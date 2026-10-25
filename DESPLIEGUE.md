@@ -519,10 +519,16 @@ llegó—. El fichero las lee **una sola vez**, al activarse y antes de la vista
 conjunto (las redes de `src/lib/redes.ts`; `DESTINOS_VALIDOS`), así que un valor ajeno llega
 nulo y la vista sale igual; y las **quita de la dirección** con `history.replaceState`, sin
 recargar, conservando el resto de la búsqueda, el fragmento y el `history.state` que hubiera.
-Viajan con las vistas y con la lectura, y **se olvidan al emitir la lectura**: recargar, copiar la
-dirección de la barra o volver por la caché de atrás y adelante ya no cuentan otra vez la misma
-llegada. Sin punto final no hay fichero y la dirección se queda como llegó; si el navegador no
-deja escribir en el historial, también, y los eventos salen igual con sus marcas. La canónica y
+Viajan con las vistas que declara la página y con la lectura —una vista que pidiera una isla
+saldría sin ellas—, y **se olvidan al emitir la lectura**: recargar, copiar la dirección de la
+barra o volver por la caché de atrás y adelante ya no cuentan otra vez la misma llegada. Sin punto
+final no hay fichero y la dirección se queda como llegó; si el navegador no deja escribir en el
+historial, también, y los eventos salen igual con sus marcas. **Lo mismo pasa si un bloqueador
+impide descargar el fichero**, y ahí se paga: esa visita no se cuenta, la marca se queda en la
+barra, y quien copie la dirección la difunde con ella, así que las visitas que traiga esa copia
+llegan —con su fichero— como si vinieran de la cuenta o del botón. Se acepta: quitarlas en el
+arranque en línea, que corre siempre, lo haría crecer contra `MAX_BYTES_DE_GUION` en todas las
+páginas, y la medición sigue siendo un plano aparte del que el sitio no depende. La canónica y
 `og:url` no cambian: nunca llevaron consulta. **`via` nombra el botón, nunca a quien comparte ni
 a quien abre** (NFR-11): no hay identificador de por medio, y un `?via=` inventado llega nulo. La
 difusión **se cuenta sobre lecturas**, nunca con la sola vista: una llegada con `?via=` que nadie
@@ -603,9 +609,13 @@ superficies de agregación.
 **corte de serie**: antes, recargar la página, copiar la dirección de la barra o volver a ella con
 la marca puesta volvía a contar la llegada, porque `?de=` se quedaba en la dirección; desde la
 llegada en vivo de la Épica 23 se cuenta una vez, así que el tramo de antes y el de después no se
-comparan. La jornada del corte sale de la jornada de despliegue de la 23, que da la 23.11 (y de
-ella, la primera entrada de `CORTES_DE_SM8`); hasta entonces se parte a mano en esa jornada, y la
-de llegada, que es mixta, se informa aparte.
+comparan. La jornada del corte sale de la jornada de despliegue de la 23, que da la 23.11, y de
+ella se compone la primera entrada de `CORTES_DE_SM8`, la lista de cortes que trae la 23.10 en
+`src/lib/umbrales.ts` y que todavía no existe. Hasta entonces **se parte a mano**: a las dos
+consultas de abajo se les añade `AND jornada < 'AAAA-MM-DD'` para el tramo de antes y
+`AND jornada > 'AAAA-MM-DD'` para el de después, con esa jornada, y la de llegada, que es mixta
+—páginas abiertas que aún piden el fichero anterior—, se lee aparte con `AND jornada = 'AAAA-MM-DD'`.
+Sin partirla, una consulta que cruce esa jornada mezcla dos instrumentos.
 
 **Las llegadas a una página 2+ no cuentan.** Es un subrecuento conocido y aceptado: quien
 entra por un enlace a `/autor/<slug>/2/` no deja fila de vista.

@@ -34,14 +34,18 @@ type Ajustes = boolean | { once?: boolean; capture?: boolean; passive?: boolean 
  * `interactuar(tipo)` despacha un evento, y `restaurar(persisted)`, que despacha `pageshow` como
  * la caché de atrás y adelante.
  *
- * Desde la Historia 23.6 la dirección es entera —ruta, búsqueda y fragmento (`fragmento`)— y hay
- * **historial**: `history.state` (el de `estado`, por omisión `null`) y un `replaceState(estado,
- * título, url)` que apunta cada llamada, tal como llega, y aplica la URL a `location` partiéndola a
- * mano, sin recodificar nada, como haría el navegador con una dirección ya codificada. Con
+ * Desde la Historia 23.6 la dirección es entera —origen (`ORIGEN_DEL_SANDBOX`), ruta, búsqueda y
+ * fragmento (`fragmento`)— y hay **historial**: `history.state` (el de `estado`, por omisión
+ * `null`) y un `replaceState(estado, título, url)` que apunta cada llamada, tal como llega, y
+ * aplica la URL a `location` como el navegador: la resuelve contra la dirección de ahora con
+ * `URL`, que no recodifica lo ya codificado, y lanza si sale de otro origen —el `SecurityError`
+ * del navegador, que es lo que pasaría con una ruta que empieza por `//`—. Con
  * `historialQueLanza`, `replaceState` apunta la llamada y lanza, como un historial que no se deja
  * escribir; con `sinHistorial`, no hay `history` en absoluto. `historial()` da las llamadas y
  * `direccion()`, lo que mostraría la barra: ruta, búsqueda y fragmento.
  */
+export const ORIGEN_DEL_SANDBOX = 'https://ejemplo.invalid';
+
 export function medicionEnUnSandbox(
   opciones: {
     ruta?: string;
@@ -115,6 +119,7 @@ export function medicionEnUnSandbox(
   };
 
   const ubicacion = {
+    origin: ORIGEN_DEL_SANDBOX,
     pathname: opciones.ruta ?? '/',
     search: opciones.busqueda ?? '',
     hash: opciones.fragmento ?? '',
@@ -128,19 +133,16 @@ export function medicionEnUnSandbox(
       if (opciones.historialQueLanza) throw new Error('el historial no se deja escribir');
       historia.state = estado;
       if (url === undefined || url === null) return;
-      // Una ruta del mismo origen, partida a mano: el fragmento desde el primer `#`, la búsqueda
-      // desde el primer `?` anterior a él. Un `?` o un `#` solos son una búsqueda o un fragmento
-      // vacíos, como en el navegador.
-      const texto = String(url);
-      if (!texto.startsWith('/')) throw new Error(`replaceState con una URL que no es una ruta: ${texto}`);
-      const almohadilla = texto.indexOf('#');
-      const sinFragmento = almohadilla < 0 ? texto : texto.slice(0, almohadilla);
-      const interrogacion = sinFragmento.indexOf('?');
-      const fragmento = almohadilla < 0 ? '' : texto.slice(almohadilla);
-      const busqueda = interrogacion < 0 ? '' : sinFragmento.slice(interrogacion);
-      ubicacion.pathname = interrogacion < 0 ? sinFragmento : sinFragmento.slice(0, interrogacion);
-      ubicacion.search = busqueda === '?' ? '' : busqueda;
-      ubicacion.hash = fragmento === '#' ? '' : fragmento;
+      // Resuelta contra la dirección de ahora, como en el navegador: una URL de otro origen lanza
+      // —el `SecurityError`—, y un `?` o un `#` solos son una búsqueda o un fragmento vacíos.
+      const actual = `${ubicacion.origin}${ubicacion.pathname}${ubicacion.search}${ubicacion.hash}`;
+      const nueva = new URL(String(url), actual);
+      if (nueva.origin !== ubicacion.origin) {
+        throw new Error(`SecurityError: replaceState a otro origen (${nueva.origin}) desde ${ubicacion.origin}`);
+      }
+      ubicacion.pathname = nueva.pathname;
+      ubicacion.search = nueva.search;
+      ubicacion.hash = nueva.hash;
     },
   };
 

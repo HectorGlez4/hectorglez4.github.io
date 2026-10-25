@@ -225,7 +225,10 @@ export const MAX_BYTES_DE_GUION = 6656;
  * Marca de difusión (`?via=`) —una fuente más y su conjunto en la tabla de las tres vistas y la
  * lectura— y quita las dos marcas de la dirección con `history.replaceState`, con la función pura
  * que parte la búsqueda (`SIN_MARCAS_DE_LLEGADA`) viajando dentro como texto. Sigue sin contar en
- * `MAX_BYTES_DE_GUION`, que no se mueve. Las Historias 23.7 a 23.9 lo vuelven a medir.
+ * `MAX_BYTES_DE_GUION`, que no se mueve. Tras su revisión —las marcas viajan solo con las vistas
+ * que declara la página y con la lectura, y la dirección nueva va entera, con `location.origin`—,
+ * **2.520** (2.521 con la barra final; 2.488 con el de las pruebas), y el tope no se mueve. Las
+ * Historias 23.7 a 23.9 lo vuelven a medir.
  */
 export const MAX_BYTES_GUION_DE_MEDICION = 2880;
 

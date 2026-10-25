@@ -238,12 +238,16 @@ export const INTERACCIONES_DE_LECTURA = ['pointerdown', 'keydown', 'wheel', 'tou
  * (`?via=`), `MARCAS_DE_LLEGADA`. Se leen una sola vez, al activarse y antes de emitir ninguna
  * vista, con `URLSearchParams` —la primera aparición de cada una— y se guardan por separado; cada
  * una se coteja al emitir contra su conjunto, por la tabla del vocabulario, así que un valor ajeno
- * viaja como `null` y el evento sale igual. Viajan con las vistas y con la lectura, y **se
- * olvidan al emitir la lectura**: la llegada se cuenta una vez. Y se quitan de la dirección con
- * `history.replaceState`, sin recargar, conservando el resto de la búsqueda, el fragmento y el
+ * viaja como `null` y el evento sale igual. Viajan con las vistas que la página declara —las
+ * que emite el fichero al activarse— y con la lectura, y **se olvidan al emitir la lectura**: la
+ * llegada se cuenta una vez. Una vista que pida una isla por `__medir`, directa o de la cola, sale
+ * sin ellas: si las llevara, una isla que pidiera otra vista antes de la lectura —o en una página
+ * sin vista, donde nada las olvida— volvería a contar la misma llegada. Y se quitan de la dirección
+ * con `history.replaceState`, sin recargar, conservando el resto de la búsqueda, el fragmento y el
  * `history.state` que hubiera (`SIN_MARCAS_DE_LLEGADA`), solo si había alguna y dentro de un
  * `try`: sin historial, o si escribir en él falla, la dirección se queda como llegó y los eventos
- * salen igual con sus marcas. Así recargar, copiar la dirección de la barra o volver a ella no
+ * salen igual con sus marcas. La dirección nueva va entera, con `location.origin` delante: una
+ * ruta que empezara por `//` se leería, sola, como otro anfitrión. Así recargar, copiar la dirección de la barra o volver a ella no
  * cuentan otra vez la misma llegada. Se quitan también en una página sin vista —páginas 2+,
  * `/buscar/`, 404—, donde ningún evento las lleva. Las lee y las quita **solo el fichero**:
  * ninguna isla las lee, la única que lee la dirección es la de la búsqueda —su consulta, antes que
@@ -268,8 +272,9 @@ export const INTERACCIONES_DE_LECTURA = ['pointerdown', 'keydown', 'wheel', 'tou
  *
  * Lo que viaja con cada evento son **exactamente** las claves que el vocabulario le declara y
  * que el fichero sabe producir (Historia 23.2, AD-13): el nombre del evento, la ruta de la
- * página y, según el evento, las Marcas de llegada —solo con las vistas y la lectura: una acción
- * no las lleva, ni una isla puede ponerlas por argumento—, el destino —cotejado con el conjunto
+ * página y, según el evento, las Marcas de llegada —solo con las vistas declaradas y la lectura:
+ * una acción no las lleva, ni una vista que pida una isla, ni una isla puede ponerlas por
+ * argumento—, el destino —cotejado con el conjunto
  * de su evento—, `primera` o, solo en la búsqueda sin resultados, el texto de la consulta. Un
  * campo declarado sin valor legítimo viaja como `null`; uno que el evento no declara no viaja.
  * Nada más. No hay identificador de
@@ -327,7 +332,7 @@ export function guionDeMedicion(url: string): string {
     `N=${JSON.stringify(MARCAS_DE_LLEGADA)}`,
     `R=${SIN_MARCAS_DE_LLEGADA}`,
     'P={}',
-    'o,w,V,L,C,I,T',
+    'o,w,D,V,L,C,I,T',
   ].join(',');
   const lectura = JSON.stringify(EVENTOS.lectura);
   const descarga = JSON.stringify(EVENTOS.descargaDeImagen);
@@ -342,8 +347,9 @@ export function guionDeMedicion(url: string): string {
    *   · N, los parámetros de las dos Marcas de llegada (`MARCAS_DE_LLEGADA`); R, la función pura
    *     que las quita de una búsqueda (`SIN_MARCAS_DE_LLEGADA`);
    *   · o, la Marca de origen y w, la de difusión, leídas al activarse y olvidadas al emitir la
-   *     lectura; V, si la página es superficie con lectura; L, si la lectura de esta carga ya
-   *     salió;
+   *     lectura; D, si lo que se compone ahora lleva las marcas —solo mientras el fichero emite
+   *     las vistas declaradas o la lectura—; V, si la página es superficie con lectura; L, si la
+   *     lectura de esta carga ya salió;
    *   · C, los milisegundos visibles acumulados; I, el `performance.now()` en que empezó el rato
    *     visible en curso (-1 si no hay ninguno); T, el temporizador de la lectura.
    *
@@ -357,7 +363,7 @@ export function guionDeMedicion(url: string): string {
     `var ${variables};` +
     `function b(v,t,z,y){` +
     `try{` +
-    `var c={evento:v,ruta:location.pathname},m=[o,t,z,y,w];` +
+    `var c={evento:v,ruta:location.pathname},m=[D&&o,t,z,y,D&&w];` +
     `s[v].forEach(function(f){var x=m[f[1]];c[f[0]]=f[2]?f[2].indexOf(x)<0?null:x:x||null});` +
     `c=JSON.stringify(c);` +
     `if(navigator.sendBeacon)navigator.sendBeacon(${JSON.stringify(url)},c)` +
@@ -372,13 +378,15 @@ export function guionDeMedicion(url: string): string {
     `}` +
     `function h(){I>=0&&(C+=performance.now()-I);I=-1;clearTimeout(T)}` +
     `function g(){h();V&&!L&&(C<${MIN_MS_VISIBLES_PARA_LA_LECTURA}?document.visibilityState!='hidden'&&(I=performance.now(),T=setTimeout(l,${MIN_MS_VISIBLES_PARA_LA_LECTURA}-C)):l())}` +
-    `function l(){V&&!L&&(L=1,h(),b(${lectura}),o=w=null)}` +
+    `function l(){V&&!L&&(L=1,h(),D=1,b(${lectura}),D=o=w=null)}` +
     `function n(){h();L=C=0;P={};g()}` +
     `function a(){` +
     `var u=new URLSearchParams(location.search),x;` +
     `o=u.get(N[0]);w=u.get(N[1]);` +
-    `try{x=R(location.search,N);x!=location.search&&history.replaceState(history.state,'',location.pathname+x+location.hash)}catch(y){}` +
+    `try{x=R(location.search,N);x!=location.search&&history.replaceState(history.state,'',location.origin+location.pathname+x+location.hash)}catch(y){}` +
+    `D=1;` +
     `(document.documentElement.dataset.vistas||'').split(' ').forEach(function(v){W.indexOf(v)>=0&&e(v)&&(V=1)});` +
+    `D=0;` +
     `n();` +
     `window.__medir=e;` +
     `${JSON.stringify(INTERACCIONES_DE_LECTURA)}.forEach(function(k){addEventListener(k,l,{capture:true,passive:true})});` +

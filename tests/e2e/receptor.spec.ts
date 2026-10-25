@@ -903,16 +903,20 @@ test.describe('Historia 23.5 — una carga que se lee deja una lectura', () => {
         });
       });
 
-      await pagina.goto(`${SITIO}${RUTA_CITA}?de=instagram`);
+      // Historia 23.6: con las dos Marcas de llegada, que la barra pierde al llegar.
+      await pagina.goto(`${SITIO}${RUTA_CITA}?de=instagram&via=whatsapp`);
       await esperarAlFichero(pagina);
       await pagina.keyboard.press('Shift');
       await expect.poll(() => llegadas(EVENTOS.lectura).length).toBe(1);
-      expect(llegadas(EVENTOS.lectura)[0]).toMatchObject({ ruta: RUTA_CITA, origen: 'instagram' });
+      expect(llegadas(EVENTOS.lectura)[0]).toMatchObject({ ruta: RUTA_CITA, origen: 'instagram', via: 'whatsapp' });
+      expect(new URL(pagina.url()).search).toBe('');
 
       await pagina.goto(`${SITIO}${rutaDeAutor('seneca')}`);
       await esperarAlFichero(pagina);
       await pagina.goBack({ waitUntil: 'commit' });
+      // La entrada del historial es la que dejó `replaceState`: sin marcas.
       expect(new URL(pagina.url()).pathname).toBe(RUTA_CITA);
+      expect(new URL(pagina.url()).search).toBe('');
 
       const restaurada = async () =>
         pagina.evaluate(() => (window as unknown as { __restaurada?: boolean }).__restaurada === true).catch(() => false);
@@ -928,7 +932,10 @@ test.describe('Historia 23.5 — una carga que se lee deja una lectura', () => {
       await expect.poll(() => deLaCita(EVENTOS.lectura).length).toBe(2);
       await esperar(500);
       expect(deLaCita(EVENTOS.vistaDeCita), 'volver por la caché emitió otra vista').toHaveLength(1);
-      expect(deLaCita(EVENTOS.lectura).map((r) => r!.origen)).toEqual(['instagram', null]);
+      expect(deLaCita(EVENTOS.lectura).map((r) => [r!.origen, r!.via])).toEqual([
+        ['instagram', 'whatsapp'],
+        [null, null],
+      ]);
       // La vista de la Página de Autor sí llegó: fue una carga de verdad.
       expect(llegadas(EVENTOS.vistaDeSuperficie)).toHaveLength(1);
     } finally {

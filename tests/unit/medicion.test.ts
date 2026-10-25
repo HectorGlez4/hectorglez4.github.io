@@ -49,7 +49,7 @@ import {
   superficieDeclaradaDe,
   superficiesDelBarrido,
 } from '../../src/lib/superficies.ts';
-import { medicionEnUnSandbox } from './ayuda/medicion.js';
+import { ORIGEN_DEL_SANDBOX, medicionEnUnSandbox } from './ayuda/medicion.js';
 import {
   AUTOR_VALIDO,
   TEMA_VALIDO,
@@ -917,7 +917,7 @@ describe('Historia 23.6 — las marcas de llegada cuentan una vez y salen de la 
     const estado = { anterior: 'de otra isla' };
     const entorno = enCita({ busqueda: '?de=instagram&via=whatsapp', estado });
     expect(deVista(entorno.balizas()).map(marcas)).toEqual([['instagram', 'whatsapp']]);
-    expect(entorno.historial()).toEqual([{ estado, titulo: '', url: RUTA }]);
+    expect(entorno.historial()).toEqual([{ estado, titulo: '', url: `${ORIGEN_DEL_SANDBOX}${RUTA}` }]);
     // El mismo objeto que había, no una copia ni `null`.
     expect(entorno.historial()[0].estado).toBe(estado);
     expect(entorno.direccion()).toBe(RUTA);
@@ -982,7 +982,7 @@ describe('Historia 23.6 — las marcas de llegada cuentan una vez y salen de la 
       fragmento: '#frag',
     });
     expect(direccion()).toBe(`${RUTA}?a=1&b=%20#frag`);
-    expect(historial()).toEqual([{ estado: null, titulo: '', url: `${RUTA}?a=1&b=%20#frag` }]);
+    expect(historial()).toEqual([{ estado: null, titulo: '', url: `${ORIGEN_DEL_SANDBOX}${RUTA}?a=1&b=%20#frag` }]);
     expect(marcas(balizas()[0])).toEqual(['instagram', 'x']);
   });
 
@@ -1036,7 +1036,7 @@ describe('Historia 23.6 — las marcas de llegada cuentan una vez y salen de la 
     expect(direccion()).toBe(`${RUTA}?de=instagram&via=whatsapp`);
 
     activar();
-    expect(historial()).toEqual([{ estado, titulo: '', url: RUTA }]);
+    expect(historial()).toEqual([{ estado, titulo: '', url: `${ORIGEN_DEL_SANDBOX}${RUTA}` }]);
     interactuar('keydown');
     expect(balizas().map((b) => [b.evento, ...marcas(b)])).toEqual([
       [EVENTOS.vistaDeCita, 'instagram', 'whatsapp'],
@@ -1113,6 +1113,59 @@ describe('Historia 23.6 — las marcas de llegada cuentan una vez y salen de la 
         { evento: EVENTOS.vistaDeSuperficie, ruta: RUTA, origen: null, via: null },
       ]);
     }
+  });
+
+  it('una vista que pide una isla, antes de la lectura, directa o de la cola, sale sin marcas: solo las llevan las declaradas y la lectura', () => {
+    /*
+     * Revisión de la 23.6. Si una vista pedida por `__medir` llevara las marcas, una isla que la
+     * pidiera antes de la lectura volvería a contar la llegada en SM-8, que cuenta vistas. Hoy
+     * ninguna isla pide una vista —la declara la superficie—, y esto lo cierra en el fichero.
+     */
+    for (const cargado of [true, false]) {
+      const { emitir, cargar, interactuar, balizas } = enCita({ busqueda: '?de=instagram&via=whatsapp', cargado });
+      emitir(EVENTOS.vistaDeCita);
+      emitir(EVENTOS.vistaDeSuperficie);
+      if (!cargado) cargar();
+      interactuar('keydown');
+      // La declarada sale primero también con la cola: el fichero emite las vistas antes de vaciarla.
+      expect(balizas().map((b) => [b.evento, ...marcas(b)]), cargado ? 'directa' : 'de la cola').toEqual([
+        [EVENTOS.vistaDeCita, 'instagram', 'whatsapp'],
+        [EVENTOS.vistaDeCita, null, null],
+        [EVENTOS.vistaDeSuperficie, null, null],
+        [EVENTOS.lectura, 'instagram', 'whatsapp'],
+      ]);
+    }
+  });
+
+  it('sin vista: una vista que pida una isla tampoco lleva las marcas, aunque nada las olvide', () => {
+    const { emitir, avanzar, balizas, direccion } = medicionEnUnSandbox({
+      ruta: '/autor/seneca/2/',
+      busqueda: '?de=instagram&via=whatsapp',
+    });
+    emitir(EVENTOS.vistaDeSuperficie);
+    avanzar(30_000);
+    emitir(EVENTOS.vistaDeCita);
+    expect(balizas().map((b) => [b.evento, ...marcas(b)])).toEqual([
+      [EVENTOS.vistaDeSuperficie, null, null],
+      [EVENTOS.vistaDeCita, null, null],
+    ]);
+    expect(direccion()).toBe('/autor/seneca/2/');
+  });
+
+  it('una ruta que empieza por `//`: la dirección nueva va entera y del mismo origen, y conserva la ruta', () => {
+    /*
+     * Revisión de la 23.6. Sin el origen delante, `//cita/una/` se resolvería como el anfitrión
+     * `cita`: el navegador lanzaría y las marcas se quedarían en la barra, o, con
+     * `//<este anfitrión>/…`, la dirección pasaría a otra ruta.
+     */
+    const { balizas, direccion, historial } = medicionEnUnSandbox({
+      ruta: `/${RUTA}`,
+      busqueda: '?de=instagram&a=1',
+      vistas: EVENTOS.vistaDeCita,
+    });
+    expect(historial()).toEqual([{ estado: null, titulo: '', url: `${ORIGEN_DEL_SANDBOX}/${RUTA}?a=1` }]);
+    expect(direccion()).toBe(`/${RUTA}?a=1`);
+    expect(marcas(balizas()[0])).toEqual(['instagram', null]);
   });
 
   it('se lee una sola vez: con la dirección todavía marcada —el historial no la dejó quitar—, la carga nueva no vuelve a leerla', () => {
@@ -1787,15 +1840,25 @@ describe('Historia 23.1 — los guiones en línea se dejan analizar, y el arranq
  */
 describe('Historia 23.6 — solo el fichero lee y quita las marcas, en `dist/`', () => {
   const NOMBRES = [PARAMETRO_DE_ORIGEN, PARAMETRO_DE_DIFUSION];
-  /** Nombra una marca: su nombre como cadena entre comillas, o detrás de `?`/`&` con su `=`. */
+  /**
+   * Nombra una marca: su nombre como cadena entre comillas, o detrás de `?`/`&` con su `=`. Es
+   * textual a propósito, y se equivoca hacia el lado seguro: una cadena `"de"` que no lea ninguna
+   * marca —una preposición, un código de idioma— lo enciende y pone la prueba en rojo, y quien
+   * llegue ahí mira el guion y estrecha el detector; nunca deja pasar en verde un guion que lea.
+   * Lo que sí se le escapa es un nombre compuesto por piezas.
+   */
   const LEE_MARCAS = new RegExp(NOMBRES.flatMap((nombre) => [`['"\`]${nombre}['"\`]`, `[?&]${nombre}=`]).join('|'));
-  /** Escribe en el historial o en la dirección. */
+  /**
+   * Escribe en el historial o en la dirección: `history.pushState`/`replaceState` —también por
+   * corchetes—, asignar a `location` o a una de sus partes —también con `+=`—, `assign`/`replace`
+   * y `navigation.navigate`.
+   */
   const ESCRIBE_DIRECCION =
-    /\bhistory\s*\.\s*(?:pushState|replaceState)\b|(?<![\w$.])(?:(?:window|document|self|globalThis)\s*\.\s*)?location\s*(?:\.\s*(?:href|search|hash|pathname))?\s*=(?!=)|(?<![\w$.])(?:(?:window|document|self|globalThis)\s*\.\s*)?location\s*\.\s*(?:assign|replace)\s*\(|\bnavigation\s*\.\s*navigate\s*\(/;
+    /\bhistory\s*(?:\.\s*|\[\s*['"`])(?:pushState|replaceState)\b|(?<![\w$.])(?:(?:window|document|self|globalThis)\s*\.\s*)?location\s*(?:\.\s*(?:href|search|hash|pathname))?\s*\+?=(?!=)|(?<![\w$.])(?:(?:window|document|self|globalThis)\s*\.\s*)?location\s*\.\s*(?:assign|replace)\s*\(|\bnavigation\s*\.\s*navigate\s*\(/;
   /** Lee la dirección: `location` como variable global, o la URL del documento. */
   const LEE_DIRECCION =
     /(?<![\w$.])(?:(?:window|document|self|globalThis)\s*\.\s*)?location\b|\bdocument\s*\.\s*(?:URL|documentURI)\b/;
-  /** El guion en línea de la búsqueda, el único que lee la dirección y, desde la 23.8, escribirá en el historial. */
+  /** El guion en línea de la búsqueda, el único que lee la dirección; desde la 23.8 escribirá además en el historial. */
   const esDeLaBusqueda = (ruta: string, guion: string) => ruta === '/buscar/' && guion.includes("'[data-consulta]'");
 
   /** Los ficheros que descarga cada entrada de la lista cerrada, con lo que arrancan, por entrada. */
@@ -1827,12 +1890,30 @@ describe('Historia 23.6 — solo el fichero lee y quita las marcas, en `dist/`',
     for (const inocente of ['palabra.location=1', 'x={dev:1,"vias":2}', "o.get('dev')", 'a.history_state=1']) {
       expect(LEE_MARCAS.test(inocente) || ESCRIBE_DIRECCION.test(inocente), inocente).toBe(false);
     }
-    for (const culpable of ["new URLSearchParams(location.search).get('de')", 'u.get("via")', "'?via=x'", 'window.location.href=u', 'location.assign(u)', 'history.pushState(null,"",u)']) {
+    for (const culpable of [
+      "new URLSearchParams(location.search).get('de')",
+      'u.get("via")',
+      "'?via=x'",
+      'window.location.href=u',
+      'location.assign(u)',
+      'history.pushState(null,"",u)',
+      "history['replaceState'](null,'',u)",
+      "location.search+='&x=1'",
+      'location.href += u',
+    ]) {
       expect(LEE_MARCAS.test(culpable) || ESCRIBE_DIRECCION.test(culpable), culpable).toBe(true);
     }
   });
 
-  it('en toda página que carga el fichero, su `<script src>` va en el `<head>` antes de todo guion que escriba en el historial o la dirección', async () => {
+  it('el fichero corre antes que todo guion que escriba en la dirección: va con `defer` y ningún otro guion de su página escribe', async () => {
+    /*
+     * «Antes» es de ejecución, no de documento. El fichero va con `defer` en el `<head>`, y un
+     * `defer` corre al acabar de analizar el documento: detrás de todo guion clásico, esté donde
+     * esté —la isla de `/buscar/`, al final del `<body>`, corre antes que él—. Así que no basta con
+     * mirar los guiones que lo preceden en el documento: ningún otro guion de la página, en ningún
+     * sitio, escribe en el historial ni en la dirección. Los descargados los mira la prueba de los
+     * ficheros, abajo.
+     */
     let vistas = 0;
     for (const [ruta, html] of paginasDe(await sitioMedido())) {
       const guiones = guionesEjecutables(html);
@@ -1840,24 +1921,31 @@ describe('Historia 23.6 — solo el fichero lee y quita las marcas, en `dist/`',
       if (delFichero < 0) continue;
       vistas++;
       expect(cabezaDe(html), ruta).toContain(RUTA_DEL_FICHERO);
-      for (const guion of guiones.slice(0, delFichero)) {
-        expect(ESCRIBE_DIRECCION.test(guion.cuerpo), `${ruta}: un guion anterior al fichero escribe en la dirección`).toBe(false);
-      }
+      const { atributos } = guiones[delFichero];
+      expect(atributos, ruta).toMatch(/(?:^|\s)defer(?=[\s=>]|$)/i);
+      expect(atributos, ruta).not.toMatch(/(?:^|\s)async(?=[\s=>]|$)|\btype\s*=\s*["']?module/i);
+      guiones.forEach((guion, i) => {
+        if (i === delFichero) return;
+        expect(ESCRIBE_DIRECCION.test(guion.cuerpo), `${ruta}: el guion ${i + 1} escribe en la dirección`).toBe(false);
+      });
     }
     expect(vistas).toBeGreaterThan(SLUGS.length);
   }, 240_000);
 
-  it('ningún guion en línea escribe en el historial o la dirección, salvo la búsqueda; ni lee una marca', async () => {
+  it('ningún guion en línea escribe en el historial o la dirección —tampoco la búsqueda, todavía—, ni lee una marca', async () => {
+    /*
+     * La búsqueda no tiene exención aquí. Cuando la 23.8 la haga escribir en el historial, esta
+     * prueba y la anterior se pondrán en rojo a propósito: la isla es un guion clásico y corre
+     * antes que el fichero diferido, así que tendrá que probar —ejecutándola— que escribe solo
+     * desde sus escuchas, nunca al analizarse, y con la dirección que haya, ya sin marcas.
+     */
     let busqueda = 0;
     let mirados = 0;
     for (const [ruta, html] of paginasDe(await sitioMedido())) {
       for (const guion of guionesEnLinea(html)) {
         mirados++;
+        if (esDeLaBusqueda(ruta, guion)) busqueda++;
         expect(LEE_MARCAS.test(guion), `${ruta}: un guion en línea lee una marca`).toBe(false);
-        if (esDeLaBusqueda(ruta, guion)) {
-          busqueda++;
-          continue;
-        }
         expect(ESCRIBE_DIRECCION.test(guion), `${ruta}: un guion en línea escribe en la dirección`).toBe(false);
       }
     }

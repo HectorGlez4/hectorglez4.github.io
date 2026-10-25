@@ -30,7 +30,12 @@ import {
   DESTINOS_VALIDOS,
 } from '../../src/lib/destinos.ts';
 import { PARAMETRO_DE_ORIGEN as PARAMETRO_DE_REDES, REDES_VALIDAS } from '../../src/lib/redes.ts';
-import { CAMPOS_DEL_GUION, EVENTOS_DEL_GUION, EVENTOS_SOLO_DEL_FICHERO } from '../../src/lib/medicion.ts';
+import {
+  CAMPOS_DEL_GUION,
+  EVENTOS_DE_VISTA,
+  EVENTOS_DEL_GUION,
+  EVENTOS_SOLO_DEL_FICHERO,
+} from '../../src/lib/medicion.ts';
 import { interpretar } from '../../medicion/receptor.ts';
 import { medicionEnUnSandbox } from './ayuda/medicion.js';
 import { listaTras } from './ayuda/d1.js';
@@ -263,10 +268,16 @@ const PRODUCIR_DEL_FICHERO: { readonly [E in Evento]?: (entorno: ReturnType<type
 
 /**
  * Lo que sale por la baliza al producir un evento en un entorno nuevo, con esa entrada: lo que
- * pasa una isla por `__medir`, o lo que hace el visitante para que el fichero lo emita por su
- * cuenta. Solo las balizas de ese evento: la vista declarada que necesita la lectura no cuenta.
+ * pasa una isla por `__medir`, la vista que declara la página o lo que hace el visitante para que
+ * el fichero lo emita por su cuenta. Solo las balizas de ese evento: la vista declarada que
+ * necesita la lectura no cuenta. Las vistas salen de `data-vistas`, como en el sitio: desde la
+ * revisión de la 23.6, una vista que pida una isla sale sin Marcas de llegada.
  */
 function producir(evento: Evento, entrada: { busqueda?: string; datos?: string; destino?: string }) {
+  if ((EVENTOS_DE_VISTA as readonly Evento[]).includes(evento)) {
+    const entorno = medicionEnUnSandbox({ ruta: '/cita/una/', busqueda: entrada.busqueda, vistas: evento });
+    return entorno.balizas().filter((baliza) => baliza.evento === evento);
+  }
   const porSuCuenta = PRODUCIR_DEL_FICHERO[evento];
   if (EVENTOS_SOLO_DEL_FICHERO.includes(evento)) {
     expect(porSuCuenta, `${evento} lo emite solo el fichero y no tiene cómo producirse`).toBeDefined();
