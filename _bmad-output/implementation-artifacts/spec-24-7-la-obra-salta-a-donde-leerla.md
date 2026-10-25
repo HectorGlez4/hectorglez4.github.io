@@ -2,7 +2,8 @@
 title: 'Historia 24.7 — La Obra salta a dónde leerla'
 type: 'feature'
 created: '2026-10-25'
-status: 'ready-for-dev'
+status: 'done'
+baseline_revision: '4fc409fec2213297e5df5cabc12e89fe0bd5b49a'
 review_loop_iteration: 0
 followup_review_recommended: false
 context:
@@ -92,6 +93,17 @@ deferred: []
 
 ## Review Triage Log
 
+### 2026-10-25 — Review pass
+- intent_gap: 0
+- bad_spec: 0
+- patch: 0
+- defer: 0
+- reject: 0
+- addressed_findings:
+  - none
+
+Las capas de revisión son externas (bucle v8-ralph) y en esta pasada no traen hallazgos: la revisión independiente viene después.
+
 ## Design Notes
 
 **Por qué 3 × y no menos.** La zona de «de {Autor}» es el `a` en `inline-block` con 10 px de relleno y −10 de margen: asoma 10 px bajo la línea de `p.de`. El `a` del salto en `inline-flex` de 44 px llena la línea de su párrafo (alineado por la base, la caja ocupa exactamente los 44 px), así que su zona empieza en el borde de `p.salto`. Hueco = 24 − 10 = **14 px** (con 2 × serían 6: por eso 3 × es «lo mínimo», DESIGN.md § Página de Obra). La prueba exige ≥ 7,5, como el resto de medidas de zonas.
@@ -110,5 +122,31 @@ deferred: []
 
 ## Auto Run Result
 
-Status: ready-for-dev
-Blocking condition: ninguna. Planificación cerrada el 2026-10-25 en `v8/epicas-24-26` (bmad-build-auto, «Halt after planning»); falta implementar, verificar y revisar.
+Status: done
+Blocking condition: ninguna.
+
+**Qué se construyó.** La Cabecera de la página 1 de toda Obra lleva, en su propia línea tras `p.de`, el enlace «Dónde leer esta obra ↓» a `#donde-leer-esta-obra` (sin `target`, sin `rel`, sin zona propia ni heredada, fuera de Pagefind, con la flecha `aria-hidden`); su destino, el `h2` de `DondeLeer`, lleva `tabindex="-1"` y `scroll-margin-top` de 2 × `--unidad`. Un solo booleano de la página (`conDondeLeer`) decide el salto y la sección; las 2+ no llevan ni uno ni otra. El bloque no se mueve. Sin guion, sin regla de foco propia, sin exención nueva.
+
+**Ficheros.**
+- `src/lib/obras.ts` — `ANCLA_DE_DONDE_LEER`, único dueño del `id` (junto a `dondeLeer`).
+- `src/components/Rotulo.astro` — prop `destino` → `tabindex="-1"`; regla `.rotulo[tabindex='-1']` con `scroll-margin-top`. Sin `destino`, el `h2` sale como antes.
+- `src/components/DondeLeer.astro` — `id` y `aria-labelledby` desde la constante; `destino` en su rótulo.
+- `src/pages/obra/[autor]/[slug]/[...page].astro` — `conDondeLeer`; el `p.salto` en la Cabecera; su hoja (3 ×, `--cuerpo-md`, 1,6; el `a` en `inline-flex` de `--zona-de-toque`, siena, subrayado siempre).
+- `tests/unit/obra-pagina.test.ts` — `reglasDe`/`declaraciones` a nivel de módulo; `comprobarSaltos` sobre todo `dist/obra/**` de las construcciones 22.4, 22.6 y 22.8; marcado exacto; `h2` «Temas» y de la Lista de Obras sin `tabindex`; guardia de la hoja emitida (salto, destino, listado a 4 ×, y el pie con nota: 5 ×, 4 ×, 2 ×, 1 ×, nota 4 × / 3 × con filete).
+- `tests/unit/ediciones-en-venta.test.ts` — las dos construcciones de `corpusConstruido(true)` memorizadas (`construida('encendida' | 'apagada')`); `describe` 24.7: salto y `h2` iguales byte a byte en `PAGINA_1`, `CARTAS_1` e `IRA_1`; encendida = apagada + `div[data-ingreso]` en `PAGINA_1` y `CARTAS_1`; iguales sin quitar nada en `IRA_1` y `PAGINA_2`.
+- `tests/e2e/accesibilidad.spec.ts` — `obrasDelPie()` del `dist/` (con Paginación y Temas; sin Paginación, con Temas y edición cotejada; con nota si la hay) y `describe` 24.7: foco tras Intro con `:focus-visible`, anillo de 2 px siena separado 2 px y `scroll-margin-top` 16 px; zona de 44 px y ≥ 7,5 px de «de {Autor}» a 360 y 320; primera Cita en 360 × 640; listado a 32 px del salto (y de `p.de` en la 2); pie 40 / 32 / 16 / 8; la Nota se salta si ninguna Obra del `dist/` la trae (hoy ninguna: la guarda la prueba unitaria).
+
+**Revisión.** Pasada sin hallazgos (capas externas aún por correr): 0 parches, 0 aplazados, 0 rechazados. `followup_review_recommended: false` (parcheados: 0 high, 0 medium, 0 low; puntuación 0).
+
+**Verificación.** Desde el worktree:
+- `npx vitest run tests/unit/obra-pagina.test.ts` — 64/64 (`FINISHED EXIT=0`).
+- `npx vitest run tests/unit/ediciones-en-venta.test.ts` — 51/51 (`FINISHED EXIT=0`).
+- Uno a uno: `lista-de-obras` 18, `obra-construida` 16, `congelacion-de-obras` 4, `espinas-de-ux` 10, `publicable-y-alcanzable` 30, `ingreso-construido` 38, `medicion` 492 — todos verdes.
+- `npm run check` — 0 errores, 0 avisos (8 pistas previas, ninguna de estos ficheros).
+- `npm test` — 133 ficheros, 6115 pruebas, `FINISHED EXIT=0` (714 s).
+- `npx playwright test tests/e2e/accesibilidad.spec.ts` (móvil y escritorio) — 102 pasan, 2 saltadas (la Nota, en los dos proyectos: ninguna Obra del Corpus trae nota).
+- `npx playwright test tests/e2e/pagina-de-cita.spec.ts --grep "Cabecera de Obra"` — 2/2.
+- `npx playwright test tests/e2e/ingreso-accesible.spec.ts --project=escritorio` — 12/12.
+- Ningún Block If se disparó: Chromium deja el foco en el `h2` y casa `:focus-visible`; la primera Cita sigue en la primera pantalla; la página encendida difiere de la apagada solo en el `div[data-ingreso]`; 3 × basta para los 8 px sin tocar `.de a`. Servidores parados al terminar.
+
+**Riesgos residuales.** La medida de la Nota en el navegador no corre mientras ninguna Obra traiga nota (la regla la fija la guardia de CI). El salto se mide en Chromium; Safari/Firefox enfocan el destino de un fragmento enfocable por la misma especificación, pero no se han probado aquí.
