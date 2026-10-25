@@ -14,6 +14,7 @@ import Medicion from './Medicion.astro';
 import DondeSeguirnos from './DondeSeguirnos.astro';
 import { LADO_DE_IOS, MARCA, TAMANOS_DEL_ICONO } from '../lib/marca.ts';
 import { consecuenciasDe, declararRutasIndexables } from '../lib/superficies.ts';
+import { ATRIBUTO_DE_INDEXABLE } from '../lib/medicion.ts';
 import { conjuntoPublicable, rutasIndexables } from '../lib/publicado.ts';
 import { tipoDeOpenGraph, type TipoDeResultado } from '../lib/tipoDeResultado.ts';
 import '../styles/tokens.css';
@@ -74,7 +75,15 @@ const canonica = new URL(ruta, Astro.site).href;
  * Obra en vez de adivinar. La lista se calcula una vez por conjunto.
  */
 declararRutasIndexables(rutasIndexables(await conjuntoPublicable()));
-const { noIndexar, enLaBusquedaPropia, vistas, cargaLaMedicion } = consecuenciasDe(ruta);
+const { noIndexar, enLaBusquedaPropia, vistas, cargaLaMedicion, marcaDeObra } = consecuenciasDe(ruta);
+/*
+ * Historia 23.9 — la marca de la vista de Obra, al `<html>` junto a `data-vistas`, y solo en la
+ * página 1 de una Obra: sale de la misma `consecuenciasDe` que el `noindex` de arriba, así que dice
+ * lo mismo que él, y el nombre del atributo es el que lee el fichero de medición
+ * (`ATRIBUTO_DE_INDEXABLE`). La comprobación de `astro:build:done` lo coteja en `dist/`. Se escribe
+ * también sin punto final, como `data-vistas`.
+ */
+const marcaDeLaObra = marcaDeObra === undefined ? {} : { [ATRIBUTO_DE_INDEXABLE]: marcaDeObra };
 // Absoluta y no relativa: una previsualización se resuelve en el servidor de la red, que
 // no tiene la página delante para completar la ruta.
 const imagenSocial = tarjeta === undefined ? undefined : new URL(tarjeta, Astro.site).href;
@@ -82,7 +91,7 @@ const imagenSocial = tarjeta === undefined ? undefined : new URL(tarjeta, Astro.
 
 <!doctype html>
 <!-- UX-DR27 — idioma `es` sin variante regional. -->
-<html lang="es" data-vistas={vistas.length > 0 ? vistas.join(' ') : undefined}>
+<html lang="es" data-vistas={vistas.length > 0 ? vistas.join(' ') : undefined} {...marcaDeLaObra}>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />

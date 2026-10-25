@@ -34,14 +34,17 @@ import {
 } from '../../src/lib/umbrales.ts';
 import { descripcionDeObra, lineaDeProcedencia } from '../../src/lib/atribucion.ts';
 import { tituloDeObra } from '../../src/lib/marca.ts';
-import { EVENTOS } from '../../src/lib/medicion.ts';
+import { ATRIBUTO_DE_INDEXABLE, EVENTOS } from '../../src/lib/medicion.ts';
+import { MARCAS_DE_OBRA } from '../../src/lib/vocabulario.ts';
 import {
   desajustesDeIndexables,
+  informeDeCoincidencia,
   informeDeObras,
   nombresCongeladosSinFicha,
   marcasDePagina,
   rutaDeFicheroHtml,
   rutasDelSitemap,
+  titularDeDesajustes,
 } from '../../tools/lib/indexables.ts';
 
 /**
@@ -224,7 +227,9 @@ describe('superficies.ts falla cerrado', () => {
       enLaBusquedaPropia: true,
       enElBarrido: true,
       cargaLaMedicion: true,
-      vistas: [EVENTOS.vistaDeSuperficie],
+      // Historia 23.9 — la indexable emite las dos vistas, en este orden, con su marca.
+      vistas: [EVENTOS.vistaDeSuperficie, EVENTOS.vistaDeObra],
+      marcaDeObra: MARCAS_DE_OBRA[0],
     });
 
     expect(caracterDe('/obra/a/c/')).toBe('servicio');
@@ -237,7 +242,9 @@ describe('superficies.ts falla cerrado', () => {
       enElBarrido: true,
       // Historia 23.1 — se visita y carga la medición, pero no emite la vista de superficie.
       cargaLaMedicion: true,
-      vistas: [],
+      // Historia 23.9 — emite la de Obra, con la marca de su `noindex`.
+      vistas: [EVENTOS.vistaDeObra],
+      marcaDeObra: MARCAS_DE_OBRA[1],
     });
     expect(anunciableEnElSitemap('https://sabiduriadebolsillo.net/obra/a/c/')).toBe(false);
   });
@@ -250,6 +257,12 @@ describe('superficies.ts falla cerrado', () => {
 
 describe('la comprobación del build, pura', () => {
   const pagina = (ruta: string, noindex: boolean, enPagefind = !noindex) => ({ ruta, noindex, enPagefind });
+  const [INDEXABLE, NO_INDEXABLE] = MARCAS_DE_OBRA;
+  /** Una página con la marca de Obra en su `<html>`, tal cual. */
+  const conMarca = (ruta: string, noindex: boolean, marcaDeObra: string) => ({
+    ...pagina(ruta, noindex),
+    marcaDeObra,
+  });
 
   it('coinciden: nada que decir', () => {
     expect(
@@ -265,7 +278,7 @@ describe('la comprobación del build, pura', () => {
   it('no coinciden: nombra las rutas de cada lado', () => {
     const lineas = desajustesDeIndexables(['/', '/obra/a/b'], [
       pagina('/', false),
-      pagina('/obra/a/b', true),
+      conMarca('/obra/a/b', true, NO_INDEXABLE),
       pagina('/cita/x', false),
       pagina('/autor/y', false, false),
     ]);
@@ -273,6 +286,53 @@ describe('la comprobación del build, pura', () => {
     expect(texto).toContain('en el sitemap y con `noindex`: /obra/a/b');
     expect(texto).toContain('sin `noindex` y fuera del sitemap: /autor/y, /cita/x');
     expect(texto).toContain('sin `noindex` y fuera de Pagefind: /autor/y');
+  });
+
+  it('23.9 — las Obras con su marca, que casa con su `noindex`: nada que decir', () => {
+    expect(
+      desajustesDeIndexables(['/', '/obra/a/b'], [
+        pagina('/', false),
+        conMarca('/obra/a/b', false, INDEXABLE),
+        conMarca('/obra/a/c', true, NO_INDEXABLE),
+        pagina('/obra/a/c/2', true),
+        pagina('/obra/a/b/2', true),
+      ]),
+    ).toEqual([]);
+  });
+
+  it('23.9 — nombra cada una de las cuatro clases de desajuste de la marca', () => {
+    const atributo = `\`${ATRIBUTO_DE_INDEXABLE}\``;
+    // Una página 1 de Obra sin marca, o con una que no es del vocabulario.
+    expect(
+      desajustesDeIndexables(['/obra/a/b'], [pagina('/obra/a/b', false), conMarca('/obra/a/c', true, 'si')]),
+    ).toEqual([`  · página 1 de Obra sin marca ${atributo} válida: /obra/a/b, /obra/a/c`]);
+    // Una indexable con `noindex`, fuera del sitemap y de Pagefind: solo la de la marca.
+    expect(desajustesDeIndexables([], [conMarca('/obra/a/b', true, INDEXABLE)])).toEqual([
+      `  · marca \`${INDEXABLE}\` con \`noindex\`: /obra/a/b`,
+    ]);
+    // Una no indexable sin `noindex`, que el sitemap anuncia: solo la de la marca.
+    expect(desajustesDeIndexables(['/obra/a/c'], [conMarca('/obra/a/c', false, NO_INDEXABLE)])).toEqual([
+      `  · marca \`${NO_INDEXABLE}\` sin \`noindex\`: /obra/a/c`,
+    ]);
+    // Una marca fuera de la página 1 de una Obra: una 2+, una Cita, la portada.
+    expect(
+      desajustesDeIndexables(['/cita/x', '/'], [
+        conMarca('/obra/a/c/2', true, NO_INDEXABLE),
+        conMarca('/cita/x', false, INDEXABLE),
+        conMarca('/', false, 'ajena'),
+      ]),
+    ).toEqual([`  · marca de Obra en una página que no es la 1 de una Obra: /, /cita/x, /obra/a/c/2`]);
+  });
+
+  it('23.9 — una página no declarada no se juzga, lleve o no la marca', () => {
+    expect(desajustesDeIndexables([], [conMarca('/sonda', true, INDEXABLE)])).toEqual([]);
+  });
+
+  it('23.9 — la línea del registro y el titular nombran la marca', () => {
+    expect(informeDeCoincidencia(3)).toBe(
+      'El sitemap, los `noindex`, Pagefind y la marca de Obra coinciden (3 rutas indexables).',
+    );
+    expect(titularDeDesajustes(2)).toMatch(/^El sitemap, los `noindex`, el índice de Pagefind y la marca de Obra no coinciden \(2 desajustes\)/);
   });
 
   it('lee las marcas y las rutas del dist', () => {
@@ -284,6 +344,21 @@ describe('la comprobación del build, pura', () => {
       noindex: false,
       enPagefind: true,
     });
+    // Historia 23.9 — la marca de Obra del `<html>`: presente, ausente y ajena, tal cual.
+    const [INDEXABLE] = MARCAS_DE_OBRA;
+    const conHtml = (atributos: string) =>
+      `<html lang="es"${atributos}><head></head><main id="contenido" data-pagefind-body></main></html>`;
+    expect(marcasDePagina(conHtml(` data-vistas="a b" ${ATRIBUTO_DE_INDEXABLE}="${INDEXABLE}"`))).toEqual({
+      noindex: false,
+      enPagefind: true,
+      marcaDeObra: INDEXABLE,
+    });
+    const sinMarca = marcasDePagina(conHtml(' data-vistas="a"'));
+    expect(sinMarca).toEqual({ noindex: false, enPagefind: true });
+    expect('marcaDeObra' in sinMarca).toBe(false);
+    expect(marcasDePagina(conHtml(` ${ATRIBUTO_DE_INDEXABLE}="si"`)).marcaDeObra).toBe('si');
+    // Fuera del `<html>` no es la marca.
+    expect('marcaDeObra' in marcasDePagina(`<html lang="es"><body><p ${ATRIBUTO_DE_INDEXABLE}="${INDEXABLE}"></p>`)).toBe(false);
     expect(rutaDeFicheroHtml('index.html')).toBe('/');
     expect(rutaDeFicheroHtml('404.html')).toBe('/404');
     expect(rutaDeFicheroHtml('obra/a/b/2/index.html')).toBe('/obra/a/b/2');

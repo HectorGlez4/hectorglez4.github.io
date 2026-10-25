@@ -1,5 +1,5 @@
 import { createContext, runInContext } from 'node:vm';
-import { ARRANQUE_DE_MEDICION, guionDeMedicion } from '../../../src/lib/medicion.ts';
+import { ARRANQUE_DE_MEDICION, ATRIBUTO_DE_INDEXABLE, guionDeMedicion } from '../../../src/lib/medicion.ts';
 
 /** Un oyente guardado, con sus ajustes. */
 interface Oyente {
@@ -138,6 +138,12 @@ function comoElemento(nodo: Nodo, vistos = new Map<Nodo, Record<string, unknown>
  * solo listas de `etiqueta[atributo]` y `[atributo]`, que es lo que pide el fichero. No dispara
  * `pointerdown`: un clic de `element.click()` no lo trae, y quien quiera el del ratón lo pide antes
  * con `interactuar`.
+ *
+ * Desde la Historia 23.9 el `<html>` lleva también **la marca de la Obra** (`indexable`): el
+ * atributo `ATRIBUTO_DE_INDEXABLE` con el valor que se dé, tal cual —el entorno no lo coteja con
+ * nada, que es lo que tiene que hacer el fichero—, y sin él no lo lleva. El `documentElement` lo
+ * ofrece por `getAttribute`, como el navegador, junto con `data-vistas`, que sigue además en
+ * `dataset`.
  */
 export const ORIGEN_DEL_SANDBOX = 'https://ejemplo.invalid';
 
@@ -148,6 +154,8 @@ export function medicionEnUnSandbox(
     sendBeacon?: (url: string, carga: string) => void;
     /** El `data-vistas` del `<html>`. Sin él, la página no declara vistas. */
     vistas?: string;
+    /** La marca de la Obra del `<html>` (`ATRIBUTO_DE_INDEXABLE`), tal cual. Sin ella, no la lleva. */
+    indexable?: string;
     /** `document.prerendering` al cargar el fichero. */
     prerendering?: boolean;
     /** Si el fichero se carga al crear el entorno. Por omisión, sí. */
@@ -204,9 +212,15 @@ export function medicionEnUnSandbox(
     if (indice >= 0) temporizadores.splice(indice, 1);
   };
 
+  /** Los atributos del `<html>`: los que la página trae, con su nombre de verdad. */
+  const delHtml = new Map<string, string>();
+  if (opciones.vistas !== undefined) delHtml.set('data-vistas', opciones.vistas);
+  if (opciones.indexable !== undefined) delHtml.set(ATRIBUTO_DE_INDEXABLE, opciones.indexable);
   const documento = {
     documentElement: {
       dataset: opciones.vistas === undefined ? {} : { vistas: opciones.vistas },
+      getAttribute: (nombre: string) => delHtml.get(nombre) ?? null,
+      hasAttribute: (nombre: string) => delHtml.has(nombre),
     },
     prerendering: opciones.prerendering ?? false,
     visibilityState: opciones.visible === false ? 'hidden' : 'visible',

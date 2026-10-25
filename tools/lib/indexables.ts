@@ -8,11 +8,27 @@
  * páginas, que lee el armazón—. Que las dos digan lo mismo no se le confía a nadie: se mira en
  * el `dist/` de verdad, y si discrepan el build rompe nombrando las rutas.
  *
+ * Desde la Historia 23.9 hay un cuarto lector: la marca de la vista de Obra, el atributo
+ * `ATRIBUTO_DE_INDEXABLE` del `<html>` que el fichero de medición envía con `vista-de-obra`. Sale
+ * de la misma `consecuenciasDe` que el `noindex` de esa página, y se coteja aquí con él, en la misma
+ * lista de desajustes y con el mismo corte: toda página 1 de Obra la lleva, con un valor de
+ * `MARCAS_DE_OBRA`; la indexable no lleva `noindex` y la otra sí; y ninguna otra página la lleva.
+ *
  * Puro (AD-5): recibe el HTML y el sitemap ya leídos. Quien lee disco y detiene la
  * construcción es `integraciones/indexables.ts`.
  */
 
-import { rutaNormalizada, superficieDeclaradaDe } from '../../src/lib/superficies.ts';
+import {
+  esRutaDeObra,
+  esServicioPorForma,
+  rutaNormalizada,
+  superficieDeclaradaDe,
+} from '../../src/lib/superficies.ts';
+import { ATRIBUTO_DE_INDEXABLE } from '../../src/lib/medicion.ts';
+import { MARCAS_DE_OBRA } from '../../src/lib/vocabulario.ts';
+
+/** Las dos marcas de Obra, nombradas contra el vocabulario: la de la indexable y la de la que no. */
+const [OBRA_INDEXABLE, OBRA_NO_INDEXABLE] = MARCAS_DE_OBRA;
 
 /** Lo que de una página construida importa para la comprobación. */
 export interface PaginaIndexable {
@@ -22,6 +38,12 @@ export interface PaginaIndexable {
   noindex: boolean;
   /** Su `<main>` lleva `data-pagefind-body`: entra en la búsqueda propia. */
   enPagefind: boolean;
+  /**
+   * El valor del atributo `ATRIBUTO_DE_INDEXABLE` de su `<html>`, tal cual —Historia 23.9—, o
+   * ausente si no lo lleva. Se lee sin cotejar: decir si es una de `MARCAS_DE_OBRA` es de la
+   * comprobación.
+   */
+  marcaDeObra?: string;
 }
 
 /**
@@ -34,11 +56,19 @@ export function rutaDeFicheroHtml(relativa: string): string {
   return rutaNormalizada(`/${sinIndice}`);
 }
 
-/** Las dos marcas que la comprobación lee de una página construida. */
+/** El atributo de la marca de Obra en la etiqueta `<html>`, con su valor entre comillas. */
+const MARCA_EN_EL_HTML = new RegExp(`<html\\b[^>]*\\s${ATRIBUTO_DE_INDEXABLE}="([^"]*)"`, 'iu');
+
+/**
+ * Las marcas que la comprobación lee de una página construida: su `noindex`, su entrada en
+ * Pagefind y, desde la 23.9, la marca de Obra de su `<html>`, que se omite si no la lleva.
+ */
 export function marcasDePagina(html: string): Omit<PaginaIndexable, 'ruta'> {
+  const marcaDeObra = MARCA_EN_EL_HTML.exec(html)?.[1];
   return {
     noindex: /<meta\s+name="robots"\s+content="noindex/iu.test(html),
     enPagefind: /<main\b[^>]*\sdata-pagefind-body(?=[\s=>])/iu.test(html),
+    ...(marcaDeObra === undefined ? {} : { marcaDeObra }),
   };
 }
 
@@ -48,12 +78,17 @@ export function rutasDelSitemap(xml: string): string[] {
 }
 
 /**
- * Lo que no coincide entre el sitemap, las páginas sin `noindex` y las que entran en Pagefind.
+ * Lo que no coincide entre el sitemap, las páginas sin `noindex`, las que entran en Pagefind y
+ * —desde la Historia 23.9— la marca de Obra de cada página.
  *
  * Solo cuentan las páginas de una superficie **declarada**: las sonda que alguna prueba añade
  * al proyecto temporal no son superficies del sitio, el filtro del sitemap tampoco las anuncia,
  * y quien grita por una superficie sin declarar es el armazón. Devuelve las líneas del
- * informe, vacío si los tres conjuntos son el mismo.
+ * informe, vacío si los tres conjuntos son el mismo y cada marca casa con su página.
+ *
+ * La marca de Obra se juzga en cuatro clases: una página 1 de Obra (`esRutaDeObra` y no
+ * `esServicioPorForma`) sin marca o con una que no es de `MARCAS_DE_OBRA`; una marca indexable con
+ * `noindex`; una no indexable sin `noindex`; y una marca en una página que no es la 1 de una Obra.
  */
 export function desajustesDeIndexables(
   sitemap: readonly string[],
@@ -83,17 +118,46 @@ export function desajustesDeIndexables(
   nombrar('en Pagefind y fuera del sitemap', menos(enPagefind, enElSitemap));
   nombrar('sin `noindex` y fuera de Pagefind', menos(sinNoindex, enPagefind));
   nombrar('en Pagefind y con `noindex`', menos(enPagefind, sinNoindex));
+
+  // Historia 23.9 — la marca de la vista de Obra, contra el `noindex` de su misma página.
+  const ordenadas = (lista: readonly PaginaIndexable[]) =>
+    lista.map((p) => p.ruta).sort((x, y) => x.localeCompare(y, 'es'));
+  const esPrimeraDeObra = (p: PaginaIndexable) => esRutaDeObra(p.ruta) && !esServicioPorForma(p.ruta);
+  const marcaValida = (marca: string | undefined) =>
+    marca !== undefined && (MARCAS_DE_OBRA as readonly string[]).includes(marca);
+  nombrar(
+    `página 1 de Obra sin marca \`${ATRIBUTO_DE_INDEXABLE}\` válida`,
+    ordenadas(declaradas.filter((p) => esPrimeraDeObra(p) && !marcaValida(p.marcaDeObra))),
+  );
+  nombrar(
+    `marca \`${OBRA_INDEXABLE}\` con \`noindex\``,
+    ordenadas(declaradas.filter((p) => p.marcaDeObra === OBRA_INDEXABLE && p.noindex)),
+  );
+  nombrar(
+    `marca \`${OBRA_NO_INDEXABLE}\` sin \`noindex\``,
+    ordenadas(declaradas.filter((p) => p.marcaDeObra === OBRA_NO_INDEXABLE && !p.noindex)),
+  );
+  nombrar(
+    'marca de Obra en una página que no es la 1 de una Obra',
+    ordenadas(declaradas.filter((p) => p.marcaDeObra !== undefined && !esPrimeraDeObra(p))),
+  );
   return lineas;
 }
 
 /** El titular del corte, cuando la comprobación falla. */
 export function titularDeDesajustes(lineas: number): string {
   return (
-    `El sitemap, los \`noindex\` y el índice de Pagefind no coinciden (${lineas} ` +
+    `El sitemap, los \`noindex\`, el índice de Pagefind y la marca de Obra no coinciden (${lineas} ` +
     `${lineas === 1 ? 'desajuste' : 'desajustes'}). Salen de la misma declaración de ` +
     'src/lib/superficies.ts y de la misma lista de rutas indexables: si discrepan, alguna ' +
-    'instancia se construyó con otra lista. Ver el detalle arriba.'
+    'instancia se construyó con otra lista, o la marca de Obra no salió de `consecuenciasDe`. ' +
+    'Ver el detalle arriba.'
   );
+}
+
+/** La línea del registro cuando la comprobación pasa: los cuatro lectores coinciden. */
+export function informeDeCoincidencia(indexables: number): string {
+  return `El sitemap, los \`noindex\`, Pagefind y la marca de Obra coinciden (${indexables} rutas indexables).`;
 }
 
 /** «N Obras publicadas, M indexables»: la línea base de SM-11 en el registro del build. */

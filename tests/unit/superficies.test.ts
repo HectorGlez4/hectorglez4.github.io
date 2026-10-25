@@ -25,6 +25,7 @@ import {
 } from '../../src/lib/superficies.ts';
 import { slug } from '../../src/lib/admision.ts';
 import { EVENTOS } from '../../src/lib/medicion.ts';
+import { MARCAS_DE_OBRA } from '../../src/lib/vocabulario.ts';
 
 /**
  * Historia 12.1 — una superficie declara en un solo sitio si es publicable.
@@ -1013,26 +1014,60 @@ describe('Historia 23.1 — la medición es una consecuencia más de la declarac
     olvidarRutasIndexables();
   });
 
-  it('la vista sale de la superficie y solo la emite la ruta de producto', () => {
+  it('la vista sale de la superficie y solo la emite la ruta de producto; la de Obra, la página 1 de toda Obra, con su marca', () => {
     declararRutasIndexables(['/obra/seneca/cartas-a-lucilio']);
-    const casos: [string, readonly string[]][] = [
-      ['/', [EVENTOS.vistaDeSuperficie]],
-      ['/cita/una', [EVENTOS.vistaDeCita]],
-      ['/autor/seneca', [EVENTOS.vistaDeSuperficie]],
-      ['/autor/seneca/2', []],
-      ['/tema/el-tiempo', [EVENTOS.vistaDeSuperficie]],
-      ['/tema/el-tiempo/2', []],
-      ['/coleccion/frases', [EVENTOS.vistaDeSuperficie]],
-      ['/coleccion/frases/2', []],
-      ['/obra/seneca/cartas-a-lucilio', [EVENTOS.vistaDeSuperficie]],
-      ['/obra/seneca/otra', []],
-      ['/obra/seneca/cartas-a-lucilio/2', []],
-      ['/buscar', []],
-      ['/404', []],
-      ['/kit', []],
-      ['/lote', []],
+    const [indexable, noIndexable] = MARCAS_DE_OBRA;
+    // Historia 23.9 — la Obra indexable emite las dos, en este orden; la que no se indexa, solo la
+    // de Obra; su página 2, ninguna. La marca solo en las dos páginas 1 de Obra.
+    const casos: [string, readonly string[], string | undefined][] = [
+      ['/', [EVENTOS.vistaDeSuperficie], undefined],
+      ['/cita/una', [EVENTOS.vistaDeCita], undefined],
+      ['/autor/seneca', [EVENTOS.vistaDeSuperficie], undefined],
+      ['/autor/seneca/2', [], undefined],
+      ['/tema/el-tiempo', [EVENTOS.vistaDeSuperficie], undefined],
+      ['/tema/el-tiempo/2', [], undefined],
+      ['/coleccion/frases', [EVENTOS.vistaDeSuperficie], undefined],
+      ['/coleccion/frases/2', [], undefined],
+      ['/obra/seneca/cartas-a-lucilio', [EVENTOS.vistaDeSuperficie, EVENTOS.vistaDeObra], indexable],
+      ['/obra/seneca/otra', [EVENTOS.vistaDeObra], noIndexable],
+      ['/obra/seneca/cartas-a-lucilio/2', [], undefined],
+      ['/obra/seneca/otra/2', [], undefined],
+      ['/buscar', [], undefined],
+      ['/404', [], undefined],
+      ['/kit', [], undefined],
+      ['/lote', [], undefined],
     ];
-    for (const [ruta, vistas] of casos) expect(consecuenciasDe(ruta).vistas, ruta).toEqual(vistas);
+    for (const [ruta, vistas, marca] of casos) {
+      const consecuencias = consecuenciasDe(ruta);
+      expect(consecuencias.vistas, ruta).toEqual(vistas);
+      expect(consecuencias.marcaDeObra, ruta).toBe(marca);
+      // Sin marca, la clave se omite: nunca `undefined` escrito.
+      expect('marcaDeObra' in consecuencias, ruta).toBe(marca !== undefined);
+    }
+  });
+
+  it('la vista con marca no cambia el carácter de ninguna ruta de Obra, ni lo que de él sale', () => {
+    // Historia 23.9 — el sitemap, el `noindex` y Pagefind de cada ruta siguen siendo los de su carácter.
+    declararRutasIndexables(['/obra/seneca/cartas-a-lucilio']);
+    for (const [ruta, caracter] of [
+      ['/obra/seneca/cartas-a-lucilio', 'producto'],
+      ['/obra/seneca/otra', 'servicio'],
+      ['/obra/seneca/cartas-a-lucilio/2', 'servicio'],
+    ] as const) {
+      expect(caracterDe(ruta), ruta).toBe(caracter);
+      expect(consecuenciasDe(ruta), ruta).toMatchObject(consecuenciasDelCaracter(caracter));
+    }
+  });
+
+  it('la marca sigue a la lista declarada, sin recalcular nada: la misma ruta cambia de marca al cambiar la lista', () => {
+    const [indexable, noIndexable] = MARCAS_DE_OBRA;
+    declararRutasIndexables([]);
+    expect(consecuenciasDe('/obra/seneca/cartas-a-lucilio').marcaDeObra).toBe(noIndexable);
+    declararRutasIndexables(['/obra/seneca/cartas-a-lucilio/']);
+    expect(consecuenciasDe('/obra/seneca/cartas-a-lucilio').marcaDeObra).toBe(indexable);
+    // Y sin lista rompe, como el carácter: no se decide por omisión.
+    olvidarRutasIndexables();
+    expect(() => consecuenciasDe('/obra/seneca/cartas-a-lucilio')).toThrow(/no se ha declarado/);
   });
 
   it('carga el fichero toda superficie que se visita; el Kit y el lote, no', () => {
@@ -1045,7 +1080,24 @@ describe('Historia 23.1 — la medición es una consecuencia más de la declarac
 
   it('ninguna superficie que no es de producto declara una vista', () => {
     for (const superficie of SUPERFICIES) {
-      if (superficie.caracter !== 'producto') expect(superficie.vista, superficie.nombre).toBeUndefined();
+      if (superficie.caracter !== 'producto') {
+        expect(superficie.vista, superficie.nombre).toBeUndefined();
+        expect(superficie.vistaConMarca, superficie.nombre).toBeUndefined();
+      }
+    }
+  });
+
+  it('la vista con marca solo la declara una superficie `indexablePorContenido`, y ninguna `vista` es la de Obra', () => {
+    // Historia 23.9 — la marca sale de la lista de rutas indexables: sin ella no hay qué marcar. Y
+    // la vista de Obra no es «sí y solo si producto»: en `vista` la perdería la Obra que no se indexa.
+    const conMarca = SUPERFICIES.filter((s) => s.vistaConMarca !== undefined);
+    expect(conMarca.map((s) => s.nombre)).toEqual(['la Página de Obra']);
+    for (const superficie of conMarca) {
+      expect(superficie.vistaConMarca, superficie.nombre).toBe(EVENTOS.vistaDeObra);
+      expect(superficie.indexablePorContenido, superficie.nombre).toBe(true);
+    }
+    for (const superficie of SUPERFICIES) {
+      expect(superficie.vista, superficie.nombre).not.toBe(EVENTOS.vistaDeObra);
     }
   });
 

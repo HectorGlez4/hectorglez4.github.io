@@ -20,7 +20,11 @@
  *     (`CRITERIOS_QUE_AÑADE_WCAG_22`) se declaran aquí y en ningún fichero de prueba—,
  *   · y la medición (Historia 23.1, AD-17): si la página carga el fichero de medición y qué
  *     vistas emite —el `data-vistas` del `<html>`—. Ninguna página elige su vista: la declara
- *     su superficie aquí, y solo la emite la ruta cuyo carácter efectivo es `producto`.
+ *     su superficie aquí, y solo la emite la ruta cuyo carácter efectivo es `producto`. La
+ *     excepción con nombre es la vista de Obra (Historia 23.9, `vistaConMarca`): la emite la
+ *     página 1 de **toda** Obra, se indexe o no, con una marca —`marcaDeObra`, al atributo
+ *     `ATRIBUTO_DE_INDEXABLE` del `<html>`— que dice lo mismo que su `noindex`, porque las dos
+ *     salen de la misma lista de rutas indexables.
  *
  * Vive en `src/lib/` y no en la configuración porque es derivación pura: no lee disco
  * (AD-5) y la consumen tanto el sitio —`Armazon.astro`— como `astro.config.mjs` y las
@@ -29,6 +33,16 @@
  */
 
 import { EVENTOS, type EventoDeVista } from './medicion.ts';
+import { MARCAS_DE_OBRA, type MarcaDeObra } from './vocabulario.ts';
+
+/**
+ * Las dos marcas de la vista de Obra, nombradas contra `MARCAS_DE_OBRA` del vocabulario y nunca
+ * escritas aquí: la de la página 1 de una Obra que se indexa y la de la que no (Historia 23.9).
+ */
+const [OBRA_INDEXABLE, OBRA_NO_INDEXABLE] = MARCAS_DE_OBRA;
+
+/** La vista de Obra (Historia 23.9): la única que una superficie declara con marca. */
+type VistaDeObra = typeof EVENTOS.vistaDeObra;
 
 /**
  * Qué es una superficie. No hay más valores, y añadir uno es una decisión visible:
@@ -56,12 +70,24 @@ export interface Superficie {
    * La vista que emite la superficie cuando su ruta es `producto` — AD-13, Historia 23.1.
    *
    * Una sola y por el vocabulario (`EVENTOS`), nunca una cadena suelta: así una página no
-   * puede emitir a la vez la vista de Cita y la de superficie (Historia 20.1). El tipo
-   * (`EventoDeVista`) solo admite esas dos: un evento de gesto aquí saldría en cada carga. Sale al
-   * `data-vistas` del `<html>`, que lee el fichero de medición. Las páginas 2+ y la Obra que no
-   * se indexa no la emiten aunque su superficie la declare: su carácter efectivo es `servicio`.
+   * puede emitir a la vez la vista de Cita y la de superficie (Historia 20.1). El tipo solo admite
+   * esas dos —un evento de gesto aquí saldría en cada carga, y la vista de Obra va en su campo,
+   * `vistaConMarca`, porque sale con otra regla—. Sale al `data-vistas` del `<html>`, que lee el
+   * fichero de medición. Las páginas 2+ y la Obra que no se indexa no la emiten aunque su
+   * superficie la declare: su carácter efectivo es `servicio`. Es «sí y solo si producto».
    */
-  vista?: EventoDeVista;
+  vista?: Exclude<EventoDeVista, VistaDeObra>;
+  /**
+   * La vista con marca — FR-51, Historia 23.9: la vista de Obra (`EVENTOS.vistaDeObra`).
+   *
+   * Sale con otra regla que `vista`, y por eso va en su campo: la emite la página 1 de la
+   * superficie **se indexe o no** —no las 2+, que son servicio por forma—, detrás de `vista` si la
+   * ruta es producto, y con la marca que dice si lo es (`marcaDeObra` de `consecuenciasDe`). Si
+   * fuera una segunda `vista`, o la Obra que no se indexa la perdería, o la vista de superficie
+   * dejaría de ser «solo producto». Solo la declara una superficie `indexablePorContenido`: la marca
+   * sale de la lista de rutas indexables, y sin ella no hay qué marcar.
+   */
+  vistaConMarca?: VistaDeObra;
   /**
    * Publicabilidad **condicional** — FR-5.
    *
@@ -159,6 +185,9 @@ export const SUPERFICIES: readonly Superficie[] = [
     // Historia 20.1 — la emite solo la página 1 de una Obra indexable; la que repite otra
     // página es `servicio` por contenido y no la emite, como una página 2+.
     vista: EVENTOS.vistaDeSuperficie,
+    // Historia 23.9 — la vista de Obra la emite la página 1 de toda Obra, se indexe o no, con la
+    // marca que dice cuál de las dos es. La 2+ no.
+    vistaConMarca: EVENTOS.vistaDeObra,
     indexablePorContenido: true,
     // Anclada a la ruta entera, como Autor y Tema. Un slug de obra enteramente numérico no
     // llega a existir: `fallosDeObras` rompe el build antes, porque esta forma no lo vería.
@@ -301,13 +330,22 @@ export interface Consecuencias {
   cargaLaMedicion: boolean;
 }
 
-/** Las consecuencias de una ruta concreta: las de su carácter y las vistas que emite. */
+/** Las consecuencias de una ruta concreta: las de su carácter, las vistas que emite y su marca. */
 export interface ConsecuenciasDeRuta extends Consecuencias {
   /**
-   * Las vistas que emite la ruta, en el `data-vistas` del `<html>` (Historia 23.1). Las que
-   * declara su superficie si su carácter efectivo es `producto`; ninguna si no.
+   * Las vistas que emite la ruta, en el `data-vistas` del `<html>` (Historia 23.1), en este orden:
+   * la `vista` de su superficie si su carácter efectivo es `producto`, y después la vista con marca
+   * (`vistaConMarca`, Historia 23.9) si es la página 1 de una superficie que la declara, se indexe o
+   * no. Ninguna si no.
    */
   vistas: readonly EventoDeVista[];
+  /**
+   * La marca de la vista de Obra — FR-52, Historia 23.9, al atributo `ATRIBUTO_DE_INDEXABLE` del
+   * `<html>`. Solo en la ruta que emite la vista con marca: de `MARCAS_DE_OBRA`, la indexable si
+   * su carácter efectivo es `producto` y la otra si es servicio por contenido —lo mismo que dice su
+   * `noindex`, de la misma lista declarada—. En toda otra ruta la clave se omite.
+   */
+  marcaDeObra?: MarcaDeObra;
 }
 
 /**
@@ -527,14 +565,27 @@ export function caracterDe(rutaOUrl: string): Caracter {
   return causaDelServicio(ruta) === undefined ? superficie.caracter : 'servicio';
 }
 
-/** Las consecuencias de una ruta concreta. Es lo que consume `Armazon.astro`. */
+/**
+ * Las consecuencias de una ruta concreta. Es lo que consume `Armazon.astro`.
+ *
+ * La vista con marca (Historia 23.9) sale de la **misma** causa del servicio que el carácter: en
+ * la página 1 de una superficie que la declara, la indexable si no hay causa —es producto— y la no
+ * indexable si la causa es el contenido; en una página 2+ (causa `forma`) no sale. Así la marca no
+ * se recalcula aparte, y sigue a FR-52 y a la congelación igual que el `noindex`.
+ */
 export function consecuenciasDe(rutaOUrl: string): ConsecuenciasDeRuta {
   const ruta = rutaNormalizada(rutaOUrl);
+  const superficie = superficieDeclarada(ruta);
   const caracter = caracterDe(ruta);
-  const vista = superficieDeclarada(ruta).vista;
+  const causa = causaDelServicio(ruta);
+  const vistas: EventoDeVista[] = caracter === 'producto' && superficie.vista !== undefined ? [superficie.vista] : [];
+  if (superficie.vistaConMarca === undefined || causa === 'forma') {
+    return { ...consecuenciasDelCaracter(caracter), vistas };
+  }
   return {
     ...consecuenciasDelCaracter(caracter),
-    vistas: caracter === 'producto' && vista !== undefined ? [vista] : [],
+    vistas: [...vistas, superficie.vistaConMarca],
+    marcaDeObra: causa === 'contenido' ? OBRA_NO_INDEXABLE : OBRA_INDEXABLE,
   };
 }
 

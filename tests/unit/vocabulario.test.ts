@@ -231,14 +231,15 @@ describe('Historia 23.2 — los eventos y los conjuntos cerrados', () => {
 /**
  * Lo que el vocabulario declara y el guion todavía no emite, por historia. **Sacar una entrada
  * de aquí es parte de su historia**, en el mismo diff que la enseña al guion: la prueba exige que
- * lo pendiente no salga, así que adelantarse o quedarse atrás la pone en rojo. Se vacía en la
- * 23.11.
+ * lo pendiente no salga, así que adelantarse o quedarse atrás la pone en rojo. La 23.11 la cierra.
+ *
+ * Desde la 23.9 está **vacía**: el guion emite todo el vocabulario. La 23.6 le enseñó `via`, en las
+ * vistas y la lectura; la 23.7, la salida interna, con su zona; la 23.8, la búsqueda, con su tramo y
+ * sus filtros; y la 23.9, la vista de Obra, con su marca `indexable`. Un evento o un campo que el
+ * vocabulario gane después, y que el guion no sepa producir todavía, vuelve a entrar aquí con su
+ * historia.
  */
-const PENDIENTES: readonly { historia: string; eventos?: readonly Evento[]; campos?: readonly [Evento, Campo][] }[] = [
-  // La 23.6 enseñó `via` al guion, en las vistas y la lectura: ya no hay ningún campo pendiente.
-  // La 23.7 le enseñó la salida interna, con su zona; la 23.8, la búsqueda, con su tramo y sus filtros.
-  { historia: '23.9', eventos: [EVENTOS.vistaDeObra] },
-];
+const PENDIENTES: readonly { historia: string; eventos?: readonly Evento[]; campos?: readonly [Evento, Campo][] }[] = [];
 
 const eventoPendiente = (evento: Evento) => PENDIENTES.some((p) => p.eventos?.includes(evento));
 const campoPendiente = (evento: Evento, campo: Campo) =>
@@ -281,6 +282,11 @@ interface Entrada {
   tramo?: string;
   /** La combinación de filtros que pasa como tercero (Historia 23.8). */
   filtros?: string;
+  /**
+   * La marca de la Obra que lleva el `<html>` (`ATRIBUTO_DE_INDEXABLE`, Historia 23.9), tal cual.
+   * Solo la leen las vistas, que salen de `data-vistas`.
+   */
+  indexable?: string;
 }
 
 /** La zona con la que sale la salida interna de un escenario que no nombra ninguna. */
@@ -291,11 +297,17 @@ const ZONA_POR_OMISION = ZONAS[0];
  * pasa una isla por `__medir`, la vista que declara la página o lo que hace el visitante para que
  * el fichero lo emita por su cuenta. Solo las balizas de ese evento: la vista declarada que
  * necesita la lectura no cuenta. Las vistas salen de `data-vistas`, como en el sitio: desde la
- * revisión de la 23.6, una vista que pida una isla sale sin Marcas de llegada.
+ * revisión de la 23.6, una vista que pida una isla sale sin Marcas de llegada. Desde la 23.9, con la
+ * marca de la Obra del `<html>` que dé la entrada.
  */
 function producir(evento: Evento, entrada: Entrada) {
   if ((EVENTOS_DE_VISTA as readonly Evento[]).includes(evento)) {
-    const entorno = medicionEnUnSandbox({ ruta: '/cita/una/', busqueda: entrada.busqueda, vistas: evento });
+    const entorno = medicionEnUnSandbox({
+      ruta: '/cita/una/',
+      busqueda: entrada.busqueda,
+      vistas: evento,
+      indexable: entrada.indexable,
+    });
     return entorno.balizas().filter((baliza) => baliza.evento === evento);
   }
   const porSuCuenta = PRODUCIR_DEL_FICHERO[evento];
@@ -434,6 +446,26 @@ function escenariosDe(evento: Evento): Escenario[] {
       esperado: (campo) => (campo === 'tramo' ? primerTramo.rotulo : campo === 'filtros' ? ultimo : null),
     });
   }
+  // Historia 23.9 — cada marca de Obra del vocabulario, una ajena —un valor de otro conjunto, uno
+  // inventado y el atributo vacío— y una junto a la Marca de origen, solo en los eventos que declaran
+  // `indexable`: la marca no es un argumento de `__medir` ni de la dirección, sino un atributo del
+  // `<html>`, y solo la vista de Obra la lee. Sin marca, el escenario «sin marca ni argumentos». Que
+  // no viaje con los demás eventos ya lo dicen sus claves exactas, en todo escenario.
+  if (valoresDe('indexable').length > 0) {
+    const deLaObra = (campo: Campo, marca: string) =>
+      campo === 'indexable' && valoresDe('indexable').includes(marca) ? marca : null;
+    for (const marca of [...MARCAS_DE_OBRA, 'si', DESTINO_AJENO, '']) {
+      escenarios.push({ nombre: `marca de Obra «${marca}»`, indexable: marca, esperado: (campo) => deLaObra(campo, marca) });
+    }
+    const [red] = REDES_VALIDAS;
+    const [marca] = MARCAS_DE_OBRA;
+    escenarios.push({
+      nombre: `?${PARAMETRO_DE_ORIGEN}=${red} y marca de Obra «${marca}»`,
+      busqueda: `?${PARAMETRO_DE_ORIGEN}=${red}`,
+      indexable: marca,
+      esperado: (campo) => (campo === 'origen' ? red : deLaObra(campo, marca)),
+    });
+  }
   // `primera` no sale de la entrada: la calcula el fichero, y en la primera acción de cada
   // entorno es «si», salvo la descarga con destino de su conjunto. La `zona` tampoco sale de
   // un argumento: es la del contenedor del enlace pulsado, la del escenario o la de por omisión.
@@ -455,12 +487,13 @@ describe('Historia 23.2 — la correspondencia: guion, receptor y esquema, event
     expect(columnas).toEqual(['jornada', 'evento', 'ruta', ...CAMPOS]);
   });
 
-  it('lo no pendiente son los diez eventos de hoy, y es lo que el guion emite', () => {
+  it('lo no pendiente son los once eventos de hoy, y es lo que el guion emite', () => {
     const vigentes = EVENTOS_VALIDOS.filter((evento) => !eventoPendiente(evento));
     expect([...vigentes].sort()).toEqual(
       [
         EVENTOS.vistaDeCita,
         EVENTOS.vistaDeSuperficie,
+        EVENTOS.vistaDeObra,
         EVENTOS.lectura,
         EVENTOS.salidaInterna,
         EVENTOS.busqueda,
@@ -497,6 +530,24 @@ describe('Historia 23.2 — la correspondencia: guion, receptor y esquema, event
       } else {
         expect(tramos, evento).toEqual([]);
         expect(filtros, evento).toEqual([]);
+      }
+    }
+  });
+
+  it('la vista de Obra se recorre con cada marca, una ajena y ninguna, y ningún otro evento lleva escenarios de marca', () => {
+    // Historia 23.9: para que la correspondencia de abajo no pase en vacío con `indexable`.
+    expect(PENDIENTES).toEqual([]);
+    for (const evento of EVENTOS_VALIDOS) {
+      const escenarios = escenariosDe(evento);
+      const marcas = escenarios.flatMap((escenario) => (escenario.indexable === undefined ? [] : [escenario.indexable]));
+      if (CAMPOS_DE_EVENTO[evento].indexable !== undefined) {
+        expect(evento).toBe(EVENTOS.vistaDeObra);
+        expect(marcas, evento).toEqual(expect.arrayContaining([...MARCAS_DE_OBRA]));
+        // Una ajena —que no es de su conjunto— y ninguna: sin marca, sale nula.
+        expect(marcas.some((marca) => !(MARCAS_DE_OBRA as readonly string[]).includes(marca)), evento).toBe(true);
+        expect(escenarios.some((escenario) => escenario.indexable === undefined), evento).toBe(true);
+      } else {
+        expect(marcas, evento).toEqual([]);
       }
     }
   });

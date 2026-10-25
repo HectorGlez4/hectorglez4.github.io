@@ -8,6 +8,7 @@ import { parseSync } from 'vite';
 import {
   ARRANQUE_DE_MEDICION,
   ASENTAMIENTO_DE_BUSQUEDA,
+  ATRIBUTO_DE_INDEXABLE,
   ATRIBUTO_DE_ZONA,
   ATRIBUTO_SIN_ZONA,
   EVENTOS,
@@ -40,6 +41,7 @@ import {
 import {
   DESTINOS_DE_DESCARGA,
   FILTROS,
+  MARCAS_DE_OBRA,
   METRICA_DE_ACCION,
   PARAMETRO_DE_DIFUSION,
   TRAMOS,
@@ -169,14 +171,15 @@ describe('Historia 2.9 — el vocabulario es cerrado', () => {
     // invente un nombre no consigue emitirlo. Se comprueba **ejecutándolo**, no leyendo
     // su texto: una prueba sobre la forma del guion se rompe al compactarla y no dice
     // nada sobre lo que hace. Desde la 23.2 el guion emite solo los eventos que ya sabe
-    // producir: los de la v8 esperan a sus historias (23.6 a 23.9) y se descartan igual. Desde
-    // la 23.5, `__medir` descarta además los que solo emite el fichero: la lectura.
+    // producir: los de la v8 esperaron a sus historias (23.5 a 23.9), y desde la 23.9 los sabe
+    // todos. Desde la 23.5, `__medir` descarta además los que solo emite el fichero: la lectura y,
+    // desde la 23.7, la salida interna.
     const { emitir, balizas } = medicionEnUnSandbox();
     const aPeticion = EVENTOS_DEL_GUION.filter((evento) => !EVENTOS_SOLO_DEL_FICHERO.includes(evento));
 
     for (const evento of EVENTOS_VALIDOS) emitir(evento);
     expect(balizas().map((b) => b.evento)).toEqual(aPeticion);
-    expect(EVENTOS_DEL_GUION.length).toBeLessThan(EVENTOS_VALIDOS.length);
+    expect([...EVENTOS_DEL_GUION].sort()).toEqual([...EVENTOS_VALIDOS].sort());
     expect(aPeticion).not.toContain(EVENTOS.lectura);
 
     for (const impostor of ['pageview', 'clic', 'VISTA-DE-CITA', '', 'toString', 'hasOwnProperty']) emitir(impostor);
@@ -553,7 +556,8 @@ describe('Historia 23.5 — una carga que se lee deja una lectura', () => {
   });
 
   it('de `data-vistas` solo salen vistas: una acción escrita ahí no sale ni hace de la página superficie con lectura', () => {
-    expect([...EVENTOS_DE_VISTA]).toEqual([EVENTOS.vistaDeCita, EVENTOS.vistaDeSuperficie]);
+    // Desde la 23.9, con la de Obra.
+    expect([...EVENTOS_DE_VISTA]).toEqual([EVENTOS.vistaDeCita, EVENTOS.vistaDeSuperficie, EVENTOS.vistaDeObra]);
     const { avanzar, interactuar, emitir, balizas, pendientes } = medicionEnUnSandbox({
       ruta: '/cita/una/',
       vistas: `${EVENTOS.copiado} ${EVENTOS.busquedaSinResultados} ${EVENTOS.comparticionDeEnlace}`,
@@ -1533,6 +1537,182 @@ describe('Historia 23.7 — cada salida interna dice desde qué zona', () => {
   });
 });
 
+describe('Historia 23.9 — toda Obra cuenta sus vistas, se indexe o no', () => {
+  /*
+   * Una prueba por fila de guion de la matriz de la historia, en el entorno simulado, que desde la
+   * 23.9 da también la marca de la Obra del `<html>` (`indexable`). Lo que se afirma es lo que sale
+   * por `sendBeacon`, en su orden.
+   */
+  const [INDEXABLE, NO_INDEXABLE] = MARCAS_DE_OBRA;
+  const UMBRAL = MIN_MS_VISIBLES_PARA_LA_LECTURA;
+  const OBRA = '/obra/seneca/cartas-a-lucilio/';
+  const OTRA_OBRA = '/obra/seneca/sobre-la-brevedad-de-la-vida/';
+  /** Lo que declara la página 1 de la Obra indexable: las dos vistas, en este orden. */
+  const DOS_VISTAS = `${EVENTOS.vistaDeSuperficie} ${EVENTOS.vistaDeObra}`;
+  const indexable = (opciones: Parameters<typeof medicionEnUnSandbox>[0] = {}) =>
+    medicionEnUnSandbox({ ruta: OBRA, vistas: DOS_VISTAS, indexable: INDEXABLE, ...opciones });
+  const noIndexable = (opciones: Parameters<typeof medicionEnUnSandbox>[0] = {}) =>
+    medicionEnUnSandbox({ ruta: OTRA_OBRA, vistas: EVENTOS.vistaDeObra, indexable: NO_INDEXABLE, ...opciones });
+  const eventos = (balizas: Record<string, unknown>[]) => balizas.map((b) => b.evento);
+  /** El Autor de la Cabecera de Obra: un enlace a otra ruta, en la zona de la Atribución. */
+  const AL_AUTOR = { href: '/autor/seneca/', contenedores: [{ zona: 'atribucion' }] };
+
+  it('la vista de Obra es una vista más: sale de `data-vistas`, no la emite solo el fichero ni es una acción', () => {
+    expect([...EVENTOS_DE_VISTA]).toContain(EVENTOS.vistaDeObra);
+    expect(EVENTOS_DEL_GUION).toContain(EVENTOS.vistaDeObra);
+    expect(EVENTOS_SOLO_DEL_FICHERO).not.toContain(EVENTOS.vistaDeObra);
+    expect(Object.keys(METRICA_DE_ACCION)).not.toContain(EVENTOS.vistaDeObra);
+    // El atributo y el conjunto, compuestos en el fichero desde sus módulos.
+    expect(ATRIBUTO_DE_INDEXABLE).toBe('data-indexable');
+    const guion = guionDeMedicion('https://ejemplo.invalid/e');
+    expect(guion).toContain(JSON.stringify(ATRIBUTO_DE_INDEXABLE));
+    expect(guion).toContain(JSON.stringify(MARCAS_DE_OBRA));
+  });
+
+  it('Obra indexable: la vista de superficie y la de Obra con su marca, en ese orden; después, una sola lectura', () => {
+    const { avanzar, interactuar, balizas, pendientes } = indexable();
+    expect(balizas()).toEqual([
+      { evento: EVENTOS.vistaDeSuperficie, ruta: OBRA, origen: null, via: null },
+      { evento: EVENTOS.vistaDeObra, ruta: OBRA, origen: null, via: null, indexable: INDEXABLE },
+    ]);
+    avanzar(UMBRAL);
+    interactuar('pointerdown');
+    avanzar(10 * 60_000);
+    expect(eventos(balizas())).toEqual([EVENTOS.vistaDeSuperficie, EVENTOS.vistaDeObra, EVENTOS.lectura]);
+    // La lectura no lleva la marca de la Obra: solo la lleva el evento que la declara.
+    expect(balizas()[2]).toEqual({ evento: EVENTOS.lectura, ruta: OBRA, origen: null, via: null });
+    expect(pendientes()).toBe(0);
+  });
+
+  it('Obra no indexable: solo la vista de Obra, y gana su lectura a los 8 s', () => {
+    const { avanzar, balizas } = noIndexable();
+    expect(balizas()).toEqual([
+      { evento: EVENTOS.vistaDeObra, ruta: OTRA_OBRA, origen: null, via: null, indexable: NO_INDEXABLE },
+    ]);
+    avanzar(UMBRAL - 1);
+    expect(eventos(balizas())).toEqual([EVENTOS.vistaDeObra]);
+    avanzar(1);
+    expect(eventos(balizas())).toEqual([EVENTOS.vistaDeObra, EVENTOS.lectura]);
+    expect(balizas()[1]).toEqual({ evento: EVENTOS.lectura, ruta: OTRA_OBRA, origen: null, via: null });
+  });
+
+  it('Obra no indexable: con una interacción antes, la lectura sale entonces; y su salida, detrás de ella', () => {
+    const { interactuar, pulsar, avanzar, balizas } = noIndexable();
+    avanzar(1_000);
+    interactuar('keydown');
+    expect(eventos(balizas())).toEqual([EVENTOS.vistaDeObra, EVENTOS.lectura]);
+    pulsar(AL_AUTOR);
+    expect(eventos(balizas())).toEqual([EVENTOS.vistaDeObra, EVENTOS.lectura, EVENTOS.salidaInterna]);
+    expect(balizas()[2]).toEqual({ evento: EVENTOS.salidaInterna, ruta: OTRA_OBRA, zona: 'atribucion' });
+  });
+
+  it('Obra no indexable: un clic sin `pointerdown` emite antes la lectura que debía, y la salida sale detrás', () => {
+    const { pulsar, avanzar, balizas } = noIndexable();
+    pulsar(AL_AUTOR);
+    expect(eventos(balizas())).toEqual([EVENTOS.vistaDeObra, EVENTOS.lectura, EVENTOS.salidaInterna]);
+    avanzar(10 * 60_000);
+    expect(balizas()).toHaveLength(3);
+  });
+
+  it('página 2+ de una Obra: ni vista, ni marca, ni lectura; la salida sale sola, como hoy', () => {
+    const ruta = `${OTRA_OBRA}2/`;
+    const { interactuar, avanzar, pulsar, balizas } = medicionEnUnSandbox({ ruta });
+    interactuar('pointerdown');
+    avanzar(10 * 60_000);
+    expect(balizas()).toEqual([]);
+    pulsar({ href: OTRA_OBRA, contenedores: [{ zona: 'paginacion' }] });
+    expect(balizas()).toEqual([{ evento: EVENTOS.salidaInterna, ruta, zona: 'paginacion' }]);
+  });
+
+  it('llegada `?de=instagram&via=whatsapp` a la indexable: las dos vistas y la lectura llevan las dos marcas, y la dirección las pierde', () => {
+    const { interactuar, balizas, direccion } = indexable({ busqueda: '?de=instagram&via=whatsapp' });
+    expect(direccion()).toBe(OBRA);
+    interactuar('pointerdown');
+    expect(balizas().map((b) => [b.evento, b.origen, b.via, b.indexable])).toEqual([
+      [EVENTOS.vistaDeSuperficie, 'instagram', 'whatsapp', undefined],
+      [EVENTOS.vistaDeObra, 'instagram', 'whatsapp', INDEXABLE],
+      [EVENTOS.lectura, 'instagram', 'whatsapp', undefined],
+    ]);
+    // SM-8 como hoy: una sola vista de superficie con origen.
+    expect(balizas().filter((b) => b.evento === EVENTOS.vistaDeSuperficie && b.origen !== null)).toHaveLength(1);
+  });
+
+  it.each([
+    ['de otro conjunto', 'si'],
+    ['inventada', 'lo-que-me-invente'],
+    ['vacía', ''],
+    ['ausente', undefined],
+  ])('marca %s en el `<html>`: la vista de Obra sale igual, con `indexable` nulo', (_, marca) => {
+    const { balizas } = noIndexable({ indexable: marca });
+    expect(balizas()).toEqual([
+      { evento: EVENTOS.vistaDeObra, ruta: OTRA_OBRA, origen: null, via: null, indexable: null },
+    ]);
+  });
+
+  it('marca puesta y una vista que no la declara: la vista de superficie sale sin `indexable`, y ni la lectura ni las acciones la llevan', () => {
+    const { emitir, pulsar, balizas } = medicionEnUnSandbox({
+      ruta: '/autor/seneca/',
+      vistas: EVENTOS.vistaDeSuperficie,
+      indexable: INDEXABLE,
+    });
+    emitir(EVENTOS.copiado);
+    emitir(EVENTOS.comparticionDeEnlace, null, 'whatsapp');
+    pulsar({ href: '/cita/una/', contenedores: [{ zona: 'listado' }] });
+    expect(eventos(balizas())).toEqual([
+      EVENTOS.vistaDeSuperficie,
+      EVENTOS.lectura,
+      EVENTOS.copiado,
+      EVENTOS.comparticionDeEnlace,
+      EVENTOS.salidaInterna,
+    ]);
+    for (const baliza of balizas()) expect(baliza, String(baliza.evento)).not.toHaveProperty('indexable');
+  });
+
+  it('caché de atrás y adelante: ninguna vista nueva; otra lectura, sin marcas de llegada ni de Obra', () => {
+    const { interactuar, restaurar, avanzar, balizas } = indexable({ busqueda: '?de=instagram' });
+    interactuar('pointerdown');
+    restaurar();
+    avanzar(UMBRAL);
+    expect(eventos(balizas())).toEqual([
+      EVENTOS.vistaDeSuperficie,
+      EVENTOS.vistaDeObra,
+      EVENTOS.lectura,
+      EVENTOS.lectura,
+    ]);
+    expect(balizas()[3]).toEqual({ evento: EVENTOS.lectura, ruta: OBRA, origen: null, via: null });
+  });
+
+  it('prerender: nada hasta activarse; al activarse, las dos vistas, una vez, con su marca', () => {
+    const { avanzar, interactuar, activar, balizas, pendientes } = indexable({ prerendering: true });
+    avanzar(30_000);
+    interactuar('pointerdown');
+    expect(balizas()).toEqual([]);
+    expect(pendientes()).toBe(0);
+    activar();
+    expect(balizas()).toEqual([
+      { evento: EVENTOS.vistaDeSuperficie, ruta: OBRA, origen: null, via: null },
+      { evento: EVENTOS.vistaDeObra, ruta: OBRA, origen: null, via: null, indexable: INDEXABLE },
+    ]);
+    activar();
+    expect(eventos(balizas())).toEqual([EVENTOS.vistaDeSuperficie, EVENTOS.vistaDeObra]);
+  });
+
+  it('ninguna isla pide la vista de Obra ni lee su marca: la escribe el armazón y la lee solo el fichero', () => {
+    // Los dueños: el vocabulario la declara, `superficies.ts` la declara por superficie y nombra las
+    // marcas, `Armazon.astro` escribe el atributo y `umbrales.ts` anota lo que pesa en el fichero.
+    // `medicion.ts` ya queda fuera de `fuentesDeSrc`.
+    const DUEÑOS = ['lib/vocabulario.ts', 'lib/superficies.ts', 'components/Armazon.astro', 'lib/umbrales.ts'];
+    const PROHIBIDO = /EVENTOS\.vistaDeObra|ATRIBUTO_DE_INDEXABLE|MARCAS_DE_OBRA|data-indexable|vista-de-obra/;
+    const fuentes = [
+      ...fuentesDeSrc().filter((f) => !DUEÑOS.some((d) => f.endsWith(d))),
+      ...ficherosDe(resolve(RAIZ, 'public', 'islas')).filter((f) => /\.m?js$/.test(f)),
+    ];
+    expect(fuentes.length).toBeGreaterThan(10);
+    const infractores = fuentes.filter((f) => PROHIBIDO.test(readFileSync(f, 'utf8')));
+    expect(infractores.map((f) => relative(RAIZ, f))).toEqual([]);
+  });
+});
+
 describe('Historia 23.1 — la versión del fichero sale de su contenido', () => {
   it('el mismo punto final da la misma ruta; otro punto final, otra', () => {
     const una = rutaDelGuionDeMedicion('https://a.invalid/e');
@@ -1826,9 +2006,10 @@ describe('Historia 20.1 y 23.1 — las vistas salen de la declaración, al `data
     expect(vistasDe(await leerMedida(CITA_SIN_IMAGEN))).toBe(EVENTOS.vistaDeCita);
   }, 240_000);
 
-  it('la Obra indexable declara la vista de superficie; la que no se indexa y su página 2, ninguna', async () => {
-    expect(vistasDe(await leerMedida(OBRAS[0]))).toBe(EVENTOS.vistaDeSuperficie);
-    expect(vistasDe(await leerMedida(OBRAS[1]))).toBeUndefined();
+  it('la Obra indexable declara la vista de superficie y la de Obra; la que no se indexa, la de Obra; su página 2, ninguna', async () => {
+    // Historia 23.9 — la vista de Obra la declara la página 1 de toda Obra, se indexe o no.
+    expect(vistasDe(await leerMedida(OBRAS[0]))).toBe(`${EVENTOS.vistaDeSuperficie} ${EVENTOS.vistaDeObra}`);
+    expect(vistasDe(await leerMedida(OBRAS[1]))).toBe(EVENTOS.vistaDeObra);
     expect(vistasDe(await leerMedida(OBRAS[2]))).toBeUndefined();
   }, 240_000);
 
@@ -1853,10 +2034,86 @@ describe('Historia 20.1 y 23.1 — las vistas salen de la declaración, al `data
   );
 
   it('ninguna superficie escribe el nombre de una vista como cadena suelta', () => {
-    // El vocabulario es el único sitio donde se escriben, desde la Historia 23.2.
-    const suelta = /["'`]vista-de-(cita|superficie)["'`]/;
+    // El vocabulario es el único sitio donde se escriben, desde la Historia 23.2; la de Obra, desde
+    // la 23.9, igual. Ve también lo citado entre comillas invertidas en los comentarios.
+    const suelta = /["'`]vista-de-(cita|superficie|obra)["'`]/;
     for (const fuente of fuentesDeSrc().filter((f) => !f.endsWith('lib/vocabulario.ts'))) {
       expect(readFileSync(fuente, 'utf8'), fuente).not.toMatch(suelta);
+    }
+  });
+});
+
+/** El valor de la marca de Obra del `<html>`, o `undefined` si la página no la lleva. */
+const marcaDeObraDe = (html: string): string | undefined =>
+  new RegExp(`<html\\b[^>]*\\s${ATRIBUTO_DE_INDEXABLE}="([^"]*)"`).exec(html)?.[1];
+const NOINDEX = /<meta name="robots" content="noindex/;
+
+describe('Historia 23.9 — la marca de Obra, en `dist/`', () => {
+  beforeEach(() => {
+    declararRutasIndexables([OBRA_INDEXABLE]);
+  });
+  afterEach(() => {
+    olvidarRutasIndexables();
+  });
+
+  it.each([
+    ['con punto final', sitioMedido],
+    ['sin punto final', sitioSinMedir],
+  ] as const)(
+    '%s, la marca de cada ruta construida es exactamente la de `superficies.ts`',
+    async (_, sitio) => {
+      const paginas = paginasDe(await sitio());
+      expect(paginas.size).toBeGreaterThan(SLUGS_DE_CITA.length);
+      for (const [ruta, html] of paginas) {
+        expect(marcaDeObraDe(html), ruta).toBe(consecuenciasDe(ruta).marcaDeObra);
+      }
+    },
+    240_000,
+  );
+
+  it.each([
+    ['con punto final', sitioMedido],
+    ['sin punto final', sitioSinMedir],
+  ] as const)('%s, toda página 1 de Obra lleva su marca, y casa con su `noindex`', async (_, sitio) => {
+    const proyecto = await sitio();
+    const leer = (ruta: string) => readFile(paginaConstruida(proyecto, ruta), 'utf8');
+    const [indexable, noIndexable] = MARCAS_DE_OBRA;
+    const primera = await leer(OBRAS[0]);
+    expect(marcaDeObraDe(primera)).toBe(indexable);
+    expect(primera).not.toMatch(NOINDEX);
+    const segunda = await leer(OBRAS[1]);
+    expect(marcaDeObraDe(segunda)).toBe(noIndexable);
+    expect(segunda).toMatch(NOINDEX);
+    expect(vistasDe(segunda)).toBe(EVENTOS.vistaDeObra);
+    // La página 2 de la Obra: ni marca ni vista.
+    const paginaDos = await leer(OBRAS[2]);
+    expect(marcaDeObraDe(paginaDos)).toBeUndefined();
+    expect(vistasDe(paginaDos)).toBeUndefined();
+  }, 240_000);
+
+  it('la página 1 de la Obra que no se indexa ya es superficie con lectura: pide el fichero y declara vista', async () => {
+    // El suelo `sinLectura` de la 23.7 no la nombraba, a propósito: con su vista sale de él.
+    const html = await leerMedida(OBRAS[1]);
+    expect(etiquetasDeGuionExterno(html).map((e) => e.src)).toContain(RUTA_DEL_FICHERO);
+    expect(vistasDe(html)).toBeDefined();
+  }, 240_000);
+
+  it('SM-8: las consultas de `DESPLIEGUE.md` cuentan la vista de Cita y la de superficie, y no la de Obra', () => {
+    const despliegue = readFileSync(resolve(RAIZ, 'DESPLIEGUE.md'), 'utf8');
+    const inicio = despliegue.indexOf('### Consultar el canal propio — SM-8');
+    expect(inicio).toBeGreaterThan(-1);
+    const fin = despliegue.indexOf('\n### ', inicio + 1);
+    const seccion = despliegue.slice(inicio, fin === -1 ? undefined : fin);
+    const filtros = [...seccion.matchAll(/evento IN \(([^)]*)\)/g)].map((m) => m[1]);
+    expect(filtros.length).toBeGreaterThanOrEqual(2);
+    for (const filtro of filtros) {
+      expect(filtro).toContain(`'${EVENTOS.vistaDeCita}'`);
+      expect(filtro).toContain(`'${EVENTOS.vistaDeSuperficie}'`);
+      expect(filtro).not.toContain(EVENTOS.vistaDeObra);
+    }
+    // Y la razón de profundidad tampoco la suma: solo nombra la de Obra para decir que no entra.
+    for (const consulta of seccion.match(/npx --yes wrangler[\s\S]*?"\n/g) ?? []) {
+      expect(consulta).not.toContain(EVENTOS.vistaDeObra);
     }
   });
 });
@@ -1908,7 +2165,7 @@ describe('Historia 2.9 y 23.1 — sin punto final, el sitio no pide ni envía na
     expect(puntoFinal({ MEDICION_ENDPOINT: 'https://x.invalid/e' })).toBe('https://x.invalid/e');
   });
 
-  it('ni fichero ni etiqueta; quedan el arranque y el `data-vistas`', async () => {
+  it('ni fichero ni etiqueta; quedan el arranque, el `data-vistas` y la marca de Obra', async () => {
     const proyecto = await sitioSinMedir();
     expect(existsSync(join(proyecto, 'dist', 'medicion'))).toBe(false);
     for (const [ruta, html] of paginasDe(proyecto)) {
@@ -1921,6 +2178,9 @@ describe('Historia 2.9 y 23.1 — sin punto final, el sitio no pide ni envía na
     }
     expect(vistasDe(await leerSinMedir(CITA))).toBe(EVENTOS.vistaDeCita);
     expect(vistasDe(await leerSinMedir('/'))).toBe(EVENTOS.vistaDeSuperficie);
+    // Historia 23.9 — y la marca de Obra del `<html>`, junto a `data-vistas`.
+    expect(marcaDeObraDe(await leerSinMedir(OBRAS[0]))).toBe(MARCAS_DE_OBRA[0]);
+    expect(marcaDeObraDe(await leerSinMedir(OBRAS[1]))).toBe(MARCAS_DE_OBRA[1]);
   }, 240_000);
 });
 
@@ -2558,8 +2818,8 @@ describe('Historia 23.7 — toda salida interna de `dist/` dice su zona', () => 
     expect(enlaces).toBeGreaterThan(paginas * 3);
     /*
      * Y entre las juzgadas están las que no tendrán lectura nunca: las páginas 2+ —también la de la
-     * Obra—, `/buscar/` y el 404. La página 1 de la Obra que no se indexa no se nombra: hoy sale sin
-     * lectura, y la 23.9 le da vista y lectura y la deja entrar como las demás, sin tocar esto.
+     * Obra—, `/buscar/` y el 404. La página 1 de la Obra que no se indexa no se nombra: desde la 23.9
+     * tiene vista y lectura y entra como las demás (lo afirma «la marca de Obra, en `dist/`»).
      */
     for (const ruta of [...PAGINAS_2, OBRAS[2], '/buscar/', '/404']) expect([...sinLectura], ruta).toContain(ruta);
   }, 240_000);

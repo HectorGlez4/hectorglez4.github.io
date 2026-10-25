@@ -13,7 +13,7 @@ import {
   camposQueEmite,
   rutaDelGuionDeMedicion,
 } from '../../src/lib/medicion.ts';
-import { CAMPOS, claveEnLaBaliza, tramoDe } from '../../src/lib/vocabulario.ts';
+import { CAMPOS, MARCAS_DE_OBRA, claveEnLaBaliza, tramoDe } from '../../src/lib/vocabulario.ts';
 import { MIN_MS_VISIBLES_PARA_LA_LECTURA } from '../../src/lib/umbrales.ts';
 import { entradaDeLoDescargado } from '../../src/lib/guiones.ts';
 import { apuntarGuiones } from './ayuda/guiones.ts';
@@ -76,6 +76,8 @@ const SIN_RESULTADOS = 'zzzzqqqxxx';
 const PUNTO_FINAL = `http://localhost:${PUERTO_RECEPTOR}/e`;
 /** Historia 23.1 — el fichero de medición que este sitio sirve, con su versión. */
 const RUTA_DEL_FICHERO = rutaDelGuionDeMedicion(PUNTO_FINAL);
+/** Historia 23.9 — la Fuente de las dos Citas de «Cartas a Lucilio», coherente con su obra. */
+const FUENTE_DE_CARTAS = { id: 'wikisource-es', url: 'https://es.wikisource.org/wiki/Cartas_a_Lucilio' };
 
 let recibidos: (Registro | null)[] = [];
 let receptor: Server;
@@ -154,16 +156,25 @@ test.beforeAll(async () => {
       'autores/seneca.yml': AUTOR_VALIDO,
       'temas/el-tiempo.yml': TEMA_VALIDO,
       'citas/seneca--una.md': citaValida(),
+      /*
+       * Historia 23.9 — dos de las tres Citas son de «Cartas a Lucilio», que así se indexa (2 de 3,
+       * por debajo del tope de FR-52), y «Sobre la brevedad de la vida» queda con una, que no se
+       * indexa por `MIN_CITAS_OBRA_INDEXABLE`: una Obra de cada clase, sin añadir Citas.
+       */
       'citas/seneca--dos.md': citaValida({
         texto: 'No hay viento favorable para el que no sabe adónde va.',
         slug: 'seneca-no-hay-viento-favorable',
         aptaParaPortada: true,
+        procedencia: { obra: 'Cartas a Lucilio', año: 64 },
+        fuente: FUENTE_DE_CARTAS,
       }),
       'citas/seneca--larga.md': citaValida({
         texto: TEXTO_LARGO,
         slug: CITA_LARGA,
         temas: [],
         aptaParaPortada: true,
+        procedencia: { obra: 'Cartas a Lucilio', año: 64 },
+        fuente: FUENTE_DE_CARTAS,
       }),
       'portada.json': JSON.stringify({ fijaciones: { [JORNADA]: CITA_LARGA } }, null, 2),
     },
@@ -412,6 +423,8 @@ test.describe('Historia 7.3 — el receptor caído no rompe el sitio', () => {
  * exigencia entera: exactamente el fichero de medición, una vez.
  */
 const OBRA_NO_INDEXABLE = rutaDeObra('seneca', 'sobre-la-brevedad-de-la-vida');
+/** Historia 23.9 — la Obra que se indexa: dos de las tres Citas del sitio. */
+const OBRA_INDEXABLE = rutaDeObra('seneca', 'cartas-a-lucilio');
 
 test.describe('Historia 23.1 — cada superficie descarga exactamente el guion de medición', () => {
   const SUPERFICIES: [string, string][] = [
@@ -497,10 +510,10 @@ test.describe('Historia 23.1 — las vistas que llegan son las que declara cada 
     });
   }
 
+  // La Obra que no se indexa salió de esta lista con la Historia 23.9: emite su vista de Obra.
   for (const [nombre, ruta] of [
     ['la búsqueda', RUTA_BUSCAR],
     ['el 404', '/no-existe-esta-ruta/'],
-    ['la Obra que no se indexa', OBRA_NO_INDEXABLE],
   ] as const) {
     test(`${nombre} carga el fichero y no emite ninguna vista`, async ({ page }) => {
       await page.goto(`${SITIO}${ruta}`, { waitUntil: 'networkidle' });
@@ -1761,5 +1774,74 @@ test.describe('Historia 23.8 — una búsqueda cuenta una vez, cuando se asienta
     await esperarAlFichero(page);
     await esperar(500);
     expect(busquedas()).toHaveLength(1);
+  });
+});
+
+/*
+ * Historia 23.9 — toda Obra cuenta sus vistas, se indexe o no, en un navegador de verdad y contra
+ * el receptor de la prueba. Cada fila de la matriz la recorre el entorno simulado de
+ * `tests/unit/medicion.test.ts`; aquí se mira que el fichero servido lee la marca del `<html>` que
+ * escribió el build y la envía, y que la Obra que no se indexa gana su lectura y su salida.
+ */
+test.describe('Historia 23.9 — toda Obra cuenta sus vistas, se indexe o no', () => {
+  const llegadas = (nombre: string) => recibidos.filter((r) => r?.evento === nombre);
+  const [INDEXABLE, NO_INDEXABLE] = MARCAS_DE_OBRA;
+  /** El Autor de la Cabecera de Obra, en la zona de la Atribución. */
+  const AUTOR_DE_LA_CABECERA = '.cabecera-de-obra [data-zona="atribucion"] a';
+
+  test('la Obra indexable con `?de=instagram`: la vista de superficie y la de Obra, en ese orden, con el origen y la marca; la barra pierde la marca', async ({
+    page,
+  }) => {
+    await apuntarBalizas(page);
+    await page.goto(`${SITIO}${OBRA_INDEXABLE}?de=instagram`);
+    await esperarAlFichero(page);
+    await expect.poll(() => page.url()).toBe(`${SITIO}${OBRA_INDEXABLE}`);
+
+    const vistaDeObra = await esperarEvento(EVENTOS.vistaDeObra);
+    expect(vistaDeObra, 'no llegó la vista de Obra').toBeTruthy();
+    expect(vistaDeObra).toMatchObject({ ruta: OBRA_INDEXABLE, origen: 'instagram', indexable: INDEXABLE });
+    expect(await esperarEvento(EVENTOS.vistaDeSuperficie), 'no llegó la vista de superficie').toBeTruthy();
+    // En el orden en que salen por `sendBeacon`: el receptor no lo garantiza.
+    expect((await balizasDe(page)).map((b) => [b.evento, b.origen, b.indexable])).toEqual([
+      [EVENTOS.vistaDeSuperficie, 'instagram', undefined],
+      [EVENTOS.vistaDeObra, 'instagram', INDEXABLE],
+    ]);
+    await esperar(500);
+    // SM-8 como hoy: una sola vista de superficie, con su origen, y sin columna de marca.
+    expect(llegadas(EVENTOS.vistaDeSuperficie)).toHaveLength(1);
+    expect(llegadas(EVENTOS.vistaDeSuperficie)[0]).toMatchObject({ origen: 'instagram', indexable: null });
+    expect(llegadas(EVENTOS.vistaDeObra)).toHaveLength(1);
+  });
+
+  test('la Obra que no se indexa: solo la vista de Obra; un `pointerdown` da su lectura detrás, y el Autor de la Cabecera, la salida detrás de ella', async ({
+    page,
+    context,
+  }) => {
+    await quedarseEn(context, OBRA_NO_INDEXABLE);
+    await apuntarBalizas(page);
+    await page.goto(`${SITIO}${OBRA_NO_INDEXABLE}`);
+    await esperarAlFichero(page);
+    const vista = await esperarEvento(EVENTOS.vistaDeObra);
+    expect(vista, 'no llegó la vista de Obra').toBeTruthy();
+    expect(vista).toMatchObject({ ruta: OBRA_NO_INDEXABLE, origen: null, indexable: NO_INDEXABLE });
+    expect((await balizasDe(page)).map((b) => b.evento)).toEqual([EVENTOS.vistaDeObra]);
+
+    // Sobre el título de la Obra, donde pulsar no hace nada más.
+    const caja = (await page.locator('h1').first().boundingBox())!;
+    await page.mouse.move(caja.x + 5, caja.y + 5);
+    await page.mouse.down();
+    await page.mouse.up();
+    const lectura = await esperarEvento(EVENTOS.lectura);
+    expect(lectura, 'el pointerdown no emitió la lectura').toBeTruthy();
+    expect(lectura).toMatchObject({ ruta: OBRA_NO_INDEXABLE, indexable: null });
+
+    await page.locator(AUTOR_DE_LA_CABECERA).click();
+    const salida = await esperarEvento(EVENTOS.salidaInterna);
+    expect(salida, 'no llegó la salida').toBeTruthy();
+    const balizas = await balizasDe(page);
+    expect(balizas.map((b) => b.evento)).toEqual([EVENTOS.vistaDeObra, EVENTOS.lectura, EVENTOS.salidaInterna]);
+    expect(balizas[2]).toEqual({ evento: EVENTOS.salidaInterna, ruta: OBRA_NO_INDEXABLE, zona: 'atribucion' });
+    await esperar(500);
+    expect(llegadas(EVENTOS.vistaDeSuperficie)).toEqual([]);
   });
 });
