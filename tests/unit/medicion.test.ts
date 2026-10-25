@@ -2,7 +2,8 @@ import { afterAll, afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import { readFile } from 'node:fs/promises';
 import { join, relative, resolve } from 'node:path';
-import { Script } from 'node:vm';
+import { Script, runInNewContext } from 'node:vm';
+import ts from 'typescript';
 import { parseSync } from 'vite';
 import {
   ARRANQUE_DE_MEDICION,
@@ -12,6 +13,8 @@ import {
   EVENTOS_SOLO_DEL_FICHERO,
   EVENTOS_VALIDOS,
   INTERACCIONES_DE_LECTURA,
+  MARCAS_DE_LLEGADA,
+  SIN_MARCAS_DE_LLEGADA,
   esEventoValido,
   guionDeMedicion,
   puntoFinal,
@@ -27,7 +30,8 @@ import {
   MAX_CARACTERES_IMAGEN,
   MIN_MS_VISIBLES_PARA_LA_LECTURA,
 } from '../../src/lib/umbrales.ts';
-import { DESTINOS_DE_DESCARGA, METRICA_DE_ACCION } from '../../src/lib/vocabulario.ts';
+import { DESTINOS_DE_DESCARGA, METRICA_DE_ACCION, PARAMETRO_DE_DIFUSION } from '../../src/lib/vocabulario.ts';
+import { PARAMETRO_DE_ORIGEN } from '../../src/lib/redes.ts';
 import {
   bytesDeGuionEnLinea,
   descargaDeLaEntrada,
@@ -342,10 +346,10 @@ describe('Historia 23.1 — el arranque y el fichero, ejecutados', () => {
     ]);
   });
 
-  it('la marca de origen viaja con la vista y la lectura, también tras la cola, y no con el copiado', () => {
-    // Historia 23.2 (AD-13): las marcas viajan solo con las vistas y la lectura.
+  it('las dos marcas viajan con la vista y la lectura, también tras la cola, y no con el copiado', () => {
+    // Historias 23.2 (AD-13) y 23.6: las marcas viajan solo con las vistas y la lectura.
     const { emitir, cargar, balizas } = medicionEnUnSandbox({
-      busqueda: '?de=instagram',
+      busqueda: '?de=instagram&via=whatsapp',
       vistas: EVENTOS.vistaDeCita,
       cargado: false,
     });
@@ -353,10 +357,11 @@ describe('Historia 23.1 — el arranque y el fichero, ejecutados', () => {
     cargar();
     expect(balizas()).toHaveLength(3);
     const [vista, lectura, copiado] = balizas();
-    expect(vista).toMatchObject({ evento: EVENTOS.vistaDeCita, origen: 'instagram' });
-    expect(lectura).toMatchObject({ evento: EVENTOS.lectura, origen: 'instagram' });
+    expect(vista).toMatchObject({ evento: EVENTOS.vistaDeCita, origen: 'instagram', via: 'whatsapp' });
+    expect(lectura).toMatchObject({ evento: EVENTOS.lectura, origen: 'instagram', via: 'whatsapp' });
     expect(copiado.evento).toBe(EVENTOS.copiado);
     expect(copiado).not.toHaveProperty('origen');
+    expect(copiado).not.toHaveProperty('via');
   });
 });
 
@@ -382,9 +387,10 @@ describe('Historia 23.5 — una carga que se lee deja una lectura', () => {
     avanzar(UMBRAL - 1);
     expect(lecturas(balizas())).toEqual([]);
     avanzar(1);
-    expect(lecturas(balizas())).toEqual([{ evento: EVENTOS.lectura, ruta: '/cita/una/', origen: null }]);
-    // Exactamente `evento`, `ruta` y `origen`: `via` espera a la 23.6, y ni hora ni nada más.
-    expect(Object.keys(lecturas(balizas())[0]).sort()).toEqual(['evento', 'origen', 'ruta']);
+    expect(lecturas(balizas())).toEqual([{ evento: EVENTOS.lectura, ruta: '/cita/una/', origen: null, via: null }]);
+    // Exactamente `evento`, `ruta` y las dos Marcas de llegada (`via`, desde la 23.6), y ni hora
+    // ni nada más.
+    expect(Object.keys(lecturas(balizas())[0]).sort()).toEqual(['evento', 'origen', 'ruta', 'via']);
 
     avanzar(10 * 60_000);
     expect(lecturas(balizas())).toHaveLength(1);
@@ -435,7 +441,7 @@ describe('Historia 23.5 — una carga que se lee deja una lectura', () => {
     bloquear(UMBRAL + 500);
     expect(lecturas(balizas())).toEqual([]);
     ocultar();
-    expect(lecturas(balizas())).toEqual([{ evento: EVENTOS.lectura, ruta: '/cita/una/', origen: null }]);
+    expect(lecturas(balizas())).toEqual([{ evento: EVENTOS.lectura, ruta: '/cita/una/', origen: null, via: null }]);
     expect(pendientes()).toBe(0);
     mostrar();
     avanzar(10 * 60_000);
@@ -456,7 +462,7 @@ describe('Historia 23.5 — una carga que se lee deja una lectura', () => {
     avanzar(1_000);
     expect(lecturas(balizas())).toEqual([]);
     interactuar(tipo);
-    expect(lecturas(balizas())).toEqual([{ evento: EVENTOS.lectura, ruta: '/cita/una/', origen: 'tiktok' }]);
+    expect(lecturas(balizas())).toEqual([{ evento: EVENTOS.lectura, ruta: '/cita/una/', origen: 'tiktok', via: null }]);
 
     for (const otra of INTERACCIONES_DE_LECTURA) interactuar(otra);
     avanzar(10 * 60_000);
@@ -548,7 +554,7 @@ describe('Historia 23.5 — una carga que se lee deja una lectura', () => {
   ] as const)('marca de origen `?de=%s`: la lectura lleva `origen` %s', (marca, origen) => {
     const { avanzar, balizas } = enCita({ busqueda: `?de=${marca}` });
     avanzar(UMBRAL);
-    expect(lecturas(balizas())).toEqual([{ evento: EVENTOS.lectura, ruta: '/cita/una/', origen }]);
+    expect(lecturas(balizas())).toEqual([{ evento: EVENTOS.lectura, ruta: '/cita/una/', origen, via: null }]);
   });
 
   it('`__medir("lectura")`, directo: no sale nada y no gasta la lectura de la carga', () => {
@@ -708,8 +714,8 @@ describe('Historia 23.5 — una carga que se lee deja una lectura', () => {
     emitir(EVENTOS.comparticionDeEnlace, null, 'correo');
     avanzar(10 * 60_000);
     expect(balizas()).toEqual([
-      { evento: EVENTOS.vistaDeCita, ruta: '/cita/una/', origen: 'x' },
-      { evento: EVENTOS.lectura, ruta: '/cita/una/', origen: 'x' },
+      { evento: EVENTOS.vistaDeCita, ruta: '/cita/una/', origen: 'x', via: null },
+      { evento: EVENTOS.lectura, ruta: '/cita/una/', origen: 'x', via: null },
       { evento: EVENTOS.copiado, ruta: '/cita/una/', primera: 'si' },
       { evento: EVENTOS.comparticionDeEnlace, ruta: '/cita/una/', destino: 'correo', primera: 'si' },
     ]);
@@ -745,7 +751,7 @@ describe('Historia 23.5 — una carga que se lee deja una lectura', () => {
     avanzar(UMBRAL);
     emitir(EVENTOS.copiado);
     expect(balizas().slice(3)).toEqual([
-      { evento: EVENTOS.lectura, ruta: '/cita/una/', origen: null },
+      { evento: EVENTOS.lectura, ruta: '/cita/una/', origen: null, via: null },
       { evento: EVENTOS.copiado, ruta: '/cita/una/', primera: 'si' },
     ]);
     expect(balizas().filter((b) => b.evento === EVENTOS.vistaDeCita)).toHaveLength(1);
@@ -768,7 +774,9 @@ describe('Historia 23.5 — una carga que se lee deja una lectura', () => {
       avanzar(3_000);
       expect(lecturas(balizas()), orden).toEqual([]);
       avanzar(UMBRAL - 3_000);
-      expect(lecturas(balizas()), orden).toEqual([{ evento: EVENTOS.lectura, ruta: '/cita/una/', origen: null }]);
+      expect(lecturas(balizas()), orden).toEqual([
+        { evento: EVENTOS.lectura, ruta: '/cita/una/', origen: null, via: null },
+      ]);
     }
   });
 
@@ -807,11 +815,319 @@ describe('Historia 23.5 — una carga que se lee deja una lectura', () => {
     expect(intentos.filter((e) => e === EVENTOS.lectura).length).toBeGreaterThanOrEqual(2);
   });
 
-  it('el fichero no lleva hora, identificador ni almacenamiento, y compone el umbral y las métricas desde sus módulos', () => {
+  it('el fichero no lleva hora, identificador ni almacenamiento, y compone el umbral, las métricas y las marcas desde sus módulos', () => {
     const guion = guionDeMedicion('https://ejemplo.invalid/e');
     expect(guion).not.toMatch(/Date|toISOString|getTime|localStorage|sessionStorage|indexedDB|document\.cookie/);
     expect(guion).toContain(`${MIN_MS_VISIBLES_PARA_LA_LECTURA}-`);
     expect(guion).toContain(JSON.stringify(METRICA_DE_ACCION));
+    // Historia 23.6: los nombres de las dos Marcas de llegada, de `redes.ts` y del vocabulario.
+    expect([...MARCAS_DE_LLEGADA]).toEqual([PARAMETRO_DE_ORIGEN, PARAMETRO_DE_DIFUSION]);
+    expect(guion).toContain(JSON.stringify([PARAMETRO_DE_ORIGEN, PARAMETRO_DE_DIFUSION]));
+    expect(guion).toContain(SIN_MARCAS_DE_LLEGADA);
+  });
+
+  it('`src/lib/medicion.ts` no escribe el nombre de ninguna marca: los compone de sus módulos', () => {
+    /*
+     * Historia 23.6. Se leen los literales del código con el compilador —los comentarios pueden
+     * nombrar `?de=`, el código no—: ni una cadena que sea el nombre, ni una que lo lleve entre
+     * comillas o detrás de `?`/`&` con su `=`.
+     */
+    const ruta = resolve(RAIZ, 'src/lib/medicion.ts');
+    const fuente = ts.createSourceFile(ruta, readFileSync(ruta, 'utf8'), ts.ScriptTarget.Latest, true);
+    const literales: string[] = [];
+    const recorrer = (nodo: ts.Node): void => {
+      if (
+        ts.isStringLiteral(nodo) ||
+        ts.isNoSubstitutionTemplateLiteral(nodo) ||
+        ts.isTemplateHead(nodo) ||
+        ts.isTemplateMiddle(nodo) ||
+        ts.isTemplateTail(nodo)
+      ) {
+        literales.push(nodo.text);
+      }
+      ts.forEachChild(nodo, recorrer);
+    };
+    recorrer(fuente);
+    expect(literales.length).toBeGreaterThan(20);
+    for (const nombre of MARCAS_DE_LLEGADA) {
+      const escrito = new RegExp(`^${nombre}$|(['"\`])${nombre}\\1|[?&]${nombre}=`);
+      expect(literales.filter((l) => escrito.test(l)), nombre).toEqual([]);
+    }
+  });
+});
+
+describe('Historia 23.6 — las marcas de llegada cuentan una vez y salen de la dirección', () => {
+  /*
+   * Una prueba por fila de guion de la matriz de la historia, en el entorno simulado, que desde
+   * la 23.6 tiene dirección entera e historial: `direccion()` es lo que mostraría la barra e
+   * `historial()` las llamadas a `replaceState`, con sus argumentos tal como llegaron.
+   */
+  const RUTA = '/cita/una/';
+  const enCita = (opciones: Parameters<typeof medicionEnUnSandbox>[0] = {}) =>
+    medicionEnUnSandbox({ ruta: RUTA, vistas: EVENTOS.vistaDeCita, ...opciones });
+  const deVista = (balizas: Record<string, unknown>[]) => balizas.filter((b) => b.evento === EVENTOS.vistaDeCita);
+  const lecturas = (balizas: Record<string, unknown>[]) => balizas.filter((b) => b.evento === EVENTOS.lectura);
+  /** Las dos marcas de una baliza, en el orden de `MARCAS_DE_LLEGADA`. */
+  const marcas = (baliza: Record<string, unknown> | undefined) => [baliza?.origen, baliza?.via];
+
+  /** La función pura, evaluada como texto —igual que viaja— y llamada con los nombres compuestos. */
+  const sinMarcas = runInNewContext(`(${SIN_MARCAS_DE_LLEGADA})`, { URLSearchParams }) as (
+    busqueda: string,
+    nombres: string[],
+  ) => string;
+  const quitar = (busqueda: string) => sinMarcas(busqueda, [...MARCAS_DE_LLEGADA]);
+
+  it('la función pura: quita exactamente los segmentos que el lector lee como una marca, y deja el resto literal', () => {
+    const casos: [string, string][] = [
+      ['', ''],
+      ['?de=instagram', ''],
+      ['?de=instagram&via=whatsapp', ''],
+      ['?de=x&', ''],
+      ['?a=1&&de=x', '?a=1&'],
+      ['?de', ''],
+      ['?de=', ''],
+      ['?via', ''],
+      ['?via=&de', ''],
+      ['?a=1&de=instagram&b=%20&via=x', '?a=1&b=%20'],
+      ['?a=%20&b=1+2&de=x&c&d=%E2%9C%93', '?a=%20&b=1+2&c&d=%E2%9C%93'],
+      ['?z=9&de=x&a=1&via=y&m', '?z=9&a=1&m'],
+      ['?de=x&de=y&via=a&via=b&q=1', '?q=1'],
+      ['?dev=1&vias=2&DE=3&de%20=4&xde=5', '?dev=1&vias=2&DE=3&de%20=4&xde=5'],
+      ['?de+=1&via%20=2', '?de+=1&via%20=2'],
+      ['?d%65=tiktok', ''],
+      ['?a=1&vi%61=whatsapp', '?a=1'],
+      // El lector toma el primer `?` por el de la búsqueda; un `?de` dentro no es `de` para él.
+      ['?a=1&?de=x', '?a=1&?de=x'],
+      ['??de=x', '??de=x'],
+      ['?a=1&&b=2', '?a=1&&b=2'],
+    ];
+    for (const [busqueda, esperada] of casos) {
+      expect(quitar(busqueda), busqueda).toBe(esperada);
+      // Lo que queda no lo lee el lector como marca, y lo que había y no era marca, sigue.
+      const leido = new URLSearchParams(esperada);
+      for (const nombre of MARCAS_DE_LLEGADA) expect(leido.has(nombre), `${busqueda}: ${nombre}`).toBe(false);
+      const antes = [...new URLSearchParams(busqueda).keys()].filter((k) => !(MARCAS_DE_LLEGADA as readonly string[]).includes(k));
+      expect([...leido.keys()], busqueda).toEqual(antes);
+    }
+    // Pura: no lee la dirección ni nada de fuera de sus argumentos.
+    expect(SIN_MARCAS_DE_LLEGADA).not.toMatch(/location|history|document|window/);
+  });
+
+  it('dos marcas: la vista las lleva, la dirección las pierde una vez y con el mismo estado, la lectura las lleva y nada después', () => {
+    const estado = { anterior: 'de otra isla' };
+    const entorno = enCita({ busqueda: '?de=instagram&via=whatsapp', estado });
+    expect(deVista(entorno.balizas()).map(marcas)).toEqual([['instagram', 'whatsapp']]);
+    expect(entorno.historial()).toEqual([{ estado, titulo: '', url: RUTA }]);
+    // El mismo objeto que había, no una copia ni `null`.
+    expect(entorno.historial()[0].estado).toBe(estado);
+    expect(entorno.direccion()).toBe(RUTA);
+
+    entorno.interactuar('keydown');
+    expect(lecturas(entorno.balizas())).toEqual([
+      { evento: EVENTOS.lectura, ruta: RUTA, origen: 'instagram', via: 'whatsapp' },
+    ]);
+
+    // Tras la lectura, nada las lleva: ni una vista que pida una isla, ni la acción, ni otra carga.
+    entorno.emitir(EVENTOS.vistaDeCita);
+    entorno.emitir(EVENTOS.copiado);
+    entorno.restaurar();
+    entorno.avanzar(MIN_MS_VISIBLES_PARA_LA_LECTURA);
+    const despues = entorno.balizas().slice(2);
+    expect(despues.map((b) => b.evento)).toEqual([EVENTOS.vistaDeCita, EVENTOS.copiado, EVENTOS.lectura]);
+    for (const baliza of despues) {
+      expect(baliza.origen ?? null, String(baliza.evento)).toBeNull();
+      expect(baliza.via ?? null, String(baliza.evento)).toBeNull();
+    }
+    expect(entorno.historial()).toHaveLength(1);
+  });
+
+  it('solo difusión: `origen` nulo y `via` en la vista y la lectura', () => {
+    const { balizas, avanzar, direccion } = enCita({ busqueda: '?via=telegram' });
+    avanzar(MIN_MS_VISIBLES_PARA_LA_LECTURA);
+    expect(balizas().map(marcas)).toEqual([
+      [null, 'telegram'],
+      [null, 'telegram'],
+    ]);
+    expect(direccion()).toBe(RUTA);
+  });
+
+  it('ajenas: las dos viajan nulas, la vista y la lectura salen, y las dos se quitan', () => {
+    const { balizas, interactuar, direccion, historial } = enCita({ busqueda: '?de=visitante-7f3a&via=lo-que-sea' });
+    interactuar('pointerdown');
+    expect(balizas().map((b) => [b.evento, ...marcas(b)])).toEqual([
+      [EVENTOS.vistaDeCita, null, null],
+      [EVENTOS.lectura, null, null],
+    ]);
+    expect(direccion()).toBe(RUTA);
+    expect(historial()).toHaveLength(1);
+  });
+
+  it.each([
+    // La primera aparición manda: una ajena delante deja `via` nula aunque detrás venga una buena.
+    ['?via=lo-que-sea&via=whatsapp', null],
+    ['?via=whatsapp&via=lo-que-sea', 'whatsapp'],
+    // `x` es un destino del conjunto —el de X, `DESTINOS_DE_ENLACE`—, así que delante es la primera.
+    ['?via=x&via=whatsapp', 'x'],
+    ['?via=whatsapp&via=x', 'whatsapp'],
+  ] as const)('repetidas `%s`: `via` es la primera (%s), y se quitan todas', (busqueda, via) => {
+    const { balizas, interactuar, direccion } = enCita({ busqueda });
+    interactuar('keydown');
+    expect(balizas().map((b) => b.via)).toEqual([via, via]);
+    expect(direccion()).toBe(RUTA);
+  });
+
+  it('resto y fragmento: la dirección conserva lo demás, literal y en su orden, y el fragmento', () => {
+    const { direccion, historial, balizas } = enCita({
+      busqueda: '?a=1&de=instagram&b=%20&via=x',
+      fragmento: '#frag',
+    });
+    expect(direccion()).toBe(`${RUTA}?a=1&b=%20#frag`);
+    expect(historial()).toEqual([{ estado: null, titulo: '', url: `${RUTA}?a=1&b=%20#frag` }]);
+    expect(marcas(balizas()[0])).toEqual(['instagram', 'x']);
+  });
+
+  it('nombres parecidos: ninguna marca, y no se escribe en el historial', () => {
+    const busqueda = '?dev=1&vias=2&DE=3&de%20=4&xde=5';
+    const { balizas, direccion, historial } = enCita({ busqueda });
+    expect(marcas(balizas()[0])).toEqual([null, null]);
+    expect(historial()).toEqual([]);
+    expect(direccion()).toBe(`${RUTA}${busqueda}`);
+  });
+
+  it('codificado: `?d%65=tiktok` es la marca de origen, y se quita', () => {
+    const { balizas, direccion } = enCita({ busqueda: '?d%65=tiktok' });
+    expect(marcas(balizas()[0])).toEqual(['tiktok', null]);
+    expect(direccion()).toBe(RUTA);
+  });
+
+  it.each(['', '?a=1&&b=2'])('sin marcas (`%s`): ni `replaceState` ni cambio de dirección', (busqueda) => {
+    const { direccion, historial } = enCita({ busqueda, fragmento: '#x' });
+    expect(historial()).toEqual([]);
+    expect(direccion()).toBe(`${RUTA}${busqueda}#x`);
+  });
+
+  it('sin vista: se quitan igual, y ningún evento lleva `origen` ni `via`', () => {
+    const { balizas, interactuar, emitir, avanzar, direccion, historial } = medicionEnUnSandbox({
+      ruta: '/buscar/',
+      busqueda: '?q=tiempo&de=x&via=whatsapp',
+    });
+    expect(direccion()).toBe('/buscar/?q=tiempo');
+    expect(historial()).toHaveLength(1);
+    for (const tipo of INTERACCIONES_DE_LECTURA) interactuar(tipo);
+    avanzar(30_000);
+    emitir(EVENTOS.copiado);
+    emitir(EVENTOS.busquedaSinResultados, 'zzz');
+    expect(balizas()).toEqual([
+      { evento: EVENTOS.copiado, ruta: '/buscar/', primera: 'si' },
+      { evento: EVENTOS.busquedaSinResultados, ruta: '/buscar/', datos: 'zzz' },
+    ]);
+  });
+
+  it('prerender: nada se lee ni se quita antes de activarse; al activar, como con dos marcas', () => {
+    const estado = { previo: 1 };
+    const { balizas, activar, interactuar, direccion, historial } = enCita({
+      busqueda: '?de=instagram&via=whatsapp',
+      estado,
+      prerendering: true,
+    });
+    interactuar('keydown');
+    expect(balizas()).toEqual([]);
+    expect(historial()).toEqual([]);
+    expect(direccion()).toBe(`${RUTA}?de=instagram&via=whatsapp`);
+
+    activar();
+    expect(historial()).toEqual([{ estado, titulo: '', url: RUTA }]);
+    interactuar('keydown');
+    expect(balizas().map((b) => [b.evento, ...marcas(b)])).toEqual([
+      [EVENTOS.vistaDeCita, 'instagram', 'whatsapp'],
+      [EVENTOS.lectura, 'instagram', 'whatsapp'],
+    ]);
+  });
+
+  it('caché de atrás y adelante: tras la lectura, la de la carga nueva sale con las dos marcas nulas, sin volver a leer la dirección', () => {
+    const { balizas, interactuar, restaurar, avanzar, historial } = enCita({ busqueda: '?de=tiktok&via=correo' });
+    interactuar('pointerdown');
+    restaurar();
+    avanzar(MIN_MS_VISIBLES_PARA_LA_LECTURA);
+    expect(lecturas(balizas()).map(marcas)).toEqual([
+      ['tiktok', 'correo'],
+      [null, null],
+    ]);
+    expect(historial()).toHaveLength(1);
+  });
+
+  it('caché de atrás y adelante antes de la lectura: la vuelta tampoco lleva las marcas', () => {
+    const { balizas, ocultar, mostrar, restaurar, avanzar } = enCita({ busqueda: '?de=tiktok&via=correo' });
+    avanzar(1_000);
+    ocultar();
+    restaurar();
+    mostrar();
+    avanzar(MIN_MS_VISIBLES_PARA_LA_LECTURA);
+    expect(lecturas(balizas()).map(marcas)).toEqual([[null, null]]);
+  });
+
+  it('recarga: con la dirección que dejó `replaceState`, la vista y la lectura salen sin marcas', () => {
+    const primera = enCita({ busqueda: '?x=1&de=instagram&via=whatsapp', fragmento: '#cita' });
+    const dejada = new URL(primera.direccion(), 'https://ejemplo.invalid');
+    expect(dejada.search).toBe('?x=1');
+
+    const recargada = medicionEnUnSandbox({
+      ruta: dejada.pathname,
+      busqueda: dejada.search,
+      fragmento: dejada.hash,
+      vistas: EVENTOS.vistaDeCita,
+    });
+    recargada.interactuar('keydown');
+    expect(recargada.balizas().map((b) => [b.evento, ...marcas(b)])).toEqual([
+      [EVENTOS.vistaDeCita, null, null],
+      [EVENTOS.lectura, null, null],
+    ]);
+    expect(recargada.historial()).toEqual([]);
+    expect(recargada.direccion()).toBe(primera.direccion());
+  });
+
+  it.each([
+    ['un historial que lanza', { historialQueLanza: true }],
+    ['ningún `history`', { sinHistorial: true }],
+  ] as const)('historial roto (%s): la vista y la lectura salen con sus marcas y ninguna excepción sale', (_, roto) => {
+    let entorno: ReturnType<typeof enCita> | undefined;
+    expect(() => {
+      entorno = enCita({ busqueda: '?de=instagram&via=whatsapp', ...roto });
+    }).not.toThrow();
+    expect(() => entorno!.interactuar('keydown')).not.toThrow();
+    expect(entorno!.balizas().map((b) => [b.evento, ...marcas(b)])).toEqual([
+      [EVENTOS.vistaDeCita, 'instagram', 'whatsapp'],
+      [EVENTOS.lectura, 'instagram', 'whatsapp'],
+    ]);
+    expect(entorno!.direccion()).toBe(`${RUTA}?de=instagram&via=whatsapp`);
+  });
+
+  it('una isla no cuela `via`: lo que llega de más a `__medir` no la pone, directo ni encolado', () => {
+    for (const cargado of [true, false]) {
+      const { emitir, cargar, balizas } = medicionEnUnSandbox({ ruta: RUTA, cargado });
+      emitir(EVENTOS.vistaDeCita, null, undefined, 'si', 'whatsapp');
+      emitir(EVENTOS.vistaDeSuperficie, 'whatsapp', 'whatsapp', 'whatsapp', 'whatsapp');
+      if (!cargado) cargar();
+      expect(balizas(), cargado ? 'directo' : 'encolado').toEqual([
+        { evento: EVENTOS.vistaDeCita, ruta: RUTA, origen: null, via: null },
+        { evento: EVENTOS.vistaDeSuperficie, ruta: RUTA, origen: null, via: null },
+      ]);
+    }
+  });
+
+  it('se lee una sola vez: con la dirección todavía marcada —el historial no la dejó quitar—, la carga nueva no vuelve a leerla', () => {
+    const { balizas, interactuar, restaurar, avanzar, direccion } = enCita({
+      busqueda: '?de=tiktok&via=correo',
+      historialQueLanza: true,
+    });
+    interactuar('pointerdown');
+    restaurar();
+    avanzar(MIN_MS_VISIBLES_PARA_LA_LECTURA);
+    expect(direccion()).toBe(`${RUTA}?de=tiktok&via=correo`);
+    expect(lecturas(balizas()).map(marcas)).toEqual([
+      ['tiktok', 'correo'],
+      [null, null],
+    ]);
   });
 });
 
@@ -1458,6 +1774,127 @@ describe('Historia 23.1 — los guiones en línea se dejan analizar, y el arranq
         expect(primero?.atributos, ruta).not.toMatch(/\bsrc\s*=/i);
       }
     }
+  }, 240_000);
+});
+
+/*
+ * Historia 23.6 — las Marcas de llegada las lee y las quita **solo el fichero**, y eso se mira en
+ * lo construido: en `dist/` están todos los guiones que el visitante ejecuta —los en línea, el
+ * fichero, la Imagen de `islas/` y Pagefind con su worker—, y no hay forma de ver desde `src/` lo
+ * que el empaquetado o una dependencia añadan. Los detectores componen los nombres de las marcas
+ * desde sus módulos y se comprueban contra el fichero, que sí lee y sí escribe: si dejaran de verlo
+ * ahí, todo lo demás pasaría en vacío.
+ */
+describe('Historia 23.6 — solo el fichero lee y quita las marcas, en `dist/`', () => {
+  const NOMBRES = [PARAMETRO_DE_ORIGEN, PARAMETRO_DE_DIFUSION];
+  /** Nombra una marca: su nombre como cadena entre comillas, o detrás de `?`/`&` con su `=`. */
+  const LEE_MARCAS = new RegExp(NOMBRES.flatMap((nombre) => [`['"\`]${nombre}['"\`]`, `[?&]${nombre}=`]).join('|'));
+  /** Escribe en el historial o en la dirección. */
+  const ESCRIBE_DIRECCION =
+    /\bhistory\s*\.\s*(?:pushState|replaceState)\b|(?<![\w$.])(?:(?:window|document|self|globalThis)\s*\.\s*)?location\s*(?:\.\s*(?:href|search|hash|pathname))?\s*=(?!=)|(?<![\w$.])(?:(?:window|document|self|globalThis)\s*\.\s*)?location\s*\.\s*(?:assign|replace)\s*\(|\bnavigation\s*\.\s*navigate\s*\(/;
+  /** Lee la dirección: `location` como variable global, o la URL del documento. */
+  const LEE_DIRECCION =
+    /(?<![\w$.])(?:(?:window|document|self|globalThis)\s*\.\s*)?location\b|\bdocument\s*\.\s*(?:URL|documentURI)\b/;
+  /** El guion en línea de la búsqueda, el único que lee la dirección y, desde la 23.8, escribirá en el historial. */
+  const esDeLaBusqueda = (ruta: string, guion: string) => ruta === '/buscar/' && guion.includes("'[data-consulta]'");
+
+  /** Los ficheros que descarga cada entrada de la lista cerrada, con lo que arrancan, por entrada. */
+  async function ficherosDescargados(): Promise<Map<string, Map<string, string>>> {
+    const proyecto = await sitioMedido();
+    const dist = join(proyecto, 'dist');
+    const porEntrada = new Map<string, Map<string, string>>();
+    for (const html of paginasDe(proyecto).values()) {
+      for (const especificador of guionesExternosDe(html)) {
+        const entrada = guionExternoDe(especificador);
+        if (entrada === undefined) continue; // lo ajeno ya lo juzga la prueba de la lista cerrada
+        const { ficheros } = descargaDeLaEntrada(dist, especificador.replace(/[?#].*$/, ''), entrada.arranca ?? [], (f) =>
+          readFileSync(f),
+        );
+        const deLaEntrada = porEntrada.get(entrada.id) ?? new Map<string, string>();
+        for (const fichero of ficheros) deLaEntrada.set(fichero, readFileSync(join(dist, fichero), 'utf8'));
+        porEntrada.set(entrada.id, deLaEntrada);
+      }
+    }
+    return porEntrada;
+  }
+
+  it('los detectores ven el fichero, que lee las marcas y la dirección y escribe en el historial', () => {
+    const fichero = guionDeMedicion(ENDPOINT);
+    expect(LEE_MARCAS.test(fichero)).toBe(true);
+    expect(ESCRIBE_DIRECCION.test(fichero)).toBe(true);
+    expect(LEE_DIRECCION.test(fichero)).toBe(true);
+    // Y no se encienden con lo que no es: una propiedad que se llama igual, un nombre parecido.
+    for (const inocente of ['palabra.location=1', 'x={dev:1,"vias":2}', "o.get('dev')", 'a.history_state=1']) {
+      expect(LEE_MARCAS.test(inocente) || ESCRIBE_DIRECCION.test(inocente), inocente).toBe(false);
+    }
+    for (const culpable of ["new URLSearchParams(location.search).get('de')", 'u.get("via")', "'?via=x'", 'window.location.href=u', 'location.assign(u)', 'history.pushState(null,"",u)']) {
+      expect(LEE_MARCAS.test(culpable) || ESCRIBE_DIRECCION.test(culpable), culpable).toBe(true);
+    }
+  });
+
+  it('en toda página que carga el fichero, su `<script src>` va en el `<head>` antes de todo guion que escriba en el historial o la dirección', async () => {
+    let vistas = 0;
+    for (const [ruta, html] of paginasDe(await sitioMedido())) {
+      const guiones = guionesEjecutables(html);
+      const delFichero = guiones.findIndex((g) => g.atributos.includes(RUTA_DEL_FICHERO));
+      if (delFichero < 0) continue;
+      vistas++;
+      expect(cabezaDe(html), ruta).toContain(RUTA_DEL_FICHERO);
+      for (const guion of guiones.slice(0, delFichero)) {
+        expect(ESCRIBE_DIRECCION.test(guion.cuerpo), `${ruta}: un guion anterior al fichero escribe en la dirección`).toBe(false);
+      }
+    }
+    expect(vistas).toBeGreaterThan(SLUGS.length);
+  }, 240_000);
+
+  it('ningún guion en línea escribe en el historial o la dirección, salvo la búsqueda; ni lee una marca', async () => {
+    let busqueda = 0;
+    let mirados = 0;
+    for (const [ruta, html] of paginasDe(await sitioMedido())) {
+      for (const guion of guionesEnLinea(html)) {
+        mirados++;
+        expect(LEE_MARCAS.test(guion), `${ruta}: un guion en línea lee una marca`).toBe(false);
+        if (esDeLaBusqueda(ruta, guion)) {
+          busqueda++;
+          continue;
+        }
+        expect(ESCRIBE_DIRECCION.test(guion), `${ruta}: un guion en línea escribe en la dirección`).toBe(false);
+      }
+    }
+    expect(busqueda).toBe(1);
+    expect(mirados).toBeGreaterThan(SLUGS.length);
+  }, 240_000);
+
+  it('entre los guiones propios —en línea e `islas/`— solo la búsqueda lee la dirección', async () => {
+    let busqueda = 0;
+    for (const [ruta, html] of paginasDe(await sitioMedido())) {
+      for (const guion of guionesEnLinea(html)) {
+        if (!esDeLaBusqueda(ruta, guion)) {
+          expect(LEE_DIRECCION.test(guion), `${ruta}: un guion en línea lee la dirección`).toBe(false);
+          continue;
+        }
+        busqueda++;
+        // El detector la ve: lee su consulta de la dirección.
+        expect(LEE_DIRECCION.test(guion), ruta).toBe(true);
+      }
+    }
+    expect(busqueda).toBe(1);
+    const islas = (await ficherosDescargados()).get('imagen');
+    expect(islas?.size, 'la Imagen de `islas/` se descarga en este sitio').toBeGreaterThan(0);
+    for (const [fichero, codigo] of islas!) expect(LEE_DIRECCION.test(codigo), fichero).toBe(false);
+  }, 240_000);
+
+  it('de lo que se descarga, solo el fichero lee una marca o escribe en la dirección: ni la Imagen ni Pagefind', async () => {
+    const descargados = await ficherosDescargados();
+    expect([...descargados.keys()].sort()).toEqual(GUIONES_EXTERNOS.map((g) => g.id).sort());
+    for (const [id, ficheros] of descargados) {
+      for (const [fichero, codigo] of ficheros) {
+        const esElFichero = id === 'medicion';
+        expect(LEE_MARCAS.test(codigo), `${fichero} lee una marca`).toBe(esElFichero);
+        expect(ESCRIBE_DIRECCION.test(codigo), `${fichero} escribe en la dirección`).toBe(esElFichero);
+      }
+    }
+    expect(descargados.get('pagefind')?.size, 'Pagefind y su worker').toBeGreaterThanOrEqual(2);
   }, 240_000);
 });
 

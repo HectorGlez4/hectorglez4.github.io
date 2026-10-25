@@ -218,8 +218,16 @@ export const MAX_BYTES_DE_GUION = 6656;
  * nueva de `pageshow` con `persisted`. Nada de eso cabe en el arranque en línea, que no cambia, ni
  * cuenta en `MAX_BYTES_DE_GUION`: es justo el hueco para el que la 23.1 sacó la medición a un
  * fichero. Las Historias 23.6 a 23.9 lo vuelven a medir al añadir lo suyo.
+ *
+ * Subido de 2.420 a 2.880 en la Historia 23.6: medido, **2.482 bytes** con el punto final de
+ * producción (2.483 con la barra final; 2.450 con el de las pruebas), más unos 400 de margen,
+ * como la 23.1 y la 23.5. Sin subirlo no cabía: creció 386 bytes porque el fichero lee también la
+ * Marca de difusión (`?via=`) —una fuente más y su conjunto en la tabla de las tres vistas y la
+ * lectura— y quita las dos marcas de la dirección con `history.replaceState`, con la función pura
+ * que parte la búsqueda (`SIN_MARCAS_DE_LLEGADA`) viajando dentro como texto. Sigue sin contar en
+ * `MAX_BYTES_DE_GUION`, que no se mueve. Las Historias 23.7 a 23.9 lo vuelven a medir.
  */
-export const MAX_BYTES_GUION_DE_MEDICION = 2420;
+export const MAX_BYTES_GUION_DE_MEDICION = 2880;
 
 /**
  * El generador de la Imagen de Cita, `public/islas/imagen.js` — AD-6, AD-7.

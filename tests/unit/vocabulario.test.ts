@@ -230,15 +230,7 @@ describe('Historia 23.2 — los eventos y los conjuntos cerrados', () => {
  * 23.11.
  */
 const PENDIENTES: readonly { historia: string; eventos?: readonly Evento[]; campos?: readonly [Evento, Campo][] }[] = [
-  {
-    historia: '23.6',
-    campos: [
-      [EVENTOS.vistaDeCita, 'via'],
-      [EVENTOS.vistaDeSuperficie, 'via'],
-      [EVENTOS.vistaDeObra, 'via'],
-      [EVENTOS.lectura, 'via'],
-    ],
-  },
+  // La 23.6 enseñó `via` al guion, en las vistas y la lectura: ya no hay ningún campo pendiente.
   { historia: '23.7', eventos: [EVENTOS.salidaInterna] },
   { historia: '23.8', eventos: [EVENTOS.busqueda] },
   { historia: '23.9', eventos: [EVENTOS.vistaDeObra] },
@@ -318,6 +310,44 @@ function escenariosDe(evento: Evento): Escenario[] {
       nombre: `?${PARAMETRO_DE_ORIGEN}=${red}`,
       busqueda: `?${PARAMETRO_DE_ORIGEN}=${red}`,
       esperado: (campo) => (campo === 'origen' && valoresDe('origen').includes(red) ? red : null),
+    });
+  }
+  // Historia 23.6 — la Marca de difusión: cada destino del conjunto y uno ajeno, también en los
+  // eventos que no la declaran (ahí no debe salir); repetida, manda la primera aparición; y junto
+  // a la de origen, cada una con su valor.
+  const difusion = (valor: string) => `${PARAMETRO_DE_DIFUSION}=${valor}`;
+  const deDifusion = (campo: Campo, valor: string) =>
+    campo === 'via' && valoresDe('via').includes(valor) ? valor : null;
+  for (const destino of [...DESTINOS_VALIDOS, DESTINO_AJENO]) {
+    escenarios.push({
+      nombre: `?${difusion(destino)}`,
+      busqueda: `?${difusion(destino)}`,
+      esperado: (campo) => deDifusion(campo, destino),
+    });
+  }
+  const [unDestino, otroDestino] = DESTINOS_VALIDOS;
+  escenarios.push(
+    {
+      nombre: `?${difusion(DESTINO_AJENO)}&${difusion(unDestino)} (la ajena primero)`,
+      busqueda: `?${difusion(DESTINO_AJENO)}&${difusion(unDestino)}`,
+      esperado: () => null,
+    },
+    {
+      nombre: `?${difusion(unDestino)}&${difusion(otroDestino)} (manda la primera)`,
+      busqueda: `?${difusion(unDestino)}&${difusion(otroDestino)}`,
+      esperado: (campo) => deDifusion(campo, unDestino),
+    },
+  );
+  for (const [red, destino] of [
+    [REDES_VALIDAS[0], unDestino],
+    [RED_AJENA, otroDestino],
+    [REDES_VALIDAS[1], DESTINO_AJENO],
+  ] as const) {
+    escenarios.push({
+      nombre: `?${PARAMETRO_DE_ORIGEN}=${red}&${difusion(destino)}`,
+      busqueda: `?${PARAMETRO_DE_ORIGEN}=${red}&${difusion(destino)}`,
+      esperado: (campo) =>
+        campo === 'origen' && valoresDe('origen').includes(red) ? red : deDifusion(campo, destino),
     });
   }
   // Cada destino conocido —de todos los conjuntos— y uno ajeno, también en los eventos que no

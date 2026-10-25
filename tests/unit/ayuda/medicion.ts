@@ -33,6 +33,14 @@ type Ajustes = boolean | { once?: boolean; capture?: boolean; passive?: boolean 
  * `mostrar()` despachando `visibilitychange`, las escuchas de la ventana, a las que
  * `interactuar(tipo)` despacha un evento, y `restaurar(persisted)`, que despacha `pageshow` como
  * la caché de atrás y adelante.
+ *
+ * Desde la Historia 23.6 la dirección es entera —ruta, búsqueda y fragmento (`fragmento`)— y hay
+ * **historial**: `history.state` (el de `estado`, por omisión `null`) y un `replaceState(estado,
+ * título, url)` que apunta cada llamada, tal como llega, y aplica la URL a `location` partiéndola a
+ * mano, sin recodificar nada, como haría el navegador con una dirección ya codificada. Con
+ * `historialQueLanza`, `replaceState` apunta la llamada y lanza, como un historial que no se deja
+ * escribir; con `sinHistorial`, no hay `history` en absoluto. `historial()` da las llamadas y
+ * `direccion()`, lo que mostraría la barra: ruta, búsqueda y fragmento.
  */
 export function medicionEnUnSandbox(
   opciones: {
@@ -47,6 +55,14 @@ export function medicionEnUnSandbox(
     cargado?: boolean;
     /** Si el documento está visible al crear el entorno. Por omisión, sí. */
     visible?: boolean;
+    /** `location.hash`, con su `#`. Por omisión, ninguno. */
+    fragmento?: string;
+    /** `history.state` al cargar. Por omisión, `null`, como una página recién servida. */
+    estado?: unknown;
+    /** Si `history.replaceState` lanza, como un historial que no se deja escribir. */
+    historialQueLanza?: boolean;
+    /** Si no hay `history` en el entorno. */
+    sinHistorial?: boolean;
   } = {},
 ) {
   const enviadas: string[] = [];
@@ -98,9 +114,39 @@ export function medicionEnUnSandbox(
     addEventListener: guardar(delDocumento),
   };
 
+  const ubicacion = {
+    pathname: opciones.ruta ?? '/',
+    search: opciones.busqueda ?? '',
+    hash: opciones.fragmento ?? '',
+  };
+  /** Cada llamada a `replaceState`, con sus tres argumentos tal como llegaron. */
+  const llamadas: { estado: unknown; titulo: unknown; url: unknown }[] = [];
+  const historia: { state: unknown; replaceState: (estado: unknown, titulo: unknown, url?: unknown) => void } = {
+    state: opciones.estado === undefined ? null : opciones.estado,
+    replaceState(estado: unknown, titulo: unknown, url?: unknown) {
+      llamadas.push({ estado, titulo, url });
+      if (opciones.historialQueLanza) throw new Error('el historial no se deja escribir');
+      historia.state = estado;
+      if (url === undefined || url === null) return;
+      // Una ruta del mismo origen, partida a mano: el fragmento desde el primer `#`, la búsqueda
+      // desde el primer `?` anterior a él. Un `?` o un `#` solos son una búsqueda o un fragmento
+      // vacíos, como en el navegador.
+      const texto = String(url);
+      if (!texto.startsWith('/')) throw new Error(`replaceState con una URL que no es una ruta: ${texto}`);
+      const almohadilla = texto.indexOf('#');
+      const sinFragmento = almohadilla < 0 ? texto : texto.slice(0, almohadilla);
+      const interrogacion = sinFragmento.indexOf('?');
+      const fragmento = almohadilla < 0 ? '' : texto.slice(almohadilla);
+      const busqueda = interrogacion < 0 ? '' : sinFragmento.slice(interrogacion);
+      ubicacion.pathname = interrogacion < 0 ? sinFragmento : sinFragmento.slice(0, interrogacion);
+      ubicacion.search = busqueda === '?' ? '' : busqueda;
+      ubicacion.hash = fragmento === '#' ? '' : fragmento;
+    },
+  };
+
   const ventana: Record<string, unknown> = {
     document: documento,
-    location: { pathname: opciones.ruta ?? '/', search: opciones.busqueda ?? '' },
+    location: ubicacion,
     navigator: {
       sendBeacon:
         opciones.sendBeacon ?? ((_url: string, carga: string) => void enviadas.push(carga)),
@@ -111,6 +157,7 @@ export function medicionEnUnSandbox(
     clearTimeout,
     addEventListener: guardar(deLaVentana),
   };
+  if (!opciones.sinHistorial) ventana.history = historia;
   ventana.window = ventana;
   createContext(ventana);
 
@@ -201,5 +248,9 @@ export function medicionEnUnSandbox(
       return vistos;
     },
     balizas: () => enviadas.map((c) => JSON.parse(c) as Record<string, unknown>),
+    /** Las llamadas a `history.replaceState`, en su orden, con sus argumentos tal como llegaron. */
+    historial: () => [...llamadas],
+    /** Lo que mostraría la barra: ruta, búsqueda y fragmento. */
+    direccion: () => `${ubicacion.pathname}${ubicacion.search}${ubicacion.hash}`,
   };
 }

@@ -695,8 +695,8 @@ test.describe('Historia 23.5 — una carga que se lee deja una lectura', () => {
     await esperar(500);
     expect(llegadas(EVENTOS.lectura)).toHaveLength(1);
     expect((await balizasDe(page)).map((b) => b.evento)).toEqual([EVENTOS.vistaDeCita, EVENTOS.lectura]);
-    // Exactamente la ruta y la Marca de origen: ni `via` (23.6) ni nada más.
-    expect(Object.keys((await balizasDe(page))[1]).sort()).toEqual(['evento', 'origen', 'ruta']);
+    // Exactamente la ruta y las dos Marcas de llegada (`via`, desde la 23.6), y nada más.
+    expect(Object.keys((await balizasDe(page))[1]).sort()).toEqual(['evento', 'origen', 'ruta', 'via']);
   });
 
   test('un `pointerdown` antes de los 8 s emite la lectura en el momento, y nada emite otra', async ({ page }) => {
@@ -933,6 +933,91 @@ test.describe('Historia 23.5 — una carga que se lee deja una lectura', () => {
       expect(llegadas(EVENTOS.vistaDeSuperficie)).toHaveLength(1);
     } finally {
       await navegador.close();
+    }
+  });
+});
+
+/*
+ * Historia 23.6 — las Marcas de llegada cuentan una vez y salen de la dirección, en un navegador de
+ * verdad: la barra, el historial, la canónica y lo que llega al receptor. Cada fila de guion de su
+ * matriz la recorre el entorno simulado de `tests/unit/medicion.test.ts`.
+ */
+test.describe('Historia 23.6 — las marcas de llegada cuentan una vez y salen de la dirección', () => {
+  const llegadas = (nombre: string) => recibidos.filter((r) => r?.evento === nombre);
+  /** La canónica y el `og:url` de un HTML servido. */
+  const direccionesDe = (html: string) => ({
+    canonica: /<link\b[^>]*\brel="canonical"[^>]*\bhref="([^"]*)"/.exec(html)?.[1],
+    ogUrl: /<meta\b[^>]*\bproperty="og:url"[^>]*\bcontent="([^"]*)"/.exec(html)?.[1],
+  });
+
+  test('llegar con `?de=` y `?via=`: la barra las pierde sin recargar, la vista y la lectura las llevan, y recargar no las cuenta otra vez', async ({
+    page,
+  }) => {
+    const documentos: string[] = [];
+    page.on('request', (peticion) => {
+      if (peticion.resourceType() === 'document') documentos.push(peticion.url());
+    });
+    // Un `history.state` previo, puesto antes de que corra ningún guion de la página.
+    await page.addInitScript(() => history.replaceState({ previo: 'de antes' }, ''));
+    await apuntarBalizas(page);
+
+    await page.goto(`${SITIO}${RUTA_CITA}?x=1&de=instagram&via=whatsapp#cita`);
+    await esperarAlFichero(page);
+    await expect.poll(() => page.url()).toBe(`${SITIO}${RUTA_CITA}?x=1#cita`);
+    expect(documentos, 'quitar las marcas no recarga').toHaveLength(1);
+    expect(await page.evaluate(() => history.state)).toEqual({ previo: 'de antes' });
+
+    // La canónica y el `og:url`, los de la página sin marcas, y sin consulta.
+    const limpias = direccionesDe(await (await fetch(`${SITIO}${RUTA_CITA}`)).text());
+    expect(limpias.canonica).toBeTruthy();
+    expect(limpias.ogUrl).toBeTruthy();
+    expect(`${limpias.canonica}${limpias.ogUrl}`).not.toContain('?');
+    expect(direccionesDe(await page.content())).toEqual(limpias);
+
+    const vista = await esperarEvento(EVENTOS.vistaDeCita);
+    expect(vista, 'no llegó la vista').toBeTruthy();
+    expect(vista).toMatchObject({ ruta: RUTA_CITA, origen: 'instagram', via: 'whatsapp' });
+    await page.keyboard.press('Shift');
+    const lectura = await esperarEvento(EVENTOS.lectura);
+    expect(lectura, 'no llegó la lectura').toBeTruthy();
+    expect(lectura).toMatchObject({ ruta: RUTA_CITA, origen: 'instagram', via: 'whatsapp' });
+    expect((await balizasDe(page)).map((b) => [b.evento, b.origen, b.via])).toEqual([
+      [EVENTOS.vistaDeCita, 'instagram', 'whatsapp'],
+      [EVENTOS.lectura, 'instagram', 'whatsapp'],
+    ]);
+
+    // Recargar es otra carga, con la dirección que quedó: su vista ya no lleva marcas.
+    await page.reload();
+    await esperarAlFichero(page);
+    await expect.poll(() => llegadas(EVENTOS.vistaDeCita).length).toBe(2);
+    expect(llegadas(EVENTOS.vistaDeCita).map((r) => [r!.origen, r!.via])).toEqual(
+      expect.arrayContaining([
+        ['instagram', 'whatsapp'],
+        [null, null],
+      ]),
+    );
+    expect((await balizasDe(page)).map((b) => [b.evento, b.origen, b.via])).toEqual([[EVENTOS.vistaDeCita, null, null]]);
+    expect(page.url()).toBe(`${SITIO}${RUTA_CITA}?x=1#cita`);
+    expect(documentos).toHaveLength(2);
+  });
+
+  test('`/buscar/?q=…&de=instagram` queda en `/buscar/?q=…`, la búsqueda inicial corre y ningún evento lleva marca', async ({
+    page,
+  }) => {
+    await apuntarBalizas(page);
+    await page.goto(`${SITIO}${RUTA_BUSCAR}?q=${SIN_RESULTADOS}&de=instagram`);
+    await esperarAlFichero(page);
+    await expect.poll(() => page.url()).toBe(`${SITIO}${RUTA_BUSCAR}?q=${SIN_RESULTADOS}`);
+    await expect(page.locator('[data-consulta]')).toHaveValue(SIN_RESULTADOS);
+
+    const registro = await esperarEvento(EVENTOS.busquedaSinResultados);
+    expect(registro, 'la búsqueda inicial no corrió').toBeTruthy();
+    expect(registro).toMatchObject({ ruta: RUTA_BUSCAR, consulta: SIN_RESULTADOS, origen: null, via: null });
+    const balizas = await balizasDe(page);
+    expect(balizas.map((b) => b.evento)).toEqual([EVENTOS.busquedaSinResultados]);
+    for (const baliza of balizas) {
+      expect(baliza).not.toHaveProperty('origen');
+      expect(baliza).not.toHaveProperty('via');
     }
   });
 });

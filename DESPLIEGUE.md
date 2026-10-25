@@ -494,7 +494,7 @@ pestaña cerrada antes de tiempo sin tocarla no se leyó. La única que sale al 
 la carga ya debía: si una tarea larga retrasa el temporizador y la página se oculta con los 8 s
 visibles cumplidos, la lectura sale entonces en vez de perderse. Lo que no emite vista —páginas 2+,
 `/buscar/`, el 404 y, hasta la 23.9, la Obra que no se indexa— no emite lectura. La lectura
-lleva la ruta y la Marca de origen, como la vista. Cada acción —`copiado`, `descarga-de-imagen`
+lleva la ruta y las dos Marcas de llegada, como la vista (abajo). Cada acción —`copiado`, `descarga-de-imagen`
 y las dos comparticiones— lleva `primera`: `si` si es la primera de su métrica en la carga
 (SM-5: copiado y descarga; SM-7: las dos comparticiones) y `no` si no; la descarga que impone el
 navegador, la que llega con `destino`, lleva siempre `no` y no gasta la primera. Esa descarga
@@ -509,10 +509,25 @@ detrás de su lectura, en la misma carga. Es una garantía de la emisión, no de
 baliza que se pierde no se reintenta, y el receptor fecha cada evento en la jornada UTC en que
 llega, así que una lectura de las 23:59:59 y su acción pueden caer en jornadas distintas. Leída
 por jornada, la tasa puede pasar de uno junto a medianoche; se lee sobre varias. Volver por la
-caché de atrás y adelante es una carga nueva: otra lectura posible, sin Marca de origen y sin
+caché de atrás y adelante es una carga nueva: otra lectura posible, sin Marcas de llegada y sin
 vista. Por eso las lecturas no son un subconjunto de las vistas —`lecturas/vistas` puede pasar
-de uno— y el reparto de lecturas por Marca de origen no casa con el de vistas: la vuelta pierde
-la marca.
+de uno— y el reparto de lecturas por marca no casa con el de vistas: la vuelta pierde la marca.
+
+**Las Marcas de llegada** (Historia 23.6, FR-22, AD-13): la de origen, `?de=<red>` —de qué
+cuenta propia llega la visita— y la de difusión, `?via=<destino>` —por qué botón de compartir
+llegó—. El fichero las lee **una sola vez**, al activarse y antes de la vista, cada una contra su
+conjunto (las redes de `src/lib/redes.ts`; `DESTINOS_VALIDOS`), así que un valor ajeno llega
+nulo y la vista sale igual; y las **quita de la dirección** con `history.replaceState`, sin
+recargar, conservando el resto de la búsqueda, el fragmento y el `history.state` que hubiera.
+Viajan con las vistas y con la lectura, y **se olvidan al emitir la lectura**: recargar, copiar la
+dirección de la barra o volver por la caché de atrás y adelante ya no cuentan otra vez la misma
+llegada. Sin punto final no hay fichero y la dirección se queda como llegó; si el navegador no
+deja escribir en el historial, también, y los eventos salen igual con sus marcas. La canónica y
+`og:url` no cambian: nunca llevaron consulta. **`via` nombra el botón, nunca a quien comparte ni
+a quien abre** (NFR-11): no hay identificador de por medio, y un `?via=` inventado llega nulo. La
+difusión **se cuenta sobre lecturas**, nunca con la sola vista: una llegada con `?via=` que nadie
+leyó no es difusión. Los botones de compartir aún no componen `?via=` —lo hace la Épica 25—, así
+que hasta entonces la columna llega casi siempre nula.
 
 **Corte de serie de SM-5 y SM-7.** Antes del despliegue del sitio de la Épica 23 no hay
 `lectura` y `primera` llega nula, así que las tasas por lectura empiezan la **primera jornada
@@ -555,6 +570,13 @@ npx --yes wrangler@4.151.1 d1 execute medicion --remote --command \
 npx --yes wrangler@4.151.1 d1 execute medicion --remote --command \
   "SELECT jornada, SUM(evento='lectura') AS lecturas, SUM(evento IN ('comparticion-de-enlace','comparticion-de-imagen') AND primera='si') AS con_comparticion FROM eventos WHERE jornada >= 'AAAA-MM-DD' AND ruta LIKE '/cita/%' AND evento IN ('lectura','comparticion-de-enlace','comparticion-de-imagen') GROUP BY jornada ORDER BY jornada DESC LIMIT 30"
 
+# Difusión por botón, sobre lecturas — Historia 23.6. Cambia AAAA-MM-DD por la primera jornada
+# UTC completa tras la llegada de la 23: la de llegada es mixta, con páginas abiertas que aún
+# piden el fichero anterior, que no lee `?via=`. Cuenta lecturas con `via`, nunca vistas: una
+# llegada con la marca que nadie leyó no es difusión.
+npx --yes wrangler@4.151.1 d1 execute medicion --remote --command \
+  "SELECT jornada, via, COUNT(*) lecturas FROM eventos WHERE evento='lectura' AND via IS NOT NULL AND jornada >= 'AAAA-MM-DD' GROUP BY jornada, via ORDER BY jornada DESC, lecturas DESC LIMIT 60"
+
 # Lo que se buscó y no había, para decidir a quién sembrar — FR-8, SM-6.
 npx --yes wrangler@4.151.1 d1 execute medicion --remote --command \
   "SELECT consulta, COUNT(*) c FROM eventos WHERE evento='busqueda-sin-resultados' GROUP BY consulta ORDER BY c DESC LIMIT 40"
@@ -576,6 +598,14 @@ sola vez la portada y la página 1 de Autor, Tema y Colección. Las páginas 2+ 
 internas (lo declara `src/lib/superficies.ts`), y las Piezas del Canal enlazan a la
 página 1. Contar solo `vista-de-cita` dejaba fuera todo lo que el Canal trae a las
 superficies de agregación.
+
+**SM-8 sigue contando solo `origen` en las vistas**, y la Historia 23.6 es una causa de su
+**corte de serie**: antes, recargar la página, copiar la dirección de la barra o volver a ella con
+la marca puesta volvía a contar la llegada, porque `?de=` se quedaba en la dirección; desde la
+llegada en vivo de la Épica 23 se cuenta una vez, así que el tramo de antes y el de después no se
+comparan. La jornada del corte sale de la jornada de despliegue de la 23, que da la 23.11 (y de
+ella, la primera entrada de `CORTES_DE_SM8`); hasta entonces se parte a mano en esa jornada, y la
+de llegada, que es mixta, se informa aparte.
 
 **Las llegadas a una página 2+ no cuentan.** Es un subrecuento conocido y aceptado: quien
 entra por un enlace a `/autor/<slug>/2/` no deja fila de vista.
