@@ -2,7 +2,8 @@
 title: 'Historia 23.6 — Las marcas de llegada cuentan una vez y salen de la dirección'
 type: 'feature'
 created: '2026-10-25'
-status: 'ready-for-dev'
+status: 'done'
+baseline_revision: 'a0e540104fb3c693e3651b0b73b9f8cda7e36998'
 review_loop_iteration: 0
 followup_review_recommended: false
 context:
@@ -122,6 +123,18 @@ deferred: []
 
 ## Review Triage Log
 
+### 2026-10-25 — Review pass
+- intent_gap: 0
+- bad_spec: 0
+- patch: 0
+- defer: 0
+- reject: 0
+- addressed_findings:
+  - none
+
+Las capas de revisión de esta pasada son externas (blind-hunter, edge-case-hunter, verification-gap,
+intent-alignment, ac-auditor) y no traían hallazgos todavía: la revisión independiente viene después.
+
 ## Design Notes
 
 **La función pura viaja como texto.** El fichero es una cadena, así que la función tiene que ir dentro como texto; con `String(función)` el empaquetado del build puede renombrarla o reformatearla, y el fichero —y su versión, que sale del contenido— dejaría de ser el mismo que calcula Vitest (`medicion.test.ts` compara `dist/` con `guionDeMedicion(ENDPOINT)` byte a byte). Por eso se escribe una sola vez como texto de una expresión de función, con los nombres como argumento, y las pruebas la evalúan en `node:vm` y la llaman. Orientativo (nombres y compactación los fija el código):
@@ -156,13 +169,102 @@ try{x=R(location.search,["de","via"]);x!=location.search&&history.replaceState(h
 
 ## Auto Run Result
 
-Status: ready-for-dev
+Status: done
 Blocking condition: ninguna.
 
-Planificación cerrada (bmad-build-auto, alto tras planificar). Avisos: `multiple-goals` —el fichero de
-medición y la validación de `npm run canal` son entregables separables, que la historia junta— y
-`oversized`. Lo que la historia pediría enmendar fuera del código: nada; `vocabulario.ts` y
-`medicion/` no se tocan, así que no hace falta otro `desplegar`. Riesgo para la fusión de la 23.11:
-la rama reescribe las cabeceras de `corpus/senales-externas.yml` y `corpus/publicaciones-de-canal.yml`;
-si en la principal se anota antes alguna entrada, al fusionar se conservan las entradas y se toma la
-cabecera nueva.
+**Qué se hizo.** El fichero de medición lee las dos Marcas de llegada **una vez**, en `a()` —tras
+`prerenderingchange` si hace falta— y antes de emitir ninguna vista, de
+`new URLSearchParams(location.search)`: `o` (origen) y `w` (difusión), la primera aparición de cada
+una, cotejadas al emitir contra su conjunto por la tabla de `CAMPOS_DE_EVENTO` (fuente 4 nueva,
+`via`). Luego, dentro de un `try`, compone la búsqueda sin marcas con la función pura
+`SIN_MARCAS_DE_LLEGADA` —texto de una expresión de función, (búsqueda, nombres) → búsqueda— y, solo
+si cambió, llama a `history.replaceState(history.state, '', location.pathname + nueva +
+location.hash)`. Las marcas viajan con las vistas y la lectura (`m=[o,t,z,y,w]`), se olvidan al
+emitir la lectura (`o=w=null` en `l`) y con `pageshow` `persisted`; nada vuelve a leer
+`location.search`. Los nombres salen de `MARCAS_DE_LLEGADA = [PARAMETRO_DE_ORIGEN,
+PARAMETRO_DE_DIFUSION]`, compuestos de `redes.ts` y del vocabulario; `medicion.ts` no escribe ninguno
+(lo fija una prueba sobre sus literales). La función pura da a cada segmento un `&` delante antes de
+preguntarle a `URLSearchParams`, para que un `?` inicial de segmento no se lea como el de la búsqueda
+(`?a=1&?de=x` se queda: el lector tampoco lee ahí `de`). En `tools/`, `anotar` y `senal --tipo
+propia` rechazan con 1 un enlace con `?via=` («marca de un visitante… no la de una cuenta propia»);
+`senal --tipo ajena` lo coteja contra `DESTINOS_VALIDOS` con la regla de `?de=` y anota
+`compartido: true`, y la consulta pinta «⚠ copia un enlace compartido». `marcasDeOrigen` pasó a
+`marcasDe(dada, parametro)`, una función para las dos marcas.
+
+**Ficheros.**
+- `src/lib/medicion.ts` — `MARCAS_DE_LLEGADA`, `SIN_MARCAS_DE_LLEGADA`, fuente `via: 4`; el fichero
+  lee, quita y olvida las marcas; docblocks y comentario de variables (`N`, `R`, `w`) al día.
+- `src/lib/umbrales.ts` — `MAX_BYTES_GUION_DE_MEDICION` de 2.420 a 2.880: medido **2.482 bytes** con
+  el punto final de producción (2.483 con barra final; 2.450 con el de las pruebas), +386 sobre la
+  23.5, más unos 400 de margen; la medida y el porqué en su comentario.
+- `tests/unit/ayuda/medicion.ts` — `location.hash` (`fragmento`), `history` con `state` (`estado`) y
+  `replaceState` que apunta la llamada y aplica la URL sin recodificar; `historialQueLanza`,
+  `sinHistorial`; `historial()` y `direccion()`.
+- `tests/unit/medicion.test.ts` — `describe('Historia 23.6 — …')`: la función pura en `node:vm`
+  (20 casos, con la comprobación de que lo quitado es exactamente lo que el lector lee) y una prueba
+  por fila de guion de la matriz; `describe('Historia 23.6 — solo el fichero lee y quita las marcas,
+  en `dist/`')` sobre `sitioMedido()`: el `<script src>` del fichero en el `<head>` antes de todo
+  guion que escriba en el historial; ningún guion en línea escribe salvo la búsqueda; ninguno lee
+  una marca, tampoco la Imagen ni Pagefind y su worker; entre los propios, solo la búsqueda lee la
+  dirección; los detectores, comprobados contra el fichero. Las lecturas comparadas ganan `via`.
+- `tests/unit/vocabulario.test.ts` — fuera la entrada 23.6 de `PENDIENTES`; `escenariosDe` con
+  `?via=` por cada destino y uno ajeno, repetida (manda la primera) y junto a `?de=`.
+- `tests/e2e/receptor.spec.ts` — `describe('Historia 23.6 — …')`: llegada con
+  `?x=1&de=instagram&via=whatsapp#cita` y `history.state` previo (barra `?x=1#cita`, un solo
+  documento, estado intacto, canónica y `og:url` como sin marcas; vista y lectura con las dos al
+  receptor; recargar da una vista sin marcas) y `/buscar/?q=…&de=instagram`; la lista de claves de la
+  23.5 gana `via`.
+- `tools/lib/canal.ts` — `marcasDe`, `motivoDeDifusionPropia`, `?via=` en `componerPublicacion` y
+  `componerSenal`, `compartido?` en `SenalExterna`, el aviso en `lineaDeSenal`, `CODIGOS_DE_SENAL`.
+- `tools/lib/corpus.ts` — `analizarSenales` niega `compartido` no booleano; `bloqueDeSenal` lo escribe
+  tras `marcado`; las dos cabeceras al día.
+- `tools/canal.ts` — docblock (rechazo de `?via=` en `anotar`, códigos de `senal` literales) y uso.
+- `corpus/senales-externas.yml`, `corpus/publicaciones-de-canal.yml` — exactamente la cabecera nueva
+  con la lista vacía (solo comentarios; ninguna entrada, en la rama ni en la principal).
+- `tests/unit/canal.test.ts` — `describe('Historia 23.6 — …')`: cada fila de `tools/` de la matriz en
+  `componer*` y por `principal` (código y fichero sin tocar), la consulta con los dos avisos, el
+  registro que escribe y relee `compartido`, el que niega `compartido: "sí"`, las cabeceras.
+- `AGENTS.md` — la convención de la medición (solo el fichero lee y quita las marcas, con el
+  `history.state` que había; ninguna isla las lee; solo la búsqueda escribirá además en el historial,
+  desde la 23.8); el canal: `?via=` en `anotar`, `compartido` y su aviso en la señal, códigos literales.
+- `DESPLIEGUE.md` — §3: las Marcas de llegada y la consulta de difusión sobre lecturas desde la
+  primera jornada UTC completa tras la llegada de la 23; SM-8: sigue contando solo `origen` en vistas
+  y la 23.6 es una causa de su corte, compuesto de la jornada de despliegue de la 23 (23.11).
+
+**Discrepancia de la matriz, para la revisión.** La fila «Repetidas» escribe `?via=x&via=whatsapp →
+via: null`, pero `x` es un destino del conjunto (`DESTINOS_DE_ENLACE`, el de X), y las filas de
+`tools/` lo tratan como válido (`?via=x&via=x` se admite; `?de=instagram&via=x` da `compartido`).
+Con la regla de los Boundaries —la primera aparición, cotejada contra `DESTINOS_VALIDOS`— y sin tocar
+el vocabulario (Block If), esa entrada da `'x'`. Se implementó la regla y se prueba la intención de la
+fila con un valor ajeno delante (`?via=lo-que-sea&via=whatsapp` → `null`; `?via=whatsapp&via=lo-que-sea`
+→ `'whatsapp'`), y además el caso literal con su valor real (`?via=x&via=whatsapp` → `'x'`), comentado.
+
+**Revisión.** Capas externas sin hallazgos en esta pasada: 0 parches, 0 diferidos, 0 rechazados.
+Seguimiento recomendado: `false` (parcheados: 0 altos, 0 medios, 0 bajos; puntuación 0).
+
+**Verificación.**
+- `npx astro check` — 0 errores, 0 avisos (20 sugerencias previas). La primera pasada dio 1 error de
+  tipo en el entorno simulado (`history.state` como `unknown`), corregido.
+- `npx vitest run` de `medicion`, `vocabulario`, `redes`, `comparticion`, `huella`, `receptor`,
+  `canal`, `superficies`, `espinas-de-ux` y `kit-construido` — 10 ficheros, 687 pruebas en verde.
+- `npm test` (con `correr.sh`) — 131 ficheros, 5.712 pruebas en verde.
+- `npx playwright test tests/e2e/receptor.spec.ts --project=escritorio` — 37 en verde, 1 saltada
+  (la de prerender, como antes); las dos de la 23.6 pasan y la caché de atrás y adelante real restauró.
+- Con el `webServer`, `origen`, `copiar`, `imagen`, `compartir-enlace`, `compartir-imagen`,
+  `busqueda`, `pagina-de-cita` y `receptor-local` en `escritorio` — 114 en verde, 2 saltadas.
+  Puertos 4321, 4399, 4400, 4402 y 8787 libres al terminar.
+- `guionDeMedicion` medido con `npx tsx`: 2.482 bytes con
+  `https://medicion-sabiduria-de-bolsillo.sabiduriadebolsillo.workers.dev` (≤ 2.880).
+- `git diff 3dd8b508f3bf544a2c14f82907f2ff2e4075f831 -- src/lib/vocabulario.ts medicion/` vacío;
+  `ARRANQUE_DE_MEDICION` y `MAX_BYTES_DE_GUION` sin cambios; en `corpus/` solo las cabeceras de los
+  dos registros, con la lista vacía.
+
+**Riesgos que quedan.**
+- La difusión llega casi siempre nula hasta que la Épica 25 componga `?via=` en los botones.
+- La isla de `/buscar/` lee `q` antes que el fichero (guion clásico al final del `<body>`); cuando la
+  23.8 escriba en el historial, debe hacerlo desde sus escuchas y con la dirección ya sin marcas: la
+  prueba sobre `dist/` fija solo el orden en el documento.
+- Un `history.replaceState` que falla deja las marcas en la barra: esa carga se cuenta bien, pero
+  recargarla las volvería a contar, como antes de la historia.
+- Los detectores de `dist/` son textuales (cadena entre comillas, `?nombre=`, `location`, `history`):
+  un guion que compusiera el nombre de una marca por piezas se les escaparía.
