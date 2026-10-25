@@ -29,7 +29,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 # - Retrospective appends its action items to action_items; the status view surfaces open ones
 generated: 08-11-2026 09:00
-last_updated: 10-25-2026 08:31
+last_updated: 10-25-2026 10:55
 project: brainlySabiduria
 project_key: NOKEY
 tracking_system: file-system
@@ -392,7 +392,7 @@ development_status:
   23-5-una-carga-que-se-lee-deja-una-lectura: review # v8-ralph 2026-10-25 01:58 UTC: una carga que se lee deja una lectura, con revisión de código aplicada; sin diferidos para Héctor
   23-6-las-marcas-de-llegada-cuentan-una-vez-y-salen-de-la-direcció: review # v8-ralph 2026-10-25 04:34 UTC: entran las marcas ?de=/?via= que cuentan una vez y salen de la dirección, compartido en canal; diferidos para Héctor: criterio de epics.md sobre ?via= repetido (bmad-create-epics-and-stories)
   23-7-cada-salida-interna-dice-desde-qué-zona: review  # v8-ralph 2026-10-25: cada salida interna marca la zona de origen en la baliza (continuación), con 404 y páginas 2+ apartadas; sin diferidos para Héctor
-  23-8-una-búsqueda-cuenta-una-vez-cuando-se-asienta: backlog
+  23-8-una-búsqueda-cuenta-una-vez-cuando-se-asienta: review # v8-ralph 2026-10-25: la búsqueda se cuenta una vez al asentarse (Enter, clic o botón central) y el índice que falla se reintenta; diferido para Héctor: marcar en epics.md la 3.2 como sustituida por la 23.8 (bmad-create-epics-and-stories)
   23-9-toda-obra-cuenta-sus-vistas-se-indexe-o-no: backlog
   23-10-la-línea-base-se-lee-desde-tools-con-la-cuota-de-d1-a-la-vis: backlog
   23-11-la-lectura-se-mide-en-vivo-y-su-línea-base-empieza-a-contar: backlog  # operativa: acto de Héctor (mínimo de lecturas, plan de Cloudflare, merge y primer corte de SM-8)
