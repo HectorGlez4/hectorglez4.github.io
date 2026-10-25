@@ -88,7 +88,7 @@ export function posicionesDeCitas(
       return typeof cuerpo === 'string' ? [{ nombre, cuerpo: colapsarEspacios(cuerpo) }] : [];
     });
     for (const cita of delGrupo) {
-      const buscado = typeof cita.texto === 'string' ? colapsarEspacios(cita.texto) : '';
+      const buscado = colapsarEspacios(typeof cita.texto === 'string' ? cita.texto : '');
       const apariciones: AparicionDeCita[] = [];
       for (const { nombre, cuerpo } of cuerpos) {
         const posicion = localizar(buscado, cuerpo);

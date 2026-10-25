@@ -978,9 +978,21 @@ function porValor(a: string, b: string): number {
  * **la palabra va antes que el número**, que es «proemio» antes de «i». Si un nombre es prefijo
  * del otro, el corto va primero: el documento de la obra entera antes que sus páginas.
  *
- * Como los documentos de una Obra comparten `{fuente}--{obra}`, equivale al orden del slug de
- * la página en su Fuente. Límite aceptado: una palabra que es romano canónico («mi», «di») se
- * lee como número; lo corregirá el índice de subpáginas de la Fuente cuando se capture.
+ * Mientras los documentos de una Obra compartan `{fuente}--{obra}` —en el Corpus de hoy, todos
+ * los de una misma Fuente—, equivale al orden del slug de la página en su Fuente. Una Obra
+ * reunida con varias formas (`npm run obra -- reunir`) ordena sus documentos de una Fuente
+ * forma a forma, por el slug de cada una.
+ *
+ * Límites aceptados hasta que se capture el índice de subpáginas de la Fuente, que es lo que
+ * los corregirá (no hay detector de desorden):
+ *   · una palabra que es romano canónico («mi», «di») se lee como número;
+ *   · la palabra va antes que el número también al final del libro: «epilogo», «notas» o
+ *     «apendice» van antes que «i»;
+ *   · los ordinales escritos («jornada-primera», «libro-segundo») y los trozos de cifra y
+ *     letra («10a», «1o») son palabras, por unidades de código: «cuarta» antes que «primera»,
+ *     «10a» antes que «1o», y los dos antes que cualquier número;
+ *   · las páginas con nombre de capítulo («la-gitanilla», «el-coloquio-de-los-perros») van
+ *     por orden alfabético, no por el del libro.
  */
 export function compararDocumentos(a: string, b: string): number {
   const trozosA = a.split('-');

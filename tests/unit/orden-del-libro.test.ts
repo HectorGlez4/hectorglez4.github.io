@@ -118,14 +118,46 @@ describe('24.1 — compararDocumentos: el orden natural de los documentos de una
     expect(natural([...enOrden].sort())).toEqual(enOrden);
   });
 
-  it('Ariel: el documento corto antes que sus capítulos', () => {
-    const enOrden = [
-      'wikisource-es--ariel',
-      'wikisource-es--ariel--ariel-capitulo-i',
-      'wikisource-es--ariel--ariel-capitulo-ii',
-      'wikisource-es--ariel--ariel-capitulo-viii',
-    ];
+  it('Ariel: capítulo i, ii, iii, viii', () => {
+    const enOrden = ['i', 'ii', 'iii', 'viii'].map((r) => `wikisource-es--ariel--ariel-capitulo-${r}`);
     expect(natural([...enOrden].reverse())).toEqual(enOrden);
+    expect(natural([...enOrden].sort())).toEqual(enOrden);
+  });
+
+  it('Novelas ejemplares: el documento corto antes que sus páginas', () => {
+    const base = 'wikisource-es--novelas-ejemplares';
+    const enOrden = [base, `${base}--el-celoso-extremeno-1825`, `${base}--la-gitanilla-1825`];
+    expect(natural([...enOrden].reverse())).toEqual(enOrden);
+  });
+
+  /*
+   * Los límites que la historia acepta hasta que se capture el índice de subpáginas de la
+   * Fuente. Se fijan tal y como son hoy para que, cuando ese índice los corrija, esta prueba
+   * diga que el comportamiento cambió.
+   */
+  it('límites aceptados: páginas con nombre de capítulo, «mi», el final del libro, ordinales escritos y cifra con letra', () => {
+    // Por título, alfabético: El coloquio de los perros —la última del libro— va antes que La gitanilla.
+    const novelas = 'wikisource-es--novelas-ejemplares';
+    expect(natural([`${novelas}--la-gitanilla-1825`, `${novelas}--el-coloquio-de-los-perros-1825`])).toEqual([
+      `${novelas}--el-coloquio-de-los-perros-1825`,
+      `${novelas}--la-gitanilla-1825`,
+    ]);
+    // «mi» se lee 1001, y «notas» es palabra: las notas del autor van antes que «Mi educación».
+    const recuerdos = 'wikisource-es--recuerdos-de-provincia--recuerdos-de-provincia';
+    expect(natural([`${recuerdos}-mi-educacion`, `${recuerdos}-notas-del-autor`])).toEqual([
+      `${recuerdos}-notas-del-autor`,
+      `${recuerdos}-mi-educacion`,
+    ]);
+    expect(compararDocumentos('x-mi', 'x-ii')).toBeGreaterThan(0);
+    // El final del libro, como palabra, va antes que el capítulo i.
+    expect(compararDocumentos('wikisource-es--plenitud--plenitud-epilogo', 'wikisource-es--plenitud--plenitud-iii-la-mujer')).toBeLessThan(0);
+    // Los ordinales escritos son palabras: «primera, segunda, tercera» sale bien por casualidad, «cuarta» no.
+    const zalamea = 'wikisource-es--el-alcalde-de-zalamea--el-alcalde-de-zalamea-jornada';
+    const jornadas = ['primera', 'segunda', 'tercera'].map((o) => `${zalamea}-${o}`);
+    expect(natural([...jornadas].reverse())).toEqual(jornadas);
+    expect(compararDocumentos(`${zalamea}-cuarta`, `${zalamea}-primera`)).toBeLessThan(0);
+    // Cifra con letra es palabra: «10a» antes que «1o», y los dos antes que cualquier número.
+    expect(natural(['x-1', 'x-1o', 'x-10a'])).toEqual(['x-10a', 'x-1o', 'x-1']);
   });
 
   it('es un orden total y estable: cero solo consigo mismo, y antisimétrico', () => {
@@ -338,9 +370,10 @@ describe('24.1 — posicionesDeCitas: dónde cae cada Cita, con el localizador d
   });
 
   it('el localizador: indexOf sobre formas colapsadas, y -1 para el texto vacío', () => {
-    expect(localizar('b c', 'a b c')).toBe(2);
-    expect(localizar('', 'a b c')).toBe(-1);
-    expect(localizar('d', 'a b c')).toBe(-1);
+    const c = colapsarEspacios;
+    expect(localizar(c('b\n c'), c('a  b c'))).toBe(2);
+    expect(localizar(c('  '), c('a b c'))).toBe(-1);
+    expect(localizar(c('d'), c('a b c'))).toBe(-1);
   });
 });
 
@@ -377,6 +410,15 @@ describe('24.1 — leerPosicionesDelCorpus: lo que el cargador entrega, leído d
         'fuentes/ws--la-obra--la-obra-rota.txt': 'Y otra frase. La frase de las dos páginas.',
       };
       for (const [ruta, contenido] of Object.entries(ficheros)) await writeFile(join(corpus, ruta), contenido, 'utf8');
+      // El árbol entero, con el contenido de cada fichero: ni se reescribe uno ni aparece otro.
+      const arbol = async () => {
+        const entradas = (await readdir(raiz, { recursive: true, withFileTypes: true })).filter((e) => e.isFile());
+        return Promise.all(
+          entradas.map(async (e) => [join(e.parentPath, e.name), await readFile(join(e.parentPath, e.name), 'utf8')]),
+        ).then((pares) => pares.sort((a, b) => (a[0] < b[0] ? -1 : 1)));
+      };
+      const antes = await arbol();
+      expect(antes).toHaveLength(Object.keys(ficheros).length);
 
       const posiciones = await leerPosicionesDelCorpus(corpus);
       expect([...posiciones.keys()].sort()).toEqual(['censada', 'doble', 'y']);
@@ -386,9 +428,7 @@ describe('24.1 — leerPosicionesDelCorpus: lo que el cargador entrega, leído d
         { documento: 'ws--la-obra--la-obra-ii', posicion: 0 },
         { documento: 'ws--la-obra--la-obra-x', posicion: 'Antes. '.length },
       ]);
-      for (const [ruta, contenido] of Object.entries(ficheros)) {
-        expect(await readFile(join(corpus, ruta), 'utf8'), ruta).toBe(contenido);
-      }
+      expect(await arbol()).toEqual(antes);
     } finally {
       await rm(raiz, { recursive: true, force: true });
     }
@@ -419,10 +459,14 @@ describe('24.1 — el Corpus real, sin construir', () => {
   it('las Citas del censo no tienen apariciones', async () => {
     const censo = await leerCensoDeCotejo(rutas);
     expect(censo.length).toBeGreaterThan(0);
+    let miradas = 0;
     for (const slug of censo) {
       if (!posiciones.has(slug)) continue;
       expect(posiciones.get(slug), slug).toEqual([]);
+      miradas += 1;
     }
+    // Y no por no mirar ninguna: las del censo son Citas publicadas con su entrada.
+    expect(miradas).toBeGreaterThan(0);
   });
 
   it('aparecer ⇔ apareceEnDocumento, y la posición es la del cuerpo colapsado', () => {
@@ -504,14 +548,16 @@ describe('24.1 — las dependencias que la historia prohíbe', () => {
     expect(importados("// import { a } from '../../tools/lib/x.ts';")).toEqual([]);
   });
 
-  it('ningún fichero de src/lib/ importa de tools/lib/', async () => {
-    const directorio = join(RAIZ_DEL_REPO, 'src', 'lib');
+  it('ningún fichero de src/ —src/lib/ incluido— importa de tools/lib/, salvo el cargador de content.config.ts', async () => {
+    const directorio = join(RAIZ_DEL_REPO, 'src');
     const ficheros = (await readdir(directorio, { recursive: true })).filter((f) => /\.(ts|js|mjs|astro)$/.test(f));
-    expect(ficheros).toContain('obras.ts');
+    expect(ficheros).toContain(join('lib', 'obras.ts'));
+    expect(ficheros.some((f) => f.startsWith(join('pages', 'obra')))).toBe(true);
     const infractores: string[] = [];
     for (const fichero of ficheros) {
+      if (fichero === 'content.config.ts') continue;
       const codigo = await readFile(join(directorio, fichero), 'utf8');
-      for (const ruta of importados(codigo)) if (/(^|\/)tools\/lib\//.test(ruta)) infractores.push(`${fichero} → ${ruta}`);
+      for (const ruta of importados(codigo)) if (/(^|\/)tools\//.test(ruta)) infractores.push(`${fichero} → ${ruta}`);
     }
     expect(infractores).toEqual([]);
   });
@@ -525,10 +571,15 @@ describe('24.1 — las dependencias que la historia prohíbe', () => {
 
   it('tools/lib/posiciones.ts localiza solo con `localizar` y lee con los lectores del cotejo', async () => {
     const codigo = sinComentarios(await readFile(join(RAIZ_DEL_REPO, 'tools', 'lib', 'posiciones.ts'), 'utf8'));
-    for (const prohibido of ['indexOf', 'includes(', 'search(', 'match(']) expect(codigo).not.toContain(prohibido);
+    const prohibidos = ['indexOf', 'IndexOf', 'includes(', 'search(', 'match(', 'startsWith(', 'endsWith(', '.test(', '.exec('];
+    for (const prohibido of prohibidos) expect(codigo, prohibido).not.toContain(prohibido);
     const deCorpus = /import\s*\{([^}]*)\}\s*from\s*'\.\/corpus\.ts'/.exec(codigo)?.[1] ?? '';
     const deCotejo = /import\s*\{([^}]*)\}\s*from\s*'\.\/cotejo\.ts'/.exec(codigo)?.[1] ?? '';
-    for (const nombre of ['leerCitas', 'leerDocumentosDeFuente']) expect(deCorpus).toMatch(new RegExp(`\\b${nombre}\\b`));
+    // De `corpus.ts`, solo los lectores: ninguna de sus funciones que escriben en `corpus/`.
+    const nombres = (lista: string) => lista.split(',').map((n) => n.trim()).filter((n) => n !== '').sort();
+    expect(nombres(deCorpus)).toEqual(['leerCitas', 'leerDocumentosDeFuente', 'rutasDelCorpus']);
     for (const nombre of ['documentosDeCita', 'localizar']) expect(deCotejo).toMatch(new RegExp(`\\b${nombre}\\b`));
+    // Y nada del sistema de ficheros por su cuenta: todo lo que importa es de `./`.
+    expect(importados(codigo).filter((r) => !r.startsWith('./') && !r.startsWith('../../src/lib/'))).toEqual([]);
   });
 });

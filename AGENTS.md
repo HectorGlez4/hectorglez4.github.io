@@ -729,8 +729,13 @@ natural (`compararDocumentos`: trozos por `-`, arábigos y romanos canónicos po
 palabra antes que el número —«proemio» antes que «i»— y el nombre corto antes que sus páginas),
 la posición y el slug; al final, por slug, las Citas sin Fuente o sin aparición (las del censo).
 La página lo toma de `citasDeLasObras` de `src/lib/publicado.ts`. El índice de subpáginas de la
-Fuente queda aplazado, y no hay detector de desorden: una página cuyo slug no ordena bien
-(«mi» se lee 1001) se corregirá con ese índice. Ningún `src/lib/` importa de `tools/lib/`.
+Fuente queda aplazado, y no hay detector de desorden: las páginas cuyo slug no ordena bien se
+corregirán con ese índice. Son las que se nombran por capítulo y no por número (*Novelas
+ejemplares*: «la-gitanilla», «el-coloquio-de-los-perros», por orden alfabético), las de
+ordinal escrito («jornada-primera») o de cifra y letra («10a»), que se leen como palabras, una
+palabra que es romano canónico («mi» se lee 1001) y el final del libro —«epilogo», «notas»—,
+que como palabra va antes que «i». Ningún fichero de `src/` importa de `tools/lib/`, salvo
+ese cargador.
 
 ### El aviso, la serie y la congelación (Historia 22.8)
 

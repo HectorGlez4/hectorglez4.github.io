@@ -271,6 +271,9 @@ const biografias = defineCollection({
   }),
 });
 
+/** En desarrollo, cuánto se espera tras el último cambio antes de volver a situar las Citas. */
+const ESPERA_TRAS_CAMBIO_MS = 250;
+
 /*
  * Las posiciones — Historia 24.1, AD-23, AD-25.
  *
@@ -289,26 +292,46 @@ const biografias = defineCollection({
  */
 const cargadorDePosiciones: Loader = {
   name: 'posiciones',
-  load: async ({ store, parseData, config, watcher }) => {
+  load: async ({ store, parseData, config, watcher, logger }) => {
     const raiz = join(fileURLToPath(config.root), 'corpus');
     const vigiladas = [join(raiz, 'citas'), join(raiz, 'fuentes')];
 
     async function cargar(): Promise<void> {
       const posiciones = await leerPosicionesDelCorpus(raiz);
-      store.clear();
+      const entradas: { id: string; data: Record<string, unknown> }[] = [];
       for (const [slug, apariciones] of posiciones) {
-        const data = await parseData({ id: slug, data: { apariciones } });
-        store.set({ id: slug, data });
+        entradas.push({ id: slug, data: await parseData({ id: slug, data: { apariciones } }) });
       }
+      // El almacén se vacía y se llena de un golpe, sin ninguna espera en medio: nadie lo lee a
+      // medias, y una lectura que falle antes deja intacto el anterior.
+      store.clear();
+      for (const entrada of entradas) store.set(entrada);
     }
 
     await cargar();
 
-    // En desarrollo, una Cita o un documento que cambian se vuelven a situar sin reiniciar.
+    /*
+     * En desarrollo, una Cita o un documento que cambian se vuelven a situar sin reiniciar. Cada
+     * relectura recorre el Corpus y sus documentos enteros, así que una ráfaga de cambios —un
+     * `git checkout`, una tanda de aprobaciones— se resuelve en una sola, nunca hay dos a la vez,
+     * y la que falla —un frontmatter a medio escribir— se dice y conserva lo anterior en vez de
+     * tumbar el servidor.
+     */
     if (watcher !== undefined) {
       for (const carpeta of vigiladas) watcher.add(carpeta);
+      let pendiente: ReturnType<typeof setTimeout> | undefined;
+      let enCurso: Promise<void> = Promise.resolve();
+      const recargar = () => {
+        enCurso = enCurso.then(cargar).catch((error: unknown) => {
+          logger.error(
+            `No se pudieron volver a situar las Citas: ${error instanceof Error ? error.message : String(error)}`,
+          );
+        });
+      };
       const alCambiar = (ruta: string) => {
-        if (vigiladas.some((carpeta) => ruta.startsWith(carpeta))) void cargar();
+        if (!vigiladas.some((carpeta) => ruta.startsWith(carpeta))) return;
+        clearTimeout(pendiente);
+        pendiente = setTimeout(recargar, ESPERA_TRAS_CAMBIO_MS);
       };
       watcher.on('add', alCambiar);
       watcher.on('change', alCambiar);

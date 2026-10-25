@@ -141,6 +141,7 @@ async function anunciadas(proyecto: string): Promise<string[]> {
  * misma llamada que hace el armazón. Se compara con lo que calcula la integración de disco.
  */
 const SONDA = `---
+import { getCollection } from 'astro:content';
 import { conjuntoPublicable, obrasPublicadas, rutasIndexables } from '../lib/publicado.ts';
 import { rutaDeLaObra } from '../lib/obras.ts';
 const conjunto = await conjuntoPublicable();
@@ -148,10 +149,12 @@ const datos = {
   publicadas: obrasPublicadas(conjunto).map((o) => rutaDeLaObra(o)),
   indexables: rutasIndexables(conjunto).filter((r) => r.startsWith('/obra/')),
 };
+// Historia 24.1 — la colección \`posiciones\` tal y como la deja el cargador.
+const posiciones = Object.fromEntries((await getCollection('posiciones')).map((e) => [e.id, e.data]));
 ---
 <!doctype html>
 <html lang="es"><head><meta charset="utf-8" /><title>Sonda</title></head>
-<body><pre id="obras">{JSON.stringify(datos)}</pre></body></html>
+<body><pre id="obras">{JSON.stringify(datos)}</pre><pre id="posiciones">{JSON.stringify(posiciones)}</pre></body></html>
 `;
 
 /** Una ruta como literal de expresión regular: `/obra/…/` lleva barras y puede llevar puntos. */
@@ -346,6 +349,34 @@ describe('Historia 22.4 — la Página de Obra, construida', () => {
     const enlaces = [...listado.matchAll(/href="([^"]+)"/g)].map((m) => m[1]);
     expect(enlaces).toEqual(['/cita/seneca-cartas-2/', '/cita/seneca-cartas-1/', '/cita/seneca-cartas-0/']);
     expect(listado).not.toContain('class="autor"');
+    // Indexable también: ninguna línea nombra el orden, y las Tarjetas no llevan el título de la Obra.
+    expect(pagina).toMatch(/<\/header>\s*<ul class="listado"/);
+    expect(listado).not.toContain('Cartas a Lucilio');
+  });
+
+  it('24.1 — la colección `posiciones`, leída tras construir: el slug del frontmatter, sin texto', async () => {
+    const sonda = await html(proyecto, '/sonda/');
+    const posiciones = JSON.parse(
+      (/<pre id="posiciones">([\s\S]*?)<\/pre>/.exec(sonda)?.[1] ?? '{}').replace(/&quot;/g, '"'),
+    ) as Record<string, { apariciones: { documento: string; posicion: number }[] }>;
+    // La clave es el slug (`seneca-cartas-2`), no el nombre del fichero (`seneca--cartas-2.md`).
+    const slugs = Object.values(corpus(1)).flatMap((f) => {
+      const declarado = /^slug: (.+)$/m.exec(f)?.[1];
+      return declarado === undefined ? [] : [JSON.parse(declarado) as string];
+    });
+    expect(slugs).toHaveLength(65);
+    expect(Object.keys(posiciones).sort()).toEqual([...slugs].sort());
+    for (const [slug, entrada] of Object.entries(posiciones)) {
+      expect(Object.keys(entrada), slug).toEqual(['apariciones']);
+      expect(entrada.apariciones, slug).toHaveLength(1);
+      for (const aparicion of entrada.apariciones) expect(Object.keys(aparicion).sort(), slug).toEqual(['documento', 'posicion']);
+    }
+    const cartas = [2, 1, 0].map((i) => posiciones[`seneca-cartas-${i}`].apariciones[0]);
+    expect(cartas.map((a) => a.documento)).toEqual(Array(3).fill('wikisource-es--cartas-a-lucilio'));
+    expect(cartas.map((a) => a.posicion)).toEqual([...cartas.map((a) => a.posicion)].sort((a, b) => a - b));
+    // Nada del texto de ninguna Cita.
+    expect(sonda).not.toContain('nadie se hace sabio');
+    expect(sonda).not.toContain('la vida es larga');
   });
 
   /*
@@ -366,6 +397,7 @@ describe('Historia 22.4 — la Página de Obra, construida', () => {
       const listado = /<ul class="listado"[^>]*>([\s\S]*?)<\/ul>/.exec(pagina)?.[1] ?? '';
       expect([...listado.matchAll(/href="([^"]+)"/g)].map((m) => m[1]), ruta).toEqual(citas);
       expect(listado, ruta).not.toContain('class="autor"');
+      expect(listado, ruta).not.toContain('Sobre la brevedad de la vida');
       // Ninguna línea que nombre el orden: de la Cabecera al Listado no hay nada.
       expect(pagina, ruta).toMatch(/<\/header>\s*<ul class="listado"/);
       const lista = jsonLd(pagina).find((b) => b['@type'] === 'CollectionPage')?.mainEntity as {
