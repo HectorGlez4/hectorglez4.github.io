@@ -2917,12 +2917,13 @@ function analizarSenales(nombre: string, contenido: string): SenalExterna[] {
         );
       }
     }
-    const { fecha, tipo, origen, destino, marcado, compartido, retira, nota } = campos as Record<string, unknown> & {
-      fecha: string;
-      tipo: string;
-      origen: string;
-      destino: string;
-    };
+    const { fecha, tipo, origen, destino, marcado, compartido, retira, nota } =
+      campos as Record<string, unknown> & {
+        fecha: string;
+        tipo: string;
+        origen: string;
+        destino: string;
+      };
     if (!esJornada(fecha)) {
       throw new Error(`${deLaEntrada} tiene «fecha: ${fecha}», que no es AAAA-MM-DD del calendario.`);
     }
@@ -2949,11 +2950,12 @@ function analizarSenales(nombre: string, contenido: string): SenalExterna[] {
     }
     // Revisión de la 23.6: la orden lo escribe solo en una ajena, porque ?via= es la marca de un
     // visitante y una propia que la lleve se rechaza. Una entrada a mano no cuela lo que la orden
-    // rechaza, como con el origen.
-    if (compartido === true && tipo !== 'ajena') {
+    // rechaza, como con el origen, y una propia no lleva el campo ni en falso: lo que dicen la
+    // cabecera del registro y AGENTS.md es que una propia con el campo no se deja leer.
+    if (compartido !== undefined && tipo !== 'ajena') {
       throw new Error(
-        `${deLaEntrada} tiene «compartido: true» en una ${tipo}: ?via= es la marca de un visitante, ` +
-          'y solo una ajena puede copiar un enlace compartido.',
+        `${deLaEntrada} tiene «compartido: ${String(compartido)}» en una ${tipo}: ?via= es la marca ` +
+          'de un visitante, y solo una ajena puede copiar un enlace compartido.',
       );
     }
     if (retira !== undefined && (typeof retira !== 'string' || !esJornada(retira))) {

@@ -609,8 +609,8 @@ export interface SenalExterna {
    * llevaba `?via=<destino>`: alguien copió el enlace de lo que un visitante compartió con un botón
    * del sitio, y la visita que traiga llegará al receptor con su Marca de difusión. Una propia con
    * `?via=` se rechaza, porque esa marca es de un visitante y no de una cuenta, y una propia a mano
-   * con `compartido: true` no se deja leer. Sin marca, el campo no se escribe; una entrada a mano
-   * con `false` se lee como sin marca.
+   * con el campo —cierto o falso— no se deja leer. Sin marca, el campo no se escribe; una ajena a
+   * mano con `false` se lee como sin marca.
    */
   compartido?: boolean;
   /**

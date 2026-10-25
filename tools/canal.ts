@@ -40,10 +40,9 @@
  * que no existe, o más de una distinta; una marca ?via= en una propia, o en una ajena de un
  * destino que no existe, o más de una distinta; una fecha futura; un --retira sin señal
  * igual viva en esa fecha; o un registro que no se deja leer. Código 2 si falla la forma de
- * la invocación:
- * sin --tipo o con un tipo que no es propia ni ajena; una bandera desconocida o repetida;
- * argumentos de menos o de más; un --fecha o un --retira sin forma de jornada; una --nota
- * vacía; --tipo o --retira fuera de senal. Ninguno de los dos escribe nada.
+ * la invocación: sin --tipo o con un tipo que no es propia ni ajena; una bandera desconocida
+ * o repetida; argumentos de menos o de más; un --fecha o un --retira sin forma de jornada;
+ * una --nota vacía; --tipo o --retira fuera de senal. Ninguno de los dos escribe nada.
  */
 
 import { esJornada } from '../src/lib/citaDelDia.ts';

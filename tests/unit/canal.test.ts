@@ -1429,6 +1429,15 @@ describe('Historia 23.6 — la Marca de difusión en el canal', () => {
     ).toBe(1);
     expect(salida.join('')).toMatch(VISITANTE);
     expect(existsSync(join(corpus, FICHERO_DE_PUBLICACIONES))).toBe(false);
+
+    // Con un registro que ya tiene una entrada, tampoco lo toca: queda byte a byte como estaba.
+    expect(await principal(['--corpus', corpus, 'anotar', 'facebook', 'foto', '/cita/cita-0/'], AHORA)).toBe(0);
+    const fichero = join(corpus, FICHERO_DE_PUBLICACIONES);
+    const antes = await readFile(fichero, 'utf8');
+    expect(
+      await principal(['--corpus', corpus, 'anotar', 'facebook', 'foto', '/cita/cita-0/?de=facebook&via=whatsapp'], AHORA),
+    ).toBe(1);
+    expect(await readFile(fichero, 'utf8')).toBe(antes);
   });
 
   it('la orden: `senal --tipo propia` con `?via=` sale con 1, con el mismo motivo, y no escribe', async () => {
@@ -1439,6 +1448,15 @@ describe('Historia 23.6 — la Marca de difusión en el canal', () => {
     ).toBe(1);
     expect(salida.join('')).toMatch(VISITANTE);
     expect(existsSync(join(corpus, FICHERO_DE_SENALES))).toBe(false);
+
+    // Con un registro que ya tiene una entrada, tampoco lo toca: queda byte a byte como estaba.
+    expect(await principal(['--corpus', corpus, 'senal', 'https://linktr.ee/x', '/', '--tipo', 'propia'], AHORA)).toBe(0);
+    const fichero = join(corpus, FICHERO_DE_SENALES);
+    const antes = await readFile(fichero, 'utf8');
+    expect(
+      await principal(['--corpus', corpus, 'senal', 'https://linktr.ee/x', '/?via=whatsapp', '--tipo', 'propia'], AHORA),
+    ).toBe(1);
+    expect(await readFile(fichero, 'utf8')).toBe(antes);
   });
 
   it('la orden: `senal --tipo ajena` con `?via=whatsapp` sale con 0, anota `compartido: true` y la consulta lo avisa', async () => {
@@ -1593,13 +1611,18 @@ describe('Historia 23.6 — la Marca de difusión en el canal', () => {
     }
   });
 
-  it('una propia a mano con `compartido: true` no se deja leer: la orden sale con 1 y no escribe', async () => {
+  // Ni cierto ni falso: una propia con el campo no se deja leer, como dicen la cabecera del
+  // registro y AGENTS.md (revisión de la 23.6).
+  it.each([true, false])('una propia a mano con `compartido: %s` no se deja leer: la orden sale con 1 y no escribe', async (valor) => {
     const corpus = await corpusConCitas(MIN_CITAS_POR_TEMA);
     const fichero = join(corpus, FICHERO_DE_SENALES);
     const roto =
-      'senales:\n  - fecha: "2026-10-08"\n    tipo: "propia"\n    origen: "https://linktr.ee/x"\n    destino: "/"\n    compartido: true\n';
+      'senales:\n  - fecha: "2026-10-08"\n    tipo: "propia"\n    origen: "https://linktr.ee/x"\n    destino: "/"\n' +
+      `    compartido: ${valor}\n`;
     await writeFile(fichero, roto, 'utf8');
-    await expect(leerSenalesExternas(rutasDelCorpus(corpus))).rejects.toThrow(/entrada 1 .*«compartido: true» en una propia/);
+    await expect(leerSenalesExternas(rutasDelCorpus(corpus))).rejects.toThrow(
+      new RegExp(`entrada 1 .*«compartido: ${valor}» en una propia`),
+    );
 
     const salida = capturarSalida();
     expect(await principal(['--corpus', corpus, 'senal', 'https://b.example/', '/', '--tipo', 'ajena'], AHORA)).toBe(1);
