@@ -2,7 +2,8 @@
 title: 'Historia 23.9 — Toda Obra cuenta sus vistas, se indexe o no'
 type: 'feature'
 created: '2026-10-25'
-status: 'ready-for-dev'
+status: 'done'
+baseline_revision: 'b51311c2da5367470efb2e8925dca3f62c2079c6'
 review_loop_iteration: 0
 followup_review_recommended: false
 context:
@@ -103,6 +104,17 @@ deferred:
 
 ## Review Triage Log
 
+### 2026-10-25 — Review pass
+- intent_gap: 0
+- bad_spec: 0
+- patch: 0
+- defer: 0
+- reject: 0
+- addressed_findings:
+  - none
+
+Las cinco capas de revisión son externas en este bucle (v8-ralph) y la invocación no traía ninguna sección «Hallazgos externos»: esta pasada no tiene hallazgos que clasificar. La revisión independiente llega después.
+
 ## Design Notes
 
 **Por qué un campo propio y no una segunda `vista`.** `vista` sigue siendo «sí y solo si producto» (20.1, y el criterio de la 22.4 que esta historia sustituye solo en lo que dice de la Obra). La vista de Obra sale con otra regla —la página 1, se indexe o no— y lleva una marca; meterla en `vista` haría que la Obra no indexable la perdiera, o que `vista-de-superficie` dejara de ser «solo producto».
@@ -138,7 +150,41 @@ return { ...consecuenciasDelCaracter(caracter), vistas: [...vistas, superficie.v
 
 ## Auto Run Result
 
-Status: ready-for-dev
+Status: done
 Blocking condition: ninguna.
 
-Planificación terminada y detenida tras planificar, como pide la invocación. La spec cumple el estándar «Ready for Development»: cada tarea nombra su fichero y su acción, los criterios van en Given/When/Then y observan `dist/`, la construcción y el receptor, y no quedan huecos de intención. Diferido para Héctor (en el `deferred` del frontmatter): marcar en `epics.md` el criterio de la Historia 22.4 como «(sustituido en la v8 por la Historia 23.9)» — pendiente de Héctor (bmad-create-epics-and-stories).
+**Qué se hizo.** La página 1 de **toda** Obra emite ahora `vista-de-obra`, se indexe o no, con la marca `indexable` o `no-indexable`. `src/lib/superficies.ts` lo declara en un campo propio de la Página de Obra, `vistaConMarca` (el campo `vista` ya no admite la vista de Obra: `Exclude<EventoDeVista, …>`), y `consecuenciasDe` da para la página 1 de una Obra `vistas: [vista-de-superficie, vista-de-obra]` y `marcaDeObra: indexable` si es producto, `vistas: [vista-de-obra]` y `marcaDeObra: no-indexable` si es servicio por contenido, y para las 2+ y toda otra ruta ni la vista de Obra ni la clave; la marca sale de la misma `causaDelServicio` que el carácter, así que sigue a la lista declarada (FR-52 y congelación) y sin lista rompe como antes. Los dos valores salen de `MARCAS_DE_OBRA` por desestructuración, nunca como cadena. `Armazon.astro` escribe la marca en el `<html>` con el nombre de `ATRIBUTO_DE_INDEXABLE` (`data-indexable`, nuevo en `src/lib/medicion.ts`), solo si la hay y también sin punto final. El fichero de medición añade `vista-de-obra` a `EVENTOS_DE_VISTA` y a `EVENTOS_DEL_GUION` (ya emite todo el vocabulario), da a `indexable` la fuente 6 —el atributo, leído una vez al activarse junto con `data-vistas`— y lo coteja con `MARCAS_DE_OBRA` por la tabla. La comprobación de `astro:build:done` (`tools/lib/indexables.ts`) lee también la marca (`marcasDePagina`) y nombra en la misma lista sus cuatro clases de desajuste; la línea de registro (`informeDeCoincidencia`) y el titular la nombran. SM-8 no cambia: sus consultas siguen filtrando las dos vistas de siempre.
+
+**Ficheros.**
+- `src/lib/medicion.ts` — la vista de Obra en `EVENTOS_DE_VISTA` y `EVENTOS_DEL_GUION`; `ATRIBUTO_DE_INDEXABLE`; `indexable: 6` en `FUENTE_EN_EL_GUION`; el fichero lee la marca del `<html>` (variable `H`, `d` para el `<html>` en `a`); docblocks al día.
+- `src/lib/superficies.ts` — `vistaConMarca` en `Superficie` y en la Página de Obra; `vista` sin la de Obra; `marcaDeObra?` en `ConsecuenciasDeRuta`; `consecuenciasDe` con la vista con marca; docblocks.
+- `src/components/Armazon.astro` — el atributo de la marca en el `<html>`, por propagación de un objeto con la clave de la constante.
+- `tools/lib/indexables.ts` — `marcaDeObra?` en `PaginaIndexable` y en `marcasDePagina`; las cuatro clases en `desajustesDeIndexables`; titular e `informeDeCoincidencia`.
+- `integraciones/indexables.ts` — la línea de registro por `informeDeCoincidencia`; docblock.
+- `src/lib/umbrales.ts` — la medida de la 23.9 en el comentario de `MAX_BYTES_GUION_DE_MEDICION` (3.644 bytes; el tope de 3.730 no se mueve).
+- `tests/unit/ayuda/medicion.ts` — opción `indexable`: el `documentElement` simulado ofrece la marca por `getAttribute`, como el fichero la lee.
+- `tests/unit/medicion.test.ts` — `describe` de la 23.9 en el entorno simulado (una prueba por fila de la matriz y la guarda de islas) y sobre `dist/` (marca exacta por ruta con y sin punto final, la de cada página 1 de Obra frente a su `noindex`, la Obra no indexable con vista y fichero, SM-8 en `DESPLIEGUE.md`); 2.9, 23.5, 20.1/23.1 de la Obra, sin punto final y la guarda de cadena suelta al día.
+- `tests/unit/vocabulario.test.ts` — `PENDIENTES` vacía; la marca del `<html>` en `Entrada` y `producir`; escenarios de cada marca, ajenas y ninguna solo en el evento que declara `indexable`, con su prueba; «once eventos».
+- `tests/unit/superficies.test.ts` — la tabla de la 23.1 con vistas y marca; carácter sin cambios; la marca sigue a la lista; la vista con marca solo en una superficie `indexablePorContenido`.
+- `tests/unit/obra-indexable.test.ts` — `consecuenciasDe` exacto con vistas y marca; `marcasDePagina` con marca presente, ausente, ajena y fuera del `<html>`; las cuatro clases y su silencio; registro y titular.
+- `tests/unit/obra-pagina.test.ts` — vistas y marca de CARTAS, de las cuatro no indexables y de la página 2; la congelación (CARTAS `no-indexable`, solo la de Obra); la copia con `Armazon.astro` que siempre marca `indexable` rompe el build nombrando la Obra; las dos lecturas de la línea de registro.
+- `tests/e2e/receptor.spec.ts` — `seneca--dos` y `seneca--larga` pasan a «Cartas a Lucilio»; la Obra no indexable sale de la lista «sin vista»; `describe` de la 23.9 con dos pruebas.
+- `DESPLIEGUE.md` §3 — párrafo de la vista de Obra; fuera los «hasta la 23.9» de la Lectura, la Salida y el comentario de SM-4; la consulta de vistas, lecturas y salidas de Obra por marca y jornada (probada con `sqlite3` sobre una tabla de muestra); SM-8 con el tercer evento, que no entra.
+- `AGENTS.md` — la convención de la medición, el párrafo de la Página de Obra y la comprobación de `astro:build:done`.
+
+**Revisión.** 0 parches, 0 diferidos, 0 rechazados en esta pasada (capas externas sin hallazgos todavía). Recomendación de revisión de seguimiento: `false` (parches: 0 altos, 0 medios, 0 bajos; puntuación 0).
+
+**Verificación.**
+- `npx astro check` — 0 errores, 0 avisos (20 sugerencias ajenas a la historia).
+- `npx vitest run` por fichero: `medicion` (491), `obra-pagina` (53) y, en una invocación, `vocabulario`, `superficies`, `obra-indexable`, `congelacion-de-obras`, `huella`, `receptor`, `espinas-de-ux`, `ingreso-construido`, `publicable-y-alcanzable` y `medicion-orden` (10 ficheros, 407): 12 ficheros, 951 pruebas en verde. `git diff b51311c2da5367470efb2e8925dca3f62c2079c6..HEAD -- src/lib/vocabulario.ts medicion/` vacío; ningún `caracter`, `reconoce`, `noPublicableEn` ni `indexablePorContenido` cambia.
+- `npm test` (con `correr.sh`) — 131 ficheros, 5.918 pruebas en verde.
+- `npx playwright test tests/e2e/receptor.spec.ts tests/e2e/receptor-local.spec.ts tests/e2e/origen.spec.ts tests/e2e/busqueda.spec.ts tests/e2e/pagina-404.spec.ts --project=escritorio` (con el `webServer`) — 92 en verde y 2 saltadas ajenas (el prerender de la 23.1 y la 3.1 del índice); las dos de la 23.9 en verde. Puertos 4321, 4399, 4400, 4402 y 8787 libres al terminar.
+- `npx tsx -e` con `guionDeMedicion` y el punto final de producción — 3.644 bytes ≤ 3.730 (3.645 con la barra final; 3.612 con el de las pruebas).
+- Comprobación a mano: `ARRANQUE_DE_MEDICION`, `MAX_BYTES_DE_GUION`, `src/lib/vocabulario.ts`, `medicion/` y `corpus/` sin cambios.
+- Auditoría de la matriz: Obra indexable, no indexable (lectura por tiempo, por interacción y la salida detrás), página 2+, llegada con `?de=`/`?via=`, marca ajena o ausente (cuatro casos), marca con otra vista, caché y prerender tienen su prueba en el entorno simulado de `tests/unit/medicion.test.ts`; la congelación, en la construcción de la 22.8 de `obra-pagina` y en la marca que sigue a la lista de `superficies`; el build con la marca falsa, en «lo que rompe el build» de `obra-pagina` y en las cuatro clases puras de `obra-indexable`; las dos primeras filas, además, en Playwright. Todas corrieron y pasaron.
+
+**Riesgos que quedan.**
+- El fichero queda a 86 bytes de su tope: la próxima historia que le añada algo lo sube en su diff, con la medida.
+- Una isla que pidiera `vista-de-obra` por `__medir` saldría con la marca del `<html>` (no con las Marcas de llegada): ninguna lo hace y una prueba de `tests/unit/medicion.test.ts` lo vigila sobre el texto de las fuentes.
+- La consulta de Obra por marca reparte lecturas y salidas con la marca de las vistas de su ruta y jornada; una ruta que cambia de indexabilidad a mitad de jornada sale como `cambio`, y leer la familia Obra desde `tools/` es de la 23.10.
+- Diferido para Héctor (en el `deferred` del frontmatter): marcar en `epics.md` el criterio de la Historia 22.4 como «(sustituido en la v8 por la Historia 23.9)» — pendiente de Héctor (bmad-create-epics-and-stories).
