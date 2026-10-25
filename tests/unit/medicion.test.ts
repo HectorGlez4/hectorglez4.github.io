@@ -2060,11 +2060,12 @@ describe('Historia 20.1 y 23.1 — las vistas salen de la declaración, al `data
 });
 
 /**
- * El valor de la marca de Obra del `<html>`, o `undefined` si la página no la lleva: lo lee el mismo
- * `marcasDePagina` que la comprobación de `astro:build:done`, no una copia de su expresión.
+ * El valor de la marca de Obra del `<html>`, o `undefined` si la página no la lleva, y su `noindex`:
+ * los lee el mismo `marcasDePagina` que la comprobación de `astro:build:done`, no una copia de sus
+ * expresiones.
  */
 const marcaDeObraDe = (html: string): string | undefined => marcasDePagina(html).marcaDeObra;
-const NOINDEX = /<meta name="robots" content="noindex/;
+const llevaNoindex = (html: string): boolean => marcasDePagina(html).noindex;
 
 describe('Historia 23.9 — la marca de Obra, en `dist/`', () => {
   beforeEach(() => {
@@ -2087,7 +2088,7 @@ describe('Historia 23.9 — la marca de Obra, en `dist/`', () => {
         const marca = marcaDeObraDe(html);
         expect(marca, ruta).toBe(consecuenciasDe(ruta).marcaDeObra);
         // Y, en cada página que la lleva, dice lo mismo que su `noindex` (AD-17).
-        if (marca !== undefined) expect(NOINDEX.test(html), ruta).toBe(marca === noIndexable);
+        if (marca !== undefined) expect(llevaNoindex(html), ruta).toBe(marca === noIndexable);
       }
     },
     240_000,
@@ -2102,10 +2103,10 @@ describe('Historia 23.9 — la marca de Obra, en `dist/`', () => {
     const [indexable, noIndexable] = MARCAS_DE_OBRA;
     const primera = await leer(OBRAS[0]);
     expect(marcaDeObraDe(primera)).toBe(indexable);
-    expect(primera).not.toMatch(NOINDEX);
+    expect(llevaNoindex(primera)).toBe(false);
     const segunda = await leer(OBRAS[1]);
     expect(marcaDeObraDe(segunda)).toBe(noIndexable);
-    expect(segunda).toMatch(NOINDEX);
+    expect(llevaNoindex(segunda)).toBe(true);
     expect(vistasDe(segunda)).toBe(EVENTOS.vistaDeObra);
     // La página 2 de la Obra: ni marca ni vista.
     const paginaDos = await leer(OBRAS[2]);
@@ -2124,9 +2125,12 @@ describe('Historia 23.9 — la marca de Obra, en `dist/`', () => {
     const despliegue = readFileSync(resolve(RAIZ, 'DESPLIEGUE.md'), 'utf8');
     const inicio = despliegue.indexOf('### Consultar el canal propio — SM-8');
     expect(inicio).toBeGreaterThan(-1);
-    const fin = despliegue.indexOf('\n### ', inicio + 1);
-    const seccion = despliegue.slice(inicio, fin === -1 ? undefined : fin);
-    const filtros = [...seccion.matchAll(/evento IN \(([^)]*)\)/g)].map((m) => m[1]);
+    // Hasta el siguiente encabezado de nivel 2 o 3, sea cual sea: los comentarios de las órdenes
+    // (`# …`) no lo son.
+    const fin = despliegue.slice(inicio + 1).search(/\n#{2,3} /u);
+    const seccion = despliegue.slice(inicio, fin === -1 ? undefined : inicio + 1 + fin);
+    // Los filtros que cuentan vistas: uno de acciones u otros eventos no es de esta regla.
+    const filtros = [...seccion.matchAll(/evento IN \(([^)]*)\)/g)].map((m) => m[1]).filter((f) => f.includes("'vista-"));
     expect(filtros.length).toBeGreaterThanOrEqual(2);
     for (const filtro of filtros) {
       expect(filtro).toContain(`'${EVENTOS.vistaDeCita}'`);
@@ -2840,10 +2844,12 @@ describe('Historia 23.7 — toda salida interna de `dist/` dice su zona', () => 
     expect(enlaces).toBeGreaterThan(paginas * 3);
     /*
      * Y entre las juzgadas están las que no tendrán lectura nunca: las páginas 2+ —también la de la
-     * Obra—, `/buscar/` y el 404. La página 1 de la Obra que no se indexa no se nombra: desde la 23.9
-     * tiene vista y lectura y entra como las demás (lo afirma «la marca de Obra, en `dist/`»).
+     * Obra—, `/buscar/` y el 404. La página 1 de toda Obra, en cambio, no está entre ellas: desde la
+     * 23.9 la que no se indexa tiene vista y lectura, y sus enlaces se juzgan como superficie con
+     * lectura, igual que los de la indexable.
      */
     for (const ruta of [...PAGINAS_2, OBRAS[2], '/buscar/', '/404']) expect([...sinLectura], ruta).toContain(ruta);
+    for (const ruta of [OBRAS[0], OBRAS[1]]) expect([...sinLectura], ruta).not.toContain(ruta);
   }, 240_000);
 
   /**

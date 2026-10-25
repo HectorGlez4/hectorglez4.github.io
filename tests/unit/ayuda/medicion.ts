@@ -146,7 +146,8 @@ export const ORIGEN_DEL_SANDBOX = 'https://ejemplo.invalid';
  * atributo `ATRIBUTO_DE_INDEXABLE` con el valor que se dé, tal cual —el entorno no lo coteja con
  * nada, que es lo que tiene que hacer el fichero—, y sin él no lo lleva. El `documentElement` lo
  * ofrece por `getAttribute`, como el navegador, junto con `data-vistas`; el `dataset` sale de los
- * mismos atributos, así que los dos caminos dicen lo mismo.
+ * mismos atributos —todo `data-*`, en camello, como en el navegador—, así que los dos caminos dicen
+ * lo mismo.
  */
 export function medicionEnUnSandbox(
   opciones: {
@@ -217,10 +218,18 @@ export function medicionEnUnSandbox(
   const delHtml = new Map<string, string>();
   if (opciones.vistas !== undefined) delHtml.set('data-vistas', opciones.vistas);
   if (opciones.indexable !== undefined) delHtml.set(ATRIBUTO_DE_INDEXABLE, opciones.indexable);
-  const vistasDelHtml = delHtml.get('data-vistas');
+  /*
+   * El `dataset`, como lo da el navegador: cada `data-*` del `<html>`, sin el prefijo y con el resto
+   * en camello (`data-vistas` → `vistas`, `data-indexable` → `indexable`).
+   */
+  const dataset = Object.fromEntries(
+    [...delHtml]
+      .filter(([nombre]) => nombre.startsWith('data-'))
+      .map(([nombre, valor]) => [nombre.slice('data-'.length).replace(/-([a-z])/gu, (_, letra: string) => letra.toUpperCase()), valor]),
+  );
   const documento = {
     documentElement: {
-      dataset: vistasDelHtml === undefined ? {} : { vistas: vistasDelHtml },
+      dataset,
       getAttribute: (nombre: string) => delHtml.get(nombre) ?? null,
     },
     prerendering: opciones.prerendering ?? false,

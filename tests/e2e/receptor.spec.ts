@@ -431,6 +431,7 @@ test.describe('Historia 23.1 — cada superficie descarga exactamente el guion d
     ['la Página de Cita', RUTA_CITA],
     ['la portada', '/'],
     ['la Página de Autor', rutaDeAutor('seneca')],
+    ['la Obra que se indexa', OBRA_INDEXABLE],
     ['la Obra que no se indexa', OBRA_NO_INDEXABLE],
     ['la búsqueda', RUTA_BUSCAR],
     ['una ruta que no existe (404)', '/no-existe-esta-ruta/'],
@@ -497,6 +498,8 @@ test.describe('Historia 23.1 — las vistas que llegan son las que declara cada 
   for (const [nombre, ruta] of [
     ['la portada', '/'],
     ['la página 1 de Autor', rutaDeAutor('seneca')],
+    // Historia 23.9 — y la Obra que se indexa, que emite además la de Obra (abajo, en la 23.9).
+    ['la página 1 de la Obra que se indexa', OBRA_INDEXABLE],
   ] as const) {
     test(`${nombre} emite una vista de superficie, con su ruta, y ninguna de Cita`, async ({ page }) => {
       await page.goto(`${SITIO}${ruta}`, { waitUntil: 'networkidle' });
@@ -1782,6 +1785,10 @@ test.describe('Historia 23.8 — una búsqueda cuenta una vez, cuando se asienta
  * el receptor de la prueba. Cada fila de la matriz la recorre el entorno simulado de
  * `tests/unit/medicion.test.ts`; aquí se mira que el fichero servido lee la marca del `<html>` que
  * escribió el build y la envía, y que la Obra que no se indexa gana su lectura y su salida.
+ *
+ * El reloj de la página se finge y se **pausa antes de navegar**, como en la 23.5: lo que se afirma
+ * antes del gesto —solo las vistas, sin lectura— no depende de que el sitio tarde menos de 8 s en
+ * llegar ahí, y la lectura sale solo del `pointerdown`.
  */
 test.describe('Historia 23.9 — toda Obra cuenta sus vistas, se indexe o no', () => {
   const llegadas = (nombre: string) => recibidos.filter((r) => r?.evento === nombre);
@@ -1790,12 +1797,28 @@ test.describe('Historia 23.9 — toda Obra cuenta sus vistas, se indexe o no', (
   const AUTOR_DE_LA_CABECERA = `.cabecera-de-obra [${ATRIBUTO_DE_ZONA}="atribucion"] a`;
   /** El `noindex` de la página: la premisa de cada prueba, que depende de los umbrales de FR-52. */
   const NOINDEX = 'meta[name="robots"][content^="noindex"]';
+  const INICIO = new Date('2026-10-25T10:00:00Z');
 
-  test('la Obra indexable con `?de=instagram`: la vista de superficie y la de Obra, en ese orden, con el origen y la marca; la barra pierde la marca', async ({
+  /** Instala el reloj fingido y lo para: el tiempo de la página solo corre con `runFor`. */
+  async function relojParado(page: Page) {
+    await page.clock.install({ time: INICIO });
+    await page.clock.pauseAt(new Date(INICIO.getTime() + 1_000));
+  }
+
+  /** Un `pointerdown` sobre el título de la Obra, donde pulsar no hace nada más. */
+  async function pulsarElTitulo(page: Page) {
+    const caja = (await page.locator('h1').first().boundingBox())!;
+    await page.mouse.move(caja.x + 5, caja.y + 5);
+    await page.mouse.down();
+    await page.mouse.up();
+  }
+
+  test('la Obra indexable con `?de=instagram&via=whatsapp`: la vista de superficie y la de Obra, en ese orden, con las dos marcas de llegada y la de Obra; la barra las pierde; después, una sola lectura', async ({
     page,
   }) => {
+    await relojParado(page);
     await apuntarBalizas(page);
-    await page.goto(`${SITIO}${OBRA_INDEXABLE}?de=instagram`);
+    await page.goto(`${SITIO}${OBRA_INDEXABLE}?de=instagram&via=whatsapp`);
     await esperarAlFichero(page);
     // La premisa: con los umbrales de hoy, «Cartas a Lucilio» (2 de 3 Citas) se indexa.
     await expect(page.locator(NOINDEX), 'la Obra indexable salió con `noindex`: ¿cambiaron los umbrales de FR-52?').toHaveCount(0);
@@ -1803,17 +1826,30 @@ test.describe('Historia 23.9 — toda Obra cuenta sus vistas, se indexe o no', (
 
     const vistaDeObra = await esperarEvento(EVENTOS.vistaDeObra);
     expect(vistaDeObra, 'no llegó la vista de Obra').toBeTruthy();
-    expect(vistaDeObra).toMatchObject({ ruta: OBRA_INDEXABLE, origen: 'instagram', indexable: INDEXABLE });
+    expect(vistaDeObra).toMatchObject({ ruta: OBRA_INDEXABLE, origen: 'instagram', via: 'whatsapp', indexable: INDEXABLE });
     expect(await esperarEvento(EVENTOS.vistaDeSuperficie), 'no llegó la vista de superficie').toBeTruthy();
-    // En el orden en que salen por `sendBeacon`: el receptor no lo garantiza.
-    expect((await balizasDe(page)).map((b) => [b.evento, b.origen, b.indexable])).toEqual([
-      [EVENTOS.vistaDeSuperficie, 'instagram', undefined],
-      [EVENTOS.vistaDeObra, 'instagram', INDEXABLE],
+    // En el orden en que salen por `sendBeacon`: el receptor no lo garantiza. Sin lectura todavía.
+    expect((await balizasDe(page)).map((b) => [b.evento, b.origen, b.via, b.indexable])).toEqual([
+      [EVENTOS.vistaDeSuperficie, 'instagram', 'whatsapp', undefined],
+      [EVENTOS.vistaDeObra, 'instagram', 'whatsapp', INDEXABLE],
     ]);
+
+    // Después de las dos, una sola lectura: con las marcas de llegada y sin la de Obra.
+    await pulsarElTitulo(page);
+    const lectura = await esperarEvento(EVENTOS.lectura);
+    expect(lectura, 'el pointerdown no emitió la lectura').toBeTruthy();
+    expect(lectura).toMatchObject({ ruta: OBRA_INDEXABLE, origen: 'instagram', via: 'whatsapp', indexable: null });
+    await page.clock.runFor(20_000);
     await esperar(500);
+    expect((await balizasDe(page)).map((b) => b.evento)).toEqual([
+      EVENTOS.vistaDeSuperficie,
+      EVENTOS.vistaDeObra,
+      EVENTOS.lectura,
+    ]);
+    expect(llegadas(EVENTOS.lectura)).toHaveLength(1);
     // SM-8 como hoy: una sola vista de superficie, con su origen, y sin columna de marca.
     expect(llegadas(EVENTOS.vistaDeSuperficie)).toHaveLength(1);
-    expect(llegadas(EVENTOS.vistaDeSuperficie)[0]).toMatchObject({ origen: 'instagram', indexable: null });
+    expect(llegadas(EVENTOS.vistaDeSuperficie)[0]).toMatchObject({ origen: 'instagram', via: 'whatsapp', indexable: null });
     expect(llegadas(EVENTOS.vistaDeObra)).toHaveLength(1);
   });
 
@@ -1822,6 +1858,7 @@ test.describe('Historia 23.9 — toda Obra cuenta sus vistas, se indexe o no', (
     context,
   }) => {
     await quedarseEn(context, OBRA_NO_INDEXABLE);
+    await relojParado(page);
     await apuntarBalizas(page);
     await page.goto(`${SITIO}${OBRA_NO_INDEXABLE}`);
     await esperarAlFichero(page);
@@ -1832,11 +1869,7 @@ test.describe('Historia 23.9 — toda Obra cuenta sus vistas, se indexe o no', (
     expect(vista).toMatchObject({ ruta: OBRA_NO_INDEXABLE, origen: null, indexable: NO_INDEXABLE });
     expect((await balizasDe(page)).map((b) => b.evento)).toEqual([EVENTOS.vistaDeObra]);
 
-    // Sobre el título de la Obra, donde pulsar no hace nada más.
-    const caja = (await page.locator('h1').first().boundingBox())!;
-    await page.mouse.move(caja.x + 5, caja.y + 5);
-    await page.mouse.down();
-    await page.mouse.up();
+    await pulsarElTitulo(page);
     const lectura = await esperarEvento(EVENTOS.lectura);
     expect(lectura, 'el pointerdown no emitió la lectura').toBeTruthy();
     expect(lectura).toMatchObject({ ruta: OBRA_NO_INDEXABLE, indexable: null });

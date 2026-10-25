@@ -342,8 +342,9 @@ export interface ConsecuenciasDeRuta extends Consecuencias {
   /**
    * La marca de la vista de Obra — FR-52, Historia 23.9, al atributo `ATRIBUTO_DE_INDEXABLE` del
    * `<html>`. Solo en la ruta que emite la vista con marca: de `MARCAS_DE_OBRA`, la indexable si
-   * su carácter efectivo es `producto` y la otra si es servicio por contenido —lo mismo que dice su
-   * `noindex`, de la misma lista declarada—. En toda otra ruta la clave se omite.
+   * la ruta no lleva `noindex` y la otra si lo lleva —sale de su mismo `noIndexar`, que en la Obra
+   * dice si es producto o servicio por contenido según la lista declarada—. En toda otra ruta la
+   * clave se omite.
    */
   marcaDeObra?: MarcaDeObra;
 }
@@ -573,45 +574,29 @@ function caracterPorCausa(superficie: Superficie, causa: CausaDelServicio | unde
 }
 
 /**
- * La marca de la vista de Obra según la causa del servicio de una página 1 (Historia 23.9): la
- * indexable sin causa —es producto— y la no indexable si la causa es el contenido. Exhaustiva a
- * propósito: una causa nueva no cae por omisión en la indexable, sino que no compila.
- */
-function marcaPorCausa(causa: Exclude<CausaDelServicio, 'forma'> | undefined): MarcaDeObra {
-  switch (causa) {
-    case undefined:
-      return OBRA_INDEXABLE;
-    case 'contenido':
-      return OBRA_NO_INDEXABLE;
-    default: {
-      const nunca: never = causa;
-      throw new Error(`Causa del servicio sin marca de Obra: «${String(nunca)}».`);
-    }
-  }
-}
-
-/**
  * Las consecuencias de una ruta concreta. Es lo que consume `Armazon.astro`.
  *
- * La vista con marca (Historia 23.9) sale de la **misma** causa del servicio que el carácter,
- * calculada una sola vez: en la página 1 de una superficie que la declara, la indexable si no hay
- * causa —es producto— y la no indexable si la causa es el contenido; en una página 2+ (causa
- * `forma`) no sale. Así la marca no se recalcula aparte, y sigue a FR-52 y a la congelación igual
- * que el `noindex`.
+ * La vista con marca (Historia 23.9) sale en la página 1 de una superficie que la declara —en una
+ * página 2+ (causa `forma`) no sale—, y su marca sale del **mismo** `noIndexar` que la página
+ * pinta: la no indexable si la página lleva `noindex` y la indexable si no. No se deduce de la causa
+ * ni de la superficie por otro camino, así que no puede decir otra cosa que el `noindex` aunque una
+ * superficie de otro carácter llegara a declarar la vista, y sigue a FR-52 y a la congelación igual
+ * que él. La causa del servicio se calcula una sola vez.
  */
 export function consecuenciasDe(rutaOUrl: string): ConsecuenciasDeRuta {
   const ruta = rutaNormalizada(rutaOUrl);
   const superficie = superficieDeclarada(ruta);
   const causa = causaDelServicio(ruta);
   const caracter = caracterPorCausa(superficie, causa);
+  const consecuencias = consecuenciasDelCaracter(caracter);
   const vistas: EventoDeVista[] = caracter === 'producto' && superficie.vista !== undefined ? [superficie.vista] : [];
   if (superficie.vistaConMarca === undefined || causa === 'forma') {
-    return { ...consecuenciasDelCaracter(caracter), vistas };
+    return { ...consecuencias, vistas };
   }
   return {
-    ...consecuenciasDelCaracter(caracter),
+    ...consecuencias,
     vistas: [...vistas, superficie.vistaConMarca],
-    marcaDeObra: marcaPorCausa(causa),
+    marcaDeObra: consecuencias.noIndexar ? OBRA_NO_INDEXABLE : OBRA_INDEXABLE,
   };
 }
 

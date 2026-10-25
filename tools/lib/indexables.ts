@@ -12,7 +12,8 @@
  * `ATRIBUTO_DE_INDEXABLE` del `<html>` que el fichero de medición envía con `vista-de-obra`. Sale
  * de la misma `consecuenciasDe` que el `noindex` de esa página, y se coteja aquí con él, en la misma
  * lista de desajustes y con el mismo corte: toda página 1 de Obra la lleva, con un valor de
- * `MARCAS_DE_OBRA`; la indexable no lleva `noindex` y la otra sí; y ninguna otra página la lleva.
+ * `MARCAS_DE_OBRA`; la indexable no lleva `noindex` y la otra sí; ninguna otra página la lleva; y
+ * va siempre con la `vista-de-obra` en `data-vistas`, que es lo único que la envía.
  *
  * Puro (AD-5): recibe el HTML y el sitemap ya leídos. Quien lee disco y detiene la
  * construcción es `integraciones/indexables.ts`.
@@ -24,7 +25,7 @@ import {
   rutaNormalizada,
   superficieDeclaradaDe,
 } from '../../src/lib/superficies.ts';
-import { ATRIBUTO_DE_INDEXABLE } from '../../src/lib/medicion.ts';
+import { ATRIBUTO_DE_INDEXABLE, EVENTOS } from '../../src/lib/medicion.ts';
 import { MARCAS_DE_OBRA } from '../../src/lib/vocabulario.ts';
 
 /** Las dos marcas de Obra, nombradas contra el vocabulario: la de la indexable y la de la que no. */
@@ -44,6 +45,12 @@ export interface PaginaIndexable {
    * comprobación.
    */
   marcaDeObra?: string;
+  /**
+   * Las vistas del `data-vistas` de su `<html>` (Historia 23.1), o ausente si no lo lleva. Desde la
+   * 23.9 la comprobación mira que la marca de Obra vaya con la `vista-de-obra`: la marca sola no se
+   * envía con nada, y la vista sola sale con la marca nula.
+   */
+  vistas?: readonly string[];
 }
 
 /**
@@ -56,19 +63,41 @@ export function rutaDeFicheroHtml(relativa: string): string {
   return rutaNormalizada(`/${sinIndice}`);
 }
 
-/** El atributo de la marca de Obra en la etiqueta `<html>`, con su valor entre comillas. */
-const MARCA_EN_EL_HTML = new RegExp(`<html\\b[^>]*\\s${ATRIBUTO_DE_INDEXABLE}="([^"]*)"`, 'iu');
+/**
+ * Un atributo de la etiqueta `<html>`, con su valor entre comillas dobles, simples o sin ellas
+ * —el build escribe las dobles, pero un desajuste no se nombra mal por cómo vinieran escritas—,
+ * y vacío si va sin valor. El nombre se escapa: sale de una constante, no se escribe aquí.
+ */
+function atributoDelHtml(nombre: string): RegExp {
+  const escapado = nombre.replace(/[.*+?^${}()|[\]\\]/gu, '\\$&');
+  return new RegExp(`<html\\b[^>]*?\\s${escapado}(?:\\s*=\\s*(?:"([^"]*)"|'([^']*)'|([^\\s"'=<>\`]+)))?(?=[\\s/>])`, 'iu');
+}
+
+/** Lee el valor de un atributo del `<html>` con `atributoDelHtml`, o `undefined` si no lo lleva. */
+function valorDelHtml(expresion: RegExp, html: string): string | undefined {
+  const encontrado = expresion.exec(html);
+  if (encontrado === null) return undefined;
+  return encontrado[1] ?? encontrado[2] ?? encontrado[3] ?? '';
+}
+
+/** La marca de Obra en la etiqueta `<html>`. */
+const MARCA_EN_EL_HTML = atributoDelHtml(ATRIBUTO_DE_INDEXABLE);
+/** Las vistas que declara la etiqueta `<html>` (Historia 23.1). */
+const VISTAS_EN_EL_HTML = atributoDelHtml('data-vistas');
 
 /**
  * Las marcas que la comprobación lee de una página construida: su `noindex`, su entrada en
- * Pagefind y, desde la 23.9, la marca de Obra de su `<html>`, que se omite si no la lleva.
+ * Pagefind y, desde la 23.9, la marca de Obra de su `<html>` y las vistas de su `data-vistas`,
+ * que se omiten si no las lleva.
  */
 export function marcasDePagina(html: string): Omit<PaginaIndexable, 'ruta'> {
-  const marcaDeObra = MARCA_EN_EL_HTML.exec(html)?.[1];
+  const marcaDeObra = valorDelHtml(MARCA_EN_EL_HTML, html);
+  const vistas = valorDelHtml(VISTAS_EN_EL_HTML, html)?.split(/\s+/u).filter((v) => v !== '');
   return {
     noindex: /<meta\s+name="robots"\s+content="noindex/iu.test(html),
     enPagefind: /<main\b[^>]*\sdata-pagefind-body(?=[\s=>])/iu.test(html),
     ...(marcaDeObra === undefined ? {} : { marcaDeObra }),
+    ...(vistas === undefined ? {} : { vistas }),
   };
 }
 
@@ -86,9 +115,12 @@ export function rutasDelSitemap(xml: string): string[] {
  * y quien grita por una superficie sin declarar es el armazón. Devuelve las líneas del
  * informe, vacío si los tres conjuntos son el mismo y cada marca casa con su página.
  *
- * La marca de Obra se juzga en cuatro clases: una página 1 de Obra (`esRutaDeObra` y no
+ * La marca de Obra se juzga en cinco clases: una página 1 de Obra (`esRutaDeObra` y no
  * `esServicioPorForma`) sin marca o con una que no es de `MARCAS_DE_OBRA`; una marca indexable con
- * `noindex`; una no indexable sin `noindex`; y una marca en una página que no es la 1 de una Obra.
+ * `noindex`; una no indexable sin `noindex`; una marca en una página que no es la 1 de una Obra; y
+ * una marca sin la `vista-de-obra` en `data-vistas`, o la vista sin la marca —salen de la misma
+ * llamada a `consecuenciasDe`, y se cotejan por si alguna vez dejan de salir del mismo sitio: la
+ * marca sola no la envía nada, y la vista sola sale con la marca nula—.
  */
 export function desajustesDeIndexables(
   sitemap: readonly string[],
@@ -145,6 +177,14 @@ export function desajustesDeIndexables(
   nombrar(
     'marca de Obra en una página que no es la 1 de una Obra',
     ordenadas(declaradas.filter((p) => p.marcaDeObra !== undefined && !esPrimeraDeObra(p))),
+  );
+  const conVistaDeObra = (p: PaginaIndexable) => p.vistas?.includes(EVENTOS.vistaDeObra) ?? false;
+  nombrar(
+    `marca de Obra y \`${EVENTOS.vistaDeObra}\` de \`data-vistas\` por separado`,
+    declaradas
+      .filter((p) => (p.marcaDeObra !== undefined) !== conVistaDeObra(p))
+      .sort((x, y) => x.ruta.localeCompare(y.ruta, 'es'))
+      .map((p) => `${p.ruta} (${p.marcaDeObra === undefined ? 'la vista sin la marca' : 'la marca sin la vista'})`),
   );
   return lineas;
 }

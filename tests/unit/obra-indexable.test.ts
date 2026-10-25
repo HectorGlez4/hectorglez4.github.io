@@ -258,10 +258,11 @@ describe('superficies.ts falla cerrado', () => {
 describe('la comprobación del build, pura', () => {
   const pagina = (ruta: string, noindex: boolean, enPagefind = !noindex) => ({ ruta, noindex, enPagefind });
   const [INDEXABLE, NO_INDEXABLE] = MARCAS_DE_OBRA;
-  /** Una página con la marca de Obra en su `<html>`, tal cual. */
+  /** Una página con la marca de Obra en su `<html>`, tal cual, y la vista de Obra que la envía. */
   const conMarca = (ruta: string, noindex: boolean, marcaDeObra: string) => ({
     ...pagina(ruta, noindex),
     marcaDeObra,
+    vistas: [EVENTOS.vistaDeObra],
   });
 
   it('coinciden: nada que decir', () => {
@@ -300,7 +301,7 @@ describe('la comprobación del build, pura', () => {
     ).toEqual([]);
   });
 
-  it('23.9 — nombra cada una de las cuatro clases de desajuste de la marca', () => {
+  it('23.9 — nombra cada una de las clases de desajuste de la marca', () => {
     const atributo = `\`${ATRIBUTO_DE_INDEXABLE}\``;
     // Una página 1 de Obra sin marca, o con una que no es del vocabulario.
     expect(
@@ -322,6 +323,17 @@ describe('la comprobación del build, pura', () => {
         conMarca('/', false, 'ajena'),
       ]),
     ).toEqual([`  · marca de Obra en una página que no es la 1 de una Obra: /, /cita/x, /obra/a/c/2`]);
+    // La marca sin la vista de Obra que la envía, y la vista sin la marca: van juntas o no van.
+    const porSeparado = `  · marca de Obra y \`${EVENTOS.vistaDeObra}\` de \`data-vistas\` por separado`;
+    expect(
+      desajustesDeIndexables(['/obra/a/b'], [
+        { ...conMarca('/obra/a/b', false, INDEXABLE), vistas: [EVENTOS.vistaDeSuperficie] },
+        { ...conMarca('/obra/a/c', true, NO_INDEXABLE), vistas: undefined },
+      ]),
+    ).toEqual([`${porSeparado}: /obra/a/b (la marca sin la vista), /obra/a/c (la marca sin la vista)`]);
+    expect(
+      desajustesDeIndexables(['/cita/x'], [{ ...pagina('/cita/x', false), vistas: [EVENTOS.vistaDeObra] }]),
+    ).toEqual([`${porSeparado}: /cita/x (la vista sin la marca)`]);
   });
 
   it('23.9 — una página no declarada no se juzga, lleve o no la marca', () => {
@@ -355,11 +367,20 @@ describe('la comprobación del build, pura', () => {
       noindex: false,
       enPagefind: true,
       marcaDeObra: INDEXABLE,
+      vistas: ['a', 'b'],
     });
     const sinMarca = marcasDePagina(conHtml(' data-vistas="a"'));
-    expect(sinMarca).toEqual({ noindex: false, enPagefind: true });
+    expect(sinMarca).toEqual({ noindex: false, enPagefind: true, vistas: ['a'] });
     expect('marcaDeObra' in sinMarca).toBe(false);
+    expect('vistas' in marcasDePagina(conHtml(''))).toBe(false);
     expect(marcasDePagina(conHtml(` ${ATRIBUTO_DE_INDEXABLE}="si"`)).marcaDeObra).toBe('si');
+    // Con comillas simples, sin ellas o sin valor, se lee lo que hay y no se toma por ausente.
+    expect(marcasDePagina(conHtml(` ${ATRIBUTO_DE_INDEXABLE}='${INDEXABLE}'`)).marcaDeObra).toBe(INDEXABLE);
+    expect(marcasDePagina(conHtml(` ${ATRIBUTO_DE_INDEXABLE}=${INDEXABLE}`)).marcaDeObra).toBe(INDEXABLE);
+    expect(marcasDePagina(conHtml(` ${ATRIBUTO_DE_INDEXABLE}`)).marcaDeObra).toBe('');
+    expect(marcasDePagina(conHtml(` data-vistas='a b'`)).vistas).toEqual(['a', 'b']);
+    // Un atributo que solo empieza igual no es la marca.
+    expect('marcaDeObra' in marcasDePagina(conHtml(` ${ATRIBUTO_DE_INDEXABLE}-otra="${INDEXABLE}"`))).toBe(false);
     // Fuera del `<html>` no es la marca.
     expect('marcaDeObra' in marcasDePagina(`<html lang="es"><body><p ${ATRIBUTO_DE_INDEXABLE}="${INDEXABLE}"></p>`)).toBe(false);
     expect(rutaDeFicheroHtml('index.html')).toBe('/');

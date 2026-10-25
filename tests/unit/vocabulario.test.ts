@@ -231,13 +231,15 @@ describe('Historia 23.2 — los eventos y los conjuntos cerrados', () => {
 /**
  * Lo que el vocabulario declara y el guion todavía no emite, por historia. **Sacar una entrada
  * de aquí es parte de su historia**, en el mismo diff que la enseña al guion: la prueba exige que
- * lo pendiente no salga, así que adelantarse o quedarse atrás la pone en rojo. La 23.11 la cierra.
+ * lo pendiente no salga, así que adelantarse o quedarse atrás la pone en rojo.
  *
- * Desde la 23.9 está **vacía**: el guion emite todo el vocabulario. La 23.6 le enseñó `via`, en las
- * vistas y la lectura; la 23.7, la salida interna, con su zona; la 23.8, la búsqueda, con su tramo y
- * sus filtros; y la 23.9, la vista de Obra, con su marca `indexable`. Un evento o un campo que el
- * vocabulario gane después, y que el guion no sepa producir todavía, vuelve a entrar aquí con su
- * historia.
+ * Se planeó vaciarla en la 23.11, y la vació la 23.9, la última historia de la Épica 23 que enseña
+ * al guion algo del vocabulario: está **vacía**, y es su estado de llegada, no uno de paso. El guion
+ * emite todo el vocabulario: la 23.6 le enseñó `via`, en las vistas y la lectura; la 23.7, la salida
+ * interna, con su zona; la 23.8, la búsqueda, con su tramo y sus filtros; y la 23.9, la vista de
+ * Obra, con su marca `indexable`. Las pruebas que la recorren con `it.each` se quedan sin casos y no
+ * fallan por ello; un evento o un campo que el vocabulario gane después, y que el guion no sepa
+ * producir todavía, vuelve a entrar aquí con su historia.
  */
 const PENDIENTES: readonly { historia: string; eventos?: readonly Evento[]; campos?: readonly [Evento, Campo][] }[] = [];
 

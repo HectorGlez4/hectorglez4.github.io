@@ -572,13 +572,15 @@ vocabulario llegan con las Épicas 24, 26 y 28, y hasta entonces no aparecen en 
 lectura, la serie empieza la **primera jornada UTC completa** tras la llegada en vivo de la 23.
 
 **La vista de Obra** (Historia 23.9, FR-51, FR-52, AD-13, SM-11): la página 1 de **toda** Obra —se
-indexe o no— emite una `vista-de-obra` con la marca `indexable`, que vale `indexable` o
-`no-indexable` y dice **lo mismo que el `noindex` de esa página**: las dos cosas salen de la misma
-lista de rutas indexables del build (FR-52 y, si rige, la congelación de `CONGELACION_DE_OBRAS`), que
-la escribe en el atributo `data-indexable` del `<html>` junto a `data-vistas`; el fichero la lee
-una vez al activarse y no la calcula ni la saca de la dirección. La comprobación de
-`astro:build:done` (`tools/lib/indexables.ts`) para la construcción si una página 1 de Obra sale sin
-marca, si la marca contradice su `noindex` o si otra página la lleva. La **Obra indexable** emite
+indexe o no— emite una `vista-de-obra` cuya columna `indexable` lleva una de las dos marcas de
+`MARCAS_DE_OBRA` —el valor `indexable` o el valor `no-indexable`— y dice **lo mismo que el `noindex`
+de esa página**: las dos cosas salen de la misma lista de rutas indexables del build (FR-52 y, si
+rige, la congelación de `CONGELACION_DE_OBRAS`), que escribe la marca en el atributo
+`data-indexable` del `<html>` junto a `data-vistas`; el fichero la lee una vez al activarse y no la
+calcula ni la saca de la dirección. La comprobación de `astro:build:done`
+(`tools/lib/indexables.ts`) para la construcción si una página 1 de Obra sale sin marca o con un
+valor ajeno a `MARCAS_DE_OBRA`, si la marca contradice su `noindex`, si otra página la lleva o si
+la marca y la `vista-de-obra` de `data-vistas` no van juntas. La **Obra indexable** emite
 dos vistas, en este orden: su `vista-de-superficie` de siempre —la de SM-8, como toda agregación de
 producto— y la `vista-de-obra`; la lectura sale una vez, detrás de las dos, y las dos llevan las
 Marcas de llegada. La **Obra que no se indexa** emite solo la `vista-de-obra`, y con ella gana lo
@@ -586,7 +588,10 @@ que hasta la 23.9 no tenía: una **lectura** (los 8 s o la primera interacción)
 de ella**, así que desde entonces su continuación se calcula como la de las demás. Las **páginas 2+**
 de una Obra no emiten vista ni llevan marca, y sus salidas siguen saliendo solas. La lectura, las
 salidas y las acciones no llevan la marca: la lleva solo la vista de Obra, y para partir lo demás por
-marca se toma la de las vistas de Obra de esa ruta y jornada (la consulta de abajo). Si un despliegue
+marca se toma la de las vistas de Obra de esa ruta y jornada (la consulta de abajo, que cuenta
+vistas, lecturas y salidas: la Página de Obra no emite hoy ninguna acción —copiar, descargar y
+compartir viven en la Página de Cita—, y si un día las emite se parten igual, por su ruta y su
+jornada). Si un despliegue
 cambia la indexabilidad de una Obra, esa ruta llega la jornada del cambio con las dos marcas —y, por el
 techo de caché de §1 (`max-age=600`), puede seguir llegando con la vieja hasta 10 minutos, así que un
 despliegue cerca de la medianoche UTC la alarga a los primeros minutos de la jornada siguiente—, y la
@@ -735,9 +740,22 @@ npx --yes wrangler@4.151.1 d1 execute medicion --remote --command \
 # esa jornada, así que las páginas 2+ quedan fuera. La Obra indexable emite además su
 # `vista-de-superficie`, que aquí no se suma: es la de SM-8. Es cota inferior, como toda continuación.
 # Hasta cuatro filas por jornada —las dos marcas, `cambio` y `nula`—: `LIMIT 120` da al menos las
-# últimas 30 jornadas.
+# últimas 30 jornadas. Como en SM-4, el «Ver esta cita» del 404 (`zona='cita-del-dia'`, que ninguna
+# Página de Obra lleva) no entra: una Obra absorbida o retirada sirve el 404 en su ruta, y la jornada
+# del cambio esa ruta aún tiene vistas de Obra de antes. Las demás salidas de ese 404 —la cabecera—
+# sí entran ese día; es raro y queda así hasta la 23.10.
 npx --yes wrangler@4.151.1 d1 execute medicion --remote --command \
-  "WITH e AS (SELECT jornada, ruta, evento, indexable FROM eventos WHERE jornada >= 'AAAA-MM-DD' AND jornada < date('now') AND ruta LIKE '/obra/%' AND evento IN ('vista-de-obra','lectura','salida-interna')), m AS (SELECT jornada, ruta, CASE WHEN COUNT(DISTINCT COALESCE(indexable,'nula')) > 1 THEN 'cambio' ELSE COALESCE(MAX(indexable),'nula') END AS marca FROM e WHERE evento='vista-de-obra' GROUP BY jornada, ruta) SELECT e.jornada, m.marca, SUM(e.evento='vista-de-obra') vistas, SUM(e.evento='lectura') lecturas, SUM(e.evento='salida-interna') salidas, ROUND(1.0 * SUM(e.evento='salida-interna') / NULLIF(SUM(e.evento='lectura'), 0), 3) continuacion FROM e JOIN m ON m.jornada = e.jornada AND m.ruta = e.ruta GROUP BY e.jornada, m.marca ORDER BY e.jornada DESC, m.marca LIMIT 120"
+  "WITH e AS (SELECT jornada, ruta, evento, indexable FROM eventos WHERE jornada >= 'AAAA-MM-DD' AND jornada < date('now') AND ruta LIKE '/obra/%' AND evento IN ('vista-de-obra','lectura','salida-interna') AND NOT (evento='salida-interna' AND zona IS 'cita-del-dia')), m AS (SELECT jornada, ruta, CASE WHEN COUNT(DISTINCT COALESCE(indexable,'nula')) > 1 THEN 'cambio' ELSE COALESCE(MAX(indexable),'nula') END AS marca FROM e WHERE evento='vista-de-obra' GROUP BY jornada, ruta) SELECT e.jornada, m.marca, SUM(e.evento='vista-de-obra') vistas, SUM(e.evento='lectura') lecturas, SUM(e.evento='salida-interna') salidas, ROUND(1.0 * SUM(e.evento='salida-interna') / NULLIF(SUM(e.evento='lectura'), 0), 3) continuacion FROM e JOIN m ON m.jornada = e.jornada AND m.ruta = e.ruta GROUP BY e.jornada, m.marca ORDER BY e.jornada DESC, m.marca LIMIT 120"
+
+# Llegadas con marca de origen a la página 1 de Obra, por marca y red — Historia 23.9. SM-8 no cuenta
+# la `vista-de-obra` y nunca contó la Obra que no se indexa, pero `npm run canal` acepta cualquier
+# Obra publicada: lo que el Canal trae a una Obra, se indexe o no, se lee aquí, por su vista de Obra
+# y con su marca. La indexable cuenta además en SM-8, por su `vista-de-superficie`: no se suman. La
+# difusión por botón (`via`) a una Obra la da la consulta de difusión de arriba con
+# `AND ruta LIKE '/obra/%'`. Misma jornada de partida, sin la de hoy; leerla desde `tools/` es de la
+# 23.10.
+npx --yes wrangler@4.151.1 d1 execute medicion --remote --command \
+  "SELECT jornada, COALESCE(indexable,'nula') marca, origen, COUNT(*) vistas FROM eventos WHERE evento='vista-de-obra' AND origen IS NOT NULL AND jornada >= 'AAAA-MM-DD' AND jornada < date('now') GROUP BY jornada, marca, origen ORDER BY jornada DESC, marca, vistas DESC LIMIT 90"
 
 # Salidas desde los resultados de `/buscar/`, por jornada — el numerador de SM-13, Historia 23.7.
 # La misma jornada de partida, sin la de hoy. El denominador, las búsquedas asentadas, llega con
