@@ -1175,6 +1175,36 @@ Queda por leer, antes del merge de la 23.11, la primera jornada cerrada tras el 
 llegando como antes, porque el sitio en vivo sigue en la v7.1. El plan contratado de Cloudflare lo
 revisa y lo anota aquí la 23.11; la cuota de este barajado se contó con la del plan gratuito.
 
+### El día de la fusión de la 23 — Historia 23.11 (2026-10-25)
+
+Lo leyó y lo corrió el **2026-10-25, entre las 17:20 y las 17:22 UTC**, el orquestador del bucle
+v8-ralph en la sesión principal, con la autorización que Héctor dio en el chat el 2026-10-24, y se
+lo pasó al paso de fusión, que lo anota aquí antes de crear el merge. Las dos lecturas son de solo
+lectura; `comprobar` escribe sus balizas y las borra.
+
+- **El plan contratado de Cloudflare: sin verificar.** `wrangler` 4.151.1 no expone el plan
+  contratado de la cuenta (leído a las 17:21 UTC). `d1 info medicion`, a esa hora: **905 kB** de
+  base, **13.294 filas escritas en 24 h** —casi todas del barajado de la 23.3, que corrió hace
+  menos de 24 h— y 50.818 leídas. Se conservan las cuotas del plan gratuito, que son las
+  conservadoras: `CUOTA_DE_FILAS_ESCRITAS_POR_DIA_EN_D1` (100.000) y
+  `CUOTA_DE_BYTES_POR_BASE_EN_D1` (500 MB decimales) no cambian. **Pendiente de Héctor**:
+  confirmar el plan en el panel de Cloudflare y, si no es el gratuito, poner las dos cuotas al día
+  en `src/lib/umbrales.ts` en un diff visible.
+- **Los eventos del sitio en vivo siguen llegando tras la 23.3** (leído a las 17:20 UTC). La
+  jornada UTC **2026-10-25**, la primera entera bajo el receptor nuevo, **aún no ha cerrado**
+  —cierra a las 00:00 UTC del 2026-10-26, y si este merge llega hoy al sitio en vivo será mixta,
+  con eventos de la v7.1 y de la v8—, pero a las 17:20 UTC ya llevaba **72 `vista-de-cita` y 10
+  `vista-de-superficie`**, el nivel de una jornada entera: la 2026-10-24 cerró con 74 y 6, y la
+  2026-10-23 con 82 y 2. La 2026-10-24 pasó de 71 `vista-de-cita` al correr `desplegar` (23:13
+  UTC) a 74, así que también recibió eventos después. Los eventos del sitio de la v7.1 llegan con
+  las columnas nuevas a nulo, como se espera. Nada indica que el receptor nuevo pierda lo que envía
+  el sitio en vivo.
+- **`npm run medicion -- comprobar`, desde la rama, a las 17:22 UTC**: salió con **0** al primer
+  intento de tres —87 balizas enviadas y 86 filas leídas, que casan—. El receptor en vivo guarda
+  cada evento y cada valor de la huella (`b4303b0e7c`, la de `medicion/huella-del-vocabulario.json`
+  de la rama), descarta lo ajeno, numera al azar y las balizas se borraron. No hace falta repetir
+  la 23.3 antes de fusionar. La salida, en `.claude/v8-ralph/logs/s-23/orq-comprobar.log`.
+
 ### Consultar la compartición — SM-5, SM-7 y SM-C3
 
 ```bash

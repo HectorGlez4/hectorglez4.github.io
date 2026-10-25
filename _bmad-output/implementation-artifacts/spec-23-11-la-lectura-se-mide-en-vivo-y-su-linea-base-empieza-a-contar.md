@@ -9,25 +9,12 @@ context:
   - '{project-root}/_bmad-output/implementation-artifacts/spec-23-10-la-linea-base-se-lee-desde-tools-con-la-cuota-de-d1-a-la-vista.md'
 pending:
   - summary: >-
-      Revisar el plan contratado de Cloudflare y anotarlo en DESPLIEGUE.md §3; si no es el
-      gratuito, poner al día en un diff visible las cuotas con nombre de la 23.10
-      (CUOTA_DE_FILAS_ESCRITAS_POR_DIA_EN_D1 y CUOTA_DE_BYTES_POR_BASE_EN_D1).
-    owner: 'orquestador del bucle v8-ralph, en la sesión principal, para el paso de fusión'
-  - summary: >-
-      Comprobar que los eventos del sitio en vivo (v7.1) siguieron llegando tras la 23.3, en la
-      primera jornada UTC cerrada bajo el receptor nuevo (la 2026-10-25, que cierra a las
-      00:00 UTC del 2026-10-26), y anotarlo en DESPLIEGUE.md §3 y aquí.
-    owner: 'orquestador del bucle v8-ralph, en la sesión principal, para el paso de fusión'
-  - summary: >-
-      Correr desde la rama, el día de la fusión, «npm run medicion -- comprobar» contra el
-      receptor desplegado: tiene que casar con la huella de la rama y seguir insertando con rowid
-      aleatorio; si no casa, se repite la 23.3 antes de fusionar.
-    owner: 'orquestador del bucle v8-ralph, en la sesión principal, para el paso de fusión'
-  - summary: >-
-      La puerta previa a la fusión: build, astro check y npm test enteros; npm run test:e2e
-      entero contra un receptor local; NFR-7 con Lighthouse frente a la principal del mismo día.
-      Se anota aquí, en «Verificación previa a la fusión».
-    owner: 'paso de puerta del bucle v8-ralph'
+      Confirmar en el panel de Cloudflare el plan contratado, que wrangler 4.151.1 no expone (se
+      conservan las cuotas del plan gratuito, las conservadoras); si no es el gratuito, poner al
+      día en un diff visible las cuotas con nombre de la 23.10
+      (CUOTA_DE_FILAS_ESCRITAS_POR_DIA_EN_D1 y CUOTA_DE_BYTES_POR_BASE_EN_D1) y anotarlo en
+      DESPLIEGUE.md §3.
+    owner: 'Héctor'
   - summary: >-
       Tras el despliegue que llega al sitio en vivo: dar valor a DESPLIEGUE_DE_LA_LECTURA (la
       jornada UTC en que termina «Desplegar»), en un commit aparte del día en que llega, de la que
@@ -122,6 +109,33 @@ orquestador desde la sesión principal y se los pasa al paso de fusión, que los
 - **`npm run medicion -- comprobar` desde la rama, el día de la fusión**: el receptor desplegado
   tiene que casar con la huella de la rama y seguir insertando con `rowid` aleatorio. Si no casa
   —el receptor se volvió a desplegar desde la principal—, se repite la 23.3 antes de fusionar.
+
+### Paso de fusión — 2026-10-25
+
+Lo de arriba lo hizo el orquestador del bucle v8-ralph en la sesión principal el **2026-10-25,
+entre las 17:20 y las 17:22 UTC**, con la autorización de Héctor del 2026-10-24, y el paso de
+fusión de la etapa s-23 lo anota aquí y en `DESPLIEGUE.md` §3 («El día de la fusión de la 23»)
+antes de crear el merge. El paso de fusión no corrió nada contra el D1 de producción, el Worker ni
+el sitio en vivo.
+
+- **El plan contratado de Cloudflare: sin verificar.** `wrangler` 4.151.1 no lo expone. `d1 info
+  medicion` a las 17:21 UTC: 905 kB, 13.294 filas escritas en 24 h (casi todas del barajado de la
+  23.3) y 50.818 leídas. Se conservan las cuotas del plan gratuito, que son las conservadoras, así
+  que `CUOTA_DE_FILAS_ESCRITAS_POR_DIA_EN_D1` y `CUOTA_DE_BYTES_POR_BASE_EN_D1` no cambian. Lo
+  confirma Héctor en el panel de Cloudflare (queda en `pending`).
+- **Los eventos del sitio en vivo siguen llegando.** La jornada UTC 2026-10-25 no ha cerrado,
+  pero a las 17:20 UTC ya llevaba 72 `vista-de-cita` y 10 `vista-de-superficie`, el nivel de una
+  jornada entera (2026-10-24: 74 y 6; 2026-10-23: 82 y 2); la 2026-10-24 pasó de 71
+  `vista-de-cita` al correr `desplegar` a 74. Los eventos de la v7.1 llegan con las columnas nuevas
+  a nulo, como se espera. Si este merge llega al sitio en vivo hoy, la 2026-10-25 será mixta (v7.1
+  y v8): la jornada de llegada lo es siempre, y la primera entera de la v8 es la siguiente.
+- **`npm run medicion -- comprobar`, desde la rama, a las 17:22 UTC**: código 0 al primer intento
+  de tres; 87 balizas enviadas y 86 filas leídas, que casan con la huella de la rama
+  (`b4303b0e7c`); descarta lo ajeno, numera al azar y las balizas se borraron. No hace falta repetir
+  la 23.3. Salida en `.claude/v8-ralph/logs/s-23/orq-comprobar.log`.
+- **La puerta** pasó en el intento 2 («Verificación previa a la fusión — 2026-10-25 (intento 2)»,
+  abajo), sobre `a98156f7f2`; `origin/main` (`ed5a3f47e2`) sigue siendo antecesor de la rama, así
+  que no hubo que fusionarla ni repetir la puerta.
 
 ### Tras el despliegue
 
