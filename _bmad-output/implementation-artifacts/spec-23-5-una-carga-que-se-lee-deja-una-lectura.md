@@ -5,7 +5,7 @@ created: '2026-10-25'
 status: 'done'
 baseline_revision: '38149b31a157e1d63df6887571020be8e70efc42'
 review_loop_iteration: 0
-followup_review_recommended: false
+followup_review_recommended: true
 context:
   - '{project-root}/_bmad-output/implementation-artifacts/epic-23-context.md'
 warnings: [oversized]
@@ -119,6 +119,33 @@ deferred: []
 Las capas de revisión de esta pasada son externas (blind-hunter, edge-case-hunter, verification-gap,
 intent-alignment, ac-auditor) y no traían hallazgos todavía: la revisión independiente viene después.
 
+### 2026-10-25 — Review pass (revisión independiente, pasada 1)
+- intent_gap: 0
+- bad_spec: 0
+- patch: 17: (high 0, medium 3, low 14)
+- defer: 0
+- reject: 17: (high 0, medium 0, low 17)
+- addressed_findings:
+  - `[medium]` `[patch]` La lectura se perdía si el temporizador llegaba tarde (una tarea larga) y la página se ocultaba con los 8 s visibles ya cumplidos (blind-hunter, edge-case-hunter). `g()` emite ahora la lectura cuando el rato acumulado ya alcanza `MIN_MS_VISIBLES_PARA_LA_LECTURA`; el sandbox gana `bloquear(ms)` y dos pruebas (con y sin los 8 s cumplidos).
+  - `[medium]` `[patch]` Nada comprobaba que ninguna isla conozca `METRICA_DE_ACCION` ni emita `lectura`, ni que el espía de punta a punta no vea la lectura (blind-hunter, ac-auditor). Prueba que recorre `src/` y `public/islas/` (fuera de los dueños) y prueba con `espiar()` en el sandbox.
+  - `[medium]` `[patch]` La consulta de SM-5 sobre lecturas de `DESPLIEGUE.md` mezclaba todas las superficies; ahora filtra `ruta LIKE '/cita/%'`, como pide SM-5 enmendada.
+  - `[low]` `[patch]` `V` se encendía con cualquier evento de la tabla escrito en `data-vistas`. De ahí solo salen ya los de `EVENTOS_DE_VISTA` (exportado de `medicion.ts`); prueba con acciones en `data-vistas`.
+  - `[low]` `[patch]` Ninguna prueba fijaba que las escuchas de interacción sean pasivas y en captura: el sandbox apunta los ajustes y una prueba los exige.
+  - `[low]` `[patch]` El JSDoc de `ficherosDelSitio` quedó encima de `REVISADO_SIN_DESMENTIR` en `tests/unit/superficies.test.ts`: devuelto a su función.
+  - `[low]` `[patch]` La prueba de la cola de la 23.1 leía `__balizas` con la forma vieja (`string[]`): usa `balizasDe(page)`.
+  - `[low]` `[patch]` `apuntarBalizas` podía impedir el envío si la carga no era JSON: apunta `{ sinInterpretar }` y la baliza sale igual.
+  - `[low]` `[patch]` Faltaba el caso «descarga con destino y después una sin destino» del criterio de `primera`: prueba por destino del conjunto.
+  - `[low]` `[patch]` `DESPLIEGUE.md` no traía consulta de SM-7 sobre lecturas: añadida, también solo de rutas de Cita.
+  - `[low]` `[patch]` `DESPLIEGUE.md` no decía que la descarga impuesta no entra ni en SM-5 ni en SM-7: dicho, como decisión de la v8.2.
+  - `[low]` `[patch]` `DESPLIEGUE.md` no avisaba de que las lecturas no son subconjunto de las vistas (la vuelta por la caché de atrás y adelante): avisado.
+  - `[low]` `[patch]` El corte de serie se describía como un día limpio: ahora empieza la primera jornada UTC completa tras la llegada, con la de llegada (mixta) informada aparte.
+  - `[low]` `[patch]` «toda acción con `primera='si'` tiene su lectura» se afirmaba de lo guardado: reescrito como garantía de la emisión (una baliza perdida no se reintenta).
+  - `[low]` `[patch]` La lectura y su acción pueden caer en jornadas distintas junto a medianoche: dicho, con la indicación de leer sobre varias jornadas.
+  - `[low]` `[patch]` `DESPLIEGUE.md` y el docblock afirmaban que la descarga impuesta llega con destino, y la isla de la Imagen no lo pasa hasta la 25.2 (verification-gap, edge-case-hunter): los dos lo dicen.
+  - `[low]` `[patch]` `tests/servidor.mjs` leía una variable genérica `CACHE_CONTROL`: ahora `SERVIDOR_CACHE_CONTROL`.
+
+Rechazados (17), con su motivo: filtrar máquinas (`navigator.webdriver`, renderizadores que adelantan el tiempo) — la intención define la lectura por FR-56 y deja las firmas mecánicas a la comparación del informe de la 23.10; filtrar teclas modificadoras, atajos o botones de salida — la intención nombra `keydown`/`pointerdown` sin excepciones, y la salida interna fuerza la lectura en la 23.7; `isTrusted` — ningún guion del sitio despacha eventos sintéticos; `__medir('vista-…')` directo — superficie de la 23.1 que nadie usa; `URLSearchParams` que lanza — ningún navegador con `sendBeacon` carece de él; escuchas sin quitar — la carga nueva de `pageshow` las necesita y su coste es nulo; `REVISADO_SIN_DESMENTIR` como interruptor — texto exacto con prueba compañera que obliga a revisar; el tope fijado por lo medido — lo manda la intención; el Chromium completo sin documentar — la instalación por omisión lo trae y la prueba se salta nombrando el motivo; cobertura en navegador de visibilidad, `wheel`/`touchmove`, páginas 2+ y 404 — la intención reparte entre Vitest y Playwright y la lista de Playwright se cumple; contar desde `timeOrigin` — la intención lo prohíbe; la continuación — 23.7/23.10; el prerender real — salto preexistente de la 23.1; el 8_000 fijado en una prueba — deliberado; la revisión apuntada antes de hacerse — la corrige esta pasada; `sprint-status.yaml` — lo lleva el orquestador.
+
 ## Design Notes
 
 Forma del fichero (orientativa; nombres y compactación los fija el código):
@@ -160,85 +187,80 @@ Status: done
 Blocking condition: ninguna.
 
 **Qué se hizo.** El fichero de medición (`guionDeMedicion`) emite, en toda carga que emite al menos
-una vista de su `data-vistas`, como mucho una `lectura` —`{evento, ruta, origen}`— a los
-`MIN_MS_VISIBLES_PARA_LA_LECTURA` (8.000, nuevo en `umbrales.ts`) de visibilidad acumulada o a la
-primera de `INTERACCIONES_DE_LECTURA` (`pointerdown`, `keydown`, `wheel`, `touchmove`, en captura y
-pasivas); pone `primera` en cada acción con memoria por métrica y por carga, desde
-`METRICA_DE_ACCION` importada; la descarga con destino de `DESTINOS_DE_DESCARGA` lleva siempre `no`
-y no gasta la primera; emite la lectura antes de toda acción que llegue sin ella (también al vaciar
-la cola); trata `pageshow` con `persisted` como carga nueva (sin vista, marca a `null`, `primera` y
-reloj a cero), y descarta `__medir('lectura')` por la lista exportada `EVENTOS_SOLO_DEL_FICHERO`.
-El reloj se arma en la activación (tras `prerenderingchange` si hace falta), se para con
-`visibilitychange` y se rearma con lo que falta; ni `scroll` ni `setInterval`. La Marca de origen se
-lee una vez, al activar. El arranque en línea y `MAX_BYTES_DE_GUION` no cambian; la huella tampoco
-(`git diff src/lib/vocabulario.ts medicion/` vacío).
+una vista de su `data-vistas` —de ahí solo salen los eventos de `EVENTOS_DE_VISTA`—, como mucho una
+`lectura` —`{evento, ruta, origen}`— a los `MIN_MS_VISIBLES_PARA_LA_LECTURA` (8.000, nuevo en
+`umbrales.ts`) de visibilidad acumulada o a la primera de `INTERACCIONES_DE_LECTURA` (`pointerdown`,
+`keydown`, `wheel`, `touchmove`, en captura y pasivas); si el temporizador llega tarde y la página se
+oculta con el tiempo ya cumplido, la lectura sale entonces. Pone `primera` en cada acción con memoria
+por métrica y por carga, desde `METRICA_DE_ACCION` importada; la descarga con destino de
+`DESTINOS_DE_DESCARGA` lleva siempre `no` y no gasta la primera; emite la lectura antes de toda acción
+que llegue sin ella (también al vaciar la cola); trata `pageshow` con `persisted` como carga nueva (sin
+vista, marca a `null`, `primera` y reloj a cero), y descarta `__medir('lectura')` por la lista
+exportada `EVENTOS_SOLO_DEL_FICHERO`. El reloj se arma en la activación (tras `prerenderingchange` si
+hace falta), se para con `visibilitychange` y se rearma con lo que falta; ni `scroll` ni
+`setInterval`. La Marca de origen se lee una vez, al activar. El arranque en línea y
+`MAX_BYTES_DE_GUION` no cambian; la huella tampoco (`git diff src/lib/vocabulario.ts medicion/`
+vacío).
 
 **Ficheros.**
-- `src/lib/medicion.ts` — `EVENTOS_DEL_GUION` con `lectura`; `EVENTOS_SOLO_DEL_FICHERO`; fuente 3
-  (`primera`, calculada); `INTERACCIONES_DE_LECTURA`; el fichero con reloj, escuchas, memoria de
-  `primera` y carga nueva; docblocks al día.
+- `src/lib/medicion.ts` — `EVENTOS_DEL_GUION` con `lectura`; `EVENTOS_SOLO_DEL_FICHERO`;
+  `EVENTOS_DE_VISTA` (revisión); fuente 3 (`primera`, calculada); `INTERACCIONES_DE_LECTURA`; el
+  fichero con reloj, escuchas, memoria de `primera`, carga nueva y lectura debida al ocultarse
+  (revisión); docblocks al día, con la nota de la descarga impuesta hasta la 25.2.
 - `src/lib/umbrales.ts` — `MIN_MS_VISIBLES_PARA_LA_LECTURA = 8_000`; `MAX_BYTES_GUION_DE_MEDICION`
-  de 1.320 a 2.420 (medido: 2.024 bytes con el punto final de producción, 1.979 con el de las
-  pruebas; más unos 400).
-- `tests/unit/ayuda/medicion.ts` — sandbox con reloj fingido (`avanzar`), visibilidad (`visible`,
-  `ocultar`, `mostrar`), escuchas de ventana (`interactuar`), `restaurar(persisted)` y `pendientes`.
+  de 1.320 a 2.420 (medido 2.024 bytes con el punto final de producción en la implementación; 2.096
+  tras la revisión, sin mover el tope).
+- `tests/unit/ayuda/medicion.ts` — sandbox con reloj fingido (`avanzar`, `bloquear`), visibilidad
+  (`visible`, `ocultar`, `mostrar`), escuchas de ventana con sus ajustes (`interactuar`, `escuchas`),
+  `restaurar(persisted)`, `pendientes` y `espiar`.
 - `tests/unit/medicion.test.ts` — `describe('Historia 23.5 — …')`, una prueba (o más) por fila de la
-  matriz; las cinco de la 23.1/2.9 ajustadas sin rebajar lo que afirman.
+  matriz, y las de la revisión: temporizador tardío, escuchas pasivas y en captura, `data-vistas` con
+  acciones, el espía, el recorrido de las islas y la descarga con destino seguida de una elegida.
 - `tests/unit/vocabulario.test.ts` — fuera la entrada 23.5 de `PENDIENTES`; ocho vigentes; la
-  correspondencia produce la lectura con vista declarada y un `pointerdown` (`PRODUCIR_DEL_FICHERO`)
-  y espera `primera`; prueba de que la lectura no sale por `__medir`.
-- `tests/unit/superficies.test.ts` — la señal de WCAG 2.5.7 de la 23.4 se encendía con `touchmove`
-  en `src/lib/medicion.ts`. Revisado el motivo («ninguna función se maneja arrastrando»), sigue
-  siendo cierto: la escucha es pasiva y solo anota la lectura. Se anota como
-  `REVISADO_SIN_DESMENTIR` —el texto exacto de la declaración, por fichero y criterio, con su
-  porqué—, que se quita de la fuente solo para la señal de ese criterio; una prueba nueva exige que
-  siga en su fichero una vez y que encendería la señal. Cualquier otra aparición la sigue
-  encendiendo. No estaba en el Code Map: lo pidió la suite entera.
-- `tests/servidor.mjs` — `CACHE_CONTROL` opcional (por omisión `no-store`).
+  correspondencia produce la lectura (`PRODUCIR_DEL_FICHERO`) y espera `primera`.
+- `tests/unit/superficies.test.ts` — `REVISADO_SIN_DESMENTIR` para la señal de WCAG 2.5.7 que
+  enciende `touchmove` en `INTERACCIONES_DE_LECTURA`, con su prueba compañera; el JSDoc de
+  `ficherosDelSitio`, de vuelta en su sitio (revisión).
+- `tests/servidor.mjs` — `SERVIDOR_CACHE_CONTROL` opcional (por omisión `no-store`; renombrada en la
+  revisión desde `CACHE_CONTROL`, que es lo que dicen las Tasks).
 - `tests/e2e/receptor.spec.ts` — su sitio se sirve `max-age=600`; la cola retenida espera
-  `[vista-de-cita, lectura, copiado]` y `primera: 'si'`; `describe('Historia 23.5 — …')` con ocho
-  pruebas: 8 s con `page.clock` parado antes de navegar (nada a 7,9 s, una a 8 s, una tras 20 s
-  más), `pointerdown`, tecla, `/buscar/` sin lectura, `element.click()` (lectura antes del copiado,
-  `si`), `primera` por métrica (copiar ×2, Telegram ×2), `pageshow` sintético y caché de atrás y
-  adelante real.
-- `DESPLIEGUE.md` §3 — la lectura y `primera`, el corte de serie de SM-5/SM-7 y dos consultas
-  (lecturas por jornada; SM-5 sobre lecturas con `primera`).
+  `[vista-de-cita, lectura, copiado]` y `primera: 'si'` (con `balizasDe`, revisión);
+  `apuntarBalizas` nunca impide enviar (revisión); `describe('Historia 23.5 — …')` con ocho pruebas.
+- `DESPLIEGUE.md` §3 — la lectura y `primera`; la descarga impuesta fuera de SM-5 y SM-7 y sin
+  destino hasta la 25.2; la garantía de orden como garantía de la emisión; la jornada UTC del
+  receptor; lecturas que no son subconjunto de vistas; el corte de serie desde la primera jornada UTC
+  completa; consultas de lecturas por jornada y de SM-5 y SM-7 sobre lecturas de Página de Cita.
 - `AGENTS.md` — en la convención de la medición, que la lectura y `primera` las decide solo el
   fichero y `__medir('lectura')` se descarta.
 
-**Decisión de implementación.** La caché de atrás y adelante real se prueba con un Chromium propio
-lanzado con `channel: 'chromium'` además de `ignoreDefaultArgs: ['--disable-back-forward-cache']`:
-el `chromium-headless-shell` por omisión no restaura nunca —`Page.backForwardCacheNotUsed` da
-`BackForwardCacheDisabledForDelegate`—, y con el Chromium completo en su modo sin cabeza nuevo sí.
-Como una página restaurada no dispara `load`, volver atrás espera a `commit`. Si no restaura, la
-prueba se salta nombrando los motivos de CDP. En esta pasada **restauró y pasó**.
+**Revisión (pasada 1, capas externas: blind-hunter, edge-case-hunter, verification-gap,
+intent-alignment, ac-auditor).** 17 parches aplicados (0 altos, 3 medios, 14 bajos), 0 diferidos,
+17 rechazados; ningún `intent_gap` ni `bad_spec`. Seguimiento recomendado: `true` (puntuación
+3 × 3 + 14 = 23 ≥ 5).
 
-**Revisión.** Capas externas sin hallazgos en esta pasada: 0 parches, 0 diferidos, 0 rechazados.
-Seguimiento recomendado: `false` (parcheados: 0 altos, 0 medios, 0 bajos; puntuación 0).
-
-**Verificación.**
+**Verificación (tras los parches).**
 - `npx astro check` — 0 errores, 0 avisos (331 ficheros).
 - `npx vitest run` de `medicion`, `vocabulario`, `redes`, `comparticion`, `huella`, `receptor`,
-  `espinas-de-ux` y `kit-construido` — 8 ficheros, 411 pruebas en verde.
-- `npm test` (con `correr.sh`) — la primera pasada dio 1 fallo (la señal 2.5.7 de
-  `superficies.test.ts`, arriba); tras anotarlo, 131 ficheros y 5.653 pruebas en verde.
+  `espinas-de-ux`, `kit-construido` y `superficies` — 9 ficheros, 513 pruebas en verde.
+- `npm test` (con `correr.sh`, `r1-23-5-npm-test.log`) — 131 ficheros, 5.661 pruebas en verde.
 - `npx playwright test` de `receptor`, `copiar`, `imagen`, `compartir-enlace`, `compartir-imagen`,
-  `busqueda`, `pagina-de-cita` y `receptor-local` en `escritorio`, con el `webServer` — 144 en verde y
-  3 saltadas que no son de esta historia (prerender con DevTools, la de móvil de la Página de Cita y
-  la del índice sin Tema bajo umbral); la de la caché real, en verde. Puertos 4321, 4399, 4400, 4402
-  y 8787 libres al terminar.
-- `npx tsx -e` con `guionDeMedicion` y el punto final de producción — 2.024 bytes ≤ 2.420.
-- Matriz: cada fila tiene al menos una prueba de `tests/unit/medicion.test.ts` que corrió y pasó.
-- `git diff src/lib/vocabulario.ts medicion/` vacío; `ARRANQUE_DE_MEDICION` y `MAX_BYTES_DE_GUION`
-  sin cambios.
+  `busqueda`, `pagina-de-cita` y `receptor-local` en `escritorio` (`r1-23-5-e2e.log`) — 144 en verde y
+  3 saltadas que no son de esta historia (prerender con DevTools, la de móvil de la Página de Cita y la
+  del índice sin Tema bajo umbral); la de la caché real, en verde. Puertos 4321, 4399, 4400, 4402 y
+  8787 libres al terminar.
+- `npx tsx -e` con `guionDeMedicion` — 2.096 bytes con el punto final de producción (2.051 con el de
+  las pruebas) ≤ 2.420.
+- `git diff 38149b31..HEAD -- src/lib/vocabulario.ts medicion/` vacío; `ARRANQUE_DE_MEDICION` y
+  `MAX_BYTES_DE_GUION` sin cambios.
 
 **Riesgos residuales.**
 - La lectura cuenta desde la activación del fichero (con `defer`), así que peca por defecto: una
   carga vista poco más de 8 s puede quedarse sin lectura por tiempo. Es lo que dice la historia.
-- La prueba de la caché real depende de que el Chromium completo esté instalado y restaure; si no,
-  se salta nombrando el motivo, y el comportamiento lo siguen cubriendo el `pageshow` sintético y el
-  entorno simulado.
-- El cambio en `tests/unit/superficies.test.ts` (fuera del Code Map) merece la mirada de la revisión
-  independiente: es una exención con nombre, no una rebaja de la señal.
+- Hasta la 25.2 la descarga que impone el navegador tras un rechazo de la compartición llega sin
+  destino y cuenta en SM-5 como elegida; `DESPLIEGUE.md` lo dice.
+- Un renderizador sin cabeza que adelante el tiempo virtual deja lectura: lo separa la comparación
+  por firma de la 23.10, no el fichero.
+- La prueba de la caché real depende del Chromium completo; si no restaura, se salta nombrando el
+  motivo, y el comportamiento lo siguen cubriendo el `pageshow` sintético y el entorno simulado.
 - Nada de esto se ha desplegado: la serie de lecturas empieza con el despliegue del sitio de la 23
   (23.11).
