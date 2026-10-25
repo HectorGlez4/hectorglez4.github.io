@@ -32,7 +32,13 @@ import {
   temasDeLaObra,
   temasPublicados,
 } from '../../../../lib/publicado.ts';
-import { ANCLA_DE_DONDE_LEER, dondeLeer, rutaDeLaObra, segmentosDeObra } from '../../../../lib/obras.ts';
+import {
+  ANCLA_DE_DONDE_LEER,
+  ROTULO_DE_DONDE_LEER,
+  dondeLeer,
+  rutaDeLaObra,
+  segmentosDeObra,
+} from '../../../../lib/obras.ts';
 import { edicionesEnVenta, modelosEnRuta } from '../../../../lib/ingreso.ts';
 import { descripcionDeObra } from '../../../../lib/atribucion.ts';
 import { CITAS_POR_PAGINA } from '../../../../lib/umbrales.ts';
@@ -91,7 +97,8 @@ const primera = pagina.currentPage === 1;
 /*
  * Historia 24.7 — un solo booleano decide si la página pinta «Dónde leer esta obra» y si lleva el
  * salto que va a ella: un salto sin destino sería un enlace muerto, y un destino sin salto, el
- * bloque al pie detrás de hasta 50 Tarjetas. Hoy es toda página 1, se indexe o no, congelada o no.
+ * bloque al pie detrás de una página entera de Tarjetas (`CITAS_POR_PAGINA`). Hoy es toda página
+ * 1, se indexe o no, congelada o no.
  */
 const conDondeLeer = primera && resumenDondeLeer !== undefined;
 
@@ -150,10 +157,11 @@ const enVenta =
          * Historia 24.7, UX-DR96 — el salto a «Dónde leer esta obra», en su propia línea y fuera de
          * `p.de`, que declara la zona de la Atribución: es un ancla de la propia página, ya exenta
          * de zona (AD-13), y va en la misma pestaña. La flecha es decoración. Fuera de Pagefind por
-         * lo mismo que la sección: no es texto buscable de cada Obra.
+         * lo mismo que la sección: no es texto buscable de cada Obra. Su texto es el del rótulo de
+         * destino, `ROTULO_DE_DONDE_LEER`: el salto se llama como el encabezado al que lleva.
          */
         conDondeLeer && (
-          <p class="salto" data-pagefind-ignore><a href={`#${ANCLA_DE_DONDE_LEER}`}>Dónde leer esta obra<span aria-hidden="true">&nbsp;↓</span></a></p>
+          <p class="salto" data-pagefind-ignore><a href={`#${ANCLA_DE_DONDE_LEER}`}>{ROTULO_DE_DONDE_LEER}<span aria-hidden="true">&nbsp;↓</span></a></p>
         )
       }
     </header>

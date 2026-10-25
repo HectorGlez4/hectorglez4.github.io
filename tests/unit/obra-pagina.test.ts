@@ -202,7 +202,10 @@ const EN_PAGEFIND = /<main[^>]*data-pagefind-body/;
 /**
  * Las reglas de la hoja que el build emite en una página —en línea, en sus `<style>`— como
  * `selector → cuerpo`, sin el atributo de ámbito de Astro. Es la guardia que corre en CI de lo
- * que las pruebas de punta a punta miden en el navegador (22.5, 24.7).
+ * que las pruebas de punta a punta miden en el navegador (22.5, 24.7). Cuidado: una regla de
+ * dentro de un `@media` o un `@supports` sale sin su condición, como si valiera siempre; quien
+ * busque una regla con `find` se queda con la primera, así que una guardia que deba ver también
+ * las anulaciones cuenta todas las reglas de su selector.
  */
 async function reglasDe(proyecto: string, ruta: string): Promise<{ selector: string; cuerpo: string }[]> {
   const pagina = await html(proyecto, ruta);
@@ -253,6 +256,18 @@ async function comprobarSaltos(proyecto: string): Promise<{ primeras: string[]; 
       expect(anclas, ruta).toStrictEqual([{ href: SALTO, enMain: true, declaracion: null }]);
       expect(pagina.split(`id="${ANCLA_DE_DONDE_LEER}"`), ruta).toHaveLength(2);
       expect(pagina, ruta).toContain(`<h2 class="rotulo" id="${ANCLA_DE_DONDE_LEER}" tabindex="-1"`);
+      // El salto se llama como el encabezado al que lleva: lo que oye el lector en el enlace —sin
+      // la flecha oculta— es el texto del `h2` de destino. El `span` lleva el ámbito de Astro.
+      const texto = (marcado: string) =>
+        marcado
+          .replace(/<span aria-hidden="true"[^>]*>[\s\S]*?<\/span>/g, '')
+          .replace(/<[^>]+>/g, '')
+          .trim();
+      const enlace = /<p class="salto"[^>]*>\s*<a\b[^>]*>([\s\S]*?)<\/a>/.exec(pagina)?.[1];
+      const rotulo = new RegExp(`<h2 class="rotulo" id="${ANCLA_DE_DONDE_LEER}"[^>]*>([\\s\\S]*?)</h2>`).exec(pagina)?.[1];
+      expect(enlace, ruta).toBeDefined();
+      expect(rotulo, ruta).toBeDefined();
+      expect(texto(enlace!), ruta).toBe(texto(rotulo!));
       vistas.primeras.push(ruta);
     } else {
       expect(anclas, ruta).toEqual([]);
@@ -799,8 +814,12 @@ describe('Historia 22.4 — la Página de Obra, construida', () => {
       expect(enlace.get('color')).toBe('var(--siena)');
       expect(enlace.get('text-decoration-line')).toBe('underline');
       expect(enlace.get('text-decoration-thickness')).toBe('var(--grosor-filete)');
-      // Subrayado siempre: ninguna regla del salto depende del cursor ni toca el foco.
-      expect(todas.filter((r) => /\.salto\b[^,]*:(hover|focus)/.test(r.selector)).map((r) => r.selector)).toEqual([]);
+      // Subrayado siempre: ninguna otra regla toca el salto —ni de cursor o foco, ni una que
+      // `reglasDe` haya sacado de un `@media`, que leería como incondicional—. Solo estas dos.
+      expect(todas.map((r) => r.selector).filter((selector) => /\.salto(?![\w-])/.test(selector))).toEqual([
+        '.salto',
+        '.salto a',
+      ]);
       // El destino: `scroll-margin-top` de 2 × `--unidad`, solo en el rótulo enfocable.
       const destino = todas.filter((r) => /^\.rotulo\[tabindex=(['"]?)-1\1\]$/.test(r.selector));
       expect(destino).toHaveLength(1);

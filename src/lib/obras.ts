@@ -1232,6 +1232,15 @@ export function entradaComun(urls: readonly string[]): string | undefined {
 export const ANCLA_DE_DONDE_LEER = 'donde-leer-esta-obra';
 
 /**
+ * El nombre de «Dónde leer esta obra» — Historia 24.7, UX-DR96.
+ *
+ * El texto del rótulo de la sección y el del salto que va a ella son el mismo a propósito: quien
+ * activa «Dónde leer esta obra ↓» tiene que llegar a un encabezado que se llame igual. Escrito
+ * dos veces, renombrar la sección dejaría al salto anunciando el nombre viejo.
+ */
+export const ROTULO_DE_DONDE_LEER = 'Dónde leer esta obra';
+
+/**
  * Dónde leer una Obra — Historia 22.6, UX-DR42.
  *
  * Agrupa las Citas **con Fuente** por (Fuente, traductor): una traducción es otra edición, así
