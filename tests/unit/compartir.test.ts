@@ -1,7 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
-import { DESTINOS, textoParaCompartir } from '../../src/lib/compartir.ts';
+import {
+  CONSTRUCTORES,
+  DESTINOS_OFRECIDOS,
+  textoParaCompartir,
+} from '../../src/lib/compartir.ts';
+import { DESTINOS_DE_ENLACE, DESTINO_DE_IMAGEN, DESTINO_OPACO } from '../../src/lib/destinos.ts';
 import { procedenciaCompuesta, textoParaCopiar } from '../../src/lib/atribucion.ts';
 import { citaEnPieza } from '../../src/lib/pieza.ts';
 import type { Cita, Autor } from '../../src/lib/publicado.ts';
@@ -57,9 +62,12 @@ describe('Historia 10.3 — el texto propuesto', () => {
   });
 });
 
+/** Todos los constructores, los que se ofrecen y los que esperan a la Historia 25.1. */
+const DESTINOS = Object.values(CONSTRUCTORES);
+
 describe('Historia 10.3 — los destinos', () => {
-  it('cada uno lleva el texto y el enlace dentro', () => {
-    for (const destino of DESTINOS) {
+  it('cada uno lleva el texto y el enlace dentro, salvo Facebook, que solo admite el enlace', () => {
+    for (const destino of DESTINOS.filter((d) => d.id !== 'facebook')) {
       const enlace = destino.enlace(textoParaCompartir(CITA, AUTOR), URL_CITA);
       expect(enlace, destino.id).toContain(encodeURIComponent(AUTOR.nombre));
       expect(decodeURIComponent(enlace), destino.id).toContain(URL_CITA);
@@ -89,7 +97,8 @@ describe('Historia 10.3 — los destinos', () => {
 
   it('el texto va escapado: una Cita con signos no rompe la dirección', () => {
     const conSignos = { ...CITA, texto: '¿Y ahora qué? Todo & nada #así' } as unknown as Cita;
-    for (const destino of DESTINOS) {
+    // Facebook no lleva el texto (abajo, Historia 23.2): su enlace va escapado igual.
+    for (const destino of DESTINOS.filter((d) => d.id !== 'facebook')) {
       const enlace = destino.enlace(textoParaCompartir(conSignos, AUTOR), URL_CITA);
       // Sin escapar, el `#` cortaría la dirección y el `&` inventaría un parámetro.
       expect(enlace, destino.id).not.toContain('#así');
@@ -99,6 +108,40 @@ describe('Historia 10.3 — los destinos', () => {
 
   it('cada destino tiene identificador propio: la medición los distingue', () => {
     expect(new Set(DESTINOS.map((d) => d.id)).size).toBe(DESTINOS.length);
+  });
+});
+
+describe('Historia 23.2 — un constructor por destino de enlace, y se ofrecen los de siempre', () => {
+  it('las claves de CONSTRUCTORES son los destinos de enlace, y cada una construye el suyo', () => {
+    expect(Object.keys(CONSTRUCTORES)).toEqual([...DESTINOS_DE_ENLACE]);
+    for (const [id, destino] of Object.entries(CONSTRUCTORES)) expect(destino.id).toBe(id);
+  });
+
+  it('ninguno para la Historia de Instagram ni para la hoja del sistema', () => {
+    expect(CONSTRUCTORES).not.toHaveProperty(DESTINO_DE_IMAGEN);
+    expect(CONSTRUCTORES).not.toHaveProperty(DESTINO_OPACO);
+  });
+
+  it('los ofrecidos son los cuatro de hoy, en su orden, y salen de CONSTRUCTORES', () => {
+    expect(DESTINOS_OFRECIDOS.map((d) => d.id)).toEqual(['whatsapp', 'telegram', 'x', 'correo']);
+    for (const destino of DESTINOS_OFRECIDOS) expect(destino).toBe(CONSTRUCTORES[destino.id]);
+  });
+
+  it('Facebook lleva el enlace y no el texto: su diálogo no admite otro', () => {
+    const enlace = CONSTRUCTORES.facebook.enlace(textoParaCompartir(CITA, AUTOR), URL_CITA);
+    expect(enlace).toBe(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(URL_CITA)}`);
+    expect(decodeURIComponent(enlace)).not.toContain(AUTOR.nombre);
+  });
+
+  it('Threads lleva el texto y el enlace, cada uno en su parámetro y escapado', () => {
+    const texto = '¿Y ahora qué? Todo & nada #así';
+    const enlace = CONSTRUCTORES.threads.enlace(texto, URL_CITA);
+    expect(enlace).toBe(
+      `https://www.threads.com/intent/post?text=${encodeURIComponent(texto)}&url=${encodeURIComponent(URL_CITA)}`,
+    );
+    const parametros = new URL(enlace).searchParams;
+    expect(parametros.get('text')).toBe(texto);
+    expect(parametros.get('url')).toBe(URL_CITA);
   });
 });
 

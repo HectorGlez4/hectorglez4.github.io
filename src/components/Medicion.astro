@@ -1,35 +1,34 @@
 ---
 /**
- * Instalación de la medición — AD-13.
+ * La medición en la página — AD-6, AD-13, Historia 23.1.
  *
- * Si no hay punto final configurado no se renderiza nada: el sitio no envía un solo byte
- * de telemetría en desarrollo ni en las pruebas, y la Página de Cita sigue sin descargar
- * ningún fichero de script.
+ * Dos piezas, y solo la primera va en línea:
+ *
+ *   · **el arranque** (`ARRANQUE_DE_MEDICION`), siempre, en toda página del armazón —también
+ *     `/kit`, `/lote` y un sitio construido sin punto final—: abre la cola `__medir` antes de
+ *     cualquier isla, para que las islas llamen `__medir(…)` a secas. No envía nada.
+ *   · **la etiqueta del fichero**, `<script src="/medicion/{versión}.js" defer>`, solo con punto
+ *     final y solo si la ruta carga la medición, que lo dice `src/lib/superficies.ts`
+ *     (`cargaLaMedicion`: toda superficie `producto` o `servicio`; `/kit` y `/lote`, no). Sin
+ *     punto final no hay fichero que pedir y no se pide.
+ *
+ * Qué vista emite la página no se decide aquí ni en la página: va en el `data-vistas` del
+ * `<html>`, que pone `Armazon.astro` desde la misma declaración, y lo lee el fichero.
  */
-import { EVENTO_DE_VISTA, guionDeMedicion, puntoFinal, emitir, type Vista } from '../lib/medicion.ts';
+import { ARRANQUE_DE_MEDICION, puntoFinal, rutaDelGuionDeMedicion } from '../lib/medicion.ts';
 
 interface Props {
-  /**
-   * El evento de vista que emite la página, si emite alguno: `cita` solo desde la Página
-   * de Cita, `superficie` solo desde una superficie de agregación de producto. Una sola
-   * prop, así que las dos vistas a la vez son imposibles por tipo.
-   */
-  vista?: Vista;
+  /** Si la ruta carga el fichero de medición: `consecuenciasDe(ruta).cargaLaMedicion`. */
+  carga: boolean;
 }
 
-const { vista } = Astro.props;
+const { carga } = Astro.props;
 // Se lee de `process.env` y no de `import.meta.env`: Astro solo expone en esta última
 // las variables con prefijo público, y el punto final no debe serlo. El frontmatter se
 // evalúa en Node durante el build, así que `process.env` es el sitio correcto.
 const url = puntoFinal(process.env);
-const guion = url === null ? null : guionDeMedicion(url);
+const fichero = url !== null && carga ? rutaDelGuionDeMedicion(url) : null;
 ---
 
-{
-  guion !== null && (
-    <script
-      is:inline
-      set:html={vista === undefined ? guion : `${guion}\n${emitir(EVENTO_DE_VISTA[vista])}`}
-    />
-  )
-}
+<script is:inline set:html={ARRANQUE_DE_MEDICION} />
+{fichero !== null && <script is:inline src={fichero} defer></script>}

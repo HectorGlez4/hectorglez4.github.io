@@ -16,7 +16,14 @@ import {
   limpiar,
   TIENDA_DE_PRUEBA,
 } from './ayuda/construir.js';
-import { bytesDeGuionEnLinea } from './ayuda/guion.js';
+import {
+  bytesDeGuionEnLinea,
+  etiquetasDeGuionExterno,
+  guionesEnLinea,
+  guionesExternosDe,
+} from './ayuda/guion.js';
+import { ARRANQUE_DE_MEDICION } from '../../src/lib/medicion.ts';
+import { guionExternoDe } from '../../src/lib/guiones.ts';
 import {
   MARCA_DE_INGRESO,
   MODELOS,
@@ -180,6 +187,7 @@ describe('Historia 14.1 — el sitio con los cuatro Modelos apagados', () => {
   let segunda: Record<string, string> = {};
   let paginas: Record<string, string> = {};
   let hojasCss: Record<string, string> = {};
+  let guionesJs: Record<string, string> = {};
 
   beforeAll(async () => {
     /*
@@ -211,6 +219,7 @@ describe('Historia 14.1 — el sitio con los cuatro Modelos apagados', () => {
     segunda = await huellaDe(join(dos.proyecto, 'dist'));
     paginas = await paginasDe(join(uno.proyecto, 'dist'));
     hojasCss = await ficherosConExtension(join(uno.proyecto, 'dist'), '.css');
+    guionesJs = await ficherosConExtension(join(uno.proyecto, 'dist'), '.js');
   }, 240_000);
 
   afterAll(async () => {
@@ -229,10 +238,11 @@ describe('Historia 14.1 — el sitio con los cuatro Modelos apagados', () => {
      * `MEDICION_ENDPOINT` no llegara nunca al build. Dos mitades:
      *
      *   · la dirección **llegó** al build, y se ve en el sitio construido, porque el guion de
-     *     la baliza la lleva escrita dentro (AD-13);
+     *     la baliza la lleva escrita dentro (AD-13). Desde la Historia 23.1 ese guion es el
+     *     fichero `/medicion/{versión}.js`, no un trozo de cada página;
      *   · el contador **sabe** contar, comprobado pidiéndole algo a mano.
      */
-    expect(Object.values(paginas).some((html) => html.includes(endpoint))).toBe(true);
+    expect(Object.values(guionesJs).some((js) => js.includes(endpoint))).toBe(true);
 
     const antes = peticiones;
     await fetch(endpoint);
@@ -806,13 +816,39 @@ describe('Historia 17.5 — el tope de guion, con todo encendido donde se admite
     expect(conModelo.map(([relativa]) => rutaDe(relativa)).sort()).toEqual(esperadas);
 
     for (const [relativa, html] of conModelo) {
-      // El instalador de la medición tiene que estar: sin él se mediría menos de lo servido.
-      expect(html, relativa).toContain('window.__medir=function');
+      /*
+       * La medición tiene que estar puesta: sin ella se mediría menos de lo servido. Desde la
+       * Historia 23.1 lo que lo dice es la etiqueta del fichero —el emisor ya no va en línea—,
+       * y lo que cuenta aquí del lado de la medición es el arranque.
+       */
+      expect(
+        etiquetasDeGuionExterno(html).filter((e) => guionExternoDe(e.src)?.id === 'medicion'),
+        relativa,
+      ).toHaveLength(1);
+      expect(guionesEnLinea(html), relativa).toContain(ARRANQUE_DE_MEDICION);
       const bytes = bytesDeGuionEnLinea(html);
       expect(bytes, `${relativa}: ${bytes} bytes de guion en línea`).toBeLessThan(
         MAX_BYTES_DE_GUION,
       );
     }
+  });
+
+  it('con todo encendido, lo que cada ruta pide como guion está en la lista cerrada — Historia 23.1', () => {
+    /*
+     * La lista cerrada de `src/lib/guiones.ts` se recorre en `tests/unit/medicion.test.ts` sobre
+     * un sitio con los Modelos apagados; aquí es donde un Modelo encendido podría traer un
+     * `<script src>` o un `import()` de un tercero —publicidad, afiliación, donaciones—, así que
+     * se pasa el mismo detector por cada página de esta construcción.
+     */
+    let pedidos = 0;
+    for (const [relativa, html] of Object.entries(paginas)) {
+      for (const especificador of guionesExternosDe(html)) {
+        pedidos++;
+        expect(guionExternoDe(especificador), `${relativa} pide «${especificador}», fuera de GUIONES_EXTERNOS`).toBeDefined();
+      }
+    }
+    // Con la medición puesta, toda página que se visita pide al menos el fichero de medición.
+    expect(pedidos).toBeGreaterThan(0);
   });
 
   it('y el contador de guion cuenta bytes de guion, no el ld+json ni lo que se descarga', () => {
@@ -880,7 +916,8 @@ describe('Historia 17.5 — la página 2+ de un listado admitido no lleva el Mod
     );
 
     const IMPORTACION = "import TarjetaDeCita from '../../../components/TarjetaDeCita.astro';";
-    const PAGINACION = '<Paginacion pagina={pagina} />';
+    // Con su Zona de salida interna desde la Historia 23.7.
+    const PAGINACION = '<Paginacion pagina={pagina} zona="paginacion" />';
     const pagina = await readFile(resolve(RAIZ, 'src/pages', TEMA), 'utf8');
     expect(pagina.split(IMPORTACION), 'la página de Tema cambió de forma').toHaveLength(2);
     expect(pagina.split(PAGINACION), 'la página de Tema cambió de forma').toHaveLength(2);

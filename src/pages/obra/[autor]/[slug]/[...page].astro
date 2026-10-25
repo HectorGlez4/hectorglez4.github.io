@@ -27,7 +27,6 @@ import {
   autoresPublicados,
   conjuntoPublicable,
   obrasPublicadas,
-  rutasIndexables,
   temasDeLaObra,
   temasPublicados,
   type Cita,
@@ -37,12 +36,7 @@ import { edicionesEnVenta, modelosEnRuta } from '../../../../lib/ingreso.ts';
 import { descripcionDeObra } from '../../../../lib/atribucion.ts';
 import { CITAS_POR_PAGINA } from '../../../../lib/umbrales.ts';
 import { tituloDeObra } from '../../../../lib/marca.ts';
-import {
-  caracterDe,
-  declararRutasIndexables,
-  rutaDeAutor,
-  rutaDeTema,
-} from '../../../../lib/superficies.ts';
+import { rutaDeAutor, rutaDeTema } from '../../../../lib/superficies.ts';
 import type { GetStaticPaths, InferGetStaticPropsType } from 'astro';
 
 export const getStaticPaths = (async ({ paginate }) => {
@@ -98,15 +92,6 @@ const canonica = new URL(ruta, Astro.site).href;
 const primera = pagina.currentPage === 1;
 
 /*
- * Historia 20.1 — la vista de superficie sale si y solo si la ruta es de producto: la página 1
- * de una Obra **indexable**. Una Obra con `noindex` es servicio por contenido y no la emite,
- * igual que una página 2+. La lista se declara aquí porque esta pregunta llega antes que el
- * armazón, que la declara también.
- */
-declararRutasIndexables(rutasIndexables(await conjuntoPublicable()));
-const emiteVista = caracterDe(ruta) === 'producto';
-
-/*
  * Historia 22.9 — las ediciones en venta. Se pregunta por la **ruta**: la afiliación se admite
  * en esta superficie, y `modelosEnRuta` la excluye por forma de las páginas 2+ y la deja en la 1
  * se indexe la Obra o no. Apagada, no hay `enVenta` y «Dónde leer» se pinta como antes.
@@ -124,7 +109,6 @@ const enVenta =
   ruta={ruta}
   tipo="obra"
   tarjeta={tarjeta}
-  vista={emiteVista ? 'superficie' : undefined}
 >
   <DatosDeObra
     slot="cabeza"
@@ -147,7 +131,8 @@ const enVenta =
         * título de la Obra; Pagefind lo toma del texto del enlace. Las páginas 2+ no entran en
         * el índice, así que lo lleve o no da igual.
         */}
-      <p class="de">
+      {/* Historia 23.7 — el Autor de la Cabecera de Obra sale por la zona de la Atribución. */}
+      <p class="de" data-zona="atribucion">
         de <a href={rutaDeAutor(autor.slug)} class="enlace-en-tinta" data-pagefind-meta="autor">{autor.nombre}</a>{
           obra.año !== undefined && (
             <>
@@ -160,16 +145,16 @@ const enVenta =
 
     {/* UX-DR40 — el listado de la Obra: las Tarjetas **sin** el Autor, que ya dice la Cabecera. */}
     <ul class="listado">
-      {pagina.data.map((cita) => <TarjetaDeCita cita={cita} autor={undefined} />)}
+      {pagina.data.map((cita) => <TarjetaDeCita cita={cita} autor={undefined} zona="listado" />)}
     </ul>
 
-    <Paginacion pagina={pagina} />
+    <Paginacion pagina={pagina} zona="paginacion" />
 
     {
       primera && temas.length > 0 && (
         <section class="temas" aria-labelledby="temas-de-la-obra">
           <Rotulo id="temas-de-la-obra">Temas</Rotulo>
-          <Chips enlaces={temas.map((tema) => ({ href: rutaDeTema(tema.slug), nombre: tema.nombre }))} />
+          <Chips enlaces={temas.map((tema) => ({ href: rutaDeTema(tema.slug), nombre: tema.nombre }))} zona="chip-de-tema" />
         </section>
       )
     }

@@ -13,7 +13,7 @@
  */
 
 import { textoParaCopiar } from './atribucion.ts';
-import { DESTINOS_CONOCIDOS, type IdDeDestino } from './destinos.ts';
+import type { IdDeDestino } from './destinos.ts';
 import type { Cita, Autor } from './publicado.ts';
 
 // Se reexportan para quien ya los consumía por aquí. El conjunto cerrado vive en
@@ -29,7 +29,11 @@ export interface Destino {
 }
 
 /**
- * Los destinos que se ofrecen cuando no hay hoja del sistema.
+ * El constructor de cada destino de enlace — FR-18, AD-13, Historia 23.2.
+ *
+ * Uno por identificador de `DESTINOS_DE_ENLACE`, ni uno de más ni uno de menos: lo exige el
+ * tipo, así que un destino de enlace sin constructor no compila. Ninguno para la Historia de
+ * Instagram ni para la hoja del sistema, que no reciben una dirección (`destinos.ts`).
  *
  * Están **todos** los que admiten recibir un enlace desde la web, y solo esos. Instagram
  * y TikTok no están, y su ausencia es la decisión: ninguna de las dos acepta un enlace
@@ -38,33 +42,62 @@ export interface Destino {
  * lo prohíbe explícitamente. Para esas dos, el camino es la Imagen y la hoja del sistema
  * de FR-17.
  *
+ * Facebook es la excepción declarada a «el texto y el enlace dentro»: su diálogo de
+ * compartir solo admite la dirección, y el texto lo pone quien comparte —o lo compone
+ * Facebook con la vista previa de la página—. Threads admite los dos.
+ *
  * Ninguno pide registrarse en este sitio: son direcciones públicas que el navegador abre.
  */
-/** Un destino por identificador conocido, en el mismo orden y sin ninguno de más. */
-export const DESTINOS: readonly Destino[] = [
-  {
+export const CONSTRUCTORES: { readonly [Id in IdDeDestino]: Destino } = {
+  whatsapp: {
     id: 'whatsapp',
     nombre: 'WhatsApp',
     enlace: (texto, url) => `https://wa.me/?text=${encodeURIComponent(`${texto} ${url}`)}`,
   },
-  {
+  telegram: {
     id: 'telegram',
     nombre: 'Telegram',
     enlace: (texto, url) =>
       `https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(texto)}`,
   },
-  {
+  x: {
     id: 'x',
     nombre: 'X',
     enlace: (texto, url) =>
       `https://x.com/intent/post?text=${encodeURIComponent(texto)}&url=${encodeURIComponent(url)}`,
   },
-  {
+  correo: {
     id: 'correo',
     nombre: 'Correo',
     enlace: (texto, url) =>
       `mailto:?subject=${encodeURIComponent('Una cita')}&body=${encodeURIComponent(`${texto}\n\n${url}`)}`,
   },
+  facebook: {
+    id: 'facebook',
+    nombre: 'Facebook',
+    enlace: (_texto, url) => `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`,
+  },
+  threads: {
+    id: 'threads',
+    nombre: 'Threads',
+    enlace: (texto, url) =>
+      `https://www.threads.com/intent/post?text=${encodeURIComponent(texto)}&url=${encodeURIComponent(url)}`,
+  },
+};
+
+/**
+ * Los destinos que se ofrecen cuando no hay hoja del sistema, en el orden en que se pintan.
+ *
+ * Son los cuatro de siempre: que Facebook y Threads tengan constructor no los pone en la
+ * página. Pintarlos —con la rejilla de «Compartir en», la Historia y la Marca de difusión— es
+ * de la Historia 25.1, y hasta entonces el bloque de la Página de Cita es idéntico al de la
+ * v7.1.
+ */
+export const DESTINOS_OFRECIDOS: readonly Destino[] = [
+  CONSTRUCTORES.whatsapp,
+  CONSTRUCTORES.telegram,
+  CONSTRUCTORES.x,
+  CONSTRUCTORES.correo,
 ];
 
 /**

@@ -28,6 +28,16 @@ import { extname, join, normalize } from 'node:path';
 const RAIZ = process.env.DIST ?? new URL('../dist/', import.meta.url).pathname;
 const puerto = Number(process.env.PUERTO ?? 4321);
 
+/*
+ * `SERVIDOR_CACHE_CONTROL` permite servir con otra cabecera de caché que `no-store` —Historia
+ * 23.5—. Por omisión todo se sirve `no-store`, como siempre, y eso deja la página fuera de la
+ * caché de atrás y adelante del navegador. El alojamiento sirve `max-age=600` (DESPLIEGUE.md §1),
+ * así que la prueba que necesita volver atrás por esa caché lo pide aquí, solo para su sitio. El
+ * nombre lleva el prefijo del servidor para que una variable genérica que quede en el entorno de
+ * quien prueba no cambie a escondidas la caché de toda la suite.
+ */
+const CACHE_CONTROL = process.env.SERVIDOR_CACHE_CONTROL || 'no-store';
+
 const TIPOS = {
   '.html': 'text/html; charset=utf-8',
   '.css': 'text/css; charset=utf-8',
@@ -94,7 +104,7 @@ createServer(async (peticion, respuesta) => {
 
   respuesta.writeHead(200, {
     'content-type': TIPOS[extname(fichero)] ?? 'application/octet-stream',
-    'cache-control': 'no-store',
+    'cache-control': CACHE_CONTROL,
   });
   respuesta.end(await readFile(fichero));
 }).listen(puerto, () => {

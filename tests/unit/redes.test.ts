@@ -38,15 +38,14 @@ describe('Historia 8.2 — el origen se coteja en los dos extremos', () => {
   const guion = guionDeMedicion('https://ejemplo.invalid/e');
 
   it('el guion solo deja salir una de las cinco', () => {
-    // Ejecutado con una marca válida y con otra inventada, en vez de leyendo su texto.
+    // Ejecutado con una marca válida y con otra inventada, en vez de leyendo su texto. La vista
+    // la declara la página (`data-vistas`): desde la 23.6, una que pida una isla sale sin marcas.
     for (const red of REDES_VALIDAS) {
-      const { emitir, balizas } = medicionEnUnSandbox({ busqueda: `?de=${red}` });
-      emitir('vista-de-cita');
+      const { balizas } = medicionEnUnSandbox({ busqueda: `?de=${red}`, vistas: 'vista-de-cita' });
       expect(balizas()[0].origen, red).toBe(red);
     }
 
-    const { emitir, balizas } = medicionEnUnSandbox({ busqueda: '?de=visitante-7f3a' });
-    emitir('vista-de-cita');
+    const { balizas } = medicionEnUnSandbox({ busqueda: '?de=visitante-7f3a', vistas: 'vista-de-cita' });
     expect(balizas()[0].origen).toBeNull();
   });
 
@@ -92,14 +91,23 @@ describe('Historia 8.2 — el origen se coteja en los dos extremos', () => {
     )!;
     expect(registro.jornada).toBe('2026-08-12');
     expect(registro.origen).toBe('tiktok');
-    // Y sigue sin haber nada por lo que agrupar personas.
-    expect(Object.keys(registro).sort()).toEqual([
-      'consulta',
-      'destino',
-      'evento',
-      'jornada',
-      'origen',
-      'ruta',
-    ]);
+    // Y sigue sin haber nada por lo que agrupar personas: las doce columnas de `esquema.sql`
+    // desde la Historia 23.2, ninguna de visitante.
+    expect(Object.keys(registro).sort()).toEqual(
+      [
+        'consulta',
+        'destino',
+        'evento',
+        'filtros',
+        'indexable',
+        'jornada',
+        'origen',
+        'primera',
+        'ruta',
+        'tramo',
+        'via',
+        'zona',
+      ].sort(),
+    );
   });
 });

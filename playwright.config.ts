@@ -24,14 +24,35 @@ export default defineConfig({
       use: { ...devices['Desktop Chrome'], viewport: { width: 1280, height: 900 } },
     },
   ],
-  webServer: {
-    // `astro preview` se demoniza en Astro 7 y deja el servidor de fondo, así que
-    // Playwright acababa hablando con un demonio huérfano que servía un `dist/` viejo.
-    // `tests/servidor.mjs` se queda en primer plano y sirve igual que el alojamiento.
-    command: 'npm run build && node tests/servidor.mjs',
-    url: 'http://localhost:4321',
-    reuseExistingServer: false,
-    timeout: 180_000,
-    stdout: 'ignore',
-  },
+  /*
+   * Historia 23.2 — dos servidores: el receptor local y el sitio construido **con** punto final.
+   *
+   * Las construcciones de rama con medición apuntan a `wrangler dev` con un D1 local, nunca a
+   * producción: así las pruebas ven el fichero de medición que se despliega, las balizas salen
+   * de verdad y el D1 local las guarda con el receptor de esta rama. `npm run medicion -- local`
+   * aplica antes las migraciones al D1 local (`medicion/.wrangler/`, que no se versiona), y
+   * contesta 204 a todo, también a la petición con la que Playwright espera a que arranque.
+   */
+  webServer: [
+    {
+      command: 'npm run medicion -- local',
+      url: 'http://localhost:8787',
+      reuseExistingServer: false,
+      timeout: 180_000,
+      stdout: 'ignore',
+      // `wrangler dev` cierra su D1 local con un SIGTERM; sin él, Playwright lo mata en seco.
+      gracefulShutdown: { signal: 'SIGTERM', timeout: 10_000 },
+    },
+    {
+      // `astro preview` se demoniza en Astro 7 y deja el servidor de fondo, así que
+      // Playwright acababa hablando con un demonio huérfano que servía un `dist/` viejo.
+      // `tests/servidor.mjs` se queda en primer plano y sirve igual que el alojamiento.
+      command: 'npm run build && node tests/servidor.mjs',
+      url: 'http://localhost:4321',
+      reuseExistingServer: false,
+      timeout: 180_000,
+      stdout: 'ignore',
+      env: { MEDICION_ENDPOINT: 'http://localhost:8787/' },
+    },
+  ],
 });

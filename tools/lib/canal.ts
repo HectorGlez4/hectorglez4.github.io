@@ -22,9 +22,11 @@
  */
 
 import { esJornada } from '../../src/lib/citaDelDia.ts';
+import { DESTINOS_VALIDOS, esDestinoValido } from '../../src/lib/destinos.ts';
 import { DOMINIO } from '../../src/lib/dominio.ts';
 import { PARAMETRO_DE_ORIGEN, REDES_VALIDAS, esRedValida, type Red } from '../../src/lib/redes.ts';
 import { esServicioPorForma, rutaNormalizada, superficieDeclaradaDe } from '../../src/lib/superficies.ts';
+import { PARAMETRO_DE_DIFUSION } from '../../src/lib/vocabulario.ts';
 import type { CensoPorFamilia } from './indexacion.ts';
 import { PRIMERA_JORNADA_ANOTABLE, familiaDeRuta, hostAjeno } from './rastreo.ts';
 
@@ -79,15 +81,38 @@ export type ComposicionDePublicacion =
   | { ok: true; publicacion: PublicacionDeCanal }
   | { ok: false; motivos: string[] };
 
-/** Los valores de `?de=` que trae lo tecleado, en el orden en que aparecen. */
-function marcasDeOrigen(dada: string): string[] {
-  // El fragmento se quita antes de buscar la consulta: un `?de=` detrás de `#` no llega al
+/**
+ * Los valores de una marca —`?de=` u `?via=`— que trae lo tecleado, en el orden en que
+ * aparecen. Una sola función para las dos, para que se lean con la misma regla.
+ */
+function marcasDe(dada: string, parametro: string): string[] {
+  // El fragmento se quita antes de buscar la consulta: una marca detrás de `#` no llega al
   // servidor, y no marca nada.
   const sinFragmento = dada.split('#')[0];
   const inicio = sinFragmento.indexOf('?');
   if (inicio === -1) return [];
   const consulta = sinFragmento.slice(inicio + 1);
-  return new URLSearchParams(consulta).getAll(PARAMETRO_DE_ORIGEN);
+  return new URLSearchParams(consulta).getAll(parametro);
+}
+
+/**
+ * Por qué un enlace propio no puede llevar `?via=` — Historia 23.6. La Marca de difusión la
+ * compone el sitio cuando un **visitante** comparte con uno de sus botones (FR-18), y nombra el
+ * botón: un enlace con ella que se publica desde una cuenta propia, o que Héctor pone en una bio,
+ * haría pasar por difusión de un visitante lo que trajo la cuenta. La redacción es una para
+ * `anotar` y para `senal --tipo propia`.
+ */
+function motivoDeDifusionPropia(marcas: readonly string[], que: 'el enlace' | 'el destino'): string {
+  // Todas las que trae, en su orden: una vacía se nombra como tal.
+  const nombradas = marcas
+    .map((marca) => `?${PARAMETRO_DE_DIFUSION}=${marca === '' ? ' (vacío)' : marca}`)
+    .join(', ');
+  return (
+    `${que === 'el enlace' ? 'El enlace' : 'El destino'} lleva ${nombradas}: ` +
+    `?${PARAMETRO_DE_DIFUSION}= es la marca de un ` +
+    'visitante que comparte con un botón del sitio, y no la de una cuenta propia; sus visitas ' +
+    'contarían como difusión. Pegue el enlace del Kit, o la ruta sin esa marca.'
+  );
 }
 
 /**
@@ -228,7 +253,7 @@ export function componerPublicacion(
     if (resuelta.ok) ruta = resuelta.ruta;
     else motivos.push(resuelta.motivo);
 
-    const marcas = marcasDeOrigen(entrada.ruta);
+    const marcas = marcasDe(entrada.ruta, PARAMETRO_DE_ORIGEN);
     const ajena = marcas.find((marca) => marca !== entrada.red);
     if (redValida && ajena !== undefined) {
       /*
@@ -242,6 +267,8 @@ export function componerPublicacion(
           `cuenta. Pegue el enlace del Kit para ${entrada.red}, o la ruta sin marca.`,
       );
     }
+    const difusion = marcasDe(entrada.ruta, PARAMETRO_DE_DIFUSION);
+    if (difusion.length > 0) motivos.push(motivoDeDifusionPropia(difusion, 'el enlace'));
     marcado = marcas.length > 0;
   }
 
@@ -556,11 +583,12 @@ export const CODIGOS_DE_SENAL =
   'Código 1 si lo dicho se rechaza: un origen que no es una URL http(s) absoluta, que es del ' +
   'dominio propio o de un subdominio suyo, localhost, una IP, un host sin punto o una URL con ' +
   'usuario o contraseña; un destino que el sitio no publica; una marca ?de= de una red que no ' +
-  'existe, o más de una; una fecha futura; un --retira sin señal igual viva en esa fecha; o un ' +
-  'registro que no se deja leer. Código 2 si falla la forma de la invocación: sin --tipo o con ' +
-  'un tipo que no es propia ni ajena; una bandera desconocida o repetida; argumentos de menos ' +
-  'o de más; un --fecha o un --retira sin forma de jornada; una --nota vacía; --tipo o --retira ' +
-  'fuera de senal. Ninguno de los dos escribe nada.';
+  'existe, o más de una distinta; una marca ?via= en una propia, o en una ajena de un destino ' +
+  'que no existe, o más de una distinta; una fecha futura; un --retira sin señal igual viva en ' +
+  'esa fecha; o un registro que no se deja leer. Código 2 si falla la forma de la invocación: ' +
+  'sin --tipo o con un tipo que no es propia ni ajena; una bandera desconocida o repetida; ' +
+  'argumentos de menos o de más; un --fecha o un --retira sin forma de jornada; una --nota ' +
+  'vacía; --tipo o --retira fuera de senal. Ninguno de los dos escribe nada.';
 
 /** Una señal externa anotada. */
 export interface SenalExterna {
@@ -576,6 +604,15 @@ export interface SenalExterna {
    * a mano con `false` se lee como sin marca.
    */
   marcado?: boolean;
+  /**
+   * Historia 23.6. La orden lo escribe, y cierto, solo en una **ajena** cuyo destino tecleado
+   * llevaba `?via=<destino>`: alguien copió el enlace de lo que un visitante compartió con un botón
+   * del sitio, y la visita que traiga llegará al receptor con su Marca de difusión. Una propia con
+   * `?via=` se rechaza, porque esa marca es de un visitante y no de una cuenta, y una propia a mano
+   * con el campo —cierto o falso— no se deja leer. Sin marca, el campo no se escribe; una ajena a
+   * mano con `false` se lee como sin marca.
+   */
+  compartido?: boolean;
   /**
    * Presente solo en una **corrección**: la fecha de la señal con la misma terna —origen,
    * destino y tipo— que esta entrada retira. El registro solo añade, así que deshacer una
@@ -648,7 +685,9 @@ export function motivoDeOrigen(origen: string): string | undefined {
  * destino se juzga exactamente como la ruta de una publicación (21.3): `rutasPublicadas`
  * decide, se recortan consulta y fragmento y se guarda la ruta del censo. La marca `?de=` se
  * juzga con la misma regla, salvo que aquí no hay red de la publicación con la que cotejarla:
- * basta con que nombre una red propia, y una sola.
+ * basta con que nombre una red propia, y una sola. La de difusión, `?via=` (Historia 23.6), se
+ * rechaza en una propia —es de un visitante—, y en una ajena se juzga con la regla de `?de=`
+ * contra los destinos de compartir: uno del conjunto, y uno solo.
  */
 export function componerSenal(
   entrada: {
@@ -683,7 +722,7 @@ export function componerSenal(
     else motivos.push(resuelta.motivo);
   }
 
-  const marcas = marcasDeOrigen(destinoDado);
+  const marcas = marcasDe(destinoDado, PARAMETRO_DE_ORIGEN);
   const invalida = marcas.find((marca) => !esRedValida(marca));
   if (invalida !== undefined) {
     motivos.push(
@@ -696,6 +735,26 @@ export function componerSenal(
       `El destino lleva más de una marca de origen (${marcas.join(', ')}): sus visitas se ` +
         'atribuirían a una sola de ellas. Pegue el enlace con una marca, o sin ninguna.',
     );
+  }
+
+  const difusion = marcasDe(destinoDado, PARAMETRO_DE_DIFUSION);
+  if (difusion.length > 0 && entrada.tipo === 'propia') {
+    motivos.push(motivoDeDifusionPropia(difusion, 'el destino'));
+  } else {
+    const ajeno = difusion.find((destino) => !esDestinoValido(destino));
+    if (ajeno !== undefined) {
+      motivos.push(
+        `El destino está compartido por ${ajeno === '' ? 'ningún destino («via=» vacío)' : `«${ajeno}»`}, ` +
+          `que no es uno de los destinos de compartir (${DESTINOS_VALIDOS.join(', ')}): sus visitas ` +
+          'llegarían al receptor con una difusión que no se cuenta. Pegue el enlace tal como lo ' +
+          'compartieron, o la ruta sin marca.',
+      );
+    } else if (new Set(difusion).size > 1) {
+      motivos.push(
+        `El destino lleva más de una marca de difusión (${difusion.join(', ')}): sus visitas se ` +
+          'atribuirían a una sola de ellas. Pegue el enlace con una marca, o sin ninguna.',
+      );
+    }
   }
 
   if (entrada.retira !== undefined && motivos.length === 0) {
@@ -719,6 +778,7 @@ export function componerSenal(
   if (motivos.length > 0) return { ok: false, motivos };
   const senal: SenalExterna = { fecha: entrada.fecha, tipo: entrada.tipo, origen, destino };
   if (marcas.length > 0) senal.marcado = true;
+  if (difusion.length > 0) senal.compartido = true;
   if (entrada.retira !== undefined) senal.retira = entrada.retira;
   if (entrada.nota !== undefined) senal.nota = entrada.nota;
   return { ok: true, senal };
@@ -806,6 +866,13 @@ export function resumenDeSenales(
     const ya = enlaces.find((e) => mismaTerna(e, senal));
     if (ya !== undefined) {
       ya.anotaciones += 1;
+      /*
+       * Revisión de la 23.6 — la terna no mira las marcas, así que un mismo enlace puede estar
+       * anotado una vez sin ellas y otra con ellas. El enlace lleva la marca si alguna de sus
+       * anotaciones vivas la lleva: si no, el aviso dependería de cuál se anotó antes.
+       */
+      if (senal.marcado === true) ya.marcado = true;
+      if (senal.compartido === true) ya.compartido = true;
       continue;
     }
     enlaces.push({
@@ -843,9 +910,15 @@ function lineaDeSenal(enlace: EnlaceExterno): string {
    * tomó de una publicación propia —y está bien que se diga—, o es propia mal clasificada.
    */
   const kit = enlace.tipo === 'ajena' && enlace.marcado === true ? '  ⚠ copia un enlace del Kit' : '';
+  /*
+   * Historia 23.6 — una ajena con `?via=` copia lo que compartió un visitante con un botón del
+   * sitio: alguien lo pegó en su página. Se dice, como el del Kit, y pueden ir los dos.
+   */
+  const compartido =
+    enlace.tipo === 'ajena' && enlace.compartido === true ? '  ⚠ copia un enlace compartido' : '';
   return (
     `    ${enlace.fecha}  ${enlace.origen}  →  ${enlace.destino}  ` +
-    `(${NOMBRE_DEL_DESTINO[enlace.familia]}${marca}${veces})${nota}${kit}`
+    `(${NOMBRE_DEL_DESTINO[enlace.familia]}${marca}${veces})${nota}${kit}${compartido}`
   );
 }
 

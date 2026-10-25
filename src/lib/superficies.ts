@@ -8,19 +8,41 @@
  * porque nadie puso la segunda bandera. El Kit se salvó solo porque allí sí se acordaron.
  * Una nota en AGENTS.md que hay que leer no es una puerta; esto sí lo es.
  *
- * De la declaración de abajo derivan las **cuatro** consecuencias, y las tres primeras
- * salen literalmente del mismo booleano, así que es imposible tener una sin las otras:
+ * De la declaración de abajo derivan las consecuencias, y las tres primeras salen
+ * literalmente del mismo booleano, así que es imposible tener una sin las otras:
  *
  *   · la entrada en el sitemap,
  *   · la etiqueta `noindex` para el buscador de fuera,
  *   · la entrada en el índice de la búsqueda propia, el buscador de dentro,
- *   · la entrada en el barrido automatizado de accesibilidad y móvil.
+ *   · la entrada en el barrido automatizado de accesibilidad y móvil —y, desde la Historia 23.4
+ *     (AD-17), también **contra qué** se barre: las etiquetas que se le piden a axe
+ *     (`ETIQUETAS_DEL_BARRIDO`) y quién responde de cada criterio que añade WCAG 2.2
+ *     (`CRITERIOS_QUE_AÑADE_WCAG_22`) se declaran aquí y en ningún fichero de prueba—,
+ *   · y la medición (Historia 23.1, AD-17): si la página carga el fichero de medición y qué
+ *     vistas emite —el `data-vistas` del `<html>`—. Ninguna página elige su vista: la declara
+ *     su superficie aquí, y solo la emite la ruta cuyo carácter efectivo es `producto`. La
+ *     excepción con nombre es la vista de Obra (Historia 23.9, `vistaConMarca`): la emite la
+ *     página 1 de **toda** Obra, se indexe o no, con una marca —`marcaDeObra`, al atributo
+ *     `ATRIBUTO_DE_INDEXABLE` del `<html>`— que dice lo mismo que su `noindex`, porque las dos
+ *     salen de la misma lista de rutas indexables.
  *
  * Vive en `src/lib/` y no en la configuración porque es derivación pura: no lee disco
  * (AD-5) y la consumen tanto el sitio —`Armazon.astro`— como `astro.config.mjs` y las
  * pruebas. Si viviera en la configuración, el armazón no podría leerla sin arrastrar
  * Astro al núcleo.
  */
+
+import { EVENTOS, type EventoDeVista } from './medicion.ts';
+import { MARCAS_DE_OBRA, type MarcaDeObra } from './vocabulario.ts';
+
+/**
+ * Las dos marcas de la vista de Obra, nombradas contra `MARCAS_DE_OBRA` del vocabulario y nunca
+ * escritas aquí: la de la página 1 de una Obra que se indexa y la de la que no (Historia 23.9).
+ */
+const [OBRA_INDEXABLE, OBRA_NO_INDEXABLE] = MARCAS_DE_OBRA;
+
+/** La vista de Obra (Historia 23.9): la única que una superficie declara con marca. */
+type VistaDeObra = typeof EVENTOS.vistaDeObra;
 
 /**
  * Qué es una superficie. No hay más valores, y añadir uno es una decisión visible:
@@ -42,8 +64,30 @@ export interface Superficie {
   pagina: string;
   /** Qué rutas construidas le pertenecen. Sin `g`: un `RegExp` global guarda estado entre llamadas. */
   reconoce: RegExp;
-  /** Su carácter, del que salen las cuatro consecuencias. */
+  /** Su carácter, del que salen las consecuencias. */
   caracter: Caracter;
+  /**
+   * La vista que emite la superficie cuando su ruta es `producto` — AD-13, Historia 23.1.
+   *
+   * Una sola y por el vocabulario (`EVENTOS`), nunca una cadena suelta: así una página no
+   * puede emitir a la vez la vista de Cita y la de superficie (Historia 20.1). El tipo solo admite
+   * esas dos —un evento de gesto aquí saldría en cada carga, y la vista de Obra va en su campo,
+   * `vistaConMarca`, porque sale con otra regla—. Sale al `data-vistas` del `<html>`, que lee el
+   * fichero de medición. Las páginas 2+ y la Obra que no se indexa no la emiten aunque su
+   * superficie la declare: su carácter efectivo es `servicio`. Es «sí y solo si producto».
+   */
+  vista?: Exclude<EventoDeVista, VistaDeObra>;
+  /**
+   * La vista con marca — FR-51, Historia 23.9: la vista de Obra (`EVENTOS.vistaDeObra`).
+   *
+   * Sale con otra regla que `vista`, y por eso va en su campo: la emite la página 1 de la
+   * superficie **se indexe o no** —no las 2+, que son servicio por forma—, detrás de `vista` si la
+   * ruta es producto, y con la marca que dice si lo es (`marcaDeObra` de `consecuenciasDe`). Si
+   * fuera una segunda `vista`, o la Obra que no se indexa la perdería, o la vista de superficie
+   * dejaría de ser «solo producto». Solo la declara una superficie `indexablePorContenido`: la marca
+   * sale de la lista de rutas indexables, y sin ella no hay qué marcar.
+   */
+  vistaConMarca?: VistaDeObra;
   /**
    * Publicabilidad **condicional** — FR-5.
    *
@@ -70,6 +114,31 @@ export interface Superficie {
    * declarada falla cerrado.
    */
   indexablePorContenido?: true;
+  /**
+   * La superficie de línea base — FR-56, AD-13, Historia 23.10.
+   *
+   * La unidad con que se agregan las lecturas de una superficie es la superficie misma, la portada
+   * incluida, nunca la familia; pero para la línea base dos superficies pueden ser una sola, que
+   * junta sus lecturas para el mínimo que la cierra: es el nombre que declaran las dos. Sin él, la
+   * superficie es su propia unidad (`superficieDeLineaBase`). La lectura de la línea base lo lee de
+   * forma genérica y no nombra ninguna ruta, y cada superficie se informa también por separado.
+   *
+   * Hoy no lo declara ninguna: lo declaran `/autores/` y `/obras/` cuando existan, las dos con
+   * `LINEA_BASE_DE_LOS_DIRECTORIOS` (Historias 26.3 y 26.4).
+   */
+  lineaBase?: string;
+}
+
+/**
+ * La superficie de línea base de los Directorios — Historia 23.10: «los Directorios», `/autores/`
+ * y `/obras/` juntos, como los nombran FR-56 y SM-4. La declaran sus dos superficies (26.3, 26.4),
+ * y la nombra la tabla de juicios por ventanas de la lectura de la línea base.
+ */
+export const LINEA_BASE_DE_LOS_DIRECTORIOS = 'los Directorios';
+
+/** La unidad de línea base de una superficie: la que declara, o ella misma por su nombre. */
+export function superficieDeLineaBase(superficie: Pick<Superficie, 'nombre' | 'lineaBase'>): string {
+  return superficie.lineaBase ?? superficie.nombre;
 }
 
 /**
@@ -86,18 +155,21 @@ export const SUPERFICIES: readonly Superficie[] = [
     pagina: 'index.astro',
     reconoce: /^\/$/,
     caracter: 'producto',
+    vista: EVENTOS.vistaDeSuperficie,
   },
   {
     nombre: 'la Página de Cita',
     pagina: 'cita/[slug].astro',
     reconoce: /^\/cita\/[^/]+$/,
     caracter: 'producto',
+    vista: EVENTOS.vistaDeCita,
   },
   {
     nombre: 'la Página de Autor',
     pagina: 'autor/[slug]/[...page].astro',
     reconoce: /^\/autor\/[^/]+(?:\/\d+)?$/,
     caracter: 'producto',
+    vista: EVENTOS.vistaDeSuperficie,
     // La forma completa, y no «acaba en dígitos»: el esquema de slugs de
     // `src/lib/admision.ts` admite un slug enteramente numérico, así que `/autor/1984` es
     // una Página de Autor y no la página 1984 de nada.
@@ -108,6 +180,7 @@ export const SUPERFICIES: readonly Superficie[] = [
     pagina: 'tema/[slug]/[...page].astro',
     reconoce: /^\/tema\/[^/]+(?:\/\d+)?$/,
     caracter: 'producto',
+    vista: EVENTOS.vistaDeSuperficie,
     // Anclada igual que la de Autor, y por el mismo motivo: `/tema/1984` es un Tema.
     noPublicableEn: /^\/tema\/[^/]+\/\d+$/,
   },
@@ -120,6 +193,7 @@ export const SUPERFICIES: readonly Superficie[] = [
     // el barrido de accesibilidad y móvil. No hay una segunda lista que tocar; si alguien
     // se ve añadiéndola en otro sitio, la Historia 12.1 no habría servido de nada.
     caracter: 'producto',
+    vista: EVENTOS.vistaDeSuperficie,
     // Anclada a la ruta entera igual que Autor y Tema, y por el mismo motivo: el esquema de
     // slugs admite uno enteramente numérico, así que `/coleccion/1984` es una Colección y no
     // la página 1984 de nada.
@@ -133,6 +207,12 @@ export const SUPERFICIES: readonly Superficie[] = [
     // indexa la que no repite otra (FR-52). Esa mitad la decide el Corpus, no la ruta: llega
     // por `declararRutasIndexables`, y sin ella `caracterDe` rompe en vez de adivinar.
     caracter: 'producto',
+    // Historia 20.1 — la emite solo la página 1 de una Obra indexable; la que repite otra
+    // página es `servicio` por contenido y no la emite, como una página 2+.
+    vista: EVENTOS.vistaDeSuperficie,
+    // Historia 23.9 — la vista de Obra la emite la página 1 de toda Obra, se indexe o no, con la
+    // marca que dice cuál de las dos es. La 2+ no.
+    vistaConMarca: EVENTOS.vistaDeObra,
     indexablePorContenido: true,
     // Anclada a la ruta entera, como Autor y Tema. Un slug de obra enteramente numérico no
     // llega a existir: `fallosDeObras` rompe el build antes, porque esta forma no lo vería.
@@ -257,7 +337,7 @@ export function rutaDeObra(autor: string, slugObra: string, pagina = 1): string 
   return rutaDePagina(`/obra/${autor}/${slugObra}/`, pagina);
 }
 
-/** Las cuatro consecuencias de declarar una superficie. */
+/** Las consecuencias de declarar una superficie que salen solo de su carácter. */
 export interface Consecuencias {
   /** Se anuncia en el sitemap. */
   enElSitemap: boolean;
@@ -267,10 +347,35 @@ export interface Consecuencias {
   enLaBusquedaPropia: boolean;
   /** Entra en el barrido automatizado de accesibilidad y móvil. */
   enElBarrido: boolean;
+  /**
+   * Carga el fichero de medición —la etiqueta `<script src defer>` del `<head>`, con punto
+   * final— (Historia 23.1, AD-6). Toda superficie que se visita lo carga, `producto` o
+   * `servicio`; una `ajena` —`/kit`, `/lote`— no, aunque lleve el arranque como todas.
+   */
+  cargaLaMedicion: boolean;
+}
+
+/** Las consecuencias de una ruta concreta: las de su carácter, las vistas que emite y su marca. */
+export interface ConsecuenciasDeRuta extends Consecuencias {
+  /**
+   * Las vistas que emite la ruta, en el `data-vistas` del `<html>` (Historia 23.1), en este orden:
+   * la `vista` de su superficie si su carácter efectivo es `producto`, y después la vista con marca
+   * (`vistaConMarca`, Historia 23.9) si es la página 1 de una superficie que la declara, se indexe o
+   * no. Ninguna si no.
+   */
+  vistas: readonly EventoDeVista[];
+  /**
+   * La marca de la vista de Obra — FR-52, Historia 23.9, al atributo `ATRIBUTO_DE_INDEXABLE` del
+   * `<html>`. Solo en la ruta que emite la vista con marca: de `MARCAS_DE_OBRA`, la indexable si
+   * la ruta no lleva `noindex` y la otra si lo lleva —sale de su mismo `noIndexar`, que en la Obra
+   * dice si es producto o servicio por contenido según la lista declarada—. En toda otra ruta la
+   * clave se omite.
+   */
+  marcaDeObra?: MarcaDeObra;
 }
 
 /**
- * La tabla que deriva las cuatro consecuencias del carácter.
+ * La tabla que deriva del carácter las consecuencias que solo dependen de él.
  *
  * Las tres primeras salen del **mismo** booleano a propósito. Es lo que impide el defecto
  * que la historia cierra: no hay forma de escribir una superficie `noindex` para el
@@ -283,6 +388,7 @@ export function consecuenciasDelCaracter(caracter: Caracter): Consecuencias {
     noIndexar: !publicable,
     enLaBusquedaPropia: publicable,
     enElBarrido: caracter !== 'ajena',
+    cargaLaMedicion: caracter !== 'ajena',
   };
 }
 
@@ -429,6 +535,9 @@ function indexablePorContenido(ruta: string, superficie: Superficie): boolean {
   return rutasIndexablesDeclaradas.has(ruta);
 }
 
+/** Las causas por las que una ruta de producto se sirve como `servicio` (abajo). */
+export type CausaDelServicio = 'forma' | 'contenido';
+
 /**
  * Por qué una ruta de producto se sirve como `servicio`, o `undefined` si no es el caso:
  *
@@ -440,7 +549,7 @@ function indexablePorContenido(ruta: string, superficie: Superficie): boolean {
  * un producto degradado, es lo que es. Rompe, como `caracterDe`, si la ruta no está declarada o
  * si la causa depende de una lista que no se ha declarado.
  */
-export function causaDelServicio(rutaOUrl: string): 'forma' | 'contenido' | undefined {
+export function causaDelServicio(rutaOUrl: string): CausaDelServicio | undefined {
   const ruta = rutaNormalizada(rutaOUrl);
   const superficie = superficieDeclarada(ruta);
   if (esServicioPorForma(ruta)) return 'forma';
@@ -481,13 +590,39 @@ function superficieDeclarada(ruta: string): Superficie {
  */
 export function caracterDe(rutaOUrl: string): Caracter {
   const ruta = rutaNormalizada(rutaOUrl);
-  const superficie = superficieDeclarada(ruta);
-  return causaDelServicio(ruta) === undefined ? superficie.caracter : 'servicio';
+  return caracterPorCausa(superficieDeclarada(ruta), causaDelServicio(ruta));
 }
 
-/** Las cuatro consecuencias de una ruta concreta. Es lo que consume `Armazon.astro`. */
-export function consecuenciasDe(rutaOUrl: string): Consecuencias {
-  return consecuenciasDelCaracter(caracterDe(rutaOUrl));
+/** El carácter efectivo de una superficie según la causa de su servicio: la única regla. */
+function caracterPorCausa(superficie: Superficie, causa: CausaDelServicio | undefined): Caracter {
+  return causa === undefined ? superficie.caracter : 'servicio';
+}
+
+/**
+ * Las consecuencias de una ruta concreta. Es lo que consume `Armazon.astro`.
+ *
+ * La vista con marca (Historia 23.9) sale en la página 1 de una superficie que la declara —en una
+ * página 2+ (causa `forma`) no sale—, y su marca sale del **mismo** `noIndexar` que la página
+ * pinta: la no indexable si la página lleva `noindex` y la indexable si no. No se deduce de la causa
+ * ni de la superficie por otro camino, así que no puede decir otra cosa que el `noindex` aunque una
+ * superficie de otro carácter llegara a declarar la vista, y sigue a FR-52 y a la congelación igual
+ * que él. La causa del servicio se calcula una sola vez.
+ */
+export function consecuenciasDe(rutaOUrl: string): ConsecuenciasDeRuta {
+  const ruta = rutaNormalizada(rutaOUrl);
+  const superficie = superficieDeclarada(ruta);
+  const causa = causaDelServicio(ruta);
+  const caracter = caracterPorCausa(superficie, causa);
+  const consecuencias = consecuenciasDelCaracter(caracter);
+  const vistas: EventoDeVista[] = caracter === 'producto' && superficie.vista !== undefined ? [superficie.vista] : [];
+  if (superficie.vistaConMarca === undefined || causa === 'forma') {
+    return { ...consecuencias, vistas };
+  }
+  return {
+    ...consecuencias,
+    vistas: [...vistas, superficie.vistaConMarca],
+    marcaDeObra: consecuencias.noIndexar ? OBRA_NO_INDEXABLE : OBRA_INDEXABLE,
+  };
 }
 
 /**
@@ -539,4 +674,176 @@ export function superficiesDelBarrido(rutasConstruidas: readonly string[]): stri
     if (muestra !== undefined) muestras.push(muestra);
   }
   return muestras;
+}
+
+/**
+ * Historia 23.4 — contra qué se barre: las etiquetas que el barrido le pide a axe (AD-17).
+ *
+ * El suelo declarado es WCAG 2.2 AA (NFR-9, UX-DR103), y el barrido pedía solo hasta 2.1:
+ * `wcag2a`, `wcag2aa`, `wcag21a` y `wcag21aa`, escritas a mano en tres llamadas de dos ficheros
+ * de prueba. Tres copias de una lista son tres sitios donde subir el suelo, y el día que se
+ * subió en uno los otros dos habrían seguido barriendo contra el de antes sin que nada fallara.
+ * Ahora la lista existe aquí, una vez, junto a la que dice **qué** superficies se barren, y
+ * `tests/unit/superficies.test.ts` falla si un fichero de `tests/e2e/` escribe la suya.
+ *
+ * Por qué estas cinco y no otras. Las etiquetas de axe **no se acumulan**: cada una marca solo
+ * las reglas de los criterios que esa versión de WCAG añade en ese nivel, así que los conjuntos
+ * son disjuntos y es quien barre el que tiene que sumarlos. `wcag22aa` trae solo lo que añade
+ * 2.2 en AA, y sin las cuatro de 2.1 el barrido dejaría de mirar el contraste o el nombre de
+ * los enlaces. Las de AAA (`wcag2aaa`) quedan fuera porque no son el suelo, y `wcag22a` porque
+ * los dos criterios A que añade 2.2 —3.2.6 y 3.3.7— no tienen regla en axe y no aplican aquí
+ * (abajo). Si axe le diera regla a alguno, la prueba de `axe.getRules()` lo dice antes de que
+ * haga falta pedirla. Lo que 2.2 **quita** —4.1.1, Procesamiento— axe ya lo marca
+ * `wcag2a-obsolete` y retirado, así que `wcag2a` no lo trae.
+ *
+ * `as const` y congelada: `withTags` de `@axe-core/playwright` tipa `string | string[]`, así que
+ * quien la pasa la expande (`[...ETIQUETAS_DEL_BARRIDO]`), y nadie puede mutarla desde una
+ * prueba a fuerza de un cast: cada barrido la comparte, y también la comprobación de lo que
+ * corrió.
+ */
+export const ETIQUETAS_DEL_BARRIDO = Object.freeze([
+  'wcag2a',
+  'wcag2aa',
+  'wcag21a',
+  'wcag21aa',
+  'wcag22aa',
+] as const);
+
+/**
+ * Quién responde de un criterio de WCAG 2.2. Tres formas y ninguna más:
+ *
+ *   · `axe` — lo comprueba el barrido con una regla que existe en la versión instalada y que
+ *     lleva la etiqueta del criterio;
+ *   · `ux` — axe no tiene regla para él, y lo da por cumplido la UX con un motivo escrito
+ *     (`EXPERIENCE.md`, «Accessibility Floor»). No se da por comprobado: nadie lo mide;
+ *   · `no-aplica` — el sitio no tiene aquello de lo que el criterio habla, y el motivo lo dice.
+ */
+export type ResponsableDeCriterio =
+  | { comprueba: 'axe'; regla: string }
+  | { comprueba: 'ux'; motivo: string }
+  | { comprueba: 'no-aplica'; motivo: string };
+
+export type CriterioDeWcag = {
+  /** El número del criterio, tal cual lo numera WCAG: `'2.5.8'`. */
+  criterio: string;
+  nivel: 'A' | 'AA';
+  /** Su nombre en español; sale en el título de la prueba que lo enuncia. */
+  nombre: string;
+} & ResponsableDeCriterio;
+
+/**
+ * Historia 23.4 — los seis criterios A y AA que WCAG 2.2 añade a 2.1, y quién responde de
+ * cada uno. Es un dato y no un comentario porque la prueba del navegador enuncia el reparto en
+ * sus títulos y la de Vitest lo coteja contra las reglas que trae axe: un comentario no avisa
+ * el día que deja de ser cierto.
+ *
+ * De dónde sale cada motivo: `EXPERIENCE.md`, «Accessibility Floor» —«de lo que añade 2.2, la
+ * v8 cumple 2.4.11, 2.5.7 y 2.5.8, y 3.2.6, 3.3.7 y 3.3.8 no aplican»—, y la revisión de
+ * accesibilidad de la UX que lo razona: no hay cabecera fija que tape el foco, no hay arrastre,
+ * no hay ayuda, entrada repetida ni autenticación. Lo que de eso se deja ver en el código —nada
+ * fijo, pegado o en la capa superior, nada que se arrastre, ningún enlace de contacto, ningún
+ * formulario que no sea de búsqueda, ningún campo de contraseña— no se afirma aquí a mano: lo
+ * vigila `tests/unit/superficies.test.ts` sobre `src/` y `public/`, una señal por criterio, y el
+ * día que aparezca, la prueba pide revisar el motivo antes de que el título del barrido mienta.
+ *
+ * Por qué 2.4.11 y 2.5.7 son `ux` y no `axe`: la 4.14.0 de axe no tiene ninguna regla con
+ * `wcag2411` ni con `wcag257` —que algo se tape o se arrastre depende de cómo se usa la
+ * página, no de su marcado—. Darlos por comprobados porque el barrido sale en verde sería
+ * afirmar lo que nadie ha medido. Lo más cerca que llega una prueba es la de
+ * `tests/e2e/accesibilidad.spec.ts` que exige que nada fijo tape el contenido al cargar, y eso
+ * no es el criterio: el foco puede quedar tapado por algo pequeño o al desplazarse.
+ *
+ * El 2.5.8 sí es `axe`: `target-size`, que en la 4.14.0 es la única regla de `wcag22aa` y ya
+ * no da por solapados dos enlaces con el mismo destino, que es lo que la v8 va a apilar. El
+ * sitio pide 44 px por decisión de producto (`EXPERIENCE.md`), muy por encima de los 24 del
+ * criterio; la regla vigila el suelo, no la decisión.
+ */
+export const CRITERIOS_QUE_AÑADE_WCAG_22: readonly CriterioDeWcag[] = [
+  {
+    criterio: '2.4.11',
+    nivel: 'AA',
+    nombre: 'Foco no oculto (mínimo)',
+    comprueba: 'ux',
+    motivo: 'ninguna superficie lleva nada fijo que tape el foco',
+  },
+  {
+    criterio: '2.5.7',
+    nivel: 'AA',
+    nombre: 'Movimientos de arrastre',
+    comprueba: 'ux',
+    motivo: 'ninguna función se maneja arrastrando',
+  },
+  {
+    criterio: '2.5.8',
+    nivel: 'AA',
+    nombre: 'Tamaño del objetivo (mínimo)',
+    comprueba: 'axe',
+    regla: 'target-size',
+  },
+  {
+    criterio: '3.2.6',
+    nivel: 'A',
+    nombre: 'Ayuda consistente',
+    comprueba: 'no-aplica',
+    motivo: 'el sitio no ofrece ningún mecanismo de ayuda',
+  },
+  {
+    criterio: '3.3.7',
+    nivel: 'A',
+    nombre: 'Entrada redundante',
+    comprueba: 'no-aplica',
+    motivo: 'ningún proceso pide dos veces el mismo dato',
+  },
+  {
+    criterio: '3.3.8',
+    nivel: 'AA',
+    nombre: 'Autenticación accesible (mínimo)',
+    comprueba: 'no-aplica',
+    motivo: 'no hay autenticación',
+  },
+];
+
+/**
+ * La etiqueta con la que axe marca las reglas de un criterio: `'2.4.11'` → `'wcag2411'`.
+ *
+ * Es la convención de axe —`wcag` y los dígitos del número sin puntos—, y vive aquí para que
+ * las dos pruebas que cotejan el reparto la compongan igual. Rompe con nombre ante algo que no
+ * tiene forma de número de criterio, en vez de devolver una etiqueta que no casaría con nada y
+ * dejaría la comprobación en verde por vacía.
+ */
+export function etiquetaDeAxe(criterio: string): string {
+  if (!/^[1-4]\.\d+\.\d+$/.test(criterio)) {
+    throw new Error(`«${criterio}» no tiene forma de criterio de WCAG (principio.pauta.criterio).`);
+  }
+  return `wcag${criterio.replaceAll('.', '')}`;
+}
+
+/**
+ * Las etiquetas con las que axe deja una regla fuera de todo barrido por etiquetas, salvo que se
+ * pidan por su nombre (su `tagExclude` por omisión). Una regla experimental o retirada que lleve
+ * `wcag22aa` **no corre** en el barrido, así que no mide nada aquí: no puede responder de un
+ * criterio `axe` y no desmiente un `ux` ni un `no-aplica`. Sin esto, la prueba de Vitest diría
+ * «reclasifícalo como `axe`» ante una regla experimental y la del navegador, que la ve sin
+ * correr, fallaría después: las dos gemelas tienen que llamar «regla de axe» a lo mismo. Que
+ * sean las de axe y no una copia que envejezca lo coteja `tests/unit/superficies.test.ts` contra
+ * el `tagExclude` de la axe instalada.
+ */
+export const ETIQUETAS_QUE_AXE_NO_CORRE = Object.freeze(['experimental', 'deprecated'] as const);
+
+/** Una regla tal como la describe axe: lo único que se mira de ella es su id y sus etiquetas. */
+export type ReglaDeAxe = { ruleId: string; tags: readonly string[] };
+
+/** Si axe corre la regla cuando se piden sus etiquetas: no es experimental ni está retirada. */
+export function axeLaCorre(regla: ReglaDeAxe): boolean {
+  return !regla.tags.some((t) => (ETIQUETAS_QUE_AXE_NO_CORRE as readonly string[]).includes(t));
+}
+
+/**
+ * Si el barrido de página entera la corre: axe la corre y lleva una de `ETIQUETAS_DEL_BARRIDO`.
+ * Es el conjunto que el barrido tiene que haber ejecutado, regla por regla, y con el que la
+ * prueba del navegador coteja lo que de verdad corrió: un barrido acotado a un nodo o a unas
+ * reglas sale en verde igual, y solo el conjunto ejecutado lo delata.
+ */
+export function elBarridoLaCorre(regla: ReglaDeAxe): boolean {
+  return axeLaCorre(regla) && regla.tags.some((t) => (ETIQUETAS_DEL_BARRIDO as readonly string[]).includes(t));
 }

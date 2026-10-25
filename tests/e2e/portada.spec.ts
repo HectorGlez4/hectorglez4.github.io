@@ -1,5 +1,6 @@
 import { expect, test } from '@playwright/test';
 import { MARCA } from '../../src/lib/marca.ts';
+import { apuntarGuiones, fueraDeLaListaAlCargar } from './ayuda/guiones.ts';
 
 /** Historia 4.1 — portada con Cita del Día. */
 
@@ -66,15 +67,26 @@ test.describe('Historia 4.1 — la portada', () => {
     await otro.close();
   });
 
-  test('el contenido está en el HTML inicial y no descarga scripts', async ({ page, request }) => {
-    const scripts: string[] = [];
-    page.on('response', (r) => {
-      if (r.request().resourceType() === 'script') scripts.push(r.url());
-    });
+  test('no descarga más guion que los declarados', async ({ page, baseURL }) => {
+    /*
+     * Historia 23.1 — de «no descarga ningún fichero de script» a «solo los guiones externos
+     * declarados», como enmienda la Historia 4.1: al cargar, a lo sumo el de medición, que es lo
+     * único de la lista cerrada de `src/lib/guiones.ts` que se pide sin tocar nada. Contra este
+     * servidor, construido desde la 23.2 con el punto final del receptor local
+     * (`playwright.config.ts`), se pide el fichero de medición —lo exige
+     * `receptor-local.spec.ts`, que además lo ve llegar al D1 local—, y esta prueba lo admite por
+     * estar en la lista.
+     * `tests/e2e/receptor.spec.ts` exige además que sea exactamente uno.
+     */
+    const pedidos = apuntarGuiones(page, baseURL!);
     await page.goto('/', { waitUntil: 'networkidle' });
-    expect(scripts).toHaveLength(0);
+    expect(fueraDeLaListaAlCargar(pedidos), `la portada pidió ${pedidos.join(', ')}`).toEqual([]);
+  });
 
-    // Y el texto de la Cita viaja en el HTML, sin ejecutar nada.
+  test('el contenido está en el HTML inicial', async ({ page, request }) => {
+    await page.goto('/');
+
+    // El texto de la Cita viaja en el HTML, sin ejecutar nada.
     const html = await (await request.get('/')).text();
     const texto = await page.locator('.del-dia blockquote .texto').innerText();
     expect(html).toContain(texto.slice(1, 30));

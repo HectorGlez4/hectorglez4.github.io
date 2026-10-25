@@ -6,14 +6,15 @@
  * porque no hay jerarquía que reflejar: el visitante entra por una hoja y se mueve
  * lateralmente entre hojas a través de Autor y Tema.
  *
- * NFR-2 — el contenido llega en el HTML inicial. AD-6 — la página no envía JavaScript.
+ * NFR-2 — el contenido llega en el HTML inicial. AD-6 — en línea van las islas y el arranque
+ * de la medición; lo que se descarga está en la lista cerrada de `src/lib/guiones.ts`.
  */
 import { Font } from 'astro:assets';
 import Medicion from './Medicion.astro';
-import type { Vista } from '../lib/medicion.ts';
 import DondeSeguirnos from './DondeSeguirnos.astro';
 import { LADO_DE_IOS, MARCA, TAMANOS_DEL_ICONO } from '../lib/marca.ts';
 import { consecuenciasDe, declararRutasIndexables } from '../lib/superficies.ts';
+import { ATRIBUTO_DE_INDEXABLE } from '../lib/medicion.ts';
 import { conjuntoPublicable, rutasIndexables } from '../lib/publicado.ts';
 import { tipoDeOpenGraph, type TipoDeResultado } from '../lib/tipoDeResultado.ts';
 import '../styles/tokens.css';
@@ -31,14 +32,6 @@ interface Props {
    * Esto **no** decide si la página se indexa: eso sale entero de `src/lib/superficies.ts`.
    */
   tipo?: TipoDeResultado;
-  /**
-   * El evento de vista que emite la página (AD-13): `cita` en la Página de Cita (SM-2),
-   * `superficie` en la portada y la página 1 de Autor, Tema y Colección (SM-8, FR-22).
-   * Una sola prop y no dos booleanos, para que las dos vistas a la vez no puedan pedirse.
-   * No la piden las de servicio —páginas 2+, `/buscar`, `/404`— ni las internas —`/kit`,
-   * `/lote`—: el carácter de cada ruta está declarado en `src/lib/superficies.ts`.
-   */
-  vista?: Vista;
   descripcion: string;
   /**
    * Ruta de la página, sin dominio. Compone la canónica de NFR-1 **y** es lo que decide
@@ -61,13 +54,18 @@ interface Props {
   tarjeta?: string;
 }
 
-const { titulo, descripcion, ruta, vista, tipo, tarjeta } = Astro.props;
+const { titulo, descripcion, ruta, tipo, tarjeta } = Astro.props;
 const canonica = new URL(ruta, Astro.site).href;
 
 /*
- * Las cuatro consecuencias de la declaración, derivadas de la ruta. `consecuenciasDe`
- * **rompe el build** si nadie ha declarado esta superficie: una página nueva sin
- * declaración no pasa desapercibida, se para aquí y el mensaje dice qué fichero tocar.
+ * Las consecuencias de la declaración, derivadas de la ruta. `consecuenciasDe` **rompe el
+ * build** si nadie ha declarado esta superficie: una página nueva sin declaración no pasa
+ * desapercibida, se para aquí y el mensaje dice qué fichero tocar.
+ *
+ * Historia 23.1 — de ahí salen también las vistas que emite la página, al `data-vistas` del
+ * `<html>`, y si carga el fichero de medición. Ninguna página elige su vista: la prop `vista`
+ * que las páginas pasaban hasta la 23.1 era una segunda copia de lo que ya decía la
+ * declaración, y cada página la recalculaba con su `currentPage === 1`.
  */
 /*
  * Historia 22.4 — si una Página de Obra se indexa depende del Corpus (FR-52), y
@@ -77,7 +75,15 @@ const canonica = new URL(ruta, Astro.site).href;
  * Obra en vez de adivinar. La lista se calcula una vez por conjunto.
  */
 declararRutasIndexables(rutasIndexables(await conjuntoPublicable()));
-const { noIndexar, enLaBusquedaPropia } = consecuenciasDe(ruta);
+const { noIndexar, enLaBusquedaPropia, vistas, cargaLaMedicion, marcaDeObra } = consecuenciasDe(ruta);
+/*
+ * Historia 23.9 — la marca de la vista de Obra, al `<html>` junto a `data-vistas`, y solo en la
+ * página 1 de una Obra: sale de la misma `consecuenciasDe` que el `noindex` de arriba, así que dice
+ * lo mismo que él, y el nombre del atributo es el que lee el fichero de medición
+ * (`ATRIBUTO_DE_INDEXABLE`). La comprobación de `astro:build:done` lo coteja en `dist/`. Se escribe
+ * también sin punto final, como `data-vistas`.
+ */
+const marcaDeLaObra = marcaDeObra === undefined ? {} : { [ATRIBUTO_DE_INDEXABLE]: marcaDeObra };
 // Absoluta y no relativa: una previsualización se resuelve en el servidor de la red, que
 // no tiene la página delante para completar la ruta.
 const imagenSocial = tarjeta === undefined ? undefined : new URL(tarjeta, Astro.site).href;
@@ -85,7 +91,7 @@ const imagenSocial = tarjeta === undefined ? undefined : new URL(tarjeta, Astro.
 
 <!doctype html>
 <!-- UX-DR27 — idioma `es` sin variante regional. -->
-<html lang="es">
+<html lang="es" data-vistas={vistas.length > 0 ? vistas.join(' ') : undefined} {...marcaDeLaObra}>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -156,13 +162,22 @@ const imagenSocial = tarjeta === undefined ? undefined : new URL(tarjeta, Astro.
     )}
     <Font cssVariable="--fuente-serif" preload />
     <Font cssVariable="--fuente-sans" preload />
+    {/*
+      * Historia 23.1 — el arranque de la medición va antes de lo que traiga cada página: abre la
+      * cola `__medir` antes de cualquier guion que la llame, también uno que una página pusiera
+      * en su cabeza. `tests/unit/medicion.test.ts` exige que sea el primer guion en línea.
+      */}
+    <Medicion carga={cargaLaMedicion} />
     <slot name="cabeza" />
-    <Medicion vista={vista} />
   </head>
   <body>
     <a class="saltar" href="#contenido">Saltar al contenido.</a>
 
-    <header class="cabecera contenedor">
+    {/*
+      * Historia 23.7 — la Zona de salida interna de la marca y de «Buscar». El enlace de salto de
+      * arriba no la lleva: es un ancla de la propia página, y eso no es salida.
+      */}
+    <header class="cabecera contenedor" data-zona="cabecera">
       <a class="marca" href="/">{MARCA}</a>
       <a class="buscar" href="/buscar/">Buscar</a>
     </header>

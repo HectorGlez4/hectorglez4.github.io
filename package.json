@@ -35,6 +35,7 @@
     "demanda:registrar": "tsx tools/demanda.ts --registrar",
     "rastreo": "tsx tools/rastreo.ts",
     "canal": "tsx tools/canal.ts",
+    "medicion": "tsx tools/medicion.ts",
     "test": "vitest run",
     "test:e2e": "playwright test",
     "astro": "astro"
@@ -47,8 +48,9 @@
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.10",
-    "@axe-core/playwright": "^4.12.1",
+    "@axe-core/playwright": "4.14.0",
     "@playwright/test": "^1.62.1",
+    "axe-core": "4.14.0",
     "googleapis": "178.0.0",
     "pagefind": "^1.5.2",
     "tsx": "^4.23.12",

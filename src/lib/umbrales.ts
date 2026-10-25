@@ -111,6 +111,160 @@ export const DESPLIEGUE_DE_OBRA_Y_DIRECTORIOS: string | undefined = undefined;
 /** La portada de retorno, si llega antes del juicio de SM-11 (Historia 28.5). */
 export const DESPLIEGUE_DE_LA_PORTADA_DE_RETORNO: string | undefined = undefined;
 
+/**
+ * La llegada en vivo del sitio de la Épica 23 — AD-9, AD-13, Historia 23.10.
+ *
+ * Es la jornada UTC en que el sitio con la lectura, las Marcas de llegada contadas una vez, las
+ * salidas internas, la búsqueda asentada y la vista de Obra (Historias 23.5–23.9) **llega al sitio
+ * en vivo** —el fin de «Desplegar», no el merge—, con la misma forma que las de arriba:
+ * `undefined` mientras no haya llegado. **Le da valor Héctor, en un commit aparte (23.11), y ningún
+ * agente se lo da.**
+ *
+ * No está entre las jornadas que mueven SM-11 —no cambia lo que el buscador indexa, así que la
+ * línea SM-11 del informe de indexación no la nombra—: solo parte series de la medición, por su
+ * entrada en `CORTES_DE_SERIE_DECLARADOS` (abajo).
+ */
+export const DESPLIEGUE_DE_LA_LECTURA: string | undefined = undefined;
+
+/*
+ * Los cortes de serie de la medición — AD-9, AD-13, Historia 23.10.
+ *
+ * Un corte es una jornada a partir de la cual una serie no se compara con lo de antes porque
+ * cambió el instrumento que la mide: la llegada en vivo que cambia qué se emite o cómo, su
+ * reversión, un cambio de los cortes de tramo de `busqueda` (vocabulario) o un cambio de
+ * `MIN_MS_VISIBLES_PARA_LA_LECTURA`, que repite la línea base. Cada entrada dice su jornada, qué
+ * cambió y qué series parte, y **la jornada sale siempre de una constante de despliegue**, nunca
+ * de un literal: la lista se compone de ellas y filtra las que aún no llegaron. Una entrada nueva
+ * entra con su historia, y con su constante.
+ *
+ * La lectura de la línea base parte cada serie solo por las entradas que la nombran, sin elegir
+ * ninguna ni suponer cuántas hay: el tramo nuevo empieza la primera jornada UTC completa tras la
+ * llegada, y la de llegada se informa aparte, como «cambió». Dos entradas en la misma jornada, con
+ * distinto motivo, son un solo «cambió».
+ */
+
+/** Las series de la medición que un corte puede partir. */
+export type SerieDeMedicion = 'sm8' | 'lectura' | 'busqueda';
+
+/** Un corte de serie tal como se declara: su jornada es la de una constante de despliegue. */
+export interface CorteDeSerie {
+  /** La jornada UTC de la llegada en vivo, `AAAA-MM-DD`; `undefined` mientras no haya llegado. */
+  readonly jornada: string | undefined;
+  /** Qué cambió, como lo nombra el informe. */
+  readonly que: string;
+  /** Las series que parte. */
+  readonly series: readonly SerieDeMedicion[];
+}
+
+/** Un corte que ya llegó: el que tiene jornada. */
+export interface CorteLlegado extends CorteDeSerie {
+  readonly jornada: string;
+}
+
+/**
+ * La lista declarada, en el orden en que se escribió: cada jornada es una constante de arriba.
+ * La de la Épica 23 parte SM-8 —la marca se cuenta una vez por llegada y la vista sale del fichero
+ * diferido—, la serie de la lectura y la de la búsqueda, que empiezan con ella; la de la 24 con la
+ * 26 parte SM-8, porque los Directorios emiten vista.
+ */
+export const CORTES_DE_SERIE_DECLARADOS: readonly CorteDeSerie[] = [
+  {
+    jornada: DESPLIEGUE_DE_LA_LECTURA,
+    que: 'la llegada de la Épica 23 (la lectura, las marcas contadas una vez, las salidas y la búsqueda asentada)',
+    series: ['sm8', 'lectura', 'busqueda'],
+  },
+  {
+    jornada: DESPLIEGUE_DE_OBRA_Y_DIRECTORIOS,
+    que: 'la llegada de la Tarjeta de Obra con los Directorios (Épicas 24 y 26)',
+    series: ['sm8'],
+  },
+];
+
+/**
+ * Los cortes que ya llegaron, ordenados por jornada: filtra los que no tienen y conserva el orden
+ * declarado entre los de la misma jornada (`sort` es estable).
+ */
+export function cortesQueLlegaron(declarados: readonly CorteDeSerie[]): CorteLlegado[] {
+  return declarados
+    .filter((corte): corte is CorteLlegado => corte.jornada !== undefined)
+    .sort((a, b) => (a.jornada < b.jornada ? -1 : a.jornada > b.jornada ? 1 : 0));
+}
+
+/** La lista de cortes de serie, solo con los que llegaron y en orden. */
+export const CORTES_DE_SERIE: readonly CorteLlegado[] = cortesQueLlegaron(CORTES_DE_SERIE_DECLARADOS);
+
+/**
+ * Su proyección sobre SM-8 — las entradas que parten la serie del canal propio, en el mismo orden
+ * (Héctor, 2026-10-19). Mientras ninguna constante tenga valor está vacía, y el informe lo dice.
+ */
+export const CORTES_DE_SM8: readonly CorteLlegado[] = CORTES_DE_SERIE.filter((corte) =>
+  corte.series.includes('sm8'),
+);
+
+/**
+ * Las pasadas de prueba que escriben a propósito en el D1 de producción — AD-9, AD-14,
+ * Historia 23.10 (Héctor, 2026-10-23).
+ *
+ * Son dos y ninguna más: la de la Historia 25.3, sobre el sitio en vivo, y la de la 25.7, cuyo
+ * clic en la tarjeta de Facebook aterriza en la canónica en vivo. Cada una deja registros de
+ * verdad en la tabla que no son visitas, así que la lectura de la línea base los descuenta —los de
+ * esas rutas en esa jornada, y ninguno más— en cada lectura. **La anota Héctor el día de la
+ * pasada**, con su jornada UTC y las rutas que recorrió; ningún agente la anota. `DESPLIEGUE.md` §3
+ * la cita y no la copia, y la lectura la lee y no la copia.
+ *
+ * La baliza de prueba con que se comprueba el receptor no es una pasada: va a una ruta que ninguna
+ * página publica, se borra en la misma orden y se descuenta por su ruta.
+ */
+export interface PasadaEnProduccion {
+  /** Qué pasada fue, como la nombra su historia: «25.3», «25.7». */
+  readonly pasada: string;
+  /** La jornada UTC en que escribió, `AAAA-MM-DD`. */
+  readonly jornada: string;
+  /** Las rutas que recorrió, como las guarda el receptor (`/cita/<slug>/`). */
+  readonly rutas: readonly string[];
+}
+
+export const PASADAS_QUE_ESCRIBEN_EN_PRODUCCION: readonly PasadaEnProduccion[] = [];
+
+/**
+ * Lecturas de su superficie que cierran una línea base — AD-9, FR-56, Historia 23.10.
+ *
+ * La línea base de cada métrica empieza la primera jornada UTC completa del tramo vigente de su
+ * serie y se cierra la jornada en que reúne este mínimo de lecturas de su superficie —de búsquedas
+ * asentadas, la de SM-6 y SM-13—; no es un número de días. Las ventanas con que se juzgan después
+ * las tasas reúnen cada una el mismo mínimo.
+ *
+ * **300, valor de Héctor** (2026-10-24), dado en un diff visible en la 23.11 antes de leer la
+ * primera línea base: ninguna fuente se lo da, y ningún agente lo elige ni lo cambia. Sigue
+ * admitiendo `undefined`, como `CONGELACION_DE_OBRAS`, que significa «sin mínimo declarado»: el
+ * informe lo dice y nunca da una línea base por cerrada. Que una línea base cerrada sea **buena**
+ * no lo dice ningún número: lo anota Héctor en `DESPLIEGUE.md` §3.
+ */
+export const MIN_LECTURAS_DE_LINEA_BASE: number | undefined = 300;
+
+/**
+ * Si Facebook entra en la comparación de SM-12 entre destinos — AD-9, SM-12, Historia 23.10.
+ *
+ * Apagado: no consta todavía que `?via=` sobreviva al clic en la tarjeta que Facebook compone del
+ * enlace, y sin eso las lecturas con `via=facebook` serían una cota de cuánto se pierde, no una
+ * difusión comparable con la de los demás destinos. La lectura informa Facebook aparte, con el
+ * motivo. **Lo enciende Héctor en la 25.7**, en un diff visible, si la matriz dice que la marca
+ * sobrevive; ningún agente lo enciende.
+ */
+export const SM12_CON_FACEBOOK = false;
+
+/**
+ * Rutas de Página de Cita con una sola vista en una jornada a partir de las cuales esa jornada es
+ * una **ráfaga** — AD-9, FR-56, Historia 23.10.
+ *
+ * Es la firma mecánica de un rastreador que recorre el sitio cargando cada Cita una vez: cien
+ * rutas o más con exactamente una vista de carga el mismo día. La lectura de la línea base da la
+ * razón lecturas/vistas de esos pares frente a la del resto; si se parecen, el tiempo mínimo de la
+ * lectura no está separando máquinas de personas, y lo ajusta Héctor (23.5). El valor, cien, lo da
+ * el plan (FR-56); moverlo lo decide Héctor, en un diff visible.
+ */
+export const MIN_RUTAS_DE_CITA_EN_RAFAGA = 100;
+
 /** Citas del mismo Autor que ofrece una Página de Cita como ruta de salida — UX-DR17. */
 export const MAX_CITAS_RELACIONADAS = 4;
 
@@ -179,8 +333,123 @@ export const META_AUTORES_DE_OTRA_TRADICION: number | undefined = undefined;
  * Antes de subirlo se compactó el guion de medición, que pasó de 952 a 572 bytes; el tope
  * nuevo deja unos 400 de margen, suficiente para no ir justo y poco para que un
  * crecimiento futuro pase inadvertido.
+ *
+ * Medido en la Historia 23.8, sin moverlo: `/buscar/` lleva **6.441 bytes** en línea con la
+ * medición puesta (215 libres; 3.535 antes), porque su isla carga ahora la búsqueda asentada —el
+ * estado que se ve, sus tres disparadores (con el `auxclick` del botón central), la página que nunca
+ * se vio, la memoria de la carga, la marca del historial y el reintento de verdad tras un índice que
+ * falla (`?{n}` y `destroy()`)— y lleva dentro, por su texto, la parte pura que decide qué emitir
+ * (`asentamientoDeBusqueda`) con sus constantes del vocabulario. Es la superficie más justa del
+ * sitio: la Página de Cita con Imagen sigue en 5.630 (1.026 libres). Lo que la Épica 27 le añada
+ * (los filtros, «Mostrar 30 más», el aviso del índice) no cabe en ese hueco: sube el tope en el
+ * mismo diff, con la medida, o compacta antes el texto de la parte pura al construir.
  */
 export const MAX_BYTES_DE_GUION = 6656;
+
+/*
+ * Los topes de la lista cerrada de guiones externos — AD-6, AD-9, Historia 23.1.
+ *
+ * `MAX_BYTES_DE_GUION` mide lo que va en línea; estos miden lo que se **descarga**, una
+ * entrada por cosa que `src/lib/guiones.ts` deja pedir. Cuentan los bytes UTF-8 sin comprimir
+ * del fichero, de lo que importa de forma estática y de lo que arranca al ejecutarse (el worker
+ * de Pagefind), y los vigila
+ * `tests/unit/medicion.test.ts` sobre el `dist/` de un sitio construido con punto final y con
+ * Pagefind. Cada uno se fijó con el precedente de `MAX_BYTES_DE_GUION`: lo medido el
+ * 2026-10-24 más unos 400 bytes, suficiente para no ir justo y poco para que un crecimiento
+ * pase inadvertido. Subir uno es una decisión visible en el diff, como subir aquel.
+ */
+
+/**
+ * El fichero de medición, `/medicion/{versión}.js` — lo compone `guionDeMedicion`.
+ *
+ * Medido: 920 bytes con el punto final de producción (el más largo de los que se usan; 886 con
+ * el de las pruebas). No importa nada. Lleva el punto final dentro, así que una dirección más
+ * larga lo engorda byte a byte.
+ *
+ * Medido de nuevo en la Historia 23.2: **1.128 bytes** con el punto final de producción (1.096
+ * con el de las pruebas). Creció porque ya no manda las cinco claves a todo evento: lleva una
+ * tabla por evento, compuesta desde `CAMPOS_DE_EVENTO` de `src/lib/vocabulario.ts`, con el
+ * conjunto de cada campo, y los destinos pasaron de cinco a ocho. Cabe en el tope de la 23.1,
+ * que no se sube; las Historias 23.5 a 23.9 lo vuelven a medir al añadir sus eventos.
+ *
+ * Subido de 1.320 a 2.420 en la Historia 23.5: medido, **2.024 bytes** con el punto final de
+ * producción (1.979 con el de las pruebas), más unos 400 de margen, como la 23.1; tras su
+ * revisión —la lectura que debía la carga sale aunque el temporizador llegue tarde, y de
+ * `data-vistas` solo salen vistas—, **2.096** (2.051), y el tope no se mueve. Creció porque
+ * el fichero dejó de ser solo un emisor: lleva el reloj de la Lectura —visibilidad acumulada con
+ * `visibilitychange`, el temporizador con lo que falta y las cuatro escuchas de interacción—, la
+ * memoria de `primera` por métrica, con la correspondencia de cada acción con la suya, y la carga
+ * nueva de `pageshow` con `persisted`. Nada de eso cabe en el arranque en línea, que no cambia, ni
+ * cuenta en `MAX_BYTES_DE_GUION`: es justo el hueco para el que la 23.1 sacó la medición a un
+ * fichero. Las Historias 23.6 a 23.9 lo vuelven a medir al añadir lo suyo.
+ *
+ * Subido de 2.420 a 2.880 en la Historia 23.6: medido, **2.482 bytes** con el punto final de
+ * producción (2.483 con la barra final; 2.450 con el de las pruebas), más unos 400 de margen,
+ * como la 23.1 y la 23.5. Sin subirlo no cabía: creció 386 bytes porque el fichero lee también la
+ * Marca de difusión (`?via=`) —una fuente más y su conjunto en la tabla de las tres vistas y la
+ * lectura— y quita las dos marcas de la dirección con `history.replaceState`, con la función pura
+ * que parte la búsqueda (`SIN_MARCAS_DE_LLEGADA`) viajando dentro como texto. Sigue sin contar en
+ * `MAX_BYTES_DE_GUION`, que no se mueve. Tras sus dos revisiones —las marcas viajan solo con
+ * las vistas que declara la página y con la lectura, la dirección nueva va entera, con
+ * `location.origin`, y quitar las marcas no deja un `?&` sin nada—, **2.548** (2.549 con la barra
+ * final; 2.516 con el de las pruebas), y el tope no se mueve. Las Historias 23.7 a 23.9 lo
+ * vuelven a medir.
+ *
+ * Subido de 2.880 a 3.730 en la Historia 23.7: medido, **3.330 bytes** con el punto final de
+ * producción (3.331 con la barra final; 3.298 con el de las pruebas), más unos 400 de margen, como
+ * la 23.1, la 23.5 y la 23.6. Sin subirlo no cabía: creció 782 bytes sobre los 2.548 de la 23.6
+ * porque el fichero emite la Salida interna —el evento en su tabla, con el conjunto de las
+ * dieciséis zonas del vocabulario (unos 250 bytes él solo), y la escucha de `click` que descarta
+ * lo que no es salida, toma la zona del contenedor más cercano, se gasta una vez por carga y emite
+ * antes la lectura—. Tras la revisión de la 23.7, que compara `target` con `_self` sin distinguir
+ * mayúsculas, mide **3.339** (3.340; 3.307): 791 bytes sobre la 23.6 y 391 de margen, y el tope no
+ * se mueve. Sigue sin contar en `MAX_BYTES_DE_GUION`, que no se mueve. Las Historias 23.8 y 23.9
+ * lo vuelven a medir.
+ *
+ * Medido de nuevo en la Historia 23.8: **3.487 bytes** con el punto final de producción (3.488 con
+ * la barra final; 3.455 con el de las pruebas), 148 sobre los 3.339 de la 23.7 y 243 de margen, así
+ * que el tope no se mueve. Creció porque el fichero emite la `busqueda`: su entrada en la tabla, con
+ * el tramo y los filtros que le pasa la isla de `/buscar/` y los dos conjuntos del vocabulario con
+ * que los coteja (los cuatro rótulos de `TRAMOS` y las seis combinaciones de `FILTROS`). Lo demás
+ * de la búsqueda asentada —qué estado cuenta, cuándo y una vez— vive en la isla, en línea, y cuenta
+ * en `MAX_BYTES_DE_GUION` de `/buscar/`, que tampoco se mueve. La Historia 23.9 lo vuelve a medir.
+ *
+ * Medido de nuevo en la Historia 23.9: **3.647 bytes** con el punto final de producción (3.648 con
+ * la barra final; 3.602 con `https://ejemplo.invalid/e`, el de las pruebas unitarias, y 3.600 con
+ * `http://localhost:8787/e`, el del receptor local), 160 sobre los 3.487 de la 23.8 y 83 de margen
+ * con el de producción, así que el tope no se mueve. Creció porque el fichero emite la vista de
+ * Obra: su entrada en la tabla,
+ * con la marca `indexable` y el conjunto de las dos marcas de Obra del vocabulario con que la
+ * coteja, el evento en la lista de vistas que salen de `data-vistas`, y la lectura de la marca del
+ * atributo del `<html>` una vez al activarse, que solo viaja con la vista que declara la página. Con
+ * ella el fichero emite ya todo el vocabulario.
+ */
+export const MAX_BYTES_GUION_DE_MEDICION = 3730;
+
+/**
+ * El generador de la Imagen de Cita, `public/islas/imagen.js` — AD-6, AD-7.
+ *
+ * Medido: 7.153 bytes, sin importaciones. Lo pide la Página de Cita al pulsar y `/kit` y
+ * `/lote` al cargar.
+ */
+export const MAX_BYTES_GUION_DE_IMAGEN = 7550;
+
+/**
+ * El cliente de Pagefind, `/pagefind/pagefind.js`, y el worker que arranca — FR-7.
+ *
+ * Medido: 86.810 bytes con Pagefind 1.5.2 — el cliente, 45.555, y el worker que crea al
+ * iniciarse con `new Worker`, `/pagefind/pagefind-worker.js`, 41.255 (lo declara la entrada en
+ * `arranca`); ninguno importa nada de forma estática. El índice y el WebAssembly llegan por
+ * `fetch` y no cuentan, y lo segundo es una elección, no un descuido: el WebAssembly **es** código
+ * que se ejecuta, pero no es guion —no lo ve `<script>`, `import()` ni `new Worker`, que es lo que
+ * la lista cierra—, llega solo tras enfocar o buscar, como el resto de Pagefind, y su peso lo fija
+ * Pagefind por idioma, no el proyecto. Si un día hubiera que contarlo, sería otra entrada con su
+ * tope, no este número. Hasta la revisión de la 23.1 solo contaba el
+ * cliente, y el worker se descargaba al enfocar el campo fuera de toda cuenta. No lo escribe el
+ * proyecto: lo escribe Pagefind al construir, así que subir de versión puede moverlo, y este
+ * tope es lo que hace que eso se vea.
+ */
+export const MAX_BYTES_GUION_DE_PAGEFIND = 87200;
 
 /**
  * El techo de lo que el alojamiento admite por sitio — Historia 24.2, Entorno operativo.
@@ -241,6 +510,48 @@ export const TOPE_DE_PESO_DE_DIST = 900 * 1024 * 1024;
  * tiene tope, en vez de inventárselo.
  */
 export const TOPE_DE_PNG_DE_DIST: number | undefined = undefined;
+
+/**
+ * Filas que D1 deja escribir al día en el plan gratuito — AD-9, AD-13, Historia 23.2.
+ *
+ * Es la cuota de escritura de «Cuotas del receptor» de la espina, y no la decide nadie del
+ * proyecto: la pone Cloudflare. Cada índice cuenta una fila más, así que una inserción en
+ * `eventos`, con sus dos índices, gasta tres. La usa `npm run medicion -- desplegar` antes de
+ * barajar el `rowid`, que reescribe cada fila y sus dos entradas de índice: si lo escrito en el
+ * día más el barajado no cabe, no baraja, lo dice con las cifras y sale con 1 —se repite otro
+ * día, nunca troceado—. Si el proyecto pasa al plan de pago, cambia aquí y en ningún otro sitio.
+ */
+export const CUOTA_DE_FILAS_ESCRITAS_POR_DIA_EN_D1 = 100_000;
+
+/**
+ * Bytes que D1 admite por base en el plan gratuito — AD-9, Historia 23.10.
+ *
+ * La otra cuota de «Cuotas del receptor» de la espina, y tampoco la decide el proyecto: 500 MB.
+ * Se escribe en bytes decimales, `500 * 1000 * 1000`, que es la lectura más estrecha de «500 MB»:
+ * con 500 MiB el aviso llegaría tarde. La lectura de la línea base compara con ella el
+ * `database_size` de `d1 info`; pasada, las escrituras fallan y el Worker lo calla. Si el proyecto
+ * pasa al plan de pago, cambia aquí y en ningún otro sitio.
+ */
+export const CUOTA_DE_BYTES_POR_BASE_EN_D1 = 500 * 1000 * 1000;
+
+/**
+ * Milisegundos de visibilidad acumulada tras los que una carga cuenta como leída — AD-9, AD-13,
+ * FR-56, Historia 23.5.
+ *
+ * Es la mitad «por tiempo» de la Lectura: el fichero de medición (`guionDeMedicion`) emite una
+ * `lectura` cuando la página lleva este tiempo visible —sumando los ratos en que lo está, con
+ * `visibilitychange`— o antes, a la primera interacción. El valor, 8 s, lo dan FR-56 y AD-13.
+ *
+ * **Cuenta desde que el fichero se activa**, no desde que empezó la navegación: el fichero llega
+ * con `defer`, y una página prerenderizada no cuenta hasta verse. Peca por defecto: una carga
+ * vista algo más de 8 s puede quedarse sin lectura por tiempo, pero ninguna carga visible menos
+ * de 8 s la tiene por tiempo (por una interacción, sí).
+ *
+ * Cambiarlo cambia qué es una Lectura: es una entrada de `CORTES_DE_SERIE_DECLARADOS`, con su
+ * constante de despliegue, y repite la línea base, y lo decide Héctor tras la comparación por
+ * firma. Viaja dentro del fichero, así que moverlo cambia también su versión.
+ */
+export const MIN_MS_VISIBLES_PARA_LA_LECTURA = 8_000;
 
 /**
  * Citas publicadas **resueltas** que necesita una Colección para publicarse — FR de la

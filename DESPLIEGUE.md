@@ -204,9 +204,13 @@ los umbrales pueden llegar con menos Citas, nunca con más. La Épica 24 engorda
 Héctor revisa los valores.**
 
 Es una construcción local, sin `MEDICION_ENDPOINT` ni `SITE_URL`. La del flujo de publicación
-pesa algo más, porque lleva el guion de medición en línea en cada página HTML —unos 650 bytes
-por página: del orden de 3,5 MB con las 5.288 de hoy—. El paso en CI juzga esa, que es la que
-se despliega; la cifra de base no se compara con la del CI. `SITE_URL` no cambia nada mientras
+pesa algo más, pero desde la Historia 23.1 apenas: el emisor de la medición ya no va en línea
+en cada página —eran unos 650 bytes por página, del orden de 3,5 MB con las 5.288 de
+entonces—, sino en un solo fichero, `/medicion/{versión}.js` (menos de 1 KB), y lo que va en
+línea es el arranque, 65 bytes que llevan también las construcciones sin punto final. Lo que
+añade el punto final es ese fichero y la etiqueta que lo pide en cada página, unos 50 bytes.
+El paso en CI juzga esa construcción, que es la que se despliega; la cifra de base no se
+compara con la del CI. `SITE_URL` no cambia nada mientras
 el sitio corra en su dominio: no se define (§1) y el origen sale del mismo `CNAME` que en local.
 Si se definiera para una previsualización, cada URL absoluta de cada página —canónica, Open
 Graph, JSON-LD— y del sitemap cambiaría de largo, y con ella la medida.
@@ -350,9 +354,20 @@ plataforma es reescribir `medicion/worker.ts`, unas treinta líneas.
 Hecho en el repositorio:
 
 - `medicion/receptor.ts` — decide qué se registra. Importa el vocabulario cerrado de
-  `src/lib/medicion.ts` en vez de copiarlo: copiado, un evento nuevo en el sitio se
-  descartaría en silencio aquí y el fallo aparecería como «esa métrica está a cero»
-  semanas más tarde.
+  `src/lib/vocabulario.ts` en vez de copiarlo (desde la Historia 23.2; antes, de
+  `src/lib/medicion.ts`): copiado, un evento nuevo en el sitio se descartaría en silencio aquí
+  y el fallo aparecería como «esa métrica está a cero» semanas más tarde. Cada campo se guarda
+  solo en los eventos que lo declaran y solo si es de su conjunto; fuera de eso se descarta el
+  campo, nunca el evento. La Marca de origen se sigue guardando en todo evento, como la envía
+  el guion de la v7.1, para que el receptor nuevo no pierda nada del sitio viejo.
+
+  **Corte de serie: las acciones dejan de llevar `origen` el día que se despliega el sitio de
+  la v8.** Su guion manda la Marca de origen solo con las vistas y la lectura (AD-13), así que
+  desde ese día `copiado`, `descarga-de-imagen` y las dos comparticiones llegan con `origen`
+  nulo. Ninguna consulta de esta sección reparte acciones por red, pero una que lo haga cambia
+  de sentido esa jornada: lo de antes y lo de después no se comparan. Su jornada es la de
+  `DESPLIEGUE_DE_LA_LECTURA`, la llegada de la 23 en `CORTES_DE_SERIE_DECLARADOS` de
+  `src/lib/umbrales.ts` (Historia 23.10); la lectura de la línea base no reparte acciones por red.
 - `medicion/worker.ts` — el adaptador. No lee ni una cabecera de la petición: ni IP, ni
   agente de usuario, ni referente, ni el país que la plataforma regala en `request.cf`.
   Inserta con `rowid` aleatorio (`abs(random())`, Historia 23.12), así que el orden de las
@@ -369,8 +384,10 @@ Hecho en el repositorio:
   primera mitad en `tools/`, y más estricta que la regla: una sentencia que ordena no nombra
   el `rowid` —por ningún camino, ni un alias, ni una subconsulta—, no lleva huecos (un
   `${…}`, un operando que no es literal, una variable de terminal) y no deja el `ORDER BY`
-  sin término. Lo que varía va enlazado con `?` o dentro de un literal. La segunda mitad, la
-  lectura, no la vigila todavía (23.10), y nada vigila las consultas a mano de esta sección.
+  sin término. Lo que varía va enlazado con `?` o dentro de un literal. Desde la 23.10 la misma
+  prueba vigila además que **ningún** SQL de `tools/` nombre el `rowid` salvo dos, las dos de
+  `tools/lib/medicion.ts`: el barajado y la lectura de las balizas como texto; la lectura de la
+  línea base cuenta sin nombrarlo. Nada vigila las consultas a mano de esta sección.
   Sin `ORDER BY` las filas salen en un orden cualquiera: un `LIMIT` no da las primeras ni
   las últimas, y lo reciente se pide por `jornada`; ninguna consulta de esta sección
   dependía del orden de llegada.
@@ -381,26 +398,41 @@ Hecho en el repositorio:
   un 20 % más (49 MB frente a 41), y barajar lo ya escrito la creció algo más (50 MB).
   Barajar reescribe cada fila y sus dos entradas de índice, unas tres filas escritas por
   fila, que D1 cuenta contra la cuota de escritura del día (AD-13). D1 admite 500 MB por
-  base en el plan gratuito; el tamaño de hoy lo da `npx wrangler d1 info medicion`, y lo
-  informará la orden de la 23.10.
+  base en el plan gratuito; el tamaño de hoy lo da `npx --yes wrangler@4.151.1 d1 info medicion`, y lo
+  informa `npm run medicion` frente a `CUOTA_DE_BYTES_POR_BASE_EN_D1` («Leer la línea base», abajo).
 
-  Mientras el Worker en vivo no se redespliegue con este cambio sigue numerando en orden de
-  llegada, y lo ya escrito sigue así hasta que lo baraje `npm run medicion -- desplegar`
-  (23.2, aún por construir), que corre Héctor en la 23.3, desde la rama de la Épica 23: el
-  receptor con este cambio no se despliega antes. El orden importa: la 23.2 baraja solo
+  El Worker en vivo inserta así desde el **2026-10-24 a las 23:13 UTC**, cuando lo desplegó el
+  primer `npm run medicion -- desplegar` (construida en la 23.2, abajo), en la 23.3 y desde la
+  rama de la Épica 23, que barajó también lo ya escrito («El primer `desplegar`», abajo); hasta
+  entonces numeraba en orden de llegada. El orden importa: la 23.2 baraja solo
   después de comprobar con su baliza que el receptor en vivo ya inserta con `rowid`
   aleatorio, porque barajar con el Worker viejo dejaría lo que llegue después otra vez en
   orden de llegada. Por lo mismo, una vuelta atrás del Worker a una versión anterior a la
   23.12 vuelve a numerar en orden (`max(rowid)+1`), y lo que llegue entretanto lo baraja el
-  siguiente despliegue que pase la comprobación. Cómo verlo a mano, más abajo: «Comprobar a
-  mano si el Worker en vivo inserta con `rowid` aleatorio».
-- `medicion/esquema.sql` — seis columnas: jornada, evento, ruta, origen, destino y
-  consulta. Las tres últimas son de un solo evento cada una —`origen` de la visita que
-  viene de una cuenta propia (FR-22), `destino` de una compartición (FR-20), `consulta` de
-  una búsqueda sin resultados (FR-8)— y llegan `NULL` en el resto. No hay columna de
-  visitante porque no hay visitante que guardar, y la marca de tiempo es la jornada y no el
-  instante: un instante al milisegundo junto a una ruta poco visitada es, en la práctica,
-  un identificador.
+  siguiente despliegue que pase la comprobación. Lo comprueba `npm run medicion -- comprobar`,
+  más abajo.
+- `medicion/migrations/` — el esquema, en migraciones versionadas y solo aditivas (AD-14,
+  Historia 23.2), que `migrations_dir` de `wrangler.toml` señala. La `0000` es la tabla de
+  producción tal cual —seis columnas: jornada, evento, ruta, origen, destino y consulta, y
+  sus dos índices—, toda con `IF NOT EXISTS`: en la base de producción no hace nada. La `0001`
+  añade seis columnas, solo con `ALTER TABLE … ADD COLUMN`: `via`, `zona`, `tramo`,
+  `filtros`, `indexable` y `primera`. Las dos están aplicadas en producción desde el
+  2026-10-24 (23.3). Las migraciones nunca se revierten.
+- `medicion/esquema.sql` — el estado acumulado de las migraciones, de **referencia**: doce
+  columnas. Ninguna base se crea desde él. Cada columna después de `ruta` es de unos eventos
+  —`origen` y `via`, las Marcas de origen y de difusión de las vistas y la lectura (FR-22);
+  `destino` de una compartición o de la descarga que impuso el navegador (FR-20); `consulta`
+  de una búsqueda sin resultados (FR-8); `zona` de una salida interna; `tramo` y `filtros`
+  de una búsqueda asentada; `indexable` de una vista de Obra; `primera` de una acción— y llega
+  `NULL` en el resto. Ninguna lleva `CHECK`, ni JSON, ni hora: el conjunto de cada una lo
+  coteja el receptor desde `src/lib/vocabulario.ts`. No hay columna de visitante porque no hay
+  visitante que guardar, y la marca de tiempo es la jornada y no el instante: un instante al
+  milisegundo junto a una ruta poco visitada es, en la práctica, un identificador.
+- `medicion/huella-del-vocabulario.json` — la huella del vocabulario desplegado. La escribe
+  solo `npm run medicion -- desplegar`, y `npm test` falla si no casa con
+  `src/lib/vocabulario.ts`: así el sitio no se despliega con un vocabulario que el receptor en
+  vivo no conoce (AD-14). Nunca se escribe a mano. La primera la escribió el `desplegar` del
+  2026-10-24 (23.3) y entró en la rama de la Épica 23 en `6aece9a77f`.
 - `[observability] enabled = false` en `wrangler.toml`. El registro de acceso de la
   plataforma guarda IP y agente de usuario; apagarlo es parte de la propiedad, no una
   opción de rendimiento.
@@ -409,11 +441,18 @@ A mano, una vez (necesita una cuenta de Cloudflare):
 
 ```bash
 cd medicion
-npx wrangler login
-npx wrangler d1 create medicion            # copia el database_id a wrangler.toml
-npx wrangler d1 execute medicion --remote --file=esquema.sql
-npx wrangler deploy                        # imprime la URL del Worker
+npx --yes wrangler@4.151.1 login
+npx --yes wrangler@4.151.1 d1 create medicion   # copia el database_id a wrangler.toml
+npx --yes wrangler@4.151.1 d1 migrations apply medicion --remote
+npx --yes wrangler@4.151.1 deploy               # imprime la URL del Worker
 ```
+
+Así se hizo el 2026-09-02, con `--file=esquema.sql` en lugar de las migraciones, que no
+existían. **Desde la Historia 23.2 una base nueva —local, de pruebas o recreada— se crea solo
+aplicando `migrations/`**, nunca desde `esquema.sql`: así tiene el mismo `d1_migrations` que
+la de producción —que lo tiene desde el 2026-10-24, con la `0000` y la `0001` (23.3)— y la
+siguiente migración se aplica igual en las dos. Para la base que ya existe, lo de cada día es
+`npm run medicion -- desplegar`, abajo.
 
 **El paso que no está en esa lista y para el despliegue en seco** (hecho el 2026-09-02): la
 cuenta necesita un **subdominio `workers.dev`**, que se elige una sola vez y lo comparten
@@ -434,22 +473,331 @@ su causa.
 
 Después, en el repositorio del sitio: **Settings → Secrets and variables → Actions →
 Secrets**, definir `MEDICION_ENDPOINT` con la URL que imprimió `wrangler deploy`. Sin esa
-variable el sitio no instala la medición y no envía un solo byte — que es como corre en
-desarrollo y en las pruebas.
+variable el build no escribe el fichero de medición ni lo pide ninguna página, y el sitio no
+envía un solo byte — que es como corre en desarrollo y en las pruebas. Queda el arranque en
+línea (`__medir` como cola), que no envía nada.
+
+**La medición es un fichero, y eso tiene un coste aceptado** (Historia 23.1, AD-6). El
+emisor se sirve como `/medicion/{versión}.js`, con la versión sacada del contenido —el
+guion y el punto final que lleva dentro—, y cada página de producto o de servicio lo pide con
+`<script src defer>` en el `<head>`. `/kit` y `/lote`, ajenas, no lo piden: lo que se copia o se
+descarga ahí ya no se envía, y quedan fuera de toda serie (NFR-6). Con el techo de caché de §1 (`max-age=600`), cuando el guion cambia hay una ventana
+de hasta **10 minutos** en la que un visitante con la página anterior en caché pide un fichero
+que el despliegue nuevo ya no sirve: ese 404 no rompe nada —el arranque encola y la página
+funciona igual—, pero las vistas y acciones de esa visita **no se envían**. Se acepta: el
+guion cambia pocas veces, y siempre con un despliegue. Conservar el fichero anterior en el
+despliegue para cerrar esa ventana **sigue aplazado**; no hay hoy nada que lo haga.
+
+**La Lectura y `primera`** (Historia 23.5, FR-56, AD-13). En toda carga que emite vista, el
+fichero emite además, como mucho, una `lectura`: cuando la página lleva
+`MIN_MS_VISIBLES_PARA_LA_LECTURA` visible (8 s, en `src/lib/umbrales.ts`; sumando los ratos en
+que lo está, contados desde que el fichero se activa) o antes, a la primera `pointerdown`,
+`keydown`, `wheel` o `touchmove`. Nunca por `scroll`, y ocultarse o cerrarse no la crea: una
+pestaña cerrada antes de tiempo sin tocarla no se leyó. La única que sale al ocultarse es la que
+la carga ya debía: si una tarea larga retrasa el temporizador y la página se oculta con los 8 s
+visibles cumplidos, la lectura sale entonces en vez de perderse. Lo que no emite vista —páginas 2+,
+`/buscar/` y el 404— no emite lectura; desde la 23.9 la página 1 de la Obra que no se indexa sí
+emite vista, y con ella lectura (abajo, «La vista de Obra»). La lectura
+lleva la ruta y las dos Marcas de llegada, como la vista (abajo). Cada acción —`copiado`,
+`descarga-de-imagen` y las dos comparticiones— lleva `primera`: `si` si es la primera de su
+métrica en la carga (SM-5: copiado y descarga; SM-7: las dos comparticiones) y `no` si no; la
+descarga que impone el navegador, la que llega con `destino`, lleva siempre `no` y no gasta la
+primera. Esa descarga no entra ni en SM-5 ni en SM-7 (las dos enmendadas en la v8.2): una carga
+cuya única acción fue ella no es lectura con acción, y es a propósito. El destino lo pone la isla
+de la Imagen desde la Historia 25.2; **hasta entonces la descarga impuesta llega sin destino**,
+con su `primera`, y cuenta en SM-5 como si la hubiera elegido el visitante. **Las dos las decide
+solo el fichero**: ninguna isla las emite ni las calcula, y `__medir('lectura')` se descarta. Una
+acción que llega sin lectura —un clic sin `pointerdown`, lo que se encoló antes de que llegara el
+fichero— la emite antes, así que en una superficie con lectura toda acción con `primera='si'`
+**sale** detrás de su lectura, en la misma carga. Es una garantía de la emisión, no de lo
+guardado: una baliza que se pierde no se reintenta, y el receptor fecha cada evento en la jornada
+UTC en que llega, así que una lectura de las 23:59:59 y su acción pueden caer en jornadas
+distintas. Leída por jornada, la tasa puede pasar de uno junto a medianoche; se lee sobre varias.
+Volver por la caché de atrás y adelante es una carga nueva: otra lectura posible, sin Marcas de
+llegada y sin vista. Por eso las lecturas no son un subconjunto de las vistas —`lecturas/vistas`
+puede pasar de uno— y el reparto de lecturas por marca no casa con el de vistas: la vuelta pierde
+la marca.
+
+**Las Marcas de llegada** (Historia 23.6, FR-22, AD-13): la de origen, `?de=<red>` —de qué cuenta
+propia llega la visita— y la de difusión, `?via=<destino>` —por qué botón de compartir llegó—. El
+fichero las lee **una sola vez**, al activarse y antes de la vista, cada una contra su conjunto
+(las redes de `src/lib/redes.ts`; `DESTINOS_VALIDOS`), así que un valor ajeno llega nulo y la
+vista sale igual; y las **quita de la dirección** con `history.replaceState`, sin recargar,
+conservando el resto de la búsqueda, el fragmento y el `history.state` que hubiera. Viajan con las
+vistas que declara la página y con la lectura —una vista que pidiera una isla saldría sin ellas—,
+y **se olvidan al emitir la lectura** y al volver por la caché de atrás y adelante, que ya
+olvidaba la de origen desde la 23.5. Lo que deja de contar otra vez la misma llegada al recargar,
+al copiar la dirección de la barra o al volver a ella es que **salen de la dirección**: la entrada
+del historial ya no las lleva. Sin punto final no hay fichero y la dirección se queda como llegó;
+si el navegador no deja escribir en el historial, también, y los eventos salen igual con sus
+marcas. **Lo mismo pasa si un bloqueador impide descargar el fichero**, y ahí se paga: esa visita
+no se cuenta, la marca se queda en la barra, y quien copie la dirección la difunde con ella, así
+que las visitas que traiga esa copia llegan —con su fichero— como si vinieran de la cuenta o del
+botón. Se acepta: quitarlas en el arranque en línea, que corre siempre, lo haría crecer contra
+`MAX_BYTES_DE_GUION` en todas las páginas, y la medición sigue siendo un plano aparte del que el
+sitio no depende. La canónica y `og:url` no cambian: nunca llevaron consulta. **`via` nombra el
+botón, nunca a quien comparte ni a quien abre** (NFR-11): no hay identificador de por medio, y un
+`?via=` inventado llega nulo. La difusión **se cuenta sobre lecturas**, nunca con la sola vista:
+una llegada con `?via=` que nadie leyó no es difusión. Los botones de compartir aún no componen
+`?via=` —lo hace la Épica 25—, así que hasta entonces la columna llega casi siempre nula.
+
+**La Salida interna** (Historia 23.7, FR-56, UX-DR111): por qué enlace siguió quien leía. El
+fichero escucha los clics y emite, **como mucho una por carga**, una `salida-interna` con la ruta
+de la página y la **zona** del enlace —una de `ZONAS` del vocabulario, la del contenedor más
+cercano que la declara con `data-zona`—, y nada más: ni el destino, ni el texto pulsado, ni las
+marcas. Es salida un clic en un enlace del mismo origen a otra ruta, con el botón principal, sin
+modificador, sin `download` y sin que una isla se quede con el clic; un ancla, la propia ruta con
+otra búsqueda o enviar un formulario no lo son, y un enlace sin zona —o en un contenedor exento,
+`data-sin-zona`— no se registra ni gasta la salida de la carga. En una superficie con lectura la
+salida sale **detrás de la lectura**: si la carga aún no la había emitido —un clic sin
+`pointerdown`—, la emite antes, así que toda salida de una superficie con lectura tiene su lectura
+en la misma carga (con la misma salvedad de la baliza perdida y la medianoche que SM-5). Volver
+por la caché de atrás y adelante es una carga nueva, con otra salida posible. **Lo que se abre en
+pestaña nueva no se mide** —el clic con Control o Meta, el botón central, un `target` ajeno—, y
+tampoco un clic anterior a que el fichero se active —va con `defer`, después del análisis—, así
+que **toda continuación es cota inferior**: dice al menos cuánto se siguió, nunca cuánto. Al revés,
+un clic cuya navegación no llega a ocurrir —se detiene, o un `beforeunload` la cancela— cuenta como
+salida y gasta la de la carga: es raro y se tolera. Las páginas
+2+, `/buscar/` y el 404 no emiten lectura, así que sus salidas salen **sin lectura** y ahí no se
+calcula continuación: se cuentan solas. Ninguna emite vista, y así las aparta la consulta de abajo: una salida entra en la
+continuación solo si su ruta tuvo vista esa jornada. **El 404 no tiene ruta propia**: se sirve en
+la dirección que se pidió —la de una Cita retirada, un Autor retirado, una Obra absorbida o una
+errata—, que no suele tener vista, así que sus salidas quedan entre las sin vista de la familia de
+esa ruta; su «Ver esta cita» se aparta además por la zona (`cita-del-dia` fuera de la portada),
+también en una ruta que aún tuvo vista ese día, como la de una Cita retirada por el despliegue de
+esa misma jornada. La superficie exacta la resuelve `npm run medicion` contra el censo de hoy
+(«Leer la línea base», abajo): la ruta de una Cita retirada o de una errata no está en él, y lo
+suyo va aparte, como «ya no se publica» o «sin superficie declarada». Los chips de
+respaldo de las Rutas de salida —«Explorar por tema», los Temas del sitio cuando una Cita no tiene
+hermanas ni Temas propios— cuentan como `chip-de-tema`, igual que los Temas de la Cita, y el
+último recurso, «Sobre {Autor}», como `rutas-de-salida`. Las zonas que coloca la Épica 23 son once —`cabecera`,
+`atribucion`, `chip-de-tema`, `colecciones`, `listado`, `paginacion`, `lista-de-obras`,
+`resultado`, `cita-del-dia`, `rutas-de-salida` y `autores-de-portada`—; las otras cinco del
+vocabulario llegan con las Épicas 24, 26 y 28, y hasta entonces no aparecen en la tabla. Como la
+lectura, la serie empieza la **primera jornada UTC completa** tras la llegada en vivo de la 23.
+
+**La vista de Obra** (Historia 23.9, FR-51, FR-52, AD-13, SM-11): la página 1 de **toda** Obra —se
+indexe o no— emite una `vista-de-obra` cuya columna `indexable` lleva una de las dos marcas de
+`MARCAS_DE_OBRA` —el valor `indexable` o el valor `no-indexable`— y dice **lo mismo que el `noindex`
+de esa página**: las dos cosas salen de la misma lista de rutas indexables del build (FR-52 y, si
+rige, la congelación de `CONGELACION_DE_OBRAS`), que escribe la marca en el atributo
+`data-indexable` del `<html>` junto a `data-vistas`; el fichero la lee una vez al activarse y no la
+calcula ni la saca de la dirección. La comprobación de `astro:build:done`
+(`tools/lib/indexables.ts`) para la construcción si una página 1 de Obra sale sin marca o con un
+valor ajeno a `MARCAS_DE_OBRA`, si la marca contradice su `noindex`, si otra página la lleva o si
+la marca y la `vista-de-obra` de `data-vistas` no van juntas. La **Obra indexable** emite
+dos vistas, en este orden: su `vista-de-superficie` de siempre —la de SM-8, como toda agregación de
+producto— y la `vista-de-obra`; la lectura sale una vez, detrás de las dos, y las dos llevan las
+Marcas de llegada. La **Obra que no se indexa** emite solo la `vista-de-obra`, y con ella gana lo
+que hasta la 23.9 no tenía: una **lectura** (los 8 s o la primera interacción) y sus **salidas detrás
+de ella**, así que desde entonces su continuación se calcula como la de las demás. Las **páginas 2+**
+de una Obra no emiten vista ni llevan marca, y sus salidas siguen saliendo solas. La lectura, las
+salidas y las acciones no llevan la marca: la lleva solo la vista de Obra, y para partir lo demás por
+marca se toma la de las vistas de Obra de esa ruta y jornada (la consulta de abajo, que cuenta
+vistas, lecturas y salidas: la Página de Obra no emite hoy ninguna acción —copiar, descargar y
+compartir viven en la Página de Cita—, y si un día las emite se parten igual, por su ruta y su
+jornada). Si un despliegue
+cambia la indexabilidad de una Obra, esa ruta llega la jornada del cambio con las dos marcas —y, por el
+techo de caché de §1 (`max-age=600`), puede seguir llegando con la vieja hasta 10 minutos, así que un
+despliegue cerca de la medianoche UTC la alarga a los primeros minutos de la jornada siguiente—, y la
+consulta la aparta como `cambio`. Una vista de Obra sin marca —el fichero la manda nula si el `<html>`
+no traía una de las dos, o si la pidiera una isla— no debería llegar nunca; si llega, la consulta la nombra `nula`. Como la
+lectura, la serie empieza la **primera jornada UTC completa** tras la llegada en vivo de la 23; la lee
+—y parte la familia Obra por esa marca, para todo registro de la ruta y la jornada— `npm run medicion`
+(«Leer la línea base», abajo).
+
+**La búsqueda asentada** (Historia 23.8, FR-56, FR-8, AD-13, SM-6, SM-13): una búsqueda **cuenta
+una vez, cuando se asienta**, nunca por tecla ni por repintado. La asientan tres gestos en
+`/buscar/`: enviar el formulario (Enter), pulsar un resultado —con el botón principal o el central
+(que lo abre en otra pestaña y da `auxclick`, no `click`), con modificador o con el teclado— y
+ocultarse la página (`visibilitychange` a `hidden`, con `pagehide` de respaldo: irse a otra página,
+cambiar de pestaña, cerrarla). El botón secundario abre el menú contextual y no la asienta: abrir el
+resultado desde ese menú, o con el central en un navegador sin `auxclick`, la asienta al ocultarse
+la página. Lo que se asienta es lo que **se ve**: el texto y los filtros de la última búsqueda que
+se pintó; lo escrito cuya búsqueda aún no se pintó no cuenta, vaciar el campo no deja nada, y una
+página que no se llegó a ver —abierta de fondo y cerrada sin mirarla— no asienta nada. Sale
+como mucho **una `busqueda` por estado distinto en la carga** —el estado es el texto recortado en
+los extremos, con sus mayúsculas, y los filtros—, y la memoria de lo ya emitido vive en la propia
+isla, sin almacenamiento ni cookie, y sobrevive a la caché de atrás y adelante. Lleva el **tramo
+del total** de resultados (`0`, `1-9`, `10-29`, `30+`, los `TRAMOS` del vocabulario; el total de
+Pagefind, no los 30 que se pintan) y los **filtros** (`ninguno` hasta la Épica 27); nunca el texto
+ni el número. Con texto y sin resultados sale además, detrás, una `busqueda-sin-resultados` con la
+consulta, el único texto libre (FR-8); un filtrado sin texto que no encuentra nada va al tramo 0 y
+no la emite. **Si el índice no carga** —Pagefind no se descarga, o falla al iniciarse o al buscar—
+no se pinta nada y nada se asienta: no es una búsqueda (SM-6); la búsqueda siguiente, también Enter
+con el mismo texto, vuelve a pedirlo —con otra dirección (`pagefind.js?1`), porque el navegador
+recuerda el fallo de un módulo por la suya, o desde una instancia nueva de Pagefind, que guarda el
+error de su índice en la suya—. Un trozo del índice que no llega es otra cosa: Pagefind lo anota en
+la consola y sigue, la búsqueda devuelve menos resultados o ninguno, y cuenta como tal (en el tramo
+0, con su `busqueda-sin-resultados`, si no queda ninguno). El aviso de ese índice que no carga es de
+la Épica 27.
+**Volver o recargar no cuenta otra vez**: al asentar, la isla marca su entrada del historial con un
+booleano (`asentada: true` en el objeto de estado, por `history.replaceState`, sin tocar la
+dirección ni abrir entrada); una llegada con `?q=` cuya entrada lleva la marca —una vuelta atrás
+sin la caché, una recarga, una pestaña restaurada o duplicada— la da por registrada, y sin objeto
+de estado responde Navigation Timing: `back_forward` o `reload` cuentan como registradas, cualquier
+otra carga no. Se aceptan tres laxitudes: la marca es de la entrada y no del texto —la isla no
+escribe `?q=` en la dirección—, así que si se llega con `?q=A` y se asienta B, volver a esa entrada
+da A por registrada; volver o recargar a una búsqueda que nunca se asentó —se llegó con `?q=` y se
+fue antes de asentar— la da también por registrada, y no cuenta nunca; y asentar al irse por
+navegación puede no dejar la marca (el documento ya se va), y entonces responde el tipo de
+navegación. El fichero envía **cada** `busqueda` que recibe: la regla de una por estado es de la
+isla, no del fichero, y el fichero no lee el historial. **Sin firma ni lectura:** `/buscar/` no
+emite vista ni lectura y ninguna `busqueda` se ata a una carga, así que SM-6 y SM-13 son razones de
+recuentos por jornada UTC, no de sesiones, y se leen sabiéndolo: un mismo visitante que busca tres
+cosas son tres asentadas. **SM-13 no es una proporción, y se desvía en los dos sentidos.** Por
+debajo: un resultado abierto en otra pestaña asienta la búsqueda y su salida no se mide, y varias
+búsquedas asentadas en la misma carga comparten como mucho una salida. Por encima: una salida tras
+volver —restaurada de la caché, que es carga nueva para la salida (23.7) pero no para la búsqueda,
+o cargada de nuevo en una entrada ya marcada— cuenta sin `busqueda` nueva; resultado, atrás y otro
+resultado son una asentada y dos salidas. La razón puede pasar de 1: se compara consigo misma a lo
+largo del tiempo, nunca como «la fracción de búsquedas seguidas». Como la lectura, la serie empieza
+la **primera jornada UTC completa** tras la llegada en vivo de la 23.
+
+**Corte de serie de FR-8.** Hasta la Historia 23.8 la `busqueda-sin-resultados` salía en **cada
+repintado vacío** —una por pausa del tecleo, con fragmentos a medio escribir—; desde la llegada en
+vivo de la 23 sale solo al asentarse un estado con texto y sin resultados, una vez por estado y
+carga. Los recuentos de antes y de después no se comparan: el registro de antes trae muchos más
+fragmentos y repeticiones, y la jornada de llegada es mixta, con páginas abiertas que aún llevan la
+isla anterior. El de después **también puede traer fragmentos**, menos: lo que se ve al ocultarse se
+asienta, así que quien cambia de pestaña o de aplicación a mitad de escribir, con «sene» pintado sin
+resultados, deja esa consulta. Para curar el Corpus sirven los dos, sabiendo que un fragmento no es
+una petición; para contar, desde la primera jornada UTC completa.
+
+**Corte de serie de SM-5 y SM-7.** Antes del despliegue del sitio de la Épica 23 no hay
+`lectura` y `primera` llega nula, así que las tasas por lectura empiezan la **primera jornada
+UTC completa** tras la llegada en vivo, y la jornada de llegada se informa aparte: es mixta, porque
+las páginas que ya estaban abiertas con el fichero anterior siguen enviando acciones sin
+`primera` y ninguna lectura. No se comparan con lo anterior; las consultas de acciones a secas
+siguen valiendo para su propia serie. **La llegada en vivo de la Historia 25.2 es otro corte de
+SM-5**: desde entonces la descarga impuesta llega con su `destino`, lleva `no` y deja de contar
+como elegida, así que el numerador baja sin que cambie nada de los visitantes; el tramo de antes
+y el de después no se comparan, y su jornada de llegada también se informa aparte. Desde la 23.10
+los parte `npm run medicion` por `CORTES_DE_SERIE` («Leer la línea base», abajo); la llegada de la
+25.2 entra en esa lista con su constante, que trae su historia. Las consultas de abajo siguen
+sirviendo para mirar una cifra suelta, partiendo a mano.
 
 Consultar, sin panel de nadie:
 
 ```bash
 # Vistas de Página de Cita por jornada — SM-2, SM-3.
-npx wrangler d1 execute medicion --remote --command \
+npx --yes wrangler@4.151.1 d1 execute medicion --remote --command \
   "SELECT jornada, COUNT(*) FROM eventos WHERE evento='vista-de-cita' GROUP BY jornada ORDER BY jornada DESC LIMIT 30"
 
-# Lo que se llevaron: copiado y descarga — SM-5.
-npx wrangler d1 execute medicion --remote --command \
+# Lo que se llevaron: copiado y descarga — SM-5, en acciones.
+npx --yes wrangler@4.151.1 d1 execute medicion --remote --command \
   "SELECT evento, COUNT(*) FROM eventos WHERE evento IN ('copiado','descarga-de-imagen') GROUP BY evento"
 
-# Lo que se buscó y no había, para decidir a quién sembrar — FR-8, SM-6.
-npx wrangler d1 execute medicion --remote --command \
+# Lecturas por jornada — FR-56, el denominador de la v8 (Historia 23.5).
+npx --yes wrangler@4.151.1 d1 execute medicion --remote --command \
+  "SELECT jornada, COUNT(*) FROM eventos WHERE evento='lectura' GROUP BY jornada ORDER BY jornada DESC LIMIT 30"
+
+# SM-5 sobre lecturas de Página de Cita: lecturas con su primera acción de SM-5 —copiado o
+# descarga elegida— frente a lecturas, por jornada. Cambia AAAA-MM-DD por la primera jornada UTC
+# completa del tramo (tras la llegada de la 23 o, desde ella, de la 25.2); sin cambiarla no
+# devuelve nada, nunca una jornada mixta. Las rutas de Cita van aquí por el prefijo, a mano, y
+# una Cita retirada sigue contando: `npm run medicion` las resuelve contra el censo de la
+# medición, nunca por el prefijo. La portada (`ruta='/'`), la Obra y los listados se leen con la
+# misma consulta cambiando el filtro de `ruta`, y no se suman a la Cita.
+npx --yes wrangler@4.151.1 d1 execute medicion --remote --command \
+  "SELECT jornada, SUM(evento='lectura') AS lecturas, SUM(evento IN ('copiado','descarga-de-imagen') AND primera='si') AS con_accion FROM eventos WHERE jornada >= 'AAAA-MM-DD' AND ruta LIKE '/cita/%' AND evento IN ('lectura','copiado','descarga-de-imagen') GROUP BY jornada ORDER BY jornada DESC LIMIT 30"
+
+# SM-7 sobre lecturas de Página de Cita: lecturas con su primera compartición, por jornada. La
+# misma jornada de partida (la de la 23) y el mismo prefijo que la de SM-5.
+npx --yes wrangler@4.151.1 d1 execute medicion --remote --command \
+  "SELECT jornada, SUM(evento='lectura') AS lecturas, SUM(evento IN ('comparticion-de-enlace','comparticion-de-imagen') AND primera='si') AS con_comparticion FROM eventos WHERE jornada >= 'AAAA-MM-DD' AND ruta LIKE '/cita/%' AND evento IN ('lectura','comparticion-de-enlace','comparticion-de-imagen') GROUP BY jornada ORDER BY jornada DESC LIMIT 30"
+
+# Difusión por botón, sobre lecturas — Historia 23.6. Cambia AAAA-MM-DD por la primera jornada
+# UTC completa tras la llegada de la 23: la de llegada es mixta, con páginas abiertas que aún
+# piden el fichero anterior, que no lee `?via=`. Cuenta lecturas con `via`, nunca vistas: una
+# llegada con la marca que nadie leyó no es difusión.
+npx --yes wrangler@4.151.1 d1 execute medicion --remote --command \
+  "SELECT jornada, via, COUNT(*) lecturas FROM eventos WHERE evento='lectura' AND via IS NOT NULL AND jornada >= 'AAAA-MM-DD' GROUP BY jornada, via ORDER BY jornada DESC, lecturas DESC LIMIT 60"
+
+# Salidas internas por zona y lecturas, por superficie — SM-4, Historia 23.7. Cambia AAAA-MM-DD
+# por la primera jornada UTC completa tras la llegada de la 23; la jornada en curso (UTC) no
+# entra, que aún no ha cerrado. La superficie va aquí por el prefijo de la ruta, a mano; contra el
+# censo la resuelve `npm run medicion`. «Ver esta cita» fuera de la portada es el 404 y sale como
+# «404»; las páginas 2+ salen como «paginas-2+», separadas de la familia de su ruta. `con_vista`
+# dice si la ruta tuvo vista esa jornada: las salidas sin vista —páginas 2+, `/buscar/` y el 404 en
+# la ruta que se pidió— salen aparte, sin lectura, y no entran en la continuación. Desde la 23.9 la
+# página 1 de toda Obra tiene vista: la Obra que no se indexa entra con su lectura y sus salidas, sin
+# tocar la consulta (`GLOB 'vista-*'` ya junta la `vista-de-obra`). Es por ruta y jornada UTC, no por carga: la salida de una carga que
+# cruza la medianoche —vista un día, salida al siguiente— cae entre las sin vista si su ruta no
+# tuvo otra vista ese día, y una ruta retirada a mitad de jornada pone con vista las salidas de su
+# 404 por la cabecera y la Atribución. Las dos cosas son raras y aquí quedan como están;
+# `npm run medicion` no pide vista: cada salida va a la superficie de su ruta en el censo de hoy, y
+# la de una ruta retirada, a «ya no se publica».
+npx --yes wrangler@4.151.1 d1 execute medicion --remote --command \
+  "WITH e AS (SELECT jornada, ruta, evento, zona FROM eventos WHERE jornada >= 'AAAA-MM-DD' AND jornada < date('now')), v AS (SELECT DISTINCT jornada, ruta FROM e WHERE evento GLOB 'vista-*'), s AS (SELECT CASE WHEN e.evento='salida-interna' AND e.zona='cita-del-dia' AND e.ruta<>'/' THEN '404' WHEN e.ruta GLOB '*/[0-9]/' OR e.ruta GLOB '*/[0-9][0-9]/' OR e.ruta GLOB '*/[0-9][0-9][0-9]/' THEN 'paginas-2+' WHEN e.ruta='/' THEN 'portada' WHEN e.ruta='/buscar/' THEN 'buscar' WHEN e.ruta LIKE '/cita/%' THEN 'cita' WHEN e.ruta LIKE '/autor/%' THEN 'autor' WHEN e.ruta LIKE '/tema/%' THEN 'tema' WHEN e.ruta LIKE '/coleccion/%' THEN 'coleccion' WHEN e.ruta LIKE '/obra/%' THEN 'obra' ELSE 'otra' END AS superficie, v.ruta IS NOT NULL AS con_vista, e.evento, e.zona FROM e LEFT JOIN v ON v.jornada = e.jornada AND v.ruta = e.ruta WHERE e.evento IN ('lectura','salida-interna')) SELECT superficie, con_vista, evento, zona, COUNT(*) n FROM s GROUP BY superficie, con_vista, evento, zona ORDER BY superficie, con_vista DESC, evento, n DESC"
+
+# La continuación por superficie — SM-4, Historia 23.7: sus salidas frente a sus lecturas, solo en
+# las rutas que tuvieron vista esa jornada y sin el «Ver esta cita» del 404, desde la misma jornada
+# de partida y sin la de hoy. Las vistas se juntan una vez por ruta y jornada, como arriba, y no
+# fila a fila con una subconsulta: así las filas del intervalo se leen un número fijo de veces y no
+# una por cada lectura y cada salida, que es lo que cuenta la cuota de lectura de D1. Es cota
+# inferior: la pestaña nueva no se mide.
+npx --yes wrangler@4.151.1 d1 execute medicion --remote --command \
+  "WITH e AS (SELECT jornada, ruta, evento, zona FROM eventos WHERE jornada >= 'AAAA-MM-DD' AND jornada < date('now')), v AS (SELECT DISTINCT jornada, ruta FROM e WHERE evento GLOB 'vista-*'), s AS (SELECT CASE WHEN e.evento='salida-interna' AND e.zona='cita-del-dia' AND e.ruta<>'/' THEN '404' WHEN e.ruta='/' THEN 'portada' WHEN e.ruta LIKE '/cita/%' THEN 'cita' WHEN e.ruta LIKE '/autor/%' THEN 'autor' WHEN e.ruta LIKE '/tema/%' THEN 'tema' WHEN e.ruta LIKE '/coleccion/%' THEN 'coleccion' WHEN e.ruta LIKE '/obra/%' THEN 'obra' ELSE 'otra' END AS superficie, e.evento FROM e JOIN v ON v.jornada = e.jornada AND v.ruta = e.ruta WHERE e.evento IN ('lectura','salida-interna')) SELECT superficie, SUM(evento='salida-interna') salidas, SUM(evento='lectura') lecturas, ROUND(1.0 * SUM(evento='salida-interna') / NULLIF(SUM(evento='lectura'), 0), 3) continuacion FROM s WHERE superficie <> '404' GROUP BY superficie ORDER BY superficie"
+
+# Vistas, lecturas y salidas de la página 1 de Obra, por marca y jornada UTC — Historia 23.9, SM-11.
+# Cambia AAAA-MM-DD por la primera jornada UTC completa tras la llegada de la 23; la de hoy no entra.
+# La lectura y la salida no llevan marca: toman la de las vistas de Obra de su ruta y jornada, y una
+# ruta que ese día llegó con más de una —un despliegue cambió su indexabilidad, o la caché de 10
+# minutos de §1 sirvió la página de antes pasada la medianoche— sale como `cambio`. Una vista de
+# Obra sin marca cuenta como marca `nula` (`COUNT(DISTINCT …)` y `MAX` se saltarían el NULL), así que
+# una ruta que la mezcla con otra sale también como `cambio`. Solo entran las rutas con vista de Obra
+# esa jornada, así que las páginas 2+ quedan fuera. La Obra indexable emite además su
+# `vista-de-superficie`, que aquí no se suma: es la de SM-8. Es cota inferior, como toda continuación.
+# Hasta cuatro filas por jornada —las dos marcas, `cambio` y `nula`—: `LIMIT 120` da al menos las
+# últimas 30 jornadas. Como en SM-4, el «Ver esta cita» del 404 (`zona='cita-del-dia'`, que ninguna
+# Página de Obra lleva) no entra: una Obra absorbida o retirada sirve el 404 en su ruta, y la jornada
+# del cambio esa ruta aún tiene vistas de Obra de antes. Las demás salidas de ese 404 —la cabecera—
+# sí entran ese día; es raro y aquí queda así. En `npm run medicion` la ruta de una Obra absorbida
+# o retirada no está en el censo de hoy, y todo lo suyo va a «ya no se publica».
+npx --yes wrangler@4.151.1 d1 execute medicion --remote --command \
+  "WITH e AS (SELECT jornada, ruta, evento, indexable FROM eventos WHERE jornada >= 'AAAA-MM-DD' AND jornada < date('now') AND ruta LIKE '/obra/%' AND evento IN ('vista-de-obra','lectura','salida-interna') AND NOT (evento='salida-interna' AND zona IS 'cita-del-dia')), m AS (SELECT jornada, ruta, CASE WHEN COUNT(DISTINCT COALESCE(indexable,'nula')) > 1 THEN 'cambio' ELSE COALESCE(MAX(indexable),'nula') END AS marca FROM e WHERE evento='vista-de-obra' GROUP BY jornada, ruta) SELECT e.jornada, m.marca, SUM(e.evento='vista-de-obra') vistas, SUM(e.evento='lectura') lecturas, SUM(e.evento='salida-interna') salidas, ROUND(1.0 * SUM(e.evento='salida-interna') / NULLIF(SUM(e.evento='lectura'), 0), 3) continuacion FROM e JOIN m ON m.jornada = e.jornada AND m.ruta = e.ruta GROUP BY e.jornada, m.marca ORDER BY e.jornada DESC, m.marca LIMIT 120"
+
+# Llegadas con marca de origen a la página 1 de Obra, por marca y red — Historia 23.9. SM-8 no cuenta
+# la `vista-de-obra` y nunca contó la Obra que no se indexa, pero `npm run canal` acepta cualquier
+# Obra publicada: lo que el Canal trae a una Obra, se indexe o no, se lee aquí, por su vista de Obra
+# y con su marca. La indexable cuenta además en SM-8, por su `vista-de-superficie`: no se suman. La
+# difusión por botón (`via`) a una Obra la da la consulta de difusión de arriba con
+# `AND ruta LIKE '/obra/%'`. Misma jornada de partida, sin la de hoy. `npm run medicion` cuenta la
+# Obra por su marca, sin repartirla por red: las llegadas con marca de origen se leen aquí.
+npx --yes wrangler@4.151.1 d1 execute medicion --remote --command \
+  "SELECT jornada, COALESCE(indexable,'nula') marca, origen, COUNT(*) vistas FROM eventos WHERE evento='vista-de-obra' AND origen IS NOT NULL AND jornada >= 'AAAA-MM-DD' AND jornada < date('now') GROUP BY jornada, marca, origen ORDER BY jornada DESC, marca, vistas DESC LIMIT 90"
+
+# Salidas desde los resultados de `/buscar/`, por jornada — el numerador de SM-13, Historia 23.7.
+# La misma jornada de partida, sin la de hoy. El denominador, las búsquedas asentadas, llega con
+# la 23.8: la tasa es la consulta siguiente.
+npx --yes wrangler@4.151.1 d1 execute medicion --remote --command \
+  "SELECT jornada, COUNT(*) salidas FROM eventos WHERE evento='salida-interna' AND ruta='/buscar/' AND zona='resultado' AND jornada >= 'AAAA-MM-DD' AND jornada < date('now') GROUP BY jornada ORDER BY jornada DESC LIMIT 30"
+
+# SM-13, la búsqueda seguida — Historias 23.7 y 23.8: las salidas desde los resultados de
+# `/buscar/` frente a las búsquedas asentadas, por jornada UTC. Cambia AAAA-MM-DD por la primera
+# jornada UTC completa tras la llegada de la 23; la de hoy no entra. Es una razón de recuentos por
+# jornada, no de sesiones —ninguna `busqueda` se ata a una carga—, y se desvía en los dos sentidos
+# (§3, «La búsqueda asentada»): la pestaña nueva no mide su salida, y una salida tras volver atrás
+# cuenta sin `busqueda` nueva. Puede pasar de 1; se compara consigo misma en el tiempo.
+npx --yes wrangler@4.151.1 d1 execute medicion --remote --command \
+  "SELECT jornada, SUM(evento='busqueda') asentadas, SUM(evento='salida-interna') seguidas, ROUND(1.0 * SUM(evento='salida-interna') / NULLIF(SUM(evento='busqueda'), 0), 3) sm13 FROM eventos WHERE ruta='/buscar/' AND (evento='busqueda' OR (evento='salida-interna' AND zona='resultado')) AND jornada >= 'AAAA-MM-DD' AND jornada < date('now') GROUP BY jornada ORDER BY jornada DESC LIMIT 30"
+
+# SM-6, la búsqueda sin resultados — Historia 23.8: las asentadas en el tramo 0 frente a todas las
+# asentadas, por jornada UTC, desde la misma jornada de partida y sin la de hoy. El numerador es el
+# tramo 0 de la `busqueda`, no el registro de FR-8: un filtrado sin texto que no encuentra nada
+# cuenta aquí y no deja consulta. Las búsquedas con filtros llegan con la Épica 27; hasta entonces
+# `filtros` es siempre `ninguno`, y el desglose por filtros sale de añadirlo al `GROUP BY`.
+npx --yes wrangler@4.151.1 d1 execute medicion --remote --command \
+  "SELECT jornada, COUNT(*) asentadas, SUM(tramo='0') sin_resultados, ROUND(1.0 * SUM(tramo='0') / NULLIF(COUNT(*), 0), 3) sm6 FROM eventos WHERE evento='busqueda' AND ruta='/buscar/' AND jornada >= 'AAAA-MM-DD' AND jornada < date('now') GROUP BY jornada ORDER BY jornada DESC LIMIT 30"
+
+# Lo que se buscó y no había, para decidir a quién sembrar — FR-8. Desde la 23.8 cada fila es una
+# búsqueda asentada con texto y sin resultados, una por estado y carga; antes de la llegada de la 23
+# salía en cada repintado vacío, con fragmentos a medio escribir y repeticiones (el corte de serie
+# de FR-8, arriba). Para curar sirven las dos épocas; para contar o comparar, añade
+# `AND jornada >= 'AAAA-MM-DD'` con la primera jornada UTC completa tras la llegada. Ya no es el
+# numerador de SM-6, que sale de la `busqueda` (la consulta anterior).
+npx --yes wrangler@4.151.1 d1 execute medicion --remote --command \
   "SELECT consulta, COUNT(*) c FROM eventos WHERE evento='busqueda-sin-resultados' GROUP BY consulta ORDER BY c DESC LIMIT 40"
 ```
 
@@ -460,28 +808,155 @@ protege de nadie, y en cambio descarta eventos de verdad en silencio el día que
 dominio. Si algún día la tabla se llena de ruido, la respuesta es un límite de frecuencia
 en la plataforma, no una comprobación que aparenta seguridad.
 
+### Leer la línea base — Historia 23.10
+
+```bash
+npm run medicion            # lee D1 en remoto, informa y no escribe nada
+```
+
+**Qué lee.** Con sesión de `wrangler` —`npx --yes wrangler@4.151.1 login`, en `medicion/`—, lee el
+Corpus de este equipo y cinco recuentos agrupados de las **jornadas UTC cerradas** —anteriores a
+hoy— sin las balizas de prueba, con `wrangler` 4.151.1 y `--remote` siempre explícito: las vistas y
+las lecturas por (jornada, ruta, evento, origen, via, indexable); las salidas internas por
+(jornada, ruta, zona); las acciones por (jornada, ruta, evento, destino, primera); las búsquedas
+asentadas por (jornada, ruta, tramo, filtros), y las búsquedas sin resultados por (jornada, ruta,
+consulta). Y `d1 info`, para la cuota. Solo recuentos, sin sesiones ni recorridos (NFR-11), sin
+`ORDER BY` —se ordena en JavaScript— y sin nombrar el `rowid`. Cada lectura recorre la tabla cinco
+veces, una por consulta, y D1 cuenta esas filas leídas contra su cuota de lectura, que la orden no
+informa todavía (es una pregunta abierta de la arquitectura). Lo que se hace con lo leído vive en
+`tools/lib/medicion.ts` (la secuencia, `leer`) y `tools/lib/lineaBase.ts` (todo lo demás, puro).
+
+**Qué no hace.** No escribe nada, ni en D1 ni en el repositorio, y no pide `MEDICION_ENDPOINT`:
+no envía nada al receptor. No hay punto final de lectura: el receptor sigue contestando 204 a todo
+lo que no sea un `POST` (AD-14). Leer en remoto no es un acto que cambie nada, pero sí gasta cuota
+de lectura: no se corre en bucle.
+
+**Códigos.** **2** sin sesión de `wrangler` —lo dice con la orden que la abre— o con una bandera o
+un argumento que no son de la orden (la lectura no lleva opciones), antes de tocar nada; **1** si un
+valor de `src/lib/umbrales.ts` que la lectura lee no se sostiene —una jornada que no existe, como
+`2026-11-3`; una pasada sin rutas o con una ruta que el sitio no declara; un mínimo o un umbral de
+ráfaga que no son enteros positivos—, que se juzga **antes de tocar nada**, para no gastar cinco
+recorridos de la tabla en una lectura que no se compondría; si la sesión no se deja leer; si el
+Corpus no se deja leer o no se saca de él el censo; o si no se leyó nada de D1 —ni una consulta con
+recuentos con forma ni ninguna cifra de `d1 info`—, nombrando cada cosa; **0** si leyó algo. Una consulta que falla —también una en la que
+`wrangler` se corta por su tope— no para la orden: sale en «Sin leer» con su motivo, y toda cifra que
+dependa de ella se omite y se nombra, **jamás como cero**. Una tasa sin denominador dice «sin
+denominador», nunca 0 %.
+
+**El censo, no el prefijo** (AD-13). La superficie de cada registro —lecturas, salidas y acciones—
+es la página donde ocurrió, resuelta contra el **censo de hoy** —`rutasPublicadas` del Corpus: la
+portada, las Citas, Autores, Temas y Colecciones publicados y **toda** Obra, se indexe o no; nunca
+una página 2+— y la declaración de `src/lib/superficies.ts`. Lo que no casa se cuenta aparte, por
+evento, y se nombra: «páginas 2+», «ya no se publica» (una Cita o un Autor retirados, una Obra
+absorbida, y también una dirección con forma de página que nunca se publicó, como una errata en un
+enlace: el censo de hoy no las distingue, y el informe lo dice), la búsqueda o la página 404 por su
+nombre, y «sin superficie declarada» (la dirección rota que sirve el 404). Cada lectura reatribuye el
+pasado con el censo de hoy. La unidad es la
+superficie declarada, la portada incluida, nunca la familia; para la línea base, la que una
+superficie declara en su campo `lineaBase` —los Directorios, `/autores/` y `/obras/` juntos, desde
+la 26—, y cada superficie se informa también por separado.
+
+**Los descuentos.** Fuera, además de en el SQL, la ruta de las balizas (`/__comprobacion/`), y los
+registros de las **pasadas que escriben a propósito en producción**, las de
+`PASADAS_QUE_ESCRIBEN_EN_PRODUCCION` en `src/lib/umbrales.ts`: la 25.3 y la 25.7, que anota Héctor
+el día de cada pasada con su jornada UTC y las rutas que recorrió —caminos que el sitio declara,
+sin `?…` ni `#…`, como los guarda el receptor—. La orden descuenta los registros de esas rutas en
+esa jornada, y ninguno más, y nombra cada pasada con lo descontado. Descuenta **todos**: también los
+de visitantes de verdad que pasaron por esas rutas ese día, porque la tabla no los distingue, y lo
+dice; si dos pasadas comparten ruta y jornada, lo compartido se cuenta en la primera.
+
+**Los cortes.** Cada serie se parte por las entradas de `CORTES_DE_SERIE` (`src/lib/umbrales.ts`)
+que la nombran: la lista declarada, `CORTES_DE_SERIE_DECLARADOS`, se compone de constantes de
+despliegue —`DESPLIEGUE_DE_LA_LECTURA`, la llegada de la 23, y `DESPLIEGUE_DE_OBRA_Y_DIRECTORIOS`—
+sin ninguna fecha escrita, y filtra las que aún no tienen valor; `CORTES_DE_SM8` es su proyección
+sobre SM-8. Cada tramo empieza la primera jornada UTC completa tras la llegada, la jornada de llegada
+no entra en ninguno y se informa como «cambió», y los tramos no se suman. SM-8 se da por todos sus
+tramos; lo de la lectura —superficies, Obra, Página de Cita, SM-12—, sobre el tramo vigente de la
+lectura, y las búsquedas sobre el de la búsqueda.
+
+**Lo que informa**, en este orden: la cuota —las filas escritas en 24 h de `d1 info` frente a
+`CUOTA_DE_FILAS_ESCRITAS_POR_DIA_EN_D1`, que pecan por exceso, y el tamaño de la base frente a
+`CUOTA_DE_BYTES_POR_BASE_EN_D1`, 500 MB decimales; al pasar cualquiera de las dos, las escrituras
+fallan en silencio, pero no igual: pasada la de filas escritas, hasta las 00:00 UTC, cuando se
+renueva; pasada la de tamaño, hasta que se borren filas o cambie el plan, porque esa no se renueva
+sola—; los descuentos; los cortes; SM-8 —sin la vista de Obra; Threads no se lee
+como personas mientras no conste quién publica sus enlaces—; las superficies, con sus vistas,
+lecturas, salidas y acciones y la continuación por zona, que es cota inferior —todas las superficies
+con lectura, también a cero—; lo de fuera del censo; la Obra por la marca de sus vistas de Obra
+de cada ruta y jornada —indexable, no indexable, cambió (las dos marcas el mismo día), nula y sin
+marca—; la Página de Cita —SM-5, SM-7 (cota inferior en Chrome para Android), la continuación, SM-3,
+SM-C3 y SM-C5, cada una con su denominador; con más salidas que lecturas, SM-3 no se calcula y se
+dice por qué— y, aparte y sin llamarse así, la portada y la Obra;
+SM-12 por destino —Facebook en su propia línea, detrás de los que se comparan y fuera de la
+comparación mientras `SM12_CON_FACEBOOK` esté apagada, y la Imagen cuadrada aparte—; las búsquedas —SM-6, SM-13 y las consultas sin resultados—; las líneas
+base con sus firmas —Threads y la ráfaga de `MIN_RUTAS_DE_CITA_EN_RAFAGA` rutas de Cita—, y las
+ventanas de las tasas que se juzgan contra su propia serie (`JUICIOS_POR_VENTANAS`, la tabla que
+compone `juiciosPorVentanas` en `tools/lib/lineaBase.ts`). Ninguna cifra se compara con las metas de SM-3 a SM-7, que están en
+suspenso.
+
+**«Cerrada», nunca «buena».** La línea base de cada unidad empieza el primer día del tramo vigente
+de su serie —la de los Directorios, que no existen antes de la 26, el día siguiente a
+`DESPLIEGUE_DE_OBRA_Y_DIRECTORIOS`, la llegada que los hace medibles—, salta las jornadas de llegada
+de lo que se juzga en ella y se cierra la jornada en que reúne `MIN_LECTURAS_DE_LINEA_BASE` lecturas
+de su unidad —búsquedas asentadas, la de las búsquedas—: **300**, el valor que dio Héctor el
+2026-10-24 y que entró en la 23.11 en un diff visible, antes de leer la primera. Sin valor, el
+informe diría «sin mínimo declarado» y ninguna se cerraría nunca. Las ventanas no juntan jornadas de los dos lados de una
+llegada: el bloque en curso que una llegada corta sin el mínimo se nombra y no se juzga. Si la línea
+base se cerró antes de la llegada de lo que se juzga, las ventanas de antes de esa llegada se juzgan
+—se cuentan desde el cierre— pero dicen que no juzgan lo que llega. Cuando la referencia es
+la serie de antes y no reúne el mínimo, se dice. Una señal de SM-C3 o SM-C5 a la que le falta una
+dirección dice que no se puede juzgar, nunca «no se da», y no deja pasar la cadena de «salta»: dos
+ventanas con la señal separadas por una sin juzgar no son «dos seguidas». La orden dice
+«cerrada»; que Héctor la miró, con la comparación por firma delante, y la da por buena lo anota él
+aquí debajo, con la fecha, la métrica y la superficie. Ningún agente lo anota.
+
+#### Líneas base dadas por buenas
+
+Ninguna todavía.
+
 ### Consultar el canal propio — SM-8
 
-Desde la Historia 20.1 hay **dos** eventos de vista, y los dos llevan la marca de origen:
+Desde la Historia 20.1 hay **dos** eventos de vista para SM-8, y los dos llevan la marca de origen:
 `vista-de-cita`, que emite solo la Página de Cita, y `vista-de-superficie`, que emiten una
-sola vez la portada y la página 1 de Autor, Tema y Colección. Las páginas 2+ de un listado,
-`/buscar`, `/404`, `/kit` y `/lote` no emiten vista: son superficies de servicio o
+sola vez la portada y la página 1 de Autor, Tema, Colección y Obra indexable. Las páginas 2+ de un
+listado, `/buscar`, `/404`, `/kit` y `/lote` no emiten vista: son superficies de servicio o
 internas (lo declara `src/lib/superficies.ts`), y las Piezas del Canal enlazan a la
 página 1. Contar solo `vista-de-cita` dejaba fuera todo lo que el Canal trae a las
 superficies de agregación.
+
+Desde la Historia 23.9 hay un **tercer** evento de vista, `vista-de-obra`, y **no entra en SM-8**:
+las consultas de abajo siguen filtrando `evento IN ('vista-de-cita','vista-de-superficie')`. La
+Obra indexable emite las dos —su `vista-de-superficie` y su `vista-de-obra`—, y cuenta **una vez**,
+por la de superficie, como hasta ahora; la que no se indexa no cuenta en SM-8, igual que antes,
+aunque ahora emita su vista de Obra con la marca de origen. Sumar `vista-de-obra` contaría dos veces
+la Obra indexable y metería en SM-8 páginas `noindex` que no medía.
+
+**SM-8 sigue contando solo `origen` en las vistas**, y la Historia 23.6 es una causa de su **corte
+de serie**: antes, recargar la página, copiar la dirección de la barra o volver a ella con la
+marca puesta volvía a contar la llegada, porque `?de=` se quedaba en la dirección; desde la
+llegada en vivo de la Épica 23 se cuenta una vez, así que el tramo de antes y el de después no se
+comparan. La jornada del corte es `DESPLIEGUE_DE_LA_LECTURA`, a la que da valor la 23.11, y de
+ella sale la primera entrada de `CORTES_DE_SM8`, la proyección sobre SM-8 de `CORTES_DE_SERIE` en
+`src/lib/umbrales.ts`; la segunda es `DESPLIEGUE_DE_OBRA_Y_DIRECTORIOS` (26.11). `npm run medicion`
+parte SM-8 por ellas solo («Leer la línea base», arriba). Con las consultas de abajo **se parte a
+mano**: se les añade `AND jornada < 'AAAA-MM-DD'` para el tramo de antes y
+`AND jornada > 'AAAA-MM-DD'` para el de después, con esa jornada, y la de llegada, que es mixta
+—páginas abiertas que aún piden el fichero anterior—, se lee aparte con
+`AND jornada = 'AAAA-MM-DD'`. Sin partirla, una consulta que cruce esa jornada mezcla dos
+instrumentos.
 
 **Las llegadas a una página 2+ no cuentan.** Es un subrecuento conocido y aceptado: quien
 entra por un enlace a `/autor/<slug>/2/` no deja fila de vista.
 
 ```bash
 # Cuál de las cinco redes trae visitas, por jornada y por evento.
-npx wrangler d1 execute medicion --remote --command \
+npx --yes wrangler@4.151.1 d1 execute medicion --remote --command \
   "SELECT jornada, origen, evento, COUNT(*) visitas FROM eventos \
    WHERE evento IN ('vista-de-cita','vista-de-superficie') AND origen IS NOT NULL \
    GROUP BY jornada, origen, evento ORDER BY jornada DESC, visitas DESC"
 
 # El mes entero, por origen y evento, para decidir dónde va el tiempo del siguiente.
-npx wrangler d1 execute medicion --remote --command \
+npx --yes wrangler@4.151.1 d1 execute medicion --remote --command \
   "SELECT origen, evento, COUNT(*) visitas FROM eventos \
    WHERE evento IN ('vista-de-cita','vista-de-superficie') AND origen IS NOT NULL \
    AND jornada >= date('now','-30 days') \
@@ -489,12 +964,12 @@ npx wrangler d1 execute medicion --remote --command \
 
 # Recuento por evento, todos los orígenes — aquí aparecería también una baliza de
 # comprobación que no se hubiera borrado.
-npx wrangler d1 execute medicion --remote --command \
+npx --yes wrangler@4.151.1 d1 execute medicion --remote --command \
   "SELECT evento, ruta = '/__comprobacion/' comprobacion, COUNT(*) n FROM eventos \
    GROUP BY evento, comprobacion ORDER BY evento"
 
 # Proxy de profundidad: vista-de-cita / vista-de-superficie, POR JORNADA, últimos 30 días.
-npx wrangler d1 execute medicion --remote --command \
+npx --yes wrangler@4.151.1 d1 execute medicion --remote --command \
   "SELECT jornada, \
      SUM(evento='vista-de-cita') citas, \
      SUM(evento='vista-de-superficie') superficies, \
@@ -503,7 +978,7 @@ npx wrangler d1 execute medicion --remote --command \
    GROUP BY jornada ORDER BY jornada DESC"
 
 # La misma razón, separando lo que llega con marca de origen (el Canal) de lo que no.
-npx wrangler d1 execute medicion --remote --command \
+npx --yes wrangler@4.151.1 d1 execute medicion --remote --command \
   "SELECT jornada, origen IS NOT NULL con_origen, \
      SUM(evento='vista-de-cita') citas, \
      SUM(evento='vista-de-superficie') superficies, \
@@ -520,85 +995,227 @@ por ninguna superficie; la cifra no distingue las dos cosas, y leerla como «pá
 sesión» sería inventar el dato que la medición se niega a recoger. `NULL` en `razon` es
 una jornada sin vistas de superficie, no un cero.
 
-**No hay migración, pero hay orden: primero el Worker, después el sitio.**
-`medicion/esquema.sql` no lleva `CHECK` sobre `evento`, así que la tabla acepta el evento
-nuevo tal cual. El receptor, en cambio, importa el vocabulario de `src/lib/medicion.ts` al
-empaquetarse: se redespliega **antes** que el sitio (`cd medicion && npx wrangler deploy`).
-En el hueco entre los dos despliegues —o si el Worker no se redespliega—, cada
-`vista-de-superficie` se pierde en silencio: el receptor contesta 204 y no escribe nada.
+### Desplegar el receptor: migración, receptor, sitio — Historia 23.2 (AD-14)
 
-**Comprobar a mano que el Worker desplegado acepta el evento.** Una baliza manual deja en
-D1 una fila indistinguible de una visita, así que va **sin `origen`** —no cuenta en SM-8,
-que filtra `origen IS NOT NULL`— y con una ruta que el sitio no publica, y se borra en
-cuanto se ha visto:
+Cuando cambian el vocabulario o las columnas, el orden es **migración, receptor, sitio**, y lo
+cumple una orden. Un receptor que escribe una columna que no existe pierde cada evento; un
+sitio que envía un campo que el receptor no coteja lo ve llegar a nulo, indistinguible de un
+cero. La Historia 2.9 no se enmienda —el vocabulario sigue cerrado, sin cookie ni
+identificador—: se amplía con cuatro eventos y seis campos, cada uno con su conjunto.
 
 ```bash
-# La misma URL que el secreto MEDICION_ENDPOINT del repositorio.
-curl -s -o /dev/null -w '%{http_code}\n' -X POST \
-  --data '{"evento":"vista-de-superficie","ruta":"/__comprobacion/"}' \
-  "$MEDICION_ENDPOINT"
-# 204 siempre — el código no dice nada. Lo que lo dice es la fila:
-npx wrangler d1 execute medicion --remote --command \
-  "SELECT jornada, evento, ruta, origen FROM eventos WHERE ruta='/__comprobacion/'"
-# Vista la fila, se borra para que no se acumule:
-npx wrangler d1 execute medicion --remote --command \
-  "DELETE FROM eventos WHERE ruta='/__comprobacion/'"
+cd ~/brainlySabiduria                     # en la rama que cambia el vocabulario, árbol limpio
+export MEDICION_ENDPOINT=https://medicion-sabiduria-de-bolsillo.sabiduriadebolsillo.workers.dev
+npm run medicion -- desplegar             # acto de Héctor: migra, despliega, comprueba, baraja
+git add medicion/huella-del-vocabulario.json && git commit   # la huella, con su mensaje
 ```
 
-Si la fila no aparece, el Worker desplegado es anterior a la 20.1: redesplegarlo y repetir.
-Una baliza que se quedara sin borrar sale en el recuento por evento de arriba, y la razón
-por jornada la excluye.
+`desplegar` hace, en este orden, y se para con 1 en el primer fallo diciendo qué quedó
+aplicado —sin reintentar migraciones ni despliegues—:
 
-**Comprobar a mano si el Worker en vivo inserta con `rowid` aleatorio (Historia 23.12).**
-Hasta que `npm run medicion -- desplegar` y `comprobar` (23.2) lo digan solos, se ve con dos
-balizas como la de arriba y el `rowid` de sus filas, leído como texto para que no se
-redondee:
+1. Comprueba la invocación, `MEDICION_ENDPOINT` (con `http(s)://`, y nunca la máquina propia:
+   contra el receptor local está `ensayo`) y la sesión de `wrangler` (`whoami --json`). Sin
+   cualquiera de las tres sale con **2**, antes de tocar nada.
+2. Exige el árbol limpio en `medicion/` y `src/lib/`: la huella nombra el commit, y el commit
+   tiene que contener lo que se despliega. Si lo único sin commitear es la huella de un
+   `desplegar` anterior, lo dice así: se commitea antes de repetir.
+3. Coteja el receptor de la rama contra lo que envía el sitio en vivo: **siempre** el
+   vocabulario de `origin/main` —el que tenga este clon, sin `fetch`; la orden dice su commit y
+   su fecha, así que conviene un `git fetch` antes— y, si la hay, también la huella versionada.
+   Hasta la merge la principal es la v7.1, con la Marca de origen en las acciones, y eso lo
+   pide aunque la huella ya sea de la v8. Si el receptor nuevo no guarda algo de eso, lo nombra
+   y se para: **nunca se despliega un receptor que no cubra lo que emite el sitio en vivo**.
+4. Cuenta las filas por jornada y evento (sin las balizas) y mira la tabla: si no es la de
+   partida ni la migrada, la nombra y se para sin aplicar nada, porque `ADD COLUMN` no es
+   idempotente. Mira también **la cuota antes de tocar nada** (paso 7, con las escrituras de las
+   balizas ya sumadas): si hoy el barajado no cabría, sale con 1 sin migrar ni desplegar —migrar y
+   desplegar para pararse después no ahorra nada: se repite otro día igual—. Dice el instante
+   anterior a la migración.
+5. Aplica las migraciones en remoto (`d1 migrations apply --remote`) y despliega el receptor
+   (`wrangler deploy`), con `wrangler` 4.151.1 y `--remote` siempre explícito. Cada paso tiene un
+   tope de 300 s: uno que no termina se corta, y el parte dice que **quizá** se aplicó.
+6. **La baliza:** envía a `/__comprobacion/` una baliza por cada valor de cada campo de cada
+   evento del vocabulario y, por evento, otra que tiene que dejar la fila vacía —valores que
+   ningún conjunto admite en los campos del evento, y en los que **no** declara un valor válido
+   de otro evento, que solo descarta un receptor que mira qué evento lleva cada campo—, más una
+   de un evento inventado: lo que el receptor guarda y lo que tiene que descartar. La Marca de
+   origen de los siete eventos de la v7.1 lleva un valor ajeno, porque el receptor la guarda en
+   ellos por compatibilidad. Las envía sin seguir redirecciones —un `POST` redirigido llega como
+   `GET`, que el receptor contesta con 204 sin escribir—, y si `MEDICION_ENDPOINT` redirige lo
+   dice. Lee las filas con `CAST(rowid AS TEXT)` y las coteja con lo
+   esperado, hasta tres veces —un receptor recién desplegado tarda en llegar a todas partes—.
+   **Las borra siempre**, casen o no, y si no puede lo dice con la orden que las borra. Si dos
+   `rowid` vecinos están cerca, el receptor en vivo numera en orden de llegada: se para y **no
+   baraja**.
+7. **El barajado:** `UPDATE eventos SET rowid = abs(random())`, que reescribe cada fila y sus
+   dos entradas de índice, unas **tres filas escritas por fila**. Antes lo cuenta contra la
+   cuota de escritura del día (`CUOTA_DE_FILAS_ESCRITAS_POR_DIA_EN_D1`, 100.000 en el plan
+   gratuito), con las filas escritas en 24 h que da `d1 info --json`, que pecan por exceso, **y
+   otras tantas de reserva** para lo que el sitio escriba hasta las 00:00 UTC: pasada la cuota,
+   D1 rechaza cada `INSERT` hasta la medianoche y el Worker lo calla, así que un barajado que la
+   agotara justo dejaría el resto del día a cero. Lo escrito en 24 h lleva sumadas las
+   escrituras de las balizas de la orden (unas 1.566, por exceso), que `d1 info` puede no ver
+   todavía. La cuota es de la cuenta: lo que escriba otra base D1 suya no está contado. Si no
+   cabe, lo dice con las cifras y sale con 1: **se repite otro día, nunca troceado**. Dice el
+   instante anterior al barajado.
+8. Vuelve a contar, **da los recuentos de antes y de después** —una línea por jornada, que la
+   23.3 anota con fecha en su spec— y exige que las jornadas cerradas sean idénticas y que la de
+   hoy y la víspera solo hayan crecido (el reloj del Worker puede ir unos segundos por detrás al
+   cruzar la medianoche): migrar y barajar no pierden ni inventan filas. No se copia ni se
+   guarda ninguna.
+9. Escribe la huella. No hace commit.
+
+Cuando se para después de aplicar algo, el parte dice qué quedó aplicado y los instantes
+anteriores a la migración y al barajado, con la orden de Time Travel de cada uno (abajo); no la
+corre. Los instantes son del reloj de este equipo, y se escriben también al pasar: **si la orden
+se corta con Ctrl-C** no llega a dar su parte, y lo que dice es dónde mirar —las líneas de arriba,
+`d1_migrations`, `deployments list`— y la orden que borra las balizas si quedaron en la tabla.
+
+**Si no llega ninguna baliza a la tabla** —el parte lo dice—, el Worker contesta 204 y no
+escribe, por una de dos causas que el `catch` calla: el receptor que contesta no es el de esta
+rama, o D1 rechaza su `INSERT` porque la tabla no tiene una columna —una migración sin
+aplicar—. Lo distingue la versión desplegada, `npx --yes wrangler@4.151.1 deployments list` en
+`medicion/`, junto con `PRAGMA table_info(eventos)`. Para volver a la última versión que
+guardaba, por su identificador: `npx --yes wrangler@4.151.1 versions list` y `rollback <id>` —sin
+identificador, `rollback` va a la versión anterior, que puede ser otra que tampoco guarde—.
+
+Se repite en **cada** despliegue del receptor —el barajado es idempotente—, y después, con la
+huella commiteada, se despliega el sitio. `npm test` está en rojo entre que la rama toca
+`src/lib/vocabulario.ts` y que la huella entra: es lo que impide desplegar el sitio antes.
+
+**Comprobar lo que hay en vivo**, sin desplegar nada:
 
 ```bash
-: "${MEDICION_ENDPOINT:?falta MEDICION_ENDPOINT}"
-for i in 1 2; do
-  curl -sS --fail -o /dev/null -w '%{http_code}\n' -X POST \
-    --data '{"evento":"vista-de-superficie","ruta":"/__comprobacion/"}' "$MEDICION_ENDPOINT"
-done
-npx wrangler d1 execute medicion --remote --command \
-  "SELECT CAST(rowid AS TEXT) AS fila FROM eventos WHERE ruta='/__comprobacion/'"
-npx wrangler d1 execute medicion --remote --command \
-  "DELETE FROM eventos WHERE ruta='/__comprobacion/'"
+npm run medicion -- comprobar   # acto de Héctor
 ```
 
-Cada `curl` tiene que escribir `204`; si falla, la baliza no salió y lo que diga el `SELECT`
-no cuenta. Lo que decide es si los números son **contiguos**, no cuántas cifras tienen:
+Envía las balizas del vocabulario de la huella —las que guarda y las que descarta—, las coteja,
+mira que el `rowid` sea aleatorio y las borra. Sale con 1 nombrando la diferencia si el receptor
+en vivo no guarda lo que la huella dice, guarda lo que debía descartar o numera en orden de
+llegada —un receptor anterior a la 23.12, también tras una vuelta
+atrás—; lo cierra repetir la 23.3, `npm run medicion -- desplegar`. Es lo que sustituye a las
+comprobaciones a mano con `curl` de las Historias 20.1 y 23.12.
 
-- **Contiguos** —el segundo es el primero más uno, o poco más si entretanto llegó
-  tráfico—: el Worker en vivo numera en orden de llegada. Hasta la 23.3 es lo esperado, y no
-  se adelanta: el receptor con la 23.12 lo despliega Héctor en la 23.3, desde la rama. Desde
-  la 23.3 dice que el Worker en vivo es anterior a la 23.12, también tras una vuelta atrás,
-  que numera `max(rowid)+1` sobre los aleatorios y da números contiguos de 19 cifras; lo
-  cierra repetir la 23.3.
-- **Dispersos** —separados por mucho más que el tráfico de unos segundos—: inserta con
-  `rowid` aleatorio.
-- **Uno, o más de dos**: quedaba una baliza de antes sin borrar, o una se perdió. Se borran
-  con el `DELETE` y se repite.
-- **Ninguno**: antes de concluir nada se espera unos segundos y se repite el `SELECT`. Si
-  sigue sin filas, el Worker no guarda: o es anterior a la 20.1, como arriba, o —con el de la
-  23.12 en vivo— D1 rechaza el `INSERT` con `rowid` y el `catch` lo calla. Lo distingue la
-  versión desplegada (`npx wrangler deployments list`, en `medicion/`). En el segundo caso
-  Héctor vuelve a la última versión que guardaba —en orden de llegada— por su identificador,
-  `npx wrangler versions list` y `npx wrangler rollback <id>`: sin él, `rollback` va a la
-  versión anterior, que puede ser otra que tampoco guarde. La 23.12 se revisa antes de
-  volver a desplegarla.
+**Mientras viva la rama de la Épica 23, el receptor no se despliega desde la principal.** Si se
+hace, el receptor en vivo vuelve al vocabulario de la principal, la huella de la rama queda
+rancia y la 23.3 se repite.
+
+**Reversión, en el orden inverso**: primero el sitio, después el receptor
+(`npx --yes wrangler@4.151.1 versions list` y `rollback <id>`, en `medicion/`). Las migraciones
+nunca se revierten: las columnas nuevas quedan nulas y no molestan a un receptor anterior. Un
+receptor anterior a la 23.12 vuelve a numerar en orden de llegada, y lo que llegue entretanto lo
+baraja el siguiente `desplegar` que pase la comprobación.
+
+**Recuperar D1 tras un error** es Time Travel: `npx --yes wrangler@4.151.1 d1 time-travel
+restore medicion --timestamp=<instante>`, en `medicion/`, dentro de los 7 días del plan gratuito
+o los 30 del de pago. **Sobrescribe todo lo escrito después** de ese instante, y devuelve el
+orden de llegada de antes del barajado: es un acto de Héctor, y ninguna orden de `tools/`
+restaura producción. Los instantes los da el parte de `desplegar`. Volver a antes del barajado
+conserva las columnas nuevas. Volver a antes de la migración devuelve **también la tabla de
+antes**, sin ellas: con el receptor nuevo en vivo cada `INSERT` fallaría en silencio, así que
+antes se vuelve al receptor anterior (`versions list` y `rollback <id>`).
+
+**El receptor local**, para probar sin tocar producción:
+
+```bash
+npm run medicion -- local    # migra el D1 local (medicion/.wrangler/) y arranca wrangler dev en :8787
+npm run medicion -- ensayo   # en otra terminal: la comprobación de desplegar, contra el local
+```
+
+`ensayo` corre la secuencia de `desplegar` contra el D1 local, salvo lo que solo existe en remoto
+—migrar, que ya hizo `local`, desplegar y `d1 info`— y la huella: recuentos, estado de la tabla,
+balizas, `rowid`, recuento de filas, barajado y recuentos otra vez, con las respuestas de verdad
+de `wrangler`. Sale con 0 si la tabla es la migrada, cada evento y cada valor del vocabulario
+llegó al D1 local, lo ajeno se descartó, el `rowid` es aleatorio, las balizas se borraron y
+barajar dejó los recuentos iguales. Corrida antes de la 23.3, es lo más cerca de producción que
+se prueba el SQL de `desplegar`. El D1 local no se vacía nunca solo:
+lo que dejan las pruebas se acumula en `medicion/.wrangler/`, que no se versiona y se puede
+borrar entero (el siguiente `local` lo vuelve a migrar). Si `local` no puede migrarlo —un D1
+local creado a mano desde `esquema.sql`, sin `d1_migrations`—, se borra igual. Las pruebas de Playwright levantan el mismo receptor local
+y construyen el sitio con `MEDICION_ENDPOINT=http://localhost:8787/` (`playwright.config.ts`):
+toda construcción de rama con medición —Playwright, y la de Lighthouse de la 23.11, que se hace
+a mano con `MEDICION_ENDPOINT=http://localhost:8787/ npm run build` y el receptor local en
+marcha— apunta a `wrangler dev` con D1 local, nunca a producción.
+
+### El primer `desplegar` — Historia 23.3 (2026-10-24)
+
+Corrió el **2026-10-24 a las 23:13 UTC** desde la rama de la Épica 23 (`v8/epica-23`, en
+`b4303b0e7c`), sin huella versionada —era el primero—, así que cotejó el receptor de la rama
+contra el vocabulario de `origin/main` (`ed5a3f47e2`), el que envía el sitio en vivo, y lo cubría.
+Lo corrió el orquestador del bucle v8-ralph con autorización de Héctor del mismo día, después de
+un `ensayo` en verde contra el D1 local, y salió con **0**. Quedó aplicado, en este orden:
+
+- **Las migraciones, en remoto**: `0000_tabla_de_partida.sql`, que no cambió nada —la orden
+  reconoció antes la tabla de partida— y dejó anotada la línea de partida en `d1_migrations`, y
+  `0001_vocabulario_de_la_v8.sql`, con sus seis columnas a nulo en las filas de antes. Desde ese día
+  la base de producción **tiene migraciones**: «No hay migración», lo que esta sección decía hasta
+  la 23.2, ya no es cierto tampoco en producción, y su esquema es el de `medicion/migrations/` y no
+  el `esquema.sql` del 2026-09-02.
+- **El receptor**: `medicion-sabiduria-de-bolsillo`, versión
+  **`23386626-a2b0-4c59-8d69-f78ab906ba10`**, con el vocabulario de la v8 y el `rowid` aleatorio
+  de la 23.12. La versión que había antes es anterior a la 23.12 y numera en orden de llegada: si
+  lo que envía el sitio de la v7.1 dejara de llegar, la vuelta atrás que pide la 23.3 es desplegar
+  desde la principal el receptor de la principal, que conserva el `rowid` aleatorio; un `rollback`
+  a esa versión volvería al orden de llegada (Reversión, arriba).
+- **La baliza**: 87 balizas enviadas y 86 filas leídas —la del evento inventado no deja fila—, que
+  casaron al primer intento; `rowid` aleatorio; las balizas, borradas.
+- **El barajado**: 4.201 filas, unas 12.603 escrituras; con las 1.797 escritas en 24 h y otras
+  tantas de reserva, 16.197 de las 100.000 del día. Los recuentos por (jornada, evento) de antes y
+  de después coinciden en las 50 jornadas; están, con fecha, en el spec de la historia
+  (`_bmad-output/implementation-artifacts/spec-23-3-la-migracion-y-el-receptor-llegan-antes-que-el-sitio.md`).
+- **Los instantes para Time Travel**, del reloj del equipo: antes de migrar,
+  `2026-10-24T23:13:16.949Z`; antes de barajar, `2026-10-24T23:13:45.352Z`. Sirven 7 días en el
+  plan gratuito.
+- **La huella**: `medicion/huella-del-vocabulario.json` (`escritaEl: 2026-10-24`, del commit
+  `b4303b0e7c`), commiteada en la rama en `6aece9a77f` y nunca en la principal. Con ella
+  `npm test` vuelve a verde en la rama.
+
+Queda por leer, antes del merge de la 23.11, la primera jornada cerrada tras el despliegue —la
+2026-10-25 UTC es la primera entera bajo el receptor nuevo—: sus eventos tienen que seguir
+llegando como antes, porque el sitio en vivo sigue en la v7.1. El plan contratado de Cloudflare lo
+revisa y lo anota aquí la 23.11; la cuota de este barajado se contó con la del plan gratuito.
+
+### El día de la fusión de la 23 — Historia 23.11 (2026-10-25)
+
+Lo leyó y lo corrió el **2026-10-25, entre las 17:20 y las 17:22 UTC**, el orquestador del bucle
+v8-ralph en la sesión principal, con la autorización que Héctor dio en el chat el 2026-10-24, y se
+lo pasó al paso de fusión, que lo anota aquí antes de crear el merge. Las dos lecturas son de solo
+lectura; `comprobar` escribe sus balizas y las borra.
+
+- **El plan contratado de Cloudflare: sin verificar.** `wrangler` 4.151.1 no expone el plan
+  contratado de la cuenta (leído a las 17:21 UTC). `d1 info medicion`, a esa hora: **905 kB** de
+  base, **13.294 filas escritas en 24 h** —casi todas del barajado de la 23.3, que corrió hace
+  menos de 24 h— y 50.818 leídas. Se conservan las cuotas del plan gratuito, que son las
+  conservadoras: `CUOTA_DE_FILAS_ESCRITAS_POR_DIA_EN_D1` (100.000) y
+  `CUOTA_DE_BYTES_POR_BASE_EN_D1` (500 MB decimales) no cambian. **Pendiente de Héctor**:
+  confirmar el plan en el panel de Cloudflare y, si no es el gratuito, poner las dos cuotas al día
+  en `src/lib/umbrales.ts` en un diff visible.
+- **Los eventos del sitio en vivo siguen llegando tras la 23.3** (leído a las 17:20 UTC). La
+  jornada UTC **2026-10-25**, la primera entera bajo el receptor nuevo, **aún no ha cerrado**
+  —cierra a las 00:00 UTC del 2026-10-26, y si este merge llega hoy al sitio en vivo será mixta,
+  con eventos de la v7.1 y de la v8—, pero a las 17:20 UTC ya llevaba **72 `vista-de-cita` y 10
+  `vista-de-superficie`**, el nivel de una jornada entera: la 2026-10-24 cerró con 74 y 6, y la
+  2026-10-23 con 82 y 2. La 2026-10-24 pasó de 71 `vista-de-cita` al correr `desplegar` (23:13
+  UTC) a 74, así que también recibió eventos después. Los eventos del sitio de la v7.1 llegan con
+  las columnas nuevas a nulo, como se espera. Nada indica que el receptor nuevo pierda lo que envía
+  el sitio en vivo.
+- **`npm run medicion -- comprobar`, desde la rama, a las 17:22 UTC**: salió con **0** al primer
+  intento de tres —87 balizas enviadas y 86 filas leídas, que casan—. El receptor en vivo guarda
+  cada evento y cada valor de la huella (`b4303b0e7c`, la de `medicion/huella-del-vocabulario.json`
+  de la rama), descarta lo ajeno, numera al azar y las balizas se borraron. No hace falta repetir
+  la 23.3 antes de fusionar. La salida, en `.claude/v8-ralph/logs/s-23/orq-comprobar.log`.
 
 ### Consultar la compartición — SM-5, SM-7 y SM-C3
 
 ```bash
 # Cuánto se comparte y hacia dónde — SM-7, FR-20.
-npx wrangler d1 execute medicion --remote --command \
+npx --yes wrangler@4.151.1 d1 execute medicion --remote --command \
   "SELECT evento, destino, COUNT(*) n FROM eventos \
    WHERE evento IN ('comparticion-de-imagen','comparticion-de-enlace') \
    GROUP BY evento, destino ORDER BY n DESC"
 
 # SM-C3 — si la compartición creció a costa del copiado, por jornada.
-npx wrangler d1 execute medicion --remote --command \
+npx --yes wrangler@4.151.1 d1 execute medicion --remote --command \
   "SELECT jornada, \
      SUM(evento IN ('copiado','descarga-de-imagen')) llevarselo, \
      SUM(evento IN ('comparticion-de-imagen','comparticion-de-enlace')) compartirlo \
@@ -660,6 +1277,15 @@ pasa axe a la portada, `/buscar` y la 404 con la invitación puesta. El porqué 
 la cabecera de `tests/e2e/ingreso-accesible.spec.ts`; aquí solo hace falta saber que sin ella
 se publica una invitación cuya accesibilidad no ha medido nadie.
 
+El barrido es contra **WCAG 2.2 AA**, el suelo declarado (NFR-9), y no contra 2.1: le pide a
+axe las etiquetas que declara `ETIQUETAS_DEL_BARRIDO` en `src/lib/superficies.ts` —las de 2.1 AA
+y la de 2.2 AA—, las mismas que el barrido del sitio (Historia 23.4). Ninguna de las dos pruebas
+de axe escribe la lista: subir el suelo es cambiarla ahí —y en `tests/unit/superficies.test.ts`,
+que la fija—, y las dos lo heredan. Cada barrido comprueba además en su resultado que corrió
+entero, así que uno acotado a un nodo o a unas reglas no sale en verde. De lo que añade 2.2, axe
+solo comprueba 2.5.8 (`target-size`): 2.4.11 y 2.5.7 los da por cumplidos la UX y 3.2.6, 3.3.7
+y 3.3.8 no aplican, con su motivo en la misma declaración.
+
 Lo que conviene saber antes de teclearla:
 
 - **Tarda minutos, no segundos.** La orden dispara el `webServer` de `playwright.config.ts`,
@@ -679,6 +1305,21 @@ Lo que conviene saber antes de teclearla:
 regla, ni se enciende «mientras tanto»: la invitación se publica accesible o no se publica.
 Lo que falle se arregla en `src/components/Sostener.astro` —o se decide aparte— y se vuelve a
 correr hasta verde.
+
+Desde la Historia 23.4 el rojo puede venir de tres sitios, y el mensaje dice de cuál:
+
+- **una violación**, con la regla y el selector del nodo. Ojo con una que no salía antes: la
+  axe 4.14 corre `label-content-name-mismatch` con las etiquetas de 2.1, así que un enlace cuyo
+  texto visible no está, tal cual, dentro de su nombre accesible falla. El aviso de pestaña
+  nueva va **dentro** del nombre (`AVISO_DE_PESTAÑA_NUEVA`, Historia 22.10) y no lo rompe; un
+  `aria-label` que reescriba el texto visible, sí;
+- **«el barrido no corrió lo que pide»**, con `faltan` o `sobran`: el barrido se acotó —un
+  `.include(` o un `.withRules(` añadido a la prueba— o la axe de la página no es la que se
+  comprobó. No es un fallo de la invitación: se deshace el cambio de la prueba o se reinstala
+  con `npm ci`;
+- **«axe no supo decidir»**, con el selector: un objetivo que `target-size` no pudo medir, casi
+  siempre por un vecino solapado fuera del orden de tabulación. Se arregla como una violación,
+  separando o agrandando el objetivo según `DESIGN.md`; no se da por bueno.
 
 ### Y después de desplegar, abrir el sitio publicado
 

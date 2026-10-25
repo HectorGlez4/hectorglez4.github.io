@@ -22,7 +22,7 @@ Sitio panhispánico de citas célebres en español, estático, construido con As
 
 ## Running and verifying
 
-- El CI no ejecuta `npm run test:e2e`: las pruebas de Playwright solo corren en local, y lo hacen contra el sitio ya construido por `tests/servidor.mjs`, no contra `astro dev`.
+- El CI no ejecuta `npm run test:e2e`: las pruebas de Playwright solo corren en local, y lo hacen contra el sitio ya construido por `tests/servidor.mjs`, no contra `astro dev`. Desde la 23.2 ese sitio se construye con `MEDICION_ENDPOINT=http://localhost:8787/`, y el `webServer` levanta antes el receptor local (`npm run medicion -- local`: `wrangler dev` con D1 local): el puerto 8787 tiene que estar libre, y ninguna construcción de rama apunta al receptor de producción; `tests/e2e/receptor-local.spec.ts` comprueba que la Página de Cita pide su fichero de medición y que su vista llega al D1 local. La primera vez, sin conexión o con la caché de `npx` vacía, `npx --yes wrangler@4.151.1` se descarga dentro del plazo de 180 s del `webServer` —`wrangler` no es dependencia del proyecto, a propósito—; si no llega, córrelo una vez a mano (`npm run medicion -- local`) y repite. El D1 local (`medicion/.wrangler/`, sin versionar) acumula lo de cada pasada y se puede borrar entero.
 - Itera por fichero de prueba: la suite unitaria serializa a propósito (`fileParallelism: false`) porque cada prueba lanza un `astro build`.
 - `astro check` abarca todo el repositorio, no solo el sitio: `medicion/` y las pruebas e2e entran en el mismo programa de TypeScript.
 - `npm run build` termina con `tsx integraciones/peso.ts`, tras Pagefind: mide `dist/` en bytes sin los cinco ficheros que rotan con la jornada, escribe sus cinco líneas de cifras por stdout cuando hay algo que juzgar —sin `dist/`, con uno vacío o con uno que solo trae lo que rota no da cifras y sale con 1—, avisa entre `AVISO_DE_PESO_DE_DIST` y `TOPE_DE_PESO_DE_DIST` y se para por encima del tope (`src/lib/umbrales.ts`; DESPLIEGUE.md, «El techo de peso del hospedaje»). No es una integración de Astro: `construirConCorpus` corre `astro build` a secas y no lo ejecuta salvo con `conNpmRunBuild`. Los umbrales se rebajan en la copia, nunca en el árbol.
@@ -33,13 +33,19 @@ Sitio panhispánico de citas célebres en español, estático, construido con As
 - Un campo opcional sin valor se omite del fichero; nunca cadena vacía ni `null`. La distinción entre procedencia completa, parcial y ausente es de presencia de campos.
 - Ningún componente lleva valores literales de color o tipografía — usa los tokens de `DESIGN.md` como propiedades personalizadas de CSS.
 - La familia serif se aplica solo a texto de Cita, nombre de Autor y nombre de Tema.
-- Un mensaje de estado («Copiado.», el recuento de `/buscar/`, la imagen lista, el fallo del generador) se anuncia por una región `role="status"` que está en el marcado desde la carga, vacía y sin `hidden` (`.solo-para-lectores` de `tokens.css`; dentro del `<dialog>` si se anuncia con él abierto, porque lo de fuera es inerte). Para anunciar se vacía la región y se escribe el mensaje en el siguiente fotograma (`requestAnimationFrame`): el mismo texto escrito sobre sí mismo no se anuncia. Pestaña nueva solo para donar, compartir y comprar, con `AVISO_DE_PESTAÑA_NUEVA` de `src/lib/accesibilidad.ts` —su único dueño— oculto dentro del nombre accesible; todo lo demás, en la misma pestaña (Historia 22.10).
+- Un mensaje de estado («Copiado.», el recuento de `/buscar/`, la imagen lista, el fallo del generador) se anuncia por una región `role="status"` que está en el marcado desde la carga, vacía y sin `hidden` (`.solo-para-lectores` de `tokens.css`; dentro del `<dialog>` si se anuncia con él abierto, porque lo de fuera es inerte). Para anunciar se vacía la región y se escribe el mensaje en el siguiente fotograma: el mismo texto escrito sobre sí mismo no se anuncia. Lo hace `anunciar` de `src/lib/anuncio.ts` —su único dueño—; una isla en línea lo lleva dentro por `guionQueAnuncia` y `set:html` (`define:vars` y `set:html` juntos pierden el cuerpo en Astro 7.2), y ningún guion en línea usa `requestAnimationFrame` fuera de él (Historia 23.1). Pestaña nueva solo para donar, compartir y comprar, con `AVISO_DE_PESTAÑA_NUEVA` de `src/lib/accesibilidad.ts` —su único dueño— oculto dentro del nombre accesible; todo lo demás, en la misma pestaña (Historia 22.10).
+- La medición se llama `__medir(…)` a secas, nunca `window.__medir && …`: el arranque (`ARRANQUE_DE_MEDICION`) abre la cola en línea en toda página del armazón y es el único guion en línea que asigna `__medir`; el fichero `/medicion/{versión}.js` la vacía y la sustituye. Qué vista emite una página lo declara su superficie en `src/lib/superficies.ts` y sale al `data-vistas` del `<html>`; ninguna página la elige. La página 1 de toda Obra declara además, se indexe o no, la `vista-de-obra` (`vistaConMarca`, Historia 23.9), con su marca —`indexable` o `no-indexable`, de `MARCAS_DE_OBRA`— en el atributo `ATRIBUTO_DE_INDEXABLE` del `<html>`: la escribe `Armazon.astro` desde `consecuenciasDe`, de la misma lista de rutas indexables que su `noindex`, el fichero la lee una vez al activarse y la envía solo con la vista que declara la página —una `vista-de-obra` que pidiera una isla saldría con la marca nula—, y `astro:build:done` (`tools/lib/indexables.ts`) para la construcción si falta en una página 1 de Obra o trae un valor ajeno a `MARCAS_DE_OBRA`, contradice su `noindex`, aparece en otra página o no va junto a la `vista-de-obra` de `data-vistas`; ninguna isla la pide ni la lee, y no entra en SM-8. La `lectura` y el `primera` de cada acción los decide solo el fichero (Historia 23.5): ninguna isla los emite ni los calcula, ni conoce `METRICA_DE_ACCION`, y `__medir('lectura')` se descarta (`EVENTOS_SOLO_DEL_FICHERO`). Las Marcas de llegada (`?de=` y `?via=`, `MARCAS_DE_LLEGADA`) las lee y las quita de la dirección solo el fichero, una vez y con el `history.state` que había (Historia 23.6), y viajan solo con las vistas que declara la página y con la lectura —una vista que pida una isla sale sin ellas—: ninguna isla las lee, y la única que escribe además en el historial es la de la búsqueda: solo `history.replaceState` con la marca de su búsqueda asentada (`MARCA_DE_BUSQUEDA_ASENTADA`, un booleano) en el objeto de estado, sin dirección, desde sus escuchas y nunca al analizarse, que corre antes que el fichero diferido (lo vigilan `tests/unit/medicion.test.ts` sobre `dist/` y, ejecutándola, el entorno simulado de `tests/unit/ayuda/busqueda.ts`). La `busqueda` y la `busqueda-sin-resultados` las emite solo esa isla al asentar un estado —enviar, pulsar un resultado, ocultarse; nunca por tecla ni por repintado— y una vez por estado y carga: qué emite, con qué tramo y si una llegada ya estaba registrada lo decide `asentamientoDeBusqueda` de `src/lib/medicion.ts`, que viaja a la isla por su texto con sus constantes del vocabulario (`ASENTAMIENTO_DE_BUSQUEDA`), y el fichero no descarta ninguna `busqueda` ni lee el historial (Historia 23.8). La `salida-interna` (Historia 23.7) la emite también solo el fichero, desde una única escucha de `click` en la ventana y en burbuja: un enlace del mismo origen a otra ruta, con el botón principal, sin modificador, sin `defaultPrevented`, sin `download` y sin abrir en otra pestaña; como mucho una por carga, detrás de la lectura, con la ruta y la zona y nada más —ni el destino ni el texto pulsado—, y `__medir('salida-interna')` se descarta. La zona la pinta el build en el **contenedor**, nunca en el `<a>`: `data-zona` con un valor de `ZONAS` del vocabulario —prop `zona: Zona` obligatoria en `TarjetaDeCita`, `Chips`, `Paginacion`, `ListaDeObras`, `RutasDeSalida` y `Atribucion`; atributo en los contenedores propios de cada página—, y lo exento lleva `data-sin-zona` con un motivo de `EXENCIONES_DE_ZONA` (`src/lib/medicion.ts`); la escucha toma la declaración más cercana al enlace, y lo que inserta una isla la hereda. Ninguna isla emite la salida ni lee zonas. Ningún guion en línea lleva datos de contenido —slug, texto, Obra—: van en `data-*` (exención nombrada: `ImagenDelKit`, hasta la 25.4). Lo que una página descarga —`<script src>`, `<link rel="modulepreload">` o `import()`, y lo que un fichero de la lista arranca al ejecutarse, como el worker de Pagefind (`arranca`)— está en `GUIONES_EXTERNOS` de `src/lib/guiones.ts`, con su tope en `umbrales.ts` (Historia 23.1).
 
 ## Known pitfalls
 
-- Al añadir una página a `src/pages/`, declárala en `src/lib/superficies.ts`: es el único sitio donde se dice si una superficie es publicable, y de ahí salen el sitemap, el `noindex`, el índice de Pagefind y el barrido de accesibilidad. Sin declaración el build se para. Antes eran tres sitios y había que acordarse de los tres; `/404` y `/buscar` acabaron `noindex` para el buscador de fuera y visibles para el de dentro (Historia 12.1). Desde la 22.4 la Página de Obra depende además de la **lista de rutas indexables**, que `superficies.ts` recibe por `declararRutasIndexables` y que se declara en **dos instancias** del módulo —`Armazon.astro` en las páginas e `integraciones/indexables.ts` en la configuración—; sin ella `caracterDe` lanza ante una Obra. Un guion o una prueba que pregunte por una ruta de Obra la declara antes (y la olvida después).
+- Al añadir una página a `src/pages/`, declárala en `src/lib/superficies.ts`: es el único sitio donde se dice si una superficie es publicable, y de ahí salen el sitemap, el `noindex`, el índice de Pagefind, el barrido de accesibilidad y, desde la 23.1, la medición: si la página carga el fichero (`cargaLaMedicion`) y qué vista emite —una superficie `producto` declara su `vista`, y una prueba de `tests/unit/superficies.test.ts` falla si la omite—. Sin declaración el build se para. Antes eran tres sitios y había que acordarse de los tres; `/404` y `/buscar` acabaron `noindex` para el buscador de fuera y visibles para el de dentro (Historia 12.1). Desde la 22.4 la Página de Obra depende además de la **lista de rutas indexables**, que `superficies.ts` recibe por `declararRutasIndexables` y que se declara en **dos instancias** del módulo —`Armazon.astro` en las páginas e `integraciones/indexables.ts` en la configuración—; sin ella `caracterDe` lanza ante una Obra. Un guion o una prueba que pregunte por una ruta de Obra la declara antes (y la olvida después).
 - Una página nueva cuyo contenido dependa de la jornada —la Cita del Día, `FECHA_JORNADA`, `corpus/portada.json`— va también en `FICHEROS_QUE_ROTAN_CON_LA_JORNADA` de `tools/lib/peso.ts`, con su ruta exacta en `dist/`: si no, el paso del peso la juzga con el resto y su veredicto pasa a depender del día (AD-12). Una prueba de `tests/unit/peso.test.ts` sigue las importaciones de las páginas, las integraciones y la configuración y lo exige; no sabe seguir un alias de importación ni un `import.meta.glob`, y por eso los rechaza.
 - No traigas `@cloudflare/workers-types`: sus globales redefinen `Buffer` y descompilan las pruebas que leen cabeceras PNG. Declara en `medicion/worker.ts` solo la superficie de D1 que uses.
+- Un enlace interno nuevo dentro de `<main>` de una página que carga el fichero de medición necesita zona o exención: un contenedor con `data-zona` (o un componente de enlace con su prop `zona`) o con `data-sin-zona`, en él o en un antepasado. Cargan el fichero todas las superficies salvo `/kit` y `/lote`, con lectura o sin ella: también las páginas 2+, `/buscar/` y el 404. Sin zona, la escucha no lo mide y la prueba de `dist/` de `tests/unit/medicion.test.ts` («todo enlace interno de `main` tiene zona o exención») falla nombrando la ruta y el enlace.
+  - La zona del sitio la fija la tabla `COLOCACION` de esa prueba: un enlace nuevo con una de las once zonas de la Épica 23 **suma su fila**, porque la prueba solo exige una zona válida, y una válida en el sitio equivocado pasaría.
+  - Las zonas del vocabulario que la Épica 23 no coloca son de las Épicas 24, 26 y 28, y entran con su épica sin tocar la prueba: exige que estén las once, no que sean las únicas, y la tabla no compara las demás.
+  - Una zona o una exención **nueva** —fuera del vocabulario o de `EXENCIONES_DE_ZONA`— no se inventa: la decide Héctor (UX-DR111).
+- Tocar `src/lib/vocabulario.ts` —un evento, un campo, un valor, un tramo— mueve la huella del vocabulario desplegado: `tests/unit/huella.test.ts` falla en `npm test` hasta que Héctor repita `npm run medicion -- desplegar` (la 23.3) desde la rama y commitee `medicion/huella-del-vocabulario.json`. Es a propósito; no se arregla escribiendo la huella a mano. Una columna nueva, además, es una migración nueva en `medicion/migrations/` —nunca se edita una aplicada— y el guion solo emite lo que `PENDIENTES` de `tests/unit/vocabulario.test.ts` ya no retiene.
 
 <!-- /bmad:context -->
 
@@ -262,6 +268,78 @@ dada de alta **como propietaria** (`DESPLIEGUE.md` §5). Sin ella no escribe nad
 **código 2**, igual que con una bandera desconocida; sale con **1** si no pudo leer el corpus o
 la serie, si no pudo leer ninguna ventana o si falla la escritura, y entonces no escribe nada.
 
+## Desplegar el receptor de la medición
+
+El esquema de D1 cambia solo por migraciones aditivas (`medicion/migrations/`, AD-14), y cuando
+cambian el vocabulario o las columnas el orden es **migración, receptor, sitio**. Lo cumple una
+orden, con `wrangler` fijado a 4.151.1 y `--remote` o `--local` siempre explícito:
+
+```
+npm run medicion -- desplegar   # migra en remoto, despliega, comprueba con balizas, baraja, escribe la huella
+npm run medicion -- comprobar   # que el receptor en vivo guarda lo que dice la huella y numera al azar
+npm run medicion -- local       # D1 local migrado y wrangler dev en :8787, en primer plano
+npm run medicion -- ensayo      # la secuencia de desplegar contra el receptor local, sin migrar ni desplegar
+```
+
+**`desplegar` y `comprobar` son actos de Héctor**, con `MEDICION_ENDPOINT` y sesión de `wrangler`:
+ningún agente los corre, ni `wrangler deploy`, ni nada con `--remote`. `local` y `ensayo` no tocan
+nada remoto. Códigos: **2** si la invocación no vale, si falta `MEDICION_ENDPOINT` (o no es
+`http(s)://`, o apunta a la máquina propia) o si `wrangler` no tiene sesión, siempre antes de tocar nada; **1** para todo lo
+demás, con el parte de lo que quedó aplicado y los instantes para Time Travel. `desplegar` coteja
+el receptor de la rama siempre contra el vocabulario de `origin/main` —el sitio en vivo; haz
+`git fetch` antes— y contra la huella si la hay, mira la cuota **antes de migrar** (si hoy el
+barajado no cabría, sale con 1 sin tocar nada), se para en el primer fallo, no reintenta
+migraciones ni despliegues, borra sus balizas pase lo que pase, no baraja si el `rowid` de las
+balizas es contiguo ni si el barajado (unas tres filas escritas por fila, más otro tanto de lo
+escrito en 24 h de reserva para el resto del día) no cabe en
+`CUOTA_DE_FILAS_ESCRITAS_POR_DIA_EN_D1` —se repite otro día, nunca troceado—, da los recuentos de
+antes y de después por (jornada, evento) y escribe la huella **solo en su último paso**. No hace
+commit: la huella la commitea Héctor, y el sitio se despliega después. El orden de cada
+subcomando y sus paradas viven en `tools/lib/medicion.ts`, con sus efectos inyectados (AD-22), y
+`tests/unit/medicion-secuencias.test.ts` los recorre con un D1 en memoria; el paso a paso, la
+reversión y Time Travel, en `DESPLIEGUE.md` §3.
+
+### Leer la línea base (Historia 23.10)
+
+```
+npm run medicion                # sin subcomando: lee D1 en remoto, informa y no escribe nada
+```
+
+**Es solo lectura**, con `--remote` explícito: sesión de `wrangler`, el Corpus de este equipo —del
+que sale el censo—, cinco recuentos agrupados con `d1 execute` de las jornadas UTC cerradas y
+`d1 info`. No pide `MEDICION_ENDPOINT`, no escribe en D1 ni en el repositorio, no ordena ni nombra
+el `rowid` —una prueba estrecha de `tests/unit/orden-de-llegada.test.ts` exige que en `tools/` solo
+lo nombren el barajado y la lectura de las balizas— y no hay punto final de lectura. Códigos: **2**
+sin sesión o con cualquier bandera o argumento (la lectura no lleva opciones); **1** si un valor de
+`src/lib/umbrales.ts` que lee no se sostiene (una jornada que no existe, un mínimo que no es un entero
+positivo, una ruta de pasada que el sitio no declara) —se juzga antes de tocar nada—, si la sesión no
+se deja leer, si el Corpus no se deja leer o si no se leyó nada de D1 (tampoco cuando las consultas
+solo traen filas sin forma); 0 si leyó algo. El detalle, en `DESPLIEGUE.md` §3, «Leer la línea base». Una consulta que falla va a «Sin leer» y lo
+que depende de ella se omite, nunca como cero. Va con `--remote`, así que, como todo lo de arriba con
+`--remote`, la corre Héctor y no un agente; cada lectura son cinco recorridos de la tabla, que D1
+cuenta contra su cuota de lectura.
+
+La secuencia (`leer`, con `Efectos`) vive en `tools/lib/medicion.ts`; todo lo demás —descuentos,
+censo, tramos, tasas, líneas base, firmas, ventanas y el informe— en `tools/lib/lineaBase.ts`, puro
+y probado con respuestas fijas en `tests/unit/linea-base.test.ts`. La superficie de cada registro
+sale del censo de hoy (`rutasPublicadas`) y de `src/lib/superficies.ts`, **nunca del prefijo de la
+ruta**; la unidad de línea base, del campo `lineaBase` de la superficie (`superficieDeLineaBase`),
+que la orden lee sin nombrar ninguna ruta. Ningún módulo de `src/`, `integraciones/` ni
+`astro.config.mjs` la importa ni la nombra.
+
+**Las constantes que la gobiernan son de `src/lib/umbrales.ts` y las de valor son de Héctor**:
+`MIN_LECTURAS_DE_LINEA_BASE` (300, el valor de Héctor, desde la 23.11), `DESPLIEGUE_DE_LA_LECTURA`
+(sin valor hasta que la 23 llegue al sitio en vivo; se lo da la 23.11, en un commit aparte),
+`PASADAS_QUE_ESCRIBEN_EN_PRODUCCION` (vacía; la anota él el día de la 25.3 y de la 25.7) y
+`SM12_CON_FACEBOOK` (apagada; la enciende él en la 25.7). Ningún agente les da valor. Los **cortes de
+serie** viven en `CORTES_DE_SERIE_DECLARADOS`, una lista de constantes de despliegue sin ninguna
+fecha escrita —`CORTES_DE_SERIE` filtra las que llegaron y `CORTES_DE_SM8` es su proyección—: un
+corte nuevo entra con su historia y su constante, nunca con un literal. Una tasa nueva que se juzgue
+por ventanas entra en la tabla de `juiciosPorVentanas` (`JUICIOS_POR_VENTANAS`) de
+`tools/lib/lineaBase.ts`. Ninguna prueba fija el valor de esas constantes: siguen el que tengan, para
+que darles valor (23.11, 25.7, 26.11) no ponga la principal en rojo. La orden dice «cerrada»,
+nunca «buena»: que una línea base es buena lo anota Héctor en `DESPLIEGUE.md` §3.
+
 ## Pedir rastreo de unas pocas URL, y anotarlo
 
 Google conoce las 1.715 URL y aun así indexa 2 de cada 80: no es descubrimiento, es que un
@@ -312,14 +390,18 @@ rastreo— o `-` si no enlaza. Se acepta la URL entera y se guarda la ruta. `--n
 cual y se omite si no se da.
 
 **El campo `marcado` es la mitad del cierre de la 18.2.** Vale `true` si el enlace tecleado
-llevaba `?de=<red>` con la misma red de la publicación y `false` si no llevaba marca; un enlace
-marcado para **otra** red se rechaza, porque sus visitas se atribuirían a otra cuenta. Lo que
-va con `-` no lleva el campo. Pega el enlace del Kit, que ya sale marcado, y no la ruta a pelo.
+llevaba `?de=<red>` con la misma red de la publicación y `false` si no llevaba marca; un
+enlace marcado para **otra** red se rechaza, porque sus visitas se atribuirían a otra cuenta.
+Lo que va con `-` no lleva el campo. Pega el enlace del Kit, que ya sale marcado, y no la ruta
+a pelo. **Un enlace con `?via=` también se rechaza** (Historia 23.6): es la Marca de difusión,
+la de un visitante que comparte con un botón del sitio, nunca la de una cuenta propia, y sus
+visitas contarían como difusión.
 
 Un rechazo de lo dicho —red ajena, formato desconocido, ruta no publicada, enlace marcado para
-otra red, fecha futura, un Corpus o un registro ilegibles— sale con código 1; la forma de la
-invocación —bandera mal escrita o repetida, argumentos de menos o de más, `--fecha` sin forma
-de jornada, `--nota` vacía—, con 2. En ninguno de los dos casos se escribe nada.
+otra red, enlace con `?via=`, fecha futura, un Corpus o un registro ilegibles— sale con código
+1; la forma de la invocación —bandera mal escrita o repetida, argumentos de menos o de más,
+`--fecha` sin forma de jornada, `--nota` vacía—, con 2. En ninguno de los dos casos se escribe
+nada.
 
 `corpus/publicaciones-de-canal.yml` **solo añade**, como `peticiones-de-rastreo.yml` y al
 revés que las series: dos fotos el mismo día en la misma cuenta son dos publicaciones. Se
@@ -342,6 +424,7 @@ La misma orden anota los enlaces hacia el sitio desde fuera (Historia 21.4), par
 npm run canal -- senal https://www.tiktok.com/@sabiduriabolsillo / --tipo propia     # la bio, hoy
 npm run canal -- senal https://linktr.ee/sabiduriadebolsillo /?de=instagram --tipo propia --fecha 2026-10-08
 npm run canal -- senal https://blog.ejemplo.org/resena /cita/<slug>/ --tipo ajena --nota "reseña"
+npm run canal -- senal https://foro.ejemplo.org/hilo /cita/<slug>/?via=whatsapp --tipo ajena   # compartido: true
 npm run canal -- senal https://blog.ejemplo.org/resena /cita/<slug>/ --tipo ajena --retira 2026-10-09
 ```
 
@@ -350,17 +433,22 @@ Linktree, el campo web de Facebook—, **ajena** si lo puso un tercero. El orige
 `http(s)` pública que no sea del dominio propio ni de ningún subdominio suyo, y se guarda tal
 cual se tecleó. El destino se recorta y se juzga como la ruta de `anotar` —`rutasPublicadas`,
 sin `?…` ni `#…`, ruta del censo— y lleva `marcado: true` solo si su cadena de consulta traía
-`?de=<red>`. `--fecha` y `--nota` funcionan como en `anotar`, salvo que la fecha **puede ser
-anterior al canal**: una bio o un enlace ajeno pueden existir de antes.
+`?de=<red>`. **`?via=` en el destino** (Historia 23.6) se rechaza en una **propia** —es la
+marca de un visitante, no la de una cuenta—, y en una **ajena** se coteja con la regla de
+`?de=` contra los destinos de compartir (`DESTINOS_VALIDOS`): uno del conjunto, y uno solo (el
+mismo dos veces vale); entonces la entrada lleva `compartido: true`, y una propia a mano con
+el campo no se deja leer. `--fecha` y `--nota` funcionan como en `anotar`, salvo que la fecha
+**puede ser anterior al canal**: una bio o un enlace ajeno pueden existir de antes.
 
 Código 1 si lo dicho se rechaza: un origen que no es una URL http(s) absoluta, que es del
 dominio propio o de un subdominio suyo, localhost, una IP, un host sin punto o una URL con
 usuario o contraseña; un destino que el sitio no publica; una marca ?de= de una red que no
-existe, o más de una; una fecha futura; un --retira sin señal igual viva en esa fecha; o un
-registro que no se deja leer. Código 2 si falla la forma de la invocación: sin --tipo o con
-un tipo que no es propia ni ajena; una bandera desconocida o repetida; argumentos de menos o
-de más; un --fecha o un --retira sin forma de jornada; una --nota vacía; --tipo o --retira
-fuera de senal. Ninguno de los dos escribe nada.
+existe, o más de una distinta; una marca ?via= en una propia, o en una ajena de un destino que
+no existe, o más de una distinta; una fecha futura; un --retira sin señal igual viva en esa
+fecha; o un registro que no se deja leer. Código 2 si falla la forma de la invocación: sin
+--tipo o con un tipo que no es propia ni ajena; una bandera desconocida o repetida; argumentos
+de menos o de más; un --fecha o un --retira sin forma de jornada; una --nota vacía; --tipo o
+--retira fuera de senal. Ninguno de los dos escribe nada.
 
 Cada suborden lee solo su registro: un `senales-externas.yml` roto no impide `anotar`, ni un
 `publicaciones-de-canal.yml` roto impide `senal`. La consulta enseña lo que pudo leer,
@@ -373,16 +461,17 @@ Anotar dos veces el mismo enlace —mismo origen, destino y tipo— se admite co
 nueva con `retira:` y la misma terna; la consulta deja de contar la retirada. Nada se
 reescribe.
 
-La consulta `npm run canal` da un bloque «Señales externas» que separa propias de ajenas,
-por fecha, con origen, destino y familia del destino, y señala la ajena que lleva `?de=`
-(«copia un enlace del Kit»). **La 18.1 no se cierra con señales propias, sino con la primera
-ajena**, y la consulta la nombra con su fecha, origen y destino. Las propias de la semana del
-ciclo se anotan el día que se ponen; a los 14 días de la primera, se mira a mano en el
-informe de Enlaces de Search Console si su dominio figura como dominio de referencia y se
-anota a mano como comentario al final del fichero. La consulta dice si eso «aún no toca» o
-está «pendiente desde AAAA-MM-DD». La orden no lee Search Console ni hace peticiones de red,
-el sitio no lee el fichero (AD-24), y se versiona con su cabecera y `senales:` vacío: ningún
-agente anota señales que no ha visto.
+La consulta `npm run canal` da un bloque «Señales externas» que separa propias de ajenas, por
+fecha, con origen, destino y familia del destino, y señala la ajena que lleva `?de=` («copia
+un enlace del Kit») y la que lleva `compartido` («copia un enlace compartido»; pueden ir los
+dos, y basta con que los lleve una de las anotaciones vivas del mismo enlace). **La 18.1 no se
+cierra con señales propias, sino con la primera ajena**, y la consulta la nombra con su fecha,
+origen y destino. Las propias de la semana del ciclo se anotan el día que se ponen; a los 14
+días de la primera, se mira a mano en el informe de Enlaces de Search Console si su dominio
+figura como dominio de referencia y se anota a mano como comentario al final del fichero. La
+consulta dice si eso «aún no toca» o está «pendiente desde AAAA-MM-DD». La orden no lee Search
+Console ni hace peticiones de red, el sitio no lee el fichero (AD-24), y se versiona con su
+cabecera y `senales:` vacío: ningún agente anota señales que no ha visto.
 
 ## Documentar una Cita ya publicada
 
@@ -606,11 +695,16 @@ ella, `caracterDe` **rompe** ante una Obra en vez de adivinar (`causaDelServicio
 con la misma función: `Armazon.astro` en las páginas e `integraciones/indexables.ts` en la
 configuración, que además escribe «N Obras publicadas, M indexables» y, en
 `astro:build:done`, **rompe** si el sitemap, las páginas sin `noindex` y las que llevan
-`data-pagefind-body` no son el mismo conjunto. Un script que pregunte `caracterDe` por una
+`data-pagefind-body` no son el mismo conjunto —y, desde la 23.9, si la marca de Obra del `<html>`
+falta en una página 1 de Obra o trae un valor ajeno a `MARCAS_DE_OBRA`, contradice su `noindex`,
+aparece en otra página o no va junto a la `vista-de-obra` de `data-vistas`—. Un script que pregunte `caracterDe` por una
 ruta de Obra tiene que declarar antes la lista. Un slug de obra solo numérico rompe el build.
 
 La vista de superficie (20.1) sale solo de la página 1 de una Obra **indexable**: «sí y solo
-si producto». `npm run rastreo -- --registrar` juzga contra las rutas indexables y rechaza
+si producto». La vista de Obra (Historia 23.9) sale de la página 1 de **toda** Obra, con la marca
+de su `noindex` en el `<html>`: la indexable emite las dos, la de superficie delante; la que no se
+indexa, solo la de Obra, y con ella gana lectura y salidas detrás; las 2+, ninguna. SM-8 sigue
+contando solo la de Cita y la de superficie. `npm run rastreo -- --registrar` juzga contra las rutas indexables y rechaza
 una Obra con `noindex`; `npm run canal` acepta cualquier Obra publicada, porque una
 publicación puede enlazarla. En el sitemap, la Obra lleva `lastmod` con el criterio de las
 demás agregaciones: lo más reciente de su ficha, sus Citas y el fichero de su Autor.

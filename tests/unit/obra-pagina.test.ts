@@ -14,6 +14,9 @@ import {
 import { obrasDelCorpusEnDisco } from '../../integraciones/indexables.ts';
 import { componerDocumento } from '../../tools/lib/documento.ts';
 import { rutaDeLaObra } from '../../src/lib/obras.ts';
+import { EVENTOS } from '../../src/lib/medicion.ts';
+import { marcasDePagina } from '../../tools/lib/indexables.ts';
+import { MARCAS_DE_OBRA } from '../../src/lib/vocabulario.ts';
 
 /**
  * Historia 22.4 — la Obra tiene página, y solo se indexa si no repite otra (FR-52).
@@ -155,6 +158,17 @@ const html = (proyecto: string, ruta: string) => readFile(paginaConstruida(proye
 const NOINDEX = /<meta name="robots" content="noindex, follow"/;
 
 /**
+ * Historia 23.9 — la marca de Obra del `<html>`, o `undefined` si no la lleva: la lee el mismo
+ * `marcasDePagina` que la comprobación de `astro:build:done`.
+ */
+const marcaDe = (pagina: string) => marcasDePagina(pagina).marcaDeObra;
+/** Historia 23.9 — el `data-vistas` del `<html>`, o `undefined` si no lo lleva. */
+const vistasDe = (pagina: string) => /<html\b[^>]*\bdata-vistas="([^"]*)"/.exec(pagina)?.[1];
+const [INDEXABLE, NO_INDEXABLE] = MARCAS_DE_OBRA;
+/** La línea del registro cuando la comprobación de `astro:build:done` pasa (23.9: nombra la marca). */
+const COINCIDEN = /El sitemap, los `noindex`, Pagefind y la marca de Obra coinciden/;
+
+/**
  * La sección «Dónde leer esta obra» entera, con su `</section>` de cierre: lleva otra `section`
  * dentro —la parte de la edición cotejada—, así que no basta con el primer cierre.
  */
@@ -198,7 +212,7 @@ describe('Historia 22.4 — la Página de Obra, construida', () => {
 
   it('el registro del build da las cifras y la comprobación final pasa', () => {
     expect(salida).toContain('5 Obras publicadas, 1 indexable.');
-    expect(salida).toMatch(/El sitemap, los `noindex` y Pagefind coinciden/);
+    expect(salida).toMatch(COINCIDEN);
   });
 
   it('la lista de la integración y la del armazón coinciden para el mismo corpus', async () => {
@@ -234,6 +248,31 @@ describe('Historia 22.4 — la Página de Obra, construida', () => {
     expect(pagina).not.toMatch(EN_PAGEFIND);
     expect(pagina).toMatch(/<h1[^>]*>/);
     expect(await anunciadas(proyecto)).not.toContain(ruta);
+  });
+
+  /*
+   * Historia 23.9 — la página 1 de toda Obra declara la vista de Obra, con la marca de su `noindex`;
+   * la indexable, además la de superficie, delante. La página 2, ninguna de las dos cosas.
+   */
+  it('23.9 — indexable: las dos vistas, en este orden, y la marca indexable', async () => {
+    const pagina = await html(proyecto, CARTAS);
+    expect(vistasDe(pagina)).toBe(`${EVENTOS.vistaDeSuperficie} ${EVENTOS.vistaDeObra}`);
+    expect(marcaDe(pagina)).toBe(INDEXABLE);
+  });
+
+  it.each([IRA, BREVEDAD, ENQUIRIDION, DISERTACIONES])(
+    '23.9 — no indexable (%s): solo la vista de Obra, y la marca no indexable',
+    async (ruta) => {
+      const pagina = await html(proyecto, ruta);
+      expect(vistasDe(pagina)).toBe(EVENTOS.vistaDeObra);
+      expect(marcaDe(pagina)).toBe(NO_INDEXABLE);
+    },
+  );
+
+  it('23.9 — la página 2 de una Obra: ni vista ni marca', async () => {
+    const pagina = await html(proyecto, `${BREVEDAD}2/`);
+    expect(vistasDe(pagina)).toBeUndefined();
+    expect(marcaDe(pagina)).toBeUndefined();
   });
 
   /*
@@ -600,6 +639,35 @@ describe('Historia 22.4 — lo que rompe el build', () => {
     expect(resultado.salida).toContain('no coinciden');
   }, 300_000);
 
+  it('23.9 — si la marca de Obra no dice lo mismo que el `noindex`, rompe y nombra la Obra', async () => {
+    /*
+     * La copia del armazón escribe siempre la marca indexable, salga lo que salga de
+     * `consecuenciasDe`: la Obra de una sola Cita, que no se indexa, sale con `noindex` y con la
+     * marca de la que sí. El sitemap, el `noindex` y Pagefind siguen casando entre sí; lo que la
+     * comprobación para es la marca.
+     */
+    const original = await readFile(join(RAIZ, 'src/components/Armazon.astro'), 'utf8');
+    const literal = '{ [ATRIBUTO_DE_INDEXABLE]: marcaDeObra }';
+    expect(original).toContain(literal);
+    const parcheado = original.replace(literal, `{ [ATRIBUTO_DE_INDEXABLE]: ${JSON.stringify(INDEXABLE)} }`);
+    const resultado = await construirConCorpus(
+      {
+        'autores/seneca.yml': AUTOR_VALIDO,
+        'temas/el-tiempo.yml': TEMA_VALIDO,
+        'citas/seneca--no-es-que-tengamos-poco-tiempo.md': citaValida(),
+      },
+      { ficheros: { 'src/components/Armazon.astro': parcheado } },
+    );
+    aLimpiar.push(resultado.proyecto);
+    expect(resultado.codigo, resultado.salida).not.toBe(0);
+    expect(resultado.salida).toContain(
+      `marca \`${INDEXABLE}\` con \`noindex\`: /obra/seneca/sobre-la-brevedad-de-la-vida`,
+    );
+    // Y solo eso: un desajuste, el de la marca; los otros tres lectores casan.
+    expect(resultado.salida).toContain('la marca de Obra no coinciden (1 desajuste)');
+    expect(resultado.salida).not.toContain('en el sitemap y con `noindex`');
+  }, 300_000);
+
   it('una ficha con slug de obra numérico rompe el build', async () => {
     const resultado = await construirConCorpus({
       'autores/seneca.yml': AUTOR_VALIDO,
@@ -810,7 +878,7 @@ describe('Historia 22.8 — la congelación declarada, construida', () => {
 
   it('ninguna Obra entra y la de la lista que no cumple la regla tampoco', async () => {
     expect(salida).toContain('5 Obras publicadas, 0 indexables.');
-    expect(salida).toMatch(/El sitemap, los `noindex` y Pagefind coinciden/);
+    expect(salida).toMatch(COINCIDEN);
     const sonda = await html(proyecto, '/sonda/');
     const delArmazon = JSON.parse(
       (/<pre id="obras">([\s\S]*?)<\/pre>/.exec(sonda)?.[1] ?? '{}').replace(/&quot;/g, '"'),
@@ -819,6 +887,10 @@ describe('Historia 22.8 — la congelación declarada, construida', () => {
     expect(delArmazon.indexables).toEqual([]);
     expect((await anunciadas(proyecto)).filter((r) => r.startsWith('/obra/'))).toEqual([]);
     // Cartas cumple FR-52 y no estaba en la lista: la misma página, con `noindex`.
-    expect(await html(proyecto, CARTAS)).toMatch(NOINDEX);
+    const cartas = await html(proyecto, CARTAS);
+    expect(cartas).toMatch(NOINDEX);
+    // Historia 23.9 — y la marca la sigue: no indexable, y solo la vista de Obra.
+    expect(marcaDe(cartas)).toBe(NO_INDEXABLE);
+    expect(vistasDe(cartas)).toBe(EVENTOS.vistaDeObra);
   });
 });

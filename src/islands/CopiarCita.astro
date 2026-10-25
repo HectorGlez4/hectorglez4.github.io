@@ -23,20 +23,29 @@
  *     permiso. Es un caso real, no teórico: pasa en `http://` y en algunos navegadores
  *     incrustados. El respaldo revela el texto y lo selecciona, que es el siguiente
  *     gesto que iba a hacer el visitante de todos modos — sin mensaje de error técnico.
- *   · AD-13 — la isla no habla con el proveedor: llama a lo que instala `medicion.ts`,
- *     con un nombre que viene del vocabulario cerrado. Sin medición configurada no hay
- *     nada que llamar y el copiado funciona igual.
+ *   · AD-13 — la isla no habla con el proveedor: llama `__medir(…)` a secas, con un nombre
+ *     que viene del vocabulario cerrado. La cola la abre el arranque del armazón en toda
+ *     página, así que la llamada nunca falla; sin medición configurada nadie la lee y el
+ *     copiado funciona igual.
  *   · El respaldo que se revela es el de **esta** isla y no el primero de la página: el
  *     Kit Diario lleva dos.
  *
- * El guion no lleva su propio `(() => { … })()`: `define:vars` ya lo envuelve en una
- * función, y el envoltorio repetido eran dos espacios de sangría por línea en el
- * presupuesto de bytes (Historia 22.10). Tampoco pregunta si su marcado existe: el guion lo
- * emite este mismo componente justo detrás, bajo la misma condición, y el compilador no
- * admite un `return` fuera de función. Quitarle `define:vars` obligaría a devolverle el
- * envoltorio.
+ * Historia 23.1 — **el guion no lleva ningún dato de la Cita**, ni siquiera el slug: todo lo
+ * que necesita está en el marcado (`data-carga`), y la isla se encuentra a sí misma por
+ * `document.currentScript`, que es este guion mientras se ejecuta, y el elemento anterior, que
+ * es su `.isla`. Así el guion es idéntico byte a byte en toda Página de Cita, y las dos copias
+ * del Kit encuentran cada una su botón. Hasta la 23.1 llevaba el slug por `define:vars` y
+ * buscaba `[data-copiar="{slug}"]`.
+ *
+ * Se compone aquí, en el frontmatter, con `guionQueAnuncia` de `src/lib/anuncio.ts` —el único
+ * dueño del anuncio—, que mete el texto de `anunciar` y el nombre del evento, que no es
+ * contenido, y lo envuelve en `(function(){…})()`: las constantes no chocan entre las dos
+ * copias del Kit y `document.currentScript` sigue siendo el guion. Se inserta con `set:html`.
+ * El texto del guion no lleva comentarios: viajarían al visitante y contarían en
+ * `MAX_BYTES_DE_GUION`.
  */
 import { textoParaCopiar } from '../lib/atribucion.ts';
+import { guionQueAnuncia } from '../lib/anuncio.ts';
 import { EVENTOS } from '../lib/medicion.ts';
 import type { Cita, Autor } from '../lib/publicado.ts';
 
@@ -49,10 +58,8 @@ const { cita, autor } = Astro.props;
 const carga = textoParaCopiar(cita, autor);
 
 /*
- * El slug identifica a esta instancia. La Página de Cita solo tiene una, pero el Kit
- * Diario lleva dos —la Cita del Día y su alternativa—, y sin identificador las dos
- * copias del guion buscaban el mismo botón: la segunda quedaba muerta y la primera
- * escuchaba dos veces. El `id` del respaldo también se repetía, que es marcado inválido.
+ * El slug identifica a esta instancia **en el marcado**: el `id` del respaldo no puede
+ * repetirse entre las dos copias del Kit, que es marcado inválido. El guion ya no lo usa.
  */
 const instancia = cita.slug;
 
@@ -65,12 +72,52 @@ const instancia = cita.slug;
  * sigue conteniendo el rótulo en reposo; «Copiado.» es una confirmación de dos segundos, no
  * el rótulo del control.
  *
- * Para que copiar dos veces seguidas vuelva a anunciarse, `volver` vacía la región al empezar
- * cada pulsación y el mensaje se escribe en el fotograma siguiente: escribir el mismo texto
- * sobre sí mismo no es un cambio y no se anuncia. Y si el portapapeles falla tras una copia
- * buena, `volver` ya ha quitado temporizador, región y rótulo antes del respaldo.
+ * Para que copiar dos veces seguidas vuelva a anunciarse, `anunciar` vacía la región y escribe
+ * el mensaje en el fotograma siguiente: escribir el mismo texto sobre sí mismo no es un cambio
+ * y no se anuncia. Y si el portapapeles falla tras una copia buena, `volver` ya ha quitado
+ * temporizador, región y rótulo antes del respaldo.
+ *
+ * El `try` envuelve solo el portapapeles, y `__medir` va al final, fuera de él: si la medición
+ * fallara, la copia ya está hecha y confirmada, y no se enseña el respaldo de una copia que sí
+ * funcionó.
  */
 const ROTULO = 'Copiar la cita';
+
+const guion = guionQueAnuncia(
+  { EVENTO_COPIADO: EVENTOS.copiado },
+  `const isla = document.currentScript.previousElementSibling;
+const boton = isla.querySelector('[data-copiar]');
+const etiqueta = boton.querySelector('[data-etiqueta]');
+const anuncio = isla.querySelector('[data-anuncio]');
+const original = etiqueta.textContent;
+let temporizador;
+
+const volver = () => {
+  clearTimeout(temporizador);
+  etiqueta.textContent = original;
+  anuncio.textContent = '';
+  boton.removeAttribute('data-estado');
+};
+
+boton.addEventListener('click', async () => {
+  volver();
+  try {
+    await navigator.clipboard.writeText(boton.dataset.carga);
+  } catch {
+    isla.querySelector('[data-respaldo]').hidden = false;
+    const campo = isla.querySelector('[data-respaldo-texto]');
+    campo.focus();
+    campo.select();
+    return;
+  }
+  etiqueta.textContent = 'Copiado.';
+  boton.setAttribute('data-estado', 'copiado');
+  anunciar(anuncio, 'Copiado.');
+  temporizador = setTimeout(volver, 2000);
+  __medir(EVENTO_COPIADO);
+});
+`,
+);
 ---
 
 <div class="isla" data-pagefind-ignore>
@@ -90,40 +137,7 @@ const ROTULO = 'Copiar la cita';
   </p>
 </div>
 
-<script is:inline define:vars={{ EVENTO_COPIADO: EVENTOS.copiado, INSTANCIA: instancia }}>
-  const boton = document.querySelector(`[data-copiar="${INSTANCIA}"]`);
-  const isla = boton.closest('.isla');
-  const etiqueta = boton.querySelector('[data-etiqueta]');
-  const anuncio = isla.querySelector('[data-anuncio]');
-  const original = etiqueta.textContent;
-  let temporizador;
-
-  const volver = () => {
-    clearTimeout(temporizador);
-    etiqueta.textContent = original;
-    anuncio.textContent = '';
-    boton.removeAttribute('data-estado');
-  };
-
-  boton.addEventListener('click', async () => {
-    volver();
-    try {
-      await navigator.clipboard.writeText(boton.dataset.carga);
-
-      window.__medir && window.__medir(EVENTO_COPIADO);
-      etiqueta.textContent = 'Copiado.';
-      boton.setAttribute('data-estado', 'copiado');
-      requestAnimationFrame(() => (anuncio.textContent = 'Copiado.'));
-      temporizador = setTimeout(volver, 2000);
-    } catch {
-      const respaldo = isla.querySelector('[data-respaldo]');
-      const campo = isla.querySelector('[data-respaldo-texto]');
-      respaldo.hidden = false;
-      campo.focus();
-      campo.select();
-    }
-  });
-</script>
+<script is:inline set:html={guion} />
 
 <style>
   .isla {

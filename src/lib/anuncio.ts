@@ -1,0 +1,68 @@
+/**
+ * El anuncio de un mensaje de estado — UX-DR99, WCAG 4.1.3, Historia 23.1.
+ *
+ * Es el **primer ritmo**: lo que el visitante provoca con un gesto —«Copiado.», la imagen lista,
+ * el fallo del generador, el recuento de `/buscar/`— se anuncia por una región `role="status"`
+ * que está en el marcado desde la carga, vacía y sin `hidden`. Para que el mismo mensaje dos
+ * veces seguidas se vuelva a anunciar, se vacía la región y el texto se escribe en el
+ * fotograma siguiente: escrito sobre sí mismo no es un cambio y ningún lector lo dice. (El
+ * segundo ritmo, el del tecleo, es de la Épica 26 y vivirá aquí también.)
+ *
+ * Hasta la 23.1 esto estaba escrito tres veces —en `CopiarCita`, en `ImagenDeCita` y en
+ * `/buscar/`—, a mano y cada una a su manera. Ahora hay un solo dueño, y las tres islas lo
+ * llevan dentro de su guion en línea como texto: componen el guion en el frontmatter con
+ * `guionQueAnuncia`, que mete `String(anunciar)`, y lo insertan con `set:html`. Por eso la
+ * función se escribe para que **su texto sea JavaScript válido y corto** una vez quitados los
+ * tipos: sin importar nada, sin cierres sobre este módulo y sin comentarios dentro, que
+ * viajarían a cada página y contarían en `MAX_BYTES_DE_GUION`. Que ningún guion en línea use `requestAnimationFrame`
+ * fuera de esta función lo vigila `tests/unit/medicion.test.ts` sobre lo construido.
+ */
+export function anunciar(region: { textContent: string | null }, texto: string): void {
+  region.textContent = '';
+  requestAnimationFrame(() => (region.textContent = texto));
+}
+
+/**
+ * El guion en línea entero de una isla que anuncia — Historia 23.1.
+ *
+ * Compone, en este orden y dentro de un `(function(){…})();`: las constantes que no son
+ * contenido (nombres de evento, la tabla de rótulos de la búsqueda), declaradas como las
+ * declara `define:vars` de Astro —`JSON.stringify` con `<` escapado, para que ningún valor
+ * cierre el `<script>`—; la función `anunciar`, por su texto; y el cuerpo de la isla. La isla
+ * lo inserta con `<script is:inline set:html={…} />`.
+ *
+ * Se hace aquí y no con `define:vars` más `set:html`, que era lo previsto: el compilador de
+ * Astro 7.2 (`@astrojs/compiler-rs` 0.3.2) emite el envoltorio y las constantes de
+ * `define:vars` y **descarta** el `set:html` cuando van juntos, así que la isla salía sin
+ * cuerpo y sin un solo aviso. El envoltorio es el mismo que pone `define:vars`, con las mismas
+ * dos consecuencias que importan: las constantes no chocan entre las dos copias de una isla en
+ * el Kit, y `document.currentScript` sigue siendo el guion mientras se ejecuta.
+ *
+ * `anunciar` se asigna a una constante en vez de insertarse como declaración: si el
+ * empaquetado le cambiara el nombre interno, el cuerpo seguiría llamando `anunciar`.
+ *
+ * Rompe el build, en vez de emitir un guion roto, ante tres cosas que `set:html` insertaría tal
+ * cual: un nombre de constante que no es un identificador de JavaScript, un valor que JSON no
+ * sabe escribir (`undefined`, una función) y un guion que contiene `</script` o `<!--`, que el
+ * analizador de HTML leería como el final del `<script>` y pintaría el resto como texto. Las
+ * constantes ya salen con el `<` escapado; lo que se mira es el cuerpo y el texto de `anunciar`.
+ */
+export function guionQueAnuncia(constantes: Record<string, unknown>, cuerpo: string): string {
+  const declaradas = Object.entries(constantes)
+    .map(([nombre, valor]) => {
+      if (!/^[A-Za-z_$][\w$]*$/.test(nombre)) {
+        throw new Error(`guionQueAnuncia: «${nombre}» no es un identificador de JavaScript.`);
+      }
+      const json = JSON.stringify(valor);
+      if (json === undefined) {
+        throw new Error(`guionQueAnuncia: el valor de «${nombre}» no se puede escribir en JSON.`);
+      }
+      return `const ${nombre} = ${json.replace(/</g, '\\u003c')};\n`;
+    })
+    .join('');
+  const guion = `(function(){${declaradas}const anunciar = ${String(anunciar)};\n${cuerpo}})();`;
+  if (/<\/script|<!--/i.test(guion)) {
+    throw new Error('guionQueAnuncia: el guion contiene «</script» o «<!--» y cerraría el <script> en el HTML.');
+  }
+  return guion;
+}

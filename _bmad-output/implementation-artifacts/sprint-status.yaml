@@ -29,7 +29,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 # - Retrospective appends its action items to action_items; the status view surfaces open ones
 generated: 08-11-2026 09:00
-last_updated: 10-24-2026 12:40
+last_updated: 10-25-2026 15:17
 project: brainlySabiduria
 project_key: NOKEY
 tracking_system: file-system
@@ -385,16 +385,16 @@ development_status:
 
   # Épica 23 — medir la lectura. Va primera: sin ella ninguna otra se juzga.
   epic-23: in-progress
-  23-1-la-medición-sale-a-un-fichero-y-la-página-de-cita-no-pierde: backlog  # el presupuesto de AD-6 (medición a fichero) es la puerta de la 25 y la 28
-  23-2-el-receptor-sabe-guardar-lo-que-la-v8-va-a-medir-antes-de-qu: backlog  # desde aquí la prueba de huella queda en rojo en la rama hasta la 23.3 (aceptado)
-  23-3-la-migración-y-el-receptor-llegan-antes-que-el-sitio: backlog  # operativa: acto de Héctor (migraciones en remoto, receptor desplegado, huella)
-  23-4-el-sitio-se-audita-contra-wcag-2-2-aa: backlog
-  23-5-una-carga-que-se-lee-deja-una-lectura: backlog
-  23-6-las-marcas-de-llegada-cuentan-una-vez-y-salen-de-la-direcció: backlog
-  23-7-cada-salida-interna-dice-desde-qué-zona: backlog
-  23-8-una-búsqueda-cuenta-una-vez-cuando-se-asienta: backlog
-  23-9-toda-obra-cuenta-sus-vistas-se-indexe-o-no: backlog
-  23-10-la-línea-base-se-lee-desde-tools-con-la-cuota-de-d1-a-la-vis: backlog
+  23-1-la-medición-sale-a-un-fichero-y-la-página-de-cita-no-pierde: review  # el presupuesto de AD-6 (medición a fichero) es la puerta de la 25 y la 28; v8-ralph 2026-10-24: con punto final, la Página de Cita lleva 5630 B en línea con Imagen (1026 libres de 6656) y 1954 sin Imagen (4702 libres); topes de la lista cerrada: medición 1320 B (920 medidos con el punto final de producción), Imagen 7550 B (7153), Pagefind 87200 B (86810: cliente 45555 + worker 41255, Pagefind 1.5.2); v8-ralph 2026-10-24 17:33 UTC: entró la medición a fichero del presupuesto de AD-6 con sus topes y la prueba de la Página de Cita; sin diferidos para Héctor
+  23-2-el-receptor-sabe-guardar-lo-que-la-v8-va-a-medir-antes-de-qu: review  # desde aquí la prueba de huella queda en rojo en la rama hasta la 23.3 (aceptado) · v8-ralph 2026-10-24 22:53: el receptor guarda Marca y lecturas v8 con su migración, y desplegar mira la cuota; diferido: barrer la suite e2e entera con el webServer nuevo; desplegar y comprobar remotos quedan para la 23.3
+  23-3-la-migración-y-el-receptor-llegan-antes-que-el-sitio: review  # operativa: desplegar corrido por el orquestador del bucle v8-ralph el 2026-10-24 23:13 UTC con autorización de Héctor del 2026-10-24; huella 6aece9a77f
+  23-4-el-sitio-se-audita-contra-wcag-2-2-aa: review  # v8-ralph 2026-10-24: barrido axe contra WCAG 2.2 AA desde un solo sitio, con guardia y dos revisiones; diferidos en el frontmatter (Modelos a 360 px, Obra contada dos veces, incomplete de axe y estados interactivos de la 2.8)
+  23-5-una-carga-que-se-lee-deja-una-lectura: review # v8-ralph 2026-10-25 01:58 UTC: una carga que se lee deja una lectura, con revisión de código aplicada; sin diferidos para Héctor
+  23-6-las-marcas-de-llegada-cuentan-una-vez-y-salen-de-la-direcció: review # v8-ralph 2026-10-25 04:34 UTC: entran las marcas ?de=/?via= que cuentan una vez y salen de la dirección, compartido en canal; diferidos para Héctor: criterio de epics.md sobre ?via= repetido (bmad-create-epics-and-stories)
+  23-7-cada-salida-interna-dice-desde-qué-zona: review  # v8-ralph 2026-10-25: cada salida interna marca la zona de origen en la baliza (continuación), con 404 y páginas 2+ apartadas; sin diferidos para Héctor
+  23-8-una-búsqueda-cuenta-una-vez-cuando-se-asienta: review # v8-ralph 2026-10-25: la búsqueda se cuenta una vez al asentarse (Enter, clic o botón central) y el índice que falla se reintenta; diferido para Héctor: marcar en epics.md la 3.2 como sustituida por la 23.8 (bmad-create-epics-and-stories)
+  23-9-toda-obra-cuenta-sus-vistas-se-indexe-o-no: review  # v8-ralph 2026-10-25: toda Obra (indexable o no) emite vista-de-obra con su marca y la puerta lo exige; diferido para Héctor: marcar en epics.md el criterio de la 22.4 como sustituido por la 23.9 (bmad-create-epics-and-stories)
+  23-10-la-línea-base-se-lee-desde-tools-con-la-cuota-de-d1-a-la-vis: review # v8-ralph 2026-10-25: npm run medicion -- leer da la línea base por superficie y la cuota de D1 (escrituras y tamaño) desde tools/; diferidos para Héctor: cuota de lectura (bmad-architecture), letra del criterio de la cuota en epics.md (bmad-create-epics-and-stories), y lo pendiente de bmad-prd
   23-11-la-lectura-se-mide-en-vivo-y-su-línea-base-empieza-a-contar: backlog  # operativa: acto de Héctor (mínimo de lecturas, plan de Cloudflare, merge y primer corte de SM-8)
   23-12-el-orden-de-llegada-no-reconstruye-a-nadie: review  # v8.2: se fusiona SOLA en la principal antes de la 23.3 (rowid aleatorio del Worker); excepción declarada a la fusión por épica; # v8-ralph 2026-10-24: el receptor inserta con rowid aleatorio, prueba de orden de llegada en tools/ y DESPLIEGUE.md §3; diferido para Héctor: la rama trae debajo el commit de epic-23-context.md (aceptarlo o quitarlo al fusionar)
   epic-23-retrospective: optional

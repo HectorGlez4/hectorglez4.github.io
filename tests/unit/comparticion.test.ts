@@ -3,7 +3,8 @@ import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { EVENTOS, EVENTOS_VALIDOS, guionDeMedicion } from '../../src/lib/medicion.ts';
 import { medicionEnUnSandbox } from './ayuda/medicion.js';
-import { DESTINOS, DESTINOS_VALIDOS, DESTINO_OPACO } from '../../src/lib/compartir.ts';
+import { CONSTRUCTORES, DESTINOS_OFRECIDOS, DESTINOS_VALIDOS, DESTINO_OPACO } from '../../src/lib/compartir.ts';
+import { DESTINOS_DE_ENLACE, DESTINO_DE_IMAGEN } from '../../src/lib/destinos.ts';
 import { interpretar } from '../../medicion/receptor.ts';
 import worker from '../../medicion/worker.ts';
 import { d1QueApunta, listaTras, peticionAlReceptor } from './ayuda/d1.js';
@@ -52,12 +53,14 @@ describe('Historia 10.4 — los eventos nuevos están en el vocabulario cerrado'
 
 describe('Historia 10.4 — el destino', () => {
   it('un destino elegido en el sitio se registra con su nombre', () => {
-    for (const destino of DESTINOS) {
+    // Todos los de enlace, también Facebook y Threads, que aún no se pintan (Historia 23.2): el
+    // receptor ya los sabe guardar el día que la 25.1 los ponga en la página.
+    for (const destino of DESTINOS_DE_ENLACE) {
       const registro = interpretar(
-        baliza({ evento: EVENTOS.comparticionDeEnlace, ruta: '/cita/una', destino: destino.id }),
+        baliza({ evento: EVENTOS.comparticionDeEnlace, ruta: '/cita/una', destino }),
         INSTANTE,
       );
-      expect(registro!.destino, destino.id).toBe(destino.id);
+      expect(registro!.destino, destino).toBe(destino);
     }
   });
 
@@ -80,8 +83,20 @@ describe('Historia 10.4 — el destino', () => {
     }
   });
 
-  it('el conjunto de destinos es cerrado, con el opaco dentro', () => {
-    expect(DESTINOS_VALIDOS).toEqual([...DESTINOS.map((d) => d.id), 'opaco']);
+  it('el conjunto de destinos es cerrado: los de enlace, el de imagen y el opaco', () => {
+    // Historia 23.2 — los destinos se parten en enlace, con constructor, e imagen, sin él.
+    expect(Object.keys(CONSTRUCTORES)).toEqual([...DESTINOS_DE_ENLACE]);
+    expect(DESTINOS_VALIDOS).toEqual([...DESTINOS_DE_ENLACE, DESTINO_DE_IMAGEN, 'opaco']);
+  });
+
+  it('los ofrecidos son subconjunto de los de enlace: todo lo que se pinta tiene constructor', () => {
+    // Historia 23.2 — la invariante de siempre, escrita sobre la lista que pinta la página. Vale
+    // también entre la 23 y la 25, cuando los ofrecidos son menos que los de enlace.
+    expect(DESTINOS_OFRECIDOS.length).toBeGreaterThan(0);
+    for (const destino of DESTINOS_OFRECIDOS) {
+      expect(DESTINOS_DE_ENLACE as readonly string[], destino.id).toContain(destino.id);
+      expect(destino, destino.id).toBe(CONSTRUCTORES[destino.id]);
+    }
   });
 
   it('un destino inventado no se registra, pero la compartición sí se cuenta', () => {
@@ -97,7 +112,8 @@ describe('Historia 10.4 — el destino', () => {
     /*
      * Simétrico a lo que ya se hacía con la consulta. Sin esto, una `vista-de-cita` con
      * destino se registraba con destino, y una consulta que agrupara solo por esa columna
-     * contaría comparticiones que nunca ocurrieron.
+     * contaría comparticiones que nunca ocurrieron. La descarga admite destino desde la 23.2,
+     * pero solo el de su botón —`opaco` o la Historia—, nunca uno de enlace.
      */
     for (const evento of [EVENTOS.vistaDeCita, EVENTOS.copiado, EVENTOS.descargaDeImagen]) {
       const registro = interpretar(
@@ -118,7 +134,8 @@ describe('Historia 10.4 — el destino', () => {
 
     const [buena, inventada] = balizas();
     expect(buena.destino).toBe('telegram');
-    expect(buena.datos).toBeNull();
+    // Desde la 23.2 una compartición ni siquiera lleva `datos`: solo las claves que declara.
+    expect(buena).not.toHaveProperty('datos');
     expect(inventada.destino).toBeNull();
   });
 });
@@ -136,14 +153,23 @@ describe('Historia 10.4 — lo que viaja no identifica a nadie', () => {
       INSTANTE,
     )!;
 
-    expect(Object.keys(registro).sort()).toEqual([
-      'consulta',
-      'destino',
-      'evento',
-      'jornada',
-      'origen',
-      'ruta',
-    ]);
+    // Las doce columnas de `esquema.sql` desde la Historia 23.2; ninguna para lo colado.
+    expect(Object.keys(registro).sort()).toEqual(
+      [
+        'consulta',
+        'destino',
+        'evento',
+        'filtros',
+        'indexable',
+        'jornada',
+        'origen',
+        'primera',
+        'ruta',
+        'tramo',
+        'via',
+        'zona',
+      ].sort(),
+    );
     expect(JSON.stringify(registro)).not.toContain('abc');
   });
 
@@ -240,9 +266,16 @@ describe('Retro épica 7 — el receptor no arrastra código de interfaz', () =>
 
     expect(enTiempoDeEjecucion('medicion/receptor.ts')).not.toContain('compartir.ts');
     expect(enTiempoDeEjecucion('src/lib/medicion.ts')).not.toContain('compartir.ts');
+    // Historia 23.2 — el receptor importa el vocabulario, que tampoco pasa por la interfaz.
+    expect(enTiempoDeEjecucion('src/lib/vocabulario.ts')).not.toContain('compartir.ts');
 
     // Y por tanto tampoco por la composición del texto de atribución.
-    for (const modulo of ['medicion/receptor.ts', 'src/lib/medicion.ts', 'src/lib/destinos.ts']) {
+    for (const modulo of [
+      'medicion/receptor.ts',
+      'src/lib/medicion.ts',
+      'src/lib/vocabulario.ts',
+      'src/lib/destinos.ts',
+    ]) {
       expect(enTiempoDeEjecucion(modulo), modulo).not.toContain('atribucion.ts');
     }
   });

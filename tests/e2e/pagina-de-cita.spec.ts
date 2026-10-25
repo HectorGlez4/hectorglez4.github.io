@@ -1,6 +1,7 @@
 import { expect, test, type Page } from '@playwright/test';
 import { MAX_BYTES_DE_GUION } from '../../src/lib/umbrales.ts';
 import { citaConObraMasLarga, citaConProcedenciaCompleta, procedenciaDe } from './ayuda/corpus.ts';
+import { apuntarGuiones, fueraDeLaListaAlCargar } from './ayuda/guiones.ts';
 
 /**
  * Historia 2.1 — Página de Cita.
@@ -129,30 +130,43 @@ test.describe('Historia 2.1 — tramos tipográficos', () => {
   });
 });
 
-test.describe('Historia 2.1 — cero JavaScript y HTML inicial', () => {
-  test('la página no descarga ningún fichero de script', async ({ page }) => {
+test.describe('Historia 2.1 — solo las islas declaradas y HTML inicial', () => {
+  test('la página solo descarga los guiones externos declarados', async ({ page, baseURL }) => {
+    /*
+     * Historia 23.1 — de «no descarga ningún fichero de script» a «solo los guiones externos
+     * declarados», como enmienda la Historia 2.1: al cargar, a lo sumo el de medición, que es lo
+     * único de la lista cerrada de `src/lib/guiones.ts` que se pide sin tocar nada. Contra este
+     * servidor, construido desde la 23.2 con el punto final del receptor local
+     * (`playwright.config.ts`), se pide el fichero de medición —lo exige
+     * `receptor-local.spec.ts`, que además lo ve llegar al D1 local—, y esta prueba lo admite por
+     * estar en la lista.
+     * `tests/e2e/receptor.spec.ts` exige además que sea exactamente uno.
+     */
+    const pedidos = apuntarGuiones(page, baseURL!);
+    await page.goto(CORTA, { waitUntil: 'networkidle' });
+    expect(fueraDeLaListaAlCargar(pedidos), `la Página de Cita pidió ${pedidos.join(', ')}`).toEqual([]);
+  });
+
+  test('el guion en línea cabe en MAX_BYTES_DE_GUION', async ({ page }) => {
     /*
      * El criterio de la 2.1 dice «la página no envía JavaScript» y la 2.2 añade el botón
      * de copiar, que necesita algo. AD-6 resuelve la tensión: existen tres islas, cada
-     * una hidratada bajo demanda. Lo que se exige, entonces, es que no se descargue
-     * ningún script y que el contenido no dependa de que se ejecute nada —las dos cosas
-     * que sostienen NFR-2 y NFR-7—, no que el HTML tenga cero bytes de JavaScript.
+     * una hidratada bajo demanda, y desde la 23.1 la medición se descarga aparte, de la
+     * lista cerrada de `src/lib/guiones.ts`. Lo que se exige aquí es que lo que va en
+     * línea no crezca sin que nadie lo note, y que el contenido no dependa de que se
+     * ejecute nada —las dos cosas que sostienen NFR-2 y NFR-7—, no que el HTML tenga cero
+     * bytes de JavaScript.
      */
-    const scripts: string[] = [];
-    page.on('response', (r) => {
-      if (r.request().resourceType() === 'script') scripts.push(r.url());
-    });
-
-    await page.goto(CORTA, { waitUntil: 'networkidle' });
-    expect(scripts, `la página descargó ${scripts.join(', ')}`).toHaveLength(0);
+    await page.goto(CORTA);
 
     /*
-     * Lo que hay en línea son las dos islas —copiar y abrir el diálogo de imagen—, no un
-     * armazón. El tope existe para que no crezca sin que nadie lo note; se sube cuando
-     * una isla nueva entra a propósito, no cuando algo engorda por su cuenta.
+     * Lo que hay en línea son las tres islas —copiar, la Imagen y compartir— y el arranque
+     * de la medición, no un armazón. El tope existe para que no crezca sin que nadie lo
+     * note; se sube cuando una isla nueva entra a propósito, no cuando algo engorda por su
+     * cuenta.
      *
-     * Hoy son unos 4,8 KB sin comprimir de un HTML de 25 KB. El generador de verdad, que
-     * son decenas de kilobytes, sigue fuera y solo se descarga al pulsar.
+     * Tras la 23.1 son unos 5,6 KB sin comprimir. El generador de verdad, que son decenas de
+     * kilobytes, sigue fuera y solo se descarga al pulsar.
      *
      * El tope vive en `umbrales.ts` desde la v2 y no aquí: esta prueba mide la página
      * **sin** medición configurada, y hay otra que la mide **con** ella. Con el número

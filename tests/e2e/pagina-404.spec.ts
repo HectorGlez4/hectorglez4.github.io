@@ -1,5 +1,6 @@
 import { expect, test } from '@playwright/test';
 import { MARCA } from '../../src/lib/marca.ts';
+import { apuntarGuiones, fueraDeLaListaAlCargar } from './ayuda/guiones.ts';
 
 /** Historia 4.3 — la página 404 como puerta de entrada. */
 
@@ -86,13 +87,20 @@ test.describe('Historia 4.3 — el 404 no es un muro', () => {
     expect(new Set(bordes).size).toBe(1);
   });
 
-  test('tampoco descarga scripts', async ({ page }) => {
-    const scripts: string[] = [];
-    page.on('response', (r) => {
-      if (r.request().resourceType() === 'script') scripts.push(r.url());
-    });
+  test('tampoco descarga más guion que los declarados', async ({ page, baseURL }) => {
+    /*
+     * Historia 23.1 — de «no descarga ningún fichero de script» a «solo los guiones externos
+     * declarados», como pide la Historia 23.1: al cargar, a lo sumo el de medición, que es lo
+     * único de la lista cerrada de `src/lib/guiones.ts` que se pide sin tocar nada. Contra este
+     * servidor, construido desde la 23.2 con el punto final del receptor local
+     * (`playwright.config.ts`), se pide el fichero de medición —lo exige
+     * `receptor-local.spec.ts`, que además lo ve llegar al D1 local—, y esta prueba lo admite por
+     * estar en la lista.
+     * `tests/e2e/receptor.spec.ts` exige además que sea exactamente uno.
+     */
+    const pedidos = apuntarGuiones(page, baseURL!);
     await page.goto(INEXISTENTE, { waitUntil: 'networkidle' });
-    expect(scripts).toHaveLength(0);
+    expect(fueraDeLaListaAlCargar(pedidos), `el 404 pidió ${pedidos.join(', ')}`).toEqual([]);
   });
 
   test('no está en el sitemap', async ({ request }) => {

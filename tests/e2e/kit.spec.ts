@@ -33,6 +33,43 @@ test.describe('Historia 8.1 — el material del día, ya compuesto', () => {
     expect(await page.evaluate(() => navigator.clipboard.readText())).toBe(carga);
   });
 
+  test('el segundo botón de copiar copia lo suyo, y el primero no se entera — Historia 23.1', async ({
+    page,
+    context,
+  }) => {
+    /*
+     * El Kit lleva dos copias de `CopiarCita`, la Cita del Día y su alternativa. Desde la 23.1
+     * el guion no lleva el slug: cada copia se encuentra por `document.currentScript`. Si las
+     * dos encontraran el mismo botón —el defecto que el slug cerraba antes—, el segundo
+     * quedaría muerto y el primero escucharía dos veces.
+     */
+    await context.grantPermissions(['clipboard-read', 'clipboard-write']);
+    await page.goto('/kit/');
+
+    /*
+     * La alternativa solo existe el día que la Cita del Día no admite Imagen, y este sitio es
+     * el Corpus de verdad, que rota. La misma prueba, con un Kit de dos copias fijado a mano,
+     * corre siempre en `tests/e2e/receptor.spec.ts`.
+     */
+    const botones = page.locator('[data-copiar]');
+    test.skip(
+      (await botones.count()) < 2,
+      'hoy la Cita del Día admite Imagen y el Kit no lleva alternativa; la versión fija está en receptor.spec.ts',
+    );
+    await expect(botones).toHaveCount(2);
+    const [primero, segundo] = [botones.nth(0), botones.nth(1)];
+    const carga = await segundo.getAttribute('data-carga');
+    expect(carga).toMatch(/^«.+» — .+\.$/);
+    expect(carga).not.toBe(await primero.getAttribute('data-carga'));
+
+    await segundo.click();
+    expect(await page.evaluate(() => navigator.clipboard.readText())).toBe(carga);
+    await expect(segundo.locator('[data-etiqueta]')).toHaveText('Copiado.');
+    await expect(segundo).toHaveAttribute('data-estado', 'copiado');
+    await expect(primero.locator('[data-etiqueta]')).toHaveText('Copiar la cita');
+    await expect(primero).not.toHaveAttribute('data-estado', /.*/);
+  });
+
   test('trae el enlace a la Página de Cita, y esa página existe', async ({ page, request }) => {
     await page.goto('/kit/');
     const href = await page.locator('[data-enlace-cita]').first().getAttribute('href');

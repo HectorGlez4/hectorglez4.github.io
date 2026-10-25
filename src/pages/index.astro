@@ -58,7 +58,6 @@ const DESCRIPCION = DESCRIPCION_DEL_SITIO;
   descripcion={DESCRIPCION}
   tarjeta="/tarjeta/portada.png"
   ruta="/"
-  vista="superficie"
 >
   <DatosDelSitio slot="cabeza" descripcion={DESCRIPCION} />
 
@@ -70,7 +69,8 @@ const DESCRIPCION = DESCRIPCION_DEL_SITIO;
         <section class="del-dia">
           <h2>La cita de hoy</h2>
           <BloqueDeCita cita={seleccion.cita} autor={autorDelDia} />
-          <p class="ir">
+          {/* Historia 23.7 — las Zonas de salida interna van en los contenedores de la portada. */}
+          <p class="ir" data-zona="cita-del-dia">
             <a href={rutaDeCita(seleccion.cita.slug)}>Ver esta cita</a>
           </p>
         </section>
@@ -86,7 +86,7 @@ const DESCRIPCION = DESCRIPCION_DEL_SITIO;
       temas.length > 0 && (
         <section>
           <h2>Temas</h2>
-          <ul class="chips">
+          <ul class="chips" data-zona="chip-de-tema">
             {temas.map((tema) => (
               <li>
                 <a class="chip" href={rutaDeTema(tema.slug)}>
@@ -126,7 +126,7 @@ const DESCRIPCION = DESCRIPCION_DEL_SITIO;
         <section>
           <h2>Colecciones</h2>
           {/* Chip idéntico al de Tema: la Colección es navegación lateral, no jerarquía. */}
-          <ul class="chips">
+          <ul class="chips" data-zona="colecciones">
             {colecciones.map((coleccion) => (
               <li>
                 <a class="chip" href={rutaDeColeccion(coleccion.slug)}>
@@ -141,7 +141,7 @@ const DESCRIPCION = DESCRIPCION_DEL_SITIO;
 
     <section>
       <h2>Autores</h2>
-      <ul class="autores">
+      <ul class="autores" data-zona="autores-de-portada">
         {
           autores.map((autor) => (
             <li>

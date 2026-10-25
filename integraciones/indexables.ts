@@ -15,8 +15,10 @@
  *     `rutasIndexables`, que contiene exactamente estas mismas rutas de Obra.
  *
  *   · **`astro:build:done`** — sobre el `dist/` real, comprueba que el sitemap, las páginas sin
- *     `noindex` y las que llevan `data-pagefind-body` son el mismo conjunto. Si no, rompe
- *     nombrando lo que sobra o falta en cada lado. Va **después** de la integración del sitemap
+ *     `noindex` y las que llevan `data-pagefind-body` son el mismo conjunto, y —desde la Historia
+ *     23.9— que la marca de Obra del `<html>` (`ATRIBUTO_DE_INDEXABLE`) está en toda página 1 de
+ *     Obra, solo en ellas, y dice lo mismo que su `noindex`. Si no, rompe nombrando lo que sobra o
+ *     falta en cada lado. Va **después** de la integración del sitemap
  *     en `astro.config.mjs`, porque es esa la que lo escribe en este mismo gancho. Pagefind
  *     corre después de Astro (`package.json`), así que lo que se compara es la marca.
  */
@@ -28,6 +30,7 @@ import type { AstroIntegration } from 'astro';
 import { leerAutores, leerCitas, leerFichasDeObra, rutasDelCorpus } from '../tools/lib/corpus.ts';
 import {
   desajustesDeIndexables,
+  informeDeCoincidencia,
   informeDeObras,
   marcasDePagina,
   nombresCongeladosSinFicha,
@@ -119,9 +122,7 @@ export default function rutasIndexablesDelCorpus(): AstroIntegration {
 
         const desajustes = desajustesDeIndexables(sitemap, paginas);
         if (desajustes.length === 0) {
-          logger.info(
-            `El sitemap, los \`noindex\` y Pagefind coinciden (${sitemap.length} rutas indexables).`,
-          );
+          logger.info(informeDeCoincidencia(sitemap.length));
           return;
         }
         // El detalle por el registro y el corte por la excepción, como en la cobertura.

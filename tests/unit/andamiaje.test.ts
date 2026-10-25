@@ -137,7 +137,7 @@ describe('Historia 11.2 — el censo de pendientes de cotejo', () => {
 /**
  * AD-22 — La red vive **solo** en la cáscara exterior de `tools/`.
  *
- * Siete excepciones, las siete escritas y con nombre. Una excepción escrita se revisa; un
+ * Ocho excepciones, las ocho escritas y con nombre. Una excepción escrita se revisa; un
  * punto ciego, no:
  *
  *   · `tools/recuperar.ts` es la cáscara exterior de las herramientas de editor: la única
@@ -164,6 +164,11 @@ describe('Historia 11.2 — el censo de pendientes de cotejo', () => {
  *     cómo se lee lo que contesta y cómo se cruza contra el Corpus vive en
  *     `tools/lib/epocas.ts`, que no pide nada. El build no la invoca y ningún paso de CI la
  *     ejecuta: la corre una persona antes de una sesión de sembrado.
+ *   · `tools/medicion.ts` es la cáscara de `npm run medicion` —Historia 23.2—: despliega el
+ *     receptor de la medición con `wrangler` y lo comprueba enviándole con `fetch` balizas de
+ *     prueba. Lo que decide qué se envía y cómo se lee lo que contesta D1 vive en
+ *     `tools/lib/medicion.ts`, que no pide nada. El build no la invoca y ningún paso de CI la
+ *     ejecuta: la corre Héctor (AD-14).
  *   · `astro.config.mjs` declara las dos familias de UX-DR3 por la Fonts API de Astro, y
  *     `fontProviders.google()` **sí descarga** en el build: los `.woff2` acaban en
  *     `.astro/fonts/` y `unifont` está en el árbol de dependencias por eso.
@@ -206,6 +211,10 @@ describe('AD-22 — la red vive solo en la cáscara exterior de tools/', () => {
     [
       'tools/avisar.ts',
       'la cáscara del aviso a IndexNow: avisa a los buscadores de lo ya publicado, y corre en el flujo de trabajo con needs: desplegar — el build no la invoca, así que sigue construyendo sin internet',
+    ],
+    [
+      'tools/medicion.ts',
+      'la cáscara que despliega y comprueba el receptor de la medición (Historia 23.2): envía con fetch las balizas de prueba al receptor y corre wrangler; lo que decide vive en tools/lib/medicion.ts, que no pide nada — el build no la invoca y ningún paso de CI la ejecuta (AD-14)',
     ],
   ]);
 
@@ -316,17 +325,25 @@ describe('AD-22 — la red vive solo en la cáscara exterior de tools/', () => {
     expect(tieneLlamadaDeRed(readFileSync(resolve(raiz, ruta), 'utf8'))).toBe(true);
   });
 
-  it('no hay más excepciones que esas siete', () => {
-    // Añadir una octava tiene que ser un cambio deliberado de esta prueba.
+  it('no hay más excepciones que esas ocho', () => {
+    // Añadir una novena tiene que ser un cambio deliberado de esta prueba. La octava,
+    // `tools/medicion.ts`, la añadió la Historia 23.2.
     expect([...EXCEPCIONES.keys()].sort()).toEqual([
       'astro.config.mjs',
       'tools/avisar.ts',
       'tools/epocas.ts',
       'tools/indexacion.ts',
       'tools/ingreso.ts',
+      'tools/medicion.ts',
       'tools/recuperar.ts',
       'tools/trafico.ts',
     ]);
+  });
+
+  it('tools/lib/medicion.ts, la parte pura de la orden del receptor, no pide nada', () => {
+    // Historia 23.2 — AD-22: la red de `npm run medicion` vive solo en su cáscara.
+    expect(tieneLlamadaDeRed(readFileSync(resolve(raiz, 'tools/lib/medicion.ts'), 'utf8'))).toBe(false);
+    expect(readFileSync(resolve(raiz, 'tools/lib/medicion.ts'), 'utf8')).not.toMatch(/from\s+'node:child_process'/);
   });
 
   it('tools/demanda.ts pide por la red solo a través del cliente de tools/trafico.ts', () => {
@@ -410,6 +427,9 @@ describe('AD-22 — la red vive solo en la cáscara exterior de tools/', () => {
      *   garantía que esta prueba defiende —`npm run build` sigue construyendo sin internet—
      *   y además lo único correcto, porque avisar antes de desplegar manda al buscador a la
      *   versión anterior.
+     * - `tools/medicion.ts` despliega el receptor de la medición y lo comprueba con balizas de
+     *   prueba que envía con `fetch` (Historia 23.2). **El build no lo llama** y ningún paso de
+     *   CI lo ejecuta: lo corre Héctor, desde la rama que cambia el vocabulario (AD-14).
      */
     const conRed = barridos.filter((ruta) =>
       tieneLlamadaDeRed(readFileSync(resolve(raiz, ruta), 'utf8')),
@@ -420,6 +440,7 @@ describe('AD-22 — la red vive solo en la cáscara exterior de tools/', () => {
       'tools/epocas.ts',
       'tools/indexacion.ts',
       'tools/ingreso.ts',
+      'tools/medicion.ts',
       'tools/recuperar.ts',
       'tools/trafico.ts',
     ]);

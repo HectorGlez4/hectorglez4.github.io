@@ -31,13 +31,16 @@
 #
 # EL CAMPO `marcado`. Cierto si el enlace tecleado llevaba ?de=<red> con la misma red
 # de la publicación; falso si no llevaba marca. Un enlace marcado para OTRA red se
-# rechaza: sus visitas se atribuirían a otra cuenta. Lo sin enlace no lleva el campo. Se
-# guarda la ruta y no la URL: el dominio tiene un solo dueño, src/lib/dominio.ts.
+# rechaza: sus visitas se atribuirían a otra cuenta. Un enlace con ?via= también: es la
+# marca de un visitante que comparte con un botón del sitio, nunca la de una cuenta
+# propia. Lo sin enlace no lleva el campo. Se guarda la ruta y no la URL: el dominio
+# tiene un solo dueño, src/lib/dominio.ts.
 #
 # CÓDIGOS DE SALIDA. 1 si lo dicho se rechaza —red ajena, formato desconocido, ruta que
-# el sitio no publica, enlace marcado para otra red, fecha futura— o si este fichero no
-# se deja leer; 2 si la forma de la invocación falla —bandera desconocida, argumentos de
-# menos o de más, --fecha sin forma de jornada, una opción repetida—. Ninguno escribe.
+# el sitio no publica, enlace marcado para otra red, enlace con ?via=, fecha futura— o si
+# este fichero no se deja leer; 2 si la forma de la invocación falla —bandera
+# desconocida, argumentos de menos o de más, --fecha sin forma de jornada, una opción
+# repetida—. Ninguno escribe.
 #
 # Este fichero es metadato del Corpus y no una colección: vive en la raíz de `corpus/` y
 # ninguna base de `src/content.config.ts` apunta aquí. Ningún módulo de `src/lib/` lo lee

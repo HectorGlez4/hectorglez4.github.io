@@ -11,7 +11,11 @@ compatibility_date = "2026-08-01"
 [observability]
 enabled = false
 
+# El esquema cambia solo por migraciones aditivas y versionadas (AD-14): `migrations/`. Las
+# aplica `npm run medicion -- desplegar` en remoto y `npm run medicion -- local` en local, con
+# la versión de wrangler fijada en tools/lib/medicion.ts y --remote o --local siempre explícito.
 [[d1_databases]]
 binding = "MEDICION"
 database_name = "medicion"
 database_id = "3a60afb4-1285-4191-b467-8c3768de4545"
+migrations_dir = "migrations"

@@ -3,6 +3,7 @@ import { superficiesInalcanzables } from '../../src/lib/publicado.ts';
 import { MAX_SALTOS_DESDE_LA_PORTADA } from '../../src/lib/umbrales.ts';
 import { procedenciaDe, temaBajoUmbral } from './ayuda/corpus.ts';
 import { rutaDeTema } from '../../src/lib/superficies.ts';
+import { apuntarGuiones, fueraDeLaListaAlCargar } from './ayuda/guiones.ts';
 
 /** Historia 2.7 — fundamentos de SEO. */
 
@@ -104,15 +105,20 @@ test.describe('Historia 2.7 — datos estructurados', () => {
     expect(datos.creator.name).toBe('Concepción Arenal');
   });
 
-  test('los datos estructurados no son JavaScript ejecutable', async ({ page }) => {
-    const scripts: string[] = [];
-    page.on('response', (r) => {
-      if (r.request().resourceType() === 'script') scripts.push(r.url());
-    });
-    await page.goto('/cita/miguel-de-cervantes-la-libertad-sancho-es-uno-de-los', {
-      waitUntil: 'networkidle',
-    });
-    expect(scripts).toHaveLength(0);
+  test('los datos estructurados no son JavaScript ejecutable', async ({ page, baseURL }) => {
+    /*
+     * Historia 23.1 — de «no descarga ningún fichero de script» a «solo los guiones externos
+     * declarados», como pide la Historia 23.1: al cargar, a lo sumo el de medición, que es lo
+     * único de la lista cerrada de `src/lib/guiones.ts` que se pide sin tocar nada. Contra este
+     * servidor, construido desde la 23.2 con el punto final del receptor local
+     * (`playwright.config.ts`), se pide el fichero de medición —lo exige
+     * `receptor-local.spec.ts`, que además lo ve llegar al D1 local—, y esta prueba lo admite por
+     * estar en la lista.
+     * `tests/e2e/receptor.spec.ts` exige además que sea exactamente uno.
+     */
+    const pedidos = apuntarGuiones(page, baseURL!);
+    await page.goto('/cita/miguel-de-cervantes-la-libertad-sancho-es-uno-de-los', { waitUntil: 'networkidle' });
+    expect(fueraDeLaListaAlCargar(pedidos), `la Página de Cita pidió ${pedidos.join(', ')}`).toEqual([]);
   });
 });
 
@@ -187,8 +193,23 @@ test.describe('Historia 2.7 — nada huérfano', () => {
       );
     };
 
+    /*
+     * Se abren las páginas hasta el penúltimo salto, no hasta el último — puerta de la Épica 23.
+     *
+     * Lo que está a `MAX_SALTOS_DESDE_LA_PORTADA` saltos ya cuenta como alcanzado con que lo
+     * enlace una página del salto anterior: `superficiesInalcanzables` lo marca al leer los
+     * enlaces de ésa, y los salientes de una página del último salto llevarían un salto más
+     * allá del tope, donde ya no mira (lo fija «lo que está más hondo que el tope de saltos
+     * cuenta como inalcanzable», de `tests/unit/publicable-y-alcanzable.test.ts`). Abrirlas era
+     * trabajo cuyo resultado nadie leía: con 5286 páginas, 1559 —el 29,5 % del recorrido—, y
+     * con ellas la prueba llegaba a los 90 s sin evaluar la aserción. Medido sobre el mismo
+     * `dist/`, los dos recorridos dan el mismo conjunto alcanzado.
+     *
+     * La aserción, el tope y lo que se cuenta como enlace son los de antes; lo que cambia es que
+     * no se abre lo que no puede cambiar el veredicto.
+     */
     let frontera = ['/'];
-    for (let salto = 0; salto <= MAX_SALTOS_DESDE_LA_PORTADA && frontera.length > 0; salto += 1) {
+    for (let salto = 0; salto < MAX_SALTOS_DESDE_LA_PORTADA && frontera.length > 0; salto += 1) {
       const pendientes = frontera.filter((ruta) => !enlaces.has(ruta));
       const siguiente: string[] = [];
 

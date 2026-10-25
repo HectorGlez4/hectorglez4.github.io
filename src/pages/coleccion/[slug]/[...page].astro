@@ -121,7 +121,6 @@ const canonica = new URL(ruta, Astro.site).href;
   tarjeta={`/tarjeta/coleccion/${coleccion.slug}.png`}
   ruta={ruta}
   tipo="coleccion"
-  vista={pagina.currentPage === 1 ? 'superficie' : undefined}
 >
   <DatosDeColeccion
     slot="cabeza"
@@ -141,10 +140,10 @@ const canonica = new URL(ruta, Astro.site).href;
       */}
     {/* UX-DR25 — los listados son listas reales. */}
     <ul class="listado">
-      {pagina.data.map((cita) => <TarjetaDeCita cita={cita} autor={autores.get(cita.autor)} />)}
+      {pagina.data.map((cita) => <TarjetaDeCita cita={cita} autor={autores.get(cita.autor)} zona="listado" />)}
     </ul>
 
-    <Paginacion pagina={pagina} />
+    <Paginacion pagina={pagina} zona="paginacion" />
 
     {/*
       * El criterio, al pie y por debajo de todo lo citado en jerarquía visual (UX-DR32).

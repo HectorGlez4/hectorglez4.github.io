@@ -28,18 +28,21 @@
  *
  * `anotar`: 2 por una bandera desconocida o repetida, argumentos de menos o de más, un
  * `--fecha` sin forma de jornada o una `--nota` vacía; 1 por una red ajena, un formato que no
- * existe, una ruta que el sitio no publica, un enlace marcado para otra red, una fecha futura
- * o anterior a la primera anotable, o un Corpus o un registro que no se dejan leer.
+ * existe, una ruta que el sitio no publica, un enlace marcado para otra red, un enlace con
+ * `?via=` —la marca de un visitante que comparte, nunca la de una cuenta propia (Historia
+ * 23.6)—, una fecha futura o anterior a la primera anotable, o un Corpus o un registro que no
+ * se dejan leer.
  *
  * `senal`:
  * Código 1 si lo dicho se rechaza: un origen que no es una URL http(s) absoluta, que es del
  * dominio propio o de un subdominio suyo, localhost, una IP, un host sin punto o una URL
  * con usuario o contraseña; un destino que el sitio no publica; una marca ?de= de una red
- * que no existe, o más de una; una fecha futura; un --retira sin señal igual viva en esa
- * fecha; o un registro que no se deja leer. Código 2 si falla la forma de la invocación:
- * sin --tipo o con un tipo que no es propia ni ajena; una bandera desconocida o repetida;
- * argumentos de menos o de más; un --fecha o un --retira sin forma de jornada; una --nota
- * vacía; --tipo o --retira fuera de senal. Ninguno de los dos escribe nada.
+ * que no existe, o más de una distinta; una marca ?via= en una propia, o en una ajena de un
+ * destino que no existe, o más de una distinta; una fecha futura; un --retira sin señal
+ * igual viva en esa fecha; o un registro que no se deja leer. Código 2 si falla la forma de
+ * la invocación: sin --tipo o con un tipo que no es propia ni ajena; una bandera desconocida
+ * o repetida; argumentos de menos o de más; un --fecha o un --retira sin forma de jornada;
+ * una --nota vacía; --tipo o --retira fuera de senal. Ninguno de los dos escribe nada.
  */
 
 import { esJornada } from '../src/lib/citaDelDia.ts';
@@ -99,13 +102,15 @@ const USO = [
   `      <formato>: ${FORMATOS.join(', ')}.`,
   '      <ruta>: una página que el sitio publica —ruta o URL entera—, o',
   `      «${SIN_ENLACE}» si la publicación no enlaza. Con ?de=<red> de la misma red queda`,
-  '      «marcado: true»; marcada para otra red, se rechaza.',
+  '      «marcado: true»; marcada para otra red, o con ?via= (la marca de un visitante),',
+  '      se rechaza.',
   '',
   '  npm run canal -- senal <url-origen> <ruta-destino> --tipo propia|ajena',
   '                         [--fecha AAAA-MM-DD] [--nota "…"] [--retira AAAA-MM-DD]',
   '      Añade al final de corpus/senales-externas.yml un enlace hacia el sitio desde fuera.',
   '      <url-origen>: la página pública que enlaza, con http(s)://; nunca del dominio propio.',
-  '      <ruta-destino>: una página que el sitio publica —ruta o URL entera—.',
+  '      <ruta-destino>: una página que el sitio publica —ruta o URL entera—. Con ?de=<red>',
+  '      queda «marcado: true»; con ?via=<destino>, solo en una ajena, «compartido: true».',
   `      --tipo: ${TIPOS_DE_SENAL.join(' o ')}. Obligatorio: propia si la puso Héctor, ajena si un tercero.`,
   '      --retira: la fecha de una señal igual (mismo origen, destino y tipo) que se',
   '      corrige; la consulta deja de contarla. Nada se reescribe.',

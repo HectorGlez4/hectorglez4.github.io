@@ -10,7 +10,9 @@ import {
   paginaConstruida,
 } from './ayuda/construir.js';
 import { AVISO_DE_PESTAÑA_NUEVA } from '../../src/lib/accesibilidad.ts';
-import { DESTINOS, rotuloDeDestino } from '../../src/lib/compartir.ts';
+import { DESTINOS_OFRECIDOS, rotuloDeDestino } from '../../src/lib/compartir.ts';
+import { ARRANQUE_DE_MEDICION } from '../../src/lib/medicion.ts';
+import { guionesEnLinea, guionesExternosDe } from './ayuda/guion.js';
 
 /**
  * Historia 22.10 — lo construido cumple las espinas de UX.
@@ -171,9 +173,16 @@ describe('Historia 22.10 — el marcado construido', () => {
     expect(/<dialog[\s\S]*?role="status"[\s\S]*?<\/dialog>/.test(html)).toBe(true);
   });
 
+  it('los destinos de la Página de Cita son exactamente los ofrecidos, en su orden (Historia 23.2)', () => {
+    // Que Facebook y Threads tengan constructor no los pone en la página: eso es de la 25.1.
+    const html = paginas[`/cita/${SLUG}/`];
+    const pintados = [...html.matchAll(/\bdata-destino="([^"]*)"/g)].map((m) => m[1]);
+    expect(pintados).toEqual(DESTINOS_OFRECIDOS.map((d) => d.id));
+  });
+
   it('cada destino de compartir dice «Compartir en {destino}» y avisa de la pestaña nueva', () => {
     const html = paginas[`/cita/${SLUG}/`];
-    for (const destino of DESTINOS) {
+    for (const destino of DESTINOS_OFRECIDOS) {
       const enlace = new RegExp(`<a[^>]*data-destino="${destino.id}"[^>]*>([\\s\\S]*?)</a>`).exec(html);
       expect(enlace, destino.id).not.toBeNull();
       expect(enlace![0], destino.id).toContain('target="_blank"');
@@ -195,8 +204,11 @@ describe('Historia 22.10 — el marcado construido', () => {
     expect(paginas['/buscar/']).toMatch(/role="status"[^>]*><\/p>/);
   });
 
-  it('el 404 no carga guiones ni necesita región de estado', () => {
-    expect(paginas['/404']).not.toMatch(/<script(?![^>]*application\/ld\+json)/);
+  it('el 404 no lleva ninguna isla —solo el arranque de la medición— ni necesita región de estado', () => {
+    // Historia 23.1 — lo único en línea es el arranque de la medición, que va en toda página;
+    // ninguna isla, y sin punto final no pide ningún fichero.
+    expect(guionesEnLinea(paginas['/404'])).toEqual([ARRANQUE_DE_MEDICION]);
+    expect(guionesExternosDe(paginas['/404'])).toEqual([]);
     expect(regiones(paginas['/404'])).toEqual([]);
   });
 

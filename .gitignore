@@ -31,3 +31,8 @@ playwright-report/
 # queda uno huérfano, y el criterio de aceptación de esa historia es un `git status --short`
 # limpio.
 corpus/*.nueva
+
+# Estado local de wrangler (Historia 23.2): el D1 local que crean `npm run medicion -- local` y
+# `ensayo`, y lo que `wrangler dev` y `wrangler deploy` dejan al empaquetar. Es de la máquina:
+# una base local se rehace aplicando `medicion/migrations/`, y nada del sitio la lee (AD-14).
+medicion/.wrangler/
