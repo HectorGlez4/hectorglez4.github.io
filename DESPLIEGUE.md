@@ -549,10 +549,17 @@ salida sale **detrás de la lectura**: si la carga aún no la había emitido —
 `pointerdown`—, la emite antes, así que toda salida de una superficie con lectura tiene su lectura
 en la misma carga (con la misma salvedad de la baliza perdida y la medianoche que SM-5). Volver
 por la caché de atrás y adelante es una carga nueva, con otra salida posible. **Lo que se abre en
-pestaña nueva no se mide** —el clic con Control o Meta, el botón central, un `target` ajeno—, así
-que **toda continuación es cota inferior**: dice al menos cuánto se siguió, nunca cuánto. Las páginas
+pestaña nueva no se mide** —el clic con Control o Meta, el botón central, un `target` ajeno—, y
+tampoco un clic anterior a que el fichero se active —va con `defer`, después del análisis—, así
+que **toda continuación es cota inferior**: dice al menos cuánto se siguió, nunca cuánto. Al revés,
+un clic cuya navegación no llega a ocurrir —se detiene, o un `beforeunload` la cancela— cuenta como
+salida y gasta la de la carga: es raro y se tolera. Las páginas
 2+, `/buscar/` y el 404 no emiten lectura, así que sus salidas salen **sin lectura** y ahí no se
-calcula continuación: se cuentan solas. Las zonas que coloca la Épica 23 son once —`cabecera`,
+calcula continuación: se cuentan solas. **El 404 no tiene ruta propia**: se sirve en la dirección
+que se pidió, así que sus salidas llevan esa ruta —la de una Cita retirada, un Autor retirado, una
+Obra absorbida o una errata—, y la consulta de abajo solo puede apartar la de «Ver esta cita»
+(`cita-del-dia` fuera de la portada); las de la cabecera y la Atribución del 404 caen en la familia
+de su ruta, sin lectura, hasta que la 23.10 resuelva las rutas contra el censo. Las zonas que coloca la Épica 23 son once —`cabecera`,
 `atribucion`, `chip-de-tema`, `colecciones`, `listado`, `paginacion`, `lista-de-obras`,
 `resultado`, `cita-del-dia`, `rutas-de-salida` y `autores-de-portada`—; las otras cinco del
 vocabulario llegan con las Épicas 24, 26 y 28, y hasta entonces no aparecen en la tabla. Como la
@@ -608,12 +615,15 @@ npx --yes wrangler@4.151.1 d1 execute medicion --remote --command \
 
 # Salidas internas por zona y lecturas, por superficie — SM-4, Historia 23.7. Cambia AAAA-MM-DD
 # por la primera jornada UTC completa tras la llegada de la 23. La superficie va aquí por el
-# prefijo de la ruta, a mano —una Cita retirada, que sirve el 404, sigue contando como Cita; la
-# 23.10 las resolverá contra el censo—, y las páginas 2+ salen aparte y sin lecturas, como
-# `/buscar/` y el 404 (por su propia ruta): ahí no se calcula continuación. La continuación de una
-# superficie es sus salidas frente a sus lecturas, y es cota inferior: la pestaña nueva no se mide.
+# prefijo de la ruta, a mano, hasta que la 23.10 la resuelva contra el censo. El 404 se sirve en la
+# ruta que se pidió, nunca en `/404`: su «Ver esta cita» se aparta por la zona (`cita-del-dia`
+# fuera de la portada) y lo que sale en una ruta de ninguna familia va a «otra»; sus salidas por la
+# cabecera y la Atribución en la ruta de una Cita, un Autor, un Tema o una Obra que ya no existen
+# caen en esa familia, sin lectura, e inflan un poco su continuación. Las páginas 2+ y `/buscar/`
+# salen aparte y sin lecturas: ahí no se calcula continuación. La continuación de una superficie
+# es sus salidas frente a sus lecturas, y es cota inferior: la pestaña nueva no se mide.
 npx --yes wrangler@4.151.1 d1 execute medicion --remote --command \
-  "SELECT CASE WHEN ruta GLOB '*/[0-9]/' OR ruta GLOB '*/[0-9][0-9]/' OR ruta GLOB '*/[0-9][0-9][0-9]/' THEN 'paginas-2+' WHEN ruta='/' THEN 'portada' WHEN ruta LIKE '/cita/%' THEN 'cita' WHEN ruta LIKE '/autor/%' THEN 'autor' WHEN ruta LIKE '/tema/%' THEN 'tema' WHEN ruta LIKE '/coleccion/%' THEN 'coleccion' WHEN ruta LIKE '/obra/%' THEN 'obra' ELSE ruta END AS superficie, evento, zona, COUNT(*) n FROM eventos WHERE jornada >= 'AAAA-MM-DD' AND evento IN ('lectura','salida-interna') GROUP BY superficie, evento, zona ORDER BY superficie, evento, n DESC"
+  "SELECT CASE WHEN zona='cita-del-dia' AND ruta<>'/' THEN '404' WHEN ruta GLOB '*/[0-9]/' OR ruta GLOB '*/[0-9][0-9]/' OR ruta GLOB '*/[0-9][0-9][0-9]/' THEN 'paginas-2+' WHEN ruta='/' THEN 'portada' WHEN ruta='/buscar/' THEN 'buscar' WHEN ruta LIKE '/cita/%' THEN 'cita' WHEN ruta LIKE '/autor/%' THEN 'autor' WHEN ruta LIKE '/tema/%' THEN 'tema' WHEN ruta LIKE '/coleccion/%' THEN 'coleccion' WHEN ruta LIKE '/obra/%' THEN 'obra' ELSE 'otra' END AS superficie, evento, zona, COUNT(*) n FROM eventos WHERE jornada >= 'AAAA-MM-DD' AND evento IN ('lectura','salida-interna') GROUP BY superficie, evento, zona ORDER BY superficie, evento, n DESC"
 
 # Salidas desde los resultados de `/buscar/`, por jornada — el numerador de SM-13, Historia 23.7.
 # La misma jornada de partida. El denominador, las búsquedas asentadas, llega con la 23.8: hasta

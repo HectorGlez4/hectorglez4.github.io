@@ -5,7 +5,7 @@ created: '2026-10-25'
 status: 'done'
 baseline_revision: 'c7b4757cb613309d3245ed5bc4d6826c246f4e1d'
 review_loop_iteration: 0
-followup_review_recommended: false
+followup_review_recommended: true
 context:
   - '{project-root}/_bmad-output/implementation-artifacts/epic-23-context.md'
 warnings: [oversized]
@@ -118,6 +118,28 @@ Las cinco capas de esta pasada son externas (`blind-hunter`, `edge-case-hunter`,
 `verification-gap`, `intent-alignment`, `ac-auditor`) y la invocación no trajo hallazgos suyos: la
 revisión independiente llega después.
 
+### 2026-10-25 — Review pass
+- intent_gap: 0
+- bad_spec: 0
+- patch: 12 (high 0, medium 3, low 9)
+- defer: 0
+- reject: 20 (high 0, medium 0, low 20)
+- addressed_findings:
+  - `[medium]` `[patch]` La consulta de SM-4 de `DESPLIEGUE.md` decía que el 404 sale «por su propia ruta», y se sirve en la que se pidió: sus salidas caían en la familia de esa ruta o en una fila por errata (blind-hunter, edge-case-hunter, intent-alignment, ac-auditor). La consulta aparta ahora `cita-del-dia` fuera de la portada como «404», nombra `buscar` y manda el resto a «otra»; el comentario y el párrafo de §3 dicen qué salidas del 404 no se pueden apartar hasta la 23.10.
+  - `[medium]` `[patch]` La prueba de `dist/` solo exigía zona en las páginas con `data-vistas`, y las páginas 2+, `/buscar/` y el 404 también emiten salida (blind-hunter, edge-case-hunter, intent-alignment). Ahora juzga toda página que pide el fichero de medición, cuenta las que salen sin lectura y comprueba que ninguna página con vista se quede sin fichero; el «Known pitfall» de `AGENTS.md` y el docblock de `ATRIBUTO_DE_ZONA` lo dicen.
+  - `[medium]` `[patch]` Nada fijaba qué zona lleva cada sitio: una zona válida en el sitio equivocado —los Chips de Tema de la Cita con `rutas-de-salida`, la Paginación con `listado`, los chips de la portada cruzados— pasaba todo (verification-gap, ac-auditor). Nueva tabla `COLOCACION` en `tests/unit/medicion.test.ts`: 29 filas de página, enlace y declaraciones esperadas, con la Cita, la portada, el 404, `/buscar/`, los tres listados, sus páginas 2+ y las dos Obras. Comprobado a mano que rompe con `zona={zona}` en los Chips de `RutasDeSalida`.
+  - `[low]` `[patch]` El ancla de la prueba de punta a punta era «Saltar al contenido», fuera de toda zona: no probaba la regla (ac-auditor, intent-alignment). Ahora la prueba mete en `.hermanas` un ancla `#contenido` y un enlace a la propia ruta con `?q=otra` (cuya navegación se anula con 204) y los pulsa dentro de `rutas-de-salida`.
+  - `[low]` `[patch]` En macOS Control-clic es el menú contextual y Chromium da `auxclick` al botón central: dos de los gestos no llegaban como `click` (blind-hunter, ac-auditor). La prueba apunta cada `click` que llega a la ventana, pulsa de verdad con Meta y con Mayúsculas, despacha `click` con Control y con el botón 1 en el enlace, y exige los seis `click` con lo suyo. Comprobado a mano que rompe al quitar del fichero, juntos, los filtros de Control, del botón y de la propia ruta.
+  - `[low]` `[patch]` Ninguna prueba activaba un enlace con el teclado (blind-hunter). Nueva prueba de punta a punta: Enter en una hermana da vista, lectura —por la tecla— y la salida `rutas-de-salida`.
+  - `[low]` `[patch]` El envío de un formulario no tenía prueba propia (ac-auditor, intent-alignment). `pulsar` admite `{ envio: true, contenedores }` —el `click` en el botón de enviar de un `<form>`— y la tabla de «no es salida» lo prueba dentro de una zona.
+  - `[low]` `[patch]` La prueba simulada del 404 usaba `ruta: '/404'`, que en producción no ocurre (blind-hunter, ac-auditor): ahora `/cita/una-retirada/`.
+  - `[low]` `[patch]` `String.fromCodePoint` lanzaba con una entidad numérica fuera de Unicode y tumbaba la prueba de `dist/` (edge-case-hunter): `resolverEntidades` la deja tal cual, y el fragmento escrito a mano la lleva.
+  - `[low]` `[patch]` Dos cotas sin decir (edge-case-hunter, blind-hunter): un clic anterior a que el fichero se active no se mide, y un clic cuya navegación no llega a ocurrir gasta la salida de la carga. Las dos, en el párrafo de la Salida interna de `DESPLIEGUE.md` §3.
+  - `[low]` `[patch]` Las exenciones decían que una zona nueva «exigiría otra migración (AD-14)» sin citar la decisión, y la tabla de D1 no tiene `CHECK`: lo que exige es cambiar el vocabulario, su huella y otro despliegue del receptor (blind-hunter). Corregido en `EXENCIONES_DE_ZONA`, `404.astro` y `buscar.astro`, con la Historia 23.7 y la decisión de Héctor del 2026-10-19 (EXPERIENCE.md § Zonas) como fuente.
+  - `[low]` `[patch]` Una isla que parara la propagación del clic sin `preventDefault` escondería la salida, y no constaba (blind-hunter). Ninguna lo hace (`stopPropagation` no aparece en `src/` ni en `public/`); el docblock del fichero lo dice.
+
+Rechazados, con su porqué: exigir `isTrusted` (la historia nombra `element.click()` como camino que emite la lectura antes); el cierre de la pasada anterior sin revisión (esta es la revisión); los riesgos sin `deferred` y `sprint-status.yaml` sin tocar (los riesgos se escriben en el resultado, y el tablero lo lleva el bucle); la exención del 404 frente a los chips de la portada (las dos exenciones las nombra la historia); las zonas de página sin tipo (la prueba de `dist/` coteja cada valor con `ZONAS` y ahora fija su sitio); `atribucion` fija en `BloqueDeCita` (la tabla de EXPERIENCE.md da `atribucion` a toda Atribución, también la de la Cita del Día); la zona en cada `li.tarjeta` (la historia hace de `zona` prop obligatoria de `TarjetaDeCita`); numerador de SM-13 por carga frente a por búsqueda (pulsar un resultado termina la carga); el tokenizador frente al DOM (ningún `<p>` con zona contiene un bloque, y `noscript`/`template` solo harían la prueba más estricta); las tres listas de zonas colocadas (la prueba es la que obliga); `/kit` y `/lote` (no cargan el fichero); la barra final en `pathname` (toda ruta sale de sus constructores, con barra); la segunda línea base (`fe55077e` es el padre del commit que solo añade la spec); el DOM de mentira en CI (reparto de la propia historia); la prueba sobre el corpus de prueba y no el real (convención del proyecto; el `dist/` real se escaneó limpio en la revisión: 4.873 páginas, 39.976 enlaces); `astro check` por las Props (comprobado a mano dos veces); D1 sin ejercer (desplegar queda fuera de esta pasada); el chip «Sobre {Autor}» en `rutas-de-salida` (el PRD da a esa zona «las demás rutas de salida (FR-12)»); la zona ajena sin enviar (EXPERIENCE.md); el tope subido (lo pide la spec).
+
 ## Design Notes
 
 **Por qué no se envía una zona ajena.** «Un enlace que no figura en la tabla no pertenece a ninguna zona y no se registra» (EXPERIENCE.md § Zonas): una salida con `zona: null` sumaría continuación sin zona. La tabla de `b` seguiría poniendo a nulo un valor ajeno, pero la escucha no llega a pedirlo. Orientativo (nombres y compactación los fija el código):
@@ -215,19 +237,42 @@ los contenedores de las páginas; exenciones en el `ul.chips` del 404 y el `div[
 - `DESPLIEGUE.md` — §3: el párrafo de la Salida interna y las consultas de SM-4 (salidas por zona y
   lecturas por superficie) y del numerador de SM-13 desde la primera jornada UTC completa.
 
-**Revisión.** Capas externas sin hallazgos en esta pasada: 0 parches, 0 diferidos, 0 rechazados.
-Seguimiento recomendado: `false` (parcheados: 0 altos, 0 medios, 0 bajos; puntuación 0).
+**Tocados por la revisión** (segunda pasada; el detalle, en el Review Triage Log):
+- `tests/unit/medicion.test.ts` — la prueba de `dist/` juzga toda página que pide el fichero de
+  medición, con lectura o sin ella, y comprueba que ninguna página con vista se quede sin él; la
+  tabla `COLOCACION` (29 filas) fija qué zona lleva cada sitio; el envío de un formulario dentro de
+  una zona no es salida; el 404 simulado sirve en `/cita/una-retirada/`; el fragmento a mano lleva
+  una entidad numérica fuera de Unicode.
+- `tests/unit/ayuda/medicion.ts` — `pulsar` admite `{ envio: true, contenedores }`.
+- `tests/unit/ayuda/enlaces.ts` — `resolverEntidades` deja tal cual una entidad fuera de Unicode.
+- `tests/e2e/receptor.spec.ts` — ancla y propia ruta con `?q=` dentro de `rutas-de-salida`; Meta y
+  Mayúsculas de verdad, Control y botón 1 despachados, con los seis `click` contados en la ventana;
+  una prueba nueva con Enter. Cinco pruebas de la 23.7.
+- `src/lib/medicion.ts`, `src/pages/404.astro`, `src/pages/buscar.astro` — solo comentarios: el
+  alcance de la prueba de `dist/`, la fuente de las exenciones (la Historia 23.7 y la decisión de
+  Héctor del 2026-10-19) y la isla que pararía la propagación. El fichero emitido no cambia.
+- `DESPLIEGUE.md` — la consulta de SM-4 aparta el «Ver esta cita» del 404, nombra `buscar` y manda
+  el resto a «otra»; el párrafo de §3 dice las dos cotas nuevas y qué salidas del 404 no se pueden
+  apartar hasta la 23.10.
+- `AGENTS.md` — el «Known pitfall» abarca toda página que carga el fichero y nombra `COLOCACION`.
 
-**Verificación.**
-- `npx astro check` — 0 errores, 0 avisos (20 sugerencias previas). A mano: quitar `zona` de
-  `<Paginacion>` en el Tema dio 1 error; quitarla de `<TarjetaDeCita>` en el Autor y de
-  `<RutasDeSalida>` en la Cita y escribir `chips-de-tema` en la Obra, 3; revertido, 0.
-- `npx vitest run` de `medicion`, `vocabulario`, `redes`, `huella`, `receptor`,
-  `ingreso-construido`, `obra-pagina`, `paginacion`, `coleccion-pagina`, `lista-de-obras` y
-  `superficies` — 11 ficheros, 706 pruebas en verde.
-- `npm test` (con `correr.sh`) — 131 ficheros, 5.768 pruebas en verde.
-- `npx playwright test tests/e2e/receptor.spec.ts --project=escritorio` — 41 en verde, 1 saltada (la
-  de prerender, como antes); las cuatro de la 23.7 pasan.
+**Revisión.** Dos pasadas. La primera, sin hallazgos: las capas externas aún no habían corrido. La
+segunda, con los hallazgos de las cinco capas externas (`blind-hunter`, `edge-case-hunter`,
+`verification-gap`, `intent-alignment`, `ac-auditor`): 12 parches aplicados (0 altos, 3 medios, 9
+bajos), 0 diferidos, 20 rechazados con su porqué. Esa pasada quedó interrumpida después de
+verificar y antes de cerrar; la invocación siguiente, sin hallazgos nuevos, la cierra sin tocar el
+código: reverifica lo que faltaba, escribe este resultado y hace el commit. Seguimiento
+recomendado: `true` (parcheados: 0 altos, 3 medios, 9 bajos; puntuación 3 × 3 + 9 = 18).
+
+**Verificación** (tras la revisión, sobre el árbol que se commitea).
+- `npx astro check` — 0 errores, 0 avisos, 20 sugerencias (las de antes). A mano, en la primera
+  pasada: quitar `zona` de `<Paginacion>` en el Tema dio 1 error; quitarla de `<TarjetaDeCita>` en
+  el Autor y de `<RutasDeSalida>` en la Cita y escribir `chips-de-tema` en la Obra, 3; revertido, 0.
+- `npm test` (con `correr.sh`, empezado después del último cambio de código) — 131 ficheros, 5.798
+  pruebas en verde; incluye los once ficheros del primer criterio.
+- `npx playwright test tests/e2e/receptor.spec.ts --project=escritorio` — 42 en verde, 1 saltada (la
+  de prerender, como antes); las cinco de la 23.7 pasan. A mano: quitar del fichero, juntos, los
+  filtros de Control, del botón y de la propia ruta rompe la primera de la 23.7; revertido.
 - Con el `webServer`, `busqueda`, `pagina-de-cita`, `rutas-de-salida`, `portada`, `pagina-404`,
   `origen` y `receptor-local` en `escritorio` — 77 en verde, 2 saltadas (las de antes). Puertos 4321,
   4399, 4400, 4402 y 8787 libres al terminar.
