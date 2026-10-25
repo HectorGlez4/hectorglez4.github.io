@@ -7,6 +7,7 @@ import ts from 'typescript';
 import { parseSync } from 'vite';
 import {
   ARRANQUE_DE_MEDICION,
+  ASENTAMIENTO_DE_BUSQUEDA,
   ATRIBUTO_DE_ZONA,
   ATRIBUTO_SIN_ZONA,
   EVENTOS,
@@ -17,7 +18,9 @@ import {
   EXENCIONES_DE_ZONA,
   INTERACCIONES_DE_LECTURA,
   MARCAS_DE_LLEGADA,
+  MARCA_DE_BUSQUEDA_ASENTADA,
   SIN_MARCAS_DE_LLEGADA,
+  asentamientoDeBusqueda,
   esEventoValido,
   guionDeMedicion,
   puntoFinal,
@@ -36,9 +39,13 @@ import {
 } from '../../src/lib/umbrales.ts';
 import {
   DESTINOS_DE_DESCARGA,
+  FILTROS,
   METRICA_DE_ACCION,
   PARAMETRO_DE_DIFUSION,
+  TRAMOS,
   ZONAS,
+  filtrosUsados,
+  tramoDe,
   type Zona,
 } from '../../src/lib/vocabulario.ts';
 import { SITIO } from '../../src/lib/dominio.ts';
@@ -61,6 +68,7 @@ import {
   superficiesDelBarrido,
 } from '../../src/lib/superficies.ts';
 import { ORIGEN_DEL_SANDBOX, medicionEnUnSandbox } from './ayuda/medicion.js';
+import { islaDeBusquedaEnUnSandbox, type OpcionesDeLaIsla, type Respuesta } from './ayuda/busqueda.js';
 import { enlacesDe, recorrerElementos, type Declaracion, type Elemento } from './ayuda/enlaces.js';
 import {
   AUTOR_VALIDO,
@@ -2208,8 +2216,17 @@ describe('Historia 23.6 — solo el fichero lee y quita las marcas, en `dist/`',
   /** Lee la dirección: `location` como variable global, o la URL del documento. */
   const LEE_DIRECCION =
     /(?<![\w$.])(?:(?:window|document|self|globalThis)\s*\.\s*)?location\b|\bdocument\s*\.\s*(?:URL|documentURI)\b/;
-  /** El guion en línea de la búsqueda, el único que lee la dirección; desde la 23.8 escribirá además en el historial. */
+  /** El guion en línea de la búsqueda, el único que lee la dirección; desde la 23.8 escribe además en el historial. */
   const esDeLaBusqueda = (ruta: string, guion: string) => ruta === '/buscar/' && guion.includes("'[data-consulta]'");
+  /**
+   * Lo único que la búsqueda puede escribir —Historia 23.8—: `history.replaceState`, con la marca de su
+   * búsqueda asentada en el objeto de estado. Que lo llame **sin dirección** (dos argumentos), solo
+   * desde sus escuchas y nunca al analizarse lo prueba el entorno simulado de la isla, ejecutándola
+   * (abajo, «Historia 23.8»); aquí se quita esa forma, y la única, para que todo lo demás —`pushState`,
+   * escribir `location`, `replaceState` por corchetes— siga en rojo.
+   */
+  const ESCRIBE_EL_ESTADO = /\bhistory\s*\.\s*replaceState\s*\(/g;
+  const sinEscribirElEstado = (guion: string) => guion.replace(ESCRIBE_EL_ESTADO, '');
 
   /** Los ficheros que descarga cada entrada de la lista cerrada, con lo que arrancan, por entrada. */
   async function ficherosDescargados(): Promise<Map<string, Map<string, string>>> {
@@ -2263,6 +2280,12 @@ describe('Historia 23.6 — solo el fichero lee y quita las marcas, en `dist/`',
      * mirar los guiones que lo preceden en el documento: ningún otro guion de la página, en ningún
      * sitio, escribe en el historial ni en la dirección. Los descargados los mira la prueba de los
      * ficheros, abajo.
+     *
+     * Con una salvedad desde la 23.8, y solo una: la búsqueda escribe `history.replaceState` con la
+     * marca de su búsqueda asentada, sin dirección y solo desde sus escuchas —nunca al analizarse—,
+     * así que la dirección que deja es la que haya. Si un gesto la asentara antes de que el fichero
+     * se active, el fichero quitaría después las marcas conservando ese `history.state`; si después,
+     * la dirección ya va sin ellas. Lo demás de su guion se juzga igual que el de cualquiera.
      */
     let vistas = 0;
     for (const [ruta, html] of paginasDe(await sitioMedido())) {
@@ -2276,27 +2299,37 @@ describe('Historia 23.6 — solo el fichero lee y quita las marcas, en `dist/`',
       expect(atributos, ruta).not.toMatch(/(?:^|\s)async(?=[\s=>]|$)|\btype\s*=\s*["']?module/i);
       guiones.forEach((guion, i) => {
         if (i === delFichero) return;
-        expect(ESCRIBE_DIRECCION.test(guion.cuerpo), `${ruta}: el guion ${i + 1} escribe en la dirección`).toBe(false);
+        const cuerpo = esDeLaBusqueda(ruta, guion.cuerpo) ? sinEscribirElEstado(guion.cuerpo) : guion.cuerpo;
+        expect(ESCRIBE_DIRECCION.test(cuerpo), `${ruta}: el guion ${i + 1} escribe en la dirección`).toBe(false);
       });
     }
     expect(vistas).toBeGreaterThan(SLUGS.length);
   }, 240_000);
 
-  it('ningún guion en línea escribe en el historial o la dirección —tampoco la búsqueda, todavía—, ni lee una marca', async () => {
+  it('ningún guion en línea escribe en el historial o la dirección —la búsqueda, solo `history.replaceState`—, ni lee una marca', async () => {
     /*
-     * La búsqueda no tiene exención aquí. Cuando la 23.8 la haga escribir en el historial, esta
-     * prueba y la anterior se pondrán en rojo a propósito: la isla es un guion clásico y corre
-     * antes que el fichero diferido, así que tendrá que probar —ejecutándola— que escribe solo
-     * desde sus escuchas, nunca al analizarse, y con la dirección que haya, ya sin marcas.
+     * Hasta la 23.8 la búsqueda no tenía exención aquí, y esta prueba y la anterior se pusieron en rojo
+     * a propósito al hacerla escribir en el historial. Ahora se le admite una forma, y solo esa:
+     * `history.replaceState`. Que la llame sin dirección, solo desde sus escuchas y nunca al
+     * analizarse —la isla es un guion clásico y corre antes que el fichero diferido— lo prueba el
+     * entorno simulado de la 23.8, ejecutándola. Ni `pushState`, ni escribir `location`, ni leer una
+     * marca: eso sigue en rojo también para ella.
      */
     let busqueda = 0;
     let mirados = 0;
     for (const [ruta, html] of paginasDe(await sitioMedido())) {
       for (const guion of guionesEnLinea(html)) {
         mirados++;
-        if (esDeLaBusqueda(ruta, guion)) busqueda++;
+        const deLaBusqueda = esDeLaBusqueda(ruta, guion);
+        if (deLaBusqueda) {
+          busqueda++;
+          // La forma admitida está, y el detector la ve: sin la exención, la prueba estaría en rojo.
+          expect(guion.match(ESCRIBE_EL_ESTADO), ruta).toHaveLength(1);
+          expect(ESCRIBE_DIRECCION.test(guion), ruta).toBe(true);
+        }
         expect(LEE_MARCAS.test(guion), `${ruta}: un guion en línea lee una marca`).toBe(false);
-        expect(ESCRIBE_DIRECCION.test(guion), `${ruta}: un guion en línea escribe en la dirección`).toBe(false);
+        const cuerpo = deLaBusqueda ? sinEscribirElEstado(guion) : guion;
+        expect(ESCRIBE_DIRECCION.test(cuerpo), `${ruta}: un guion en línea escribe en la dirección`).toBe(false);
       }
     }
     expect(busqueda).toBe(1);
@@ -2790,5 +2823,522 @@ describe('Historia 23.1 — el tope del fichero se juzga con el punto final de v
       if (antes === undefined) delete process.env.MEDICION_ENDPOINT;
       else process.env.MEDICION_ENDPOINT = antes;
     }
+  });
+});
+
+/*
+ * Historia 23.8 — una búsqueda cuenta una vez, cuando se asienta.
+ *
+ * Dos mitades, como la historia. La **parte pura** (`asentamientoDeBusqueda`) se llama directa y
+ * evaluada por su texto en un contexto vacío —que es como viaja a la isla—, y las dos dan lo mismo
+ * en cada fila de la matriz que le toca. La **isla** de `/buscar/` se ejecuta tal como sale en
+ * `dist/`, en el entorno simulado de `tests/unit/ayuda/busqueda.ts`, con un Pagefind de mentira: una
+ * prueba por fila de la matriz. Lo que se afirma es lo que pide a `__medir` y lo que escribe en el
+ * historial, en su orden; y, al cerrar cada entorno, que no quedó ninguna promesa rechazada sin
+ * manejar y que la isla no abrió entradas, ni escribió la dirección, ni paró la propagación de nada.
+ */
+describe('Historia 23.8 — una búsqueda cuenta una vez, cuando se asienta', () => {
+  const NINGUNO = filtrosUsados({ autor: false, obra: false, tema: false })!;
+  const BUSQUEDA = EVENTOS.busqueda;
+  const SIN_RESULTADOS = EVENTOS.busquedaSinResultados;
+  const MARCA = MARCA_DE_BUSQUEDA_ASENTADA;
+  type Parte = ReturnType<typeof asentamientoDeBusqueda>;
+
+  /** Lo que devuelve una función de otro contexto, comparable con `toEqual`. */
+  const plano = (valor: unknown) => (valor === undefined ? undefined : JSON.parse(JSON.stringify(valor)));
+  /** La parte pura evaluada como texto, sin nada de su módulo alrededor: ni siquiera `URLSearchParams`. */
+  const porSuTexto = runInNewContext(`(${String(asentamientoDeBusqueda)})`, {}) as typeof asentamientoDeBusqueda;
+  const PARTES: [string, Parte][] = [
+    ['directa', asentamientoDeBusqueda(ASENTAMIENTO_DE_BUSQUEDA)],
+    ['por su texto', porSuTexto(JSON.parse(JSON.stringify(ASENTAMIENTO_DE_BUSQUEDA)))],
+  ];
+  const estadoDe = (texto: string, total: number, filtros: string = NINGUNO) => ({ texto, filtros, total });
+
+  describe('la parte pura', () => {
+    it('sus constantes salen del vocabulario, y la marca es una clave con nombre', () => {
+      expect(NINGUNO).toBe(FILTROS[0]);
+      expect(ASENTAMIENTO_DE_BUSQUEDA).toEqual({
+        busqueda: EVENTOS.busqueda,
+        sinResultados: EVENTOS.busquedaSinResultados,
+        tramos: TRAMOS,
+        sinFiltros: NINGUNO,
+        marca: MARCA,
+      });
+      expect(ASENTAMIENTO_DE_BUSQUEDA.tramos).toBe(TRAMOS);
+      expect(MARCA).toBe('asentada');
+    });
+
+    it('su texto es autocontenido: ni comentarios, ni ayudas del empaquetado, ni nombres de su módulo', () => {
+      const texto = String(asentamientoDeBusqueda);
+      expect(texto).not.toMatch(/\/\/|\/\*|__name|__publicField/);
+      for (const nombre of ['ASENTAMIENTO_DE_BUSQUEDA', 'MARCA_DE_BUSQUEDA_ASENTADA', 'TRAMOS', 'EVENTOS', 'tramoDe', 'filtrosUsados']) {
+        expect(texto, nombre).not.toContain(nombre);
+      }
+    });
+
+    it.each(PARTES)('%s: el tramo es el del total, el mismo de `tramoDe`, y viajan los filtros del estado', (_, parte) => {
+      for (const total of [0, 1, 9, 10, 29, 30, 45]) {
+        const texto = total === 0 ? 'zzz' : 'viento';
+        const resultado = plano(parte.emisiones(estadoDe(texto, total), []));
+        expect(resultado.eventos[0], String(total)).toEqual([BUSQUEDA, tramoDe(total), NINGUNO]);
+      }
+      expect(plano(parte.emisiones(estadoDe('viento', 3, 'autor-tema'), []))?.eventos).toEqual([[BUSQUEDA, '1-9', 'autor-tema']]);
+    });
+
+    it.each(PARTES)('%s: sin estado, sin búsqueda que corriera o sin texto ni filtros, nada', (_, parte) => {
+      expect(parte.emisiones(null, [])).toBeNull();
+      expect(parte.emisiones(undefined, [])).toBeNull();
+      for (const total of [Number.NaN, 1.5, -1, Number.POSITIVE_INFINITY, undefined, '3', null]) {
+        expect(parte.emisiones({ texto: 'viento', filtros: NINGUNO, total: total as number }, []), String(total)).toBeNull();
+      }
+      expect(parte.emisiones(estadoDe('', 3), [])).toBeNull();
+      expect(parte.emisiones(estadoDe('   ', 0), [])).toBeNull();
+    });
+
+    it.each(PARTES)('%s: con texto y total 0, la búsqueda en el tramo 0 y después la búsqueda sin resultados con el texto tal como se buscó', (_, parte) => {
+      expect(plano(parte.emisiones(estadoDe('zzz', 0), []))).toEqual({
+        clave: parte.clave('zzz', NINGUNO),
+        eventos: [
+          [BUSQUEDA, '0', NINGUNO],
+          [SIN_RESULTADOS, 'zzz'],
+        ],
+      });
+      expect(plano(parte.emisiones(estadoDe(' Zzz ', 0), []))?.eventos[1]).toEqual([SIN_RESULTADOS, ' Zzz ']);
+      // Con resultados, solo la búsqueda.
+      expect(plano(parte.emisiones(estadoDe('viento', 1), []))?.eventos).toEqual([[BUSQUEDA, '1-9', NINGUNO]]);
+    });
+
+    it.each(PARTES)('%s: un filtrado sin texto y sin resultados da solo la búsqueda en el tramo 0', (_, parte) => {
+      expect(plano(parte.emisiones(estadoDe('', 0, 'autor'), []))?.eventos).toEqual([[BUSQUEDA, '0', 'autor']]);
+      expect(plano(parte.emisiones(estadoDe('  ', 4, 'autor-obra-tema'), []))?.eventos).toEqual([
+        [BUSQUEDA, '1-9', 'autor-obra-tema'],
+      ]);
+    });
+
+    it.each(PARTES)('%s: la clave recorta los extremos y respeta mayúsculas y filtros; una registrada no se repite', (_, parte) => {
+      expect(parte.clave(' viento ', NINGUNO)).toBe(parte.clave('viento', NINGUNO));
+      expect(parte.clave('Viento', NINGUNO)).not.toBe(parte.clave('viento', NINGUNO));
+      expect(parte.clave('viento', 'autor')).not.toBe(parte.clave('viento', NINGUNO));
+      expect(parte.clave('viento del sur', NINGUNO)).not.toBe(parte.clave('viento  del sur', NINGUNO));
+      const registradas = [parte.clave('viento', NINGUNO)];
+      expect(parte.emisiones(estadoDe('viento', 3), registradas)).toBeNull();
+      expect(parte.emisiones(estadoDe('viento ', 3), registradas)).toBeNull();
+      expect(parte.emisiones(estadoDe('Viento', 3), registradas)).not.toBeNull();
+      expect(parte.emisiones(estadoDe('viento', 3, 'autor'), registradas)).not.toBeNull();
+      // La clave que devuelve es la del estado, para que la isla la registre.
+      expect(parte.emisiones(estadoDe(' lluvia', 2), registradas)?.clave).toBe(parte.clave('lluvia', NINGUNO));
+    });
+
+    it.each(PARTES)('%s: una llegada está registrada si su entrada lleva la marca o, sin objeto de estado, si es una vuelta atrás o una recarga', (_, parte) => {
+      for (const tipo of ['navigate', 'reload', 'back_forward', 'prerender', undefined, null]) {
+        expect(parte.yaRegistrada({ [MARCA]: true }, tipo), `marcada, ${tipo}`).toBe(true);
+        expect(parte.yaRegistrada({ [MARCA]: true, otra: 1 }, tipo), `marcada con más, ${tipo}`).toBe(true);
+        // Con objeto de estado manda el objeto: sin la marca —o con otra cosa que `true`—, no.
+        expect(parte.yaRegistrada({}, tipo), `objeto sin marca, ${tipo}`).toBe(false);
+        expect(parte.yaRegistrada({ [MARCA]: 'true' }, tipo), `marca que no es booleano, ${tipo}`).toBe(false);
+        expect(parte.yaRegistrada({ [MARCA]: 1 }, tipo), `marca 1, ${tipo}`).toBe(false);
+      }
+      // Sin objeto de estado responde el tipo de la carga.
+      for (const sinObjeto of [null, undefined, 'asentada', 1]) {
+        expect(parte.yaRegistrada(sinObjeto, 'back_forward'), String(sinObjeto)).toBe(true);
+        expect(parte.yaRegistrada(sinObjeto, 'reload'), String(sinObjeto)).toBe(true);
+        for (const tipo of ['navigate', 'prerender', undefined, null, '']) {
+          expect(parte.yaRegistrada(sinObjeto, tipo), `${String(sinObjeto)}, ${tipo}`).toBe(false);
+        }
+      }
+    });
+
+    it.each(PARTES)('%s: la entrada marcada es una copia con la marca a `true`, sin tocar el objeto ni perder sus claves', (_, parte) => {
+      const original = { otra: 1, anidada: { x: 2 } };
+      const marcada = parte.marcada(original);
+      expect(plano(marcada)).toEqual({ otra: 1, anidada: { x: 2 }, [MARCA]: true });
+      expect(marcada).not.toBe(original);
+      expect(original).toEqual({ otra: 1, anidada: { x: 2 } });
+      expect(plano(parte.marcada({ [MARCA]: false }))).toEqual({ [MARCA]: true });
+      for (const sinObjeto of [null, undefined, 'x', 3]) {
+        expect(plano(parte.marcada(sinObjeto)), String(sinObjeto)).toEqual({ [MARCA]: true });
+      }
+    });
+  });
+
+  describe('la isla de `/buscar/`, ejecutada', () => {
+    /** El guion de la isla, el de `dist/`: el de `/buscar/` que lleva el campo. */
+    let guionDeLaIsla: string | undefined;
+    const islaConstruida = async () => {
+      if (guionDeLaIsla === undefined) {
+        const guiones = guionesEnLinea(await leerMedida('/buscar/')).filter((g) => g.includes("'[data-consulta]'"));
+        expect(guiones).toHaveLength(1);
+        guionDeLaIsla = guiones[0];
+      }
+      return guionDeLaIsla;
+    };
+    /** Lo que responde el índice de mentira: «zzz…» no encuentra nada, «muchas» da 12 y pinta 3, lo demás da 3. */
+    const RESPUESTAS = (consulta: string): Respuesta => {
+      const recortada = consulta.trim();
+      if (recortada.startsWith('zzz')) return { total: 0 };
+      if (recortada === 'muchas') return { total: 12, pintados: 3 };
+      return { total: 3 };
+    };
+    const abiertas: ReturnType<typeof islaDeBusquedaEnUnSandbox>[] = [];
+    afterEach(async () => {
+      for (const entorno of abiertas.splice(0)) {
+        await entorno.cerrar();
+        expect(entorno.rechazos(), 'quedó una promesa rechazada sin manejar').toEqual([]);
+        expect(entorno.violaciones(), 'la isla hizo lo que no debe').toEqual([]);
+      }
+    });
+    /** Un entorno nuevo con la isla de `dist/`, ya analizada y con sus promesas corridas. */
+    async function isla(opciones: OpcionesDeLaIsla = {}) {
+      const entorno = islaDeBusquedaEnUnSandbox(await islaConstruida(), { respuestas: RESPUESTAS, ...opciones });
+      abiertas.push(entorno);
+      await entorno.vaciar();
+      return entorno;
+    }
+    const VIENTO = [BUSQUEDA, '1-9', NINGUNO];
+
+    it('la isla de `dist/` lleva las constantes con el JSON de `TRAMOS` y la parte pura por su texto; `buscar.astro` no escribe rótulos, combinaciones ni eventos', async () => {
+      const guion = await islaConstruida();
+      expect(guion).toContain(JSON.stringify(TRAMOS));
+      expect(guion).toContain(`const ASENTAMIENTO = ${JSON.stringify(ASENTAMIENTO_DE_BUSQUEDA)};`);
+      expect(colapsado(guion)).toContain(colapsado(String(asentamientoDeBusqueda)));
+      expect(guion).not.toContain('__name');
+      // Un solo `import(`: el del índice. Lo sustituye el entorno simulado, y lo comprueba.
+      expect(guion.split('import(')).toHaveLength(2);
+
+      // El código de la página, sin sus comentarios: el docblock sí nombra los eventos, entre tildes.
+      const fuente = readFileSync(resolve(RAIZ, 'src/pages/buscar.astro'), 'utf8')
+        .replace(/\/\*[\s\S]*?\*\//g, '')
+        .replace(/^\s*\/\/.*$/gm, '');
+      expect(fuente).toContain('guionQueAnuncia(');
+      const entreComillas = (valor: string) =>
+        new RegExp(`['"\`]${valor.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}['"\`]`);
+      for (const { rotulo } of TRAMOS) expect(fuente, rotulo).not.toMatch(entreComillas(rotulo));
+      for (const combinacion of FILTROS) expect(fuente, combinacion).not.toMatch(entreComillas(combinacion));
+      expect(fuente).not.toContain(NINGUNO);
+      for (const evento of [BUSQUEDA, SIN_RESULTADOS]) expect(fuente, evento).not.toMatch(entreComillas(evento));
+      expect(fuente).not.toContain(MARCA);
+      // Y el detector ve lo que tiene que ver.
+      expect(entreComillas('30+').test("x = '30+'")).toBe(true);
+      expect(entreComillas('0').test('const n = "0";')).toBe(true);
+    }, 240_000);
+
+    it('al analizarse: ni `__medir` ni escritura del historial, tampoco al llegar con la consulta', async () => {
+      for (const opciones of [
+        {},
+        { busqueda: '?q=viento' },
+        { busqueda: '?q=zzz', navegacion: 'reload' },
+        { busqueda: '?q=viento', estado: { [MARCA]: true } },
+      ] satisfies OpcionesDeLaIsla[]) {
+        const entorno = await isla(opciones);
+        expect(entorno.analizado(), JSON.stringify(opciones)).toEqual({ emitidos: [], historial: [], violaciones: [] });
+        expect(entorno.emitidos(), JSON.stringify(opciones)).toEqual([]);
+        expect(entorno.historial(), JSON.stringify(opciones)).toEqual([]);
+      }
+    }, 240_000);
+
+    it('tecleo: ni por tecla, ni por la pausa, ni por el repintado, ni al enfocar o borrar', async () => {
+      const entorno = await isla();
+      entorno.enfocar();
+      for (const texto of ['v', 'vi', 'vie', 'viento']) await entorno.teclear(texto);
+      expect(entorno.pintados()).toHaveLength(3);
+      await entorno.teclear('zzz');
+      expect(entorno.pintados()).toEqual([]);
+      await entorno.teclear('');
+      entorno.escribir('vien');
+      entorno.avanzar(1_000);
+      await entorno.vaciar();
+      expect(entorno.emitidos()).toEqual([]);
+      expect(entorno.historial()).toEqual([]);
+    }, 240_000);
+
+    it('enviar con resultados: una `busqueda` con su tramo y «ninguno», la entrada marcada sin dirección, y el fichero la envía con sus claves exactas', async () => {
+      const entorno = await isla();
+      await entorno.teclear('viento');
+      const envio = await entorno.enviar();
+      expect(envio.defaultPrevented).toBe(true);
+      expect(entorno.emitidos()).toEqual([VIENTO]);
+      expect(plano(entorno.historial())).toEqual([[{ [MARCA]: true }, '']]);
+      expect(entorno.historial()[0], 'replaceState sin argumento de dirección').toHaveLength(2);
+      expect(plano(entorno.estadoDelHistorial())).toEqual({ [MARCA]: true });
+
+      // Lo que pidió la isla, por el fichero de verdad: la baliza lleva exactamente sus claves.
+      const fichero = medicionEnUnSandbox({ ruta: '/buscar/' });
+      for (const llamada of entorno.emitidos()) fichero.emitir(...(llamada as [string, string, string]));
+      expect(fichero.balizas()).toEqual([{ evento: BUSQUEDA, ruta: '/buscar/', tramo: '1-9', filtros: NINGUNO }]);
+    }, 240_000);
+
+    it('enviar antes de la pausa del tecleo: espera a que se pinte lo enviado y lo asienta', async () => {
+      const entorno = await isla({ manual: true });
+      entorno.escribir('viento');
+      const envio = entorno.enviar();
+      expect(entorno.emitidos()).toEqual([]);
+      await entorno.responder('viento');
+      await envio;
+      expect(entorno.emitidos()).toEqual([VIENTO]);
+      // La pausa del tecleo no vuelve a buscar ni a asentar: quedó cancelada.
+      entorno.avanzar(1_000);
+      await entorno.vaciar();
+      expect(entorno.emitidos()).toEqual([VIENTO]);
+    }, 240_000);
+
+    it('enviar un texto que no llega a verse —otro lo superó— no asienta nada', async () => {
+      const entorno = await isla({ manual: true });
+      entorno.escribir('viento');
+      const envio = entorno.enviar();
+      // Antes de que responda, el visitante sigue escribiendo y esa búsqueda se pinta.
+      entorno.escribir('lluvia');
+      entorno.avanzar(150);
+      await entorno.responder('lluvia');
+      await entorno.responder('viento');
+      await envio;
+      expect(entorno.pintados()[0]).toContain('lluvia');
+      expect(entorno.emitidos()).toEqual([]);
+    }, 240_000);
+
+    it('si el historial no se deja escribir, la `busqueda` sale igual y nada sale de la escucha', async () => {
+      const entorno = await isla({ historialQueLanza: true });
+      await entorno.teclear('viento');
+      await entorno.enviar();
+      expect(entorno.emitidos()).toEqual([VIENTO]);
+      expect(entorno.historial()).toHaveLength(1);
+      await entorno.teclear('zzz');
+      expect(() => entorno.ocultar()).not.toThrow();
+      expect(entorno.emitidos()).toEqual([VIENTO, [BUSQUEDA, '0', NINGUNO], [SIN_RESULTADOS, 'zzz']]);
+    }, 240_000);
+
+    it('sin resultados: la `busqueda` en el tramo 0 y después la `busqueda-sin-resultados` con el texto, una vez', async () => {
+      const entorno = await isla();
+      await entorno.teclear('zzz');
+      await entorno.enviar();
+      await entorno.enviar();
+      entorno.ocultar();
+      expect(entorno.emitidos()).toEqual([
+        [BUSQUEDA, '0', NINGUNO],
+        [SIN_RESULTADOS, 'zzz'],
+      ]);
+      const fichero = medicionEnUnSandbox({ ruta: '/buscar/' });
+      for (const llamada of entorno.emitidos()) fichero.emitir(...(llamada as [string, string, string]));
+      expect(fichero.balizas()).toEqual([
+        { evento: BUSQUEDA, ruta: '/buscar/', tramo: '0', filtros: NINGUNO },
+        { evento: SIN_RESULTADOS, ruta: '/buscar/', datos: 'zzz' },
+      ]);
+    }, 240_000);
+
+    it('repetir: Enter otra vez, A, B, A y «viento » no emiten más que una vez por estado', async () => {
+      const entorno = await isla();
+      await entorno.teclear('viento');
+      await entorno.enviar();
+      await entorno.enviar();
+      await entorno.teclear('lluvia');
+      await entorno.enviar();
+      await entorno.teclear('viento');
+      await entorno.enviar();
+      await entorno.teclear('viento ');
+      await entorno.enviar();
+      entorno.pulsarResultado(0);
+      entorno.ocultar();
+      entorno.pagehide();
+      expect(entorno.emitidos()).toEqual([VIENTO, VIENTO]);
+      expect(entorno.historial()).toHaveLength(2);
+      // Otro estado, con otras mayúsculas, sí es otro.
+      await entorno.teclear('Viento');
+      await entorno.enviar();
+      expect(entorno.emitidos()).toHaveLength(3);
+    }, 240_000);
+
+    it('sin texto: Enter con el campo vacío o con espacios no emite nada', async () => {
+      const entorno = await isla();
+      await entorno.enviar();
+      await entorno.teclear('   ');
+      await entorno.enviar();
+      entorno.ocultar();
+      entorno.pagehide();
+      // Y borrar lo buscado limpia el estado que se ve: ocultarse después no asienta lo de antes.
+      await entorno.teclear('viento');
+      await entorno.teclear('');
+      entorno.ocultar();
+      expect(entorno.emitidos()).toEqual([]);
+      expect(entorno.historial()).toEqual([]);
+    }, 240_000);
+
+    it('pulsar un resultado —también con modificador o por teclado— asienta lo que se ve, antes de que el clic llegue a la ventana, y no se queda con el clic', async () => {
+      for (const gesto of [{}, { metaKey: true }, { ctrlKey: true }, { shiftKey: true }, { detail: 0 }]) {
+        const entorno = await isla();
+        await entorno.teclear('viento');
+        const { clic, alLlegarALaVentana } = entorno.pulsarResultado(1, gesto);
+        expect(entorno.emitidos(), JSON.stringify(gesto)).toEqual([VIENTO]);
+        // La escucha del fichero, en la ventana, lo ve después: la `busqueda` va delante de la salida.
+        expect(alLlegarALaVentana, JSON.stringify(gesto)).toBe(1);
+        expect(clic.defaultPrevented, JSON.stringify(gesto)).toBe(false);
+        // Otro resultado del mismo estado no repite.
+        entorno.pulsarResultado(0, gesto);
+        expect(entorno.emitidos(), JSON.stringify(gesto)).toEqual([VIENTO]);
+      }
+      // Escucha en la lista, nunca en la ventana ni en el documento.
+      const entorno = await isla();
+      expect(entorno.escuchas().lista).toEqual(['click']);
+      expect(entorno.escuchas().ventana).not.toContain('click');
+      expect(entorno.escuchas().documento).not.toContain('click');
+    }, 240_000);
+
+    it('ocultarse asienta el estado que se ve —no el texto cuya búsqueda aún no se pintó—, con `pagehide` de respaldo; sin estado, nada', async () => {
+      const entorno = await isla({ manual: true });
+      entorno.escribir('viento');
+      entorno.avanzar(150);
+      await entorno.responder('viento');
+      entorno.escribir('zzz');
+      entorno.avanzar(150);
+      await entorno.vaciar();
+      entorno.ocultar();
+      expect(entorno.emitidos()).toEqual([VIENTO]);
+      // Se pinta lo pendiente, y un `pagehide` sin `visibilitychange` lo asienta.
+      await entorno.responder('zzz');
+      entorno.pagehide();
+      expect(entorno.emitidos()).toEqual([VIENTO, [BUSQUEDA, '0', NINGUNO], [SIN_RESULTADOS, 'zzz']]);
+
+      // Sin nada pintado —ni siquiera con un texto escrito cuya búsqueda no respondió—, nada.
+      const vacia = await isla({ manual: true });
+      vacia.ocultar();
+      vacia.pagehide();
+      vacia.escribir('viento');
+      vacia.avanzar(150);
+      await vacia.vaciar();
+      vacia.mostrar();
+      vacia.ocultar();
+      vacia.pagehide();
+      expect(vacia.emitidos()).toEqual([]);
+      expect(vacia.historial()).toEqual([]);
+    }, 240_000);
+
+    it('el total, no los pintados: 12 resultados de los que se pintan 3 van al tramo 10-29', async () => {
+      const entorno = await isla();
+      await entorno.teclear('muchas');
+      expect(entorno.pintados()).toHaveLength(3);
+      await entorno.enviar();
+      expect(entorno.emitidos()).toEqual([[BUSQUEDA, '10-29', NINGUNO]]);
+    }, 240_000);
+
+    it.each(['importacion', 'init', 'search'] as const)(
+      'índice que falla en %s: ni `busqueda` ni `busqueda-sin-resultados`, al enviar ni al ocultarse, y ningún rechazo sin manejar',
+      async (falla) => {
+        const entorno = await isla({ falla });
+        entorno.enfocar();
+        await entorno.teclear('viento');
+        await entorno.enviar();
+        await entorno.teclear('zzz');
+        await entorno.enviar();
+        entorno.ocultar();
+        entorno.pagehide();
+        await entorno.vaciar();
+        expect(entorno.importaciones().length).toBeGreaterThan(0);
+        expect(entorno.pintados()).toEqual([]);
+        expect(entorno.emitidos()).toEqual([]);
+        expect(entorno.historial()).toEqual([]);
+      },
+      240_000,
+    );
+
+    it('una búsqueda que falla no cambia el estado que se ve: se sigue asentando el anterior', async () => {
+      const entorno = await isla();
+      await entorno.teclear('viento');
+      entorno.fallar('search');
+      await entorno.teclear('zzz');
+      expect(entorno.pintados()).toHaveLength(3);
+      await entorno.enviar();
+      expect(entorno.emitidos()).toEqual([]);
+      entorno.ocultar();
+      expect(entorno.emitidos()).toEqual([VIENTO]);
+    }, 240_000);
+
+    it('llegada con `?q=` sin registrar: busca al cargar y no emite hasta asentarse', async () => {
+      const entorno = await isla({ busqueda: '?q=viento' });
+      expect(entorno.valor()).toBe('viento');
+      expect(entorno.pintados()).toHaveLength(3);
+      expect(entorno.emitidos()).toEqual([]);
+      expect(entorno.historial()).toEqual([]);
+      await entorno.enviar();
+      expect(entorno.emitidos()).toEqual([VIENTO]);
+    }, 240_000);
+
+    it.each([
+      ['marcada, al navegar', { estado: { [MARCA]: true }, navegacion: 'navigate' }],
+      ['marcada con más claves, sin entrada de navegación', { estado: { [MARCA]: true, otra: 1 }, navegacion: null }],
+      ['marcada, sin Navigation Timing', { estado: { [MARCA]: true }, sinNavigationTiming: true }],
+      ['sin objeto de estado, al volver atrás', { estado: null, navegacion: 'back_forward' }],
+      ['sin objeto de estado, al recargar', { estado: null, navegacion: 'reload' }],
+    ] satisfies [string, OpcionesDeLaIsla][])('llegada registrada (%s): asentar ese estado no emite; otro, sí', async (_, opciones) => {
+      const entorno = await isla({ busqueda: '?q=viento', ...opciones });
+      expect(entorno.pintados()).toHaveLength(3);
+      await entorno.enviar();
+      entorno.pulsarResultado(0);
+      entorno.ocultar();
+      expect(entorno.emitidos()).toEqual([]);
+      expect(entorno.historial()).toEqual([]);
+      entorno.mostrar();
+      await entorno.teclear('zzz');
+      await entorno.enviar();
+      expect(entorno.emitidos()).toEqual([[BUSQUEDA, '0', NINGUNO], [SIN_RESULTADOS, 'zzz']]);
+    }, 240_000);
+
+    it.each([
+      ['sin objeto de estado, al navegar', { estado: null, navegacion: 'navigate' }, {}],
+      ['sin objeto de estado, prerenderizada', { estado: null, navegacion: 'prerender' }, {}],
+      ['sin objeto de estado ni entrada de navegación', { estado: null, navegacion: null }, {}],
+      ['sin objeto de estado ni Navigation Timing', { estado: null, sinNavigationTiming: true }, {}],
+      ['con un objeto sin la marca, al recargar', { estado: { otra: 1 }, navegacion: 'reload' }, { otra: 1 }],
+      ['con la marca en otra cosa que `true`, al volver atrás', { estado: { [MARCA]: 'true' }, navegacion: 'back_forward' }, {}],
+    ] satisfies [string, OpcionesDeLaIsla, Record<string, unknown>][])(
+      'llegada sin registrar (%s): asentar emite y marca la entrada',
+      async (_, opciones, conserva) => {
+        const entorno = await isla({ busqueda: '?q=viento', ...opciones });
+        await entorno.enviar();
+        expect(entorno.emitidos()).toEqual([VIENTO]);
+        expect(plano(entorno.estadoDelHistorial())).toEqual({ ...conserva, [MARCA]: true });
+      },
+      240_000,
+    );
+
+    it('caché de atrás y adelante: volver, ocultarse o pulsar otro resultado no repite nada', async () => {
+      const entorno = await isla();
+      await entorno.teclear('viento');
+      entorno.pulsarResultado(0);
+      entorno.pagehide(true);
+      entorno.ocultar();
+      entorno.restaurar();
+      entorno.ocultar();
+      entorno.restaurar();
+      entorno.pulsarResultado(1);
+      entorno.pagehide(true);
+      await entorno.enviar();
+      expect(entorno.emitidos()).toEqual([VIENTO]);
+      expect(entorno.historial()).toHaveLength(1);
+    }, 240_000);
+
+    it('respuesta vieja: la de A llega después de la de B, y A ni se pinta ni se asienta', async () => {
+      const entorno = await isla({ manual: true });
+      entorno.escribir('zzz');
+      entorno.avanzar(150);
+      entorno.escribir('viento');
+      entorno.avanzar(150);
+      await entorno.responder('viento');
+      await entorno.responder('zzz');
+      expect(entorno.pintados()).toHaveLength(3);
+      expect(entorno.pintados().every((titulo) => titulo.includes('viento'))).toBe(true);
+      entorno.ocultar();
+      expect(entorno.emitidos()).toEqual([VIENTO]);
+
+      // A, B, A: la primera A, que responde la última, tampoco cuenta; la segunda, sí.
+      const otra = await isla({ manual: true });
+      for (const texto of ['zzz', 'viento', 'zzz']) {
+        otra.escribir(texto);
+        otra.avanzar(150);
+      }
+      await otra.responder('viento');
+      expect(otra.pintados()).toEqual([]);
+      await otra.responder('zzz');
+      await otra.responder('zzz');
+      otra.ocultar();
+      expect(otra.emitidos()).toEqual([[BUSQUEDA, '0', NINGUNO], [SIN_RESULTADOS, 'zzz']]);
+    }, 240_000);
   });
 });

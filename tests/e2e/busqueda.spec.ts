@@ -1,5 +1,7 @@
 import { expect, test, type Page } from '@playwright/test';
 import { ETIQUETAS_DE_RESULTADO } from '../../src/lib/tipoDeResultado.ts';
+import { ASENTAMIENTO_DE_BUSQUEDA, EVENTOS } from '../../src/lib/medicion.ts';
+import { tramoDe } from '../../src/lib/vocabulario.ts';
 import { temaBajoUmbral } from './ayuda/corpus.ts';
 import { emitidos as emitidosEn, espiarMedicion } from './ayuda/espia.ts';
 
@@ -276,7 +278,7 @@ test.describe('Historia 3.2 — resultado vacío con salida', () => {
     }
   });
 
-  test('se emite el evento de búsqueda sin resultados, con la consulta y sin visitante', async ({
+  test('se emite el evento de búsqueda sin resultados al asentarse, con la consulta y sin visitante', async ({
     page,
   }) => {
     // Se resuelve la consulta antes de instalar el espía, porque buscar la mueve de página.
@@ -293,11 +295,16 @@ test.describe('Historia 3.2 — resultado vacío con salida', () => {
       { timeout: 10_000 },
     );
 
-    const emitidos = await emitidosEn(page);
+    // Historia 23.8 — teclear no emite: la búsqueda cuenta cuando se asienta.
+    await page.waitForTimeout(300);
+    expect(await emitidosEn(page)).toEqual([]);
 
-    expect(emitidos).toHaveLength(1);
-    expect(emitidos[0].evento).toBe('busqueda-sin-resultados');
-    expect(emitidos[0].datos).toBe(consulta);
+    await page.locator('[data-consulta]').press('Enter');
+    await expect.poll(async () => (await emitidosEn(page)).length).toBe(2);
+    const emitidos = await emitidosEn(page);
+    expect(emitidos[0]).toEqual({ evento: EVENTOS.busqueda, datos: tramoDe(0), destino: ASENTAMIENTO_DE_BUSQUEDA.sinFiltros });
+    expect(emitidos[1].evento).toBe(EVENTOS.busquedaSinResultados);
+    expect(emitidos[1].datos).toBe(consulta);
   });
 
   test('con resultados no se muestra la salida', async ({ page }) => {

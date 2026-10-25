@@ -179,6 +179,14 @@ export const META_AUTORES_DE_OTRA_TRADICION: number | undefined = undefined;
  * Antes de subirlo se compactó el guion de medición, que pasó de 952 a 572 bytes; el tope
  * nuevo deja unos 400 de margen, suficiente para no ir justo y poco para que un
  * crecimiento futuro pase inadvertido.
+ *
+ * Medido en la Historia 23.8, sin moverlo: `/buscar/` lleva **6.111 bytes** en línea con la
+ * medición puesta (545 libres; 3.535 antes), porque su isla carga ahora la búsqueda asentada —el
+ * estado que se ve, sus tres disparadores, la memoria de la carga y la marca del historial— y lleva
+ * dentro, por su texto, la parte pura que decide qué emitir (`asentamientoDeBusqueda`) con sus
+ * constantes del vocabulario. Es la superficie más justa del sitio: la Página de Cita con Imagen
+ * sigue en 5.630 (1.026 libres). Lo que la Épica 27 le añada (los filtros) entra en ese hueco o
+ * sube el tope en el mismo diff.
  */
 export const MAX_BYTES_DE_GUION = 6656;
 
@@ -241,6 +249,14 @@ export const MAX_BYTES_DE_GUION = 6656;
  * mayúsculas, mide **3.339** (3.340; 3.307): 791 bytes sobre la 23.6 y 391 de margen, y el tope no
  * se mueve. Sigue sin contar en `MAX_BYTES_DE_GUION`, que no se mueve. Las Historias 23.8 y 23.9
  * lo vuelven a medir.
+ *
+ * Medido de nuevo en la Historia 23.8: **3.487 bytes** con el punto final de producción (3.488 con
+ * la barra final; 3.455 con el de las pruebas), 148 sobre los 3.339 de la 23.7 y 243 de margen, así
+ * que el tope no se mueve. Creció porque el fichero emite la `busqueda`: su entrada en la tabla, con
+ * el tramo y los filtros que le pasa la isla de `/buscar/` y los dos conjuntos del vocabulario con
+ * que los coteja (los cuatro rótulos de `TRAMOS` y las seis combinaciones de `FILTROS`). Lo demás
+ * de la búsqueda asentada —qué estado cuenta, cuándo y una vez— vive en la isla, en línea, y cuenta
+ * en `MAX_BYTES_DE_GUION` de `/buscar/`, que tampoco se mueve. La Historia 23.9 lo vuelve a medir.
  */
 export const MAX_BYTES_GUION_DE_MEDICION = 3730;
 

@@ -236,8 +236,7 @@ describe('Historia 23.2 — los eventos y los conjuntos cerrados', () => {
  */
 const PENDIENTES: readonly { historia: string; eventos?: readonly Evento[]; campos?: readonly [Evento, Campo][] }[] = [
   // La 23.6 enseñó `via` al guion, en las vistas y la lectura: ya no hay ningún campo pendiente.
-  // La 23.7 le enseñó la salida interna, con su zona.
-  { historia: '23.8', eventos: [EVENTOS.busqueda] },
+  // La 23.7 le enseñó la salida interna, con su zona; la 23.8, la búsqueda, con su tramo y sus filtros.
   { historia: '23.9', eventos: [EVENTOS.vistaDeObra] },
 ];
 
@@ -278,6 +277,10 @@ interface Entrada {
   destino?: string;
   /** La zona del contenedor del enlace que se pulsa, para la salida interna (Historia 23.7). */
   zona?: string;
+  /** El rótulo del tramo que pasa la isla de `/buscar/` como segundo argumento (Historia 23.8). */
+  tramo?: string;
+  /** La combinación de filtros que pasa como tercero (Historia 23.8). */
+  filtros?: string;
 }
 
 /** La zona con la que sale la salida interna de un escenario que no nombra ninguna. */
@@ -303,7 +306,8 @@ function producir(evento: Evento, entrada: Entrada) {
     return entorno.balizas().filter((baliza) => baliza.evento === evento);
   }
   const { emitir, balizas } = medicionEnUnSandbox({ ruta: '/cita/una/', busqueda: entrada.busqueda });
-  emitir(evento, entrada.datos, entrada.destino);
+  // El tramo y los filtros de la búsqueda llegan en los mismos argumentos que la consulta y el destino.
+  emitir(evento, entrada.tramo ?? entrada.datos, entrada.filtros ?? entrada.destino);
   return balizas();
 }
 
@@ -400,6 +404,36 @@ function escenariosDe(evento: Evento): Escenario[] {
       escenarios.push({ nombre: `zona ${zona}`, zona, esperado: () => null });
     }
   }
+  // Historia 23.8 — cada rótulo de tramo y cada combinación de filtros, solo en los eventos que los
+  // declaran: los pasa la isla de `/buscar/` en el segundo y el tercer argumento de `__medir`, que en
+  // los demás eventos son la consulta y el destino, y esos ya los recorren sus escenarios. Uno ajeno
+  // —un número, un texto, una combinación imposible— viaja nulo.
+  if (valoresDe('tramo').length > 0) {
+    for (const tramo of [...TRAMOS.map((t) => t.rotulo), '12', DESTINO_AJENO]) {
+      escenarios.push({
+        nombre: `tramo ${tramo}`,
+        tramo,
+        esperado: (campo) => (campo === 'tramo' && valoresDe('tramo').includes(tramo) ? tramo : null),
+      });
+    }
+  }
+  if (valoresDe('filtros').length > 0) {
+    for (const filtros of [...FILTROS, 'obra', DESTINO_AJENO]) {
+      escenarios.push({
+        nombre: `filtros ${filtros}`,
+        filtros,
+        esperado: (campo) => (campo === 'filtros' && valoresDe('filtros').includes(filtros) ? filtros : null),
+      });
+    }
+    const [primerTramo] = TRAMOS;
+    const ultimo = FILTROS[FILTROS.length - 1];
+    escenarios.push({
+      nombre: `tramo ${primerTramo.rotulo} y filtros ${ultimo}`,
+      tramo: primerTramo.rotulo,
+      filtros: ultimo,
+      esperado: (campo) => (campo === 'tramo' ? primerTramo.rotulo : campo === 'filtros' ? ultimo : null),
+    });
+  }
   // `primera` no sale de la entrada: la calcula el fichero, y en la primera acción de cada
   // entorno es «si», salvo la descarga con destino de su conjunto. La `zona` tampoco sale de
   // un argumento: es la del contenedor del enlace pulsado, la del escenario o la de por omisión.
@@ -421,7 +455,7 @@ describe('Historia 23.2 — la correspondencia: guion, receptor y esquema, event
     expect(columnas).toEqual(['jornada', 'evento', 'ruta', ...CAMPOS]);
   });
 
-  it('lo no pendiente son los nueve eventos de hoy, y es lo que el guion emite', () => {
+  it('lo no pendiente son los diez eventos de hoy, y es lo que el guion emite', () => {
     const vigentes = EVENTOS_VALIDOS.filter((evento) => !eventoPendiente(evento));
     expect([...vigentes].sort()).toEqual(
       [
@@ -429,6 +463,7 @@ describe('Historia 23.2 — la correspondencia: guion, receptor y esquema, event
         EVENTOS.vistaDeSuperficie,
         EVENTOS.lectura,
         EVENTOS.salidaInterna,
+        EVENTOS.busqueda,
         EVENTOS.copiado,
         EVENTOS.descargaDeImagen,
         EVENTOS.busquedaSinResultados,
@@ -448,6 +483,31 @@ describe('Historia 23.2 — la correspondencia: guion, receptor y esquema, event
       const conZona = escenariosDe(evento).flatMap((escenario) => (escenario.zona === undefined ? [] : [escenario.zona]));
       expect(conZona, evento).toEqual(evento === EVENTOS.salidaInterna ? [...ZONAS] : []);
     }
+  });
+
+  it('la búsqueda se recorre con cada tramo y cada combinación de filtros, y ningún otro evento lleva escenarios de tramo o filtros', () => {
+    // Historia 23.8: para que la correspondencia de abajo no pase en vacío con el tramo y los filtros.
+    for (const evento of EVENTOS_VALIDOS) {
+      const escenarios = escenariosDe(evento);
+      const tramos = escenarios.flatMap((escenario) => (escenario.tramo === undefined ? [] : [escenario.tramo]));
+      const filtros = escenarios.flatMap((escenario) => (escenario.filtros === undefined ? [] : [escenario.filtros]));
+      if (evento === EVENTOS.busqueda) {
+        expect(tramos, evento).toEqual(expect.arrayContaining(TRAMOS.map((t) => t.rotulo)));
+        expect(filtros, evento).toEqual(expect.arrayContaining([...FILTROS]));
+      } else {
+        expect(tramos, evento).toEqual([]);
+        expect(filtros, evento).toEqual([]);
+      }
+    }
+  });
+
+  it('dos `busqueda` iguales dan dos balizas: el fichero no descarta ninguna, la regla de una por estado es de la isla', () => {
+    const [tramo] = TRAMOS;
+    const { emitir, balizas } = medicionEnUnSandbox({ ruta: '/buscar/' });
+    emitir(EVENTOS.busqueda, tramo.rotulo, FILTROS[0]);
+    emitir(EVENTOS.busqueda, tramo.rotulo, FILTROS[0]);
+    const esperada = { evento: EVENTOS.busqueda, ruta: '/buscar/', tramo: tramo.rotulo, filtros: FILTROS[0] };
+    expect(balizas()).toEqual([esperada, esperada]);
   });
 
   it('cada campo pendiente es de un evento que lo declara', () => {

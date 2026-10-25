@@ -571,6 +571,46 @@ hermanas ni Temas propios— cuentan como `chip-de-tema`, igual que los Temas de
 vocabulario llegan con las Épicas 24, 26 y 28, y hasta entonces no aparecen en la tabla. Como la
 lectura, la serie empieza la **primera jornada UTC completa** tras la llegada en vivo de la 23.
 
+**La búsqueda asentada** (Historia 23.8, FR-56, FR-8, AD-13, SM-6, SM-13): una búsqueda **cuenta
+una vez, cuando se asienta**, nunca por tecla ni por repintado. La asientan tres gestos en
+`/buscar/`: enviar el formulario (Enter), pulsar un resultado —también con modificador o con el
+teclado— y ocultarse la página (`visibilitychange` a `hidden`, con `pagehide` de respaldo: irse a
+otra página, cambiar de pestaña, cerrarla). Lo que se asienta es lo que **se ve**: el texto y los
+filtros de la última búsqueda que se pintó; lo escrito cuya búsqueda aún no se pintó no cuenta, y
+vaciar el campo no deja nada. Sale como mucho **una `busqueda` por estado distinto en la carga**
+—el estado es el texto recortado en los extremos, con sus mayúsculas, y los filtros—, y la memoria
+de lo ya emitido vive en la propia isla, sin almacenamiento ni cookie, y sobrevive a la caché de
+atrás y adelante. Lleva el **tramo del total** de resultados (`0`, `1-9`, `10-29`, `30+`, los
+`TRAMOS` del vocabulario; el total de Pagefind, no los 30 que se pintan) y los **filtros**
+(`ninguno` hasta la Épica 27); nunca el texto ni el número. Con texto y sin resultados sale además,
+detrás, una `busqueda-sin-resultados` con la consulta, el único texto libre (FR-8); un filtrado sin
+texto que no encuentra nada va al tramo 0 y no la emite. **Si el índice no carga** —Pagefind no se
+descarga, o falla al iniciarse o al buscar— no se pinta nada y nada se asienta: no es una búsqueda
+(SM-6); el aviso de ese índice que no carga es de la Épica 27. **Volver o recargar no cuenta otra
+vez**: al asentar, la isla marca su entrada del historial con un booleano (`asentada: true` en el
+objeto de estado, por `history.replaceState`, sin tocar la dirección ni abrir entrada); una llegada
+con `?q=` cuya entrada lleva la marca —una vuelta atrás sin la caché, una recarga, una pestaña
+restaurada o duplicada— la da por registrada, y sin objeto de estado responde Navigation Timing:
+`back_forward` o `reload` cuentan como registradas, cualquier otra carga no. Se aceptan tres
+laxitudes: la marca es de la entrada y no del texto —la isla no escribe `?q=` en la dirección—, así
+que si se llega con `?q=A` y se asienta B, volver a esa entrada da A por registrada; recargar una
+búsqueda que nunca se asentó la da también por registrada; y asentar al irse por navegación puede
+no dejar la marca (el documento ya se va), y entonces responde el tipo de navegación. El fichero envía **cada** `busqueda` que recibe: la regla de una por estado
+es de la isla, no del fichero, y el fichero no lee el historial. **Sin firma ni lectura:** `/buscar/`
+no emite vista ni lectura y ninguna `busqueda` se ata a una carga, así que SM-6 y SM-13 son razones
+de recuentos por jornada UTC, no de sesiones, y se leen sabiéndolo: un mismo visitante que busca
+tres cosas son tres asentadas. SM-13 es además **cota inferior**: un resultado abierto en pestaña
+nueva asienta la búsqueda pero su salida no se mide. Como la lectura, la serie empieza la **primera
+jornada UTC completa** tras la llegada en vivo de la 23.
+
+**Corte de serie de FR-8.** Hasta la Historia 23.8 la `busqueda-sin-resultados` salía en **cada
+repintado vacío** —una por pausa del tecleo, con fragmentos a medio escribir—; desde la llegada en
+vivo de la 23 sale solo al asentarse un estado con texto y sin resultados, una vez por estado y
+carga. Los recuentos de antes y de después no se comparan: el registro de antes trae fragmentos y
+repeticiones que el de después no tiene, y la jornada de llegada es mixta, con páginas abiertas que
+aún llevan la isla anterior. Para curar el Corpus sirven los dos; para contar, desde la primera
+jornada UTC completa.
+
 **Corte de serie de SM-5 y SM-7.** Antes del despliegue del sitio de la Épica 23 no hay
 `lectura` y `primera` llega nula, así que las tasas por lectura empiezan la **primera jornada
 UTC completa** tras la llegada en vivo, y la jornada de llegada se informa aparte: es mixta, porque
@@ -644,11 +684,32 @@ npx --yes wrangler@4.151.1 d1 execute medicion --remote --command \
 
 # Salidas desde los resultados de `/buscar/`, por jornada — el numerador de SM-13, Historia 23.7.
 # La misma jornada de partida, sin la de hoy. El denominador, las búsquedas asentadas, llega con
-# la 23.8: hasta entonces la serie se lee sola, sin tasa.
+# la 23.8: la tasa es la consulta siguiente.
 npx --yes wrangler@4.151.1 d1 execute medicion --remote --command \
   "SELECT jornada, COUNT(*) salidas FROM eventos WHERE evento='salida-interna' AND ruta='/buscar/' AND zona='resultado' AND jornada >= 'AAAA-MM-DD' AND jornada < date('now') GROUP BY jornada ORDER BY jornada DESC LIMIT 30"
 
-# Lo que se buscó y no había, para decidir a quién sembrar — FR-8, SM-6.
+# SM-13, la búsqueda seguida — Historias 23.7 y 23.8: las salidas desde los resultados de
+# `/buscar/` frente a las búsquedas asentadas, por jornada UTC. Cambia AAAA-MM-DD por la primera
+# jornada UTC completa tras la llegada de la 23; la de hoy no entra. Es una razón de recuentos por
+# jornada, no de sesiones —ninguna `busqueda` se ata a una carga—, y cota inferior: el resultado
+# abierto en pestaña nueva asienta la búsqueda y su salida no se mide.
+npx --yes wrangler@4.151.1 d1 execute medicion --remote --command \
+  "SELECT jornada, SUM(evento='busqueda') asentadas, SUM(evento='salida-interna') seguidas, ROUND(1.0 * SUM(evento='salida-interna') / NULLIF(SUM(evento='busqueda'), 0), 3) sm13 FROM eventos WHERE ruta='/buscar/' AND (evento='busqueda' OR (evento='salida-interna' AND zona='resultado')) AND jornada >= 'AAAA-MM-DD' AND jornada < date('now') GROUP BY jornada ORDER BY jornada DESC LIMIT 30"
+
+# SM-6, la búsqueda sin resultados — Historia 23.8: las asentadas en el tramo 0 frente a todas las
+# asentadas, por jornada UTC, desde la misma jornada de partida y sin la de hoy. El numerador es el
+# tramo 0 de la `busqueda`, no el registro de FR-8: un filtrado sin texto que no encuentra nada
+# cuenta aquí y no deja consulta. Las búsquedas con filtros llegan con la Épica 27; hasta entonces
+# `filtros` es siempre `ninguno`, y el desglose por filtros sale de añadirlo al `GROUP BY`.
+npx --yes wrangler@4.151.1 d1 execute medicion --remote --command \
+  "SELECT jornada, COUNT(*) asentadas, SUM(tramo='0') sin_resultados, ROUND(1.0 * SUM(tramo='0') / NULLIF(COUNT(*), 0), 3) sm6 FROM eventos WHERE evento='busqueda' AND jornada >= 'AAAA-MM-DD' AND jornada < date('now') GROUP BY jornada ORDER BY jornada DESC LIMIT 30"
+
+# Lo que se buscó y no había, para decidir a quién sembrar — FR-8. Desde la 23.8 cada fila es una
+# búsqueda asentada con texto y sin resultados, una por estado y carga; antes de la llegada de la 23
+# salía en cada repintado vacío, con fragmentos a medio escribir y repeticiones (el corte de serie
+# de FR-8, arriba). Para curar sirven las dos épocas; para contar o comparar, añade
+# `AND jornada >= 'AAAA-MM-DD'` con la primera jornada UTC completa tras la llegada. Ya no es el
+# numerador de SM-6, que sale de la `busqueda` (la consulta anterior).
 npx --yes wrangler@4.151.1 d1 execute medicion --remote --command \
   "SELECT consulta, COUNT(*) c FROM eventos WHERE evento='busqueda-sin-resultados' GROUP BY consulta ORDER BY c DESC LIMIT 40"
 ```

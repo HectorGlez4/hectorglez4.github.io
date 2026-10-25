@@ -26,8 +26,10 @@ import {
   EVENTOS,
   METRICA_DE_ACCION,
   PARAMETRO_DE_DIFUSION,
+  TRAMOS,
   ZONAS,
   claveEnLaBaliza,
+  filtrosUsados,
   type Campo,
   type Evento,
   type Primera,
@@ -60,20 +62,23 @@ export const EVENTOS_DE_VISTA = [EVENTOS.vistaDeCita, EVENTOS.vistaDeSuperficie]
 export type EventoDeVista = (typeof EVENTOS_DE_VISTA)[number];
 
 /**
- * Los eventos que el fichero sabe emitir hoy — Historias 23.2, 23.5 y 23.7.
+ * Los eventos que el fichero sabe emitir hoy — Historias 23.2, 23.5, 23.7 y 23.8.
  *
- * El vocabulario declara más: `busqueda` y `vista-de-obra` llegan con las Historias 23.8 y 23.9,
- * que los añaden aquí y los sacan de los pendientes de `tests/unit/vocabulario.test.ts` en el
- * mismo diff. Hasta entonces el fichero descarta cualquiera de los dos, igual que un evento
- * inventado: el receptor ya los sabe guardar, pero nadie los envía. La `lectura` entró con la
- * 23.5 y la `salida-interna` con la 23.7, y las dos las emite solo el fichero
- * (`EVENTOS_SOLO_DEL_FICHERO`).
+ * El vocabulario declara uno más: `vista-de-obra` llega con la Historia 23.9, que lo añade aquí
+ * y lo saca de los pendientes de `tests/unit/vocabulario.test.ts` en el mismo diff. Hasta
+ * entonces el fichero lo descarta, igual que un evento inventado: el receptor ya lo sabe guardar,
+ * pero nadie lo envía. La `lectura` entró con la 23.5 y la `salida-interna` con la 23.7, y las dos
+ * las emite solo el fichero (`EVENTOS_SOLO_DEL_FICHERO`). La `busqueda` entró con la 23.8, y al
+ * revés: la pide la isla de `/buscar/` al asentarse un estado, y el fichero envía **cada una** que
+ * recibe —qué estado cuenta y cuándo lo decide la isla con `asentamientoDeBusqueda`, nunca el
+ * fichero—.
  */
 export const EVENTOS_DEL_GUION: readonly Evento[] = [
   EVENTOS.vistaDeCita,
   EVENTOS.vistaDeSuperficie,
   EVENTOS.lectura,
   EVENTOS.salidaInterna,
+  EVENTOS.busqueda,
   EVENTOS.copiado,
   EVENTOS.descargaDeImagen,
   EVENTOS.busquedaSinResultados,
@@ -95,11 +100,12 @@ export const EVENTOS_DEL_GUION: readonly Evento[] = [
 export const EVENTOS_SOLO_DEL_FICHERO: readonly Evento[] = [EVENTOS.lectura, EVENTOS.salidaInterna];
 
 /**
- * De dónde saca el fichero cada campo que sabe producir — Historias 23.2, 23.5, 23.6 y 23.7.
+ * De dónde saca el fichero cada campo que sabe producir — Historias 23.2, 23.5, 23.6, 23.7 y 23.8.
  *
  *   · 0 — la Marca de origen, leída de la dirección (`?de=`) una sola vez, al activarse;
- *   · 1 — el segundo argumento de `__medir`, el texto de la búsqueda sin resultados;
- *   · 2 — el tercero, el destino que nombra la isla;
+ *   · 1 — el segundo argumento de `__medir`: el texto de la búsqueda sin resultados o, en la
+ *     `busqueda`, el rótulo del tramo de su total;
+ *   · 2 — el tercero: el destino que nombra la isla o, en la `busqueda`, la combinación de filtros;
  *   · 3 — `primera`, que **calcula el fichero** al emitir cada acción, con su memoria de la
  *     carga: ninguna isla la pasa ni la sabe (AD-13, SM-5, SM-7);
  *   · 4 — la Marca de difusión, leída de la dirección (`?via=`) a la vez que la de origen y por
@@ -107,8 +113,10 @@ export const EVENTOS_SOLO_DEL_FICHERO: readonly Evento[] = [EVENTOS.lectura, EVE
  *   · 5 — la Zona de salida interna, que lee **la escucha de `click`** del contenedor más cercano
  *     que la declara (`ATRIBUTO_DE_ZONA`) y que nunca pasa por `__medir`.
  *
- * Los demás campos del vocabulario —`tramo`, `filtros` e `indexable`— no los produce todavía, y
- * no los envía: llegan con las Historias 23.8 y 23.9.
+ * El tramo y los filtros los pasa la isla tal como se los da `asentamientoDeBusqueda`, y el
+ * fichero los coteja con su conjunto del vocabulario como todo campo: un valor ajeno viaja como
+ * `null`. Nunca viaja el número de resultados ni el texto buscado (NFR-11). El campo que queda del
+ * vocabulario —`indexable`— no lo produce todavía, y no lo envía: llega con la Historia 23.9.
  */
 const FUENTE_EN_EL_GUION: { readonly [C in Campo]?: 0 | 1 | 2 | 3 | 4 | 5 } = {
   origen: 0,
@@ -117,6 +125,8 @@ const FUENTE_EN_EL_GUION: { readonly [C in Campo]?: 0 | 1 | 2 | 3 | 4 | 5 } = {
   primera: 3,
   via: 4,
   zona: 5,
+  tramo: 1,
+  filtros: 2,
 };
 
 /** Los dos valores de `primera`, nombrados contra su tipo del vocabulario (`PRIMERA`). */
@@ -260,7 +270,126 @@ export const EXENCIONES_DE_ZONA = ['chips-del-404', 'salidas-sin-resultados'] as
 export type ExencionDeZona = (typeof EXENCIONES_DE_ZONA)[number];
 
 /**
- * El fichero de medición — AD-6, AD-13, Historias 23.1, 23.5, 23.6 y 23.7.
+ * La marca de una búsqueda asentada en su entrada del historial — Historia 23.8, AD-13.
+ *
+ * Es la **clave** que la isla de `/buscar/` pone a `true` en el objeto de estado de su entrada
+ * (`history.state`) al asentar un estado, con `history.replaceState(…, '')`: sin argumento de
+ * dirección, así que la dirección no cambia y no se abre ninguna entrada. Lleva el booleano y nada
+ * más —ni el texto, ni la hora, ni nada que identifique a nadie (NFR-11)— y no sale del navegador:
+ * solo sirve para que volver a esa entrada o recargarla no cuente otra vez la misma búsqueda.
+ */
+export const MARCA_DE_BUSQUEDA_ASENTADA = 'asentada';
+
+/** Lo que la isla de `/buscar/` ve en un momento dado: el texto tal como se buscó, sus filtros y el total. */
+export interface EstadoDeBusqueda {
+  readonly texto: string;
+  readonly filtros: string;
+  /** `respuesta.results.length`: el total, nunca los resultados pintados. */
+  readonly total: number;
+}
+
+/** Las constantes que la parte pura del asentamiento recibe, compuestas desde el vocabulario. */
+export interface ConstantesDelAsentamiento {
+  readonly busqueda: string;
+  readonly sinResultados: string;
+  readonly tramos: readonly { readonly desde: number; readonly rotulo: string }[];
+  readonly sinFiltros: string;
+  readonly marca: string;
+}
+
+/** La combinación de filtros de una búsqueda sin filtros: «ninguno», hasta la Épica 27. */
+const SIN_FILTROS = filtrosUsados({ autor: false, obra: false, tema: false });
+if (SIN_FILTROS === null) throw new Error('medicion.ts: el vocabulario no declara la combinación sin filtros.');
+
+/**
+ * Las constantes del asentamiento — Historia 23.8: los dos eventos, los tramos del vocabulario (con
+ * sus cortes y sus rótulos), la combinación sin filtros y la clave de la marca. Se componen aquí,
+ * desde sus módulos, y viajan a la isla de `/buscar/` como constante —`guionQueAnuncia` las escribe
+ * en JSON—: ni la isla ni `buscar.astro` escriben un rótulo de tramo, un corte ni un nombre de
+ * evento. Cambiar un corte en el vocabulario cambia lo que la isla emite sin tocarla.
+ */
+export const ASENTAMIENTO_DE_BUSQUEDA: ConstantesDelAsentamiento = {
+  busqueda: EVENTOS.busqueda,
+  sinResultados: EVENTOS.busquedaSinResultados,
+  tramos: TRAMOS,
+  sinFiltros: SIN_FILTROS,
+  marca: MARCA_DE_BUSQUEDA_ASENTADA,
+};
+
+/**
+ * La parte pura de la búsqueda asentada — Historia 23.8, FR-56, FR-8, AD-13, SM-6, SM-13.
+ *
+ * Una búsqueda **cuenta una vez, cuando se asienta**: no por tecla ni por repintado, sino cuando
+ * quien busca se decide —envía el formulario, pulsa un resultado o se va (la página se oculta)—, y
+ * como mucho una vez por estado distinto en la carga. Qué disparador asienta y cuál es el estado
+ * que se ve lo sabe la isla de `/buscar/`; qué se emite ante ese estado, si una llegada ya estaba
+ * registrada y cómo se marca la entrada lo decide **esta función**, y nada más. Recibe las
+ * constantes (`ASENTAMIENTO_DE_BUSQUEDA`) y devuelve cuatro funciones puras:
+ *
+ *   · `clave(texto, filtros)` — la identidad de un estado: el texto recortado en los extremos (sin
+ *     tocar mayúsculas: «Viento» y «viento» son dos búsquedas) y los filtros. «viento » y «viento»
+ *     son el mismo estado;
+ *   · `emisiones(estado, registradas)` — `null` si no hay estado, si su total no es un entero ≥ 0
+ *     (la búsqueda no corrió: el índice no cargó o falló), si no tiene texto ni filtros —no es una
+ *     búsqueda— o si su clave ya está entre las registradas de la carga. Si no, la clave y los
+ *     eventos, en orden: `[busqueda, tramo del total, filtros]` y, solo con texto y total 0,
+ *     `[busqueda-sin-resultados, el texto tal como se buscó]` (FR-8, el único texto libre). Un
+ *     filtrado sin texto y sin resultados da solo la `busqueda` en el tramo 0: sin texto no hay
+ *     consulta que registrar. El tramo es el de `TRAMOS` del vocabulario, el mismo de `tramoDe`;
+ *   · `yaRegistrada(estadoDeLaEntrada, tipo)` — si una llegada a un estado cuenta como ya
+ *     asentada: con objeto de estado en la entrada, si lleva la marca a `true`; sin él, si la carga
+ *     es `back_forward` o `reload` (Navigation Timing, el respaldo de la entrada que no lleva
+ *     objeto). Cualquier otro tipo, o ninguno, no;
+ *   · `marcada(estadoDeLaEntrada)` — el objeto que la isla escribe en su entrada: una copia del que
+ *     hubiera, con sus demás claves y la marca a `true`, sin mutarlo; o uno nuevo con solo la marca.
+ *
+ * **Viaja por su texto**, como `anunciar`: `buscar.astro` la mete en el guion en línea con
+ * `String(asentamientoDeBusqueda)`, y la isla la llama con las constantes. Por eso es
+ * autocontenida —no lee nada de este módulo ni importa nada, y su texto, evaluado en un contexto
+ * vacío, funciona igual— y no lleva comentarios dentro, que viajarían a la página. Tampoco declara
+ * funciones con nombre dentro, solo métodos: un empaquetado con `keepNames` (el de `tsx`, no el de
+ * Astro ni el de Vitest) las envolvería en una ayuda suya, `__name`, que en la página no existe. Ni
+ * constantes locales de un solo uso: el build las sustituye en su sitio y su texto dejaría de ser el
+ * que ve Vitest. Lo vigila `tests/unit/medicion.test.ts`, que la llama directa y por su texto y
+ * comprueba que la isla de `dist/` lleva ese mismo texto.
+ */
+export function asentamientoDeBusqueda(c: ConstantesDelAsentamiento) {
+  const a = {
+    clave(texto: string, filtros: string): string {
+      return JSON.stringify([texto.trim(), filtros]);
+    },
+    emisiones(
+      estado: EstadoDeBusqueda | null | undefined,
+      registradas: readonly string[],
+    ): { clave: string; eventos: string[][] } | null {
+      if (!estado || !Number.isInteger(estado.total) || estado.total < 0) return null;
+      const texto = estado.texto.trim();
+      const k = a.clave(estado.texto, estado.filtros);
+      if ((texto === '' && estado.filtros === c.sinFiltros) || registradas.indexOf(k) >= 0) return null;
+      let tramo = '';
+      for (const t of c.tramos) if (estado.total >= t.desde) tramo = t.rotulo;
+      const eventos = [[c.busqueda, tramo, estado.filtros]];
+      if (texto !== '' && estado.total === 0) eventos.push([c.sinResultados, estado.texto]);
+      return { clave: k, eventos };
+    },
+    yaRegistrada(estadoDeLaEntrada: unknown, tipo?: string | null): boolean {
+      return estadoDeLaEntrada !== null && typeof estadoDeLaEntrada === 'object'
+        ? (estadoDeLaEntrada as Record<string, unknown>)[c.marca] === true
+        : tipo === 'back_forward' || tipo === 'reload';
+    },
+    marcada(estadoDeLaEntrada: unknown): Record<string, unknown> {
+      return Object.assign(
+        {},
+        estadoDeLaEntrada !== null && typeof estadoDeLaEntrada === 'object' ? estadoDeLaEntrada : {},
+        { [c.marca]: true },
+      );
+    },
+  };
+  return a;
+}
+
+/**
+ * El fichero de medición — AD-6, AD-13, Historias 23.1, 23.5, 23.6, 23.7 y 23.8.
  *
  * Es el emisor de siempre, servido como fichero (`/medicion/{versión}.js`, con `defer`) en vez
  * de en línea: en línea se comía unos 630 de los 6.656 bytes de guion de la Página de Cita, y
@@ -308,8 +437,12 @@ export type ExencionDeZona = (typeof EXENCIONES_DE_ZONA)[number];
  * dirección de la barra o volver a ella no cuentan otra vez la misma llegada. Se quitan también
  * en una página sin vista —páginas 2+, `/buscar/`, 404—, donde ningún evento las lleva. Las lee
  * y las quita **solo el fichero**: ninguna isla las lee, la única que lee la dirección es la de la
- * búsqueda —su consulta, antes que el fichero, que va con `defer`— y la única que escribirá además
- * en el historial es ella, con su propio estado (23.8). Sin punto final no hay fichero, y la
+ * búsqueda —su consulta, antes que el fichero, que va con `defer`— y la única que escribe además
+ * en el historial es ella (Historia 23.8): solo `history.replaceState` con la marca de su búsqueda
+ * asentada (`MARCA_DE_BUSQUEDA_ASENTADA`) en el objeto de estado, sin dirección, y solo desde sus
+ * escuchas —nunca al analizarse, que corre antes que este fichero—. Conserva así la dirección que
+ * haya, ya sin marcas, y este fichero conserva al quitarlas el `history.state` que ella escribió. El
+ * fichero no lee ese estado: no descarta ninguna `busqueda`. Sin punto final no hay fichero, y la
  * dirección se queda como llegó.
  *
  * **`primera`** (SM-5, SM-7): cada acción —un evento de `METRICA_DE_ACCION`— lleva `si` si es la
@@ -359,8 +492,9 @@ export type ExencionDeZona = (typeof EXENCIONES_DE_ZONA)[number];
  * página y, según el evento, las Marcas de llegada —solo con las vistas declaradas y la lectura:
  * una acción no las lleva, ni una vista que pida una isla, ni una isla puede ponerlas por
  * argumento—, el destino —cotejado con el conjunto
- * de su evento—, `primera`, la zona de la salida o, solo en la búsqueda sin resultados, el texto
- * de la consulta. Un
+ * de su evento—, `primera`, la zona de la salida, el tramo y los filtros de la `busqueda` —los
+ * rótulos que le pasa la isla, cotejados con sus conjuntos; nunca el número de resultados ni el
+ * texto— o, solo en la búsqueda sin resultados, el texto de la consulta. Un
  * campo declarado sin valor legítimo viaja como `null`; uno que el evento no declara no viaja.
  * Nada más. No hay identificador de
  * visitante, ni se genera uno, ni se lee ni se escribe ninguna cookie ni ningún almacenamiento,
