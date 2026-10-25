@@ -14,13 +14,19 @@ import type { Cita, Autor } from '../lib/publicado.ts';
 import { rutaDeAutor } from '../lib/superficies.ts';
 import { lineaDeProcedencia } from '../lib/atribucion.ts';
 import { rutaDeLaObra } from '../lib/obras.ts';
+import type { Zona } from '../lib/vocabulario.ts';
 
 interface Props {
   cita: Cita;
   autor: Autor;
+  /**
+   * La Zona de salida interna de sus enlaces (FR-56, UX-DR111, Historia 23.7). Obligatoria: cada
+   * uso dice desde qué zona se sale, y un uso nuevo que la olvide no pasa `astro check`.
+   */
+  zona: Zona;
 }
 
-const { cita, autor } = Astro.props;
+const { cita, autor, zona } = Astro.props;
 /*
  * La línea de procedencia la compone `lineaDeProcedencia` (src/lib/atribucion.ts) en piezas:
  * el título de la Obra, si consta, y lo que le sigue. Historia 22.4 — el título enlaza a la
@@ -31,14 +37,15 @@ const linea = lineaDeProcedencia(cita);
 const enlaceDeObra = cita.obra === undefined ? undefined : rutaDeLaObra(cita.obra);
 ---
 
-<p class="autor">
+{/* La zona va en los dos párrafos, que son los contenedores que pinta el build (Historia 23.7). */}
+<p class="autor" data-zona={zona}>
   <a href={rutaDeAutor(autor.slug)} class="enlace-en-tinta">{autor.nombre}</a>
 </p>
 {
   linea.titulo !== undefined && enlaceDeObra !== undefined ? (
-    <p class="procedencia"><a href={enlaceDeObra} class="enlace-en-tinta">{linea.titulo}</a>{linea.resto}</p>
+    <p class="procedencia" data-zona={zona}><a href={enlaceDeObra} class="enlace-en-tinta">{linea.titulo}</a>{linea.resto}</p>
   ) : (
-    <p class="procedencia">{linea.resto}</p>
+    <p class="procedencia" data-zona={zona}>{linea.resto}</p>
   )
 }
 

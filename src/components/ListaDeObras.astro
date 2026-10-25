@@ -18,13 +18,19 @@
 import Rotulo from './Rotulo.astro';
 import { rutaDeLaObra, type ObraResuelta } from '../lib/obras.ts';
 import { añoLegible } from '../lib/atribucion.ts';
+import type { Zona } from '../lib/vocabulario.ts';
 
 interface Props {
   obras: readonly ObraResuelta[];
   sinObra: number;
+  /**
+   * La Zona de salida interna de sus enlaces (FR-56, UX-DR111, Historia 23.7). Obligatoria: cada
+   * uso dice desde qué zona se sale, y un uso nuevo que la olvide no pasa `astro check`.
+   */
+  zona: Zona;
 }
 
-const { obras, sinObra } = Astro.props;
+const { obras, sinObra, zona } = Astro.props;
 
 /*
  * «Y …» solo cuando sigue a la lista: sin ninguna Obra, la línea va sola bajo el rótulo y no
@@ -46,7 +52,7 @@ const citas = (n: number) => (n === 1 ? 'una cita' : `${n} citas`);
     <section class="obras-del-autor" aria-labelledby="su-obra" data-pagefind-ignore>
       <Rotulo id="su-obra">Su obra en este Corpus</Rotulo>
       {obras.length > 0 && (
-        <ul class="lista-de-obras">
+        <ul class="lista-de-obras" data-zona={zona}>
           {obras.map((obra) => (
             <li>
               <a href={rutaDeLaObra(obra)}>

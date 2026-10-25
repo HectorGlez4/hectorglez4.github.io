@@ -230,8 +230,16 @@ export const MAX_BYTES_DE_GUION = 6656;
  * `location.origin`, y quitar las marcas no deja un `?&` sin nada—, **2.548** (2.549 con la barra
  * final; 2.516 con el de las pruebas), y el tope no se mueve. Las Historias 23.7 a 23.9 lo
  * vuelven a medir.
+ *
+ * Subido de 2.880 a 3.730 en la Historia 23.7: medido, **3.330 bytes** con el punto final de
+ * producción (3.331 con la barra final; 3.298 con el de las pruebas), más unos 400 de margen, como
+ * la 23.1, la 23.5 y la 23.6. Sin subirlo no cabía: creció 782 bytes porque el fichero emite la
+ * Salida interna —el evento en su tabla, con el conjunto de las dieciséis zonas del vocabulario
+ * (unos 250 bytes él solo), y la escucha de `click` que descarta lo que no es salida, toma la zona
+ * del contenedor más cercano, se gasta una vez por carga y emite antes la lectura—. Sigue sin
+ * contar en `MAX_BYTES_DE_GUION`, que no se mueve. Las Historias 23.8 y 23.9 lo vuelven a medir.
  */
-export const MAX_BYTES_GUION_DE_MEDICION = 2880;
+export const MAX_BYTES_GUION_DE_MEDICION = 3730;
 
 /**
  * El generador de la Imagen de Cita, `public/islas/imagen.js` — AD-6, AD-7.

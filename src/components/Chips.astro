@@ -9,14 +9,21 @@
  *
  * Solo la lista: el rótulo que la precede y la sección que la envuelve son de quien la usa.
  */
+import type { Zona } from '../lib/vocabulario.ts';
+
 interface Props {
   enlaces: readonly { href: string; nombre: string }[];
+  /**
+   * La Zona de salida interna de sus enlaces (FR-56, UX-DR111, Historia 23.7). Obligatoria: cada
+   * uso dice desde qué zona se sale, y un uso nuevo que la olvide no pasa `astro check`.
+   */
+  zona: Zona;
 }
 
-const { enlaces } = Astro.props;
+const { enlaces, zona } = Astro.props;
 ---
 
-<ul class="chips">
+<ul class="chips" data-zona={zona}>
   {
     enlaces.map((enlace) => (
       <li>

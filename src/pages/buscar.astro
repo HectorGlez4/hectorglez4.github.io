@@ -210,10 +210,19 @@ if (inicial) {
       */}
     <p class="estado" role="status" data-estado></p>
 
-    <ul class="resultados" data-resultados></ul>
+    {/*
+      * Historia 23.7 — la Zona de salida interna de los resultados va en la lista, que pinta el
+      * build vacía: los `li.resultado` que mete la isla la heredan sin saber de zonas.
+      */}
+    <ul class="resultados" data-resultados data-zona="resultado"></ul>
 
     {/* FR-8 — la salida siempre está, en el HTML inicial. Se muestra al no haber nada. */}
-    <div class="salida" data-salida hidden>
+    {/*
+      * Historia 23.7 — exentas de zona, por escrito (UX-DR111): las salidas de la búsqueda sin
+      * resultados no son resultados, la tabla de zonas no las nombra y una zona nueva exigiría otra
+      * migración (AD-14). Se revisa en la pasada de métricas.
+      */}
+    <div class="salida" data-salida hidden data-sin-zona="salidas-sin-resultados">
       <p class="sugerencia">
         No encontramos esa frase. Prueba con menos palabras.
       </p>

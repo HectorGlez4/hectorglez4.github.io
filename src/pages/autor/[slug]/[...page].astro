@@ -123,7 +123,7 @@ const descripcion = descripcionDeAutor(autor, documentadas);
        * Historia 17.3, UX-DR46 — la Lista de Obras, bajo la semblanza y su atribución y antes
        * del catálogo. Es parte de la ficha, así que solo la lleva la página 1 (17.4).
        */
-      primera && <ListaDeObras obras={suObra.obras} sinObra={suObra.sinObra} />
+      primera && <ListaDeObras obras={suObra.obras} sinObra={suObra.sinObra} zona="lista-de-obras" />
     }
 
     {
@@ -138,10 +138,10 @@ const descripcion = descripcionDeAutor(autor, documentadas);
 
     {/* UX-DR25 — los listados son listas reales. */}
     <ul class="listado">
-      {pagina.data.map((cita) => <TarjetaDeCita cita={cita} />)}
+      {pagina.data.map((cita) => <TarjetaDeCita cita={cita} zona="listado" />)}
     </ul>
 
-    <Paginacion pagina={pagina} />
+    <Paginacion pagina={pagina} zona="paginacion" />
   </div>
 </Armazon>
 

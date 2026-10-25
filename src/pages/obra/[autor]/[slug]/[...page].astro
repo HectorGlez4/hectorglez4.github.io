@@ -131,7 +131,8 @@ const enVenta =
         * título de la Obra; Pagefind lo toma del texto del enlace. Las páginas 2+ no entran en
         * el índice, así que lo lleve o no da igual.
         */}
-      <p class="de">
+      {/* Historia 23.7 — el Autor de la Cabecera de Obra sale por la zona de la Atribución. */}
+      <p class="de" data-zona="atribucion">
         de <a href={rutaDeAutor(autor.slug)} class="enlace-en-tinta" data-pagefind-meta="autor">{autor.nombre}</a>{
           obra.año !== undefined && (
             <>
@@ -144,16 +145,16 @@ const enVenta =
 
     {/* UX-DR40 — el listado de la Obra: las Tarjetas **sin** el Autor, que ya dice la Cabecera. */}
     <ul class="listado">
-      {pagina.data.map((cita) => <TarjetaDeCita cita={cita} autor={undefined} />)}
+      {pagina.data.map((cita) => <TarjetaDeCita cita={cita} autor={undefined} zona="listado" />)}
     </ul>
 
-    <Paginacion pagina={pagina} />
+    <Paginacion pagina={pagina} zona="paginacion" />
 
     {
       primera && temas.length > 0 && (
         <section class="temas" aria-labelledby="temas-de-la-obra">
           <Rotulo id="temas-de-la-obra">Temas</Rotulo>
-          <Chips enlaces={temas.map((tema) => ({ href: rutaDeTema(tema.slug), nombre: tema.nombre }))} />
+          <Chips enlaces={temas.map((tema) => ({ href: rutaDeTema(tema.slug), nombre: tema.nombre }))} zona="chip-de-tema" />
         </section>
       )
     }

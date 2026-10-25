@@ -916,7 +916,8 @@ describe('Historia 17.5 — la página 2+ de un listado admitido no lleva el Mod
     );
 
     const IMPORTACION = "import TarjetaDeCita from '../../../components/TarjetaDeCita.astro';";
-    const PAGINACION = '<Paginacion pagina={pagina} />';
+    // Con su Zona de salida interna desde la Historia 23.7.
+    const PAGINACION = '<Paginacion pagina={pagina} zona="paginacion" />';
     const pagina = await readFile(resolve(RAIZ, 'src/pages', TEMA), 'utf8');
     expect(pagina.split(IMPORTACION), 'la página de Tema cambió de forma').toHaveLength(2);
     expect(pagina.split(PAGINACION), 'la página de Tema cambió de forma').toHaveLength(2);

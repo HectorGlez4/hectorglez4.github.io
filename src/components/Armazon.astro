@@ -164,7 +164,11 @@ const imagenSocial = tarjeta === undefined ? undefined : new URL(tarjeta, Astro.
   <body>
     <a class="saltar" href="#contenido">Saltar al contenido.</a>
 
-    <header class="cabecera contenedor">
+    {/*
+      * Historia 23.7 — la Zona de salida interna de la marca y de «Buscar». El enlace de salto de
+      * arriba no la lleva: es un ancla de la propia página, y eso no es salida.
+      */}
+    <header class="cabecera contenedor" data-zona="cabecera">
       <a class="marca" href="/">{MARCA}</a>
       <a class="buscar" href="/buscar/">Buscar</a>
     </header>

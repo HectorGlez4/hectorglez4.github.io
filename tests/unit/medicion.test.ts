@@ -7,11 +7,14 @@ import ts from 'typescript';
 import { parseSync } from 'vite';
 import {
   ARRANQUE_DE_MEDICION,
+  ATRIBUTO_DE_ZONA,
+  ATRIBUTO_SIN_ZONA,
   EVENTOS,
   EVENTOS_DEL_GUION,
   EVENTOS_DE_VISTA,
   EVENTOS_SOLO_DEL_FICHERO,
   EVENTOS_VALIDOS,
+  EXENCIONES_DE_ZONA,
   INTERACCIONES_DE_LECTURA,
   MARCAS_DE_LLEGADA,
   SIN_MARCAS_DE_LLEGADA,
@@ -20,6 +23,7 @@ import {
   puntoFinal,
   rutaDelGuionDeMedicion,
   versionDelGuion,
+  type ExencionDeZona,
 } from '../../src/lib/medicion.ts';
 import { anunciar, guionQueAnuncia } from '../../src/lib/anuncio.ts';
 import { GUIONES_EXTERNOS, guionExternoDe } from '../../src/lib/guiones.ts';
@@ -30,7 +34,14 @@ import {
   MAX_CARACTERES_IMAGEN,
   MIN_MS_VISIBLES_PARA_LA_LECTURA,
 } from '../../src/lib/umbrales.ts';
-import { DESTINOS_DE_DESCARGA, METRICA_DE_ACCION, PARAMETRO_DE_DIFUSION } from '../../src/lib/vocabulario.ts';
+import {
+  DESTINOS_DE_DESCARGA,
+  METRICA_DE_ACCION,
+  PARAMETRO_DE_DIFUSION,
+  ZONAS,
+  type Zona,
+} from '../../src/lib/vocabulario.ts';
+import { SITIO } from '../../src/lib/dominio.ts';
 import { PARAMETRO_DE_ORIGEN } from '../../src/lib/redes.ts';
 import {
   bytesDeGuionEnLinea,
@@ -50,6 +61,7 @@ import {
   superficiesDelBarrido,
 } from '../../src/lib/superficies.ts';
 import { ORIGEN_DEL_SANDBOX, medicionEnUnSandbox } from './ayuda/medicion.js';
+import { enlacesDe, recorrerElementos, type Declaracion, type Elemento } from './ayuda/enlaces.js';
 import {
   AUTOR_VALIDO,
   TEMA_VALIDO,
@@ -576,7 +588,8 @@ describe('Historia 23.5 — una carga que se lee deja una lectura', () => {
   });
 
   it('la lectura es un evento que solo emite el fichero', () => {
-    expect(EVENTOS_SOLO_DEL_FICHERO).toEqual([EVENTOS.lectura]);
+    // Desde la 23.7, junto con la salida interna.
+    expect(EVENTOS_SOLO_DEL_FICHERO).toEqual([EVENTOS.lectura, EVENTOS.salidaInterna]);
     expect(EVENTOS_DEL_GUION).toContain(EVENTOS.lectura);
   });
 
@@ -597,7 +610,9 @@ describe('Historia 23.5 — una carga que se lee deja una lectura', () => {
     // correspondencia y `medicion.ts` la compone en el fichero —`fuentesDeSrc` ya lo deja fuera—;
     // nadie más la nombra, tampoco en un comentario.
     const DUEÑOS = ['lib/vocabulario.ts'];
-    const PROHIBIDO = /METRICA_DE_ACCION|EVENTOS_SOLO_DEL_FICHERO|EVENTOS\.lectura\b|__medir\(\s*['"`]lectura['"`]/;
+    // Desde la 23.7, tampoco la salida interna: ninguna isla la emite ni lee zonas.
+    const PROHIBIDO =
+      /METRICA_DE_ACCION|EVENTOS_SOLO_DEL_FICHERO|EVENTOS\.(lectura|salidaInterna)\b|__medir\(\s*['"`](lectura|salida-interna)['"`]/;
     const fuentes = [
       ...fuentesDeSrc().filter((f) => !DUEÑOS.some((d) => f.endsWith(d))),
       ...ficherosDe(resolve(RAIZ, 'public', 'islas')).filter((f) => /\.m?js$/.test(f)),
@@ -1190,6 +1205,246 @@ describe('Historia 23.6 — las marcas de llegada cuentan una vez y salen de la 
   });
 });
 
+describe('Historia 23.7 — cada salida interna dice desde qué zona', () => {
+  /*
+   * Una prueba por fila de la matriz de la historia, en el entorno simulado: `pulsar(enlace,
+   * gesto)` despacha el `click` que sube desde un `<span>` dentro de un `<a>` de mentira,
+   * envuelto en sus contenedores. Lo que se afirma es lo que sale por `sendBeacon`, en su orden.
+   */
+  const RUTA = '/cita/una/';
+  const OTRA = '/cita/otra/';
+  const enCita = (opciones: Parameters<typeof medicionEnUnSandbox>[0] = {}) =>
+    medicionEnUnSandbox({ ruta: RUTA, vistas: EVENTOS.vistaDeCita, ...opciones });
+  const eventos = (balizas: Record<string, unknown>[]) => balizas.map((b) => b.evento);
+  const salidas = (balizas: Record<string, unknown>[]) => balizas.filter((b) => b.evento === EVENTOS.salidaInterna);
+  /** Un enlace a otra ruta del sitio, dentro de una zona. */
+  const enZona = (zona: string, href = OTRA) => ({ href, contenedores: [{ zona }] });
+
+  it('la salida la emite solo el fichero, y su zona sale de la escucha, no de `__medir`', () => {
+    expect(EVENTOS_DEL_GUION).toContain(EVENTOS.salidaInterna);
+    expect(EVENTOS_SOLO_DEL_FICHERO).toContain(EVENTOS.salidaInterna);
+    // Los atributos y las exenciones, con su nombre: el fichero los compone, nunca los escribe.
+    expect(ATRIBUTO_DE_ZONA).toBe('data-zona');
+    expect(ATRIBUTO_SIN_ZONA).toBe('data-sin-zona');
+    expect([...EXENCIONES_DE_ZONA]).toEqual(['chips-del-404', 'salidas-sin-resultados']);
+    // Ninguna exención se llama como una zona: la prueba de `dist/` las distingue por su atributo,
+    // pero un motivo con nombre de zona confundiría a quien lee el marcado.
+    for (const exencion of EXENCIONES_DE_ZONA) expect(ZONAS as readonly string[]).not.toContain(exencion);
+  });
+
+  it('una sola escucha de `click`, en la ventana y en burbuja, y ninguna en el documento', () => {
+    // En burbuja, no en captura: así ve el `defaultPrevented` que haya puesto una isla.
+    const { escuchas } = enCita();
+    expect(escuchas('ventana').filter((e) => e.tipo === 'click')).toEqual([
+      { tipo: 'click', unaVez: false, captura: false, pasiva: false },
+    ]);
+    expect(escuchas('documento').map((e) => e.tipo)).not.toContain('click');
+  });
+
+  it('salida tras la lectura: vista, lectura y la salida con su ruta y su zona, exactamente esas claves', () => {
+    const { interactuar, pulsar, balizas } = enCita();
+    interactuar('pointerdown');
+    pulsar(enZona('listado'));
+    expect(balizas()).toEqual([
+      { evento: EVENTOS.vistaDeCita, ruta: RUTA, origen: null, via: null },
+      { evento: EVENTOS.lectura, ruta: RUTA, origen: null, via: null },
+      { evento: EVENTOS.salidaInterna, ruta: RUTA, zona: 'listado' },
+    ]);
+    expect(Object.keys(salidas(balizas())[0]).sort()).toEqual(['evento', 'ruta', 'zona']);
+  });
+
+  it('sin `pointerdown` ni `keydown` —un `element.click()`—: la lectura sale antes que la salida', () => {
+    const { pulsar, balizas } = enCita();
+    pulsar(enZona('atribucion'));
+    expect(eventos(balizas())).toEqual([EVENTOS.vistaDeCita, EVENTOS.lectura, EVENTOS.salidaInterna]);
+    expect(salidas(balizas())).toEqual([{ evento: EVENTOS.salidaInterna, ruta: RUTA, zona: 'atribucion' }]);
+  });
+
+  it('una por carga: un segundo clic válido, en otra zona y a otra ruta, no emite nada', () => {
+    const { interactuar, pulsar, avanzar, balizas } = enCita();
+    interactuar('pointerdown');
+    pulsar(enZona('listado'));
+    pulsar(enZona('cabecera', '/buscar/'));
+    pulsar(enZona('paginacion', '/tema/el-tiempo/2/'));
+    avanzar(30_000);
+    expect(eventos(balizas())).toEqual([EVENTOS.vistaDeCita, EVENTOS.lectura, EVENTOS.salidaInterna]);
+    expect(salidas(balizas())[0].zona).toBe('listado');
+  });
+
+  it.each([
+    ['con Meta', enZona('listado'), { metaKey: true }],
+    ['con Control', enZona('listado'), { ctrlKey: true }],
+    ['con Mayúsculas', enZona('listado'), { shiftKey: true }],
+    ['con Alt', enZona('listado'), { altKey: true }],
+    ['con el botón central', enZona('listado'), { button: 1 }],
+    ['con el botón secundario', enZona('listado'), { button: 2 }],
+    ['con `defaultPrevented`', enZona('listado'), { defaultPrevented: true }],
+    ['a pestaña nueva (`target="_blank"`)', { ...enZona('listado'), target: '_blank' }, {}],
+    ['a otro marco con nombre (`target="otro"`)', { ...enZona('listado'), target: 'otro' }, {}],
+    ['con `download`', { ...enZona('listado'), descarga: true }, {}],
+    ['a un ancla de la propia página', enZona('listado', '#contenido'), {}],
+    ['a la propia ruta con otra búsqueda', enZona('listado', `${RUTA}?q=otra`), {}],
+    ['a la propia ruta, entera', enZona('listado', `${ORIGEN_DEL_SANDBOX}${RUTA}#arriba`), {}],
+    ['a otro origen', enZona('listado', 'https://otro.invalid/cita/otra/'), {}],
+    ['a `mailto:`', enZona('listado', 'mailto:alguien@ejemplo.invalid'), {}],
+    ['fuera de cualquier enlace', null, {}],
+  ] as const)('no es salida %s: nada sale, y un clic válido después sí', (_, enlace, gesto) => {
+    const { pulsar, balizas } = enCita();
+    pulsar(enlace, gesto);
+    // Ni salida ni lectura forzada: solo la vista de la carga.
+    expect(eventos(balizas())).toEqual([EVENTOS.vistaDeCita]);
+    pulsar(enZona('listado'));
+    expect(eventos(balizas())).toEqual([EVENTOS.vistaDeCita, EVENTOS.lectura, EVENTOS.salidaInterna]);
+  });
+
+  it('`target="_self"` sí es salida: se abre en la misma pestaña', () => {
+    const { pulsar, balizas } = enCita();
+    pulsar({ ...enZona('cabecera', '/'), target: '_self' });
+    expect(salidas(balizas())).toEqual([{ evento: EVENTOS.salidaInterna, ruta: RUTA, zona: 'cabecera' }]);
+  });
+
+  it.each([
+    ['sin ningún contenedor', { href: OTRA }],
+    ['con una exención', { href: OTRA, contenedores: [{ sinZona: 'chips-del-404' }] }],
+    ['con una exención dentro de una zona', { href: OTRA, contenedores: [{ sinZona: 'salidas-sin-resultados' }, { zona: 'listado' }] }],
+    ['con una zona ajena al vocabulario', { href: OTRA, contenedores: [{ zona: 'inventada' }] }],
+    ['con una zona ajena dentro de una buena', { href: OTRA, contenedores: [{ zona: 'inventada' }, { zona: 'listado' }] }],
+    ['con una zona vacía', { href: OTRA, contenedores: [{ zona: '' }] }],
+  ] as const)('sin zona válida (%s): nada sale, ni se gasta la salida ni se fuerza la lectura', (_, enlace) => {
+    const { pulsar, balizas } = enCita();
+    pulsar(enlace);
+    expect(eventos(balizas())).toEqual([EVENTOS.vistaDeCita]);
+    // No gastó la salida de la carga: la siguiente, con zona, sale con su lectura delante.
+    pulsar(enZona('rutas-de-salida'));
+    expect(eventos(balizas())).toEqual([EVENTOS.vistaDeCita, EVENTOS.lectura, EVENTOS.salidaInterna]);
+    expect(salidas(balizas())[0].zona).toBe('rutas-de-salida');
+  });
+
+  it('la zona más concreta manda: un Chip de Tema dentro de las Rutas de salida es `chip-de-tema`', () => {
+    const { pulsar, balizas } = enCita();
+    pulsar({ href: '/tema/el-tiempo/', contenedores: [{ zona: 'chip-de-tema' }, { zona: 'rutas-de-salida' }] });
+    expect(salidas(balizas())).toEqual([{ evento: EVENTOS.salidaInterna, ruta: RUTA, zona: 'chip-de-tema' }]);
+  });
+
+  it.each([
+    ['una página 2+', '/tema/el-tiempo/2/', 'paginacion'],
+    ['`/buscar/`', '/buscar/', 'resultado'],
+    ['el 404', '/404', 'cita-del-dia'],
+  ] as const)('sin lectura (%s, sin `data-vistas`): solo la salida, y nunca una lectura', (_, ruta, zona) => {
+    const { interactuar, pulsar, avanzar, balizas } = medicionEnUnSandbox({ ruta });
+    interactuar('pointerdown');
+    pulsar(enZona(zona));
+    avanzar(30_000);
+    expect(balizas()).toEqual([{ evento: EVENTOS.salidaInterna, ruta, zona }]);
+  });
+
+  it('caché de atrás y adelante: la carga nueva permite otra salida, detrás de su lectura nueva', () => {
+    const { interactuar, pulsar, ocultar, mostrar, restaurar, balizas } = enCita();
+    interactuar('pointerdown');
+    pulsar(enZona('listado'));
+    ocultar();
+    restaurar();
+    mostrar();
+    // Sin restaurar todavía no habría salido otra; tras `pageshow` con `persisted`, sí.
+    pulsar(enZona('atribucion', '/autor/seneca/'));
+    expect(eventos(balizas())).toEqual([
+      EVENTOS.vistaDeCita,
+      EVENTOS.lectura,
+      EVENTOS.salidaInterna,
+      EVENTOS.lectura,
+      EVENTOS.salidaInterna,
+    ]);
+    expect(salidas(balizas()).map((b) => b.zona)).toEqual(['listado', 'atribucion']);
+  });
+
+  it('caché de atrás y adelante en una página sin lectura: otra salida, sin lectura', () => {
+    const { pulsar, restaurar, balizas } = medicionEnUnSandbox({ ruta: '/buscar/' });
+    pulsar(enZona('resultado'));
+    pulsar(enZona('resultado', '/cita/tercera/'));
+    restaurar(false);
+    pulsar(enZona('resultado', '/cita/tercera/'));
+    expect(eventos(balizas())).toEqual([EVENTOS.salidaInterna]);
+    restaurar();
+    pulsar(enZona('resultado', '/cita/tercera/'));
+    expect(eventos(balizas())).toEqual([EVENTOS.salidaInterna, EVENTOS.salidaInterna]);
+  });
+
+  it('prerender: un clic antes de activarse no emite nada; tras activarse, como siempre', () => {
+    const { pulsar, activar, balizas, escuchas } = enCita({ prerendering: true });
+    pulsar(enZona('listado'));
+    expect(balizas()).toEqual([]);
+    expect(escuchas('ventana').map((e) => e.tipo)).not.toContain('click');
+    activar();
+    pulsar(enZona('listado'));
+    expect(eventos(balizas())).toEqual([EVENTOS.vistaDeCita, EVENTOS.lectura, EVENTOS.salidaInterna]);
+  });
+
+  it('una isla que la pide por `__medir`, directa o de la cola, no la emite ni gasta la de la carga', () => {
+    for (const cargado of [true, false]) {
+      const { emitir, cargar, pulsar, balizas } = enCita({ cargado });
+      emitir(EVENTOS.salidaInterna, null, undefined, 'listado');
+      emitir(EVENTOS.salidaInterna, 'listado', 'listado');
+      if (!cargado) cargar();
+      expect(eventos(balizas()), cargado ? 'directo' : 'encolado').toEqual([EVENTOS.vistaDeCita]);
+      pulsar(enZona('cabecera', '/'));
+      expect(salidas(balizas()), cargado ? 'directo' : 'encolado').toEqual([
+        { evento: EVENTOS.salidaInterna, ruta: RUTA, zona: 'cabecera' },
+      ]);
+    }
+  });
+
+  it('con las dos Marcas de llegada: la salida no lleva `origen` ni `via`', () => {
+    const { pulsar, balizas } = enCita({ busqueda: '?de=instagram&via=whatsapp' });
+    pulsar(enZona('listado'));
+    expect(balizas()).toEqual([
+      { evento: EVENTOS.vistaDeCita, ruta: RUTA, origen: 'instagram', via: 'whatsapp' },
+      { evento: EVENTOS.lectura, ruta: RUTA, origen: 'instagram', via: 'whatsapp' },
+      { evento: EVENTOS.salidaInterna, ruta: RUTA, zona: 'listado' },
+    ]);
+  });
+
+  it('transporte roto: ninguna excepción sale de la escucha', () => {
+    const intentos: string[] = [];
+    const { pulsar, restaurar } = enCita({
+      sendBeacon: (_url, carga) => {
+        intentos.push(JSON.parse(carga).evento);
+        throw new Error('el transporte falló');
+      },
+    });
+    expect(() => pulsar(enZona('listado'))).not.toThrow();
+    expect(() => restaurar()).not.toThrow();
+    expect(() => pulsar(enZona('listado'))).not.toThrow();
+    // Lo intentó: la salida salió dos veces hacia el transporte, que falló.
+    expect(intentos.filter((e) => e === EVENTOS.salidaInterna)).toHaveLength(2);
+  });
+
+  it('el fichero compone el conjunto de las zonas y los atributos desde sus módulos, y no lee la dirección entera', () => {
+    const guion = guionDeMedicion('https://ejemplo.invalid/e');
+    expect(guion).toContain(JSON.stringify(ZONAS));
+    expect(guion).toContain(JSON.stringify(`[${ATRIBUTO_DE_ZONA}],[${ATRIBUTO_SIN_ZONA}]`));
+    // Ni el destino del enlace ni su texto viajan: el fichero no los lee.
+    expect(guion).not.toMatch(/\.href\b|textContent|innerText|referrer/);
+    // Ningún valor de zona escrito en el código de `src/lib/medicion.ts`: salen de `ZONAS`. Se leen
+    // los literales con el compilador, como en la prueba de las marcas: un comentario puede
+    // nombrar una zona, el código no.
+    const ruta = resolve(RAIZ, 'src/lib/medicion.ts');
+    const fuente = ts.createSourceFile(ruta, readFileSync(ruta, 'utf8'), ts.ScriptTarget.Latest, true);
+    const literales: string[] = [];
+    const recorrer = (nodo: ts.Node): void => {
+      if (ts.isStringLiteral(nodo) || ts.isNoSubstitutionTemplateLiteral(nodo)) literales.push(nodo.text);
+      ts.forEachChild(nodo, recorrer);
+    };
+    recorrer(fuente);
+    expect(literales.length).toBeGreaterThan(20);
+    // Como palabra entera: `salidas-sin-resultados`, una exención, no escribe la zona `resultado`.
+    const escribe = (literal: string, zona: string) => new RegExp(`(^|[^a-z-])${zona}([^a-z-]|$)`).test(literal);
+    expect(literales.filter((l) => ZONAS.some((zona) => escribe(l, zona)))).toEqual([]);
+    // Y el detector ve una zona escrita, entre comillas o dentro de otro texto.
+    expect(escribe('cabecera', 'cabecera')).toBe(true);
+    expect(escribe('[data-zona="listado"]', 'listado')).toBe(true);
+  });
+});
+
 describe('Historia 23.1 — la versión del fichero sale de su contenido', () => {
   it('el mismo punto final da la misma ruta; otro punto final, otra', () => {
     const una = rutaDelGuionDeMedicion('https://a.invalid/e');
@@ -1361,7 +1616,16 @@ const CORPUS_MEDIDO: Record<string, string> = {
   ...Object.fromEntries(
     SLUGS.map((slug, i) => [
       `citas/${slug}.md`,
-      citaValida({ texto: `Frase número ${i} del catálogo de prueba.`, slug }),
+      citaValida({
+        texto: `Frase número ${i} del catálogo de prueba.`,
+        slug,
+        /*
+         * Historia 23.7 — la primera, apta para portada: así la portada y el 404 tienen Cita del
+         * Día, y sus zonas (`cita-del-dia`, y `atribucion` en el Bloque de Cita) salen en `dist/`.
+         * Es la única apta, así que la Cita del Día es esa en cualquier jornada.
+         */
+        ...(i === 0 ? { aptaParaPortada: true } : {}),
+      }),
     ]),
   ),
   // Historia 23.1 — fuera del Tema y de la Colección, para no tocar sus listados.
@@ -1990,6 +2254,182 @@ describe('Historia 23.6 — solo el fichero lee y quita las marcas, en `dist/`',
     }
     expect(descargados.get('pagefind')?.size, 'Pagefind y su worker').toBeGreaterThanOrEqual(2);
   }, 240_000);
+});
+
+describe('Historia 23.7 — toda salida interna de `dist/` dice su zona', () => {
+  /**
+   * Las once Zonas de salida interna que coloca la Épica 23 (UX-DR111). Las otras cinco del
+   * vocabulario —`tarjeta-de-obra`, `siguiente`, `misma-obra`, `directorio` y `obras-de-portada`—
+   * las colocan las Épicas 24, 26 y 28, que las añaden aquí en el mismo diff.
+   */
+  const ZONAS_DE_HOY = [
+    'cabecera',
+    'atribucion',
+    'chip-de-tema',
+    'colecciones',
+    'listado',
+    'paginacion',
+    'lista-de-obras',
+    'resultado',
+    'cita-del-dia',
+    'rutas-de-salida',
+    'autores-de-portada',
+  ] as const satisfies readonly Zona[];
+  /** Dónde va cada exención: la página, la etiqueta y lo que la distingue. */
+  const SITIO_DE_LA_EXENCION: Record<ExencionDeZona, { ruta: string; etiqueta: string; marca: (e: Elemento) => boolean }> = {
+    'chips-del-404': { ruta: '/404', etiqueta: 'ul', marca: (e) => (e.atributos.get('class') ?? '').split(/\s+/).includes('chips') },
+    'salidas-sin-resultados': { ruta: '/buscar/', etiqueta: 'div', marca: (e) => e.atributos.has('data-salida') },
+  };
+  /**
+   * La única exención que nombra esta prueba, y no el marcado: un ancla de la propia página
+   * (`href="#…"`) no saca de ella, y la escucha del fichero no la cuenta.
+   */
+  const esAnclaDeLaPropiaPagina = (href: string) => href.startsWith('#');
+  const BASE = new URL(SITIO);
+
+  /** Las declaraciones de zona de cada página construida, con su elemento. */
+  async function declaracionesDelSitio() {
+    const todas: { ruta: string; elemento: Elemento; declaracion: Declaracion }[] = [];
+    for (const [ruta, html] of paginasDe(await sitioMedido())) {
+      recorrerElementos(html, (elemento) => {
+        if (elemento.atributos.has(ATRIBUTO_DE_ZONA)) {
+          todas.push({ ruta, elemento, declaracion: { zona: elemento.atributos.get(ATRIBUTO_DE_ZONA)! } });
+        }
+        if (elemento.atributos.has(ATRIBUTO_SIN_ZONA)) {
+          todas.push({ ruta, elemento, declaracion: { sinZona: elemento.atributos.get(ATRIBUTO_SIN_ZONA)! } });
+        }
+      });
+    }
+    return todas;
+  }
+
+  it('el tokenizador ve enlaces, `main` y la declaración más cercana, y salta guiones, estilos y comentarios', () => {
+    const html = [
+      '<!doctype html><html><head><title>Un <a href="/no/"> en el título</title>',
+      '<script>var s = \'<a href="/tampoco/">\';</script><style>a[data-zona="x"]{}</style></head>',
+      '<body><a class="saltar" href="#contenido">Saltar</a>',
+      '<header class="cabecera" data-zona="cabecera"><a href="/">Marca</a></header>',
+      '<main id="contenido"><!-- <a href="/comentado/"> -->',
+      '<ul data-zona="listado" title="uno > dos"><li><a href="/cita/a/?x=1&amp;y=2"><span>A</span></a><br><img src=x alt="">',
+      '</li></ul>',
+      '<nav data-zona="rutas-de-salida"><ul class="hermanas"><li><a href=/cita/b/>B</a></li></ul>',
+      '<ul class="chips" data-zona="chip-de-tema"><li><a class="chip" href="/tema/t/">T</a></li></ul>',
+      '<div data-sin-zona="salidas-sin-resultados"><a href="/tema/u/">U</a></div></nav>',
+      '<div data-zona="listado"><p data-sin-zona="chips-del-404" data-zona="cabecera"><a href="/c/">C</a></p></div>',
+      '<a href="/sin/">Sin</a><a name="sin-href">N</a><input value="<a href=/no/>"></main>',
+      '<footer><a href="/rss.xml">RSS</a></footer></body></html>',
+    ].join('');
+    expect(enlacesDe(html)).toEqual([
+      { href: '#contenido', enMain: false, declaracion: null },
+      { href: '/', enMain: false, declaracion: { zona: 'cabecera' } },
+      { href: '/cita/a/?x=1&y=2', enMain: true, declaracion: { zona: 'listado' } },
+      { href: '/cita/b/', enMain: true, declaracion: { zona: 'rutas-de-salida' } },
+      { href: '/tema/t/', enMain: true, declaracion: { zona: 'chip-de-tema' } },
+      { href: '/tema/u/', enMain: true, declaracion: { sinZona: 'salidas-sin-resultados' } },
+      // Con las dos en el mismo elemento, manda la exención, como en la escucha del fichero.
+      { href: '/c/', enMain: true, declaracion: { sinZona: 'chips-del-404' } },
+      { href: '/sin/', enMain: true, declaracion: null },
+      { href: undefined, enMain: true, declaracion: null },
+      { href: '/rss.xml', enMain: false, declaracion: null },
+    ]);
+  });
+
+  it('en toda superficie con lectura, todo enlace interno de `main` tiene zona o exención', async () => {
+    let paginas = 0;
+    let enlaces = 0;
+    const sinDeclarar: string[] = [];
+    for (const [ruta, html] of paginasDe(await sitioMedido())) {
+      if (vistasDe(html) === undefined) continue;
+      paginas++;
+      for (const { href, enMain, declaracion } of enlacesDe(html)) {
+        if (!enMain || href === undefined || esAnclaDeLaPropiaPagina(href)) continue;
+        if (new URL(href, new URL(ruta, BASE)).origin !== BASE.origin) continue;
+        enlaces++;
+        const valida =
+          declaracion !== null &&
+          ('zona' in declaracion
+            ? (ZONAS as readonly string[]).includes(declaracion.zona)
+            : (EXENCIONES_DE_ZONA as readonly string[]).includes(declaracion.sinZona));
+        if (!valida) sinDeclarar.push(`${ruta}: ${href} (${JSON.stringify(declaracion)})`);
+      }
+    }
+    expect(sinDeclarar).toEqual([]);
+    // Portada, las Citas, el Autor, el Tema, la Colección y la Obra indexable: ninguna en vacío.
+    expect(paginas).toBeGreaterThan(SLUGS_DE_CITA.length + 4);
+    expect(enlaces).toBeGreaterThan(paginas * 3);
+  }, 240_000);
+
+  it('en todo `dist/` las zonas son del vocabulario, son exactamente las once de hoy y van en un contenedor, nunca en el enlace', async () => {
+    const declaraciones = await declaracionesDelSitio();
+    const zonas = declaraciones.flatMap(({ declaracion }) => ('zona' in declaracion ? [declaracion.zona] : []));
+    for (const zona of ZONAS_DE_HOY) expect(ZONAS as readonly string[]).toContain(zona);
+    for (const zona of zonas) expect(ZONAS as readonly string[], zona).toContain(zona);
+    expect([...new Set(zonas)].sort()).toEqual([...ZONAS_DE_HOY].sort());
+    const enEnlaces = declaraciones.filter(({ elemento }) => elemento.etiqueta === 'a');
+    expect(enEnlaces.map(({ ruta }) => ruta)).toEqual([]);
+  }, 240_000);
+
+  it('en todo `dist/` las exenciones son de su conjunto, están las dos y cada una en su sitio', async () => {
+    const exenciones = (await declaracionesDelSitio()).flatMap(({ ruta, elemento, declaracion }) =>
+      'sinZona' in declaracion ? [{ ruta, elemento, motivo: declaracion.sinZona }] : [],
+    );
+    for (const { motivo } of exenciones) expect(EXENCIONES_DE_ZONA as readonly string[], motivo).toContain(motivo);
+    expect([...new Set(exenciones.map(({ motivo }) => motivo))].sort()).toEqual([...EXENCIONES_DE_ZONA].sort());
+    for (const { ruta, elemento, motivo } of exenciones) {
+      const sitio = SITIO_DE_LA_EXENCION[motivo as ExencionDeZona];
+      expect(ruta, motivo).toBe(sitio.ruta);
+      expect(elemento.etiqueta, motivo).toBe(sitio.etiqueta);
+      expect(sitio.marca(elemento), motivo).toBe(true);
+    }
+    // Una vez cada una: el 404 tiene una lista de Temas y `/buscar/`, un bloque de salidas.
+    expect(exenciones).toHaveLength(EXENCIONES_DE_ZONA.length);
+  }, 240_000);
+
+  it('la cabecera de cada página lleva `cabecera`, y la lista de resultados de `/buscar/`, `resultado`', async () => {
+    const paginas = paginasDe(await sitioMedido());
+    for (const [ruta, html] of paginas) {
+      const cabeceras: Elemento[] = [];
+      recorrerElementos(html, (elemento, antepasados) => {
+        if (elemento.etiqueta === 'header' && !antepasados.some((e) => e.etiqueta === 'main')) cabeceras.push(elemento);
+      });
+      expect(cabeceras.map((c) => c.atributos.get(ATRIBUTO_DE_ZONA)), ruta).toEqual(['cabecera']);
+    }
+    const resultados: Elemento[] = [];
+    recorrerElementos(paginas.get('/buscar/')!, (elemento) => {
+      if (elemento.atributos.has('data-resultados')) resultados.push(elemento);
+    });
+    expect(resultados.map((r) => [r.etiqueta, r.atributos.get(ATRIBUTO_DE_ZONA)])).toEqual([['ul', 'resultado']]);
+  }, 240_000);
+
+  it('la portada y el 404, con Cita del Día, la enlazan desde `cita-del-dia` y su Autor desde `atribucion`', async () => {
+    for (const ruta of ['/', '/404']) {
+      const enlaces = enlacesDe(await leerMedida(ruta)).filter((e) => e.enMain);
+      const declaracionesDe = (href: string) => enlaces.filter((e) => e.href === href).map((e) => e.declaracion);
+      expect(declaracionesDe(CITA), ruta).toEqual([{ zona: 'cita-del-dia' }]);
+      // En la portada, el Autor también sale de la lista de Autores.
+      expect(declaracionesDe('/autor/seneca/'), ruta).toContainEqual({ zona: 'atribucion' });
+    }
+  }, 240_000);
+
+  it('los seis componentes de enlace declaran `zona: Zona`, obligatoria, en sus Props', () => {
+    for (const componente of ['TarjetaDeCita', 'Chips', 'Paginacion', 'ListaDeObras', 'RutasDeSalida', 'Atribucion']) {
+      const ruta = resolve(RAIZ, `src/components/${componente}.astro`);
+      const [, frontmatter] = readFileSync(ruta, 'utf8').split(/^---$/m);
+      const fuente = ts.createSourceFile(ruta, frontmatter, ts.ScriptTarget.Latest, true);
+      const props = fuente.statements.find(
+        (s): s is ts.InterfaceDeclaration => ts.isInterfaceDeclaration(s) && s.name.text === 'Props',
+      );
+      expect(props, componente).toBeDefined();
+      const zona = props!.members.find(
+        (m): m is ts.PropertySignature => ts.isPropertySignature(m) && m.name.getText(fuente) === 'zona',
+      );
+      expect(zona, `${componente}: sin \`zona\` en sus Props`).toBeDefined();
+      expect(zona!.questionToken, `${componente}: \`zona\` es opcional`).toBeUndefined();
+      expect(zona!.type?.getText(fuente), componente).toBe('Zona');
+      // Y `Zona` es la del vocabulario, no una propia.
+      expect(frontmatter, componente).toMatch(/import type \{ Zona \} from '\.\.\/lib\/vocabulario\.ts';/);
+    }
+  });
 });
 
 describe('Historia 23.1 — toda isla que anuncia lleva `anunciar`', () => {

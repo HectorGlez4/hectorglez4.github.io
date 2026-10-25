@@ -56,7 +56,7 @@ const autorDelDia = seleccion
         <section class="del-dia">
           <h2>La cita de hoy</h2>
           <BloqueDeCita cita={seleccion.cita} autor={autorDelDia} />
-          <p class="ir">
+          <p class="ir" data-zona="cita-del-dia">
             <a href={rutaDeCita(seleccion.cita.slug)}>Ver esta cita</a>
           </p>
         </section>
@@ -67,7 +67,12 @@ const autorDelDia = seleccion
       temas.length > 0 && (
         <section>
           <h2>Temas</h2>
-          <ul class="chips">
+          {/*
+            * Historia 23.7 — exentos de zona, por escrito (UX-DR111): la tabla de zonas de
+            * EXPERIENCE.md no los nombra, y una zona nueva exigiría otra migración (AD-14). Se
+            * revisa en la pasada de métricas.
+            */}
+          <ul class="chips" data-sin-zona="chips-del-404">
             {temas.map((tema) => (
               <li>
                 <a class="chip" href={rutaDeTema(tema.slug)}>

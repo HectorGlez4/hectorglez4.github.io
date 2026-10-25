@@ -14,6 +14,77 @@ interface Oyente {
 type Ajustes = boolean | { once?: boolean; capture?: boolean; passive?: boolean };
 
 /**
+ * Lo que declara un contenedor de un enlace — Historia 23.7: una Zona de salida interna
+ * (`data-zona`) o una exención con su motivo (`data-sin-zona`). Los valores van tal cual: el
+ * entorno no los coteja con nada, que es lo que tiene que hacer el fichero.
+ */
+export type Contenedor = { zona: string } | { sinZona: string };
+
+/** El enlace que se pulsa — Historia 23.7. */
+export interface EnlacePulsado {
+  /** El `href`, tal como iría escrito: se resuelve contra la dirección de ahora. */
+  href: string;
+  /** Los contenedores que lo envuelven, del más cercano al más lejano. */
+  contenedores?: readonly Contenedor[];
+  /** El atributo `target`, si lo lleva. */
+  target?: string;
+  /** Si lleva el atributo `download`. */
+  descarga?: boolean;
+}
+
+/** Cómo se pulsa — Historia 23.7: el botón (por omisión, 0, el principal) y lo demás del clic. */
+export interface Gesto {
+  button?: number;
+  metaKey?: boolean;
+  ctrlKey?: boolean;
+  shiftKey?: boolean;
+  altKey?: boolean;
+  /** Si una isla ya se quedó con el clic (`preventDefault`) antes de que llegue a la ventana. */
+  defaultPrevented?: boolean;
+}
+
+/** Un elemento de mentira: lo justo para `closest`, `getAttribute` y `hasAttribute`. */
+interface Nodo {
+  etiqueta: string;
+  atributos: Map<string, string>;
+  padre: Nodo | null;
+}
+
+/**
+ * Si un nodo casa con una lista de selectores separados por comas, cada uno `etiqueta[atributo]`
+ * o `[atributo]`. Es lo único que el fichero pide a `closest`; cualquier otra forma lanza, para
+ * que una escucha que empiece a pedir otra cosa no pase en verde contra un entorno que no la sabe
+ * leer.
+ */
+function casa(nodo: Nodo, selectores: string): boolean {
+  return selectores.split(',').some((selector) => {
+    const forma = /^\s*([a-z]*)\[([a-z-]+)\]\s*$/.exec(selector);
+    if (!forma) throw new Error(`el entorno no sabe leer el selector «${selector}»`);
+    const [, etiqueta, atributo] = forma;
+    return (etiqueta === '' || etiqueta === nodo.etiqueta) && nodo.atributos.has(atributo);
+  });
+}
+
+/** El objeto que ve el guion por cada nodo: el elemento, con sus tres métodos. */
+function comoElemento(nodo: Nodo, vistos = new Map<Nodo, Record<string, unknown>>()): Record<string, unknown> {
+  const ya = vistos.get(nodo);
+  if (ya) return ya;
+  const elemento: Record<string, unknown> = {
+    tagName: nodo.etiqueta.toUpperCase(),
+    getAttribute: (nombre: string) => nodo.atributos.get(nombre) ?? null,
+    hasAttribute: (nombre: string) => nodo.atributos.has(nombre),
+    closest: (selectores: string) => {
+      for (let actual: Nodo | null = nodo; actual; actual = actual.padre) {
+        if (casa(actual, selectores)) return comoElemento(actual, vistos);
+      }
+      return null;
+    },
+  };
+  vistos.set(nodo, elemento);
+  return elemento;
+}
+
+/**
  * Ejecuta el arranque y el fichero de medición con un navegador de mentira y recoge lo que
  * envía.
  *
@@ -43,6 +114,17 @@ type Ajustes = boolean | { once?: boolean; capture?: boolean; passive?: boolean 
  * `historialQueLanza`, `replaceState` apunta la llamada y lanza, como un historial que no se deja
  * escribir; con `sinHistorial`, no hay `history` en absoluto. `historial()` da las llamadas y
  * `direccion()`, lo que mostraría la barra: ruta, búsqueda y fragmento.
+ *
+ * Desde la Historia 23.7 hay **clics en enlaces**: `pulsar(enlace, gesto)` despacha `click`
+ * —primero al documento y después a la ventana, como el que sube desde un elemento— con el botón,
+ * los modificadores y el `defaultPrevented` del gesto. El objetivo es un `<span>` dentro de un `<a>`
+ * de mentira, cuyo `href` se resuelve con `URL` contra la dirección de ahora (`origin`,
+ * `pathname`), con su `target` y su `download`, y envuelto en los contenedores del enlace —una
+ * zona (`data-zona`) o una exención (`data-sin-zona`)—, del más cercano al más lejano. Con
+ * `enlace` nulo el objetivo es un `<p>` que no está dentro de ningún enlace. `closest` sabe leer
+ * solo listas de `etiqueta[atributo]` y `[atributo]`, que es lo que pide el fichero. No dispara
+ * `pointerdown`: un clic de `element.click()` no lo trae, y quien quiera el del ratón lo pide antes
+ * con `interactuar`.
  */
 export const ORIGEN_DEL_SANDBOX = 'https://ejemplo.invalid';
 
@@ -252,6 +334,51 @@ export function medicionEnUnSandbox(
     balizas: () => enviadas.map((c) => JSON.parse(c) as Record<string, unknown>),
     /** Las llamadas a `history.replaceState`, en su orden, con sus argumentos tal como llegaron. */
     historial: () => [...llamadas],
+    /**
+     * Un clic —Historia 23.7—: en un enlace, dentro de sus contenedores, o, con `enlace` nulo,
+     * fuera de cualquier enlace. Llega al documento y después a la ventana.
+     */
+    pulsar: (enlace: EnlacePulsado | null, gesto: Gesto = {}) => {
+      let padre: Nodo | null = null;
+      // Del más lejano al más cercano, para que cada uno sea el padre del siguiente.
+      for (const contenedor of [...(enlace?.contenedores ?? [])].reverse()) {
+        const atributos = new Map<string, string>(
+          'zona' in contenedor ? [['data-zona', contenedor.zona]] : [['data-sin-zona', contenedor.sinZona]],
+        );
+        padre = { etiqueta: 'div', atributos, padre };
+      }
+      let objetivo: Record<string, unknown>;
+      if (enlace === null) {
+        objetivo = comoElemento({ etiqueta: 'p', atributos: new Map(), padre });
+      } else {
+        const atributos = new Map<string, string>([['href', enlace.href]]);
+        if (enlace.target !== undefined) atributos.set('target', enlace.target);
+        if (enlace.descarga) atributos.set('download', '');
+        const nodoDelEnlace: Nodo = { etiqueta: 'a', atributos, padre };
+        const vistos = new Map<Nodo, Record<string, unknown>>();
+        // Resuelto contra la dirección de ahora, como el `HTMLAnchorElement` del navegador.
+        const actual = `${ubicacion.origin}${ubicacion.pathname}${ubicacion.search}${ubicacion.hash}`;
+        const resuelto = new URL(enlace.href, actual);
+        Object.assign(comoElemento(nodoDelEnlace, vistos), {
+          href: resuelto.href,
+          origin: resuelto.origin,
+          pathname: resuelto.pathname,
+          target: enlace.target ?? '',
+        });
+        objetivo = comoElemento({ etiqueta: 'span', atributos: new Map(), padre: nodoDelEnlace }, vistos);
+      }
+      const evento = {
+        target: objetivo,
+        button: gesto.button ?? 0,
+        metaKey: gesto.metaKey ?? false,
+        ctrlKey: gesto.ctrlKey ?? false,
+        shiftKey: gesto.shiftKey ?? false,
+        altKey: gesto.altKey ?? false,
+        defaultPrevented: gesto.defaultPrevented ?? false,
+      };
+      despachar(delDocumento, 'click', evento);
+      despachar(deLaVentana, 'click', evento);
+    },
     /** Lo que mostraría la barra: ruta, búsqueda y fragmento. */
     direccion: () => `${ubicacion.pathname}${ubicacion.search}${ubicacion.hash}`,
   };

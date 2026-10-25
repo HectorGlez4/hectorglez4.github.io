@@ -16,6 +16,7 @@
  */
 import type { Cita, Autor, Tema } from '../lib/publicado.ts';
 import { rutaDeAutor, rutaDeCita, rutaDeTema } from '../lib/superficies.ts';
+import type { Zona } from '../lib/vocabulario.ts';
 import Chips from './Chips.astro';
 
 interface Props {
@@ -25,9 +26,16 @@ interface Props {
   chips: Tema[];
   /** Respaldo cuando no hay ni hermanas ni chips. */
   temasDelSitio: Tema[];
+  /**
+   * La Zona de salida interna de las Citas hermanas y del chip de respaldo «Sobre {Autor}» (FR-56,
+   * UX-DR111, Historia 23.7). Los Chips de Tema llevan la suya, `chip-de-tema`, más concreta: la
+   * escucha del fichero toma la declaración más cercana al enlace. Obligatoria, como en los demás
+   * componentes de enlace.
+   */
+  zona: Zona;
 }
 
-const { autor, relacionadas, chips, temasDelSitio } = Astro.props;
+const { autor, relacionadas, chips, temasDelSitio, zona } = Astro.props;
 
 const sinSalidaPropia = relacionadas.length === 0 && chips.length === 0;
 const temasAMostrar = sinSalidaPropia ? temasDelSitio.slice(0, 6) : chips;
@@ -40,7 +48,7 @@ const fragmento = (texto: string) =>
   * `data-pagefind-ignore`: aquí aparece el texto de otras Citas, y sin esto un fragmento
   * buscado devolvería también las cuatro páginas que lo tienen como ruta de salida.
   */}
-<nav class="salidas" aria-label="Seguir leyendo" data-pagefind-ignore>
+<nav class="salidas" aria-label="Seguir leyendo" data-pagefind-ignore data-zona={zona}>
   {
     relacionadas.length > 0 && (
       <section>
@@ -62,6 +70,7 @@ const fragmento = (texto: string) =>
         <h2>{sinSalidaPropia ? 'Explorar por tema' : 'Temas'}</h2>
         <Chips
           enlaces={temasAMostrar.map((tema) => ({ href: rutaDeTema(tema.slug), nombre: tema.nombre }))}
+          zona="chip-de-tema"
         />
       </section>
     )
@@ -76,7 +85,7 @@ const fragmento = (texto: string) =>
     sinSalidaPropia && temasAMostrar.length === 0 && (
       <section>
         <h2>Seguir leyendo</h2>
-        <Chips enlaces={[{ href: rutaDeAutor(autor.slug), nombre: `Sobre ${autor.nombre}` }]} />
+        <Chips enlaces={[{ href: rutaDeAutor(autor.slug), nombre: `Sobre ${autor.nombre}` }]} zona={zona} />
       </section>
     )
   }

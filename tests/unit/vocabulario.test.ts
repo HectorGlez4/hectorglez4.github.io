@@ -236,7 +236,7 @@ describe('Historia 23.2 — los eventos y los conjuntos cerrados', () => {
  */
 const PENDIENTES: readonly { historia: string; eventos?: readonly Evento[]; campos?: readonly [Evento, Campo][] }[] = [
   // La 23.6 enseñó `via` al guion, en las vistas y la lectura: ya no hay ningún campo pendiente.
-  { historia: '23.7', eventos: [EVENTOS.salidaInterna] },
+  // La 23.7 le enseñó la salida interna, con su zona.
   { historia: '23.8', eventos: [EVENTOS.busqueda] },
   { historia: '23.9', eventos: [EVENTOS.vistaDeObra] },
 ];
@@ -257,14 +257,31 @@ const columnasDelEsquema = () =>
   )!.map((definicion) => definicion.split(/\s+/)[0]);
 
 /**
- * Cómo se produce, en el sandbox, cada evento que solo emite el fichero (Historia 23.5): no pasa
- * por `__medir`, así que no basta con pedirlo. Uno de `EVENTOS_SOLO_DEL_FICHERO` sin entrada aquí
- * deja la prueba en rojo —la 23.7 añade la salida interna—.
+ * Cómo se produce, en el sandbox, cada evento que solo emite el fichero (Historias 23.5 y 23.7): no
+ * pasa por `__medir`, así que no basta con pedirlo. Uno de `EVENTOS_SOLO_DEL_FICHERO` sin entrada
+ * aquí deja la prueba en rojo.
  */
-const PRODUCIR_DEL_FICHERO: { readonly [E in Evento]?: (entorno: ReturnType<typeof medicionEnUnSandbox>) => void } = {
+const PRODUCIR_DEL_FICHERO: {
+  readonly [E in Evento]?: (entorno: ReturnType<typeof medicionEnUnSandbox>, entrada: Entrada) => void;
+} = {
   // En una superficie con lectura —una vista declarada—, la primera interacción.
   [EVENTOS.lectura]: (entorno) => entorno.interactuar('pointerdown'),
+  // Un clic en un enlace a otra ruta, dentro de la zona del escenario (por omisión, la primera).
+  [EVENTOS.salidaInterna]: (entorno, entrada) =>
+    entorno.pulsar({ href: '/cita/otra/', contenedores: [{ zona: entrada.zona ?? ZONA_POR_OMISION }] }),
 };
+
+/** Lo que entra en el sandbox para producir un evento. */
+interface Entrada {
+  busqueda?: string;
+  datos?: string;
+  destino?: string;
+  /** La zona del contenedor del enlace que se pulsa, para la salida interna (Historia 23.7). */
+  zona?: string;
+}
+
+/** La zona con la que sale la salida interna de un escenario que no nombra ninguna. */
+const ZONA_POR_OMISION = ZONAS[0];
 
 /**
  * Lo que sale por la baliza al producir un evento en un entorno nuevo, con esa entrada: lo que
@@ -273,7 +290,7 @@ const PRODUCIR_DEL_FICHERO: { readonly [E in Evento]?: (entorno: ReturnType<type
  * necesita la lectura no cuenta. Las vistas salen de `data-vistas`, como en el sitio: desde la
  * revisión de la 23.6, una vista que pida una isla sale sin Marcas de llegada.
  */
-function producir(evento: Evento, entrada: { busqueda?: string; datos?: string; destino?: string }) {
+function producir(evento: Evento, entrada: Entrada) {
   if ((EVENTOS_DE_VISTA as readonly Evento[]).includes(evento)) {
     const entorno = medicionEnUnSandbox({ ruta: '/cita/una/', busqueda: entrada.busqueda, vistas: evento });
     return entorno.balizas().filter((baliza) => baliza.evento === evento);
@@ -282,7 +299,7 @@ function producir(evento: Evento, entrada: { busqueda?: string; datos?: string; 
   if (EVENTOS_SOLO_DEL_FICHERO.includes(evento)) {
     expect(porSuCuenta, `${evento} lo emite solo el fichero y no tiene cómo producirse`).toBeDefined();
     const entorno = medicionEnUnSandbox({ ruta: '/cita/una/', busqueda: entrada.busqueda, vistas: EVENTOS.vistaDeCita });
-    porSuCuenta!(entorno);
+    porSuCuenta!(entorno, entrada);
     return entorno.balizas().filter((baliza) => baliza.evento === evento);
   }
   const { emitir, balizas } = medicionEnUnSandbox({ ruta: '/cita/una/', busqueda: entrada.busqueda });
@@ -298,11 +315,8 @@ const primeraEsperada = (evento: Evento, destino?: string) =>
   evento === EVENTOS.descargaDeImagen && (DESTINOS_DE_DESCARGA as readonly string[]).includes(destino ?? '') ? 'no' : 'si';
 
 /** Lo que entra en el sandbox en cada escenario de un evento, y lo que debe salir de cada campo. */
-interface Escenario {
+interface Escenario extends Entrada {
   nombre: string;
-  busqueda?: string;
-  datos?: string;
-  destino?: string;
   /** El valor esperado de cada campo, dada la entrada: el de su conjunto, o nulo. */
   esperado: (campo: Campo) => string | null;
 }
@@ -375,12 +389,23 @@ function escenariosDe(evento: Evento): Escenario[] {
     datos: 'texto buscado',
     esperado: (campo) => (campo === 'consulta' ? 'texto buscado' : null),
   });
+  // Historia 23.7 — cada zona del vocabulario, también en los eventos que no la declaran (ahí no
+  // debe salir). Una zona ajena no está: con ella no sale ninguna salida, y eso lo prueba
+  // `tests/unit/medicion.test.ts`.
+  for (const zona of ZONAS) {
+    escenarios.push({ nombre: `zona ${zona}`, zona, esperado: () => null });
+  }
   // `primera` no sale de la entrada: la calcula el fichero, y en la primera acción de cada
-  // entorno es «si», salvo la descarga con destino de su conjunto.
+  // entorno es «si», salvo la descarga con destino de su conjunto. La `zona` tampoco sale de
+  // un argumento: es la del contenedor del enlace pulsado, la del escenario o la de por omisión.
   return escenarios.map((escenario) => ({
     ...escenario,
     esperado: (campo: Campo) =>
-      campo === 'primera' ? primeraEsperada(evento, escenario.destino) : escenario.esperado(campo),
+      campo === 'primera'
+        ? primeraEsperada(evento, escenario.destino)
+        : campo === 'zona'
+          ? (escenario.zona ?? ZONA_POR_OMISION)
+          : escenario.esperado(campo),
   }));
 }
 
@@ -391,13 +416,14 @@ describe('Historia 23.2 — la correspondencia: guion, receptor y esquema, event
     expect(columnas).toEqual(['jornada', 'evento', 'ruta', ...CAMPOS]);
   });
 
-  it('lo no pendiente son los ocho eventos de hoy, y es lo que el guion emite', () => {
+  it('lo no pendiente son los nueve eventos de hoy, y es lo que el guion emite', () => {
     const vigentes = EVENTOS_VALIDOS.filter((evento) => !eventoPendiente(evento));
     expect([...vigentes].sort()).toEqual(
       [
         EVENTOS.vistaDeCita,
         EVENTOS.vistaDeSuperficie,
         EVENTOS.lectura,
+        EVENTOS.salidaInterna,
         EVENTOS.copiado,
         EVENTOS.descargaDeImagen,
         EVENTOS.busquedaSinResultados,
@@ -478,7 +504,7 @@ describe('Historia 23.2 — la correspondencia: guion, receptor y esquema, event
     }
   });
 
-  it('la lectura no sale por `__medir`, ni directa ni de la cola: solo la produce el fichero', () => {
+  it('la lectura y la salida interna no salen por `__medir`, ni directas ni de la cola: solo las produce el fichero', () => {
     for (const evento of EVENTOS_SOLO_DEL_FICHERO) {
       const directo = medicionEnUnSandbox({ vistas: EVENTOS.vistaDeCita });
       directo.emitir(evento, 'datos', DESTINOS_VALIDOS[0]);

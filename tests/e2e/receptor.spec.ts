@@ -1,4 +1,4 @@
-import { expect, test, type Page } from '@playwright/test';
+import { expect, test, type BrowserContext, type Page, type PlaywrightWorkerArgs } from '@playwright/test';
 import { createServer, type Server } from 'node:http';
 import { spawn, type ChildProcess } from 'node:child_process';
 import { join } from 'node:path';
@@ -1026,5 +1026,201 @@ test.describe('Historia 23.6 — las marcas de llegada cuentan una vez y salen d
       expect(baliza).not.toHaveProperty('origen');
       expect(baliza).not.toHaveProperty('via');
     }
+  });
+});
+
+/*
+ * Historia 23.7 — la Salida interna en un navegador de verdad: los gestos que no son salida, la
+ * zona que llega desde el contenedor que pinta el build, la que heredan los resultados que mete la
+ * isla de `/buscar/`, y la carga nueva de la caché de atrás y adelante. Cada fila de guion de su
+ * matriz la recorre el entorno simulado de `tests/unit/medicion.test.ts`.
+ */
+test.describe('Historia 23.7 — cada salida interna dice desde qué zona', () => {
+  const llegadas = (nombre: string) => recibidos.filter((r) => r?.evento === nombre);
+  const salidas = () => llegadas(EVENTOS.salidaInterna);
+  /** Las Citas hermanas de las Rutas de salida: «Más de Séneca». */
+  const HERMANAS = 'nav[aria-label="Seguir leyendo"] .hermanas a';
+  const RESULTADOS = '[data-resultados] .resultado a';
+  /** Una consulta que encuentra algo en este sitio: la Cita del viento favorable. */
+  const CON_RESULTADOS = 'viento';
+
+  /**
+   * Anula toda navegación del documento que salga de `ruta`, también la de una pestaña nueva: con
+   * un 204 el navegador se queda donde está, así que la carga sigue y lo que salió por
+   * `sendBeacon` se puede leer. Lo demás —el fichero, Pagefind— pasa sin tocar.
+   */
+  async function quedarseEn(contexto: BrowserContext, ruta: string) {
+    await contexto.route(`${SITIO}/**`, (peticion) => {
+      const pedida = peticion.request();
+      if (pedida.isNavigationRequest() && new URL(pedida.url()).pathname !== ruta) {
+        return peticion.fulfill({ status: 204 });
+      }
+      return peticion.fallback();
+    });
+  }
+
+  test('en la Cita, un clic con Control o Meta, el botón central y el salto al contenido no salen; el primer clic de ratón sí, y solo ese', async ({
+    page,
+    context,
+  }) => {
+    await quedarseEn(context, RUTA_CITA);
+    await apuntarBalizas(page);
+    await page.goto(`${SITIO}${RUTA_CITA}`);
+    await esperarAlFichero(page);
+    expect(await esperarEvento(EVENTOS.vistaDeCita), 'no llegó la vista').toBeTruthy();
+
+    const hermana = page.locator(HERMANAS).first();
+    await hermana.click({ modifiers: ['Control'] });
+    await hermana.click({ modifiers: ['Meta'] });
+    await hermana.click({ button: 'middle' });
+    // El enlace de salto solo se ve con el foco: se activa con el teclado, como lo usa quien lo usa.
+    await page.locator('a.saltar').focus();
+    await page.keyboard.press('Enter');
+    await expect.poll(() => new URL(page.url()).hash).toBe('#contenido');
+    await esperar(500);
+    // La lectura sí: la trajo el primer `pointerdown`. La salida, no.
+    expect((await balizasDe(page)).map((b) => b.evento)).toEqual([EVENTOS.vistaDeCita, EVENTOS.lectura]);
+    expect(salidas(), 'salió una salida sin serlo').toEqual([]);
+
+    await hermana.click();
+    const salida = await esperarEvento(EVENTOS.salidaInterna);
+    expect(salida, 'no llegó la salida').toBeTruthy();
+    expect(salida).toMatchObject({ ruta: RUTA_CITA, zona: 'rutas-de-salida' });
+    const balizas = await balizasDe(page);
+    expect(balizas.map((b) => b.evento)).toEqual([EVENTOS.vistaDeCita, EVENTOS.lectura, EVENTOS.salidaInterna]);
+    expect(balizas[2]).toEqual({ evento: EVENTOS.salidaInterna, ruta: RUTA_CITA, zona: 'rutas-de-salida' });
+    // Seguimos en la Cita: el destino contestó 204.
+    expect(new URL(page.url()).pathname).toBe(RUTA_CITA);
+
+    // Un segundo clic, en otra zona: nada más.
+    await page.locator('header a.buscar').click();
+    await esperar(500);
+    expect((await balizasDe(page)).map((b) => b.evento)).toHaveLength(3);
+    expect(salidas()).toHaveLength(1);
+  });
+
+  test('en `/buscar/`, pulsar un resultado llega con `resultado`, la ruta de la búsqueda y sin lectura', async ({
+    page,
+    context,
+  }) => {
+    await quedarseEn(context, RUTA_BUSCAR);
+    await apuntarBalizas(page);
+    await page.goto(`${SITIO}${RUTA_BUSCAR}?q=${CON_RESULTADOS}`);
+    await esperarAlFichero(page);
+    const resultado = page.locator(RESULTADOS).first();
+    await expect(resultado).toBeVisible();
+
+    await resultado.click();
+    const salida = await esperarEvento(EVENTOS.salidaInterna);
+    expect(salida, 'no llegó la salida').toBeTruthy();
+    expect(salida).toMatchObject({ ruta: RUTA_BUSCAR, zona: 'resultado' });
+    await esperar(500);
+    expect((await balizasDe(page)).map((b) => b.evento)).toEqual([EVENTOS.salidaInterna]);
+    expect(llegadas(EVENTOS.lectura), '`/buscar/` no emite lectura').toEqual([]);
+  });
+
+  /**
+   * Con la caché de atrás y adelante de verdad, como la prueba de la 23.5: un Chromium completo,
+   * lanzado sin `--disable-back-forward-cache`, y el sitio servido `max-age=600`. Si no restaura,
+   * se salta diciendo por qué.
+   */
+  async function conLaCacheDeVerdad(
+    playwright: PlaywrightWorkerArgs['playwright'],
+    recorrido: (pagina: Page, restaurada: () => Promise<void>) => Promise<void>,
+  ) {
+    let navegador: Awaited<ReturnType<typeof playwright.chromium.launch>>;
+    try {
+      navegador = await playwright.chromium.launch({
+        channel: 'chromium',
+        ignoreDefaultArgs: ['--disable-back-forward-cache'],
+      });
+    } catch (error) {
+      test.skip(true, `no se pudo lanzar el Chromium completo sin cabeza: ${String(error).split('\n')[0]}`);
+      return;
+    }
+    try {
+      const contexto = await navegador.newContext();
+      const pagina = await contexto.newPage();
+      const cdp = await contexto.newCDPSession(pagina);
+      await cdp.send('Page.enable');
+      const sinCache: string[] = [];
+      cdp.on('Page.backForwardCacheNotUsed', (evento) => {
+        for (const explicacion of evento.notRestoredExplanations) sinCache.push(explicacion.reason);
+      });
+      await apuntarBalizas(pagina);
+      await pagina.addInitScript(() => {
+        const ventana = window as unknown as { __restaurada: boolean };
+        ventana.__restaurada = false;
+        addEventListener('pageshow', (evento) => {
+          if ((evento as PageTransitionEvent).persisted) ventana.__restaurada = true;
+        });
+      });
+      /** Vuelve atrás y espera a la restauración; si no la hubo, salta la prueba. */
+      const restaurada = async () => {
+        await pagina.goBack({ waitUntil: 'commit' });
+        const lo = async () =>
+          pagina.evaluate(() => (window as unknown as { __restaurada?: boolean }).__restaurada === true).catch(() => false);
+        const hasta = Date.now() + 3_000;
+        while (!(await lo()) && Date.now() < hasta) await esperar(100);
+        test.skip(
+          !(await lo()),
+          `Chromium no restauró la página de la caché de atrás y adelante: ${sinCache.join(', ') || 'sin motivo'}`,
+        );
+        // Desde aquí, salir ya no navega: la página restaurada se queda y sus balizas se leen.
+        await quedarseEn(contexto, new URL(pagina.url()).pathname);
+      };
+      await recorrido(pagina, restaurada);
+    } finally {
+      await navegador.close();
+    }
+  }
+
+  test('caché de atrás y adelante en la Cita: salir, volver y salir otra vez da dos salidas, la segunda tras la lectura nueva', async ({
+    playwright,
+  }) => {
+    await conLaCacheDeVerdad(playwright, async (pagina, restaurada) => {
+      await pagina.goto(`${SITIO}${RUTA_CITA}`);
+      await esperarAlFichero(pagina);
+      await pagina.locator(HERMANAS).first().click();
+      await pagina.waitForURL((url) => url.pathname !== RUTA_CITA);
+      await esperarAlFichero(pagina);
+      await restaurada();
+      expect(new URL(pagina.url()).pathname).toBe(RUTA_CITA);
+
+      await pagina.locator(HERMANAS).last().click();
+      await expect.poll(() => salidas().filter((r) => r!.ruta === RUTA_CITA).length).toBe(2);
+      // La misma página, restaurada: lleva en memoria lo de las dos cargas, en su orden.
+      expect((await balizasDe(pagina)).map((b) => [b.evento, b.zona])).toEqual([
+        [EVENTOS.vistaDeCita, undefined],
+        [EVENTOS.lectura, undefined],
+        [EVENTOS.salidaInterna, 'rutas-de-salida'],
+        [EVENTOS.lectura, undefined],
+        [EVENTOS.salidaInterna, 'rutas-de-salida'],
+      ]);
+    });
+  });
+
+  test('caché de atrás y adelante en `/buscar/`: un resultado, atrás y otro resultado dan dos salidas `resultado`', async ({
+    playwright,
+  }) => {
+    await conLaCacheDeVerdad(playwright, async (pagina, restaurada) => {
+      await pagina.goto(`${SITIO}${RUTA_BUSCAR}?q=${CON_RESULTADOS}`);
+      await esperarAlFichero(pagina);
+      await expect(pagina.locator(RESULTADOS).first()).toBeVisible();
+      await pagina.locator(RESULTADOS).first().click();
+      await pagina.waitForURL((url) => url.pathname !== RUTA_BUSCAR);
+      await esperarAlFichero(pagina);
+      await restaurada();
+      expect(new URL(pagina.url()).pathname).toBe(RUTA_BUSCAR);
+
+      await expect(pagina.locator(RESULTADOS).last()).toBeVisible();
+      await pagina.locator(RESULTADOS).last().click();
+      await expect.poll(() => salidas().filter((r) => r!.ruta === RUTA_BUSCAR).length).toBe(2);
+      expect((await balizasDe(pagina)).map((b) => [b.evento, b.ruta, b.zona])).toEqual([
+        [EVENTOS.salidaInterna, RUTA_BUSCAR, 'resultado'],
+        [EVENTOS.salidaInterna, RUTA_BUSCAR, 'resultado'],
+      ]);
+      expect(llegadas(EVENTOS.lectura).filter((r) => r!.ruta === RUTA_BUSCAR)).toEqual([]);
+    });
   });
 });

@@ -64,10 +64,10 @@ const canonica = new URL(ruta, Astro.site).href;
     <h1>{tema.nombre}</h1>
 
     <ul class="listado">
-      {pagina.data.map((cita) => <TarjetaDeCita cita={cita} autor={autores.get(cita.autor)} />)}
+      {pagina.data.map((cita) => <TarjetaDeCita cita={cita} autor={autores.get(cita.autor)} zona="listado" />)}
     </ul>
 
-    <Paginacion pagina={pagina} />
+    <Paginacion pagina={pagina} zona="paginacion" />
   </div>
 </Armazon>
 
