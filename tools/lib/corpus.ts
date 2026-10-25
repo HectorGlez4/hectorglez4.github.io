@@ -2809,8 +2809,9 @@ export const CABECERA_DE_SENALES = [
   '#',
   '# EL CAMPO `compartido`. Cierto solo en una AJENA cuyo destino llevaba ?via=<destino>: el',
   '# enlace se copió de lo que un visitante compartió con un botón del sitio, y la consulta lo',
-  '# avisa («copia un enlace compartido»). Una PROPIA con ?via= se rechaza: esa marca es de un',
-  '# visitante, nunca de una cuenta. Sin la marca, el campo no se escribe.',
+  '# avisa («copia un enlace compartido»). Una PROPIA con ?via= se rechaza —y una propia con',
+  '# el campo, escrita a mano, no se deja leer—: esa marca es de un visitante, nunca de una',
+  '# cuenta. Sin la marca, el campo no se escribe.',
   '#',
   '# POR QUÉ SOLO AÑADE, como publicaciones-de-canal.yml y peticiones-de-rastreo.yml, y al',
   '# contrario que las series, que miden un ESTADO y reemplazan por fecha. Esto registra',
@@ -2945,6 +2946,15 @@ function analizarSenales(nombre: string, contenido: string): SenalExterna[] {
     }
     if (compartido !== undefined && typeof compartido !== 'boolean') {
       throw new Error(`${deLaEntrada} tiene «compartido: ${String(compartido)}»: tiene que ser true o false.`);
+    }
+    // Revisión de la 23.6: la orden lo escribe solo en una ajena, porque ?via= es la marca de un
+    // visitante y una propia que la lleve se rechaza. Una entrada a mano no cuela lo que la orden
+    // rechaza, como con el origen.
+    if (compartido === true && tipo !== 'ajena') {
+      throw new Error(
+        `${deLaEntrada} tiene «compartido: true» en una ${tipo}: ?via= es la marca de un visitante, ` +
+          'y solo una ajena puede copiar un enlace compartido.',
+      );
     }
     if (retira !== undefined && (typeof retira !== 'string' || !esJornada(retira))) {
       throw new Error(

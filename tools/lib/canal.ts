@@ -25,8 +25,8 @@ import { esJornada } from '../../src/lib/citaDelDia.ts';
 import { DESTINOS_VALIDOS, esDestinoValido } from '../../src/lib/destinos.ts';
 import { DOMINIO } from '../../src/lib/dominio.ts';
 import { PARAMETRO_DE_ORIGEN, REDES_VALIDAS, esRedValida, type Red } from '../../src/lib/redes.ts';
-import { PARAMETRO_DE_DIFUSION } from '../../src/lib/vocabulario.ts';
 import { esServicioPorForma, rutaNormalizada, superficieDeclaradaDe } from '../../src/lib/superficies.ts';
+import { PARAMETRO_DE_DIFUSION } from '../../src/lib/vocabulario.ts';
 import type { CensoPorFamilia } from './indexacion.ts';
 import { PRIMERA_JORNADA_ANOTABLE, familiaDeRuta, hostAjeno } from './rastreo.ts';
 
@@ -103,9 +103,13 @@ function marcasDe(dada: string, parametro: string): string[] {
  * `anotar` y para `senal --tipo propia`.
  */
 function motivoDeDifusionPropia(marcas: readonly string[], que: 'el enlace' | 'el destino'): string {
+  // Todas las que trae, en su orden: una vacía se nombra como tal.
+  const nombradas = marcas
+    .map((marca) => `?${PARAMETRO_DE_DIFUSION}=${marca === '' ? ' (vacío)' : marca}`)
+    .join(', ');
   return (
-    `${que === 'el enlace' ? 'El enlace' : 'El destino'} lleva ?${PARAMETRO_DE_DIFUSION}=` +
-    `${marcas[0] === '' ? ' (vacío)' : marcas[0]}: ?${PARAMETRO_DE_DIFUSION}= es la marca de un ` +
+    `${que === 'el enlace' ? 'El enlace' : 'El destino'} lleva ${nombradas}: ` +
+    `?${PARAMETRO_DE_DIFUSION}= es la marca de un ` +
     'visitante que comparte con un botón del sitio, y no la de una cuenta propia; sus visitas ' +
     'contarían como difusión. Pegue el enlace del Kit, o la ruta sin esa marca.'
   );
@@ -579,12 +583,12 @@ export const CODIGOS_DE_SENAL =
   'Código 1 si lo dicho se rechaza: un origen que no es una URL http(s) absoluta, que es del ' +
   'dominio propio o de un subdominio suyo, localhost, una IP, un host sin punto o una URL con ' +
   'usuario o contraseña; un destino que el sitio no publica; una marca ?de= de una red que no ' +
-  'existe, o más de una; una marca ?via= en una propia, o en una ajena de un destino que no ' +
-  'existe, o más de una; una fecha futura; un --retira sin señal igual viva en esa fecha; o un ' +
-  'registro que no se deja leer. Código 2 si falla la forma de la invocación: sin --tipo o con ' +
-  'un tipo que no es propia ni ajena; una bandera desconocida o repetida; argumentos de menos ' +
-  'o de más; un --fecha o un --retira sin forma de jornada; una --nota vacía; --tipo o --retira ' +
-  'fuera de senal. Ninguno de los dos escribe nada.';
+  'existe, o más de una distinta; una marca ?via= en una propia, o en una ajena de un destino ' +
+  'que no existe, o más de una distinta; una fecha futura; un --retira sin señal igual viva en ' +
+  'esa fecha; o un registro que no se deja leer. Código 2 si falla la forma de la invocación: ' +
+  'sin --tipo o con un tipo que no es propia ni ajena; una bandera desconocida o repetida; ' +
+  'argumentos de menos o de más; un --fecha o un --retira sin forma de jornada; una --nota ' +
+  'vacía; --tipo o --retira fuera de senal. Ninguno de los dos escribe nada.';
 
 /** Una señal externa anotada. */
 export interface SenalExterna {
@@ -604,8 +608,9 @@ export interface SenalExterna {
    * Historia 23.6. La orden lo escribe, y cierto, solo en una **ajena** cuyo destino tecleado
    * llevaba `?via=<destino>`: alguien copió el enlace de lo que un visitante compartió con un botón
    * del sitio, y la visita que traiga llegará al receptor con su Marca de difusión. Una propia con
-   * `?via=` se rechaza, porque esa marca es de un visitante y no de una cuenta. Sin marca, el campo
-   * no se escribe; una entrada a mano con `false` se lee como sin marca.
+   * `?via=` se rechaza, porque esa marca es de un visitante y no de una cuenta, y una propia a mano
+   * con `compartido: true` no se deja leer. Sin marca, el campo no se escribe; una entrada a mano
+   * con `false` se lee como sin marca.
    */
   compartido?: boolean;
   /**
@@ -861,6 +866,13 @@ export function resumenDeSenales(
     const ya = enlaces.find((e) => mismaTerna(e, senal));
     if (ya !== undefined) {
       ya.anotaciones += 1;
+      /*
+       * Revisión de la 23.6 — la terna no mira las marcas, así que un mismo enlace puede estar
+       * anotado una vez sin ellas y otra con ellas. El enlace lleva la marca si alguna de sus
+       * anotaciones vivas la lleva: si no, el aviso dependería de cuál se anotó antes.
+       */
+      if (senal.marcado === true) ya.marcado = true;
+      if (senal.compartido === true) ya.compartido = true;
       continue;
     }
     enlaces.push({

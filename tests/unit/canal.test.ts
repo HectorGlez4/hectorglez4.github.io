@@ -9,6 +9,8 @@ import { parse as parsearYaml } from 'yaml';
 import { rutasPublicadas } from '../../src/lib/publicado.ts';
 import { MIN_CITAS_POR_COLECCION, MIN_CITAS_POR_TEMA } from '../../src/lib/umbrales.ts';
 import { DOMINIO } from '../../src/lib/dominio.ts';
+import { DESTINOS_VALIDOS, esDestinoValido } from '../../src/lib/destinos.ts';
+import { CAMPOS_DE_EVENTO, EVENTOS_VALIDOS } from '../../src/lib/vocabulario.ts';
 import { rutaDeColeccion } from '../../src/lib/superficies.ts';
 import {
   CABECERA_DE_PUBLICACIONES,
@@ -1407,7 +1409,8 @@ describe('Historia 23.6 — la Marca de difusión en el canal', () => {
       { fecha: '2026-10-08', tipo: 'ajena', origen: 'https://a.example/', destino: '/', compartido: true },
       { fecha: '2026-10-09', tipo: 'ajena', origen: 'https://b.example/', destino: '/', marcado: true, compartido: true },
       { fecha: '2026-10-09', tipo: 'ajena', origen: 'https://c.example/', destino: '/' },
-      // Una propia escrita a mano con el campo no lleva el aviso: el aviso es de lo ajeno.
+      // Una propia con el campo —que el registro ya no deja leer— tampoco llevaría el aviso: el
+      // aviso es de lo ajeno.
       { fecha: '2026-10-09', tipo: 'propia', origen: 'https://linktr.ee/x', destino: '/', compartido: true },
     ];
     const texto = lineasDeSenales(resumenDeSenales(senales, censo, ['/'], HOY)).join('\n');
@@ -1547,6 +1550,60 @@ describe('Historia 23.6 — la Marca de difusión en el canal', () => {
     expect(CABECERA_DE_SENALES).toMatch(/EL CAMPO `compartido`/);
     expect(CABECERA_DE_SENALES).toMatch(/copia un enlace compartido/);
     expect(CABECERA_DE_PUBLICACIONES).toMatch(/enlace con \?via=/);
-    expect(CODIGOS_DE_SENAL).toMatch(/una marca \?via= en una propia, o en una ajena de un destino que no existe, o más de una/);
+    expect(CODIGOS_DE_SENAL).toMatch(
+      /una marca \?via= en una propia, o en una ajena de un destino que no existe, o más de una distinta/,
+    );
+  });
+
+  it('el fichero y la orden cotejan `?via=` contra el mismo conjunto: el de la Marca de difusión es `DESTINOS_VALIDOS`', () => {
+    // La orden coteja con `esDestinoValido`; el fichero, con lo que el vocabulario le declara a `via`.
+    const declarados = EVENTOS_VALIDOS.flatMap((evento) => {
+      const via = CAMPOS_DE_EVENTO[evento].via;
+      return via === undefined ? [] : [via.valores];
+    });
+    expect(declarados.length).toBeGreaterThan(0);
+    for (const valores of declarados) expect(valores).toEqual(DESTINOS_VALIDOS);
+    for (const destino of DESTINOS_VALIDOS) expect(esDestinoValido(destino), destino).toBe(true);
+  });
+
+  it('componer: una propia con varias `?via=` las nombra todas', () => {
+    expect(motivosDeSenal(senal('https://linktr.ee/x', '/?via=whatsapp&via=&via=x'))).toMatch(
+      /lleva \?via=whatsapp, \?via= \(vacío\), \?via=x: \?via= es la marca de un visitante/,
+    );
+  });
+
+  it('la consulta: un mismo enlace anotado sin marcas y luego con ellas lleva los avisos, en el orden que sea', () => {
+    const censo = { cita: [], autor: [], tema: [], coleccion: [] };
+    const base = { tipo: 'ajena' as const, origen: 'https://a.example/', destino: '/' };
+    for (const senales of [
+      [
+        { fecha: '2026-10-08', ...base },
+        { fecha: '2026-10-09', ...base, marcado: true, compartido: true },
+      ],
+      [
+        { fecha: '2026-10-08', ...base, marcado: true, compartido: true },
+        { fecha: '2026-10-09', ...base },
+      ],
+    ] satisfies SenalExterna[][]) {
+      const resumen = resumenDeSenales(senales, censo, ['/'], HOY);
+      expect(resumen.ajenas).toHaveLength(1);
+      expect(resumen.ajenas[0]).toMatchObject({ fecha: '2026-10-08', anotaciones: 2, marcado: true, compartido: true });
+      const texto = lineasDeSenales(resumen).join('\n');
+      expect(texto).toMatch(/anotada 2 veces\) {2}⚠ copia un enlace del Kit {2}⚠ copia un enlace compartido/);
+    }
+  });
+
+  it('una propia a mano con `compartido: true` no se deja leer: la orden sale con 1 y no escribe', async () => {
+    const corpus = await corpusConCitas(MIN_CITAS_POR_TEMA);
+    const fichero = join(corpus, FICHERO_DE_SENALES);
+    const roto =
+      'senales:\n  - fecha: "2026-10-08"\n    tipo: "propia"\n    origen: "https://linktr.ee/x"\n    destino: "/"\n    compartido: true\n';
+    await writeFile(fichero, roto, 'utf8');
+    await expect(leerSenalesExternas(rutasDelCorpus(corpus))).rejects.toThrow(/entrada 1 .*«compartido: true» en una propia/);
+
+    const salida = capturarSalida();
+    expect(await principal(['--corpus', corpus, 'senal', 'https://b.example/', '/', '--tipo', 'ajena'], AHORA)).toBe(1);
+    expect(salida.join('')).toMatch(/solo una ajena puede copiar un enlace compartido/);
+    expect(await readFile(fichero, 'utf8')).toBe(roto);
   });
 });

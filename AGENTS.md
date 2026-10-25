@@ -34,7 +34,7 @@ Sitio panhispánico de citas célebres en español, estático, construido con As
 - Ningún componente lleva valores literales de color o tipografía — usa los tokens de `DESIGN.md` como propiedades personalizadas de CSS.
 - La familia serif se aplica solo a texto de Cita, nombre de Autor y nombre de Tema.
 - Un mensaje de estado («Copiado.», el recuento de `/buscar/`, la imagen lista, el fallo del generador) se anuncia por una región `role="status"` que está en el marcado desde la carga, vacía y sin `hidden` (`.solo-para-lectores` de `tokens.css`; dentro del `<dialog>` si se anuncia con él abierto, porque lo de fuera es inerte). Para anunciar se vacía la región y se escribe el mensaje en el siguiente fotograma: el mismo texto escrito sobre sí mismo no se anuncia. Lo hace `anunciar` de `src/lib/anuncio.ts` —su único dueño—; una isla en línea lo lleva dentro por `guionQueAnuncia` y `set:html` (`define:vars` y `set:html` juntos pierden el cuerpo en Astro 7.2), y ningún guion en línea usa `requestAnimationFrame` fuera de él (Historia 23.1). Pestaña nueva solo para donar, compartir y comprar, con `AVISO_DE_PESTAÑA_NUEVA` de `src/lib/accesibilidad.ts` —su único dueño— oculto dentro del nombre accesible; todo lo demás, en la misma pestaña (Historia 22.10).
-- La medición se llama `__medir(…)` a secas, nunca `window.__medir && …`: el arranque (`ARRANQUE_DE_MEDICION`) abre la cola en línea en toda página del armazón y es el único guion en línea que asigna `__medir`; el fichero `/medicion/{versión}.js` la vacía y la sustituye. Qué vista emite una página lo declara su superficie en `src/lib/superficies.ts` y sale al `data-vistas` del `<html>`; ninguna página la elige. La `lectura` y el `primera` de cada acción los decide solo el fichero (Historia 23.5): ninguna isla los emite ni los calcula, ni conoce `METRICA_DE_ACCION`, y `__medir('lectura')` se descarta (`EVENTOS_SOLO_DEL_FICHERO`). Las Marcas de llegada (`?de=` y `?via=`, `MARCAS_DE_LLEGADA`) las lee y las quita de la dirección solo el fichero, una vez y con el `history.state` que había (Historia 23.6): ninguna isla las lee, y la única que escribe además en el historial es la de la búsqueda (desde la 23.8), nunca al analizarse. Ningún guion en línea lleva datos de contenido —slug, texto, Obra—: van en `data-*` (exención nombrada: `ImagenDelKit`, hasta la 25.4). Lo que una página descarga —`<script src>`, `<link rel="modulepreload">` o `import()`, y lo que un fichero de la lista arranca al ejecutarse, como el worker de Pagefind (`arranca`)— está en `GUIONES_EXTERNOS` de `src/lib/guiones.ts`, con su tope en `umbrales.ts` (Historia 23.1).
+- La medición se llama `__medir(…)` a secas, nunca `window.__medir && …`: el arranque (`ARRANQUE_DE_MEDICION`) abre la cola en línea en toda página del armazón y es el único guion en línea que asigna `__medir`; el fichero `/medicion/{versión}.js` la vacía y la sustituye. Qué vista emite una página lo declara su superficie en `src/lib/superficies.ts` y sale al `data-vistas` del `<html>`; ninguna página la elige. La `lectura` y el `primera` de cada acción los decide solo el fichero (Historia 23.5): ninguna isla los emite ni los calcula, ni conoce `METRICA_DE_ACCION`, y `__medir('lectura')` se descarta (`EVENTOS_SOLO_DEL_FICHERO`). Las Marcas de llegada (`?de=` y `?via=`, `MARCAS_DE_LLEGADA`) las lee y las quita de la dirección solo el fichero, una vez y con el `history.state` que había (Historia 23.6), y viajan solo con las vistas que declara la página y con la lectura —una vista que pida una isla sale sin ellas—: ninguna isla las lee, y la única que escribe además en el historial es la de la búsqueda (desde la 23.8), nunca al analizarse, que corre antes que el fichero diferido (lo vigila `tests/unit/medicion.test.ts`, que hoy no le admite ninguna escritura). Ningún guion en línea lleva datos de contenido —slug, texto, Obra—: van en `data-*` (exención nombrada: `ImagenDelKit`, hasta la 25.4). Lo que una página descarga —`<script src>`, `<link rel="modulepreload">` o `import()`, y lo que un fichero de la lista arranca al ejecutarse, como el worker de Pagefind (`arranca`)— está en `GUIONES_EXTERNOS` de `src/lib/guiones.ts`, con su tope en `umbrales.ts` (Historia 23.1).
 
 ## Known pitfalls
 
@@ -353,9 +353,10 @@ visitante que comparte con un botón del sitio, nunca la de una cuenta propia, y
 contarían como difusión.
 
 Un rechazo de lo dicho —red ajena, formato desconocido, ruta no publicada, enlace marcado para
-otra red, enlace con `?via=`, fecha futura, un Corpus o un registro ilegibles— sale con código 1; la forma de la
-invocación —bandera mal escrita o repetida, argumentos de menos o de más, `--fecha` sin forma
-de jornada, `--nota` vacía—, con 2. En ninguno de los dos casos se escribe nada.
+otra red, enlace con `?via=`, fecha futura, un Corpus o un registro ilegibles— sale con código
+1; la forma de la invocación —bandera mal escrita o repetida, argumentos de menos o de más,
+`--fecha` sin forma de jornada, `--nota` vacía—, con 2. En ninguno de los dos casos se escribe
+nada.
 
 `corpus/publicaciones-de-canal.yml` **solo añade**, como `peticiones-de-rastreo.yml` y al
 revés que las series: dos fotos el mismo día en la misma cuenta son dos publicaciones. Se
@@ -390,19 +391,20 @@ sin `?…` ni `#…`, ruta del censo— y lleva `marcado: true` solo si su caden
 `?de=<red>`. **`?via=` en el destino** (Historia 23.6) se rechaza en una **propia** —es la marca
 de un visitante, no la de una cuenta—, y en una **ajena** se coteja con la regla de `?de=` contra
 los destinos de compartir (`DESTINOS_VALIDOS`): uno del conjunto, y uno solo (el mismo dos veces
-vale); entonces la entrada lleva `compartido: true`. `--fecha` y `--nota` funcionan como en
+vale); entonces la entrada lleva `compartido: true`, y una propia a mano con el campo no se deja
+leer. `--fecha` y `--nota` funcionan como en
 `anotar`, salvo que la fecha **puede ser anterior al canal**: una bio o un enlace ajeno pueden
 existir de antes.
 
 Código 1 si lo dicho se rechaza: un origen que no es una URL http(s) absoluta, que es del
 dominio propio o de un subdominio suyo, localhost, una IP, un host sin punto o una URL con
 usuario o contraseña; un destino que el sitio no publica; una marca ?de= de una red que no
-existe, o más de una; una marca ?via= en una propia, o en una ajena de un destino que no
-existe, o más de una; una fecha futura; un --retira sin señal igual viva en esa fecha; o un
-registro que no se deja leer. Código 2 si falla la forma de la invocación: sin --tipo o con
-un tipo que no es propia ni ajena; una bandera desconocida o repetida; argumentos de menos o
-de más; un --fecha o un --retira sin forma de jornada; una --nota vacía; --tipo o --retira
-fuera de senal. Ninguno de los dos escribe nada.
+existe, o más de una distinta; una marca ?via= en una propia, o en una ajena de un destino que
+no existe, o más de una distinta; una fecha futura; un --retira sin señal igual viva en esa
+fecha; o un registro que no se deja leer. Código 2 si falla la forma de la invocación: sin
+--tipo o con un tipo que no es propia ni ajena; una bandera desconocida o repetida; argumentos
+de menos o de más; un --fecha o un --retira sin forma de jornada; una --nota vacía; --tipo o
+--retira fuera de senal. Ninguno de los dos escribe nada.
 
 Cada suborden lee solo su registro: un `senales-externas.yml` roto no impide `anotar`, ni un
 `publicaciones-de-canal.yml` roto impide `senal`. La consulta enseña lo que pudo leer,
@@ -418,7 +420,7 @@ reescribe.
 La consulta `npm run canal` da un bloque «Señales externas» que separa propias de ajenas,
 por fecha, con origen, destino y familia del destino, y señala la ajena que lleva `?de=`
 («copia un enlace del Kit») y la que lleva `compartido` («copia un enlace compartido»; pueden ir
-los dos). **La 18.1 no se cierra con señales propias, sino con la primera
+los dos, y basta con que los lleve una de las anotaciones vivas del mismo enlace). **La 18.1 no se cierra con señales propias, sino con la primera
 ajena**, y la consulta la nombra con su fecha, origen y destino. Las propias de la semana del
 ciclo se anotan el día que se ponen; a los 14 días de la primera, se mira a mano en el
 informe de Enlaces de Search Console si su dominio figura como dominio de referencia y se

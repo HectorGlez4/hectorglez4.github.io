@@ -37,9 +37,10 @@
  * Código 1 si lo dicho se rechaza: un origen que no es una URL http(s) absoluta, que es del
  * dominio propio o de un subdominio suyo, localhost, una IP, un host sin punto o una URL
  * con usuario o contraseña; un destino que el sitio no publica; una marca ?de= de una red
- * que no existe, o más de una; una marca ?via= en una propia, o en una ajena de un destino
- * que no existe, o más de una; una fecha futura; un --retira sin señal igual viva en esa
- * fecha; o un registro que no se deja leer. Código 2 si falla la forma de la invocación:
+ * que no existe, o más de una distinta; una marca ?via= en una propia, o en una ajena de un
+ * destino que no existe, o más de una distinta; una fecha futura; un --retira sin señal
+ * igual viva en esa fecha; o un registro que no se deja leer. Código 2 si falla la forma de
+ * la invocación:
  * sin --tipo o con un tipo que no es propia ni ajena; una bandera desconocida o repetida;
  * argumentos de menos o de más; un --fecha o un --retira sin forma de jornada; una --nota
  * vacía; --tipo o --retira fuera de senal. Ninguno de los dos escribe nada.

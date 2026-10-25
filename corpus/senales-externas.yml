@@ -10,8 +10,9 @@
 #
 # EL CAMPO `compartido`. Cierto solo en una AJENA cuyo destino llevaba ?via=<destino>: el
 # enlace se copió de lo que un visitante compartió con un botón del sitio, y la consulta lo
-# avisa («copia un enlace compartido»). Una PROPIA con ?via= se rechaza: esa marca es de un
-# visitante, nunca de una cuenta. Sin la marca, el campo no se escribe.
+# avisa («copia un enlace compartido»). Una PROPIA con ?via= se rechaza —y una propia con
+# el campo, escrita a mano, no se deja leer—: esa marca es de un visitante, nunca de una
+# cuenta. Sin la marca, el campo no se escribe.
 #
 # POR QUÉ SOLO AÑADE, como publicaciones-de-canal.yml y peticiones-de-rastreo.yml, y al
 # contrario que las series, que miden un ESTADO y reemplazan por fecha. Esto registra
@@ -54,12 +55,13 @@
 # Código 1 si lo dicho se rechaza: un origen que no es una URL http(s) absoluta, que es
 # del dominio propio o de un subdominio suyo, localhost, una IP, un host sin punto o una
 # URL con usuario o contraseña; un destino que el sitio no publica; una marca ?de= de una
-# red que no existe, o más de una; una marca ?via= en una propia, o en una ajena de un
-# destino que no existe, o más de una; una fecha futura; un --retira sin señal igual viva
-# en esa fecha; o un registro que no se deja leer. Código 2 si falla la forma de la
-# invocación: sin --tipo o con un tipo que no es propia ni ajena; una bandera desconocida
-# o repetida; argumentos de menos o de más; un --fecha o un --retira sin forma de jornada;
-# una --nota vacía; --tipo o --retira fuera de senal. Ninguno de los dos escribe nada.
+# red que no existe, o más de una distinta; una marca ?via= en una propia, o en una ajena
+# de un destino que no existe, o más de una distinta; una fecha futura; un --retira sin
+# señal igual viva en esa fecha; o un registro que no se deja leer. Código 2 si falla la
+# forma de la invocación: sin --tipo o con un tipo que no es propia ni ajena; una bandera
+# desconocida o repetida; argumentos de menos o de más; un --fecha o un --retira sin forma
+# de jornada; una --nota vacía; --tipo o --retira fuera de senal. Ninguno de los dos
+# escribe nada.
 #
 # Este fichero es metadato del Corpus y no una colección: vive en la raíz de `corpus/` y
 # ninguna base de `src/content.config.ts` apunta aquí. Ningún módulo de `src/lib/` lo lee
