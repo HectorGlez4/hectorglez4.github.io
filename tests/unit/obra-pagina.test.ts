@@ -14,7 +14,8 @@ import {
 import { obrasDelCorpusEnDisco } from '../../integraciones/indexables.ts';
 import { componerDocumento } from '../../tools/lib/documento.ts';
 import { rutaDeLaObra } from '../../src/lib/obras.ts';
-import { ATRIBUTO_DE_INDEXABLE, EVENTOS } from '../../src/lib/medicion.ts';
+import { EVENTOS } from '../../src/lib/medicion.ts';
+import { marcasDePagina } from '../../tools/lib/indexables.ts';
 import { MARCAS_DE_OBRA } from '../../src/lib/vocabulario.ts';
 
 /**
@@ -156,9 +157,11 @@ const escapar = (texto: string) => texto.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 const html = (proyecto: string, ruta: string) => readFile(paginaConstruida(proyecto, ruta), 'utf8');
 const NOINDEX = /<meta name="robots" content="noindex, follow"/;
 
-/** Historia 23.9 — la marca de Obra del `<html>`, o `undefined` si no la lleva. */
-const marcaDe = (pagina: string) =>
-  new RegExp(`<html\\b[^>]*\\s${ATRIBUTO_DE_INDEXABLE}="([^"]*)"`).exec(pagina)?.[1];
+/**
+ * Historia 23.9 — la marca de Obra del `<html>`, o `undefined` si no la lleva: la lee el mismo
+ * `marcasDePagina` que la comprobación de `astro:build:done`.
+ */
+const marcaDe = (pagina: string) => marcasDePagina(pagina).marcaDeObra;
 /** Historia 23.9 — el `data-vistas` del `<html>`, o `undefined` si no lo lleva. */
 const vistasDe = (pagina: string) => /<html\b[^>]*\bdata-vistas="([^"]*)"/.exec(pagina)?.[1];
 const [INDEXABLE, NO_INDEXABLE] = MARCAS_DE_OBRA;
@@ -660,8 +663,8 @@ describe('Historia 22.4 — lo que rompe el build', () => {
     expect(resultado.salida).toContain(
       `marca \`${INDEXABLE}\` con \`noindex\`: /obra/seneca/sobre-la-brevedad-de-la-vida`,
     );
-    expect(resultado.salida).toContain('la marca de Obra no coinciden');
-    // Y solo eso: los otros tres lectores casan.
+    // Y solo eso: un desajuste, el de la marca; los otros tres lectores casan.
+    expect(resultado.salida).toContain('la marca de Obra no coinciden (1 desajuste)');
     expect(resultado.salida).not.toContain('en el sitemap y con `noindex`');
   }, 300_000);
 

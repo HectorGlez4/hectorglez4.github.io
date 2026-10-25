@@ -535,8 +535,10 @@ describe('Historia 23.2 — la correspondencia: guion, receptor y esquema, event
   });
 
   it('la vista de Obra se recorre con cada marca, una ajena y ninguna, y ningún otro evento lleva escenarios de marca', () => {
-    // Historia 23.9: para que la correspondencia de abajo no pase en vacío con `indexable`.
-    expect(PENDIENTES).toEqual([]);
+    // Historia 23.9: para que la correspondencia de abajo no pase en vacío con `indexable`. Ni la
+    // vista de Obra ni su marca están pendientes; otra historia puede volver a llenar `PENDIENTES`.
+    expect(eventoPendiente(EVENTOS.vistaDeObra)).toBe(false);
+    expect(campoPendiente(EVENTOS.vistaDeObra, 'indexable')).toBe(false);
     for (const evento of EVENTOS_VALIDOS) {
       const escenarios = escenariosDe(evento);
       const marcas = escenarios.flatMap((escenario) => (escenario.indexable === undefined ? [] : [escenario.indexable]));

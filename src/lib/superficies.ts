@@ -509,6 +509,9 @@ function indexablePorContenido(ruta: string, superficie: Superficie): boolean {
   return rutasIndexablesDeclaradas.has(ruta);
 }
 
+/** Las causas por las que una ruta de producto se sirve como `servicio` (abajo). */
+export type CausaDelServicio = 'forma' | 'contenido';
+
 /**
  * Por qué una ruta de producto se sirve como `servicio`, o `undefined` si no es el caso:
  *
@@ -520,7 +523,7 @@ function indexablePorContenido(ruta: string, superficie: Superficie): boolean {
  * un producto degradado, es lo que es. Rompe, como `caracterDe`, si la ruta no está declarada o
  * si la causa depende de una lista que no se ha declarado.
  */
-export function causaDelServicio(rutaOUrl: string): 'forma' | 'contenido' | undefined {
+export function causaDelServicio(rutaOUrl: string): CausaDelServicio | undefined {
   const ruta = rutaNormalizada(rutaOUrl);
   const superficie = superficieDeclarada(ruta);
   if (esServicioPorForma(ruta)) return 'forma';
@@ -561,23 +564,46 @@ function superficieDeclarada(ruta: string): Superficie {
  */
 export function caracterDe(rutaOUrl: string): Caracter {
   const ruta = rutaNormalizada(rutaOUrl);
-  const superficie = superficieDeclarada(ruta);
-  return causaDelServicio(ruta) === undefined ? superficie.caracter : 'servicio';
+  return caracterPorCausa(superficieDeclarada(ruta), causaDelServicio(ruta));
+}
+
+/** El carácter efectivo de una superficie según la causa de su servicio: la única regla. */
+function caracterPorCausa(superficie: Superficie, causa: CausaDelServicio | undefined): Caracter {
+  return causa === undefined ? superficie.caracter : 'servicio';
+}
+
+/**
+ * La marca de la vista de Obra según la causa del servicio de una página 1 (Historia 23.9): la
+ * indexable sin causa —es producto— y la no indexable si la causa es el contenido. Exhaustiva a
+ * propósito: una causa nueva no cae por omisión en la indexable, sino que no compila.
+ */
+function marcaPorCausa(causa: Exclude<CausaDelServicio, 'forma'> | undefined): MarcaDeObra {
+  switch (causa) {
+    case undefined:
+      return OBRA_INDEXABLE;
+    case 'contenido':
+      return OBRA_NO_INDEXABLE;
+    default: {
+      const nunca: never = causa;
+      throw new Error(`Causa del servicio sin marca de Obra: «${String(nunca)}».`);
+    }
+  }
 }
 
 /**
  * Las consecuencias de una ruta concreta. Es lo que consume `Armazon.astro`.
  *
- * La vista con marca (Historia 23.9) sale de la **misma** causa del servicio que el carácter: en
- * la página 1 de una superficie que la declara, la indexable si no hay causa —es producto— y la no
- * indexable si la causa es el contenido; en una página 2+ (causa `forma`) no sale. Así la marca no
- * se recalcula aparte, y sigue a FR-52 y a la congelación igual que el `noindex`.
+ * La vista con marca (Historia 23.9) sale de la **misma** causa del servicio que el carácter,
+ * calculada una sola vez: en la página 1 de una superficie que la declara, la indexable si no hay
+ * causa —es producto— y la no indexable si la causa es el contenido; en una página 2+ (causa
+ * `forma`) no sale. Así la marca no se recalcula aparte, y sigue a FR-52 y a la congelación igual
+ * que el `noindex`.
  */
 export function consecuenciasDe(rutaOUrl: string): ConsecuenciasDeRuta {
   const ruta = rutaNormalizada(rutaOUrl);
   const superficie = superficieDeclarada(ruta);
-  const caracter = caracterDe(ruta);
   const causa = causaDelServicio(ruta);
+  const caracter = caracterPorCausa(superficie, causa);
   const vistas: EventoDeVista[] = caracter === 'producto' && superficie.vista !== undefined ? [superficie.vista] : [];
   if (superficie.vistaConMarca === undefined || causa === 'forma') {
     return { ...consecuenciasDelCaracter(caracter), vistas };
@@ -585,7 +611,7 @@ export function consecuenciasDe(rutaOUrl: string): ConsecuenciasDeRuta {
   return {
     ...consecuenciasDelCaracter(caracter),
     vistas: [...vistas, superficie.vistaConMarca],
-    marcaDeObra: causa === 'contenido' ? OBRA_NO_INDEXABLE : OBRA_INDEXABLE,
+    marcaDeObra: marcaPorCausa(causa),
   };
 }
 

@@ -260,12 +260,13 @@ export const MAX_BYTES_DE_GUION = 6656;
  * de la búsqueda asentada —qué estado cuenta, cuándo y una vez— vive en la isla, en línea, y cuenta
  * en `MAX_BYTES_DE_GUION` de `/buscar/`, que tampoco se mueve. La Historia 23.9 lo vuelve a medir.
  *
- * Medido de nuevo en la Historia 23.9: **3.644 bytes** con el punto final de producción (3.645 con
- * la barra final; 3.612 con el de las pruebas), 157 sobre los 3.487 de la 23.8 y 86 de margen, así
+ * Medido de nuevo en la Historia 23.9: **3.647 bytes** con el punto final de producción (3.648 con
+ * la barra final; 3.615 con el de las pruebas), 160 sobre los 3.487 de la 23.8 y 83 de margen, así
  * que el tope no se mueve. Creció porque el fichero emite la vista de Obra: su entrada en la tabla,
- * con la marca `indexable` y el conjunto de las dos `MARCAS_DE_OBRA` con que la coteja, el evento en
- * la lista de vistas que salen de `data-vistas`, y la lectura de la marca del `<html>`
- * (`ATRIBUTO_DE_INDEXABLE`) una vez al activarse. Con ella el fichero emite ya todo el vocabulario.
+ * con la marca `indexable` y el conjunto de las dos marcas de Obra del vocabulario con que la
+ * coteja, el evento en la lista de vistas que salen de `data-vistas`, y la lectura de la marca del
+ * atributo del `<html>` una vez al activarse, que solo viaja con la vista que declara la página. Con
+ * ella el fichero emite ya todo el vocabulario.
  */
 export const MAX_BYTES_GUION_DE_MEDICION = 3730;
 

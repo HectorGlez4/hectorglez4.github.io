@@ -1787,7 +1787,9 @@ test.describe('Historia 23.9 — toda Obra cuenta sus vistas, se indexe o no', (
   const llegadas = (nombre: string) => recibidos.filter((r) => r?.evento === nombre);
   const [INDEXABLE, NO_INDEXABLE] = MARCAS_DE_OBRA;
   /** El Autor de la Cabecera de Obra, en la zona de la Atribución. */
-  const AUTOR_DE_LA_CABECERA = '.cabecera-de-obra [data-zona="atribucion"] a';
+  const AUTOR_DE_LA_CABECERA = `.cabecera-de-obra [${ATRIBUTO_DE_ZONA}="atribucion"] a`;
+  /** El `noindex` de la página: la premisa de cada prueba, que depende de los umbrales de FR-52. */
+  const NOINDEX = 'meta[name="robots"][content^="noindex"]';
 
   test('la Obra indexable con `?de=instagram`: la vista de superficie y la de Obra, en ese orden, con el origen y la marca; la barra pierde la marca', async ({
     page,
@@ -1795,6 +1797,8 @@ test.describe('Historia 23.9 — toda Obra cuenta sus vistas, se indexe o no', (
     await apuntarBalizas(page);
     await page.goto(`${SITIO}${OBRA_INDEXABLE}?de=instagram`);
     await esperarAlFichero(page);
+    // La premisa: con los umbrales de hoy, «Cartas a Lucilio» (2 de 3 Citas) se indexa.
+    await expect(page.locator(NOINDEX), 'la Obra indexable salió con `noindex`: ¿cambiaron los umbrales de FR-52?').toHaveCount(0);
     await expect.poll(() => page.url()).toBe(`${SITIO}${OBRA_INDEXABLE}`);
 
     const vistaDeObra = await esperarEvento(EVENTOS.vistaDeObra);
@@ -1821,6 +1825,8 @@ test.describe('Historia 23.9 — toda Obra cuenta sus vistas, se indexe o no', (
     await apuntarBalizas(page);
     await page.goto(`${SITIO}${OBRA_NO_INDEXABLE}`);
     await esperarAlFichero(page);
+    // La premisa: con los umbrales de hoy, «Sobre la brevedad de la vida» (1 Cita) no se indexa.
+    await expect(page.locator(NOINDEX), 'la Obra no indexable salió sin `noindex`: ¿cambiaron los umbrales de FR-52?').toHaveCount(1);
     const vista = await esperarEvento(EVENTOS.vistaDeObra);
     expect(vista, 'no llegó la vista de Obra').toBeTruthy();
     expect(vista).toMatchObject({ ruta: OBRA_NO_INDEXABLE, origen: null, indexable: NO_INDEXABLE });

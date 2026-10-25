@@ -69,6 +69,7 @@ import {
   superficieDeclaradaDe,
   superficiesDelBarrido,
 } from '../../src/lib/superficies.ts';
+import { marcasDePagina } from '../../tools/lib/indexables.ts';
 import { ORIGEN_DEL_SANDBOX, medicionEnUnSandbox } from './ayuda/medicion.js';
 import { islaDeBusquedaEnUnSandbox, type OpcionesDeLaIsla, type Respuesta } from './ayuda/busqueda.js';
 import { enlacesDe, recorrerElementos, type Declaracion, type Elemento } from './ayuda/enlaces.js';
@@ -179,7 +180,9 @@ describe('Historia 2.9 — el vocabulario es cerrado', () => {
 
     for (const evento of EVENTOS_VALIDOS) emitir(evento);
     expect(balizas().map((b) => b.evento)).toEqual(aPeticion);
-    expect([...EVENTOS_DEL_GUION].sort()).toEqual([...EVENTOS_VALIDOS].sort());
+    // Solo eventos del vocabulario. Que los emita todos —menos los pendientes de una historia— lo
+    // exige la correspondencia de `tests/unit/vocabulario.test.ts`, que conoce `PENDIENTES`.
+    for (const evento of EVENTOS_DEL_GUION) expect(EVENTOS_VALIDOS, evento).toContain(evento);
     expect(aPeticion).not.toContain(EVENTOS.lectura);
 
     for (const impostor of ['pageview', 'clic', 'VISTA-DE-CITA', '', 'toString', 'hasOwnProperty']) emitir(impostor);
@@ -1668,6 +1671,18 @@ describe('Historia 23.9 — toda Obra cuenta sus vistas, se indexe o no', () => 
     for (const baliza of balizas()) expect(baliza, String(baliza.evento)).not.toHaveProperty('indexable');
   });
 
+  it('una vista de Obra que pidiera una isla sale sin la marca del `<html>`, como sin las de llegada: la marca solo viaja con la vista declarada', () => {
+    // Revisión de la 23.9: ninguna isla la pide (lo vigila la guarda de abajo), y si alguna lo
+    // hiciera, su baliza no se confundiría con la de la página: `indexable` nula.
+    const { emitir, balizas } = indexable({ busqueda: '?de=instagram' });
+    emitir(EVENTOS.vistaDeObra);
+    expect(balizas().slice(2)).toEqual([
+      { evento: EVENTOS.vistaDeObra, ruta: OBRA, origen: null, via: null, indexable: null },
+    ]);
+    // Las dos declaradas, con las suyas.
+    expect(balizas()[1]).toEqual({ evento: EVENTOS.vistaDeObra, ruta: OBRA, origen: 'instagram', via: null, indexable: INDEXABLE });
+  });
+
   it('caché de atrás y adelante: ninguna vista nueva; otra lectura, sin marcas de llegada ni de Obra', () => {
     const { interactuar, restaurar, avanzar, balizas } = indexable({ busqueda: '?de=instagram' });
     interactuar('pointerdown');
@@ -1699,9 +1714,10 @@ describe('Historia 23.9 — toda Obra cuenta sus vistas, se indexe o no', () => 
 
   it('ninguna isla pide la vista de Obra ni lee su marca: la escribe el armazón y la lee solo el fichero', () => {
     // Los dueños: el vocabulario la declara, `superficies.ts` la declara por superficie y nombra las
-    // marcas, `Armazon.astro` escribe el atributo y `umbrales.ts` anota lo que pesa en el fichero.
-    // `medicion.ts` ya queda fuera de `fuentesDeSrc`.
-    const DUEÑOS = ['lib/vocabulario.ts', 'lib/superficies.ts', 'components/Armazon.astro', 'lib/umbrales.ts'];
+    // marcas y `Armazon.astro` escribe el atributo. `medicion.ts` ya queda fuera de `fuentesDeSrc`.
+    // `umbrales.ts` anota lo que pesa en el fichero sin nombrar ninguno de estos identificadores, así
+    // que no está exento: un uso de verdad allí saldría aquí.
+    const DUEÑOS = ['lib/vocabulario.ts', 'lib/superficies.ts', 'components/Armazon.astro'];
     const PROHIBIDO = /EVENTOS\.vistaDeObra|ATRIBUTO_DE_INDEXABLE|MARCAS_DE_OBRA|data-indexable|vista-de-obra/;
     const fuentes = [
       ...fuentesDeSrc().filter((f) => !DUEÑOS.some((d) => f.endsWith(d))),
@@ -2043,9 +2059,11 @@ describe('Historia 20.1 y 23.1 — las vistas salen de la declaración, al `data
   });
 });
 
-/** El valor de la marca de Obra del `<html>`, o `undefined` si la página no la lleva. */
-const marcaDeObraDe = (html: string): string | undefined =>
-  new RegExp(`<html\\b[^>]*\\s${ATRIBUTO_DE_INDEXABLE}="([^"]*)"`).exec(html)?.[1];
+/**
+ * El valor de la marca de Obra del `<html>`, o `undefined` si la página no la lleva: lo lee el mismo
+ * `marcasDePagina` que la comprobación de `astro:build:done`, no una copia de su expresión.
+ */
+const marcaDeObraDe = (html: string): string | undefined => marcasDePagina(html).marcaDeObra;
 const NOINDEX = /<meta name="robots" content="noindex/;
 
 describe('Historia 23.9 — la marca de Obra, en `dist/`', () => {
@@ -2064,8 +2082,12 @@ describe('Historia 23.9 — la marca de Obra, en `dist/`', () => {
     async (_, sitio) => {
       const paginas = paginasDe(await sitio());
       expect(paginas.size).toBeGreaterThan(SLUGS_DE_CITA.length);
+      const [, noIndexable] = MARCAS_DE_OBRA;
       for (const [ruta, html] of paginas) {
-        expect(marcaDeObraDe(html), ruta).toBe(consecuenciasDe(ruta).marcaDeObra);
+        const marca = marcaDeObraDe(html);
+        expect(marca, ruta).toBe(consecuenciasDe(ruta).marcaDeObra);
+        // Y, en cada página que la lleva, dice lo mismo que su `noindex` (AD-17).
+        if (marca !== undefined) expect(NOINDEX.test(html), ruta).toBe(marca === noIndexable);
       }
     },
     240_000,

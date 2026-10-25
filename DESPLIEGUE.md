@@ -587,10 +587,13 @@ de ella**, así que desde entonces su continuación se calcula como la de las de
 de una Obra no emiten vista ni llevan marca, y sus salidas siguen saliendo solas. La lectura, las
 salidas y las acciones no llevan la marca: la lleva solo la vista de Obra, y para partir lo demás por
 marca se toma la de las vistas de Obra de esa ruta y jornada (la consulta de abajo). Si un despliegue
-cambia la indexabilidad de una Obra a mitad de jornada, esa ruta llega ese día con las dos marcas, y
-la consulta la aparta como `cambio`. Como la lectura, la serie empieza la **primera jornada UTC
-completa** tras la llegada en vivo de la 23; leerla —y partir la familia Obra— desde `tools/` es de la
-23.10.
+cambia la indexabilidad de una Obra, esa ruta llega la jornada del cambio con las dos marcas —y, por el
+techo de caché de §1 (`max-age=600`), puede seguir llegando con la vieja hasta 10 minutos, así que un
+despliegue cerca de la medianoche UTC la alarga a los primeros minutos de la jornada siguiente—, y la
+consulta la aparta como `cambio`. Una vista de Obra sin marca —el fichero la manda nula si el `<html>`
+no traía una de las dos, o si la pidiera una isla— no debería llegar nunca; si llega, la consulta la nombra `nula`. Como la
+lectura, la serie empieza la **primera jornada UTC completa** tras la llegada en vivo de la 23; leerla
+—y partir la familia Obra— desde `tools/` es de la 23.10.
 
 **La búsqueda asentada** (Historia 23.8, FR-56, FR-8, AD-13, SM-6, SM-13): una búsqueda **cuenta
 una vez, cuando se asienta**, nunca por tecla ni por repintado. La asientan tres gestos en
@@ -725,12 +728,16 @@ npx --yes wrangler@4.151.1 d1 execute medicion --remote --command \
 # Vistas, lecturas y salidas de la página 1 de Obra, por marca y jornada UTC — Historia 23.9, SM-11.
 # Cambia AAAA-MM-DD por la primera jornada UTC completa tras la llegada de la 23; la de hoy no entra.
 # La lectura y la salida no llevan marca: toman la de las vistas de Obra de su ruta y jornada, y una
-# ruta que ese día llegó con las dos —un despliegue cambió su indexabilidad— sale como `cambio`. Solo
-# entran las rutas con vista de Obra esa jornada, así que las páginas 2+ quedan fuera. La Obra
-# indexable emite además su `vista-de-superficie`, que aquí no se suma: es la de SM-8. Es cota
-# inferior, como toda continuación.
+# ruta que ese día llegó con más de una —un despliegue cambió su indexabilidad, o la caché de 10
+# minutos de §1 sirvió la página de antes pasada la medianoche— sale como `cambio`. Una vista de
+# Obra sin marca cuenta como marca `nula` (`COUNT(DISTINCT …)` y `MAX` se saltarían el NULL), así que
+# una ruta que la mezcla con otra sale también como `cambio`. Solo entran las rutas con vista de Obra
+# esa jornada, así que las páginas 2+ quedan fuera. La Obra indexable emite además su
+# `vista-de-superficie`, que aquí no se suma: es la de SM-8. Es cota inferior, como toda continuación.
+# Hasta cuatro filas por jornada —las dos marcas, `cambio` y `nula`—: `LIMIT 120` da al menos las
+# últimas 30 jornadas.
 npx --yes wrangler@4.151.1 d1 execute medicion --remote --command \
-  "WITH e AS (SELECT jornada, ruta, evento, indexable FROM eventos WHERE jornada >= 'AAAA-MM-DD' AND jornada < date('now') AND ruta LIKE '/obra/%' AND evento IN ('vista-de-obra','lectura','salida-interna')), m AS (SELECT jornada, ruta, CASE WHEN COUNT(DISTINCT indexable) > 1 THEN 'cambio' ELSE MAX(indexable) END AS marca FROM e WHERE evento='vista-de-obra' GROUP BY jornada, ruta) SELECT e.jornada, m.marca, SUM(e.evento='vista-de-obra') vistas, SUM(e.evento='lectura') lecturas, SUM(e.evento='salida-interna') salidas, ROUND(1.0 * SUM(e.evento='salida-interna') / NULLIF(SUM(e.evento='lectura'), 0), 3) continuacion FROM e JOIN m ON m.jornada = e.jornada AND m.ruta = e.ruta GROUP BY e.jornada, m.marca ORDER BY e.jornada DESC, m.marca LIMIT 90"
+  "WITH e AS (SELECT jornada, ruta, evento, indexable FROM eventos WHERE jornada >= 'AAAA-MM-DD' AND jornada < date('now') AND ruta LIKE '/obra/%' AND evento IN ('vista-de-obra','lectura','salida-interna')), m AS (SELECT jornada, ruta, CASE WHEN COUNT(DISTINCT COALESCE(indexable,'nula')) > 1 THEN 'cambio' ELSE COALESCE(MAX(indexable),'nula') END AS marca FROM e WHERE evento='vista-de-obra' GROUP BY jornada, ruta) SELECT e.jornada, m.marca, SUM(e.evento='vista-de-obra') vistas, SUM(e.evento='lectura') lecturas, SUM(e.evento='salida-interna') salidas, ROUND(1.0 * SUM(e.evento='salida-interna') / NULLIF(SUM(e.evento='lectura'), 0), 3) continuacion FROM e JOIN m ON m.jornada = e.jornada AND m.ruta = e.ruta GROUP BY e.jornada, m.marca ORDER BY e.jornada DESC, m.marca LIMIT 120"
 
 # Salidas desde los resultados de `/buscar/`, por jornada — el numerador de SM-13, Historia 23.7.
 # La misma jornada de partida, sin la de hoy. El denominador, las búsquedas asentadas, llega con

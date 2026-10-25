@@ -528,7 +528,8 @@ export function asentamientoDeBusqueda(c: ConstantesDelAsentamiento) {
  * que el fichero sabe producir (Historia 23.2, AD-13): el nombre del evento, la ruta de la
  * página y, según el evento, las Marcas de llegada —solo con las vistas declaradas y la lectura:
  * una acción no las lleva, ni una vista que pida una isla, ni una isla puede ponerlas por
- * argumento—, la marca de la Obra —solo con la vista de Obra—, el destino —cotejado con el conjunto
+ * argumento—, la marca de la Obra —solo con la vista de Obra que declara la página: una que pida una
+ * isla sale con ella nula—, el destino —cotejado con el conjunto
  * de su evento—, `primera`, la zona de la salida, el tramo y los filtros de la `busqueda` —los
  * rótulos que le pasa la isla, cotejados con sus conjuntos; nunca el número de resultados ni el
  * texto— o, solo en la búsqueda sin resultados, el texto de la consulta. Un
@@ -619,7 +620,8 @@ export function guionDeMedicion(url: string): string {
    *     visible en curso (-1 si no hay ninguno); T, el temporizador de la lectura;
    *   · S, si la salida interna de esta carga ya salió; H, la marca de la Obra, leída del `<html>`
    *     al activarse (Historia 23.9), que se coteja al emitir como las demás fuentes y solo usa el
-   *     evento que declara `indexable`.
+   *     evento que declara `indexable`; como las Marcas de llegada, solo viaja con D —la vista de
+   *     Obra que declara la página—, así que una que pidiera una isla saldría con ella nula.
    *
    * Y sus funciones: b compone y envía un evento —su quinto argumento es la zona—; e es `__medir`;
    * h para el reloj y suma el rato; g lo rearma con lo que falta, si toca —o emite la lectura, si
@@ -634,7 +636,7 @@ export function guionDeMedicion(url: string): string {
     `var ${variables};` +
     `function b(v,t,z,y,j){` +
     `try{` +
-    `var c={evento:v,ruta:location.pathname},m=[D&&o,t,z,y,D&&w,j,H];` +
+    `var c={evento:v,ruta:location.pathname},m=[D&&o,t,z,y,D&&w,j,D&&H];` +
     `s[v].forEach(function(f){var x=m[f[1]];c[f[0]]=f[2]?f[2].indexOf(x)<0?null:x:x||null});` +
     `c=JSON.stringify(c);` +
     `if(navigator.sendBeacon)navigator.sendBeacon(${JSON.stringify(url)},c)` +

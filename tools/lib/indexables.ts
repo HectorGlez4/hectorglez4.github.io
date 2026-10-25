@@ -125,9 +125,14 @@ export function desajustesDeIndexables(
   const esPrimeraDeObra = (p: PaginaIndexable) => esRutaDeObra(p.ruta) && !esServicioPorForma(p.ruta);
   const marcaValida = (marca: string | undefined) =>
     marca !== undefined && (MARCAS_DE_OBRA as readonly string[]).includes(marca);
+  // Con lo que se encontró al lado de cada ruta: no es lo mismo un armazón que dejó de escribir el
+  // atributo que uno que escribe un valor ajeno.
   nombrar(
     `página 1 de Obra sin marca \`${ATRIBUTO_DE_INDEXABLE}\` válida`,
-    ordenadas(declaradas.filter((p) => esPrimeraDeObra(p) && !marcaValida(p.marcaDeObra))),
+    declaradas
+      .filter((p) => esPrimeraDeObra(p) && !marcaValida(p.marcaDeObra))
+      .sort((x, y) => x.ruta.localeCompare(y.ruta, 'es'))
+      .map((p) => `${p.ruta} (${p.marcaDeObra === undefined ? 'sin el atributo' : `«${p.marcaDeObra}»`})`),
   );
   nombrar(
     `marca \`${OBRA_INDEXABLE}\` con \`noindex\``,
@@ -157,7 +162,9 @@ export function titularDeDesajustes(lineas: number): string {
 
 /** La línea del registro cuando la comprobación pasa: los cuatro lectores coinciden. */
 export function informeDeCoincidencia(indexables: number): string {
-  return `El sitemap, los \`noindex\`, Pagefind y la marca de Obra coinciden (${indexables} rutas indexables).`;
+  return `El sitemap, los \`noindex\`, Pagefind y la marca de Obra coinciden (${indexables} ${
+    indexables === 1 ? 'ruta indexable' : 'rutas indexables'
+  }).`;
 }
 
 /** «N Obras publicadas, M indexables»: la línea base de SM-11 en el registro del build. */

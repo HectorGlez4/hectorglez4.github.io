@@ -305,7 +305,7 @@ describe('la comprobación del build, pura', () => {
     // Una página 1 de Obra sin marca, o con una que no es del vocabulario.
     expect(
       desajustesDeIndexables(['/obra/a/b'], [pagina('/obra/a/b', false), conMarca('/obra/a/c', true, 'si')]),
-    ).toEqual([`  · página 1 de Obra sin marca ${atributo} válida: /obra/a/b, /obra/a/c`]);
+    ).toEqual([`  · página 1 de Obra sin marca ${atributo} válida: /obra/a/b (sin el atributo), /obra/a/c («si»)`]);
     // Una indexable con `noindex`, fuera del sitemap y de Pagefind: solo la de la marca.
     expect(desajustesDeIndexables([], [conMarca('/obra/a/b', true, INDEXABLE)])).toEqual([
       `  · marca \`${INDEXABLE}\` con \`noindex\`: /obra/a/b`,
@@ -331,6 +331,9 @@ describe('la comprobación del build, pura', () => {
   it('23.9 — la línea del registro y el titular nombran la marca', () => {
     expect(informeDeCoincidencia(3)).toBe(
       'El sitemap, los `noindex`, Pagefind y la marca de Obra coinciden (3 rutas indexables).',
+    );
+    expect(informeDeCoincidencia(1)).toBe(
+      'El sitemap, los `noindex`, Pagefind y la marca de Obra coinciden (1 ruta indexable).',
     );
     expect(titularDeDesajustes(2)).toMatch(/^El sitemap, los `noindex`, el índice de Pagefind y la marca de Obra no coinciden \(2 desajustes\)/);
   });

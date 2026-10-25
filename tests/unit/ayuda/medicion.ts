@@ -96,6 +96,9 @@ function comoElemento(nodo: Nodo, vistos = new Map<Nodo, Record<string, unknown>
   return elemento;
 }
 
+/** El origen de la dirección del entorno simulado (Historia 23.6). */
+export const ORIGEN_DEL_SANDBOX = 'https://ejemplo.invalid';
+
 /**
  * Ejecuta el arranque y el fichero de medición con un navegador de mentira y recoge lo que
  * envía.
@@ -142,11 +145,9 @@ function comoElemento(nodo: Nodo, vistos = new Map<Nodo, Record<string, unknown>
  * Desde la Historia 23.9 el `<html>` lleva también **la marca de la Obra** (`indexable`): el
  * atributo `ATRIBUTO_DE_INDEXABLE` con el valor que se dé, tal cual —el entorno no lo coteja con
  * nada, que es lo que tiene que hacer el fichero—, y sin él no lo lleva. El `documentElement` lo
- * ofrece por `getAttribute`, como el navegador, junto con `data-vistas`, que sigue además en
- * `dataset`.
+ * ofrece por `getAttribute`, como el navegador, junto con `data-vistas`; el `dataset` sale de los
+ * mismos atributos, así que los dos caminos dicen lo mismo.
  */
-export const ORIGEN_DEL_SANDBOX = 'https://ejemplo.invalid';
-
 export function medicionEnUnSandbox(
   opciones: {
     ruta?: string;
@@ -216,11 +217,11 @@ export function medicionEnUnSandbox(
   const delHtml = new Map<string, string>();
   if (opciones.vistas !== undefined) delHtml.set('data-vistas', opciones.vistas);
   if (opciones.indexable !== undefined) delHtml.set(ATRIBUTO_DE_INDEXABLE, opciones.indexable);
+  const vistasDelHtml = delHtml.get('data-vistas');
   const documento = {
     documentElement: {
-      dataset: opciones.vistas === undefined ? {} : { vistas: opciones.vistas },
+      dataset: vistasDelHtml === undefined ? {} : { vistas: vistasDelHtml },
       getAttribute: (nombre: string) => delHtml.get(nombre) ?? null,
-      hasAttribute: (nombre: string) => delHtml.has(nombre),
     },
     prerendering: opciones.prerendering ?? false,
     visibilityState: opciones.visible === false ? 'hidden' : 'visible',
