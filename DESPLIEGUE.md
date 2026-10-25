@@ -898,8 +898,9 @@ suspenso.
 de su serie —la de los Directorios, que no existen antes de la 26, el día siguiente a
 `DESPLIEGUE_DE_OBRA_Y_DIRECTORIOS`, la llegada que los hace medibles—, salta las jornadas de llegada
 de lo que se juzga en ella y se cierra la jornada en que reúne `MIN_LECTURAS_DE_LINEA_BASE` lecturas
-de su unidad —búsquedas asentadas, la de las búsquedas—. Sin valor, como hoy, el informe dice «sin
-mínimo declarado» y ninguna se cierra nunca. Las ventanas no juntan jornadas de los dos lados de una
+de su unidad —búsquedas asentadas, la de las búsquedas—: **300**, el valor que dio Héctor el
+2026-10-24 y que entró en la 23.11 en un diff visible, antes de leer la primera. Sin valor, el
+informe diría «sin mínimo declarado» y ninguna se cerraría nunca. Las ventanas no juntan jornadas de los dos lados de una
 llegada: el bloque en curso que una llegada corta sin el mínimo se nombra y no se juzga. Si la línea
 base se cerró antes de la llegada de lo que se juzga, las ventanas de antes de esa llegada se juzgan
 —se cuentan desde el cierre— pero dicen que no juzgan lo que llega. Cuando la referencia es

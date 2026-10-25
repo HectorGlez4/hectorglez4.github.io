@@ -328,7 +328,8 @@ que la orden lee sin nombrar ninguna ruta. Ningún módulo de `src/`, `integraci
 `astro.config.mjs` la importa ni la nombra.
 
 **Las constantes que la gobiernan son de `src/lib/umbrales.ts` y las de valor son de Héctor**:
-`MIN_LECTURAS_DE_LINEA_BASE` y `DESPLIEGUE_DE_LA_LECTURA` (sin valor hasta la 23.11),
+`MIN_LECTURAS_DE_LINEA_BASE` (300, el valor de Héctor, desde la 23.11), `DESPLIEGUE_DE_LA_LECTURA`
+(sin valor hasta que la 23 llegue al sitio en vivo; se lo da la 23.11, en un commit aparte),
 `PASADAS_QUE_ESCRIBEN_EN_PRODUCCION` (vacía; la anota él el día de la 25.3 y de la 25.7) y
 `SM12_CON_FACEBOOK` (apagada; la enciende él en la 25.7). Ningún agente les da valor. Los **cortes de
 serie** viven en `CORTES_DE_SERIE_DECLARADOS`, una lista de constantes de despliegue sin ninguna
