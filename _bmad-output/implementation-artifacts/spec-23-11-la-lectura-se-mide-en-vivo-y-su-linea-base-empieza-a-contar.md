@@ -179,3 +179,66 @@ veces— y por eso NFR-7 no se midió.
   fallaron diez. No se buscó la causa.
 - **NFR-7** — no se midió: la puerta lo pide solo con los pasos de build, comprobación y pruebas
   en verde. Lighthouse 13.5.0 quedó preparado por `npx` para la siguiente puerta.
+
+## Verificación previa a la fusión — 2026-10-25 (intento 2)
+
+Puerta previa a la fusión de la etapa s-23 (rama `v8/epica-23`, intento 2), en el worktree
+`.claude/worktrees/v8-epica-23`, sobre `a98156f7f2` —el arreglo del recorrido de «nada huérfano»
+que pidió el intento 1—, entre las 16:40 y las 17:20 UTC. Node v24.3.0, npm 11.4.2. 103 GB
+libres. Los puertos 4321, 4399, 4400, 4402 y 8787 estaban libres al empezar y quedan libres al
+terminar. No se corrió nada con `--remote` ni contra el D1 de producción, el Worker o el sitio en
+vivo. **Resultado: la puerta pasa** —construcción, comprobación, pruebas de unidad y de punta a
+punta en verde, con ocho fallos de punta a punta por carga que pasan a la repetición— y NFR-7 no
+empeora.
+
+- **Sincronía.** `git fetch origin`: `origin/main` (`ed5a3f47e2`) ya es antecesor de `HEAD`, así
+  que no hubo fusión ni conflictos.
+- **`npm ci`** — no se corrió: `package-lock.json` cambió por última vez el 2026-10-24 a las
+  21:27 (+02:00) y `node_modules` se instaló después, el 2026-10-25 a las 01:11.
+- **`npm run build`** (`logs/s-23/gate2-build.log`) — en verde, `EXIT:0`: 5.288 páginas en 1 min
+  25 s; el sitemap, los `noindex`, Pagefind y la marca de Obra coinciden (4.873 rutas
+  indexables); Pagefind indexa 4.873 páginas. Un solo aviso, `[fichas-de-obra]`, el de siempre.
+  El peso: 467.049.898 bytes (445,4 MiB) en 15.339 ficheros; juzgado 466.951.408 bytes
+  (445,3 MiB), quedan 304,7 MiB hasta el aviso de 750 MiB; 5.116 PNG, sin tope.
+- **`npx astro check`** (`logs/s-23/gate2-astro-check.log`) — en verde, `EXIT:0`: 335 ficheros,
+  0 errores, 0 avisos, 20 sugerencias.
+- **`npm test`** (desprendido, `logs/s-23/gate2-npm-test.log`) — en verde, `EXIT:0`: 132 ficheros
+  y 6.048 pruebas pasadas, 0 fallidas, en 706,8 s.
+- **`npm run test:e2e`** entero, los dos proyectos (desprendido, `logs/s-23/gate2-e2e.log`), con
+  los dos `webServer` de `playwright.config.ts`: el receptor local (`npm run medicion -- local`,
+  `wrangler dev` con el D1 local) y el sitio construido con
+  `MEDICION_ENDPOINT=http://localhost:8787/` — `EXIT:1`: de 674 pruebas, **577 pasadas,
+  8 fallidas y 89 omitidas**, en 6,4 min con 5 trabajadores y la máquina a carga media 17–22. Las
+  ocho son barridos del sitemap entero que se paran por tiempo sin llegar a su aserción
+  («Test timeout of 30000ms exceeded» o, en la de Tarjetas, de 90000 ms): `[movil]`
+  `rutas-de-salida.spec.ts:98`, `seo.spec.ts:59` y `:68`, `tarjeta.spec.ts:79` y `:154`;
+  `[escritorio]` `seo.spec.ts:59` y `:68` y `tarjeta.spec.ts:154`. La de «nada huérfano»
+  (`seo.spec.ts:126`), que falló dos veces en el intento 1, **pasó en los dos proyectos**: 1,5 min
+  en móvil y 1,4 min en escritorio.
+- **Repetición de los ficheros que fallaron**, una vez, con un solo trabajador para quitar la
+  competencia (`npx playwright test tests/e2e/rutas-de-salida.spec.ts tests/e2e/seo.spec.ts
+  tests/e2e/tarjeta.spec.ts --workers=1`, `logs/s-23/gate2-e2e-repeticion.log`) — en verde,
+  `EXIT:0`: **46 pasadas**, 0 fallidas, en 6,9 min (`seo.spec.ts:126` en escritorio, 1,0 min).
+  Ninguna prueba falla dos veces: las ocho fueron inestabilidad por carga.
+- **NFR-7** (`logs/s-23/gate2-nfr7-*.log`) — **no empeora**. Lighthouse **13.5.0** por
+  `npx -y lighthouse@13.5.0`, con Google Chrome 155.0.8059.85 (`CHROME_PATH`, `--headless=new`),
+  solo la categoría de rendimiento y el preajuste móvil por omisión: `formFactor: mobile`,
+  limitación simulada (`simulate`), 4G lento —150 ms de RTT, 1.638,4 kbps— y CPU ×4. La página:
+  la Página de Cita `/cita/antonio-machado-caminante-no-hay-camino-se-hace-camino/`, que admite
+  Imagen (`data-imagen` en el marcado) y es idéntica en el Corpus de las dos ramas. Las dos
+  construcciones, de hoy, con `MEDICION_ENDPOINT=http://localhost:8787/ npm run build` y un
+  receptor ficticio en 8787 que contesta 204 a todo con CORS abierto —el mismo para las dos,
+  recibió las balizas de cada pasada—, servidas con `node tests/servidor.mjs` (`DIST`,
+  `PUERTO=4400`). Primero `git switch --detach origin/main` (`ed5a3f47e2`), construcción y cinco
+  pasadas; después `git switch v8/epica-23`, reconstrucción y cinco pasadas. Carga media de la
+  máquina durante las pasadas: 9–10 (principal) y 7–9 (rama).
+
+  | Construcción | LCP (ms) por pasada | Mediana LCP | FCP mediana | TBT | CLS |
+  |---|---|---|---|---|---|
+  | `origin/main` `ed5a3f47e2` | 1952, 1953, 1803, 1802, 1953 | **1952** | 1353 | 0 | 0 |
+  | `v8/epica-23` `a98156f7f2` | 1952, 1952, 1952, 1952, 1951 | **1952** | 1352 | 0 | 0 |
+
+  La rama queda por debajo de 2.500 ms y de la mediana de la principal más 100 ms: veredicto
+  **ok**. La página de la rama pesa 27.670 bytes de HTML frente a 28.346 y pide además el fichero
+  de medición (`/medicion/514e7587.js`, 3.813 bytes transferidos): 185.763 bytes en total frente a
+  182.626, con el mismo LCP.
