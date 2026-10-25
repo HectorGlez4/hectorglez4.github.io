@@ -554,12 +554,16 @@ tampoco un clic anterior a que el fichero se active —va con `defer`, después 
 que **toda continuación es cota inferior**: dice al menos cuánto se siguió, nunca cuánto. Al revés,
 un clic cuya navegación no llega a ocurrir —se detiene, o un `beforeunload` la cancela— cuenta como
 salida y gasta la de la carga: es raro y se tolera. Las páginas
-2+, `/buscar/` y el 404 no emiten lectura, así que sus salidas salen **sin lectura** y ahí no se
-calcula continuación: se cuentan solas. **El 404 no tiene ruta propia**: se sirve en la dirección
-que se pidió, así que sus salidas llevan esa ruta —la de una Cita retirada, un Autor retirado, una
-Obra absorbida o una errata—, y la consulta de abajo solo puede apartar la de «Ver esta cita»
-(`cita-del-dia` fuera de la portada); las de la cabecera y la Atribución del 404 caen en la familia
-de su ruta, sin lectura, hasta que la 23.10 resuelva las rutas contra el censo. Las zonas que coloca la Épica 23 son once —`cabecera`,
+2+, `/buscar/`, el 404 y —hasta que la 23.9 le dé vista— la página 1 de la Obra que no se indexa
+no emiten lectura, así que sus salidas salen **sin lectura** y ahí no se calcula continuación: se
+cuentan solas. Ninguna emite vista, y así las aparta la consulta de abajo: una salida entra en la
+continuación solo si su ruta tuvo vista esa jornada. **El 404 no tiene ruta propia**: se sirve en
+la dirección que se pidió —la de una Cita retirada, un Autor retirado, una Obra absorbida o una
+errata—, que no tiene vista, así que sus salidas quedan entre las sin vista de la familia de esa
+ruta; la superficie exacta la resuelve la 23.10 contra el censo. Los chips de respaldo de las
+Rutas de salida —«Explorar por tema», los Temas del sitio cuando una Cita no tiene hermanas ni
+Temas propios— cuentan como `chip-de-tema`, igual que los Temas de la Cita, y el último recurso,
+«Sobre {Autor}», como `rutas-de-salida`; con el corpus de hoy ninguno de los dos se pinta. Las zonas que coloca la Épica 23 son once —`cabecera`,
 `atribucion`, `chip-de-tema`, `colecciones`, `listado`, `paginacion`, `lista-de-obras`,
 `resultado`, `cita-del-dia`, `rutas-de-salida` y `autores-de-portada`—; las otras cinco del
 vocabulario llegan con las Épicas 24, 26 y 28, y hasta entonces no aparecen en la tabla. Como la
@@ -614,22 +618,25 @@ npx --yes wrangler@4.151.1 d1 execute medicion --remote --command \
   "SELECT jornada, via, COUNT(*) lecturas FROM eventos WHERE evento='lectura' AND via IS NOT NULL AND jornada >= 'AAAA-MM-DD' GROUP BY jornada, via ORDER BY jornada DESC, lecturas DESC LIMIT 60"
 
 # Salidas internas por zona y lecturas, por superficie — SM-4, Historia 23.7. Cambia AAAA-MM-DD
-# por la primera jornada UTC completa tras la llegada de la 23. La superficie va aquí por el
-# prefijo de la ruta, a mano, hasta que la 23.10 la resuelva contra el censo. El 404 se sirve en la
-# ruta que se pidió, nunca en `/404`: su «Ver esta cita» se aparta por la zona (`cita-del-dia`
-# fuera de la portada) y lo que sale en una ruta de ninguna familia va a «otra»; sus salidas por la
-# cabecera y la Atribución en la ruta de una Cita, un Autor, un Tema o una Obra que ya no existen
-# caen en esa familia, sin lectura, e inflan un poco su continuación. Las páginas 2+ y `/buscar/`
-# salen aparte y sin lecturas: ahí no se calcula continuación. La continuación de una superficie
-# es sus salidas frente a sus lecturas, y es cota inferior: la pestaña nueva no se mide.
+# por la primera jornada UTC completa tras la llegada de la 23; la jornada en curso (UTC) no
+# entra, que aún no ha cerrado. La superficie va aquí por el prefijo de la ruta, a mano, hasta que
+# la 23.10 la resuelva contra el censo. `con_vista` dice si la ruta tuvo vista esa jornada: las
+# salidas sin vista —páginas 2+, `/buscar/`, el 404 en la ruta que se pidió y la Obra que no se
+# indexa hasta la 23.9— salen aparte, sin lectura, y no entran en la continuación.
 npx --yes wrangler@4.151.1 d1 execute medicion --remote --command \
-  "SELECT CASE WHEN zona='cita-del-dia' AND ruta<>'/' THEN '404' WHEN ruta GLOB '*/[0-9]/' OR ruta GLOB '*/[0-9][0-9]/' OR ruta GLOB '*/[0-9][0-9][0-9]/' THEN 'paginas-2+' WHEN ruta='/' THEN 'portada' WHEN ruta='/buscar/' THEN 'buscar' WHEN ruta LIKE '/cita/%' THEN 'cita' WHEN ruta LIKE '/autor/%' THEN 'autor' WHEN ruta LIKE '/tema/%' THEN 'tema' WHEN ruta LIKE '/coleccion/%' THEN 'coleccion' WHEN ruta LIKE '/obra/%' THEN 'obra' ELSE 'otra' END AS superficie, evento, zona, COUNT(*) n FROM eventos WHERE jornada >= 'AAAA-MM-DD' AND evento IN ('lectura','salida-interna') GROUP BY superficie, evento, zona ORDER BY superficie, evento, n DESC"
+  "WITH e AS (SELECT jornada, ruta, evento, zona FROM eventos WHERE jornada >= 'AAAA-MM-DD' AND jornada < date('now')), v AS (SELECT DISTINCT jornada, ruta FROM e WHERE evento LIKE 'vista-%'), s AS (SELECT CASE WHEN e.ruta='/' THEN 'portada' WHEN e.ruta='/buscar/' THEN 'buscar' WHEN e.ruta LIKE '/cita/%' THEN 'cita' WHEN e.ruta LIKE '/autor/%' THEN 'autor' WHEN e.ruta LIKE '/tema/%' THEN 'tema' WHEN e.ruta LIKE '/coleccion/%' THEN 'coleccion' WHEN e.ruta LIKE '/obra/%' THEN 'obra' ELSE 'otra' END AS superficie, v.ruta IS NOT NULL AS con_vista, e.evento, e.zona FROM e LEFT JOIN v ON v.jornada = e.jornada AND v.ruta = e.ruta WHERE e.evento IN ('lectura','salida-interna')) SELECT superficie, con_vista, evento, zona, COUNT(*) n FROM s GROUP BY superficie, con_vista, evento, zona ORDER BY superficie, con_vista DESC, evento, n DESC"
+
+# La continuación por superficie — SM-4, Historia 23.7: sus salidas frente a sus lecturas, solo en
+# las rutas que tuvieron vista esa jornada, desde la misma jornada de partida y sin la de hoy. Es
+# cota inferior: la pestaña nueva no se mide.
+npx --yes wrangler@4.151.1 d1 execute medicion --remote --command \
+  "WITH e AS (SELECT jornada, ruta, evento FROM eventos WHERE jornada >= 'AAAA-MM-DD' AND jornada < date('now') AND evento IN ('lectura','salida-interna') AND EXISTS (SELECT 1 FROM eventos v WHERE v.jornada = eventos.jornada AND v.ruta = eventos.ruta AND v.evento LIKE 'vista-%')) SELECT CASE WHEN ruta='/' THEN 'portada' WHEN ruta LIKE '/cita/%' THEN 'cita' WHEN ruta LIKE '/autor/%' THEN 'autor' WHEN ruta LIKE '/tema/%' THEN 'tema' WHEN ruta LIKE '/coleccion/%' THEN 'coleccion' WHEN ruta LIKE '/obra/%' THEN 'obra' ELSE 'otra' END AS superficie, SUM(evento='salida-interna') salidas, SUM(evento='lectura') lecturas, ROUND(1.0 * SUM(evento='salida-interna') / NULLIF(SUM(evento='lectura'), 0), 3) continuacion FROM e GROUP BY superficie ORDER BY superficie"
 
 # Salidas desde los resultados de `/buscar/`, por jornada — el numerador de SM-13, Historia 23.7.
-# La misma jornada de partida. El denominador, las búsquedas asentadas, llega con la 23.8: hasta
-# entonces la serie se lee sola, sin tasa.
+# La misma jornada de partida, sin la de hoy. El denominador, las búsquedas asentadas, llega con
+# la 23.8: hasta entonces la serie se lee sola, sin tasa.
 npx --yes wrangler@4.151.1 d1 execute medicion --remote --command \
-  "SELECT jornada, COUNT(*) salidas FROM eventos WHERE evento='salida-interna' AND ruta='/buscar/' AND zona='resultado' AND jornada >= 'AAAA-MM-DD' GROUP BY jornada ORDER BY jornada DESC LIMIT 30"
+  "SELECT jornada, COUNT(*) salidas FROM eventos WHERE evento='salida-interna' AND ruta='/buscar/' AND zona='resultado' AND jornada >= 'AAAA-MM-DD' AND jornada < date('now') GROUP BY jornada ORDER BY jornada DESC LIMIT 30"
 
 # Lo que se buscó y no había, para decidir a quién sembrar — FR-8, SM-6.
 npx --yes wrangler@4.151.1 d1 execute medicion --remote --command \

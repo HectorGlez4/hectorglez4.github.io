@@ -3,8 +3,8 @@ title: 'Historia 23.7 — Cada salida interna dice desde qué zona'
 type: 'feature'
 created: '2026-10-25'
 status: 'done'
-baseline_revision: 'c7b4757cb613309d3245ed5bc4d6826c246f4e1d'
-review_loop_iteration: 0
+baseline_revision: 'ebc9088534cc9a5eae709c2d7e1a8007d7124756'
+review_loop_iteration: 1
 followup_review_recommended: true
 context:
   - '{project-root}/_bmad-output/implementation-artifacts/epic-23-context.md'
@@ -86,12 +86,12 @@ deferred: []
 - `src/components/{TarjetaDeCita,Chips,Paginacion,ListaDeObras,RutasDeSalida,Atribucion}.astro` -- `zona: Zona` obligatoria y `data-zona={zona}` en su contenedor (RutasDeSalida pasa `chip-de-tema` a sus Chips de Tema y su propia zona al de «Sobre {Autor}») -- AC de los componentes compartidos.
 - `src/components/{BloqueDeCita,Armazon}.astro`, `src/pages/{index,404,buscar}.astro`, `src/pages/cita/[slug].astro`, `src/pages/{tema,autor,coleccion}/[slug]/[...page].astro`, `src/pages/obra/[autor]/[slug]/[...page].astro` -- pasar la zona a cada componente y poner `data-zona`/`data-sin-zona` en los contenedores que nombra Always -- las once de hoy y las dos exenciones.
 - `tests/unit/ayuda/medicion.ts` -- `pulsar(enlace, gesto)`: `enlace` `null` (objetivo fuera de un enlace) o `{ href, contenedores?: ({ zona } | { sinZona })[] (del más cercano al más lejano), target?, descarga? }`; un `a` falso resuelto con `URL` contra la dirección de ahora (`origin`, `pathname`, `target`, `getAttribute`, `hasAttribute`, `closest` para listas de selectores `etiqueta[atributo]`/`[atributo]`), y `click` despachado a ventana y documento con `button` (0), modificadores y `defaultPrevented` -- el entorno que pide la historia.
-- `tests/unit/medicion.test.ts` -- `describe('Historia 23.7 — …')` con una prueba por fila de la matriz y una sola escucha de `click`, en la ventana, sin captura; `CORPUS_MEDIDO` marca una Cita `aptaParaPortada: true` (portada y 404 con Cita del Día; si eso mueve alguna afirmación existente, se ajusta diciendo por qué); sobre `sitioMedido()`: en toda página con vista en `data-vistas`, todo `<a href>` de `main` del mismo origen que no sea ancla de la propia página tiene zona de `ZONAS` o exención de `EXENCIONES_DE_ZONA` en sí o en un antepasado (las anclas, exención que nombra la prueba); en todo `dist/`, todo `data-zona` ∈ `ZONAS`, todo `data-sin-zona` ∈ `EXENCIONES_DE_ZONA`, las zonas presentes son exactamente las once (constante con nombre en la prueba, ⊂ `ZONAS`) y las exenciones, las dos, cada una en su sitio; la `<header>` de cada página lleva `cabecera`; `ul[data-resultados]` lleva `resultado`; y, con `ts`, las Props de los seis componentes declaran `zona: Zona` sin `?` -- Vitest, que corre el CI.
+- `tests/unit/medicion.test.ts` -- `describe('Historia 23.7 — …')` con una prueba por fila de la matriz y una sola escucha de `click`, en la ventana, sin captura; `CORPUS_MEDIDO` marca una Cita `aptaParaPortada: true` (portada y 404 con Cita del Día; si eso mueve alguna afirmación existente, se ajusta diciendo por qué); sobre `sitioMedido()`: en toda página que carga el fichero de medición —con lectura o sin ella—, todo `<a href>` de `main` del mismo origen que no sea ancla de la propia página tiene zona de `ZONAS` o exención de `EXENCIONES_DE_ZONA` en sí o en un antepasado (las anclas, exención que nombra la prueba), y entre las juzgadas sin lectura están cada página 2+, `/buscar/` y el 404 —nunca la página 1 de la Obra que no se indexa, que la 23.9 pasa a con lectura—; en todo `dist/`, todo `data-zona` ∈ `ZONAS`, todo `data-sin-zona` ∈ `EXENCIONES_DE_ZONA`, **están** las once de hoy (constante con nombre en la prueba, ⊂ `ZONAS`), sin exigir que sean las únicas, y las exenciones, las dos, cada una en su sitio; una tabla de colocación fija qué zona de las once, o qué exención, lleva cada sitio, comparando solo las declaraciones que no son zonas de épicas posteriores (`ZONAS` fuera de las once); la `<header>` de cada página lleva `cabecera`; `ul[data-resultados]` lleva `resultado`; y, con `ts`, las Props de los seis componentes declaran `zona: Zona` sin `?`. **Ninguna afirmación de esta prueba se rompe con lo que planean las historias siguientes**, cuyos criterios dicen que la prueba de la 23.7 «sigue pasando» o las cubre «sin tocarla»: la vista y la lectura de la Obra que no se indexa (23.9), la Tarjeta de Obra con `tarjeta-de-obra` hacia `/obra/…` en la Cita (24.4), las zonas de la 24, `directorio` (26.3) y `obras-de-portada` (28.3) -- Vitest, que corre el CI.
 - `tests/unit/ayuda/enlaces.ts` -- tokenizador mínimo con pila de etiquetas (vacías, `<script>`/`<style>` y comentarios saltados, comillas con `>` dentro) que da por cada `<a>` su `href`, si está en `main` y la declaración más cercana; probado en `medicion.test.ts` con fragmentos escritos a mano (anidadas, exención dentro de zona, sin zona) para no pasar en vacío -- `parse5` no es dependencia declarada.
 - `tests/unit/vocabulario.test.ts` -- quitar la entrada 23.7 de `PENDIENTES`; `PRODUCIR_DEL_FICHERO[salida-interna]` pulsa un enlace a otra ruta con la zona del escenario (por omisión `ZONAS[0]`); un escenario por cada zona de `ZONAS`, con `zona` esperada en todos; «nueve eventos de hoy» -- correspondencia de la 23.2.
 - `tests/unit/ingreso-construido.test.ts` -- el literal de la Paginación, con su zona.
 - `tests/e2e/receptor.spec.ts` -- `describe('Historia 23.7 — …')`: en la Cita, con la navegación del destino anulada (`page.route(…, r => r.fulfill({ status: 204 }))`, o `r.abort('aborted')`) para seguir en la carga: Control/Meta-clic, clic central y «Saltar al contenido» no emiten; luego un clic de ratón en «Más de Séneca» da vista, lectura y `salida-interna` `rutas-de-salida` (claves `evento, ruta, zona`), y un segundo clic, nada; en `/buscar/?q=…` pulsar un resultado llega con `zona: 'resultado'`, `ruta: '/buscar/'` y sin lectura; con la caché de atrás y adelante de verdad (patrón de la 23.5, salto si no restaura): en la Cita, salir, volver y salir otra vez da dos salidas, la segunda tras la lectura nueva; en `/buscar/`, resultado, atrás, otro resultado: dos salidas `resultado` -- Playwright local.
-- `AGENTS.md` -- convención de la medición: la salida la emite solo el fichero, con qué reglas, y dónde van zona y exención; «Known pitfalls»: un enlace interno nuevo en `main` de una superficie con lectura necesita zona o exención, o la prueba de `dist/` falla.
+- `AGENTS.md` -- convención de la medición: la salida la emite solo el fichero, con qué reglas, y dónde van zona y exención; «Known pitfalls»: un enlace interno nuevo en `main` de una página que carga el fichero necesita zona o exención, o la prueba de `dist/` falla; una zona del vocabulario que la Épica 23 no coloca entra con su épica sin tocar la prueba.
 - `DESPLIEGUE.md` -- §3: párrafo de la Salida interna (una por carga, tras la lectura, zona del contenedor, pestaña nueva sin medir: toda continuación es cota inferior; páginas 2+, `/buscar/` y 404 salen sin lectura y ahí no se calcula continuación) y dos consultas a mano desde la primera jornada UTC completa tras la llegada de la 23: salidas por zona frente a lecturas por superficie (SM-4) y salidas `resultado` de `/buscar/` (numerador de SM-13; el denominador llega con la 23.8).
 
 **Acceptance Criteria:**
@@ -102,6 +102,62 @@ deferred: []
 - Given el fichero con el punto final de producción, when se mide, then cabe en el tope nuevo, cuyo comentario dice la medida.
 
 ## Spec Change Log
+
+### 2026-10-25 — Vuelta desde la revisión (review_loop_iteration 1)
+
+- **Hallazgos que la disparan** (bad_spec, los dos medios): la prueba de `dist/` exige que las
+  zonas presentes sean **exactamente** las once y que cada fila de `COLOCACION` lleve exactamente
+  sus declaraciones, así que la 24.4 (`tarjeta-de-obra`, también hacia `/obra/…` en la Cita), la
+  26.3 (`directorio`) y la 28.3 (`obras-de-portada`) la pondrían en rojo, cuando sus criterios
+  dicen que «sigue pasando» o que las cubre «sin tocarla» (intent-alignment); y su suelo de
+  páginas sin lectura cuenta la página 1 de la Obra que no se indexa, que la 23.9 pasa a con
+  lectura, cuando la 23.7 dice que esa página entra en la prueba «sin tocarla» (ac-auditor).
+- **Qué se enmienda**: en Tasks & Acceptance, la tarea de `tests/unit/medicion.test.ts` —toda
+  página que carga el fichero; «están» las once y no «son exactamente»; la tabla de colocación
+  compara solo lo que no es zona de una épica posterior; el suelo sin lectura nombra las páginas
+  2+, `/buscar/` y el 404, nunca la Obra que no se indexa; y la condición general de que nada de
+  la prueba se rompa con la 23.9, la 24, la 26 o la 28— y la de `AGENTS.md` (una zona que la
+  Épica 23 no coloca entra con su épica sin tocar la prueba).
+- **Estado malo que se evita**: una prueba de la 23.7 que una historia posterior del plan tenga
+  que editar para seguir en verde, o que pase a rojo con un cambio que su criterio declara
+  compatible.
+- **KEEP** (lo commiteado en `ebc9088534cc9a5eae709c2d7e1a8007d7124756` que funciona y se
+  conserva tal cual): la escucha `k` y su regla entera, `S` y su rearme en `n()`, la fuente 5 y
+  `b(v,t,z,y,j)`; `ATRIBUTO_DE_ZONA`, `ATRIBUTO_SIN_ZONA`, `EXENCIONES_DE_ZONA` y sus docblocks;
+  `MAX_BYTES_GUION_DE_MEDICION = 3730`; la prop `zona: Zona` de los seis componentes y cada zona y
+  exención colocada; `pulsar` y sus formas; el tokenizador de `tests/unit/ayuda/enlaces.ts`; las
+  pruebas de la matriz; el alcance de la prueba de `dist/` (toda página que pide el fichero), la
+  constante `ZONAS_DE_HOY`, las 29 filas de `COLOCACION` (cambia solo cómo compara), la prueba de
+  las exenciones, la de la cabecera y `resultado`, la de la Cita del Día y la de las Props; el
+  `vocabulario.test.ts` de la 23.2; el e2e de la 23.7; el párrafo y las consultas de
+  `DESPLIEGUE.md` §3; la convención de `AGENTS.md`.
+- **Parches de la misma pasada, que sobreviven a la vuelta** y se aplican en la pasada siguiente
+  del paso 4, no aquí:
+  1. (medio) La consulta de SM-4 de `DESPLIEGUE.md`: separar las salidas de una ruta sin vista en
+     su jornada —páginas 2+, `/buscar/`, el 404 en cualquier ruta, la Obra que no se indexa hasta
+     la 23.9—, acotar `jornada < date('now')`, y una consulta que dé salidas, lecturas y
+     continuación por superficie; el párrafo de §3, al día.
+  2. Una fila con exención y zona en el mismo elemento (`pulsar` lo admite).
+  3. El docblock del fichero: una isla que se quede con el clic de un enlace llama a
+     `preventDefault` desde el enlace, el documento o un antepasado, nunca desde una escucha de
+     `click` en la ventana puesta después.
+  4. `vocabulario.test.ts`: los escenarios de zona, solo en los eventos que declaran `zona`.
+  5. La detección de literales de zona en `src/lib/medicion.ts`, estrecha como la de las marcas.
+  6. Filas de `COLOCACION`: `/coleccion/frases-cortas/2/` y la página 2 de la Obra (`listado`), la
+     Paginación de `/autor/seneca/2/` hacia la 1, y la Obra de la Atribución del 404.
+  7. Las ramas de respaldo de `RutasDeSalida` («Explorar por tema», `chip-de-tema`; «Sobre
+     {Autor}», `rutas-de-salida`) en un `dist/` construido.
+  8. `DESPLIEGUE.md`: los chips de respaldo cuentan como `chip-de-tema` y «Sobre {Autor}» como
+     `rutas-de-salida`.
+  9. `target`: sin distinguir mayúsculas y admitiendo `_self`, `_top` y `_parent` como misma
+     pestaña; con sus filas.
+  10. Los nombres cortos del fichero que se sombrean (`a` y `k`).
+  11. «39 pruebas», rancio en el resultado.
+  12. El e2e: la prueba de teclado afirma `ruta`, y una prueba nueva en el 404 servido en la ruta
+      pedida.
+  13. El tokenizador: un bloque cierra un `<p>` abierto y un `<a>` cierra otro `<a>`, como el
+      navegador.
+  14. `AGENTS.md`: sin contar «cinco» zonas pendientes.
 
 ## Review Triage Log
 
@@ -140,6 +196,78 @@ revisión independiente llega después.
 
 Rechazados, con su porqué: exigir `isTrusted` (la historia nombra `element.click()` como camino que emite la lectura antes); el cierre de la pasada anterior sin revisión (esta es la revisión); los riesgos sin `deferred` y `sprint-status.yaml` sin tocar (los riesgos se escriben en el resultado, y el tablero lo lleva el bucle); la exención del 404 frente a los chips de la portada (las dos exenciones las nombra la historia); las zonas de página sin tipo (la prueba de `dist/` coteja cada valor con `ZONAS` y ahora fija su sitio); `atribucion` fija en `BloqueDeCita` (la tabla de EXPERIENCE.md da `atribucion` a toda Atribución, también la de la Cita del Día); la zona en cada `li.tarjeta` (la historia hace de `zona` prop obligatoria de `TarjetaDeCita`); numerador de SM-13 por carga frente a por búsqueda (pulsar un resultado termina la carga); el tokenizador frente al DOM (ningún `<p>` con zona contiene un bloque, y `noscript`/`template` solo harían la prueba más estricta); las tres listas de zonas colocadas (la prueba es la que obliga); `/kit` y `/lote` (no cargan el fichero); la barra final en `pathname` (toda ruta sale de sus constructores, con barra); la segunda línea base (`fe55077e` es el padre del commit que solo añade la spec); el DOM de mentira en CI (reparto de la propia historia); la prueba sobre el corpus de prueba y no el real (convención del proyecto; el `dist/` real se escaneó limpio en la revisión: 4.873 páginas, 39.976 enlaces); `astro check` por las Props (comprobado a mano dos veces); D1 sin ejercer (desplegar queda fuera de esta pasada); el chip «Sobre {Autor}» en `rutas-de-salida` (el PRD da a esa zona «las demás rutas de salida (FR-12)»); la zona ajena sin enviar (EXPERIENCE.md); el tope subido (lo pide la spec).
 
+### 2026-10-25 — Review pass
+- intent_gap: 0
+- bad_spec: 2 (high 0, medium 2, low 0)
+- patch: 14 (high 0, medium 1, low 13)
+- defer: 0
+- reject: 14 (high 0, medium 0, low 14)
+- addressed_findings:
+  - `[medium]` `[bad_spec]` La prueba de `dist/` exige que las zonas presentes sean **exactamente** las once de hoy, y `COLOCACION` exige igualdad exacta de las declaraciones de los enlaces que casan: en cuanto la 24.4 ponga la Tarjeta de Obra (`tarjeta-de-obra`, que enlaza a `/obra/…` en la Cita, donde la Atribución ya enlaza con `atribucion`), la 26.3 `directorio` o la 28.3 `obras-de-portada`, la prueba se pone en rojo, y esas historias dicen que la prueba de la 23.7 «sigue pasando» o las cubre «sin tocarla» (intent-alignment). La raíz es la tarea de la spec, «las zonas presentes son exactamente las once»: se enmienda Tasks (Spec Change Log) y se vuelve por el paso 3.
+  - `[medium]` `[bad_spec]` El suelo de `sinLectura` cuenta la Obra que no se indexa (`PAGINAS_2.length + OBRAS.length - 1 + 2`, 7 hoy): cuando la 23.9 le dé vista, la cifra baja a 6 y la prueba falla, y la propia historia dice que esa página «entra en la prueba en cuanto la 23.9 le da vista, sin tocarla» (ac-auditor). La tarea de la spec no pedía que la prueba sobreviviera sin cambios a lo que planean la 23.9 y las Épicas 24, 26 y 28, y la revisión anterior metió esa cuenta: se enmienda con esa condición y se vuelve por el paso 3.
+
+Los catorce parches de esta pasada **sobreviven a la vuelta** y se aplican en la pasada siguiente del
+paso 4 (la lista, en el Spec Change Log): la consulta de SM-4 de `DESPLIEGUE.md` (medio: separa por
+la vista de la ruta en la jornada las salidas sin lectura —páginas 2+, `/buscar/`, el 404 en
+cualquier ruta y la Obra que no se indexa—, acota la jornada en curso y calcula la continuación;
+blind-hunter, intent-alignment, ac-auditor) y trece bajos: la exención y la zona en el mismo
+elemento, sin prueba (blind-hunter); la isla que se queda con el clic desde una escucha de ventana
+posterior (blind-hunter, edge-case-hunter); los escenarios de zona de `vocabulario.test.ts` que no
+prueban nada fuera de la salida (blind-hunter); la detección de literales de zona demasiado ancha
+(blind-hunter); filas de `COLOCACION` que faltan (blind-hunter); las ramas de respaldo de
+`RutasDeSalida` sin construir en ninguna prueba (verification-gap, ac-auditor, blind-hunter); los
+chips de respaldo sin línea en `DESPLIEGUE.md` (blind-hunter); `target` comparado tal cual
+(blind-hunter, edge-case-hunter); nombres cortos que se sombrean en el fichero compacto
+(blind-hunter); «39 pruebas» rancio en el resultado (blind-hunter); la prueba de teclado sin
+`ruta` y ningún 404 en un navegador de verdad (blind-hunter, ac-auditor); el tokenizador sin los
+cierres implícitos de `<p>` y `<a>` (edge-case-hunter); y el «cinco zonas» de `AGENTS.md`, que se
+queda rancio con la primera zona de la 24 (blind-hunter).
+
+Rechazados, con su porqué: las zonas de página sin tipo y los nombres de atributo escritos a mano
+(blind-hunter, ac-auditor: una errata de valor la coteja con `ZONAS` la prueba de `dist/`, que corre
+el CI, y una de nombre deja el enlace sin declaración y la misma prueba lo nombra); nada que guarde
+los enlaces de fuera de `main` (blind-hunter: la historia acota la regla a `main`); los enlaces de
+un Modelo de Ingreso (blind-hunter: hoy solo añaden enlaces a otro origen —Ko-fi, las tiendas—, que
+la escucha no cuenta); el peso del HTML y la zona en el párrafo sin enlace de la Atribución
+(blind-hunter: el contrato pone `atribucion` en los dos `<p>`, son unos bytes por tarjeta y el paso
+del peso del CI vigila `dist/`); `review_loop_iteration: 0`, la primera entrada del registro y
+`done` junto a `followup_review_recommended: true` (blind-hunter: es como el flujo los lleva); lo
+diferido solo en prosa y `sprint-status.yaml` sin tocar (blind-hunter: son historias planeadas
+—23.8, 23.10, la pasada de métricas—, no trabajo diferido, y el tablero lo lleva el bucle); leer
+`defaultPrevented` en un `setTimeout` (edge-case-hunter: la carga puede irse antes de que corra y
+perder la salida; el orden de las escuchas se documenta); el alcance más ancho que la intención
+(intent-alignment: es un superconjunto); el DOM simulado y el Playwright local (intent-alignment: el
+reparto lo fija la historia); `astro check` sin prueba automática que rompa (intent-alignment,
+ac-auditor: comprobado a mano tres veces, la última con siete errores por siete mutaciones); el
+chip «Sobre {Autor}» en `rutas-de-salida` (intent-alignment: lo fija el contrato, con el PRD, que da
+a esa zona «las demás rutas de salida (FR-12)»); D1 sin ejercer (intent-alignment: desplegar es del
+cierre de la épica).
+
+### 2026-10-25 — Review pass
+- intent_gap: 0
+- bad_spec: 0
+- patch: 14 (high 0, medium 1, low 13)
+- defer: 0
+- reject: 0
+- addressed_findings:
+  - `[medium]` `[patch]` La consulta de SM-4 de `DESPLIEGUE.md` mezclaba en la continuación salidas sin lectura —la Obra que no se indexa, el 404 en la ruta que se pidió— y contaba la jornada UTC en curso. Ahora `con_vista` separa las salidas de una ruta sin vista esa jornada (páginas 2+, `/buscar/`, el 404, la Obra que no se indexa hasta la 23.9), las tres consultas acotan `jornada < date('now')` y una segunda da salidas, lecturas y continuación por superficie solo con vista; el párrafo de §3 lo dice. Las tres se ejecutaron contra una tabla SQLite con la forma de la de D1.
+  - `[low]` `[patch]` La exención y la zona en el mismo elemento no tenían prueba: `pulsar` admite contenedores con las dos y la tabla «sin zona válida» lleva esa fila; quitar `!c.hasAttribute(…)&&` del fichero la pone en rojo (comprobado y revertido).
+  - `[low]` `[patch]` Una isla que se quedara con el clic desde una escucha de `click` en la ventana, puesta después, lo cancelaría con la salida ya emitida: lo dice el docblock del fichero y una prueba nueva exige que ninguna fuente de `src/` ni de `public/islas/` escuche `click` en la ventana (con su detector probado).
+  - `[low]` `[patch]` Los escenarios de zona de `vocabulario.test.ts` corrían en los nueve eventos sin darle la zona a ninguno salvo la salida: ahora solo en los que declaran `zona`, y una prueba exige que la salida los recorra todos y ningún otro evento lleve ninguno.
+  - `[low]` `[patch]` La detección de zonas escritas en `src/lib/medicion.ts` saltaba con cualquier literal que usara una palabra como `siguiente` o `resultado`: ahora busca, como la de las marcas, el literal que es la zona, la lleva entre comillas o la da como valor (`=listado`), con casos de los dos lados.
+  - `[low]` `[patch]` `COLOCACION` gana seis filas: `listado` en `/coleccion/frases-cortas/2/` y en la página 2 de la Obra, la Paginación de `/autor/seneca/2/` y de la página 2 de la Obra hacia la 1, y la Obra de la Atribución del 404.
+  - `[low]` `[patch]` Las ramas de respaldo de `RutasDeSalida` no se construían en ninguna prueba: un sitio aparte con una Cita sola de su Autor y sin Temas pinta «Sobre Séneca» (`atribucion` y `rutas-de-salida` hacia `/autor/seneca/`, en ese orden) y una sonda pinta «Explorar por tema» con `chip-de-tema`; escribir `zona="chip-de-tema"` en el chip de respaldo la pone en rojo (comprobado y revertido).
+  - `[low]` `[patch]` `DESPLIEGUE.md` §3 dice que los chips de respaldo cuentan como `chip-de-tema` y «Sobre {Autor}» como `rutas-de-salida`.
+  - `[low]` `[patch]` `target` se comparaba con `_self` tal cual: ahora sin distinguir mayúsculas, como lo lee el navegador (`/^_self$/i`), con filas `_SELF`, `_Self` y `_BLANK`. `_top` y `_parent` siguen sin medirse, porque el contrato admite solo vacío o `_self` y ningún enlace del sitio los usa. El fichero pasa de 3.330 a 3.339 bytes, dentro del tope, con la medida en su comentario.
+  - `[low]` `[patch]` En el fichero compacto, el enlace de `k` se llamaba `a`, como la función que activa, y el parámetro del recorrido de `a` se llamaba `k`, como la escucha que se pone justo después: ahora `r` y `v`, y el comentario de variables lo dice.
+  - `[low]` `[patch]` «39 pruebas» en el resultado: corregido al reescribirlo.
+  - `[low]` `[patch]` La prueba de teclado de punta a punta afirma también la `ruta`, y una prueba nueva carga una Cita que no existe —el servidor contesta 404 en esa ruta—, pulsa «Ver esta cita» y recibe solo la salida, con esa ruta y `cita-del-dia`.
+  - `[low]` `[patch]` El tokenizador de la prueba de `dist/` no cerraba lo que cierra el navegador: un bloque cierra el `<p>` abierto y un `<a>` cierra el `<a>` abierto, los dos hasta un límite de ámbito, con su fragmento probado; el `dist/` real (5.286 páginas que cargan el fichero, 49.589 enlaces internos de `main`) sigue sin ningún enlace sin declaración.
+  - `[low]` `[patch]` `AGENTS.md` ya no cuenta «cinco» zonas pendientes: las de las Épicas 24, 26 y 28 entran sin tocar la prueba.
+
+Es la pasada repetida tras la vuelta por el paso 3: las capas externas no traen hallazgos nuevos, y
+los catorce parches son los de la pasada anterior, que sobreviven a la vuelta.
+
 ## Design Notes
 
 **Por qué no se envía una zona ajena.** «Un enlace que no figura en la tabla no pertenece a ninguna zona y no se registra» (EXPERIENCE.md § Zonas): una salida con `zona: null` sumaría continuación sin zona. La tabla de `b` seguiría poniendo a nulo un valor ajeno, pero la escucha no llega a pedirlo. Orientativo (nombres y compactación los fija el código):
@@ -174,24 +302,25 @@ Blocking condition: ninguna.
 **Qué se hizo.** El fichero de medición pone, en la activación (`a()`), una sola escucha de `click`
 en la ventana y en burbuja (`k`). Es salida un clic en el `a[href]` más cercano al objetivo con
 `button` 0, sin `metaKey/ctrlKey/shiftKey/altKey`, sin `defaultPrevented`, sin `download`, con un
-`target` vacío o `_self`, del mismo origen y a otro `pathname`. La zona es la declaración más
-cercana (`closest('[data-zona],[data-sin-zona]')`, compuesto de `ATRIBUTO_DE_ZONA` y
-`ATRIBUTO_SIN_ZONA`); si es exención —también si un mismo elemento lleva las dos—, si no hay o si su
-valor no está en `ZONAS` (la variable de conjunto que ya compone la tabla), sale sin gastar nada.
-Si es salida: `S=1`, `l()` (la lectura, si toca) y `b('salida-interna',0,0,0,z)`, con la zona como
-fuente 5 (`m=[D&&o,t,z,y,D&&w,j]`). `n()` rearma `S`, así que la caché de atrás y adelante permite
-otra. `salida-interna` entra en `EVENTOS_DEL_GUION` y en `EVENTOS_SOLO_DEL_FICHERO`. La zona la
-pinta el build en el contenedor: prop `zona: Zona` obligatoria en los seis componentes y atributo en
-los contenedores de las páginas; exenciones en el `ul.chips` del 404 y el `div[data-salida]` de
-`/buscar/`.
+`target` vacío o `_self` (sin distinguir mayúsculas), del mismo origen y a otro `pathname`. La zona
+es la declaración más cercana (`closest('[data-zona],[data-sin-zona]')`, compuesto de
+`ATRIBUTO_DE_ZONA` y `ATRIBUTO_SIN_ZONA`); si es exención —también si un mismo elemento lleva las
+dos—, si no hay o si su valor no está en `ZONAS` (la variable de conjunto que ya compone la tabla),
+sale sin gastar nada. Si es salida: `S=1`, `l()` (la lectura, si toca) y
+`b('salida-interna',0,0,0,z)`, con la zona como fuente 5 (`m=[D&&o,t,z,y,D&&w,j]`). `n()` rearma
+`S`, así que la caché de atrás y adelante permite otra. `salida-interna` entra en
+`EVENTOS_DEL_GUION` y en `EVENTOS_SOLO_DEL_FICHERO`. La zona la pinta el build en el contenedor:
+prop `zona: Zona` obligatoria en los seis componentes y atributo en los contenedores de las
+páginas; exenciones en el `ul.chips` del 404 y el `div[data-salida]` de `/buscar/`.
 
 **Ficheros.**
 - `src/lib/medicion.ts` — `ATRIBUTO_DE_ZONA`, `ATRIBUTO_SIN_ZONA`, `EXENCIONES_DE_ZONA` y
   `ExencionDeZona`, documentados; `salida-interna` en las dos listas; fuente `zona: 5`; la escucha
-  `k`, `S` en las variables y en `n()`; docblocks y comentario de variables al día.
+  `k` (con el enlace en `r` y `target` comparado con `/^_self$/i`), `S` en las variables y en
+  `n()`; docblocks —también el orden de las escuchas de ventana— y comentario de variables al día.
 - `src/lib/umbrales.ts` — `MAX_BYTES_GUION_DE_MEDICION` de 2.880 a 3.730: medido **3.330 bytes** con
-  el punto final de producción (3.331 con barra final; 3.298 con el de las pruebas), +782 sobre la
-  23.6, más unos 400 de margen; la medida y el porqué en su comentario.
+  el punto final de producción, y **3.339** tras la revisión (3.340 con barra final; 3.307 con el de
+  las pruebas); la medida y el porqué en su comentario.
 - `src/components/{TarjetaDeCita,Chips,Paginacion,ListaDeObras,RutasDeSalida,Atribucion}.astro` —
   `zona: Zona` obligatoria (tipo del vocabulario) y `data-zona={zona}` tras los atributos de su
   contenedor (`li.tarjeta`, `ul.chips`, `nav.paginacion`, `ul.lista-de-obras`, `nav.salidas`, los dos
@@ -208,76 +337,75 @@ los contenedores de las páginas; exenciones en el `ul.chips` del 404 y el `div[
   `src/pages/obra/[autor]/[slug]/[...page].astro` — la zona de cada componente; `atribucion` en
   `<p class="de">` de la Cabecera de Obra.
 - `tests/unit/ayuda/medicion.ts` — `pulsar(enlace, gesto)`: `a` de mentira resuelto con `URL`, sus
-  contenedores, `closest` para listas `etiqueta[atributo]`/`[atributo]` (otra forma lanza), y el
-  `click` al documento y a la ventana con botón, modificadores y `defaultPrevented`.
+  contenedores (zona, exención o las dos), `closest` para listas `etiqueta[atributo]`/`[atributo]`
+  (otra forma lanza), el envío de un formulario, y el `click` al documento y a la ventana con botón,
+  modificadores y `defaultPrevented`.
 - `tests/unit/ayuda/enlaces.ts` — tokenizador mínimo con pila (vacías, texto crudo, comentarios,
-  comillas con `>`, entidades): `recorrerElementos`, `declaracionDe` y `enlacesDe`.
+  comillas con `>`, entidades, y los cierres implícitos de `<p>` por un bloque y de `<a>` por otro
+  `<a>`, hasta un límite de ámbito): `recorrerElementos`, `declaracionDe` y `enlacesDe`.
 - `tests/unit/medicion.test.ts` — `describe('Historia 23.7 — cada salida interna dice desde qué
-  zona')`, 39 pruebas, una o más por fila de la matriz, y la escucha única en burbuja;
-  `describe('Historia 23.7 — toda salida interna de dist/ dice su zona')`: el tokenizador con un
-  fragmento a mano, todo enlace interno de `main` de las páginas con vista con zona o exención, las
-  once zonas exactas (`ZONAS_DE_HOY`, ⊂ `ZONAS`) y ninguna en un `<a>`, las dos exenciones en su
-  sitio, `cabecera` en la cabecera de cada página y `resultado` en `ul[data-resultados]`, la Cita
-  del Día de la portada y el 404 y las Props leídas con `ts`. `CORPUS_MEDIDO` marca apta para
-  portada su primera Cita: ninguna afirmación existente se movió. La 23.5 pasa a esperar
-  `[lectura, salida-interna]` como eventos solo del fichero y su detector de islas prohíbe también
-  `EVENTOS.salidaInterna` y `__medir('salida-interna')`.
+  zona')`, 45 pruebas: una o más por fila de la matriz (con `target` en mayúsculas y la exención y la
+  zona en el mismo elemento), la escucha única en burbuja, ninguna isla que escuche `click` en la
+  ventana y ningún literal de zona en el fichero; `describe('Historia 23.7 — toda salida interna de
+  dist/ dice su zona')`: el tokenizador con dos fragmentos a mano, todo enlace interno de `main` de
+  toda página que carga el fichero con zona o exención —y entre las sin lectura, cada página 2+,
+  `/buscar/` y el 404, nunca la Obra que no se indexa—, la tabla `COLOCACION` (35 filas, que no
+  compara las zonas de épicas posteriores), las ramas de respaldo de `RutasDeSalida` en un sitio
+  aparte, las once zonas presentes (`ZONAS_DE_HOY`, ⊂ `ZONAS`, sin exigir que sean las únicas) y
+  ninguna en un `<a>`, las dos exenciones en su sitio, `cabecera` y `resultado`, la Cita del Día de la
+  portada y el 404, y las Props leídas con `ts`. `CORPUS_MEDIDO` marca apta para portada su primera
+  Cita. La 23.5 espera `[lectura, salida-interna]` como eventos solo del fichero y su detector de
+  islas prohíbe también la salida.
 - `tests/unit/vocabulario.test.ts` — fuera la entrada 23.7 de `PENDIENTES`; `PRODUCIR_DEL_FICHERO`
   de la salida pulsa un enlace con la zona del escenario (por omisión `ZONAS[0]`); un escenario por
-  zona; «nueve eventos de hoy».
+  zona, solo en los eventos que declaran `zona`, con una prueba que lo exige; «nueve eventos de hoy».
 - `tests/unit/ingreso-construido.test.ts` — el literal de la Paginación, con su zona.
-- `tests/e2e/receptor.spec.ts` — `describe('Historia 23.7 — …')`: en la Cita, con las navegaciones
-  fuera de la página anuladas con 204 (también las de una pestaña nueva), Control-clic, Meta-clic,
-  clic central y el salto al contenido no salen; el clic en «Más de Séneca» da vista, lectura y la
-  salida `rutas-de-salida` con `evento, ruta, zona`; un segundo clic, nada. En `/buscar/?q=viento`,
-  un resultado llega con `resultado`, `ruta: '/buscar/'` y sin lectura. Con la caché de atrás y
-  adelante de verdad, en la Cita (dos salidas, la segunda tras la lectura nueva) y en `/buscar/`
-  (dos salidas `resultado`): las dos restauraron y pasaron.
-- `AGENTS.md` — la convención de la salida interna y un «Known pitfall» del enlace nuevo sin zona.
-- `DESPLIEGUE.md` — §3: el párrafo de la Salida interna y las consultas de SM-4 (salidas por zona y
-  lecturas por superficie) y del numerador de SM-13 desde la primera jornada UTC completa.
+- `tests/e2e/receptor.spec.ts` — `describe('Historia 23.7 — …')`, seis pruebas: en la Cita, con las
+  navegaciones fuera de la página anuladas con 204, Meta y Mayúsculas de verdad, Control y el botón 1
+  despachados, un ancla y la propia ruta con `?q=` dentro de `rutas-de-salida` no salen (con los seis
+  `click` contados en la ventana); el clic en «Más de Séneca» da vista, lectura y la salida con
+  `evento, ruta, zona`, y un segundo clic, nada; Enter en una hermana (con `ruta`); el 404 servido en
+  la ruta pedida, con «Ver esta cita» saliendo con esa ruta y sin vista ni lectura; un resultado de
+  `/buscar/`; y la caché de atrás y adelante de verdad en la Cita y en `/buscar/`.
+- `AGENTS.md` — la convención de la salida interna y un «Known pitfall» del enlace nuevo sin zona,
+  que dice que las zonas de las Épicas 24, 26 y 28 entran sin tocar la prueba.
+- `DESPLIEGUE.md` — §3: el párrafo de la Salida interna (cotas, páginas sin lectura —también la Obra
+  que no se indexa hasta la 23.9—, el 404 y los chips de respaldo) y tres consultas desde la primera
+  jornada UTC completa y sin la de hoy: salidas y lecturas por superficie, zona y `con_vista`; la
+  continuación por superficie, solo con vista; y el numerador de SM-13.
 
-**Tocados por la revisión** (segunda pasada; el detalle, en el Review Triage Log):
-- `tests/unit/medicion.test.ts` — la prueba de `dist/` juzga toda página que pide el fichero de
-  medición, con lectura o sin ella, y comprueba que ninguna página con vista se quede sin él; la
-  tabla `COLOCACION` (29 filas) fija qué zona lleva cada sitio; el envío de un formulario dentro de
-  una zona no es salida; el 404 simulado sirve en `/cita/una-retirada/`; el fragmento a mano lleva
-  una entidad numérica fuera de Unicode.
-- `tests/unit/ayuda/medicion.ts` — `pulsar` admite `{ envio: true, contenedores }`.
-- `tests/unit/ayuda/enlaces.ts` — `resolverEntidades` deja tal cual una entidad fuera de Unicode.
-- `tests/e2e/receptor.spec.ts` — ancla y propia ruta con `?q=` dentro de `rutas-de-salida`; Meta y
-  Mayúsculas de verdad, Control y botón 1 despachados, con los seis `click` contados en la ventana;
-  una prueba nueva con Enter. Cinco pruebas de la 23.7.
-- `src/lib/medicion.ts`, `src/pages/404.astro`, `src/pages/buscar.astro` — solo comentarios: el
-  alcance de la prueba de `dist/`, la fuente de las exenciones (la Historia 23.7 y la decisión de
-  Héctor del 2026-10-19) y la isla que pararía la propagación. El fichero emitido no cambia.
-- `DESPLIEGUE.md` — la consulta de SM-4 aparta el «Ver esta cita» del 404, nombra `buscar` y manda
-  el resto a «otra»; el párrafo de §3 dice las dos cotas nuevas y qué salidas del 404 no se pueden
-  apartar hasta la 23.10.
-- `AGENTS.md` — el «Known pitfall» abarca toda página que carga el fichero y nombra `COLOCACION`.
+**Revisión.** Cuatro pasadas del paso 4. La primera, sin hallazgos (las capas externas aún no
+habían corrido). La segunda, con los hallazgos de las cinco capas externas: 12 parches (0 altos, 3
+medios, 9 bajos), 0 diferidos, 20 rechazados. Esta invocación hizo dos: la primera, con una nueva
+ronda de las cinco capas, encontró **2 bad_spec medios** —la prueba de `dist/` se ponía en rojo con
+lo que planean la 23.9, la 24.4, la 26.3 y la 28.3, cuyos criterios dicen que «sigue pasando» o que
+las cubre «sin tocarla»—, enmendó la tarea de la spec (Spec Change Log) y volvió por el paso 3, que
+dejó la prueba en «están las once», `COLOCACION` sin comparar zonas de épicas posteriores y el suelo
+sin lectura sin la Obra que no se indexa; 14 parches sobrevivieron a la vuelta y 14 hallazgos se
+rechazaron, 0 diferidos. La repetida, sin hallazgos externos nuevos, aplicó esos **14 parches** (0
+altos, 1 medio, 13 bajos). Seguimiento recomendado: `true` (parcheados en la última pasada: 0 altos,
+1 medio, 13 bajos; puntuación 3 × 1 + 13 = 16).
 
-**Revisión.** Dos pasadas. La primera, sin hallazgos: las capas externas aún no habían corrido. La
-segunda, con los hallazgos de las cinco capas externas (`blind-hunter`, `edge-case-hunter`,
-`verification-gap`, `intent-alignment`, `ac-auditor`): 12 parches aplicados (0 altos, 3 medios, 9
-bajos), 0 diferidos, 20 rechazados con su porqué. Esa pasada quedó interrumpida después de
-verificar y antes de cerrar; la invocación siguiente, sin hallazgos nuevos, la cierra sin tocar el
-código: reverifica lo que faltaba, escribe este resultado y hace el commit. Seguimiento
-recomendado: `true` (parcheados: 0 altos, 3 medios, 9 bajos; puntuación 3 × 3 + 9 = 18).
-
-**Verificación** (tras la revisión, sobre el árbol que se commitea).
-- `npx astro check` — 0 errores, 0 avisos, 20 sugerencias (las de antes). A mano, en la primera
-  pasada: quitar `zona` de `<Paginacion>` en el Tema dio 1 error; quitarla de `<TarjetaDeCita>` en
-  el Autor y de `<RutasDeSalida>` en la Cita y escribir `chips-de-tema` en la Obra, 3; revertido, 0.
-- `npm test` (con `correr.sh`, empezado después del último cambio de código) — 131 ficheros, 5.798
-  pruebas en verde; incluye los once ficheros del primer criterio.
-- `npx playwright test tests/e2e/receptor.spec.ts --project=escritorio` — 42 en verde, 1 saltada (la
-  de prerender, como antes); las cinco de la 23.7 pasan. A mano: quitar del fichero, juntos, los
-  filtros de Control, del botón y de la propia ruta rompe la primera de la 23.7; revertido.
+**Verificación** (sobre el árbol que se commitea).
+- `npx astro check` — 0 errores, 0 avisos, 20 sugerencias (las de antes), tras el paso 3 y tras los
+  parches. A mano, en pasadas anteriores: quitar `zona` de cada uno de los seis componentes y escribir
+  una zona inventada da un error ts(2322) por cambio.
+- `npm test` (con `correr.sh`, empezado después del último cambio de código) — tras el paso 3, 131
+  ficheros y 5.798 pruebas en verde; tras los parches, **131 ficheros y 5.811 pruebas en verde**;
+  incluye los once ficheros del primer criterio.
+- `npx playwright test tests/e2e/receptor.spec.ts --project=escritorio` — tras los parches, **43 en
+  verde, 1 saltada** (la de prerender, como antes); las seis de la 23.7 pasan, también las dos de la
+  caché de atrás y adelante, que restauraron.
 - Con el `webServer`, `busqueda`, `pagina-de-cita`, `rutas-de-salida`, `portada`, `pagina-404`,
-  `origen` y `receptor-local` en `escritorio` — 77 en verde, 2 saltadas (las de antes). Puertos 4321,
-  4399, 4400, 4402 y 8787 libres al terminar.
-- `guionDeMedicion` medido con `npx tsx`: 3.330 bytes con
+  `origen` y `receptor-local` en `escritorio` — **77 en verde, 2 saltadas** (las de antes), tras el paso 3 y tras los parches. Puertos 4321, 4399, 4400, 4402
+  y 8787 libres al terminar.
+- `guionDeMedicion` medido con `npx tsx`: **3.339 bytes** con
   `https://medicion-sabiduria-de-bolsillo.sabiduriadebolsillo.workers.dev` (≤ 3.730).
+- A mano: quitar `!c.hasAttribute(…)&&` del fichero pone en rojo la fila de la exención y la zona en
+  el mismo elemento, y `zona="chip-de-tema"` en el chip «Sobre {Autor}» pone en rojo la prueba de las
+  ramas de respaldo; revertido. Las tres consultas de `DESPLIEGUE.md` corren en una tabla SQLite con
+  la forma de la de D1. El `dist/` real del árbol (5.288 páginas; 5.286 cargan el fichero) pasado por
+  el tokenizador nuevo: 49.589 enlaces internos de `main`, ninguno sin zona ni exención.
 - `git diff fe55077e241ba717e4a7cdedfd40ee573ad3abf2 -- src/lib/vocabulario.ts medicion/` vacío;
   `ARRANQUE_DE_MEDICION` y `MAX_BYTES_DE_GUION` sin cambios; ningún fichero de `corpus/` tocado.
 
@@ -285,10 +413,15 @@ recomendado: `true` (parcheados: 0 altos, 3 medios, 9 bajos; puntuación 3 × 3 
 - Las zonas de los contenedores propios de una página (portada, 404, `/buscar/`, la Cabecera de Obra
   y la cabecera) son atributos escritos, no props tipadas: una errata ahí no la ve `astro check`, la
   ve la prueba de `dist/` (que corre el CI).
-- `target` se compara con `_self` tal cual; un `_SELF` en mayúsculas no se mediría (no hay ninguno).
+- `target="_top"` o `"_parent"` no se miden: el contrato admite solo vacío o `_self`, y ningún enlace
+  del sitio los lleva. Un `<base target>` tampoco se mira (el sitio no lo usa).
 - Chromium no despacha `click` con el botón central (es `auxclick`): el filtro de `button` es
   defensa, y la prueba de punta a punta lo confirma sin salida.
 - Los enlaces internos fuera de `main` sin zona —el RSS del pie— no se miden, a propósito: la tabla
   de zonas no los nombra y la prueba de `dist/` solo exige zona dentro de `main`.
-- Las consultas de SM-4 de `DESPLIEGUE.md` resuelven la superficie por el prefijo de la ruta y las
-  páginas 2+ con `GLOB`, a mano, hasta que la 23.10 lo haga contra el censo.
+- Las consultas de SM-4 de `DESPLIEGUE.md` resuelven la superficie por el prefijo de la ruta, a
+  mano, y apartan lo que no tiene lectura por la vista de su ruta en la jornada, hasta que la 23.10
+  lo haga contra el censo; una ruta publicada o retirada a mitad de jornada puede caer del lado
+  equivocado ese día.
+- Nada se ha leído aún de D1 de producción: la serie empieza la primera jornada UTC completa tras
+  la llegada de la 23.
