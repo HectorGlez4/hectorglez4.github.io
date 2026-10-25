@@ -113,3 +113,102 @@ export async function leerPosicionesDelCorpus(
   const [citas, documentos] = await Promise.all([leerCitas(rutas.citas), leerDocumentosDeFuente(rutas)]);
   return posicionesDeCitas(citas, documentos);
 }
+
+/** Una entrada del almacén de la colección `posiciones`. */
+interface EntradaDePosiciones {
+  id: string;
+  data: Record<string, unknown>;
+}
+
+/** Lo que del almacén del cargador (`store`) usa `guardarPosiciones`. */
+export interface AlmacenDePosiciones {
+  clear(): void;
+  set(entrada: EntradaDePosiciones): unknown;
+}
+
+/**
+ * Lleva las posiciones al almacén de la colección — Historia 24.1. Es el cuerpo del cargador
+ * `posiciones` de `src/content.config.ts`, que solo le pasa su lector, su `parseData` y su
+ * `store`.
+ *
+ * Primero lee y analiza **todo**; solo entonces vacía el almacén y lo llena, sin ninguna espera
+ * en medio. Así nadie lo lee a medias, y una lectura o un análisis que fallen —un frontmatter a
+ * medio escribir en `astro dev`— lo dejan como estaba.
+ */
+export async function guardarPosiciones(opciones: {
+  leer: () => Promise<Map<string, AparicionDeCita[]>>;
+  analizar: (entrada: EntradaDePosiciones) => Promise<Record<string, unknown>>;
+  almacen: AlmacenDePosiciones;
+}): Promise<void> {
+  const { leer, analizar, almacen } = opciones;
+  const entradas: EntradaDePosiciones[] = [];
+  for (const [slug, apariciones] of await leer()) {
+    entradas.push({ id: slug, data: await analizar({ id: slug, data: { apariciones } }) });
+  }
+  almacen.clear();
+  for (const entrada of entradas) almacen.set(entrada);
+}
+
+/** Lo que del vigilante de ficheros de `astro dev` usa la relectura: el `watcher` del cargador. */
+export interface VigilanteDeFicheros {
+  add(ruta: string): unknown;
+  on(evento: 'add' | 'change' | 'unlink', oyente: (ruta: string) => void): unknown;
+}
+
+/** Si una ruta es una de las carpetas o está dentro de alguna, separador incluido. */
+function estaDentro(ruta: string, carpetas: readonly string[]): boolean {
+  return carpetas.some((carpeta) => {
+    if (ruta.slice(0, carpeta.length) !== carpeta) return false;
+    const siguiente = ruta.slice(carpeta.length, carpeta.length + 1);
+    // `corpus/citas-borrador` comparte el prefijo con `corpus/citas` y no es suya.
+    return siguiente === '' || siguiente === '/' || siguiente === '\\';
+  });
+}
+
+/**
+ * En `astro dev`, volver a situar las Citas cuando cambia una de ellas o un documento — Historia
+ * 24.1. Es la relectura del cargador `posiciones` de `src/content.config.ts`, que solo la cablea.
+ *
+ * Cada relectura recorre el Corpus y sus documentos enteros, así que:
+ *   · solo la dispara un cambio **dentro** de las carpetas vigiladas;
+ *   · una ráfaga —un `git checkout`, una tanda de aprobaciones— se resuelve en **una**,
+ *     `esperaMs` después del último cambio;
+ *   · nunca hay dos a la vez: cada una espera a que acabe la anterior;
+ *   · la que falla —un frontmatter a medio escribir— se dice con `avisar` y no deja ninguna
+ *     promesa rechazada sin tratar, ni impide la siguiente. Conservar lo anterior es cosa de
+ *     `releer` (`guardarPosiciones`), que solo toca el almacén cuando ya lo tiene todo.
+ *
+ * Devuelve la espera de la cadena en curso, para quien necesite saber cuándo ha terminado.
+ */
+export function releerAlCambiar(opciones: {
+  vigilante: VigilanteDeFicheros;
+  carpetas: readonly string[];
+  releer: () => Promise<void>;
+  esperaMs: number;
+  avisar: (mensaje: string) => void;
+}): { terminado: () => Promise<void> } {
+  const { vigilante, carpetas, releer, esperaMs, avisar } = opciones;
+  let pendiente: ReturnType<typeof setTimeout> | undefined;
+  let enCurso: Promise<void> = Promise.resolve();
+
+  const encadenar = () => {
+    pendiente = undefined;
+    enCurso = enCurso.then(releer).catch((error: unknown) => {
+      avisar(
+        `No se pudieron volver a situar las Citas: ${error instanceof Error ? error.message : String(error)}`,
+      );
+    });
+  };
+  const alCambiar = (ruta: string) => {
+    if (!estaDentro(ruta, carpetas)) return;
+    clearTimeout(pendiente);
+    pendiente = setTimeout(encadenar, esperaMs);
+  };
+
+  for (const carpeta of carpetas) vigilante.add(carpeta);
+  vigilante.on('add', alCambiar);
+  vigilante.on('change', alCambiar);
+  vigilante.on('unlink', alCambiar);
+
+  return { terminado: () => enCurso };
+}

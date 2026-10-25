@@ -735,7 +735,10 @@ ejemplares*: «la-gitanilla», «el-coloquio-de-los-perros», por orden alfabét
 ordinal escrito («jornada-primera») o de cifra y letra («10a»), que se leen como palabras, una
 palabra que es romano canónico («mi» se lee 1001) y el final del libro —«epilogo», «notas»—,
 que como palabra va antes que «i». Ningún fichero de `src/` importa de `tools/lib/`, salvo
-ese cargador.
+ese cargador. **La Página de Obra depende así también de `corpus/fuentes/`**, y la relación de
+22.8 todavía no lo sabe: recuperar o retirar un documento puede reordenar una Obra —y pasar
+Citas de su página 1 a la `/2/`— sin que cambie su `lastmod` ni la avise `tools/avisar.ts`
+(Historia 24.8).
 
 ### El aviso, la serie y la congelación (Historia 22.8)
 

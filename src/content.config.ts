@@ -23,7 +23,7 @@ import {
   tradicion,
 } from './lib/admision.js';
 import { leerBiografia } from './lib/biografia.js';
-import { leerPosicionesDelCorpus } from '../tools/lib/posiciones.ts';
+import { guardarPosiciones, leerPosicionesDelCorpus, releerAlCambiar } from '../tools/lib/posiciones.ts';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // AD-1 — La puerta de admisión vive aquí, no en `tools/`.
@@ -296,46 +296,25 @@ const cargadorDePosiciones: Loader = {
     const raiz = join(fileURLToPath(config.root), 'corpus');
     const vigiladas = [join(raiz, 'citas'), join(raiz, 'fuentes')];
 
-    async function cargar(): Promise<void> {
-      const posiciones = await leerPosicionesDelCorpus(raiz);
-      const entradas: { id: string; data: Record<string, unknown> }[] = [];
-      for (const [slug, apariciones] of posiciones) {
-        entradas.push({ id: slug, data: await parseData({ id: slug, data: { apariciones } }) });
-      }
-      // El almacén se vacía y se llena de un golpe, sin ninguna espera en medio: nadie lo lee a
-      // medias, y una lectura que falle antes deja intacto el anterior.
-      store.clear();
-      for (const entrada of entradas) store.set(entrada);
-    }
+    const cargar = () =>
+      guardarPosiciones({ leer: () => leerPosicionesDelCorpus(raiz), analizar: parseData, almacen: store });
 
     await cargar();
 
     /*
-     * En desarrollo, una Cita o un documento que cambian se vuelven a situar sin reiniciar. Cada
-     * relectura recorre el Corpus y sus documentos enteros, así que una ráfaga de cambios —un
-     * `git checkout`, una tanda de aprobaciones— se resuelve en una sola, nunca hay dos a la vez,
-     * y la que falla —un frontmatter a medio escribir— se dice y conserva lo anterior en vez de
-     * tumbar el servidor.
+     * En desarrollo, una Cita o un documento que cambian se vuelven a situar sin reiniciar: una
+     * ráfaga en una sola relectura, nunca dos a la vez, y la que falla —un frontmatter a medio
+     * escribir— se dice y conserva lo anterior. Cómo, lo decide `releerAlCambiar`, que tiene sus
+     * pruebas; aquí solo se cablea.
      */
     if (watcher !== undefined) {
-      for (const carpeta of vigiladas) watcher.add(carpeta);
-      let pendiente: ReturnType<typeof setTimeout> | undefined;
-      let enCurso: Promise<void> = Promise.resolve();
-      const recargar = () => {
-        enCurso = enCurso.then(cargar).catch((error: unknown) => {
-          logger.error(
-            `No se pudieron volver a situar las Citas: ${error instanceof Error ? error.message : String(error)}`,
-          );
-        });
-      };
-      const alCambiar = (ruta: string) => {
-        if (!vigiladas.some((carpeta) => ruta.startsWith(carpeta))) return;
-        clearTimeout(pendiente);
-        pendiente = setTimeout(recargar, ESPERA_TRAS_CAMBIO_MS);
-      };
-      watcher.on('add', alCambiar);
-      watcher.on('change', alCambiar);
-      watcher.on('unlink', alCambiar);
+      releerAlCambiar({
+        vigilante: watcher,
+        carpetas: vigiladas,
+        releer: cargar,
+        esperaMs: ESPERA_TRAS_CAMBIO_MS,
+        avisar: (mensaje) => logger.error(mensaje),
+      });
     }
   },
 };

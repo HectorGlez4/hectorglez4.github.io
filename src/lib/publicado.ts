@@ -897,6 +897,11 @@ export function citasDeLasObras(conjunto: ConjuntoPublicable): Promise<ReadonlyM
     return citasPorObra(conjunto.citas, posiciones);
   })();
   citasDeLasObrasPorConjunto.set(conjunto, calculo);
+  // Un fallo no se memoriza: la siguiente página que la pida vuelve a intentarlo, como
+  // `conjuntoPublicable`, que solo guarda lo que terminó bien.
+  calculo.catch(() => {
+    if (citasDeLasObrasPorConjunto.get(conjunto) === calculo) citasDeLasObrasPorConjunto.delete(conjunto);
+  });
   return calculo;
 }
 

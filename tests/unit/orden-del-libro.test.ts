@@ -1,4 +1,4 @@
-import { beforeAll, describe, expect, it } from 'vitest';
+import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
 import { mkdir, mkdtemp, readFile, readdir, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -9,7 +9,15 @@ import {
   type AparicionDeCita,
   type PosicionesDeCitas,
 } from '../../src/lib/obras.ts';
-import { leerPosicionesDelCorpus, posicionesDeCitas, type CitaParaSituar } from '../../tools/lib/posiciones.ts';
+import {
+  guardarPosiciones,
+  leerPosicionesDelCorpus,
+  posicionesDeCitas,
+  releerAlCambiar,
+  type CitaParaSituar,
+  type VigilanteDeFicheros,
+} from '../../tools/lib/posiciones.ts';
+import { citasDeLasObras, type ConjuntoPublicable } from '../../src/lib/publicado.ts';
 import { componerDocumento } from '../../tools/lib/documento.ts';
 import {
   apareceEnDocumento,
@@ -63,70 +71,91 @@ function revuelto(posiciones: PosicionesDeCitas): PosicionesDeCitas {
 const natural = (nombres: readonly string[]) => [...nombres].sort(compararDocumentos);
 
 describe('24.1 — compararDocumentos: el orden natural de los documentos de una Obra', () => {
+  /*
+   * Los nombres que pasan por `real` son documentos de `corpus/fuentes/`, y la última prueba del
+   * bloque comprueba que existen: si se retira o se renombra uno, la prueba lo dice en vez de
+   * seguir afirmando «con slugs reales» sobre nombres que ya no lo son. Los demás se declaran
+   * construidos donde se usan.
+   */
+  const reales: string[] = [];
+  const real = (nombres: string[]) => {
+    reales.push(...nombres);
+    return nombres;
+  };
+
+  const ciudad = real(
+    ['proemio', 'i', 'ii', 'iii', 'iv', 'v', 'vi', 'vii', 'viii', 'ix', 'x', 'xi'].map(
+      (p) => `wikisource-es--la-ciudad-de-dios--la-ciudad-de-dios-${p}`,
+    ),
+  );
+  const dafnis = real(['proemio', 'i', 'ii', 'iii', 'iv'].map((p) => `wikisource-es--dafnis-y-cloe--dafnis-y-cloe-longo-${p}`));
+  const zarco = real(
+    ['i', 'ii', 'iii', 'iv', 'v', 'vi', 'vii', 'viii', 'ix', 'x', 'xi', 'xii', 'xiii', 'xiv', 'xv', 'xvi', 'xvii', 'xviii', 'xix', 'xx'].map(
+      (r) => `wikisource-es--el-zarco--el-zarco-capitulo-${r}`,
+    ),
+  );
+  const lucanor = real([1, 2, 10, 19].map((n) => `wikisource-es--conde-lucanor--conde-lucanor-ejemplo-${n}`));
+  const etica = real([2, 10].map((n) => `wikisource-es--etica-a-nicomaco--etica-a-nicomaco-libro-${n}`));
+  const oraculo = real(
+    ['1-25', '26-50', '101-125'].map(
+      (a) => `wikisource-es--oraculo-manual-y-arte-de-prudencia--oraculo-manual-y-arte-de-prudencia-aforismos-${a}`,
+    ),
+  );
+  const plenitud = real(
+    ['iii-la-mujer', 'iv-enciende-tu-lampara', 'ix-todos-tenemos-hambre', 'l-las-preguntas', 'li-tu-cuerpo', 'lv-incomprension'].map(
+      (p) => `wikisource-es--plenitud--plenitud-${p}`,
+    ),
+  );
+  const ariel = real(['i', 'ii', 'iii', 'viii'].map((r) => `wikisource-es--ariel--ariel-capitulo-${r}`));
+  const novelas = 'wikisource-es--novelas-ejemplares';
+  const [novelasCorto, celoso, gitanilla, coloquio] = real([
+    novelas,
+    `${novelas}--el-celoso-extremeno-1825`,
+    `${novelas}--la-gitanilla-1825`,
+    `${novelas}--el-coloquio-de-los-perros-1825`,
+  ]);
+  const recuerdos = 'wikisource-es--recuerdos-de-provincia--recuerdos-de-provincia';
+  const [notasDelAutor, miEducacion] = real([`${recuerdos}-notas-del-autor`, `${recuerdos}-mi-educacion`]);
+  const zalamea = 'wikisource-es--el-alcalde-de-zalamea--el-alcalde-de-zalamea-jornada';
+  const jornadas = real(['primera', 'segunda', 'tercera'].map((o) => `${zalamea}-${o}`));
+
   it('La ciudad de Dios: «proemio» antes que «i», y los romanos por su valor', () => {
-    const base = 'wikisource-es--la-ciudad-de-dios--la-ciudad-de-dios';
-    const enOrden = ['proemio', 'i', 'ii', 'iii', 'iv', 'v', 'vi', 'vii', 'viii', 'ix', 'x', 'xi'].map(
-      (p) => `${base}-${p}`,
-    );
-    expect(natural([...enOrden].reverse())).toEqual(enOrden);
-    expect(natural([...enOrden].sort())).toEqual(enOrden);
+    expect(natural([...ciudad].reverse())).toEqual(ciudad);
+    expect(natural([...ciudad].sort())).toEqual(ciudad);
   });
 
   it('Dafnis y Cloe: el proemio también va delante', () => {
-    const base = 'wikisource-es--dafnis-y-cloe--dafnis-y-cloe-longo';
-    const enOrden = ['proemio', 'i', 'ii', 'iii', 'iv'].map((p) => `${base}-${p}`);
-    expect(natural([...enOrden].sort())).toEqual(enOrden);
+    expect(natural([...dafnis].sort())).toEqual(dafnis);
   });
 
   it('El Zarco: capítulo i a xx, con ix antes que x y xix antes que xx', () => {
-    const romanos = ['i', 'ii', 'iii', 'iv', 'v', 'vi', 'vii', 'viii', 'ix', 'x', 'xi', 'xii', 'xiii', 'xiv', 'xv', 'xvi', 'xvii', 'xviii', 'xix', 'xx'];
-    const enOrden = romanos.map((r) => `wikisource-es--el-zarco--el-zarco-capitulo-${r}`);
-    expect(natural([...enOrden].sort())).toEqual(enOrden);
+    expect(natural([...zarco].sort())).toEqual(zarco);
   });
 
   it('El conde Lucanor: ejemplo 1, 2, 10, 19 —por valor, no por cadena—', () => {
-    const enOrden = [1, 2, 10, 19].map((n) => `wikisource-es--conde-lucanor--conde-lucanor-ejemplo-${n}`);
-    expect(natural([...enOrden].sort())).toEqual(enOrden);
+    expect(natural([...lucanor].sort())).toEqual(lucanor);
   });
 
   it('Ética a Nicómaco: el libro 2 antes que el 10', () => {
-    const enOrden = [2, 10].map((n) => `wikisource-es--etica-a-nicomaco--etica-a-nicomaco-libro-${n}`);
-    expect(natural([...enOrden].reverse())).toEqual(enOrden);
+    expect(natural([...etica].reverse())).toEqual(etica);
   });
 
-  it('Oráculo manual: aforismos 1-25, 26-50, 101-125, y el documento corto antes que sus páginas', () => {
-    const base = 'wikisource-es--oraculo-manual-y-arte-de-prudencia';
-    const enOrden = [
-      base,
-      `${base}--oraculo-manual-y-arte-de-prudencia-aforismos-1-25`,
-      `${base}--oraculo-manual-y-arte-de-prudencia-aforismos-26-50`,
-      `${base}--oraculo-manual-y-arte-de-prudencia-aforismos-101-125`,
-    ];
-    expect(natural([...enOrden].sort())).toEqual(enOrden);
-    expect(natural([...enOrden].reverse())).toEqual(enOrden);
+  it('Oráculo manual: aforismos 1-25, 26-50, 101-125', () => {
+    expect(natural([...oraculo].sort())).toEqual(oraculo);
+    expect(natural([...oraculo].reverse())).toEqual(oraculo);
   });
 
   it('Plenitud: iii, iv, ix, l, li, lv —el romano manda aunque siga una palabra—', () => {
-    const enOrden = [
-      'iii-la-mujer',
-      'iv-enciende-tu-lampara',
-      'ix-todos-tenemos-hambre',
-      'l-las-preguntas',
-      'li-tu-cuerpo',
-      'lv-incomprension',
-    ].map((p) => `wikisource-es--plenitud--plenitud-${p}`);
-    expect(natural([...enOrden].sort())).toEqual(enOrden);
+    expect(natural([...plenitud].sort())).toEqual(plenitud);
   });
 
   it('Ariel: capítulo i, ii, iii, viii', () => {
-    const enOrden = ['i', 'ii', 'iii', 'viii'].map((r) => `wikisource-es--ariel--ariel-capitulo-${r}`);
-    expect(natural([...enOrden].reverse())).toEqual(enOrden);
-    expect(natural([...enOrden].sort())).toEqual(enOrden);
+    expect(natural([...ariel].reverse())).toEqual(ariel);
+    expect(natural([...ariel].sort())).toEqual(ariel);
   });
 
   it('Novelas ejemplares: el documento corto antes que sus páginas', () => {
-    const base = 'wikisource-es--novelas-ejemplares';
-    const enOrden = [base, `${base}--el-celoso-extremeno-1825`, `${base}--la-gitanilla-1825`];
+    const enOrden = [novelasCorto, celoso, gitanilla];
     expect(natural([...enOrden].reverse())).toEqual(enOrden);
   });
 
@@ -137,41 +166,43 @@ describe('24.1 — compararDocumentos: el orden natural de los documentos de una
    */
   it('límites aceptados: páginas con nombre de capítulo, «mi», el final del libro, ordinales escritos y cifra con letra', () => {
     // Por título, alfabético: El coloquio de los perros —la última del libro— va antes que La gitanilla.
-    const novelas = 'wikisource-es--novelas-ejemplares';
-    expect(natural([`${novelas}--la-gitanilla-1825`, `${novelas}--el-coloquio-de-los-perros-1825`])).toEqual([
-      `${novelas}--el-coloquio-de-los-perros-1825`,
-      `${novelas}--la-gitanilla-1825`,
-    ]);
+    expect(natural([gitanilla, coloquio])).toEqual([coloquio, gitanilla]);
     // «mi» se lee 1001, y «notas» es palabra: las notas del autor van antes que «Mi educación».
-    const recuerdos = 'wikisource-es--recuerdos-de-provincia--recuerdos-de-provincia';
-    expect(natural([`${recuerdos}-mi-educacion`, `${recuerdos}-notas-del-autor`])).toEqual([
-      `${recuerdos}-notas-del-autor`,
-      `${recuerdos}-mi-educacion`,
-    ]);
+    expect(natural([miEducacion, notasDelAutor])).toEqual([notasDelAutor, miEducacion]);
     expect(compararDocumentos('x-mi', 'x-ii')).toBeGreaterThan(0);
-    // El final del libro, como palabra, va antes que el capítulo i.
-    expect(compararDocumentos('wikisource-es--plenitud--plenitud-epilogo', 'wikisource-es--plenitud--plenitud-iii-la-mujer')).toBeLessThan(0);
-    // Los ordinales escritos son palabras: «primera, segunda, tercera» sale bien por casualidad, «cuarta» no.
-    const zalamea = 'wikisource-es--el-alcalde-de-zalamea--el-alcalde-de-zalamea-jornada';
-    const jornadas = ['primera', 'segunda', 'tercera'].map((o) => `${zalamea}-${o}`);
+    // El final del libro, como palabra, va antes que el capítulo i. Construido: hoy ninguna
+    // página «epilogo» tiene capítulos hermanos en el Corpus.
+    expect(compararDocumentos('wikisource-es--plenitud--plenitud-epilogo', plenitud[0])).toBeLessThan(0);
+    // Los ordinales escritos son palabras: «primera, segunda, tercera» sale bien por casualidad,
+    // y una «cuarta» —construida: la obra tiene tres jornadas— iría la primera.
     expect(natural([...jornadas].reverse())).toEqual(jornadas);
-    expect(compararDocumentos(`${zalamea}-cuarta`, `${zalamea}-primera`)).toBeLessThan(0);
-    // Cifra con letra es palabra: «10a» antes que «1o», y los dos antes que cualquier número.
+    expect(compararDocumentos(`${zalamea}-cuarta`, jornadas[0])).toBeLessThan(0);
+    // Cifra con letra es palabra (construido): «10a» antes que «1o», y los dos antes que cualquier número.
     expect(natural(['x-1', 'x-1o', 'x-10a'])).toEqual(['x-10a', 'x-1o', 'x-1']);
   });
 
-  it('es un orden total y estable: cero solo consigo mismo, y antisimétrico', () => {
-    const nombres = ['a-1', 'a-01', 'a-i', 'a-proemio', 'a', 'a--b', 'a-x', 'a-10'];
+  it('es un orden total: cero solo consigo mismo, antisimétrico y transitivo', () => {
+    const nombres = ['a-1', 'a-01', 'a-i', 'a-proemio', 'a', 'a--b', 'a-x', 'a-10', 'a-mi', 'a-10a', 'a-ii-b', ...ariel, ...oraculo, novelasCorto, coloquio];
+    const signo = (x: string, y: string) => Math.sign(compararDocumentos(x, y));
     for (const x of nombres) {
       expect(compararDocumentos(x, x)).toBe(0);
       for (const y of nombres) {
         if (x === y) continue;
-        expect(compararDocumentos(x, y), `${x} / ${y}`).not.toBe(0);
-        expect(Math.sign(compararDocumentos(x, y))).toBe(-Math.sign(compararDocumentos(y, x)));
+        expect(signo(x, y), `${x} / ${y}`).not.toBe(0);
+        expect(signo(x, y)).toBe(-signo(y, x));
+        for (const z of nombres) {
+          if (signo(x, y) < 0 && signo(y, z) < 0) expect(signo(x, z), `${x} < ${y} < ${z}`).toBe(-1);
+        }
       }
     }
     // A igual valor, decide la cadena: «01» antes que «1», y «1» antes que «i».
     expect(natural(['a-i', 'a-1', 'a-01'])).toEqual(['a-01', 'a-1', 'a-i']);
+  });
+
+  it('los nombres «reales» de estas pruebas existen en corpus/fuentes/', async () => {
+    const enDisco = new Set(await readdir(join(RAIZ_DEL_REPO, 'corpus', 'fuentes')));
+    expect(reales.length).toBeGreaterThan(50);
+    expect(reales.filter((nombre) => !enDisco.has(`${nombre}.txt`))).toEqual([]);
   });
 });
 
@@ -435,6 +466,224 @@ describe('24.1 — leerPosicionesDelCorpus: lo que el cargador entrega, leído d
   });
 });
 
+/*
+ * La relectura de `astro dev` del cargador `posiciones`: `content.config.ts` solo la cablea, y
+ * lo que decide —qué cambio cuenta, cuándo se relee, que nunca haya dos a la vez y que un fallo
+ * se diga sin tumbar nada— vive en `releerAlCambiar`, que se prueba aquí con un vigilante de
+ * mentira y el reloj de Vitest.
+ */
+describe('24.1 — releerAlCambiar: la relectura de desarrollo', () => {
+  const CITAS = '/p/corpus/citas';
+  const FUENTES = '/p/corpus/fuentes';
+
+  /** Un vigilante que guarda lo que se le pide y deja disparar los eventos a mano. */
+  function vigilante() {
+    const oyentes = new Map<string, ((ruta: string) => void)[]>();
+    const anadidas: string[] = [];
+    const v: VigilanteDeFicheros & { emitir: (evento: string, ruta: string) => void; anadidas: string[] } = {
+      anadidas,
+      add: (ruta: string) => anadidas.push(ruta),
+      on: (evento, oyente) => oyentes.set(evento, [...(oyentes.get(evento) ?? []), oyente]),
+      emitir: (evento, ruta) => {
+        for (const oyente of oyentes.get(evento) ?? []) oyente(ruta);
+      },
+    };
+    return v;
+  }
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  function montar(releer: () => Promise<void>) {
+    vi.useFakeTimers();
+    const v = vigilante();
+    const avisos: string[] = [];
+    const { terminado } = releerAlCambiar({
+      vigilante: v,
+      carpetas: [CITAS, FUENTES],
+      releer,
+      esperaMs: 250,
+      avisar: (mensaje) => avisos.push(mensaje),
+    });
+    return { v, avisos, terminado };
+  }
+
+  it('vigila las dos carpetas, y una ráfaga de cambios es una sola relectura tras la espera', async () => {
+    const releer = vi.fn(async () => {});
+    const { v, terminado } = montar(releer);
+    expect(v.anadidas).toEqual([CITAS, FUENTES]);
+    v.emitir('change', `${CITAS}/a.md`);
+    await vi.advanceTimersByTimeAsync(200);
+    v.emitir('add', `${CITAS}/b.md`);
+    v.emitir('unlink', `${FUENTES}/ws--obra.txt`);
+    v.emitir('change', `${FUENTES}/ws--obra--obra-ii.txt`);
+    await vi.advanceTimersByTimeAsync(249);
+    expect(releer).not.toHaveBeenCalled();
+    await vi.advanceTimersByTimeAsync(1);
+    await terminado();
+    expect(releer).toHaveBeenCalledTimes(1);
+  });
+
+  it('un cambio fuera de las carpetas no relee, tampoco una carpeta que solo comparte el prefijo', async () => {
+    const releer = vi.fn(async () => {});
+    const { v, terminado } = montar(releer);
+    for (const ruta of ['/p/corpus/autores/x.yml', '/p/corpus/citas-borrador/x.md', '/p/corpus/fuentes.bak', '/p/src/x.ts']) {
+      v.emitir('change', ruta);
+    }
+    await vi.advanceTimersByTimeAsync(1_000);
+    await terminado();
+    expect(releer).not.toHaveBeenCalled();
+    // La carpeta misma sí cuenta: se borra o se crea entera.
+    v.emitir('unlink', CITAS);
+    await vi.advanceTimersByTimeAsync(250);
+    await terminado();
+    expect(releer).toHaveBeenCalledTimes(1);
+  });
+
+  it('nunca hay dos a la vez: la que llega mientras otra lee espera a que acabe', async () => {
+    let enMarcha = 0;
+    let maximo = 0;
+    const lentas: (() => void)[] = [];
+    const releer = vi.fn(
+      () =>
+        new Promise<void>((resolver) => {
+          enMarcha += 1;
+          maximo = Math.max(maximo, enMarcha);
+          lentas.push(() => {
+            enMarcha -= 1;
+            resolver();
+          });
+        }),
+    );
+    const { v, terminado } = montar(releer);
+    v.emitir('change', `${CITAS}/a.md`);
+    await vi.advanceTimersByTimeAsync(250);
+    expect(releer).toHaveBeenCalledTimes(1);
+    v.emitir('change', `${CITAS}/b.md`);
+    await vi.advanceTimersByTimeAsync(250);
+    // La segunda está programada, pero no empieza hasta que la primera termina.
+    expect(releer).toHaveBeenCalledTimes(1);
+    lentas.shift()?.();
+    await vi.advanceTimersByTimeAsync(0);
+    expect(releer).toHaveBeenCalledTimes(2);
+    lentas.shift()?.();
+    await terminado();
+    expect(maximo).toBe(1);
+  });
+
+  it('una relectura que falla se dice, no deja ninguna promesa rechazada y no impide la siguiente', async () => {
+    const rechazadas: unknown[] = [];
+    const alRechazar = (motivo: unknown) => rechazadas.push(motivo);
+    process.on('unhandledRejection', alRechazar);
+    try {
+      const releer = vi
+        .fn<() => Promise<void>>()
+        .mockRejectedValueOnce(new Error('corpus/citas/a.md no tiene un frontmatter YAML válido'))
+        .mockResolvedValue(undefined);
+      const { v, avisos, terminado } = montar(releer);
+      v.emitir('change', `${CITAS}/a.md`);
+      await vi.advanceTimersByTimeAsync(250);
+      await terminado();
+      expect(avisos).toEqual([
+        'No se pudieron volver a situar las Citas: corpus/citas/a.md no tiene un frontmatter YAML válido',
+      ]);
+      v.emitir('change', `${CITAS}/a.md`);
+      await vi.advanceTimersByTimeAsync(250);
+      await terminado();
+      expect(releer).toHaveBeenCalledTimes(2);
+      expect(avisos).toHaveLength(1);
+      vi.useRealTimers();
+      await new Promise((resolver) => setTimeout(resolver, 0));
+      expect(rechazadas).toEqual([]);
+    } finally {
+      process.off('unhandledRejection', alRechazar);
+    }
+  });
+});
+
+describe('24.1 — guardarPosiciones: el almacén cambia de un golpe o no cambia', () => {
+  /** Un almacén de mentira que anota cada operación. */
+  function almacen(inicial: Record<string, unknown>) {
+    const datos = new Map(Object.entries(inicial));
+    const operaciones: string[] = [];
+    return {
+      datos,
+      operaciones,
+      clear: () => {
+        operaciones.push('clear');
+        datos.clear();
+      },
+      set: (entrada: { id: string; data: Record<string, unknown> }) => {
+        operaciones.push(`set ${entrada.id}`);
+        datos.set(entrada.id, entrada.data);
+      },
+    };
+  }
+  const leidas = new Map<string, AparicionDeCita[]>([
+    ['a', [en('ws--obra', 3)]],
+    ['b', []],
+  ]);
+
+  it('lee y analiza todo antes de vaciar, y entonces vacía y llena sin esperar a nada', async () => {
+    const destino = almacen({ vieja: { apariciones: [] } });
+    const analizar = vi.fn(async (entrada: { id: string; data: Record<string, unknown> }) => {
+      destino.operaciones.push(`analizar ${entrada.id}`);
+      return entrada.data;
+    });
+    await guardarPosiciones({ leer: async () => leidas, analizar, almacen: destino });
+    expect(destino.operaciones).toEqual(['analizar a', 'analizar b', 'clear', 'set a', 'set b']);
+    expect(Object.fromEntries(destino.datos)).toEqual({
+      a: { apariciones: [{ documento: 'ws--obra', posicion: 3 }] },
+      b: { apariciones: [] },
+    });
+  });
+
+  it('si la lectura o el análisis fallan, el almacén se queda como estaba', async () => {
+    const anterior = { vieja: { apariciones: [en('ws--obra', 1)] } };
+    const destino = almacen(anterior);
+    await expect(
+      guardarPosiciones({ leer: async () => Promise.reject(new Error('frontmatter roto')), analizar: async (e) => e.data, almacen: destino }),
+    ).rejects.toThrow('frontmatter roto');
+    const analizar = async (entrada: { id: string; data: Record<string, unknown> }) => {
+      if (entrada.id === 'b') throw new Error('esquema');
+      return entrada.data;
+    };
+    await expect(guardarPosiciones({ leer: async () => leidas, analizar, almacen: destino })).rejects.toThrow('esquema');
+    expect(destino.operaciones).toEqual([]);
+    expect(Object.fromEntries(destino.datos)).toEqual(anterior);
+  });
+});
+
+/*
+ * La fachada de `publicado.ts` memoriza por conjunto, y lo que se memoriza es una promesa: si
+ * la de un conjunto fallara y se quedara guardada, toda página posterior repetiría el fallo.
+ * En Vitest `astro:content` no existe, así que la consulta falla de verdad.
+ */
+describe('24.1 — citasDeLasObras: un fallo no se memoriza', () => {
+  it('mientras está en curso es la misma promesa; si falla, la siguiente vuelve a intentarlo', async () => {
+    const conjunto = {
+      citas: [{ slug: 'a', obra: { nombre: 'x--y' } }],
+      autores: [],
+      temas: [],
+      colecciones: [],
+    } as unknown as ConjuntoPublicable;
+    const primera = citasDeLasObras(conjunto);
+    expect(citasDeLasObras(conjunto)).toBe(primera);
+    await expect(primera).rejects.toThrow();
+    const segunda = citasDeLasObras(conjunto);
+    expect(segunda).not.toBe(primera);
+    await expect(segunda).rejects.toThrow();
+  });
+
+  it('sin ninguna Cita con Obra no consulta nada, y eso sí se memoriza', async () => {
+    const conjunto = { citas: [{ slug: 'a' }], autores: [], temas: [], colecciones: [] } as unknown as ConjuntoPublicable;
+    const primera = citasDeLasObras(conjunto);
+    expect(await primera).toEqual(new Map());
+    expect(citasDeLasObras(conjunto)).toBe(primera);
+  });
+});
+
 describe('24.1 — el Corpus real, sin construir', () => {
   const rutas = rutasDelCorpus(join(RAIZ_DEL_REPO, 'corpus'));
   let citas: CitaEnCorpus[] = [];
@@ -458,15 +707,11 @@ describe('24.1 — el Corpus real, sin construir', () => {
 
   it('las Citas del censo no tienen apariciones', async () => {
     const censo = await leerCensoDeCotejo(rutas);
-    expect(censo.length).toBeGreaterThan(0);
-    let miradas = 0;
-    for (const slug of censo) {
-      if (!posiciones.has(slug)) continue;
-      expect(posiciones.get(slug), slug).toEqual([]);
-      miradas += 1;
-    }
-    // Y no por no mirar ninguna: las del censo son Citas publicadas con su entrada.
-    expect(miradas).toBeGreaterThan(0);
+    // Todas, y no por no mirar ninguna: un slug del censo sin Cita publicada rompe la
+    // construcción, así que cada uno tiene su entrada. Con el censo vacío —la meta de la
+    // Historia 11.4— no queda ninguna que mirar, y la prueba sigue en verde.
+    expect(censo.filter((slug) => !posiciones.has(slug))).toEqual([]);
+    for (const slug of censo) expect(posiciones.get(slug), slug).toEqual([]);
   });
 
   it('aparecer ⇔ apareceEnDocumento, y la posición es la del cuerpo colapsado', () => {
@@ -520,6 +765,53 @@ describe('24.1 — el Corpus real, sin construir', () => {
     expect(distintas).toBeGreaterThan(0);
   });
 
+  /*
+   * La anterior dice que el orden **cambia**; esta, que lo que sale **es** el del libro, sin usar
+   * `ordenDelLibro` de oráculo: en cada Obra real, las Citas situadas van delante, cada Fuente
+   * junta y por recuento, y dentro de una Fuente el documento de cada Cita —el primero de los
+   * suyos— y su posición nunca retroceden; las sueltas, detrás y por slug.
+   */
+  it('en cada Obra real, documento y posición nunca retroceden dentro de una Fuente', async () => {
+    const fichas = await leerFichasDeObra(rutas);
+    const porObra = new Map<string, CitaEnCorpus[]>();
+    for (const c of colgarObras(citas, fichas)) {
+      if (c.obra === undefined) continue;
+      porObra.set(c.obra.nombre, [...(porObra.get(c.obra.nombre) ?? []), c]);
+    }
+    const primera = (slug: string) =>
+      [...(posiciones.get(slug) ?? [])].sort((a, b) => compararDocumentos(a.documento, b.documento) || a.posicion - b.posicion)[0];
+    const fallos: string[] = [];
+    let comparadas = 0;
+    for (const [obra, suyas] of porObra) {
+      const enOrden = ordenDelLibro(suyas, posiciones);
+      const situada = (c: CitaEnCorpus) => typeof c.fuente?.id === 'string' && primera(c.slug) !== undefined;
+      const nSituadas = enOrden.filter(situada).length;
+      if (enOrden.slice(0, nSituadas).some((c) => !situada(c))) fallos.push(`${obra}: una suelta entre las situadas`);
+      const sueltas = slugs(enOrden.slice(nSituadas));
+      if (sueltas.join() !== [...sueltas].sort((a, b) => a.localeCompare(b, 'es') || (a < b ? -1 : 1)).join()) {
+        fallos.push(`${obra}: las sueltas no van por slug`);
+      }
+      const situadas = enOrden.slice(0, nSituadas);
+      const recuento = new Map<string, number>();
+      for (const c of situadas) recuento.set(c.fuente!.id, (recuento.get(c.fuente!.id) ?? 0) + 1);
+      const fuentes = situadas.map((c) => c.fuente!.id).filter((f, i, todas) => i === 0 || todas[i - 1] !== f);
+      if (new Set(fuentes).size !== fuentes.length) fallos.push(`${obra}: una Fuente partida`);
+      for (let i = 1; i < fuentes.length; i += 1) {
+        if (recuento.get(fuentes[i - 1])! < recuento.get(fuentes[i])!) fallos.push(`${obra}: Fuentes fuera de recuento`);
+      }
+      for (let i = 1; i < situadas.length; i += 1) {
+        const [a, b] = [situadas[i - 1], situadas[i]];
+        if (a.fuente!.id !== b.fuente!.id) continue;
+        const [pa, pb] = [primera(a.slug), primera(b.slug)];
+        const orden = compararDocumentos(pa.documento, pb.documento) || pa.posicion - pb.posicion;
+        if (orden > 0) fallos.push(`${obra}: ${a.slug} (${pa.documento} ${pa.posicion}) antes que ${b.slug} (${pb.documento} ${pb.posicion})`);
+        comparadas += 1;
+      }
+    }
+    expect(fallos).toEqual([]);
+    expect(comparadas).toBeGreaterThan(1000);
+  });
+
   it('ningún frontmatter de Cita guarda una posición (AD-23)', async () => {
     const ficheros = (await readdir(rutas.citas, { recursive: true })).filter((f) => f.endsWith('.md'));
     expect(ficheros.length).toBe(citas.length);
@@ -533,19 +825,88 @@ describe('24.1 — el Corpus real, sin construir', () => {
 });
 
 describe('24.1 — las dependencias que la historia prohíbe', () => {
-  /** El código sin comentarios de bloque ni de línea (los `//` de una URL se respetan). */
-  const sinComentarios = (codigo: string) =>
-    codigo.replace(/\/\*[\s\S]*?\*\//g, '').replace(/(^|[^:'"`\\])\/\/.*$/gm, '$1');
+  /**
+   * El código sin comentarios de bloque ni de línea. Recorre el texto respetando las cadenas
+   * —entre comillas simples, dobles o invertidas— y las expresiones regulares literales, así que
+   * un `'corpus/**' + '/*.md'`, el `//` de una URL o un `/['"]/` no abren, cortan ni esconden
+   * nada. Una regex se reconoce como lo hace el analizador: una `/` donde no puede ir una
+   * división, tras un signo de puntuación o una palabra como `return`. No sigue las plantillas
+   * anidadas dentro de `${…}`.
+   */
+  function sinComentarios(codigo: string): string {
+    let salida = '';
+    let i = 0;
+    const puedeEmpezarRegex = () => {
+      const previo = salida.slice(-12).trimEnd();
+      return previo === '' || /[(,=:[!&|?{};+\-*%<>~^]$/.test(previo) || /\b(?:return|typeof|case|in|of|void|yield|await)$/.test(previo);
+    };
+    while (i < codigo.length) {
+      const c = codigo[i];
+      const siguiente = codigo[i + 1];
+      if (c === '/' && siguiente === '*') {
+        const fin = codigo.indexOf('*/', i + 2);
+        i = fin === -1 ? codigo.length : fin + 2;
+        continue;
+      }
+      if (c === '/' && siguiente === '/') {
+        while (i < codigo.length && codigo[i] !== '\n') i += 1;
+        continue;
+      }
+      let fin = -1;
+      if (c === "'" || c === '"' || c === '`') {
+        fin = i + 1;
+        while (fin < codigo.length && codigo[fin] !== c) fin += codigo[fin] === '\\' ? 2 : 1;
+      } else if (c === '/' && puedeEmpezarRegex()) {
+        let enClase = false;
+        fin = i + 1;
+        while (fin < codigo.length && codigo[fin] !== '\n') {
+          const d = codigo[fin];
+          if (d === '\\') {
+            fin += 2;
+            continue;
+          }
+          if (d === '[') enClase = true;
+          else if (d === ']') enClase = false;
+          else if (d === '/' && !enClase) break;
+          fin += 1;
+        }
+      }
+      if (fin !== -1) {
+        salida += codigo.slice(i, fin + 1);
+        i = fin + 1;
+        continue;
+      }
+      salida += c;
+      i += 1;
+    }
+    return salida;
+  }
 
-  /** Lo que un fichero importa: estático, `export … from` e `import()`. */
-  const IMPORTA = /(?:\bfrom\s*|\bimport\s*\(\s*|\bimport\s+)['"`]([^'"`]+)['"`]/g;
+  /** Lo que un fichero importa: estático, `export … from`, `import()`, `import.meta.glob()` y `require()`. */
+  const IMPORTA =
+    /(?:\bfrom\s*|\bimport\s*\(\s*|\bimport\s+|\bimport\.meta\.glob(?:Eager)?\s*\(\s*\[?\s*|\brequire\s*\(\s*)['"`]([^'"`]+)['"`]/g;
   const importados = (codigo: string) => [...sinComentarios(codigo).matchAll(IMPORTA)].map((m) => m[1]);
 
-  it('el detector ve las tres formas', () => {
-    expect(importados("import { a } from '../../tools/lib/x.ts';")).toEqual(['../../tools/lib/x.ts']);
-    expect(importados("export { a } from '../../tools/lib/x.ts';")).toEqual(['../../tools/lib/x.ts']);
-    expect(importados("const m = await import('../../tools/lib/x.ts');")).toEqual(['../../tools/lib/x.ts']);
-    expect(importados("// import { a } from '../../tools/lib/x.ts';")).toEqual([]);
+  it('el detector ve todas las formas, y las cadenas no lo engañan', () => {
+    const x = '../../tools/lib/x.ts';
+    expect(importados(`import { a } from '${x}';`)).toEqual([x]);
+    expect(importados(`export { a } from '${x}';`)).toEqual([x]);
+    expect(importados(`const m = await import('${x}');`)).toEqual([x]);
+    expect(importados(`const m = import.meta.glob('${x}');`)).toEqual([x]);
+    expect(importados(`const m = import.meta.glob(['${x}']);`)).toEqual([x]);
+    expect(importados(`const m = require('${x}');`)).toEqual([x]);
+    expect(importados(`// import { a } from '${x}';`)).toEqual([]);
+    expect(importados(`/* import { a } from '${x}'; */`)).toEqual([]);
+    // Un patrón de glob dentro de una cadena no abre un comentario que se trague lo de después…
+    expect(importados(`const p = 'corpus/**/*.md';\nconst m = await import('${x}');`)).toEqual([x]);
+    // …ni una URL dentro de una cadena corta la línea.
+    expect(importados(`const u = 'https://x.org'; const m = await import('${x}');`)).toEqual([x]);
+    expect(importados(`const u = "a // b"; import('${x}');`)).toEqual([x]);
+    // …ni una regex con comillas o con barras esconde lo que viene detrás.
+    expect(importados(`const r = /['"]/g;\nconst m = await import('${x}');`)).toEqual([x]);
+    expect(importados(`const r = s.replace(/\\/\\//g, '');\nimport('${x}');`)).toEqual([x]);
+    // Y una división no es una regex.
+    expect(importados(`const r = a / b; const t = c / d;\nimport('${x}');`)).toEqual([x]);
   });
 
   it('ningún fichero de src/ —src/lib/ incluido— importa de tools/lib/, salvo el cargador de content.config.ts', async () => {
@@ -567,6 +928,17 @@ describe('24.1 — las dependencias que la historia prohíbe', () => {
     expect(codigo).not.toMatch(/import\s*\{[^}]*\bz\b[^}]*\}\s*from\s*['"]astro:content['"]/);
     expect(codigo).toMatch(/import\s*\{\s*z\s*\}\s*from\s*['"]astro\/zod['"]/);
     expect(importados(codigo).filter((r) => /(^|\/)tools\//.test(r))).toEqual(['../tools/lib/posiciones.ts']);
+  });
+
+  it('el único localizador: el `indexOf` de cotejo.ts está en `localizar`, y `apareceEnDocumento` lo usa', async () => {
+    const codigo = sinComentarios(await readFile(join(RAIZ_DEL_REPO, 'tools', 'lib', 'cotejo.ts'), 'utf8'));
+    const cuerpoDe = (nombre: string) =>
+      new RegExp(`export function ${nombre}\\([^)]*\\)[^{]*\\{([\\s\\S]*?)\\n\\}`).exec(codigo)?.[1] ?? '';
+    expect(codigo.match(/indexOf\(/g) ?? []).toHaveLength(1);
+    expect(cuerpoDe('localizar')).toMatch(/cuerpo\.indexOf\(buscado\)/);
+    expect(cuerpoDe('apareceEnDocumento').trim()).toBe(
+      'return localizar(colapsarEspacios(texto), colapsarEspacios(cuerpo)) !== -1;',
+    );
   });
 
   it('tools/lib/posiciones.ts localiza solo con `localizar` y lee con los lectores del cotejo', async () => {

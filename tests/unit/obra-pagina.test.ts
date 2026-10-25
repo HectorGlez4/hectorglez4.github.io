@@ -352,6 +352,12 @@ describe('Historia 22.4 — la Página de Obra, construida', () => {
     // Indexable también: ninguna línea nombra el orden, y las Tarjetas no llevan el título de la Obra.
     expect(pagina).toMatch(/<\/header>\s*<ul class="listado"/);
     expect(listado).not.toContain('Cartas a Lucilio');
+    // Y los datos estructurados enumeran las Citas en ese mismo orden.
+    const lista = jsonLd(pagina).find((b) => b['@type'] === 'CollectionPage')?.mainEntity as {
+      itemListElement: { position: number; url: string }[];
+    };
+    expect(lista.itemListElement.map((e) => new URL(e.url).pathname)).toEqual(enlaces);
+    expect(lista.itemListElement.map((e) => e.position)).toEqual([1, 2, 3]);
   });
 
   it('24.1 — la colección `posiciones`, leída tras construir: el slug del frontmatter, sin texto', async () => {
@@ -364,7 +370,9 @@ describe('Historia 22.4 — la Página de Obra, construida', () => {
       const declarado = /^slug: (.+)$/m.exec(f)?.[1];
       return declarado === undefined ? [] : [JSON.parse(declarado) as string];
     });
-    expect(slugs).toHaveLength(65);
+    // Cada fichero de Cita del fixture declara su slug, y son más de las 50 de una página.
+    expect(slugs).toHaveLength(Object.keys(corpus(1)).filter((ruta) => ruta.startsWith('citas/')).length);
+    expect(slugs.length).toBeGreaterThan(50);
     expect(Object.keys(posiciones).sort()).toEqual([...slugs].sort());
     for (const [slug, entrada] of Object.entries(posiciones)) {
       expect(Object.keys(entrada), slug).toEqual(['apariciones']);
@@ -409,15 +417,31 @@ describe('Historia 22.4 — la Página de Obra, construida', () => {
     }
   });
 
-  it('24.1 — construir no escribe nada en los ficheros de Cita', async () => {
+  it('24.1 — construir no escribe nada en corpus/', async () => {
     const fixture = corpus(1);
     const deCitas = Object.keys(fixture).filter((ruta) => ruta.startsWith('citas/'));
-    const { readdir } = await import('node:fs/promises');
+    const { readdir, stat } = await import('node:fs/promises');
     const enDisco = (await readdir(join(proyecto, 'corpus', 'citas'), { recursive: true })).filter((f) => f.endsWith('.md'));
     expect(enDisco.map((f) => `citas/${f}`).sort()).toEqual(deCitas.sort());
-    for (const ruta of deCitas) {
-      expect(await readFile(join(proyecto, 'corpus', ruta), 'utf8'), ruta).toBe(fixture[ruta]);
+    // Los ficheros de Cita, byte a byte, y lo demás que trae el fixture.
+    for (const [ruta, contenido] of Object.entries(fixture)) {
+      expect(await readFile(join(proyecto, 'corpus', ruta), 'utf8'), ruta).toBe(contenido);
     }
+    /*
+     * Y nada de `corpus/` —tampoco lo que siembra el andamio: documentos de Fuente, fichas,
+     * `portada.json`— se escribe ni aparece después de que empiece la construcción. El andamio
+     * escribe la sonda de `src/pages/` después de todo el corpus y antes de construir, así que
+     * ningún fichero de `corpus/` puede ser más reciente que ella.
+     */
+    const antesDeConstruir = (await stat(join(proyecto, 'src', 'pages', 'sonda.astro'))).mtimeMs;
+    const todos = (await readdir(join(proyecto, 'corpus'), { recursive: true, withFileTypes: true })).filter((e) => e.isFile());
+    expect(todos.length).toBeGreaterThan(Object.keys(fixture).length);
+    const posteriores: string[] = [];
+    for (const e of todos) {
+      const ruta = join(e.parentPath, e.name);
+      if ((await stat(ruta)).mtimeMs > antesDeConstruir) posteriores.push(ruta);
+    }
+    expect(posteriores).toEqual([]);
   });
 
   it('los Temas: solo los publicados, por recuento de la Obra, sin recuento visible', async () => {
@@ -995,11 +1019,12 @@ describe('Historia 22.8 — la congelación declarada, construida', () => {
     expect(cartas).toMatch(NOINDEX);
     // Historia 24.1 — congelada fuera, el mismo orden del libro.
     const listado = /<ul class="listado"[^>]*>([\s\S]*?)<\/ul>/.exec(cartas)?.[1] ?? '';
-    expect([...listado.matchAll(/href="([^"]+)"/g)].map((m) => m[1])).toEqual([
-      '/cita/seneca-cartas-2/',
-      '/cita/seneca-cartas-1/',
-      '/cita/seneca-cartas-0/',
-    ]);
+    const enlaces = [...listado.matchAll(/href="([^"]+)"/g)].map((m) => m[1]);
+    expect(enlaces).toEqual(['/cita/seneca-cartas-2/', '/cita/seneca-cartas-1/', '/cita/seneca-cartas-0/']);
+    const lista = jsonLd(cartas).find((b) => b['@type'] === 'CollectionPage')?.mainEntity as {
+      itemListElement: { url: string }[];
+    };
+    expect(lista.itemListElement.map((e) => new URL(e.url).pathname)).toEqual(enlaces);
     // Historia 23.9 — y la marca la sigue: no indexable, y solo la vista de Obra.
     expect(marcaDe(cartas)).toBe(NO_INDEXABLE);
     expect(vistasDe(cartas)).toBe(EVENTOS.vistaDeObra);
