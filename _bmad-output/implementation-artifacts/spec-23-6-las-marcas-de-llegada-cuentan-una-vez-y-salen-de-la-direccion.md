@@ -5,11 +5,18 @@ created: '2026-10-25'
 status: 'done'
 baseline_revision: 'a0e540104fb3c693e3651b0b73b9f8cda7e36998'
 review_loop_iteration: 0
-followup_review_recommended: false
+followup_review_recommended: true
 context:
   - '{project-root}/_bmad-output/implementation-artifacts/epic-23-context.md'
 warnings: [multiple-goals, oversized]
-deferred: []
+deferred:
+  - summary: >-
+      La regla «la difusión se cuenta sobre lecturas, nunca con la sola vista» (FR-56) vive solo en la consulta a mano de DESPLIEGUE.md §3; el informe de la 23.10 tiene que contarla sobre lecturas y probarlo.
+    evidence: |-
+      La vista también lleva `via` al D1 —el vocabulario de la 23.2 la declara en las vistas y el fichero la emite con las declaradas—, así que un lector que cuente vistas con `via` contaría difusión sin lectura. Ni Vitest ni Playwright cubren la regla de recuento: solo la aplica la consulta «Difusión por botón, sobre lecturas» (`WHERE evento='lectura' AND via IS NOT NULL`). Lo señalaron intent-alignment (a) y ac-auditor (3) en la revisión de la 23.6.
+    location: >-
+      DESPLIEGUE.md §3, consulta «Difusión por botón, sobre lecturas»; informe de la Historia 23.10
+    severity: low
 ---
 
 <intent-contract>
@@ -135,6 +142,26 @@ deferred: []
 Las capas de revisión de esta pasada son externas (blind-hunter, edge-case-hunter, verification-gap,
 intent-alignment, ac-auditor) y no traían hallazgos todavía: la revisión independiente viene después.
 
+### 2026-10-25 — Review pass
+- intent_gap: 0
+- bad_spec: 0
+- patch: 12: (high 0, medium 1, low 11)
+- defer: 1: (high 0, medium 0, low 1)
+- reject: 9: (high 0, medium 0, low 9)
+- addressed_findings:
+  - `[medium]` `[patch]` «Va antes» se probaba por orden en el documento, y la isla de `/buscar/` —guion clásico al final del `<body>`, que corre antes que el fichero diferido— quedaba exenta de «no escribe» (blind-hunter, intent-alignment b, ac-auditor 2). La prueba sobre `dist/` exige ahora `defer` sin `async` ni módulo en el `<script src>` del fichero y que ningún otro guion de su página, en ningún sitio, escriba en el historial o la dirección; la búsqueda pierde la exención hasta que la 23.8 pruebe, ejecutándola, que no escribe al analizarse.
+  - `[low]` `[patch]` Una vista pedida por `__medir` —directa o de la cola— antes de la lectura, o en una página sin vista, llevaba otra vez las marcas (blind-hunter, edge-case-hunter, intent-alignment d, ac-auditor 4). El fichero solo pone las marcas mientras emite las vistas declaradas y la lectura (`D`); la correspondencia de la 23.2 y la prueba de la 8.2 producen las vistas desde `data-vistas`, y dos pruebas nuevas cubren la vista de una isla con marcas y sin vista.
+  - `[low]` `[patch]` `replaceState` con una ruta que empieza por `//` se resolvía como otro anfitrión (edge-case-hunter). La dirección nueva va entera, con `location.origin` delante; el entorno simulado la resuelve con `URL` y lanza ante otro origen, como el navegador, y una prueba lo cubre.
+  - `[low]` `[patch]` Nada comprobaba que el conjunto de `via` del vocabulario y el `DESTINOS_VALIDOS` de la orden fueran el mismo (blind-hunter): prueba de igualdad en `tests/unit/canal.test.ts`.
+  - `[low]` `[patch]` El registro aceptaba una propia a mano con `compartido: true`, que la orden nunca escribe (blind-hunter, edge-case-hunter): `analizarSenales` la niega; cabecera del registro, docblock de `SenalExterna`, AGENTS.md y prueba por `principal` (código 1, fichero intacto).
+  - `[low]` `[patch]` Un mismo enlace anotado sin marcas y luego con ellas mostraba los avisos de su primera anotación (blind-hunter, edge-case-hunter): `resumenDeSenales` une `marcado` y `compartido` de todas las anotaciones vivas de la terna; prueba en los dos órdenes.
+  - `[low]` `[patch]` «o más de una» contradecía «el mismo dos veces vale» (blind-hunter, ac-auditor 1): `CODIGOS_DE_SENAL` y sus copias literales dicen «o más de una distinta» para `?de=` y `?via=`, y `corpus/senales-externas.yml` vuelve a ser exactamente la cabecera; el comportamiento sigue el contrato (valores distintos).
+  - `[low]` `[patch]` Los detectores de `dist/` no veían `+=` sobre `location` ni `history['replaceState']` (blind-hunter, intent-alignment c): los ven, con casos culpables nuevos, y el comentario dice que el falso positivo de una cadena `"de"` cae del lado seguro.
+  - `[low]` `[patch]` DESPLIEGUE.md no pesaba que un bloqueador del fichero deja la marca en la barra y la difunde con cada copia (blind-hunter): párrafo con el coste y por qué se acepta.
+  - `[low]` `[patch]` El corte de SM-8 no tenía procedimiento a mano y nombraba `CORTES_DE_SM8` sin decir que aún no existe (blind-hunter): las condiciones exactas para partir las consultas, con la jornada mixta aparte.
+  - `[low]` `[patch]` Mensajes y forma (blind-hunter): el rechazo de una propia nombra todas sus `?via=`; el `import` de `vocabulario.ts` en su orden en `tools/lib/canal.ts`; el párrafo de códigos de `anotar` en AGENTS.md, reenvuelto.
+  - `[low]` `[patch]` La prueba real de la caché de atrás y adelante solo miraba `origen` (intent-alignment e, ac-auditor 5): llega con `?de=` y `?via=`, comprueba la barra sin marcas al llegar y al volver, y las dos marcas de las dos lecturas.
+
 ## Design Notes
 
 **La función pura viaja como texto.** El fichero es una cadena, así que la función tiene que ir dentro como texto; con `String(función)` el empaquetado del build puede renombrarla o reformatearla, y el fichero —y su versión, que sale del contenido— dejaría de ser el mismo que calcula Vitest (`medicion.test.ts` compara `dist/` con `guionDeMedicion(ENDPOINT)` byte a byte). Por eso se escribe una sola vez como texto de una expresión de función, con los nombres como argumento, y las pruebas la evalúan en `node:vm` y la llaman. Orientativo (nombres y compactación los fija el código):
@@ -239,8 +266,8 @@ el vocabulario (Block If), esa entrada da `'x'`. Se implementó la regla y se pr
 fila con un valor ajeno delante (`?via=lo-que-sea&via=whatsapp` → `null`; `?via=whatsapp&via=lo-que-sea`
 → `'whatsapp'`), y además el caso literal con su valor real (`?via=x&via=whatsapp` → `'x'`), comentado.
 
-**Revisión.** Capas externas sin hallazgos en esta pasada: 0 parches, 0 diferidos, 0 rechazados.
-Seguimiento recomendado: `false` (parcheados: 0 altos, 0 medios, 0 bajos; puntuación 0).
+**Revisión (primera pasada, sin hallazgos todavía).** Las capas externas aún no habían corrido: 0
+parches, 0 diferidos, 0 rechazados. La revisión de verdad es la del apartado siguiente.
 
 **Verificación.**
 - `npx astro check` — 0 errores, 0 avisos (20 sugerencias previas). La primera pasada dio 1 error de
@@ -268,3 +295,84 @@ Seguimiento recomendado: `false` (parcheados: 0 altos, 0 medios, 0 bajos; puntua
   recargarla las volvería a contar, como antes de la historia.
 - Los detectores de `dist/` son textuales (cadena entre comillas, `?nombre=`, `location`, `history`):
   un guion que compusiera el nombre de una marca por piezas se les escaparía.
+
+### Revisión del 2026-10-25 — capas externas
+
+**Qué cambió.** Doce parches, ninguno dentro del contrato. El fichero pone las Marcas de llegada
+**solo** mientras emite las vistas que declara la página y la lectura (`D`): una vista que pida una
+isla por `__medir`, directa o de la cola, sale sin ellas, antes o después de la lectura y con vista
+o sin ella, así que «una vez por llegada» ya no depende de que ninguna isla pida vistas. La dirección
+nueva va entera, `location.origin` delante, para que una ruta que empiece por `//` no se lea como
+otro anfitrión. La prueba de orden sobre `dist/` mira la ejecución y no el documento —el fichero va
+con `defer` y ningún otro guion de su página escribe en el historial o la dirección—, y la isla de
+`/buscar/` pierde la exención de antemano: cuando la 23.8 la haga escribir, la prueba se pondrá en
+rojo y tendrá que demostrar, ejecutándola, que no escribe al analizarse (esto sustituye a la tarea
+y a la nota de diseño «Orden en el documento», que pedían la exención y el orden en el documento).
+En `tools/`, el registro niega una propia a mano con `compartido: true`, la consulta une las
+marcas de todas las anotaciones vivas de un enlace, el rechazo de una propia nombra todas sus
+`?via=` y los códigos de `senal` dicen «o más de una distinta». DESPLIEGUE.md pesa el bloqueador
+del fichero y da el corte de SM-8 a mano.
+
+**Ficheros.**
+- `src/lib/medicion.ts` — `D` en `b`, `a` y `l`; `location.origin` en `replaceState`; docblocks.
+- `src/lib/umbrales.ts` — la medida tras la revisión: **2.520 bytes** (2.521 con barra final; 2.488
+  con el punto final de las pruebas), bajo el tope de 2.880, que no se mueve.
+- `tests/unit/ayuda/medicion.ts` — `location.origin` (`ORIGEN_DEL_SANDBOX`); `replaceState` resuelve
+  con `URL` y lanza ante otro origen.
+- `tests/unit/medicion.test.ts` — tres pruebas nuevas (vista de isla con marcas, vista de isla sin
+  vista declarada, ruta con `//`); URL entera en `historial()`; detectores con `+=` y corchetes; la
+  prueba de orden por ejecución; la búsqueda sin exención.
+- `tests/unit/vocabulario.test.ts`, `tests/unit/redes.test.ts` — las vistas se producen desde
+  `data-vistas`, como en el sitio.
+- `tests/e2e/receptor.spec.ts` — la caché de atrás y adelante de verdad, con las dos marcas y la
+  barra sin ellas al llegar y al volver.
+- `tools/lib/canal.ts` — `CODIGOS_DE_SENAL` («distinta»), `motivoDeDifusionPropia` con todas las
+  marcas, orden del `import`, marcas unidas en `resumenDeSenales`, docblock de `compartido`.
+- `tools/lib/corpus.ts` — `analizarSenales` niega `compartido: true` fuera de una ajena; cabecera.
+- `tools/canal.ts`, `AGENTS.md`, `corpus/senales-externas.yml` — los códigos literales al día (el
+  registro sigue siendo exactamente su cabecera, sin ninguna entrada); AGENTS.md, además, la
+  convención de la medición y el párrafo de `anotar` reenvuelto.
+- `tests/unit/canal.test.ts` — cuatro pruebas nuevas (igualdad del conjunto de `via`, varias `?via=`
+  en una propia, marcas unidas en los dos órdenes, propia a mano con `compartido`).
+- `DESPLIEGUE.md` — el bloqueador del fichero y su coste; el corte de SM-8 a mano.
+
+**Hallazgos.** 12 parches (0 altos, 1 medio, 11 bajos), 1 diferido (la difusión sobre lecturas,
+para el informe de la 23.10) y 9 rechazados: `compartido` como booleano (lo fija el criterio), la
+fila «Repetidas» de la matriz (dentro del contrato; el código sigue la regla de la primera aparición
+y la discrepancia ya consta arriba), el estado `done` previo a la revisión y `sprint-status.yaml`
+(los lleva el bucle), los riesgos sin seguimiento (el de la 23.8 lo vigila ahora la prueba de
+orden; los demás se aceptan), la línea base de la verificación (`a0e54010` solo añade esta spec: el
+`git diff` sale vacío desde las dos), la frase de la 23.5 en `umbrales.ts` (es el registro
+cronológico, como el párrafo de la 23.2), el `&` suelto que queda al quitar una marca junto a un
+segmento vacío (la spec pide el resto literal; es cosmético), la consulta de difusión sin tasa (la
+da el informe de la 23.10) y las tres lecturas de `location.search` en la misma activación (la
+cadena literal la exige `redes.test.ts`; nada la vuelve a leer después).
+
+**Seguimiento recomendado: `true`** — parcheados 0 altos, 1 medio y 11 bajos; puntuación 3 × 1 + 11
+= 14, por encima de 5.
+
+**Verificación de la revisión.**
+- `npx astro check` — 0 errores, 0 avisos (20 sugerencias previas).
+- `npx vitest run` de `medicion`, `vocabulario`, `redes`, `comparticion`, `huella`, `receptor`,
+  `canal`, `superficies`, `espinas-de-ux` y `kit-construido` — 10 ficheros, 694 pruebas en verde.
+- `npm test` (con `correr.sh`) — 131 ficheros, 5.719 pruebas en verde.
+- `npx playwright test tests/e2e/receptor.spec.ts --project=escritorio` — 37 en verde, 1 saltada (la
+  de prerender, como antes); la caché de atrás y adelante de verdad restauró y pasa con `via`.
+- Con el `webServer`, `origen`, `copiar`, `imagen`, `compartir-enlace`, `compartir-imagen`,
+  `busqueda`, `pagina-de-cita` y `receptor-local` en `escritorio` — 114 en verde, 2 saltadas.
+  Puertos 4321, 4399, 4400, 4402 y 8787 libres al terminar.
+- `guionDeMedicion` con el punto final de producción: 2.520 bytes (≤ 2.880).
+- `git diff` desde `3dd8b508f3bf544a2c14f82907f2ff2e4075f831` y desde
+  `a0e540104fb3c693e3651b0b73b9f8cda7e36998` de `src/lib/vocabulario.ts` y `medicion/`: vacío;
+  `ARRANQUE_DE_MEDICION` y `MAX_BYTES_DE_GUION` sin cambios.
+
+**Riesgos que quedan tras la revisión.**
+- La 23.8 encontrará en rojo las dos pruebas de `dist/` que miran quién escribe en la dirección: es a
+  propósito, y la exención que añada tiene que venir con la prueba de que la búsqueda no escribe al
+  analizarse.
+- Un bloqueador que impida el fichero deja la marca en la barra y la difunde con cada copia
+  (DESPLIEGUE.md §3); un `replaceState` que falla, igual.
+- Los detectores de `dist/` siguen siendo textuales: un nombre de marca compuesto por piezas se les
+  escapa, y una cadena `"de"` ajena los enciende (del lado seguro).
+- La regla de contar la difusión sobre lecturas vive en una consulta a mano hasta el informe de la
+  23.10 (diferido).
