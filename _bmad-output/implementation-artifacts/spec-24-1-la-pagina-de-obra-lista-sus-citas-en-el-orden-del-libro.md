@@ -5,12 +5,25 @@ created: '2026-10-25'
 status: 'done'
 baseline_revision: '7886273b8fb051ac47f3932e684b122268f819f4'
 review_loop_iteration: 0
-followup_review_recommended: false
+followup_review_recommended: true
 context:
   - '{project-root}/_bmad-output/implementation-artifacts/epic-24-context.md'
 warnings:
   - oversized
-deferred: []
+deferred:
+  - summary: >-
+      La primera Obra desordenada ya existe: Novelas ejemplares (y Vidas paralelas, Recuerdos de provincia y Novelas y cuadros de la vida sur-americana) nombra sus páginas por título, así que el orden natural las lista por orden alfabético y no por el del libro; la 24.1 aplaza el índice de subpáginas de la Fuente «hasta la primera Obra que salga desordenada».
+    evidence: |-
+      Sobre el Corpus del worktree (2026-10-25), con posicionesDeCitas y compararDocumentos:
+      wikisource-es--novelas-ejemplares lista el-coloquio-de-los-perros (4 Citas, la última
+      novela de 1613) antes que la-gitanilla (3 Citas, la primera); vidas-paralelas lista
+      ciceron antes que pericles; recuerdos-de-provincia y novelas-y-cuadros van por título.
+      Es el límite que la historia acepta (no hay detector ni índice), y la condición con la
+      que la épica aplaza el índice ya se cumple: decidir si se captura, y en qué historia, es
+      de Héctor — pendiente de Héctor (bmad-create-epics-and-stories).
+    location: >-
+      src/lib/obras.ts compararDocumentos; corpus/fuentes/wikisource-es--novelas-ejemplares--*.txt
+    severity: medium
 ---
 
 <intent-contract>
@@ -110,74 +123,48 @@ deferred: []
 
 Las cinco capas de revisión (blind-hunter, edge-case-hunter, verification-gap, intent-alignment, ac-auditor) son externas en el bucle v8-ralph y la invocación de esta pasada no trae ninguna sección «## Hallazgos externos»: ninguna tiene hallazgos en esta pasada. La revisión independiente viene después.
 
-## Design Notes
-
-**Medido al planificar (2026-10-25, Corpus del worktree):** 4.420 Citas y 1.421 documentos (155 MB); 19.676 pares Cita–documento candidato (1,15 GB de cuerpo). Localizar colapsando el cuerpo en cada par: 12,3 s; colapsando cada cuerpo una vez: 1,3 s, más ~0,7 s de `leerCitas` y ~0,9 s de `leerDocumentosDeFuente`. Hoy ninguna Cita aparece en más de un documento, y 270 de 335 grupos (Autor, obra) de varias Citas difieren del orden por slug. Por eso `localizar` recibe formas ya colapsadas: es el mismo `indexOf` para el cotejo y para el cargador, y la composición puede colapsar cada cuerpo una sola vez.
-
-**Orden natural (`compararDocumentos`):** se trocea el nombre del documento por `-` (los segmentos vacíos de `--` cuentan como palabra vacía). Un trozo es número si es `^\d+$` o un romano en forma canónica minúscula (`^m{0,3}(cm|cd|d?c{0,3})(xc|xl|l?x{0,3})(ix|iv|v?i{0,3})$`, no vacío). Número con número: por valor y, a igual valor, por cadena; palabra con palabra: por unidades de código; **palabra antes que número** —en el Corpus es «proemio» antes de «i» en *La ciudad de Dios* y en *Dafnis y Cloe*—; si una lista es prefijo de la otra, la corta primero. Como los documentos de una Obra comparten `{fuente}--{obra}`, equivale al orden del slug de página. Límite aceptado: «mi» se lee 1001 (solo en *Recuerdos de provincia*, sin efecto); lo corrige el índice de subpáginas cuando se capture.
-
-```ts
-// clave de una Cita documentada (las demás van detrás, por slug)
-[rangoDeFuente(cita.fuente.id), primerDocumento /* por compararDocumentos */, posicion, cita.slug]
-```
-
-## Medidas
-
-Corpus real del worktree, `FECHA_JORNADA=2026-10-25` en las dos construcciones, `env FECHA_JORNADA=2026-10-25 /usr/bin/time -p npm run build` desde el árbol limpio (antes, en `7886273b8f`) y con la historia aplicada (después). Logs: `/Users/hec/brainlySabiduria/.claude/v8-ralph/logs/s-24-26/24-1-build-antes.log` y `24-1-build-despues.log`.
-
-| | antes | después | diferencia |
-|---|---|---|---|
-| `real` de `npm run build` | 122,29 s | 93,95 s | −28,34 s |
-| `user` / `sys` | 101,75 s / 20,88 s | 102,06 s / 33,62 s | +0,31 s / +12,74 s |
-| `[content] Syncing` → `Synced` | ~2 s (19:41:19 → 19:41:21) | ~4 s (19:55:24 → 19:55:28) | ~+2 s |
-
-La diferencia de `real` es ruido de caché, no ganancia: la de antes fue la primera construcción del worktree tras `npm ci`. El coste propio del cargador `posiciones` se ve en la sincronización de contenido, ~2 s más (lectura de Citas y documentos y localización con cada cuerpo colapsado una vez por grupo), coherente con los ~2,9 s medidos al planificar. `npm run check` sincroniza el contenido con el cargador en 3 s.
-
-`diff -rq "$ANTES" dist` (824 líneas): **299 ficheros distintos en `dist/obra/`**, todos `index.html` (269 páginas 1 y 30 páginas 2+); **525 en `dist/pagefind/`** (`pagefind-entry.json` distinto y 524 fragmentos y metadatos con nombre por contenido presentes en un solo lado); **0 fuera de `dist/obra/` y `dist/pagefind/`**. Comprobación a ojo: *La ciudad de Dios* (46 Citas) sale por libro ii, iv, iv, iv, v, vii… y posición; *El Zarco*, capítulos iv, vii, xvi, xx. `$ANTES` y `dist/` borrados tras comparar.
-
-## Verification
-
-**Commands:**
-Desde `/Users/hec/brainlySabiduria/.claude/worktrees/v8-epicas-24-26`, un fichero por orden; lo que pueda pasar de ~8 min, con `/Users/hec/brainlySabiduria/.claude/v8-ralph/correr.sh /Users/hec/brainlySabiduria/.claude/v8-ralph/logs/s-24-26/24-1-<nombre>.log /Users/hec/brainlySabiduria/.claude/worktrees/v8-epicas-24-26 <orden>` y `esperar.pl`.
-- `npx vitest run tests/unit/orden-del-libro.test.ts` -- verde.
-- `npx vitest run tests/unit/<f>.test.ts` para cada uno de `cotejo`, `documentacion`, `puerta-de-admision`, `obras`, `publicado`, `aislamiento-de-revision`, `andamiaje` -- verdes.
-- `npx vitest run tests/unit/obra-pagina.test.ts`, en segundo plano (varias construcciones) -- `FINISHED EXIT=0`.
-- Igual, uno a uno, los que construyen Páginas de Obra: `obra-construida`, `lista-de-obras`, `ediciones-en-venta`, `ingreso-construido`, `publicable-y-alcanzable`, `congelacion-de-obras`, `traduccion-construida`, `cotejo-build`, `espinas-de-ux` -- verdes.
-- `npm run check` -- 0 errores.
-- `npm test` en segundo plano (≈16 min), log `24-1-npm-test.log` -- `FINISHED EXIT=0`.
-- Las dos construcciones de la medida y `diff -rq` -- según el último criterio de aceptación.
-
-## Auto Run Result
+### 2026-10-25 — Review pass
+- intent_gap: 0
+- bad_spec: 0
+- patch: 16: (high 0, medium 1, low 15)
+- defer: 1: (high 0, medium 1, low 0)
+- reject: 20: (high 0, medium 1, low 19)
+- addressed_findings:
+  - `[medium]` `[patch]` La relectura de desarrollo del cargador `posiciones` era `void cargar()` sin `catch`: un frontmatter a medio escribir dejaba una promesa rechazada sin tratar en `astro dev` (blind-hunter, edge-case-hunter). Ahora el fallo se dice con `logger.error` y conserva el almacén anterior.
+  - `[low]` `[patch]` La relectura vaciaba el almacén antes de esperar a `parseData`, dos recargas podían cruzarse y cada evento releía el Corpus entero (blind-hunter ×2, edge-case-hunter). Ahora se analiza todo antes y se vacía y llena de un golpe, las recargas van en cadena y una ráfaga se resuelve en una sola tras 250 ms (`ESPERA_TRAS_CAMBIO_MS`). Comprobado en `astro dev`: cuatro ficheros tocados, una sola relectura, árbol limpio.
+  - `[low]` `[patch]` El final del libro («epilogo», «notas», «apendice») va antes que el capítulo i (blind-hunter): documentado como límite aceptado en `compararDocumentos` y en AGENTS.md, y fijado por prueba con nombres reales (*Recuerdos de provincia*: «notas-del-autor» antes que «mi-educacion»).
+  - `[low]` `[patch]` Los ordinales escritos y los trozos de cifra y letra se leen como palabras, y no estaba dicho (blind-hunter): documentado y fijado («cuarta» antes que «primera» en *El alcalde de Zalamea*; «10a», «1o», «1»). También las páginas con nombre de capítulo (*Novelas ejemplares*), por orden alfabético.
+  - `[low]` `[patch]` El comentario de `compararDocumentos` afirmaba que los documentos de una Obra comparten `{fuente}--{obra}`, falso tras `reunir` (blind-hunter): corregido, diciendo cómo ordena una Obra de varias formas.
+  - `[low]` `[patch]` La medida era una pareja fría/templada sin explicar `sys` ni los 270 frente a 269 (blind-hunter, intent-alignment): `## Medidas` añade la medida aislada del cargador (cinco pasadas, ~2 s, `sys` ≤ 0,6 s) y explica la diferencia de grupos (agrupado crudo frente a Obra resuelta).
+  - `[low]` `[patch]` El `## Auto Run Result
 
 Status: done
-Blocking condition: ninguna. Planificación cerrada el 2026-10-25 en `v8/epicas-24-26`; implementada, verificada y cerrada el mismo día en la misma rama, sin push.
+Blocking condition: ninguna. Planificación cerrada el 2026-10-25 en `v8/epicas-24-26`; implementada, verificada, revisada (primera pasada con las cinco capas externas) y cerrada el mismo día en la misma rama, sin push.
 
-**Lo implementado.** La Página de Obra lista sus Citas en el orden del libro en todas sus páginas y en su `ItemList`, sin ninguna línea que lo diga. Un cargador de contenido `posiciones` en `src/content.config.ts` (al patrón del de biografías) solo cablea `tools/lib/posiciones.ts`, que lee Citas y documentos con los lectores del cotejo, los casa con `documentosDeCita` y los localiza con `localizar`, el único localizador, del que ahora sale también `apareceEnDocumento`. Entrega, por el `slug` del frontmatter, `{documento, posicion}` por documento en que aparece el texto, sin texto, sin elegir y sin escribir nada en `corpus/`. `src/lib/obras.ts` es el único que ordena (`ordenDelLibro`, `compararDocumentos`), con las posiciones por parámetro; `src/lib/publicado.ts` agrupa (`citasPorObra`) y da la fachada memorizada (`citasDeLasObras`), y la página la usa en lugar de su `sort` por slug. `content.config.ts` toma `z` de `astro/zod`.
+**Lo implementado.** La Página de Obra lista sus Citas en el orden del libro en todas sus páginas y en su `ItemList`, sin ninguna línea que lo diga. Un cargador de contenido `posiciones` en `src/content.config.ts` (al patrón del de biografías) solo cablea `tools/lib/posiciones.ts`, que lee Citas y documentos con los lectores del cotejo, los casa con `documentosDeCita` y los localiza con `localizar`, el único localizador, del que también sale `apareceEnDocumento`, y que solo acepta formas marcadas `Colapsado` por `colapsarEspacios`. Entrega, por el `slug` del frontmatter, `{documento, posicion}` por documento en que aparece el texto, sin texto, sin elegir y sin escribir nada en `corpus/`. `src/lib/obras.ts` es el único que ordena (`ordenDelLibro`, `compararDocumentos`), con las posiciones por parámetro; `src/lib/publicado.ts` agrupa (`citasPorObra`) y da la fachada memorizada (`citasDeLasObras`), y la página la usa en lugar de su `sort` por slug. `content.config.ts` toma `z` de `astro/zod`.
 
 **Ficheros:**
-- `tools/lib/cotejo.ts` — `localizar(buscado, cuerpo)` sobre formas colapsadas (vacío → -1); `apareceEnDocumento` pasa a usarlo.
+- `tools/lib/cotejo.ts` — `localizar(buscado, cuerpo)` sobre formas `Colapsado` (vacío → -1); `colapsarEspacios` devuelve ese tipo marcado; `apareceEnDocumento` usa `localizar`.
 - `tools/lib/posiciones.ts` (nuevo) — `posicionesDeCitas` pura, agrupando por documento corto y colapsando cada cuerpo una vez por grupo; `leerPosicionesDelCorpus`, su lector de disco.
-- `src/lib/obras.ts` — `AparicionDeCita`, `PosicionesDeCitas`, `compararDocumentos` (orden natural con romanos canónicos, palabra antes que número, corto antes que sus páginas) y `ordenDelLibro`.
+- `src/lib/obras.ts` — `AparicionDeCita`, `PosicionesDeCitas`, `compararDocumentos` (orden natural con romanos canónicos, palabra antes que número, corto antes que sus páginas, y sus límites aceptados escritos) y `ordenDelLibro`.
 - `src/lib/publicado.ts` — `citasPorObra` (puro) y `citasDeLasObras` (fachada memorizada por conjunto, `import('astro:content')` dinámico, sin consultar la colección si ninguna Cita tiene Obra).
-- `src/content.config.ts` — `z` de `astro/zod`; `cargadorDePosiciones` y colección `posiciones` con su esquema, vigilando `corpus/citas` y `corpus/fuentes` en desarrollo.
+- `src/content.config.ts` — `z` de `astro/zod`; `cargadorDePosiciones` y colección `posiciones`; en desarrollo, relectura atómica, en cadena, agrupada tras `ESPERA_TRAS_CAMBIO_MS` y con los fallos dichos por `logger.error`.
 - `src/pages/obra/[autor]/[slug]/[...page].astro` — toma el agrupado y el orden de `citasDeLasObras`.
-- `tests/unit/orden-del-libro.test.ts` (nuevo, sin construir) — la matriz entera, el orden natural con nombres reales de `corpus/fuentes/`, la permutación, el lector de disco (clave `y` para `x.md`, documento ilegible fuera, ningún fichero tocado), el Corpus real (entrada por Cita, censo sin apariciones, equivalencia con `apareceEnDocumento` y la posición, alguna Obra distinta del orden por slug, ningún frontmatter con posición) y los estructurales.
-- `tests/unit/obra-pagina.test.ts` — Cartas insertadas 2, 1, 0 y el listado «en el orden del libro»; «Sobre la brevedad» paginada y `noindex` con su `ItemList`; construir no toca los ficheros de Cita; la congelación con el mismo orden; en la 22.6, `[B2, B1]`, Epístolas en dos páginas (carta-ii y carta-x) y la cotejada de Cartas renombrada, con la prueba nueva del orden.
-- `AGENTS.md` — el párrafo «El orden del libro (Historia 24.1)» bajo la Página de Obra.
+- `tests/unit/orden-del-libro.test.ts` (nuevo, sin construir) — la matriz, el orden natural con nombres reales de `corpus/fuentes/` (Ariel por capítulos, el corto de *Novelas ejemplares*), los límites aceptados fijados tal y como son hoy, la permutación, el lector de disco (árbol entero intacto), el Corpus real y los estructurales (todo `src/` salvo el cargador, lista de localizadores prohibidos, solo los lectores de `corpus.ts`).
+- `tests/unit/obra-pagina.test.ts` — el orden del libro en Cartas (indexable, también sin línea del orden y sin título de Obra en las Tarjetas), en Sobre la brevedad paginada y `noindex`, en la congelación y en la 22.6; la sonda vuelca la colección `posiciones` y una prueba la lee tras construir.
+- `AGENTS.md` — el párrafo «El orden del libro (Historia 24.1)», con los límites del orden natural.
 
-**Revisión:** 0 parches, 0 diferidos, 0 rechazados (capas externas sin hallazgos en esta pasada). Revisión de seguimiento: 0 parches altos, 0 medios, 0 bajos; puntuación 0 → `followup_review_recommended: false`.
+**Revisión (2026-10-25, cinco capas externas):** 16 parches aplicados (1 medio, 15 bajos), 1 diferido (la primera Obra desordenada ya existe; decide Héctor) y 20 rechazados; detalle en `## Review Triage Log`. La pasada anterior de este spec no tuvo capas y no fue una revisión. Seguimiento: parches de esta pasada 0 altos, 1 medio, 15 bajos; puntuación 3 × 1 + 15 = 18 → `followup_review_recommended: true`.
 
 **Verificación** (logs en `/Users/hec/brainlySabiduria/.claude/v8-ralph/logs/s-24-26/`):
-- `npx vitest run tests/unit/orden-del-libro.test.ts` — 34/34 verde (~16 s; la equivalencia sobre el Corpus real, ~12,5 s).
-- `cotejo`, `documentacion`, `obras`, `publicado`, `andamiaje` — verdes (la guarda «ningún fichero de src/lib/ nombra el cotejo» cazó un comentario de `obras.ts`, reescrito); `puerta-de-admision` 12/12 y `aislamiento-de-revision` 6/6 sin tocarlas.
-- `obra-pagina.test.ts` — 56/56, `FINISHED EXIT=0`.
-- Uno a uno (`24-1-construyen.log`): `obra-construida` 16, `lista-de-obras` 18, `ediciones-en-venta` 44, `ingreso-construido` 38, `publicable-y-alcanzable` 30, `congelacion-de-obras` 4, `traduccion-construida` 6, `cotejo-build` 20, `espinas-de-ux` 10 — todas verdes.
-- `npm run check` — 0 errores, 0 avisos (dos veces; la última tras los cambios finales).
-- `npm test` (`24-1-npm-test.log`) — 133 ficheros, 6.087 pruebas, `FINISHED EXIT=0` (705 s).
-- Medidas antes/después y `diff -rq`: ver `## Medidas` — HTML distinto solo en `dist/obra/` (299) y `dist/pagefind/` (525), 0 fuera.
-- Auditoría de la matriz: cada fila tiene prueba que corrió y pasó en `orden-del-libro.test.ts` (un documento, varias Fuentes 3–2 y 2–2, paginada con proemio/romanos/2 y 10/corto, varias apariciones, empate, sin documento, permutación, y el cargador: censo, texto vacío, `null` y biografía, dos documentos, `x.md` con `slug: y`).
+- Implementación: `orden-del-libro` 34/34; `cotejo`, `documentacion`, `obras`, `publicado`, `andamiaje`, `puerta-de-admision` 12/12 y `aislamiento-de-revision` 6/6 verdes; `obra-pagina` 56/56; los nueve que construyen Páginas de Obra (`24-1-construyen.log`) verdes; `npm run check` 0 errores; `npm test` 6.087 pruebas, `FINISHED EXIT=0`; medidas y `diff -rq` en `## Medidas`.
+- Tras los parches de la revisión: `orden-del-libro` 36/36; `cotejo` 58/58, `documentacion` 46/46, `obras` 117/117, `publicado` 56/56, `andamiaje` 39/39; `obra-pagina` 57/57 (`24-1-r1-obra-pagina.log`, `FINISHED EXIT=0`); `npm run check` 0 errores, 0 avisos, 8 sugerencias (como antes). `npm test` (`24-1-r1-npm-test.log`): 133 ficheros, 6.089 de 6.090 en verde; la que falló era `gestion.test.ts` («ningún módulo repite los números de regla de negocio»), que cazó la espera de 300 ms del cargador (el umbral de caracteres de imagen); pasó a 250 ms y `gestion` 48/48, `orden-del-libro` 36/36 y `npm run check` 0 errores tras el cambio.
+- `astro dev` (`npx astro dev --port 4321`, parado con `astro dev stop`): con una línea de registro provisional, retirada después, la carga inicial sitúa 4.420 Citas, y cuatro ficheros tocados con `touch -c` (tres Citas y un documento) dan **una sola** relectura; el árbol de git queda limpio.
+- Medida aislada del cargador: cinco pasadas de ~2 s reales y ≤ 0,6 s de `sys` (ver `## Medidas`).
+- No se repiten las dos construcciones del Corpus real: ningún parche toca lo que se construye (el orden, la composición y la página no cambian; los cambios son de tipos, de la relectura de desarrollo, de comentarios y de pruebas).
 
 **Riesgos que quedan:**
-- El orden natural lee como romano toda palabra que sea romano canónico («mi», «di»): aceptado por la historia hasta que se capture el índice de subpáginas de la Fuente; no hay detector de desorden.
-- El cargador lee el Corpus y los documentos una segunda vez por construcción (el cotejo los lee en `astro:build:start`): ~2 s medidos en la sincronización de contenido, y la memoria de los cuerpos colapsados de un grupo a la vez.
-- En desarrollo, dos cambios seguidos pueden lanzar dos recargas del cargador a la vez, igual que el de biografías.
+- El orden natural no sabe el orden de las páginas con nombre de capítulo: hoy *Novelas ejemplares* lista *El coloquio de los perros* antes que *La gitanilla*, y *Vidas paralelas*, *Recuerdos de provincia* y *Novelas y cuadros de la vida sur-americana* van por título. Es el límite aceptado; el índice de subpáginas queda diferido para Héctor (frontmatter `deferred`). Los demás límites —«mi», el final del libro, los ordinales escritos, cifra con letra— no afectan hoy a ninguna Obra con Citas en varias páginas y están fijados por prueba.
+- La Página de Obra depende ahora de `corpus/fuentes/`, y ni el `lastmod` del sitemap ni el aviso lo saben todavía: es la Historia 24.8.
+- El cargador lee el Corpus y los documentos una segunda vez por construcción (~2 s medidos).
+- El cargador de biografías conserva la relectura de desarrollo sin `catch` ni agrupado; lee pocos ficheros pequeños y no se tocó.
