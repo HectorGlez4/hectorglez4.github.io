@@ -1,0 +1,123 @@
+---
+title: 'Historia 24.3 — Cada Cita de un listado dice de qué obra es'
+type: 'feature'
+created: '2026-10-26'
+status: 'ready-for-dev'
+review_loop_iteration: 0
+followup_review_recommended: false
+context:
+  - '{project-root}/_bmad-output/implementation-artifacts/epic-24-context.md'
+warnings:
+  - oversized
+deferred: []
+---
+
+<intent-contract>
+
+## Intent
+
+**Problem:** La Tarjeta de Cita de los listados enseña el fragmento y, a veces, el Autor, pero nunca de qué Obra sale, así que quien recorre un Tema, un Autor o una Colección tiene que abrir cada Cita para saberlo; y el componente decide si pinta el Autor por la presencia de un `autor?` opcional, sin que ningún uso declare qué atribución lleva.
+
+**Approach:** `TarjetaDeCita.astro`, la única tarjeta (AD-19), gana una prop obligatoria `atribucion` con un conjunto cerrado —`'autor-y-obra' | 'obra' | 'ninguna'`, sin valor por omisión— y pinta bajo el fragmento, y bajo el Autor si lo lleva, el título de su Obra resuelta (`cita.obra.titulo`) como texto, con un «, » solo para lectores entre partes. Tema y Colección declaran `autor-y-obra`; Autor, `obra`; Obra, `ninguna`.
+
+## Boundaries & Constraints
+
+**Always:**
+- Un solo componente, sin tamaño compacto ni variante: `Props` sigue siendo `interface Props` con `zona: Zona` obligatoria (lo exige `tests/unit/medicion.test.ts:3033`) y gana `atribucion` obligatoria; `autor?: Autor` se queda solo para `autor-y-obra`.
+- `autor-y-obra` sin `autor` para el build con un error que nombra el slug de la Cita y `autor-y-obra` (la integridad del conjunto garantiza que el Autor resuelve: nunca una tarjeta sin el Autor que su contexto declara). Con `obra` o `ninguna` el componente no lee `autor`, y ningún uso se lo pasa.
+- La línea de Obra sale de `cita.obra?.titulo` y de nada más; sin `cita.obra`, no hay línea, ni hueco, ni «Sin obra documentada», ni coma.
+- Línea de Obra en `var(--sans)`, `var(--pie)`, peso 400, interlineado 1,5, `var(--tinta-apagada)`, sin `text-transform` ni `letter-spacing`; parte palabras antes que desbordar; sin `white-space: nowrap`, `text-overflow`, `line-clamp` ni `overflow: hidden`. A `var(--unidad)` de la parte anterior (el `gap` que ya tiene el enlace).
+- Un único `<a>` por tarjeta, a `rutaDeCita(cita.slug)`, con la zona en el `<li>` como hoy, 44 px mínimos y el fondo a `var(--contenedor-bajo)` al pasar el cursor. El recorte del fragmento (120) no cambia.
+- La pausa: un `<span class="solo-para-lectores">, </span>` (clase global de `tokens.css`) entre cada parte visible y la siguiente; ninguno al final ni en una tarjeta de una sola parte.
+- La indexabilidad y la congelación no alcanzan a la tarjeta: el título va igual en una Obra `noindex` o congelada fuera.
+
+**Block If:**
+- Hacer que `astro check` rechace un uso sin `atribucion` exigiera abandonar `interface Props` o la prop `zona: Zona` de la 23.7.
+- Cumplir el contrato exigiera tocar `src/lib/vocabulario.ts` (mueve la huella de AD-14) o un artefacto de `_bmad-output/planning-artifacts/` o `_bmad-output/specs/`.
+
+**Never:**
+- Un segundo enlace en la tarjeta, ni enlazar la Obra.
+- Escribir en `src/` la cadena `procedencia.obra` ni sus variantes, **tampoco en comentarios**: la prueba de la 22.3 (`tests/unit/obras.test.ts:1053`) lee el fichero entero.
+- Tocar la relación de `tools/lib/cambios.ts` (los listados ganan la ficha de Obra en la 24.8), `RutasDeSalida.astro` y sus hermanas (24.6), la Tarjeta de Obra (24.4) o los marcadores de Pagefind de los listados.
+
+## I/O & Edge-Case Matrix
+
+| Scenario | Input / State | Expected Output / Behavior | Error Handling |
+|----------|--------------|---------------------------|----------------|
+| Tema o Colección, con Obra | `atribucion="autor-y-obra"`, Cita con Obra | fragmento, Autor, título; lector: `«…», Séneca, Sobre la brevedad de la vida` | — |
+| Tema o Colección, sin Obra | `autor-y-obra`, sin `cita.obra` | fragmento, Autor; lector `«…», Séneca` | — |
+| Autor, con Obra | `atribucion="obra"` | fragmento, título; lector `«…», Cartas a Lucilio` | — |
+| Autor, sin Obra | `obra`, sin `cita.obra` | solo el fragmento, sin coma | — |
+| Listado de Obra | `atribucion="ninguna"` | solo el fragmento, sin coma, sin Autor ni título | — |
+| Título más largo que 120 | Obra de título de 125 caracteres | el título entero, sin «…» | — |
+| Obra `noindex` o congelada fuera | Cita de esa Obra en un Tema | el título igual que en una indexable | — |
+| Autor que falta | `autor-y-obra` con `autor={undefined}` | — | el build se para nombrando la Cita y `autor-y-obra` |
+
+</intent-contract>
+
+## Code Map
+
+- `src/components/TarjetaDeCita.astro:16-47` -- `Props` (`cita`, `autor?`, `zona`), recorte del fragmento 34-38, marcado `li.tarjeta[data-zona] > a > span.fragmento + span.autor`; estilos 49-90 (`.tarjeta a` en flex columna con `gap: var(--unidad)`, `.autor` en `--autor` y versalitas). Docblock cita UX-DR11: pasa a UX-DR70.
+- `src/pages/tema/[slug]/[...page].astro:67` -- `<TarjetaDeCita cita autor={autores.get(cita.autor)} zona="listado" />`; docblock 10-11 habla de la tarjeta con Autor.
+- `src/pages/coleccion/[slug]/[...page].astro:143` -- igual que el Tema; docblock 26-27.
+- `src/pages/autor/[slug]/[...page].astro:141` -- sin `autor`.
+- `src/pages/obra/[autor]/[slug]/[...page].astro:169-171` -- `autor={undefined}` y comentario UX-DR40.
+- `src/lib/publicado.ts:69` (`Cita.obra?: ObraResuelta`), `:676` (`verificarIntegridad`: toda Cita resuelve su Autor), `:926-927` (`colgarObras` cuelga la Obra a toda Cita del conjunto, también a las de las Colecciones); `src/lib/obras.ts:704-709` (`ObraResuelta.titulo`, el título efectivo de la ficha).
+- `src/styles/tokens.css:187` -- `.solo-para-lectores`, global (lo carga `Armazon.astro:20`); tokens `--pie`, `--tinta-apagada`, `--sans`, `--unidad`, `--contenedor-bajo`.
+- `src/components/ListaDeObras.astro:59-64` -- precedente de la pausa oculta dentro de una fila de bloque.
+- `tools/lib/cambios.ts:39-44` y `:193-197` -- comentarios que afirman que `TarjetaDeCita` no lleva la Obra; la relación no se toca.
+- `AGENTS.md`, sección «La obra se llama igual en todas partes (Historia 22.3)» -- lista de superficies que pintan `cita.obra.titulo`.
+- Pruebas que deben seguir verdes: `tests/unit/medicion.test.ts:3033-3051` (Props con `zona: Zona` y la importación de `Zona`), `tests/unit/obras.test.ts:1053` (22.3), `tests/unit/coleccion-pagina.test.ts:185-205` (el `<li>` de la Colección es idéntico al del Tema; `span.autor` con texto plano), `tests/unit/obra-pagina.test.ts:425-435,488-489` (listado de Obra sin `class="autor"` ni el título), `tests/unit/paginacion.test.ts:55` (`<li class="tarjeta"`), `tests/unit/ingreso-construido.test.ts:918` (la línea de importación de la página de Tema, intacta). E2E: `tests/e2e/coleccion.spec.ts:150-165` (en `main` solo `h1` y `span.fragmento` en serif), `tests/e2e/pagina-de-autor.spec.ts:52-64`, `tests/e2e/pagina-de-tema.spec.ts:30` (`.listado li .autor`), `tests/e2e/accesibilidad.spec.ts:540` (sin desplazamiento a 360 px en las superficies derivadas).
+- Andamio de pruebas: `tests/unit/ayuda/construir.ts` (`construirConCorpus`, `citaValida`, `coleccionValida`, `AUTOR_VALIDO`, `TEMA_VALIDO`, `paginaConstruida`; las fichas de Obra se siembran solas; un `pendientes-de-cotejo.yml` en el fixture apaga los documentos automáticos), `tools/lib/documento.ts` (`componerDocumento`, `nombreDeDocumento:2387`), patrón de censo y documentos a mano en `tests/unit/lista-de-obras.test.ts:117-190`; construcción con congelación en `tests/unit/obra-pagina.test.ts:1165-1209`.
+
+## Tasks & Acceptance
+
+**Execution:**
+- `src/components/TarjetaDeCita.astro` -- añadir `atribucion: 'autor-y-obra' | 'obra' | 'ninguna'` obligatoria a `interface Props` (docblock con los seis usos: Tema, Colección, Autor, «Más de {Autor}», Obra, «De la misma obra»), la guarda que para el build, la línea `span.obra` y las pausas según Design Notes, y la regla `.obra`; actualizar el docblock a UX-DR70 -- el contrato entero vive en el único componente.
+- `src/pages/tema/[slug]/[...page].astro`, `src/pages/coleccion/[slug]/[...page].astro` -- `atribucion="autor-y-obra"` con el `autor` de hoy; docblocks a «Autor y Obra» -- FR-6, FR-26.
+- `src/pages/autor/[slug]/[...page].astro` -- `atribucion="obra"` -- FR-4.
+- `src/pages/obra/[autor]/[slug]/[...page].astro` -- `atribucion="ninguna"` y quitar `autor={undefined}`; comentario: ni Autor ni título, que dice la Cabecera -- FR-51.
+- `tools/lib/cambios.ts` -- solo los dos comentarios: los listados pintan el título de la Obra desde la 24.3 y su relación lo recoge la 24.8 (AD-27).
+- `AGENTS.md` -- en la sección 22.3, añadir la Tarjeta de Cita de los listados de Tema, Colección y Autor a las superficies que nombran la obra por `cita.obra.titulo`, y una línea con el conjunto cerrado de `atribucion` por uso.
+- `tests/unit/tarjeta-de-cita.test.ts` (nuevo) -- **sin construir:** `Props` (TypeScript sobre el frontmatter, como `medicion.test.ts:3033`) trae `atribucion` sin `?` y con exactamente esos tres literales, la desestructuración no le da valor por omisión, y no hay más miembros que `cita`, `atribucion`, `autor`, `zona`; todo `<TarjetaDeCita` de `src/` declara `atribucion` con un literal del conjunto, pasa `autor=` solo con `autor-y-obra`, y en las cuatro páginas declara el que toca; la regla `.obra` cumple la tipografía y no lleva nada que recorte (como `lista-de-obras.test.ts:102-115`). **Una construcción que falla**, con el corpus mínimo (`citaValida()`, `AUTOR_VALIDO`, `TEMA_VALIDO`) y una sonda `paginas: { 'sonda-tarjeta.astro': … }` sin armazón que pinta la primera Cita con `atribucion="autor-y-obra" autor={undefined}`: código distinto de 0 y la salida nombra el slug y `autor-y-obra`. **Una construcción** (fixture en Design Notes): en todas las páginas de `/tema/el-tiempo/`, de la Colección, de `/autor/seneca/` y `/autor/antonio-machado/`, y de las Páginas de Obra, cada `li.tarjeta` del `ul.listado` tiene un solo `<a`, a `/cita/{slug}/`; sus partes visibles (`.fragmento`, `.autor`, `.obra`, en ese orden) son las de su contexto y su Cita; el texto para lectores (sin etiquetas, con lo `.solo-para-lectores`, espacios colapsados) es exactamente las partes unidas por «, »; cada Cita del Tema y del Autor aparece una vez entre todas sus páginas; el título de 125 caracteres sale entero; `/obra/seneca/de-la-ira/` lleva `noindex` y su Cita dice «De la ira» en el Tema; ninguna página contiene «Sin obra documentada» dentro de un listado -- la prueba de la historia.
+- `tests/unit/obra-pagina.test.ts` -- en la construcción con congelación (1165), un `it` 24.3: en `/tema/la-vida/` las tarjetas de `seneca-cartas-0…2` (Obra congelada fuera, `noindex`) llevan `Cartas a Lucilio` en su `.obra` y las de `seneca-brevedad-*`, `Sobre la brevedad de la vida` -- la congelación no alcanza a la navegación, sin construcción nueva.
+
+**Acceptance Criteria:**
+- Given el repositorio con la historia, when corre `npm run check`, then pasa sin errores, y un `<TarjetaDeCita>` sin `atribucion`, o con un valor fuera del conjunto, sería un error de tipos (lo fija la prueba estructural sobre `Props`).
+- Given el `dist/` de la construcción de prueba, when se lee la Tarjeta de Cita de cualquiera de los cuatro listados, en cualquiera de sus páginas, then lleva exactamente lo que dice su contexto, la Obra como texto y un solo enlace, y la prueba de zonas de la 23.7 (`medicion.test.ts`) sigue pasando sin tocarla.
+- Given la suite de Vitest, when corren `tarjeta-de-cita`, `obra-pagina`, `coleccion-pagina`, `obras`, `medicion`, `paginacion`, `lista-de-obras` e `ingreso-construido`, then pasan, y `obras.test.ts` (22.3) sin permitidos nuevos.
+- Given el sitio construido, when corren las pruebas locales de Playwright de Tema, Autor, Colección y accesibilidad, then pasan: ningún elemento nuevo va en serif y ninguna superficie desborda a 360 px.
+
+## Spec Change Log
+
+## Review Triage Log
+
+## Design Notes
+
+**El marcado.** Las pausas van **pegadas** a la parte anterior, sin espacio entre etiquetas (Astro conserva un espacio donde hay salto de línea, y entonces el texto para lectores sería `«…» , Séneca`), y como hermanas, nunca dentro de `.fragmento`: heredarían la serif y `coleccion.spec.ts` solo admite `h1` y `span.fragmento` en serif. `.solo-para-lectores` es `position: absolute`, así que queda fuera del flujo flexible y el `gap` sigue siendo de `--unidad` entre partes visibles. Forma de referencia para `autor-y-obra` con Obra:
+
+```astro
+<a href={rutaDeCita(cita.slug)}><span class="fragmento">«{fragmento}»</span>{nombre !== undefined && (<><span class="solo-para-lectores">, </span><span class="autor">{nombre}</span></>)}{titulo !== undefined && (<><span class="solo-para-lectores">, </span><span class="obra">{titulo}</span></>)}</a>
+```
+
+con `nombre` el de `autor` solo en `autor-y-obra` (tras la guarda) y `titulo = atribucion === 'ninguna' ? undefined : cita.obra?.titulo`. Las sondas de prueba sin `Armazon.astro` ya construyen (`superficies.ts:631`: lo no declarado no se anuncia y no rompe).
+
+**El fixture de la construcción.** Séneca (`AUTOR_VALIDO`) y Antonio Machado; un solo Tema, `el-tiempo`, en todas las Citas. Séneca: «Sobre la brevedad de la vida» 50 (93 %, `noindex`), «Cartas a Lucilio» 2 (indexable), «De la ira» 1 (`noindex`, una sola Cita) y 1 sin Obra (`procedencia: { referencia }`, sin `fuente`). Machado: una Obra de título de 125 caracteres con 2 Citas y 1 sin Obra (`procedencia: { referencia }`, sin `fuente`). Son 57 Citas en el Tema (dos páginas) y 54 de Séneca (dos páginas). Las dos sin Obra van en `pendientes-de-cotejo.yml`, así que los documentos de las cuatro Obras se escriben a mano con `componerDocumento` en `fuentes/${nombreDeDocumento('wikisource-es', titulo)}.txt`. Una Colección de 15 miembros (`MIN_CITAS_POR_COLECCION`): las dos sin Obra, una de «Cartas a Lucilio», la de «De la ira», una de la Obra de Machado y diez de «Sobre la brevedad». Las fichas las siembra el andamio. Un Listado de Obra no puede tener una Cita sin Obra: ahí se comprueba solo que ninguna tarjeta lleva Autor ni título.
+
+**Pagefind.** No se toca: los listados ya indexan lo que dicen sus tarjetas (el fragmento y el Autor), y el título de la Obra entra igual. Buscar el título de una Obra puede devolver además los listados que la nombran; `busqueda.spec.ts` filtra los resultados de Obra por tipo y debe seguir verde.
+
+## Verification
+
+**Commands:** desde `/Users/hec/brainlySabiduria/.claude/worktrees/v8-epicas-24-26`; lo que pase de ~8 min, con `/Users/hec/brainlySabiduria/.claude/v8-ralph/correr.sh /Users/hec/brainlySabiduria/.claude/v8-ralph/logs/s-24-26/24-3-<nombre>.log /Users/hec/brainlySabiduria/.claude/worktrees/v8-epicas-24-26 <orden>` y llamadas sucesivas a `/Users/hec/brainlySabiduria/.claude/v8-ralph/esperar.pl <log> 540`.
+- `npx vitest run tests/unit/tarjeta-de-cita.test.ts` y `npx vitest run tests/unit/obra-pagina.test.ts` (en segundo plano) -- `FINISHED EXIT=0`.
+- Uno a uno: `coleccion-pagina`, `paginacion`, `obras`, `medicion`, `lista-de-obras`, `ingreso-construido`, `fecha-de-cambio` -- verdes.
+- `npm run check` -- 0 errores. `npm test` en segundo plano (≈16 min) -- `FINISHED EXIT=0`.
+- `npx playwright test tests/e2e/pagina-de-tema.spec.ts tests/e2e/pagina-de-autor.spec.ts tests/e2e/coleccion.spec.ts tests/e2e/busqueda.spec.ts tests/e2e/accesibilidad.spec.ts` (los dos proyectos; construye el sitio con `tests/servidor.mjs`, puertos 4321 y 8787) en segundo plano -- verde. Parar todo servidor arrancado.
+
+**Manual checks (if no CLI):**
+- Con el sitio servido, a 320 px, la Página de Autor que lista la Obra de título más largo del Corpus no desborda (`scrollWidth <= clientWidth`) y el título parte en varias líneas.
+
+## Auto Run Result
+
+Status: ready-for-dev
+Blocking condition: ninguna. Planificación terminada (se pidió parar tras planificar); sin diferidos para Héctor.
