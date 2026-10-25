@@ -578,7 +578,7 @@ describe('Historia 23.12 — ninguna consulta de tools/ ordena por rowid', () =>
  */
 
 /** Lo que hace de un texto una sentencia de SQL, y no prosa. */
-const ES_SENTENCIA = /\bSELECT\b[\s\S]*\bFROM\b|\bUPDATE\b[\s\S]*\bSET\b|\bINSERT\b[\s\S]*\bINTO\b|\bDELETE\s+FROM\b|\bWITH\b|\bPRAGMA\b/i;
+const ES_SENTENCIA = /\bSELECT\b[\s\S]*\bFROM\b|\bUPDATE\b[\s\S]*\bSET\b|\b(?:INSERT|REPLACE)\b[\s\S]*\bINTO\b|\bDELETE\s+FROM\b|\bWITH\b|\bPRAGMA\b/i;
 
 /** Las dos que lo nombran con razón, tal como las pliega el compilador, y el único fichero donde valen. */
 const NOMBRAN_ROWID_CON_PERMISO: ReadonlyMap<string, readonly string[]> = new Map([
@@ -609,6 +609,7 @@ describe('Historia 23.10 — ningún SQL de tools/ nombra el rowid, salvo el bar
     ['consulta.sql', 'PRAGMA table_info(eventos); SELECT oid FROM eventos'],
     ['consulta.ts', "const sql = 'DELETE FROM eventos WHERE rowid = 1';"],
     ['consulta.ts', "const sql = 'INSERT INTO eventos (rowid, jornada) VALUES (1, 2)';"],
+    ['consulta.ts', "const sql = 'REPLACE INTO eventos (rowid, jornada) VALUES (1, 2)';"],
     // Las dos permitidas, fuera de su fichero, no valen.
     ['consulta.ts', "const sql = 'UPDATE eventos SET rowid = abs(random())';"],
     ['tools/lib/lineaBase.ts', "const sql = 'UPDATE eventos SET rowid = abs(random())';"],

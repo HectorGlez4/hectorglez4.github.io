@@ -10,8 +10,7 @@ import {
   CORTES_DE_SERIE,
   CORTES_DE_SERIE_DECLARADOS,
   CORTES_DE_SM8,
-  MIN_LECTURAS_DE_LINEA_BASE,
-  PASADAS_QUE_ESCRIBEN_EN_PRODUCCION,
+  SM12_CON_FACEBOOK,
   cortesQueLlegaron,
   type CorteLlegado,
 } from '../../src/lib/umbrales.ts';
@@ -29,8 +28,10 @@ import {
   esJornadaReal,
   legible,
   lineasDeLecturaDeMedicion,
+  nadaSeLeyo,
   partirSerie,
   problemasDeLaLectura,
+  valoresDeLaLectura,
   type JuicioPorVentanas,
   type LecturaDeMedicion,
   type OpcionesDeLaLectura,
@@ -227,7 +228,12 @@ describe('Historia 23.10 — la cuota de D1', () => {
         'Peca por exceso: cubre lo escrito desde las 00:00 UTC y algo más.',
     );
     expect(informe).toContain('Tamaño de la base: 12.000.000 bytes de 500.000.000 (CUOTA_DE_BYTES_POR_BASE_EN_D1), 2,4 %.');
-    expect(informe).toContain('las escrituras fallan en silencio hasta las 00:00 UTC');
+    // Las dos fallan en silencio, pero solo la de filas escritas se renueva a las 00:00 UTC.
+    expect(informe).toContain(
+      'Al pasar cualquiera de las dos, las escrituras fallan en silencio —el Worker se traga el error—: pasada la de ' +
+        'filas escritas, hasta las 00:00 UTC, cuando se renueva; pasada la de tamaño, hasta que se borren filas o cambie ' +
+        'el plan, porque esa no se renueva sola.',
+    );
     expect(informe).toContain('Cada lectura recorre la tabla cinco veces, una por consulta.');
   });
 });
@@ -429,14 +435,16 @@ describe('Historia 23.10 — los cortes de serie y los tramos', () => {
    */
   async function umbralesCon(lectura: string, obraYDirectorios: string) {
     const fuente = readFileSync(resolve(RAIZ, 'src/lib/umbrales.ts'), 'utf8');
-    const sinValor = (nombre: string) => `export const ${nombre}: string | undefined = undefined;`;
-    expect(fuente).toContain(sinValor('DESPLIEGUE_DE_LA_LECTURA'));
-    expect(fuente).toContain(sinValor('DESPLIEGUE_DE_OBRA_Y_DIRECTORIOS'));
+    // La declaración, con el valor que tenga: sin él hasta la 23.11 y la 26.11, y con el suyo
+    // después. Esta prueba no fija ninguno de los dos, que son de Héctor.
+    const declaracion = (nombre: string) => new RegExp(`export const ${nombre}: string \\| undefined = [^;\\n]+;`);
+    expect(fuente).toMatch(declaracion('DESPLIEGUE_DE_LA_LECTURA'));
+    expect(fuente).toMatch(declaracion('DESPLIEGUE_DE_OBRA_Y_DIRECTORIOS'));
     expect(fuente).not.toMatch(/^import /m);
     const copia = fuente
-      .replace(sinValor('DESPLIEGUE_DE_LA_LECTURA'), `export const DESPLIEGUE_DE_LA_LECTURA: string | undefined = '${lectura}';`)
+      .replace(declaracion('DESPLIEGUE_DE_LA_LECTURA'), `export const DESPLIEGUE_DE_LA_LECTURA: string | undefined = '${lectura}';`)
       .replace(
-        sinValor('DESPLIEGUE_DE_OBRA_Y_DIRECTORIOS'),
+        declaracion('DESPLIEGUE_DE_OBRA_Y_DIRECTORIOS'),
         `export const DESPLIEGUE_DE_OBRA_Y_DIRECTORIOS: string | undefined = '${obraYDirectorios}';`,
       );
     const dir = mkdtempSync(join(tmpdir(), 'sabiduria-umbrales-'));
@@ -665,7 +673,7 @@ describe('Historia 23.10 — las líneas base', () => {
     const l = leer({ vistasYLecturas: lecturasDeCita(120) }, { minimo: undefined });
     expect(deCita(l)).toMatchObject({ estado: 'sin-minimo', desde: D1, acumulado: 1200 });
     expect(texto(l)).toContain('la Página de Cita: sin mínimo declarado: 1200 lecturas desde el 2026-11-02; no se cierra.');
-    expect(texto(l)).toContain('Líneas base (MIN_LECTURAS_DE_LINEA_BASE: sin valor)');
+    expect(texto(l)).toContain('Líneas base (MIN_LECTURAS_DE_LINEA_BASE: sin mínimo declarado; ninguna se cierra)');
   });
 
   it('abierta mientras no reúne el mínimo', () => {
@@ -1035,10 +1043,12 @@ describe('Historia 23.10 — revisión: lo que la primera pasada dejaba sin deci
     expect(l.superficies.map((s) => s.nombre)).not.toContain('la búsqueda');
     expect(l.superficies.map((s) => s.nombre)).not.toContain('la página 404');
     const informe = texto(l);
-    expect(informe).toContain('la Página de Autor: vistas 0, lecturas 0, salidas 0; continuación sin denominador (0 sobre ninguna).');
+    expect(informe).toContain(
+      'la Página de Autor: vistas 0, lecturas 0, salidas 0, acciones 0; continuación sin denominador (0 sobre ninguna).',
+    );
     expect(informe).toContain('sin marca: vistas de Obra 0, lecturas 0, salidas 0, acciones 0;');
     // Sin las salidas, la superficie sigue saliendo, con lo que no se leyó nombrado.
-    expect(texto(leer({ salidas: 'D1_ERROR' }))).toContain('la Página de Autor: vistas 0, lecturas 0, salidas sin leer;');
+    expect(texto(leer({ salidas: 'D1_ERROR' }))).toContain('la Página de Autor: vistas 0, lecturas 0, salidas sin leer, acciones 0;');
   });
 
   it('«ya no se publica» dice que junta lo retirado con lo que nunca se publicó', () => {
@@ -1070,6 +1080,7 @@ describe('Historia 23.10 — revisión: lo que la primera pasada dejaba sin deci
       cortes: [{ jornada: '2026-11-3', que: 'la 23', series: ['lectura'] }],
       pasadas: [{ pasada: '25.3', jornada: '2026-02-30', rutas: [] }],
       minimo: 0,
+      minRutasEnRafaga: 0,
       juicios: [{ ...JUICIOS_POR_VENTANAS[0], llegada: '2026-1-5', deDondeLlega: 'DE_PRUEBA' }],
       superficies: [{ ...SUPERFICIES[0], lineaBase: UNIDAD_DE_LAS_BUSQUEDAS }],
     });
@@ -1078,34 +1089,37 @@ describe('Historia 23.10 — revisión: lo que la primera pasada dejaba sin deci
       'PASADAS_QUE_ESCRIBEN_EN_PRODUCCION, la 25.3: «2026-02-30» no es una jornada AAAA-MM-DD que exista.',
       'PASADAS_QUE_ESCRIBEN_EN_PRODUCCION, la 25.3: no nombra ninguna ruta, así que no descontaría nada.',
       'MIN_LECTURAS_DE_LINEA_BASE: «0» no es un entero positivo.',
+      'MIN_RUTAS_DE_CITA_EN_RAFAGA: «0» no es un entero positivo.',
+      'src/lib/superficies.ts no declara ninguna superficie que emita la vista de Cita: la lectura no sabe cuál es la Página de Cita.',
       'DE_PRUEBA (la llegada de SM-C3): «2026-1-5» no es una jornada AAAA-MM-DD que exista.',
       'src/lib/superficies.ts, la portada: su línea base se llama «las búsquedas», la de las búsquedas.',
     ]);
     expect(() => leer({}, { minimo: Number.NaN })).toThrow(/MIN_LECTURAS_DE_LINEA_BASE: «NaN» no es un entero positivo/);
-    expect(() => leer({}, { pasadas: [{ pasada: '25.3', jornada: D2, rutas: ['sin-barra'] }] })).toThrow(
-      /«sin-barra» no es una ruta del sitio/,
-    );
+    expect(() => leer({}, { minRutasEnRafaga: 2.5 })).toThrow('MIN_RUTAS_DE_CITA_EN_RAFAGA: «2.5» no es un entero positivo');
+    // Una ruta de pasada es un camino que el sitio declara, sin `?…` ni `#…`: otra no casaría con
+    // ningún registro, y la pasada contaría como visitas.
+    for (const ruta of ['sin-barra', '/cita/una/?via=whatsapp', '/cita/una/#atribucion', '/x-rota']) {
+      expect(() => leer({}, { pasadas: [{ pasada: '25.3', jornada: D2, rutas: [ruta] }] }), ruta).toThrow(
+        `«${ruta}» no es una ruta del sitio`,
+      );
+    }
+    // Sin la portada declarada, la lectura no sabe su unidad, y lo dice en vez de romper al cargar.
+    const sinPortada = SUPERFICIES.filter((superficie) => superficie.reconoce.test('/') === false);
+    expect(() => leer({}, { superficies: sinPortada })).toThrow(/no declara la portada \(\/\)/);
   });
 
   it('los valores que el repositorio declara hoy se sostienen', () => {
-    expect(
-      problemasDeLaLectura({
-        cortes: CORTES_DE_SERIE,
-        pasadas: PASADAS_QUE_ESCRIBEN_EN_PRODUCCION,
-        minimo: MIN_LECTURAS_DE_LINEA_BASE,
-        juicios: JUICIOS_POR_VENTANAS,
-        superficies: SUPERFICIES,
-      }),
-    ).toEqual([]);
+    expect(problemasDeLaLectura(valoresDeLaLectura())).toEqual([]);
   });
 
-  it('sin opciones, la lectura lee los valores de src/lib/umbrales.ts: los cortes, las pasadas, el mínimo y Facebook', async () => {
+  it('sin opciones, la lectura lee los valores de src/lib/umbrales.ts: los cortes, las pasadas, el mínimo, la ráfaga y Facebook', async () => {
     vi.resetModules();
     vi.doMock('../../src/lib/umbrales.ts', async (importOriginal) => ({
       ...(await importOriginal<typeof import('../../src/lib/umbrales.ts')>()),
       CORTES_DE_SERIE: [CORTE_23],
       PASADAS_QUE_ESCRIBEN_EN_PRODUCCION: [{ pasada: '25.3', jornada: D2, rutas: ['/cita/una/'] }],
       MIN_LECTURAS_DE_LINEA_BASE: 10,
+      MIN_RUTAS_DE_CITA_EN_RAFAGA: 1,
       SM12_CON_FACEBOOK: true,
     }));
     try {
@@ -1114,7 +1128,7 @@ describe('Historia 23.10 — revisión: lo que la primera pasada dejaba sin deci
         hoy: HOY,
         censo: CENSO,
         consultas: consultas({
-          vistasYLecturas: [lectura(D1, '/cita/una/', 12), lectura(D2, '/cita/una/', 5)],
+          vistasYLecturas: [lectura(D1, '/cita/una/', 12), lectura(D2, '/cita/una/', 5), vista(D1, '/cita/dos/', EVENTOS.vistaDeCita, 1)],
           acciones: [accion(D1, '/cita/una/', EVENTOS.comparticionDeEnlace, 1, { destino: 'facebook' })],
         }),
         cuota: CUOTA,
@@ -1122,7 +1136,10 @@ describe('Historia 23.10 — revisión: lo que la primera pasada dejaba sin deci
       expect(l.series.lectura.vigente.desde).toBe(D1);
       expect(l.descuentos.pasadas).toEqual([{ pasada: '25.3', jornada: D2, rutas: ['/cita/una/'], registros: 5 }]);
       expect(l.minimo).toBe(10);
-      expect(l.lineasBase.find((b) => b.unidad === UNIDAD_DE_LA_PAGINA_DE_CITA)).toMatchObject({ estado: 'cerrada', cerradaEl: D1 });
+      const deCita = l.lineasBase.find((b) => b.unidad === UNIDAD_DE_LA_PAGINA_DE_CITA)!;
+      expect(deCita).toMatchObject({ estado: 'cerrada', cerradaEl: D1 });
+      // Con el umbral de la ráfaga en una ruta, la jornada con una sola ruta de una vista es ráfaga.
+      expect(deCita.firmas?.find((f) => f.firma === 'ráfaga')).toMatchObject({ aplica: true, jornadas: [D1] });
       const sm12 = l.sm12 as Exclude<LecturaDeMedicion['sm12'], { faltan: unknown }>;
       expect(sm12.destinos.find((d) => d.destino === 'facebook')?.fuera).toBeUndefined();
     } finally {
@@ -1131,12 +1148,245 @@ describe('Historia 23.10 — revisión: lo que la primera pasada dejaba sin deci
     }
   });
 
-  it('sin opciones, la tabla de juicios es JUICIOS_POR_VENTANAS, y Facebook queda fuera con la constante apagada', () => {
+  it('sin opciones, la tabla de juicios es JUICIOS_POR_VENTANAS, y Facebook queda fuera o dentro según la constante', () => {
     const l = componerLecturaDeMedicion({ hoy: HOY, censo: CENSO, consultas: consultas({}), cuota: CUOTA });
     expect(l.juicios.map((j) => j.juicio.nombre)).toEqual(JUICIOS_POR_VENTANAS.map((j) => j.nombre));
-    expect(texto(l)).toMatch(/^ {2}SM-C3 \(la Página de Cita; llegada: sin constante todavía: la da la Épica 25\)/m);
+    expect(texto(l)).toMatch(/^ {2}SM-C3 \(la Página de Cita; llegada: /m);
+    // La constante es de Héctor (la enciende en la 25.7): la prueba sigue su valor, no lo fija.
     const sm12 = l.sm12 as Exclude<LecturaDeMedicion['sm12'], { faltan: unknown }>;
-    expect(sm12.destinos.find((d) => d.destino === 'facebook')?.fuera).toMatch(/SM12_CON_FACEBOOK/);
+    const fuera = sm12.destinos.find((d) => d.destino === 'facebook')?.fuera;
+    if (SM12_CON_FACEBOOK) expect(fuera).toBeUndefined();
+    else expect(fuera).toMatch(/SM12_CON_FACEBOOK/);
+  });
+});
+
+describe('Historia 23.10 — segunda revisión: lo que una consulta sin leer deja, y los bordes', () => {
+  const SM_C3: JuicioPorVentanas = JUICIOS_POR_VENTANAS.find((j) => j.nombre === 'SM-C3')!;
+
+  it('sin las vistas y las lecturas: SM-8, cada línea base, SM-12 y las ventanas salen sin leer, nunca a cero', () => {
+    const l = leer(
+      {
+        vistasYLecturas: 'D1_ERROR: fallo de mentira',
+        salidas: [salida(D1, '/cita/una/', 'atribucion', 2)],
+        acciones: [accion(D1, '/cita/una/', EVENTOS.copiado, 1)],
+        busquedas: DIAS.map((dia) => busqueda(dia, '1-9', 50)),
+      },
+      { minimo: 120, juicios: [{ ...SM_C3, llegada: undefined }] },
+    );
+    expect(l.sm8).toEqual({ faltan: ['vistasYLecturas'] });
+    expect(l.sm12).toEqual({ faltan: ['vistasYLecturas'] });
+    for (const base of l.lineasBase.filter((b) => b.serie === 'lectura')) {
+      expect(base, base.unidad).toMatchObject({ estado: 'sin-leer', faltan: ['vistasYLecturas'] });
+      expect(base.acumulado, base.unidad).toBeUndefined();
+    }
+    // La de las búsquedas no depende de ellas, y se cierra.
+    expect(l.lineasBase.find((b) => b.unidad === UNIDAD_DE_LAS_BUSQUEDAS)).toMatchObject({ estado: 'cerrada' });
+    expect(l.juicios[0].sinVentanas).toBe('sin leer: las vistas y las lecturas');
+    const informe = texto(l);
+    expect(informe).toMatch(/^SM-8 .*\n {2}Sin leer \(las vistas y las lecturas\)\.$/m);
+    expect(informe).toMatch(/^SM-12 .*\n {2}Sin leer \(las vistas y las lecturas\)\.$/m);
+    expect(informe).toContain('  la Página de Cita: sin leer (las vistas y las lecturas).');
+    expect(informe).toContain('SM-C3 (la Página de Cita; llegada: sin constante todavía: la da la Épica 25): sin leer: las vistas y las lecturas.');
+    expect(informe).not.toContain('ninguna vista con marca');
+    expect(informe).not.toMatch(/sin mínimo declarado: 0 lecturas|abierta desde el .*: 0 de/);
+  });
+
+  it('sin las búsquedas asentadas: las asentadas, SM-6, SM-13 y su línea base salen sin leer', () => {
+    const l = leer(
+      {
+        busquedas: 'D1_ERROR: fallo de mentira',
+        salidas: [salida(D1, '/buscar/', 'resultado', 3)],
+        sinResultados: [{ jornada: D1, ruta: '/buscar/', consulta: 'sene', n: 1 }],
+      },
+      { minimo: 120 },
+    );
+    expect(l.busquedas.asentadas).toBeUndefined();
+    expect(l.busquedas.porTramo).toEqual([]);
+    expect(l.busquedas.sm6).toEqual({ estado: 'sin-leer', faltan: ['busquedas'] });
+    expect(l.busquedas.sm13).toEqual({ estado: 'sin-leer', faltan: ['busquedas'] });
+    expect(l.lineasBase.find((b) => b.unidad === UNIDAD_DE_LAS_BUSQUEDAS)).toMatchObject({ estado: 'sin-leer', faltan: ['busquedas'] });
+    const informe = texto(l);
+    expect(informe).toContain('  Asentadas: sin leer.');
+    expect(informe).toContain('  SM-6, en el tramo 0: sin leer (las búsquedas asentadas).');
+    expect(informe).toContain('  las búsquedas: sin leer (las búsquedas asentadas).');
+    expect(informe).not.toMatch(/Asentadas: 0|sin denominador \(0 sobre ninguna\)\.\n {2}SM-13/);
+  });
+
+  it('sin las búsquedas sin resultados: «sin leer», nunca «ninguna»', () => {
+    const l = leer({ sinResultados: 'D1_ERROR: fallo de mentira', busquedas: [busqueda(D1, '0', 1)] });
+    expect(l.busquedas.sinResultados).toBeUndefined();
+    expect(texto(l)).toContain('  Consultas sin resultados (FR-8): sin leer.');
+    expect(texto(l)).not.toContain('Consultas sin resultados (FR-8): ninguna.');
+    expect(texto(leer({}))).toContain('Consultas sin resultados (FR-8): ninguna.');
+  });
+
+  it('lo de fuera del censo y los descuentos dicen qué no contaron cuando una consulta no se leyó', () => {
+    const l = leer(
+      {
+        vistasYLecturas: [lectura(D2, '/cita/una/', 5), lectura(D1, '/cita/retirada/', 1)],
+        salidas: 'D1_ERROR: fallo de mentira',
+      },
+      { pasadas: [{ pasada: '25.3', jornada: D2, rutas: ['/cita/una/'] }] },
+    );
+    expect(l.fueraDelCensoSinLeer).toEqual(['salidas']);
+    expect(l.descuentos.incompletos).toEqual(['salidas']);
+    const informe = texto(l);
+    expect(informe).toContain('  Sin contar las salidas internas, que no se leyeron.');
+    expect(informe).toContain('la 25.3, el 2026-11-03, en /cita/una/: 5 registros descontados (sin contar las salidas internas, que no se leyeron).');
+    expect(informe).toContain('Balizas de prueba (/__comprobacion/): 0 registros (sin contar las salidas internas, que no se leyeron),');
+    // Con todo leído, ninguna de las dos notas.
+    const entera = texto(leer({ vistasYLecturas: [lectura(D1, '/cita/retirada/', 1)] }));
+    expect(entera).not.toContain('Sin contar');
+    expect(entera).not.toContain('sin contar');
+  });
+
+  it('una pasada descuenta también a los visitantes de esas rutas ese día, y lo compartido por dos va a la primera', () => {
+    const l = leer(
+      { vistasYLecturas: [lectura(D2, '/cita/una/', 5), lectura(D2, '/cita/dos/', 2)] },
+      {
+        pasadas: [
+          { pasada: '25.3', jornada: D2, rutas: ['/cita/una/'] },
+          { pasada: '25.7', jornada: D2, rutas: ['/cita/una/', '/cita/dos/'] },
+        ],
+      },
+    );
+    expect(l.descuentos.pasadas.map((p) => p.registros)).toEqual([5, 2]);
+    expect(superficie(l, 'la Página de Cita').lecturas).toBe(0);
+    expect(texto(l)).toContain(
+      'Cada pasada descuenta todos los registros de sus rutas en su jornada, también los de visitantes de verdad: ' +
+        'la tabla no los distingue. Si dos comparten ruta y jornada, lo compartido se cuenta en la primera.',
+    );
+  });
+
+  it('la acción en una ruta fuera del censo no cuenta en SM-5 ni SM-7: se cuenta fuera, por evento; y cada superficie da sus acciones', () => {
+    const l = leer({
+      vistasYLecturas: [lectura(D1, '/cita/una/', 10)],
+      acciones: [
+        accion(D1, '/cita/una/', EVENTOS.copiado, 2),
+        accion(D1, '/cita/retirada/', EVENTOS.copiado, 3),
+        accion(D1, '/cita/retirada/', EVENTOS.comparticionDeEnlace, 1, { destino: 'whatsapp' }),
+        accion(D1, '/autor/a/', EVENTOS.copiado, 4),
+      ],
+    });
+    expect(l.cita?.conAccion).toEqual(calculada(2, 10));
+    expect(l.cita?.conComparticion).toEqual(calculada(0, 10));
+    expect(l.fueraDelCenso).toEqual([
+      {
+        clase: YA_NO_SE_PUBLICA,
+        porEvento: [
+          { evento: EVENTOS.comparticionDeEnlace, n: 1 },
+          { evento: EVENTOS.copiado, n: 3 },
+        ],
+      },
+    ]);
+    expect(superficie(l, 'la Página de Cita').acciones).toBe(2);
+    expect(superficie(l, 'la Página de Autor').acciones).toBe(4);
+    expect(texto(l)).toContain('  la Página de Autor: vistas 0, lecturas 0, salidas 0, acciones 4;');
+  });
+
+  it('con más salidas que lecturas, SM-3 no se calcula: nunca un porcentaje negativo', () => {
+    const l = leer({ vistasYLecturas: [lectura(D1, '/cita/una/', 2)], salidas: [salida(D1, '/cita/una/', 'atribucion', 3)] });
+    expect(l.cita?.continuacion).toEqual(calculada(3, 2));
+    expect(l.cita?.sinContinuacion).toEqual({ estado: 'por-encima', numerador: 3, denominador: 2 });
+    const informe = texto(l);
+    expect(informe).toContain(
+      'SM-3, 1 − la continuación: no se calcula: la tasa de la que es complemento pasa del 100 % (3 de 2), con más salidas ' +
+        'que lecturas —balizas perdidas o partidas por la medianoche UTC—',
+    );
+    expect(informe).not.toMatch(/-\d+,\d %/);
+  });
+
+  it('una línea base cerrada antes de la llegada: sus ventanas de antes se juzgan, pero dicen que no juzgan lo que llega', () => {
+    const llegada = '2026-11-09';
+    const partes: Partes = {
+      vistasYLecturas: DIAS.map((dia) => lectura(dia, '/cita/una/', 120)),
+      acciones: DIAS.flatMap((dia, i) => [
+        accion(dia, '/cita/una/', EVENTOS.copiado, i < 3 ? 12 : 6),
+        accion(dia, '/cita/una/', EVENTOS.comparticionDeEnlace, i < 3 ? 6 : 12, { destino: 'whatsapp' }),
+      ]),
+    };
+    const l = leer(partes, { minimo: 300, juicios: [{ ...SM_C3, llegada, deDondeLlega: 'DE_PRUEBA' }] });
+    const [leido] = l.juicios;
+    expect(leido.referencia).toBe('linea-base');
+    expect(leido.ventanas.map((v) => [v.desde, v.hasta, v.antesDeLaLlegada])).toEqual([['2026-11-05', '2026-11-07', llegada]]);
+    expect(leido.cortadas).toEqual([{ desde: '2026-11-08', hasta: '2026-11-08', acumulado: 120, por: llegada }]);
+    expect(texto(l)).toContain('la señal se da. Antes de la llegada del 2026-11-09: no juzga lo que llega.');
+  });
+
+  it('la llegada que hace medibles los Directorios, si es anterior al tramo vigente, no retrasa su línea base', () => {
+    const DIRECTORIOS = JUICIOS_POR_VENTANAS.find((j) => j.nombre === 'la continuación de los Directorios')!;
+    const directorio = (nombre: string, ruta: string): Superficie => ({
+      nombre,
+      pagina: `${ruta}.astro`,
+      reconoce: new RegExp(`^/${ruta}$`),
+      caracter: 'producto',
+      vista: EVENTOS.vistaDeSuperficie,
+      lineaBase: DIRECTORIOS.unidad,
+    });
+    const superficies = [...SUPERFICIES, directorio('los autores', 'autores'), directorio('las obras', 'obras')];
+    const l = leer(
+      { vistasYLecturas: DIAS.map((dia) => lectura(dia, '/autores/', 60)) },
+      { superficies, minimo: 300, juicios: [{ ...DIRECTORIOS, llegada: '2026-10-20' }] },
+      [...CENSO, '/autores/', '/obras/'],
+    );
+    expect(l.lineasBase.find((b) => b.unidad === DIRECTORIOS.unidad)).toMatchObject({ desde: D1, estado: 'cerrada', cerradaEl: '2026-11-06' });
+  });
+
+  it('una jornada de hoy que no existe se rechaza antes de componer', () => {
+    for (const hoy of ['2026-11-31', '2026-1-12', 'hoy']) {
+      expect(() => componerLecturaDeMedicion({ hoy, censo: CENSO, consultas: consultas({}), cuota: CUOTA }), hoy).toThrow(
+        'no es una jornada AAAA-MM-DD',
+      );
+    }
+  });
+
+  it('no se leyó nada si ninguna consulta trajo recuentos —tampoco con filas sin forma— y d1 info no dio nada', () => {
+    const sinForma = [{ jornada: 'ayer', ruta: '/', n: 1 }];
+    const partes = Object.fromEntries(CONSULTAS_DE_LA_LECTURA.map((c) => [c, sinForma])) as Partes;
+    const sinCuota: CuotaLeida = { escritas: { ok: false, motivo: 'no' }, tamaño: { ok: false, motivo: 'no' } };
+    expect(nadaSeLeyo(leer(partes, {}, CENSO, sinCuota))).toBe(true);
+    // Basta una cifra de d1 info, o una consulta con recuentos, para que algo se leyera.
+    expect(nadaSeLeyo(leer(partes, {}, CENSO, { ...sinCuota, tamaño: { ok: true, valor: 1 } }))).toBe(false);
+    expect(nadaSeLeyo(leer({ ...partes, salidas: [] }, {}, CENSO, sinCuota))).toBe(false);
+  });
+
+  it('el texto de un visitante tampoco trae separadores de línea, marcas de dirección árabes ni caracteres de anchura cero', () => {
+    expect(legible('a b c؜d​e﻿f')).toBe('a�b�c�d�e�f');
+  });
+
+  it('Facebook, con la constante apagada, sale aparte, detrás de los destinos que se comparan', () => {
+    const l = leer(
+      {
+        vistasYLecturas: [lectura(D1, '/cita/una/', 1, { via: 'facebook' }), lectura(D1, '/cita/una/', 1, { via: 'whatsapp' })],
+        acciones: [
+          accion(D1, '/cita/una/', EVENTOS.comparticionDeEnlace, 1, { destino: 'facebook' }),
+          accion(D1, '/cita/una/', EVENTOS.comparticionDeEnlace, 2, { destino: 'whatsapp' }),
+        ],
+      },
+      { conFacebook: false },
+    );
+    const lineas = lineasDeLecturaDeMedicion(l);
+    const inicio = lineas.findIndex((linea) => linea.startsWith('SM-12'));
+    const bloque = lineas.slice(inicio + 1, lineas.indexOf('', inicio + 1));
+    const aparte = bloque.findIndex((linea) => linea.startsWith('  Aparte, facebook: 100,0 % (1 de 1); fuera de la comparación'));
+    expect(aparte).toBeGreaterThan(bloque.findIndex((linea) => linea.startsWith('  whatsapp: 50,0 % (1 de 2).')));
+    expect(bloque.some((linea) => linea.startsWith('  facebook:'))).toBe(false);
+    const encendida = lineasDeLecturaDeMedicion(leer({}, { conFacebook: true }));
+    expect(encendida.some((linea) => linea.startsWith('  Aparte, facebook'))).toBe(false);
+    expect(encendida.some((linea) => linea.startsWith('  facebook:'))).toBe(true);
+  });
+
+  it('sin mínimo declarado, el informe lo dice aunque ninguna línea base haya empezado', () => {
+    const l = leer({}, { cortes: [], minimo: undefined });
+    expect(l.lineasBase.every((b) => b.estado === 'no-ha-empezado')).toBe(true);
+    expect(texto(l)).toContain('Líneas base (MIN_LECTURAS_DE_LINEA_BASE: sin mínimo declarado; ninguna se cierra)');
+  });
+
+  it('las unidades salen de la declaración que se dé, y ninguna falta hace romper al cargar el módulo', () => {
+    const renombrada = SUPERFICIES.map((s) => (s.vista === EVENTOS.vistaDeCita ? { ...s, lineaBase: 'las Citas' } : s));
+    const juicios = valoresDeLaLectura({ superficies: renombrada }).juicios;
+    expect(juicios.find((j) => j.nombre === 'SM-C3')?.unidad).toBe('las Citas');
+    expect(UNIDAD_DE_LA_PAGINA_DE_CITA).toBe('la Página de Cita');
   });
 });
 

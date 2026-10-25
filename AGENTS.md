@@ -310,10 +310,11 @@ que sale el censo—, cinco recuentos agrupados con `d1 execute` de las jornadas
 `d1 info`. No pide `MEDICION_ENDPOINT`, no escribe en D1 ni en el repositorio, no ordena ni nombra
 el `rowid` —una prueba estrecha de `tests/unit/orden-de-llegada.test.ts` exige que en `tools/` solo
 lo nombren el barajado y la lectura de las balizas— y no hay punto final de lectura. Códigos: **2**
-sin sesión o con cualquier bandera o argumento (la lectura no lleva opciones); **1** si la sesión
-no se deja leer, si el Corpus no se deja leer, si no se leyó nada de D1 o si un valor de
+sin sesión o con cualquier bandera o argumento (la lectura no lleva opciones); **1** si un valor de
 `src/lib/umbrales.ts` que lee no se sostiene (una jornada que no existe, un mínimo que no es un entero
-positivo); 0 si leyó algo. El detalle, en `DESPLIEGUE.md` §3, «Leer la línea base». Una consulta que falla va a «Sin leer» y lo
+positivo, una ruta de pasada que el sitio no declara) —se juzga antes de tocar nada—, si la sesión no
+se deja leer, si el Corpus no se deja leer o si no se leyó nada de D1 (tampoco cuando las consultas
+solo traen filas sin forma); 0 si leyó algo. El detalle, en `DESPLIEGUE.md` §3, «Leer la línea base». Una consulta que falla va a «Sin leer» y lo
 que depende de ella se omite, nunca como cero. Va con `--remote`, así que, como todo lo de arriba con
 `--remote`, la corre Héctor y no un agente; cada lectura son cinco recorridos de la tabla, que D1
 cuenta contra su cuota de lectura.
@@ -333,7 +334,9 @@ que la orden lee sin nombrar ninguna ruta. Ningún módulo de `src/`, `integraci
 serie** viven en `CORTES_DE_SERIE_DECLARADOS`, una lista de constantes de despliegue sin ninguna
 fecha escrita —`CORTES_DE_SERIE` filtra las que llegaron y `CORTES_DE_SM8` es su proyección—: un
 corte nuevo entra con su historia y su constante, nunca con un literal. Una tasa nueva que se juzgue
-por ventanas entra en `JUICIOS_POR_VENTANAS` de `tools/lib/lineaBase.ts`. La orden dice «cerrada»,
+por ventanas entra en la tabla de `juiciosPorVentanas` (`JUICIOS_POR_VENTANAS`) de
+`tools/lib/lineaBase.ts`. Ninguna prueba fija el valor de esas constantes: siguen el que tengan, para
+que darles valor (23.11, 25.7, 26.11) no ponga la principal en rojo. La orden dice «cerrada»,
 nunca «buena»: que una línea base es buena lo anota Héctor en `DESPLIEGUE.md` §3.
 
 ## Pedir rastreo de unas pocas URL, y anotarlo

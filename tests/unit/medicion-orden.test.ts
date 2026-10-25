@@ -6,7 +6,8 @@ import { join, resolve } from 'node:path';
 import * as vocabulario from '../../src/lib/vocabulario.ts';
 import { EVENTOS } from '../../src/lib/vocabulario.ts';
 import { EVENTOS_DE_LA_V71, interpretar } from '../../medicion/receptor.ts';
-import { CUOTA_DE_FILAS_ESCRITAS_POR_DIA_EN_D1 } from '../../src/lib/umbrales.ts';
+import { CORTES_DE_SERIE, CUOTA_DE_FILAS_ESCRITAS_POR_DIA_EN_D1 } from '../../src/lib/umbrales.ts';
+import { partirSerie } from '../../tools/lib/lineaBase.ts';
 import { rutasIndexables, rutasPublicadas } from '../../src/lib/publicado.ts';
 import { conjuntoDelCorpus } from '../../tools/indexacion.ts';
 import { rutasDelCorpus } from '../../tools/lib/corpus.ts';
@@ -904,6 +905,56 @@ describe('Historia 23.10 — el SQL de la lectura', () => {
     expect(sentencias.sinResultados).toMatch(/GROUP BY jornada, ruta, consulta$/);
   });
 
+  it('las cinco corren en un SQLite con la tabla de las migraciones: cortan en hoy, apartan la comprobación y agrupan', async () => {
+    // El mismo motor que D1, con la tabla que dejan las migraciones versionadas: un SQL que D1 no
+    // aceptara falla aquí, y no el día de la primera lectura de verdad (23.11).
+    const { DatabaseSync } = await import('node:sqlite');
+    const base = new DatabaseSync(':memory:');
+    try {
+      const directorio = resolve(raiz, 'medicion/migrations');
+      for (const nombre of readdirSync(directorio).filter((n) => n.endsWith('.sql')).sort()) {
+        base.exec(readFileSync(join(directorio, nombre), 'utf8'));
+      }
+      const insertar = base.prepare(
+        'INSERT INTO eventos (jornada, evento, ruta, origen, via, indexable, zona, destino, primera, tramo, filtros, consulta) ' +
+          'VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+      );
+      const ayer = '2026-11-09';
+      const filas: (string | null)[][] = [
+        [ayer, EVENTOS.vistaDeCita, '/cita/una/', 'instagram', null, null, null, null, null, null, null, null],
+        [ayer, EVENTOS.vistaDeCita, '/cita/una/', 'instagram', null, null, null, null, null, null, null, null],
+        [ayer, EVENTOS.lectura, '/cita/una/', null, 'whatsapp', null, null, null, null, null, null, null],
+        [ayer, EVENTOS.vistaDeObra, '/obra/a/b/', null, null, 'indexable', null, null, null, null, null, null],
+        [ayer, EVENTOS.salidaInterna, '/cita/una/', null, null, null, 'atribucion', null, null, null, null, null],
+        [ayer, EVENTOS.copiado, '/cita/una/', null, null, null, null, null, 'si', null, null, null],
+        [ayer, EVENTOS.busqueda, '/buscar/', null, null, null, null, null, null, '1-9', 'ninguno', null],
+        [ayer, EVENTOS.busquedaSinResultados, '/buscar/', null, null, null, null, null, null, null, null, 'sene'],
+        // Hoy no entra, ni la ruta de las balizas.
+        [HOY, EVENTOS.lectura, '/cita/una/', null, null, null, null, null, null, null, null, null],
+        [ayer, EVENTOS.lectura, RUTA_DE_COMPROBACION, null, null, null, null, null, null, null, null, null],
+      ];
+      for (const fila of filas) insertar.run(...fila);
+      const de = (consulta: (typeof CONSULTAS_DE_LA_LECTURA)[number]) =>
+        base.prepare(sentencias[consulta]).all().map((fila) => ({ ...fila }));
+      expect(de('vistasYLecturas')).toEqual(
+        expect.arrayContaining([
+          { jornada: ayer, ruta: '/cita/una/', evento: EVENTOS.vistaDeCita, origen: 'instagram', via: null, indexable: null, n: 2 },
+          { jornada: ayer, ruta: '/cita/una/', evento: EVENTOS.lectura, origen: null, via: 'whatsapp', indexable: null, n: 1 },
+          { jornada: ayer, ruta: '/obra/a/b/', evento: EVENTOS.vistaDeObra, origen: null, via: null, indexable: 'indexable', n: 1 },
+        ]),
+      );
+      expect(de('vistasYLecturas')).toHaveLength(3);
+      expect(de('salidas')).toEqual([{ jornada: ayer, ruta: '/cita/una/', zona: 'atribucion', n: 1 }]);
+      expect(de('acciones')).toEqual([
+        { jornada: ayer, ruta: '/cita/una/', evento: EVENTOS.copiado, destino: null, primera: 'si', n: 1 },
+      ]);
+      expect(de('busquedas')).toEqual([{ jornada: ayer, ruta: '/buscar/', tramo: '1-9', filtros: 'ninguno', n: 1 }]);
+      expect(de('sinResultados')).toEqual([{ jornada: ayer, ruta: '/buscar/', consulta: 'sene', n: 1 }]);
+    } finally {
+      base.close();
+    }
+  });
+
   it('«hoy» se juzga antes de entrar en el SQL', () => {
     expect(() => consultasDeLaLectura("2026-11-10' OR '1'='1")).toThrow(/no es una jornada/);
     expect(() => consultasDeLaLectura('10/11/2026')).toThrow(/no es una jornada/);
@@ -1036,11 +1087,19 @@ describe('Historia 23.2 — la cáscara sale con 2 antes de tocar la red', () =>
     const obra = publicadas.find((ruta) => ruta.startsWith('/obra/') && !indexables.has(ruta))!;
     expect(cita).toBeDefined();
     expect(obra, 'el Corpus tiene alguna Obra que no se indexa').toBeDefined();
+    // La víspera de hoy en UTC, la última jornada cerrada, que cae en el tramo vigente de la lectura
+    // con los cortes del repositorio —sin valor hasta la 23.11, y con el suyo después—. Solo el día
+    // de una llegada y el siguiente no tiene el tramo vigente ninguna jornada cerrada: entonces nada
+    // cuenta en ninguna superficie, y la prueba lo exige así.
+    const hoy = jornadaUtc(new Date());
+    const ayer = jornadaAnterior(hoy);
+    const vigente = partirSerie('lectura', CORTES_DE_SERIE, hoy).vigente;
+    const cuenta = vigente.desde === undefined || vigente.desde <= ayer;
     const filas = JSON.stringify([
       {
         results: [
-          { jornada: '2026-01-05', ruta: cita, evento: 'lectura', origen: null, via: null, indexable: null, n: 3 },
-          { jornada: '2026-01-05', ruta: obra, evento: 'lectura', origen: null, via: null, indexable: null, n: 2 },
+          { jornada: ayer, ruta: cita, evento: 'lectura', origen: null, via: null, indexable: null, n: 3 },
+          { jornada: ayer, ruta: obra, evento: 'lectura', origen: null, via: null, indexable: null, n: 2 },
         ],
         success: true,
       },
@@ -1064,8 +1123,8 @@ describe('Historia 23.2 — la cáscara sale con 2 antes de tocar la red', () =>
     chmodSync(join(dir, 'npx'), 0o755);
     const { codigo, salida } = await correr([], { MEDICION_ENDPOINT: undefined, PATH: `${dir}:${process.env.PATH}` });
     expect(codigo, salida).toBe(0);
-    expect(salida).toContain('  la Página de Cita: vistas 0, lecturas 3, salidas 0;');
-    expect(salida).toContain('  la Página de Obra: vistas 0, lecturas 2, salidas 0;');
+    expect(salida).toContain(`  la Página de Cita: vistas 0, lecturas ${cuenta ? 3 : 0}, salidas 0, acciones 0;`);
+    expect(salida).toContain(`  la Página de Obra: vistas 0, lecturas ${cuenta ? 2 : 0}, salidas 0, acciones 0;`);
     expect(salida).toMatch(/Fuera del censo —se cuenta aparte y se nombra, nunca se descarta—\n {2}nada\./);
   }, 120_000);
 
@@ -1081,6 +1140,32 @@ describe('Historia 23.2 — la cáscara sale con 2 antes de tocar la red', () =>
       expect(salida).toContain(que);
     }
     expect(salida).toContain('Consulta: no se ha escrito nada.');
+  }, 60_000);
+
+  it('la lectura (23.10): si wrangler contesta pero ninguna consulta trae recuentos con forma ni d1 info cifras, sale con 1', async () => {
+    const dir = mkdtempSync(join(tmpdir(), 'sabiduria-npx-'));
+    aBorrar.push(dir);
+    writeFileSync(
+      join(dir, 'npx'),
+      [
+        '#!/bin/sh',
+        'case "$*" in',
+        `  *whoami*) printf '%s' '{"loggedIn":true}' ;;`,
+        `  *"d1 info"*) printf '%s' '{}' ;;`,
+        `  *"d1 execute"*) printf '%s' '[{"results":[{"jornada":"ayer","ruta":"/","n":"muchas"}],"success":true}]' ;;`,
+        '  *) exit 99 ;;',
+        'esac',
+        '',
+      ].join('\n'),
+    );
+    chmodSync(join(dir, 'npx'), 0o755);
+    const { codigo, salida } = await correr([], { MEDICION_ENDPOINT: undefined, PATH: `${dir}:${process.env.PATH}` });
+    expect(codigo, salida).toBe(1);
+    expect(salida).toContain('No se leyó nada de D1:');
+    expect(salida).toContain('las vistas y las lecturas: una fila sin forma de recuento');
+    expect(salida).toContain('el tamaño de la base (d1 info): d1 info no trae database_size.');
+    expect(salida).not.toContain('Cuota de D1 (plan gratuito)');
+    expect(salida.trim().split('\n').at(-1)).toBe('Consulta: no se ha escrito nada.');
   }, 60_000);
 
   it('con un wrangler que no arranca —no hay npx— sale con 1', async () => {

@@ -832,11 +832,13 @@ lo que no sea un `POST` (AD-14). Leer en remoto no es un acto que cambie nada, p
 de lectura: no se corre en bucle.
 
 **Códigos.** **2** sin sesión de `wrangler` —lo dice con la orden que la abre— o con una bandera o
-un argumento que no son de la orden (la lectura no lleva opciones), antes de tocar nada; **1** si la
-sesión no se deja leer, si el Corpus no se deja leer, si no se leyó nada de D1 —ni una consulta ni
-ninguna cifra de `d1 info`— o si un valor de `src/lib/umbrales.ts` que la lectura lee no se sostiene
-—una jornada que no existe, como `2026-11-3`; una pasada sin rutas; un mínimo que no es un entero
-positivo—, nombrando cada cosa; **0** si leyó algo. Una consulta que falla —también una en la que
+un argumento que no son de la orden (la lectura no lleva opciones), antes de tocar nada; **1** si un
+valor de `src/lib/umbrales.ts` que la lectura lee no se sostiene —una jornada que no existe, como
+`2026-11-3`; una pasada sin rutas o con una ruta que el sitio no declara; un mínimo o un umbral de
+ráfaga que no son enteros positivos—, que se juzga **antes de tocar nada**, para no gastar cinco
+recorridos de la tabla en una lectura que no se compondría; si la sesión no se deja leer; si el
+Corpus no se deja leer o no se saca de él el censo; o si no se leyó nada de D1 —ni una consulta con
+recuentos con forma ni ninguna cifra de `d1 info`—, nombrando cada cosa; **0** si leyó algo. Una consulta que falla —también una en la que
 `wrangler` se corta por su tope— no para la orden: sale en «Sin leer» con su motivo, y toda cifra que
 dependa de ella se omite y se nombra, **jamás como cero**. Una tasa sin denominador dice «sin
 denominador», nunca 0 %.
@@ -857,8 +859,11 @@ la 26—, y cada superficie se informa también por separado.
 **Los descuentos.** Fuera, además de en el SQL, la ruta de las balizas (`/__comprobacion/`), y los
 registros de las **pasadas que escriben a propósito en producción**, las de
 `PASADAS_QUE_ESCRIBEN_EN_PRODUCCION` en `src/lib/umbrales.ts`: la 25.3 y la 25.7, que anota Héctor
-el día de cada pasada con su jornada UTC y las rutas que recorrió. La orden descuenta los registros
-de esas rutas en esa jornada, y ninguno más, y nombra cada pasada con lo descontado.
+el día de cada pasada con su jornada UTC y las rutas que recorrió —caminos que el sitio declara,
+sin `?…` ni `#…`, como los guarda el receptor—. La orden descuenta los registros de esas rutas en
+esa jornada, y ninguno más, y nombra cada pasada con lo descontado. Descuenta **todos**: también los
+de visitantes de verdad que pasaron por esas rutas ese día, porque la tabla no los distingue, y lo
+dice; si dos pasadas comparten ruta y jornada, lo compartido se cuenta en la primera.
 
 **Los cortes.** Cada serie se parte por las entradas de `CORTES_DE_SERIE` (`src/lib/umbrales.ts`)
 que la nombran: la lista declarada, `CORTES_DE_SERIE_DECLARADOS`, se compone de constantes de
@@ -871,30 +876,36 @@ lectura, y las búsquedas sobre el de la búsqueda.
 
 **Lo que informa**, en este orden: la cuota —las filas escritas en 24 h de `d1 info` frente a
 `CUOTA_DE_FILAS_ESCRITAS_POR_DIA_EN_D1`, que pecan por exceso, y el tamaño de la base frente a
-`CUOTA_DE_BYTES_POR_BASE_EN_D1`, 500 MB decimales; al pasarlas, las escrituras fallan en silencio
-hasta las 00:00 UTC—; los descuentos; los cortes; SM-8 —sin la vista de Obra; Threads no se lee
-como personas mientras no conste quién publica sus enlaces—; las superficies, con la continuación
-por zona, que es cota inferior —todas las superficies con lectura, también a cero—; lo de fuera del
-censo; la Obra por la marca de sus vistas de Obra
+`CUOTA_DE_BYTES_POR_BASE_EN_D1`, 500 MB decimales; al pasar cualquiera de las dos, las escrituras
+fallan en silencio, pero no igual: pasada la de filas escritas, hasta las 00:00 UTC, cuando se
+renueva; pasada la de tamaño, hasta que se borren filas o cambie el plan, porque esa no se renueva
+sola—; los descuentos; los cortes; SM-8 —sin la vista de Obra; Threads no se lee
+como personas mientras no conste quién publica sus enlaces—; las superficies, con sus vistas,
+lecturas, salidas y acciones y la continuación por zona, que es cota inferior —todas las superficies
+con lectura, también a cero—; lo de fuera del censo; la Obra por la marca de sus vistas de Obra
 de cada ruta y jornada —indexable, no indexable, cambió (las dos marcas el mismo día), nula y sin
 marca—; la Página de Cita —SM-5, SM-7 (cota inferior en Chrome para Android), la continuación, SM-3,
-SM-C3 y SM-C5, cada una con su denominador— y, aparte y sin llamarse así, la portada y la Obra;
-SM-12 por destino —Facebook fuera de la comparación mientras `SM12_CON_FACEBOOK` esté apagada, y la
-Imagen cuadrada aparte—; las búsquedas —SM-6, SM-13 y las consultas sin resultados—; las líneas
+SM-C3 y SM-C5, cada una con su denominador; con más salidas que lecturas, SM-3 no se calcula y se
+dice por qué— y, aparte y sin llamarse así, la portada y la Obra;
+SM-12 por destino —Facebook en su propia línea, detrás de los que se comparan y fuera de la
+comparación mientras `SM12_CON_FACEBOOK` esté apagada, y la Imagen cuadrada aparte—; las búsquedas —SM-6, SM-13 y las consultas sin resultados—; las líneas
 base con sus firmas —Threads y la ráfaga de `MIN_RUTAS_DE_CITA_EN_RAFAGA` rutas de Cita—, y las
-ventanas de las tasas que se juzgan contra su propia serie (`JUICIOS_POR_VENTANAS`, en
-`tools/lib/lineaBase.ts`). Ninguna cifra se compara con las metas de SM-3 a SM-7, que están en
+ventanas de las tasas que se juzgan contra su propia serie (`JUICIOS_POR_VENTANAS`, la tabla que
+compone `juiciosPorVentanas` en `tools/lib/lineaBase.ts`). Ninguna cifra se compara con las metas de SM-3 a SM-7, que están en
 suspenso.
 
 **«Cerrada», nunca «buena».** La línea base de cada unidad empieza el primer día del tramo vigente
 de su serie —la de los Directorios, que no existen antes de la 26, el día siguiente a
 `DESPLIEGUE_DE_OBRA_Y_DIRECTORIOS`, la llegada que los hace medibles—, salta las jornadas de llegada
 de lo que se juzga en ella y se cierra la jornada en que reúne `MIN_LECTURAS_DE_LINEA_BASE` lecturas
-de su unidad —búsquedas asentadas, la de las búsquedas—. Sin valor, como hoy, dice «sin mínimo
-declarado» y no se cierra nunca. Las ventanas no juntan jornadas de los dos lados de una llegada: el
-bloque en curso que una llegada corta sin el mínimo se nombra y no se juzga. Cuando la referencia es
+de su unidad —búsquedas asentadas, la de las búsquedas—. Sin valor, como hoy, el informe dice «sin
+mínimo declarado» y ninguna se cierra nunca. Las ventanas no juntan jornadas de los dos lados de una
+llegada: el bloque en curso que una llegada corta sin el mínimo se nombra y no se juzga. Si la línea
+base se cerró antes de la llegada de lo que se juzga, las ventanas de antes de esa llegada se juzgan
+—se cuentan desde el cierre— pero dicen que no juzgan lo que llega. Cuando la referencia es
 la serie de antes y no reúne el mínimo, se dice. Una señal de SM-C3 o SM-C5 a la que le falta una
-dirección dice que no se puede juzgar, nunca «no se da». La orden dice
+dirección dice que no se puede juzgar, nunca «no se da», y no deja pasar la cadena de «salta»: dos
+ventanas con la señal separadas por una sin juzgar no son «dos seguidas». La orden dice
 «cerrada»; que Héctor la miró, con la comparación por firma delante, y la da por buena lo anota él
 aquí debajo, con la fecha, la métrica y la superficie. Ningún agente lo anota.
 

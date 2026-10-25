@@ -300,12 +300,15 @@ export function partirSerie(serie: SerieDeMedicion, cortes: readonly CorteLlegad
 
 /**
  * Una tasa: calculada con su numerador y su denominador, sin denominador —nunca un 0 %— o sin leer,
- * nombrando las consultas que faltan.
+ * nombrando las consultas que faltan. «Por encima» es el complemento de una tasa que pasa de uno
+ * —más salidas que lecturas: balizas perdidas o partidas por la medianoche UTC—, que no se calcula:
+ * daría un porcentaje negativo.
  */
 export type Tasa =
   | { estado: 'calculada'; numerador: number; denominador: number }
   | { estado: 'sin-denominador'; numerador: number }
-  | { estado: 'sin-leer'; faltan: ConsultaDeLaLectura[] };
+  | { estado: 'sin-leer'; faltan: ConsultaDeLaLectura[] }
+  | { estado: 'por-encima'; numerador: number; denominador: number };
 
 export type Direccion = 'sube' | 'baja' | 'igual';
 
@@ -327,22 +330,32 @@ export function direccionDe(tasa: Tasa, referencia: Tasa): Direccion | undefined
  */
 export const UNIDAD_DE_LAS_BUSQUEDAS = 'las búsquedas';
 
-/** La unidad de una superficie que la lectura necesita, o un error que dice cuál falta. */
+/** La superficie que emite la vista de Cita, de la declaración. */
+const paginaDeCitaEn = (superficies: readonly Superficie[]) =>
+  superficies.find((superficie) => superficie.vista === EVENTOS.vistaDeCita);
+
+/** La portada, de la declaración. */
+const portadaEn = (superficies: readonly Superficie[]) => superficieDeclaradaDe('/', superficies);
+
+/**
+ * La unidad de una superficie que la lectura necesita. Sin ella, un rótulo que ninguna superficie
+ * declara, nunca un error al cargar el módulo: `tools/medicion.ts` lo importa para todos sus
+ * subcomandos, y `problemasDeLaLectura` nombra la que falta antes de leer nada.
+ */
 function unidadDeclarada(superficie: Superficie | undefined, que: string): string {
-  if (superficie === undefined) {
-    throw new Error(`src/lib/superficies.ts no declara ${que}: la lectura de la línea base no sabe cuál es su unidad.`);
-  }
-  return superficieDeLineaBase(superficie);
+  return superficie === undefined ? `(sin declarar: ${que})` : superficieDeLineaBase(superficie);
 }
 
 /** La unidad de línea base de la Página de Cita, de su declaración: la que emite la vista de Cita. */
-export const UNIDAD_DE_LA_PAGINA_DE_CITA = unidadDeclarada(
-  SUPERFICIES.find((superficie) => superficie.vista === EVENTOS.vistaDeCita),
-  'ninguna superficie que emita la vista de Cita',
-);
+export const unidadDeLaPaginaDeCita = (superficies: readonly Superficie[] = SUPERFICIES) =>
+  unidadDeclarada(paginaDeCitaEn(superficies), 'la vista de Cita');
 
 /** La de la portada, de su declaración. */
-export const UNIDAD_DE_LA_PORTADA = unidadDeclarada(superficieDeclaradaDe('/'), 'la portada (/)');
+export const unidadDeLaPortada = (superficies: readonly Superficie[] = SUPERFICIES) =>
+  unidadDeclarada(portadaEn(superficies), 'la portada');
+
+export const UNIDAD_DE_LA_PAGINA_DE_CITA = unidadDeLaPaginaDeCita();
+export const UNIDAD_DE_LA_PORTADA = unidadDeLaPortada();
 
 /** Una tasa que una ventana juzga: SM-5, SM-7, la continuación, la de cada zona, SM-6 o SM-13. */
 export type TasaDeJuicio = 'sm5' | 'sm7' | 'continuacion' | 'continuacion-por-zona' | 'sm6' | 'sm13';
@@ -372,13 +385,15 @@ export interface JuicioPorVentanas {
 
 /**
  * Las tasas que una historia de cierre juzga por ventanas, frente a su línea base o a su serie de
- * antes. **Una tasa nueva que se juzgue así entra aquí por su historia**, con su llegada: una
- * llegada sin constante todavía es `undefined`, y su historia la enchufa.
+ * antes, con las unidades de la declaración de superficies que se le dé. **Una tasa nueva que se
+ * juzgue así entra aquí por su historia**, con su llegada: una llegada sin constante todavía es
+ * `undefined`, y su historia la enchufa. `JUICIOS_POR_VENTANAS` es la tabla con la declaración de
+ * `src/lib/superficies.ts`.
  */
-export const JUICIOS_POR_VENTANAS: readonly JuicioPorVentanas[] = [
+export const juiciosPorVentanas = (superficies: readonly Superficie[] = SUPERFICIES): readonly JuicioPorVentanas[] => [
   {
     nombre: 'SM-C3',
-    unidad: UNIDAD_DE_LA_PAGINA_DE_CITA,
+    unidad: unidadDeLaPaginaDeCita(superficies),
     llegada: undefined,
     deDondeLlega: 'sin constante todavía: la da la Épica 25',
     tasas: ['sm7', 'sm5'],
@@ -386,7 +401,7 @@ export const JUICIOS_POR_VENTANAS: readonly JuicioPorVentanas[] = [
   },
   {
     nombre: 'SM-C5',
-    unidad: UNIDAD_DE_LA_PAGINA_DE_CITA,
+    unidad: unidadDeLaPaginaDeCita(superficies),
     llegada: DESPLIEGUE_DE_OBRA_Y_DIRECTORIOS,
     deDondeLlega: 'DESPLIEGUE_DE_OBRA_Y_DIRECTORIOS',
     tasas: ['continuacion', 'sm5'],
@@ -403,7 +418,7 @@ export const JUICIOS_POR_VENTANAS: readonly JuicioPorVentanas[] = [
   },
   {
     nombre: 'la continuación de la portada por zona',
-    unidad: UNIDAD_DE_LA_PORTADA,
+    unidad: unidadDeLaPortada(superficies),
     llegada: DESPLIEGUE_DE_LA_PORTADA_DE_RETORNO,
     deDondeLlega: 'DESPLIEGUE_DE_LA_PORTADA_DE_RETORNO',
     tasas: ['continuacion-por-zona'],
@@ -423,6 +438,8 @@ export const JUICIOS_POR_VENTANAS: readonly JuicioPorVentanas[] = [
     tasas: ['sm13'],
   },
 ];
+
+export const JUICIOS_POR_VENTANAS: readonly JuicioPorVentanas[] = juiciosPorVentanas();
 
 // ── Lo que sale ───────────────────────────────────────────────────────────────────────────
 
@@ -455,6 +472,8 @@ export interface CifrasDeSuperficie {
   vistas?: number;
   lecturas?: number;
   salidas?: number;
+  /** Todas sus acciones, sin mirar `primera` ni destino: todo registro se reparte, también estos. */
+  acciones?: number;
   continuacion: Tasa;
   porZona: { zona: string; continuacion: Tasa }[];
 }
@@ -561,6 +580,11 @@ export interface Ventana {
   tasas: { tasa: string; valor: Tasa; direccion?: Direccion }[];
   /** «sin dirección»: a una de las dos tasas de la señal le falta dirección; no es «no se da». */
   senal?: 'se da' | 'salta' | 'no se da' | 'sin dirección';
+  /**
+   * La llegada de lo que se juzga, si la ventana acaba antes de ella: la línea base se cerró antes
+   * de que llegara, y esa ventana no juzga lo que llega.
+   */
+  antesDeLaLlegada?: string;
 }
 
 /** Un bloque que un cambio cortó antes de reunir el mínimo: no se juzga, y se nombra. */
@@ -652,9 +676,14 @@ function tasaDe(numerador: number | undefined, denominador: number | undefined, 
   return { estado: 'calculada', numerador, denominador };
 }
 
-/** 1 − una tasa, con el mismo denominador. */
+/**
+ * 1 − una tasa, con el mismo denominador. De una que pasa de uno no se calcula: el porcentaje
+ * saldría negativo, y se dice por qué.
+ */
 function complemento(tasa: Tasa): Tasa {
-  return tasa.estado === 'calculada' ? { ...tasa, numerador: tasa.denominador - tasa.numerador } : tasa;
+  if (tasa.estado !== 'calculada') return tasa;
+  if (tasa.numerador > tasa.denominador) return { ...tasa, estado: 'por-encima' };
+  return { ...tasa, numerador: tasa.denominador - tasa.numerador };
 }
 
 const ordenarPorClave = <T>(mapa: Map<string, T>, orden: readonly string[] = []): [string, T][] =>
@@ -672,19 +701,43 @@ export function esJornadaReal(jornada: unknown): jornada is string {
   return !Number.isNaN(instante.getTime()) && jornadaUtc(instante) === jornada;
 }
 
-/**
- * Lo que una persona escribe a mano y la lectura lee —los cortes, las pasadas, el mínimo, las
- * llegadas de los juicios— y la declaración de superficies, juzgado antes de usarlo. Las jornadas
- * se comparan como texto, así que una mal escrita no fallaría: no descontaría nada o partiría la
- * serie el día equivocado, en silencio. Devuelve cada problema, nombrando la constante.
- */
-export function problemasDeLaLectura(valores: {
+/** Los valores con que se compone la lectura: los de las opciones, o los del repositorio. */
+export interface ValoresDeLaLectura {
+  superficies: readonly Superficie[];
   cortes: readonly CorteLlegado[];
   pasadas: readonly PasadaEnProduccion[];
   minimo: number | undefined;
+  conFacebook: boolean;
+  minRutasEnRafaga: number;
   juicios: readonly JuicioPorVentanas[];
-  superficies: readonly Superficie[];
-}): string[] {
+}
+
+/**
+ * Las opciones resueltas: lo que no se pasa sale de `src/lib/umbrales.ts` y de la declaración de
+ * superficies, y la tabla de juicios, de las superficies que se den.
+ */
+export function valoresDeLaLectura(opciones: OpcionesDeLaLectura = {}): ValoresDeLaLectura {
+  const superficies = opciones.superficies ?? SUPERFICIES;
+  return {
+    superficies,
+    cortes: opciones.cortes ?? CORTES_DE_SERIE,
+    pasadas: opciones.pasadas ?? PASADAS_QUE_ESCRIBEN_EN_PRODUCCION,
+    minimo: 'minimo' in opciones ? opciones.minimo : MIN_LECTURAS_DE_LINEA_BASE,
+    conFacebook: opciones.conFacebook ?? SM12_CON_FACEBOOK,
+    minRutasEnRafaga: opciones.minRutasEnRafaga ?? MIN_RUTAS_DE_CITA_EN_RAFAGA,
+    juicios: opciones.juicios ?? juiciosPorVentanas(superficies),
+  };
+}
+
+/**
+ * Lo que una persona escribe a mano y la lectura lee —los cortes, las pasadas, el mínimo, el umbral
+ * de la ráfaga, las llegadas de los juicios— y la declaración de superficies, juzgado antes de
+ * usarlo. Las jornadas se comparan como texto, así que una mal escrita no fallaría: no descontaría
+ * nada o partiría la serie el día equivocado, en silencio. Devuelve cada problema, nombrando la
+ * constante. Es puro: la cáscara lo pregunta **antes de leer nada de D1**, para no gastar cinco
+ * recorridos de la tabla en una lectura que no se va a componer.
+ */
+export function problemasDeLaLectura(valores: Omit<ValoresDeLaLectura, 'conFacebook'>): string[] {
   const problemas: string[] = [];
   const noEsJornada = (jornada: unknown) => `«${String(jornada)}» no es una jornada AAAA-MM-DD que exista`;
   for (const corte of valores.cortes) {
@@ -697,15 +750,28 @@ export function problemasDeLaLectura(valores: {
     if (!esJornadaReal(pasada.jornada)) problemas.push(`${cual}: ${noEsJornada(pasada.jornada)}.`);
     if (pasada.rutas.length === 0) problemas.push(`${cual}: no nombra ninguna ruta, así que no descontaría nada.`);
     for (const ruta of pasada.rutas) {
+      // Como la guarda el receptor: un camino sin `?…` ni `#…` que alguna superficie declara. Otra
+      // cosa no casaría con ningún registro, y su pasada contaría como visitas sin decirlo.
+      let declarada = false;
       try {
-        rutaNormalizada(ruta);
+        declarada = !/[?#]/.test(ruta) && superficieDeclaradaDe(ruta, valores.superficies) !== undefined;
       } catch {
-        problemas.push(`${cual}: «${ruta}» no es una ruta del sitio.`);
+        declarada = false;
       }
+      if (!declarada) problemas.push(`${cual}: «${ruta}» no es una ruta del sitio.`);
     }
   }
   if (valores.minimo !== undefined && !(Number.isInteger(valores.minimo) && valores.minimo > 0)) {
     problemas.push(`MIN_LECTURAS_DE_LINEA_BASE: «${valores.minimo}» no es un entero positivo.`);
+  }
+  if (!(Number.isInteger(valores.minRutasEnRafaga) && valores.minRutasEnRafaga > 0)) {
+    problemas.push(`MIN_RUTAS_DE_CITA_EN_RAFAGA: «${valores.minRutasEnRafaga}» no es un entero positivo.`);
+  }
+  if (paginaDeCitaEn(valores.superficies) === undefined) {
+    problemas.push('src/lib/superficies.ts no declara ninguna superficie que emita la vista de Cita: la lectura no sabe cuál es la Página de Cita.');
+  }
+  if (portadaEn(valores.superficies) === undefined) {
+    problemas.push('src/lib/superficies.ts no declara la portada (/): la lectura no sabe cuál es su unidad.');
   }
   for (const juicio of valores.juicios) {
     if (juicio.llegada !== undefined && !esJornadaReal(juicio.llegada)) {
@@ -731,16 +797,11 @@ export function componerLecturaDeMedicion(
   entrada: EntradaDeLaLectura,
   opciones: OpcionesDeLaLectura = {},
 ): LecturaDeMedicion {
-  const superficies = opciones.superficies ?? SUPERFICIES;
-  const cortes = opciones.cortes ?? CORTES_DE_SERIE;
-  const pasadas = opciones.pasadas ?? PASADAS_QUE_ESCRIBEN_EN_PRODUCCION;
-  const minimo = 'minimo' in opciones ? opciones.minimo : MIN_LECTURAS_DE_LINEA_BASE;
-  const conFacebook = opciones.conFacebook ?? SM12_CON_FACEBOOK;
-  const minRutasEnRafaga = opciones.minRutasEnRafaga ?? MIN_RUTAS_DE_CITA_EN_RAFAGA;
-  const juicios = opciones.juicios ?? JUICIOS_POR_VENTANAS;
+  const valores = valoresDeLaLectura(opciones);
+  const { superficies, cortes, pasadas, minimo, conFacebook, minRutasEnRafaga, juicios } = valores;
   const { hoy } = entrada;
   if (!esJornadaReal(hoy)) throw new Error(`«${hoy}» no es una jornada AAAA-MM-DD.`);
-  const problemas = problemasDeLaLectura({ cortes, pasadas, minimo, juicios, superficies });
+  const problemas = problemasDeLaLectura(valores);
   if (problemas.length > 0) {
     throw new Error(
       ['Lo que la lectura lee de src/lib/umbrales.ts y src/lib/superficies.ts no se sostiene:', ...problemas.map((p) => `  ${p}`)].join(
@@ -855,6 +916,7 @@ export function componerLecturaDeMedicion(
     const filtro = conJornada(enLectura, deSuperficie(superficie.nombre));
     const lecturas = sumar(vistasYLecturas, (r) => esLectura(r) && filtro(r));
     const deSalidas = sumar(salidas, filtro);
+    const deAcciones = sumar(acciones, filtro);
     return {
       nombre: superficie.nombre,
       unidad: superficieDeLineaBase(superficie),
@@ -863,6 +925,7 @@ export function componerLecturaDeMedicion(
         : { vistas: vistasDeCargaPorPar(vistasYLecturas, filtro).reduce((total, par) => total + par.vistas, 0) }),
       ...(lecturas === undefined ? {} : { lecturas }),
       ...(deSalidas === undefined ? {} : { salidas: deSalidas }),
+      ...(deAcciones === undefined ? {} : { acciones: deAcciones }),
       continuacion: tasaDe(deSalidas, lecturas, faltan('salidas', 'vistasYLecturas')),
       porZona: ordenarPorClave(zonasDe(filtro)).map(([zona, n]) => ({
         zona,
@@ -1284,11 +1347,16 @@ export function componerLecturaDeMedicion(
         return { tasa: nombreDeTasa(tasa), valor, ...(direccion === undefined ? {} : { direccion }) };
       });
       const ventana: Ventana = { desde: actual[0], hasta: actual[actual.length - 1], acumulado, tasas: valores };
+      // Una línea base cerrada antes de la llegada da ventanas antes de ella: se juzgan, como pide
+      // «contadas desde el cierre», pero se dice que no juzgan lo que llega.
+      if (juicio.llegada !== undefined && ventana.hasta < juicio.llegada) ventana.antesDeLaLlegada = juicio.llegada;
       if (juicio.senal !== undefined) {
         const sube = valores[tasas.indexOf(juicio.senal.sube)]?.direccion;
         const baja = valores[tasas.indexOf(juicio.senal.baja)]?.direccion;
-        // Sin una de las dos direcciones la señal no se puede juzgar: decir «no se da» sería
-        // escribir una ausencia como un hecho, y rompería la cadena de «salta».
+        // Sin una de las dos direcciones la señal no se puede juzgar, y no se escribe «no se da»,
+        // que afirmaría una ausencia como un hecho. Tampoco deja pasar la cadena: dos ventanas con
+        // la señal separadas por una sin juzgar no son «dos seguidas», así que la siguiente que la
+        // dé vuelve a «se da», como tras una llegada.
         if (sube === undefined || baja === undefined) {
           ventana.senal = 'sin dirección';
         } else if (sube === 'sube' && baja === 'baja') {
@@ -1340,6 +1408,18 @@ export function componerLecturaDeMedicion(
   };
 }
 
+/**
+ * Si no se leyó nada: ninguna consulta dio recuentos —falló, o trajo filas sin forma— y `d1 info`
+ * no dio ninguna de sus dos cifras. Entonces la orden sale con 1, como cuando `wrangler` no contesta.
+ */
+export function nadaSeLeyo(lectura: LecturaDeMedicion): boolean {
+  return (
+    lectura.descuentos.incompletos.length === CONSULTAS_DE_LA_LECTURA.length &&
+    !lectura.cuota.escritas.ok &&
+    !lectura.cuota.tamaño.ok
+  );
+}
+
 // ── El informe ────────────────────────────────────────────────────────────────────────────
 
 const entero = (n: number) => n.toLocaleString('es-ES');
@@ -1360,6 +1440,11 @@ export function textoDeTasa(tasa: Tasa): string {
       return `sin denominador (${entero(tasa.numerador)} sobre ninguna)`;
     case 'sin-leer':
       return `sin leer (${nombresDe(tasa.faltan)})`;
+    case 'por-encima':
+      return (
+        `no se calcula: la tasa de la que es complemento pasa del 100 % (${entero(tasa.numerador)} de ` +
+        `${entero(tasa.denominador)}), con más salidas que lecturas —balizas perdidas o partidas por la medianoche UTC—`
+      );
   }
 }
 
@@ -1367,11 +1452,12 @@ const cifra = (valor: number | undefined) => (valor === undefined ? 'sin leer' :
 
 /**
  * Un texto que llega de D1 tal cual lo escribió un visitante —la consulta sin resultados, sobre
- * todo—, sin caracteres de control ni de dirección: uno de ellos partiría el informe en líneas
- * falsas o metería secuencias de escape en la terminal de quien lo lee.
+ * todo—, sin caracteres de control, de dirección, de anchura cero ni separadores de línea: uno de
+ * ellos partiría el informe en líneas falsas, lo reordenaría o metería secuencias de escape en la
+ * terminal de quien lo lee. El receptor ya lo recorta a `MAX_CONSULTA` caracteres.
  */
 export function legible(texto: string): string {
-  return texto.replace(/[\u0000-\u001f\u007f-\u009f\u200e\u200f\u202a-\u202e\u2066-\u2069]/g, '\ufffd');
+  return texto.replace(/[\u0000-\u001f\u007f-\u009f\u061c\u200b\u200e\u200f\u2028\u2029\u202a-\u202e\u2066-\u2069\ufeff]/g, '\ufffd');
 }
 
 /**
@@ -1425,24 +1511,33 @@ export function lineasDeLecturaDeMedicion(lectura: LecturaDeMedicion): string[] 
       : `  Tamaño de la base: sin leer (${tamaño.motivo})`,
   );
   lineas.push(
-    '  Al pasar cualquiera de las dos cuotas, las escrituras fallan en silencio hasta las 00:00 UTC: el Worker se traga el error.',
+    '  Al pasar cualquiera de las dos, las escrituras fallan en silencio —el Worker se traga el error—: pasada la de ' +
+      'filas escritas, hasta las 00:00 UTC, cuando se renueva; pasada la de tamaño, hasta que se borren filas o cambie ' +
+      'el plan, porque esa no se renueva sola.',
     '  Cada lectura recorre la tabla cinco veces, una por consulta.',
   );
 
   // Los descuentos.
+  const sinContar =
+    lectura.descuentos.incompletos.length > 0 ? ` (sin contar ${nombresDe(lectura.descuentos.incompletos)}, que no se leyeron)` : '';
   lineas.push('', 'Descuentos');
-  lineas.push(`  Balizas de prueba (${RUTA_DE_COMPROBACION}): ${entero(lectura.descuentos.comprobacion)} registros, además de los que ya aparta el SQL.`);
+  lineas.push(
+    `  Balizas de prueba (${RUTA_DE_COMPROBACION}): ${entero(lectura.descuentos.comprobacion)} registros${sinContar}, ` +
+      'además de los que ya aparta el SQL.',
+  );
   if (lectura.descuentos.pasadas.length === 0) {
     lineas.push('  Pasadas que escriben en producción (PASADAS_QUE_ESCRIBEN_EN_PRODUCCION): ninguna anotada.');
   } else {
     lineas.push('  Pasadas que escriben en producción (PASADAS_QUE_ESCRIBEN_EN_PRODUCCION):');
     for (const pasada of lectura.descuentos.pasadas) {
       lineas.push(
-        `    la ${pasada.pasada}, el ${pasada.jornada}, en ${lista([...pasada.rutas])}: ${entero(pasada.registros)} registros descontados` +
-          (lectura.descuentos.incompletos.length > 0 ? ` (sin contar ${nombresDe(lectura.descuentos.incompletos)})` : '') +
-          '.',
+        `    la ${pasada.pasada}, el ${pasada.jornada}, en ${lista([...pasada.rutas])}: ${entero(pasada.registros)} registros descontados${sinContar}.`,
       );
     }
+    lineas.push(
+      '    Cada pasada descuenta todos los registros de sus rutas en su jornada, también los de visitantes de verdad: ' +
+        'la tabla no los distingue. Si dos comparten ruta y jornada, lo compartido se cuenta en la primera.',
+    );
   }
 
   // Los cortes.
@@ -1492,7 +1587,8 @@ export function lineasDeLecturaDeMedicion(lectura: LecturaDeMedicion): string[] 
   );
   for (const s of lectura.superficies) {
     lineas.push(
-      `  ${s.nombre}: vistas ${cifra(s.vistas)}, lecturas ${cifra(s.lecturas)}, salidas ${cifra(s.salidas)}; ` +
+      `  ${s.nombre}: vistas ${cifra(s.vistas)}, lecturas ${cifra(s.lecturas)}, salidas ${cifra(s.salidas)}, ` +
+        `acciones ${cifra(s.acciones)}; ` +
         `continuación ${textoDeTasa(s.continuacion)}.`,
     );
     if (s.porZona.length > 0) {
@@ -1563,8 +1659,12 @@ export function lineasDeLecturaDeMedicion(lectura: LecturaDeMedicion): string[] 
   if ('faltan' in lectura.sm12) {
     lineas.push(`  Sin leer (${nombresDe(lectura.sm12.faltan)}).`);
   } else {
-    for (const d of lectura.sm12.destinos) {
-      lineas.push(`  ${d.destino}: ${textoDeTasa(d.tasa)}${d.fuera === undefined ? '' : `; ${d.fuera}`}.`);
+    // Los que se comparan, y después, aparte, los que quedan fuera de la comparación, con su motivo.
+    for (const d of lectura.sm12.destinos.filter((destino) => destino.fuera === undefined)) {
+      lineas.push(`  ${d.destino}: ${textoDeTasa(d.tasa)}.`);
+    }
+    for (const d of lectura.sm12.destinos.filter((destino) => destino.fuera !== undefined)) {
+      lineas.push(`  Aparte, ${d.destino}: ${textoDeTasa(d.tasa)}; ${d.fuera}.`);
     }
     lineas.push(
       `  La Imagen cuadrada (comparticion-de-imagen con destino ${DESTINO_OPACO}), fuera de todo destino: ${cifra(lectura.sm12.imagenCuadrada)}.`,
@@ -1601,7 +1701,9 @@ export function lineasDeLecturaDeMedicion(lectura: LecturaDeMedicion): string[] 
   // Las líneas base.
   lineas.push(
     '',
-    `Líneas base (MIN_LECTURAS_DE_LINEA_BASE: ${lectura.minimo === undefined ? 'sin valor' : entero(lectura.minimo)})`,
+    `Líneas base (MIN_LECTURAS_DE_LINEA_BASE: ${
+      lectura.minimo === undefined ? 'sin mínimo declarado; ninguna se cierra' : entero(lectura.minimo)
+    })`,
   );
   for (const l of lectura.lineasBase) {
     const quien = l.superficies.length > 1 ? `${l.unidad} (${lista(l.superficies)})` : l.unidad;
@@ -1698,7 +1800,9 @@ export function lineasDeLecturaDeMedicion(lectura: LecturaDeMedicion): string[] 
           : v.senal === 'sin dirección'
             ? '; la señal no se puede juzgar: a una de sus dos tasas le falta dirección.'
             : `; la señal ${v.senal}.`;
-      lineas.push(`    ${v.desde} – ${v.hasta} (${entero(v.acumulado)}): ${tasas.join('; ')}${senal}`);
+      const antes =
+        v.antesDeLaLlegada === undefined ? '' : ` Antes de la llegada del ${v.antesDeLaLlegada}: no juzga lo que llega.`;
+      lineas.push(`    ${v.desde} – ${v.hasta} (${entero(v.acumulado)}): ${tasas.join('; ')}${senal}${antes}`);
     }
     for (const c of j.cortadas) {
       lineas.push(

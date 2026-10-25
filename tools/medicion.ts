@@ -37,11 +37,12 @@
  * 2 si la invocación no vale —subcomando, bandera o argumento desconocidos—, si falta
  * `MEDICION_ENDPOINT` (salvo en la lectura, que no lo usa), no es una dirección http(s) o apunta a
  * la máquina propia, o si `wrangler` no tiene sesión: en todos, antes de tocar nada. 1 para todo lo
- * demás, con el parte de lo que quedó aplicado; en la lectura, si la sesión no se deja leer, si no se
- * pudo leer el Corpus, si no se leyó nada de D1 o si un valor de `src/lib/umbrales.ts` que la lectura
- * lee no se sostiene —una jornada mal escrita, un mínimo que no es un entero positivo—, nombrando
- * cada cosa. La lectura sale con 0 si leyó algo. Se para en el primer fallo y no reintenta
- * migraciones ni despliegues.
+ * demás, con el parte de lo que quedó aplicado; en la lectura, si un valor de `src/lib/umbrales.ts`
+ * que la lectura lee no se sostiene —una jornada mal escrita, un mínimo que no es un entero
+ * positivo—, que se juzga **antes de tocar nada**, si la sesión no se deja leer, si no se pudo leer
+ * el Corpus o sacar de él el censo, o si no se leyó nada de D1 —ni una consulta con recuentos ni
+ * ninguna cifra de `d1 info`—, nombrando cada cosa. La lectura sale con 0 si leyó algo. Se para en
+ * el primer fallo y no reintenta migraciones ni despliegues.
  *
  * ── Red ──────────────────────────────────────────────────────────────────────────────────
  *
@@ -60,7 +61,14 @@ import { interpretar } from '../medicion/receptor.ts';
 import { rutasPublicadas } from '../src/lib/publicado.ts';
 import { conjuntoDelCorpus } from './indexacion.ts';
 import { rutasDelCorpus } from './lib/corpus.ts';
-import { componerLecturaDeMedicion, lineasDeLecturaDeMedicion } from './lib/lineaBase.ts';
+import {
+  censoDeLaMedicion,
+  componerLecturaDeMedicion,
+  lineasDeLecturaDeMedicion,
+  nadaSeLeyo,
+  problemasDeLaLectura,
+  valoresDeLaLectura,
+} from './lib/lineaBase.ts';
 import {
   ARGUMENTOS_DEL_RECEPTOR_LOCAL,
   DIRECTORIO_DE_MIGRACIONES,
@@ -295,26 +303,56 @@ async function principal(): Promise<number> {
 
   if (subcomando === null) {
     // La lectura: sin MEDICION_ENDPOINT —no envía nada— y sin aviso de interrupción, porque cortada
-    // a mitad no deja nada aplicado.
-    const lectura = await leer(efectos, () => conjuntoDelCorpus(rutasDelCorpus(join(RAIZ, 'corpus'))));
-    // Componer puede fallar por el censo —una ruta que no se normaliza— o por un valor de
-    // `umbrales.ts` escrito a mano que no se sostiene: sale con 1 nombrándolo, no con una traza.
+    // a mitad no deja nada aplicado. Lo escrito a mano en `umbrales.ts` se juzga antes de tocar
+    // nada: con un valor que no se sostiene, cinco recorridos de la tabla no compondrían informe.
+    const problemas = problemasDeLaLectura(valoresDeLaLectura());
+    if (problemas.length > 0) {
+      throw new Parada(
+        1,
+        [
+          'Lo que la lectura lee de src/lib/umbrales.ts y src/lib/superficies.ts no se sostiene:',
+          ...problemas.map((problema) => `  ${problema}`),
+          'Consulta: no se ha leído ni escrito nada.',
+        ].join('\n'),
+      );
+    }
+    // El censo sale con el Corpus, antes de las consultas: una ruta que no se normaliza para la
+    // orden ahí, como un Corpus ilegible.
+    const lectura = await leer(efectos, async () => {
+      const rutas = rutasPublicadas(await conjuntoDelCorpus(rutasDelCorpus(join(RAIZ, 'corpus'))));
+      censoDeLaMedicion(rutas);
+      return rutas;
+    });
     let lineas: string[];
     try {
       const informe = componerLecturaDeMedicion({
         hoy: lectura.hoy,
-        censo: rutasPublicadas(lectura.corpus),
+        censo: lectura.corpus,
         consultas: lectura.consultas,
         cuota: lectura.cuota,
       });
+      // `wrangler` contestó, pero ninguna consulta trajo recuentos con forma y `d1 info` tampoco
+      // dio nada: es no haber leído nada, y sale con 1 como cuando no contesta.
+      if (nadaSeLeyo(informe)) {
+        throw new Parada(
+          1,
+          [
+            'No se leyó nada de D1:',
+            ...informe.sinLeer.map(({ que, motivo }) => `  ${que}: ${motivo}`),
+            'Consulta: no se ha escrito nada.',
+          ].join('\n'),
+        );
+      }
       lineas = lineasDeLecturaDeMedicion(informe);
     } catch (error) {
+      if (error instanceof Parada) throw error;
       throw new Parada(
         1,
         `No se pudo componer el informe: ${error instanceof Error ? error.message : String(error)}\nConsulta: no se ha escrito nada.`,
       );
     }
-    process.stdout.write(`${lineas.join('\n')}\n`);
+    // Escrito a una tubería en macOS, `stdout` es asíncrono: salir antes de que acabe lo cortaría.
+    await new Promise<void>((listo) => process.stdout.write(`${lineas.join('\n')}\n`, () => listo()));
     return 0;
   }
   if (subcomando === 'local') return local();
