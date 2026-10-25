@@ -144,7 +144,61 @@ intent-alignment, ac-auditor) y no traían hallazgos todavía: la revisión inde
   - `[low]` `[patch]` `DESPLIEGUE.md` y el docblock afirmaban que la descarga impuesta llega con destino, y la isla de la Imagen no lo pasa hasta la 25.2 (verification-gap, edge-case-hunter): los dos lo dicen.
   - `[low]` `[patch]` `tests/servidor.mjs` leía una variable genérica `CACHE_CONTROL`: ahora `SERVIDOR_CACHE_CONTROL`.
 
-Rechazados (17), con su motivo: filtrar máquinas (`navigator.webdriver`, renderizadores que adelantan el tiempo) — la intención define la lectura por FR-56 y deja las firmas mecánicas a la comparación del informe de la 23.10; filtrar teclas modificadoras, atajos o botones de salida — la intención nombra `keydown`/`pointerdown` sin excepciones, y la salida interna fuerza la lectura en la 23.7; `isTrusted` — ningún guion del sitio despacha eventos sintéticos; `__medir('vista-…')` directo — superficie de la 23.1 que nadie usa; `URLSearchParams` que lanza — ningún navegador con `sendBeacon` carece de él; escuchas sin quitar — la carga nueva de `pageshow` las necesita y su coste es nulo; `REVISADO_SIN_DESMENTIR` como interruptor — texto exacto con prueba compañera que obliga a revisar; el tope fijado por lo medido — lo manda la intención; el Chromium completo sin documentar — la instalación por omisión lo trae y la prueba se salta nombrando el motivo; cobertura en navegador de visibilidad, `wheel`/`touchmove`, páginas 2+ y 404 — la intención reparte entre Vitest y Playwright y la lista de Playwright se cumple; contar desde `timeOrigin` — la intención lo prohíbe; la continuación — 23.7/23.10; el prerender real — salto preexistente de la 23.1; el 8_000 fijado en una prueba — deliberado; la revisión apuntada antes de hacerse — la corrige esta pasada; `sprint-status.yaml` — lo lleva el orquestador.
+Rechazados (17 contados; la lista nombra 16 y el que falta no se puede reconstruir —nota de la
+pasada 2—), con su motivo: filtrar máquinas (`navigator.webdriver`, renderizadores que adelantan el tiempo) — la intención define la lectura por FR-56 y deja las firmas mecánicas a la comparación del informe de la 23.10; filtrar teclas modificadoras, atajos o botones de salida — la intención nombra `keydown`/`pointerdown` sin excepciones, y la salida interna fuerza la lectura en la 23.7; `isTrusted` — ningún guion del sitio despacha eventos sintéticos; `__medir('vista-…')` directo — superficie de la 23.1 que nadie usa; `URLSearchParams` que lanza — ningún navegador con `sendBeacon` carece de él; escuchas sin quitar — la carga nueva de `pageshow` las necesita y su coste es nulo; `REVISADO_SIN_DESMENTIR` como interruptor — texto exacto con prueba compañera que obliga a revisar; el tope fijado por lo medido — lo manda la intención; el Chromium completo sin documentar — la instalación por omisión lo trae y la prueba se salta nombrando el motivo; cobertura en navegador de visibilidad, `wheel`/`touchmove`, páginas 2+ y 404 — la intención reparte entre Vitest y Playwright y la lista de Playwright se cumple; contar desde `timeOrigin` — la intención lo prohíbe; la continuación — 23.7/23.10; el prerender real — salto preexistente de la 23.1; el 8_000 fijado en una prueba — deliberado; la revisión apuntada antes de hacerse — la corrige esta pasada; `sprint-status.yaml` — lo lleva el orquestador.
+
+### 2026-10-25 — Review pass (revisión independiente, pasada 2)
+- intent_gap: 0
+- bad_spec: 0
+- patch: 13: (high 0, medium 0, low 13)
+- defer: 0
+- reject: 23: (high 0, medium 0, low 23)
+- addressed_findings:
+  - `[low]` `[patch]` `DESPLIEGUE.md` §3 decía que la lectura no sale nunca al ocultarse, y el fichero emite al ocultarse la que la carga ya debía cuando el temporizador llega tarde (blind-hunter): lo dice, como única excepción.
+  - `[low]` `[patch]` El corte de serie de SM-5 y SM-7 no nombraba la llegada de la 25.2, que baja el numerador de SM-5 al sacar la descarga impuesta (blind-hunter): nombrada como otro corte de SM-5, con su jornada de llegada aparte.
+  - `[low]` `[patch]` Las consultas de SM-5 y SM-7 no aplicaban el corte que describen y remitían «aparte» a la portada, la Obra y los listados sin decir cómo (blind-hunter): llevan `jornada >= 'AAAA-MM-DD'`, que sin cambiar no devuelve nada —nunca una jornada mixta—, y dicen que las demás superficies se leen cambiando el filtro de `ruta`.
+  - `[low]` `[patch]` Las consultas eligen la Cita por el prefijo `/cita/`, y la 23.10 manda resolverla contra el censo (intent-alignment, ac-auditor): dicho en la consulta —a mano es por prefijo y cuenta Citas retiradas; el informe de la 23.10 resuelve contra el censo—.
+  - `[low]` `[patch]` «Nunca cuenta una vista menos», en `MIN_MS_VISIBLES_PARA_LA_LECTURA`, no se entendía (blind-hunter): reescrito —ninguna carga visible menos de 8 s tiene lectura por tiempo; por interacción, sí—.
+  - `[low]` `[patch]` La prueba «ninguna isla…» eximía `umbrales.ts` entero por un comentario y no decía por dónde queda fuera `medicion.ts` (blind-hunter): el comentario del tope ya no nombra `METRICA_DE_ACCION`, los dueños son solo `vocabulario.ts` y el comentario explica `fuentesDeSrc`.
+  - `[low]` `[patch]` Nada fijaba que una isla no pueda colar `primera` por un argumento de más (blind-hunter): `emitir` del entorno simulado pasa lo que vaya detrás del destino, y una prueba lo intenta directo y encolado.
+  - `[low]` `[patch]` En `receptor.spec.ts`, «nada a 7,9 s» y «una tecla…» miraban solo el receptor tras 500 ms (blind-hunter): miran también `balizasDe`, que apunta al llamar a `sendBeacon`.
+  - `[low]` `[patch]` Nada fijaba «como mucho una lectura» con dos vistas en `data-vistas`, o la misma dos veces (blind-hunter): dos casos en Vitest.
+  - `[low]` `[patch]` El registro de la pasada 1 contaba 17 rechazos y nombraba 16 (blind-hunter): anotado allí, sin reescribir lo que contó.
+  - `[low]` `[patch]` La prueba de `primera` por métrica contaba en el receptor el copiado y la lectura sin esperar, y las balizas llegan sin orden (edge-case-hunter): `expect.poll` para cada recuento.
+  - `[low]` `[patch]` `EVENTOS_DE_VISTA` y el tipo `EventoDeVista` se escribían por separado, y una vista nueva declarada solo en el tipo (la de la Obra, 23.9) saldría al `data-vistas` y el fichero la descartaría en silencio (verification-gap): el tipo sale ahora de la lista (`as const`), un solo sitio; el fichero no cambia ni un byte.
+  - `[low]` `[patch]` El comentario «guardada en su columna» de `receptor.spec.ts` hablaba de una columna que en ese camino no hay (intent-alignment): dice que es la interpretación del receptor.
+
+Rechazados (23), con su motivo: la lectura sin su disparador ni la marca de la caché de atrás y
+adelante — añadir campos es tocar `vocabulario.ts` (Block If) y la intención fija la carga en
+`evento`, `ruta` y `origen`; filtrar máquinas —`navigator.webdriver`, tiempo virtual— — la
+intención define la lectura por FR-56 y la separación por firma es de la 23.10; olvidar la Marca
+de origen al volver por la caché — lo manda la intención («queda en `null`») y FR-56 («sin
+marcas»); el historial de medidas del comentario del tope, que envejecerá — la intención pide la
+medida y el porqué en el comentario, como la 23.1 y la 23.2; la cobertura en navegador de la
+visibilidad, `wheel`/`touchmove`, páginas 2+, 404, la descarga con destino y el reinicio de
+`primera` tras una restauración real — la intención reparte entre Vitest y Playwright y la lista
+de Playwright de la historia se cumple; los demás `spec` de punta a punta sin `primera` y los
+ayudantes fuera de `tests/e2e/ayuda/` — fuera de lo pedido; el `max-age=600` para todo
+`receptor.spec.ts` y la variable sin validar — cada prueba abre su contexto, el navegador por
+omisión no usa la caché de atrás y adelante, la caché HTTP devuelve los mismos bytes y la variable
+la pone la propia prueba; la prueba de la caché real que se salta — la intención lo prescribe;
+`status: done` con `followup_review_recommended: true` — es la forma del flujo, y por eso existe
+esta pasada; la primera entrada a ceros del registro — apunta lo que pasó; `sprint-status.yaml` —
+lo lleva el orquestador; teclas modificadoras y atajos — la intención nombra `keydown` sin
+excepciones; `isTrusted` — ningún guion del sitio despacha eventos sintéticos; `__medir('vista-…')`
+directo — superficie de la 23.1 que nadie usa; `sendBeacon` que devuelve `false` en la vista y
+enciende `V` — «emitió» es intentarlo, como en el transporte roto de la matriz, y una baliza
+perdida no se reintenta; el resultado en D1 frente al emisor — la intención prohíbe desplegar
+(23.11); la descarga impuesta sin destino hasta la 25.2 — orden de la épica, documentado;
+contar desde la activación — la intención lo elige; **la lectura debida que sale al ocultarse
+frente al «ocultarse no emite nada» del contrato** — la épica acota el «tampoco al ocultarse» a la
+carga cerrada **antes** de los 8 s y exige la lectura de la que lleva 8 s visibles; con el
+temporizador tardío las dos cláusulas del contrato chocan y la única lectura que cumple las dos de
+la épica es emitirla (lo dice ya `DESPLIEGUE.md`); `tests/unit/superficies.test.ts` tocado — lo
+exige `touchmove`, que la intención nombra; la continuación — 23.7 y 23.10; el cambio del umbral
+como entrada de cortes — la lista y su guarda son de la 23.10, que nombra «un cambio del tiempo
+mínimo de la lectura»; la expresión regular que no ve una emisión indirecta — el descarte en
+tiempo de ejecución de `__medir('lectura')` lo impide igual y está probado.
 
 ## Design Notes
 
@@ -204,18 +258,22 @@ vacío).
 
 **Ficheros.**
 - `src/lib/medicion.ts` — `EVENTOS_DEL_GUION` con `lectura`; `EVENTOS_SOLO_DEL_FICHERO`;
-  `EVENTOS_DE_VISTA` (revisión); fuente 3 (`primera`, calculada); `INTERACCIONES_DE_LECTURA`; el
+  `EVENTOS_DE_VISTA` (revisión), del que sale el tipo `EventoDeVista` (pasada 2); fuente 3 (`primera`, calculada); `INTERACCIONES_DE_LECTURA`; el
   fichero con reloj, escuchas, memoria de `primera`, carga nueva y lectura debida al ocultarse
   (revisión); docblocks al día, con la nota de la descarga impuesta hasta la 25.2.
 - `src/lib/umbrales.ts` — `MIN_MS_VISIBLES_PARA_LA_LECTURA = 8_000`; `MAX_BYTES_GUION_DE_MEDICION`
   de 1.320 a 2.420 (medido 2.024 bytes con el punto final de producción en la implementación; 2.096
-  tras la revisión, sin mover el tope).
+  tras la revisión, sin mover el tope); en la pasada 2, dos comentarios más claros y sin nombrar
+  `METRICA_DE_ACCION`.
 - `tests/unit/ayuda/medicion.ts` — sandbox con reloj fingido (`avanzar`, `bloquear`), visibilidad
   (`visible`, `ocultar`, `mostrar`), escuchas de ventana con sus ajustes (`interactuar`, `escuchas`),
-  `restaurar(persisted)`, `pendientes` y `espiar`.
+  `restaurar(persisted)`, `pendientes` y `espiar`; `emitir` pasa lo que vaya detrás del destino
+  (pasada 2).
 - `tests/unit/medicion.test.ts` — `describe('Historia 23.5 — …')`, una prueba (o más) por fila de la
   matriz, y las de la revisión: temporizador tardío, escuchas pasivas y en captura, `data-vistas` con
-  acciones, el espía, el recorrido de las islas y la descarga con destino seguida de una elegida.
+  acciones, el espía, el recorrido de las islas y la descarga con destino seguida de una elegida; y
+  las de la pasada 2: un argumento de más no cuela `primera`, y dos vistas —o la misma dos veces— en
+  `data-vistas` dejan una sola lectura.
 - `tests/unit/vocabulario.test.ts` — fuera la entrada 23.5 de `PENDIENTES`; ocho vigentes; la
   correspondencia produce la lectura (`PRODUCIR_DEL_FICHERO`) y espera `primera`.
 - `tests/unit/superficies.test.ts` — `REVISADO_SIN_DESMENTIR` para la señal de WCAG 2.5.7 que
@@ -225,11 +283,14 @@ vacío).
   revisión desde `CACHE_CONTROL`, que es lo que dicen las Tasks).
 - `tests/e2e/receptor.spec.ts` — su sitio se sirve `max-age=600`; la cola retenida espera
   `[vista-de-cita, lectura, copiado]` y `primera: 'si'` (con `balizasDe`, revisión);
-  `apuntarBalizas` nunca impide enviar (revisión); `describe('Historia 23.5 — …')` con ocho pruebas.
+  `apuntarBalizas` nunca impide enviar (revisión); `describe('Historia 23.5 — …')` con ocho pruebas;
+  las ausencias miran también `balizasDe` y los recuentos del receptor se esperan (pasada 2).
 - `DESPLIEGUE.md` §3 — la lectura y `primera`; la descarga impuesta fuera de SM-5 y SM-7 y sin
   destino hasta la 25.2; la garantía de orden como garantía de la emisión; la jornada UTC del
   receptor; lecturas que no son subconjunto de vistas; el corte de serie desde la primera jornada UTC
-  completa; consultas de lecturas por jornada y de SM-5 y SM-7 sobre lecturas de Página de Cita.
+  completa; consultas de lecturas por jornada y de SM-5 y SM-7 sobre lecturas de Página de Cita; en
+  la pasada 2, la lectura debida que sale al ocultarse, la 25.2 como otro corte de SM-5 y las
+  consultas con su jornada de partida, el prefijo dicho y cómo leer las demás superficies.
 - `AGENTS.md` — en la convención de la medición, que la lectura y `primera` las decide solo el
   fichero y `__medir('lectura')` se descarta.
 
@@ -238,7 +299,30 @@ intent-alignment, ac-auditor).** 17 parches aplicados (0 altos, 3 medios, 14 baj
 17 rechazados; ningún `intent_gap` ni `bad_spec`. Seguimiento recomendado: `true` (puntuación
 3 × 3 + 14 = 23 ≥ 5).
 
-**Verificación (tras los parches).**
+**Revisión (pasada 2, las mismas capas externas).** 13 parches aplicados (0 altos, 0 medios, 13
+bajos), 0 diferidos, 23 rechazados; ningún `intent_gap` ni `bad_spec`, así que ningún bucle de
+vuelta. Seguimiento recomendado: `true` (puntuación 3 × 0 + 13 = 13 ≥ 5), aunque los trece son de
+documentación, comentarios y pruebas: el fichero de medición no cambia ni un byte (2.096 con el punto
+final de producción). Lo que pide una decisión de lectura: el contrato dice «ocultarse no emite
+nada», y el fichero emite al ocultarse la lectura que la carga ya debía cuando una tarea larga
+retrasa el temporizador; se mantiene porque la épica acota el «tampoco al ocultarse» a la carga
+cerrada antes de los 8 s y exige la lectura de la que lleva 8 s visibles, y `DESPLIEGUE.md` §3 lo
+dice ya.
+
+**Verificación (pasada 2, tras sus parches).**
+- `npx astro check` — 0 errores, 0 avisos (331 ficheros).
+- `npx vitest run` de `medicion`, `vocabulario`, `redes`, `comparticion`, `huella`, `receptor`,
+  `espinas-de-ux`, `kit-construido` y `superficies` — 9 ficheros, 516 pruebas en verde.
+- `npm test` (con `correr.sh`, `r2-23-5-npm-test.log`) — 131 ficheros, 5.664 pruebas en verde.
+- `npx playwright test` de `receptor`, `copiar`, `imagen`, `compartir-enlace`, `compartir-imagen`,
+  `busqueda`, `pagina-de-cita` y `receptor-local` en `escritorio` (`r2-23-5-e2e.log`) — 144 en verde y
+  las mismas 3 saltadas que no son de esta historia; la de la caché real, en verde. Puertos 4321,
+  4399, 4400, 4402 y 8787 libres al terminar.
+- `npx tsx -e` con `guionDeMedicion` — 2.096 bytes con el punto final de producción ≤ 2.420.
+- `git diff 38149b31..HEAD -- src/lib/vocabulario.ts medicion/` vacío; `ARRANQUE_DE_MEDICION` y
+  `MAX_BYTES_DE_GUION` sin cambios.
+
+**Verificación (pasada 1, tras sus parches).**
 - `npx astro check` — 0 errores, 0 avisos (331 ficheros).
 - `npx vitest run` de `medicion`, `vocabulario`, `redes`, `comparticion`, `huella`, `receptor`,
   `espinas-de-ux`, `kit-construido` y `superficies` — 9 ficheros, 513 pruebas en verde.
@@ -262,5 +346,10 @@ intent-alignment, ac-auditor).** 17 parches aplicados (0 altos, 3 medios, 14 baj
   por firma de la 23.10, no el fichero.
 - La prueba de la caché real depende del Chromium completo; si no restaura, se salta nombrando el
   motivo, y el comportamiento lo siguen cubriendo el `pageshow` sintético y el entorno simulado.
+- Cualquier `keydown` cuenta como interacción, también una tecla modificadora o el atajo que cierra
+  la pestaña: una carga cerrada así antes de 8 s deja lectura. Es lo que nombra la historia; si la
+  comparación por firma de la 23.10 lo señala, se decide entonces.
+- Las consultas a mano de `DESPLIEGUE.md` eligen la Cita por el prefijo `/cita/` y cuentan Citas
+  retiradas; el informe de la 23.10 la resuelve contra el censo.
 - Nada de esto se ha desplegado: la serie de lecturas empieza con el despliegue del sitio de la 23
   (23.11).
