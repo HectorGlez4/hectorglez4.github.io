@@ -29,7 +29,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 # - Retrospective appends its action items to action_items; the status view surfaces open ones
 generated: 08-11-2026 09:00
-last_updated: 10-25-2026 12:56
+last_updated: 10-25-2026 15:17
 project: brainlySabiduria
 project_key: NOKEY
 tracking_system: file-system
@@ -394,7 +394,7 @@ development_status:
   23-7-cada-salida-interna-dice-desde-qué-zona: review  # v8-ralph 2026-10-25: cada salida interna marca la zona de origen en la baliza (continuación), con 404 y páginas 2+ apartadas; sin diferidos para Héctor
   23-8-una-búsqueda-cuenta-una-vez-cuando-se-asienta: review # v8-ralph 2026-10-25: la búsqueda se cuenta una vez al asentarse (Enter, clic o botón central) y el índice que falla se reintenta; diferido para Héctor: marcar en epics.md la 3.2 como sustituida por la 23.8 (bmad-create-epics-and-stories)
   23-9-toda-obra-cuenta-sus-vistas-se-indexe-o-no: review  # v8-ralph 2026-10-25: toda Obra (indexable o no) emite vista-de-obra con su marca y la puerta lo exige; diferido para Héctor: marcar en epics.md el criterio de la 22.4 como sustituido por la 23.9 (bmad-create-epics-and-stories)
-  23-10-la-línea-base-se-lee-desde-tools-con-la-cuota-de-d1-a-la-vis: backlog
+  23-10-la-línea-base-se-lee-desde-tools-con-la-cuota-de-d1-a-la-vis: review # v8-ralph 2026-10-25: npm run medicion -- leer da la línea base por superficie y la cuota de D1 (escrituras y tamaño) desde tools/; diferidos para Héctor: cuota de lectura (bmad-architecture), letra del criterio de la cuota en epics.md (bmad-create-epics-and-stories), y lo pendiente de bmad-prd
   23-11-la-lectura-se-mide-en-vivo-y-su-línea-base-empieza-a-contar: backlog  # operativa: acto de Héctor (mínimo de lecturas, plan de Cloudflare, merge y primer corte de SM-8)
   23-12-el-orden-de-llegada-no-reconstruye-a-nadie: review  # v8.2: se fusiona SOLA en la principal antes de la 23.3 (rowid aleatorio del Worker); excepción declarada a la fusión por épica; # v8-ralph 2026-10-24: el receptor inserta con rowid aleatorio, prueba de orden de llegada en tools/ y DESPLIEGUE.md §3; diferido para Héctor: la rama trae debajo el commit de epic-23-context.md (aceptarlo o quitarlo al fusionar)
   epic-23-retrospective: optional
