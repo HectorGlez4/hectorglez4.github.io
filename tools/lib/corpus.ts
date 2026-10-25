@@ -2553,13 +2553,16 @@ export const CABECERA_DE_PUBLICACIONES = [
   '#',
   '# EL CAMPO `marcado`. Cierto si el enlace tecleado llevaba ?de=<red> con la misma red',
   '# de la publicación; falso si no llevaba marca. Un enlace marcado para OTRA red se',
-  '# rechaza: sus visitas se atribuirían a otra cuenta. Lo sin enlace no lleva el campo. Se',
-  '# guarda la ruta y no la URL: el dominio tiene un solo dueño, src/lib/dominio.ts.',
+  '# rechaza: sus visitas se atribuirían a otra cuenta. Un enlace con ?via= también: es la',
+  '# marca de un visitante que comparte con un botón del sitio, nunca la de una cuenta',
+  '# propia. Lo sin enlace no lleva el campo. Se guarda la ruta y no la URL: el dominio',
+  '# tiene un solo dueño, src/lib/dominio.ts.',
   '#',
   '# CÓDIGOS DE SALIDA. 1 si lo dicho se rechaza —red ajena, formato desconocido, ruta que',
-  '# el sitio no publica, enlace marcado para otra red, fecha futura— o si este fichero no',
-  '# se deja leer; 2 si la forma de la invocación falla —bandera desconocida, argumentos de',
-  '# menos o de más, --fecha sin forma de jornada, una opción repetida—. Ninguno escribe.',
+  '# el sitio no publica, enlace marcado para otra red, enlace con ?via=, fecha futura— o si',
+  '# este fichero no se deja leer; 2 si la forma de la invocación falla —bandera',
+  '# desconocida, argumentos de menos o de más, --fecha sin forma de jornada, una opción',
+  '# repetida—. Ninguno escribe.',
   '#',
   '# Este fichero es metadato del Corpus y no una colección: vive en la raíz de `corpus/` y',
   '# ninguna base de `src/content.config.ts` apunta aquí. Ningún módulo de `src/lib/` lo lee',
@@ -2804,6 +2807,11 @@ export const CABECERA_DE_SENALES = [
   '# señal externa y de qué clase. La fecha puede ser anterior al canal: una bio o un enlace',
   '# ajeno pueden existir de antes.',
   '#',
+  '# EL CAMPO `compartido`. Cierto solo en una AJENA cuyo destino llevaba ?via=<destino>: el',
+  '# enlace se copió de lo que un visitante compartió con un botón del sitio, y la consulta lo',
+  '# avisa («copia un enlace compartido»). Una PROPIA con ?via= se rechaza: esa marca es de un',
+  '# visitante, nunca de una cuenta. Sin la marca, el campo no se escribe.',
+  '#',
   '# POR QUÉ SOLO AÑADE, como publicaciones-de-canal.yml y peticiones-de-rastreo.yml, y al',
   '# contrario que las series, que miden un ESTADO y reemplazan por fecha. Esto registra',
   '# HECHOS: que un enlace apareció. Reescribir una entrada borraría cuándo apareció, que es',
@@ -2908,7 +2916,7 @@ function analizarSenales(nombre: string, contenido: string): SenalExterna[] {
         );
       }
     }
-    const { fecha, tipo, origen, destino, marcado, retira, nota } = campos as Record<string, unknown> & {
+    const { fecha, tipo, origen, destino, marcado, compartido, retira, nota } = campos as Record<string, unknown> & {
       fecha: string;
       tipo: string;
       origen: string;
@@ -2934,6 +2942,9 @@ function analizarSenales(nombre: string, contenido: string): SenalExterna[] {
     }
     if (marcado !== undefined && typeof marcado !== 'boolean') {
       throw new Error(`${deLaEntrada} tiene «marcado: ${String(marcado)}»: tiene que ser true o false.`);
+    }
+    if (compartido !== undefined && typeof compartido !== 'boolean') {
+      throw new Error(`${deLaEntrada} tiene «compartido: ${String(compartido)}»: tiene que ser true o false.`);
     }
     if (retira !== undefined && (typeof retira !== 'string' || !esJornada(retira))) {
       throw new Error(
@@ -2963,6 +2974,7 @@ function bloqueDeSenal(senal: SenalExterna): string {
       origen: senal.origen,
       destino: senal.destino,
       marcado: senal.marcado,
+      compartido: senal.compartido,
       retira: senal.retira,
       nota: senal.nota,
     },

@@ -348,9 +348,12 @@ cual y se omite si no se da.
 llevaba `?de=<red>` con la misma red de la publicación y `false` si no llevaba marca; un enlace
 marcado para **otra** red se rechaza, porque sus visitas se atribuirían a otra cuenta. Lo que
 va con `-` no lleva el campo. Pega el enlace del Kit, que ya sale marcado, y no la ruta a pelo.
+**Un enlace con `?via=` también se rechaza** (Historia 23.6): es la Marca de difusión, la de un
+visitante que comparte con un botón del sitio, nunca la de una cuenta propia, y sus visitas
+contarían como difusión.
 
 Un rechazo de lo dicho —red ajena, formato desconocido, ruta no publicada, enlace marcado para
-otra red, fecha futura, un Corpus o un registro ilegibles— sale con código 1; la forma de la
+otra red, enlace con `?via=`, fecha futura, un Corpus o un registro ilegibles— sale con código 1; la forma de la
 invocación —bandera mal escrita o repetida, argumentos de menos o de más, `--fecha` sin forma
 de jornada, `--nota` vacía—, con 2. En ninguno de los dos casos se escribe nada.
 
@@ -375,6 +378,7 @@ La misma orden anota los enlaces hacia el sitio desde fuera (Historia 21.4), par
 npm run canal -- senal https://www.tiktok.com/@sabiduriabolsillo / --tipo propia     # la bio, hoy
 npm run canal -- senal https://linktr.ee/sabiduriadebolsillo /?de=instagram --tipo propia --fecha 2026-10-08
 npm run canal -- senal https://blog.ejemplo.org/resena /cita/<slug>/ --tipo ajena --nota "reseña"
+npm run canal -- senal https://foro.ejemplo.org/hilo /cita/<slug>/?via=whatsapp --tipo ajena   # compartido: true
 npm run canal -- senal https://blog.ejemplo.org/resena /cita/<slug>/ --tipo ajena --retira 2026-10-09
 ```
 
@@ -383,12 +387,17 @@ Linktree, el campo web de Facebook—, **ajena** si lo puso un tercero. El orige
 `http(s)` pública que no sea del dominio propio ni de ningún subdominio suyo, y se guarda tal
 cual se tecleó. El destino se recorta y se juzga como la ruta de `anotar` —`rutasPublicadas`,
 sin `?…` ni `#…`, ruta del censo— y lleva `marcado: true` solo si su cadena de consulta traía
-`?de=<red>`. `--fecha` y `--nota` funcionan como en `anotar`, salvo que la fecha **puede ser
-anterior al canal**: una bio o un enlace ajeno pueden existir de antes.
+`?de=<red>`. **`?via=` en el destino** (Historia 23.6) se rechaza en una **propia** —es la marca
+de un visitante, no la de una cuenta—, y en una **ajena** se coteja con la regla de `?de=` contra
+los destinos de compartir (`DESTINOS_VALIDOS`): uno del conjunto, y uno solo (el mismo dos veces
+vale); entonces la entrada lleva `compartido: true`. `--fecha` y `--nota` funcionan como en
+`anotar`, salvo que la fecha **puede ser anterior al canal**: una bio o un enlace ajeno pueden
+existir de antes.
 
 Código 1 si lo dicho se rechaza: un origen que no es una URL http(s) absoluta, que es del
 dominio propio o de un subdominio suyo, localhost, una IP, un host sin punto o una URL con
 usuario o contraseña; un destino que el sitio no publica; una marca ?de= de una red que no
+existe, o más de una; una marca ?via= en una propia, o en una ajena de un destino que no
 existe, o más de una; una fecha futura; un --retira sin señal igual viva en esa fecha; o un
 registro que no se deja leer. Código 2 si falla la forma de la invocación: sin --tipo o con
 un tipo que no es propia ni ajena; una bandera desconocida o repetida; argumentos de menos o
@@ -408,7 +417,8 @@ reescribe.
 
 La consulta `npm run canal` da un bloque «Señales externas» que separa propias de ajenas,
 por fecha, con origen, destino y familia del destino, y señala la ajena que lleva `?de=`
-(«copia un enlace del Kit»). **La 18.1 no se cierra con señales propias, sino con la primera
+(«copia un enlace del Kit») y la que lleva `compartido` («copia un enlace compartido»; pueden ir
+los dos). **La 18.1 no se cierra con señales propias, sino con la primera
 ajena**, y la consulta la nombra con su fecha, origen y destino. Las propias de la semana del
 ciclo se anotan el día que se ponen; a los 14 días de la primera, se mira a mano en el
 informe de Enlaces de Search Console si su dominio figura como dominio de referencia y se
