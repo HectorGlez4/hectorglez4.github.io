@@ -573,12 +573,14 @@ lectura, la serie empieza la **primera jornada UTC completa** tras la llegada en
 
 **La búsqueda asentada** (Historia 23.8, FR-56, FR-8, AD-13, SM-6, SM-13): una búsqueda **cuenta
 una vez, cuando se asienta**, nunca por tecla ni por repintado. La asientan tres gestos en
-`/buscar/`: enviar el formulario (Enter), pulsar un resultado —con cualquier botón (el central, que
-lo abre en otra pestaña, da `auxclick` y no `click`), con modificador o con el teclado— y ocultarse
-la página (`visibilitychange` a `hidden`, con `pagehide` de respaldo: irse a otra página, cambiar
-de pestaña, cerrarla). Abrirlo desde el menú contextual puede no asentarla hasta que la página se
-oculte. Lo que se asienta es lo que **se ve**: el texto y los filtros de la última búsqueda que se
-pintó; lo escrito cuya búsqueda aún no se pintó no cuenta, y vaciar el campo no deja nada. Sale
+`/buscar/`: enviar el formulario (Enter), pulsar un resultado —con el botón principal o el central
+(que lo abre en otra pestaña y da `auxclick`, no `click`), con modificador o con el teclado— y
+ocultarse la página (`visibilitychange` a `hidden`, con `pagehide` de respaldo: irse a otra página,
+cambiar de pestaña, cerrarla). El botón secundario abre el menú contextual y no la asienta: abrir el
+resultado desde ese menú, o con el central en un navegador sin `auxclick`, la asienta al ocultarse
+la página. Lo que se asienta es lo que **se ve**: el texto y los filtros de la última búsqueda que
+se pintó; lo escrito cuya búsqueda aún no se pintó no cuenta, vaciar el campo no deja nada, y una
+página que no se llegó a ver —abierta de fondo y cerrada sin mirarla— no asienta nada. Sale
 como mucho **una `busqueda` por estado distinto en la carga** —el estado es el texto recortado en
 los extremos, con sus mayúsculas, y los filtros—, y la memoria de lo ya emitido vive en la propia
 isla, sin almacenamiento ni cookie, y sobrevive a la caché de atrás y adelante. Lleva el **tramo
@@ -588,7 +590,12 @@ ni el número. Con texto y sin resultados sale además, detrás, una `busqueda-s
 consulta, el único texto libre (FR-8); un filtrado sin texto que no encuentra nada va al tramo 0 y
 no la emite. **Si el índice no carga** —Pagefind no se descarga, o falla al iniciarse o al buscar—
 no se pinta nada y nada se asienta: no es una búsqueda (SM-6); la búsqueda siguiente, también Enter
-con el mismo texto, vuelve a pedirlo. El aviso de ese índice que no carga es de la Épica 27.
+con el mismo texto, vuelve a pedirlo —con otra dirección (`pagefind.js?1`), porque el navegador
+recuerda el fallo de un módulo por la suya, o desde una instancia nueva de Pagefind, que guarda el
+error de su índice en la suya—. Un trozo del índice que no llega es otra cosa: Pagefind lo anota en
+la consola y sigue, la búsqueda devuelve menos resultados o ninguno, y cuenta como tal (en el tramo
+0, con su `busqueda-sin-resultados`, si no queda ninguno). El aviso de ese índice que no carga es de
+la Épica 27.
 **Volver o recargar no cuenta otra vez**: al asentar, la isla marca su entrada del historial con un
 booleano (`asentada: true` en el objeto de estado, por `history.replaceState`, sin tocar la
 dirección ni abrir entrada); una llegada con `?q=` cuya entrada lleva la marca —una vuelta atrás

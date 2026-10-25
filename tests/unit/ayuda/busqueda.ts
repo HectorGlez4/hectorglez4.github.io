@@ -23,12 +23,15 @@ import { createContext, runInContext } from 'node:vm';
  *     sus argumentos tal como llegaron (y puede lanzar) —con argumento de dirección, además, es una
  *     violación: la marca no toca la dirección— y un `pushState` que es una violación;
  *   · Navigation Timing configurable: el tipo de la entrada, ninguna entrada o sin la API;
- *   · la visibilidad del documento, `pagehide` y `pageshow`;
+ *   · la visibilidad del documento —visible al cargar, u oculta, como una pestaña de fondo—,
+ *     `pagehide` y `pageshow`;
  *   · `__medir` espía;
  *   · un Pagefind de mentira en lugar del único `import(` del guion —la sustitución se comprueba:
- *     si el guion no lleva exactamente uno, o no pide `/pagefind/pagefind.js`, el entorno lanza—,
- *     con el total y lo que da `slice` configurables por consulta, respuestas que esperan a
- *     `responder(consulta)` si se pide, y rechazo en la importación, en `init` o en `search`.
+ *     si el guion no lleva exactamente uno, o no empieza pidiendo `/pagefind/pagefind.js`, el
+ *     entorno lanza; lo que pide de verdad, con el `?{n}` de su reintento, se apunta—, con el total
+ *     y lo que da `slice` configurables por consulta, respuestas que esperan a
+ *     `responder(consulta)` si se pide, rechazo en la importación, en `init`, en `search` o en los
+ *     datos de un resultado, y un `destroy` que se cuenta.
  *
  * `analizado()` es lo que la isla hizo **al evaluarse**, antes de ninguna escucha ni de ninguna
  * promesa: ahí no puede haber ni medición ni escritura en el historial. `rechazos()` son las
@@ -53,12 +56,14 @@ export interface OpcionesDeLaIsla {
   sinNavigationTiming?: boolean;
   /** Si `history.replaceState` lanza, como un historial que no se deja escribir. */
   historialQueLanza?: boolean;
-  /** Dónde falla el índice: la importación, `init` o `search` (que lanza). */
-  falla?: 'importacion' | 'init' | 'search';
+  /** Dónde falla el índice: la importación, `init`, `search` (que lanza) o los datos del primer resultado. */
+  falla?: 'importacion' | 'init' | 'search' | 'data';
   /** Lo que responde el índice a cada consulta. Por omisión, nada: total 0. */
   respuestas?: (consulta: string) => Respuesta;
   /** Si las respuestas de `search` esperan a `responder(consulta)`. */
   manual?: boolean;
+  /** Si la página carga oculta —una pestaña de fondo—, sin haberse visto. */
+  oculta?: boolean;
 }
 
 /** Lo que la isla pide a `__medir`, cada llamada con sus argumentos. */
@@ -148,8 +153,8 @@ function despachar(oyentes: Oyente[], tipo: string, evento: Record<string, unkno
   }
 }
 
-/** El especificador que la isla importa: el único `import(` del guion. */
-const IMPORTACION = "import('/pagefind/pagefind.js')";
+/** Cómo empieza el único `import(` del guion: el índice, con el `?{n}` del reintento concatenado detrás. */
+const IMPORTACION = "import('/pagefind/pagefind.js'";
 
 export function islaDeBusquedaEnUnSandbox(guion: string, opciones: OpcionesDeLaIsla = {}) {
   /*
@@ -160,7 +165,7 @@ export function islaDeBusquedaEnUnSandbox(guion: string, opciones: OpcionesDeLaI
   if (importaciones !== 1 || !guion.includes(IMPORTACION)) {
     throw new Error(`la isla lleva ${importaciones} «import(», y el entorno sabe sustituir exactamente uno: ${IMPORTACION}`);
   }
-  const sustituido = guion.replace(IMPORTACION, "__importar('/pagefind/pagefind.js')");
+  const sustituido = guion.replace(IMPORTACION, "__importar('/pagefind/pagefind.js'");
 
   const emitidos: Emitido[] = [];
   const llamadasAlHistorial: unknown[][] = [];
@@ -223,7 +228,11 @@ export function islaDeBusquedaEnUnSandbox(guion: string, opciones: OpcionesDeLaI
   const delDocumento: Oyente[] = [];
   const deLaVentana: Oyente[] = [];
   const documento = {
-    visibilityState: 'visible',
+    visibilityState: opciones.oculta ? 'hidden' : 'visible',
+    /** `document.hidden`, que el navegador deriva de `visibilityState`. */
+    get hidden() {
+      return this.visibilityState === 'hidden';
+    },
     querySelector: (selector: string) => {
       const elemento = porSelector.get(selector);
       if (elemento === undefined) throw new Error(`el entorno no sabe buscar «${selector}» en el documento`);
@@ -278,11 +287,16 @@ export function islaDeBusquedaEnUnSandbox(guion: string, opciones: OpcionesDeLaI
 
   // El índice de mentira. Dónde falla se puede cambiar a mitad de prueba, con `fallar`.
   let falla = opciones.falla;
+  let destrucciones = 0;
   const esperando: { consulta: string; resolver: () => void }[] = [];
   const responderA = (consulta: string) => {
     const { total, pintados = total }: Respuesta = (opciones.respuestas ?? (() => ({ total: 0 })))(consulta);
     const todos = Array.from({ length: total }, (_, i) => ({
-      data: async () => ({ url: `/cita/${encodeURIComponent(consulta)}-${i}.html`, meta: { title: `${consulta} ${i}`, tipo: 'cita' } }),
+      data: async () => {
+        // Un fragmento que no llega: el índice y la búsqueda corrieron, los datos de un resultado no.
+        if (falla === 'data' && i === 0) throw new Error('los datos de un resultado no llegan');
+        return { url: `/cita/${encodeURIComponent(consulta)}-${i}.html`, meta: { title: `${consulta} ${i}`, tipo: 'cita' } };
+      },
     }));
     // El total es el largo; lo que se pinta sale de `slice`, que puede dar menos.
     const results = Object.assign([...todos], {
@@ -298,6 +312,9 @@ export function islaDeBusquedaEnUnSandbox(guion: string, opciones: OpcionesDeLaI
       if (falla === 'search') throw new Error('la búsqueda falla');
       if (!opciones.manual) return Promise.resolve(responderA(consulta));
       return new Promise((resolver) => esperando.push({ consulta, resolver: () => resolver(responderA(consulta)) }));
+    },
+    destroy: async () => {
+      destrucciones++;
     },
   };
   const importar = (especificador: string) => {
@@ -379,8 +396,10 @@ export function islaDeBusquedaEnUnSandbox(guion: string, opciones: OpcionesDeLaI
     violaciones: () => [...violaciones],
     /** Las promesas rechazadas sin manejar desde que se abrió el entorno. */
     rechazos: () => [...rechazos],
-    /** Lo que la isla pidió importar. */
+    /** Lo que la isla pidió importar, con el `?{n}` de cada reintento. */
     importaciones: () => [...pedidas],
+    /** Cuántas veces la isla destruyó el índice. */
+    destrucciones: () => destrucciones,
     /** Los resultados pintados: su título, en orden. */
     pintados: () => lista.hijos.map((li) => li.hijos[0].hijos.map((span) => span.textContent).join(' · ')),
     /** El valor del campo. */
@@ -415,12 +434,18 @@ export function islaDeBusquedaEnUnSandbox(guion: string, opciones: OpcionesDeLaI
      * clic sube del `<span>` al `<a>`, al `<li>`, a la lista, al documento y a la ventana, como en el
      * navegador. Devuelve el evento y cuántas llamadas a `__medir` había cuando llegó a la ventana,
      * que es donde escucha el fichero de medición. Con `tipo` `auxclick` es el botón central o el
-     * secundario, que en el navegador **no** dan `click`.
+     * secundario, que en el navegador **no** dan `click`. Con `en` `fila` o `lista`, el clic cae en
+     * el `<li>` o en la propia lista, fuera de todo enlace.
      */
-    pulsarResultado: (indice = 0, gesto: Record<string, unknown> = {}, tipo: 'click' | 'auxclick' = 'click') => {
+    pulsarResultado: (
+      indice = 0,
+      gesto: Record<string, unknown> = {},
+      tipo: 'click' | 'auxclick' = 'click',
+      en: 'enlace' | 'fila' | 'lista' = 'enlace',
+    ) => {
       const li = lista.hijos[indice];
       if (!li) throw new Error(`no hay resultado ${indice} que pulsar`);
-      const objetivo = li.hijos[0].hijos[0];
+      const objetivo = en === 'lista' ? lista : en === 'fila' ? li : li.hijos[0].hijos[0];
       const clic = evento(tipo, { target: objetivo, button: tipo === 'click' ? 0 : 1, ...gesto });
       for (let nodo: Elemento | null = objetivo; nodo; nodo = nodo.padre) despachar(nodo.oyentes, tipo, clic);
       despachar(delDocumento, tipo, clic);

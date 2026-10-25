@@ -2196,6 +2196,29 @@ describe('Historia 23.1 — los guiones en línea se dejan analizar, y el arranq
  * desde sus módulos y se comprueban contra el fichero, que sí lee y sí escribe: si dejaran de verlo
  * ahí, todo lo demás pasaría en vacío.
  */
+/**
+ * Los ficheros que descarga cada entrada de la lista cerrada, con lo que arrancan, por entrada — los
+ * leen las pruebas de las Historias 23.6 y 23.8 sobre el sitio medido.
+ */
+async function ficherosDescargados(): Promise<Map<string, Map<string, string>>> {
+  const proyecto = await sitioMedido();
+  const dist = join(proyecto, 'dist');
+  const porEntrada = new Map<string, Map<string, string>>();
+  for (const html of paginasDe(proyecto).values()) {
+    for (const especificador of guionesExternosDe(html)) {
+      const entrada = guionExternoDe(especificador);
+      if (entrada === undefined) continue; // lo ajeno ya lo juzga la prueba de la lista cerrada
+      const { ficheros } = descargaDeLaEntrada(dist, especificador.replace(/[?#].*$/, ''), entrada.arranca ?? [], (f) =>
+        readFileSync(f),
+      );
+      const deLaEntrada = porEntrada.get(entrada.id) ?? new Map<string, string>();
+      for (const fichero of ficheros) deLaEntrada.set(fichero, readFileSync(join(dist, fichero), 'utf8'));
+      porEntrada.set(entrada.id, deLaEntrada);
+    }
+  }
+  return porEntrada;
+}
+
 describe('Historia 23.6 — solo el fichero lee y quita las marcas, en `dist/`', () => {
   const NOMBRES = [PARAMETRO_DE_ORIGEN, PARAMETRO_DE_DIFUSION];
   /**
@@ -2227,26 +2250,6 @@ describe('Historia 23.6 — solo el fichero lee y quita las marcas, en `dist/`',
    */
   const ESCRIBE_EL_ESTADO = /\bhistory\s*\.\s*replaceState\s*\(/g;
   const sinEscribirElEstado = (guion: string) => guion.replace(ESCRIBE_EL_ESTADO, '');
-
-  /** Los ficheros que descarga cada entrada de la lista cerrada, con lo que arrancan, por entrada. */
-  async function ficherosDescargados(): Promise<Map<string, Map<string, string>>> {
-    const proyecto = await sitioMedido();
-    const dist = join(proyecto, 'dist');
-    const porEntrada = new Map<string, Map<string, string>>();
-    for (const html of paginasDe(proyecto).values()) {
-      for (const especificador of guionesExternosDe(html)) {
-        const entrada = guionExternoDe(especificador);
-        if (entrada === undefined) continue; // lo ajeno ya lo juzga la prueba de la lista cerrada
-        const { ficheros } = descargaDeLaEntrada(dist, especificador.replace(/[?#].*$/, ''), entrada.arranca ?? [], (f) =>
-          readFileSync(f),
-        );
-        const deLaEntrada = porEntrada.get(entrada.id) ?? new Map<string, string>();
-        for (const fichero of ficheros) deLaEntrada.set(fichero, readFileSync(join(dist, fichero), 'utf8'));
-        porEntrada.set(entrada.id, deLaEntrada);
-      }
-    }
-    return porEntrada;
-  }
 
   it('los detectores ven el fichero, que lee las marcas y la dirección y escribe en el historial', () => {
     const fichero = guionDeMedicion(ENDPOINT);
@@ -3035,7 +3038,7 @@ describe('Historia 23.8 — una búsqueda cuenta una vez, cuando se asienta', ()
       expect(entreComillas('0').test('const n = "0";')).toBe(true);
     }, 240_000);
 
-    it('solo la isla de `/buscar/` lleva los nombres de la `busqueda` y de la `busqueda-sin-resultados` en un guion en línea', async () => {
+    it('solo la isla de `/buscar/` lleva los nombres de la `busqueda` y de la `busqueda-sin-resultados`: ni otro guion en línea ni lo que se descarga', async () => {
       // El fichero envía cada `busqueda` que recibe, venga de la ruta que venga: la regla de una por
       // estado y carga solo se sostiene si nadie más la pide. Aquí, en todo el sitio construido.
       const nombres = [BUSQUEDA, SIN_RESULTADOS].flatMap((nombre) => [`"${nombre}"`, `'${nombre}'`, `\`${nombre}\``]);
@@ -3046,6 +3049,22 @@ describe('Historia 23.8 — una búsqueda cuenta una vez, cuando se asienta', ()
         }
       }
       expect(llevan).toEqual(['/buscar/']);
+      // Ni lo que se descarga: la Imagen y Pagefind tampoco. El fichero de medición sí los nombra —su
+      // tabla de eventos—, y es el que los envía, no el que los pide.
+      const descargados = await ficherosDescargados();
+      expect(descargados.get('imagen')?.size, 'la Imagen de `islas/` se descarga en este sitio').toBeGreaterThan(0);
+      expect(descargados.get('pagefind')?.size, 'Pagefind y su worker').toBeGreaterThanOrEqual(2);
+      const descargadosQueLosNombran: string[] = [];
+      for (const [id, ficheros] of descargados) {
+        if (id === 'medicion') continue;
+        for (const [fichero, codigo] of ficheros) {
+          if (nombres.some((nombre) => codigo.includes(nombre))) descargadosQueLosNombran.push(fichero);
+        }
+      }
+      expect(descargadosQueLosNombran).toEqual([]);
+      // El detector ve el fichero de medición, que sí los nombra.
+      const [delFichero] = [...(descargados.get('medicion')?.values() ?? [])];
+      expect(nombres.some((nombre) => delFichero.includes(nombre))).toBe(true);
     }, 240_000);
 
     it('al analizarse: ni `__medir` ni escritura del historial, tampoco al llegar con la consulta', async () => {
@@ -3200,17 +3219,28 @@ describe('Historia 23.8 — una búsqueda cuenta una vez, cuando se asienta', ()
         entorno.pulsarResultado(0, gesto);
         expect(entorno.emitidos(), JSON.stringify(gesto)).toEqual([VIENTO]);
       }
-      // El botón central —abrir en otra pestaña— y el secundario no dan `click` en el navegador, sino
-      // `auxclick`: también asientan, y el fichero no ve ninguna salida (no escucha `auxclick`).
-      for (const boton of [1, 2]) {
+      // El botón central —abrir en otra pestaña— no da `click` en el navegador, sino `auxclick`:
+      // también asienta, y el fichero no ve ninguna salida (no escucha `auxclick`).
+      {
         const entorno = await isla();
         await entorno.teclear('viento');
-        const { clic, alLlegarALaVentana } = entorno.pulsarResultado(0, { button: boton }, 'auxclick');
-        expect(entorno.emitidos(), `auxclick ${boton}`).toEqual([VIENTO]);
-        expect(alLlegarALaVentana, `auxclick ${boton}`).toBe(1);
-        expect(clic.defaultPrevented, `auxclick ${boton}`).toBe(false);
+        const { clic, alLlegarALaVentana } = entorno.pulsarResultado(0, { button: 1 }, 'auxclick');
+        expect(entorno.emitidos(), 'auxclick central').toEqual([VIENTO]);
+        expect(alLlegarALaVentana, 'auxclick central').toBe(1);
+        expect(clic.defaultPrevented, 'auxclick central').toBe(false);
         entorno.pulsarResultado(1, {});
-        expect(entorno.emitidos(), `auxclick ${boton}, y luego clic`).toEqual([VIENTO]);
+        expect(entorno.emitidos(), 'auxclick central, y luego clic').toEqual([VIENTO]);
+      }
+      // El secundario abre el menú contextual —copiar el enlace, inspeccionar—, que no es pulsar el
+      // resultado: su `auxclick` no asienta, y lo que se ve se asienta después, una vez.
+      {
+        const entorno = await isla();
+        await entorno.teclear('viento');
+        const { clic } = entorno.pulsarResultado(0, { button: 2 }, 'auxclick');
+        expect(entorno.emitidos(), 'auxclick secundario').toEqual([]);
+        expect(clic.defaultPrevented, 'auxclick secundario').toBe(false);
+        entorno.pulsarResultado(0, {});
+        expect(entorno.emitidos(), 'auxclick secundario, y luego clic').toEqual([VIENTO]);
       }
       // Escucha en la lista, nunca en la ventana ni en el documento.
       const entorno = await isla();
@@ -3219,6 +3249,54 @@ describe('Historia 23.8 — una búsqueda cuenta una vez, cuando se asienta', ()
       expect(entorno.escuchas().documento).not.toContain('auxclick');
       expect(entorno.escuchas().ventana).not.toContain('click');
       expect(entorno.escuchas().documento).not.toContain('click');
+    }, 240_000);
+
+    it('un clic en la lista fuera de todo enlace —en la fila o en la propia lista— no asienta', async () => {
+      for (const en of ['fila', 'lista'] as const) {
+        for (const tipo of ['click', 'auxclick'] as const) {
+          const entorno = await isla();
+          await entorno.teclear('viento');
+          entorno.pulsarResultado(0, tipo === 'auxclick' ? { button: 1 } : {}, tipo, en);
+          expect(entorno.emitidos(), `${tipo} en la ${en}`).toEqual([]);
+          expect(entorno.historial(), `${tipo} en la ${en}`).toEqual([]);
+          entorno.ocultar();
+          expect(entorno.emitidos(), `${tipo} en la ${en}, y luego ocultarse`).toEqual([VIENTO]);
+        }
+      }
+    }, 240_000);
+
+    it('volver a verse no asienta: lo pintado con la página oculta se asienta al ocultarse otra vez', async () => {
+      const entorno = await isla({ manual: true });
+      entorno.escribir('viento');
+      entorno.avanzar(150);
+      await entorno.vaciar();
+      // Se va antes de que se pinte: no hay nada que asentar.
+      entorno.ocultar();
+      expect(entorno.emitidos()).toEqual([]);
+      // La respuesta llega con la página oculta, y vuelve a verse sin ningún gesto: nada.
+      await entorno.responder('viento');
+      expect(entorno.pintados()).toHaveLength(3);
+      entorno.mostrar();
+      expect(entorno.emitidos()).toEqual([]);
+      expect(entorno.historial()).toEqual([]);
+      entorno.ocultar();
+      expect(entorno.emitidos()).toEqual([VIENTO]);
+    }, 240_000);
+
+    it('una página que nunca se vio —abierta de fondo con `?q=` y cerrada sin mirarla— no asienta; vista una vez, sí', async () => {
+      const cerrada = await isla({ busqueda: '?q=viento', oculta: true });
+      expect(cerrada.pintados()).toHaveLength(3);
+      cerrada.pagehide();
+      expect(cerrada.emitidos()).toEqual([]);
+      expect(cerrada.historial()).toEqual([]);
+
+      const mirada = await isla({ busqueda: '?q=zzz', oculta: true });
+      mirada.pagehide();
+      expect(mirada.emitidos()).toEqual([]);
+      mirada.mostrar();
+      expect(mirada.emitidos()).toEqual([]);
+      mirada.ocultar();
+      expect(mirada.emitidos()).toEqual([[BUSQUEDA, '0', NINGUNO], [SIN_RESULTADOS, 'zzz']]);
     }, 240_000);
 
     it('ocultarse asienta el estado que se ve —no el texto cuya búsqueda aún no se pintó—, con `pagehide` de respaldo; sin estado, nada', async () => {
@@ -3258,6 +3336,23 @@ describe('Historia 23.8 — una búsqueda cuenta una vez, cuando se asienta', ()
       expect(entorno.emitidos()).toEqual([[BUSQUEDA, '10-29', NINGUNO]]);
     }, 240_000);
 
+    it('los datos de un resultado que no llegan: ni se pinta ni se asienta, al enviar ni al ocultarse, y ningún rechazo sin manejar', async () => {
+      // Sin resultados no hay datos que pedir: «zzz» sí corre, y es una búsqueda sin resultados de verdad.
+      const entorno = await isla({ falla: 'data' });
+      await entorno.teclear('viento');
+      await entorno.enviar();
+      entorno.ocultar();
+      entorno.pagehide();
+      await entorno.vaciar();
+      expect(entorno.pintados()).toEqual([]);
+      expect(entorno.emitidos()).toEqual([]);
+      expect(entorno.historial()).toEqual([]);
+      entorno.mostrar();
+      await entorno.teclear('zzz');
+      await entorno.enviar();
+      expect(entorno.emitidos()).toEqual([[BUSQUEDA, '0', NINGUNO], [SIN_RESULTADOS, 'zzz']]);
+    }, 240_000);
+
     it.each(['importacion', 'init', 'search'] as const)(
       'índice que falla en %s: ni `busqueda` ni `busqueda-sin-resultados`, al enviar ni al ocultarse, y ningún rechazo sin manejar',
       async (falla) => {
@@ -3295,11 +3390,39 @@ describe('Historia 23.8 — una búsqueda cuenta una vez, cuando se asienta', ()
         expect(entorno.pintados()).toHaveLength(3);
         await entorno.enviar();
         expect(entorno.emitidos()).toEqual([VIENTO]);
+        // Cada reintento pide otra dirección: el navegador recuerda el fallo de un módulo por la suya,
+        // y pedir la misma le devolvería el mismo rechazo sin volver a pedirlo.
+        const pedidas = entorno.importaciones();
+        expect(pedidas[0]).toBe('/pagefind/pagefind.js');
+        expect(new Set(pedidas).size, pedidas.join(', ')).toBe(pedidas.length);
+        for (const pedida of pedidas) expect(pedida).toMatch(/^\/pagefind\/pagefind\.js(\?[1-9][0-9]*)?$/);
+        expect(entorno.destrucciones()).toBe(0);
       },
       240_000,
     );
 
-    it.each(['importacion', 'init', 'search'] as const)(
+    it.each(['search', 'data'] as const)(
+      'índice que falla en %s: la isla destruye la instancia de Pagefind, y la búsqueda siguiente pinta y asienta',
+      async (falla) => {
+        const entorno = await isla();
+        await entorno.teclear('viento');
+        expect(entorno.destrucciones()).toBe(0);
+        entorno.fallar(falla);
+        await entorno.teclear('lluvia');
+        // Pagefind guarda el error de su índice en su instancia: sin destruirla, lo repetiría.
+        expect(entorno.destrucciones()).toBe(1);
+        entorno.fallar();
+        await entorno.teclear('lluvia');
+        expect(entorno.pintados()).toHaveLength(3);
+        await entorno.enviar();
+        expect(entorno.emitidos()).toEqual([[BUSQUEDA, '1-9', NINGUNO]]);
+        expect(entorno.destrucciones()).toBe(1);
+        expect(entorno.importaciones()).toEqual(['/pagefind/pagefind.js']);
+      },
+      240_000,
+    );
+
+    it.each(['importacion', 'init', 'search', 'data'] as const)(
       'tras un fallo en %s, Enter con el mismo texto vuelve a buscar, y asienta si ya corre',
       async (falla) => {
         const entorno = await isla({ falla });

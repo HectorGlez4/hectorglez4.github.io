@@ -35,10 +35,13 @@
  *     (`results.length`, no los pintados); vaciar el campo lo limpia. Lo asientan tres gestos:
  *     enviar el formulario —espera a que se pinte la búsqueda del texto enviado, y asienta solo si
  *     sigue siendo la que se ve—, pulsar un enlace de la lista de resultados —`click`, también con
- *     modificador o con el teclado, y `auxclick`, el botón central que lo abre en otra pestaña sin
- *     dar `click`; escuchados en la lista, que corre antes que la escucha de salida de la ventana,
- *     sin quedarse con el clic ni parar su propagación— y ocultarse la página (`visibilitychange` a `hidden`, con `pagehide` de
- *     respaldo). Qué se emite ante ese estado lo decide `asentamientoDeBusqueda`, de
+ *     modificador o con el teclado, y el `auxclick` del botón central (`button` 1), que lo abre en
+ *     otra pestaña sin dar `click`; el del secundario abre el menú contextual, que no es pulsar, y
+ *     no asienta. Escuchados en la lista, que corre antes que la escucha de salida de la ventana,
+ *     sin quedarse con el clic ni parar su propagación— y ocultarse la página (`visibilitychange` a
+ *     `hidden`, con `pagehide` de respaldo). Una página que no se ha visto nunca —abierta en una
+ *     pestaña de fondo y cerrada sin mirarla, o prerenderizada y descartada— no asienta nada: lo que
+ *     se asienta es lo que se ve. Qué se emite ante ese estado lo decide `asentamientoDeBusqueda`, de
  *     `src/lib/medicion.ts`, que viaja aquí por su texto con sus constantes compuestas desde el
  *     vocabulario (`ASENTAMIENTO_DE_BUSQUEDA`): la `busqueda` con el tramo del total y los
  *     filtros, y, con texto y sin resultados, la `busqueda-sin-resultados` con la consulta. Esta
@@ -54,9 +57,14 @@
  *   · La búsqueda que no corre —el índice no carga, o `init`, `search` o los datos de un
  *     resultado fallan— no pinta, no cambia el estado que se ve y no deja ninguna promesa rechazada
  *     sin manejar; no se asienta. La siguiente vuelve a pedir el índice, también con el mismo texto
- *     (Enter otra vez). Solo esas llamadas al índice van en el `try`: un fallo al pintar es un
- *     error del guion y tiene que verse. La respuesta de una búsqueda ya superada por otra no se
- *     pinta ni pasa a ser la que se ve.
+ *     (Enter otra vez), y lo pide de verdad: tras una importación fallida, con `?{n}` en la
+ *     dirección, porque el navegador recuerda el fallo de un módulo por su URL y devolvería el mismo
+ *     rechazo sin volver a pedirlo (el precedente es el reintento de la Imagen de Cita); tras un
+ *     fallo de Pagefind, con `destroy()`, porque Pagefind guarda el error de su índice en su
+ *     instancia y la siguiente búsqueda lo repetiría hasta recargar —destruida, la siguiente crea
+ *     otra—. Solo esas llamadas al índice van en el `try`: un fallo al pintar es un error del guion
+ *     y tiene que verse. La respuesta de una búsqueda ya superada por otra no se pinta ni pasa a ser
+ *     la que se ve.
  *   · La consulta de la dirección se lee del campo después de escribirla en él: un campo de
  *     búsqueda quita los saltos de línea, y la clave de la llegada tiene que ser la del texto que
  *     Enter buscará.
@@ -109,20 +117,25 @@ if (!campo) return;
 const A = (${String(asentamientoDeBusqueda)})(ASENTAMIENTO);
 const hechos = [];
 let indice = null;
+let fallos = 0;
 let ultima = '';
 let pendiente = Promise.resolve();
 let turno = 0;
 let visto = null;
+let vista = !document.hidden;
 let temporizador;
 
 function cargar() {
   if (!indice) {
-    indice = import('/pagefind/pagefind.js')
+    indice = import('/pagefind/pagefind.js' + (fallos ? '?' + fallos : ''))
       .then(async (pf) => {
         await pf.init();
         return pf;
       })
-      .catch(() => (indice = null));
+      .catch(() => {
+        fallos++;
+        return (indice = null);
+      });
   }
   return indice;
 }
@@ -197,13 +210,14 @@ function buscar(consulta) {
   }
 
   return (pendiente = (async () => {
-    let respuesta, resultados;
+    let pf, respuesta, resultados;
     try {
-      const pf = await cargar();
+      pf = await cargar();
       respuesta = await pf.search(consulta);
       resultados = await Promise.all(respuesta.results.slice(0, 30).map((r) => r.data()));
     } catch (e) {
       if (mio === turno) ultima = null;
+      pf?.destroy?.().catch(() => {});
       return;
     }
     if (mio !== turno) return;
@@ -213,6 +227,7 @@ function buscar(consulta) {
 }
 
 function asentar() {
+  if (!vista) return;
   const r = A.emisiones(visto, hechos);
   if (!r) return;
   hechos.push(r.clave);
@@ -239,11 +254,12 @@ document.querySelector('.formulario').addEventListener('submit', (e) => {
 
 for (const tipo of ['click', 'auxclick']) {
   lista.addEventListener(tipo, (e) => {
-    if (e.target.closest('a')) asentar();
+    if ((tipo === 'click' || e.button === 1) && e.target.closest('a')) asentar();
   });
 }
 document.addEventListener('visibilitychange', () => {
-  if (document.visibilityState === 'hidden') asentar();
+  if (document.hidden) asentar();
+  else vista = true;
 });
 addEventListener('pagehide', asentar);
 

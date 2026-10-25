@@ -1519,7 +1519,7 @@ test.describe('Historia 23.8 — una búsqueda cuenta una vez, cuando se asienta
     ]);
   });
 
-  test('el botón central —abrir en otra pestaña— da `auxclick` y no `click`: asienta la búsqueda y no hay salida', async ({
+  test('el botón central —abrir en otra pestaña— da `auxclick` y no `click`: asienta la búsqueda y no hay salida; el secundario no asienta', async ({
     page,
     context,
   }) => {
@@ -1529,6 +1529,11 @@ test.describe('Historia 23.8 — una búsqueda cuenta una vez, cuando se asienta
     await esperarAlFichero(page);
     await buscarEn(page, CON_RESULTADOS, true);
     const tramo = await tramoDeLoQueSeVe(page);
+    // El secundario abre el menú contextual —copiar el enlace—, que no es pulsar: no asienta.
+    await page.locator(RESULTADOS).first().click({ button: 'right' });
+    await page.keyboard.press('Escape');
+    await esperar(300);
+    expect(await balizasDe(page), 'el botón secundario asentó la búsqueda').toEqual([]);
     await page.locator(RESULTADOS).first().click({ button: 'middle' });
     await expect.poll(async () => (await balizasDe(page)).length).toBe(1);
     await esperar(300);
@@ -1590,10 +1595,14 @@ test.describe('Historia 23.8 — una búsqueda cuenta una vez, cuando se asienta
     expect(busquedas()[0]).toMatchObject({ ruta: RUTA_BUSCAR, tramo, filtros: NINGUNO, consulta: null });
   });
 
+  /** Las peticiones del índice, con el `?{n}` de cada reintento de la isla. */
+  const esPagefind = (url: URL) => url.pathname === '/pagefind/pagefind.js';
+
   test('con `pagefind.js` abortado no llega nada: ni al enviar ni al irse, y la página no da error', async ({ page }) => {
     const errores: string[] = [];
     page.on('pageerror', (error) => errores.push(error.message));
-    await page.route('**/pagefind/pagefind.js', (ruta) => ruta.abort());
+    // Abortado siempre, también los reintentos, que piden otra dirección.
+    await page.route(esPagefind, (ruta) => ruta.abort());
     await apuntarBalizas(page);
     await page.goto(`${SITIO}${RUTA_BUSCAR}`);
     await esperarAlFichero(page);
@@ -1612,6 +1621,41 @@ test.describe('Historia 23.8 — una búsqueda cuenta una vez, cuando se asienta
     expect(busquedas()).toEqual([]);
     expect(llegadas(EVENTOS.busquedaSinResultados)).toEqual([]);
     expect(errores, 'la búsqueda que no corre dejó un error en la página').toEqual([]);
+  });
+
+  test('con `pagefind.js` caído un rato, Enter con el mismo texto lo vuelve a pedir con otra dirección, pinta y asienta', async ({
+    page,
+  }) => {
+    const errores: string[] = [];
+    page.on('pageerror', (error) => errores.push(error.message));
+    const pedidas: string[] = [];
+    let caido = true;
+    await page.route(esPagefind, (ruta) => {
+      const url = new URL(ruta.request().url());
+      pedidas.push(url.pathname + url.search);
+      return caido ? ruta.abort() : ruta.continue();
+    });
+    await apuntarBalizas(page);
+    await page.goto(`${SITIO}${RUTA_BUSCAR}`);
+    await esperarAlFichero(page);
+    // Enfocar y la pausa del tecleo lo piden, y fallan: nada pintado, nada asentado.
+    await campo(page).fill(CON_RESULTADOS);
+    await expect.poll(() => pedidas.length).toBeGreaterThan(0);
+    await esperar(400);
+    await expect(page.locator(RESULTADOS)).toHaveCount(0);
+    const fallidas = pedidas.length;
+    caido = false;
+    // El navegador recuerda el fallo de un módulo por su dirección: el reintento pide otra.
+    await campo(page).press('Enter');
+    await expect(page.locator(RESULTADOS).first()).toBeVisible();
+    const tramo = await tramoDeLoQueSeVe(page);
+    await expect.poll(async () => (await balizasDe(page)).length).toBe(1);
+    expect(await balizasDe(page)).toEqual([{ evento: EVENTOS.busqueda, ruta: RUTA_BUSCAR, tramo, filtros: NINGUNO }]);
+    expect(pedidas[0]).toBe('/pagefind/pagefind.js');
+    expect(pedidas).toHaveLength(fallidas + 1);
+    expect(new Set(pedidas).size, pedidas.join(', ')).toBe(pedidas.length);
+    expect(pedidas.at(-1)).toBe(`/pagefind/pagefind.js?${fallidas}`);
+    expect(errores).toEqual([]);
   });
 
   test('texto, resultado, atrás, atrás —sin la caché—: una sola `busqueda`, y la vuelta llega marcada como `back_forward`', async ({

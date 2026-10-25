@@ -180,14 +180,15 @@ export const META_AUTORES_DE_OTRA_TRADICION: number | undefined = undefined;
  * nuevo deja unos 400 de margen, suficiente para no ir justo y poco para que un
  * crecimiento futuro pase inadvertido.
  *
- * Medido en la Historia 23.8, sin moverlo: `/buscar/` lleva **6.222 bytes** en línea con la
- * medición puesta (434 libres; 3.535 antes), porque su isla carga ahora la búsqueda asentada —el
- * estado que se ve, sus tres disparadores (con el `auxclick` del botón central), la memoria de la
- * carga, la marca del historial y el reintento tras un índice que falla— y lleva dentro, por su
- * texto, la parte pura que decide qué emitir (`asentamientoDeBusqueda`) con sus constantes del
- * vocabulario. Es la superficie más justa del sitio: la Página de Cita con Imagen sigue en 5.630
- * (1.026 libres). Lo que la Épica 27 le añada (los filtros) entra en ese hueco o sube el tope en el
- * mismo diff; compactar el texto de la parte pura al construir es la primera reserva.
+ * Medido en la Historia 23.8, sin moverlo: `/buscar/` lleva **6.441 bytes** en línea con la
+ * medición puesta (215 libres; 3.535 antes), porque su isla carga ahora la búsqueda asentada —el
+ * estado que se ve, sus tres disparadores (con el `auxclick` del botón central), la página que nunca
+ * se vio, la memoria de la carga, la marca del historial y el reintento de verdad tras un índice que
+ * falla (`?{n}` y `destroy()`)— y lleva dentro, por su texto, la parte pura que decide qué emitir
+ * (`asentamientoDeBusqueda`) con sus constantes del vocabulario. Es la superficie más justa del
+ * sitio: la Página de Cita con Imagen sigue en 5.630 (1.026 libres). Lo que la Épica 27 le añada
+ * (los filtros, «Mostrar 30 más», el aviso del índice) no cabe en ese hueco: sube el tope en el
+ * mismo diff, con la medida, o compacta antes el texto de la parte pura al construir.
  */
 export const MAX_BYTES_DE_GUION = 6656;
 
