@@ -643,7 +643,15 @@ describe('Historia 23.10 — leer, la secuencia de la lectura', () => {
    * toca, y una llamada así rompería la prueba.
    */
   function mundoDeLectura(
-    opciones: { sesion?: boolean | 'ilegible'; fallan?: (sql: string) => boolean; informacion?: string; corpusRoto?: boolean } = {},
+    opciones: {
+      sesion?: boolean | 'ilegible';
+      fallan?: (sql: string) => boolean;
+      /** Las consultas en las que `wrangler` se corta —su tope, más salida de la que cabe—: lanza. */
+      lanzan?: (sql: string) => boolean;
+      informacion?: string;
+      informacionLanza?: boolean;
+      corpusRoto?: boolean;
+    } = {},
   ) {
     const llamadas: string[] = [];
     const prohibido = (que: string) => () => {
@@ -659,6 +667,7 @@ describe('Historia 23.10 — leer, la secuencia de la lectura', () => {
         }
         if (argumentos.join(' ') === ARGUMENTOS_DE_INFORMACION.join(' ')) {
           llamadas.push('informacion');
+          if (opciones.informacionLanza) throw new Parada(1, 'npx no contestó en 300 s y se cortó.');
           return opciones.informacion === undefined
             ? { codigo: 0, stdout: JSON.stringify({ rows_written_24h: 900, database_size: 4_000_000 }), stderr: '' }
             : { codigo: 1, stdout: opciones.informacion, stderr: '✘ [ERROR] Authentication error [code: 10000]' };
@@ -666,6 +675,7 @@ describe('Historia 23.10 — leer, la secuencia de la lectura', () => {
         if (argumentos[0] === 'd1' && argumentos[1] === 'execute') {
           const sql = argumentos[argumentos.length - 1];
           llamadas.push(`consulta ${argumentos[3]} ${sql}`);
+          if (opciones.lanzan?.(sql)) throw new Parada(1, 'npx no contestó en 300 s y se cortó.');
           if (opciones.fallan?.(sql)) {
             return { codigo: 1, stdout: JSON.stringify({ error: { text: 'D1_ERROR: fallo de mentira' } }), stderr: '✘ [ERROR] D1_ERROR' };
           }
@@ -738,6 +748,26 @@ describe('Historia 23.10 — leer, la secuencia de la lectura', () => {
     expect(lectura.consultas.salidas.ok).toBe(false);
     if (!lectura.consultas.salidas.ok) expect(lectura.consultas.salidas.motivo).toMatch(/D1_ERROR: fallo de mentira/);
     expect(lectura.consultas.vistasYLecturas.ok).toBe(true);
+  });
+
+  it('un wrangler que se corta en una consulta no se lleva lo leído: esa va a «Sin leer» y las demás se leen', async () => {
+    const { efectos, llamadas, corpus } = mundoDeLectura({ lanzan: (sql) => sql === SENTENCIAS.salidas, informacionLanza: true });
+    const lectura = await leer(efectos, corpus);
+    expect(lectura.consultas.salidas).toEqual({ ok: false, motivo: 'npx no contestó en 300 s y se cortó.' });
+    for (const c of CONSULTAS_DE_LA_LECTURA.filter((c) => c !== 'salidas')) expect(lectura.consultas[c].ok, c).toBe(true);
+    expect(lectura.cuota).toEqual({
+      escritas: { ok: false, motivo: 'npx no contestó en 300 s y se cortó.' },
+      tamaño: { ok: false, motivo: 'npx no contestó en 300 s y se cortó.' },
+    });
+    // Siguió con las consultas de después de la que se cortó.
+    expect(llamadas.filter((l) => l.startsWith('consulta '))).toHaveLength(CONSULTAS_DE_LA_LECTURA.length);
+  });
+
+  it('si wrangler se corta en todo, no leyó nada: 1', async () => {
+    const { efectos, corpus } = mundoDeLectura({ lanzan: () => true, informacionLanza: true });
+    const parada = await paradaDe(leer(efectos, corpus).then(() => undefined));
+    expect(parada?.codigo).toBe(1);
+    expect(parada?.message).toContain('las acciones: npx no contestó en 300 s y se cortó.');
   });
 
   it('con solo d1 info legible, lee: sale con 0', async () => {

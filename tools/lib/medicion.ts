@@ -258,8 +258,18 @@ export function argumentosDeMedicion(argumentos: readonly string[]): Invocacion 
   if (primero === undefined) return { ok: true, subcomando: null };
   if (!(SUBCOMANDOS as readonly string[]).includes(primero)) {
     if (primero.startsWith('-')) {
-      const motivos = motivosDeArgumentosNoReconocidos([...argumentos], { solas: [], conValor: [] });
-      return { ok: false, motivo: `${motivos.join(' ')} La lectura no lleva opciones. ${USO_DE_MEDICION}` };
+      // Una bandera delante de un subcomando no es la lectura con opciones: es el subcomando mal
+      // escrito, y se dice así.
+      const subcomando = resto.find((argumento) => (SUBCOMANDOS as readonly string[]).includes(argumento));
+      const motivos = motivosDeArgumentosNoReconocidos(
+        subcomando === undefined ? [...argumentos] : argumentos.filter((a) => a !== subcomando),
+        { solas: [], conValor: [] },
+      );
+      const despues =
+        subcomando === undefined
+          ? 'La lectura no lleva opciones.'
+          : `El subcomando va primero, y sin opciones: npm run medicion -- ${subcomando}.`;
+      return { ok: false, motivo: `${motivos.join(' ')} ${despues} ${USO_DE_MEDICION}` };
     }
     return { ok: false, motivo: `«${primero}» no es un subcomando de esta orden. ${USO_DE_MEDICION}` };
   }
@@ -1778,13 +1788,28 @@ export async function leer<C>(efectos: Efectos, leerCorpus: () => Promise<C>): P
   const hoy = jornadaUtc(efectos.ahora());
   const sentencias = consultasDeLaLectura(hoy);
   const consultas = {} as Record<ConsultaDeLaLectura, Filas>;
+  // Un `wrangler` que se corta —su tope de tiempo, más salida de la que cabe, un `npx` que no
+  // arranca— es una consulta que falla, y no se lleva lo ya leído: va a «Sin leer» con su motivo.
+  const mensajeDe = (error: unknown) => (error instanceof Error ? error.message : String(error));
   for (const nombre of CONSULTAS_DE_LA_LECTURA) {
-    const salida = await efectos.wrangler(argumentosDeConsulta(sentencias[nombre], 'remota'));
+    let salida: Salida;
+    try {
+      salida = await efectos.wrangler(argumentosDeConsulta(sentencias[nombre], 'remota'));
+    } catch (error) {
+      consultas[nombre] = { ok: false, motivo: mensajeDe(error) };
+      continue;
+    }
     const leido = leerConsulta(salida.stdout);
     consultas[nombre] = leido.ok ? leido : { ok: false, motivo: `${leido.motivo}${causaDe(salida)}` };
   }
-  const informacion = await efectos.wrangler(ARGUMENTOS_DE_INFORMACION);
-  const cuota = leerInformacionDeLaCuota(informacion.stdout, informacion.codigo === 0 ? '' : causaDe(informacion));
+  let cuota: CuotaLeida;
+  try {
+    const informacion = await efectos.wrangler(ARGUMENTOS_DE_INFORMACION);
+    cuota = leerInformacionDeLaCuota(informacion.stdout, informacion.codigo === 0 ? '' : causaDe(informacion));
+  } catch (error) {
+    const motivo = mensajeDe(error);
+    cuota = { escritas: { ok: false, motivo }, tamaño: { ok: false, motivo } };
+  }
 
   const leidas = CONSULTAS_DE_LA_LECTURA.filter((nombre) => consultas[nombre].ok);
   if (leidas.length === 0 && !cuota.escritas.ok && !cuota.tamaño.ok) {

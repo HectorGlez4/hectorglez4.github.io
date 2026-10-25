@@ -1,4 +1,4 @@
-import { afterAll, describe, expect, it } from 'vitest';
+import { afterAll, describe, expect, it, vi } from 'vitest';
 import { execFile } from 'node:child_process';
 import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
@@ -10,6 +10,8 @@ import {
   CORTES_DE_SERIE,
   CORTES_DE_SERIE_DECLARADOS,
   CORTES_DE_SM8,
+  MIN_LECTURAS_DE_LINEA_BASE,
+  PASADAS_QUE_ESCRIBEN_EN_PRODUCCION,
   cortesQueLlegaron,
   type CorteLlegado,
 } from '../../src/lib/umbrales.ts';
@@ -24,8 +26,11 @@ import {
   YA_NO_SE_PUBLICA,
   componerLecturaDeMedicion,
   direccionDe,
+  esJornadaReal,
+  legible,
   lineasDeLecturaDeMedicion,
   partirSerie,
+  problemasDeLaLectura,
   type JuicioPorVentanas,
   type LecturaDeMedicion,
   type OpcionesDeLaLectura,
@@ -116,7 +121,7 @@ describe('Historia 23.10 — una lectura sana', () => {
     });
     expect(l.sinLeer).toEqual([]);
     const lineas = lineasDeLecturaDeMedicion(l);
-    for (const parte of [
+    const partes = [
       'Cuota de D1',
       'Descuentos',
       'Cortes de serie',
@@ -129,9 +134,13 @@ describe('Historia 23.10 — una lectura sana', () => {
       'Búsquedas',
       'Líneas base',
       'Ventanas',
-    ]) {
+    ];
+    for (const parte of partes) {
       expect(lineas.some((linea) => linea.startsWith(parte)), parte).toBe(true);
     }
+    // En el orden de DESPLIEGUE.md §3, «Lo que informa».
+    const posiciones = partes.map((parte) => lineas.findIndex((linea) => linea.startsWith(parte)));
+    expect(posiciones).toEqual([...posiciones].sort((a, b) => a - b));
     expect(lineas.at(-1)).toBe('Consulta: no se ha escrito nada.');
     expect(lineas[0]).toContain('jornadas UTC cerradas hasta el 2026-11-11; la de hoy (2026-11-12) no entra');
   });
@@ -180,9 +189,12 @@ describe('Historia 23.10 — ausencia antes que cero', () => {
     expect(juicio.ventanas.length).toBeGreaterThan(0);
     for (const ventana of juicio.ventanas) {
       expect(ventana.tasas[0]).toEqual({ tasa: 'continuación', valor: { estado: 'sin-leer', faltan: ['salidas'] } });
-      expect(ventana.senal).toBe('no se da');
+      // Sin dirección no se puede juzgar la señal: no es «no se da».
+      expect(ventana.senal).toBe('sin dirección');
     }
     expect(texto(l)).toContain('continuación sin leer (las salidas internas), sin dirección');
+    expect(texto(l)).toContain('la señal no se puede juzgar: a una de sus dos tasas le falta dirección.');
+    expect(texto(l)).not.toContain('la señal no se da');
   });
 
   it('una tasa sin denominador lo dice, nunca 0 %', () => {
@@ -597,9 +609,15 @@ describe('Historia 23.10 — la Página de Cita, la portada y la Obra', () => {
   });
 
   it('ninguna cifra se compara con las metas en suspenso de SM-3 a SM-7', () => {
-    const informe = texto(l);
-    expect(informe).toContain('Las metas de SM-3 a SM-7 están en suspenso hasta su línea base');
-    expect(informe).not.toMatch(/(?<![\d,])(?:65|15|3|2) %|(?<![\d,])1,8(?![\d])/);
+    const lineas = lineasDeLecturaDeMedicion(l);
+    // La única línea que nombra las metas es la que dice que están en suspenso.
+    expect(lineas.filter((linea) => /meta/i.test(linea))).toEqual([
+      '  Las metas de SM-3 a SM-7 están en suspenso hasta su línea base: ninguna cifra de aquí se compara con ellas.',
+    ]);
+    // Y ninguna de sus cifras —65 %, 1,8, 3 %, 15 % y 2 %— aparece, con o sin el decimal del informe.
+    const metas = /(?<![\d,])(?:65|15|3|2)(?:,0)? %|(?<![\d,])1,8(?![\d])/;
+    expect(metas.test('SM-3: 65,0 %'), 'la expresión detecta una meta con el decimal').toBe(true);
+    expect(texto(l)).not.toMatch(metas);
   });
 });
 
@@ -816,6 +834,150 @@ describe('Historia 23.10 — las ventanas', () => {
     // La jornada de llegada no está en ninguna ventana.
     expect(leido.ventanas.some((v) => v.desde <= D2 && D2 <= v.hasta)).toBe(false);
     expect(texto(l)).toContain('frente a la serie propia de antes');
+    // La serie de antes no tiene por qué reunir el mínimo, y si no lo reúne se dice.
+    expect(leido.referenciaAcumulada).toBe(120);
+    expect(texto(l)).toContain('La serie de antes reúne 120 lecturas, por debajo del mínimo de una ventana (300)');
+  });
+
+  it('una llegada después del cierre corta el bloque en curso: ninguna ventana junta días de los dos lados', () => {
+    // La línea base se cierra el 2026-11-04; la llegada, el 2026-11-06.
+    const llegada = '2026-11-06';
+    const l = leer(partesDeVentanas(), { minimo: 300, juicios: [{ ...SM_C3, llegada, deDondeLlega: 'DE_PRUEBA' }] });
+    const [leido] = l.juicios;
+    expect(leido.referencia).toBe('linea-base');
+    expect(leido.cortadas).toEqual([{ desde: '2026-11-05', hasta: '2026-11-05', acumulado: 120, por: llegada }]);
+    expect(leido.ventanas.map((v) => [v.desde, v.hasta, v.acumulado])).toEqual([['2026-11-07', '2026-11-09', 360]]);
+    expect(leido.ventanas.some((v) => v.desde <= llegada && llegada <= v.hasta)).toBe(false);
+    expect(leido.enCurso).toEqual({ desde: '2026-11-10', acumulado: 240 });
+    expect(texto(l)).toContain(
+      '2026-11-05 – 2026-11-05 (120): cortada por el cambio del 2026-11-06 sin reunir el mínimo; no se juzga',
+    );
+  });
+
+  it('SM-C5: la continuación sube y SM-5 baja, con las salidas leídas: «se da» y «salta»', () => {
+    const SM_C5 = JUICIOS_POR_VENTANAS.find((j) => j.nombre === 'SM-C5')!;
+    const l = leer(
+      {
+        vistasYLecturas: DIAS.map((dia) => lectura(dia, '/cita/una/', 120)),
+        // La línea base, días 1 a 3: 10 % de continuación y 10 % de SM-5; después, 30 % y 5 %.
+        salidas: DIAS.map((dia, i) => salida(dia, '/cita/una/', 'atribucion', i < 3 ? 12 : 36)),
+        acciones: DIAS.map((dia, i) => accion(dia, '/cita/una/', EVENTOS.copiado, i < 3 ? 12 : 6)),
+      },
+      { minimo: 300, juicios: [{ ...SM_C5, llegada: undefined }] },
+    );
+    const [juicio] = l.juicios;
+    expect(juicio.referencias).toEqual([
+      { tasa: 'continuación', valor: calculada(36, 360) },
+      { tasa: 'SM-5', valor: calculada(36, 360) },
+    ]);
+    expect(juicio.ventanas[0].tasas).toEqual([
+      { tasa: 'continuación', valor: calculada(108, 360), direccion: 'sube' },
+      { tasa: 'SM-5', valor: calculada(18, 360), direccion: 'baja' },
+    ]);
+    expect(juicio.ventanas.map((v) => v.senal)).toEqual(['se da', 'salta']);
+  });
+
+  it('la continuación de la portada por zona: una tasa por zona, cada una con solo sus salidas', () => {
+    const PORTADA = JUICIOS_POR_VENTANAS.find((j) => j.nombre === 'la continuación de la portada por zona')!;
+    const l = leer(
+      {
+        vistasYLecturas: DIAS.map((dia) => lectura(dia, '/', 120)),
+        salidas: DIAS.flatMap((dia, i) => [
+          salida(dia, '/', 'cita-del-dia', i < 3 ? 12 : 24),
+          salida(dia, '/', 'autores-de-portada', 6),
+          // La misma zona en otra superficie no es de la portada.
+          salida(dia, '/cita/una/', 'cita-del-dia', 50),
+        ]),
+      },
+      { minimo: 300, juicios: [{ ...PORTADA, llegada: undefined }] },
+    );
+    const [juicio] = l.juicios;
+    expect(juicio.referencias).toEqual([
+      { tasa: 'continuación desde autores-de-portada', valor: calculada(18, 360) },
+      { tasa: 'continuación desde cita-del-dia', valor: calculada(36, 360) },
+    ]);
+    expect(juicio.ventanas[0].tasas).toEqual([
+      { tasa: 'continuación desde autores-de-portada', valor: calculada(18, 360), direccion: 'igual' },
+      { tasa: 'continuación desde cita-del-dia', valor: calculada(72, 360), direccion: 'sube' },
+    ]);
+  });
+
+  it('la continuación de la portada por zona, sin las salidas: no hay zonas, y se nombra lo que falta', () => {
+    const PORTADA = JUICIOS_POR_VENTANAS.find((j) => j.nombre === 'la continuación de la portada por zona')!;
+    const l = leer(
+      { vistasYLecturas: DIAS.map((dia) => lectura(dia, '/', 120)), salidas: 'D1_ERROR' },
+      { minimo: 300, juicios: [{ ...PORTADA, llegada: undefined }] },
+    );
+    expect(l.juicios[0].sinVentanas).toBe('sin leer: las salidas internas');
+  });
+
+  it('SM-6 y SM-13, sobre las búsquedas asentadas, frente a su línea base', () => {
+    const SM_6 = JUICIOS_POR_VENTANAS.find((j) => j.nombre === 'SM-6')!;
+    const SM_13 = JUICIOS_POR_VENTANAS.find((j) => j.nombre === 'SM-13')!;
+    const l = leer(
+      {
+        // 50 asentadas al día: el tramo 0, el 20 % en la línea base y el 40 % después.
+        busquedas: DIAS.flatMap((dia, i) => [busqueda(dia, '0', i < 3 ? 10 : 20), busqueda(dia, '1-9', i < 3 ? 40 : 30)]),
+        // Las salidas desde un resultado de /buscar/: 20 % y después 50 %. Las de otra superficie, no.
+        salidas: DIAS.flatMap((dia, i) => [
+          salida(dia, '/buscar/', 'resultado', i < 3 ? 10 : 25),
+          salida(dia, '/cita/una/', 'resultado', 40),
+        ]),
+      },
+      { minimo: 150, juicios: [{ ...SM_6, llegada: undefined }, { ...SM_13, llegada: undefined }] },
+    );
+    const [sm6, sm13] = l.juicios;
+    expect(sm6.referencias).toEqual([{ tasa: 'SM-6', valor: calculada(30, 150) }]);
+    expect(sm6.ventanas[0]).toMatchObject({
+      desde: '2026-11-05',
+      hasta: '2026-11-07',
+      acumulado: 150,
+      tasas: [{ tasa: 'SM-6', valor: calculada(60, 150), direccion: 'sube' }],
+    });
+    expect(sm13.referencias).toEqual([{ tasa: 'SM-13', valor: calculada(30, 150) }]);
+    expect(sm13.ventanas[0].tasas).toEqual([{ tasa: 'SM-13', valor: calculada(75, 150), direccion: 'sube' }]);
+  });
+
+  it('los Directorios: la línea base empieza tras la llegada que los hace medibles, y las ventanas se juzgan frente a ella', () => {
+    const DIRECTORIOS = JUICIOS_POR_VENTANAS.find((j) => j.nombre === 'la continuación de los Directorios')!;
+    const directorio = (nombre: string, ruta: string): Superficie => ({
+      nombre,
+      pagina: `${ruta}.astro`,
+      reconoce: new RegExp(`^/${ruta}$`),
+      caracter: 'producto',
+      vista: EVENTOS.vistaDeSuperficie,
+      lineaBase: DIRECTORIOS.unidad,
+    });
+    const superficies = [...SUPERFICIES, directorio('los autores', 'autores'), directorio('las obras', 'obras')];
+    const censo = [...CENSO, '/autores/', '/obras/'];
+    const llegada = D2; // 2026-11-03: los Directorios no existen antes.
+    const despues = DIAS.slice(2);
+    const partes: Partes = {
+      vistasYLecturas: despues.flatMap((dia) => [lectura(dia, '/autores/', 60), lectura(dia, '/obras/', 60)]),
+      // 10 % de continuación en la línea base (días 3 a 5) y 30 % después.
+      salidas: despues.map((dia, i) => salida(dia, '/autores/', 'directorio', i < 3 ? 12 : 36)),
+    };
+    const l = leer(partes, { superficies, minimo: 300, juicios: [{ ...DIRECTORIOS, llegada }] }, censo);
+    const base = l.lineasBase.find((b) => b.unidad === DIRECTORIOS.unidad)!;
+    expect(base).toMatchObject({ estado: 'cerrada', desde: '2026-11-04', cerradaEl: '2026-11-06', acumulado: 360 });
+    const [juicio] = l.juicios;
+    expect(juicio.referencia).toBe('linea-base');
+    expect(juicio.referencias).toEqual([{ tasa: 'continuación', valor: calculada(36, 360) }]);
+    expect(juicio.ventanas.map((v) => [v.desde, v.hasta, v.tasas[0].direccion])).toEqual([['2026-11-07', '2026-11-09', 'sube']]);
+
+    // Sin la llegada todavía, la línea base no ha empezado, y dice qué espera.
+    const sinLlegada = leer(partes, { superficies, minimo: 300, juicios: [{ ...DIRECTORIOS, llegada: undefined }] }, censo);
+    expect(sinLlegada.lineasBase.find((b) => b.unidad === DIRECTORIOS.unidad)).toMatchObject({
+      estado: 'no-ha-empezado',
+      esperando: 'DESPLIEGUE_DE_OBRA_Y_DIRECTORIOS',
+    });
+    expect(sinLlegada.juicios[0].sinVentanas).toBe(
+      'la línea base no ha empezado: espera DESPLIEGUE_DE_OBRA_Y_DIRECTORIOS, la llegada que la hace medible',
+    );
+    expect(texto(sinLlegada)).toContain(
+      'los Directorios (los autores y las obras): no ha empezado: empieza la primera jornada UTC completa tras ' +
+        'DESPLIEGUE_DE_OBRA_Y_DIRECTORIOS, la llegada que la hace medible.',
+    );
   });
 
   it('sin mínimo no hay ventanas, y se dice', () => {
@@ -841,6 +1003,140 @@ describe('Historia 23.10 — las ventanas', () => {
     expect(direccionDe(calculada(1, 3), calculada(2, 6))).toBe('igual');
     expect(direccionDe(calculada(2, 5), calculada(1, 3))).toBe('sube');
     expect(direccionDe({ estado: 'sin-denominador', numerador: 1 }, calculada(1, 3))).toBeUndefined();
+  });
+});
+
+describe('Historia 23.10 — revisión: lo que la primera pasada dejaba sin decir', () => {
+  it('un corte de ayer: el tramo vigente empieza hoy y aún no tiene jornadas, y no se confunde con dos llegadas seguidas', () => {
+    const ayer = '2026-11-11';
+    const l = leer({}, { cortes: [{ ...CORTE_23, jornada: ayer }], minimo: 300 });
+    expect(l.series.lectura.vigente).toEqual({ numero: 2, desde: HOY, hasta: ayer });
+    const informe = texto(l);
+    expect(informe).toContain('Vigente: tramo 2 (empieza el 2026-11-12: aún no tiene ninguna jornada cerrada)');
+    expect(informe).not.toContain('dos llegadas seguidas');
+    expect(informe).toContain(
+      'la Página de Cita: abierta: empieza el 2026-11-12 y aún no tiene ninguna jornada cerrada (mínimo: 300 lecturas).',
+    );
+    // Dos llegadas en días seguidos sí dejan un tramo vacío entre ellas.
+    const seguidas = leer({}, { cortes: [{ ...CORTE_23, jornada: '2026-11-05' }, { ...CORTE_23, jornada: '2026-11-06', que: 'otra' }] });
+    expect(texto(seguidas)).toContain('tramo 2 (vacío: dos llegadas seguidas)');
+  });
+
+  it('la consulta que tecleó un visitante sale sin caracteres de control ni de dirección', () => {
+    const l = leer({ sinResultados: [{ jornada: D1, ruta: '/buscar/', consulta: 'a\u001b[31mb\nc‮d', n: 2 }] });
+    const informe = texto(l);
+    expect(informe).toContain('«a�[31mb�c�d» 2');
+    expect(informe).not.toMatch(/[\u0000-\u0009\u000b-\u001f\u007f‮]/);
+    expect(legible('sin nada raro: «Séneca»')).toBe('sin nada raro: «Séneca»');
+  });
+
+  it('cada superficie con lectura se informa, también a cero; las de servicio no tienen continuación', () => {
+    const l = leer({});
+    expect(l.superficies.map((s) => s.nombre)).not.toContain('la búsqueda');
+    expect(l.superficies.map((s) => s.nombre)).not.toContain('la página 404');
+    const informe = texto(l);
+    expect(informe).toContain('la Página de Autor: vistas 0, lecturas 0, salidas 0; continuación sin denominador (0 sobre ninguna).');
+    expect(informe).toContain('sin marca: vistas de Obra 0, lecturas 0, salidas 0, acciones 0;');
+    // Sin las salidas, la superficie sigue saliendo, con lo que no se leyó nombrado.
+    expect(texto(leer({ salidas: 'D1_ERROR' }))).toContain('la Página de Autor: vistas 0, lecturas 0, salidas sin leer;');
+  });
+
+  it('«ya no se publica» dice que junta lo retirado con lo que nunca se publicó', () => {
+    const l = leer({ vistasYLecturas: [lectura(D1, '/cita/errata/', 1)] });
+    expect(texto(l)).toContain('«ya no se publica» junta lo retirado');
+    expect(texto(leer({}))).not.toContain('«ya no se publica» junta');
+  });
+
+  it('una pasada en /buscar/ descuenta sus búsquedas y sus consultas sin resultados de esa jornada', () => {
+    const l = leer(
+      {
+        busquedas: [busqueda(D2, '0', 4), busqueda(D1, '0', 1)],
+        sinResultados: [
+          { jornada: D2, ruta: '/buscar/', consulta: 'prueba de la pasada', n: 3 },
+          { jornada: D1, ruta: '/buscar/', consulta: 'sene', n: 1 },
+        ],
+      },
+      { pasadas: [{ pasada: '25.7', jornada: D2, rutas: ['/buscar/'] }] },
+    );
+    expect(l.busquedas.asentadas).toBe(1);
+    expect(l.busquedas.sinResultados).toEqual([{ consulta: 'sene', n: 1 }]);
+    expect(l.descuentos.pasadas[0].registros).toBe(7);
+  });
+
+  it('lo escrito a mano en umbrales.ts se juzga antes de usarlo, nombrando cada problema', () => {
+    expect(esJornadaReal('2026-11-03')).toBe(true);
+    for (const mala of ['2026-11-3', '2026-02-30', '2026-13-01', 'mañana', 20261103]) expect(esJornadaReal(mala)).toBe(false);
+    const problemas = problemasDeLaLectura({
+      cortes: [{ jornada: '2026-11-3', que: 'la 23', series: ['lectura'] }],
+      pasadas: [{ pasada: '25.3', jornada: '2026-02-30', rutas: [] }],
+      minimo: 0,
+      juicios: [{ ...JUICIOS_POR_VENTANAS[0], llegada: '2026-1-5', deDondeLlega: 'DE_PRUEBA' }],
+      superficies: [{ ...SUPERFICIES[0], lineaBase: UNIDAD_DE_LAS_BUSQUEDAS }],
+    });
+    expect(problemas).toEqual([
+      'CORTES_DE_SERIE, «la 23»: «2026-11-3» no es una jornada AAAA-MM-DD que exista.',
+      'PASADAS_QUE_ESCRIBEN_EN_PRODUCCION, la 25.3: «2026-02-30» no es una jornada AAAA-MM-DD que exista.',
+      'PASADAS_QUE_ESCRIBEN_EN_PRODUCCION, la 25.3: no nombra ninguna ruta, así que no descontaría nada.',
+      'MIN_LECTURAS_DE_LINEA_BASE: «0» no es un entero positivo.',
+      'DE_PRUEBA (la llegada de SM-C3): «2026-1-5» no es una jornada AAAA-MM-DD que exista.',
+      'src/lib/superficies.ts, la portada: su línea base se llama «las búsquedas», la de las búsquedas.',
+    ]);
+    expect(() => leer({}, { minimo: Number.NaN })).toThrow(/MIN_LECTURAS_DE_LINEA_BASE: «NaN» no es un entero positivo/);
+    expect(() => leer({}, { pasadas: [{ pasada: '25.3', jornada: D2, rutas: ['sin-barra'] }] })).toThrow(
+      /«sin-barra» no es una ruta del sitio/,
+    );
+  });
+
+  it('los valores que el repositorio declara hoy se sostienen', () => {
+    expect(
+      problemasDeLaLectura({
+        cortes: CORTES_DE_SERIE,
+        pasadas: PASADAS_QUE_ESCRIBEN_EN_PRODUCCION,
+        minimo: MIN_LECTURAS_DE_LINEA_BASE,
+        juicios: JUICIOS_POR_VENTANAS,
+        superficies: SUPERFICIES,
+      }),
+    ).toEqual([]);
+  });
+
+  it('sin opciones, la lectura lee los valores de src/lib/umbrales.ts: los cortes, las pasadas, el mínimo y Facebook', async () => {
+    vi.resetModules();
+    vi.doMock('../../src/lib/umbrales.ts', async (importOriginal) => ({
+      ...(await importOriginal<typeof import('../../src/lib/umbrales.ts')>()),
+      CORTES_DE_SERIE: [CORTE_23],
+      PASADAS_QUE_ESCRIBEN_EN_PRODUCCION: [{ pasada: '25.3', jornada: D2, rutas: ['/cita/una/'] }],
+      MIN_LECTURAS_DE_LINEA_BASE: 10,
+      SM12_CON_FACEBOOK: true,
+    }));
+    try {
+      const conValores = await import('../../tools/lib/lineaBase.ts');
+      const l = conValores.componerLecturaDeMedicion({
+        hoy: HOY,
+        censo: CENSO,
+        consultas: consultas({
+          vistasYLecturas: [lectura(D1, '/cita/una/', 12), lectura(D2, '/cita/una/', 5)],
+          acciones: [accion(D1, '/cita/una/', EVENTOS.comparticionDeEnlace, 1, { destino: 'facebook' })],
+        }),
+        cuota: CUOTA,
+      });
+      expect(l.series.lectura.vigente.desde).toBe(D1);
+      expect(l.descuentos.pasadas).toEqual([{ pasada: '25.3', jornada: D2, rutas: ['/cita/una/'], registros: 5 }]);
+      expect(l.minimo).toBe(10);
+      expect(l.lineasBase.find((b) => b.unidad === UNIDAD_DE_LA_PAGINA_DE_CITA)).toMatchObject({ estado: 'cerrada', cerradaEl: D1 });
+      const sm12 = l.sm12 as Exclude<LecturaDeMedicion['sm12'], { faltan: unknown }>;
+      expect(sm12.destinos.find((d) => d.destino === 'facebook')?.fuera).toBeUndefined();
+    } finally {
+      vi.doUnmock('../../src/lib/umbrales.ts');
+      vi.resetModules();
+    }
+  });
+
+  it('sin opciones, la tabla de juicios es JUICIOS_POR_VENTANAS, y Facebook queda fuera con la constante apagada', () => {
+    const l = componerLecturaDeMedicion({ hoy: HOY, censo: CENSO, consultas: consultas({}), cuota: CUOTA });
+    expect(l.juicios.map((j) => j.juicio.nombre)).toEqual(JUICIOS_POR_VENTANAS.map((j) => j.nombre));
+    expect(texto(l)).toMatch(/^ {2}SM-C3 \(la Página de Cita; llegada: sin constante todavía: la da la Épica 25\)/m);
+    const sm12 = l.sm12 as Exclude<LecturaDeMedicion['sm12'], { faltan: unknown }>;
+    expect(sm12.destinos.find((d) => d.destino === 'facebook')?.fuera).toMatch(/SM12_CON_FACEBOOK/);
   });
 });
 

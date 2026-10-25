@@ -832,19 +832,24 @@ lo que no sea un `POST` (AD-14). Leer en remoto no es un acto que cambie nada, p
 de lectura: no se corre en bucle.
 
 **Códigos.** **2** sin sesión de `wrangler` —lo dice con la orden que la abre— o con una bandera o
-un argumento que no son de la orden (la lectura no lleva opciones), antes de tocar nada; **1** si el
-Corpus no se deja leer, o si no se leyó nada de D1 —ni una consulta ni ninguna cifra de
-`d1 info`—, nombrando cada cosa; **0** si leyó algo. Una consulta que falla no para la orden: sale
-en «Sin leer» con su motivo, y toda cifra que dependa de ella se omite y se nombra, **jamás como
-cero**. Una tasa sin denominador dice «sin denominador», nunca 0 %.
+un argumento que no son de la orden (la lectura no lleva opciones), antes de tocar nada; **1** si la
+sesión no se deja leer, si el Corpus no se deja leer, si no se leyó nada de D1 —ni una consulta ni
+ninguna cifra de `d1 info`— o si un valor de `src/lib/umbrales.ts` que la lectura lee no se sostiene
+—una jornada que no existe, como `2026-11-3`; una pasada sin rutas; un mínimo que no es un entero
+positivo—, nombrando cada cosa; **0** si leyó algo. Una consulta que falla —también una en la que
+`wrangler` se corta por su tope— no para la orden: sale en «Sin leer» con su motivo, y toda cifra que
+dependa de ella se omite y se nombra, **jamás como cero**. Una tasa sin denominador dice «sin
+denominador», nunca 0 %.
 
 **El censo, no el prefijo** (AD-13). La superficie de cada registro —lecturas, salidas y acciones—
 es la página donde ocurrió, resuelta contra el **censo de hoy** —`rutasPublicadas` del Corpus: la
 portada, las Citas, Autores, Temas y Colecciones publicados y **toda** Obra, se indexe o no; nunca
 una página 2+— y la declaración de `src/lib/superficies.ts`. Lo que no casa se cuenta aparte, por
 evento, y se nombra: «páginas 2+», «ya no se publica» (una Cita o un Autor retirados, una Obra
-absorbida), la búsqueda o la página 404 por su nombre, y «sin superficie declarada» (la dirección
-rota que sirve el 404). Cada lectura reatribuye el pasado con el censo de hoy. La unidad es la
+absorbida, y también una dirección con forma de página que nunca se publicó, como una errata en un
+enlace: el censo de hoy no las distingue, y el informe lo dice), la búsqueda o la página 404 por su
+nombre, y «sin superficie declarada» (la dirección rota que sirve el 404). Cada lectura reatribuye el
+pasado con el censo de hoy. La unidad es la
 superficie declarada, la portada incluida, nunca la familia; para la línea base, la que una
 superficie declara en su campo `lineaBase` —los Directorios, `/autores/` y `/obras/` juntos, desde
 la 26—, y cada superficie se informa también por separado.
@@ -869,7 +874,8 @@ lectura, y las búsquedas sobre el de la búsqueda.
 `CUOTA_DE_BYTES_POR_BASE_EN_D1`, 500 MB decimales; al pasarlas, las escrituras fallan en silencio
 hasta las 00:00 UTC—; los descuentos; los cortes; SM-8 —sin la vista de Obra; Threads no se lee
 como personas mientras no conste quién publica sus enlaces—; las superficies, con la continuación
-por zona, que es cota inferior; lo de fuera del censo; la Obra por la marca de sus vistas de Obra
+por zona, que es cota inferior —todas las superficies con lectura, también a cero—; lo de fuera del
+censo; la Obra por la marca de sus vistas de Obra
 de cada ruta y jornada —indexable, no indexable, cambió (las dos marcas el mismo día), nula y sin
 marca—; la Página de Cita —SM-5, SM-7 (cota inferior en Chrome para Android), la continuación, SM-3,
 SM-C3 y SM-C5, cada una con su denominador— y, aparte y sin llamarse así, la portada y la Obra;
@@ -881,9 +887,14 @@ ventanas de las tasas que se juzgan contra su propia serie (`JUICIOS_POR_VENTANA
 suspenso.
 
 **«Cerrada», nunca «buena».** La línea base de cada unidad empieza el primer día del tramo vigente
-de su serie, salta las jornadas de llegada de lo que se juzga en ella y se cierra la jornada en que
-reúne `MIN_LECTURAS_DE_LINEA_BASE` lecturas de su unidad —búsquedas asentadas, la de las
-búsquedas—. Sin valor, como hoy, dice «sin mínimo declarado» y no se cierra nunca. La orden dice
+de su serie —la de los Directorios, que no existen antes de la 26, el día siguiente a
+`DESPLIEGUE_DE_OBRA_Y_DIRECTORIOS`, la llegada que los hace medibles—, salta las jornadas de llegada
+de lo que se juzga en ella y se cierra la jornada en que reúne `MIN_LECTURAS_DE_LINEA_BASE` lecturas
+de su unidad —búsquedas asentadas, la de las búsquedas—. Sin valor, como hoy, dice «sin mínimo
+declarado» y no se cierra nunca. Las ventanas no juntan jornadas de los dos lados de una llegada: el
+bloque en curso que una llegada corta sin el mínimo se nombra y no se juzga. Cuando la referencia es
+la serie de antes y no reúne el mínimo, se dice. Una señal de SM-C3 o SM-C5 a la que le falta una
+dirección dice que no se puede juzgar, nunca «no se da». La orden dice
 «cerrada»; que Héctor la miró, con la comparación por firma delante, y la da por buena lo anota él
 aquí debajo, con la fecha, la métrica y la superficie. Ningún agente lo anota.
 

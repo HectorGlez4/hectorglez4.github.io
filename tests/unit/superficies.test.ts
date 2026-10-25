@@ -25,6 +25,7 @@ import {
   type Caracter,
   type ReglaDeAxe,
 } from '../../src/lib/superficies.ts';
+import { UNIDAD_DE_LAS_BUSQUEDAS } from '../../tools/lib/lineaBase.ts';
 import { slug } from '../../src/lib/admision.ts';
 import { EVENTOS } from '../../src/lib/medicion.ts';
 import { MARCAS_DE_OBRA } from '../../src/lib/vocabulario.ts';
@@ -1123,10 +1124,13 @@ describe('Historia 23.10 — la superficie de línea base', () => {
     expect(superficieDeLineaBase({ nombre: 'otra', lineaBase: 'compartida' })).toBe('compartida');
   });
 
-  it('una línea base declarada junta al menos dos superficies, y no se llama como otra superficie', () => {
+  it('una línea base declarada junta al menos dos superficies, y no se llama como otra superficie ni como la de las búsquedas', () => {
     // Hoy no la declara ninguna; los Directorios la declaran con la 26 (26.3 y 26.4).
     const nombres = new Set(SUPERFICIES.map((s) => s.nombre));
     for (const superficie of SUPERFICIES) {
+      // La unidad de las búsquedas no es una superficie: unas lecturas que se llamaran así se medirían
+      // con las búsquedas asentadas.
+      expect(superficieDeLineaBase(superficie), superficie.nombre).not.toBe(UNIDAD_DE_LAS_BUSQUEDAS);
       if (superficie.lineaBase === undefined) continue;
       expect(SUPERFICIES.filter((s) => s.lineaBase === superficie.lineaBase).length, superficie.nombre).toBeGreaterThan(1);
       expect(nombres.has(superficie.lineaBase), superficie.nombre).toBe(false);

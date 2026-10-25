@@ -37,9 +37,11 @@
  * 2 si la invocación no vale —subcomando, bandera o argumento desconocidos—, si falta
  * `MEDICION_ENDPOINT` (salvo en la lectura, que no lo usa), no es una dirección http(s) o apunta a
  * la máquina propia, o si `wrangler` no tiene sesión: en todos, antes de tocar nada. 1 para todo lo
- * demás, con el parte de lo que quedó aplicado; en la lectura, si no se pudo leer el Corpus o si no
- * se leyó nada de D1, nombrando cada cosa. La lectura sale con 0 si leyó algo. Se para en el primer
- * fallo y no reintenta migraciones ni despliegues.
+ * demás, con el parte de lo que quedó aplicado; en la lectura, si la sesión no se deja leer, si no se
+ * pudo leer el Corpus, si no se leyó nada de D1 o si un valor de `src/lib/umbrales.ts` que la lectura
+ * lee no se sostiene —una jornada mal escrita, un mínimo que no es un entero positivo—, nombrando
+ * cada cosa. La lectura sale con 0 si leyó algo. Se para en el primer fallo y no reintenta
+ * migraciones ni despliegues.
  *
  * ── Red ──────────────────────────────────────────────────────────────────────────────────
  *
@@ -295,13 +297,24 @@ async function principal(): Promise<number> {
     // La lectura: sin MEDICION_ENDPOINT —no envía nada— y sin aviso de interrupción, porque cortada
     // a mitad no deja nada aplicado.
     const lectura = await leer(efectos, () => conjuntoDelCorpus(rutasDelCorpus(join(RAIZ, 'corpus'))));
-    const informe = componerLecturaDeMedicion({
-      hoy: lectura.hoy,
-      censo: rutasPublicadas(lectura.corpus),
-      consultas: lectura.consultas,
-      cuota: lectura.cuota,
-    });
-    process.stdout.write(`${lineasDeLecturaDeMedicion(informe).join('\n')}\n`);
+    // Componer puede fallar por el censo —una ruta que no se normaliza— o por un valor de
+    // `umbrales.ts` escrito a mano que no se sostiene: sale con 1 nombrándolo, no con una traza.
+    let lineas: string[];
+    try {
+      const informe = componerLecturaDeMedicion({
+        hoy: lectura.hoy,
+        censo: rutasPublicadas(lectura.corpus),
+        consultas: lectura.consultas,
+        cuota: lectura.cuota,
+      });
+      lineas = lineasDeLecturaDeMedicion(informe);
+    } catch (error) {
+      throw new Parada(
+        1,
+        `No se pudo componer el informe: ${error instanceof Error ? error.message : String(error)}\nConsulta: no se ha escrito nada.`,
+      );
+    }
+    process.stdout.write(`${lineas.join('\n')}\n`);
     return 0;
   }
   if (subcomando === 'local') return local();

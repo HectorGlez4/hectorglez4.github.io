@@ -7,6 +7,9 @@ import * as vocabulario from '../../src/lib/vocabulario.ts';
 import { EVENTOS } from '../../src/lib/vocabulario.ts';
 import { EVENTOS_DE_LA_V71, interpretar } from '../../medicion/receptor.ts';
 import { CUOTA_DE_FILAS_ESCRITAS_POR_DIA_EN_D1 } from '../../src/lib/umbrales.ts';
+import { rutasIndexables, rutasPublicadas } from '../../src/lib/publicado.ts';
+import { conjuntoDelCorpus } from '../../tools/indexacion.ts';
+import { rutasDelCorpus } from '../../tools/lib/corpus.ts';
 import {
   ARGUMENTOS_DE_INFORMACION,
   ARGUMENTOS_DE_SESION,
@@ -130,13 +133,23 @@ describe('Historia 23.2 — la invocación', () => {
     [['comprobar', 'otra'], /«otra» sobra/],
     // Historia 23.10 — sin subcomando es la lectura, que no lleva opciones.
     [['--rapido'], /«--rapido» no es una opción de esta orden\. La lectura no lleva opciones/],
-    [['--rapido', 'desplegar'], /«--rapido» no es una opción/],
+    // Una bandera delante de un subcomando: es el subcomando mal escrito, no la lectura con opciones.
+    [['--rapido', 'desplegar'], /«--rapido» no es una opción.*El subcomando va primero, y sin opciones: npm run medicion -- desplegar\./],
   ])('%j no vale, y dice por qué y cómo se usa', (argumentos, motivo) => {
     const invocacion = argumentosDeMedicion(argumentos);
     expect(invocacion.ok).toBe(false);
     if (!invocacion.ok) {
       expect(invocacion.motivo).toMatch(motivo);
       expect(invocacion.motivo).toContain('Uso: npm run medicion [-- desplegar | comprobar | local | ensayo]');
+    }
+  });
+
+  it('una bandera delante de un subcomando no se llama «la lectura» ni da el subcomando por sobrante', () => {
+    const invocacion = argumentosDeMedicion(['--rapido', 'desplegar']);
+    expect(invocacion.ok).toBe(false);
+    if (!invocacion.ok) {
+      expect(invocacion.motivo).not.toContain('La lectura no lleva opciones');
+      expect(invocacion.motivo).not.toMatch(/«desplegar»/);
     }
   });
 
@@ -1012,6 +1025,49 @@ describe('Historia 23.2 — la cáscara sale con 2 antes de tocar la red', () =>
     expect(pedido.slice(1, 6).every((linea) => linea.startsWith(`--yes ${WRANGLER} d1 execute medicion --remote --json --command SELECT `))).toBe(true);
     expect(pedido.slice(6)).toEqual([`--yes ${WRANGLER} d1 info medicion --json`]);
   }, 60_000);
+
+  it('la lectura (23.10): resuelve las filas contra el censo del Corpus de verdad —una Cita y una Obra que no se indexa—', async () => {
+    // El censo de la cáscara, sacado aquí del mismo Corpus y por el mismo dueño: una ruta de Cita
+    // publicada y una de Obra que no se indexa tienen que contar en su superficie, no fuera del censo.
+    const conjunto = await conjuntoDelCorpus(rutasDelCorpus(resolve(raiz, 'corpus')));
+    const publicadas = rutasPublicadas(conjunto);
+    const indexables = new Set(rutasIndexables(conjunto));
+    const cita = publicadas.find((ruta) => ruta.startsWith('/cita/'))!;
+    const obra = publicadas.find((ruta) => ruta.startsWith('/obra/') && !indexables.has(ruta))!;
+    expect(cita).toBeDefined();
+    expect(obra, 'el Corpus tiene alguna Obra que no se indexa').toBeDefined();
+    const filas = JSON.stringify([
+      {
+        results: [
+          { jornada: '2026-01-05', ruta: cita, evento: 'lectura', origen: null, via: null, indexable: null, n: 3 },
+          { jornada: '2026-01-05', ruta: obra, evento: 'lectura', origen: null, via: null, indexable: null, n: 2 },
+        ],
+        success: true,
+      },
+    ]);
+    const dir = mkdtempSync(join(tmpdir(), 'sabiduria-npx-'));
+    aBorrar.push(dir);
+    writeFileSync(
+      join(dir, 'npx'),
+      [
+        '#!/bin/sh',
+        'case "$*" in',
+        `  *whoami*) printf '%s' '{"loggedIn":true}' ;;`,
+        `  *"d1 info"*) printf '%s' '{"rows_written_24h":1200,"database_size":9000000}' ;;`,
+        `  *vista-de-obra*) printf '%s' '${filas}' ;;`,
+        `  *"d1 execute"*) printf '%s' '[{"results":[],"success":true}]' ;;`,
+        '  *) exit 99 ;;',
+        'esac',
+        '',
+      ].join('\n'),
+    );
+    chmodSync(join(dir, 'npx'), 0o755);
+    const { codigo, salida } = await correr([], { MEDICION_ENDPOINT: undefined, PATH: `${dir}:${process.env.PATH}` });
+    expect(codigo, salida).toBe(0);
+    expect(salida).toContain('  la Página de Cita: vistas 0, lecturas 3, salidas 0;');
+    expect(salida).toContain('  la Página de Obra: vistas 0, lecturas 2, salidas 0;');
+    expect(salida).toMatch(/Fuera del censo —se cuenta aparte y se nombra, nunca se descarta—\n {2}nada\./);
+  }, 120_000);
 
   it('la lectura (23.10): con un npx que no contesta consultas sale con 1, nombrando lo que no leyó', async () => {
     // Contesta lo mismo a todo: con sesión, y ninguna consulta ni `d1 info` se deja leer.
