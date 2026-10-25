@@ -132,3 +132,50 @@ del merge (AD-9)— en un commit aparte del día en que llega, del que sale la p
 tras la llegada, correr `npm run medicion` y anotar con fecha en `DESPLIEGUE.md` §3 las filas
 escritas frente a la cuota, el tamaño de la base y cada evento nuevo con sus filas o nombrado sin
 ellas. La línea base de cada métrica empieza a contar desde esa jornada.
+
+## Verificación previa a la fusión — 2026-10-25
+
+Puerta previa a la fusión de la etapa s-23 (rama `v8/epica-23`, intento 1), en el worktree
+`.claude/worktrees/v8-epica-23`, sobre `fa1c4a125b`, entre las 15:20 y las 15:55 UTC. Node v24.3.0,
+npm 11.4.2. 107 GB libres. Los puertos 4321, 4399, 4400, 4402 y 8787 estaban libres al empezar y
+quedan libres al terminar. No se corrió nada con `--remote` ni contra el D1 de producción, el
+Worker o el sitio en vivo. **Resultado: la puerta no pasa** —una prueba de punta a punta falla dos
+veces— y por eso NFR-7 no se midió.
+
+- **Sincronía.** `git fetch origin`: `origin/main` (`ed5a3f47e2`) ya es antecesor de `HEAD`, así
+  que no hubo fusión ni conflictos.
+- **`npm ci`** — no se corrió: `package-lock.json` cambió por última vez el 2026-10-24 a las
+  21:27 (+02:00) y `node_modules` se instaló después, el 2026-10-25 a las 01:11.
+- **`npm run build`** (`logs/s-23/gate-build.log`) — en verde, `EXIT:0`: 5.288 páginas en 1 min
+  24 s; el sitemap, los `noindex`, Pagefind y la marca de Obra coinciden (4.873 rutas indexables);
+  Pagefind indexa 4.873 páginas. Un solo aviso, `[fichas-de-obra]`, el de siempre. El peso:
+  467.049.898 bytes (445,4 MiB) en 15.339 ficheros; juzgado 466.951.408 bytes (445,3 MiB), quedan
+  304,7 MiB hasta el aviso de 750 MiB; 5.116 PNG, sin tope.
+- **`npx astro check`** (`logs/s-23/gate-astro-check.log`) — en verde, `EXIT:0`: 335 ficheros,
+  0 errores, 0 avisos, 20 sugerencias.
+- **`npm test`** (desprendido, `logs/s-23/gate-npm-test.log`) — en verde, `EXIT:0`: 132 ficheros
+  y 6.048 pruebas pasadas, 0 fallidas, en 703,1 s.
+- **`npm run test:e2e`** entero, los dos proyectos (desprendido, `logs/s-23/gate-e2e.log`), con
+  los dos `webServer` de `playwright.config.ts`: el receptor local (`npm run medicion -- local`,
+  `wrangler dev` con el D1 local) y el sitio construido con
+  `MEDICION_ENDPOINT=http://localhost:8787/` — en rojo, `EXIT:1`: de 674 pruebas, **574 pasadas,
+  11 fallidas y 89 omitidas**, en 7,9 min con 5 trabajadores. Las once son pruebas de barrido del
+  sitemap entero que se paran por tiempo (ninguna llega a su aserción):
+  `seo.spec.ts:48`, `:59`, `:68` y `:126`, `tarjeta.spec.ts:79` y `:154`, y `dominio.spec.ts:34`,
+  entre los dos proyectos.
+- **Repetición de los ficheros que fallaron**, una vez, con un solo trabajador para quitar la
+  competencia (`npx playwright test tests/e2e/seo.spec.ts tests/e2e/tarjeta.spec.ts
+  tests/e2e/dominio.spec.ts --workers=1`, `logs/s-23/gate-e2e-repeticion.log`) — `EXIT:1`: 39
+  pasadas y **1 fallida**: `[escritorio] › tests/e2e/seo.spec.ts:126:3 › Historia 2.7 — nada
+  huérfano › toda página publicada se alcanza desde la portada en pocos saltos`, otra vez por
+  tiempo («Test timeout of 90000ms exceeded», 1,8 min; la de `[movil]` pasó en 1,5 min). Falla dos
+  veces, así que cuenta como fallo de la puerta. Las otras diez fueron inestabilidad por carga.
+  Para quien la arregle: no llega a la aserción —recorre en el navegador, con seis pestañas,
+  cada página alcanzable desde la portada, y se queda sin los 90 s de `test.slow()`—. No es
+  nueva de hoy: en los registros de la rama (`.claude/v8-ralph/logs/s-23/`), las ocho pasadas del
+  2026-10-24 hasta las 17:26 (+02:00; `e2e-1.log` a `e2e-3.log`, `e2e-seo-solo.log`,
+  `e2e-seo-movil-solo.log`) tardaron 1,1–1,8 min y fallaron una vez; las trece desde las 18:24
+  (`rev1-seo*.log`, `rev2-seo*.log`, `rev2-e2e.log` y las dos de hoy) tardaron 1,5–2,9 min y
+  fallaron diez. No se buscó la causa.
+- **NFR-7** — no se midió: la puerta lo pide solo con los pasos de build, comprobación y pruebas
+  en verde. Lighthouse 13.5.0 quedó preparado por `npx` para la siguiente puerta.
