@@ -234,13 +234,13 @@ export const PASADAS_QUE_ESCRIBEN_EN_PRODUCCION: readonly PasadaEnProduccion[] =
  * asentadas, la de SM-6 y SM-13—; no es un número de días. Las ventanas con que se juzgan después
  * las tasas reúnen cada una el mismo mínimo.
  *
- * **Sin valor, y a propósito**, como `CONGELACION_DE_OBRAS`: ninguna fuente se lo da, y lo fija
- * Héctor en un diff visible (23.11) antes de leer la primera línea base. `undefined` significa eso:
- * el informe dice «sin mínimo declarado» y nunca da una línea base por cerrada. Ningún agente se lo
- * da. Que una línea base cerrada sea **buena** no lo dice ningún número: lo anota Héctor en
- * `DESPLIEGUE.md` §3.
+ * **300, valor de Héctor** (2026-10-24), dado en un diff visible en la 23.11 antes de leer la
+ * primera línea base: ninguna fuente se lo da, y ningún agente lo elige ni lo cambia. Sigue
+ * admitiendo `undefined`, como `CONGELACION_DE_OBRAS`, que significa «sin mínimo declarado»: el
+ * informe lo dice y nunca da una línea base por cerrada. Que una línea base cerrada sea **buena**
+ * no lo dice ningún número: lo anota Héctor en `DESPLIEGUE.md` §3.
  */
-export const MIN_LECTURAS_DE_LINEA_BASE: number | undefined = undefined;
+export const MIN_LECTURAS_DE_LINEA_BASE: number | undefined = 300;
 
 /**
  * Si Facebook entra en la comparación de SM-12 entre destinos — AD-9, SM-12, Historia 23.10.
