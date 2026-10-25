@@ -29,7 +29,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 # - Retrospective appends its action items to action_items; the status view surfaces open ones
 generated: 08-11-2026 09:00
-last_updated: 10-25-2026 20:46
+last_updated: 10-25-2026 22:46
 project: brainlySabiduria
 project_key: NOKEY
 tracking_system: file-system
@@ -407,7 +407,7 @@ development_status:
   24-4-bajo-la-cita-la-obra-de-la-que-sale: backlog
   24-5-de-una-cita-a-la-siguiente-del-libro: backlog
   24-6-al-pie-más-de-la-misma-obra-y-más-del-autor: backlog
-  24-7-la-obra-salta-a-dónde-leerla: backlog
+  24-7-la-obra-salta-a-dónde-leerla: review  # v8-ralph 2026-10-25: la página 1 de una Obra salta a «Dónde leer esta obra», medido en navegador; diferido para Héctor: verificar el salto en WebKit
   24-8-una-cita-nueva-no-refecha-las-demás-páginas-de-cita: backlog
   epic-24-retrospective: optional
 
