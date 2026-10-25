@@ -182,10 +182,13 @@ export const MARCAS_DE_LLEGADA = [PARAMETRO_DE_ORIGEN, PARAMETRO_DE_DIFUSION] as
  * `de`, que el lector no lee así. Así lo que se quita es exactamente lo que se leyó —`d%65`
  * también, porque el lector lo descodifica— y ningún nombre parecido (`dev`, `vias`, `DE`,
  * `de%20`, `xde`). El resto se devuelve **literal**, en su orden y sin recodificar —nunca por
- * `URLSearchParams#toString`, que reescribiría lo ajeno—, con `?` delante solo si queda algo.
+ * `URLSearchParams#toString`, que reescribiría lo ajeno—, con `?` delante solo si queda algo más
+ * que separadores: si de lo que había no queda más que `&` sueltos (`?de=x&&`), la búsqueda queda
+ * vacía, sin un `?&` que no lleva nada. Si no quita nada, la devuelve tal cual, para que el
+ * fichero no llame a `replaceState` sin marcas (`?&&` se queda).
  */
 export const SIN_MARCAS_DE_LLEGADA =
-  'function(s,n){var r=s.slice(1).split("&").filter(function(x){return!n.some(function(k){return new URLSearchParams("&"+x).has(k)})}).join("&");return r?"?"+r:""}';
+  'function(s,n){var r=s.slice(1).split("&").filter(function(x){return!n.some(function(k){return new URLSearchParams("&"+x).has(k)})}).join("&");return/[^&]/.test(r)?"?"+r:r==s.slice(1)?s:""}';
 
 /**
  * Lo que cuenta como interacción para la Lectura — AD-13, Historia 23.5.
@@ -247,12 +250,13 @@ export const INTERACCIONES_DE_LECTURA = ['pointerdown', 'keydown', 'wheel', 'tou
  * `history.state` que hubiera (`SIN_MARCAS_DE_LLEGADA`), solo si había alguna y dentro de un
  * `try`: sin historial, o si escribir en él falla, la dirección se queda como llegó y los eventos
  * salen igual con sus marcas. La dirección nueva va entera, con `location.origin` delante: una
- * ruta que empezara por `//` se leería, sola, como otro anfitrión. Así recargar, copiar la dirección de la barra o volver a ella no
- * cuentan otra vez la misma llegada. Se quitan también en una página sin vista —páginas 2+,
- * `/buscar/`, 404—, donde ningún evento las lleva. Las lee y las quita **solo el fichero**:
- * ninguna isla las lee, la única que lee la dirección es la de la búsqueda —su consulta, antes que
- * el fichero, que va con `defer`— y la única que escribirá además en el historial es ella, con su
- * propio estado (23.8). Sin punto final no hay fichero, y la dirección se queda como llegó.
+ * ruta que empezara por `//` se leería, sola, como otro anfitrión. Así recargar, copiar la
+ * dirección de la barra o volver a ella no cuentan otra vez la misma llegada. Se quitan también
+ * en una página sin vista —páginas 2+, `/buscar/`, 404—, donde ningún evento las lleva. Las lee
+ * y las quita **solo el fichero**: ninguna isla las lee, la única que lee la dirección es la de la
+ * búsqueda —su consulta, antes que el fichero, que va con `defer`— y la única que escribirá además
+ * en el historial es ella, con su propio estado (23.8). Sin punto final no hay fichero, y la
+ * dirección se queda como llegó.
  *
  * **`primera`** (SM-5, SM-7): cada acción —un evento de `METRICA_DE_ACCION`— lleva `si` si es la
  * primera de su métrica en la carga y `no` si no lo es, y la decide el fichero al emitir, también

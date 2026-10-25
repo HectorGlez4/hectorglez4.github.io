@@ -884,6 +884,12 @@ describe('Historia 23.6 — las marcas de llegada cuentan una vez y salen de la 
       ['?de=instagram&via=whatsapp', ''],
       ['?de=x&', ''],
       ['?a=1&&de=x', '?a=1&'],
+      // Si de lo que había no quedan más que separadores, no queda un `?&` sin nada (revisión de
+      // la 23.6); sin marcas, ni eso se toca.
+      ['?de=x&&', ''],
+      ['?&de=x&', ''],
+      ['?&&via=whatsapp', ''],
+      ['?&&', '?&&'],
       ['?de', ''],
       ['?de=', ''],
       ['?via', ''],
@@ -1000,7 +1006,7 @@ describe('Historia 23.6 — las marcas de llegada cuentan una vez y salen de la 
     expect(direccion()).toBe(RUTA);
   });
 
-  it.each(['', '?a=1&&b=2'])('sin marcas (`%s`): ni `replaceState` ni cambio de dirección', (busqueda) => {
+  it.each(['', '?a=1&&b=2', '?&&'])('sin marcas (`%s`): ni `replaceState` ni cambio de dirección', (busqueda) => {
     const { direccion, historial } = enCita({ busqueda, fragmento: '#x' });
     expect(historial()).toEqual([]);
     expect(direccion()).toBe(`${RUTA}${busqueda}#x`);
