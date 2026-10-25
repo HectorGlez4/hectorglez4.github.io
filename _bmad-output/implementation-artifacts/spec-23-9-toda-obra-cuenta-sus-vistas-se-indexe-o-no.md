@@ -5,7 +5,7 @@ created: '2026-10-25'
 status: 'done'
 baseline_revision: 'b51311c2da5367470efb2e8925dca3f62c2079c6'
 review_loop_iteration: 0
-followup_review_recommended: false
+followup_review_recommended: true
 context:
   - '{project-root}/_bmad-output/implementation-artifacts/epic-23-context.md'
 warnings: [oversized]
@@ -115,6 +115,31 @@ deferred:
 
 Las cinco capas de revisión son externas en este bucle (v8-ralph) y la invocación no traía ninguna sección «Hallazgos externos»: esta pasada no tiene hallazgos que clasificar. La revisión independiente llega después.
 
+### 2026-10-25 — Review pass
+- intent_gap: 0
+- bad_spec: 0
+- patch: 15: (high 0, medium 0, low 15)
+- defer: 0
+- reject: 18
+- addressed_findings:
+  - `[low]` `[patch]` `consecuenciasDe` daba la marca indexable a cualquier causa que no fuera `contenido` (blind-hunter): la marca sale ahora de `marcaPorCausa`, un `switch` exhaustivo con `never`, y la causa tiene tipo propio (`CausaDelServicio`); una causa nueva no compila en vez de caer en la indexable.
+  - `[low]` `[patch]` La causa del servicio se calculaba dos veces en `consecuenciasDe` (blind-hunter): se calcula una vez y el carácter sale de ella por `caracterPorCausa`, la misma regla que usa `caracterDe`.
+  - `[low]` `[patch]` Una isla que pidiera `vista-de-obra` por `__medir` se llevaba la marca del `<html>` (blind-hunter, edge-case-hunter): la fuente 6 es ahora `D&&H`, como las Marcas de llegada, así que la marca solo viaja con la vista que declara la página y la de una isla sale nula; prueba nueva en el entorno simulado. El fichero pasa de 3.644 a 3.647 bytes (tope 3.730, sin mover), anotado en `umbrales.ts`.
+  - `[low]` `[patch]` Dos aserciones rompían el mecanismo de `PENDIENTES` (blind-hunter, edge-case-hunter): la 2.9 exige ya solo que lo que emite el guion sea del vocabulario —lo completo lo exige la correspondencia, que conoce `PENDIENTES`— y la prueba de la vista de Obra comprueba que ni ella ni su marca están pendientes, en vez de exigir la lista vacía.
+  - `[low]` `[patch]` La consulta de Obra por marca de `DESPLIEGUE.md` se saltaba las marcas nulas (blind-hunter, edge-case-hunter): `COALESCE(indexable,'nula')` en el recuento y en la marca, comentado; probada con `sqlite3` sobre el esquema y una tabla de muestra (dos marcas, `cambio` por las dos y por una nula con otra, `nula` sola, página 2 fuera).
+  - `[low]` `[patch]` `LIMIT 90` limitaba filas y no jornadas (blind-hunter): `LIMIT 120`, con el comentario de que son hasta cuatro filas por jornada y al menos las últimas 30.
+  - `[low]` `[patch]` La salvedad de `cambio` suponía un cambio «a mitad de jornada» (blind-hunter): el párrafo y el comentario de la consulta nombran el techo de caché de §1 (`max-age=600`), que puede alargar la marca vieja a los primeros minutos de la jornada siguiente.
+  - `[low]` `[patch]` `informeDeCoincidencia` decía «(1 rutas indexables)» (blind-hunter, edge-case-hunter): singular y plural, con su prueba.
+  - `[low]` `[patch]` La línea «página 1 de Obra sin marca válida» no decía qué se encontró (blind-hunter): cada ruta lleva al lado «(sin el atributo)» o el valor ajeno entre comillas; prueba al día.
+  - `[low]` `[patch]` Las pruebas copiaban la expresión de la marca en vez de usar el lector de la puerta (blind-hunter): `medicion.test.ts` y `obra-pagina.test.ts` leen la marca con `marcasDePagina` de `tools/lib/indexables.ts`.
+  - `[low]` `[patch]` «Y solo eso» de la copia que rompe el build solo descartaba una línea (blind-hunter): se exige el titular con «(1 desajuste)».
+  - `[low]` `[patch]` La guarda de islas eximía `umbrales.ts` entero por un comentario (blind-hunter): el comentario de `MAX_BYTES_GUION_DE_MEDICION` ya no nombra los identificadores vigilados y `umbrales.ts` sale de los dueños.
+  - `[low]` `[patch]` El entorno simulado tenía un `hasAttribute` del `<html>` que nadie llama, `dataset` con otra fuente que `getAttribute`, y su docblock sobre `ORIGEN_DEL_SANDBOX` (blind-hunter): fuera `hasAttribute`, `dataset` sale de los mismos atributos y la constante va antes del docblock, que queda sobre `medicionEnUnSandbox`.
+  - `[low]` `[patch]` Las premisas del sitio de `receptor.spec.ts` no se comprobaban y el selector del Autor escribía el atributo de zona a mano (blind-hunter): cada prueba de la 23.9 comprueba primero el `noindex` de su Obra, con un mensaje que nombra los umbrales de FR-52, y el selector se compone con `ATRIBUTO_DE_ZONA`.
+  - `[low]` `[patch]` La prueba de Vitest sobre `dist/` cotejaba marca y `noindex` solo en rutas con nombre (intent-alignment, ac-auditor): el recorrido de todas las rutas construidas exige además, en cada página con marca, que diga lo mismo que su `noindex`.
+
+Rechazados (18): la puerta que nombra la Obra en vez de leer `vistaConMarca` (la spec prescribe ese predicado, una prueba de `superficies.test.ts` fija la Página de Obra como única declarante, y el predicado independiente para el build también si la Obra perdiera su declaración); comprobar `data-vistas` contra la marca en la puerta (las dos salen de la misma llamada a `consecuenciasDe` en la misma línea del armazón, no dependen del Corpus, y el CI las fija en la tabla de `superficies.test.ts` y en el `data-vistas` de cada ruta construida); el corte de la serie `obra` de la continuación (la medición de la Épica 23 llega en vivo en el mismo despliegue que la 23.9, y la serie empieza tras esa llegada: no hay datos de antes); el parche por cadena exacta de `Armazon.astro` (la precondición falla en voz alta; precedente de la 22.4); la spec cerrada antes de la revisión (es esta pasada); otras consultas de §3 que contarían dos vistas (comprobado: todo `GLOB 'vista-*'` es `SELECT DISTINCT jornada, ruta` y lo demás nombra sus eventos); el orden de `MARCAS_DE_OBRA` (lo fija literal `tests/unit/vocabulario.test.ts:189`, además de la huella); la carga útil probada solo en el entorno simulado y en Playwright local (por diseño: el CI no corre e2e y el entorno ejecuta el fichero de verdad); la prueba de zonas de la 23.7 sin tocar (lo pide la 23.7); las consultas de SM-8 sin ejecutar en pruebas; la falta de comparación antes/después de sitemap, `noindex` y Pagefind (la puerta corre en cada construcción y las expectativas de la 22.4 no cambian); el sitio de `receptor.spec.ts` y la lectura tras las dos vistas solo en el entorno simulado; `producir` sobre `/cita/una/`; el orden de las dos vistas (coherente con la spec); el criterio de la 22.4 en `epics.md` (ya diferido a Héctor en el frontmatter); `sprint-status.yaml` (lo lleva el orquestador; la spec prohíbe tocarlo); la copia rota que dispara una sola clase en un build real (las cuatro se prueban puras y el cableado con una); la cobertura de navegador solo en `escritorio`.
+
 ## Design Notes
 
 **Por qué un campo propio y no una segunda `vista`.** `vista` sigue siendo «sí y solo si producto» (20.1, y el criterio de la 22.4 que esta historia sustituye solo en lo que dice de la Obra). La vista de Obra sale con otra regla —la página 1, se indexe o no— y lleva una marca; meterla en `vista` haría que la Obra no indexable la perdiera, o que `vista-de-superficie` dejara de ser «solo producto».
@@ -172,9 +197,22 @@ Blocking condition: ninguna.
 - `DESPLIEGUE.md` §3 — párrafo de la vista de Obra; fuera los «hasta la 23.9» de la Lectura, la Salida y el comentario de SM-4; la consulta de vistas, lecturas y salidas de Obra por marca y jornada (probada con `sqlite3` sobre una tabla de muestra); SM-8 con el tercer evento, que no entra.
 - `AGENTS.md` — la convención de la medición, el párrafo de la Página de Obra y la comprobación de `astro:build:done`.
 
-**Revisión.** 0 parches, 0 diferidos, 0 rechazados en esta pasada (capas externas sin hallazgos todavía). Recomendación de revisión de seguimiento: `false` (parches: 0 altos, 0 medios, 0 bajos; puntuación 0).
+**Revisión.** Primera pasada: 0 parches, 0 diferidos, 0 rechazados (capas externas sin hallazgos todavía). **Segunda pasada (revisión externa, 2026-10-25)**: 33 hallazgos tras deduplicar —blind-hunter 20, edge-case-hunter 1 propio (los otros cinco repetían los del blind-hunter), verification-gap ninguno, intent-alignment 9, ac-auditor 3 propios—; **15 parches aplicados** (todos bajos), **0 diferidos** nuevos y **18 rechazados**, con el detalle en el Review Triage Log. Recomendación de revisión de seguimiento: `true` (parches de esta pasada: 0 altos, 0 medios, 15 bajos; puntuación 3 × 0 + 15 = 15 ≥ 5).
 
-**Verificación.**
+Ficheros que toca la segunda pasada:
+- `src/lib/superficies.ts` — `CausaDelServicio`; `caracterPorCausa`, que comparten `caracterDe` y `consecuenciasDe`; `marcaPorCausa`, exhaustiva; la causa se calcula una vez.
+- `src/lib/medicion.ts` — la marca de la Obra solo viaja con la vista declarada (`D&&H`); docblocks.
+- `src/lib/umbrales.ts` — la medida nueva (3.647 bytes, tope sin mover) y el comentario sin los identificadores vigilados.
+- `tools/lib/indexables.ts` — el valor encontrado al lado de cada página 1 de Obra sin marca válida; singular en `informeDeCoincidencia`.
+- `DESPLIEGUE.md` §3 — la marca nula y el `LIMIT 120` de la consulta de Obra por marca; la caché de §1 en la salvedad de `cambio`.
+- `tests/unit/medicion.test.ts` — la 2.9 sin igualdad estricta; la vista de Obra pedida por una isla; `umbrales.ts` fuera de los dueños; marca leída con `marcasDePagina` y cotejada con el `noindex` en cada ruta construida.
+- `tests/unit/vocabulario.test.ts` — la vista de Obra no pendiente, en vez de `PENDIENTES` vacía.
+- `tests/unit/obra-indexable.test.ts` — el valor en la línea de la marca no válida; el singular.
+- `tests/unit/obra-pagina.test.ts` — la marca con `marcasDePagina`; «(1 desajuste)» en la copia que rompe.
+- `tests/unit/ayuda/medicion.ts` — sin `hasAttribute` en el `<html>`, `dataset` de los mismos atributos, docblock sobre `medicionEnUnSandbox`.
+- `tests/e2e/receptor.spec.ts` — la premisa del `noindex` de cada Obra y el selector con `ATRIBUTO_DE_ZONA`.
+
+**Verificación de la primera pasada.**
 - `npx astro check` — 0 errores, 0 avisos (20 sugerencias ajenas a la historia).
 - `npx vitest run` por fichero: `medicion` (491), `obra-pagina` (53) y, en una invocación, `vocabulario`, `superficies`, `obra-indexable`, `congelacion-de-obras`, `huella`, `receptor`, `espinas-de-ux`, `ingreso-construido`, `publicable-y-alcanzable` y `medicion-orden` (10 ficheros, 407): 12 ficheros, 951 pruebas en verde. `git diff b51311c2da5367470efb2e8925dca3f62c2079c6..HEAD -- src/lib/vocabulario.ts medicion/` vacío; ningún `caracter`, `reconoce`, `noPublicableEn` ni `indexablePorContenido` cambia.
 - `npm test` (con `correr.sh`) — 131 ficheros, 5.918 pruebas en verde.
@@ -183,8 +221,17 @@ Blocking condition: ninguna.
 - Comprobación a mano: `ARRANQUE_DE_MEDICION`, `MAX_BYTES_DE_GUION`, `src/lib/vocabulario.ts`, `medicion/` y `corpus/` sin cambios.
 - Auditoría de la matriz: Obra indexable, no indexable (lectura por tiempo, por interacción y la salida detrás), página 2+, llegada con `?de=`/`?via=`, marca ajena o ausente (cuatro casos), marca con otra vista, caché y prerender tienen su prueba en el entorno simulado de `tests/unit/medicion.test.ts`; la congelación, en la construcción de la 22.8 de `obra-pagina` y en la marca que sigue a la lista de `superficies`; el build con la marca falsa, en «lo que rompe el build» de `obra-pagina` y en las cuatro clases puras de `obra-indexable`; las dos primeras filas, además, en Playwright. Todas corrieron y pasaron.
 
+**Verificación de la segunda pasada.**
+- `npx astro check` — 0 errores, 0 avisos (20 sugerencias ajenas a la historia).
+- `npx vitest run tests/unit/vocabulario.test.ts tests/unit/superficies.test.ts tests/unit/obra-indexable.test.ts` — 3 ficheros, 180 pruebas en verde.
+- `npm test` (con `correr.sh`) — 131 ficheros, 5.919 pruebas en verde (incluye `medicion`, `obra-pagina` y el resto de los ficheros del primer criterio).
+- `npx playwright test tests/e2e/receptor.spec.ts tests/e2e/receptor-local.spec.ts tests/e2e/origen.spec.ts tests/e2e/busqueda.spec.ts tests/e2e/pagina-404.spec.ts --project=escritorio` (con el `webServer`) — 92 en verde y 2 saltadas ajenas; las dos de la 23.9 en verde. Puertos 4321, 4399, 4400, 4402 y 8787 libres al terminar.
+- `npx tsx -e` con `guionDeMedicion` y el punto final de producción — 3.647 bytes ≤ 3.730 (3.648 con la barra final; 3.602 con `https://ejemplo.invalid/e`).
+- La consulta de Obra por marca, con `sqlite3` sobre `medicion/esquema.sql` y una tabla de muestra: `indexable`, `no-indexable`, `cambio` (dos marcas, y una nula con otra) y `nula`, con la página 2 fuera.
+- Comprobación a mano: `git diff b51311c2da5367470efb2e8925dca3f62c2079c6 -- src/lib/vocabulario.ts medicion/ corpus/` vacío; `ARRANQUE_DE_MEDICION`, `MAX_BYTES_DE_GUION` y los campos `caracter`, `reconoce`, `noPublicableEn` e `indexablePorContenido` sin cambios.
+
 **Riesgos que quedan.**
-- El fichero queda a 86 bytes de su tope: la próxima historia que le añada algo lo sube en su diff, con la medida.
-- Una isla que pidiera `vista-de-obra` por `__medir` saldría con la marca del `<html>` (no con las Marcas de llegada): ninguna lo hace y una prueba de `tests/unit/medicion.test.ts` lo vigila sobre el texto de las fuentes.
-- La consulta de Obra por marca reparte lecturas y salidas con la marca de las vistas de su ruta y jornada; una ruta que cambia de indexabilidad a mitad de jornada sale como `cambio`, y leer la familia Obra desde `tools/` es de la 23.10.
+- El fichero queda a 83 bytes de su tope: la próxima historia que le añada algo lo sube en su diff, con la medida.
+- Una isla que pidiera `vista-de-obra` por `__medir` seguiría emitiéndola, ahora con la marca nula y sin Marcas de llegada (como cualquier vista pedida por una isla): ninguna lo hace, una prueba de `tests/unit/medicion.test.ts` lo vigila sobre el texto de las fuentes, y la consulta de Obra por marca la sacaría como `nula` o `cambio`.
+- La consulta de Obra por marca reparte lecturas y salidas con la marca de las vistas de su ruta y jornada; una ruta que cambia de indexabilidad sale ese día —y, por la caché de 10 minutos, quizá los primeros minutos del siguiente— como `cambio`, y leer la familia Obra desde `tools/` es de la 23.10.
 - Diferido para Héctor (en el `deferred` del frontmatter): marcar en `epics.md` el criterio de la Historia 22.4 como «(sustituido en la v8 por la Historia 23.9)» — pendiente de Héctor (bmad-create-epics-and-stories).
