@@ -299,6 +299,41 @@ subcomando y sus paradas viven en `tools/lib/medicion.ts`, con sus efectos inyec
 `tests/unit/medicion-secuencias.test.ts` los recorre con un D1 en memoria; el paso a paso, la
 reversión y Time Travel, en `DESPLIEGUE.md` §3.
 
+### Leer la línea base (Historia 23.10)
+
+```
+npm run medicion                # sin subcomando: lee D1 en remoto, informa y no escribe nada
+```
+
+**Es solo lectura**, con `--remote` explícito: sesión de `wrangler`, el Corpus de este equipo —del
+que sale el censo—, cinco recuentos agrupados con `d1 execute` de las jornadas UTC cerradas y
+`d1 info`. No pide `MEDICION_ENDPOINT`, no escribe en D1 ni en el repositorio, no ordena ni nombra
+el `rowid` —una prueba estrecha de `tests/unit/orden-de-llegada.test.ts` exige que en `tools/` solo
+lo nombren el barajado y la lectura de las balizas— y no hay punto final de lectura. Códigos: **2**
+sin sesión o con cualquier bandera o argumento (la lectura no lleva opciones); **1** si el Corpus no
+se deja leer o si no se leyó nada de D1; 0 si leyó algo. Una consulta que falla va a «Sin leer» y lo
+que depende de ella se omite, nunca como cero. Va con `--remote`, así que, como todo lo de arriba con
+`--remote`, la corre Héctor y no un agente; cada lectura son cinco recorridos de la tabla, que D1
+cuenta contra su cuota de lectura.
+
+La secuencia (`leer`, con `Efectos`) vive en `tools/lib/medicion.ts`; todo lo demás —descuentos,
+censo, tramos, tasas, líneas base, firmas, ventanas y el informe— en `tools/lib/lineaBase.ts`, puro
+y probado con respuestas fijas en `tests/unit/linea-base.test.ts`. La superficie de cada registro
+sale del censo de hoy (`rutasPublicadas`) y de `src/lib/superficies.ts`, **nunca del prefijo de la
+ruta**; la unidad de línea base, del campo `lineaBase` de la superficie (`superficieDeLineaBase`),
+que la orden lee sin nombrar ninguna ruta. Ningún módulo de `src/`, `integraciones/` ni
+`astro.config.mjs` la importa ni la nombra.
+
+**Las constantes que la gobiernan son de `src/lib/umbrales.ts` y las de valor son de Héctor**:
+`MIN_LECTURAS_DE_LINEA_BASE` y `DESPLIEGUE_DE_LA_LECTURA` (sin valor hasta la 23.11),
+`PASADAS_QUE_ESCRIBEN_EN_PRODUCCION` (vacía; la anota él el día de la 25.3 y de la 25.7) y
+`SM12_CON_FACEBOOK` (apagada; la enciende él en la 25.7). Ningún agente les da valor. Los **cortes de
+serie** viven en `CORTES_DE_SERIE_DECLARADOS`, una lista de constantes de despliegue sin ninguna
+fecha escrita —`CORTES_DE_SERIE` filtra las que llegaron y `CORTES_DE_SM8` es su proyección—: un
+corte nuevo entra con su historia y su constante, nunca con un literal. Una tasa nueva que se juzgue
+por ventanas entra en `JUICIOS_POR_VENTANAS` de `tools/lib/lineaBase.ts`. La orden dice «cerrada»,
+nunca «buena»: que una línea base es buena lo anota Héctor en `DESPLIEGUE.md` §3.
+
 ## Pedir rastreo de unas pocas URL, y anotarlo
 
 Google conoce las 1.715 URL y aun así indexa 2 de cada 80: no es descubrimiento, es que un

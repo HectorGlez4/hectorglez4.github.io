@@ -1,6 +1,9 @@
 /**
- * El receptor de la medición, desplegado en su orden — AD-13, AD-14, Historia 23.2.
+ * El receptor de la medición, desplegado en su orden, y su lectura — AD-13, AD-14, Historias 23.2
+ * y 23.10.
  *
+ *   npm run medicion                # la lectura de la línea base: lee D1 en remoto, informa
+ *                                   # y no escribe nada (Historia 23.10).
  *   npm run medicion -- desplegar   # migra en remoto, despliega el receptor, lo comprueba,
  *                                   # baraja el rowid y escribe la huella. Acto de Héctor.
  *   npm run medicion -- comprobar   # que el receptor en vivo guarda lo que dice la huella,
@@ -20,19 +23,30 @@
  * `npm test` coteja contra `src/lib/vocabulario.ts`. No hace commit: la huella la commitea quien
  * corre la orden.
  *
+ * ── La lectura ───────────────────────────────────────────────────────────────────────────
+ *
+ * Sin subcomando, la orden lee lo que el receptor guardó: sesión de `wrangler`, el Corpus de este
+ * equipo —del que sale el censo—, cinco recuentos agrupados con `d1 execute --remote` y `d1 info`.
+ * No pide `MEDICION_ENDPOINT` —no envía nada al receptor— y **no escribe nada**, ni en D1 ni en el
+ * repositorio: no hay punto final de lectura, y el receptor sigue contestando 204 a todo lo que no
+ * sea un `POST` (AD-14). Cada lectura recorre la tabla cinco veces, una por consulta. Lo que se
+ * hace con lo leído es de `tools/lib/lineaBase.ts`.
+ *
  * ── Códigos ──────────────────────────────────────────────────────────────────────────────
  *
- * 2 si la invocación no vale —subcomando o bandera desconocidos—, si falta `MEDICION_ENDPOINT`,
- * no es una dirección http(s) o apunta a la máquina propia, o si `wrangler` no tiene sesión: en
- * todos, antes de tocar nada. 1 para todo lo demás, con el parte de lo que quedó aplicado. Se
- * para en el primer fallo y no reintenta migraciones ni despliegues.
+ * 2 si la invocación no vale —subcomando, bandera o argumento desconocidos—, si falta
+ * `MEDICION_ENDPOINT` (salvo en la lectura, que no lo usa), no es una dirección http(s) o apunta a
+ * la máquina propia, o si `wrangler` no tiene sesión: en todos, antes de tocar nada. 1 para todo lo
+ * demás, con el parte de lo que quedó aplicado; en la lectura, si no se pudo leer el Corpus o si no
+ * se leyó nada de D1, nombrando cada cosa. La lectura sale con 0 si leyó algo. Se para en el primer
+ * fallo y no reintenta migraciones ni despliegues.
  *
  * ── Red ──────────────────────────────────────────────────────────────────────────────────
  *
  * Es la cáscara (AD-22): `wrangler`, `git`, el disco y el `fetch` de las balizas viven aquí, y
  * nada más. El orden de cada subcomando, sus paradas y lo que dice están en
- * `tools/lib/medicion.ts`, que recibe estos efectos y se prueba con otros de mentira. El build no
- * la invoca y ningún paso de CI la ejecuta.
+ * `tools/lib/medicion.ts`, que recibe estos efectos y se prueba con otros de mentira. La lectura
+ * solo usa `wrangler`, `ahora` y el Corpus. El build no la invoca y ningún paso de CI la ejecuta.
  */
 import { execFile, spawn } from 'node:child_process';
 import { existsSync } from 'node:fs';
@@ -41,6 +55,10 @@ import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { interpretar } from '../medicion/receptor.ts';
+import { rutasPublicadas } from '../src/lib/publicado.ts';
+import { conjuntoDelCorpus } from './indexacion.ts';
+import { rutasDelCorpus } from './lib/corpus.ts';
+import { componerLecturaDeMedicion, lineasDeLecturaDeMedicion } from './lib/lineaBase.ts';
 import {
   ARGUMENTOS_DEL_RECEPTOR_LOCAL,
   DIRECTORIO_DE_MIGRACIONES,
@@ -55,6 +73,7 @@ import {
   comprobar,
   desplegar,
   ensayo,
+  leer,
   puntoFinalDeComprobacion,
   vocabularioDeLaPrincipal,
   type Efectos,
@@ -272,6 +291,19 @@ async function principal(): Promise<number> {
   if (!invocacion.ok) throw new Parada(2, invocacion.motivo);
   const { subcomando } = invocacion;
 
+  if (subcomando === null) {
+    // La lectura: sin MEDICION_ENDPOINT —no envía nada— y sin aviso de interrupción, porque cortada
+    // a mitad no deja nada aplicado.
+    const lectura = await leer(efectos, () => conjuntoDelCorpus(rutasDelCorpus(join(RAIZ, 'corpus'))));
+    const informe = componerLecturaDeMedicion({
+      hoy: lectura.hoy,
+      censo: rutasPublicadas(lectura.corpus),
+      consultas: lectura.consultas,
+      cuota: lectura.cuota,
+    });
+    process.stdout.write(`${lineasDeLecturaDeMedicion(informe).join('\n')}\n`);
+    return 0;
+  }
   if (subcomando === 'local') return local();
   if (subcomando === 'ensayo') {
     await ensayo(efectos);

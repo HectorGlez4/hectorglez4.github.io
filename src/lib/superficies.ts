@@ -114,6 +114,31 @@ export interface Superficie {
    * declarada falla cerrado.
    */
   indexablePorContenido?: true;
+  /**
+   * La superficie de línea base — FR-56, AD-13, Historia 23.10.
+   *
+   * La unidad con que se agregan las lecturas de una superficie es la superficie misma, la portada
+   * incluida, nunca la familia; pero para la línea base dos superficies pueden ser una sola, que
+   * junta sus lecturas para el mínimo que la cierra: es el nombre que declaran las dos. Sin él, la
+   * superficie es su propia unidad (`superficieDeLineaBase`). La lectura de la línea base lo lee de
+   * forma genérica y no nombra ninguna ruta, y cada superficie se informa también por separado.
+   *
+   * Hoy no lo declara ninguna: lo declaran `/autores/` y `/obras/` cuando existan, las dos con
+   * `LINEA_BASE_DE_LOS_DIRECTORIOS` (Historias 26.3 y 26.4).
+   */
+  lineaBase?: string;
+}
+
+/**
+ * La superficie de línea base de los Directorios — Historia 23.10: «los Directorios», `/autores/`
+ * y `/obras/` juntos, como los nombran FR-56 y SM-4. La declaran sus dos superficies (26.3, 26.4),
+ * y la nombra la tabla de juicios por ventanas de la lectura de la línea base.
+ */
+export const LINEA_BASE_DE_LOS_DIRECTORIOS = 'los Directorios';
+
+/** La unidad de línea base de una superficie: la que declara, o ella misma por su nombre. */
+export function superficieDeLineaBase(superficie: Pick<Superficie, 'nombre' | 'lineaBase'>): string {
+  return superficie.lineaBase ?? superficie.nombre;
 }
 
 /**

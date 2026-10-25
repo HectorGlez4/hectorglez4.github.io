@@ -27,8 +27,11 @@ import {
   VALOR_AJENO,
   WRANGLER,
   INTENTOS_DE_COMPROBACION,
+  CONSULTAS_DE_LA_LECTURA,
   argumentosDeConsulta,
   avisoDeInterrupcion,
+  consultasDeLaLectura,
+  leerInformacionDeLaCuota,
   escriturasDeLasBalizas,
   esHostLocal,
   ordenDeBorradoDeLasBalizas,
@@ -121,22 +124,28 @@ const MODULOS_V71 = {
 
 describe('Historia 23.2 — la invocación', () => {
   it.each([
-    [[], /Falta el subcomando/],
     [['x'], /«x» no es un subcomando/],
     [['desplegar', '--rapido'], /«--rapido» no es una opción/],
+    [['desplegar', '--x'], /«--x» no es una opción/],
     [['comprobar', 'otra'], /«otra» sobra/],
-    [['--rapido'], /«--rapido» no es un subcomando/],
+    // Historia 23.10 — sin subcomando es la lectura, que no lleva opciones.
+    [['--rapido'], /«--rapido» no es una opción de esta orden\. La lectura no lleva opciones/],
+    [['--rapido', 'desplegar'], /«--rapido» no es una opción/],
   ])('%j no vale, y dice por qué y cómo se usa', (argumentos, motivo) => {
     const invocacion = argumentosDeMedicion(argumentos);
     expect(invocacion.ok).toBe(false);
     if (!invocacion.ok) {
       expect(invocacion.motivo).toMatch(motivo);
-      expect(invocacion.motivo).toContain('desplegar | comprobar | local | ensayo');
+      expect(invocacion.motivo).toContain('Uso: npm run medicion [-- desplegar | comprobar | local | ensayo]');
     }
   });
 
   it.each(SUBCOMANDOS.map((s) => [s]))('%s vale, solo', (subcomando) => {
     expect(argumentosDeMedicion([subcomando])).toEqual({ ok: true, subcomando });
+  });
+
+  it('sin nada detrás es la lectura de la línea base (23.10)', () => {
+    expect(argumentosDeMedicion([])).toEqual({ ok: true, subcomando: null });
   });
 
   it('el punto final tiene que ser http(s), y el motivo no repite el valor, que es un secreto', () => {
@@ -427,7 +436,7 @@ describe('Historia 23.2 — la huella', () => {
     });
     const delTramo = diferenciasDeHuella(otrosCortes, huellaDelVocabulario()).find((d) => d.startsWith('los tramos'));
     expect(delTramo).toBeDefined();
-    expect(delTramo).toMatch(/lista de cortes de serie \(Historia 23\.10\)/);
+    expect(delTramo).toMatch(/CORTES_DE_SERIE_DECLARADOS de src\/lib\/umbrales\.ts \(Historia 23\.10\)/);
   });
 
   it('un campo que no es un nombre de columna no entra: comprobar lo pondría en el SQL remoto', () => {
@@ -828,6 +837,79 @@ describe('Historia 23.2 — la cuota y los recuentos', () => {
   });
 });
 
+describe('Historia 23.10 — el SQL de la lectura', () => {
+  const HOY = '2026-11-10';
+  const sentencias = consultasDeLaLectura(HOY);
+
+  it('son cinco sentencias, una por consulta, y todas empiezan por SELECT', () => {
+    expect(Object.keys(sentencias)).toEqual([...CONSULTAS_DE_LA_LECTURA]);
+    for (const sql of Object.values(sentencias)) expect(sql).toMatch(/^SELECT /);
+  });
+
+  it.each(CONSULTAS_DE_LA_LECTURA.map((c) => [c]))(
+    '%s no escribe, no ordena, no nombra el rowid, aparta la comprobación y corta en hoy',
+    (consulta) => {
+      const sql = sentencias[consulta];
+      expect(sql).not.toMatch(/\b(?:INSERT|UPDATE|DELETE|REPLACE|CREATE|DROP|ALTER|PRAGMA|ATTACH|VACUUM)\b/i);
+      expect(sql).not.toMatch(/\bORDER\s+BY\b/i);
+      expect(sql).not.toMatch(/\b(?:_rowid_|rowid|oid)\b/i);
+      expect(sql).not.toContain(';');
+      expect(sql).toContain(`ruta <> '${RUTA_DE_COMPROBACION}'`);
+      expect(sql).toContain(`jornada < '${HOY}'`);
+      expect(sql).toMatch(/ COUNT\(\*\) AS n FROM eventos WHERE /);
+      expect(sql).toMatch(/ GROUP BY jornada, ruta/);
+    },
+  );
+
+  it('nombra los eventos del vocabulario, cada uno en su consulta, y ninguno más', () => {
+    const eventosDe = (sql: string) => [...(/evento IN \(([^)]*)\)/.exec(sql)?.[1] ?? '').matchAll(/'([^']+)'/g)].map((m) => m[1]);
+    expect(eventosDe(sentencias.vistasYLecturas)).toEqual([
+      EVENTOS.vistaDeCita,
+      EVENTOS.vistaDeSuperficie,
+      EVENTOS.vistaDeObra,
+      EVENTOS.lectura,
+    ]);
+    expect(eventosDe(sentencias.salidas)).toEqual([EVENTOS.salidaInterna]);
+    expect(eventosDe(sentencias.acciones)).toEqual([
+      EVENTOS.copiado,
+      EVENTOS.descargaDeImagen,
+      EVENTOS.comparticionDeImagen,
+      EVENTOS.comparticionDeEnlace,
+    ]);
+    expect(eventosDe(sentencias.busquedas)).toEqual([EVENTOS.busqueda]);
+    expect(eventosDe(sentencias.sinResultados)).toEqual([EVENTOS.busquedaSinResultados]);
+    // Entre las cinco, el vocabulario entero: ningún evento se queda sin leer.
+    const todos = Object.values(sentencias).flatMap(eventosDe).sort();
+    expect(todos).toEqual([...vocabulario.EVENTOS_VALIDOS].sort());
+  });
+
+  it('solo recuentos por jornada, ruta, evento y campo: ni sesiones ni recorridos (NFR-11)', () => {
+    expect(sentencias.vistasYLecturas).toMatch(/GROUP BY jornada, ruta, evento, origen, via, indexable$/);
+    expect(sentencias.salidas).toMatch(/GROUP BY jornada, ruta, zona$/);
+    expect(sentencias.acciones).toMatch(/GROUP BY jornada, ruta, evento, destino, primera$/);
+    expect(sentencias.busquedas).toMatch(/GROUP BY jornada, ruta, tramo, filtros$/);
+    expect(sentencias.sinResultados).toMatch(/GROUP BY jornada, ruta, consulta$/);
+  });
+
+  it('«hoy» se juzga antes de entrar en el SQL', () => {
+    expect(() => consultasDeLaLectura("2026-11-10' OR '1'='1")).toThrow(/no es una jornada/);
+    expect(() => consultasDeLaLectura('10/11/2026')).toThrow(/no es una jornada/);
+  });
+
+  it('d1 info da las dos cifras de la cuota por separado: la falta de una no se lleva la otra', () => {
+    expect(leerInformacionDeLaCuota(JSON.stringify({ rows_written_24h: 1234, database_size: 5_000_000 }))).toEqual({
+      escritas: { ok: true, valor: 1234 },
+      tamaño: { ok: true, valor: 5_000_000 },
+    });
+    const sinTamaño = leerInformacionDeLaCuota(JSON.stringify({ rows_written_24h: 7 }));
+    expect(sinTamaño.escritas).toEqual({ ok: true, valor: 7 });
+    expect(sinTamaño.tamaño).toEqual({ ok: false, motivo: 'd1 info no trae database_size.' });
+    const roto = leerInformacionDeLaCuota('✘ [ERROR] Authentication error', ' (wrangler salió con 1)');
+    expect(roto.escritas).toEqual({ ok: false, motivo: 'wrangler no contestó JSON (wrangler salió con 1).' });
+    expect(roto.tamaño.ok).toBe(false);
+  });
+});
+
 describe('Historia 23.2 — la cáscara sale con 2 antes de tocar la red', () => {
   /** Un `PATH` con un `npx` de mentira delante, que contesta lo que se le dé y sale con su código. */
   function npxDeMentira(salida: string, codigo: number): string {
@@ -857,7 +939,8 @@ describe('Historia 23.2 — la cáscara sale con 2 antes de tocar la red', () =>
   it.each([
     [['x'], {}, /no es un subcomando/],
     [['desplegar', '--rapido'], {}, /«--rapido» no es una opción/],
-    [[], {}, /Falta el subcomando/],
+    // La lectura (23.10): una bandera detrás sale con 2 sin llamar a npx.
+    [['--rapido'], {}, /«--rapido» no es una opción/],
     [['comprobar'], { MEDICION_ENDPOINT: undefined }, /Falta MEDICION_ENDPOINT/],
     [['desplegar'], { MEDICION_ENDPOINT: undefined }, /Falta MEDICION_ENDPOINT/],
     [['desplegar'], { MEDICION_ENDPOINT: 'ftp://receptor.example/m' }, /no es una dirección http\(s\)/],
@@ -887,6 +970,61 @@ describe('Historia 23.2 — la cáscara sale con 2 antes de tocar la red', () =>
     expect(roto.codigo, roto.salida).toBe(1);
     expect(roto.salida).toContain('whoami --json no contestó lo esperado');
     expect(roto.salida).toContain('No se aplicó nada en remoto.');
+  }, 60_000);
+
+  it('la lectura (23.10): sin sesión sale con 2 sin pedir MEDICION_ENDPOINT', async () => {
+    const sinSesion = await correr([], {
+      MEDICION_ENDPOINT: undefined,
+      PATH: `${npxDeMentira('{"loggedIn":false}', 1)}:${process.env.PATH}`,
+    });
+    expect(sinSesion.codigo, sinSesion.salida).toBe(2);
+    expect(sinSesion.salida).toContain(`npx --yes ${WRANGLER} login`);
+    expect(sinSesion.salida).not.toMatch(/MEDICION_ENDPOINT/);
+  }, 60_000);
+
+  it('la lectura (23.10): con todo leído sale con 0, y acaba diciendo que no escribió nada', async () => {
+    // Un `npx` que contesta como `wrangler`: sesión, consultas vacías y `d1 info`; y apunta cada
+    // invocación, para ver que solo se pidió eso.
+    const dir = mkdtempSync(join(tmpdir(), 'sabiduria-npx-'));
+    aBorrar.push(dir);
+    const apuntes = join(dir, 'apuntes');
+    writeFileSync(
+      join(dir, 'npx'),
+      [
+        '#!/bin/sh',
+        `printf '%s\\n' "$*" >> '${apuntes}'`,
+        'case "$*" in',
+        `  *whoami*) printf '%s' '{"loggedIn":true}' ;;`,
+        `  *"d1 info"*) printf '%s' '{"rows_written_24h":1200,"database_size":9000000}' ;;`,
+        `  *"d1 execute"*) printf '%s' '[{"results":[],"success":true}]' ;;`,
+        '  *) exit 99 ;;',
+        'esac',
+        '',
+      ].join('\n'),
+    );
+    chmodSync(join(dir, 'npx'), 0o755);
+    const { codigo, salida } = await correr([], { MEDICION_ENDPOINT: undefined, PATH: `${dir}:${process.env.PATH}` });
+    expect(codigo, salida).toBe(0);
+    expect(salida).toContain('Cuota de D1 (plan gratuito)');
+    expect(salida.trim().split('\n').at(-1)).toBe('Consulta: no se ha escrito nada.');
+    const pedido = readFileSync(apuntes, 'utf8').trim().split('\n');
+    expect(pedido[0]).toBe(`--yes ${WRANGLER} whoami --json`);
+    expect(pedido.slice(1, 6).every((linea) => linea.startsWith(`--yes ${WRANGLER} d1 execute medicion --remote --json --command SELECT `))).toBe(true);
+    expect(pedido.slice(6)).toEqual([`--yes ${WRANGLER} d1 info medicion --json`]);
+  }, 60_000);
+
+  it('la lectura (23.10): con un npx que no contesta consultas sale con 1, nombrando lo que no leyó', async () => {
+    // Contesta lo mismo a todo: con sesión, y ninguna consulta ni `d1 info` se deja leer.
+    const { codigo, salida } = await correr([], {
+      MEDICION_ENDPOINT: undefined,
+      PATH: `${npxDeMentira('{"loggedIn":true}', 0)}:${process.env.PATH}`,
+    });
+    expect(codigo, salida).toBe(1);
+    expect(salida).toContain('No se leyó nada de D1');
+    for (const que of ['las vistas y las lecturas', 'las salidas internas', 'las acciones', 'las búsquedas asentadas', 'las búsquedas sin resultados', 'las filas escritas en 24 h', 'el tamaño de la base']) {
+      expect(salida).toContain(que);
+    }
+    expect(salida).toContain('Consulta: no se ha escrito nada.');
   }, 60_000);
 
   it('con un wrangler que no arranca —no hay npx— sale con 1', async () => {

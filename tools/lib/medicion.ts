@@ -11,8 +11,15 @@
  * `tests/unit/medicion-orden.test.ts` y con un D1 en memoria en
  * `tests/unit/medicion-secuencias.test.ts`, sin tocar ningún D1.
  *
- * Ningún SQL de aquí ordena: el `rowid` es aleatorio (Historia 23.12) y solo lo nombran la
- * lectura de las balizas de prueba, como texto, y el barajado.
+ * Desde la Historia 23.10 también la lectura de la línea base, `npm run medicion` sin
+ * subcomando: la invocación, sus cinco consultas (`consultasDeLaLectura`) y su secuencia (`leer`).
+ * Lo que se hace con lo leído —descuentos, censo, tramos, tasas, líneas base y el informe— es de
+ * `tools/lib/lineaBase.ts`, puro.
+ *
+ * Ningún SQL de aquí ordena: el `rowid` es aleatorio (Historia 23.12) y solo lo nombran dos
+ * sentencias, la lectura de las balizas de prueba, como texto, y el barajado. Ninguna otra lo
+ * nombra, tampoco las de la lectura, y `tests/unit/orden-de-llegada.test.ts` lo vigila en todo
+ * `tools/`.
  */
 
 import * as vocabularioDeLaRama from '../../src/lib/vocabulario.ts';
@@ -67,7 +74,10 @@ export const ESPERA_ENTRE_INTENTOS_EN_LOCAL_MS = 1_000;
 /** El texto que llevan las balizas de prueba en un campo de texto libre. */
 export const TEXTO_DE_PRUEBA = 'comprobacion';
 
-/** Los subcomandos, y nada más: ni banderas ni argumentos sueltos. */
+/**
+ * Los subcomandos, y nada más: ni banderas ni argumentos sueltos. Sin subcomando, la orden es la
+ * lectura de la línea base (Historia 23.10).
+ */
 export const SUBCOMANDOS = ['desplegar', 'comprobar', 'local', 'ensayo'] as const;
 export type Subcomando = (typeof SUBCOMANDOS)[number];
 
@@ -161,20 +171,100 @@ export function sqlDeLasBalizas(campos: readonly string[]): string {
   );
 }
 
+// ── El SQL de la lectura de la línea base (Historia 23.10) ───────────────────────────────
+
+/** Las cinco consultas de la lectura: una por grupo de eventos, para que un fallo no las vacíe todas. */
+export const CONSULTAS_DE_LA_LECTURA = ['vistasYLecturas', 'salidas', 'acciones', 'busquedas', 'sinResultados'] as const;
+export type ConsultaDeLaLectura = (typeof CONSULTAS_DE_LA_LECTURA)[number];
+
+/** Lo que lee cada consulta, como lo nombra el informe cuando falta. */
+export const QUE_LEE: { readonly [C in ConsultaDeLaLectura]: string } = {
+  vistasYLecturas: 'las vistas y las lecturas',
+  salidas: 'las salidas internas',
+  acciones: 'las acciones',
+  busquedas: 'las búsquedas asentadas',
+  sinResultados: 'las búsquedas sin resultados',
+};
+
+const { EVENTOS } = vocabularioDeLaRama;
+
+/**
+ * Los eventos y las columnas de cada consulta — AD-13, NFR-11. Solo recuentos por jornada, ruta,
+ * evento y campo: ni sesiones ni recorridos. Los eventos salen del vocabulario, nunca escritos.
+ */
+const FORMA_DE_LA_CONSULTA: {
+  readonly [C in ConsultaDeLaLectura]: { eventos: readonly string[]; columnas: readonly string[] };
+} = {
+  vistasYLecturas: {
+    eventos: [EVENTOS.vistaDeCita, EVENTOS.vistaDeSuperficie, EVENTOS.vistaDeObra, EVENTOS.lectura],
+    columnas: ['jornada', 'ruta', 'evento', 'origen', 'via', 'indexable'],
+  },
+  salidas: { eventos: [EVENTOS.salidaInterna], columnas: ['jornada', 'ruta', 'zona'] },
+  acciones: {
+    eventos: [EVENTOS.copiado, EVENTOS.descargaDeImagen, EVENTOS.comparticionDeImagen, EVENTOS.comparticionDeEnlace],
+    columnas: ['jornada', 'ruta', 'evento', 'destino', 'primera'],
+  },
+  busquedas: { eventos: [EVENTOS.busqueda], columnas: ['jornada', 'ruta', 'tramo', 'filtros'] },
+  // La ruta va también aquí, aunque la consulta sin resultados salga siempre de `/buscar/`: sin
+  // ella no se podrían descontar las pasadas en producción, que se descuentan por ruta.
+  sinResultados: { eventos: [EVENTOS.busquedaSinResultados], columnas: ['jornada', 'ruta', 'consulta'] },
+};
+
+/** Lo que tiene forma de jornada: lo único que entra en el SQL de la lectura además de constantes. */
+export const FORMA_DE_JORNADA = /^\d{4}-\d{2}-\d{2}$/;
+
+/**
+ * Las cinco sentencias de la lectura, todas de solo lectura y con la misma forma: los recuentos
+ * agrupados de las jornadas **cerradas** —anteriores a `hoy`, en UTC— sin las balizas de prueba,
+ * sin `ORDER BY` —se ordena en JavaScript— y sin nombrar el `rowid`. Cada una recorre la tabla una
+ * vez, así que una lectura son cinco recorridos, que D1 cuenta contra su cuota de lectura.
+ *
+ * `hoy` se juzga antes de entrar en el SQL: otra cosa que una jornada lanza.
+ */
+export function consultasDeLaLectura(hoy: string): { readonly [C in ConsultaDeLaLectura]: string } {
+  if (!FORMA_DE_JORNADA.test(hoy)) throw new Error(`«${hoy}» no es una jornada AAAA-MM-DD.`);
+  const sentencia = ({ eventos, columnas }: { eventos: readonly string[]; columnas: readonly string[] }) => {
+    const dimensiones = columnas.join(', ');
+    const lista = eventos.map((evento) => `'${evento}'`).join(', ');
+    return (
+      `SELECT ${dimensiones}, COUNT(*) AS n FROM eventos WHERE jornada < '${hoy}' ` +
+      `AND ruta <> '${RUTA_DE_COMPROBACION}' AND evento IN (${lista}) GROUP BY ${dimensiones}`
+    );
+  };
+  return {
+    vistasYLecturas: sentencia(FORMA_DE_LA_CONSULTA.vistasYLecturas),
+    salidas: sentencia(FORMA_DE_LA_CONSULTA.salidas),
+    acciones: sentencia(FORMA_DE_LA_CONSULTA.acciones),
+    busquedas: sentencia(FORMA_DE_LA_CONSULTA.busquedas),
+    sinResultados: sentencia(FORMA_DE_LA_CONSULTA.sinResultados),
+  };
+}
+
 // ── La invocación ─────────────────────────────────────────────────────────────────────────
 
-export type Invocacion = { ok: true; subcomando: Subcomando } | { ok: false; motivo: string };
+/** `subcomando: null` es la lectura de la línea base: la orden sin nada detrás (Historia 23.10). */
+export type Invocacion = { ok: true; subcomando: Subcomando | null } | { ok: false; motivo: string };
 
-/** El subcomando, o por qué la invocación no vale (código 2, sin tocar nada). */
+/** Cómo se usa la orden: la lectura a secas, o uno de los subcomandos. */
+export const USO_DE_MEDICION = `Uso: npm run medicion [-- ${SUBCOMANDOS.join(' | ')}]`;
+
+/**
+ * El subcomando —`null` para la lectura—, o por qué la invocación no vale (código 2, sin tocar
+ * nada). La lectura no lleva opciones: una bandera o un argumento suelto, solos o detrás de un
+ * subcomando, no son «lo mismo pero sin ellos».
+ */
 export function argumentosDeMedicion(argumentos: readonly string[]): Invocacion {
   const [primero, ...resto] = argumentos;
-  const uso = `Uso: npm run medicion -- ${SUBCOMANDOS.join(' | ')}`;
-  if (primero === undefined) return { ok: false, motivo: `Falta el subcomando. ${uso}` };
+  if (primero === undefined) return { ok: true, subcomando: null };
   if (!(SUBCOMANDOS as readonly string[]).includes(primero)) {
-    return { ok: false, motivo: `«${primero}» no es un subcomando de esta orden. ${uso}` };
+    if (primero.startsWith('-')) {
+      const motivos = motivosDeArgumentosNoReconocidos([...argumentos], { solas: [], conValor: [] });
+      return { ok: false, motivo: `${motivos.join(' ')} La lectura no lleva opciones. ${USO_DE_MEDICION}` };
+    }
+    return { ok: false, motivo: `«${primero}» no es un subcomando de esta orden. ${USO_DE_MEDICION}` };
   }
   const motivos = motivosDeArgumentosNoReconocidos([...resto], { solas: [], conValor: [] });
-  if (motivos.length > 0) return { ok: false, motivo: `${motivos.join(' ')} ${uso}` };
+  if (motivos.length > 0) return { ok: false, motivo: `${motivos.join(' ')} ${USO_DE_MEDICION}` };
   return { ok: true, subcomando: primero as Subcomando };
 }
 
@@ -296,6 +386,43 @@ export function leerInformacion(salida: string): Informacion {
     return { ok: false, motivo: 'd1 info no trae rows_written_24h: sin él no se sabe si el barajado cabe.' };
   }
   return typeof tamaño === 'number' ? { ok: true, escritas24h: escritas, tamaño } : { ok: true, escritas24h: escritas };
+}
+
+/** Un dato leído, o por qué no se pudo leer: nunca un cero en su lugar. */
+export type Leido<T> = { ok: true; valor: T } | { ok: false; motivo: string };
+
+/** Las dos cifras de la cuota que da `d1 info`, cada una por su lado (Historia 23.10). */
+export interface CuotaLeida {
+  /** `rows_written_24h`: lo escrito en las últimas 24 horas, que peca por exceso frente al día. */
+  escritas: Leido<number>;
+  /** `database_size`, en bytes. */
+  tamaño: Leido<number>;
+}
+
+const cifraDe = (valor: unknown, nombre: string): Leido<number> =>
+  typeof valor === 'number' && Number.isFinite(valor) && valor >= 0
+    ? { ok: true, valor }
+    : { ok: false, motivo: `d1 info no trae ${nombre}.` };
+
+/**
+ * `d1 info --json` para la lectura: las filas escritas en 24 h y el tamaño, **por separado** —la
+ * falta de una no se lleva la otra—. `causa` es lo que dijo `wrangler`, para el motivo.
+ */
+export function leerInformacionDeLaCuota(salida: string, causa = ''): CuotaLeida {
+  let dato: unknown;
+  try {
+    dato = JSON.parse(salida);
+  } catch {
+    const motivo = `wrangler no contestó JSON${causa}.`;
+    return { escritas: { ok: false, motivo }, tamaño: { ok: false, motivo } };
+  }
+  const objeto = (typeof dato === 'object' && dato !== null && !Array.isArray(dato) ? dato : {}) as Record<string, unknown>;
+  const conCausa = (leido: Leido<number>): Leido<number> =>
+    leido.ok ? leido : { ok: false, motivo: `${leido.motivo.replace(/\.$/, '')}${causa}.` };
+  return {
+    escritas: conCausa(cifraDe(objeto.rows_written_24h, 'rows_written_24h')),
+    tamaño: conCausa(cifraDe(objeto.database_size, 'database_size')),
+  };
 }
 
 // ── El estado de la tabla ─────────────────────────────────────────────────────────────────
@@ -666,7 +793,8 @@ export function diferenciasDeHuella(
     // Otros cortes parten la serie: lo de antes no se compara con lo de después (AD-13).
     diferencias.push(
       `los tramos: ${lados.a} dice [${tramos(a)}] y ${lados.b} [${tramos(b)}]. Cambiar los cortes abre un ` +
-        'corte de serie: anótalo, con su jornada de despliegue, en la lista de cortes de serie (Historia 23.10).',
+        'corte de serie: anótalo, con su constante de despliegue, en CORTES_DE_SERIE_DECLARADOS de ' +
+        'src/lib/umbrales.ts (Historia 23.10).',
     );
   }
   return diferencias;
@@ -1613,6 +1741,66 @@ export async function comprobar(efectos: Efectos, url: string): Promise<void> {
     `El receptor en vivo guarda cada evento y cada valor de la huella (${huella.commit}), descarta lo ajeno, ` +
       'numera al azar y las balizas se borraron.',
   );
+}
+
+/** Lo que trae la lectura de D1, sin tocar todavía: el informe lo compone `tools/lib/lineaBase.ts`. */
+export interface LecturaCruda<C> {
+  /** La jornada UTC de hoy, que no entra: solo se leen jornadas cerradas. */
+  hoy: string;
+  /** Lo que devolvió `leerCorpus`: el Corpus de este equipo, del que sale el censo. */
+  corpus: C;
+  /** Cada consulta, con sus filas o con por qué no se leyó. */
+  consultas: { readonly [Q in ConsultaDeLaLectura]: Filas };
+  cuota: CuotaLeida;
+}
+
+/**
+ * `npm run medicion` sin subcomando: la lectura de la línea base (Historia 23.10, AD-14, AD-22).
+ *
+ * Sesión de `wrangler` —sin ella, 2; ilegible, 1—, el Corpus —sin él no se sabe qué publica el
+ * sitio, y sale con 1—, las cinco consultas con `--remote` y `d1 info`. **Solo lee**: no despliega,
+ * no migra, no envía balizas ni toca git, la huella o el disco. Una consulta que falla no para: va
+ * con su motivo, y el informe omite y nombra lo que dependía de ella. Si no se leyó nada —ni una
+ * consulta ni ninguna cifra de `d1 info`—, sale con 1 nombrando cada cosa.
+ */
+export async function leer<C>(efectos: Efectos, leerCorpus: () => Promise<C>): Promise<LecturaCruda<C>> {
+  await exigirSesion(efectos);
+  let corpus: C;
+  try {
+    corpus = await leerCorpus();
+  } catch (error) {
+    throw new Parada(
+      1,
+      `No se pudo leer el Corpus: ${error instanceof Error ? error.message : String(error)}. Sin él no se sabe ` +
+        'qué publica el sitio, así que no se lee ni se reparte nada.',
+    );
+  }
+  const hoy = jornadaUtc(efectos.ahora());
+  const sentencias = consultasDeLaLectura(hoy);
+  const consultas = {} as Record<ConsultaDeLaLectura, Filas>;
+  for (const nombre of CONSULTAS_DE_LA_LECTURA) {
+    const salida = await efectos.wrangler(argumentosDeConsulta(sentencias[nombre], 'remota'));
+    const leido = leerConsulta(salida.stdout);
+    consultas[nombre] = leido.ok ? leido : { ok: false, motivo: `${leido.motivo}${causaDe(salida)}` };
+  }
+  const informacion = await efectos.wrangler(ARGUMENTOS_DE_INFORMACION);
+  const cuota = leerInformacionDeLaCuota(informacion.stdout, informacion.codigo === 0 ? '' : causaDe(informacion));
+
+  const leidas = CONSULTAS_DE_LA_LECTURA.filter((nombre) => consultas[nombre].ok);
+  if (leidas.length === 0 && !cuota.escritas.ok && !cuota.tamaño.ok) {
+    const motivo = (leido: Filas | Leido<number>) => (leido.ok ? '' : leido.motivo);
+    throw new Parada(
+      1,
+      [
+        'No se leyó nada de D1:',
+        ...CONSULTAS_DE_LA_LECTURA.map((nombre) => `  ${QUE_LEE[nombre]}: ${motivo(consultas[nombre])}`),
+        `  las filas escritas en 24 h: ${motivo(cuota.escritas)}`,
+        `  el tamaño de la base: ${motivo(cuota.tamaño)}`,
+        'Consulta: no se ha escrito nada.',
+      ].join('\n'),
+    );
+  }
+  return { hoy, corpus, consultas, cuota };
 }
 
 /**

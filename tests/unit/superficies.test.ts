@@ -6,6 +6,7 @@ import {
   CRITERIOS_QUE_AÑADE_WCAG_22,
   ETIQUETAS_DEL_BARRIDO,
   ETIQUETAS_QUE_AXE_NO_CORRE,
+  LINEA_BASE_DE_LOS_DIRECTORIOS,
   SUPERFICIES,
   axeLaCorre,
   anunciableEnElSitemap,
@@ -18,6 +19,7 @@ import {
   etiquetaDeAxe,
   olvidarRutasIndexables,
   rutaNormalizada,
+  superficieDeLineaBase,
   superficieDeclaradaDe,
   superficiesDelBarrido,
   type Caracter,
@@ -1110,5 +1112,24 @@ describe('Historia 23.1 — la medición es una consecuencia más de la declarac
     const deProducto = SUPERFICIES.filter((s) => s.caracter === 'producto');
     expect(deProducto.length).toBeGreaterThan(0);
     for (const superficie of deProducto) expect(superficie.vista, superficie.nombre).toBeDefined();
+  });
+});
+
+describe('Historia 23.10 — la superficie de línea base', () => {
+  it('es la que declara la superficie, o ella misma por su nombre', () => {
+    const portada = superficieDeclaradaDe('/')!;
+    expect(superficieDeLineaBase(portada)).toBe('la portada');
+    expect(superficieDeLineaBase({ ...portada, lineaBase: LINEA_BASE_DE_LOS_DIRECTORIOS })).toBe('los Directorios');
+    expect(superficieDeLineaBase({ nombre: 'otra', lineaBase: 'compartida' })).toBe('compartida');
+  });
+
+  it('una línea base declarada junta al menos dos superficies, y no se llama como otra superficie', () => {
+    // Hoy no la declara ninguna; los Directorios la declaran con la 26 (26.3 y 26.4).
+    const nombres = new Set(SUPERFICIES.map((s) => s.nombre));
+    for (const superficie of SUPERFICIES) {
+      if (superficie.lineaBase === undefined) continue;
+      expect(SUPERFICIES.filter((s) => s.lineaBase === superficie.lineaBase).length, superficie.nombre).toBeGreaterThan(1);
+      expect(nombres.has(superficie.lineaBase), superficie.nombre).toBe(false);
+    }
   });
 });

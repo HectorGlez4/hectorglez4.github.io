@@ -6,6 +6,7 @@ import { EVENTOS } from '../../src/lib/medicion.ts';
 import { CAMPOS, CAMPOS_DE_EVENTO, EVENTOS_VALIDOS, claveEnLaBaliza } from '../../src/lib/vocabulario.ts';
 import { interpretar, jornadaDe } from '../../medicion/receptor.ts';
 import worker from '../../medicion/worker.ts';
+import { SQL_DE_BARAJADO } from '../../tools/lib/medicion.ts';
 import { d1QueApunta, listaTras, peticionAlReceptor, sqlNeutralizado } from './ayuda/d1.js';
 
 const raiz = resolve(import.meta.dirname, '../..');
@@ -305,8 +306,8 @@ function lecturas({ texto, origen }: TextoSql): Lectura[] {
  * ordena nombra el `rowid`, ninguna ordena por él, venga por un alias, un CTE, una tabla
  * derivada o un `UNION`. Es más estricta que el criterio y no le quita nada a la 23.2: la
  * comprobación (`CAST(rowid AS TEXT)`) y el barajado (`UPDATE … SET rowid`) no ordenan, y
- * la 23.10 prohibirá nombrarlo en cualquier otro SQL. Lo que marca de más, a propósito, y
- * su salida están en los casos de control.
+ * desde la 23.10 ningún otro SQL lo nombra (la prueba estrecha, abajo). Lo que marca de más,
+ * a propósito, y su salida están en los casos de control.
  */
 function ordenaPorRowid(texto: TextoSql): boolean {
   return lecturas(texto).some(({ sql, hueco, sinTermino }) =>
@@ -562,5 +563,95 @@ describe('Historia 23.12 — ninguna consulta de tools/ ordena por rowid', () =>
 
     const ordenan = barridos.filter((ruta) => ficheroOrdenaPorRowid(ruta, fuentes.get(ruta) ?? ''));
     expect(ordenan, `ordenan por rowid: ${ordenan.join(', ')}`).toEqual([]);
+  });
+});
+
+/*
+ * Historia 23.10 — la prueba estrecha: ningún SQL de `tools/` nombra el `rowid`, salvo dos.
+ *
+ * La lectura de la línea base cuenta, y no tiene por qué leer el `rowid` por ningún camino: ni
+ * para ordenar ni para seleccionarlo. Las dos sentencias que lo nombran con razón son de
+ * `tools/lib/medicion.ts` —el barajado, que lo reescribe, y la lectura de las balizas de prueba,
+ * que lo lee como texto para juzgar si es aleatorio—, y solo ahí valen. Una sentencia es lo que
+ * lleva `SELECT … FROM`, `UPDATE … SET`, `INSERT … INTO`, `DELETE FROM`, `WITH` o `PRAGMA`: la
+ * prosa de un mensaje que nombra el `rowid` no es SQL.
+ */
+
+/** Lo que hace de un texto una sentencia de SQL, y no prosa. */
+const ES_SENTENCIA = /\bSELECT\b[\s\S]*\bFROM\b|\bUPDATE\b[\s\S]*\bSET\b|\bINSERT\b[\s\S]*\bINTO\b|\bDELETE\s+FROM\b|\bWITH\b|\bPRAGMA\b/i;
+
+/** Las dos que lo nombran con razón, tal como las pliega el compilador, y el único fichero donde valen. */
+const NOMBRAN_ROWID_CON_PERMISO: ReadonlyMap<string, readonly string[]> = new Map([
+  [
+    'tools/lib/medicion.ts',
+    [SQL_DE_BARAJADO, `SELECT CAST(rowid AS TEXT) AS fila, ${HUECO} FROM eventos WHERE ruta = '${HUECO}'`],
+  ],
+]);
+
+/** ¿Alguna sentencia de este texto nombra `rowid`, `_rowid_` u `oid`? */
+const nombraRowid = (texto: TextoSql) =>
+  lecturas(texto).some(({ sql }) => sql.split(';').some((sentencia) => ES_SENTENCIA.test(sentencia) && NOMBRA_ROWID.test(sentencia)));
+
+/** Los textos SQL de un fichero que nombran el `rowid` sin estar entre los dos con permiso. */
+function nombranRowidSinPermiso(ruta: string, fuente: string): string[] {
+  const permitidos = NOMBRAN_ROWID_CON_PERMISO.get(ruta) ?? [];
+  return textosSql(ruta, fuente)
+    .filter((texto) => !permitidos.includes(texto.texto) && nombraRowid(texto))
+    .map(({ texto }) => texto);
+}
+
+describe('Historia 23.10 — ningún SQL de tools/ nombra el rowid, salvo el barajado y las balizas', () => {
+  it.each([
+    ['consulta.ts', "const sql = 'SELECT rowid, ruta FROM eventos';"],
+    ['consulta.ts', "const sql = 'SELECT jornada, COUNT(rowid) AS n FROM eventos GROUP BY jornada';"],
+    ['consulta.sql', 'SELECT CAST(rowid AS TEXT) AS fila FROM eventos'],
+    ['consulta.ts', 'const sql = `WITH t AS (SELECT _rowid_ AS r FROM eventos) SELECT count(*) FROM t`;'],
+    ['consulta.sql', 'PRAGMA table_info(eventos); SELECT oid FROM eventos'],
+    ['consulta.ts', "const sql = 'DELETE FROM eventos WHERE rowid = 1';"],
+    ['consulta.ts', "const sql = 'INSERT INTO eventos (rowid, jornada) VALUES (1, 2)';"],
+    // Las dos permitidas, fuera de su fichero, no valen.
+    ['consulta.ts', "const sql = 'UPDATE eventos SET rowid = abs(random())';"],
+    ['tools/lib/lineaBase.ts', "const sql = 'UPDATE eventos SET rowid = abs(random())';"],
+    // Y en su fichero, otra sentencia que lo nombre tampoco.
+    ['tools/lib/medicion.ts', "const sql = 'SELECT rowid FROM eventos';"],
+    ['consulta.sh', 'npx wrangler d1 execute medicion --remote --command "SELECT rowid FROM eventos"'],
+  ])('marca %s: %j', (ruta, fuente) => {
+    expect(nombranRowidSinPermiso(ruta, fuente)).not.toEqual([]);
+  });
+
+  it.each([
+    // La prosa de un mensaje que nombra el `rowid` no es SQL.
+    ['consulta.ts', "throw new Error('El receptor numera en orden de llegada: hay rowid de las balizas contiguos.');"],
+    ['consulta.ts', "const que = 'barajar el rowid';"],
+    // Un comentario no es código.
+    ['consulta.ts', '// SELECT rowid FROM eventos\nconst a = 1;'],
+    // Una lectura que cuenta sin nombrarlo.
+    ['consulta.ts', "const sql = `SELECT jornada, ruta, COUNT(*) AS n FROM eventos WHERE jornada < '${hoy}' GROUP BY jornada, ruta`;"],
+    // Las dos con permiso, en su fichero.
+    ['tools/lib/medicion.ts', "export const SQL_DE_BARAJADO = 'UPDATE eventos SET rowid = abs(random())';"],
+    [
+      'tools/lib/medicion.ts',
+      "const sql =\n  `SELECT CAST(rowid AS TEXT) AS fila, ${columnas} FROM eventos ` +\n  `WHERE ruta = '${RUTA_DE_COMPROBACION}'`;",
+    ],
+  ])('no marca %s: %j', (ruta, fuente) => {
+    expect(nombranRowidSinPermiso(ruta, fuente)).toEqual([]);
+  });
+
+  it('se barren los ficheros de tools/ —la lectura de la línea base también— y solo nombran el rowid las dos', () => {
+    const barridos = ficherosDe(resolve(raiz, 'tools')).map((ruta) => relative(raiz, ruta));
+    const fuentes = new Map(barridos.map((ruta) => [ruta, readFileSync(resolve(raiz, ruta), 'utf8')]));
+    for (const conocido of ['tools/medicion.ts', 'tools/lib/medicion.ts', 'tools/lib/lineaBase.ts']) {
+      expect(barridos).toContain(conocido);
+      expect(textosSql(conocido, fuentes.get(conocido) ?? '').length, conocido).toBeGreaterThan(0);
+    }
+    // Las dos con permiso siguen ahí: un permiso rancio dejaría pasar cualquier cosa con su forma.
+    const deMedicion = textosSql('tools/lib/medicion.ts', fuentes.get('tools/lib/medicion.ts') ?? '').map((t) => t.texto);
+    for (const permitida of NOMBRAN_ROWID_CON_PERMISO.get('tools/lib/medicion.ts') ?? []) {
+      expect(deMedicion).toContain(permitida);
+    }
+    const nombran = barridos.flatMap((ruta) =>
+      nombranRowidSinPermiso(ruta, fuentes.get(ruta) ?? '').map((texto) => `${ruta}: ${texto}`),
+    );
+    expect(nombran, nombran.join('\n')).toEqual([]);
   });
 });

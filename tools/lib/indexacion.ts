@@ -816,7 +816,11 @@ export interface DespliegueDeSm11 {
   jornada: string;
 }
 
-/** Los despliegues de `umbrales.ts` que ya llegaron, en orden; los que no, no salen. */
+/**
+ * Los despliegues de `umbrales.ts` que ya llegaron, en orden; los que no, no salen. La llegada de
+ * la Épica 23 (`DESPLIEGUE_DE_LA_LECTURA`) no está: no cambia lo que el buscador indexa, y solo
+ * parte series de la medición (Historia 23.10).
+ */
 export function desplieguesQueMuevenSm11(): DespliegueDeSm11[] {
   const todos: { que: string; jornada: string | undefined }[] = [
     { que: 'la reparación de la publicación', jornada: DESPLIEGUE_DE_LA_REPARACION },
@@ -831,6 +835,10 @@ export function desplieguesQueMuevenSm11(): DespliegueDeSm11[] {
  * Autor **de la misma lectura**, y, desde `jornadaDeJuzgarSm11`, el recordatorio de que toca
  * juzgarla. Juzgar no lo hace la orden: congelar es un commit de Héctor. Cierra con los
  * despliegues que movieron la comparación (PRD §6.7), si alguno llegó ya.
+ *
+ * El «hoy» con que se compara la jornada de juzgar se compone **en UTC** (AD-9, Historia 23.10),
+ * como esa jornada y las de despliegue de `umbrales.ts`: con el calendario local, cerca de la
+ * medianoche diría «toca juzgar» un día antes —o después— de la jornada UTC que nombra.
  */
 export function lineasDeSm11(
   lectura: LecturaDeIndexacion,
@@ -849,7 +857,7 @@ export function lineasDeSm11(
     lineas.push(`SM-11: Obra ${proporcion(obra)} indexada frente a Autor ${proporcion(autor)}.`);
   }
   const momento = lectura.momento ?? new Date();
-  const hoy = `${momento.getFullYear()}-${String(momento.getMonth() + 1).padStart(2, '0')}-${String(momento.getDate()).padStart(2, '0')}`;
+  const hoy = momento.toISOString().slice(0, 10);
   const juzgar = jornadaDeJuzgarSm11();
   lineas.push(
     hoy >= juzgar

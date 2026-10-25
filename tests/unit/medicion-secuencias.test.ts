@@ -18,8 +18,11 @@ import {
   SQL_DE_MIGRACIONES_ANOTADAS,
   SQL_DE_RECUENTOS,
   SQL_DE_TABLA_DE_MIGRACIONES,
+  CONSULTAS_DE_LA_LECTURA,
   argumentosDeMigracion,
   columnasDeLaMigracion,
+  consultasDeLaLectura,
+  leer,
   componerHuella,
   comprobar,
   desplegar,
@@ -627,6 +630,131 @@ describe('Historia 23.2 — comprobar', () => {
   it('sin sesión: 2', async () => {
     const { efectos } = desplegado({ sesion: false });
     expect((await paradaDe(comprobar(efectos, URL_EN_VIVO)))?.codigo).toBe(2);
+  });
+});
+
+describe('Historia 23.10 — leer, la secuencia de la lectura', () => {
+  const AHORA = new Date('2026-11-10T08:00:00.000Z');
+  const SENTENCIAS = consultasDeLaLectura('2026-11-10');
+
+  /**
+   * Un mundo para la lectura: solo contesta `whoami`, `d1 execute` y `d1 info`. Todo otro efecto
+   * —desplegar, migrar, git, balizas, la huella, el disco— lo apunta y lanza: la lectura no lo
+   * toca, y una llamada así rompería la prueba.
+   */
+  function mundoDeLectura(
+    opciones: { sesion?: boolean | 'ilegible'; fallan?: (sql: string) => boolean; informacion?: string; corpusRoto?: boolean } = {},
+  ) {
+    const llamadas: string[] = [];
+    const prohibido = (que: string) => () => {
+      llamadas.push(que);
+      throw new Error(`la lectura no ${que}`);
+    };
+    const efectos: Efectos = {
+      async wrangler(argumentos) {
+        if (argumentos.join(' ') === ARGUMENTOS_DE_SESION.join(' ')) {
+          llamadas.push('sesion');
+          if (opciones.sesion === 'ilegible') return { codigo: 1, stdout: '', stderr: '✘ [ERROR] algo' };
+          return { codigo: opciones.sesion === false ? 1 : 0, stdout: JSON.stringify({ loggedIn: opciones.sesion !== false }), stderr: '' };
+        }
+        if (argumentos.join(' ') === ARGUMENTOS_DE_INFORMACION.join(' ')) {
+          llamadas.push('informacion');
+          return opciones.informacion === undefined
+            ? { codigo: 0, stdout: JSON.stringify({ rows_written_24h: 900, database_size: 4_000_000 }), stderr: '' }
+            : { codigo: 1, stdout: opciones.informacion, stderr: '✘ [ERROR] Authentication error [code: 10000]' };
+        }
+        if (argumentos[0] === 'd1' && argumentos[1] === 'execute') {
+          const sql = argumentos[argumentos.length - 1];
+          llamadas.push(`consulta ${argumentos[3]} ${sql}`);
+          if (opciones.fallan?.(sql)) {
+            return { codigo: 1, stdout: JSON.stringify({ error: { text: 'D1_ERROR: fallo de mentira' } }), stderr: '✘ [ERROR] D1_ERROR' };
+          }
+          return { codigo: 0, stdout: JSON.stringify([{ results: [], success: true }]), stderr: '' };
+        }
+        llamadas.push(`wrangler ${argumentos.join(' ')}`);
+        throw new Error(`la lectura no corre wrangler ${argumentos.join(' ')}`);
+      },
+      wranglerALaVista: prohibido('corre wrangler a la vista'),
+      git: prohibido('toca git'),
+      enviar: prohibido('envía balizas'),
+      sondear: prohibido('sondea'),
+      leerHuella: prohibido('lee la huella'),
+      escribirHuella: prohibido('escribe la huella'),
+      migraciones: prohibido('lee migraciones'),
+      vocabularioDeOrigin: prohibido('lee origin/main'),
+      receptor: prohibido('interpreta balizas'),
+      esperar: prohibido('espera'),
+      decir: prohibido('dice nada: el informe lo escribe la cáscara'),
+      ahora: () => AHORA,
+    };
+    const corpus = async () => {
+      llamadas.push('corpus');
+      if (opciones.corpusRoto) throw new Error('ENOENT: corpus/citas');
+      return { citas: [] };
+    };
+    return { efectos, llamadas, corpus };
+  }
+
+  it('sesión, Corpus, las cinco consultas con --remote y d1 info; nada más', async () => {
+    const { efectos, llamadas, corpus } = mundoDeLectura();
+    const lectura = await leer(efectos, corpus);
+    expect(llamadas).toEqual([
+      'sesion',
+      'corpus',
+      ...CONSULTAS_DE_LA_LECTURA.map((c) => `consulta --remote ${SENTENCIAS[c]}`),
+      'informacion',
+    ]);
+    expect(lectura.hoy).toBe('2026-11-10');
+    expect(lectura.corpus).toEqual({ citas: [] });
+    for (const c of CONSULTAS_DE_LA_LECTURA) expect(lectura.consultas[c]).toEqual({ ok: true, filas: [] });
+    expect(lectura.cuota).toEqual({ escritas: { ok: true, valor: 900 }, tamaño: { ok: true, valor: 4_000_000 } });
+  });
+
+  it('sin sesión: 2, antes de leer el Corpus o consultar', async () => {
+    const { efectos, llamadas, corpus } = mundoDeLectura({ sesion: false });
+    const parada = await paradaDe(leer(efectos, corpus).then(() => undefined));
+    expect(parada?.codigo).toBe(2);
+    expect(parada?.message).toContain('login');
+    expect(llamadas).toEqual(['sesion']);
+  });
+
+  it('con una sesión ilegible: 1, sin consultar', async () => {
+    const { efectos, llamadas, corpus } = mundoDeLectura({ sesion: 'ilegible' });
+    expect((await paradaDe(leer(efectos, corpus).then(() => undefined)))?.codigo).toBe(1);
+    expect(llamadas).toEqual(['sesion']);
+  });
+
+  it('sin Corpus: 1, sin consultar', async () => {
+    const { efectos, llamadas, corpus } = mundoDeLectura({ corpusRoto: true });
+    const parada = await paradaDe(leer(efectos, corpus).then(() => undefined));
+    expect(parada?.codigo).toBe(1);
+    expect(parada?.message).toMatch(/No se pudo leer el Corpus: ENOENT/);
+    expect(llamadas).toEqual(['sesion', 'corpus']);
+  });
+
+  it('una consulta que falla no para: va con su motivo y las demás se leen', async () => {
+    const { efectos, corpus } = mundoDeLectura({ fallan: (sql) => sql === SENTENCIAS.salidas });
+    const lectura = await leer(efectos, corpus);
+    expect(lectura.consultas.salidas.ok).toBe(false);
+    if (!lectura.consultas.salidas.ok) expect(lectura.consultas.salidas.motivo).toMatch(/D1_ERROR: fallo de mentira/);
+    expect(lectura.consultas.vistasYLecturas.ok).toBe(true);
+  });
+
+  it('con solo d1 info legible, lee: sale con 0', async () => {
+    const { efectos, corpus } = mundoDeLectura({ fallan: () => true });
+    const lectura = await leer(efectos, corpus);
+    expect(CONSULTAS_DE_LA_LECTURA.every((c) => !lectura.consultas[c].ok)).toBe(true);
+    expect(lectura.cuota.escritas.ok).toBe(true);
+  });
+
+  it('si no se lee nada —ni una consulta ni d1 info—: 1, nombrando cada cosa', async () => {
+    const { efectos, corpus } = mundoDeLectura({ fallan: () => true, informacion: '' });
+    const parada = await paradaDe(leer(efectos, corpus).then(() => undefined));
+    expect(parada?.codigo).toBe(1);
+    expect(parada?.message).toContain('No se leyó nada de D1');
+    expect(parada?.message).toContain('las salidas internas: D1_ERROR: fallo de mentira');
+    expect(parada?.message).toMatch(/las filas escritas en 24 h: wrangler no contestó JSON \(wrangler salió con 1/);
+    expect(parada?.message).toContain('Consulta: no se ha escrito nada.');
   });
 });
 

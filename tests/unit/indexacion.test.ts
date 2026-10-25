@@ -1277,7 +1277,7 @@ describe('Historia 22.8 — la familia Obra en la serie', () => {
       propiedad: 'sc-domain:x',
       publicadas: 0,
       inspeccionadas: 0,
-      momento: new Date(2026, 9, 20),
+      momento: new Date('2026-10-20T12:00:00Z'),
       familias: {
         autor: { publicadas: 60, muestra: 55, indexadas: 5, noIndexadas: 50, estados: [] },
         obra: { publicadas: 80, muestra: 80, indexadas: 2, noIndexadas: 78, estados: [] },
@@ -1367,16 +1367,16 @@ describe('Historia 22.8 — la familia Obra en la serie', () => {
       sinLeer: {},
     };
     expect(jornadaDeJuzgarSm11()).toBe('2026-12-05');
-    const antes = lineasDeSm11({ ...lectura, momento: new Date(2026, 9, 20) });
+    const antes = lineasDeSm11({ ...lectura, momento: new Date('2026-10-20T12:00:00Z') });
     expect(antes[0]).toBe('SM-11: Obra 2,5 % (2 de 80) indexada frente a Autor 16,7 % (10 de 60).');
     expect(antes[1]).toBe('SM-11 se juzga desde el 2026-12-05.');
-    const despues = lineasDeSm11({ ...lectura, momento: new Date(2026, 11, 5) });
+    const despues = lineasDeSm11({ ...lectura, momento: new Date('2026-12-05T12:00:00Z') });
     expect(despues[1]).toMatch(/^Toca juzgar SM-11: lo decide Héctor/);
     // Sin una de las dos, no hay comparación, y se dice.
-    const sinObra = lineasDeSm11({ ...lectura, familias: { autor: familia(1, 2) }, momento: new Date(2026, 9, 20) });
+    const sinObra = lineasDeSm11({ ...lectura, familias: { autor: familia(1, 2) }, momento: new Date('2026-10-20T12:00:00Z') });
     expect(sinObra[0]).toMatch(/sin comparación .*Obra/);
     // Y el informe la lleva.
-    expect(lineasDeLectura({ ...lectura, momento: new Date(2026, 9, 20) }).join('\n')).toContain('SM-11: Obra');
+    expect(lineasDeLectura({ ...lectura, momento: new Date('2026-10-20T12:00:00Z') }).join('\n')).toContain('SM-11: Obra');
   });
 
   it('la línea SM-11 nombra los despliegues que movieron la comparación, y calla los que no han llegado', () => {
@@ -1384,7 +1384,7 @@ describe('Historia 22.8 — la familia Obra en la serie', () => {
       propiedad: 'sc-domain:x',
       publicadas: 0,
       inspeccionadas: 0,
-      momento: new Date(2026, 9, 20),
+      momento: new Date('2026-10-20T12:00:00Z'),
       familias: {},
       sinLeer: {},
     };
@@ -1400,5 +1400,53 @@ describe('Historia 22.8 — la familia Obra en la serie', () => {
     );
     // Lo que no ha llegado no se escribe como hueco: sin despliegues, no hay línea.
     expect(lineasDeSm11(lectura, []).some((l) => l.startsWith('Despliegues'))).toBe(false);
+  });
+
+  /*
+   * Historia 23.10 — el «hoy» de `tools/` frente a una jornada de despliegue se compone en UTC,
+   * como la jornada con que se compara (AD-9). Con el calendario local, en Madrid a las 00:30 del
+   * día 5 —las 23:30 UTC del 4— la línea diría «toca juzgar» una jornada UTC antes de tiempo.
+   */
+  it('el «hoy» de la línea SM-11 es la jornada UTC, también cerca de la medianoche (23.10)', () => {
+    const zona = process.env.TZ;
+    try {
+      process.env.TZ = 'Europe/Madrid';
+      const momento = new Date('2026-12-04T23:30:00Z');
+      const local = `${momento.getFullYear()}-${String(momento.getMonth() + 1).padStart(2, '0')}-${String(momento.getDate()).padStart(2, '0')}`;
+      // La premisa, antes que nada: la jornada local y la UTC difieren en ese instante.
+      expect(local).toBe('2026-12-05');
+      expect(momento.toISOString().slice(0, 10)).toBe('2026-12-04');
+      const lineas = lineasDeSm11({
+        propiedad: 'sc-domain:x',
+        publicadas: 0,
+        inspeccionadas: 0,
+        momento,
+        familias: {},
+        sinLeer: {},
+      });
+      expect(lineas[1]).toBe('SM-11 se juzga desde el 2026-12-05.');
+    } finally {
+      if (zona === undefined) delete process.env.TZ;
+      else process.env.TZ = zona;
+    }
+  });
+
+  it('la llegada de la Épica 23 no está entre los despliegues que mueven SM-11 (23.10)', async () => {
+    vi.resetModules();
+    vi.doMock('../../src/lib/umbrales.ts', async (importOriginal) => ({
+      ...(await importOriginal<typeof import('../../src/lib/umbrales.ts')>()),
+      DESPLIEGUE_DE_LA_LECTURA: '2026-11-02',
+      DESPLIEGUE_DE_OBRA_Y_DIRECTORIOS: '2026-11-20',
+    }));
+    try {
+      const { desplieguesQueMuevenSm11: conValor } = await import('../../tools/lib/indexacion.ts');
+      const despliegues = conValor();
+      // La de la 24 con la 26, con valor, sale; la de la 23, con valor también, no.
+      expect(despliegues).toContainEqual({ que: 'la Tarjeta de Obra con los Directorios', jornada: '2026-11-20' });
+      expect(despliegues.map((d) => d.jornada)).not.toContain('2026-11-02');
+    } finally {
+      vi.doUnmock('../../src/lib/umbrales.ts');
+      vi.resetModules();
+    }
   });
 });

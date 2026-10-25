@@ -111,6 +111,160 @@ export const DESPLIEGUE_DE_OBRA_Y_DIRECTORIOS: string | undefined = undefined;
 /** La portada de retorno, si llega antes del juicio de SM-11 (Historia 28.5). */
 export const DESPLIEGUE_DE_LA_PORTADA_DE_RETORNO: string | undefined = undefined;
 
+/**
+ * La llegada en vivo del sitio de la Épica 23 — AD-9, AD-13, Historia 23.10.
+ *
+ * Es la jornada UTC en que el sitio con la lectura, las Marcas de llegada contadas una vez, las
+ * salidas internas, la búsqueda asentada y la vista de Obra (Historias 23.5–23.9) **llega al sitio
+ * en vivo** —el fin de «Desplegar», no el merge—, con la misma forma que las de arriba:
+ * `undefined` mientras no haya llegado. **Le da valor Héctor, en un commit aparte (23.11), y ningún
+ * agente se lo da.**
+ *
+ * No está entre las jornadas que mueven SM-11 —no cambia lo que el buscador indexa, así que la
+ * línea SM-11 del informe de indexación no la nombra—: solo parte series de la medición, por su
+ * entrada en `CORTES_DE_SERIE_DECLARADOS` (abajo).
+ */
+export const DESPLIEGUE_DE_LA_LECTURA: string | undefined = undefined;
+
+/*
+ * Los cortes de serie de la medición — AD-9, AD-13, Historia 23.10.
+ *
+ * Un corte es una jornada a partir de la cual una serie no se compara con lo de antes porque
+ * cambió el instrumento que la mide: la llegada en vivo que cambia qué se emite o cómo, su
+ * reversión, un cambio de los cortes de tramo de `busqueda` (vocabulario) o un cambio de
+ * `MIN_MS_VISIBLES_PARA_LA_LECTURA`, que repite la línea base. Cada entrada dice su jornada, qué
+ * cambió y qué series parte, y **la jornada sale siempre de una constante de despliegue**, nunca
+ * de un literal: la lista se compone de ellas y filtra las que aún no llegaron. Una entrada nueva
+ * entra con su historia, y con su constante.
+ *
+ * La lectura de la línea base parte cada serie solo por las entradas que la nombran, sin elegir
+ * ninguna ni suponer cuántas hay: el tramo nuevo empieza la primera jornada UTC completa tras la
+ * llegada, y la de llegada se informa aparte, como «cambió». Dos entradas en la misma jornada, con
+ * distinto motivo, son un solo «cambió».
+ */
+
+/** Las series de la medición que un corte puede partir. */
+export type SerieDeMedicion = 'sm8' | 'lectura' | 'busqueda';
+
+/** Un corte de serie tal como se declara: su jornada es la de una constante de despliegue. */
+export interface CorteDeSerie {
+  /** La jornada UTC de la llegada en vivo, `AAAA-MM-DD`; `undefined` mientras no haya llegado. */
+  readonly jornada: string | undefined;
+  /** Qué cambió, como lo nombra el informe. */
+  readonly que: string;
+  /** Las series que parte. */
+  readonly series: readonly SerieDeMedicion[];
+}
+
+/** Un corte que ya llegó: el que tiene jornada. */
+export interface CorteLlegado extends CorteDeSerie {
+  readonly jornada: string;
+}
+
+/**
+ * La lista declarada, en el orden en que se escribió: cada jornada es una constante de arriba.
+ * La de la Épica 23 parte SM-8 —la marca se cuenta una vez por llegada y la vista sale del fichero
+ * diferido—, la serie de la lectura y la de la búsqueda, que empiezan con ella; la de la 24 con la
+ * 26 parte SM-8, porque los Directorios emiten vista.
+ */
+export const CORTES_DE_SERIE_DECLARADOS: readonly CorteDeSerie[] = [
+  {
+    jornada: DESPLIEGUE_DE_LA_LECTURA,
+    que: 'la llegada de la Épica 23 (la lectura, las marcas contadas una vez, las salidas y la búsqueda asentada)',
+    series: ['sm8', 'lectura', 'busqueda'],
+  },
+  {
+    jornada: DESPLIEGUE_DE_OBRA_Y_DIRECTORIOS,
+    que: 'la llegada de la Tarjeta de Obra con los Directorios (Épicas 24 y 26)',
+    series: ['sm8'],
+  },
+];
+
+/**
+ * Los cortes que ya llegaron, ordenados por jornada: filtra los que no tienen y conserva el orden
+ * declarado entre los de la misma jornada (`sort` es estable).
+ */
+export function cortesQueLlegaron(declarados: readonly CorteDeSerie[]): CorteLlegado[] {
+  return declarados
+    .filter((corte): corte is CorteLlegado => corte.jornada !== undefined)
+    .sort((a, b) => (a.jornada < b.jornada ? -1 : a.jornada > b.jornada ? 1 : 0));
+}
+
+/** La lista de cortes de serie, solo con los que llegaron y en orden. */
+export const CORTES_DE_SERIE: readonly CorteLlegado[] = cortesQueLlegaron(CORTES_DE_SERIE_DECLARADOS);
+
+/**
+ * Su proyección sobre SM-8 — las entradas que parten la serie del canal propio, en el mismo orden
+ * (Héctor, 2026-10-19). Mientras ninguna constante tenga valor está vacía, y el informe lo dice.
+ */
+export const CORTES_DE_SM8: readonly CorteLlegado[] = CORTES_DE_SERIE.filter((corte) =>
+  corte.series.includes('sm8'),
+);
+
+/**
+ * Las pasadas de prueba que escriben a propósito en el D1 de producción — AD-9, AD-14,
+ * Historia 23.10 (Héctor, 2026-10-23).
+ *
+ * Son dos y ninguna más: la de la Historia 25.3, sobre el sitio en vivo, y la de la 25.7, cuyo
+ * clic en la tarjeta de Facebook aterriza en la canónica en vivo. Cada una deja registros de
+ * verdad en la tabla que no son visitas, así que la lectura de la línea base los descuenta —los de
+ * esas rutas en esa jornada, y ninguno más— en cada lectura. **La anota Héctor el día de la
+ * pasada**, con su jornada UTC y las rutas que recorrió; ningún agente la anota. `DESPLIEGUE.md` §3
+ * la cita y no la copia, y la lectura la lee y no la copia.
+ *
+ * La baliza de prueba con que se comprueba el receptor no es una pasada: va a una ruta que ninguna
+ * página publica, se borra en la misma orden y se descuenta por su ruta.
+ */
+export interface PasadaEnProduccion {
+  /** Qué pasada fue, como la nombra su historia: «25.3», «25.7». */
+  readonly pasada: string;
+  /** La jornada UTC en que escribió, `AAAA-MM-DD`. */
+  readonly jornada: string;
+  /** Las rutas que recorrió, como las guarda el receptor (`/cita/<slug>/`). */
+  readonly rutas: readonly string[];
+}
+
+export const PASADAS_QUE_ESCRIBEN_EN_PRODUCCION: readonly PasadaEnProduccion[] = [];
+
+/**
+ * Lecturas de su superficie que cierran una línea base — AD-9, FR-56, Historia 23.10.
+ *
+ * La línea base de cada métrica empieza la primera jornada UTC completa del tramo vigente de su
+ * serie y se cierra la jornada en que reúne este mínimo de lecturas de su superficie —de búsquedas
+ * asentadas, la de SM-6 y SM-13—; no es un número de días. Las ventanas con que se juzgan después
+ * las tasas reúnen cada una el mismo mínimo.
+ *
+ * **Sin valor, y a propósito**, como `CONGELACION_DE_OBRAS`: ninguna fuente se lo da, y lo fija
+ * Héctor en un diff visible (23.11) antes de leer la primera línea base. `undefined` significa eso:
+ * el informe dice «sin mínimo declarado» y nunca da una línea base por cerrada. Ningún agente se lo
+ * da. Que una línea base cerrada sea **buena** no lo dice ningún número: lo anota Héctor en
+ * `DESPLIEGUE.md` §3.
+ */
+export const MIN_LECTURAS_DE_LINEA_BASE: number | undefined = undefined;
+
+/**
+ * Si Facebook entra en la comparación de SM-12 entre destinos — AD-9, SM-12, Historia 23.10.
+ *
+ * Apagado: no consta todavía que `?via=` sobreviva al clic en la tarjeta que Facebook compone del
+ * enlace, y sin eso las lecturas con `via=facebook` serían una cota de cuánto se pierde, no una
+ * difusión comparable con la de los demás destinos. La lectura informa Facebook aparte, con el
+ * motivo. **Lo enciende Héctor en la 25.7**, en un diff visible, si la matriz dice que la marca
+ * sobrevive; ningún agente lo enciende.
+ */
+export const SM12_CON_FACEBOOK = false;
+
+/**
+ * Rutas de Página de Cita con una sola vista en una jornada a partir de las cuales esa jornada es
+ * una **ráfaga** — AD-9, FR-56, Historia 23.10.
+ *
+ * Es la firma mecánica de un rastreador que recorre el sitio cargando cada Cita una vez: cien
+ * rutas o más con exactamente una vista de carga el mismo día. La lectura de la línea base da la
+ * razón lecturas/vistas de esos pares frente a la del resto; si se parecen, el tiempo mínimo de la
+ * lectura no está separando máquinas de personas, y lo ajusta Héctor (23.5). El valor, cien, lo da
+ * el plan (FR-56); moverlo lo decide Héctor, en un diff visible.
+ */
+export const MIN_RUTAS_DE_CITA_EN_RAFAGA = 100;
+
 /** Citas del mismo Autor que ofrece una Página de Cita como ruta de salida — UX-DR17. */
 export const MAX_CITAS_RELACIONADAS = 4;
 
@@ -370,6 +524,17 @@ export const TOPE_DE_PNG_DE_DIST: number | undefined = undefined;
 export const CUOTA_DE_FILAS_ESCRITAS_POR_DIA_EN_D1 = 100_000;
 
 /**
+ * Bytes que D1 admite por base en el plan gratuito — AD-9, Historia 23.10.
+ *
+ * La otra cuota de «Cuotas del receptor» de la espina, y tampoco la decide el proyecto: 500 MB.
+ * Se escribe en bytes decimales, `500 * 1000 * 1000`, que es la lectura más estrecha de «500 MB»:
+ * con 500 MiB el aviso llegaría tarde. La lectura de la línea base compara con ella el
+ * `database_size` de `d1 info`; pasada, las escrituras fallan y el Worker lo calla. Si el proyecto
+ * pasa al plan de pago, cambia aquí y en ningún otro sitio.
+ */
+export const CUOTA_DE_BYTES_POR_BASE_EN_D1 = 500 * 1000 * 1000;
+
+/**
  * Milisegundos de visibilidad acumulada tras los que una carga cuenta como leída — AD-9, AD-13,
  * FR-56, Historia 23.5.
  *
@@ -382,9 +547,9 @@ export const CUOTA_DE_FILAS_ESCRITAS_POR_DIA_EN_D1 = 100_000;
  * vista algo más de 8 s puede quedarse sin lectura por tiempo, pero ninguna carga visible menos
  * de 8 s la tiene por tiempo (por una interacción, sí).
  *
- * Cambiarlo cambia qué es una Lectura: es una entrada de la lista de cortes de serie (Historia
- * 23.10) y repite la línea base, y lo decide Héctor tras la comparación por firma. Viaja dentro
- * del fichero, así que moverlo cambia también su versión.
+ * Cambiarlo cambia qué es una Lectura: es una entrada de `CORTES_DE_SERIE_DECLARADOS`, con su
+ * constante de despliegue, y repite la línea base, y lo decide Héctor tras la comparación por
+ * firma. Viaja dentro del fichero, así que moverlo cambia también su versión.
  */
 export const MIN_MS_VISIBLES_PARA_LA_LECTURA = 8_000;
 
