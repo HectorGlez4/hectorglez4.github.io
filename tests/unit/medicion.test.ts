@@ -8,7 +8,9 @@ import {
   ARRANQUE_DE_MEDICION,
   EVENTOS,
   EVENTOS_DEL_GUION,
+  EVENTOS_SOLO_DEL_FICHERO,
   EVENTOS_VALIDOS,
+  INTERACCIONES_DE_LECTURA,
   esEventoValido,
   guionDeMedicion,
   puntoFinal,
@@ -22,7 +24,9 @@ import {
   MAX_BYTES_DE_GUION,
   MAX_BYTES_GUION_DE_MEDICION,
   MAX_CARACTERES_IMAGEN,
+  MIN_MS_VISIBLES_PARA_LA_LECTURA,
 } from '../../src/lib/umbrales.ts';
+import { DESTINOS_DE_DESCARGA, METRICA_DE_ACCION } from '../../src/lib/vocabulario.ts';
 import {
   bytesDeGuionEnLinea,
   descargaDeLaEntrada,
@@ -140,15 +144,18 @@ describe('Historia 2.9 — el vocabulario es cerrado', () => {
     // invente un nombre no consigue emitirlo. Se comprueba **ejecutándolo**, no leyendo
     // su texto: una prueba sobre la forma del guion se rompe al compactarla y no dice
     // nada sobre lo que hace. Desde la 23.2 el guion emite solo los eventos que ya sabe
-    // producir: los cuatro de la v8 esperan a sus historias (23.5 a 23.9) y se descartan igual.
+    // producir: los de la v8 esperan a sus historias (23.6 a 23.9) y se descartan igual. Desde
+    // la 23.5, `__medir` descarta además los que solo emite el fichero: la lectura.
     const { emitir, balizas } = medicionEnUnSandbox();
+    const aPeticion = EVENTOS_DEL_GUION.filter((evento) => !EVENTOS_SOLO_DEL_FICHERO.includes(evento));
 
     for (const evento of EVENTOS_VALIDOS) emitir(evento);
-    expect(balizas().map((b) => b.evento)).toEqual([...EVENTOS_DEL_GUION]);
+    expect(balizas().map((b) => b.evento)).toEqual(aPeticion);
     expect(EVENTOS_DEL_GUION.length).toBeLessThan(EVENTOS_VALIDOS.length);
+    expect(aPeticion).not.toContain(EVENTOS.lectura);
 
     for (const impostor of ['pageview', 'clic', 'VISTA-DE-CITA', '', 'toString', 'hasOwnProperty']) emitir(impostor);
-    expect(balizas()).toHaveLength(EVENTOS_DEL_GUION.length);
+    expect(balizas()).toHaveLength(aPeticion.length);
   });
 });
 
@@ -168,16 +175,18 @@ describe('Historia 2.9 — sin cookies y sin identificar al visitante', () => {
     }
   });
 
-  it('lo que viaja es el evento, la ruta y nada más', () => {
-    // Desde la 23.2, el copiado no lleva ni la Marca de origen ni campos que no declara: solo
-    // el evento y la ruta. Lo que lleva cada evento lo fija `tests/unit/vocabulario.test.ts`.
+  it('lo que viaja es el evento, la ruta, `primera` y nada más', () => {
+    // Desde la 23.2, el copiado no lleva ni la Marca de origen ni campos que no declara: el
+    // evento y la ruta, y desde la 23.5 `primera`, que calcula el fichero —lo que pase la isla
+    // no entra—. Lo que lleva cada evento lo fija `tests/unit/vocabulario.test.ts`.
     const { emitir, balizas } = medicionEnUnSandbox({ ruta: '/cita/una', busqueda: '?de=instagram' });
     emitir(EVENTOS.copiado, 'visitante-7f3a', 'telegram');
 
     const [baliza] = balizas();
     expect(baliza.evento).toBe(EVENTOS.copiado);
     expect(baliza.ruta).toBe('/cita/una');
-    expect(Object.keys(baliza).sort()).toEqual(['evento', 'ruta']);
+    expect(baliza.primera).toBe('si');
+    expect(Object.keys(baliza).sort()).toEqual(['evento', 'primera', 'ruta']);
     // Ni referente, ni agente de usuario, ni pantalla, ni zona horaria.
     expect(guion).not.toMatch(/referrer|userAgent|screen\.|timeZone|language/);
   });
@@ -258,6 +267,8 @@ describe('Historia 23.1 — el arranque y el fichero, ejecutados', () => {
   });
 
   it('cola: al cargar, primero las vistas y después lo encolado, en su orden y una vez cada uno', () => {
+    // Desde la 23.5, en una superficie con lectura la primera acción encolada emite antes la
+    // lectura, y cada acción lleva su `primera` calculada al vaciar la cola, en su orden.
     const { emitir, cargar, balizas } = medicionEnUnSandbox({
       ruta: '/cita/una/',
       vistas: EVENTOS.vistaDeCita,
@@ -268,22 +279,25 @@ describe('Historia 23.1 — el arranque y el fichero, ejecutados', () => {
     emitir(EVENTOS.descargaDeImagen);
     cargar();
 
-    expect(balizas().map((b) => b.evento)).toEqual([
-      EVENTOS.vistaDeCita,
-      EVENTOS.copiado,
-      EVENTOS.comparticionDeEnlace,
-      EVENTOS.descargaDeImagen,
+    expect(balizas().map((b) => [b.evento, b.primera])).toEqual([
+      [EVENTOS.vistaDeCita, undefined],
+      [EVENTOS.lectura, undefined],
+      [EVENTOS.copiado, 'si'],
+      [EVENTOS.comparticionDeEnlace, 'si'],
+      [EVENTOS.descargaDeImagen, 'no'],
     ]);
-    expect(balizas()[2].destino).toBe('telegram');
+    expect(balizas()[3].destino).toBe('telegram');
 
-    // Ya cargado, el fichero es `__medir`: lo que llega sale directo y no repite la cola.
+    // Ya cargado, el fichero es `__medir`: lo que llega sale directo y no repite la cola ni la
+    // lectura.
     emitir(EVENTOS.copiado);
-    expect(balizas().map((b) => b.evento)).toEqual([
-      EVENTOS.vistaDeCita,
-      EVENTOS.copiado,
-      EVENTOS.comparticionDeEnlace,
-      EVENTOS.descargaDeImagen,
-      EVENTOS.copiado,
+    expect(balizas().map((b) => [b.evento, b.primera])).toEqual([
+      [EVENTOS.vistaDeCita, undefined],
+      [EVENTOS.lectura, undefined],
+      [EVENTOS.copiado, 'si'],
+      [EVENTOS.comparticionDeEnlace, 'si'],
+      [EVENTOS.descargaDeImagen, 'no'],
+      [EVENTOS.copiado, 'no'],
     ]);
   });
 
@@ -310,7 +324,7 @@ describe('Historia 23.1 — el arranque y el fichero, ejecutados', () => {
     expect(balizas().map((b) => b.evento)).toEqual([EVENTOS.vistaDeSuperficie]);
   });
 
-  it('prerender: nada hasta activarse; entonces las vistas, una sola vez, y la cola', () => {
+  it('prerender: nada hasta activarse; entonces las vistas, una sola vez, la lectura y la cola', () => {
     const { emitir, activar, balizas } = medicionEnUnSandbox({
       vistas: EVENTOS.vistaDeSuperficie,
       prerendering: true,
@@ -320,10 +334,14 @@ describe('Historia 23.1 — el arranque y el fichero, ejecutados', () => {
 
     activar();
     activar();
-    expect(balizas().map((b) => b.evento)).toEqual([EVENTOS.vistaDeSuperficie, EVENTOS.copiado]);
+    expect(balizas().map((b) => b.evento)).toEqual([
+      EVENTOS.vistaDeSuperficie,
+      EVENTOS.lectura,
+      EVENTOS.copiado,
+    ]);
   });
 
-  it('la marca de origen viaja con la vista, también tras la cola, y no con el copiado', () => {
+  it('la marca de origen viaja con la vista y la lectura, también tras la cola, y no con el copiado', () => {
     // Historia 23.2 (AD-13): las marcas viajan solo con las vistas y la lectura.
     const { emitir, cargar, balizas } = medicionEnUnSandbox({
       busqueda: '?de=instagram',
@@ -332,10 +350,343 @@ describe('Historia 23.1 — el arranque y el fichero, ejecutados', () => {
     });
     emitir(EVENTOS.copiado);
     cargar();
-    const [vista, copiado] = balizas();
+    expect(balizas()).toHaveLength(3);
+    const [vista, lectura, copiado] = balizas();
     expect(vista).toMatchObject({ evento: EVENTOS.vistaDeCita, origen: 'instagram' });
+    expect(lectura).toMatchObject({ evento: EVENTOS.lectura, origen: 'instagram' });
     expect(copiado.evento).toBe(EVENTOS.copiado);
     expect(copiado).not.toHaveProperty('origen');
+  });
+});
+
+describe('Historia 23.5 — una carga que se lee deja una lectura', () => {
+  /*
+   * Una fila de la matriz de la historia por prueba, en el entorno simulado: el reloj solo avanza
+   * con `avanzar`, la visibilidad la cambian `ocultar` y `mostrar`, y las interacciones llegan por
+   * `interactuar`. Lo que se afirma es lo que sale por `sendBeacon`, en su orden.
+   */
+  const UMBRAL = MIN_MS_VISIBLES_PARA_LA_LECTURA;
+  const lecturas = (balizas: Record<string, unknown>[]) => balizas.filter((b) => b.evento === EVENTOS.lectura);
+  const enCita = (opciones: Parameters<typeof medicionEnUnSandbox>[0] = {}) =>
+    medicionEnUnSandbox({ ruta: '/cita/una/', vistas: EVENTOS.vistaDeCita, ...opciones });
+
+  it('el umbral es el de FR-56: 8 s', () => {
+    expect(MIN_MS_VISIBLES_PARA_LA_LECTURA).toBe(8_000);
+  });
+
+  it('8 s visibles: nada a 7.999 ms; a 8.000, una lectura con su ruta y su marca, y ninguna más', () => {
+    const { avanzar, balizas, pendientes } = enCita();
+    expect(balizas().map((b) => b.evento)).toEqual([EVENTOS.vistaDeCita]);
+
+    avanzar(UMBRAL - 1);
+    expect(lecturas(balizas())).toEqual([]);
+    avanzar(1);
+    expect(lecturas(balizas())).toEqual([{ evento: EVENTOS.lectura, ruta: '/cita/una/', origen: null }]);
+    // Exactamente `evento`, `ruta` y `origen`: `via` espera a la 23.6, y ni hora ni nada más.
+    expect(Object.keys(lecturas(balizas())[0]).sort()).toEqual(['evento', 'origen', 'ruta']);
+
+    avanzar(10 * 60_000);
+    expect(lecturas(balizas())).toHaveLength(1);
+    expect(balizas()).toHaveLength(2);
+    expect(pendientes()).toBe(0);
+  });
+
+  it('oculta a ratos: solo cuenta lo visible, y sale al completar los 8 s', () => {
+    const { avanzar, ocultar, mostrar, balizas } = enCita();
+    avanzar(5_000);
+    ocultar();
+    avanzar(60_000);
+    expect(lecturas(balizas())).toEqual([]);
+
+    mostrar();
+    avanzar(2_900);
+    expect(lecturas(balizas())).toEqual([]);
+    avanzar(99);
+    expect(lecturas(balizas())).toEqual([]);
+    avanzar(1);
+    expect(lecturas(balizas())).toHaveLength(1);
+    avanzar(60_000);
+    expect(lecturas(balizas())).toHaveLength(1);
+  });
+
+  it('nunca visible: ninguna lectura, por mucho tiempo que pase', () => {
+    const { avanzar, balizas, pendientes } = enCita({ visible: false });
+    avanzar(10 * 60_000);
+    expect(lecturas(balizas())).toEqual([]);
+    expect(pendientes()).toBe(0);
+  });
+
+  it('cerrada antes: 5 s y se oculta o se descarga; ocultarse no emite nada', () => {
+    const { avanzar, ocultar, interactuar, balizas, pendientes } = enCita();
+    avanzar(5_000);
+    ocultar();
+    interactuar('pagehide');
+    interactuar('beforeunload');
+    avanzar(10 * 60_000);
+    expect(balizas().map((b) => b.evento)).toEqual([EVENTOS.vistaDeCita]);
+    expect(pendientes()).toBe(0);
+  });
+
+  it.each(INTERACCIONES_DE_LECTURA)('interacción: `%s` a 1 s emite la lectura en ese momento, y nada emite otra', (tipo) => {
+    const { avanzar, interactuar, balizas } = enCita({ busqueda: '?de=tiktok' });
+    avanzar(1_000);
+    expect(lecturas(balizas())).toEqual([]);
+    interactuar(tipo);
+    expect(lecturas(balizas())).toEqual([{ evento: EVENTOS.lectura, ruta: '/cita/una/', origen: 'tiktok' }]);
+
+    for (const otra of INTERACCIONES_DE_LECTURA) interactuar(otra);
+    avanzar(10 * 60_000);
+    expect(lecturas(balizas())).toHaveLength(1);
+  });
+
+  it('las interacciones son exactamente estas cuatro, y `scroll` no está', () => {
+    expect([...INTERACCIONES_DE_LECTURA]).toEqual(['pointerdown', 'keydown', 'wheel', 'touchmove']);
+    const guion = guionDeMedicion('https://ejemplo.invalid/e');
+    // Ninguna escucha de `scroll`, y el tiempo se cuenta con `visibilitychange`, no a golpe de
+    // `setInterval`.
+    expect(guion).not.toMatch(/scroll|setInterval/);
+    expect(guion).toContain('visibilitychange');
+  });
+
+  it('solo `scroll`: ni la restauración de la posición ni un ancla cuentan como interacción', () => {
+    const { avanzar, interactuar, balizas } = enCita();
+    for (let i = 0; i < 20; i++) {
+      interactuar('scroll');
+      avanzar(395);
+    }
+    expect(lecturas(balizas())).toEqual([]);
+    interactuar('scrollend');
+    interactuar('click');
+    interactuar('focus');
+    expect(lecturas(balizas())).toEqual([]);
+  });
+
+  it('prerender: nada antes de activarse, ni el reloj ni las escuchas; al activar, las vistas y, 8 s después, la lectura', () => {
+    const { avanzar, activar, interactuar, balizas, pendientes } = enCita({ prerendering: true });
+    avanzar(30_000);
+    interactuar('pointerdown');
+    expect(balizas()).toEqual([]);
+    expect(pendientes()).toBe(0);
+
+    activar();
+    expect(balizas().map((b) => b.evento)).toEqual([EVENTOS.vistaDeCita]);
+    avanzar(UMBRAL - 1);
+    expect(lecturas(balizas())).toEqual([]);
+    avanzar(1);
+    expect(balizas().map((b) => b.evento)).toEqual([EVENTOS.vistaDeCita, EVENTOS.lectura]);
+  });
+
+  it.each([
+    ['sin `data-vistas`', undefined],
+    ['con solo vistas ajenas a la tabla', 'vista-inventada lectura copiado-no'],
+  ])('sin vista (%s): ninguna lectura, y la acción sale sola, con su `primera`', (_, vistas) => {
+    const { avanzar, interactuar, emitir, balizas, pendientes } = medicionEnUnSandbox({ ruta: '/buscar/', vistas });
+    for (const tipo of INTERACCIONES_DE_LECTURA) interactuar(tipo);
+    avanzar(30_000);
+    emitir(EVENTOS.copiado);
+    expect(balizas()).toEqual([{ evento: EVENTOS.copiado, ruta: '/buscar/', primera: 'si' }]);
+    expect(pendientes()).toBe(0);
+  });
+
+  it.each([
+    ['instagram', 'instagram'],
+    ['ajena', null],
+    ['visitante-7f3a', null],
+  ] as const)('marca de origen `?de=%s`: la lectura lleva `origen` %s', (marca, origen) => {
+    const { avanzar, balizas } = enCita({ busqueda: `?de=${marca}` });
+    avanzar(UMBRAL);
+    expect(lecturas(balizas())).toEqual([{ evento: EVENTOS.lectura, ruta: '/cita/una/', origen }]);
+  });
+
+  it('`__medir("lectura")`, directo: no sale nada y no gasta la lectura de la carga', () => {
+    const { avanzar, emitir, balizas } = enCita();
+    emitir(EVENTOS.lectura);
+    emitir(EVENTOS.lectura, 'datos', 'opaco');
+    expect(lecturas(balizas())).toEqual([]);
+    avanzar(UMBRAL);
+    expect(lecturas(balizas())).toHaveLength(1);
+  });
+
+  it('`__medir("lectura")`, encolado antes de cargar: tampoco sale ni gasta la lectura', () => {
+    const { avanzar, emitir, cargar, balizas } = enCita({ cargado: false });
+    emitir(EVENTOS.lectura);
+    cargar();
+    expect(balizas().map((b) => b.evento)).toEqual([EVENTOS.vistaDeCita]);
+    avanzar(UMBRAL);
+    expect(balizas().map((b) => b.evento)).toEqual([EVENTOS.vistaDeCita, EVENTOS.lectura]);
+  });
+
+  it('la lectura es un evento que solo emite el fichero', () => {
+    expect(EVENTOS_SOLO_DEL_FICHERO).toEqual([EVENTOS.lectura]);
+    expect(EVENTOS_DEL_GUION).toContain(EVENTOS.lectura);
+  });
+
+  it('`primera`: copiado, copiado, descarga sin destino, compartición de enlace y de imagen dan sí, no, no, sí, no', () => {
+    const { emitir, balizas } = medicionEnUnSandbox();
+    emitir(EVENTOS.copiado);
+    emitir(EVENTOS.copiado);
+    emitir(EVENTOS.descargaDeImagen);
+    emitir(EVENTOS.comparticionDeEnlace, null, 'telegram');
+    emitir(EVENTOS.comparticionDeImagen, null, 'opaco');
+    expect(balizas().map((b) => [b.evento, b.primera])).toEqual([
+      [EVENTOS.copiado, 'si'],
+      [EVENTOS.copiado, 'no'],
+      [EVENTOS.descargaDeImagen, 'no'],
+      [EVENTOS.comparticionDeEnlace, 'si'],
+      [EVENTOS.comparticionDeImagen, 'no'],
+    ]);
+  });
+
+  it('`primera` sigue `METRICA_DE_ACCION`: la segunda acción es «no» si y solo si comparte métrica con la primera', () => {
+    const acciones = Object.keys(METRICA_DE_ACCION) as (keyof typeof METRICA_DE_ACCION)[];
+    expect(acciones.length).toBeGreaterThan(0);
+    for (const una of acciones) {
+      for (const otra of acciones) {
+        const { emitir, balizas } = medicionEnUnSandbox();
+        emitir(una, null, 'telegram');
+        emitir(otra, null, 'telegram');
+        const misma = METRICA_DE_ACCION[una] === METRICA_DE_ACCION[otra];
+        expect(balizas().map((b) => b.primera), `${una} → ${otra}`).toEqual(['si', misma ? 'no' : 'si']);
+      }
+    }
+  });
+
+  it.each(DESTINOS_DE_DESCARGA)(
+    'descarga con destino `%s`: siempre «no», y no gasta la primera de su métrica',
+    (destino) => {
+      const { emitir, balizas } = medicionEnUnSandbox();
+      emitir(EVENTOS.descargaDeImagen, null, destino);
+      emitir(EVENTOS.descargaDeImagen, null, destino);
+      emitir(EVENTOS.copiado);
+      expect(balizas().map((b) => [b.evento, b.destino ?? null, b.primera])).toEqual([
+        [EVENTOS.descargaDeImagen, destino, 'no'],
+        [EVENTOS.descargaDeImagen, destino, 'no'],
+        [EVENTOS.copiado, null, 'si'],
+      ]);
+    },
+  );
+
+  it('descarga con un destino ajeno: viaja con `destino: null` y cuenta como sin destino', () => {
+    const { emitir, balizas } = medicionEnUnSandbox();
+    emitir(EVENTOS.descargaDeImagen, null, 'whatsapp');
+    emitir(EVENTOS.copiado);
+    expect(balizas().map((b) => [b.evento, b.destino ?? null, b.primera])).toEqual([
+      [EVENTOS.descargaDeImagen, null, 'si'],
+      [EVENTOS.copiado, null, 'no'],
+    ]);
+  });
+
+  it('acción sin lectura, directa: vista, lectura y copiado («sí»), en ese orden; otra acción no repite la lectura', () => {
+    const { emitir, avanzar, balizas } = enCita({ busqueda: '?de=x' });
+    avanzar(1_000);
+    emitir(EVENTOS.copiado);
+    emitir(EVENTOS.comparticionDeEnlace, null, 'correo');
+    avanzar(10 * 60_000);
+    expect(balizas()).toEqual([
+      { evento: EVENTOS.vistaDeCita, ruta: '/cita/una/', origen: 'x' },
+      { evento: EVENTOS.lectura, ruta: '/cita/una/', origen: 'x' },
+      { evento: EVENTOS.copiado, ruta: '/cita/una/', primera: 'si' },
+      { evento: EVENTOS.comparticionDeEnlace, ruta: '/cita/una/', destino: 'correo', primera: 'si' },
+    ]);
+  });
+
+  it('acción sin lectura, en la cola antes de cargar: vista, lectura y copiado («sí»), en ese orden', () => {
+    const { emitir, cargar, avanzar, balizas } = enCita({ cargado: false });
+    emitir(EVENTOS.copiado);
+    emitir(EVENTOS.copiado);
+    cargar();
+    avanzar(10 * 60_000);
+    expect(balizas().map((b) => [b.evento, b.primera])).toEqual([
+      [EVENTOS.vistaDeCita, undefined],
+      [EVENTOS.lectura, undefined],
+      [EVENTOS.copiado, 'si'],
+      [EVENTOS.copiado, 'no'],
+    ]);
+  });
+
+  it('caché de atrás y adelante: ninguna vista, una lectura nueva posible sin marca, y `primera` otra vez «sí»', () => {
+    const { emitir, avanzar, ocultar, mostrar, restaurar, interactuar, balizas } = enCita({ busqueda: '?de=instagram' });
+    interactuar('pointerdown');
+    emitir(EVENTOS.copiado);
+    expect(balizas().map((b) => b.evento)).toEqual([EVENTOS.vistaDeCita, EVENTOS.lectura, EVENTOS.copiado]);
+
+    // Se va a otra página —la pestaña se oculta— y vuelve por la caché.
+    ocultar();
+    avanzar(30_000);
+    restaurar();
+    mostrar();
+    expect(balizas()).toHaveLength(3);
+
+    avanzar(UMBRAL);
+    emitir(EVENTOS.copiado);
+    expect(balizas().slice(3)).toEqual([
+      { evento: EVENTOS.lectura, ruta: '/cita/una/', origen: null },
+      { evento: EVENTOS.copiado, ruta: '/cita/una/', primera: 'si' },
+    ]);
+    expect(balizas().filter((b) => b.evento === EVENTOS.vistaDeCita)).toHaveLength(1);
+  });
+
+  it('caché de atrás y adelante: el tiempo acumulado vuelve a cero, y da igual el orden de `pageshow` y `visibilitychange`', () => {
+    for (const orden of ['pageshow primero', 'visibilitychange primero'] as const) {
+      const { avanzar, ocultar, mostrar, restaurar, balizas } = enCita();
+      avanzar(5_000);
+      ocultar();
+      avanzar(60_000);
+      if (orden === 'pageshow primero') {
+        restaurar();
+        mostrar();
+      } else {
+        mostrar();
+        restaurar();
+      }
+      // Con los 5 s de antes, 3 s bastarían; tras la carga nueva hacen falta los 8.
+      avanzar(3_000);
+      expect(lecturas(balizas()), orden).toEqual([]);
+      avanzar(UMBRAL - 3_000);
+      expect(lecturas(balizas()), orden).toEqual([{ evento: EVENTOS.lectura, ruta: '/cita/una/', origen: null }]);
+    }
+  });
+
+  it('`pageshow` sin `persisted` no es una carga nueva: no pasa nada', () => {
+    const { emitir, avanzar, restaurar, balizas } = enCita();
+    avanzar(UMBRAL);
+    emitir(EVENTOS.copiado);
+    restaurar(false);
+    avanzar(UMBRAL);
+    emitir(EVENTOS.copiado);
+    expect(balizas().map((b) => [b.evento, b.primera])).toEqual([
+      [EVENTOS.vistaDeCita, undefined],
+      [EVENTOS.lectura, undefined],
+      [EVENTOS.copiado, 'si'],
+      [EVENTOS.copiado, 'no'],
+    ]);
+  });
+
+  it('transporte roto en la lectura: ninguna excepción sale del temporizador ni de las escuchas', () => {
+    const intentos: string[] = [];
+    const roto = (_url: string, carga: string) => {
+      intentos.push(JSON.parse(carga).evento);
+      throw new Error('el transporte falló');
+    };
+    const porTiempo = enCita({ sendBeacon: roto });
+    expect(() => porTiempo.avanzar(UMBRAL)).not.toThrow();
+
+    const porInteraccion = enCita({ sendBeacon: roto });
+    expect(() => porInteraccion.interactuar('keydown')).not.toThrow();
+    expect(() => porInteraccion.ocultar()).not.toThrow();
+    expect(() => porInteraccion.restaurar()).not.toThrow();
+    expect(() => porInteraccion.mostrar()).not.toThrow();
+    expect(() => porInteraccion.avanzar(UMBRAL)).not.toThrow();
+    expect(() => porInteraccion.emitir(EVENTOS.copiado)).not.toThrow();
+    // Lo intentó: la lectura salió hacia el transporte, que falló.
+    expect(intentos.filter((e) => e === EVENTOS.lectura).length).toBeGreaterThanOrEqual(2);
+  });
+
+  it('el fichero no lleva hora, identificador ni almacenamiento, y compone el umbral y las métricas desde sus módulos', () => {
+    const guion = guionDeMedicion('https://ejemplo.invalid/e');
+    expect(guion).not.toMatch(/Date|toISOString|getTime|localStorage|sessionStorage|indexedDB|document\.cookie/);
+    expect(guion).toContain(`${MIN_MS_VISIBLES_PARA_LA_LECTURA}-`);
+    expect(guion).toContain(JSON.stringify(METRICA_DE_ACCION));
   });
 });
 

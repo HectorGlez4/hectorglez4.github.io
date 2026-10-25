@@ -485,6 +485,29 @@ funciona igual—, pero las vistas y acciones de esa visita **no se envían**. S
 guion cambia pocas veces, y siempre con un despliegue. Conservar el fichero anterior en el
 despliegue para cerrar esa ventana **sigue aplazado**; no hay hoy nada que lo haga.
 
+**La Lectura y `primera`** (Historia 23.5, FR-56, AD-13). En toda carga que emite vista, el
+fichero emite además, como mucho, una `lectura`: cuando la página lleva
+`MIN_MS_VISIBLES_PARA_LA_LECTURA` visible (8 s, en `src/lib/umbrales.ts`; sumando los ratos en
+que lo está, contados desde que el fichero se activa) o antes, a la primera `pointerdown`,
+`keydown`, `wheel` o `touchmove`. Nunca por `scroll`, y nunca al ocultarse o cerrarse: una
+pestaña cerrada antes de tiempo sin tocarla no se leyó. Lo que no emite vista —páginas 2+,
+`/buscar/`, el 404 y, hasta la 23.9, la Obra que no se indexa— no emite lectura. La lectura
+lleva la ruta y la Marca de origen, como la vista. Cada acción —`copiado`, `descarga-de-imagen`
+y las dos comparticiones— lleva `primera`: `si` si es la primera de su métrica en la carga
+(SM-5: copiado y descarga; SM-7: las dos comparticiones) y `no` si no; la descarga que impone el
+navegador, la que llega con `destino`, lleva siempre `no` y no gasta la primera. **Las dos las
+decide solo el fichero**: ninguna isla las emite ni las calcula, y `__medir('lectura')` se
+descarta. Una acción que llega sin lectura —un clic sin `pointerdown`, lo que se encoló antes de
+que llegara el fichero— la emite antes, así que en una superficie con lectura toda acción con
+`primera='si'` tiene su lectura en la misma carga, y el numerador de SM-5 y SM-7 cabe en su
+denominador. Volver por la caché de atrás y adelante es una carga nueva: otra lectura posible,
+sin Marca de origen y sin vista.
+
+**Corte de serie de SM-5 y SM-7.** Antes del despliegue del sitio de la Épica 23 no hay
+`lectura` y `primera` llega nula, así que las tasas por lectura empiezan ese día y no se
+comparan con lo anterior; las consultas de acciones a secas siguen valiendo para su propia
+serie. Hasta que la 23.10 lea la línea base desde `tools/`, se miran a mano (abajo).
+
 Consultar, sin panel de nadie:
 
 ```bash
@@ -492,9 +515,18 @@ Consultar, sin panel de nadie:
 npx --yes wrangler@4.151.1 d1 execute medicion --remote --command \
   "SELECT jornada, COUNT(*) FROM eventos WHERE evento='vista-de-cita' GROUP BY jornada ORDER BY jornada DESC LIMIT 30"
 
-# Lo que se llevaron: copiado y descarga — SM-5.
+# Lo que se llevaron: copiado y descarga — SM-5, en acciones.
 npx --yes wrangler@4.151.1 d1 execute medicion --remote --command \
   "SELECT evento, COUNT(*) FROM eventos WHERE evento IN ('copiado','descarga-de-imagen') GROUP BY evento"
+
+# Lecturas por jornada — FR-56, el denominador de la v8 (Historia 23.5).
+npx --yes wrangler@4.151.1 d1 execute medicion --remote --command \
+  "SELECT jornada, COUNT(*) FROM eventos WHERE evento='lectura' GROUP BY jornada ORDER BY jornada DESC LIMIT 30"
+
+# SM-5 sobre lecturas: cargas que se llevaron la Cita (su primera acción de SM-5) frente a
+# lecturas, por jornada. Antes del despliegue de la 23, `primera` es nula y no cuenta.
+npx --yes wrangler@4.151.1 d1 execute medicion --remote --command \
+  "SELECT jornada, SUM(evento='lectura') AS lecturas, SUM(evento IN ('copiado','descarga-de-imagen') AND primera='si') AS con_accion FROM eventos WHERE evento IN ('lectura','copiado','descarga-de-imagen') GROUP BY jornada ORDER BY jornada DESC LIMIT 30"
 
 # Lo que se buscó y no había, para decidir a quién sembrar — FR-8, SM-6.
 npx --yes wrangler@4.151.1 d1 execute medicion --remote --command \

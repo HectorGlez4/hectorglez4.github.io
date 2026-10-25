@@ -207,8 +207,17 @@ export const MAX_BYTES_DE_GUION = 6656;
  * tabla por evento, compuesta desde `CAMPOS_DE_EVENTO` de `src/lib/vocabulario.ts`, con el
  * conjunto de cada campo, y los destinos pasaron de cinco a ocho. Cabe en el tope de la 23.1,
  * que no se sube; las Historias 23.5 a 23.9 lo vuelven a medir al añadir sus eventos.
+ *
+ * Subido de 1.320 a 2.420 en la Historia 23.5: medido, **2.024 bytes** con el punto final de
+ * producción (1.979 con el de las pruebas), más unos 400 de margen, como la 23.1. Creció porque
+ * el fichero dejó de ser solo un emisor: lleva el reloj de la Lectura —visibilidad acumulada con
+ * `visibilitychange`, el temporizador con lo que falta y las cuatro escuchas de interacción—, la
+ * memoria de `primera` por métrica, con la correspondencia de `METRICA_DE_ACCION`, y la carga
+ * nueva de `pageshow` con `persisted`. Nada de eso cabe en el arranque en línea, que no cambia, ni
+ * cuenta en `MAX_BYTES_DE_GUION`: es justo el hueco para el que la 23.1 sacó la medición a un
+ * fichero. Las Historias 23.6 a 23.9 lo vuelven a medir al añadir lo suyo.
  */
-export const MAX_BYTES_GUION_DE_MEDICION = 1320;
+export const MAX_BYTES_GUION_DE_MEDICION = 2420;
 
 /**
  * El generador de la Imagen de Cita, `public/islas/imagen.js` — AD-6, AD-7.
@@ -306,6 +315,24 @@ export const TOPE_DE_PNG_DE_DIST: number | undefined = undefined;
  * día, nunca troceado—. Si el proyecto pasa al plan de pago, cambia aquí y en ningún otro sitio.
  */
 export const CUOTA_DE_FILAS_ESCRITAS_POR_DIA_EN_D1 = 100_000;
+
+/**
+ * Milisegundos de visibilidad acumulada tras los que una carga cuenta como leída — AD-9, AD-13,
+ * FR-56, Historia 23.5.
+ *
+ * Es la mitad «por tiempo» de la Lectura: el fichero de medición (`guionDeMedicion`) emite una
+ * `lectura` cuando la página lleva este tiempo visible —sumando los ratos en que lo está, con
+ * `visibilitychange`— o antes, a la primera interacción. El valor, 8 s, lo dan FR-56 y AD-13.
+ *
+ * **Cuenta desde que el fichero se activa**, no desde que empezó la navegación: el fichero llega
+ * con `defer`, y una página prerenderizada no cuenta hasta verse. Peca por defecto —una carga
+ * vista algo más de 8 s puede quedarse sin lectura por tiempo—, nunca cuenta una vista menos.
+ *
+ * Cambiarlo cambia qué es una Lectura: es una entrada de la lista de cortes de serie (Historia
+ * 23.10) y repite la línea base, y lo decide Héctor tras la comparación por firma. Viaja dentro
+ * del fichero, así que moverlo cambia también su versión.
+ */
+export const MIN_MS_VISIBLES_PARA_LA_LECTURA = 8_000;
 
 /**
  * Citas publicadas **resueltas** que necesita una Colección para publicarse — FR de la

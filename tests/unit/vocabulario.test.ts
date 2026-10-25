@@ -30,7 +30,7 @@ import {
   DESTINOS_VALIDOS,
 } from '../../src/lib/destinos.ts';
 import { PARAMETRO_DE_ORIGEN as PARAMETRO_DE_REDES, REDES_VALIDAS } from '../../src/lib/redes.ts';
-import { CAMPOS_DEL_GUION, EVENTOS_DEL_GUION } from '../../src/lib/medicion.ts';
+import { CAMPOS_DEL_GUION, EVENTOS_DEL_GUION, EVENTOS_SOLO_DEL_FICHERO } from '../../src/lib/medicion.ts';
 import { interpretar } from '../../medicion/receptor.ts';
 import { medicionEnUnSandbox } from './ayuda/medicion.js';
 import { listaTras } from './ayuda/d1.js';
@@ -231,16 +231,6 @@ describe('Historia 23.2 — los eventos y los conjuntos cerrados', () => {
  */
 const PENDIENTES: readonly { historia: string; eventos?: readonly Evento[]; campos?: readonly [Evento, Campo][] }[] = [
   {
-    historia: '23.5',
-    eventos: [EVENTOS.lectura],
-    campos: [
-      [EVENTOS.copiado, 'primera'],
-      [EVENTOS.descargaDeImagen, 'primera'],
-      [EVENTOS.comparticionDeImagen, 'primera'],
-      [EVENTOS.comparticionDeEnlace, 'primera'],
-    ],
-  },
-  {
     historia: '23.6',
     campos: [
       [EVENTOS.vistaDeCita, 'via'],
@@ -268,6 +258,41 @@ const columnasDelEsquema = () =>
     readFileSync(resolve(raiz, 'medicion/esquema.sql'), 'utf8'),
     /CREATE\s+TABLE\s+IF\s+NOT\s+EXISTS\s+eventos\s*\(/i,
   )!.map((definicion) => definicion.split(/\s+/)[0]);
+
+/**
+ * Cómo se produce, en el sandbox, cada evento que solo emite el fichero (Historia 23.5): no pasa
+ * por `__medir`, así que no basta con pedirlo. Uno de `EVENTOS_SOLO_DEL_FICHERO` sin entrada aquí
+ * deja la prueba en rojo —la 23.7 añade la salida interna—.
+ */
+const PRODUCIR_DEL_FICHERO: { readonly [E in Evento]?: (entorno: ReturnType<typeof medicionEnUnSandbox>) => void } = {
+  // En una superficie con lectura —una vista declarada—, la primera interacción.
+  [EVENTOS.lectura]: (entorno) => entorno.interactuar('pointerdown'),
+};
+
+/**
+ * Lo que sale por la baliza al producir un evento en un entorno nuevo, con esa entrada: lo que
+ * pasa una isla por `__medir`, o lo que hace el visitante para que el fichero lo emita por su
+ * cuenta. Solo las balizas de ese evento: la vista declarada que necesita la lectura no cuenta.
+ */
+function producir(evento: Evento, entrada: { busqueda?: string; datos?: string; destino?: string }) {
+  const porSuCuenta = PRODUCIR_DEL_FICHERO[evento];
+  if (EVENTOS_SOLO_DEL_FICHERO.includes(evento)) {
+    expect(porSuCuenta, `${evento} lo emite solo el fichero y no tiene cómo producirse`).toBeDefined();
+    const entorno = medicionEnUnSandbox({ ruta: '/cita/una/', busqueda: entrada.busqueda, vistas: EVENTOS.vistaDeCita });
+    porSuCuenta!(entorno);
+    return entorno.balizas().filter((baliza) => baliza.evento === evento);
+  }
+  const { emitir, balizas } = medicionEnUnSandbox({ ruta: '/cita/una/', busqueda: entrada.busqueda });
+  emitir(evento, entrada.datos, entrada.destino);
+  return balizas();
+}
+
+/**
+ * `primera` de la primera acción de un entorno nuevo (Historia 23.5): «si», salvo la descarga
+ * con un destino de su conjunto —la que impuso el navegador—, que es siempre «no».
+ */
+const primeraEsperada = (evento: Evento, destino?: string) =>
+  evento === EVENTOS.descargaDeImagen && (DESTINOS_DE_DESCARGA as readonly string[]).includes(destino ?? '') ? 'no' : 'si';
 
 /** Lo que entra en el sandbox en cada escenario de un evento, y lo que debe salir de cada campo. */
 interface Escenario {
@@ -309,7 +334,13 @@ function escenariosDe(evento: Evento): Escenario[] {
     datos: 'texto buscado',
     esperado: (campo) => (campo === 'consulta' ? 'texto buscado' : null),
   });
-  return escenarios;
+  // `primera` no sale de la entrada: la calcula el fichero, y en la primera acción de cada
+  // entorno es «si», salvo la descarga con destino de su conjunto.
+  return escenarios.map((escenario) => ({
+    ...escenario,
+    esperado: (campo: Campo) =>
+      campo === 'primera' ? primeraEsperada(evento, escenario.destino) : escenario.esperado(campo),
+  }));
 }
 
 describe('Historia 23.2 — la correspondencia: guion, receptor y esquema, evento por evento', () => {
@@ -319,12 +350,13 @@ describe('Historia 23.2 — la correspondencia: guion, receptor y esquema, event
     expect(columnas).toEqual(['jornada', 'evento', 'ruta', ...CAMPOS]);
   });
 
-  it('lo no pendiente son los siete eventos de hoy, y es lo que el guion emite', () => {
+  it('lo no pendiente son los ocho eventos de hoy, y es lo que el guion emite', () => {
     const vigentes = EVENTOS_VALIDOS.filter((evento) => !eventoPendiente(evento));
     expect([...vigentes].sort()).toEqual(
       [
         EVENTOS.vistaDeCita,
         EVENTOS.vistaDeSuperficie,
+        EVENTOS.lectura,
         EVENTOS.copiado,
         EVENTOS.descargaDeImagen,
         EVENTOS.busquedaSinResultados,
@@ -367,9 +399,7 @@ describe('Historia 23.2 — la correspondencia: guion, receptor y esquema, event
       const claves = ['evento', 'ruta', ...campos.map(claveEnLaBaliza)].sort();
 
       for (const escenario of escenariosDe(evento)) {
-        const { emitir, balizas } = medicionEnUnSandbox({ ruta: '/cita/una/', busqueda: escenario.busqueda });
-        emitir(evento, escenario.datos, escenario.destino);
-        const enviadas = balizas();
+        const enviadas = producir(evento, escenario);
         expect(enviadas, `${evento}, ${escenario.nombre}`).toHaveLength(1);
         const [carga] = enviadas;
 
@@ -399,11 +429,24 @@ describe('Historia 23.2 — la correspondencia: guion, receptor y esquema, event
 
   it('los campos pendientes no salen en ningún evento vigente', () => {
     for (const evento of EVENTOS_VALIDOS.filter((e) => !eventoPendiente(e))) {
-      const { emitir, balizas } = medicionEnUnSandbox({ busqueda: `?${PARAMETRO_DE_DIFUSION}=${DESTINOS_VALIDOS[0]}` });
-      emitir(evento);
+      const [carga] = producir(evento, { busqueda: `?${PARAMETRO_DE_DIFUSION}=${DESTINOS_VALIDOS[0]}` });
+      expect(carga, evento).toBeDefined();
       for (const campo of Object.keys(CAMPOS_DE_EVENTO[evento]) as Campo[]) {
-        if (campoPendiente(evento, campo)) expect(balizas()[0], `${evento}.${campo}`).not.toHaveProperty(claveEnLaBaliza(campo));
+        if (campoPendiente(evento, campo)) expect(carga, `${evento}.${campo}`).not.toHaveProperty(claveEnLaBaliza(campo));
       }
+    }
+  });
+
+  it('la lectura no sale por `__medir`, ni directa ni de la cola: solo la produce el fichero', () => {
+    for (const evento of EVENTOS_SOLO_DEL_FICHERO) {
+      const directo = medicionEnUnSandbox({ vistas: EVENTOS.vistaDeCita });
+      directo.emitir(evento, 'datos', DESTINOS_VALIDOS[0]);
+      expect(directo.balizas().map((b) => b.evento), evento).toEqual([EVENTOS.vistaDeCita]);
+
+      const encolado = medicionEnUnSandbox({ vistas: EVENTOS.vistaDeCita, cargado: false });
+      encolado.emitir(evento);
+      encolado.cargar();
+      expect(encolado.balizas().map((b) => b.evento), evento).toEqual([EVENTOS.vistaDeCita]);
     }
   });
 });

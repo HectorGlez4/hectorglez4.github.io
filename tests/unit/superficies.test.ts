@@ -603,6 +603,30 @@ describe('Historia 23.4 — el barrido pide WCAG 2.2 AA desde un solo sitio', ()
   };
 
   /** Lo que se publica o se ejecuta en el navegador: `src/` y `public/`, solo ficheros de texto. */
+  /**
+   * Lo que ya se revisó contra el motivo de un criterio y no lo desmiente, con su porqué: el texto
+   * exacto, por fichero y criterio. Se quita de la fuente antes de buscar la señal de **ese**
+   * criterio, así que cualquier otra aparición en el mismo fichero la sigue encendiendo; y si el
+   * texto deja de estar, o deja de encender la señal, la prueba lo dice para que no se pudra.
+   */
+  const REVISADO_SIN_DESMENTIR: { fichero: string; criterio: string; texto: string; porque: string }[] = [
+    {
+      fichero: 'src/lib/medicion.ts',
+      criterio: '2.5.7',
+      texto: "export const INTERACCIONES_DE_LECTURA = ['pointerdown', 'keydown', 'wheel', 'touchmove'] as const;",
+      porque:
+        'Historia 23.5: el fichero de medición escucha el dedo que se desliza, en pasiva, solo para ' +
+        'anotar que la carga se leyó; no mueve nada ni maneja ninguna función por arrastre',
+    },
+  ];
+
+  /** La fuente de un fichero sin lo ya revisado para un criterio. */
+  const fuenteSinLoRevisado = (fichero: string, criterio: string, fuente: string) =>
+    REVISADO_SIN_DESMENTIR.filter((r) => r.fichero === fichero && r.criterio === criterio).reduce(
+      (resto, r) => resto.split(r.texto).join(''),
+      fuente,
+    );
+
   function ficherosDelSitio(): string[] {
     const ficheros: string[] = [];
     const recorrer = (dir: string) => {
@@ -910,7 +934,8 @@ describe('Historia 23.4 — el barrido pide WCAG 2.2 AA desde un solo sitio', ()
       const fuente = readFileSync(join(RAIZ, fichero), 'utf8');
       for (const criterio of CRITERIOS_QUE_AÑADE_WCAG_22) {
         const señal = SEÑALES_QUE_DESMIENTEN[criterio.criterio];
-        if (señal === undefined || criterio.comprueba === 'axe' || !señal.patron.test(fuente)) continue;
+        if (señal === undefined || criterio.comprueba === 'axe') continue;
+        if (!señal.patron.test(fuenteSinLoRevisado(fichero, criterio.criterio, fuente))) continue;
         desmentidos.push(
           `${fichero}: ${señal.que} — ${criterio.criterio} se declara «${criterio.comprueba}» porque ` +
             `${criterio.motivo}; revisa el motivo en CRITERIOS_QUE_AÑADE_WCAG_22 antes de seguir`,
@@ -918,6 +943,15 @@ describe('Historia 23.4 — el barrido pide WCAG 2.2 AA desde un solo sitio', ()
       }
     }
     expect(desmentidos).toEqual([]);
+  });
+
+  it('lo revisado sin desmentir sigue en su fichero, una vez, y encendería la señal si no estuviera revisado', () => {
+    for (const { fichero, criterio, texto, porque } of REVISADO_SIN_DESMENTIR) {
+      expect(porque.trim(), `${fichero}, ${criterio}: sin porqué`).not.toBe('');
+      const fuente = readFileSync(join(RAIZ, fichero), 'utf8');
+      expect(fuente.split(texto).length - 1, `${fichero} ya no lleva lo revisado para ${criterio}`).toBe(1);
+      expect(SEÑALES_QUE_DESMIENTEN[criterio]?.patron.test(texto), `${fichero}, ${criterio}: ya no enciende la señal`).toBe(true);
+    }
   });
 });
 

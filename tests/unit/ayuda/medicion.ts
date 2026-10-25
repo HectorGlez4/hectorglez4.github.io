@@ -1,6 +1,13 @@
 import { createContext, runInContext } from 'node:vm';
 import { ARRANQUE_DE_MEDICION, guionDeMedicion } from '../../../src/lib/medicion.ts';
 
+/** Un oyente guardado, con su `once`. */
+interface Oyente {
+  tipo: string;
+  oyente: (evento: Record<string, unknown>) => void;
+  unaVez: boolean;
+}
+
 /**
  * Ejecuta el arranque y el fichero de medición con un navegador de mentira y recoge lo que
  * envía.
@@ -14,6 +21,13 @@ import { ARRANQUE_DE_MEDICION, guionDeMedicion } from '../../../src/lib/medicion
  * resuelve si `window` es el propio global, como en el navegador. Por omisión el fichero se
  * carga en cuanto se crea el entorno; con `cargado: false` las llamadas se encolan hasta
  * `cargar()`, y con `prerendering: true` el fichero espera a `activar()`.
+ *
+ * Desde la Historia 23.5 el entorno tiene además **tiempo y visibilidad fingidos**: un reloj
+ * entero que solo avanza con `avanzar(ms)` —`performance.now`, `setTimeout` y `clearTimeout`
+ * lo leen—, la visibilidad del documento (`visible`, por omisión sí) que cambian `ocultar()` y
+ * `mostrar()` despachando `visibilitychange`, las escuchas de la ventana, a las que
+ * `interactuar(tipo)` despacha un evento, y `restaurar(persisted)`, que despacha `pageshow` como
+ * la caché de atrás y adelante.
  */
 export function medicionEnUnSandbox(
   opciones: {
@@ -26,18 +40,50 @@ export function medicionEnUnSandbox(
     prerendering?: boolean;
     /** Si el fichero se carga al crear el entorno. Por omisión, sí. */
     cargado?: boolean;
+    /** Si el documento está visible al crear el entorno. Por omisión, sí. */
+    visible?: boolean;
   } = {},
 ) {
   const enviadas: string[] = [];
-  const oyentes: { tipo: string; oyente: () => void; unaVez: boolean }[] = [];
+  const delDocumento: Oyente[] = [];
+  const deLaVentana: Oyente[] = [];
+  const guardar = (lista: Oyente[]) => (tipo: string, oyente: Oyente['oyente'], ajustes?: boolean | { once?: boolean }) => {
+    lista.push({ tipo, oyente, unaVez: typeof ajustes === 'object' && ajustes?.once === true });
+  };
+  /** Llama a los oyentes de un tipo en el orden en que se registraron; los `once`, una vez. */
+  const despachar = (lista: Oyente[], tipo: string, evento: Record<string, unknown> = {}) => {
+    for (const registro of [...lista]) {
+      if (registro.tipo !== tipo) continue;
+      if (registro.unaVez) lista.splice(lista.indexOf(registro), 1);
+      registro.oyente({ type: tipo, ...evento });
+    }
+  };
+
+  /*
+   * El reloj fingido: un entero y una lista de temporizadores. Nada avanza solo; `avanzar(ms)`
+   * dispara en orden de vencimiento los que vencen dentro del tramo, con el reloj puesto en su
+   * instante, y deja el reloj al final del tramo.
+   */
+  let ahora = 0;
+  let siguiente = 1;
+  const temporizadores: { id: number; vence: number; funcion: () => void }[] = [];
+  const setTimeout = (funcion: () => void, ms?: number) => {
+    const id = siguiente++;
+    temporizadores.push({ id, vence: ahora + Math.max(0, Number(ms) || 0), funcion });
+    return id;
+  };
+  const clearTimeout = (id?: number) => {
+    const indice = temporizadores.findIndex((t) => t.id === id);
+    if (indice >= 0) temporizadores.splice(indice, 1);
+  };
+
   const documento = {
     documentElement: {
       dataset: opciones.vistas === undefined ? {} : { vistas: opciones.vistas },
     },
     prerendering: opciones.prerendering ?? false,
-    addEventListener: (tipo: string, oyente: () => void, ajustes?: { once?: boolean }) => {
-      oyentes.push({ tipo, oyente, unaVez: ajustes?.once === true });
-    },
+    visibilityState: opciones.visible === false ? 'hidden' : 'visible',
+    addEventListener: guardar(delDocumento),
   };
 
   const ventana: Record<string, unknown> = {
@@ -48,6 +94,10 @@ export function medicionEnUnSandbox(
         opciones.sendBeacon ?? ((_url: string, carga: string) => void enviadas.push(carga)),
     },
     URLSearchParams,
+    performance: { now: () => ahora },
+    setTimeout,
+    clearTimeout,
+    addEventListener: guardar(deLaVentana),
   };
   ventana.window = ventana;
   createContext(ventana);
@@ -55,6 +105,11 @@ export function medicionEnUnSandbox(
   runInContext(ARRANQUE_DE_MEDICION, ventana);
   const cargar = () => runInContext(guionDeMedicion('https://ejemplo.invalid/e'), ventana);
   if (opciones.cargado !== false) cargar();
+
+  const cambiarVisibilidad = (estado: 'visible' | 'hidden') => {
+    documento.visibilityState = estado;
+    despachar(delDocumento, 'visibilitychange');
+  };
 
   return {
     /** Lo que haría una isla: `__medir(…)` a secas, antes o después de que llegue el fichero. */
@@ -69,12 +124,37 @@ export function medicionEnUnSandbox(
     /** La página prerenderizada pasa a verse: dispara `prerenderingchange`. */
     activar: () => {
       documento.prerendering = false;
-      for (const registro of [...oyentes]) {
-        if (registro.tipo !== 'prerenderingchange') continue;
-        if (registro.unaVez) oyentes.splice(oyentes.indexOf(registro), 1);
-        registro.oyente();
-      }
+      despachar(delDocumento, 'prerenderingchange');
     },
+    /** Avanza el reloj `ms` milisegundos, disparando en orden los temporizadores que vencen. */
+    avanzar: (ms: number) => {
+      const hasta = ahora + ms;
+      for (;;) {
+        const vencidos = temporizadores.filter((t) => t.vence <= hasta).sort((x, y) => x.vence - y.vence || x.id - y.id);
+        if (vencidos.length === 0) break;
+        const [primero] = vencidos;
+        temporizadores.splice(temporizadores.indexOf(primero), 1);
+        ahora = primero.vence;
+        primero.funcion();
+      }
+      ahora = hasta;
+    },
+    /**
+     * Una interacción del visitante —`pointerdown`, `keydown`, `wheel`, `touchmove`, `scroll`…—:
+     * llega a la ventana, y también al documento, como el evento que sube desde un elemento.
+     */
+    interactuar: (tipo: string) => {
+      despachar(delDocumento, tipo);
+      despachar(deLaVentana, tipo);
+    },
+    /** La pestaña se oculta: `visibilityState` pasa a `hidden` y se despacha `visibilitychange`. */
+    ocultar: () => cambiarVisibilidad('hidden'),
+    /** La pestaña vuelve a verse: `visibilityState` pasa a `visible` y se despacha `visibilitychange`. */
+    mostrar: () => cambiarVisibilidad('visible'),
+    /** La caché de atrás y adelante devuelve la página: despacha `pageshow` con `persisted`. */
+    restaurar: (persisted = true) => despachar(deLaVentana, 'pageshow', { persisted }),
+    /** Cuántos temporizadores siguen pendientes. */
+    pendientes: () => temporizadores.length,
     balizas: () => enviadas.map((c) => JSON.parse(c) as Record<string, unknown>),
   };
 }

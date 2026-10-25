@@ -1,9 +1,10 @@
-import { expect, test } from '@playwright/test';
+import { expect, test, type Page } from '@playwright/test';
 import { createServer, type Server } from 'node:http';
 import { spawn, type ChildProcess } from 'node:child_process';
 import { join } from 'node:path';
 import { EVENTOS, EVENTOS_DEL_GUION, camposQueEmite, rutaDelGuionDeMedicion } from '../../src/lib/medicion.ts';
 import { CAMPOS, claveEnLaBaliza } from '../../src/lib/vocabulario.ts';
+import { MIN_MS_VISIBLES_PARA_LA_LECTURA } from '../../src/lib/umbrales.ts';
 import { entradaDeLoDescargado } from '../../src/lib/guiones.ts';
 import { apuntarGuiones } from './ayuda/guiones.ts';
 import { interpretar, type Registro } from '../../medicion/receptor.ts';
@@ -82,6 +83,38 @@ async function esperarEvento(nombre: string, milisegundos = 5000) {
   return undefined;
 }
 
+/** Espera a que el fichero de medición se haya ejecutado: ha sustituido a la cola del arranque. */
+async function esperarAlFichero(page: Page) {
+  await page.waitForFunction(() => {
+    const medir = (window as unknown as { __medir?: { q?: unknown } }).__medir;
+    return typeof medir === 'function' && !('q' in medir);
+  });
+}
+
+/** Una espera de verdad, en el reloj de la prueba: el de la página puede estar fingido. */
+const esperar = (milisegundos: number) => new Promise((r) => setTimeout(r, milisegundos));
+
+/**
+ * Apunta, en la página, cada baliza en el orden en que sale por `sendBeacon`: el receptor las
+ * recibe por varias conexiones y no garantiza ese orden. Se instala antes de navegar.
+ */
+async function apuntarBalizas(page: Page) {
+  await page.addInitScript(() => {
+    const ventana = window as unknown as { __balizas: Record<string, unknown>[] };
+    ventana.__balizas = [];
+    const original = navigator.sendBeacon.bind(navigator);
+    navigator.sendBeacon = (url: string | URL, datos?: BodyInit | null) => {
+      ventana.__balizas.push(JSON.parse(String(datos)));
+      return original(url, datos);
+    };
+  });
+}
+
+/** Lo que `apuntarBalizas` ha visto salir hasta ahora, en su orden. */
+function balizasDe(page: Page): Promise<Record<string, unknown>[]> {
+  return page.evaluate(() => (window as unknown as { __balizas?: Record<string, unknown>[] }).__balizas ?? []);
+}
+
 test.beforeAll(async () => {
   // El montaje también se salta fuera del perfil: si no, el trabajador del otro perfil
   // levantaría los mismos puertos en paralelo aunque no llegara a ejecutar nada.
@@ -125,8 +158,19 @@ test.beforeAll(async () => {
   expect(resultado.codigo, resultado.salida).toBe(0);
   proyecto = resultado.proyecto;
 
+  /*
+   * Historia 23.5 — este sitio se sirve como el alojamiento, `max-age=600`, y no `no-store`: una
+   * respuesta `no-store` deja la página fuera de la caché de atrás y adelante, y la prueba de la
+   * lectura tras volver por esa caché no podría ocurrir. Cada prueba abre su propio contexto, con
+   * su caché vacía, así que ninguna otra se entera.
+   */
   servidor = spawn('node', [join(new URL('..', import.meta.url).pathname, 'servidor.mjs')], {
-    env: { ...process.env, DIST: join(proyecto, 'dist'), PUERTO: String(PUERTO_SITIO) },
+    env: {
+      ...process.env,
+      DIST: join(proyecto, 'dist'),
+      PUERTO: String(PUERTO_SITIO),
+      CACHE_CONTROL: 'max-age=600',
+    },
     stdio: 'ignore',
   });
 
@@ -417,14 +461,6 @@ test.describe('Historia 23.1 — las vistas que llegan son las que declara cada 
    */
   const llegadas = (nombre: string) => recibidos.filter((r) => r?.evento === nombre);
 
-  /** Espera a que el fichero de medición se haya ejecutado: ha sustituido a la cola del arranque. */
-  async function esperarAlFichero(page: import('@playwright/test').Page) {
-    await page.waitForFunction(() => {
-      const medir = (window as unknown as { __medir?: { q?: unknown } }).__medir;
-      return typeof medir === 'function' && !('q' in medir);
-    });
-  }
-
   for (const [nombre, ruta] of [
     ['la portada', '/'],
     ['la página 1 de Autor', rutaDeAutor('seneca')],
@@ -466,15 +502,7 @@ test.describe('Historia 23.1 — la cola del arranque y la espera al prerender',
     await context.grantPermissions(['clipboard-read', 'clipboard-write']);
     // La página apunta el orden en que salen sus balizas: el receptor las recibe por dos
     // conexiones y no garantiza ese orden.
-    await page.addInitScript(() => {
-      const ventana = window as unknown as { __balizas: string[] };
-      ventana.__balizas = [];
-      const original = navigator.sendBeacon.bind(navigator);
-      navigator.sendBeacon = (url: string | URL, datos?: BodyInit | null) => {
-        ventana.__balizas.push(JSON.parse(String(datos)).evento);
-        return original(url, datos);
-      };
-    });
+    await apuntarBalizas(page);
 
     // El fichero se retiene hasta después de copiar: la isla llama `__medir` con la cola sola.
     let soltar!: () => void;
@@ -493,15 +521,22 @@ test.describe('Historia 23.1 — la cola del arranque y la espera al prerender',
     expect(await page.evaluate(() => (window as unknown as { __balizas: string[] }).__balizas)).toEqual([]);
 
     soltar();
-    expect(await esperarEvento(EVENTOS.copiado), 'no llegó el copiado encolado').toBeTruthy();
+    const copiado = await esperarEvento(EVENTOS.copiado);
+    expect(copiado, 'no llegó el copiado encolado').toBeTruthy();
     expect(await esperarEvento(EVENTOS.vistaDeCita), 'no llegó la vista').toBeTruthy();
+    expect(await esperarEvento(EVENTOS.lectura), 'no llegó la lectura').toBeTruthy();
     await page.waitForTimeout(500);
 
-    expect(await page.evaluate(() => (window as unknown as { __balizas: string[] }).__balizas)).toEqual([
+    // Historia 23.5: el clic se hizo antes de que el fichero escuchara, así que la lectura sale
+    // del propio copiado, delante de él, y el copiado es el primero de su métrica.
+    expect((await balizasDe(page)).map((b) => b.evento)).toEqual([
       EVENTOS.vistaDeCita,
+      EVENTOS.lectura,
       EVENTOS.copiado,
     ]);
+    expect(copiado!.primera).toBe('si');
     expect(llegadas(EVENTOS.vistaDeCita)).toBe(1);
+    expect(llegadas(EVENTOS.lectura)).toBe(1);
     expect(llegadas(EVENTOS.copiado)).toBe(1);
   });
 
@@ -604,5 +639,279 @@ test.describe('Historia 23.1 — el guion de copiar no lleva el slug', () => {
       await primero.getAttribute('data-carga'),
     );
     await expect(primero.locator('[data-etiqueta]')).toHaveText('Copiado.');
+  });
+});
+
+/*
+ * Historia 23.5 — una carga que se lee deja una lectura, en un navegador de verdad y contra el
+ * receptor de la prueba. La lógica entera —cada fila de su matriz— la recorre el entorno simulado
+ * de `tests/unit/medicion.test.ts`; aquí se mira que el fichero servido la cumple con el reloj, la
+ * visibilidad, los eventos y la caché de un Chromium.
+ *
+ * El reloj de la página se finge con `page.clock` y se **pausa antes de navegar**: así ningún
+ * tiempo de carga cuenta por su cuenta y lo que se afirma a 7,9 s y a 8 s no depende de lo que
+ * tarde el sitio. Las esperas de las pruebas son del reloj de la prueba (`esperar`).
+ */
+test.describe('Historia 23.5 — una carga que se lee deja una lectura', () => {
+  const llegadas = (nombre: string) => recibidos.filter((r) => r?.evento === nombre);
+  const INICIO = new Date('2026-10-25T10:00:00Z');
+
+  /** Instala el reloj fingido y lo para: el tiempo de la página solo corre con `runFor`. */
+  async function relojParado(page: Page) {
+    await page.clock.install({ time: INICIO });
+    await page.clock.pauseAt(new Date(INICIO.getTime() + 1_000));
+  }
+
+  test('una Página de Cita visible 8 s deja una lectura, detrás de la vista, y ninguna más', async ({ page }) => {
+    await relojParado(page);
+    await apuntarBalizas(page);
+    await page.goto(`${SITIO}${RUTA_CITA}?de=instagram`);
+    await esperarAlFichero(page);
+    expect(await esperarEvento(EVENTOS.vistaDeCita), 'no llegó la vista').toBeTruthy();
+
+    await page.clock.runFor(MIN_MS_VISIBLES_PARA_LA_LECTURA - 100);
+    await esperar(500);
+    expect(llegadas(EVENTOS.lectura), 'salió una lectura antes de los 8 s').toEqual([]);
+
+    await page.clock.runFor(100);
+    const lectura = await esperarEvento(EVENTOS.lectura);
+    expect(lectura, 'no llegó la lectura a los 8 s').toBeTruthy();
+    expect(lectura).toMatchObject({ evento: EVENTOS.lectura, ruta: RUTA_CITA, origen: 'instagram' });
+
+    await page.clock.runFor(20_000);
+    await esperar(500);
+    expect(llegadas(EVENTOS.lectura)).toHaveLength(1);
+    expect((await balizasDe(page)).map((b) => b.evento)).toEqual([EVENTOS.vistaDeCita, EVENTOS.lectura]);
+    // Exactamente la ruta y la Marca de origen: ni `via` (23.6) ni nada más.
+    expect(Object.keys((await balizasDe(page))[1]).sort()).toEqual(['evento', 'origen', 'ruta']);
+  });
+
+  test('un `pointerdown` antes de los 8 s emite la lectura en el momento, y nada emite otra', async ({ page }) => {
+    await relojParado(page);
+    await apuntarBalizas(page);
+    await page.goto(`${SITIO}${RUTA_CITA}`);
+    await esperarAlFichero(page);
+    expect(await esperarEvento(EVENTOS.vistaDeCita), 'no llegó la vista').toBeTruthy();
+    await page.clock.runFor(1_000);
+
+    // Sobre el texto de la Cita, donde pulsar no hace nada más.
+    const caja = (await page.locator('blockquote .texto').boundingBox())!;
+    await page.mouse.move(caja.x + 5, caja.y + 5);
+    await page.mouse.down();
+    await page.mouse.up();
+    const lectura = await esperarEvento(EVENTOS.lectura);
+    expect(lectura, 'el pointerdown no emitió la lectura').toBeTruthy();
+    expect(lectura).toMatchObject({ ruta: RUTA_CITA, origen: null });
+
+    await page.keyboard.press('Shift');
+    await page.mouse.wheel(0, 200);
+    await page.clock.runFor(20_000);
+    await esperar(500);
+    expect(llegadas(EVENTOS.lectura)).toHaveLength(1);
+    expect((await balizasDe(page)).map((b) => b.evento)).toEqual([EVENTOS.vistaDeCita, EVENTOS.lectura]);
+  });
+
+  test('una tecla antes de los 8 s también la emite, una sola vez', async ({ page }) => {
+    await relojParado(page);
+    await apuntarBalizas(page);
+    await page.goto(`${SITIO}${RUTA_CITA}`);
+    await esperarAlFichero(page);
+    expect(await esperarEvento(EVENTOS.vistaDeCita), 'no llegó la vista').toBeTruthy();
+    await page.clock.runFor(2_000);
+
+    await page.keyboard.press('Shift');
+    expect(await esperarEvento(EVENTOS.lectura), 'la tecla no emitió la lectura').toBeTruthy();
+    await page.keyboard.press('Shift');
+    await page.clock.runFor(20_000);
+    await esperar(500);
+    expect(llegadas(EVENTOS.lectura)).toHaveLength(1);
+  });
+
+  test('`/buscar/` no emite lectura, ni con interacción ni con el tiempo', async ({ page }) => {
+    await relojParado(page);
+    await apuntarBalizas(page);
+    await page.goto(`${SITIO}${RUTA_BUSCAR}`);
+    await esperarAlFichero(page);
+
+    const caja = (await page.locator('h1').first().boundingBox())!;
+    await page.mouse.move(caja.x + 5, caja.y + 5);
+    await page.mouse.down();
+    await page.mouse.up();
+    await page.keyboard.press('Shift');
+    await page.clock.runFor(20_000);
+    await esperar(500);
+    expect(llegadas(EVENTOS.lectura)).toEqual([]);
+    expect(await balizasDe(page)).toEqual([]);
+  });
+
+  test('copiar con `element.click()`, sin `pointerdown` ni `keydown`: la lectura sale antes del copiado, que es «si»', async ({
+    page,
+    context,
+  }) => {
+    await context.grantPermissions(['clipboard-read', 'clipboard-write']);
+    await relojParado(page);
+    await apuntarBalizas(page);
+    await page.goto(`${SITIO}${RUTA_CITA}`);
+    await esperarAlFichero(page);
+    expect(await esperarEvento(EVENTOS.vistaDeCita), 'no llegó la vista').toBeTruthy();
+
+    // `click()` del elemento despacha el clic a secas: ningún `pointerdown` ni `keydown` antes.
+    await page.locator('[data-copiar]').evaluate((boton) => (boton as HTMLButtonElement).click());
+    await expect(page.locator('[data-copiar]')).toHaveAttribute('data-estado', 'copiado');
+    const copiado = await esperarEvento(EVENTOS.copiado);
+    expect(copiado, 'no llegó el copiado').toBeTruthy();
+    expect(await esperarEvento(EVENTOS.lectura), 'no llegó la lectura').toBeTruthy();
+
+    expect((await balizasDe(page)).map((b) => [b.evento, b.primera])).toEqual([
+      [EVENTOS.vistaDeCita, undefined],
+      [EVENTOS.lectura, undefined],
+      [EVENTOS.copiado, 'si'],
+    ]);
+    expect(copiado!.primera).toBe('si');
+  });
+
+  test('`primera` por métrica: copiar dos veces da «si» y «no»; compartir el enlace dos veces, también', async ({
+    page,
+    context,
+  }) => {
+    await context.grantPermissions(['clipboard-read', 'clipboard-write']);
+    // El enlace abre otra pestaña: se anula ahí, en todo el contexto, sin salir a la red.
+    await context.route('**/t.me/**', (ruta) => ruta.abort());
+    await apuntarBalizas(page);
+    await page.goto(`${SITIO}${RUTA_CITA}`);
+    await esperarAlFichero(page);
+
+    const copiar = page.getByRole('button', { name: 'Copiar la cita' });
+    await copiar.click();
+    await expect(page.locator('[data-copiar]')).toHaveAttribute('data-estado', 'copiado');
+    await copiar.click();
+    await expect.poll(async () => (await balizasDe(page)).filter((b) => b.evento === EVENTOS.copiado).length).toBe(2);
+
+    const telegram = page.locator('[data-destino="telegram"]');
+    await telegram.click();
+    await telegram.click();
+    await expect
+      .poll(async () => (await balizasDe(page)).filter((b) => b.evento === EVENTOS.comparticionDeEnlace).length)
+      .toBe(2);
+
+    const acciones = (await balizasDe(page)).filter((b) => b.evento !== EVENTOS.vistaDeCita && b.evento !== EVENTOS.lectura);
+    expect(acciones.map((b) => [b.evento, b.primera])).toEqual([
+      [EVENTOS.copiado, 'si'],
+      [EVENTOS.copiado, 'no'],
+      [EVENTOS.comparticionDeEnlace, 'si'],
+      [EVENTOS.comparticionDeEnlace, 'no'],
+    ]);
+    // Y al receptor llegan con su `primera`, guardada en su columna.
+    await expect.poll(() => llegadas(EVENTOS.comparticionDeEnlace).length).toBe(2);
+    expect(llegadas(EVENTOS.copiado).map((r) => r!.primera).sort()).toEqual(['no', 'si']);
+    expect(llegadas(EVENTOS.comparticionDeEnlace).map((r) => r!.primera).sort()).toEqual(['no', 'si']);
+    expect(llegadas(EVENTOS.lectura)).toHaveLength(1);
+  });
+
+  test('un `pageshow` con `persisted` es una carga nueva: sin vista, con otra lectura sin marca y `primera` otra vez «si»', async ({
+    page,
+    context,
+  }) => {
+    await context.grantPermissions(['clipboard-read', 'clipboard-write']);
+    await relojParado(page);
+    await apuntarBalizas(page);
+    await page.goto(`${SITIO}${RUTA_CITA}?de=instagram`);
+    await esperarAlFichero(page);
+    await page.getByRole('button', { name: 'Copiar la cita' }).click();
+    await expect.poll(async () => (await balizasDe(page)).length).toBe(3);
+
+    // Sin `persisted`, nada.
+    await page.evaluate(() => window.dispatchEvent(new PageTransitionEvent('pageshow', { persisted: false })));
+    await page.clock.runFor(MIN_MS_VISIBLES_PARA_LA_LECTURA);
+    await esperar(300);
+    expect(await balizasDe(page)).toHaveLength(3);
+
+    await page.evaluate(() => window.dispatchEvent(new PageTransitionEvent('pageshow', { persisted: true })));
+    await page.clock.runFor(MIN_MS_VISIBLES_PARA_LA_LECTURA);
+    await page.locator('[data-copiar]').evaluate((boton) => (boton as HTMLButtonElement).click());
+    await expect.poll(async () => (await balizasDe(page)).length).toBe(5);
+
+    expect((await balizasDe(page)).map((b) => [b.evento, b.origen ?? null, b.primera ?? null])).toEqual([
+      [EVENTOS.vistaDeCita, 'instagram', null],
+      [EVENTOS.lectura, 'instagram', null],
+      [EVENTOS.copiado, null, 'si'],
+      [EVENTOS.lectura, null, null],
+      [EVENTOS.copiado, null, 'si'],
+    ]);
+    await expect.poll(() => llegadas(EVENTOS.lectura).length).toBe(2);
+    expect(llegadas(EVENTOS.vistaDeCita)).toHaveLength(1);
+  });
+
+  test('volver por la caché de atrás y adelante de verdad: ninguna vista nueva y otra lectura, sin marca', async ({
+    playwright,
+  }) => {
+    /*
+     * Playwright lanza Chromium con `--disable-back-forward-cache`; aquí se lanza uno propio sin
+     * ese argumento, y el sitio de esta prueba se sirve `max-age=600`, como el alojamiento: con
+     * `no-store` la página no entraría en esa caché. Y con el Chromium completo en su modo sin
+     * cabeza nuevo (`channel: 'chromium'`): el `chromium-headless-shell` de por omisión no
+     * restaura nunca —su delegado la desactiva, `BackForwardCacheDisabledForDelegate`, comprobado
+     * con `Page.backForwardCacheNotUsed` el 2026-10-25 con Chromium 151—. Una página restaurada no
+     * dispara `load`, así que volver atrás espera solo a `commit`.
+     */
+    let navegador: Awaited<ReturnType<typeof playwright.chromium.launch>>;
+    try {
+      navegador = await playwright.chromium.launch({
+        channel: 'chromium',
+        ignoreDefaultArgs: ['--disable-back-forward-cache'],
+      });
+    } catch (error) {
+      test.skip(true, `no se pudo lanzar el Chromium completo sin cabeza: ${String(error).split('\n')[0]}`);
+      return;
+    }
+    try {
+      const contexto = await navegador.newContext();
+      const pagina = await contexto.newPage();
+      const cdp = await contexto.newCDPSession(pagina);
+      await cdp.send('Page.enable');
+      const sinCache: string[] = [];
+      cdp.on('Page.backForwardCacheNotUsed', (evento) => {
+        for (const explicacion of evento.notRestoredExplanations) sinCache.push(explicacion.reason);
+      });
+      await apuntarBalizas(pagina);
+      await pagina.addInitScript(() => {
+        const ventana = window as unknown as { __restaurada: boolean };
+        ventana.__restaurada = false;
+        addEventListener('pageshow', (evento) => {
+          if ((evento as PageTransitionEvent).persisted) ventana.__restaurada = true;
+        });
+      });
+
+      await pagina.goto(`${SITIO}${RUTA_CITA}?de=instagram`);
+      await esperarAlFichero(pagina);
+      await pagina.keyboard.press('Shift');
+      await expect.poll(() => llegadas(EVENTOS.lectura).length).toBe(1);
+      expect(llegadas(EVENTOS.lectura)[0]).toMatchObject({ ruta: RUTA_CITA, origen: 'instagram' });
+
+      await pagina.goto(`${SITIO}${rutaDeAutor('seneca')}`);
+      await esperarAlFichero(pagina);
+      await pagina.goBack({ waitUntil: 'commit' });
+      expect(new URL(pagina.url()).pathname).toBe(RUTA_CITA);
+
+      const restaurada = async () =>
+        pagina.evaluate(() => (window as unknown as { __restaurada?: boolean }).__restaurada === true).catch(() => false);
+      const hasta = Date.now() + 3_000;
+      while (!(await restaurada()) && Date.now() < hasta) await esperar(100);
+      test.skip(
+        !(await restaurada()),
+        `Chromium no restauró la página de la caché de atrás y adelante: ${sinCache.join(', ') || 'sin motivo'}`,
+      );
+
+      const deLaCita = (nombre: string) => llegadas(nombre).filter((r) => r!.ruta === RUTA_CITA);
+      await pagina.keyboard.press('Shift');
+      await expect.poll(() => deLaCita(EVENTOS.lectura).length).toBe(2);
+      await esperar(500);
+      expect(deLaCita(EVENTOS.vistaDeCita), 'volver por la caché emitió otra vista').toHaveLength(1);
+      expect(deLaCita(EVENTOS.lectura).map((r) => r!.origen)).toEqual(['instagram', null]);
+      // La vista de la Página de Autor sí llegó: fue una carga de verdad.
+      expect(llegadas(EVENTOS.vistaDeSuperficie)).toHaveLength(1);
+    } finally {
+      await navegador.close();
+    }
   });
 });
