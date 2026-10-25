@@ -32,6 +32,17 @@ export interface EnlacePulsado {
   descarga?: boolean;
 }
 
+/**
+ * Un clic que no es en un enlace — Historia 23.7: el que el navegador despacha en el botón de
+ * enviar de un formulario (`<button type="submit">` dentro de un `<form>`) al enviarlo con Enter o
+ * pulsándolo, envuelto en sus contenedores.
+ */
+export interface EnvioDeFormulario {
+  envio: true;
+  /** Los contenedores que envuelven el formulario, del más cercano al más lejano. */
+  contenedores?: readonly Contenedor[];
+}
+
 /** Cómo se pulsa — Historia 23.7: el botón (por omisión, 0, el principal) y lo demás del clic. */
 export interface Gesto {
   button?: number;
@@ -121,7 +132,8 @@ function comoElemento(nodo: Nodo, vistos = new Map<Nodo, Record<string, unknown>
  * de mentira, cuyo `href` se resuelve con `URL` contra la dirección de ahora (`origin`,
  * `pathname`), con su `target` y su `download`, y envuelto en los contenedores del enlace —una
  * zona (`data-zona`) o una exención (`data-sin-zona`)—, del más cercano al más lejano. Con
- * `enlace` nulo el objetivo es un `<p>` que no está dentro de ningún enlace. `closest` sabe leer
+ * `enlace` nulo el objetivo es un `<p>` que no está dentro de ningún enlace, y con `{ envio: true }`,
+ * el botón de enviar de un formulario dentro de sus contenedores. `closest` sabe leer
  * solo listas de `etiqueta[atributo]` y `[atributo]`, que es lo que pide el fichero. No dispara
  * `pointerdown`: un clic de `element.click()` no lo trae, y quien quiera el del ratón lo pide antes
  * con `interactuar`.
@@ -335,10 +347,11 @@ export function medicionEnUnSandbox(
     /** Las llamadas a `history.replaceState`, en su orden, con sus argumentos tal como llegaron. */
     historial: () => [...llamadas],
     /**
-     * Un clic —Historia 23.7—: en un enlace, dentro de sus contenedores, o, con `enlace` nulo,
-     * fuera de cualquier enlace. Llega al documento y después a la ventana.
+     * Un clic —Historia 23.7—: en un enlace, dentro de sus contenedores; con `{ envio: true }`, en
+     * el botón de enviar de un formulario; o, con `enlace` nulo, fuera de cualquier enlace. Llega al
+     * documento y después a la ventana.
      */
-    pulsar: (enlace: EnlacePulsado | null, gesto: Gesto = {}) => {
+    pulsar: (enlace: EnlacePulsado | EnvioDeFormulario | null, gesto: Gesto = {}) => {
       let padre: Nodo | null = null;
       // Del más lejano al más cercano, para que cada uno sea el padre del siguiente.
       for (const contenedor of [...(enlace?.contenedores ?? [])].reverse()) {
@@ -350,6 +363,9 @@ export function medicionEnUnSandbox(
       let objetivo: Record<string, unknown>;
       if (enlace === null) {
         objetivo = comoElemento({ etiqueta: 'p', atributos: new Map(), padre });
+      } else if ('envio' in enlace) {
+        const formulario: Nodo = { etiqueta: 'form', atributos: new Map([['action', '/buscar/']]), padre };
+        objetivo = comoElemento({ etiqueta: 'button', atributos: new Map([['type', 'submit']]), padre: formulario });
       } else {
         const atributos = new Map<string, string>([['href', enlace.href]]);
         if (enlace.target !== undefined) atributos.set('target', enlace.target);

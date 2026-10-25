@@ -1288,6 +1288,8 @@ describe('Historia 23.7 — cada salida interna dice desde qué zona', () => {
     ['a otro origen', enZona('listado', 'https://otro.invalid/cita/otra/'), {}],
     ['a `mailto:`', enZona('listado', 'mailto:alguien@ejemplo.invalid'), {}],
     ['fuera de cualquier enlace', null, {}],
+    // Enter en el campo despacha un `click` en el botón de enviar: dentro de una zona, tampoco sale.
+    ['al enviar un formulario (el clic en su botón, dentro de una zona)', { envio: true, contenedores: [{ zona: 'listado' }] }, {}],
   ] as const)('no es salida %s: nada sale, y un clic válido después sí', (_, enlace, gesto) => {
     const { pulsar, balizas } = enCita();
     pulsar(enlace, gesto);
@@ -1329,7 +1331,8 @@ describe('Historia 23.7 — cada salida interna dice desde qué zona', () => {
   it.each([
     ['una página 2+', '/tema/el-tiempo/2/', 'paginacion'],
     ['`/buscar/`', '/buscar/', 'resultado'],
-    ['el 404', '/404', 'cita-del-dia'],
+    // El 404 se sirve en la ruta pedida, nunca en `/404`: aquí, la de una Cita retirada.
+    ['el 404, en la ruta que se pidió', '/cita/una-retirada/', 'cita-del-dia'],
   ] as const)('sin lectura (%s, sin `data-vistas`): solo la salida, y nunca una lectura', (_, ruta, zona) => {
     const { interactuar, pulsar, avanzar, balizas } = medicionEnUnSandbox({ ruta });
     interactuar('pointerdown');
@@ -2310,7 +2313,7 @@ describe('Historia 23.7 — toda salida interna de `dist/` dice su zona', () => 
       '<body><a class="saltar" href="#contenido">Saltar</a>',
       '<header class="cabecera" data-zona="cabecera"><a href="/">Marca</a></header>',
       '<main id="contenido"><!-- <a href="/comentado/"> -->',
-      '<ul data-zona="listado" title="uno > dos"><li><a href="/cita/a/?x=1&amp;y=2"><span>A</span></a><br><img src=x alt="">',
+      '<ul data-zona="listado" title="uno > dos"><li><a href="/cita/a/?x=1&amp;y=2&#99999999;"><span>A</span></a><br><img src=x alt="">',
       '</li></ul>',
       '<nav data-zona="rutas-de-salida"><ul class="hermanas"><li><a href=/cita/b/>B</a></li></ul>',
       '<ul class="chips" data-zona="chip-de-tema"><li><a class="chip" href="/tema/t/">T</a></li></ul>',
@@ -2322,7 +2325,8 @@ describe('Historia 23.7 — toda salida interna de `dist/` dice su zona', () => 
     expect(enlacesDe(html)).toEqual([
       { href: '#contenido', enMain: false, declaracion: null },
       { href: '/', enMain: false, declaracion: { zona: 'cabecera' } },
-      { href: '/cita/a/?x=1&y=2', enMain: true, declaracion: { zona: 'listado' } },
+      // Una entidad fuera de Unicode se queda como está, en vez de tumbar la prueba.
+      { href: '/cita/a/?x=1&y=2&#99999999;', enMain: true, declaracion: { zona: 'listado' } },
       { href: '/cita/b/', enMain: true, declaracion: { zona: 'rutas-de-salida' } },
       { href: '/tema/t/', enMain: true, declaracion: { zona: 'chip-de-tema' } },
       { href: '/tema/u/', enMain: true, declaracion: { sinZona: 'salidas-sin-resultados' } },
@@ -2334,13 +2338,28 @@ describe('Historia 23.7 — toda salida interna de `dist/` dice su zona', () => 
     ]);
   });
 
-  it('en toda superficie con lectura, todo enlace interno de `main` tiene zona o exención', async () => {
+  /** Si la página construida pide el fichero de medición: entonces su escucha de `click` corre en ella. */
+  const cargaElFichero = (html: string) =>
+    etiquetasDeGuionExterno(html).some((etiqueta) => guionExternoDe(etiqueta.src)?.id === 'medicion');
+
+  /*
+   * Toda página que carga el fichero, no solo las superficies con lectura: las páginas 2+,
+   * `/buscar/` y el 404 también emiten su salida (sin lectura), y un enlace sin zona en ellas se
+   * quedaría sin medir igual de callado. Lo que no carga el fichero —`/kit` y `/lote`— no mide
+   * nada y no entra.
+   */
+  it('en toda página que carga el fichero —con lectura o sin ella—, todo enlace interno de `main` tiene zona o exención', async () => {
     let paginas = 0;
+    let sinLectura = 0;
     let enlaces = 0;
     const sinDeclarar: string[] = [];
     for (const [ruta, html] of paginasDe(await sitioMedido())) {
-      if (vistasDe(html) === undefined) continue;
+      if (!cargaElFichero(html)) {
+        expect(vistasDe(html), `${ruta}: declara vista y no carga el fichero`).toBeUndefined();
+        continue;
+      }
       paginas++;
+      if (vistasDe(html) === undefined) sinLectura++;
       for (const { href, enMain, declaracion } of enlacesDe(html)) {
         if (!enMain || href === undefined || esAnclaDeLaPropiaPagina(href)) continue;
         if (new URL(href, new URL(ruta, BASE)).origin !== BASE.origin) continue;
@@ -2357,7 +2376,65 @@ describe('Historia 23.7 — toda salida interna de `dist/` dice su zona', () => 
     // Portada, las Citas, el Autor, el Tema, la Colección y la Obra indexable: ninguna en vacío.
     expect(paginas).toBeGreaterThan(SLUGS_DE_CITA.length + 4);
     expect(enlaces).toBeGreaterThan(paginas * 3);
+    // Y las que salen sin lectura: las páginas 2+, la Obra que no se indexa, `/buscar/` y el 404.
+    expect(sinLectura).toBeGreaterThanOrEqual(PAGINAS_2.length + OBRAS.length - 1 + 2);
   }, 240_000);
+
+  /**
+   * Qué zona lleva cada sitio, no solo que lleve una del conjunto: una zona válida en el sitio
+   * equivocado —los Chips de Tema de la Cita con la de sus Rutas de salida, la Paginación con la del
+   * listado, los chips de la portada intercambiados— pasa las demás pruebas y mide mal SM-4.
+   *
+   * Cada fila es una página, un enlace —su `href` exacto, o una expresión para todos los que casen—
+   * y las declaraciones distintas que llevan los enlaces de `main` que casan, en el orden en que
+   * aparecen por primera vez; al menos uno tiene que casar. La Paginación va por expresión: la misma
+   * página sale como número y como «Siguiente», y la barra final la pone Astro.
+   */
+  const COLOCACION: readonly (readonly [ruta: string, enlace: string | RegExp, esperadas: readonly Declaracion[]])[] = [
+    ['/', CITA, [{ zona: 'cita-del-dia' }]],
+    ['/', '/autor/seneca/', [{ zona: 'atribucion' }, { zona: 'autores-de-portada' }]],
+    ['/', '/obra/seneca/sobre-la-brevedad-de-la-vida/', [{ zona: 'atribucion' }]],
+    ['/', '/tema/el-tiempo/', [{ zona: 'chip-de-tema' }]],
+    ['/', '/coleccion/frases-cortas/', [{ zona: 'colecciones' }]],
+    ['/404', CITA, [{ zona: 'cita-del-dia' }]],
+    ['/404', '/autor/seneca/', [{ zona: 'atribucion' }]],
+    ['/404', '/tema/el-tiempo/', [{ sinZona: 'chips-del-404' }]],
+    [CITA, '/autor/seneca/', [{ zona: 'atribucion' }]],
+    [CITA, '/obra/seneca/sobre-la-brevedad-de-la-vida/', [{ zona: 'atribucion' }]],
+    [CITA, /^\/cita\//, [{ zona: 'rutas-de-salida' }]],
+    [CITA, '/tema/el-tiempo/', [{ zona: 'chip-de-tema' }]],
+    ['/autor/seneca/', /^\/obra\//, [{ zona: 'lista-de-obras' }]],
+    ['/autor/seneca/', /^\/cita\//, [{ zona: 'listado' }]],
+    ['/autor/seneca/', /^\/autor\/seneca\/2\/?$/, [{ zona: 'paginacion' }]],
+    ['/autor/seneca/2/', /^\/cita\//, [{ zona: 'listado' }]],
+    ['/tema/el-tiempo/', /^\/cita\//, [{ zona: 'listado' }]],
+    ['/tema/el-tiempo/', /^\/tema\/el-tiempo\/2\/?$/, [{ zona: 'paginacion' }]],
+    ['/tema/el-tiempo/2/', /^\/tema\/el-tiempo\/?$/, [{ zona: 'paginacion' }]],
+    ['/coleccion/frases-cortas/', /^\/cita\//, [{ zona: 'listado' }]],
+    ['/coleccion/frases-cortas/', /^\/coleccion\/frases-cortas\/2\/?$/, [{ zona: 'paginacion' }]],
+    [OBRA_INDEXABLE, '/autor/seneca/', [{ zona: 'atribucion' }]],
+    [OBRA_INDEXABLE, /^\/cita\//, [{ zona: 'listado' }]],
+    [OBRAS[1], '/autor/seneca/', [{ zona: 'atribucion' }]],
+    [OBRAS[1], /^\/obra\/seneca\/sobre-la-brevedad-de-la-vida\/2\/?$/, [{ zona: 'paginacion' }]],
+    [OBRAS[1], '/tema/el-tiempo/', [{ zona: 'chip-de-tema' }]],
+    ['/buscar/', '/tema/el-tiempo/', [{ sinZona: 'salidas-sin-resultados' }]],
+    ['/buscar/', '/coleccion/frases-cortas/', [{ sinZona: 'salidas-sin-resultados' }]],
+    ['/buscar/', '/autor/seneca/', [{ sinZona: 'salidas-sin-resultados' }]],
+  ];
+
+  it.each(COLOCACION.map(([ruta, enlace, esperadas]) => [ruta, String(enlace), enlace, esperadas] as const))(
+    'en %s, %s sale por su zona',
+    async (ruta, _, enlace, esperadas) => {
+      const html = paginasDe(await sitioMedido()).get(ruta);
+      expect(html, `${ruta} no está en dist/`).toBeDefined();
+      const casa = (href: string) => (typeof enlace === 'string' ? href === enlace : enlace.test(href));
+      const casan = enlacesDe(html!).filter((e) => e.enMain && e.href !== undefined && casa(e.href));
+      expect(casan.length, `ningún enlace de \`main\` de ${ruta} casa con ${String(enlace)}`).toBeGreaterThan(0);
+      const distintas = [...new Set(casan.map((e) => JSON.stringify(e.declaracion)))].map((d) => JSON.parse(d));
+      expect(distintas).toEqual(esperadas);
+    },
+    240_000,
+  );
 
   it('en todo `dist/` las zonas son del vocabulario, son exactamente las once de hoy y van en un contenedor, nunca en el enlace', async () => {
     const declaraciones = await declaracionesDelSitio();

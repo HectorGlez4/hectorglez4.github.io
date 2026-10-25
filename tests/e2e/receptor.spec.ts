@@ -1059,28 +1059,95 @@ test.describe('Historia 23.7 — cada salida interna dice desde qué zona', () =
     });
   }
 
-  test('en la Cita, un clic con Control o Meta, el botón central y el salto al contenido no salen; el primer clic de ratón sí, y solo ese', async ({
+  /**
+   * Apunta en la página cada `click` que llega a la ventana, con su botón y sus modificadores, y el
+   * `href` de su enlace. Se pone después del fichero, así que lo que ve esta escucha lo vio antes la
+   * del fichero: un gesto que no llega como `click` —el botón central, o Control en macOS— no
+   * prueba su filtro, y la lista lo deja a la vista.
+   */
+  async function apuntarClics(page: Page) {
+    await page.evaluate(() => {
+      const ventana = window as unknown as { __clics: Record<string, unknown>[] };
+      ventana.__clics = [];
+      addEventListener('click', (evento) => {
+        const enlace = (evento.target as Element | null)?.closest?.('a[href]');
+        ventana.__clics.push({
+          button: evento.button,
+          ctrlKey: evento.ctrlKey,
+          metaKey: evento.metaKey,
+          shiftKey: evento.shiftKey,
+          altKey: evento.altKey,
+          href: enlace?.getAttribute('href') ?? null,
+        });
+      });
+    });
+  }
+  const clicsDe = (page: Page) =>
+    page.evaluate(() => (window as unknown as { __clics: Record<string, unknown>[] }).__clics);
+
+  test('en la Cita, dentro de una zona, ni un modificador, ni el botón central, ni un ancla, ni la propia ruta salen; el primer clic de ratón sí, y solo ese', async ({
     page,
     context,
   }) => {
     await quedarseEn(context, RUTA_CITA);
+    // La propia ruta con otra búsqueda también pide al servidor: se anula igual, para seguir en la carga.
+    await page.route(
+      (url) => url.pathname === RUTA_CITA && url.search !== '',
+      (peticion) => (peticion.request().isNavigationRequest() ? peticion.fulfill({ status: 204 }) : peticion.fallback()),
+    );
     await apuntarBalizas(page);
     await page.goto(`${SITIO}${RUTA_CITA}`);
     await esperarAlFichero(page);
     expect(await esperarEvento(EVENTOS.vistaDeCita), 'no llegó la vista').toBeTruthy();
+    await apuntarClics(page);
+
+    // Un ancla y la propia ruta, dentro de la zona de las Rutas de salida: sin su regla, saldrían.
+    const PROPIA = `${RUTA_CITA}?q=otra`;
+    await page.evaluate(
+      ([ancla, propia]) => {
+        const lista = document.querySelector('nav[aria-label="Seguir leyendo"] .hermanas')!;
+        for (const [href, texto] of [
+          [ancla, 'Ancla de la propia página'],
+          [propia, 'La propia ruta, con otra búsqueda'],
+        ]) {
+          const elemento = document.createElement('li');
+          const enlace = document.createElement('a');
+          enlace.setAttribute('href', href);
+          enlace.textContent = texto;
+          elemento.append(enlace);
+          lista.append(elemento);
+        }
+      },
+      ['#contenido', PROPIA],
+    );
 
     const hermana = page.locator(HERMANAS).first();
-    await hermana.click({ modifiers: ['Control'] });
+    // Meta y Mayúsculas llegan como `click` en todas partes: abren otra pestaña u otra ventana.
     await hermana.click({ modifiers: ['Meta'] });
-    await hermana.click({ button: 'middle' });
-    // El enlace de salto solo se ve con el foco: se activa con el teclado, como lo usa quien lo usa.
-    await page.locator('a.saltar').focus();
-    await page.keyboard.press('Enter');
+    await hermana.click({ modifiers: ['Shift'] });
+    // Control y el botón central, no siempre —en macOS Control es el menú contextual, y Chromium da
+    // `auxclick` al central—: se despachan como `click` en el enlace, para que su filtro se pruebe.
+    await hermana.dispatchEvent('click', { button: 0, ctrlKey: true });
+    await hermana.dispatchEvent('click', { button: 1 });
+    await page.locator('a[href="#contenido"]').last().click();
     await expect.poll(() => new URL(page.url()).hash).toBe('#contenido');
+    await page.locator(`a[href="${PROPIA}"]`).click();
     await esperar(500);
+
+    // Cada gesto llegó como `click`, con lo suyo, a la escucha de la ventana.
+    const destino = await hermana.getAttribute('href');
+    expect(await clicsDe(page)).toEqual([
+      { button: 0, ctrlKey: false, metaKey: true, shiftKey: false, altKey: false, href: destino },
+      { button: 0, ctrlKey: false, metaKey: false, shiftKey: true, altKey: false, href: destino },
+      { button: 0, ctrlKey: true, metaKey: false, shiftKey: false, altKey: false, href: destino },
+      { button: 1, ctrlKey: false, metaKey: false, shiftKey: false, altKey: false, href: destino },
+      { button: 0, ctrlKey: false, metaKey: false, shiftKey: false, altKey: false, href: '#contenido' },
+      { button: 0, ctrlKey: false, metaKey: false, shiftKey: false, altKey: false, href: PROPIA },
+    ]);
     // La lectura sí: la trajo el primer `pointerdown`. La salida, no.
     expect((await balizasDe(page)).map((b) => b.evento)).toEqual([EVENTOS.vistaDeCita, EVENTOS.lectura]);
     expect(salidas(), 'salió una salida sin serlo').toEqual([]);
+    expect(new URL(page.url()).pathname).toBe(RUTA_CITA);
 
     await hermana.click();
     const salida = await esperarEvento(EVENTOS.salidaInterna);
@@ -1097,6 +1164,24 @@ test.describe('Historia 23.7 — cada salida interna dice desde qué zona', () =
     await esperar(500);
     expect((await balizasDe(page)).map((b) => b.evento)).toHaveLength(3);
     expect(salidas()).toHaveLength(1);
+  });
+
+  test('con el teclado: Enter en un enlace con zona da la lectura, por la tecla, y la salida', async ({ page, context }) => {
+    await quedarseEn(context, RUTA_CITA);
+    await apuntarBalizas(page);
+    await page.goto(`${SITIO}${RUTA_CITA}`);
+    await esperarAlFichero(page);
+    expect(await esperarEvento(EVENTOS.vistaDeCita), 'no llegó la vista').toBeTruthy();
+
+    await page.locator(HERMANAS).first().focus();
+    await page.keyboard.press('Enter');
+    const salida = await esperarEvento(EVENTOS.salidaInterna);
+    expect(salida, 'no llegó la salida').toBeTruthy();
+    expect((await balizasDe(page)).map((b) => [b.evento, b.zona])).toEqual([
+      [EVENTOS.vistaDeCita, undefined],
+      [EVENTOS.lectura, undefined],
+      [EVENTOS.salidaInterna, 'rutas-de-salida'],
+    ]);
   });
 
   test('en `/buscar/`, pulsar un resultado llega con `resultado`, la ruta de la búsqueda y sin lectura', async ({

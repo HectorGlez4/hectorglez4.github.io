@@ -64,7 +64,8 @@ const resolverEntidades = (texto: string) =>
   texto.replace(/&(#x[0-9a-f]+|#\d+|[a-z]+);/gi, (entera, nombre: string) => {
     if (nombre[0] === '#') {
       const codigo = nombre[1] === 'x' || nombre[1] === 'X' ? parseInt(nombre.slice(2), 16) : parseInt(nombre.slice(1), 10);
-      return Number.isFinite(codigo) ? String.fromCodePoint(codigo) : entera;
+      // Fuera de Unicode `fromCodePoint` lanza: la entidad se deja tal cual, y la prueba informa.
+      return Number.isFinite(codigo) && codigo <= 0x10ffff ? String.fromCodePoint(codigo) : entera;
     }
     return ENTIDADES[nombre.toLowerCase()] ?? entera;
   });

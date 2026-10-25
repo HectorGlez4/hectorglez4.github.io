@@ -225,7 +225,8 @@ export const INTERACCIONES_DE_LECTURA = ['pointerdown', 'keydown', 'wheel', 'tou
  * `ListaDeObras`, `RutasDeSalida`, `Atribucion`) la zona es una prop `zona: Zona` obligatoria, de
  * modo que un uso nuevo que la olvide no pasa `astro check`; en los contenedores propios de una
  * página va escrita como atributo. Una prueba de `tests/unit/medicion.test.ts` sobre `dist/` exige
- * zona o exención en todo enlace interno de `main` de una superficie con lectura.
+ * zona o exención en todo enlace interno de `main` de toda página que carga este fichero —con
+ * lectura o sin ella—, y otra fija qué zona lleva cada sitio.
  */
 export const ATRIBUTO_DE_ZONA = 'data-zona';
 
@@ -238,9 +239,11 @@ export const ATRIBUTO_SIN_ZONA = 'data-sin-zona';
 
 /**
  * Los motivos de exención de hoy — UX-DR111, Historia 23.7. Son enlaces que la tabla de zonas de
- * `EXPERIENCE.md` no nombra, exentos por escrito porque una zona nueva exigiría otra migración
- * (AD-14), y se revisan en la pasada de métricas. Es un conjunto cerrado: una exención nueva la
- * decide Héctor, igual que una zona nueva.
+ * `EXPERIENCE.md` no nombra, exentos por escrito (la Historia 23.7, y para las salidas de la
+ * búsqueda sin resultados la decisión de Héctor del 2026-10-19 en `EXPERIENCE.md § Zonas de
+ * salida interna`), porque una zona nueva cambiaría el vocabulario —y con él la huella de AD-14 y
+ * otro despliegue del receptor—; se revisan en la pasada de métricas. Es un conjunto cerrado: una
+ * exención nueva la decide Héctor, igual que una zona nueva.
  *
  *   · `chips-del-404` — los Chips de Tema del 404;
  *   · `salidas-sin-resultados` — las salidas que `/buscar/` enseña cuando una búsqueda no
@@ -335,7 +338,9 @@ export type ExencionDeZona = (typeof EXENCIONES_DE_ZONA)[number];
  * todavía no la emitió (un clic de `element.click()`, sin `pointerdown`), la emite antes. Lleva la
  * ruta de la página y la zona; nada más: ni el destino, ni el texto pulsado, ni las marcas, ni
  * nada que encadene esta carga con la siguiente (NFR-11). La emite solo el fichero
- * (`EVENTOS_SOLO_DEL_FICHERO`).
+ * (`EVENTOS_SOLO_DEL_FICHERO`). Una isla que parara la propagación del clic en un enlace
+ * (`stopPropagation`) sin `preventDefault` lo escondería de la escucha y la salida no se mediría:
+ * ninguna lo hace, y una que lo necesite tiene que decirlo aquí.
  *
  * **Volver por la caché de atrás y adelante** (`pageshow` con `persisted`) es una carga nueva:
  * la lectura y la salida pueden volver a salir, `primera` y el reloj vuelven a cero y las Marcas
