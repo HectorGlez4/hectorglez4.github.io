@@ -814,8 +814,11 @@ describe('Historia 22.4 — la Página de Obra, construida', () => {
       expect(enlace.get('color')).toBe('var(--siena)');
       expect(enlace.get('text-decoration-line')).toBe('underline');
       expect(enlace.get('text-decoration-thickness')).toBe('var(--grosor-filete)');
-      // Subrayado siempre: ninguna otra regla toca el salto —ni de cursor o foco, ni una que
-      // `reglasDe` haya sacado de un `@media`, que leería como incondicional—. Solo estas dos.
+      // Subrayado siempre: en la hoja de la página, ninguna otra regla nombra el salto —ni de
+      // cursor o foco, ni una que `reglasDe` haya sacado de un `@media`, que leería como
+      // incondicional—. Solo estas dos. Lo que esta guardia no ve —una regla global de `a` en
+      // `tokens.css`, o una de un antepasado como `.cabecera-de-obra a`— lo mide la prueba de
+      // punta a punta de la 24.7 en el estilo calculado, también bajo el puntero.
       expect(todas.map((r) => r.selector).filter((selector) => /\.salto(?![\w-])/.test(selector))).toEqual([
         '.salto',
         '.salto a',

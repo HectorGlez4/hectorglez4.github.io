@@ -622,9 +622,20 @@ function bloqueDeEdiciones(html: string): string {
 }
 
 /**
+ * La fuente de `src/lib/ingreso.ts` con la tienda de prueba declarada y la afiliación como se
+ * pida. Una sola, para que toda construcción que se compara con otra declare la misma tienda.
+ */
+async function ingresoConTienda(afiliacion: 'encendida' | 'apagada'): Promise<string> {
+  const conTienda = fuenteConTiendaDePrueba(await readFile(resolve(RAIZ, 'src/lib/ingreso.ts'), 'utf8'));
+  return afiliacion === 'encendida' ? fuenteConModeloEncendido(conTienda, 'afiliacion-de-libros') : conTienda;
+}
+
+/**
  * Las dos construcciones de `corpusConstruido(true)` —la tienda de prueba declarada, con la
  * afiliación encendida y apagada—, memorizadas para el fichero: la 22.9 y la 24.7 las comparten
  * sin construir más. La primera `describe` que la pide la construye; las demás esperan la misma.
+ * Se comparten porque son de solo lectura: ninguna prueba escribe en su proyecto, y las borra el
+ * `afterAll` del fichero, que corre después de la última prueba de todas sus `describe`.
  */
 type Construida = Awaited<ReturnType<typeof construirConCorpus>>;
 const memorizadas = new Map<'encendida' | 'apagada', Promise<Construida>>();
@@ -632,8 +643,7 @@ function construida(afiliacion: 'encendida' | 'apagada'): Promise<Construida> {
   let promesa = memorizadas.get(afiliacion);
   if (promesa === undefined) {
     promesa = (async () => {
-      const conTienda = fuenteConTiendaDePrueba(await readFile(resolve(RAIZ, 'src/lib/ingreso.ts'), 'utf8'));
-      const ingreso = afiliacion === 'encendida' ? fuenteConModeloEncendido(conTienda, 'afiliacion-de-libros') : conTienda;
+      const ingreso = await ingresoConTienda(afiliacion);
       const resultado = await construirConCorpus(corpusConstruido(true), { ficheros: { 'src/lib/ingreso.ts': ingreso } });
       aLimpiar.push(resultado.proyecto);
       return resultado;
@@ -751,11 +761,13 @@ describe('Historia 22.9 — apagada, `dist/` igual con y sin ediciones', () => {
   }
 
   beforeAll(async () => {
-    // La tienda declarada en las dos copias: sin ella, la ficha con ediciones no se admite.
-    const ingreso = fuenteConTiendaDePrueba(await readFile(resolve(RAIZ, 'src/lib/ingreso.ts'), 'utf8'));
+    // La tienda declarada en las dos copias —la misma fuente—: sin ella, la ficha con ediciones
+    // no se admite.
     const uno = await construida('apagada');
     expect(uno.codigo, uno.salida).toBe(0);
-    const dos = await construirConCorpus(corpusConstruido(false), { ficheros: { 'src/lib/ingreso.ts': ingreso } });
+    const dos = await construirConCorpus(corpusConstruido(false), {
+      ficheros: { 'src/lib/ingreso.ts': await ingresoConTienda('apagada') },
+    });
     aLimpiar.push(dos.proyecto);
     expect(dos.codigo, dos.salida).toBe(0);
     con = await huellas(uno.proyecto);

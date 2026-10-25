@@ -10,7 +10,22 @@ context:
   - '{project-root}/_bmad-output/implementation-artifacts/epic-24-context.md'
 warnings:
   - oversized
-deferred: []
+deferred:
+  - summary: >-
+      El salto de la 24.7 (foco en el h2 con Intro, su anillo, el Tab siguiente y la llegada a
+      16 px) solo está verificado en Chromium: WebKit, el motor de Safari en iOS, no se ha probado.
+    evidence: |-
+      Los dos proyectos de playwright.config.ts son Chromium ('movil' emula un Pixel 7 y
+      'escritorio' es Desktop Chrome), y la caché de Playwright de este equipo solo trae chromium
+      y chromium_headless_shell. Enfocar el destino de un fragmento es justo lo que ha diferido
+      entre motores, y el sitio se lee sobre todo en el teléfono. Instalar WebKit es descargar un
+      navegador (npx playwright install webkit), que este bucle no hace sin permiso. Pendiente de
+      Héctor: correr una vez el describe «Historia 24.7» de tests/e2e/accesibilidad.spec.ts con un
+      proyecto webkit, o probar el salto con teclado y VoiceOver en Safari de iOS. Si no deja el
+      foco en el h2, arreglarlo exige guion o una regla de foco (Block If de la 24.7: decide Héctor).
+    location: >-
+      playwright.config.ts:17
+    severity: medium
 ---
 
 <intent-contract>
@@ -121,6 +136,20 @@ Las capas de revisión son externas (bucle v8-ralph) y en esta pasada no traen h
   - `[low]` `[patch]` El texto visible «Dónde leer esta obra» no tenía dueño: escrito en el salto y en el rótulo (blind-hunter). `ROTULO_DE_DONDE_LEER` en `src/lib/obras.ts`, junto a `ANCLA_DE_DONDE_LEER`, lo usan los dos; `comprobarSaltos` exige en cada página 1 que el nombre del enlace (sin la flecha oculta) sea el texto del `h2` de destino. Salida byte a byte igual.
   - `[low]` `[patch]` El comentario «detrás de hasta 50 Tarjetas» repetía `CITAS_POR_PAGINA` (blind-hunter): ahora nombra la constante.
 
+### 2026-10-25 — Review pass
+- intent_gap: 0
+- bad_spec: 0
+- patch: 6 (high 0, medium 0, low 6)
+- defer: 1 (high 0, medium 1, low 0)
+- reject: 22 (high 0, medium 0, low 22)
+- addressed_findings:
+  - `[low]` `[patch]` Nada comprobaba adónde va el Tab tras el salto, que es la razón de `tabindex="-1"` (UX-DR100) (blind-hunter). La prueba de Intro pulsa después Tab y exige que el foco quede detrás del `h2` en el documento y fuera de la Cabecera.
+  - `[low]` `[patch]` La prueba de puntero fijaba como requisito que el anillo no saliera —la heurística de `:focus-visible` de Chromium—, en tensión con «el anillo global… nunca se suprime» (UX-DR100) (intent-alignment). Ahora exige que el contorno sea exactamente el de la regla global según case o no `:focus-visible` (2 px `solid` o ninguno): atrapa una regla de foco propia, que el contrato prohíbe, sin decidir por el navegador.
+  - `[low]` `[patch]` La primera pantalla se medía en una muestra de Cabeceras elegida por longitud de texto, que el propio comentario reconocía insuficiente (blind-hunter, intent-alignment). Ahora se mide en toda página 1 de Obra del `dist/` a 360 × 640, con un plazo que crece con el Corpus, y el fallo nombra cada página fuera y la peor de las que caben; la muestra se queda solo para las zonas, que no dependen del alto (el comentario de `obrasDelPie` lo explica).
+  - `[low]` `[patch]` La prueba de llegada a 16 px fallaría culpando al `scroll-margin-top` si la Obra elegida no tuviera bastante página bajo el `h2` (edge-case-hunter). Antes de medir comprueba que lo que sigue al `h2` llena la ventana, con un mensaje propio.
+  - `[low]` `[patch]` El comentario de la guardia de CI decía que ninguna otra regla toca el salto, pero solo mira las reglas de la hoja de la página que nombran `.salto` (blind-hunter). Dice ahora su alcance y qué lo cubre fuera de él (la prueba de punta a punta, en el estilo calculado y bajo el puntero).
+  - `[low]` `[patch]` Las construcciones memorizadas de `ediciones-en-venta.test.ts` no decían de qué dependía compartirlas, y la «misma tienda» de la comparación de la 22.9 se componía en dos sitios (blind-hunter). `ingresoConTienda` es la única fuente de las tres construcciones, y el comentario dice que son de solo lectura y que las borra el `afterAll` del fichero, tras la última prueba.
+
 ## Design Notes
 
 **Por qué 3 × y no menos.** La zona de «de {Autor}» es el `a` en `inline-block` con 10 px de relleno y −10 de margen: asoma 10 px bajo la línea de `p.de`. El `a` del salto en `inline-flex` de 44 px llena la línea de su párrafo (alineado por la base, la caja ocupa exactamente los 44 px), así que su zona empieza en el borde de `p.salto`. Hueco = 24 − 10 = **14 px** (con 2 × serían 6: por eso 3 × es «lo mínimo», DESIGN.md § Página de Obra). La prueba exige ≥ 7,5, como el resto de medidas de zonas.
@@ -149,17 +178,23 @@ Blocking condition: ninguna.
 - `src/components/Rotulo.astro` — prop `destino` → `tabindex="-1"`; regla `.rotulo[tabindex='-1']` con `scroll-margin-top`. Sin `destino`, el `h2` sale como antes.
 - `src/components/DondeLeer.astro` — `id`, `aria-labelledby` y texto del rótulo desde las constantes; `destino` en su rótulo.
 - `src/pages/obra/[autor]/[slug]/[...page].astro` — `conDondeLeer`; el `p.salto` en la Cabecera, con su texto de `ROTULO_DE_DONDE_LEER`; su hoja (3 ×, `--cuerpo-md`, 1,6; el `a` en `inline-flex` de `--zona-de-toque`, siena, subrayado siempre).
-- `tests/unit/obra-pagina.test.ts` — `reglasDe`/`declaraciones` a nivel de módulo (con su límite ante `@media` escrito); `comprobarSaltos` sobre todo `dist/obra/**` de las construcciones 22.4, 22.6 y 22.8, que exige además que el nombre del salto sea el texto del `h2`; marcado exacto; `h2` «Temas» y de la Lista de Obras sin `tabindex`; guardia de la hoja emitida (solo `.salto` y `.salto a` tocan el salto, destino, listado a 4 ×, y el pie con nota: 5 ×, 4 ×, 2 ×, 1 ×, nota 4 × / 3 × con filete).
-- `tests/unit/ediciones-en-venta.test.ts` — las dos construcciones de `corpusConstruido(true)` memorizadas (`construida('encendida' | 'apagada')`); `describe` 24.7: salto y `h2` iguales byte a byte en `PAGINA_1`, `CARTAS_1` e `IRA_1`; encendida = apagada + `div[data-ingreso]` en `PAGINA_1` y `CARTAS_1`; iguales sin quitar nada en `IRA_1` y `PAGINA_2`.
-- `tests/e2e/accesibilidad.spec.ts` — `PIE()`, derivada del `dist/` al pedirla (con Paginación y Temas; sin Paginación, con Temas y edición cotejada; con nota si la hay; y las diez Cabeceras candidatas a la más alta), y `describe` 24.7: foco tras Intro con `:focus-visible`, anillo de 2 px siena separado 2 px y `scroll-margin-top` 16 px; con puntero o toque, foco en el `h2` sin anillo (y un clic en el `h2`, tampoco); llegada a 16 ± 1 px del borde con Intro, puntero y dirección con el fragmento; siena y subrayado, también bajo el puntero; a 360 y 320, el salto a 24 px de `p.de`, zona de 44 px y ≥ 7,5 px de «de {Autor}»; primera Cita en 360 × 640 en las Cabeceras candidatas; listado a 32 px del salto (y de `p.de` en la 2); pie 40 / 32 / 16 / 8; la Nota, medida en el navegador —en la Obra que la traiga o, si ninguna, puesta en una página servida con el marcado de la plantilla—.
+- `tests/unit/obra-pagina.test.ts` — `reglasDe`/`declaraciones` a nivel de módulo (con su límite ante `@media` escrito); `comprobarSaltos` sobre todo `dist/obra/**` de las construcciones 22.4, 22.6 y 22.8, que exige además que el nombre del salto sea el texto del `h2`; marcado exacto; `h2` «Temas» y de la Lista de Obras sin `tabindex`; guardia de la hoja emitida (solo `.salto` y `.salto a` nombran el salto en la hoja de la página —y el comentario dice qué queda fuera de su alcance—, destino, listado a 4 ×, y el pie con nota: 5 ×, 4 ×, 2 ×, 1 ×, nota 4 × / 3 × con filete).
+- `tests/unit/ediciones-en-venta.test.ts` — las dos construcciones de `corpusConstruido(true)` memorizadas (`construida('encendida' | 'apagada')`), de solo lectura, con `ingresoConTienda` como única fuente de la tienda de prueba de las tres construcciones; `describe` 24.7: salto y `h2` iguales byte a byte en `PAGINA_1`, `CARTAS_1` e `IRA_1`; encendida = apagada + `div[data-ingreso]` en `PAGINA_1` y `CARTAS_1`; iguales sin quitar nada en `IRA_1` y `PAGINA_2`.
+- `tests/e2e/accesibilidad.spec.ts` — `PIE()`, derivada del `dist/` al pedirla (con Paginación y Temas; sin Paginación, con Temas y edición cotejada; con nota si la hay; todas las páginas 1; y las diez Cabeceras de texto más largo), y `describe` 24.7: foco tras Intro con `:focus-visible`, anillo de 2 px siena separado 2 px, `scroll-margin-top` 16 px, y el Tab siguiente detrás del `h2` y fuera de la Cabecera; con puntero o toque (y con un clic en el `h2`), foco en el `h2` con el contorno exacto de la regla global; llegada a 16 ± 1 px del borde con Intro, puntero y dirección con el fragmento, tras comprobar que la página da de sí; siena y subrayado, también bajo el puntero; a 360 y 320, el salto a 24 px de `p.de`, zona de 44 px y ≥ 7,5 px de «de {Autor}»; primera Cita en 360 × 640 en **toda** página 1 de Obra; listado a 32 px del salto (y de `p.de` en la 2); pie 40 / 32 / 16 / 8; la Nota, medida en el navegador —en la Obra que la traiga o, si ninguna, puesta en una página servida con el marcado de la plantilla—.
 
-**Revisión.** Primera pasada con las cinco capas externas (blind-hunter, edge-case-hunter, verification-gap, intent-alignment, ac-auditor): 9 parches aplicados (0 high, 3 medium, 6 low), 0 aplazados, 15 rechazados, ni `intent_gap` ni `bad_spec`. El detalle, en el Review Triage Log. `followup_review_recommended: true` (parcheados: 0 high, 3 medium, 6 low; puntuación 3 × 3 + 6 = 15 ≥ 5).
+**Revisión.**
+- Primera pasada con las cinco capas externas (blind-hunter, edge-case-hunter, verification-gap, intent-alignment, ac-auditor): 9 parches (0 high, 3 medium, 6 low), 0 aplazados, 15 rechazados.
+- Segunda pasada (revisión de seguimiento, con las cinco capas externas de nuevo; verification-gap sin hallazgos): **6 parches aplicados** (0 high, 0 medium, 6 low), **1 aplazado** (medium: el salto no está verificado en WebKit, en el `deferred` del frontmatter, pendiente de Héctor), **22 rechazados**. Ni `intent_gap` ni `bad_spec`. Todos los parches son de pruebas y comentarios: ningún fichero de `src/` cambió en esta pasada. El detalle, en el Review Triage Log.
+- `followup_review_recommended: true` — de esta pasada, parcheados 0 high, 0 medium y 6 low: puntuación 3 × 0 + 6 = 6 ≥ 5.
 
-**Verificación.** Desde el worktree, tras los parches:
+**Verificación.** Desde el worktree, tras los parches de la segunda pasada:
 - `npm run check` — 0 errores, 0 avisos, 8 pistas previas.
-- `npm test` — 132 de 133 ficheros y 6112 de 6115 pruebas en verde; las 3 rojas eran de la comprobación nueva de `comprobarSaltos` (su expresión no quitaba el `span` de la flecha, que lleva el ámbito de Astro). Corregida la prueba, `npx vitest run tests/unit/obra-pagina.test.ts` — 64/64 (`FINISHED EXIT=0`). Ningún otro fichero cambió después.
-- `npx playwright test tests/e2e/accesibilidad.spec.ts` (móvil y escritorio, sitio construido) — 110 pasan, 0 saltadas.
+- `npm test` — 133 de 133 ficheros y 6115 de 6115 pruebas en verde (`FINISHED EXIT=0`), incluidos `obra-pagina`, `ediciones-en-venta`, `lista-de-obras`, `obra-construida`, `congelacion-de-obras`, `espinas-de-ux`, `publicable-y-alcanzable`, `ingreso-construido` y `medicion` (con la prueba de zonas de la 23.7 sin tocar).
+- `npx playwright test tests/e2e/accesibilidad.spec.ts` (móvil y escritorio, sitio construido por `tests/servidor.mjs`) — 110/110; las 22 de la 24.7 en verde, la de primera pantalla sobre todas las páginas 1 en unos 13–20 s por proyecto.
 - `npx playwright test tests/e2e/pagina-de-cita.spec.ts --grep "Cabecera de Obra"` — 2/2; `npx playwright test tests/e2e/ingreso-accesible.spec.ts --project=escritorio` — 12/12.
 - Ningún Block If se disparó. Servidores parados y puertos 4321, 4399, 4400, 4402 y 8787 libres al terminar.
 
-**Riesgos residuales.** La Nota se mide sobre el marcado que la prueba pone cuando ninguna Obra del Corpus trae nota: si la plantilla cambiara su marcado, la prueba de la 22.6 que fija ese marcado es la que avisa. El salto se mide solo en Chromium (los dos proyectos de Playwright); Safari y Firefox no se han probado. La primera pantalla se comprueba en las diez Cabeceras candidatas a la más alta, no en todas las páginas 1.
+**Riesgos residuales.**
+- El salto se verifica solo en Chromium (los dos proyectos de Playwright); WebKit y Firefox no se han probado. Lo de WebKit queda aplazado para Héctor.
+- La Nota se mide sobre el marcado que la prueba pone mientras ninguna Obra del Corpus traiga nota. Si la plantilla cambiara ese marcado, avisa la prueba de la 22.6 que lo fija; con la primera nota real, la prueba la mide sola.
+- El `a` del salto es `inline-flex`, como fija el contrato siguiendo la maqueta 1A. Si una escala de texto muy grande lo parte en dos líneas, la flecha queda centrada junto al bloque y no tras «obra». Es un defecto cosmético que no cambia ni el nombre ni la zona.

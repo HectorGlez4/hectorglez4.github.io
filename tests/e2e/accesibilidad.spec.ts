@@ -792,15 +792,18 @@ test.describe('Historia 22.10 — subrayado y pestaña nueva', () => {
  * Historia 24.7 — las Páginas de Obra con las que se mide el pie y la Cabecera, sacadas del
  * `dist/` como `OBRAS` y no escritas a mano: una página 1 con Paginación y Temas, otra sin
  * Paginación, con Temas y alguna línea de edición cotejada, y, si alguna Obra del `dist/` trae
- * nota, la primera. Y las Cabeceras candidatas a ser la más alta: las cinco de título más largo
- * y las cinco de «de {Autor} · {año}» más largo, que es la línea que parte en dos con un Autor
- * de nombre largo. La más alta no es siempre la del título más largo: parte en más líneas la que
- * tiene palabras más largas.
+ * nota, la primera. Y dos listas de páginas 1: todas (`primeras`), para la primera pantalla, que
+ * depende del alto de la Cabecera y se mide en cada una —la más alta no es siempre la del título
+ * más largo: parte en más líneas la que tiene palabras más largas—, y las Cabeceras de texto más
+ * largo (`cabecerasLargas`: las cinco de título más largo y las cinco de «de {Autor} · {año}» más
+ * largo), para las zonas del salto, que no dependen del alto: «de {Autor}» parta o no, su zona
+ * acaba 10 px bajo `p.de` y la del salto empieza en el borde de `p.salto`.
  */
 function obrasDelPie(): {
   conPaginacion: string;
   sinPaginacion: string;
   conNota: string | undefined;
+  primeras: string[];
   cabecerasLargas: string[];
 } {
   const obras = rutasConstruidas()
@@ -847,6 +850,7 @@ function obrasDelPie(): {
       'sin Paginación, con Temas y edición cotejada',
     ),
     conNota: primeras.find((o) => o.html.includes('class="nota-de-la-ficha"'))?.ruta,
+    primeras: primeras.map((o) => o.ruta),
     cabecerasLargas: [...new Set([...las5MasLargas('titulo'), ...las5MasLargas('de')])],
   };
 }
@@ -864,9 +868,11 @@ const PIE = () => (pie ??= obrasDelPie());
  *
  * Se tabula hasta él y se activa con Intro, sin guion de por medio: el foco tiene que acabar en
  * el `h2` de destino (`tabindex="-1"`) con el anillo global, porque el salto nativo del navegador
- * enfoca un destino enfocable y el último gesto fue de teclado. Con el puntero el foco llega
- * igual y el anillo no sale; y, se llegue con Intro, con el puntero o abriendo la dirección con
- * el fragmento, el `h2` queda a 2 × `--unidad` del borde. Las medidas son las de `DESIGN.md`
+ * enfoca un destino enfocable y el último gesto fue de teclado; y el Tab siguiente sale de ahí
+ * hacia delante, no vuelve a la Cabecera. Con el puntero el foco llega igual y el anillo es el que
+ * decida la regla global, sin ninguna de la página que lo pinte o lo quite; y, se llegue con
+ * Intro, con el puntero o abriendo la dirección con el fragmento, el `h2` queda a 2 × `--unidad`
+ * del borde. Las medidas son las de `DESIGN.md`
  * § Página de Obra: el salto a 3 × de «de {Autor}», su zona de 44 px a 8 px como poco de la de
  * «de {Autor}» —sin tocar ninguna de las dos—, la primera Cita aún en la primera pantalla y el
  * ritmo del pie, que el salto no mueve. Medio píxel de holgura por el redondeo subpíxel, como en
@@ -931,10 +937,30 @@ test.describe('Historia 24.7 — el salto «Dónde leer esta obra ↓»', () => 
         return color;
       }, foco.siena);
       expect(foco.color, ruta).toBe(sienaResuelto);
+
+      // UX-DR100 — el destino mueve también el punto de partida de la tabulación: el Tab
+      // siguiente sigue desde «Dónde leer esta obra» hacia delante y no vuelve a la Cabecera.
+      await page.keyboard.press('Tab');
+      const siguiente = await page.evaluate((ancla) => {
+        const destino = document.getElementById(ancla)!;
+        const activo = document.activeElement;
+        if (activo === null || activo === document.body) return { despues: false, enCabecera: false };
+        return {
+          despues: Boolean(destino.compareDocumentPosition(activo) & Node.DOCUMENT_POSITION_FOLLOWING),
+          enCabecera: activo.closest('.cabecera-de-obra') !== null,
+        };
+      }, ANCLA);
+      expect(siguiente, `${ruta}: el Tab tras el salto`).toStrictEqual({ despues: true, enCabecera: false });
     });
   }
 
-  test('con el puntero, el salto lleva el foco al h2 sin pintar el anillo, y un clic en el h2 tampoco', async ({
+  /*
+   * Con el puntero, que el anillo salga o no lo decide `:focus-visible` —la regla global, que
+   * nunca se suprime (UX-DR100)—, no la página: se exige que el contorno sea exactamente el de esa
+   * regla según case o no, y no qué decide el navegador. Lo que esto atrapa es una regla de foco
+   * propia (`.rotulo:focus`, un `outline` local), que la 24.7 no puede añadir.
+   */
+  test('con el puntero, el salto lleva el foco al h2 con el anillo de la regla global, y un clic en el h2 también', async ({
     page,
     isMobile,
   }) => {
@@ -948,18 +974,23 @@ test.describe('Historia 24.7 — el salto «Dónde leer esta obra ↓»', () => 
       await expect
         .poll(() => page.evaluate(() => document.activeElement?.id), { message: `${ruta}: el foco no llega al h2` })
         .toBe(ANCLA);
+      // El contorno, el que da la regla global: 2 px `solid` si casa `:focus-visible`, ninguno si no.
       const anillo = () =>
         page.evaluate(() => {
           const n = document.activeElement as HTMLElement;
-          return { id: n.id, visible: n.matches(':focus-visible'), contorno: getComputedStyle(n).outlineStyle };
+          const s = getComputedStyle(n);
+          const visible = n.matches(':focus-visible');
+          return {
+            id: n.id,
+            deLaRegla: visible ? s.outlineStyle === 'solid' && s.outlineWidth === '2px' : s.outlineStyle === 'none',
+          };
         });
-      // El anillo es de quien navega con teclado: tras un gesto de puntero, `:focus-visible` no casa.
-      expect(await anillo(), `${ruta}, tras el salto`).toStrictEqual({ id: ANCLA, visible: false, contorno: 'none' });
+      expect(await anillo(), `${ruta}, tras el salto`).toStrictEqual({ id: ANCLA, deLaRegla: true });
 
-      // `tabindex="-1"` hace enfocable el h2 también al pulsarlo, y tampoco ahí sale el anillo.
+      // `tabindex="-1"` hace enfocable el h2 también al pulsarlo, con el mismo anillo.
       await page.goto(ruta);
       await page.locator(`#${ANCLA}`).click();
-      expect(await anillo(), `${ruta}, clic en el h2`).toStrictEqual({ id: ANCLA, visible: false, contorno: 'none' });
+      expect(await anillo(), `${ruta}, clic en el h2`).toStrictEqual({ id: ANCLA, deLaRegla: true });
     }
   });
 
@@ -987,6 +1018,13 @@ test.describe('Historia 24.7 — el salto «Dónde leer esta obra ↓»', () => 
     for (const ruta of [OBRAS.indexable, PIE().sinPaginacion]) {
       const salto = page.getByRole('link', { name: 'Dónde leer esta obra', exact: true });
       await page.goto(ruta);
+      // Antes de medir, que la página dé de sí: si lo que sigue al h2 no llena la ventana, el
+      // navegador se queda en el fondo y la llegada no dice nada del `scroll-margin-top`.
+      const daDeSi = await page.evaluate((ancla) => {
+        const arriba = document.getElementById(ancla)!.getBoundingClientRect().top + window.scrollY;
+        return document.scrollingElement!.scrollHeight - (arriba - 16) >= window.innerHeight;
+      }, ANCLA);
+      expect(daDeSi, `${ruta}: lo que sigue al h2 no llena la ventana; aquí no se puede medir la llegada`).toBe(true);
       await salto.focus();
       await page.keyboard.press('Enter');
       await llegada(ruta, 'con Intro');
@@ -1047,26 +1085,36 @@ test.describe('Historia 24.7 — el salto «Dónde leer esta obra ↓»', () => 
     });
   }
 
-  test('a 360 × 640, la primera Cita sigue empezando en la primera pantalla', async ({ page }) => {
+  test('a 360 × 640, la primera Cita sigue empezando en la primera pantalla de toda página 1', async ({ page }) => {
+    /*
+     * En todas, no en una muestra: el alto de la Cabecera depende de cómo parten el título y
+     * «de {Autor} · {año}» a 360 px, y ninguna longitud dice de antemano cuál es la más alta. Una
+     * navegación por Obra; el plazo crece con el Corpus.
+     */
+    const { primeras } = PIE();
+    expect(primeras.length, 'páginas 1 de Obra en el dist/').toBeGreaterThan(0);
+    test.setTimeout(60_000 + primeras.length * 500);
     await page.setViewportSize({ width: 360, height: 640 });
-    // Las candidatas a la Cabecera más alta: la de título más largo, las cinco de título más
-    // largo y las cinco de «de {Autor} · {año}» más largo.
-    for (const ruta of new Set([OBRAS.tituloLargo, OBRAS.indexable, ...PIE().cabecerasLargas])) {
+    const fuera: string[] = [];
+    let peor = { ruta: '', fin: 0 };
+    for (const ruta of primeras) {
       await page.goto(ruta);
-      await page.evaluate(async () => {
+      const medida = await page.evaluate(async () => {
         await document.fonts.ready;
-      });
-      const medida = await page.evaluate(() => {
-        const fragmento = document.querySelector('.listado .fragmento') as HTMLElement;
+        const fragmento = document.querySelector<HTMLElement>('.listado .fragmento');
+        if (fragmento === null) return null;
         return {
           desplazada: window.scrollY,
-          arriba: fragmento.getBoundingClientRect().top,
-          linea: parseFloat(getComputedStyle(fragmento).lineHeight),
+          fin: fragmento.getBoundingClientRect().top + parseFloat(getComputedStyle(fragmento).lineHeight),
         };
       });
-      expect(medida.desplazada, ruta).toBe(0);
-      expect(medida.arriba + medida.linea, ruta).toBeLessThanOrEqual(640);
+      if (medida === null || medida.desplazada !== 0 || medida.fin > 640) {
+        fuera.push(`${ruta}: ${JSON.stringify(medida)}`);
+      } else if (medida.fin > peor.fin) {
+        peor = { ruta, fin: medida.fin };
+      }
     }
+    expect(fuera, `fuera de la primera pantalla (la peor de las que caben: ${peor.ruta}, ${peor.fin} px)`).toEqual([]);
   });
 
   /** El hueco vertical entre el borde inferior de `a` y el superior de `b`. */
