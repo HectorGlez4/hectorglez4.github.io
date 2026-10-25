@@ -2,7 +2,8 @@
 title: 'Historia 23.10 — La línea base se lee desde tools/, con la cuota de D1 a la vista'
 type: 'feature'
 created: '2026-10-25'
-status: 'ready-for-dev'
+status: 'done'
+baseline_revision: '6ae8a9a7a86b876414fbea20ab20344b3f173da0'
 review_loop_iteration: 0
 followup_review_recommended: false
 context:
@@ -130,6 +131,17 @@ deferred:
 
 ## Review Triage Log
 
+### 2026-10-25 — Review pass
+- intent_gap: 0
+- bad_spec: 0
+- patch: 0
+- defer: 0
+- reject: 0
+- addressed_findings:
+  - none
+
+Las cinco capas de revisión son externas en este bucle (v8-ralph) y la invocación no traía ninguna sección «Hallazgos externos»: esta pasada no tiene hallazgos que clasificar. La revisión independiente llega después.
+
 ## Design Notes
 
 **Por qué cinco consultas y no una.** Una sola agrupación por todas las columnas daría lo mismo, pero un fallo la vaciaría entera: con cinco, una que falla deja en `sinLeer` solo las cifras que dependen de ella (AC «una consulta que falla»). Cada una recorre la tabla una vez, sin `ORDER BY` —se ordena en JavaScript—, y el informe no lee el `rowid` por ningún camino.
@@ -160,5 +172,43 @@ tramo 1: … – 2026-11-01   ·   2026-11-02 «cambió»   ·   tramo 2: 2026-1
 
 ## Auto Run Result
 
-Status: ready-for-dev
-Blocking condition: ninguna. Planificación terminada y detenida tras planificar, como pide la invocación. Dos preguntas abiertas del plan quedan en `deferred` (la cuota de lectura de D1 y el cierre de la línea base de SM-12), sin bloquear la historia.
+Status: done
+Blocking condition: ninguna.
+
+**Lo implementado.** `npm run medicion` sin subcomando es la lectura de la línea base, de solo lectura. La cáscara (`tools/medicion.ts`) acepta la orden a secas —sin `MEDICION_ENDPOINT` ni aviso de interrupción— y llama a `leer` (`tools/lib/medicion.ts`), que exige sesión (2 sin ella, 1 ilegible), lee el Corpus por una función que le pasa la cáscara (`conjuntoDelCorpus(rutasDelCorpus(…))`; 1 si falla), corre las cinco consultas de `consultasDeLaLectura(hoy)` con `--remote` y `d1 info`, y para con 1 solo si no se leyó nada. `tools/lib/lineaBase.ts`, nuevo y puro, compone el informe (`componerLecturaDeMedicion`) y su texto (`lineasDeLecturaDeMedicion`): descuentos (balizas y `PASADAS_QUE_ESCRIBEN_EN_PRODUCCION`), censo y clases de fuera del censo, marcas de Obra por (ruta, jornada), tramos por `CORTES_DE_SERIE`, SM-8, superficies y continuación por zona y por unidad de línea base, Página de Cita (SM-5, SM-7, continuación, SM-3, SM-C3, SM-C5) con portada y Obra aparte, SM-12 con Facebook según `SM12_CON_FACEBOOK` y la Imagen cuadrada aparte, búsquedas (SM-6, SM-13, consultas sin resultados), líneas base con firmas (Threads y ráfaga), ventanas de `JUICIOS_POR_VENTANAS`, cuota con sus dos constantes y la frase de las metas en suspenso. El informe acaba con «Consulta: no se ha escrito nada.».
+
+**Ficheros.**
+- `src/lib/umbrales.ts` — `DESPLIEGUE_DE_LA_LECTURA` (sin valor), `SerieDeMedicion`, `CorteDeSerie`, `CorteLlegado`, `CORTES_DE_SERIE_DECLARADOS` (dos entradas de constantes, sin fecha literal), `cortesQueLlegaron`, `CORTES_DE_SERIE`, `CORTES_DE_SM8`, `PasadaEnProduccion` y `PASADAS_QUE_ESCRIBEN_EN_PRODUCCION` (vacía), `MIN_LECTURAS_DE_LINEA_BASE` (sin valor), `SM12_CON_FACEBOOK = false`, `MIN_RUTAS_DE_CITA_EN_RAFAGA = 100`, `CUOTA_DE_BYTES_POR_BASE_EN_D1 = 500 * 1000 * 1000`, cada una con quién le da valor; sigue sin importaciones.
+- `src/lib/superficies.ts` — campo `lineaBase?`, `LINEA_BASE_DE_LOS_DIRECTORIOS` y `superficieDeLineaBase`; ninguna superficie cambia.
+- `tools/lib/medicion.ts` — invocación con la lectura (`subcomando: null`, `USO_DE_MEDICION`), `CONSULTAS_DE_LA_LECTURA`, `QUE_LEE`, `consultasDeLaLectura`, `FORMA_DE_JORNADA`, `leerInformacionDeLaCuota` (filas y tamaño por separado), `leer`; cabecera al día y el mensaje de la huella nombra `CORTES_DE_SERIE_DECLARADOS`.
+- `tools/lib/lineaBase.ts` — nuevo: la composición pura y el informe.
+- `tools/medicion.ts` — la lectura en `principal` y su docblock (uso, códigos, red).
+- `tools/lib/indexacion.ts` — «hoy» de `lineasDeSm11` en UTC; docblocks.
+- `tests/unit/linea-base.test.ts` — nuevo: 46 pruebas con respuestas fijas (cada fila de la matriz, censo frente a prefijo, clases fuera del censo, dos superficies con la misma línea base, las cinco marcas de Obra, tramos, SM-8, SM-12 en los dos estados, SM-5/SM-7/SM-3, SM-6/SM-13, líneas base, firmas, ventanas, cuota, sinLeer, metas, cortes de `umbrales.ts`, aislamiento por `git grep`).
+- `tests/unit/medicion-orden.test.ts` — invocación, las cinco sentencias, `d1 info` por separado y la cáscara (2 con `--rapido` sin `npx`, 2 sin sesión sin `MEDICION_ENDPOINT`, 1 sin nada legible, 0 con todo leído y solo `whoami`, cinco `d1 execute --remote` y `d1 info`).
+- `tests/unit/medicion-secuencias.test.ts` — `leer` con efectos de mentira que lanzan ante cualquier otro efecto.
+- `tests/unit/orden-de-llegada.test.ts` — la prueba estrecha: ningún SQL de `tools/` nombra el `rowid` salvo `SQL_DE_BARAJADO` y la lectura de las balizas, en `tools/lib/medicion.ts`; casos de control; el barrido ve `tools/lib/lineaBase.ts`.
+- `tests/unit/indexacion.test.ts` — SM-11 con instantes UTC, la prueba de `TZ=Europe/Madrid` a las 23:30 UTC y la de `vi.doMock` de las dos constantes.
+- `tests/unit/superficies.test.ts` — `superficieDeLineaBase` y que una línea base declarada junte al menos dos superficies.
+- `DESPLIEGUE.md` — §3: «Leer la línea base — Historia 23.10» con «Líneas base dadas por buenas» vacío para Héctor, y las menciones «hasta la 23.10» al día.
+- `AGENTS.md` — «Leer la línea base (Historia 23.10)» dentro de «Desplegar el receptor de la medición».
+
+**Desviaciones de la letra del spec, y por qué.**
+- La consulta (5) agrupa por (jornada, **ruta**, consulta), no solo por (jornada, consulta): sin la ruta no se podían descontar las pasadas en producción, y el spec pide los descuentos «para todo». Sigue siendo un recuento sin sesiones; la ruta es siempre `/buscar/`.
+- La prueba de `CORTES_DE_SM8` con las dos constantes con valor no usa `vi.doMock`: la lista se compone **dentro** de `umbrales.ts` con sus propias constantes, y un mock de las exportaciones no la alcanza. Se evalúa una copia del fuente con las dos constantes con valor (posible porque `umbrales.ts` no importa nada), y comprueba antes que el fuente las declara sin valor. La de `desplieguesQueMuevenSm11` sí usa `vi.doMock`, porque `tools/lib/indexacion.ts` importa las constantes.
+- La prueba de `superficies.test.ts` fija un invariante duradero (una línea base declarada junta al menos dos superficies y no se llama como otra) en lugar de «ninguna la declara», que la 26.3 tendría que deshacer.
+
+**Revisión.** Esta pasada no tiene hallazgos (capas externas, sin sección de hallazgos): 0 parches, 0 diferidos, 0 rechazados. Recomendación de revisión de seguimiento: `false` (0 parches; puntuación 0).
+
+**Verificación.**
+- `npx astro check` — 0 errores, 0 avisos.
+- `npx vitest run tests/unit/<f>.test.ts`, uno a uno: `linea-base` (46), `medicion-orden` (106), `medicion-secuencias` (42), `orden-de-llegada` (126), `indexacion` (80), `superficies` (99), `huella` (1), `vocabulario` (42), `gestion` (48), `trafico` (38) y `publicable-y-alcanzable` (30): todo en verde.
+- `npm test` en segundo plano (`correr.sh`): 132 ficheros, 6.010 pruebas, en verde (695 s). La prueba de la cáscara con todo leído se añadió después y se corrió por fichero (`medicion-orden`, 106 en verde).
+- `npx tsx tools/medicion.ts --rapido; echo $?` — 2, sin red.
+- A mano: ningún `wrangler … --remote` corrido; `git diff 6ae8a9a7a86b876414fbea20ab20344b3f173da0 -- src/lib/vocabulario.ts medicion/ tools/ingreso.ts tools/lib/ingresos.ts corpus/` vacío; ninguna entrada de `SUPERFICIES` cambia; `MIN_LECTURAS_DE_LINEA_BASE`, `DESPLIEGUE_DE_LA_LECTURA`, `PASADAS_QUE_ESCRIBEN_EN_PRODUCCION` y `SM12_CON_FACEBOOK` valen `undefined`, `undefined`, `[]` y `false`.
+- Auditoría de la matriz: cada fila tiene su prueba y corrió en verde — lectura sana (`linea-base` «trae cada parte», `medicion-orden` «con todo leído sale con 0», `medicion-secuencias` «sesión, Corpus, las cinco consultas…»); sin sesión y bandera (`medicion-orden`, `medicion-secuencias`); una consulta que falla (`linea-base` «ausencia antes que cero», «las ventanas que usan la continuación», `medicion-secuencias`); nada legible (`medicion-secuencias`, `medicion-orden`); pasada en producción, fuera del censo, misma `lineaBase`, Obra con las dos marcas, dos cortes, constante sin valor, sin mínimo, llegada antes del cierre y SM-12 en los dos estados (`linea-base`).
+
+**Riesgos que quedan.**
+- La lectura no se ha corrido nunca contra el D1 de producción (lo prohíbe la historia): la forma de lo que contesta `wrangler` 4.151.1 a `d1 execute --json` y a `d1 info --json` es la que ya leen `desplegar` y `comprobar`, y `database_size` se supone en bytes, como lo documenta `wrangler`. La primera lectura de verdad es de la 23.11.
+- Leer filtra solo por `jornada < hoy`: cada lectura recorre la tabla entera cinco veces; con la cuota de lectura de D1 aún sin informar (diferida), una base grande y lecturas frecuentes podrían acercarse a ella.
+- El informe es largo y lista todas las unidades y destinos, también a cero; su formato no lo fija ningún criterio más allá de lo que prueban los tests.
