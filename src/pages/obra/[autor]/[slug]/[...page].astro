@@ -166,9 +166,12 @@ const enVenta =
       }
     </header>
 
-    {/* UX-DR40 — el listado de la Obra: las Tarjetas **sin** el Autor, que ya dice la Cabecera. */}
+    {/*
+      * UX-DR40 — el listado de la Obra: las Tarjetas **sin** el Autor ni el título, que ya dice la
+      * Cabecera (`atribucion="ninguna"`, FR-51, Historia 24.3).
+      */}
     <ul class="listado">
-      {pagina.data.map((cita) => <TarjetaDeCita cita={cita} autor={undefined} zona="listado" />)}
+      {pagina.data.map((cita) => <TarjetaDeCita cita={cita} atribucion="ninguna" zona="listado" />)}
     </ul>
 
     <Paginacion pagina={pagina} zona="paginacion" />

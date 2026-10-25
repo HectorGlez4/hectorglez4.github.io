@@ -1208,6 +1208,25 @@ describe('Historia 22.8 — la congelación declarada, construida', () => {
     expect(vistasDe(cartas)).toBe(EVENTOS.vistaDeObra);
   });
 
+  it('24.3 — congelada fuera, sus Citas dicen su Obra en el listado de Tema', async () => {
+    // Cartas y Brevedad, las dos fuera de la lista indexable: la congelación no alcanza a la
+    // navegación, y la Tarjeta de Cita del Tema nombra su Obra igual que con la familia abierta.
+    expect(await html(proyecto, CARTAS)).toMatch(NOINDEX);
+    expect(await html(proyecto, BREVEDAD)).toMatch(NOINDEX);
+    const tema = await html(proyecto, '/tema/la-vida/');
+    const listado = /<ul class="listado"[^>]*>([\s\S]*?)<\/ul>/.exec(tema)?.[1] ?? '';
+    const obraDe = new Map(
+      [...listado.matchAll(/<a href="\/cita\/([^/"]+)\/"[^>]*>([\s\S]*?)<\/a>/g)].map((m) => [
+        m[1],
+        /<span class="obra"[^>]*>([^<]*)<\/span>/.exec(m[2])?.[1],
+      ]),
+    );
+    for (const i of [0, 1, 2]) expect(obraDe.get(`seneca-cartas-${i}`), `seneca-cartas-${i}`).toBe('Cartas a Lucilio');
+    const brevedad = [...obraDe].filter(([slug]) => slug.startsWith('seneca-brevedad-'));
+    expect(brevedad).toHaveLength(20);
+    for (const [slug, titulo] of brevedad) expect(titulo, slug).toBe('Sobre la brevedad de la vida');
+  });
+
   it('24.7 — congelada, toda página 1 sigue llevando el salto, y la 2 no', async () => {
     const { primeras, segundas } = await comprobarSaltos(proyecto);
     expect(primeras.sort()).toEqual([BREVEDAD, CARTAS, DISERTACIONES, ENQUIRIDION, IRA].sort());

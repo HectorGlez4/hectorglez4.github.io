@@ -136,9 +136,12 @@ const descripcion = descripcionDeAutor(autor, documentadas);
     }
     <h2 class="rotulo">Citas documentadas</h2>
 
-    {/* UX-DR25 — los listados son listas reales. */}
+    {/*
+      * UX-DR25 — los listados son listas reales. Cada tarjeta lleva el título de su Obra y no el
+      * Autor, que es el mismo en todas y ya dice el `h1` (`atribucion="obra"`, Historia 24.3).
+      */}
     <ul class="listado">
-      {pagina.data.map((cita) => <TarjetaDeCita cita={cita} zona="listado" />)}
+      {pagina.data.map((cita) => <TarjetaDeCita cita={cita} atribucion="obra" zona="listado" />)}
     </ul>
 
     <Paginacion pagina={pagina} zona="paginacion" />

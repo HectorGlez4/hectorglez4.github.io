@@ -41,7 +41,9 @@
  *     nueva en un Tema, la página cambió aunque el fichero del Tema no se haya tocado; y
  *     sus tarjetas llevan el nombre del Autor —`TarjetaDeCita`, con `autores.get(...)`—,
  *     así que un Autor renombrado también las cambia. Es la fila «Página derivada de
- *     varias fuentes» de la matriz, leída hasta el final.
+ *     varias fuentes» de la matriz, leída hasta el final. Desde la Historia 24.3 sus
+ *     tarjetas pintan además el título de la Obra de cada Cita, pero la ficha de Obra aún
+ *     no entra aquí: la relación por campos que la recoge es la de la Historia 24.8 (AD-27).
  *
  * ── La portada, que es el caso incómodo y por eso no lleva fecha ─────────────────────
  *
@@ -194,7 +196,8 @@ export function relacionDeSuperficies(corpus: CorpusParaFechar): Map<string, str
     // título, la meta descripción y los datos estructurados: cambiarlo cambia el HTML. Los de
     // sus Temas, porque `RutasDeSalida` pinta el nombre de cada uno en su chip. Y la ficha de
     // su Obra, porque la Atribución y el JSON-LD pintan `cita.obra.titulo` (22.3). Los
-    // listados no: `TarjetaDeCita` no lleva la Obra.
+    // listados de Tema, Colección y Autor también lo pintan en su `TarjetaDeCita` desde la
+    // 24.3, y la ficha de Obra entra en su relación con la 24.8 (AD-27), no aquí.
     declarar(rutaDeCita(cita.slug), [
       cita.ruta,
       ficheroDeAutor.get(cita.autor),
