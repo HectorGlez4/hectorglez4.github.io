@@ -118,13 +118,18 @@ export const DESPLIEGUE_DE_LA_PORTADA_DE_RETORNO: string | undefined = undefined
  * salidas internas, la búsqueda asentada y la vista de Obra (Historias 23.5–23.9) **llega al sitio
  * en vivo** —el fin de «Desplegar», no el merge—, con la misma forma que las de arriba:
  * `undefined` mientras no haya llegado. **Le da valor Héctor, en un commit aparte (23.11), y ningún
- * agente se lo da.**
+ * agente la elige.**
+ *
+ * **Llegó el 2026-10-25**: el merge `63b2bb95d2` («merge: la Épica 23, medir la lectura») y su
+ * «Desplegar» de Publicar, que terminó a las 17:48:18 UTC de esa jornada. La jornada de llegada es
+ * mixta —páginas abiertas con el guion de la v7.1— y el tramo nuevo empieza la siguiente, la
+ * 2026-10-26. La escribió el bucle v8-ralph con la autorización de Héctor del 2026-10-24.
  *
  * No está entre las jornadas que mueven SM-11 —no cambia lo que el buscador indexa, así que la
  * línea SM-11 del informe de indexación no la nombra—: solo parte series de la medición, por su
  * entrada en `CORTES_DE_SERIE_DECLARADOS` (abajo).
  */
-export const DESPLIEGUE_DE_LA_LECTURA: string | undefined = undefined;
+export const DESPLIEGUE_DE_LA_LECTURA: string | undefined = '2026-10-25';
 
 /*
  * Los cortes de serie de la medición — AD-9, AD-13, Historia 23.10.
@@ -196,6 +201,8 @@ export const CORTES_DE_SERIE: readonly CorteLlegado[] = cortesQueLlegaron(CORTES
 /**
  * Su proyección sobre SM-8 — las entradas que parten la serie del canal propio, en el mismo orden
  * (Héctor, 2026-10-19). Mientras ninguna constante tenga valor está vacía, y el informe lo dice.
+ * Desde la 23.11 su primera entrada es la llegada de la Épica 23, compuesta de
+ * `DESPLIEGUE_DE_LA_LECTURA`; la segunda llega con `DESPLIEGUE_DE_OBRA_Y_DIRECTORIOS` (26.11).
  */
 export const CORTES_DE_SM8: readonly CorteLlegado[] = CORTES_DE_SERIE.filter((corte) =>
   corte.series.includes('sm8'),
