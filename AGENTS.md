@@ -345,12 +345,12 @@ rastreo— o `-` si no enlaza. Se acepta la URL entera y se guarda la ruta. `--n
 cual y se omite si no se da.
 
 **El campo `marcado` es la mitad del cierre de la 18.2.** Vale `true` si el enlace tecleado
-llevaba `?de=<red>` con la misma red de la publicación y `false` si no llevaba marca; un enlace
-marcado para **otra** red se rechaza, porque sus visitas se atribuirían a otra cuenta. Lo que
-va con `-` no lleva el campo. Pega el enlace del Kit, que ya sale marcado, y no la ruta a pelo.
-**Un enlace con `?via=` también se rechaza** (Historia 23.6): es la Marca de difusión, la de un
-visitante que comparte con un botón del sitio, nunca la de una cuenta propia, y sus visitas
-contarían como difusión.
+llevaba `?de=<red>` con la misma red de la publicación y `false` si no llevaba marca; un
+enlace marcado para **otra** red se rechaza, porque sus visitas se atribuirían a otra cuenta.
+Lo que va con `-` no lleva el campo. Pega el enlace del Kit, que ya sale marcado, y no la ruta
+a pelo. **Un enlace con `?via=` también se rechaza** (Historia 23.6): es la Marca de difusión,
+la de un visitante que comparte con un botón del sitio, nunca la de una cuenta propia, y sus
+visitas contarían como difusión.
 
 Un rechazo de lo dicho —red ajena, formato desconocido, ruta no publicada, enlace marcado para
 otra red, enlace con `?via=`, fecha futura, un Corpus o un registro ilegibles— sale con código
@@ -388,13 +388,12 @@ Linktree, el campo web de Facebook—, **ajena** si lo puso un tercero. El orige
 `http(s)` pública que no sea del dominio propio ni de ningún subdominio suyo, y se guarda tal
 cual se tecleó. El destino se recorta y se juzga como la ruta de `anotar` —`rutasPublicadas`,
 sin `?…` ni `#…`, ruta del censo— y lleva `marcado: true` solo si su cadena de consulta traía
-`?de=<red>`. **`?via=` en el destino** (Historia 23.6) se rechaza en una **propia** —es la marca
-de un visitante, no la de una cuenta—, y en una **ajena** se coteja con la regla de `?de=` contra
-los destinos de compartir (`DESTINOS_VALIDOS`): uno del conjunto, y uno solo (el mismo dos veces
-vale); entonces la entrada lleva `compartido: true`, y una propia a mano con el campo no se deja
-leer. `--fecha` y `--nota` funcionan como en
-`anotar`, salvo que la fecha **puede ser anterior al canal**: una bio o un enlace ajeno pueden
-existir de antes.
+`?de=<red>`. **`?via=` en el destino** (Historia 23.6) se rechaza en una **propia** —es la
+marca de un visitante, no la de una cuenta—, y en una **ajena** se coteja con la regla de
+`?de=` contra los destinos de compartir (`DESTINOS_VALIDOS`): uno del conjunto, y uno solo (el
+mismo dos veces vale); entonces la entrada lleva `compartido: true`, y una propia a mano con
+el campo no se deja leer. `--fecha` y `--nota` funcionan como en `anotar`, salvo que la fecha
+**puede ser anterior al canal**: una bio o un enlace ajeno pueden existir de antes.
 
 Código 1 si lo dicho se rechaza: un origen que no es una URL http(s) absoluta, que es del
 dominio propio o de un subdominio suyo, localhost, una IP, un host sin punto o una URL con
@@ -417,17 +416,17 @@ Anotar dos veces el mismo enlace —mismo origen, destino y tipo— se admite co
 nueva con `retira:` y la misma terna; la consulta deja de contar la retirada. Nada se
 reescribe.
 
-La consulta `npm run canal` da un bloque «Señales externas» que separa propias de ajenas,
-por fecha, con origen, destino y familia del destino, y señala la ajena que lleva `?de=`
-(«copia un enlace del Kit») y la que lleva `compartido` («copia un enlace compartido»; pueden ir
-los dos, y basta con que los lleve una de las anotaciones vivas del mismo enlace). **La 18.1 no se cierra con señales propias, sino con la primera
-ajena**, y la consulta la nombra con su fecha, origen y destino. Las propias de la semana del
-ciclo se anotan el día que se ponen; a los 14 días de la primera, se mira a mano en el
-informe de Enlaces de Search Console si su dominio figura como dominio de referencia y se
-anota a mano como comentario al final del fichero. La consulta dice si eso «aún no toca» o
-está «pendiente desde AAAA-MM-DD». La orden no lee Search Console ni hace peticiones de red,
-el sitio no lee el fichero (AD-24), y se versiona con su cabecera y `senales:` vacío: ningún
-agente anota señales que no ha visto.
+La consulta `npm run canal` da un bloque «Señales externas» que separa propias de ajenas, por
+fecha, con origen, destino y familia del destino, y señala la ajena que lleva `?de=` («copia
+un enlace del Kit») y la que lleva `compartido` («copia un enlace compartido»; pueden ir los
+dos, y basta con que los lleve una de las anotaciones vivas del mismo enlace). **La 18.1 no se
+cierra con señales propias, sino con la primera ajena**, y la consulta la nombra con su fecha,
+origen y destino. Las propias de la semana del ciclo se anotan el día que se ponen; a los 14
+días de la primera, se mira a mano en el informe de Enlaces de Search Console si su dominio
+figura como dominio de referencia y se anota a mano como comentario al final del fichero. La
+consulta dice si eso «aún no toca» o está «pendiente desde AAAA-MM-DD». La orden no lee Search
+Console ni hace peticiones de red, el sitio no lee el fichero (AD-24), y se versiona con su
+cabecera y `senales:` vacío: ningún agente anota señales que no ha visto.
 
 ## Documentar una Cita ya publicada
 

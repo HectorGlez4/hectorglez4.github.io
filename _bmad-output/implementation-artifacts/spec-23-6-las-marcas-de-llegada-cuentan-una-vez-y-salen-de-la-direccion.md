@@ -17,6 +17,20 @@ deferred:
     location: >-
       DESPLIEGUE.md §3, consulta «Difusión por botón, sobre lecturas»; informe de la Historia 23.10
     severity: low
+  - summary: >-
+      Pendiente de Héctor (bmad-create-epics-and-stories): el criterio de la Historia 23.6 en epics.md dice que «más de un `?via=`» se rechaza, y `senal --tipo ajena` admite el mismo valor dos veces (`?via=x&via=x`) y rechaza solo valores distintos, como dice el contrato de esta spec y como hace `?de=` desde la 21.4.
+    evidence: |-
+      `componerSenal` rechaza con `new Set(difusion).size > 1`, y `tests/unit/canal.test.ts` afirma que `?via=x&via=x` se admite; las tres copias de `CODIGOS_DE_SENAL` dicen «o más de una distinta». El `<intent-contract>` lo decide así («más de un valor distinto, 1 … `?via=x&via=x` se admite»), y la lectura es defendible porque la redacción vieja de `?de=` decía «o más de una» con el mismo `Set`; pero el texto literal de epics.md (v8.2, Héctor, 2026-10-23) dice «más de un `?via=`» y su plan de pruebas habla del `?via=` «repetido». Lo señalaron intent-alignment (5) y ac-auditor (1) en la segunda revisión. Dos salidas, las dos de Héctor: reescribir el criterio como «más de un valor distinto» con bmad-create-epics-and-stories, o cambiar la comprobación a `difusion.length > 1` con sus pruebas y las tres copias de los códigos.
+    location: >-
+      tools/lib/canal.ts, componerSenal (`new Set(difusion).size > 1`); _bmad-output/planning-artifacts/epics.md, Historia 23.6
+    severity: low
+  - summary: >-
+      Las tres redacciones de los códigos de `anotar` no dicen lo mismo: el docblock de tools/canal.ts rechaza con 1 «una fecha futura o anterior a la primera anotable», y AGENTS.md y `CABECERA_DE_PUBLICACIONES` solo «fecha futura»; `anotar` no tiene un dueño único de su redacción como `CODIGOS_DE_SENAL` lo es de la de `senal`.
+    evidence: |-
+      La orden rechaza una fecha de publicación anterior a `PRIMERA_JORNADA_DEL_CANAL` (tools/lib/canal.ts), y solo el docblock lo dice. La divergencia viene de antes de la 23.6 (la frase entró en el docblock con la 21.4, 476d281f967d415d04fd4f03a838d1bfe79d51bb); esta historia editó las tres copias a mano para añadir `?via=` y no la introdujo. Lo señaló blind-hunter en la segunda revisión. Cerrarla con una constante compuesta en la cabecera y comprobada contra AGENTS.md y el docblock, como `CODIGOS_DE_SENAL`, exige reescribir la cabecera de corpus/publicaciones-de-canal.yml.
+    location: >-
+      AGENTS.md «Anotar lo que se publica en el canal»; tools/lib/corpus.ts CABECERA_DE_PUBLICACIONES; tools/canal.ts docblock
+    severity: low
 ---
 
 <intent-contract>
@@ -107,7 +121,7 @@ deferred:
 - `src/lib/medicion.ts` -- exportar los nombres de las dos marcas compuestos desde sus módulos y el texto de la función pura (ver Design Notes); `via` como fuente; `guionDeMedicion` según Boundaries (lectura única, `replaceState` condicional en `try`, olvido al emitir la lectura y en `pageshow` con `persisted`); docblocks y comentario de variables al día (las marcas, quién las quita, que solo la búsqueda escribe además en el historial) -- AD-13, FR-22, FR-56.
 - `src/lib/umbrales.ts` -- tras implementar, medir el fichero con el punto final de producción y subir `MAX_BYTES_GUION_DE_MEDICION` a medida + ~400, con la medida y el porqué en su comentario -- un tope visible en el diff.
 - `tests/unit/ayuda/medicion.ts` -- `location.hash` (opción `fragmento`, por omisión `''`); `history` con `state` (opción `estado`, por omisión `null`) y `replaceState(estado, titulo, url)` que apunta la llamada y aplica la URL a `location`; opción para un historial que lanza y otra sin `history`; devolver `historial()` (las llamadas) y `direccion()` (`pathname + search + hash`) -- el entorno que pide la historia.
-- `tests/unit/medicion.test.ts` -- `describe('Historia 23.6 — …')`: una prueba por fila de guion de la matriz; la función pura evaluada en `node:vm` como función y llamada con los nombres compuestos (vacío, solo marcas, `?de=x&`, `?a=1&&de=x` → `?a=1&`, `?de` y `?de=` sin valor, resto literal con `%20` y `+`, nombres parecidos, `d%65`); que `replaceState` recibe **el mismo** `history.state` que había; y sobre `sitioMedido()`: en toda página que carga el fichero su `<script src>` está en el `<head>` antes de todo guion que escriba en el historial o la dirección; ningún guion salvo el fichero y la isla de `/buscar/` lo hace; ningún guion salvo el fichero lee `de` ni `via` (también `/islas/imagen.js` y Pagefind); entre los guiones propios (en línea e `islas/`) solo la isla de `/buscar/` lee la dirección. Los detectores componen `de`/`via` desde sus módulos y se comprueban contra el fichero (que sí escribe y sí lee), para no pasar en vacío. Ajustar las pruebas del Code Map que ganan `via` -- Vitest, que corre el CI.
+- `tests/unit/medicion.test.ts` -- *(la parte de `dist/` la sustituyó la revisión del 2026-10-25: `defer` en el `<script src>` del fichero y ningún otro guion de la página escribe, la búsqueda tampoco)* `describe('Historia 23.6 — …')`: una prueba por fila de guion de la matriz; la función pura evaluada en `node:vm` como función y llamada con los nombres compuestos (vacío, solo marcas, `?de=x&`, `?a=1&&de=x` → `?a=1&`, `?de` y `?de=` sin valor, resto literal con `%20` y `+`, nombres parecidos, `d%65`); que `replaceState` recibe **el mismo** `history.state` que había; y sobre `sitioMedido()`: en toda página que carga el fichero su `<script src>` está en el `<head>` antes de todo guion que escriba en el historial o la dirección; ningún guion salvo el fichero y la isla de `/buscar/` lo hace; ningún guion salvo el fichero lee `de` ni `via` (también `/islas/imagen.js` y Pagefind); entre los guiones propios (en línea e `islas/`) solo la isla de `/buscar/` lee la dirección. Los detectores componen `de`/`via` desde sus módulos y se comprueban contra el fichero (que sí escribe y sí lee), para no pasar en vacío. Ajustar las pruebas del Code Map que ganan `via` -- Vitest, que corre el CI.
 - `tests/unit/vocabulario.test.ts` -- quitar la entrada 23.6 de `PENDIENTES`; `escenariosDe` gana `?via=` por cada destino de `DESTINOS_VALIDOS` y uno ajeno, `?via` repetido y `?de=…&via=…` juntos, con su valor esperado por campo -- la prueba de correspondencia de la 23.2.
 - `tests/e2e/receptor.spec.ts` -- `describe('Historia 23.6 — …')`: llegada a la Cita con `?x=1&de=instagram&via=whatsapp#cita` y un `history.state` puesto antes (`addInitScript`): la dirección queda `?x=1#cita`, una sola petición de documento, `history.state` intacto, canónica y `og:url` iguales a las de la página sin marcas y sin `?`; la vista y la lectura (una tecla) llegan con `instagram` y `whatsapp`; recargar da una vista sin marcas y la misma dirección. `/buscar/?q=…&de=instagram` queda `/buscar/?q=…`, la búsqueda inicial corre y ningún evento lleva marca. Ajustar la lista de claves de la 23.5 -- Playwright local, que el CI no corre.
 - `tools/lib/canal.ts` -- leer cualquier marca de lo tecleado con una sola función (sin fragmento, `getAll`); `componerPublicacion` y `componerSenal` según Boundaries; `compartido?: boolean` en `SenalExterna`, con su docblock; `lineaDeSenal` con «⚠ copia un enlace compartido» para la ajena con `compartido`; `CODIGOS_DE_SENAL` con la marca `?via=` (en una propia; en una ajena, de un destino que no existe o más de una) -- AD-13, FR-22.
@@ -162,6 +176,22 @@ intent-alignment, ac-auditor) y no traían hallazgos todavía: la revisión inde
   - `[low]` `[patch]` Mensajes y forma (blind-hunter): el rechazo de una propia nombra todas sus `?via=`; el `import` de `vocabulario.ts` en su orden en `tools/lib/canal.ts`; el párrafo de códigos de `anotar` en AGENTS.md, reenvuelto.
   - `[low]` `[patch]` La prueba real de la caché de atrás y adelante solo miraba `origen` (intent-alignment e, ac-auditor 5): llega con `?de=` y `?via=`, comprueba la barra sin marcas al llegar y al volver, y las dos marcas de las dos lecturas.
 
+### 2026-10-25 — Review pass
+- intent_gap: 0
+- bad_spec: 0
+- patch: 6: (high 0, medium 0, low 6)
+- defer: 2: (high 0, medium 0, low 2)
+- reject: 15: (high 0, medium 0, low 15)
+- addressed_findings:
+  - `[low]` `[patch]` La crónica de la primera pasada contradecía el código final —`replaceState` sin `location.origin`, `m=[o,t,z,y,w]`, la prueba de `dist/` por orden en el documento con la búsqueda exenta— (blind-hunter): marcadas en «Qué se hizo», en la tarea de `tests/unit/medicion.test.ts`, en la nota «Orden en el documento» y en los riesgos de la primera pasada como sustituidas por la revisión, que manda donde difieren.
+  - `[low]` `[patch]` AGENTS.md y la cabecera del registro dicen que una propia con `compartido` no se deja leer, y el registro solo negaba `compartido: true` (blind-hunter): `analizarSenales` niega el campo en una propia con cualquier valor, el docblock de `SenalExterna` lo dice, y la prueba por `principal` cubre `true` y `false` (código 1, fichero intacto).
+  - `[low]` `[patch]` DESPLIEGUE.md atribuía a «se olvidan al emitir la lectura» que recargar o copiar la dirección ya no vuelvan a contar, y presentaba como nuevo el olvido en la caché de atrás y adelante (blind-hunter): el párrafo dice que eso lo hace que las marcas salgan de la dirección, y que la vuelta por la caché ya olvidaba la de origen desde la 23.5.
+  - `[low]` `[patch]` Forma (blind-hunter): el párrafo de `?via=` en `anotar`, el de la señal y el de la consulta de AGENTS.md, el de la lectura, el de las Marcas y el de SM-8 de DESPLIEGUE.md, el docblock de `src/lib/medicion.ts` y la desestructuración de `analizarSenales`, reenvueltos; en el docblock de `tools/canal.ts`, «la invocación:» ya no queda sola. Al reenvolver SM-8 se evitó una línea que empezaba por `>` dentro de un código, que CommonMark habría leído como cita.
+  - `[low]` `[patch]` Quitar las marcas de `?de=x&&`, `?&de=x&` o `?&&de=x` dejaba un `?&` sin nada, y `?de=x&` en cambio quedaba vacío (ac-auditor 3): `SIN_MARCAS_DE_LLEGADA` devuelve la búsqueda vacía si de lo que había solo quedan separadores, y la devuelve tal cual si no quitó nada, así que `?&&` sin marcas no llama a `replaceState`; `?a=1&&de=x` sigue dando `?a=1&`, literal. Cuatro casos nuevos en la tabla de la función pura y `?&&` en la de «sin marcas». El fichero pasa de 2.520 a 2.548 bytes, bajo el tope de 2.880 (comentario de `umbrales.ts` al día).
+  - `[low]` `[patch]` Las pruebas de `anotar` y `senal --tipo propia` con `?via=` solo veían que no se creaba el registro (ac-auditor 4): ahora también, con un registro que ya tiene una entrada, que queda byte a byte como estaba.
+
+Rechazados, con su porqué: el `review_loop_iteration` en 0 y la primera entrada vacía del registro (cuenta las vueltas por bad_spec, no las pasadas; la entrada vacía es lo que pasó), `sprint-status.yaml` (lo lleva el bucle), `compartido` sin el botón (el contrato lo fija booleano, «al patrón de `marcado`»), el rechazo de un `?via=` ajeno o de varios distintos en una ajena (lo fija el contrato), el `o=w=null` de `l` redundante con `D` (el contrato pide el olvido al emitir la lectura), varias vistas por página (`superficies.ts` declara una como mucho por ruta), las posiciones de `m` por número (las ata la prueba de correspondencia de la 23.2, campo a campo), más e2e en portada y superficies y la tabla de la función pura en el navegador (las cubre el entorno simulado; el analizador es el mismo WHATWG), el comentario de `MAX_BYTES_GUION_DE_MEDICION` como crónica (la spec pide la medida en él; solo se puso al día la cifra tras este parche), `URLSearchParams` sin `try` en navegadores sin él (ya era así desde la 8.2, y `redes.test.ts` exige esa lectura literal; son navegadores de 2015), la regla FR-56 de contar difusión sobre lecturas (ya diferida a la 23.10 en la pasada anterior), el orden de `dist/` probado como ausencia (a propósito, hasta la 23.8), las marcas solo en las vistas declaradas (lo que hace que una llegada cuente una vez), la canónica para el rastreador (la sigue mirando `origen.spec.ts`) y los detectores textuales (riesgo ya anotado).
+
 ## Design Notes
 
 **La función pura viaja como texto.** El fichero es una cadena, así que la función tiene que ir dentro como texto; con `String(función)` el empaquetado del build puede renombrarla o reformatearla, y el fichero —y su versión, que sale del contenido— dejaría de ser el mismo que calcula Vitest (`medicion.test.ts` compara `dist/` con `guionDeMedicion(ENDPOINT)` byte a byte). Por eso se escribe una sola vez como texto de una expresión de función, con los nombres como argumento, y las pruebas la evalúan en `node:vm` y la llaman. Orientativo (nombres y compactación los fija el código):
@@ -178,7 +208,7 @@ try{x=R(location.search,["de","via"]);x!=location.search&&history.replaceState(h
 
 **`via` en la vista y en la lectura, pero la difusión se cuenta en la lectura.** El vocabulario declara `via` en las dos y la historia pide que viaje con las dos; que una llegada con `?via=` cuente solo si se leyó es regla de lectura de la serie (consulta de `DESPLIEGUE.md`, informe de la 23.10), no del fichero.
 
-**Orden en el documento.** El fichero va en el `<head>` con `defer`; la isla de `/buscar/` es un guion clásico al final del `<body>` que se ejecuta antes que él. Hoy no escribe en el historial; cuando la 23.8 lo haga, debe hacerlo desde sus escuchas (enviar, pulsar, ocultarse), nunca al analizarse, y siempre con la dirección que haya (ya sin marcas) y su propio `history.state`. La prueba sobre `dist/` fija el orden en el documento; esta nota es para la 23.8.
+**Orden en el documento.** *(Sustituida por la revisión del 2026-10-25: la prueba de `dist/` mira la ejecución —`defer` y ningún otro guion que escriba— y la búsqueda no tiene exención; lo que sigue vale como nota para la 23.8.)* El fichero va en el `<head>` con `defer`; la isla de `/buscar/` es un guion clásico al final del `<body>` que se ejecuta antes que él. Hoy no escribe en el historial; cuando la 23.8 lo haga, debe hacerlo desde sus escuchas (enviar, pulsar, ocultarse), nunca al analizarse, y siempre con la dirección que haya (ya sin marcas) y su propio `history.state`. La prueba sobre `dist/` fija el orden en el documento; esta nota es para la 23.8.
 
 **`?via=` repetido en una ajena** sigue la regla vigente de `?de=` (`new Set(marcas).size > 1`): dos valores distintos se rechazan porque sus visitas se atribuirían a uno solo; el mismo valor dos veces no confunde a nadie.
 
@@ -198,6 +228,8 @@ try{x=R(location.search,["de","via"]);x!=location.search&&history.replaceState(h
 
 Status: done
 Blocking condition: ninguna.
+
+*Esta es la crónica de la primera pasada. Donde difiere, manda la sección «Revisión del 2026-10-25 — capas externas», más abajo: `replaceState` recibe la dirección entera, con `location.origin` delante; las marcas viajan con `m=[D&&o,t,z,y,D&&w]`, solo mientras el fichero emite las vistas declaradas y la lectura (el `o=w=null` de `l` queda como olvido explícito, que el contrato pide); y la prueba de `dist/` mira la ejecución y no le admite ninguna escritura a la búsqueda.*
 
 **Qué se hizo.** El fichero de medición lee las dos Marcas de llegada **una vez**, en `a()` —tras
 `prerenderingchange` si hace falta— y antes de emitir ninguna vista, de
@@ -290,7 +322,8 @@ parches, 0 diferidos, 0 rechazados. La revisión de verdad es la del apartado si
 - La difusión llega casi siempre nula hasta que la Épica 25 componga `?via=` en los botones.
 - La isla de `/buscar/` lee `q` antes que el fichero (guion clásico al final del `<body>`); cuando la
   23.8 escriba en el historial, debe hacerlo desde sus escuchas y con la dirección ya sin marcas: la
-  prueba sobre `dist/` fija solo el orden en el documento.
+  prueba sobre `dist/` fija solo el orden en el documento *(superado: la revisión la pasó a orden de
+  ejecución, sin exención para la búsqueda)*.
 - Un `history.replaceState` que falla deja las marcas en la barra: esa carga se cuenta bien, pero
   recargarla las volvería a contar, como antes de la historia.
 - Los detectores de `dist/` son textuales (cadena entre comillas, `?nombre=`, `location`, `history`):
@@ -376,3 +409,59 @@ cadena literal la exige `redes.test.ts`; nada la vuelve a leer después).
   escapa, y una cadena `"de"` ajena los enciende (del lado seguro).
 - La regla de contar la difusión sobre lecturas vive en una consulta a mano hasta el informe de la
   23.10 (diferido).
+
+### Segunda revisión del 2026-10-25 — capas externas
+
+**Qué cambió.** Seis parches, todos bajos y ninguno dentro del contrato. La función pura ya no deja
+un `?&` sin nada cuando de lo que había solo quedan separadores (`?de=x&&` → vacío, como ya daba
+`?de=x&`), y devuelve la búsqueda tal cual cuando no quita nada, así que sin marcas el fichero
+sigue sin llamar a `replaceState`; `?a=1&&de=x` sigue dando `?a=1&`. El registro de señales niega
+`compartido` en una propia con cualquier valor, que es lo que ya decían AGENTS.md y la cabecera.
+DESPLIEGUE.md atribuye bien lo que deja de contar dos veces la misma llegada al recargar o copiar
+la dirección (que las marcas salgan de ella, no que se olviden en la lectura). Las pruebas de
+`anotar` y `senal --tipo propia` con `?via=` comprueban además que un registro con entradas
+queda byte a byte como estaba. La crónica de la primera pasada marca lo que la revisión
+sustituyó, y varios párrafos de AGENTS.md, DESPLIEGUE.md y dos docblocks se reenvolvieron.
+
+**Ficheros.**
+- `src/lib/medicion.ts` — `SIN_MARCAS_DE_LLEGADA` (sin `?&` vacío; tal cual si no quita nada) y su
+  docblock; el párrafo de las Marcas en el docblock del fichero, reenvuelto.
+- `src/lib/umbrales.ts` — la medida tras esta revisión: **2.548 bytes** (2.549 con barra final;
+  2.516 con el punto final de las pruebas), bajo el tope de 2.880, que no se mueve.
+- `tests/unit/medicion.test.ts` — cuatro casos nuevos en la tabla de la función pura
+  (`?de=x&&`, `?&de=x&`, `?&&via=whatsapp`, `?&&`) y `?&&` en «sin marcas».
+- `tools/lib/corpus.ts` — `analizarSenales` niega `compartido` en una propia con cualquier valor;
+  la desestructuración, reenvuelta.
+- `tools/lib/canal.ts` — docblock de `SenalExterna.compartido` al día.
+- `tools/canal.ts` — el docblock de los códigos de `senal`, sin la línea suelta.
+- `tests/unit/canal.test.ts` — la propia a mano con `compartido: true` y `false`; `anotar` y
+  `senal --tipo propia` con `?via=` sobre un registro con entradas, intacto.
+- `AGENTS.md`, `DESPLIEGUE.md` — párrafos reenvueltos; en DESPLIEGUE.md §3, qué evita contar dos
+  veces la misma llegada y que la caché de atrás y adelante ya olvidaba la de origen desde la 23.5.
+- Esta spec — la crónica de la primera pasada marca lo sustituido; tres diferidos (uno de antes).
+
+**Hallazgos.** 6 parches (0 altos, 0 medios, 6 bajos), 2 diferidos —el `?via=` repetido con el
+mismo valor, que el criterio de epics.md rechaza al pie de la letra y el contrato admite
+(pendiente de Héctor), y la redacción de los códigos de `anotar`, que diverge desde la 21.4— y
+15 rechazados (el porqué de cada uno, en el registro de triaje de esta pasada).
+
+**Seguimiento recomendado: `true`** — parcheados 0 altos, 0 medios y 6 bajos; puntuación 3 × 0 + 6
+= 6, por encima de 5.
+
+**Verificación de esta revisión.**
+- `npx astro check` — 0 errores, 0 avisos (20 sugerencias previas).
+- `npx vitest run` de `medicion`, `vocabulario`, `redes`, `comparticion`, `huella`, `receptor`,
+  `canal`, `superficies`, `espinas-de-ux` y `kit-construido` — 10 ficheros, 696 pruebas en verde.
+- `npm test` (con `correr.sh`) — 131 ficheros, 5.721 pruebas en verde.
+- `npx playwright test tests/e2e/receptor.spec.ts --project=escritorio` — 37 en verde, 1 saltada
+  (la de prerender, como antes).
+- Con el `webServer`, `origen`, `copiar`, `imagen`, `compartir-enlace`, `compartir-imagen`,
+  `busqueda`, `pagina-de-cita` y `receptor-local` en `escritorio` — 114 en verde, 2 saltadas.
+  Puertos 4321, 4399, 4400, 4402 y 8787 libres al terminar.
+- `guionDeMedicion` con el punto final de producción: 2.548 bytes (≤ 2.880).
+- `git diff` desde `3dd8b508f3bf544a2c14f82907f2ff2e4075f831` y desde
+  `a0e540104fb3c693e3651b0b73b9f8cda7e36998` de `src/lib/vocabulario.ts` y `medicion/`: vacío;
+  `ARRANQUE_DE_MEDICION` y `MAX_BYTES_DE_GUION` sin cambios; `corpus/` no se tocó en esta pasada.
+
+**Riesgos que quedan tras esta revisión.** Los de la revisión anterior, y uno más: el criterio de
+epics.md y el contrato de esta spec leen distinto «más de un `?via=`» (diferido, de Héctor).
