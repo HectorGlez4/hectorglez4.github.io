@@ -16,11 +16,10 @@ pending:
       DESPLIEGUE.md §3.
     owner: 'Héctor'
   - summary: >-
-      Tras el despliegue que llega al sitio en vivo: dar valor a DESPLIEGUE_DE_LA_LECTURA (la
-      jornada UTC en que termina «Desplegar»), en un commit aparte del día en que llega, de la que
-      sale la primera entrada de CORTES_DE_SM8; y, cerrada la primera jornada UTC completa tras la
-      llegada, anotar con fecha en DESPLIEGUE.md §3 las filas escritas frente a la cuota y el
-      tamaño de la base que da «npm run medicion».
+      Cerrada la primera jornada UTC completa tras la llegada (la 2026-10-26, que cierra a las
+      00:00 UTC del 2026-10-27), correr «npm run medicion» y anotar con fecha en DESPLIEGUE.md §3
+      las filas escritas frente a la cuota, el tamaño de la base y cada evento nuevo con sus filas
+      o nombrado sin ellas. DESPLIEGUE_DE_LA_LECTURA ya vale 2026-10-25 («Tras el despliegue»).
     owner: 'Héctor, o el bucle v8-ralph con su autorización del 2026-10-24'
 ---
 
@@ -146,6 +145,27 @@ del merge (AD-9)— en un commit aparte del día en que llega, del que sale la p
 tras la llegada, correr `npm run medicion` y anotar con fecha en `DESPLIEGUE.md` §3 las filas
 escritas frente a la cuota, el tamaño de la base y cada evento nuevo con sus filas o nombrado sin
 ellas. La línea base de cada métrica empieza a contar desde esa jornada.
+
+### La llegada en vivo — 2026-10-25
+
+El merge `63b2bb95d2` («merge: la Épica 23, medir la lectura») entró en la principal y desplegó
+con Publicar, ejecución `40216550392`: «Construir y validar el corpus» de 17:27:28 a 17:47:56 UTC,
+**«Desplegar» de 17:48:00 a 17:48:18 UTC** y «Avisar a los buscadores» hasta las 17:49:07 UTC, los
+tres en verde. La jornada de llegada es, por tanto, la **2026-10-25**.
+
+- **`DESPLIEGUE_DE_LA_LECTURA = '2026-10-25'`**, en su propio commit, `8ac8ec227e` «feat(medicion):
+  la Épica 23 llega en vivo el 2026-10-25 y abre el primer corte de SM-8 (23.11)», que cambia
+  solo `src/lib/umbrales.ts`. Lo escribió el bucle v8-ralph con la autorización de Héctor del
+  2026-10-24. Ninguna fecha entra en `CORTES_DE_SERIE_DECLARADOS`: con la constante,
+  `CORTES_DE_SERIE` y `CORTES_DE_SM8` traen una entrada, la llegada de la Épica 23, de jornada
+  2026-10-25 y que parte `sm8`, `lectura` y `busqueda`. La jornada de llegada es mixta; el tramo
+  nuevo de cada serie y la línea base de cada métrica empiezan la **2026-10-26**.
+- **Pruebas**, en el worktree con la constante puesta:
+  `npx vitest run tests/unit/linea-base.test.ts tests/unit/medicion-orden.test.ts
+  tests/unit/medicion.test.ts tests/unit/indexacion.test.ts` — 4 ficheros, 758 pruebas, todas en
+  verde (`.claude/v8-ralph/logs/s-23/post-unit-cortes.log`).
+- **Queda pendiente** (en el `pending` de arriba): las filas escritas frente a la cuota y el tamaño
+  de la base de la 2026-10-26, que no se pueden leer hasta que cierre.
 
 ## Verificación previa a la fusión — 2026-10-25
 

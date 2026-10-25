@@ -935,8 +935,8 @@ la Obra indexable y metería en SM-8 páginas `noindex` que no medía.
 de serie**: antes, recargar la página, copiar la dirección de la barra o volver a ella con la
 marca puesta volvía a contar la llegada, porque `?de=` se quedaba en la dirección; desde la
 llegada en vivo de la Épica 23 se cuenta una vez, así que el tramo de antes y el de después no se
-comparan. La jornada del corte es `DESPLIEGUE_DE_LA_LECTURA`, a la que da valor la 23.11, y de
-ella sale la primera entrada de `CORTES_DE_SM8`, la proyección sobre SM-8 de `CORTES_DE_SERIE` en
+comparan. La jornada del corte es `DESPLIEGUE_DE_LA_LECTURA` —**2026-10-25**, el valor que le dio
+la 23.11: «Desplegar» terminó a las 17:48:18 UTC—, y de ella sale la primera entrada de `CORTES_DE_SM8`, la proyección sobre SM-8 de `CORTES_DE_SERIE` en
 `src/lib/umbrales.ts`; la segunda es `DESPLIEGUE_DE_OBRA_Y_DIRECTORIOS` (26.11). `npm run medicion`
 parte SM-8 por ellas solo («Leer la línea base», arriba). Con las consultas de abajo **se parte a
 mano**: se les añade `AND jornada < 'AAAA-MM-DD'` para el tramo de antes y
@@ -1204,6 +1204,14 @@ lectura; `comprobar` escribe sus balizas y las borra.
   cada evento y cada valor de la huella (`b4303b0e7c`, la de `medicion/huella-del-vocabulario.json`
   de la rama), descarta lo ajeno, numera al azar y las balizas se borraron. No hace falta repetir
   la 23.3 antes de fusionar. La salida, en `.claude/v8-ralph/logs/s-23/orq-comprobar.log`.
+
+**La llegada en vivo.** El merge `63b2bb95d2` («merge: la Épica 23, medir la lectura») desplegó
+con Publicar (ejecución `40216550392`), cuyo trabajo «Desplegar» terminó a las **17:48:18 UTC del
+2026-10-25**: esa es la jornada de `DESPLIEGUE_DE_LA_LECTURA`, y de ella sale la primera entrada de
+`CORTES_DE_SM8`. La 2026-10-25 es mixta —eventos de la v7.1 y de la v8— y la primera jornada UTC
+completa de la v8 es la **2026-10-26**. Queda por anotar aquí, cuando esa jornada cierre y con
+`npm run medicion`, las filas escritas frente a la cuota, el tamaño de la base y cada evento nuevo
+con sus filas o nombrado sin ellas (23.11).
 
 ### Consultar la compartición — SM-5, SM-7 y SM-C3
 
