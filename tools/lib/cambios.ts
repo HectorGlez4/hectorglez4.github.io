@@ -195,9 +195,7 @@ export function relacionDeSuperficies(corpus: CorpusParaFechar): Map<string, str
     // El fichero del Autor entra aquí porque la plantilla compone con `autor.nombre` el
     // título, la meta descripción y los datos estructurados: cambiarlo cambia el HTML. Los de
     // sus Temas, porque `RutasDeSalida` pinta el nombre de cada uno en su chip. Y la ficha de
-    // su Obra, porque la Atribución y el JSON-LD pintan `cita.obra.titulo` (22.3). Los
-    // listados de Tema, Colección y Autor también lo pintan en su `TarjetaDeCita` desde la
-    // 24.3, y la ficha de Obra entra en su relación con la 24.8 (AD-27), no aquí.
+    // su Obra, porque la Atribución y el JSON-LD pintan `cita.obra.titulo` (22.3).
     declarar(rutaDeCita(cita.slug), [
       cita.ruta,
       ficheroDeAutor.get(cita.autor),
@@ -206,6 +204,12 @@ export function relacionDeSuperficies(corpus: CorpusParaFechar): Map<string, str
     ]);
   }
 
+  /*
+   * Los listados de Autor, Tema y Colección. Desde la Historia 24.3 sus tarjetas pintan además
+   * el título de la Obra de cada Cita, y la ficha de Obra todavía no entra en ninguno de los
+   * tres: la recoge la Historia 24.8 (AD-27). Hasta entonces, retitular o reunir una Obra
+   * cambia estos listados sin moverles la fecha ni avisarlos.
+   */
   for (const autor of corpus.autores) {
     declarar(rutaDeAutor(autor.slug), [autor.ruta, ...(citasDeAutor.get(autor.slug) ?? [])]);
   }

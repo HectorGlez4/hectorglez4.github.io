@@ -15,6 +15,7 @@ import { obrasDelCorpusEnDisco } from '../../integraciones/indexables.ts';
 import { componerDocumento } from '../../tools/lib/documento.ts';
 import { ANCLA_DE_DONDE_LEER, rutaDeLaObra } from '../../src/lib/obras.ts';
 import { enlacesDe } from './ayuda/enlaces.js';
+import { obraDeLaTarjeta, tarjetasDelListado } from './ayuda/listado.js';
 import { EVENTOS } from '../../src/lib/medicion.ts';
 import { marcasDePagina } from '../../tools/lib/indexables.ts';
 import { MARCAS_DE_OBRA } from '../../src/lib/vocabulario.ts';
@@ -1219,10 +1220,8 @@ describe('Historia 22.8 — la congelación declarada, construida', () => {
     for (let n = 1; ; n += 1) {
       const ruta = n === 1 ? '/tema/la-vida/' : `/tema/la-vida/${n}/`;
       if (n > 1 && !existsSync(paginaConstruida(proyecto, ruta))) break;
-      const listado = /<ul class="listado"[^>]*>([\s\S]*?)<\/ul>/.exec(await html(proyecto, ruta))?.[1];
-      expect(listado, `${ruta}: sin \`ul.listado\``).toBeDefined();
-      for (const m of listado!.matchAll(/<a href="\/cita\/([^/"]+)\/"[^>]*>([\s\S]*?)<\/a>/g)) {
-        obraDe.set(m[1], /<span class="obra"[^>]*>([^<]*)<\/span>/.exec(m[2])?.[1]);
+      for (const tarjeta of tarjetasDelListado(await html(proyecto, ruta), ruta)) {
+        obraDe.set(tarjeta.slug, obraDeLaTarjeta(tarjeta));
       }
     }
     const esperadas = new Map([

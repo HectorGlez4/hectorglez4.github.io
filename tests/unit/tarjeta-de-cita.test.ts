@@ -1,7 +1,9 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import { execFile } from 'node:child_process';
 import { existsSync } from 'node:fs';
-import { readFile, readdir } from 'node:fs/promises';
+import { readFile, readdir, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
+import { promisify } from 'node:util';
 import ts from 'typescript';
 import {
   AUTOR_VALIDO,
@@ -13,6 +15,7 @@ import {
   limpiar,
   paginaConstruida,
 } from './ayuda/construir.js';
+import { listadoDe, obraDeLaTarjeta, tarjetasDelListado } from './ayuda/listado.js';
 import { componerDocumento, nombreDeDocumento } from '../../tools/lib/documento.ts';
 
 /**
@@ -23,7 +26,9 @@ import { componerDocumento, nombreDeDocumento } from '../../tools/lib/documento.
  *   · **Sin construir**: el contrato de `TarjetaDeCita.astro` —`atribucion` obligatoria, un
  *     conjunto cerrado de tres literales y sin valor por omisión—, que cada uso de `src/` lo
  *     declare con el literal que toca, y la regla `.obra` (tipografía y nada que recorte).
- *   · **Una construcción que falla**: `autor-y-obra` sin `autor` para el build nombrando la Cita.
+ *   · **Construcciones que fallan**: un uso sin `atribucion`, uno fuera del conjunto y
+ *     `autor-y-obra` sin el Autor de la Cita detienen la construcción nombrándola; y `astro
+ *     check`, sobre esa copia, rechaza los dos primeros.
  *   · **Una construcción**: lo que cada Tarjeta lleva en los cuatro listados, en todas sus
  *     páginas, leído de `dist/`.
  */
@@ -38,11 +43,53 @@ const ATRIBUCIONES = ['autor-y-obra', 'obra', 'ninguna'] as const;
 type Atribucion = (typeof ATRIBUCIONES)[number];
 
 /**
- * La etiqueta de apertura de un uso de la tarjeta, entera, se cierre sola o no: un atributo entre
- * comillas o entre llaves (con un nivel de anidamiento) puede llevar `>` o `/>` sin cerrarla. El
- * grupo 1 son sus atributos.
+ * La etiqueta de apertura de un uso de la tarjeta con el nombre que le dé el fichero, entera, se
+ * cierre sola o no: un atributo entre comillas o entre llaves (con un nivel de anidamiento) puede
+ * llevar `>` o `/>` sin cerrarla. El grupo 1 son sus atributos.
  */
-const APERTURA_DE_TARJETA = /<TarjetaDeCita\b((?:"[^"]*"|'[^']*'|\{(?:[^{}]|\{[^{}]*\})*\}|[^>"'{])*)>/g;
+const aperturaDe = (nombre: string) =>
+  new RegExp(`<${nombre}\\b((?:"[^"]*"|'[^']*'|\\{(?:[^{}]|\\{[^{}]*\\})*\\}|[^>"'{])*)>`, 'g');
+
+/** La importación por defecto del componente, con el nombre que le dé quien la importa. */
+const IMPORTACION = /import\s+([A-Za-z_$][\w$]*)\s+from\s+(['"])[^'"]*\/TarjetaDeCita\.astro\2/g;
+
+/** Un uso: sus atributos, la atribución que declara (si es un literal) y si pasa `autor`. */
+interface Uso {
+  etiqueta: string;
+  atribuciones: (string | undefined)[];
+  autor: boolean;
+}
+
+/**
+ * Los usos de la tarjeta en un fichero, sea cual sea el nombre con que la importe. En un `.astro`
+ * se buscan en la plantilla —el frontmatter es TypeScript y no puede pintar la tarjeta, así que lo
+ * que diga un comentario suyo no cuenta—; en un `.mdx`, en todo el cuerpo. Sin comentarios de
+ * plantilla ni de HTML, que pueden nombrar el componente sin usarlo. Lanza si el fichero importa
+ * el componente de un modo que no es una importación por defecto, que la prueba no sabría seguir.
+ */
+function usosDe(ruta: string, contenido: string): Uso[] {
+  const [codigo, plantilla] = ruta.endsWith('.astro')
+    ? (() => {
+        const [, frontmatter = '', ...resto] = contenido.split(/^---$/m);
+        return [frontmatter, resto.join('---')];
+      })()
+    : [contenido, contenido];
+  const nombres = [...codigo.matchAll(IMPORTACION)].map((m) => m[1]);
+  const importaciones = [...codigo.matchAll(/(?:\bfrom|\bimport)\s*\(?\s*['"][^'"]*\/TarjetaDeCita\.astro['"]/g)];
+  if (importaciones.length !== nombres.length) {
+    throw new Error(`${ruta}: importa \`TarjetaDeCita.astro\` de un modo que esta prueba no sabe seguir`);
+  }
+  const limpia = plantilla.replace(/<!--[\s\S]*?-->/g, '').replace(/\/\*[\s\S]*?\*\//g, '');
+  return nombres.flatMap((nombre) =>
+    [...limpia.matchAll(aperturaDe(nombre))].map(([etiqueta, atributos]) => ({
+      etiqueta,
+      // Un atributo empieza tras un espacio: `data-autor=` no es `autor=`. Entre llaves no es un
+      // literal: `undefined`.
+      atribuciones: [...atributos.matchAll(/\satribucion=(?:"([^"]*)"|'([^']*)'|\{)/g)].map((m) => m[1] ?? m[2]),
+      autor: /\sautor=/.test(atributos),
+    })),
+  );
+}
 
 /** El frontmatter de un `.astro`, como lo lee `medicion.test.ts` para la `zona` de la 23.7. */
 async function frontmatterDe(ruta: string): Promise<{ texto: string; fuente: ts.SourceFile }> {
@@ -129,18 +176,11 @@ describe('Historia 24.3 — el contrato del componente, sin construir', () => {
     };
     const vistas = new Map<string, Atribucion[]>();
     for (const ruta of await astrosDeSrc()) {
-      // Sin comentarios —los de plantilla, los de HTML y los de bloque del frontmatter—, que
-      // pueden nombrar el componente sin usarlo.
-      const texto = (await readFile(join(RAIZ, ruta), 'utf8'))
-        .replace(/<!--[\s\S]*?-->/g, '')
-        .replace(/\/\*[\s\S]*?\*\//g, '');
-      for (const [uso, atributos] of texto.matchAll(APERTURA_DE_TARJETA)) {
-        // Un atributo empieza tras un espacio: `data-autor=` no es `autor=`.
-        const declaradas = [...atributos.matchAll(/\satribucion=("([^"]*)"|\{)/g)];
-        expect(declaradas, `${ruta}: ${uso}`).toHaveLength(1);
-        const valor = declaradas[0][2];
-        expect(ATRIBUCIONES as readonly (string | undefined)[], `${ruta}: no es un literal del conjunto: ${uso}`).toContain(valor);
-        expect(/\sautor=/.test(atributos), `${ruta}: \`autor\` va con \`autor-y-obra\` y con nada más: ${uso}`).toBe(
+      for (const uso of usosDe(ruta, await readFile(join(RAIZ, ruta), 'utf8'))) {
+        expect(uso.atribuciones, `${ruta}: ${uso.etiqueta}`).toHaveLength(1);
+        const [valor] = uso.atribuciones;
+        expect(ATRIBUCIONES as readonly (string | undefined)[], `${ruta}: no es un literal del conjunto: ${uso.etiqueta}`).toContain(valor);
+        expect(uso.autor, `${ruta}: \`autor\` va con \`autor-y-obra\` y con nada más: ${uso.etiqueta}`).toBe(
           valor === 'autor-y-obra',
         );
         vistas.set(ruta, [...(vistas.get(ruta) ?? []), valor as Atribucion]);
@@ -156,24 +196,61 @@ describe('Historia 24.3 — el contrato del componente, sin construir', () => {
   });
 
   it('el escáner de usos ve lo que tiene que ver', () => {
-    // La expresión de la prueba anterior, sobre usos inventados: un atributo con `>` o
-    // `/>` dentro, una etiqueta que no se cierra sola y un `data-autor=` que no es `autor=`.
-    const texto = [
-      '<TarjetaDeCita cita={cita} atribucion="obra" zona={a > b ? "listado" : "x"} />',
-      '<TarjetaDeCita cita={cita} atribucion="ninguna" zona="listado"></TarjetaDeCita>',
-      '<TarjetaDeCita cita={{ ...cita }} atribucion="autor-y-obra" autor={autores.get(cita.autor)} zona="listado" />',
-      '<TarjetaDeCita cita={cita} atribucion="obra" data-autor="x" zona="listado" />',
+    // El lector de la prueba anterior, sobre usos inventados: un atributo con `>` o `/>`
+    // dentro, una etiqueta que no se cierra sola, un `data-autor=` que no es `autor=`, comillas
+    // simples, un valor entre llaves, el componente importado con otro nombre, y lo que dicen de
+    // él los comentarios —del frontmatter, de plantilla y de HTML—, que no son usos.
+    const pagina = [
+      '---',
+      "import Tarjeta from '../../components/TarjetaDeCita.astro';",
+      '// <Tarjeta cita={cita} atribucion="mal" />',
+      '/* <Tarjeta cita={cita} atribucion="mal" /> */',
+      '---',
+      '<Tarjeta cita={cita} atribucion="obra" zona={a > b ? "listado" : "x"} />',
+      '<Tarjeta cita={cita} atribucion="ninguna" zona="listado"></Tarjeta>',
+      '<Tarjeta cita={{ ...cita }} atribucion="autor-y-obra" autor={autores.get(cita.autor)} zona="listado" />',
+      '<Tarjeta cita={cita} atribucion="obra" data-autor="x" zona="listado" />',
+      "<Tarjeta cita={cita} atribucion='ninguna' zona=\"listado\" />",
+      '<Tarjeta cita={cita} atribucion={valor} zona="listado" />',
+      '<Tarjeta cita={cita} zona="listado" />',
+      '{/* <Tarjeta cita={cita} atribucion="mal" /> */}',
+      '<!-- <Tarjeta cita={cita} atribucion="mal" /> -->',
+      '<TarjetaDeCita cita={cita} atribucion="mal" />',
     ].join('\n');
-    const usos = [...texto.matchAll(APERTURA_DE_TARJETA)].map(([, atributos]) => ({
-      atribucion: /\satribucion="([^"]*)"/.exec(atributos)?.[1],
-      autor: /\sautor=/.test(atributos),
-    }));
-    expect(usos).toEqual([
-      { atribucion: 'obra', autor: false },
-      { atribucion: 'ninguna', autor: false },
-      { atribucion: 'autor-y-obra', autor: true },
-      { atribucion: 'obra', autor: false },
+    expect(usosDe('src/pages/x.astro', pagina).map(({ atribuciones, autor }) => ({ atribuciones, autor }))).toEqual([
+      { atribuciones: ['obra'], autor: false },
+      { atribuciones: ['ninguna'], autor: false },
+      { atribuciones: ['autor-y-obra'], autor: true },
+      { atribuciones: ['obra'], autor: false },
+      { atribuciones: ['ninguna'], autor: false },
+      { atribuciones: [undefined], autor: false },
+      { atribuciones: [], autor: false },
     ]);
+    // Sin la importación, nada que contar; importado de otro modo, la prueba no lo sigue y lo dice.
+    expect(usosDe('src/pages/x.astro', '---\n---\n<p>TarjetaDeCita</p>')).toEqual([]);
+    expect(() =>
+      usosDe('src/pages/x.astro', "---\nconst { default: T } = await import('../components/TarjetaDeCita.astro');\n---\n"),
+    ).toThrow(/no sabe seguir/);
+  });
+
+  it('la lista de la guarda es la unión de `Props`, con los mismos literales', async () => {
+    // `satisfies` impide que la lista tenga un literal que la unión no tenga; esto, que le falte
+    // uno: un valor nuevo de la unión que la guarda no conociera pararía el build en un uso bueno.
+    const { fuente } = await frontmatterDe(COMPONENTE);
+    let lista: ts.Expression | undefined;
+    const visitar = (nodo: ts.Node) => {
+      if (ts.isVariableDeclaration(nodo) && nodo.name.getText(fuente) === 'ATRIBUCIONES') lista = nodo.initializer;
+      ts.forEachChild(nodo, visitar);
+    };
+    visitar(fuente);
+    while (lista !== undefined && (ts.isSatisfiesExpression(lista) || ts.isAsExpression(lista) || ts.isParenthesizedExpression(lista))) {
+      lista = lista.expression;
+    }
+    expect(lista !== undefined && ts.isArrayLiteralExpression(lista), 'sin la lista `ATRIBUCIONES`').toBe(true);
+    const literales = (lista as ts.ArrayLiteralExpression).elements.map((e) =>
+      ts.isStringLiteral(e) ? e.text : `(no literal) ${e.getText(fuente)}`,
+    );
+    expect(literales.sort()).toEqual([...ATRIBUCIONES].sort());
   });
 
   it('la regla `.obra`: Inter pequeña y apagada, sin versalitas, y nada que recorte', async () => {
@@ -222,6 +299,22 @@ describe('Historia 24.3 — el contrato del componente, sin construir', () => {
     // Parte palabras antes que desbordar: un título largo ocupa más líneas (NFR-12).
     expect(['anywhere', 'break-word']).toContain(declaraciones.get('overflow-wrap'));
 
+    // Ni la tarjeta ni el enlace que la contiene recortan: una regla del `li` o del `a` con
+    // `overflow: clip` cortaría el título igual que una suya.
+    for (const regla of reglas) {
+      for (const recorta of ['overflow', 'overflow-x', 'overflow-y', 'max-height', 'max-block-size', 'contain', 'text-overflow']) {
+        expect(regla.declaraciones.has(recorta), `\`${regla.selector}\` declara ${recorta}`).toBe(false);
+      }
+    }
+
+    // Al pasar el cursor, el fondo a `surface-container-low` y nunca una sombra (UX-DR6, UX-DR70).
+    const encima = reglas.find((r) => r.selector === '.tarjeta a:hover');
+    expect(encima, 'sin regla `.tarjeta a:hover`').toBeDefined();
+    expect(encima!.declaraciones.get('background') ?? encima!.declaraciones.get('background-color')).toBe(
+      'var(--contenedor-bajo)',
+    );
+    expect(estilo).not.toMatch(/box-shadow/);
+
     // Y en todo el componente, ni color ni tipografía escritos a mano.
     expect(estilo).not.toMatch(/#[0-9a-f]{3,8}\b/i);
     expect(estilo).not.toMatch(/\b(rgb|rgba|hsl|hsla)\(/i);
@@ -233,7 +326,7 @@ describe('Historia 24.3 — el contrato del componente, sin construir', () => {
   });
 });
 
-describe('Historia 24.3 — un uso roto para el build', () => {
+describe('Historia 24.3 — un uso roto detiene la construcción', () => {
   const SLUG = 'seneca-no-es-que-tengamos-poco-tiempo';
 
   /** Construye el corpus mínimo con una sonda sin armazón que pinta su Cita con `atributos`. */
@@ -273,6 +366,75 @@ ${frontmatter}
     expect(resultado.codigo, resultado.salida).not.toBe(0);
     expect(resultado.salida).toMatch(new RegExp(`«${SLUG}»[^\\n]*atribucion="otra", fuera del conjunto`));
   }, 300_000);
+
+  it('un uso sin `atribucion`: código distinto de 0, diciendo que falta y no que está fuera', async () => {
+    // El caso para el que existe la guarda: `astro check` lo rechaza, `astro build` no.
+    const resultado = await construirSonda('', '');
+    expect(resultado.codigo, resultado.salida).not.toBe(0);
+    expect(resultado.salida).toMatch(new RegExp(`«${SLUG}»[^\\n]*sin \`atribucion\``));
+    expect(resultado.salida).not.toMatch(/fuera del conjunto/);
+  }, 300_000);
+
+  it('`astro check` rechaza un uso sin `atribucion` y uno fuera del conjunto, y admite el que la declara', async () => {
+    // El criterio dice `astro check`, y aquí se corre `astro check`: sobre la copia de una
+    // construcción que sí sale, con una sonda que el build no pinta —no es una página— y que
+    // el comprobador lee igual que cualquier componente.
+    const { codigo: construida, salida: deLaConstruccion, proyecto } = await construirSonda('', 'atribucion="obra"');
+    expect(construida, deLaConstruccion).toBe(0);
+    const SONDA = 'src/components/SondaDeTipos.astro';
+    await writeFile(
+      join(proyecto, SONDA),
+      [
+        '---',
+        "import TarjetaDeCita from './TarjetaDeCita.astro';",
+        "import type { Cita } from '../lib/publicado.ts';",
+        'const cita = undefined as unknown as Cita;',
+        '---',
+        '<ul>',
+        '  <TarjetaDeCita cita={cita} zona="listado" />',
+        '  <TarjetaDeCita cita={cita} atribucion="otra" zona="listado" />',
+        '  <TarjetaDeCita cita={cita} atribucion="obra" zona="listado" />',
+        '</ul>',
+        '',
+      ].join('\n'),
+      'utf8',
+    );
+    const { codigo, salida } = await promisify(execFile)(
+      process.execPath,
+      [join(RAIZ, 'node_modules', 'astro', 'bin', 'astro.mjs'), 'check'],
+      { cwd: proyecto, maxBuffer: 64 * 1024 * 1024, env: { ...process.env, FORCE_COLOR: '0', NO_COLOR: '1' } },
+    ).then(
+      ({ stdout, stderr }) => ({ codigo: 0, salida: `${stdout}\n${stderr}` }),
+      (fallo: { code?: number; stdout?: string; stderr?: string }) => ({
+        codigo: fallo.code ?? 1,
+        salida: `${fallo.stdout ?? ''}\n${fallo.stderr ?? ''}`,
+      }),
+    );
+    const limpia = salida.replace(/\u001b\[[0-9;]*m/g, '');
+    // El código de salida solo dice que hubo errores: la copia no lleva `medicion/`, y `tools/`
+    // da los suyos. Lo que se juzga son los de la sonda.
+    expect(codigo, limpia).not.toBe(0);
+    // Los errores de la sonda, por su línea: la 7 (sin `atribucion`) y la 8 (`"otra"`), y ninguno
+    // en la 9, que la declara.
+    // Un diagnóstico ocupa varias líneas («… no es asignable a Props» y, debajo, la propiedad):
+    // su mensaje llega hasta el siguiente diagnóstico o el recuento final.
+    const errores = [
+      ...limpia.matchAll(/SondaDeTipos\.astro:(\d+):\d+\s+-\s+error\s+ts\(\d+\):([\s\S]*?)(?=\n\S+:\d+:\d+\s+-\s+|\nResult\b|$)/g),
+    ].map(([, linea, mensaje]) => ({ linea: Number(linea), mensaje }));
+    expect(errores.map((e) => e.linea).sort(), limpia).toEqual([7, 8]);
+    expect(errores.find((e) => e.linea === 7)!.mensaje).toMatch(/'atribucion'/);
+    expect(errores.find((e) => e.linea === 8)!.mensaje).toMatch(/"otra"/);
+  }, 300_000);
+
+  it('`autor-y-obra` con el Autor de otro: código distinto de 0, nombrando los dos', async () => {
+    // Una tarjeta que atribuyera la Cita a quien no la firma: peor que una sin Autor.
+    const resultado = await construirSonda(
+      "const otro = { slug: 'otro-autor', nombre: 'Otro Autor', semblanza: 'Otro.', añoFallecimiento: 1900 };",
+      'atribucion="autor-y-obra" autor={otro}',
+    );
+    expect(resultado.codigo, resultado.salida).not.toBe(0);
+    expect(resultado.salida).toMatch(new RegExp(`«${SLUG}»[^\\n]*«otro-autor»[^\\n]*«seneca»`));
+  }, 300_000);
 });
 
 describe('Historia 24.3 — la Tarjeta de cada listado, construida', () => {
@@ -287,6 +449,12 @@ describe('Historia 24.3 — la Tarjeta de cada listado, construida', () => {
   /** Un título de 125 caracteres: más largo que el recorte del fragmento, y sale entero. */
   const LARGO =
     'Soledades, galerías y otros poemas, con las canciones del alto Duero y los proverbios y cantares del que hace camino al andar';
+  /**
+   * Lo que alarga las Citas de esa Obra por encima del recorte del fragmento: su tarjeta recorta
+   * el texto como antes de la 24.3, y el título de la Obra, en la misma tarjeta, no.
+   */
+  const COLA_LARGA =
+    'y así, verso a verso, el poeta deja escrito en la piedra del camino lo que el agua del río no supo decir a la orilla';
 
   // El censo es cerrado (11.2): solo admite slugs de las Citas anteriores a la v3, como en
   // `lista-de-obras.test.ts`.
@@ -312,13 +480,16 @@ describe('Historia 24.3 — la Tarjeta de cada listado, construida', () => {
     'pendientes-de-cotejo.yml': `citas:\n${SIN_OBRA.map((s) => `  - ${s}\n`).join('')}`,
   };
 
-  /** Siembra `n` Citas cotejadas de una Obra, con su documento. El texto no lleva el título. */
-  function sembrar(autor: string, clave: string, prefijo: string, titulo: string, n: number) {
+  /**
+   * Siembra `n` Citas cotejadas de una Obra, con su documento. El texto no lleva el título; con
+   * `cola`, cada texto la lleva detrás.
+   */
+  function sembrar(autor: string, clave: string, prefijo: string, titulo: string, n: number, cola = '') {
     const url = `${WS}${titulo.replaceAll(' ', '_')}`;
     const textos: string[] = [];
     for (let i = 0; i < n; i += 1) {
       const slug = `${autor}-${clave}-${i}`;
-      const texto = `${prefijo} ${i}: una sentencia distinta para cada número, la ${i}.`;
+      const texto = `${prefijo} ${i}: una sentencia distinta para cada número, la ${i}${cola === '' ? '' : `, ${cola}`}.`;
       textos.push(texto);
       sembradas.set(slug, { autor, texto, obra: titulo });
       corpus[`citas/${autor}--${clave}-${i}.md`] = citaValida({
@@ -338,8 +509,10 @@ describe('Historia 24.3 — la Tarjeta de cada listado, construida', () => {
 
   /** Una Cita sin Obra: declara solo la referencia, sin Fuente, y va en el censo. */
   function sinObra(autor: string, slug: string, texto: string) {
+    const fichero = `citas/${autor}--${slug.slice(autor.length + 1)}.md`;
+    if (fichero in corpus) throw new Error(`El fixture ya tiene ${fichero}`);
     sembradas.set(slug, { autor, texto });
-    corpus[`citas/${autor}--sin-obra.md`] = citaValida({
+    corpus[fichero] = citaValida({
       autor,
       slug,
       texto,
@@ -355,7 +528,7 @@ describe('Historia 24.3 — la Tarjeta de cada listado, construida', () => {
   sembrar('seneca', 'cartas', 'Carta', CARTAS, 2);
   sembrar('seneca', 'ira', 'Ira', IRA, 1);
   sinObra('seneca', SIN_OBRA[0], 'Mientras esperamos vivir, la vida pasa.');
-  sembrar('antonio-machado', 'soledades', 'Soledad', LARGO, 2);
+  sembrar('antonio-machado', 'soledades', 'Soledad', LARGO, 2, COLA_LARGA);
   sinObra('antonio-machado', SIN_OBRA[1], 'Caminante, no hay camino, se hace camino al andar.');
 
   // La Colección: delante, las dos sin Obra, una de cada Obra pequeña y diez de Brevedad; detrás,
@@ -372,6 +545,8 @@ describe('Historia 24.3 — la Tarjeta de cada listado, construida', () => {
   corpus[`colecciones/${COLECCION}.yml`] = coleccionValida({ miembros: MIEMBROS });
 
   let proyecto = '';
+  /** El recorte del fragmento, leído del componente: la prueba no fija una copia del número. */
+  let largoDeFragmento = 0;
   const html = (ruta: string) => readFile(paginaConstruida(proyecto, ruta), 'utf8');
 
   /** La ruta y sus páginas 2+, mientras existan en `dist/`. */
@@ -381,54 +556,18 @@ describe('Historia 24.3 — la Tarjeta de cada listado, construida', () => {
     return rutas;
   }
 
-  const decodificar = (s: string) =>
-    s.replaceAll('&quot;', '"').replaceAll('&#39;', "'").replaceAll('&lt;', '<').replaceAll('&gt;', '>').replaceAll('&amp;', '&');
+  const tarjetasDe = async (ruta: string) => tarjetasDelListado(await html(ruta), ruta);
 
-  interface Tarjeta {
-    slug: string;
-    zona: string | undefined;
-    enlaces: number;
-    /** Las clases de los `span` del enlace, en orden, pausas incluidas. */
-    clases: string[];
-    /** Las partes visibles: los `span` que no son `.solo-para-lectores`. */
-    visibles: { clase: string; texto: string }[];
-    /** Lo que oye el lector: el texto entero del enlace, con las pausas, espacios colapsados. */
-    lector: string;
-    /** Lo que queda del enlace al quitar los `span` sin anidar: tiene que ser nada. */
-    resto: string;
-  }
-
-  function listadoDe(pagina: string, ruta: string): string {
-    const listado = /<ul class="listado"[^>]*>([\s\S]*?)<\/ul>/.exec(pagina)?.[1];
-    if (listado === undefined) throw new Error(`${ruta}: sin \`ul.listado\``);
-    return listado;
-  }
-
-  async function tarjetasDe(ruta: string): Promise<Tarjeta[]> {
-    const listado = listadoDe(await html(ruta), ruta);
-    return [...listado.matchAll(/<li class="tarjeta"([^>]*)>([\s\S]*?)<\/li>/g)].map(([, atributos, dentro]) => {
-      const enlace = /^\s*<a href="\/cita\/([^/"]+)\/"[^>]*>([\s\S]*?)<\/a>\s*$/.exec(dentro);
-      if (enlace === null) throw new Error(`${ruta}: la tarjeta no es un solo enlace a una Cita: ${dentro}`);
-      const SPAN = /<span class="([^"]+)"[^>]*>([^<]*)<\/span>/g;
-      const spans = [...enlace[2].matchAll(SPAN)].map(([, clase, texto]) => ({ clase, texto: decodificar(texto) }));
-      return {
-        slug: enlace[1],
-        zona: /data-zona="([^"]+)"/.exec(atributos)?.[1],
-        enlaces: (dentro.match(/<a\b/g) ?? []).length,
-        clases: spans.map((s) => s.clase),
-        visibles: spans.filter((s) => s.clase !== 'solo-para-lectores'),
-        lector: spans.map((s) => s.texto).join('').replace(/\s+/g, ' ').trim(),
-        resto: enlace[2].replace(SPAN, ''),
-      };
-    });
-  }
+  /** El fragmento que la tarjeta enseña: el texto, recortado como antes de la 24.3 si pasa. */
+  const fragmentoDe = (texto: string) =>
+    texto.length > largoDeFragmento ? `${texto.slice(0, largoDeFragmento - 1).trimEnd()}…` : texto;
 
   /** Lo que la Tarjeta de una Cita tiene que llevar en un contexto. */
   function esperado(slug: string, atribucion: Atribucion) {
     const cita = sembradas.get(slug);
     if (cita === undefined) throw new Error(`«${slug}» no es una Cita del fixture`);
     const visibles = [
-      { clase: 'fragmento', texto: `«${cita.texto}»` },
+      { clase: 'fragmento', texto: `«${fragmentoDe(cita.texto)}»` },
       ...(atribucion === 'autor-y-obra' ? [{ clase: 'autor', texto: NOMBRES[cita.autor] }] : []),
       ...(atribucion !== 'ninguna' && cita.obra !== undefined ? [{ clase: 'obra', texto: cita.obra }] : []),
     ];
@@ -463,14 +602,36 @@ describe('Historia 24.3 — la Tarjeta de cada listado, construida', () => {
   const deAutor = (autor: string) => [...sembradas].filter(([, c]) => c.autor === autor).map(([slug]) => slug);
 
   beforeAll(async () => {
+    const { fuente } = await frontmatterDe(COMPONENTE);
+    const visitar = (nodo: ts.Node) => {
+      if (
+        ts.isVariableDeclaration(nodo) &&
+        nodo.name.getText(fuente) === 'LARGO_DE_FRAGMENTO' &&
+        nodo.initializer !== undefined &&
+        ts.isNumericLiteral(nodo.initializer)
+      ) {
+        largoDeFragmento = Number(nodo.initializer.text);
+      }
+      ts.forEachChild(nodo, visitar);
+    };
+    visitar(fuente);
     const resultado = await construirConCorpus(corpus);
     aLimpiar.push(resultado.proyecto);
     proyecto = resultado.proyecto;
     expect(resultado.codigo, resultado.salida).toBe(0);
   }, 300_000);
 
-  it('el fixture: el título largo pasa del recorte del fragmento', () => {
-    expect(LARGO).toHaveLength(125);
+  it('el fixture: el título largo y los textos de su Obra pasan del recorte del fragmento', () => {
+    expect(largoDeFragmento, 'sin `LARGO_DE_FRAGMENTO` en el componente').toBeGreaterThan(0);
+    expect(LARGO.length).toBeGreaterThan(largoDeFragmento);
+    for (const slug of ['antonio-machado-soledades-0', 'antonio-machado-soledades-1']) {
+      expect(sembradas.get(slug)!.texto.length, slug).toBeGreaterThan(largoDeFragmento);
+    }
+    // Y ninguna otra: el recorte se mira en esas dos, el resto sale entero.
+    expect([...sembradas].filter(([, c]) => c.texto.length > largoDeFragmento).map(([slug]) => slug).sort()).toEqual([
+      'antonio-machado-soledades-0',
+      'antonio-machado-soledades-1',
+    ]);
     expect(sembradas.size).toBe(57);
   });
 
@@ -520,9 +681,28 @@ describe('Historia 24.3 — la Tarjeta de cada listado, construida', () => {
     for (const ruta of ['/tema/el-tiempo/', `/coleccion/${COLECCION}/`, '/autor/antonio-machado/']) {
       const tarjeta = (await tarjetasDe(ruta)).find((t) => t.slug === 'antonio-machado-soledades-0');
       expect(tarjeta, ruta).toBeDefined();
-      const obra = tarjeta!.visibles.find((v) => v.clase === 'obra')?.texto;
+      const obra = obraDeLaTarjeta(tarjeta!);
       expect(obra, ruta).toBe(LARGO);
       expect(obra, ruta).not.toContain('…');
+    }
+  });
+
+  it('el fragmento de una Cita larga se recorta como antes, en la misma tarjeta que el título entero', async () => {
+    const slug = 'antonio-machado-soledades-0';
+    const texto = sembradas.get(slug)!.texto;
+    for (const ruta of ['/tema/el-tiempo/', `/coleccion/${COLECCION}/`, '/autor/antonio-machado/', '/obra/antonio-machado/']) {
+      const paginas = ruta.startsWith('/obra/')
+        ? (await readdir(join(proyecto, 'dist', 'obra', 'antonio-machado'))).map((o) => `/obra/antonio-machado/${o}/`)
+        : [ruta];
+      for (const pagina of paginas) {
+        const tarjeta = (await tarjetasDe(pagina)).find((t) => t.slug === slug);
+        expect(tarjeta, pagina).toBeDefined();
+        const fragmento = tarjeta!.visibles[0];
+        expect(fragmento.clase, pagina).toBe('fragmento');
+        expect(fragmento.texto, pagina).toMatch(/…»$/);
+        expect(fragmento.texto.length, pagina).toBeLessThanOrEqual(largoDeFragmento + 2);
+        expect(texto.startsWith(fragmento.texto.slice(1, -2)), pagina).toBe(true);
+      }
     }
   });
 

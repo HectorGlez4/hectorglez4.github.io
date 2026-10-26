@@ -40,9 +40,9 @@ interface Props {
   atribucion: 'autor-y-obra' | 'obra' | 'ninguna';
   /**
    * El Autor de la Cita, **solo** con `atribucion="autor-y-obra"`; con las otras dos ni se lee
-   * ni se pasa. Su ausencia con `autor-y-obra` para el build: la integridad del conjunto
-   * publicable garantiza que toda Cita resuelve su Autor, así que faltar aquí es un uso roto,
-   * no un caso que pintar sin él.
+   * ni se pasa. Con `autor-y-obra`, que falte o que no sea el que declara la Cita detiene la
+   * construcción: la integridad del conjunto publicable garantiza que toda Cita resuelve su
+   * Autor, así que cualquiera de las dos cosas es un uso roto, no un caso que pintar.
    */
   autor?: Autor;
   /**
@@ -58,20 +58,27 @@ const { cita, atribucion, autor, zona } = Astro.props;
  * Sin valor por omisión también al construir. `astro check` rechaza el uso que no declara
  * `atribucion`, pero `astro build` no comprueba tipos: sin esta guarda, un uso que la olvidara
  * se pintaría en silencio como `'obra'`, que sería un valor por omisión escondido.
+ *
+ * La lista es la de la unión de `Props`, atada a ella: `satisfies` no deja escribir aquí un
+ * valor que la unión no tenga, y `tests/unit/tarjeta-de-cita.test.ts` exige que tenga todos
+ * los de la unión.
  */
-const ATRIBUCIONES: readonly string[] = ['autor-y-obra', 'obra', 'ninguna'];
+const ATRIBUCIONES = ['autor-y-obra', 'obra', 'ninguna'] as const satisfies readonly Props['atribucion'][];
 if (!ATRIBUCIONES.includes(atribucion)) {
+  const declarada =
+    atribucion === undefined
+      ? 'sin `atribucion`'
+      : `con atribucion=${JSON.stringify(atribucion)}, fuera del conjunto (${ATRIBUCIONES.join(', ')})`;
   throw new Error(
-    `TarjetaDeCita: la Cita «${cita.slug}» se pinta en ${Astro.url.pathname} con ` +
-      `atribucion=${JSON.stringify(atribucion)}, fuera del conjunto (${ATRIBUCIONES.join(', ')}). ` +
+    `TarjetaDeCita: la Cita «${cita.slug}» se pinta en ${Astro.url.pathname} ${declarada}. ` +
       'Cada uso declara la suya, sin valor por omisión (Historia 24.3).',
   );
 }
 
 /**
- * El nombre del Autor, solo donde el contexto lo pide. Sin él, la tarjeta no sale: un Tema o
- * una Colección que enseñara una Cita sin decir de quién es sería justo lo que el contexto
- * declara que no puede pasar.
+ * El nombre del Autor, solo donde el contexto lo pide. Sin él, o con el de otro, la tarjeta no
+ * sale: un Tema o una Colección que enseñara una Cita sin decir de quién es —o atribuyéndosela
+ * a quien no la firma— sería justo lo que el contexto declara que no puede pasar.
  */
 let nombre: string | undefined;
 if (atribucion === 'autor-y-obra') {
@@ -82,11 +89,26 @@ if (atribucion === 'autor-y-obra') {
         `y la tarjeta no sale sin él: pásale el Autor que declara la Cita, «${cita.autor}».`,
     );
   }
+  if (autor.slug !== cita.autor) {
+    throw new Error(
+      `TarjetaDeCita: la Cita «${cita.slug}» se pinta en ${Astro.url.pathname} con ` +
+        `atribucion="autor-y-obra" y el Autor «${autor.slug}», pero la Cita declara «${cita.autor}».`,
+    );
+  }
   nombre = autor.nombre;
 }
 
 /** El título de su Obra, que la tarjeta no recorta nunca (NFR-12). */
 const titulo = atribucion === 'ninguna' ? undefined : cita.obra?.titulo;
+
+/**
+ * Las partes que siguen al fragmento, en su orden. Cada una lleva delante su pausa solo para
+ * lectores, y es la única regla: ninguna pausa al final, ninguna en una tarjeta de una parte.
+ */
+const partes = [
+  { clase: 'autor', texto: nombre },
+  { clase: 'obra', texto: titulo },
+].filter((parte): parte is { clase: string; texto: string } => parte.texto !== undefined);
 
 /**
  * El fragmento. Una Cita larga se recorta **para el listado**, que no es publicarla
@@ -113,12 +135,12 @@ const fragmento =
   * Pegarlas fija el texto, no el nombre que calcula el navegador: las partes son elementos de
   * flujo flexible, de bloque, y Chromium separa cada bloque con un espacio al componer el nombre
   * accesible, así que lo anuncia como «…» , Séneca , Cartas a Lucilio. No se oye —el lector hace
-  * la pausa en la coma— y es lo mismo que ya hace `ListaDeObras.astro`. La prueba de punta a
-  * punta de la Página de Tema fija lo que sí importa: las partes visibles, en su orden, unidas
-  * por comas y nada más.
+  * la pausa en la coma— y es lo mismo que ya hace `ListaDeObras.astro`. Las pruebas de punta a
+  * punta de los listados fijan lo que sí importa: las partes visibles, en su orden, unidas por
+  * comas y nada más.
   */}
 <li class="tarjeta" data-zona={zona}>
-  <a href={rutaDeCita(cita.slug)}><span class="fragmento">«{fragmento}»</span>{nombre !== undefined && (<><span class="solo-para-lectores">, </span><span class="autor">{nombre}</span></>)}{titulo !== undefined && (<><span class="solo-para-lectores">, </span><span class="obra">{titulo}</span></>)}</a>
+  <a href={rutaDeCita(cita.slug)}><span class="fragmento">«{fragmento}»</span>{partes.map((parte) => (<><span class="solo-para-lectores">, </span><span class={parte.clase}>{parte.texto}</span></>))}</a>
 </li>
 
 <style>

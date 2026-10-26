@@ -1,12 +1,14 @@
-import { expect, test } from '@playwright/test';
+import { expect, test, type Page } from '@playwright/test';
 import {
   autorConBiografia,
-  autorDe,
   autorEnUnaPagina,
   autorEnVariasPaginas,
-  citaConObraMasLarga,
+  citaConTituloDeObraMasLargo,
+  citaSinObra,
+  paginasDeAutor,
 } from './ayuda/corpus.ts';
 import { apuntarGuiones, fueraDeLaListaAlCargar } from './ayuda/guiones.ts';
+import { comprobarNombresDeTarjetas } from './ayuda/tarjetas.ts';
 
 /** Historia 2.3 — Página de Autor. */
 
@@ -227,26 +229,34 @@ test.describe('Historia 17.4 — la ficha abre la página, y solo la primera', (
  * Historia 24.3 — la línea de Obra de la Tarjeta de Cita, pintada.
  *
  * La prueba unitaria fija la regla `.obra` en la hoja y lo que lleva cada Tarjeta en `dist/`;
- * esto mide lo que el navegador hace con ellas a 320 px, con la Inter del sitio y la Obra de
- * título más largo del Corpus, que se deriva y no se fija. Los valores esperados salen de los
- * tokens de la propia página.
+ * esto mide lo que el navegador hace con ellas a 320 px, con la Inter que el sitio carga y la
+ * Obra de título más largo del Corpus, que se deriva —resuelta como en el build, por su ficha— y
+ * no se fija. Los valores esperados salen de los tokens de la propia página.
  */
 test.describe('Historia 24.3 — la línea de Obra en el listado de Autor', () => {
-  const larga = citaConObraMasLarga();
+  const larga = citaConTituloDeObraMasLargo();
+  const sinObra = citaSinObra();
 
-  test('a 320 px el título más largo sale entero en Inter apagada, parte en líneas y no desborda', async ({ page }) => {
-    test.skip(larga === undefined, 'Ninguna Cita del Corpus declara Obra con Fuente.');
-    const autor = autorDe(larga!.slug);
-    await page.setViewportSize({ width: 320, height: 640 });
-
-    // La página del listado de su Autor que lleva su Tarjeta.
-    const enlace = page.locator(`.listado li a[href="/cita/${larga!.slug}/"]`);
-    for (let n = 1; ; n += 1) {
+  /** Abre la página del listado de `autor` que lleva la Tarjeta de `slug`, y la devuelve. */
+  async function abrirLaPaginaDe(page: Page, autor: string, slug: string) {
+    const enlace = page.locator(`.listado li a[href="/cita/${slug}/"]`);
+    const paginas = paginasDeAutor(autor);
+    for (let n = 1; n <= paginas; n += 1) {
       const ruta = n === 1 ? `/autor/${autor}/` : `/autor/${autor}/${n}/`;
       const respuesta = await page.goto(ruta);
-      expect(respuesta?.status(), `${ruta}: sin la Tarjeta de ${larga!.slug}`).toBe(200);
-      if ((await enlace.count()) === 1) break;
+      expect(respuesta?.status(), ruta).toBe(200);
+      const cuantas = await enlace.count();
+      expect(cuantas, `${ruta}: la Tarjeta de ${slug} sale más de una vez`).toBeLessThanOrEqual(1);
+      if (cuantas === 1) return enlace;
     }
+    throw new Error(`Ninguna de las ${paginas} páginas de /autor/${autor}/ lleva la Tarjeta de ${slug}.`);
+  }
+
+  test('a 320 px el título más largo sale entero en Inter apagada, parte en líneas y no desborda', async ({ page }) => {
+    test.skip(larga === undefined, 'Ninguna Cita del Corpus resuelve una Ficha de Obra.');
+    const { slug, autor, titulo } = larga!;
+    await page.setViewportSize({ width: 320, height: 640 });
+    const enlace = await abrirLaPaginaDe(page, autor, slug);
     await page.evaluate(async () => {
       await document.fonts.ready;
     });
@@ -264,17 +274,32 @@ test.describe('Historia 24.3 — la línea de Obra en el listado de Autor', () =
       sonda.remove();
       const e = getComputedStyle(obra);
       const caja = obra.getBoundingClientRect();
+      // El ancho que el título ocuparía en una sola línea, con su misma fuente: si no cabe en la
+      // caja, tiene que partir en varias. Así no hay umbral de caracteres que fijar.
+      const enUnaLinea = document.createElement('span');
+      enUnaLinea.style.cssText = `position: absolute; visibility: hidden; white-space: nowrap; font: ${e.font}`;
+      enUnaLinea.textContent = obra.textContent;
+      document.body.append(enUnaLinea);
+      const natural = enUnaLinea.getBoundingClientRect().width;
+      enUnaLinea.remove();
+      const primera = e.fontFamily.split(',')[0].trim().replace(/^["']|["']$/g, '');
       const raiz = document.documentElement;
       return {
         esperado,
         texto: obra.textContent ?? '',
         color: e.color,
         familia: e.fontFamily,
+        primera,
+        cargada: [...document.fonts].some(
+          (f) => f.family.replace(/^["']|["']$/g, '') === primera && f.status === 'loaded',
+        ),
         tamaño: e.fontSize,
         peso: e.fontWeight,
         transformacion: e.textTransform,
         espaciado: e.letterSpacing,
         lineas: Math.round(caja.height / parseFloat(e.lineHeight)),
+        natural,
+        disponible: caja.width,
         derecha: caja.right,
         ancho: raiz.clientWidth,
         desborde: raiz.scrollWidth - raiz.clientWidth,
@@ -284,9 +309,12 @@ test.describe('Historia 24.3 — la línea de Obra en el listado de Autor', () =
     });
     expect(medida, 'la Tarjeta no lleva fragmento y línea de Obra').toBeDefined();
     const m = medida!;
-    expect(m.texto.trim().length).toBeGreaterThan(0);
-    expect(m.texto).not.toMatch(/…$/);
+    // El título de la ficha, entero y al pie de la letra: ni recortado ni el de otra Obra.
+    expect(m.texto).toBe(titulo);
     expect(m.familia).toBe(m.esperado.familia);
+    // La Inter que el sitio declara y carga, no un respaldo del sistema con el mismo nombre de pila.
+    expect(m.primera).toMatch(/^Inter(-|$)/);
+    expect(m.cargada, `la cara «${m.primera}» no está cargada`).toBe(true);
     expect(m.color).toBe(m.esperado.color);
     expect(m.tamaño).toBe(m.esperado.tamaño);
     expect(m.peso).toBe('400');
@@ -295,7 +323,25 @@ test.describe('Historia 24.3 — la línea de Obra en el listado de Autor', () =
     expect(m.hueco).toBeCloseTo(m.unidad, 0);
     expect(m.derecha).toBeLessThanOrEqual(m.ancho);
     expect(m.desborde).toBe(0);
-    // Un título que no cabe en una línea ocupa más, nunca se recorta (NFR-12).
-    if (m.texto.length > 60) expect(m.lineas).toBeGreaterThan(1);
+    // Un título que no cabe en una línea ocupa más, nunca se recorta (NFR-12); uno que cabe, una.
+    if (m.natural > m.disponible) expect(m.lineas).toBeGreaterThan(1);
+    else expect(m.lineas).toBe(1);
+
+    // Y el nombre de cada Tarjeta de esa página: fragmento y Obra, sin el Autor.
+    const vistas = await comprobarNombresDeTarjetas(page, [['fragmento'], ['fragmento', 'obra']]);
+    expect(vistas.conObra).toBeGreaterThan(0);
+  });
+
+  test('una Cita sin Obra: solo el fragmento, sin pausa, sin hueco y sin rótulo', async ({ page }) => {
+    test.skip(sinObra === undefined, 'Todas las Citas del Corpus llevan Obra.');
+    const { slug, autor, texto } = sinObra!;
+    const enlace = await abrirLaPaginaDe(page, autor, slug);
+    const hijos = await enlace.evaluate((a) => [...a.children].map((h) => h.className));
+    expect(hijos).toEqual(['fragmento']);
+    await expect(enlace).not.toContainText(/sin obra/i);
+    // El nombre es el fragmento y nada más: ninguna coma colgando al final.
+    const fragmento = (await enlace.locator('.fragmento').textContent()) ?? '';
+    expect(texto.startsWith(fragmento.replace(/^«|…?»$/g, ''))).toBe(true);
+    expect(await enlace.evaluate((a) => a.textContent)).toBe(fragmento);
   });
 });

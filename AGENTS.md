@@ -676,8 +676,9 @@ omisión (Historia 24.3): `autor-y-obra` en Tema y Colección, `obra` en Autor y
 Listado de Obra. El conjunto está hecho también para «Más de {Autor}» (`obra`) y «De la misma
 obra» (`ninguna`), que hoy pinta `RutasDeSalida.astro` con su propio marcado y que la 24.6 pasa
 a la tarjeta: un uso nuevo se declara además en la prueba de `tests/unit/tarjeta-de-cita.test.ts`.
-Un valor fuera del conjunto, o `autor-y-obra` sin `autor`, para el build; una Cita sin Obra no
-lleva línea de Obra, y la Obra es texto, nunca un segundo enlace.
+Un valor fuera del conjunto —o ninguno—, o `autor-y-obra` sin el `autor` que declara la Cita,
+detiene la construcción; una Cita sin Obra no lleva línea de Obra, y la Obra es texto, nunca un
+segundo enlace.
 
 El build **avisa** «Obra con años discrepantes» cuando las Citas de una misma ficha declaran
 `procedencia.año` distintos, y nombra la ficha y los años. Significa que la Obra no tiene año:

@@ -13,6 +13,8 @@
  */
 import { readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
+import { parse } from 'yaml';
+import { colgarObras, type FichaDeObra } from '../../../src/lib/obras.ts';
 import { CITAS_POR_PAGINA, MIN_CITAS_POR_TEMA } from '../../../src/lib/umbrales.ts';
 
 const raiz = join(new URL('../../..', import.meta.url).pathname, 'corpus');
@@ -124,24 +126,114 @@ export function citaConObraMasLarga(): { slug: string; obra: string } | undefine
   return mejor;
 }
 
-/** El texto literal de una Cita del Corpus, por su slug. */
-export function textoDe(slug: string): string {
+/**
+ * Un campo de primer nivel de la Cita del Corpus de ese slug. Lanza, nombrándolo, si no hay
+ * Cita con ese slug o si no declara el campo: un `undefined` que pasara por cadena acabaría en
+ * una ruta como `/autor/undefined/` y en un fallo que no dice nada.
+ */
+function campoDeCita(slug: string, nombre: string): string {
   for (const fichero of readdirSync(join(raiz, 'citas')).filter((f) => f.endsWith('.md'))) {
     const contenido = readFileSync(join(raiz, 'citas', fichero), 'utf8');
     if (campo(contenido, 'slug') !== slug) continue;
-    return campo(contenido, 'texto')!;
+    const valor = campo(contenido, nombre);
+    if (valor === undefined) throw new Error(`La Cita «${slug}» (citas/${fichero}) no declara \`${nombre}\`.`);
+    return valor;
   }
   throw new Error(`No hay ninguna Cita con el slug «${slug}» en el Corpus.`);
 }
 
+/** El texto literal de una Cita del Corpus, por su slug. */
+export function textoDe(slug: string): string {
+  return campoDeCita(slug, 'texto');
+}
+
 /** El slug del Autor que declara una Cita del Corpus, por el slug de la Cita. */
 export function autorDe(slug: string): string {
-  for (const fichero of readdirSync(join(raiz, 'citas')).filter((f) => f.endsWith('.md'))) {
-    const contenido = readFileSync(join(raiz, 'citas', fichero), 'utf8');
-    if (campo(contenido, 'slug') !== slug) continue;
-    return campo(contenido, 'autor')!;
+  return campoDeCita(slug, 'autor');
+}
+
+/** Una Cita del Corpus con su Obra resuelta, como la cuelga el build. */
+interface CitaResuelta {
+  slug: string;
+  autor: string;
+  texto: string;
+  /** El título que pinta la Tarjeta de Cita, o `undefined` si no lleva línea de Obra. */
+  obra?: string;
+}
+
+/**
+ * Las Citas del Corpus con el título de su Obra **resuelto por la misma función que el build**
+ * (`colgarObras`, Historia 22.3): el de la Ficha de Obra que reclama su forma, o la grafía por
+ * omisión si el título de la ficha ya no lo declara ninguna Cita. Nunca la grafía de la
+ * Procedencia, que es lo que una prueba leería si mirara la Cita sola.
+ */
+function citasResueltas(): CitaResuelta[] {
+  const citas = readdirSync(join(raiz, 'citas'))
+    .filter((f) => f.endsWith('.md'))
+    .map((fichero) => {
+      const contenido = readFileSync(join(raiz, 'citas', fichero), 'utf8');
+      const frontmatter = /^---\n([\s\S]*?)\n---/.exec(contenido)?.[1];
+      if (frontmatter === undefined) throw new Error(`citas/${fichero}: sin frontmatter`);
+      const datos = parse(frontmatter) as {
+        slug: string;
+        autor: string;
+        texto: string;
+        procedencia?: { obra?: string } | null;
+      };
+      return { slug: datos.slug, autor: datos.autor, texto: datos.texto, procedencia: datos.procedencia };
+    });
+  const fichas: FichaDeObra[] = readdirSync(join(raiz, 'obras'))
+    .filter((f) => /\.ya?ml$/.test(f))
+    .map((fichero) => {
+      const ficha = parse(readFileSync(join(raiz, 'obras', fichero), 'utf8')) as Omit<FichaDeObra, 'nombre' | 'ruta'>;
+      return { ...ficha, nombre: fichero.replace(/\.ya?ml$/, ''), ruta: `corpus/obras/${fichero}` };
+    });
+  return colgarObras(citas, fichas).map((c) => ({
+    slug: c.slug,
+    autor: c.autor,
+    texto: c.texto,
+    ...(c.obra !== undefined ? { obra: c.obra.titulo } : {}),
+  }));
+}
+
+/**
+ * La Cita cuya Tarjeta lleva el título de Obra más largo del Corpus, con su Autor y ese título
+ * —el de la ficha, resuelto como en el build—. Historia 24.3. Empate, por slug.
+ */
+export function citaConTituloDeObraMasLargo(): { slug: string; autor: string; titulo: string } | undefined {
+  let mejor: { slug: string; autor: string; titulo: string } | undefined;
+  for (const cita of citasResueltas()) {
+    if (cita.obra === undefined) continue;
+    if (
+      mejor === undefined ||
+      cita.obra.length > mejor.titulo.length ||
+      (cita.obra.length === mejor.titulo.length && cita.slug < mejor.slug)
+    ) {
+      mejor = { slug: cita.slug, autor: cita.autor, titulo: cita.obra };
+    }
   }
-  throw new Error(`No hay ninguna Cita con el slug «${slug}» en el Corpus.`);
+  return mejor;
+}
+
+/**
+ * Una Cita del Corpus que no lleva línea de Obra —no declara obra o ninguna ficha la reclama—,
+ * con su Autor y su texto, si hoy hay alguna. Historia 24.3. La primera por slug.
+ */
+export function citaSinObra(): { slug: string; autor: string; texto: string } | undefined {
+  const cita = citasResueltas()
+    .filter((c) => c.obra === undefined)
+    .sort((a, b) => (a.slug < b.slug ? -1 : a.slug > b.slug ? 1 : 0))[0];
+  return cita === undefined ? undefined : { slug: cita.slug, autor: cita.autor, texto: cita.texto };
+}
+
+/** Cuántas páginas tiene el listado de un Autor del Corpus. */
+export function paginasDeAutor(autor: string): number {
+  return Math.max(1, Math.ceil((citasPorAutor().get(autor) ?? 0) / CITAS_POR_PAGINA));
+}
+
+/** Cuántas páginas tiene el listado de un Tema del Corpus. */
+export function paginasDeTema(tema: string): number {
+  return Math.max(1, Math.ceil((citasPorTema().get(tema) ?? 0) / CITAS_POR_PAGINA));
 }
 
 /**
