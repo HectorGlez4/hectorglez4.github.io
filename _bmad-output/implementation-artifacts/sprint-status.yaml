@@ -29,7 +29,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 # - Retrospective appends its action items to action_items; the status view surfaces open ones
 generated: 08-11-2026 09:00
-last_updated: 10-25-2026 22:46
+last_updated: 10-26-2026 00:54
 project: brainlySabiduria
 project_key: NOKEY
 tracking_system: file-system
@@ -403,7 +403,7 @@ development_status:
   epic-24: in-progress
   24-1-la-página-de-obra-lista-sus-citas-en-el-orden-del-libro: review  # el cargador de posiciones va primero; pasa z a astro/zod (Héctor, 19/10) · v8-ralph 2026-10-25: la Página de Obra ordena sus Citas por posición en el documento cotejado (cargador de posiciones, z de astro/zod); diferidos para Héctor: Obras con nombre de capítulo ya en orden alfabético, y la enmienda de épicas (bmad-create-epics-and-stories)
   24-2-el-build-avisa-antes-de-que-dist-llegue-al-techo-del-alojami: review  # v8-ralph 2026-10-24 12:40 UTC: el paso del build mide dist/ sin lo que rota y avisa a 750 MiB y para a 900 MiB; diferidos para Héctor: enmienda de épica con el contexto de la Épica 24 (bmad-create-epics-and-stories) y la deriva de Pagefind entre jornadas (26.2)
-  24-3-cada-cita-de-un-listado-dice-de-qué-obra-es: backlog
+  24-3-cada-cita-de-un-listado-dice-de-qué-obra-es: review  # v8-ralph 2026-10-26: la Tarjeta de Cita nombra su Obra en los listados de Tema, Autor, Colección y Obra; sin diferidos
   24-4-bajo-la-cita-la-obra-de-la-que-sale: backlog
   24-5-de-una-cita-a-la-siguiente-del-libro: backlog
   24-6-al-pie-más-de-la-misma-obra-y-más-del-autor: backlog
