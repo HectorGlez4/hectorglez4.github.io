@@ -1,0 +1,486 @@
+From b05d7e4c70429dfc7e054f789f5b8b03a9a40ac3 Mon Sep 17 00:00:00 2001
+From: HectorGlez4 <3779528+HectorGlez4@users.noreply.github.com>
+Date: Mon, 26 Oct 2026 02:22:49 +0100
+Subject: [PATCH] feat(cita): la tarjeta de obra bajo la cita, a medias y sin
+ construir (24.4)
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Trabajo parcial de la Historia 24.4, guardado aparte de la rama de la épica
+porque no construye: la puerta de cobertura tipográfica
+(integraciones/cobertura.ts) detiene `npm run build` por la flecha «→»
+(U+2192) de la Fila de bloque en las 4.416 Páginas de Cita con Obra. Ningún
+subconjunto de Google Fonts de Inter ni de Source Serif 4 cubre U+2192, y
+cubrirla exige tocar `fonts` en astro.config.mjs, que el spec pone en Block If.
+Lo decide Héctor.
+
+Lo que hay: `contenidoDeTarjetaDeObra` y los dos rótulos de la fila en
+src/lib/atribucion.ts, `nivel` en Rotulo.astro (los usos de hoy salen byte a
+byte iguales), FilaDeBloque.astro y TarjetaDeObra.astro nuevos, la tarjeta en
+la Página de Cita entre la Fuente y Copiar, el comentario de la 24.8 en
+tools/lib/cambios.ts y el lector tests/unit/ayuda/tarjeta-de-obra.ts. Faltan
+las pruebas, AGENTS.md y la verificación.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ src/components/FilaDeBloque.astro   |  64 ++++++++++++++
+ src/components/Rotulo.astro         |  17 +++-
+ src/components/TarjetaDeObra.astro  | 129 ++++++++++++++++++++++++++++
+ src/lib/atribucion.ts               |  39 +++++++++
+ src/pages/cita/[slug].astro         |   8 ++
+ tests/unit/ayuda/tarjeta-de-obra.ts |  94 ++++++++++++++++++++
+ tools/lib/cambios.ts                |   9 +-
+ 7 files changed, 356 insertions(+), 4 deletions(-)
+ create mode 100644 src/components/FilaDeBloque.astro
+ create mode 100644 src/components/TarjetaDeObra.astro
+ create mode 100644 tests/unit/ayuda/tarjeta-de-obra.ts
+
+diff --git a/src/components/FilaDeBloque.astro b/src/components/FilaDeBloque.astro
+new file mode 100644
+index 0000000000..b34107920d
+--- /dev/null
++++ b/src/components/FilaDeBloque.astro
+@@ -0,0 +1,64 @@
++---
++/**
++ * Fila de bloque — UX-DR105, UX-DR106, Historia 24.4.
++ *
++ * Un enlace que ocupa su fila entera: alto mínimo de toque, filete debajo, en tinta y sin
++ * subrayado —lo identifican su forma y su posición (EXPERIENCE.md, «Subrayado siempre
++ * visible»)—, en la misma pestaña y con la flecha oculta al lector de pantalla. Es el trato de
++ * la Lista de Obras (17.3), escrito **una vez**: la Lista conserva su marcado —dos columnas, el
++ * filete solo entre entradas y la zona en el `ul`—, y lo que se toma de ella es el trato, no
++ * el marcado.
++ *
++ * Es la forma de «Ver la obra» en la Tarjeta de Obra (24.4), y la reutilizarán «Siguiente»
++ * (24.5), los cierres «Las {n} citas de… →» de las Rutas de salida (24.6), las filas de los
++ * Directorios (26) y las de la portada (28). Dos copias divergirían a la primera corrección.
++ *
++ * La clase `fila-de-bloque` es también por la que la 24.5, la primera que apila dos, eximirá a
++ * las filas apiladas de los 8 px de separación de la prueba de toque: la exención va por
++ * componente, no por ruta.
++ *
++ * Pinta un `<li>`: quien la usa la mete en su lista, que es quien pone el filete de encima de
++ * la primera. La zona va en el `<li>`, el contenedor que pinta el build (Historia 23.7).
++ */
++import type { Zona } from '../lib/vocabulario.ts';
++
++interface Props {
++  /** A dónde lleva: una ruta del sitio, en la misma pestaña. */
++  href: string;
++  /**
++   * La Zona de salida interna de su enlace (FR-56, UX-DR111, Historia 23.7). Obligatoria: cada
++   * uso dice desde qué zona se sale, y un uso nuevo que la olvide no pasa `astro check`.
++   */
++  zona: Zona;
++  /** La flecha « →» detrás del texto, oculta al lector de pantalla. */
++  flecha?: boolean;
++}
++
++const { href, zona, flecha } = Astro.props;
++---
++
++<li class="fila-de-bloque" data-zona={zona}><a href={href}><slot />{flecha && <span aria-hidden="true">&nbsp;→</span>}</a></li>
++
++<style>
++  /* UX-DR13 — el filete de 1px es el único separador. */
++  .fila-de-bloque {
++    border-bottom: var(--grosor-filete) solid var(--filete);
++  }
++
++  /* La fila entera es la zona de toque (UX-DR22). */
++  .fila-de-bloque a {
++    display: flex;
++    align-items: center;
++    box-sizing: border-box;
++    min-height: var(--zona-de-toque);
++    padding-block: calc(var(--unidad) * 1.25);
++    font-family: var(--sans);
++    font-size: var(--cuerpo-md);
++    line-height: 1.4;
++    color: var(--tinta);
++    text-decoration: none;
++    /* Parte palabras antes que desbordar: `anywhere` y no `break-word`, porque en un elemento
++     * flexible solo `anywhere` rebaja el ancho mínimo del texto y le deja partir. */
++    overflow-wrap: anywhere;
++  }
++</style>
+diff --git a/src/components/Rotulo.astro b/src/components/Rotulo.astro
+index c3efdd89c5..36e8bd7dc4 100644
+--- a/src/components/Rotulo.astro
++++ b/src/components/Rotulo.astro
+@@ -12,17 +12,30 @@
+  * el salto nativo del navegador le lleva el foco sin guion, con el anillo global de `tokens.css`
+  * (aquí no se declara ninguna regla de foco). `scroll-margin-top` le deja 2 × `--unidad` de aire
+  * sobre el borde de la ventana al llegar. Sin `destino`, el `h2` sale byte a byte como antes.
++ *
++ * Historia 24.4, UX-DR104 — lo usa también la Tarjeta de Obra («De la obra»), que no vive solo
++ * en la Página de Cita: la portada la pintará bajo un `h2` propio (28.2). Por eso el nivel lo
++ * recibe quien lo usa, con `nivel`; sin él, `h2`, y los usos de antes salen byte a byte iguales.
++ * La regla es la misma en los dos niveles: el aspecto no depende del encabezado.
+  */
+ interface Props {
+   id: string;
+   /** El rótulo es destino de un ancla de la página: recibe el foco al saltar (UX-DR100). */
+   destino?: boolean;
++  /** El nivel del encabezado: 2 por omisión; 3 donde la sección cuelga de otro `h2` (UX-DR104). */
++  nivel?: 2 | 3;
+ }
+ 
+-const { id, destino } = Astro.props;
++const { id, destino, nivel = 2 } = Astro.props;
+ ---
+ 
+-<h2 class="rotulo" id={id} tabindex={destino ? -1 : undefined}><slot /></h2>
++{
++  nivel === 3 ? (
++    <h3 class="rotulo" id={id} tabindex={destino ? -1 : undefined}><slot /></h3>
++  ) : (
++    <h2 class="rotulo" id={id} tabindex={destino ? -1 : undefined}><slot /></h2>
++  )
++}
+ 
+ <style>
+   .rotulo {
+diff --git a/src/components/TarjetaDeObra.astro b/src/components/TarjetaDeObra.astro
+new file mode 100644
+index 0000000000..f68040266c
+--- /dev/null
++++ b/src/components/TarjetaDeObra.astro
+@@ -0,0 +1,129 @@
++---
++/**
++ * Tarjeta de Obra — FR-12, UX-DR64, UX-DR104, UX-DR108, UX-DR110, Historia 24.4.
++ *
++ * Lo que la Página de Cita dice de la Obra de la que sale su Cita, justo debajo de la Línea de
++ * la Fuente —o de la Atribución, sin Fuente— y antes de Copiar. Quien llega desde un buscador ve
++ * de qué libro es la frase, cuántas citas hay de él y que puede ir a la Obra y a dónde leerla,
++ * sin buscarlo dentro de la línea de la Procedencia.
++ *
++ *   · Rótulo «De la obra», con el nivel que recibe (`nivel`, sin valor por omisión): la Página de
++ *     Cita pasa `2`; la portada pasará `3`, bajo «La cita de hoy» (28.2).
++ *   · El título de su Ficha de Obra, sin enlace —ya enlaza en la Atribución, y aquí lo hace la
++ *     fila— y sin recortar nunca (NFR-12).
++ *   · «{Autor} · {año} · {n} citas»: lo compone `contenidoDeTarjetaDeObra`, en
++ *     `src/lib/atribucion.ts`, con el año y el recuento de la Obra resuelta. Aquí no se cuenta
++ *     ni se deriva nada (AD-11).
++ *   · Una Fila de bloque a la página 1 de la Obra —se indexe o no, esté congelada o no: el
++ *     `noindex` y la congelación no alcanzan a la navegación—, que promete «y dónde leerla» solo
++ *     si alguna de sus Citas está cotejada (`edicionCotejada`). Las `ediciones` de la ficha y la
++ *     afiliación no cuentan: la tarjeta sale idéntica byte a byte con el Modelo encendido o
++ *     apagado (FR-35), y no aloja ninguno.
++ *
++ * Sin Obra no pinta nada —ni sección, ni rótulo, ni hueco—, como `Fuente.astro` sin Fuente.
++ *
++ * **No vive dentro de `BloqueDeCita.astro`** porque ese bloque lo comparten la portada y el
++ * 404, y ninguna de las dos cambia con esta historia: la portada la recibe en la 28.2, con su
++ * propio nivel, y el 404 no la lleva nunca.
++ *
++ * Fuera de Pagefind con `all` y no con el atributo a secas: la tarjeta nombra el título y el
++ * Autor, que el índice no debe recoger ni como texto ni como filtro desde cada Página de Cita
++ * (NFR-13). Sin guion: todo sale del build.
++ */
++import Rotulo from './Rotulo.astro';
++import FilaDeBloque from './FilaDeBloque.astro';
++import type { Cita, Autor } from '../lib/publicado.ts';
++import { rutaDeLaObra } from '../lib/obras.ts';
++import { contenidoDeTarjetaDeObra } from '../lib/atribucion.ts';
++
++interface Props {
++  cita: Cita;
++  /** El Autor de la Cita: el que declara `cita.autor`, y ningún otro. */
++  autor: Autor;
++  /**
++   * El nivel del rótulo «De la obra». Obligatorio y sin valor por omisión: depende de bajo qué
++   * encabezado cuelga la tarjeta, y eso solo lo sabe quien la usa.
++   */
++  nivel: 2 | 3;
++}
++
++const { cita, autor, nivel } = Astro.props;
++
++/*
++ * Que la Tarjeta nombre al Autor de otro sería atribuirle la Obra a quien no la firma. La
++ * integridad del conjunto publicable garantiza que toda Cita resuelve su Autor, así que esto es
++ * un uso roto, no un caso que pintar: detiene la construcción.
++ */
++if (autor.slug !== cita.autor) {
++  throw new Error(
++    `TarjetaDeObra: la Cita «${cita.slug}» se pinta en ${Astro.url.pathname} con el Autor ` +
++      `«${autor.slug}», pero la Cita declara «${cita.autor}».`,
++  );
++}
++
++const obra = cita.obra;
++const contenido = obra === undefined ? undefined : contenidoDeTarjetaDeObra(autor, obra);
++---
++
++{/*
++  * Las partes de los hechos van pegadas, sin espacio entre etiquetas: Astro conserva uno donde
++  * hay salto de línea, y la vista diría «Séneca  · 49». El punto medio es decoración y el lector
++  * oye una coma; ninguno al principio ni al final, y ninguno de sobra cuando falta el año.
++  */}
++{
++  obra !== undefined && contenido !== undefined && (
++    <section class="tarjeta-de-obra" aria-labelledby="de-la-obra" data-pagefind-ignore="all">
++      <Rotulo id="de-la-obra" nivel={nivel}>De la obra</Rotulo>
++      <p class="titulo">{obra.titulo}</p>
++      <p class="hechos">{contenido.hechos.map((parte, i) => (<>{i > 0 && (<><span aria-hidden="true"> · </span><span class="solo-para-lectores">, </span></>)}{parte}</>))}</p>
++      <ul class="filas"><FilaDeBloque href={rutaDeLaObra(obra)} zona="tarjeta-de-obra" flecha>{contenido.fila}</FilaDeBloque></ul>
++    </section>
++  )
++}
++
++<style>
++  /*
++   * Plana y en tinta (variante 1A): la delimitan el filete de arriba y su rótulo, como las Rutas
++   * de salida. Ni fondo, ni radio, ni siena: un fondo sería el primero de la Página de Cita.
++   */
++  .tarjeta-de-obra {
++    margin-top: calc(var(--unidad) * 4);
++    border-top: var(--grosor-filete) solid var(--filete);
++    padding-top: calc(var(--unidad) * 3);
++    max-width: var(--medida-prosa);
++  }
++
++  /*
++   * Inter, nunca la serif: el título de una Obra no es nombre de Autor ni de Tema. Sin segundo
++   * tamaño ni máximo de líneas: un título largo reparte sus líneas y parte palabras antes que
++   * desbordar, con la partición del `h1` de la Cabecera de Obra.
++   */
++  .titulo {
++    margin: var(--unidad) 0 0;
++    font-family: var(--sans);
++    font-size: var(--cuerpo-lg);
++    font-weight: 600;
++    line-height: 1.4;
++    color: var(--tinta);
++    text-wrap: balance;
++    overflow-wrap: break-word;
++    hyphens: auto;
++  }
++
++  .hechos {
++    margin: var(--unidad) 0 0;
++    font-family: var(--sans);
++    font-size: var(--pie);
++    font-weight: 400;
++    line-height: 1.5;
++    color: var(--tinta-apagada);
++  }
++
++  /* El filete de encima de la primera fila; el de debajo de cada una lo pone la fila. */
++  .filas {
++    list-style: none;
++    margin: calc(var(--unidad) * 2) 0 0;
++    padding: 0;
++    border-top: var(--grosor-filete) solid var(--filete);
++  }
++</style>
+diff --git a/src/lib/atribucion.ts b/src/lib/atribucion.ts
+index 5786d63266..9a0e40ee90 100644
+--- a/src/lib/atribucion.ts
++++ b/src/lib/atribucion.ts
+@@ -231,6 +231,45 @@ export function descripcionDeObra(
+   return `${cuantas} de ${autor.nombre} en ${obra.titulo}${año}, con su procedencia documentada.${tramo}`;
+ }
+ 
++/**
++ * El texto de la Fila de bloque de la Tarjeta de Obra cuando alguna Cita de la Obra está
++ * cotejada: la Página de Obra tiene entonces «Dónde leer esta obra», y la fila lo promete
++ * (UX-DR104, Historia 24.4).
++ */
++export const FILA_VER_LA_OBRA_Y_DONDE_LEERLA = 'Ver la obra y dónde leerla';
++
++/**
++ * El de una Obra sin ninguna Cita cotejada: no hay edición que enseñar, y prometer «dónde
++ * leerla» llevaría a una página que no lo dice. Las `ediciones` de la ficha no cuentan: la
++ * edición en venta nunca va sola (FR-54).
++ */
++export const FILA_VER_LA_OBRA = 'Ver la obra';
++
++/**
++ * Lo que dice la Tarjeta de Obra bajo la Cita — FR-12, UX-DR104, Historia 24.4.
++ *
++ * `hechos` son las partes de la línea «{Autor} · {año} · {n} citas», en su orden, sin
++ * separadores: el componente pone el punto medio para la vista y la coma para el lector. El año
++ * es el de la Obra resuelta —omitido si sus Citas discrepan o no lo dicen, nunca el de una
++ * traducción—, como lo lee una persona (`añoLegible`: «350 a. C.»), y cuando falta no deja
++ * hueco: la parte no está. El recuento es `obra.recuento`, el de la Obra resuelta: el
++ * componente no cuenta nada (AD-11).
++ *
++ * `fila` es el texto de su Fila de bloque, sin la flecha, que pone `FilaDeBloque.astro`.
++ *
++ * Un solo dueño junto a `descripcionDeObra` y `añoLegible`, porque la portada pintará la misma
++ * tarjeta (28.2) y dos redacciones dirían la misma Obra de dos maneras.
++ */
++export function contenidoDeTarjetaDeObra(
++  autor: Pick<Autor, 'nombre'>,
++  obra: Pick<ObraResuelta, 'año' | 'recuento' | 'edicionCotejada'>,
++): { hechos: string[]; fila: string } {
++  const hechos = [autor.nombre];
++  if (obra.año !== undefined) hechos.push(añoLegible(obra.año));
++  hechos.push(obra.recuento === 1 ? '1 cita' : `${obra.recuento} citas`);
++  return { hechos, fila: obra.edicionCotejada ? FILA_VER_LA_OBRA_Y_DONDE_LEERLA : FILA_VER_LA_OBRA };
++}
++
+ /**
+  * La línea de procedencia de la Atribución, en piezas — UX-DR8, FR-2, Historia 22.4.
+  *
+diff --git a/src/pages/cita/[slug].astro b/src/pages/cita/[slug].astro
+index b925fb28f0..e72c2ad944 100644
+--- a/src/pages/cita/[slug].astro
++++ b/src/pages/cita/[slug].astro
+@@ -13,6 +13,7 @@
+ import Armazon from '../../components/Armazon.astro';
+ import BloqueDeCita from '../../components/BloqueDeCita.astro';
+ import Fuente from '../../components/Fuente.astro';
++import TarjetaDeObra from '../../components/TarjetaDeObra.astro';
+ import CopiarCita from '../../islands/CopiarCita.astro';
+ import ImagenDeCita from '../../islands/ImagenDeCita.astro';
+ import CompartirEnlace from '../../islands/CompartirEnlace.astro';
+@@ -76,6 +77,13 @@ const canonica = new URL(rutaDeCita(cita.slug), Astro.site).href;
+       * verificar una atribución.
+       */}
+     <Fuente cita={cita} />
++    {/*
++      * Historia 24.4 — la Obra de la que sale la Cita, entre lo que la Cita es (atribución y
++      * Fuente) y lo que se hace con ella (las acciones). Aquí y no en `BloqueDeCita` por lo
++      * mismo que la Fuente: la portada y el 404 no cambian con esta historia. Sin Obra no pinta
++      * nada, y Copiar sigue a la Fuente o a la Atribución.
++      */}
++    <TarjetaDeObra cita={cita} autor={autor} nivel={2} />
+     <CopiarCita cita={cita} autor={autor} />
+     <ImagenDeCita cita={cita} autor={autor} />
+     <CompartirEnlace cita={cita} autor={autor} canonica={canonica} />
+diff --git a/tests/unit/ayuda/tarjeta-de-obra.ts b/tests/unit/ayuda/tarjeta-de-obra.ts
+new file mode 100644
+index 0000000000..605376c9eb
+--- /dev/null
++++ b/tests/unit/ayuda/tarjeta-de-obra.ts
+@@ -0,0 +1,94 @@
++/**
++ * La Tarjeta de Obra de una Página de Cita, leída del HTML de `dist/` — Historia 24.4.
++ *
++ * Un solo lector para las tres pruebas que la miran (`tarjeta-de-obra`, `ediciones-en-venta` y
++ * `obra-pagina`): dos que la recortaran cada una a su manera podrían comparar subárboles
++ * distintos y dar por iguales dos tarjetas que no lo son.
++ */
++import { decodificar } from './listado.js';
++
++const APERTURA = '<section class="tarjeta-de-obra"';
++
++/** Cuántas Tarjetas de Obra hay en una página: la apertura de su sección, contada. */
++export function cuantasTarjetasDeObra(html: string): number {
++  return html.split(APERTURA).length - 1;
++}
++
++/**
++ * El subárbol `section.tarjeta-de-obra` completo —de su apertura a su cierre, con las secciones
++ * que tuviera dentro emparejadas—, o `undefined` si la página no lo tiene. Lanza si la sección
++ * no se cierra.
++ */
++export function tarjetaDeObraDe(html: string): string | undefined {
++  const inicio = html.indexOf(APERTURA);
++  if (inicio === -1) return undefined;
++  const ETIQUETA = /<(\/?)section\b[^>]*>/g;
++  ETIQUETA.lastIndex = inicio;
++  let abiertas = 0;
++  for (let m = ETIQUETA.exec(html); m !== null; m = ETIQUETA.exec(html)) {
++    abiertas += m[1] === '/' ? -1 : 1;
++    if (abiertas === 0) return html.slice(inicio, m.index + m[0].length);
++  }
++  throw new Error(`La Tarjeta de Obra no se cierra: «${html.slice(inicio, inicio + 200)}»`);
++}
++
++/** Un texto de marcado sin etiquetas, decodificado y con los espacios colapsados. */
++function soloTexto(marcado: string): string {
++  return decodificar(marcado.replace(/<[^>]*>/g, ''))
++    .replace(/ /g, ' ')
++    .replace(/&nbsp;/g, ' ')
++    .replace(/\s+/g, ' ')
++    .trim();
++}
++
++/** El marcado sin los elementos `span` que lleven `atributo` (no anidan otros `span`). */
++const sinSpansCon = (marcado: string, atributo: RegExp) =>
++  marcado.replace(/<span\b([^>]*)>[^<]*<\/span>/g, (entero, atributos: string) => (atributo.test(atributos) ? '' : entero));
++
++const OCULTO_AL_LECTOR = /\baria-hidden="true"/;
++const SOLO_PARA_LECTORES = /\bclass="solo-para-lectores"/;
++
++export interface TarjetaDeObraLeida {
++  /** Los atributos de la etiqueta de apertura de la sección, tal como salen. */
++  apertura: string;
++  /** El rótulo: su etiqueta (`h2`, `h3`), su `id` y su texto. */
++  rotulo: { etiqueta: string; id: string | undefined; texto: string } | undefined;
++  /** El texto de `p.titulo`, y si lleva algún enlace dentro. */
++  titulo: { texto: string; conEnlace: boolean } | undefined;
++  /** `p.hechos` como lo ve quien mira (sin lo solo para lectores) y como lo oye el lector (sin lo `aria-hidden`). */
++  hechos: { vista: string; lector: string; marcado: string } | undefined;
++  /** El contenido de `ul.filas`. */
++  filas: string | undefined;
++}
++
++/** Las piezas de una Tarjeta de Obra ya recortada por `tarjetaDeObraDe`. */
++export function leerTarjetaDeObra(subarbol: string): TarjetaDeObraLeida {
++  const apertura = /^<section\b([^>]*)>/.exec(subarbol)?.[1] ?? '';
++  const rotulo = /<(h[1-6])\b([^>]*)>([\s\S]*?)<\/\1>/.exec(subarbol);
++  const titulo = /<p class="titulo"[^>]*>([\s\S]*?)<\/p>/.exec(subarbol)?.[1];
++  const hechos = /<p class="hechos"[^>]*>([\s\S]*?)<\/p>/.exec(subarbol)?.[1];
++  const filas = /<ul class="filas"[^>]*>([\s\S]*?)<\/ul>/.exec(subarbol)?.[1];
++  return {
++    apertura,
++    rotulo:
++      rotulo === null
++        ? undefined
++        : { etiqueta: rotulo[1], id: /\bid="([^"]*)"/.exec(rotulo[2])?.[1], texto: soloTexto(rotulo[3]) },
++    titulo: titulo === undefined ? undefined : { texto: soloTexto(titulo), conEnlace: /<a\b/.test(titulo) },
++    hechos:
++      hechos === undefined
++        ? undefined
++        : {
++            // Sin colapsar: lo que se compara son las pausas exactas, « · » y «, ».
++            vista: decodificar(sinSpansCon(hechos, SOLO_PARA_LECTORES).replace(/<[^>]*>/g, '')),
++            lector: decodificar(sinSpansCon(hechos, OCULTO_AL_LECTOR).replace(/<[^>]*>/g, '')),
++            marcado: hechos,
++          },
++    filas,
++  };
++}
++
++/** El texto de un enlace como lo ve quien mira y como lo oye el lector (sin lo `aria-hidden`). */
++export function textosDelEnlace(marcado: string): { vista: string; lector: string } {
++  return { vista: soloTexto(marcado), lector: soloTexto(sinSpansCon(marcado, OCULTO_AL_LECTOR)) };
++}
+diff --git a/tools/lib/cambios.ts b/tools/lib/cambios.ts
+index 7ea5745f9d..7046a9508c 100644
+--- a/tools/lib/cambios.ts
++++ b/tools/lib/cambios.ts
+@@ -34,7 +34,10 @@
+  *     y cuando dispara es porque el HTML cambió. Los Temas entran porque `RutasDeSalida`
+  *     pinta el nombre de cada Tema de la Cita en su chip (Historia 22.8: el aviso ya lo
+  *     sabía y la fecha no; ahora las dos lecturas salen de la misma relación). Y la ficha
+- *     de su Obra, cuyo título pintan la Atribución y los datos estructurados.
++ *     de su Obra, cuyo título pintan la Atribución y los datos estructurados. Desde la
++ *     Historia 24.4 la Tarjeta de Obra pinta además el año de la Obra, su recuento y si tiene
++ *     edición cotejada, que dependen de las Citas hermanas: es navegación, y por excepción de
++ *     Héctor no fecha ni avisa (FR-47; la deja así la 24.8). Las Citas hermanas no entran.
+  *   · **Página de Obra** — su ficha, sus Citas y el fichero de su Autor (Historia 22.4).
+  *   · **Página de Autor, de Tema y de Colección** — su fichero, los de las Citas que
+  *     agregan **y los de los Autores de esas Citas**. Son listados: si entra una Cita
+@@ -195,7 +198,9 @@ export function relacionDeSuperficies(corpus: CorpusParaFechar): Map<string, str
+     // El fichero del Autor entra aquí porque la plantilla compone con `autor.nombre` el
+     // título, la meta descripción y los datos estructurados: cambiarlo cambia el HTML. Los de
+     // sus Temas, porque `RutasDeSalida` pinta el nombre de cada uno en su chip. Y la ficha de
+-    // su Obra, porque la Atribución y el JSON-LD pintan `cita.obra.titulo` (22.3).
++    // su Obra, porque la Atribución y el JSON-LD pintan `cita.obra.titulo` (22.3). La Tarjeta
++    // de Obra (24.4) pinta también el año, el recuento y si hay edición cotejada, que salen de
++    // las Citas hermanas; es navegación y no fecha ni avisa (excepción de Héctor, 24.8, FR-47).
+     declarar(rutaDeCita(cita.slug), [
+       cita.ruta,
+       ficheroDeAutor.get(cita.autor),
+-- 
+2.50.1 (Apple Git-155)
+
