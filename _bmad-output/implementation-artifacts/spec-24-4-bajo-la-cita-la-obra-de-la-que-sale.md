@@ -2,7 +2,8 @@
 title: 'Historia 24.4 — Bajo la Cita, la obra de la que sale'
 type: 'feature'
 created: '2026-10-26'
-status: 'ready-for-dev'
+status: 'blocked'
+baseline_revision: '943ff5d38951d5f2bfa895d79043044a2c72ed98'
 review_loop_iteration: 0
 followup_review_recommended: false
 context:
@@ -148,7 +149,22 @@ deferred: []
 
 ## Auto Run Result
 
-Status: ready-for-dev
-Blocking condition: ninguna.
+Status: blocked
+Blocking condition: Block If del spec — cumplir el contrato exige tocar la configuración de Astro. La flecha «→» (U+2192) que `FilaDeBloque.astro` pinta como `<span aria-hidden="true">&nbsp;→</span>` no la cubre ninguna fuente declarada en `fonts` de `astro.config.mjs` (Inter y Source Serif 4, `subsets: ['latin']`), y la puerta de cobertura tipográfica (`integraciones/cobertura.ts`, criterio en `tools/lib/cobertura.ts`) detiene `npm run build`. Lo decide Héctor.
 
-Planificada por el bucle v8-ralph (2026-10-26) sobre `epic-24-context.md`, la continuidad de la 24.3 (`status: done`) y el código del worktree; la ejecución se detuvo tras planificar, como pedía la invocación. Sin aplazados para Héctor: la enmienda del texto de la Historia 2.8 ya está en `epics.md`, y nada de esta historia toca artefactos de planificación.
+Planificada por el bucle v8-ralph (2026-10-26) sobre `epic-24-context.md`, la continuidad de la 24.3 (`status: done`) y el código del worktree. Implementación detenida el 2026-10-26 en la verificación.
+
+**Lo que falla.** `FECHA_JORNADA=2026-10-26 npm run build` con la historia sale con código 1 en `astro:build:done`: «Caracteres que las fuentes declaradas no saben componer: «→» U+2192 — cita/… (+4413 más)», es decir, las 4.416 Páginas de Cita con Obra. El rango `latin` de Google Fonts (`U+0000-00FF, …, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, …`) trae «↑» y «↓» —por eso la 24.7 pudo poner «Dónde leer esta obra ↓»— pero no «→». Ninguno de los subconjuntos que Google sirve de las dos familias lo cubre (consultado el 2026-10-26: Inter tiene `cyrillic-ext`, `cyrillic`, `greek-ext`, `greek`, `vietnamese`, `latin-ext` y `latin`; Source Serif 4, los mismos sin `greek-ext`), así que ni siquiera ensanchar `subsets` basta: haría falta otra forma de servir la fuente. La puerta exige que **todas** las familias cubran el carácter.
+
+**Por qué no se rodea.** `DESIGN.md § Iconografía` dice que las flechas son glifos tipográficos de la familia del rótulo, ocultos al lector, y no iconos: un SVG lo contradice; ponerla con `content` de CSS esquiva la puerta pero la compone igual con la reserva del sistema, que es justo lo que la puerta impide; y cambiar el glifo es decisión de diseño (`bmad-ux`). La misma flecha la piden la 24.5 («Siguiente cita de esta obra →»), la 24.6 («Las {n} citas de… →»), la 26 y la 28, así que la decisión vale para toda la rama 24+26.
+
+**Opciones para Héctor** (ninguna la toma un agente):
+1. Servir Inter y Source Serif 4 con un recorte propio que incluya U+2192 —por ejemplo, con el proveedor local de la API de fuentes de Astro—, en `astro.config.mjs`; es un `.woff2` más o distinto en el camino crítico, decisión que el propio fichero dice que se mide.
+2. Cambiar el glifo por uno del rango `latin` (por ejemplo «›», U+203A), enmendando `DESIGN.md`/`EXPERIENCE.md` con `bmad-ux` y el spec con `bmad-build`.
+3. Afinar la puerta para que juzgue cada carácter solo contra la familia que lo compone (hoy exige la intersección, y su propio comentario dice cuándo dejaría de bastar); seguiría haciendo falta que Inter cubra U+2192, así que no evita la opción 1.
+
+**Lo que queda hecho y guardado.** La implementación parcial está en la rama local `v8/wip-24-4-tarjeta-de-obra`, commit `b05d7e4c70429dfc7e054f789f5b8b03a9a40ac3`, fuera de `v8/epicas-24-26` porque no construye: `contenidoDeTarjetaDeObra` y las constantes `FILA_VER_LA_OBRA_Y_DONDE_LEERLA` / `FILA_VER_LA_OBRA` en `src/lib/atribucion.ts`; `nivel?: 2 | 3` en `Rotulo.astro`; `FilaDeBloque.astro` y `TarjetaDeObra.astro` nuevos; la tarjeta en `src/pages/cita/[slug].astro` entre `Fuente` y `CopiarCita`; el comentario de la 24.8 en `tools/lib/cambios.ts`; y el lector `tests/unit/ayuda/tarjeta-de-obra.ts`. Faltan las pruebas unitarias y de punta a punta, `AGENTS.md` y la verificación entera.
+
+**Lo que se midió con esa implementación** (el `dist/` que la construcción dejó escrito antes de detenerse; sin Pagefind ni sitemap, que no llegaron a correr): `diff -rq -x pagefind` contra la línea base da 4.424 diferencias, todas en `dist/cita/` (4.420 páginas, porque todas enlazan la hoja de la Página de Cita) salvo la propia hoja `_astro/_slug_.*.css`, que solo la usan las Páginas de Cita, y el sitemap que faltaba. Ninguna Página de Obra, de Autor, la portada ni el 404 cambian, así que `nivel` deja los rótulos de hoy byte a byte iguales; en una Cita sin Obra (`concepcion-arenal-abrid-escuelas-y-se-cerraran-carceles`, una de las 4 del Corpus) el `<main>` es idéntico. Una tarjeta sale así: rótulo `h2#de-la-obra`, título, «Agustín Álvarez · 20 citas» con el punto `aria-hidden` y la coma para lectores pegados, y una sola fila `li.fila-de-bloque[data-zona="tarjeta-de-obra"]` a la página 1 de su Obra con «Ver la obra y dónde leerla».
+
+**Para retomar:** con la decisión tomada (y, si es la opción 1, su commit en la principal o en la rama), devolver este spec a `ready-for-dev` —o enmendarlo con `bmad-build` si cambia el glifo—, partir de `v8/wip-24-4-tarjeta-de-obra` y seguir por las tareas de pruebas de **Tasks & Acceptance**.
