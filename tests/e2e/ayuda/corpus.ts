@@ -134,6 +134,16 @@ export function textoDe(slug: string): string {
   throw new Error(`No hay ninguna Cita con el slug «${slug}» en el Corpus.`);
 }
 
+/** El slug del Autor que declara una Cita del Corpus, por el slug de la Cita. */
+export function autorDe(slug: string): string {
+  for (const fichero of readdirSync(join(raiz, 'citas')).filter((f) => f.endsWith('.md'))) {
+    const contenido = readFileSync(join(raiz, 'citas', fichero), 'utf8');
+    if (campo(contenido, 'slug') !== slug) continue;
+    return campo(contenido, 'autor')!;
+  }
+  throw new Error(`No hay ninguna Cita con el slug «${slug}» en el Corpus.`);
+}
+
 /**
  * Un Autor cuyas Citas **caben en una sola página**, con su recuento.
  *

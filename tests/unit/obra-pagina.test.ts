@@ -1213,18 +1213,23 @@ describe('Historia 22.8 — la congelación declarada, construida', () => {
     // navegación, y la Tarjeta de Cita del Tema nombra su Obra igual que con la familia abierta.
     expect(await html(proyecto, CARTAS)).toMatch(NOINDEX);
     expect(await html(proyecto, BREVEDAD)).toMatch(NOINDEX);
-    const tema = await html(proyecto, '/tema/la-vida/');
-    const listado = /<ul class="listado"[^>]*>([\s\S]*?)<\/ul>/.exec(tema)?.[1] ?? '';
-    const obraDe = new Map(
-      [...listado.matchAll(/<a href="\/cita\/([^/"]+)\/"[^>]*>([\s\S]*?)<\/a>/g)].map((m) => [
-        m[1],
-        /<span class="obra"[^>]*>([^<]*)<\/span>/.exec(m[2])?.[1],
-      ]),
-    );
-    for (const i of [0, 1, 2]) expect(obraDe.get(`seneca-cartas-${i}`), `seneca-cartas-${i}`).toBe('Cartas a Lucilio');
-    const brevedad = [...obraDe].filter(([slug]) => slug.startsWith('seneca-brevedad-'));
-    expect(brevedad).toHaveLength(20);
-    for (const [slug, titulo] of brevedad) expect(titulo, slug).toBe('Sobre la brevedad de la vida');
+    // Todas las páginas del Tema, no solo la primera: lo que se compara es el conjunto de sus
+    // Citas, no cuántas caben en una página ni en qué orden salen.
+    const obraDe = new Map<string, string | undefined>();
+    for (let n = 1; ; n += 1) {
+      const ruta = n === 1 ? '/tema/la-vida/' : `/tema/la-vida/${n}/`;
+      if (n > 1 && !existsSync(paginaConstruida(proyecto, ruta))) break;
+      const listado = /<ul class="listado"[^>]*>([\s\S]*?)<\/ul>/.exec(await html(proyecto, ruta))?.[1];
+      expect(listado, `${ruta}: sin \`ul.listado\``).toBeDefined();
+      for (const m of listado!.matchAll(/<a href="\/cita\/([^/"]+)\/"[^>]*>([\s\S]*?)<\/a>/g)) {
+        obraDe.set(m[1], /<span class="obra"[^>]*>([^<]*)<\/span>/.exec(m[2])?.[1]);
+      }
+    }
+    const esperadas = new Map([
+      ...[0, 1, 2].map((i) => [`seneca-cartas-${i}`, 'Cartas a Lucilio'] as const),
+      ...Array.from({ length: 20 }, (_, i) => [`seneca-brevedad-${i}`, 'Sobre la brevedad de la vida'] as const),
+    ]);
+    expect(obraDe).toEqual(esperadas);
   });
 
   it('24.7 — congelada, toda página 1 sigue llevando el salto, y la 2 no', async () => {

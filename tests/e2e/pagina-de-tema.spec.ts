@@ -63,6 +63,51 @@ test.describe('Historia 2.5 — un Tema por encima del umbral', () => {
   });
 });
 
+/**
+ * Historia 24.3 — el nombre de cada Tarjeta es su texto visible, en su orden (WCAG 2.5.3).
+ *
+ * La prueba unitaria fija el texto del enlace en `dist/`: las partes unidas por «, », sin
+ * espacio delante de la coma. Lo que anuncia el navegador no es exactamente ese texto: las
+ * partes son bloques de un contenedor flexible y Chromium separa cada bloque con un espacio, así
+ * que dice «…» , Séneca , Cartas a Lucilio —como en la Lista de Obras—, y eso no se oye. Lo que
+ * se fija aquí es lo que importa: las partes visibles, en su orden, con una coma entre cada una y
+ * ninguna palabra más.
+ */
+test.describe('Historia 24.3 — el nombre de la Tarjeta de Cita', () => {
+  /** Una parte, como patrón: literal salvo los espacios, que el nombre accesible colapsa. */
+  const patron = (s: string) =>
+    s
+      .trim()
+      .split(/\s+/)
+      .map((palabra) => palabra.replace(/[.*+?^${}()|[\]\\/]/g, '\\$&'))
+      .join('\\s+');
+
+  test('cada Tarjeta se nombra con su fragmento, su Autor y su Obra, en ese orden y nada más', async ({ page }) => {
+    await page.goto(PUBLICADO);
+    const enlaces = page.locator('.listado li a');
+    const total = await enlaces.count();
+    expect(total).toBeGreaterThanOrEqual(15);
+    let conObra = 0;
+    for (let i = 0; i < total; i += 1) {
+      const enlace = enlaces.nth(i);
+      const partes = await enlace.evaluate((a) =>
+        [...a.querySelectorAll(':scope > span:not(.solo-para-lectores)')].map((s) => ({
+          clase: s.className,
+          texto: s.textContent ?? '',
+        })),
+      );
+      const clases = partes.map((p) => p.clase);
+      expect([['fragmento', 'autor'], ['fragmento', 'autor', 'obra']], `tarjeta ${i}`).toContainEqual(clases);
+      if (clases.includes('obra')) conObra += 1;
+      // Sin distinguir mayúsculas: el Autor va en versalitas por CSS y Chromium las lee así.
+      await expect(enlace, `tarjeta ${i}`).toHaveAccessibleName(
+        new RegExp(`^${partes.map((p) => patron(p.texto)).join('\\s*,\\s*')}$`, 'i'),
+      );
+    }
+    expect(conObra, 'ninguna Tarjeta del Tema lleva línea de Obra').toBeGreaterThan(0);
+  });
+});
+
 test.describe('Historia 2.5 — un Tema por debajo del umbral', () => {
   const bajoUmbral = temaBajoUmbral();
   const sinCondicion = `Hoy no hay ningún Tema por debajo del umbral: los ${

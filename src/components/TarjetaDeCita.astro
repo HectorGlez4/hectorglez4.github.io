@@ -25,10 +25,14 @@ interface Props {
    *
    *   · `'autor-y-obra'` — el Autor y el título de la Obra: la Página de Tema y la de Colección,
    *     que reúnen a varios Autores (FR-6, FR-26).
-   *   · `'obra'` — solo el título de la Obra: la Página de Autor (FR-4) y «Más de {Autor}», donde
-   *     el Autor es el mismo en todas las tarjetas.
-   *   · `'ninguna'` — solo el fragmento: el Listado de Obra (FR-51) y «De la misma obra», cuya
-   *     Cabecera ya dice el Autor y el título.
+   *   · `'obra'` — solo el título de la Obra: la Página de Autor (FR-4), donde el Autor es el
+   *     mismo en todas las tarjetas.
+   *   · `'ninguna'` — solo el fragmento: el Listado de Obra (FR-51), cuya Cabecera ya dice el
+   *     Autor y el título.
+   *
+   * El conjunto cubre también los dos bloques del pie de la Página de Cita, que hoy pinta
+   * `RutasDeSalida.astro` con su propio marcado y que la Historia 24.6 pasará a esta tarjeta:
+   * «Más de {Autor}» con `'obra'` y «De la misma obra» con `'ninguna'`.
    *
    * La línea de Obra es `cita.obra.titulo`, el título de su Ficha de Obra (AD-25, Historia
    * 22.3). Una Cita sin Obra no la lleva: ni hueco, ni rótulo, ni pausa.
@@ -51,6 +55,20 @@ interface Props {
 const { cita, atribucion, autor, zona } = Astro.props;
 
 /**
+ * Sin valor por omisión también al construir. `astro check` rechaza el uso que no declara
+ * `atribucion`, pero `astro build` no comprueba tipos: sin esta guarda, un uso que la olvidara
+ * se pintaría en silencio como `'obra'`, que sería un valor por omisión escondido.
+ */
+const ATRIBUCIONES: readonly string[] = ['autor-y-obra', 'obra', 'ninguna'];
+if (!ATRIBUCIONES.includes(atribucion)) {
+  throw new Error(
+    `TarjetaDeCita: la Cita «${cita.slug}» se pinta en ${Astro.url.pathname} con ` +
+      `atribucion=${JSON.stringify(atribucion)}, fuera del conjunto (${ATRIBUCIONES.join(', ')}). ` +
+      'Cada uso declara la suya, sin valor por omisión (Historia 24.3).',
+  );
+}
+
+/**
  * El nombre del Autor, solo donde el contexto lo pide. Sin él, la tarjeta no sale: un Tema o
  * una Colección que enseñara una Cita sin decir de quién es sería justo lo que el contexto
  * declara que no puede pasar.
@@ -59,8 +77,9 @@ let nombre: string | undefined;
 if (atribucion === 'autor-y-obra') {
   if (autor === undefined) {
     throw new Error(
-      `TarjetaDeCita: la Cita «${cita.slug}» se pinta con atribucion="autor-y-obra" y sin Autor. ` +
-        'Ese contexto declara el Autor de cada tarjeta, y la tarjeta no sale sin él: pásale `autor`.',
+      `TarjetaDeCita: la Cita «${cita.slug}» se pinta en ${Astro.url.pathname} con ` +
+        `atribucion="autor-y-obra" y sin Autor. Ese contexto declara el Autor de cada tarjeta, ` +
+        `y la tarjeta no sale sin él: pásale el Autor que declara la Cita, «${cita.autor}».`,
     );
   }
   nombre = autor.nombre;
@@ -85,10 +104,18 @@ const fragmento =
   * La zona va en el `<li>`, no en el enlace: el contenedor que pinta el build (Historia 23.7).
   *
   * Las partes van pegadas, sin espacio entre etiquetas: Astro conserva uno donde hay salto de
-  * línea, y el lector oiría «…» , Séneca. La pausa «, » solo para lectores va como hermana de
-  * cada parte que sigue —nunca dentro de `.fragmento`, que la pasaría a la serif—, y como es
-  * `position: absolute` queda fuera del flujo flexible: el `gap` sigue siendo el de las partes
-  * visibles. El nombre de la tarjeta es su texto visible, en su orden (WCAG 2.5.3).
+  * línea, y el texto del enlace sería «…» , Séneca. La pausa «, » solo para lectores va como
+  * hermana de cada parte que sigue —nunca dentro de `.fragmento`, que la pasaría a la serif—, y
+  * como es `position: absolute` queda fuera del flujo flexible: el `gap` sigue siendo el de las
+  * partes visibles. El nombre de la tarjeta es su texto visible, en su orden y sin ninguna
+  * palabra más (WCAG 2.5.3).
+  *
+  * Pegarlas fija el texto, no el nombre que calcula el navegador: las partes son elementos de
+  * flujo flexible, de bloque, y Chromium separa cada bloque con un espacio al componer el nombre
+  * accesible, así que lo anuncia como «…» , Séneca , Cartas a Lucilio. No se oye —el lector hace
+  * la pausa en la coma— y es lo mismo que ya hace `ListaDeObras.astro`. La prueba de punta a
+  * punta de la Página de Tema fija lo que sí importa: las partes visibles, en su orden, unidas
+  * por comas y nada más.
   */}
 <li class="tarjeta" data-zona={zona}>
   <a href={rutaDeCita(cita.slug)}><span class="fragmento">«{fragmento}»</span>{nombre !== undefined && (<><span class="solo-para-lectores">, </span><span class="autor">{nombre}</span></>)}{titulo !== undefined && (<><span class="solo-para-lectores">, </span><span class="obra">{titulo}</span></>)}</a>

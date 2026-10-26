@@ -663,18 +663,21 @@ conocidas están propuestas, con sus datos y la orden exacta, en
 
 Toda superficie nombra la obra con el **título de su Obra resuelta** (`cita.obra.titulo`), que
 `src/lib/obras.ts` deriva con `resolverObras` y `src/lib/publicado.ts` cuelga en cada Cita:
-la Atribución, lo copiado, el JSON-LD, la Tarjeta, la Imagen de Cita, la Imagen del Kit, la
-Pieza y, desde la 24.3, la Tarjeta de Cita de los listados de Tema, Colección y Autor. **Fuera
-de `src/lib/obras.ts` y `src/lib/admision.ts`, nada de `src/` ni de `public/islas/` lee
+la Atribución, lo copiado, el JSON-LD, la Tarjeta Social, la Imagen de Cita, la Imagen del Kit,
+la Pieza y, desde la 24.3, la Tarjeta de Cita de los listados de Tema, Colección y Autor.
+**Fuera de `src/lib/obras.ts` y `src/lib/admision.ts`, nada de `src/` ni de `public/islas/` lee
 `procedencia.obra`**; lo fija una prueba de `tests/unit/obras.test.ts`.
-El año que acompaña al título en la Atribución, lo copiado, la Imagen y la Tarjeta es el de la
-Procedencia de **esa** Cita. El `isPartOf` del JSON-LD describe la Obra y lleva el año de la
-Obra, y sin él va sin fecha.
+El año que acompaña al título en la Atribución, lo copiado, la Imagen y la Tarjeta Social es el
+de la Procedencia de **esa** Cita; la Tarjeta de Cita de los listados lleva el título sin año.
+El `isPartOf` del JSON-LD describe la Obra y lleva el año de la Obra, y sin él va sin fecha.
 
 Cada uso de `TarjetaDeCita.astro` declara su `atribucion`, un conjunto cerrado y sin valor por
-omisión (Historia 24.3): `autor-y-obra` en Tema y Colección, `obra` en Autor y «Más de {Autor}»,
-`ninguna` en el Listado de Obra y «De la misma obra». `autor-y-obra` sin `autor` para el build;
-una Cita sin Obra no lleva línea de Obra, y la Obra es texto, nunca un segundo enlace.
+omisión (Historia 24.3): `autor-y-obra` en Tema y Colección, `obra` en Autor y `ninguna` en el
+Listado de Obra. El conjunto está hecho también para «Más de {Autor}» (`obra`) y «De la misma
+obra» (`ninguna`), que hoy pinta `RutasDeSalida.astro` con su propio marcado y que la 24.6 pasa
+a la tarjeta: un uso nuevo se declara además en la prueba de `tests/unit/tarjeta-de-cita.test.ts`.
+Un valor fuera del conjunto, o `autor-y-obra` sin `autor`, para el build; una Cita sin Obra no
+lleva línea de Obra, y la Obra es texto, nunca un segundo enlace.
 
 El build **avisa** «Obra con años discrepantes» cuando las Citas de una misma ficha declaran
 `procedencia.año` distintos, y nombra la ficha y los años. Significa que la Obra no tiene año:

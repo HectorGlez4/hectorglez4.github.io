@@ -1,5 +1,11 @@
 import { expect, test } from '@playwright/test';
-import { autorConBiografia, autorEnUnaPagina, autorEnVariasPaginas } from './ayuda/corpus.ts';
+import {
+  autorConBiografia,
+  autorDe,
+  autorEnUnaPagina,
+  autorEnVariasPaginas,
+  citaConObraMasLarga,
+} from './ayuda/corpus.ts';
 import { apuntarGuiones, fueraDeLaListaAlCargar } from './ayuda/guiones.ts';
 
 /** Historia 2.3 — Página de Autor. */
@@ -214,5 +220,82 @@ test.describe('Historia 17.4 — la ficha abre la página, y solo la primera', (
     await expect(page.getByText('Semblanza tomada de')).toHaveCount(0);
     expect(await page.locator('.listado > li').count()).toBeGreaterThan(0);
     await expect(page.locator('meta[name="robots"]')).toHaveAttribute('content', /noindex/);
+  });
+});
+
+/**
+ * Historia 24.3 — la línea de Obra de la Tarjeta de Cita, pintada.
+ *
+ * La prueba unitaria fija la regla `.obra` en la hoja y lo que lleva cada Tarjeta en `dist/`;
+ * esto mide lo que el navegador hace con ellas a 320 px, con la Inter del sitio y la Obra de
+ * título más largo del Corpus, que se deriva y no se fija. Los valores esperados salen de los
+ * tokens de la propia página.
+ */
+test.describe('Historia 24.3 — la línea de Obra en el listado de Autor', () => {
+  const larga = citaConObraMasLarga();
+
+  test('a 320 px el título más largo sale entero en Inter apagada, parte en líneas y no desborda', async ({ page }) => {
+    test.skip(larga === undefined, 'Ninguna Cita del Corpus declara Obra con Fuente.');
+    const autor = autorDe(larga!.slug);
+    await page.setViewportSize({ width: 320, height: 640 });
+
+    // La página del listado de su Autor que lleva su Tarjeta.
+    const enlace = page.locator(`.listado li a[href="/cita/${larga!.slug}/"]`);
+    for (let n = 1; ; n += 1) {
+      const ruta = n === 1 ? `/autor/${autor}/` : `/autor/${autor}/${n}/`;
+      const respuesta = await page.goto(ruta);
+      expect(respuesta?.status(), `${ruta}: sin la Tarjeta de ${larga!.slug}`).toBe(200);
+      if ((await enlace.count()) === 1) break;
+    }
+    await page.evaluate(async () => {
+      await document.fonts.ready;
+    });
+    await page.mouse.move(0, 0);
+
+    const medida = await enlace.evaluate((a) => {
+      const obra = a.querySelector(':scope > .obra');
+      const fragmento = a.querySelector(':scope > .fragmento');
+      if (obra === null || fragmento === null) return undefined;
+      const sonda = document.createElement('span');
+      sonda.style.cssText = 'color: var(--tinta-apagada); font-family: var(--sans); font-size: var(--pie)';
+      document.body.append(sonda);
+      const tokens = getComputedStyle(sonda);
+      const esperado = { color: tokens.color, familia: tokens.fontFamily, tamaño: tokens.fontSize };
+      sonda.remove();
+      const e = getComputedStyle(obra);
+      const caja = obra.getBoundingClientRect();
+      const raiz = document.documentElement;
+      return {
+        esperado,
+        texto: obra.textContent ?? '',
+        color: e.color,
+        familia: e.fontFamily,
+        tamaño: e.fontSize,
+        peso: e.fontWeight,
+        transformacion: e.textTransform,
+        espaciado: e.letterSpacing,
+        lineas: Math.round(caja.height / parseFloat(e.lineHeight)),
+        derecha: caja.right,
+        ancho: raiz.clientWidth,
+        desborde: raiz.scrollWidth - raiz.clientWidth,
+        hueco: caja.top - fragmento.getBoundingClientRect().bottom,
+        unidad: parseFloat(getComputedStyle(raiz).getPropertyValue('--unidad')),
+      };
+    });
+    expect(medida, 'la Tarjeta no lleva fragmento y línea de Obra').toBeDefined();
+    const m = medida!;
+    expect(m.texto.trim().length).toBeGreaterThan(0);
+    expect(m.texto).not.toMatch(/…$/);
+    expect(m.familia).toBe(m.esperado.familia);
+    expect(m.color).toBe(m.esperado.color);
+    expect(m.tamaño).toBe(m.esperado.tamaño);
+    expect(m.peso).toBe('400');
+    expect(m.transformacion).toBe('none');
+    expect(m.espaciado).toBe('normal');
+    expect(m.hueco).toBeCloseTo(m.unidad, 0);
+    expect(m.derecha).toBeLessThanOrEqual(m.ancho);
+    expect(m.desborde).toBe(0);
+    // Un título que no cabe en una línea ocupa más, nunca se recorta (NFR-12).
+    if (m.texto.length > 60) expect(m.lineas).toBeGreaterThan(1);
   });
 });

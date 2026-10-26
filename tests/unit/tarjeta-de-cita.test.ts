@@ -37,17 +37,24 @@ const COMPONENTE = 'src/components/TarjetaDeCita.astro';
 const ATRIBUCIONES = ['autor-y-obra', 'obra', 'ninguna'] as const;
 type Atribucion = (typeof ATRIBUCIONES)[number];
 
+/**
+ * La etiqueta de apertura de un uso de la tarjeta, entera, se cierre sola o no: un atributo entre
+ * comillas o entre llaves (con un nivel de anidamiento) puede llevar `>` o `/>` sin cerrarla. El
+ * grupo 1 son sus atributos.
+ */
+const APERTURA_DE_TARJETA = /<TarjetaDeCita\b((?:"[^"]*"|'[^']*'|\{(?:[^{}]|\{[^{}]*\})*\}|[^>"'{])*)>/g;
+
 /** El frontmatter de un `.astro`, como lo lee `medicion.test.ts` para la `zona` de la 23.7. */
 async function frontmatterDe(ruta: string): Promise<{ texto: string; fuente: ts.SourceFile }> {
   const [, texto] = (await readFile(join(RAIZ, ruta), 'utf8')).split(/^---$/m);
   return { texto, fuente: ts.createSourceFile(ruta, texto, ts.ScriptTarget.Latest, true) };
 }
 
-/** Los `.astro` de `src/`, con su ruta relativa a la raíz. */
+/** Los ficheros de `src/` que pueden usar un componente de Astro, con su ruta relativa a la raíz. */
 async function astrosDeSrc(): Promise<string[]> {
   const entradas = await readdir(join(RAIZ, 'src'), { recursive: true, withFileTypes: true });
   return entradas
-    .filter((e) => e.isFile() && e.name.endsWith('.astro'))
+    .filter((e) => e.isFile() && /\.(astro|mdx)$/.test(e.name))
     .map((e) => {
       const padre = (e as { parentPath?: string }).parentPath ?? (e as { path?: string }).path ?? join(RAIZ, 'src');
       return join(padre, e.name).slice(RAIZ.length + 1).split('\\').join('/');
@@ -122,36 +129,77 @@ describe('Historia 24.3 — el contrato del componente, sin construir', () => {
     };
     const vistas = new Map<string, Atribucion[]>();
     for (const ruta of await astrosDeSrc()) {
-      const texto = await readFile(join(RAIZ, ruta), 'utf8');
-      for (const [uso] of texto.matchAll(/<TarjetaDeCita\b[\s\S]*?\/>/g)) {
-        const declaradas = [...uso.matchAll(/\batribucion=("([^"]*)"|\{)/g)];
+      // Sin comentarios —los de plantilla, los de HTML y los de bloque del frontmatter—, que
+      // pueden nombrar el componente sin usarlo.
+      const texto = (await readFile(join(RAIZ, ruta), 'utf8'))
+        .replace(/<!--[\s\S]*?-->/g, '')
+        .replace(/\/\*[\s\S]*?\*\//g, '');
+      for (const [uso, atributos] of texto.matchAll(APERTURA_DE_TARJETA)) {
+        // Un atributo empieza tras un espacio: `data-autor=` no es `autor=`.
+        const declaradas = [...atributos.matchAll(/\satribucion=("([^"]*)"|\{)/g)];
         expect(declaradas, `${ruta}: ${uso}`).toHaveLength(1);
         const valor = declaradas[0][2];
         expect(ATRIBUCIONES as readonly (string | undefined)[], `${ruta}: no es un literal del conjunto: ${uso}`).toContain(valor);
-        expect(/\bautor=/.test(uso), `${ruta}: \`autor\` va con \`autor-y-obra\` y con nada más: ${uso}`).toBe(
+        expect(/\sautor=/.test(atributos), `${ruta}: \`autor\` va con \`autor-y-obra\` y con nada más: ${uso}`).toBe(
           valor === 'autor-y-obra',
         );
         vistas.set(ruta, [...(vistas.get(ruta) ?? []), valor as Atribucion]);
       }
     }
+    // Las cuatro páginas declaran la suya, y ningún otro fichero usa la tarjeta sin que esta
+    // prueba diga qué atribución le toca: «Más de {Autor}» (`obra`) y «De la misma obra»
+    // (`ninguna`) entran aquí el día que la 24.6 los pase a la tarjeta.
+    expect([...vistas.keys()].sort()).toEqual(Object.keys(ESPERADA).sort());
     for (const [ruta, atribucion] of Object.entries(ESPERADA)) {
       expect(vistas.get(ruta), ruta).toEqual([atribucion]);
     }
   });
 
+  it('el escáner de usos ve lo que tiene que ver', () => {
+    // La expresión de la prueba anterior, sobre usos inventados: un atributo con `>` o
+    // `/>` dentro, una etiqueta que no se cierra sola y un `data-autor=` que no es `autor=`.
+    const texto = [
+      '<TarjetaDeCita cita={cita} atribucion="obra" zona={a > b ? "listado" : "x"} />',
+      '<TarjetaDeCita cita={cita} atribucion="ninguna" zona="listado"></TarjetaDeCita>',
+      '<TarjetaDeCita cita={{ ...cita }} atribucion="autor-y-obra" autor={autores.get(cita.autor)} zona="listado" />',
+      '<TarjetaDeCita cita={cita} atribucion="obra" data-autor="x" zona="listado" />',
+    ].join('\n');
+    const usos = [...texto.matchAll(APERTURA_DE_TARJETA)].map(([, atributos]) => ({
+      atribucion: /\satribucion="([^"]*)"/.exec(atributos)?.[1],
+      autor: /\sautor=/.test(atributos),
+    }));
+    expect(usos).toEqual([
+      { atribucion: 'obra', autor: false },
+      { atribucion: 'ninguna', autor: false },
+      { atribucion: 'autor-y-obra', autor: true },
+      { atribucion: 'obra', autor: false },
+    ]);
+  });
+
   it('la regla `.obra`: Inter pequeña y apagada, sin versalitas, y nada que recorte', async () => {
     const fuente = await readFile(join(RAIZ, COMPONENTE), 'utf8');
     const estilo = fuente.slice(fuente.indexOf('<style>'));
-    const cuerpo = /(?:^|\s)\.obra\s*\{([^}]*)\}/m.exec(estilo)?.[1];
-    expect(cuerpo, 'sin regla `.obra`').toBeDefined();
-    const declaraciones = new Map(
-      cuerpo!
-        .replace(/\/\*[\s\S]*?\*\//g, '')
-        .split(';')
-        .map((d) => d.trim())
-        .filter((d) => d.includes(':'))
-        .map((d) => [d.slice(0, d.indexOf(':')).trim(), d.slice(d.indexOf(':') + 1).trim()] as const),
+    // Todas las reglas, también las de dentro de un `@media`: el cuerpo de la más interna no
+    // lleva llaves.
+    const reglas = [...estilo.replace(/\/\*[\s\S]*?\*\//g, '').matchAll(/([^{}]+)\{([^{}]*)\}/g)].map(
+      ([, selector, cuerpo]) => ({
+        selector: selector.replace('<style>', '').trim(),
+        declaraciones: new Map(
+          cuerpo
+            .split(';')
+            .map((d) => d.trim())
+            .filter((d) => d.includes(':'))
+            .map((d) => [d.slice(0, d.indexOf(':')).trim(), d.slice(d.indexOf(':') + 1).trim()] as const),
+        ),
+      }),
     );
+    const base = reglas.find((r) => r.selector === '.obra');
+    expect(base, 'sin regla `.obra`').toBeDefined();
+    const declaraciones = base!.declaraciones;
+    // Lo que recorta o pasa a versalitas no entra por ninguna regla que alcance a `.obra`: ni la
+    // suya, ni una de `a:hover .obra` o de un `@media`.
+    const deObra = reglas.filter((r) => /(^|[\s,>+~])\.obra(?![\w-])/.test(r.selector));
+    expect(deObra.map((r) => r.selector)).toContain('.obra');
     expect(declaraciones.get('font-family')).toBe('var(--sans)');
     expect(declaraciones.get('font-size')).toBe('var(--pie)');
     expect(declaraciones.get('font-weight')).toBe('400');
@@ -167,7 +215,9 @@ describe('Historia 24.3 — el contrato del componente, sin construir', () => {
       'overflow',
       'max-height',
     ]) {
-      expect(declaraciones.has(prohibida), `\`.obra\` declara ${prohibida}`).toBe(false);
+      for (const regla of deObra) {
+        expect(regla.declaraciones.has(prohibida), `\`${regla.selector}\` declara ${prohibida}`).toBe(false);
+      }
     }
     // Parte palabras antes que desbordar: un título largo ocupa más líneas (NFR-12).
     expect(['anywhere', 'break-word']).toContain(declaraciones.get('overflow-wrap'));
@@ -183,18 +233,21 @@ describe('Historia 24.3 — el contrato del componente, sin construir', () => {
   });
 });
 
-describe('Historia 24.3 — `autor-y-obra` sin Autor para el build', () => {
-  it('con código distinto de 0, nombrando la Cita y `autor-y-obra`', async () => {
-    const SLUG = 'seneca-no-es-que-tengamos-poco-tiempo';
+describe('Historia 24.3 — un uso roto para el build', () => {
+  const SLUG = 'seneca-no-es-que-tengamos-poco-tiempo';
+
+  /** Construye el corpus mínimo con una sonda sin armazón que pinta su Cita con `atributos`. */
+  async function construirSonda(frontmatter: string, atributos: string) {
     const SONDA = `---
 import TarjetaDeCita from '../components/TarjetaDeCita.astro';
 import { conjuntoPublicable } from '../lib/publicado.ts';
 const conjunto = await conjuntoPublicable();
 const cita = conjunto.citas.find((c) => c.slug === '${SLUG}')!;
+${frontmatter}
 ---
 <!doctype html>
 <html lang="es"><head><meta charset="utf-8" /><title>Sonda</title></head>
-<body><ul><TarjetaDeCita cita={cita} atribucion="autor-y-obra" autor={undefined} zona="listado" /></ul></body></html>
+<body><ul><TarjetaDeCita cita={cita} ${atributos} zona="listado" /></ul></body></html>
 `;
     const resultado = await construirConCorpus(
       {
@@ -205,8 +258,20 @@ const cita = conjunto.citas.find((c) => c.slug === '${SLUG}')!;
       { paginas: { 'sonda-tarjeta.astro': SONDA } },
     );
     aLimpiar.push(resultado.proyecto);
+    return resultado;
+  }
+
+  it('`autor-y-obra` sin Autor: código distinto de 0, nombrando la Cita, `autor-y-obra` y su Autor', async () => {
+    const resultado = await construirSonda('', 'atribucion="autor-y-obra" autor={undefined}');
     expect(resultado.codigo, resultado.salida).not.toBe(0);
-    expect(resultado.salida).toMatch(new RegExp(`«${SLUG}»[^\\n]*autor-y-obra`));
+    expect(resultado.salida).toMatch(new RegExp(`«${SLUG}»[^\\n]*autor-y-obra[^\\n]*«seneca»`));
+  }, 300_000);
+
+  it('una atribución fuera del conjunto: código distinto de 0, nombrando la Cita y el valor', async () => {
+    // `astro build` no comprueba tipos: sin la guarda, el uso se pintaría como `obra`.
+    const resultado = await construirSonda("const fuera = 'otra' as unknown as 'obra';", 'atribucion={fuera}');
+    expect(resultado.codigo, resultado.salida).not.toBe(0);
+    expect(resultado.salida).toMatch(new RegExp(`«${SLUG}»[^\\n]*atribucion="otra", fuera del conjunto`));
   }, 300_000);
 });
 
@@ -293,15 +358,17 @@ describe('Historia 24.3 — la Tarjeta de cada listado, construida', () => {
   sembrar('antonio-machado', 'soledades', 'Soledad', LARGO, 2);
   sinObra('antonio-machado', SIN_OBRA[1], 'Caminante, no hay camino, se hace camino al andar.');
 
-  // La Colección, de 15 (`MIN_CITAS_POR_COLECCION`): las dos sin Obra, una de cada Obra pequeña y
-  // diez de Brevedad.
-  const MIEMBROS = [
+  // La Colección: delante, las dos sin Obra, una de cada Obra pequeña y diez de Brevedad; detrás,
+  // las 42 que quedan, al revés de como se sembraron. Son 57 y pasan de `CITAS_POR_PAGINA`, así
+  // que la Colección también tiene página 2, y el orden declarado no es el de ningún criterio.
+  const PRIMEROS = [
     ...SIN_OBRA,
     'seneca-cartas-0',
     'seneca-ira-0',
     'antonio-machado-soledades-0',
     ...Array.from({ length: 10 }, (_, i) => `seneca-brevedad-${i}`),
   ];
+  const MIEMBROS = [...PRIMEROS, ...[...sembradas.keys()].filter((s) => !PRIMEROS.includes(s)).reverse()];
   corpus[`colecciones/${COLECCION}.yml`] = coleccionValida({ miembros: MIEMBROS });
 
   let proyecto = '';
@@ -414,8 +481,9 @@ describe('Historia 24.3 — la Tarjeta de cada listado, construida', () => {
     expect([...slugs].sort()).toEqual([...sembradas.keys()].sort());
   });
 
-  it('Colección: fragmento, Autor y Obra, en el orden declarado', async () => {
-    expect(paginasDe(`/coleccion/${COLECCION}/`)).toHaveLength(1);
+  it('Colección: fragmento, Autor y Obra, en todas sus páginas y en el orden declarado', async () => {
+    expect(MIEMBROS).toHaveLength(57);
+    expect(paginasDe(`/coleccion/${COLECCION}/`)).toEqual([`/coleccion/${COLECCION}/`, `/coleccion/${COLECCION}/2/`]);
     expect(await comprobarListado(`/coleccion/${COLECCION}/`, 'autor-y-obra')).toEqual(MIEMBROS);
   });
 
@@ -473,7 +541,7 @@ describe('Historia 24.3 — la Tarjeta de cada listado, construida', () => {
   it('ningún listado dice «Sin obra documentada»', async () => {
     const rutas = [
       ...paginasDe('/tema/el-tiempo/'),
-      `/coleccion/${COLECCION}/`,
+      ...paginasDe(`/coleccion/${COLECCION}/`),
       ...paginasDe('/autor/seneca/'),
       '/autor/antonio-machado/',
     ];

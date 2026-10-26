@@ -17,6 +17,10 @@ import {
  * Procedencia, tienen que decir ese título en la Atribución, lo copiado, el JSON-LD,
  * `data-procedencia` y la Tarjeta. El año que lo acompaña es el de **cada** Cita, y como los
  * dos discrepan, el build avisa de que la Obra no publica año.
+ *
+ * Historia 24.3 — y la Tarjeta de Cita del listado de Autor, que lo pinta sin año: la Cita que
+ * declara la otra grafía dice también el título de la ficha, porque la línea sale de
+ * `cita.obra.titulo`. Es la única construcción donde grafía y título difieren.
  */
 
 const aLimpiar: string[] = [];
@@ -162,6 +166,25 @@ describe('Historia 22.3 — una Obra reunida se llama igual en todas las superfi
         [CON_OTRA.slug, `${TITULO}, ${CON_OTRA.año}`],
       ]),
     );
+  });
+
+  it('24.3 — el listado de Autor dice el título de la ficha en las dos Tarjetas, nunca la otra grafía', async () => {
+    const html = await readFile(paginaConstruida(proyecto, '/autor/seneca/'), 'utf8');
+    const listado = /<ul class="listado"[^>]*>([\s\S]*?)<\/ul>/.exec(html)?.[1];
+    expect(listado, 'sin `ul.listado`').toBeDefined();
+    const obraDe = new Map(
+      [...listado!.matchAll(/<a href="\/cita\/([^/"]+)\/"[^>]*>([\s\S]*?)<\/a>/g)].map((m) => [
+        m[1],
+        [...m[2].matchAll(/<span class="obra"[^>]*>([^<]*)<\/span>/g)].map((o) => o[1]),
+      ]),
+    );
+    expect(obraDe).toEqual(
+      new Map([
+        [CON_TITULO.slug, [TITULO]],
+        [CON_OTRA.slug, [TITULO]],
+      ]),
+    );
+    expect(listado).not.toContain(OTRA_GRAFIA);
   });
 
   it('el Kit de la Cita fijada dice el título de la ficha en data-procedencia y lo copiado', async () => {
