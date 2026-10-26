@@ -5,12 +5,19 @@ created: '2026-10-26'
 status: 'done'
 baseline_revision: '2e877a2304d04541b05d230931c7da505d6c438d'
 review_loop_iteration: 0
-followup_review_recommended: false
+followup_review_recommended: true
 context:
   - '{project-root}/_bmad-output/implementation-artifacts/epic-24-context.md'
 warnings:
   - oversized
-deferred: []
+deferred:
+  - summary: >-
+      La relación de `tools/lib/cambios.ts` no cuenta la ficha de Obra en los listados de Tema, Colección y Autor, que desde la 24.3 pintan su título: retitular una Obra no refecha esos listados en el sitemap ni los avisa `tools/avisar.ts`.
+    evidence: |-
+      `relacionDeSuperficies` declara la ficha de Obra solo en la Página de Cita y en la de Obra, y la Tarjeta de Cita de los listados pinta `cita.obra.titulo` desde la 24.3. Hasta que se cierre, `titular`, `reunir`, `restituir-grafia` o `documentar` cambian el HTML de esos listados sin mover su `lastmod` ni avisarlos. El contrato de la 24.3 prohíbe tocar la relación, y la Historia 24.8 de `epics.md` lo asigna allí: «Given los listados de Tema, Colección y Autor / When se fechan / Then cuentan también con la ficha de Obra de cada una de sus Citas, porque sus Tarjetas pintan su título desde la 24.3». Lo señalaron blind-hunter, edge-case-hunter e intent-alignment en la revisión del 2026-10-26.
+    location: >-
+      tools/lib/cambios.ts (relacionDeSuperficies, la declaración de los listados de Tema, Colección y Autor)
+    severity: medium
 ---
 
 <intent-contract>
@@ -104,6 +111,26 @@ deferred: []
 
 Las capas de revisión son externas (bucle v8-ralph) y en esta pasada no traen hallazgos: la revisión independiente viene después.
 
+### 2026-10-26 — Review pass
+- intent_gap: 0
+- bad_spec: 0
+- patch: 12 (high 0, medium 0, low 12)
+- defer: 1 (high 0, medium 1, low 0)
+- reject: 16
+- addressed_findings:
+  - `[low]` `[patch]` AGENTS.md y el docblock de `TarjetaDeCita.astro` daban «Más de {Autor}» (`obra`) y «De la misma obra» (`ninguna`) como usos de hoy: ahora dicen que los pinta `RutasDeSalida.astro` con su propio marcado y que la 24.6 los pasa a la tarjeta.
+  - `[low]` `[patch]` AGENTS.md (22.3) decía «la Tarjeta» junto a «la Tarjeta de Cita de los listados» y le atribuía el año: ahora es «la Tarjeta Social», y la de los listados lleva el título sin año.
+  - `[low]` `[patch]` El error de `autor-y-obra` sin Autor nombra además la ruta que se construye (`Astro.url.pathname`) y el Autor que declara la Cita (`cita.autor`).
+  - `[low]` `[patch]` `atribucion` fuera del conjunto —o ausente, que `astro build` no comprueba tipos— se pintaba en silencio como `obra`: una guarda para el build nombrando la Cita, la ruta y el valor, con su construcción que falla en `tarjeta-de-cita.test.ts` (comprobada por mutación).
+  - `[low]` `[patch]` El escáner de usos de `tarjeta-de-cita.test.ts` lee la etiqueta de apertura entera (comillas y llaves, se cierre sola o no), quita comentarios, no confunde `data-autor=` con `autor=`, mira también `.mdx`, exige que todo fichero con un uso esté en `ESPERADA` y se prueba a sí mismo sobre usos inventados.
+  - `[low]` `[patch]` La prueba de la regla `.obra` mira toda regla que alcance a `.obra` (`a:hover .obra`, un `@media`), no solo la primera.
+  - `[low]` `[patch]` La prueba 24.3 de `obra-pagina.test.ts` recorre todas las páginas de `/tema/la-vida/`, exige el `ul.listado` y compara el conjunto exacto de slugs y títulos en vez de contar 20 en la página 1.
+  - `[low]` `[patch]` Ninguna prueba distinguía el título de la ficha de la grafía de la Cita: `obra-construida.test.ts`, la única construcción con dos grafías, lee el listado de `/autor/seneca/` y exige el título de la ficha en las dos Tarjetas y nunca la otra grafía (comprobada por mutación: leyendo la Procedencia, falla).
+  - `[low]` `[patch]` La Colección de la construcción de `tarjeta-de-cita.test.ts` pasa a 57 miembros en un orden declarado que no es el de ningún criterio, así que también se comprueba su página 2.
+  - `[low]` `[patch]` La tipografía, el hueco y el desborde de la línea de Obra solo se medían a mano: `pagina-de-autor.spec.ts` (24.3) mide a 320 px, en la página de Autor que lleva la Obra de título más largo del Corpus (derivada), familia, color y cuerpo contra los tokens de la página, peso 400, sin versalitas ni espaciado, `--unidad` bajo el fragmento, varias líneas y nada que desborde.
+  - `[low]` `[patch]` Chromium calcula el nombre de la tarjeta con un espacio delante de cada coma («…» , Séneca , Obra) porque las partes son bloques flexibles: el comentario del marcado lo dice en vez de prometer lo contrario, y `pagina-de-tema.spec.ts` (24.3) fija lo que importa en todas las tarjetas de `/tema/la-vida/`: las partes visibles, en su orden, separadas por comas y sin ninguna palabra más.
+  - `[low]` `[patch]` Los riesgos residuales decían que la comprobación de serif de `coleccion.spec.ts` no corre; el Corpus publica hoy Colecciones y corre y pasa: corregido en el Auto Run Result.
+
 ## Design Notes
 
 **El marcado.** Las pausas van **pegadas** a la parte anterior, sin espacio entre etiquetas (Astro conserva un espacio donde hay salto de línea, y entonces el texto para lectores sería `«…» , Séneca`), y como hermanas, nunca dentro de `.fragmento`: heredarían la serif y `coleccion.spec.ts` solo admite `h1` y `span.fragmento` en serif. `.solo-para-lectores` es `position: absolute`, así que queda fuera del flujo flexible y el `gap` sigue siendo de `--unidad` entre partes visibles. Forma de referencia para `autor-y-obra` con Obra:
@@ -134,28 +161,32 @@ con `nombre` el de `autor` solo en `autor-y-obra` (tras la guarda) y `titulo = a
 Status: done
 Blocking condition: ninguna.
 
-**Qué se construyó.** `TarjetaDeCita.astro` gana `atribucion: 'autor-y-obra' | 'obra' | 'ninguna'`, obligatoria y sin valor por omisión, junto a `cita`, `autor?` y `zona: Zona` (la `interface Props` de la 23.7 intacta). Con `autor-y-obra` la tarjeta pinta el Autor y, si falta, el build se para con «TarjetaDeCita: la Cita «{slug}» se pinta con atribucion="autor-y-obra" y sin Autor…»; con `obra` y `ninguna` no lee `autor`. La línea `span.obra` sale de `cita.obra?.titulo` (nunca con `ninguna`), en `var(--sans)`, `var(--pie)`, 400, 1,5, `var(--tinta-apagada)`, con `overflow-wrap: anywhere` y nada que recorte. Las pausas `<span class="solo-para-lectores">, </span>` van pegadas y como hermanas antes de cada parte que sigue al fragmento; ninguna al final. Un solo `<a>`, la zona en el `<li>`, el recorte del fragmento (120) igual. Tema y Colección declaran `autor-y-obra`, Autor `obra`, Obra `ninguna` (sin `autor={undefined}`).
+**Qué se construyó.** `TarjetaDeCita.astro` gana `atribucion: 'autor-y-obra' | 'obra' | 'ninguna'`, obligatoria y sin valor por omisión, junto a `cita`, `autor?` y `zona: Zona` (la `interface Props` de la 23.7 intacta). Un valor fuera del conjunto —o ausente, que `astro build` no comprueba tipos— para el build nombrando la Cita, la ruta y el valor. Con `autor-y-obra` la tarjeta pinta el Autor y, si falta, el build se para nombrando la Cita, la ruta y el Autor que la Cita declara; con `obra` y `ninguna` no lee `autor`. La línea `span.obra` sale de `cita.obra?.titulo` (nunca con `ninguna`), en `var(--sans)`, `var(--pie)`, 400, 1,5, `var(--tinta-apagada)`, con `overflow-wrap: anywhere` y nada que recorte. Las pausas `<span class="solo-para-lectores">, </span>` van pegadas y como hermanas antes de cada parte que sigue al fragmento; ninguna al final. Un solo `<a>`, la zona en el `<li>`, el recorte del fragmento (120) igual. Tema y Colección declaran `autor-y-obra`, Autor `obra`, Obra `ninguna` (sin `autor={undefined}`).
 
-**Ficheros** (commit `29ca0c3ea2c42b3c0def573b65e3c889e78e94cd`).
-- `src/components/TarjetaDeCita.astro` — `atribucion`, la guarda, la línea de Obra y las pausas; docblock a UX-DR70 con los seis usos.
+**Ficheros** (construcción en `29ca0c3ea2c42b3c0def573b65e3c889e78e94cd`; esta revisión, en el commit que cierra la pasada).
+- `src/components/TarjetaDeCita.astro` — `atribucion`, las dos guardas, la línea de Obra y las pausas; docblock a UX-DR70 con los cuatro usos de hoy y los dos que traerá la 24.6; el comentario del marcado dice cómo nombra Chromium la tarjeta.
 - `src/pages/tema/[slug]/[...page].astro`, `src/pages/coleccion/[slug]/[...page].astro` — `atribucion="autor-y-obra"`; docblocks a «Autor y Obra».
 - `src/pages/autor/[slug]/[...page].astro` — `atribucion="obra"`.
-- `src/pages/obra/[autor]/[slug]/[...page].astro` — `atribucion="ninguna"`, sin `autor={undefined}`; comentario: ni Autor ni título, que dice la Cabecera.
-- `tools/lib/cambios.ts` — solo los dos comentarios (los listados pintan el título desde la 24.3; su relación la recoge la 24.8). La relación no se toca.
-- `AGENTS.md` — sección 22.3: la Tarjeta de Cita de Tema, Colección y Autor entre las superficies que nombran la obra, y el conjunto de `atribucion` por uso.
-- `tests/unit/tarjeta-de-cita.test.ts` (nuevo, 13 pruebas) — sin construir: `Props` (TypeScript sobre el frontmatter; miembros exactos, `atribucion` sin `?` y con los tres literales, `autor` opcional), la desestructuración sin valor por omisión ni `??`/`||`/asignación, todo `<TarjetaDeCita` de `src/` con un literal del conjunto y `autor=` solo con `autor-y-obra` (y el que toca en cada una de las cuatro páginas), la regla `.obra` y la hoja sin literales. Una construcción que falla (sonda sin armazón): código ≠ 0 y una línea con «{slug}» y `autor-y-obra`. Una construcción con el fixture de Design Notes (censo con los dos slugs anteriores a la v3 de `lista-de-obras.test.ts`, que el censo cerrado sí admite; documentos escritos con `componerDocumento` y `nombreDeDocumento`): en todas las páginas de `/tema/el-tiempo/` (2), la Colección (15, en el orden declarado), `/autor/seneca/` (2) y `/autor/antonio-machado/`, y las 4 Páginas de Obra, cada `li.tarjeta` tiene un solo `<a>` a `/cita/{slug}/`, zona `listado`, solo `span` sin anidar, la secuencia de clases exacta (pausas incluidas), las partes visibles de su contexto y el texto para lectores igual a las partes unidas por «, »; cada Cita una vez por listado; el título de 125 caracteres entero y sin «…»; `/obra/seneca/de-la-ira/` y Brevedad con `noindex` y su título igual en el Tema; ningún listado con «sin obra documentada».
-- `tests/unit/obra-pagina.test.ts` — en la construcción con congelación, `it` 24.3: en `/tema/la-vida/` las tres de Cartas (congelada fuera, `noindex`) dicen «Cartas a Lucilio» y las 20 de Brevedad «Sobre la brevedad de la vida».
+- `src/pages/obra/[autor]/[slug]/[...page].astro` — `atribucion="ninguna"`, sin `autor={undefined}`.
+- `tools/lib/cambios.ts` — solo los dos comentarios; la relación la recoge la 24.8 (aplazado en el frontmatter).
+- `AGENTS.md` — sección 22.3: la Tarjeta de Cita de Tema, Colección y Autor entre las superficies que nombran la obra, sin año; «la Tarjeta Social» donde decía «la Tarjeta»; el conjunto de `atribucion` por uso, con «Más de {Autor}» y «De la misma obra» para cuando la 24.6 los pase a la tarjeta.
+- `tests/unit/tarjeta-de-cita.test.ts` (nuevo, 15 pruebas) — sin construir: `Props`, la desestructuración sin valor por omisión, el escáner de usos (etiqueta de apertura entera, sin comentarios, `.astro` y `.mdx`, todo fichero con un uso declarado en `ESPERADA`) con su propia prueba, y toda regla que alcance a `.obra`. Dos construcciones que fallan: `autor-y-obra` sin Autor y una atribución fuera del conjunto. Una construcción (57 Citas): los cuatro listados en todas sus páginas —la Colección, de 57 miembros, también en su página 2 y en el orden declarado—, el título de 125 caracteres entero, la Obra `noindex` nombrada igual y ningún «Sin obra documentada».
+- `tests/unit/obra-pagina.test.ts` — `it` 24.3 con la familia congelada: el conjunto exacto de las 23 Citas de `/tema/la-vida/`, en todas sus páginas, con su título.
+- `tests/unit/obra-construida.test.ts` — `it` 24.3: con una ficha que reúne dos grafías, el listado de `/autor/seneca/` dice el título de la ficha en las dos Tarjetas y nunca la otra grafía.
+- `tests/e2e/pagina-de-autor.spec.ts` — 24.3: a 320 px, la línea de Obra de título más largo del Corpus (derivado con `citaConObraMasLarga` y `autorDe`), medida contra los tokens de la página.
+- `tests/e2e/pagina-de-tema.spec.ts` — 24.3: el nombre accesible de cada tarjeta de `/tema/la-vida/` son sus partes visibles, en su orden, separadas por comas y nada más.
+- `tests/e2e/ayuda/corpus.ts` — `autorDe(slug)`.
 
-**Auditoría de la matriz.** Las ocho filas tienen prueba que corrió y pasó: Tema/Colección con y sin Obra, Autor con y sin Obra y Listado de Obra (los cuatro `it` de listado de `tarjeta-de-cita`), título de 125 (su `it`), Obra `noindex` (su `it`) y congelada (`obra-pagina`, 24.3), Autor que falta (la construcción que falla).
+**Revisión (2026-10-26, capas externas del bucle v8-ralph).** 12 parches aplicados (todos `low`), 1 aplazado (`medium`: la relación de `cambios.ts`, de la 24.8) y 16 rechazados: la casilla de `sprint-status.yaml` (la lleva el orquestador), cadenas vacías en `nombre` o `titulo` (el esquema las rechaza), la unión discriminada en `Props` (la 23.7 exige `interface Props`), el formateador que reflowaría el marcado (no hay ninguno, y la construcción de prueba fija la secuencia exacta), los literales de peso e interlineado (no hay tokens para ellos y es la convención de los demás componentes), el escapado HTML (lo hace Astro), el contraste al pasar el cursor (6,96:1, el mismo par que ya usa `.autor`), Pagefind (el contrato no lo toca), `hyphens: auto`, el control positivo de la construcción que falla (su mensaje solo sale de la guarda), la longitud del nombre accesible (es UX-DR70), el recorte del fragmento y el fondo al pasar el cursor (anteriores a la historia), `astro check` en una prueba (lo corre el CI), «Más de {Autor}» con su propio marcado (24.6), la sección de AGENTS.md donde va el contrato y que el spec saliera `done` antes de esta pasada (la revisión la cierra esta).
 
-**Revisión.** Pasada sin hallazgos (capas externas aún por correr): 0 parches, 0 aplazados, 0 rechazados. `followup_review_recommended: false` (parcheados: 0 high, 0 medium, 0 low; puntuación 0).
+**Recomendación de revisión de seguimiento:** `true`. Parcheados en esta pasada: 0 high, 0 medium, 12 low; puntuación 3 × 0 + 12 = 12 (≥ 5).
 
-**Verificación.** Desde el worktree:
-- `npx vitest run tests/unit/tarjeta-de-cita.test.ts` — 13/13 (`FINISHED EXIT=0`).
-- Uno a uno: `obra-pagina` 65, `coleccion-pagina` 34, `paginacion` 14, `obras` 117 (sin permitidos nuevos), `medicion` 492 (la de zonas de la 23.7 sin tocar), `lista-de-obras` 18, `ingreso-construido` 38, `fecha-de-cambio` 33 — todos verdes (`FINISHED EXIT=0`).
+**Verificación.** Desde el worktree, tras los parches:
+- `npx vitest run tests/unit/tarjeta-de-cita.test.ts` — 15/15 (`FINISHED EXIT=0`). Comprobación por mutación: sin la guarda del conjunto, la construcción que falla con `atribucion="otra"` se pone roja.
+- Uno a uno: `obra-construida` 17 (con la línea leyendo la Procedencia, la nueva se pone roja con «Sobre la brevedad de la vida»), `obra-pagina` 65, `coleccion-pagina` 34, `paginacion` 14, `obras` 117 (sin permitidos nuevos), `medicion` 492 (la de zonas de la 23.7 sin tocar), `lista-de-obras` 18, `ingreso-construido` 38, `fecha-de-cambio` 33 — todos `EXIT=0`.
 - `npm run check` — 0 errores, 0 avisos (8 pistas previas, ninguna de estos ficheros).
-- `npm test` — 134 ficheros, 6130 pruebas, `FINISHED EXIT=0` (723 s).
-- `npx playwright test tests/e2e/pagina-de-tema.spec.ts tests/e2e/pagina-de-autor.spec.ts tests/e2e/coleccion.spec.ts tests/e2e/busqueda.spec.ts tests/e2e/accesibilidad.spec.ts` (móvil y escritorio) — 210 pasan, 10 saltadas por condiciones del Corpus (entre ellas las de `coleccion.spec.ts` que piden una Colección publicada: el Corpus no publica ninguna). Servidores 4321 y 8787 parados.
-- Manual: con `dist/` servido en 4399, a 320 × 640, `/autor/mariano-jose-de-larra/` lista la Obra de título más largo del Corpus (163 caracteres): `scrollWidth` 320 = `clientWidth` 320, el título parte en 4 líneas, su borde derecho en 300 px, en Inter; el lector oye «…», Primera representación…». Servidor parado.
+- `npm test` — 134 ficheros, 6133 pruebas, `FINISHED EXIT=0` (727 s).
+- `npx playwright test tests/e2e/pagina-de-tema.spec.ts tests/e2e/pagina-de-autor.spec.ts tests/e2e/coleccion.spec.ts tests/e2e/busqueda.spec.ts tests/e2e/accesibilidad.spec.ts` (móvil y escritorio, sitio construido por `tests/servidor.mjs`) — 214 pasan, 10 saltadas por condiciones del Corpus (Tema bajo el umbral, portada sin Colecciones, semblanza ajena…), `EXIT=0`; las dos nuevas de la 24.3 pasan en los dos proyectos. Servidores 4321 y 8787 parados.
+- La comprobación manual a 320 px de la primera pasada (Larra, 163 caracteres, 4 líneas, sin desborde) es ahora la prueba de `pagina-de-autor.spec.ts`.
 
-**Riesgos residuales.** La comprobación de serif de `coleccion.spec.ts` no corre mientras el Corpus no publique ninguna Colección; la tipografía de `.obra` la fijan la prueba unitaria sobre la regla y la medida manual. Pagefind no se toca: buscar el título de una Obra puede devolver además los listados que la nombran (`busqueda.spec.ts` sigue verde).
+**Riesgos residuales.** Hasta la 24.8, retitular o reunir una Obra cambia el HTML de los listados de Tema, Colección y Autor sin mover su `lastmod` ni avisarlos (aplazado). Chromium anuncia la tarjeta con un espacio delante de cada coma, como la Lista de Obras: no se oye, y la prueba de punta a punta lo admite y exige lo demás. Las pruebas de punta a punta no corren en el CI. Pagefind no se toca: buscar el título de una Obra puede devolver además los listados que la nombran (`busqueda.spec.ts` sigue verde). «Más de {Autor}» y «De la misma obra» siguen con su propio marcado hasta la 24.6; su prueba de usos obliga a declararlos en cuanto pasen a la tarjeta.
