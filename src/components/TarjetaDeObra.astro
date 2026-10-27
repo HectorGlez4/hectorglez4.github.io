@@ -78,6 +78,29 @@ if (autor.slug !== cita.autor) {
 
 const obra = cita.obra;
 const contenido = obra === undefined ? undefined : contenidoDeTarjetaDeObra(autor, obra);
+
+/*
+ * Historia 24.5 — «Siguiente…» lo decide `siguienteCita`, que nunca devuelve la propia Cita, por
+ * la Obra solo da una hermana y sin Obra no da nada. Un uso que pase otra cosa —la portada dirá
+ * el suyo (28.2)— es un uso roto: una fila a la misma página, «Siguiente cita de esta obra» a
+ * otro libro, o una navegación calculada que la tarjeta sin Obra tiraría en silencio. Detiene
+ * la construcción, como el Autor ajeno.
+ */
+if (siguiente !== undefined) {
+  const roto =
+    obra === undefined
+      ? 'la Cita no tiene Obra'
+      : siguiente.cita.slug === cita.slug
+        ? 'lleva a la propia Cita'
+        : siguiente.por === 'obra' && siguiente.cita.obra?.nombre !== obra.nombre
+          ? `lleva a «${siguiente.cita.slug}», de otra Obra que «${obra.nombre}»`
+          : undefined;
+  if (roto !== undefined) {
+    throw new Error(
+      `TarjetaDeObra: «Siguiente…» de la Cita «${cita.slug}» en ${Astro.url.pathname}: ${roto}.`,
+    );
+  }
+}
 ---
 
 {/*

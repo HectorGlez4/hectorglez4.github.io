@@ -1279,7 +1279,8 @@ describe('Historia 22.8 — la congelación declarada, construida', () => {
     // Delante, «Siguiente…» a otra Cita de Cartas (24.5); detrás, la fila de su Obra.
     expect(enlaces).toHaveLength(2);
     expect(enlaces[0].declaracion).toEqual({ zona: 'siguiente' });
-    expect(enlaces[0].href).toMatch(/^\/cita\/seneca-cartas-[12]\/$/);
+    // `seneca-cartas-0` es la última en el orden del libro (2, 1, 0): vuelve a la primera.
+    expect(enlaces[0].href).toBe('/cita/seneca-cartas-2/');
     expect(enlaces[1]).toEqual({ href: CARTAS, declaracion: { zona: 'tarjeta-de-obra' } });
   }, 300_000);
 

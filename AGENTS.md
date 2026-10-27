@@ -820,7 +820,12 @@ la llevan (la portada la recibe en la 28.2). Sin Obra no pinta nada, ni rótulo 
   `src/lib/publicado.ts`, pura, y lo dice `textoDeSiguiente` de `src/lib/atribucion.ts`, con
   `temaEnFrase` como única regla de la minúscula del Tema tras «sobre». La prop `siguiente` de
   `TarjetaDeObra.astro` es **obligatoria y sin `?`** (`SiguienteCita | undefined`): cada uso
-  declara si la hay. Zona `siguiente`, en el `<li>`; sin guion ni almacenamiento del visitante,
+  declara si la hay. **Las dos detienen la construcción ante un uso roto**: `siguienteCita` lanza,
+  nombrando la Cita y su ficha o su Tema, si el grupo de su Obra o el listado de su Tema no la
+  contienen —así que quien la llame fuera de la Página de Cita (la portada, 28.2) le pasa los
+  mapas de `citasDeLasObras` y `citasDeTema`, nunca unos suyos—, y la tarjeta rompe si
+  `siguiente` lleva a la propia Cita, «de esta obra» a otro libro, o llega sin Obra. Zona
+  `siguiente`, en el `<li>`; sin guion ni almacenamiento del visitante,
   y no depende de la jornada, la indexabilidad, la congelación ni la afiliación. Es navegación:
   no fecha ni avisa, como el resto de la tarjeta.
 

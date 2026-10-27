@@ -237,6 +237,18 @@ export function citaConTarjetaCompleta(): { slug: string; autor: string; titulo:
   return cita === undefined ? undefined : { slug: cita.slug, autor: cita.autor, titulo: cita.obra! };
 }
 
+/**
+ * Historia 24.5 — las Citas de una Obra de una sola Cita, por slug: las únicas cuya tarjeta
+ * puede llevar «Siguiente cita sobre {tema}». Si la lleva o no lo decide el build (el primer
+ * Tema publicado y otro Autor en su listado), así que la prueba lo lee del `dist/`.
+ */
+export function citasDeObraDeUnaCita(): string[] {
+  return citasResueltas()
+    .filter((c) => c.obra !== undefined && c.recuento === 1)
+    .sort(porSlug)
+    .map((c) => c.slug);
+}
+
 /** Por qué falla una prueba de la 24.4 cuando el Corpus no tiene la cara que pide. */
 export const SIN_TARJETA_COMPLETA =
   'El Corpus no tiene ninguna Cita con Fuente de una Obra de dos o más Citas: no hay tarjeta completa que probar.';

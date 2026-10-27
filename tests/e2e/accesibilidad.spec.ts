@@ -17,6 +17,7 @@ import {
   citaConTituloDeObraMasLargo,
   citaDeObraSinCotejar,
   citaSinObra,
+  citasDeObraDeUnaCita,
 } from './ayuda/corpus.ts';
 import { leerTarjetaDeObra, tarjetaDeObraDe } from '../unit/ayuda/tarjeta-de-obra.js';
 
@@ -792,6 +793,51 @@ test.describe('Historia 2.8 — responsive', () => {
 
   test('las zonas de toque miden 44px con 8px de separación', async ({ page }) => {
     await medirZonasDeToque(page, '/cita/antonio-machado-hoy-es-siempre-todavia/');
+  });
+
+  /*
+   * Historia 24.5 — la otra variante de la fila, «Siguiente cita sobre {tema}», que cambia de
+   * largo con el nombre del Tema: la de la etiqueta más larga del `dist/` de hoy, entre las
+   * Citas de una Obra de una sola Cita. Zonas de toque y, a 320 px, que las dos filas caben.
+   */
+  test('24.5 — la fila «Siguiente cita sobre {tema}» más larga mide 44px y cabe a 320 px', async ({ page }) => {
+    const candidatas = citasDeObraDeUnaCita()
+      .map((slug) => {
+        const ruta = `/cita/${slug}/`;
+        const tarjeta = tarjetaDeObraDe(construida(ruta));
+        const etiqueta = tarjeta === undefined ? undefined : />(Siguiente cita sobre [^<]+)<span aria-hidden/.exec(tarjeta)?.[1];
+        return { ruta, etiqueta };
+      })
+      .filter((c): c is { ruta: string; etiqueta: string } => c.etiqueta !== undefined)
+      .sort((a, b) => b.etiqueta.length - a.etiqueta.length || a.ruta.localeCompare(b.ruta));
+    test.skip(candidatas.length === 0, 'el Corpus de hoy no tiene ninguna fila «Siguiente cita sobre {tema}»');
+    const { ruta, etiqueta } = candidatas[0];
+    test.info().annotations.push({ type: '24.5 fila por Tema', description: `${ruta}: «${etiqueta}»` });
+    // El Tema va en minúscula tras «sobre» (`temaEnFrase`).
+    expect(etiqueta, ruta).toMatch(/^Siguiente cita sobre \p{Ll}/u);
+
+    await medirZonasDeToque(page, ruta);
+    const zonas = await page.locator('.tarjeta-de-obra li.fila-de-bloque').evaluateAll((lis) =>
+      lis.map((li) => li.getAttribute('data-zona')),
+    );
+    expect(zonas, ruta).toEqual(['siguiente', 'tarjeta-de-obra']);
+
+    await page.setViewportSize({ width: 320, height: 640 });
+    await page.goto(ruta);
+    await page.evaluate(async () => {
+      await document.fonts.ready;
+    });
+    const medida = await page.evaluate(() => {
+      const filas = [...document.querySelectorAll('.tarjeta-de-obra .fila-de-bloque a')] as HTMLElement[];
+      return {
+        filas: filas.length,
+        dentro: filas.every((fila) => fila.getBoundingClientRect().right <= document.documentElement.clientWidth + 0.5),
+        desborda: document.documentElement.scrollWidth > document.documentElement.clientWidth,
+      };
+    });
+    expect(medida.filas, ruta).toBe(2);
+    expect(medida.dentro, ruta).toBe(true);
+    expect(medida.desborda, ruta).toBe(false);
   });
 
   test('24.5 — con la tarjeta de dos filas, las zonas de toque miden 44px y las filas se apilan sin solaparse', async ({

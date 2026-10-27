@@ -567,6 +567,43 @@ const otro = conjunto.autores.find((a) => a.slug === 'antonio-machado')!;
       new RegExp(`«${PRIMERA}»[^\\n]*/sonda-tarjeta-de-obra/?[^\\n]*«antonio-machado»[^\\n]*«seneca»`),
     );
   }, 300_000);
+
+  /*
+   * Historia 24.5 — la misma guarda para «Siguiente…»: un uso que no venga de `siguienteCita`
+   * (la portada dirá el suyo, 28.2) y lleve a la propia Cita o, «de esta obra», a otro libro.
+   */
+  const sondaDeSiguiente = (destino: string) => `---
+import TarjetaDeObra from '../components/TarjetaDeObra.astro';
+import { conjuntoPublicable } from '../lib/publicado.ts';
+const conjunto = await conjuntoPublicable();
+const cita = conjunto.citas.find((c) => c.slug === 'seneca-brevedad-0')!;
+const autor = conjunto.autores.find((a) => a.slug === 'seneca')!;
+const destino = conjunto.citas.find((c) => c.slug === '${destino}')!;
+---
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8" /><title>Sonda</title></head>
+<body><TarjetaDeObra cita={cita} autor={autor} nivel={2} siguiente={{ por: 'obra', cita: destino }} /></body></html>
+`;
+
+  it('24.5 — «Siguiente…» a la propia Cita detiene la construcción, nombrándola', async () => {
+    const resultado = await construirConCorpus(corpusDeLaTarjeta().corpus, {
+      paginas: { 'sonda-siguiente.astro': sondaDeSiguiente('seneca-brevedad-0') },
+    });
+    aLimpiar.push(resultado.proyecto);
+    expect(resultado.codigo, resultado.salida).not.toBe(0);
+    expect(resultado.salida).toMatch(/«Siguiente…» de la Cita «seneca-brevedad-0»[^\n]*lleva a la propia Cita/);
+  }, 300_000);
+
+  it('24.5 — «Siguiente cita de esta obra» a una Cita de otra Obra detiene la construcción', async () => {
+    const resultado = await construirConCorpus(corpusDeLaTarjeta().corpus, {
+      paginas: { 'sonda-siguiente.astro': sondaDeSiguiente('seneca-ira-0') },
+    });
+    aLimpiar.push(resultado.proyecto);
+    expect(resultado.codigo, resultado.salida).not.toBe(0);
+    expect(resultado.salida).toMatch(
+      /«Siguiente…» de la Cita «seneca-brevedad-0»[^\n]*lleva a «seneca-ira-0», de otra Obra/,
+    );
+  }, 300_000);
 });
 
 // ─── Una construcción ────────────────────────────────────────────────────────
