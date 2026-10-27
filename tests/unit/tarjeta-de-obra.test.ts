@@ -194,7 +194,10 @@ async function astrosDeSrc(): Promise<string[]> {
     });
 }
 
-/** Las reglas de la hoja de un componente, también las de dentro de un `@media`, sin comentarios. */
+/**
+ * Las reglas de la hoja de un componente, sin comentarios. Aplana: una regla de dentro de un
+ * `@media` sale como cualquier otra, sin su condición, y el `@media` mismo no sale.
+ */
 async function reglasDe(ruta: string): Promise<{ selector: string; declaraciones: Map<string, string> }[]> {
   const fuente = await readFile(join(RAIZ, ruta), 'utf8');
   const estilo = fuente.slice(fuente.indexOf('<style>')).replace(/\/\*[\s\S]*?\*\//g, '');
@@ -280,7 +283,8 @@ describe('Historia 24.4 — el contrato de los componentes, sin construir', () =
 
   it('`TarjetaDeObra` no escribe enlaces, guiones ni marcas de Modelo, y la fila lleva su zona y su avance', async () => {
     const fuente = await readFile(join(RAIZ, TARJETA), 'utf8');
-    expect(fuente).not.toContain('<a');
+    // `<a` seguido de espacio o cierre: ni `<aside`, ni `<abbr`, ni `<article`.
+    expect(sinComentarios(fuente)).not.toMatch(/<a[\s>]/);
     expect(fuente).not.toContain('<script');
     expect(fuente).not.toContain('data-ingreso');
     expect(sinComentarios(fuente)).not.toContain(FLECHA);
@@ -313,6 +317,17 @@ describe('Historia 24.4 — el contrato de los componentes, sin construir', () =
     expect((props.get('nivel')!.nodo as ts.UnionTypeNode).types.map((t) => t.getText()).sort()).toEqual(['2', '3']);
     const { texto } = await frontmatterDe('src/components/Rotulo.astro');
     expect(texto).toMatch(/nivel\s*=\s*2\s*\}\s*=\s*Astro\.props/);
+  });
+
+  it('`Rotulo`: las dos ramas pintan el mismo marcado, salvo la etiqueta', async () => {
+    // Dos ramas y no una etiqueta dinámica (el comentario de `Rotulo.astro` dice por qué): un
+    // atributo que entre en una y no en la otra haría distinto el rótulo según su nivel.
+    const fuente = await readFile(join(RAIZ, 'src/components/Rotulo.astro'), 'utf8');
+    const ramas = [...fuente.matchAll(/<(h[23])\b([^>]*)>([\s\S]*?)<\/\1>/g)];
+    expect(ramas.map((r) => r[1]).sort()).toEqual(['h2', 'h3']);
+    const [h2, h3] = ['h2', 'h3'].map((etiqueta) => ramas.find((r) => r[1] === etiqueta)!);
+    expect(h3[2]).toBe(h2[2]);
+    expect(h3[3]).toBe(h2[3]);
   });
 
   it('la hoja de la tarjeta: plana, en tinta, con los tokens del spec y nada que recorte', async () => {
@@ -393,6 +408,19 @@ describe('Historia 24.4 — el contrato de los componentes, sin construir', () =
     expect(a!.get('color')).toBe('var(--tinta)');
     expect(a!.get('text-decoration')).toBe('none');
     expect(['anywhere', 'break-word']).toContain(a!.get('overflow-wrap'));
+    // El trato es el de la Lista de Obras, no una copia que pueda divergir: lo mismo que declaran
+    // su enlace (`.lista-de-obras a`) y su título (`.titulo`).
+    const lista = await reglasDe('src/components/ListaDeObras.astro');
+    const enlaceDeLista = lista.find((r) => r.selector === '.lista-de-obras a')?.declaraciones;
+    const tituloDeLista = lista.find((r) => r.selector === '.titulo')?.declaraciones;
+    expect(enlaceDeLista, 'sin regla `.lista-de-obras a`').toBeDefined();
+    expect(tituloDeLista, 'sin regla `.titulo` en la Lista de Obras').toBeDefined();
+    for (const propiedad of ['box-sizing', 'min-height', 'padding-block', 'color', 'text-decoration']) {
+      expect(a!.get(propiedad), propiedad).toBe(enlaceDeLista!.get(propiedad));
+    }
+    for (const propiedad of ['font-family', 'font-size', 'line-height']) {
+      expect(a!.get(propiedad), propiedad).toBe(tituloDeLista!.get(propiedad));
+    }
     for (const regla of reglas) {
       for (const prohibida of ['white-space', 'text-overflow', 'line-clamp', '-webkit-line-clamp', 'overflow', 'max-height']) {
         expect(regla.declaraciones.has(prohibida), `\`${regla.selector}\` declara ${prohibida}`).toBe(false);
@@ -555,7 +583,8 @@ const autor = conjunto.autores.find((a) => a.slug === cita.autor)!;
 <!doctype html>
 <html lang="es"><head><meta charset="utf-8" /><title>Sonda</title></head>
 <body><h2>La cita de hoy</h2><TarjetaDeObra cita={cita} autor={autor} nivel={3} />
-<Rotulo id="sin-nivel">Sin nivel</Rotulo><Rotulo id="nivel-2" nivel={2}>Nivel 2</Rotulo><Rotulo id="nivel-3" nivel={3}>Nivel 3</Rotulo></body></html>
+<Rotulo id="sin-nivel">Sin nivel</Rotulo><Rotulo id="nivel-2" nivel={2}>Nivel 2</Rotulo><Rotulo id="nivel-3" nivel={3}>Nivel 3</Rotulo>
+<Rotulo id="destino-2" destino>Destino 2</Rotulo><Rotulo id="destino-3" nivel={3} destino>Destino 3</Rotulo></body></html>
 `;
 
 describe('Historia 24.4 — la tarjeta en cada Página de Cita, construida', () => {
@@ -643,6 +672,18 @@ describe('Historia 24.4 — la tarjeta en cada Página de Cita, construida', () 
     }
   });
 
+  it('años discrepantes: la Atribución dice el año de su Cita, y la tarjeta, que es de la Obra, ninguno', async () => {
+    // A propósito (22.3): el año de la línea de la Procedencia es el de esa Cita; el de la tarjeta,
+    // el de la Obra resuelta, que no lo tiene cuando sus Citas discrepan.
+    for (const [i, slug] of CARTAS_SIN.entries()) {
+      const pagina = await html(`/cita/${slug}/`);
+      expect(pagina, slug).toMatch(new RegExp(`<p class="procedencia"[^>]*><a [^>]*>${CARTAS}</a>, ${62 + 2 * i}\\.`));
+      const hechos = leerTarjetaDeObra(tarjetaDeObraDe(pagina)!).hechos!;
+      expect(hechos.vista, slug).toBe('Séneca · 2 citas');
+      expect(hechos.vista, slug).not.toMatch(/\b6[24]\b/);
+    }
+  });
+
   it('un único enlace, la fila: su texto y el glifo «›», a la página 1 de su Obra, que existe, con su zona', async () => {
     for (const [slug, esperada] of esperadas) {
       if (esperada === undefined) continue;
@@ -714,6 +755,17 @@ describe('Historia 24.4 — la tarjeta en cada Página de Cita, construida', () 
     const rotulos = [...sonda.matchAll(/<(h[1-6])\b([^>]*)>/g)]
       .filter((m) => /\bclass="rotulo"/.test(m[2]))
       .map((m) => [/\bid="([^"]+)"/.exec(m[2])?.[1], m[1]]);
-    expect(Object.fromEntries(rotulos)).toEqual({ 'de-la-obra': 'h3', 'sin-nivel': 'h2', 'nivel-2': 'h2', 'nivel-3': 'h3' });
+    expect(Object.fromEntries(rotulos)).toEqual({
+      'de-la-obra': 'h3',
+      'sin-nivel': 'h2',
+      'nivel-2': 'h2',
+      'nivel-3': 'h3',
+      'destino-2': 'h2',
+      'destino-3': 'h3',
+    });
+    // Con `destino`, las dos ramas lo hacen enfocable igual: solo cambia la etiqueta.
+    const apertura = (id: string) => new RegExp(`<h[23]\\b([^>]*\\bid="${id}"[^>]*)>`).exec(sonda)?.[1];
+    expect(apertura('destino-3')).toContain('tabindex="-1"');
+    expect(apertura('destino-3')?.replace('destino-3', 'X')).toBe(apertura('destino-2')?.replace('destino-2', 'X'));
   });
 });

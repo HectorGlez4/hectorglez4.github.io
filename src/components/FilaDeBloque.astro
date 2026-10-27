@@ -27,6 +27,11 @@
  * Serif 4, y la puerta de cobertura tipográfica pararía todas las Páginas de Cita; «›» sí lo está
  * (`U+2000-206F`). Lo decidió Héctor el 2026-10-27, y lo heredan todos los usos de la fila.
  *
+ * El texto se escribe **en la misma línea** que las etiquetas de la fila
+ * (`<FilaDeBloque …>{texto}</FilaDeBloque>`): Astro conserva un espacio donde hay salto de línea,
+ * y un salto antes del cierre dejaría «texto ␠&nbsp;›», con el glifo libre de quedarse solo en la
+ * línea de abajo. La fila no recorta el contenido de su `slot`.
+ *
  * Pinta un `<li>`: quien la usa la mete en su lista, que es quien pone el filete de encima de
  * la primera. La zona va en el `<li>`, el contenedor que pinta el build (Historia 23.7).
  */

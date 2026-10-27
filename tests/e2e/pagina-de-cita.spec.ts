@@ -6,6 +6,7 @@ import {
   citaConProcedenciaCompleta,
   citaConTarjetaCompleta,
   citaConTituloDeObraMasLargo,
+  citaSinObra,
   procedenciaDe,
 } from './ayuda/corpus.ts';
 import { apuntarGuiones, fueraDeLaListaAlCargar } from './ayuda/guiones.ts';
@@ -790,5 +791,27 @@ test.describe('Historia 24.4 — la Tarjeta de Obra en la Página de Cita', () =
     expect(Math.abs(medida.copiarAImagen - medida.unidad * 2), JSON.stringify(medida)).toBeLessThanOrEqual(1);
     expect(medida.enSuLinea, JSON.stringify(medida)).toBe(true);
     for (const ancho of medida.anchos) expect(ancho, JSON.stringify(medida)).toBeLessThan(medida.columna);
+  });
+
+  test('sin Obra, Copiar sigue donde estaba: a 32 px de la Atribución o de la Línea de la Fuente', async ({ page }) => {
+    const sinObra = citaSinObra();
+    expect(sinObra, 'el Corpus no tiene ninguna Cita sin Obra').toBeDefined();
+    await page.goto(`/cita/${sinObra!.slug}/`);
+    await page.evaluate(async () => {
+      await document.fonts.ready;
+    });
+    const medida = await page.evaluate(() => {
+      const copiar = [...document.querySelectorAll('main .isla')].find((n) => n.querySelector('button.copiar') !== null)!;
+      const anterior = copiar.previousElementSibling as HTMLElement;
+      return {
+        tarjetas: document.querySelectorAll('.tarjeta-de-obra').length,
+        anterior: anterior.matches('figure, p.fuente'),
+        hueco: copiar.getBoundingClientRect().top - anterior.getBoundingClientRect().bottom,
+        unidad: parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--unidad')),
+      };
+    });
+    expect(medida.tarjetas, JSON.stringify(medida)).toBe(0);
+    expect(medida.anterior, JSON.stringify(medida)).toBe(true);
+    expect(Math.abs(medida.hueco - medida.unidad * 4), JSON.stringify(medida)).toBeLessThanOrEqual(1);
   });
 });

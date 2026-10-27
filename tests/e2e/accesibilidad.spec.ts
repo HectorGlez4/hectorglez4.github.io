@@ -154,21 +154,22 @@ const SUPERFICIES = [...DERIVADAS, ...OBRAS_DEL_BARRIDO, ...CITAS_DEL_BARRIDO].f
 
 /** El HTML construido de una ruta con barra final. */
 const construida = (ruta: string) => readFileSync(join(dist, ...ruta.split('/').filter(Boolean), 'index.html'), 'utf8');
-/** La Tarjeta de Obra de una página construida, o `undefined`: el mismo lector que las pruebas unitarias. */
-const tarjetaDe = (html: string) => tarjetaDeObraDe(html);
 
 test('24.4 — las Páginas de Cita del barrido salen del Corpus, cada una con su cara', () => {
   const rutaCompleta = obligatoria(CITAS_24_4.completa, SIN_TARJETA_COMPLETA);
   const rutaSinObra = obligatoria(CITAS_24_4.sinObra, SIN_CITA_SIN_OBRA);
   const completa = construida(rutaCompleta);
   expect(completa, rutaCompleta).toContain('<p class="fuente"');
-  expect(tarjetaDe(completa), rutaCompleta).toMatch(/>Ver la obra y dónde leerla<span aria-hidden="true"[^>]*>&nbsp;›<\/span>/);
+  expect(tarjetaDeObraDe(completa), rutaCompleta).toMatch(/>Ver la obra y dónde leerla<span aria-hidden="true"[^>]*>&nbsp;›<\/span>/);
   const sinObra = construida(rutaSinObra);
-  expect(sinObra, rutaSinObra).not.toContain('tarjeta-de-obra');
+  // Por el lector de la tarjeta y no por el nombre de su clase en el HTML crudo, que una hoja
+  // puesta en línea traería aunque no haya tarjeta.
+  expect(tarjetaDeObraDe(sinObra), rutaSinObra).toBeUndefined();
+  expect(sinObra, rutaSinObra).not.toContain('>De la obra<');
   if (CITAS_24_4.sinCotejar === undefined) {
     test.info().annotations.push({ type: 'cara sin barrer', description: 'el Corpus no tiene ninguna Obra sin cotejar' });
   } else {
-    const tarjeta = tarjetaDe(construida(CITAS_24_4.sinCotejar));
+    const tarjeta = tarjetaDeObraDe(construida(CITAS_24_4.sinCotejar));
     expect(tarjeta, CITAS_24_4.sinCotejar).toMatch(/>Ver la obra<span aria-hidden="true"[^>]*>&nbsp;›<\/span>/);
     expect(tarjeta, CITAS_24_4.sinCotejar).not.toContain('dónde leerla');
   }
@@ -176,7 +177,7 @@ test('24.4 — las Páginas de Cita del barrido salen del Corpus, cada una con s
     test.info().annotations.push({ type: 'cara sin barrer', description: 'el Corpus no tiene ninguna Cita con Obra' });
   } else {
     const { ruta, titulo } = CITAS_24_4.tituloLargo;
-    const tarjeta = tarjetaDe(construida(ruta));
+    const tarjeta = tarjetaDeObraDe(construida(ruta));
     expect(tarjeta, ruta).toBeDefined();
     expect(leerTarjetaDeObra(tarjeta!).titulo?.texto, ruta).toBe(titulo);
   }

@@ -1256,9 +1256,11 @@ describe('Historia 22.8 — la congelación declarada, construida', () => {
     // de su Obra aunque esa Obra salga de la lista indexable.
     const abierta = await construidaAbierta();
     expect(abierta.codigo, abierta.salida).toBe(0);
+    expect(CARTAS).toBe('/obra/seneca/cartas-a-lucilio/');
     const citas = (await readdir(join(proyecto, 'dist', 'cita'))).sort();
     expect(citas).toEqual((await readdir(join(abierta.proyecto, 'dist', 'cita'))).sort());
-    expect(citas.length).toBeGreaterThan(50);
+    // Una Página de Cita por cada fichero de Cita del fixture: ninguna se queda sin comparar.
+    expect(citas).toHaveLength(Object.keys(corpus(1)).filter((ruta) => ruta.startsWith('citas/')).length);
     for (const slug of citas) {
       const ruta = `/cita/${slug}/`;
       const congelada = tarjetaDeObraDe(await html(proyecto, ruta));
@@ -1270,9 +1272,8 @@ describe('Historia 22.8 — la congelación declarada, construida', () => {
     expect(await html(proyecto, CARTAS)).toMatch(NOINDEX);
     const tarjeta = tarjetaDeObraDe(await html(proyecto, '/cita/seneca-cartas-0/'))!;
     expect(enlacesDe(tarjeta).map((e) => ({ href: e.href, declaracion: e.declaracion }))).toEqual([
-      { href: '/obra/seneca/cartas-a-lucilio/', declaracion: { zona: 'tarjeta-de-obra' } },
+      { href: CARTAS, declaracion: { zona: 'tarjeta-de-obra' } },
     ]);
-    expect(CARTAS).toBe('/obra/seneca/cartas-a-lucilio/');
   }, 300_000);
 
   it('24.7 — congelada, toda página 1 sigue llevando el salto, y la 2 no', async () => {

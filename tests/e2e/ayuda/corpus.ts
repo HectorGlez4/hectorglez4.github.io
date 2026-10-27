@@ -15,7 +15,8 @@ import { readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { parse } from 'yaml';
 import { colgarObras, type FichaDeObra } from '../../../src/lib/obras.ts';
-import { CITAS_POR_PAGINA, MAX_CARACTERES_IMAGEN, MIN_CITAS_POR_TEMA } from '../../../src/lib/umbrales.ts';
+import { CITAS_POR_PAGINA, MIN_CITAS_POR_TEMA } from '../../../src/lib/umbrales.ts';
+import { admiteImagen } from '../../../src/lib/tramos.ts';
 
 const raiz = join(new URL('../../..', import.meta.url).pathname, 'corpus');
 
@@ -230,7 +231,7 @@ export function citaConTarjetaCompleta(): { slug: string; autor: string; titulo:
         (c.recuento ?? 0) >= 2 &&
         c.edicionCotejada === true &&
         c.conFuente &&
-        c.texto.length <= MAX_CARACTERES_IMAGEN,
+        admiteImagen(c.texto),
     )
     .sort(porSlug)[0];
   return cita === undefined ? undefined : { slug: cita.slug, autor: cita.autor, titulo: cita.obra! };
