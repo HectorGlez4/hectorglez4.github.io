@@ -59,10 +59,20 @@ const { autor, rutas, zona } = Astro.props;
 const { mismaObra, delAutor, temas } = rutas;
 
 /*
- * Usos rotos, que paran la construcción: «Más de {Autor}» con una Cita de otro Autor, o una
- * tarjeta que repite la de otro grupo. `rutasDeSalidaDeCita` no los produce; un uso que no venga
- * de ella sí podría, y el pie diría algo falso.
+ * Usos rotos, que paran la construcción: «De la misma obra» con una Cita de otra Obra, «Más de
+ * {Autor}» con una Cita de otro Autor, o una tarjeta que repite la de otro grupo.
+ * `rutasDeSalidaDeCita` no los produce; un uso que no venga de ella sí podría, y el pie diría algo
+ * falso. Que ninguna sea la propia ni la de «Siguiente» lo garantiza solo `rutasDeSalidaDeCita`:
+ * el componente no recibe ninguna de las dos, y un uso nuevo (la portada, 28.2) la llama a ella.
  */
+for (const otra of mismaObra?.citas ?? []) {
+  if (otra.obra?.nombre !== mismaObra?.obra.nombre) {
+    throw new Error(
+      `RutasDeSalida: en ${Astro.url.pathname}, «De la misma obra» lleva la Cita «${otra.slug}», ` +
+        `que no es de la Obra «${mismaObra?.obra.nombre}».`,
+    );
+  }
+}
 for (const otra of delAutor?.citas ?? []) {
   if (otra.autor !== autor.slug) {
     throw new Error(
@@ -123,6 +133,11 @@ const hayAlgo = mismaObra !== undefined || delAutor !== undefined || temas.lengt
 }
 
 <style>
+  /*
+   * La apertura de UX-DR67: 8 × `--unidad` (64 px) en móvil y 12 × (96 px) desde 600 px, el
+   * corte de `tokens.css` —si ese corte se mueve, este se mueve con él—. No es `--respiracion`
+   * (40 y 64 px), que es otro ritmo; antes de la 24.6 el pie usaba 1,5 × `--respiracion`.
+   */
   .salidas {
     margin-top: calc(var(--unidad) * 8);
     padding-top: calc(var(--unidad) * 3);

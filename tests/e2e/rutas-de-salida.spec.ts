@@ -48,8 +48,11 @@ test.describe('Historia 24.6 — al pie, más de la misma obra y más del Autor'
     expect(DOS_BLOQUES, 'El Corpus no tiene ninguna Cita de una Obra de 4 o más cuyo Autor tenga Citas fuera de ella.').toBeDefined();
     await page.goto(DOS_BLOQUES!);
     const grupos = await leerPie(page);
-    expect(grupos.map((g) => g.clase)).toEqual(['de-la-misma-obra', 'mas-del-autor', 'temas-de-la-cita'].slice(0, grupos.length));
-    expect(grupos.slice(0, 2).map((g) => g.clase)).toEqual(['de-la-misma-obra', 'mas-del-autor']);
+    // Los dos bloques, primero y en su orden; y los Temas, si están, los últimos.
+    const clases = grupos.map((g) => g.clase);
+    expect(clases.slice(0, 2)).toEqual(['de-la-misma-obra', 'mas-del-autor']);
+    expect(clases).toEqual(['de-la-misma-obra', 'mas-del-autor', 'temas-de-la-cita'].filter((c) => clases.includes(c)));
+    expect(clases.length).toBe(2 + (await page.locator(`${NAV} .temas-de-la-cita`).count()));
     for (const g of grupos) expect(g.rotulo.etiqueta, g.clase).toBe('h2');
     const [misma, mas] = grupos;
     expect(misma.rotulo.texto).toBe('De la misma obra');

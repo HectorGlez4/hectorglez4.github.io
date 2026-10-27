@@ -921,6 +921,11 @@ test.describe('Historia 24.6 — el pie de la Página de Cita', () => {
             filete: [u.borderTopWidth, u.borderTopStyle, u.borderTopColor],
           };
         }),
+        // Los Temas, si están: del rótulo a los chips, el mismo hueco que a las listas.
+        chips: [...nav.querySelectorAll('.temas-de-la-cita ul.chips')].map((ul) => {
+          const rotulo = ul.parentElement!.querySelector('.rotulo')!.getBoundingClientRect();
+          return Math.round(ul.getBoundingClientRect().top - rotulo.bottom);
+        }),
         cierres: [...nav.querySelectorAll('li.fila-de-bloque a')].map((a) => {
           const c = getComputedStyle(a);
           return { tamaño: parseFloat(c.fontSize), color: c.color, subrayado: c.textDecorationLine };
@@ -942,6 +947,7 @@ test.describe('Historia 24.6 — el pie de la Página de Cita', () => {
     for (const l of medida.listas) {
       expect(l).toEqual({ hueco: t.unidad * 2, viñeta: 'none', relleno: '0px', filete: [t.grosor, 'solid', t.filete] });
     }
+    for (const hueco of medida.chips) expect(hueco).toBe(t.unidad * 2);
     expect(medida.cierres).toHaveLength(2);
     for (const c of medida.cierres) expect(c).toEqual({ tamaño: t.md, color: t.tinta, subrayado: 'none' });
     expect(medida.arriba, 'el pie va por debajo de la última acción').toBeGreaterThanOrEqual(medida.islas);

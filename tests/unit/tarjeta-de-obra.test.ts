@@ -13,6 +13,7 @@ import {
   paginaConstruida,
 } from './ayuda/construir.js';
 import { enlacesDe, recorrerElementos } from './ayuda/enlaces.js';
+import { navDeSalidas } from './ayuda/rutas-de-salida.js';
 import {
   cuantasTarjetasDeObra,
   leerTarjetaDeObra,
@@ -663,9 +664,12 @@ describe('Historia 24.4 — la tarjeta en cada Página de Cita, construida', () 
       const pagina = await html(`/cita/${slug}/`);
       if (esperada === undefined) {
         // El marcado, sin las hojas en línea: la sonda del nivel 3 comparte la hoja de la
-        // tarjeta con la Página de Cita, y Astro puede ponerla en línea en todas. Y hasta las
-        // Rutas de salida: desde la 24.6 sus cierres son Filas de bloque, que no son de la tarjeta.
-        const marcado = sinHojas(pagina).split('<nav class="salidas"')[0];
+        // tarjeta con la Página de Cita, y Astro puede ponerla en línea en todas. Y sin las
+        // Rutas de salida —solo ese `nav`, lo de después sigue mirándose—: desde la 24.6 sus
+        // cierres son Filas de bloque, que no son de la tarjeta.
+        const sinEstilo = sinHojas(pagina);
+        const pie = navDeSalidas(sinEstilo);
+        const marcado = pie === undefined ? sinEstilo : sinEstilo.replace(pie, '');
         expect(cuantasTarjetasDeObra(pagina), slug).toBe(0);
         expect(marcado, slug).not.toContain('tarjeta-de-obra');
         expect(marcado, slug).not.toContain('De la obra');

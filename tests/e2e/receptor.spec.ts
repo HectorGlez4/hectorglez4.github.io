@@ -1149,8 +1149,12 @@ async function conLaCacheDeVerdad(
 test.describe('Historia 23.7 — cada salida interna dice desde qué zona', () => {
   const llegadas = (nombre: string) => recibidos.filter((r) => r?.evento === nombre);
   const salidas = () => llegadas(EVENTOS.salidaInterna);
-  /** Las tarjetas de «Más de Séneca» en las Rutas de salida (Historia 24.6): las dos Cartas. */
-  const HERMANAS = 'nav[aria-label="Seguir leyendo"] .mas-del-autor li.tarjeta a';
+  /**
+   * Las tarjetas de «Más de {Autor}» en las Rutas de salida (Historia 24.6). Las pruebas usan la
+   * primera y la última, así que la Cita que se lee necesita al menos dos (en este sitio, las dos
+   * Cartas de Séneca).
+   */
+  const MAS_DEL_AUTOR = 'nav[aria-label="Seguir leyendo"] .mas-del-autor li.tarjeta a';
   const RESULTADOS = '[data-resultados] .resultado a';
   /** Una consulta que encuentra algo en este sitio: la Cita del viento favorable. */
   const CON_RESULTADOS = 'viento';
@@ -1217,21 +1221,21 @@ test.describe('Historia 23.7 — cada salida interna dice desde qué zona', () =
       ['#contenido', PROPIA],
     );
 
-    const hermana = page.locator(HERMANAS).first();
+    const delAutor = page.locator(MAS_DEL_AUTOR).first();
     // Meta y Mayúsculas llegan como `click` en todas partes: abren otra pestaña u otra ventana.
-    await hermana.click({ modifiers: ['Meta'] });
-    await hermana.click({ modifiers: ['Shift'] });
+    await delAutor.click({ modifiers: ['Meta'] });
+    await delAutor.click({ modifiers: ['Shift'] });
     // Control y el botón central, no siempre —en macOS Control es el menú contextual, y Chromium da
     // `auxclick` al central—: se despachan como `click` en el enlace, para que su filtro se pruebe.
-    await hermana.dispatchEvent('click', { button: 0, ctrlKey: true });
-    await hermana.dispatchEvent('click', { button: 1 });
+    await delAutor.dispatchEvent('click', { button: 0, ctrlKey: true });
+    await delAutor.dispatchEvent('click', { button: 1 });
     await page.locator('a[href="#contenido"]').last().click();
     await expect.poll(() => new URL(page.url()).hash).toBe('#contenido');
     await page.locator(`a[href="${PROPIA}"]`).click();
     await esperar(500);
 
     // Cada gesto llegó como `click`, con lo suyo, a la escucha de la ventana.
-    const destino = await hermana.getAttribute('href');
+    const destino = await delAutor.getAttribute('href');
     expect(await clicsDe(page)).toEqual([
       { button: 0, ctrlKey: false, metaKey: true, shiftKey: false, altKey: false, href: destino },
       { button: 0, ctrlKey: false, metaKey: false, shiftKey: true, altKey: false, href: destino },
@@ -1245,7 +1249,7 @@ test.describe('Historia 23.7 — cada salida interna dice desde qué zona', () =
     expect(salidas(), 'salió una salida sin serlo').toEqual([]);
     expect(new URL(page.url()).pathname).toBe(RUTA_CITA);
 
-    await hermana.click();
+    await delAutor.click();
     const salida = await esperarEvento(EVENTOS.salidaInterna);
     expect(salida, 'no llegó la salida').toBeTruthy();
     expect(salida).toMatchObject({ ruta: RUTA_CITA, zona: 'rutas-de-salida' });
@@ -1269,7 +1273,7 @@ test.describe('Historia 23.7 — cada salida interna dice desde qué zona', () =
     await esperarAlFichero(page);
     expect(await esperarEvento(EVENTOS.vistaDeCita), 'no llegó la vista').toBeTruthy();
 
-    await page.locator(HERMANAS).first().focus();
+    await page.locator(MAS_DEL_AUTOR).first().focus();
     await page.keyboard.press('Enter');
     const salida = await esperarEvento(EVENTOS.salidaInterna);
     expect(salida, 'no llegó la salida').toBeTruthy();
@@ -1363,13 +1367,13 @@ test.describe('Historia 23.7 — cada salida interna dice desde qué zona', () =
     await conLaCacheDeVerdad(playwright, async (pagina, restaurada) => {
       await pagina.goto(`${SITIO}${RUTA_CITA}`);
       await esperarAlFichero(pagina);
-      await pagina.locator(HERMANAS).first().click();
+      await pagina.locator(MAS_DEL_AUTOR).first().click();
       await pagina.waitForURL((url) => url.pathname !== RUTA_CITA);
       await esperarAlFichero(pagina);
       await restaurada();
       expect(new URL(pagina.url()).pathname).toBe(RUTA_CITA);
 
-      await pagina.locator(HERMANAS).last().click();
+      await pagina.locator(MAS_DEL_AUTOR).last().click();
       await expect.poll(() => salidas().filter((r) => r!.ruta === RUTA_CITA).length).toBe(2);
       // La misma página, restaurada: lleva en memoria lo de las dos cargas, en su orden.
       expect((await balizasDe(pagina)).map((b) => [b.evento, b.zona])).toEqual([

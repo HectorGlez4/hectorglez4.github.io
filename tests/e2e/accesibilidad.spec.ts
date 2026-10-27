@@ -826,10 +826,13 @@ test.describe('Historia 2.8 — responsive', () => {
             lista === null
               ? -1
               : [...document.querySelectorAll('ul:has(> li.tarjeta), ul:has(> li.fila-de-bloque)')].indexOf(lista),
+          // Si la lista reúne Tarjetas de Cita: solo ahí hay margen negativo que absorber.
+          conTarjetas: lista !== null && lista.querySelector(':scope > li.tarjeta') !== null,
         })),
     );
     // El margen negativo de la tarjeta (`margin-inline: -1 × --unidad`) la saca un `--unidad` por
-    // cada lado de la fila que la cierra: dentro de una lista, eso no es otra columna.
+    // cada lado de la fila que la cierra: dentro de una lista con tarjetas, eso no es otra columna.
+    // Una lista solo de Filas de bloque (la Tarjeta de Obra) sigue con el píxel de siempre.
     const unidad = await page.evaluate(() => {
       const sonda = document.createElement('div');
       sonda.style.width = 'var(--unidad)';
@@ -858,11 +861,12 @@ test.describe('Historia 2.8 — responsive', () => {
       for (let j = i + 1; j < cajas.length; j += 1) {
         const a = cajas[i];
         const b = cajas[j];
+        const holgura = a.conTarjetas ? unidad + 1 : 1;
         const filasDeUnListado =
           a.lista !== -1 &&
           a.lista === b.lista &&
-          Math.abs(a.izq - b.izq) <= unidad + 1 &&
-          Math.abs(a.der - b.der) <= unidad + 1;
+          Math.abs(a.izq - b.izq) <= holgura &&
+          Math.abs(a.der - b.der) <= holgura;
         if (filasDeUnListado) {
           expect(a.abajo <= b.arriba || b.abajo <= a.arriba, `${ruta}: ${JSON.stringify([a, b])}`).toBe(true);
           continue;

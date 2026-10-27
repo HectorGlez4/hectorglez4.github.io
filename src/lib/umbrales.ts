@@ -277,6 +277,8 @@ export const MIN_RUTAS_DE_CITA_EN_RAFAGA = 100;
  *
  * Del Autor, **sin las de su Obra**, que ya tiene su propio bloque (`MAX_CITAS_DE_LA_MISMA_OBRA`),
  * ni la propia ni la que ofrece «Siguiente» (Historia 24.6). Las elige `citasRelacionadas`.
+ *
+ * Un entero de 2 o más: lo reparte `repartir`, que con menos lanza y para la construcción.
  */
 export const MAX_CITAS_RELACIONADAS = 4;
 
@@ -284,9 +286,10 @@ export const MAX_CITAS_RELACIONADAS = 4;
  * Citas de la misma Obra que ofrece una Página de Cita en «De la misma obra» — UX-DR68, AD-9,
  * Historia 24.6.
  *
- * En el orden del libro, sin la propia ni la que ofrece «Siguiente». Con las cuatro de «Más de
- * {Autor}», una Página de Cita lleva como mucho siete Tarjetas al pie. Las elige
- * `citasDeLaMismaObra`; moverlo lo decide Héctor, en un diff visible.
+ * En el orden del libro, sin la propia ni la que ofrece «Siguiente». Una Página de Cita lleva
+ * al pie como mucho esta cifra más `MAX_CITAS_RELACIONADAS` Tarjetas (hoy, 3 + 4). Las elige
+ * `citasDeLaMismaObra`; moverlo lo decide Héctor, en un diff visible. Un entero de 2 o más: lo
+ * reparte `repartir`, que con menos lanza y para la construcción.
  */
 export const MAX_CITAS_DE_LA_MISMA_OBRA = 3;
 

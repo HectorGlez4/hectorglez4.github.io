@@ -1,5 +1,5 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { readFile, readdir } from 'node:fs/promises';
+import { access, readFile, readdir } from 'node:fs/promises';
 import { join } from 'node:path';
 import {
   AUTOR_VALIDO,
@@ -394,6 +394,12 @@ describe('Historia 24.6 — el pie de cada Página de Cita, en `dist/`', () => {
       const tarjetas = (leerRutasDeSalida(html, slug)?.grupos ?? []).flatMap((g) => g.tarjetas.map((t) => t.slug));
       expect(tarjetas, slug).not.toContain(slug);
       const siguiente = siguienteDe(html);
+      // En una Obra de dos Citas o más siempre hay «Siguiente»: si no se lee, la comprobación no
+      // miraría nada, y eso es un fallo, no un salto.
+      const obra = porSlug.get(slug)!.obra;
+      if (obra !== undefined && citas.filter((c) => c.obra === obra).length >= 2) {
+        expect(siguiente, `${slug}: sin «Siguiente» legible`).toBeDefined();
+      }
       if (siguiente !== undefined) expect(tarjetas, slug).not.toContain(siguiente);
       expect(new Set(tarjetas).size, slug).toBe(tarjetas.length);
     }
@@ -435,8 +441,24 @@ describe('Historia 24.6 — el pie de cada Página de Cita, en `dist/`', () => {
     );
   });
 
-  it('(d) «Más de {Autor}»: del Autor, nada de su Obra, la línea de Obra de la ficha, por `rutas-de-salida`, con su cierre', () => {
+  /** Las Citas que lista la Página de Autor construida, en todas sus páginas. */
+  async function listadoDelAutor(ruta: string): Promise<string[]> {
+    const slugsListados: string[] = [];
+    for (let n = 1; ; n += 1) {
+      const pagina = n === 1 ? ruta : `${ruta}${n}/`;
+      const fichero = paginaConstruida(proyecto, pagina);
+      try {
+        await access(fichero);
+      } catch {
+        return slugsListados;
+      }
+      slugsListados.push(...tarjetasDelListado(await readFile(fichero, 'utf8'), pagina).map((t) => t.slug));
+    }
+  }
+
+  it('(d) «Más de {Autor}»: del Autor, nada de su Obra, la línea de Obra de la ficha, por `rutas-de-salida`, con su cierre', async () => {
     let vistos = 0;
+    const listados = new Map<string, string[]>();
     for (const [slug, html] of paginas) {
       const mas = grupo(html, slug, 'mas-del-autor');
       if (mas === undefined) continue;
@@ -453,6 +475,9 @@ describe('Historia 24.6 — el pie de cada Página de Cita, en `dist/`', () => {
         if (otra.obra !== undefined) expect(tarjeta.visibles[1].texto, slug).toBe(otra.obra);
       }
       const recuento = citas.filter((c) => c.autor === propia.autor).length;
+      // El cierre promete lo que lista la Página de Autor a la que lleva: se lee de `dist/`.
+      if (!listados.has(autor.ruta)) listados.set(autor.ruta, await listadoDelAutor(autor.ruta));
+      expect(listados.get(autor.ruta)!.length, slug).toBe(recuento);
       expect(mas.cierre, slug).toEqual({
         texto: `Las ${recuento} citas de ${autor.nombre}`,
         href: autor.ruta,
@@ -508,7 +533,10 @@ describe('Historia 24.6 — el pie de cada Página de Cita, en `dist/`', () => {
         const esDeObra = elemento.etiqueta === 'section' && clases.includes('tarjeta-de-obra');
         if (!esTarjeta && !esDeObra) return;
         tarjetas += 1;
-        const ignorada = [...antepasados, elemento].some((e) => e.atributos.get('data-pagefind-ignore') === 'all');
+        // Un antepasado estricto para las tarjetas del pie (el `nav`); la Tarjeta de Obra lleva el
+        // atributo en su propia `section` desde la 24.4, que para Pagefind la excluye igual.
+        const candidatos = esDeObra ? [...antepasados, elemento] : antepasados;
+        const ignorada = candidatos.some((e) => e.atributos.get('data-pagefind-ignore') === 'all');
         expect(ignorada, `${slug}: ${elemento.etiqueta}.${clases.join('.')}`).toBe(true);
       });
       if (ESPERADO[slug] !== 'sin-nav') expect(tarjetas, slug).toBeGreaterThan(0);
@@ -560,4 +588,61 @@ describe('Historia 24.6 — el pie de cada Página de Cita, en `dist/`', () => {
     // La Cita sin Obra no tiene Tarjeta de Obra, y elige 4 de las 14 demás de Séneca.
     expect(paginas.get(SIN_OBRA)).not.toContain('class="tarjeta-de-obra"');
   });
+});
+
+// ─── Construcciones que fallan ───────────────────────────────────────────────
+
+/*
+ * Las guardas de `RutasDeSalida.astro`: un uso que no venga de `rutasDeSalidaDeCita` (la portada
+ * pasará el suyo, 28.2) y diga algo falso detiene la construcción. La página real nunca las
+ * dispara, así que solo una sonda las prueba.
+ */
+describe('Historia 24.6 — un pie roto detiene la construcción', () => {
+  const sonda = (rutas: string) => `---
+import RutasDeSalida from '../components/RutasDeSalida.astro';
+import { conjuntoPublicable } from '../lib/publicado.ts';
+const conjunto = await conjuntoPublicable();
+const de = (slug: string) => conjunto.citas.find((c) => c.slug === slug)!;
+const autor = conjunto.autores.find((a) => a.slug === 'seneca')!;
+const obra = de('seneca-brevedad-0').obra!;
+---
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8" /><title>Sonda</title></head>
+<body><RutasDeSalida autor={autor} rutas={${rutas}} zona="rutas-de-salida" /></body></html>
+`;
+  const construirSonda = async (rutas: string) => {
+    const resultado = await construirConCorpus(corpusDelPie().corpus, {
+      paginas: { 'sonda-rutas-de-salida.astro': sonda(rutas) },
+    });
+    aLimpiar.push(resultado.proyecto);
+    return resultado;
+  };
+
+  it('«Más de {Autor}» con una Cita de otro Autor, nombrando la ruta, la Cita y los dos Autores', async () => {
+    const resultado = await construirSonda(
+      "{ mismaObra: undefined, delAutor: { recuento: 15, citas: [de('epicteto-manual-0')] }, temas: [] }",
+    );
+    expect(resultado.codigo, resultado.salida).not.toBe(0);
+    expect(resultado.salida).toMatch(
+      /\/sonda-rutas-de-salida\/?[^\n]*«Más de Séneca» lleva la Cita «epicteto-manual-0», que es de «epicteto» y no de «seneca»/,
+    );
+  }, 300_000);
+
+  it('«De la misma obra» con una Cita de otra Obra, nombrando la ruta y la Cita', async () => {
+    const resultado = await construirSonda(
+      "{ mismaObra: { obra, citas: [de('seneca-cartas-0')] }, delAutor: undefined, temas: [] }",
+    );
+    expect(resultado.codigo, resultado.salida).not.toBe(0);
+    expect(resultado.salida).toMatch(
+      /\/sonda-rutas-de-salida\/?[^\n]*«De la misma obra» lleva la Cita «seneca-cartas-0», que no es de la Obra/,
+    );
+  }, 300_000);
+
+  it('una tarjeta en los dos grupos, nombrando la ruta y la Cita', async () => {
+    const resultado = await construirSonda(
+      "{ mismaObra: { obra, citas: [de('seneca-brevedad-1')] }, delAutor: { recuento: 15, citas: [de('seneca-brevedad-1')] }, temas: [] }",
+    );
+    expect(resultado.codigo, resultado.salida).not.toBe(0);
+    expect(resultado.salida).toMatch(/\/sonda-rutas-de-salida\/?[^\n]*la Cita «seneca-brevedad-1» sale dos veces/);
+  }, 300_000);
 });

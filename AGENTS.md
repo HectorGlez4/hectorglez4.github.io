@@ -837,7 +837,8 @@ cada uno con su `h2` (`Rotulo.astro`): **«De la misma obra»** —hasta `MAX_CI
 y el cierre «Las {n} citas de {título} ›» a la página 1 de la Obra—, **«Más de {Autor}»** —hasta
 `MAX_CITAS_RELACIONADAS` (4) del Autor **sin las de su Obra**, con la Tarjeta `obra`, zona
 `rutas-de-salida`, y el cierre «Las {n} citas de {Autor} ›» a su Página de Autor— y **«Temas»**
-(chips, `chip-de-tema`). Como mucho siete tarjetas; ninguna es la propia ni la de «Siguiente», ni
+(chips, `chip-de-tema`). Como mucho `MAX_CITAS_DE_LA_MISMA_OBRA` + `MAX_CITAS_RELACIONADAS`
+tarjetas (hoy, siete); ninguna es la propia ni la de «Siguiente», ni
 sale en los dos grupos. El orden de tabulación es el del marcado.
 
 - Lo decide solo `rutasDeSalidaDeCita` de `src/lib/publicado.ts`, pura y determinista por commit
@@ -851,8 +852,9 @@ sale en los dos grupos. El orden de tabulación es el del marcado.
   `FilaDeBloque`) y sin recortar el título; un recuento menor que 2 lanza.
 - **Un grupo vacío no está** —ni rótulo, ni filete, ni hueco— y sin ninguno no hay `nav`. **No
   hay respaldo**: «Explorar por tema» y la sección «Seguir leyendo» hacia el Autor se retiraron, y la Atribución sigue
-  enlazando al Autor y a la Obra. El componente lanza si «Más de» trae una Cita de otro Autor o
-  una tarjeta se repite.
+  enlazando al Autor y a la Obra. El componente lanza si «De la misma obra» trae una Cita de otra
+  Obra, «Más de» una de otro Autor o una tarjeta se repite; que ninguna sea la propia ni la de
+  «Siguiente» lo garantiza solo `rutasDeSalidaDeCita`, así que un uso nuevo la llama a ella.
 - El `nav` va bajo `data-pagefind-ignore="all"` (NFR-13) y **no** lleva `data-zona`: cada `<li>`
   y el `ul` de chips declaran la suya. Sin guion ni `data-ingreso`.
 - Pinta textos, Obras y recuentos de otras Citas: es navegación y, por la excepción de Héctor,

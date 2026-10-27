@@ -33,22 +33,53 @@ async function resultados(page: import('@playwright/test').Page) {
 
 /*
  * Historia 24.6, NFR-13 — el pie de la Página de Cita va bajo `data-pagefind-ignore="all"`: el
- * texto de una Cita de «De la misma obra» encuentra su propia página, nunca la que la ofrece al pie.
+ * texto de una Cita del pie encuentra su propia página, nunca las que la ofrecen al pie.
  */
 test.describe('Historia 24.6 — el pie no entra en la búsqueda', () => {
-  test('el fragmento de una tarjeta de «De la misma obra» no devuelve la página que la ofrece', async ({ page }) => {
+  /** Minúsculas y sin acentos, como compara el buscador. */
+  const plano = (texto: string) =>
+    texto
+      .normalize('NFD')
+      .replace(/\p{M}/gu, '')
+      .toLowerCase();
+  const palabras = (texto: string) =>
+    plano(texto)
+      .replace(/[«»"“”.,;:¡!¿?()]/g, ' ')
+      .split(/\s+/)
+      .filter(Boolean);
+  /** Si el texto de una Cita trae todas las palabras de la consulta (también como parte de otra). */
+  const traeTodas = (texto: string, consulta: string) => palabras(consulta).every((p) => plano(texto).includes(p));
+
+  test('el fragmento de una tarjeta del pie no devuelve ninguna página que la ofrezca al pie', async ({ page, request }) => {
     const slug = citaConLosDosBloques();
     expect(slug, 'El Corpus no tiene ninguna Cita con los dos bloques del pie.').toBeDefined();
     const ruta = `/cita/${slug}/`;
     await page.goto(ruta);
-    const href = await page.locator('nav.salidas .de-la-misma-obra li.tarjeta a').first().getAttribute('href');
-    expect(href, ruta).toMatch(/^\/cita\/[^/]+\/$/);
-    const otra = href!.split('/')[2];
-    const consulta = textoDe(otra).replace(/[«»"“”.,;:¡!¿?()]/g, ' ').split(/\s+/).filter(Boolean).slice(0, 6).join(' ');
+    const hrefs = await page
+      .locator('nav.salidas .de-la-misma-obra li.tarjeta a, nav.salidas .mas-del-autor li.tarjeta a')
+      .evaluateAll((as) => as.map((a) => a.getAttribute('href')!));
+    // Una tarjeta cuyas primeras palabras no estén también en la Cita que se lee: si lo están, la
+    // página que la ofrece saldría por su propio texto, que es lo correcto, y la prueba no diría nada.
+    const elegida = hrefs
+      .map((href) => {
+        const otra = href.split('/')[2];
+        return { href, consulta: palabras(textoDe(otra)).slice(0, 6).join(' ') };
+      })
+      .find(({ consulta }) => !traeTodas(textoDe(slug!), consulta));
+    expect(elegida, `${ruta}: ninguna tarjeta del pie se distingue por sus primeras palabras`).toBeDefined();
+    const { href, consulta } = elegida!;
     await buscar(page, consulta);
     const citas = (await resultados(page)).filter((r) => r.tipo === 'cita').map((r) => r.href.replace(/\/?$/, '/'));
     expect(citas, consulta).toContain(href);
     expect(citas, consulta).not.toContain(ruta);
+    // Y ninguna otra: toda página de los resultados que ofrece la tarjeta al pie tiene que haber
+    // salido por su propio texto.
+    for (const resultado of citas.filter((c) => c !== href)) {
+      const html = await (await request.get(resultado)).text();
+      const pie = /<nav class="salidas"[\s\S]*?<\/nav>/.exec(html)?.[0] ?? '';
+      if (!pie.includes(`href="${href}"`)) continue;
+      expect(traeTodas(textoDe(resultado.split('/')[2]), consulta), `${resultado} sale por el pie con «${consulta}»`).toBe(true);
+    }
   });
 });
 
