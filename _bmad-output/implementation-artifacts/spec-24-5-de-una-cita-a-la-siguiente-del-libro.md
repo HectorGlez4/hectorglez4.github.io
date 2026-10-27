@@ -5,7 +5,7 @@ created: '2026-10-27'
 status: 'done'
 baseline_revision: 'f096023b4267b202859c71c97f669d63a4effd94'
 review_loop_iteration: 0
-followup_review_recommended: false
+followup_review_recommended: true
 context:
   - '{project-root}/_bmad-output/implementation-artifacts/epic-24-context.md'
 warnings:
@@ -115,6 +115,19 @@ deferred: []
 
 Las cinco capas son externas y en esta pasada no traen hallazgos: la revisión independiente viene después.
 
+### 2026-10-27 — Review pass
+- intent_gap: 0
+- bad_spec: 0
+- patch: 3: (high 0, medium 1, low 2)
+- defer: 0
+- reject: 20
+- addressed_findings:
+  - `[medium]` `[patch]` La rama del Tema de `siguienteCita` caía en silencio ante un mapa roto (blind-hunter, edge-case-hunter, ac-auditor 4): `listados.get(...) ?? []` callaba un Tema ausente y, con la Cita fuera de su listado (`aqui === -1`), el recorrido arrancaba en 0 y daba un destino que no es «la que sigue». Ahora lanza nombrando Cita y Tema, como el grupo roto de la Obra (`citasDeTema` lista toda Cita que declara el Tema), con docblock al día y una prueba pura nueva en `tests/unit/siguiente.test.ts` («listado roto»: Tema ausente de `listados` y Cita ausente de su listado). El build del Corpus real sigue con código 0 y el mismo peso de `dist/`.
+  - `[low]` `[patch]` `tests/unit/siguiente.test.ts`: (a) volvía a leer la página en cada salto y tomaba el texto del primer enlace a `/cita/` sin mirar su zona; ahora reutiliza la tarjeta de la primera lectura y lee el texto de la fila `data-zona="siguiente"`. La segunda prueba «(b)» pasa a «(b′)».
+  - `[low]` `[patch]` `tests/e2e/pagina-de-cita.spec.ts` (ac-auditor 2, blind-hunter): desde la 24.5 nada medía el filete de debajo de la fila de la Obra, y el destino de «Siguiente» solo se comprobaba con un 200. La prueba de la cara completa compara ahora también el filete inferior de las dos filas (el de la primera lo juzga contra los tokens «los tokens calculados…») y exige que la tarjeta del destino lleve a la misma Página de Obra.
+
+Rechazados (20, tras deduplicar), con su motivo: `temaEnFrase` sobre un Tema que empiece por nombre propio o por espacios —la regla la fija el contrato, los 24 Temas empiezan por artículo y el esquema rechaza el nombre en blanco sin recortarlo por NFR-12—; la zona `siguiente` sin registrar —está en `ZONAS` de `src/lib/vocabulario.ts` y la prueba de la 23.7 la trata como de otra épica, como manda el contrato—; el spec en `done` antes de la revisión —es el diseño del bucle, cuyas capas externas corren después—; riesgos residuales como diferidos —Copiar fuera de la primera pantalla es deuda aceptada (SM-C5) y la caída por tiempo de `rutas-de-salida.spec.ts:98` ya estaba diferida en la 24.4—; tiempo de build y `findIndex` lineal —`citasDeLasObras` está memorizada y la suma de cuadrados de los grupos es despreciable—; la vuelta sin señal y la fila del Tema bajo «De la obra» —las fija el contrato y UX-DR65—; aserciones de fuente frágiles —patrón vigente de la 24.4—; el predicado de zona repetido en las pruebas —cosmético—; el `[12]` de `obra-pagina.test.ts` —el orden exacto lo juzga (a) de `siguiente.test.ts`—; la anotación renombrada a `24.5 a 360 × 640` y la exención de los 8 px por componente —las pide el contrato—; la prop con la Cita entera —el tipo lo fija el contrato—; la variante del Tema y la ausencia de fila sin navegador —mismo componente, mismo marcado, juzgados en `dist/`—; el alto de 240 px sin aserción —el contrato lo pide anotado (UX-DR64), y la Cita «completa» sale del Corpus real, que se siembra a diario—; el clic que no mira la baliza —la declaración más cercana, que es lo que lee la escucha, la juzga (d)—; «sin hueco» sin prueba permanente —(c) exige una sola fila y la zona de la Obra—; 24.1 y 24.4 en `review` —es el estado del bucle—; el Corpus real sin prueba repetible —medido en el spec, como pide la Verification—.
+
 ## Design Notes
 
 **El fixture de `siguiente.test.ts`** (todas cotejadas: el andamio escribe los documentos en orden de inserción y las fichas). Autores `seneca` (`AUTOR_VALIDO`), `antonio-machado`, `epicteto`; Temas «La vida» (`la-vida`), «El deber» (`el-deber`), «La amistad» (`la-amistad`, < 15). Séneca: «Sobre la brevedad de la vida» 4 Citas insertadas 3, 2, 1, 0 (orden del libro inverso al de los slugs), «Cartas a Lucilio» 2, «Sobre la vida feliz» 2 (`seneca-vida-feliz-0/1`, `la-vida`), «De la ira» 1 (`seneca-ira-0`, `[la-amistad, la-vida]`), «De la providencia» 1 (`[la-amistad]`). Epicteto: «Manual» 12 (`la-vida`), «Disertaciones» 1 (`epicteto-disertaciones-0`, `la-vida`). Machado: «Campos de Castilla» 15 (`el-deber`), «Soledades» 1 (`antonio-machado-soledades-0`, `[el-deber, la-vida]`). Listado de `la-vida`: soledades-0, disertaciones-0, manual-×12, ira-0, vida-feliz-0/1 (17). Esperado: brevedad 3→2→1→0→3; disertaciones-0 → `seneca-ira-0` (salta las doce del Manual); ira-0 → `antonio-machado-soledades-0` (salta vida-feliz y da la vuelta), «Siguiente cita sobre la vida»; providencia-0 y soledades-0 sin fila. La prueba deriva lo esperado de `dist/` y además lo compara con estas cifras.
@@ -162,3 +175,19 @@ Verificación:
 Revisión: 0 parches, 0 diferidos, 0 rechazados en esta pasada (capas externas sin hallazgos todavía). `followup_review_recommended: false` (0 parches; puntuación 0).
 
 Riesgos residuales: «Siguiente…» depende del orden de la Obra y del listado del Tema —otras Citas, sus posiciones y sus Autores— y, como el resto de la tarjeta, no fecha ni avisa (excepción de Héctor; la 24.8 la deja así). Copiar sale de la primera pantalla de 360 × 640 unos 45 px más abajo que con la 24.4 (deuda aceptada, SM-C5). `[movil] rutas-de-salida.spec.ts:98` sigue rozando su límite de 30 s con la máquina cargada.
+
+**Primera pasada de revisión (2026-10-27).** Las cinco capas externas; 3 parches aplicados (1 medio, 2 bajos), 0 diferidos, 20 rechazados tras deduplicar (motivos en el Review Triage Log).
+
+Qué cambia:
+- `src/lib/publicado.ts` -- la rama del Tema de `siguienteCita` lanza, nombrando Cita y Tema, si el listado de su Tema falta o no la contiene, igual que el grupo roto de la Obra; antes devolvía en silencio «sin fila» o un destino que no era «la que sigue».
+- `tests/unit/siguiente.test.ts` -- prueba pura «listado roto» (20 pruebas); (a) lee el texto de la fila por su zona y sin volver a leer la página; la segunda «(b)» pasa a «(b′)».
+- `tests/e2e/pagina-de-cita.spec.ts` -- la prueba de la cara completa compara además el filete inferior de las dos filas y exige que la tarjeta del destino de «Siguiente» lleve a la misma Página de Obra.
+
+Verificación:
+- `npx vitest run tests/unit/siguiente.test.ts`: 20 verdes. `npm run check`: 0 errores, 0 avisos. `npm test`: 136 ficheros, 6.206 pruebas, verde (827 s).
+- `FECHA_JORNADA=2026-10-27 npm run build` del Corpus real: código 0, sin que ninguna Cita lance; `dist/` pesa lo mismo que antes del parche (475.701.816 bytes en 15.340 ficheros).
+- Playwright `pagina-de-cita` y `accesibilidad` en los dos proyectos: 190 verdes, 4 saltadas (las de 360 × 640 en `escritorio`, a propósito); los servidores los para Playwright al terminar.
+
+Seguimiento: `followup_review_recommended: true` — parches de esta pasada: 0 altos, 1 medio, 2 bajos; puntuación 3 × 1 + 1 × 2 = 5 (≥ 5).
+
+Riesgos residuales: los de la implementación, sin cambios. La regla de `temaEnFrase` supone que todo Tema empieza por artículo (hoy los 24); un Tema que empiece por nombre propio lo bajaría a minúscula.
