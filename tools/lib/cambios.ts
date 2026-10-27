@@ -40,7 +40,9 @@
  *     Héctor no fecha ni avisa (FR-47; la deja así la 24.8). Las Citas hermanas no entran. Lo
  *     mismo «Siguiente…» (Historia 24.5): depende del orden de la Obra y del listado del Tema
  *     de la Cita —otras Citas, sus posiciones en los documentos y sus Autores—, y es navegación:
- *     tampoco fecha ni avisa.
+ *     tampoco fecha ni avisa. Y las Rutas de salida del pie (Historia 24.6): «De la misma obra»
+ *     y «Más de {Autor}» pintan los textos, los títulos de Obra y los recuentos de otras Citas,
+ *     y es navegación: por la misma excepción tampoco fechan ni avisan.
  *   · **Página de Obra** — su ficha, sus Citas y el fichero de su Autor (Historia 22.4).
  *   · **Página de Autor, de Tema y de Colección** — su fichero, los de las Citas que
  *     agregan **y los de los Autores de esas Citas**. Son listados: si entra una Cita
@@ -205,7 +207,8 @@ export function relacionDeSuperficies(corpus: CorpusParaFechar): Map<string, str
     // de Obra (24.4) pinta también el año, el recuento y si hay edición cotejada, que salen de
     // las Citas hermanas; es navegación y no fecha ni avisa (excepción de Héctor, 24.8, FR-47).
     // «Siguiente…» (24.5) depende del orden de la Obra y del listado del Tema: también es
-    // navegación, y por la misma excepción tampoco entra aquí.
+    // navegación, y por la misma excepción tampoco entra aquí. Ni las Rutas de salida del pie
+    // (24.6), que pintan textos, Obras y recuentos de otras Citas: navegación, que no fecha.
     declarar(rutaDeCita(cita.slug), [
       cita.ruta,
       ficheroDeAutor.get(cita.autor),

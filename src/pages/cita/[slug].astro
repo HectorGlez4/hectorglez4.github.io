@@ -22,13 +22,11 @@ import DatosEstructurados from '../../components/DatosEstructurados.astro';
 import {
   citasDeLasObras,
   citasDeTema,
-  citasRelacionadas,
   conjuntoPublicable,
+  rutasDeSalidaDeCita,
   siguienteCita,
-  temasDeLaCita,
   temasPublicados,
 } from '../../lib/publicado.ts';
-import { MAX_CITAS_RELACIONADAS } from '../../lib/umbrales.ts';
 import { tituloDe } from '../../lib/marca.ts';
 import type { GetStaticPaths } from 'astro';
 import { rutaDeCita } from '../../lib/superficies.ts';
@@ -46,20 +44,26 @@ export const getStaticPaths = (async () => {
   const porObra = await citasDeLasObras(conjunto);
   const listados = new Map(publicados.map((tema) => [tema.slug, citasDeTema(conjunto.citas, tema.slug)]));
 
-  return conjunto.citas.map((cita) => ({
-    params: { slug: cita.slug },
-    props: {
-      cita,
-      autor: autores.get(cita.autor)!,
-      relacionadas: citasRelacionadas(conjunto.citas, cita, MAX_CITAS_RELACIONADAS),
-      chips: temasDeLaCita(cita, publicados),
-      temasDelSitio: publicados,
-      siguiente: siguienteCita(cita, porObra, publicados, listados),
-    },
-  }));
+  return conjunto.citas.map((cita) => {
+    const siguiente = siguienteCita(cita, porObra, publicados, listados);
+    return {
+      params: { slug: cita.slug },
+      props: {
+        cita,
+        autor: autores.get(cita.autor)!,
+        siguiente,
+        /*
+         * Historia 24.6 — las Rutas de salida del pie: «De la misma obra», «Más de {Autor}» y
+         * los Temas. Las decide `rutasDeSalidaDeCita` con el mismo `porObra` y el mismo
+         * `siguiente` que la tarjeta, para que ninguna repita la Cita que «Siguiente» ya ofrece.
+         */
+        rutas: rutasDeSalidaDeCita(cita, conjunto.citas, porObra, publicados, siguiente),
+      },
+    };
+  });
 }) satisfies GetStaticPaths;
 
-const { cita, autor, relacionadas, chips, temasDelSitio, siguiente } = Astro.props;
+const { cita, autor, siguiente, rutas } = Astro.props;
 
 /**
  * El título de pestaña y la meta descripción llevan la Cita entera si cabe. Quien llega
@@ -100,13 +104,11 @@ const canonica = new URL(rutaDeCita(cita.slug), Astro.site).href;
     <CopiarCita cita={cita} autor={autor} />
     <ImagenDeCita cita={cita} autor={autor} />
     <CompartirEnlace cita={cita} autor={autor} canonica={canonica} />
-    <RutasDeSalida
-      autor={autor}
-      relacionadas={relacionadas}
-      chips={chips}
-      temasDelSitio={temasDelSitio}
-      zona="rutas-de-salida"
-    />
+    {/*
+      * Historia 24.6 — tras las acciones, los tres grupos del pie. Un grupo sin Citas no pinta
+      * nada, y sin ninguno no hay `nav`: la Atribución sigue enlazando al Autor y a la Obra.
+      */}
+    <RutasDeSalida autor={autor} rutas={rutas} zona="rutas-de-salida" />
   </article>
 </Armazon>
 

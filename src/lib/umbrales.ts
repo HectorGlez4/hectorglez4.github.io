@@ -272,8 +272,23 @@ export const SM12_CON_FACEBOOK = false;
  */
 export const MIN_RUTAS_DE_CITA_EN_RAFAGA = 100;
 
-/** Citas del mismo Autor que ofrece una Página de Cita como ruta de salida — UX-DR17. */
+/**
+ * Citas del mismo Autor que ofrece una Página de Cita en «Más de {Autor}» — UX-DR17, UX-DR69.
+ *
+ * Del Autor, **sin las de su Obra**, que ya tiene su propio bloque (`MAX_CITAS_DE_LA_MISMA_OBRA`),
+ * ni la propia ni la que ofrece «Siguiente» (Historia 24.6). Las elige `citasRelacionadas`.
+ */
 export const MAX_CITAS_RELACIONADAS = 4;
+
+/**
+ * Citas de la misma Obra que ofrece una Página de Cita en «De la misma obra» — UX-DR68, AD-9,
+ * Historia 24.6.
+ *
+ * En el orden del libro, sin la propia ni la que ofrece «Siguiente». Con las cuatro de «Más de
+ * {Autor}», una Página de Cita lleva como mucho siete Tarjetas al pie. Las elige
+ * `citasDeLaMismaObra`; moverlo lo decide Héctor, en un diff visible.
+ */
+export const MAX_CITAS_DE_LA_MISMA_OBRA = 3;
 
 /**
  * Saltos de enlace interno desde la portada en los que toda superficie publicada debe

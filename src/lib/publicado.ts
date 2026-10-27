@@ -18,6 +18,8 @@
 
 import type { CollectionEntry } from 'astro:content';
 import {
+  MAX_CITAS_DE_LA_MISMA_OBRA,
+  MAX_CITAS_RELACIONADAS,
   MAX_SALTOS_DESDE_LA_PORTADA,
   MIN_CITAS_POR_COLECCION,
   MIN_CITAS_POR_TEMA,
@@ -166,7 +168,7 @@ export function citasDocumentadasDeAutor(citas: readonly Cita[], slugAutor: stri
 }
 
 /** Las Citas de un Autor, en orden estable para que el build sea reproducible. */
-export function citasDeAutor(citas: Cita[], slugAutor: string): Cita[] {
+export function citasDeAutor(citas: readonly Cita[], slugAutor: string): Cita[] {
   return citas.filter((c) => c.autor === slugAutor).sort((a, b) => a.slug.localeCompare(b.slug, 'es'));
 }
 
@@ -374,39 +376,144 @@ export function desajustesDeColecciones(
 }
 
 /**
- * Otras Citas del mismo Autor — FR-12, UX-DR17.
+ * El reparto de las rutas de salida — FR-12, AD-11, Historia 24.6. **El único**: lo usan «Más de
+ * {Autor}» (`citasRelacionadas`) y «De la misma obra» (`citasDeLaMismaObra`), y no hay otra
+ * aritmética que elija cuáles de una lista se enseñan.
  *
- * Se deriva de Autor y de Tema, sin motor de recomendación: primero las del mismo Autor
- * que además comparten algún Tema con esta, y después el resto de las suyas. Ordenar así
- * no es «recomendar»; es preferir la vecindad más estrecha de las dos que ya existen.
+ * **Repartidas, no las primeras.** Antes «Más de {Autor}» era `.slice(0, maximo)` sobre una lista
+ * ordenada por slug, es decir las primeras del alfabeto. Y slugs contiguos son casi siempre textos
+ * casi iguales, así que enseñaba variantes de lo mismo. Visto en una página de verdad:
+ *
+ *     «Caminante, no hay camino, se hace camino al andar.»
+ *     «Caminante, no hay camino, sino estelas en la mar.»
+ *
+ * UX-DR17 declara **cuántas** y **de quién**; cuáles es de aquí. Se toman a pasos iguales a lo
+ * largo de las candidatas, lo que da Citas distintas entre sí y hace que la cola de una lista
+ * larga —que en un listado de tres páginas no se veía nunca— aparezca. Conserva el orden de
+ * entrada: «De la misma obra» sale en el orden del libro porque entra en él.
+ *
+ * El paso se calcula sobre `length - 1` para que la primera y la última entren siempre: la última
+ * es la que ninguna otra superficie alcanza. Y es aritmética pura, sin azar: dos construcciones
+ * del mismo commit tienen que dar el mismo sitio.
+ *
+ * `maximo` es un entero de 2 o más: con 1 el paso dividiría por cero, y con menos no hay reparto.
  */
-export function citasRelacionadas(citas: Cita[], cita: Cita, maximo: number): Cita[] {
-  const suyas = citasDeAutor(citas, cita.autor).filter((c) => c.slug !== cita.slug);
+export function repartir<T>(candidatas: readonly T[], maximo: number): T[] {
+  if (!Number.isInteger(maximo) || maximo < 2) {
+    throw new Error(`repartir: el máximo tiene que ser un entero de 2 o más, y es ${maximo}.`);
+  }
+  if (candidatas.length <= maximo) return [...candidatas];
+  const paso = (candidatas.length - 1) / (maximo - 1);
+  return Array.from({ length: maximo }, (_, i) => candidatas[Math.round(i * paso)]);
+}
+
+/**
+ * «Más de {Autor}» — FR-12, UX-DR17, UX-DR69, Historia 24.6.
+ *
+ * Se deriva de Autor y de Tema, sin motor de recomendación: primero las del mismo Autor que además
+ * comparten algún Tema con esta, y después el resto de las suyas. Ordenar así no es «recomendar»;
+ * es preferir la vecindad más estrecha de las dos que ya existen.
+ *
+ * Desde la 24.6, **sin las de su Obra** —que tienen «De la misma obra»—, sin la propia y sin la
+ * que ofrece «Siguiente» (`siguiente`, obligatorio: quien llama dice si la hay). Una Cita sin Obra
+ * no excluye por Obra: elige entre todas las demás de su Autor. Cuáles, lo decide `repartir`.
+ */
+export function citasRelacionadas(
+  citas: readonly Cita[],
+  cita: Cita,
+  maximo: number,
+  siguiente: Cita | undefined,
+): Cita[] {
+  const obra = cita.obra?.nombre;
+  const suyas = citasDeAutor(citas, cita.autor).filter(
+    (c) =>
+      c.slug !== cita.slug &&
+      c.slug !== siguiente?.slug &&
+      (obra === undefined || c.obra?.nombre !== obra),
+  );
   const temas = new Set(cita.temas);
   const comparteTema = (c: Cita) => c.temas.some((t) => temas.has(t));
 
-  const candidatas = [...suyas.filter(comparteTema), ...suyas.filter((c) => !comparteTema(c))];
-  if (candidatas.length <= maximo) return candidatas;
+  return repartir([...suyas.filter(comparteTema), ...suyas.filter((c) => !comparteTema(c))], maximo);
+}
 
-  /*
-   * **Repartidas, no las primeras.** Antes esto era `.slice(0, maximo)` sobre una lista ordenada
-   * por slug, es decir las primeras del alfabeto. Y slugs contiguos son casi siempre textos casi
-   * iguales, así que «Más de este Autor» enseñaba variantes de lo mismo. Visto en una página de
-   * verdad:
-   *
-   *     «Caminante, no hay camino, se hace camino al andar.»
-   *     «Caminante, no hay camino, sino estelas en la mar.»
-   *
-   * UX-DR17 declara **cuántas** y **de quién**; cuáles es de aquí. Se toman a pasos iguales a lo
-   * largo de las candidatas, lo que da cuatro Citas distintas entre sí y hace que la cola de un
-   * Autor con muchas —que en un listado de tres páginas no se veía nunca— aparezca.
-   *
-   * El paso se calcula sobre `length - 1` para que la última entre siempre: es la que ninguna
-   * otra superficie alcanza. Y es aritmética pura, sin azar: dos construcciones del mismo commit
-   * tienen que dar el mismo sitio.
+/**
+ * «De la misma obra» — FR-12, UX-DR68, AD-25, Historia 24.6.
+ *
+ * Las Citas de la Obra de esta, **en el orden del libro**, sin la propia ni la que ofrece
+ * «Siguiente», repartidas con `repartir` hasta `maximo`. `porObra` es el mapa de
+ * `citasDeLasObras`, ya en ese orden: aquí no se ordena ni se agrupa nada (AD-25, AD-11).
+ *
+ * Sin Obra, ninguna. Que la Cita no esté en el grupo de su Obra es un uso roto —`citasPorObra`
+ * agrupa toda Cita con Obra—, y para el build como en `siguienteCita`.
+ */
+export function citasDeLaMismaObra(
+  cita: Cita,
+  porObra: ReadonlyMap<string, readonly Cita[]>,
+  siguiente: Cita | undefined,
+  maximo: number,
+): Cita[] {
+  if (cita.obra === undefined) return [];
+  const grupo = porObra.get(cita.obra.nombre);
+  if (grupo === undefined || !grupo.some((c) => c.slug === cita.slug)) {
+    throw new Error(
+      `citasDeLaMismaObra: la Cita «${cita.slug}» no está entre las Citas de su Obra ` +
+        `(ficha «${cita.obra.nombre}»). citasDeLasObras agrupa toda Cita con Obra: el mapa no ` +
+        'es el de este conjunto.',
+    );
+  }
+  return repartir(
+    grupo.filter((c) => c.slug !== cita.slug && c.slug !== siguiente?.slug),
+    maximo,
+  );
+}
+
+/**
+ * Lo que pintan las Rutas de salida de una Página de Cita — Historia 24.6. Un grupo sin Citas es
+ * `undefined`, nunca una lista vacía: un grupo que no está no deja rótulo, filete ni hueco.
+ */
+export interface RutasDeSalidaDeCita {
+  /** «De la misma obra»: la Obra (su `recuento` y su ruta, para el cierre) y sus Citas. */
+  mismaObra: { obra: ObraResuelta; citas: Cita[] } | undefined;
+  /**
+   * «Más de {Autor}»: cuántas Citas publicadas tiene el Autor —todas, la propia incluida: las que
+   * lista su Página de Autor, a la que lleva el cierre— y las elegidas.
    */
-  const paso = (candidatas.length - 1) / (maximo - 1);
-  return Array.from({ length: maximo }, (_, i) => candidatas[Math.round(i * paso)]);
+  delAutor: { recuento: number; citas: Cita[] } | undefined;
+  /** Los Temas publicados de la Cita, en el orden en que los declara. */
+  temas: Tema[];
+}
+
+/**
+ * Las Rutas de salida de una Página de Cita — FR-12, UX-DR67–69, AD-11, Historia 24.6.
+ *
+ * Tres grupos, de lo más cercano a lo más amplio: «De la misma obra» (hasta
+ * `MAX_CITAS_DE_LA_MISMA_OBRA`, en el orden del libro), «Más de {Autor}» (hasta
+ * `MAX_CITAS_RELACIONADAS`, sin las de su Obra) y los Temas. Ninguna Cita sale en los dos grupos,
+ * ni la propia, ni la que ofrece «Siguiente» (`siguiente`, de `siguienteCita`).
+ *
+ * Pura, y solo de lo publicado: no depende de la jornada, el visitante, la indexabilidad, la
+ * congelación ni la afiliación. Dos construcciones del mismo commit dan las mismas rutas, y el
+ * orden de `citas` no cuenta. El componente pinta lo que esto decide y no cuenta nada (AD-11).
+ */
+export function rutasDeSalidaDeCita(
+  cita: Cita,
+  citas: readonly Cita[],
+  porObra: ReadonlyMap<string, readonly Cita[]>,
+  publicados: readonly Tema[],
+  siguiente: SiguienteCita | undefined,
+): RutasDeSalidaDeCita {
+  const otra = siguiente?.cita;
+  const deLaObra = citasDeLaMismaObra(cita, porObra, otra, MAX_CITAS_DE_LA_MISMA_OBRA);
+  const delAutor = citasRelacionadas(citas, cita, MAX_CITAS_RELACIONADAS, otra);
+  return {
+    mismaObra: cita.obra !== undefined && deLaObra.length > 0 ? { obra: cita.obra, citas: deLaObra } : undefined,
+    delAutor:
+      delAutor.length > 0
+        ? { recuento: citas.filter((c) => c.autor === cita.autor).length, citas: delAutor }
+        : undefined,
+    temas: temasDeLaCita(cita, publicados),
+  };
 }
 
 /**

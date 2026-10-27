@@ -673,10 +673,10 @@ de la Procedencia de **esa** Cita; la Tarjeta de Cita de los listados lleva el t
 El `isPartOf` del JSON-LD describe la Obra y lleva el año de la Obra, y sin él va sin fecha.
 
 Cada uso de `TarjetaDeCita.astro` declara su `atribucion`, un conjunto cerrado y sin valor por
-omisión (Historia 24.3): `autor-y-obra` en Tema y Colección, `obra` en Autor y `ninguna` en el
-Listado de Obra. El conjunto está hecho también para «Más de {Autor}» (`obra`) y «De la misma
-obra» (`ninguna`), que hoy pinta `RutasDeSalida.astro` con su propio marcado y que la 24.6 pasa
-a la tarjeta: un uso nuevo se declara además en la prueba de `tests/unit/tarjeta-de-cita.test.ts`.
+omisión (Historia 24.3): `autor-y-obra` en Tema y Colección, `obra` en Autor y en «Más de
+{Autor}», y `ninguna` en el Listado de Obra y en «De la misma obra» —los dos bloques del pie de
+la Página de Cita, que pinta `RutasDeSalida.astro` (24.6)—. Un uso nuevo se declara además en la
+prueba de `tests/unit/tarjeta-de-cita.test.ts`.
 Un valor fuera del conjunto —o ninguno—, o `autor-y-obra` sin el `autor` que declara la Cita,
 detiene la construcción; una Cita sin Obra no lleva línea de Obra, y la Obra es texto, nunca un
 segundo enlace.
@@ -828,6 +828,35 @@ la llevan (la portada la recibe en la 28.2). Sin Obra no pinta nada, ni rótulo 
   `siguiente`, en el `<li>`; sin guion ni almacenamiento del visitante,
   y no depende de la jornada, la indexabilidad, la congelación ni la afiliación. Es navegación:
   no fecha ni avisa, como el resto de la tarjeta.
+
+### Al pie de la Página de Cita (Historia 24.6)
+
+Tras las acciones, `src/components/RutasDeSalida.astro` pinta hasta tres grupos, en este orden y
+cada uno con su `h2` (`Rotulo.astro`): **«De la misma obra»** —hasta `MAX_CITAS_DE_LA_MISMA_OBRA`
+(3) Citas de su Obra, en el orden del libro, con la Tarjeta de Cita `ninguna`, zona `misma-obra`,
+y el cierre «Las {n} citas de {título} ›» a la página 1 de la Obra—, **«Más de {Autor}»** —hasta
+`MAX_CITAS_RELACIONADAS` (4) del Autor **sin las de su Obra**, con la Tarjeta `obra`, zona
+`rutas-de-salida`, y el cierre «Las {n} citas de {Autor} ›» a su Página de Autor— y **«Temas»**
+(chips, `chip-de-tema`). Como mucho siete tarjetas; ninguna es la propia ni la de «Siguiente», ni
+sale en los dos grupos. El orden de tabulación es el del marcado.
+
+- Lo decide solo `rutasDeSalidaDeCita` de `src/lib/publicado.ts`, pura y determinista por commit
+  (ni jornada, ni visitante, ni indexabilidad, ni congelación, ni afiliación), con el `porObra`
+  de `citasDeLasObras` —no se ordena fuera de `src/lib/obras.ts`— y el mismo `siguiente` que la
+  Tarjeta de Obra. **`repartir` es el único reparto** (a pasos iguales, primera y última incluidas,
+  orden de entrada conservado; un máximo menor que 2 lanza): lo usan `citasRelacionadas` y
+  `citasDeLaMismaObra`, y no se escribe otra aritmética. `citasDeLaMismaObra` lanza, como
+  `siguienteCita`, si la Cita no está en el grupo de su Obra. Los cierres los redactan
+  `cierreDeLaMismaObra` y `cierreDeMasDelAutor` de `src/lib/atribucion.ts`, sin glifo (lo pone
+  `FilaDeBloque`) y sin recortar el título; un recuento menor que 2 lanza.
+- **Un grupo vacío no está** —ni rótulo, ni filete, ni hueco— y sin ninguno no hay `nav`. **No
+  hay respaldo**: «Explorar por tema» y la sección «Seguir leyendo» hacia el Autor se retiraron, y la Atribución sigue
+  enlazando al Autor y a la Obra. El componente lanza si «Más de» trae una Cita de otro Autor o
+  una tarjeta se repite.
+- El `nav` va bajo `data-pagefind-ignore="all"` (NFR-13) y **no** lleva `data-zona`: cada `<li>`
+  y el `ul` de chips declaran la suya. Sin guion ni `data-ingreso`.
+- Pinta textos, Obras y recuentos de otras Citas: es navegación y, por la excepción de Héctor,
+  no fecha ni avisa (`tools/lib/cambios.ts`, 24.8, FR-47).
 
 ## Curar una Colección
 

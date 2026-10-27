@@ -44,7 +44,15 @@ export function listadoDe(pagina: string, ruta: string): string {
  * o si una tarjeta no es un solo enlace a una Página de Cita.
  */
 export function tarjetasDelListado(pagina: string, ruta: string): TarjetaLeida[] {
-  const listado = listadoDe(pagina, ruta);
+  return tarjetasDe(listadoDe(pagina, ruta), ruta);
+}
+
+/**
+ * Las Tarjetas de Cita de un trozo de HTML —el contenido de un `ul`—, en su orden. Lanza si una
+ * tarjeta no es un solo enlace a una Página de Cita. La comparten el listado y las Rutas de salida
+ * de la Página de Cita (Historia 24.6), que pintan la misma tarjeta.
+ */
+export function tarjetasDe(listado: string, ruta: string): TarjetaLeida[] {
   return [...listado.matchAll(/<li class="tarjeta"([^>]*)>([\s\S]*?)<\/li>/g)].map(([, atributos, dentro]) => {
     const enlace = /^\s*<a href="\/cita\/([^/"]+)\/"[^>]*>([\s\S]*?)<\/a>\s*$/.exec(dentro);
     if (enlace === null) throw new Error(`${ruta}: la tarjeta no es un solo enlace a una Cita: ${dentro}`);

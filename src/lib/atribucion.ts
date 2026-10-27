@@ -304,6 +304,43 @@ export function textoDeSiguiente(siguiente: SiguienteCita): string {
 }
 
 /**
+ * El recuento de un cierre de las Rutas de salida, que nunca es singular: el bloque de la Obra
+ * solo existe con tres Citas o más, y el del Autor con dos o más. Un recuento menor es un uso
+ * roto, no un caso que redactar.
+ */
+function recuentoDeCierre(quien: string, recuento: number): number {
+  if (!Number.isInteger(recuento) || recuento < 2) {
+    throw new Error(
+      `${quien}: un cierre de las Rutas de salida cuenta dos Citas o más, y este cuenta ${recuento}. ` +
+        'El bloque no existe con menos: el uso está roto (Historia 24.6).',
+    );
+  }
+  return recuento;
+}
+
+/**
+ * El cierre de «De la misma obra» — «Las {n} citas de {título}», FR-12, UX-DR68, UX-DR108,
+ * Historia 24.6.
+ *
+ * Sin el glifo de avance «›», que pone `FilaDeBloque.astro`. El recuento es `obra.recuento` y el
+ * título el de la Obra resuelta, que nunca se recorta (NFR-12): lleva a la página 1 de la Obra.
+ */
+export function cierreDeLaMismaObra(obra: Pick<ObraResuelta, 'recuento' | 'titulo'>): string {
+  return `Las ${recuentoDeCierre('cierreDeLaMismaObra', obra.recuento)} citas de ${obra.titulo}`;
+}
+
+/**
+ * El cierre de «Más de {Autor}» — «Las {n} citas de {Autor}», FR-12, UX-DR69, UX-DR108,
+ * Historia 24.6.
+ *
+ * `recuento` son las Citas publicadas del Autor, todas: las que lista su Página de Autor, a la
+ * que lleva. Lo cuenta `rutasDeSalidaDeCita`, no el componente (AD-11). Sin glifo, como el otro.
+ */
+export function cierreDeMasDelAutor(autor: Pick<Autor, 'nombre'>, recuento: number): string {
+  return `Las ${recuentoDeCierre('cierreDeMasDelAutor', recuento)} citas de ${autor.nombre}`;
+}
+
+/**
  * La línea de procedencia de la Atribución, en piezas — UX-DR8, FR-2, Historia 22.4.
  *
  * `titulo` es el título de la Obra resuelta, si consta, y `resto` todo lo que va detrás en la

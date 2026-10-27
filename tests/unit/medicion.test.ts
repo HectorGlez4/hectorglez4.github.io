@@ -2877,7 +2877,8 @@ describe('Historia 23.7 — toda salida interna de `dist/` dice su zona', () => 
     ['/404', '/autor/seneca/', [{ zona: 'atribucion' }]],
     ['/404', '/obra/seneca/sobre-la-brevedad-de-la-vida/', [{ zona: 'atribucion' }]],
     ['/404', '/tema/el-tiempo/', [{ sinZona: 'chips-del-404' }]],
-    [CITA, '/autor/seneca/', [{ zona: 'atribucion' }]],
+    // Historia 24.6 — el Autor sale además por el cierre de «Más de Séneca», con la zona de las Rutas de salida.
+    [CITA, '/autor/seneca/', [{ zona: 'atribucion' }, { zona: 'rutas-de-salida' }]],
     [CITA, '/obra/seneca/sobre-la-brevedad-de-la-vida/', [{ zona: 'atribucion' }]],
     [CITA, /^\/cita\//, [{ zona: 'rutas-de-salida' }]],
     [CITA, '/tema/el-tiempo/', [{ zona: 'chip-de-tema' }]],
@@ -2923,58 +2924,38 @@ describe('Historia 23.7 — toda salida interna de `dist/` dice su zona', () => 
   );
 
   /*
-   * Las dos ramas de respaldo de las Rutas de salida, que el corpus medido no alcanza —toda Cita
-   * suya tiene hermanas—, en un sitio aparte: una Cita sola de su Autor y sin Temas, en un sitio sin
-   * ningún Tema publicado, pinta el último recurso, «Sobre {Autor}», con la zona que la página da a
-   * sus Rutas de salida; y una sonda pinta el componente con Temas en el sitio —«Explorar por
-   * tema»—, cuyos chips llevan `chip-de-tema`, como los de una Cita. Una zona válida en la rama
-   * equivocada pasa `astro check` y todas las demás pruebas.
+   * Historia 24.6 — las Rutas de salida ya no tienen respaldo: «Explorar por tema» y «Sobre {Autor}»
+   * se retiraron. Una Cita sola de su Autor, de una Obra de una Cita y sin Temas, en un sitio sin
+   * ningún Tema publicado, no pinta Rutas de salida: ni `nav`, ni rótulo. Y sus demás enlaces —la
+   * cabecera, la Atribución…— se juzgan como en el sitio medido.
    */
   const CITA_SOLA = 'seneca-sola';
-  const SONDA_DE_RESPALDO = `---
-import RutasDeSalida from '../components/RutasDeSalida.astro';
-const autor = { slug: 'seneca', nombre: 'Séneca' };
-const temasDelSitio = [{ slug: 'el-tiempo', nombre: 'El tiempo' }];
----
-<!doctype html>
-<html lang="es"><head><meta charset="utf-8" /><title>Sonda</title></head>
-<body><main><RutasDeSalida autor={autor} relacionadas={[]} chips={[]} temasDelSitio={temasDelSitio} zona="rutas-de-salida" /></main></body></html>
-`;
   let respaldo: Promise<string> | undefined;
   const sitioDeRespaldo = () =>
     (respaldo ??= construirConCorpus(
       { 'autores/seneca.yml': AUTOR_VALIDO, [`citas/${CITA_SOLA}.md`]: citaValida({ slug: CITA_SOLA, temas: [] }) },
-      { entorno: { MEDICION_ENDPOINT: ENDPOINT }, paginas: { 'sonda-de-respaldo.astro': SONDA_DE_RESPALDO } },
+      { entorno: { MEDICION_ENDPOINT: ENDPOINT } },
     ).then((resultado) => {
       aLimpiar.push(resultado.proyecto);
       expect(resultado.codigo, resultado.salida).toBe(0);
       return resultado.proyecto;
     }));
 
-  it('las ramas de respaldo de las Rutas de salida: «Sobre {Autor}» sale por su zona, y «Explorar por tema», por `chip-de-tema`', async () => {
+  it('una Cita sola de su Autor, de una Obra de una Cita y sin Temas no pinta Rutas de salida', async () => {
     const paginas = paginasDe(await sitioDeRespaldo());
-    // El resto de enlaces de este sitio —la cabecera, la Atribución…— se juzga como en el medido.
     const juicio = juzgarEnlacesDeMain(paginas);
     expect(juicio.sinDeclarar).toEqual([]);
     expect(juicio.sinMedirEnLaMismaPestaña).toEqual([]);
     expect([...paginas.keys()].filter((ruta) => cargaElFichero(paginas.get(ruta)!))).toContain(`/cita/${CITA_SOLA}/`);
     const cita = paginas.get(`/cita/${CITA_SOLA}/`);
     expect(cita, 'la Cita sola no está en dist/').toBeDefined();
-    expect(cita).toContain('Sobre Séneca');
+    expect(cita).not.toContain('class="salidas"');
+    expect(cita).not.toContain('Sobre Séneca');
+    expect(cita).not.toContain('Explorar por tema');
     const deLaCita = enlacesDe(cita!).filter((e) => e.enMain);
-    // El Autor sale dos veces: por la Atribución y por el último recurso, cada uno con la suya.
-    expect(deLaCita.filter((e) => e.href === '/autor/seneca/').map((e) => e.declaracion)).toEqual([
-      { zona: 'atribucion' },
-      { zona: 'rutas-de-salida' },
-    ]);
+    // El Autor sale solo por la Atribución.
+    expect(deLaCita.filter((e) => e.href === '/autor/seneca/').map((e) => e.declaracion)).toEqual([{ zona: 'atribucion' }]);
     expect(deLaCita.filter((e) => e.href?.startsWith('/tema/'))).toEqual([]);
-
-    const sonda = paginas.get('/sonda-de-respaldo/');
-    expect(sonda, 'la sonda no está en dist/').toBeDefined();
-    expect(sonda).toContain('Explorar por tema');
-    expect(enlacesDe(sonda!).filter((e) => e.enMain).map((e) => [e.href, e.declaracion])).toEqual([
-      ['/tema/el-tiempo/', { zona: 'chip-de-tema' }],
-    ]);
   }, 240_000);
 
   it('en todo `dist/` las zonas son del vocabulario, están las once de hoy y van en un contenedor, nunca en el enlace', async () => {

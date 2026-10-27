@@ -4,6 +4,7 @@ import {
   SIN_TARJETA_COMPLETA,
   citaConObraMasLarga,
   citaConProcedenciaCompleta,
+  citaConLosDosBloques,
   citaConTarjetaCompleta,
   citaConTituloDeObraMasLargo,
   citaSinObra,
@@ -271,11 +272,12 @@ test.describe('Historia 2.1 — armazón y tratamiento visual', () => {
     /*
      * La regla de DESIGN.md es sobre qué es cada cosa, no sobre cuántas hay: la serif se
      * aplica al texto de una Cita, al nombre de un Autor y al nombre de un Tema, y a
-     * nada más. En esta página eso son el texto citado, los fragmentos de las Citas
-     * hermanas y los chips de Tema. Comprobarlo con una lista de etiquetas hacía que
-     * añadir rutas de salida rompiera la prueba sin que nada estuviera mal.
+     * nada más. En esta página eso son el texto citado, los fragmentos de las Tarjetas de
+     * Cita de las Rutas de salida (Historia 24.6) y los chips de Tema. Comprobarlo con una
+     * lista de etiquetas hacía que añadir rutas de salida rompiera la prueba sin que nada
+     * estuviera mal.
      */
-    const PERMITIDOS = ['.texto', '.hermanas a', '.chip'];
+    const PERMITIDOS = ['.texto', '.tarjeta .fragmento', '.chip'];
 
     const intrusos = await page.evaluate((permitidos) => {
       return [...document.querySelectorAll('body *')]
@@ -316,9 +318,10 @@ test.describe('Historia 2.1 — microcopia', () => {
        * también en las tarjetas del listado «Más de este Autor». Faltaba, y la prueba empezó a
        * fallar el día que una Cita con exclamación —«¡Ah, cuando yo era niño…!»— entró en ese
        * listado. La regla es sobre el texto **propio** del sitio; una Cita no lo es, y NFR-12
-       * prohíbe tocarla para que cumpla una regla de microcopia.
+       * prohíbe tocarla para que cumpla una regla de microcopia. Desde la 24.6 esas tarjetas son
+       * las Tarjetas de Cita de las Rutas de salida.
        */
-      for (const fuera of copia.querySelectorAll('blockquote, .cita, .hermanas, script, [hidden]')) {
+      for (const fuera of copia.querySelectorAll('blockquote, .cita, .salidas li.tarjeta, script, [hidden]')) {
         fuera.remove();
       }
       return copia.textContent ?? '';
@@ -853,5 +856,108 @@ test.describe('Historia 24.4 — la Tarjeta de Obra en la Página de Cita', () =
     expect(medida.tarjetas, JSON.stringify(medida)).toBe(0);
     expect(medida.anterior, JSON.stringify(medida)).toBe(true);
     expect(Math.abs(medida.hueco - medida.unidad * 4), JSON.stringify(medida)).toBeLessThanOrEqual(1);
+  });
+});
+
+/**
+ * Historia 24.6 — al pie, más de la misma obra y más del Autor.
+ *
+ * Los tokens calculados del pie en la cara con los dos bloques, que va siempre tras las acciones,
+ * y su alto a 360 × 640 anotado (la cifra que la 24.6 anota en el spec frente a la de la
+ * principal). Los valores esperados salen de los tokens de la propia página.
+ */
+test.describe('Historia 24.6 — el pie de la Página de Cita', () => {
+  const ruta = ((s) => (s === undefined ? undefined : `/cita/${s}/`))(citaConLosDosBloques());
+  const SIN_DOS_BLOQUES = 'El Corpus no tiene ninguna Cita con «De la misma obra» y «Más de {Autor}».';
+
+  async function abrir(page: Page) {
+    expect(ruta, SIN_DOS_BLOQUES).toBeDefined();
+    await page.goto(ruta!);
+    await page.evaluate(async () => {
+      await document.fonts.ready;
+    });
+  }
+
+  test('los tokens calculados del pie: márgenes, filetes, rótulos, listas y cierres', async ({ page }) => {
+    await abrir(page);
+    const medida = await page.evaluate(() => {
+      const nav = document.querySelector('nav.salidas') as HTMLElement;
+      const sonda = document.createElement('div');
+      sonda.style.cssText =
+        'width: var(--unidad); color: var(--tinta); background-color: var(--filete); border-top: var(--grosor-filete) solid; max-width: var(--medida-prosa)';
+      // Hermana del pie, con su misma letra: `--medida-prosa` va en `ch` y depende de ella.
+      nav.parentElement!.append(sonda);
+      const t = getComputedStyle(sonda);
+      const tokens = {
+        unidad: parseFloat(t.width),
+        tinta: t.color,
+        filete: t.backgroundColor,
+        grosor: t.borderTopWidth,
+        medida: t.maxWidth,
+        md: 0,
+      };
+      sonda.style.fontSize = 'var(--cuerpo-md)';
+      tokens.md = parseFloat(getComputedStyle(sonda).fontSize);
+      sonda.remove();
+      const n = getComputedStyle(nav);
+      const secciones = [...nav.querySelectorAll(':scope > section')] as HTMLElement[];
+      return {
+        tokens,
+        ancho: window.innerWidth,
+        nav: {
+          margen: parseFloat(n.marginTop),
+          relleno: parseFloat(n.paddingTop),
+          filete: [n.borderTopWidth, n.borderTopStyle, n.borderTopColor],
+          maximo: n.maxWidth,
+        },
+        entreGrupos: secciones.slice(1).map((sec) => parseFloat(getComputedStyle(sec).marginTop)),
+        listas: [...nav.querySelectorAll('ul.tarjetas')].map((ul) => {
+          const u = getComputedStyle(ul);
+          const rotulo = ul.parentElement!.querySelector('.rotulo')!.getBoundingClientRect();
+          return {
+            hueco: Math.round(ul.getBoundingClientRect().top - rotulo.bottom),
+            viñeta: u.listStyleType,
+            relleno: u.paddingLeft,
+            filete: [u.borderTopWidth, u.borderTopStyle, u.borderTopColor],
+          };
+        }),
+        cierres: [...nav.querySelectorAll('li.fila-de-bloque a')].map((a) => {
+          const c = getComputedStyle(a);
+          return { tamaño: parseFloat(c.fontSize), color: c.color, subrayado: c.textDecorationLine };
+        }),
+        islas: Math.max(...[...document.querySelectorAll('.isla')].map((i) => i.getBoundingClientRect().bottom)),
+        arriba: nav.getBoundingClientRect().top,
+      };
+    });
+    const { tokens: t } = medida;
+    expect(medida.nav).toEqual({
+      margen: t.unidad * (medida.ancho >= 600 ? 12 : 8),
+      relleno: t.unidad * 3,
+      filete: [t.grosor, 'solid', t.filete],
+      maximo: t.medida,
+    });
+    expect(medida.entreGrupos.length).toBeGreaterThanOrEqual(1);
+    for (const m of medida.entreGrupos) expect(m).toBe(t.unidad * 4);
+    expect(medida.listas).toHaveLength(2);
+    for (const l of medida.listas) {
+      expect(l).toEqual({ hueco: t.unidad * 2, viñeta: 'none', relleno: '0px', filete: [t.grosor, 'solid', t.filete] });
+    }
+    expect(medida.cierres).toHaveLength(2);
+    for (const c of medida.cierres) expect(c).toEqual({ tamaño: t.md, color: t.tinta, subrayado: 'none' });
+    expect(medida.arriba, 'el pie va por debajo de la última acción').toBeGreaterThanOrEqual(medida.islas);
+  });
+
+  test('a 360 × 640: alto de la página y del pie, anotados', async ({ page }, info) => {
+    await page.setViewportSize({ width: 360, height: 640 });
+    await abrir(page);
+    const { pagina, pie } = await page.evaluate(() => ({
+      pagina: document.documentElement.scrollHeight,
+      pie: document.querySelector('nav.salidas')!.getBoundingClientRect().height,
+    }));
+    expect(pie).toBeGreaterThan(0);
+    info.annotations.push({
+      type: '24.6 a 360',
+      description: `${ruta}: página de ${pagina} px de alto; pie de ${Math.round(pie)} px`,
+    });
   });
 });

@@ -1,11 +1,13 @@
 ---
 /**
- * El rótulo de sección de la Página de Obra — «Temas» y «Dónde leer esta obra» (UX-DR41, UX-DR42).
+ * El rótulo de sección — «Temas» y «Dónde leer esta obra» de la Página de Obra (UX-DR41, UX-DR42),
+ * «De la obra» de la Tarjeta de Obra y, desde la Historia 24.6, «De la misma obra», «Más de
+ * {Autor}» y «Temas» de las Rutas de salida de la Página de Cita.
  *
- * Un `h2` en `author` y tinta apagada, en versalitas por espaciado. Una sola regla para los dos
- * rótulos de la página: dos copias acabarían divergiendo. Sin márgenes: el aire lo pone quien lo
- * rodea. El peso, el espaciado y el interlineado son los mismos literales que el rótulo de las
- * Rutas de salida y el nombre del Autor, porque `tokens.css` no declara tokens para ellos.
+ * Un `h2` en `author` y tinta apagada, en versalitas por espaciado. Una sola regla para todos
+ * los rótulos: dos copias acabarían divergiendo. Sin márgenes: el aire lo pone quien lo rodea.
+ * El peso, el espaciado y el interlineado son los mismos literales que el nombre del Autor,
+ * porque `tokens.css` no declara tokens para ellos.
  *
  * Historia 24.7, UX-DR100 — `destino` lo pone el rótulo al que salta un ancla de la propia página
  * («Dónde leer esta obra»): `tabindex="-1"` lo hace enfocable sin meterlo en la tabulación, y así

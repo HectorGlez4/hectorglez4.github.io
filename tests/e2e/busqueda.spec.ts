@@ -2,7 +2,7 @@ import { expect, test, type Page } from '@playwright/test';
 import { ETIQUETAS_DE_RESULTADO } from '../../src/lib/tipoDeResultado.ts';
 import { ASENTAMIENTO_DE_BUSQUEDA, EVENTOS } from '../../src/lib/medicion.ts';
 import { tramoDe } from '../../src/lib/vocabulario.ts';
-import { temaBajoUmbral } from './ayuda/corpus.ts';
+import { citaConLosDosBloques, temaBajoUmbral, textoDe } from './ayuda/corpus.ts';
 import { emitidos as emitidosEn, espiarMedicion } from './ayuda/espia.ts';
 
 /** Historias 3.1 y 3.2 — búsqueda y resultado vacío. */
@@ -30,6 +30,27 @@ async function resultados(page: import('@playwright/test').Page) {
     })),
   );
 }
+
+/*
+ * Historia 24.6, NFR-13 — el pie de la Página de Cita va bajo `data-pagefind-ignore="all"`: el
+ * texto de una Cita de «De la misma obra» encuentra su propia página, nunca la que la ofrece al pie.
+ */
+test.describe('Historia 24.6 — el pie no entra en la búsqueda', () => {
+  test('el fragmento de una tarjeta de «De la misma obra» no devuelve la página que la ofrece', async ({ page }) => {
+    const slug = citaConLosDosBloques();
+    expect(slug, 'El Corpus no tiene ninguna Cita con los dos bloques del pie.').toBeDefined();
+    const ruta = `/cita/${slug}/`;
+    await page.goto(ruta);
+    const href = await page.locator('nav.salidas .de-la-misma-obra li.tarjeta a').first().getAttribute('href');
+    expect(href, ruta).toMatch(/^\/cita\/[^/]+\/$/);
+    const otra = href!.split('/')[2];
+    const consulta = textoDe(otra).replace(/[«»"“”.,;:¡!¿?()]/g, ' ').split(/\s+/).filter(Boolean).slice(0, 6).join(' ');
+    await buscar(page, consulta);
+    const citas = (await resultados(page)).filter((r) => r.tipo === 'cita').map((r) => r.href.replace(/\/?$/, '/'));
+    expect(citas, consulta).toContain(href);
+    expect(citas, consulta).not.toContain(ruta);
+  });
+});
 
 test.describe('Historia 3.1 — encontrar', () => {
   test('un fragmento de tres o más palabras localiza la Cita', async ({ page }) => {

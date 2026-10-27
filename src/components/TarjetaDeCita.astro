@@ -26,13 +26,12 @@ interface Props {
    *   · `'autor-y-obra'` — el Autor y el título de la Obra: la Página de Tema y la de Colección,
    *     que reúnen a varios Autores (FR-6, FR-26).
    *   · `'obra'` — solo el título de la Obra: la Página de Autor (FR-4), donde el Autor es el
-   *     mismo en todas las tarjetas.
+   *     mismo en todas las tarjetas, y «Más de {Autor}» al pie de la Página de Cita (24.6).
    *   · `'ninguna'` — solo el fragmento: el Listado de Obra (FR-51), cuya Cabecera ya dice el
-   *     Autor y el título.
+   *     Autor y el título, y «De la misma obra» al pie de la Página de Cita (24.6).
    *
-   * El conjunto cubre también los dos bloques del pie de la Página de Cita, que hoy pinta
-   * `RutasDeSalida.astro` con su propio marcado y que la Historia 24.6 pasará a esta tarjeta:
-   * «Más de {Autor}» con `'obra'` y «De la misma obra» con `'ninguna'`.
+   * Los dos bloques del pie de la Página de Cita los pinta `RutasDeSalida.astro` con esta
+   * tarjeta desde la Historia 24.6.
    *
    * La línea de Obra es `cita.obra.titulo`, el título de su Ficha de Obra (AD-25, Historia
    * 22.3). Una Cita sin Obra no la lleva: ni hueco, ni rótulo, ni pausa.

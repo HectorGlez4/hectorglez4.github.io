@@ -13,7 +13,10 @@ import {
 import { desviacionDelBarrido, reglasDeLaPagina, sinDecidir, versionesDeAxe } from './ayuda/barrido.ts';
 import {
   SIN_TARJETA_COMPLETA,
+  citaConLosDosBloques,
   citaConTarjetaCompleta,
+  citaSinMasDelAutor,
+  citaSinMismaObra,
   citaConTituloDeObraMasLargo,
   citaDeObraSinCotejar,
   citaSinObra,
@@ -134,6 +137,19 @@ const CITAS_24_4 = {
   ),
 };
 const SIN_CITA_SIN_OBRA = 'El Corpus no tiene ninguna Cita sin Obra: no hay cara sin tarjeta que barrer.';
+/**
+ * Historia 24.6 — las tres caras del pie: con «De la misma obra» y «Más de {Autor}», solo con «Más
+ * de» (una Obra de dos) y solo con «De la misma obra» (un Autor que es todo una Obra). Las dos
+ * primeras son obligatorias; la tercera entra si el Corpus la tiene, y la prueba la nombra si no.
+ */
+const CITAS_24_6 = {
+  dosBloques: ((s) => (s === undefined ? undefined : `/cita/${s}/`))(citaConLosDosBloques()),
+  sinMismaObra: ((s) => (s === undefined ? undefined : `/cita/${s}/`))(citaSinMismaObra()),
+  sinMasDelAutor: ((s) => (s === undefined ? undefined : `/cita/${s}/`))(citaSinMasDelAutor()),
+};
+const SIN_DOS_BLOQUES =
+  'El Corpus no tiene ninguna Cita de una Obra de 4 o más cuyo Autor tenga Citas fuera de ella: no hay pie con los dos bloques.';
+const SIN_MISMA_OBRA = 'El Corpus no tiene ninguna Cita de una Obra de dos cuyo Autor tenga Citas fuera de ella.';
 /** La ruta de una cara obligatoria, o el fallo de la prueba que la pide, con su motivo. */
 function obligatoria(ruta: string | undefined, motivo: string): string {
   expect(ruta, motivo).toBeDefined();
@@ -144,6 +160,9 @@ const CITAS_DEL_BARRIDO = [
   CITAS_24_4.sinObra,
   CITAS_24_4.sinCotejar,
   CITAS_24_4.tituloLargo?.ruta,
+  CITAS_24_6.dosBloques,
+  CITAS_24_6.sinMismaObra,
+  CITAS_24_6.sinMasDelAutor,
 ].filter((ruta): ruta is string => ruta !== undefined);
 
 /** Una ruta sin su barra final: la muestra derivada las da sin ella, y las de arriba con ella. */
@@ -183,6 +202,28 @@ test('24.4 — las Páginas de Cita del barrido salen del Corpus, cada una con s
     expect(leerTarjetaDeObra(tarjeta!).titulo?.texto, ruta).toBe(titulo);
   }
   for (const ruta of CITAS_DEL_BARRIDO) expect(SUPERFICIES.map(sinBarra), ruta).toContain(sinBarra(ruta));
+});
+
+test('24.6 — las caras del pie del barrido salen del Corpus, cada una con sus grupos', () => {
+  const dos = construida(obligatoria(CITAS_24_6.dosBloques, SIN_DOS_BLOQUES));
+  expect(dos).toContain('<section class="de-la-misma-obra"');
+  expect(dos).toContain('<section class="mas-del-autor"');
+  const sinMisma = construida(obligatoria(CITAS_24_6.sinMismaObra, SIN_MISMA_OBRA));
+  expect(sinMisma).not.toContain('<section class="de-la-misma-obra"');
+  expect(sinMisma).toContain('<section class="mas-del-autor"');
+  if (CITAS_24_6.sinMasDelAutor === undefined) {
+    test.info().annotations.push({
+      type: 'cara sin barrer',
+      description: 'el Corpus no tiene ningún Autor con todas sus Citas en una Obra de 4 o más',
+    });
+  } else {
+    const sinMas = construida(CITAS_24_6.sinMasDelAutor);
+    expect(sinMas, CITAS_24_6.sinMasDelAutor).toContain('<section class="de-la-misma-obra"');
+    expect(sinMas, CITAS_24_6.sinMasDelAutor).not.toContain('<section class="mas-del-autor"');
+  }
+  for (const ruta of [CITAS_24_6.dosBloques, CITAS_24_6.sinMismaObra, CITAS_24_6.sinMasDelAutor]) {
+    if (ruta !== undefined) expect(SUPERFICIES.map(sinBarra), ruta).toContain(sinBarra(ruta));
+  }
 });
 
 test('24.4 — a 320 px el título de Obra más largo de la tarjeta parte en varias líneas, sin desplazamiento', async ({
@@ -636,6 +677,37 @@ test.describe('Historia 2.8 — foco', () => {
     expect(tarjeta[1].href, ruta).toMatch(/^\/obra\//);
   });
 
+  /*
+   * Historia 24.6 — dentro del pie, el orden de tabulación es el del marcado: las tarjetas de la
+   * misma obra, su cierre, las tarjetas del Autor, su cierre y los chips.
+   */
+  test('24.6 — en el pie, misma obra, su cierre, Autor, su cierre y chips', async ({ page }) => {
+    const ruta = obligatoria(CITAS_24_6.dosBloques, SIN_DOS_BLOQUES);
+    await page.goto(ruta);
+    await page.locator('nav.salidas a').first().focus();
+    const paradas: string[] = [];
+    for (let i = 0; i < 40; i += 1) {
+      const parada = await page.evaluate(() => {
+        const n = document.activeElement as HTMLElement | null;
+        if (n === null || !n.closest('nav.salidas')) return 'fuera';
+        const grupo = n.closest('section')?.classList[0] ?? 'sin-grupo';
+        const pieza = n.closest('li.tarjeta') ? 'tarjeta' : n.closest('li.fila-de-bloque') ? 'cierre' : n.closest('.chips') ? 'chip' : 'otro';
+        return `${grupo}:${pieza}`;
+      });
+      if (parada === 'fuera') break;
+      paradas.push(parada);
+      await page.keyboard.press('Tab');
+    }
+    const secuencia = paradas.filter((p, k, todas) => k === 0 || todas[k - 1] !== p);
+    expect(secuencia, `${ruta}\n${JSON.stringify(paradas)}`).toEqual([
+      'de-la-misma-obra:tarjeta',
+      'de-la-misma-obra:cierre',
+      'mas-del-autor:tarjeta',
+      'mas-del-autor:cierre',
+      ...(paradas.some((p) => p.startsWith('temas-de-la-cita')) ? ['temas-de-la-cita:chip'] : []),
+    ]);
+  });
+
   test('sin Obra, el orden es contenido, acciones y después salidas', async ({ page }) => {
     const ruta = obligatoria(CITAS_24_4.sinObra, SIN_CITA_SIN_OBRA);
     const { paradas, grupos } = await paradasDesdeElAutor(page, ruta);
@@ -733,13 +805,14 @@ test.describe('Historia 2.8 — responsive', () => {
           return !(enLinea && acompanado);
         })
         /*
-         * Solo los listados de bloque con filete entre filas: las Citas hermanas y, desde la
-         * 24.5, el `ul` que reúne Filas de bloque (`.fila-de-bloque`, el componente), como las dos
-         * de la Tarjeta de Obra. Por el componente, no por la ruta.
+         * Solo los listados de bloque con filete entre filas: el `ul` que reúne Tarjetas de Cita
+         * o Filas de bloque (los componentes `.tarjeta` y `.fila-de-bloque`), como las dos filas
+         * de la Tarjeta de Obra (24.5) o las tarjetas y el cierre de cada grupo del pie (24.6).
+         * Por el componente, no por la ruta.
          */
         .map((n) => ({
           r: n.getBoundingClientRect(),
-          lista: n.closest('.hermanas') ?? n.closest('li.fila-de-bloque')?.parentElement ?? null,
+          lista: n.closest('li.tarjeta, li.fila-de-bloque')?.parentElement ?? null,
         }))
         .filter(({ r }) => r.width > 0 && r.height > 0)
         .map(({ r, lista }) => ({
@@ -752,9 +825,19 @@ test.describe('Historia 2.8 — responsive', () => {
           lista:
             lista === null
               ? -1
-              : [...document.querySelectorAll('.hermanas, ul:has(> li.fila-de-bloque)')].indexOf(lista),
+              : [...document.querySelectorAll('ul:has(> li.tarjeta), ul:has(> li.fila-de-bloque)')].indexOf(lista),
         })),
     );
+    // El margen negativo de la tarjeta (`margin-inline: -1 × --unidad`) la saca un `--unidad` por
+    // cada lado de la fila que la cierra: dentro de una lista, eso no es otra columna.
+    const unidad = await page.evaluate(() => {
+      const sonda = document.createElement('div');
+      sonda.style.width = 'var(--unidad)';
+      document.body.append(sonda);
+      const ancho = sonda.getBoundingClientRect().width;
+      sonda.remove();
+      return ancho;
+    });
 
     for (const caja of cajas) expect(caja.alto, `${ruta}: ${JSON.stringify(caja)}`).toBeGreaterThanOrEqual(44);
 
@@ -763,12 +846,13 @@ test.describe('Historia 2.8 — responsive', () => {
      * comentario prometía los 8px sin medirlos (Historia 22.10). El hueco es por eje: dos
      * cajas quedan separadas por el eje en el que no se cruzan.
      *
-     * Las filas de las Citas hermanas —`.hermanas`, con el ancho entero de la columna y el
-     * filete entre una y otra, el único separador del sistema— no se miden entre sí: son
-     * enlaces de bloque de `EXPERIENCE.md` y su separación es el filete, no un hueco. Basta
-     * con que no se solapen. Lo mismo las Filas de bloque de un mismo `ul` (Historia 24.5:
-     * «Siguiente…» sobre «Ver la obra»). La exención se nombra por selector, no por «cualquier
-     * lista», para que una botonera en `ul` no se cuele por ella.
+     * Las filas de un mismo `ul` de Tarjetas de Cita o de Filas de bloque —con el ancho entero
+     * de la columna y el filete entre una y otra, el único separador del sistema— no se miden
+     * entre sí: son enlaces de bloque de `EXPERIENCE.md` y su separación es el filete, no un
+     * hueco. Basta con que no se solapen (Historia 24.5: «Siguiente…» sobre «Ver la obra»; 24.6:
+     * las tarjetas y el cierre de cada grupo del pie, que sustituyen a las Citas hermanas). La
+     * exención se nombra por componente, no por «cualquier lista», para que una botonera en `ul`
+     * no se cuele por ella.
      */
     for (let i = 0; i < cajas.length; i += 1) {
       for (let j = i + 1; j < cajas.length; j += 1) {
@@ -777,8 +861,8 @@ test.describe('Historia 2.8 — responsive', () => {
         const filasDeUnListado =
           a.lista !== -1 &&
           a.lista === b.lista &&
-          Math.abs(a.izq - b.izq) <= 1 &&
-          Math.abs(a.der - b.der) <= 1;
+          Math.abs(a.izq - b.izq) <= unidad + 1 &&
+          Math.abs(a.der - b.der) <= unidad + 1;
         if (filasDeUnListado) {
           expect(a.abajo <= b.arriba || b.abajo <= a.arriba, `${ruta}: ${JSON.stringify([a, b])}`).toBe(true);
           continue;
@@ -793,6 +877,10 @@ test.describe('Historia 2.8 — responsive', () => {
 
   test('las zonas de toque miden 44px con 8px de separación', async ({ page }) => {
     await medirZonasDeToque(page, '/cita/antonio-machado-hoy-es-siempre-todavia/');
+  });
+
+  test('24.6 — las zonas de toque del pie con los dos bloques', async ({ page }) => {
+    await medirZonasDeToque(page, obligatoria(CITAS_24_6.dosBloques, SIN_DOS_BLOQUES));
   });
 
   /*

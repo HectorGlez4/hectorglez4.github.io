@@ -1149,8 +1149,8 @@ async function conLaCacheDeVerdad(
 test.describe('Historia 23.7 — cada salida interna dice desde qué zona', () => {
   const llegadas = (nombre: string) => recibidos.filter((r) => r?.evento === nombre);
   const salidas = () => llegadas(EVENTOS.salidaInterna);
-  /** Las Citas hermanas de las Rutas de salida: «Más de Séneca». */
-  const HERMANAS = 'nav[aria-label="Seguir leyendo"] .hermanas a';
+  /** Las tarjetas de «Más de Séneca» en las Rutas de salida (Historia 24.6): las dos Cartas. */
+  const HERMANAS = 'nav[aria-label="Seguir leyendo"] .mas-del-autor li.tarjeta a';
   const RESULTADOS = '[data-resultados] .resultado a';
   /** Una consulta que encuentra algo en este sitio: la Cita del viento favorable. */
   const CON_RESULTADOS = 'viento';
@@ -1201,7 +1201,7 @@ test.describe('Historia 23.7 — cada salida interna dice desde qué zona', () =
     const PROPIA = `${RUTA_CITA}?q=otra`;
     await page.evaluate(
       ([ancla, propia]) => {
-        const lista = document.querySelector('nav[aria-label="Seguir leyendo"] .hermanas')!;
+        const lista = document.querySelector('nav[aria-label="Seguir leyendo"] .mas-del-autor ul.tarjetas')!;
         for (const [href, texto] of [
           [ancla, 'Ancla de la propia página'],
           [propia, 'La propia ruta, con otra búsqueda'],

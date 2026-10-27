@@ -1,142 +1,150 @@
 ---
 /**
- * Rutas de salida — FR-12, UX-DR17.
+ * Rutas de salida — FR-12, UX-DR67, UX-DR68, UX-DR69, UX-DR101, UX-DR108, UX-DR112, AD-11, AD-19,
+ * NFR-13, Historia 24.6.
  *
- * Hasta cuatro Citas del mismo Autor y los chips de los Temas publicados a los que
- * pertenece. **Nunca vacío**: una visita de un segundo se convierte en sesión o se pierde
- * aquí, y una hoja sin salida es tráfico que entra por un buscador y se va por donde vino.
+ * Al pie de la Página de Cita, tras las acciones, tres grupos de lo más cercano a lo más amplio:
  *
- * El caso que obliga a pensar: un Autor con una sola Cita cuyos Temas están todos por
- * debajo del umbral. No hay Citas hermanas y no hay chips. El respaldo son los Temas
- * publicados del sitio — sigue siendo navegación por Tema, no un motor de recomendación.
+ *   · **«De la misma obra»** — hasta `MAX_CITAS_DE_LA_MISMA_OBRA` Citas de su Obra, en el orden
+ *     del libro, con la Tarjeta de Cita sin atribución (el contexto ya dice Autor y Obra) y el
+ *     cierre «Las {n} citas de {título} ›» hacia la página 1 de la Obra;
+ *   · **«Más de {Autor}»** — hasta `MAX_CITAS_RELACIONADAS` Citas del Autor sacadas de otras
+ *     Obras, con la Tarjeta que lleva solo la Obra y el cierre «Las {n} citas de {Autor} ›»
+ *     hacia su Página de Autor;
+ *   · **«Temas»** — los chips de los Temas publicados de la Cita.
  *
- * No hay enlace «Ver la ficha del Autor»: la atribución de arriba ya lleva a su página,
- * y repetirlo ponía el siena en tres sitios de la misma pantalla. DESIGN.md lo acota a
- * dos, y con razón: el acento deja de señalar en cuanto se reparte.
+ * Qué Citas, cuántas y los recuentos los decide `rutasDeSalidaDeCita` (`src/lib/publicado.ts`),
+ * y los textos de los cierres, `src/lib/atribucion.ts`: aquí no se cuenta, ni se ordena, ni se
+ * recorta nada (AD-11). La tarjeta es la única Tarjeta de Cita (AD-19) y la fila, la única Fila
+ * de bloque, con su glifo «›».
+ *
+ * **Un grupo vacío no está**: ni rótulo, ni filete, ni hueco. Y sin ninguno no hay `nav`, porque
+ * no hay respaldo: los de antes —«Explorar por tema» con los Temas del sitio y «Seguir leyendo»
+ * hacia el Autor— se retiraron, y la Atribución de arriba sigue enlazando al Autor y a la Obra.
+ *
+ * Todo va bajo `data-pagefind-ignore="all"` (NFR-13): aquí aparece el texto de otras Citas, y sin
+ * esto un fragmento buscado devolvería también las páginas que lo tienen como ruta de salida.
+ *
+ * El `nav` no lleva `data-zona`: cada tarjeta y cada fila declaran la suya en su `<li>` y los
+ * chips en su `ul`, la declaración más cercana manda, y una del `nav` no la pintaría nadie.
+ *
+ * No hay enlace «Ver la ficha del Autor» aparte del cierre: la atribución de arriba ya lleva a
+ * su página, y el siena en tres sitios de la misma pantalla deja de señalar.
  */
-import type { Cita, Autor, Tema } from '../lib/publicado.ts';
-import { rutaDeAutor, rutaDeCita, rutaDeTema } from '../lib/superficies.ts';
+import type { Autor, RutasDeSalidaDeCita } from '../lib/publicado.ts';
+import { cierreDeLaMismaObra, cierreDeMasDelAutor } from '../lib/atribucion.ts';
+import { rutaDeLaObra } from '../lib/obras.ts';
+import { rutaDeAutor, rutaDeTema } from '../lib/superficies.ts';
 import type { Zona } from '../lib/vocabulario.ts';
 import Chips from './Chips.astro';
+import FilaDeBloque from './FilaDeBloque.astro';
+import Rotulo from './Rotulo.astro';
+import TarjetaDeCita from './TarjetaDeCita.astro';
 
 interface Props {
+  /** El Autor de la Cita: el de «Más de {Autor}» y su cierre. */
   autor: Autor;
-  relacionadas: Cita[];
-  /** Temas publicados de esta Cita. Los que no llegan al umbral no se renderizan. */
-  chips: Tema[];
-  /** Respaldo cuando no hay ni hermanas ni chips. */
-  temasDelSitio: Tema[];
+  /** Lo que pinta el pie, decidido por `rutasDeSalidaDeCita`. */
+  rutas: RutasDeSalidaDeCita;
   /**
-   * La Zona de salida interna de las Citas hermanas y del chip de respaldo «Sobre {Autor}» (FR-56,
-   * UX-DR111, Historia 23.7). Los Chips de Tema llevan la suya, `chip-de-tema`, más concreta: la
-   * escucha del fichero toma la declaración más cercana al enlace. Obligatoria, como en los demás
-   * componentes de enlace.
+   * La Zona de salida interna de «Más de {Autor}» y de su cierre (FR-56, UX-DR111, Historia
+   * 23.7). «De la misma obra» lleva la suya, `misma-obra`, y los Chips de Tema, `chip-de-tema`:
+   * la escucha del fichero toma la declaración más cercana al enlace. Obligatoria, como en los
+   * demás componentes de enlace.
    */
   zona: Zona;
 }
 
-const { autor, relacionadas, chips, temasDelSitio, zona } = Astro.props;
+const { autor, rutas, zona } = Astro.props;
+const { mismaObra, delAutor, temas } = rutas;
 
-const sinSalidaPropia = relacionadas.length === 0 && chips.length === 0;
-const temasAMostrar = sinSalidaPropia ? temasDelSitio.slice(0, 6) : chips;
+/*
+ * Usos rotos, que paran la construcción: «Más de {Autor}» con una Cita de otro Autor, o una
+ * tarjeta que repite la de otro grupo. `rutasDeSalidaDeCita` no los produce; un uso que no venga
+ * de ella sí podría, y el pie diría algo falso.
+ */
+for (const otra of delAutor?.citas ?? []) {
+  if (otra.autor !== autor.slug) {
+    throw new Error(
+      `RutasDeSalida: en ${Astro.url.pathname}, «Más de ${autor.nombre}» lleva la Cita «${otra.slug}», ` +
+        `que es de «${otra.autor}» y no de «${autor.slug}».`,
+    );
+  }
+}
+const vistas = new Set<string>();
+for (const otra of [...(mismaObra?.citas ?? []), ...(delAutor?.citas ?? [])]) {
+  if (vistas.has(otra.slug)) {
+    throw new Error(
+      `RutasDeSalida: en ${Astro.url.pathname}, la Cita «${otra.slug}» sale dos veces en las Rutas de salida.`,
+    );
+  }
+  vistas.add(otra.slug);
+}
 
-const fragmento = (texto: string) =>
-  texto.length > 90 ? `${texto.slice(0, 89).trimEnd()}…` : texto;
+const hayAlgo = mismaObra !== undefined || delAutor !== undefined || temas.length > 0;
 ---
 
-{/*
-  * `data-pagefind-ignore`: aquí aparece el texto de otras Citas, y sin esto un fragmento
-  * buscado devolvería también las cuatro páginas que lo tienen como ruta de salida.
-  */}
-<nav class="salidas" aria-label="Seguir leyendo" data-pagefind-ignore data-zona={zona}>
-  {
-    relacionadas.length > 0 && (
-      <section>
-        <h2>Más de {autor.nombre}</h2>
-        <ul class="hermanas">
-          {relacionadas.map((otra) => (
-            <li>
-              <a href={rutaDeCita(otra.slug)}>«{fragmento(otra.texto)}»</a>
-            </li>
-          ))}
-        </ul>
-      </section>
-    )
-  }
-
-  {
-    temasAMostrar.length > 0 && (
-      <section>
-        <h2>{sinSalidaPropia ? 'Explorar por tema' : 'Temas'}</h2>
-        <Chips
-          enlaces={temasAMostrar.map((tema) => ({ href: rutaDeTema(tema.slug), nombre: tema.nombre }))}
-          zona="chip-de-tema"
-        />
-      </section>
-    )
-  }
-
-  {
-    /*
-     * Último recurso: si el sitio todavía no tiene ningún Tema publicado, la ficha del
-     * Autor sigue siendo una salida. Con el corpus actual no se alcanza, pero un corpus
-     * pequeño en los primeros días sí lo alcanzaría, y FR-12 no admite excepciones.
-     */
-    sinSalidaPropia && temasAMostrar.length === 0 && (
-      <section>
-        <h2>Seguir leyendo</h2>
-        <Chips enlaces={[{ href: rutaDeAutor(autor.slug), nombre: `Sobre ${autor.nombre}` }]} zona={zona} />
-      </section>
-    )
-  }
-
-</nav>
+{
+  hayAlgo && (
+    <nav class="salidas" aria-label="Seguir leyendo" data-pagefind-ignore="all">
+      {mismaObra !== undefined && (
+        <section class="de-la-misma-obra">
+          <Rotulo id="de-la-misma-obra">De la misma obra</Rotulo>
+          <ul class="tarjetas">
+            {mismaObra.citas.map((otra) => (
+              <TarjetaDeCita cita={otra} atribucion="ninguna" zona="misma-obra" />
+            ))}
+            <FilaDeBloque href={rutaDeLaObra(mismaObra.obra)} zona="misma-obra" avance>{cierreDeLaMismaObra(mismaObra.obra)}</FilaDeBloque>
+          </ul>
+        </section>
+      )}
+      {delAutor !== undefined && (
+        <section class="mas-del-autor">
+          <Rotulo id="mas-del-autor">Más de {autor.nombre}</Rotulo>
+          <ul class="tarjetas">
+            {delAutor.citas.map((otra) => (
+              <TarjetaDeCita cita={otra} atribucion="obra" zona={zona} />
+            ))}
+            <FilaDeBloque href={rutaDeAutor(autor.slug)} zona={zona} avance>{cierreDeMasDelAutor(autor, delAutor.recuento)}</FilaDeBloque>
+          </ul>
+        </section>
+      )}
+      {temas.length > 0 && (
+        <section class="temas-de-la-cita">
+          <Rotulo id="temas-de-la-cita">Temas</Rotulo>
+          <Chips
+            enlaces={temas.map((tema) => ({ href: rutaDeTema(tema.slug), nombre: tema.nombre }))}
+            zona="chip-de-tema"
+          />
+        </section>
+      )}
+    </nav>
+  )
+}
 
 <style>
   .salidas {
-    margin-top: calc(var(--respiracion) * 1.5);
+    margin-top: calc(var(--unidad) * 8);
     padding-top: calc(var(--unidad) * 3);
     border-top: var(--grosor-filete) solid var(--filete);
     max-width: var(--medida-prosa);
+  }
+
+  @media (min-width: 600px) {
+    .salidas {
+      margin-top: calc(var(--unidad) * 12);
+    }
   }
 
   section + section {
     margin-top: calc(var(--unidad) * 4);
   }
 
-  h2 {
-    margin: 0;
-    font-family: var(--sans);
-    font-size: var(--autor);
-    font-weight: 600;
-    letter-spacing: 0.09em;
-    text-transform: uppercase;
-    color: var(--tinta-apagada);
-  }
-
-  .hermanas {
+  /* Como el listado de la Página de Autor: filete encima de la primera, y cada fila pone el suyo debajo. */
+  .tarjetas {
     list-style: none;
-    margin: calc(var(--unidad) * 2) 0 0;
     padding: 0;
-  }
-
-  .hermanas li + li {
+    margin: calc(var(--unidad) * 2) 0 0;
     border-top: var(--grosor-filete) solid var(--filete);
-  }
-
-  .hermanas a {
-    display: flex;
-    align-items: center;
-    min-height: var(--zona-de-toque);
-    padding-block: var(--unidad);
-    font-family: var(--serif);
-    font-size: var(--cuerpo-lg);
-    color: var(--tinta);
-    text-decoration: none;
-    text-wrap: pretty;
-  }
-
-  .hermanas a:hover {
-    text-decoration: underline;
   }
 </style>

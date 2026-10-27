@@ -168,11 +168,13 @@ describe('Historia 24.3 — el contrato del componente, sin construir', () => {
   });
 
   it('todo `<TarjetaDeCita` de `src/` declara un literal del conjunto, y pasa `autor` solo con `autor-y-obra`', async () => {
-    const ESPERADA: Record<string, Atribucion> = {
-      'src/pages/tema/[slug]/[...page].astro': 'autor-y-obra',
-      'src/pages/coleccion/[slug]/[...page].astro': 'autor-y-obra',
-      'src/pages/autor/[slug]/[...page].astro': 'obra',
-      'src/pages/obra/[autor]/[slug]/[...page].astro': 'ninguna',
+    const ESPERADA: Record<string, Atribucion[]> = {
+      'src/pages/tema/[slug]/[...page].astro': ['autor-y-obra'],
+      'src/pages/coleccion/[slug]/[...page].astro': ['autor-y-obra'],
+      'src/pages/autor/[slug]/[...page].astro': ['obra'],
+      'src/pages/obra/[autor]/[slug]/[...page].astro': ['ninguna'],
+      // Historia 24.6 — «De la misma obra» y «Más de {Autor}», en ese orden.
+      'src/components/RutasDeSalida.astro': ['ninguna', 'obra'],
     };
     const vistas = new Map<string, Atribucion[]>();
     for (const ruta of await astrosDeSrc()) {
@@ -186,12 +188,13 @@ describe('Historia 24.3 — el contrato del componente, sin construir', () => {
         vistas.set(ruta, [...(vistas.get(ruta) ?? []), valor as Atribucion]);
       }
     }
-    // Las cuatro páginas declaran la suya, y ningún otro fichero usa la tarjeta sin que esta
-    // prueba diga qué atribución le toca: «Más de {Autor}» (`obra`) y «De la misma obra»
-    // (`ninguna`) entran aquí el día que la 24.6 los pase a la tarjeta.
+    // Las cuatro páginas y las Rutas de salida declaran las suyas, en el orden de sus usos, y
+    // ningún otro fichero usa la tarjeta sin que esta prueba diga qué atribución le toca: desde
+    // la 24.6, «De la misma obra» (`ninguna`) y «Más de {Autor}» (`obra`) la usan al pie de la
+    // Página de Cita.
     expect([...vistas.keys()].sort()).toEqual(Object.keys(ESPERADA).sort());
-    for (const [ruta, atribucion] of Object.entries(ESPERADA)) {
-      expect(vistas.get(ruta), ruta).toEqual([atribucion]);
+    for (const [ruta, atribuciones] of Object.entries(ESPERADA)) {
+      expect(vistas.get(ruta), ruta).toEqual(atribuciones);
     }
   });
 

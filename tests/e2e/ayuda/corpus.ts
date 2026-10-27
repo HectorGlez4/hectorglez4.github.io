@@ -160,6 +160,8 @@ interface CitaResuelta {
   texto: string;
   /** El título que pinta la Tarjeta de Cita, o `undefined` si no lleva línea de Obra. */
   obra?: string;
+  /** Historia 24.6 — el nombre de la ficha de su Obra: la identidad, no el título. */
+  ficha?: string;
   /** Si la Cita tiene Fuente: su Línea de la Fuente se pinta. */
   conFuente: boolean;
   /** Historia 24.4 — cuántas Citas tiene su Obra, como la cuenta el build. */
@@ -209,7 +211,7 @@ function citasResueltas(): CitaResuelta[] {
     texto: c.texto,
     conFuente: typeof c.fuente?.id === 'string' && c.fuente.id !== '',
     ...(c.obra !== undefined
-      ? { obra: c.obra.titulo, recuento: c.obra.recuento, edicionCotejada: c.obra.edicionCotejada }
+      ? { obra: c.obra.titulo, ficha: c.obra.nombre, recuento: c.obra.recuento, edicionCotejada: c.obra.edicionCotejada }
       : {}),
   }));
 }
@@ -247,6 +249,46 @@ export function citasDeObraDeUnaCita(): string[] {
     .filter((c) => c.obra !== undefined && c.recuento === 1)
     .sort(porSlug)
     .map((c) => c.slug);
+}
+
+/**
+ * Historia 24.6 — las caras del pie de la Página de Cita, del Corpus y nunca fijadas a mano. Cada
+ * una es la primera por slug, o `undefined` si el Corpus de hoy no la tiene: quien la pide dice
+ * qué hace entonces.
+ *
+ * Una Obra de cuatro Citas o más deja al menos dos para «De la misma obra» después de quitar la
+ * propia y la siguiente, y una de dos no deja ninguna. «Más de {Autor}» existe si el Autor tiene
+ * alguna Cita fuera de esa Obra (de otra o sin Obra).
+ */
+function citasPorAutorResueltas(): Map<string, CitaResuelta[]> {
+  const porAutor = new Map<string, CitaResuelta[]>();
+  for (const cita of citasResueltas()) porAutor.set(cita.autor, [...(porAutor.get(cita.autor) ?? []), cita]);
+  return porAutor;
+}
+
+function primeraQue(condicion: (cita: CitaResuelta, delAutor: readonly CitaResuelta[]) => boolean): string | undefined {
+  const porAutor = citasPorAutorResueltas();
+  return citasResueltas()
+    .filter((c) => condicion(c, porAutor.get(c.autor) ?? []))
+    .sort(porSlug)[0]?.slug;
+}
+
+const fueraDeSuObra = (cita: CitaResuelta, delAutor: readonly CitaResuelta[]) =>
+  delAutor.some((otra) => otra.ficha !== cita.ficha);
+
+/** Una Cita con «De la misma obra» y «Más de {Autor}»: Obra de 4 o más y Autor con Citas fuera de ella. */
+export function citaConLosDosBloques(): string | undefined {
+  return primeraQue((c, delAutor) => c.ficha !== undefined && (c.recuento ?? 0) >= 4 && fueraDeSuObra(c, delAutor));
+}
+
+/** Una Cita sin «De la misma obra» y con «Más de {Autor}»: Obra de 2 y Autor con Citas fuera de ella. */
+export function citaSinMismaObra(): string | undefined {
+  return primeraQue((c, delAutor) => c.ficha !== undefined && c.recuento === 2 && fueraDeSuObra(c, delAutor));
+}
+
+/** Una Cita con «De la misma obra» y sin «Más de {Autor}»: todas las de su Autor en una Obra de 4 o más. */
+export function citaSinMasDelAutor(): string | undefined {
+  return primeraQue((c, delAutor) => c.ficha !== undefined && (c.recuento ?? 0) >= 4 && !fueraDeSuObra(c, delAutor));
 }
 
 /** Por qué falla una prueba de la 24.4 cuando el Corpus no tiene la cara que pide. */
