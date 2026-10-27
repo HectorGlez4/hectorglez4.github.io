@@ -2,7 +2,8 @@
 title: 'Historia 24.5 — De una Cita a la siguiente del libro'
 type: 'feature'
 created: '2026-10-27'
-status: 'ready-for-dev'
+status: 'done'
+baseline_revision: 'f096023b4267b202859c71c97f669d63a4effd94'
 review_loop_iteration: 0
 followup_review_recommended: false
 context:
@@ -103,6 +104,17 @@ deferred: []
 
 ## Review Triage Log
 
+### 2026-10-27 — Review pass
+- intent_gap: 0
+- bad_spec: 0
+- patch: 0
+- defer: 0
+- reject: 0
+- addressed_findings:
+  - none
+
+Las cinco capas son externas y en esta pasada no traen hallazgos: la revisión independiente viene después.
+
 ## Design Notes
 
 **El fixture de `siguiente.test.ts`** (todas cotejadas: el andamio escribe los documentos en orden de inserción y las fichas). Autores `seneca` (`AUTOR_VALIDO`), `antonio-machado`, `epicteto`; Temas «La vida» (`la-vida`), «El deber» (`el-deber`), «La amistad» (`la-amistad`, < 15). Séneca: «Sobre la brevedad de la vida» 4 Citas insertadas 3, 2, 1, 0 (orden del libro inverso al de los slugs), «Cartas a Lucilio» 2, «Sobre la vida feliz» 2 (`seneca-vida-feliz-0/1`, `la-vida`), «De la ira» 1 (`seneca-ira-0`, `[la-amistad, la-vida]`), «De la providencia» 1 (`[la-amistad]`). Epicteto: «Manual» 12 (`la-vida`), «Disertaciones» 1 (`epicteto-disertaciones-0`, `la-vida`). Machado: «Campos de Castilla» 15 (`el-deber`), «Soledades» 1 (`antonio-machado-soledades-0`, `[el-deber, la-vida]`). Listado de `la-vida`: soledades-0, disertaciones-0, manual-×12, ira-0, vida-feliz-0/1 (17). Esperado: brevedad 3→2→1→0→3; disertaciones-0 → `seneca-ira-0` (salta las doce del Manual); ira-0 → `antonio-machado-soledades-0` (salta vida-feliz y da la vuelta), «Siguiente cita sobre la vida»; providencia-0 y soledades-0 sin fila. La prueba deriva lo esperado de `dist/` y además lo compara con estas cifras.
@@ -121,3 +133,32 @@ deferred: []
 
 **Manual checks (if no CLI):**
 - Anotar en el spec, de las anotaciones de Playwright, el alto de la tarjeta de dos filas a 360 px y la posición de Copiar.
+
+## Auto Run Result
+
+**Implementación (2026-10-27, bucle v8-ralph).** Status: done. Línea base `f096023b4267b202859c71c97f669d63a4effd94` (el commit del spec); código en `2794cbc3f1`.
+
+Qué cambia:
+- `src/lib/publicado.ts` -- `type SiguienteCita` y la pura `siguienteCita(cita, porObra, publicados, listados)`: por la Obra (grupo ≥ 2, `(i + 1) % n`), por el primer Tema publicado (primera de otro Autor tras ella, con vuelta), `undefined` sin Obra / sin Tema / sin otro Autor, y lanza ante un grupo roto nombrando Cita y ficha. `temasDeLaCita` acepta `readonly Tema[]` (solo el tipo).
+- `src/lib/atribucion.ts` -- `FILA_SIGUIENTE_DE_ESTA_OBRA`, `temaEnFrase` (primera letra con `toLocaleLowerCase('es')`) y `textoDeSiguiente`, sin glifo; solo importa tipos de `publicado.ts`.
+- `src/pages/cita/[slug].astro` -- `await citasDeLasObras(conjunto)` y el mapa de `citasDeTema` por Tema publicado, una vez; cada Cita recibe `siguiente`, que pasa a `<TarjetaDeObra … siguiente={siguiente} />`.
+- `src/components/TarjetaDeObra.astro` -- prop `siguiente: SiguienteCita | undefined` obligatoria; la fila `zona="siguiente"` delante de la de la Obra dentro de `ul.filas`, en la misma línea; docblock al día. Sin `<a` propio, sin guion, sin `data-ingreso`; `FilaDeBloque.astro` sin tocar.
+- `tools/lib/cambios.ts` -- solo comentarios: «Siguiente…» es navegación y no fecha ni avisa (24.8, FR-47).
+- `AGENTS.md` -- «La Tarjeta de Obra (Historia 24.4)»: una o dos filas, y el punto sobre «Siguiente…» (24.5).
+- `tests/unit/siguiente.test.ts` (nuevo, 19 pruebas) -- la matriz pura, la independencia del orden de `conjunto.citas`, `temaEnFrase` y `textoDeSiguiente`; y una construcción con el fixture de las Design Notes: recorridos (a) a (e), contra el Listado de Obra y el de Tema leídos de `dist/` y contra las cifras del spec (37 Citas con fila de 39).
+- `tests/unit/tarjeta-de-obra.test.ts` -- Props con `siguiente`, el uso exacto, la fuente con la fila `siguiente`, las sondas con `siguiente={undefined}`, «la fila de la Obra es el último enlace y el único con `tarjeta-de-obra`» (con «Siguiente…» en las 7 de Brevedad, Cartas y Machado y no en De la ira) y `filaDeLaObra` donde se tomaba `enlacesDe(...)[0]`.
+- `tests/unit/obra-pagina.test.ts` y `tests/unit/ediciones-en-venta.test.ts` -- la igualdad byte a byte (congelada / afiliación) exige que alguna tarjeta comparada lleve `li[data-zona="siguiente"]`; la tarjeta de `seneca-cartas-0` y las filas de la afiliación se leen por zona.
+- `tests/e2e/accesibilidad.spec.ts` -- dos paradas de tabulación en la tarjeta («Siguiente cita de esta obra» a `/cita/…`, después «Ver la obra y dónde leerla»); la prueba de zonas de toque pasa a función y mide además la cara completa, con las dos `.fila-de-bloque` apiladas; la exención de los 8 px se extiende al `ul` padre de `li.fila-de-bloque` (por el componente) y sigue exigiendo que no se solapen; a 320 px caben todas las filas.
+- `tests/e2e/pagina-de-cita.spec.ts` -- la tarjeta de la cara completa tiene dos filas, «Siguiente…» primero, del mismo trato y a una Página de Cita servida; la anotación pasa a `24.5 a 360 × 640`.
+
+Verificación:
+- `FECHA_JORNADA=2026-10-27 npm run build` en la línea base y con la historia: las dos con código 0; la segunda pasa la cobertura («5288 páginas, 2 familias, sin caídas al tipo de reserva») y las rutas indexables (4.873). `diff -rq`: 4.416 diferencias, todas Páginas de `dist/cita/`; ningún fichero de `dist/pagefind/`, ni la hoja `_astro/_slug_.*.css`, ni ninguna otra página. Las 4 Citas sin Obra (p. ej. `concepcion-arenal-abrid-escuelas-y-se-cerraran-carceles`) salen idénticas, `<main>` incluido. Recuento: **4.232** Páginas de Cita con «Siguiente» por la Obra, **184** por el Tema, **0** con Obra y sin fila, 4 sin Obra; ningún «→» en `dist/cita/`. Peso de `dist/`: 474.347.224 → 475.701.816 bytes (452,4 → 453,7 MiB, +1.354.592 bytes, ≈ 307 bytes por Página de Cita con fila), 15.340 ficheros en los dos.
+- Vitest uno a uno: `siguiente` 19, `tarjeta-de-obra` 28, `ediciones-en-venta` 55, `obra-pagina` 66, `medicion` 496 (sin tocar `COLOCACION`, `ZONAS_DE_HOY` ni `esDeOtraEpica`), `obras` 117 (sin tocar su tabla), `orden-del-libro` 47, `publicado` 58, `ingreso-construido` 38, `peso` 56, `superficies` 99, `espinas-de-ux` 10, `publicable-y-alcanzable` 30, `fecha-de-cambio-build` 10, `cobertura-build` 2: todo verde.
+- `npm run check`: 0 errores, 0 avisos. `npm test`: 136 ficheros, 6.205 pruebas, verde (786 s).
+- Playwright `accesibilidad`, `pagina-de-cita`, `rutas-de-salida`, `copiar`, `busqueda` en los dos proyectos: 261 verdes, 6 saltadas, 1 caída por tiempo en `[movil] rutas-de-salida.spec.ts:98` (45,3 s, ya diferida en la 24.4); repetida sola, verde en 14,5 s. Servidores parados y puertos 4321 y 8787 libres al terminar.
+- Medido en el navegador (anotaciones de Playwright, `movil`): a 360 × 640 la tarjeta de dos filas de `agustin-alvarez-ahora-empieza-a-haber-quienes-piensen-en` mide **233 px** desde y = 536 (≈ 240 px de UX-DR64) y Copiar queda en y = 801; con el título de Obra más largo (`mariano-jose-de-larra-la-verdad-del-teatro-es-enteramente-convencional`), 305 px desde y = 575 y Copiar en y = 912. La Cita sigue empezando en la primera pantalla y Copiar antes de y = 1.280 (deuda aceptada que vigila SM-C5; la 24.4 medía 756 y 867).
+- Auditoría de la matriz: cada fila la cubre al menos una prueba que corrió y pasó — n ≥ 3, 2, una con otro Autor detrás, la vuelta, primer Tema sin publicar, primer Tema publicado sin otro Autor, sin Tema publicado, sin Obra y grupo roto en la parte pura de `siguiente.test.ts`; los mismos casos construidos en (a)–(c) (Brevedad 3→2→1→0→3, Disertaciones → De la ira, De la ira → Soledades con vuelta, Providencia y Soledades sin fila); Obra `noindex` en `siguiente.test.ts` (Disertaciones, De la ira y Campos de Castilla con fila) y congelada en `obra-pagina.test.ts` (igualdad byte a byte con alguna tarjeta con «Siguiente»).
+
+Revisión: 0 parches, 0 diferidos, 0 rechazados en esta pasada (capas externas sin hallazgos todavía). `followup_review_recommended: false` (0 parches; puntuación 0).
+
+Riesgos residuales: «Siguiente…» depende del orden de la Obra y del listado del Tema —otras Citas, sus posiciones y sus Autores— y, como el resto de la tarjeta, no fecha ni avisa (excepción de Héctor; la 24.8 la deja así). Copiar sale de la primera pantalla de 360 × 640 unos 45 px más abajo que con la 24.4 (deuda aceptada, SM-C5). `[movil] rutas-de-salida.spec.ts:98` sigue rozando su límite de 30 s con la máquina cargada.
