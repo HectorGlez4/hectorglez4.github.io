@@ -2,7 +2,8 @@
 title: 'Historia 24.8 — Una Cita nueva no refecha las demás Páginas de Cita'
 type: 'feature'
 created: '2026-10-27'
-status: 'ready-for-dev'
+status: 'done'
+baseline_revision: '74d911b0db61a68bd97b14f3770b127ca8651ae3'
 review_loop_iteration: 0
 followup_review_recommended: false
 context:
@@ -137,7 +138,125 @@ La prueba de inversas es la que impide que las dos lecturas diverjan; la de clas
 **Manual checks (if no CLI):**
 - Las dos cifras (relación de antes y de ahora) y la duración de la lectura del historial quedan anotadas en este spec con fecha y rango.
 
+## Medidas
+
+Tomadas el 2026-10-27/28 en la rama `v8/epicas-24-26`, solo con git y sin tocar el sitio en vivo
+(el ensayo pide el sitemap publicado para saber qué Obras se indexan; no escribe ni envía).
+
+**Rango A — `fd2c295d0f^..fd2c295d0f`** (sesión 146: 16 Citas nuevas, 16 ficheros).
+
+| familia | cambian de fecha (antes → ahora) | se avisarían (antes → ahora) |
+|---|---|---|
+| cita | 16 → 16 | 16 → 16 |
+| autor | 4 → 4 | 4 → 4 |
+| tema | 8 → 8 | 8 → 8 |
+| coleccion | 0 → 0 | 0 → 0 |
+| obra | 6 → 6 | 4 → 4 |
+| portada | — | 1 → 1 |
+
+**Rango B — `169880e015^..169880e015`** (sesión 144: 21 Citas y 11 fichas nuevas, 32 ficheros).
+
+| familia | cambian de fecha (antes → ahora) | se avisarían (antes → ahora) |
+|---|---|---|
+| cita | 21 → 21 | 21 → 21 |
+| autor | 4 → 4 | 4 → 4 |
+| tema | 12 → 12 | 12 → 12 |
+| coleccion | 0 → 0 | 0 → 0 |
+| obra | 18 → 18 | 18 → 18 |
+| portada | — | 1 → 1 |
+
+«Antes» es la relación por ficheros del código de `74d911b0` sobre los Corpus extraídos de `desde`
+y `hasta` (guion de medida en el scratchpad, ya borrado); «ahora», `npx tsx tools/avisar.ts
+--ensayo --desde … --hasta …`. Una siembra que solo **añade** Citas ya no refechaba hermanas con
+la relación por ficheros, así que las cifras coinciden: la relación vieja fallaba en los cambios
+de campos, no en las altas. Ningún commit del historial toca solo `aptaParaPortada` (el único es
+la siembra inicial, `c4886d43d5`), así que ese caso se mide en `fecha-de-cambio-build.test.ts`.
+
+**El `lastmod` del Corpus real, relación vieja frente a la nueva** (HEAD de la rama, 5.148
+superficies): Cita 4.348 iguales y **72 más viejas** (cambios que solo tocaban campos que la
+página no pinta); Autor 148 iguales y 23 más nuevas; Tema 20 y 4; Colección 2 y 14 más nuevas
+(bajas de miembros y fichas de Obra); Obra 414 iguales, **101 más nuevas** (documentos de
+`corpus/fuentes/` recuperados después) y 2 más viejas.
+
+**Duración de la lectura del historial en el Corpus real:** `historialDeLosFicheros` sobre los seis
+ámbitos (con `corpus/fuentes/` opaco) — 7.297 ficheros, 8.755 transiciones — **0,89 s**;
+`fechasDeLasSuperficies` entera (Corpus, historial, bajas y relación) **1,73 s**, sin avisos. El
+historial de un rango en el ensayo, 0,04–0,05 s; la orden del ensayo entera, unos 7 s de reloj
+(con la petición del sitemap publicado).
+
+## Review Triage Log
+
+### 2026-10-28 — Review pass
+- intent_gap: 0
+- bad_spec: 0
+- patch: 0
+- defer: 0
+- reject: 0
+- addressed_findings:
+  - none
+
+Las capas de revisión son externas en este bucle y no traen hallazgos en esta pasada: sigue una
+revisión independiente.
+
 ## Auto Run Result
 
-Status: ready-for-dev
-Blocking condition: ninguna (alto tras planificar, por indicación de la invocación).
+Status: done
+Blocking condition: ninguna.
+
+**Qué se hizo.** La relación de AD-27 pasa de «superficie → ficheros» a «superficie → (fichero,
+campos que pinta)», con la familia de la ruta, y un solo comparador puro (`cambiaronLosCampos`)
+lo leen las dos lecturas: la fecha del sitemap, sobre el historial por commit (`git log --raw` +
+un `git cat-file --batch`), y el aviso, sobre `git diff --raw desde..hasta`. Los listados cuentan
+las fichas de Obra de sus Citas, la Página de Obra sus documentos de `corpus/fuentes/`, y las bajas
+fechan lo vivo que componían. `tools/avisar.ts --ensayo --desde --hasta` imprime el reparto por
+familia.
+
+**Ficheros.**
+- `tools/lib/cambios.ts` — dueño único: `CAMPOS_QUE_PINTA`, `CAMPOS_QUE_NO_FECHAN`, `VERSION_OPACA`,
+  `CUALQUIER_CAMBIO`, `cambiaronLosCampos`, la relación por campos con bajas y documentos,
+  `superficiesFechadas`, `fechasPorSuperficie` sobre un historial, `bajasDelHistorial`, `conRutas`;
+  cabecera reescrita al criterio «lo que afirma, por campos».
+- `tools/lib/avisar.ts` — `FAMILIAS_DE_FICHERO` (con `documento`) y `FAMILIAS_DE_RUTA`;
+  `rutasAvisadasPor` y `componerAviso` sobre cambios con antes/después y el mismo comparador; la
+  portada, con todo cambio que no sea un documento.
+- `integraciones/historial.ts` — `historialDeLosFicheros` (log raw + cat-file batch, opacos para
+  `corpus/fuentes/`), `entradasCrudas`, `analizarVersion`, `versionesDeBlobs`; `corpusParaFechar`
+  con documentos, formas, obra declarada y Fuente; `fechasDeLasSuperficies` con bajas y el ámbito
+  de los documentos, sin romper el build.
+- `tools/avisar.ts` — diff raw con blobs, Corpus de `hasta` (el árbol o una copia), documentos por
+  `git ls-tree`, `ensayoDelRango` e `informeDelEnsayo`.
+- `tests/unit/fecha-de-cambio.test.ts` — comparador, clasificación de los esquemas, la matriz entera
+  (fecha y aviso), las bajas; las pruebas de git leen el historial nuevo.
+- `tests/unit/indexnow.test.ts` — las dos constantes de familias, el aviso por campos, una Cita
+  nueva, solo `aptaParaPortada`, un documento, y la prueba de inversas con alta y baja.
+- `tests/unit/avisar-rango.test.ts` — rangos de `aptaParaPortada` (solo portada) y de un documento
+  (solo su Obra), el Corpus de `hasta` fuera del árbol, el ensayo; la nota de la ficha ya no fecha
+  la Página de Cita.
+- `tests/unit/fecha-de-cambio-build.test.ts` — sobre `dist/sitemap-0.xml`: un commit de solo
+  `aptaParaPortada` no fecha nada y uno de solo semblanza solo fecha la Página de Autor.
+- `AGENTS.md` — la relación por campos, la tabla, las bajas, la familia `documento` y la orden del
+  ensayo; fuera la frase de que la 24.8 estaba pendiente.
+
+**Revisión.** Sin hallazgos en esta pasada (capas externas): 0 parches, 0 diferidos, 0 rechazados.
+Seguimiento recomendado: `false` (0 parches; puntuación 0).
+
+**Verificación.**
+- `npx vitest run tests/unit/fecha-de-cambio.test.ts` — 58/58 verde.
+- `npx vitest run tests/unit/indexnow.test.ts` — 34/34 verde.
+- `npx vitest run tests/unit/avisar-rango.test.ts` — 20/20 verde.
+- `npx vitest run tests/unit/fecha-de-cambio-build.test.ts` — 12/12 verde (construye; git real).
+- `npx astro check` — 0 errores, 0 avisos (8 pistas ajenas a esta historia).
+- `npx tsx tools/avisar.ts --ensayo --desde fd2c295d0f^ --hasta fd2c295d0f` (y el rango B) — reparto
+  impreso y «Ensayo: no se ha enviado nada.»
+- `npm test` desacoplado — 137 ficheros, 6.297 pruebas, verde (771 s).
+- Mutaciones a mano: quitar `fuente` de la tabla hace fallar la clasificación nombrándola; un
+  comparador que siempre dice «cambió» tumba 8 pruebas (campos, matriz e inversas).
+
+**Riesgos residuales.**
+- El build lee ahora unos 6.200 blobs y analiza su YAML en cada construcción (≈0,9 s hoy); crece
+  con el historial del Corpus, no con el número de commits del día.
+- Una baja cuya última versión no se deja analizar no fecha lo que componía (no se sabe a qué
+  componía); su borrado sí se avisa por la relación de `--desde`.
+- Los diferidos del frontmatter siguen abiertos: el cambio de Tema, Autor u Obra de una Cita viva
+  no fecha el listado que abandona; FR-51 frente a AD-27 (pendiente de Héctor, `bmad-prd`); las
+  fusiones con conflictos en `corpus/` siguen invisibles para el historial.
