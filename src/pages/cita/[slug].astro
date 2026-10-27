@@ -13,6 +13,7 @@
 import Armazon from '../../components/Armazon.astro';
 import BloqueDeCita from '../../components/BloqueDeCita.astro';
 import Fuente from '../../components/Fuente.astro';
+import TarjetaDeObra from '../../components/TarjetaDeObra.astro';
 import CopiarCita from '../../islands/CopiarCita.astro';
 import ImagenDeCita from '../../islands/ImagenDeCita.astro';
 import CompartirEnlace from '../../islands/CompartirEnlace.astro';
@@ -76,6 +77,13 @@ const canonica = new URL(rutaDeCita(cita.slug), Astro.site).href;
       * verificar una atribución.
       */}
     <Fuente cita={cita} />
+    {/*
+      * Historia 24.4 — la Obra de la que sale la Cita, entre lo que la Cita es (atribución y
+      * Fuente) y lo que se hace con ella (las acciones). Aquí y no en `BloqueDeCita` por lo
+      * mismo que la Fuente: la portada y el 404 no cambian con esta historia. Sin Obra no pinta
+      * nada, y Copiar sigue a la Fuente o a la Atribución.
+      */}
+    <TarjetaDeObra cita={cita} autor={autor} nivel={2} />
     <CopiarCita cita={cita} autor={autor} />
     <ImagenDeCita cita={cita} autor={autor} />
     <CompartirEnlace cita={cita} autor={autor} canonica={canonica} />

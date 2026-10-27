@@ -664,7 +664,8 @@ conocidas están propuestas, con sus datos y la orden exacta, en
 Toda superficie nombra la obra con el **título de su Obra resuelta** (`cita.obra.titulo`), que
 `src/lib/obras.ts` deriva con `resolverObras` y `src/lib/publicado.ts` cuelga en cada Cita:
 la Atribución, lo copiado, el JSON-LD, la Tarjeta Social, la Imagen de Cita, la Imagen del Kit,
-la Pieza y, desde la 24.3, la Tarjeta de Cita de los listados de Tema, Colección y Autor.
+la Pieza, desde la 24.3, la Tarjeta de Cita de los listados de Tema, Colección y Autor y, desde
+la 24.4, la Tarjeta de Obra bajo la Cita, que lleva el año **de la Obra** y no el de la Cita.
 **Fuera de `src/lib/obras.ts` y `src/lib/admision.ts`, nada de `src/` ni de `public/islas/` lee
 `procedencia.obra`**; lo fija una prueba de `tests/unit/obras.test.ts`.
 El año que acompaña al título en la Atribución, lo copiado, la Imagen y la Tarjeta Social es el
@@ -782,6 +783,33 @@ npm run obra -- levantar     # lo devuelve a undefined
 
 Ninguna hace commit; las dos se niegan con 1 y sin escribir si no hay nada que hacer
 —también `congelar` cuando hoy no se indexa ninguna Obra—.
+
+### La Tarjeta de Obra (Historia 24.4)
+
+Bajo la Cita, entre la Línea de la Fuente —o la Atribución, sin Fuente— y Copiar, la Página de
+Cita dice de qué Obra sale: `src/components/TarjetaDeObra.astro`, con el rótulo «De la obra»,
+el título de la ficha sin enlace, «{Autor} · {año} · {n} citas» y una sola Fila de bloque a la
+página 1 de la Obra —se indexe o no, esté congelada o no—. **Solo en `src/pages/cita/[slug].astro`**:
+no va dentro de `BloqueDeCita.astro` porque ese bloque lo comparten la portada y el 404, que no
+la llevan (la portada la recibe en la 28.2). Sin Obra no pinta nada, ni rótulo ni hueco.
+
+- `nivel` (2 | 3) es obligatorio y sin valor por omisión: la Página de Cita pasa `2`; la portada
+  pasará `3`. `Rotulo.astro` admite `nivel`, por omisión `2`.
+- Lo que dice lo compone `contenidoDeTarjetaDeObra` de `src/lib/atribucion.ts`, con el año y el
+  recuento de la Obra resuelta: el componente no cuenta nada. La fila dice «Ver la obra y dónde
+  leerla» si `edicionCotejada` —alguna Cita de la Obra tiene Fuente— y «Ver la obra» si no; las
+  `ediciones` de la ficha y la afiliación no cuentan, y la tarjeta sale idéntica con el Modelo
+  encendido o apagado. No aloja ningún Modelo (sin `data-ingreso`) ni lleva guion.
+- La fila es `src/components/FilaDeBloque.astro`, escrita una vez con el trato de la Lista de
+  Obras y que reutilizarán «Siguiente» (24.5), los cierres (24.6), los Directorios y la portada:
+  `zona` obligatoria del vocabulario (aquí `tarjeta-de-obra`, en el `<li>`) y el glifo de avance
+  **«›» (U+203A)** con `avance`, en un `span` `aria-hidden`. **Nunca «→» (U+2192)**: no está en
+  el subconjunto `latin` de Inter ni de Source Serif 4, y la puerta de cobertura tipográfica para
+  el build en todas las Páginas de Cita (decisión de Héctor, v8.3).
+- Fuera de Pagefind con `data-pagefind-ignore="all"`, no con el atributo a secas: la tarjeta
+  nombra el título y el Autor, que el índice no debe recoger desde cada Página de Cita.
+- Pinta el año, el recuento y si hay edición cotejada, que dependen de las Citas hermanas: es
+  navegación, y por excepción de Héctor no fecha ni avisa (`tools/lib/cambios.ts`, 24.8).
 
 ## Curar una Colección
 

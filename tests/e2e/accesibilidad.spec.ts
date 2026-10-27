@@ -11,6 +11,12 @@ import {
   type CriterioDeWcag,
 } from '../../src/lib/superficies.ts';
 import { desviacionDelBarrido, reglasDeLaPagina, sinDecidir, versionesDeAxe } from './ayuda/barrido.ts';
+import {
+  citaConTarjetaCompleta,
+  citaConTituloDeObraMasLargo,
+  citaDeObraSinCotejar,
+  citaSinObra,
+} from './ayuda/corpus.ts';
 
 /**
  * Historia 2.8 — accesibilidad y comportamiento responsive.
@@ -106,7 +112,90 @@ function obrasDelBarrido(): { indexable: string; noIndexable: string; segunda: s
 const OBRAS = obrasDelBarrido();
 const OBRAS_DEL_BARRIDO = [OBRAS.indexable, OBRAS.noIndexable, OBRAS.segunda, OBRAS.tituloLargo];
 
-const SUPERFICIES = [...new Set([...DERIVADAS, ...OBRAS_DEL_BARRIDO])];
+/**
+ * Historia 24.4 — cuatro Páginas de Cita además de la muestra derivada, sacadas del Corpus con
+ * los mismos ayudantes que las demás pruebas y nunca fijadas a mano: la de la tarjeta completa
+ * (Línea de la Fuente, tarjeta con «Ver la obra y dónde leerla ›», Copiar e Imagen), la de una
+ * Cita sin Obra (sin tarjeta), la de una Obra sin cotejar («Ver la obra ›») y la del título de
+ * Obra más largo, que es la que puede desbordar la columna. Las dos primeras son obligatorias;
+ * las otras dos entran si el Corpus de hoy las tiene, y la prueba de abajo nombra la que falte.
+ */
+const SIN_OBRA = citaSinObra();
+if (SIN_OBRA === undefined) throw new Error('El Corpus no tiene ninguna Cita sin Obra: no hay cara sin tarjeta que barrer.');
+const CITAS_24_4 = {
+  completa: `/cita/${citaConTarjetaCompleta().slug}/`,
+  sinObra: `/cita/${SIN_OBRA.slug}/`,
+  sinCotejar: ((c) => (c === undefined ? undefined : `/cita/${c.slug}/`))(citaDeObraSinCotejar()),
+  tituloLargo: ((c) => (c === undefined ? undefined : { ruta: `/cita/${c.slug}/`, titulo: c.titulo }))(
+    citaConTituloDeObraMasLargo(),
+  ),
+};
+const CITAS_DEL_BARRIDO = [
+  CITAS_24_4.completa,
+  CITAS_24_4.sinObra,
+  ...(CITAS_24_4.sinCotejar === undefined ? [] : [CITAS_24_4.sinCotejar]),
+  ...(CITAS_24_4.tituloLargo === undefined ? [] : [CITAS_24_4.tituloLargo.ruta]),
+];
+
+const SUPERFICIES = [...new Set([...DERIVADAS, ...OBRAS_DEL_BARRIDO, ...CITAS_DEL_BARRIDO])];
+
+/** El HTML construido de una ruta con barra final. */
+const construida = (ruta: string) => readFileSync(join(dist, ...ruta.split('/').filter(Boolean), 'index.html'), 'utf8');
+/** La Tarjeta de Obra de una página construida, o `undefined`. */
+const tarjetaDe = (html: string) => /<section class="tarjeta-de-obra"[\s\S]*?<\/section>/.exec(html)?.[0];
+
+test('24.4 — las Páginas de Cita del barrido salen del Corpus, cada una con su cara', () => {
+  const completa = construida(CITAS_24_4.completa);
+  expect(completa, CITAS_24_4.completa).toContain('<p class="fuente"');
+  expect(tarjetaDe(completa), CITAS_24_4.completa).toMatch(/>Ver la obra y dónde leerla<span aria-hidden="true"[^>]*>&nbsp;›<\/span>/);
+  const sinObra = construida(CITAS_24_4.sinObra);
+  expect(sinObra, CITAS_24_4.sinObra).not.toContain('tarjeta-de-obra');
+  if (CITAS_24_4.sinCotejar === undefined) {
+    test.info().annotations.push({ type: 'cara sin barrer', description: 'el Corpus no tiene ninguna Obra sin cotejar' });
+  } else {
+    const tarjeta = tarjetaDe(construida(CITAS_24_4.sinCotejar));
+    expect(tarjeta, CITAS_24_4.sinCotejar).toMatch(/>Ver la obra<span aria-hidden="true"[^>]*>&nbsp;›<\/span>/);
+    expect(tarjeta, CITAS_24_4.sinCotejar).not.toContain('dónde leerla');
+  }
+  if (CITAS_24_4.tituloLargo === undefined) {
+    test.info().annotations.push({ type: 'cara sin barrer', description: 'el Corpus no tiene ninguna Cita con Obra' });
+  } else {
+    const { ruta, titulo } = CITAS_24_4.tituloLargo;
+    const tarjeta = tarjetaDe(construida(ruta)) ?? '';
+    const enLaTarjeta = /<p class="titulo"[^>]*>([\s\S]*?)<\/p>/.exec(tarjeta)?.[1]
+      ?.replace(/&amp;/g, '&')
+      .replace(/&quot;/g, '"')
+      .replace(/&#39;/g, "'");
+    expect(enLaTarjeta, ruta).toBe(titulo);
+  }
+  for (const ruta of CITAS_DEL_BARRIDO) expect(SUPERFICIES, ruta).toContain(ruta);
+});
+
+test('24.4 — a 320 px el título de Obra más largo de la tarjeta parte en varias líneas, sin desplazamiento', async ({
+  page,
+}) => {
+  test.skip(CITAS_24_4.tituloLargo === undefined, 'el Corpus no tiene ninguna Cita con Obra');
+  const { ruta } = CITAS_24_4.tituloLargo!;
+  await page.setViewportSize({ width: 320, height: 640 });
+  await page.goto(ruta);
+  await page.evaluate(async () => {
+    await document.fonts.ready;
+  });
+  const medida = await page.evaluate(() => {
+    const titulo = document.querySelector('.tarjeta-de-obra .titulo') as HTMLElement;
+    const fila = document.querySelector('.tarjeta-de-obra .fila-de-bloque a') as HTMLElement;
+    return {
+      alto: titulo.getBoundingClientRect().height,
+      linea: parseFloat(getComputedStyle(titulo).lineHeight),
+      filaDentro: fila.getBoundingClientRect().right <= document.documentElement.clientWidth + 0.5,
+      desborda: document.documentElement.scrollWidth > document.documentElement.clientWidth,
+    };
+  });
+  test.info().annotations.push({ type: 'alto del título a 320 px', description: `${medida.alto} px (${medida.linea} px por línea)` });
+  expect(medida.alto, ruta).toBeGreaterThanOrEqual(medida.linea * 2 - 1);
+  expect(medida.filaDentro, ruta).toBe(true);
+  expect(medida.desborda, ruta).toBe(false);
+});
 
 test('las cuatro Páginas de Obra del barrido salen del dist/, cada una con su cara', () => {
   const noindex = (ruta: string) =>
@@ -461,30 +550,75 @@ test.describe('Historia 2.8 — foco', () => {
     });
   }
 
-  test('en la Página de Cita el orden es contenido, acciones y después salidas', async ({
-    page,
-  }) => {
-    /*
-     * EXPERIENCE.md pide «contenido primero, acciones después, navegación al final».
-     * Se comprueba dentro del contenido principal, que es donde la secuencia significa
-     * algo. La cabecera queda fuera a propósito: moverla detrás del `main` en el marcado
-     * para que se tabule al final desalinearía el orden visual del de foco, y eso es un
-     * incumplimiento de WCAG 2.4.3 — arreglaría la letra del criterio rompiendo el
-     * criterio de al lado. Para eso está el enlace de salto, que es lo primero que
-     * recibe foco en toda la página.
-     */
-    await page.goto('/cita/miguel-de-cervantes-la-libertad-sancho-es-uno-de-los/');
+  /*
+   * EXPERIENCE.md pide «contenido primero, acciones después, navegación al final», y la v8 mete
+   * la Tarjeta de Obra entre el contenido y las acciones (Historia 24.4, enmienda de la 2.8). Se
+   * comprueba dentro del contenido principal, que es donde la secuencia significa algo. La
+   * cabecera queda fuera a propósito: moverla detrás del `main` en el marcado para que se
+   * tabule al final desalinearía el orden visual del de foco, y eso es un incumplimiento de
+   * WCAG 2.4.3 — arreglaría la letra del criterio rompiendo el criterio de al lado. Para eso
+   * está el enlace de salto, que es lo primero que recibe foco en toda la página.
+   *
+   * Con Tab de verdad, desde el enlace del Autor hasta el primer enlace de las salidas: cada
+   * parada se clasifica por dónde está —`figcaption` o `.fuente` es contenido, `.tarjeta-de-obra`
+   * es tarjeta, `.isla` es acción y `nav` es salida— y cualquier otra es un fallo.
+   */
+  async function paradasDesdeElAutor(page: Page, ruta: string) {
+    await page.goto(ruta);
+    expect(
+      await page.evaluate(() =>
+        [...document.querySelectorAll('main [tabindex]')].filter((n) => Number(n.getAttribute('tabindex')) > 0).length,
+      ),
+      `${ruta}: un elemento de main con tabindex positivo`,
+    ).toBe(0);
+    await page.locator('main figcaption a[href^="/autor/"]').first().focus();
+    const paradas: { grupo: string; texto: string; href: string | null }[] = [];
+    for (let i = 0; i < 80; i += 1) {
+      const parada = await page.evaluate(() => {
+        const n = document.activeElement as HTMLElement | null;
+        const grupo =
+          n === null || !n.closest('main')
+            ? 'fuera'
+            : n.closest('nav')
+              ? 'salida'
+              : n.closest('.tarjeta-de-obra')
+                ? 'tarjeta'
+                : n.closest('.isla')
+                  ? 'accion'
+                  : n.closest('figcaption, .fuente')
+                    ? 'contenido'
+                    : 'otro';
+        return { grupo, texto: (n?.textContent ?? '').replace(/\s+/g, ' ').trim(), href: n?.getAttribute('href') ?? null };
+      });
+      paradas.push(parada);
+      if (parada.grupo === 'salida') break;
+      await page.keyboard.press('Tab');
+    }
+    expect(paradas.filter((p) => p.grupo === 'otro' || p.grupo === 'fuera'), `${ruta}\n${JSON.stringify(paradas)}`).toEqual([]);
+    const grupos = paradas.map((p) => p.grupo).filter((g, k, todos) => k === 0 || todos[k - 1] !== g);
+    return { paradas, grupos };
+  }
 
-    const orden = await page.evaluate(() => {
-      const enfocables = [...document.querySelectorAll('main a, main button')];
-      return enfocables.map((n) =>
-        n.closest('nav') ? 'salida' : n.tagName === 'BUTTON' ? 'accion' : 'contenido',
-      );
-    });
+  test('en la Página de Cita el orden es contenido, tarjeta, acciones y después salidas', async ({ page }) => {
+    const ruta = CITAS_24_4.completa;
+    const { paradas, grupos } = await paradasDesdeElAutor(page, ruta);
+    expect(grupos, `${ruta}\n${JSON.stringify(paradas)}`).toEqual(['contenido', 'tarjeta', 'accion', 'salida']);
+    const contenido = paradas.filter((p) => p.grupo === 'contenido');
+    // El Autor, el título de la Obra y la Fuente, delante de la tarjeta.
+    expect(contenido[0].href, ruta).toMatch(/^\/autor\//);
+    expect(contenido.some((p) => p.href?.startsWith('/obra/')), ruta).toBe(true);
+    expect(contenido.some((p) => /^https?:/.test(p.href ?? '')), `${ruta}: sin parada en la Fuente`).toBe(true);
+    // Una sola parada en la tarjeta: «Ver la obra y dónde leerla».
+    const tarjeta = paradas.filter((p) => p.grupo === 'tarjeta');
+    expect(tarjeta, ruta).toHaveLength(1);
+    expect(tarjeta[0].texto, ruta).toMatch(/^Ver la obra y dónde leerla/);
+    expect(tarjeta[0].href, ruta).toMatch(/^\/obra\//);
+  });
 
-    expect(orden.indexOf('accion')).toBeLessThan(orden.indexOf('salida'));
-    // Y el enlace de atribución —contenido— va antes que la acción.
-    expect(orden.indexOf('contenido')).toBeLessThan(orden.indexOf('accion'));
+  test('sin Obra, el orden es contenido, acciones y después salidas', async ({ page }) => {
+    const ruta = CITAS_24_4.sinObra;
+    const { paradas, grupos } = await paradasDesdeElAutor(page, ruta);
+    expect(grupos, `${ruta}\n${JSON.stringify(paradas)}`).toEqual(['contenido', 'accion', 'salida']);
   });
 
   test('el enlace de salto es lo primero que recibe foco', async ({ page }) => {

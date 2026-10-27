@@ -232,6 +232,45 @@ export function descripcionDeObra(
 }
 
 /**
+ * El texto de la Fila de bloque de la Tarjeta de Obra cuando alguna Cita de la Obra está
+ * cotejada: la Página de Obra tiene entonces «Dónde leer esta obra», y la fila lo promete
+ * (UX-DR104, Historia 24.4).
+ */
+export const FILA_VER_LA_OBRA_Y_DONDE_LEERLA = 'Ver la obra y dónde leerla';
+
+/**
+ * El de una Obra sin ninguna Cita cotejada: no hay edición que enseñar, y prometer «dónde
+ * leerla» llevaría a una página que no lo dice. Las `ediciones` de la ficha no cuentan: la
+ * edición en venta nunca va sola (FR-54).
+ */
+export const FILA_VER_LA_OBRA = 'Ver la obra';
+
+/**
+ * Lo que dice la Tarjeta de Obra bajo la Cita — FR-12, UX-DR104, Historia 24.4.
+ *
+ * `hechos` son las partes de la línea «{Autor} · {año} · {n} citas», en su orden, sin
+ * separadores: el componente pone el punto medio para la vista y la coma para el lector. El año
+ * es el de la Obra resuelta —omitido si sus Citas discrepan o no lo dicen, nunca el de una
+ * traducción—, como lo lee una persona (`añoLegible`: «350 a. C.»), y cuando falta no deja
+ * hueco: la parte no está. El recuento es `obra.recuento`, el de la Obra resuelta: el
+ * componente no cuenta nada (AD-11).
+ *
+ * `fila` es el texto de su Fila de bloque, sin el glifo de avance «›», que pone `FilaDeBloque.astro`.
+ *
+ * Un solo dueño junto a `descripcionDeObra` y `añoLegible`, porque la portada pintará la misma
+ * tarjeta (28.2) y dos redacciones dirían la misma Obra de dos maneras.
+ */
+export function contenidoDeTarjetaDeObra(
+  autor: Pick<Autor, 'nombre'>,
+  obra: Pick<ObraResuelta, 'año' | 'recuento' | 'edicionCotejada'>,
+): { hechos: string[]; fila: string } {
+  const hechos = [autor.nombre];
+  if (obra.año !== undefined) hechos.push(añoLegible(obra.año));
+  hechos.push(obra.recuento === 1 ? '1 cita' : `${obra.recuento} citas`);
+  return { hechos, fila: obra.edicionCotejada ? FILA_VER_LA_OBRA_Y_DONDE_LEERLA : FILA_VER_LA_OBRA };
+}
+
+/**
  * La línea de procedencia de la Atribución, en piezas — UX-DR8, FR-2, Historia 22.4.
  *
  * `titulo` es el título de la Obra resuelta, si consta, y `resto` todo lo que va detrás en la

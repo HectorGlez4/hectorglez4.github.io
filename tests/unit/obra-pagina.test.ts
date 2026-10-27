@@ -16,6 +16,7 @@ import { componerDocumento } from '../../tools/lib/documento.ts';
 import { ANCLA_DE_DONDE_LEER, rutaDeLaObra } from '../../src/lib/obras.ts';
 import { enlacesDe } from './ayuda/enlaces.js';
 import { obraDeLaTarjeta, tarjetasDelListado } from './ayuda/listado.js';
+import { tarjetaDeObraDe } from './ayuda/tarjeta-de-obra.js';
 import { EVENTOS } from '../../src/lib/medicion.ts';
 import { marcasDePagina } from '../../tools/lib/indexables.ts';
 import { MARCAS_DE_OBRA } from '../../src/lib/vocabulario.ts';
@@ -286,13 +287,28 @@ function jsonLd(pagina: string): Record<string, unknown>[] {
   );
 }
 
+/**
+ * La construcción abierta de `corpus(1)` con la sonda, memorizada para el fichero: la comparten
+ * la `describe` de la 22.4 y la prueba de la 24.4 de la congelada, que compara las Tarjetas de
+ * Obra de las dos sin construir otra vez. Es de solo lectura, y la borra el `afterAll` del
+ * fichero, que corre después de la última prueba de todas sus `describe`.
+ */
+let abiertaMemorizada: Promise<Awaited<ReturnType<typeof construirConCorpus>>> | undefined;
+function construidaAbierta(): Promise<Awaited<ReturnType<typeof construirConCorpus>>> {
+  abiertaMemorizada ??= (async () => {
+    const resultado = await construirConCorpus(corpus(1), { paginas: { 'sonda.astro': SONDA } });
+    aLimpiar.push(resultado.proyecto);
+    return resultado;
+  })();
+  return abiertaMemorizada;
+}
+
 describe('Historia 22.4 — la Página de Obra, construida', () => {
   let proyecto = '';
   let salida = '';
 
   beforeAll(async () => {
-    const resultado = await construirConCorpus(corpus(1), { paginas: { 'sonda.astro': SONDA } });
-    aLimpiar.push(resultado.proyecto);
+    const resultado = await construidaAbierta();
     expect(resultado.codigo, resultado.salida).toBe(0);
     proyecto = resultado.proyecto;
     salida = resultado.salida;
@@ -1230,6 +1246,30 @@ describe('Historia 22.8 — la congelación declarada, construida', () => {
     ]);
     expect(obraDe).toEqual(esperadas);
   });
+
+  it('24.4 — congelada, la Tarjeta de Obra de cada Página de Cita es la de la familia abierta', async () => {
+    // La congelación no alcanza a la navegación: la misma tarjeta, byte a byte, y a la página 1
+    // de su Obra aunque esa Obra salga de la lista indexable.
+    const abierta = await construidaAbierta();
+    expect(abierta.codigo, abierta.salida).toBe(0);
+    const citas = (await readdir(join(proyecto, 'dist', 'cita'))).sort();
+    expect(citas).toEqual((await readdir(join(abierta.proyecto, 'dist', 'cita'))).sort());
+    expect(citas.length).toBeGreaterThan(50);
+    for (const slug of citas) {
+      const ruta = `/cita/${slug}/`;
+      const congelada = tarjetaDeObraDe(await html(proyecto, ruta));
+      expect(congelada, ruta).toBeDefined();
+      expect(congelada, ruta).toBe(tarjetaDeObraDe(await html(abierta.proyecto, ruta)));
+    }
+    // Cartas: indexable con la familia abierta, `noindex` congelada; la tarjeta enlaza igual.
+    expect(await html(abierta.proyecto, CARTAS)).not.toMatch(NOINDEX);
+    expect(await html(proyecto, CARTAS)).toMatch(NOINDEX);
+    const tarjeta = tarjetaDeObraDe(await html(proyecto, '/cita/seneca-cartas-0/'))!;
+    expect(enlacesDe(tarjeta).map((e) => ({ href: e.href, declaracion: e.declaracion }))).toEqual([
+      { href: '/obra/seneca/cartas-a-lucilio/', declaracion: { zona: 'tarjeta-de-obra' } },
+    ]);
+    expect(CARTAS).toBe('/obra/seneca/cartas-a-lucilio/');
+  }, 300_000);
 
   it('24.7 — congelada, toda página 1 sigue llevando el salto, y la 2 no', async () => {
     const { primeras, segundas } = await comprobarSaltos(proyecto);

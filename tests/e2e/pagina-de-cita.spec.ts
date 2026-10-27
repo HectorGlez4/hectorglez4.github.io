@@ -1,6 +1,12 @@
 import { expect, test, type Page } from '@playwright/test';
 import { MAX_BYTES_DE_GUION } from '../../src/lib/umbrales.ts';
-import { citaConObraMasLarga, citaConProcedenciaCompleta, procedenciaDe } from './ayuda/corpus.ts';
+import {
+  citaConObraMasLarga,
+  citaConProcedenciaCompleta,
+  citaConTarjetaCompleta,
+  citaConTituloDeObraMasLargo,
+  procedenciaDe,
+} from './ayuda/corpus.ts';
 import { apuntarGuiones, fueraDeLaListaAlCargar } from './ayuda/guiones.ts';
 
 /**
@@ -560,5 +566,222 @@ test.describe('Historia 22.5 — los enlaces en tinta de la Atribución', () => 
     expect(enObra).toEqual(enCita);
     expect(enObra).toEqual({ color: tinta, linea: 'underline', grosor });
     expect(alto).toBeGreaterThanOrEqual(44);
+  });
+});
+
+/**
+ * Historia 24.4 — bajo la Cita, la obra de la que sale.
+ *
+ * La Tarjeta de Obra va entre la Línea de la Fuente y Copiar. Se mide en el navegador lo que la
+ * prueba unitaria no ve: que el texto de la Cita sigue empezando en la primera pantalla de
+ * 360 × 640 (que Copiar quede justo debajo es deuda aceptada que vigila SM-C5, y su posición se
+ * anota), los tokens calculados de la tarjeta y de su fila, y la separación de las acciones de
+ * debajo. Las Citas salen del Corpus, nunca fijadas a mano. Los valores esperados salen de los
+ * tokens de la propia página.
+ */
+test.describe('Historia 24.4 — la Tarjeta de Obra en la Página de Cita', () => {
+  const completa = `/cita/${citaConTarjetaCompleta().slug}/`;
+  const larga = citaConTituloDeObraMasLargo();
+  const conTarjeta = [completa, ...(larga === undefined ? [] : [`/cita/${larga.slug}/`])];
+
+  async function abrir(page: Page, ruta: string) {
+    await page.goto(ruta);
+    await page.evaluate(async () => {
+      await document.fonts.ready;
+    });
+  }
+
+  for (const ruta of conTarjeta) {
+    test(`${ruta}: la Cita empieza en la primera pantalla de 360 × 640 y Copiar va debajo de la tarjeta`, async ({
+      page,
+    }, info) => {
+      test.skip(info.project.name !== 'movil', 'El criterio se enuncia sobre 360×640.');
+      await abrir(page, ruta);
+      expect(await page.evaluate(() => window.scrollY)).toBe(0);
+      const cita = await page.locator('blockquote .texto').boundingBox();
+      const tarjeta = await page.locator('.tarjeta-de-obra').boundingBox();
+      const copiar = await page.locator('button.copiar').boundingBox();
+      expect(cita).not.toBeNull();
+      expect(tarjeta).not.toBeNull();
+      expect(copiar).not.toBeNull();
+      expect(cita!.y, ruta).toBeGreaterThan(0);
+      expect(cita!.y, ruta).toBeLessThan(640);
+      expect(copiar!.y, ruta).toBeGreaterThanOrEqual(tarjeta!.y + tarjeta!.height);
+      info.annotations.push({
+        type: '24.4 a 360 × 640',
+        description: `${ruta}: tarjeta de ${Math.round(tarjeta!.height)} px desde y = ${Math.round(tarjeta!.y)}; Copiar en y = ${Math.round(copiar!.y)} (${copiar!.y + copiar!.height <= 640 ? 'dentro' : 'fuera'} de la primera pantalla)`,
+      });
+    });
+  }
+
+  test('los tokens calculados de la tarjeta y de su fila', async ({ page }) => {
+    await abrir(page, completa);
+    const medida = await page.evaluate(() => {
+      const seccion = document.querySelector('.tarjeta-de-obra') as HTMLElement;
+      // Los tokens, resueltos en una sonda hermana de la tarjeta: hereda la misma letra, y
+      // `68ch` se resuelve igual.
+      const sonda = document.createElement('div');
+      sonda.style.cssText =
+        'width: var(--unidad); max-width: var(--medida-prosa); color: var(--tinta); background-color: var(--filete); ' +
+        'border-top: var(--grosor-filete) solid; min-height: var(--zona-de-toque); font-family: var(--sans)';
+      seccion.parentElement!.append(sonda);
+      const s = getComputedStyle(sonda);
+      const tokens = {
+        unidad: parseFloat(s.width),
+        medida: s.maxWidth,
+        tinta: s.color,
+        filete: s.backgroundColor,
+        grosor: s.borderTopWidth,
+        toque: s.minHeight,
+        sans: s.fontFamily,
+      };
+      const tamaño = (token: string) => {
+        sonda.style.fontSize = `var(${token})`;
+        return parseFloat(getComputedStyle(sonda).fontSize);
+      };
+      const tamaños = { lg: tamaño('--cuerpo-lg'), md: tamaño('--cuerpo-md'), pie: tamaño('--pie') };
+      sonda.style.color = 'var(--tinta-apagada)';
+      const apagada = getComputedStyle(sonda).color;
+      sonda.remove();
+
+      const css = (selector: string) => getComputedStyle(seccion.querySelector(selector) ?? seccion);
+      const sec = getComputedStyle(seccion);
+      const titulo = css('.titulo');
+      const hechos = css('.hechos');
+      const filas = css('ul.filas');
+      const li = css('li.fila-de-bloque');
+      const a = css('li.fila-de-bloque a');
+      const recorta = (e: CSSStyleDeclaration) =>
+        e.whiteSpace === 'nowrap' || e.textOverflow === 'ellipsis' || e.overflow !== 'visible' || e.webkitLineClamp !== 'none';
+      return {
+        tokens: { ...tokens, ...tamaños, apagada },
+        seccion: {
+          margen: parseFloat(sec.marginTop),
+          filete: [sec.borderTopWidth, sec.borderTopStyle, sec.borderTopColor],
+          relleno: parseFloat(sec.paddingTop),
+          maximo: sec.maxWidth,
+          fondo: sec.backgroundColor,
+          radio: sec.borderTopLeftRadius,
+          recorta: recorta(sec),
+        },
+        titulo: {
+          margen: parseFloat(titulo.marginTop),
+          familia: titulo.fontFamily,
+          tamaño: parseFloat(titulo.fontSize),
+          peso: titulo.fontWeight,
+          color: titulo.color,
+          equilibrio: `${titulo.getPropertyValue('text-wrap')} ${titulo.getPropertyValue('text-wrap-style')}`,
+          parte: titulo.overflowWrap,
+          guiones: titulo.hyphens,
+          recorta: recorta(titulo),
+        },
+        hechos: {
+          margen: parseFloat(hechos.marginTop),
+          familia: hechos.fontFamily,
+          tamaño: parseFloat(hechos.fontSize),
+          peso: hechos.fontWeight,
+          interlineado: parseFloat(hechos.lineHeight),
+          color: hechos.color,
+          recorta: recorta(hechos),
+        },
+        filas: {
+          margen: parseFloat(filas.marginTop),
+          viñeta: filas.listStyleType,
+          relleno: filas.paddingLeft,
+          filete: [filas.borderTopWidth, filas.borderTopStyle, filas.borderTopColor],
+        },
+        fila: {
+          filete: [li.borderBottomWidth, li.borderBottomStyle, li.borderBottomColor],
+          display: a.display,
+          alineado: a.alignItems,
+          alto: a.minHeight,
+          relleno: parseFloat(a.paddingTop),
+          familia: a.fontFamily,
+          tamaño: parseFloat(a.fontSize),
+          interlineado: parseFloat(a.lineHeight),
+          color: a.color,
+          subrayado: a.textDecorationLine,
+          recorta: recorta(a),
+        },
+      };
+    });
+    const { tokens: t } = medida;
+    expect(medida.seccion).toEqual({
+      margen: t.unidad * 4,
+      filete: [t.grosor, 'solid', t.filete],
+      relleno: t.unidad * 3,
+      maximo: t.medida,
+      fondo: 'rgba(0, 0, 0, 0)',
+      radio: '0px',
+      recorta: false,
+    });
+    expect(medida.titulo).toMatchObject({
+      margen: t.unidad,
+      familia: t.sans,
+      tamaño: t.lg,
+      peso: '600',
+      color: t.tinta,
+      parte: 'break-word',
+      guiones: 'auto',
+      recorta: false,
+    });
+    expect(medida.titulo.equilibrio).toContain('balance');
+    expect(medida.hechos).toEqual({
+      margen: t.unidad,
+      familia: t.sans,
+      tamaño: t.pie,
+      peso: '400',
+      interlineado: t.pie * 1.5,
+      color: t.apagada,
+      recorta: false,
+    });
+    expect(medida.filas).toEqual({
+      margen: t.unidad * 2,
+      viñeta: 'none',
+      relleno: '0px',
+      filete: [t.grosor, 'solid', t.filete],
+    });
+    expect(medida.fila.interlineado).toBeCloseTo(t.md * 1.4, 1);
+    expect({ ...medida.fila, interlineado: undefined }).toEqual({
+      filete: [t.grosor, 'solid', t.filete],
+      display: 'flex',
+      alineado: 'center',
+      alto: t.toque,
+      relleno: t.unidad * 1.25,
+      familia: t.sans,
+      tamaño: t.md,
+      interlineado: undefined,
+      color: t.tinta,
+      subrayado: 'none',
+      recorta: false,
+    });
+  });
+
+  test('las acciones de debajo: Copiar a 32 px de la tarjeta, Imagen a 16 px de Copiar, cada botón en su línea', async ({
+    page,
+  }) => {
+    await abrir(page, completa);
+    const medida = await page.evaluate(() => {
+      const caja = (n: Element | null) => (n as HTMLElement).getBoundingClientRect();
+      const tarjeta = caja(document.querySelector('.tarjeta-de-obra'));
+      const islas = [...document.querySelectorAll('main .isla')];
+      const copiar = islas.find((n) => n.querySelector('button.copiar') !== null)!;
+      const imagen = islas.find((n) => n.hasAttribute('data-imagen'))!;
+      const botonCopiar = caja(copiar.querySelector('button.copiar'));
+      const botonImagen = caja(imagen.querySelector('button[data-abrir]'));
+      const columna = caja(document.querySelector('main article'));
+      return {
+        tarjetaACopiar: caja(copiar).top - tarjeta.bottom,
+        copiarAImagen: caja(imagen).top - caja(copiar).bottom,
+        unidad: parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--unidad')),
+        enSuLinea: botonImagen.top >= botonCopiar.bottom,
+        anchos: [botonCopiar.width, botonImagen.width],
+        columna: columna.width,
+      };
+    });
+    expect(Math.abs(medida.tarjetaACopiar - medida.unidad * 4), JSON.stringify(medida)).toBeLessThanOrEqual(1);
+    expect(Math.abs(medida.copiarAImagen - medida.unidad * 2), JSON.stringify(medida)).toBeLessThanOrEqual(1);
+    expect(medida.enSuLinea, JSON.stringify(medida)).toBe(true);
+    for (const ancho of medida.anchos) expect(ancho, JSON.stringify(medida)).toBeLessThan(medida.columna);
   });
 });

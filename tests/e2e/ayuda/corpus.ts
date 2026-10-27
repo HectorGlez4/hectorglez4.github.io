@@ -15,7 +15,7 @@ import { readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { parse } from 'yaml';
 import { colgarObras, type FichaDeObra } from '../../../src/lib/obras.ts';
-import { CITAS_POR_PAGINA, MIN_CITAS_POR_TEMA } from '../../../src/lib/umbrales.ts';
+import { CITAS_POR_PAGINA, MAX_CARACTERES_IMAGEN, MIN_CITAS_POR_TEMA } from '../../../src/lib/umbrales.ts';
 
 const raiz = join(new URL('../../..', import.meta.url).pathname, 'corpus');
 
@@ -159,6 +159,12 @@ interface CitaResuelta {
   texto: string;
   /** El título que pinta la Tarjeta de Cita, o `undefined` si no lleva línea de Obra. */
   obra?: string;
+  /** Si la Cita tiene Fuente: su Línea de la Fuente se pinta. */
+  conFuente: boolean;
+  /** Historia 24.4 — cuántas Citas tiene su Obra, como la cuenta el build. */
+  recuento?: number;
+  /** Historia 24.4 — si alguna Cita de su Obra está cotejada: la Tarjeta promete «dónde leerla». */
+  edicionCotejada?: boolean;
 }
 
 /**
@@ -178,9 +184,17 @@ function citasResueltas(): CitaResuelta[] {
         slug: string;
         autor: string;
         texto: string;
-        procedencia?: { obra?: string } | null;
+        procedencia?: { obra?: string; año?: number } | null;
+        fuente?: { id: string } | null;
       };
-      return { slug: datos.slug, autor: datos.autor, texto: datos.texto, procedencia: datos.procedencia };
+      // La Fuente también: de ella sale si la Obra tiene edición cotejada (Historia 24.4).
+      return {
+        slug: datos.slug,
+        autor: datos.autor,
+        texto: datos.texto,
+        procedencia: datos.procedencia,
+        ...(datos.fuente != null ? { fuente: datos.fuente } : {}),
+      };
     });
   const fichas: FichaDeObra[] = readdirSync(join(raiz, 'obras'))
     .filter((f) => /\.ya?ml$/.test(f))
@@ -192,8 +206,46 @@ function citasResueltas(): CitaResuelta[] {
     slug: c.slug,
     autor: c.autor,
     texto: c.texto,
-    ...(c.obra !== undefined ? { obra: c.obra.titulo } : {}),
+    conFuente: typeof c.fuente?.id === 'string' && c.fuente.id !== '',
+    ...(c.obra !== undefined
+      ? { obra: c.obra.titulo, recuento: c.obra.recuento, edicionCotejada: c.obra.edicionCotejada }
+      : {}),
   }));
+}
+
+const porSlug = (a: { slug: string }, b: { slug: string }) => (a.slug < b.slug ? -1 : a.slug > b.slug ? 1 : 0);
+
+/**
+ * Historia 24.4 — una Cita con la Tarjeta de Obra entera: su Obra tiene al menos dos Citas y
+ * edición cotejada, y ella misma tiene Fuente y texto que cabe en la Imagen de Cita (así su
+ * página lleva Línea de la Fuente, tarjeta, Copiar e Imagen). La primera por slug.
+ */
+export function citaConTarjetaCompleta(): { slug: string; autor: string; titulo: string } {
+  const cita = citasResueltas()
+    .filter(
+      (c) =>
+        c.obra !== undefined &&
+        (c.recuento ?? 0) >= 2 &&
+        c.edicionCotejada === true &&
+        c.conFuente &&
+        c.texto.length <= MAX_CARACTERES_IMAGEN,
+    )
+    .sort(porSlug)[0];
+  if (cita === undefined) {
+    throw new Error('El Corpus no tiene ninguna Cita con Fuente de una Obra de dos o más Citas: no hay tarjeta completa que probar.');
+  }
+  return { slug: cita.slug, autor: cita.autor, titulo: cita.obra! };
+}
+
+/**
+ * Historia 24.4 — una Cita cuya Obra no tiene ninguna Cita cotejada (su tarjeta dice «Ver la
+ * obra ›»), si hoy hay alguna. La primera por slug.
+ */
+export function citaDeObraSinCotejar(): { slug: string; autor: string; titulo: string } | undefined {
+  const cita = citasResueltas()
+    .filter((c) => c.obra !== undefined && c.edicionCotejada === false)
+    .sort(porSlug)[0];
+  return cita === undefined ? undefined : { slug: cita.slug, autor: cita.autor, titulo: cita.obra! };
 }
 
 /**

@@ -34,6 +34,8 @@ import { esquemaDeObra, obraAdmisible } from '../../src/lib/admision.ts';
 import { avisosDeEdicionesSinCotejada, resolverObras, type FichaDeObra } from '../../src/lib/obras.ts';
 import { MAX_CARACTERES_NOTA_DE_OBRA } from '../../src/lib/umbrales.ts';
 import { componerDocumento } from '../../tools/lib/documento.ts';
+import { enlacesDe } from './ayuda/enlaces.js';
+import { tarjetaDeObraDe, textosDelEnlace } from './ayuda/tarjeta-de-obra.js';
 import { escribirCita, rutasDelCorpus } from '../../tools/lib/corpus.ts';
 import { declararEdicion, quitarEdicion, reunirFichas } from '../../tools/lib/obras.ts';
 import { datosDelInforme, lineasDelInforme, estadosDe } from '../../tools/lib/ingresos.ts';
@@ -834,6 +836,54 @@ describe('Historia 24.7 — el salto, igual con la afiliación encendida o apaga
     const con = await html(encendida, ruta);
     expect(con, ruta).not.toContain('data-ingreso');
     expect(con, ruta).toBe(await html(apagada, ruta));
+  });
+});
+
+/*
+ * Historia 24.4 — la Tarjeta de Obra no aloja ningún Modelo y no depende de la afiliación ni de
+ * las `ediciones` de la ficha: en toda Página de Cita sale igual byte a byte con la afiliación
+ * encendida o apagada (FR-35), y promete «dónde leerla» solo si hay edición cotejada (FR-54).
+ * Las dos construcciones son las de arriba, sin construir otra.
+ */
+describe('Historia 24.4 — la Tarjeta de Obra, igual con la afiliación encendida o apagada', () => {
+  let encendida = '';
+  let apagada = '';
+  let citas: string[] = [];
+  const html = (proyecto: string, ruta: string) => readFile(paginaConstruida(proyecto, ruta), 'utf8');
+
+  beforeAll(async () => {
+    const con = await construida('encendida');
+    const sin = await construida('apagada');
+    expect(con.codigo, con.salida).toBe(0);
+    expect(sin.codigo, sin.salida).toBe(0);
+    encendida = con.proyecto;
+    apagada = sin.proyecto;
+    citas = (await readdir(join(encendida, 'dist', 'cita'))).sort();
+  }, 600_000);
+
+  it('en toda Página de Cita, la tarjeta es la misma byte a byte, y ninguna lleva `data-ingreso`', async () => {
+    // Las 51 de Brevedad, la de Cartas y la de De la ira: todas con Obra.
+    expect(citas).toHaveLength(53);
+    for (const slug of citas) {
+      const ruta = `/cita/${slug}/`;
+      const [con, sin] = [await html(encendida, ruta), await html(apagada, ruta)];
+      const tarjeta = tarjetaDeObraDe(con);
+      expect(tarjeta, ruta).toBeDefined();
+      expect(tarjeta, ruta).toBe(tarjetaDeObraDe(sin));
+      expect(con, ruta).not.toContain('data-ingreso');
+      expect(sin, ruta).not.toContain('data-ingreso');
+    }
+  });
+
+  it.each([
+    ['cotejada y con ediciones', 'seneca-brevedad-00', 'Ver la obra y dónde leerla', PAGINA_1],
+    ['cotejada, una Cita y con edición', 'seneca-cartas-1', 'Ver la obra y dónde leerla', CARTAS_1],
+    ['sin cotejar y con ediciones', IRA_SIN, 'Ver la obra', IRA_1],
+  ])('%s: la fila dice lo que toca, con la afiliación encendida', async (_caso, slug, fila, obra) => {
+    const tarjeta = tarjetaDeObraDe(await html(encendida, `/cita/${slug}/`))!;
+    const interior = /<a\b[^>]*>([\s\S]*?)<\/a>/.exec(tarjeta)![1];
+    expect(textosDelEnlace(interior)).toEqual({ vista: `${fila} \u203A`, lector: fila });
+    expect(enlacesDe(tarjeta).map((e) => e.href)).toEqual([obra]);
   });
 });
 
