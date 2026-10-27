@@ -5,12 +5,26 @@ created: '2026-10-26'
 status: 'done'
 baseline_revision: 'ac71f2cd11129ebd42caa1aaabb34c6456191dcb'
 review_loop_iteration: 0
-followup_review_recommended: false
+followup_review_recommended: true
 context:
   - '{project-root}/_bmad-output/implementation-artifacts/epic-24-context.md'
 warnings:
   - oversized
-deferred: []
+deferred:
+  - summary: >-
+      La Tarjeta de Obra pinta el año, el recuento y la edición cotejada de la Obra, que dependen de las Citas hermanas, y ni el lastmod ni el aviso de esas hermanas se mueven cuando entra o sale una Cita de la Obra; ninguna prueba fija que la exclusión es deliberada.
+    evidence: |-
+      contenidoDeTarjetaDeObra lee obra.recuento, obra.año y obra.edicionCotejada (resolverObras, todas las Citas de la Obra); relacionDeSuperficies de tools/lib/cambios.ts declara la Página de Cita con sus Temas y la ficha de su Obra, no con las Citas hermanas, y en esta historia solo ganó un comentario. Es la excepción de Héctor que el contrato deja a la 24.8 («ni la relación de tools/lib/cambios.ts (24.8; solo un comentario)»); hallazgo de la revisión del 2026-10-27 (blind-hunter).
+    location: >-
+      tools/lib/cambios.ts (relacionDeSuperficies, Página de Cita)
+    severity: low
+  - summary: >-
+      La prueba «ningún enlace saliente apunta a una página que no existe» recorre todas las Páginas de Cita y sus destinos y pasa de su límite de 30 s en el proyecto movil cuando corre junto al barrido de accesibilidad.
+    evidence: |-
+      Dos pasadas de los cinco ficheros del criterio (2026-10-27) la dan caída por tiempo en [movil] con 41,5 s y 41,4 s, mientras en la misma pasada [escritorio] tarda 12,8-13,4 s; sola, [movil] pasa en 11,9-13,6 s. La 24.4 no le añade destinos —el enlace de la tarjeta es el mismo que el del título en la Atribución, que ya estaba en el conjunto— y solo ~1,1 kB por página, así que el límite depende de la carga de la máquina y no de la historia.
+    location: >-
+      tests/e2e/rutas-de-salida.spec.ts:98
+    severity: low
 ---
 
 <intent-contract>
@@ -131,6 +145,29 @@ deferred: []
 
 Las capas de revisión de este bucle son externas y en esta pasada no traían hallazgos (no hay secciones «## Hallazgos externos — …» en la invocación); la revisión independiente viene después.
 
+### 2026-10-27 — Review pass
+- intent_gap: 0
+- bad_spec: 0
+- patch: 15 (high 0, medium 1, low 14)
+- defer: 2 (low 2)
+- reject: 18
+- addressed_findings:
+  - `[medium]` `[patch]` La Fila de bloque es flexible y el texto y el «›» eran dos hijos: al partirse el texto el glifo quedaba en su propia columna, no tras la última palabra. Ahora van juntos en un único `span`, el único hijo del enlace (`FilaDeBloque.astro`, docblock al día); la prueba de la construcción lo exige.
+  - `[low]` `[patch]` El peso anotado («447,6 MiB en los dos») era el de la línea base: re-medido con las dos construcciones del Corpus real, 469.343.209 → 474.347.283 bytes (447,6 → 452,4 MiB, +4,8 MiB; la tarjeta son ~848 B en 4.416 páginas). Corregido en Auto Run Result.
+  - `[low]` `[patch]` `nivel={3}` no se construía nunca: una sonda sin armazón en la construcción de `tarjeta-de-obra.test.ts` pinta la tarjeta con `nivel={3}` (rótulo `h3#de-la-obra`) y `Rotulo` sin nivel, con 2 y con 3.
+  - `[low]` `[patch]` Nada comprobaba que la Obra enlazada cumple «y dónde leerla»: la prueba mira en la página de destino «Dónde leer esta obra» con edición cotejada exactamente cuando la fila lo promete, y el estado (c) cuando no.
+  - `[low]` `[patch]` `accesibilidad.spec.ts` y `pagina-de-cita.spec.ts` lanzaban al cargar si al Corpus le faltaba una cara obligatoria, tumbando el fichero entero: `citaConTarjetaCompleta` devuelve `undefined` y fallan, con su motivo, solo las pruebas que la piden.
+  - `[low]` `[patch]` `accesibilidad.spec.ts` recortaba la tarjeta con su propia expresión y decodificaba a mano: usa `tarjetaDeObraDe` y `leerTarjetaDeObra` de `tests/unit/ayuda/tarjeta-de-obra.ts`, el lector único.
+  - `[low]` `[patch]` La deuda de Copiar a 360 × 640 no tenía cota: «justo debajo» se exige como Copiar antes del final de la segunda pantalla (y < 1.280).
+  - `[low]` `[patch]` La cifra 53 de `ediciones-en-venta.test.ts` se deriva de las Citas del fixture.
+  - `[low]` `[patch]` El U+00A0 literal de `soloTexto` se escribe `\u00A0`.
+  - `[low]` `[patch]` Fuera el campo `año` sin uso del tipo de `citasResueltas` en `tests/e2e/ayuda/corpus.ts`.
+  - `[low]` `[patch]` `Rotulo.astro` duplica el encabezado en dos ramas: se probó una etiqueta dinámica y Astro pinta el atributo de ámbito como `data-astro-cid-…="true"`, que cambiaba los rótulos de 135 Páginas de Autor y 517 de Obra; se conserva el ternario con un comentario que lo explica.
+  - `[low]` `[patch]` El `line-height: 1.4` del título entra en la prueba de la hoja.
+  - `[low]` `[patch]` `construidaAbierta` de `obra-pagina.test.ts` memorizaba una promesa rechazada: un rechazo ya no se memoriza.
+  - `[low]` `[patch]` La portada y el 404 sin tarjeta solo se sostenían con el `diff`: la construcción de prueba los mira (sin las hojas en línea).
+  - `[low]` `[patch]` El barrido pasaba axe dos veces por la misma Página de Cita, con y sin barra final: `SUPERFICIES` se deduplica por la ruta sin barra.
+
 ## Design Notes
 
 **El marcado de referencia** (la regla de las pausas pegadas es la de la 24.3: Astro conserva un espacio donde hay salto de línea):
@@ -181,7 +218,7 @@ Qué cambia:
 - `tests/e2e/ayuda/corpus.ts` (`citasResueltas` con Fuente, recuento y `edicionCotejada`; `citaConTarjetaCompleta`, `citaDeObraSinCotejar`), `tests/e2e/accesibilidad.spec.ts` (las cuatro caras de Página de Cita en el barrido, su comprobación en `dist/`, el orden de tabulación con Tab real y el reflujo a 320 px), `tests/e2e/pagina-de-cita.spec.ts` (`describe` 24.4).
 
 Verificación:
-- `FECHA_JORNADA=2026-10-26 npm run build` en la línea base y con la historia: las dos con código 0; la segunda pasa la puerta de cobertura («5288 páginas, 2 familias, sin caídas al tipo de reserva»). `diff -rq`: 4.422 líneas, 4.420 páginas de `dist/cita/` y el par de la hoja `_astro/_slug_.*.css` (solo la usan las Páginas de Cita); ningún fichero de `dist/pagefind/`, ninguna Página de Obra, de Autor, la portada ni el 404. En una Cita sin Obra (`concepcion-arenal-abrid-escuelas-y-se-cerraran-carceles`) el `<main>` es idéntico (mismo SHA-1). Peso: 447,6 MiB en 15.340 ficheros en los dos.
+- `FECHA_JORNADA=2026-10-26 npm run build` en la línea base y con la historia: las dos con código 0; la segunda pasa la puerta de cobertura («5288 páginas, 2 familias, sin caídas al tipo de reserva»). `diff -rq`: 4.422 líneas, 4.420 páginas de `dist/cita/` y el par de la hoja `_astro/_slug_.*.css` (solo la usan las Páginas de Cita); ningún fichero de `dist/pagefind/`, ninguna Página de Obra, de Autor, la portada ni el 404. En una Cita sin Obra (`concepcion-arenal-abrid-escuelas-y-se-cerraran-carceles`) el `<main>` es idéntico (mismo SHA-1). Peso: ~~447,6 MiB en 15.340 ficheros en los dos~~ — corregido en la revisión: 469.343.209 → 474.347.283 bytes (447,6 → 452,4 MiB), 15.340 ficheros en los dos.
 - Vitest uno a uno: `tarjeta-de-obra` 23, `ediciones-en-venta` 55, `obra-pagina` 66, `medicion` 496 (sin tocarla), `tarjeta-de-cita` 20, `obras` 117 (sin tocarla), `lista-de-obras` 18, `ingreso-construido` 38, `peso` 56, `superficies` 99, `espinas-de-ux` 10, `publicable-y-alcanzable` 30, `fecha-de-cambio-build` 10, `cobertura-build` 2: todo verde.
 - `npm run check`: 0 errores. `npm test`: 135 ficheros, 6.180 pruebas, verde (774 s).
 - Playwright `accesibilidad`, `pagina-de-cita`, `rutas-de-salida`, `copiar`, `busqueda` en los dos proyectos: 259 verdes, 6 saltadas por proyecto, 1 caída por tiempo en `[movil] rutas-de-salida.spec.ts:98` (41,5 s con la máquina cargada; en escritorio 12,8 s). Repetido `rutas-de-salida.spec.ts` solo: 14 verdes (la misma prueba en 13,6 s). La tarjeta no añade destinos nuevos a esa prueba: su enlace es el mismo que el del título en la Atribución. La prueba de zonas de toque de la 2.8, sin tocarla, verde.
@@ -216,3 +253,21 @@ Planificada por el bucle v8-ralph (2026-10-26) sobre `epic-24-context.md`, la co
 **Lo que se midió con esa implementación** (el `dist/` que la construcción dejó escrito antes de detenerse; sin Pagefind ni sitemap, que no llegaron a correr): `diff -rq -x pagefind` contra la línea base da 4.424 diferencias, todas en `dist/cita/` (4.420 páginas, porque todas enlazan la hoja de la Página de Cita) salvo la propia hoja `_astro/_slug_.*.css`, que solo la usan las Páginas de Cita, y el sitemap que faltaba. Ninguna Página de Obra, de Autor, la portada ni el 404 cambian, así que `nivel` deja los rótulos de hoy byte a byte iguales; en una Cita sin Obra (`concepcion-arenal-abrid-escuelas-y-se-cerraran-carceles`, una de las 4 del Corpus) el `<main>` es idéntico. Una tarjeta sale así: rótulo `h2#de-la-obra`, título, «Agustín Álvarez · 20 citas» con el punto `aria-hidden` y la coma para lectores pegados, y una sola fila `li.fila-de-bloque[data-zona="tarjeta-de-obra"]` a la página 1 de su Obra con «Ver la obra y dónde leerla».
 
 **Para retomar:** con la decisión tomada (y, si es la opción 1, su commit en la principal o en la rama), devolver este spec a `ready-for-dev` —o enmendarlo con `bmad-build` si cambia el glifo—, partir de `v8/wip-24-4-tarjeta-de-obra` —o, si la rama ya no está, de `git am _bmad-output/implementation-artifacts/24-4-tarjeta-de-obra-wip.patch`, el mismo commit— y seguir por las tareas de pruebas de **Tasks & Acceptance**.
+
+**Revisión, primera pasada (2026-10-27, bucle v8-ralph).** Status: done. Cinco capas externas (blind-hunter, edge-case-hunter, verification-gap sin hallazgos, intent-alignment, ac-auditor); 15 parches aplicados (1 medio, 14 bajos), 2 diferidos (bajos) y 18 rechazados. Ningún `intent_gap` ni `bad_spec`.
+
+Qué cambia en esta pasada:
+- `src/components/FilaDeBloque.astro` -- texto y glifo en un único `span`, el único hijo del enlace flexible, para que «›» siga a la última palabra cuando el texto parte; docblock al día.
+- `src/components/Rotulo.astro` -- solo un comentario: por qué dos ramas y no una etiqueta dinámica (Astro la pinta con `data-astro-cid-…="true"`, y se probó: cambiaba 135 Páginas de Autor y 517 de Obra).
+- `tests/unit/tarjeta-de-obra.test.ts` -- sonda de `nivel={3}` y de `Rotulo` en la construcción, la página de destino cumple «y dónde leerla», portada y 404 sin tarjeta, el `span` único de la fila, el `line-height` del título; la Cita sin Obra se mira sin las hojas en línea (la sonda comparte la hoja de la tarjeta).
+- `tests/unit/ayuda/tarjeta-de-obra.ts` (`\u00A0` visible), `tests/unit/ediciones-en-venta.test.ts` (recuento derivado del fixture), `tests/unit/obra-pagina.test.ts` (no memoriza un rechazo).
+- `tests/e2e/ayuda/corpus.ts` (`citaConTarjetaCompleta` devuelve `undefined`, `SIN_TARJETA_COMPLETA`, fuera `año`), `tests/e2e/accesibilidad.spec.ts` (caras obligatorias que fallan por prueba, lector único de la tarjeta, barrido sin duplicados por la barra final), `tests/e2e/pagina-de-cita.spec.ts` (cara obligatoria por prueba, Copiar antes de y = 1.280).
+
+Verificación de esta pasada:
+- Dos `FECHA_JORNADA=2026-10-26 npm run build` del Corpus real, `src/` en la línea base y con los parches: las dos con código 0 y la cobertura sin caídas; `diff -rq` 4.422 líneas, 4.420 de `dist/cita/` y el par de `_astro/_slug_.*.css`, nada más; `<main>` de la Cita sin Obra idéntico (SHA-1 `1ec052ee…`); peso 469.343.209 → 474.347.283 bytes (+4,8 MiB; la tarjeta mide ~848 B en cada una de las 4.416 Páginas de Cita con Obra), lejos del aviso de 750 MiB.
+- `npx vitest run tests/unit/tarjeta-de-obra.test.ts`: 26 verdes. `npm run check`: 0 errores. `npm test`: 135 ficheros, 6.183 pruebas, verde (764 s).
+- Playwright `accesibilidad`, `pagina-de-cita`, `rutas-de-salida`, `copiar`, `busqueda` en los dos proyectos: 255 verdes, 6 saltadas, y otra vez la caída por tiempo de `[movil] rutas-de-salida.spec.ts:98` (41,4 s; en escritorio 13,4 s). Repetido `rutas-de-salida.spec.ts --project=movil` solo: 7 verdes (esa prueba en 11,9 s). Diferido con su evidencia: la tarjeta no le añade destinos.
+
+`followup_review_recommended: true` — parches de esta pasada: 0 altos, 1 medio, 14 bajos; puntuación 3 × 1 + 14 = 17 (≥ 5).
+
+Riesgos residuales: Copiar sigue fuera de la primera pantalla de 360 × 640 en las Citas con tarjeta (deuda aceptada, SM-C5; ahora con cota de la segunda pantalla); la caída por tiempo de `rutas-de-salida.spec.ts:98` bajo carga (diferida); la Tarjeta de Obra de las hermanas no fecha ni avisa (excepción de la 24.8, diferida).
