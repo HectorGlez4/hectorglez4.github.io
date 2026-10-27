@@ -24,12 +24,15 @@
  * que ya dejó escrito `tools/avisar.ts`, y la misma técnica —`execFile` promisificado, sin
  * dependencia nueva—.
  *
- * ── Una sola invocación, y no una por fichero ────────────────────────────────────────
+ * ── Dos invocaciones, y no una por fichero ───────────────────────────────────────────
  *
- * `git log -1` por fichero serían mil setecientos procesos en el camino crítico del build.
- * Un solo `git log --name-only` recorre el historial en orden inverso y la **primera** vez
- * que aparece un fichero es su último cambio: sobre el repositorio real, con los cuatro
- * directorios del Corpus como ámbito, son **149 KB de salida y 0,06 s** medidos.
+ * `git log -1` por fichero serían miles de procesos en el camino crítico del build. Desde la
+ * Historia 24.8 la fecha no es la del último cambio del fichero sino la del último cambio **de
+ * los campos que cada superficie pinta**, así que hace falta saber qué cambió en cada commit:
+ * un solo `git log --raw` da, por commit y fichero, el blob de antes y el de después, y un solo
+ * `git cat-file --batch` trae el contenido de los blobs que hay que analizar —los de
+ * `corpus/fuentes/` no: un documento solo cuenta como «cambió»—. Medido el 2026-10-27 en la
+ * rama: unas 6.800 transiciones y 6.200 blobs distintos, 0,26 s el `git log --raw`.
  *
  * Lo que sí es O(Corpus) y conviene tener escrito: `corpusParaFechar` **vuelve a leer y a
  * analizar el Corpus entero** —mil seiscientas y pico Citas, con su frontmatter— encima de
@@ -42,7 +45,7 @@
  *
  * Un checkout superficial —`fetch-depth: 1`, que es lo que `actions/checkout` hace por
  * omisión— **no devuelve el vacío**: devuelve un commit injertado que git trata como raíz,
- * y `--name-only` sobre una raíz lista el árbol **entero**. O sea que en CI, sin darse
+ * y `--raw` sobre una raíz lista el árbol **entero**. O sea que en CI, sin darse
  * cuenta, todos los ficheros del Corpus tendrían la fecha del último commit y el sitemap
  * publicaría 1.715 fechas idénticas indistinguibles de una fecha de build. Es exactamente
  * la mentira que la historia existe para no cometer, y llega disfrazada de éxito: en local
@@ -62,11 +65,13 @@
  * en el módulo puro— y se avisa con el mismo énfasis que en el caso superficial.
  */
 
-import { execFile } from 'node:child_process';
+import { execFile, spawn } from 'node:child_process';
 import { promisify } from 'node:util';
 import { fileURLToPath } from 'node:url';
-import { realpath } from 'node:fs/promises';
-import { join, relative, resolve } from 'node:path';
+import { existsSync } from 'node:fs';
+import { readdir, realpath } from 'node:fs/promises';
+import { extname, join, relative, resolve, sep } from 'node:path';
+import { parse as parsearYaml } from 'yaml';
 import type { AstroIntegration } from 'astro';
 import {
   leerAutores,
@@ -75,14 +80,21 @@ import {
   leerFichasDeObra,
   leerTemas,
   rutasDelCorpus,
+  separarFrontmatter,
 } from '../tools/lib/corpus.ts';
 import { colgarObras } from '../src/lib/obras.ts';
 import {
+  VERSION_OPACA,
+  bajasDelHistorial,
   coberturaInsuficiente,
   fechasPorSuperficie,
+  ficherosDelCorpus,
   type CorpusParaFechar,
   type FechaDeCambio,
+  type TransicionFechada,
+  type Version,
 } from '../tools/lib/cambios.ts';
+import type { FamiliaDeFichero } from '../tools/lib/avisar.ts';
 
 const ejecutar = promisify(execFile);
 
@@ -159,125 +171,272 @@ export async function estadoDelRepositorio(raiz: string): Promise<EstadoDelRepos
   }
 }
 
+/** Un blob vacío de git: la «versión» de un fichero que no existe en ese lado. */
+const BLOB_NULO = /^0+$/u;
+
+/** Una entrada de `git log --raw` o `git diff --raw`: un fichero, su blob de antes y el de después. */
+export interface EntradaCruda {
+  fichero: string;
+  antes: string | null;
+  despues: string | null;
+}
+
 /**
- * La fecha del último cambio de cada fichero del Corpus, en UTC y por su ruta absoluta.
+ * Las entradas de una salida `--raw -z` de git, con la cabecera de cada commit si la hay.
  *
- * `tope` es la raíz del **repositorio**, no la del proyecto, porque es a ella a la que
- * `git log` refiere las rutas que imprime. Los ámbitos llegan en absoluto y se traducen a
- * relativos contra la misma raíz, así que un proyecto que viva en un subdirectorio del
- * repositorio funciona igual.
- *
- * Absoluta porque así es como las nombra quien lee el corpus, y comparar rutas escritas de
- * dos maneras es el fallo silencioso clásico de esta clase de cruce —`tools/avisar.ts` ya
- * lo resuelve igual, con `resolve`—.
- *
- * En UTC porque el sitemap tiene que declarar lo mismo se construya donde se construya:
- * `%cI` trae el instante con el desfase de quien commiteó, y publicarlo tal cual haría que
- * el mismo commit se anunciara con dos cadenas distintas desde Madrid y desde el CI.
+ * Con `-z` cada trozo va terminado en NUL: `:<modo> <modo> <blob> <blob> <estado>` y, en el
+ * trozo siguiente, la ruta tal cual —sin comillas de C—. Con `git log`, la cabecera de cada commit
+ * —`\u0001<instante>`— va pegada a la primera de sus líneas por el único salto de línea que emite
+ * `--pretty=format:`. Un trozo que no se entiende no contamina el resto: se salta.
  */
-export async function fechasDeLosFicheros(
+export function entradasCrudas(salida: string): { fecha: FechaDeCambio | undefined; entrada: EntradaCruda }[] {
+  const resultado: { fecha: FechaDeCambio | undefined; entrada: EntradaCruda }[] = [];
+  let fecha: FechaDeCambio | undefined;
+  let meta: string[] | undefined;
+  for (const bruto of salida.split('\0')) {
+    let trozo = bruto;
+    if (trozo.startsWith(MARCA)) {
+      const salto = trozo.indexOf('\n');
+      const cabecera = (salto === -1 ? trozo.slice(MARCA.length) : trozo.slice(MARCA.length, salto)).trim();
+      const momento = new Date(cabecera);
+      // Una cabecera que no se deja leer no contamina el resto: se descarta ese commit.
+      fecha = Number.isNaN(momento.getTime()) ? undefined : momento.toISOString();
+      trozo = salto === -1 ? '' : trozo.slice(salto + 1);
+      meta = undefined;
+    }
+    if (trozo === '') continue;
+    if (meta === undefined && trozo.startsWith(':')) {
+      meta = trozo.slice(1).split(' ');
+      continue;
+    }
+    if (meta !== undefined) {
+      // Sin `trim`: con `-z` la ruta viene literal, y un nombre con espacio al principio o al
+      // final es un nombre distinto.
+      const [, , viejo = '', nuevo = ''] = meta;
+      resultado.push({
+        fecha,
+        entrada: {
+          fichero: trozo,
+          antes: viejo === '' || BLOB_NULO.test(viejo) ? null : viejo,
+          despues: nuevo === '' || BLOB_NULO.test(nuevo) ? null : nuevo,
+        },
+      });
+      meta = undefined;
+    }
+  }
+  return resultado;
+}
+
+/**
+ * Los campos de una versión de un fichero del Corpus: el frontmatter de un `.md` o el YAML de un
+ * `.yml`, analizados como los lee `tools/lib/corpus.ts`. Lo que no se deja analizar, o no es un
+ * objeto, es **opaco**, y cuenta como cambio de todos los campos: antes fechar de más que mentir
+ * de menos.
+ */
+export function analizarVersion(fichero: string, contenido: string): Version {
+  try {
+    const extension = extname(fichero);
+    const datos =
+      extension === '.md'
+        ? separarFrontmatter(contenido)
+        : extension === '.yml' || extension === '.yaml'
+          ? (parsearYaml(contenido) as unknown)
+          : undefined;
+    if (datos === null || datos === undefined || typeof datos !== 'object' || Array.isArray(datos)) {
+      return VERSION_OPACA;
+    }
+    return datos as Record<string, unknown>;
+  } catch {
+    return VERSION_OPACA;
+  }
+}
+
+/**
+ * Las versiones de unos blobs, leídas con **un solo** `git cat-file --batch` y analizadas por la
+ * extensión del fichero al que pertenecen. Un blob que git no encuentra es opaco.
+ */
+export async function versionesDeBlobs(
+  tope: string,
+  pedidos: ReadonlyMap<string, string>,
+): Promise<Map<string, Version>> {
+  const versiones = new Map<string, Version>();
+  if (pedidos.size === 0) return versiones;
+  const salida = await new Promise<Buffer>((listo, fallo) => {
+    const proceso = spawn('git', ['cat-file', '--batch'], { cwd: tope });
+    const trozos: Buffer[] = [];
+    let error = '';
+    proceso.stdout.on('data', (trozo: Buffer) => trozos.push(trozo));
+    proceso.stderr.on('data', (trozo) => (error += String(trozo)));
+    proceso.on('error', fallo);
+    proceso.on('close', (codigo) => {
+      if (codigo === 0) listo(Buffer.concat(trozos));
+      else fallo(new Error(`git cat-file salió con ${codigo}${error.trim() === '' ? '' : ` (${error.trim()})`}`));
+    });
+    proceso.stdin.end(`${[...pedidos.keys()].join('\n')}\n`);
+  });
+
+  let posicion = 0;
+  while (posicion < salida.length) {
+    const salto = salida.indexOf(0x0a, posicion);
+    if (salto === -1) break;
+    const [blob = '', tipo, tamano] = salida.toString('utf8', posicion, salto).split(' ');
+    posicion = salto + 1;
+    if (tipo === 'missing' || tamano === undefined) {
+      versiones.set(blob, VERSION_OPACA);
+      continue;
+    }
+    const bytes = Number(tamano);
+    const contenido = salida.toString('utf8', posicion, posicion + bytes);
+    posicion += bytes + 1;
+    versiones.set(blob, analizarVersion(pedidos.get(blob) ?? '', contenido));
+  }
+  return versiones;
+}
+
+/** Qué leer del historial además de los ámbitos. */
+export interface OpcionesDelHistorial {
+  /**
+   * Los directorios —en absoluto— cuyos blobs **no** se leen: sus transiciones son opacas.
+   * `corpus/fuentes/`, que pesa 155 MB y del que solo importa que un documento cambió.
+   */
+  opacos?: readonly string[];
+  /** Un rango de revisiones —`desde..hasta`—; sin él, todo lo alcanzable desde `HEAD`. */
+  rango?: string;
+}
+
+/**
+ * Las transiciones de cada fichero del Corpus, en UTC y por su ruta absoluta — Historia 24.8.
+ *
+ * `tope` es la raíz del **repositorio**, no la del proyecto, porque es a ella a la que git refiere
+ * las rutas que imprime. Los ámbitos llegan en absoluto y se traducen a relativos contra la misma
+ * raíz, así que un proyecto que viva en un subdirectorio del repositorio funciona igual.
+ * Absoluta porque así es como las nombra quien lee el corpus, y comparar rutas escritas de dos
+ * maneras es el fallo silencioso clásico de esta clase de cruce. En UTC porque el sitemap tiene
+ * que declarar lo mismo se construya donde se construya.
+ *
+ * Los commits de fusión no traen líneas con `--raw` sin `-m`: lo que cambiaron sus padres sí
+ * aparece, en sus propios commits.
+ */
+export async function historialDeLosFicheros(
   tope: string,
   ambitos: readonly string[],
-): Promise<Map<string, FechaDeCambio>> {
+  opciones: OpcionesDelHistorial = {},
+): Promise<Map<string, TransicionFechada[]>> {
   const { stdout } = await ejecutar(
     'git',
     [
       'log',
       `--pretty=format:${MARCA}%cI`,
-      '--name-only',
+      '--raw',
       /*
-       * `-z` no es cosmético: sin él git **entrecomilla en C** cualquier ruta con
-       * caracteres que considere raros —`"corpus/citas/caf\303\251.md"`—, y el bucle de
-       * abajo resolvería ese literal, con comillas y escapes incluidos, contra la raíz. La
-       * fecha de ese fichero desaparecería sin que nada fallara. Hoy no dispara porque los
-       * slugs son `^[a-z0-9-]+$`, pero nada obliga a que los **nombres de fichero** lo
-       * sean, y el día que entre uno con un acento el sitemap perdería su fecha en
-       * silencio. Con `-z` las rutas salen tal cual, terminadas en NUL.
+       * `-z` no es cosmético: sin él git **entrecomilla en C** cualquier ruta con caracteres que
+       * considere raros —`"corpus/citas/caf\303\251.md"`—, y se resolvería ese literal, con
+       * comillas y escapes incluidos, contra la raíz. Con `-z` las rutas salen tal cual.
        */
       '-z',
-      // Un `log.showSignature = true` en la configuración de quien construye metería las
-      // líneas de la verificación GPG en medio de la salida, y algunas parecerían nombres
-      // de fichero. Se apaga aquí en vez de confiar en que nadie lo tenga puesto.
+      // Los blobs enteros: abreviados, `cat-file` podría no saber cuál es.
+      '--no-abbrev',
+      // Un `log.showSignature = true` de quien construye metería la verificación GPG en medio.
       '--no-show-signature',
-      // Sin detección de renombrados: es cara y su heurística puede dar resultados
-      // distintos según el tamaño del historial. Un renombrado sale como alta del nombre
-      // nuevo, que para lo que aquí se mide es la respuesta correcta de todos modos.
+      // Sin detección de renombrados: es cara y su heurística depende del tamaño del historial.
+      // Un renombrado sale como baja del nombre viejo y alta del nuevo, que es lo que se mide.
       '--no-renames',
+      ...(opciones.rango === undefined ? [] : [opciones.rango]),
       '--',
       /*
-       * Los **ámbitos** —los cuatro directorios del Corpus—, y no los mil setecientos
-       * ficheros uno a uno: una lista de argumentos de ese tamaño roza el límite del
-       * sistema y reventaría el día que el Corpus crezca lo suficiente, con un error que
-       * nadie relacionaría con el sitemap. Lo que sobre en la respuesta no casa con
-       * ninguna superficie y se descarta solo.
+       * Los **ámbitos** —los directorios del Corpus—, y no los miles de ficheros uno a uno: una
+       * lista de argumentos de ese tamaño roza el límite del sistema. Lo que sobre en la
+       * respuesta no casa con ninguna superficie y se descarta solo.
        */
       ...ambitos.map((ruta) => relative(tope, ruta).split('\\').join('/')),
     ],
     { cwd: tope, maxBuffer: TOPE_DE_SALIDA },
   );
 
-  const fechas = new Map<string, FechaDeCambio>();
-  let fecha: FechaDeCambio | undefined;
+  const opacos = (opciones.opacos ?? []).map((directorio) => `${resolve(directorio)}${sep}`);
+  const esOpaco = (absoluta: string) => opacos.some((directorio) => absoluta.startsWith(directorio));
 
-  /*
-   * Con `-z`, la salida es: `\u0001<instante>\n` seguido de las rutas del commit, cada una
-   * terminada en NUL, y un NUL de más antes del siguiente commit. O sea que el primer
-   * trozo de cada commit trae pegados la cabecera y su primera ruta, separadas por el
-   * único salto de línea que `--pretty=format:` emite.
-   */
-  for (const trozo of stdout.split('\0')) {
-    let fichero = trozo;
-
-    if (fichero.startsWith(MARCA)) {
-      const salto = fichero.indexOf('\n');
-      const cabecera = (salto === -1 ? fichero.slice(MARCA.length) : fichero.slice(MARCA.length, salto)).trim();
-      const momento = new Date(cabecera);
-      // Una cabecera que no se deja leer no contamina el resto: se descarta ese commit.
-      fecha = Number.isNaN(momento.getTime()) ? undefined : momento.toISOString();
-      fichero = salto === -1 ? '' : fichero.slice(salto + 1);
+  const crudas: { fecha: FechaDeCambio; absoluta: string; entrada: EntradaCruda; opaca: boolean }[] = [];
+  const pedidos = new Map<string, string>();
+  for (const { fecha, entrada } of entradasCrudas(stdout)) {
+    if (fecha === undefined) continue;
+    const absoluta = resolve(tope, entrada.fichero);
+    const opaca = esOpaco(absoluta);
+    crudas.push({ fecha, absoluta, entrada, opaca });
+    if (opaca) continue;
+    for (const blob of [entrada.antes, entrada.despues]) {
+      if (blob !== null && !pedidos.has(blob)) pedidos.set(blob, entrada.fichero);
     }
-
-    // Sin `trim`: con `-z` la ruta viene literal, y un nombre con espacio al principio o al
-    // final es un nombre distinto. Recortarlo sería reintroducir el fallo que `-z` cierra.
-    if (fichero === '' || fecha === undefined) continue;
-
-    // `git log` va del presente al pasado, así que la primera aparición manda y las
-    // siguientes son historia anterior del mismo fichero.
-    const absoluta = resolve(tope, fichero);
-    if (!fechas.has(absoluta)) fechas.set(absoluta, fecha);
   }
 
-  return fechas;
+  const versiones = await versionesDeBlobs(tope, pedidos);
+  const version = (blob: string | null, opaca: boolean): Version | null =>
+    blob === null ? null : opaca ? VERSION_OPACA : (versiones.get(blob) ?? VERSION_OPACA);
+
+  const historial = new Map<string, TransicionFechada[]>();
+  for (const { fecha, absoluta, entrada, opaca } of crudas) {
+    const transicion: TransicionFechada = {
+      fecha,
+      antes: version(entrada.antes, opaca),
+      despues: version(entrada.despues, opaca),
+    };
+    const lista = historial.get(absoluta);
+    if (lista === undefined) historial.set(absoluta, [transicion]);
+    else lista.push(transicion);
+  }
+  return historial;
+}
+
+/** Los documentos de `corpus/fuentes/` en disco, por su ruta absoluta: `.txt`, con subdirectorios. */
+async function documentosEnDisco(directorio: string): Promise<string[]> {
+  if (!existsSync(directorio)) return [];
+  const entradas = await readdir(directorio, { recursive: true });
+  return entradas
+    .filter((entrada) => extname(entrada) === '.txt')
+    .map((entrada) => resolve(directorio, entrada))
+    .sort();
 }
 
 /**
  * El corpus leído con lo justo para fechar superficies.
  *
  * Lee las **declaraciones** y no aplica ningún umbral: quién se anuncia lo decide el filtro
- * del sitemap (AD-11, Historia 12.1) y aquí solo se pone fecha a lo que aquél deje pasar.
+ * del sitemap (AD-11, Historia 12.1) y aquí solo se pone fecha a lo que aquél deje pasar. Los
+ * documentos de `corpus/fuentes/` se listan del disco —solo los nombres; ninguno se lee—, salvo
+ * que se den: `tools/avisar.ts` los da de `git ls-tree` para una revisión que no extrae.
  */
-export async function corpusParaFechar(raiz: string): Promise<CorpusParaFechar> {
+export async function corpusParaFechar(
+  raiz: string,
+  opciones: { documentos?: readonly string[] } = {},
+): Promise<CorpusParaFechar> {
   const rutas = rutasDelCorpus(join(raiz, 'corpus'));
-  const [leidas, autores, temas, colecciones, fichas] = await Promise.all([
+  const [leidas, autores, temas, colecciones, fichas, documentos] = await Promise.all([
     leerCitas(rutas.citas),
     leerAutores(rutas),
     leerTemas(rutas),
     leerColecciones(rutas),
     leerFichasDeObra(rutas),
+    opciones.documentos === undefined ? documentosEnDisco(rutas.fuentes) : Promise.resolve(opciones.documentos),
   ]);
   // Historia 22.4 — la Obra de cada Cita, resuelta como la resuelve el sitio.
   const citas = colgarObras(leidas, fichas);
 
   return {
-    citas: citas.map((cita) => ({
-      slug: cita.slug,
-      autor: cita.autor,
-      ...(cita.obra !== undefined ? { obra: cita.obra.nombre } : {}),
-      // El frontmatter se lee crudo, sin el `default([])` del esquema: una Cita sin `temas`
-      // llega con el campo ausente y no con la lista vacía.
-      temas: cita.temas ?? [],
-      ruta: resolve(cita.ruta),
-    })),
+    citas: citas.map((cita) => {
+      const obraDeclarada = cita.procedencia?.obra;
+      const fuente = (cita.fuente as { id?: unknown } | null | undefined)?.id;
+      return {
+        slug: cita.slug,
+        autor: cita.autor,
+        ...(cita.obra !== undefined ? { obra: cita.obra.nombre } : {}),
+        ...(typeof obraDeclarada === 'string' ? { obraDeclarada } : {}),
+        ...(typeof fuente === 'string' && fuente !== '' ? { fuente } : {}),
+        // El frontmatter se lee crudo, sin el `default([])` del esquema: una Cita sin `temas`
+        // llega con el campo ausente y no con la lista vacía.
+        temas: cita.temas ?? [],
+        ruta: resolve(cita.ruta),
+      };
+    }),
     autores: autores.map((autor) => ({ slug: autor.slug, ruta: resolve(autor.ruta) })),
     temas: temas.map((tema) => ({ slug: tema.slug, ruta: resolve(tema.ruta) })),
     colecciones: colecciones.map((coleccion) => ({
@@ -288,8 +447,10 @@ export async function corpusParaFechar(raiz: string): Promise<CorpusParaFechar> 
     obras: fichas.map((ficha) => ({
       nombre: ficha.nombre,
       autor: ficha.autor,
+      formas: ficha.formas,
       ruta: resolve(ficha.ruta),
     })),
+    documentos: documentos.map((documento) => resolve(documento)),
   };
 }
 
@@ -324,14 +485,36 @@ export async function fechasDeLasSuperficies(
     }
 
     const rutas = rutasDelCorpus(join(raiz, 'corpus'));
-    // Historia 22.8 — las Fichas de Obra se fechan con git como los demás ficheros: sin su
-    // directorio en el ámbito, el título de una Obra cambiaba sin mover su `lastmod`.
-    const ambitos = [rutas.citas, rutas.autores, rutas.temas, rutas.colecciones, rutas.obras];
+    /*
+     * Historia 22.8 — las Fichas de Obra se fechan con git como los demás ficheros. Historia
+     * 24.8 — y los documentos de `corpus/fuentes/`, que ordenan la Página de Obra; sus blobs no
+     * se leen: un documento solo cuenta como «cambió».
+     */
+    const ambitos: readonly (readonly [string, FamiliaDeFichero])[] = [
+      [rutas.citas, 'cita'],
+      [rutas.autores, 'autor'],
+      [rutas.temas, 'tema'],
+      [rutas.colecciones, 'coleccion'],
+      [rutas.obras, 'obra'],
+      [rutas.fuentes, 'documento'],
+    ];
 
-    const [corpus, fechas] = await Promise.all([
+    const [vivo, historial] = await Promise.all([
       corpusParaFechar(raiz),
-      fechasDeLosFicheros(tope, ambitos),
+      historialDeLosFicheros(
+        tope,
+        ambitos.map(([directorio]) => directorio),
+        { opacos: [rutas.fuentes] },
+      ),
     ]);
+
+    // Historia 24.8 — lo que salió del Corpus fecha, con el commit que lo sacó, lo que componía.
+    const familiaDe = (fichero: string) =>
+      ambitos.find(([directorio]) => fichero.startsWith(`${resolve(directorio)}${sep}`))?.[1];
+    const corpus: CorpusParaFechar = {
+      ...vivo,
+      bajas: bajasDelHistorial(historial, familiaDe, new Set(ficherosDelCorpus(vivo))),
+    };
 
     /*
      * El guardián del fallo mudo. Que git conteste que sí y no diga nada deja el mapa
@@ -339,7 +522,7 @@ export async function fechasDeLasSuperficies(
      * la historia entera en nada, y en verde. Se avisa con el mismo énfasis que en el
      * caso superficial porque para quien mira el registro es la misma noticia.
      */
-    const pobre = coberturaInsuficiente(corpus, fechas);
+    const pobre = coberturaInsuficiente(vivo, historial);
     if (pobre !== undefined) {
       avisar(
         `${SIN_FECHAS}${pobre}. Git contestó sin error, así que no es que el historial ` +
@@ -348,7 +531,7 @@ export async function fechasDeLasSuperficies(
       );
     }
 
-    return fechasPorSuperficie(corpus, fechas);
+    return fechasPorSuperficie(corpus, historial);
   } catch (fallo) {
     avisar(
       `${SIN_FECHAS}no se pudo leer el historial del Corpus: ` +

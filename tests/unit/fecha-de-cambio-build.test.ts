@@ -46,7 +46,10 @@ const ejecutar = promisify(execFile);
  *     demuestra dando a dos superficies del mismo sitio dos fechas distintas y ninguna de
  *     hoy;
  *   · **dos construcciones del mismo commit dan las mismas fechas**, que es el criterio que
- *     separa una fecha de contenido de una fecha de reloj.
+ *     separa una fecha de contenido de una fecha de reloj;
+ *   · **la fecha es la de los campos que la página pinta** (Historia 24.8): un commit que solo
+ *     marca una Cita apta para portada no fecha nada, y uno que solo cambia la semblanza solo
+ *     fecha la Página de Autor.
  *
  * Las construcciones son del **mismo** proyecto a propósito —salvo la superficial, que por
  * definición tiene que ser un clon—: comparar dos proyectos distintos compararía dos
@@ -97,6 +100,12 @@ const PRIMER_INSTANTE = '2024-01-02T09:00:00.000Z';
 /** El día en que se toca **solo** el fichero del Tema. */
 const SEGUNDO_COMMIT = '2024-03-04';
 const SEGUNDO_INSTANTE = '2024-03-04T09:00:00.000Z';
+/** Historia 24.8 — el día en que una Cita solo se marca apta para portada: no fecha nada. */
+const TERCER_COMMIT = '2024-05-06';
+const TERCER_INSTANTE = '2024-05-06T09:00:00.000Z';
+/** Historia 24.8 — el día en que solo cambia la semblanza del Autor: solo fecha su página. */
+const CUARTO_COMMIT = '2024-07-08';
+const CUARTO_INSTANTE = '2024-07-08T09:00:00.000Z';
 
 /**
  * El entorno de git de estas pruebas, sin heredar la configuración de quien las corre.
@@ -180,6 +189,27 @@ describe('Historia 18.4 — el sitemap declara cuándo cambió cada superficie',
     await writeFile(join(proyecto, 'corpus', 'temas', 'el-tiempo.yml'), 'nombre: El Tiempo\n', 'utf8');
     await git(['add', 'corpus']);
     await git(['commit', '-m', 'el Tema'], `${SEGUNDO_COMMIT}T09:00:00+0000`);
+
+    // Historia 24.8 — dos commits que solo tocan campos que la Página de Cita no pinta.
+    await writeFile(
+      join(proyecto, 'corpus', 'citas', 'seneca--fragmento-1.md'),
+      citaValida({
+        slug: SLUGS[0],
+        texto: 'Fragmento 1 sobre la brevedad de la vida, que es larga si sabes usarla.',
+        aptaParaPortada: true,
+      }),
+      'utf8',
+    );
+    await git(['add', 'corpus']);
+    await git(['commit', '-m', 'apta para portada'], `${TERCER_COMMIT}T09:00:00+0000`);
+
+    await writeFile(
+      join(proyecto, 'corpus', 'autores', 'seneca.yml'),
+      AUTOR_VALIDO.replace(/^semblanza: .*$/mu, 'semblanza: Filósofo estoico nacido en Córdoba, consejero de Nerón.'),
+      'utf8',
+    );
+    await git(['add', 'corpus']);
+    await git(['commit', '-m', 'la semblanza'], `${CUARTO_COMMIT}T09:00:00+0000`);
 
     // 3) Dos construcciones más, del mismo commit y sin tocar nada entre medias.
     const conGit = await construirProyecto(proyecto);
@@ -274,8 +304,18 @@ describe('Historia 18.4 — el sitemap declara cuándo cambió cada superficie',
     // Es la prueba de que la fecha es del contenido y no del build: dos superficies del
     // mismo sitio, construidas a la vez, con fechas distintas.
     expect(primera.get('/tema/el-tiempo')).toBe(SEGUNDO_INSTANTE);
-    expect(primera.get('/autor/seneca')).toBe(PRIMER_INSTANTE);
     expect(primera.get('/coleccion/frases-cortas')).toBe(PRIMER_INSTANTE);
+  });
+
+  it('Historia 24.8 — un commit que solo toca `aptaParaPortada` no fecha ninguna entrada', () => {
+    expect([...primera].filter(([, fecha]) => fecha === TERCER_INSTANTE)).toEqual([]);
+    expect(primera.get(`/cita/${SLUGS[0]}`)).toBe(SEGUNDO_INSTANTE);
+  });
+
+  it('Historia 24.8 — la semblanza solo fecha la Página de Autor, que es la única que la pinta', () => {
+    expect([...primera].filter(([, fecha]) => fecha === CUARTO_INSTANTE).map(([ruta]) => ruta)).toEqual([
+      '/autor/seneca',
+    ]);
   });
 
   it('ninguna fecha es la de hoy: no se ha colado el reloj por ninguna rendija', () => {

@@ -1,82 +1,85 @@
 /**
- * Qué ficheros del Corpus componen cada superficie — Historia 18.4.
+ * Qué compone cada superficie, **por campos** — Historias 18.4, 22.8 y 24.8 (AD-27).
  *
- * Aquí vive **toda la decisión** de la historia: de qué depende la fecha que el sitemap
- * declara para cada URL. Y no toca ni el disco ni git, a propósito: recibe el corpus ya
- * leído y un mapa de «fichero → fecha de su último cambio», y devuelve «superficie →
- * fecha». Así los casos que importan —la agregación, la ausencia, el empate— se prueban
- * sin repositorio, que es la única forma de probarlos deprisa y sin fixture de git.
+ * Aquí vive **toda la decisión** de qué fecha declara el sitemap para cada URL y de qué avisa
+ * `tools/avisar.ts`: la relación «superficie → (fichero, campos que pinta)» y el único
+ * comparador que dice si una transición de un fichero cambió esos campos. No toca ni el disco ni
+ * git, a propósito: recibe el corpus ya leído y las transiciones ya analizadas, así que los casos
+ * que importan —la agregación, la ausencia, la baja, el campo que no fecha— se prueban sin
+ * repositorio.
  *
  * ── Por qué la fecha sale del historial y no del build ───────────────────────────────
  *
- * AD-12 reconstruye el sitio una vez al día. Una fecha de construcción declararía las
- * 1.715 páginas como nuevas cada mañana, y eso no es un dato pobre: es un dato falso, y
- * enseña al buscador a no hacer caso del campo. Peor que no declararlo. Lo que sí sabe
- * este repositorio es cuándo cambió de verdad cada fichero de `corpus/`, porque el Corpus
- * **es** el repositorio (AD-10).
+ * AD-12 reconstruye el sitio una vez al día. Una fecha de construcción declararía todas las
+ * páginas como nuevas cada mañana, y eso no es un dato pobre: es un dato falso, y enseña al
+ * buscador a no hacer caso del campo. Lo que sí sabe este repositorio es cuándo cambió de verdad
+ * cada fichero de `corpus/`, porque el Corpus **es** el repositorio (AD-10).
  *
- * ── Qué compone cada superficie ──────────────────────────────────────────────────────
+ * ── Lo que la página afirma, por campos (Historia 24.8) ──────────────────────────────
  *
- * El criterio es uno solo y se aplica sin excepciones: **lo que la página renderiza**. No
- * lo que su plantilla recibe por nombre, ni lo que uno diría que «es» la página. Si un
- * fichero acaba dentro del HTML publicado, un cambio suyo cambia esa página, y declarar
- * una fecha anterior es la misma quema de señal que declarar una fecha de build, solo que
- * en la dirección rancia: el buscador vuelve, ve el HTML cambiado, y aprende que el campo
- * miente.
+ * Hasta la 24.8 la relación iba a **ficheros enteros**, y eso fallaba en los dos sentidos. De
+ * más: un commit que solo escribe `aptaParaPortada` fechaba y avisaba las Páginas de Cita que
+ * tocaba, y la semblanza de un Autor fechaba todas las Páginas de Cita suyas, que no la pintan.
+ * De menos: los listados de Autor, Tema y Colección no contaban la ficha de Obra cuyo título
+ * pintan (24.3), la Página de Obra no contaba sus documentos de `corpus/fuentes/` —que ordenan
+ * sus Citas (24.1)— y una baja no fechaba lo que componía.
  *
- *   · **Página de Cita** — su fichero, **el de su Autor, los de sus Temas y la ficha de su Obra**. La plantilla
- *     —`src/pages/cita/[slug].astro`— recibe `autor` de su `getStaticPaths` y compone con
- *     `autor.nombre` el título de pestaña, la `<meta description>` y el
- *     `application/ld+json`. Corregir la semblanza de Séneca reconstruye 181 páginas con
- *     HTML distinto: si solo dependieran de su propio fichero, las 181 declararían una
- *     fecha de hace meses. La inflación al revés —retocar un Autor mueve la fecha de sus
- *     Citas— está acotada y es la verdad: solo dispara cuando ese fichero cambia de veras,
- *     y cuando dispara es porque el HTML cambió. Los Temas entran porque `RutasDeSalida`
- *     pinta el nombre de cada Tema de la Cita en su chip (Historia 22.8: el aviso ya lo
- *     sabía y la fecha no; ahora las dos lecturas salen de la misma relación). Y la ficha
- *     de su Obra, cuyo título pintan la Atribución y los datos estructurados. Desde la
- *     Historia 24.4 la Tarjeta de Obra pinta además el año de la Obra, su recuento y si tiene
- *     edición cotejada, que dependen de las Citas hermanas: es navegación, y por excepción de
- *     Héctor no fecha ni avisa (FR-47; la deja así la 24.8). Las Citas hermanas no entran. Lo
- *     mismo «Siguiente…» (Historia 24.5): depende del orden de la Obra y del listado del Tema
- *     de la Cita —otras Citas, sus posiciones en los documentos y sus Autores—, y es navegación:
- *     tampoco fecha ni avisa. Y las Rutas de salida del pie (Historia 24.6): «De la misma obra»
- *     y «Más de {Autor}» pintan los textos, los títulos de Obra y los recuentos de otras Citas,
- *     y es navegación: por la misma excepción tampoco fechan ni avisan.
- *   · **Página de Obra** — su ficha, sus Citas y el fichero de su Autor (Historia 22.4).
- *   · **Página de Autor, de Tema y de Colección** — su fichero, los de las Citas que
- *     agregan **y los de los Autores de esas Citas**. Son listados: si entra una Cita
- *     nueva en un Tema, la página cambió aunque el fichero del Tema no se haya tocado; y
- *     sus tarjetas llevan el nombre del Autor —`TarjetaDeCita`, con `autores.get(...)`—,
- *     así que un Autor renombrado también las cambia. Es la fila «Página derivada de
- *     varias fuentes» de la matriz, leída hasta el final. Desde la Historia 24.3 sus
- *     tarjetas pintan además el título de la Obra de cada Cita, pero la ficha de Obra aún
- *     no entra aquí: la relación por campos que la recoge es la de la Historia 24.8 (AD-27).
+ * El criterio es uno: **lo que la superficie afirma**. Cada componente es un fichero y la lista
+ * de campos suyos que esa superficie pinta, sacada de una tabla con nombre (`CAMPOS_QUE_PINTA`),
+ * y los campos que el sitio lee pero ninguna superficie afirma están en otra lista con nombre
+ * (`CAMPOS_QUE_NO_FECHAN`). Las dos son **listas explícitas**, nunca «todos menos»: un campo
+ * nuevo de un esquema tiene que clasificarse a mano, y `tests/unit/fecha-de-cambio.test.ts`
+ * falla nombrándolo mientras no lo esté.
  *
- * ── La portada, que es el caso incómodo y por eso no lleva fecha ─────────────────────
+ *   · **Página de Cita** — su fichero, su Autor (nombre y años: título, meta, JSON-LD y Tarjeta
+ *     de Obra), sus Temas (el nombre de cada chip) y su ficha de Obra (el título de la
+ *     Atribución y del `isPartOf`). **Nunca Citas hermanas**: la Tarjeta de Obra (24.4) pinta
+ *     el año, el recuento y si hay edición cotejada de la Obra, «Siguiente…» (24.5) depende del
+ *     orden del libro y del listado del Tema, y las Rutas de salida del pie (24.6) pintan textos,
+ *     Obras y recuentos de otras Citas. Todo eso es navegación y, por excepción declarada de
+ *     Héctor (FR-47), no fecha ni avisa.
+ *   · **Página de Autor, de Tema y de Colección** — su fichero, sus Citas, los Autores de esas
+ *     Citas (el nombre de cada tarjeta) y **las fichas de Obra de esas Citas** (el título de la
+ *     línea de Obra de cada tarjeta, 24.3, y de la Lista de Obras del Autor). Son listados: si
+ *     entra una Cita nueva en un Tema, la página cambió aunque el fichero del Tema no se toque.
+ *   · **Página de Obra** — su ficha, sus Citas, su Autor y **sus documentos**: la unión de
+ *     `documentosDeCita` de sus Citas sobre los nombres de `corpus/fuentes/`. Un documento no se
+ *     analiza: cualquier cambio suyo puede reordenar la Obra, y solo fecha esa página.
  *
- * La portada **no entra en este mapa**, y es una decisión, no un olvido. Es la única URL
- * del sitio que cambia a diario: AD-12 rota la Cita del Día sin que nadie commitee nada,
- * así que su HTML es distinto cada mañana. Cualquier fecha que el historial sepa dar es
- * por definición vieja, y sería vieja justo en la única URL donde el buscador sí entra a
- * diario — enseñarle que ahí no ha cambiado nada es peor que no decirle nada.
+ * ── Un comparador, dos lecturas ──────────────────────────────────────────────────────
  *
- * Las dos salidas están cerradas. Declarar «hoy» es una fecha de build con otro nombre, y
- * la historia entera existe para no cometerla. Declarar la fecha del último commit del
- * Corpus es afirmar por escrito que la portada no cambió desde entonces, que es falso. Lo
- * que queda es la regla de esta misma historia: **cuando no se sabe la fecha, se omite el
- * campo**. Ausencia antes que centinela, y también antes que dato rancio.
+ * `cambiaronLosCampos` es la única regla, y la usan las dos lecturas de la relación: la fecha
+ * del sitemap, sobre el historial por commit (`integraciones/historial.ts`, `git log --raw`), y
+ * el aviso, sobre el par `desde`/`hasta` (`tools/lib/avisar.ts`, `git diff --raw`). Comparación
+ * canónica: un campo ausente equivale a `undefined`, los objetos se comparan sin depender del
+ * orden de sus claves, un alta o una baja cambian todos los campos y una versión que no se deja
+ * analizar cuenta como cambio —antes fechar de más que mentir de menos—.
  *
- * Y no, el descargo no es `tools/avisar.ts`: ese canal es IndexNow —Bing, Yandex, Naver,
- * Seznam—, y el buscador cuyo rastreo se está intentando ganar aquí es Google, que no lo
- * consume. Que la portada se avise por otro canal no autoriza a mentir en éste.
+ * ── Las bajas ────────────────────────────────────────────────────────────────────────
+ *
+ * Un fichero que ya no está en el Corpus —su última transición es un borrado: mover una Cita a
+ * `corpus/_revision/` o una ficha a `corpus/_obras-retiradas/` lo es— entra con su última versión
+ * como **baja** y fecha, con el instante del commit que lo sacó, las superficies **vivas** que
+ * compondría: una Cita, su Autor, sus Temas, sus Colecciones (por `miembros`) y su Obra
+ * (resuelta por Autor y forma contra las fichas de hoy); una ficha, las Páginas de Cita y los
+ * listados de las Citas de hoy cuya forma reclamaba; un documento, la Obra cuyas Citas lo
+ * casarían. Una baja nunca declara la página de sí misma.
+ *
+ * ── La portada, que no lleva fecha ───────────────────────────────────────────────────
+ *
+ * La portada **no entra en este mapa**, y es una decisión, no un olvido. Es la única URL del
+ * sitio que cambia a diario: AD-12 rota la Cita del Día sin que nadie commitee nada, así que
+ * cualquier fecha que el historial sepa dar es vieja el día que se publica, y lo sería justo en
+ * la única URL donde el buscador entra a diario. Declarar «hoy» es una fecha de build con otro
+ * nombre, y declarar el último commit del Corpus afirma algo falso. Lo que queda es la regla de
+ * esta historia: **cuando no se sabe la fecha, se omite el campo**. Y no, el descargo no es
+ * `tools/avisar.ts`: ese canal es IndexNow, y Google no lo consume.
  *
  * ── Ausencia antes que centinela ─────────────────────────────────────────────────────
  *
  * Una superficie de la que no se sepa ninguna fecha **no aparece en el mapa**, y quien lo
- * consume omite el campo. Ni «hoy», ni la época, ni una cadena vacía. Es la convención de
- * todo campo opcional del proyecto, y aquí importa el doble: un centinela en 1.715
- * entradas es indistinguible de un dato, y el buscador no tiene forma de saber cuál mira.
+ * consume omite el campo. Ni «hoy», ni la época, ni una cadena vacía: un centinela en miles de
+ * entradas es indistinguible de un dato.
  */
 
 import {
@@ -86,29 +89,167 @@ import {
   rutaDeTema,
   rutaNormalizada,
 } from '../../src/lib/superficies.ts';
-import { rutaDeLaObra } from '../../src/lib/obras.ts';
+import { formaDeObra, rutaDeLaObra } from '../../src/lib/obras.ts';
+import { documentosDeCita } from './cotejo.ts';
+import type { FamiliaDeFichero, FamiliaDeRuta } from './avisar.ts';
 
 /**
  * El instante de un cambio, en ISO 8601 y **siempre en UTC** — lo que `Date#toISOString`
  * devuelve: `2026-09-04T17:59:55.000Z`.
  *
- * En UTC y no en la zona de quien construye: `git log` da el instante con el desfase de
- * quien commiteó, y quedarse con esa forma ataría el sitemap a la zona horaria de la
- * máquina. El mismo commit se anunciaría con dos cadenas distintas —una desde Madrid, otra
- * desde el CI— y el criterio «dos construcciones del mismo commit dan las mismas fechas»
- * dejaría de cumplirse por un motivo que nadie vería. Convertir es cosa de quien lee git;
- * aquí ya llega hecho.
- *
- * **El instante entero y no solo el día**, porque recortarlo no ahorra nada y miente: la
- * librería del sitemap expande `AAAA-MM-DD` a la medianoche de ese día, así que el XML
- * acabaría afirmando una hora exacta que nadie ha medido. Publicando el instante real, lo
- * que se declara es lo que el repositorio sabe.
- *
- * Se compara como cadena a propósito: esta forma es de anchura fija y termina en `Z`, así
- * que ordena igual lexicográficamente que cronológicamente y «la más reciente» no necesita
- * construir ninguna `Date`.
+ * En UTC y no en la zona de quien construye: el mismo commit se anunciaría con dos cadenas
+ * distintas desde Madrid y desde el CI, y «dos construcciones del mismo commit dan las mismas
+ * fechas» dejaría de cumplirse sin que nadie viera por qué. El instante entero y no solo el día:
+ * la librería del sitemap expande `AAAA-MM-DD` a la medianoche, y el XML afirmaría una hora que
+ * nadie ha medido. Se compara como cadena: la forma es de anchura fija y termina en `Z`, así que
+ * ordena igual lexicográfica que cronológicamente.
  */
 export type FechaDeCambio = string;
+
+// ─── Versiones, transiciones y el comparador ─────────────────────────────────────────
+
+/**
+ * Una versión que no se analizó o no se dejó analizar: un documento de `corpus/fuentes/` —que
+ * solo cuenta como «cambió»— o un blob que no es un frontmatter o un YAML de objeto. Cualquier
+ * comparación en que aparezca cuenta como cambio de todos los campos.
+ */
+export const VERSION_OPACA: unique symbol = Symbol('versión opaca');
+
+/** Los campos de una versión de un fichero, tal como los dejó su analizador. */
+export type Version = Readonly<Record<string, unknown>> | typeof VERSION_OPACA;
+
+/** El paso de un fichero de una versión a otra. `null` es «no existe»: alta o baja. */
+export interface Transicion {
+  antes: Version | null;
+  despues: Version | null;
+}
+
+/** Una transición del historial, con el instante del commit que la hizo. */
+export interface TransicionFechada extends Transicion {
+  fecha: FechaDeCambio;
+}
+
+/** El historial del Corpus: las transiciones de cada fichero, en cualquier orden. */
+export type Historial = ReadonlyMap<string, readonly TransicionFechada[]>;
+
+/** Un fichero que cambió entre dos revisiones, con sus dos versiones — lo que lee el aviso. */
+export interface CambioDeFichero extends Transicion {
+  fichero: string;
+}
+
+/** Que cualquier cambio del fichero cuenta: el documento de Fuente en la Página de Obra. */
+export const CUALQUIER_CAMBIO: unique symbol = Symbol('cualquier cambio');
+
+/** Los campos que una superficie pinta de un fichero, o que le basta con que cambie. */
+export type Campos = typeof CUALQUIER_CAMBIO | readonly string[];
+
+/**
+ * Si una transición cambió alguno de los campos dados — **la** regla de AD-27.
+ *
+ * Un alta o una baja cambian todos; una versión opaca, también; si no, se comparan los campos
+ * uno a uno en forma canónica. La usan, sin copia, la fecha del sitemap y el aviso.
+ */
+export function cambiaronLosCampos(transicion: Transicion, campos: Campos): boolean {
+  if (campos === CUALQUIER_CAMBIO) return true;
+  const { antes, despues } = transicion;
+  if (antes === null || despues === null) return antes !== despues;
+  if (antes === VERSION_OPACA || despues === VERSION_OPACA) return true;
+  return campos.some((campo) => canonica(antes[campo]) !== canonica(despues[campo]));
+}
+
+/**
+ * Una forma de comparar que no depende del orden de las claves y en que un campo ausente es
+ * `undefined`: una clave con `undefined` dentro de un objeto se descarta, igual que si faltara.
+ */
+function canonica(valor: unknown): string {
+  return valor === undefined ? '∅' : JSON.stringify(ordenado(valor));
+}
+
+function ordenado(valor: unknown): unknown {
+  if (Array.isArray(valor)) return valor.map(ordenado);
+  if (valor !== null && typeof valor === 'object' && !(valor instanceof Date)) {
+    return Object.fromEntries(
+      Object.keys(valor)
+        .filter((clave) => (valor as Record<string, unknown>)[clave] !== undefined)
+        .sort()
+        .map((clave) => [clave, ordenado((valor as Record<string, unknown>)[clave])]),
+    );
+  }
+  return valor;
+}
+
+// ─── La tabla de campos ──────────────────────────────────────────────────────────────
+
+/** Lo que toda superficie que pinta una Cita afirma de ella: su página, los listados y la Obra. */
+const CAMPOS_DE_CITA = ['texto', 'autor', 'temas', 'procedencia', 'fuente', 'slug'] as const;
+
+/** Lo que pinta de un Autor toda superficie que no es la suya: el nombre y los años. */
+const CAMPOS_DEL_AUTOR_FUERA = ['nombre', 'añoNacimiento', 'añoFallecimiento'] as const;
+
+/**
+ * Qué campos de cada familia de fichero pinta cada familia de superficie — AD-27, Historia 24.8.
+ *
+ * Es la tabla entera: una casilla que falta es «este fichero no compone esa superficie». Se
+ * leen por (familia de fichero → familia de ruta), y la relación las aplica sin excepción.
+ *
+ *   · la **semblanza** y la **biografía** de un Autor solo las pinta su página (1);
+ *   · la ficha de Obra pinta su `titulo` en la Página de Cita y en los listados, y en su propia
+ *     página además `autor`, `formas` —qué Citas reúne—, `nota` y `ediciones`;
+ *   · un documento, cualquier cambio, y solo en la Página de Obra.
+ */
+export const CAMPOS_QUE_PINTA = {
+  cita: {
+    cita: CAMPOS_DE_CITA,
+    autor: CAMPOS_DE_CITA,
+    tema: CAMPOS_DE_CITA,
+    coleccion: CAMPOS_DE_CITA,
+    obra: CAMPOS_DE_CITA,
+  },
+  autor: {
+    cita: CAMPOS_DEL_AUTOR_FUERA,
+    autor: [...CAMPOS_DEL_AUTOR_FUERA, 'semblanza', 'biografia'],
+    tema: CAMPOS_DEL_AUTOR_FUERA,
+    coleccion: CAMPOS_DEL_AUTOR_FUERA,
+    obra: CAMPOS_DEL_AUTOR_FUERA,
+  },
+  tema: {
+    cita: ['nombre'],
+    tema: ['nombre'],
+  },
+  coleccion: {
+    coleccion: ['nombre', 'criterio', 'miembros'],
+  },
+  obra: {
+    cita: ['titulo'],
+    autor: ['titulo'],
+    tema: ['titulo'],
+    coleccion: ['titulo'],
+    obra: ['autor', 'titulo', 'formas', 'nota', 'ediciones'],
+  },
+  documento: {
+    obra: CUALQUIER_CAMBIO,
+  },
+} as const satisfies Record<FamiliaDeFichero, Partial<Record<FamiliaDeRuta, Campos>>>;
+
+/**
+ * Los campos que el sitio lee y **ninguna** superficie afirma: no fechan ni avisan nada.
+ *
+ *   · `aptaParaPortada` decide la rotación de la Cita del Día, que solo la portada pinta, y la
+ *     portada se avisa siempre que cambie algo del Corpus;
+ *   · `estadoDerechos` es una puerta de admisión, no un texto publicado;
+ *   · `tradicion` es del suelo del 40 % de tradición latinoamericana (§6.1);
+ *   · `distintaDe` solo silencia un aviso del build (22.2).
+ *
+ * Está escrita para que un campo no fechable sea una decisión con nombre y no un olvido: la
+ * prueba de clasificación exige que cada clave de los esquemas esté aquí o en la tabla.
+ */
+export const CAMPOS_QUE_NO_FECHAN = {
+  cita: ['aptaParaPortada', 'estadoDerechos'],
+  autor: ['tradicion'],
+  obra: ['distintaDe'],
+} as const satisfies Partial<Record<FamiliaDeFichero, readonly string[]>>;
+
+// ─── El corpus leído ─────────────────────────────────────────────────────────────────
 
 /** Una Cita del corpus, con lo justo para saber qué superficies compone. */
 export interface CitaParaFechar {
@@ -117,9 +258,13 @@ export interface CitaParaFechar {
   temas?: readonly string[];
   /**
    * El nombre de la Ficha de Obra que la resuelve, si alguna la resuelve — Historia 22.4. Lo
-   * pone quien lee el corpus, con `colgarObras`: aquí no se resuelve ninguna Obra.
+   * pone quien lee el corpus, con `colgarObras`: aquí no se resuelve ninguna Obra viva.
    */
   obra?: string;
+  /** La `procedencia.obra` tal como la declara: su forma resuelve bajas y casa documentos. */
+  obraDeclarada?: string;
+  /** El identificador de su Fuente: con la obra, nombra sus documentos (`documentosDeCita`). */
+  fuente?: string;
   /** El fichero del que salió, tal como lo nombra quien leyó el corpus. */
   ruta: string;
 }
@@ -128,6 +273,8 @@ export interface CitaParaFechar {
 export interface ObraParaFechar {
   nombre: string;
   autor: string;
+  /** Las formas canónicas que reclama: resuelven las bajas de Cita y las de ficha. */
+  formas?: readonly string[];
   ruta: string;
 }
 
@@ -142,14 +289,21 @@ export interface ColeccionParaFechar extends EntidadParaFechar {
   miembros: readonly string[];
 }
 
+/** Lo que ya no está en el Corpus, con su última versión — Historia 24.8. */
+export interface BajasParaFechar {
+  citas?: readonly CitaParaFechar[];
+  obras?: readonly ObraParaFechar[];
+  /** Las rutas de los documentos de Fuente que salieron de `corpus/fuentes/`. */
+  documentos?: readonly string[];
+}
+
 /**
  * El corpus ya leído, con las rutas de sus ficheros.
  *
- * Son las **declaraciones**, no el conjunto publicable: aquí no se aplica ningún umbral y
- * no debe aplicarse. Quien decide qué se anuncia es `src/lib/superficies.ts` a través del
- * filtro del sitemap (AD-11, Historia 12.1), y este mapa se limita a poner fecha a lo que
- * aquél haya dejado pasar. Calcular de más no publica de más: una entrada que sobre en el
- * mapa nunca se consulta.
+ * Son las **declaraciones**, no el conjunto publicable: aquí no se aplica ningún umbral y no
+ * debe aplicarse. Quien decide qué se anuncia es `src/lib/superficies.ts` a través del filtro
+ * del sitemap (AD-11, Historia 12.1). Calcular de más no publica de más: una entrada que sobre
+ * en el mapa nunca se consulta.
  */
 export interface CorpusParaFechar {
   citas: readonly CitaParaFechar[];
@@ -158,181 +312,337 @@ export interface CorpusParaFechar {
   colecciones: readonly ColeccionParaFechar[];
   /** Las Fichas de Obra — Historia 22.4. Opcional: un corpus sin Obras no la trae. */
   obras?: readonly ObraParaFechar[];
+  /** Las rutas de los documentos de `corpus/fuentes/` — Historia 24.8. */
+  documentos?: readonly string[];
+  /** Las bajas, que salen del historial y no del disco — Historia 24.8. */
+  bajas?: BajasParaFechar;
 }
 
+// ─── La relación ─────────────────────────────────────────────────────────────────────
+
+/** Un fichero que compone una superficie, con los campos suyos que esa superficie pinta. */
+export interface Componente {
+  fichero: string;
+  campos: Campos;
+}
+
+/** Una superficie de la relación: su familia de ruta y lo que la compone. */
+export interface Superficie {
+  familia: FamiliaDeRuta;
+  componentes: readonly Componente[];
+}
+
+/** La relación «ruta canónica → superficie», tal como la da `relacionDeSuperficies`. */
+export type Relacion = ReadonlyMap<string, Superficie>;
+
 /**
- * Qué ficheros del Corpus compone cada superficie, por su ruta **canónica** — AD-27.
+ * Qué compone cada superficie, por su ruta **canónica** — AD-27.
  *
- * Es el **único dueño** de la relación «superficie → ficheros que renderiza». Tiene dos
- * lecturas y ninguna la repite: `ficherosPorSuperficie` —por ruta normalizada— fecha el
- * sitemap, y `rutasAvisadasPor` de `tools/lib/avisar.ts` la recorre al revés —«fichero →
- * rutas»— para el aviso de cambio. Que sean inversas lo fija una prueba sobre un corpus de
- * ejemplo (`tests/unit/indexnow.test.ts`); antes eran dos funciones escritas a mano, y el
- * aviso sabía que los chips de una Cita nombran sus Temas mientras la fecha no lo sabía.
+ * Es el **único dueño** de la relación. Tiene dos lecturas y ninguna la repite: la fecha del
+ * sitemap (`superficiesFechadas`) y el aviso (`rutasAvisadasPor` de `tools/lib/avisar.ts`),
+ * las dos con `cambiaronLosCampos`. Que sean inversas lo fija `tests/unit/indexnow.test.ts`.
+ * Las rutas salen de los constructores de `src/lib/superficies.ts`, nunca escritas a mano.
  */
-export function relacionDeSuperficies(corpus: CorpusParaFechar): Map<string, string[]> {
-  /** El fichero de cada Autor, que es lo que aporta el nombre que las páginas renderizan. */
+export function relacionDeSuperficies(corpus: CorpusParaFechar): Map<string, Superficie> {
   const ficheroDeAutor = new Map(corpus.autores.map((autor) => [autor.slug, autor.ruta]));
   const ficheroDeTema = new Map(corpus.temas.map((tema) => [tema.slug, tema.ruta]));
-  const ficheroDeObra = new Map((corpus.obras ?? []).map((obra) => [obra.nombre, obra.ruta]));
-  const citasDeAutor = new Map<string, string[]>();
-  const deTema = new Map<string, string[]>();
-  const deCita = new Map<string, CitaParaFechar>();
+  const fichas = corpus.obras ?? [];
+  const ficheroDeObra = new Map(fichas.map((obra) => [obra.nombre, obra.ruta]));
+  const bajas = corpus.bajas ?? {};
+  const vivos = new Set(ficherosDelCorpus(corpus));
 
-  const deObra = new Map<string, string[]>();
-
-  for (const cita of corpus.citas) {
-    deCita.set(cita.slug, cita);
-    if (cita.obra !== undefined) apilar(deObra, cita.obra, cita.ruta);
-    apilar(citasDeAutor, cita.autor, cita.ruta);
-    for (const tema of cita.temas ?? []) {
-      apilar(deTema, tema, cita.ruta);
-      // El listado renderiza el nombre del Autor en cada tarjeta, así que su fichero es
-      // parte de lo que la página afirma. Una Cita cuyo Autor no resuelve no aporta nada.
-      const autor = ficheroDeAutor.get(cita.autor);
-      if (autor !== undefined) apilar(deTema, tema, autor);
-    }
+  /** La ficha viva que reclama (Autor, forma): resuelve la Obra de una Cita que se fue. */
+  const fichaViva = new Map<string, ObraParaFechar>();
+  for (const ficha of fichas) {
+    for (const forma of ficha.formas ?? []) fichaViva.set(clave(ficha.autor, forma), ficha);
+  }
+  /** Las fichas que se fueron, por (Autor, forma): fechan las Citas de hoy que reclamaban. */
+  const fichasDeBaja = new Map<string, string[]>();
+  for (const ficha of bajas.obras ?? []) {
+    if (vivos.has(ficha.ruta)) continue;
+    for (const forma of ficha.formas ?? []) apilar(fichasDeBaja, clave(ficha.autor, forma), ficha.ruta);
+  }
+  /** Los documentos, de hoy y de baja, por su nombre sin extensión. */
+  const documentos = new Map<string, string[]>();
+  for (const ruta of [...(corpus.documentos ?? []), ...(bajas.documentos ?? [])]) {
+    apilar(documentos, nombreDeDocumento(ruta), ruta);
   }
 
-  const porSuperficie = new Map<string, string[]>();
-  const declarar = (ruta: string, ficheros: readonly (string | undefined)[]) => {
-    porSuperficie.set(ruta, [...new Set(ficheros.filter((f): f is string => f !== undefined))]);
+  /** Las fichas de Obra cuyo título pinta una Cita viva: la suya y las de baja que la reclamaban. */
+  const fichasDeLaCita = (cita: CitaParaFechar): string[] => {
+    const forma = formaDe(cita);
+    return [
+      ...(cita.obra === undefined ? [] : [ficheroDeObra.get(cita.obra)].filter(definido)),
+      ...(forma === undefined ? [] : (fichasDeBaja.get(clave(cita.autor, forma)) ?? [])),
+    ];
   };
 
+  const porSuperficie = new Map<string, { familia: FamiliaDeRuta; campos: Map<string, Campos> }>();
+  const declarar = (ruta: string, familia: FamiliaDeRuta) => {
+    if (!porSuperficie.has(ruta)) porSuperficie.set(ruta, { familia, campos: new Map() });
+  };
+  /** Añade un fichero a una superficie ya declarada, con los campos que la tabla le da. */
+  const componer = (ruta: string, fichero: string | undefined, deFamilia: FamiliaDeFichero) => {
+    const superficie = porSuperficie.get(ruta);
+    if (superficie === undefined || fichero === undefined) return;
+    const campos = (CAMPOS_QUE_PINTA[deFamilia] as Partial<Record<FamiliaDeRuta, Campos>>)[
+      superficie.familia
+    ];
+    if (campos === undefined) return;
+    const previos = superficie.campos.get(fichero);
+    superficie.campos.set(fichero, previos === undefined ? campos : unir(previos, campos));
+  };
+  /** Una Cita viva en un listado: ella, su Autor y las fichas de Obra cuyo título pinta. */
+  const conLaCita = (ruta: string, cita: CitaParaFechar) => {
+    componer(ruta, cita.ruta, 'cita');
+    componer(ruta, ficheroDeAutor.get(cita.autor), 'autor');
+    for (const ficha of fichasDeLaCita(cita)) componer(ruta, ficha, 'obra');
+  };
+
+  const citasDeObra = new Map<string, CitaParaFechar[]>();
   for (const cita of corpus.citas) {
-    // El fichero del Autor entra aquí porque la plantilla compone con `autor.nombre` el
-    // título, la meta descripción y los datos estructurados: cambiarlo cambia el HTML. Los de
-    // sus Temas, porque `RutasDeSalida` pinta el nombre de cada uno en su chip. Y la ficha de
-    // su Obra, porque la Atribución y el JSON-LD pintan `cita.obra.titulo` (22.3). La Tarjeta
-    // de Obra (24.4) pinta también el año, el recuento y si hay edición cotejada, que salen de
-    // las Citas hermanas; es navegación y no fecha ni avisa (excepción de Héctor, 24.8, FR-47).
-    // «Siguiente…» (24.5) depende del orden de la Obra y del listado del Tema: también es
-    // navegación, y por la misma excepción tampoco entra aquí. Ni las Rutas de salida del pie
-    // (24.6), que pintan textos, Obras y recuentos de otras Citas: navegación, que no fecha.
-    declarar(rutaDeCita(cita.slug), [
-      cita.ruta,
-      ficheroDeAutor.get(cita.autor),
-      ...(cita.temas ?? []).map((tema) => ficheroDeTema.get(tema)),
-      cita.obra === undefined ? undefined : ficheroDeObra.get(cita.obra),
-    ]);
+    if (cita.obra !== undefined) apilar(citasDeObra, cita.obra, cita);
   }
 
-  /*
-   * Los listados de Autor, Tema y Colección. Desde la Historia 24.3 sus tarjetas pintan además
-   * el título de la Obra de cada Cita, y la ficha de Obra todavía no entra en ninguno de los
-   * tres: la recoge la Historia 24.8 (AD-27). Hasta entonces, retitular o reunir una Obra
-   * cambia estos listados sin moverles la fecha ni avisarlos.
-   */
-  for (const autor of corpus.autores) {
-    declarar(rutaDeAutor(autor.slug), [autor.ruta, ...(citasDeAutor.get(autor.slug) ?? [])]);
+  // La Página de Cita: su fichero, su Autor, sus Temas y su ficha de Obra. Nunca sus hermanas.
+  for (const cita of corpus.citas) {
+    const ruta = rutaDeCita(cita.slug);
+    declarar(ruta, 'cita');
+    componer(ruta, cita.ruta, 'cita');
+    componer(ruta, ficheroDeAutor.get(cita.autor), 'autor');
+    for (const tema of cita.temas ?? []) componer(ruta, ficheroDeTema.get(tema), 'tema');
+    for (const ficha of fichasDeLaCita(cita)) componer(ruta, ficha, 'obra');
   }
 
-  for (const tema of corpus.temas) {
-    declarar(rutaDeTema(tema.slug), [tema.ruta, ...(deTema.get(tema.slug) ?? [])]);
+  // Los listados de Autor, Tema y Colección.
+  for (const autor of corpus.autores) declarar(rutaDeAutor(autor.slug), 'autor');
+  for (const tema of corpus.temas) declarar(rutaDeTema(tema.slug), 'tema');
+  for (const coleccion of corpus.colecciones) declarar(rutaDeColeccion(coleccion.slug), 'coleccion');
+  for (const autor of corpus.autores) componer(rutaDeAutor(autor.slug), autor.ruta, 'autor');
+  for (const tema of corpus.temas) componer(rutaDeTema(tema.slug), tema.ruta, 'tema');
+  for (const cita of corpus.citas) {
+    conLaCita(rutaDeAutor(cita.autor), cita);
+    for (const tema of cita.temas ?? []) conLaCita(rutaDeTema(tema), cita);
   }
-
+  const deCita = new Map(corpus.citas.map((cita) => [cita.slug, cita]));
   for (const coleccion of corpus.colecciones) {
-    declarar(rutaDeColeccion(coleccion.slug), [
-      coleccion.ruta,
-      // Un miembro que no resuelve —Cita retirada a revisión, o errata— no aporta fecha y
-      // tampoco es un fallo aquí: la pertenencia es blanda por diseño (Historia 12.2).
-      ...coleccion.miembros.flatMap((slug) => {
-        const cita = deCita.get(slug);
-        return cita === undefined ? [] : [cita.ruta, ficheroDeAutor.get(cita.autor)];
-      }),
-    ]);
+    const ruta = rutaDeColeccion(coleccion.slug);
+    componer(ruta, coleccion.ruta, 'coleccion');
+    // Un miembro que no resuelve —Cita retirada a revisión, o errata— no aporta nada aquí: la
+    // pertenencia es blanda por diseño (Historia 12.2). Su baja, si la hubo, entra más abajo.
+    for (const slug of coleccion.miembros) {
+      const cita = deCita.get(slug);
+      if (cita !== undefined) conLaCita(ruta, cita);
+    }
   }
 
-  /*
-   * Historia 22.4 — la Página de Obra, con el mismo criterio que las demás agregaciones: lo
-   * más reciente de lo que compone. Son su ficha —el título—, sus Citas y el fichero de su
-   * Autor, cuyo nombre lleva la Cabecera. Una ficha sin Citas no tiene página: no se declara.
-   */
-  for (const obra of corpus.obras ?? []) {
-    const citas = deObra.get(obra.nombre);
+  // La Página de Obra: su ficha, sus Citas, su Autor y sus documentos. Sin Citas no tiene página.
+  for (const obra of fichas) {
+    const citas = citasDeObra.get(obra.nombre);
     if (citas === undefined) continue;
-    declarar(rutaDeLaObra(obra), [obra.ruta, ...citas, ficheroDeAutor.get(obra.autor)]);
+    const ruta = rutaDeLaObra(obra);
+    declarar(ruta, 'obra');
+    componer(ruta, obra.ruta, 'obra');
+    for (const cita of citas) componer(ruta, cita.ruta, 'cita');
+    componer(ruta, ficheroDeAutor.get(obra.autor), 'autor');
+    for (const cita of citas) {
+      if (cita.fuente === undefined) continue;
+      for (const nombre of documentosDeCita({ id: cita.fuente }, cita.obraDeclarada, documentos)) {
+        for (const documento of documentos.get(nombre) ?? []) componer(ruta, documento, 'documento');
+      }
+    }
   }
 
   /*
-   * La portada **no se declara**, y la ausencia es la decisión. Rota a diario sin commit
-   * (AD-12), así que cualquier fecha que el historial sepa dar es vieja el día que se
-   * publica, y lo sería en la única URL que el buscador visita a diario. La regla de la
-   * historia se le aplica igual que a cualquier otra superficie: cuando no se sabe la
-   * fecha, se omite el campo. El razonamiento largo está en la cabecera del módulo. El
-   * aviso, en cambio, la anuncia siempre: es la excepción que nombra su prueba.
+   * Las bajas de Cita fechan lo vivo que compondrían —su Autor, sus Temas, sus Colecciones y su
+   * Obra— y nunca declaran su propia página: `componer` no declara nada. La Obra se resuelve
+   * contra las fichas de hoy, por (Autor, forma).
+   */
+  const coleccionesDe = new Map<string, string[]>();
+  for (const coleccion of corpus.colecciones) {
+    for (const slug of coleccion.miembros) apilar(coleccionesDe, slug, rutaDeColeccion(coleccion.slug));
+  }
+  for (const baja of bajas.citas ?? []) {
+    if (vivos.has(baja.ruta)) continue;
+    componer(rutaDeAutor(baja.autor), baja.ruta, 'cita');
+    for (const tema of baja.temas ?? []) componer(rutaDeTema(tema), baja.ruta, 'cita');
+    for (const ruta of coleccionesDe.get(baja.slug) ?? []) componer(ruta, baja.ruta, 'cita');
+    const forma = formaDe(baja);
+    const obra = forma === undefined ? undefined : fichaViva.get(clave(baja.autor, forma));
+    if (obra !== undefined) componer(rutaDeLaObra(obra), baja.ruta, 'cita');
+  }
+
+  /*
+   * La portada **no se declara**, y la ausencia es la decisión: rota a diario sin commit
+   * (AD-12). El razonamiento largo está en la cabecera del módulo. El aviso, en cambio, la
+   * anuncia siempre que cambie algo del Corpus que no sea un documento.
    */
 
-  return porSuperficie;
+  const relacion = new Map<string, Superficie>();
+  for (const [ruta, { familia, campos }] of porSuperficie) {
+    relacion.set(ruta, {
+      familia,
+      componentes: [...campos].map(([fichero, deFichero]) => ({ fichero, campos: deFichero })),
+    });
+  }
+  return relacion;
 }
 
 /**
- * Qué ficheros del Corpus compone cada superficie, por su ruta ya normalizada.
- *
- * Las rutas salen de los constructores de `src/lib/superficies.ts` y **no se escriben a
- * mano**: es la misma exigencia que cumple `tools/avisar.ts`, y por el mismo motivo —lo
- * que aquí se nombre mal no falla, simplemente no casa con ninguna entrada del sitemap y
- * la fecha desaparece en silencio—. Se normalizan porque el sitemap entrega direcciones
- * completas y con barra final, y `rutaNormalizada` es quien decide que las dos formas son
- * la misma superficie.
+ * Qué compone cada superficie, por su ruta ya normalizada — la forma con que el sitemap
+ * pregunta. `rutaNormalizada` decide que la dirección completa y la ruta con barra final son la
+ * misma superficie.
  */
-export function ficherosPorSuperficie(corpus: CorpusParaFechar): Map<string, string[]> {
-  const porSuperficie = new Map<string, string[]>();
-  for (const [ruta, ficheros] of relacionDeSuperficies(corpus)) {
-    porSuperficie.set(rutaNormalizada(ruta), ficheros);
+export function componentesPorSuperficie(corpus: CorpusParaFechar): Map<string, readonly Componente[]> {
+  const porSuperficie = new Map<string, readonly Componente[]>();
+  for (const [ruta, { componentes }] of relacionDeSuperficies(corpus)) {
+    porSuperficie.set(rutaNormalizada(ruta), componentes);
   }
   return porSuperficie;
 }
 
-function apilar(mapa: Map<string, string[]>, clave: string, valor: string): void {
-  const lista = mapa.get(clave);
-  if (lista === undefined) mapa.set(clave, [valor]);
-  else lista.push(valor);
-}
+// ─── La lectura de fechas ────────────────────────────────────────────────────────────
 
 /**
- * La más reciente de las fechas de unos ficheros, o `undefined` si no se sabe ninguna.
- *
- * Un fichero sin fecha conocida **no arrastra a los demás**: una Cita recién escrita y
- * todavía sin commit no borra la fecha del Tema que la agrega, solo no la adelanta. Y si
- * no se sabe ninguna, no hay nada que declarar: se devuelve la ausencia, que es lo que
- * hace que el campo se omita en vez de rellenarse.
+ * La fecha más reciente, **por instante**, entre las transiciones de cada componente que cambian
+ * sus campos; o la ausencia si no hay ninguna. Un componente sin historial **no arrastra a los
+ * demás**: una Cita recién escrita y sin commit no borra la fecha del Tema que la agrega.
  */
-export function fechaMasReciente(
-  ficheros: readonly string[],
-  fechas: ReadonlyMap<string, FechaDeCambio>,
+export function fechaDeLosComponentes(
+  componentes: readonly Componente[],
+  historial: Historial,
+  memoria: Map<string, FechaDeCambio | undefined> = new Map(),
 ): FechaDeCambio | undefined {
   let masReciente: FechaDeCambio | undefined;
-  for (const fichero of ficheros) {
-    const fecha = fechas.get(fichero);
-    if (fecha !== undefined && (masReciente === undefined || fecha > masReciente)) {
-      masReciente = fecha;
-    }
+  for (const componente of componentes) {
+    const fecha = fechaDelComponente(componente, historial, memoria);
+    if (fecha !== undefined && (masReciente === undefined || fecha > masReciente)) masReciente = fecha;
   }
   return masReciente;
 }
 
+function fechaDelComponente(
+  { fichero, campos }: Componente,
+  historial: Historial,
+  memoria: Map<string, FechaDeCambio | undefined>,
+): FechaDeCambio | undefined {
+  const llave = `${fichero}\u0000${campos === CUALQUIER_CAMBIO ? '*' : campos.join(',')}`;
+  if (memoria.has(llave)) return memoria.get(llave);
+  let masReciente: FechaDeCambio | undefined;
+  for (const transicion of historial.get(fichero) ?? []) {
+    if (masReciente !== undefined && transicion.fecha <= masReciente) continue;
+    if (cambiaronLosCampos(transicion, campos)) masReciente = transicion.fecha;
+  }
+  memoria.set(llave, masReciente);
+  return masReciente;
+}
+
 /**
- * La fecha del último cambio de cada superficie — lo que el sitemap declara como `lastmod`.
- *
- * Las superficies sin fecha **no entran en el mapa**. No es un detalle de implementación:
- * es la fila «Fecha indeterminable» de la matriz, y es lo que hace que un fallo de esta
- * historia degrade al sitemap de hoy —sin fechas, honesto— en vez de a 1.715 fechas
- * inventadas.
+ * Cada superficie con fecha, por su ruta **canónica** y con su familia — la lectura de fechas de
+ * la relación. Las superficies sin fecha **no entran**: es la fila «Fecha indeterminable», y es
+ * lo que hace que un fallo degrade a un sitemap sin fechas, honesto, en vez de a fechas
+ * inventadas. La usa el sitemap (por ruta normalizada) y el ensayo de `tools/avisar.ts`.
  */
-export function fechasPorSuperficie(
+export function superficiesFechadas(
   corpus: CorpusParaFechar,
-  fechas: ReadonlyMap<string, FechaDeCambio>,
-): Map<string, FechaDeCambio> {
-  const resultado = new Map<string, FechaDeCambio>();
-  for (const [ruta, ficheros] of ficherosPorSuperficie(corpus)) {
-    const fecha = fechaMasReciente(ficheros, fechas);
-    if (fecha !== undefined) resultado.set(ruta, fecha);
+  historial: Historial,
+): Map<string, { familia: FamiliaDeRuta; fecha: FechaDeCambio }> {
+  const memoria = new Map<string, FechaDeCambio | undefined>();
+  const resultado = new Map<string, { familia: FamiliaDeRuta; fecha: FechaDeCambio }>();
+  for (const [ruta, { familia, componentes }] of relacionDeSuperficies(corpus)) {
+    const fecha = fechaDeLosComponentes(componentes, historial, memoria);
+    if (fecha !== undefined) resultado.set(ruta, { familia, fecha });
   }
   return resultado;
 }
 
-/** Los ficheros del Corpus que componen alguna superficie, sin repetir. */
+/** La fecha del último cambio de cada superficie, por ruta normalizada — el `lastmod`. */
+export function fechasPorSuperficie(
+  corpus: CorpusParaFechar,
+  historial: Historial,
+): Map<string, FechaDeCambio> {
+  const resultado = new Map<string, FechaDeCambio>();
+  for (const [ruta, { fecha }] of superficiesFechadas(corpus, historial)) {
+    resultado.set(rutaNormalizada(ruta), fecha);
+  }
+  return resultado;
+}
+
+/**
+ * Las bajas de un historial — Historia 24.8: los ficheros cuya última transición, por instante,
+ * es un borrado, con la versión que tenían antes de salir. Lo que hoy está vivo no es baja
+ * aunque su historial termine en un borrado (una restitución todavía sin commit). Una versión
+ * opaca no dice a qué componía, así que no entra: su propio borrado ya no tiene a quién fechar.
+ */
+export function bajasDelHistorial(
+  historial: Historial,
+  familiaDe: (fichero: string) => FamiliaDeFichero | undefined,
+  vivos: ReadonlySet<string>,
+): BajasParaFechar {
+  const citas: CitaParaFechar[] = [];
+  const obras: ObraParaFechar[] = [];
+  const documentos: string[] = [];
+  for (const [fichero, transiciones] of historial) {
+    if (vivos.has(fichero) || transiciones.length === 0) continue;
+    let ultima = transiciones[0] as TransicionFechada;
+    for (const transicion of transiciones) if (transicion.fecha > ultima.fecha) ultima = transicion;
+    if (ultima.despues !== null) continue;
+    const familia = familiaDe(fichero);
+    if (familia === 'documento') {
+      documentos.push(fichero);
+      continue;
+    }
+    const version = ultima.antes;
+    if (version === null || version === VERSION_OPACA) continue;
+    if (familia === 'cita') {
+      const { slug, autor, temas, procedencia } = version as Record<string, unknown>;
+      if (typeof slug !== 'string' || typeof autor !== 'string') continue;
+      const obra = (procedencia as { obra?: unknown } | null | undefined)?.obra;
+      citas.push({
+        slug,
+        autor,
+        temas: Array.isArray(temas) ? temas.filter((t): t is string => typeof t === 'string') : [],
+        ...(typeof obra === 'string' ? { obraDeclarada: obra } : {}),
+        ruta: fichero,
+      });
+    } else if (familia === 'obra') {
+      const { autor, formas } = version as Record<string, unknown>;
+      if (typeof autor !== 'string' || !Array.isArray(formas)) continue;
+      obras.push({
+        nombre: nombreDeDocumento(fichero).replace(/\.ya?ml$/u, ''),
+        autor,
+        formas: formas.filter((f): f is string => typeof f === 'string'),
+        ruta: fichero,
+      });
+    }
+  }
+  return { citas, obras, documentos };
+}
+
+/** El mismo corpus con cada ruta de fichero traducida —a relativa, por ejemplo—. */
+export function conRutas(corpus: CorpusParaFechar, traducir: (ruta: string) => string): CorpusParaFechar {
+  const cita = (c: CitaParaFechar) => ({ ...c, ruta: traducir(c.ruta) });
+  const obra = (o: ObraParaFechar) => ({ ...o, ruta: traducir(o.ruta) });
+  return {
+    citas: corpus.citas.map(cita),
+    autores: corpus.autores.map((a) => ({ ...a, ruta: traducir(a.ruta) })),
+    temas: corpus.temas.map((t) => ({ ...t, ruta: traducir(t.ruta) })),
+    colecciones: corpus.colecciones.map((c) => ({ ...c, ruta: traducir(c.ruta) })),
+    ...(corpus.obras === undefined ? {} : { obras: corpus.obras.map(obra) }),
+    ...(corpus.documentos === undefined ? {} : { documentos: corpus.documentos.map(traducir) }),
+    ...(corpus.bajas === undefined
+      ? {}
+      : {
+          bajas: {
+            citas: (corpus.bajas.citas ?? []).map(cita),
+            obras: (corpus.bajas.obras ?? []).map(obra),
+            documentos: (corpus.bajas.documentos ?? []).map(traducir),
+          },
+        }),
+  };
+}
+
+/** Los ficheros vivos del Corpus que componen alguna superficie, documentos incluidos, sin repetir. */
 export function ficherosDelCorpus(corpus: CorpusParaFechar): string[] {
   return [
     ...new Set([
@@ -341,51 +651,41 @@ export function ficherosDelCorpus(corpus: CorpusParaFechar): string[] {
       ...corpus.temas.map((tema) => tema.ruta),
       ...corpus.colecciones.map((coleccion) => coleccion.ruta),
       ...(corpus.obras ?? []).map((obra) => obra.ruta),
+      ...(corpus.documentos ?? []),
     ]),
   ];
 }
 
 /**
- * Por debajo de esta fracción de ficheros fechados, el cruce está roto y no menguado.
+ * Por debajo de esta fracción de ficheros con historial, el cruce está roto y no menguado.
  *
- * La mitad, y no un número pegado al Corpus de hoy: lo que se está distinguiendo son dos
- * cosas de tamaños muy distintos. Que falten algunas fechas es **normal** —una Cita recién
- * escrita y todavía sin commit no tiene historial, y la matriz ya dice que eso se omite y
- * ya está—. Que falten casi todas no es una variante de lo anterior: significa que las
- * rutas de git y las del corpus no están casando, y eso no mengua el resultado, lo anula.
+ * La mitad, y no un número pegado al Corpus de hoy: que falten algunas fechas es **normal** —una
+ * Cita recién escrita y sin commit no tiene historial—; que falten casi todas significa que las
+ * rutas de git y las del corpus no casan, y eso no mengua el resultado, lo anula.
  */
 export const SUELO_DE_COBERTURA = 0.5;
 
 /**
- * El aviso cuando el historial no fechó lo que debía, o la ausencia si fechó bastante.
+ * El aviso cuando el historial no cubrió lo que debía, o la ausencia si cubrió bastante.
  *
- * **Es el guardián del fallo mudo de esta historia.** El caso que hay que temer no es que
- * git reviente —eso se ve— sino que conteste que sí y no diga nada: `git log -- <ámbito
- * que no casa>` sale con **código 0 y salida vacía**, y con eso el mapa queda vacío, las
- * mil setecientas fechas se omiten una por una como si cada superficie fuera un caso
- * legítimo de «fecha indeterminable», y el sitemap sale exactamente como el de hoy. La
- * historia entera se habría quedado en nada con todas las pruebas en verde y sin una sola
- * línea en el registro. Un cwd que no es la raíz del repositorio, un directorio del Corpus
- * renombrado o un ámbito mal compuesto bastan para llegar ahí.
- *
- * Por eso el aviso pesa lo mismo que el del checkout superficial: los dos dicen «este
- * sitemap va a salir sin fechas y no debería», que es lo único que quien mira el registro
- * necesita saber. Un Corpus vacío no avisa, porque entonces no hay nada que fechar y el
- * silencio sí es la respuesta correcta.
+ * **Es el guardián del fallo mudo.** `git log -- <ámbito que no casa>` sale con código 0 y salida
+ * vacía, el mapa queda vacío y el sitemap sale sin fechas como si cada superficie fuera un caso
+ * legítimo de «fecha indeterminable». Se mide sobre los ficheros vivos con alguna transición en
+ * el historial. Un Corpus vacío no avisa: no hay nada que fechar.
  */
 export function coberturaInsuficiente(
   corpus: CorpusParaFechar,
-  fechas: ReadonlyMap<string, FechaDeCambio>,
+  historial: ReadonlyMap<string, unknown>,
 ): string | undefined {
   const ficheros = ficherosDelCorpus(corpus);
   if (ficheros.length === 0) return undefined;
 
-  const conFecha = ficheros.filter((fichero) => fechas.has(fichero)).length;
-  if (conFecha === 0) {
+  const conHistorial = ficheros.filter((fichero) => historial.has(fichero)).length;
+  if (conHistorial === 0) {
     return `el historial no fechó ni uno solo de los ${ficheros.length} ficheros del Corpus`;
   }
-  if (conFecha / ficheros.length < SUELO_DE_COBERTURA) {
-    return `el historial solo fechó ${conFecha} de los ${ficheros.length} ficheros del Corpus`;
+  if (conHistorial / ficheros.length < SUELO_DE_COBERTURA) {
+    return `el historial solo fechó ${conHistorial} de los ${ficheros.length} ficheros del Corpus`;
   }
   return undefined;
 }
@@ -394,16 +694,10 @@ export function coberturaInsuficiente(
  * La fecha que le toca a una entrada del sitemap, o la ausencia — lo que consume
  * `astro.config.mjs`.
  *
- * Vive aquí y no en la configuración por dos motivos que van juntos. El primero es que
- * traducir una dirección completa a la superficie que nombra es una decisión, y las
- * decisiones se prueban. El segundo es que **la configuración no puede llevar un
- * `try`/`catch`**: `tests/unit/puerta-de-admision.test.ts` lo prohíbe en todo el fichero,
- * porque una captura allí convertiría la puerta de admisión del build en una sugerencia.
- * La dirección que no se deja leer se trata aquí, donde capturarla no tapa ninguna puerta.
- *
- * Que ese caso no ocurra hoy no lo hace superfluo: `@astrojs/sitemap` **descarta el sitemap
- * entero** si su `serialize` lanza, así que el precio de equivocarse no es una entrada sin
- * fecha, es un sitio sin sitemap.
+ * Vive aquí porque **la configuración no puede llevar un `try`/`catch`**
+ * (`tests/unit/puerta-de-admision.test.ts`), y `@astrojs/sitemap` **descarta el sitemap entero**
+ * si su `serialize` lanza: el precio de equivocarse no es una entrada sin fecha, es un sitio sin
+ * sitemap.
  */
 export function fechaDeLaEntrada(
   fechas: ReadonlyMap<string, FechaDeCambio>,
@@ -416,4 +710,36 @@ export function fechaDeLaEntrada(
     return undefined;
   }
   return fechas.get(ruta);
+}
+
+// ─── Ayudantes ───────────────────────────────────────────────────────────────────────
+
+function formaDe(cita: CitaParaFechar): string | undefined {
+  if (cita.obraDeclarada === undefined) return undefined;
+  const forma = formaDeObra(cita.obraDeclarada);
+  return forma === '' ? undefined : forma;
+}
+
+function clave(autor: string, forma: string): string {
+  return `${autor}\u0000${forma}`;
+}
+
+/** El nombre de un fichero sin directorio y, si es un documento, sin su `.txt`. */
+function nombreDeDocumento(ruta: string): string {
+  return (ruta.split(/[\\/]/u).pop() ?? ruta).replace(/\.txt$/u, '');
+}
+
+function unir(a: Campos, b: Campos): Campos {
+  if (a === CUALQUIER_CAMBIO || b === CUALQUIER_CAMBIO) return CUALQUIER_CAMBIO;
+  return [...new Set([...a, ...b])];
+}
+
+function definido<T>(valor: T | undefined): valor is T {
+  return valor !== undefined;
+}
+
+function apilar<T>(mapa: Map<string, T[]>, llave: string, valor: T): void {
+  const lista = mapa.get(llave);
+  if (lista === undefined) mapa.set(llave, [valor]);
+  else lista.push(valor);
 }

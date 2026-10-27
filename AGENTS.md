@@ -719,7 +719,8 @@ indexa, solo la de Obra, y con ella gana lectura y salidas detrás; las 2+, ning
 contando solo la de Cita y la de superficie. `npm run rastreo -- --registrar` juzga contra las rutas indexables y rechaza
 una Obra con `noindex`; `npm run canal` acepta cualquier Obra publicada, porque una
 publicación puede enlazarla. En el sitemap, la Obra lleva `lastmod` con el criterio de las
-demás agregaciones: lo más reciente de su ficha, sus Citas y el fichero de su Autor.
+demás agregaciones, por campos (Historia 24.8): lo más reciente de su ficha, sus Citas, su Autor
+y sus documentos de `corpus/fuentes/`.
 
 Toda Página de Obra —indexable o no, y sus páginas 2+— declara su Tarjeta Social en
 `/tarjeta/obra/{slug-autor}/{slug-obra}.png` (Historia 22.7): la de listado con el título en la
@@ -746,19 +747,66 @@ ejemplares*: «la-gitanilla», «el-coloquio-de-los-perros», por orden alfabét
 ordinal escrito («jornada-primera») o de cifra y letra («10a»), que se leen como palabras, una
 palabra que es romano canónico («mi» se lee 1001) y el final del libro —«epilogo», «notas»—,
 que como palabra va antes que «i». Ningún fichero de `src/` importa de `tools/lib/`, salvo
-ese cargador. **La Página de Obra depende así también de `corpus/fuentes/`**, y la relación de
-22.8 todavía no lo sabe: recuperar o retirar un documento puede reordenar una Obra —y pasar
-Citas de su página 1 a la `/2/`— sin que cambie su `lastmod` ni la avise `tools/avisar.ts`
-(Historia 24.8).
+ese cargador. **La Página de Obra depende así también de `corpus/fuentes/`**, y desde la 24.8 la
+relación lo sabe: recuperar o retirar un documento —que puede reordenar una Obra y pasar Citas de
+su página 1 a la `/2/`— mueve el `lastmod` de esa Obra y la avisa, y a ninguna otra superficie.
 
 ### El aviso, la serie y la congelación (Historia 22.8)
 
-Qué fichero compone qué página lo dice **una sola relación**, `relacionDeSuperficies` de
+Qué compone qué página lo dice **una sola relación**, `relacionDeSuperficies` de
 `tools/lib/cambios.ts` (AD-27): fecha el sitemap y, leída al revés, decide qué avisa
-`tools/avisar.ts`. La Página de Obra es su ficha, sus Citas y el fichero de su Autor; una
-Página de Cita incluye además los ficheros de sus Temas y la ficha de su Obra (lo que su
-marcado pinta). `corpus/obras/` se fecha con git y entra en el `git diff` del aviso, igual que
+`tools/avisar.ts`. `corpus/obras/` se fecha con git y entra en el `git diff` del aviso, igual que
 `src/lib/umbrales.ts`: un commit que solo congela o mueve un umbral compara las listas igual.
+
+**Desde la 24.8 la relación va por campos**: cada superficie es una lista de componentes
+(fichero, campos que pinta), con la familia de su ruta, y **un solo comparador**,
+`cambiaronLosCampos`, decide si una transición de un fichero (antes → después) cambió esos campos.
+Lo usan las dos lecturas: la fecha, sobre el historial por commit (`git log --raw` y un
+`git cat-file --batch` en `integraciones/historial.ts`; los documentos no se leen, solo cuentan
+como «cambió»), y el aviso, sobre `git diff --raw desde..hasta`. Una versión que no se deja
+analizar cuenta como cambio de todo; un campo ausente es `undefined`; el orden de claves no cuenta.
+
+- **Qué pinta cada superficie** está en `CAMPOS_QUE_PINTA`, una tabla con nombre por (familia de
+  fichero → familia de ruta), y lo que ninguna afirma, en `CAMPOS_QUE_NO_FECHAN`: hoy
+  `aptaParaPortada` y `estadoDerechos` (Cita), `tradicion` (Autor) y `distintaDe` (ficha). Las dos
+  son listas explícitas, nunca «todos menos», y `tests/unit/fecha-de-cambio.test.ts` falla
+  nombrando la clave de un esquema que no esté en ninguna: **un campo nuevo —el `ordenAlfabetico`
+  de la 26.1— se clasifica en el mismo commit que lo añade**.
+- **Página de Cita** = su fichero, su Autor (nombre y años), sus Temas (nombre) y su ficha de
+  Obra (título). Nunca Citas hermanas: la Tarjeta de Obra, «Siguiente», «De la misma obra», «Más
+  de», sus recuentos y el año del `isPartOf` son navegación (excepción de Héctor, FR-47). Una
+  Cita nueva no refecha ninguna otra Página de Cita, y un commit que solo toca `aptaParaPortada`
+  no fecha nada y solo avisa la portada.
+- **Autor, Tema y Colección** = su fichero, sus Citas, los Autores de esas Citas y **las fichas
+  de Obra de esas Citas** (el título de la línea de Obra, 24.3). La semblanza y la biografía solo
+  fechan la Página de Autor.
+- **Página de Obra** = su ficha (`autor`, `titulo`, `formas`, `nota`, `ediciones`), sus Citas, su
+  Autor y **sus documentos**: la unión de `documentosDeCita` de sus Citas sobre los nombres de
+  `corpus/fuentes/`. `nota` y `ediciones` solo fechan la Página de Obra.
+- **Bajas.** Un fichero cuya última transición es un borrado —mover una Cita a
+  `corpus/_revision/` o una ficha a `corpus/_obras-retiradas/` lo es— fecha con el instante de
+  ese commit lo vivo que compondría: una Cita, su Autor, sus Temas, sus Colecciones (por
+  `miembros`) y su Obra (por Autor y forma contra las fichas de hoy); una ficha, las Páginas de
+  Cita y los listados de las Citas de hoy cuya forma reclamaba; un documento, su Obra. Nunca
+  declara la página de sí misma. El aviso las encuentra en la relación de `--desde`.
+- **Familias.** `tools/lib/avisar.ts` declara `FAMILIAS_DE_FICHERO` (`cita`, `autor`, `tema`,
+  `coleccion`, `obra` y `documento` → `corpus/fuentes`; una sola tabla para el filtro del diff,
+  el historial y el reconocimiento) y `FAMILIAS_DE_RUTA` (las cinco superficies; la familia de
+  una ruta la pone su entrada en la relación). La portada se avisa con cualquier cambio del
+  Corpus que no sea un documento, sin familia y sin fecha.
+
+Qué movería un rango, sin desplegar ni enviar nada —`--ensayo` es obligatorio: sin él la orden
+envía a IndexNow—:
+
+```
+npx tsx tools/avisar.ts --ensayo --desde <A> --hasta <B> [--sitemap <fichero>]
+```
+
+Imprime, por familia de ruta, cuántas superficies **cambian de fecha** (la lectura de fechas
+sobre `git log --raw A..B`, el Corpus de `B` y las bajas del rango) y cuántas **se avisarían**,
+más la portada aparte, y lo que tardó la lectura del historial del rango. El Corpus de después
+es el árbol si `B` es su commit, o una copia de `B`; `corpus/fuentes` se lista con `git ls-tree`
+y nunca se extrae. Sin `--sitemap` pide el sitemap publicado para saber qué Obras se indexan.
 
 Para el aviso, el estado de una Obra es uno: **indexable o no**. Una Obra tocada se avisa si
 es indexable después —lo dice el sitemap desplegado, `{SITIO}/sitemap-0.xml`, o

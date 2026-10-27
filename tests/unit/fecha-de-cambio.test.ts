@@ -4,21 +4,72 @@ import { mkdtemp, mkdir, readdir, realpath, rm, writeFile } from 'node:fs/promis
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { promisify } from 'node:util';
+import { formaDeObra } from '../../src/lib/obras.ts';
+import { rutaNormalizada } from '../../src/lib/superficies.ts';
 import {
+  CAMPOS_QUE_NO_FECHAN,
+  CAMPOS_QUE_PINTA,
+  CUALQUIER_CAMBIO,
+  VERSION_OPACA,
+  bajasDelHistorial,
+  relacionDeSuperficies,
+  cambiaronLosCampos,
   coberturaInsuficiente,
+  componentesPorSuperficie,
   fechaDeLaEntrada,
-  fechaMasReciente,
+  fechaDeLosComponentes,
   fechasPorSuperficie,
-  ficherosPorSuperficie,
   type CorpusParaFechar,
+  type Historial,
+  type TransicionFechada,
+  type Version,
 } from '../../tools/lib/cambios.ts';
+import { familiaDeFichero, rutasAvisadasPor } from '../../tools/lib/avisar.ts';
+import {
+  autorAdmisible,
+  citaAdmisible,
+  coleccionAdmisible,
+  esquemaDeObra,
+} from '../../src/lib/admision.ts';
 import {
   estadoDelRepositorio,
   fechasDeLasSuperficies,
-  fechasDeLosFicheros,
+  historialDeLosFicheros,
 } from '../../integraciones/historial.ts';
 
 const ejecutar = promisify(execFile);
+
+/** Los ficheros que componen cada superficie, por ruta normalizada: la relación sin sus campos. */
+function ficherosPorSuperficie(corpus: CorpusParaFechar): Map<string, string[]> {
+  return new Map(
+    [...componentesPorSuperficie(corpus)].map(([ruta, componentes]) => [
+      ruta,
+      componentes.map((componente) => componente.fichero),
+    ]),
+  );
+}
+
+/**
+ * Un historial en que cada fichero solo tiene su alta, en la fecha dada. Un alta cambia todos
+ * los campos, así que con él la fecha de una superficie es la más reciente de sus ficheros: la
+ * regla de la 18.4, que la 24.8 conserva para todo lo que no sea un cambio de campos.
+ */
+function historialDeAltas(fechas: Iterable<readonly [string, string]>): Historial {
+  return new Map([...fechas].map(([fichero, fecha]) => [fichero, [{ fecha, antes: null, despues: {} }]]));
+}
+
+/** `fechasPorSuperficie` con un historial de altas: la forma de las pruebas de la 18.4. */
+function fechasConAltas(corpus: CorpusParaFechar, fechas: Iterable<readonly [string, string]>) {
+  return fechasPorSuperficie(corpus, historialDeAltas(fechas));
+}
+
+/** La fecha más reciente de las transiciones de un fichero, como la lee el sitemap. */
+function ultimaFecha(historial: Historial, fichero: string): string | undefined {
+  return (historial.get(fichero) ?? []).reduce<string | undefined>(
+    (max, t) => (max === undefined || t.fecha > max ? t.fecha : max),
+    undefined,
+  );
+}
 
 /**
  * Historia 18.4 — el sitemap dice qué cambió y cuándo.
@@ -110,7 +161,7 @@ describe('Historia 18.4 — de qué ficheros depende cada superficie', () => {
     // que el buscador entra a diario. Ausencia antes que centinela, y antes que dato rancio.
     // Y no vale el descargo de `tools/avisar.ts`: ese canal es IndexNow, no Google.
     expect(ficherosPorSuperficie(CORPUS).has('/')).toBe(false);
-    expect(fechasPorSuperficie(CORPUS, new Map([['citas/a.md', '2026-02-02T00:00:00.000Z']])).has('/')).toBe(
+    expect(fechasConAltas(CORPUS, new Map([['citas/a.md', '2026-02-02T00:00:00.000Z']])).has('/')).toBe(
       false,
     );
   });
@@ -128,7 +179,7 @@ describe('Historia 18.4 — de qué ficheros depende cada superficie', () => {
 
 describe('Historia 18.4 — la fecha de una superficie es la más reciente de lo que agrega', () => {
   it('la de un listado es la del cambio más nuevo, venga del fichero o de una Cita', () => {
-    const fechas = fechasPorSuperficie(
+    const fechas = fechasConAltas(
       CORPUS,
       new Map([
         ['autores/seneca.yml', '2026-01-01T00:00:00.000Z'],
@@ -140,7 +191,7 @@ describe('Historia 18.4 — la fecha de una superficie es la más reciente de lo
   });
 
   it('el fichero propio gana cuando es el más nuevo', () => {
-    const fechas = fechasPorSuperficie(
+    const fechas = fechasConAltas(
       CORPUS,
       new Map([
         ['temas/el-tiempo.yml', '2026-04-01T00:00:00.000Z'],
@@ -152,7 +203,7 @@ describe('Historia 18.4 — la fecha de una superficie es la más reciente de lo
   });
 
   it('retocar un Autor mueve la fecha de sus Páginas de Cita, que es lo que el HTML hace', () => {
-    const fechas = fechasPorSuperficie(
+    const fechas = fechasConAltas(
       CORPUS,
       new Map([
         ['citas/a.md', '2026-01-01T00:00:00.000Z'],
@@ -167,7 +218,7 @@ describe('Historia 18.4 — la fecha de una superficie es la más reciente de lo
   it('un fichero sin fecha no arrastra a los que sí la tienen', () => {
     // Una Cita recién escrita y todavía sin commit no puede borrar la fecha del Tema que la
     // agrega: lo único que no hace es adelantarla.
-    const fechas = fechasPorSuperficie(
+    const fechas = fechasConAltas(
       CORPUS,
       new Map([
         ['temas/el-tiempo.yml', '2026-01-01T00:00:00.000Z'],
@@ -179,7 +230,7 @@ describe('Historia 18.4 — la fecha de una superficie es la más reciente de lo
 
   it('una superficie sin ninguna fecha conocida se omite, y las demás conservan la suya', () => {
     // La fila «Fecha indeterminable» de la matriz: se omite el campo, jamás un centinela.
-    const fechas = fechasPorSuperficie(CORPUS, new Map([['citas/c.md', '2026-02-02T00:00:00.000Z']]));
+    const fechas = fechasConAltas(CORPUS, new Map([['citas/c.md', '2026-02-02T00:00:00.000Z']]));
     expect(fechas.has('/cita/seneca-el-tiempo')).toBe(false);
     expect(fechas.has('/autor/seneca')).toBe(false);
     expect(fechas.get('/cita/marco-aurelio-el-deber')).toBe('2026-02-02T00:00:00.000Z');
@@ -190,8 +241,8 @@ describe('Historia 18.4 — la fecha de una superficie es la más reciente de lo
   });
 
   it('la más reciente de una lista vacía es la ausencia, no una época ni una cadena', () => {
-    expect(fechaMasReciente([], new Map())).toBeUndefined();
-    expect(fechaMasReciente(['citas/a.md'], new Map())).toBeUndefined();
+    expect(fechaDeLosComponentes([], new Map())).toBeUndefined();
+    expect(fechaDeLosComponentes([{ fichero: 'citas/a.md', campos: ['texto'] }], new Map())).toBeUndefined();
   });
 
   it('el mismo corpus y las mismas fechas dan el mismo mapa: la derivación es pura', () => {
@@ -201,9 +252,379 @@ describe('Historia 18.4 — la fecha de una superficie es la más reciente de lo
       ['citas/a.md', '2026-03-15T00:00:00.000Z'],
       ['autores/seneca.yml', '2026-01-01T00:00:00.000Z'],
     ]);
-    expect([...fechasPorSuperficie(CORPUS, fechas)]).toEqual([
-      ...fechasPorSuperficie(CORPUS, fechas),
+    expect([...fechasConAltas(CORPUS, fechas)]).toEqual([...fechasConAltas(CORPUS, fechas)]);
+  });
+});
+
+// ─── Historia 24.8 — la relación por campos ──────────────────────────────────────────
+
+describe('Historia 24.8 — el comparador de una transición', () => {
+  it('un campo ausente es `undefined`, y el orden de las claves no cuenta', () => {
+    expect(cambiaronLosCampos({ antes: { a: 1 }, despues: { a: 1, b: undefined } }, ['a', 'b'])).toBe(false);
+    expect(
+      cambiaronLosCampos(
+        { antes: { procedencia: { obra: 'O', año: 1 } }, despues: { procedencia: { año: 1, obra: 'O' } } },
+        ['procedencia'],
+      ),
+    ).toBe(false);
+    expect(
+      cambiaronLosCampos(
+        { antes: { procedencia: { obra: 'O' } }, despues: { procedencia: { obra: 'O', año: 2 } } },
+        ['procedencia'],
+      ),
+    ).toBe(true);
+  });
+
+  it('un campo que no está en la lista no cuenta', () => {
+    expect(cambiaronLosCampos({ antes: { texto: 'a', aptaParaPortada: false }, despues: { texto: 'a', aptaParaPortada: true } }, ['texto'])).toBe(false);
+  });
+
+  it('un alta, una baja, una versión opaca y «cualquier cambio» cuentan siempre', () => {
+    expect(cambiaronLosCampos({ antes: null, despues: { texto: 'a' } }, ['texto'])).toBe(true);
+    expect(cambiaronLosCampos({ antes: { texto: 'a' }, despues: null }, ['texto'])).toBe(true);
+    expect(cambiaronLosCampos({ antes: VERSION_OPACA, despues: { texto: 'a' } }, ['texto'])).toBe(true);
+    expect(cambiaronLosCampos({ antes: { texto: 'a' }, despues: VERSION_OPACA }, [])).toBe(true);
+    expect(cambiaronLosCampos({ antes: VERSION_OPACA, despues: VERSION_OPACA }, CUALQUIER_CAMBIO)).toBe(true);
+  });
+});
+
+/**
+ * La prueba de clasificación: cada clave de los esquemas está en alguna lista de la tabla o en la
+ * de los que no fechan, y ninguna lista nombra una clave que no exista. Así un campo nuevo —el
+ * `ordenAlfabetico` de la 26.1— no puede quedar fuera en silencio, y un nombre mal escrito en la
+ * tabla, que nunca fecharía nada, tampoco.
+ */
+describe('Historia 24.8 — todo campo de los esquemas está clasificado', () => {
+  const ESQUEMAS = {
+    cita: Object.keys(citaAdmisible.shape),
+    autor: Object.keys(autorAdmisible.shape),
+    tema: ['nombre'],
+    coleccion: Object.keys(coleccionAdmisible.shape),
+    obra: Object.keys(esquemaDeObra([]).shape),
+  } as const;
+
+  const clasificados = (familia: keyof typeof ESQUEMAS): Set<string> => {
+    const enLaTabla = Object.values(CAMPOS_QUE_PINTA[familia]).flatMap((campos) =>
+      campos === CUALQUIER_CAMBIO ? [] : [...(campos as readonly string[])],
+    );
+    const queNoFechan = (CAMPOS_QUE_NO_FECHAN as Partial<Record<string, readonly string[]>>)[familia] ?? [];
+    return new Set([...enLaTabla, ...queNoFechan]);
+  };
+
+  for (const familia of Object.keys(ESQUEMAS) as (keyof typeof ESQUEMAS)[]) {
+    it(`${familia}: cada clave del esquema está clasificada, y no hay ninguna de más`, () => {
+      const claves: readonly string[] = ESQUEMAS[familia];
+      expect(claves.length).toBeGreaterThan(0);
+      const sinClasificar = claves.filter((clave) => !clasificados(familia).has(clave));
+      expect(sinClasificar, `${familia}: claves sin clasificar`).toEqual([]);
+      const inexistentes = [...clasificados(familia)].filter((clave) => !claves.includes(clave));
+      expect(inexistentes, `${familia}: la tabla nombra claves que el esquema no tiene`).toEqual([]);
+    });
+  }
+
+  it('ninguna clave fecha y a la vez está entre las que no fechan', () => {
+    for (const [familia, lista] of Object.entries(CAMPOS_QUE_NO_FECHAN)) {
+      const enLaTabla = Object.values(CAMPOS_QUE_PINTA[familia as keyof typeof CAMPOS_QUE_PINTA]).flatMap(
+        (campos) => (campos === CUALQUIER_CAMBIO ? [] : [...(campos as readonly string[])]),
+      );
+      expect(lista.filter((clave) => enLaTabla.includes(clave)), familia).toEqual([]);
+    }
+  });
+});
+
+describe('Historia 24.8 — la matriz: qué cambia de fecha', () => {
+  const T0 = '2026-01-01T00:00:00.000Z';
+  const T1 = '2026-02-01T00:00:00.000Z';
+  const DOCUMENTO = 'corpus/fuentes/fuente--obra-o.txt';
+
+  const cita = (slug: string, autor: string, temas: string[], obraDeclarada: string, extra: Record<string, unknown> = {}) => ({
+    slug,
+    autor,
+    temas,
+    procedencia: { obra: obraDeclarada },
+    texto: `Texto de ${slug}.`,
+    estadoDerechos: 'dominio-público',
+    fuente: { id: 'fuente', url: 'https://ejemplo.org/' },
+    ...extra,
+  });
+
+  /** Las versiones de hoy de cada fichero del ejemplo, por su ruta. */
+  const VERSIONES: Record<string, Record<string, unknown>> = {
+    'corpus/citas/x--a.md': cita('x-a', 'x', ['t'], 'Obra O'),
+    'corpus/citas/x--b.md': cita('x-b', 'x', ['t'], 'Obra O'),
+    'corpus/citas/x--c.md': cita('x-c', 'x', ['u'], 'Obra O'),
+    'corpus/citas/y--b.md': cita('y-b', 'y', ['t'], 'Obra P'),
+    'corpus/autores/x.yml': { nombre: 'Equis', añoFallecimiento: 1900, semblanza: 'Una.', tradicion: 'otra' },
+    'corpus/autores/y.yml': { nombre: 'Ye', añoFallecimiento: 1900, semblanza: 'Otra.' },
+    'corpus/temas/t.yml': { nombre: 'Te' },
+    'corpus/temas/u.yml': { nombre: 'U' },
+    'corpus/colecciones/c.yml': { nombre: 'Ce', criterio: 'Breves.', miembros: ['x-b', 'y-b'] },
+    'corpus/obras/x--o.yml': { autor: 'x', titulo: 'Obra O', formas: ['obra o'] },
+    'corpus/obras/y--p.yml': { autor: 'y', titulo: 'Obra P', formas: ['obra p'] },
+  };
+
+  const citaParaFechar = (ruta: string, obra: string) => {
+    const v = VERSIONES[ruta] as ReturnType<typeof cita>;
+    return { slug: v.slug, autor: v.autor, temas: v.temas, obra, obraDeclarada: v.procedencia.obra, fuente: 'fuente', ruta };
+  };
+
+  const corpusDeEjemplo = (sin: string[] = [], documentos: string[] = [DOCUMENTO]): CorpusParaFechar => ({
+    citas: [
+      citaParaFechar('corpus/citas/x--a.md', 'x--o'),
+      citaParaFechar('corpus/citas/x--b.md', 'x--o'),
+      citaParaFechar('corpus/citas/x--c.md', 'x--o'),
+      citaParaFechar('corpus/citas/y--b.md', 'y--p'),
+    ].filter((c) => !sin.includes(c.ruta)),
+    autores: [
+      { slug: 'x', ruta: 'corpus/autores/x.yml' },
+      { slug: 'y', ruta: 'corpus/autores/y.yml' },
+    ],
+    temas: [
+      { slug: 't', ruta: 'corpus/temas/t.yml' },
+      { slug: 'u', ruta: 'corpus/temas/u.yml' },
+    ],
+    colecciones: [{ slug: 'c', miembros: ['x-b', 'y-b'], ruta: 'corpus/colecciones/c.yml' }],
+    obras: [
+      { nombre: 'x--o', autor: 'x', formas: ['obra o'], ruta: 'corpus/obras/x--o.yml' },
+      { nombre: 'y--p', autor: 'y', formas: ['obra p'], ruta: 'corpus/obras/y--p.yml' },
+    ],
+    documentos,
+  });
+
+  /** Todo nace en T0; luego, las transiciones del commit de T1. */
+  const historial = (
+    enT1: Record<string, { antes: Version | null; despues: Version | null }>,
+    nacenEnT1: string[] = [],
+  ): Map<string, TransicionFechada[]> => {
+    const resultado = new Map<string, TransicionFechada[]>();
+    for (const [ruta, version] of Object.entries(VERSIONES)) {
+      if (!nacenEnT1.includes(ruta)) resultado.set(ruta, [{ fecha: T0, antes: null, despues: version }]);
+    }
+    if (!nacenEnT1.includes(DOCUMENTO)) resultado.set(DOCUMENTO, [{ fecha: T0, antes: null, despues: VERSION_OPACA }]);
+    for (const [ruta, transicion] of Object.entries(enT1)) {
+      resultado.set(ruta, [{ fecha: T1, ...transicion }, ...(resultado.get(ruta) ?? [])]);
+    }
+    return resultado;
+  };
+
+  /** Las rutas normalizadas que el commit de T1 refecha. */
+  const refechadas = (corpus: CorpusParaFechar, h: Historial) =>
+    [...fechasPorSuperficie(corpus, h)].filter(([, fecha]) => fecha === T1).map(([ruta]) => ruta).sort();
+
+  const conBajas = (corpus: CorpusParaFechar, h: Historial): CorpusParaFechar => ({
+    ...corpus,
+    bajas: bajasDelHistorial(h, familiaDeFichero, new Set([
+      ...corpus.citas.map((c) => c.ruta),
+      ...corpus.autores.map((a) => a.ruta),
+      ...corpus.temas.map((t) => t.ruta),
+      ...corpus.colecciones.map((c) => c.ruta),
+      ...(corpus.obras ?? []).map((o) => o.ruta),
+      ...(corpus.documentos ?? []),
+    ])),
+  });
+
+  /**
+   * Lo que avisaría el mismo commit: la lectura inversa de la relación de después y, para lo que
+   * se borró, la de antes restringida a lo que sigue vivo. Normalizado, para compararlo con la
+   * fecha: «fecha y aviso coinciden».
+   */
+  const avisadas = (
+    enT1: Record<string, { antes: Version | null; despues: Version | null }>,
+    despues: CorpusParaFechar,
+    antes: CorpusParaFechar = despues,
+  ) => {
+    const cambios = Object.entries(enT1).map(([fichero, t]) => ({ fichero, ...t }));
+    const relacionDespues = relacionDeSuperficies(despues);
+    return [
+      ...new Set([
+        ...rutasAvisadasPor(cambios, relacionDespues),
+        ...[...rutasAvisadasPor(cambios, relacionDeSuperficies(antes))].filter((r) => relacionDespues.has(r)),
+      ]),
+    ]
+      .map(rutaNormalizada)
+      .sort();
+  };
+
+  const editado = (ruta: string, cambios: Record<string, unknown>) => ({
+    antes: VERSIONES[ruta] as Version,
+    despues: { ...VERSIONES[ruta], ...cambios } as Version,
+  });
+
+  it('sin cambios en T1, todo lleva T0: el ejemplo de partida', () => {
+    const fechas = fechasPorSuperficie(corpusDeEjemplo(), historial({}));
+    expect(fechas.size).toBeGreaterThan(10);
+    expect([...fechas.values()].every((fecha) => fecha === T0)).toBe(true);
+  });
+
+  it('Cita nueva: su página, su Autor, su Tema, su Colección y su Obra; ninguna otra Página de Cita', () => {
+    const enT1 = { 'corpus/citas/x--b.md': { antes: null, despues: VERSIONES['corpus/citas/x--b.md'] as Version } };
+    const h = historial(enT1, ['corpus/citas/x--b.md']);
+    const esperadas = ['/cita/x-b', '/autor/x', '/tema/t', '/coleccion/c', '/obra/x/o'].sort();
+    expect(refechadas(corpusDeEjemplo(), h)).toEqual(esperadas);
+    expect(avisadas(enT1, corpusDeEjemplo(), corpusDeEjemplo(['corpus/citas/x--b.md']))).toEqual(esperadas);
+  });
+
+  it('cruce de Autores: la Cita de otro Autor en el mismo Tema no cambia de fecha', () => {
+    const h = historial({ 'corpus/citas/x--b.md': { antes: null, despues: VERSIONES['corpus/citas/x--b.md'] as Version } }, ['corpus/citas/x--b.md']);
+    const fechas = fechasPorSuperficie(corpusDeEjemplo(), h);
+    expect(fechas.get('/cita/y-b')).toBe(T0);
+    expect(
+      avisadas({ 'corpus/citas/x--b.md': { antes: null, despues: VERSIONES['corpus/citas/x--b.md'] as Version } }, corpusDeEjemplo()),
+    ).not.toContain('/cita/y-b');
+    // Ni la hermana de la misma Obra, aunque su «Siguiente» y su recuento cambien.
+    expect(fechas.get('/cita/x-a')).toBe(T0);
+  });
+
+  it('solo `aptaParaPortada`, `estadoDerechos`, `tradicion` o `distintaDe`: nada cambia de fecha', () => {
+    const enT1 = {
+      'corpus/citas/x--a.md': editado('corpus/citas/x--a.md', { aptaParaPortada: true }),
+      'corpus/citas/x--c.md': editado('corpus/citas/x--c.md', { estadoDerechos: 'otro' }),
+      'corpus/autores/x.yml': editado('corpus/autores/x.yml', { tradicion: 'latinoamericana' }),
+      'corpus/obras/x--o.yml': editado('corpus/obras/x--o.yml', { distintaDe: ['obra p'] }),
+    };
+    expect(refechadas(corpusDeEjemplo(), historial(enT1))).toEqual([]);
+    expect(avisadas(enT1, corpusDeEjemplo())).toEqual([]);
+  });
+
+  it('solo la semblanza: solo la Página del Autor', () => {
+    const enT1 = { 'corpus/autores/x.yml': editado('corpus/autores/x.yml', { semblanza: 'Otra semblanza.' }) };
+    expect(refechadas(corpusDeEjemplo(), historial(enT1))).toEqual(['/autor/x']);
+    expect(avisadas(enT1, corpusDeEjemplo())).toEqual(['/autor/x']);
+  });
+
+  it('el nombre o los años del Autor: el Autor, sus Páginas de Cita, los listados que lo pintan y sus Obras', () => {
+    const esperadas = [
+      '/autor/x',
+      '/cita/x-a',
+      '/cita/x-b',
+      '/cita/x-c',
+      '/tema/t',
+      '/tema/u',
+      '/coleccion/c',
+      '/obra/x/o',
+    ].sort();
+    const enT1 = { 'corpus/autores/x.yml': editado('corpus/autores/x.yml', { nombre: 'Equis Zeta' }) };
+    expect(refechadas(corpusDeEjemplo(), historial(enT1))).toEqual(esperadas);
+    expect(avisadas(enT1, corpusDeEjemplo())).toEqual(esperadas);
+    expect(refechadas(corpusDeEjemplo(), historial({ 'corpus/autores/x.yml': editado('corpus/autores/x.yml', { añoNacimiento: 1830 }) }))).toEqual(esperadas);
+  });
+
+  it('`nota` o `ediciones` de la ficha: solo la Página de Obra', () => {
+    const enT1 = { 'corpus/obras/x--o.yml': editado('corpus/obras/x--o.yml', { nota: 'Una nota.' }) };
+    expect(refechadas(corpusDeEjemplo(), historial(enT1))).toEqual(['/obra/x/o']);
+    expect(avisadas(enT1, corpusDeEjemplo())).toEqual(['/obra/x/o']);
+    expect(
+      refechadas(
+        corpusDeEjemplo(),
+        historial({ 'corpus/obras/x--o.yml': editado('corpus/obras/x--o.yml', { ediciones: [{ tienda: 'a', formato: 'impresa', url: 'https://a.example/' }] }) }),
+      ),
+    ).toEqual(['/obra/x/o']);
+  });
+
+  it('retitular la ficha: su Obra, sus Páginas de Cita y los listados de Autor, Tema y Colección de esas Citas', () => {
+    const enT1 = { 'corpus/obras/x--o.yml': editado('corpus/obras/x--o.yml', { titulo: 'La obra O' }) };
+    const esperadas = ['/obra/x/o', '/cita/x-a', '/cita/x-b', '/cita/x-c', '/autor/x', '/tema/t', '/tema/u', '/coleccion/c'].sort();
+    expect(refechadas(corpusDeEjemplo(), historial(enT1))).toEqual(esperadas);
+    expect(avisadas(enT1, corpusDeEjemplo())).toEqual(esperadas);
+  });
+
+  it('un documento nuevo de una Obra paginada: solo esa Obra', () => {
+    const pagina = 'corpus/fuentes/fuente--obra-o--iii.txt';
+    const enT1 = { [pagina]: { antes: null, despues: VERSION_OPACA as Version } };
+    expect(refechadas(corpusDeEjemplo([], [DOCUMENTO, pagina]), historial(enT1))).toEqual(['/obra/x/o']);
+    expect(avisadas(enT1, corpusDeEjemplo([], [DOCUMENTO, pagina]), corpusDeEjemplo())).toEqual(['/obra/x/o']);
+    // Y un documento de otra obra no compone esta.
+    const ajeno = 'corpus/fuentes/fuente--otra-cosa.txt';
+    expect(refechadas(corpusDeEjemplo([], [DOCUMENTO, ajeno]), historial({ [ajeno]: { antes: null, despues: VERSION_OPACA } }))).toEqual([]);
+  });
+
+  it('la baja de una Cita fecha su Autor, sus Temas, sus Colecciones y su Obra, y no declara su página', () => {
+    const ruta = 'corpus/citas/x--b.md';
+    const enT1 = { [ruta]: { antes: VERSIONES[ruta] as Version, despues: null } };
+    const h = historial(enT1);
+    const corpus = conBajas(corpusDeEjemplo([ruta]), h);
+    expect(corpus.bajas?.citas?.map((c) => c.slug)).toEqual(['x-b']);
+    const esperadas = ['/autor/x', '/tema/t', '/coleccion/c', '/obra/x/o'].sort();
+    expect(refechadas(corpus, h)).toEqual(esperadas);
+    // Fecha y aviso coinciden: el aviso lo encuentra en la relación de antes.
+    expect(avisadas(enT1, corpusDeEjemplo([ruta]), corpusDeEjemplo())).toEqual(esperadas);
+    expect(fechasPorSuperficie(corpus, h).has('/cita/x-b')).toBe(false);
+  });
+
+  it('el documento que sale fecha la Obra cuyas Citas lo casaban', () => {
+    const h = historial({ [DOCUMENTO]: { antes: VERSION_OPACA, despues: null } });
+    const corpus = conBajas(corpusDeEjemplo([], []), h);
+    expect(corpus.bajas?.documentos).toEqual([DOCUMENTO]);
+    expect(refechadas(corpus, h)).toEqual(['/obra/x/o']);
+  });
+
+  it('reunir: la Obra destino y las Páginas de Cita y listados de las Citas que la absorbida reclamaba', () => {
+    const absorbida = 'corpus/obras/x--q.yml';
+    const nueva = 'corpus/citas/x--d.md';
+    const versionAbsorbida = { autor: 'x', titulo: 'Otra obra', formas: [formaDeObra('Otra obra')] };
+    const versionNueva = cita('x-d', 'x', ['u'], 'Otra obra');
+    const h = historial({
+      'corpus/obras/x--o.yml': editado('corpus/obras/x--o.yml', { formas: ['obra o', formaDeObra('Otra obra')] }),
+      [absorbida]: { antes: versionAbsorbida, despues: null },
+    });
+    h.set(absorbida, [...(h.get(absorbida) ?? []), { fecha: T0, antes: null, despues: versionAbsorbida }]);
+    h.set(nueva, [{ fecha: T0, antes: null, despues: versionNueva }]);
+    const base = corpusDeEjemplo();
+    const corpus = conBajas(
+      {
+        ...base,
+        citas: [...base.citas, { slug: 'x-d', autor: 'x', temas: ['u'], obra: 'x--o', obraDeclarada: 'Otra obra', ruta: nueva }],
+        obras: (base.obras ?? []).map((o) => (o.nombre === 'x--o' ? { ...o, formas: ['obra o', formaDeObra('Otra obra')] } : o)),
+      },
+      h,
+    );
+    expect(corpus.bajas?.obras?.map((o) => o.ruta)).toEqual([absorbida]);
+    expect(refechadas(corpus, h)).toEqual(['/obra/x/o', '/cita/x-d', '/autor/x', '/tema/u'].sort());
+  });
+
+  it('una versión ilegible cuenta como cambio de todos los campos, sin lanzar', () => {
+    const enT1 = { 'corpus/citas/x--a.md': { antes: VERSION_OPACA as Version, despues: VERSIONES['corpus/citas/x--a.md'] as Version } };
+    const h = historial(enT1);
+    expect(() => fechasPorSuperficie(corpusDeEjemplo(), h)).not.toThrow();
+    expect(refechadas(corpusDeEjemplo(), h)).toEqual(['/cita/x-a', '/autor/x', '/tema/t', '/obra/x/o'].sort());
+    expect(avisadas(enT1, corpusDeEjemplo())).toEqual(['/cita/x-a', '/autor/x', '/tema/t', '/obra/x/o'].sort());
+  });
+
+  it('sin historial no se declara ninguna fecha', () => {
+    expect(fechasPorSuperficie(corpusDeEjemplo(), new Map()).size).toBe(0);
+  });
+
+  it('la fecha es la más reciente **por instante**, no la primera del historial', () => {
+    const ruta = 'corpus/citas/x--a.md';
+    const h = historial({});
+    // Un historial cuyo orden no es el del tiempo: el primero que aparece es el más viejo.
+    h.set(ruta, [
+      { fecha: '2025-01-01T00:00:00.000Z', antes: null, despues: VERSIONES[ruta] as Version },
+      { fecha: T1, ...editado(ruta, { texto: 'Otro texto.' }) },
     ]);
+    expect(fechasPorSuperficie(corpusDeEjemplo(), h).get('/cita/x-a')).toBe(T1);
+  });
+});
+
+describe('Historia 24.8 — qué es una baja', () => {
+  it('lo vivo no es baja aunque su historial termine en un borrado, y lo opaco no dice a qué componía', () => {
+    const h: Historial = new Map([
+      ['corpus/citas/viva.md', [{ fecha: '2026-01-02T00:00:00.000Z', antes: { slug: 'a', autor: 'x' }, despues: null }]],
+      ['corpus/citas/opaca.md', [{ fecha: '2026-01-02T00:00:00.000Z', antes: VERSION_OPACA, despues: null }]],
+      ['corpus/citas/sigue.md', [{ fecha: '2026-01-02T00:00:00.000Z', antes: null, despues: { slug: 'b', autor: 'x' } }]],
+      [
+        'corpus/citas/ida.md',
+        [
+          { fecha: '2026-01-01T00:00:00.000Z', antes: null, despues: { slug: 'c', autor: 'x' } },
+          { fecha: '2026-01-03T00:00:00.000Z', antes: { slug: 'c', autor: 'x', temas: ['t'], procedencia: { obra: 'O' } }, despues: null },
+        ],
+      ],
+      ['corpus/obras/x--o.yml', [{ fecha: '2026-01-02T00:00:00.000Z', antes: { autor: 'x', titulo: 'O', formas: ['o'] }, despues: null }]],
+    ]);
+    const bajas = bajasDelHistorial(h, familiaDeFichero, new Set(['corpus/citas/viva.md']));
+    expect(bajas.citas).toEqual([{ slug: 'c', autor: 'x', temas: ['t'], obraDeclarada: 'O', ruta: 'corpus/citas/ida.md' }]);
+    expect(bajas.obras).toEqual([{ nombre: 'x--o', autor: 'x', formas: ['o'], ruta: 'corpus/obras/x--o.yml' }]);
+    expect(bajas.documentos).toEqual([]);
   });
 });
 
@@ -242,7 +663,7 @@ describe('Historia 22.4 — la Página de Obra lleva `lastmod`, como las demás 
       ['citas/b.md', '2026-03-01T00:00:00.000Z'],
       ['citas/c.md', '2026-09-01T00:00:00.000Z'],
     ]);
-    const porSuperficie = fechasPorSuperficie(CON_OBRAS, fechas);
+    const porSuperficie = fechasConAltas(CON_OBRAS, fechas);
     expect(porSuperficie.get('/obra/seneca/cartas-a-lucilio')).toBe('2026-03-01T00:00:00.000Z');
     expect(
       fechaDeLaEntrada(porSuperficie, 'https://sabiduriadebolsillo.net/obra/seneca/cartas-a-lucilio/'),
@@ -393,9 +814,14 @@ describe('Historia 18.4 — el historial, contra git de verdad', () => {
   it('cada fichero lleva la fecha de su último cambio, no la del último commit', async () => {
     const raiz = await repositorio();
     try {
-      const fechas = await fechasDeLosFicheros(raiz, [join(raiz, 'corpus')]);
-      expect(fechas.get(resolve(raiz, 'corpus/citas/a.md'))).toBe('2024-01-02T09:00:00.000Z');
-      expect(fechas.get(resolve(raiz, 'corpus/citas/b.md'))).toBe('2024-03-04T09:00:00.000Z');
+      const historial = await historialDeLosFicheros(raiz, [join(raiz, 'corpus')]);
+      expect(ultimaFecha(historial, resolve(raiz, 'corpus/citas/a.md'))).toBe('2024-01-02T09:00:00.000Z');
+      expect(ultimaFecha(historial, resolve(raiz, 'corpus/citas/b.md'))).toBe('2024-03-04T09:00:00.000Z');
+      // Historia 24.8 — cada transición trae sus dos versiones, analizadas: b.md tiene alta y edición.
+      expect(historial.get(resolve(raiz, 'corpus/citas/b.md'))?.map((t) => [t.antes === null, t.despues === null])).toEqual([
+        [false, false],
+        [true, false],
+      ]);
     } finally {
       await rm(raiz, { recursive: true, force: true });
     }
@@ -418,13 +844,13 @@ describe('Historia 18.4 — el historial, contra git de verdad', () => {
       // El nombre se relee del disco: macOS normaliza los acentos al escribirlos, así que
       // la forma que hay que buscar es la que el sistema de ficheros guardó.
       const [nombre] = await readdir(join(raiz, 'corpus', 'citas'));
-      const fechas = await fechasDeLosFicheros(raiz, [join(raiz, 'corpus')]);
+      const historial = await historialDeLosFicheros(raiz, [join(raiz, 'corpus')]);
 
-      expect(fechas.size).toBe(1);
-      expect(fechas.get(resolve(raiz, 'corpus/citas', nombre ?? ''))).toBe(
+      expect(historial.size).toBe(1);
+      expect(ultimaFecha(historial, resolve(raiz, 'corpus/citas', nombre ?? ''))).toBe(
         '2024-07-08T09:00:00.000Z',
       );
-      expect([...fechas.keys()].some((ruta) => ruta.includes('"') || ruta.includes('\\3'))).toBe(
+      expect([...historial.keys()].some((ruta) => ruta.includes('"') || ruta.includes('\\3'))).toBe(
         false,
       );
     } finally {
@@ -446,8 +872,8 @@ describe('Historia 18.4 — el historial, contra git de verdad', () => {
       await git(['add', 'corpus']);
       await git(['commit', '-m', 'x'], '2024-05-10T23:30:00+0200');
 
-      const fechas = await fechasDeLosFicheros(raiz, [join(raiz, 'corpus')]);
-      expect(fechas.get(resolve(raiz, 'corpus/x.md'))).toBe('2024-05-10T21:30:00.000Z');
+      const historial = await historialDeLosFicheros(raiz, [join(raiz, 'corpus')]);
+      expect(ultimaFecha(historial, resolve(raiz, 'corpus/x.md'))).toBe('2024-05-10T21:30:00.000Z');
     } finally {
       await rm(raiz, { recursive: true, force: true });
     }
@@ -475,8 +901,8 @@ describe('Historia 18.4 — el historial, contra git de verdad', () => {
       // La premisa, y es el corazón del asunto: la copia superficial **no** devuelve el
       // vacío. Git trata el commit injertado como raíz y fecha el árbol entero con él, así
       // que sin la comprobación el sitemap publicaría todas las entradas con la misma fecha.
-      const fechas = await fechasDeLosFicheros(copia, [join(copia, 'corpus')]);
-      expect(fechas.get(resolve(copia, 'corpus/citas/a.md'))).toBe('2024-03-04T09:00:00.000Z');
+      const historial = await historialDeLosFicheros(copia, [join(copia, 'corpus')]);
+      expect(ultimaFecha(historial, resolve(copia, 'corpus/citas/a.md'))).toBe('2024-03-04T09:00:00.000Z');
 
       const estado = await estadoDelRepositorio(copia);
       expect(estado.motivo).toMatch(/superficial/);
@@ -502,7 +928,7 @@ describe('Historia 18.4 — el historial, contra git de verdad', () => {
 /**
  * El cruce completo, que es donde vivían los dos fallos graves de la revisión.
  *
- * Aquí no se llama a `fechasDeLosFicheros` con la raíz ya sabida: se llama a
+ * Aquí no se llama a `historialDeLosFicheros` con la raíz ya sabida: se llama a
  * `fechasDeLasSuperficies` como lo hace el sitemap, y se le da un proyecto que **no** es el
  * directorio de trabajo. Si el módulo volviera a suponer `process.cwd()`, o volviera a
  * resolver las rutas de git contra algo que no es la raíz del repositorio, estas dos

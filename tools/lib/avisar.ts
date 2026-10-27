@@ -1,70 +1,99 @@
 /**
- * Qué superficies cambian cuando cambia un fichero del Corpus — FR-38, AD-27.
+ * Qué superficies cambian cuando cambia un fichero del Corpus — FR-38, AD-27, Historia 24.8.
  *
- * Este módulo **no decide** qué fichero compone qué página: eso tiene un solo dueño,
- * `relacionDeSuperficies` de `tools/lib/cambios.ts`, que también fecha el sitemap. Aquí se lee
- * esa relación al revés —«fichero → rutas»— y se le añade lo único que es del aviso: la
- * portada, que va siempre, y la indexabilidad de las Obras, que no sale de ningún fichero.
- * Que las dos lecturas sean inversas lo fija `tests/unit/indexnow.test.ts`.
+ * Este módulo **no decide** qué fichero compone qué página ni qué campos pinta: eso tiene un solo
+ * dueño, `relacionDeSuperficies` de `tools/lib/cambios.ts`, que también fecha el sitemap, y la
+ * regla de si una transición cambió esos campos es `cambiaronLosCampos`, la misma que usa la
+ * fecha. Aquí se lee esa relación al revés —«cambio → rutas»— y se le añade lo único que es del
+ * aviso: la portada y la indexabilidad de las Obras, que no sale de ningún fichero. Que las dos
+ * lecturas sean inversas lo fija `tests/unit/indexnow.test.ts`.
  *
- * `tools/avisar.ts` averigua qué ficheros tocó git, lee el Corpus de antes y de después y
- * las dos listas de Obras indexables, y entrega aquí datos ya leídos; este módulo no toca
- * disco ni red.
+ * `tools/avisar.ts` averigua qué ficheros cambió git y con qué versiones, lee el Corpus de antes
+ * y de después y las dos listas de Obras indexables, y entrega aquí datos ya leídos; este módulo
+ * no toca disco ni red.
  */
 import { SITIO } from '../../src/lib/dominio.ts';
 import { esRutaDeObra, rutaNormalizada } from '../../src/lib/superficies.ts';
-
-export type FamiliaAvisable = 'cita' | 'autor' | 'tema' | 'coleccion' | 'obra';
+import {
+  cambiaronLosCampos,
+  type CambioDeFichero,
+  type Relacion as RelacionDeCambios,
+} from './cambios.ts';
 
 /**
- * Los únicos directorios del Corpus cuyo contenido llega al HTML público.
+ * Las familias de **fichero** del Corpus: los únicos directorios cuyo contenido llega al HTML
+ * público, y la familia de cada uno — Historia 24.8.
  *
- * La misma tabla alimenta el filtro de `git diff` y el reconocimiento posterior: si se
- * añade otra familia publicable, no puede quedar visible para una mitad del aviso e
- * invisible para la otra. Las Fichas de Obra entran desde la 22.8: su título es la Cabecera
- * de la Página de Obra.
+ * Una sola tabla alimenta el filtro de `git diff`, el del historial y el reconocimiento
+ * posterior: si se añade otra familia publicable, no puede quedar visible para una mitad del
+ * aviso e invisible para la otra. Las Fichas de Obra entran desde la 22.8; los documentos de
+ * Fuente, desde la 24.8, porque ordenan las Citas de la Página de Obra (24.1) y solo la fechan a
+ * ella.
  */
-export const DIRECTORIOS_AVISABLES = [
+export const FAMILIAS_DE_FICHERO = [
   ['corpus/citas', 'cita'],
   ['corpus/autores', 'autor'],
   ['corpus/temas', 'tema'],
   ['corpus/colecciones', 'coleccion'],
   ['corpus/obras', 'obra'],
-] as const satisfies readonly (readonly [string, FamiliaAvisable])[];
+  ['corpus/fuentes', 'documento'],
+] as const;
 
-/** Reconoce solo las familias publicables; el metadato vecino no emite aviso. */
-export function familiaDeFichero(fichero: string): FamiliaAvisable | undefined {
-  const relativa = fichero.split('\\').join('/');
-  return DIRECTORIOS_AVISABLES.find(([directorio]) =>
-    relativa.startsWith(`${directorio}/`)
-  )?.[1];
-}
-
-/** La relación «ruta canónica → ficheros que renderiza», tal como la da `cambios.ts`. */
-export type Relacion = ReadonlyMap<string, readonly string[]>;
+export type FamiliaDeFichero = (typeof FAMILIAS_DE_FICHERO)[number][1];
 
 /**
- * La lectura inversa de la relación: las rutas que renderizan alguno de los ficheros dados.
- *
- * Es la definición entera de «a quién afecta un cambio»: R se avisa por F si y solo si F está
- * entre los ficheros de R. Las rutas salen tal como las declara la relación —canónicas, con
- * su barra final—, que es lo que el buscador tiene que recibir.
+ * Las familias de **ruta**: las superficies que la relación declara. La portada no es ninguna:
+ * no lleva fecha y se avisa aparte. La familia de una ruta la pone su entrada en la relación,
+ * nunca el prefijo de la ruta.
  */
-export function rutasAvisadasPor(cambiados: readonly string[], relacion: Relacion): Set<string> {
-  const tocados = new Set(cambiados.map((f) => f.split('\\').join('/')));
+export const FAMILIAS_DE_RUTA = ['cita', 'autor', 'tema', 'coleccion', 'obra'] as const;
+
+export type FamiliaDeRuta = (typeof FAMILIAS_DE_RUTA)[number];
+
+/** Reconoce solo las familias publicables; el metadato vecino no emite aviso. */
+export function familiaDeFichero(fichero: string): FamiliaDeFichero | undefined {
+  const relativa = fichero.split('\\').join('/');
+  return FAMILIAS_DE_FICHERO.find(([directorio]) => relativa.startsWith(`${directorio}/`))?.[1];
+}
+
+/** La relación «ruta canónica → superficie», tal como la da `cambios.ts`. */
+export type Relacion = RelacionDeCambios;
+
+/**
+ * La lectura inversa de la relación: las rutas con algún componente cuyo fichero cambió **en
+ * los campos que esa ruta pinta**.
+ *
+ * Es la definición entera de «a quién afecta un cambio»: R se avisa por el cambio de F si y solo
+ * si F compone R y `cambiaronLosCampos` dice que la transición de F cambió sus campos en R — la
+ * misma regla con que se fecha R. Las rutas salen tal como las declara la relación —canónicas,
+ * con su barra final—, que es lo que el buscador tiene que recibir.
+ */
+export function rutasAvisadasPor(cambios: readonly CambioDeFichero[], relacion: Relacion): Set<string> {
+  const porFichero = new Map(cambios.map((cambio) => [normalizar(cambio.fichero), cambio]));
   const rutas = new Set<string>();
-  for (const [ruta, ficheros] of relacion) {
-    if (ficheros.some((f) => tocados.has(f.split('\\').join('/')))) rutas.add(ruta);
+  for (const [ruta, { componentes }] of relacion) {
+    const tocada = componentes.some((componente) => {
+      const cambio = porFichero.get(normalizar(componente.fichero));
+      return cambio !== undefined && cambiaronLosCampos(cambio, componente.campos);
+    });
+    if (tocada) rutas.add(ruta);
   }
   return rutas;
+}
+
+function normalizar(fichero: string): string {
+  return fichero.split('\\').join('/');
 }
 
 /** Una lista de rutas de Obra indexables, o por qué no se pudo leer. */
 export type ListaDeObras = { rutas: readonly string[] } | { motivo: string };
 
 export interface EntradaDelAviso {
-  /** Los ficheros del Corpus que cambiaron, relativos a la raíz del repositorio. */
-  cambiados: readonly string[];
+  /**
+   * Los ficheros del Corpus que cambiaron, relativos a la raíz del repositorio, con su versión
+   * de antes y la de después (`null` si no existe en ese lado).
+   */
+  cambios: readonly CambioDeFichero[];
   /**
    * Si el rango cambió la regla de indexabilidad sin tocar el Corpus —`src/lib/umbrales.ts`:
    * una congelación, o un umbral de FR-52—. Entonces no hay fichero que avisar, pero las
@@ -93,12 +122,14 @@ export interface AvisoCompuesto {
 /**
  * Compone las rutas que hay que avisar por un rango de cambios.
  *
- * La portada va siempre que cambie algo del Corpus: enumera Autores, Temas y Colecciones y,
- * además, cambia con la jornada. Lo demás es la lectura inversa de la relación, sobre el
- * Corpus de antes y el de después, con una sola excepción, que es de la Obra (FR-38, 22.8).
+ * La portada va siempre que cambie algo del Corpus que no sea un documento —también un campo que
+ * no fecha nada, como `aptaParaPortada`, que es justo lo que decide su rotación—: enumera
+ * Autores, Temas y Colecciones y cambia con la jornada. Lo demás es la lectura inversa de la
+ * relación, por campos, sobre el Corpus de antes y el de después, con una sola excepción, que es
+ * de la Obra (FR-38, 22.8).
  * Una Obra tiene tres estados —indexable, `noindex` o ausente—, y:
  *
- *   · una Obra cuya ficha, Citas o Autor cambiaron se avisa si su estado cambió en cualquier
+ *   · una Obra cuya ficha, Citas, Autor o documentos cambiaron —en lo que ella pinta— se avisa si su estado cambió en cualquier
  *     sentido —desaparece, pasa a `noindex`, nace— y, si no cambió, solo si es indexable. Una
  *     `noindex` antes y después no se avisa. Si falta el dato de un lado y el otro no lo
  *     decide, se nombra en vez de callarlo.
@@ -111,7 +142,7 @@ export interface AvisoCompuesto {
  */
 export function componerAviso(entrada: EntradaDelAviso): AvisoCompuesto {
   const avisos: string[] = [];
-  if (entrada.cambiados.length === 0 && entrada.reglaCambiada !== true) return { rutas: [], avisos };
+  if (entrada.cambios.length === 0 && entrada.reglaCambiada !== true) return { rutas: [], avisos };
 
   const despues = new Map<string, string>();
   for (const ruta of entrada.relacionDespues.keys()) despues.set(rutaNormalizada(ruta), ruta);
@@ -138,12 +169,15 @@ export function componerAviso(entrada: EntradaDelAviso): AvisoCompuesto {
     return entrada.relacionAntes === undefined ? undefined : 'noindex';
   };
 
-  const rutas = new Set<string>(entrada.cambiados.length > 0 ? ['/'] : []);
+  // La portada, con cualquier cambio del Corpus que no sea un documento: un documento solo
+  // compone la Página de Obra, y la portada no pinta ninguno.
+  const portada = entrada.cambios.some((cambio) => familiaDeFichero(cambio.fichero) !== 'documento');
+  const rutas = new Set<string>(portada ? ['/'] : []);
   const tocadas = new Set<string>([
-    ...rutasAvisadasPor(entrada.cambiados, entrada.relacionDespues),
+    ...rutasAvisadasPor(entrada.cambios, entrada.relacionDespues),
     ...(entrada.relacionAntes === undefined
       ? []
-      : rutasAvisadasPor(entrada.cambiados, entrada.relacionAntes)),
+      : rutasAvisadasPor(entrada.cambios, entrada.relacionAntes)),
   ]);
 
   const obrasSinDecidir: string[] = [];

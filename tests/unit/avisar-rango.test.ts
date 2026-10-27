@@ -6,7 +6,7 @@ import { join } from 'node:path';
 import { promisify } from 'node:util';
 import { AUTOR_VALIDO, RAIZ, TEMA_VALIDO, citaValida } from './ayuda/construir.js';
 import { formaDeObra } from '../../src/lib/obras.ts';
-import { obrasDelSitemap, rutasTocadas } from '../../tools/avisar.ts';
+import { ensayoDelRango, informeDelEnsayo, obrasDelSitemap, rutasTocadas } from '../../tools/avisar.ts';
 import { fechasDeLasSuperficies } from '../../integraciones/historial.ts';
 
 const ejecutar = promisify(execFile);
@@ -130,6 +130,19 @@ beforeAll(async () => {
 
   await escribir('src/lib/umbrales.ts', UMBRALES);
   await commit('tope-restituido');
+
+  // Historia 24.8 — un commit que solo marca una Cita apta para portada.
+  await escribir('corpus/citas/seneca--brevedad-0.md', citaValida({
+    slug: 'seneca-brevedad-0',
+    texto: 'Brevedad 0: la vida es larga si se sabe usar.',
+    procedencia: { obra: 'Brevedad', año: 49 },
+    aptaParaPortada: true,
+  }));
+  await commit('apta');
+
+  // Historia 24.8 — un documento nuevo de Cartas: una página más de su Fuente.
+  await escribir('corpus/fuentes/wikisource-es--cartas--ii.txt', 'Una página más de las Cartas.\n');
+  await commit('documento');
 }, 60_000);
 
 afterAll(async () => {
@@ -212,8 +225,64 @@ describe('Historia 22.8 — rutasTocadas contra un git de verdad', () => {
   });
 });
 
+describe('Historia 24.8 — el aviso de un rango, por campos', () => {
+  it('un rango que solo toca `aptaParaPortada` avisa la portada y nada más', async () => {
+    const { rutas, avisos } = await rango('tope-restituido', 'apta', [CARTAS, BREVEDAD]);
+    expect(rutas).toEqual(['/']);
+    expect(avisos).toEqual([]);
+  });
+
+  it('un rango que añade un documento avisa solo su Obra', async () => {
+    const { rutas, avisos } = await rango('apta', 'documento', [CARTAS, BREVEDAD]);
+    expect(rutas).toEqual([CARTAS]);
+    expect(avisos).toEqual([]);
+  });
+
+  it('el Corpus de después es el de `hasta` aunque el árbol esté en otra revisión', async () => {
+    await git(['checkout', '-q', sha['sin-obras']]);
+    const antes = await copiasDeAviso();
+    const { rutas } = await rutasTocadas(raiz, sha['con-obras'], sha['cita-modificada'], { rutas: [CARTAS, BREVEDAD] });
+    expect(rutas.sort()).toEqual(['/', '/autor/seneca/', '/cita/seneca-cartas-0/', '/tema/el-tiempo/', CARTAS].sort());
+    expect(await copiasDeAviso()).toBe(antes);
+  });
+
+  it('el ensayo reparte por familia lo que cambia de fecha y lo que se avisaría', async () => {
+    await git(['checkout', '-q', sha['cita-modificada']]);
+    const ensayo = await ensayoDelRango(raiz, sha['con-obras'], sha['cita-modificada'], { rutas: [CARTAS, BREVEDAD] });
+    expect(ensayo.portada).toBe(true);
+    expect(ensayo.reparto).toEqual({
+      cita: { cambianDeFecha: 1, seAvisarian: 1 },
+      autor: { cambianDeFecha: 1, seAvisarian: 1 },
+      tema: { cambianDeFecha: 1, seAvisarian: 1 },
+      coleccion: { cambianDeFecha: 0, seAvisarian: 0 },
+      obra: { cambianDeFecha: 1, seAvisarian: 1 },
+    });
+    const informe = informeDelEnsayo('a', 'b', ensayo).join('\n');
+    expect(informe).toMatch(/Reparto por familia, a\.\.b/);
+    expect(informe).toMatch(/portada\s+—\s+1/);
+  });
+
+  it('el ensayo de un documento: solo la Obra cambia de fecha y se avisa, sin portada', async () => {
+    await git(['checkout', '-q', sha['documento']]);
+    const ensayo = await ensayoDelRango(raiz, sha['apta'], sha['documento'], { rutas: [CARTAS, BREVEDAD] });
+    expect(ensayo.portada).toBe(false);
+    expect(ensayo.reparto.obra).toEqual({ cambianDeFecha: 1, seAvisarian: 1 });
+    expect(ensayo.reparto.cita).toEqual({ cambianDeFecha: 0, seAvisarian: 0 });
+  });
+
+  it('el ensayo de una baja: lo que componía cambia de fecha, y la Cita borrada se avisa', async () => {
+    await git(['checkout', '-q', sha['cita-borrada']]);
+    const ensayo = await ensayoDelRango(raiz, sha['cita-modificada'], sha['cita-borrada'], { rutas: [CARTAS, BREVEDAD] });
+    expect(ensayo.reparto.autor.cambianDeFecha).toBe(1);
+    expect(ensayo.reparto.tema.cambianDeFecha).toBe(1);
+    expect(ensayo.reparto.obra.cambianDeFecha).toBe(1);
+    expect(ensayo.reparto.cita).toEqual({ cambianDeFecha: 0, seAvisarian: 1 });
+    expect(ensayo.aviso.rutas).toContain('/cita/seneca-cartas-1/');
+  });
+});
+
 describe('Historia 22.8 — el `lastmod` de una Obra se mueve con su ficha', () => {
-  it('editar la ficha fecha la Página de Obra y las de sus Citas, no las demás', async () => {
+  it('la nota de la ficha fecha la Página de Obra y no las de sus Citas, que no la pintan (24.8)', async () => {
     const proyecto = await mkdtemp(join(tmpdir(), 'sabiduria-lastmod-obra-'));
     try {
       const enProyecto = (argumentos: string[], momento?: string) =>
@@ -244,7 +313,8 @@ describe('Historia 22.8 — el `lastmod` de una Obra se mueve con su ficha', () 
       const fechas = await fechasDeLasSuperficies(proyecto, (m) => avisos.push(m));
       expect(avisos).toEqual([]);
       expect(fechas.get('/obra/seneca/cartas')).toBe('2024-03-04T09:00:00.000Z');
-      expect(fechas.get('/cita/seneca-cartas-0')).toBe('2024-03-04T09:00:00.000Z');
+      // Historia 24.8 — la Página de Cita pinta el título de la ficha y no su nota: no cambia.
+      expect(fechas.get('/cita/seneca-cartas-0')).toBe('2024-01-02T09:00:00.000Z');
       expect(fechas.get('/obra/seneca/brevedad')).toBe('2024-01-02T09:00:00.000Z');
       expect(fechas.get('/cita/seneca-ira-0')).toBe('2024-01-02T09:00:00.000Z');
     } finally {
