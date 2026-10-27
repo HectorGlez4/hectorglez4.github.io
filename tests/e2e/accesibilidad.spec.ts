@@ -196,11 +196,14 @@ test('24.4 — a 320 px el título de Obra más largo de la tarjeta parte en var
   });
   const medida = await page.evaluate(() => {
     const titulo = document.querySelector('.tarjeta-de-obra .titulo') as HTMLElement;
-    const fila = document.querySelector('.tarjeta-de-obra .fila-de-bloque a') as HTMLElement;
+    // Todas las filas: desde la 24.5 puede ir «Siguiente…» encima de «Ver la obra».
+    const filas = [...document.querySelectorAll('.tarjeta-de-obra .fila-de-bloque a')] as HTMLElement[];
     return {
       alto: titulo.getBoundingClientRect().height,
       linea: parseFloat(getComputedStyle(titulo).lineHeight),
-      filaDentro: fila.getBoundingClientRect().right <= document.documentElement.clientWidth + 0.5,
+      filaDentro:
+        filas.length > 0 &&
+        filas.every((fila) => fila.getBoundingClientRect().right <= document.documentElement.clientWidth + 0.5),
       desborda: document.documentElement.scrollWidth > document.documentElement.clientWidth,
     };
   });
@@ -621,11 +624,15 @@ test.describe('Historia 2.8 — foco', () => {
     expect(contenido[0].href, ruta).toMatch(/^\/autor\//);
     expect(contenido.some((p) => p.href?.startsWith('/obra/')), ruta).toBe(true);
     expect(contenido.some((p) => /^https?:/.test(p.href ?? '')), `${ruta}: sin parada en la Fuente`).toBe(true);
-    // Una sola parada en la tarjeta: «Ver la obra y dónde leerla».
+    // Dos paradas en la tarjeta (Historia 24.5, UX-DR63): «Siguiente cita de esta obra» —la
+    // cara completa es de una Obra de dos Citas o más— y después «Ver la obra y dónde leerla».
     const tarjeta = paradas.filter((p) => p.grupo === 'tarjeta');
-    expect(tarjeta, ruta).toHaveLength(1);
-    expect(tarjeta[0].texto, ruta).toMatch(/^Ver la obra y dónde leerla/);
-    expect(tarjeta[0].href, ruta).toMatch(/^\/obra\//);
+    expect(tarjeta, ruta).toHaveLength(2);
+    expect(tarjeta[0].texto, ruta).toMatch(/^Siguiente cita de esta obra/);
+    expect(tarjeta[0].href, ruta).toMatch(/^\/cita\//);
+    expect(tarjeta[0].href, ruta).not.toBe(ruta);
+    expect(tarjeta[1].texto, ruta).toMatch(/^Ver la obra y dónde leerla/);
+    expect(tarjeta[1].href, ruta).toMatch(/^\/obra\//);
   });
 
   test('sin Obra, el orden es contenido, acciones y después salidas', async ({ page }) => {
@@ -695,9 +702,13 @@ test.describe('Historia 2.8 — responsive', () => {
     }
   });
 
-  test('las zonas de toque miden 44px con 8px de separación', async ({ page }) => {
+  /**
+   * Las zonas de toque de `main` en una página, a 360 px: 44 px de alto y 8 px entre vecinas,
+   * salvo las filas apiladas de un enlace de bloque, que basta con que no se solapen.
+   */
+  async function medirZonasDeToque(page: Page, ruta: string) {
     await page.setViewportSize({ width: 360, height: 640 });
-    await page.goto('/cita/antonio-machado-hoy-es-siempre-todavia/');
+    await page.goto(ruta);
 
     const cajas = await page.evaluate(() =>
       [...document.querySelectorAll('main a, main button')]
@@ -720,8 +731,15 @@ test.describe('Historia 2.8 — responsive', () => {
             (padre.textContent ?? '').trim().length > (n.textContent ?? '').trim().length;
           return !(enLinea && acompanado);
         })
-        // Solo los listados de bloque con filete entre filas: las Citas hermanas.
-        .map((n) => ({ r: n.getBoundingClientRect(), lista: n.closest('.hermanas') }))
+        /*
+         * Solo los listados de bloque con filete entre filas: las Citas hermanas y, desde la
+         * 24.5, el `ul` que reúne Filas de bloque (`.fila-de-bloque`, el componente), como las dos
+         * de la Tarjeta de Obra. Por el componente, no por la ruta.
+         */
+        .map((n) => ({
+          r: n.getBoundingClientRect(),
+          lista: n.closest('.hermanas') ?? n.closest('li.fila-de-bloque')?.parentElement ?? null,
+        }))
         .filter(({ r }) => r.width > 0 && r.height > 0)
         .map(({ r, lista }) => ({
           arriba: r.top,
@@ -730,11 +748,14 @@ test.describe('Historia 2.8 — responsive', () => {
           der: r.right,
           alto: r.height,
           // El listado al que pertenece, para reconocer las filas apiladas de un enlace de bloque.
-          lista: lista === null ? -1 : [...document.querySelectorAll('.hermanas')].indexOf(lista),
+          lista:
+            lista === null
+              ? -1
+              : [...document.querySelectorAll('.hermanas, ul:has(> li.fila-de-bloque)')].indexOf(lista),
         })),
     );
 
-    for (const caja of cajas) expect(caja.alto).toBeGreaterThanOrEqual(44);
+    for (const caja of cajas) expect(caja.alto, `${ruta}: ${JSON.stringify(caja)}`).toBeGreaterThanOrEqual(44);
 
     /*
      * Y entre dos zonas vecinas quedan 8px. Antes solo se pedía que no se solapasen, y el
@@ -744,8 +765,9 @@ test.describe('Historia 2.8 — responsive', () => {
      * Las filas de las Citas hermanas —`.hermanas`, con el ancho entero de la columna y el
      * filete entre una y otra, el único separador del sistema— no se miden entre sí: son
      * enlaces de bloque de `EXPERIENCE.md` y su separación es el filete, no un hueco. Basta
-     * con que no se solapen. La exención se nombra por selector, no por «cualquier lista»,
-     * para que una botonera en `ul` no se cuele por ella.
+     * con que no se solapen. Lo mismo las Filas de bloque de un mismo `ul` (Historia 24.5:
+     * «Siguiente…» sobre «Ver la obra»). La exención se nombra por selector, no por «cualquier
+     * lista», para que una botonera en `ul` no se cuele por ella.
      */
     for (let i = 0; i < cajas.length; i += 1) {
       for (let j = i + 1; j < cajas.length; j += 1) {
@@ -757,15 +779,35 @@ test.describe('Historia 2.8 — responsive', () => {
           Math.abs(a.izq - b.izq) <= 1 &&
           Math.abs(a.der - b.der) <= 1;
         if (filasDeUnListado) {
-          expect(a.abajo <= b.arriba || b.abajo <= a.arriba, JSON.stringify([a, b])).toBe(true);
+          expect(a.abajo <= b.arriba || b.abajo <= a.arriba, `${ruta}: ${JSON.stringify([a, b])}`).toBe(true);
           continue;
         }
         const vertical = Math.max(a.arriba - b.abajo, b.arriba - a.abajo);
         const horizontal = Math.max(a.izq - b.der, b.izq - a.der);
         // Medio píxel de holgura por el redondeo subpíxel del navegador.
-        expect(Math.max(vertical, horizontal), JSON.stringify([a, b])).toBeGreaterThanOrEqual(7.5);
+        expect(Math.max(vertical, horizontal), `${ruta}: ${JSON.stringify([a, b])}`).toBeGreaterThanOrEqual(7.5);
       }
     }
+  }
+
+  test('las zonas de toque miden 44px con 8px de separación', async ({ page }) => {
+    await medirZonasDeToque(page, '/cita/antonio-machado-hoy-es-siempre-todavia/');
+  });
+
+  test('24.5 — con la tarjeta de dos filas, las zonas de toque miden 44px y las filas se apilan sin solaparse', async ({
+    page,
+  }) => {
+    const ruta = obligatoria(CITAS_24_4.completa, SIN_TARJETA_COMPLETA);
+    await medirZonasDeToque(page, ruta);
+    // La cara completa trae las dos Filas de bloque, «Siguiente…» encima de «Ver la obra».
+    const filas = await page.locator('.tarjeta-de-obra li.fila-de-bloque').evaluateAll((lis) =>
+      lis.map((li) => {
+        const r = li.getBoundingClientRect();
+        return { zona: li.getAttribute('data-zona'), arriba: r.top, abajo: r.bottom };
+      }),
+    );
+    expect(filas.map((f) => f.zona), ruta).toEqual(['siguiente', 'tarjeta-de-obra']);
+    expect(filas[1].arriba, ruta).toBeGreaterThanOrEqual(filas[0].abajo - 0.5);
   });
 
   /*

@@ -221,9 +221,11 @@ const sinComentarios = (texto: string) =>
     .replace(/^\s*\/\/.*$/gm, '');
 
 describe('Historia 24.4 — el contrato de los componentes, sin construir', () => {
-  it('`TarjetaDeObra`: `cita`, `autor` y `nivel: 2 | 3`, los tres obligatorios', async () => {
+  it('`TarjetaDeObra`: `cita`, `autor`, `nivel: 2 | 3` y `siguiente`, los cuatro obligatorios', async () => {
     const props = await propsDe(TARJETA);
-    expect([...props.keys()].sort()).toEqual(['autor', 'cita', 'nivel']);
+    expect([...props.keys()].sort()).toEqual(['autor', 'cita', 'nivel', 'siguiente']);
+    // Historia 24.5 — obligatorio y sin `?`: cada uso declara si hay «Siguiente…».
+    expect(props.get('siguiente')).toMatchObject({ tipo: 'SiguienteCita | undefined', opcional: false });
     expect(props.get('cita')).toMatchObject({ tipo: 'Cita', opcional: false });
     expect(props.get('autor')).toMatchObject({ tipo: 'Autor', opcional: false });
     const nivel = props.get('nivel')!;
@@ -291,6 +293,10 @@ describe('Historia 24.4 — el contrato de los componentes, sin construir', () =
     expect(fuente).toContain('<section class="tarjeta-de-obra" aria-labelledby="de-la-obra" data-pagefind-ignore="all">');
     expect(fuente).toMatch(/<Rotulo id="de-la-obra" nivel=\{nivel\}>De la obra<\/Rotulo>/);
     expect(fuente).toMatch(/<FilaDeBloque href=\{rutaDeLaObra\(obra\)\} zona="tarjeta-de-obra" avance>/);
+    // Historia 24.5 — «Siguiente…» delante, con su zona, solo si lo hay.
+    expect(fuente).toContain(
+      '<ul class="filas">{siguiente !== undefined && (<FilaDeBloque href={rutaDeCita(siguiente.cita.slug)} zona="siguiente" avance>{textoDeSiguiente(siguiente)}</FilaDeBloque>)}<FilaDeBloque href={rutaDeLaObra(obra)}',
+    );
   });
 
   it('solo la Página de Cita usa la tarjeta: ni `BloqueDeCita`, ni la portada, ni el 404', async () => {
@@ -302,7 +308,7 @@ describe('Historia 24.4 — el contrato de los componentes, sin construir', () =
     expect(usan).toEqual(['src/pages/cita/[slug].astro']);
     const pagina = await readFile(join(RAIZ, 'src/pages/cita/[slug].astro'), 'utf8');
     const usos = [...sinComentarios(pagina).matchAll(/<TarjetaDeObra\b[^>]*\/>/g)].map((m) => m[0]);
-    expect(usos).toEqual(['<TarjetaDeObra cita={cita} autor={autor} nivel={2} />']);
+    expect(usos).toEqual(['<TarjetaDeObra cita={cita} autor={autor} nivel={2} siguiente={siguiente} />']);
     // Entre la Fuente y Copiar.
     const plantilla = sinComentarios(pagina);
     const posicion = (marca: string) => plantilla.indexOf(marca);
@@ -550,7 +556,7 @@ const otro = conjunto.autores.find((a) => a.slug === 'antonio-machado')!;
 ---
 <!doctype html>
 <html lang="es"><head><meta charset="utf-8" /><title>Sonda</title></head>
-<body><TarjetaDeObra cita={cita} autor={otro} nivel={2} /></body></html>
+<body><TarjetaDeObra cita={cita} autor={otro} nivel={2} siguiente={undefined} /></body></html>
 `;
     const resultado = await construirConCorpus(corpusDeLaTarjeta().corpus, {
       paginas: { 'sonda-tarjeta-de-obra.astro': SONDA },
@@ -582,10 +588,19 @@ const autor = conjunto.autores.find((a) => a.slug === cita.autor)!;
 ---
 <!doctype html>
 <html lang="es"><head><meta charset="utf-8" /><title>Sonda</title></head>
-<body><h2>La cita de hoy</h2><TarjetaDeObra cita={cita} autor={autor} nivel={3} />
+<body><h2>La cita de hoy</h2><TarjetaDeObra cita={cita} autor={autor} nivel={3} siguiente={undefined} />
 <Rotulo id="sin-nivel">Sin nivel</Rotulo><Rotulo id="nivel-2" nivel={2}>Nivel 2</Rotulo><Rotulo id="nivel-3" nivel={3}>Nivel 3</Rotulo>
 <Rotulo id="destino-2" destino>Destino 2</Rotulo><Rotulo id="destino-3" nivel={3} destino>Destino 3</Rotulo></body></html>
 `;
+
+/** El enlace de la fila «Ver la obra» de una tarjeta: el único con la zona `tarjeta-de-obra`. */
+function filaDeLaObra(tarjeta: string) {
+  const filas = enlacesDe(tarjeta).filter(
+    (e) => e.declaracion !== null && 'zona' in e.declaracion && e.declaracion.zona === 'tarjeta-de-obra',
+  );
+  expect(filas).toHaveLength(1);
+  return filas[0];
+}
 
 describe('Historia 24.4 — la tarjeta en cada Página de Cita, construida', () => {
   const { corpus, esperadas } = corpusDeLaTarjeta();
@@ -684,21 +699,28 @@ describe('Historia 24.4 — la tarjeta en cada Página de Cita, construida', () 
     }
   });
 
-  it('un único enlace, la fila: su texto y el glifo «›», a la página 1 de su Obra, que existe, con su zona', async () => {
+  it('la fila de la Obra es el último enlace y el único con `tarjeta-de-obra`: su texto y «›», a su página 1, con su zona', async () => {
+    const conSiguiente: string[] = [];
     for (const [slug, esperada] of esperadas) {
       if (esperada === undefined) continue;
       const tarjeta = tarjetaDeObraDe(await html(`/cita/${slug}/`))!;
       expect(tarjeta, slug).not.toContain(FLECHA);
       const enlaces = enlacesDe(tarjeta);
-      expect(enlaces, slug).toHaveLength(1);
-      const [enlace] = enlaces;
+      // Historia 24.5 — delante, como mucho, «Siguiente…» con su propia zona.
+      const zonas = enlaces.map((e) => (e.declaracion !== null && 'zona' in e.declaracion ? e.declaracion.zona : null));
+      expect(zonas.filter((z) => z === 'tarjeta-de-obra'), slug).toHaveLength(1);
+      expect(zonas.at(-1), slug).toBe('tarjeta-de-obra');
+      expect(zonas.slice(0, -1).every((z) => z === 'siguiente'), slug).toBe(true);
+      if (zonas.length === 2) conSiguiente.push(slug);
+      expect(zonas.length, slug).toBeLessThanOrEqual(2);
+      const enlace = enlaces.at(-1)!;
       expect(enlace.target, slug).toBeUndefined();
       expect(enlace.declaracion, slug).toEqual({ zona: 'tarjeta-de-obra' });
       if (typeof esperada.obra === 'string') expect(enlace.href, slug).toBe(esperada.obra);
       else expect(enlace.href, slug).toMatch(esperada.obra);
       expect(existsSync(paginaConstruida(proyecto, enlace.href!)), `${slug} → ${enlace.href}`).toBe(true);
 
-      const interior = /<a\b[^>]*>([\s\S]*?)<\/a>/.exec(tarjeta)![1];
+      const interior = /<li class="fila-de-bloque" data-zona="tarjeta-de-obra"[^>]*><a\b[^>]*>([\s\S]*?)<\/a>/.exec(tarjeta)![1];
       expect(textosDelEnlace(interior).lector, slug).toBe(esperada.fila);
       // Texto y glifo en un solo `span`, el único hijo del enlace flexible: si fueran dos
       // hijos, al partir el texto el glifo quedaría en su propia columna y no tras la última
@@ -711,13 +733,23 @@ describe('Historia 24.4 — la tarjeta en cada Página de Cita, construida', () 
       // El glifo va detrás del texto, pegado.
       expect(interior.replace(/<[^>]+>/g, '').replace(/&nbsp;/g, '\u00A0'), slug).toBe(`${esperada.fila}\u00A0${AVANCE}`);
     }
+    // «Siguiente…» solo en las Obras de dos Citas o más: Brevedad, Cartas y Machado; De la ira,
+    // de una Cita y sin Tema publicado, no lo lleva.
+    expect(conSiguiente.sort()).toEqual(
+      [...esperadas]
+        .filter(([, e]) => e !== undefined && e.hechos.at(-1) !== '1 cita')
+        .map(([slug]) => slug)
+        .sort(),
+    );
+    expect(conSiguiente).not.toContain('seneca-ira-0');
+    expect(conSiguiente).toHaveLength(7);
   });
 
   it('la Obra `noindex` enlaza igual, a su página 1', async () => {
     const vistas: string[] = [];
     for (const [slug, esperada] of esperadas) {
       if (esperada === undefined) continue;
-      const href = enlacesDe(tarjetaDeObraDe(await html(`/cita/${slug}/`))!)[0].href!;
+      const href = filaDeLaObra(tarjetaDeObraDe(await html(`/cita/${slug}/`))!).href!;
       const obra = await html(href);
       expect(/<meta name="robots" content="noindex, follow"/.test(obra), `${slug} → ${href}`).toBe(esperada.noindex);
       if (esperada.noindex) vistas.push(slug);
@@ -728,7 +760,7 @@ describe('Historia 24.4 — la tarjeta en cada Página de Cita, construida', () 
   it('la página a la que lleva cumple lo que promete la fila: «y dónde leerla» solo con edición cotejada', async () => {
     for (const [slug, esperada] of esperadas) {
       if (esperada === undefined) continue;
-      const href = enlacesDe(tarjetaDeObraDe(await html(`/cita/${slug}/`))!)[0].href!;
+      const href = filaDeLaObra(tarjetaDeObraDe(await html(`/cita/${slug}/`))!).href!;
       const obra = await html(href);
       expect(obra, `${slug} → ${href}`).toContain('Dónde leer esta obra');
       const cotejada = obra.includes('id="edicion-cotejada"');

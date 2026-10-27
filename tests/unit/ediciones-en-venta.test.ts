@@ -866,6 +866,7 @@ describe('Historia 24.4 — la Tarjeta de Obra, igual con la afiliación encendi
     const delFixture = Object.keys(corpusConstruido(true)).filter((ruta) => ruta.startsWith('citas/'));
     expect(citas.length).toBeGreaterThan(0);
     expect(citas).toHaveLength(delFixture.length);
+    let conSiguiente = 0;
     for (const slug of citas) {
       const ruta = `/cita/${slug}/`;
       const [con, sin] = [await html(encendida, ruta), await html(apagada, ruta)];
@@ -874,7 +875,10 @@ describe('Historia 24.4 — la Tarjeta de Obra, igual con la afiliación encendi
       expect(tarjeta, ruta).toBe(tarjetaDeObraDe(sin));
       expect(con, ruta).not.toContain('data-ingreso');
       expect(sin, ruta).not.toContain('data-ingreso');
+      if (tarjeta!.includes('<li class="fila-de-bloque" data-zona="siguiente"')) conSiguiente += 1;
     }
+    // Historia 24.5 — la igualdad cubre también «Siguiente…»: alguna tarjeta comparada lo lleva.
+    expect(conSiguiente).toBeGreaterThan(0);
   });
 
   it.each([
@@ -883,9 +887,14 @@ describe('Historia 24.4 — la Tarjeta de Obra, igual con la afiliación encendi
     ['sin cotejar y con ediciones', IRA_SIN, 'Ver la obra', IRA_1],
   ])('%s: la fila dice lo que toca, con la afiliación encendida', async (_caso, slug, fila, obra) => {
     const tarjeta = tarjetaDeObraDe(await html(encendida, `/cita/${slug}/`))!;
-    const interior = /<a\b[^>]*>([\s\S]*?)<\/a>/.exec(tarjeta)![1];
+    // La fila de la Obra; delante puede ir «Siguiente…» (24.5), con su propia zona.
+    const interior = /<li class="fila-de-bloque" data-zona="tarjeta-de-obra"[^>]*><a\b[^>]*>([\s\S]*?)<\/a>/.exec(tarjeta)![1];
     expect(textosDelEnlace(interior)).toEqual({ vista: `${fila} \u203A`, lector: fila });
-    expect(enlacesDe(tarjeta).map((e) => e.href)).toEqual([obra]);
+    const deLaObra = enlacesDe(tarjeta).filter(
+      (e) => e.declaracion !== null && 'zona' in e.declaracion && e.declaracion.zona === 'tarjeta-de-obra',
+    );
+    expect(deLaObra.map((e) => e.href)).toEqual([obra]);
+    expect(enlacesDe(tarjeta).at(-1)?.href).toBe(obra);
   });
 });
 

@@ -20,8 +20,11 @@ import CompartirEnlace from '../../islands/CompartirEnlace.astro';
 import RutasDeSalida from '../../components/RutasDeSalida.astro';
 import DatosEstructurados from '../../components/DatosEstructurados.astro';
 import {
+  citasDeLasObras,
+  citasDeTema,
   citasRelacionadas,
   conjuntoPublicable,
+  siguienteCita,
   temasDeLaCita,
   temasPublicados,
 } from '../../lib/publicado.ts';
@@ -34,6 +37,14 @@ export const getStaticPaths = (async () => {
   const conjunto = await conjuntoPublicable();
   const autores = new Map(conjunto.autores.map((a) => [a.slug, a]));
   const publicados = temasPublicados(conjunto.temas, conjunto.citas);
+  /*
+   * Historia 24.5 — «Siguiente…» de la Tarjeta de Obra. Lo decide `siguienteCita`, con los
+   * mismos dueños que pintan los dos listados que sigue: el orden del libro de
+   * `citasDeLasObras` (la Página de Obra) y `citasDeTema` (la Página de Tema), calculados una
+   * vez para todas las Citas y no por página.
+   */
+  const porObra = await citasDeLasObras(conjunto);
+  const listados = new Map(publicados.map((tema) => [tema.slug, citasDeTema(conjunto.citas, tema.slug)]));
 
   return conjunto.citas.map((cita) => ({
     params: { slug: cita.slug },
@@ -43,11 +54,12 @@ export const getStaticPaths = (async () => {
       relacionadas: citasRelacionadas(conjunto.citas, cita, MAX_CITAS_RELACIONADAS),
       chips: temasDeLaCita(cita, publicados),
       temasDelSitio: publicados,
+      siguiente: siguienteCita(cita, porObra, publicados, listados),
     },
   }));
 }) satisfies GetStaticPaths;
 
-const { cita, autor, relacionadas, chips, temasDelSitio } = Astro.props;
+const { cita, autor, relacionadas, chips, temasDelSitio, siguiente } = Astro.props;
 
 /**
  * El título de pestaña y la meta descripción llevan la Cita entera si cabe. Quien llega
@@ -81,9 +93,10 @@ const canonica = new URL(rutaDeCita(cita.slug), Astro.site).href;
       * Historia 24.4 — la Obra de la que sale la Cita, entre lo que la Cita es (atribución y
       * Fuente) y lo que se hace con ella (las acciones). Aquí y no en `BloqueDeCita` por lo
       * mismo que la Fuente: la portada y el 404 no cambian con esta historia. Sin Obra no pinta
-      * nada, y Copiar sigue a la Fuente o a la Atribución.
+      * nada, y Copiar sigue a la Fuente o a la Atribución. Desde la 24.5 lleva además
+      * «Siguiente…» cuando hay a dónde ir (`siguiente`, decidido arriba).
       */}
-    <TarjetaDeObra cita={cita} autor={autor} nivel={2} />
+    <TarjetaDeObra cita={cita} autor={autor} nivel={2} siguiente={siguiente} />
     <CopiarCita cita={cita} autor={autor} />
     <ImagenDeCita cita={cita} autor={autor} />
     <CompartirEnlace cita={cita} autor={autor} canonica={canonica} />

@@ -613,14 +613,46 @@ test.describe('Historia 24.4 — la Tarjeta de Obra en la Página de Cita', () =
       expect(cita!.y, ruta).toBeLessThan(640);
       expect(copiar!.y, ruta).toBeGreaterThanOrEqual(tarjeta!.y + tarjeta!.height);
       // «Justo debajo»: la deuda aceptada es que Copiar salga de la primera pantalla, no que se
-      // vaya más allá de la segunda (medido el 2026-10-27: y = 756 y 867).
+      // vaya más allá de la segunda (medido el 2026-10-27 con una fila: y = 756 y 867; desde la
+      // 24.5 la tarjeta suma la fila de «Siguiente…» y la cifra se anota con su nombre).
       expect(copiar!.y, `${ruta}: Copiar pasa de la segunda pantalla`).toBeLessThan(640 * 2);
       info.annotations.push({
-        type: '24.4 a 360 × 640',
+        type: '24.5 a 360 × 640',
         description: `${ruta}: tarjeta de ${Math.round(tarjeta!.height)} px desde y = ${Math.round(tarjeta!.y)}; Copiar en y = ${Math.round(copiar!.y)} (${copiar!.y + copiar!.height <= 640 ? 'dentro' : 'fuera'} de la primera pantalla)`,
       });
     });
   }
+
+  test('24.5 — la tarjeta de la cara completa tiene dos filas, «Siguiente…» primero y del mismo trato', async ({
+    page,
+  }) => {
+    await abrir(page, completa);
+    const filas = await page.locator('.tarjeta-de-obra ul.filas > li').evaluateAll((lis) =>
+      lis.map((li) => {
+        const a = li.querySelector('a')!;
+        const s = getComputedStyle(a);
+        return {
+          deBloque: li.classList.contains('fila-de-bloque'),
+          zona: li.getAttribute('data-zona'),
+          href: a.getAttribute('href'),
+          target: a.getAttribute('target'),
+          texto: (a.textContent ?? '').replace(/\s+/g, ' ').trim(),
+          trato: [s.display, s.minHeight, s.fontFamily, s.fontSize, s.color, s.textDecorationLine].join(' | '),
+        };
+      }),
+    );
+    expect(filas.map((f) => f.zona), completa).toEqual(['siguiente', 'tarjeta-de-obra']);
+    expect(filas.every((f) => f.deBloque), completa).toBe(true);
+    expect(filas[0].texto, completa).toBe('Siguiente cita de esta obra \u203A');
+    expect(filas[0].href, completa).toMatch(/^\/cita\/[^/]+\/$/);
+    expect(filas[0].href, completa).not.toBe(completa);
+    expect(filas[1].href, completa).toMatch(/^\/obra\//);
+    expect(filas.map((f) => f.target), completa).toEqual([null, null]);
+    expect(filas[0].trato, completa).toBe(filas[1].trato);
+    // La siguiente existe: la fila lleva a una Página de Cita servida.
+    const respuesta = await page.goto(filas[0].href!);
+    expect(respuesta?.status(), filas[0].href!).toBe(200);
+  });
 
   test('los tokens calculados de la tarjeta y de su fila', async ({ page }) => {
     await abrir(page, completa);

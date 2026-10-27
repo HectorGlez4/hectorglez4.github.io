@@ -14,11 +14,19 @@
  *   · «{Autor} · {año} · {n} citas»: lo compone `contenidoDeTarjetaDeObra`, en
  *     `src/lib/atribucion.ts`, con el año y el recuento de la Obra resuelta. Aquí no se cuenta
  *     ni se deriva nada (AD-11).
- *   · Una Fila de bloque a la página 1 de la Obra —se indexe o no, esté congelada o no: el
- *     `noindex` y la congelación no alcanzan a la navegación—, que promete «y dónde leerla» solo
- *     si alguna de sus Citas está cotejada (`edicionCotejada`). Las `ediciones` de la ficha y la
- *     afiliación no cuentan: la tarjeta sale idéntica byte a byte con el Modelo encendido o
- *     apagado (FR-35), y no aloja ninguno.
+ *   · Una o dos Filas de bloque, apiladas (UX-DR65):
+ *       – primero, si hay a dónde ir, «Siguiente…» (Historia 24.5): «Siguiente cita de esta obra»
+ *         en el orden del libro, o, en una Obra de una sola Cita, «Siguiente cita sobre {tema}» a
+ *         la de otro Autor que le sigue en el listado de su primer Tema publicado. Lo decide
+ *         `siguienteCita` (`src/lib/publicado.ts`) y lo dice `textoDeSiguiente`
+ *         (`src/lib/atribucion.ts`); llega por `siguiente`, y sin él la fila no está y la tarjeta
+ *         es la de la 24.4 byte a byte. Va antes que «Ver la obra» en el marcado, y por eso en
+ *         el orden de tabulación (UX-DR63);
+ *       – después, la de la página 1 de la Obra —se indexe o no, esté congelada o no: el
+ *         `noindex` y la congelación no alcanzan a la navegación—, que promete «y dónde leerla»
+ *         solo si alguna de sus Citas está cotejada (`edicionCotejada`).
+ *     Las `ediciones` de la ficha y la afiliación no cuentan en ninguna: la tarjeta sale
+ *     idéntica byte a byte con el Modelo encendido o apagado (FR-35), y no aloja ninguno.
  *
  * Sin Obra no pinta nada —ni sección, ni rótulo, ni hueco—, como `Fuente.astro` sin Fuente.
  *
@@ -32,9 +40,10 @@
  */
 import Rotulo from './Rotulo.astro';
 import FilaDeBloque from './FilaDeBloque.astro';
-import type { Cita, Autor } from '../lib/publicado.ts';
+import type { Cita, Autor, SiguienteCita } from '../lib/publicado.ts';
 import { rutaDeLaObra } from '../lib/obras.ts';
-import { contenidoDeTarjetaDeObra } from '../lib/atribucion.ts';
+import { contenidoDeTarjetaDeObra, textoDeSiguiente } from '../lib/atribucion.ts';
+import { rutaDeCita } from '../lib/superficies.ts';
 
 interface Props {
   cita: Cita;
@@ -45,9 +54,15 @@ interface Props {
    * encabezado cuelga la tarjeta, y eso solo lo sabe quien la usa.
    */
   nivel: 2 | 3;
+  /**
+   * A dónde lleva «Siguiente…», o `undefined` si no hay a dónde ir (Historia 24.5). Obligatorio y
+   * sin `?`: cada uso declara si lo hay —la portada dirá el suyo (28.2)—, y uno nuevo que lo
+   * olvide no pasa `astro check`.
+   */
+  siguiente: SiguienteCita | undefined;
 }
 
-const { cita, autor, nivel } = Astro.props;
+const { cita, autor, nivel, siguiente } = Astro.props;
 
 /*
  * Que la Tarjeta nombre al Autor de otro sería atribuirle la Obra a quien no la firma. La
@@ -76,7 +91,7 @@ const contenido = obra === undefined ? undefined : contenidoDeTarjetaDeObra(auto
       <Rotulo id="de-la-obra" nivel={nivel}>De la obra</Rotulo>
       <p class="titulo">{obra.titulo}</p>
       <p class="hechos">{contenido.hechos.map((parte, i) => (<>{i > 0 && (<><span aria-hidden="true"> · </span><span class="solo-para-lectores">, </span></>)}{parte}</>))}</p>
-      <ul class="filas"><FilaDeBloque href={rutaDeLaObra(obra)} zona="tarjeta-de-obra" avance>{contenido.fila}</FilaDeBloque></ul>
+      <ul class="filas">{siguiente !== undefined && (<FilaDeBloque href={rutaDeCita(siguiente.cita.slug)} zona="siguiente" avance>{textoDeSiguiente(siguiente)}</FilaDeBloque>)}<FilaDeBloque href={rutaDeLaObra(obra)} zona="tarjeta-de-obra" avance>{contenido.fila}</FilaDeBloque></ul>
     </section>
   )
 }
@@ -119,7 +134,8 @@ const contenido = obra === undefined ? undefined : contenidoDeTarjetaDeObra(auto
     color: var(--tinta-apagada);
   }
 
-  /* El filete de encima de la primera fila; el de debajo de cada una lo pone la fila. */
+  /* El filete de encima de la primera fila; el de debajo de cada una lo pone la fila, y entre
+   * «Siguiente…» y «Ver la obra» no hay más separación que ese filete (UX-DR65). */
   .filas {
     list-style: none;
     margin: calc(var(--unidad) * 2) 0 0;

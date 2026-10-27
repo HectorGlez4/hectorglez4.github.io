@@ -10,7 +10,7 @@
  * AD-5 — Derivación pura.
  */
 
-import type { Cita, Autor } from './publicado.ts';
+import type { Cita, Autor, SiguienteCita } from './publicado.ts';
 import type { ObraResuelta } from './obras.ts';
 import { MARCA } from './marca.ts';
 
@@ -268,6 +268,39 @@ export function contenidoDeTarjetaDeObra(
   if (obra.año !== undefined) hechos.push(añoLegible(obra.año));
   hechos.push(obra.recuento === 1 ? '1 cita' : `${obra.recuento} citas`);
   return { hechos, fila: obra.edicionCotejada ? FILA_VER_LA_OBRA_Y_DONDE_LEERLA : FILA_VER_LA_OBRA };
+}
+
+/**
+ * El texto de «Siguiente…» cuando sigue el orden de la Obra (UX-DR65, Historia 24.5).
+ */
+export const FILA_SIGUIENTE_DE_ESTA_OBRA = 'Siguiente cita de esta obra';
+
+/**
+ * El nombre de un Tema dentro de una frase, tras «sobre»: «Siguiente cita sobre la vida», no
+ * «sobre La vida» — Historia 24.5.
+ *
+ * Solo la primera letra pasa a minúscula, con las reglas del español: los Temas empiezan por
+ * artículo («La vida», «El deber»), y el resto se respeta para no rebajar un nombre propio
+ * interior el día que lo haya. Es la **única** regla de esa minúscula; la reutilizará el
+ * recuento de la 27.x.
+ */
+export function temaEnFrase(nombre: string): string {
+  const [primera = '', ...resto] = nombre;
+  return primera.toLocaleLowerCase('es') + resto.join('');
+}
+
+/**
+ * El texto de la Fila de bloque «Siguiente…» de la Tarjeta de Obra — FR-12, UX-DR65, UX-DR107,
+ * Historia 24.5.
+ *
+ * Por la Obra, «Siguiente cita de esta obra»; por el Tema, «Siguiente cita sobre {tema}», con
+ * el Tema en minúscula (`temaEnFrase`). Sin el glifo de avance «›», que pone `FilaDeBloque.astro`:
+ * lo compone `src/lib/`, no la plantilla. A dónde lleva lo decide `siguienteCita`.
+ */
+export function textoDeSiguiente(siguiente: SiguienteCita): string {
+  return siguiente.por === 'obra'
+    ? FILA_SIGUIENTE_DE_ESTA_OBRA
+    : `Siguiente cita sobre ${temaEnFrase(siguiente.tema.nombre)}`;
 }
 
 /**

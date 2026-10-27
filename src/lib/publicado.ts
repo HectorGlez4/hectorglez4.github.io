@@ -180,7 +180,7 @@ export function citasDeTema(citas: Cita[], slugTema: string): Cita[] {
  * Es la función que impide el chip que enlaza a un 404: una Cita puede pertenecer a un
  * Tema de cuatro Citas, y ese Tema no tiene página. El chip no debe renderizarse.
  */
-export function temasDeLaCita(cita: Cita, publicados: Tema[]): Tema[] {
+export function temasDeLaCita(cita: Cita, publicados: readonly Tema[]): Tema[] {
   const porSlug = new Map(publicados.map((t) => [t.slug, t]));
   return cita.temas.map((s) => porSlug.get(s)).filter((t): t is Tema => t !== undefined);
 }
@@ -407,6 +407,66 @@ export function citasRelacionadas(citas: Cita[], cita: Cita, maximo: number): Ci
    */
   const paso = (candidatas.length - 1) / (maximo - 1);
   return Array.from({ length: maximo }, (_, i) => candidatas[Math.round(i * paso)]);
+}
+
+/**
+ * A dónde lleva «Siguiente…» de la Tarjeta de Obra, y por qué: por el orden de la Obra o por
+ * el listado de un Tema, que es lo que cambia el texto de la fila (`textoDeSiguiente`).
+ */
+export type SiguienteCita = { por: 'obra'; cita: Cita } | { por: 'tema'; cita: Cita; tema: Tema };
+
+/**
+ * La Cita que sigue a esta — FR-12, UX-DR65, UX-DR109, Historia 24.5.
+ *
+ * Quien acaba de leer una Cita y quiere seguir con ese libro no vuelve al listado: la Tarjeta de
+ * Obra le ofrece la siguiente. La decisión es una sola y vive aquí, pura y sin construir:
+ *
+ *   · **Obra de dos Citas o más** — la que sigue en el orden del libro, y de la última a la
+ *     primera. `porObra` es el mapa de `citasDeLasObras`, ya en ese orden: aquí no se ordena ni
+ *     se agrupa nada, solo se busca la posición (AD-25, AD-11). Que la Cita no esté en el grupo
+ *     de su Obra es un uso roto —`citasPorObra` agrupa toda Cita con Obra— y para el build.
+ *   · **Obra de una Cita** — no hay libro que seguir, y se sigue por su **primer Tema
+ *     publicado**, en el orden en que la Cita los declara (`temasDeLaCita`: un Tema bajo su
+ *     umbral no tiene página y no cuenta). En el listado que pinta la Página de Tema
+ *     (`listados`, por slug, de `citasDeTema`), la primera Cita de **otro Autor** que le sigue,
+ *     con vuelta al principio: «siguiente sobre la vida» no puede ser más del mismo, que ya
+ *     tiene «Más de {Autor}». Sin Tema publicado, o sin otro Autor en él, no hay fila; no se
+ *     mira un segundo Tema.
+ *   · **Sin Obra** — no hay Tarjeta de Obra, y nada que decidir.
+ *
+ * No depende del visitante, de la jornada, de la indexabilidad, de la congelación ni de la
+ * afiliación: dos construcciones del mismo commit dan el mismo destino.
+ */
+export function siguienteCita(
+  cita: Cita,
+  porObra: ReadonlyMap<string, readonly Cita[]>,
+  publicados: readonly Tema[],
+  listados: ReadonlyMap<string, readonly Cita[]>,
+): SiguienteCita | undefined {
+  if (cita.obra === undefined) return undefined;
+  const grupo = porObra.get(cita.obra.nombre);
+  const i = grupo?.findIndex((c) => c.slug === cita.slug) ?? -1;
+  if (grupo === undefined || i < 0) {
+    throw new Error(
+      `siguienteCita: la Cita «${cita.slug}» no está entre las Citas de su Obra ` +
+        `(ficha «${cita.obra.nombre}»). citasDeLasObras agrupa toda Cita con Obra: el mapa no ` +
+        'es el de este conjunto.',
+    );
+  }
+  if (grupo.length >= 2) return { por: 'obra', cita: grupo[(i + 1) % grupo.length] };
+
+  const tema = temasDeLaCita(cita, publicados)[0];
+  if (tema === undefined) return undefined;
+  const listado = listados.get(tema.slug) ?? [];
+  const aqui = listado.findIndex((c) => c.slug === cita.slug);
+  // Una vuelta entera desde la siguiente: la propia Cita cae la última y no cuenta.
+  for (let paso = 1; paso <= listado.length; paso++) {
+    const candidata = listado[(aqui + paso) % listado.length];
+    if (candidata.slug !== cita.slug && candidata.autor !== cita.autor) {
+      return { por: 'tema', cita: candidata, tema };
+    }
+  }
+  return undefined;
 }
 
 /**

@@ -1261,19 +1261,26 @@ describe('Historia 22.8 — la congelación declarada, construida', () => {
     expect(citas).toEqual((await readdir(join(abierta.proyecto, 'dist', 'cita'))).sort());
     // Una Página de Cita por cada fichero de Cita del fixture: ninguna se queda sin comparar.
     expect(citas).toHaveLength(Object.keys(corpus(1)).filter((ruta) => ruta.startsWith('citas/')).length);
+    let conSiguiente = 0;
     for (const slug of citas) {
       const ruta = `/cita/${slug}/`;
       const congelada = tarjetaDeObraDe(await html(proyecto, ruta));
       expect(congelada, ruta).toBeDefined();
       expect(congelada, ruta).toBe(tarjetaDeObraDe(await html(abierta.proyecto, ruta)));
+      if (congelada!.includes('<li class="fila-de-bloque" data-zona="siguiente"')) conSiguiente += 1;
     }
+    // Historia 24.5 — la igualdad cubre también «Siguiente…»: alguna tarjeta comparada lo lleva.
+    expect(conSiguiente).toBeGreaterThan(0);
     // Cartas: indexable con la familia abierta, `noindex` congelada; la tarjeta enlaza igual.
     expect(await html(abierta.proyecto, CARTAS)).not.toMatch(NOINDEX);
     expect(await html(proyecto, CARTAS)).toMatch(NOINDEX);
     const tarjeta = tarjetaDeObraDe(await html(proyecto, '/cita/seneca-cartas-0/'))!;
-    expect(enlacesDe(tarjeta).map((e) => ({ href: e.href, declaracion: e.declaracion }))).toEqual([
-      { href: CARTAS, declaracion: { zona: 'tarjeta-de-obra' } },
-    ]);
+    const enlaces = enlacesDe(tarjeta).map((e) => ({ href: e.href, declaracion: e.declaracion }));
+    // Delante, «Siguiente…» a otra Cita de Cartas (24.5); detrás, la fila de su Obra.
+    expect(enlaces).toHaveLength(2);
+    expect(enlaces[0].declaracion).toEqual({ zona: 'siguiente' });
+    expect(enlaces[0].href).toMatch(/^\/cita\/seneca-cartas-[12]\/$/);
+    expect(enlaces[1]).toEqual({ href: CARTAS, declaracion: { zona: 'tarjeta-de-obra' } });
   }, 300_000);
 
   it('24.7 — congelada, toda página 1 sigue llevando el salto, y la 2 no', async () => {

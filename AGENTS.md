@@ -788,8 +788,9 @@ Ninguna hace commit; las dos se niegan con 1 y sin escribir si no hay nada que h
 
 Bajo la Cita, entre la Línea de la Fuente —o la Atribución, sin Fuente— y Copiar, la Página de
 Cita dice de qué Obra sale: `src/components/TarjetaDeObra.astro`, con el rótulo «De la obra»,
-el título de la ficha sin enlace, «{Autor} · {año} · {n} citas» y una sola Fila de bloque a la
-página 1 de la Obra —se indexe o no, esté congelada o no—. **Solo en `src/pages/cita/[slug].astro`**:
+el título de la ficha sin enlace, «{Autor} · {año} · {n} citas» y una o dos Filas de bloque:
+«Siguiente…» cuando hay a dónde ir (24.5) y, siempre, la de la página 1 de la Obra —se indexe o
+no, esté congelada o no—. **Solo en `src/pages/cita/[slug].astro`**:
 no va dentro de `BloqueDeCita.astro` porque ese bloque lo comparten la portada y el 404, que no
 la llevan (la portada la recibe en la 28.2). Sin Obra no pinta nada, ni rótulo ni hueco.
 
@@ -810,6 +811,18 @@ la llevan (la portada la recibe en la 28.2). Sin Obra no pinta nada, ni rótulo 
   nombra el título y el Autor, que el índice no debe recoger desde cada Página de Cita.
 - Pinta el año, el recuento y si hay edición cotejada, que dependen de las Citas hermanas: es
   navegación, y por excepción de Héctor no fecha ni avisa (`tools/lib/cambios.ts`, 24.8).
+- **«Siguiente…» (Historia 24.5)** es la primera fila, antes que «Ver la obra» en el marcado y
+  en la tabulación. En una Obra de dos Citas o más, «Siguiente cita de esta obra» lleva a la que
+  sigue en el orden del libro (`citasDeLasObras`), y de la última a la primera; en una Obra de
+  una Cita, «Siguiente cita sobre {tema}» lleva a la primera Cita de **otro Autor** que le sigue,
+  con vuelta, en el listado de `citasDeTema` de su **primer Tema publicado**; sin ese Tema o sin
+  otro Autor en él, no hay fila (no se mira un segundo Tema). Lo decide solo `siguienteCita` de
+  `src/lib/publicado.ts`, pura, y lo dice `textoDeSiguiente` de `src/lib/atribucion.ts`, con
+  `temaEnFrase` como única regla de la minúscula del Tema tras «sobre». La prop `siguiente` de
+  `TarjetaDeObra.astro` es **obligatoria y sin `?`** (`SiguienteCita | undefined`): cada uso
+  declara si la hay. Zona `siguiente`, en el `<li>`; sin guion ni almacenamiento del visitante,
+  y no depende de la jornada, la indexabilidad, la congelación ni la afiliación. Es navegación:
+  no fecha ni avisa, como el resto de la tarjeta.
 
 ## Curar una Colección
 
