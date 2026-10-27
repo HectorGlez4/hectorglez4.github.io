@@ -2,7 +2,7 @@
 title: 'Historia 24.6 — Al pie, más de la misma obra y más del Autor'
 type: 'feature'
 created: '2026-10-27'
-status: 'in-progress'
+status: 'done'
 baseline_revision: '3f369c8aec38c995744e611968dbe762dba9f6b5'
 review_loop_iteration: 0
 followup_review_recommended: false
@@ -10,7 +10,14 @@ context:
   - '{project-root}/_bmad-output/implementation-artifacts/epic-24-context.md'
 warnings:
   - oversized
-deferred: []
+deferred:
+  - summary: >-
+      El docblock de src/components/Chips.astro aún dice que la lista lleva, «como último recurso de las Rutas de salida», a un Autor; ese respaldo se retiró en la 24.6.
+    evidence: |-
+      La 24.6 quita la sección «Seguir leyendo» con el chip «Sobre {Autor}», y Chips ya solo se usa para Temas. El Code Map del spec declara Chips.astro de solo lectura, así que el comentario no se tocó en esta historia; es un comentario, sin efecto en dist/.
+    location: >-
+      src/components/Chips.astro:5
+    severity: low
 ---
 
 <intent-contract>
@@ -123,6 +130,17 @@ deferred: []
 
 ## Review Triage Log
 
+### 2026-10-27 — Review pass
+- intent_gap: 0
+- bad_spec: 0
+- patch: 0
+- defer: 0
+- reject: 0
+- addressed_findings:
+  - none
+
+Las capas de revisión son externas en este bucle y no traían hallazgos en esta pasada: la revisión independiente viene después.
+
 ## Design Notes
 
 **Fixture de `rutas-de-salida.test.ts`** (patrón de `tarjeta-de-obra.test.ts:464-540`: con censo, los documentos se escriben a mano, uno por Obra con los textos en orden de inserción). Autores `seneca` (`AUTOR_VALIDO`), `epicteto`, `antonio-machado`; Tema `el-tiempo` (`TEMA_VALIDO`, ≥ 15). Séneca 15: «Sobre la brevedad de la vida» 8 (`seneca-brevedad-0…7`, insertadas 7…0: orden del libro inverso al de los slugs, `el-tiempo`), «Cartas a Lucilio» 3 (`el-tiempo`), «Sobre la vida feliz» 2, «De la ira» 1 (`temas: []`), una sin Obra en el censo. Epicteto: «Manual» 5 (`el-tiempo`). Machado: «Soledades» 1 (`temas: []`). Esperado: brevedad con 3 + 4 tarjetas (7) y chip; cartas 1 + 4; vida feliz 0 + 4; ira 0 + 4 sin Temas; sin Obra sin tarjeta de obra y 4 de las 14; Manual 3 + 0; Soledades sin `nav`. Cierres: «Las 8 citas de Sobre la brevedad de la vida», «Las 3 citas de Cartas a Lucilio», «Las 5 citas de Manual», «Las 15 citas de Séneca»; Epicteto, ninguno.
@@ -146,5 +164,44 @@ deferred: []
 
 ## Auto Run Result
 
-Status: ready-for-dev
-Blocking condition: ninguna. Planificación terminada el 2026-10-27 (bucle v8-ralph); la ejecución se detiene tras planificar, como pide la invocación.
+Status: done
+Blocking condition: ninguna.
+
+**Resumen.** Al pie de la Página de Cita, `RutasDeSalida.astro` pinta ahora tres grupos —«De la misma obra» (hasta 3, orden del libro, Tarjeta `ninguna`, zona `misma-obra`), «Más de {Autor}» (hasta 4, sin las de su Obra, Tarjeta `obra`, zona `rutas-de-salida`) y «Temas»—, cada uno con su `h2` y, los dos primeros, con su cierre Fila de bloque «Las {n} citas de… ›». Lo decide la pura `rutasDeSalidaDeCita` con el único reparto `repartir`; un grupo vacío no está, sin ninguno no hay `nav`, no hay respaldo, y todo va bajo `data-pagefind-ignore="all"`, sin `data-zona` en el `nav`.
+
+**Ficheros.**
+- `src/lib/umbrales.ts` — `MAX_CITAS_DE_LA_MISMA_OBRA = 3` y docblocks (UX-DR68/69).
+- `src/lib/publicado.ts` — `repartir`, `citasRelacionadas` con `siguiente`, `citasDeLaMismaObra`, `RutasDeSalidaDeCita`, `rutasDeSalidaDeCita`; `citasDeAutor` admite `readonly`.
+- `src/lib/atribucion.ts` — `cierreDeLaMismaObra`, `cierreDeMasDelAutor` (lanzan con recuento < 2).
+- `src/pages/cita/[slug].astro` — `rutas` en `getStaticPaths` con el mismo `porObra` y `siguiente`.
+- `src/components/RutasDeSalida.astro` — reescrito.
+- `src/components/TarjetaDeCita.astro`, `src/components/Rotulo.astro`, `tools/lib/cambios.ts` — solo comentarios.
+- `AGENTS.md` — párrafo de `TarjetaDeCita` en presente y subsección «Al pie de la Página de Cita (Historia 24.6)».
+- `tests/unit/rutas-de-salida.test.ts` y `tests/unit/ayuda/rutas-de-salida.ts` (nuevos); `tests/unit/ayuda/listado.ts` (`tarjetasDe`); `citas-relacionadas`, `tarjeta-de-cita`, `medicion` según el spec; `tarjeta-de-obra.test.ts` —fuera de la lista del spec— mira el marcado de la Cita sin Obra solo hasta `nav.salidas`, porque los cierres del pie son Filas de bloque que no son de la Tarjeta de Obra.
+- `tests/e2e/{rutas-de-salida,receptor,pagina-de-cita,accesibilidad,busqueda}.spec.ts` y `tests/e2e/ayuda/corpus.ts` (`citaConLosDosBloques`, `citaSinMismaObra`, `citaSinMasDelAutor`).
+
+**Revisión.** Ningún parche, nada diferido por revisión, nada rechazado (capas externas sin hallazgos en esta pasada). Diferido aparte: el docblock rancio de `Chips.astro` (solo lectura según el Code Map). `followup_review_recommended: false` (parches: 0 high, 0 medium, 0 low; puntuación 0).
+
+**Verificación.**
+- `npm run check` (`astro check`): 0 errores.
+- Vitest uno a uno: `rutas-de-salida` (32), `citas-relacionadas` (8), `tarjeta-de-cita` (20), `medicion` (496), `siguiente` (20), `tarjeta-de-obra` (30, tras el ajuste), `obra-pagina` (66), `ediciones-en-venta` (55), `obras` (117), `publicado` (58), `ingreso-construido` (38), `peso` (56), `superficies` (99), `espinas-de-ux` (10), `publicable-y-alcanzable` (30), `fecha-de-cambio-build` (10), `cobertura-build` (2): verdes. `medicion` sin tocar `ZONAS_DE_HOY` ni `esDeOtraEpica`.
+- `npm test` entero: 137 ficheros, 6.244 pruebas, `FINISHED EXIT=0`.
+- Playwright, `accesibilidad`, `pagina-de-cita`, `rutas-de-salida`, `busqueda`, `copiar` y `receptor` en `movil` y `escritorio`: 337 verdes y 3 rojas en la primera pasada —la prueba nueva de tokens medía `--medida-prosa` (en `ch`) con otra letra en la sonda, corregida, y la caída por tiempo ya diferida de `[movil] … ningún enlace saliente apunta a una página que no existe`—; repetidas solas, 14/14 verdes.
+- Construcciones del Corpus real con `FECHA_JORNADA=2026-10-27` y `MEDICION_ENDPOINT=http://localhost:8787/`: línea base (rama en `3f369c8a`), principal (`origin/main` = `881949f4d62a31a308685bc12d2e61d624a6b8fa`, mismo `package.json`/`package-lock.json`) y con la historia; las tres salen con 0 y sin aviso de peso.
+- `diff -rq` línea base → historia: 4.420 `cita/`, `pagefind/`, una hoja `_astro/_slug_.*.css` sustituida, y 863 páginas de otras familias (192 `autor`, 547 `obra`, 107 `tema`, 17 `coleccion`) cuyo **`<body>` es idéntico byte a byte** y cuyo `<head>` solo difiere en la hoja en línea (`<style>`) y la referencia a la hoja: lo que admite el Block If. Sitemaps idénticos, ningún PNG cambia.
+- Páginas de Cita (4.420): con los dos bloques 3.423; solo «De la misma obra» 635; solo «Más de» 324; ninguno de los dos (solo Temas) 38; sin `nav` 0. Máximo 7 tarjetas, en 3.057 páginas. Ninguna Cita sin Obra lleva «De la misma obra»; ningún «→»; todo `nav.salidas` con `data-pagefind-ignore="all"`.
+
+**Peso de `dist/`** (línea de `integraciones/peso.ts`):
+- Principal: 467.323.266 bytes (445,7 MiB) en 15.340 ficheros; juzgado 467.224.460 bytes; PNG 5.116.
+- Rama antes: 475.975.001 bytes (453,9 MiB) en 15.341 ficheros; juzgado 475.876.195 bytes; PNG 5.116.
+- Rama con la 24.6: 490.817.690 bytes (468,1 MiB) en 15.341 ficheros; juzgado 490.718.884 bytes (468 MiB), quedan 295.713.116 bytes (282 MiB) hasta el aviso de 750 MiB; tarjetas sociales 312.472.917 bytes (298 MiB); PNG 5.116.
+
+**Proyección** (para que Héctor revise los valores de la 24.2): Δ = 14.842.689 bytes / 4.420 Páginas de Cita ≈ 3.358 bytes (≈ 3,4 KB) por Página de Cita. Con 1 KB = 1.000 bytes, KB por Cita nueva ≈ 95 + 3,4 = 98,4 KB, y las Citas hasta el aviso, el tope y 1 GB decimal son ≈ **7.426 / 9.026 / 9.598** (frente a ~7.790 / ~9.440 / ~10.030 de la 24.2); con 1 KB = 1.024 bytes (≈ 100,6 KB por Cita), ≈ 7.358 / 8.921 / 9.481. Cotas: un Autor o una Obra nuevos suman además su página y su Tarjeta.
+
+**NFR-7** (sin puerta; Lighthouse 13.5.0, preajuste móvil, cinco pasadas, receptor ficticio en 8787 y `tests/servidor.mjs` en 4400; misma Cita de siete tarjetas, `/cita/alfonso-x-el-sabio-ca-bien-asi-como-la-manziella-tuelle/`, que en la principal tiene cuatro hermanas). Medianas:
+- Principal: LCP 1.953 ms, FCP 1.353 ms, TBT 0 ms, CLS 0, 188.682 bytes, rendimiento 0,99.
+- Rama con la 24.6: LCP 2.252 ms, FCP 1.652 ms, TBT 0 ms, CLS 0, 246.104 bytes, rendimiento 0,98. (La diferencia de bytes suma lo de las 24.1–24.5 de la rama, no solo el pie.)
+
+**Alto a 360 × 640** (`document.documentElement.scrollHeight`, misma página): principal 1.805 px (pie de 579 px); rama 3.078 px (pie de 1.583 px), frente a la estimación ~1.500 → ~2.780.
+
+**Riesgos residuales.** La página se alarga ~1.270 px a 360 en la cara de siete tarjetas (la deuda declarada). La prueba `[movil] … ningún enlace saliente apunta a una página que no existe` sigue cayendo por tiempo cuando corre con el resto del fichero (diferida antes de esta historia); sola, pasa.
