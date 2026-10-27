@@ -299,7 +299,11 @@ function construidaAbierta(): Promise<Awaited<ReturnType<typeof construirConCorp
     const resultado = await construirConCorpus(corpus(1), { paginas: { 'sonda.astro': SONDA } });
     aLimpiar.push(resultado.proyecto);
     return resultado;
-  })();
+  })().catch((error: unknown) => {
+    // Un rechazo no se memoriza: la siguiente `describe` vuelve a intentarlo en vez de heredarlo.
+    abiertaMemorizada = undefined;
+    throw error;
+  });
   return abiertaMemorizada;
 }
 

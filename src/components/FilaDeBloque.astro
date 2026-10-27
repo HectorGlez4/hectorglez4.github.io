@@ -20,6 +20,9 @@
  * El glifo de avance es «›» (U+203A), UX-DR107 en la v8.3: un glifo tipográfico del rótulo,
  * nunca un icono, un SVG ni un `content` de CSS, en un `span` `aria-hidden` —el nombre accesible
  * del enlace es solo su texto— y pegado a él con `&nbsp;` para que nunca quede solo en una línea.
+ * Texto y glifo van juntos en un único `span`, el único hijo del enlace: el enlace es flexible, y
+ * un glifo hermano del texto sería otro elemento flexible, que al partirse el texto se quedaría en
+ * su propia columna, centrado al lado, en vez de seguir a la última palabra.
  * No es la flecha «→» (U+2192) porque esa no está en el subconjunto `latin` de Inter ni de Source
  * Serif 4, y la puerta de cobertura tipográfica pararía todas las Páginas de Cita; «›» sí lo está
  * (`U+2000-206F`). Lo decidió Héctor el 2026-10-27, y lo heredan todos los usos de la fila.
@@ -44,7 +47,7 @@ interface Props {
 const { href, zona, avance } = Astro.props;
 ---
 
-<li class="fila-de-bloque" data-zona={zona}><a href={href}><slot />{avance && <span aria-hidden="true">&nbsp;›</span>}</a></li>
+<li class="fila-de-bloque" data-zona={zona}><a href={href}><span><slot />{avance && <span aria-hidden="true">&nbsp;›</span>}</span></a></li>
 
 <style>
   /* UX-DR13 — el filete de 1px es el único separador. */

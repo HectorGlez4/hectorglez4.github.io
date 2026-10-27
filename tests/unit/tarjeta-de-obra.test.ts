@@ -333,6 +333,7 @@ describe('Historia 24.4 — el contrato de los componentes, sin construir', () =
     expect(titulo.get('font-family')).toBe('var(--sans)');
     expect(titulo.get('font-size')).toBe('var(--cuerpo-lg)');
     expect(titulo.get('font-weight')).toBe('600');
+    expect(titulo.get('line-height')).toBe('1.4');
     expect(titulo.get('color')).toBe('var(--tinta)');
     expect(titulo.get('text-wrap')).toBe('balance');
     expect(titulo.get('overflow-wrap')).toBe('break-word');
@@ -536,13 +537,34 @@ const otro = conjunto.autores.find((a) => a.slug === 'antonio-machado')!;
 
 // ─── Una construcción ────────────────────────────────────────────────────────
 
+/**
+ * La sonda del nivel 3: la tarjeta como la pintará la portada (28.2), bajo otro `h2`, y el
+ * `Rotulo` con y sin `nivel`. Sin armazón: no es una superficie del sitio.
+ */
+/** Una página sin sus `<style>` en línea: lo que se mira es el marcado. */
+const sinHojas = (pagina: string) => pagina.replace(/<style\b[^>]*>[\s\S]*?<\/style>/g, '');
+
+const SONDA_NIVEL_3 = `---
+import TarjetaDeObra from '../components/TarjetaDeObra.astro';
+import Rotulo from '../components/Rotulo.astro';
+import { conjuntoPublicable } from '../lib/publicado.ts';
+const conjunto = await conjuntoPublicable();
+const cita = conjunto.citas.find((c) => c.slug === 'seneca-brevedad-0')!;
+const autor = conjunto.autores.find((a) => a.slug === cita.autor)!;
+---
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8" /><title>Sonda</title></head>
+<body><h2>La cita de hoy</h2><TarjetaDeObra cita={cita} autor={autor} nivel={3} />
+<Rotulo id="sin-nivel">Sin nivel</Rotulo><Rotulo id="nivel-2" nivel={2}>Nivel 2</Rotulo><Rotulo id="nivel-3" nivel={3}>Nivel 3</Rotulo></body></html>
+`;
+
 describe('Historia 24.4 — la tarjeta en cada Página de Cita, construida', () => {
   const { corpus, esperadas } = corpusDeLaTarjeta();
   let proyecto = '';
   const html = (ruta: string) => readFile(paginaConstruida(proyecto, ruta), 'utf8');
 
   beforeAll(async () => {
-    const resultado = await construirConCorpus(corpus);
+    const resultado = await construirConCorpus(corpus, { paginas: { 'sonda-nivel-3.astro': SONDA_NIVEL_3 } });
     aLimpiar.push(resultado.proyecto);
     expect(resultado.codigo, resultado.salida).toBe(0);
     proyecto = resultado.proyecto;
@@ -559,10 +581,13 @@ describe('Historia 24.4 — la tarjeta en cada Página de Cita, construida', () 
     for (const [slug, esperada] of esperadas) {
       const pagina = await html(`/cita/${slug}/`);
       if (esperada === undefined) {
+        // El marcado, sin las hojas en línea: la sonda del nivel 3 comparte la hoja de la
+        // tarjeta con la Página de Cita, y Astro puede ponerla en línea en todas.
+        const marcado = sinHojas(pagina);
         expect(cuantasTarjetasDeObra(pagina), slug).toBe(0);
-        expect(pagina, slug).not.toContain('tarjeta-de-obra');
-        expect(pagina, slug).not.toContain('De la obra');
-        expect(pagina, slug).not.toContain('fila-de-bloque');
+        expect(marcado, slug).not.toContain('tarjeta-de-obra');
+        expect(marcado, slug).not.toContain('De la obra');
+        expect(marcado, slug).not.toContain('fila-de-bloque');
         // Copiar sigue a la Atribución, sin nada entre medias.
         const article = pagina.slice(pagina.indexOf('<article'));
         expect(article.indexOf('</figure>'), slug).toBeLessThan(article.indexOf('<div class="isla"'));
@@ -634,6 +659,10 @@ describe('Historia 24.4 — la tarjeta en cada Página de Cita, construida', () 
 
       const interior = /<a\b[^>]*>([\s\S]*?)<\/a>/.exec(tarjeta)![1];
       expect(textosDelEnlace(interior).lector, slug).toBe(esperada.fila);
+      // Texto y glifo en un solo `span`, el único hijo del enlace flexible: si fueran dos
+      // hijos, al partir el texto el glifo quedaría en su propia columna y no tras la última
+      // palabra.
+      expect(interior, slug).toMatch(/^<span\b(?![^>]*aria-hidden)[^>]*>[^<]+<span aria-hidden="true"[^>]*>&nbsp;›<\/span><\/span>$/);
       const ocultos = [...interior.matchAll(/<span\b[^>]*aria-hidden="true"[^>]*>([\s\S]*?)<\/span>/g)].map((m) =>
         m[1].replace(/&nbsp;/g, '\u00A0'),
       );
@@ -653,5 +682,38 @@ describe('Historia 24.4 — la tarjeta en cada Página de Cita, construida', () 
       if (esperada.noindex) vistas.push(slug);
     }
     expect(vistas.sort()).toEqual(['antonio-machado-soledades-0', 'antonio-machado-soledades-1', 'seneca-ira-0']);
+  });
+
+  it('la página a la que lleva cumple lo que promete la fila: «y dónde leerla» solo con edición cotejada', async () => {
+    for (const [slug, esperada] of esperadas) {
+      if (esperada === undefined) continue;
+      const href = enlacesDe(tarjetaDeObraDe(await html(`/cita/${slug}/`))!)[0].href!;
+      const obra = await html(href);
+      expect(obra, `${slug} → ${href}`).toContain('Dónde leer esta obra');
+      const cotejada = obra.includes('id="edicion-cotejada"');
+      expect(cotejada, `${slug} → ${href}`).toBe(esperada.fila === FILA_VER_LA_OBRA_Y_DONDE_LEERLA);
+      if (!cotejada) expect(obra, `${slug} → ${href}`).toContain('Ninguna de sus citas tiene todavía documento cotejado.');
+    }
+  });
+
+  it('ni la portada ni el 404 llevan la tarjeta', async () => {
+    for (const ruta of ['index.html', '404.html']) {
+      const fichero = join(proyecto, 'dist', ruta);
+      expect(existsSync(fichero), ruta).toBe(true);
+      const marcado = sinHojas(await readFile(fichero, 'utf8'));
+      expect(marcado, ruta).not.toContain('tarjeta-de-obra');
+      expect(marcado, ruta).not.toContain('fila-de-bloque');
+    }
+  });
+
+  it('con `nivel={3}` el rótulo es un `h3`, y `Rotulo` sin `nivel` sigue siendo un `h2`', async () => {
+    const sonda = await html('/sonda-nivel-3/');
+    const leida = leerTarjetaDeObra(tarjetaDeObraDe(sonda)!);
+    expect(leida.rotulo).toEqual({ etiqueta: 'h3', id: 'de-la-obra', texto: 'De la obra' });
+    expect(leida.titulo).toEqual({ texto: BREVEDAD, conEnlace: false });
+    const rotulos = [...sonda.matchAll(/<(h[1-6])\b([^>]*)>/g)]
+      .filter((m) => /\bclass="rotulo"/.test(m[2]))
+      .map((m) => [/\bid="([^"]+)"/.exec(m[2])?.[1], m[1]]);
+    expect(Object.fromEntries(rotulos)).toEqual({ 'de-la-obra': 'h3', 'sin-nivel': 'h2', 'nivel-2': 'h2', 'nivel-3': 'h3' });
   });
 });

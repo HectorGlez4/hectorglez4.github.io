@@ -12,11 +12,13 @@ import {
 } from '../../src/lib/superficies.ts';
 import { desviacionDelBarrido, reglasDeLaPagina, sinDecidir, versionesDeAxe } from './ayuda/barrido.ts';
 import {
+  SIN_TARJETA_COMPLETA,
   citaConTarjetaCompleta,
   citaConTituloDeObraMasLargo,
   citaDeObraSinCotejar,
   citaSinObra,
 } from './ayuda/corpus.ts';
+import { leerTarjetaDeObra, tarjetaDeObraDe } from '../unit/ayuda/tarjeta-de-obra.js';
 
 /**
  * Historia 2.8 — accesibilidad y comportamiento responsive.
@@ -117,39 +119,52 @@ const OBRAS_DEL_BARRIDO = [OBRAS.indexable, OBRAS.noIndexable, OBRAS.segunda, OB
  * los mismos ayudantes que las demás pruebas y nunca fijadas a mano: la de la tarjeta completa
  * (Línea de la Fuente, tarjeta con «Ver la obra y dónde leerla ›», Copiar e Imagen), la de una
  * Cita sin Obra (sin tarjeta), la de una Obra sin cotejar («Ver la obra ›») y la del título de
- * Obra más largo, que es la que puede desbordar la columna. Las dos primeras son obligatorias;
- * las otras dos entran si el Corpus de hoy las tiene, y la prueba de abajo nombra la que falte.
+ * Obra más largo, que es la que puede desbordar la columna. Las dos primeras son obligatorias
+ * —si el Corpus de hoy no las tiene, fallan las pruebas que las piden, nombrando la que falta, y
+ * no el fichero entero al cargarse—; las otras dos entran si el Corpus las tiene, y la prueba de
+ * abajo nombra la que falte.
  */
-const SIN_OBRA = citaSinObra();
-if (SIN_OBRA === undefined) throw new Error('El Corpus no tiene ninguna Cita sin Obra: no hay cara sin tarjeta que barrer.');
 const CITAS_24_4 = {
-  completa: `/cita/${citaConTarjetaCompleta().slug}/`,
-  sinObra: `/cita/${SIN_OBRA.slug}/`,
+  completa: ((c) => (c === undefined ? undefined : `/cita/${c.slug}/`))(citaConTarjetaCompleta()),
+  sinObra: ((c) => (c === undefined ? undefined : `/cita/${c.slug}/`))(citaSinObra()),
   sinCotejar: ((c) => (c === undefined ? undefined : `/cita/${c.slug}/`))(citaDeObraSinCotejar()),
   tituloLargo: ((c) => (c === undefined ? undefined : { ruta: `/cita/${c.slug}/`, titulo: c.titulo }))(
     citaConTituloDeObraMasLargo(),
   ),
 };
+const SIN_CITA_SIN_OBRA = 'El Corpus no tiene ninguna Cita sin Obra: no hay cara sin tarjeta que barrer.';
+/** La ruta de una cara obligatoria, o el fallo de la prueba que la pide, con su motivo. */
+function obligatoria(ruta: string | undefined, motivo: string): string {
+  expect(ruta, motivo).toBeDefined();
+  return ruta!;
+}
 const CITAS_DEL_BARRIDO = [
   CITAS_24_4.completa,
   CITAS_24_4.sinObra,
-  ...(CITAS_24_4.sinCotejar === undefined ? [] : [CITAS_24_4.sinCotejar]),
-  ...(CITAS_24_4.tituloLargo === undefined ? [] : [CITAS_24_4.tituloLargo.ruta]),
-];
+  CITAS_24_4.sinCotejar,
+  CITAS_24_4.tituloLargo?.ruta,
+].filter((ruta): ruta is string => ruta !== undefined);
 
-const SUPERFICIES = [...new Set([...DERIVADAS, ...OBRAS_DEL_BARRIDO, ...CITAS_DEL_BARRIDO])];
+/** Una ruta sin su barra final: la muestra derivada las da sin ella, y las de arriba con ella. */
+const sinBarra = (ruta: string) => (ruta.length > 1 ? ruta.replace(/\/$/, '') : ruta);
+/** Sin repetir una página por escribirse con barra final y sin ella: axe la barrería dos veces. */
+const SUPERFICIES = [...DERIVADAS, ...OBRAS_DEL_BARRIDO, ...CITAS_DEL_BARRIDO].filter(
+  (ruta, i, todas) => todas.findIndex((otra) => sinBarra(otra) === sinBarra(ruta)) === i,
+);
 
 /** El HTML construido de una ruta con barra final. */
 const construida = (ruta: string) => readFileSync(join(dist, ...ruta.split('/').filter(Boolean), 'index.html'), 'utf8');
-/** La Tarjeta de Obra de una página construida, o `undefined`. */
-const tarjetaDe = (html: string) => /<section class="tarjeta-de-obra"[\s\S]*?<\/section>/.exec(html)?.[0];
+/** La Tarjeta de Obra de una página construida, o `undefined`: el mismo lector que las pruebas unitarias. */
+const tarjetaDe = (html: string) => tarjetaDeObraDe(html);
 
 test('24.4 — las Páginas de Cita del barrido salen del Corpus, cada una con su cara', () => {
-  const completa = construida(CITAS_24_4.completa);
-  expect(completa, CITAS_24_4.completa).toContain('<p class="fuente"');
-  expect(tarjetaDe(completa), CITAS_24_4.completa).toMatch(/>Ver la obra y dónde leerla<span aria-hidden="true"[^>]*>&nbsp;›<\/span>/);
-  const sinObra = construida(CITAS_24_4.sinObra);
-  expect(sinObra, CITAS_24_4.sinObra).not.toContain('tarjeta-de-obra');
+  const rutaCompleta = obligatoria(CITAS_24_4.completa, SIN_TARJETA_COMPLETA);
+  const rutaSinObra = obligatoria(CITAS_24_4.sinObra, SIN_CITA_SIN_OBRA);
+  const completa = construida(rutaCompleta);
+  expect(completa, rutaCompleta).toContain('<p class="fuente"');
+  expect(tarjetaDe(completa), rutaCompleta).toMatch(/>Ver la obra y dónde leerla<span aria-hidden="true"[^>]*>&nbsp;›<\/span>/);
+  const sinObra = construida(rutaSinObra);
+  expect(sinObra, rutaSinObra).not.toContain('tarjeta-de-obra');
   if (CITAS_24_4.sinCotejar === undefined) {
     test.info().annotations.push({ type: 'cara sin barrer', description: 'el Corpus no tiene ninguna Obra sin cotejar' });
   } else {
@@ -161,14 +176,11 @@ test('24.4 — las Páginas de Cita del barrido salen del Corpus, cada una con s
     test.info().annotations.push({ type: 'cara sin barrer', description: 'el Corpus no tiene ninguna Cita con Obra' });
   } else {
     const { ruta, titulo } = CITAS_24_4.tituloLargo;
-    const tarjeta = tarjetaDe(construida(ruta)) ?? '';
-    const enLaTarjeta = /<p class="titulo"[^>]*>([\s\S]*?)<\/p>/.exec(tarjeta)?.[1]
-      ?.replace(/&amp;/g, '&')
-      .replace(/&quot;/g, '"')
-      .replace(/&#39;/g, "'");
-    expect(enLaTarjeta, ruta).toBe(titulo);
+    const tarjeta = tarjetaDe(construida(ruta));
+    expect(tarjeta, ruta).toBeDefined();
+    expect(leerTarjetaDeObra(tarjeta!).titulo?.texto, ruta).toBe(titulo);
   }
-  for (const ruta of CITAS_DEL_BARRIDO) expect(SUPERFICIES, ruta).toContain(ruta);
+  for (const ruta of CITAS_DEL_BARRIDO) expect(SUPERFICIES.map(sinBarra), ruta).toContain(sinBarra(ruta));
 });
 
 test('24.4 — a 320 px el título de Obra más largo de la tarjeta parte en varias líneas, sin desplazamiento', async ({
@@ -600,7 +612,7 @@ test.describe('Historia 2.8 — foco', () => {
   }
 
   test('en la Página de Cita el orden es contenido, tarjeta, acciones y después salidas', async ({ page }) => {
-    const ruta = CITAS_24_4.completa;
+    const ruta = obligatoria(CITAS_24_4.completa, SIN_TARJETA_COMPLETA);
     const { paradas, grupos } = await paradasDesdeElAutor(page, ruta);
     expect(grupos, `${ruta}\n${JSON.stringify(paradas)}`).toEqual(['contenido', 'tarjeta', 'accion', 'salida']);
     const contenido = paradas.filter((p) => p.grupo === 'contenido');
@@ -616,7 +628,7 @@ test.describe('Historia 2.8 — foco', () => {
   });
 
   test('sin Obra, el orden es contenido, acciones y después salidas', async ({ page }) => {
-    const ruta = CITAS_24_4.sinObra;
+    const ruta = obligatoria(CITAS_24_4.sinObra, SIN_CITA_SIN_OBRA);
     const { paradas, grupos } = await paradasDesdeElAutor(page, ruta);
     expect(grupos, `${ruta}\n${JSON.stringify(paradas)}`).toEqual(['contenido', 'accion', 'salida']);
   });

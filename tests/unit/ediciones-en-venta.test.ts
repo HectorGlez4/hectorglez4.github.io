@@ -862,8 +862,10 @@ describe('Historia 24.4 — la Tarjeta de Obra, igual con la afiliación encendi
   }, 600_000);
 
   it('en toda Página de Cita, la tarjeta es la misma byte a byte, y ninguna lleva `data-ingreso`', async () => {
-    // Las 51 de Brevedad, la de Cartas y la de De la ira: todas con Obra.
-    expect(citas).toHaveLength(53);
+    // Todas las Citas del fixture —las de Brevedad, la de Cartas y la de De la ira—, todas con Obra.
+    const delFixture = Object.keys(corpusConstruido(true)).filter((ruta) => ruta.startsWith('citas/'));
+    expect(citas.length).toBeGreaterThan(0);
+    expect(citas).toHaveLength(delFixture.length);
     for (const slug of citas) {
       const ruta = `/cita/${slug}/`;
       const [con, sin] = [await html(encendida, ruta), await html(apagada, ruta)];

@@ -35,7 +35,7 @@ export function tarjetaDeObraDe(html: string): string | undefined {
 /** Un texto de marcado sin etiquetas, decodificado y con los espacios colapsados. */
 function soloTexto(marcado: string): string {
   return decodificar(marcado.replace(/<[^>]*>/g, ''))
-    .replace(/ /g, ' ')
+    .replace(/\u00A0/g, ' ')
     .replace(/&nbsp;/g, ' ')
     .replace(/\s+/g, ' ')
     .trim();

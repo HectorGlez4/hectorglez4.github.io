@@ -29,6 +29,11 @@ interface Props {
 const { id, destino, nivel = 2 } = Astro.props;
 ---
 
+{/*
+  * Dos ramas con el mismo marcado, y no una etiqueta dinámica (`const Encabezado = 'h3'`): Astro
+  * pinta el atributo de ámbito de una etiqueta dinámica como `data-astro-cid-…="true"`, y los
+  * rótulos de hoy dejarían de salir byte a byte iguales. Un atributo nuevo va en las dos ramas.
+  */}
 {
   nivel === 3 ? (
     <h3 class="rotulo" id={id} tabindex={destino ? -1 : undefined}><slot /></h3>

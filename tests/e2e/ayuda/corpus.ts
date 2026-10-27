@@ -184,7 +184,7 @@ function citasResueltas(): CitaResuelta[] {
         slug: string;
         autor: string;
         texto: string;
-        procedencia?: { obra?: string; año?: number } | null;
+        procedencia?: { obra?: string } | null;
         fuente?: { id: string } | null;
       };
       // La Fuente también: de ella sale si la Obra tiene edición cotejada (Historia 24.4).
@@ -218,9 +218,11 @@ const porSlug = (a: { slug: string }, b: { slug: string }) => (a.slug < b.slug ?
 /**
  * Historia 24.4 — una Cita con la Tarjeta de Obra entera: su Obra tiene al menos dos Citas y
  * edición cotejada, y ella misma tiene Fuente y texto que cabe en la Imagen de Cita (así su
- * página lleva Línea de la Fuente, tarjeta, Copiar e Imagen). La primera por slug.
+ * página lleva Línea de la Fuente, tarjeta, Copiar e Imagen). La primera por slug, o
+ * `undefined` si el Corpus de hoy no la tiene: la cara es obligatoria, y la hace fallar cada
+ * prueba que la pide —nunca una excepción al cargar el fichero, que tumbaría el barrido entero—.
  */
-export function citaConTarjetaCompleta(): { slug: string; autor: string; titulo: string } {
+export function citaConTarjetaCompleta(): { slug: string; autor: string; titulo: string } | undefined {
   const cita = citasResueltas()
     .filter(
       (c) =>
@@ -231,11 +233,12 @@ export function citaConTarjetaCompleta(): { slug: string; autor: string; titulo:
         c.texto.length <= MAX_CARACTERES_IMAGEN,
     )
     .sort(porSlug)[0];
-  if (cita === undefined) {
-    throw new Error('El Corpus no tiene ninguna Cita con Fuente de una Obra de dos o más Citas: no hay tarjeta completa que probar.');
-  }
-  return { slug: cita.slug, autor: cita.autor, titulo: cita.obra! };
+  return cita === undefined ? undefined : { slug: cita.slug, autor: cita.autor, titulo: cita.obra! };
 }
+
+/** Por qué falla una prueba de la 24.4 cuando el Corpus no tiene la cara que pide. */
+export const SIN_TARJETA_COMPLETA =
+  'El Corpus no tiene ninguna Cita con Fuente de una Obra de dos o más Citas: no hay tarjeta completa que probar.';
 
 /**
  * Historia 24.4 — una Cita cuya Obra no tiene ninguna Cita cotejada (su tarjeta dice «Ver la

@@ -1,6 +1,7 @@
 import { expect, test, type Page } from '@playwright/test';
 import { MAX_BYTES_DE_GUION } from '../../src/lib/umbrales.ts';
 import {
+  SIN_TARJETA_COMPLETA,
   citaConObraMasLarga,
   citaConProcedenciaCompleta,
   citaConTarjetaCompleta,
@@ -574,18 +575,21 @@ test.describe('Historia 22.5 — los enlaces en tinta de la Atribución', () => 
  *
  * La Tarjeta de Obra va entre la Línea de la Fuente y Copiar. Se mide en el navegador lo que la
  * prueba unitaria no ve: que el texto de la Cita sigue empezando en la primera pantalla de
- * 360 × 640 (que Copiar quede justo debajo es deuda aceptada que vigila SM-C5, y su posición se
- * anota), los tokens calculados de la tarjeta y de su fila, y la separación de las acciones de
- * debajo. Las Citas salen del Corpus, nunca fijadas a mano. Los valores esperados salen de los
- * tokens de la propia página.
+ * 360 × 640 (que Copiar quede justo debajo es deuda aceptada que vigila SM-C5: su posición se
+ * anota, y se exige que no pase de la segunda pantalla), los tokens calculados de la tarjeta y
+ * de su fila, y la separación de las acciones de debajo. Las Citas salen del Corpus, nunca
+ * fijadas a mano. Los valores esperados salen de los tokens de la propia página.
  */
 test.describe('Historia 24.4 — la Tarjeta de Obra en la Página de Cita', () => {
-  const completa = `/cita/${citaConTarjetaCompleta().slug}/`;
+  // La cara es obligatoria: si el Corpus de hoy no la tiene, fallan las pruebas que la piden, y
+  // no el fichero entero al cargarse.
+  const completa = ((c) => (c === undefined ? undefined : `/cita/${c.slug}/`))(citaConTarjetaCompleta());
   const larga = citaConTituloDeObraMasLargo();
-  const conTarjeta = [completa, ...(larga === undefined ? [] : [`/cita/${larga.slug}/`])];
+  const conTarjeta = [completa ?? '(sin tarjeta completa)', ...(larga === undefined ? [] : [`/cita/${larga.slug}/`])];
 
-  async function abrir(page: Page, ruta: string) {
-    await page.goto(ruta);
+  async function abrir(page: Page, ruta: string | undefined) {
+    expect(ruta, SIN_TARJETA_COMPLETA).toBeDefined();
+    await page.goto(ruta!);
     await page.evaluate(async () => {
       await document.fonts.ready;
     });
@@ -596,7 +600,7 @@ test.describe('Historia 24.4 — la Tarjeta de Obra en la Página de Cita', () =
       page,
     }, info) => {
       test.skip(info.project.name !== 'movil', 'El criterio se enuncia sobre 360×640.');
-      await abrir(page, ruta);
+      await abrir(page, ruta === '(sin tarjeta completa)' ? undefined : ruta);
       expect(await page.evaluate(() => window.scrollY)).toBe(0);
       const cita = await page.locator('blockquote .texto').boundingBox();
       const tarjeta = await page.locator('.tarjeta-de-obra').boundingBox();
@@ -607,6 +611,9 @@ test.describe('Historia 24.4 — la Tarjeta de Obra en la Página de Cita', () =
       expect(cita!.y, ruta).toBeGreaterThan(0);
       expect(cita!.y, ruta).toBeLessThan(640);
       expect(copiar!.y, ruta).toBeGreaterThanOrEqual(tarjeta!.y + tarjeta!.height);
+      // «Justo debajo»: la deuda aceptada es que Copiar salga de la primera pantalla, no que se
+      // vaya más allá de la segunda (medido el 2026-10-27: y = 756 y 867).
+      expect(copiar!.y, `${ruta}: Copiar pasa de la segunda pantalla`).toBeLessThan(640 * 2);
       info.annotations.push({
         type: '24.4 a 360 × 640',
         description: `${ruta}: tarjeta de ${Math.round(tarjeta!.height)} px desde y = ${Math.round(tarjeta!.y)}; Copiar en y = ${Math.round(copiar!.y)} (${copiar!.y + copiar!.height <= 640 ? 'dentro' : 'fuera'} de la primera pantalla)`,
