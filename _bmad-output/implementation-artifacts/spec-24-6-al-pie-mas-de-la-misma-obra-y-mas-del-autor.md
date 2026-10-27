@@ -10,14 +10,7 @@ context:
   - '{project-root}/_bmad-output/implementation-artifacts/epic-24-context.md'
 warnings:
   - oversized
-deferred:
-  - summary: >-
-      El docblock de src/components/Chips.astro aún dice que la lista lleva, «como último recurso de las Rutas de salida», a un Autor; ese respaldo se retiró en la 24.6.
-    evidence: |-
-      La 24.6 quita la sección «Seguir leyendo» con el chip «Sobre {Autor}», y Chips ya solo se usa para Temas. El Code Map del spec declara Chips.astro de solo lectura, así que el comentario no se tocó en esta historia; es un comentario, sin efecto en dist/.
-    location: >-
-      src/components/Chips.astro:5
-    severity: low
+deferred: []
 ---
 
 <intent-contract>
@@ -168,6 +161,30 @@ Las capas de revisión son externas en este bucle y no traían hallazgos en esta
 
 Rechazados: el orden de parámetros de las dos elecciones (lo fija el intent-contract); el coste por página del recuento (≈ 2·10⁷ comparaciones por construcción, sin efecto medible); el respaldo de FR-12 (UX-DR67 y el intent-contract lo retiran, y «nunca sin enlaces internos» lo cumple la Atribución, que la prueba sigue mirando); `aria-labelledby` en las secciones (convertiría tres `section` en regiones dentro del `nav`; la navegación por `h2` ya existe); `status: done` frente a `review` (el spec cierra el bucle de construcción; el tablero dice revisión, como debe); el recuento de la Obra frente al largo de su grupo (salen de la misma resolución, y (c) lo ata al Listado de Obra de `dist/`); `cita`/`siguiente` como props del componente (cambiaría el contrato de Props del spec; lo cubre `rutasDeSalidaDeCita` y (b)); la garantía de ≤ 7 en el Corpus real solo por recuento a mano (el ac-auditor la repitió sobre las 4.420 páginas); el título frente a la identidad de la Obra en e2e (la identidad la mira (d)); `aria-label="Seguir leyendo"` en el `nav` (lo pide el spec); las historias previas en `review` y la caída por tiempo ya diferida de `[movil] rutas-de-salida.spec.ts:159`.
 
+### 2026-10-27 — Review pass
+- intent_gap: 0
+- bad_spec: 0
+- patch: 14: (high 0, medium 2, low 12)
+- defer: 0
+- reject: 15: (high 0, medium 0, low 15)
+- addressed_findings:
+  - `[medium]` `[patch]` La rama del `nav` con solo «De la misma obra» no la construía nada (verification-gap): el fixture de `rutas-de-salida.test.ts` gana a Marco Aurelio, una sola Obra de 4 sin Temas, con `{ mismaObra: 2, delAutor: 0, chip: false }` en `ESPERADO` y «Las 4 citas de Meditaciones» en los cierres; quitar `mismaObra !== undefined ||` de `hayAlgo` pone (c), (f) y (j) en rojo (comprobado y restituido).
+  - `[medium]` `[patch]` `[movil] rutas-de-salida.spec.ts` «ningún enlace saliente apunta a una página que no existe» caía por tiempo con el resto del fichero (ac-auditor): `test.setTimeout(180_000)`, con el porqué —el pie de la 24.6 enlaza hasta nueve páginas por Cita—.
+  - `[low]` `[patch]` Las guardas no cubrían un grupo vacío, los máximos, un cierre que cuenta menos de lo que enseña ni la Obra de otro Autor (blind-hunter, edge-case-hunter; también la falta de una guarda contra contar en el componente, ac-auditor): la pura `problemaDeRutasDeSalida` de `src/lib/publicado.ts` las reúne todas —con los mismos mensajes de antes para las tres de la pasada 1— y el componente solo para la construcción con lo que diga; once pruebas sin construir, y las tres sondas siguen verdes.
+  - `[low]` `[patch]` Que una Obra de dos no tenga «De la misma obra» dependía de «Siguiente» sin decirlo ni probarlo (blind-hunter, intent-alignment R3): lo dicen los docblocks de `rutasDeSalidaDeCita` y `recuentoDeCierre` y `AGENTS.md`, y una prueba pura lo ata a `siguienteCita` desde las dos Citas de la Obra.
+  - `[low]` `[patch]` La prueba de tabulación encogía lo esperado si los chips no recibían foco (blind-hunter): si hay chips lo dice el marcado (`section.temas-de-la-cita a`).
+  - `[low]` `[patch]` «Más de» se comparaba en e2e por el título de la Obra (blind-hunter, ac-auditor): además, por la ficha de cada Cita (`fichasDeObraPorCita` de `tests/e2e/ayuda/corpus.ts`).
+  - `[low]` `[patch]` Ninguna prueba exigía que el cierre fuera el último `li` de su lista (ac-auditor): el lector de `dist/` da las `piezas` de cada `ul.tarjetas` y (f) exige tarjetas y, la última, la Fila de bloque.
+  - `[low]` `[patch]` `AGENTS.md` decía que no se ordena fuera de `src/lib/obras.ts` (blind-hunter): lo que no se recalcula fuera es el orden del libro; «Más de» sigue poniendo primero las que comparten Tema. (La regla del intent-contract no se toca.)
+  - `[low]` `[patch]` Por qué el `nav` se sigue llamando «Seguir leyendo» no constaba (blind-hunter): lo dicen el docblock del componente y `AGENTS.md`.
+  - `[low]` `[patch]` `COLOCACION` no decía por qué no ve la zona `misma-obra` (blind-hunter): comentario en `medicion.test.ts` —`esDeOtraEpica` la aparta, y la mira (c)—, sin tocar `ZONAS_DE_HOY` ni `esDeOtraEpica`.
+  - `[low]` `[patch]` Renglón de ~140 columnas en el docblock de `Chips.astro` (blind-hunter): reajustado a ~100.
+  - `[low]` `[patch]` El frontmatter seguía difiriendo el docblock de `Chips.astro`, ya resuelto (blind-hunter): sale de `deferred`. (`review_loop_iteration: 0` es el que pone el paso 1 a cada pasada nueva.)
+  - `[low]` `[patch]` El Auto Run Result se contradecía con la pasada de construcción (blind-hunter): ese párrafo queda marcado como superado.
+  - `[low]` `[patch]` Los ~269 px se daban como medidos (blind-hunter, intent-alignment R9): el Auto Run Result dice que salen por diferencia y que NFR-7 suma las 24.1–24.6.
+
+Rechazados: aislar NFR-7 y el alto de la 24.6 sola (el criterio pide la principal del mismo día); FR-12 sin guarda de CI en el Corpus real (la Atribución enlaza siempre al Autor, y el contrato retira el respaldo); `misma-obra` en `receptor.spec.ts` (su sitio no tiene ninguna Obra de tres o más; la zona sale de la declaración más cercana, que (c) mira en `dist/`); los `id` fijos de los rótulos (los fija el contrato, una vez por página); la excepción «no fecha ni avisa» y el efecto en SEO del texto repetido (decisiones de Héctor fuera de la historia); el alto a 360 sin umbral (el criterio pide anotarlo); el lector por expresiones de `dist/` (hipotético); `AGENTS.md` sin la proyección (es una cifra de un día, en la nota del tablero); las divergencias R4, R7, R8, la holgura de bordes y las ediciones fuera del Code Map (las fija el contrato o ya se triaron en la pasada 1); el interlineado 1,4 de la Fila de bloque (diferido ya en la 24.4); el antepasado de la Tarjeta de Obra (triado en la pasada 1); las historias previas en `review`.
+
 ## Design Notes
 
 **Fixture de `rutas-de-salida.test.ts`** (patrón de `tarjeta-de-obra.test.ts:464-540`: con censo, los documentos se escriben a mano, uno por Obra con los textos en orden de inserción). Autores `seneca` (`AUTOR_VALIDO`), `epicteto`, `antonio-machado`; Tema `el-tiempo` (`TEMA_VALIDO`, ≥ 15). Séneca 15: «Sobre la brevedad de la vida» 8 (`seneca-brevedad-0…7`, insertadas 7…0: orden del libro inverso al de los slugs, `el-tiempo`), «Cartas a Lucilio» 3 (`el-tiempo`), «Sobre la vida feliz» 2, «De la ira» 1 (`temas: []`), una sin Obra en el censo. Epicteto: «Manual» 5 (`el-tiempo`). Machado: «Soledades» 1 (`temas: []`). Esperado: brevedad con 3 + 4 tarjetas (7) y chip; cartas 1 + 4; vida feliz 0 + 4; ira 0 + 4 sin Temas; sin Obra sin tarjeta de obra y 4 de las 14; Manual 3 + 0; Soledades sin `nav`. Cierres: «Las 8 citas de Sobre la brevedad de la vida», «Las 3 citas de Cartas a Lucilio», «Las 5 citas de Manual», «Las 15 citas de Séneca»; Epicteto, ninguno.
@@ -207,7 +224,7 @@ Blocking condition: ninguna.
 - `tests/unit/rutas-de-salida.test.ts` y `tests/unit/ayuda/rutas-de-salida.ts` (nuevos); `tests/unit/ayuda/listado.ts` (`tarjetasDe`); `citas-relacionadas`, `tarjeta-de-cita`, `medicion` según el spec; `tarjeta-de-obra.test.ts` —fuera de la lista del spec— mira el marcado de la Cita sin Obra solo hasta `nav.salidas`, porque los cierres del pie son Filas de bloque que no son de la Tarjeta de Obra.
 - `tests/e2e/{rutas-de-salida,receptor,pagina-de-cita,accesibilidad,busqueda}.spec.ts` y `tests/e2e/ayuda/corpus.ts` (`citaConLosDosBloques`, `citaSinMismaObra`, `citaSinMasDelAutor`).
 
-**Revisión.** Ningún parche, nada diferido por revisión, nada rechazado (capas externas sin hallazgos en esta pasada). Diferido aparte: el docblock rancio de `Chips.astro` (solo lectura según el Code Map). `followup_review_recommended: false` (parches: 0 high, 0 medium, 0 low; puntuación 0).
+**Revisión** (pasada de la construcción, sin capas externas; la superan las dos revisiones independientes de abajo, que mandan). Ningún parche, nada diferido por revisión, nada rechazado. El docblock rancio de `Chips.astro`, diferido entonces, se corrigió en la pasada 1 y salió de `deferred` en la pasada 2. El `followup_review_recommended` vigente es el del frontmatter.
 
 **Verificación.**
 - `npm run check` (`astro check`): 0 errores.
@@ -251,7 +268,7 @@ Blocking condition: ninguna.
 - `tests/e2e/pagina-de-cita.spec.ts` — hueco de «Temas» a sus chips, 2 × `--unidad`.
 - `_bmad-output/implementation-artifacts/sprint-status.yaml` — la nota de la 24.6 lleva las cifras para Héctor (proyección, NFR-7, alto a 360) y apunta a este Auto Run Result.
 
-**Alto a 360, conciliado.** UX-DR67 dice que todo lo que crece cae después de las acciones. Entre la principal y la rama la página crece 1.273 px (1.805 → 3.078), de los que el pie pone 1.004 (579 → 1.583); los ~269 px restantes están por encima de las acciones y son de la Tarjeta de Obra y «Siguiente» (24.4 y 24.5), que la rama ya trae y la principal no. Lo que añade la 24.6 cae entero tras las acciones.
+**Alto a 360, conciliado.** UX-DR67 dice que todo lo que crece cae después de las acciones. Entre la principal y la rama la página crece 1.273 px (1.805 → 3.078), de los que el pie pone 1.004 (579 → 1.583, medido sobre el `nav`). Los ~269 px restantes salen **por diferencia**, no de una medida aparte: es lo que la página crece fuera del `nav` —la Tarjeta de Obra y «Siguiente» de la 24.4 y la 24.5, que la rama ya trae y la principal no, y los 4 px de más de la apertura del pie (64 frente a 60 px)—. La línea base de la rama (`$ANTES`) no se midió a 360 ni con Lighthouse: el criterio pide la principal del mismo día, y las cifras de NFR-7 suman lo de las 24.1–24.6.
 
 **Verificación.**
 - `npm run check`: 0 errores.
@@ -263,3 +280,31 @@ Blocking condition: ninguna.
 **Seguimiento.** Parches de esta pasada: 0 high, 2 medium, 15 low; puntuación 3 × 2 + 15 = 21 ≥ 5, así que `followup_review_recommended: true`.
 
 **Riesgos residuales.** La prueba de búsqueda da por buena una página que ofrece la tarjeta si su propia Cita trae todas las palabras de la consulta (también como parte de otra palabra); una coincidencia del buscador por raíz que no cumpla eso la haría fallar en falso. La caída por tiempo de `[movil] rutas-de-salida.spec.ts:162` sigue.
+
+### Revisión independiente (pasada 2, 2026-10-27)
+
+**Resumen.** Cinco capas externas otra vez. Ningún intent_gap ni bad_spec: 14 parches (2 medium, 12 low), nada diferido, 15 rechazados; el detalle, en el Review Triage Log. Lo publicado no cambia: el marcado del pie es el mismo y las guardas, ahora en `problemaDeRutasDeSalida`, solo pueden parar la construcción, que con el Corpus real no paran.
+
+**Ficheros.**
+- `src/lib/publicado.ts` — `problemaDeRutasDeSalida` (pura: grupo vacío, máximos, cierre que cuenta menos de lo que enseña, Obra de otro Autor, Cita de otra Obra u otro Autor, tarjeta repetida); el docblock de `rutasDeSalidaDeCita` explica por qué una Obra de dos no tiene «De la misma obra».
+- `src/components/RutasDeSalida.astro` — para la construcción con lo que objete `problemaDeRutasDeSalida` (ya no cuenta nada); por qué el `nav` sigue llamándose «Seguir leyendo».
+- `src/lib/atribucion.ts` — docblock de `recuentoDeCierre` sin la garantía de tamaño que el código no impone.
+- `src/components/Chips.astro` — docblock reajustado a ~100 columnas.
+- `AGENTS.md` — el orden del libro (y no todo orden) es de `src/lib/obras.ts`; el nombre del `nav`; la Obra de dos; `problemaDeRutasDeSalida`.
+- `tests/unit/rutas-de-salida.test.ts` — once pruebas de `problemaDeRutasDeSalida`, la Obra de dos atada a `siguienteCita`, Marco Aurelio en el fixture (el `nav` con solo «De la misma obra») y el cierre como último `li` en (f).
+- `tests/unit/ayuda/rutas-de-salida.ts` — `piezas` de cada `ul.tarjetas`.
+- `tests/unit/medicion.test.ts` — solo un comentario en `COLOCACION`.
+- `tests/e2e/rutas-de-salida.spec.ts` — «Más de» por ficha; `test.setTimeout(180_000)` en la que recorre todos los enlaces.
+- `tests/e2e/ayuda/corpus.ts` — `fichasDeObraPorCita`.
+- `tests/e2e/accesibilidad.spec.ts` — la tabulación espera chips si el marcado los tiene.
+
+**Verificación.**
+- `npm run check`: 0 errores.
+- `npx vitest run tests/unit/rutas-de-salida.test.ts`: 47 verdes. Sin `mismaObra !== undefined ||` en `hayAlgo`, (c), (f) y (j) en rojo (comprobado y restituido).
+- `npm test`: 137 ficheros, 6.259 pruebas, `FINISHED EXIT=0`.
+- Playwright `accesibilidad` y `rutas-de-salida` (los dos ficheros e2e que cambian), los dos proyectos: 148 verdes; `[movil] … ningún enlace saliente apunta a una página que no existe` pasa en 43 s con su nuevo límite. Puertos libres al terminar.
+- No se repitieron Lighthouse, el alto ni el peso, ni `busqueda`, `pagina-de-cita`, `copiar` y `receptor`: ningún parche cambia lo que se publica ni esos ficheros.
+
+**Seguimiento.** Parches de esta pasada: 0 high, 2 medium, 12 low; puntuación 3 × 2 + 12 = 18 ≥ 5, así que `followup_review_recommended: true`.
+
+**Riesgos residuales.** La zona `misma-obra` no la recorre ningún navegador hasta la baliza (el sitio de `receptor.spec.ts` no tiene una Obra de tres o más); la sostiene (c) sobre `dist/`. La prueba de búsqueda sigue con el falso rojo posible que anotó la pasada 1.
