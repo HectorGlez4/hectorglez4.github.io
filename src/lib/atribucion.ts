@@ -304,9 +304,11 @@ export function textoDeSiguiente(siguiente: SiguienteCita): string {
 }
 
 /**
- * El recuento de un cierre de las Rutas de salida, que nunca es singular: el bloque de la Obra
- * solo existe con tres Citas o más, y el del Autor con dos o más. Un recuento menor es un uso
- * roto, no un caso que redactar.
+ * El recuento de un cierre de las Rutas de salida, que nunca es singular. El bloque del Autor
+ * enseña al menos otra Cita suya, así que cuenta dos o más; el de la Obra, también, y en la
+ * práctica tres o más: en una Obra de dos la otra es siempre la de «Siguiente» y el bloque no
+ * existe (lo explica `rutasDeSalidaDeCita`, no es una regla de tamaño). Un recuento menor de dos
+ * es un uso roto, no un caso que redactar.
  */
 function recuentoDeCierre(quien: string, recuento: number): number {
   if (!Number.isInteger(recuento) || recuento < 2) {

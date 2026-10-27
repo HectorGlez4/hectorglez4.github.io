@@ -2878,6 +2878,8 @@ describe('Historia 23.7 — toda salida interna de `dist/` dice su zona', () => 
     ['/404', '/obra/seneca/sobre-la-brevedad-de-la-vida/', [{ zona: 'atribucion' }]],
     ['/404', '/tema/el-tiempo/', [{ sinZona: 'chips-del-404' }]],
     // Historia 24.6 — el Autor sale además por el cierre de «Más de Séneca», con la zona de las Rutas de salida.
+    // «De la misma obra» enlaza aquí también a la Obra y a otras Citas, con `misma-obra`, que es de otra
+    // épica y `esDeOtraEpica` aparta de estas filas: la mira (c) de `tests/unit/rutas-de-salida.test.ts`.
     [CITA, '/autor/seneca/', [{ zona: 'atribucion' }, { zona: 'rutas-de-salida' }]],
     [CITA, '/obra/seneca/sobre-la-brevedad-de-la-vida/', [{ zona: 'atribucion' }]],
     [CITA, /^\/cita\//, [{ zona: 'rutas-de-salida' }]],

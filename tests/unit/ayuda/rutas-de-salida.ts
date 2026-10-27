@@ -24,6 +24,8 @@ export interface GrupoLeido {
   clase: string;
   rotulo: { nivel: string; id: string | undefined; texto: string } | undefined;
   tarjetas: TarjetaLeida[];
+  /** La clase de cada `<li>` de su `ul.tarjetas`, en su orden: para ver que el cierre va el último. */
+  piezas: string[];
   cierre: CierreLeido | undefined;
   chips: { href: string; zona: string | undefined }[];
 }
@@ -82,6 +84,7 @@ export function leerRutasDeSalida(html: string, ruta: string): RutasDeSalidaLeid
             ? undefined
             : { nivel: rotulo[1], id: /\bid="([^"]*)"/.exec(rotulo[2])?.[1], texto: soloTexto(rotulo[3]) },
         tarjetas: lista === undefined ? [] : tarjetasDe(lista, ruta),
+        piezas: lista === undefined ? [] : [...lista.matchAll(/<li class="([^"]+)"/g)].map(([, clase]) => clase),
         cierre,
         chips:
           chips === null

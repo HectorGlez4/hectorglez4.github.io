@@ -495,6 +495,12 @@ export interface RutasDeSalidaDeCita {
  * Pura, y solo de lo publicado: no depende de la jornada, el visitante, la indexabilidad, la
  * congelación ni la afiliación. Dos construcciones del mismo commit dan las mismas rutas, y el
  * orden de `citas` no cuenta. El componente pinta lo que esto decide y no cuenta nada (AD-11).
+ *
+ * Una Obra de dos Citas no tiene «De la misma obra», y no por una regla de tamaño: quitadas la
+ * propia y la de «Siguiente» no queda ninguna, porque en una Obra de dos o más `siguienteCita`
+ * da siempre la que sigue en el libro, con vuelta al principio —la otra de las dos—. Si
+ * «Siguiente» dejara de recorrer la Obra entera, el bloque aparecería con una sola tarjeta y un
+ * cierre de dos; lo mira, en `dist/`, la Obra de dos del fixture de `rutas-de-salida.test.ts`.
  */
 export function rutasDeSalidaDeCita(
   cita: Cita,
@@ -514,6 +520,70 @@ export function rutasDeSalidaDeCita(
         : undefined,
     temas: temasDeLaCita(cita, publicados),
   };
+}
+
+/**
+ * Lo que tendría de falso un pie que no venga de `rutasDeSalidaDeCita` — Historia 24.6.
+ *
+ * `RutasDeSalida.astro` lo pregunta antes de pintar y para la construcción con lo que diga: un
+ * uso nuevo (la portada, 28.2) que arme sus rutas a mano no puede prometer en un cierre menos
+ * Citas de las que enseña, ni un grupo vacío, ni más tarjetas de las que admiten
+ * `MAX_CITAS_DE_LA_MISMA_OBRA` y `MAX_CITAS_RELACIONADAS`, ni una Cita de otra Obra u otro Autor,
+ * ni la misma Cita dos veces. Vive aquí, y no en el componente, porque contar es de aquí (AD-11).
+ *
+ * Que ninguna sea la propia ni la de «Siguiente» no se puede mirar con esto —las rutas no las
+ * traen—: lo garantiza solo `rutasDeSalidaDeCita`. `undefined` si no hay nada que objetar.
+ */
+export function problemaDeRutasDeSalida(
+  autor: Pick<Autor, 'slug' | 'nombre'>,
+  rutas: RutasDeSalidaDeCita,
+): string | undefined {
+  const { mismaObra, delAutor } = rutas;
+  if (mismaObra !== undefined) {
+    const { obra, citas: deLaObra } = mismaObra;
+    if (deLaObra.length === 0) return '«De la misma obra» llega sin Citas: un grupo vacío es `undefined`.';
+    if (obra.autor !== autor.slug) {
+      return `«De la misma obra» es de la Obra «${obra.nombre}», de «${obra.autor}» y no de «${autor.slug}».`;
+    }
+    if (deLaObra.length > MAX_CITAS_DE_LA_MISMA_OBRA) {
+      return `«De la misma obra» lleva ${deLaObra.length} Citas, y no caben más de ${MAX_CITAS_DE_LA_MISMA_OBRA}.`;
+    }
+    for (const otra of deLaObra) {
+      if (otra.obra?.nombre !== obra.nombre) {
+        return `«De la misma obra» lleva la Cita «${otra.slug}», que no es de la Obra «${obra.nombre}».`;
+      }
+    }
+    if (obra.recuento < deLaObra.length + 1) {
+      return (
+        `el cierre de «De la misma obra» cuenta ${obra.recuento} Citas de «${obra.nombre}», ` +
+        `y el pie enseña ${deLaObra.length} más la que se lee.`
+      );
+    }
+  }
+  if (delAutor !== undefined) {
+    const { recuento, citas: suyas } = delAutor;
+    if (suyas.length === 0) return `«Más de ${autor.nombre}» llega sin Citas: un grupo vacío es \`undefined\`.`;
+    if (suyas.length > MAX_CITAS_RELACIONADAS) {
+      return `«Más de ${autor.nombre}» lleva ${suyas.length} Citas, y no caben más de ${MAX_CITAS_RELACIONADAS}.`;
+    }
+    for (const otra of suyas) {
+      if (otra.autor !== autor.slug) {
+        return `«Más de ${autor.nombre}» lleva la Cita «${otra.slug}», que es de «${otra.autor}» y no de «${autor.slug}».`;
+      }
+    }
+    if (recuento < suyas.length + 1) {
+      return (
+        `el cierre de «Más de ${autor.nombre}» cuenta ${recuento} Citas, ` +
+        `y el pie enseña ${suyas.length} más la que se lee.`
+      );
+    }
+  }
+  const vistas = new Set<string>();
+  for (const otra of [...(mismaObra?.citas ?? []), ...(delAutor?.citas ?? [])]) {
+    if (vistas.has(otra.slug)) return `la Cita «${otra.slug}» sale dos veces en las Rutas de salida.`;
+    vistas.add(otra.slug);
+  }
+  return undefined;
 }
 
 /**

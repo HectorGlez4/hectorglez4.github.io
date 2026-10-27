@@ -843,18 +843,24 @@ sale en los dos grupos. El orden de tabulación es el del marcado.
 
 - Lo decide solo `rutasDeSalidaDeCita` de `src/lib/publicado.ts`, pura y determinista por commit
   (ni jornada, ni visitante, ni indexabilidad, ni congelación, ni afiliación), con el `porObra`
-  de `citasDeLasObras` —no se ordena fuera de `src/lib/obras.ts`— y el mismo `siguiente` que la
-  Tarjeta de Obra. **`repartir` es el único reparto** (a pasos iguales, primera y última incluidas,
+  de `citasDeLasObras` —el orden del libro no se recalcula fuera de `src/lib/obras.ts`; lo único
+  que se ordena aquí es «Más de», que pone primero las que comparten Tema, como antes de la 24.6—
+  y el mismo `siguiente` que la Tarjeta de Obra. **`repartir` es el único reparto** (a pasos iguales, primera y última incluidas,
   orden de entrada conservado; un máximo menor que 2 lanza): lo usan `citasRelacionadas` y
   `citasDeLaMismaObra`, y no se escribe otra aritmética. `citasDeLaMismaObra` lanza, como
   `siguienteCita`, si la Cita no está en el grupo de su Obra. Los cierres los redactan
   `cierreDeLaMismaObra` y `cierreDeMasDelAutor` de `src/lib/atribucion.ts`, sin glifo (lo pone
   `FilaDeBloque`) y sin recortar el título; un recuento menor que 2 lanza.
 - **Un grupo vacío no está** —ni rótulo, ni filete, ni hueco— y sin ninguno no hay `nav`. **No
-  hay respaldo**: «Explorar por tema» y la sección «Seguir leyendo» hacia el Autor se retiraron, y la Atribución sigue
-  enlazando al Autor y a la Obra. El componente lanza si «De la misma obra» trae una Cita de otra
-  Obra, «Más de» una de otro Autor o una tarjeta se repite; que ninguna sea la propia ni la de
-  «Siguiente» lo garantiza solo `rutasDeSalidaDeCita`, así que un uso nuevo la llama a ella.
+  hay respaldo**: «Explorar por tema» y la sección «Seguir leyendo» hacia el Autor se retiraron,
+  y la Atribución sigue enlazando al Autor y a la Obra; el `nav` conserva «Seguir leyendo» como
+  nombre accesible del pie entero. Una Obra de dos no tiene «De la misma obra» porque la otra es
+  siempre la de «Siguiente», no por una regla de tamaño.
+- El componente para la construcción con lo que objete `problemaDeRutasDeSalida`
+  (`src/lib/publicado.ts`): un grupo vacío, más tarjetas de las que caben, un cierre que cuenta
+  menos de lo que enseña, una Cita de otra Obra u otro Autor, una tarjeta repetida. Que ninguna
+  sea la propia ni la de «Siguiente» lo garantiza solo `rutasDeSalidaDeCita`, así que un uso nuevo
+  la llama a ella.
 - El `nav` va bajo `data-pagefind-ignore="all"` (NFR-13) y **no** lleva `data-zona`: cada `<li>`
   y el `ul` de chips declaran la suya. Sin guion ni `data-ingreso`.
 - Pinta textos, Obras y recuentos de otras Citas: es navegación y, por la excepción de Héctor,

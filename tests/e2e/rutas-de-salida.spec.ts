@@ -4,6 +4,7 @@ import {
   citaDeAutorConUnaSola,
   citaSinMasDelAutor,
   citaSinMismaObra,
+  fichasDeObraPorCita,
   temaBajoUmbral,
 } from './ayuda/corpus.ts';
 
@@ -71,9 +72,16 @@ test.describe('Historia 24.6 — al pie, más de la misma obra y más del Autor'
     expect(new Set(todas).size).toBe(todas.length);
     // «De la misma obra» sin atribución; «Más de» con la Obra, nunca la de esta Cita, y sin Autor.
     for (const t of misma.tarjetas) expect([t.obra, t.autor]).toEqual([undefined, undefined]);
+    // La Obra se compara por su ficha —la identidad—, no solo por el título que pinta.
+    const fichas = fichasDeObraPorCita();
+    const slugDe = (ruta: string) => /^\/cita\/([^/]+)\/$/.exec(ruta)?.[1];
+    const suFicha = fichas.get(slugDe(new URL(page.url()).pathname)!);
+    expect(suFicha, 'la Cita con los dos bloques tiene Obra').toBeDefined();
     for (const t of mas.tarjetas) {
       expect(t.autor).toBeUndefined();
       expect(t.obra).not.toBe(titulo);
+      expect(fichas.has(slugDe(t.href)!), t.href).toBe(true);
+      expect(fichas.get(slugDe(t.href)!), t.href).not.toBe(suFicha);
     }
 
     expect(misma.cierre?.texto).toMatch(new RegExp(`^Las \\d+ citas de .+ ›$`));
@@ -160,6 +168,9 @@ test.describe('Historia 2.6 — hacia dónde seguir', () => {
   });
 
   test('ningún enlace saliente apunta a una página que no existe', async ({ request }) => {
+    // Pide cada Página de Cita y cada destino: desde la 24.6 el pie de cada una enlaza hasta nueve
+    // páginas, y con el resto del fichero en marcha el recorrido pasaba de los 30 s por omisión.
+    test.setTimeout(180_000);
     const destinos = new Set<string>();
     for (const ruta of await rutasDeCita(request)) {
       for (const href of enlacesInternosDe(await (await request.get(ruta)).text())) {

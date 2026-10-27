@@ -699,12 +699,15 @@ test.describe('Historia 2.8 — foco', () => {
       await page.keyboard.press('Tab');
     }
     const secuencia = paradas.filter((p, k, todas) => k === 0 || todas[k - 1] !== p);
+    // Si hay chips lo dice el marcado, no las paradas: un chip que no recibiera foco encogería la
+    // secuencia esperada y la prueba pasaría igual.
+    const hayChips = (await page.locator('nav.salidas section.temas-de-la-cita a').count()) > 0;
     expect(secuencia, `${ruta}\n${JSON.stringify(paradas)}`).toEqual([
       'de-la-misma-obra:tarjeta',
       'de-la-misma-obra:cierre',
       'mas-del-autor:tarjeta',
       'mas-del-autor:cierre',
-      ...(paradas.some((p) => p.startsWith('temas-de-la-cita')) ? ['temas-de-la-cita:chip'] : []),
+      ...(hayChips ? ['temas-de-la-cita:chip'] : []),
     ]);
   });
 

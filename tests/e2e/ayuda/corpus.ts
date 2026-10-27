@@ -276,6 +276,14 @@ function primeraQue(condicion: (cita: CitaResuelta, delAutor: readonly CitaResue
 const fueraDeSuObra = (cita: CitaResuelta, delAutor: readonly CitaResuelta[]) =>
   delAutor.some((otra) => otra.ficha !== cita.ficha);
 
+/**
+ * La ficha de la Obra de cada Cita del Corpus, por slug (`undefined` si no tiene Obra): la
+ * identidad de la Obra, que no cambia con el título. Historia 24.6.
+ */
+export function fichasDeObraPorCita(): Map<string, string | undefined> {
+  return new Map(citasResueltas().map((c) => [c.slug, c.ficha]));
+}
+
 /** Una Cita con «De la misma obra» y «Más de {Autor}»: Obra de 4 o más y Autor con Citas fuera de ella. */
 export function citaConLosDosBloques(): string | undefined {
   return primeraQue((c, delAutor) => c.ficha !== undefined && (c.recuento ?? 0) >= 4 && fueraDeSuObra(c, delAutor));

@@ -25,13 +25,17 @@
  * Todo va bajo `data-pagefind-ignore="all"` (NFR-13): aquí aparece el texto de otras Citas, y sin
  * esto un fragmento buscado devolvería también las páginas que lo tienen como ruta de salida.
  *
+ * El `nav` se sigue llamando «Seguir leyendo» para el lector de pantalla (`aria-label`): es el
+ * nombre del punto de referencia entero —qué ofrece el pie, no uno de sus grupos—, y la sección
+ * de respaldo que se llamaba igual es la que se retiró.
+ *
  * El `nav` no lleva `data-zona`: cada tarjeta y cada fila declaran la suya en su `<li>` y los
  * chips en su `ul`, la declaración más cercana manda, y una del `nav` no la pintaría nadie.
  *
  * No hay enlace «Ver la ficha del Autor» aparte del cierre: la atribución de arriba ya lleva a
  * su página, y el siena en tres sitios de la misma pantalla deja de señalar.
  */
-import type { Autor, RutasDeSalidaDeCita } from '../lib/publicado.ts';
+import { problemaDeRutasDeSalida, type Autor, type RutasDeSalidaDeCita } from '../lib/publicado.ts';
 import { cierreDeLaMismaObra, cierreDeMasDelAutor } from '../lib/atribucion.ts';
 import { rutaDeLaObra } from '../lib/obras.ts';
 import { rutaDeAutor, rutaDeTema } from '../lib/superficies.ts';
@@ -59,36 +63,16 @@ const { autor, rutas, zona } = Astro.props;
 const { mismaObra, delAutor, temas } = rutas;
 
 /*
- * Usos rotos, que paran la construcción: «De la misma obra» con una Cita de otra Obra, «Más de
- * {Autor}» con una Cita de otro Autor, o una tarjeta que repite la de otro grupo.
- * `rutasDeSalidaDeCita` no los produce; un uso que no venga de ella sí podría, y el pie diría algo
- * falso. Que ninguna sea la propia ni la de «Siguiente» lo garantiza solo `rutasDeSalidaDeCita`:
- * el componente no recibe ninguna de las dos, y un uso nuevo (la portada, 28.2) la llama a ella.
+ * Un uso roto para la construcción: lo que diga `problemaDeRutasDeSalida` (un grupo vacío, más
+ * tarjetas de las que caben, un cierre que cuenta menos de lo que se enseña, una Cita de otra
+ * Obra u otro Autor, una tarjeta repetida). `rutasDeSalidaDeCita` no los produce; un uso que no
+ * venga de ella sí podría, y el pie diría algo falso. Que ninguna sea la propia ni la de
+ * «Siguiente» lo garantiza solo `rutasDeSalidaDeCita`: el componente no recibe ninguna de las dos,
+ * y un uso nuevo (la portada, 28.2) la llama a ella.
  */
-for (const otra of mismaObra?.citas ?? []) {
-  if (otra.obra?.nombre !== mismaObra?.obra.nombre) {
-    throw new Error(
-      `RutasDeSalida: en ${Astro.url.pathname}, «De la misma obra» lleva la Cita «${otra.slug}», ` +
-        `que no es de la Obra «${mismaObra?.obra.nombre}».`,
-    );
-  }
-}
-for (const otra of delAutor?.citas ?? []) {
-  if (otra.autor !== autor.slug) {
-    throw new Error(
-      `RutasDeSalida: en ${Astro.url.pathname}, «Más de ${autor.nombre}» lleva la Cita «${otra.slug}», ` +
-        `que es de «${otra.autor}» y no de «${autor.slug}».`,
-    );
-  }
-}
-const vistas = new Set<string>();
-for (const otra of [...(mismaObra?.citas ?? []), ...(delAutor?.citas ?? [])]) {
-  if (vistas.has(otra.slug)) {
-    throw new Error(
-      `RutasDeSalida: en ${Astro.url.pathname}, la Cita «${otra.slug}» sale dos veces en las Rutas de salida.`,
-    );
-  }
-  vistas.add(otra.slug);
+const problema = problemaDeRutasDeSalida(autor, rutas);
+if (problema !== undefined) {
+  throw new Error(`RutasDeSalida: en ${Astro.url.pathname}, ${problema}`);
 }
 
 const hayAlgo = mismaObra !== undefined || delAutor !== undefined || temas.length > 0;
