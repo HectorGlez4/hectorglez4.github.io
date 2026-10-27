@@ -2,7 +2,7 @@
 title: 'Historia 24.4 — Bajo la Cita, la obra de la que sale'
 type: 'feature'
 created: '2026-10-26'
-status: 'blocked'
+status: 'draft'
 baseline_revision: '943ff5d38951d5f2bfa895d79043044a2c72ed98'
 review_loop_iteration: 0
 followup_review_recommended: false
@@ -149,7 +149,9 @@ deferred: []
 
 ## Auto Run Result
 
-Status: blocked
+**Desbloqueo (2026-10-27).** Héctor decidió en el chat cambiar «→» por «›» (U+203A), que el subconjunto `latin` ya cubre; `DESIGN.md`, `EXPERIENCE.md` y `epics.md` quedan enmendados en e54a0594ab y f571d0c0de (v8.3). Sin cambio de fuentes ni de la puerta. El spec vuelve a borrador para replanificarlo con el glifo nuevo y retomar la rama `v8/wip-24-4-tarjeta-de-obra`.
+
+Status: blocked (anterior al desbloqueo)
 Blocking condition: Block If del spec — cumplir el contrato exige tocar la configuración de Astro. La flecha «→» (U+2192) que `FilaDeBloque.astro` pinta como `<span aria-hidden="true">&nbsp;→</span>` no la cubre ninguna fuente declarada en `fonts` de `astro.config.mjs` (Inter y Source Serif 4, `subsets: ['latin']`), y la puerta de cobertura tipográfica (`integraciones/cobertura.ts`, criterio en `tools/lib/cobertura.ts`) detiene `npm run build`. Lo decide Héctor.
 
 Planificada por el bucle v8-ralph (2026-10-26) sobre `epic-24-context.md`, la continuidad de la 24.3 (`status: done`) y el código del worktree. Implementación detenida el 2026-10-26 en la verificación.
