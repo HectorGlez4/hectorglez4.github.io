@@ -94,7 +94,7 @@ import {
   type TransicionFechada,
   type Version,
 } from '../tools/lib/cambios.ts';
-import type { FamiliaDeFichero } from '../tools/lib/avisar.ts';
+import { FAMILIAS_DE_FICHERO, type FamiliaDeFichero } from '../tools/lib/avisar.ts';
 
 const ejecutar = promisify(execFile);
 
@@ -268,6 +268,13 @@ export async function versionesDeBlobs(
     proceso.stdout.on('data', (trozo: Buffer) => trozos.push(trozo));
     proceso.stderr.on('data', (trozo) => (error += String(trozo)));
     proceso.on('error', fallo);
+    /*
+     * Si git sale antes de leerlo todo —un repositorio roto, un proceso matado—, escribir en su
+     * entrada da EPIPE, y un `'error'` sin escucha tumbaría el proceso entero en vez de rechazar
+     * esta promesa: se saltaría el «no rompe nunca» de `fechasDeLasSuperficies`. El código de
+     * salida ya dice que falló.
+     */
+    proceso.stdin.on('error', () => undefined);
     proceso.on('close', (codigo) => {
       if (codigo === 0) listo(Buffer.concat(trozos));
       else fallo(new Error(`git cat-file salió con ${codigo}${error.trim() === '' ? '' : ` (${error.trim()})`}`));
@@ -314,8 +321,14 @@ export interface OpcionesDelHistorial {
  * maneras es el fallo silencioso clásico de esta clase de cruce. En UTC porque el sitemap tiene
  * que declarar lo mismo se construya donde se construya.
  *
- * Los commits de fusión no traen líneas con `--raw` sin `-m`: lo que cambiaron sus padres sí
- * aparece, en sus propios commits.
+ * Los commits de fusión no traen líneas con `--raw` sin `-m`: lo que cambiaron sus padres aparece
+ * en sus propios commits, pero lo que solo cambió la fusión —la resolución de un conflicto— no
+ * aparece (diferido en la 24.8). Y la simplificación de historia por defecto de un `git log`
+ * acotado a rutas sigue un solo padre cuando la fusión es idéntica a él en esas rutas: las ramas
+ * que pode no llegaron al árbol final, o llegaron igual por el padre que sí se sigue.
+ *
+ * Un cambio solo de modo —el mismo blob antes y después, un `chmod`— no es una transición: no
+ * cambió nada que ninguna superficie pinte, tampoco en un documento opaco.
  */
 export async function historialDeLosFicheros(
   tope: string,
@@ -359,7 +372,7 @@ export async function historialDeLosFicheros(
   const crudas: { fecha: FechaDeCambio; absoluta: string; entrada: EntradaCruda; opaca: boolean }[] = [];
   const pedidos = new Map<string, string>();
   for (const { fecha, entrada } of entradasCrudas(stdout)) {
-    if (fecha === undefined) continue;
+    if (fecha === undefined || soloDeModo(entrada)) continue;
     const absoluta = resolve(tope, entrada.fichero);
     const opaca = esOpaco(absoluta);
     crudas.push({ fecha, absoluta, entrada, opaca });
@@ -385,6 +398,11 @@ export async function historialDeLosFicheros(
     else lista.push(transicion);
   }
   return historial;
+}
+
+/** Una entrada cuyo contenido no cambió —mismo blob en los dos lados—: solo cambió el modo. */
+export function soloDeModo(entrada: EntradaCruda): boolean {
+  return entrada.antes !== null && entrada.antes === entrada.despues;
 }
 
 /** Los documentos de `corpus/fuentes/` en disco, por su ruta absoluta: `.txt`, con subdirectorios. */
@@ -484,33 +502,30 @@ export async function fechasDeLasSuperficies(
       return new Map();
     }
 
-    const rutas = rutasDelCorpus(join(raiz, 'corpus'));
     /*
      * Historia 22.8 — las Fichas de Obra se fechan con git como los demás ficheros. Historia
      * 24.8 — y los documentos de `corpus/fuentes/`, que ordenan la Página de Obra; sus blobs no
-     * se leen: un documento solo cuenta como «cambió».
+     * se leen: un documento solo cuenta como «cambió». Los ámbitos y sus familias salen de
+     * `FAMILIAS_DE_FICHERO`, la misma tabla que filtra el diff del aviso y el historial del
+     * ensayo: una familia nueva no puede fecharse en una lectura y no en la otra.
      */
-    const ambitos: readonly (readonly [string, FamiliaDeFichero])[] = [
-      [rutas.citas, 'cita'],
-      [rutas.autores, 'autor'],
-      [rutas.temas, 'tema'],
-      [rutas.colecciones, 'coleccion'],
-      [rutas.obras, 'obra'],
-      [rutas.fuentes, 'documento'],
-    ];
+    const ambitos: readonly (readonly [string, FamiliaDeFichero])[] = FAMILIAS_DE_FICHERO.map(
+      ([directorio, familia]) => [resolve(raiz, directorio), familia] as const,
+    );
+    const opacos = ambitos.filter(([, familia]) => familia === 'documento').map(([directorio]) => directorio);
 
     const [vivo, historial] = await Promise.all([
       corpusParaFechar(raiz),
       historialDeLosFicheros(
         tope,
         ambitos.map(([directorio]) => directorio),
-        { opacos: [rutas.fuentes] },
+        { opacos },
       ),
     ]);
 
     // Historia 24.8 — lo que salió del Corpus fecha, con el commit que lo sacó, lo que componía.
     const familiaDe = (fichero: string) =>
-      ambitos.find(([directorio]) => fichero.startsWith(`${resolve(directorio)}${sep}`))?.[1];
+      ambitos.find(([directorio]) => fichero.startsWith(`${directorio}${sep}`))?.[1];
     const corpus: CorpusParaFechar = {
       ...vivo,
       bajas: bajasDelHistorial(historial, familiaDe, new Set(ficherosDelCorpus(vivo))),

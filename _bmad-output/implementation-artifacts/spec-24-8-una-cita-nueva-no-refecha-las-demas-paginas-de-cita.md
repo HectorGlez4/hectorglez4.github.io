@@ -5,7 +5,7 @@ created: '2026-10-27'
 status: 'done'
 baseline_revision: '74d911b0db61a68bd97b14f3770b127ca8651ae3'
 review_loop_iteration: 0
-followup_review_recommended: false
+followup_review_recommended: true
 context:
   - '{project-root}/_bmad-output/implementation-artifacts/epic-24-context.md'
   - '{project-root}/_bmad-output/planning-artifacts/architecture/architecture-brainlySabiduria-2026-08-10/ARCHITECTURE-SPINE.md'
@@ -19,6 +19,20 @@ deferred:
   - summary: 'Los commits de fusión con resolución de conflictos en corpus/ siguen invisibles para el historial (git log --raw sin -m), como hoy con --name-only.'
     location: 'integraciones/historial.ts'
     severity: 'low'
+  - summary: >-
+      La página 1 de la Página de Obra pinta el nombre de los Temas de sus Citas (chips) y la relación no compone esos ficheros de Tema: renombrar un Tema no fecha ni avisa las Obras que lo muestran — pendiente de Héctor (bmad-create-epics-and-stories).
+    evidence: |-
+      src/pages/obra/[autor]/[slug]/[...page].astro pinta `tema.nombre` en la sección «Temas» desde la 22.4, y CAMPOS_QUE_PINTA.tema solo tiene `cita` y `tema`. El AC de la 24.8 y el intent-contract enumeran la composición de la Obra («su ficha, sus Citas, el fichero de su Autor y sus documentos») sin Temas, mientras el mismo AC pide «los ficheros y los campos que pinta»: es el caso del Block If, y no se decide a mano. La omisión ya estaba en la relación de la 22.8. Añadirla es una casilla (`tema: { …, obra: ['nombre'] }`) y componer los Temas de las Citas de la Obra.
+    location: >-
+      tools/lib/cambios.ts (CAMPOS_QUE_PINTA, relacionDeSuperficies)
+    severity: low
+  - summary: >-
+      Cuando el `titulo` de una ficha ya no lo declara ninguna Cita publicada, el título efectivo de la Obra sale de las grafías de sus Citas (`grafiaPorOmision`), y el cambio de grafía de una Cita hermana cambia el título que pintan las Páginas de Cita y los listados sin fecharlos ni avisarlos.
+    evidence: |-
+      `tituloEfectivo` (src/lib/obras.ts) cae a `grafiaPorOmision` sobre la `procedencia.obra` de las Citas de la Obra; la relación compone de la ficha solo `titulo` y nunca Citas hermanas en la Página de Cita. El build ya avisa de un `titulo` que no se sostiene y `documentar`/`restituir-grafia` lo ponen al día en el mismo gesto, así que el caso solo aparece con ese aviso desatendido. Anterior a la 24.8: la relación por ficheros tampoco componía hermanas.
+    location: >-
+      src/lib/obras.ts (tituloEfectivo), tools/lib/cambios.ts
+    severity: low
 ---
 
 <intent-contract>
@@ -198,6 +212,30 @@ historial de un rango en el ensayo, 0,04–0,05 s; la orden del ensayo entera, u
 Las capas de revisión son externas en este bucle y no traen hallazgos en esta pasada: sigue una
 revisión independiente.
 
+### 2026-10-28 — Review pass
+- intent_gap: 0
+- bad_spec: 0
+- patch: 14: (high 0, medium 4, low 10)
+- defer: 2: (high 0, medium 0, low 2)
+- reject: 19: (high 0, medium 0, low 19)
+- addressed_findings:
+  - `[medium]` `[patch]` El camino del sitemap declaraba su propia tabla de ámbitos y familias en `integraciones/historial.ts`: ahora sale de `FAMILIAS_DE_FICHERO`, la misma que filtra el diff del aviso y el historial del ensayo (también los opacos).
+  - `[medium]` `[patch]` La prueba de clasificación leía solo `admision.ts` y escribía a mano las claves de Tema: ahora une las del `z.object` literal de `citas`, `autores` y `temas` en `src/content.config.ts` (árbol sintáctico de TypeScript), con una prueba de que el lector las encuentra. Mutación: una clave nueva en `temas` falla nombrándola.
+  - `[medium]` `[patch]` Las bajas del camino del sitemap (`fechasDeLasSuperficies`) no se probaban con git de verdad: la prueba de la nota de la ficha suma un `git mv` de una Cita a `corpus/_revision/` y comprueba que su Autor, su Tema y su Obra toman ese instante y la Página de Cita hermana no. Mutación: quitar `bajas:` la tumba.
+  - `[medium]` `[patch]` Los documentos de `corpus/fuentes/` en el camino del sitemap tampoco: la misma prueba commitea un documento de Cartas después y comprueba que solo su Obra cambia de fecha. Mutación: `documentosEnDisco` vacío la tumba.
+  - `[low]` `[patch]` `versionesDeBlobs` no escuchaba `'error'` en la entrada de `git cat-file`: un EPIPE tumbaba el proceso en vez de rechazar la promesa; ahora se ignora y manda el código de salida.
+  - `[low]` `[patch]` Un cambio solo de modo (mismo blob) contaba como transición y fechaba/avisaba la Obra por un documento: `soloDeModo` lo descarta en el historial y en el diff del rango.
+  - `[low]` `[patch]` Si `cat-file` fallaba en `leerRango` se perdía el aviso entero, portada incluida: ahora cada versión queda opaca y se avisa de más, con un aviso en el registro.
+  - `[low]` `[patch]` El ensayo leía el árbol como Corpus de `hasta` aunque `corpus/` tuviera cambios sin commit: `esLaDelArbol` exige además `git status` limpio en los directorios que se extraen; prueba nueva con el árbol sucio (mutación comprobada).
+  - `[low]` `[patch]` «Cambian de fecha» del ensayo cuenta también las Obras `noindex` y los cambios que el rango deshace: dicho en la cabecera de `ensayoDelRango` y en `AGENTS.md`.
+  - `[low]` `[patch]` `AGENTS.md` y la cabecera de `cambios.ts` no decían que solo hay bajas de Cita, ficha y documento ni que una baja ilegible no fecha: escrito, con el porqué en `bajasDelHistorial` y una prueba de que la baja de un Autor, un Tema o una Colección no compone nada vivo.
+  - `[low]` `[patch]` El comentario de `historialDeLosFicheros` sobre las fusiones afirmaba de más: ahora nombra la resolución de conflictos y la simplificación de historia.
+  - `[low]` `[patch]` Nombre de prueba rancio en `indexnow.test.ts` (la Obra sin documentos): renombrado.
+  - `[low]` `[patch]` Faltaba un rango de git de verdad que solo añade una Cita: `avisar-rango.test.ts` suma el commit `cita-nueva` y comprueba que avisa su Cita, Autor, Tema y Obra, y ninguna otra.
+  - `[low]` `[patch]` La prueba de «reunir» solo miraba la fecha: ahora comprueba también que el aviso (relación de antes con la absorbida) da las mismas rutas.
+
+Diferidos (frontmatter): los chips de Tema de la Página de Obra fuera de su composición —choca con la composición que fija el AC; pendiente de Héctor (bmad-create-epics-and-stories)— y el título efectivo que cae a las grafías de las hermanas. Rechazados: `estadoDerechos` (literal: cambiarlo rompe el build, no despublica), el cuerpo Markdown (el texto vive en el frontmatter y ninguna página renderiza el cuerpo), `TOPE_DE_SALIDA` (128 MB frente a ~1,3 MB), el blob analizado por la extensión del primer fichero (solo coincidiría el blob vacío), las medidas iguales y el guion borrado (lo pedía el spec; el AC solo pide anotar las cifras), el `lastmod` que retrocede (es el valor verdadero), el registro de la pasada vacía (esta es la revisión), `sprint-status.yaml` (lo lleva el orquestador), el orden de las pruebas de `avisar-rango` (cada caso hace su `checkout`), la Colección que quita el miembro en el mismo commit (`miembros` cambia y fecha), `CAMPOS_DE_CITA` en los listados y la resolución de bajas contra las fichas de hoy (los fija el intent-contract), las fechas de committer no monótonas, la prueba de inversas frente a `componerAviso`, el recuento que baja sin baja (ya diferido), la 21.2 delante de Héctor (los datos están en este spec), las precondiciones en `review` y el titular probado solo en puro (ahora también con git).
+
 ## Auto Run Result
 
 Status: done
@@ -260,3 +298,47 @@ Seguimiento recomendado: `false` (0 parches; puntuación 0).
 - Los diferidos del frontmatter siguen abiertos: el cambio de Tema, Autor u Obra de una Cita viva
   no fecha el listado que abandona; FR-51 frente a AD-27 (pendiente de Héctor, `bmad-prd`); las
   fusiones con conflictos en `corpus/` siguen invisibles para el historial.
+
+### Pasada de revisión del 2026-10-28 (capas externas)
+
+**Qué cambió.** Catorce parches, ninguno de contrato: el camino del sitemap toma sus ámbitos y
+familias de `FAMILIAS_DE_FICHERO`; `git cat-file` ya no puede tumbar el proceso por EPIPE y, en el
+aviso, su fallo deja las versiones opacas en vez de perder el aviso; un cambio solo de modo no es
+una transición (`soloDeModo`); el ensayo extrae una copia de `hasta` si `corpus/` está sucio; la
+clasificación lee también los esquemas literales de `src/content.config.ts` (Tema incluido); y las
+pruebas cubren con git de verdad las bajas y los documentos del sitemap, el alta sola en un rango
+y el aviso de «reunir». `AGENTS.md` y las cabeceras dicen qué bajas existen, qué cuenta «cambian
+de fecha» y qué no ve el historial en las fusiones.
+
+**Ficheros.**
+- `integraciones/historial.ts` — ámbitos desde `FAMILIAS_DE_FICHERO`; escucha de `'error'` en la
+  entrada de `cat-file`; `soloDeModo`; comentario de las fusiones.
+- `tools/avisar.ts` — `soloDeModo` en el diff; `cat-file` fallido → versiones opacas con aviso;
+  `esLaDelArbol` exige `corpus/` limpio; cabecera de `ensayoDelRango`.
+- `tools/lib/cambios.ts` — por qué solo hay bajas de Cita, ficha y documento, y la baja ilegible.
+- `tests/unit/fecha-de-cambio.test.ts` — clasificación contra `content.config.ts`; aviso de
+  «reunir»; la baja de Autor, Tema o Colección no compone nada vivo.
+- `tests/unit/avisar-rango.test.ts` — rango que solo añade una Cita; árbol sucio; documento y
+  baja en `fechasDeLasSuperficies`.
+- `tests/unit/indexnow.test.ts` — nombre de prueba al día.
+- `AGENTS.md` — bajas y ensayo.
+
+**Revisión.** 14 parches (4 medios, 10 bajos), 2 diferidos, 19 rechazados. Seguimiento
+recomendado: `true` (puntuación 3 × 4 + 10 = 22).
+
+**Verificación.**
+- `npx vitest run tests/unit/avisar-rango.test.ts` — 22/22 verde; mutaciones: sin la comprobación
+  del árbol limpio, sin `bajas:` y con `documentosEnDisco` vacío, la prueba que toca falla.
+- `npx vitest run tests/unit/fecha-de-cambio.test.ts tests/unit/indexnow.test.ts` — verde; una
+  clave nueva solo en el esquema de `temas` falla nombrándola.
+- `npx vitest run tests/unit/fecha-de-cambio.test.ts tests/unit/fecha-de-cambio-build.test.ts` —
+  72/72 verde.
+- `npx astro check` — 0 errores, 0 avisos, 8 pistas ajenas.
+- `npx tsx tools/avisar.ts --ensayo --desde fd2c295d0f^ --hasta fd2c295d0f --sitemap
+  dist/sitemap-0.xml` — mismo reparto que en «Medidas» (16/16, 4/4, 8/8, 0/0, 6/4, portada 1),
+  «Ensayo: no se ha enviado nada.», 6,6 s.
+- `npm test` desacoplado — 137 ficheros, 6.301 pruebas, verde (770 s).
+
+**Riesgos residuales.** Los diferidos del frontmatter: los chips de Tema de la Página de Obra
+(pendiente de Héctor), el título efectivo por grafías hermanas, el recuento que baja sin baja,
+FR-51 frente a AD-27 y las fusiones con conflictos en `corpus/`.

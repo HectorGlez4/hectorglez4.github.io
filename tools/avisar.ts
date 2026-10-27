@@ -71,6 +71,7 @@ import {
   corpusParaFechar,
   entradasCrudas,
   historialDeLosFicheros,
+  soloDeModo,
   versionesDeBlobs,
 } from '../integraciones/historial.ts';
 import { obrasDelCorpusEnDisco } from '../integraciones/indexables.ts';
@@ -269,13 +270,24 @@ interface LecturaDelRango {
   avisos: string[];
 }
 
-/** Si una revisión es el commit del árbol de trabajo: entonces el Corpus de después es el árbol. */
+/**
+ * Si el Corpus de una revisión es el del árbol de trabajo: es su commit **y** los directorios que
+ * se leen están limpios. Con una siembra a medias —una Cita sin commit, una ficha a medio
+ * escribir— el árbol ya no es `hasta`, y leerlo mezclaría dos estados en una misma lectura: se
+ * extrae una copia de `hasta`, como para cualquier otra revisión.
+ */
 async function esLaDelArbol(raiz: string, revision: string): Promise<boolean> {
   const { stdout } = await ejecutar('git', ['rev-parse', `${revision}^{commit}`, 'HEAD^{commit}'], {
     cwd: raiz,
   });
   const [una, otra] = stdout.split('\n').map((linea) => linea.trim());
-  return una !== undefined && una !== '' && una === otra;
+  if (una === undefined || una === '' || una !== otra) return false;
+  const { stdout: estado } = await ejecutar(
+    'git',
+    ['status', '--porcelain', '--untracked-files=all', '--', ...DIRECTORIOS_QUE_SE_EXTRAEN],
+    { cwd: raiz, maxBuffer: 64 * 1024 * 1024 },
+  );
+  return estado.trim() === '';
 }
 
 /**
@@ -319,7 +331,10 @@ async function leerRango(
     { cwd: raiz, maxBuffer: 64 * 1024 * 1024 },
   );
 
-  const entradas = entradasCrudas(stdout).map(({ entrada }) => entrada);
+  // Un cambio solo de modo no cambió nada que se pinte, tampoco en un documento.
+  const entradas = entradasCrudas(stdout)
+    .map(({ entrada }) => entrada)
+    .filter((entrada) => !soloDeModo(entrada));
   const reglaCambiada = entradas.some((e) => e.fichero === FICHERO_DE_LA_REGLA);
   const delCorpus = entradas.filter((e) => e.fichero !== FICHERO_DE_LA_REGLA);
   if (delCorpus.length === 0 && !reglaCambiada) return undefined;
@@ -329,7 +344,20 @@ async function leerRango(
     if (familiaDeFichero(e.fichero) === 'documento') continue;
     for (const blob of [e.antes, e.despues]) if (blob !== null) pedidos.set(blob, e.fichero);
   }
-  const versiones = await versionesDeBlobs(raiz, pedidos);
+  /*
+   * Si `cat-file` falla, el aviso no se pierde entero —la portada incluida—: cada versión queda
+   * opaca, cuenta como cambio de todo y se avisa de más, que es el lado bueno de equivocarse.
+   */
+  let versiones: Map<string, Version>;
+  try {
+    versiones = await versionesDeBlobs(raiz, pedidos);
+  } catch (fallo) {
+    versiones = new Map();
+    avisar(
+      `no se pudieron leer las versiones del rango (${fallo instanceof Error ? fallo.message : String(fallo)}): ` +
+        'cada fichero cambiado cuenta como cambio de todos sus campos.',
+    );
+  }
   const version = (blob: string | null, opaca: boolean): Version | null =>
     blob === null ? null : opaca ? VERSION_OPACA : (versiones.get(blob) ?? VERSION_OPACA);
   const cambios: CambioDeFichero[] = delCorpus.map((e) => {
@@ -440,7 +468,10 @@ export interface EnsayoDelRango {
  * «Cambian de fecha» es la lectura de fechas de la relación sobre el historial **del rango**
  * (`git log --raw desde..hasta`), el Corpus de después y las bajas del rango: una superficie
  * cambia de fecha si y solo si alguna transición del rango cambió los campos que pinta. Es la
- * misma función que fecha el sitemap, así que la cifra es la que movería el despliegue.
+ * misma función que fecha el sitemap, con dos diferencias que conviene leer junto a la cifra:
+ * cuenta **toda** superficie de la relación —también las Obras `noindex`, que el sitemap no
+ * publica—, y el historial ve cada commit intermedio, así que un cambio que el propio rango
+ * deshace cambia de fecha y, como el aviso compara solo los extremos, no se avisa.
  */
 export async function ensayoDelRango(
   raiz: string,

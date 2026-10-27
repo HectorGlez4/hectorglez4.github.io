@@ -788,7 +788,11 @@ analizar cuenta como cambio de todo; un campo ausente es `undefined`; el orden d
   ese commit lo vivo que compondría: una Cita, su Autor, sus Temas, sus Colecciones (por
   `miembros`) y su Obra (por Autor y forma contra las fichas de hoy); una ficha, las Páginas de
   Cita y los listados de las Citas de hoy cuya forma reclamaba; un documento, su Obra. Nunca
-  declara la página de sí misma. El aviso las encuentra en la relación de `--desde`.
+  declara la página de sí misma. El aviso las encuentra en la relación de `--desde`. Solo hay
+  bajas de esas tres familias: un Autor, un Tema o una Colección que salen no componen nada vivo
+  (un Autor solo se retira sin nada que apunte a él, una Cita viva con un Tema que no existe rompe
+  el build, y una Colección solo compone su propia página). Y una baja cuya última versión no se
+  deja analizar no fecha nada —no se sabe qué componía—, aunque el aviso sí la encuentra.
 - **Familias.** `tools/lib/avisar.ts` declara `FAMILIAS_DE_FICHERO` (`cita`, `autor`, `tema`,
   `coleccion`, `obra` y `documento` → `corpus/fuentes`; una sola tabla para el filtro del diff,
   el historial y el reconocimiento) y `FAMILIAS_DE_RUTA` (las cinco superficies; la familia de
@@ -804,9 +808,13 @@ npx tsx tools/avisar.ts --ensayo --desde <A> --hasta <B> [--sitemap <fichero>]
 
 Imprime, por familia de ruta, cuántas superficies **cambian de fecha** (la lectura de fechas
 sobre `git log --raw A..B`, el Corpus de `B` y las bajas del rango) y cuántas **se avisarían**,
-más la portada aparte, y lo que tardó la lectura del historial del rango. El Corpus de después
-es el árbol si `B` es su commit, o una copia de `B`; `corpus/fuentes` se lista con `git ls-tree`
-y nunca se extrae. Sin `--sitemap` pide el sitemap publicado para saber qué Obras se indexan.
+más la portada aparte, y lo que tardó la lectura del historial del rango. «Cambian de fecha»
+cuenta toda superficie de la relación —también las Obras `noindex`, que el sitemap no publica—
+y ve cada commit intermedio: un cambio que el propio rango deshace cambia de fecha y no se
+avisa, porque el aviso compara solo `A` y `B`. El Corpus de después es el árbol si `B` es su
+commit y `corpus/` está limpio —sin una siembra a medias—, o una copia de `B`; `corpus/fuentes`
+se lista con `git ls-tree` y nunca se extrae. Sin `--sitemap` pide el sitemap publicado para
+saber qué Obras se indexan.
 
 Para el aviso, el estado de una Obra es uno: **indexable o no**. Una Obra tocada se avisa si
 es indexable después —lo dice el sitemap desplegado, `{SITIO}/sitemap-0.xml`, o

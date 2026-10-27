@@ -63,7 +63,9 @@
  * compondría: una Cita, su Autor, sus Temas, sus Colecciones (por `miembros`) y su Obra
  * (resuelta por Autor y forma contra las fichas de hoy); una ficha, las Páginas de Cita y los
  * listados de las Citas de hoy cuya forma reclamaba; un documento, la Obra cuyas Citas lo
- * casarían. Una baja nunca declara la página de sí misma.
+ * casarían. Una baja nunca declara la página de sí misma. Un Autor, un Tema o una Colección que
+ * salen no componen nada vivo (`bajasDelHistorial` dice por qué), y una baja cuya última versión
+ * no se deja analizar no fecha nada: no se sabe qué componía.
  *
  * ── La portada, que no lleva fecha ───────────────────────────────────────────────────
  *
@@ -572,7 +574,15 @@ export function fechasPorSuperficie(
  * Las bajas de un historial — Historia 24.8: los ficheros cuya última transición, por instante,
  * es un borrado, con la versión que tenían antes de salir. Lo que hoy está vivo no es baja
  * aunque su historial termine en un borrado (una restitución todavía sin commit). Una versión
- * opaca no dice a qué componía, así que no entra: su propio borrado ya no tiene a quién fechar.
+ * opaca no dice a qué componía, así que no entra: su propio borrado ya no tiene a quién fechar
+ * (el aviso sí lo encuentra, en la relación de `--desde`).
+ *
+ * Solo hay bajas de Cita, de ficha de Obra y de documento, y no es un olvido: la baja de un
+ * Autor, de un Tema o de una Colección no compone ninguna superficie **viva**. Un Autor solo se
+ * retira cuando nada del Corpus apunta a él (`tools/autor.ts retirar`), una Cita viva que nombre
+ * un Tema que ya no existe rompe el build (`reference('temas')`), y una Colección solo compone su
+ * propia página, que sale con ella. Lo que sí cambia —su propia página, que deja de existir— lo
+ * avisa el aviso por la relación de `--desde`.
  */
 export function bajasDelHistorial(
   historial: Historial,

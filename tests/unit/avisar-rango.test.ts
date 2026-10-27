@@ -143,6 +143,14 @@ beforeAll(async () => {
   // Historia 24.8 — un documento nuevo de Cartas: una página más de su Fuente.
   await escribir('corpus/fuentes/wikisource-es--cartas--ii.txt', 'Una página más de las Cartas.\n');
   await commit('documento');
+
+  // Historia 24.8 — una siembra: una Cita nueva de Brevedad y nada más.
+  await escribir('corpus/citas/seneca--brevedad-5.md', citaValida({
+    slug: 'seneca-brevedad-5',
+    texto: 'Brevedad 5: la vida es larga si se sabe usar.',
+    procedencia: { obra: 'Brevedad', año: 49 },
+  }));
+  await commit('cita-nueva');
 }, 60_000);
 
 afterAll(async () => {
@@ -238,6 +246,25 @@ describe('Historia 24.8 — el aviso de un rango, por campos', () => {
     expect(avisos).toEqual([]);
   });
 
+  it('un rango que solo añade una Cita avisa su Cita, su Autor, su Tema y su Obra; ninguna otra', async () => {
+    const { rutas, avisos } = await rango('documento', 'cita-nueva', [CARTAS, BREVEDAD]);
+    expect(rutas.sort()).toEqual(['/', '/autor/seneca/', '/cita/seneca-brevedad-5/', '/tema/el-tiempo/', BREVEDAD].sort());
+    expect(avisos).toEqual([]);
+  });
+
+  it('con una siembra a medias en el árbol, el Corpus de después es el de `hasta`, no el del disco', async () => {
+    await git(['checkout', '-q', sha['cita-modificada']]);
+    // El árbol está en `hasta`, pero la Cita que el rango modificó se ha quitado sin commit: leído
+    // del disco, el Corpus de después no la tendría y su página no cambiaría de fecha.
+    await unlink(join(raiz, 'corpus/citas/seneca--cartas-0.md'));
+    try {
+      const ensayo = await ensayoDelRango(raiz, sha['con-obras'], sha['cita-modificada'], { rutas: [CARTAS, BREVEDAD] });
+      expect(ensayo.reparto.cita).toEqual({ cambianDeFecha: 1, seAvisarian: 1 });
+    } finally {
+      await git(['checkout', '-q', '--', 'corpus/citas/seneca--cartas-0.md']);
+    }
+  });
+
   it('el Corpus de después es el de `hasta` aunque el árbol esté en otra revisión', async () => {
     await git(['checkout', '-q', sha['sin-obras']]);
     const antes = await copiasDeAviso();
@@ -317,6 +344,30 @@ describe('Historia 22.8 — el `lastmod` de una Obra se mueve con su ficha', () 
       expect(fechas.get('/cita/seneca-cartas-0')).toBe('2024-01-02T09:00:00.000Z');
       expect(fechas.get('/obra/seneca/brevedad')).toBe('2024-01-02T09:00:00.000Z');
       expect(fechas.get('/cita/seneca-ira-0')).toBe('2024-01-02T09:00:00.000Z');
+
+      // Historia 24.8 — en el camino del sitemap, un documento de Cartas fecha solo su Obra…
+      await mkdir(join(proyecto, 'corpus', 'fuentes'), { recursive: true });
+      await writeFile(join(proyecto, 'corpus', 'fuentes', 'wikisource-es--cartas--ii.txt'), 'Otra página.\n', 'utf8');
+      await enProyecto(['add', '-A']);
+      await enProyecto(['commit', '-q', '-m', 'un documento'], '2024-05-06T09:00:00+0000');
+      const conDocumento = await fechasDeLasSuperficies(proyecto, (m) => avisos.push(m));
+      expect(conDocumento.get('/obra/seneca/cartas')).toBe('2024-05-06T09:00:00.000Z');
+      expect(conDocumento.get('/cita/seneca-cartas-0')).toBe('2024-01-02T09:00:00.000Z');
+      expect(conDocumento.get('/autor/seneca')).toBe(fechas.get('/autor/seneca'));
+      // …y la baja de una Cita —movida a `corpus/_revision/`— fecha lo vivo que componía.
+      await mkdir(join(proyecto, 'corpus', '_revision'), { recursive: true });
+      await enProyecto(['mv', 'corpus/citas/seneca--cartas-1.md', 'corpus/_revision/seneca--cartas-1.md']);
+      await enProyecto(['commit', '-q', '-m', 'una baja'], '2024-07-08T09:00:00+0000');
+
+      const despues = await fechasDeLasSuperficies(proyecto, (m) => avisos.push(m));
+      expect(avisos).toEqual([]);
+      expect(despues.get('/obra/seneca/cartas')).toBe('2024-07-08T09:00:00.000Z');
+      expect(despues.get('/autor/seneca')).toBe('2024-07-08T09:00:00.000Z');
+      expect(despues.get('/tema/el-tiempo')).toBe('2024-07-08T09:00:00.000Z');
+      expect(despues.has('/cita/seneca-cartas-1')).toBe(false);
+      // Ni el documento ni la baja tocan las Páginas de Cita que quedan ni otra Obra.
+      expect(despues.get('/cita/seneca-cartas-0')).toBe('2024-01-02T09:00:00.000Z');
+      expect(despues.get('/obra/seneca/brevedad')).toBe('2024-01-02T09:00:00.000Z');
     } finally {
       await rm(proyecto, { recursive: true, force: true });
     }

@@ -4,6 +4,8 @@ import { mkdtemp, mkdir, readdir, realpath, rm, writeFile } from 'node:fs/promis
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { promisify } from 'node:util';
+import { readFileSync } from 'node:fs';
+import ts from 'typescript';
 import { formaDeObra } from '../../src/lib/obras.ts';
 import { rutaNormalizada } from '../../src/lib/superficies.ts';
 import {
@@ -294,14 +296,65 @@ describe('Historia 24.8 — el comparador de una transición', () => {
  * `ordenAlfabetico` de la 26.1— no puede quedar fuera en silencio, y un nombre mal escrito en la
  * tabla, que nunca fecharía nada, tampoco.
  */
+/**
+ * Las claves del `z.object({…})` literal con que `src/content.config.ts` declara el esquema de una
+ * colección — el que el build aplica de verdad. `citas`, `autores` y `temas` no reusan un objeto
+ * de `admision.ts` (las referencias de Astro no caben en un módulo puro, y el de Tema nunca se
+ * escribió), así que una clave añadida solo ahí escaparía a la clasificación si se leyera solo
+ * `admision.ts`. Se lee el árbol sintáctico, no el módulo: `astro:content` no se carga fuera de
+ * Astro. Una colección cuyo esquema no es un literal devuelve `undefined`.
+ */
+function clavesDeLaColeccion(coleccion: string): string[] | undefined {
+  const ruta = resolve(import.meta.dirname, '../../src/content.config.ts');
+  const fuente = ts.createSourceFile(ruta, readFileSync(ruta, 'utf8'), ts.ScriptTarget.Latest, true);
+  let claves: string[] | undefined;
+  const visitar = (nodo: ts.Node): void => {
+    if (
+      ts.isVariableDeclaration(nodo) &&
+      ts.isIdentifier(nodo.name) &&
+      nodo.name.text === coleccion &&
+      nodo.initializer !== undefined &&
+      ts.isCallExpression(nodo.initializer)
+    ) {
+      const [argumento] = nodo.initializer.arguments;
+      if (argumento === undefined || !ts.isObjectLiteralExpression(argumento)) return;
+      for (const propiedad of argumento.properties) {
+        if (!ts.isPropertyAssignment(propiedad) || propiedad.name.getText(fuente) !== 'schema') continue;
+        const valor = propiedad.initializer;
+        if (!ts.isCallExpression(valor) || valor.expression.getText(fuente) !== 'z.object') continue;
+        const [objeto] = valor.arguments;
+        if (objeto === undefined || !ts.isObjectLiteralExpression(objeto)) continue;
+        claves = objeto.properties.flatMap((p) =>
+          (ts.isPropertyAssignment(p) || ts.isShorthandPropertyAssignment(p)) && p.name !== undefined
+            ? [p.name.getText(fuente)]
+            : [],
+        );
+      }
+      return;
+    }
+    ts.forEachChild(nodo, visitar);
+  };
+  visitar(fuente);
+  return claves;
+}
+
 describe('Historia 24.8 — todo campo de los esquemas está clasificado', () => {
+  const unidas = (...listas: (readonly string[] | undefined)[]) => [...new Set(listas.flatMap((l) => l ?? []))];
   const ESQUEMAS = {
-    cita: Object.keys(citaAdmisible.shape),
-    autor: Object.keys(autorAdmisible.shape),
-    tema: ['nombre'],
+    cita: unidas(Object.keys(citaAdmisible.shape), clavesDeLaColeccion('citas')),
+    autor: unidas(Object.keys(autorAdmisible.shape), clavesDeLaColeccion('autores')),
+    tema: unidas(clavesDeLaColeccion('temas')),
     coleccion: Object.keys(coleccionAdmisible.shape),
     obra: Object.keys(esquemaDeObra([]).shape),
   } as const;
+
+  it('lee las claves de los esquemas que el build aplica, también el de Tema', () => {
+    // Si `content.config.ts` cambiara de forma y el lector dejara de encontrarlas, la
+    // clasificación quedaría ciega en silencio para lo que solo se declara ahí.
+    expect(clavesDeLaColeccion('citas')).toEqual(expect.arrayContaining(['texto', 'aptaParaPortada']));
+    expect(clavesDeLaColeccion('autores')).toEqual(expect.arrayContaining(['nombre', 'semblanza']));
+    expect(clavesDeLaColeccion('temas')).toEqual(expect.arrayContaining(['nombre']));
+  });
 
   const clasificados = (familia: keyof typeof ESQUEMAS): Set<string> => {
     const enLaTabla = Object.values(CAMPOS_QUE_PINTA[familia]).flatMap((campos) =>
@@ -579,7 +632,27 @@ describe('Historia 24.8 — la matriz: qué cambia de fecha', () => {
       h,
     );
     expect(corpus.bajas?.obras?.map((o) => o.ruta)).toEqual([absorbida]);
-    expect(refechadas(corpus, h)).toEqual(['/obra/x/o', '/cita/x-d', '/autor/x', '/tema/u'].sort());
+    const esperadas = ['/obra/x/o', '/cita/x-d', '/autor/x', '/tema/u'].sort();
+    expect(refechadas(corpus, h)).toEqual(esperadas);
+    // Fecha y aviso coinciden: la absorbida la encuentra el aviso en la relación de antes.
+    const enT1 = {
+      'corpus/obras/x--o.yml': editado('corpus/obras/x--o.yml', { formas: ['obra o', formaDeObra('Otra obra')] }),
+      [absorbida]: { antes: versionAbsorbida as Version, despues: null },
+    };
+    const antes: CorpusParaFechar = {
+      ...base,
+      citas: [...base.citas, { slug: 'x-d', autor: 'x', temas: ['u'], obra: 'x--q', obraDeclarada: 'Otra obra', ruta: nueva }],
+      obras: [...(base.obras ?? []), { nombre: 'x--q', autor: 'x', formas: [formaDeObra('Otra obra')], ruta: absorbida }],
+    };
+    const despues: CorpusParaFechar = { ...base, citas: corpus.citas, ...(corpus.obras ? { obras: corpus.obras } : {}) };
+    expect(avisadas(enT1, despues, antes)).toEqual(esperadas);
+  });
+
+  it('la baja de un Autor, un Tema o una Colección no compone nada vivo, y no lanza', () => {
+    const salen = ['corpus/autores/y.yml', 'corpus/temas/u.yml', 'corpus/colecciones/c.yml'];
+    const h = historial(Object.fromEntries(salen.map((ruta) => [ruta, { antes: VERSIONES[ruta] as Version, despues: null }])));
+    const vivos = new Set(Object.keys(VERSIONES).filter((ruta) => !salen.includes(ruta)));
+    expect(bajasDelHistorial(h, familiaDeFichero, vivos)).toEqual({ citas: [], obras: [], documentos: [] });
   });
 
   it('una versión ilegible cuenta como cambio de todos los campos, sin lanzar', () => {

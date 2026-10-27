@@ -259,7 +259,7 @@ describe('AD-27 — el aviso es la lectura inversa de la relación que fecha el 
     }
   });
 
-  it('la Página de Obra es su ficha, sus Citas y el fichero de su Autor', () => {
+  it('la Página de Obra es su ficha, sus Citas y el fichero de su Autor (aquí sin documentos, que prueba fecha-de-cambio)', () => {
     const relacion = relacionDeSuperficies(corpusDeEjemplo());
     expect(ficherosDe(relacion, NIEBLA).sort()).toEqual(
       [
