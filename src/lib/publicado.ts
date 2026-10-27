@@ -431,7 +431,8 @@ export type SiguienteCita = { por: 'obra'; cita: Cita } | { por: 'tema'; cita: C
  *     (`listados`, por slug, de `citasDeTema`), la primera Cita de **otro Autor** que le sigue,
  *     con vuelta al principio: «siguiente sobre la vida» no puede ser más del mismo, que ya
  *     tiene «Más de {Autor}». Sin Tema publicado, o sin otro Autor en él, no hay fila; no se
- *     mira un segundo Tema.
+ *     mira un segundo Tema. Que la Cita no esté en el listado de su Tema es, como en la Obra, un
+ *     uso roto, y para el build.
  *   · **Sin Obra** — no hay Tarjeta de Obra, y nada que decidir.
  *
  * No depende del visitante, de la jornada, de la indexabilidad, de la congelación ni de la
@@ -457,8 +458,17 @@ export function siguienteCita(
 
   const tema = temasDeLaCita(cita, publicados)[0];
   if (tema === undefined) return undefined;
-  const listado = listados.get(tema.slug) ?? [];
-  const aqui = listado.findIndex((c) => c.slug === cita.slug);
+  const listado = listados.get(tema.slug);
+  const aqui = listado?.findIndex((c) => c.slug === cita.slug) ?? -1;
+  if (listado === undefined || aqui < 0) {
+    // Como el grupo roto de la Obra: `citasDeTema` lista toda Cita que declara el Tema, y este
+    // Tema sale de los que la Cita declara. Si falta, el mapa no es el de este conjunto, y
+    // recorrer desde -1 daría un destino que no es «la que sigue».
+    throw new Error(
+      `siguienteCita: la Cita «${cita.slug}» no está en el listado de su Tema «${tema.slug}». ` +
+        'citasDeTema lista toda Cita que lo declara: el mapa no es el de este conjunto.',
+    );
+  }
   // Una vuelta entera desde la siguiente: la propia Cita cae la última y no cuenta.
   for (let paso = 1; paso <= listado.length; paso++) {
     const candidata = listado[(aqui + paso) % listado.length];

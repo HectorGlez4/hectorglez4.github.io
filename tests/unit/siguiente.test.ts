@@ -166,6 +166,15 @@ describe('Historia 24.5 — `siguienteCita`, sin construir', () => {
     expect(sinGrupo).toThrow(/«seneca-x»[\s\S]*«seneca--brevedad»/);
   });
 
+  it('listado roto: el Tema falta en `listados`, o la Cita no está en el suyo, y lanza nombrando Cita y Tema', () => {
+    const x = sola('seneca-x', 'seneca', ['la-vida']);
+    const w = cita('epicteto-w', 'epicteto', ['la-vida']);
+    const sinElTema = () => siguienteCita(x.cita, x.porObra, PUBLICADOS, sinListados);
+    expect(sinElTema).toThrow(/«seneca-x»[\s\S]*«la-vida»/);
+    const sinLaCita = () => siguienteCita(x.cita, x.porObra, PUBLICADOS, new Map([['la-vida', [w]]]));
+    expect(sinLaCita).toThrow(/«seneca-x»[\s\S]*«la-vida»/);
+  });
+
   it('no depende del orden de `conjunto.citas`: los dos mapas salen de sus dueños, que ordenan', () => {
     const o = obra('seneca--brevedad', 3);
     const libro = ['seneca-c', 'seneca-a', 'seneca-b'];
@@ -328,13 +337,13 @@ describe('Historia 24.5 — «Siguiente…» en cada Página de Cita, construida
       let actual = orden[0];
       const recorrido = [actual];
       for (let salto = 0; salto < orden.length; salto += 1) {
-        const { enlace } = await filaSiguiente(actual);
+        const { tarjeta, enlace } = await filaSiguiente(actual);
         expect(enlace, `${actual}: sin «Siguiente»`).toBeDefined();
         const destino = slugDe(enlace!.href!);
         expect(existsSync(paginaConstruida(proyecto, enlace!.href!)), `${actual} → ${enlace!.href}`).toBe(true);
-        expect(textosDelEnlace(/<a\b[^>]*href="\/cita\/[^"]+"[^>]*>([\s\S]*?)<\/a>/.exec((await filaSiguiente(actual)).tarjeta!)![1]).lector).toBe(
-          FILA_SIGUIENTE_DE_ESTA_OBRA,
-        );
+        // El texto de la fila con zona `siguiente`, no del primer enlace a una Cita que aparezca.
+        const interior = /<li class="fila-de-bloque" data-zona="siguiente"[^>]*><a\b[^>]*>([\s\S]*?)<\/a>/.exec(tarjeta!)![1];
+        expect(textosDelEnlace(interior).lector, actual).toBe(FILA_SIGUIENTE_DE_ESTA_OBRA);
         actual = destino!;
         recorrido.push(actual);
       }
@@ -383,7 +392,7 @@ describe('Historia 24.5 — «Siguiente…» en cada Página de Cita, construida
     expect(await listadoEntero('/tema/la-vida/')).toHaveLength(17);
   });
 
-  it('(b) la fila sigue también en una Obra `noindex`: Disertaciones, De la ira y Campos de Castilla', async () => {
+  it('(b′) la fila sigue también en una Obra `noindex`: Disertaciones, De la ira y Campos de Castilla', async () => {
     for (const slug of ['epicteto-disertaciones-0', 'seneca-ira-0', 'antonio-machado-campos-0']) {
       const obra = await html(await obraDe(slug));
       expect(obra, slug).toContain('<meta name="robots" content="noindex, follow"');

@@ -631,6 +631,7 @@ test.describe('Historia 24.4 — la Tarjeta de Obra en la Página de Cita', () =
       lis.map((li) => {
         const a = li.querySelector('a')!;
         const s = getComputedStyle(a);
+        const l = getComputedStyle(li);
         return {
           deBloque: li.classList.contains('fila-de-bloque'),
           zona: li.getAttribute('data-zona'),
@@ -638,6 +639,8 @@ test.describe('Historia 24.4 — la Tarjeta de Obra en la Página de Cita', () =
           target: a.getAttribute('target'),
           texto: (a.textContent ?? '').replace(/\s+/g, ' ').trim(),
           trato: [s.display, s.minHeight, s.fontFamily, s.fontSize, s.color, s.textDecorationLine].join(' | '),
+          // El filete de debajo de cada fila: el de la primera lo mide «los tokens calculados…».
+          filete: [l.borderBottomWidth, l.borderBottomStyle, l.borderBottomColor].join(' | '),
         };
       }),
     );
@@ -649,9 +652,14 @@ test.describe('Historia 24.4 — la Tarjeta de Obra en la Página de Cita', () =
     expect(filas[1].href, completa).toMatch(/^\/obra\//);
     expect(filas.map((f) => f.target), completa).toEqual([null, null]);
     expect(filas[0].trato, completa).toBe(filas[1].trato);
-    // La siguiente existe: la fila lleva a una Página de Cita servida.
+    expect(filas[0].filete, completa).toBe(filas[1].filete);
+    // La siguiente existe y es de la misma Obra: su propia tarjeta lleva a la misma página.
     const respuesta = await page.goto(filas[0].href!);
     expect(respuesta?.status(), filas[0].href!).toBe(200);
+    expect(
+      await page.locator('.tarjeta-de-obra li[data-zona="tarjeta-de-obra"] a').getAttribute('href'),
+      filas[0].href!,
+    ).toBe(filas[1].href);
   });
 
   test('los tokens calculados de la tarjeta y de su fila', async ({ page }) => {
