@@ -2,8 +2,8 @@
 title: 'Historia 24.4 — Bajo la Cita, la obra de la que sale'
 type: 'feature'
 created: '2026-10-26'
-status: 'ready-for-dev'
-baseline_revision: '943ff5d38951d5f2bfa895d79043044a2c72ed98'
+status: 'done'
+baseline_revision: 'ac71f2cd11129ebd42caa1aaabb34c6456191dcb'
 review_loop_iteration: 0
 followup_review_recommended: false
 context:
@@ -120,6 +120,17 @@ deferred: []
 
 ## Review Triage Log
 
+### 2026-10-27 — Review pass
+- intent_gap: 0
+- bad_spec: 0
+- patch: 0
+- defer: 0
+- reject: 0
+- addressed_findings:
+  - none
+
+Las capas de revisión de este bucle son externas y en esta pasada no traían hallazgos (no hay secciones «## Hallazgos externos — …» en la invocación); la revisión independiente viene después.
+
 ## Design Notes
 
 **El marcado de referencia** (la regla de las pausas pegadas es la de la 24.3: Astro conserva un espacio donde hay salto de línea):
@@ -155,6 +166,32 @@ deferred: []
 - Hasta la 26.9, el reflujo a 320 px de la Página de Cita con el título de Obra más largo se mira con una captura: el título parte en varias líneas, nada se sale y la fila cabe. Anotar en el spec el alto de la tarjeta a 360 px y la posición de Copiar en la primera pantalla.
 
 ## Auto Run Result
+
+**Implementación (2026-10-27, bucle v8-ralph).** Status: done. Línea base `ac71f2cd11129ebd42caa1aaabb34c6456191dcb` (el spec replanificado); se partió del commit guardado `b05d7e4c70429dfc7e054f789f5b8b03a9a40ac3` con `git cherry-pick --no-commit`, con la prop `flecha` renombrada a `avance` y el glifo cambiado a `&nbsp;›` (U+203A).
+
+Qué cambia:
+- `src/lib/atribucion.ts` -- `contenidoDeTarjetaDeObra` y las constantes `FILA_VER_LA_OBRA_Y_DONDE_LEERLA` / `FILA_VER_LA_OBRA`: lo único que dice la tarjeta.
+- `src/components/Rotulo.astro` -- `nivel?: 2 | 3`, por omisión 2; los usos de hoy salen byte a byte iguales (comprobado en la construcción real).
+- `src/components/FilaDeBloque.astro` (nuevo) -- la Fila de bloque con `zona` obligatoria y `avance` («›» en `span` `aria-hidden`), docblock con el porqué de «›» y no «→».
+- `src/components/TarjetaDeObra.astro` (nuevo) -- la tarjeta, con la guarda del Autor ajeno.
+- `src/pages/cita/[slug].astro` -- la tarjeta entre `Fuente` y `CopiarCita`, `nivel={2}`.
+- `tools/lib/cambios.ts` -- solo comentario (navegación que no fecha ni avisa, 24.8).
+- `AGENTS.md` -- la Tarjeta de Obra en la lista de la 22.3 y la subsección «La Tarjeta de Obra (Historia 24.4)».
+- `tests/unit/ayuda/tarjeta-de-obra.ts` (nuevo), `tests/unit/tarjeta-de-obra.test.ts` (nuevo, 23 pruebas: matriz pura, contrato de los componentes, hoja, construcción que falla y construcción), `tests/unit/ediciones-en-venta.test.ts` (`describe` 24.4), `tests/unit/obra-pagina.test.ts` (construcción abierta memorizada y `it` 24.4 en la congelada).
+- `tests/e2e/ayuda/corpus.ts` (`citasResueltas` con Fuente, recuento y `edicionCotejada`; `citaConTarjetaCompleta`, `citaDeObraSinCotejar`), `tests/e2e/accesibilidad.spec.ts` (las cuatro caras de Página de Cita en el barrido, su comprobación en `dist/`, el orden de tabulación con Tab real y el reflujo a 320 px), `tests/e2e/pagina-de-cita.spec.ts` (`describe` 24.4).
+
+Verificación:
+- `FECHA_JORNADA=2026-10-26 npm run build` en la línea base y con la historia: las dos con código 0; la segunda pasa la puerta de cobertura («5288 páginas, 2 familias, sin caídas al tipo de reserva»). `diff -rq`: 4.422 líneas, 4.420 páginas de `dist/cita/` y el par de la hoja `_astro/_slug_.*.css` (solo la usan las Páginas de Cita); ningún fichero de `dist/pagefind/`, ninguna Página de Obra, de Autor, la portada ni el 404. En una Cita sin Obra (`concepcion-arenal-abrid-escuelas-y-se-cerraran-carceles`) el `<main>` es idéntico (mismo SHA-1). Peso: 447,6 MiB en 15.340 ficheros en los dos.
+- Vitest uno a uno: `tarjeta-de-obra` 23, `ediciones-en-venta` 55, `obra-pagina` 66, `medicion` 496 (sin tocarla), `tarjeta-de-cita` 20, `obras` 117 (sin tocarla), `lista-de-obras` 18, `ingreso-construido` 38, `peso` 56, `superficies` 99, `espinas-de-ux` 10, `publicable-y-alcanzable` 30, `fecha-de-cambio-build` 10, `cobertura-build` 2: todo verde.
+- `npm run check`: 0 errores. `npm test`: 135 ficheros, 6.180 pruebas, verde (774 s).
+- Playwright `accesibilidad`, `pagina-de-cita`, `rutas-de-salida`, `copiar`, `busqueda` en los dos proyectos: 259 verdes, 6 saltadas por proyecto, 1 caída por tiempo en `[movil] rutas-de-salida.spec.ts:98` (41,5 s con la máquina cargada; en escritorio 12,8 s). Repetido `rutas-de-salida.spec.ts` solo: 14 verdes (la misma prueba en 13,6 s). La tarjeta no añade destinos nuevos a esa prueba: su enlace es el mismo que el del título en la Atribución. La prueba de zonas de toque de la 2.8, sin tocarla, verde.
+- Medido en el navegador (anotaciones de Playwright): a 360 × 640 la tarjeta de `agustin-alvarez-ahora-empieza-a-haber-quienes-piensen-en` mide 188 px desde y = 536 y Copiar queda en y = 756, fuera de la primera pantalla; con el título de Obra más largo (`mariano-jose-de-larra-la-verdad-del-teatro-es-enteramente-convencional`), 260 px desde y = 575 y Copiar en y = 867 (deuda aceptada que vigila SM-C5). A 320 px ese título ocupa 119 px (cinco líneas de 23,8 px), la fila cabe y no hay desplazamiento horizontal; la captura manual la sustituye esta medida.
+- Auditoría de la matriz: cada fila la cubre al menos una prueba que corrió y pasó (pura en `tarjeta-de-obra.test.ts` para las diez; construida para varias Citas, una Cita, años discrepantes, sin cotejar, `noindex`, título largo, sin Obra y Autor ajeno; congelada en `obra-pagina.test.ts`; sin cotejar con ediciones y afiliación encendida en `ediciones-en-venta.test.ts`).
+
+Revisión: 0 parches, 0 diferidos, 0 rechazados en esta pasada (capas externas sin hallazgos todavía). `followup_review_recommended: false` (0 parches; puntuación 0).
+
+Riesgos residuales: Copiar sale de la primera pantalla de 360 × 640 en las Citas con tarjeta (deuda aceptada, SM-C5); la prueba de `rutas-de-salida.spec.ts:98` recorre todas las Páginas de Cita y roza su límite de 30 s cuando la máquina va cargada, sin relación con esta historia.
+
 
 **Replanificación (2026-10-27, bucle v8-ralph).** Con el glifo «›» el contrato ya no exige tocar la configuración de Astro: se enmiendan el enfoque, la `FilaDeBloque` (prop `avance`, `&nbsp;›`), la matriz y las pruebas, se añade la tarea de partir del commit guardado y el criterio de que la construcción real pasa la puerta de cobertura. Lo demás del contrato no cambia. Estado: `ready-for-dev`. Lo de abajo es el historial del bloqueo y lo medido entonces.
 
