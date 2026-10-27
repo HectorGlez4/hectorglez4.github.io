@@ -2,7 +2,8 @@
 title: 'Historia 26.2 — El tipo de un resultado no casa como texto, y la portada tiene el suyo'
 type: 'feature'
 created: '2026-10-26'
-status: 'ready-for-dev'
+status: 'in-progress'
+baseline_revision: 'd26f3c1b9f6a2ff17654444a8fb12a22a19006f1'
 review_loop_iteration: 0
 followup_review_recommended: false
 context:
