@@ -25,6 +25,13 @@ deferred:
     location: >-
       tests/e2e/rutas-de-salida.spec.ts:98
     severity: low
+  - summary: >-
+      La Fila de bloque (y la Lista de Obras de la que toma el trato) pinta su texto en `{typography.body-md}` con interlineado 1,4, y el token `body-md` de DESIGN.md declara `lineHeight: '1.6'`; lo decide Héctor (bmad-ux), y el cambio alcanzaría a la Lista de Obras y a toda fila que herede la Fila de bloque.
+    evidence: |-
+      DESIGN.md, `typography.body-md`: fontSize 15px, lineHeight '1.6'. `src/components/ListaDeObras.astro` (`.titulo`, desde la 17.3) declara `line-height: 1.4`, y el contrato de la 24.4 pide «interlineado 1,4» con el trato de la Lista de Obras; `src/components/FilaDeBloque.astro` lo copia y `tests/unit/tarjeta-de-obra.test.ts` exige ya que los dos coincidan. La divergencia con el token es anterior a la historia (ac-auditor, segunda revisión del 2026-10-27).
+    location: >-
+      src/components/ListaDeObras.astro (.titulo), src/components/FilaDeBloque.astro (.fila-de-bloque a)
+    severity: low
 ---
 
 <intent-contract>
@@ -168,6 +175,28 @@ Las capas de revisión de este bucle son externas y en esta pasada no traían ha
   - `[low]` `[patch]` La portada y el 404 sin tarjeta solo se sostenían con el `diff`: la construcción de prueba los mira (sin las hojas en línea).
   - `[low]` `[patch]` El barrido pasaba axe dos veces por la misma Página de Cita, con y sin barra final: `SUPERFICIES` se deduplica por la ruta sin barra.
 
+### 2026-10-27 — Review pass (segunda)
+- intent_gap: 0
+- bad_spec: 0
+- patch: 12 (high 0, medium 0, low 12)
+- defer: 1 (low 1)
+- reject: 18
+- addressed_findings:
+  - `[low]` `[patch]` `sprint-status.yaml` decía «sin diferidos» en la línea de la 24.4 con dos en el spec: el comentario nombra ahora los tres diferidos (solo esa línea).
+  - `[low]` `[patch]` El Auto Run Result mezclaba bloques vigentes y superados sin decir cuál manda: un párrafo «Cómo leer esta sección» al principio, el bloque de la primera implementación marcado como superado y «Para retomar» como histórico, con la rama y el parche del bloqueo declarados innecesarios (borrarlos lo decide Héctor).
+  - `[low]` `[patch]` La Atribución con el año de su Cita y la tarjeta sin año de la Obra en la misma página no lo fijaba ninguna prueba: una prueba de la construcción lo exige en las dos Citas de Cartas (62 y 64 → «Séneca · 2 citas»).
+  - `[low]` `[patch]` `&nbsp;›` depende de que el `slot` no traiga un salto de línea al final: el docblock de `FilaDeBloque.astro` dice que el texto va en la misma línea que la etiqueta, para la 24.5, la 24.6, la 26 y la 28.
+  - `[low]` `[patch]` Las dos ramas de `Rotulo.astro` podían divergir: una prueba sin construir compara sus atributos y su contenido, y la sonda de la construcción pinta `destino` en `h2` y en `h3` y exige la misma apertura.
+  - `[low]` `[patch]` La comprobación «sin Obra» de `accesibilidad.spec.ts` buscaba la clase en el HTML crudo, que una hoja en línea traería: usa el lector `tarjetaDeObraDe` y busca el rótulo.
+  - `[low]` `[patch]` `citaConTarjetaCompleta` medía el texto en unidades UTF-16: usa `admiteImagen` de `src/lib/tramos.ts`, la regla del sitio (puntos de código), y deja de importar `MAX_CARACTERES_IMAGEN` (blind-hunter y edge-case-hunter, un solo parche).
+  - `[low]` `[patch]` `not.toContain('<a')` también casaba con `<aside`/`<abbr`/`<article` y con comentarios: `/<a[\s>]/` sobre la fuente sin comentarios; el comentario de `reglasDe` dice que aplana los `@media`.
+  - `[low]` `[patch]` Restos de `obra-pagina.test.ts` y `accesibilidad.spec.ts`: la ruta de Cartas se comprueba antes de usarse, el `> 50` pasa a «una Página de Cita por cada Cita del fixture» y fuera el envoltorio `tarjetaDe`.
+  - `[low]` `[patch]` «Mismo trato que la Lista de Obras» se probaba contra cadenas escritas en la prueba: ahora contra las reglas de `ListaDeObras.astro` (`.lista-de-obras a` y `.titulo`), para que no diverjan sin que nada falle.
+  - `[low]` `[patch]` Sin Obra, la separación de Copiar no se medía en el navegador: una prueba de `pagina-de-cita.spec.ts` la mide (32 px ±1 del `figure` o de la Línea de la Fuente) en los dos proyectos.
+  - `[low]` `[patch]` La «deuda» de la baseline y del WIP sin cierre (blind-hunter): cubierta por el párrafo «Cómo leer esta sección» del Auto Run Result.
+
+Diferido: el interlineado 1,4 de la Fila de bloque y de la Lista de Obras frente al 1,6 de `body-md` (anterior a la historia; lo decide Héctor). Rechazados: la deuda de Copiar a 360 × 640 (la acepta la propia historia y la vigila SM-C5), las hermanas sin fecha ni aviso y la caída por tiempo de `rutas-de-salida.spec.ts:98` (ya diferidos), el `id` fijo del rótulo (lo fija el contrato; una tarjeta por página hasta la 28.2), el `href` sin tipo de ruta interna (el contrato pide `string`), el estado al pasar el cursor (es el trato de la Lista de Obras y el anillo global), las dos líneas a 320 px (las pide la propia historia sobre el título más largo), el modo oscuro (tokens del sitio), Pagefind (el atributo `all` está probado), el formato y el cero del recuento (una Cita siempre cuenta en su Obra; cuatro cifras no llevan punto), el centinela de `pagina-de-cita.spec.ts`, `construidaAbierta` con código distinto de 0 (cada uso lo comprueba), las lecturas R3–R6 de intent-alignment (el contrato fija la R1; la R5 es el diferido de la 24.8), la partición de palabras sin fixture (la propiedad calculada está probada), los años de traducción solo en la prueba pura (los resuelve `resolverObras`, probada en `obras.test.ts`), la comprobación del Corpus real por `diff -rq` (es la verificación del spec) y el estado `review` del tablero (lo cambia la fusión de la épica).
+
 ## Design Notes
 
 **El marcado de referencia** (la regla de las pausas pegadas es la de la 24.3: Astro conserva un espacio donde hay salto de línea):
@@ -204,6 +233,8 @@ Las capas de revisión de este bucle son externas y en esta pasada no traían ha
 
 ## Auto Run Result
 
+**Cómo leer esta sección.** Los bloques son el historial del bucle y no se reescriben: la implementación, la replanificación y el bloqueo anterior a ella, y después una entrada por pasada de revisión, de la más antigua a la más nueva. **Manda el último bloque** («Revisión, segunda pasada»): sus cifras de pruebas, parches y diferidos y el `followup_review_recommended` del frontmatter son los vigentes. «Para retomar» y la rama `v8/wip-24-4-tarjeta-de-obra` / `24-4-tarjeta-de-obra-wip.patch` son del bloqueo: la implementación entró en `v8/epicas-24-26` desde 253b605b97, así que la rama y el parche ya no hacen falta para nada (borrarlos lo decide Héctor; la rama es local).
+
 **Implementación (2026-10-27, bucle v8-ralph).** Status: done. Línea base `ac71f2cd11129ebd42caa1aaabb34c6456191dcb` (el spec replanificado); se partió del commit guardado `b05d7e4c70429dfc7e054f789f5b8b03a9a40ac3` con `git cherry-pick --no-commit`, con la prop `flecha` renombrada a `avance` y el glifo cambiado a `&nbsp;›` (U+203A).
 
 Qué cambia:
@@ -225,7 +256,7 @@ Verificación:
 - Medido en el navegador (anotaciones de Playwright): a 360 × 640 la tarjeta de `agustin-alvarez-ahora-empieza-a-haber-quienes-piensen-en` mide 188 px desde y = 536 y Copiar queda en y = 756, fuera de la primera pantalla; con el título de Obra más largo (`mariano-jose-de-larra-la-verdad-del-teatro-es-enteramente-convencional`), 260 px desde y = 575 y Copiar en y = 867 (deuda aceptada que vigila SM-C5). A 320 px ese título ocupa 119 px (cinco líneas de 23,8 px), la fila cabe y no hay desplazamiento horizontal; la captura manual la sustituye esta medida.
 - Auditoría de la matriz: cada fila la cubre al menos una prueba que corrió y pasó (pura en `tarjeta-de-obra.test.ts` para las diez; construida para varias Citas, una Cita, años discrepantes, sin cotejar, `noindex`, título largo, sin Obra y Autor ajeno; congelada en `obra-pagina.test.ts`; sin cotejar con ediciones y afiliación encendida en `ediciones-en-venta.test.ts`).
 
-Revisión: 0 parches, 0 diferidos, 0 rechazados en esta pasada (capas externas sin hallazgos todavía). `followup_review_recommended: false` (0 parches; puntuación 0).
+Revisión: 0 parches, 0 diferidos, 0 rechazados en esta pasada (capas externas sin hallazgos todavía). `followup_review_recommended: false` (0 parches; puntuación 0). *(Superado por las pasadas de revisión de abajo.)*
 
 Riesgos residuales: Copiar sale de la primera pantalla de 360 × 640 en las Citas con tarjeta (deuda aceptada, SM-C5); la prueba de `rutas-de-salida.spec.ts:98` recorre todas las Páginas de Cita y roza su límite de 30 s cuando la máquina va cargada, sin relación con esta historia.
 
@@ -252,7 +283,7 @@ Planificada por el bucle v8-ralph (2026-10-26) sobre `epic-24-context.md`, la co
 
 **Lo que se midió con esa implementación** (el `dist/` que la construcción dejó escrito antes de detenerse; sin Pagefind ni sitemap, que no llegaron a correr): `diff -rq -x pagefind` contra la línea base da 4.424 diferencias, todas en `dist/cita/` (4.420 páginas, porque todas enlazan la hoja de la Página de Cita) salvo la propia hoja `_astro/_slug_.*.css`, que solo la usan las Páginas de Cita, y el sitemap que faltaba. Ninguna Página de Obra, de Autor, la portada ni el 404 cambian, así que `nivel` deja los rótulos de hoy byte a byte iguales; en una Cita sin Obra (`concepcion-arenal-abrid-escuelas-y-se-cerraran-carceles`, una de las 4 del Corpus) el `<main>` es idéntico. Una tarjeta sale así: rótulo `h2#de-la-obra`, título, «Agustín Álvarez · 20 citas» con el punto `aria-hidden` y la coma para lectores pegados, y una sola fila `li.fila-de-bloque[data-zona="tarjeta-de-obra"]` a la página 1 de su Obra con «Ver la obra y dónde leerla».
 
-**Para retomar:** con la decisión tomada (y, si es la opción 1, su commit en la principal o en la rama), devolver este spec a `ready-for-dev` —o enmendarlo con `bmad-build` si cambia el glifo—, partir de `v8/wip-24-4-tarjeta-de-obra` —o, si la rama ya no está, de `git am _bmad-output/implementation-artifacts/24-4-tarjeta-de-obra-wip.patch`, el mismo commit— y seguir por las tareas de pruebas de **Tasks & Acceptance**.
+**Para retomar** *(histórico: ya se retomó; véase «Cómo leer esta sección»)*: con la decisión tomada (y, si es la opción 1, su commit en la principal o en la rama), devolver este spec a `ready-for-dev` —o enmendarlo con `bmad-build` si cambia el glifo—, partir de `v8/wip-24-4-tarjeta-de-obra` —o, si la rama ya no está, de `git am _bmad-output/implementation-artifacts/24-4-tarjeta-de-obra-wip.patch`, el mismo commit— y seguir por las tareas de pruebas de **Tasks & Acceptance**.
 
 **Revisión, primera pasada (2026-10-27, bucle v8-ralph).** Status: done. Cinco capas externas (blind-hunter, edge-case-hunter, verification-gap sin hallazgos, intent-alignment, ac-auditor); 15 parches aplicados (1 medio, 14 bajos), 2 diferidos (bajos) y 18 rechazados. Ningún `intent_gap` ni `bad_spec`.
 
@@ -271,3 +302,22 @@ Verificación de esta pasada:
 `followup_review_recommended: true` — parches de esta pasada: 0 altos, 1 medio, 14 bajos; puntuación 3 × 1 + 14 = 17 (≥ 5).
 
 Riesgos residuales: Copiar sigue fuera de la primera pantalla de 360 × 640 en las Citas con tarjeta (deuda aceptada, SM-C5; ahora con cota de la segunda pantalla); la caída por tiempo de `rutas-de-salida.spec.ts:98` bajo carga (diferida); la Tarjeta de Obra de las hermanas no fecha ni avisa (excepción de la 24.8, diferida).
+
+**Revisión, segunda pasada (2026-10-27, bucle v8-ralph).** Status: done. Cinco capas externas (blind-hunter, edge-case-hunter, verification-gap sin hallazgos, intent-alignment, ac-auditor); 12 parches aplicados (12 bajos), 1 diferido (bajo) y 18 rechazados. Ningún `intent_gap` ni `bad_spec`. El código de producción solo cambia en un comentario.
+
+Qué cambia en esta pasada:
+- `src/components/FilaDeBloque.astro` -- solo el docblock: el texto de la fila va en la misma línea que la etiqueta, o el «›» puede quedarse solo.
+- `tests/unit/tarjeta-de-obra.test.ts` -- las dos ramas de `Rotulo` comparadas sin construir y con `destino` en la sonda; el trato de la Fila de bloque contra las reglas de `ListaDeObras.astro`; la Atribución con el año de su Cita junto a la tarjeta sin año de la Obra; `/<a[\s>]/` sobre la fuente sin comentarios; el comentario de `reglasDe`.
+- `tests/unit/obra-pagina.test.ts` -- la ruta de Cartas comprobada antes de usarse y una Página de Cita por Cita del fixture en lugar de «> 50».
+- `tests/e2e/ayuda/corpus.ts` (`admiteImagen` en vez de `.length`), `tests/e2e/accesibilidad.spec.ts` (sin Obra por el lector de la tarjeta; fuera el envoltorio), `tests/e2e/pagina-de-cita.spec.ts` (sin Obra, Copiar a 32 px ±1 de lo de arriba, medido).
+- `_bmad-output/implementation-artifacts/sprint-status.yaml` -- solo el comentario de la línea de la 24.4: los tres diferidos.
+- Este spec -- el diferido nuevo, «Cómo leer esta sección» y los bloques superados marcados como tales.
+
+Verificación de esta pasada:
+- `npx vitest run tests/unit/tarjeta-de-obra.test.ts`: 28 verdes. `npx vitest run tests/unit/obra-pagina.test.ts`: 66 verdes. `npm run check`: 0 errores. `npm test`: 135 ficheros, 6.185 pruebas, verde (731 s).
+- Playwright `accesibilidad`, `pagina-de-cita`, `rutas-de-salida`, `copiar`, `busqueda` en los dos proyectos: 257 verdes, 6 saltadas, y la caída por tiempo ya diferida de `[movil] rutas-de-salida.spec.ts:98` (42,3 s; en escritorio 14,2 s). Repetido `rutas-de-salida.spec.ts --project=movil` solo: 7 verdes (esa prueba en 9,8 s). La prueba nueva de Copiar sin Obra, verde en los dos proyectos.
+- El `dist/` del Corpus real que reconstruyó `tests/servidor.mjs` con los parches: `shasum` de `dist/cita/` y `dist/_astro/` idéntico, fichero a fichero (4.423), al de la construcción anterior de `e95f6ba534`; el docblock no cambia la salida, así que el `diff -rq` y el peso de la primera pasada siguen valiendo.
+
+`followup_review_recommended: true` — parches de esta pasada: 0 altos, 0 medios, 12 bajos; puntuación 3 × 0 + 12 = 12 (≥ 5).
+
+Riesgos residuales: Copiar fuera de la primera pantalla de 360 × 640 en las Citas con tarjeta (deuda aceptada, SM-C5); la caída por tiempo de `rutas-de-salida.spec.ts:98` bajo carga, que pone en rojo la pasada conjunta de Playwright (diferida); la Tarjeta de Obra de las hermanas no fecha ni avisa (24.8, diferida); el interlineado 1,4 frente al 1,6 de `body-md` (diferido, lo decide Héctor).
