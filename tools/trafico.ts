@@ -40,6 +40,7 @@ import {
   type FamiliaSinLeer,
 } from './lib/indexacion.ts';
 import {
+  FAMILIAS_DEL_TRAFICO,
   FILAS_POR_PAGINA,
   MESES_QUE_CONSERVA_LA_FUENTE,
   MOTIVOS_SIN_CREDENCIALES_DE_TRAFICO,
@@ -192,6 +193,7 @@ export async function leerTrafico(opciones: {
         await filasPorPagina(opciones.consultar, mes),
         censo,
         opciones.dominio,
+        FAMILIAS_DEL_TRAFICO,
       );
     } catch (error) {
       const motivo = motivoDeFallo(error);
@@ -204,7 +206,9 @@ export async function leerTrafico(opciones: {
         });
         continue;
       }
-      for (const familia of familiasPublicadas(censo)) familiasSinLeer.push({ familia, motivo });
+      for (const familia of familiasPublicadas(censo, FAMILIAS_DEL_TRAFICO)) {
+        familiasSinLeer.push({ familia, motivo });
+      }
     }
 
     leidos.push(

@@ -439,10 +439,28 @@ describe('el cruce con la serie', () => {
     }
     // La portada sigue suelta, y el informe ya no nombra a los Directorios con ella.
     const portada = lineasDeRegistro([{ fecha: HOY, ruta: '/' }], censo, publicadas).join('\n');
-    expect(portada).toMatch(/Sin familia —la portada no es de ninguna—: 1/);
+    expect(portada).toMatch(/Sin familia —la portada, y las Obras, que el rastreo no cuenta—: 1/);
   });
 
-  it('Historia 26.7 — con la Obra congelada, `/obras/` se anota y la consulta la cuenta en «Directorio»', async () => {
+  it('Historia 26.7 — una Obra indexable pedida cae «sin familia» y el rótulo lo dice, no solo la portada', async () => {
+    const conjunto = await conjuntoDelCorpus(rutasDelCorpus(await corpusConCitas(MIN_CITAS_POR_TEMA)));
+    const censo = censoPorFamilia(conjunto);
+    // El rastreo no cuenta la Obra (`FAMILIAS_DEL_RASTREO`): publicada y fuera del censo.
+    const obra = '/obra/autor-0/una-obra/';
+    const publicadas = [...rutasPublicadas(conjunto), obra];
+    expect(destinoDePeticion(obra, censo, publicadas)).toEqual({ clase: 'suelta' });
+    const lineas = lineasDeRegistro(
+      [
+        { fecha: HOY, ruta: '/' },
+        { fecha: HOY, ruta: obra },
+      ],
+      censo,
+      publicadas,
+    ).join('\n');
+    expect(lineas).toMatch(/Sin familia —la portada, y las Obras, que el rastreo no cuenta—: 2/);
+  });
+
+  it('Historia 26.7 — con la Obra congelada, `/autores/` y `/obras/` se anotan y la consulta los cuenta en «Directorio»', async () => {
     vi.resetModules();
     vi.doMock('../../src/lib/umbrales.ts', async (importOriginal) => ({
       ...(await importOriginal<typeof import('../../src/lib/umbrales.ts')>()),
@@ -454,11 +472,20 @@ describe('el cruce con la serie', () => {
       expect(congelacionVigente()).toBeDefined();
       const corpus = await corpusConCitas(MIN_CITAS_POR_TEMA);
       const salida = capturarSalida();
-      expect(await conCongelacion(['--corpus', corpus, '--registrar', rutaDelDirectorioDeObras()])).toBe(0);
+      expect(
+        await conCongelacion([
+          '--corpus',
+          corpus,
+          '--registrar',
+          rutaDelDirectorioDeAutores(),
+          rutaDelDirectorioDeObras(),
+        ]),
+      ).toBe(0);
       expect(await leerPeticionesDeRastreo(rutasDelCorpus(corpus))).toEqual([
+        { fecha: fechaLocal(new Date()), ruta: '/autores/' },
         { fecha: fechaLocal(new Date()), ruta: '/obras/' },
       ]);
-      expect(salida.join('')).toMatch(/^ {2}Directorio: 1 pedidas de 2 publicadas$/m);
+      expect(salida.join('')).toMatch(/^ {2}Directorio: 2 pedidas de 2 publicadas$/m);
       expect(salida.join('')).not.toMatch(/congelada/);
     } finally {
       vi.doUnmock('../../src/lib/umbrales.ts');

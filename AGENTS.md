@@ -241,7 +241,8 @@ publicadas. Los Directorios (`/autores/` y `/obras/`) cuentan desde la Historia 
 familia, `directorio` («Directorio» en el informe), y no en Autor ni en Obra. **Cada pasada
 reatribuye los meses pasados con el censo de hoy**: una Cita retirada desde entonces pasa a
 `fueraDelCenso`, y lo que de los Directorios estaba en `fueraDelCenso` pasa a `directorio` en
-la primera pasada tras la 26.7.
+cada mes que se relee tras la 26.7 —los 16 en una pasada sin `--meses`; con `--meses N`, solo
+esos, y los demás siguen con la atribución anterior hasta que se relean—.
 
 **Ausencia antes que cero.** Un mes cuya consulta falla no se escribe y conserva su entrada
 anterior; sale nombrado en `sinLeer` del informe con su motivo. Una familia cuya consulta por
@@ -291,7 +292,10 @@ con menos de `MIN_IMPRESIONES_POR_FILA` (5) impresiones no se versiona en `citas
 (`agregarPorFamilia`, con su `fueraDelCenso`), así que una Cita retirada cuenta en su Autor y,
 por familia, fuera del censo. Los Directorios (`/autores/` y `/obras/`) no son ruta de Cita: no
 cuentan en ningún Autor y, por familia, cuentan en `directorio` (Historia 26.7;
-`FAMILIAS_DE_LA_DEMANDA`, todas menos `obra`), que la pasada reatribuye como el tráfico.
+`FAMILIAS_DE_LA_DEMANDA`, todas menos `obra`) **en las ventanas leídas desde entonces**. La
+demanda no relee lo registrado —`--rellenar` solo pide los meses que faltan—, así que las
+ventanas anteriores a la 26.7 conservan los Directorios en `fueraDelCenso`: la serie mezcla las
+dos atribuciones y no se comparan sin decirlo.
 
 **Ausencia antes que cero.** Una ventana cuya consulta falla, o cuyo reparto no se puede
 componer, no se escribe —se conserva la entrada anterior si la había— y sale en el `sinLeer`
@@ -410,7 +414,8 @@ no tener el registro. Mientras la familia Obra esté congelada (`CONGELACION_DE_
 22.8), toda URL de Obra se rechaza con 1, nombrando la congelación. Una petición de uno de los
 Directorios (`/autores/` y `/obras/`) se anota —el sitio la publica, y `/obras/` no es una Obra:
 la congelación no la alcanza— y la consulta la cuenta en su familia, «Directorio» (Historia
-26.7, `FAMILIAS_DEL_RASTREO`); «sin familia» queda solo para la portada.
+26.7, `FAMILIAS_DEL_RASTREO`); «sin familia» queda para la portada y para una Obra, que el
+rastreo no cuenta todavía.
 
 ## Anotar lo que se publica en el canal
 

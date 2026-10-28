@@ -343,6 +343,16 @@ export interface PlanDeInspeccion {
 }
 
 /**
+ * Las familias cuyo suelo **no** se reserva por delante de las enteras — Historia 26.7.
+ *
+ * Mientras rija SM-11, Autor y Obra se leen enteras «y el Directorio no les quita suelo»: sus
+ * dos URL no pueden dejar a la Obra muestreada cuando el presupuesto aprieta. Su suelo sale de
+ * lo que quede tras las enteras, en el reparto de las demás, que sirve el suelo de la más
+ * pequeña a la más grande: con dos URL se lee entera mientras quede algo que repartir.
+ */
+const SIN_SUELO_POR_DELANTE: readonly FamiliaDeLaSerie[] = ['directorio'];
+
+/**
  * Qué inspeccionar con el presupuesto que hay.
  *
  * Todo si cabe. Si no cabe, muestra por familia, y el reparto tiene dos pasos por un
@@ -389,8 +399,9 @@ export function planDeInspeccion(
   const publicadas = [...tamaños.values()].reduce((a, b) => a + b, 0);
 
   /*
-   * Primero se **reserva el suelo** de las demás familias —que ninguna se quede sin serie—;
-   * con lo que quede, las enteras en el orden dado; y lo que sobre aún se reparte entre las
+   * Primero se **reserva el suelo** de las demás familias —que ninguna se quede sin serie—,
+   * salvo el del Directorio (`SIN_SUELO_POR_DELANTE`); con lo que quede, las enteras en el
+   * orden dado; y lo que sobre aún se reparte entre las
    * demás con el suelo y la proporción de siempre. Si las enteras no caben, se muestrean y lo
    * dice su `muestreada`.
    */
@@ -399,7 +410,9 @@ export function planDeInspeccion(
   const demas = new Map([...tamaños].filter(([familia]) => !enterasConCenso.includes(familia)));
   const suelo = Math.min(
     disponible,
-    [...demas.values()].reduce((suma, total) => suma + Math.min(total, MUESTRA_MINIMA_POR_FAMILIA), 0),
+    [...demas]
+      .filter(([familia]) => !SIN_SUELO_POR_DELANTE.includes(familia))
+      .reduce((suma, [, total]) => suma + Math.min(total, MUESTRA_MINIMA_POR_FAMILIA), 0),
   );
   let paraEnteras = disponible - suelo;
   for (const familia of enterasConCenso) {

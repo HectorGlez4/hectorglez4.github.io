@@ -36,8 +36,9 @@ import {
  *
  * Derivadas de `FAMILIAS` (`src/lib/superficies.ts`), nunca reescritas: el día que el tráfico
  * cuente la Obra cambia esta constante y ninguna otra. El Directorio cuenta desde la 26.7, y como
- * cada pasada reatribuye los meses pasados con el censo de hoy, lo que de `/autores/` y `/obras/`
- * estaba en `fueraDelCenso` pasa a su familia.
+ * cada mes que se relee se reatribuye con el censo de hoy, lo que de `/autores/` y `/obras/`
+ * estaba en `fueraDelCenso` pasa a su familia **en los meses releídos**: una pasada con
+ * `--meses N` deja los demás como estaban.
  */
 export const FAMILIAS_DEL_TRAFICO: readonly FamiliaDelCenso[] = FAMILIAS.filter(
   (f): f is FamiliaDelCenso => f !== 'obra',
@@ -353,11 +354,12 @@ function familiaDePagina(
 
 /**
  * Las familias con alguna URL publicada. Una sin publicar no tiene tráfico que medir.
- * `familias` es el subconjunto que cuenta la serie: el del tráfico por omisión.
+ * `familias` es el subconjunto que cuenta la serie que pregunta, y se pasa siempre: sin valor
+ * por omisión, una serie no puede heredar en silencio el subconjunto de otra.
  */
 export function familiasPublicadas(
   censo: CensoPorFamilia,
-  familias: readonly FamiliaDelCenso[] = FAMILIAS_DEL_TRAFICO,
+  familias: readonly FamiliaDelCenso[],
 ): FamiliaDelCenso[] {
   return familias.filter((f) => (censo[f]?.length ?? 0) > 0);
 }
@@ -371,15 +373,15 @@ export function familiasPublicadas(
  * no se lea como «sin tráfico». Lo que no casa con el censo —la portada, una página 2, una
  * Cita retirada, otro host— se suma aparte en `fueraDelCenso`.
  *
- * `familias` es el subconjunto que cuenta la serie que llama —el del tráfico por omisión; la
- * demanda pasa el suyo—: una ruta del censo de una familia que la serie no cuenta va también
- * a `fueraDelCenso`, nunca a otra familia.
+ * `familias` es el subconjunto que cuenta la serie que llama —`FAMILIAS_DEL_TRAFICO` o
+ * `FAMILIAS_DE_LA_DEMANDA`—, y se pasa siempre, sin valor por omisión: una ruta del censo de
+ * una familia que la serie no cuenta va también a `fueraDelCenso`, nunca a otra familia.
  */
 export function agregarPorFamilia(
   filas: readonly FilaDeTrafico[],
   censo: CensoPorFamilia,
   dominio: string,
-  familias: readonly FamiliaDelCenso[] = FAMILIAS_DEL_TRAFICO,
+  familias: readonly FamiliaDelCenso[],
 ): { familias: Partial<Record<FamiliaDelCenso, Metricas>>; fueraDelCenso: FueraDelCenso } {
   const mapa = familiaPorRuta(censo, familias);
   const acumulados = Object.fromEntries(familias.map((f) => [f, vacio()])) as Record<
@@ -471,7 +473,7 @@ export function componerLecturaDeTrafico(entrada: {
     sinLeer[familia] = motivo;
   }
 
-  const publicadas = familiasPublicadas(entrada.censo);
+  const publicadas = familiasPublicadas(entrada.censo, FAMILIAS_DEL_TRAFICO);
   for (const familia of FAMILIAS_DEL_TRAFICO) {
     if (!publicadas.includes(familia)) {
       if (familias[familia] !== undefined || sinLeer[familia] !== undefined) {

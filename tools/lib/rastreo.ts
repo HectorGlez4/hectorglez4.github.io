@@ -416,9 +416,10 @@ function normalizadaOTalCual(ruta: string): string {
  * y afirmaba que lo que sobraba era la portada, con la petición escrita en el fichero.
  *
  *   · `familia`      — el censo la reparte, y es el caso normal.
- *   · `suelta`       — el sitio la publica y el censo la deja fuera: la portada. Los
- *                      Directorios (`/autores/` y `/obras/`) lo fueron de la 26.3 a la 26.7,
- *                      que les dio familia: `directorio`.
+ *   · `suelta`       — el sitio la publica y el censo la deja fuera: la portada y, mientras el
+ *                      rastreo no cuente la Obra (`FAMILIAS_DEL_RASTREO`), una Obra indexable.
+ *                      Los Directorios (`/autores/` y `/obras/`) lo fueron de la 26.3 a la
+ *                      26.7, que les dio familia: `directorio`.
  *   · `despublicada` — el sitio ya no la publica. Ocurrió, y por eso sigue anotada.
  */
 export type DestinoDePeticion =
@@ -577,7 +578,7 @@ export function lineasDeRegistro(
   const fuera = peticionesFueraDelCenso(peticiones, censo, publicadas);
   if (fuera.sueltas.length > 0) {
     lineas.push(
-      `  Sin familia —la portada no es de ninguna—: ${new Set(fuera.sueltas.map((p) => p.ruta)).size}`,
+      `  Sin familia —la portada, y las Obras, que el rastreo no cuenta—: ${new Set(fuera.sueltas.map((p) => p.ruta)).size}`,
     );
   }
   if (fuera.despublicadas.length > 0) {

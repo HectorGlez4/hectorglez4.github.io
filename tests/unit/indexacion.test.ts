@@ -1529,6 +1529,28 @@ describe('Historia 26.7 — los Directorios se miden como familia propia', () =>
     expect(plan.inspecciones).toBe(TECHO_DIARIO_DE_INSPECCIONES);
   });
 
+  it('con SM-11 y el presupuesto justo, el Directorio no les quita suelo a Autor ni a Obra', () => {
+    const censo = {
+      cita: Array.from({ length: 3500 }, (_, i) => `/cita/c-${String(i).padStart(5, '0')}/`),
+      autor: Array.from({ length: 150 }, (_, i) => `/autor/a-${i}/`),
+      tema: Array.from({ length: 60 }, (_, i) => `/tema/t-${i}/`),
+      coleccion: [],
+      obra: Array.from({ length: 80 }, (_, i) => `/obra/a/o-${i}/`),
+      directorio: DIRECTORIOS,
+    };
+    // El suelo de Cita y Tema, y Autor y Obra enteras: ni una petición de más.
+    const justo = 2 * MUESTRA_MINIMA_POR_FAMILIA + 150 + 80;
+    const plan = planDeInspeccion(censo, justo, ['autor', 'obra']);
+    const de = (f: string) => plan.familias.find((x) => x.familia === f);
+    expect(de('autor')).toMatchObject({ publicadas: 150, muestreada: false });
+    expect(de('obra')).toMatchObject({ publicadas: 80, muestreada: false });
+    expect(de('obra')?.rutas).toHaveLength(80);
+    // Su suelo sale de lo que queda, y por ser la más pequeña se sirve primero.
+    expect(de('directorio')).toMatchObject({ publicadas: 2, muestreada: false, rutas: DIRECTORIOS });
+    expect(plan.inspecciones).toBe(justo);
+    expect(plan.sinPresupuesto).toEqual([]);
+  });
+
   it('la lectura anota `directorio` con su censo de lo publicado, fuera del total de la entrada', async () => {
     const { lectura } = await leerIndexacion({
       conjunto: conjuntoDe(MIN_CITAS_POR_TEMA),
