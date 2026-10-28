@@ -89,12 +89,16 @@ const { obras, zona } = Astro.props;
   }
 
   /*
-   * Base 0 y crecimiento: ocupa lo que deja el recuento, y una palabra más larga que la fila se
-   * parte (`overflow-wrap`) en vez de salirse. Sin `min-width: 0`: su mínimo es la palabra más
-   * larga ya partida, así que el recuento baja de línea antes que aplastarlo.
+   * Base 0 y crecimiento: ocupa lo que deja el recuento. Sin `min-width: 0`, su mínimo es su
+   * palabra más larga (`break-word` no la cuenta partida), así que cuando esa palabra y el recuento
+   * no caben juntos el recuento baja de línea antes que aplastar el título. `max-width: 100%` topa
+   * ese mínimo en el ancho de la fila: una palabra más larga que la fila entera se parte
+   * (`overflow-wrap`) en vez de salirse y abrir un desplazamiento horizontal (`anywhere` también
+   * la partiría, pero el recuento ya no bajaría nunca).
    */
   .titulo {
     flex: 1 1 0%;
+    max-width: 100%;
     font-family: var(--sans);
     font-size: var(--cuerpo-md);
     line-height: 1.4;

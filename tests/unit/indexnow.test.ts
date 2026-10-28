@@ -278,8 +278,11 @@ describe('AD-27 — el aviso es la lectura inversa de la relación que fecha el 
         ...(noFechan[familia] ?? []),
       ]);
       for (const campo of campos) {
-        const antes: Version = { [campo]: 'a' };
-        const despues: Version = { [campo]: 'b' };
+        // Un subcampo —`procedencia.obra`, 26.4— va anidado en su clave.
+        const version = (valor: string): Version =>
+          campo.split('.').reduceRight<unknown>((dentro, clave) => ({ [clave]: dentro }), valor) as Version;
+        const antes: Version = version('a');
+        const despues: Version = version('b');
         const historial = new Map<string, TransicionFechada[]>(
           ficheros.map((f) => [f, [{ fecha: T0, antes: null, despues: antes }]]),
         );

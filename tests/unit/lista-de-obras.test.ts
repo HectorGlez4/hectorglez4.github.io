@@ -124,6 +124,8 @@ describe('Historia 17.3 — la regla del enlace de bloque (el CI no corre e2e)',
     expect(titulo).toMatch(/flex:\s*1 1 0%/);
     expect(titulo).toMatch(/overflow-wrap:\s*break-word/);
     expect(titulo).not.toMatch(/min-width/);
+    // Una palabra más larga que la fila se parte en vez de desbordarla (lo mide el e2e de 26.4).
+    expect(titulo).toMatch(/max-width:\s*100%/);
     const recuento = regla('.recuento');
     expect(recuento).toMatch(/flex:\s*none/);
     expect(recuento).not.toMatch(/nowrap/);

@@ -529,7 +529,9 @@ test.describe('Historia 2.8 — foco', () => {
      * Obras, las letras y sus «Volver»). Medido el 2026-10-28: unos 10 s antes de `/obras/`, 29,4 s
      * en escritorio y más de 30 en móvil con ella. `test.slow()` triplica el presupuesto de ésta y
      * solo de ésta; no toca ningún umbral del producto ni lo que se comprueba. Se revierte borrando
-     * la línea.
+     * la línea. `/obras/` crece con cada Obra: si esta prueba vuelve a agotar el tiempo, es el
+     * mismo crecimiento que vigila `MAX_BYTES_DEL_DIRECTORIO_DE_OBRAS` (`src/lib/umbrales.ts`), y
+     * paginar `/obras/` lo decide Héctor —no se sube el presupuesto otra vez sin decirlo—.
      */
     test.slow();
     for (const ruta of SUPERFICIES) {

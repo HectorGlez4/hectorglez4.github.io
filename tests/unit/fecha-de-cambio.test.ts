@@ -357,8 +357,9 @@ describe('Historia 24.8 — todo campo de los esquemas está clasificado', () =>
   });
 
   const clasificados = (familia: keyof typeof ESQUEMAS): Set<string> => {
+    // Un subcampo —`procedencia.obra`, 26.4— clasifica la clave del esquema que lo contiene.
     const enLaTabla = Object.values(CAMPOS_QUE_PINTA[familia]).flatMap((campos) =>
-      campos === CUALQUIER_CAMBIO ? [] : [...(campos as readonly string[])],
+      campos === CUALQUIER_CAMBIO ? [] : (campos as readonly string[]).map((campo) => campo.split('.')[0]),
     );
     const queNoFechan = (CAMPOS_QUE_NO_FECHAN as Partial<Record<string, readonly string[]>>)[familia] ?? [];
     return new Set([...enLaTabla, ...queNoFechan]);
@@ -378,7 +379,7 @@ describe('Historia 24.8 — todo campo de los esquemas está clasificado', () =>
   it('ninguna clave fecha y a la vez está entre las que no fechan', () => {
     for (const [familia, lista] of Object.entries(CAMPOS_QUE_NO_FECHAN)) {
       const enLaTabla = Object.values(CAMPOS_QUE_PINTA[familia as keyof typeof CAMPOS_QUE_PINTA]).flatMap(
-        (campos) => (campos === CUALQUIER_CAMBIO ? [] : [...(campos as readonly string[])]),
+        (campos) => (campos === CUALQUIER_CAMBIO ? [] : (campos as readonly string[]).map((campo) => campo.split('.')[0])),
       );
       expect(lista.filter((clave) => enLaTabla.includes(clave)), familia).toEqual([]);
     }
@@ -596,6 +597,58 @@ describe('Historia 24.8 — la matriz: qué cambia de fecha', () => {
     expect(refechadas(corpusDeEjemplo(), historial(enT1))).toContain('/obras');
     expect(refechadas(corpusDeEjemplo(), historial(enT1))).not.toContain('/autores');
     expect(avisadas(enT1, corpusDeEjemplo())).toContain('/obras');
+  });
+
+  it('de la Procedencia, solo la Obra y el año mueven `/obras/`: la referencia y la traducción, no', () => {
+    const ruta = 'corpus/citas/x--a.md';
+    for (const procedencia of [
+      { obra: 'Obra O', referencia: 'cap. 3' },
+      { obra: 'Obra O', traduccion: { traductor: 'Fulano', año: 1900 } },
+    ]) {
+      const enT1 = { [ruta]: editado(ruta, { procedencia }) };
+      const motivo = JSON.stringify(procedencia);
+      expect(refechadas(corpusDeEjemplo(), historial(enT1)), motivo).not.toContain('/obras');
+      expect(avisadas(enT1, corpusDeEjemplo()), motivo).not.toContain('/obras');
+      // La Página de Cita sí la pinta entera.
+      expect(refechadas(corpusDeEjemplo(), historial(enT1)), motivo).toContain('/cita/x-a');
+    }
+    const otraObra = { [ruta]: editado(ruta, { procedencia: { obra: 'Obra Q' } }) };
+    expect(refechadas(corpusDeEjemplo(), historial(otraObra))).toContain('/obras');
+    expect(avisadas(otraObra, corpusDeEjemplo())).toContain('/obras');
+  });
+
+  it('una Cita sin Obra no compone `/obras/`: ni su alta, ni su baja, ni su cambio de Autor', () => {
+    // `y-b` sin Obra: no figura en `/obras/`, y sí cuenta en `/autores/`.
+    const ruta = 'corpus/citas/y--b.md';
+    const sinSuObra: Readonly<Record<string, unknown>> = { ...VERSIONES[ruta], procedencia: undefined };
+    const base = corpusDeEjemplo();
+    const conYbSinObra: CorpusParaFechar = {
+      ...base,
+      citas: base.citas.map((c) => {
+        if (c.slug !== 'y-b') return c;
+        const { obra: _obra, obraDeclarada: _declarada, ...sinObra } = c;
+        return sinObra;
+      }),
+    };
+    const alta = { [ruta]: { antes: null, despues: sinSuObra } };
+    const altaH = historial(alta, [ruta]);
+    expect(refechadas(conYbSinObra, altaH)).toContain('/autores');
+    expect(refechadas(conYbSinObra, altaH)).not.toContain('/obras');
+    expect(avisadas(alta, conYbSinObra, corpusDeEjemplo([ruta]))).not.toContain('/obras');
+
+    const deAutor = { [ruta]: { antes: sinSuObra, despues: { ...sinSuObra, autor: 'x' } } };
+    expect(refechadas(conYbSinObra, historial(deAutor))).toContain('/autores');
+    expect(refechadas(conYbSinObra, historial(deAutor))).not.toContain('/obras');
+    expect(avisadas(deAutor, conYbSinObra)).not.toContain('/obras');
+
+    const baja = { [ruta]: { antes: sinSuObra, despues: null } };
+    const bajaH = new Map(historial({}));
+    bajaH.set(ruta, [{ fecha: T1, ...baja[ruta] }, { fecha: T0, antes: null, despues: sinSuObra }]);
+    const sinYb = conBajas(corpusDeEjemplo([ruta]), bajaH);
+    expect(sinYb.bajas?.citas?.map((c) => c.slug)).toEqual(['y-b']);
+    expect(refechadas(sinYb, bajaH)).toContain('/autores');
+    expect(refechadas(sinYb, bajaH)).not.toContain('/obras');
+    expect(avisadas(baja, corpusDeEjemplo([ruta]), conYbSinObra)).not.toContain('/obras');
   });
 
   it('las formas de una ficha mueven su Obra y `/obras/`, y su `distintaDe` nada', () => {

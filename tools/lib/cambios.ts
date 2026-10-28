@@ -50,12 +50,13 @@
  *     Cita, solo su `autor`, porque el Directorio cuenta Citas por Autor: un alta, una baja o un
  *     cambio de Autor lo mueven, un cambio de texto no. La semblanza, la tradición, la biografía y
  *     `ordenRevisado` no lo fechan.
- *   · **Directorio de Obras** (Historia 26.4) — lo que pinta: de cada Cita, su `autor` y su
- *     `procedencia` —de donde salen su Obra y el año de la Obra—, porque el Directorio cuenta
- *     Citas por Obra; de cada ficha de Obra de esas Citas, el `titulo` y las `formas` —que deciden
- *     qué Citas cuentan en ella—; del Autor de cada Cita con Obra, el nombre y la clave de orden.
- *     Los años y la semblanza de un Autor, un Autor sin Obras, la `nota`, las `ediciones` y
- *     `distintaDe` de una ficha y `ordenRevisado` no lo fechan.
+ *   · **Directorio de Obras** (Historia 26.4) — lo que pinta: de cada Cita con Obra, su `autor` y,
+ *     de su Procedencia, la `obra` y el `año` —su Obra y el año de la Obra—, porque el Directorio
+ *     cuenta Citas por Obra; de cada ficha de Obra de esas Citas, el `titulo` y las `formas` —que
+ *     deciden qué Citas cuentan en ella—; del Autor de cada Cita con Obra, el nombre y la clave de
+ *     orden. Una Cita sin Obra no figura en él y no lo compone, ni viva ni de baja. Los años y la
+ *     semblanza de un Autor, un Autor sin Obras, la referencia y la traducción de una Procedencia,
+ *     la `nota`, las `ediciones` y `distintaDe` de una ficha y `ordenRevisado` no lo fechan.
  *
  * ── Un comparador, dos lecturas ──────────────────────────────────────────────────────
  *
@@ -71,7 +72,8 @@
  * Un fichero que ya no está en el Corpus —su última transición es un borrado: mover una Cita a
  * `corpus/_revision/` o una ficha a `corpus/_obras-retiradas/` lo es— entra con su última versión
  * como **baja** y fecha, con el instante del commit que lo sacó, las superficies **vivas** que
- * compondría: una Cita, su Autor, los dos Directorios, sus Temas, sus Colecciones (por
+ * compondría: una Cita, su Autor, los dos Directorios (el de Obras, si declaraba Obra), sus
+ * Temas, sus Colecciones (por
  * `miembros`) y su Obra (resuelta por Autor y forma contra las fichas de hoy); una ficha, las Páginas de Cita y los
  * listados de las Citas de hoy cuya forma reclamaba; un documento, la Obra cuyas Citas lo
  * casarían. Una baja nunca declara la página de sí misma. Un Autor, un Tema o una Colección que
@@ -163,13 +165,27 @@ export type Campos = typeof CUALQUIER_CAMBIO | readonly string[];
  *
  * Un alta o una baja cambian todos; una versión opaca, también; si no, se comparan los campos
  * uno a uno en forma canónica. La usan, sin copia, la fecha del sitemap y el aviso.
+ *
+ * Un campo puede nombrar un subcampo con punto —`procedencia.obra`—: el Directorio de Obras
+ * (26.4) pinta de la Procedencia solo la Obra y su año, no la referencia ni la traducción.
  */
 export function cambiaronLosCampos(transicion: Transicion, campos: Campos): boolean {
   if (campos === CUALQUIER_CAMBIO) return true;
   const { antes, despues } = transicion;
   if (antes === null || despues === null) return antes !== despues;
   if (antes === VERSION_OPACA || despues === VERSION_OPACA) return true;
-  return campos.some((campo) => canonica(antes[campo]) !== canonica(despues[campo]));
+  return campos.some((campo) => canonica(valorDelCampo(antes, campo)) !== canonica(valorDelCampo(despues, campo)));
+}
+
+/** El valor de un campo —o de un subcampo con punto— de una versión; ausente si no está. */
+function valorDelCampo(version: Readonly<Record<string, unknown>>, campo: string): unknown {
+  return campo
+    .split('.')
+    .reduce<unknown>(
+      (valor, clave) =>
+        valor !== null && typeof valor === 'object' ? (valor as Record<string, unknown>)[clave] : undefined,
+      version,
+    );
 }
 
 /**
@@ -227,8 +243,9 @@ export type Columna = Exclude<FamiliaDeRuta, 'directorio'> | 'directorioDeAutore
  *   · el Directorio de Autores (26.3) pinta de un Autor el nombre, los años y su clave de orden,
  *     y de una Cita solo su `autor`: la cuenta por Autor;
  *   · el Directorio de Obras (26.4) pinta de un Autor el nombre y la clave —no los años—, de una
- *     Cita su `autor` y su `procedencia` —su Obra y el año de la Obra— y de una ficha el `titulo`
- *     y las `formas`, que deciden qué Citas cuenta cada Obra; nunca la `nota` ni las `ediciones`.
+ *     Cita su `autor` y, de su Procedencia, solo `procedencia.obra` y `procedencia.año` —su Obra
+ *     y el año de la Obra; ni la referencia ni la traducción— y de una ficha el `titulo` y las
+ *     `formas`, que deciden qué Citas cuenta cada Obra; nunca la `nota` ni las `ediciones`.
  *
  * Las biografías de `corpus/biografias/` **no** son una familia, y tampoco es un olvido: la
  * Página de Autor pinta de ellas la atribución de la semblanza (título, revisión, licencia),
@@ -244,7 +261,7 @@ export const CAMPOS_QUE_PINTA = {
     coleccion: CAMPOS_DE_CITA,
     obra: CAMPOS_DE_CITA,
     directorioDeAutores: ['autor'],
-    directorioDeObras: ['autor', 'procedencia'],
+    directorioDeObras: ['autor', 'procedencia.obra', 'procedencia.año'],
   },
   autor: {
     cita: CAMPOS_DEL_AUTOR_FUERA,
@@ -510,14 +527,16 @@ export function relacionDeSuperficies(corpus: CorpusParaFechar): Map<string, Sup
 
   /*
    * El Directorio de Obras (Historia 26.4): estático y declarado siempre, de la familia
-   * `directorio` y con su propia columna. Lo componen todas las Citas —su `autor` y su
-   * `procedencia`: una Cita sin Obra que pasa a declarar una entra en él—, las fichas de Obra
+   * `directorio` y con su propia columna. Lo componen las Citas con Obra —su `autor` y la `obra`
+   * y el `año` de su Procedencia: la transición que le dio la Obra la fecha—, las fichas de Obra
    * cuyo título pintan (las vivas y las de baja que las reclamaban) y los Autores de las Citas con
-   * Obra, que son los que tienen grupo. Un Autor sin Obras no lo compone: no figura.
+   * Obra, que son los que tienen grupo. Una Cita sin Obra no figura en él, y un Autor sin Obras
+   * tampoco: no lo componen.
    */
   const directorioDeObras = rutaDelDirectorioDeObras();
   declarar(directorioDeObras, 'directorio', 'directorioDeObras');
   for (const cita of corpus.citas) {
+    if (cita.obra === undefined && formaDe(cita) === undefined) continue;
     componer(directorioDeObras, cita.ruta, 'cita');
     for (const ficha of fichasDeLaCita(cita)) componer(directorioDeObras, ficha, 'obra');
   }
@@ -543,7 +562,8 @@ export function relacionDeSuperficies(corpus: CorpusParaFechar): Map<string, Sup
   }
 
   /*
-   * Las bajas de Cita fechan lo vivo que compondrían —su Autor, los dos Directorios, sus
+   * Las bajas de Cita fechan lo vivo que compondrían —su Autor, los dos Directorios (el de Obras,
+   * si declaraba Obra), sus
    * Temas, sus Colecciones y su Obra— y nunca declaran su propia página: `componer` no declara nada. La Obra se resuelve
    * contra las fichas de hoy, por (Autor, forma).
    */
@@ -557,7 +577,7 @@ export function relacionDeSuperficies(corpus: CorpusParaFechar): Map<string, Sup
     // El Directorio la contaba en su Autor: la baja mueve el recuento (26.3).
     componer(directorio, baja.ruta, 'cita');
     // Y el de Obras la contaba en su Obra, si declaraba una: la baja mueve su recuento (26.4).
-    componer(directorioDeObras, baja.ruta, 'cita');
+    if (formaDe(baja) !== undefined) componer(directorioDeObras, baja.ruta, 'cita');
     for (const tema of baja.temas ?? []) componer(rutaDeTema(tema), baja.ruta, 'cita');
     for (const ruta of coleccionesDe.get(baja.slug) ?? []) componer(ruta, baja.ruta, 'cita');
     const forma = formaDe(baja);

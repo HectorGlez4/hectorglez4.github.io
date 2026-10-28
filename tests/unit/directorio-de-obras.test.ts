@@ -1,4 +1,4 @@
-import { existsSync, readFileSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { mkdtemp, readFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -446,6 +446,20 @@ describe('Historia 26.4 — `/obras/` construido', () => {
     expect([...hrefs].sort()).toEqual([...OBRAS].sort());
     expect(main()).not.toMatch(/href="\/cita\//);
     for (const href of hrefs) expect(existsSync(paginaConstruida(proyecto, href)), href).toBe(true);
+  });
+
+  it('el conjunto es el de las Páginas de Obra construidas y el que cuenta `integraciones/indexables.ts`', () => {
+    // Contra las otras dos derivaciones de `obrasPublicadas`, no contra una lista escrita: las
+    // páginas `/obra/{autor}/{obra}/` de `dist/` y el «N Obras publicadas» del build.
+    const hrefs = filas().map((f) => f.href);
+    const raiz = join(proyecto, 'dist', 'obra');
+    const construidas = readdirSync(raiz).flatMap((autor) =>
+      readdirSync(join(raiz, autor))
+        .filter((obra) => existsSync(join(raiz, autor, obra, 'index.html')))
+        .map((obra) => `/obra/${autor}/${obra}/`),
+    );
+    expect([...hrefs].sort()).toEqual(construidas.sort());
+    expect(salida).toContain(`${hrefs.length} Obras publicadas`);
   });
 
   it('cada Autor con Obras, en el orden del Directorio, con su cabecera enlazada y en la zona `directorio`', () => {

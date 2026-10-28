@@ -99,7 +99,14 @@ test.describe('Historia 26.4 — las filas y las cabeceras de grupo', () => {
       const unidad = (n: number) => parseFloat(sonda(`width: calc(var(--unidad) * ${n})`).ancho);
       const estilo = (e: Element) => {
         const c = getComputedStyle(e);
-        return { familia: c.fontFamily, cuerpo: c.fontSize, peso: c.fontWeight, color: c.color, subrayado: c.textDecorationLine };
+        return {
+          familia: c.fontFamily,
+          cuerpo: c.fontSize,
+          peso: c.fontWeight,
+          color: c.color,
+          subrayado: c.textDecorationLine,
+          cifras: c.fontVariantNumeric,
+        };
       };
       const uno = (selector: string) => {
         const e = document.querySelector(selector);
@@ -123,7 +130,10 @@ test.describe('Historia 26.4 — las filas y las cabeceras de grupo', () => {
           serif: sonda('font-family: var(--serif)').familia,
           sans: sonda('font-family: var(--sans)').familia,
           titularSm: sonda('font-size: var(--titular-sm)').cuerpo,
+          cuerpoMd: sonda('font-size: var(--cuerpo-md)').cuerpo,
+          pie: sonda('font-size: var(--pie)').cuerpo,
           tinta: sonda('color: var(--tinta)').color,
+          tintaApagada: sonda('color: var(--tinta-apagada)').color,
           u1: unidad(1),
           u2: unidad(2),
           u4: unidad(4),
@@ -152,6 +162,9 @@ test.describe('Historia 26.4 — las filas y las cabeceras de grupo', () => {
     expect(m.enlaceDelAutor).toMatchObject({ familia: t.serif, color: t.tinta, subrayado: 'underline' });
     expect(m.enlaceDelAutor.alto).toBeGreaterThanOrEqual(t.zonaDeToque);
     for (const pieza of [m.h1, m.letra, m.titulo, m.recuento, m.volver]) expect(pieza.familia).toBe(t.sans);
+    // La Fila de Obra: el título en `body-md` y tinta; el recuento en `caption`, apagado y con cifras tabulares.
+    expect(m.titulo).toMatchObject({ cuerpo: t.cuerpoMd, color: t.tinta });
+    expect(m.recuento).toMatchObject({ cuerpo: t.pie, color: t.tintaApagada, cifras: 'tabular-nums' });
     expect(m.serifFuera, 'la serif fuera del nombre del Autor').toEqual([]);
 
     expect(m.filaBajoElAutor).toBeCloseTo(t.u1, 0);
@@ -159,30 +172,71 @@ test.describe('Historia 26.4 — las filas y las cabeceras de grupo', () => {
     if (m.entreAutores !== undefined) expect(m.entreAutores).toBeCloseTo(t.u4, 0);
   });
 
-  test('a 320 px nada se recorta: el título más largo parte línea, el recuento no se encoge y no hay desplazamiento horizontal', async ({ page }) => {
+  test('a 320 px nada se recorta: el recuento no se encoge y no hay desplazamiento horizontal', async ({ page }) => {
     await page.setViewportSize({ width: 320, height: 640 });
     await page.goto(RUTA);
     const m = await page.evaluate(() => {
-      const titulos = [...document.querySelectorAll<HTMLElement>('ul.lista-de-obras .titulo')];
-      const largo = titulos.reduce((a, b) => ((b.textContent ?? '').length > (a.textContent ?? '').length ? b : a));
+      const recuentos = [...document.querySelectorAll<HTMLElement>('ul.lista-de-obras .recuento')];
       const alturaDeLinea = (e: HTMLElement) => parseFloat(getComputedStyle(e).lineHeight);
-      const recuento = largo.parentElement!.querySelector<HTMLElement>('.recuento')!;
       return {
-        texto: largo.textContent,
-        lineasDelTitulo: largo.getBoundingClientRect().height / alturaDeLinea(largo),
-        lineasDelRecuento: recuento.getBoundingClientRect().height / alturaDeLinea(recuento),
-        recuentoEntero: recuento.getBoundingClientRect().width + 0.5 >= recuento.scrollWidth,
-        encoge: getComputedStyle(recuento).flexShrink,
-        espacio: getComputedStyle(recuento).whiteSpace,
+        filas: recuentos.length,
+        recuentosEnVariasLineas: recuentos.filter((r) => r.getBoundingClientRect().height / alturaDeLinea(r) >= 1.5).length,
+        recuentosCortados: recuentos.filter((r) => r.getBoundingClientRect().width + 0.5 < r.scrollWidth).length,
+        encoge: getComputedStyle(recuentos[0]).flexShrink,
+        espacio: getComputedStyle(recuentos[0]).whiteSpace,
         anchoDelDocumento: document.documentElement.scrollWidth,
         ventana: window.innerWidth,
       };
     });
-    expect(m.lineasDelTitulo, m.texto ?? '').toBeGreaterThan(1.5);
-    expect(m.lineasDelRecuento).toBeLessThan(1.5);
-    expect(m.recuentoEntero).toBe(true);
+    expect(m.filas).toBeGreaterThan(0);
+    expect(m.recuentosEnVariasLineas).toBe(0);
+    expect(m.recuentosCortados).toBe(0);
     expect(m.encoge).toBe('0');
     expect(m.espacio).not.toBe('nowrap');
     expect(m.anchoDelDocumento).toBeLessThanOrEqual(m.ventana);
+  });
+
+  /*
+   * Lo que el Corpus de hoy quizá no trae: se escribe el título en una fila servida y se mide.
+   * Un título largo parte línea junto al recuento; una palabra más ancha que la fila se parte
+   * dentro de ella, y el recuento baja entero bajo el título (NFR-12, UX-DR103).
+   */
+  test('a 320 px un título largo parte línea y una palabra indivisible se parte sin desbordar; el recuento baja entero', async ({ page }) => {
+    await page.setViewportSize({ width: 320, height: 640 });
+    await page.goto(RUTA);
+    const medir = (texto: string) =>
+      page.evaluate((texto) => {
+        const titulo = document.querySelector<HTMLElement>('ul.lista-de-obras .titulo')!;
+        titulo.textContent = texto;
+        const fila = titulo.parentElement!;
+        const recuento = fila.querySelector<HTMLElement>('.recuento')!;
+        const alturaDeLinea = (e: HTMLElement) => parseFloat(getComputedStyle(e).lineHeight);
+        const t = titulo.getBoundingClientRect();
+        const r = recuento.getBoundingClientRect();
+        const f = fila.getBoundingClientRect();
+        return {
+          lineasDelTitulo: t.height / alturaDeLinea(titulo),
+          lineasDelRecuento: r.height / alturaDeLinea(recuento),
+          recuentoEntero: r.width + 0.5 >= recuento.scrollWidth,
+          recuentoBajoElTitulo: r.top >= t.bottom - 1,
+          tituloDentro: t.right <= f.right + 0.5 && titulo.scrollWidth <= Math.ceil(t.width) + 0.5,
+          anchoDelDocumento: document.documentElement.scrollWidth,
+          ventana: window.innerWidth,
+        };
+      }, texto);
+
+    const largo = await medir('Tratado de las cosas que se dicen y se callan en las cartas a los amigos de siempre');
+    expect(largo.lineasDelTitulo).toBeGreaterThan(1.5);
+    expect(largo.lineasDelRecuento).toBeLessThan(1.5);
+    expect(largo.recuentoEntero).toBe(true);
+    expect(largo.anchoDelDocumento).toBeLessThanOrEqual(largo.ventana);
+
+    const indivisible = await medir('Antidisestablishmentarianismoextraordinariamenteinterminable');
+    expect(indivisible.tituloDentro).toBe(true);
+    expect(indivisible.lineasDelTitulo).toBeGreaterThan(1.5);
+    expect(indivisible.recuentoBajoElTitulo).toBe(true);
+    expect(indivisible.lineasDelRecuento).toBeLessThan(1.5);
+    expect(indivisible.recuentoEntero).toBe(true);
+    expect(indivisible.anchoDelDocumento).toBeLessThanOrEqual(indivisible.ventana);
   });
 });

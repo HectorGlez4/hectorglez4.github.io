@@ -5,7 +5,7 @@ created: '2026-10-28'
 status: 'done'
 baseline_revision: 'bad5a77126a29981612864abbe8d0aa674391743'
 review_loop_iteration: 0
-followup_review_recommended: false
+followup_review_recommended: true
 context:
   - '{project-root}/_bmad-output/implementation-artifacts/epic-26-context.md'
   - '{project-root}/_bmad-output/planning-artifacts/ux-designs/ux-brainlySabiduria-2026-08-10/DESIGN.md'
@@ -125,6 +125,24 @@ deferred: []
 
 Las cinco capas (blind-hunter, edge-case-hunter, verification-gap, intent-alignment, ac-auditor) son externas en el bucle v8-ralph y no traían hallazgos en esta pasada: la revisión independiente viene después.
 
+### 2026-10-28 — Review pass
+- intent_gap: 0
+- bad_spec: 0
+- patch: 8 (high 0, medium 1, low 7)
+- defer: 0
+- reject: 14 (high 0, medium 0, low 14)
+- addressed_findings:
+  - `[medium]` `[patch]` Una palabra más ancha que la fila desbordaba a 320 px (`overflow-wrap: break-word` no topa el mínimo flex; 355 px medidos): `.titulo` gana `max-width: 100%`, que parte la palabra dentro de la fila y conserva que el recuento baje bajo el título (`anywhere` lo habría dejado siempre al lado). Comentario y aserción de `tests/unit/lista-de-obras.test.ts` al día.
+  - `[low]` `[patch]` AD-27: una Cita sin Obra componía `/obras/` (su alta, su baja y su cambio de Autor lo refechaban y avisaban): solo la componen las Citas con Obra, vivas o de baja (`formaDe`), como ya decía el comentario de las bajas.
+  - `[low]` `[patch]` AD-27: toda la `procedencia` fechaba `/obras/`, también la referencia y la traducción, que no pinta: `cambiaronLosCampos` admite subcampos con punto y la columna `directorioDeObras` de una Cita pasa a `autor`, `procedencia.obra`, `procedencia.año`. Las pruebas de clasificación (fecha-de-cambio, indexnow) leen la clave raíz del subcampo; dos pruebas nuevas fijan los casos.
+  - `[low]` `[patch]` El e2e de 320 px dependía de que el Corpus trajera un título largo y no comprobaba que el recuento bajara: ahora mide todas las filas servidas y escribe en una fila un título largo y una palabra indivisible, exigiendo que el título parta, que nada desborde y que el recuento baje entero.
+  - `[low]` `[patch]` Faltaban sondas de tokens de la Fila de Obra: el e2e exige `--cuerpo-md` y `--tinta` en el título y `--pie`, `--tinta-apagada` y `tabular-nums` en el recuento.
+  - `[low]` `[patch]` El conjunto de `/obras/` se comparaba solo con una lista escrita: una prueba sobre `dist/` lo compara además con las Páginas de Obra construidas y con el «N Obras publicadas» de `integraciones/indexables.ts`.
+  - `[low]` `[patch]` El aviso de tamaño del build no estaba en `AGENTS.md`: nueva sección «El Directorio de Obras (Historia 26.4)» con la frase, el tope, su origen y que paginar o subir el tope lo decide Héctor.
+  - `[low]` `[patch]` `test.slow()` en la prueba de foco no decía por qué volvería a fallar: su comentario y `AGENTS.md` lo atan al crecimiento de `/obras/` y a `MAX_BYTES_DEL_DIRECTORIO_DE_OBRAS`.
+
+Rechazados (14): el `{n}` de la meta (lo fija la matriz del intent-contract y la redacción la aprobó Héctor; en el sitio real son 4.416 de ~4.420); el registro de la pasada anterior (esta es la revisión); `sprint-status.yaml` (lo lleva el bucle); nombres de enlace sin Autor (el `h3` precedente da el contexto, H80, y la AC fija el nombre de la fila); `Cache-Control` del PNG (mismo patrón que `autores.png.ts`, sin efecto en estático); tope solo para `/obras/` (es lo que pide la AC); estado vacío (lo fija la matriz); CSS que depende del marcado de `GrupoDeLetra` (lo mide el e2e); la reexportación de `publicado.ts` (la exige la AC); columna opcional en `declarar` (lanza al construir la relación, en toda prueba); coste Autores × Citas (la AC exige la misma llamada que la Página de Autor; ~600 k operaciones); la línea «sin obra documentada» sin lista (cubierta por `lista-de-obras.test.ts`, Machado); estilos de página copiados de `autores.astro` (la AC pide reutilizar letras, grupos y orden); y las lecturas descriptivas de intent-alignment (cláusula posterior a la 27, alcance de la prueba de secuencia, informe por separado de la línea base), que no piden ningún cambio.
+
 ## Design Notes
 
 **Columnas de la tabla, no familias.** `CAMPOS_QUE_PINTA` se indexaba por `FamiliaDeRuta`, y los dos Directorios son la misma familia (`directorio`, la que medirá la 26.7) pero pintan cosas distintas: `/autores/` los años, `/obras/` no; `/obras/` el título de ficha y la Procedencia, `/autores/` no. La familia sigue siendo `directorio` para el aviso y el ensayo; solo la columna de la tabla se desdobla. `formas` de una ficha entra porque decide qué Citas cuentan en cada Obra (el recuento); `procedencia` de una Cita, porque da su Obra y el año.
@@ -191,3 +209,32 @@ Blocking condition: ninguna.
 **Matriz.** Cada fila la cubre `tests/unit/directorio-de-obras.test.ts` (puro y sobre `dist/`, con una segunda construcción congelada), y la de la Página de Autor `tests/unit/lista-de-obras.test.ts`; todas corrieron en `npm test`.
 
 **Riesgos residuales.** `/obras/` crece con cada Obra: hoy 230 KB, el aviso salta hacia las ~660 Obras. La prueba de foco del barrido tarda ~30 s y vive de `test.slow()`. Las exenciones de alcance por ruta (`/autores/`, `/obras/`) siguen hasta la 26.5.
+
+### Pasada de revisión 1 (2026-10-28)
+
+**Resumen.** Las cinco capas externas trajeron 22 hallazgos distintos: 8 parches aplicados (1 medio, 7 bajos), 0 aplazados, 14 rechazados; ni `intent_gap` ni `bad_spec`. El detalle, en el Review Triage Log.
+
+**Ficheros.**
+- `src/components/ListaDeObras.astro` — `.titulo` con `max-width: 100%`: una palabra más ancha que la fila se parte dentro de ella y el recuento sigue bajando bajo el título.
+- `tools/lib/cambios.ts` — `cambiaronLosCampos` admite subcampos con punto; la columna `directorioDeObras` de una Cita es `autor`, `procedencia.obra`, `procedencia.año`; solo las Citas con Obra (vivas o de baja) componen `/obras/`. Cabecera y comentarios al día.
+- `tests/unit/fecha-de-cambio.test.ts` — clasificación por clave raíz del subcampo; dos pruebas nuevas (referencia/traducción no fechan `/obras/`, otra obra sí; una Cita sin Obra no la compone en alta, baja ni cambio de Autor), comprobadas en rojo contra el `cambios.ts` anterior.
+- `tests/unit/indexnow.test.ts` — la prueba de inversas anida el subcampo en su clave.
+- `tests/unit/lista-de-obras.test.ts` — exige `max-width: 100%` en `.titulo`.
+- `tests/unit/directorio-de-obras.test.ts` — el conjunto de `/obras/` contra las Páginas de Obra de `dist/` y el «N Obras publicadas» del build.
+- `tests/e2e/directorio-de-obras.spec.ts` — sondas de tokens de título y recuento; el 320 px mide todas las filas y escribe un título largo y una palabra indivisible.
+- `tests/e2e/accesibilidad.spec.ts` — el comentario de `test.slow()` lo ata a `MAX_BYTES_DEL_DIRECTORIO_DE_OBRAS`.
+- `AGENTS.md` — sección «El Directorio de Obras (Historia 26.4)» con el aviso de tamaño.
+
+**Desvíos de las Tasks.** Las Tasks decían «componerla con cada Cita» con `procedencia` entera y `overflow-wrap: break-word` sin más; el criterio («se compone de lo que pinta», «nunca se recorta») manda, y el código lo sigue ahora. El texto de las Tasks no se ha reescrito.
+
+**Recomendación de revisión de seguimiento:** `true` — parches de esta pasada: 0 altos, 1 medio, 7 bajos; puntuación 3 × 1 + 7 = 10 ≥ 5.
+
+**Verificación.**
+- `npx vitest run` de fecha-de-cambio, indexnow, directorio-de-obras y lista-de-obras — 155 verdes.
+- `npm run check` — 0 errores, 0 avisos.
+- `npm test` completo — 142 ficheros, 6.533 pruebas verdes (810 s).
+- `npm run build` — sale 0; «El Directorio de Obras pesa 230470 bytes, dentro de MAX_BYTES_DEL_DIRECTORIO_DE_OBRAS (296960)»; «517 Obras publicadas, 277 indexables»; `/obras/` en el sitemap; existen `dist/obras/index.html` y su Tarjeta.
+- Playwright local `--project=escritorio --project=movil`: directorio-de-obras, pagina-de-autor y accesibilidad — 186 verdes, 2 saltadas (17.4, ajenas); la prueba de foco, 26,4 s.
+
+**Riesgos residuales.** Una Cita que pierde la Obra por completo (no por cambiar a otra) ya no compone `/obras/` y esa transición no lo refecha —el mismo criterio por estado de hoy que la Página de Obra y el listado de Autor—. Lo demás, como en la pasada de implementación.
+

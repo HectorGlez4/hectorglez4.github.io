@@ -965,6 +965,19 @@ sale en los dos grupos. El orden de tabulación es el del marcado.
 - Pinta textos, Obras y recuentos de otras Citas: es navegación y, por la excepción de Héctor,
   no fecha ni avisa (`tools/lib/cambios.ts`, 24.8, FR-47).
 
+### El Directorio de Obras (Historia 26.4)
+
+`/obras/` lista **toda** Obra de `obrasPublicadas` —también las `noindex` y con congelación, sin
+marca que las distinga— bajo su Autor, en el orden de `/autores/` y con la Lista de Obras de su
+Página de Autor (el mismo componente y `ordenDeLaListaDeObras` de `src/lib/obras.ts`). Es una
+sola página, sin 2+, y crece con cada Obra. Por eso `npm run build` informa siempre, desde
+`integraciones/directorios.ts`, «El Directorio de Obras pesa N bytes»; si pasa de
+`MAX_BYTES_DEL_DIRECTORIO_DE_OBRAS` (`src/lib/umbrales.ts`, 290 KiB, fijado con un 25 % sobre los
+230.455 bytes del día de construirla), **avisa sin romper** y dice que reabre paginar `/obras/`.
+Paginar o subir el tope **lo decide Héctor**: ningún agente sube el tope para callar el aviso. La
+prueba de foco de `tests/e2e/accesibilidad.spec.ts` tabula cada enlace de la página y lleva
+`test.slow()` por ella; si vuelve a agotar el tiempo, es el mismo crecimiento.
+
 ## Curar una Colección
 
 Una Colección se cura con su orden, nunca escribiendo el YAML a mano:
