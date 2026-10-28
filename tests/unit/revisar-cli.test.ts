@@ -5,6 +5,8 @@ import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { promisify } from 'node:util';
 import { componerDocumento } from '../../tools/lib/documento.ts';
+import { rutasDelCorpus } from '../../tools/lib/corpus.ts';
+import { TEMA_PUBLICADO, ficherosPublicados, sembrarTemaPublicado } from './ayuda/relleno.ts';
 
 const ejecutar = promisify(execFile);
 const RAIZ = resolve(import.meta.dirname, '../..');
@@ -54,6 +56,8 @@ async function corpus() {
     'nombre: "Séneca"\nañoFallecimiento: 65\nsemblanza: "Filósofo estoico hispanorromano."\nordenAlfabetico: "Séneca"\n',
     'utf8',
   );
+  // Historia 26.8 — un Tema con página, para que aprobar con `--temas` publique (NFR-5).
+  await sembrarTemaPublicado(rutasDelCorpus(dir));
   return { raiz, dir };
 }
 
@@ -100,7 +104,9 @@ describe('Historia 9.2 — sembrar es una sesión, no treinta', () => {
       .map((linea) => linea.trim());
     expect(pendientes).toHaveLength(3);
 
-    const aprobacion = await correr('tools/revisar.ts', ['--corpus', dir, '--aprobar', pendientes[0]]);
+    const aprobacion = await correr('tools/revisar.ts', [
+      '--corpus', dir, '--aprobar', pendientes[0], '--temas', TEMA_PUBLICADO,
+    ]);
     expect(aprobacion.codigo, aprobacion.salida).toBe(0);
     expect(aprobacion.salida).toMatch(/Publicadas: 1/);
 
@@ -113,8 +119,29 @@ describe('Historia 9.2 — sembrar es una sesión, no treinta', () => {
     expect(segundoListado.salida).toContain(pendientes[2]);
     expect(segundoListado.salida).not.toContain(pendientes[1]);
 
-    expect(await readdir(join(dir, 'citas'))).toHaveLength(1);
+    expect(await ficherosPublicados({ citas: join(dir, 'citas') })).toHaveLength(1);
     expect(await readdir(join(dir, '_revision'))).toHaveLength(1);
+  });
+
+  it('aprobar una que no tendría ningún Tema publicado sale con 1 y la deja en revisión', async () => {
+    const { dir } = await corpus();
+    await correr('tools/extraer.ts', [
+      join(dir, 'fuentes', NOMBRE_DEL_DOCUMENTO), '--autor', 'seneca', '--corpus', dir,
+    ]);
+    const listado = await correr('tools/revisar.ts', ['--corpus', dir]);
+    const [primera] = listado.salida
+      .split('\n')
+      .filter((linea) => /^seneca-/.test(linea))
+      .map((linea) => linea.trim());
+
+    const resultado = await correr('tools/revisar.ts', ['--corpus', dir, '--aprobar', primera]);
+
+    expect(resultado.codigo).toBe(1);
+    expect(resultado.salida).toMatch(/Publicadas: 0/);
+    expect(resultado.salida).toContain(`✕ ${primera} — sigue en revisión: no tendría ningún Tema publicado.`);
+    expect(resultado.salida).toMatch(/no declara ningún Tema/);
+    expect(await ficherosPublicados({ citas: join(dir, 'citas') })).toHaveLength(0);
+    expect(await readdir(join(dir, '_revision'))).toHaveLength(3);
   });
 
   it('aprobar algo que la admisión rechaza sale con error y lo deja donde estaba', async () => {
@@ -134,7 +161,7 @@ describe('Historia 9.2 — sembrar es una sesión, no treinta', () => {
     expect(resultado.codigo).not.toBe(0);
     expect(resultado.salida).toMatch(/sigue en revisión/);
     expect(resultado.salida).toMatch(/Procedencia/);
-    expect(await readdir(join(dir, 'citas'))).toHaveLength(0);
+    expect(await ficherosPublicados({ citas: join(dir, 'citas') })).toHaveLength(0);
     expect(await readdir(join(dir, '_revision'))).toHaveLength(1);
   });
 });

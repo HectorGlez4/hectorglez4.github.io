@@ -28,6 +28,20 @@ import {
 } from '../../tools/lib/corpus.ts';
 import { slugsSembrados } from '../../tools/lib/epocas.ts';
 import { temasPublicados, type Cita, type Tema } from '../../src/lib/publicado.ts';
+import {
+  NOMBRE_DEL_TEMA_PUBLICADO,
+  TEMA_PUBLICADO,
+  ficherosPublicados,
+  sembrarTemaPublicado,
+  sinRelleno,
+} from './ayuda/relleno.ts';
+import {
+  DE_EPICTETO,
+  EN_LA_IRA,
+  SIN_EFECTO,
+  instantaneaDe,
+  sembrarCorpusAlLimite,
+} from './ayuda/al-limite.ts';
 
 const temporales: string[] = [];
 afterEach(async () => {
@@ -137,18 +151,20 @@ describe('Historia 1.7 — Temas', () => {
     const rutas = await corpusVacio();
     await crearAutor(rutas, SENECA);
     await crearTema(rutas, 'El tiempo');
+    // Historia 26.8 — con un segundo Tema que ya tiene página: sin él, el alta no publica.
+    await sembrarTemaPublicado(rutas);
     await darDeAltaLote(
       [
         {
           texto: 'No es que tengamos poco tiempo, es que perdemos mucho.',
           autor: 'Séneca',
-          temas: ['El tiempo'],
+          temas: ['El tiempo', NOMBRE_DEL_TEMA_PUBLICADO],
           procedencia: { obra: 'Sobre la brevedad de la vida', año: 49 },
         },
         {
           texto: 'La vida, si sabes usarla, es larga.',
           autor: 'Séneca',
-          temas: ['El tiempo'],
+          temas: ['El tiempo', NOMBRE_DEL_TEMA_PUBLICADO],
           procedencia: { obra: 'Sobre la brevedad de la vida', año: 49 },
         },
       ],
@@ -160,7 +176,7 @@ describe('Historia 1.7 — Temas', () => {
     if (resultado.ok) return;
     expect(resultado.motivos[0]).toMatch(/2 Citas publicadas/);
     // El Tema sigue ahí.
-    expect(await readdir(rutas.temas)).toEqual(['el-tiempo.yml']);
+    expect(await readdir(rutas.temas)).toEqual([`${TEMA_PUBLICADO}.yml`, 'el-tiempo.yml']);
   });
 
   it('eliminar un Tema que no existe se rechaza', async () => {
@@ -174,11 +190,14 @@ describe('Historia 1.7 — marcado de Cita apta para portada', () => {
   async function corpusConUnaCita(): Promise<{ rutas: Rutas; slug: string }> {
     const rutas = await corpusVacio();
     await crearAutor(rutas, SENECA);
+    // Historia 26.8 — con un Tema que tiene página: sin él, el alta no publica.
+    await sembrarTemaPublicado(rutas);
     const informe = await darDeAltaLote(
       [
         {
           texto: 'La vida, si sabes usarla, es larga.',
           autor: 'Séneca',
+          temas: [NOMBRE_DEL_TEMA_PUBLICADO],
           procedencia: { obra: 'Sobre la brevedad de la vida', año: 49 },
         },
       ],
@@ -192,7 +211,7 @@ describe('Historia 1.7 — marcado de Cita apta para portada', () => {
     const resultado = await marcarAptaParaPortada(rutas, slug, true);
 
     expect(resultado.ok).toBe(true);
-    const [fichero] = await readdir(rutas.citas);
+    const [fichero] = await ficherosPublicados(rutas);
     const contenido = await readFile(join(rutas.citas, fichero), 'utf8');
     expect(contenido).toContain('aptaParaPortada: true');
   });
@@ -202,14 +221,14 @@ describe('Historia 1.7 — marcado de Cita apta para portada', () => {
     await marcarAptaParaPortada(rutas, slug, true);
     await marcarAptaParaPortada(rutas, slug, false);
 
-    const [fichero] = await readdir(rutas.citas);
+    const [fichero] = await ficherosPublicados(rutas);
     const contenido = await readFile(join(rutas.citas, fichero), 'utf8');
     expect(contenido).not.toContain('aptaParaPortada');
   });
 
   it('marcar no altera el texto ni el resto del fichero', async () => {
     const { rutas, slug } = await corpusConUnaCita();
-    const [fichero] = await readdir(rutas.citas);
+    const [fichero] = await ficherosPublicados(rutas);
     const antes = await readFile(join(rutas.citas, fichero), 'utf8');
 
     await marcarAptaParaPortada(rutas, slug, true);
@@ -434,10 +453,13 @@ describe('Historia 15.5 — asignar un Tema a Citas ya publicadas', () => {
     await crearAutor(rutas, SENECA);
     await crearTema(rutas, 'El tiempo');
     await crearTema(rutas, 'La verdad');
+    // Historia 26.8 — con un Tema que tiene página: sin él, el alta no publica.
+    await sembrarTemaPublicado(rutas);
+    const temas = ['El tiempo', NOMBRE_DEL_TEMA_PUBLICADO];
     const informe = await darDeAltaLote(
       [
-        { texto: PRIMERA, autor: 'Séneca', temas: ['El tiempo'], procedencia: { obra: 'De la brevedad de la vida' }, fuente: FUENTE },
-        { texto: SEGUNDA, autor: 'Séneca', temas: ['El tiempo'], procedencia: { obra: 'De la brevedad de la vida' }, fuente: FUENTE },
+        { texto: PRIMERA, autor: 'Séneca', temas, procedencia: { obra: 'De la brevedad de la vida' }, fuente: FUENTE },
+        { texto: SEGUNDA, autor: 'Séneca', temas, procedencia: { obra: 'De la brevedad de la vida' }, fuente: FUENTE },
       ],
       rutas,
     );
@@ -451,7 +473,7 @@ describe('Historia 15.5 — asignar un Tema a Citas ya publicadas', () => {
     const resultado = await asignarTema(rutas, 'la-verdad', slugs);
 
     expect(resultado.ok, resultado.ok ? '' : resultado.motivos.join(' ')).toBe(true);
-    const citas = await leerCitas(rutas.citas);
+    const citas = sinRelleno(await leerCitas(rutas.citas));
     for (const cita of citas) {
       expect(cita.temas).toContain('la-verdad');
       expect(cita.temas).toContain('el-tiempo');
@@ -460,11 +482,11 @@ describe('Historia 15.5 — asignar un Tema a Citas ya publicadas', () => {
 
   it('no toca el texto de la Cita, que es lo que NFR-12 protege', async () => {
     const { rutas, slugs } = await corpusConDosCitas();
-    const antes = (await leerCitas(rutas.citas)).map((c) => c.texto).sort();
+    const antes = sinRelleno(await leerCitas(rutas.citas)).map((c) => c.texto).sort();
 
     await asignarTema(rutas, 'la-verdad', slugs);
 
-    expect((await leerCitas(rutas.citas)).map((c) => c.texto).sort()).toEqual(antes);
+    expect(sinRelleno(await leerCitas(rutas.citas)).map((c) => c.texto).sort()).toEqual(antes);
   });
 
   it('marca la Cita cuyo slug contiene el slug del Tema, que es donde falló el script a mano', async () => {
@@ -476,7 +498,7 @@ describe('Historia 15.5 — asignar un Tema a Citas ya publicadas', () => {
 
     await asignarTema(rutas, 'la-verdad', [conTrampa!]);
 
-    const cita = (await leerCitas(rutas.citas)).find((c) => c.slug === conTrampa);
+    const cita = sinRelleno(await leerCitas(rutas.citas)).find((c) => c.slug === conTrampa);
     expect(cita?.temas).toContain('la-verdad');
   });
 
@@ -488,7 +510,7 @@ describe('Historia 15.5 — asignar un Tema a Citas ya publicadas', () => {
     expect(segunda.ok).toBe(true);
     if (!segunda.ok) return;
     expect(segunda.mensaje).toMatch(/ya lo ten|0 Citas/i);
-    const cita = (await leerCitas(rutas.citas))[0]!;
+    const cita = sinRelleno(await leerCitas(rutas.citas))[0]!;
     expect(cita.temas!.filter((t) => t === 'la-verdad')).toHaveLength(1);
   });
 
@@ -499,7 +521,7 @@ describe('Historia 15.5 — asignar un Tema a Citas ya publicadas', () => {
     expect(resultado.ok).toBe(false);
     if (resultado.ok) return;
     expect(resultado.motivos.join(' ')).toMatch(/la-muerte/);
-    expect((await leerCitas(rutas.citas))[0]!.temas).not.toContain('la-muerte');
+    expect(sinRelleno(await leerCitas(rutas.citas))[0]!.temas).not.toContain('la-muerte');
   });
 
   it('una Cita que no existe se rechaza nombrándola, y ninguna otra se modifica', async () => {
@@ -510,7 +532,7 @@ describe('Historia 15.5 — asignar un Tema a Citas ya publicadas', () => {
     if (resultado.ok) return;
     expect(resultado.motivos.join(' ')).toContain('seneca-no-existe');
     // Se comprueba antes de escribir: un lote con una errata no deja el corpus a medias.
-    for (const cita of await leerCitas(rutas.citas)) {
+    for (const cita of sinRelleno(await leerCitas(rutas.citas))) {
       expect(cita.temas).not.toContain('la-verdad');
     }
   });
@@ -543,7 +565,7 @@ describe('Historia 15.5 — asignar un Tema a Citas ya publicadas', () => {
       const resultado = await quitarTema(rutas, 'la-verdad', slugs);
 
       expect(resultado.ok, resultado.ok ? '' : resultado.motivos.join(' ')).toBe(true);
-      for (const cita of await leerCitas(rutas.citas)) {
+      for (const cita of sinRelleno(await leerCitas(rutas.citas))) {
         expect(cita.temas).not.toContain('la-verdad');
         expect(cita.temas).toContain('el-tiempo');
       }
@@ -551,11 +573,11 @@ describe('Historia 15.5 — asignar un Tema a Citas ya publicadas', () => {
 
     it('no toca el texto de la Cita, que es lo que NFR-12 protege', async () => {
       const { rutas, slugs } = await corpusConDosCitasEnDosTemas();
-      const antes = (await leerCitas(rutas.citas)).map((c) => c.texto).sort();
+      const antes = sinRelleno(await leerCitas(rutas.citas)).map((c) => c.texto).sort();
 
       await quitarTema(rutas, 'la-verdad', slugs);
 
-      expect((await leerCitas(rutas.citas)).map((c) => c.texto).sort()).toEqual(antes);
+      expect(sinRelleno(await leerCitas(rutas.citas)).map((c) => c.texto).sort()).toEqual(antes);
     });
 
     it('quitar dos veces no es un fallo: la segunda dice que ya no lo tenían', async () => {
@@ -573,7 +595,7 @@ describe('Historia 15.5 — asignar un Tema a Citas ya publicadas', () => {
 
       expect(resultado.ok).toBe(false);
       // Y las Citas siguen con los suyos: el rechazo es antes de escribir.
-      for (const cita of await leerCitas(rutas.citas)) expect(cita.temas).toContain('la-verdad');
+      for (const cita of sinRelleno(await leerCitas(rutas.citas))) expect(cita.temas).toContain('la-verdad');
     });
 
     it('si una Cita del lote no está publicada, no se desmarca ninguna', async () => {
@@ -581,7 +603,7 @@ describe('Historia 15.5 — asignar un Tema a Citas ya publicadas', () => {
       const resultado = await quitarTema(rutas, 'la-verdad', [...slugs, 'seneca-no-existe']);
 
       expect(resultado.ok).toBe(false);
-      for (const cita of await leerCitas(rutas.citas)) expect(cita.temas).toContain('la-verdad');
+      for (const cita of sinRelleno(await leerCitas(rutas.citas))) expect(cita.temas).toContain('la-verdad');
     });
 
     /*
@@ -595,8 +617,12 @@ describe('Historia 15.5 — asignar un Tema a Citas ya publicadas', () => {
       const { rutas, slugs } = await corpusConDosCitas();
       const resultado = await quitarTema(rutas, 'el-tiempo', [slugs[0]!]);
       expect(resultado.ok, resultado.ok ? '' : resultado.motivos.join(' ')).toBe(true);
+      // Historia 26.8 — y el de relleno, que es el último. La Cita sigue al alcance por la
+      // página 1 de su Autor, así que la puerta de NFR-5 lo deja pasar.
+      const ultimo = await quitarTema(rutas, TEMA_PUBLICADO, [slugs[0]!]);
+      expect(ultimo.ok, ultimo.ok ? '' : ultimo.motivos.join(' ')).toBe(true);
 
-      const citas = await leerCitas(rutas.citas);
+      const citas = sinRelleno(await leerCitas(rutas.citas));
       expect(citas.find((c) => c.slug === slugs[0])?.temas).toEqual([]);
       expect(() =>
         temasPublicados(
@@ -1001,5 +1027,45 @@ describe('Historia 26.1 — la clave de orden en las funciones de gestión', () 
     expect((await fijarClave(rutas, 'seneca', '1984', '2026-10-29')).ok).toBe(false);
     expect((await fijarClave(rutas, 'nadie', 'Nadie', '2026-10-29')).ok).toBe(false);
     expect(await readFile(ruta, 'utf8')).toBe(antes);
+  });
+});
+
+/** Historia 26.8 — un Corpus al límite en un directorio temporal propio (`ayuda/al-limite.ts`). */
+const alLimite: string[] = [];
+afterEach(async () => {
+  await Promise.all(alLimite.splice(0).map((d) => rm(d, { recursive: true, force: true })));
+});
+async function corpusAlLimite() {
+  const raiz = await mkdtemp(join(tmpdir(), 'sabiduria-al-limite-'));
+  alLimite.push(raiz);
+  const rutas = rutasDelCorpus(join(raiz, 'corpus'));
+  await sembrarCorpusAlLimite(rutas);
+  return rutas;
+}
+
+describe('Historia 26.8 — quitar un Tema no deja una Cita fuera de alcance', () => {
+  it('quitarlo de otra Cita que deja el Tema bajo su umbral se niega con el recuento', async () => {
+    const rutas = await corpusAlLimite();
+    const antes = await instantaneaDe(rutas.raiz);
+
+    const resultado = await quitarTema(rutas, 'la-ira', [DE_EPICTETO[3]!]);
+
+    expect(resultado.ok).toBe(false);
+    if (resultado.ok) return;
+    expect(resultado.motivos.join('\n')).toContain(`/cita/${EN_LA_IRA}/ — su Tema «La ira» (la-ira) tiene 14 Citas`);
+    expect(await instantaneaDe(rutas.raiz)).toEqual(antes);
+  });
+
+  it('quitárselo a la propia Cita, que se queda sin camino, también se niega', async () => {
+    const rutas = await corpusAlLimite();
+    const resultado = await quitarTema(rutas, 'la-ira', [EN_LA_IRA]);
+    expect(resultado.ok).toBe(false);
+    if (!resultado.ok) expect(resultado.motivos.join('\n')).toContain(`/cita/${EN_LA_IRA}/ — no declara ningún Tema`);
+  });
+
+  it('quitar un Tema que no sostiene a nadie funciona como siempre', async () => {
+    const rutas = await corpusAlLimite();
+    const resultado = await quitarTema(rutas, 'el-tiempo', [SIN_EFECTO]);
+    expect(resultado.ok, resultado.ok ? '' : resultado.motivos.join('\n')).toBe(true);
   });
 });

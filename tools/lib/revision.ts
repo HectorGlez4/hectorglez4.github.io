@@ -23,12 +23,19 @@ import { normalizar } from '../../src/lib/normalizar.ts';
 import { slugLibre } from '../../src/lib/slug.ts';
 import { leerCitas, leerTemas, mover, nombreDeFicheroDeCita, type Rutas } from './corpus.ts';
 import { aplicarFichaDeObra, resolverFichaDeObra } from './obras.ts';
+import { motivoSinTemaPublicado, temaPublicadoConLaPasada } from './alcance.ts';
+import type { TemaBajoUmbral } from '../../src/lib/publicado.ts';
 
 export interface CandidataEnRevision {
   slug: string;
   texto: string;
   /** Slug del Autor: compone el nombre del fichero al publicar. */
   autor: string;
+  /**
+   * Los Temas que ya declara, si declara alguno — Historia 26.8: aprobarla exige que, con los
+   * de la orden, alguno quede publicado.
+   */
+  temas?: string[];
   ruta: string;
   /**
    * La obra que declara su Procedencia, si declara alguna — Historia 22.1. Aprobarla
@@ -132,6 +139,7 @@ export async function loteEnRevision(rutas: Rutas): Promise<CandidataEnRevision[
       slug: candidata.slug,
       texto: candidata.texto,
       autor: candidata.autor,
+      ...(Array.isArray(candidata.temas) && candidata.temas.length > 0 ? { temas: candidata.temas } : {}),
       ruta: candidata.ruta,
       ...(typeof candidata.procedencia?.obra === 'string' ? { obra: candidata.procedencia.obra } : {}),
       // La publicada gana: lo que el editor necesita saber es que ya está publicada.
@@ -208,6 +216,13 @@ export interface ResultadoDeDecision {
    */
   rechazadasPorFicha: { slug: string; motivos: string[] }[];
   /**
+   * Aprobadas que cumplen la admisión pero no tendrían **ningún Tema publicado** —contando las
+   * publicadas y las que esta misma pasada publica— — Historia 26.8, NFR-5. Siguen en revisión,
+   * intactas: sin Tema, una Cita queda fuera de alcance en cuanto deja la página 1 de su Autor.
+   * `temas` son los que declara (los suyos y los de la orden), con su recuento.
+   */
+  rechazadasPorTema: { slug: string; temas: TemaBajoUmbral[]; motivos: string[] }[];
+  /**
    * Publicadas cuya ficha, resuelta antes de publicar, no se pudo escribir después —un
    * fallo de disco entre medias—. La Cita está publicada; `npm run obra -- sembrar` la
    * completa.
@@ -235,6 +250,7 @@ export async function aprobar(
     renombradas: [],
     rechazadasPorAdmision: [],
     rechazadasPorFicha: [],
+    rechazadasPorTema: [],
     fichasSinAsegurar: [],
     rechazadas: [],
     noEncontradas: [],
@@ -250,8 +266,9 @@ export async function aprobar(
    * lo caza después con `reference()`, pero para entonces la Cita ya está publicada y lo
    * que se rompe es la construcción del sitio.
    */
+  const temasDelCorpus = await leerTemas(rutas);
   if (temas.length > 0) {
-    const conocidos = new Set((await leerTemas(rutas)).map((t) => t.slug));
+    const conocidos = new Set(temasDelCorpus.map((t) => t.slug));
     const desconocidos = [...new Set(temas)].filter((t) => !conocidos.has(t));
     if (desconocidos.length > 0) return { ...resultado, temasDesconocidos: desconocidos };
   }
@@ -265,17 +282,54 @@ export async function aprobar(
     ...yaPublicadas,
   ];
 
-  for (const slug of slugs) {
+  /*
+   * Historia 26.8 — primero se **planifica** la pasada entera, sin escribir nada: qué se
+   * encuentra, qué admite la puerta y, de eso, qué tendría algún Tema publicado contando lo ya
+   * publicado **y** lo que esta pasada publicaría (`temaPublicadoConLaPasada`, un punto fijo).
+   * Solo entonces se escribe, en el orden pedido. La que no tendría Tema sigue en revisión,
+   * intacta, con sus Temas y sus recuentos en el parte.
+   */
+  const planeadas: { indice: number; slug: string; candidata: CandidataEnRevision; temas: string[] }[] = [];
+  slugs.forEach((slug, indice) => {
     const candidata = lote.find((c) => c.slug === slug);
     if (candidata === undefined) {
       resultado.noEncontradas.push(slug);
-      continue;
+      return;
     }
-
     if (!candidata.admisible) {
       resultado.rechazadasPorAdmision.push({ slug, motivos: candidata.motivos });
-      continue;
+      return;
     }
+    planeadas.push({ indice, slug, candidata, temas: [...new Set([...(candidata.temas ?? []), ...temas])] });
+  });
+
+  // Lo que esta pasada ya publicó: cuenta para los Temas de las que quedan.
+  const escritas: { temas: string[] }[] = [];
+  let pendientes = planeadas;
+  /*
+   * El punto fijo sobre lo que queda por escribir. Se repite si una Ficha de Obra deja a una sin
+   * publicar, porque esa ya no cuenta para los Temas de las demás. Lo escrito no se deshace.
+   */
+  const replanificar = () => {
+    const { admitidas, rechazadas } = temaPublicadoConLaPasada(
+      [...yaPublicadas, ...escritas],
+      pendientes.map((p) => ({ clave: p.indice, temas: p.temas })),
+      temasDelCorpus,
+    );
+    for (const rechazada of rechazadas) {
+      const planeada = pendientes.find((p) => p.indice === rechazada.clave)!;
+      resultado.rechazadasPorTema.push({
+        slug: planeada.slug,
+        temas: rechazada.temas,
+        motivos: [motivoSinTemaPublicado(rechazada.temas)],
+      });
+    }
+    pendientes = pendientes.filter((p) => admitidas.has(p.indice));
+  };
+  replanificar();
+
+  while (pendientes.length > 0) {
+    const { slug, candidata, temas: suyos } = pendientes.shift()!;
 
     /*
      * Historia 22.1 — la Ficha de Obra, en el mismo gesto en que se publica (AD-25).
@@ -299,6 +353,7 @@ export async function aprobar(
           });
     if (plan !== undefined && !plan.ok) {
       resultado.rechazadasPorFicha.push({ slug, motivos: plan.motivos });
+      replanificar();
       continue;
     }
 
@@ -314,6 +369,7 @@ export async function aprobar(
       }
     }
     publicadasParaObra.push(comoPublicada);
+    escritas.push({ temas: suyos });
 
     if (plan !== undefined) {
       const ficha = await aplicarFichaDeObra(rutas, plan);
@@ -413,6 +469,7 @@ export async function rechazar(rutas: Rutas, slugs: string[]): Promise<Resultado
     renombradas: [],
     rechazadasPorAdmision: [],
     rechazadasPorFicha: [],
+    rechazadasPorTema: [],
     fichasSinAsegurar: [],
     rechazadas: [],
     noEncontradas: [],

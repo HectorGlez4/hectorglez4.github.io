@@ -82,6 +82,7 @@ import {
 import { formaDeObra } from '../../src/lib/obras.ts';
 import { fuenteDeUrl } from './fuentes.ts';
 import type { Resultado } from './gestion.ts';
+import { negativaPorAlcance } from './alcance.ts';
 
 /**
  * Lo que se dice antes de escribir, cuando lo que se va a escribir cambia lo que lee el
@@ -821,6 +822,17 @@ export async function retirarCita(
   const localizada = await localizarPublicada(rutas, slug);
   if (!localizada.ok) return { ok: false, motivos: localizada.motivos };
   const { cita } = localizada;
+
+  /*
+   * Historia 26.8 — NFR-5, antes de tocar nada: si al retirarla otra Cita queda fuera de alcance
+   * (su Tema cae bajo el umbral, una Colección deja de publicarse, una página se corre), se niega
+   * nombrándola. La que se retira no cuenta: sale del sitio, no queda fuera de alcance.
+   */
+  const negativa = await negativaPorAlcance(rutas, (datos) => ({
+    ...datos,
+    citas: datos.citas.filter((c) => c.slug !== cita.slug),
+  }));
+  if (negativa !== undefined) return negativa;
 
   const censoAntes = await leerCensoBruto(rutas);
   const censoDespues =

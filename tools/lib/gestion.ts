@@ -53,6 +53,7 @@ import { leerColeccionesRetiradas } from './curacion.ts';
 import { descartesPorCandidato, slugsSembrados } from './epocas.ts';
 import { readFile } from 'node:fs/promises';
 import { basename } from 'node:path';
+import { negativaPorAlcance } from './alcance.ts';
 
 export type Resultado =
   | { ok: true; ruta: string; mensaje: string }
@@ -696,6 +697,19 @@ export async function quitarTema(
     };
   }
 
+  /*
+   * Historia 26.8 — NFR-5, antes de escribir: desmarcar puede dejar el Tema bajo su umbral, y
+   * con él sin camino a sus Citas, o dejar sin Tema publicado a la propia Cita.
+   */
+  const aDesmarcar = new Set(slugsDeCitas);
+  const negativa = await negativaPorAlcance(rutas, (datos) => ({
+    ...datos,
+    citas: datos.citas.map((c) =>
+      aDesmarcar.has(c.slug) ? { ...c, temas: c.temas.filter((t) => t !== slugTema) } : c,
+    ),
+  }));
+  if (negativa !== undefined) return negativa;
+
   let desmarcadas = 0;
   let noLoTenian = 0;
   for (const slug of new Set(slugsDeCitas)) {
@@ -906,6 +920,11 @@ async function pendienteEnEpocas(rutas: Rutas, autor: AutorEnCorpus): Promise<st
  *
  * **Mueve y no borra**, con `mover`, que nunca sobrescribe; y **sin motivo no retira**, como
  * `retirarCita`: el motivo va en el mensaje y de ahí al del commit (AD-10).
+ *
+ * **No consulta NFR-5 (Historia 26.8), y no hace falta.** Las órdenes que retiran comparan el
+ * modelo antes y después (`negativaPorAlcance`, `tools/lib/alcance.ts`) porque pueden dejar sin
+ * camino a una Cita que sigue publicada. Esta no puede: se niega mientras el Autor tenga una sola
+ * Cita publicada, así que no retira ninguna ni le quita a ninguna su Tema, su Colección o su página.
  */
 export async function retirarAutor(
   rutas: Rutas,

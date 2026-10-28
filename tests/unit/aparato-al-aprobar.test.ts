@@ -5,6 +5,7 @@ import { join } from 'node:path';
 
 import { aprobar } from '../../tools/lib/revision.ts';
 import { rutasDelCorpus, type Rutas } from '../../tools/lib/corpus.ts';
+import { TEMA_PUBLICADO, ficherosPublicados, sembrarTemaPublicado } from './ayuda/relleno.ts';
 
 /**
  * La puerta de aparato de la Fuente también se aplica **al aprobar**, no solo al extraer.
@@ -51,7 +52,8 @@ function candidataCon(texto: string, slug: string): Record<string, unknown> {
   return {
     texto,
     autor: 'concepcion-arenal',
-    temas: [],
+    // Historia 26.8 — con un Tema publicado: sin él, aprobar no publica nada (NFR-5).
+    temas: [TEMA_PUBLICADO],
     slug,
     procedencia: { obra: 'La mujer del porvenir', año: 1869 },
     estadoDerechos: 'dominio-público',
@@ -71,6 +73,7 @@ async function corpusCon(candidatas: Record<string, unknown>[]): Promise<Rutas> 
   for (const dir of [rutas.citas, rutas.autores, rutas.temas, rutas.revision]) {
     await mkdir(dir, { recursive: true });
   }
+  await sembrarTemaPublicado(rutas);
   for (const candidata of candidatas) {
     await writeFile(join(rutas.revision, `${candidata.slug}.md`), ficheroDeCita(candidata), 'utf8');
   }
@@ -90,7 +93,7 @@ describe('aprobar vuelve a pasar la puerta de aparato de la Fuente', () => {
     expect(resultado.publicadas).toEqual([]);
     expect(resultado.rechazadasPorAdmision).toHaveLength(1);
     // Y sigue donde estaba: aprobarla por error no la pierde.
-    expect(await readdir(rutas.citas)).toHaveLength(0);
+    expect(await ficherosPublicados(rutas)).toHaveLength(0);
     expect(await readdir(rutas.revision)).toHaveLength(1);
   });
 

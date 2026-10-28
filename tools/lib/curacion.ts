@@ -44,6 +44,7 @@ import {
   type Rutas,
 } from './corpus.ts';
 import type { Resultado } from './gestion.ts';
+import { negativaPorAlcance } from './alcance.ts';
 
 export interface DatosDeColeccion {
   nombre?: string;
@@ -450,6 +451,19 @@ export async function quitarCitas(
   }
 
   const miembros = declaracion.datos.miembros.filter((s) => !aQuitar.includes(s));
+
+  /*
+   * Historia 26.8 — NFR-5, antes de escribir: quitar miembros puede dejar la Colección bajo su
+   * umbral, y con ella sin camino a una Cita que solo se alcanzaba por aquí.
+   */
+  const negativa = await negativaPorAlcance(rutas, (datos) => ({
+    ...datos,
+    colecciones: datos.colecciones.map((c) =>
+      c.ruta === encontrada.coleccion.ruta ? { ...c, miembros } : c,
+    ),
+  }));
+  if (negativa !== undefined) return negativa;
+
   const ruta = await escribirColeccion(encontrada.coleccion.ruta, {
     ...declaracion.datos,
     miembros,
@@ -565,6 +579,16 @@ export async function despublicarColeccion(rutas: Rutas, slug: string): Promise<
 
   const publicadas = await citasPublicadas(rutas);
   const estado = estadoDe(encontrada.coleccion, publicadas);
+
+  /*
+   * Historia 26.8 — NFR-5, antes de mover: despublicarla no puede dejar fuera de alcance una
+   * Cita que solo se alcanzaba por ella.
+   */
+  const negativa = await negativaPorAlcance(rutas, (datos) => ({
+    ...datos,
+    colecciones: datos.colecciones.filter((c) => c.ruta !== encontrada.coleccion.ruta),
+  }));
+  if (negativa !== undefined) return negativa;
 
   const movida = await moverColeccion(encontrada.coleccion.ruta, rutas.coleccionesRetiradas);
   if (!movida.ok) return movida;

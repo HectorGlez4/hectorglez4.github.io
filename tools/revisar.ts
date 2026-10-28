@@ -129,6 +129,12 @@ if (aAprobar.length > 0) {
     lineas.push(`  ✕ ${rechazada.slug} — sigue en revisión: su Ficha de Obra no se puede asegurar.`);
     for (const motivo of rechazada.motivos) lineas.push(`      ${motivo}`);
   }
+  for (const rechazada of resultado.rechazadasPorTema) {
+    // Historia 26.8: cumple la admisión, pero publicada no tendría ningún Tema publicado (NFR-5).
+    fallo = true;
+    lineas.push(`  ✕ ${rechazada.slug} — sigue en revisión: no tendría ningún Tema publicado.`);
+    for (const motivo of rechazada.motivos) lineas.push(`      ${motivo}`);
+  }
   for (const pendiente of resultado.fichasSinAsegurar) {
     fallo = true;
     lineas.push(

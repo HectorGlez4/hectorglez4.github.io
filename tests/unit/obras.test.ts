@@ -54,6 +54,7 @@ import { componerDocumento } from '../../tools/lib/documento.ts';
 import { aprobar } from '../../tools/lib/revision.ts';
 import { darDeAltaLote } from '../../tools/alta.ts';
 import { retirarAutor } from '../../tools/lib/gestion.ts';
+import { NOMBRE_DEL_TEMA_PUBLICADO, TEMA_PUBLICADO, ficherosPublicados, sembrarTemaPublicado } from './ayuda/relleno.ts';
 
 /** Historia 22.1 — cada Obra tiene ficha antes de tener URL. */
 
@@ -242,6 +243,9 @@ function citaCompleta(slug: string, obra: string, autor = 'seneca') {
     texto: `Texto de la Cita ${slug}.`,
     autor,
     slug,
+    // Historia 26.8 — aprobarla exige un Tema publicado: el de `ayuda/relleno.ts`, que las pruebas
+    // que aprueban siembran. Donde no se siembra, el Tema no existe y no cambia nada.
+    temas: [TEMA_PUBLICADO],
     procedencia: { obra, año: 49 },
     estadoDerechos: 'dominio-público',
     fuente: FUENTE,
@@ -439,6 +443,7 @@ describe('retirar una ficha', () => {
 describe('los enganches que publican', () => {
   it('aprobar crea la ficha con el título literal', async () => {
     const rutas = await corpusTemporal();
+    await sembrarTemaPublicado(rutas);
     await escribirCita(rutas.revision, 'seneca-a', citaCompleta('seneca-a', 'Sobre la brevedad de la vida'));
 
     const resultado = await aprobar(rutas, ['seneca-a']);
@@ -449,6 +454,7 @@ describe('los enganches que publican', () => {
 
   it('aprobar no publica si la ficha choca con otra', async () => {
     const rutas = await corpusTemporal();
+    await sembrarTemaPublicado(rutas);
     await writeFile(
       join(rutas.obras, 'seneca--x.yml'),
       'autor: "seneca"\ntitulo: "X"\nformas:\n  - "otra"\n',
@@ -460,7 +466,7 @@ describe('los enganches que publican', () => {
     expect(resultado.publicadas).toEqual([]);
     expect(resultado.rechazadasPorAdmision).toEqual([]);
     expect(resultado.rechazadasPorFicha.map((r) => r.slug)).toEqual(['seneca-a']);
-    expect(await readdir(rutas.citas)).toEqual([]);
+    expect(await ficherosPublicados(rutas)).toEqual([]);
   });
 
   it('escribir una candidata en _revision no crea ficha, ni el alta en seco', async () => {
@@ -503,8 +509,17 @@ describe('los enganches que publican', () => {
 
   it('el alta que publica crea la ficha', async () => {
     const rutas = await corpusTemporal();
+    await sembrarTemaPublicado(rutas);
     const informe = await darDeAltaLote(
-      [{ texto: 'Otra Cita.', autor: 'seneca', procedencia: { obra: 'De la ira', año: 49 }, fuente: FUENTE }],
+      [
+        {
+          texto: 'Otra Cita.',
+          autor: 'seneca',
+          temas: [NOMBRE_DEL_TEMA_PUBLICADO],
+          procedencia: { obra: 'De la ira', año: 49 },
+          fuente: FUENTE,
+        },
+      ],
       rutas,
     );
     expect(informe.publicadas).toHaveLength(1);
@@ -1342,6 +1357,7 @@ describe('22.6 — la nota de la ficha: ninguna orden la escribe, y las que rees
 
   it('aprobar con la ficha ya existente (aplicarFichaDeObra) la deja con su nota', async () => {
     const rutas = await corpusTemporal();
+    await sembrarTemaPublicado(rutas);
     await asegurarFichaDeObra(rutas, { autor: 'seneca', obra: 'X', citasPublicadas: [] });
     await conNota(rutas, 'seneca--x');
     const antes = await readFile(join(rutas.obras, 'seneca--x.yml'), 'utf8');
@@ -1354,6 +1370,7 @@ describe('22.6 — la nota de la ficha: ninguna orden la escribe, y las que rees
 
   it('retirar mueve la ficha con su nota, y aprobar la restaura con ella', async () => {
     const rutas = await corpusTemporal();
+    await sembrarTemaPublicado(rutas);
     await asegurarFichaDeObra(rutas, { autor: 'seneca', obra: 'X', citasPublicadas: [] });
     await conNota(rutas, 'seneca--x');
     expect((await retirarFichaDeObra(rutas, 'seneca--x', 'prueba')).ok).toBe(true);
