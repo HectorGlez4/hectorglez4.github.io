@@ -84,3 +84,57 @@ entero no se ha corrido todavía en esta preparación: es el paso siguiente de l
 - El merge (bucle v8-ralph, con la autorización de Héctor del 2026-10-24), el despliegue, la
   comprobación con `curl` y, en un commit aparte del día de llegada, el valor de
   `DESPLIEGUE_DE_OBRA_Y_DIRECTORIOS` (jornada UTC en que termina «Desplegar»).
+
+## Verificación previa a la fusión — 2026-10-28 (UTC)
+
+Primer intento de la puerta previa al merge (bucle v8-ralph, etapa s-24-26), sobre
+847f4a57d6. Disco libre al empezar: 102 GB. Puertos 4321, 4399, 4400, 4402 y 8787 libres.
+
+**Sincronía.** `git fetch origin`: `origin/main` ya es antecesor de la rama; no hubo merge, ni
+Autores nuevos, ni lote de claves.
+
+**Equivalente del CI** (`.github/workflows/publicar.yml`, en este orden):
+
+| orden | resultado |
+|---|---|
+| `npm ci` | no se corrió: `package-lock.json` no ha cambiado desde que se instaló `node_modules/` |
+| `npm run build` | **verde** — 5.290 páginas, 4.875 indexables; `dist/` 456 MiB (294,1 MiB hasta el aviso de 750 MiB) |
+| `npx astro check` | **verde** — 385 ficheros, 0 errores, 0 avisos, 8 pistas |
+| `npm test` | **rojo** — 146 ficheros (1 fallido), 6.696 pruebas: 6.695 pasan, 1 falla (878 s) |
+
+La prueba que falla, y vuelve a fallar sola (`npx vitest run tests/unit/obra-pagina.test.ts`,
+65/66), es `tests/unit/obra-pagina.test.ts` › «Historia 22.4 — la Página de Obra, construida» ›
+«la hoja emitida — 22.5» › «existe `.enlace-en-tinta`: tinta, subrayado y grosor del filete»:
+
+```
+AssertionError: /cita/seneca-cartas-0/: expected undefined to be defined
+ ❯ tests/unit/obra-pagina.test.ts:618:29
+```
+
+Lectura: `reglasDe` solo lee los `<style>` en línea, y la Página de Cita ya no lleva en línea la
+hoja del Armazón: en el `dist/` de la rama sale como `<link rel="stylesheet"
+href="/_astro/Armazon.DArhJbZa.css">`, de 4.176 bytes, por encima del límite de 4.096 bytes con
+que Astro decide en línea o fichero. `.enlace-en-tinta` está en esa hoja. La misma prueba ya
+fallaba en las pasadas de la 26.7 y la 26.8 de este bucle. Queda para quien corrija, que además
+pesa en NFR-7: una hoja externa más bloquea el pintado de la Página de Cita.
+
+**`npm run test:e2e` entero** (los dos proyectos, con `wrangler dev` y el D1 local que levanta
+`playwright.config.ts`; nada contra producción): **rojo** — 902 pasan, 7 fallan, 95 se saltan
+(8,3 min). Las siete son barridos del sitemap entero que agotan su tiempo:
+
+- `[movil]` y `[escritorio]` › `tests/e2e/seo.spec.ts:59` «cada página declara su propia canónica»
+- `[movil]` y `[escritorio]` › `tests/e2e/seo.spec.ts:68` «el idioma es `es`, sin variante regional»
+- `[movil]` › `tests/e2e/tarjeta.spec.ts:79` «cada Tarjeta declarada existe, se sirve como PNG y mide 1200×630»
+- `[movil]` y `[escritorio]` › `tests/e2e/tarjeta.spec.ts:154` «toda página que el sitemap anuncia declara una imagen, sea propia o de marca»
+
+Primeras líneas: «Test timeout of 30000ms exceeded.» / «apiRequestContext.get: Request context
+disposed.» (y 90000 ms en `tarjeta.spec.ts:79`). Repetidos una vez solo esos dos ficheros
+(`npx playwright test tests/e2e/seo.spec.ts tests/e2e/tarjeta.spec.ts`): **7 fallan otra vez**
+—`seo.spec.ts:59` y `:68` en los dos proyectos, `seo.spec.ts:25` y `:48` y `tarjeta.spec.ts:79`
+en `movil`—, 25 pasan. Cuentan como fallos. Como diagnóstico, no como verde: con
+`--workers=1` los dos ficheros pasan enteros (32/32, 6,4 min); el presupuesto de tiempo de esos
+barridos no aguanta las 4.875 rutas con varios trabajadores a la vez.
+
+**NFR-7 con Lighthouse:** no se midió. La puerta lo pide solo con el CI y el barrido en verde.
+
+Resultado: la puerta **no pasa**; el merge espera a la corrección de las dos cosas.
