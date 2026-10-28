@@ -484,6 +484,29 @@ describe('la orden', () => {
     expect(serie).toHaveLength(16);
   });
 
+  it('Historia 26.7 — la orden escribe las filas de los Directorios en `directorio`, no en fueraDelCenso', async () => {
+    const corpus = await corpusDePrueba();
+    capturarSalida();
+    const conDirectorios = fuente(
+      [],
+      [
+        { keys: [URL('/autores/')], clicks: 2, impressions: 9, position: 3 },
+        { keys: [URL('/obras/')], clicks: 1, impressions: 4, position: 5 },
+      ],
+    );
+    expect(
+      await principal(['--corpus', corpus, '--registrar'], conCliente(conDirectorios.consultar), CREDENCIAL, HOY),
+    ).toBe(0);
+
+    const serie = await leerSerieDeDemanda(rutasDelCorpus(corpus));
+    const movil = serie.find((e) => e.clase === '28-dias');
+    expect(movil?.familias?.directorio).toMatchObject({ clics: 3, impresiones: 13 });
+    expect(movil?.fueraDelCenso).toEqual({ clics: 0, impresiones: 0 });
+    expect(movil?.familias).not.toHaveProperty('obra');
+    // Ninguna es ruta de Cita: ningún Autor (un campo vacío se omite al escribir).
+    expect(movil?.autores ?? []).toEqual([]);
+  });
+
   it('una ventana que falla no se escribe, va a sinLeer con su motivo y sale con 0', async () => {
     const corpus = await corpusDePrueba();
     const salida = capturarSalida();

@@ -160,6 +160,8 @@ describe('las familias del Corpus', () => {
     expect(familiaDeFichero('corpus/indexacion.yml')).toBeUndefined();
     expect(familiaDeFichero('corpus/sesiones-de-sembrado.yml')).toBeUndefined();
     expect(familiaDeFichero('corpus/_revision/x.md')).toBeUndefined();
+    // Historia 26.7 — los umbrales llegan al aviso, pero sin familia.
+    expect(familiaDeFichero('src/lib/umbrales.ts')).toBeUndefined();
   });
 
   it('las familias de ruta son las seis superficies que la relación declara, y la pone la relación', () => {

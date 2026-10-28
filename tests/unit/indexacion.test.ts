@@ -1547,8 +1547,40 @@ describe('Historia 26.7 — los Directorios se miden como familia propia', () =>
     expect(de('obra')?.rutas).toHaveLength(80);
     // Su suelo sale de lo que queda, y por ser la más pequeña se sirve primero.
     expect(de('directorio')).toMatchObject({ publicadas: 2, muestreada: false, rutas: DIRECTORIOS });
+    // Y el precio, fijado: las dos URL salen del suelo de la más grande de las demás —Cita—,
+    // nunca de Tema, de Autor ni de Obra.
+    expect(de('tema')?.rutas).toHaveLength(MUESTRA_MINIMA_POR_FAMILIA);
+    expect(de('cita')?.rutas).toHaveLength(MUESTRA_MINIMA_POR_FAMILIA - 2);
     expect(plan.inspecciones).toBe(justo);
     expect(plan.sinPresupuesto).toEqual([]);
+  });
+
+  it('con SM-11 y sin presupuesto para el Directorio entero, se declara muestreado o sin presupuesto, jamás cero', () => {
+    // Sin otras familias que le cedan suelo: lo que le llega es lo que dejan las enteras.
+    const censo = {
+      cita: [],
+      autor: Array.from({ length: 150 }, (_, i) => `/autor/a-${i}/`),
+      tema: [],
+      coleccion: [],
+      obra: Array.from({ length: 80 }, (_, i) => `/obra/a/o-${i}/`),
+      directorio: DIRECTORIOS,
+    };
+    const de = (plan: ReturnType<typeof planDeInspeccion>, f: string) =>
+      plan.familias.find((x) => x.familia === f);
+
+    // Una sola petición tras las enteras: el Directorio se lee una de dos, y lo dice.
+    const una = planDeInspeccion(censo, 150 + 80 + 1, ['autor', 'obra']);
+    expect(de(una, 'autor')).toMatchObject({ muestreada: false });
+    expect(de(una, 'obra')).toMatchObject({ muestreada: false });
+    expect(de(una, 'directorio')).toMatchObject({ publicadas: 2, muestreada: true });
+    expect(de(una, 'directorio')?.rutas).toHaveLength(1);
+    expect(una.sinPresupuesto).toEqual([]);
+
+    // Ninguna tras las enteras: no se intentó, y lo dice `sinPresupuesto`, no un cero.
+    const ninguna = planDeInspeccion(censo, 150 + 80, ['autor', 'obra']);
+    expect(de(ninguna, 'obra')).toMatchObject({ muestreada: false });
+    expect(de(ninguna, 'directorio')).toBeUndefined();
+    expect(ninguna.sinPresupuesto).toEqual(['directorio']);
   });
 
   it('la lectura anota `directorio` con su censo de lo publicado, fuera del total de la entrada', async () => {

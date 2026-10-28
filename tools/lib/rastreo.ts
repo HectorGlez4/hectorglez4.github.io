@@ -397,6 +397,19 @@ export function repartoPorFamilia(
   });
 }
 
+/**
+ * Por qué lo suelto no tiene familia, dicho de lo que de verdad hay suelto — Historia 26.7.
+ * Solo dos cosas publicadas caen fuera del censo del rastreo: la portada, que no es de
+ * ninguna, y una Obra, que el rastreo no cuenta (`FAMILIAS_DEL_RASTREO`). Nombrar las Obras
+ * cuando solo se pidió la portada diría que hay una que no hay.
+ */
+function porQueSinFamilia(sueltas: readonly PeticionDeRastreo[]): string {
+  const obras = sueltas.some((p) => esRutaDeObra(normalizadaOTalCual(p.ruta)));
+  const otras = sueltas.some((p) => !esRutaDeObra(normalizadaOTalCual(p.ruta)));
+  if (obras && otras) return 'la portada, y las Obras, que el rastreo no cuenta';
+  return obras ? 'las Obras, que el rastreo no cuenta' : 'la portada no es de ninguna';
+}
+
 /** La forma normalizada de una ruta, o la ruta tal cual si no se deja normalizar. */
 function normalizadaOTalCual(ruta: string): string {
   try {
@@ -578,7 +591,7 @@ export function lineasDeRegistro(
   const fuera = peticionesFueraDelCenso(peticiones, censo, publicadas);
   if (fuera.sueltas.length > 0) {
     lineas.push(
-      `  Sin familia —la portada, y las Obras, que el rastreo no cuenta—: ${new Set(fuera.sueltas.map((p) => p.ruta)).size}`,
+      `  Sin familia —${porQueSinFamilia(fuera.sueltas)}—: ${new Set(fuera.sueltas.map((p) => p.ruta)).size}`,
     );
   }
   if (fuera.despublicadas.length > 0) {

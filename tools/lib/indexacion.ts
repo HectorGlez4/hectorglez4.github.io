@@ -64,7 +64,9 @@ import {
  * Las familias que mide **esta serie**: las seis — Historias 22.8 y 26.7, FR-40.
  *
  * La Obra se mide aquí y en ningún otro informe todavía —el tráfico, la demanda, el rastreo y
- * el canal cuentan `FAMILIAS_DEL_CENSO`—, y se mide distinto: su censo no es lo publicado sino
+ * el canal cuentan cada uno su subconjunto sin ella (`FAMILIAS_DEL_TRAFICO`,
+ * `FAMILIAS_DE_LA_DEMANDA`, `FAMILIAS_DEL_RASTREO`, `FAMILIAS_DEL_CANAL`), del tipo
+ * `FamiliaDelCenso`—, y se mide distinto: su censo no es lo publicado sino
  * **las rutas `/obra/…` del sitemap publicado**, porque una Obra con `noindex` existe y no se
  * cuenta (FR-52). Sin sitemap legible la familia va a `sinLeer` con su motivo, jamás a cero.
  * El Directorio (26.7) se mide con su censo de lo publicado: son dos URL y se leen enteras.
@@ -349,6 +351,13 @@ export interface PlanDeInspeccion {
  * dos URL no pueden dejar a la Obra muestreada cuando el presupuesto aprieta. Su suelo sale de
  * lo que quede tras las enteras, en el reparto de las demás, que sirve el suelo de la más
  * pequeña a la más grande: con dos URL se lee entera mientras quede algo que repartir.
+ *
+ * El precio, dicho: con un presupuesto que cubre el suelo de las demás y las enteras **sin
+ * una petición de sobra**, las dos URL del Directorio salen del suelo de la familia más grande
+ * de las demás —Cita—, que se queda dos por debajo de `MUESTRA_MINIMA_POR_FAMILIA`; nunca de
+ * Autor ni de Obra. Sin otra familia cuyo suelo lo pague, si tras las enteras queda una sola
+ * petición el Directorio se lee una de dos y sale `muestreada`; si no queda ninguna, va a
+ * `sinPresupuesto` y de ahí a `sinLeer` con su motivo. Jamás se escribe como cero. Con el techo real de 2.000 nada de esto ocurre.
  */
 const SIN_SUELO_POR_DELANTE: readonly FamiliaDeLaSerie[] = ['directorio'];
 

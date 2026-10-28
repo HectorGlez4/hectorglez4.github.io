@@ -31,8 +31,8 @@ import {
  * ella.
  *
  * Desde la Historia 26.7 la tabla se juzga contra `Familia` (`src/lib/superficies.ts`): son las
- * cinco familias con directorio en el Corpus —el Directorio no tiene fichero propio y entra por
- * sus páginas— más `documento`, que no es familia de ruta. `src/lib/umbrales.ts` también llega al
+ * cinco familias con carpeta propia en `corpus/` —la familia `directorio` no tiene ficheros y
+ * entra por sus páginas— más `documento`, que no es familia de ruta. `src/lib/umbrales.ts` también llega al
  * aviso, pero sin familia: mueve listas de Obras indexables, no ficheros.
  */
 export const FAMILIAS_DE_FICHERO = [

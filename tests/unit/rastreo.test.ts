@@ -439,7 +439,9 @@ describe('el cruce con la serie', () => {
     }
     // La portada sigue suelta, y el informe ya no nombra a los Directorios con ella.
     const portada = lineasDeRegistro([{ fecha: HOY, ruta: '/' }], censo, publicadas).join('\n');
-    expect(portada).toMatch(/Sin familia —la portada, y las Obras, que el rastreo no cuenta—: 1/);
+    // Y nombra solo lo que hay suelto: sin ninguna Obra pedida, el rótulo no las menciona.
+    expect(portada).toMatch(/^ {2}Sin familia —la portada no es de ninguna—: 1$/m);
+    expect(portada).not.toMatch(/Obras/);
   });
 
   it('Historia 26.7 — una Obra indexable pedida cae «sin familia» y el rótulo lo dice, no solo la portada', async () => {
@@ -458,6 +460,9 @@ describe('el cruce con la serie', () => {
       publicadas,
     ).join('\n');
     expect(lineas).toMatch(/Sin familia —la portada, y las Obras, que el rastreo no cuenta—: 2/);
+    // Solo la Obra: el rótulo no habla de la portada.
+    const soloObra = lineasDeRegistro([{ fecha: HOY, ruta: obra }], censo, publicadas).join('\n');
+    expect(soloObra).toMatch(/^ {2}Sin familia —las Obras, que el rastreo no cuenta—: 1$/m);
   });
 
   it('Historia 26.7 — con la Obra congelada, `/autores/` y `/obras/` se anotan y la consulta los cuenta en «Directorio»', async () => {

@@ -45,6 +45,20 @@ deferred:
     location: >-
       tools/lib/indexacion.ts:796
     severity: low
+  - summary: >-
+      La demanda no reatribuye lo ya registrado, así que la premisa del criterio de la 26.7 («como cada
+      pasada reatribuye los meses pasados con el censo de hoy, lo que de esas dos URL estaba en
+      fueraDelCenso pasa a ella») solo se cumple para el tráfico: pendiente de Héctor
+      (bmad-create-epics-and-stories) enmendar el criterio o pedir una vía de relectura en `tools/demanda.ts`.
+    evidence: |-
+      `tools/demanda.ts` no vuelve a pedir ninguna ventana registrada: tras la primera lectura solo lee la
+      de 28 días y `--rellenar` pide solo los meses cerrados que faltan. Es diseño anterior a la 26.7 (la
+      serie mide fotos de ventana). Las ventanas de demanda anteriores a la 26.7 conservan los Directorios
+      en `fueraDelCenso`; AGENTS.md lo dice («la serie mezcla las dos atribuciones»). La parte normativa
+      del criterio —cuentan `directorio` como familia— sí se cumple y la fija una prueba de orden.
+    location: >-
+      tools/demanda.ts
+    severity: medium
 ---
 
 <intent-contract>
@@ -117,7 +131,7 @@ deferred:
 - `tools/lib/indexacion.ts` -- quitar la declaración propia de `Familia`/`FAMILIAS`; `FamiliaDeLaSerie = Familia`, `FAMILIAS_DE_LA_SERIE = FAMILIAS`; exportar `type FamiliaDelCenso = Exclude<Familia,'obra'>` y su lista `FAMILIAS_DEL_CENSO` (claves de `CensoPorFamilia`); `NOMBRE_DE_FAMILIA.directorio = 'Directorio'`, `CENSO_DE_FAMILIA.directorio = 'publicadas'`; `censoPorFamilia` añade `directorio`; `componerLectura` suma en `publicadas` solo las cuatro de siempre (constante con nombre); default genérico de `FamiliaSinLeer` = `FamiliaDelCenso`; docblocks -- AC 1, 2, 3.
 - `tools/lib/trafico.ts` -- `FAMILIAS_DEL_TRAFICO` derivada de `FAMILIAS` (sin `obra`) en lugar de la `FAMILIAS` de indexación; tipos `FamiliaDelCenso`; el relleno del rótulo calculado sobre el nombre más largo del subconjunto -- AC 4.
 - `tools/lib/demanda.ts` -- `FAMILIAS_DE_LA_DEMANDA` igual derivada; `lineasDeDemanda` la recorre con el mismo relleno -- AC 4.
-- `tools/lib/rastreo.ts` -- `FAMILIAS_DEL_RASTREO` derivada; `familiaDeRuta`/`repartoPorFamilia` sobre ella; `suelta` y la línea «Sin familia» hablan solo de la portada -- AC 5.
+- `tools/lib/rastreo.ts` -- `FAMILIAS_DEL_RASTREO` derivada; `familiaDeRuta`/`repartoPorFamilia` sobre ella; `suelta` y la línea «Sin familia» dejan de nombrar a los Directorios y nombran lo que de verdad queda suelto —la portada, una Obra (que el rastreo no cuenta) o las dos— -- AC 5.
 - `tools/lib/canal.ts` -- `FAMILIAS_DEL_CANAL` derivada; `Destino` gana `directorio` («Directorio») tras `coleccion` en `DESTINOS`; `destinoDePublicacion` lo devuelve por el censo; docblock -- AC 6.
 - `tools/lib/avisar.ts` -- `FAMILIAS_DE_RUTA` = `FAMILIAS` importada; `FAMILIAS_DE_FICHERO` tipada con `satisfies` contra `Exclude<Familia,'directorio'> | 'documento'`; `FamiliaDeRuta = Familia`; docblocks -- AC 1.
 - `src/lib/publicado.ts`, `tools/lib/cambios.ts` -- comentarios «hasta la 26.7» al día.
@@ -160,6 +174,24 @@ deferred:
   - `[low]` `[patch]` `agregarPorFamilia` y `familiasPublicadas` tomaban por omisión el subconjunto del tráfico: el parámetro es obligatorio y cada llamada pasa el suyo.
   - `[low]` `[patch]` Cobertura de la reatribución en la orden: la prueba de tráfico parte de una serie anterior a la 26.7 (Directorios en `fueraDelCenso`, sin `directorio`) y fija que el mes releído pasa a `directorio` y el no releído se sigue leyendo igual.
   - `[low]` `[patch]` Cobertura del rastreo en la orden: la prueba con la Obra congelada anota `/autores/` además de `/obras/` y fija «Directorio: 2 pedidas de 2 publicadas».
+
+### 2026-10-28 — Review pass
+- intent_gap: 0
+- bad_spec: 0
+- patch: 10: (high 0, medium 1, low 9)
+- defer: 1: (high 0, medium 1, low 0)
+- reject: 22: (high 0, medium 1, low 21)
+- addressed_findings:
+  - `[medium]` `[patch]` Con SM-11 y el presupuesto justo, las dos URL del Directorio salían del suelo de Cita (18 de 20) sin que nada lo dijera: el docblock de `SIN_SUELO_POR_DELANTE` declara el precio (Cita, nunca Tema, Autor ni Obra) y la prueba del presupuesto justo fija Tema en el mínimo y Cita dos por debajo.
+  - `[low]` `[patch]` Sin prueba del presupuesto que no llega al Directorio entero: una prueba nueva fija que, sin suelo ajeno que lo pague, una petición de sobra lo lee una de dos y `muestreada`, y ninguna lo deja en `sinPresupuesto` (de ahí a `sinLeer`), nunca cero.
+  - `[low]` `[patch]` AGENTS.md decía que el Directorio «entra en el suelo de las demás»: ahora dice que su suelo no se reserva por delante de Autor y Obra, que con presupuesto justo lo paga Cita y que sin presupuesto va a `sinLeer`.
+  - `[low]` `[patch]` La tarea de rastreo de la spec seguía diciendo «Sin familia» solo para la portada: dice ahora que nombra lo que de verdad queda suelto.
+  - `[low]` `[patch]` El docblock de `FAMILIAS_DE_LA_SERIE` atribuía `FAMILIAS_DEL_CENSO` a tráfico, demanda, rastreo y canal: nombra la constante de cada uno.
+  - `[low]` `[patch]` El rótulo «Sin familia» del rastreo nombraba siempre a las Obras: `porQueSinFamilia` lo compone con lo suelto (la portada, las Obras o las dos), y las pruebas fijan los tres casos.
+  - `[low]` `[patch]` El docblock de `FAMILIAS_DE_FICHERO` usaba «directorio» por carpeta junto a la familia `directorio`: dice «carpeta propia en `corpus/`».
+  - `[low]` `[patch]` La prueba de la 26.2 ataba el orden de la tabla de `/buscar/` al de `FAMILIAS`: compara las claves como conjunto.
+  - `[low]` `[patch]` La demanda no tenía prueba de orden con filas de los Directorios: una prueba de `principal --registrar` fija `familias.directorio` {3, 13} en la ventana escrita y `fueraDelCenso` a cero.
+  - `[low]` `[patch]` Nada fijaba que `src/lib/umbrales.ts` siga sin familia de fichero: lo fija `indexnow.test.ts`.
 
 ## Design Notes
 
@@ -265,3 +297,45 @@ previo de `obra-pagina`, ya aplazado). Recomendación de revisión de seguimient
 **Riesgos residuales.** El rojo previo de `obra-pagina.test.ts` sigue bloqueando un `npm test` verde antes de
 fusionar la épica. Las ventanas de demanda ya registradas mezclan atribuciones (documentado, no corregido:
 corregirlo exigiría releer lo registrado, que la orden no hace por diseño).
+
+### Segunda pasada de revisión (2026-10-28)
+
+**Cambio.** Diez parches, ninguno de comportamiento salvo el rótulo del rastreo: el «Sin familia» de
+`lineasDeRegistro` nombra solo lo que de verdad hay suelto (`porQueSinFamilia`: la portada, las Obras o
+las dos). El resto declara y fija lo que ya hacía el plan de inspección con presupuesto justo —el
+Directorio no le quita a Autor ni a Obra; lo paga el suelo de Cita, y si no queda nada va a
+`sinPresupuesto`—, corrige docblocks y AGENTS.md, y añade pruebas (demanda en la orden, umbrales sin
+familia, tabla de `/buscar/` como conjunto).
+
+**Ficheros.**
+- `tools/lib/rastreo.ts` — `porQueSinFamilia` compone el rótulo «Sin familia» con lo suelto.
+- `tools/lib/indexacion.ts` — docblocks de `FAMILIAS_DE_LA_SERIE` (constante de cada serie) y de `SIN_SUELO_POR_DELANTE` (quién paga con presupuesto justo, muestreada, `sinPresupuesto`).
+- `tools/lib/avisar.ts` — docblock de `FAMILIAS_DE_FICHERO` sin el doble sentido de «directorio».
+- `AGENTS.md` — el suelo del Directorio, dicho como lo hace el código.
+- `tests/unit/indexacion.test.ts` — Tema y Cita fijados en el presupuesto justo; prueba nueva del Directorio muestreado o sin presupuesto.
+- `tests/unit/rastreo.test.ts` — rótulo de solo la portada, solo una Obra y las dos.
+- `tests/unit/demanda.test.ts` — la orden escribe los Directorios en `directorio`.
+- `tests/unit/indexnow.test.ts` — `src/lib/umbrales.ts` sin familia de fichero.
+- `tests/unit/tipo-de-resultado.test.ts` — claves comparadas como conjunto.
+- Esta spec — tarea de rastreo al día, un aplazado nuevo y esta entrada.
+
+**Hallazgos.** 10 parches (0 altos, 1 medio, 9 bajos); 1 aplazado: la demanda no relee lo registrado y la
+premisa del criterio («cada pasada reatribuye…») solo vale para el tráfico, pendiente de Héctor
+(bmad-create-epics-and-stories); 22 rechazados (constantes por serie y alias que la spec prescribe,
+tablas de rótulos y helpers en otro módulo, prueba-guarda estrecha, fixtures repetidas, ceros de meses
+sin página —la reatribución de siempre—, rutas no canónicas escritas a mano en registros —búsqueda exacta
+común a todas las familias y previa—, cableado SM-11 de la 22.8, el rojo previo de `obra-pagina` ya
+aplazado, el seguimiento en `sprint-status.yaml` que lleva el orquestador, y las entradas históricas de
+esta spec, que dicen lo de su pasada). Recomendación de revisión de seguimiento: `true` — parches 0 altos,
+1 medio, 9 bajos; puntuación 3 × 1 + 9 = 12 ≥ 5.
+
+**Verificación.**
+- `npx vitest run tests/unit/{demanda,rastreo,indexacion,tipo-de-resultado,indexnow}.test.ts` — 234/234 tras corregir una aserción de la prueba nueva de demanda (un `autores` vacío se omite al escribir).
+- `npx astro check` — 0 errores, 0 avisos, 8 *hints*.
+- `npm test` (desacoplado) — 6.616/6.617, `FINISHED EXIT=1`: el único rojo sigue siendo `obra-pagina.test.ts` «existe `.enlace-en-tinta`», previo y aplazado.
+- `git status --porcelain corpus/` — vacío.
+
+**Riesgos residuales.** El rojo previo de `obra-pagina.test.ts` sigue impidiendo un `npm test` verde antes de
+fusionar la épica. Con un presupuesto artificialmente justo Cita queda dos por debajo de su suelo (dicho y
+fijado; con el techo real de 2.000 no ocurre). La serie de demanda mezcla atribuciones hasta que Héctor
+decida sobre el aplazado.

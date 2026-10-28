@@ -58,8 +58,9 @@ describe('Historia 26.2 — la tabla de tipos de resultado', () => {
     });
     expect(TIPO_POR_OMISION).toBe('cita');
     // Historia 26.7 — los tipos son las familias con resultado (`FAMILIAS`, su único dueño) más
-    // `portada`, en ese orden.
-    expect(Object.keys(ETIQUETAS_DE_RESULTADO)).toEqual([...FAMILIAS, 'portada']);
+    // `portada`. Como conjunto: el orden de `FAMILIAS` es el de los informes de las series y no
+    // decide el de la tabla de `/buscar/`.
+    expect(Object.keys(ETIQUETAS_DE_RESULTADO).sort()).toEqual([...FAMILIAS, 'portada'].sort());
   });
 
   it('el rótulo de la portada no repite la marca: su título sale del `h1`', () => {

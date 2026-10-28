@@ -202,8 +202,10 @@ frente a Autor de la misma lectura y, desde `PRIMER_DESPLIEGUE_DE_OBRAS` más
 26.7): nunca Autor ni Obra. Las seis familias las declara solo `src/lib/superficies.ts`
 (`FAMILIAS`), y cada serie deriva de ahí su subconjunto con nombre (`FAMILIAS_DE_LA_SERIE`, las
 seis, aquí). El Directorio se mide con su censo de lo publicado y se anota con
-`censo: publicadas`; son dos URL, así que se lee entera y entra en el suelo de las demás sin
-quitárselo a Autor ni a Obra mientras rija SM-11. **El `publicadas` de la entrada sigue sumando
+`censo: publicadas`; son dos URL, así que se lee entera. Mientras rija SM-11 no le quita
+presupuesto a Autor ni a Obra: su suelo no se reserva por delante de ellas, sino que sale de lo
+que queda tras leerlas enteras, y con un presupuesto tan justo que no sobre ni una petición lo
+paga el suelo de Cita (dos por debajo del mínimo); si no queda nada, va a `sinLeer` con su motivo. **El `publicadas` de la entrada sigue sumando
 solo las cuatro de siempre** —Cita, Autor, Tema y Colección—: la Obra y el Directorio van cada
 una en su familia, para que el total siga siendo comparable. Una lectura fallida va a `sinLeer`
 con su motivo, jamás a cero, y las entradas anteriores, sin `directorio`, se siguen leyendo.
