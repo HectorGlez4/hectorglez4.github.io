@@ -2,7 +2,7 @@
 title: 'Historia 26.1 — Todo Autor publicado tiene su clave de orden'
 type: 'feature'
 created: '2026-10-28'
-status: 'in-progress'
+status: 'done'
 baseline_revision: '39234cc4dd8ace36326b2709551cd7c483209b71'
 review_loop_iteration: 0
 followup_review_recommended: false
@@ -112,7 +112,63 @@ El orden de commits evita un commit roto: si la puerta entrase antes que el lote
 - `npm run build` y `npx astro check` -- 0 errores.
 - `npm test` completo (≈16 min, con `correr.sh`/`esperar.pl`) -- verde.
 
+## Review Triage Log
+
+### 2026-10-28 — Review pass
+- intent_gap: 0
+- bad_spec: 0
+- patch: 0
+- defer: 0
+- reject: 0
+- addressed_findings:
+  - none
+
+(Las cinco capas de revisión son externas en el bucle v8-ralph y en esta pasada no traían hallazgos: la revisión independiente viene después.)
+
 ## Auto Run Result
 
-Status: ready-for-dev
-Blocking condition: ninguna (planificación detenida a propósito: «Halt after planning»).
+Status: done
+Blocking condition: ninguna
+
+**Qué se hizo.** `ordenAlfabetico` y `ordenRevisado` existen como campos opcionales del Autor con un solo validador; la hermana de `normalizar` da la inicial (A–Z o Ñ) y el orden (ñ entre n y o, desempate por slug); la regla fija «última palabra del nombre» vive en `tools/lib/claves.ts`; `tools/autor.ts` propone la clave al crear, la recuerda al editar, la propone en lote (`proponer-claves`) y la confirma o corrige (`clave`, la única que escribe `ordenRevisado`); el build rompe ante un Autor publicado sin clave o ante una clave sin forma. Los 171 Autores del Corpus llevan la clave propuesta, ninguna revisada.
+
+**Commits** (sobre `39234cc4dd8ace36326b2709551cd7c483209b71`):
+1. `0deecbaae8` feat(autores) — código sin puerta, pruebas y Autores de las pruebas con clave.
+2. `908ee84fc1` chore(autores) — el lote de `proponer-claves`, solo `corpus/autores/` (171 ficheros, +1 línea `ordenAlfabetico:` cada uno, 0 líneas quitadas).
+3. `f05ffa143f` feat(autores) — la puerta del build, su prueba construida y el paso de Héctor en `AGENTS.md`.
+4. `2bb2c15b2c` fix(autores) — `esJornada` pasa a `src/lib/jornada.ts` (reexportada por `citaDelDia.ts`): importarla de `citaDelDia.ts` metía a toda superficie que admite contenido en el grafo de las que rotan con la jornada (lo cazó `tests/unit/peso.test.ts`).
+
+**Ficheros.**
+- `src/lib/normalizar.ts` — `inicialDeClave`, `claveDeComparacion`, `compararPorClave`.
+- `src/lib/admision.ts` — validadores `ordenAlfabetico` (con `REGLA_DE_CLAVE_DE_ORDEN`) y `ordenRevisado`; los dos en `autorAdmisible`.
+- `src/lib/jornada.ts` (nuevo), `src/lib/citaDelDia.ts` — `esJornada` en su propio módulo, reexportada.
+- `src/content.config.ts` — los dos campos en la colección `autores`, importados.
+- `tools/lib/claves.ts` (nuevo) — `proponerClave`, `fallosDeClaves`, órdenes nombradas.
+- `tools/lib/corpus.ts` — `fijarCamposDeAutor`, que localiza con `parseDocument` y escribe por texto (conserva comentarios byte a byte).
+- `tools/lib/gestion.ts` — `crearAutor` con clave, `editarAutor` que la recuerda, `proponerClaves`, `fijarClave`.
+- `tools/autor.ts` — órdenes `proponer-claves` y `clave`, `listar` con clave y recuento, guardián de argumentos.
+- `tools/lib/cambios.ts` — `CAMPOS_QUE_NO_FECHAN.autor` con los dos campos.
+- `integraciones/claves.ts` (nuevo), `astro.config.mjs` — la puerta (`astro:build:start` rompe, `astro:server:setup` avisa).
+- `AGENTS.md` — § Una sesión de sembrado: el paso de Héctor y la vuelta a `proponer-claves` tras cada puesta al día.
+- Pruebas: `tests/unit/claves.test.ts` y `tests/unit/claves-build.test.ts` (nuevos); casos nuevos en `normalizar-y-slug`, `autor-cli`, `gestion` y `fecha-de-cambio`; `ordenAlfabetico` en `tests/unit/ayuda/construir.ts` (`AUTOR_VALIDO`) y en los Autores en YAML de 32 ficheros de prueba.
+
+**Parte del lote** (`npx tsx tools/autor.ts proponer-claves`, 2026-10-28): 171 claves escritas, sin revisar: 171 de 171; la regla dio clave a todos. Nombres de tres palabras o más, sin revisar —para la 26.10, de Héctor—: 78:
+agustin-de-arguelles «Argüelles», agustin-de-hipona «Hipona», alfonso-x-el-sabio «Sabio», antonio-alcala-galiano «Galiano», antonio-canovas-del-castillo «Castillo», arcipreste-de-hita «Hita», aristobulo-del-valle «Valle», armando-palacio-valdes «Valdés», bartolome-de-las-casas «Casas», benito-perez-galdos «Galdós», caton-el-viejo «Viejo», clorinda-matto-de-turner «Turner», domingo-faustino-sarmiento «Sarmiento», eduardo-acevedo-diaz «Díaz», emilia-pardo-bazan «Bazán», enric-prat-de-la-riba «Riba», eugenio-maria-de-hostos «Hostos», federico-garcia-lorca «Lorca», felix-lope-de-vega-y-carpio «Carpio», felix-maria-samaniego «Samaniego», fernan-gonzalez-de-eslava «Eslava», fernando-de-rojas «Rojas», fernando-tarrida-del-marmol «Mármol», francisco-de-quevedo «Quevedo», francisco-pi-y-margall «Margall», francois-de-salignac-de-la-mothe-fenelon «Mothe-Fénelon», gaspar-melchor-de-jovellanos «Jovellanos», gayo-julio-fedro «Fedro», gertrudis-gomez-de-avellaneda «Avellaneda», gonzalo-de-berceo «Berceo», gustavo-adolfo-becquer «Bécquer», gustavo-sanchez-galarraga «Galarraga», guy-de-maupassant «Maupassant», henry-david-thoreau «Thoreau», honore-de-balzac «Balzac», ignacio-manuel-altamirano «Altamirano», joaquin-diaz-garces «Garcés», joaquin-v-gonzalez «González», jose-asuncion-silva «Silva», jose-de-san-martin «Martín», jose-enrique-rodo «Rodó», jose-manuel-de-navarrete «Navarrete», jose-maria-de-pereda «Pereda», jose-maria-samper «Samper», jose-victorino-lastarria «Lastarria», josefa-amar-y-borbon «Borbón», juan-bautista-alberdi «Alberdi», juan-donoso-cortes «Cortés», juan-maria-gutierrez «Gutiérrez», juan-ruiz-de-alarcon «Alarcón», juana-manuela-gorriti «Gorriti», julio-herrera-y-reissig «Reissig», luis-de-gongora «Góngora», manuel-gonzalez-prada «Prada», marcelino-menendez-y-pelayo «Pelayo», maria-de-zayas-y-sotomayor «Sotomayor», mariano-jose-de-larra «Larra», miguel-antonio-caro «Caro», miguel-de-cervantes «Cervantes», miguel-de-unamuno «Unamuno», pablo-de-olavide «Olavide», pedro-antonio-de-alarcon «Alarcón», pedro-bonifacio-palacios «Palacios», pedro-calderon-de-la-barca «Barca», praxedis-g-guerrero «Guerrero», publio-terencio-africano «Africano», ramon-del-valle-inclan «Valle-Inclán», ricardo-flores-magon «Magón», rosalia-de-castro «Castro», rosario-de-acuna «Acuña», salvador-camacho-roldan «Roldán», santiago-ramon-y-cajal «Cajal», soledad-acosta-de-samper «Samper», sor-juana-ines-de-la-cruz «Cruz», t-h-pardo-de-tavera «Tavera», teresa-de-jesus «Jesús», tomas-de-iriarte «Iriarte», vicente-blasco-ibanez «Ibáñez».
+
+**Revisión.** Parches: 0. Aplazados: 0. Rechazados: 0 (capas externas sin hallazgos en esta pasada). `followup_review_recommended: false` — parcheados: high 0, medium 0, low 0; puntuación 0.
+
+**Verificación.**
+- `npx vitest run` de `normalizar-y-slug`, `claves`, `autor-cli`, `gestion`, `fecha-de-cambio`, `claves-build`, `peso`, `cita-del-dia`, `lote`, `linea-base` — verde.
+- `npx tsx tools/autor.ts proponer-claves` dos veces — la primera escribe 171; la segunda «Ninguna clave nueva»; `git status --porcelain corpus/autores` vacío tras el commit 2.
+- `npx tsx tools/autor.ts listar` — cada Autor con «…» y «sin revisar»; última línea «Claves de orden: faltan 0 y 171 están sin revisar, de 171 Autores.»
+- `npx tsx tools/avisar.ts --ensayo --desde 0deecbaae8 --hasta 908ee84fc1 --sitemap dist/sitemap-0.xml` — el lote no refecha ni avisa ninguna familia (0 en cita, autor, tema, colección y obra; solo la portada, que se avisa siempre que cambia el Corpus).
+- `npm run build` con la puerta y tras el arreglo — EXIT 0 (467,7 MiB juzgados). `npx astro check` — 0 errores, 0 avisos.
+- `npm test` completo — primera pasada: 1 fallo (`peso.test.ts`, la jornada; arreglado en el commit 4); segunda: 140 ficheros, 6398 pruebas, verde.
+- Ningún fichero de `corpus/autores/` lleva `ordenRevisado`.
+
+**Auditoría de la matriz.** Cada fila tiene prueba que corrió en verde: iniciales y orden (`normalizar-y-slug`), propuesta (`claves`), `crear`/regla sin inicial/`proponer-claves`/`clave` con sus códigos (`autor-cli`, `gestion`), las tres filas del build (`claves-build`; la orden nombrada cuando la regla no da clave, en `claves`).
+
+**Riesgos residuales.**
+- El aviso de `astro dev` (`astro:server:setup`) no tiene prueba propia, igual que el del cotejo.
+- `editar` y `biografia` siguen volcando la ficha con `aYaml` y pierden comentarios (anterior a esta historia); conservan la clave y la revisión.
+- Al fusionar con la principal hay que volver a correr `proponer-claves` (26.11): los Autores sembrados allí entretanto llegan sin clave y romperían el build.
