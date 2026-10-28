@@ -10,7 +10,14 @@ context:
   - '{project-root}/_bmad-output/implementation-artifacts/epic-26-context.md'
   - '{project-root}/_bmad-output/planning-artifacts/ux-designs/ux-brainlySabiduria-2026-08-10/DESIGN.md'
 warnings: ['oversized']
-deferred: []
+deferred:
+  - summary: >-
+      Los pesos tipográficos (`font-weight: 400`, `600`) y el `line-height: 1` de las letras se escriben como literales en los componentes porque `tokens.css` no declara tokens de peso ni de interlineado.
+    evidence: |-
+      AGENTS.md prohíbe literales de tipografía en los componentes, pero la base (9e5c4693) ya trae `font-weight` literal en Armazon, Atribucion, BloqueDeCita, DondeLeer, EdicionesEnVenta, Paginacion, Rotulo, TarjetaDeCita, TarjetaDeObra y 404; la 26.3 sigue la convención existente (FilaDeAutor, LetrasDeSalto, autores.astro). Falta declarar los tokens en `tokens.css` y en `DESIGN.md` (pendiente de Héctor, bmad-ux) y migrar todos los componentes a la vez.
+    location: >-
+      src/styles/tokens.css; src/components/FilaDeAutor.astro; src/components/LetrasDeSalto.astro; src/pages/autores.astro
+    severity: low
 ---
 
 <intent-contract>
@@ -150,6 +157,31 @@ Las capas de revisión son externas en este bucle (v8-ralph) y esta pasada no tr
 
 Rechazados, con su razón: el coste cuadrático de `citasDeAutor` (135 × 4.420 en el build, y contar aparte sería otro dueño del recuento); `Cache-Control … immutable` (el patrón de todas las Tarjetas, y el sitio estático no sirve esa cabecera); la reconstrucción de `dist/` en la 17.5 de `ingreso-construido` (las pruebas posteriores leen `paginas` en memoria); el Corpus vacío —página fina, meta con ceros, sin construir— (lo fija la matriz de I/O del intent, y el Corpus real nunca está vacío); JSON-LD propio (el intent lo prohíbe); separador de miles (convención del sitio entero); `font-weight`/`line-height` literales (`tokens.css` no declara pesos, y es lo que hacen los demás componentes); el orden del nombre accesible «Autores por la C» (lo prescribe el criterio); `aria-labelledby` en cada grupo (veintisiete regiones de más, y axe pasa); la redacción de la prueba de línea base (fixture de la 26.4); los años sin fallecimiento (lo fija el spec); el spec cerrado sin revisión y los tiempos agotados de `seo.spec.ts` (proceso, y esta es la revisión; el barrido pasa con `--workers=1`); el alcance del diff (informativo); el 500 de `astro dev` ante un Autor sin clave (el intent manda lanzar, y el mensaje da la orden); las balizas de vista y lectura en tiempo de ejecución (las cubre `receptor.spec.ts` para toda vista declarada; aquí se prueba `data-vistas`); `directorio` en `FAMILIAS_DE_RUTA` (decisión del spec: el aviso no es una serie); la exención de línea base como lectura de borde (prevista en el spec, y ahora caduca sola); el barrido axe sin prueba nueva (`accesibilidad.spec.ts` lo cubre por la declaración); `sprint-status.yaml` y las precondiciones en `review` (lo lleva el orquestador); el anillo de foco con teclado (regla global ya probada en la 2.8); Autor con todas sus Citas en `_revision/` y publicadas frente a documentadas (equivalen a «sin Citas» y a las 12 sin documentar de la prueba pura); las claves sin revisar (dato de la 26.10).
 
+### 2026-10-28 — Review pass
+- intent_gap: 0
+- bad_spec: 0
+- patch: 15 (high 0, medium 1, low 14)
+- defer: 1 (high 0, medium 0, low 1)
+- reject: 19 (high 0, medium 0, low 19)
+- addressed_findings:
+  - `[medium]` `[patch]` La 17.5 de `ingreso-construido.test.ts` exigía que el árbol tuviera todos los Modelos apagados (blind-hunter): encender un Modelo en `src/lib/ingreso.ts` habría tumbado el bloque entero. La copia apagada apaga en la copia todo lo encendido (`encendido: true,` → `false,`, con un `encendido: false,` por Modelo como guarda).
+  - `[low]` `[patch]` La construcción apagada escribía sobre el `dist/` de la encendida (blind-hunter): ahora va en su propia copia (`construirConCorpus`, en `aLimpiar`), y ninguna prueba del bloque puede leer una por la otra.
+  - `[low]` `[patch]` El docblock de `FilaDelDirectorioDeAutores.años` contradecía a `hechosDeFilaDeAutor` (blind-hunter): dice ahora que falta si no consta el fallecimiento y que un nacimiento solo no se pinta. La conducta no cambia: la fija la matriz del intent.
+  - `[low]` `[patch]` «Autores» escrito a mano en el `h1`, en las letras y en la Tarjeta (blind-hunter): `NOMBRE_DEL_DIRECTORIO_DE_AUTORES` en `src/lib/marca.ts`, único dueño, del que sale también el título de pestaña.
+  - `[low]` `[patch]` `'autores.astro'` dos veces en `src/lib/superficies.ts` (blind-hunter): la declaración y `PAGINAS_DE_DIRECTORIO` leen la misma constante.
+  - `[low]` `[patch]` `GrupoDeLetra<T>` genérico con el campo `autores` (blind-hunter): pasa a `entradas`, para que la 26.4 lo reutilice sin renombrar.
+  - `[low]` `[patch]` «Familia» con dos sentidos en `AGENTS.md` (blind-hunter): el texto distingue las familias de las series de la familia de ruta `directorio` del aviso y el ensayo.
+  - `[low]` `[patch]` Cada orden sin su excepción (blind-hunter): `AGENTS.md` dice qué pasa con `/autores/` en indexación (ni inspección ni `sinLeer`), demanda (`fueraDelCenso`, ningún Autor), rastreo («sin familia») y canal («otra»), y el docblock de `destinoDePublicacion` en `tools/lib/canal.ts` lo nombra.
+  - `[low]` `[patch]` La comprobación «sin semblanza» del PNG dependía de otra prueba (blind-hunter, intent-alignment): compara el PNG construido con el rasterizado del SVG dentro del mismo `it`.
+  - `[low]` `[patch]` La exención de `seo.spec.ts` no caducaba sola (blind-hunter): exige que el Directorio siga siendo la única ruta inalcanzable del sitemap, como su gemela unitaria.
+  - `[low]` `[patch]` Las claves sin inicial no se probaban (blind-hunter): cifra, signo y espacio delante lanzan nombrando el slug. La rama de «inicial que se reabre» no se alcanza con `normalizar.ts` coherente y queda sin prueba directa.
+  - `[low]` `[patch]` El texto de las filas dependía de una sola línea de marcado sin vigilancia (blind-hunter): `directorio-de-autores.test.ts` exige el texto exacto de todas las filas construidas y ningún doble espacio.
+  - `[low]` `[patch]` La demanda sin prueba propia de `/autores/` (ac-auditor): `demanda.test.ts` lo reparte con el censo real de un corpus y cae en `fueraDelCenso`, en ningún Autor y no en `sinAutor`.
+  - `[low]` `[patch]` El corte de palabras del nombre sin prueba (ac-auditor): `directorio-de-autores.spec.ts` mide `overflow-wrap: anywhere`.
+  - `[low]` `[patch]` Tres detalles visuales sin medir (ac-auditor): las letras cuadradas y sin caja (sin fondo ni borde), «Volver a las letras» con `min-height` de `--zona-de-toque` y alto ≥ 44, y `.prosa` con el `max-width` de `--medida-prosa`, sondeado junto a ella.
+
+Diferido: los pesos y el interlineado literales (falta el token; convención anterior a la 26.3). Rechazados, con su razón: una segunda regla de singular en «cita publicada» (es otra concordancia, la del participio); `SUPERFICIES_SIN_SEMBLANZA` y `esRutaDeDirectorio` vigiladas solo por pruebas (lo manda el spec y AD-28 lo pide sobre `dist/`); `immutable` y la URL fija de la Tarjeta (el patrón de todas las Tarjetas con recuento; ya rechazado); la prueba de línea base con fixture (ya rechazado: la 26.4 la cambia); `estadoDerechos` como puerta (`z.literal('dominio-público')`: no hay otro valor que saque una Cita de lo publicado sin romper el build); el spec y su registro (proceso); una sola muestra en la búsqueda (la estructura `data-pagefind-ignore="all"` cubre el caso general, y no hay Ñ en el Corpus real); pintar el nacimiento solo y su fecha en AD-27 (el esquema exige el fallecimiento y la matriz fija la conducta); `esRutaDeDirectorio` ante una ruta vacía (el mismo comportamiento de `esRutaDeObra` y de `superficieDeclaradaDe`); `directorio` en `FAMILIAS_DE_RUTA` (el criterio de «fuera de toda familia» es de las series por familia de `tools/`, y el aviso no lo es); la exención de línea base ≥2 (prevista en el spec y caduca sola); las balizas en tiempo de ejecución, el barrido axe sin prueba nueva, «bajada» frente a `hechos`, el Corpus vacío construido y el commit de solo `ordenAlfabetico` por el build (ya cubiertos o rechazados en la pasada anterior); el anillo de foco (regla global de la 2.8); `sprint-status.yaml` y las precondiciones en `review` (lo lleva el orquestador).
+
 ## Design Notes
 
 **`directorio` como familia de ruta del aviso ya en la 26.3.** La relación de AD-27 exige una familia por superficie, y `/autores/` no es un Autor. Darle `directorio` en `FAMILIAS_DE_RUTA` (la tabla del aviso y del ensayo) no la mete en ninguna serie: indexación, tráfico, demanda, rastreo y canal siguen leyendo su censo, donde `/autores/` cae en `fueraDelCenso` hasta la 26.7, que muda las familias a `superficies.ts`. La alternativa —la familia `autor`— contaría el Directorio como Autor en el ensayo, que es lo que FR-40 prohíbe.
@@ -208,6 +240,28 @@ Fila de Autor (forma; tokens arriba):
 - Pruebas: `directorio-de-autores` (PNG construido byte a byte), `fecha-de-cambio` (Autor sin Citas, biografía), `publicable-y-alcanzable` y `superficies` (exenciones que caducan), `rastreo`, `trafico`, y `tests/e2e/directorio-de-autores.spec.ts` (tokens y ritmo).
 
 **Revisión de seguimiento recomendada:** `true` — 11 parches en la pasada 1 (alta 0, media 1, baja 10); puntuación 3 × 1 + 1 × 10 = 13.
+
+**Revisión (pasada 2 con las capas externas, 2026-10-28).** Parches aplicados: 15 (media 1, baja 14). Diferidos: 1 (los pesos y el interlineado sin token). Rechazados: 19. Ficheros de esta pasada:
+- `src/lib/marca.ts` — `NOMBRE_DEL_DIRECTORIO_DE_AUTORES`, del que salen el título de pestaña, el `h1`, las letras y la Tarjeta.
+- `src/lib/superficies.ts` — `PAGINA_DEL_DIRECTORIO_DE_AUTORES`, una sola grafía para la declaración y `PAGINAS_DE_DIRECTORIO`.
+- `src/lib/directorios.ts` — `GrupoDeLetra.entradas` (antes `autores`) y el docblock de `años` de acuerdo con `hechosDeFilaDeAutor`.
+- `src/lib/tarjeta.ts`, `src/pages/autores.astro` — leen el nombre del Directorio de su dueño; la página recorre `grupo.entradas`.
+- `tools/lib/canal.ts` — el docblock de «otra» nombra el Directorio hasta la 26.7.
+- `AGENTS.md` — familias de las series frente a la familia de ruta del aviso; la excepción de `/autores/` en indexación, tráfico, demanda, rastreo y canal.
+- Pruebas: `ingreso-construido` (la copia apagada en su propia copia, apagando lo que el árbol encienda), `directorio-de-autores` (claves sin inicial, texto exacto de todas las filas, PNG byte a byte dentro de la prueba de semblanzas), `demanda` (`/autores/` en `fueraDelCenso` con el censo real), `tests/e2e/directorio-de-autores.spec.ts` (`overflow-wrap`, letras cuadradas y sin caja, zona de «Volver», medida de prosa) y `tests/e2e/seo.spec.ts` (la exención caduca sola).
+
+**Revisión de seguimiento recomendada (pasada 2):** `true` — 15 parches (alta 0, media 1, baja 14); puntuación 3 × 1 + 1 × 14 = 17.
+
+**Verificación de la pasada 2.**
+- `npm run check` — 0 errores, 0 avisos (8 pistas previas).
+- Construyen: `directorio-de-autores`, `ingreso-construido`, `publicable-y-alcanzable` — 100/100.
+- Puras: `superficies`, `barra-final`, `ingreso`, `publicado`, `tarjeta`, `semblanza`, `indexacion`, `fecha-de-cambio`, `indexnow`, `rastreo`, `trafico`, `linea-base`, `demanda`, `canal` — 826/826.
+- Playwright local contra lo construido (su `webServer` corre `npm run build`), `--project=escritorio --project=movil --workers=1`: `directorio-de-autores.spec.ts`, `busqueda.spec.ts`, `accesibilidad.spec.ts` y `seo.spec.ts` — 218 pasan, 2 omitidas (`busqueda.spec.ts:195`, de la 3.1); «nada huérfano» con la exención que caduca, verde en los dos proyectos.
+- `npm test` completo no se repite en esta pasada: los cambios de código son de nombre y de una constante, y los ficheros de prueba que los leen corren arriba; el último completo (pasada 1) dio 141/141.
+
+**Riesgos residuales (pasada 2).**
+- La rama de `directorioDeAutores` que lanza ante una inicial reabierta no tiene prueba directa: con `src/lib/normalizar.ts` coherente no se alcanza sin simular un módulo roto.
+- Los pesos tipográficos siguen literales hasta que `tokens.css` declare sus tokens (diferido).
 
 **Verificación de la pasada 1.**
 - Puras: `fecha-de-cambio`, `indexnow`, `superficies`, `barra-final`, `ingreso`, `indexacion`, `publicado`, `linea-base`, `tarjeta` — 516/516; `rastreo` y `trafico` — 91/91.
