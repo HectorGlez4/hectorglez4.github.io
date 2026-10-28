@@ -151,6 +151,29 @@ Las capas de revisión de esta pasada son externas (blind-hunter, edge-case-hunt
 
 Rechazados: la frase visible del recuento va por detrás de la lista durante la pausa (es el diseño: «la lista se repinta al teclear, y la frase llega después», y vaciar la región en cada tecla rompería «solo si cambió»); `data-buscar` ausente (lo pone siempre el build); `sprint-status.yaml` y el cierre sin revisión (lo lleva el orquestador del bucle, y esta es la revisión); frases sin tope de longitud o con «» tecleadas (cosmético; el enlace parte línea con `overflow-wrap: anywhere`); el orden de tabulación a cero (lo oculto va con `display: none` y el enlace sigue a la región en el DOM); `:global(.listado [hidden])` (es lo que `hidden` significa en el listado); las pruebas de `dist/` sobre corpus de prueba (el guion no lleva Corpus); el Campo de búsqueda probado solo dentro del filtro (su reutilización es de la 27); `@__PURE__` en `umbrales.ts` (dentro de lo que el contrato permite); la lectura «comparar con la región» frente a «con lo último anunciado» (nada más escribe en la región); `define:vars` y singulares en el navegador (la fuente no lleva `define:vars` y los singulares los fija la prueba pura).
 
+### 2026-10-28 — Review pass
+- intent_gap: 0
+- bad_spec: 0
+- patch: 13 (high 0, medium 2, low 11)
+- defer: 0
+- reject: 22 (high 0, medium 1, low 21)
+- addressed_findings:
+  - `[medium]` `[patch]` Una letra a medio componer filtraba (blind-hunter, edge-case-hunter): con la tecla muerta de la tilde el valor lleva el signo suelto («gonz´»), que `normalizar` no quita, y la lista se vaciaba y asomaba «Buscar «gonz´» en las citas» a cada vocal con tilde. El guion ignora el `input` con `isComposing` y filtra con `compositionend`; lo fijan el guion ejecutado (`filtroEjecutado.ts`, comprobado por mutación) y una e2e nueva en las dos rutas.
+  - `[medium]` `[patch]` Cuando la frase nueva era más corta que la anterior —la frase a cero de dos líneas que pasa a «14 autores.»—, la fila del recuento seguía alta durante la pausa y la lista subía 700 ms después (edge-case-hunter). La región va ahora fuera del flujo, encima de la sombra (`position: absolute` en su área de rejilla), y el alto de la fila lo da solo la sombra, que cambia al teclear; nueva aserción e2e: de la frase a cero a una con coincidencias, el primer grupo no se mueve cuando llega la frase.
+  - `[low]` `[patch]` El tope del filtro tenía unos 270 bytes de margen y no los ~400 que pide el contrato (blind-hunter, intent-alignment): rederivado con la medida de hoy, 3.167 + ~400 = **3.570**, con la medida en su docblock.
+  - `[low]` `[patch]` Cifras rancias en `AGENTS.md` («3.510 bytes en vez de 2.969»): ahora dice lo que no envejece, «unos 540 bytes más». El Auto Run Result de este spec, al día abajo.
+  - `[low]` `[patch]` Una palabra larga sin cortes en la frase a cero ensanchaba la página a 360 px (edge-case-hunter): `overflow-wrap: anywhere` en la región y la sombra, como ya tenía el enlace.
+  - `[low]` `[patch]` `tests/unit/ayuda/filtro.ts` llevaba `/buscar/` escrito a mano: ahora pregunta a `rutaDeLaBusqueda()`.
+  - `[low]` `[patch]` Nada del `dist/` fijaba que el filtro y el listado fueran hermanos, y sin eso el guion no inserta nada sin decir nada (verification-gap): `comprobarFiltroEnElHtml` exige que el contenedor del filtro se cierre justo antes del listado, sin más que la petición del guion entre los dos.
+  - `[low]` `[patch]` El primer grupo **visible** a 4 × y los siguientes a 5 × no lo medía ninguna prueba (verification-gap): e2e nueva en las dos rutas, filtrando por una fila del último grupo (exige el primero oculto) y por un trozo que deja varios.
+  - `[low]` `[patch]` Las e2e no exigían los ejemplos de la historia (ac-auditor 2): «espana» exige «Historia de la decadencia de España» y «mar» exige a Josefa Amar y Borbón, sin caer a otro trozo.
+  - `[low]` `[patch]` En `/autores/` no se comprobaba que los grupos que quedan conserven su letra (ac-auditor 4): añadido.
+  - `[low]` `[patch]` «El guion importa el ritmo y la pausa, nunca por `define:vars` ni copiados» solo tenía un sustituto en `dist/` (ac-auditor 6): prueba nueva sobre la fuente de `FiltroDelDirectorio.astro`, sin build.
+  - `[low]` `[patch]` El anclaje solo se probaba en `/autores/` y «las letras y la lista bajan» solo en `/obras/` y midiendo las letras (ac-auditor 7): las dos e2e, en las dos rutas, y la segunda mide también el primer grupo.
+  - `[low]` `[patch]` El filete del foco se comparaba con `'2px'`: ahora con una sonda de `calc(var(--grosor-filete) * 2)` (ac-auditor 8).
+
+Rechazados: las contradicciones del spec (el párrafo de la pasada sin hallazgos es histórico y ahora lo dice; `review_loop_iteration: 0` es lo que fija el flujo para una revisión nueva; la tarea con «2px» es el plan); la fila de `COLOCACION` para el enlace a cero (sin `href` en `dist/` no hay enlace que colocar; su `data-zona="directorio"` lo fija la prueba de la plantilla y la zona, la e2e); `firstChild` del título y `iniciar` mudo (el marcado lo fijan `filtro.ts` y el guion ejecutado sobre `dist/`, y ahora también el parentesco); reescribir `hidden` por tecla (sin coste medible, y bytes); el margen colapsado bajo el campo al filtrar (4 ×, coherente, y nada lo especifica); la especificidad de `li:not([hidden]) ~ li` (selecciona lo mismo que `li + li` sin filtro, y la Página de Autor no tiene reglas que compitan); `assetsInlineLimit` para todo `.js` (lo manda el contrato) y lo que no es `.js` (devuelve la regla por omisión); el acoplamiento con `umbrales.ts` (lo vigila el tope); que las e2e no corran en el CI (convención del proyecto); la prueba de cadenas del anunciante (el guion ejecutado es la de verdad); casos de borde puros sin caso real (bloque de `/obras/` sin Obras, «» tecleadas, longitud, la vuelta desde `/buscar/`); `aria-controls`/`aria-describedby` (fuera del contrato; la etiqueta dice qué hace el campo); `sprint-status.yaml` (lo lleva el orquestador); `data-buscar` ausente y Directorio sin grupos (el build los pone siempre); la lectura descriptiva de intent-alignment, con la fila del recuento en blanco durante la pausa (es la sombra: lo que salta, salta al teclear); el anclaje en WebKit (ya diferido); «sin icono» comprobado en el navegador (el pseudoelemento no se deja medir de forma fiable); singulares en el navegador (los fija la prueba pura); el nombre interno del fichero de Astro (informativo).
+
 ## Design Notes
 
 - **Plantilla y no `createElement`:** etiqueta y enlace salen del build con los estilos de ámbito del componente, y el guion queda genérico y sin contenido. El `<template>` es inerte (la 26.8 ya prevé ignorarlo en el grafo) y su `<a>` no lleva `href` hasta la frase a cero, así que no es enlace interno para la prueba de zonas.
@@ -188,7 +211,7 @@ Rechazados: la frase visible del recuento va por detrás de la lista durante la 
 - `src/lib/filtroDelDirectorio.ts` (nuevo) — la decisión pura: `filtroDe`, `fraseDelFiltro`, `textoDeBuscarEnLasCitas`, `rutaDeBuscarEnLasCitas`, `ETIQUETA_DEL_FILTRO`.
 - `src/lib/recuentos.ts` (nuevo) — `recuentoDeAutores` y `recuentoDeObras`, sin importaciones; `atribucion.ts` los reexporta.
 - `src/lib/anuncio.ts` — `ritmoDeTecleo`, el segundo ritmo, junto a `anunciar` (sin tocar su texto).
-- `src/lib/umbrales.ts` — `PAUSA_DE_TECLEO_MS = 700`, `MAX_BYTES_GUION_DEL_FILTRO = 3370` (medido 2.969 + ~400) y `@__PURE__` en `CORTES_DE_SERIE`/`CORTES_DE_SM8` para que el empaquetado no arrastre la lista de cortes al navegador (sin la marca, 3.510 bytes).
+- `src/lib/umbrales.ts` — `PAUSA_DE_TECLEO_MS = 700`, `MAX_BYTES_GUION_DEL_FILTRO` (3.370 al construir, medido 2.969 + ~400; 3.570 tras la revisión 2, medido 3.167 + ~400) y `@__PURE__` en `CORTES_DE_SERIE`/`CORTES_DE_SM8` para que el empaquetado no arrastre la lista de cortes al navegador (sin la marca, 3.510 bytes).
 - `src/lib/guiones.ts` — entrada `filtro` de la lista cerrada, con su `reconoce` y su tope.
 - `src/components/CampoDeBusqueda.astro` (nuevo) — etiqueta visible, `type="search"` sin `placeholder` ni cruz nativa, Inter `--cuerpo-lg`, filete que pasa a 2px siena con el foco además del anillo.
 - `src/components/FiltroDelDirectorio.astro` (nuevo) — plantilla, región, estilos y el guion.
@@ -199,7 +222,7 @@ Rechazados: la frase visible del recuento va por detrás de la lista durante la 
 - `AGENTS.md` — la convención del segundo ritmo.
 - `tests/unit/filtro-del-directorio.test.ts` (nuevo), `tests/unit/ayuda/filtro.ts` (nuevo), `tests/unit/directorio-de-autores.test.ts`, `tests/unit/directorio-de-obras.test.ts`, `tests/unit/medicion.test.ts`, `tests/e2e/filtro-del-directorio.spec.ts` (nuevo).
 
-**Revisión.** Esta pasada no clasificó hallazgos (capas externas sin hallazgos aún): 0 parches, 0 diferidos, 0 rechazados. `followup_review_recommended: false` (puntuación 0: ningún parche).
+**Revisión 0 (pasada sin hallazgos).** Esta pasada no clasificó hallazgos (capas externas sin hallazgos aún): 0 parches, 0 diferidos, 0 rechazados. `followup_review_recommended: false` (puntuación 0: ningún parche).
 
 **Verificación.**
 - `npx vitest run tests/unit/filtro-del-directorio.test.ts` — 20/20 verdes.
@@ -227,3 +250,15 @@ Verificación de la revisión: `npx vitest run tests/unit/directorio-de-autores.
 
 **Riesgos.** La sombra iguala el alto de la fila al de la frase que vendrá, así que lo que salta, salta al teclear y no después; la frase visible sigue mostrando la cifra anterior durante la pausa, como dice el diseño. El anclaje en Safari queda diferido. El nombre del fichero que emite Astro (`…astro_astro_type_script_index_0_lang…`) es interno de Astro: si cambia al subir de versión, `reconoce` deja de casar y `medicion.test.ts` sale en rojo (lo pide una página y no está en la lista), que es lo que se quiere. Lo mismo `assetsInlineLimit`: si Astro dejara de consultarlo, el guion volvería en línea y lo diría la prueba de `dist/`. El anclaje del desplazamiento es del navegador (`overflow-anchor`), comprobado en Chromium; no en Safari ni Firefox.
 
+**Revisión 2 (2026-10-28).** 13 parches (0 altos, 2 medios, 11 bajos), 0 diferidos, 22 rechazados; `followup_review_recommended: true` (puntuación 3 × 2 + 11 = 17). Lo que cambió:
+- `src/components/FiltroDelDirectorio.astro` — el guion espera a la letra compuesta (`isComposing` en `input`, y `compositionend`); la región va fuera del flujo, encima de la sombra, que es la única que da alto a la fila; `overflow-wrap: anywhere` en la región y la sombra.
+- `src/lib/umbrales.ts` — `MAX_BYTES_GUION_DEL_FILTRO = 3570` (medido 3.167 + ~400).
+- `AGENTS.md` — el escollo de `@__PURE__` sin cifras que envejezcan.
+- `tests/unit/ayuda/filtroEjecutado.ts` — eventos con `isComposing`, la escucha de `compositionend` y el caso de la letra a medio componer.
+- `tests/unit/ayuda/filtro.ts` — `rutaDeLaBusqueda()`, y el filtro hermano del listado.
+- `tests/unit/filtro-del-directorio.test.ts` — la fuente del guion importa el ritmo, la pausa y la decisión pura, sin `define:vars` ni la pausa escrita.
+- `tests/e2e/filtro-del-directorio.spec.ts` — ejemplos de la historia exigidos (España, Josefa Amar y Borbón), letras de los grupos que quedan en `/autores/`, el primer grupo visible a 4 × y los demás a 5 ×, la letra a medio componer, la frase que mengua sin mover nada, anclaje y «letras y lista bajan» en las dos rutas, y el filete del foco contra el token.
+
+Verificación de la revisión 2: `npx vitest run tests/unit/filtro-del-directorio.test.ts` 22/22; `npx vitest run tests/unit/medicion.test.ts tests/unit/filtro-del-directorio.test.ts tests/unit/directorio-de-autores.test.ts tests/unit/directorio-de-obras.test.ts` 628/628 (el filtro, 3.167 bytes de 3.570); mutación: quitar la guarda de `isComposing` pone en rojo `directorio-de-autores.test.ts`; `npx astro check` 0 errores, 0 avisos (8 *hints* ajenos); `npx playwright test tests/e2e/filtro-del-directorio.spec.ts tests/e2e/directorio-de-autores.spec.ts tests/e2e/directorio-de-obras.spec.ts tests/e2e/accesibilidad.spec.ts` (con el `npm run build` del `webServer`) 214/214 en `movil` y `escritorio`.
+
+**Riesgos tras la revisión 2.** Con la región fuera del flujo, una frase que mengua se pinta durante la pausa más alta que su fila: su línea de más cae en el hueco de 4 × `--unidad` que hay hasta el primer grupo, y solo una frase a cero de tres líneas o más —un texto hostil o muy largo, en el móvil— llegaría a montarse sobre el rótulo durante esos 700 ms. Los eventos de composición de la e2e son sintéticos: la tecla muerta real de macOS y los IME no se han tecleado en un navegador. El anclaje en Safari sigue diferido.
