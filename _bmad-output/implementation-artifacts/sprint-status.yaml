@@ -29,7 +29,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 # - Retrospective appends its action items to action_items; the status view surfaces open ones
 generated: 08-11-2026 09:00
-last_updated: 10-28-2026 02:07
+last_updated: 10-28-2026 04:02
 project: brainlySabiduria
 project_key: NOKEY
 tracking_system: file-system
@@ -412,7 +412,7 @@ development_status:
   epic-24-retrospective: optional
 
   epic-26: in-progress
-  26-1-todo-autor-publicado-tiene-su-clave-de-orden: backlog  # tras la 24.8: sin la relación por campos, el lote de claves refecharía todo el sitio
+  26-1-todo-autor-publicado-tiene-su-clave-de-orden: review  # tras la 24.8: sin la relación por campos, el lote de claves refecharía todo el sitio · v8-ralph 2026-10-28: el build rompe ante un autor publicado sin clave de orden; órdenes y lote de claves la escriben; sin diferidos para Héctor
   26-2-el-tipo-de-un-resultado-no-casa-como-texto-y-la-portada-tien: review  # v8-ralph 2026-10-28: el tipo de un resultado viaja como filtro de pagefind y la portada responde solo por su título; sin diferidos para Héctor
   26-3-todos-los-autores-de-la-a-a-la-z: backlog
   26-4-todas-las-obras-bajo-su-autor: backlog
