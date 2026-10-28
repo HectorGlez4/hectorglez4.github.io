@@ -2,7 +2,8 @@
 title: 'Todos los Autores, de la A a la Z'
 type: 'feature'
 created: '2026-10-28'
-status: 'ready-for-dev'
+status: 'done'
+baseline_revision: '9e5c4693379a12fdda9a546a97df3ed74baada34'
 review_loop_iteration: 0
 followup_review_recommended: false
 context:
@@ -117,6 +118,17 @@ deferred: []
 
 ## Review Triage Log
 
+### 2026-10-28 — Review pass
+- intent_gap: 0
+- bad_spec: 0
+- patch: 0
+- defer: 0
+- reject: 0
+- addressed_findings:
+  - none
+
+Las capas de revisión son externas en este bucle (v8-ralph) y esta pasada no traía hallazgos: la revisión independiente viene después.
+
 ## Design Notes
 
 **`directorio` como familia de ruta del aviso ya en la 26.3.** La relación de AD-27 exige una familia por superficie, y `/autores/` no es un Autor. Darle `directorio` en `FAMILIAS_DE_RUTA` (la tabla del aviso y del ensayo) no la mete en ninguna serie: indexación, tráfico, demanda, rastreo y canal siguen leyendo su censo, donde `/autores/` cae en `fueraDelCenso` hasta la 26.7, que muda las familias a `superficies.ts`. La alternativa —la familia `autor`— contaría el Directorio como Autor en el ensayo, que es lo que FR-40 prohíbe.
@@ -143,3 +155,44 @@ Fila de Autor (forma; tokens arriba):
 
 **Manual checks:**
 - Abrir `/autores/` construido a 360 × 640: seis letras por fila, nombres en serif, hechos en una línea bajo cada nombre, «Volver a las letras» tras cada grupo.
+
+## Auto Run Result
+
+**Resumen.** `/autores/` existe: una página de producto declarada en `src/lib/superficies.ts` (constructor `rutaDelDirectorioDeAutores`, `TARJETA_DEL_DIRECTORIO_DE_AUTORES`, `PAGINAS_DE_DIRECTORIO`, `esRutaDeDirectorio`, vista de superficie y línea base «los Directorios»), que lista los Autores con Citas publicadas por la clave de orden de la 26.1, agrupados por inicial (Ñ propia, tildes fuera), con letras de salto que funcionan sin guion, «Volver a las letras», su Tarjeta Social de los Directorios, sin ningún Modelo de Ingreso y compuesta en la relación de AD-27 por lo que pinta. Sin campo de filtro, región de recuento ni guion (26.6).
+
+**Ficheros.**
+- `src/lib/superficies.ts` — declaración del Directorio de Autores, constructor, Tarjeta, `PAGINAS_DE_DIRECTORIO`, `esRutaDeDirectorio`; comentario de `lineaBase` al día.
+- `src/lib/directorios.ts` (nuevo) — `directorioDeAutores` y `anclaDeLetra`: orden por `compararPorClave`, grupos por `inicialDeClave`, lanza ante un publicado sin clave.
+- `src/lib/publicado.ts` — `Autor.ordenAlfabetico?`, `aplanarAutor` la copia; `rutasPublicadas` enumera `/autores/` siempre, tras los Autores.
+- `src/lib/atribucion.ts` — `recuentoDeCitas`, `hechosDeFilaDeAutor`, `descripcionDelDirectorioDeAutores`, `SUPERFICIES_SIN_SEMBLANZA`; la Tarjeta de Obra usa `recuentoDeCitas`.
+- `src/lib/tarjeta.ts` — `datosDeTarjetaDelDirectorioDeAutores`; `bajadaDeTarjetaDeObra` usa `recuentoDeCitas`.
+- `src/lib/marca.ts` — `tituloDelDirectorioDeAutores`.
+- `src/lib/ingreso.ts` — `SUPERFICIES_SIN_INGRESO` gana `autores.astro`; el mensaje del rechazo nombra la lista.
+- `src/pages/autores.astro`, `src/pages/tarjeta/directorio/autores.png.ts` (nuevos) — la página y su Tarjeta.
+- `src/components/LetrasDeSalto.astro`, `GrupoDeLetra.astro`, `FilaDeAutor.astro` (nuevos) — letras, grupo con rótulo destino y cierre, fila.
+- `tools/lib/avisar.ts` — `FAMILIAS_DE_RUTA` gana `directorio` (solo aviso y ensayo).
+- `tools/lib/cambios.ts` — `CAMPOS_QUE_PINTA` para `directorio` (Cita: `autor`; Autor: nombre, años y `ordenAlfabetico`); `ordenAlfabetico` sale de `CAMPOS_QUE_NO_FECHAN`; la relación declara y compone `/autores/`, también en las bajas de Cita.
+- Pruebas: `tests/unit/directorio-de-autores.test.ts` y `tests/e2e/directorio-de-autores.spec.ts` (nuevas); al día `fecha-de-cambio`, `fecha-de-cambio-build`, `indexnow`, `avisar-rango`, `superficies`, `barra-final`, `ingreso`, `ingreso-construido`, `indexacion`, `publicado`, `publicable-y-alcanzable`, `linea-base`, `medicion` (unitarias) y `seo.spec.ts`, `busqueda.spec.ts` (e2e). Exención de alcance de `/autores/` por su ruta, con comentario, en `publicable-y-alcanzable.test.ts` y `seo.spec.ts` (la quita la 26.5); exención de línea base ≥2 para «los Directorios» en `superficies.test.ts` (la quita la 26.4).
+
+**Revisión.** Parches aplicados: 0. Diferidos: 0. Rechazados: 0 (las capas son externas y esta pasada no traía hallazgos).
+
+**Revisión de seguimiento recomendada:** `false` — 0 parches (alta 0, media 0, baja 0); puntuación 3 × 0 + 1 × 0 = 0.
+
+**Verificación.**
+- `npm run build` — EXIT 0; `dist/sitemap-0.xml` contiene `https://sabiduriadebolsillo.net/autores/`; existen `dist/autores/index.html` (135 Autores, meta «135 autores, de la A a la Z, con 4420 citas publicadas.») y `dist/tarjeta/directorio/autores.png`; `integraciones/indexables.ts` no rompe.
+- `npm run check` — 0 errores, 0 avisos (8 pistas previas).
+- `npx vitest run tests/unit/directorio-de-autores.test.ts` — 23/23.
+- Puras: `fecha-de-cambio`, `indexnow`, `superficies`, `barra-final`, `ingreso`, `indexacion`, `publicado`, `linea-base` — verdes.
+- Construyen: `publicable-y-alcanzable` (34/34) e `ingreso-construido` (40/40, con `/autores/` idéntico byte a byte encendido frente a apagado y en la huella de dos construcciones).
+- `npm test` completo — 138/141 ficheros verdes a la primera; los 5 fallos (`avisar-rango` ×3, `fecha-de-cambio-build`, `medicion`) eran expectativas que no contaban `/autores/` o la familia `directorio`; corregidas, los tres ficheros vuelven a correr en verde (572/572).
+- Playwright local contra lo construido, `--project=escritorio --project=movil`: `directorio-de-autores.spec.ts`, `busqueda.spec.ts` y `accesibilidad.spec.ts` verdes (incluido «nada huérfano» con la exención); `seo.spec.ts` dio 8 tiempos agotados en los barridos de todo el sitemap bajo carga paralela (problema conocido de esos barridos) y, repetido solo con `--workers=1`, 20/20.
+- Comprobación manual a 360 × 640 (captura): seis letras por fila (A–F), nombres en serif, hechos en una línea bajo cada nombre, «Volver a las letras» tras cada grupo; `scrollWidth` 360.
+
+**Matriz.** Cada fila la cubre `tests/unit/directorio-de-autores.test.ts` (orden por clave con Cervantes, Ñ, tilde, empate por slug, sin Citas, años, «Fallecido en», sin años en la función pura, sin clave lanza, Corpus vacío por la función pura y la descripción), y las de orden, Ñ, sin Citas y «Fallecido en» también sobre `dist/`.
+
+**Riesgos residuales.**
+- La fila «Corpus vacío» se prueba en lo puro (`directorioDeAutores` sin grupos y la meta con ceros); la página solo pinta las letras si hay grupos, pero no se construye un sitio con el Corpus vacío.
+- La meta escribe las cifras sin separador de miles («4420 citas»), como las demás descripciones del sitio.
+- Las claves de orden son las propuestas por la regla «última palabra del nombre» y aún sin revisar (26.10): hoy «Publio Terencio Africano» cae en la A. Es dato del Corpus, no de esta historia.
+- El barrido de `seo.spec.ts` sobre todo el sitemap es sensible a la carga cuando corre en paralelo con otras pruebas.
+
