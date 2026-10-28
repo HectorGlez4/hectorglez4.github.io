@@ -5,7 +5,7 @@ created: '2026-10-28'
 status: 'done'
 baseline_revision: '5984c1cb33cf0cf3f913098b8351767f1362f47c'
 review_loop_iteration: 0
-followup_review_recommended: false
+followup_review_recommended: true
 context:
   - '{project-root}/_bmad-output/implementation-artifacts/epic-26-context.md'
 warnings: ['oversized']
@@ -23,6 +23,28 @@ deferred:
     location: >-
       tests/unit/obra-pagina.test.ts:615
     severity: medium
+  - summary: >-
+      `tools/indexacion.ts` reintenta un 403: el motivo normalizado de un fallo de permiso empieza por
+      «sin acceso» y la guarda de reintento mira `startsWith('permiso')`.
+    evidence: |-
+      `motivoDeFallo` (`tools/lib/indexacion.ts`) devuelve para la clase `permiso` «sin acceso a la
+      propiedad (403): …», y `tools/indexacion.ts` decide `reintentable = !motivo.startsWith('permiso') &&
+      !motivo.startsWith('cuota')`, así que un 403 se reintenta aunque el comentario de al lado diga que no.
+      Es anterior a la 26.7 (baseline 5984c1cb33cf0cf3f913098b8351767f1362f47c) y la 26.7 no toca la orden.
+    location: >-
+      tools/indexacion.ts:346
+    severity: low
+  - summary: >-
+      El informe de indexación puede enseñar más «Inspeccionadas» que «Publicadas»: el total de la entrada
+      suma solo Cita, Autor, Tema y Colección, y las inspecciones incluyen Obra (desde la 22.8) y Directorio.
+    evidence: |-
+      `lineasDeLectura` imprime `Publicadas: N` con `lectura.publicadas` (`FAMILIAS_DEL_TOTAL`) e
+      `Inspeccionadas: M` con todas las familias leídas; con un Corpus pequeño o una lectura entera M > N, y
+      `PlanDeInspeccion.publicadas` y `LecturaDeIndexacion.publicadas` se llaman igual sin medir lo mismo. La
+      discrepancia nace con la Obra en la 22.8; la 26.7 solo le suma dos URL.
+    location: >-
+      tools/lib/indexacion.ts:796
+    severity: low
 ---
 
 <intent-contract>
@@ -124,6 +146,21 @@ deferred:
 - addressed_findings:
   - none
 
+### 2026-10-28 — Review pass
+- intent_gap: 0
+- bad_spec: 0
+- patch: 7: (high 0, medium 3, low 4)
+- defer: 2: (high 0, medium 0, low 2)
+- reject: 17: (high 0, medium 2, low 15)
+- addressed_findings:
+  - `[medium]` `[patch]` `planDeInspeccion` reservaba el suelo del Directorio antes que Autor y Obra enteras, y con el presupuesto justo dejaba la Obra muestreada (78 de 80): el suelo del Directorio ya no se reserva por delante (`SIN_SUELO_POR_DELANTE`), sale del reparto de lo que queda, y una prueba con presupuesto justo fija Autor, Obra y Directorio enteros.
+  - `[medium]` `[patch]` Rastreo: el rótulo «Sin familia —la portada no es de ninguna—» contaba como portada una Obra indexable pedida (el rastreo no cuenta la Obra): rótulo, docblock de `suelta` y AGENTS.md dicen ahora «la portada, y las Obras, que el rastreo no cuenta», con prueba que pide una Obra.
+  - `[medium]` `[patch]` AGENTS.md decía que la demanda reatribuye los Directorios «como el tráfico», y no relee lo registrado (`--rellenar` solo pide los meses que faltan): ahora dice que sus ventanas anteriores a la 26.7 conservan los Directorios en `fueraDelCenso` y que la serie mezcla las dos atribuciones.
+  - `[low]` `[patch]` AGENTS.md y el docblock de `FAMILIAS_DEL_TRAFICO` prometían reatribuir «en la primera pasada»: ahora dicen que el tráfico reatribuye solo los meses que relee (los 16 sin `--meses`; con `--meses N`, esos).
+  - `[low]` `[patch]` `agregarPorFamilia` y `familiasPublicadas` tomaban por omisión el subconjunto del tráfico: el parámetro es obligatorio y cada llamada pasa el suyo.
+  - `[low]` `[patch]` Cobertura de la reatribución en la orden: la prueba de tráfico parte de una serie anterior a la 26.7 (Directorios en `fueraDelCenso`, sin `directorio`) y fija que el mes releído pasa a `directorio` y el no releído se sigue leyendo igual.
+  - `[low]` `[patch]` Cobertura del rastreo en la orden: la prueba con la Obra congelada anota `/autores/` además de `/obras/` y fija «Directorio: 2 pedidas de 2 publicadas».
+
 ## Design Notes
 
 **`publicadas` de la indexación sin `directorio`.** El total de la entrada es la cifra que se compara entre jornadas; sumarle dos URL partiría la serie en el día del merge. Es la misma decisión que tomó la 22.8 con `obra` y AGENTS.md la declara («suma solo las cuatro de siempre»). Se nombra el conjunto (p. ej. `FAMILIAS_DEL_TOTAL`) en vez de encadenar `!== 'obra' && !== 'directorio'`.
@@ -191,3 +228,40 @@ revisión, 0 rechazados. Recomendación de revisión de seguimiento: `false` (0 
 de `Armazon` sobre 4 KiB desde la 26.5), que la 26.11 tendrá que resolver antes de fusionar. Observado y
 no tocado: en `tools/indexacion.ts` un 403 se reintenta, porque el motivo normalizado empieza por «sin
 acceso» y la guarda mira `startsWith('permiso')`.
+
+### Primera pasada de revisión (2026-10-28)
+
+**Cambio.** Siete parches sobre la implementación: el suelo del Directorio ya no se reserva por delante
+de Autor y Obra enteras (`SIN_SUELO_POR_DELANTE` en `planDeInspeccion`), así que con el presupuesto
+justo el Directorio no les quita suelo; el rótulo «Sin familia» del rastreo nombra también a las Obras,
+que el rastreo no cuenta; AGENTS.md y el docblock de `FAMILIAS_DEL_TRAFICO` dicen que el tráfico solo
+reatribuye los meses que relee y que la demanda no relee lo registrado; `agregarPorFamilia` y
+`familiasPublicadas` exigen el subconjunto de la serie; y dos pruebas de orden más (serie de tráfico
+anterior a la 26.7, rastreo de `/autores/` con la Obra congelada).
+
+**Ficheros.**
+- `tools/lib/indexacion.ts` — `SIN_SUELO_POR_DELANTE` y la reserva del suelo sin el Directorio.
+- `tools/lib/rastreo.ts` — rótulo «Sin familia —la portada, y las Obras, que el rastreo no cuenta—» y docblock de `suelta`.
+- `tools/lib/trafico.ts`, `tools/trafico.ts` — subconjunto obligatorio en `agregarPorFamilia`/`familiasPublicadas`; docblock de la reatribución.
+- `AGENTS.md` — reatribución del tráfico por mes releído, la de la demanda no relee, «sin familia» del rastreo.
+- `tests/unit/indexacion.test.ts` — prueba con presupuesto justo bajo SM-11.
+- `tests/unit/rastreo.test.ts` — Obra pedida cae «sin familia» con el rótulo nuevo; la orden anota los dos Directorios con la Obra congelada.
+- `tests/unit/trafico.test.ts` — llamadas con el subconjunto; la orden parte de una serie anterior a la 26.7.
+
+**Hallazgos.** 7 parches (0 altos, 3 medios, 4 bajos), 2 aplazados (el 403 que se reintenta y
+«Inspeccionadas» por encima de «Publicadas» en el informe de indexación), 17 rechazados (forma de los
+subconjuntos por exclusión, que la spec prescribe y la prueba del total fija; ceros de `directorio` en meses
+sin página, que son la reatribución por el censo de hoy de siempre; robustez de la prueba-guarda; tablas de
+rótulos tipadas contra `Familia`; seguimiento en `sprint-status.yaml`, que lleva el orquestador; y el rojo
+previo de `obra-pagina`, ya aplazado). Recomendación de revisión de seguimiento: `true` — parches 0 altos,
+3 medios, 4 bajos; puntuación 3 × 3 + 4 = 13 ≥ 5.
+
+**Verificación.**
+- `npx vitest run` por fichero: `trafico` 41/41, `rastreo` 55/55, `indexacion` 88/88, `demanda` 44/44, `canal` 150/150, `superficies` 109/109, `tipo-de-resultado` 9/9, `indexnow` 36/36, `avisar-rango` 30/30, `fecha-de-cambio` 71/71.
+- `npx astro check` — 0 errores, 0 avisos, 8 *hints*.
+- `npm test` (desacoplado) — 6.614/6.615, `FINISHED EXIT=1`: el único rojo sigue siendo `obra-pagina.test.ts` «existe `.enlace-en-tinta`», previo y aplazado.
+- `git status --porcelain corpus/` — vacío.
+
+**Riesgos residuales.** El rojo previo de `obra-pagina.test.ts` sigue bloqueando un `npm test` verde antes de
+fusionar la épica. Las ventanas de demanda ya registradas mezclan atribuciones (documentado, no corregido:
+corregirlo exigiría releer lo registrado, que la orden no hace por diseño).
