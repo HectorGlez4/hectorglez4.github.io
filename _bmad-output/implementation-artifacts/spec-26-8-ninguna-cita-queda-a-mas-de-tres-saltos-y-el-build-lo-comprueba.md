@@ -159,6 +159,26 @@ Pasada de finalización sin hallazgos: las capas de revisión de este bucle son 
 
 Rechazados (sin cambio): el `data-pagefind-ignore` del 404 (la 404 es `servicio` y no lleva `data-pagefind-body`: Pagefind no la indexa y el atributo es inerte); diagnóstico de superficies que no son Cita (con el modelo contenido toda superficie del modelo está a ≤3 por la cabecera, así que una fuera viene con sus aristas que faltan en el mismo detalle); aristas Cita→Autor/Obra/Tema (la intención fija la lista); `rutaInterna` y la codificación (los slugs son ASCII por esquema); estilo del rótulo en tres copias (cosmético); `noscript`/`iframe` como texto crudo (especulativo, y el corte ya nombra la página); superficies no-Cita que una orden deja fuera (imposible en el modelo por la cabecera); las lecturas A–G de la auditoría de intención (implementan el `<intent-contract>`: dist para el alcance, modelo para las órdenes, diferencia antes/después, regla de Tema al publicar); dos jornadas que rompen, fila de Directorio y `<template>` en un build, Obra no indexable fuera, Corpus real en prueba (cubiertos por la misma función o por el build real); los tiempos de `seo.spec.ts` con varios trabajadores (ya anotados en 23.1, 26.3 y 26.5); y la pasada anterior sin hallazgos (esta es la revisión).
 
+### 2026-10-28 — Review pass
+- intent_gap: 0
+- bad_spec: 0
+- patch: 10 (high 0, medium 2, low 8)
+- defer: 0
+- reject: 33 (high 0, medium 1, low 32)
+- addressed_findings:
+  - `[medium]` `[patch]` Ninguna prueba hacía falta la segunda vuelta del ensayo de `darDeAltaLote` (verification-gap): caso en `alta.test.ts` con dos copias del mismo texto sin Tema publicado; con una sola vuelta la segunda se escribiría (comprobado rompiendo el bucle).
+  - `[medium]` `[patch]` Ninguna prueba llegaba a la replanificación de `aprobar` tras una Ficha que choca al escribir ni a `publicadasSinTema` (verification-gap): dos casos en `revision.test.ts` con «Col·loquis»/«Col loquis» —C detrás de B sigue en revisión intacta; C delante sale en `publicadasSinTema`— y la orden `revisar` sale con 1 y la línea «!» (comprobado quitando `replanificar()`).
+  - `[low]` `[patch]` El build no decía nada de las Citas que el modelo deja fuera y solo la lista de Autores de la portada alcanza, y las órdenes que retiran las cuentan como «ya fuera» (blind-hunter, intent-alignment): `avisoDeFueraDelModelo` en `tools/lib/alcance.ts`, `logger.warn` en `integraciones/alcance.ts` (no rompe; el Corpus real no tiene ninguna); pruebas pura y de build.
+  - `[low]` `[patch]` `fueraDeAlcanceTras` componía los modelos fuera del `try` y una ficha con nombre imposible salía por una traza (edge-case-hunter): leer y componer van en el mismo `try`; prueba pura.
+  - `[low]` `[patch]` El parte del alta daba a una entrada apartada el slug del ensayo, que otra entrada publicada podía llevar ya (blind-hunter): `rechazadasPorTema` se nombra por su texto, sin slug.
+  - `[low]` `[patch]` El recuento del parte del alta sumaba apartadas de vueltas distintas (duplicados entre sí) y podía decir «tendría 15» de una rechazada (edge-case-hunter): cada apartada lleva el recuento de la vuelta que la apartó.
+  - `[low]` `[patch]` La negativa de `revisar --aprobar` por Tema no decía cómo salir de ella ni cómo crece un Tema nuevo (blind-hunter): línea final con `--temas` o aprobar las de su Tema en la misma pasada; prueba en `revisar-cli.test.ts`.
+  - `[low]` `[patch]` AGENTS.md documentaba las negativas solo en «Known pitfalls» (blind-hunter): una frase en «Documentar una Cita ya publicada» (`--retirar`) y en «Curar una Colección» (`quitar`, `despublicar`), y el aviso del modelo en el párrafo de la puerta.
+  - `[low]` `[patch]` `publicable-y-alcanzable.test.ts` calculaba la ruta de cada HTML a su manera (blind-hunter): usa `rutaDeFicheroHtml`, la de la integración.
+  - `[low]` `[patch]` Ninguna construcción probaba la arista de una fila de Directorio (ac-auditor, blind-hunter): la construcción de la Paginación parcheada quita además el enlace de `FilaDeAutor.astro` y exige `/autores → /autor/seneca` y `/autores → /autor/epicteto`.
+
+Rechazados (sin cambio), con su razón: una página publicada sin HTML en `dist/` (toda superficie de `rutasPublicadas` es nodo del modelo y todo nodo lleva las aristas de la cabecera: una página que falta rompe la contención); las contradicciones del spec («punto fijo» del `<intent-contract>`, que no se toca y cuyo código es correcto con una pasada; la primera «Revisión» del resultado, que es el registro de la pasada de finalización; `review_loop_iteration`, que el flujo pone a 0 al reabrir; «cinco órdenes», que cuentan `autor retirar`, exenta con comentario como permite la historia); el tokenizador como puerta del build (lo fija la tarea del spec y la página se nombra desde la pasada anterior); Node (`package.json` exige `>=22.12.0` y el CI usa 22); enlaces ocultos, `aria-hidden`, `<dialog>` o `nofollow` (el `<intent-contract>` fija las tres exclusiones); `rutaInterna` y los enlaces relativos (el sitio no los emite y una arista que falta se nombra); el modelo leído de disco (el `<intent-contract>` lo exige); la `ruta` de la Colección en `quitarCitas` (sale del mismo lector); `retirarAutor` (la historia lo exime); CI y velocidad (`npm test` corre en CI con estas pruebas); superficies que no son Cita sin diagnóstico (ya rechazado: llegan con sus aristas que faltan); la lectura entera del Corpus en las órdenes que retiran (decisión documentada en la pasada anterior); las órdenes que añaden o reordenan y `tema --corpus` (ya aplazados); el 74 fijo y el corte por `<section>` de las pruebas (fallan a la vista, no en silencio); `<template>`/`<noscript>` en un build, dos jornadas que rompen, Obra no indexable fuera, `data-jornada` en el build real (cubiertos por la misma función o por la guarda de fuentes); `seo.spec.ts` con varios trabajadores (anterior, anotado en 23.1, 26.3 y 26.5); el recuento con un Tema repetido en la candidata (el plan cuenta de menos, nunca de más); la prueba del cableado de `sembrar.ts` (el predicado está probado por la orden del alta); el mensaje con recuento en la salida de `revisar` (lo prueba la biblioteca); y los criterios de la auditoría de aceptación ya cubiertos.
+
 ## Design Notes
 
 - **Por qué el modelo no lleva `/`→Autores:** la lista lo enumera así y la historia existe para que quitar esa lista (Épica 28) no deje nada fuera sin verse. Con el modelo literal, la contención no se rompe al quitarla y la puerta NFR-5 del `dist/` es la que avisa; y las órdenes ya calculan con el sitio que quedará. Medido hoy: 0 Citas fuera también sin esa arista.
@@ -258,3 +278,36 @@ Blocking condition: ninguna. El Corpus real del worktree pasa la puerta nueva (5
   - el `--corpus` de `tema quitar`/`asignar`, que la orden toma por un slug más.
 - Una colisión entre dos fichas nuevas de la misma pasada sigue pudiendo dejar escrita una Cita sin Tema. Ahora se dice y la orden sale con 1, pero lo escrito no se deshace.
 
+
+### Segunda pasada de revisión del 2026-10-28 (capas externas)
+
+**Cambio de esta pasada.** 10 parches (2 medium, 8 low), 0 aplazados nuevos, 33 rechazados; sin `intent_gap` ni `bad_spec`. Lo que cambia de comportamiento:
+
+- El build **avisa**, sin romper, de las Citas que el modelo deja a más de tres saltos y que hoy solo acerca la lista de Autores de la portada («NFR-5 en el modelo»). El Corpus real no tiene ninguna, así que su build no cambia.
+- `fueraDeAlcanceTras` compone los modelos dentro del mismo `try` que la lectura: un modelo que no se deja componer niega la orden con su motivo en vez de lanzar.
+- El parte del alta nombra las rechazadas por Tema por su texto, sin slug, y cada una con el recuento de la vuelta del ensayo que la apartó.
+- `revisar --aprobar` dice cómo publicar una rechazada por Tema (`--temas` o aprobar las de su Tema en la misma pasada).
+
+**Ficheros de esta pasada.**
+- `tools/lib/alcance.ts`: `avisoDeFueraDelModelo`; lectura y composición en el mismo `try`.
+- `integraciones/alcance.ts`: el aviso por `logger.warn`.
+- `tools/alta.ts`: `rechazadasPorTema` sin slug y con el recuento de su vuelta.
+- `tools/revisar.ts`: la línea que dice cómo salir de la negativa por Tema.
+- `AGENTS.md`: las negativas en «Documentar una Cita ya publicada» y «Curar una Colección», y el aviso del modelo.
+- `tests/unit/alcance.test.ts`: aviso del modelo y modelo que no se compone.
+- `tests/unit/alcance-construido.test.ts`: el aviso en el build sano; la fila del Directorio sin enlace en la construcción de la Paginación.
+- `tests/unit/alta.test.ts`: dos copias del mismo texto sin Tema; rechazada sin slug.
+- `tests/unit/revision.test.ts`: dos Fichas nuevas que chocan al escribir, en los dos órdenes, y la salida 1 de `revisar`.
+- `tests/unit/revisar-cli.test.ts`: la línea de cómo salir.
+- `tests/unit/publicable-y-alcanzable.test.ts`: la ruta de cada HTML con `rutaDeFicheroHtml`.
+
+**Seguimiento.** `followup_review_recommended: true`. Parches por severidad: 0 high, 2 medium, 8 low; puntuación 3×2 + 8 = 14 ≥ 5.
+
+**Verificación.**
+- `alcance` 24/24, `alcance-construido` 6/6, `dos-jornadas` 5/5, `publicable-y-alcanzable` 37/37, `alta` 20/20, `revision` 34/34, `revisar-cli` 4/4.
+- Las dos pruebas nuevas de las órdenes que publican fallan con la regresión que vigilan: el bucle del ensayo cortado tras una vuelta, y `aprobar` sin `replanificar()` tras la ficha que choca.
+- `npx astro check`: 0 errores, 0 avisos, 8 pistas anteriores.
+- `npm run build` sobre el Corpus del worktree: sale 0 con «NFR-5: 5115 superficies publicadas, todas a 3 saltos o menos de la portada; las 37398 aristas del modelo están en dist/.», y sin aviso del modelo.
+- `npm test`: 6691/6692. El único rojo es el previo de `tests/unit/obra-pagina.test.ts:618` («existe `.enlace-en-tinta`»), de la 26.7.
+
+**Riesgos residuales.** Los dos aplazados del frontmatter siguen. El aviso del modelo no rompe: hasta la Épica 28, una Cita fuera del modelo solo se ve en el registro del build.
