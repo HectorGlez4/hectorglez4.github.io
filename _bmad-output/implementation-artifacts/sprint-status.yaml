@@ -29,7 +29,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 # - Retrospective appends its action items to action_items; the status view surfaces open ones
 generated: 08-11-2026 09:00
-last_updated: 10-27-2026 20:12
+last_updated: 10-28-2026 00:29
 project: brainlySabiduria
 project_key: NOKEY
 tracking_system: file-system
@@ -408,7 +408,7 @@ development_status:
   24-5-de-una-cita-a-la-siguiente-del-libro: review  # v8-ralph 2026-10-27: la Tarjeta de Obra lleva a la siguiente Cita del libro, o del primer Tema publicado si la Obra tiene una sola; sin diferidos
   24-6-al-pie-más-de-la-misma-obra-y-más-del-autor: review  # v8-ralph 2026-10-27: al pie de la Página de Cita, «De la misma obra» (3), «Más de {Autor}» (4, sin su Obra) y Temas, con cierres «Las {n} citas de… ›»; PARA HÉCTOR: la proyección de peso (≈7.426/9.026/9.598 Citas hasta aviso/tope/1 GB, frente a ~7.790/9.440/10.030 de la 24.2), NFR-7 (LCP 1.953→2.252 ms) y el alto a 360 (1.805→3.078 px) están en el Auto Run Result de spec-24-6, para revisar los valores de la 24.2; el docblock de Chips se corrigió en la revisión
   24-7-la-obra-salta-a-dónde-leerla: review  # v8-ralph 2026-10-25: la página 1 de una Obra salta a «Dónde leer esta obra», medido en navegador; diferido para Héctor: verificar el salto en WebKit
-  24-8-una-cita-nueva-no-refecha-las-demás-páginas-de-cita: backlog
+  24-8-una-cita-nueva-no-refecha-las-demás-páginas-de-cita: review  # v8-ralph 2026-10-28 00:29 UTC: la relación de AD-27 va por campos y una Cita nueva no refecha las demás páginas de Cita; sin diferidos para Héctor
   epic-24-retrospective: optional
 
   epic-26: backlog
