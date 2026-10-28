@@ -1,6 +1,7 @@
 import { expect, test } from '@playwright/test';
 import { readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
+import { pedir, porTandas } from './ayuda/tandas.ts';
 
 /** Historia 10.1 — la Tarjeta Social, vista como la ve un validador de previsualización. */
 
@@ -76,7 +77,7 @@ test.describe('Historia 10.1 — toda Cita publicada declara su Tarjeta', () => 
 });
 
 test.describe('Historia 10.1 — ninguna imagen inaccesible', () => {
-  test('cada Tarjeta declarada existe, se sirve como PNG y mide 1200×630', async ({ request }) => {
+  test('cada Tarjeta declarada existe, se sirve como PNG y mide 1200×630', async ({ baseURL }) => {
     /*
      * Ésta es una **prueba de barrido**: recorre el Corpus entero, no una página.
      *
@@ -124,22 +125,34 @@ test.describe('Historia 10.1 — ninguna imagen inaccesible', () => {
      * comprobable sin pelearse con el build.
      */
     let revisadas = 0;
+    /*
+     * Lo que falla se anota con su camino y se afirma una vez al final, como `sinImagen` más
+     * abajo: con un `expect` por comprobación eran más de veintiséis mil, y su coste —no el de
+     * bajar las imágenes— era el que llevaba esta prueba a los 90 s (`tests/e2e/ayuda/tandas.ts`).
+     */
+    const problemas: string[] = [];
 
     const revisar = async (ruta: string) => {
       const meta = metadatos(readFileSync(join(dist, ruta, 'index.html'), 'utf8'));
       const camino = new URL(meta['og:image']).pathname;
 
-      const respuesta = await request.get(camino);
-      expect(respuesta.status(), `${camino} no se sirve`).toBe(200);
-      expect(respuesta.headers()['content-type'], camino).toContain('image/png');
+      // Con el `fetch` de Node y no el `request` de Playwright: `tests/e2e/ayuda/tandas.ts`.
+      const respuesta = await pedir(baseURL, camino);
+      const bytes = Buffer.from(await respuesta.arrayBuffer());
+      const tipo = respuesta.headers.get('content-type') ?? '';
+      const fallos: string[] = [];
+      if (respuesta.status !== 200) fallos.push(`no se sirve (${respuesta.status})`);
+      if (!tipo.includes('image/png')) fallos.push(`se sirve como «${tipo}»`);
 
-      const bytes = await respuesta.body();
       // La cabecera IHDR de un PNG trae ancho y alto en los bytes 16..24.
-      expect(bytes.subarray(1, 4).toString(), camino).toBe('PNG');
-      expect(bytes.readUInt32BE(16), camino).toBe(1200);
-      expect(bytes.readUInt32BE(20), camino).toBe(630);
+      if (bytes.length < 24 || bytes.subarray(1, 4).toString() !== 'PNG') fallos.push('no es un PNG');
+      else if (bytes.readUInt32BE(16) !== 1200 || bytes.readUInt32BE(20) !== 630) {
+        fallos.push(`mide ${bytes.readUInt32BE(16)}×${bytes.readUInt32BE(20)}`);
+      }
       // Una tarjeta de cuatro bytes sería técnicamente accesible y visualmente nada.
-      expect(bytes.length, camino).toBeGreaterThan(5000);
+      if (bytes.length <= 5000) fallos.push(`pesa ${bytes.length} bytes`);
+
+      if (fallos.length > 0) problemas.push(`${camino}: ${fallos.join(', ')}`);
       revisadas += 1;
     };
 
@@ -147,12 +160,14 @@ test.describe('Historia 10.1 — ninguna imagen inaccesible', () => {
       await Promise.all(rutas.slice(desde, desde + A_LA_VEZ).map(revisar));
     }
 
+    expect(problemas, 'Tarjetas declaradas que no se sirven como PNG de 1200×630').toEqual([]);
     expect(revisadas, 'se han quedado tarjetas sin mirar').toBe(rutas.length);
     expect(rutas.length, 'no hay tarjetas que mirar').toBeGreaterThan(100);
   });
 
   test('toda página que el sitemap anuncia declara una imagen, sea propia o de marca', async ({
     request,
+    baseURL,
   }) => {
     /*
      * La comprobación que faltaba, y por qué se escribe por el **sitemap** y no por una lista.
@@ -182,12 +197,13 @@ test.describe('Historia 10.1 — ninguna imagen inaccesible', () => {
     expect(rutas.length, 'el sitemap no anuncia nada').toBeGreaterThan(100);
 
     const sinImagen: string[] = [];
-    for (const ruta of rutas) {
-      const respuesta = await request.get(ruta);
-      if (respuesta.status() !== 200) continue;
+    // Por tandas y con el `fetch` de Node, como el barrido de arriba: `tests/e2e/ayuda/tandas.ts`.
+    await porTandas(rutas, async (ruta) => {
+      const respuesta = await pedir(baseURL, ruta);
+      if (respuesta.status !== 200) return void (await respuesta.arrayBuffer());
       const imagen = metadatos(await respuesta.text())['og:image'];
       if (!imagen?.startsWith('https://')) sinImagen.push(ruta);
-    }
+    });
 
     expect(sinImagen, 'páginas anunciadas y sin previsualización').toEqual([]);
   });
