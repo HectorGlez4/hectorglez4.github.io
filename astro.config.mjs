@@ -6,6 +6,7 @@ import { anunciableEnElSitemap } from './src/lib/superficies.ts';
 import { fechaDeLaEntrada } from './tools/lib/cambios.ts';
 import historialDelCorpus, { fechasDelSitemap } from './integraciones/historial.ts';
 import cotejoDeCitas from './integraciones/cotejo.ts';
+import clavesDeOrden from './integraciones/claves.ts';
 import formaDeLasColecciones from './integraciones/colecciones.ts';
 import fichasDeObra from './integraciones/obras.ts';
 import coberturaTipografica from './integraciones/cobertura.ts';
@@ -82,6 +83,15 @@ export default defineConfig({
      * una relación entre ficheros, que sin puerta se pierde en silencio.
      */
     formaDeLasColecciones(),
+
+    /*
+     * Historia 26.1 — todo Autor publicado tiene clave de orden, y toda clave tiene forma.
+     *
+     * La forma la juzga también el esquema, fichero a fichero; la presencia es una relación con
+     * las Citas publicadas (`autoresPublicados`) y solo se puede ver aquí. Rompe nombrando el
+     * fichero y la orden que la propone.
+     */
+    clavesDeOrden(),
 
     /*
      * Historia 22.1 — toda Obra publicada tiene Ficha de Obra (AD-25).

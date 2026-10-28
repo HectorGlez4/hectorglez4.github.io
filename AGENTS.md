@@ -77,6 +77,24 @@ npx tsx tools/extraer.ts corpus/fuentes/<documento>.txt --autor <slug>
 npx tsx tools/revisar.ts
 ```
 
+**Un Autor dado de alta en la sesión trae una clave de orden sin revisar** (Historia 26.1).
+`crear` la propone —la última palabra del `nombre`, la regla fija de `tools/lib/claves.ts`— y
+no hay bandera para teclearla; el build rompe ante un Autor publicado sin clave, nombrando su
+fichero y `npx tsx tools/autor.ts proponer-claves`. Antes de registrar, **Héctor** confirma o
+corrige las de los Autores nuevos —sobre todo las que el parte marca por tener tres palabras o
+más—, y es el único que lo hace: ningún agente corre esta orden sobre el Corpus real ni da el
+paso por hecho. Es la única orden que escribe `ordenRevisado`, y revisar no bloquea nada.
+
+```
+npx tsx tools/autor.ts clave <slug>              # confirma la clave que hay
+npx tsx tools/autor.ts clave <slug> "<clave>"    # la corrige
+npx tsx tools/autor.ts listar                    # cada clave, si está revisada, y cuántas faltan
+```
+
+Tras cada puesta al día de una rama con la principal se vuelve a correr
+`npx tsx tools/autor.ts proponer-claves`: los Autores sembrados entretanto en la principal
+llegan sin clave, y el lote es idempotente —solo escribe donde falta—.
+
 **`extraer` ya no acepta un `--autor` que el documento contradiga** (FR-23, Historia 11.1).
 El documento declara quién firma en la misma declaración literal de la que salen la obra y
 el año, así que la orden lo coteja contra el `nombre` de `corpus/autores/` y se niega, con
