@@ -12,14 +12,14 @@
  * necesita es por dónde seguir.
  */
 import Armazon from '../components/Armazon.astro';
-import BloqueDeCita from '../components/BloqueDeCita.astro';
+import CitaDelDia from '../components/CitaDelDia.astro';
 import Sostener from '../components/Sostener.astro';
 import portada from '../../corpus/portada.json';
 import { aptasParaPortada, citaDelDia, jornadaDelBuild } from '../lib/citaDelDia.ts';
 import { modelosEnRuta } from '../lib/ingreso.ts';
 import { tituloDe } from '../lib/marca.ts';
 import { conjuntoPublicable, temasPublicados } from '../lib/publicado.ts';
-import { rutaDeCita, rutaDeTema } from '../lib/superficies.ts';
+import { rutaDeTema } from '../lib/superficies.ts';
 
 const conjunto = await conjuntoPublicable();
 const temas = temasPublicados(conjunto.temas, conjunto.citas);
@@ -53,13 +53,8 @@ const autorDelDia = seleccion
 
     {
       seleccion && autorDelDia && (
-        <section class="del-dia">
-          <h2>La cita de hoy</h2>
-          <BloqueDeCita cita={seleccion.cita} autor={autorDelDia} />
-          <p class="ir" data-zona="cita-del-dia">
-            <a href={rutaDeCita(seleccion.cita.slug)}>Ver esta cita</a>
-          </p>
-        </section>
+        /* Historia 26.8 — el bloque, y su marca de lo que rota, los pinta un solo componente. */
+        <CitaDelDia cita={seleccion.cita} autor={autorDelDia} />
       )
     }
 
@@ -170,9 +165,9 @@ const autorDelDia = seleccion
     color: var(--tinta-apagada);
   }
 
-  .ir {
-    margin: calc(var(--unidad) * 3) 0 0;
-    font-size: var(--cuerpo-md);
+  /* La Cita del Día (su rótulo y «Ver esta cita» los estiliza `CitaDelDia.astro`). */
+  .pagina > :global(.del-dia) {
+    margin-top: calc(var(--unidad) * 6);
   }
 
   .chips {

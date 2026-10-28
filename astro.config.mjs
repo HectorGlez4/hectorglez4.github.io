@@ -12,6 +12,7 @@ import fichasDeObra from './integraciones/obras.ts';
 import coberturaTipografica from './integraciones/cobertura.ts';
 import rutasIndexablesDelCorpus from './integraciones/indexables.ts';
 import tamañoDelDirectorioDeObras from './integraciones/directorios.ts';
+import alcanceDesdeLaPortada from './integraciones/alcance.ts';
 
 // El dominio no se escribe aquí: sale de `public/CNAME`, el fichero que el hospedaje
 // exige, a través de `src/lib/dominio.ts`. La canónica de cada página y el sitemap lo
@@ -216,6 +217,17 @@ export default defineConfig({
      * de arriba acaba de escribir en ese mismo gancho.
      */
     rutasIndexablesDelCorpus(),
+
+    /*
+     * Historia 26.8 — NFR-5 con puerta: ninguna superficie de `rutasPublicadas` queda a más de
+     * `MAX_SALTOS_DESDE_LA_PORTADA` saltos de la portada, y el `dist/` contiene el grafo del
+     * modelo (`grafoDelModelo`).
+     *
+     * En `astro:build:done`, sobre el grafo de enlaces del `dist/` real sin lo que rota con la
+     * jornada (`data-jornada`, `<template>`, `<noscript>`). Rompe nombrando cada superficie fuera
+     * —con el Tema que cayó bajo su umbral— y cada arista que falta; si no, escribe una línea.
+     */
+    alcanceDesdeLaPortada(),
 
     /*
      * Historia 26.4 — cuánto pesa `/obras/`, que es una sola página con todas las Obras.

@@ -104,9 +104,9 @@ const CON_FIJACIONES = {
 
 /** La sección de una jornada dentro del lote, desde su marca hasta la de la siguiente. */
 function seccionDe(html: string, jornada: string): string {
-  const desde = html.indexOf(`data-jornada="${jornada}"`);
+  const desde = html.indexOf(`data-dia-del-lote="${jornada}"`);
   if (desde === -1) return '';
-  const siguiente = html.indexOf('data-jornada="', desde + 1);
+  const siguiente = html.indexOf('data-dia-del-lote="', desde + 1);
   return siguiente === -1 ? html.slice(desde) : html.slice(desde, siguiente);
 }
 
@@ -184,15 +184,15 @@ describe('Historia 13.1 — lo compuesto por adelantado es lo que sale el día q
   it('una clave que no es una jornada no tumba el build ni compone nada', () => {
     // Que la construcción de `beforeAll` haya salido con 0 teniendo `manana:` dentro **es**
     // la mitad de esta prueba; la otra es que esa clave no produjo ninguna sección.
-    expect(lote).not.toContain('data-jornada="manana"');
-    expect(lote).toContain(`data-jornada="${MANANA}"`);
+    expect(lote).not.toContain('data-dia-del-lote="manana"');
+    expect(lote).toContain(`data-dia-del-lote="${MANANA}"`);
   });
 
   it('compone una sección por jornada fijada por delante, y ninguna de las pasadas', () => {
     for (const jornada of [MANANA, CON_LARGA, MUDA]) {
-      expect(lote, jornada).toContain(`data-jornada="${jornada}"`);
+      expect(lote, jornada).toContain(`data-dia-del-lote="${jornada}"`);
     }
-    expect(lote).not.toContain(`data-jornada="${PASADA}"`);
+    expect(lote).not.toContain(`data-dia-del-lote="${PASADA}"`);
   });
 
   it('la jornada de una Cita larga trae el aviso y la alternativa, como en el Kit', () => {
@@ -282,7 +282,7 @@ describe('Historia 13.1 — sin ninguna jornada fijada, que es el estado de hoy'
     // Lo primero es que el sitio sigue publicando: quien abre esto en el móvil necesita
     // saber eso antes que ninguna orden de terminal.
     expect(html).toMatch(/sale la Cita del Día que le toca por rotación/);
-    expect(html).not.toContain('data-jornada=');
+    expect(html).not.toContain('data-dia-del-lote=');
   });
 
   it('y remite al Kit, que es donde sí hay algo que publicar hoy', async () => {

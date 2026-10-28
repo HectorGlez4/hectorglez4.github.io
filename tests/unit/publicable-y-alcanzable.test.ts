@@ -12,7 +12,9 @@ import {
   limpiar,
   paginaConstruida,
 } from './ayuda/construir.js';
-import { superficiesInalcanzables } from '../../src/lib/publicado.ts';
+import { rutasPublicadas, superficiesInalcanzables } from '../../src/lib/publicado.ts';
+import { conjuntoDelCorpus, grafoDeDist } from '../../tools/lib/alcance.ts';
+import { rutasDelCorpus } from '../../tools/lib/corpus.ts';
 import {
   SUPERFICIES,
   anunciableEnElSitemap,
@@ -260,11 +262,13 @@ const CORPUS_COMPLETO: Record<string, string> = {
 
 describe('Historia 12.1 — sobre un sitio construido de verdad', () => {
   let proyecto: string;
+  let salidaDelBuild: string;
 
   beforeAll(async () => {
     const resultado = await construirConCorpus(CORPUS_COMPLETO);
     expect(resultado.codigo, resultado.salida).toBe(0);
     proyecto = resultado.proyecto;
+    salidaDelBuild = resultado.salida;
     /*
      * Historia 22.4 — `caracterDe` y el filtro del sitemap preguntan por la Obra a la lista de
      * rutas indexables, y en este proceso no la ha declarado nadie. Se declara la que FR-52 da
@@ -321,20 +325,40 @@ describe('Historia 12.1 — sobre un sitio construido de verdad', () => {
   }
 
   describe('nada publicado queda huérfano', () => {
-    it('las superficies publicables del sitio se alcanzan desde la portada', async () => {
-      const enlaces = await sitioConstruido();
-      const publicables = [...enlaces.keys()].filter((ruta) => caracterDe(ruta) === 'producto');
+    it('las superficies de rutasPublicadas se alcanzan desde la portada, y el build lo dice', async () => {
+      /*
+       * Historia 26.8 — lo publicable es `rutasPublicadas`, también la Obra que no se indexa, y
+       * no `caracterDe(ruta) === 'producto'`. El grafo es el que lee la puerta del build
+       * (`grafoDeDist`): sin lo que rota con la jornada, `<template>` ni `<noscript>`.
+       */
+      const conjunto = await conjuntoDelCorpus(rutasDelCorpus(join(proyecto, 'corpus')));
+      const publicadas = [...new Set(rutasPublicadas(conjunto).map((r) => rutaNormalizada(r)))];
+      const dist = join(proyecto, 'dist');
+      const paginas = await Promise.all(
+        (await readdir(dist, { recursive: true, withFileTypes: true }))
+          .filter((e) => e.isFile() && e.name.endsWith('.html'))
+          .map(async (e) => {
+            const relativa = join(e.parentPath, e.name).slice(dist.length + 1).replace(/\.html$/, '');
+            const ruta = relativa === 'index' ? '/' : `/${relativa.replace(/\/?index$/, '')}`;
+            return { ruta, html: await readFile(join(e.parentPath, e.name), 'utf8') };
+          }),
+      );
+      const enlaces = grafoDeDist(paginas);
 
       // Sin esto la comprobación pasaría sobre un sitio vacío sin decir nada.
-      expect(publicables.length).toBeGreaterThan(2);
+      expect(publicadas.length).toBeGreaterThan(2);
+      expect(publicadas).toContain(OBRA_NO_INDEXABLE);
+      expect(caracterDe(OBRA_NO_INDEXABLE)).not.toBe('producto');
       /*
        * Historia 26.5 — los Directorios entran sin exención: la cabecera los enlaza desde toda
        * página. La exención por ruta que la 26.3 y la 26.4 dejaron aquí ya no existe.
        */
       for (const directorio of [rutaDelDirectorioDeAutores(), rutaDelDirectorioDeObras()]) {
-        expect(publicables).toContain(rutaNormalizada(directorio));
+        expect(publicadas).toContain(rutaNormalizada(directorio));
       }
-      expect(superficiesInalcanzables(publicables, enlaces)).toEqual([]);
+      expect(superficiesInalcanzables(publicadas, enlaces)).toEqual([]);
+      // Y la puerta del build midió lo mismo y lo dejó escrito.
+      expect(salidaDelBuild).toContain(`NFR-5: ${publicadas.length} superficies publicadas, todas a 3 saltos`);
     });
 
     it('toda ruta construida tiene declaración: el build no genera nada anónimo', async () => {

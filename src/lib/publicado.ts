@@ -18,6 +18,7 @@
 
 import type { CollectionEntry } from 'astro:content';
 import {
+  CITAS_POR_PAGINA,
   MAX_CITAS_DE_LA_MISMA_OBRA,
   MAX_CITAS_RELACIONADAS,
   MAX_SALTOS_DESDE_LA_PORTADA,
@@ -46,7 +47,10 @@ import {
   rutaDeColeccion,
   rutaDelDirectorioDeAutores,
   rutaDelDirectorioDeObras,
+  rutaDeLaBusqueda,
+  rutaDeLaPortada,
   rutaDeTema,
+  rutaNormalizada,
 } from './superficies.ts';
 
 // AD-25 — el orden de la Lista de Obras es de `src/lib/obras.ts`; se reexporta junto a
@@ -924,6 +928,127 @@ export function superficiesInalcanzables(
   }
 
   return publicadas.filter((ruta) => !visitadas.has(ruta));
+}
+
+/**
+ * El grafo de enlaces del **modelo** — Historia 26.8, AD-11.
+ *
+ * Qué enlaces tiene que llevar el sitio construido, compuesto con **las mismas enumeraciones que
+ * pintan las páginas** —`temasPublicados` y `citasDeTema`, `conjunto.colecciones[].citas`,
+ * `autoresPublicados`, `citasDeAutor` y `obrasDelAutor`, `obrasPublicadas` y las Citas de cada
+ * Obra en el orden del libro—, paginadas por `CITAS_POR_PAGINA` con los constructores de ruta de
+ * `src/lib/superficies.ts`. Es la única función que lo compone, y la usan las dos puertas de
+ * NFR-5: el build exige que el grafo de `dist/` **contenga** este (`integraciones/alcance.ts`), y
+ * las órdenes que retiran comparan este grafo antes y después de escribir (`tools/lib/alcance.ts`).
+ *
+ * Las aristas, todas con la ruta normalizada (`rutaNormalizada`, sin barra final):
+ *
+ *   · la portada → cada Tema publicado y cada Colección publicada (su página 1);
+ *   · la cabecera de **todo** nodo → la portada, `/autores/`, `/obras/` y `/buscar/`;
+ *   · cada página k de un listado → cada página j ≠ k del mismo listado (la Paginación pinta
+ *     todos los números) y → las Citas de su tramo;
+ *   · la página 1 de un Autor → sus Obras (la Lista de Obras va solo en la página 1);
+ *   · `/autores/` → todo Autor publicado; `/obras/` → toda Obra publicada.
+ *
+ * **Ni la portada → los Autores** —la lista de la portada se va en la Épica 28, y esta historia
+ * existe para que quitarla no deje nada fuera sin verse— **ni Cita → Cita**: las Rutas de salida
+ * de una Cita dependen de sus vecinas y no las promete ninguna enumeración. Lo que el sitio
+ * enlace de más no estorba: el modelo es lo que **tiene** que estar.
+ *
+ * Pura (AD-5): las Citas de cada Obra llegan ya ordenadas (`citasPorObra`), por nombre de ficha.
+ */
+export function grafoDelModelo(
+  conjunto: ConjuntoPublicable,
+  citasDeCadaObra: ReadonlyMap<string, readonly Pick<Cita, 'slug'>[]>,
+): Map<string, string[]> {
+  const grafo = new Map<string, Set<string>>();
+  const enlazar = (origen: string, destino: string) => {
+    const desde = rutaNormalizada(origen);
+    let salientes = grafo.get(desde);
+    if (salientes === undefined) {
+      salientes = new Set();
+      grafo.set(desde, salientes);
+    }
+    salientes.add(rutaNormalizada(destino));
+  };
+  const nodo = (ruta: string) => {
+    if (!grafo.has(rutaNormalizada(ruta))) grafo.set(rutaNormalizada(ruta), new Set());
+  };
+
+  /** Un listado paginado: sus páginas se enlazan entre sí y cada una con las Citas de su tramo. */
+  const listado = (rutaDePagina: (n: number) => string, citas: readonly Pick<Cita, 'slug'>[]) => {
+    const paginas = Math.max(1, Math.ceil(citas.length / CITAS_POR_PAGINA));
+    for (let k = 1; k <= paginas; k += 1) {
+      nodo(rutaDePagina(k));
+      for (let j = 1; j <= paginas; j += 1) if (j !== k) enlazar(rutaDePagina(k), rutaDePagina(j));
+      for (const cita of citas.slice((k - 1) * CITAS_POR_PAGINA, k * CITAS_POR_PAGINA)) {
+        enlazar(rutaDePagina(k), rutaDeCita(cita.slug));
+      }
+    }
+  };
+
+  const portada = rutaDeLaPortada();
+  nodo(portada);
+  nodo(rutaDelDirectorioDeAutores());
+  nodo(rutaDelDirectorioDeObras());
+
+  const temas = temasPublicados(conjunto.temas, conjunto.citas);
+  for (const tema of temas) {
+    enlazar(portada, rutaDeTema(tema.slug));
+    listado((n) => rutaDeTema(tema.slug, n), citasDeTema(conjunto.citas, tema.slug));
+  }
+  for (const coleccion of conjunto.colecciones) {
+    enlazar(portada, rutaDeColeccion(coleccion.slug));
+    listado((n) => rutaDeColeccion(coleccion.slug, n), coleccion.citas);
+  }
+  for (const autor of autoresPublicados(conjunto.autores, conjunto.citas)) {
+    enlazar(rutaDelDirectorioDeAutores(), rutaDeAutor(autor.slug));
+    listado((n) => rutaDeAutor(autor.slug, n), citasDeAutor(conjunto.citas, autor.slug));
+    for (const obra of obrasDelAutor(conjunto.citas, autor.slug).obras) {
+      enlazar(rutaDeAutor(autor.slug), rutaDeLaObra(obra));
+    }
+  }
+  for (const obra of obrasPublicadas(conjunto)) {
+    enlazar(rutaDelDirectorioDeObras(), rutaDeLaObra(obra));
+    listado((n) => rutaDeLaObra(obra, n), citasDeCadaObra.get(obra.nombre) ?? []);
+  }
+  for (const cita of conjunto.citas) nodo(rutaDeCita(cita.slug));
+
+  // La cabecera, en toda página del modelo.
+  const cabecera = [portada, rutaDelDirectorioDeAutores(), rutaDelDirectorioDeObras(), rutaDeLaBusqueda()];
+  for (const origen of [...grafo.keys()]) for (const destino of cabecera) enlazar(origen, destino);
+
+  return new Map([...grafo].map(([origen, destinos]) => [origen, [...destinos]]));
+}
+
+/** Un Tema declarado por una Cita que no se publica, con cuántas Citas publicadas tiene. */
+export interface TemaBajoUmbral {
+  slug: string;
+  nombre: string;
+  citas: number;
+}
+
+/**
+ * Los Temas que una Cita declara y que **no** se publican, con su recuento — Historia 26.8.
+ *
+ * Es lo que la puerta de NFR-5 dice al nombrar una Cita fuera de alcance: casi siempre está
+ * fuera porque su Tema cayó bajo `MIN_CITAS_POR_TEMA`, y el número dice cuánto le falta. Cuenta
+ * sobre `citas` —las publicadas del conjunto que se juzga— con la misma regla que
+ * `temasPublicados`, en el orden en que la Cita los declara. Un Tema que no existe en `temas` se
+ * nombra por su slug.
+ */
+export function temasBajoUmbralDe(
+  cita: Pick<Cita, 'temas'>,
+  citas: readonly Pick<Cita, 'temas'>[],
+  temas: readonly Tema[],
+): TemaBajoUmbral[] {
+  const nombres = new Map(temas.map((t) => [t.slug, t.nombre]));
+  return [...new Set(cita.temas)].flatMap((slug) => {
+    const recuento = citas.filter((c) => c.temas.includes(slug)).length;
+    return nombres.has(slug) && recuento >= MIN_CITAS_POR_TEMA
+      ? []
+      : [{ slug, nombre: nombres.get(slug) ?? slug, citas: recuento }];
+  });
 }
 
 /**

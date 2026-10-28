@@ -39,12 +39,8 @@
  */
 
 import { DOMINIO } from '../src/lib/dominio.ts';
-import {
-  coleccionesPublicadas,
-  type Cita,
-  type Coleccion,
-  type ConjuntoPublicable,
-} from '../src/lib/publicado.ts';
+import type { ConjuntoPublicable } from '../src/lib/publicado.ts';
+import { conjuntoDelCorpus } from './lib/alcance.ts';
 import {
   MOTIVOS_SIN_CREDENCIALES,
   PETICIONES_POR_MINUTO,
@@ -70,20 +66,10 @@ import {
   type LecturaDeIndexacion,
   type PlanDeInspeccion,
 } from './lib/indexacion.ts';
-import { colgarObras } from '../src/lib/obras.ts';
 import { SM11_VIGENTE } from '../src/lib/umbrales.ts';
 import type { ListaDeObras } from './lib/avisar.ts';
 import { obrasDelSitemap } from './avisar.ts';
-import {
-  leerAutores,
-  leerCitas,
-  leerColecciones,
-  leerFichasDeObra,
-  leerTemas,
-  registrarLecturaDeIndexacion,
-  rutasDelCorpus,
-  type Rutas,
-} from './lib/corpus.ts';
+import { registrarLecturaDeIndexacion, rutasDelCorpus } from './lib/corpus.ts';
 import { motivosDeArgumentosNoReconocidos, opcion, raizDeCorpusDe } from './lib/cli.ts';
 
 const USO = [
@@ -203,34 +189,10 @@ export async function inspectorDeSearchConsole(credencial: Credencial): Promise<
 }
 
 /**
- * El conjunto publicable leído del corpus, del mismo dueño que lo publica (AD-11).
- *
- * Los `as unknown as` son los mismos que usan `tools/huecos.ts` y `tools/objetivo.ts`: lo
- * que sale del disco es la forma admisible del corpus y lo que consume el dueño del
- * conjunto publicable es la forma plana, y las dos coinciden en los campos que aquí se
- * miran. Lo que **no** se hace es reimplementar ningún umbral: quién se publica lo decide
- * `src/lib/publicado.ts` y nadie más.
+ * El conjunto publicable leído del corpus vive desde la Historia 26.8 en `tools/lib/alcance.ts`,
+ * que lo comparte con la puerta de NFR-5; se reexporta aquí para sus importadores de siempre.
  */
-export async function conjuntoDelCorpus(rutas: Rutas): Promise<ConjuntoPublicable> {
-  /*
-   * Historia 22.4 — con su Obra colgada, como en `conjuntoPublicable`: sin ella,
-   * `rutasPublicadas` no enumeraría ninguna Página de Obra y `rastreo` y `canal` las
-   * rechazarían todas como inexistentes.
-   */
-  const citas = colgarObras(
-    (await leerCitas(rutas.citas)) as unknown as Cita[],
-    await leerFichasDeObra(rutas),
-  );
-  return {
-    citas,
-    autores: (await leerAutores(rutas)) as unknown as ConjuntoPublicable['autores'],
-    temas: await leerTemas(rutas),
-    colecciones: coleccionesPublicadas(
-      (await leerColecciones(rutas)) as unknown as Coleccion[],
-      citas,
-    ),
-  };
-}
+export { conjuntoDelCorpus };
 
 /**
  * La lectura entera: plan, peticiones y agregación. **No escribe nada.**
