@@ -87,8 +87,19 @@ export default defineConfig({
        * devuelve `undefined`, obedece. **Se reverifica al subir de versión**: si Astro dejara de
        * consultarla, el guion volvería a ir en línea, y lo diría `tests/unit/medicion.test.ts`,
        * que exige que ningún `<script type="module">` de `dist/` lleve cuerpo.
+       *
+       * NFR-7 — la hoja del Armazón va siempre en línea. Es la que trae los tokens, el cuerpo,
+       * la cabecera y el pie: toda página la necesita para su primera pintura. Cabía en los
+       * 4 KiB por omisión hasta que la cabecera de la 26.5 la llevó a 4.176 bytes, y entonces
+       * salió a `/_astro/Armazon.*.css` y toda página —la portada incluida, que no pedía
+       * ninguna hoja— ganó una petición que bloquea el pintado. En línea vuelve a ser lo que
+       * era, y el peso de `dist/` el que midió la 24.2. Las hojas de cada página siguen la
+       * regla por omisión. Lo vigila `tests/unit/obra-pagina.test.ts` («existe
+       * `.enlace-en-tinta`»), que lee la regla en los `<style>` de la página: si el trozo
+       * cambiara de nombre, volvería a salir a fichero y esa prueba se pondría en rojo.
        */
-      assetsInlineLimit: (fichero) => (fichero.endsWith('.js') ? false : undefined),
+      assetsInlineLimit: (fichero) =>
+        fichero.endsWith('.js') ? false : /(^|\/)Armazon\.[\w-]+\.css$/.test(fichero) ? true : undefined,
     },
   },
   integrations: [
