@@ -2,7 +2,8 @@
 title: 'Todas las Obras, bajo su Autor'
 type: 'feature'
 created: '2026-10-28'
-status: 'ready-for-dev'
+status: 'done'
+baseline_revision: 'bad5a77126a29981612864abbe8d0aa674391743'
 review_loop_iteration: 0
 followup_review_recommended: false
 context:
@@ -113,6 +114,17 @@ deferred: []
 
 ## Review Triage Log
 
+### 2026-10-28 — Review pass
+- intent_gap: 0
+- bad_spec: 0
+- patch: 0
+- defer: 0
+- reject: 0
+- addressed_findings:
+  - none
+
+Las cinco capas (blind-hunter, edge-case-hunter, verification-gap, intent-alignment, ac-auditor) son externas en el bucle v8-ralph y no traían hallazgos en esta pasada: la revisión independiente viene después.
+
 ## Design Notes
 
 **Columnas de la tabla, no familias.** `CAMPOS_QUE_PINTA` se indexaba por `FamiliaDeRuta`, y los dos Directorios son la misma familia (`directorio`, la que medirá la 26.7) pero pintan cosas distintas: `/autores/` los años, `/obras/` no; `/obras/` el título de ficha y la Procedencia, `/autores/` no. La familia sigue siendo `directorio` para el aviso y el ensayo; solo la columna de la tabla se desdobla. `formas` de una ficha entra porque decide qué Citas cuentan en cada Obra (el recuento); `procedencia` de una Cita, porque da su Obra y el año.
@@ -144,5 +156,38 @@ deferred: []
 
 ## Auto Run Result
 
-Status: ready-for-dev
-Blocking condition: ninguna. Planificación terminada y detenida tras planificar, como pedía la invocación; la implementación empieza en el paso 3 de `bmad-build-auto`.
+Status: done
+Blocking condition: ninguna.
+
+**Resumen.** `/obras/` es el segundo Directorio: declarado producto en `src/lib/superficies.ts` (`obras.astro` en `PAGINAS_DE_DIRECTORIO`, línea base «los Directorios», sin 2+), con toda Obra de `obrasPublicadas` una vez bajo su Autor —también las `noindex` y con congelación, sin marca que las distinga—, los Autores en el orden del Directorio de Autores (`agruparPorClave`, extraído de `directorioDeAutores`) y sus Obras en el de su Página de Autor (`obrasDelAutor`, que ordena con `ordenDeLaListaDeObras` de `src/lib/obras.ts`). La Lista de Obras enseña la unidad también en la Página de Autor. El código va en `e3ebafb838`.
+
+**Ficheros.**
+- `src/lib/obras.ts` — `ordenDeLaListaDeObras`, único dueño del orden (AD-25).
+- `src/lib/publicado.ts` — `obrasDelAutor` lo usa y se reexporta; `rutasPublicadas` enumera `/obras/` tras `/autores/`.
+- `src/lib/superficies.ts` — declaración «el Directorio de Obras», `rutaDelDirectorioDeObras`, `TARJETA_DEL_DIRECTORIO_DE_OBRAS`.
+- `src/lib/directorios.ts` — `agruparPorClave` común; `directorioDeObras`.
+- `src/lib/atribucion.ts` — `recuentoDeObras`, `descripcionDelDirectorioDeObras`, `SUPERFICIES_SIN_SEMBLANZA` con `/obras/` y su Tarjeta.
+- `src/lib/marca.ts`, `src/lib/tarjeta.ts`, `src/pages/tarjeta/directorio/obras.png.ts` — nombre, título y Tarjeta Social «Obras» / «{k} obras».
+- `src/components/ListaDeObras.astro` — solo la lista, con «N citas» visible y el recuento oído una vez; sin `nowrap`, el recuento baja de línea.
+- `src/pages/autor/[slug]/[...page].astro` — recibe la sección, el rótulo y la línea «sin obra documentada».
+- `src/pages/obras.astro` — la página.
+- `src/lib/umbrales.ts`, `integraciones/directorios.ts`, `astro.config.mjs` — `MAX_BYTES_DEL_DIRECTORIO_DE_OBRAS` = 290 KiB (230.455 bytes medidos + 25 %, redondeado a 10 KiB) y el aviso en `astro:build:done`, que nunca rompe.
+- `tools/lib/cambios.ts` — columnas `directorioDeAutores` / `directorioDeObras`; `/obras/` compuesta por Citas, fichas y Autores con Obras; bajas de Cita.
+- `AGENTS.md`, `tools/lib/rastreo.ts`, `tools/lib/canal.ts` — «los Directorios (`/autores/` y `/obras/`)».
+- Pruebas: `tests/unit/directorio-de-obras.test.ts` y `tests/e2e/directorio-de-obras.spec.ts` nuevas; al día las del Code Map. `tests/e2e/accesibilidad.spec.ts` pone `test.slow()` en la prueba de foco del barrido (tabula ~700 enfocables de `/obras/`; 29,4 s en escritorio y >30 s en móvil sin ello): presupuesto de prueba, no umbral de producto.
+
+**Hallazgos de revisión.** Ninguno en esta pasada (capas externas sin hallazgos): 0 parches, 0 aplazados, 0 rechazados. Recomendación de revisión de seguimiento: `false` (0 parches; puntuación 0).
+
+**Verificación.**
+- `npx vitest run tests/unit/directorio-de-obras.test.ts tests/unit/lista-de-obras.test.ts` — 49 verdes.
+- `npx vitest run` de fecha-de-cambio, indexnow, superficies, barra-final, ingreso, indexacion, publicado, rastreo, trafico, demanda, linea-base y avisar-rango — 655 verdes.
+- `npx vitest run` de directorio-de-autores, publicable-y-alcanzable, ingreso-construido, medicion y fecha-de-cambio-build — 647 verdes.
+- `npm run build` — sale 0; «El Directorio de Obras pesa 230455 bytes, dentro de MAX_BYTES_DEL_DIRECTORIO_DE_OBRAS (296960)», sin aviso; «517 Obras publicadas, 277 indexables» y coincidencia de sitemap/`noindex`/Pagefind; `dist/sitemap-0.xml` trae `/obras/`; existen `dist/obras/index.html` y `dist/tarjeta/directorio/obras.png`.
+- `npm run check` — 0 errores, 0 avisos.
+- `npm test` completo — 142 ficheros, 6.530 pruebas verdes (811 s).
+- Playwright local `--project=escritorio --project=movil`: directorio-de-obras, directorio-de-autores, busqueda, seo (`--workers=1`, 20 verdes) y, tras corregir la lectura del recuento visible y el presupuesto de la prueba de foco, pagina-de-autor y accesibilidad (174 verdes; `/obras` pasa axe WCAG 2.2 AA en los dos proyectos).
+- Comprobación manual a 360 × 640 sobre lo construido: letras en rejilla, Autor en serif subrayado, Obras con «N citas» a la derecha, «Volver a las letras» tras cada grupo; `/autor/miguel-de-unamuno/` con la unidad visible.
+
+**Matriz.** Cada fila la cubre `tests/unit/directorio-de-obras.test.ts` (puro y sobre `dist/`, con una segunda construcción congelada), y la de la Página de Autor `tests/unit/lista-de-obras.test.ts`; todas corrieron en `npm test`.
+
+**Riesgos residuales.** `/obras/` crece con cada Obra: hoy 230 KB, el aviso salta hacia las ~660 Obras. La prueba de foco del barrido tarda ~30 s y vive de `test.slow()`. Las exenciones de alcance por ruta (`/autores/`, `/obras/`) siguen hasta la 26.5.
