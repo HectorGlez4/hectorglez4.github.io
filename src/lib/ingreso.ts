@@ -36,6 +36,7 @@
  */
 
 import {
+  PAGINAS_DE_DIRECTORIO,
   SUPERFICIES,
   esServicioPorForma,
   rutaNormalizada,
@@ -197,13 +198,14 @@ export const MODELOS_VEDADOS_EN_LECTURA: readonly IdDeModelo[] = [
  *
  * El Directorio de Autores (Historia 26.3, AD-20, FR-55, UX-DR110): lista entidades y no es
  * superficie de lectura, y se construye idéntico byte a byte con todos los Modelos encendidos o
- * apagados. La 26.4 añade `obras.astro`.
+ * apagados. Entran todos por `PAGINAS_DE_DIRECTORIO` (`src/lib/superficies.ts`), su único dueño:
+ * la 26.4 añade `obras.astro` allí y queda sin Modelos aquí sin tocar esta lista.
  *
  * Su condición —«no aloja ningún Modelo»— se escribe aquí, como regla de la declaración, y no en
  * la página. Se nombra por fichero, como `admitidoEn`, y por eso cubre todas las formas de cada
  * superficie: la página 1 y las 2+ (que además quedan fuera por forma).
  */
-export const SUPERFICIES_SIN_INGRESO: readonly string[] = ['autor/[slug]/[...page].astro', 'autores.astro'];
+export const SUPERFICIES_SIN_INGRESO: readonly string[] = ['autor/[slug]/[...page].astro', ...PAGINAS_DE_DIRECTORIO];
 
 /**
  * Si un fichero de página es la Página de Obra — la única superficie que puede admitir la

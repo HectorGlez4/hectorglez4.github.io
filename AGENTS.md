@@ -225,7 +225,9 @@ total agrega por propiedad (la suma puede quedar por encima).
 La familia de una URL sale **del censo de lo publicado**, nunca del prefijo de la ruta. Lo que no
 casa —la portada, páginas 2+, Citas retiradas, otro host como `www.`— se suma en
 `fueraDelCenso`, que se escribe y se informa: nunca se descarta en silencio. La familia Obra no
-se cuenta todavía, ni una familia sin URL publicadas. **Cada pasada reatribuye los meses
+se cuenta todavía, ni una familia sin URL publicadas. El Directorio de Autores (`/autores/`,
+Historia 26.3) tampoco tiene familia hasta la 26.7: en tráfico y demanda cae en `fueraDelCenso`,
+en el rastreo sale «sin familia» como la portada, y no es un fallo. **Cada pasada reatribuye los meses
 pasados con el censo de hoy**: una Cita retirada desde entonces pasa a `fueraDelCenso`.
 
 **Ausencia antes que cero.** Un mes cuya consulta falla no se escribe y conserva su entrada

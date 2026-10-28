@@ -19,7 +19,7 @@
 import { PALETA, SANS, SERIF, escapar, repartirEnLineas } from './lienzo.ts';
 import { MARCA } from './marca.ts';
 import { tramoDe } from './tramos.ts';
-import { añoLegible, añosDeAutor, recuentoDeCitas, recuentoDeDocumentadas } from './atribucion.ts';
+import { añoLegible, añosDeAutor, recuentoDeAutores, recuentoDeCitas, recuentoDeDocumentadas } from './atribucion.ts';
 import { citasDocumentadasDeAutor, type Autor, type Cita } from './publicado.ts';
 import type { ObraResuelta } from './obras.ts';
 
@@ -303,12 +303,13 @@ export function datosDeTarjetaDeObra(
  *
  * La de listado con «Autores» en la familia de la interfaz —no es nombre de Autor, Tema ni
  * Colección— y un solo hecho del Corpus: cuántos Autores lista, con su unidad («1 autor» en
- * singular). Sin bajada ni prosa, y sin ninguna semblanza: recibe la cifra y nada más.
+ * singular, por `recuentoDeAutores`, como la meta). Sin bajada ni prosa, y sin ninguna semblanza:
+ * recibe la cifra y nada más.
  */
 export function datosDeTarjetaDelDirectorioDeAutores(autores: number): DatosDeTarjetaDeListado {
   return {
     titulo: 'Autores',
-    hechos: [autores === 1 ? '1 autor' : `${autores} autores`],
+    hechos: [recuentoDeAutores(autores)],
     familiaDelTitulo: 'sans',
   };
 }

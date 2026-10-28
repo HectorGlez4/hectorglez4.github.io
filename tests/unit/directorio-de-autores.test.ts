@@ -7,9 +7,11 @@ import {
   SUPERFICIES_DE_LA_SEMBLANZA,
   descripcionDelDirectorioDeAutores,
   hechosDeFilaDeAutor,
+  recuentoDeAutores,
   recuentoDeCitas,
 } from '../../src/lib/atribucion.ts';
-import { datosDeTarjetaDelDirectorioDeAutores } from '../../src/lib/tarjeta.ts';
+import sharp from 'sharp';
+import { datosDeTarjetaDelDirectorioDeAutores, svgDeTarjetaDeListado } from '../../src/lib/tarjeta.ts';
 import { tituloDelDirectorioDeAutores } from '../../src/lib/marca.ts';
 import {
   TARJETA_DEL_DIRECTORIO_DE_AUTORES,
@@ -146,12 +148,15 @@ describe('Historia 26.3 — el orden y los grupos del Directorio de Autores', ()
 
   it('con el Corpus vacío no hay letras ni grupos, y la descripción dice ceros', () => {
     expect(directorioDeAutores([], [])).toEqual({ grupos: [], autores: 0, citas: 0 });
-    expect(descripcionDelDirectorioDeAutores([], [])).toBe('0 autores, de la A a la Z, con 0 citas publicadas.');
+    expect(descripcionDelDirectorioDeAutores(directorioDeAutores([], []))).toBe('0 autores, de la A a la Z, con 0 citas publicadas.');
   });
 });
 
 describe('Historia 26.3 — los textos del Directorio de Autores', () => {
-  it('el recuento de Citas, con su singular', () => {
+  it('el recuento de Citas y el de Autores, con sus singulares', () => {
+    expect(recuentoDeAutores(1)).toBe('1 autor');
+    expect(recuentoDeAutores(0)).toBe('0 autores');
+    expect(recuentoDeAutores(135)).toBe('135 autores');
     expect(recuentoDeCitas(1)).toBe('1 cita');
     expect(recuentoDeCitas(0)).toBe('0 citas');
     expect(recuentoDeCitas(27)).toBe('27 citas');
@@ -161,10 +166,11 @@ describe('Historia 26.3 — los textos del Directorio de Autores', () => {
     const a = autor('a', 'A', 'A');
     const b = autor('b', 'B', 'B');
     const sinCitas = autor('c', 'C', 'C');
-    expect(descripcionDelDirectorioDeAutores([a], [cita('a-1', 'a')])).toBe(
+    expect(descripcionDelDirectorioDeAutores(directorioDeAutores([a], [cita('a-1', 'a')]))).toBe(
       '1 autor, de la A a la Z, con 1 cita publicada.',
     );
-    expect(descripcionDelDirectorioDeAutores([a, b, sinCitas], [cita('a-1', 'a'), cita('a-2', 'a'), cita('b-1', 'b')])).toBe(
+    // Las cifras son las del Directorio (AD-11): el Autor sin Citas no cuenta.
+    expect(descripcionDelDirectorioDeAutores(directorioDeAutores([a, b, sinCitas], [cita('a-1', 'a'), cita('a-2', 'a'), cita('b-1', 'b')]))).toBe(
       '2 autores, de la A a la Z, con 3 citas publicadas.',
     );
   });
@@ -344,14 +350,33 @@ describe('Historia 26.3 — `/autores/` construido', () => {
     expect(png.readUInt32BE(20)).toBe(630);
   });
 
+  /** El SVG que la Tarjeta tiene que rasterizar: la de listado, con los Autores que lista la página. */
+  const svgEsperado = () => svgDeTarjetaDeListado(datosDeTarjetaDelDirectorioDeAutores(ORDEN.length));
+
+  it('la Tarjeta construida dice los Autores de la página, no los del Corpus: los mismos bytes que su SVG', async () => {
+    /*
+     * Se compara el PNG servido con el que sale de rasterizar la Tarjeta esperada: cinco Autores
+     * —Ocampo no tiene Citas y no cuenta—, banda siena y «Autores» en la sans de la plantilla de
+     * listado. Una ruta que contara las fichas («6 autores») o pasara otros datos pintaría otro PNG.
+     */
+    expect(svgEsperado()).toContain('5 autores');
+    const construido = readFileSync(join(proyecto, 'dist', 'tarjeta', 'directorio', 'autores.png'));
+    const esperado = await sharp(Buffer.from(svgEsperado())).png().toBuffer();
+    expect(construido.equals(esperado)).toBe(true);
+  });
+
   it('ninguna superficie sin semblanza reproduce la de ningún Autor, ni dice «frases»', () => {
     for (const ruta of SUPERFICIES_SIN_SEMBLANZA) {
       if (ruta.endsWith('.png')) {
-        // La imagen no se deja leer como texto: se juzga lo que la compone, que es solo la cifra.
+        /*
+         * La imagen no se deja leer como texto: se juzga el SVG que la compone, y la prueba de
+         * arriba exige que el PNG construido sea byte a byte su rasterizado. Así lo que se mira es
+         * lo que sale del build, no una llamada que la prueba se inventa.
+         */
         expect(existsSync(join(proyecto, 'dist', ...ruta.split('/').filter(Boolean))), ruta).toBe(true);
-        const datos = JSON.stringify(datosDeTarjetaDelDirectorioDeAutores(5));
-        for (const semblanza of Object.values(SEMBLANZAS)) expect(datos).not.toContain(semblanza);
-        expect(datos.toLowerCase()).not.toContain('frase');
+        const svg = svgEsperado();
+        for (const semblanza of Object.values(SEMBLANZAS)) expect(svg, ruta).not.toContain(semblanza);
+        expect(svg.toLowerCase(), ruta).not.toContain('frase');
         continue;
       }
       const pagina = readFileSync(paginaConstruida(proyecto, ruta), 'utf8');

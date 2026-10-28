@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { formaDeObra } from '../../src/lib/obras.ts';
-import { olvidarRutasIndexables } from '../../src/lib/superficies.ts';
+import { olvidarRutasIndexables, rutaDelDirectorioDeAutores } from '../../src/lib/superficies.ts';
 import { mkdtemp, mkdir, readFile, writeFile } from 'node:fs/promises';
 import { existsSync, readFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
@@ -409,6 +409,17 @@ describe('el cruce con la serie', () => {
     ).toHaveLength(1);
   });
 
+  it('el Directorio de Autores se publica sin familia hasta la 26.7: suelta, como la portada, y el informe lo dice', async () => {
+    const conjunto = await conjuntoDelCorpus(rutasDelCorpus(await corpusConCitas(MIN_CITAS_POR_TEMA)));
+    const censo = censoPorFamilia(conjunto);
+    const publicadas = rutasPublicadas(conjunto);
+    const directorio = rutaDelDirectorioDeAutores();
+    expect(publicadas).toContain(directorio);
+    expect(destinoDePeticion(directorio, censo, publicadas)).toEqual({ clase: 'suelta' });
+    const lineas = lineasDeRegistro([{ fecha: HOY, ruta: directorio }], censo, publicadas).join('\n');
+    expect(lineas).toMatch(/Sin familia —la portada y los Directorios no son de ninguna—: 1/);
+  });
+
   it('una petición cuya URL se despublicó no es la portada, y se nombra por lo que es', async () => {
     /*
      * El registro es permanente y el censo es de hoy. Retirar unas Citas, un Tema que cae
@@ -432,7 +443,7 @@ describe('el cruce con la serie', () => {
     expect(lineas).toMatch(/\(ya no se publica\)/);
     expect(lineas).toMatch(/Ya no se publica —se pidió, y después el sitio la retiró—: 1/);
     // Y no se cuenta como portada, que es justo lo que hacía antes.
-    expect(lineas).not.toMatch(/la portada no es de ninguna/);
+    expect(lineas).not.toMatch(/Sin familia/);
   });
 
   it('el informe pone lo indexado de la serie junto a lo pedido, y omite lo que no se leyó', async () => {

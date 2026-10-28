@@ -28,7 +28,7 @@ import { TARJETA_DEL_DIRECTORIO_DE_AUTORES, rutaDelDirectorioDeAutores } from '.
 
 const conjunto = await conjuntoPublicable();
 const directorio = directorioDeAutores(conjunto.autores, conjunto.citas);
-const descripcion = descripcionDelDirectorioDeAutores(conjunto.autores, conjunto.citas);
+const descripcion = descripcionDelDirectorioDeAutores(directorio);
 ---
 
 <Armazon

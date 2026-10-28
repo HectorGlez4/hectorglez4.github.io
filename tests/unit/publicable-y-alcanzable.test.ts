@@ -338,6 +338,12 @@ describe('Historia 12.1 — sobre un sitio construido de verdad', () => {
       expect(publicables.length).toBeGreaterThan(2);
       expect(publicables).toContain(EXENTA_DE_ALCANCE);
       expect(superficiesInalcanzables(alcanzables(publicables), enlaces)).toEqual([]);
+      /*
+       * Y la exención caduca sola: mientras exista, el Directorio tiene que seguir sin alcanzarse.
+       * El día que la cabecera de la 26.5 lo enlace, esta línea falla y obliga a quitarla aquí y en
+       * `tests/e2e/seo.spec.ts`, en vez de dejarla viva eximiendo algo que ya no lo necesita.
+       */
+      expect(superficiesInalcanzables(publicables, enlaces)).toEqual([EXENTA_DE_ALCANCE]);
     });
 
     it('toda ruta construida tiene declaración: el build no genera nada anónimo', async () => {

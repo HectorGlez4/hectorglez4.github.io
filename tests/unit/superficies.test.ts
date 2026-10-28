@@ -1140,7 +1140,14 @@ describe('Historia 23.10 — la superficie de línea base', () => {
        * Exención transitoria (Historia 26.3): «los Directorios» la declara solo `/autores/` hasta
        * que `/obras/` exista. La 26.4 quita esta exención.
        */
-      if (superficie.lineaBase === LINEA_BASE_DE_LOS_DIRECTORIOS) continue;
+      if (superficie.lineaBase === LINEA_BASE_DE_LOS_DIRECTORIOS) {
+        // Y caduca sola: cuando una segunda superficie la declare, esto falla y obliga a quitarla.
+        expect(
+          SUPERFICIES.filter((s) => s.lineaBase === LINEA_BASE_DE_LOS_DIRECTORIOS).map((s) => s.pagina),
+          'la exención de «los Directorios» ya no hace falta: quítala',
+        ).toEqual(['autores.astro']);
+        continue;
+      }
       expect(SUPERFICIES.filter((s) => s.lineaBase === superficie.lineaBase).length, superficie.nombre).toBeGreaterThan(1);
     }
   });

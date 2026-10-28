@@ -178,24 +178,27 @@ export function hechosDeFilaDeAutor(
 }
 
 /**
+ * «1 autor», «135 autores»: el recuento de Autores con su unidad, en singular cuando es uno —
+ * Historia 26.3. Un solo dueño para la meta del Directorio de Autores y su Tarjeta Social, que
+ * dicen la misma cifra y no pueden escribirla de dos maneras.
+ */
+export function recuentoDeAutores(m: number): string {
+  return m === 1 ? '1 autor' : `${m} autores`;
+}
+
+/**
  * El `<meta description>` del Directorio de Autores — Historia 26.3, UX-DR80, UX-DR107:
  * «{m} autores, de la A a la Z, con {n} citas publicadas.», en singular cuando la cifra es una
  * —«1 autor», «1 cita publicada»—, con la redacción que aprobó Héctor el 2026-10-19.
  *
- * Solo hechos del Corpus: {m}, los Autores con alguna Cita publicada —los que lista la página—, y
- * {n}, las Citas publicadas de esos Autores. Nunca «frases».
+ * Solo hechos del Corpus, y **sin contarlos aquí** (AD-11): recibe las dos cifras de
+ * `directorioDeAutores` —{m}, los Autores que lista la página; {n}, las Citas publicadas que
+ * suman—, las mismas que pinta la página y que dice su Tarjeta Social. Contarlas otra vez sería
+ * un segundo dueño del mismo hecho. Nunca «frases».
  */
-export function descripcionDelDirectorioDeAutores(
-  autores: readonly Pick<Autor, 'slug'>[],
-  citas: readonly Pick<Cita, 'autor'>[],
-): string {
-  const conCitas = new Set(citas.map((cita) => cita.autor));
-  const listados = new Set(autores.filter((autor) => conCitas.has(autor.slug)).map((autor) => autor.slug));
-  const m = listados.size;
-  const n = citas.filter((cita) => listados.has(cita.autor)).length;
-  const deAutores = m === 1 ? '1 autor' : `${m} autores`;
-  const deCitas = n === 1 ? '1 cita publicada' : `${n} citas publicadas`;
-  return `${deAutores}, de la A a la Z, con ${deCitas}.`;
+export function descripcionDelDirectorioDeAutores(directorio: { autores: number; citas: number }): string {
+  const deCitas = directorio.citas === 1 ? '1 cita publicada' : `${directorio.citas} citas publicadas`;
+  return `${recuentoDeAutores(directorio.autores)}, de la A a la Z, con ${deCitas}.`;
 }
 
 /** Un año como lo lee una persona: los negativos, sin signo y «a. C.». */

@@ -100,6 +100,20 @@ export function directorioDeAutores(autores: readonly Autor[], citas: readonly C
     if (ultimo !== undefined && ultimo.inicial === inicial) {
       ultimo.autores.push(fila);
     } else {
+      /*
+       * Los grupos se abren en el orden de `compararPorClave`, así que dependen de que ese orden
+       * y `inicialDeClave` —las dos de `src/lib/normalizar.ts`— no se contradigan nunca. Si un
+       * día lo hicieran, una inicial ya cerrada volvería a abrirse: dos grupos de la misma letra,
+       * dos `id` repetidos y una letra de salto que solo alcanza el primero. Se para aquí, con
+       * el Autor que la reabre, en vez de publicar la página rota.
+       */
+      if (grupos.some((grupo) => grupo.inicial === inicial)) {
+        throw new Error(
+          `El Autor «${autor.slug}» reabre la letra «${inicial}» del Directorio de Autores después de ` +
+            `otra: el orden de las claves (compararPorClave) y sus iniciales (inicialDeClave) no ` +
+            'concuerdan, y `src/lib/normalizar.ts` es quien tiene que volver a ponerlos de acuerdo.',
+        );
+      }
       grupos.push({ inicial, ancla: anclaDeLetra(inicial), autores: [fila] });
     }
   }

@@ -5,7 +5,7 @@ created: '2026-10-28'
 status: 'done'
 baseline_revision: '9e5c4693379a12fdda9a546a97df3ed74baada34'
 review_loop_iteration: 0
-followup_review_recommended: false
+followup_review_recommended: true
 context:
   - '{project-root}/_bmad-output/implementation-artifacts/epic-26-context.md'
   - '{project-root}/_bmad-output/planning-artifacts/ux-designs/ux-brainlySabiduria-2026-08-10/DESIGN.md'
@@ -129,6 +129,27 @@ deferred: []
 
 Las capas de revisión son externas en este bucle (v8-ralph) y esta pasada no traía hallazgos: la revisión independiente viene después.
 
+### 2026-10-28 — Review pass
+- intent_gap: 0
+- bad_spec: 0
+- patch: 11 (high 0, medium 1, low 10)
+- defer: 0
+- reject: 24 (high 0, medium 2, low 22)
+- addressed_findings:
+  - `[medium]` `[patch]` La Tarjeta del Directorio no se juzgaba construida (blind-hunter, verification-gap, ac-auditor, intent-alignment): `tests/unit/directorio-de-autores.test.ts` exige ahora que `dist/tarjeta/directorio/autores.png` sea byte a byte el rasterizado de `svgDeTarjetaDeListado(datosDeTarjetaDelDirectorioDeAutores(5))` —«5 autores», Ocampo sin Citas no cuenta—, y la comprobación de «sin semblanza ni frases» mira ese SVG y no una llamada inventada.
+  - `[low]` `[patch]` La meta contaba Autores y Citas por su cuenta (AD-11): `descripcionDelDirectorioDeAutores` recibe las cifras de `directorioDeAutores`, y la página le pasa el mismo Directorio que pinta.
+  - `[low]` `[patch]` «1 autor» se escribía en dos sitios: `recuentoDeAutores` en `src/lib/atribucion.ts`, único dueño para la meta y la Tarjeta.
+  - `[low]` `[patch]` El agrupado confiaba en que orden e inicial nunca se contradigan: `directorioDeAutores` lanza, nombrando el Autor, si una inicial ya cerrada se reabre, en vez de publicar dos `id` iguales.
+  - `[low]` `[patch]` `'autores.astro'` escrito a mano en `SUPERFICIES_SIN_INGRESO`: ahora entra por `...PAGINAS_DE_DIRECTORIO`, y la 26.4 no tiene que acordarse de dos listas.
+  - `[low]` `[patch]` Las exenciones transitorias no caducaban solas: `publicable-y-alcanzable.test.ts` exige que `/autores/` siga siendo la única inalcanzable y `superficies.test.ts` que solo `autores.astro` declare «los Directorios»; las dos fallan el día que la exención sobra.
+  - `[low]` `[patch]` AD-27 sin fijar para un Autor sin Citas ni para la biografía: `fecha-de-cambio.test.ts` prueba que clave, nombre o años de un Autor sin Citas publicadas no mueven `/autores/`, y que la biografía mueve solo la Página del Autor.
+  - `[low]` `[patch]` El rastreo nombraba como portada una petición de `/autores/`: el informe dice «Sin familia —la portada y los Directorios no son de ninguna—», el docblock de `DestinoDePeticion` lo explica y `rastreo.test.ts` lo prueba.
+  - `[low]` `[patch]` `fueraDelCenso` de `/autores/` solo por construcción: `trafico.test.ts` lo prueba con el censo real de un corpus (la demanda reparte con la misma `agregarPorFamilia`).
+  - `[low]` `[patch]` `AGENTS.md` no decía que `/autores/` cae fuera de toda familia hasta la 26.7: una frase en «Leer el tráfico orgánico».
+  - `[low]` `[patch]` Tipografía, color, subrayado y ritmo sin prueba: `tests/e2e/directorio-de-autores.spec.ts` los mide en el navegador contra sondas de los propios tokens (serif solo en el nombre, Inter en el `h1`, letras, hechos y «Volver»; siena y subrayado; rejilla a 1×, grupos a 4× y 5×, lista y «Volver» a 2×, `scroll-margin-top` 2×).
+
+Rechazados, con su razón: el coste cuadrático de `citasDeAutor` (135 × 4.420 en el build, y contar aparte sería otro dueño del recuento); `Cache-Control … immutable` (el patrón de todas las Tarjetas, y el sitio estático no sirve esa cabecera); la reconstrucción de `dist/` en la 17.5 de `ingreso-construido` (las pruebas posteriores leen `paginas` en memoria); el Corpus vacío —página fina, meta con ceros, sin construir— (lo fija la matriz de I/O del intent, y el Corpus real nunca está vacío); JSON-LD propio (el intent lo prohíbe); separador de miles (convención del sitio entero); `font-weight`/`line-height` literales (`tokens.css` no declara pesos, y es lo que hacen los demás componentes); el orden del nombre accesible «Autores por la C» (lo prescribe el criterio); `aria-labelledby` en cada grupo (veintisiete regiones de más, y axe pasa); la redacción de la prueba de línea base (fixture de la 26.4); los años sin fallecimiento (lo fija el spec); el spec cerrado sin revisión y los tiempos agotados de `seo.spec.ts` (proceso, y esta es la revisión; el barrido pasa con `--workers=1`); el alcance del diff (informativo); el 500 de `astro dev` ante un Autor sin clave (el intent manda lanzar, y el mensaje da la orden); las balizas de vista y lectura en tiempo de ejecución (las cubre `receptor.spec.ts` para toda vista declarada; aquí se prueba `data-vistas`); `directorio` en `FAMILIAS_DE_RUTA` (decisión del spec: el aviso no es una serie); la exención de línea base como lectura de borde (prevista en el spec, y ahora caduca sola); el barrido axe sin prueba nueva (`accesibilidad.spec.ts` lo cubre por la declaración); `sprint-status.yaml` y las precondiciones en `review` (lo lleva el orquestador); el anillo de foco con teclado (regla global ya probada en la 2.8); Autor con todas sus Citas en `_revision/` y publicadas frente a documentadas (equivalen a «sin Citas» y a las 12 sin documentar de la prueba pura); las claves sin revisar (dato de la 26.10).
+
 ## Design Notes
 
 **`directorio` como familia de ruta del aviso ya en la 26.3.** La relación de AD-27 exige una familia por superficie, y `/autores/` no es un Autor. Darle `directorio` en `FAMILIAS_DE_RUTA` (la tabla del aviso y del ensayo) no la mete en ninguna serie: indexación, tráfico, demanda, rastreo y canal siguen leyendo su censo, donde `/autores/` cae en `fueraDelCenso` hasta la 26.7, que muda las familias a `superficies.ts`. La alternativa —la familia `autor`— contaría el Directorio como Autor en el ensayo, que es lo que FR-40 prohíbe.
@@ -174,9 +195,26 @@ Fila de Autor (forma; tokens arriba):
 - `tools/lib/cambios.ts` — `CAMPOS_QUE_PINTA` para `directorio` (Cita: `autor`; Autor: nombre, años y `ordenAlfabetico`); `ordenAlfabetico` sale de `CAMPOS_QUE_NO_FECHAN`; la relación declara y compone `/autores/`, también en las bajas de Cita.
 - Pruebas: `tests/unit/directorio-de-autores.test.ts` y `tests/e2e/directorio-de-autores.spec.ts` (nuevas); al día `fecha-de-cambio`, `fecha-de-cambio-build`, `indexnow`, `avisar-rango`, `superficies`, `barra-final`, `ingreso`, `ingreso-construido`, `indexacion`, `publicado`, `publicable-y-alcanzable`, `linea-base`, `medicion` (unitarias) y `seo.spec.ts`, `busqueda.spec.ts` (e2e). Exención de alcance de `/autores/` por su ruta, con comentario, en `publicable-y-alcanzable.test.ts` y `seo.spec.ts` (la quita la 26.5); exención de línea base ≥2 para «los Directorios» en `superficies.test.ts` (la quita la 26.4).
 
-**Revisión.** Parches aplicados: 0. Diferidos: 0. Rechazados: 0 (las capas son externas y esta pasada no traía hallazgos).
+**Revisión (primera pasada, sin hallazgos).** Parches aplicados: 0. Diferidos: 0. Rechazados: 0 (las capas son externas y esta pasada no traía hallazgos).
 
-**Revisión de seguimiento recomendada:** `false` — 0 parches (alta 0, media 0, baja 0); puntuación 3 × 0 + 1 × 0 = 0.
+**Revisión (pasada 1 con las capas externas, 2026-10-28).** Parches aplicados: 11 (media 1, baja 10). Diferidos: 0. Rechazados: 24. Ficheros de esta pasada:
+- `src/lib/atribucion.ts` — `recuentoDeAutores`; `descripcionDelDirectorioDeAutores` recibe las cifras del Directorio.
+- `src/lib/tarjeta.ts` — la Tarjeta usa `recuentoDeAutores`.
+- `src/lib/directorios.ts` — lanza si una inicial cerrada se reabre.
+- `src/lib/ingreso.ts` — `SUPERFICIES_SIN_INGRESO` entra por `PAGINAS_DE_DIRECTORIO`.
+- `src/pages/autores.astro` — la meta sale del mismo Directorio que pinta.
+- `tools/lib/rastreo.ts` — «Sin familia —la portada y los Directorios no son de ninguna—» y su docblock.
+- `AGENTS.md` — `/autores/` fuera de toda familia hasta la 26.7.
+- Pruebas: `directorio-de-autores` (PNG construido byte a byte), `fecha-de-cambio` (Autor sin Citas, biografía), `publicable-y-alcanzable` y `superficies` (exenciones que caducan), `rastreo`, `trafico`, y `tests/e2e/directorio-de-autores.spec.ts` (tokens y ritmo).
+
+**Revisión de seguimiento recomendada:** `true` — 11 parches en la pasada 1 (alta 0, media 1, baja 10); puntuación 3 × 1 + 1 × 10 = 13.
+
+**Verificación de la pasada 1.**
+- Puras: `fecha-de-cambio`, `indexnow`, `superficies`, `barra-final`, `ingreso`, `indexacion`, `publicado`, `linea-base`, `tarjeta` — 516/516; `rastreo` y `trafico` — 91/91.
+- Construyen: `directorio-de-autores`, `publicable-y-alcanzable`, `ingreso-construido` — 98/98.
+- `npm run check` — 0 errores, 0 avisos (8 pistas previas).
+- `npm test` completo, desatendido — 141/141 ficheros, 6478/6478 pruebas.
+- Playwright local contra lo construido (su `webServer` corre `npm run build`): `directorio-de-autores.spec.ts`, `busqueda.spec.ts` y `accesibilidad.spec.ts` con `--project=escritorio --project=movil` — 198 pasan, 2 omitidas; `seo.spec.ts` en los dos proyectos con `--workers=1` — 20/20.
 
 **Verificación.**
 - `npm run build` — EXIT 0; `dist/sitemap-0.xml` contiene `https://sabiduriadebolsillo.net/autores/`; existen `dist/autores/index.html` (135 Autores, meta «135 autores, de la A a la Z, con 4420 citas publicadas.») y `dist/tarjeta/directorio/autores.png`; `integraciones/indexables.ts` no rompe.

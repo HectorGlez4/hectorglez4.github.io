@@ -7,6 +7,7 @@ import { join, resolve } from 'node:path';
 import { promisify } from 'node:util';
 import { parse as parsearYaml } from 'yaml';
 import { MIN_CITAS_POR_TEMA } from '../../src/lib/umbrales.ts';
+import { rutasPublicadas } from '../../src/lib/publicado.ts';
 import { DOMINIO } from '../../src/lib/dominio.ts';
 import {
   CABECERA_DE_TRAFICO,
@@ -392,6 +393,20 @@ describe('la orden', () => {
     expect(censo.cita).toContain('/cita/cita-0/');
     expect(censo.autor).toContain('/autor/autor-0/');
     expect(censo.tema).toContain('/tema/la-vida/');
+  });
+
+  it('Historia 26.3 — el Directorio de Autores, publicado, cae en fueraDelCenso hasta que la 26.7 le dé familia', async () => {
+    const corpus = await corpusConCitas(MIN_CITAS_POR_TEMA);
+    const conjunto = await conjuntoDelCorpus(rutasDelCorpus(corpus));
+    const censo = censoPorFamilia(conjunto);
+    expect(rutasPublicadas(conjunto)).toContain('/autores/');
+    const { familias, fueraDelCenso } = agregarPorFamilia(
+      [{ keys: [URL('/autores/')], clicks: 2, impressions: 9, position: 3 }],
+      censo,
+      DOMINIO,
+    );
+    expect(fueraDelCenso).toEqual({ clics: 2, impresiones: 9 });
+    expect(familias.autor).toEqual({ clics: 0, impresiones: 0 });
   });
 
   it('registrar: cabecera y una entrada por mes, con parcial solo en el mes en curso', async () => {

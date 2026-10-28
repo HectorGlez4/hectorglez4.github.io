@@ -101,3 +101,94 @@ test.describe('Historia 26.3 — las Filas de Autor', () => {
     }
   });
 });
+
+/**
+ * Lo que la página pinta con los tokens de `DESIGN.md`, medido en el navegador: la familia, el
+ * cuerpo, el peso y el color de cada pieza, el subrayado de lo que mueve dentro de la página, y el
+ * ritmo vertical en múltiplos de `--unidad`. Cada valor esperado sale de rasterizar el propio token
+ * en una sonda de la misma página, nunca de un número escrito aquí: si el token cambia, la prueba
+ * lo sigue; si una pieza deja de usarlo, falla.
+ */
+test.describe('Historia 26.3 — los tokens y el ritmo del Directorio', () => {
+  test('tipografía, color, subrayado y espaciado salen de los tokens', async ({ page }) => {
+    await page.goto(RUTA);
+    const m = await page.evaluate(() => {
+      const sonda = (css: string) => {
+        const d = document.createElement('div');
+        d.style.cssText = css;
+        document.body.append(d);
+        const c = getComputedStyle(d);
+        const r = { familia: c.fontFamily, cuerpo: c.fontSize, color: c.color, ancho: c.width };
+        d.remove();
+        return r;
+      };
+      const unidad = (n: number) => sonda(`width: calc(var(--unidad) * ${n})`).ancho;
+      const de = (selector: string) => {
+        const e = document.querySelector(selector);
+        if (e === null) throw new Error(`no hay ${selector}`);
+        const c = getComputedStyle(e);
+        return {
+          familia: c.fontFamily,
+          cuerpo: c.fontSize,
+          peso: c.fontWeight,
+          color: c.color,
+          subrayado: c.textDecorationLine,
+          cifras: c.fontVariantNumeric,
+          margenArriba: c.marginTop,
+          margenDeDesplazamiento: c.scrollMarginTop,
+          hueco: c.columnGap,
+          filete: c.borderTopStyle,
+        };
+      };
+      const grupos = [...document.querySelectorAll('section.grupo')].map((g) => getComputedStyle(g).marginTop);
+      return {
+        tokens: {
+          serif: sonda('font-family: var(--serif)').familia,
+          sans: sonda('font-family: var(--sans)').familia,
+          titularSm: sonda('font-size: var(--titular-sm)').cuerpo,
+          titularMd: sonda('font-size: var(--titular-md)').cuerpo,
+          cuerpoMd: sonda('font-size: var(--cuerpo-md)').cuerpo,
+          pie: sonda('font-size: var(--pie)').cuerpo,
+          tinta: sonda('color: var(--tinta)').color,
+          apagada: sonda('color: var(--tinta-apagada)').color,
+          siena: sonda('color: var(--siena)').color,
+          u1: unidad(1),
+          u2: unidad(2),
+          u4: unidad(4),
+          u5: unidad(5),
+        },
+        h1: de('main h1'),
+        nombre: de('li.fila-de-bloque .nombre'),
+        hechos: de('li.fila-de-bloque .hechos'),
+        fila: de('li.fila-de-bloque a'),
+        letra: de('#letras a'),
+        rejilla: de('#letras ul'),
+        rotulo: de('section.grupo h2'),
+        lista: de('section.grupo > ul'),
+        volverP: de('section.grupo .volver'),
+        volver: de('section.grupo .volver a'),
+        grupos,
+      };
+    });
+    const t = m.tokens;
+
+    // La serif solo en el nombre del Autor; el `h1`, las letras, los hechos y «Volver», en Inter.
+    expect(m.nombre).toMatchObject({ familia: t.serif, cuerpo: t.titularSm, peso: '400', color: t.tinta });
+    expect(m.h1).toMatchObject({ familia: t.sans, cuerpo: t.titularMd, peso: '600', color: t.tinta });
+    expect(m.hechos).toMatchObject({ familia: t.sans, cuerpo: t.pie, color: t.apagada });
+    expect(m.hechos.cifras).toContain('tabular-nums');
+    expect(m.letra).toMatchObject({ familia: t.sans, cuerpo: t.cuerpoMd, peso: '600', color: t.siena, subrayado: 'none' });
+    expect(m.volver).toMatchObject({ familia: t.sans, cuerpo: t.cuerpoMd, color: t.siena, subrayado: 'underline' });
+    expect(m.fila.subrayado).toBe('none');
+
+    // El ritmo: rejilla a `--unidad`; primer grupo a 4×, los demás a 5×; lista a 2× con filete;
+    // «Volver» a 2×; y el rótulo deja 2× de aire al recibir el salto.
+    expect(m.rejilla.hueco).toBe(t.u1);
+    expect(m.grupos.length).toBeGreaterThan(0);
+    expect(m.grupos[0]).toBe(t.u4);
+    for (const margen of m.grupos.slice(1)) expect(margen).toBe(t.u5);
+    expect(m.lista).toMatchObject({ margenArriba: t.u2, filete: 'solid' });
+    expect(m.volverP.margenArriba).toBe(t.u2);
+    expect(m.rotulo.margenDeDesplazamiento).toBe(t.u2);
+  });
+});

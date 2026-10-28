@@ -581,6 +581,27 @@ describe('Historia 24.8 — la matriz: qué cambia de fecha', () => {
     expect(avisadas(deAutor, corpusDeEjemplo())).toContain('/autores');
   });
 
+  it('la clave, el nombre o los años de un Autor sin Citas publicadas no mueven el Directorio: no figura en él', () => {
+    // Sin `y--b`, «Ye» no tiene ninguna Cita publicada y el Directorio no lo lista (26.3).
+    const sinCitas = corpusDeEjemplo(['corpus/citas/y--b.md']);
+    for (const cambios of [{ ordenAlfabetico: 'Ye' }, { nombre: 'Ye Zeta' }, { añoNacimiento: 1830 }]) {
+      const enT1 = { 'corpus/autores/y.yml': editado('corpus/autores/y.yml', cambios) };
+      const motivo = JSON.stringify(cambios);
+      expect(refechadas(sinCitas, historial(enT1)), motivo).not.toContain('/autores');
+      expect(avisadas(enT1, sinCitas), motivo).not.toContain('/autores');
+    }
+  });
+
+  it('solo la biografía: la Página del Autor, nunca el Directorio', () => {
+    const enT1 = {
+      'corpus/autores/x.yml': editado('corpus/autores/x.yml', {
+        biografia: { documento: 'wikipedia-es--equis--r1.txt', revision: 1 },
+      }),
+    };
+    expect(refechadas(corpusDeEjemplo(), historial(enT1))).toEqual(['/autor/x']);
+    expect(avisadas(enT1, corpusDeEjemplo())).toEqual(['/autor/x']);
+  });
+
   // La semblanza, la tradición y la biografía no las pinta el Directorio de Autores (26.3).
   it('solo la semblanza: solo la Página del Autor', () => {
     const enT1 = { 'corpus/autores/x.yml': editado('corpus/autores/x.yml', { semblanza: 'Otra semblanza.' }) };
