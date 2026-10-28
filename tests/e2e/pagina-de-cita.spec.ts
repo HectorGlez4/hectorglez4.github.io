@@ -225,7 +225,7 @@ test.describe('Historia 2.1 — armazón y tratamiento visual', () => {
     await expect(enlaces).toHaveCount(4);
     for (const [i, destino] of ['/', '/autores/', '/obras/', '/buscar/'].entries()) {
       await expect(enlaces.nth(i)).toHaveAttribute('href', destino);
-      await expect(enlaces.nth(i)).not.toHaveAttribute('target', /.*/);
+      await expect(enlaces.nth(i)).not.toHaveAttribute('target');
     }
     await expect(page.locator('nav[aria-label*="miga" i], .migas, .breadcrumb')).toHaveCount(0);
   });

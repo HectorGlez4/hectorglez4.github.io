@@ -380,6 +380,7 @@ describe('Historia 12.1 — sobre un sitio construido de verdad', () => {
    */
   describe('Historia 26.5 — la cabecera lleva a Autores, Obras y Buscar', () => {
     const DESTINOS = ['/', '/autores/', '/obras/', '/buscar/'];
+    const ROTULOS = [MARCA, 'Autores', 'Obras', 'Buscar'];
     /** La página donde cada destino lleva `aria-current`, por su ruta normalizada. */
     const ACTUAL_EN = new Map(DESTINOS.map((destino) => [rutaNormalizada(destino), destino]));
 
@@ -402,12 +403,35 @@ describe('Historia 12.1 — sobre un sitio construido de verdad', () => {
           }
           if (!entrada.name.endsWith('.html')) continue;
           const sinExtension = entrada.name.replace(/\.html$/, '');
-          const ruta = sinExtension === 'index' ? `${prefijo}/` : `${prefijo}/${sinExtension}`;
-          paginas.set(rutaNormalizada(ruta), await readFile(completa, 'utf8'));
+          const ruta = rutaNormalizada(sinExtension === 'index' ? `${prefijo}/` : `${prefijo}/${sinExtension}`);
+          // `x.html` y `x/index.html` son la misma ruta: el segundo taparía al primero sin mirarlo.
+          if (paginas.has(ruta)) throw new Error(`dos ficheros de dist/ para ${ruta}`);
+          paginas.set(ruta, await readFile(completa, 'utf8'));
         }
       }
       await recorrer(dist, '');
       return paginas;
+    }
+
+    /**
+     * El texto de cada `<a>` de la cabecera del armazón, sin etiquetas y con los espacios
+     * colapsados. El tokenizador no guarda texto, y la cabecera es marcado plano de Astro.
+     */
+    function rotulosDeLaCabecera(html: string): string[] {
+      const cabecera = /<header class="cabecera[^"]*"[^>]*>([\s\S]*?)<\/header>/.exec(html);
+      if (cabecera === null) return [];
+      return [...cabecera[1].matchAll(/<a\b[^>]*>([\s\S]*?)<\/a>/g)].map((m) =>
+        m[1].replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim(),
+      );
+    }
+
+    /** La única cabecera de fuera de `main` de una página, o un fallo que nombra la ruta. */
+    function cabeceraDe(ruta: string, html: string | undefined) {
+      expect(html, `${ruta}: no se construyó`).toBeDefined();
+      const [primera, ...otras] = cabecerasDe(html!);
+      expect(primera, `${ruta}: sin cabecera fuera de main`).toBeDefined();
+      expect(otras, `${ruta}: más de una cabecera fuera de main`).toEqual([]);
+      return primera;
     }
 
     /** Las cabeceras de fuera de `main` de una página, cada una con sus enlaces. */
@@ -445,6 +469,8 @@ describe('Historia 12.1 — sobre un sitio construido de verdad', () => {
         expect(cabeceras, ruta).toHaveLength(1);
         const [{ enlaces }] = cabeceras;
         expect(enlaces.map((e) => e.elemento.atributos.get('href')), ruta).toEqual(DESTINOS);
+        // Y lo que dicen: «Sabiduría de Bolsillo · Autores · Obras · Buscar».
+        expect(rotulosDeLaCabecera(html), ruta).toEqual(ROTULOS);
 
         for (const [i, { elemento, antepasados, declaracion }] of enlaces.entries()) {
           const href = elemento.atributos.get('href')!;
@@ -486,7 +512,7 @@ describe('Historia 12.1 — sobre un sitio construido de verdad', () => {
     it('`aria-current="page"` solo en su página, y solo en el enlace que toca', async () => {
       const paginas = await paginasConstruidas();
       for (const [ruta, html] of paginas) {
-        const actuales = cabecerasDe(html)[0].enlaces
+        const actuales = cabeceraDe(ruta, html).enlaces
           .filter(({ elemento }) => elemento.atributos.has('aria-current'))
           .map(({ elemento }) => [elemento.atributos.get('href'), elemento.atributos.get('aria-current')]);
         const esperado = ACTUAL_EN.get(ruta);
@@ -503,13 +529,15 @@ describe('Historia 12.1 — sobre un sitio construido de verdad', () => {
        * Un grafo con solo esos caminos: de la portada, nada más que lo que enlaza su cabecera; de
        * los dos Directorios, todo lo suyo. Si alcanza aquí, alcanza en el sitio, que enlaza más.
        */
-      const deLaCabecera = cabecerasDe(paginas.get('/')!)[0].enlaces.map(({ elemento }) =>
+      const deLaCabecera = cabeceraDe('/', paginas.get('/')).enlaces.map(({ elemento }) =>
         rutaNormalizada(elemento.atributos.get('href')!),
       );
+      const directorios = [rutaDelDirectorioDeAutores(), rutaDelDirectorioDeObras()].map((d) => rutaNormalizada(d));
+      // Sin esto, una ruta normalizada de otra forma daría una lista vacía y un «inalcanzable» engañoso.
+      for (const directorio of directorios) expect(enlaces.get(directorio), `${directorio}: sin enlaces`).toBeDefined();
       const grafo = new Map<string, string[]>([
         ['/', deLaCabecera],
-        ['/autores', enlaces.get('/autores') ?? []],
-        ['/obras', enlaces.get('/obras') ?? []],
+        ...directorios.map((d): [string, string[]] => [d, enlaces.get(d)!]),
       ]);
 
       const autores = [...paginas.keys()].filter((ruta) => /^\/autor\/[^/]+$/.test(ruta));

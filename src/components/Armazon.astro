@@ -5,8 +5,9 @@
  * La cabecera — Historia 26.5 (UX-DR54, UX-DR55, UX-DR101, UX-DR102, UX-DR105, UX-DR106 y
  * UX-DR112, que enmienda la UX-DR29 de la 2.1): «Sabiduría de Bolsillo · Autores · Obras ·
  * Buscar». La marca lleva a la portada y una navegación «Principal» lleva a los dos Directorios
- * y a la búsqueda, con las rutas de `src/lib/superficies.ts`; así todo Autor y toda Obra quedan
- * a dos saltos de la portada (FR-55). Sigue sin migas de pan: no hay jerarquía que reflejar,
+ * y a la búsqueda, con las rutas de `src/lib/superficies.ts`; así toda Página de Autor y toda
+ * página 1 de Obra quedan a dos saltos de la portada (FR-55; las 2+ cuelgan de su página 1).
+ * Sigue sin migas de pan: no hay jerarquía que reflejar,
  * el visitante entra por una hoja y se mueve lateralmente entre hojas. La marca no es un `h1`
  * (eso es de la 28.1).
  *
@@ -322,6 +323,11 @@ const busqueda = rutaDeLaBusqueda();
   /*
    * Los tres enlaces se parten en otra fila si no caben, con `--unidad` entre filas. El primero
    * se retranquea su relleno para que su texto quede alineado con el de la marca.
+   *
+   * El retranqueo sigue desde 600px: en la fila única no se ve —la navegación va al borde derecho
+   * por `space-between`, y el margen negativo del lado de entrada no la mueve—, y si el texto
+   * ampliado la parte bajo la marca, su «Autores» vuelve a alinearse con el texto de la marca en
+   * vez de quedar 8px a la derecha.
    */
   .principal {
     display: flex;
@@ -387,10 +393,6 @@ const busqueda = rutaDeLaBusqueda();
 
     .marca {
       align-self: center;
-    }
-
-    .principal {
-      margin-inline-start: 0;
     }
   }
 

@@ -18,8 +18,9 @@ import {
  * `tests/unit/publicable-y-alcanzable.test.ts` sobre `dist/`, que sí corre en el CI.
  *
  * Cada valor esperado de color y de medida sale de una sonda que resuelve el token en la misma
- * página, nunca de un número escrito aquí, salvo los 113 px que `DESIGN.md` declara y que esta
- * historia mide: si difieren, se anotan para `bmad-ux` y no se corrige `DESIGN.md` a mano.
+ * página, nunca de un número escrito aquí, salvo dos que `DESIGN.md` declara y de los que sale el
+ * alto: el `{spacing.unit}` de 8 px y los 113 px de la cabecera, que esta historia mide. Si
+ * difieren, se anotan para `bmad-ux` y no se corrige `DESIGN.md` a mano.
  */
 
 /** Una Página de Cita del Corpus servido, la misma que miden las pruebas del armazón. */
@@ -54,6 +55,8 @@ interface Medida {
   bordeDerechoDelContenido: number;
   /** `--unidad` resuelto dentro de la cabecera, en el mismo espacio que las cajas. */
   unidad: number;
+  /** `--zona-de-toque` resuelto dentro de la cabecera, en el mismo espacio que las cajas. */
+  zonaDeToque: number;
   /** Si la página entera se desplaza en horizontal. */
   desborda: boolean;
   /** Si la cabecera desborda su caja, o algo suyo pasa del borde de su contenido. */
@@ -81,11 +84,16 @@ async function medirCabecera(page: Page): Promise<Medida> {
       rango.selectNodeContents(e);
       return rango.getClientRects()[0].left;
     };
-    const sonda = document.createElement('div');
-    sonda.style.cssText = 'height: var(--unidad)';
-    cabecera.append(sonda);
-    const unidad = sonda.getBoundingClientRect().height;
-    sonda.remove();
+    const alto = (css: string) => {
+      const sonda = document.createElement('div');
+      sonda.style.cssText = `height: ${css}`;
+      cabecera.append(sonda);
+      const r = sonda.getBoundingClientRect().height;
+      sonda.remove();
+      return r;
+    };
+    const unidad = alto('var(--unidad)');
+    const zonaDeToque = alto('var(--zona-de-toque)');
     const estilo = getComputedStyle(cabecera);
     const rCabecera = cabecera.getBoundingClientRect();
     // El factor entre píxeles CSS y las cajas, por si el zoom las escala.
@@ -115,6 +123,7 @@ async function medirCabecera(page: Page): Promise<Medida> {
       }),
       bordeDerechoDelContenido: rCabecera.right - parseFloat(estilo.paddingRight) * escala,
       unidad,
+      zonaDeToque,
       desborda: document.documentElement.scrollWidth > document.documentElement.clientWidth,
       desbordaLaCabecera:
         cabecera.scrollWidth > cabecera.clientWidth ||
@@ -135,6 +144,30 @@ function filasDe(cajas: Caja[]): Caja[][] {
     else filas.push([c]);
   }
   return filas;
+}
+
+/**
+ * Lo que vale a cualquier ancho: cada zona de toque de 44 × 44 como mínimo (la de la marca, en
+ * alto), `--unidad` de relleno lateral en cada enlace (UX-DR102) y nada con `nowrap`.
+ */
+function zonasDeToque(m: Medida) {
+  expect(m.marca.height).toBeGreaterThanOrEqual(m.zonaDeToque);
+  for (const enlace of m.enlaces) {
+    expect(enlace.height).toBeGreaterThanOrEqual(m.zonaDeToque);
+    expect(enlace.width).toBeGreaterThanOrEqual(m.zonaDeToque);
+  }
+  for (const relleno of m.rellenos) expect(relleno).toEqual({ izquierda: m.unidad, derecha: m.unidad });
+  expect(m.conNowrap).toEqual([]);
+}
+
+/** Entre zonas de enlace contiguas, `--unidad` en horizontal: el punto medio, de ese ancho (UX-DR101). */
+function puntosEntreZonas(m: Medida) {
+  expect(m.puntos).toHaveLength(2);
+  for (const punto of m.puntos) expect(Math.abs(punto.width - m.unidad), `punto de ${punto.width}`).toBeLessThanOrEqual(0.5);
+  for (let i = 1; i < m.enlaces.length; i += 1) {
+    const entre = m.enlaces[i].left - m.enlaces[i - 1].right;
+    expect(Math.abs(entre - m.unidad), `entre zonas: ${entre}`).toBeLessThanOrEqual(0.5);
+  }
 }
 
 test.describe('Historia 26.5 — la cabecera, pintada', () => {
@@ -167,23 +200,8 @@ test.describe('Historia 26.5 — la cabecera, pintada', () => {
       // Y aire de `--unidad` arriba y abajo (el filete de 1 px va debajo del relleno).
       expect(Math.abs(m.marca.top - m.cabecera.top - m.unidad)).toBeLessThanOrEqual(0.5);
       expect(Math.abs(m.cabecera.bottom - 1 - m.enlaces[0].bottom - m.unidad)).toBeLessThanOrEqual(0.5);
-      // Entre zonas de enlace, `--unidad` en horizontal: el punto medio, de ese ancho (UX-DR101).
-      expect(m.puntos).toHaveLength(2);
-      for (const punto of m.puntos) expect(Math.abs(punto.width - m.unidad), `punto de ${punto.width}`).toBeLessThanOrEqual(0.5);
-      for (let i = 1; i < m.enlaces.length; i += 1) {
-        const entre = m.enlaces[i].left - m.enlaces[i - 1].right;
-        expect(Math.abs(entre - m.unidad), `entre zonas: ${entre}`).toBeLessThanOrEqual(0.5);
-      }
-      // Y `--unidad` de relleno lateral en cada enlace (UX-DR102).
-      for (const relleno of m.rellenos) expect(relleno).toEqual({ izquierda: m.unidad, derecha: m.unidad });
-
-      // Cada zona de toque, de 44 × 44 como mínimo, también la de la marca en alto.
-      expect(m.marca.height).toBeGreaterThanOrEqual(44);
-      for (const enlace of m.enlaces) {
-        expect(enlace.height).toBeGreaterThanOrEqual(44);
-        expect(enlace.width).toBeGreaterThanOrEqual(44);
-      }
-      expect(m.conNowrap).toEqual([]);
+      puntosEntreZonas(m);
+      zonasDeToque(m);
     });
   }
 
@@ -204,27 +222,53 @@ test.describe('Historia 26.5 — la cabecera, pintada', () => {
       // Los enlaces, pegados al borde derecho del contenido.
       expect(Math.abs(m.enlaces[m.enlaces.length - 1].right - m.bordeDerechoDelContenido)).toBeLessThanOrEqual(1);
       expect(m.desborda).toBe(false);
+      puntosEntreZonas(m);
+      zonasDeToque(m);
     });
   }
 
-  test('a 360 × 640, el texto de la Cita empieza en la primera pantalla', async ({ page }) => {
-    await page.setViewportSize({ width: 360, height: 640 });
+  /*
+   * Desde 600 px la fila única puede no caber si el texto se amplía (aquí, zoom 2 sobre `<html>` a
+   * 600: las media queries siguen viendo 600). Entonces la navegación se parte bajo la marca, y su
+   * «Autores» tiene que quedar alineado con el texto de la marca, como bajo 600, no 8 px dentro.
+   */
+  test('desde 600 px, si la fila no cabe, «Autores» se alinea con el texto de la marca', async ({ page }) => {
+    await page.setViewportSize({ width: 600, height: 900 });
     await page.goto(CITA);
-    await page.evaluate(() => document.fonts.ready);
-    const texto = await page.evaluate(() => {
-      const e = document.querySelector('main .texto') as HTMLElement;
-      const rango = document.createRange();
-      rango.selectNodeContents(e);
-      const primeraLinea = rango.getClientRects()[0];
-      return { arriba: e.getBoundingClientRect().top, finDeLaPrimeraLinea: primeraLinea.bottom };
+    await page.evaluate(() => {
+      document.documentElement.style.zoom = '2';
     });
-    test.info().annotations.push({
-      type: 'medida',
-      description: `la Cita empieza a ${texto.arriba.toFixed(2)} px y su primera línea acaba a ${texto.finDeLaPrimeraLinea.toFixed(2)} px (360 × 640)`,
-    });
-    expect(texto.arriba).toBeLessThan(640);
-    expect(texto.finDeLaPrimeraLinea).toBeLessThan(640);
+    const m = await medirCabecera(page);
+    // La premisa: la navegación se partió bajo la marca.
+    expect(m.enlaces[0].top, 'la fila cupo: la prueba no mira nada').toBeGreaterThanOrEqual(m.marca.bottom);
+    const escala = m.unidad / 8;
+    expect(
+      Math.abs(m.textoDeAutores - m.textoDeLaMarca),
+      `${m.textoDeAutores} frente a ${m.textoDeLaMarca}`,
+    ).toBeLessThanOrEqual(escala);
+    expect(m.desbordaLaCabecera, 'la cabecera desborda').toBe(false);
   });
+
+  for (const ancho of [320, 360]) {
+    test(`a ${ancho} × 640, el texto de la Cita empieza en la primera pantalla`, async ({ page }) => {
+      await page.setViewportSize({ width: ancho, height: 640 });
+      await page.goto(CITA);
+      await page.evaluate(() => document.fonts.ready);
+      const texto = await page.evaluate(() => {
+        const e = document.querySelector('main .texto') as HTMLElement;
+        const rango = document.createRange();
+        rango.selectNodeContents(e);
+        const primeraLinea = rango.getClientRects()[0];
+        return { arriba: e.getBoundingClientRect().top, finDeLaPrimeraLinea: primeraLinea.bottom };
+      });
+      test.info().annotations.push({
+        type: 'medida',
+        description: `la Cita empieza a ${texto.arriba.toFixed(2)} px y su primera línea acaba a ${texto.finDeLaPrimeraLinea.toFixed(2)} px (${ancho} × 640)`,
+      });
+      expect(texto.arriba).toBeLessThan(640);
+      expect(texto.finDeLaPrimeraLinea).toBeLessThan(640);
+    });
+  }
 
   /*
    * El texto al 200 % se simula con zoom sobre `<html>` (decisión de Héctor del 2026-10-19): los
@@ -253,6 +297,17 @@ test.describe('Historia 26.5 — la cabecera, pintada', () => {
     for (const enlace of m.enlaces) expect(enlace.right).toBeLessThanOrEqual(m.cabecera.right);
     expect(m.marca.right).toBeLessThanOrEqual(m.cabecera.right);
     expect(m.conNowrap).toEqual([]);
+    /*
+     * Ninguna fila empieza por «·»: cada punto sigue en la fila del enlace que lo precede, a su
+     * derecha (va dentro de su `<li>`), así que al partirse se queda al final de la fila de arriba.
+     */
+    expect(m.puntos).toHaveLength(2);
+    for (const [i, punto] of m.puntos.entries()) {
+      const enlace = m.enlaces[i];
+      const centro = (c: Caja) => (c.top + c.bottom) / 2;
+      expect(Math.abs(centro(punto) - centro(enlace)), `el punto ${i + 1} cambió de fila`).toBeLessThanOrEqual(1);
+      expect(punto.left, `el punto ${i + 1} no va detrás de su enlace`).toBeGreaterThanOrEqual(enlace.right - 0.5);
+    }
   });
 
   test('colores, letra y subrayados por función, y los puntos ocultos al lector', async ({ page }) => {

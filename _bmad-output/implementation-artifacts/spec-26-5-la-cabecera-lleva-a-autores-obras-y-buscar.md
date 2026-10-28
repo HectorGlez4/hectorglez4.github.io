@@ -134,6 +134,27 @@ Diferido: el desplazamiento horizontal de la **página** de Cita a 320 px con el
 
 Rechazados, con su razón: el spec cerrado antes de la revisión (proceso; esta es la revisión); la comprobación del 200 % acotada a la cabecera sin entrada en el Spec Change Log (`epics.md` reserva a la 26.9 el reflujo de toda superficie con la misma simulación, y lo que desborda la página está diferido); el retranqueo cuando la navegación se parte desde 600 px con el texto ampliado (blind-hunter, edge-case-hunter: el contrato dice «sin retranqueo» desde 600 px y el desfase de 8 px solo aparece con el texto ampliado entre 600 px y el ancho en que la fila cabe; cosmético); las comprobaciones pintadas en una sola superficie y sin modo oscuro (la cabecera es el mismo marcado en toda página —lo fija `dist/`— y el barrido axe recorre toda superficie); sin marca visible de `aria-current` (ni `DESIGN.md` ni `EXPERIENCE.md` la piden); `seo.spec.ts` con `--workers=1` (así se corre desde la 26.3, rechazado ya en su revisión); los 153 px solo como «primera pantalla» (el AC dice «hacia los 153 px», el alto de la cabecera va fijado a 113 ± 1 y la cifra se anota); `sprint-status.yaml` y las precondiciones en `review` (lo lleva el orquestador); la prueba de `dist/` sobre todo `.html` (`public/` no trae ninguno y es deliberado: toda página construida lleva el armazón); el recorrido de `dist/` repetido en tres pruebas (coste menor); la Cita fija de `cabecera.spec.ts` (es la que comparten las pruebas del armazón: `pagina-de-cita`, `marca`, `seo`, `accesibilidad`…); un constructor de ruta con `?` o `#` (los cuatro devuelven literales sin ellos); el alcance juzgado en el fixture y a 3 saltos en el sitio real (el AC dice «el sitio de prueba construido»; las páginas 2+ de Autor cuelgan de su página 1); y el barrido axe sin prueba nueva (lo cubre `accesibilidad.spec.ts` en toda superficie).
 
+### 2026-10-28 — Review pass
+- intent_gap: 0
+- bad_spec: 0
+- patch: 11: (high 0, medium 0, low 11)
+- defer: 0
+- reject: 17: (high 0, medium 0, low 17)
+- addressed_findings:
+  - `[low]` `[patch]` Desde 600 px, si el texto ampliado parte la fila, «Autores» quedaba 8 px a la derecha del texto de la marca (blind-hunter, edge-case-hunter, intent-alignment): `Armazon.astro` conserva el retranqueo de `--unidad` también desde 600 px —en la fila única no mueve nada, porque `space-between` lleva la navegación al borde derecho— y `cabecera.spec.ts` lo prueba a 600 px con zoom 2 (comprobado que falla con el `margin-inline-start: 0` de antes).
+  - `[low]` `[patch]` El docblock del armazón decía «todo Autor y toda Obra» a dos saltos (blind-hunter): dice ya «toda Página de Autor y toda página 1 de Obra», con las 2+ colgando de su página 1.
+  - `[low]` `[patch]` `cabecera.spec.ts` decía no usar literales y fijaba 44 y 8 (blind-hunter): la zona de toque sale de una sonda de `--zona-de-toque`, y el docblock nombra los dos valores declarados que sí se escriben (el `{spacing.unit}` de 8 px y los 113 px).
+  - `[low]` `[patch]` Desde 600 px no se comprobaban las zonas de 44 × 44, el relleno lateral, los 8 px entre zonas ni la ausencia de `nowrap` (blind-hunter): las pruebas de 600 y 1280 px los comprueban con las mismas funciones que las de dos filas.
+  - `[low]` `[patch]` Que ninguna fila partida empiece por «·» no se afirmaba (blind-hunter): a 320 px con el texto al 200 % cada punto sigue en la fila de su enlace y a su derecha.
+  - `[low]` `[patch]` Las medidas de 320 px de la Cita en `## Medidas` no se volvían a medir (blind-hunter): la prueba de la primera pantalla corre a 320 × 640 y a 360 × 640 y anota las dos.
+  - `[low]` `[patch]` Los rótulos de la cabecera solo se miraban en una página (ac-auditor 3): la prueba de `dist/` exige en toda página «Sabiduría de Bolsillo», «Autores», «Obras» y «Buscar», en ese orden.
+  - `[low]` `[patch]` Una página sin cabecera daba un `TypeError` y una ruta de Directorio mal normalizada, un «inalcanzable» engañoso (blind-hunter, edge-case-hunter): `cabeceraDe` exige una cabecera única nombrando la ruta, y el grafo de dos saltos exige que los dos Directorios tengan enlaces.
+  - `[low]` `[patch]` `x.html` y `x/index.html` se pisaban en silencio en el mapa de páginas (edge-case-hunter): `paginasConstruidas` lanza ante una ruta repetida.
+  - `[low]` `[patch]` `not.toHaveAttribute('target', /.*/)` en `pagina-de-cita.spec.ts` (blind-hunter): `not.toHaveAttribute('target')`.
+  - `[low]` `[patch]` El spec se contradecía (blind-hunter, también ac-auditor 5): la primera «Revisión» del Auto Run Result queda marcada como sustituida, la línea de `receptor.spec.ts` dice que se amplió a los cuatro enlaces, y la Verificación da `seo.spec.ts` con `--workers=1`, que es como pasa.
+
+Rechazados, con su razón: la primera entrada vacía del Triage Log (es el registro fiel de una pasada sin hallazgos externos; reescribir el historial es peor); `sprint-status.yaml` y las precondiciones en `review` (lo lleva el orquestador, que se mantiene a mano); `DESTINOS` y la lista de `pagina-de-cita.spec.ts` en literal (el criterio fija esas cuatro rutas; derivarlas de los constructores no vería un constructor cambiado); el «·» al final de una fila partida (consecuencia elegida por el contrato: el punto va detrás de su enlace y lo que se prohíbe es que abra fila); sin marca visible de `aria-current` y sin estado de sección en páginas hijas (ni `DESIGN.md` ni `EXPERIENCE.md` lo piden y el contrato dice «en ninguna otra ruta»); que las balizas no digan el destino del clic (`salida-interna` no lleva destino por diseño; el selector fija qué enlace se pulsa); el recorrido de `dist/` repetido (coste menor); una cabecera anidada en otra (la prueba ya exige una sola cabecera fuera de `main`); el desplazamiento de la página a 320 px al 200 % (ya diferido a la 26.9); el alcance en un grafo restringido sobre el sitio de prueba (es lo que dice el criterio, y `seo.spec.ts` juzga el sitio entero); las comprobaciones pintadas en una sola superficie (el marcado es el mismo en toda página y lo fija `dist/`; axe barre toda superficie); los ~153 px solo anotados (el alto de la cabecera va fijado a 113 ± 1 y el criterio manda anotar y llevar a `bmad-ux` si difieren); los receptores solo desde la Cita (la zona se fija en toda página en `dist/`); `/kit` y `/lote` sin enlace entrante desde los Directorios (lo cubren `kit.spec.ts` «ninguna página pública enlaza al Kit» y la prueba de `/lote` sobre todo el sitio); la correspondencia de tokens con los roles de `DESIGN.md` (es la de `tokens.css`); Playwright solo en local (política del proyecto); y el uso de los constructores sin prueba (evidencia de revisión; las rutas las fija `dist/`).
+
 ## Design Notes
 
 El punto va **dentro** del `<li>` del enlace anterior para que la lista siga teniendo tres elementos para el lector de pantalla y, al partirse a 320 × 200 %, una fila nunca empiece por «·».
@@ -154,7 +175,7 @@ El zoom (`style.zoom = '2'` sobre `<html>`) deja la ventana en 320 y el ancho CS
 - `npx vitest run tests/unit/superficies.test.ts` y `npx vitest run tests/unit/medicion.test.ts` -- expected: verde (zona `cabecera` en cada cabecera; todo enlace con zona).
 - `npx astro check` -- expected: 0 errores.
 - `npm run build` y luego, contra `tests/servidor.mjs`, `npx playwright test tests/e2e/cabecera.spec.ts tests/e2e/pagina-de-cita.spec.ts tests/e2e/receptor.spec.ts tests/e2e/pagina-404.spec.ts tests/e2e/marca.spec.ts tests/e2e/portada.spec.ts` en `movil` y `escritorio` -- expected: verde.
-- `npx playwright test tests/e2e/accesibilidad.spec.ts tests/e2e/seo.spec.ts` (largas: `correr.sh`/`esperar.pl`) -- expected: verde; si la primera Cita de una Obra sale de la primera pantalla, Block If.
+- `npx playwright test tests/e2e/accesibilidad.spec.ts --project=movil --project=escritorio` y `npx playwright test tests/e2e/seo.spec.ts --project=movil --project=escritorio --workers=1` (largas: `correr.sh`/`esperar.pl`; `seo.spec.ts` solo con `--workers=1`, porque con varios trabajadores los recorridos del sitemap agotan su tiempo por contención) -- expected: verde; si la primera Cita de una Obra sale de la primera pantalla, Block If.
 
 ## Medidas
 
@@ -185,10 +206,10 @@ Blocking condition: ninguna.
 - `tests/unit/publicable-y-alcanzable.test.ts` — sin `EXENTAS_DE_ALCANCE`/`alcanzables`; nuevo `describe` sobre el mismo build: cuatro enlaces en orden con zona `cabecera`, sin `target` y a páginas construidas en toda página de `dist/`; `aria-current` solo donde toca; Autor y Obras p1 (también la noindex) a dos saltos —y no a uno— por la cabecera y su Directorio.
 - `tests/e2e/seo.spec.ts` — sin exención: el recorrido juzga el sitemap entero.
 - `tests/e2e/pagina-de-cita.spec.ts` — la prueba de la 2.1 pasa a cuatro enlaces (UX-DR112).
-- `tests/e2e/receptor.spec.ts` — un clic en «Autores» desde la Cita da `salida-interna` con zona `cabecera`.
+- `tests/e2e/receptor.spec.ts` — un clic en «Autores» desde la Cita da `salida-interna` con zona `cabecera` (la primera pasada de revisión lo amplió a los cuatro enlaces).
 - `tests/e2e/cabecera.spec.ts` (nuevo) — medidas a 320/360/600/1280, la Cita en la primera pantalla, el 200 % por zoom, colores y subrayados por sonda, Tab y anillo, `aria-current`.
 
-**Revisión.** 0 parches, 0 diferidos, 0 rechazados en esta pasada (capas externas sin hallazgos aún). `followup_review_recommended: false` (parches: high 0, medium 0, low 0; puntuación 0).
+**Revisión.** 0 parches, 0 diferidos, 0 rechazados en esta pasada (capas externas sin hallazgos aún). `followup_review_recommended: false` (parches: high 0, medium 0, low 0; puntuación 0). *Sustituido por las pasadas de revisión con las capas externas, más abajo: el valor vigente es el del frontmatter.*
 
 **Verificación.**
 - `npx vitest run tests/unit/publicable-y-alcanzable.test.ts` — 37/37 verde, sin exenciones.
@@ -224,3 +245,26 @@ Blocking condition: ninguna.
 - `npx playwright test tests/e2e/seo.spec.ts --project=movil --project=escritorio --workers=1` — 20/20, con el recorrido de alcance del sitemap entero.
 
 **Riesgos residuales.** La Página de Cita se desplaza 20 px a 320 px con el texto al 200 % por su contenido (diferido a la 26.9). Con el texto ampliado entre 600 px y el ancho en que la fila cabe, la navegación puede partirse bajo la marca sin retranqueo (8 px de desfase; el contrato fija «sin retranqueo» desde 600 px). `seo.spec.ts` sigue necesitando `--workers=1` para los recorridos del sitemap. `sprint-status.yaml` no se ha tocado (lo lleva el orquestador).
+
+### Segunda pasada de revisión con las capas externas (2026-10-28)
+
+**Resumen.** Se triaron los hallazgos de las cinco capas (blind-hunter, edge-case-hunter, verification-gap —sin hallazgos—, intent-alignment y ac-auditor): 0 intent_gap, 0 bad_spec, 11 parches (todos low), 0 diferidos y 17 rechazados (razones en el Review Triage Log). Sin vuelta atrás por el spec.
+
+**Ficheros de esta pasada.**
+- `src/components/Armazon.astro` — el retranqueo de la navegación sigue desde 600 px (si la fila se parte, «Autores» se alinea con la marca); docblock: «toda Página de Autor y toda página 1 de Obra».
+- `tests/e2e/cabecera.spec.ts` — sonda de `--zona-de-toque`; zonas de toque, relleno, puntos y `nowrap` también a 600 y 1280 px; prueba nueva a 600 px con zoom 2; ningún punto abre fila al 200 %; la Cita en la primera pantalla a 320 y a 360 px; docblock fiel.
+- `tests/unit/publicable-y-alcanzable.test.ts` — rótulos de la cabecera en toda página de `dist/`; `cabeceraDe` con fallo que nombra la ruta; los Directorios deben tener enlaces en el grafo; ruta repetida en `dist/` lanza.
+- `tests/e2e/pagina-de-cita.spec.ts` — `not.toHaveAttribute('target')`.
+- Este spec — Verificación con `--workers=1` para `seo.spec.ts`; la primera «Revisión» marcada como sustituida.
+
+**Revisión.** Parches aplicados: 11 (high 0, medium 0, low 11). Diferidos: 0. Rechazados: 17. `followup_review_recommended: true` (puntuación 3 × 0 + 1 × 11 = 11 ≥ 5).
+
+**Verificación.**
+- `npx vitest run tests/unit/publicable-y-alcanzable.test.ts` — 37/37; `tests/unit/superficies.test.ts` — 107/107; `tests/unit/medicion.test.ts` — 532/532.
+- `npx astro check` — 0 errores, 0 avisos, 8 sugerencias previas.
+- `npx playwright test tests/e2e/cabecera.spec.ts tests/e2e/pagina-de-cita.spec.ts tests/e2e/receptor.spec.ts tests/e2e/pagina-404.spec.ts tests/e2e/marca.spec.ts tests/e2e/portada.spec.ts --project=movil --project=escritorio` — 208 verdes, 70 omitidas por diseño, 0 rojas.
+- La prueba nueva de 600 px con zoom 2 falla con el `margin-inline-start: 0` anterior (comprobado reponiéndolo) y pasa con el arreglo.
+- `npx playwright test tests/e2e/accesibilidad.spec.ts tests/e2e/cabecera.spec.ts --project=movil --project=escritorio` — 162/162 (axe en toda superficie; el Block If no se dispara).
+- `npx playwright test tests/e2e/seo.spec.ts --project=movil --project=escritorio --workers=1` — 20/20.
+
+**Riesgos residuales.** La Página de Cita se desplaza 20 px a 320 px con el texto al 200 % por su contenido (diferido a la 26.9). Una fila partida puede acabar en «·» (elegido por el contrato). `seo.spec.ts` sigue necesitando `--workers=1`. `sprint-status.yaml` no se ha tocado (lo lleva el orquestador).
