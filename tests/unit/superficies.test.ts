@@ -7,6 +7,7 @@ import {
   ETIQUETAS_DEL_BARRIDO,
   ETIQUETAS_QUE_AXE_NO_CORRE,
   LINEA_BASE_DE_LOS_DIRECTORIOS,
+  PAGINAS_DE_DIRECTORIO,
   SUPERFICIES,
   axeLaCorre,
   anunciableEnElSitemap,
@@ -15,9 +16,11 @@ import {
   consecuenciasDelCaracter,
   declararRutasIndexables,
   elBarridoLaCorre,
+  esRutaDeDirectorio,
   esServicioPorForma,
   etiquetaDeAxe,
   olvidarRutasIndexables,
+  rutaDelDirectorioDeAutores,
   rutaNormalizada,
   superficieDeLineaBase,
   superficieDeclaradaDe,
@@ -1125,15 +1128,42 @@ describe('Historia 23.10 — la superficie de línea base', () => {
   });
 
   it('una línea base declarada junta al menos dos superficies, y no se llama como otra superficie ni como la de las búsquedas', () => {
-    // Hoy no la declara ninguna; los Directorios la declaran con la 26 (26.3 y 26.4).
+    // Desde la 26.3 la declara `/autores/`; `/obras/` la declarará con la 26.4.
     const nombres = new Set(SUPERFICIES.map((s) => s.nombre));
     for (const superficie of SUPERFICIES) {
       // La unidad de las búsquedas no es una superficie: unas lecturas que se llamaran así se medirían
       // con las búsquedas asentadas.
       expect(superficieDeLineaBase(superficie), superficie.nombre).not.toBe(UNIDAD_DE_LAS_BUSQUEDAS);
       if (superficie.lineaBase === undefined) continue;
-      expect(SUPERFICIES.filter((s) => s.lineaBase === superficie.lineaBase).length, superficie.nombre).toBeGreaterThan(1);
       expect(nombres.has(superficie.lineaBase), superficie.nombre).toBe(false);
+      /*
+       * Exención transitoria (Historia 26.3): «los Directorios» la declara solo `/autores/` hasta
+       * que `/obras/` exista. La 26.4 quita esta exención.
+       */
+      if (superficie.lineaBase === LINEA_BASE_DE_LOS_DIRECTORIOS) continue;
+      expect(SUPERFICIES.filter((s) => s.lineaBase === superficie.lineaBase).length, superficie.nombre).toBeGreaterThan(1);
     }
+  });
+
+  it('el Directorio de Autores declara «los Directorios» (26.3)', () => {
+    expect(superficieDeclaradaDe('/autores/')?.lineaBase).toBe(LINEA_BASE_DE_LOS_DIRECTORIOS);
+  });
+});
+
+describe('Historia 26.3 — el Directorio de Autores', () => {
+  it('es producto, emite la vista de superficie y no tiene páginas 2+', () => {
+    expect(caracterDe(rutaDelDirectorioDeAutores())).toBe('producto');
+    expect(consecuenciasDe(rutaDelDirectorioDeAutores()).vistas).toEqual([EVENTOS.vistaDeSuperficie]);
+    expect(superficieDeclaradaDe('/autores/2/')).toBeUndefined();
+  });
+
+  it('`esRutaDeDirectorio` lo dice por la declaración, nunca por el prefijo', () => {
+    expect(esRutaDeDirectorio('/autores/')).toBe(true);
+    expect(esRutaDeDirectorio('/autores')).toBe(true);
+    expect(esRutaDeDirectorio('https://ejemplo.org/autores/')).toBe(true);
+    expect(esRutaDeDirectorio('/autor/seneca/')).toBe(false);
+    expect(esRutaDeDirectorio('/obras/')).toBe(false);
+    expect(esRutaDeDirectorio('/autores/2/')).toBe(false);
+    expect(PAGINAS_DE_DIRECTORIO).toEqual(['autores.astro']);
   });
 });

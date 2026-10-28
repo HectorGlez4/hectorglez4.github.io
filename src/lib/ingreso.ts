@@ -189,18 +189,21 @@ export const MODELOS_VEDADOS_EN_LECTURA: readonly IdDeModelo[] = [
 ];
 
 /**
- * Las superficies que no admiten **ningún** Modelo — Historia 17.5.
+ * Las superficies que no admiten **ningún** Modelo — Historias 17.5 y 26.3.
  *
- * Hoy es una: la Página de Autor. AD-20 v7.1 revocó la admisión de la afiliación ahí, y su
- * Lista de Obras (Historia 17.3, `ListaDeObras.astro`) enlaza a cada Página de Obra, que es
- * donde vive el enlace de afiliación: la Página de Autor se publica idéntica con la afiliación
- * encendida o apagada. Su condición —«no aloja ningún Modelo»— se escribe aquí, como regla de
- * la declaración, y no en la página.
+ * La Página de Autor: AD-20 v7.1 revocó la admisión de la afiliación ahí, y su Lista de Obras
+ * (Historia 17.3, `ListaDeObras.astro`) enlaza a cada Página de Obra, que es donde vive el enlace
+ * de afiliación: la Página de Autor se publica idéntica con la afiliación encendida o apagada.
  *
- * Se nombra por fichero, como `admitidoEn`, y por eso cubre las dos formas de la superficie:
- * la página 1 y las 2+ (que además quedan fuera por forma).
+ * El Directorio de Autores (Historia 26.3, AD-20, FR-55, UX-DR110): lista entidades y no es
+ * superficie de lectura, y se construye idéntico byte a byte con todos los Modelos encendidos o
+ * apagados. La 26.4 añade `obras.astro`.
+ *
+ * Su condición —«no aloja ningún Modelo»— se escribe aquí, como regla de la declaración, y no en
+ * la página. Se nombra por fichero, como `admitidoEn`, y por eso cubre todas las formas de cada
+ * superficie: la página 1 y las 2+ (que además quedan fuera por forma).
  */
-export const SUPERFICIES_SIN_INGRESO: readonly string[] = ['autor/[slug]/[...page].astro'];
+export const SUPERFICIES_SIN_INGRESO: readonly string[] = ['autor/[slug]/[...page].astro', 'autores.astro'];
 
 /**
  * Si un fichero de página es la Página de Obra — la única superficie que puede admitir la
@@ -661,9 +664,9 @@ export function revisarDeclaracionDeIngreso(
       if (SUPERFICIES_SIN_INGRESO.includes(pagina)) {
         fallos.push(
           `«${modelo.nombre}» dice admitirse en «${pagina}», que no aloja ningún Modelo ` +
-            '(AD-20 v7.1): la Página de Autor se publica idéntica con cualquier Modelo ' +
-            'encendido o apagado, y su lista de obras enlaza a la Página de Obra, que es donde ' +
-            'vive el enlace de afiliación.',
+            '(AD-20 v7.1, SUPERFICIES_SIN_INGRESO): la Página de Autor y los Directorios se ' +
+            'publican idénticos con cualquier Modelo encendido o apagado, y el enlace de ' +
+            'afiliación vive solo en la Página de Obra.',
         );
       }
       if (modelo.id === 'afiliacion-de-libros' && !esPaginaDeObra(pagina)) {

@@ -1,0 +1,61 @@
+---
+/**
+ * Un grupo de letra de un Directorio — Historia 26.3, UX-DR83, UX-DR100, UX-DR102.
+ *
+ * El rótulo es un `h2` con el trato de Rótulo de sección y es destino de su letra: `tabindex="-1"`
+ * y `scroll-margin-top` los pone `Rotulo` con `destino`, así que el salto nativo le lleva el foco
+ * sin guion, con el anillo global. Debajo, la lista que le pasa quien lo usa, y al final «Volver a
+ * las letras», un enlace de texto en su propia línea a la navegación «Letras» (`#letras`).
+ *
+ * El ritmo: el primer grupo a 4 × `--unidad` de las letras y los demás a 5 × del cierre anterior;
+ * la lista a 2 × del rótulo, con filete superior, y «Volver a las letras» a 2 × de la última fila.
+ * Lo reutilizará `/obras/` (26.4).
+ */
+import Rotulo from './Rotulo.astro';
+
+interface Props {
+  inicial: string;
+  ancla: string;
+}
+
+const { inicial, ancla } = Astro.props;
+---
+
+<section class="grupo">
+  <Rotulo id={ancla} destino>{inicial}</Rotulo>
+  <slot />
+  <p class="volver"><a href="#letras">Volver a las letras</a></p>
+</section>
+
+<style>
+  .grupo {
+    margin-top: calc(var(--unidad) * 5);
+  }
+
+  .grupo:first-of-type {
+    margin-top: calc(var(--unidad) * 4);
+  }
+
+  /* La lista del grupo, sea cual sea su marcado: a 2 × del rótulo y con filete encima. */
+  .grupo > :global(ul) {
+    margin: calc(var(--unidad) * 2) 0 0;
+    padding: 0;
+    list-style: none;
+    border-top: var(--grosor-filete) solid var(--filete);
+  }
+
+  .volver {
+    margin: calc(var(--unidad) * 2) 0 0;
+  }
+
+  /* Mueve dentro de la página: siena y subrayado, con su zona de toque entera (UX-DR102). */
+  .volver a {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--zona-de-toque);
+    font-family: var(--sans);
+    font-size: var(--cuerpo-md);
+    color: var(--siena);
+    text-decoration: underline;
+  }
+</style>

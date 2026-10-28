@@ -13,6 +13,7 @@
 import type { Cita, Autor, SiguienteCita } from './publicado.ts';
 import type { ObraResuelta } from './obras.ts';
 import { MARCA } from './marca.ts';
+import { TARJETA_DEL_DIRECTORIO_DE_AUTORES, rutaDelDirectorioDeAutores } from './superficies.ts';
 
 /**
  * La procedencia compuesta —título de la Obra y año de la Cita, en ese orden— o `undefined`
@@ -128,6 +129,73 @@ export function semblanzaEn(
 ): string | undefined {
   if (autor.atribucion === undefined) return autor.semblanza;
   return PORTAN_LA_ATRIBUCION.has(superficie) ? autor.semblanza : undefined;
+}
+
+/**
+ * Las superficies que **no reproducen** ninguna semblanza, ni propia ni ajena — Historia 26.3,
+ * AD-19, AD-28.
+ *
+ * Es la lista contraria a `SUPERFICIES_DE_LA_SEMBLANZA`, y por eso va aparte: aquellas son las de
+ * la Página de Autor que **consultan** si pueden llevarla (`semblanzaEn`); éstas no preguntan, no
+ * la llevan nunca. Un Directorio lista entidades y dice hechos del Corpus —nombre, años, recuento—,
+ * y no compone prosa sobre ninguna persona. Se nombran por su ruta y por la de su Tarjeta Social, y
+ * una prueba exige sobre `dist/` que ninguna contenga la `semblanza` de ningún Autor. La 26.4 añade
+ * `/obras/` y la suya.
+ */
+export const SUPERFICIES_SIN_SEMBLANZA: readonly string[] = [
+  rutaDelDirectorioDeAutores(),
+  TARJETA_DEL_DIRECTORIO_DE_AUTORES,
+];
+
+/**
+ * «1 cita», «12 citas»: el recuento de Citas con su unidad, en singular cuando es una — Historia
+ * 26.3. Un solo dueño para la Tarjeta de Obra, la Tarjeta Social de Obra y la Fila de Autor del
+ * Directorio, que antes escribían cada una su «1 cita».
+ */
+export function recuentoDeCitas(n: number): string {
+  return n === 1 ? '1 cita' : `${n} citas`;
+}
+
+/**
+ * Los hechos de una Fila de Autor del Directorio — Historia 26.3, FR-55, UX-DR84: sus años, si
+ * constan, y el recuento de sus Citas **publicadas** —las que lista su página, no las documentadas
+ * de la Tarjeta Social de Autor—. Las partes van sin separador: la fila pone el punto medio para la
+ * vista y la coma para el lector.
+ *
+ * Los años salen de `añosDeAutor` («1547–1616», «Fallecido en 65») y solo si consta el año de
+ * fallecimiento. El esquema lo hace obligatorio, así que la rama sin años no se alcanza con el
+ * Corpus; la función la admite para que la convención de ausencia —sin punto medio ni hueco— se
+ * pueda probar sin relajar el tipo de `Autor`.
+ */
+export function hechosDeFilaDeAutor(
+  autor: { añoNacimiento?: number; añoFallecimiento?: number },
+  citas: number,
+): { años?: string; recuento: string } {
+  const recuento = recuentoDeCitas(citas);
+  if (autor.añoFallecimiento === undefined) return { recuento };
+  const años = añosDeAutor({ ...autor, añoFallecimiento: autor.añoFallecimiento });
+  return { años, recuento };
+}
+
+/**
+ * El `<meta description>` del Directorio de Autores — Historia 26.3, UX-DR80, UX-DR107:
+ * «{m} autores, de la A a la Z, con {n} citas publicadas.», en singular cuando la cifra es una
+ * —«1 autor», «1 cita publicada»—, con la redacción que aprobó Héctor el 2026-10-19.
+ *
+ * Solo hechos del Corpus: {m}, los Autores con alguna Cita publicada —los que lista la página—, y
+ * {n}, las Citas publicadas de esos Autores. Nunca «frases».
+ */
+export function descripcionDelDirectorioDeAutores(
+  autores: readonly Pick<Autor, 'slug'>[],
+  citas: readonly Pick<Cita, 'autor'>[],
+): string {
+  const conCitas = new Set(citas.map((cita) => cita.autor));
+  const listados = new Set(autores.filter((autor) => conCitas.has(autor.slug)).map((autor) => autor.slug));
+  const m = listados.size;
+  const n = citas.filter((cita) => listados.has(cita.autor)).length;
+  const deAutores = m === 1 ? '1 autor' : `${m} autores`;
+  const deCitas = n === 1 ? '1 cita publicada' : `${n} citas publicadas`;
+  return `${deAutores}, de la A a la Z, con ${deCitas}.`;
 }
 
 /** Un año como lo lee una persona: los negativos, sin signo y «a. C.». */
@@ -266,7 +334,7 @@ export function contenidoDeTarjetaDeObra(
 ): { hechos: string[]; fila: string } {
   const hechos = [autor.nombre];
   if (obra.año !== undefined) hechos.push(añoLegible(obra.año));
-  hechos.push(obra.recuento === 1 ? '1 cita' : `${obra.recuento} citas`);
+  hechos.push(recuentoDeCitas(obra.recuento));
   return { hechos, fila: obra.edicionCotejada ? FILA_VER_LA_OBRA_Y_DONDE_LEERLA : FILA_VER_LA_OBRA };
 }
 

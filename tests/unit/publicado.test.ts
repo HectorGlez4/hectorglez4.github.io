@@ -6,6 +6,7 @@ import {
   citasDeAutor,
   citasDeTema,
   coleccionesPublicadas,
+  rutasIndexables,
   rutasPublicadas,
   temasDeLaCita,
   temasPublicados,
@@ -112,6 +113,21 @@ describe('Historia 2.1 / AD-11 — agrupaciones y rutas', () => {
     expect(rutas).toContain('/autor/a/');
     expect(rutas).toContain('/tema/t/');
     expect(rutas.filter((r) => r.startsWith('/cita/'))).toHaveLength(MIN_CITAS_POR_TEMA);
+  });
+
+  it('Historia 26.3 — el Directorio de Autores se enumera siempre, tras los Autores, y lo hereda `rutasIndexables`', () => {
+    const conjunto = {
+      citas: [...nCitas(MIN_CITAS_POR_TEMA, 't')],
+      autores: [autor('a')],
+      temas: [tema('t')],
+      colecciones: [],
+    };
+    const rutas = rutasPublicadas(conjunto);
+    expect(rutas.filter((r) => r === '/autores/')).toHaveLength(1);
+    expect(rutas.indexOf('/autores/')).toBe(rutas.indexOf('/autor/a/') + 1);
+    expect(rutasIndexables(conjunto)).toContain('/autores/');
+    // Una página estática: también con el Corpus vacío.
+    expect(rutasPublicadas({ citas: [], autores: [], temas: [], colecciones: [] })).toEqual(['/', '/autores/']);
   });
 
   it('un Tema bajo umbral no aparece entre las rutas', () => {

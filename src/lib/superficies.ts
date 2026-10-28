@@ -123,8 +123,8 @@ export interface Superficie {
    * superficie es su propia unidad (`superficieDeLineaBase`). La lectura de la línea base lo lee de
    * forma genérica y no nombra ninguna ruta, y cada superficie se informa también por separado.
    *
-   * Hoy no lo declara ninguna: lo declaran `/autores/` y `/obras/` cuando existan, las dos con
-   * `LINEA_BASE_DE_LOS_DIRECTORIOS` (Historias 26.3 y 26.4).
+   * Desde la Historia 26.3 lo declara `/autores/`, con `LINEA_BASE_DE_LOS_DIRECTORIOS`; `/obras/`
+   * lo declarará igual cuando exista (26.4), y entonces las dos juntan sus lecturas.
    */
   lineaBase?: string;
 }
@@ -148,6 +148,13 @@ export function superficieDeLineaBase(superficie: Pick<Superficie, 'nombre' | 'l
  */
 /** El fichero de la Página de Obra: su identidad en la declaración (Historia 22.4). */
 const PAGINA_DE_OBRA = 'obra/[autor]/[slug]/[...page].astro';
+
+/**
+ * Los ficheros de los Directorios — Historia 26.3: su identidad en la declaración, como la de la
+ * Página de Obra. Hoy uno, `/autores/`; la 26.4 añade `obras.astro`. De aquí sale el único
+ * predicado que dice si una ruta es de un Directorio (`esRutaDeDirectorio`).
+ */
+export const PAGINAS_DE_DIRECTORIO: readonly string[] = ['autores.astro'];
 
 export const SUPERFICIES: readonly Superficie[] = [
   {
@@ -217,6 +224,17 @@ export const SUPERFICIES: readonly Superficie[] = [
     // Anclada a la ruta entera, como Autor y Tema. Un slug de obra enteramente numérico no
     // llega a existir: `fallosDeObras` rompe el build antes, porque esta forma no lo vería.
     noPublicableEn: /^\/obra\/[^/]+\/[^/]+\/\d+$/,
+  },
+  {
+    nombre: 'el Directorio de Autores',
+    pagina: 'autores.astro',
+    // Historia 26.3 — una ruta literal y sin páginas 2+: lista entera, sin paginar. Por eso no
+    // declara `noPublicableEn`, y `/autores/2` no la reconoce nadie.
+    reconoce: /^\/autores$/,
+    caracter: 'producto',
+    vista: EVENTOS.vistaDeSuperficie,
+    // FR-56 — «los Directorios» son una sola unidad de línea base; `/obras/` la compartirá (26.4).
+    lineaBase: LINEA_BASE_DE_LOS_DIRECTORIOS,
   },
   {
     nombre: 'la búsqueda',
@@ -336,6 +354,20 @@ export function rutaDeColeccion(slug: string, pagina = 1): string {
 export function rutaDeObra(autor: string, slugObra: string, pagina = 1): string {
   return rutaDePagina(`/obra/${autor}/${slugObra}/`, pagina);
 }
+
+/**
+ * La ruta del Directorio de Autores — Historia 26.3. Literal y con barra final, sin paginación:
+ * el Directorio es una sola página.
+ */
+export function rutaDelDirectorioDeAutores(): string {
+  return '/autores/';
+}
+
+/**
+ * La Tarjeta Social del Directorio de Autores — Historia 26.3, UX-DR79. Fuera del espacio
+ * `/tarjeta/{slug}.png` de las Citas: un slug de Cita llamado `directorio` no puede pisarla.
+ */
+export const TARJETA_DEL_DIRECTORIO_DE_AUTORES = '/tarjeta/directorio/autores.png';
 
 /** Las consecuencias de declarar una superficie que salen solo de su carácter. */
 export interface Consecuencias {
@@ -463,6 +495,16 @@ export function superficieDeclaradaDe(
  */
 export function esRutaDeObra(rutaOUrl: string): boolean {
   return superficieDeclaradaDe(rutaOUrl)?.pagina === PAGINA_DE_OBRA;
+}
+
+/**
+ * Si una ruta es de un Directorio —`/autores/`, y `/obras/` desde la 26.4—, por la declaración y
+ * nunca por el prefijo — Historia 26.3. `/autor/x/` no lo es aunque empiece igual. Lo usan las
+ * pruebas que eximen los Directorios del censo de las series hasta que la 26.7 les dé familia.
+ */
+export function esRutaDeDirectorio(rutaOUrl: string): boolean {
+  const pagina = superficieDeclaradaDe(rutaOUrl)?.pagina;
+  return pagina !== undefined && PAGINAS_DE_DIRECTORIO.includes(pagina);
 }
 
 /**

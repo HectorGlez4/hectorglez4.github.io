@@ -19,7 +19,9 @@ import {
   caracterDe,
   consecuenciasDelCaracter,
   declararRutasIndexables,
+  esRutaDeDirectorio,
   olvidarRutasIndexables,
+  rutaDelDirectorioDeAutores,
   rutaNormalizada,
   superficiesDelBarrido,
 } from '../../src/lib/superficies.ts';
@@ -312,6 +314,16 @@ describe('Historia 12.1 — sobre un sitio construido de verdad', () => {
     return enlaces;
   }
 
+  /*
+   * Exención transitoria de alcance, **por su ruta** (Historias 26.3 a 26.5): el Directorio de
+   * Autores existe desde la 26.3, pero el enlace que lo alcanza es la cabecera de la 26.5. Mientras
+   * tanto ninguna página lo enlaza y se exime aquí, y solo él: ninguna otra superficie se exime. La
+   * rama no entra en la principal hasta la 26.11, así que la exención no llega al sitio en vivo
+   * (decisión de Héctor del 2026-10-19). La 26.5 la quita, aquí y en `tests/e2e/seo.spec.ts`.
+   */
+  const EXENTA_DE_ALCANCE = rutaNormalizada(rutaDelDirectorioDeAutores());
+  const alcanzables = (publicables: string[]) => publicables.filter((ruta) => ruta !== EXENTA_DE_ALCANCE);
+
   /** Las rutas que el sitio construyó, que es lo que consumen el barrido y el sitemap. */
   async function rutasConstruidas(): Promise<string[]> {
     return [...(await sitioConstruido()).keys()];
@@ -324,7 +336,8 @@ describe('Historia 12.1 — sobre un sitio construido de verdad', () => {
 
       // Sin esto la comprobación pasaría sobre un sitio vacío sin decir nada.
       expect(publicables.length).toBeGreaterThan(2);
-      expect(superficiesInalcanzables(publicables, enlaces)).toEqual([]);
+      expect(publicables).toContain(EXENTA_DE_ALCANCE);
+      expect(superficiesInalcanzables(alcanzables(publicables), enlaces)).toEqual([]);
     });
 
     it('toda ruta construida tiene declaración: el build no genera nada anónimo', async () => {
@@ -344,6 +357,7 @@ describe('Historia 12.1 — sobre un sitio construido de verdad', () => {
         '/404',
         '/kit',
         '/lote',
+        '/autores',
         '/tema/el-tiempo',
         '/coleccion/frases-cortas',
         OBRA_INDEXABLE,
@@ -457,7 +471,7 @@ describe('Historia 12.1 — sobre un sitio construido de verdad', () => {
       const enlaces = await sitioConstruido();
       const publicables = [...enlaces.keys()].filter((ruta) => caracterDe(ruta) === 'producto');
       expect(publicables).not.toContain('/lote');
-      expect(superficiesInalcanzables(publicables, enlaces)).toEqual([]);
+      expect(superficiesInalcanzables(alcanzables(publicables), enlaces)).toEqual([]);
     });
   });
 
@@ -502,6 +516,8 @@ describe('Historia 12.1 — sobre un sitio construido de verdad', () => {
       const rutas = await anunciadas();
       expect(rutas).toContain('/');
       expect(rutas).toContain('/autor/seneca');
+      // Historia 26.3 — el Directorio de Autores, por su declaración.
+      expect(rutas).toContain('/autores');
       expect(rutas).toContain('/tema/el-tiempo');
       // Historia 12.3 — sale de la misma declaración que el `noindex` y el barrido.
       expect(rutas).toContain('/coleccion/frases-cortas');
@@ -561,6 +577,8 @@ describe('Historia 12.1 — sobre un sitio construido de verdad', () => {
     /** El tipo que le toca a una ruta por su familia. */
     const tipoDeLaRuta = (ruta: string): string | undefined => {
       if (ruta === '/') return 'portada';
+      // Historia 26.3 — por su declaración, no por el prefijo: `/autores` empieza como `/autor/`.
+      if (esRutaDeDirectorio(ruta)) return 'directorio';
       return /^\/(cita|autor|tema|coleccion|obra)\//.exec(ruta)?.[1];
     };
 
@@ -613,7 +631,7 @@ describe('Historia 12.1 — sobre un sitio construido de verdad', () => {
       }
       // Sin esto pasaría sobre un sitio sin nada indexado. El corpus trae las seis familias.
       expect(conCuerpo).toBeGreaterThan(6);
-      expect([...vistas].sort()).toEqual(['autor', 'cita', 'coleccion', 'obra', 'portada', 'tema']);
+      expect([...vistas].sort()).toEqual(['autor', 'cita', 'coleccion', 'directorio', 'obra', 'portada', 'tema']);
     });
 
     it('todo `data-pagefind-meta` construido que no sea `title` declara su peso en `OPCIONES_DE_PAGEFIND`', async () => {

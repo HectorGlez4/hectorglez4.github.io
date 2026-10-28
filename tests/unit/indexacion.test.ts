@@ -12,6 +12,7 @@ import {
   type ConjuntoPublicable,
 } from '../../src/lib/publicado.ts';
 import { MIN_CITAS_POR_TEMA } from '../../src/lib/umbrales.ts';
+import { esRutaDeDirectorio } from '../../src/lib/superficies.ts';
 import {
   CABECERA_DE_INDEXACION,
   FICHERO_DE_INDEXACION,
@@ -147,13 +148,21 @@ describe('el censo por familia', () => {
      * `noindex`, y la serie la mide aparte con el censo del sitemap (`censoDeLaSerie`, 22.8).
      * Se excluye aquí por su nombre.
      */
+    /*
+     * Historia 26.3 — el Directorio de Autores tampoco es de ninguna familia hasta que la 26.7
+     * cree `directorio`: se exime por su declaración en `superficies.ts`, nunca por el prefijo
+     * (`/autores/` empieza como `/autor/x/`, y un prefijo lo contaría como Autor).
+     */
     const publicadas = rutasPublicadas(conjunto)
       .filter((r) => r !== '/')
       .filter((r) => !r.startsWith('/obra/'))
+      .filter((r) => !esRutaDeDirectorio(r))
       .sort();
 
     expect(rutasPublicadas(conjunto)).toContain('/obra/autor-0/una-obra/');
     expect(delCenso.filter((r) => r.startsWith('/obra/'))).toEqual([]);
+    expect(rutasPublicadas(conjunto).filter(esRutaDeDirectorio)).toEqual(['/autores/']);
+    for (const familia of FAMILIAS) expect(censo[familia].filter(esRutaDeDirectorio), familia).toEqual([]);
     expect(delCenso).toEqual(publicadas);
     // La portada no es de ninguna familia y se queda fuera a propósito: es una URL suelta
     // y lo que esta serie compara es el reparto por familia.

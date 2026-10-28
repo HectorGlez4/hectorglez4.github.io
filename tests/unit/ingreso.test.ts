@@ -663,6 +663,17 @@ describe('Historia 17.5 — la afiliación solo en la Página de Obra', () => {
 
 describe('Historia 17.5 — la Página de Autor no aloja ningún Modelo', () => {
   const AUTOR = 'autor/[slug]/[...page].astro';
+  const DIRECTORIO_DE_AUTORES = 'autores.astro';
+
+  it('Historia 26.3 — cualquier Modelo admitido en el Directorio de Autores se rechaza', () => {
+    for (const modelo of MODELOS) {
+      const fallos = revisarDeclaracionDeIngreso([{ ...modelo, admitidoEn: [DIRECTORIO_DE_AUTORES] }]);
+      expect(
+        fallos.some((f) => f.includes(DIRECTORIO_DE_AUTORES) && f.includes('no aloja ningún Modelo')),
+        modelo.id,
+      ).toBe(true);
+    }
+  });
 
   it('cualquier Modelo admitido en el listado de Autor se rechaza', () => {
     for (const modelo of MODELOS) {
@@ -682,7 +693,8 @@ describe('Historia 17.5 — la Página de Autor no aloja ningún Modelo', () => 
   });
 
   it('la regla nombra una superficie que existe, y si desaparece del censo se dice', () => {
-    expect(SUPERFICIES_SIN_INGRESO).toEqual([AUTOR]);
+    // Historia 26.3 — el Directorio de Autores tampoco aloja ninguno; la 26.4 añade `obras.astro`.
+    expect(SUPERFICIES_SIN_INGRESO).toEqual([AUTOR, DIRECTORIO_DE_AUTORES]);
     for (const pagina of SUPERFICIES_SIN_INGRESO) {
       expect(SUPERFICIES.map((s) => s.pagina)).toContain(pagina);
     }

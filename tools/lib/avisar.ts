@@ -45,8 +45,14 @@ export type FamiliaDeFichero = (typeof FAMILIAS_DE_FICHERO)[number][1];
  * Las familias de **ruta**: las superficies que la relación declara. La portada no es ninguna:
  * no lleva fecha y se avisa aparte. La familia de una ruta la pone su entrada en la relación,
  * nunca el prefijo de la ruta.
+ *
+ * `directorio` entra con la Historia 26.3: `/autores/` no es un Autor, y contarlo en la familia
+ * `autor` lo sumaría a los Autores en el ensayo (FR-40). Es familia **del aviso y del ensayo**,
+ * nada más: las series de `tools/` —indexación, tráfico, demanda, rastreo, canal— siguen leyendo
+ * su censo, donde el Directorio cae fuera de toda familia hasta que la 26.7 las mude a
+ * `src/lib/superficies.ts`.
  */
-export const FAMILIAS_DE_RUTA = ['cita', 'autor', 'tema', 'coleccion', 'obra'] as const;
+export const FAMILIAS_DE_RUTA = ['cita', 'autor', 'tema', 'coleccion', 'obra', 'directorio'] as const;
 
 export type FamiliaDeRuta = (typeof FAMILIAS_DE_RUTA)[number];
 

@@ -621,3 +621,52 @@ test.describe('Historia 26.2 — el tipo no casa como texto y la portada tiene e
     expect(rara.nombre).toBeNull();
   });
 });
+
+/*
+ * Historia 26.3, NFR-13 — el Directorio de Autores responde por su título, y el listado entero va
+ * fuera del índice: el nombre de un Autor da su página, nunca el Directorio.
+ */
+test.describe('Historia 26.3 — el Directorio de Autores en la búsqueda', () => {
+  /** Todas las direcciones del índice real para un término, con las opciones de la búsqueda propia. */
+  async function direcciones(page: Page, termino: string): Promise<string[]> {
+    return page.evaluate(
+      async ({ termino, opciones }) => {
+        const pf = await import('/pagefind/pagefind.js' as string);
+        await pf.init();
+        await pf.options(opciones);
+        const { results } = await pf.search(termino);
+        const urls: string[] = [];
+        for (let i = 0; i < results.length; i += 200) {
+          const datos = await Promise.all(results.slice(i, i + 200).map((r: { data: () => Promise<unknown> }) => r.data()));
+          for (const dato of datos as { url: string }[]) urls.push(dato.url.replace(/\/?$/, '/'));
+        }
+        return urls;
+      },
+      { termino, opciones: OPCIONES_DE_PAGEFIND },
+    );
+  }
+
+  test('buscar «autores» devuelve `/autores/`, rotulado «Directorio»', async ({ page }) => {
+    await buscar(page, 'autores');
+    const directorio = (await resultados(page)).find((r) => r.href.replace(/\/?$/, '/') === '/autores/');
+    expect(directorio, '«autores» no devuelve el Directorio entre los resultados pintados').toBeDefined();
+    expect(directorio!.tipo).toBe('directorio');
+    expect(directorio!.etiqueta).toBe(ETIQUETAS_DE_RESULTADO.directorio);
+    expect(directorio!.titulo).toBe('Autores');
+  });
+
+  test('el nombre de un Autor leído de `/autores/` da su Página de Autor, y no el Directorio', async ({ page }) => {
+    test.setTimeout(120_000);
+    await page.goto('/autores/');
+    const fila = page.locator('main li.fila-de-bloque[data-zona="directorio"] a').first();
+    const nombre = (await fila.locator('.nombre').textContent())!.trim();
+    const pagina = (await fila.getAttribute('href'))!;
+    expect(nombre).not.toBe('');
+
+    await page.goto('/buscar/');
+    const urls = await direcciones(page, nombre);
+    expect(urls, nombre).toContain(pagina.replace(/\/?$/, '/'));
+    expect(urls, nombre).not.toContain('/autores/');
+  });
+});
+

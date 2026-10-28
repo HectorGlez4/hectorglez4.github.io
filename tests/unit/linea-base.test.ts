@@ -956,7 +956,8 @@ describe('Historia 23.10 — las ventanas', () => {
       vista: EVENTOS.vistaDeSuperficie,
       lineaBase: DIRECTORIOS.unidad,
     });
-    const superficies = [...SUPERFICIES, directorio('los autores', 'autores'), directorio('las obras', 'obras')];
+    // Historia 26.3 — `/autores/` ya la declara `SUPERFICIES`; `/obras/` llega con la 26.4.
+    const superficies = [...SUPERFICIES, directorio('las obras', 'obras')];
     const censo = [...CENSO, '/autores/', '/obras/'];
     const llegada = D2; // 2026-11-03: los Directorios no existen antes.
     const despues = DIAS.slice(2);
@@ -983,7 +984,7 @@ describe('Historia 23.10 — las ventanas', () => {
       'la línea base no ha empezado: espera DESPLIEGUE_DE_OBRA_Y_DIRECTORIOS, la llegada que la hace medible',
     );
     expect(texto(sinLlegada)).toContain(
-      'los Directorios (los autores y las obras): no ha empezado: empieza la primera jornada UTC completa tras ' +
+      'los Directorios (el Directorio de Autores y las obras): no ha empezado: empieza la primera jornada UTC completa tras ' +
         'DESPLIEGUE_DE_OBRA_Y_DIRECTORIOS, la llegada que la hace medible.',
     );
   });
@@ -1002,7 +1003,9 @@ describe('Historia 23.10 — las ventanas', () => {
   });
 
   it('los Directorios, sin superficie que los declare, dicen que entran con la 26', () => {
-    const l = leer({}, { minimo: 300, juicios: JUICIOS_POR_VENTANAS });
+    // Desde la 26.3 los declara `/autores/`: el caso se mide sobre un censo que no los tiene.
+    const sinDirectorios = SUPERFICIES.filter((s) => s.lineaBase === undefined);
+    const l = leer({}, { superficies: sinDirectorios, minimo: 300, juicios: JUICIOS_POR_VENTANAS });
     const directorios = l.juicios.find((j) => j.juicio.nombre === 'la continuación de los Directorios')!;
     expect(directorios.sinVentanas).toBe('sin lecturas: los Directorios entran con la 26');
   });
@@ -1323,7 +1326,8 @@ describe('Historia 23.10 — segunda revisión: lo que una consulta sin leer dej
       vista: EVENTOS.vistaDeSuperficie,
       lineaBase: DIRECTORIOS.unidad,
     });
-    const superficies = [...SUPERFICIES, directorio('los autores', 'autores'), directorio('las obras', 'obras')];
+    // Historia 26.3 — `/autores/` ya la declara `SUPERFICIES`; `/obras/` llega con la 26.4.
+    const superficies = [...SUPERFICIES, directorio('las obras', 'obras')];
     const l = leer(
       { vistasYLecturas: DIAS.map((dia) => lectura(dia, '/autores/', 60)) },
       { superficies, minimo: 300, juicios: [{ ...DIRECTORIOS, llegada: '2026-10-20' }] },

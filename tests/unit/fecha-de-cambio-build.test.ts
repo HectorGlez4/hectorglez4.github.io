@@ -20,6 +20,7 @@ import {
   rutaDeAutor,
   rutaDeCita,
   rutaDeColeccion,
+  rutaDelDirectorioDeAutores,
   rutaDeTema,
   rutaNormalizada,
 } from '../../src/lib/superficies.ts';
@@ -86,6 +87,8 @@ const ANUNCIABLES = [
   '/',
   ...SLUGS.map((slug) => rutaDeCita(slug)),
   rutaDeAutor('seneca'),
+  // Historia 26.3 — el Directorio de Autores, de producto por su declaración.
+  rutaDelDirectorioDeAutores(),
   rutaDeTema('el-tiempo'),
   rutaDeColeccion('frases-cortas'),
 ]
@@ -377,6 +380,8 @@ describe('Historia 18.4 — el sitemap declara cuándo cambió cada superficie',
     expect(tercera.get(rutaNormalizada(rutaDeCita(SLUG_NUEVO)))).toBe(QUINTO_INSTANTE);
     expect(tercera.get('/autor/seneca')).toBe(QUINTO_INSTANTE);
     expect(tercera.get('/tema/el-tiempo')).toBe(QUINTO_INSTANTE);
+    // Historia 26.3 — el Directorio de Autores cuenta las Citas de cada Autor: el alta lo fecha.
+    expect(tercera.get('/autores')).toBe(QUINTO_INSTANTE);
     // No es miembro de la Colección: su página no cambia.
     expect(tercera.get('/coleccion/frases-cortas')).toBe(primera.get('/coleccion/frases-cortas'));
   });

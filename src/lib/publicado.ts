@@ -39,7 +39,13 @@ import {
   type PosicionesDeCitas,
 } from './obras.ts';
 import { atribucionDeBiografia, type AtribucionDeSemblanza } from './biografia.ts';
-import { rutaDeAutor, rutaDeCita, rutaDeColeccion, rutaDeTema } from './superficies.ts';
+import {
+  rutaDeAutor,
+  rutaDeCita,
+  rutaDeColeccion,
+  rutaDelDirectorioDeAutores,
+  rutaDeTema,
+} from './superficies.ts';
 
 // ─── Formas planas, independientes de Astro ──────────────────────────────────
 
@@ -85,6 +91,13 @@ export interface Autor {
    * Ausente, la semblanza es la breve del editor y se publica como siempre.
    */
   atribucion?: AtribucionDeSemblanza;
+  /**
+   * La clave de orden — Historia 26.1: por ella se ordena y se agrupa el Directorio de Autores
+   * (26.3), con `compararPorClave` e `inicialDeClave` de `src/lib/normalizar.ts`. Opcional como en
+   * el esquema: todo Autor **publicado** la tiene (lo para `integraciones/claves.ts`), uno sin
+   * Citas puede no tenerla. Sin valor se omite.
+   */
+  ordenAlfabetico?: string;
 }
 
 export interface Tema {
@@ -675,12 +688,18 @@ export function siguienteCita(
  * segundo criterio sería el segundo cómputo que AD-11 existe para impedir. Solo la primera
  * página de cada listado paginado aparece; las 2+ son `servicio` por la declaración de
  * `src/lib/superficies.ts`.
+ *
+ * Desde la Historia 26.3 enumera también el Directorio de Autores, **siempre**: es una página
+ * estática que existe aunque el Corpus esté vacío (entonces solo lleva su `h1`). Va tras los
+ * Autores, y por ella la hereda `rutasIndexables`. No es de ninguna familia: las series la dejan
+ * fuera del censo hasta que la 26.7 cree la familia `directorio`.
  */
 export function rutasPublicadas(conjunto: ConjuntoPublicable): string[] {
   return [
     '/',
     ...conjunto.citas.map((c) => rutaDeCita(c.slug)),
     ...autoresPublicados(conjunto.autores, conjunto.citas).map((a) => rutaDeAutor(a.slug)),
+    rutaDelDirectorioDeAutores(),
     ...temasPublicados(conjunto.temas, conjunto.citas).map((t) => rutaDeTema(t.slug)),
     ...conjunto.colecciones.map((c) => rutaDeColeccion(c.slug)),
     // Historia 22.4 — **todas** las Obras, indexables o no: existir no es indexarse (AD-11).
@@ -973,13 +992,15 @@ export function aplanarCita(entrada: EntradaCita): Cita {
  * `resolverAtribuciones`.
  */
 export function aplanarAutor(entrada: EntradaAutor): Autor {
-  const { nombre, semblanza, añoNacimiento, añoFallecimiento } = entrada.data;
+  const { nombre, semblanza, añoNacimiento, añoFallecimiento, ordenAlfabetico } = entrada.data;
   return {
     slug: entrada.id,
     nombre,
     semblanza,
     ...(añoNacimiento !== undefined ? { añoNacimiento } : {}),
     añoFallecimiento,
+    // Historia 26.3 — la clave viaja para el Directorio; `ordenRevisado` no, que no lo pinta nadie.
+    ...(ordenAlfabetico !== undefined ? { ordenAlfabetico } : {}),
   };
 }
 

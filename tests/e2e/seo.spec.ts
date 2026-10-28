@@ -2,7 +2,7 @@ import { expect, test, type Page } from '@playwright/test';
 import { superficiesInalcanzables } from '../../src/lib/publicado.ts';
 import { MAX_SALTOS_DESDE_LA_PORTADA } from '../../src/lib/umbrales.ts';
 import { procedenciaDe, temaBajoUmbral } from './ayuda/corpus.ts';
-import { rutaDeTema } from '../../src/lib/superficies.ts';
+import { rutaDeTema, rutaDelDirectorioDeAutores } from '../../src/lib/superficies.ts';
 import { apuntarGuiones, fueraDeLaListaAlCargar } from './ayuda/guiones.ts';
 
 /** Historia 2.7 — fundamentos de SEO. */
@@ -155,7 +155,17 @@ test.describe('Historia 2.7 — nada huérfano', () => {
      */
     test.slow();
 
-    const publicadas = await rutasDelSitemap(request);
+    /*
+     * Exención transitoria, **por su ruta** (Historias 26.3 a 26.5): el Directorio de Autores se
+     * publica desde la 26.3 y el enlace que lo alcanza es la cabecera de la 26.5; hasta entonces
+     * no lo enlaza ninguna página. Se exime él y nadie más, y la 26.5 quita la exención aquí y en
+     * `tests/unit/publicable-y-alcanzable.test.ts`. La rama no entra en la principal hasta la
+     * 26.11, así que no llega al sitio en vivo (decisión de Héctor del 2026-10-19).
+     */
+    const exenta = rutaDelDirectorioDeAutores();
+    const delSitemap = await rutasDelSitemap(request);
+    expect(delSitemap).toContain(exenta);
+    const publicadas = delSitemap.filter((ruta) => ruta !== exenta);
     const enlaces = new Map<string, string[]>();
 
     /*

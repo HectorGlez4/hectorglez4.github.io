@@ -1,7 +1,7 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { createHash } from 'node:crypto';
 import { createServer, type Server } from 'node:http';
-import { readFile, readdir } from 'node:fs/promises';
+import { readFile, readdir, writeFile } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 import {
   AUTOR_VALIDO,
@@ -9,6 +9,7 @@ import {
   TEMA_VALIDO,
   citaValida,
   construirConCorpus,
+  construirProyecto,
   fuenteConAdmisionAnadida,
   fuenteConDonacionesEncendidas,
   fuenteConModeloEncendido,
@@ -262,6 +263,13 @@ describe('Historia 14.1 — el sitio con los cuatro Modelos apagados', () => {
     expect(Object.keys(paginas).length).toBeGreaterThan(3);
     for (const superficie of ['index.html', 'buscar/index.html', '404.html']) {
       expect(paginas, superficie).toHaveProperty(superficie);
+    }
+  });
+
+  it('Historia 26.3 — el Directorio de Autores y su Tarjeta entran en la huella: dos construcciones, los mismos bytes', () => {
+    for (const fichero of ['autores/index.html', 'tarjeta/directorio/autores.png']) {
+      expect(primera, fichero).toHaveProperty([fichero]);
+      expect(segunda[fichero], fichero).toBe(primera[fichero]);
     }
   });
 
@@ -751,6 +759,9 @@ describe('Historia 17.5 — el tope de guion, con todo encendido donde se admite
     m.admitidoEn.length > 0 ? { ...m, encendido: true } : m,
   );
 
+  /** El Directorio de Autores de la copia con todo apagado (Historia 26.3), para compararlo. */
+  let directorioApagado = '';
+
   /*
    * Historia 22.9 — la afiliación ya se admite en la Página de Obra, así que se mide encendida
    * en una Obra **con ediciones**: la ficha de las dos Citas del corpus declara una, de la tienda
@@ -776,15 +787,29 @@ describe('Historia 17.5 — el tope de guion, con todo encendido donde se admite
     for (const modelo of ADMITIDOS) {
       if (!modelo.encendido) fuente = fuenteConModeloEncendido(fuente, modelo.id);
     }
+    const entorno = { MEDICION_ENDPOINT: 'https://medicion.ejemplo.workers.dev/e' };
     const build = await construirConCorpus(CORPUS_CON_EDICIONES, {
       jornada: JORNADA,
-      entorno: { MEDICION_ENDPOINT: 'https://medicion.ejemplo.workers.dev/e' },
+      entorno,
       ficheros: { 'src/lib/ingreso.ts': fuente },
     });
     aLimpiar.push(build.proyecto);
     expect(build.codigo, build.salida).toBe(0);
     paginas = await paginasDe(join(build.proyecto, 'dist'));
-  }, 240_000);
+
+    /*
+     * Historia 26.3 (FR-55, UX-DR110) — la misma copia, otra vez: el mismo corpus, la misma tienda
+     * y el mismo `MEDICION_ENDPOINT`, con todos los Modelos apagados. Lo único que cambia entre las
+     * dos construcciones es el encendido, así que una diferencia en `/autores/` solo puede venir de
+     * un Modelo.
+     */
+    const apagada = fuenteConTiendaDePrueba(await readFile(resolve(RAIZ, 'src/lib/ingreso.ts'), 'utf8'));
+    expect(MODELOS.every((m) => !m.encendido), 'el árbol ya enciende algún Modelo').toBe(true);
+    await writeFile(join(build.proyecto, 'src/lib/ingreso.ts'), apagada, 'utf8');
+    const otra = await construirProyecto(build.proyecto, { jornada: JORNADA, entorno });
+    expect(otra.codigo, otra.salida).toBe(0);
+    directorioApagado = await readFile(join(build.proyecto, 'dist', 'autores', 'index.html'), 'utf8');
+  }, 480_000);
 
   afterAll(async () => {
     await Promise.all(aLimpiar.splice(0).map(limpiar));
@@ -792,6 +817,14 @@ describe('Historia 17.5 — el tope de guion, con todo encendido donde se admite
 
   it('hay algo que medir: alguna superficie admite hoy algún Modelo', () => {
     expect(ADMITIDOS.length).toBeGreaterThan(0);
+  });
+
+  it('Historia 26.3 — `/autores/` sale idéntico byte a byte con todo encendido y con todo apagado', () => {
+    const encendido = paginas['autores/index.html'];
+    expect(encendido, 'la copia encendida no construyó /autores/').toBeDefined();
+    expect(directorioApagado).not.toBe('');
+    expect(modelosMarcadosEn(encendido)).toEqual([]);
+    expect(encendido).toBe(directorioApagado);
   });
 
   it('lo marcado en cada ruta es exactamente lo encendido y admitido en esa ruta', () => {

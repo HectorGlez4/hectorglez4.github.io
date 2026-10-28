@@ -509,10 +509,11 @@ describe('Historia 24.8 — la matriz: qué cambia de fecha', () => {
     expect([...fechas.values()].every((fecha) => fecha === T0)).toBe(true);
   });
 
-  it('Cita nueva: su página, su Autor, su Tema, su Colección y su Obra; ninguna otra Página de Cita', () => {
+  it('Cita nueva: su página, su Autor, su Tema, su Colección, su Obra y el Directorio; ninguna otra Página de Cita', () => {
     const enT1 = { 'corpus/citas/x--b.md': { antes: null, despues: VERSIONES['corpus/citas/x--b.md'] as Version } };
     const h = historial(enT1, ['corpus/citas/x--b.md']);
-    const esperadas = ['/cita/x-b', '/autor/x', '/tema/t', '/coleccion/c', '/obra/x/o'].sort();
+    // Historia 26.3 — el Directorio de Autores cuenta Citas por Autor: un alta lo mueve.
+    const esperadas = ['/cita/x-b', '/autor/x', '/tema/t', '/coleccion/c', '/obra/x/o', '/autores'].sort();
     expect(refechadas(corpusDeEjemplo(), h)).toEqual(esperadas);
     expect(avisadas(enT1, corpusDeEjemplo(), corpusDeEjemplo(['corpus/citas/x--b.md']))).toEqual(esperadas);
   });
@@ -546,29 +547,50 @@ describe('Historia 24.8 — la matriz: qué cambia de fecha', () => {
   });
 
   /*
-   * Historia 26.1 — el lote de `proponer-claves` escribe `ordenAlfabetico` en todos los Autores
-   * a la vez, y la confirmación de una persona, `ordenRevisado`. Hasta la 26.3 ninguna superficie
-   * pinta la clave, así que ni el lote ni la revisión pueden refechar ni avisar el sitio entero.
-   * La 26.3 y la 26.4 reescriben este caso: la clave moverá `/autores/` y `/obras/`; la revisión,
-   * nunca.
+   * Historias 26.1 y 26.3 — el lote de `proponer-claves` escribe `ordenAlfabetico` en todos los
+   * Autores a la vez, y la confirmación de una persona, `ordenRevisado`. Desde la 26.3 la clave la
+   * pinta el Directorio de Autores, que ordena y agrupa por ella: el lote mueve `/autores/` y nada
+   * más, ni las Páginas de Autor ni las de Cita. La revisión no la pinta nadie: nunca mueve nada.
+   * La 26.4 añadirá `/obras/` al primer caso.
    */
-  it('solo claves de orden o su revisión, en todos los Autores: nada cambia de fecha', () => {
+  it('solo claves de orden, en todos los Autores: cambia solo `/autores/`', () => {
     const enT1 = {
       'corpus/autores/x.yml': editado('corpus/autores/x.yml', { ordenAlfabetico: 'Equis' }),
-      'corpus/autores/y.yml': editado('corpus/autores/y.yml', { ordenAlfabetico: 'Ye', ordenRevisado: '2026-10-28' }),
+      'corpus/autores/y.yml': editado('corpus/autores/y.yml', { ordenAlfabetico: 'Ye' }),
+    };
+    expect(refechadas(corpusDeEjemplo(), historial(enT1))).toEqual(['/autores']);
+    expect(avisadas(enT1, corpusDeEjemplo())).toEqual(['/autores']);
+  });
+
+  it('solo la revisión de las claves, en todos los Autores: nada cambia de fecha', () => {
+    const enT1 = {
+      'corpus/autores/x.yml': editado('corpus/autores/x.yml', { ordenRevisado: '2026-10-28' }),
+      'corpus/autores/y.yml': editado('corpus/autores/y.yml', { ordenRevisado: '2026-10-28' }),
     };
     expect(refechadas(corpusDeEjemplo(), historial(enT1))).toEqual([]);
     expect(avisadas(enT1, corpusDeEjemplo())).toEqual([]);
   });
 
+  it('el texto de una Cita no mueve el Directorio de Autores; cambiarle el Autor, sí', () => {
+    const texto = { 'corpus/citas/x--a.md': editado('corpus/citas/x--a.md', { texto: 'Otro texto.' }) };
+    expect(refechadas(corpusDeEjemplo(), historial(texto))).not.toContain('/autores');
+    expect(avisadas(texto, corpusDeEjemplo())).not.toContain('/autores');
+
+    const deAutor = { 'corpus/citas/x--a.md': editado('corpus/citas/x--a.md', { autor: 'y' }) };
+    expect(refechadas(corpusDeEjemplo(), historial(deAutor))).toContain('/autores');
+    expect(avisadas(deAutor, corpusDeEjemplo())).toContain('/autores');
+  });
+
+  // La semblanza, la tradición y la biografía no las pinta el Directorio de Autores (26.3).
   it('solo la semblanza: solo la Página del Autor', () => {
     const enT1 = { 'corpus/autores/x.yml': editado('corpus/autores/x.yml', { semblanza: 'Otra semblanza.' }) };
     expect(refechadas(corpusDeEjemplo(), historial(enT1))).toEqual(['/autor/x']);
     expect(avisadas(enT1, corpusDeEjemplo())).toEqual(['/autor/x']);
   });
 
-  it('el nombre o los años del Autor: el Autor, sus Páginas de Cita, los listados que lo pintan y sus Obras', () => {
+  it('el nombre o los años del Autor: el Autor, sus Páginas de Cita, los listados que lo pintan, sus Obras y el Directorio', () => {
     const esperadas = [
+      '/autores',
       '/autor/x',
       '/cita/x-a',
       '/cita/x-b',
@@ -613,13 +635,13 @@ describe('Historia 24.8 — la matriz: qué cambia de fecha', () => {
     expect(refechadas(corpusDeEjemplo([], [DOCUMENTO, ajeno]), historial({ [ajeno]: { antes: null, despues: VERSION_OPACA } }))).toEqual([]);
   });
 
-  it('la baja de una Cita fecha su Autor, sus Temas, sus Colecciones y su Obra, y no declara su página', () => {
+  it('la baja de una Cita fecha su Autor, el Directorio, sus Temas, sus Colecciones y su Obra, y no declara su página', () => {
     const ruta = 'corpus/citas/x--b.md';
     const enT1 = { [ruta]: { antes: VERSIONES[ruta] as Version, despues: null } };
     const h = historial(enT1);
     const corpus = conBajas(corpusDeEjemplo([ruta]), h);
     expect(corpus.bajas?.citas?.map((c) => c.slug)).toEqual(['x-b']);
-    const esperadas = ['/autor/x', '/tema/t', '/coleccion/c', '/obra/x/o'].sort();
+    const esperadas = ['/autor/x', '/autores', '/tema/t', '/coleccion/c', '/obra/x/o'].sort();
     expect(refechadas(corpus, h)).toEqual(esperadas);
     // Fecha y aviso coinciden: el aviso lo encuentra en la relación de antes.
     expect(avisadas(enT1, corpusDeEjemplo([ruta]), corpusDeEjemplo())).toEqual(esperadas);
@@ -681,8 +703,8 @@ describe('Historia 24.8 — la matriz: qué cambia de fecha', () => {
     const enT1 = { 'corpus/citas/x--a.md': { antes: VERSION_OPACA as Version, despues: VERSIONES['corpus/citas/x--a.md'] as Version } };
     const h = historial(enT1);
     expect(() => fechasPorSuperficie(corpusDeEjemplo(), h)).not.toThrow();
-    expect(refechadas(corpusDeEjemplo(), h)).toEqual(['/cita/x-a', '/autor/x', '/tema/t', '/obra/x/o'].sort());
-    expect(avisadas(enT1, corpusDeEjemplo())).toEqual(['/cita/x-a', '/autor/x', '/tema/t', '/obra/x/o'].sort());
+    expect(refechadas(corpusDeEjemplo(), h)).toEqual(['/cita/x-a', '/autor/x', '/autores', '/tema/t', '/obra/x/o'].sort());
+    expect(avisadas(enT1, corpusDeEjemplo())).toEqual(['/cita/x-a', '/autor/x', '/autores', '/tema/t', '/obra/x/o'].sort());
   });
 
   it('sin historial no se declara ninguna fecha', () => {

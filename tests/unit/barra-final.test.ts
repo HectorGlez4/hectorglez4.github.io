@@ -9,6 +9,7 @@ import {
   rutaDeObra,
   rutaDePagina,
   rutaDeTema,
+  rutaDelDirectorioDeAutores,
   superficieDeclaradaDe,
 } from '../../src/lib/superficies.ts';
 
@@ -32,6 +33,15 @@ describe('la ruta canónica lleva barra final', () => {
     expect(rutaDeTema('la-vida')).toBe('/tema/la-vida/');
     expect(rutaDeColeccion('refranes-de-sancho')).toBe('/coleccion/refranes-de-sancho/');
     expect(rutaDeObra('cervantes', 'el-quijote')).toBe('/obra/cervantes/el-quijote/');
+    expect(rutaDelDirectorioDeAutores()).toBe('/autores/');
+  });
+
+  it('el Directorio de Autores es una sola página de producto: su ruta la reconoce, y la 2 no existe', () => {
+    // Historia 26.3 — sin páginas 2+: `/autores/2/` no la declara nadie.
+    expect(superficieDeclaradaDe(rutaDelDirectorioDeAutores())?.pagina).toBe('autores.astro');
+    expect(caracterDe(rutaDelDirectorioDeAutores())).toBe('producto');
+    expect(superficieDeclaradaDe('/autores/2/')).toBeUndefined();
+    expect(superficieDeclaradaDe('/autores/2')).toBeUndefined();
   });
 
   it('la primera página de un listado no lleva número', () => {
@@ -73,6 +83,7 @@ describe('la ruta canónica lleva barra final', () => {
       rutaDeColeccion('cuatro-mujeres', 2),
       rutaDeObra('cervantes', 'el-quijote'),
       rutaDeObra('cervantes', 'el-quijote', 2),
+      rutaDelDirectorioDeAutores(),
     ]) {
       expect(superficieDeclaradaDe(ruta), ruta).toBeDefined();
     }

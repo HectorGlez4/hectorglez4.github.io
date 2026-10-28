@@ -37,6 +37,14 @@ export function tituloDe(parte?: string): string {
 }
 
 /**
+ * El título de pestaña del Directorio de Autores — Historia 26.3, UX-DR80: «Autores, de la A a la
+ * Z | Sabiduría de Bolsillo», sin la palabra «citas» ni «frases».
+ */
+export function tituloDelDirectorioDeAutores(): string {
+  return tituloDe('Autores, de la A a la Z');
+}
+
+/**
  * El título de una Página de Autor en el resultado de búsqueda.
  *
  * La primera página no se llama «página 1»: ésa es una coordenada de implementación,

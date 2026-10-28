@@ -162,8 +162,9 @@ describe('las familias del Corpus', () => {
     expect(familiaDeFichero('corpus/_revision/x.md')).toBeUndefined();
   });
 
-  it('las familias de ruta son las cinco superficies que la relación declara, y la pone la relación', () => {
-    expect(FAMILIAS_DE_RUTA).toEqual(['cita', 'autor', 'tema', 'coleccion', 'obra']);
+  it('las familias de ruta son las seis superficies que la relación declara, y la pone la relación', () => {
+    // Historia 26.3 — `directorio`: `/autores/` no es un Autor, y la relación le da su familia.
+    expect(FAMILIAS_DE_RUTA).toEqual(['cita', 'autor', 'tema', 'coleccion', 'obra', 'directorio']);
     const familias = new Set([...relacionDeSuperficies(corpusDeEjemplo()).values()].map((s) => s.familia));
     expect([...familias].sort()).toEqual([...FAMILIAS_DE_RUTA].sort());
   });
@@ -356,7 +357,7 @@ describe('FR-38 — el aviso de las Obras (la matriz de la 22.8)', () => {
     };
   };
 
-  it('Cita nueva en Obra indexable: la Cita, su Autor, sus Temas y la Obra; ninguna hermana', () => {
+  it('Cita nueva en Obra indexable: la Cita, su Autor, sus Temas, la Obra y el Directorio; ninguna hermana', () => {
     const antes = corpusDeEjemplo({ cartas: 2 });
     const despues = corpusDeEjemplo({ cartas: 3 });
     const { rutas } = componerAviso({
@@ -367,7 +368,10 @@ describe('FR-38 — el aviso de las Obras (la matriz de la 22.8)', () => {
       indexablesDespues: indexablesDe(despues),
     });
     expect(indexablesDe(antes).rutas).toContain(CARTAS);
-    expect(rutas.sort()).toEqual(['/', '/cita/seneca-cartas-2/', '/autor/seneca/', '/tema/el-tiempo/', CARTAS].sort());
+    // Historia 26.3 — el Directorio de Autores cuenta las Citas de cada Autor: un alta lo mueve.
+    expect(rutas.sort()).toEqual(
+      ['/', '/cita/seneca-cartas-2/', '/autor/seneca/', '/autores/', '/tema/el-tiempo/', CARTAS].sort(),
+    );
   });
 
   it('una hermana que cambia de estado se avisa: las Citas nuevas bajan Brevedad del 90 %', () => {
@@ -535,7 +539,7 @@ describe('Historia 24.8 — el aviso lee la relación por campos', () => {
     colecciones: corpus.colecciones.map((c) => ({ ...c, miembros: [...c.miembros, slug] })),
   });
 
-  it('un rango que solo añade una Cita avisa solo su Cita, su Autor, sus Temas, sus Colecciones y su Obra', () => {
+  it('un rango que solo añade una Cita avisa solo su Cita, su Autor, sus Temas, sus Colecciones, su Obra y el Directorio', () => {
     const antes = conMiembro(corpusDeEjemplo({ cartas: 2 }), 'seneca-cartas-2');
     const despues = conMiembro(corpusDeEjemplo({ cartas: 3 }), 'seneca-cartas-2');
     const { rutas, avisos } = componerAviso({
@@ -546,7 +550,7 @@ describe('Historia 24.8 — el aviso lee la relación por campos', () => {
       indexablesDespues: indexables(despues),
     });
     expect(rutas.sort()).toEqual(
-      ['/', '/cita/seneca-cartas-2/', '/autor/seneca/', '/tema/el-tiempo/', '/coleccion/breves/', CARTAS].sort(),
+      ['/', '/cita/seneca-cartas-2/', '/autor/seneca/', '/autores/', '/tema/el-tiempo/', '/coleccion/breves/', CARTAS].sort(),
     );
     expect(avisos).toEqual([]);
   });

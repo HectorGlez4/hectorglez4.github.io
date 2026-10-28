@@ -45,6 +45,11 @@
  *   · **Página de Obra** — su ficha, sus Citas, su Autor y **sus documentos**: la unión de
  *     `documentosDeCita` de sus Citas sobre los nombres de `corpus/fuentes/`. Un documento no se
  *     analiza: cualquier cambio suyo puede reordenar la Obra, y solo fecha esa página.
+ *   · **Directorio de Autores** (Historia 26.3) — lo que pinta: de cada Autor con alguna Cita, el
+ *     nombre, los años y la clave de orden (`ordenAlfabetico`), que lo ordena y lo agrupa; de cada
+ *     Cita, solo su `autor`, porque el Directorio cuenta Citas por Autor: un alta, una baja o un
+ *     cambio de Autor lo mueven, un cambio de texto no. La semblanza, la tradición, la biografía y
+ *     `ordenRevisado` no lo fechan.
  *
  * ── Un comparador, dos lecturas ──────────────────────────────────────────────────────
  *
@@ -60,8 +65,8 @@
  * Un fichero que ya no está en el Corpus —su última transición es un borrado: mover una Cita a
  * `corpus/_revision/` o una ficha a `corpus/_obras-retiradas/` lo es— entra con su última versión
  * como **baja** y fecha, con el instante del commit que lo sacó, las superficies **vivas** que
- * compondría: una Cita, su Autor, sus Temas, sus Colecciones (por `miembros`) y su Obra
- * (resuelta por Autor y forma contra las fichas de hoy); una ficha, las Páginas de Cita y los
+ * compondría: una Cita, su Autor, el Directorio de Autores, sus Temas, sus Colecciones (por
+ * `miembros`) y su Obra (resuelta por Autor y forma contra las fichas de hoy); una ficha, las Páginas de Cita y los
  * listados de las Citas de hoy cuya forma reclamaba; un documento, la Obra cuyas Citas lo
  * casarían. Una baja nunca declara la página de sí misma. Un Autor, un Tema o una Colección que
  * salen no componen nada vivo (`bajasDelHistorial` dice por qué), y una baja cuya última versión
@@ -88,6 +93,7 @@ import {
   rutaDeAutor,
   rutaDeCita,
   rutaDeColeccion,
+  rutaDelDirectorioDeAutores,
   rutaDeTema,
   rutaNormalizada,
 } from '../../src/lib/superficies.ts';
@@ -197,7 +203,9 @@ const CAMPOS_DEL_AUTOR_FUERA = ['nombre', 'añoNacimiento', 'añoFallecimiento']
  *   · la **semblanza** y la **biografía** de un Autor solo las pinta su página (1);
  *   · la ficha de Obra pinta su `titulo` en la Página de Cita y en los listados, y en su propia
  *     página además `autor`, `formas` —qué Citas reúne—, `nota` y `ediciones`;
- *   · un documento, cualquier cambio, y solo en la Página de Obra.
+ *   · un documento, cualquier cambio, y solo en la Página de Obra;
+ *   · el Directorio de Autores (26.3) pinta de un Autor el nombre, los años y su clave de orden,
+ *     y de una Cita solo su `autor`: la cuenta por Autor.
  *
  * Las biografías de `corpus/biografias/` **no** son una familia, y tampoco es un olvido: la
  * Página de Autor pinta de ellas la atribución de la semblanza (título, revisión, licencia),
@@ -212,6 +220,7 @@ export const CAMPOS_QUE_PINTA = {
     tema: CAMPOS_DE_CITA,
     coleccion: CAMPOS_DE_CITA,
     obra: CAMPOS_DE_CITA,
+    directorio: ['autor'],
   },
   autor: {
     cita: CAMPOS_DEL_AUTOR_FUERA,
@@ -219,6 +228,7 @@ export const CAMPOS_QUE_PINTA = {
     tema: CAMPOS_DEL_AUTOR_FUERA,
     coleccion: CAMPOS_DEL_AUTOR_FUERA,
     obra: CAMPOS_DEL_AUTOR_FUERA,
+    directorio: [...CAMPOS_DEL_AUTOR_FUERA, 'ordenAlfabetico'],
   },
   tema: {
     cita: ['nombre'],
@@ -247,15 +257,16 @@ export const CAMPOS_QUE_PINTA = {
  *   · `estadoDerechos` es una puerta de admisión, no un texto publicado;
  *   · `tradicion` es del suelo del 40 % de tradición latinoamericana (§6.1);
  *   · `distintaDe` solo silencia un aviso del build (22.2).
- *   · `ordenAlfabetico` y `ordenRevisado` (26.1) todavía no los pinta ninguna superficie: la
- *     clave pasará a mover `/autores/` y `/obras/` con la 26.3 y la 26.4; la revisión, nunca.
+ *   · `ordenRevisado` (26.1) solo dice que una persona revisó la clave: no lo pinta ninguna
+ *     superficie, nunca. La clave, `ordenAlfabetico`, sí: la pinta el Directorio de Autores desde
+ *     la 26.3, y por eso está en la tabla y no aquí.
  *
  * Está escrita para que un campo no fechable sea una decisión con nombre y no un olvido: la
  * prueba de clasificación exige que cada clave de los esquemas esté aquí o en la tabla.
  */
 export const CAMPOS_QUE_NO_FECHAN = {
   cita: ['aptaParaPortada', 'estadoDerechos'],
-  autor: ['tradicion', 'ordenAlfabetico', 'ordenRevisado'],
+  autor: ['tradicion', 'ordenRevisado'],
   obra: ['distintaDe'],
 } as const satisfies Partial<Record<FamiliaDeFichero, readonly string[]>>;
 
@@ -446,6 +457,18 @@ export function relacionDeSuperficies(corpus: CorpusParaFechar): Map<string, Sup
     }
   }
 
+  /*
+   * El Directorio de Autores (Historia 26.3): una página estática, declarada siempre. La componen
+   * los ficheros de los Autores con alguna Cita —los que lista— y todas las Citas, de las que solo
+   * pinta el `autor`. Un Autor sin Citas no la compone: no figura.
+   */
+  const directorio = rutaDelDirectorioDeAutores();
+  declarar(directorio, 'directorio');
+  for (const slug of new Set(corpus.citas.map((cita) => cita.autor))) {
+    componer(directorio, ficheroDeAutor.get(slug), 'autor');
+  }
+  for (const cita of corpus.citas) componer(directorio, cita.ruta, 'cita');
+
   // La Página de Obra: su ficha, sus Citas, su Autor y sus documentos. Sin Citas no tiene página.
   for (const obra of fichas) {
     const citas = citasDeObra.get(obra.nombre);
@@ -464,8 +487,8 @@ export function relacionDeSuperficies(corpus: CorpusParaFechar): Map<string, Sup
   }
 
   /*
-   * Las bajas de Cita fechan lo vivo que compondrían —su Autor, sus Temas, sus Colecciones y su
-   * Obra— y nunca declaran su propia página: `componer` no declara nada. La Obra se resuelve
+   * Las bajas de Cita fechan lo vivo que compondrían —su Autor, el Directorio de Autores, sus
+   * Temas, sus Colecciones y su Obra— y nunca declaran su propia página: `componer` no declara nada. La Obra se resuelve
    * contra las fichas de hoy, por (Autor, forma).
    */
   const coleccionesDe = new Map<string, string[]>();
@@ -475,6 +498,8 @@ export function relacionDeSuperficies(corpus: CorpusParaFechar): Map<string, Sup
   for (const baja of bajas.citas ?? []) {
     if (vivos.has(baja.ruta)) continue;
     componer(rutaDeAutor(baja.autor), baja.ruta, 'cita');
+    // El Directorio la contaba en su Autor: la baja mueve el recuento (26.3).
+    componer(directorio, baja.ruta, 'cita');
     for (const tema of baja.temas ?? []) componer(rutaDeTema(tema), baja.ruta, 'cita');
     for (const ruta of coleccionesDe.get(baja.slug) ?? []) componer(ruta, baja.ruta, 'cita');
     const forma = formaDe(baja);

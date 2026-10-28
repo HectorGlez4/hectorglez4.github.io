@@ -284,9 +284,12 @@ describe('Historia 24.8 — el aviso de un rango, por campos', () => {
     expect(avisos).toEqual([]);
   });
 
-  it('un rango que solo añade una Cita avisa su Cita, su Autor, su Tema y su Obra; ninguna otra', async () => {
+  it('un rango que solo añade una Cita avisa su Cita, su Autor, su Tema, su Obra y el Directorio; ninguna otra', async () => {
     const { rutas, avisos } = await rango('documento', 'cita-nueva', [CARTAS, BREVEDAD]);
-    expect(rutas.sort()).toEqual(['/', '/autor/seneca/', '/cita/seneca-brevedad-5/', '/tema/el-tiempo/', BREVEDAD].sort());
+    // Historia 26.3 — el Directorio de Autores cuenta las Citas de cada Autor: un alta lo mueve.
+    expect(rutas.sort()).toEqual(
+      ['/', '/autor/seneca/', '/autores/', '/cita/seneca-brevedad-5/', '/tema/el-tiempo/', BREVEDAD].sort(),
+    );
     expect(avisos).toEqual([]);
   });
 
@@ -321,6 +324,8 @@ describe('Historia 24.8 — el aviso de un rango, por campos', () => {
       tema: { cambianDeFecha: 1, seAvisarian: 1 },
       coleccion: { cambianDeFecha: 0, seAvisarian: 0 },
       obra: { cambianDeFecha: 1, seAvisarian: 1 },
+      // Historia 26.3 — el rango cambia el texto de una Cita, que el Directorio no pinta.
+      directorio: { cambianDeFecha: 0, seAvisarian: 0 },
     });
     const informe = informeDelEnsayo('a', 'b', ensayo).join('\n');
     expect(informe).toMatch(/Reparto por familia, a\.\.b/);
@@ -351,7 +356,7 @@ describe('Historia 24.8 — lo que la revisión arregló, con git de verdad', ()
     expect(await rango('cita-nueva', 'modo', [CARTAS, BREVEDAD])).toEqual({ rutas: [], avisos: [] });
     const ensayo = await ensayoDelRango(raiz, sha['cita-nueva'], sha['modo'], { rutas: [CARTAS, BREVEDAD] });
     expect(ensayo.portada).toBe(false);
-    for (const familia of ['cita', 'autor', 'tema', 'coleccion', 'obra'] as const) {
+    for (const familia of ['cita', 'autor', 'tema', 'coleccion', 'obra', 'directorio'] as const) {
       expect(ensayo.reparto[familia], familia).toEqual({ cambianDeFecha: 0, seAvisarian: 0 });
     }
   });
@@ -360,8 +365,11 @@ describe('Historia 24.8 — lo que la revisión arregló, con git de verdad', ()
     rotura.catFile = true;
     try {
       const { rutas, avisos } = await rango('tope-restituido', 'apta', [CARTAS, BREVEDAD]);
-      // Sin roturas, este rango avisa solo la portada; con ellas, todo lo que compone la Cita.
-      expect(rutas.sort()).toEqual(['/', '/autor/seneca/', '/cita/seneca-brevedad-0/', '/tema/el-tiempo/', BREVEDAD].sort());
+      // Sin roturas, este rango avisa solo la portada; con ellas, todo lo que compone la Cita,
+      // también el Directorio de Autores (26.3), que la cuenta en su Autor.
+      expect(rutas.sort()).toEqual(
+        ['/', '/autor/seneca/', '/autores/', '/cita/seneca-brevedad-0/', '/tema/el-tiempo/', BREVEDAD].sort(),
+      );
       expect(avisos.join('\n')).toMatch(/no se pudieron leer las versiones del rango/);
     } finally {
       rotura.catFile = false;

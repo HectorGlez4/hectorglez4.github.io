@@ -19,7 +19,7 @@
 import { PALETA, SANS, SERIF, escapar, repartirEnLineas } from './lienzo.ts';
 import { MARCA } from './marca.ts';
 import { tramoDe } from './tramos.ts';
-import { añoLegible, añosDeAutor, recuentoDeDocumentadas } from './atribucion.ts';
+import { añoLegible, añosDeAutor, recuentoDeCitas, recuentoDeDocumentadas } from './atribucion.ts';
 import { citasDocumentadasDeAutor, type Autor, type Cita } from './publicado.ts';
 import type { ObraResuelta } from './obras.ts';
 
@@ -274,7 +274,7 @@ export function bajadaDeTarjetaDeObra(
   obra: Pick<ObraResuelta, 'recuento' | 'año'>,
   autor: Pick<Autor, 'nombre'>,
 ): string {
-  const citas = obra.recuento === 1 ? '1 cita' : `${obra.recuento} citas`;
+  const citas = recuentoDeCitas(obra.recuento);
   const año = obra.año === undefined ? '' : `, ${añoLegible(obra.año)}`;
   return `${citas} de ${autor.nombre}${año}`;
 }
@@ -294,6 +294,21 @@ export function datosDeTarjetaDeObra(
   return {
     titulo: obra.titulo,
     hechos: [bajadaDeTarjetaDeObra(obra, autor)],
+    familiaDelTitulo: 'sans',
+  };
+}
+
+/**
+ * Los datos de la Tarjeta Social del Directorio de Autores — Historia 26.3, UX-DR79, AD-28.
+ *
+ * La de listado con «Autores» en la familia de la interfaz —no es nombre de Autor, Tema ni
+ * Colección— y un solo hecho del Corpus: cuántos Autores lista, con su unidad («1 autor» en
+ * singular). Sin bajada ni prosa, y sin ninguna semblanza: recibe la cifra y nada más.
+ */
+export function datosDeTarjetaDelDirectorioDeAutores(autores: number): DatosDeTarjetaDeListado {
+  return {
+    titulo: 'Autores',
+    hechos: [autores === 1 ? '1 autor' : `${autores} autores`],
     familiaDelTitulo: 'sans',
   };
 }
