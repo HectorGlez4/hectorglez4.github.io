@@ -937,15 +937,39 @@ describe('Historia 26.1 — la clave de orden en las funciones de gestión', () 
     expect(await readFile(join(rutas.autores, 'jose-marti.yml'), 'utf8')).toBe(`${MARTI}ordenAlfabetico: "Martí"\n`);
   });
 
-  it('proponerClaves no da por revisada la clave que acaba de escribir', async () => {
+  it('proponerClaves no completa una revisión sin clave: la nombra, no la toca y sale con 1', async () => {
     const rutas = await corpusVacio();
+    const HUERFANA = 'nombre: "José Martí"\nañoFallecimiento: 1895\nsemblanza: "Poeta."\nordenRevisado: "2026-10-01"\n';
+    await writeFile(join(rutas.autores, 'jose-marti.yml'), HUERFANA, 'utf8');
+    await crearAutor(rutas, SENECA);
     await writeFile(
-      join(rutas.autores, 'jose-marti.yml'),
-      'nombre: "José Martí"\nañoFallecimiento: 1895\nsemblanza: "Poeta."\nordenRevisado: "2026-10-01"\n',
+      join(rutas.autores, 'seneca.yml'),
+      (await readFile(join(rutas.autores, 'seneca.yml'), 'utf8')).replace(/ordenAlfabetico:.*\n/u, ''),
       'utf8',
     );
-    const resultado = await proponerClaves(rutas);
-    expect(resultado.ok && resultado.mensaje).toContain('Sin revisar: 1 de 1');
+
+    for (const pasada of [1, 2]) {
+      const resultado = await proponerClaves(rutas);
+      expect(resultado.ok, `pasada ${pasada}`).toBe(false);
+      if (!resultado.ok) {
+        const parte = resultado.motivos.join('\n');
+        expect(parte).toContain('jose-marti\tordenRevisado sin ordenAlfabetico');
+        expect(parte).toContain('npx tsx tools/autor.ts clave jose-marti');
+        expect(parte).not.toContain('revisada el 2026-10-01');
+      }
+      // El fichero huérfano sigue como estaba; el sano sí recibe su clave en la primera pasada.
+      expect(await readFile(join(rutas.autores, 'jose-marti.yml'), 'utf8')).toBe(HUERFANA);
+      expect(parsearYaml(await readFile(join(rutas.autores, 'seneca.yml'), 'utf8')).ordenAlfabetico).toBe('Séneca');
+    }
+  });
+
+  it('proponerClaves y fijarClave ante un Autor ilegible salen con motivo, sin traza', async () => {
+    const rutas = await corpusVacio();
+    await writeFile(join(rutas.autores, 'roto.yml'), 'nombre: "Roto\n  : [\n', 'utf8');
+    const lote = await proponerClaves(rutas);
+    expect(lote.ok).toBe(false);
+    const clave = await fijarClave(rutas, 'roto', 'Roto', '2026-10-28');
+    expect(clave.ok).toBe(false);
   });
 
   it('fijarClave sobre un fichero que no se deja escribir se niega con motivo y no lo toca', async () => {

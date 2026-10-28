@@ -82,8 +82,9 @@ npx tsx tools/revisar.ts
 no hay bandera para teclearla; el build rompe ante un Autor publicado sin clave, nombrando su
 fichero y `npx tsx tools/autor.ts proponer-claves`. Antes de registrar, **Héctor** confirma o
 corrige las de los Autores nuevos —sobre todo las que el parte marca por tener tres palabras o
-más—, y es el único que lo hace: ningún agente corre esta orden sobre el Corpus real ni da el
-paso por hecho. Es la única orden que escribe `ordenRevisado`, y revisar no bloquea nada.
+más—, y es el único que lo hace: ningún agente corre `npx tsx tools/autor.ts clave` sobre el
+Corpus real ni da el paso por hecho. `clave` es la única orden que escribe `ordenRevisado`, y
+revisar no bloquea nada.
 
 ```
 npx tsx tools/autor.ts clave <slug>              # confirma la clave que hay

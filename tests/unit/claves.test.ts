@@ -60,6 +60,14 @@ describe('AD-1 — la forma de la clave es puerta del esquema', () => {
     }
   });
 
+  it('rechaza con la regla un valor que no es texto: vacío (null) o un número', () => {
+    for (const clave of [null, 1984]) {
+      const r = autorAdmisible.safeParse({ ...AUTOR, ordenAlfabetico: clave });
+      expect(r.success, JSON.stringify(clave)).toBe(false);
+      expect(r.error?.issues[0]?.message).toBe(REGLA_DE_CLAVE_DE_ORDEN);
+    }
+  });
+
   it('no recorta ni reescribe la clave', () => {
     expect(ordenAlfabetico.parse('Séneca ')).toBe('Séneca ');
   });
@@ -102,6 +110,7 @@ describe('la puerta: forma a todos, presencia a los publicados', () => {
     expect(fallos[0]).toContain('corpus/autores/cervantes.yml');
     expect(fallos[0]).toContain('ordenAlfabetico');
     expect(fallos[0]).toContain(REGLA_DE_CLAVE_DE_ORDEN);
+    expect(fallos[0]).toContain('npx tsx tools/autor.ts clave cervantes');
   });
 
   it('una revisión sin clave falla, esté publicado o no', () => {
@@ -154,6 +163,26 @@ describe('el escritor de campos conserva el fichero byte a byte', () => {
     );
   });
 
+  it('sustituir una clave conserva el comentario que haya entre la clave y su valor', async () => {
+    const ruta = await fichero(`${CON_COMENTARIOS}ordenAlfabetico: # nota\n  "Jesús"\n`);
+    await fijarCamposDeAutor(ruta, { ordenAlfabetico: 'Teresa' });
+    expect(await readFile(ruta, 'utf8')).toBe(`${CON_COMENTARIOS}ordenAlfabetico: # nota\n  "Teresa"\n`);
+  });
+
+  it('un fichero con fin de línea CRLF recibe la línea nueva con CRLF', async () => {
+    const crlf = CON_COMENTARIOS.split('\n').join('\r\n');
+    const ruta = await fichero(crlf);
+    await fijarCamposDeAutor(ruta, { ordenAlfabetico: 'Jesús' });
+    expect(await readFile(ruta, 'utf8')).toBe(`${crlf}ordenAlfabetico: "Jesús"\r\n`);
+  });
+
+  it('un mapa en estilo de flujo se rechaza como ilegible y no se toca', async () => {
+    const flujo = '{nombre: "Teresa de Jesús", añoFallecimiento: 1582, semblanza: "Religiosa."}\n';
+    const ruta = await fichero(flujo);
+    await expect(fijarCamposDeAutor(ruta, { ordenAlfabetico: 'Jesús' })).rejects.toThrow(/no es un mapa YAML legible/u);
+    expect(await readFile(ruta, 'utf8')).toBe(flujo);
+  });
+
   it('un fichero que no es un mapa YAML no se toca', async () => {
     const ruta = await fichero('- una lista\n- no un Autor\n');
     await expect(fijarCamposDeAutor(ruta, { ordenAlfabetico: 'X' })).rejects.toThrow();
@@ -196,5 +225,17 @@ describe('en astro dev la puerta avisa y no corta', () => {
 
     // Y el mismo Corpus, en el build, sí corta.
     await expect(ganchos['astro:build:start']({ logger })).rejects.toThrow(/Claves de orden/u);
+  });
+
+  it('un Autor ilegible en astro dev se avisa y el gancho no lanza', async () => {
+    const raiz = await proyectoConSenecaSinClave();
+    await writeFile(join(raiz, 'corpus', 'autores', 'roto.yml'), 'nombre: "Roto\n  : [\n');
+    const integracion = clavesDeOrden();
+    const ganchos = integracion.hooks as Record<string, (opciones: unknown) => unknown>;
+    await ganchos['astro:config:setup']({ config: { root: pathToFileURL(`${raiz}/`) } });
+    const avisos: string[] = [];
+    const logger = { warn: (m: string) => avisos.push(m), error: () => {}, info: () => {} };
+    await expect(ganchos['astro:server:setup']({ logger })).resolves.toBeUndefined();
+    expect(avisos.join('\n')).toContain('no se pudo leer el Corpus');
   });
 });

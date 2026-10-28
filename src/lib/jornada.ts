@@ -10,10 +10,11 @@
  */
 
 /**
- * Qué tiene forma de jornada. El **único** sitio donde se dice, y por eso está aquí.
+ * Qué tiene forma de jornada. El **único** sitio donde se dice.
  *
- * Lo consumen `jornadaDelBuild` —que lee la jornada declarada por el entorno— y la orden
- * que fija jornadas de la portada (Historia 13.1). Con dos definiciones, una
+ * Lo consumen `jornadaDelBuild` —que lee la jornada declarada por el entorno—, la orden
+ * que fija jornadas de la portada (Historia 13.1) y el validador de `ordenRevisado` de
+ * `src/lib/admision.ts` (Historia 26.1). Con dos definiciones, una
  * acabaría admitiendo lo que la otra rechaza y el lote fijaría jornadas que la Cita del
  * Día no sabe leer.
  *

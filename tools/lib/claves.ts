@@ -62,7 +62,8 @@ export interface AutorParaClaves {
 /**
  * Las líneas de fallo de las claves de orden: una por Autor que incumple.
  *
- *   · **forma** — a todo Autor que declara `ordenAlfabetico`, publicado o no;
+ *   · **forma** — a todo Autor que declara `ordenAlfabetico`, publicado o no; la línea nombra
+ *     `clave`, la única orden con que se corrige;
  *   · **presencia** — solo al Autor de `publicados` (los slugs de `autoresPublicados`). La
  *     línea nombra la orden que la arregla: `proponer-claves` si la regla da clave para su
  *     nombre, y si no `clave`, que es la de una persona;
@@ -79,7 +80,8 @@ export function fallosDeClaves(
     if (autor.ordenAlfabetico !== undefined) {
       if (!ordenAlfabetico.safeParse(autor.ordenAlfabetico).success) {
         fallos.push(
-          `${autor.ruta}: ordenAlfabetico ${JSON.stringify(autor.ordenAlfabetico)}. ${REGLA_DE_CLAVE_DE_ORDEN}`,
+          `${autor.ruta}: ordenAlfabetico ${JSON.stringify(autor.ordenAlfabetico)}. ${REGLA_DE_CLAVE_DE_ORDEN} ` +
+            `Corríjala con ${ordenFijarClave(autor.slug)}, no a mano.`,
         );
       }
       continue;

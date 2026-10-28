@@ -866,8 +866,11 @@ export async function escribirAutor(
  * `escribirAutor` vuelca el fichero entero con `aYaml`, y eso pierde los comentarios: los de
  * `teresa-de-jesus.yml`, que explican su `tituloEnFuente`, no sobrevivirían a una clave de
  * orden. Aquí el YAML se analiza solo para **localizar** la clave: si ya está, se sustituye
- * su línea en el texto; si no, se añade una al final. El resto del fichero queda byte a byte.
- * El valor se escribe como lo escribe `aYaml` (`ordenAlfabetico: "Cervantes"`).
+ * su valor en el texto —la clave y lo que haya entre ella y el valor, un comentario incluido,
+ * se quedan—; si no, se añade una línea al final, con el fin de línea que use el fichero. El
+ * resto del fichero queda byte a byte. El valor se escribe como lo escribe `aYaml`
+ * (`ordenAlfabetico: "Cervantes"`). Un mapa en estilo de flujo (`{nombre: …}`) no admite una
+ * línea al final, y se rechaza como ilegible.
  *
  * Se relee lo compuesto antes de escribir: si no dice exactamente lo que se quería fijar, se
  * lanza y el fichero no se toca.
@@ -877,24 +880,23 @@ export async function fijarCamposDeAutor(
   campos: Readonly<Record<string, string>>,
 ): Promise<void> {
   const original = await readFile(ruta, 'utf8');
+  const fin = original.includes('\r\n') ? '\r\n' : '\n';
   let texto = original;
   for (const [clave, valor] of Object.entries(campos)) {
-    const linea = `${clave}: ${escalar(valor)}`;
     const documento = parseDocument(texto);
-    if (documento.errors.length > 0 || !isMap(documento.contents)) {
+    if (documento.errors.length > 0 || !isMap(documento.contents) || documento.contents.flow === true) {
       throw new Error(`${ruta} no es un mapa YAML legible: no se le escribe ${clave}.`);
     }
     const par = documento.contents.items.find((p) => isScalar(p.key) && p.key.value === clave);
     if (par === undefined) {
-      texto = `${texto === '' || texto.endsWith('\n') ? texto : `${texto}\n`}${linea}\n`;
+      texto = `${texto === '' || texto.endsWith('\n') ? texto : `${texto}${fin}`}${clave}: ${escalar(valor)}${fin}`;
       continue;
     }
-    const inicio = isScalar(par.key) ? par.key.range?.[0] : undefined;
-    const fin = isScalar(par.value) ? par.value.range?.[1] : undefined;
-    if (inicio === undefined || fin === undefined) {
+    const rango = isScalar(par.value) ? par.value.range : undefined;
+    if (rango === undefined || rango === null) {
       throw new Error(`${ruta}: ${clave} no es un valor escalar que se pueda sustituir.`);
     }
-    texto = `${texto.slice(0, inicio)}${linea}${texto.slice(fin)}`;
+    texto = `${texto.slice(0, rango[0])}${escalar(valor)}${texto.slice(rango[1])}`;
   }
   const releido = parsearYaml(texto) as Record<string, unknown>;
   const antes = parsearYaml(original) as Record<string, unknown>;

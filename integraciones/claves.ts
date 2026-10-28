@@ -80,7 +80,14 @@ export default function clavesDeOrden(): AstroIntegration {
       },
 
       'astro:server:setup': async ({ logger }) => {
-        const fallos = await revisar();
+        // En dev se avisa y no se corta, tampoco si el Corpus no se deja leer: lo dirá el build.
+        let fallos: string[];
+        try {
+          fallos = await revisar();
+        } catch (error) {
+          logger.warn(`Claves de orden: no se pudo leer el Corpus (${error instanceof Error ? error.message : String(error)}).`);
+          return;
+        }
         if (fallos.length === 0) return;
         logger.warn(`\n${fallos.join('\n')}\nEl build no dejará publicar esto: ${titular(fallos.length)}\n`);
       },

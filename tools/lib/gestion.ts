@@ -147,8 +147,8 @@ function parteDeClaveNueva(slug: string, nombre: string, propuesta: PropuestaDeC
     );
   }
   const marca = propuesta.marcada
-    ? ` El nombre tiene tres palabras o más: revise la clave antes con ${ordenFijarClave(slug)} ` +
-      `(o confírmela con npx tsx tools/autor.ts clave ${slug}).`
+    ? ` El nombre tiene tres palabras o más: la clave merece mirarse antes, y la confirma o ` +
+      `corrige Héctor con ${ordenFijarClave(slug)} (o npx tsx tools/autor.ts clave ${slug}).`
     : '';
   return `Clave de orden: «${propuesta.clave}», sin revisar.${marca}`;
 }
@@ -233,7 +233,14 @@ export async function editarAutor(
  * no sabe proponer, con la orden con que una persona los fija.
  */
 export async function proponerClaves(rutas: Rutas): Promise<Resultado> {
-  const autores = (await leerAutores(rutas)).sort((a, b) => (a.slug < b.slug ? -1 : a.slug > b.slug ? 1 : 0));
+  let leidos: Awaited<ReturnType<typeof leerAutores>>;
+  try {
+    leidos = await leerAutores(rutas);
+  } catch (error) {
+    // Un Corpus ilegible se dice con 1 y sin escribir nada, no con una traza.
+    return { ok: false, motivos: [error instanceof Error ? error.message : String(error)] };
+  }
+  const autores = leidos.sort((a, b) => (a.slug < b.slug ? -1 : a.slug > b.slug ? 1 : 0));
   const escritas: string[] = [];
   const sinRegla: string[] = [];
   const sinForma: string[] = [];
@@ -246,6 +253,20 @@ export async function proponerClaves(rutas: Rutas): Promise<Resultado> {
     const propuesta = proponerClave(typeof autor.nombre === 'string' ? autor.nombre : '');
     let clave = autor.ordenAlfabetico;
     let nueva = false;
+    /*
+     * Una revisión sin clave —`ordenRevisado` sin `ordenAlfabetico`, que solo sale de teclear el
+     * fichero— no se completa: la clave que el lote escribiera quedaría junto a una revisión
+     * anterior a ella, y el fichero la daría por revisada sin que nadie la mirase. Se nombra, no
+     * se toca, y la orden sale con 1; la arregla una persona con `clave`, como dice el build.
+     */
+    if (clave === undefined && autor.ordenRevisado !== undefined) {
+      fallidas.push(
+        `  ${autor.slug}\tordenRevisado sin ordenAlfabetico: no se le propone clave. ` +
+          `Quite ordenRevisado y fije la clave con ${ordenFijarClave(autor.slug)}`,
+      );
+      lineas.push(`  ${autor.slug}\t${autor.nombre}\tsin clave (revisión sin clave)`);
+      continue;
+    }
     if (clave === undefined && propuesta.clave !== undefined) {
       /*
        * Un fichero que no se deja escribir —no es un mapa YAML, o la escritura cambiaría otra
@@ -269,7 +290,7 @@ export async function proponerClaves(rutas: Rutas): Promise<Resultado> {
       continue;
     }
     if (!ordenAlfabetico.safeParse(clave).success) sinForma.push(`  ${autor.slug}\t«${clave}»`);
-    // Una clave que este lote acaba de escribir no la ha revisado nadie, diga lo que diga el fichero.
+    // Una clave que este lote acaba de escribir no la ha revisado nadie.
     const revisada = !nueva && autor.ordenRevisado !== undefined;
     if (!revisada) sinRevisar += 1;
     if (!revisada && propuesta.marcada) marcadas.push(`  ${autor.slug}\t${autor.nombre}\t→ «${clave}»`);
@@ -321,7 +342,13 @@ export async function fijarClave(
   clave: string | undefined,
   hoy: string,
 ): Promise<Resultado> {
-  const autor = (await leerAutores(rutas)).find((a) => a.slug === slug);
+  let autores: Awaited<ReturnType<typeof leerAutores>>;
+  try {
+    autores = await leerAutores(rutas);
+  } catch (error) {
+    return { ok: false, motivos: [error instanceof Error ? error.message : String(error)] };
+  }
+  const autor = autores.find((a) => a.slug === slug);
   if (!autor) return { ok: false, motivos: [`El Autor «${slug}» no existe en el corpus.`] };
 
   const definitiva = clave ?? autor.ordenAlfabetico;
