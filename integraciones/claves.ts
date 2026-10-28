@@ -54,6 +54,7 @@ export default function clavesDeOrden(): AstroIntegration {
         ruta: relativaALaRaiz(raiz, a.ruta),
         nombre: a.nombre,
         ...('ordenAlfabetico' in a ? { ordenAlfabetico: a.ordenAlfabetico } : {}),
+        ...('ordenRevisado' in a ? { ordenRevisado: a.ordenRevisado } : {}),
       })),
       publicados,
     );

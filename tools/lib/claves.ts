@@ -56,6 +56,7 @@ export interface AutorParaClaves {
   ruta: string;
   nombre?: unknown;
   ordenAlfabetico?: unknown;
+  ordenRevisado?: unknown;
 }
 
 /**
@@ -64,7 +65,10 @@ export interface AutorParaClaves {
  *   · **forma** — a todo Autor que declara `ordenAlfabetico`, publicado o no;
  *   · **presencia** — solo al Autor de `publicados` (los slugs de `autoresPublicados`). La
  *     línea nombra la orden que la arregla: `proponer-claves` si la regla da clave para su
- *     nombre, y si no `clave`, que es la de una persona.
+ *     nombre, y si no `clave`, que es la de una persona;
+ *   · **revisión huérfana** — a todo Autor con `ordenRevisado` y sin `ordenAlfabetico`: la
+ *     revisión no apunta a ninguna clave, y `proponer-claves` daría por revisada la que
+ *     escribiera después. `clave` nunca deja ese estado; solo sale de teclear el fichero.
  */
 export function fallosDeClaves(
   autores: readonly AutorParaClaves[],
@@ -78,6 +82,13 @@ export function fallosDeClaves(
           `${autor.ruta}: ordenAlfabetico ${JSON.stringify(autor.ordenAlfabetico)}. ${REGLA_DE_CLAVE_DE_ORDEN}`,
         );
       }
+      continue;
+    }
+    if (autor.ordenRevisado !== undefined) {
+      fallos.push(
+        `${autor.ruta}: ordenRevisado sin ordenAlfabetico: la revisión no apunta a ninguna clave. ` +
+          `Quite ordenRevisado y fije la clave con ${ordenFijarClave(autor.slug)}`,
+      );
       continue;
     }
     if (!publicados.has(autor.slug)) continue;

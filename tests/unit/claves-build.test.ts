@@ -60,8 +60,19 @@ describe('Historia 26.1 — todo Autor publicado tiene su clave de orden', () =>
     });
     aLimpiar.push(r.proyecto);
     expect(r.codigo).not.toBe(0);
-    expect(r.salida).toContain('horacio');
+    expect(r.salida).toContain('corpus/autores/horacio.yml');
     expect(r.salida).toContain('ordenAlfabetico');
     expect(r.salida).toContain(REGLA_DE_CLAVE_DE_ORDEN);
+  });
+
+  it('una revisión que no es una jornada rompe el build con el Autor y la regla', async () => {
+    const r = await construirConCorpus({
+      ...BASE,
+      'autores/horacio.yml': `${HORACIO}ordenAlfabetico: "Horacio"\nordenRevisado: "2026-02-31"\n`,
+    });
+    aLimpiar.push(r.proyecto);
+    expect(r.codigo).not.toBe(0);
+    expect(r.salida).toContain('corpus/autores/horacio.yml');
+    expect(r.salida).toContain('ordenRevisado es una jornada');
   });
 });

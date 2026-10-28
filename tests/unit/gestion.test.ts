@@ -922,6 +922,42 @@ describe('Historia 26.1 — la clave de orden en las funciones de gestión', () 
     if (segunda.ok) expect(segunda.mensaje).toContain('Ninguna clave nueva');
   });
 
+  it('proponerClaves nombra el fichero que no se deja escribir, escribe los demás y sale con rechazo', async () => {
+    const rutas = await corpusVacio();
+    const MARTI = 'nombre: "José Martí"\nañoFallecimiento: 1895\nsemblanza: "Poeta."\n';
+    // Con marca de fin de documento: añadir la clave al final la dejaría fuera del documento.
+    const CON_FIN = 'nombre: "Rubén Darío"\nañoFallecimiento: 1916\nsemblanza: "Poeta."\n...\n';
+    await writeFile(join(rutas.autores, 'jose-marti.yml'), MARTI, 'utf8');
+    await writeFile(join(rutas.autores, 'ruben-dario.yml'), CON_FIN, 'utf8');
+
+    const resultado = await proponerClaves(rutas);
+    expect(resultado.ok).toBe(false);
+    if (!resultado.ok) expect(resultado.motivos.join('\n')).toMatch(/No se pudo escribir la clave de 1 Autor:\n {2}ruben-dario\t/u);
+    expect(await readFile(join(rutas.autores, 'ruben-dario.yml'), 'utf8')).toBe(CON_FIN);
+    expect(await readFile(join(rutas.autores, 'jose-marti.yml'), 'utf8')).toBe(`${MARTI}ordenAlfabetico: "Martí"\n`);
+  });
+
+  it('proponerClaves no da por revisada la clave que acaba de escribir', async () => {
+    const rutas = await corpusVacio();
+    await writeFile(
+      join(rutas.autores, 'jose-marti.yml'),
+      'nombre: "José Martí"\nañoFallecimiento: 1895\nsemblanza: "Poeta."\nordenRevisado: "2026-10-01"\n',
+      'utf8',
+    );
+    const resultado = await proponerClaves(rutas);
+    expect(resultado.ok && resultado.mensaje).toContain('Sin revisar: 1 de 1');
+  });
+
+  it('fijarClave sobre un fichero que no se deja escribir se niega con motivo y no lo toca', async () => {
+    const rutas = await corpusVacio();
+    const CON_FIN = 'nombre: "Rubén Darío"\nañoFallecimiento: 1916\nsemblanza: "Poeta."\n...\n';
+    await writeFile(join(rutas.autores, 'ruben-dario.yml'), CON_FIN, 'utf8');
+    const resultado = await fijarClave(rutas, 'ruben-dario', 'Darío', '2026-10-28');
+    expect(resultado.ok).toBe(false);
+    if (!resultado.ok) expect(resultado.motivos.join(' ')).toContain('ruben-dario.yml');
+    expect(await readFile(join(rutas.autores, 'ruben-dario.yml'), 'utf8')).toBe(CON_FIN);
+  });
+
   it('fijarClave corrige, confirma, y se niega sin escribir ante lo que no vale', async () => {
     const rutas = await corpusVacio();
     await crearAutor(rutas, SENECA);

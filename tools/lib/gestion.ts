@@ -23,7 +23,7 @@ import {
   ordenAlfabetico,
   tradicion,
 } from '../../src/lib/admision.ts';
-import { ORDEN_PROPONER_CLAVES, ordenFijarClave, proponerClave } from './claves.ts';
+import { ORDEN_PROPONER_CLAVES, ordenFijarClave, proponerClave, type PropuestaDeClave } from './claves.ts';
 import { slugDeAutor, slugDeTema } from '../../src/lib/slug.ts';
 import {
   FICHERO_DE_CANDIDATOS,
@@ -132,12 +132,14 @@ export async function crearAutor(rutas: Rutas, datos: DatosDeAutor): Promise<Res
     // Y sin clave de orden cuando la regla no da ninguna con forma.
     ordenAlfabetico: propuesta.clave,
   });
-  return { ok: true, ruta, mensaje: `Autor «${slug}» creado.\n${parteDeClaveNueva(slug, validado.data.nombre)}` };
+  return { ok: true, ruta, mensaje: `Autor «${slug}» creado.\n${parteDeClaveNueva(slug, validado.data.nombre, propuesta)}` };
 }
 
-/** Lo que el alta dice de la clave que acaba de proponer — Historia 26.1. */
-function parteDeClaveNueva(slug: string, nombre: string): string {
-  const propuesta = proponerClave(nombre);
+/**
+ * Lo que el alta dice de la clave que acaba de proponer — Historia 26.1. Recibe la propuesta
+ * que se escribió, no la recalcula: el parte no puede nombrar otra clave que la del fichero.
+ */
+function parteDeClaveNueva(slug: string, nombre: string, propuesta: PropuestaDeClave): string {
   if (propuesta.clave === undefined) {
     return (
       `La regla de la última palabra no da clave de orden para «${nombre}»: el Autor queda sin ` +
@@ -235,6 +237,7 @@ export async function proponerClaves(rutas: Rutas): Promise<Resultado> {
   const escritas: string[] = [];
   const sinRegla: string[] = [];
   const sinForma: string[] = [];
+  const fallidas: string[] = [];
   const marcadas: string[] = [];
   const lineas: string[] = [];
   let sinRevisar = 0;
@@ -244,7 +247,18 @@ export async function proponerClaves(rutas: Rutas): Promise<Resultado> {
     let clave = autor.ordenAlfabetico;
     let nueva = false;
     if (clave === undefined && propuesta.clave !== undefined) {
-      await fijarCamposDeAutor(autor.ruta, { ordenAlfabetico: propuesta.clave });
+      /*
+       * Un fichero que no se deja escribir —no es un mapa YAML, o la escritura cambiaría otra
+       * cosa— no detiene el lote a medias sin parte: se nombra, los demás se escriben y la orden
+       * sale con 1. Lo escrito queda escrito, y volver a correrla solo toca lo que falta.
+       */
+      try {
+        await fijarCamposDeAutor(autor.ruta, { ordenAlfabetico: propuesta.clave });
+      } catch (error) {
+        fallidas.push(`  ${autor.slug}\t${error instanceof Error ? error.message : String(error)}`);
+        lineas.push(`  ${autor.slug}\t${autor.nombre}\tsin clave (no se pudo escribir)`);
+        continue;
+      }
       clave = propuesta.clave;
       nueva = true;
       escritas.push(autor.slug);
@@ -255,7 +269,8 @@ export async function proponerClaves(rutas: Rutas): Promise<Resultado> {
       continue;
     }
     if (!ordenAlfabetico.safeParse(clave).success) sinForma.push(`  ${autor.slug}\t«${clave}»`);
-    const revisada = autor.ordenRevisado !== undefined;
+    // Una clave que este lote acaba de escribir no la ha revisado nadie, diga lo que diga el fichero.
+    const revisada = !nueva && autor.ordenRevisado !== undefined;
     if (!revisada) sinRevisar += 1;
     if (!revisada && propuesta.marcada) marcadas.push(`  ${autor.slug}\t${autor.nombre}\t→ «${clave}»`);
     lineas.push(
@@ -279,6 +294,16 @@ export async function proponerClaves(rutas: Rutas): Promise<Resultado> {
   }
   if (sinForma.length > 0) {
     parte.push(`Claves sin forma (el build las rechaza; ${REGLA_DE_CLAVE_DE_ORDEN}):`, ...sinForma);
+  }
+  if (fallidas.length > 0) {
+    return {
+      ok: false,
+      motivos: [
+        ...parte,
+        `No se pudo escribir la clave de ${fallidas.length} ${fallidas.length === 1 ? 'Autor' : 'Autores'}:`,
+        ...fallidas,
+      ],
+    };
   }
   return { ok: true, ruta: rutas.autores, mensaje: parte.join('\n') };
 }
@@ -313,10 +338,14 @@ export async function fijarClave(
     return { ok: false, motivos: [`«${definitiva}»: ${REGLA_DE_CLAVE_DE_ORDEN}`] };
   }
 
-  await fijarCamposDeAutor(autor.ruta, {
-    ...(clave !== undefined ? { ordenAlfabetico: clave } : {}),
-    ordenRevisado: hoy,
-  });
+  try {
+    await fijarCamposDeAutor(autor.ruta, {
+      ...(clave !== undefined ? { ordenAlfabetico: clave } : {}),
+      ordenRevisado: hoy,
+    });
+  } catch (error) {
+    return { ok: false, motivos: [error instanceof Error ? error.message : String(error)] };
+  }
   const antes = autor.ordenAlfabetico;
   const que =
     clave === undefined || clave === antes

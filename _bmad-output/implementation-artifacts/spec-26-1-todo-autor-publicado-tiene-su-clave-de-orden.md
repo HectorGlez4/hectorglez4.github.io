@@ -5,7 +5,7 @@ created: '2026-10-28'
 status: 'done'
 baseline_revision: '39234cc4dd8ace36326b2709551cd7c483209b71'
 review_loop_iteration: 0
-followup_review_recommended: false
+followup_review_recommended: true
 context:
   - '{project-root}/_bmad-output/implementation-artifacts/epic-26-context.md'
   - '{project-root}/_bmad-output/planning-artifacts/architecture/architecture-brainlySabiduria-2026-08-10/ARCHITECTURE-SPINE.md'
@@ -125,6 +125,26 @@ El orden de commits evita un commit roto: si la puerta entrase antes que el lote
 
 (Las cinco capas de revisión son externas en el bucle v8-ralph y en esta pasada no traían hallazgos: la revisión independiente viene después.)
 
+### 2026-10-28 — Review pass
+- intent_gap: 0
+- bad_spec: 0
+- patch: 10: (high 0, medium 2, low 8)
+- defer: 0
+- reject: 30
+- addressed_findings:
+  - `[medium]` `[patch]` `proponer-claves` se paraba a medias, con traza y sin parte, ante un fichero que `fijarCamposDeAutor` no deja escribir (blind-hunter, edge-case-hunter): ahora lo nombra en «No se pudo escribir la clave de N Autor(es)», escribe los demás y sale con 1; prueba en `gestion.test.ts`.
+  - `[medium]` `[patch]` Ninguna prueba construida fijaba la forma de `ordenRevisado` en la colección `autores` (verification-gap): cuarto caso en `claves-build.test.ts` con `ordenRevisado: "2026-02-31"`, que rompe nombrando el fichero y la regla.
+  - `[low]` `[patch]` El aviso de `astro dev` (`astro:server:setup`) no tenía prueba (blind-hunter, verification-gap, ac-auditor): `claves.test.ts` llama a los ganchos con un registro de mentira y comprueba que avisa con el fichero y la orden sin lanzar, y que `astro:build:start` sí lanza.
+  - `[low]` `[patch]` `fijarClave` dejaba escapar la excepción de `fijarCamposDeAutor` (edge-case-hunter): devuelve `motivos` y sale con 1 sin tocar el fichero; prueba en `gestion.test.ts`.
+  - `[low]` `[patch]` `proponer-claves` daba por «revisada» la clave que acababa de escribir en un fichero con `ordenRevisado` y sin `ordenAlfabetico` (edge-case-hunter): una clave nueva cuenta siempre como sin revisar; prueba en `gestion.test.ts`.
+  - `[low]` `[patch]` Un `ordenRevisado` sin `ordenAlfabetico` pasaba el build (blind-hunter, edge-case-hunter): `fallosDeClaves` lo rechaza nombrando el fichero y la orden `clave`, y la integración le pasa el campo; prueba en `claves.test.ts`.
+  - `[low]` `[patch]` `inicialDeClave` daba I y S a «ı» y «ſ», que `claveDeComparacion` ordena tras la Z (edge-case-hunter): la letra se mira antes de pasarla a mayúscula; casos en `normalizar-y-slug.test.ts`.
+  - `[low]` `[patch]` `clave <slug> ""` salía con 2 como argumento sobrante (blind-hunter, ac-auditor): la cadena vacía es la clave y la regla la rechaza con 1; caso en `autor-cli.test.ts`.
+  - `[low]` `[patch]` La prueba de la clave sin forma no fijaba la ruta del fichero, y la de `puerta-de-admision` sin año construía un Autor publicado sin clave (intent-alignment, ac-auditor): la primera exige `corpus/autores/horacio.yml`; la segunda lleva `ordenAlfabetico`, para que el fallo venga del año.
+  - `[low]` `[patch]` `crearAutor` llamaba dos veces a `proponerClave` (blind-hunter): el parte recibe la propuesta escrita.
+
+Rechazados, con su razón (30): la marca solo a partir de tres palabras, el conjunto A–Z/Ñ de iniciales sin salida para Ø/Ł/Æ, y que `editar` no recalcule la clave son reglas del `<intent-contract>`; que nada impida a la 26.3 pintar claves sin revisar es FR-15 (no parar la siembra hasta la revisión de Héctor, 26.10); las columnas de `listar` y el recuento «faltan» mezclando no publicados, el `switch` sin `break` tras `terminar(): never`, `--corpus` antes del slug, `--corpus=`, la escritura no atómica (patrón de todo `tools/lib/corpus.ts`), los marcadores de documento y escalares de bloque (la verificación ya lanza y no escribe), `ordenRevisado` futuro, los dobles de tipo en la puerta (lo único que `autoresPublicados` lee hoy es el slug y el `autor`), la doble lectura del Corpus, la reexportación de `esJornada`, la ordenación de claves compuestas (la consume la 26.3), las pruebas de `sembrar`/`revisar` (pasan por `crearAutor`) y de las 171 líneas del lote (comprobado en el commit, sin reejecución posible), la ambigüedad de `AGENTS.md`, la fusión con la principal (26.11), el estado del seguimiento de 24.8 y 26.1 en `sprint-status.yaml` (lo mueve el orquestador, no esta pasada), el aviso de la portada en `avisar` (política anterior: toda reconstrucción la avisa), la propiedad única de la ordenación (26.3), y la nota de que la pasada anterior no tuvo revisión (es esta).
+
 ## Auto Run Result
 
 Status: done
@@ -168,7 +188,16 @@ agustin-de-arguelles «Argüelles», agustin-de-hipona «Hipona», alfonso-x-el-
 
 **Auditoría de la matriz.** Cada fila tiene prueba que corrió en verde: iniciales y orden (`normalizar-y-slug`), propuesta (`claves`), `crear`/regla sin inicial/`proponer-claves`/`clave` con sus códigos (`autor-cli`, `gestion`), las tres filas del build (`claves-build`; la orden nombrada cuando la regla no da clave, en `claves`).
 
+**Segunda pasada de revisión (2026-10-28, capas externas).** Parches: 10 (high 0, medium 2, low 8). Aplazados: 0. Rechazados: 30. `followup_review_recommended: true` — puntuación 3 × 2 + 1 × 8 = 14.
+- `tools/lib/gestion.ts` — `proponerClaves` recoge el fichero que no se deja escribir, sigue con los demás y sale con 1; una clave recién escrita nunca cuenta como revisada; `fijarClave` devuelve el fallo del escritor como motivo; `crearAutor` pasa al parte la propuesta que escribió.
+- `tools/lib/claves.ts`, `integraciones/claves.ts` — la puerta rechaza `ordenRevisado` sin `ordenAlfabetico`.
+- `src/lib/normalizar.ts` — `inicialDeClave` mira la letra antes de la mayúscula («ı», «ſ» no tienen inicial).
+- `tools/autor.ts` — `clave <slug> ""` es una clave sin forma (1), no un suelto de más (2).
+- Pruebas: `claves.test.ts` (revisión huérfana; ganchos de `astro dev` y de build con registro de mentira), `claves-build.test.ts` (ruta del fichero; `ordenRevisado` que no es jornada), `gestion.test.ts` (lote con un fichero que no se deja escribir; clave nueva sin revisar; `fijarClave` sobre ese fichero), `autor-cli.test.ts` (clave vacía), `normalizar-y-slug.test.ts` («ı», «ſ»), `puerta-de-admision.test.ts` (el Autor sin año lleva clave).
+- Verificación: `npx vitest run` de `gestion`, `autor-cli`, `claves`, `normalizar-y-slug`, `fecha-de-cambio` — verde (286); `npx tsx tools/autor.ts proponer-claves` sobre el Corpus real — «Ninguna clave nueva», `git status --porcelain corpus` vacío; `npx astro check` — 0 errores, 0 avisos; `npm test` — 140 ficheros, 6404 pruebas, verde; `npm run build` — EXIT 0 (467,7 MiB juzgados).
+
 **Riesgos residuales.**
-- El aviso de `astro dev` (`astro:server:setup`) no tiene prueba propia, igual que el del cotejo.
+- El aviso de `astro dev` se prueba llamando al gancho, no arrancando `astro dev`.
+- `sprint-status.yaml` sigue con la 26.1 en `backlog` y la 24.8 en `review`: lo mueve el orquestador del bucle.
 - `editar` y `biografia` siguen volcando la ficha con `aYaml` y pierden comentarios (anterior a esta historia); conservan la clave y la revisión.
 - Al fusionar con la principal hay que volver a correr `proponer-claves` (26.11): los Autores sembrados allí entretanto llegan sin clave y romperían el build.

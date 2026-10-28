@@ -74,7 +74,8 @@ describe('Historia 1.2 — el criterio de admisión rompe el build', () => {
 
   it('un Autor sin año de fallecimiento rompe el build, indicando el Autor', async () => {
     const { codigo, salida } = await construir({
-      'autores/seneca.yml': `nombre: Séneca\nsemblanza: Filósofo estoico hispanorromano.\n`,
+      // Con clave de orden: el fallo tiene que venir del año, no de la puerta de la 26.1.
+      'autores/seneca.yml': `nombre: Séneca\nsemblanza: Filósofo estoico hispanorromano.\nordenAlfabetico: "Séneca"\n`,
       'temas/el-tiempo.yml': TEMA_VALIDO,
       'citas/seneca--el-tiempo.md': citaValida(),
     });

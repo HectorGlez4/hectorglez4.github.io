@@ -191,7 +191,7 @@ describe('Historia 26.1 — la hermana de normalizar: inicial y orden de una cla
   });
 
   it('sin inicial que repartir: en blanco, con espacio delante, cifra o signo', () => {
-    for (const sinForma of ['', '  ', ' Cervantes', '1984', '¿Quién?', '«Rojas»', '-Rojas', 'Øster']) {
+    for (const sinForma of ['', '  ', ' Cervantes', '1984', '¿Quién?', '«Rojas»', '-Rojas', 'Øster', 'ıñigo', 'ſanto']) {
       expect(inicialDeClave(sinForma), JSON.stringify(sinForma)).toBeUndefined();
     }
   });

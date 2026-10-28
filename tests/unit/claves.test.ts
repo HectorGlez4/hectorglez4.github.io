@@ -1,10 +1,13 @@
 import { afterEach, describe, expect, it } from 'vitest';
-import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
+import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
+import { pathToFileURL } from 'node:url';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { autorAdmisible, ordenAlfabetico, ordenRevisado, REGLA_DE_CLAVE_DE_ORDEN } from '../../src/lib/admision.ts';
 import { fallosDeClaves, ORDEN_PROPONER_CLAVES, proponerClave } from '../../tools/lib/claves.ts';
 import { fijarCamposDeAutor } from '../../tools/lib/corpus.ts';
+import clavesDeOrden from '../../integraciones/claves.ts';
+import { citaValida } from './ayuda/construir.js';
 
 /**
  * Historia 26.1 — la clave de orden de un Autor, en lo que se puede probar sin construir: la
@@ -101,6 +104,13 @@ describe('la puerta: forma a todos, presencia a los publicados', () => {
     expect(fallos[0]).toContain(REGLA_DE_CLAVE_DE_ORDEN);
   });
 
+  it('una revisión sin clave falla, esté publicado o no', () => {
+    const fallos = fallosDeClaves([autor('cervantes', { ordenRevisado: '2026-10-20' })], new Set());
+    expect(fallos).toHaveLength(1);
+    expect(fallos[0]).toContain('corpus/autores/cervantes.yml');
+    expect(fallos[0]).toContain('ordenRevisado sin ordenAlfabetico');
+  });
+
   it('con clave buena no falla nadie', () => {
     expect(fallosDeClaves([autor('cervantes', { ordenAlfabetico: 'Cervantes' })], new Set(['cervantes']))).toEqual([]);
   });
@@ -148,5 +158,43 @@ describe('el escritor de campos conserva el fichero byte a byte', () => {
     const ruta = await fichero('- una lista\n- no un Autor\n');
     await expect(fijarCamposDeAutor(ruta, { ordenAlfabetico: 'X' })).rejects.toThrow();
     expect(await readFile(ruta, 'utf8')).toBe('- una lista\n- no un Autor\n');
+  });
+});
+
+describe('en astro dev la puerta avisa y no corta', () => {
+  /*
+   * El aviso de `astro:server:setup` es donde se arregla lo que falla: si lanzara, `astro dev`
+   * no arrancaría justo cuando alguien va a poner la clave que falta; si callara, nadie se
+   * enteraría hasta el build. Se llama al gancho directamente, con un registro de mentira.
+   */
+  async function proyectoConSenecaSinClave(): Promise<string> {
+    const raiz = await mkdtemp(join(tmpdir(), 'sabiduria-claves-dev-'));
+    temporales.push(raiz);
+    await mkdir(join(raiz, 'corpus', 'autores'), { recursive: true });
+    await mkdir(join(raiz, 'corpus', 'citas'), { recursive: true });
+    await writeFile(
+      join(raiz, 'corpus', 'autores', 'seneca.yml'),
+      'nombre: Séneca\nañoFallecimiento: 65\nsemblanza: Filósofo estoico.\n',
+    );
+    await writeFile(join(raiz, 'corpus', 'citas', 'seneca--no-es-que-tengamos-poco-tiempo.md'), citaValida());
+    return raiz;
+  }
+
+  it('un Autor publicado sin clave sale en un aviso con su fichero, y el gancho no lanza', async () => {
+    const raiz = await proyectoConSenecaSinClave();
+    const integracion = clavesDeOrden();
+    const ganchos = integracion.hooks as Record<string, (opciones: unknown) => unknown>;
+    await ganchos['astro:config:setup']({ config: { root: pathToFileURL(`${raiz}/`) } });
+
+    const avisos: string[] = [];
+    const errores: string[] = [];
+    const logger = { warn: (m: string) => avisos.push(m), error: (m: string) => errores.push(m), info: () => {} };
+    await expect(ganchos['astro:server:setup']({ logger })).resolves.toBeUndefined();
+    expect(errores).toEqual([]);
+    expect(avisos.join('\n')).toContain('corpus/autores/seneca.yml');
+    expect(avisos.join('\n')).toContain(ORDEN_PROPONER_CLAVES);
+
+    // Y el mismo Corpus, en el build, sí corta.
+    await expect(ganchos['astro:build:start']({ logger })).rejects.toThrow(/Claves de orden/u);
   });
 });

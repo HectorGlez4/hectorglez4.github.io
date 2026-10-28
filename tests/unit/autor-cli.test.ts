@@ -483,7 +483,7 @@ describe('Historia 26.1 — la clave de orden por la boca de la orden', () => {
     const antes = await ficha(corpus, 'miguel-de-cervantes');
 
     expect((await correr(corpus, ['clave', 'nadie', 'Nadie'])).codigo).toBe(1);
-    for (const sinForma of ['1984', ' Cervantes', '¿Quién?']) {
+    for (const sinForma of ['1984', ' Cervantes', '¿Quién?', '']) {
       const fallida = await correr(corpus, ['clave', 'miguel-de-cervantes', sinForma]);
       expect(fallida.codigo, sinForma).toBe(1);
       expect(fallida.error).toContain('Regla incumplida');

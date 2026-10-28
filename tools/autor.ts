@@ -131,10 +131,15 @@ const slugPosicional =
     ? [argumentos[1]]
     : [];
 // `biografia` toma además el documento como segundo argumento suelto, y `clave` la clave.
+/*
+ * En `clave` una cadena vacía también es la clave —sin forma, y la rechaza la regla con 1—, no
+ * un argumento suelto de más que la forma de la invocación rechazaría con 2.
+ */
 if (
   (orden === 'biografia' || orden === 'clave') &&
   slugPosicional.length === 1 &&
-  argumentos[2] &&
+  argumentos[2] !== undefined &&
+  (argumentos[2] !== '' || orden === 'clave') &&
   !argumentos[2].startsWith('--')
 ) {
   slugPosicional.push(argumentos[2]);

@@ -73,7 +73,7 @@ export function equivalentes(a: string, b: string): boolean {
  */
 
 /** Las iniciales que puede tener una clave: las 26 de la A a la Z y la Ñ. */
-const INICIAL_LATINA = /^[A-Z]$/u;
+const INICIAL_LATINA = /^[A-Za-z]$/u;
 
 /**
  * Lo que sustituye a la eñe antes de normalizar: una ene seguida de un carácter de uso
@@ -95,8 +95,13 @@ export function inicialDeClave(clave: string): string | undefined {
   if (primera === undefined) return undefined;
   const letra = String.fromCodePoint(primera);
   if (letra === 'ñ' || letra === 'Ñ') return 'Ñ';
-  const base = letra.normalize('NFD').replace(DIACRITICOS, '').toUpperCase();
-  return INICIAL_LATINA.test(base) ? base : undefined;
+  /*
+   * Se mira la letra **antes** de pasarla a mayúscula: «ı» (i sin punto) y «ſ» (s larga) dan
+   * I y S con `toUpperCase`, pero `claveDeComparacion` no las pliega y ordenarían tras la Z.
+   * Una inicial que el orden no respeta no es inicial.
+   */
+  const base = letra.normalize('NFD').replace(DIACRITICOS, '');
+  return INICIAL_LATINA.test(base) ? base.toUpperCase() : undefined;
 }
 
 /**
