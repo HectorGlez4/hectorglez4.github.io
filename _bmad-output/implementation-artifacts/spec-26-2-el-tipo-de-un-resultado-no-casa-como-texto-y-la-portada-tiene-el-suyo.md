@@ -2,8 +2,8 @@
 title: 'Historia 26.2 — El tipo de un resultado no casa como texto, y la portada tiene el suyo'
 type: 'feature'
 created: '2026-10-26'
-status: 'in-progress'
-baseline_revision: 'd26f3c1b9f6a2ff17654444a8fb12a22a19006f1'
+status: 'done'
+baseline_revision: 'f8f103d26d1893be38ab989b600ad8eac5767e1b'
 review_loop_iteration: 0
 followup_review_recommended: false
 context:
@@ -109,6 +109,18 @@ deferred:
 
 ## Review Triage Log
 
+### 2026-10-28 — Review pass
+- intent_gap: 0
+- bad_spec: 0
+- patch: 0
+- defer: 0
+- reject: 0
+- addressed_findings:
+  - none
+
+Las capas de revisión son externas en este bucle y no traían hallazgos en esta pasada; la
+revisión independiente va después.
+
 ## Design Notes
 
 **Por qué un filtro.** Pagefind 1.5 busca la metadata, y `metaWeights: 0` solo quita su efecto en el orden, no la coincidencia: medido, la página sigue saliendo. Un filtro no entra en el contenido ni en la búsqueda de texto, viaja en el fragmento de cada página (`data().filters`, sin descargar el índice de filtros) y lo escribe un atributo, así que la prueba de `dist/` lo cuenta. Consecuencia para la 27: `pf.filters()` traerá también la clave `tipo`, y sus pruebas comparan clave a clave.
@@ -142,5 +154,65 @@ if (EN_SANS.includes(tipo)) {
 
 ## Auto Run Result
 
-Status: ready-for-dev
-Blocking condition: ninguna. Planificación terminada (se pidió parar tras planificar); un diferido para Héctor en el frontmatter (letra del criterio de la 27.1, bmad-create-epics-and-stories).
+Status: done
+Blocking condition: ninguna.
+
+**Resumen.** El tipo de un resultado de la búsqueda propia deja de viajar como metadato de
+Pagefind —que desde la 1.5 se busca— y pasa a ser un filtro (`data-pagefind-filter="tipo:…"`)
+en el `<main>` del armazón, su único emisor. `/buscar/` lo lee de `data().filters`, aplica
+`OPCIONES_DE_PAGEFIND` (`autor: 0`) antes de cada `search()` y pinta Obra, Directorio y Portada
+con el bloque compartido (`.en-sans`, `aria-label` «{rótulo}: {título}», el «, de {Autor}» solo
+en Obra). La portada declara `tipo="portada"` y solo indexa su `h1` (la marca): la Cita del Día,
+la entrada y las secciones de Temas, Colecciones y Autores van bajo `data-pagefind-ignore="all"`.
+
+**Ficheros.**
+- `src/lib/tipoDeResultado.ts` — `directorio` y `portada` en la tabla; `FILTRO_DE_TIPO`,
+  `TIPOS_CON_TITULO_EN_SANS` y `OPCIONES_DE_PAGEFIND`, con su docblock.
+- `src/components/Armazon.astro` — el filtro en `<main>` solo con `data-pagefind-body` y tipo;
+  sin `data-pagefind-meta`.
+- `src/pages/buscar.astro` — constantes por `guionQueAnuncia`, lectura del filtro, `options`
+  antes de cada búsqueda, bloque compartido, `.titulo.en-sans` y la cabecera al día.
+- `src/pages/index.astro` — `tipo="portada"` y los cinco `data-pagefind-ignore="all"`.
+- `src/lib/umbrales.ts` — la medida de `/buscar/` tras la 26.2 en el comentario del tope.
+- `AGENTS.md` — la línea de «Known pitfalls» sobre el filtro y `OPCIONES_DE_PAGEFIND`.
+- `tests/unit/tipo-de-resultado.test.ts` (nuevo) — tabla, sans, opciones, un emisor y un lector,
+  ningún `data-pagefind-meta` con `tipo` en `src/` ni `public/`.
+- `tests/unit/ayuda/busqueda.ts` — el índice de mentira con `options`, `llamadas()`, `filters`,
+  `datos` por respuesta y el accesor `resultados()`.
+- `tests/unit/medicion.test.ts` — `describe` 26.2 en la isla ejecutada: la matriz de pintado y
+  `options` antes de cada `search`, también tras `destroy()`.
+- `tests/unit/publicable-y-alcanzable.test.ts` — `describe` 26.2 sobre `dist/`: ningún meta con
+  tipo, un filtro por página con cuerpo y en `<main>` con el tipo de su familia, ninguno sin
+  cuerpo, y la portada solo con su `h1` = `MARCA` fuera de `data-pagefind-ignore`.
+- `tests/unit/obra-pagina.test.ts`, `coleccion-pagina.test.ts`, `obra-indexable.test.ts`,
+  `tipo-de-open-graph.test.ts` — al medio nuevo; `directorio` y `portada` dan `website`.
+- `tests/e2e/busqueda.spec.ts` — los Pagefind de mentira exportan `options`; `.de-obra` pasa a
+  `.en-sans`; `describe` 26.2 con (a) los ocho términos contra el índice real, (b) la portada
+  por su nombre, (c) la Cita del Día y un Autor dan su página y no `/`, (d) Directorio y Portada
+  con un Pagefind de mentira.
+
+**Revisión.** Parches aplicados: 0. Diferidos nuevos: 0. Rechazados: 0 (capas externas sin
+hallazgos en esta pasada). Recomendación de revisión de seguimiento: `false` (0 parches; puntuación 0).
+
+**Verificación.**
+- Rojo antes del cambio: el `describe` 26.2 (a) contra el sitio construido con `Armazon.astro`,
+  `index.astro` y `buscar.astro` de la base (`f8f103d26d`) falla — «obra» 249 de 486 sin el
+  término, «cita» 4.415 de 4.559, «autor» 108 de 207, «tema» 8 de 451, «colección» 16 de 17.
+- `npx vitest run tests/unit/tipo-de-resultado.test.ts tests/unit/tipo-de-open-graph.test.ts` — 12 verdes.
+- Uno a uno en segundo plano: `publicable-y-alcanzable` (33), `medicion` (514), `obra-pagina`
+  (66), `coleccion-pagina` (34), `obra-indexable` (41), `ingreso-construido` (38) — `FINISHED EXIT=0`.
+- Parte de bytes: `/buscar/` 6.554 B en línea con la medición puesta (102 libres de 6.656);
+  la Página de Cita con Imagen sigue en 5.630.
+- `npm run check` — 0 errores, 0 avisos.
+- `npm test` — 138 ficheros, 6.343 pruebas, `FINISHED EXIT=0`.
+- `npx playwright test tests/e2e/busqueda.spec.ts tests/e2e/receptor.spec.ts` (los dos
+  proyectos) — 108 verdes, 64 saltadas (las de siempre: el receptor en móvil y el Tema bajo
+  umbral), `FINISHED EXIT=0`; las ocho pruebas 26.2 verdes en los dos proyectos. Ningún
+  servidor queda en pie.
+
+**Riesgos residuales.**
+- `/buscar/` queda con 102 bytes libres bajo `MAX_BYTES_DE_GUION`: lo que añada la Épica 27
+  tiene que subir el tope o compactar, como ya decía el comentario de `umbrales.ts`.
+- `pf.filters()` traerá la clave `tipo` cuando la 27 lo use, y sus pruebas deben compararlo
+  clave a clave (Design Notes).
+- Sigue el diferido para Héctor sobre la letra del criterio de la 27.1 (frontmatter).
