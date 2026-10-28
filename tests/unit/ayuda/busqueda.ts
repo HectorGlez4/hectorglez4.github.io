@@ -31,7 +31,9 @@ import { createContext, runInContext } from 'node:vm';
  *     entorno lanza; lo que pide de verdad, con el `?{n}` de su reintento, se apunta—, con el total
  *     y lo que da `slice` configurables por consulta, respuestas que esperan a
  *     `responder(consulta)` si se pide, rechazo en la importación, en `init`, en `search` o en los
- *     datos de un resultado, y un `destroy` que se cuenta.
+ *     datos de un resultado, y un `destroy` que se cuenta. Desde la Historia 26.2 el módulo lleva
+ *     también `options`, y `llamadas()` da en orden cada llamada al módulo (`options` con su
+ *     argumento, `init`, `search` con su consulta y `destroy`).
  *
  * `analizado()` es lo que la isla hizo **al evaluarse**, antes de ninguna escucha ni de ninguna
  * promesa: ahí no puede haber ni medición ni escritura en el historial. `rechazos()` son las
@@ -39,10 +41,22 @@ import { createContext, runInContext } from 'node:vm';
  * de escucharlas.
  */
 
-/** El total de una consulta y cuántos resultados da su `slice` (por omisión, los mismos). */
+/** Lo que da `data()` de un resultado: su URL, su metadata y sus filtros, como Pagefind. */
+export interface DatoDeResultado {
+  url: string;
+  meta?: Record<string, unknown>;
+  filters?: Record<string, unknown>;
+}
+
+/**
+ * El total de una consulta y cuántos resultados da su `slice` (por omisión, los mismos). Con
+ * `datos`, lo que da `data()` del resultado `i`; sin él, una Cita con su filtro de tipo
+ * (Historia 26.2: el tipo llega en `filters`, no en `meta`).
+ */
 export interface Respuesta {
   total: number;
   pintados?: number;
+  datos?: (i: number) => DatoDeResultado;
 }
 
 export interface OpcionesDeLaIsla {
@@ -288,14 +302,21 @@ export function islaDeBusquedaEnUnSandbox(guion: string, opciones: OpcionesDeLaI
   // El índice de mentira. Dónde falla se puede cambiar a mitad de prueba, con `fallar`.
   let falla = opciones.falla;
   let destrucciones = 0;
+  /** Cada llamada al módulo, en orden: `['options', o]`, `['init']`, `['search', consulta]`, `['destroy']`. */
+  const llamadasAlIndice: unknown[][] = [];
   const esperando: { consulta: string; resolver: () => void }[] = [];
   const responderA = (consulta: string) => {
-    const { total, pintados = total }: Respuesta = (opciones.respuestas ?? (() => ({ total: 0 })))(consulta);
+    const { total, pintados = total, datos }: Respuesta = (opciones.respuestas ?? (() => ({ total: 0 })))(consulta);
     const todos = Array.from({ length: total }, (_, i) => ({
       data: async () => {
         // Un fragmento que no llega: el índice y la búsqueda corrieron, los datos de un resultado no.
         if (falla === 'data' && i === 0) throw new Error('los datos de un resultado no llegan');
-        return { url: `/cita/${encodeURIComponent(consulta)}-${i}.html`, meta: { title: `${consulta} ${i}`, tipo: 'cita' } };
+        if (datos) return datos(i);
+        return {
+          url: `/cita/${encodeURIComponent(consulta)}-${i}.html`,
+          meta: { title: `${consulta} ${i}` },
+          filters: { tipo: ['cita'] },
+        };
       },
     }));
     // El total es el largo; lo que se pinta sale de `slice`, que puede dar menos.
@@ -305,15 +326,21 @@ export function islaDeBusquedaEnUnSandbox(guion: string, opciones: OpcionesDeLaI
     return { results };
   };
   const modulo = {
+    options: async (o: unknown) => {
+      llamadasAlIndice.push(['options', o]);
+    },
     init: async () => {
+      llamadasAlIndice.push(['init']);
       if (falla === 'init') throw new Error('el índice no se deja iniciar');
     },
     search: (consulta: string) => {
+      llamadasAlIndice.push(['search', consulta]);
       if (falla === 'search') throw new Error('la búsqueda falla');
       if (!opciones.manual) return Promise.resolve(responderA(consulta));
       return new Promise((resolver) => esperando.push({ consulta, resolver: () => resolver(responderA(consulta)) }));
     },
     destroy: async () => {
+      llamadasAlIndice.push(['destroy']);
       destrucciones++;
     },
   };
@@ -400,6 +427,25 @@ export function islaDeBusquedaEnUnSandbox(guion: string, opciones: OpcionesDeLaI
     importaciones: () => [...pedidas],
     /** Cuántas veces la isla destruyó el índice. */
     destrucciones: () => destrucciones,
+    /** Las llamadas al módulo de Pagefind, en orden, con sus argumentos (las opciones, copiadas en JSON). */
+    llamadas: () => llamadasAlIndice.map((l) => JSON.parse(JSON.stringify(l)) as unknown[]),
+    /**
+     * Los resultados pintados, uno por fila: el tipo del rótulo (`data-tipo`), el rótulo, el título,
+     * las clases del título, la línea de Autor (si la hay) y el `aria-label` del enlace (o `null`).
+     */
+    resultados: () =>
+      lista.hijos.map((li) => {
+        const a = li.hijos[0];
+        const [clase, titulo, linea] = a.hijos;
+        return {
+          tipo: clase.dataset.tipo,
+          rotulo: clase.textContent,
+          titulo: titulo.textContent,
+          clases: [titulo.className, ...titulo.clases].join(' ').split(/\s+/).filter(Boolean),
+          autor: linea ? linea.textContent : undefined,
+          nombre: a.getAttribute('aria-label'),
+        };
+      }),
     /** Los resultados pintados: su título, en orden. */
     pintados: () => lista.hijos.map((li) => li.hijos[0].hijos.map((span) => span.textContent).join(' · ')),
     /** El valor del campo. */

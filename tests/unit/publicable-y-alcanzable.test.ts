@@ -24,6 +24,9 @@ import {
   superficiesDelBarrido,
 } from '../../src/lib/superficies.ts';
 import { CITAS_POR_PAGINA, MAX_SALTOS_DESDE_LA_PORTADA } from '../../src/lib/umbrales.ts';
+import { MARCA } from '../../src/lib/marca.ts';
+import { FILTRO_DE_TIPO } from '../../src/lib/tipoDeResultado.ts';
+import { recorrerElementos, type Elemento } from './ayuda/enlaces.js';
 
 /**
  * Historia 12.1 — publicable y alcanzable son el mismo conjunto.
@@ -517,6 +520,110 @@ describe('Historia 12.1 — sobre un sitio construido de verdad', () => {
       for (const ruta of await anunciadas()) {
         expect(caracterDe(ruta), ruta).toBe('producto');
       }
+    });
+  });
+
+  /*
+   * Historia 26.2 (AD-17, AD-19) — el tipo de un resultado viaja como filtro de Pagefind, que no
+   * casa como texto, y la portada responde solo por su título.
+   *
+   * Hasta la 26.2 el tipo iba en `data-pagefind-meta="tipo:…"`, y desde Pagefind 1.5 la metadata
+   * se busca: «obra» devolvía toda Obra. Lo que se mira aquí es el `dist/` que indexa Pagefind.
+   */
+  describe('Historia 26.2 — el tipo viaja como filtro y la portada solo expone su título', () => {
+    /** Las páginas construidas, con su ruta pública y su HTML. */
+    async function paginas(): Promise<Map<string, string>> {
+      const resultado = new Map<string, string>();
+      async function recorrer(dir: string, prefijo: string) {
+        for (const entrada of await readdir(dir, { withFileTypes: true })) {
+          const completa = join(dir, entrada.name);
+          if (entrada.isDirectory()) {
+            await recorrer(completa, `${prefijo}/${entrada.name}`);
+            continue;
+          }
+          if (!entrada.name.endsWith('.html')) continue;
+          const sinExtension = entrada.name.replace(/\.html$/, '');
+          const ruta = sinExtension === 'index' ? rutaNormalizada(`${prefijo}/`) : `${prefijo}/${sinExtension}`;
+          resultado.set(rutaNormalizada(ruta), await readFile(completa, 'utf8'));
+        }
+      }
+      await recorrer(join(proyecto, 'dist'), '');
+      return resultado;
+    }
+
+    /** El tipo que le toca a una ruta por su familia. */
+    const tipoDeLaRuta = (ruta: string): string | undefined => {
+      if (ruta === '/') return 'portada';
+      return /^\/(cita|autor|tema|coleccion|obra)\//.exec(ruta)?.[1];
+    };
+
+    /** Cada elemento con su `data-pagefind-filter`, con la etiqueta en que va. */
+    const filtrosDe = (html: string) => {
+      const filtros: { etiqueta: string; valor: string }[] = [];
+      recorrerElementos(html, (elemento) => {
+        const valor = elemento.atributos.get('data-pagefind-filter');
+        if (valor !== undefined) filtros.push({ etiqueta: elemento.etiqueta, valor });
+      });
+      return filtros;
+    };
+
+    it('ningún `data-pagefind-meta` lleva el tipo', async () => {
+      const conTipo: string[] = [];
+      for (const [ruta, html] of await paginas()) {
+        recorrerElementos(html, (elemento) => {
+          const meta = elemento.atributos.get('data-pagefind-meta');
+          if (meta !== undefined && /\btipo\b/.test(meta)) conTipo.push(`${ruta}: ${meta}`);
+        });
+      }
+      expect(conTipo).toEqual([]);
+    });
+
+    it('toda página con `data-pagefind-body` lleva su tipo una vez, en `<main>`, por el filtro; ninguna otra lo lleva', async () => {
+      const vistas = new Set<string>();
+      let conCuerpo = 0;
+      for (const [ruta, html] of await paginas()) {
+        const filtros = filtrosDe(html);
+        if (!/<main[^>]*\sdata-pagefind-body/.test(html)) {
+          expect(filtros, ruta).toEqual([]);
+          continue;
+        }
+        conCuerpo++;
+        const tipo = tipoDeLaRuta(ruta);
+        expect(tipo, `${ruta}: una página con cuerpo de Pagefind fuera de toda familia`).toBeDefined();
+        expect(filtros, ruta).toEqual([{ etiqueta: 'main', valor: `${FILTRO_DE_TIPO}:${tipo}` }]);
+        vistas.add(tipo!);
+      }
+      // Sin esto pasaría sobre un sitio sin nada indexado. El corpus trae las seis familias.
+      expect(conCuerpo).toBeGreaterThan(6);
+      expect([...vistas].sort()).toEqual(['autor', 'cita', 'coleccion', 'obra', 'portada', 'tema']);
+    });
+
+    it('la portada solo expone su `h1`, que es la marca: todo lo demás de `main` queda fuera del índice', async () => {
+      const portada = (await paginas()).get('/')!;
+      expect(portada).toBeDefined();
+      const enMain: { elemento: Elemento; antepasados: readonly Elemento[] }[] = [];
+      recorrerElementos(portada, (elemento, antepasados) => {
+        if (antepasados.some((a) => a.etiqueta === 'main')) enMain.push({ elemento, antepasados });
+      });
+      const titulos = enMain.filter(({ elemento }) => elemento.etiqueta === 'h1');
+      expect(titulos).toHaveLength(1);
+      const [titulo] = titulos;
+      const deLaRuta = new Set<Elemento>(titulo.antepasados);
+      const ignora = (e: Elemento) =>
+        e.atributos.get('data-pagefind-ignore') === 'all' ||
+        (e.atributos.has('data-ingreso') && e.atributos.has('data-pagefind-ignore'));
+
+      const expuestos = enMain
+        .filter(({ elemento }) => elemento !== titulo.elemento && !deLaRuta.has(elemento))
+        .filter(({ elemento, antepasados }) => ![elemento, ...antepasados].some(ignora))
+        .map(({ elemento }) => `<${elemento.etiqueta} class="${elemento.atributos.get('class') ?? ''}">`);
+      expect(expuestos).toEqual([]);
+      // Y no en vacío: la portada trae la Cita del Día o la entrada, los Temas y los Autores.
+      expect(enMain.length).toBeGreaterThan(10);
+      expect(enMain.filter(({ elemento }) => elemento.atributos.get('data-pagefind-ignore') === 'all').length).toBeGreaterThanOrEqual(3);
+
+      const h1 = /<main[\s\S]*?<h1[^>]*>([^<]*)<\/h1>/.exec(portada)?.[1];
+      expect(h1?.trim()).toBe(MARCA);
     });
   });
 });

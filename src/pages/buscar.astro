@@ -68,9 +68,18 @@
  *   · La consulta de la dirección se lee del campo después de escribirla en él: un campo de
  *     búsqueda quita los saltos de línea, y la clave de la llegada tiene que ser la del texto que
  *     Enter buscará.
- *   · Historia 22.7 — el resultado de Obra lleva el título en la sans y el Autor debajo, y se
- *     lee «Obra: {título}, de {Autor}». Sin metadato de Autor, ni línea ni «, de»; sin título
- *     en el índice, el visible es la URL y no se lee en voz alta.
+ *   · Historia 26.2 — el tipo de un resultado llega en `data().filters` (el filtro
+ *     `FILTRO_DE_TIPO`, que escribe solo `Armazon.astro`), y no en la metadata: la metadata se
+ *     busca, y buscar «obra» devolvía toda Obra. Sin filtro, o con un tipo que no está en la
+ *     tabla, el rótulo es el del tipo por omisión.
+ *   · Historia 26.2 — antes de **cada** `search()` se aplican `OPCIONES_DE_PAGEFIND` con
+ *     `options()`, dentro del `try`: el `destroy()` del reintento deja a cero las opciones del
+ *     módulo, y la instancia que se crea después buscaría sin pesos. Llamarlo ahí cubre la
+ *     primera carga y el reintento sin volver a importar.
+ *   · Historias 22.7 y 26.2 — los tipos de `TIPOS_CON_TITULO_EN_SANS` (Obra, Directorio y
+ *     Portada) llevan el título en la sans (`.en-sans`) y se leen «{rótulo}: {título}»; solo la
+ *     Obra lleva además el Autor debajo y el «, de {Autor}». Sin metadato de Autor, ni línea ni
+ *     «, de»; sin título en el índice, el visible es la URL y no se lee en voz alta.
  *   · Con la consulta en la URL, la búsqueda se ejecuta al cargar: es lo que ocurre cuando
  *     alguien llega desde el formulario sin JavaScript o comparte un enlace.
  */
@@ -85,7 +94,13 @@ import {
   conjuntoPublicable,
   temasPublicados,
 } from '../lib/publicado.ts';
-import { ETIQUETAS_DE_RESULTADO, TIPO_POR_OMISION } from '../lib/tipoDeResultado.ts';
+import {
+  ETIQUETAS_DE_RESULTADO,
+  FILTRO_DE_TIPO,
+  OPCIONES_DE_PAGEFIND,
+  TIPO_POR_OMISION,
+  TIPOS_CON_TITULO_EN_SANS,
+} from '../lib/tipoDeResultado.ts';
 import { rutaDeAutor, rutaDeColeccion, rutaDeTema } from '../lib/superficies.ts';
 
 const conjunto = await conjuntoPublicable();
@@ -107,6 +122,9 @@ const guion = guionQueAnuncia(
     ASENTAMIENTO: ASENTAMIENTO_DE_BUSQUEDA,
     ETIQUETA: ETIQUETAS_DE_RESULTADO,
     TIPO_POR_OMISION,
+    FILTRO: FILTRO_DE_TIPO,
+    EN_SANS: TIPOS_CON_TITULO_EN_SANS,
+    PAGEFIND: OPCIONES_DE_PAGEFIND,
   },
   `const campo = document.querySelector('[data-consulta]');
 const lista = document.querySelector('[data-resultados]');
@@ -155,7 +173,7 @@ function pintar(resultados) {
   anunciar(estado, resultados.length === 1 ? 'Un resultado.' : resultados.length + ' resultados.');
 
   for (const dato of resultados) {
-    const tipo = (dato.meta && dato.meta.tipo) || TIPO_POR_OMISION;
+    const tipo = dato.filters?.[FILTRO]?.[0] || TIPO_POR_OMISION;
 
     const li = document.createElement('li');
     li.className = 'resultado';
@@ -168,27 +186,22 @@ function pintar(resultados) {
     clase.dataset.tipo = tipo;
     clase.textContent = ETIQUETA[tipo] || ETIQUETA[TIPO_POR_OMISION];
 
+    const t = dato.meta?.title;
     const titulo = document.createElement('span');
     titulo.className = 'titulo';
-    titulo.textContent = dato.meta && dato.meta.title ? dato.meta.title : dato.url;
+    titulo.textContent = t || dato.url;
     a.append(clase, titulo);
 
-    if (tipo === 'obra') {
-      titulo.classList.add('de-obra');
-      const autor =
-        dato.meta && typeof dato.meta.autor === 'string' ? dato.meta.autor.trim() : '';
+    if (EN_SANS.includes(tipo)) {
+      titulo.classList.add('en-sans');
+      const autor = tipo === 'obra' && typeof dato.meta?.autor === 'string' ? dato.meta.autor.trim() : '';
       if (autor !== '') {
         const linea = document.createElement('span');
         linea.className = 'r-autor';
         linea.textContent = autor;
         a.append(linea);
       }
-      if (dato.meta && dato.meta.title) {
-        a.setAttribute(
-          'aria-label',
-          ETIQUETA.obra + ': ' + dato.meta.title + (autor !== '' ? ', de ' + autor : ''),
-        );
-      }
+      if (t) a.setAttribute('aria-label', ETIQUETA[tipo] + ': ' + t + (autor !== '' ? ', de ' + autor : ''));
     }
 
     li.append(a);
@@ -213,6 +226,7 @@ function buscar(consulta) {
     let pf, respuesta, resultados;
     try {
       pf = await cargar();
+      await pf.options(PAGEFIND);
       respuesta = await pf.search(consulta);
       resultados = await Promise.all(respuesta.results.slice(0, 30).map((r) => r.data()));
     } catch (e) {
@@ -487,8 +501,11 @@ if (inicial) {
     color: var(--tinta);
   }
 
-  /* Historia 22.7 — el título de una Obra va en Inter: mismo cuerpo y peso, solo cambia la familia. */
-  .resultados :global(.titulo.de-obra) {
+  /*
+   * Historias 22.7 y 26.2 — el título de una Obra, de un Directorio y de la portada va en Inter:
+   * mismo cuerpo y peso, solo cambia la familia.
+   */
+  .resultados :global(.titulo.en-sans) {
     font-family: var(--sans);
   }
 

@@ -368,6 +368,12 @@ export const META_AUTORES_DE_OTRA_TRADICION: number | undefined = undefined;
  * sitio: la Página de Cita con Imagen sigue en 5.630 (1.026 libres). Lo que la Épica 27 le añada
  * (los filtros, «Mostrar 30 más», el aviso del índice) no cabe en ese hueco: sube el tope en el
  * mismo diff, con la medida, o compacta antes el texto de la parte pura al construir.
+ *
+ * Medido otra vez en la Historia 26.2, sin moverlo: `/buscar/` lleva **6.554 bytes** con la
+ * medición puesta (102 libres), porque su isla lee el tipo del filtro de Pagefind, aplica las
+ * opciones de `OPCIONES_DE_PAGEFIND` antes de cada búsqueda y pinta Directorio y Portada con el
+ * bloque de Obra, que pasó a ser compartido (`TIPOS_CON_TITULO_EN_SANS`). La Página de Cita con
+ * Imagen sigue en 5.630.
  */
 export const MAX_BYTES_DE_GUION = 6656;
 

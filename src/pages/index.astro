@@ -58,15 +58,27 @@ const DESCRIPCION = DESCRIPCION_DEL_SITIO;
   descripcion={DESCRIPCION}
   tarjeta="/tarjeta/portada.png"
   ruta="/"
+  tipo="portada"
 >
   <DatosDelSitio slot="cabeza" descripcion={DESCRIPCION} />
 
   <div class="pagina contenedor">
+    {
+      /*
+       * Historia 26.2 (AD-17, AD-19) — en la búsqueda propia la portada responde solo por su
+       * título: este `h1`, que es la marca y del que Pagefind saca el título del resultado. Todo lo
+       * demás —la Cita del Día, la entrada, los chips y la lista de Autores— va bajo
+       * `data-pagefind-ignore="all"`, porque ya tiene su propia página en el índice: sin esto, buscar
+       * el texto del día o cualquier Autor devolvía también la portada. La invitación a sostener
+       * lleva su propio `data-pagefind-ignore` en `Sostener.astro`. Cuando la 28.1 saque el `h1`
+       * de `main`, la portada declarará su título con `data-pagefind-meta="title:…"`.
+       */
+    }
     <h1 class="marca-portada">{MARCA}</h1>
 
     {
       seleccion && autorDelDia ? (
-        <section class="del-dia">
+        <section class="del-dia" data-pagefind-ignore="all">
           <h2>La cita de hoy</h2>
           <BloqueDeCita cita={seleccion.cita} autor={autorDelDia} />
           {/* Historia 23.7 — las Zonas de salida interna van en los contenedores de la portada. */}
@@ -75,7 +87,7 @@ const DESCRIPCION = DESCRIPCION_DEL_SITIO;
           </p>
         </section>
       ) : (
-        <p class="entrada">
+        <p class="entrada" data-pagefind-ignore="all">
           Citas en español, cada una en su página, con el autor y la obra de la que
           procede. Solo se publica lo que se puede documentar.
         </p>
@@ -84,7 +96,7 @@ const DESCRIPCION = DESCRIPCION_DEL_SITIO;
 
     {
       temas.length > 0 && (
-        <section>
+        <section data-pagefind-ignore="all">
           <h2>Temas</h2>
           <ul class="chips" data-zona="chip-de-tema">
             {temas.map((tema) => (
@@ -123,7 +135,7 @@ const DESCRIPCION = DESCRIPCION_DEL_SITIO;
     }
     {
       colecciones.length > 0 && (
-        <section>
+        <section data-pagefind-ignore="all">
           <h2>Colecciones</h2>
           {/* Chip idéntico al de Tema: la Colección es navegación lateral, no jerarquía. */}
           <ul class="chips" data-zona="colecciones">
@@ -139,7 +151,7 @@ const DESCRIPCION = DESCRIPCION_DEL_SITIO;
       )
     }
 
-    <section>
+    <section data-pagefind-ignore="all">
       <h2>Autores</h2>
       <ul class="autores" data-zona="autores-de-portada">
         {

@@ -16,7 +16,7 @@ import { LADO_DE_IOS, MARCA, TAMANOS_DEL_ICONO } from '../lib/marca.ts';
 import { consecuenciasDe, declararRutasIndexables } from '../lib/superficies.ts';
 import { ATRIBUTO_DE_INDEXABLE } from '../lib/medicion.ts';
 import { conjuntoPublicable, rutasIndexables } from '../lib/publicado.ts';
-import { tipoDeOpenGraph, type TipoDeResultado } from '../lib/tipoDeResultado.ts';
+import { FILTRO_DE_TIPO, tipoDeOpenGraph, type TipoDeResultado } from '../lib/tipoDeResultado.ts';
 import '../styles/tokens.css';
 import { PALETA } from '../lib/lienzo.ts';
 
@@ -28,6 +28,10 @@ interface Props {
    * El valor y su rótulo salen los dos de `src/lib/tipoDeResultado.ts`: la unión se deriva
    * de la tabla de rótulos, así que un tipo sin rótulo no compila. Sin valor, un resultado
    * cae al tipo por omisión, y una Página de Colección se leería como si fuera una Cita.
+   *
+   * Viaja como **filtro** de Pagefind (`FILTRO_DE_TIPO`), nunca como metadato: la metadata se
+   * busca, y buscar «obra» devolvía toda Obra aunque no lo dijera (Historia 26.2). Este armazón
+   * es su único emisor, y solo en una página que entra en la búsqueda propia.
    *
    * Esto **no** decide si la página se indexa: eso sale entero de `src/lib/superficies.ts`.
    */
@@ -189,12 +193,16 @@ const imagenSocial = tarjeta === undefined ? undefined : new URL(tarjeta, Astro.
       *
       * Y quién lo lleva no se decide aquí: sale de la misma declaración que el `noindex`
       * de arriba, así que el buscador de dentro y el de fuera no pueden discrepar.
+      *
+      * Historia 26.2 — el tipo del resultado va como filtro (`data-pagefind-filter`), que no
+      * casa como texto, y no como `data-pagefind-meta`, que desde Pagefind 1.5 se busca. Solo
+      * lo lleva una página con `data-pagefind-body`: sin cuerpo no hay resultado que rotular.
       */}
     <main
       id="contenido"
       data-pagefind-body={enLaBusquedaPropia ? true : undefined}
       data-pagefind-ignore={enLaBusquedaPropia ? undefined : true}
-      data-pagefind-meta={tipo ? `tipo:${tipo}` : undefined}
+      data-pagefind-filter={enLaBusquedaPropia && tipo ? `${FILTRO_DE_TIPO}:${tipo}` : undefined}
     >
       <slot />
     </main>

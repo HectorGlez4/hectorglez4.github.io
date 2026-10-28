@@ -439,9 +439,9 @@ describe('Historia 12.3 — la Página de Colección, construida', () => {
 
   describe('la búsqueda propia sabe rotular una Colección — no solo emitir el tipo', () => {
     /*
-     * El lado consumidor. `tipo:coleccion` en la Página de Colección no sirve de nada si
-     * `buscar.astro` no sabe pintarlo: sin rótulo, el `||` de reserva etiquetaba cada
-     * Colección como «Cita». Eso no lo veía nada, porque la única prueba que existía miraba
+     * El lado consumidor. El filtro `tipo:coleccion` de la Página de Colección (Historia 26.2;
+     * antes, metadato) no sirve de nada si `buscar.astro` no sabe pintarlo: sin rótulo, el `||`
+     * de reserva etiquetaba cada Colección como «Cita». Eso no lo veía nada, porque la única prueba que existía miraba
      * el lado productor.
      */
     it('la página de búsqueda embarca la tabla de rótulos, con el de Colección', async () => {
@@ -472,7 +472,9 @@ describe('Historia 12.3 — la Página de Colección, construida', () => {
     it('se indexa dentro y se marca como Colección, sin tocar ninguna lista', async () => {
       const html = await leer('/coleccion/frases-cortas/');
       expect(html).toContain('data-pagefind-body');
-      expect(html).toContain('tipo:coleccion');
+      // Historia 26.2 — el tipo viaja como filtro de Pagefind, que no casa como texto.
+      expect(html).toContain('data-pagefind-filter="tipo:coleccion"');
+      expect(html).not.toMatch(/data-pagefind-meta="tipo:/);
     });
 
     it('y la página 2 queda fuera del índice, como todo listado paginado', async () => {

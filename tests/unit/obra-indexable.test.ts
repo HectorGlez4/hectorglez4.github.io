@@ -355,7 +355,8 @@ describe('la comprobación del build, pura', () => {
       noindex: true,
       enPagefind: false,
     });
-    expect(marcasDePagina('<main id="contenido" data-pagefind-body data-pagefind-meta="tipo:obra">')).toEqual({
+    // Historia 26.2 — el tipo de la Obra va como filtro de Pagefind, no como metadato.
+    expect(marcasDePagina('<main id="contenido" data-pagefind-body data-pagefind-filter="tipo:obra">')).toEqual({
       noindex: false,
       enPagefind: true,
     });

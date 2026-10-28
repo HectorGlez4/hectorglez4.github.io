@@ -1,5 +1,6 @@
 import { expect, test, type Page } from '@playwright/test';
-import { ETIQUETAS_DE_RESULTADO } from '../../src/lib/tipoDeResultado.ts';
+import { ETIQUETAS_DE_RESULTADO, OPCIONES_DE_PAGEFIND } from '../../src/lib/tipoDeResultado.ts';
+import { MARCA } from '../../src/lib/marca.ts';
 import { ASENTAMIENTO_DE_BUSQUEDA, EVENTOS } from '../../src/lib/medicion.ts';
 import { tramoDe } from '../../src/lib/vocabulario.ts';
 import { citaConLosDosBloques, temaBajoUmbral, textoDe } from './ayuda/corpus.ts';
@@ -145,8 +146,9 @@ test.describe('Historia 3.1 — encontrar', () => {
   });
 
   /*
-   * Historia 22.7 — el resultado de Obra: rótulo «Obra», título en la sans (`.de-obra`), el Autor
-   * debajo y el nombre accesible «Obra: {título}, de {Autor}». Los demás, como estaban.
+   * Historia 22.7 — el resultado de Obra: rótulo «Obra», título en la sans (`.en-sans` desde la
+   * 26.2; antes `.de-obra`), el Autor debajo y el nombre accesible «Obra: {título}, de {Autor}».
+   * Los demás, como estaban.
    */
   test('un resultado de Obra lleva el título en la sans y el Autor debajo', async ({ page }) => {
     await buscar(page, 'proverbios y cantares');
@@ -159,7 +161,7 @@ test.describe('Historia 3.1 — encontrar', () => {
             const titulo = n.querySelector('.titulo')!;
             return {
               etiqueta: n.querySelector('.clase')!.textContent!.trim(),
-              deObra: titulo.classList.contains('de-obra'),
+              deObra: titulo.classList.contains('en-sans'),
               familia: getComputedStyle(titulo).fontFamily,
               titulo: titulo.textContent!.trim(),
               autor: n.querySelector('.r-autor')?.textContent?.trim(),
@@ -179,7 +181,7 @@ test.describe('Historia 3.1 — encontrar', () => {
     // Los de otro tipo, como hoy: sin la clase, sin línea de Autor, sin nombre accesible propio.
     const otros = page.locator('[data-resultados] .resultado:not(:has([data-tipo="obra"]))');
     expect(await otros.count()).toBeGreaterThan(0);
-    expect(await otros.locator('.de-obra, .r-autor').count()).toBe(0);
+    expect(await otros.locator('.en-sans, .r-autor').count()).toBe(0);
     expect(await otros.locator('a[aria-label]').count()).toBe(0);
   });
 
@@ -392,7 +394,7 @@ test.describe('Historia 22.10 — el recuento y la búsqueda sin resultados se a
     await page.route('**/pagefind/pagefind.js', (ruta) =>
       ruta.fulfill({
         contentType: 'text/javascript',
-        body: 'export async function init() {}\nexport async function search() { return { results: [] }; }',
+        body: 'export async function options() {}\nexport async function init() {}\nexport async function search() { return { results: [] }; }',
       }),
     );
     await buscar(page, 'consulta que no está');
@@ -412,6 +414,7 @@ test.describe('Historia 22.10 — el recuento y la búsqueda sin resultados se a
       ruta.fulfill({
         contentType: 'text/javascript',
         body: [
+          'export async function options() {}',
           'export async function init() {}',
           'export async function search(q) {',
           "  if (q === 'nada') return { results: [] };",
@@ -429,5 +432,158 @@ test.describe('Historia 22.10 — el recuento y la búsqueda sin resultados se a
     await expect(estado).toBeVisible();
     await expect(estado).not.toHaveClass(/solo-para-lectores/);
     expect(await estado.evaluate((n) => n.getBoundingClientRect().width)).toBeGreaterThan(1);
+  });
+});
+
+/*
+ * Historia 26.2 (AD-17, AD-19) — el tipo de un resultado no casa como texto, y la portada tiene el
+ * suyo. Hasta la 26.2 el tipo viajaba en `data-pagefind-meta="tipo:…"`, y desde Pagefind 1.5 la
+ * metadata se busca: «cita» daba 4.559 resultados y 215 de los 400 primeros de «obra» no tenían la
+ * palabra. Ahora viaja como filtro, y la portada solo indexa su `h1`.
+ */
+test.describe('Historia 26.2 — el tipo no casa como texto y la portada tiene el suyo', () => {
+  /*
+   * (a) Con el Pagefind real, importado en la página y con las opciones de la búsqueda propia. Un
+   * resultado que casa solo por metadato trae `locations` vacío: ninguno puede salir así.
+   */
+  const TERMINOS = ['obra', 'cita', 'autor', 'tema', 'colección', 'directorio', 'portada', MARCA];
+
+  test('buscar el nombre de un tipo, o el del sitio, no devuelve ninguna página solo por su tipo', async ({ page }) => {
+    test.setTimeout(600_000);
+    await page.goto('/buscar/');
+    const porTermino = await page.evaluate(
+      async ({ terminos, opciones }) => {
+        const pf = await import('/pagefind/pagefind.js' as string);
+        await pf.options(opciones);
+        await pf.init();
+        const salida: Record<string, { total: number; sinCoincidencia: string[] }> = {};
+        for (const termino of terminos) {
+          const { results } = await pf.search(termino);
+          const sinCoincidencia: string[] = [];
+          // Todos sus datos, por tandas: «cita» llegó a dar miles.
+          for (let i = 0; i < results.length; i += 200) {
+            const datos = await Promise.all(results.slice(i, i + 200).map((r: { data: () => Promise<unknown> }) => r.data()));
+            for (const dato of datos as { url: string; locations: number[] }[]) {
+              if (dato.locations.length === 0) sinCoincidencia.push(dato.url);
+            }
+          }
+          salida[termino] = { total: results.length, sinCoincidencia };
+        }
+        return salida;
+      },
+      { terminos: TERMINOS, opciones: OPCIONES_DE_PAGEFIND },
+    );
+    // Todos los términos a la vez: el parte nombra cada uno que falla, no solo el primero.
+    const fallos = TERMINOS.flatMap((termino) => {
+      const { total, sinCoincidencia } = porTermino[termino];
+      return sinCoincidencia.length === 0
+        ? []
+        : [`«${termino}»: ${sinCoincidencia.length} de ${total} sin el término (${sinCoincidencia.slice(0, 3).join(', ')}…)`];
+    });
+    expect(fallos).toEqual([]);
+  });
+
+  /** Lo que pinta un resultado del tipo dado, con su presentación calculada. */
+  async function pintadosDe(page: Page) {
+    return page.locator('[data-resultados] .resultado').evaluateAll((ns) =>
+      ns.map((n) => {
+        const titulo = n.querySelector('.titulo')!;
+        const estilo = getComputedStyle(titulo);
+        return {
+          tipo: n.querySelector('.clase')!.getAttribute('data-tipo')!,
+          rotulo: n.querySelector('.clase')!.textContent!.trim(),
+          titulo: titulo.textContent!.trim(),
+          enSans: titulo.classList.contains('en-sans'),
+          familia: estilo.fontFamily,
+          peso: estilo.fontWeight,
+          cuerpo: estilo.fontSize,
+          autor: n.querySelector('.r-autor')?.textContent?.trim(),
+          href: n.querySelector('a')!.getAttribute('href')!,
+          nombre: n.querySelector('a')!.getAttribute('aria-label'),
+        };
+      }),
+    );
+  }
+
+  // (b) Con el índice de verdad: la portada responde por su nombre, rotulada «Portada».
+  test('buscar el nombre del sitio da la portada, rotulada «Portada» y con el título en Inter', async ({ page }) => {
+    await buscar(page, MARCA);
+    const portada = (await pintadosDe(page)).find((r) => r.href === '/');
+    expect(portada, `«${MARCA}» no devuelve la portada`).toBeDefined();
+    expect(portada!.tipo).toBe('portada');
+    expect(portada!.rotulo).toBe(ETIQUETAS_DE_RESULTADO.portada);
+    expect(portada!.titulo).toBe(MARCA);
+    expect(portada!.enSans).toBe(true);
+    expect(portada!.familia).toMatch(/Inter/);
+    expect(portada!.familia).not.toMatch(/Georgia|Source Serif/);
+    expect(portada!.nombre).toBe(`Portada: ${MARCA}`);
+    expect(portada!.autor).toBeUndefined();
+  });
+
+  // (c) Lo que la portada enseña ya tiene su página en el índice: la portada no sale por ello.
+  test('el texto de la Cita del Día y el nombre de un Autor de la portada dan su página, no la portada', async ({ page }) => {
+    await page.goto('/');
+    const delDia = page.locator('section.del-dia');
+    if ((await delDia.count()) > 0) {
+      const texto = (await delDia.locator('.texto').first().textContent())!.replace(/[«»]/g, '').trim();
+      const fragmento = texto.split(/\s+/).slice(0, 5).join(' ');
+      const destino = (await delDia.getByRole('link', { name: 'Ver esta cita' }).getAttribute('href'))!;
+      await buscar(page, fragmento);
+      const hrefs = (await resultados(page)).map((r) => r.href.replace(/\/?$/, '/'));
+      expect(hrefs, fragmento).toContain(destino.replace(/\/?$/, '/'));
+      expect(hrefs, fragmento).not.toContain('/');
+      await page.goto('/');
+    }
+
+    const autor = page.locator('ul.autores a').first();
+    const nombre = (await autor.textContent())!.trim();
+    const pagina = (await autor.getAttribute('href'))!;
+    await buscar(page, nombre);
+    const hrefs = (await resultados(page)).map((r) => r.href.replace(/\/?$/, '/'));
+    expect(hrefs, nombre).toContain(pagina.replace(/\/?$/, '/'));
+    expect(hrefs, nombre).not.toContain('/');
+  });
+
+  // (d) Con un Pagefind de mentira: cómo se pintan los tipos nuevos frente a una Cita.
+  test('un resultado de Directorio o de Portada lleva su rótulo, el título en Inter 400 con el cuerpo de una Cita y su nombre accesible', async ({ page }) => {
+    await page.route('**/pagefind/pagefind.js', (ruta) =>
+      ruta.fulfill({
+        contentType: 'text/javascript',
+        body: [
+          'export async function options() {}',
+          'export async function init() {}',
+          'const D = [',
+          "  { url: '/cita/una/', meta: { title: 'Una cita' }, filters: { tipo: ['cita'] } },",
+          "  { url: '/autores/', meta: { title: 'Autores' }, filters: { tipo: ['directorio'] } },",
+          `  { url: '/', meta: { title: ${JSON.stringify(MARCA)} }, filters: { tipo: ['portada'] } },`,
+          "  { url: '/rara/', meta: { title: 'Rara' }, filters: { tipo: ['desconocido'] } },",
+          '];',
+          'export async function search() { return { results: D.map((d) => ({ data: async () => d })) }; }',
+        ].join('\n'),
+      }),
+    );
+    await buscar(page, 'algo');
+    const [cita, directorio, portada, rara] = await pintadosDe(page);
+
+    expect(directorio.rotulo).toBe(ETIQUETAS_DE_RESULTADO.directorio);
+    expect(directorio.nombre).toBe('Directorio: Autores');
+    expect(portada.rotulo).toBe(ETIQUETAS_DE_RESULTADO.portada);
+    expect(portada.nombre).toBe(`Portada: ${MARCA}`);
+    for (const r of [directorio, portada]) {
+      expect(r.enSans, r.href).toBe(true);
+      expect(r.familia, r.href).toMatch(/Inter/);
+      expect(r.peso, r.href).toBe('400');
+      expect(r.cuerpo, r.href).toBe(cita.cuerpo);
+      expect(r.autor, r.href).toBeUndefined();
+    }
+
+    expect(cita.rotulo).toBe(ETIQUETAS_DE_RESULTADO.cita);
+    expect(cita.enSans).toBe(false);
+    expect(cita.familia).not.toMatch(/^Inter/);
+    expect(cita.nombre).toBeNull();
+    expect(rara.tipo).toBe('desconocido');
+    expect(rara.rotulo).toBe(ETIQUETAS_DE_RESULTADO.cita);
+    expect(rara.enSans).toBe(false);
+    expect(rara.nombre).toBeNull();
   });
 });

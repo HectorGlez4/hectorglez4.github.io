@@ -341,7 +341,9 @@ describe('Historia 22.4 — la Página de Obra, construida', () => {
     const pagina = await html(proyecto, CARTAS);
     expect(pagina).not.toMatch(NOINDEX);
     expect(pagina).toMatch(EN_PAGEFIND);
-    expect(pagina).toContain('data-pagefind-meta="tipo:obra"');
+    // Historia 26.2 — el tipo viaja como filtro de Pagefind, que no casa como texto.
+    expect(pagina).toContain('data-pagefind-filter="tipo:obra"');
+    expect(pagina).not.toMatch(/data-pagefind-meta="tipo:/);
     expect(await anunciadas(proyecto)).toContain(CARTAS);
   });
 

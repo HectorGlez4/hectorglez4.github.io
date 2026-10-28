@@ -72,6 +72,8 @@ import {
 import { marcasDePagina } from '../../tools/lib/indexables.ts';
 import { ORIGEN_DEL_SANDBOX, medicionEnUnSandbox } from './ayuda/medicion.js';
 import { islaDeBusquedaEnUnSandbox, type OpcionesDeLaIsla, type Respuesta } from './ayuda/busqueda.js';
+import { ETIQUETAS_DE_RESULTADO, OPCIONES_DE_PAGEFIND } from '../../src/lib/tipoDeResultado.ts';
+import { MARCA as MARCA_DEL_SITIO } from '../../src/lib/marca.ts';
 import { enlacesDe, recorrerElementos, type Declaracion, type Elemento } from './ayuda/enlaces.js';
 import {
   AUTOR_VALIDO,
@@ -3843,5 +3845,132 @@ describe('Historia 23.8 — una búsqueda cuenta una vez, cuando se asienta', ()
       otra.ocultar();
       expect(otra.emitidos()).toEqual([[BUSQUEDA, '0', NINGUNO], [SIN_RESULTADOS, 'zzz']]);
     }, 240_000);
+
+    describe('Historia 26.2 — el tipo llega por el filtro y Pagefind se configura antes de cada búsqueda', () => {
+      /** Una sola fila, con los datos que se digan, para la consulta «uno». */
+      const conUnDato = (dato: { url: string; meta?: Record<string, unknown>; filters?: Record<string, unknown> }) =>
+        isla({ respuestas: () => ({ total: 1, datos: () => dato }) });
+      const SERIF = { clases: ['titulo'], autor: undefined, nombre: null };
+
+      it.each([
+        [
+          'Directorio',
+          { url: '/autores/', meta: { title: 'Autores' }, filters: { tipo: ['directorio'] } },
+          { tipo: 'directorio', rotulo: 'Directorio', titulo: 'Autores', clases: ['titulo', 'en-sans'], autor: undefined, nombre: 'Directorio: Autores' },
+        ],
+        [
+          'Portada',
+          { url: '/', meta: { title: MARCA_DEL_SITIO }, filters: { tipo: ['portada'] } },
+          { tipo: 'portada', rotulo: 'Portada', titulo: MARCA_DEL_SITIO, clases: ['titulo', 'en-sans'], autor: undefined, nombre: `Portada: ${MARCA_DEL_SITIO}` },
+        ],
+        [
+          'Obra con Autor',
+          { url: '/obra/seneca/cartas/', meta: { title: 'Cartas', autor: ' Séneca ' }, filters: { tipo: ['obra'] } },
+          { tipo: 'obra', rotulo: 'Obra', titulo: 'Cartas', clases: ['titulo', 'en-sans'], autor: 'Séneca', nombre: 'Obra: Cartas, de Séneca' },
+        ],
+        [
+          'Obra sin Autor',
+          { url: '/obra/seneca/cartas/', meta: { title: 'Cartas' }, filters: { tipo: ['obra'] } },
+          { tipo: 'obra', rotulo: 'Obra', titulo: 'Cartas', clases: ['titulo', 'en-sans'], autor: undefined, nombre: 'Obra: Cartas' },
+        ],
+        [
+          'Cita',
+          { url: '/cita/una/', meta: { title: 'Una', autor: 'Nadie' }, filters: { tipo: ['cita'] } },
+          { tipo: 'cita', rotulo: 'Cita', titulo: 'Una', ...SERIF },
+        ],
+        [
+          'Autor',
+          { url: '/autor/seneca/', meta: { title: 'Séneca' }, filters: { tipo: ['autor'] } },
+          { tipo: 'autor', rotulo: 'Autor', titulo: 'Séneca', ...SERIF },
+        ],
+        [
+          'Tema',
+          { url: '/tema/la-vida/', meta: { title: 'La vida' }, filters: { tipo: ['tema'] } },
+          { tipo: 'tema', rotulo: 'Tema', titulo: 'La vida', ...SERIF },
+        ],
+        [
+          'Colección',
+          { url: '/coleccion/x/', meta: { title: 'X' }, filters: { tipo: ['coleccion'] } },
+          { tipo: 'coleccion', rotulo: 'Colección', titulo: 'X', ...SERIF },
+        ],
+        [
+          'tipo desconocido',
+          { url: '/x/', meta: { title: 'X' }, filters: { tipo: ['foo'] } },
+          { tipo: 'foo', rotulo: 'Cita', titulo: 'X', ...SERIF },
+        ],
+        [
+          'sin filtros',
+          { url: '/x/', meta: { title: 'X' } },
+          { tipo: 'cita', rotulo: 'Cita', titulo: 'X', ...SERIF },
+        ],
+        [
+          'filtro de tipo vacío',
+          { url: '/x/', meta: { title: 'X' }, filters: { tipo: [] } },
+          { tipo: 'cita', rotulo: 'Cita', titulo: 'X', ...SERIF },
+        ],
+        [
+          'el tipo en la metadata —el medio viejo— no cuenta',
+          { url: '/obra/a/b/', meta: { title: 'B', tipo: 'obra' } },
+          { tipo: 'cita', rotulo: 'Cita', titulo: 'B', ...SERIF },
+        ],
+        [
+          'Directorio sin título',
+          { url: '/autores/', filters: { tipo: ['directorio'] } },
+          { tipo: 'directorio', rotulo: 'Directorio', titulo: '/autores/', clases: ['titulo', 'en-sans'], autor: undefined, nombre: null },
+        ],
+        [
+          'Portada sin título',
+          { url: '/', meta: {}, filters: { tipo: ['portada'] } },
+          { tipo: 'portada', rotulo: 'Portada', titulo: '/', clases: ['titulo', 'en-sans'], autor: undefined, nombre: null },
+        ],
+      ])('se pinta: %s', async (_, dato, esperado) => {
+        const entorno = await conUnDato(dato);
+        await entorno.teclear('uno');
+        expect(entorno.resultados()).toEqual([esperado]);
+      }, 240_000);
+
+      it('los rótulos del guion son los de la tabla', async () => {
+        const guion = await islaConstruida();
+        expect(guion).toContain(`const ETIQUETA = ${JSON.stringify(ETIQUETAS_DE_RESULTADO)};`);
+        expect(guion).toContain(`const PAGEFIND = ${JSON.stringify(OPCIONES_DE_PAGEFIND)};`);
+        expect(guion).toContain('const FILTRO = "tipo";');
+        expect(guion).toContain('const EN_SANS = ["obra","directorio","portada"];');
+      }, 240_000);
+
+      it('toda búsqueda va precedida de `options` con las opciones de Pagefind', async () => {
+        const entorno = await isla();
+        await entorno.teclear('viento');
+        await entorno.teclear('lluvia');
+        await entorno.teclear('zzz');
+        const llamadas = entorno.llamadas();
+        const busquedas = llamadas.flatMap((l, i) => (l[0] === 'search' ? [i] : []));
+        expect(busquedas).toHaveLength(3);
+        for (const i of busquedas) expect(llamadas[i - 1]).toEqual(['options', OPCIONES_DE_PAGEFIND]);
+        expect(llamadas.filter((l) => l[0] === 'init')).toHaveLength(1);
+      }, 240_000);
+
+      it.each(['search', 'data'] as const)(
+        'tras un fallo en %s y su `destroy()`, la búsqueda siguiente vuelve a aplicar las opciones antes de buscar',
+        async (falla) => {
+          const entorno = await isla();
+          entorno.fallar(falla);
+          await entorno.teclear('viento');
+          expect(entorno.destrucciones()).toBe(1);
+          entorno.fallar();
+          await entorno.teclear('lluvia');
+          expect(entorno.pintados()).toHaveLength(3);
+          const llamadas = entorno.llamadas();
+          const destruida = llamadas.findIndex((l) => l[0] === 'destroy');
+          expect(destruida).toBeGreaterThan(0);
+          const despues = llamadas.slice(destruida + 1);
+          expect(despues).toEqual([
+            ['options', OPCIONES_DE_PAGEFIND],
+            ['search', 'lluvia'],
+          ]);
+          expect(entorno.importaciones()).toEqual(['/pagefind/pagefind.js']);
+        },
+        240_000,
+      );
+    });
   });
 });
