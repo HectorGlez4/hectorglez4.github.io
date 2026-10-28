@@ -5,7 +5,7 @@ created: '2026-10-28'
 status: 'done'
 baseline_revision: '0da4496a1fffa01c5057b1b4eb3676ff3314fd01'
 review_loop_iteration: 0
-followup_review_recommended: false
+followup_review_recommended: true
 context:
   - '{project-root}/_bmad-output/implementation-artifacts/epic-26-context.md'
 warnings: ['oversized']
@@ -100,6 +100,27 @@ deferred: []
 
 Pasada de implementación del bucle v8-ralph: las capas de revisión son externas y esta pasada no traía hallazgos («## Hallazgos externos — …» ausentes); la revisión independiente viene después.
 
+### 2026-10-28 — Review pass
+- intent_gap: 0
+- bad_spec: 0
+- patch: 11 (high 0, medium 3, low 8)
+- defer: 0
+- reject: 14 (high 0, medium 1, low 13)
+- addressed_findings:
+  - `[medium]` `[patch]` La corrección dependía del Corpus de hoy (blind-hunter, edge-case-hunter): `break-word` no rebaja el mínimo de un ítem flexible ni de un `inline-block`, y un nombre del Corpus con una palabra más ancha que la columna de 120 px CSS desbordaba. Nueva prueba que pone una palabra indivisible en cada texto del Corpus de cada superficie (texto al 200 % y espaciado de 1.4.12); señaló chips (portada, 404, `/buscar/`, `Chips.astro`), `.autores a` de la portada, el Autor de la Atribución (`.autor a`) y el de la Cabecera de Obra (`.de a`), que ganan `overflow-wrap: anywhere`.
+  - `[medium]` `[patch]` La fila de la Paginación solo se comprobaba en la página 1 (verification-gap, blind-hunter, intent-alignment): a 360 px por omisión se mide en la 1, la 2 y la última, con «Anterior» y «Siguiente» en la fila de «Página N de M» y en su orden.
+  - `[medium]` `[patch]` La premisa del zoom medía `innerWidth`, que en `movil` crece con lo que desborda, y con `expect` duro cortaba las demás condiciones (edge-case-hunter, ac-auditor): mide el `clientWidth` de `<html>` y el `zoom` calculado, falla con `expect.soft` y la condición sin premisa no se mide.
+  - `[low]` `[patch]` La premisa del espaciado solo miraba `letter-spacing` (blind-hunter, ac-auditor): comprueba las cuatro propiedades sobre un párrafo de prueba.
+  - `[low]` `[patch]` Nada del reflujo lo vigilaba el CI (blind-hunter): `tests/unit/espinas-de-ux.test.ts` fija en la fuente `overflow-wrap` de `body`, las reglas de la fila de la Paginación y los `anywhere` nuevos.
+  - `[low]` `[patch]` El criterio no veía contenedores que se desplazan o recortan en horizontal fuera de las letras de salto (blind-hunter, intent-alignment): el barrido de cada superficie los busca en las tres condiciones.
+  - `[low]` `[patch]` La prueba de títulos de Obra podía pasar en vacío (blind-hunter, edge-case-hunter, ac-auditor): falla —no se salta— sin ruta, con el motivo correcto; solo cuenta filas visibles; mide también la fila de la palabra más larga, y otra vez con una palabra indivisible añadida al título.
+  - `[low]` `[patch]` `listadoConMasPaginas` reventaba con ENOENT si una familia no tenía directorio en `dist/` (blind-hunter, edge-case-hunter): la salta, y la prueba falla nombrándolo si ningún listado tiene 2+ páginas.
+  - `[low]` `[patch]` No se medía la separación vertical cuando la Paginación se parte (blind-hunter): a 320 px, en las tres condiciones y en las páginas 1 y 2, «Anterior», «Página N de M» y «Siguiente» quedan a 7,5 px al menos entre sí.
+  - `[low]` `[patch]` La prueba de `nowrap` recorría todas las superficies en un solo `test` (blind-hunter): una prueba por ruta.
+  - `[low]` `[patch]` La cabecera solo se juzgaba con el texto al 200 % (ac-auditor, intent-alignment): nueva prueba en las tres condiciones —la cabecera no desborda y sus enlaces quedan dentro—.
+
+Rechazados: las cifras 340/417 (medidas distintas, el Intent no se toca), «done sin revisión» (esta pasada es la revisión), tareas sin poner al día (la ejecución condicional está en Design Notes), `sprint-status.yaml` (lo lleva el orquestador del bucle), estados abiertos y diálogos, el selector de `nowrap`, apaisado y poca altura, dueño de la regla global, números de línea del Code Map, muestra por familia, zoom simulado, puerta de la 26.11, proporciones con listados cortos y «Página N de M» en tres líneas a 360 px (forma previa, idéntica antes y después).
+
 ## Design Notes
 
 Cierra el diferido de la 26.5 (`spec-26-5-…`, desplazamiento de la Página de Cita con el texto al 200 %). La regla global en `body` no altera nada por omisión: `overflow-wrap` solo actúa cuando una palabra no cabe en su línea, y `break-word` no cambia el min-content, así que recuentos y números no se encogen; donde un ítem flex desborda igual, se corrige ese ítem. Con zoom 2 la columna útil es de 120 px CSS y la Cita del Día va a 36 px: partirá palabras en varias líneas, y es lo que pide NFR-8 sin tocar los tramos (AD-8).
@@ -107,6 +128,8 @@ Cierra el diferido de la 26.5 (`spec-26-5-…`, desplazamiento de la Página de 
 **Medido al implementar (2026-10-28).** Con solo `overflow-wrap: break-word` en `body` dejaron de desbordar con el texto al 200 % la portada, el 404, la Página de Cita (también las siete caras de `CITAS_DEL_BARRIDO`), Autor, Colección y las cuatro caras de Obra: el desborde era siempre una palabra que no cabía en un bloque (`p.texto`, `h1.texto`, `span.fragmento`, el `h1` de Colección). Chips, «Compartir en», Imagen y Rutas de salida no necesitaron regla propia: el barrido no señaló ninguno tras la regla global. Lo único que quedaba era la fila de la Paginación (Tema y Obra 2+, «Siguiente» y los números fuera de la ventana).
 
 **La Paginación.** `flex-wrap: wrap` a secas cambiaba la forma por omisión: el salto de línea de un contenedor flex se decide con el ancho natural de cada ítem, y la lista de 12 números mide 616 px, así que iba siempre sola en su fila. Se decide por el mínimo: `.numeros` y `.cuenta` parten de base 0 (su mínimo por contenido: 44 px y la palabra más larga) y crecen hasta `max-content`, la lista primero (`flex-grow` 1000 frente a 1). Medido a 360 px por omisión, antes y después, en `/tema/el-saber/` (12 páginas), su página 5 y las dos de `/obra/amado-nervo/plenitud/`: las cajas de los cuatro ítems salen idénticas al píxel. **Una diferencia a 320 px por omisión**, y es la que DESIGN.md pide: en las páginas 2+ de un listado largo (con «Anterior» y «Siguiente» a la vez) los mínimos suman 281 px en una columna de 280, y antes «Siguiente» sobresalía 1 px de la columna hacia el margen; ahora baja a otra fila. La página 1 (la que mide la prueba) sigue en una sola fila a 320 y a 360.
+
+**Revisión 1 — los nombres del Corpus.** La regla de `body` partía lo que el Corpus de hoy trae, pero `break-word` no rebaja el mínimo de una caja flexible ni de un `inline-block`, así que un Tema, una Colección o un Autor con una palabra más ancha que la columna de 120 px CSS desbordaba igual. Se prueba poniendo a propósito una palabra indivisible en cada texto del Corpus de cada superficie (`TEXTOS_DEL_CORPUS` de `accesibilidad.spec.ts`), y lo que señaló —el chip en sus cuatro declaraciones (`Chips.astro`, portada, 404 y `/buscar/`), `.autores a` de la portada, `.autor a` de la Atribución y `.de a` de la Cabecera de Obra— gana `overflow-wrap: anywhere`, que solo actúa cuando la palabra no cabe en la línea: por omisión, nada cambia. Los rótulos fijos («Siguiente», «Volver al índice», «N citas», los destinos de «Compartir en») no se inyectan: se miden tal cual.
 
 ## Verification
 
@@ -139,3 +162,24 @@ Status: done
 
 **Riesgos.** La regla global de `body` es heredable: un componente futuro que necesite no partir una palabra tendrá que declararlo, y lo vigila la prueba de `nowrap` solo para controles y encabezados. La simulación del 200 % es `zoom` y no el zoom de texto del navegador; es la decisión de la 26.5. El caso de 320 px por omisión en las páginas 2+ de un listado largo cambia de forma (anotado en Design Notes).
 
+### Revisión 1 (2026-10-28)
+
+**Resumen.** Once parches de la primera revisión independiente (cinco capas), sin `bad_spec` ni `intent_gap`. Lo construido gana `overflow-wrap: anywhere` donde un nombre del Corpus va en una caja flexible o `inline-block`; las pruebas ganan la palabra indivisible, premisas que no se saltan ni engañan en `movil`, la Paginación medida en sus páginas 2 y última, la cabecera en las tres condiciones, contenedores que recortan y la guardia en el CI.
+
+**Ficheros.**
+- `src/components/Chips.astro`, `src/pages/index.astro`, `src/pages/404.astro`, `src/pages/buscar.astro` — `.chip` con `overflow-wrap: anywhere`; en la portada también `.autores a`.
+- `src/components/Atribucion.astro` — `.autor a` con `overflow-wrap: anywhere`.
+- `src/pages/obra/[autor]/[slug]/[...page].astro` — `.de a` con `overflow-wrap: anywhere`.
+- `tests/e2e/accesibilidad.spec.ts` — premisas (zoom por `clientWidth` de `<html>` y `zoom` calculado, espaciado en sus cuatro propiedades, las dos con `expect.soft` y sin medir la condición fallida); contenedores que se desplazan o recortan; la palabra indivisible en `TEXTOS_DEL_CORPUS`; `nowrap` por ruta; la cabecera en las tres condiciones; títulos de Obra sin `skip`, solo filas visibles, la de palabra más larga y con palabra indivisible; Paginación con `existsSync`, fila de 360 px en las páginas 1, 2 y última, y 8 px entre zonas a 320.
+- `tests/unit/espinas-de-ux.test.ts` — «Historia 26.9 — las reglas del reflujo, en la fuente»: `body`, la fila de la Paginación y los `anywhere`.
+
+**Revisión.** Parches 11 (alta 0, media 3, baja 8), aplazados 0, rechazados 14. Seguimiento recomendado: `true` (puntuación 3 × 3 + 8 = 17 ≥ 5).
+
+**Verificación.**
+- `npx playwright test tests/e2e/accesibilidad.spec.ts --project=movil -g "26.9|Paginación"` — antes de corregir lo construido, 15 rojos con una primera inyección en todo texto de `main` (que tocaba también rótulos fijos); con `TEXTOS_DEL_CORPUS`, una sonda sobre el mismo `dist/` señaló los chips, `.autores a`, `.autor a` y `.de a`; tras corregirlos, 61 passed.
+- `npx playwright test tests/e2e/accesibilidad.spec.ts tests/e2e/cabecera.spec.ts tests/e2e/directorio-de-obras.spec.ts tests/e2e/directorio-de-autores.spec.ts tests/e2e/pagina-de-cita.spec.ts tests/e2e/portada.spec.ts` (los dos proyectos) — 390 passed, 4 skipped (los `test.skip` por proyecto de `pagina-de-cita.spec.ts`).
+- `npx playwright test tests/e2e/pagina-404.spec.ts tests/e2e/buscadores.spec.ts` (los dos proyectos) — 32 passed.
+- `npx vitest run tests/unit/tarjeta-de-cita.test.ts tests/unit/lista-de-obras.test.ts tests/unit/tarjeta-de-obra.test.ts tests/unit/espinas-de-ux.test.ts tests/unit/paginacion.test.ts tests/unit/obra-pagina.test.ts tests/unit/rutas-de-salida.test.ts` — 209/210; el único rojo es el previo de `obra-pagina.test.ts` «existe `.enlace-en-tinta`» (la hoja de `Armazon` pasa de 4 KiB y sale a fichero), aplazado desde la 26.7 y rojo igual en la 26.8.
+- `npx astro check` — 0 errores, 0 avisos (8 sugerencias, ninguna en los ficheros tocados).
+
+**Riesgos.** Los destinos de «Compartir en» con el texto al 200 % sobresalen 3 px de la columna hacia el margen (`ul.destinos` 123/120 CSS): no llegan al borde ni abren desplazamiento, así que el criterio de la 2.8 no los ve; partir el nombre de una red es decisión de diseño, no de esta pasada. Siguen sin medirse los estados abiertos (diálogo de la Imagen, hoja de compartir) y la poca altura, fuera de la muestra que fija la historia.
