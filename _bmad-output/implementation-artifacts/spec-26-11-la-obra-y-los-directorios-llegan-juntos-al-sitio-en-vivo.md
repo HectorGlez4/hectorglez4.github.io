@@ -190,3 +190,29 @@ una; la corrida sin la petición repetida es la de 1.805 ms.
 
 Resultado: CI y barrido en verde; NFR-7 **se degrada** frente a la principal del mismo día, así
 que según la propia historia el merge espera a Héctor (o a la corrección).
+
+## NFR-7, vuelta a medir con la caché del alojamiento — 2026-10-28
+
+El «peor» de arriba lo produce la cabecera del servidor de pruebas, no la rama. `tests/servidor.mjs`
+sirve por omisión `Cache-Control: no-store`, y con `no-store` Chrome no reutiliza una precarga
+de fuente que ya terminó: cuando la hoja pide la fuente, la descarga otra vez. Es una carrera.
+En la principal, más ligera, una de las dos precargas sigue en vuelo y se aprovecha (3 `woff2`).
+En la rama, con 7 KB más de HTML, las dos han terminado y se repiten las dos (4 `woff2`, unos
+50 KB más que la simulación de 4G cobra antes del primer pintado). El alojamiento sirve
+`max-age=600` (DESPLIEGUE.md §1), y con esa cabecera cada fuente se pide una sola vez.
+
+Mismo método que arriba (`lighthouse@13.5.0`, móvil, 4G simulado, Chrome 156; principal
+881949f4d6 y rama 5948d5c221 construidas hoy en local con `MEDICION_ENDPOINT=http://localhost:8787/`),
+cambiando solo la cabecera del servidor con `SERVIDOR_CACHE_CONTROL`:
+
+| construcción | cabecera | LCP mediana | FCP mediana | LCP de las 5 | `woff2` pedidas | bytes |
+|---|---|---|---|---|---|---|
+| `origin/main` | `no-store` | 1.958 ms | 1.358 ms | 1958, 1952, 1967, 1966, 1953 | 3 | 185.813 |
+| rama | `no-store` | 2.255 ms | 1.654 ms | 2255, 2255, 2254 (3 corridas) | 4 | — |
+| `origin/main` | `max-age=600` | **1.802 ms** | 1.078 ms | 1662, 1804, 1802, 1655, 1802 | 2 | 137.204 |
+| rama | `max-age=600` | **1.802 ms** | 1.073 ms | 1806, 1658, 1656, 1802, 1806 | 2 | 144.478 |
+
+Veredicto con la cabecera del alojamiento: **igual**. LCP 1.802 ms en las dos; la rama pesa
+7.274 bytes más (el HTML de la Tarjeta de Obra y del pie), sin efecto medible en LCP. La puerta
+de NFR-7 del bucle mide desde hoy con `SERVIDOR_CACHE_CONTROL=max-age=600` y comprueba en cada
+informe que cada `woff2` se pide una sola vez.
