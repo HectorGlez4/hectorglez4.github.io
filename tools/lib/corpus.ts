@@ -11,7 +11,7 @@
 import { appendFile, readFile, readdir, mkdir, writeFile, rename, rm } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import { basename, dirname, extname, join, relative } from 'node:path';
-import { parse as parsearYaml } from 'yaml';
+import { isMap, isScalar, parse as parsearYaml, parseDocument } from 'yaml';
 import {
   citaAdmisible,
   obraAdmisible,
@@ -858,6 +858,51 @@ export async function escribirAutor(
   const ruta = join(rutas.autores, `${slug}.yml`);
   await writeFile(ruta, aYaml(autor), 'utf8');
   return ruta;
+}
+
+/**
+ * Fija campos escalares de un fichero de Autor **sin tocar nada más** — Historia 26.1.
+ *
+ * `escribirAutor` vuelca el fichero entero con `aYaml`, y eso pierde los comentarios: los de
+ * `teresa-de-jesus.yml`, que explican su `tituloEnFuente`, no sobrevivirían a una clave de
+ * orden. Aquí el YAML se analiza solo para **localizar** la clave: si ya está, se sustituye
+ * su línea en el texto; si no, se añade una al final. El resto del fichero queda byte a byte.
+ * El valor se escribe como lo escribe `aYaml` (`ordenAlfabetico: "Cervantes"`).
+ *
+ * Se relee lo compuesto antes de escribir: si no dice exactamente lo que se quería fijar, se
+ * lanza y el fichero no se toca.
+ */
+export async function fijarCamposDeAutor(
+  ruta: string,
+  campos: Readonly<Record<string, string>>,
+): Promise<void> {
+  const original = await readFile(ruta, 'utf8');
+  let texto = original;
+  for (const [clave, valor] of Object.entries(campos)) {
+    const linea = `${clave}: ${escalar(valor)}`;
+    const documento = parseDocument(texto);
+    if (documento.errors.length > 0 || !isMap(documento.contents)) {
+      throw new Error(`${ruta} no es un mapa YAML legible: no se le escribe ${clave}.`);
+    }
+    const par = documento.contents.items.find((p) => isScalar(p.key) && p.key.value === clave);
+    if (par === undefined) {
+      texto = `${texto === '' || texto.endsWith('\n') ? texto : `${texto}\n`}${linea}\n`;
+      continue;
+    }
+    const inicio = isScalar(par.key) ? par.key.range?.[0] : undefined;
+    const fin = isScalar(par.value) ? par.value.range?.[1] : undefined;
+    if (inicio === undefined || fin === undefined) {
+      throw new Error(`${ruta}: ${clave} no es un valor escalar que se pueda sustituir.`);
+    }
+    texto = `${texto.slice(0, inicio)}${linea}${texto.slice(fin)}`;
+  }
+  const releido = parsearYaml(texto) as Record<string, unknown>;
+  const antes = parsearYaml(original) as Record<string, unknown>;
+  const esperado = { ...antes, ...campos };
+  if (JSON.stringify(Object.entries(releido).sort()) !== JSON.stringify(Object.entries(esperado).sort())) {
+    throw new Error(`${ruta}: fijar ${Object.keys(campos).join(' y ')} habría cambiado otra cosa.`);
+  }
+  await writeFile(ruta, texto, 'utf8');
 }
 
 export async function escribirTema(

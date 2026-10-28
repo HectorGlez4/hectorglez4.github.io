@@ -206,9 +206,9 @@ describe('Historia 17.2 — la semblanza ajena solo donde porta su atribución',
       'autores/seneca.yml': autorConBiografia(DOCUMENTO, 123),
       'autores/horacio.yml':
         `nombre: Horacio\nañoNacimiento: -65\nañoFallecimiento: -8\nsemblanza: ${HORACIO_SEMBLANZA}\n` +
-        `biografia:\n  documento: ${HORACIO_DOCUMENTO}\n  revision: 77\n`,
+        `biografia:\n  documento: ${HORACIO_DOCUMENTO}\n  revision: 77\nordenAlfabetico: Horacio\n`,
       'autores/marco-aurelio.yml':
-        `nombre: Marco Aurelio\nañoNacimiento: 121\nañoFallecimiento: 180\nsemblanza: ${SEMBLANZA_PROPIA}\n`,
+        `nombre: Marco Aurelio\nañoNacimiento: 121\nañoFallecimiento: 180\nsemblanza: ${SEMBLANZA_PROPIA}\nordenAlfabetico: Aurelio\n`,
       'citas/horacio--carpe-diem.md': citaValida({
         texto: 'Aprovecha el día.',
         autor: 'horacio',

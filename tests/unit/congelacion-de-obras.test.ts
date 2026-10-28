@@ -79,7 +79,7 @@ describe('con la congelación declarada', () => {
     temporales.push(raiz);
     const corpus = join(raiz, 'corpus');
     for (const dir of ['citas', 'autores', 'temas', 'obras']) await mkdir(join(corpus, dir), { recursive: true });
-    await writeFile(join(corpus, 'autores', 'gracian.yml'), 'nombre: "Baltasar Gracián"\nañoFallecimiento: 1658\nsemblanza: "S."\n', 'utf8');
+    await writeFile(join(corpus, 'autores', 'gracian.yml'), 'nombre: "Baltasar Gracián"\nañoFallecimiento: 1658\nsemblanza: "S."\nordenAlfabetico: "Gracián"\n', 'utf8');
     await writeFile(join(corpus, 'obras', 'gracian--oraculo.yml'), `autor: gracian\ntitulo: Oráculo\nformas:\n  - ${formaDeObra('Oráculo')}\n`, 'utf8');
     for (let i = 0; i < 6; i += 1) {
       await writeFile(

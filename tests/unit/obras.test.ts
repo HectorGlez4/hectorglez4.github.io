@@ -257,7 +257,7 @@ async function corpusTemporal(): Promise<Rutas> {
   }
   await writeFile(
     join(rutas.autores, 'seneca.yml'),
-    'nombre: Séneca\nañoFallecimiento: 65\nsemblanza: Filósofo.\n',
+    'nombre: Séneca\nañoFallecimiento: 65\nsemblanza: Filósofo.\nordenAlfabetico: Séneca\n',
     'utf8',
   );
   return rutas;
@@ -715,7 +715,7 @@ describe('22.2 — restituir la grafía', () => {
     await mkdir(rutas.fuentes, { recursive: true });
     await writeFile(
       join(rutas.autores, 'sor-juana-ines-de-la-cruz.yml'),
-      'nombre: Sor Juana Inés de la Cruz\nañoFallecimiento: 1695\nsemblanza: Poeta novohispana.\n',
+      'nombre: Sor Juana Inés de la Cruz\nañoFallecimiento: 1695\nsemblanza: Poeta novohispana.\nordenAlfabetico: Cruz\n',
       'utf8',
     );
     await escribirCita(rutas.citas, FICHERO, {
@@ -823,7 +823,7 @@ describe('22.2 — reunir, separar y titular', () => {
     const rutas = await dosFichasDeSeneca();
     await writeFile(
       join(rutas.autores, 'horacio.yml'),
-      'nombre: Horacio\nañoFallecimiento: -8\nsemblanza: Poeta latino.\n',
+      'nombre: Horacio\nañoFallecimiento: -8\nsemblanza: Poeta latino.\nordenAlfabetico: Horacio\n',
       'utf8',
     );
     await publicar(rutas, citaCompleta('horacio-a', 'Odas', 'horacio'));
@@ -871,7 +871,7 @@ describe('22.2 — reunir, separar y titular', () => {
     const rutas = await dosFichasDeSeneca();
     await writeFile(
       join(rutas.autores, 'horacio.yml'),
-      'nombre: Horacio\nañoFallecimiento: -8\nsemblanza: Poeta latino.\n',
+      'nombre: Horacio\nañoFallecimiento: -8\nsemblanza: Poeta latino.\nordenAlfabetico: Horacio\n',
       'utf8',
     );
     await publicar(rutas, citaCompleta('horacio-a', 'Odas', 'horacio'));

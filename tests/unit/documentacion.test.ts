@@ -146,6 +146,7 @@ const FICHA_DE_TERESA = [
   `nombre: ${AUTOR_DECLARADO}`,
   'añoFallecimiento: 1582',
   'semblanza: Monja y escritora castellana, fundadora de las Descalzas.',
+  'ordenAlfabetico: Jesús',
   '',
 ].join('\n');
 
@@ -793,6 +794,7 @@ citas:
         'nombre: Juan Montalvo',
         'añoFallecimiento: 1889',
         'semblanza: Ensayista ecuatoriano, desterrado por escribir contra los tiranos.',
+        'ordenAlfabetico: Montalvo',
         '',
       ].join('\n'),
       'temas/el-tiempo.yml': TEMA_VALIDO,
@@ -860,7 +862,7 @@ describe('Historia 19.1 — restituir la traducción', () => {
   const ODAS_SLUG = 'horacio-feliz-quien-lejos-de-negocios-vive';
   const ODAS_FICHERO = 'citas/horacio--feliz-quien-lejos-de-negocios-vive.md';
   const ODAS_DOCUMENTO = 'fuentes/wikisource-es--odas--odas-horacio-salinas-tr-i.txt';
-  const FICHA_DE_HORACIO = 'nombre: Horacio\nañoFallecimiento: -8\nsemblanza: Poeta lírico latino.\ntradicion: otra\n';
+  const FICHA_DE_HORACIO = 'nombre: Horacio\nañoFallecimiento: -8\nsemblanza: Poeta lírico latino.\ntradicion: otra\nordenAlfabetico: Horacio\n';
 
   function documentoDeOdas(declaracion: string[]): string {
     return componerDocumento(

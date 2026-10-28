@@ -55,7 +55,7 @@ const MOVIL = { desde: '2026-09-09', hasta: '2026-10-06', clase: '28-dias' };
 const CREDENCIAL = { [VARIABLE_DE_CREDENCIALES]: '{"type":"service_account"}' };
 
 const AUTOR = (nombre: string) =>
-  `nombre: "${nombre}"\nañoFallecimiento: 65\nsemblanza: "Semblanza de prueba."\ntradicion: "peninsular"\n`;
+  `nombre: "${nombre}"\nañoFallecimiento: 65\nsemblanza: "Semblanza de prueba."\ntradicion: "peninsular"\nordenAlfabetico: "${nombre.split(' ').at(-1)}"\n`;
 
 /** Dos Autores que se pisan el prefijo, y una Cita publicada de cada uno. */
 async function corpusDePrueba(): Promise<string> {

@@ -16,6 +16,8 @@ import {
   fuenteDeCita,
   obraAdmisible,
   nombre,
+  ordenAlfabetico,
+  ordenRevisado,
   procedencia,
   semblanza,
   slug,
@@ -94,6 +96,10 @@ const autores = defineCollection({
     tradicion: tradicion.optional(),
     // Historia 17.1 — la revisión que sostiene la semblanza. Ver la nota en `admision.ts`.
     biografia: biografia.optional(),
+    // Historia 26.1 — la clave de orden y su revisión. Ver la nota en `admision.ts`: la
+    // forma es puerta aquí; la presencia, en `integraciones/claves.ts`.
+    ordenAlfabetico: ordenAlfabetico.optional(),
+    ordenRevisado: ordenRevisado.optional(),
   }),
 });
 

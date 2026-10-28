@@ -247,13 +247,15 @@ export const CAMPOS_QUE_PINTA = {
  *   · `estadoDerechos` es una puerta de admisión, no un texto publicado;
  *   · `tradicion` es del suelo del 40 % de tradición latinoamericana (§6.1);
  *   · `distintaDe` solo silencia un aviso del build (22.2).
+ *   · `ordenAlfabetico` y `ordenRevisado` (26.1) todavía no los pinta ninguna superficie: la
+ *     clave pasará a mover `/autores/` y `/obras/` con la 26.3 y la 26.4; la revisión, nunca.
  *
  * Está escrita para que un campo no fechable sea una decisión con nombre y no un olvido: la
  * prueba de clasificación exige que cada clave de los esquemas esté aquí o en la tabla.
  */
 export const CAMPOS_QUE_NO_FECHAN = {
   cita: ['aptaParaPortada', 'estadoDerechos'],
-  autor: ['tradicion'],
+  autor: ['tradicion', 'ordenAlfabetico', 'ordenRevisado'],
   obra: ['distintaDe'],
 } as const satisfies Partial<Record<FamiliaDeFichero, readonly string[]>>;
 

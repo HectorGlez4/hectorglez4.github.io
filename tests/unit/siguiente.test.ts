@@ -236,8 +236,8 @@ describe('Historia 24.5 — los textos de «Siguiente…», sin construir', () =
 
 const WS = 'https://es.wikisource.org/wiki/';
 const AUTOR_MACHADO =
-  'nombre: Antonio Machado\nañoNacimiento: 1875\nañoFallecimiento: 1939\nsemblanza: Poeta sevillano de la generación del 98.\n';
-const AUTOR_EPICTETO = 'nombre: Epicteto\nañoNacimiento: 50\nañoFallecimiento: 135\nsemblanza: Filósofo estoico griego.\n';
+  'nombre: Antonio Machado\nañoNacimiento: 1875\nañoFallecimiento: 1939\nsemblanza: Poeta sevillano de la generación del 98.\nordenAlfabetico: Machado\n';
+const AUTOR_EPICTETO = 'nombre: Epicteto\nañoNacimiento: 50\nañoFallecimiento: 135\nsemblanza: Filósofo estoico griego.\nordenAlfabetico: Epicteto\n';
 
 /** Los números de los textos, con dos cifras: «la 1» no puede estar dentro de «la 11». */
 const dos = (i: number) => String(i).padStart(2, '0');

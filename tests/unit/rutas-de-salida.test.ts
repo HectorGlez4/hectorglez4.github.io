@@ -283,11 +283,11 @@ describe('Historia 24.6 — los dos cierres', () => {
 
 const WS = 'https://es.wikisource.org/wiki/';
 const EPICTETO =
-  'nombre: Epicteto\nañoNacimiento: 50\nañoFallecimiento: 135\nsemblanza: Filósofo estoico griego, esclavo liberto.\n';
+  'nombre: Epicteto\nañoNacimiento: 50\nañoFallecimiento: 135\nsemblanza: Filósofo estoico griego, esclavo liberto.\nordenAlfabetico: Epicteto\n';
 const MARCO_AURELIO =
-  'nombre: Marco Aurelio\nañoNacimiento: 121\nañoFallecimiento: 180\nsemblanza: Emperador romano y filósofo estoico.\n';
+  'nombre: Marco Aurelio\nañoNacimiento: 121\nañoFallecimiento: 180\nsemblanza: Emperador romano y filósofo estoico.\nordenAlfabetico: Aurelio\n';
 const MACHADO =
-  'nombre: Antonio Machado\nañoNacimiento: 1875\nañoFallecimiento: 1939\nsemblanza: Poeta sevillano de la generación del 98.\n';
+  'nombre: Antonio Machado\nañoNacimiento: 1875\nañoFallecimiento: 1939\nsemblanza: Poeta sevillano de la generación del 98.\nordenAlfabetico: Machado\n';
 
 const BREVEDAD = 'Sobre la brevedad de la vida';
 const CARTAS = 'Cartas a Lucilio';

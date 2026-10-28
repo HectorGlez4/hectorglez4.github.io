@@ -8,6 +8,14 @@
  *   npx tsx tools/autor.ts listar
  *   npx tsx tools/autor.ts retirar seneca --motivo "por qué sale del Corpus"
  *   npx tsx tools/autor.ts biografia seneca wikipedia-es--seneca--r123456789
+ *   npx tsx tools/autor.ts proponer-claves
+ *   npx tsx tools/autor.ts clave seneca ["Séneca"]
+ *
+ * **La clave de orden no se teclea** (Historia 26.1, FR-15). `crear` la propone con la regla
+ * fija de `tools/lib/claves.ts` —la última palabra del nombre— y `proponer-claves` la propone
+ * en lote a todo Autor que no la tiene. `clave` es la orden de una persona: confirma la clave
+ * que hay, o la corrige, y es la única que escribe `ordenRevisado`. Ningún agente la corre
+ * sobre el Corpus real (26.10).
  *
  * **La biografía se declara, no se teclea** (Historia 17.1): `biografia` lee la revisión
  * de la cabecera del documento de `corpus/biografias/` y la escribe en la ficha, después de
@@ -35,11 +43,13 @@ import {
   crearAutor,
   declararBiografia,
   editarAutor,
+  fijarClave,
+  proponerClaves,
   retirarAutor,
   type DatosDeAutor,
   type Tradicion,
 } from './lib/gestion.ts';
-import { leerAutores, rutasDelCorpus } from './lib/corpus.ts';
+import { fechaLocal, leerAutores, rutasDelCorpus } from './lib/corpus.ts';
 import { motivosDeArgumentosNoReconocidos, opcion, raizDeCorpusDe, terminar } from './lib/cli.ts';
 
 /** Las opciones que consumen el argumento siguiente, para que no se cuelen de posicional. */
@@ -66,6 +76,8 @@ const USO = [
   '  npx tsx tools/autor.ts listar',
   '  npx tsx tools/autor.ts retirar <slug> --motivo "…"',
   '  npx tsx tools/autor.ts biografia <slug> <documento de corpus/biografias/>',
+  '  npx tsx tools/autor.ts proponer-claves',
+  '  npx tsx tools/autor.ts clave <slug> ["<clave>"]',
   '',
 ].join('\n');
 
@@ -73,7 +85,7 @@ const USO = [
 const CON_VALOR_AL_RETIRAR = ['--corpus', '--motivo'] as const;
 
 /** Las órdenes que toman el slug del Autor como primer argumento suelto. */
-const CON_SLUG = ['editar', 'retirar', 'biografia'];
+const CON_SLUG = ['editar', 'retirar', 'biografia', 'clave'];
 
 /**
  * La tradición, comprobada contra el conjunto del esquema antes de llegar a él.
@@ -118,8 +130,13 @@ const slugPosicional =
   orden !== undefined && CON_SLUG.includes(orden) && argumentos[1] && !argumentos[1].startsWith('--')
     ? [argumentos[1]]
     : [];
-// `biografia` toma además el documento como segundo argumento suelto.
-if (orden === 'biografia' && argumentos[2] && !argumentos[2].startsWith('--')) {
+// `biografia` toma además el documento como segundo argumento suelto, y `clave` la clave.
+if (
+  (orden === 'biografia' || orden === 'clave') &&
+  slugPosicional.length === 1 &&
+  argumentos[2] &&
+  !argumentos[2].startsWith('--')
+) {
   slugPosicional.push(argumentos[2]);
 }
 const noReconocidos = motivosDeArgumentosNoReconocidos(argumentos, {
@@ -127,8 +144,20 @@ const noReconocidos = motivosDeArgumentosNoReconocidos(argumentos, {
   // Cada orden admite las suyas: un `--motivo` en `crear` o un `--nombre` en `retirar` se
   // rechazan igual que una bandera inventada, en vez de ignorarse.
   conValor:
-    orden === 'retirar' ? CON_VALOR_AL_RETIRAR : orden === 'biografia' ? ['--corpus'] : CON_VALOR,
+    orden === 'retirar'
+      ? CON_VALOR_AL_RETIRAR
+      : orden === 'biografia' || orden === 'clave' || orden === 'proponer-claves'
+        ? ['--corpus']
+        : CON_VALOR,
 });
+/*
+ * El guardián compara por valor, así que `clave seneca "Séneca" "Séneca"` colaría el tercer
+ * suelto por ser igual al segundo. Para `clave` se cuentan los sueltos: orden, slug y clave.
+ */
+if (orden === 'clave' && noReconocidos.length === 0) {
+  const sueltos = argumentos.filter((a, i) => !a.startsWith('--') && argumentos[i - 1] !== '--corpus');
+  if (sueltos.length > 3) noReconocidos.push(`«${sueltos[3]}» sobra: clave toma el slug y, como mucho, la clave.`);
+}
 if (noReconocidos.length > 0) {
   process.stderr.write(`${noReconocidos.join('\n')}\n\n${USO}`);
   process.exit(2);
@@ -156,9 +185,33 @@ switch (orden) {
        * «otra». Sin verla aquí, comprobarla exigía abrir doce ficheros.
        */
       const tradicion = a.tradicion ?? 'sin declarar';
-      process.stdout.write(`${a.slug}\t${a.nombre}\t†${a.añoFallecimiento}\t${tradicion}\n`);
+      // Historia 26.1 — la clave de orden y si una persona la ha revisado.
+      const clave =
+        a.ordenAlfabetico === undefined
+          ? 'sin clave'
+          : `«${a.ordenAlfabetico}»\t${a.ordenRevisado === undefined ? 'sin revisar' : `revisada el ${a.ordenRevisado}`}`;
+      process.stdout.write(`${a.slug}\t${a.nombre}\t†${a.añoFallecimiento}\t${tradicion}\t${clave}\n`);
     }
+    const sinClave = autores.filter((a) => a.ordenAlfabetico === undefined).length;
+    const sinRevisar = autores.filter((a) => a.ordenAlfabetico !== undefined && a.ordenRevisado === undefined).length;
+    process.stdout.write(
+      `Claves de orden: faltan ${sinClave} y ${sinRevisar} ${sinRevisar === 1 ? 'está' : 'están'} sin revisar, ` +
+        `de ${autores.length} Autores.\n`,
+    );
     break;
+  }
+
+  case 'proponer-claves':
+    terminar(await proponerClaves(rutas));
+
+  case 'clave': {
+    const slug = argumentos[1];
+    if (!slug || slug.startsWith('--')) {
+      process.stderr.write(`Indique el slug del Autor cuya clave de orden confirma o corrige.\n\n${USO}`);
+      process.exit(2);
+    }
+    const clave = argumentos[2] !== undefined && !argumentos[2].startsWith('--') ? argumentos[2] : undefined;
+    terminar(await fijarClave(rutas, slug, clave, fechaLocal(new Date())));
   }
 
   case 'retirar': {

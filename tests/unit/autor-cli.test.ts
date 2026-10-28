@@ -269,7 +269,7 @@ describe('AD-2 — autor.ts retirar', () => {
 });
 
 describe('Historia 17.1 — la biografía se declara con la orden, no se teclea', () => {
-  const FICHA = 'nombre: "Séneca"\nañoFallecimiento: 65\nsemblanza: "Filósofo estoico."\ntradicion: "otra"\n';
+  const FICHA = 'nombre: "Séneca"\nañoFallecimiento: 65\nsemblanza: "Filósofo estoico."\ntradicion: "otra"\nordenAlfabetico: "Séneca"\n';
 
   function biografia(campos: { fuente?: string; titulo?: string; revision?: number } = {}) {
     return componerBiografia(
@@ -343,5 +343,176 @@ describe('Historia 17.1 — la biografía se declara con la orden, no se teclea'
     const corpus = await conSeneca({ 'wikipedia-es--seneca--r123.txt': biografia() });
     expect((await correr(corpus, ['biografia', 'nadie', 'wikipedia-es--seneca--r123'])).codigo).toBe(1);
     expect((await correr(corpus, ['biografia', 'seneca'])).codigo).toBe(2);
+  });
+});
+
+/*
+ * Historia 26.1 — la clave de orden se propone, no se teclea, y solo una persona la revisa.
+ * Todo sobre corpus temporales: ningún agente corre `clave` sobre el Corpus real.
+ */
+describe('Historia 26.1 — la clave de orden por la boca de la orden', () => {
+  const CERVANTES = [
+    'crear',
+    '--nombre',
+    'Miguel de Cervantes',
+    '--fallecimiento',
+    '1616',
+    '--semblanza',
+    'Novelista.',
+  ];
+  const ficha = (corpus: string, slug: string) => readFile(join(corpus, 'autores', `${slug}.yml`), 'utf8');
+
+  it('crear escribe la clave propuesta al final, sin ordenRevisado, y el parte la dice con su marca', async () => {
+    const corpus = await corpusVacio();
+
+    const hecho = await correr(corpus, CERVANTES);
+
+    expect(hecho.codigo, hecho.error).toBe(0);
+    const escrito = await ficha(corpus, 'miguel-de-cervantes');
+    expect(escrito.endsWith('ordenAlfabetico: "Cervantes"\n')).toBe(true);
+    expect(escrito).not.toContain('ordenRevisado');
+    expect(hecho.salida).toContain('«Cervantes»');
+    expect(hecho.salida).toContain('sin revisar');
+    expect(hecho.salida).toContain('tres palabras o más');
+  });
+
+  it('un nombre de dos palabras no se marca', async () => {
+    const corpus = await corpusVacio();
+    const hecho = await correr(corpus, ['crear', '--nombre', 'José Martí', '--fallecimiento', '1895', '--semblanza', 'Poeta.']);
+    expect(hecho.codigo, hecho.error).toBe(0);
+    expect(await ficha(corpus, 'jose-marti')).toContain('ordenAlfabetico: "Martí"');
+    expect(hecho.salida).not.toContain('tres palabras');
+  });
+
+  it('no hay bandera para teclear la clave: --clave sale con 2 y no crea nada', async () => {
+    const corpus = await corpusVacio();
+    const fallida = await correr(corpus, [...CERVANTES, '--clave', 'Saavedra']);
+    expect(fallida.codigo).toBe(2);
+    expect(await readdir(join(corpus, 'autores'))).toEqual([]);
+  });
+
+  it('si la regla no da clave, crea el Autor sin ella y dice que la fija Héctor con «clave»', async () => {
+    const corpus = await corpusVacio();
+    const hecho = await correr(corpus, ['crear', '--nombre', 'Pío 2', '--fallecimiento', '1958', '--semblanza', 'Papa.']);
+    expect(hecho.codigo, hecho.error).toBe(0);
+    expect(await ficha(corpus, 'pio-2')).not.toContain('ordenAlfabetico');
+    expect(hecho.salida).toContain('Héctor');
+    expect(hecho.salida).toContain('npx tsx tools/autor.ts clave pio-2');
+
+    const lote = await correr(corpus, ['proponer-claves']);
+    expect(lote.codigo, lote.error).toBe(0);
+    expect(await ficha(corpus, 'pio-2')).not.toContain('ordenAlfabetico');
+    expect(lote.salida).toContain('La regla no da clave');
+    expect(lote.salida).toContain('pio-2');
+  });
+
+  it('editar no toca la clave aunque cambie el nombre, y la recuerda', async () => {
+    const corpus = await corpusVacio();
+    await correr(corpus, CERVANTES);
+    const hecho = await correr(corpus, ['editar', 'miguel-de-cervantes', '--nombre', 'Miguel de Cervantes Saavedra']);
+    expect(hecho.codigo, hecho.error).toBe(0);
+    expect(await ficha(corpus, 'miguel-de-cervantes')).toContain('ordenAlfabetico: "Cervantes"');
+    expect(hecho.salida).toContain('«Cervantes»');
+    expect(hecho.salida).toContain('No se recalcula');
+  });
+
+  it('proponer-claves escribe solo en los que no la tienen, conserva los comentarios y es idempotente', async () => {
+    const corpus = await corpusVacio();
+    const TERESA =
+      'nombre: "Teresa de Jesús"\nañoFallecimiento: 1582\nsemblanza: "Monja."\n# Un comentario.\n' +
+      'tituloEnFuente: "Santa Teresa de Jesús"\n';
+    const SENECA = 'nombre: "Séneca"\nañoFallecimiento: 65\nsemblanza: "Filósofo."\nordenAlfabetico: "Lucio"\n';
+    await writeFile(join(corpus, 'autores', 'teresa-de-jesus.yml'), TERESA, 'utf8');
+    await writeFile(join(corpus, 'autores', 'seneca.yml'), SENECA, 'utf8');
+
+    const primera = await correr(corpus, ['proponer-claves']);
+
+    expect(primera.codigo, primera.error).toBe(0);
+    expect(await ficha(corpus, 'teresa-de-jesus')).toBe(`${TERESA}ordenAlfabetico: "Jesús"\n`);
+    expect(await ficha(corpus, 'seneca')).toBe(SENECA);
+    expect(primera.salida).toContain('1 clave escrita');
+    expect(primera.salida).toContain('Teresa de Jesús');
+    expect(primera.salida).toContain('Sin revisar: 2 de 2');
+    // Teresa tiene tres palabras: sale aparte; Séneca no.
+    expect(primera.salida).toMatch(/tres palabras o más[^\n]*\n {2}teresa-de-jesus/u);
+
+    const segunda = await correr(corpus, ['proponer-claves']);
+    expect(segunda.codigo, segunda.error).toBe(0);
+    expect(segunda.salida).toContain('Ninguna clave nueva');
+    expect(await ficha(corpus, 'teresa-de-jesus')).toBe(`${TERESA}ordenAlfabetico: "Jesús"\n`);
+  });
+
+  it('proponer-claves no toma argumentos sueltos ni banderas ajenas: 2', async () => {
+    const corpus = await corpusVacio();
+    await correr(corpus, CERVANTES);
+    expect((await correr(corpus, ['proponer-claves', 'seneca'])).codigo).toBe(2);
+    expect((await correr(corpus, ['proponer-claves', '--nombre', 'X'])).codigo).toBe(2);
+  });
+
+  it('clave <slug> <clave> la corrige y escribe ordenRevisado con la jornada de hoy', async () => {
+    const corpus = await corpusVacio();
+    await correr(corpus, CERVANTES);
+
+    const hecho = await correr(corpus, ['clave', 'miguel-de-cervantes', 'Cervantes Saavedra']);
+
+    expect(hecho.codigo, hecho.error).toBe(0);
+    const escrito = await ficha(corpus, 'miguel-de-cervantes');
+    expect(escrito).toContain('ordenAlfabetico: "Cervantes Saavedra"');
+    expect(escrito).toMatch(/ordenRevisado: "\d{4}-\d{2}-\d{2}"\n$/u);
+  });
+
+  it('clave <slug> confirma la que hay; sin clave que confirmar sale con 1 sin escribir', async () => {
+    const corpus = await corpusVacio();
+    await correr(corpus, CERVANTES);
+    const confirmada = await correr(corpus, ['clave', 'miguel-de-cervantes']);
+    expect(confirmada.codigo, confirmada.error).toBe(0);
+    const escrito = await ficha(corpus, 'miguel-de-cervantes');
+    expect(escrito).toContain('ordenAlfabetico: "Cervantes"');
+    expect(escrito).toContain('ordenRevisado:');
+
+    await correr(corpus, ['crear', '--nombre', 'Pío 2', '--fallecimiento', '1958', '--semblanza', 'Papa.']);
+    const antes = await ficha(corpus, 'pio-2');
+    const fallida = await correr(corpus, ['clave', 'pio-2']);
+    expect(fallida.codigo).toBe(1);
+    expect(await ficha(corpus, 'pio-2')).toBe(antes);
+  });
+
+  it('un slug que no es de nadie o una clave sin forma salen con 1 y no escriben', async () => {
+    const corpus = await corpusVacio();
+    await correr(corpus, CERVANTES);
+    const antes = await ficha(corpus, 'miguel-de-cervantes');
+
+    expect((await correr(corpus, ['clave', 'nadie', 'Nadie'])).codigo).toBe(1);
+    for (const sinForma of ['1984', ' Cervantes', '¿Quién?']) {
+      const fallida = await correr(corpus, ['clave', 'miguel-de-cervantes', sinForma]);
+      expect(fallida.codigo, sinForma).toBe(1);
+      expect(fallida.error).toContain('Regla incumplida');
+    }
+    expect(await ficha(corpus, 'miguel-de-cervantes')).toBe(antes);
+  });
+
+  it('sin slug, con un argumento de más o con una bandera ajena, clave sale con 2 y no escribe', async () => {
+    const corpus = await corpusVacio();
+    await correr(corpus, CERVANTES);
+    const antes = await ficha(corpus, 'miguel-de-cervantes');
+
+    expect((await correr(corpus, ['clave'])).codigo).toBe(2);
+    expect((await correr(corpus, ['clave', 'miguel-de-cervantes', 'Cervantes', 'Saavedra'])).codigo).toBe(2);
+    expect((await correr(corpus, ['clave', 'miguel-de-cervantes', 'Cervantes', 'Cervantes'])).codigo).toBe(2);
+    expect((await correr(corpus, ['clave', 'miguel-de-cervantes', '--nombre', 'X'])).codigo).toBe(2);
+    expect(await ficha(corpus, 'miguel-de-cervantes')).toBe(antes);
+  });
+
+  it('listar da la clave de cada Autor y si está revisada, y cuántas faltan', async () => {
+    const corpus = await corpusVacio();
+    await correr(corpus, CERVANTES);
+    await correr(corpus, ['crear', '--nombre', 'Pío 2', '--fallecimiento', '1958', '--semblanza', 'Papa.']);
+
+    const listado = await correr(corpus, ['listar']);
+
+    expect(listado.codigo, listado.error).toBe(0);
+    expect(listado.salida).toMatch(/miguel-de-cervantes\t[^\n]*«Cervantes»\tsin revisar/u);
+    expect(listado.salida).toMatch(/pio-2\t[^\n]*sin clave/u);
+    expect(listado.salida).toContain('faltan 1 y 1 está sin revisar, de 2 Autores');
   });
 });

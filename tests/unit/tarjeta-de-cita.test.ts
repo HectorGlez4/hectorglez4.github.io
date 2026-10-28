@@ -443,7 +443,7 @@ ${frontmatter}
 describe('Historia 24.3 — la Tarjeta de cada listado, construida', () => {
   const WS = 'https://es.wikisource.org/wiki/';
   const MACHADO =
-    'nombre: Antonio Machado\nañoNacimiento: 1875\nañoFallecimiento: 1939\nsemblanza: Poeta sevillano de la generación del 98.\n';
+    'nombre: Antonio Machado\nañoNacimiento: 1875\nañoFallecimiento: 1939\nsemblanza: Poeta sevillano de la generación del 98.\nordenAlfabetico: Machado\n';
   const NOMBRES: Record<string, string> = { seneca: 'Séneca', 'antonio-machado': 'Antonio Machado' };
 
   const BREVEDAD = 'Sobre la brevedad de la vida';

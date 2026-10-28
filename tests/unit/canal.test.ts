@@ -72,7 +72,7 @@ async function corpusConCitas(cuantas: number, { conColeccion = false } = {}): P
   }
   await writeFile(
     join(corpus, 'autores', 'autor-0.yml'),
-    'nombre: "Autor Cero"\nañoFallecimiento: 65\nsemblanza: "Semblanza de prueba."\ntradicion: "peninsular"\n',
+    'nombre: "Autor Cero"\nañoFallecimiento: 65\nsemblanza: "Semblanza de prueba."\ntradicion: "peninsular"\nordenAlfabetico: "Cero"\n',
     'utf8',
   );
   await writeFile(join(corpus, 'temas', 'la-vida.yml'), 'nombre: "La vida"\n', 'utf8');

@@ -51,7 +51,7 @@ async function corpus() {
   await writeFile(join(dir, 'fuentes', NOMBRE_DEL_DOCUMENTO), DOCUMENTO, 'utf8');
   await writeFile(
     join(dir, 'autores', 'seneca.yml'),
-    'nombre: "Séneca"\nañoFallecimiento: 65\nsemblanza: "Filósofo estoico hispanorromano."\n',
+    'nombre: "Séneca"\nañoFallecimiento: 65\nsemblanza: "Filósofo estoico hispanorromano."\nordenAlfabetico: "Séneca"\n',
     'utf8',
   );
   return { raiz, dir };

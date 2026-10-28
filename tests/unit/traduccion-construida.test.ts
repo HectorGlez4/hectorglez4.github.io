@@ -20,6 +20,7 @@ const FICHA_DE_HORACIO = [
   'añoFallecimiento: -8',
   'semblanza: Poeta lírico latino del siglo de Augusto.',
   'tradicion: otra',
+  'ordenAlfabetico: Horacio',
   '',
 ].join('\n');
 

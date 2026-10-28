@@ -60,6 +60,7 @@ const SEGUNDO_AUTOR = `nombre: Antonio Machado
 añoNacimiento: 1875
 añoFallecimiento: 1939
 semblanza: Poeta español de la generación del 98, maestro y andariego.
+ordenAlfabetico: Machado
 `;
 
 /** Una Cita publicable por índice, repartida entre los dos Autores del corpus. */

@@ -76,6 +76,7 @@ function fichaDeAutor(slug: string): string {
     `nombre: "${nombre}"`,
     `añoFallecimiento: ${añoFallecimiento}`,
     'semblanza: "Autor del corpus de prueba."',
+    `ordenAlfabetico: "${nombre.split(' ').at(-1)}"`,
     '',
   ].join('\n');
 }

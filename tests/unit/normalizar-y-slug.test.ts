@@ -1,7 +1,14 @@
 import { describe, expect, it } from 'vitest';
 import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { join, resolve } from 'node:path';
-import { equivalentes, normalizar, palabras } from '../../src/lib/normalizar.js';
+import {
+  claveDeComparacion,
+  compararPorClave,
+  equivalentes,
+  inicialDeClave,
+  normalizar,
+  palabras,
+} from '../../src/lib/normalizar.js';
 import { slugDeAutor, slugDeCita, slugDeObra, slugDeTema, slugLibre } from '../../src/lib/slug.js';
 
 const RAIZ = resolve(import.meta.dirname, '../..');
@@ -168,5 +175,50 @@ describe('Historia 1.4 — nadie implementa su propia normalización', () => {
       expect(codigo, `${modulo} importa node:fs`).not.toMatch(/from 'node:fs/);
       expect(codigo, `${modulo} importa astro`).not.toMatch(/from 'astro/);
     }
+  });
+});
+
+describe('Historia 26.1 — la hermana de normalizar: inicial y orden de una clave de Autor', () => {
+  it('la inicial pierde la tilde y la mayúscula, y la Ñ es letra propia', () => {
+    expect(inicialDeClave('Álvarez')).toBe('A');
+    expect(inicialDeClave('Úbeda')).toBe('U');
+    expect(inicialDeClave('ñandú')).toBe('Ñ');
+    expect(inicialDeClave('Ñ')).toBe('Ñ');
+    expect(inicialDeClave('de la Barca')).toBe('D');
+    expect(inicialDeClave('cervantes')).toBe('C');
+    // Una eñe descompuesta (n + tilde combinante) es la misma letra.
+    expect(inicialDeClave('Ñuñez')).toBe('Ñ');
+  });
+
+  it('sin inicial que repartir: en blanco, con espacio delante, cifra o signo', () => {
+    for (const sinForma of ['', '  ', ' Cervantes', '1984', '¿Quién?', '«Rojas»', '-Rojas', 'Øster']) {
+      expect(inicialDeClave(sinForma), JSON.stringify(sinForma)).toBeUndefined();
+    }
+  });
+
+  it('la ñ va tras toda n y antes de la o, también dentro de la palabra', () => {
+    const claves = ['Ocampo', 'Ñandú', 'Nuza', 'Nuño', 'Núñez', 'Navarro'];
+    const ordenadas = claves
+      .map((clave) => ({ clave, slug: normalizar(clave) }))
+      .sort(compararPorClave)
+      .map((a) => a.clave);
+    expect(ordenadas).toEqual(['Navarro', 'Núñez', 'Nuño', 'Nuza', 'Ñandú', 'Ocampo']);
+  });
+
+  it('tildes y mayúsculas no cuentan para el orden; la eñe sí', () => {
+    expect(claveDeComparacion('Álvarez')).toBe(claveDeComparacion('alvarez'));
+    expect(claveDeComparacion('Muñoz')).not.toBe(claveDeComparacion('Munoz'));
+  });
+
+  it('el empate se resuelve por el slug, sea cual sea el orden de entrada', () => {
+    const viejo = { clave: 'Séneca', slug: 'seneca-el-viejo' };
+    const joven = { clave: 'Séneca', slug: 'seneca' };
+    expect([viejo, joven].sort(compararPorClave).map((a) => a.slug)).toEqual(['seneca', 'seneca-el-viejo']);
+    expect([joven, viejo].sort(compararPorClave).map((a) => a.slug)).toEqual(['seneca', 'seneca-el-viejo']);
+  });
+
+  it('no usa localeCompare: compara por unidades de código, igual en cualquier máquina', () => {
+    const fuente = readFileSync(join(RAIZ, 'src/lib/normalizar.ts'), 'utf8');
+    expect(fuente).not.toMatch(/localeCompare\(/);
   });
 });

@@ -24,7 +24,7 @@ describe('Historia 19.1 — tools/auditoria.ts --json', () => {
     }
     await writeFile(
       join(corpus, 'autores', 'seneca.yml'),
-      'nombre: Séneca\nañoFallecimiento: 65\nsemblanza: Filósofo estoico.\ntradicion: otra\n',
+      'nombre: Séneca\nañoFallecimiento: 65\nsemblanza: Filósofo estoico.\ntradicion: otra\nordenAlfabetico: Séneca\n',
       'utf8',
     );
     // Con documento y sin traducción: cuenta.

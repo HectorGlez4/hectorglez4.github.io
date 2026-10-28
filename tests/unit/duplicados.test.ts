@@ -19,7 +19,7 @@ async function corpusDePrueba(): Promise<Rutas> {
   }
   await writeFile(
     join(rutas.autores, 'seneca.yml'),
-    'nombre: "Séneca"\nañoFallecimiento: 65\nsemblanza: "Filósofo estoico."\n',
+    'nombre: "Séneca"\nañoFallecimiento: 65\nsemblanza: "Filósofo estoico."\nordenAlfabetico: "Séneca"\n',
     'utf8',
   );
   return rutas;

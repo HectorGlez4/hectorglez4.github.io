@@ -545,6 +545,22 @@ describe('Historia 24.8 — la matriz: qué cambia de fecha', () => {
     expect(avisadas(enT1, corpusDeEjemplo())).toEqual([]);
   });
 
+  /*
+   * Historia 26.1 — el lote de `proponer-claves` escribe `ordenAlfabetico` en todos los Autores
+   * a la vez, y la confirmación de una persona, `ordenRevisado`. Hasta la 26.3 ninguna superficie
+   * pinta la clave, así que ni el lote ni la revisión pueden refechar ni avisar el sitio entero.
+   * La 26.3 y la 26.4 reescriben este caso: la clave moverá `/autores/` y `/obras/`; la revisión,
+   * nunca.
+   */
+  it('solo claves de orden o su revisión, en todos los Autores: nada cambia de fecha', () => {
+    const enT1 = {
+      'corpus/autores/x.yml': editado('corpus/autores/x.yml', { ordenAlfabetico: 'Equis' }),
+      'corpus/autores/y.yml': editado('corpus/autores/y.yml', { ordenAlfabetico: 'Ye', ordenRevisado: '2026-10-28' }),
+    };
+    expect(refechadas(corpusDeEjemplo(), historial(enT1))).toEqual([]);
+    expect(avisadas(enT1, corpusDeEjemplo())).toEqual([]);
+  });
+
   it('solo la semblanza: solo la Página del Autor', () => {
     const enT1 = { 'corpus/autores/x.yml': editado('corpus/autores/x.yml', { semblanza: 'Otra semblanza.' }) };
     expect(refechadas(corpusDeEjemplo(), historial(enT1))).toEqual(['/autor/x']);

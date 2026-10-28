@@ -13,7 +13,9 @@ import {
   crearTema,
   editarAutor,
   eliminarTema,
+  fijarClave,
   marcarAptaParaPortada,
+  proponerClaves,
   retirarAutor,
 } from '../../tools/lib/gestion.ts';
 import {
@@ -345,6 +347,7 @@ describe('editar un Autor conserva los campos que el esquema no nombra', () => {
         'semblanza: "El Buda."',
         'tradicion: "otra"',
         'tituloEnFuente: "Buda Gautama"',
+        'ordenAlfabetico: "Gautama"',
         'campoQueNadieNombra: "sigue aquí"',
         '',
       ].join('\n'),
@@ -366,6 +369,7 @@ describe('editar un Autor conserva los campos que el esquema no nombra', () => {
       semblanza: 'El Buda, fundador del budismo.',
       tradicion: 'otra',
       tituloEnFuente: 'Buda Gautama',
+      ordenAlfabetico: 'Gautama',
       campoQueNadieNombra: 'sigue aquí',
     });
   });
@@ -625,6 +629,7 @@ describe('AD-2 — retirar un Autor mueve su ficha, y solo cuando nada apunta a 
       `nombre: "${nombre}"`,
       'añoFallecimiento: 65',
       'semblanza: "Una semblanza cualquiera."',
+      `ordenAlfabetico: "${nombre.split(' ').at(-1)}"`,
       ...extra,
       '',
     ].join('\n');
@@ -876,5 +881,65 @@ describe('AD-2 — retirar un Autor mueve su ficha, y solo cuando nada apunta a 
       expect(resultado.ok, resultado.ok ? '' : resultado.motivos.join(' ')).toBe(true);
       expect(resultado.ok && resultado.mensaje).toMatch(/epocas\.ts --descartar \S+ --motivo/);
     });
+  });
+});
+
+describe('Historia 26.1 — la clave de orden en las funciones de gestión', () => {
+  it('crear escribe la clave propuesta como último campo, con la forma de aYaml', async () => {
+    const rutas = await corpusVacio();
+    const resultado = await crearAutor(rutas, { ...SENECA, nombre: 'Lucio Anneo Séneca', tradicion: 'otra' });
+    expect(resultado.ok).toBe(true);
+    const contenido = await readFile(join(rutas.autores, 'lucio-anneo-seneca.yml'), 'utf8');
+    expect(contenido.endsWith('tradicion: "otra"\nordenAlfabetico: "Séneca"\n')).toBe(true);
+    expect(contenido).not.toContain('ordenRevisado');
+    if (resultado.ok) expect(resultado.mensaje).toContain('tres palabras o más');
+  });
+
+  it('editar conserva la clave y la revisión, y no las recalcula con el nombre', async () => {
+    const rutas = await corpusVacio();
+    await crearAutor(rutas, SENECA);
+    await fijarClave(rutas, 'seneca', undefined, '2026-10-28');
+    const resultado = await editarAutor(rutas, 'seneca', { nombre: 'Lucio Anneo Séneca' });
+    expect(resultado.ok).toBe(true);
+    const leido = parsearYaml(await readFile(join(rutas.autores, 'seneca.yml'), 'utf8'));
+    expect(leido.ordenAlfabetico).toBe('Séneca');
+    expect(leido.ordenRevisado).toBe('2026-10-28');
+    if (resultado.ok) expect(resultado.mensaje).toContain('revisada el 2026-10-28');
+  });
+
+  it('proponerClaves es idempotente y nunca escribe ordenRevisado', async () => {
+    const rutas = await corpusVacio();
+    const SIN_CLAVE = 'nombre: "José Martí"\nañoFallecimiento: 1895\nsemblanza: "Poeta."\n';
+    await writeFile(join(rutas.autores, 'jose-marti.yml'), SIN_CLAVE, 'utf8');
+
+    const primera = await proponerClaves(rutas);
+    const tras = await readFile(join(rutas.autores, 'jose-marti.yml'), 'utf8');
+    const segunda = await proponerClaves(rutas);
+
+    expect(primera.ok && segunda.ok).toBe(true);
+    expect(tras).toBe(`${SIN_CLAVE}ordenAlfabetico: "Martí"\n`);
+    expect(await readFile(join(rutas.autores, 'jose-marti.yml'), 'utf8')).toBe(tras);
+    if (segunda.ok) expect(segunda.mensaje).toContain('Ninguna clave nueva');
+  });
+
+  it('fijarClave corrige, confirma, y se niega sin escribir ante lo que no vale', async () => {
+    const rutas = await corpusVacio();
+    await crearAutor(rutas, SENECA);
+    const ruta = join(rutas.autores, 'seneca.yml');
+
+    const corregida = await fijarClave(rutas, 'seneca', 'Lucio', '2026-10-27');
+    expect(corregida.ok).toBe(true);
+    let leido = parsearYaml(await readFile(ruta, 'utf8'));
+    expect([leido.ordenAlfabetico, leido.ordenRevisado]).toEqual(['Lucio', '2026-10-27']);
+
+    const confirmada = await fijarClave(rutas, 'seneca', undefined, '2026-10-28');
+    expect(confirmada.ok).toBe(true);
+    leido = parsearYaml(await readFile(ruta, 'utf8'));
+    expect([leido.ordenAlfabetico, leido.ordenRevisado]).toEqual(['Lucio', '2026-10-28']);
+
+    const antes = await readFile(ruta, 'utf8');
+    expect((await fijarClave(rutas, 'seneca', '1984', '2026-10-29')).ok).toBe(false);
+    expect((await fijarClave(rutas, 'nadie', 'Nadie', '2026-10-29')).ok).toBe(false);
+    expect(await readFile(ruta, 'utf8')).toBe(antes);
   });
 });

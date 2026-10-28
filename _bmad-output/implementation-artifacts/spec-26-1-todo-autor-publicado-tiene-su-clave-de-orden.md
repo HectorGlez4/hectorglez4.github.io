@@ -2,7 +2,8 @@
 title: 'Historia 26.1 — Todo Autor publicado tiene su clave de orden'
 type: 'feature'
 created: '2026-10-28'
-status: 'ready-for-dev'
+status: 'in-progress'
+baseline_revision: '39234cc4dd8ace36326b2709551cd7c483209b71'
 review_loop_iteration: 0
 followup_review_recommended: false
 context:

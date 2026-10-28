@@ -125,9 +125,9 @@ describe('Historia 17.3 — la Lista de Obras, construida', () => {
       textos.join('\n\n'),
     );
 
-  const EPICTETO = 'nombre: Epicteto\nañoNacimiento: 50\nañoFallecimiento: 135\nsemblanza: Filósofo estoico griego.\n';
+  const EPICTETO = 'nombre: Epicteto\nañoNacimiento: 50\nañoFallecimiento: 135\nsemblanza: Filósofo estoico griego.\nordenAlfabetico: Epicteto\n';
   const MACHADO =
-    'nombre: Antonio Machado\nañoNacimiento: 1875\nañoFallecimiento: 1939\nsemblanza: Poeta sevillano de la generación del 98.\n';
+    'nombre: Antonio Machado\nañoNacimiento: 1875\nañoFallecimiento: 1939\nsemblanza: Poeta sevillano de la generación del 98.\nordenAlfabetico: Machado\n';
 
   // El censo es cerrado (11.2): las Citas sin obra —sin Fuente— tienen que ser slugs suyos.
   const SIN_OBRA_SENECA = ['seneca-mientras-esperamos-vivir-la-vida-pasa', 'seneca-ninguna-cosa-se-parece-tanto-a-la'];

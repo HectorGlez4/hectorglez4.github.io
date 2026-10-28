@@ -440,7 +440,7 @@ describe('Historia 24.4 — el contrato de los componentes, sin construir', () =
 
 const WS = 'https://es.wikisource.org/wiki/';
 const MACHADO =
-  'nombre: Antonio Machado\nañoNacimiento: 1875\nañoFallecimiento: 1939\nsemblanza: Poeta sevillano de la generación del 98.\n';
+  'nombre: Antonio Machado\nañoNacimiento: 1875\nañoFallecimiento: 1939\nsemblanza: Poeta sevillano de la generación del 98.\nordenAlfabetico: Machado\n';
 
 const BREVEDAD = 'Sobre la brevedad de la vida';
 const IRA = 'De la ira';

@@ -55,7 +55,7 @@ async function corpusDePrueba({
       writeFile(
         join(corpus, 'autores', `autor-${i}.yml`),
         `nombre: "Autor ${i}"\nañoFallecimiento: 65\nsemblanza: "Semblanza de prueba."\n` +
-          `tradicion: "${tradicion}"\n`,
+          `tradicion: "${tradicion}"\nordenAlfabetico: "Autor"\n`,
         'utf8',
       ),
     ),

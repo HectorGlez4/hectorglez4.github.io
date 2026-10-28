@@ -47,6 +47,7 @@ const EPICTETO = [
   'añoNacimiento: 50',
   'añoFallecimiento: 135',
   'semblanza: Filósofo estoico griego.',
+  'ordenAlfabetico: Epicteto',
   '',
 ].join('\n');
 

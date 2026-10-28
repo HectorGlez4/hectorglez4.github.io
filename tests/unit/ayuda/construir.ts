@@ -674,6 +674,7 @@ export const AUTOR_VALIDO = `nombre: Séneca
 añoNacimiento: -4
 añoFallecimiento: 65
 semblanza: Filósofo estoico hispanorromano, tutor y después consejero de Nerón.
+ordenAlfabetico: Séneca
 `;
 
 export const TEMA_VALIDO = `nombre: El tiempo

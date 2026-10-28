@@ -26,7 +26,7 @@ async function corpusDePrueba(
   for (const [slug, nombre] of Object.entries(autores)) {
     await writeFile(
       join(rutas.autores, `${slug}.yml`),
-      `nombre: "${nombre}"\nañoFallecimiento: 65\nsemblanza: "Filósofo estoico."\n`,
+      `nombre: "${nombre}"\nañoFallecimiento: 65\nsemblanza: "Filósofo estoico."\nordenAlfabetico: "${nombre.split(' ').at(-1)}"\n`,
       'utf8',
     );
   }
