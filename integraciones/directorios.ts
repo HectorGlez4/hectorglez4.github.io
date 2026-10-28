@@ -16,9 +16,19 @@ import { fileURLToPath } from 'node:url';
 import { join } from 'node:path';
 import type { AstroIntegration } from 'astro';
 import { MAX_BYTES_DEL_DIRECTORIO_DE_OBRAS } from '../src/lib/umbrales.ts';
+import { rutaDelDirectorioDeObras } from '../src/lib/superficies.ts';
 
-/** El fichero que se mide, relativo a `dist/`: la página de `rutaDelDirectorioDeObras()`. */
-export const FICHERO_DEL_DIRECTORIO_DE_OBRAS = 'obras/index.html';
+/**
+ * El fichero que se mide, relativo a `dist/`: el `index.html` que el hospedaje sirve para
+ * `rutaDelDirectorioDeObras()`. Sale del constructor y no se escribe a mano: si la ruta cambia,
+ * la medida la sigue en vez de quedarse avisando de un fichero que ya no existe.
+ */
+export const FICHERO_DEL_DIRECTORIO_DE_OBRAS = `${rutaDelDirectorioDeObras().replace(/^\/+|\/+$/gu, '')}/index.html`;
+
+/** Una medida que no se pudo tomar, con su motivo: nunca se disfraza de cero ni de otro estado. */
+export interface MedidaFallida {
+  motivo: string;
+}
 
 /** Lo que el build escribe sobre el tamaño de `/obras/`: informar o avisar, y con qué frase. */
 export interface InformeDelDirectorioDeObras {
@@ -27,19 +37,19 @@ export interface InformeDelDirectorioDeObras {
 }
 
 /**
- * El veredicto sobre el tamaño de `/obras/`, puro: con los bytes medidos —o `undefined` si no se
- * pudo medir— y el tope, que por omisión es el de `umbrales.ts`. Igualar el tope informa;
+ * El veredicto sobre el tamaño de `/obras/`, puro: con los bytes medidos —o la medida fallida,
+ * con su motivo— y el tope, que por omisión es el de `umbrales.ts`. Igualar el tope informa;
  * pasarlo avisa. Ninguna rama lanza.
  */
 export function avisoDelDirectorioDeObras(
-  bytes: number | undefined,
+  bytes: number | MedidaFallida,
   tope: number = MAX_BYTES_DEL_DIRECTORIO_DE_OBRAS,
 ): InformeDelDirectorioDeObras {
-  if (bytes === undefined) {
+  if (typeof bytes !== 'number') {
     return {
       nivel: 'warn',
       mensaje:
-        `No se pudo medir el Directorio de Obras: falta dist/${FICHERO_DEL_DIRECTORIO_DE_OBRAS}. ` +
+        `No se pudo medir el Directorio de Obras: ${bytes.motivo}. ` +
         'El build sigue; el tope MAX_BYTES_DEL_DIRECTORIO_DE_OBRAS no se ha comprobado.',
     };
   }
@@ -57,13 +67,18 @@ export function avisoDelDirectorioDeObras(
   };
 }
 
-/** Los bytes de un fichero, o `undefined` si no existe o no se deja leer. */
-async function bytesDe(ruta: string): Promise<number | undefined> {
+/**
+ * Los bytes de un fichero, o por qué no se pudieron medir: que falte no es lo mismo que no
+ * dejarse leer, y el aviso dice cuál de las dos pasó.
+ */
+export async function bytesDe(ruta: string, nombre: string): Promise<number | MedidaFallida> {
   try {
     const datos = await stat(ruta);
-    return datos.isFile() ? datos.size : undefined;
-  } catch {
-    return undefined;
+    return datos.isFile() ? datos.size : { motivo: `${nombre} no es un fichero` };
+  } catch (error) {
+    const codigo = (error as NodeJS.ErrnoException).code;
+    if (codigo === 'ENOENT') return { motivo: `falta ${nombre}` };
+    return { motivo: `no se pudo leer ${nombre} (${codigo ?? (error as Error).message})` };
   }
 }
 
@@ -72,7 +87,10 @@ export default function tamañoDelDirectorioDeObras(): AstroIntegration {
     name: 'tamaño-del-directorio-de-obras',
     hooks: {
       'astro:build:done': async ({ dir, logger }) => {
-        const bytes = await bytesDe(join(fileURLToPath(dir), ...FICHERO_DEL_DIRECTORIO_DE_OBRAS.split('/')));
+        const bytes = await bytesDe(
+          join(fileURLToPath(dir), ...FICHERO_DEL_DIRECTORIO_DE_OBRAS.split('/')),
+          `dist/${FICHERO_DEL_DIRECTORIO_DE_OBRAS}`,
+        );
         const { nivel, mensaje } = avisoDelDirectorioDeObras(bytes);
         if (nivel === 'warn') logger.warn(mensaje);
         else logger.info(mensaje);

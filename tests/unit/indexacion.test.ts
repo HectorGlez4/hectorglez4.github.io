@@ -1240,6 +1240,14 @@ describe('Historia 22.8 — la familia Obra en la serie', () => {
     expect(rutasDeObraDelSitemap(xml)).toEqual(['/obra/a/b/']);
   });
 
+  it('el Directorio de Obras está en el sitemap y no entra en la familia Obra (26.4)', () => {
+    const xml =
+      '<urlset><url><loc>https://sabiduriadebolsillo.net/obra/a/b/</loc></url>' +
+      '<url><loc>https://sabiduriadebolsillo.net/obras/</loc></url>' +
+      '<url><loc>https://sabiduriadebolsillo.net/autores/</loc></url></urlset>';
+    expect(rutasDeObraDelSitemap(xml)).toEqual(['/obra/a/b/']);
+  });
+
   it('con SM-11, Autor y Obra se leen enteras y el resto se reparte entre las demás', () => {
     const censo = {
       cita: Array.from({ length: 300 }, (_, i) => `/cita/c-${i}/`),

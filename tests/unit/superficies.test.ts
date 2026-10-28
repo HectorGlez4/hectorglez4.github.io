@@ -1180,6 +1180,10 @@ describe('Historia 26.4 — el Directorio de Obras', () => {
     expect(superficieDeclaradaDe('/obras/2/')).toBeUndefined();
   });
 
+  it('tiene las mismas consecuencias que el Directorio de Autores', () => {
+    expect(consecuenciasDe(rutaDelDirectorioDeObras())).toEqual(consecuenciasDe(rutaDelDirectorioDeAutores()));
+  });
+
   it('no es una Página de Obra: ninguna regla de Obra la alcanza', () => {
     expect(esRutaDeObra('/obras/')).toBe(false);
     expect(esRutaDeObra('/obras')).toBe(false);

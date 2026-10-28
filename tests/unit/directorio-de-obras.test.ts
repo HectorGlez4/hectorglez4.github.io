@@ -20,7 +20,11 @@ import {
 import { obrasDelAutor, ordenDeLaListaDeObras, type Autor, type Cita } from '../../src/lib/publicado.ts';
 import type { ObraResuelta } from '../../src/lib/obras.ts';
 import { MAX_BYTES_DEL_DIRECTORIO_DE_OBRAS } from '../../src/lib/umbrales.ts';
-import tamañoDelDirectorioDeObras, { avisoDelDirectorioDeObras } from '../../integraciones/directorios.ts';
+import tamañoDelDirectorioDeObras, {
+  FICHERO_DEL_DIRECTORIO_DE_OBRAS,
+  avisoDelDirectorioDeObras,
+  bytesDe,
+} from '../../integraciones/directorios.ts';
 import { componerDocumento } from '../../tools/lib/documento.ts';
 import {
   AUTOR_VALIDO,
@@ -241,10 +245,25 @@ describe('Historia 26.4 — el aviso de tamaño de `/obras/`', () => {
   });
 
   it('sin fichero avisa de que no pudo medir, y nunca escribe un cero', () => {
-    const aviso = avisoDelDirectorioDeObras(undefined, 200);
+    const aviso = avisoDelDirectorioDeObras({ motivo: 'falta dist/obras/index.html' }, 200);
     expect(aviso.nivel).toBe('warn');
     expect(aviso.mensaje).toContain('No se pudo medir');
+    expect(aviso.mensaje).toContain('falta dist/obras/index.html');
     expect(aviso.mensaje).not.toMatch(/\b0 bytes/);
+  });
+
+  it('el fichero medido es la página de `rutaDelDirectorioDeObras()`', () => {
+    expect(FICHERO_DEL_DIRECTORIO_DE_OBRAS).toBe(`${rutaDelDirectorioDeObras().slice(1)}index.html`);
+  });
+
+  it('un fichero que no se deja medir no se da por ausente: el motivo dice cuál de las dos pasó', async () => {
+    const dir = await mkdtemp(join(tmpdir(), 'sabiduria-obras-'));
+    try {
+      expect(await bytesDe(join(dir, 'no-esta.html'), 'x')).toEqual({ motivo: 'falta x' });
+      expect(await bytesDe(dir, 'x')).toEqual({ motivo: 'x no es un fichero' });
+    } finally {
+      await rm(dir, { recursive: true, force: true });
+    }
   });
 
   it('el tope tiene nombre y valor, y es el que se aplica por omisión', () => {
@@ -313,6 +332,10 @@ const CORPUS: Record<string, string> = {
     `nota: "${NOTA}"`,
     '',
   ].join('\n'),
+  // Una ficha sin ninguna Cita publicada: el build avisa y no rompe, y `/obras/` no la lista.
+  'obras/seneca--de-la-clemencia.yml': ['autor: "seneca"', 'titulo: "De la clemencia"', 'formas:', '  - "de la clemencia"', ''].join(
+    '\n',
+  ),
 };
 
 /** Siembra `n` Citas cotejadas de una Obra, con su documento (como `lista-de-obras.test.ts`). */
@@ -460,6 +483,12 @@ describe('Historia 26.4 — `/obras/` construido', () => {
     );
     expect([...hrefs].sort()).toEqual(construidas.sort());
     expect(salida).toContain(`${hrefs.length} Obras publicadas`);
+  });
+
+  it('una ficha sin Citas publicadas no figura: ni fila ni página', () => {
+    expect(main()).not.toContain('/obra/seneca/de-la-clemencia/');
+    expect(main()).not.toContain('De la clemencia');
+    expect(existsSync(paginaConstruida(proyecto, '/obra/seneca/de-la-clemencia/'))).toBe(false);
   });
 
   it('cada Autor con Obras, en el orden del Directorio, con su cabecera enlazada y en la zona `directorio`', () => {

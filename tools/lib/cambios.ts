@@ -54,7 +54,8 @@
  *     de su Procedencia, la `obra` y el `año` —su Obra y el año de la Obra—, porque el Directorio
  *     cuenta Citas por Obra; de cada ficha de Obra de esas Citas, el `titulo` y las `formas` —que
  *     deciden qué Citas cuentan en ella—; del Autor de cada Cita con Obra, el nombre y la clave de
- *     orden. Una Cita sin Obra no figura en él y no lo compone, ni viva ni de baja. Los años y la
+ *     orden. Una Cita sin Obra no figura en él y lo compone solo con su `procedencia.obra`
+ *     —perder la Obra baja un recuento—, viva o de baja; su alta y su baja lo fechan de más. Los años y la
  *     semblanza de un Autor, un Autor sin Obras, la referencia y la traducción de una Procedencia,
  *     la `nota`, las `ediciones` y `distintaDe` de una ficha y `ordenRevisado` no lo fechan.
  *
@@ -72,7 +73,7 @@
  * Un fichero que ya no está en el Corpus —su última transición es un borrado: mover una Cita a
  * `corpus/_revision/` o una ficha a `corpus/_obras-retiradas/` lo es— entra con su última versión
  * como **baja** y fecha, con el instante del commit que lo sacó, las superficies **vivas** que
- * compondría: una Cita, su Autor, los dos Directorios (el de Obras, si declaraba Obra), sus
+ * compondría: una Cita, su Autor, los dos Directorios, sus
  * Temas, sus Colecciones (por
  * `miembros`) y su Obra (resuelta por Autor y forma contra las fichas de hoy); una ficha, las Páginas de Cita y los
  * listados de las Citas de hoy cuya forma reclamaba; un documento, la Obra cuyas Citas lo
@@ -313,6 +314,14 @@ export const CAMPOS_QUE_NO_FECHAN = {
   obra: ['distintaDe'],
 } as const satisfies Partial<Record<FamiliaDeFichero, readonly string[]>>;
 
+/**
+ * Lo que compone `/obras/` de una Cita viva **sin** Obra — Historia 26.4: solo `procedencia.obra`.
+ * No figura en el Directorio, pero la transición que le quitó la Obra cambió lo que pinta (un
+ * recuento, una Obra o un grupo que desaparecen), y esa sí tiene que fecharlo. Va fuera de la
+ * tabla porque la tabla habla por familia de fichero, y aquí decide el estado de la Cita.
+ */
+export const CAMPOS_DE_CITA_SIN_OBRA_EN_EL_DIRECTORIO_DE_OBRAS = ['procedencia.obra'] as const;
+
 // ─── El corpus leído ─────────────────────────────────────────────────────────────────
 
 /** Una Cita del corpus, con lo justo para saber qué superficies compone. */
@@ -463,9 +472,15 @@ export function relacionDeSuperficies(corpus: CorpusParaFechar): Map<string, Sup
   /** Añade un fichero a una superficie ya declarada, con los campos que la tabla le da. */
   const componer = (ruta: string, fichero: string | undefined, deFamilia: FamiliaDeFichero) => {
     const superficie = porSuperficie.get(ruta);
-    if (superficie === undefined || fichero === undefined) return;
+    if (superficie === undefined) return;
     const campos = (CAMPOS_QUE_PINTA[deFamilia] as Partial<Record<Columna, Campos>>)[superficie.columna];
     if (campos === undefined) return;
+    componerCampos(ruta, fichero, campos);
+  };
+  /** Añade un fichero con unos campos dados: para el caso que la tabla no puede decir (26.4). */
+  const componerCampos = (ruta: string, fichero: string | undefined, campos: Campos) => {
+    const superficie = porSuperficie.get(ruta);
+    if (superficie === undefined || fichero === undefined) return;
     const previos = superficie.campos.get(fichero);
     superficie.campos.set(fichero, previos === undefined ? campos : unir(previos, campos));
   };
@@ -530,17 +545,28 @@ export function relacionDeSuperficies(corpus: CorpusParaFechar): Map<string, Sup
    * `directorio` y con su propia columna. Lo componen las Citas con Obra —su `autor` y la `obra`
    * y el `año` de su Procedencia: la transición que le dio la Obra la fecha—, las fichas de Obra
    * cuyo título pintan (las vivas y las de baja que las reclamaban) y los Autores de las Citas con
-   * Obra, que son los que tienen grupo. Una Cita sin Obra no figura en él, y un Autor sin Obras
-   * tampoco: no lo componen.
+   * Obra, que son los que tienen grupo. Un Autor sin Obras no figura en él y no lo compone; una
+   * Cita sin Obra tampoco figura, pero lo compone por su `procedencia.obra` (abajo).
    */
   const directorioDeObras = rutaDelDirectorioDeObras();
   declarar(directorioDeObras, 'directorio', 'directorioDeObras');
-  for (const cita of corpus.citas) {
-    if (cita.obra === undefined && formaDe(cita) === undefined) continue;
+  const conObra = corpus.citas.filter(tieneObra);
+  for (const cita of conObra) {
     componer(directorioDeObras, cita.ruta, 'cita');
     for (const ficha of fichasDeLaCita(cita)) componer(directorioDeObras, ficha, 'obra');
   }
-  for (const slug of new Set(corpus.citas.filter((cita) => cita.obra !== undefined).map((cita) => cita.autor))) {
+  /*
+   * Una Cita viva **sin** Obra no figura, pero pudo figurar: la transición que le quitó la Obra
+   * —`procedencia.obra` borrada, o cambiada a una forma vacía como «…»— baja un recuento y puede
+   * vaciar una Obra o el grupo entero de su Autor. Por eso la compone con un único campo, su
+   * `procedencia.obra`: perder (o ganar) la Obra fecha `/obras/`, y su texto, su Autor o su año,
+   * que `/obras/` no pinta mientras no tenga Obra, no. Su alta y su baja sí la fechan —cambian
+   * todos los campos—: antes fechar de más que mentir de menos.
+   */
+  for (const cita of corpus.citas) {
+    if (!tieneObra(cita)) componerCampos(directorioDeObras, cita.ruta, CAMPOS_DE_CITA_SIN_OBRA_EN_EL_DIRECTORIO_DE_OBRAS);
+  }
+  for (const slug of new Set(conObra.map((cita) => cita.autor))) {
     componer(directorioDeObras, ficheroDeAutor.get(slug), 'autor');
   }
 
@@ -562,8 +588,7 @@ export function relacionDeSuperficies(corpus: CorpusParaFechar): Map<string, Sup
   }
 
   /*
-   * Las bajas de Cita fechan lo vivo que compondrían —su Autor, los dos Directorios (el de Obras,
-   * si declaraba Obra), sus
+   * Las bajas de Cita fechan lo vivo que compondrían —su Autor, los dos Directorios, sus
    * Temas, sus Colecciones y su Obra— y nunca declaran su propia página: `componer` no declara nada. La Obra se resuelve
    * contra las fichas de hoy, por (Autor, forma).
    */
@@ -577,7 +602,10 @@ export function relacionDeSuperficies(corpus: CorpusParaFechar): Map<string, Sup
     // El Directorio la contaba en su Autor: la baja mueve el recuento (26.3).
     componer(directorio, baja.ruta, 'cita');
     // Y el de Obras la contaba en su Obra, si declaraba una: la baja mueve su recuento (26.4).
-    if (formaDe(baja) !== undefined) componer(directorioDeObras, baja.ruta, 'cita');
+    // Sin Obra, la compone como viva, por su `procedencia.obra`: la fecha y el aviso, que lee la
+    // relación de antes —donde la Cita estaba viva—, dicen lo mismo de su salida.
+    if (tieneObra(baja)) componer(directorioDeObras, baja.ruta, 'cita');
+    else componerCampos(directorioDeObras, baja.ruta, CAMPOS_DE_CITA_SIN_OBRA_EN_EL_DIRECTORIO_DE_OBRAS);
     for (const tema of baja.temas ?? []) componer(rutaDeTema(tema), baja.ruta, 'cita');
     for (const ruta of coleccionesDe.get(baja.slug) ?? []) componer(ruta, baja.ruta, 'cita');
     const forma = formaDe(baja);
@@ -836,6 +864,15 @@ export function fechaDeLaEntrada(
 }
 
 // ─── Ayudantes ───────────────────────────────────────────────────────────────────────
+
+/**
+ * Si una Cita cuenta en el Directorio de Obras: la resuelve una ficha o declara una forma no
+ * vacía. Una sola regla para sus Citas, sus bajas y los Autores con grupo (26.4); en un Corpus
+ * que construye las dos coinciden, porque una Obra publicada sin ficha rompe el build.
+ */
+function tieneObra(cita: CitaParaFechar): boolean {
+  return cita.obra !== undefined || formaDe(cita) !== undefined;
+}
 
 function formaDe(cita: CitaParaFechar): string | undefined {
   if (cita.obraDeclarada === undefined) return undefined;

@@ -10,7 +10,14 @@ context:
   - '{project-root}/_bmad-output/implementation-artifacts/epic-26-context.md'
   - '{project-root}/_bmad-output/planning-artifacts/ux-designs/ux-brainlySabiduria-2026-08-10/DESIGN.md'
 warnings: ['oversized']
-deferred: []
+deferred:
+  - summary: >-
+      El orden de la Lista de Obras desempata por título y nombre con localeCompare(…, 'es'), que depende de los datos ICU de quien construye.
+    evidence: |-
+      ordenDeLaListaDeObras (src/lib/obras.ts) mueve sin cambiarlo el orden que obrasDelAutor ya tenía en src/lib/publicado.ts antes de la 26.4 (baseline bad5a77126). AD-3 y la cabecera de src/lib/directorios.ts reservan el orden a normalizar.ts (compararPorClave) precisamente porque localeCompare depende del idioma de la máquina; los empates de recuento de /obras/ y de la Página de Autor heredan ese riesgo. No lo causa esta historia.
+    location: >-
+      src/lib/obras.ts:135
+    severity: low
 ---
 
 <intent-contract>
@@ -143,6 +150,26 @@ Las cinco capas (blind-hunter, edge-case-hunter, verification-gap, intent-alignm
 
 Rechazados (14): el `{n}` de la meta (lo fija la matriz del intent-contract y la redacción la aprobó Héctor; en el sitio real son 4.416 de ~4.420); el registro de la pasada anterior (esta es la revisión); `sprint-status.yaml` (lo lleva el bucle); nombres de enlace sin Autor (el `h3` precedente da el contexto, H80, y la AC fija el nombre de la fila); `Cache-Control` del PNG (mismo patrón que `autores.png.ts`, sin efecto en estático); tope solo para `/obras/` (es lo que pide la AC); estado vacío (lo fija la matriz); CSS que depende del marcado de `GrupoDeLetra` (lo mide el e2e); la reexportación de `publicado.ts` (la exige la AC); columna opcional en `declarar` (lanza al construir la relación, en toda prueba); coste Autores × Citas (la AC exige la misma llamada que la Página de Autor; ~600 k operaciones); la línea «sin obra documentada» sin lista (cubierta por `lista-de-obras.test.ts`, Machado); estilos de página copiados de `autores.astro` (la AC pide reutilizar letras, grupos y orden); y las lecturas descriptivas de intent-alignment (cláusula posterior a la 27, alcance de la prueba de secuencia, informe por separado de la línea base), que no piden ningún cambio.
 
+### 2026-10-28 — Review pass
+- intent_gap: 0
+- bad_spec: 0
+- patch: 8 (high 0, medium 1, low 7)
+- defer: 1 (high 0, medium 0, low 1)
+- reject: 22 (high 0, medium 0, low 22)
+- addressed_findings:
+  - `[medium]` `[patch]` AD-27: una Cita viva que perdía su Obra (`procedencia.obra` borrada o cambiada a una forma vacía como «…») no refechaba `/obras/` aunque baje un recuento o desaparezca una Obra o un grupo (lo traían blind-hunter, edge-case-hunter, verification-gap, intent-alignment y ac-auditor). `tools/lib/cambios.ts`: toda Cita sin Obra, viva o de baja, compone `/obras/` con un único campo, `procedencia.obra` (`CAMPOS_DE_CITA_SIN_OBRA_EN_EL_DIRECTORIO_DE_OBRAS`, vía `componerCampos`); su texto y su Autor siguen sin fecharlo, su alta y su baja lo fechan de más —documentado—, y fecha y aviso siguen siendo inversos. Prueba nueva en `fecha-de-cambio.test.ts`, roja contra el código anterior; la de la Cita sin Obra, al día.
+  - `[low]` `[patch]` Las Citas de `/obras/` y los Autores con grupo usaban condiciones distintas (`obra` o forma frente a solo `obra`): una sola, `tieneObra`, para Citas vivas, bajas y Autores.
+  - `[low]` `[patch]` `integraciones/directorios.ts` escribía a mano `obras/index.html`: `FICHERO_DEL_DIRECTORIO_DE_OBRAS` sale ahora de `rutaDelDirectorioDeObras()`, con prueba.
+  - `[low]` `[patch]` `bytesDe` daba por ausente todo fallo de lectura: devuelve el motivo (`falta …`, `… no es un fichero`, `no se pudo leer … (código)`) y el aviso lo nombra; prueba sobre un directorio temporal.
+  - `[low]` `[patch]` Regresión de concordancia en el mensaje de `agruparPorClave` («de el Directorio de …»): «reabre la letra «X» en el Directorio de …».
+  - `[low]` `[patch]` Ninguna prueba ponía una ficha sin Citas publicadas: el corpus de `directorio-de-obras.test.ts` gana `seneca--de-la-clemencia.yml` sin Citas y se exige que no tenga fila ni página.
+  - `[low]` `[patch]` Nada probaba que `/obras/` en el sitemap quedara fuera de la familia Obra de la serie de indexación: prueba de `rutasDeObraDelSitemap` en `indexacion.test.ts`.
+  - `[low]` `[patch]` «Mismas consecuencias que `/autores/`» no estaba fijado: `superficies.test.ts` exige `consecuenciasDe('/obras/')` igual a `consecuenciasDe('/autores/')`.
+
+Aplazado (1): el desempate de la Lista de Obras con `localeCompare`, anterior a la historia (frontmatter `deferred`).
+
+Rechazados (22): la guarda de clasificación por clave raíz (la clave `procedencia` está clasificada; `/obras/` pinta solo los dos subcampos nombrados); el tope mezcla maquetación y Obras y la estimación de ~660 Obras (lo que pide la AC es el HTML; la cifra es una nota, no un umbral); las incoherencias aparentes del spec y las Tasks sin reescribir (registro de solo añadir del flujo; los desvíos están anotados); el `{n}` de la meta (matriz del intent-contract); el nombre accesible «Obras de autores por la X» (lo fija la AC); «1 cita» frente a «una cita sin obra documentada» (texto anterior, cubierto por `lista-de-obras.test.ts`); CSS dependiente de la clase hija y estilos de página copiados (ya rechazados, los mide el e2e); `test.slow()` (ya documentado); `AGENTS.md` sin la regla de la columna (el `throw` la nombra); la reexportación de `publicado.ts` (la exige la AC); `linea-base.test.ts` sobre las superficies reales; «frases» en un título del Corpus (dato, no texto de la página); el latido de lectura en `/obras/` (cubierto por `data-vistas` y el arranque de `medicion.test.ts`); el informe por separado de los dos Directorios reales y la cláusula posterior a la 27 (mecanismo común, sin cambio que pedir); `formas` en la columna (decide los recuentos); alcance por enlaces (26.5); la medida del build real sin prueba automática (la da el log del build); y las lecturas descriptivas de intent-alignment y ac-auditor sin acción.
+
 ## Design Notes
 
 **Columnas de la tabla, no familias.** `CAMPOS_QUE_PINTA` se indexaba por `FamiliaDeRuta`, y los dos Directorios son la misma familia (`directorio`, la que medirá la 26.7) pero pintan cosas distintas: `/autores/` los años, `/obras/` no; `/obras/` el título de ficha y la Procedencia, `/autores/` no. La familia sigue siendo `directorio` para el aviso y el ensayo; solo la columna de la tabla se desdobla. `formas` de una ficha entra porque decide qué Citas cuentan en cada Obra (el recuento); `procedencia` de una Cita, porque da su Obra y el año.
@@ -238,3 +265,28 @@ Blocking condition: ninguna.
 
 **Riesgos residuales.** Una Cita que pierde la Obra por completo (no por cambiar a otra) ya no compone `/obras/` y esa transición no lo refecha —el mismo criterio por estado de hoy que la Página de Obra y el listado de Autor—. Lo demás, como en la pasada de implementación.
 
+
+### Pasada de revisión 2 (2026-10-28)
+
+**Resumen.** Las cinco capas externas trajeron 31 hallazgos distintos, tras deduplicar (el de la Cita que pierde la Obra lo traían las cinco): 8 parches aplicados (1 medio, 7 bajos), 1 aplazado, 22 rechazados; ni `intent_gap` ni `bad_spec`. El detalle, en el Review Triage Log.
+
+**Ficheros.**
+- `tools/lib/cambios.ts` — `tieneObra`, una sola regla para Citas, bajas y Autores de `/obras/`; `componerCampos`; `CAMPOS_DE_CITA_SIN_OBRA_EN_EL_DIRECTORIO_DE_OBRAS = ['procedencia.obra']`, con que toda Cita sin Obra, viva o de baja, compone `/obras/`, para que perder la Obra lo feche y lo avise. Cabecera y comentarios al día.
+- `integraciones/directorios.ts` — `FICHERO_DEL_DIRECTORIO_DE_OBRAS` derivado de `rutaDelDirectorioDeObras()`; `bytesDe` exportada y con motivo (`falta`, `no es un fichero`, `no se pudo leer (código)`); `avisoDelDirectorioDeObras` recibe bytes o `MedidaFallida`.
+- `src/lib/directorios.ts` — «reabre la letra «X» en el Directorio de …».
+- `tests/unit/fecha-de-cambio.test.ts` — prueba nueva de la Cita viva que pierde su Obra (borrada y «…»), roja contra el `cambios.ts` anterior; la de la Cita sin Obra, al día (texto y Autor no fechan; alta y baja sí).
+- `tests/unit/directorio-de-obras.test.ts` — ficha sin Citas publicadas en el corpus de prueba y su ausencia en `/obras/`; fichero medido derivado de la ruta; motivos de `bytesDe`.
+- `tests/unit/indexacion.test.ts` — `/obras/` en el sitemap queda fuera de la familia Obra.
+- `tests/unit/superficies.test.ts` — `consecuenciasDe('/obras/')` igual a la de `/autores/`.
+
+**Recomendación de revisión de seguimiento:** `true` — parches de esta pasada: 0 altos, 1 medio, 7 bajos; puntuación 3 × 1 + 7 = 10 ≥ 5.
+
+**Verificación.**
+- `npx vitest run` de fecha-de-cambio, indexnow, superficies, indexacion y avisar-rango — 322 verdes; la prueba nueva, roja con el `cambios.ts` de `c0ccde6da7`.
+- `npx vitest run tests/unit/directorio-de-obras.test.ts` — 33 verdes.
+- `npm run check` — 0 errores, 0 avisos.
+- `npm test` completo — 142 ficheros, 6.539 pruebas verdes (816 s).
+- `npm run build` — sale 0; «El Directorio de Obras pesa 230470 bytes, dentro de MAX_BYTES_DEL_DIRECTORIO_DE_OBRAS (296960)», el mismo tamaño que en la pasada 1; «517 Obras publicadas, 277 indexables»; `/obras/` en el sitemap; existen `dist/obras/index.html` y su Tarjeta.
+- Playwright no se repitió: ningún parche toca páginas, componentes ni estilos, y `dist/obras/index.html` pesa lo mismo byte a byte que en la pasada 1, en la que sus e2e pasaron.
+
+**Riesgos residuales.** El alta y la baja de una Cita sin Obra fechan y avisan `/obras/` de más; es el precio de que perder la Obra lo feche, y sigue la regla del módulo: antes fechar de más que mentir de menos. El desempate con `localeCompare` de la Lista de Obras queda aplazado. Lo demás, como en las pasadas anteriores.

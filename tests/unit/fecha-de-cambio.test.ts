@@ -617,7 +617,7 @@ describe('Historia 24.8 — la matriz: qué cambia de fecha', () => {
     expect(avisadas(otraObra, corpusDeEjemplo())).toContain('/obras');
   });
 
-  it('una Cita sin Obra no compone `/obras/`: ni su alta, ni su baja, ni su cambio de Autor', () => {
+  it('una Cita sin Obra no figura en `/obras/`: su texto y su Autor no lo mueven; su alta y su baja sí', () => {
     // `y-b` sin Obra: no figura en `/obras/`, y sí cuenta en `/autores/`.
     const ruta = 'corpus/citas/y--b.md';
     const sinSuObra: Readonly<Record<string, unknown>> = { ...VERSIONES[ruta], procedencia: undefined };
@@ -630,11 +630,20 @@ describe('Historia 24.8 — la matriz: qué cambia de fecha', () => {
         return sinObra;
       }),
     };
+    /*
+     * El alta y la baja sí lo fechan: la Cita sin Obra compone `/obras/` por su `procedencia.obra`,
+     * viva o de baja, para que perder la Obra lo feche, y un alta o una baja cambian todos los
+     * campos. Antes fechar de más que mentir de menos (cabecera de `tools/lib/cambios.ts`).
+     */
     const alta = { [ruta]: { antes: null, despues: sinSuObra } };
     const altaH = historial(alta, [ruta]);
     expect(refechadas(conYbSinObra, altaH)).toContain('/autores');
-    expect(refechadas(conYbSinObra, altaH)).not.toContain('/obras');
-    expect(avisadas(alta, conYbSinObra, corpusDeEjemplo([ruta]))).not.toContain('/obras');
+    expect(refechadas(conYbSinObra, altaH)).toContain('/obras');
+    expect(avisadas(alta, conYbSinObra, corpusDeEjemplo([ruta]))).toContain('/obras');
+
+    const deTexto = { [ruta]: { antes: sinSuObra, despues: { ...sinSuObra, texto: 'Otro.' } } };
+    expect(refechadas(conYbSinObra, historial(deTexto))).not.toContain('/obras');
+    expect(avisadas(deTexto, conYbSinObra)).not.toContain('/obras');
 
     const deAutor = { [ruta]: { antes: sinSuObra, despues: { ...sinSuObra, autor: 'x' } } };
     expect(refechadas(conYbSinObra, historial(deAutor))).toContain('/autores');
@@ -647,8 +656,30 @@ describe('Historia 24.8 — la matriz: qué cambia de fecha', () => {
     const sinYb = conBajas(corpusDeEjemplo([ruta]), bajaH);
     expect(sinYb.bajas?.citas?.map((c) => c.slug)).toEqual(['y-b']);
     expect(refechadas(sinYb, bajaH)).toContain('/autores');
-    expect(refechadas(sinYb, bajaH)).not.toContain('/obras');
-    expect(avisadas(baja, corpusDeEjemplo([ruta]), conYbSinObra)).not.toContain('/obras');
+    expect(refechadas(sinYb, bajaH)).toContain('/obras');
+    expect(avisadas(baja, corpusDeEjemplo([ruta]), conYbSinObra)).toContain('/obras');
+  });
+
+  it('una Cita viva que pierde su Obra mueve `/obras/`: borrada o cambiada a una forma vacía', () => {
+    // `y-b` es la única Cita de «Obra P»: al perderla, la Obra y el grupo de «Ye» desaparecen.
+    const ruta = 'corpus/citas/y--b.md';
+    const base = corpusDeEjemplo();
+    for (const procedencia of [undefined, { obra: '…' }]) {
+      const despues: Version = { ...VERSIONES[ruta], procedencia };
+      const sinObra: CorpusParaFechar = {
+        ...base,
+        citas: base.citas.map((c) => {
+          if (c.slug !== 'y-b') return c;
+          const { obra: _obra, obraDeclarada: _declarada, ...resto } = c;
+          return procedencia === undefined ? resto : { ...resto, obraDeclarada: procedencia.obra };
+        }),
+      };
+      const enT1 = { [ruta]: { antes: VERSIONES[ruta] as Version, despues } };
+      const motivo = JSON.stringify(procedencia ?? null);
+      expect(refechadas(sinObra, historial(enT1)), motivo).toContain('/obras');
+      expect(refechadas(sinObra, historial(enT1)), motivo).not.toContain('/autores');
+      expect(avisadas(enT1, sinObra, base), motivo).toContain('/obras');
+    }
   });
 
   it('las formas de una ficha mueven su Obra y `/obras/`, y su `distintaDe` nada', () => {

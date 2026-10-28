@@ -117,7 +117,7 @@ export function agruparPorClave<A extends Pick<Autor, 'slug' | 'ordenAlfabetico'
        */
       if (grupos.some((grupo) => grupo.inicial === inicial)) {
         throw new Error(
-          `El Autor «${autor.slug}» reabre la letra «${inicial}» de ${directorio} después de ` +
+          `El Autor «${autor.slug}» reabre la letra «${inicial}» en ${directorio} después de ` +
             `otra: el orden de las claves (compararPorClave) y sus iniciales (inicialDeClave) no ` +
             'concuerdan, y `src/lib/normalizar.ts` es quien tiene que volver a ponerlos de acuerdo.',
         );
