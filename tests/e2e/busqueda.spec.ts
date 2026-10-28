@@ -443,10 +443,12 @@ test.describe('Historia 22.10 — el recuento y la búsqueda sin resultados se a
  */
 test.describe('Historia 26.2 — el tipo no casa como texto y la portada tiene el suyo', () => {
   /*
-   * (a) Con el Pagefind real, importado en la página y con las opciones de la búsqueda propia. Un
+   * (a) Con el Pagefind real, importado en la página y con las opciones de la búsqueda propia, en
+   * el orden en que las aplica la isla (`init()` al cargar, `options()` antes de cada búsqueda). Un
    * resultado que casa solo por metadato trae `locations` vacío: ninguno puede salir así.
+   * «coleccion», sin tilde, es el valor literal que llevaba el metadato de antes.
    */
-  const TERMINOS = ['obra', 'cita', 'autor', 'tema', 'colección', 'directorio', 'portada', MARCA];
+  const TERMINOS = ['obra', 'cita', 'autor', 'tema', 'colección', 'coleccion', 'directorio', 'portada', MARCA];
 
   test('buscar el nombre de un tipo, o el del sitio, no devuelve ninguna página solo por su tipo', async ({ page }) => {
     test.setTimeout(600_000);
@@ -454,10 +456,10 @@ test.describe('Historia 26.2 — el tipo no casa como texto y la portada tiene e
     const porTermino = await page.evaluate(
       async ({ terminos, opciones }) => {
         const pf = await import('/pagefind/pagefind.js' as string);
-        await pf.options(opciones);
         await pf.init();
         const salida: Record<string, { total: number; sinCoincidencia: string[] }> = {};
         for (const termino of terminos) {
+          await pf.options(opciones);
           const { results } = await pf.search(termino);
           const sinCoincidencia: string[] = [];
           // Todos sus datos, por tandas: «cita» llegó a dar miles.
@@ -483,7 +485,9 @@ test.describe('Historia 26.2 — el tipo no casa como texto y la portada tiene e
     expect(fallos).toEqual([]);
     // Y no en vacío: un índice roto, o uno que no devuelve nada, pasaría lo de arriba sin mirar.
     // Estas palabras salen en el contenido de muchas páginas, y la marca en el `h1` de la portada.
-    const vacios = ['obra', 'cita', 'autor', 'tema', MARCA].filter((termino) => porTermino[termino].total === 0);
+    // «directorio» y «portada» pueden no salir en ningún contenido todavía (los Directorios son de
+    // la 26.3), y por eso no se les exige resultado: su prueba es que ninguno salga por su tipo.
+    const vacios = ['obra', 'cita', 'autor', 'tema', 'colección', MARCA].filter((termino) => porTermino[termino].total === 0);
     expect(vacios, 'términos sin ningún resultado').toEqual([]);
   });
 
@@ -520,33 +524,58 @@ test.describe('Historia 26.2 — el tipo no casa como texto y la portada tiene e
     expect(portada!.enSans).toBe(true);
     expect(portada!.familia).toMatch(/Inter/);
     expect(portada!.familia).not.toMatch(/Georgia|Source Serif/);
+    expect(portada!.peso).toBe('400');
     expect(portada!.nombre).toBe(`Portada: ${MARCA}`);
     expect(portada!.autor).toBeUndefined();
   });
 
+  /**
+   * Todas las direcciones que da el índice real para un término, con las opciones de la búsqueda
+   * propia: no solo las 30 que pinta `/buscar/`, porque una portada en el puesto 31 seguiría
+   * respondiendo por lo que no es suyo, y una página destino por debajo de la 30 no es un fallo.
+   */
+  async function todasLasDirecciones(page: Page, termino: string): Promise<string[]> {
+    return page.evaluate(
+      async ({ termino, opciones }) => {
+        const pf = await import('/pagefind/pagefind.js' as string);
+        await pf.init();
+        await pf.options(opciones);
+        const { results } = await pf.search(termino);
+        const urls: string[] = [];
+        for (let i = 0; i < results.length; i += 200) {
+          const datos = await Promise.all(results.slice(i, i + 200).map((r: { data: () => Promise<unknown> }) => r.data()));
+          for (const dato of datos as { url: string }[]) urls.push(dato.url.replace(/\/?$/, '/'));
+        }
+        return urls;
+      },
+      { termino, opciones: OPCIONES_DE_PAGEFIND },
+    );
+  }
+
   // (c) Lo que la portada enseña ya tiene su página en el índice: la portada no sale por ello.
   test('el texto de la Cita del Día y el nombre de un Autor de la portada dan su página, no la portada', async ({ page }) => {
+    test.setTimeout(300_000);
     await page.goto('/');
     // El Corpus publicado trae Citas aptas para portada, así que la Cita del Día está: si faltara,
     // la mitad de esta prueba no miraría nada, y eso se dice en vez de saltarlo.
     const delDia = page.locator('section.del-dia');
     await expect(delDia, 'la portada no pinta la Cita del Día').toHaveCount(1);
     const texto = (await delDia.locator('.texto').first().textContent())!.replace(/[«»]/g, '').trim();
+    // Cinco palabras, o el texto entero si es más corto: se mira la lista entera del índice, así
+    // que un arranque común («No hay nada que…») no deja el destino fuera por su puesto.
     const fragmento = texto.split(/\s+/).slice(0, 5).join(' ');
     const destino = (await delDia.getByRole('link', { name: 'Ver esta cita' }).getAttribute('href'))!;
-    await buscar(page, fragmento);
-    const deLaCita = (await resultados(page)).map((r) => r.href.replace(/\/?$/, '/'));
-    expect(deLaCita, fragmento).toContain(destino.replace(/\/?$/, '/'));
-    expect(deLaCita, fragmento).not.toContain('/');
-    await page.goto('/');
 
     const autor = page.locator('ul.autores a').first();
     const nombre = (await autor.textContent())!.trim();
     const pagina = (await autor.getAttribute('href'))!;
-    await buscar(page, nombre);
-    const hrefs = (await resultados(page)).map((r) => r.href.replace(/\/?$/, '/'));
-    expect(hrefs, nombre).toContain(pagina.replace(/\/?$/, '/'));
-    expect(hrefs, nombre).not.toContain('/');
+
+    const deLaCita = await todasLasDirecciones(page, fragmento);
+    expect(deLaCita, fragmento).toContain(destino.replace(/\/?$/, '/'));
+    expect(deLaCita, fragmento).not.toContain('/');
+    const delAutor = await todasLasDirecciones(page, nombre);
+    expect(delAutor, nombre).toContain(pagina.replace(/\/?$/, '/'));
+    expect(delAutor, nombre).not.toContain('/');
   });
 
   // (d) Con un Pagefind de mentira: cómo se pintan los tipos nuevos frente a una Cita.

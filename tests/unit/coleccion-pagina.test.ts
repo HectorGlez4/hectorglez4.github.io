@@ -13,6 +13,8 @@ import {
 } from './ayuda/construir.js';
 import { CITAS_POR_PAGINA, MIN_CITAS_POR_COLECCION } from '../../src/lib/umbrales.ts';
 import { ETIQUETAS_DE_RESULTADO } from '../../src/lib/tipoDeResultado.ts';
+import { MARCA } from '../../src/lib/marca.ts';
+import { conClase, exposicionDeLaPortada } from './ayuda/portada.js';
 
 /**
  * Historia 12.3 — la Página de Colección sobre un proyecto construido de verdad.
@@ -441,8 +443,8 @@ describe('Historia 12.3 — la Página de Colección, construida', () => {
     /*
      * El lado consumidor. El filtro `tipo:coleccion` de la Página de Colección (Historia 26.2;
      * antes, metadato) no sirve de nada si `buscar.astro` no sabe pintarlo: sin rótulo, el `||`
-     * de reserva etiquetaba cada Colección como «Cita». Eso no lo veía nada, porque la única prueba que existía miraba
-     * el lado productor.
+     * de reserva etiquetaba cada Colección como «Cita». Eso no lo veía nada, porque la única
+     * prueba que existía miraba el lado productor.
      */
     it('la página de búsqueda embarca la tabla de rótulos, con el de Colección', async () => {
       const buscar = await leer('/buscar/');
@@ -526,6 +528,24 @@ describe('Historia 12.3 — sin ninguna Colección publicada', () => {
     expect(portada).not.toMatch(/todav[íi]a no hay/i);
     // Y la portada conserva sus salidas: la ausencia no se ha llevado nada por delante.
     expect(portada).toMatch(/<h2[^>]*>Autores<\/h2>/);
+  });
+
+  /*
+   * Historia 26.2 (AD-17, AD-19) — esta construcción es la que pinta la otra rama de la portada:
+   * ninguna de sus Citas es apta, así que en lugar de la Cita del Día va la entrada. La portada
+   * responde solo por su `h1` también aquí, con la misma regla que juzga la rama de la Cita del
+   * Día en `publicable-y-alcanzable.test.ts`.
+   */
+  it('sin Cita del Día, la portada solo expone su `h1`: la entrada queda fuera del índice', async () => {
+    const portada = await readFile(join(dist, 'index.html'), 'utf8');
+    const { enMain, titulos, textoDelTitulo, expuestos, fueraDelIndice } = exposicionDeLaPortada(portada);
+    expect(conClase(enMain, 'section', 'del-dia')).toEqual([]);
+    const entrada = conClase(enMain, 'p', 'entrada');
+    expect(entrada).toHaveLength(1);
+    expect(fueraDelIndice(entrada[0])).toBe(true);
+    expect(titulos).toBe(1);
+    expect(textoDelTitulo).toBe(MARCA);
+    expect(expuestos).toEqual([]);
   });
 
   it('no se construye ninguna ruta de Colección', async () => {

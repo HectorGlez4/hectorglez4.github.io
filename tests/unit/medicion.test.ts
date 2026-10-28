@@ -72,7 +72,12 @@ import {
 import { marcasDePagina } from '../../tools/lib/indexables.ts';
 import { ORIGEN_DEL_SANDBOX, medicionEnUnSandbox } from './ayuda/medicion.js';
 import { islaDeBusquedaEnUnSandbox, type OpcionesDeLaIsla, type Respuesta } from './ayuda/busqueda.js';
-import { ETIQUETAS_DE_RESULTADO, OPCIONES_DE_PAGEFIND } from '../../src/lib/tipoDeResultado.ts';
+import {
+  ETIQUETAS_DE_RESULTADO,
+  FILTRO_DE_TIPO,
+  OPCIONES_DE_PAGEFIND,
+  TIPOS_CON_TITULO_EN_SANS,
+} from '../../src/lib/tipoDeResultado.ts';
 import { MARCA as MARCA_DEL_SITIO } from '../../src/lib/marca.ts';
 import { enlacesDe, recorrerElementos, type Declaracion, type Elemento } from './ayuda/enlaces.js';
 import {
@@ -3929,12 +3934,12 @@ describe('Historia 23.8 — una búsqueda cuenta una vez, cuando se asienta', ()
         expect(entorno.resultados()).toEqual([esperado]);
       }, 240_000);
 
-      it('los rótulos del guion son los de la tabla', async () => {
+      it('los rótulos, el filtro, los tipos en sans y las opciones del guion salen de `tipoDeResultado.ts`', async () => {
         const guion = await islaConstruida();
         expect(guion).toContain(`const ETIQUETA = ${JSON.stringify(ETIQUETAS_DE_RESULTADO)};`);
         expect(guion).toContain(`const PAGEFIND = ${JSON.stringify(OPCIONES_DE_PAGEFIND)};`);
-        expect(guion).toContain('const FILTRO = "tipo";');
-        expect(guion).toContain('const EN_SANS = ["obra","directorio","portada"];');
+        expect(guion).toContain(`const FILTRO = ${JSON.stringify(FILTRO_DE_TIPO)};`);
+        expect(guion).toContain(`const EN_SANS = ${JSON.stringify(TIPOS_CON_TITULO_EN_SANS)};`);
       }, 240_000);
 
       it('toda búsqueda va precedida de `options` con las opciones de Pagefind', async () => {

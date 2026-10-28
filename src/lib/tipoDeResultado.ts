@@ -99,9 +99,10 @@ export const OPCIONES_DE_PAGEFIND = { ranking: { metaWeights: { autor: 0 } } } a
  * una superficie nueva que olvide declararlo cae del lado correcto sin hacer nada.
  *
  * Las superficies sin tipo —el buscador, el 404— llegan con `undefined` y caen también en
- * `website`, igual que la portada y los Directorios con el suyo (Historia 26.2). Ojo con la tentación de reusar `TIPO_POR_OMISION` aquí: aquel es «cita»
- * a propósito, porque un **resultado de búsqueda** sin metadato casi siempre lo es, y aplicarlo a
- * esto devolvería justo el `article` que este cambio viene a quitar de la portada.
+ * `website`, igual que la portada y los Directorios con el suyo (Historia 26.2). Ojo con la
+ * tentación de reusar `TIPO_POR_OMISION` aquí: aquel es «cita» a propósito, porque un
+ * **resultado de búsqueda** sin metadato casi siempre lo es, y aplicarlo a esto devolvería justo
+ * el `article` que este cambio viene a quitar de la portada.
  */
 export function tipoDeOpenGraph(tipo: TipoDeResultado | undefined): 'article' | 'website' {
   return tipo === 'cita' ? 'article' : 'website';

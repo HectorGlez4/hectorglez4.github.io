@@ -119,7 +119,8 @@ deferred:
   - none
 
 Las capas de revisión son externas en este bucle y no traían hallazgos en esta pasada; la
-revisión independiente va después.
+revisión independiente va después. (Pasada de cierre de la implementación, no una revisión con
+hallazgos: `review_loop_iteration` cuenta solo las vueltas por `bad_spec`, y no ha habido ninguna.)
 
 ### 2026-10-28 — Review pass
 - intent_gap: 0
@@ -152,6 +153,45 @@ en el contrato); los tres recorridos de `dist/` (el corpus de prueba es pequeño
 falle con dos búsquedas solapadas, el efecto es el orden de una sola búsqueda sin `autor: 0`, la
 siguiente lo corrige, y la guarda cuesta bytes de los 102 libres); el rojo previo no reproducido
 por el auditor (está en el parte de verificación); y el diferido de la 27.1, ya registrado.
+
+### 2026-10-28 — Review pass
+- intent_gap: 0
+- bad_spec: 0
+- patch: 13 (high 0, medium 2, low 11)
+- defer: 0
+- reject: 25
+- addressed_findings:
+  - `[medium]` `[patch]` La rama de la portada sin Cita apta (`p.entrada`) no la construía ninguna prueba que mirara Pagefind (verification-gap). La regla de exposición pasa a `tests/unit/ayuda/portada.ts` (`exposicionDeLaPortada`) y la juzgan las dos construcciones: la de `CORPUS_COMPLETO` (Cita del Día) y la «sin ninguna Colección» de `coleccion-pagina.test.ts`, que no tiene Cita apta y pinta la entrada. Quitado a mano el `data-pagefind-ignore` de `p.entrada`, la prueba nueva se pone en rojo (comprobado y devuelto).
+  - `[medium]` `[patch]` La e2e (c) solo miraba los 30 resultados pintados: un arranque común de la Cita del Día podía dejar el destino fuera por su puesto y una portada en el 31 pasaba (blind-hunter, edge-case-hunter, ac-auditor 1). Ahora mira la lista entera del índice real con `OPCIONES_DE_PAGEFIND` (`todasLasDirecciones`), para el fragmento y para el Autor.
+  - `[low]` `[patch]` La e2e (a) aplicaba `options()` antes de `init()`, al revés que la isla, y dejaba fuera del «no en vacío» a «colección»; ahora va `init()` y `options()` antes de cada búsqueda, «colección» exige resultado y se busca también «coleccion» sin tilde, el valor del metadato de antes (blind-hunter).
+  - `[low]` `[patch]` `medicion.test.ts` escribía a mano `FILTRO` y `EN_SANS`: salen de `FILTRO_DE_TIPO` y `TIPOS_CON_TITULO_EN_SANS`, y el título de la prueba dice lo que mira (blind-hunter).
+  - `[low]` `[patch]` La prueba de `dist/` del tipo en metadato buscaba «tipo» en todo el valor (un título con la palabra fallaba) y la de pesos usaba `in` (heredaba de `Object.prototype`): las dos leen solo claves (`clavesDeMeta`) y la de pesos usa `Object.hasOwn` (edge-case-hunter, dos hallazgos).
+  - `[low]` `[patch]` El `h1` de la portada se leía con una expresión que se rompía con cualquier etiqueta dentro: `exposicionDeLaPortada` quita las etiquetas del contenido (blind-hunter).
+  - `[low]` `[patch]` Nada miraba el `og:type` de `/` en `dist/`: la prueba de la portada exige `website` (ac-auditor 4).
+  - `[low]` `[patch]` La e2e (b) no miraba el peso del título de la portada con el índice real: exige 400 (intent-alignment 7).
+  - `[low]` `[patch]` `AGENTS.md` no decía que un Pagefind de mentira tiene que exportar `options` (blind-hunter): la línea de «Known pitfalls» lo dice.
+  - `[low]` `[patch]` Dos comentarios sin reajustar (docblock de `tipoDeOpenGraph` y el de `coleccion-pagina.test.ts`) (blind-hunter).
+  - `[low]` `[patch]` El primer bloque de «Auto Run Result» y la primera entrada de este registro se leían como una revisión con cero hallazgos (blind-hunter): quedan rotulados como el cierre de la implementación, superado por las pasadas siguientes.
+
+Rechazados, con su motivo: `sprint-status.yaml` sin tocar (lo lleva el orquestador del bucle, que
+solo cambia las líneas que se le dicen); el quitacomentarios de `tipo-de-resultado.test.ts` dentro de
+cadenas (ningún fichero de `src/` ni `public/` trae un glob `/*` en una cadena, y el fallo del
+`.options(` ajeno sería en rojo, no en silencio); la regla de pesos limitada a lo que construye el
+corpus de prueba (es lo que se puede construir; la de producción la miró el auditor a mano: solo
+`autor`); la rama `data-ingreso` del ayudante (Sostener y sus Modelos no son de esta historia); el
+índice de filtros sin medir (la isla no llama `pf.filters()` y el fragmento lo trae sin
+descargarlo); `directorio` antes de su página, los bytes en prosa y las dos cifras de partida
+(215/400 en la planificación, 249/486 sobre el índice entero en la verificación: dos medidas con su
+método, las pide o las registra el contrato); las aserciones redundantes de
+`tipo-de-resultado.test.ts` (fijan el contrato); el `data-tipo` en crudo y `ETIQUETA` por herencia
+(decididos en la pasada anterior); las ocho divergencias de intent-alignment que no piden cambio
+(la letra de la 27.1, ya diferida; la prueba (a) sobre el índice y no la interfaz, que (b) y (c)
+cubren; B2 y E1, más estrictas que el criterio y queridas; el título de la portada desde su `h1`,
+que la 28.1 retoma; la construcción de prueba frente a la de producción, que el auditor contó a
+mano; el orden por `autor: 0`, que es el criterio; y las añadidas del contrato); y los huecos del
+auditor de criterios que no piden cambio (los chips por la interfaz, que la prueba de `dist/`
+cubre; Directorio con índice real, de la 26.3; la marca de varias palabras; el cuerpo contra 21 px,
+que ya da `--titular-sm`; el rojo previo, en el parte; y el diferido de la 27.1, ya registrado).
 
 ## Design Notes
 
@@ -223,8 +263,10 @@ la entrada y las secciones de Temas, Colecciones y Autores van bajo `data-pagefi
   por su nombre, (c) la Cita del Día y un Autor dan su página y no `/`, (d) Directorio y Portada
   con un Pagefind de mentira.
 
-**Revisión.** Parches aplicados: 0. Diferidos nuevos: 0. Rechazados: 0 (capas externas sin
-hallazgos en esta pasada). Recomendación de revisión de seguimiento: `false` (0 parches; puntuación 0).
+**Revisión de la implementación** (antes de la revisión externa; la superan las pasadas de
+abajo, y el `followup_review_recommended` del frontmatter es el de la última). Parches aplicados:
+0. Diferidos nuevos: 0. Rechazados: 0 (capas externas sin hallazgos en esta pasada).
+Recomendación de revisión de seguimiento en esa pasada: `false` (0 parches; puntuación 0).
 
 **Verificación.**
 - Rojo antes del cambio: el `describe` 26.2 (a) contra el sitio construido con `Armazon.astro`,
@@ -288,3 +330,43 @@ Recomendación de revisión de seguimiento: `true` (puntuación 3 × 2 + 3 = 9).
 - La prueba (c) depende de que un fragmento de cinco palabras de la Cita del Día la devuelva entre
   los 30 primeros; con la Cita del día de cada jornada puede variar.
 
+
+### Revisión externa, segunda pasada (2026-10-28)
+
+**Resumen.** Trece parches, todos en pruebas, comentarios y documentación; el código del sitio no
+cambia. La regla «la portada solo expone su `h1`» vive en un ayudante y la juzgan las dos ramas de
+la portada —con Cita del Día y con la entrada—; la e2e (c) mira la lista entera del índice real y
+no las 30 pintadas; la (a) aplica las opciones en el orden de la isla; las pruebas de `dist/` leen
+claves de metadato y no valores, y miran el `og:type` de `/`.
+
+**Ficheros.**
+- `tests/unit/ayuda/portada.ts` (nuevo) — `exposicionDeLaPortada` y `conClase`: la regla de
+  exposición de la portada y el texto del `h1` sin etiquetas dentro.
+- `tests/unit/publicable-y-alcanzable.test.ts` — usa el ayudante; `clavesDeMeta` y
+  `Object.hasOwn`; `og:type` `website` en `/`.
+- `tests/unit/coleccion-pagina.test.ts` — la rama sin Cita apta: `p.entrada` fuera del índice y el
+  `h1` igual a `MARCA`; un comentario reajustado.
+- `tests/unit/medicion.test.ts` — `FILTRO` y `EN_SANS` derivados de `tipoDeResultado.ts`.
+- `tests/e2e/busqueda.spec.ts` — (a) `init()` y `options()` antes de cada búsqueda, «coleccion»
+  sin tilde y «colección» no vacía; (b) peso 400; (c) `todasLasDirecciones` sobre el índice entero.
+- `src/lib/tipoDeResultado.ts` — docblock de `tipoDeOpenGraph` reajustado (solo comentario).
+- `AGENTS.md` — un Pagefind de mentira exporta `options`.
+
+**Revisión.** Parches aplicados: 13 (high 0, medium 2, low 11). Diferidos nuevos: 0. Rechazados: 25.
+Recomendación de revisión de seguimiento: `true` (puntuación 3 × 2 + 11 = 17).
+
+**Verificación.**
+- `npx vitest run tests/unit/tipo-de-resultado.test.ts tests/unit/tipo-de-open-graph.test.ts` — 13 verdes.
+- Uno a uno en segundo plano: `publicable-y-alcanzable` (34), `coleccion-pagina` (35), `medicion`
+  (514) — verdes; `npm run check` — 0 errores, 0 avisos (8 sugerencias viejas, ajenas).
+- Con el `data-pagefind-ignore` quitado a mano de `p.entrada`, la prueba nueva de
+  `coleccion-pagina.test.ts` se pone en rojo (comprobado y devuelto con `git checkout`).
+- `npm test` en segundo plano — 138 ficheros, 6.347 pruebas, `FINISHED EXIT=0`.
+- `npx playwright test tests/e2e/busqueda.spec.ts tests/e2e/receptor.spec.ts` — 108 verdes, 64
+  saltadas (las de siempre), `FINISHED EXIT=0`; las cuatro pruebas 26.2 verdes en los dos
+  proyectos. Puertos 4321, 4399, 4400, 4402 y 8787 libres al terminar.
+
+**Riesgos residuales.**
+- La carrera de un `destroy()` sin esperar con una búsqueda en vuelo sigue rechazada por los 102
+  bytes libres de `/buscar/`.
+- Directorio solo se mira con un índice de mentira hasta que la 26.3 construya sus páginas.

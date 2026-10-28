@@ -26,7 +26,8 @@ import {
 import { CITAS_POR_PAGINA, MAX_SALTOS_DESDE_LA_PORTADA } from '../../src/lib/umbrales.ts';
 import { MARCA } from '../../src/lib/marca.ts';
 import { FILTRO_DE_TIPO, OPCIONES_DE_PAGEFIND } from '../../src/lib/tipoDeResultado.ts';
-import { recorrerElementos, type Elemento } from './ayuda/enlaces.js';
+import { recorrerElementos } from './ayuda/enlaces.js';
+import { conClase, exposicionDeLaPortada } from './ayuda/portada.js';
 
 /**
  * Historia 12.1 — publicable y alcanzable son el mismo conjunto.
@@ -573,12 +574,23 @@ describe('Historia 12.1 — sobre un sitio construido de verdad', () => {
       return filtros;
     };
 
+    /**
+     * Las claves de un `data-pagefind-meta` («clave:valor, otra:valor»), sin sus valores: un
+     * título que diga «tipo» no es el metadato `tipo`. Un valor con coma da una clave de más, que
+     * sobra en las dos pruebas que lo usan: o no es `tipo`, o sale como clave sin peso y se ve.
+     */
+    const clavesDeMeta = (meta: string) =>
+      meta
+        .split(',')
+        .map((parte) => parte.trim().split(/[:[]/)[0].trim())
+        .filter((clave) => clave !== '');
+
     it('ningún `data-pagefind-meta` lleva el tipo', async () => {
       const conTipo: string[] = [];
       for (const [ruta, html] of await paginas()) {
         recorrerElementos(html, (elemento) => {
           const meta = elemento.atributos.get('data-pagefind-meta');
-          if (meta !== undefined && /\btipo\b/.test(meta)) conTipo.push(`${ruta}: ${meta}`);
+          if (meta !== undefined && clavesDeMeta(meta).includes(FILTRO_DE_TIPO)) conTipo.push(`${ruta}: ${meta}`);
         });
       }
       expect(conTipo).toEqual([]);
@@ -617,11 +629,9 @@ describe('Historia 12.1 — sobre un sitio construido de verdad', () => {
         recorrerElementos(html, (elemento) => {
           const meta = elemento.atributos.get('data-pagefind-meta');
           if (meta === undefined) return;
-          for (const parte of meta.split(',')) {
-            const clave = parte.trim().split(/[:[]/)[0].trim();
-            if (clave === '') continue;
+          for (const clave of clavesDeMeta(meta)) {
             vistas.add(clave);
-            if (clave !== 'title' && !(clave in pesos)) sinPeso.push(`${ruta}: ${clave}`);
+            if (clave !== 'title' && !Object.hasOwn(pesos, clave)) sinPeso.push(`${ruta}: ${clave}`);
           }
         });
       }
@@ -633,36 +643,22 @@ describe('Historia 12.1 — sobre un sitio construido de verdad', () => {
     it('la portada solo expone su `h1`, que es la marca: todo lo demás de `main` queda fuera del índice', async () => {
       const portada = (await paginas()).get('/')!;
       expect(portada).toBeDefined();
-      const enMain: { elemento: Elemento; antepasados: readonly Elemento[] }[] = [];
-      recorrerElementos(portada, (elemento, antepasados) => {
-        if (antepasados.some((a) => a.etiqueta === 'main')) enMain.push({ elemento, antepasados });
-      });
-      const titulos = enMain.filter(({ elemento }) => elemento.etiqueta === 'h1');
-      expect(titulos).toHaveLength(1);
-      const [titulo] = titulos;
-      const deLaRuta = new Set<Elemento>(titulo.antepasados);
-      const ignora = (e: Elemento) =>
-        e.atributos.get('data-pagefind-ignore') === 'all' ||
-        (e.atributos.has('data-ingreso') && e.atributos.has('data-pagefind-ignore'));
-
-      const expuestos = enMain
-        .filter(({ elemento }) => elemento !== titulo.elemento && !deLaRuta.has(elemento))
-        .filter(({ elemento, antepasados }) => ![elemento, ...antepasados].some(ignora))
-        .map(({ elemento }) => `<${elemento.etiqueta} class="${elemento.atributos.get('class') ?? ''}">`);
+      const { enMain, titulos, textoDelTitulo, expuestos, fueraDelIndice } = exposicionDeLaPortada(portada);
+      expect(titulos).toBe(1);
+      expect(textoDelTitulo).toBe(MARCA);
       expect(expuestos).toEqual([]);
       // La Cita del Día —el estado de producción, con alguna Cita apta— está en la portada y
-      // fuera del índice: buscar su texto daba también la portada.
-      const delDia = enMain.filter(
-        ({ elemento }) => elemento.etiqueta === 'section' && /\bdel-dia\b/.test(elemento.atributos.get('class') ?? ''),
-      );
+      // fuera del índice: buscar su texto daba también la portada. La otra rama, la entrada sin
+      // ninguna Cita apta, la mira la construcción «sin ninguna Colección» de
+      // `coleccion-pagina.test.ts`, con la misma regla.
+      const delDia = conClase(enMain, 'section', 'del-dia');
       expect(delDia).toHaveLength(1);
-      expect([delDia[0].elemento, ...delDia[0].antepasados].some(ignora)).toBe(true);
+      expect(fueraDelIndice(delDia[0])).toBe(true);
       // Y no en vacío: la portada trae la Cita del Día, los Temas y los Autores.
       expect(enMain.length).toBeGreaterThan(10);
       expect(enMain.filter(({ elemento }) => elemento.atributos.get('data-pagefind-ignore') === 'all').length).toBeGreaterThanOrEqual(3);
-
-      const h1 = /<main[\s\S]*?<h1[^>]*>([^<]*)<\/h1>/.exec(portada)?.[1];
-      expect(h1?.trim()).toBe(MARCA);
+      // Y al compartirse dice ser un sitio, no un artículo (FR-19): su tipo no cambia esa regla.
+      expect(portada).toContain('<meta property="og:type" content="website">');
     });
   });
 });
