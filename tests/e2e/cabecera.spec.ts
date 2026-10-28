@@ -277,8 +277,7 @@ test.describe('Historia 26.5 — la cabecera, pintada', () => {
    *
    * Se juzga la cabecera, que es lo de esta historia: que la **página** entera no se desplace
    * con el texto al 200 % lo juzga la 26.9 en toda superficie del barrido, con esta misma
-   * simulación («Historia 26.9 — reflujo a 320 px» en `accesibilidad.spec.ts`); desde ella la
-   * Página de Cita tampoco desborda.
+   * simulación («Historia 26.9 — reflujo a 320 px» en `accesibilidad.spec.ts`).
    */
   test('a 320 px con el texto al 200 %, los enlaces se parten con 8 px entre filas y la cabecera no desborda', async ({ page }) => {
     await page.setViewportSize({ width: 320, height: 640 });

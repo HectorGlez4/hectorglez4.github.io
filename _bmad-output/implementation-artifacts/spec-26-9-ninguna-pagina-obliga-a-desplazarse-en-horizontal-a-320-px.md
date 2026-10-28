@@ -9,7 +9,14 @@ followup_review_recommended: true
 context:
   - '{project-root}/_bmad-output/implementation-artifacts/epic-26-context.md'
 warnings: ['oversized']
-deferred: []
+deferred:
+  - summary: >-
+      Los destinos de «Compartir en» sobresalen 3 px de su columna hacia el margen con el texto al 200 % a 320 px, y ninguna prueba mide que el contenido quede dentro de la columna de `main`.
+    evidence: |-
+      Medido en la Página de Cita en `movil` y `escritorio` (revisión 1 y ac-auditor de la revisión 2): `ul.destinos` da scrollWidth 123 frente a clientWidth 120 px CSS. No abre desplazamiento de página, así que el criterio de la 2.8 (`scrollWidth` de `<html>`) no lo ve, y `contenedoresQueRecortan` solo mira cajas con `overflow-x` distinto de `visible`. NFR-8 pide que el contenido se enmarque y no sangre al margen. El intent de la 26.9 excluye tocar la rejilla «Compartir en» nueva (Épica 25), y partir el nombre de una red es decisión de diseño.
+    location: >-
+      src/islands/CompartirEnlace.astro (ul.destinos); tests/e2e/accesibilidad.spec.ts (Historia 26.9 — reflujo a 320 px)
+    severity: medium
 ---
 
 <intent-contract>
@@ -121,6 +128,28 @@ Pasada de implementación del bucle v8-ralph: las capas de revisión son externa
 
 Rechazados: las cifras 340/417 (medidas distintas, el Intent no se toca), «done sin revisión» (esta pasada es la revisión), tareas sin poner al día (la ejecución condicional está en Design Notes), `sprint-status.yaml` (lo lleva el orquestador del bucle), estados abiertos y diálogos, el selector de `nowrap`, apaisado y poca altura, dueño de la regla global, números de línea del Code Map, muestra por familia, zoom simulado, puerta de la 26.11, proporciones con listados cortos y «Página N de M» en tres líneas a 360 px (forma previa, idéntica antes y después).
 
+### 2026-10-28 — Review pass
+- intent_gap: 0
+- bad_spec: 0
+- patch: 10 (high 0, medium 2, low 8)
+- defer: 1 (high 0, medium 1, low 0)
+- reject: 27 (high 0, medium 1, low 26)
+- addressed_findings:
+  - `[medium]` `[patch]` Los chips de `/buscar/` sin resultados —y los resultados pintados en el cliente— no los pintaba ningún barrido (verification-gap, blind-hunter, edge-case-hunter): nueva prueba de `/buscar/` con resultados (consulta del título de Obra más largo) y sin resultados (Pagefind servido vacío, como en la 3.2), en las tres condiciones y con la palabra indivisible en títulos, Autores y chips. Comprobado que se pone en rojo quitando `overflow-wrap: anywhere` de `.chip` en `buscar.astro` (460 frente a 320).
+  - `[medium]` `[patch]` La forma de la Paginación en un listado corto, que es la que sostiene el tope `max-content`, no la medía nadie (verification-gap, blind-hunter): nueva prueba sobre el listado con menos páginas (≥ 2) a 360 px por omisión, en su página 1 y su última: una sola fila, lista de números y «Página N de M» a su ancho, y huecos entre ítems iguales a 1 px.
+  - `[low]` `[patch]` Con la fila de la Paginación partida a 320 px no se medía la separación con los números, ni la última página (blind-hunter, edge-case-hunter, ac-auditor): las zonas incluyen cada número y se miden las páginas 1, 2 y última.
+  - `[low]` `[patch]` `contenedoresQueRecortan` no miraba `<html>` ni `<body>` (edge-case-hunter): un `overflow-x` que recortara la página entera pasaría; ahora entran.
+  - `[low]` `[patch]` La sonda de la palabra indivisible abortaba con un `expect` duro dentro del bucle (blind-hunter): es `expect.soft` y la condición sin texto no se mide.
+  - `[low]` `[patch]` La regla de `nowrap` no veía controles por rol ni lo que va dentro de un control (edge-case-hunter, ac-auditor): entran `[role=button]`, `[role=link]` y los descendientes de enlaces, botones, `summary` y `label`; `pre` ya lo cubre `text-wrap-mode`, y el comentario lo dice.
+  - `[low]` `[patch]` La guardia unitaria no leía el selector exacto ni distinguía un `@media`, y llevaba la lista de chips a mano (blind-hunter, edge-case-hunter): lee las reglas de nivel superior de los `<style>`, con el selector exacto y la cascada, prueba esa lectura, y exige `anywhere` en todo `.chip` de `src/` (las cuatro de hoy tienen que aparecer). Comprobado que se pone en rojo quitando el de `buscar.astro`.
+  - `[low]` `[patch]` La prueba de títulos de Obra podía medir otra fila sin decirlo, y `/obras/` no tenía mensaje (blind-hunter): mide también la fila del título más largo del Corpus y falla si está oculta; `/obras/` lleva su motivo.
+  - `[low]` `[patch]` El comentario de `TEXTOS_DEL_CORPUS` decía que los rótulos fijos no se tocan mientras el selector incluye todo `h1–h3` (blind-hunter): dice ya que los encabezados entran todos y por qué es más exigencia, no menos.
+  - `[low]` `[patch]` El comentario de `cabecera.spec.ts` afirmaba un estado del sitio que vigila otro fichero (blind-hunter): remite solo a la prueba de la 26.9.
+
+Aplazado: «Compartir en» 3 px sobre el margen con el texto al 200 % (excluido por el intent: rejilla de la Épica 25), en `deferred`.
+
+Rechazados: el frontmatter con `review_loop_iteration: 0` y el bloque viejo de «Auto Run Result» (el flujo reinicia el contador en cada pasada y cada bloque es el registro de la suya); 340 frente a 417 (el Intent no se toca); Execution y Code Map sin poner al día (la ejecución condicional, y lo que cambió, están en Design Notes y en cada Auto Run Result); `sprint-status.yaml` (dos capas; lo lleva el orquestador del bucle); consolidar el chip en una clase global (cuatro chips con estilo propio por superficie; la guardia los encuentra ya todos); la guardia del CI fija texto y no reflujo (el CI no corre e2e por decisión del proyecto); `TEXTOS_DEL_CORPUS` escrito a mano y con un acierto por página; `nowrap` solo con el texto por omisión, y su premisa ignorada (el estilo calculado de `white-space` no depende del zoom ni de la hoja); la cabecera en una sola ruta (es el mismo componente del armazón en todas, y el desborde de cada página lo mide el barrido); tolerancias distintas entre comprobaciones y la de la cabecera (`scrollWidth`/`clientWidth` son enteros); la palabra más ancha por píxeles y no por letras; el filtro de `overflow-x: visible` (ya está); documentar la regla de `body` en AGENTS.md o DESIGN.md (DESIGN.md es de `bmad-ux`; el porqué está en `tokens.css`); el 200 % por `zoom` y no por zoom de texto, la muestra frente a «ninguna página», estados abiertos y poca altura (decisión de la historia y su muestra); la cabecera «se parte» solo con el 200 % (el AC lo pide con zoom 2 y la 26.5 lo mide); «la fila crece con él» medido por contención; la Tarjeta de Obra sin fila compartida (es su estructura); la puerta de la 26.11 (es de la 26.11); las Execution con ficheros de la Épica 24 que no hizo falta tocar; y, `[medium]`, la Paginación a 320 px por omisión en las páginas 2+ que pasa a dos filas (intent-alignment): el propio contrato manda «una fila que no cabe se parte» y esa fila no cabe (mínimos de 281 px en una columna de 280; antes «Siguiente» sangraba 1 px hacia el margen), así que «nada cambia de forma» rige donde la fila cabe —360 px y la página 1 a 320—, que es lo que se mide.
+
 ## Design Notes
 
 Cierra el diferido de la 26.5 (`spec-26-5-…`, desplazamiento de la Página de Cita con el texto al 200 %). La regla global en `body` no altera nada por omisión: `overflow-wrap` solo actúa cuando una palabra no cabe en su línea, y `break-word` no cambia el min-content, así que recuentos y números no se encogen; donde un ítem flex desborda igual, se corrige ese ítem. Con zoom 2 la columna útil es de 120 px CSS y la Cita del Día va a 36 px: partirá palabras en varias líneas, y es lo que pide NFR-8 sin tocar los tramos (AD-8).
@@ -183,3 +212,22 @@ Status: done
 - `npx astro check` — 0 errores, 0 avisos (8 sugerencias, ninguna en los ficheros tocados).
 
 **Riesgos.** Los destinos de «Compartir en» con el texto al 200 % sobresalen 3 px de la columna hacia el margen (`ul.destinos` 123/120 CSS): no llegan al borde ni abren desplazamiento, así que el criterio de la 2.8 no los ve; partir el nombre de una red es decisión de diseño, no de esta pasada. Siguen sin medirse los estados abiertos (diálogo de la Imagen, hoja de compartir) y la poca altura, fuera de la muestra que fija la historia.
+
+### Revisión 2 (2026-10-28)
+
+**Resumen.** Diez parches de la segunda revisión independiente (cinco capas), sin `bad_spec` ni `intent_gap`; ninguno toca lo construido. El barrido gana `/buscar/` con resultados y sin resultados (Pagefind servido vacío), la forma de la Paginación de un listado corto a 360 px, los números entre las zonas de la fila partida a 320 px y su última página, `<html>` y `<body>` entre los contenedores que recortan, la regla de `nowrap` por rol y dentro de los controles, y la fila del título de Obra más largo del Corpus; la guardia del CI lee la regla exacta de nivel superior y encuentra sola todo `.chip` de `src/`.
+
+**Ficheros.**
+- `tests/e2e/accesibilidad.spec.ts` — `cargarEn320` con `preparar`; `/buscar/` en sus dos estados; `contenedoresQueRecortan` con `<html>` y `<body>`; la palabra indivisible con `expect.soft`; `nowrap` por rol y en descendientes de controles; la fila del título más largo del Corpus en `/obras/` y en la Lista de Obras; la Paginación con números en las zonas y la última página a 320, y la prueba del listado corto a 360.
+- `tests/unit/espinas-de-ux.test.ts` — lectura de reglas de nivel superior (selector exacto, sin `@media`, cascada) con su propia prueba, y todo `.chip` de `src/` con `anywhere`.
+- `tests/e2e/cabecera.spec.ts` — el comentario remite a la 26.9 sin afirmar el estado de la Página de Cita.
+
+**Revisión.** Parches 10 (alta 0, media 2, baja 8), aplazados 1, rechazados 27. Seguimiento recomendado: `true` (puntuación 3 × 2 + 8 = 14 ≥ 5).
+
+**Verificación.**
+- Sensibilidad: quitando `overflow-wrap: anywhere` de `.chip` en `buscar.astro`, la prueba nueva de `/buscar/` sin resultados se pone en rojo (460 frente a 320, texto al 200 % con palabra indivisible) y la guardia unitaria también; restaurado.
+- `npx playwright test tests/e2e/accesibilidad.spec.ts tests/e2e/cabecera.spec.ts tests/e2e/directorio-de-obras.spec.ts tests/e2e/directorio-de-autores.spec.ts tests/e2e/pagina-de-cita.spec.ts tests/e2e/portada.spec.ts tests/e2e/busqueda.spec.ts` (los dos proyectos) — 452 passed, 6 skipped (los `test.skip` por proyecto de `pagina-de-cita.spec.ts` y los de la 3.2 cuando ninguna consulta da cero).
+- `npx vitest run tests/unit/tarjeta-de-cita.test.ts tests/unit/lista-de-obras.test.ts tests/unit/tarjeta-de-obra.test.ts tests/unit/espinas-de-ux.test.ts tests/unit/paginacion.test.ts` — 5 ficheros, 98 passed.
+- `npx astro check` — 0 errores, 0 avisos (8 sugerencias).
+
+**Riesgos.** Queda aplazado «Compartir en» 3 px sobre el margen con el texto al 200 % (fuera del intent). El 200 % sigue siendo `zoom` y no el zoom de texto del navegador; los diálogos abiertos y la poca altura siguen fuera de la muestra. El reflujo medido sigue solo en local: el CI fija las reglas en la fuente.

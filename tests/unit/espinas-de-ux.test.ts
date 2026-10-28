@@ -103,21 +103,69 @@ describe('Historia 22.10 — nada suprime el anillo de foco', () => {
  * cualquiera devolvería un desborde con el texto al 200 % sin que nada en el CI se pusiera rojo.
  */
 describe('Historia 26.9 — las reglas del reflujo, en la fuente', () => {
-  /** Las declaraciones del primer bloque de reglas cuyo selector es exactamente `selector`. */
-  function declaraciones(css: string, selector: string): Record<string, string> {
-    const sinComentarios = css.replace(/\/\*[\s\S]*?\*\//g, '');
-    const bloque = new RegExp(`(?:^|[}\\s])${selector.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*\\{([^}]*)\\}`, 'm').exec(
-      sinComentarios,
-    );
-    if (bloque === null) return {};
-    return Object.fromEntries(
-      bloque[1]
-        .split(';')
-        .map((d) => d.trim())
-        .filter(Boolean)
-        .map((d) => [d.slice(0, d.indexOf(':')).trim(), d.slice(d.indexOf(':') + 1).trim()]),
-    );
+  /**
+   * Las reglas de nivel superior de una hoja: selector —normalizado— y declaraciones. Lo que va
+   * dentro de un `@media`, `@supports` o similar no cuenta: no rige a 320 px por omisión, y la
+   * guardia mira la regla que rige siempre. En un `.astro` solo se leen sus bloques `<style>`.
+   */
+  function reglas(fuente: string): { selectores: string[]; declaraciones: Record<string, string> }[] {
+    const hojas = /<style[\s>]/.test(fuente) ? [...fuente.matchAll(/<style[^>]*>([\s\S]*?)<\/style>/g)].map((m) => m[1]) : [fuente];
+    const resultado: { selectores: string[]; declaraciones: Record<string, string> }[] = [];
+    for (const hoja of hojas) {
+      const css = hoja.replace(/\/\*[\s\S]*?\*\//g, '');
+      let profundidad = 0;
+      let cabecera = '';
+      let cuerpo = '';
+      for (const c of css) {
+        if (c === '{') {
+          profundidad += 1;
+          if (profundidad > 1) cuerpo += c;
+        } else if (c === '}') {
+          profundidad -= 1;
+          if (profundidad === 0) {
+            const selector = cabecera.trim();
+            if (!selector.startsWith('@')) {
+              resultado.push({
+                selectores: selector.split(',').map((s) => s.trim().replace(/\s+/g, ' ')),
+                declaraciones: Object.fromEntries(
+                  cuerpo
+                    .split(';')
+                    .map((d) => d.trim())
+                    .filter((d) => d.includes(':'))
+                    .map((d) => [d.slice(0, d.indexOf(':')).trim(), d.slice(d.indexOf(':') + 1).trim()]),
+                ),
+              });
+            }
+            cabecera = '';
+            cuerpo = '';
+          } else cuerpo += c;
+        } else if (profundidad === 0) cabecera += c;
+        else cuerpo += c;
+      }
+    }
+    return resultado;
   }
+
+  /**
+   * Las declaraciones que rigen para un selector **exacto** —`.x .chip` no es `.chip`— en el
+   * nivel superior de la hoja: las de todos sus bloques, la última gana, como en la cascada.
+   */
+  function declaraciones(fuente: string, selector: string): Record<string, string> {
+    return Object.assign({}, ...reglas(fuente).filter((r) => r.selectores.includes(selector)).map((r) => r.declaraciones));
+  }
+
+  async function astrosDe(dir: string): Promise<string[]> {
+    const entradas = await readdir(join(RAIZ, dir), { withFileTypes: true, recursive: true });
+    return entradas
+      .filter((e) => e.isFile() && e.name.endsWith('.astro'))
+      .map((e) => join(e.parentPath ?? (e as unknown as { path: string }).path, e.name).slice(RAIZ.length + 1));
+  }
+
+  it('la guardia lee la regla exacta y no la de un `@media` ni la de un selector más largo', () => {
+    const css = '.x .chip { overflow-wrap: normal } @media (min-width: 40rem) { .chip { overflow-wrap: normal } } .chip { overflow-wrap: anywhere; }';
+    expect(declaraciones(css, '.chip')['overflow-wrap']).toBe('anywhere');
+    expect(declaraciones('.zona .chip { overflow-wrap: anywhere }', '.chip')['overflow-wrap']).toBeUndefined();
+  });
 
   it('`body` parte la palabra que no cabe en su línea', async () => {
     const css = await readFile(join(RAIZ, 'src/styles/tokens.css'), 'utf8');
@@ -132,10 +180,21 @@ describe('Historia 26.9 — las reglas del reflujo, en la fuente', () => {
   });
 
   it('los nombres del Corpus en una caja flexible o en línea-bloque rebajan su mínimo para partir', async () => {
-    for (const fichero of ['src/components/Chips.astro', 'src/pages/index.astro', 'src/pages/404.astro', 'src/pages/buscar.astro']) {
-      const css = await readFile(join(RAIZ, fichero), 'utf8');
-      expect(declaraciones(css, '.chip')['overflow-wrap'], `${fichero}: .chip`).toBe('anywhere');
+    /*
+     * Todo `.chip` declarado en `src/`, no una lista escrita a mano: un quinto chip que no parta
+     * desbordaría con un nombre del Corpus más ancho que la columna, y aquí se ve. Las cuatro de
+     * hoy tienen que seguir apareciendo, o la búsqueda no está mirando donde debe.
+     */
+    const conChip: string[] = [];
+    for (const fichero of await astrosDe('src')) {
+      const fuente = await readFile(join(RAIZ, fichero), 'utf8');
+      if (!reglas(fuente).some((r) => r.selectores.includes('.chip'))) continue;
+      conChip.push(fichero);
+      expect(declaraciones(fuente, '.chip')['overflow-wrap'], `${fichero}: .chip`).toBe('anywhere');
     }
+    expect(conChip).toEqual(
+      expect.arrayContaining(['src/components/Chips.astro', 'src/pages/index.astro', 'src/pages/404.astro', 'src/pages/buscar.astro']),
+    );
     for (const [fichero, selector] of [
       ['src/pages/index.astro', '.autores a'],
       ['src/components/Atribucion.astro', '.autor a'],

@@ -787,15 +787,22 @@ const ESPACIADO_1412 =
  * Carga la ruta a 320 × 640 y aplica la condición, con su premisa comprobada. Devuelve si la
  * premisa se cumple: la premisa falla con `expect.soft` —para que las demás condiciones se sigan
  * midiendo— y quien llama no mide una condición cuya simulación no se aplicó, porque mediría el
- * texto por omisión y saldría en verde.
+ * texto por omisión y saldría en verde. `preparar` lleva la página al estado que se mide —una
+ * búsqueda escrita, por ejemplo— antes de aplicar la condición.
  */
-async function cargarEn320(page: Page, ruta: string, condicion: Condicion): Promise<boolean> {
+async function cargarEn320(
+  page: Page,
+  ruta: string,
+  condicion: Condicion,
+  preparar?: (page: Page) => Promise<void>,
+): Promise<boolean> {
   await page.setViewportSize({ width: 320, height: 640 });
   await page.goto(ruta);
   // Se mide con la Inter del sitio y no con la de reserva, que es más estrecha.
   await page.evaluate(async () => {
     await document.fonts.ready;
   });
+  if (preparar !== undefined) await preparar(page);
   if (condicion === 'texto al 200 %') {
     /*
      * La ventana es el `clientWidth` de `<html>` y no `innerWidth`: en el proyecto `movil` (Pixel
@@ -854,13 +861,14 @@ const anchoDeLaPagina = (page: Page) =>
 
 /**
  * Los contenedores que se desplazan por su cuenta o recortan en horizontal lo que se les sale: el
- * `scrollWidth` de `<html>` no los ve, y lo recortado es contenido que no se alcanza. Se dejan
- * fuera los campos de formulario y lo que no se pinta (`.solo-para-lectores`, `.oculto`, cajas de
- * 1 × 1 px).
+ * `scrollWidth` de `<html>` no los ve, y lo recortado es contenido que no se alcanza. Entran
+ * también `<html>` y `<body>`: un `overflow-x` que recortara la página entera escondería el
+ * desborde del criterio de la 2.8 y la prueba pasaría. Se dejan fuera los campos de formulario y
+ * lo que no se pinta (`.solo-para-lectores`, `.oculto`, cajas de 1 × 1 px).
  */
 const contenedoresQueRecortan = (page: Page) =>
   page.evaluate(() =>
-    [...document.body.querySelectorAll('*')]
+    [document.documentElement, document.body, ...document.body.querySelectorAll('*')]
       .filter((e) => {
         if (/^(INPUT|TEXTAREA|SELECT|OPTION)$/.test(e.tagName)) return false;
         if (e.closest('.solo-para-lectores, .oculto')) return false;
@@ -882,8 +890,10 @@ const PALABRA_INDIVISIBLE = 'Anticonstitucionalmente';
 /**
  * Los textos del Corpus que se pintan: el de la Cita, sus fragmentos, y los nombres de Autor,
  * Tema, Colección y Obra donde los pinta cada superficie. Son los únicos que cambian sin que nadie
- * toque una plantilla; los rótulos fijos («Siguiente», «Volver al índice», «N citas») se miden
- * tal cual en la prueba de arriba.
+ * toque una plantilla, y se toca el último texto visible de cada uno. Los encabezados entran
+ * todos, aunque alguno sea un rótulo fijo: muchos llevan un nombre del Corpus («Citas de {Tema}»)
+ * y sobre uno fijo la palabra es más exigencia, no menos. Los rótulos de controles («Siguiente»,
+ * «Volver al índice», «N citas») no se tocan: se miden tal cual en la prueba de arriba.
  */
 const TEXTOS_DEL_CORPUS =
   'main :is(h1, h2, h3, .texto, .fragmento, p.autor, p.procedencia, .titulo, .nombre, .chip, .autores a, p.de, .enlace-en-tinta)';
@@ -969,7 +979,9 @@ test.describe('Historia 2.8 — responsive', () => {
         for (const condicion of ['texto al 200 %', 'espaciado de 1.4.12'] as const) {
           if (!(await cargarEn320(page, ruta, condicion))) continue;
           const puestas = await ponerPalabraIndivisible(page);
-          expect(puestas, `${ruta}: no hay ningún texto del Corpus donde poner la palabra`).toBeGreaterThan(0);
+          // Blanda, como las demás: una condición sin texto donde ponerla no corta la otra.
+          expect.soft(puestas, `${ruta} (${condicion}): no hay ningún texto del Corpus donde poner la palabra`).toBeGreaterThan(0);
+          if (puestas === 0) continue;
           const m = await anchoDeLaPagina(page);
           expect
             .soft(m.scroll, `${ruta} desborda con el ${condicion} y una palabra indivisible: ${m.scroll} frente a ${m.ventana}`)
@@ -985,17 +997,109 @@ test.describe('Historia 2.8 — responsive', () => {
     }
 
     /*
+     * `/buscar/` se mide arriba vacía, y vacía no pinta nada del Corpus: los resultados (extractos,
+     * Autores, Obras) y los chips de Tema, Colección y Autor del estado sin resultados solo aparecen
+     * tras escribir. Se miden los dos estados en las tres condiciones, y con la palabra indivisible
+     * en cada texto del Corpus y en los chips con el texto al 200 % y el espaciado de 1.4.12.
+     *
+     * El estado sin resultados no se le puede pedir al índice real —Pagefind contesta a casi
+     * cualquier consulta con lo que más se le parece—, así que, como en la 3.2 (`busqueda.spec.ts`),
+     * se sirve un Pagefind que no encuentra nada: lo que se pinta es el guion de la página y los
+     * chips son los del Corpus, construidos con ella.
+     */
+    const ESTADOS_DE_BUSQUEDA = [
+      {
+        cual: 'con resultados',
+        consulta: () => citaConTituloDeObraMasLargo()?.titulo ?? 'vida',
+        quiere: 'resultados' as const,
+        palabraEn: '[data-resultados] :is(.titulo, .r-autor)',
+        pagefindVacio: false,
+      },
+      {
+        cual: 'sin resultados',
+        consulta: () => 'consulta que no está',
+        quiere: 'salida' as const,
+        palabraEn: '[data-salida] :is(.chip, h2, p)',
+        pagefindVacio: true,
+      },
+    ];
+    for (const { cual, consulta, quiere, palabraEn, pagefindVacio } of ESTADOS_DE_BUSQUEDA) {
+      test(`/buscar/ ${cual} no desborda a 320 px en las tres condiciones, ni con una palabra indivisible`, async ({ page }) => {
+        if (pagefindVacio) {
+          await page.route('**/pagefind/pagefind.js', (r) =>
+            r.fulfill({
+              contentType: 'text/javascript',
+              body: 'export async function options() {}\nexport async function init() {}\nexport async function search() { return { results: [] }; }',
+            }),
+          );
+        }
+        /** Escribe la consulta y espera a que la búsqueda pinte el estado que se mide. */
+        const preparar = async (p: Page) => {
+          await p.locator('[data-consulta]').fill(consulta());
+          await p.waitForFunction(
+            () =>
+              document.querySelector('[data-resultados]')!.children.length > 0 ||
+              !document.querySelector('[data-salida]')!.hasAttribute('hidden'),
+            undefined,
+            { timeout: 10_000 },
+          );
+          const pinto = (await p.locator('[data-salida]').isVisible()) ? 'salida' : 'resultados';
+          expect(pinto, `/buscar/ «${consulta()}» no da ${cual}`).toBe(quiere);
+        };
+        for (const condicion of CONDICIONES) {
+          for (const conPalabra of condicion === 'texto por omisión' ? [false] : [false, true]) {
+            if (!(await cargarEn320(page, '/buscar/', condicion, preparar))) continue;
+            const donde = `/buscar/ ${cual} (${condicion}${conPalabra ? ', palabra indivisible' : ''})`;
+            if (conPalabra) {
+              const puestas = await page.evaluate(
+                ({ palabra, selector }) => {
+                  let n = 0;
+                  for (const e of document.querySelectorAll(selector)) {
+                    const r = e.getBoundingClientRect();
+                    if (r.width <= 1 || r.height <= 1 || e.closest('.solo-para-lectores, .oculto')) continue;
+                    const recorrido = document.createTreeWalker(e, NodeFilter.SHOW_TEXT);
+                    let ultimo: Text | null = null;
+                    for (let t = recorrido.nextNode(); t !== null; t = recorrido.nextNode()) {
+                      if ((t.textContent ?? '').trim() !== '') ultimo = t as Text;
+                    }
+                    if (ultimo !== null) {
+                      ultimo.textContent = `${ultimo.textContent} ${palabra}`;
+                      n += 1;
+                    }
+                  }
+                  return n;
+                },
+                { palabra: PALABRA_INDIVISIBLE, selector: palabraEn },
+              );
+              expect.soft(puestas, `${donde}: no hay ningún texto del Corpus donde poner la palabra`).toBeGreaterThan(0);
+            }
+            const m = await anchoDeLaPagina(page);
+            expect.soft(m.scroll, `${donde} desborda: ${m.scroll} frente a ${m.ventana}`).toBeLessThanOrEqual(m.ventana);
+            expect.soft(await contenedoresQueRecortan(page), `${donde}: contenedores que se desplazan o recortan en horizontal`).toEqual([]);
+          }
+        }
+      });
+    }
+
+    /*
      * Ningún control ni encabezado visible calcula `nowrap` (DESIGN.md: «ningún control ni título
      * lleva `white-space: nowrap`»). «Visible» es una caja de más de 1 × 1 px fuera de
      * `.solo-para-lectores` y `.oculto`, que son hoy los únicos `nowrap` del sitio y son legítimos:
-     * su texto no se pinta. Se mira también `text-wrap-mode`, que es lo que `white-space` abrevia.
+     * su texto no se pinta. Se mira también `text-wrap-mode`, que es lo que `white-space` abrevia
+     * (y que `pre` también deja en `nowrap`). Entran los controles por rol (`[role=button]`,
+     * `[role=link]`) y todo lo que va dentro de un control: un `span` con `nowrap` dentro de un
+     * enlace no parte aunque el enlace sí.
      * Una prueba por ruta, como las de arriba: la muestra crece y una sola prueba no cabría en su tiempo.
      */
     for (const ruta of SUPERFICIES) {
       test(`${ruta}: ningún enlace, botón, campo, selector ni encabezado visible calcula nowrap`, async ({ page }) => {
         await cargarEn320(page, ruta, 'texto por omisión');
         const conNowrap = await page.evaluate(() =>
-          [...document.querySelectorAll('a, button, input, select, textarea, summary, label, h1, h2, h3, h4, h5, h6')]
+          [
+            ...document.querySelectorAll(
+              'a, button, input, select, textarea, summary, label, h1, h2, h3, h4, h5, h6, [role="button"], [role="link"], :is(a, button, summary, label, [role="button"], [role="link"]) *',
+            ),
+          ]
             .filter((e) => {
               const r = e.getBoundingClientRect();
               if (r.width <= 1 || r.height <= 1) return false;
@@ -1049,7 +1153,9 @@ test.describe('Historia 2.8 — responsive', () => {
      * el título, la que no cabe—, y otra vez con una palabra indivisible añadida al título. En las
      * tres condiciones, el título parte palabras dentro de su fila —no se sale por la derecha ni
      * desborda su propia caja— y la fila lo contiene en alto. Solo cuentan las filas visibles: una
-     * escondida por el filtro mide cero y pasaría sin decir nada.
+     * escondida por el filtro mide cero y pasaría sin decir nada. En `/obras/` y en la Lista de
+     * Obras se exige además que la fila del título más largo del Corpus (`citaConTituloDeObraMasLargo`)
+     * esté entre las medidas, si la página la lista: medir otra más corta pasaría sin decirlo.
      */
     const TITULOS_QUE_COMPARTEN_FILA = [
       {
@@ -1058,13 +1164,15 @@ test.describe('Historia 2.8 — responsive', () => {
         sinRuta: 'el Corpus no tiene ninguna Cita con Tarjeta de Obra de título largo (CITAS_24_4.tituloLargo)',
         filas: '.tarjeta-de-obra',
         titulo: '.titulo',
+        esperado: () => undefined,
       },
       {
         cual: 'el Directorio de Obras',
         ruta: () => '/obras/',
-        sinRuta: '',
+        sinRuta: 'no hay Directorio de Obras',
         filas: '.lista-de-obras li',
         titulo: '.titulo',
+        esperado: () => citaConTituloDeObraMasLargo()?.titulo,
       },
       {
         cual: 'la Lista de Obras del Autor',
@@ -1072,32 +1180,38 @@ test.describe('Historia 2.8 — responsive', () => {
         sinRuta: 'el Corpus no tiene ninguna Cita con Obra: no hay Lista de Obras que medir',
         filas: '.lista-de-obras li',
         titulo: '.titulo',
+        esperado: () => citaConTituloDeObraMasLargo()?.titulo,
       },
     ];
-    for (const { cual, ruta: rutaDe, sinRuta, filas, titulo } of TITULOS_QUE_COMPARTEN_FILA) {
+    for (const { cual, ruta: rutaDe, sinRuta, filas, titulo, esperado: esperadoDe } of TITULOS_QUE_COMPARTEN_FILA) {
       test(`el título de Obra más largo de ${cual} parte palabras dentro de su fila a 320 px`, async ({ page }) => {
         const ruta = rutaDe();
         expect(ruta, sinRuta).toBeDefined();
+        const esperado = esperadoDe();
         for (const condicion of CONDICIONES) {
           if (!(await cargarEn320(page, ruta!, condicion))) continue;
           for (const conPalabra of [false, true]) {
-            const medidas = await page.evaluate(
-              ({ filas, titulo, conPalabra, palabra }) => {
-                const visibles = [...document.querySelectorAll(filas)]
+            const { listado, medidas } = await page.evaluate(
+              ({ filas, titulo, conPalabra, palabra, esperado }) => {
+                const colapsar = (t: string) => t.replace(/\s+/g, ' ').trim();
+                const todas = [...document.querySelectorAll(filas)]
                   .map((fila) => ({ fila, titulo: fila.querySelector(titulo) as HTMLElement | null }))
-                  .filter((c): c is { fila: Element; titulo: HTMLElement } => {
-                    if (c.titulo === null) return false;
-                    const f = c.fila.getBoundingClientRect();
-                    const t = c.titulo.getBoundingClientRect();
-                    return f.width > 1 && f.height > 1 && t.width > 1 && t.height > 1;
-                  });
-                const texto = (c: { titulo: HTMLElement }) => (c.titulo.textContent ?? '').trim();
+                  .filter((c): c is { fila: Element; titulo: HTMLElement } => c.titulo !== null);
+                const visibles = todas.filter((c) => {
+                  const f = c.fila.getBoundingClientRect();
+                  const t = c.titulo.getBoundingClientRect();
+                  return f.width > 1 && f.height > 1 && t.width > 1 && t.height > 1;
+                });
+                const texto = (c: { titulo: HTMLElement }) => colapsar(c.titulo.textContent ?? '');
                 const palabraMasLarga = (c: { titulo: HTMLElement }) => Math.max(...texto(c).split(/\s+/).map((p) => p.length));
+                const delCorpus = esperado === undefined ? undefined : todas.find((c) => texto(c).includes(colapsar(esperado)));
                 const elegidas = [
                   [...visibles].sort((a, b) => texto(b).length - texto(a).length)[0],
                   [...visibles].sort((a, b) => palabraMasLarga(b) - palabraMasLarga(a))[0],
-                ].filter((c, i, todas) => c !== undefined && todas.indexOf(c) === i);
-                return elegidas.map((elegida) => {
+                  delCorpus,
+                ].filter((c, i, lista) => c !== undefined && lista.indexOf(c) === i) as { fila: Element; titulo: HTMLElement }[];
+                const listado = delCorpus === undefined ? 'no' : visibles.includes(delCorpus) ? 'visible' : 'oculto';
+                return { listado, medidas: elegidas.map((elegida) => {
                   if (conPalabra) {
                     const nodos = document.createTreeWalker(elegida.titulo, NodeFilter.SHOW_TEXT);
                     let ultimo: Text | null = null;
@@ -1115,11 +1229,14 @@ test.describe('Historia 2.8 — responsive', () => {
                     scroll: elegida.titulo.scrollWidth,
                     client: elegida.titulo.clientWidth,
                   };
-                });
+                }) };
               },
-              { filas, titulo, conPalabra, palabra: PALABRA_INDIVISIBLE },
+              { filas, titulo, conPalabra, palabra: PALABRA_INDIVISIBLE, esperado },
             );
             expect(medidas.length, `${ruta}: no hay ningún ${titulo} visible en ${filas}`).toBeGreaterThan(0);
+            expect
+              .soft(listado, `${ruta} (${cual}, ${condicion}): la fila del título más largo del Corpus, «${esperado}», está oculta`)
+              .not.toBe('oculto');
             for (const m of medidas) {
               const donde = `${ruta} (${cual}, ${condicion}${conPalabra ? ', palabra indivisible' : ''}): «${m.texto.slice(0, 60)}»`;
               expect.soft(m.titulo.der, `${donde} se sale de su fila`).toBeLessThanOrEqual(m.fila.der + 0.5);
@@ -1354,7 +1471,7 @@ test.describe('Historia 2.8 — responsive', () => {
    * px por omisión la fila sigue siendo una («Siguiente» en la de «Página N de M»), y a 320 px no
    * desborda en ninguna de las tres condiciones del reflujo, ni en su página 1 ni en la 2.
    */
-  function listadoConMasPaginas(): { ruta: string; paginas: number } | undefined {
+  function listadosPaginados(): { ruta: string; paginas: number }[] {
     const listados: { ruta: string; paginas: number }[] = [];
     const paginasDe = (dir: string) => readdirSync(dir).filter((e) => /^\d+$/.test(e)).length + 1;
     // Una familia sin listados no tiene directorio en el `dist/` —`corpus/colecciones/` puede estar
@@ -1375,8 +1492,14 @@ test.describe('Historia 2.8 — responsive', () => {
         listados.push({ ruta: `/obra/${autor}/${obra}/`, paginas: paginasDe(join(obras, autor, obra)) });
       }
     }
-    return listados.sort((a, b) => b.paginas - a.paginas || a.ruta.localeCompare(b.ruta, 'es'))[0];
+    return listados.sort((a, b) => b.paginas - a.paginas || a.ruta.localeCompare(b.ruta, 'es'));
   }
+  const listadoConMasPaginas = () => listadosPaginados()[0];
+  /** El listado con menos páginas de entre los que tienen dos o más, con la ruta como desempate. */
+  const listadoConMenosPaginas = () =>
+    listadosPaginados()
+      .filter((l) => l.paginas >= 2)
+      .sort((a, b) => a.paginas - b.paginas || a.ruta.localeCompare(b.ruta, 'es'))[0];
 
   test('los números de la Paginación quedan a 8px entre zonas de toque, en la fila y entre filas', async ({
     page,
@@ -1470,11 +1593,12 @@ test.describe('Historia 2.8 — responsive', () => {
     }
 
     /*
-     * Y a 320 px, en las tres condiciones del reflujo, ni la página 1 ni la 2 desbordan. Cuando la
-     * fila se parte —en las páginas 2+ a 320 px, o con el texto al 200 %—, «Anterior», «Página N de
-     * M» y «Siguiente» quedan a `{spacing.unit}` al menos entre sí, también en vertical.
+     * Y a 320 px, en las tres condiciones del reflujo, ni la página 1, ni la 2, ni la última
+     * desbordan. Cuando la fila se parte —en las páginas 2+ a 320 px, o con el texto al 200 %—,
+     * «Anterior», «Página N de M», «Siguiente» y cada número quedan a `{spacing.unit}` al menos
+     * entre sí, también en vertical: al partirse, un número puede quedar al lado de «Siguiente».
      */
-    for (const pagina of [ruta, `${ruta}2/`]) {
+    for (const pagina of [ruta, `${ruta}2/`, `${ruta}${paginas}/`]) {
       for (const condicion of CONDICIONES) {
         if (!(await cargarEn320(page, pagina, condicion))) continue;
         const m = await anchoDeLaPagina(page);
@@ -1482,7 +1606,13 @@ test.describe('Historia 2.8 — responsive', () => {
           m.ventana,
         );
         const fila = await filaDeLaPaginacion();
-        const zonas = [fila.anterior, fila.cuenta, fila.siguiente].filter((c) => c !== null);
+        const numeros = await page.evaluate(() =>
+          [...document.querySelectorAll('.numeros > li > *')].map((n) => {
+            const r = n.getBoundingClientRect();
+            return { arriba: r.top, abajo: r.bottom, izq: r.left, der: r.right };
+          }),
+        );
+        const zonas = [fila.anterior, fila.cuenta, fila.siguiente, ...numeros].filter((c) => c !== null);
         for (let i = 0; i < zonas.length; i += 1) {
           for (let j = i + 1; j < zonas.length; j += 1) {
             const a = zonas[i]!;
@@ -1491,6 +1621,59 @@ test.describe('Historia 2.8 — responsive', () => {
             expect.soft(separacion, `${pagina} (${condicion}): zonas ${i + 1} y ${j + 1} de la Paginación a menos de 8 px`).toBeGreaterThanOrEqual(7.5);
           }
         }
+      }
+    }
+  });
+
+  /*
+   * Historia 26.9 — la fila que se parte por el mínimo no cambia la forma de un listado corto. La
+   * prueba de arriba mide el listado más largo, cuya lista de números llena la fila con o sin el
+   * tope `max-content`; en uno corto es ese tope el que deja la lista a su ancho y reparte el aire
+   * entre los extremos (`space-between`), como antes de la 26.9. A 360 px por omisión, en su
+   * página 1 y en su última: una sola fila, la lista de números y «Página N de M» a su ancho, y
+   * los huecos entre ítems iguales.
+   */
+  test('la Paginación de un listado corto conserva su forma a 360 px por omisión', async ({ page }) => {
+    const listado = listadoConMenosPaginas();
+    expect(listado, 'ningún listado de Autor, Tema, Colección ni Obra del dist/ tiene más de una página').toBeDefined();
+    const { ruta, paginas } = listado!;
+    test.info().annotations.push({ type: 'listado con menos páginas', description: `${ruta}: ${paginas} páginas` });
+    await page.setViewportSize({ width: 360, height: 640 });
+    for (const pagina of [ruta, `${ruta}${paginas}/`]) {
+      await page.goto(pagina);
+      await page.evaluate(async () => {
+        await document.fonts.ready;
+      });
+      const m = await page.evaluate(() => {
+        const caja = (e: Element) => {
+          const r = e.getBoundingClientRect();
+          return { izq: r.left, der: r.right, centro: (r.top + r.bottom) / 2 };
+        };
+        const items = [...document.querySelectorAll('.paginacion > *')].filter((e) => e.getBoundingClientRect().width > 1);
+        const numeros = document.querySelector('.paginacion .numeros');
+        const cuenta = document.querySelector('.paginacion .cuenta');
+        const hijos = numeros === null ? [] : [...numeros.querySelectorAll(':scope > li')].map((li) => li.getBoundingClientRect());
+        const texto = document.createRange();
+        if (cuenta !== null) texto.selectNodeContents(cuenta);
+        return {
+          items: items.map((e) => ({ clase: e.getAttribute('class') ?? e.tagName.toLowerCase(), ...caja(e) })),
+          numeros: numeros === null ? null : { ancho: numeros.getBoundingClientRect().width, contenido: hijos.length === 0 ? 0 : hijos[hijos.length - 1].right - hijos[0].left },
+          cuenta: cuenta === null ? null : { ancho: cuenta.getBoundingClientRect().width, contenido: texto.getBoundingClientRect().width },
+        };
+      });
+      expect(m.items.length, `${pagina}: la Paginación no tiene ítems`).toBeGreaterThan(1);
+      const centro = m.items[0].centro;
+      for (const item of m.items) {
+        expect.soft(Math.abs(item.centro - centro), `${pagina}: ${item.clase} cambió de fila a 360 px`).toBeLessThanOrEqual(1);
+      }
+      expect(m.numeros, `${pagina}: sin lista de números`).not.toBeNull();
+      expect.soft(m.numeros!.ancho, `${pagina}: la lista de números se estira más allá de su contenido`).toBeLessThanOrEqual(m.numeros!.contenido + 1);
+      expect(m.cuenta, `${pagina}: sin «Página N de M»`).not.toBeNull();
+      expect.soft(m.cuenta!.ancho, `${pagina}: «Página N de M» se estira más allá de su texto`).toBeLessThanOrEqual(m.cuenta!.contenido + 1);
+      const huecos = m.items.slice(1).map((item, i) => item.izq - m.items[i].der);
+      for (const hueco of huecos) {
+        expect.soft(hueco, `${pagina}: los huecos de la Paginación no se reparten por igual (${huecos.map((h) => h.toFixed(1)).join(', ')})`).toBeGreaterThan(0);
+        expect.soft(Math.abs(hueco - huecos[0]), `${pagina}: los huecos de la Paginación no se reparten por igual (${huecos.map((h) => h.toFixed(1)).join(', ')})`).toBeLessThanOrEqual(1);
       }
     }
   });
