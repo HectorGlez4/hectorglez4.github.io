@@ -138,3 +138,55 @@ barridos no aguanta las 4.875 rutas con varios trabajadores a la vez.
 **NFR-7 con Lighthouse:** no se midió. La puerta lo pide solo con el CI y el barrido en verde.
 
 Resultado: la puerta **no pasa**; el merge espera a la corrección de las dos cosas.
+
+## Verificación previa a la fusión — 2026-10-28 (UTC), segundo intento
+
+Segundo intento de la puerta previa al merge (bucle v8-ralph, etapa s-24-26), sobre
+3e2a46bf44. Disco libre al empezar: 99 GB. Puertos 4321, 4399, 4400, 4402 y 8787 libres.
+
+**Sincronía.** `git fetch origin`: `origin/main` (881949f4d6) ya es antecesor de la rama; no
+hubo merge, ni Autores nuevos, ni lote de claves.
+
+**Equivalente del CI** (`.github/workflows/publicar.yml`, en este orden):
+
+| orden | resultado |
+|---|---|
+| `npm ci` | no se corrió: `package-lock.json` no ha cambiado desde que se instaló `node_modules/` (y es idéntico al de `origin/main`) |
+| `npm run build` | **verde** — 5.290 páginas, 4.875 rutas indexables (517 Obras publicadas, 277 indexables); `dist/` 476,7 MiB en 15.348 ficheros |
+| `npx astro check` | **verde** — 386 ficheros, 0 errores, 0 avisos, 8 pistas |
+| `npm test` | **verde** — 146 ficheros, 6.697 pruebas, todas pasan (848 s) |
+
+**`npm run test:e2e` entero** (los dos proyectos, con `wrangler dev` y el D1 local que levanta
+`playwright.config.ts`; nada contra producción): **verde** — 1.004 pruebas con 5
+trabajadores: 909 pasan, 95 se saltan, 0 fallan, 0 inestables (5,6 min). No hubo que repetir
+ningún fichero.
+
+**NFR-7 con Lighthouse** (`npx -y lighthouse@13.5.0`, perfil móvil, `--throttling-method=simulate`
+—4G simulado—, solo rendimiento; Google Chrome 156 sin cabeza por `CHROME_PATH`). Las dos
+construcciones, de hoy y en local, con `MEDICION_ENDPOINT=http://localhost:8787/` apuntando a
+un receptor de prueba que contesta 204 a todo; servidas con `node tests/servidor.mjs`
+(`DIST`, `PUERTO=4399`). Primero `git switch --detach origin/main` (881949f4d6), `npm run build`
+y 5 corridas; después `git switch v8/epicas-24-26` (3e2a46bf44), `npm run build` y 5 corridas.
+
+Página medida: `/cita/seneca-a-cuantos-son-molestas-sus-mismas-riquezas/`, que en la rama lleva
+la Tarjeta de Obra, «Siguiente», «De la misma obra» y las rutas de salida (en la principal no
+existen todavía). `/autores/` solo se mide en la rama: en la principal da 404.
+
+| página | construcción | LCP mediana | FCP mediana | LCP de las 5 | rendimiento |
+|---|---|---|---|---|---|
+| Página de Cita | `origin/main` | 1.952 ms | 1.352 ms | 1953, 1953, 1952, 1952, 1951 | 99 |
+| Página de Cita | rama | **2.253 ms** | 1.653 ms | 2253, 2253, 1805, 2251, 2255 | 98 |
+| `/autores/` | rama | 2.252 ms | 1.652 ms | 2252, 2252, 2252, 2253, 2252 | 98 |
+
+Veredicto: **peor**. La mediana de LCP de la rama queda por debajo de 2.500 ms, pero sube
+301 ms sobre la principal, por encima de la tolerancia de max(100 ms, 5 % = 98 ms) = 100 ms;
+FCP sube lo mismo (+301 ms), así que el retraso es anterior al primer pintado. Lo que dicen
+los informes, como pista para quien corrija y no como diagnóstico cerrado: el HTML de la
+página pasa de 28.155 a 35.246 bytes transferidos (+7 KB, la Tarjeta de Obra y los bloques del
+pie), la hoja bloqueante sigue siendo una sola (`_slug_.*.css`, 4.855 → 5.038 bytes, ~150 ms de
+bloqueo en las dos), y en 4 de las 5 corridas de la rama las dos fuentes precargadas se piden
+dos veces (la precarga y otra vez con prioridad máxima), cuando en la principal solo se repite
+una; la corrida sin la petición repetida es la de 1.805 ms.
+
+Resultado: CI y barrido en verde; NFR-7 **se degrada** frente a la principal del mismo día, así
+que según la propia historia el merge espera a Héctor (o a la corrección).
