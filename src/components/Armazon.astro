@@ -363,11 +363,15 @@ const busqueda = rutaDeLaBusqueda();
     text-decoration-line: underline;
   }
 
-  /* El punto medio es el `--unidad` entre zonas: de ese ancho, centrado y en tinta apagada. */
+  /*
+   * El punto medio es el `--unidad` entre zonas: de ese ancho, centrado, en tinta apagada y al
+   * cuerpo de los enlaces que separa (el del `body` es `--cuerpo-lg`).
+   */
   .punto {
     flex: none;
     width: var(--unidad);
     text-align: center;
+    font-size: var(--cuerpo-md);
     color: var(--tinta-apagada);
   }
 

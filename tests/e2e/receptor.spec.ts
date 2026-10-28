@@ -1285,23 +1285,31 @@ test.describe('Historia 23.7 — cada salida interna dice desde qué zona', () =
   });
 
   /*
-   * Historia 26.5 (UX-DR111) — los enlaces nuevos de la cabecera heredan la zona de su contenedor:
-   * un clic en «Autores» desde la Cita sale con `cabecera`, no sin zona.
+   * Historia 26.5 (UX-DR111) — la marca y los tres enlaces de la cabecera heredan la zona de su
+   * contenedor: un clic en cualquiera de los cuatro desde la Cita sale con `cabecera`, no sin
+   * zona. Una página nueva por enlace, porque una Cita da una sola salida.
    */
-  test('en la Cita, un clic en «Autores» de la cabecera sale con la zona `cabecera`', async ({ page, context }) => {
-    await quedarseEn(context, RUTA_CITA);
-    await apuntarBalizas(page);
-    await page.goto(`${SITIO}${RUTA_CITA}`);
-    await esperarAlFichero(page);
-    expect(await esperarEvento(EVENTOS.vistaDeCita), 'no llegó la vista').toBeTruthy();
+  for (const [nombre, selector] of [
+    ['la marca', 'header.cabecera a.marca'],
+    ['«Autores»', 'header nav[aria-label="Principal"] a:text-is("Autores")'],
+    ['«Obras»', 'header nav[aria-label="Principal"] a:text-is("Obras")'],
+    ['«Buscar»', 'header nav[aria-label="Principal"] a.buscar'],
+  ] as const) {
+    test(`en la Cita, un clic en ${nombre} de la cabecera sale con la zona \`cabecera\``, async ({ page, context }) => {
+      await quedarseEn(context, RUTA_CITA);
+      await apuntarBalizas(page);
+      await page.goto(`${SITIO}${RUTA_CITA}`);
+      await esperarAlFichero(page);
+      expect(await esperarEvento(EVENTOS.vistaDeCita), 'no llegó la vista').toBeTruthy();
 
-    await page.locator('header nav[aria-label="Principal"] a', { hasText: 'Autores' }).click();
-    const salida = await esperarEvento(EVENTOS.salidaInterna);
-    expect(salida, 'no llegó la salida').toBeTruthy();
-    expect(salida).toMatchObject({ ruta: RUTA_CITA, zona: 'cabecera' });
-    // Seguimos en la Cita: el destino contestó 204.
-    expect(new URL(page.url()).pathname).toBe(RUTA_CITA);
-  });
+      await page.locator(selector).click();
+      const salida = await esperarEvento(EVENTOS.salidaInterna);
+      expect(salida, 'no llegó la salida').toBeTruthy();
+      expect(salida).toMatchObject({ ruta: RUTA_CITA, zona: 'cabecera' });
+      // Seguimos en la Cita: el destino contestó 204.
+      expect(new URL(page.url()).pathname).toBe(RUTA_CITA);
+    });
+  }
 
   test('en el 404, servido en la ruta que se pidió, un chip exento no sale ni gasta, y «Ver esta cita» sale con `cita-del-dia`, esa ruta y sin lectura', async ({
     page,

@@ -466,6 +466,20 @@ describe('Historia 12.1 — sobre un sitio construido de verdad', () => {
           expect(antepasados.slice(nav + 1).map((e) => e.etiqueta), `${ruta} → ${href}`).toEqual(['ul', 'li']);
           expect(antepasados[nav + 1].atributos.get('role'), `${ruta} → ${href}`).toBe('list');
         }
+
+        // Una sola navegación «Principal» en la página, y sus dos puntos medios ocultos al lector,
+        // cada uno dentro del `<li>` del enlace anterior (UX-DR101).
+        let principales = 0;
+        const puntos: (string | undefined)[] = [];
+        recorrerElementos(html, (elemento, antepasados) => {
+          if (elemento.etiqueta === 'nav' && elemento.atributos.get('aria-label') === 'Principal') principales += 1;
+          if (!(elemento.atributos.get('class') ?? '').split(/\s+/).includes('punto')) return;
+          if (!antepasados.some((e) => e.etiqueta === 'header')) return;
+          expect(antepasados.at(-1)?.etiqueta, `${ruta}: un punto fuera de su <li>`).toBe('li');
+          puntos.push(elemento.atributos.get('aria-hidden'));
+        });
+        expect(principales, `${ruta}: navegaciones «Principal»`).toBe(1);
+        expect(puntos, `${ruta}: puntos medios de la cabecera`).toEqual(['true', 'true']);
       }
     });
 

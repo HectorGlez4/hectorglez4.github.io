@@ -159,11 +159,10 @@ test.describe('Historia 2.7 — nada huérfano', () => {
      * Historia 26.5 — el recorrido juzga el sitemap entero: la cabecera enlaza los dos
      * Directorios desde toda página, y la exención por ruta de la 26.3 y la 26.4 ya no existe.
      */
-    const delSitemap = await rutasDelSitemap(request);
+    const publicadas = await rutasDelSitemap(request);
     for (const directorio of [rutaDelDirectorioDeAutores(), rutaDelDirectorioDeObras()]) {
-      expect(delSitemap).toContain(directorio);
+      expect(publicadas).toContain(directorio);
     }
-    const publicadas = delSitemap;
     const enlaces = new Map<string, string[]>();
 
     /*

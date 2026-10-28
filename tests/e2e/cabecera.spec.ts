@@ -46,6 +46,12 @@ interface Medida {
   textoDeLaMarca: number;
   textoDeAutores: number;
   enlaces: Caja[];
+  /** Los dos puntos medios, en el mismo espacio que las cajas. */
+  puntos: Caja[];
+  /** El relleno lateral de cada enlace, en px CSS. */
+  rellenos: { izquierda: number; derecha: number }[];
+  /** El borde derecho del contenido de la cabecera (su caja menos el relleno derecho). */
+  bordeDerechoDelContenido: number;
   /** `--unidad` resuelto dentro de la cabecera, en el mismo espacio que las cajas. */
   unidad: number;
   /** Si la página entera se desplaza en horizontal. */
@@ -100,6 +106,14 @@ async function medirCabecera(page: Page): Promise<Medida> {
       textoDeLaMarca: inicioDelTexto(marca),
       textoDeAutores: inicioDelTexto(enlaces[0]),
       enlaces: enlaces.map((e) => caja(e.getBoundingClientRect())),
+      puntos: [...cabecera.querySelectorAll('nav[aria-label="Principal"] .punto')].map((e) =>
+        caja(e.getBoundingClientRect()),
+      ),
+      rellenos: enlaces.map((e) => {
+        const c = getComputedStyle(e);
+        return { izquierda: parseFloat(c.paddingLeft), derecha: parseFloat(c.paddingRight) };
+      }),
+      bordeDerechoDelContenido: rCabecera.right - parseFloat(estilo.paddingRight) * escala,
       unidad,
       desborda: document.documentElement.scrollWidth > document.documentElement.clientWidth,
       desbordaLaCabecera:
@@ -124,7 +138,8 @@ function filasDe(cajas: Caja[]): Caja[][] {
 }
 
 test.describe('Historia 26.5 — la cabecera, pintada', () => {
-  for (const ancho of [320, 360]) {
+  // 599 es el borde de la media query: el último ancho de dos filas.
+  for (const ancho of [320, 360, 599]) {
     test(`a ${ancho} px va en dos filas de ${ALTO_DECLARADO} px, con 8 px entre zonas`, async ({ page }) => {
       await page.setViewportSize({ width: ancho, height: 640 });
       await page.goto(CITA);
@@ -152,6 +167,15 @@ test.describe('Historia 26.5 — la cabecera, pintada', () => {
       // Y aire de `--unidad` arriba y abajo (el filete de 1 px va debajo del relleno).
       expect(Math.abs(m.marca.top - m.cabecera.top - m.unidad)).toBeLessThanOrEqual(0.5);
       expect(Math.abs(m.cabecera.bottom - 1 - m.enlaces[0].bottom - m.unidad)).toBeLessThanOrEqual(0.5);
+      // Entre zonas de enlace, `--unidad` en horizontal: el punto medio, de ese ancho (UX-DR101).
+      expect(m.puntos).toHaveLength(2);
+      for (const punto of m.puntos) expect(Math.abs(punto.width - m.unidad), `punto de ${punto.width}`).toBeLessThanOrEqual(0.5);
+      for (let i = 1; i < m.enlaces.length; i += 1) {
+        const entre = m.enlaces[i].left - m.enlaces[i - 1].right;
+        expect(Math.abs(entre - m.unidad), `entre zonas: ${entre}`).toBeLessThanOrEqual(0.5);
+      }
+      // Y `--unidad` de relleno lateral en cada enlace (UX-DR102).
+      for (const relleno of m.rellenos) expect(relleno).toEqual({ izquierda: m.unidad, derecha: m.unidad });
 
       // Cada zona de toque, de 44 × 44 como mínimo, también la de la marca en alto.
       expect(m.marca.height).toBeGreaterThanOrEqual(44);
@@ -175,6 +199,10 @@ test.describe('Historia 26.5 — la cabecera, pintada', () => {
       expect(m.enlaces[0].left).toBeGreaterThan(m.marca.right);
       // Con 2 × `--unidad` de aire arriba.
       expect(Math.abs(m.enlaces[0].top - m.cabecera.top - 2 * m.unidad)).toBeLessThanOrEqual(0.5);
+      // Y abajo (el filete de 1 px va debajo del relleno).
+      expect(Math.abs(m.cabecera.bottom - 1 - m.enlaces[0].bottom - 2 * m.unidad)).toBeLessThanOrEqual(0.5);
+      // Los enlaces, pegados al borde derecho del contenido.
+      expect(Math.abs(m.enlaces[m.enlaces.length - 1].right - m.bordeDerechoDelContenido)).toBeLessThanOrEqual(1);
       expect(m.desborda).toBe(false);
     });
   }
@@ -227,20 +255,30 @@ test.describe('Historia 26.5 — la cabecera, pintada', () => {
     expect(m.conNowrap).toEqual([]);
   });
 
-  test('colores y subrayados por función, y los puntos ocultos al lector', async ({ page }) => {
+  test('colores, letra y subrayados por función, y los puntos ocultos al lector', async ({ page }) => {
     await page.goto(CITA);
     const m = await page.evaluate(() => {
-      const sonda = (css: string) => {
+      const sondaDe = (css: string) => {
         const d = document.createElement('div');
         d.style.cssText = css;
         document.body.append(d);
-        const r = getComputedStyle(d).color;
+        const c = getComputedStyle(d);
+        const r = { color: c.color, familia: c.fontFamily, tamaño: c.fontSize, espaciado: c.letterSpacing };
         d.remove();
         return r;
       };
+      const sonda = (css: string) => sondaDe(css).color;
       const de = (e: Element) => {
         const c = getComputedStyle(e);
-        return { color: c.color, subrayado: c.textDecorationLine, familia: c.fontFamily };
+        return {
+          color: c.color,
+          subrayado: c.textDecorationLine,
+          familia: c.fontFamily,
+          tamaño: c.fontSize,
+          peso: c.fontWeight,
+          espaciado: c.letterSpacing,
+          mayusculas: c.textTransform,
+        };
       };
       const cabecera = document.querySelector('header.cabecera')!;
       return {
@@ -248,6 +286,9 @@ test.describe('Historia 26.5 — la cabecera, pintada', () => {
         apagada: sonda('color: var(--tinta-apagada)'),
         siena: sonda('color: var(--siena)'),
         filete: sonda('color: var(--filete)'),
+        // La marca: Inter al cuerpo y espaciado de `{typography.author}` (UX-DR54).
+        letraDeLaMarca: sondaDe('font-family: var(--sans); font-size: var(--autor); letter-spacing: 0.09em'),
+        cuerpoMd: sondaDe('font-size: var(--cuerpo-md)').tamaño,
         fileteDeLaCabecera: getComputedStyle(cabecera).borderBottomColor,
         marca: de(cabecera.querySelector('a.marca')!),
         enlaces: [...cabecera.querySelectorAll('nav[aria-label="Principal"] a')].map((a) => ({
@@ -258,22 +299,37 @@ test.describe('Historia 26.5 — la cabecera, pintada', () => {
           texto: p.textContent,
           oculto: p.getAttribute('aria-hidden'),
           color: getComputedStyle(p).color,
+          tamaño: getComputedStyle(p).fontSize,
         })),
       };
     });
 
     expect(m.fileteDeLaCabecera).toBe(m.filete);
-    expect(m.marca).toMatchObject({ color: m.tinta, subrayado: 'none' });
+    expect(m.marca).toMatchObject({
+      color: m.tinta,
+      subrayado: 'none',
+      familia: m.letraDeLaMarca.familia,
+      tamaño: m.letraDeLaMarca.tamaño,
+      peso: '600',
+      espaciado: m.letraDeLaMarca.espaciado,
+      mayusculas: 'uppercase',
+    });
+    expect(m.letraDeLaMarca.familia).toMatch(/Inter/);
+    const cuerpo = m.cuerpoMd;
     expect(m.enlaces).toEqual([
-      expect.objectContaining({ texto: 'Autores', color: m.tinta, subrayado: 'underline' }),
-      expect.objectContaining({ texto: 'Obras', color: m.tinta, subrayado: 'underline' }),
-      expect.objectContaining({ texto: 'Buscar', color: m.siena, subrayado: 'underline' }),
+      expect.objectContaining({ texto: 'Autores', color: m.tinta, subrayado: 'underline', tamaño: cuerpo }),
+      expect.objectContaining({ texto: 'Obras', color: m.tinta, subrayado: 'underline', tamaño: cuerpo }),
+      expect.objectContaining({ texto: 'Buscar', color: m.siena, subrayado: 'underline', tamaño: cuerpo }),
     ]);
-    // Dos puntos medios, uno detrás de «Autores» y otro detrás de «Obras»; ninguna flecha.
+    // Dos puntos medios, uno detrás de «Autores» y otro detrás de «Obras», al cuerpo de los
+    // enlaces que separan; ninguna flecha.
     expect(m.puntos).toEqual([
-      { texto: '·', oculto: 'true', color: m.apagada },
-      { texto: '·', oculto: 'true', color: m.apagada },
+      { texto: '·', oculto: 'true', color: m.apagada, tamaño: cuerpo },
+      { texto: '·', oculto: 'true', color: m.apagada, tamaño: cuerpo },
     ]);
+    // La marca, subrayada solo al pasar el cursor.
+    await page.locator('header.cabecera a.marca').hover();
+    await expect(page.locator('header.cabecera a.marca')).toHaveCSS('text-decoration-line', 'underline');
     await expect(page.locator('header.cabecera')).not.toContainText(/[→›]/);
     // La lista sigue teniendo tres elementos para el lector de pantalla.
     await expect(page.getByRole('navigation', { name: 'Principal' }).getByRole('listitem')).toHaveCount(3);
