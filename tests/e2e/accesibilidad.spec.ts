@@ -777,6 +777,42 @@ test.describe('Historia 2.8 — semántica', () => {
   });
 });
 
+/** Historia 26.9 — las tres condiciones del reflujo a 320 px (ver «Historia 26.9 — reflujo a 320 px»). */
+const CONDICIONES = ['texto por omisión', 'texto al 200 %', 'espaciado de 1.4.12'] as const;
+type Condicion = (typeof CONDICIONES)[number];
+const ESPACIADO_1412 =
+  '* { line-height: 1.5 !important; letter-spacing: 0.12em !important; word-spacing: 0.16em !important } p { margin-bottom: 2em !important }';
+
+/** Carga la ruta a 320 × 640 y aplica la condición, con su premisa comprobada. */
+async function cargarEn320(page: Page, ruta: string, condicion: Condicion): Promise<void> {
+  await page.setViewportSize({ width: 320, height: 640 });
+  await page.goto(ruta);
+  // Se mide con la Inter del sitio y no con la de reserva, que es más estrecha.
+  await page.evaluate(async () => {
+    await document.fonts.ready;
+  });
+  if (condicion === 'texto al 200 %') {
+    const premisa = await page.evaluate(() => {
+      document.documentElement.style.zoom = '2';
+      return { ventana: window.innerWidth, cuerpo: document.body.clientWidth };
+    });
+    expect(
+      Math.abs(premisa.cuerpo * 2 - premisa.ventana),
+      `${ruta}: la simulación no se aplicó (texto al 200 %): el ancho CSS de body es ${premisa.cuerpo} con la ventana a ${premisa.ventana}`,
+    ).toBeLessThanOrEqual(1);
+  } else if (condicion === 'espaciado de 1.4.12') {
+    await page.addStyleTag({ content: ESPACIADO_1412 });
+    const espaciado = await page.evaluate(() => getComputedStyle(document.body).letterSpacing);
+    expect(espaciado, `${ruta}: la simulación no se aplicó (espaciado de 1.4.12)`).not.toBe('normal');
+  }
+}
+
+const anchoDeLaPagina = (page: Page) =>
+  page.evaluate(() => ({
+    scroll: document.documentElement.scrollWidth,
+    ventana: document.documentElement.clientWidth,
+  }));
+
 test.describe('Historia 2.8 — responsive', () => {
   test('en 360px no hay desplazamiento horizontal', async ({ page }) => {
     await page.setViewportSize({ width: 360, height: 640 });
@@ -786,6 +822,153 @@ test.describe('Historia 2.8 — responsive', () => {
         () => document.documentElement.scrollWidth > document.documentElement.clientWidth,
       );
       expect(desborda, ruta).toBe(false);
+    }
+  });
+
+  /*
+   * Historia 26.9 — reflujo a 320 px (NFR-8, UX-DR103, DESIGN.md § Layout & Spacing «Reflujo sin
+   * desbordar»). La comprobación de 360 px de arriba (2.8) se queda tal cual; esta la extiende a
+   * 320 px en tres condiciones, con el mismo criterio de desbordar (`scrollWidth > clientWidth` de
+   * `<html>`) y sobre la misma muestra `SUPERFICIES`, sin exenciones por ruta.
+   *
+   * El texto al 200 % se **simula** con `zoom: 2` sobre `<html>` tras cargar (decisión de Héctor
+   * del 2026-10-19, la de la 26.5): los cuerpos de `src/styles/tokens.css` están en px y subir la
+   * letra raíz no los movería. La ventana sigue en 320 —las media queries ven 320— y el ancho CSS
+   * queda en 160. El espaciado de 1.4.12 se inyecta como hoja. Las dos simulaciones comprueban que
+   * se aplicaron: una que no se aplicara mediría el texto por omisión y saldría en verde.
+   */
+  test.describe('Historia 26.9 — reflujo a 320 px', () => {
+    for (const ruta of SUPERFICIES) {
+      test(`${ruta} no pide desplazamiento horizontal a 320 px en ninguna de las tres condiciones`, async ({ page }) => {
+        // Se miden las tres antes de fallar: una pasada dice todo lo que desborda.
+        for (const condicion of CONDICIONES) {
+          await cargarEn320(page, ruta, condicion);
+          const m = await anchoDeLaPagina(page);
+          expect.soft(m.scroll, `${ruta} desborda con el ${condicion}: ${m.scroll} frente a ${m.ventana}`).toBeLessThanOrEqual(
+            m.ventana,
+          );
+        }
+      });
+    }
+
+    /*
+     * Ningún control ni encabezado visible calcula `nowrap` (DESIGN.md: «ningún control ni título
+     * lleva `white-space: nowrap`»). «Visible» es una caja de más de 1 × 1 px fuera de
+     * `.solo-para-lectores` y `.oculto`, que son hoy los únicos `nowrap` del sitio y son legítimos:
+     * su texto no se pinta. Se mira también `text-wrap-mode`, que es lo que `white-space` abrevia.
+     */
+    test('ningún enlace, botón, campo, selector ni encabezado visible calcula nowrap', async ({ page }) => {
+      for (const ruta of SUPERFICIES) {
+        await cargarEn320(page, ruta, 'texto por omisión');
+        const conNowrap = await page.evaluate(() =>
+          [...document.querySelectorAll('a, button, input, select, textarea, summary, label, h1, h2, h3, h4, h5, h6')]
+            .filter((e) => {
+              const r = e.getBoundingClientRect();
+              if (r.width <= 1 || r.height <= 1) return false;
+              if (e.closest('.solo-para-lectores, .oculto')) return false;
+              const c = getComputedStyle(e) as CSSStyleDeclaration & { textWrapMode?: string };
+              return c.whiteSpace.includes('nowrap') || c.textWrapMode === 'nowrap';
+            })
+            .map((e) => {
+              const clases = (e.getAttribute('class') ?? '').trim().split(/\s+/).filter(Boolean);
+              return `${e.tagName.toLowerCase()}${clases.map((c) => `.${c}`).join('')} «${(e.textContent ?? '').trim().slice(0, 40)}»`;
+            }),
+        );
+        expect.soft(conNowrap, `${ruta}: controles o encabezados visibles con nowrap`).toEqual([]);
+      }
+    });
+
+    /*
+     * Los títulos de Obra que comparten fila: el de la Tarjeta de Obra de la Cita con el título
+     * más largo, la fila de título más largo de `/obras/` y la de la Lista de Obras del Autor de
+     * ese título. En las tres condiciones, el título parte palabras dentro de su fila —no se sale
+     * por la derecha ni desborda su propia caja— y la fila crece con él en alto.
+     */
+    const TITULOS_QUE_COMPARTEN_FILA = [
+      {
+        cual: 'la Tarjeta de Obra',
+        ruta: () => CITAS_24_4.tituloLargo?.ruta,
+        filas: '.tarjeta-de-obra',
+        titulo: '.titulo',
+      },
+      { cual: 'el Directorio de Obras', ruta: () => '/obras/', filas: '.lista-de-obras li', titulo: '.titulo' },
+      {
+        cual: 'la Lista de Obras del Autor',
+        ruta: () => ((c) => (c === undefined ? undefined : `/autor/${c.autor}/`))(citaConTituloDeObraMasLargo()),
+        filas: '.lista-de-obras li',
+        titulo: '.titulo',
+      },
+    ];
+    for (const { cual, ruta: rutaDe, filas, titulo } of TITULOS_QUE_COMPARTEN_FILA) {
+      test(`el título de Obra más largo de ${cual} parte palabras dentro de su fila a 320 px`, async ({ page }) => {
+        const ruta = rutaDe();
+        test.skip(ruta === undefined, 'el Corpus no tiene ninguna Cita con Obra');
+        for (const condicion of CONDICIONES) {
+          await cargarEn320(page, ruta!, condicion);
+          const m = await page.evaluate(
+            ({ filas, titulo }) => {
+              const candidatas = [...document.querySelectorAll(filas)]
+                .map((fila) => ({ fila, titulo: fila.querySelector(titulo) as HTMLElement | null }))
+                .filter((c): c is { fila: Element; titulo: HTMLElement } => c.titulo !== null)
+                .sort((a, b) => (b.titulo.textContent ?? '').length - (a.titulo.textContent ?? '').length);
+              const elegida = candidatas[0];
+              if (elegida === undefined) return undefined;
+              const f = elegida.fila.getBoundingClientRect();
+              const t = elegida.titulo.getBoundingClientRect();
+              return {
+                texto: (elegida.titulo.textContent ?? '').trim(),
+                fila: { arriba: f.top, abajo: f.bottom, der: f.right },
+                titulo: { arriba: t.top, abajo: t.bottom, der: t.right },
+                scroll: elegida.titulo.scrollWidth,
+                client: elegida.titulo.clientWidth,
+              };
+            },
+            { filas, titulo },
+          );
+          expect(m, `${ruta}: no hay ${titulo} en ${filas}`).toBeDefined();
+          const donde = `${ruta} (${cual}, ${condicion}): «${m!.texto.slice(0, 60)}»`;
+          expect.soft(m!.titulo.der, `${donde} se sale de su fila`).toBeLessThanOrEqual(m!.fila.der + 0.5);
+          expect.soft(m!.scroll, `${donde} desborda su caja`).toBeLessThanOrEqual(m!.client + 0.5);
+          expect.soft(m!.titulo.arriba, `${donde}: la fila no lo contiene en alto`).toBeGreaterThanOrEqual(m!.fila.arriba - 0.5);
+          expect.soft(m!.titulo.abajo, `${donde}: la fila no lo contiene en alto`).toBeLessThanOrEqual(m!.fila.abajo + 0.5);
+        }
+      });
+    }
+
+    /*
+     * Las letras de salto de los Directorios: una rejilla `auto-fill` de 44 px que con el texto al
+     * 200 % se queda en dos columnas. Ninguna letra se sale de la ventana y ningún contenedor de la
+     * rejilla se desplaza por su cuenta (un desplazamiento propio no lo ve el `scrollWidth` de la
+     * página).
+     */
+    for (const ruta of ['/autores/', '/obras/']) {
+      test(`las letras de salto de ${ruta} se reajustan a 320 px sin desplazamiento propio`, async ({ page }) => {
+        for (const condicion of CONDICIONES) {
+          await cargarEn320(page, ruta, condicion);
+          const m = await page.evaluate(() => {
+            const letras = document.querySelector('nav.letras');
+            if (letras === null) return undefined;
+            const ventana = document.documentElement.clientWidth;
+            return {
+              letras: letras.querySelectorAll('a').length,
+              fuera: [...letras.querySelectorAll('a')]
+                .filter((a) => {
+                  const r = a.getBoundingClientRect();
+                  return r.left < -0.5 || r.right > ventana + 0.5;
+                })
+                .map((a) => (a.textContent ?? '').trim()),
+              conDesplazamiento: [letras, ...letras.querySelectorAll('*')]
+                .filter((e) => e.scrollWidth > e.clientWidth && getComputedStyle(e).display !== 'inline')
+                .filter((e) => !e.closest('.solo-para-lectores'))
+                .map((e) => `${e.tagName.toLowerCase()} ${e.scrollWidth}/${e.clientWidth}`),
+            };
+          });
+          expect(m, `${ruta}: no hay letras de salto`).toBeDefined();
+          expect(m!.letras, `${ruta}: la rejilla no tiene letras`).toBeGreaterThan(0);
+          expect.soft(m!.fuera, `${ruta} (${condicion}): letras fuera de la ventana`).toEqual([]);
+          expect.soft(m!.conDesplazamiento, `${ruta} (${condicion}): contenedores con desplazamiento propio`).toEqual([]);
+        }
+      });
     }
   });
 
@@ -965,22 +1148,46 @@ test.describe('Historia 2.8 — responsive', () => {
   /*
    * Historia 22.10 — la prueba de arriba solo pedía que las cajas no se solapasen; los 8px de
    * `{spacing.unit}` entre zonas vecinas no los medía nadie, y los números de la Paginación
-   * iban a 4px. Se mide en el listado de Autor con más páginas del `dist/`, a 360 px, con el
-   * hueco por eje: dos cajas vecinas quedan separadas al menos 8px en el eje que las separa.
+   * iban a 4px. Se mide a 360 px, con el hueco por eje: dos cajas vecinas quedan separadas al
+   * menos 8px en el eje que las separa.
+   *
+   * Historia 26.9 — el listado ya no es «el Autor con más páginas», sino el que más páginas tiene
+   * entre las cuatro familias paginadas del `dist/` (Autor, Tema, Colección y Obra), por su número
+   * de páginas —los subdirectorios numéricos más la primera— y con la ruta como desempate. A 360
+   * px por omisión la fila sigue siendo una («Siguiente» en la de «Página N de M»), y a 320 px no
+   * desborda en ninguna de las tres condiciones del reflujo, ni en su página 1 ni en la 2.
    */
+  function listadoConMasPaginas(): { ruta: string; paginas: number } | undefined {
+    const listados: { ruta: string; paginas: number }[] = [];
+    const paginasDe = (dir: string) => readdirSync(dir).filter((e) => /^\d+$/.test(e)).length + 1;
+    for (const familia of ['autor', 'tema', 'coleccion']) {
+      const raiz = join(dist, familia);
+      for (const slug of readdirSync(raiz)) {
+        if (!statSync(join(raiz, slug)).isDirectory()) continue;
+        listados.push({ ruta: `/${familia}/${slug}/`, paginas: paginasDe(join(raiz, slug)) });
+      }
+    }
+    const obras = join(dist, 'obra');
+    for (const autor of readdirSync(obras)) {
+      if (!statSync(join(obras, autor)).isDirectory()) continue;
+      for (const obra of readdirSync(join(obras, autor))) {
+        if (!statSync(join(obras, autor, obra)).isDirectory()) continue;
+        listados.push({ ruta: `/obra/${autor}/${obra}/`, paginas: paginasDe(join(obras, autor, obra)) });
+      }
+    }
+    return listados.sort((a, b) => b.paginas - a.paginas || a.ruta.localeCompare(b.ruta, 'es'))[0];
+  }
+
   test('los números de la Paginación quedan a 8px entre zonas de toque, en la fila y entre filas', async ({
     page,
   }) => {
-    const autores = readdirSync(join(dist, 'autor'))
-      .map((slug) => ({
-        slug,
-        paginas: readdirSync(join(dist, 'autor', slug)).filter((e) => /^\d+$/.test(e)).length,
-      }))
-      .sort((a, b) => b.paginas - a.paginas || a.slug.localeCompare(b.slug, 'es'));
-    expect(autores[0]?.paginas ?? 0, 'ningún Autor del dist/ tiene más de una página').toBeGreaterThan(0);
+    const listado = listadoConMasPaginas();
+    expect(listado?.paginas ?? 0, 'ningún listado de Autor, Tema, Colección ni Obra del dist/ tiene más de una página').toBeGreaterThan(1);
+    const { ruta, paginas } = listado!;
+    test.info().annotations.push({ type: 'listado con más páginas', description: `${ruta}: ${paginas} páginas` });
 
     await page.setViewportSize({ width: 360, height: 640 });
-    await page.goto(`/autor/${autores[0].slug}/`);
+    await page.goto(ruta);
 
     const cajas = await page.evaluate(() =>
       [...document.querySelectorAll('.numeros > li > *')].map((n) => {
@@ -1016,6 +1223,34 @@ test.describe('Historia 2.8 — responsive', () => {
     });
     expect(oculto).not.toBeNull();
     expect(oculto!).toBeLessThanOrEqual(1);
+
+    // A 360 px por omisión, la fila sigue siendo una: «Siguiente» en la de «Página N de M».
+    const fila = await page.evaluate(() => {
+      const centro = (e: Element | null) => {
+        if (e === null) return null;
+        const r = e.getBoundingClientRect();
+        return { centro: (r.top + r.bottom) / 2, izq: r.left };
+      };
+      return {
+        cuenta: centro(document.querySelector('.paginacion .cuenta')),
+        siguiente: centro(document.querySelector('.paginacion a[rel="next"]')),
+      };
+    });
+    expect(fila.cuenta, `${ruta}: sin «Página N de M»`).not.toBeNull();
+    expect(fila.siguiente, `${ruta}: sin «Siguiente»`).not.toBeNull();
+    expect(Math.abs(fila.siguiente!.centro - fila.cuenta!.centro), `${ruta}: «Siguiente» cambió de fila a 360 px`).toBeLessThanOrEqual(1);
+    expect(fila.siguiente!.izq, `${ruta}: «Siguiente» no va tras «Página N de M»`).toBeGreaterThan(fila.cuenta!.izq);
+
+    // Y a 320 px, en las tres condiciones del reflujo, ni la página 1 ni la 2 desbordan.
+    for (const pagina of [ruta, `${ruta}2/`]) {
+      for (const condicion of CONDICIONES) {
+        await cargarEn320(page, pagina, condicion);
+        const m = await anchoDeLaPagina(page);
+        expect.soft(m.scroll, `${pagina} desborda con el ${condicion}: ${m.scroll} frente a ${m.ventana}`).toBeLessThanOrEqual(
+          m.ventana,
+        );
+      }
+    }
   });
 
   test('el ancho extra de escritorio es margen y no contenido nuevo', async ({ page }) => {

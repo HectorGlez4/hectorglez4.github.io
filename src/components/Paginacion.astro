@@ -88,8 +88,21 @@ const base = pagina.url.first ?? pagina.url.current;
 }
 
 <style>
+  /*
+   * Historia 26.9 — la fila se parte solo cuando no cabe (DESIGN.md § Paginación y «Reflujo sin
+   * desbordar»): con el texto al 200 % a 320 px la columna es de 120 px CSS y «Siguiente» se salía
+   * de la ventana. El `gap` separa también las filas, y es mayor que `{spacing.unit}`.
+   *
+   * Para que partir no cambie la forma por omisión, lo que decide el salto es el mínimo de cada
+   * ítem y no su ancho natural: la lista de números y «Página N de M» parten de base 0 —su mínimo
+   * por contenido, 44 px y la palabra más larga— y crecen hasta su ancho natural. La lista crece
+   * primero (el reparto 1000:1) y la cuenta se queda con lo que sobre: es el mismo reparto que
+   * daba el encogimiento de antes, con la lista de muchas páginas llenando el hueco y envolviendo,
+   * y la de pocas a su ancho y con el aire repartido entre los extremos.
+   */
   .paginacion {
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
     justify-content: space-between;
     gap: var(--canal);
@@ -115,6 +128,8 @@ const base = pagina.url.first ?? pagina.url.current;
   }
 
   .cuenta {
+    flex: 1 1 0;
+    max-width: max-content;
     margin: 0;
     font-size: var(--pie);
     color: var(--tinta-apagada);
@@ -128,6 +143,8 @@ const base = pagina.url.first ?? pagina.url.current;
    * entre filas (`EXPERIENCE.md § Interaction Primitives`); antes era la mitad.
    */
   .numeros {
+    flex: 1000 1 0;
+    max-width: max-content;
     display: flex;
     flex-wrap: wrap;
     gap: var(--unidad);
