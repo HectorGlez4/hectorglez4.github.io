@@ -5,11 +5,25 @@ created: '2026-10-28'
 status: 'done'
 baseline_revision: '6c9624d5de5166166730fb75ed4076e5b7cb92ab'
 review_loop_iteration: 0
-followup_review_recommended: false
+followup_review_recommended: true
 context:
   - '{project-root}/_bmad-output/implementation-artifacts/epic-26-context.md'
 warnings: ['oversized']
-deferred: []
+deferred:
+  - summary: >-
+      Las órdenes que añaden o reordenan Citas de un listado (aprobar y alta al publicar en un Autor o una Obra, documentar cuando cambia la obra, obra reunir, restituir-grafia, recuperar al cambiar posicionesDeCitas) no comprueban si empujan a la página 2 a una Cita existente sin Tema ni Colección publicados.
+    evidence: |-
+      Con CITAS_POR_PAGINA = 50, una Cita nueva de un Autor ordenada antes por slug (o una Obra en orden del libro) desplaza el tramo; la que cae a la página 2 sin otro camino queda a 4 saltos en el modelo. Ni aprobar ni darDeAltaLote corren fueraDeAlcanceTras: la intención de la 26.8 fija para las que publican solo la regla de Tema, y las demás órdenes quedan fuera de la historia. Hoy lo caza el build (y la integración nombra la Cita), pero después del commit.
+    location: >-
+      tools/lib/revision.ts (aprobar), tools/alta.ts (darDeAltaLote), tools/lib/documentacion.ts, tools/lib/obras.ts (reunir, restituir-grafia), tools/recuperar.ts
+    severity: medium
+  - summary: >-
+      `npx tsx tools/tema.ts quitar <tema> <slug> --corpus <dir>` (y `asignar`) toma la ruta del Corpus por un slug de Cita más.
+    evidence: |-
+      tools/tema.ts filtra los slugs con argumentos.slice(2).filter((a) => !a.startsWith('--')), que deja pasar el valor de --corpus; tools/lib/cli.ts ya tiene `posicionales(argumentos, conValor)` para esto. Anterior a la 26.8: la prueba de la orden se corre sin --corpus, desde el directorio del Corpus de prueba.
+    location: >-
+      tools/tema.ts:39,54
+    severity: low
 ---
 
 <intent-contract>
@@ -118,6 +132,33 @@ deferred: []
 
 Pasada de finalización sin hallazgos: las capas de revisión de este bucle son externas y la revisión independiente llega después.
 
+### 2026-10-28 — Review pass
+- intent_gap: 0
+- bad_spec: 0
+- patch: 17 (high 0, medium 7, low 10)
+- defer: 2 (high 0, medium 1, low 1)
+- reject: 23 (high 0, medium 0, low 23)
+- addressed_findings:
+  - `[medium]` `[patch]` Un slug repetido en `--aprobar` contaba dos veces para el Tema (blind-hunter, edge-case-hunter): `aprobar` planifica sobre `new Set(slugs)`; prueba en `revision.test.ts`.
+  - `[medium]` `[patch]` Una Ficha de Obra que falla dejaba publicada, sin Tema, a otra que contaba con ella, en `aprobar` y en la pasada real de `darDeAltaLote` (blind-hunter, edge-case-hunter ×2, verification-gap): `aprobar` resuelve las fichas al planificar —la que choca con el disco ya no cuenta para nadie— y las dos órdenes vuelven a juzgar lo escrito y lo dicen en `publicadasSinTema`, con salida 1 (`revisar`, `alta`, `sembrar`).
+  - `[medium]` `[patch]` Sin prueba de la Ficha que falla en una pasada que la necesita (verification-gap): caso en `revision.test.ts` con B antes que A, que falla sin la planificación.
+  - `[medium]` `[patch]` Sin prueba de que `fueraDeAlcanceTras` mida solo lo nuevo (verification-gap): dos casos en `alcance.test.ts` sobre el Corpus al límite con una Cita ya fuera, uno por la orden `quitarTema`.
+  - `[medium]` `[patch]` Un marcado que el tokenizador rechaza cortaba el build sin decir la página (blind-hunter, edge-case-hunter): `grafoDeDist` nombra la ruta; prueba pura.
+  - `[medium]` `[patch]` `tools/sembrar.ts` salía con 0 con Citas sin Tema publicado (blind-hunter): sale con 1, como el alta (`sinTemaPublicado`).
+  - `[medium]` `[patch]` El flujo de sembrado documentado no decía que aprobar exige Tema con página (blind-hunter): AGENTS.md (paso 3, con `--temas`) y la cabecera de `tools/revisar.ts`.
+  - `[low]` `[patch]` La integración leía los ~5.300 HTML a la vez (blind-hunter): tandas de 64 y solo la lista de enlaces por página.
+  - `[low]` `[patch]` Cabecera y uso de `tools/alta.ts` desfasados (blind-hunter): dicen dónde va la Cita sin Tema publicado, frente al Tema desconocido, y los códigos de salida.
+  - `[low]` `[patch]` El «punto fijo» de `temaPublicadoConLaPasada` no podía iterar y los comentarios describían una cascada imposible; con ella, `temasBajoUmbralDe` podía dar `[]` a una Cita con Temas (blind-hunter, edge-case-hunter): una sola pasada, comentarios corregidos en `alcance.ts`, `revision.ts`, `alta.ts` y las pruebas.
+  - `[low]` `[patch]` Las órdenes que retiran leen el Corpus entero y se niegan ante cualquier fichero ilegible sin que se dijera (blind-hunter): AGENTS.md.
+  - `[low]` `[patch]` `titularDeAlcance` con «superficie(s)» y «arista(s)» (blind-hunter): `enNumero`.
+  - `[low]` `[patch]` `temasBajoUmbralDe` contaba por Cita y `temasPublicados` por aparición (edge-case-hunter): cuenta por aparición.
+  - `[low]` `[patch]` `grafoDelModelo` callaba las aristas de una Obra sin Citas en el mapa (edge-case-hunter): lanza nombrándola.
+  - `[low]` `[patch]` `data-jornada` con dos dueños y guarda solo sobre `src/` (blind-hunter, intent-alignment): la guarda busca `MARCA_DE_JORNADA` en `src/` y `public/` y exige que el componente la emita.
+  - `[low]` `[patch]` Una negativa de `quitarTema` con aserción condicional y sin instantánea (ac-auditor): incondicional y con antes/después.
+  - `[low]` `[patch]` `tools/tema.ts quitar` sin prueba de la orden (ac-auditor): caso de salida 1 en `gestion.test.ts`.
+
+Rechazados (sin cambio): el `data-pagefind-ignore` del 404 (la 404 es `servicio` y no lleva `data-pagefind-body`: Pagefind no la indexa y el atributo es inerte); diagnóstico de superficies que no son Cita (con el modelo contenido toda superficie del modelo está a ≤3 por la cabecera, así que una fuera viene con sus aristas que faltan en el mismo detalle); aristas Cita→Autor/Obra/Tema (la intención fija la lista); `rutaInterna` y la codificación (los slugs son ASCII por esquema); estilo del rótulo en tres copias (cosmético); `noscript`/`iframe` como texto crudo (especulativo, y el corte ya nombra la página); superficies no-Cita que una orden deja fuera (imposible en el modelo por la cabecera); las lecturas A–G de la auditoría de intención (implementan el `<intent-contract>`: dist para el alcance, modelo para las órdenes, diferencia antes/después, regla de Tema al publicar); dos jornadas que rompen, fila de Directorio y `<template>` en un build, Obra no indexable fuera, Corpus real en prueba (cubiertos por la misma función o por el build real); los tiempos de `seo.spec.ts` con varios trabajadores (ya anotados en 23.1, 26.3 y 26.5); y la pasada anterior sin hallazgos (esta es la revisión).
+
 ## Design Notes
 
 - **Por qué el modelo no lleva `/`→Autores:** la lista lo enumera así y la historia existe para que quitar esa lista (Épica 28) no deje nada fuera sin verse. Con el modelo literal, la contención no se rompe al quitarla y la puerta NFR-5 del `dist/` es la que avisa; y las órdenes ya calculan con el sitio que quedará. Medido hoy: 0 Citas fuera también sin esa arista.
@@ -173,3 +214,47 @@ Blocking condition: ninguna. El Corpus real del worktree pasa la puerta nueva (5
 - `aprobar` y `darDeAltaLote` deciden la regla de Tema antes de escribir; si una Ficha de Obra falla a mitad de pasada (una colisión entre fichas nuevas del mismo lote), `aprobar` replanifica lo que queda, pero lo ya escrito no se deshace. Caso raro y anotado en el código.
 - Una Cita sin ningún Tema ya no se publica por `revisar` ni por `alta` (incluye `tools/sembrar.ts`, que usa el alta). Las fixtures de prueba que publicaban sin Tema siembran ahora un Tema con página.
 - La puerta lee el Corpus de disco en el build (~3 s) además del cargador de posiciones.
+
+### Pasada de revisión del 2026-10-28 (capas externas)
+
+**Cambio de esta pasada.** 17 parches (7 medium, 10 low), 2 aplazados, 23 rechazados; sin `intent_gap` ni `bad_spec`. Lo que cambia de comportamiento:
+
+- `aprobar` cuenta una vez el slug repetido y resuelve las Fichas de Obra al planificar: la que choca con el disco ya no le da Tema a ninguna otra.
+- `aprobar` y `darDeAltaLote` vuelven a juzgar lo que de verdad escribieron. Una Cita que se quedó sin Tema porque otra ficha chocó al escribir sale en `publicadasSinTema`, y `revisar`, `alta` y `sembrar` acaban con 1.
+- `tools/sembrar.ts` sale con 1 cuando hay rechazadas por Tema.
+- La regla de Tema es una sola pasada: el punto fijo no podía iterar.
+- `temasBajoUmbralDe` cuenta por aparición, como `temasPublicados`.
+- `grafoDelModelo` lanza ante una Obra sin sus Citas en el mapa.
+- La integración lee `dist/` en tandas de 64.
+- `grafoDeDist` nombra la página cuyo marcado no sabe leer.
+- El titular del build se escribe con singular y plural.
+- Documentación: AGENTS.md (aprobar con `--temas`, y la lectura entera del Corpus en las órdenes que retiran) y las cabeceras de `tools/revisar.ts`, `tools/alta.ts` y `tools/sembrar.ts`.
+
+**Ficheros de esta pasada.**
+- `tools/lib/revision.ts`, `tools/revisar.ts`: planificación con fichas, slugs únicos y `publicadasSinTema`.
+- `tools/alta.ts`, `tools/sembrar.ts`: el nuevo juicio tras escribir, `sinTemaPublicado`, salida 1 y cabeceras.
+- `tools/lib/alcance.ts`: una sola pasada, `grafoDeDist` que nombra la página y titular con `enNumero`.
+- `src/lib/publicado.ts`: recuento por aparición y Obra sin Citas en el mapa.
+- `integraciones/alcance.ts`: lectura por tandas.
+- `AGENTS.md`: flujo de sembrado y órdenes que retiran.
+- `tests/unit/alcance.test.ts`: página que no se deja leer y «solo lo nuevo» (dos casos).
+- `tests/unit/revision.test.ts`: slug repetido y ficha que choca.
+- `tests/unit/gestion.test.ts`: negativa con instantánea y la orden `tema quitar` con salida 1.
+- `tests/unit/alcance-construido.test.ts`: guarda con `MARCA_DE_JORNADA` en `src/` y `public/`, y titulares nuevos.
+- `tests/unit/ayuda/relleno.ts`: comentario.
+
+**Seguimiento.** `followup_review_recommended: true`. Parches por severidad: 0 high, 7 medium, 10 low; puntuación 3×7 + 10 = 31 ≥ 5.
+
+**Verificación.**
+- `npx vitest run tests/unit/alcance.test.ts`: 22/22.
+- `revision` 32/32, `alta` 19/19, `revisar-cli` 4/4, `duplicados` 13/13, `obras` 117/117, `gestion` 60/60, `curacion` 44/44, `documentacion` 48/48, `documentar-cli` 19/19, `coleccion-cli` 14/14, `aparato-al-aprobar` 3/3, `cita-ajena-al-aprobar` 3/3.
+- `npm run build` sobre el Corpus del worktree: sale 0 con «NFR-5: 5115 superficies publicadas, todas a 3 saltos o menos de la portada; las 37398 aristas del modelo están en dist/.».
+- `npx astro check`: 0 errores, 0 avisos; las 8 pistas son anteriores.
+- `npm test`: 6683/6686. Fallaron los dos titulares de `alcance-construido`, que aún esperaban «superficie(s)»: se corrigieron y el fichero queda en 5/5 al volver a correrlo. El tercer fallo es el rojo previo de `obra-pagina.test.ts:615`.
+
+**Riesgos residuales.**
+- Quedan aplazados en el frontmatter:
+  - las órdenes que añaden o reordenan Citas y pueden empujar a la página 2 a una Cita existente sin otro camino;
+  - el `--corpus` de `tema quitar`/`asignar`, que la orden toma por un slug más.
+- Una colisión entre dos fichas nuevas de la misma pasada sigue pudiendo dejar escrita una Cita sin Tema. Ahora se dice y la orden sale con 1, pero lo escrito no se deshace.
+
