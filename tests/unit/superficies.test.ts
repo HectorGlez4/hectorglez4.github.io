@@ -21,6 +21,8 @@ import {
   esServicioPorForma,
   etiquetaDeAxe,
   olvidarRutasIndexables,
+  rutaDeLaBusqueda,
+  rutaDeLaPortada,
   rutaDelDirectorioDeAutores,
   rutaDelDirectorioDeObras,
   rutaNormalizada,
@@ -1189,5 +1191,17 @@ describe('Historia 26.4 — el Directorio de Obras', () => {
     expect(esRutaDeObra('/obras')).toBe(false);
     expect(superficieDeclaradaDe('/obras/')?.indexablePorContenido).toBeUndefined();
     expect(superficieDeclaradaDe('/obras/')?.noPublicableEn).toBeUndefined();
+  });
+});
+
+describe('Historia 26.5 — las rutas de la cabecera salen de sus constructores', () => {
+  it('la portada es «/» y la declara index.astro', () => {
+    expect(rutaDeLaPortada()).toBe('/');
+    expect(superficieDeclaradaDe(rutaDeLaPortada())?.pagina).toBe('index.astro');
+  });
+
+  it('la búsqueda es «/buscar/» y la declara buscar.astro', () => {
+    expect(rutaDeLaBusqueda()).toBe('/buscar/');
+    expect(superficieDeclaradaDe(rutaDeLaBusqueda())?.pagina).toBe('buscar.astro');
   });
 });

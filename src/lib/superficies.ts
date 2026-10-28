@@ -399,6 +399,24 @@ export function rutaDelDirectorioDeObras(): string {
 /** La Tarjeta Social del Directorio de Obras — Historia 26.4, UX-DR79, junto a la de Autores. */
 export const TARJETA_DEL_DIRECTORIO_DE_OBRAS = '/tarjeta/directorio/obras.png';
 
+/**
+ * La ruta de la portada — Historia 26.5. La cabecera compone con ella el enlace de la marca y
+ * decide su `aria-current`: escrita a mano en el armazón, sería la única ruta de la cabecera
+ * que no sale de este fichero.
+ */
+export function rutaDeLaPortada(): string {
+  return '/';
+}
+
+/**
+ * La ruta de la búsqueda propia — Historia 26.5, la de «Buscar» en la cabecera. Literal y con
+ * barra final; lo que se busca viaja en la cadena de consulta, que no cambia la página (y por
+ * eso «Buscar» lleva `aria-current` con cualquier parámetro).
+ */
+export function rutaDeLaBusqueda(): string {
+  return '/buscar/';
+}
+
 /** Las consecuencias de declarar una superficie que salen solo de su carácter. */
 export interface Consecuencias {
   /** Se anuncia en el sitemap. */

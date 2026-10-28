@@ -156,17 +156,14 @@ test.describe('Historia 2.7 — nada huérfano', () => {
     test.slow();
 
     /*
-     * Exención transitoria, **por su ruta** (Historias 26.3 a 26.5): los Directorios se publican
-     * desde la 26.3 (`/autores/`) y la 26.4 (`/obras/`), y el enlace que los alcanza es la cabecera
-     * de la 26.5; hasta entonces no los enlaza ninguna página. Se eximen ellos dos y nadie más, y
-     * la 26.5 quita la exención aquí y en `tests/unit/publicable-y-alcanzable.test.ts`. La rama no
-     * entra en la principal hasta la 26.11, así que no llega al sitio en vivo (decisión de Héctor
-     * del 2026-10-19).
+     * Historia 26.5 — el recorrido juzga el sitemap entero: la cabecera enlaza los dos
+     * Directorios desde toda página, y la exención por ruta de la 26.3 y la 26.4 ya no existe.
      */
-    const exentas = [rutaDelDirectorioDeAutores(), rutaDelDirectorioDeObras()];
     const delSitemap = await rutasDelSitemap(request);
-    for (const exenta of exentas) expect(delSitemap).toContain(exenta);
-    const publicadas = delSitemap.filter((ruta) => !exentas.includes(ruta));
+    for (const directorio of [rutaDelDirectorioDeAutores(), rutaDelDirectorioDeObras()]) {
+      expect(delSitemap).toContain(directorio);
+    }
+    const publicadas = delSitemap;
     const enlaces = new Map<string, string[]>();
 
     /*
@@ -241,15 +238,5 @@ test.describe('Historia 2.7 — nada huérfano', () => {
 
     const inalcanzables = superficiesInalcanzables(publicadas, enlaces);
     expect(inalcanzables, `no se alcanzan en ${MAX_SALTOS_DESDE_LA_PORTADA} saltos`).toEqual([]);
-    /*
-     * Y la exención caduca sola, como su gemela de `tests/unit/publicable-y-alcanzable.test.ts`, y
-     * exime exactamente esas dos rutas: mientras exista, los Directorios tienen que seguir sin
-     * alcanzarse. El día que la cabecera de la 26.5 los enlace, esto falla y obliga a quitar la
-     * exención en vez de dejarla viva.
-     */
-    expect(
-      [...superficiesInalcanzables(delSitemap, enlaces)].sort(),
-      'la exención de los Directorios ya sobra',
-    ).toEqual([...exentas].sort());
   });
 });

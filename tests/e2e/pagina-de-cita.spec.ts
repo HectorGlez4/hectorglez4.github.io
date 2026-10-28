@@ -215,12 +215,18 @@ test.describe('Historia 2.1 — solo las islas declaradas y HTML inicial', () =>
 });
 
 test.describe('Historia 2.1 — armazón y tratamiento visual', () => {
-  test('la cabecera lleva solo marca y búsqueda, sin migas de pan', async ({ page }) => {
+  /*
+   * Historia 26.5 — enmienda de este criterio (UX-DR112): la cabecera ya no lleva solo marca y
+   * búsqueda, sino la marca y «Autores · Obras · Buscar». Sigue sin migas de pan.
+   */
+  test('la cabecera lleva marca, Autores, Obras y Buscar, sin migas de pan', async ({ page }) => {
     await page.goto(CORTA);
     const enlaces = page.locator('header a');
-    await expect(enlaces).toHaveCount(2);
-    await expect(enlaces.nth(0)).toHaveAttribute('href', '/');
-    await expect(enlaces.nth(1)).toHaveAttribute('href', '/buscar/');
+    await expect(enlaces).toHaveCount(4);
+    for (const [i, destino] of ['/', '/autores/', '/obras/', '/buscar/'].entries()) {
+      await expect(enlaces.nth(i)).toHaveAttribute('href', destino);
+      await expect(enlaces.nth(i)).not.toHaveAttribute('target', /.*/);
+    }
     await expect(page.locator('nav[aria-label*="miga" i], .migas, .breadcrumb')).toHaveCount(0);
   });
 

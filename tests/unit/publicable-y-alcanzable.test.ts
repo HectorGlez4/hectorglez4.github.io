@@ -29,7 +29,7 @@ import {
 import { CITAS_POR_PAGINA, MAX_SALTOS_DESDE_LA_PORTADA } from '../../src/lib/umbrales.ts';
 import { MARCA } from '../../src/lib/marca.ts';
 import { FILTRO_DE_TIPO, OPCIONES_DE_PAGEFIND } from '../../src/lib/tipoDeResultado.ts';
-import { recorrerElementos } from './ayuda/enlaces.js';
+import { declaracionDe, recorrerElementos, type Declaracion, type Elemento } from './ayuda/enlaces.js';
 import { conClase, exposicionDeLaPortada } from './ayuda/portada.js';
 
 /**
@@ -315,17 +315,6 @@ describe('Historia 12.1 — sobre un sitio construido de verdad', () => {
     return enlaces;
   }
 
-  /*
-   * Exención transitoria de alcance, **por su ruta** (Historias 26.3 a 26.5): los Directorios
-   * existen desde la 26.3 (`/autores/`) y la 26.4 (`/obras/`), pero el enlace que los alcanza es la
-   * cabecera de la 26.5. Mientras tanto ninguna página los enlaza y se eximen aquí, y solo ellos:
-   * ninguna otra superficie se exime. La rama no entra en la principal hasta la 26.11, así que la
-   * exención no llega al sitio en vivo (decisión de Héctor del 2026-10-19). La 26.5 la quita, aquí
-   * y en `tests/e2e/seo.spec.ts`.
-   */
-  const EXENTAS_DE_ALCANCE = [rutaDelDirectorioDeAutores(), rutaDelDirectorioDeObras()].map(rutaNormalizada);
-  const alcanzables = (publicables: string[]) => publicables.filter((ruta) => !EXENTAS_DE_ALCANCE.includes(ruta));
-
   /** Las rutas que el sitio construyó, que es lo que consumen el barrido y el sitemap. */
   async function rutasConstruidas(): Promise<string[]> {
     return [...(await sitioConstruido()).keys()];
@@ -338,15 +327,14 @@ describe('Historia 12.1 — sobre un sitio construido de verdad', () => {
 
       // Sin esto la comprobación pasaría sobre un sitio vacío sin decir nada.
       expect(publicables.length).toBeGreaterThan(2);
-      for (const exenta of EXENTAS_DE_ALCANCE) expect(publicables).toContain(exenta);
-      expect(superficiesInalcanzables(alcanzables(publicables), enlaces)).toEqual([]);
       /*
-       * Y la exención caduca sola, y exime exactamente esas dos rutas: mientras exista, los dos
-       * Directorios tienen que seguir sin alcanzarse, y nada más. El día que la cabecera de la 26.5
-       * los enlace, esta línea falla y obliga a quitarla aquí y en `tests/e2e/seo.spec.ts`, en vez
-       * de dejarla viva eximiendo algo que ya no lo necesita.
+       * Historia 26.5 — los Directorios entran sin exención: la cabecera los enlaza desde toda
+       * página. La exención por ruta que la 26.3 y la 26.4 dejaron aquí ya no existe.
        */
-      expect([...superficiesInalcanzables(publicables, enlaces)].sort()).toEqual([...EXENTAS_DE_ALCANCE].sort());
+      for (const directorio of [rutaDelDirectorioDeAutores(), rutaDelDirectorioDeObras()]) {
+        expect(publicables).toContain(rutaNormalizada(directorio));
+      }
+      expect(superficiesInalcanzables(publicables, enlaces)).toEqual([]);
     });
 
     it('toda ruta construida tiene declaración: el build no genera nada anónimo', async () => {
@@ -378,6 +366,149 @@ describe('Historia 12.1 — sobre un sitio construido de verdad', () => {
       }
       expect(rutas.some((r) => r.startsWith('/cita/'))).toBe(true);
       expect(rutas.filter((r) => PAGINA_SEGUNDA.test(r)).length).toBeGreaterThan(0);
+    });
+  });
+
+  /**
+   * Historia 26.5 — la cabecera lleva a Autores, Obras y Buscar (UX-DR54, UX-DR101, UX-DR106,
+   * FR-55).
+   *
+   * Sobre el `dist/` de este mismo build, porque el CI no corre Playwright: lo que se fija aquí es
+   * lo que el HTML dice —los cuatro enlaces, su orden, sus destinos, su zona y `aria-current`—, y
+   * que la cabecera y los Directorios bastan para dejar todo Autor y toda Obra a dos saltos. Lo que
+   * solo se ve pintado (medidas, colores, foco) está en `tests/e2e/cabecera.spec.ts`.
+   */
+  describe('Historia 26.5 — la cabecera lleva a Autores, Obras y Buscar', () => {
+    const DESTINOS = ['/', '/autores/', '/obras/', '/buscar/'];
+    /** La página donde cada destino lleva `aria-current`, por su ruta normalizada. */
+    const ACTUAL_EN = new Map(DESTINOS.map((destino) => [rutaNormalizada(destino), destino]));
+
+    interface EnlaceDeCabecera {
+      elemento: Elemento;
+      antepasados: readonly Elemento[];
+      declaracion: Declaracion | null;
+    }
+
+    /** Cada página HTML construida, por su ruta normalizada, con su marcado. */
+    async function paginasConstruidas(): Promise<Map<string, string>> {
+      const dist = join(proyecto, 'dist');
+      const paginas = new Map<string, string>();
+      async function recorrer(dir: string, prefijo: string) {
+        for (const entrada of await readdir(dir, { withFileTypes: true })) {
+          const completa = join(dir, entrada.name);
+          if (entrada.isDirectory()) {
+            await recorrer(completa, `${prefijo}/${entrada.name}`);
+            continue;
+          }
+          if (!entrada.name.endsWith('.html')) continue;
+          const sinExtension = entrada.name.replace(/\.html$/, '');
+          const ruta = sinExtension === 'index' ? `${prefijo}/` : `${prefijo}/${sinExtension}`;
+          paginas.set(rutaNormalizada(ruta), await readFile(completa, 'utf8'));
+        }
+      }
+      await recorrer(dist, '');
+      return paginas;
+    }
+
+    /** Las cabeceras de fuera de `main` de una página, cada una con sus enlaces. */
+    function cabecerasDe(html: string): { cabecera: Elemento; enlaces: EnlaceDeCabecera[] }[] {
+      const cabeceras: { cabecera: Elemento; enlaces: EnlaceDeCabecera[] }[] = [];
+      recorrerElementos(html, (elemento, antepasados) => {
+        if (antepasados.some((e) => e.etiqueta === 'main')) return;
+        if (elemento.etiqueta === 'header') {
+          cabeceras.push({ cabecera: elemento, enlaces: [] });
+          return;
+        }
+        if (elemento.etiqueta !== 'a') return;
+        const cabecera = antepasados.find((e) => e.etiqueta === 'header');
+        if (cabecera === undefined) return;
+        let declaracion: Declaracion | null = null;
+        for (const candidato of [elemento, ...[...antepasados].reverse()]) {
+          declaracion = declaracionDe(candidato);
+          if (declaracion !== null) break;
+        }
+        cabeceras.find((c) => c.cabecera === cabecera)!.enlaces.push({ elemento, antepasados, declaracion });
+      });
+      return cabeceras;
+    }
+
+    it('toda página lleva los cuatro enlaces, en orden, con zona `cabecera` y a páginas construidas', async () => {
+      const paginas = await paginasConstruidas();
+      // La premisa: el sitio trae las familias, también las que la cabecera no tocaba antes.
+      expect(paginas.size).toBeGreaterThan(10);
+      for (const exigida of ['/', '/autores', '/obras', '/buscar', '/404', '/kit', '/lote', OBRA_NO_INDEXABLE]) {
+        expect([...paginas.keys()], exigida).toContain(exigida);
+      }
+
+      for (const [ruta, html] of paginas) {
+        const cabeceras = cabecerasDe(html);
+        expect(cabeceras, ruta).toHaveLength(1);
+        const [{ enlaces }] = cabeceras;
+        expect(enlaces.map((e) => e.elemento.atributos.get('href')), ruta).toEqual(DESTINOS);
+
+        for (const [i, { elemento, antepasados, declaracion }] of enlaces.entries()) {
+          const href = elemento.atributos.get('href')!;
+          expect(elemento.atributos.has('target'), `${ruta} → ${href} abre otra pestaña`).toBe(false);
+          expect(declaracion, `${ruta} → ${href}`).toEqual({ zona: 'cabecera' });
+          expect(paginas.has(rutaNormalizada(href)), `${ruta} → ${href} no tiene página en dist/`).toBe(true);
+
+          const nav = antepasados.findIndex(
+            (e) => e.etiqueta === 'nav' && e.atributos.get('aria-label') === 'Principal',
+          );
+          if (i === 0) {
+            // La marca va fuera de la navegación «Principal», y no es un `h1` (eso es de la 28.1).
+            expect(nav, `${ruta}: la marca dentro de la navegación`).toBe(-1);
+            expect(antepasados.some((e) => /^h[1-6]$/.test(e.etiqueta)), `${ruta}: la marca en un encabezado`).toBe(false);
+            continue;
+          }
+          // nav[aria-label="Principal"] > ul[role="list"] > li > a
+          expect(nav, `${ruta} → ${href} fuera de la navegación «Principal»`).toBeGreaterThanOrEqual(0);
+          expect(antepasados.slice(nav + 1).map((e) => e.etiqueta), `${ruta} → ${href}`).toEqual(['ul', 'li']);
+          expect(antepasados[nav + 1].atributos.get('role'), `${ruta} → ${href}`).toBe('list');
+        }
+      }
+    });
+
+    it('`aria-current="page"` solo en su página, y solo en el enlace que toca', async () => {
+      const paginas = await paginasConstruidas();
+      for (const [ruta, html] of paginas) {
+        const actuales = cabecerasDe(html)[0].enlaces
+          .filter(({ elemento }) => elemento.atributos.has('aria-current'))
+          .map(({ elemento }) => [elemento.atributos.get('href'), elemento.atributos.get('aria-current')]);
+        const esperado = ACTUAL_EN.get(ruta);
+        expect(actuales, ruta).toEqual(esperado === undefined ? [] : [[esperado, 'page']]);
+      }
+      // Y que la comprobación vea las cuatro páginas que sí lo llevan.
+      for (const ruta of ACTUAL_EN.keys()) expect(paginas.has(ruta), ruta).toBe(true);
+    });
+
+    it('toda Página de Autor y toda página 1 de Obra quedan a dos saltos, por la cabecera y su Directorio', async () => {
+      const paginas = await paginasConstruidas();
+      const enlaces = await sitioConstruido();
+      /*
+       * Un grafo con solo esos caminos: de la portada, nada más que lo que enlaza su cabecera; de
+       * los dos Directorios, todo lo suyo. Si alcanza aquí, alcanza en el sitio, que enlaza más.
+       */
+      const deLaCabecera = cabecerasDe(paginas.get('/')!)[0].enlaces.map(({ elemento }) =>
+        rutaNormalizada(elemento.atributos.get('href')!),
+      );
+      const grafo = new Map<string, string[]>([
+        ['/', deLaCabecera],
+        ['/autores', enlaces.get('/autores') ?? []],
+        ['/obras', enlaces.get('/obras') ?? []],
+      ]);
+
+      const autores = [...paginas.keys()].filter((ruta) => /^\/autor\/[^/]+$/.test(ruta));
+      const obras = [...paginas.keys()].filter((ruta) => /^\/obra\/[^/]+\/[^/]+$/.test(ruta));
+      // La premisa: las dos Obras de este corpus, también la que no se indexa, y el Autor.
+      expect(autores).toContain('/autor/seneca');
+      expect(obras.sort()).toEqual([OBRA_INDEXABLE, OBRA_NO_INDEXABLE].sort());
+
+      expect(superficiesInalcanzables([...autores, ...obras], grafo, { maximoDeSaltos: 2 })).toEqual([]);
+      // Y no en uno: es la cabecera y luego el Directorio, no un atajo que esta prueba no vería.
+      expect(superficiesInalcanzables([...autores, ...obras], grafo, { maximoDeSaltos: 1 }).sort()).toEqual(
+        [...autores, ...obras].sort(),
+      );
     });
   });
 
@@ -481,7 +612,7 @@ describe('Historia 12.1 — sobre un sitio construido de verdad', () => {
       const enlaces = await sitioConstruido();
       const publicables = [...enlaces.keys()].filter((ruta) => caracterDe(ruta) === 'producto');
       expect(publicables).not.toContain('/lote');
-      expect(superficiesInalcanzables(alcanzables(publicables), enlaces)).toEqual([]);
+      expect(superficiesInalcanzables(publicables, enlaces)).toEqual([]);
     });
   });
 
