@@ -515,4 +515,37 @@ describe('Historia 26.8 — aprobar no publica una Cita sin Tema publicado', () 
     );
     expect(await readdir(rutas.revision)).toHaveLength(2);
   });
+
+  it('un slug repetido en la orden cuenta una vez para el Tema', async () => {
+    const una = candidata(1, ['el-tiempo']);
+    // 13 publicadas: contada dos veces llegaría a 15; contada una, se queda en 14.
+    const rutas = await corpusDelTiempo([una], MIN_CITAS_POR_TEMA - 2);
+    const resultado = await aprobar(rutas, [una.slug, una.slug]);
+
+    expect(resultado.publicadas).toEqual([]);
+    expect(resultado.rechazadasPorTema.map((r) => r.slug)).toEqual([una.slug]);
+    expect(resultado.rechazadasPorTema[0].temas).toEqual([
+      { slug: 'el-tiempo', nombre: 'El tiempo', citas: MIN_CITAS_POR_TEMA - 1 },
+    ]);
+    expect(await readdir(rutas.revision)).toEqual([`${una.slug}.md`]);
+  });
+
+  it('una cuya Ficha de Obra choca no cuenta para el Tema de las demás, y nada se escribe', async () => {
+    // A choca con una ficha del disco; B solo llega al umbral contando a A.
+    const a = { ...candidata(1, ['el-tiempo']), procedencia: { obra: 'X', año: 49 } };
+    const b = candidata(2, ['el-tiempo']);
+    const rutas = await corpusDelTiempo([a, b], MIN_CITAS_POR_TEMA - 2);
+    await mkdir(rutas.obras, { recursive: true });
+    await writeFile(join(rutas.obras, 'seneca--x.yml'), 'autor: "seneca"\ntitulo: "X"\nformas:\n  - "otra"\n', 'utf8');
+
+    // B va primero: sin planificar la ficha antes, se habría escrito apoyada en A.
+    const resultado = await aprobar(rutas, [b.slug, a.slug]);
+
+    expect(resultado.publicadas).toEqual([]);
+    expect(resultado.rechazadasPorFicha.map((r) => r.slug)).toEqual([a.slug]);
+    expect(resultado.rechazadasPorTema.map((r) => r.slug)).toEqual([b.slug]);
+    expect(resultado.publicadasSinTema).toEqual([]);
+    expect((await readdir(rutas.revision)).sort()).toEqual([`${a.slug}.md`, `${b.slug}.md`].sort());
+    expect(await ficherosPublicados(rutas)).toHaveLength(MIN_CITAS_POR_TEMA - 2);
+  });
 });

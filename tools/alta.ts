@@ -10,8 +10,19 @@
  * las carga ninguna colección (AD-2)— y el informe dice, por cada una que no se publica,
  * qué regla incumplió. Sin eso, incorporar un lote de cincuenta obliga a revisarlas todas.
  *
+ * **La excepción es la Cita sin Tema publicado** (Historia 26.8, NFR-5): completa, pero ninguno
+ * de sus Temas llegaría a `MIN_CITAS_POR_TEMA` ni contando el lote entero. Esa **no se escribe en
+ * ningún sitio** —ni `corpus/citas/` ni `corpus/_revision/`—: no le falta nada que completar en
+ * revisión, le falta un Tema en el lote, y el informe la nombra con sus Temas y sus recuentos. Un
+ * Tema **desconocido**, en cambio, es una regla incumplida de la Cita y la manda a revisión, como
+ * siempre.
+ *
  * Uso:
- *   npx tsx tools/alta.ts <lote.yaml> [--corpus corpus] [--seco]
+ *   npx tsx tools/alta.ts <lote.yaml> [--corpus corpus] [--seco] [--con-duplicados]
+ *
+ * Sale con 1 si alguna entrada se quedó sin escribir por no tener Tema publicado —también en
+ * seco— o si alguna publicada se quedó sin él; con 2 si falta el lote o no es una lista; y con 0
+ * en lo demás, también con Citas en revisión.
  */
 
 import { readFile } from 'node:fs/promises';
@@ -98,6 +109,12 @@ export interface InformeDeAlta {
    * vuelve a pasar. Con alguna, la orden sale con 1, también en seco.
    */
   rechazadasPorTema: { texto: string; slug: string; temas: TemaBajoUmbral[]; motivos: string[] }[];
+  /**
+   * Publicadas que se quedaron sin ningún Tema publicado porque la pasada que escribe discrepó del
+   * ensayo —una colisión entre dos Fichas de Obra nuevas del mismo lote mandó a revisión a otra
+   * de la que dependía su Tema—. Ya están en `corpus/citas/`. Vacío casi siempre — Historia 26.8.
+   */
+  publicadasSinTema?: { slug: string; temas: TemaBajoUmbral[]; motivos: string[] }[];
 }
 
 /**
@@ -123,13 +140,15 @@ export async function darDeAltaLote(
    * Historia 26.8 — antes de escribir nada se **ensaya** el lote entero (`recorrer` sin
    * escribir) y se mira qué entradas publicadas tendrían algún Tema publicado, contando lo ya
    * publicado y lo que el mismo lote publicaría (`temaPublicadoConLaPasada`). Las que no, se
-   * apartan y se vuelve a ensayar sin ellas —apartar una puede dejar a otra sin Tema, o liberar
-   * su slug—, hasta que nada cambia. Solo entonces se recorre de verdad, escribiendo, sin las
-   * apartadas: no se escriben en ningún sitio. En seco el ensayo es el informe.
+   * apartan y se vuelve a ensayar sin ellas —apartar una cambia el resto del recorrido: libera
+   * su slug, o deja de ser el primero de un duplicado dentro del lote—, hasta que nada cambia.
+   * Solo entonces se recorre de verdad, escribiendo, sin las apartadas: no se escriben en ningún
+   * sitio. En seco el ensayo es el informe.
    *
    * El ensayo resuelve las Fichas de Obra contra el disco de antes del lote; la pasada real, tras
    * cada Cita escrita. Solo una colisión de nombre entre dos fichas nuevas del mismo lote los haría
-   * discrepar, y entonces esa entrada va a revisión con el motivo, como siempre.
+   * discrepar: esa entrada va a revisión con el motivo, como siempre, y lo que la pasada real dejó
+   * publicado se vuelve a juzgar al final (`publicadasSinTema`).
    */
   const apartadas = new Map<number, { texto: string; slug: string; temas: string[] }>();
   let ensayo = await recorrer(false);
@@ -147,6 +166,20 @@ export async function darDeAltaLote(
     ensayo = await recorrer(false);
   }
   const { informe, aPublicar } = opciones.seco ? ensayo : await recorrer(true);
+  if (!opciones.seco) {
+    const sueltas = temaPublicadoConLaPasada(
+      yaPublicadas,
+      aPublicar.map((p) => ({ clave: p.slug, temas: p.temas })),
+      temas,
+    ).rechazadas;
+    if (sueltas.length > 0) {
+      informe.publicadasSinTema = sueltas.map((s) => ({
+        slug: s.clave,
+        temas: s.temas,
+        motivos: [motivoSinTemaPublicado(s.temas)],
+      }));
+    }
+  }
   // El recuento del parte, sobre lo publicado más el lote entero, como `temaPublicadoConLaPasada`.
   const conElLote = [
     ...yaPublicadas,
@@ -377,6 +410,14 @@ function aRegistroDeCita(datos: CitaAdmisible): Record<string, unknown> {
   };
 }
 
+/**
+ * Si el alta dejó alguna Cita sin Tema publicado —sin escribir, o escrita y suelta—: con eso, la
+ * orden y la siembra salen con 1 (Historia 26.8).
+ */
+export function sinTemaPublicado(informe: InformeDeAlta): boolean {
+  return informe.rechazadasPorTema.length > 0 || (informe.publicadasSinTema ?? []).length > 0;
+}
+
 /** Informe legible en terminal. Sin colores: se lee igual en un registro de CI. */
 export function formatearInforme(informe: InformeDeAlta): string {
   const lineas: string[] = [];
@@ -399,6 +440,15 @@ export function formatearInforme(informe: InformeDeAlta): string {
       for (const motivo of c.motivos) lineas.push(`      ${motivo}`);
     }
     lineas.push('  No se han escrito ni en corpus/citas/ ni en corpus/_revision/: corrija sus Temas en el lote.');
+  }
+
+  for (const suelta of informe.publicadasSinTema ?? []) {
+    lineas.push(
+      '',
+      `${suelta.slug}: publicada, pero se quedó sin ningún Tema publicado. Dele un Tema con ` +
+        'página o retírela antes de construir.',
+      ...suelta.motivos.map((m) => `  ${m}`),
+    );
   }
 
   for (const pendiente of informe.fichasSinAsegurar ?? []) {
@@ -494,5 +544,5 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   process.stdout.write(`${formatearInforme(informe)}\n`);
   if (seco) process.stdout.write('\n(Ejecución en seco: no se ha escrito nada.)\n');
   // Historia 26.8 — una entrada sin Tema publicado no se escribe, y la orden lo dice con 1.
-  if (informe.rechazadasPorTema.length > 0) process.exit(1);
+  if (sinTemaPublicado(informe)) process.exit(1);
 }

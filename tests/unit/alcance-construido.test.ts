@@ -11,6 +11,7 @@ import {
   limpiar,
 } from './ayuda/construir.js';
 import { MIN_CITAS_POR_TEMA } from '../../src/lib/umbrales.ts';
+import { MARCA_DE_JORNADA } from '../../tools/lib/alcance.ts';
 
 /**
  * Historia 26.8 — la puerta de NFR-5 del build, sobre sitios construidos de verdad.
@@ -121,12 +122,21 @@ describe('Historia 26.8 — el build sano', () => {
     expect(paginas.get('lote/index.html')).not.toContain('data-jornada');
   });
 
-  it('entre las fuentes de src/, solo CitaDelDia.astro nombra la marca', async () => {
-    const fuentes = (await readdir(join(RAIZ, 'src'), { recursive: true, withFileTypes: true }))
-      .filter((e) => e.isFile())
+  it('entre las fuentes de src/ y public/, solo CitaDelDia.astro nombra la marca que el grafo salta', async () => {
+    // La marca es la de `MARCA_DE_JORNADA`: si el componente y el grafo la llamaran distinto, el
+    // grafo dejaría de saltar la Cita del Día y esto lo diría.
+    const entradas = [
+      ...(await readdir(join(RAIZ, 'src'), { recursive: true, withFileTypes: true })),
+      ...(await readdir(join(RAIZ, 'public'), { recursive: true, withFileTypes: true })),
+    ];
+    const fuentes = entradas
+      .filter((e) => e.isFile() && !/\.(?:png|jpe?g|webp|gif|ico|woff2?|ttf|otf|pdf)$/iu.test(e.name))
       .map((e) => join(e.parentPath, e.name))
-      .filter((ruta) => readFileSync(ruta, 'utf8').includes('data-jornada'));
+      .filter((ruta) => readFileSync(ruta, 'utf8').includes(MARCA_DE_JORNADA));
     expect(fuentes.map((ruta) => relative(RAIZ, ruta))).toEqual(['src/components/CitaDelDia.astro']);
+    expect(readFileSync(join(RAIZ, 'src/components/CitaDelDia.astro'), 'utf8')).toMatch(
+      new RegExp(`<section class="del-dia" ${MARCA_DE_JORNADA} `),
+    );
   });
 });
 
@@ -151,7 +161,7 @@ describe('Historia 26.8 — la portada sin su lista de Autores', () => {
 
     expect(resultado.codigo).not.toBe(0);
     expect(resultado.salida).toMatch(
-      /NFR-5: 1 superficie\(s\) publicada\(s\) a más de 3 saltos de la portada y 0 arista\(s\) del modelo/,
+      /NFR-5: 1 superficie publicada a más de 3 saltos de la portada y 0 aristas del modelo/,
     );
     expect(resultado.salida).toContain(
       `/cita/seneca-fragmento-051 — su Tema «La ira» (la-ira) tiene 3 Citas, por debajo de ` +
@@ -177,7 +187,7 @@ describe('Historia 26.8 — la Paginación sin los números', () => {
     proyecto = resultado.proyecto;
 
     expect(resultado.codigo).not.toBe(0);
-    expect(resultado.salida).toMatch(/arista\(s\) del modelo que faltan en dist\//);
+    expect(resultado.salida).toMatch(/NFR-5: .* y \d+ aristas del modelo que faltan en dist\//);
     // Anterior y Siguiente siguen: lo que falta es saltar de la 1 a la 3 y de la 3 a la 1.
     for (const arista of [
       '/autor/seneca → /autor/seneca/3',

@@ -15,7 +15,7 @@ import type { Rutas } from '../../../tools/lib/corpus.ts';
  * y se puedan apartar (`ficherosPublicados`, `sinRelleno`). La candidata solo tiene que declarar
  * `TEMA_PUBLICADO`.
  *
- * Lo que la regla misma exige —la 15.ª, la que no llega, el punto fijo— lo prueban
+ * Lo que la regla misma exige —la 15.ª, la que no llega, varias que juntas llegan— lo prueban
  * `revision.test.ts` y `alta.test.ts` sin relleno.
  */
 

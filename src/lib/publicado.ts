@@ -1010,7 +1010,10 @@ export function grafoDelModelo(
   }
   for (const obra of obrasPublicadas(conjunto)) {
     enlazar(rutaDelDirectorioDeObras(), rutaDeLaObra(obra));
-    listado((n) => rutaDeLaObra(obra, n), citasDeCadaObra.get(obra.nombre) ?? []);
+    const suyas = citasDeCadaObra.get(obra.nombre);
+    // Una Obra publicada tiene Citas: sin ellas en el mapa, el modelo callaría todas sus aristas.
+    if (suyas === undefined) throw new Error(`grafoDelModelo: la Obra ${obra.nombre} no trae sus Citas en citasDeCadaObra.`);
+    listado((n) => rutaDeLaObra(obra, n), suyas);
   }
   for (const cita of conjunto.citas) nodo(rutaDeCita(cita.slug));
 
@@ -1044,7 +1047,8 @@ export function temasBajoUmbralDe(
 ): TemaBajoUmbral[] {
   const nombres = new Map(temas.map((t) => [t.slug, t.nombre]));
   return [...new Set(cita.temas)].flatMap((slug) => {
-    const recuento = citas.filter((c) => c.temas.includes(slug)).length;
+    // Por aparición, como cuenta `temasPublicados`: los dos recuentos no pueden discrepar.
+    const recuento = citas.reduce((n, c) => n + c.temas.filter((t) => t === slug).length, 0);
     return nombres.has(slug) && recuento >= MIN_CITAS_POR_TEMA
       ? []
       : [{ slug, nombre: nombres.get(slug) ?? slug, citas: recuento }];

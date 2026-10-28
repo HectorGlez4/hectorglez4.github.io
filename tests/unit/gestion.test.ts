@@ -1,7 +1,9 @@
 import { afterEach, describe, expect, it } from 'vitest';
 import { cp, mkdtemp, mkdir, readFile, readdir, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
-import { join, resolve } from 'node:path';
+import { dirname, join, resolve } from 'node:path';
+import { execFile } from 'node:child_process';
+import { promisify } from 'node:util';
 import { parse as parsearYaml } from 'yaml';
 import { RAIZ } from './ayuda/construir.js';
 import { darDeAltaLote } from '../../tools/alta.ts';
@@ -1058,9 +1060,28 @@ describe('Historia 26.8 — quitar un Tema no deja una Cita fuera de alcance', (
 
   it('quitárselo a la propia Cita, que se queda sin camino, también se niega', async () => {
     const rutas = await corpusAlLimite();
+    const antes = await instantaneaDe(rutas.raiz);
     const resultado = await quitarTema(rutas, 'la-ira', [EN_LA_IRA]);
     expect(resultado.ok).toBe(false);
-    if (!resultado.ok) expect(resultado.motivos.join('\n')).toContain(`/cita/${EN_LA_IRA}/ — no declara ningún Tema`);
+    expect(resultado.ok ? '' : resultado.motivos.join('\n')).toContain(`/cita/${EN_LA_IRA}/ — no declara ningún Tema`);
+    expect(await instantaneaDe(rutas.raiz)).toEqual(antes);
+  });
+
+  it('la orden `tema quitar` sale con 1, nombra la Cita y el Tema, y no escribe', async () => {
+    const rutas = await corpusAlLimite();
+    const antes = await instantaneaDe(rutas.raiz);
+    // Desde el directorio del Corpus de prueba, sin `--corpus` (que `quitar` tomaría por slug).
+    const fallo = await promisify(execFile)(
+      join(RAIZ, 'node_modules', '.bin', 'tsx'),
+      [join(RAIZ, 'tools', 'tema.ts'), 'quitar', 'la-ira', DE_EPICTETO[3]!],
+      { cwd: dirname(rutas.raiz) },
+    ).then(
+      () => ({ codigo: 0, error: '' }),
+      (e: { code?: number; stderr?: string }) => ({ codigo: e.code ?? 1, error: e.stderr ?? '' }),
+    );
+    expect(fallo.codigo).toBe(1);
+    expect(fallo.error).toContain(`/cita/${EN_LA_IRA}/ — su Tema «La ira» (la-ira) tiene 14 Citas`);
+    expect(await instantaneaDe(rutas.raiz)).toEqual(antes);
   });
 
   it('quitar un Tema que no sostiene a nadie funciona como siempre', async () => {

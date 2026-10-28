@@ -11,6 +11,12 @@
  * — que es el primer criterio de la Historia 11.4 — y la única salida era editar el
  * frontmatter a mano.
  *
+ * **Aprobar exige un Tema con página** (Historia 26.8, NFR-5): una candidata se publica solo si
+ * alguno de sus Temas —los suyos o los de `--temas`— llega a `MIN_CITAS_POR_TEMA` contando lo
+ * publicado y lo que la misma pasada aprueba. La que no, sigue en `corpus/_revision/`, intacta,
+ * con sus Temas y sus recuentos en el parte, y la orden sale con 1. Las candidatas que salen de
+ * `extraer` no traen Temas: casi siempre hace falta `--temas`.
+ *
  * La cola sale ordenada de más a menos prometedora (Historia 19.6), y `--primeras` corta
  * por arriba **diciendo cuántas quedan debajo**: con veintiún mil candidatas pendientes,
  * leerlas todas no es un plan, y esconderlas tampoco.
@@ -142,6 +148,15 @@ if (aAprobar.length > 0) {
         '«npm run obra -- sembrar» antes de construir:',
     );
     for (const motivo of pendiente.motivos) lineas.push(`      ${motivo}`);
+  }
+  for (const suelta of resultado.publicadasSinTema) {
+    // Historia 26.8: publicada, pero la que le daba el Tema no llegó a publicarse.
+    fallo = true;
+    lineas.push(
+      `  ! ${suelta.slug} — publicada, pero se quedó sin ningún Tema publicado: dele un Tema con ` +
+        'página o retírela antes de construir.',
+    );
+    for (const motivo of suelta.motivos) lineas.push(`      ${motivo}`);
   }
   for (const slug of resultado.noEncontradas) {
     fallo = true;

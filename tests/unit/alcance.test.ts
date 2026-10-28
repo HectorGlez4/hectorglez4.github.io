@@ -1,4 +1,7 @@
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it } from 'vitest';
+import { mkdtemp, rm, writeFile } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import {
   grafoDelModelo,
   superficiesInalcanzables,
@@ -14,6 +17,7 @@ import {
   aristasQueFaltan,
   detalleDeAlcance,
   enlacesInternos,
+  fueraDeAlcanceTras,
   grafoDeDist,
   informeDeAlcance,
   lineaDeFuera,
@@ -25,6 +29,9 @@ import {
   titularDeAlcance,
   veredictoDeAlcance,
 } from '../../tools/lib/alcance.ts';
+import { rutasDelCorpus } from '../../tools/lib/corpus.ts';
+import { quitarTema } from '../../tools/lib/gestion.ts';
+import { EN_LA_IRA, SIN_EFECTO, sembrarCorpusAlLimite } from './ayuda/al-limite.ts';
 
 /**
  * Historia 26.8 — NFR-5 con puerta, sobre lo puro: el grafo del modelo, el del HTML construido
@@ -215,6 +222,14 @@ describe('Historia 26.8 — los enlaces de una página construida', () => {
     const grafo = grafoDeDist([{ ruta: '/autor/seneca/', html: '<a href="/cita/una/">x</a>' }]);
     expect([...grafo]).toEqual([['/autor/seneca', ['/cita/una']]]);
   });
+
+  it('una página cuyo marcado el tokenizador no sabe leer corta nombrando su ruta', () => {
+    const paginas = [
+      { ruta: '/cita/bien/', html: '<p><a href="/cita/una/">x</a></p>' },
+      { ruta: '/cita/rota/', html: '<p>texto<div><a href="/cita/dos/">x</a></div></p>' },
+    ];
+    expect(() => grafoDeDist(paginas)).toThrow(/no se puede leer el grafo de enlaces de \/cita\/rota\/: .*<p>/);
+  });
 });
 
 describe('Historia 26.8 — contención y veredicto', () => {
@@ -271,10 +286,10 @@ describe('Historia 26.8 — Tema publicado con la pasada', () => {
     expect(temaPublicadoConLaPasada([], ira, temas).admitidas.size).toBe(MIN_CITAS_POR_TEMA);
   });
 
-  it('sin Tema, o con Temas que no llegan, no; y el punto fijo arrastra a las que dependían de ella', () => {
+  it('sin Tema, o con Temas que no llegan ni con la pasada entera, no', () => {
     const pasada = [
       { clave: 'sin-tema', temas: [] as string[] },
-      // 14 de «La ira»: con la de abajo serían 15, pero esa no se publica… porque es de las 14.
+      // 14 de «La ira» en la pasada entera: ninguna llega, y se rechazan todas de una vez.
       ...Array.from({ length: MIN_CITAS_POR_TEMA - 1 }, (_, i) => ({ clave: `ira-${i}`, temas: ['la-ira'] })),
     ];
     const { admitidas, rechazadas } = temaPublicadoConLaPasada([], pasada, temas);
@@ -313,5 +328,54 @@ describe('Historia 26.8 — Tema publicado con la pasada', () => {
     expect(motivos[0]).toMatch(/dejaría 1 Cita a más de 3 saltos/);
     expect(motivos[1]).toMatch(/\/cita\/x\/ — su Tema «La ira» \(la-ira\) tiene 14 Citas/);
     expect(motivos.at(-1)).toMatch(/No se ha escrito ni movido nada/);
+  });
+});
+
+describe('Historia 26.8 — las órdenes que retiran miden solo lo que ellas dejan fuera', () => {
+  const temporales: string[] = [];
+  afterEach(async () => {
+    await Promise.all(temporales.splice(0).map((d) => rm(d, { recursive: true, force: true })));
+  });
+
+  /** El Corpus al límite, más una Cita de Séneca en su página 2 sin Tema ni Colección: ya fuera. */
+  async function conUnaYaFuera() {
+    const raiz = await mkdtemp(join(tmpdir(), 'sabiduria-ya-fuera-'));
+    temporales.push(raiz);
+    const rutas = rutasDelCorpus(join(raiz, 'corpus'));
+    await sembrarCorpusAlLimite(rutas);
+    const yaFuera = `seneca-a-${String(CITAS_POR_PAGINA + 3).padStart(3, '0')}`;
+    await writeFile(
+      join(rutas.citas, `seneca--a-${String(CITAS_POR_PAGINA + 3).padStart(3, '0')}.md`),
+      [
+        '---',
+        `texto: "Texto de ${yaFuera}, que ya estaba fuera de alcance antes de ninguna orden."`,
+        'autor: "seneca"',
+        `slug: "${yaFuera}"`,
+        'estadoDerechos: "dominio-público"',
+        '---',
+        '',
+      ].join('\n'),
+      'utf8',
+    );
+    return { rutas, yaFuera };
+  }
+
+  it('una Cita que ya estaba fuera no bloquea un cambio ajeno a ella', async () => {
+    const { rutas } = await conUnaYaFuera();
+    expect(await fueraDeAlcanceTras(rutas, (datos) => datos)).toEqual({ ok: true, fuera: [] });
+    const resultado = await quitarTema(rutas, 'el-tiempo', [SIN_EFECTO]);
+    expect(resultado.ok, resultado.ok ? '' : resultado.motivos.join('\n')).toBe(true);
+  });
+
+  it('y un cambio que deja fuera a otra nombra solo a esa', async () => {
+    const { rutas, yaFuera } = await conUnaYaFuera();
+    const comprobacion = await fueraDeAlcanceTras(rutas, (datos) => ({
+      ...datos,
+      citas: datos.citas.map((c) => (c.slug === EN_LA_IRA ? { ...c, temas: [] } : c)),
+    }));
+    expect(comprobacion.ok).toBe(true);
+    if (!comprobacion.ok) return;
+    expect(comprobacion.fuera.map((f) => f.slug)).toEqual([EN_LA_IRA]);
+    expect(comprobacion.fuera.map((f) => f.slug)).not.toContain(yaFuera);
   });
 });

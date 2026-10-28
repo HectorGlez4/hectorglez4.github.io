@@ -191,10 +191,25 @@ export function enlacesInternos(html: string): string[] {
   return [...rutas];
 }
 
-/** El grafo de enlaces de unas páginas construidas, por su ruta normalizada. */
+/**
+ * El grafo de enlaces de unas páginas construidas, por su ruta normalizada. Si el tokenizador
+ * rechaza el marcado de una página, el error dice cuál: sin eso, el build se cortaría con un
+ * fragmento de HTML y ninguna pista de dónde sale.
+ */
 export function grafoDeDist(paginas: Iterable<{ ruta: string; html: string }>): Map<string, string[]> {
   const grafo = new Map<string, string[]>();
-  for (const { ruta, html } of paginas) grafo.set(rutaNormalizada(ruta), enlacesInternos(html));
+  for (const { ruta, html } of paginas) {
+    let enlaces: string[];
+    try {
+      enlaces = enlacesInternos(html);
+    } catch (fallo) {
+      throw new Error(
+        `NFR-5: no se puede leer el grafo de enlaces de ${ruta}: ` +
+          `${fallo instanceof Error ? fallo.message : String(fallo)}`,
+      );
+    }
+    grafo.set(rutaNormalizada(ruta), enlaces);
+  }
   return grafo;
 }
 
@@ -331,9 +346,10 @@ export function detalleDeAlcance(veredicto: VeredictoDeAlcance): string[] {
 /** El titular de la excepción que corta el build, con los dos números. */
 export function titularDeAlcance(veredicto: VeredictoDeAlcance): string {
   return (
-    `NFR-5: ${veredicto.fuera.length} superficie(s) publicada(s) a más de ` +
-    `${MAX_SALTOS_DESDE_LA_PORTADA} saltos de la portada y ${veredicto.aristasQueFaltan.length} ` +
-    'arista(s) del modelo que faltan en dist/. El detalle está en el registro.'
+    `NFR-5: ${enNumero(veredicto.fuera.length, 'superficie publicada', 'superficies publicadas')} a más de ` +
+    `${MAX_SALTOS_DESDE_LA_PORTADA} saltos de la portada y ` +
+    `${enNumero(veredicto.aristasQueFaltan.length, 'arista', 'aristas')} del modelo que faltan en dist/. ` +
+    'El detalle está en el registro.'
   );
 }
 
@@ -443,29 +459,24 @@ export interface SinTemaPublicado<K> {
  * Una Cita sin ningún Tema publicado solo se alcanza por la página 1 de su Autor o de su Obra, y
  * el día que caiga a la 2 queda fuera: `aprobar` y `darDeAltaLote` no la publican. El Tema se
  * cuenta con `temasPublicados` sobre las publicadas **más** las que la misma pasada publicaría,
- * así que aprobar la 15.ª de un Tema —o varias que juntas llegan— se admite. Es un **punto
- * fijo**: quitar una rechazada puede dejar a otra sin Tema, y se repite hasta que nada cambia.
- * Pura: no lee ni escribe.
+ * así que aprobar la 15.ª de un Tema —o varias que juntas llegan— se admite. Pura: no lee ni
+ * escribe.
+ *
+ * **Basta una pasada, y no es un punto fijo.** Una Cita se rechaza solo cuando **ninguno** de sus
+ * Temas llega al umbral ni contando la pasada entera; quitarla solo baja el recuento de Temas
+ * que ya no se publicaban, y `temasPublicados` depende solo del recuento, así que no puede dejar
+ * sin página el Tema de otra. Por eso el recuento del parte —lo publicado más la pasada entera,
+ * la propia incluida— nombra siempre los Temas de la rechazada: «tendría 14» quiere decir que ni
+ * con todo lo que se pidió llega.
  */
 export function temaPublicadoConLaPasada<K>(
   publicadas: readonly Pick<Cita, 'temas'>[],
   pasada: readonly { clave: K; temas: readonly string[] }[],
   temas: readonly Tema[],
 ): { admitidas: Set<K>; rechazadas: SinTemaPublicado<K>[] } {
-  let dentro = [...pasada];
-  for (;;) {
-    const todas = [...publicadas, ...dentro.map((c) => ({ temas: [...c.temas] }))];
-    const conPagina = new Set(temasPublicados([...temas], todas as unknown as Cita[]).map((t) => t.slug));
-    const siguen = dentro.filter((c) => c.temas.some((t) => conPagina.has(t)));
-    if (siguen.length === dentro.length) break;
-    dentro = siguen;
-  }
-  const admitidas = new Set(dentro.map((c) => c.clave));
-  /*
-   * El recuento del parte es el de lo publicado **más la pasada entera**, la propia incluida:
-   * «tendría 14» quiere decir que ni con todo lo que se pidió llega.
-   */
   const conLaPasada = [...publicadas, ...pasada.map((c) => ({ temas: [...c.temas] }))];
+  const conPagina = new Set(temasPublicados([...temas], conLaPasada as unknown as Cita[]).map((t) => t.slug));
+  const admitidas = new Set(pasada.filter((c) => c.temas.some((t) => conPagina.has(t))).map((c) => c.clave));
   return {
     admitidas,
     rechazadas: pasada

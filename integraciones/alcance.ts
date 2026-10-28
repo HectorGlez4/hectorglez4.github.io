@@ -38,6 +38,9 @@ import {
   veredictoDeAlcance,
 } from '../tools/lib/alcance.ts';
 
+/** Cuántas páginas de `dist/` se leen a la vez. */
+const PAGINAS_POR_TANDA = 64;
+
 export default function alcanceDesdeLaPortada(): AstroIntegration {
   let raiz = process.cwd();
 
@@ -54,14 +57,23 @@ export default function alcanceDesdeLaPortada(): AstroIntegration {
         const ficheros = entradas
           .filter((entrada) => entrada.isFile() && entrada.name.endsWith('.html'))
           .map((entrada) => join(entrada.parentPath, entrada.name));
-        const paginas = await Promise.all(
-          ficheros.map(async (fichero) => ({
-            ruta: rutaDeFicheroHtml(relative(dist, fichero).split(sep).join('/')),
-            html: await readFile(fichero, 'utf8'),
-          })),
-        );
 
-        const construido = grafoDeDist(paginas);
+        /*
+         * Por tandas de `PAGINAS_POR_TANDA`: abrir los ~5.300 ficheros a la vez arriesga EMFILE y
+         * guardaría todo el HTML en memoria. De cada página se queda solo su lista de enlaces.
+         */
+        const construido = new Map<string, string[]>();
+        for (let desde = 0; desde < ficheros.length; desde += PAGINAS_POR_TANDA) {
+          const tanda = await Promise.all(
+            ficheros.slice(desde, desde + PAGINAS_POR_TANDA).map(async (fichero) => ({
+              ruta: rutaDeFicheroHtml(relative(dist, fichero).split(sep).join('/')),
+              html: await readFile(fichero, 'utf8'),
+            })),
+          );
+          // `grafoDeDist` nombra la página cuyo marcado no sabe leer.
+          for (const [origen, destinos] of grafoDeDist(tanda)) construido.set(origen, destinos);
+        }
+
         const modelo = await modeloDelCorpus(rutasDelCorpus(join(raiz, 'corpus')));
         const veredicto = veredictoDeAlcance(modelo.conjunto, modelo.grafo, construido);
 

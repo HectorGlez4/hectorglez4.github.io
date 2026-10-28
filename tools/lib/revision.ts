@@ -228,6 +228,13 @@ export interface ResultadoDeDecision {
    * completa.
    */
   fichasSinAsegurar: { slug: string; motivos: string[] }[];
+  /**
+   * Publicadas que, tras escribir la pasada, se quedaron sin ningún Tema publicado porque otra de
+   * la que dependía no llegó a publicarse —su Ficha de Obra chocó al escribir con otra nueva de la
+   * misma pasada—. Ya están en `corpus/citas/`: o se les da un Tema con página, o se retiran,
+   * antes de construir. Vacío casi siempre — Historia 26.8.
+   */
+  publicadasSinTema: { slug: string; temas: TemaBajoUmbral[]; motivos: string[] }[];
   rechazadas: string[];
   noEncontradas: string[];
 }
@@ -252,6 +259,7 @@ export async function aprobar(
     rechazadasPorFicha: [],
     rechazadasPorTema: [],
     fichasSinAsegurar: [],
+    publicadasSinTema: [],
     rechazadas: [],
     noEncontradas: [],
   };
@@ -284,31 +292,70 @@ export async function aprobar(
 
   /*
    * Historia 26.8 — primero se **planifica** la pasada entera, sin escribir nada: qué se
-   * encuentra, qué admite la puerta y, de eso, qué tendría algún Tema publicado contando lo ya
-   * publicado **y** lo que esta pasada publicaría (`temaPublicadoConLaPasada`, un punto fijo).
-   * Solo entonces se escribe, en el orden pedido. La que no tendría Tema sigue en revisión,
-   * intacta, con sus Temas y sus recuentos en el parte.
+   * encuentra, qué admite la puerta, qué Ficha de Obra se puede asegurar contra el disco de hoy y,
+   * de lo que queda, qué tendría algún Tema publicado contando lo ya publicado **y** lo que esta
+   * pasada publicaría (`temaPublicadoConLaPasada`). Solo entonces se escribe, en el orden pedido.
+   * La que no tendría Tema sigue en revisión, intacta, con sus Temas y sus recuentos en el parte.
+   *
+   * Un slug repetido en la orden es una sola candidata: contarla dos veces le daría al Tema una
+   * Cita que no se publica.
    */
-  const planeadas: { indice: number; slug: string; candidata: CandidataEnRevision; temas: string[] }[] = [];
-  slugs.forEach((slug, indice) => {
+  const planeadas: {
+    indice: number;
+    slug: string;
+    candidata: CandidataEnRevision;
+    temas: string[];
+    comoPublicada: { autor: string; procedencia?: { obra?: string } };
+  }[] = [];
+  const planeadasParaObra = [...publicadasParaObra];
+  for (const [indice, slug] of [...new Set(slugs)].entries()) {
     const candidata = lote.find((c) => c.slug === slug);
     if (candidata === undefined) {
       resultado.noEncontradas.push(slug);
-      return;
+      continue;
     }
     if (!candidata.admisible) {
       resultado.rechazadasPorAdmision.push({ slug, motivos: candidata.motivos });
-      return;
+      continue;
     }
-    planeadas.push({ indice, slug, candidata, temas: [...new Set([...(candidata.temas ?? []), ...temas])] });
-  });
+    const obra = candidata.obra;
+    const comoPublicada = {
+      autor: candidata.autor,
+      ...(obra !== undefined ? { procedencia: { obra } } : {}),
+    };
+    /*
+     * La Ficha se resuelve ya aquí, en solo lectura: la que choca con una ficha del disco no
+     * cuenta para los Temas de las demás, y así ninguna se publica apoyada en una que no saldrá.
+     * Al escribir se vuelve a resolver, porque el disco cambia con cada ficha escrita.
+     */
+    if (obra !== undefined) {
+      const plan = await resolverFichaDeObra(rutas, {
+        autor: candidata.autor,
+        obra,
+        citasPublicadas: [...planeadasParaObra, comoPublicada],
+      });
+      if (!plan.ok) {
+        resultado.rechazadasPorFicha.push({ slug, motivos: plan.motivos });
+        continue;
+      }
+    }
+    planeadasParaObra.push(comoPublicada);
+    planeadas.push({
+      indice,
+      slug,
+      candidata,
+      temas: [...new Set([...(candidata.temas ?? []), ...temas])],
+      comoPublicada,
+    });
+  }
 
   // Lo que esta pasada ya publicó: cuenta para los Temas de las que quedan.
-  const escritas: { temas: string[] }[] = [];
+  const escritas: { slug: string; temas: string[] }[] = [];
   let pendientes = planeadas;
   /*
-   * El punto fijo sobre lo que queda por escribir. Se repite si una Ficha de Obra deja a una sin
-   * publicar, porque esa ya no cuenta para los Temas de las demás. Lo escrito no se deshace.
+   * La regla de Tema sobre lo que queda por escribir. Se repite si una Ficha de Obra falla al
+   * escribir —solo una colisión entre dos fichas nuevas de la misma pasada, que la planificación
+   * no ve—, porque esa ya no cuenta para los Temas de las demás.
    */
   const replanificar = () => {
     const { admitidas, rechazadas } = temaPublicadoConLaPasada(
@@ -329,7 +376,7 @@ export async function aprobar(
   replanificar();
 
   while (pendientes.length > 0) {
-    const { slug, candidata, temas: suyos } = pendientes.shift()!;
+    const { slug, candidata, temas: suyos, comoPublicada } = pendientes.shift()!;
 
     /*
      * Historia 22.1 — la Ficha de Obra, en el mismo gesto en que se publica (AD-25).
@@ -339,10 +386,6 @@ export async function aprobar(
      * mover la Cita, así que ningún fallo deja una ficha sin Citas.
      */
     const obra = candidata.obra;
-    const comoPublicada = {
-      autor: candidata.autor,
-      ...(obra !== undefined ? { procedencia: { obra } } : {}),
-    };
     const plan =
       obra === undefined
         ? undefined
@@ -369,7 +412,7 @@ export async function aprobar(
       }
     }
     publicadasParaObra.push(comoPublicada);
-    escritas.push({ temas: suyos });
+    escritas.push({ slug: definitivo, temas: suyos });
 
     if (plan !== undefined) {
       const ficha = await aplicarFichaDeObra(rutas, plan);
@@ -377,6 +420,19 @@ export async function aprobar(
     }
 
     resultado.publicadas.push(slug);
+  }
+
+  /*
+   * Lo escrito no se deshace. Si una Ficha que falló al escribir era la que le daba el Tema a una
+   * ya publicada, esa Cita queda sin Tema publicado: se dice aquí, y la orden sale con 1, en vez de
+   * que lo descubra el próximo build.
+   */
+  for (const { clave: suelta, temas: suyos } of temaPublicadoConLaPasada(
+    yaPublicadas,
+    escritas.map((e) => ({ clave: e.slug, temas: e.temas })),
+    temasDelCorpus,
+  ).rechazadas) {
+    resultado.publicadasSinTema.push({ slug: suelta, temas: suyos, motivos: [motivoSinTemaPublicado(suyos)] });
   }
 
   return resultado;
@@ -471,6 +527,7 @@ export async function rechazar(rutas: Rutas, slugs: string[]): Promise<Resultado
     rechazadasPorFicha: [],
     rechazadasPorTema: [],
     fichasSinAsegurar: [],
+    publicadasSinTema: [],
     rechazadas: [],
     noEncontradas: [],
   };
