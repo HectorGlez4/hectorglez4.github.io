@@ -107,6 +107,28 @@ describe('Historia 26.2 — un solo emisor y un solo lector del tipo', () => {
     expect(conTipo).toEqual([]);
   });
 
+  it('`data-pagefind-filter` solo lo escribe `Armazon.astro`, y solo `buscar.astro` configura Pagefind', async () => {
+    // Un filtro escrito a mano en otra página, o en una isla, sería un segundo emisor del tipo
+    // que la prueba de `FILTRO_DE_TIPO` no ve; y unas opciones de Pagefind fuera de
+    // `OPCIONES_DE_PAGEFIND` serían un segundo sitio donde la búsqueda pesa la metadata.
+    const filtran: string[] = [];
+    const pesan: string[] = [];
+    const configuran: string[] = [];
+    for (const fichero of [...(await ficheros('src')), ...(await ficheros('public'))]) {
+      const codigo = sinComentarios(await readFile(join(RAIZ, fichero), 'utf8'));
+      if (/data-pagefind-filter/u.test(codigo)) filtran.push(fichero);
+      if (/\bmetaWeights\b/u.test(codigo)) pesan.push(fichero);
+      if (/\.options\(/u.test(codigo)) configuran.push(fichero);
+    }
+    expect(filtran).toEqual(['src/components/Armazon.astro']);
+    expect(pesan).toEqual(['src/lib/tipoDeResultado.ts']);
+    expect(configuran).toEqual(['src/pages/buscar.astro']);
+    const buscar = sinComentarios(await readFile(join(RAIZ, 'src/pages/buscar.astro'), 'utf8'));
+    expect(buscar.match(/\.options\(/gu)).toEqual(['.options(']);
+    expect(buscar).toContain('pf.options(PAGEFIND)');
+    expect(buscar).toContain('PAGEFIND: OPCIONES_DE_PAGEFIND');
+  });
+
   it('el detector ve lo que tiene que ver', () => {
     expect(META_CON_TIPO.test('<main data-pagefind-meta="tipo:obra">')).toBe(true);
     expect(META_CON_TIPO.test('<main data-pagefind-meta={tipo ? `tipo:${tipo}` : undefined}>')).toBe(true);

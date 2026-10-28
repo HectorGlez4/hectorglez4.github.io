@@ -481,6 +481,10 @@ test.describe('Historia 26.2 — el tipo no casa como texto y la portada tiene e
         : [`«${termino}»: ${sinCoincidencia.length} de ${total} sin el término (${sinCoincidencia.slice(0, 3).join(', ')}…)`];
     });
     expect(fallos).toEqual([]);
+    // Y no en vacío: un índice roto, o uno que no devuelve nada, pasaría lo de arriba sin mirar.
+    // Estas palabras salen en el contenido de muchas páginas, y la marca en el `h1` de la portada.
+    const vacios = ['obra', 'cita', 'autor', 'tema', MARCA].filter((termino) => porTermino[termino].total === 0);
+    expect(vacios, 'términos sin ningún resultado').toEqual([]);
   });
 
   /** Lo que pinta un resultado del tipo dado, con su presentación calculada. */
@@ -523,17 +527,18 @@ test.describe('Historia 26.2 — el tipo no casa como texto y la portada tiene e
   // (c) Lo que la portada enseña ya tiene su página en el índice: la portada no sale por ello.
   test('el texto de la Cita del Día y el nombre de un Autor de la portada dan su página, no la portada', async ({ page }) => {
     await page.goto('/');
+    // El Corpus publicado trae Citas aptas para portada, así que la Cita del Día está: si faltara,
+    // la mitad de esta prueba no miraría nada, y eso se dice en vez de saltarlo.
     const delDia = page.locator('section.del-dia');
-    if ((await delDia.count()) > 0) {
-      const texto = (await delDia.locator('.texto').first().textContent())!.replace(/[«»]/g, '').trim();
-      const fragmento = texto.split(/\s+/).slice(0, 5).join(' ');
-      const destino = (await delDia.getByRole('link', { name: 'Ver esta cita' }).getAttribute('href'))!;
-      await buscar(page, fragmento);
-      const hrefs = (await resultados(page)).map((r) => r.href.replace(/\/?$/, '/'));
-      expect(hrefs, fragmento).toContain(destino.replace(/\/?$/, '/'));
-      expect(hrefs, fragmento).not.toContain('/');
-      await page.goto('/');
-    }
+    await expect(delDia, 'la portada no pinta la Cita del Día').toHaveCount(1);
+    const texto = (await delDia.locator('.texto').first().textContent())!.replace(/[«»]/g, '').trim();
+    const fragmento = texto.split(/\s+/).slice(0, 5).join(' ');
+    const destino = (await delDia.getByRole('link', { name: 'Ver esta cita' }).getAttribute('href'))!;
+    await buscar(page, fragmento);
+    const deLaCita = (await resultados(page)).map((r) => r.href.replace(/\/?$/, '/'));
+    expect(deLaCita, fragmento).toContain(destino.replace(/\/?$/, '/'));
+    expect(deLaCita, fragmento).not.toContain('/');
+    await page.goto('/');
 
     const autor = page.locator('ul.autores a').first();
     const nombre = (await autor.textContent())!.trim();

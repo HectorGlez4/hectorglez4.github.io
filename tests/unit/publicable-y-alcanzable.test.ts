@@ -25,7 +25,7 @@ import {
 } from '../../src/lib/superficies.ts';
 import { CITAS_POR_PAGINA, MAX_SALTOS_DESDE_LA_PORTADA } from '../../src/lib/umbrales.ts';
 import { MARCA } from '../../src/lib/marca.ts';
-import { FILTRO_DE_TIPO } from '../../src/lib/tipoDeResultado.ts';
+import { FILTRO_DE_TIPO, OPCIONES_DE_PAGEFIND } from '../../src/lib/tipoDeResultado.ts';
 import { recorrerElementos, type Elemento } from './ayuda/enlaces.js';
 
 /**
@@ -243,6 +243,12 @@ const CORPUS_COMPLETO: Record<string, string> = {
         texto: `Carta ${i + 1}: nadie se hace sabio por casualidad, y hay que aprenderlo.`,
         procedencia: { obra: 'Cartas a Lucilio', año: 64 },
         fuente: { id: 'wikisource-es', url: 'https://es.wikisource.org/wiki/Cartas_a_Lucilio' },
+        /*
+         * Historia 26.2 — una Cita apta para portada, para que la portada construida pinte la Cita
+         * del Día, que es lo que lleva en producción: sin ninguna apta pinta la entrada, y la
+         * prueba de que la portada solo expone su `h1` no vería nunca `section.del-dia`.
+         */
+        aptaParaPortada: i === 0 ? true : undefined,
       }),
     ]),
   ),
@@ -598,6 +604,32 @@ describe('Historia 12.1 — sobre un sitio construido de verdad', () => {
       expect([...vistas].sort()).toEqual(['autor', 'cita', 'coleccion', 'obra', 'portada', 'tema']);
     });
 
+    it('todo `data-pagefind-meta` construido que no sea `title` declara su peso en `OPCIONES_DE_PAGEFIND`', async () => {
+      /*
+       * Un metadato se busca y puntúa por omisión desde Pagefind 1.5. El que llegue sin peso
+       * declarado puntúa con el de Pagefind sin que nadie lo haya decidido: la regla de AGENTS.md
+       * se cumple aquí, sobre lo que indexa Pagefind, y no de memoria.
+       */
+      const pesos = OPCIONES_DE_PAGEFIND.ranking.metaWeights as Record<string, number>;
+      const vistas = new Set<string>();
+      const sinPeso: string[] = [];
+      for (const [ruta, html] of await paginas()) {
+        recorrerElementos(html, (elemento) => {
+          const meta = elemento.atributos.get('data-pagefind-meta');
+          if (meta === undefined) return;
+          for (const parte of meta.split(',')) {
+            const clave = parte.trim().split(/[:[]/)[0].trim();
+            if (clave === '') continue;
+            vistas.add(clave);
+            if (clave !== 'title' && !(clave in pesos)) sinPeso.push(`${ruta}: ${clave}`);
+          }
+        });
+      }
+      expect(sinPeso).toEqual([]);
+      // No en vacío: la Cabecera de la Obra indexable escribe `autor`.
+      expect(vistas).toContain('autor');
+    });
+
     it('la portada solo expone su `h1`, que es la marca: todo lo demás de `main` queda fuera del índice', async () => {
       const portada = (await paginas()).get('/')!;
       expect(portada).toBeDefined();
@@ -618,7 +650,14 @@ describe('Historia 12.1 — sobre un sitio construido de verdad', () => {
         .filter(({ elemento, antepasados }) => ![elemento, ...antepasados].some(ignora))
         .map(({ elemento }) => `<${elemento.etiqueta} class="${elemento.atributos.get('class') ?? ''}">`);
       expect(expuestos).toEqual([]);
-      // Y no en vacío: la portada trae la Cita del Día o la entrada, los Temas y los Autores.
+      // La Cita del Día —el estado de producción, con alguna Cita apta— está en la portada y
+      // fuera del índice: buscar su texto daba también la portada.
+      const delDia = enMain.filter(
+        ({ elemento }) => elemento.etiqueta === 'section' && /\bdel-dia\b/.test(elemento.atributos.get('class') ?? ''),
+      );
+      expect(delDia).toHaveLength(1);
+      expect([delDia[0].elemento, ...delDia[0].antepasados].some(ignora)).toBe(true);
+      // Y no en vacío: la portada trae la Cita del Día, los Temas y los Autores.
       expect(enMain.length).toBeGreaterThan(10);
       expect(enMain.filter(({ elemento }) => elemento.atributos.get('data-pagefind-ignore') === 'all').length).toBeGreaterThanOrEqual(3);
 

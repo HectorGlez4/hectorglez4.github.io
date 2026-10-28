@@ -5,7 +5,7 @@ created: '2026-10-26'
 status: 'done'
 baseline_revision: 'f8f103d26d1893be38ab989b600ad8eac5767e1b'
 review_loop_iteration: 0
-followup_review_recommended: false
+followup_review_recommended: true
 context:
   - '{project-root}/_bmad-output/implementation-artifacts/epic-26-context.md'
 warnings:
@@ -121,6 +121,38 @@ deferred:
 Las capas de revisión son externas en este bucle y no traían hallazgos en esta pasada; la
 revisión independiente va después.
 
+### 2026-10-28 — Review pass
+- intent_gap: 0
+- bad_spec: 0
+- patch: 5 (high 0, medium 2, low 3)
+- defer: 0
+- reject: 16
+- addressed_findings:
+  - `[medium]` `[patch]` La exclusión de `section.del-dia` no la miraba ninguna prueba del CI: el corpus de `CORPUS_COMPLETO` no tenía ninguna Cita apta y la portada construida pintaba `p.entrada` (verification-gap). Una Cita de «Cartas a Lucilio» pasa a `aptaParaPortada: true` y la prueba de la portada exige una `section.del-dia` cubierta por un `data-pagefind-ignore="all"`; quitado el atributo, la prueba se pone en rojo (comprobado).
+  - `[medium]` `[patch]` Nada hacía cumplir que todo `data-pagefind-meta` declare su peso (blind-hunter, ac-auditor 1). Nueva prueba sobre `dist/` en `publicable-y-alcanzable.test.ts`: toda clave de `data-pagefind-meta` salvo `title` está en `OPCIONES_DE_PAGEFIND.ranking.metaWeights`, y no en vacío (ve `autor`).
+  - `[low]` `[patch]` La regla mezclaba puntuar y casar (blind-hunter). `AGENTS.md` y el docblock de `OPCIONES_DE_PAGEFIND` dicen ahora que un peso 0 quita la puntuación y no la coincidencia, y que un valor que no deba casar va en un filtro o bajo `data-pagefind-ignore`, nunca en un metadato.
+  - `[low]` `[patch]` Un solo sitio de configuración y un solo emisor del filtro, sin prueba (ac-auditor 2; blind-hunter: el emisor solo se buscaba por el nombre de la constante y no en `public/`): `tipo-de-resultado.test.ts` exige que `data-pagefind-filter` solo aparezca en `Armazon.astro`, `metaWeights` solo en `tipoDeResultado.ts` y `.options(` solo una vez, en `buscar.astro`, en `src/` y `public/`.
+  - `[low]` `[patch]` Las pruebas e2e podían pasar sin mirar (blind-hunter, ac-auditor 3 y 4, intent-alignment): (a) exige además `total > 0` para «obra», «cita», «autor», «tema» y la marca; (c) exige la `section.del-dia` con `toHaveCount(1)` en vez de saltarse su mitad con un `if`.
+
+Rechazados, con su motivo: el `done` antes de la revisión y el `baseline_revision` reescrito
+(son el flujo de este bucle: la revisión externa corre sobre un spec cerrado y la base es la
+revisión de antes del código); `options()` tras `init()` (comprobado en el `pagefind.js` 1.5.2
+construido: tras `init`, `options` llama a `set_ranking` sobre la instancia viva, y tras
+`destroy` deja `initial_options` para la siguiente); el `data-tipo` en crudo de un tipo
+desconocido (lo fija la matriz del contrato); el `ETIQUETA[tipo]` por herencia (el filtro solo lo
+escribe `Armazon.astro` con un tipo de la tabla, y los 102 bytes libres no se gastan en ello);
+la ventana de despliegue con fragmentos viejos (transitoria y cosmética: todo se rotula «Cita»);
+la tabla de familias copiada en la prueba (que la 26.3 tenga que añadir `directorio` es lo
+querido); la prueba de la portada por elementos y no por nodos de texto (el marcado no tiene texto
+suelto en los antepasados del `h1`); los cinco `data-pagefind-ignore` (el contrato dice «sin
+envoltorio nuevo»); `.de-obra` sin residuo (comprobado con `grep`: solo un comentario); los bytes anotados
+en prosa y el rótulo `directorio` (los pide el contrato); `options()` dentro del `try` (decidido
+en el contrato); los tres recorridos de `dist/` (el corpus de prueba es pequeño); la carrera de un
+`destroy()` sin esperar con una búsqueda en vuelo (edge-case-hunter: hace falta que el índice
+falle con dos búsquedas solapadas, el efecto es el orden de una sola búsqueda sin `autor: 0`, la
+siguiente lo corrige, y la guarda cuesta bytes de los 102 libres); el rojo previo no reproducido
+por el auditor (está en el parte de verificación); y el diferido de la 27.1, ya registrado.
+
 ## Design Notes
 
 **Por qué un filtro.** Pagefind 1.5 busca la metadata, y `metaWeights: 0` solo quita su efecto en el orden, no la coincidencia: medido, la página sigue saliendo. Un filtro no entra en el contenido ni en la búsqueda de texto, viaja en el fragmento de cada página (`data().filters`, sin descargar el índice de filtros) y lo escribe un atributo, así que la prueba de `dist/` lo cuenta. Consecuencia para la 27: `pf.filters()` traerá también la clave `tipo`, y sus pruebas comparan clave a clave.
@@ -216,3 +248,43 @@ hallazgos en esta pasada). Recomendación de revisión de seguimiento: `false` (
 - `pf.filters()` traerá la clave `tipo` cuando la 27 lo use, y sus pruebas deben compararlo
   clave a clave (Design Notes).
 - Sigue el diferido para Héctor sobre la letra del criterio de la 27.1 (frontmatter).
+
+### Revisión externa, primera pasada (2026-10-28)
+
+**Resumen.** Cinco parches, todos en las pruebas y en la documentación; el código del sitio no
+cambia (solo el docblock de `OPCIONES_DE_PAGEFIND`). La portada de la construcción de prueba pinta
+ya la Cita del Día y la prueba de `dist/` exige que quede fuera del índice; todo
+`data-pagefind-meta` construido declara su peso; un solo emisor del filtro y un solo sitio que
+configura Pagefind, en `src/` y `public/`; y las dos pruebas e2e que podían pasar sin mirar ya no.
+
+**Ficheros.**
+- `tests/unit/publicable-y-alcanzable.test.ts` — una Cita de `CORPUS_COMPLETO` apta para portada;
+  la prueba de la portada exige `section.del-dia` bajo un `data-pagefind-ignore="all"`; prueba
+  nueva: toda clave de `data-pagefind-meta` salvo `title` tiene peso en `OPCIONES_DE_PAGEFIND`.
+- `tests/unit/tipo-de-resultado.test.ts` — `data-pagefind-filter` solo en `Armazon.astro`,
+  `metaWeights` solo en `tipoDeResultado.ts`, `.options(` una vez y solo en `buscar.astro`.
+- `tests/e2e/busqueda.spec.ts` — (a) exige resultados para «obra», «cita», «autor», «tema» y la
+  marca; (c) exige la Cita del Día en vez de saltarse su mitad.
+- `src/lib/tipoDeResultado.ts`, `AGENTS.md` — un peso 0 quita la puntuación, no la coincidencia.
+
+**Revisión.** Parches aplicados: 5 (high 0, medium 2, low 3). Diferidos nuevos: 0. Rechazados: 16.
+Recomendación de revisión de seguimiento: `true` (puntuación 3 × 2 + 3 = 9).
+
+**Verificación.**
+- `npx vitest run tests/unit/tipo-de-resultado.test.ts` — 9 verdes; `tipo-de-open-graph` — 4 verdes.
+- `npx vitest run tests/unit/publicable-y-alcanzable.test.ts` — 34 verdes. Con el
+  `data-pagefind-ignore` quitado a mano de `section.del-dia`, la prueba de la portada se pone en
+  rojo (comprobado y devuelto con `git checkout`).
+- `npm run check` — 0 errores, 0 avisos.
+- `npm test` en segundo plano — 138 ficheros, 6.345 pruebas, `FINISHED EXIT=0`.
+- `npx playwright test tests/e2e/busqueda.spec.ts tests/e2e/receptor.spec.ts` — 108 verdes, 64
+  saltadas (las de siempre), `FINISHED EXIT=0`; las cuatro pruebas 26.2 verdes en los dos
+  proyectos. Puertos 4321, 4399, 4400, 4402 y 8787 libres al terminar.
+- No se repitió el rojo previo al cambio: los parches son de pruebas y no tocan el medio.
+
+**Riesgos residuales.**
+- La carrera de un `destroy()` sin esperar con una búsqueda en vuelo puede dejar una búsqueda sin
+  `autor: 0` (solo su orden); se rechazó por los 102 bytes libres de `/buscar/`.
+- La prueba (c) depende de que un fragmento de cinco palabras de la Cita del Día la devuelva entre
+  los 30 primeros; con la Cita del día de cada jornada puede variar.
+

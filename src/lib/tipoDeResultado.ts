@@ -69,12 +69,15 @@ export const TIPOS_CON_TITULO_EN_SANS: readonly TipoDeResultado[] = ['obra', 'di
 /**
  * Las opciones con que la búsqueda propia configura Pagefind — el único sitio donde se hace.
  *
- * Pagefind 1.5 busca la metadata, y todo `data-pagefind-meta` que no deba **puntuar** declara
- * aquí su peso 0. Hoy es uno: `autor`, que la Cabecera de Obra escribe para pintar la línea del
- * resultado (Historia 22.7) y cuyo texto ya está en el cuerpo indexado; la Épica 27 lo usará
- * igual para el Autor bajo la Cita, con el mismo campo y por la misma razón. `title` no se
- * nombra: conserva el 5 que Pagefind le da por omisión. El tipo no está aquí porque no es
- * metadato sino filtro (`FILTRO_DE_TIPO`), y un filtro no se busca.
+ * Pagefind 1.5 busca la metadata, y todo `data-pagefind-meta` salvo `title` declara aquí su
+ * peso (lo exige una prueba sobre `dist/` de `tests/unit/publicable-y-alcanzable.test.ts`). Hoy es
+ * uno: `autor`, que la Cabecera de Obra escribe para pintar la línea del resultado (Historia 22.7)
+ * y pesa 0; la Épica 27 lo usará igual para el Autor bajo la Cita, con el mismo campo y por la
+ * misma razón. Un peso 0 quita la **puntuación**, no la coincidencia: `autor` no estorba solo
+ * porque su texto ya está en el cuerpo indexado, y un valor que no deba casar como texto va en un
+ * filtro o bajo `data-pagefind-ignore`, nunca en un metadato. `title` no se nombra: conserva el 5
+ * que Pagefind le da por omisión. El tipo no está aquí porque no es metadato sino filtro
+ * (`FILTRO_DE_TIPO`), y un filtro no se busca.
  *
  * `src/pages/buscar.astro` las aplica con `options()` antes de **cada** `search()`: el
  * `destroy()` del reintento de la 23.8 deja a cero las opciones del módulo, y la instancia que
