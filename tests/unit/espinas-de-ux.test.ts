@@ -97,6 +97,56 @@ describe('Historia 22.10 — nada suprime el anillo de foco', () => {
   });
 });
 
+/**
+ * Historia 26.9 — el reflujo a 320 px lo mide `tests/e2e/accesibilidad.spec.ts`, que el CI no
+ * corre. Aquí se fija la mitad que se ve en la fuente: las reglas que lo sostienen. Quitar
+ * cualquiera devolvería un desborde con el texto al 200 % sin que nada en el CI se pusiera rojo.
+ */
+describe('Historia 26.9 — las reglas del reflujo, en la fuente', () => {
+  /** Las declaraciones del primer bloque de reglas cuyo selector es exactamente `selector`. */
+  function declaraciones(css: string, selector: string): Record<string, string> {
+    const sinComentarios = css.replace(/\/\*[\s\S]*?\*\//g, '');
+    const bloque = new RegExp(`(?:^|[}\\s])${selector.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*\\{([^}]*)\\}`, 'm').exec(
+      sinComentarios,
+    );
+    if (bloque === null) return {};
+    return Object.fromEntries(
+      bloque[1]
+        .split(';')
+        .map((d) => d.trim())
+        .filter(Boolean)
+        .map((d) => [d.slice(0, d.indexOf(':')).trim(), d.slice(d.indexOf(':') + 1).trim()]),
+    );
+  }
+
+  it('`body` parte la palabra que no cabe en su línea', async () => {
+    const css = await readFile(join(RAIZ, 'src/styles/tokens.css'), 'utf8');
+    expect(declaraciones(css, 'body')['overflow-wrap']).toBe('break-word');
+  });
+
+  it('la fila de la Paginación se parte por el mínimo de sus ítems, no por su ancho natural', async () => {
+    const css = await readFile(join(RAIZ, 'src/components/Paginacion.astro'), 'utf8');
+    expect(declaraciones(css, '.paginacion')['flex-wrap']).toBe('wrap');
+    expect(declaraciones(css, '.cuenta')).toMatchObject({ flex: '1 1 0', 'max-width': 'max-content' });
+    expect(declaraciones(css, '.numeros')).toMatchObject({ flex: '1000 1 0', 'max-width': 'max-content' });
+  });
+
+  it('los nombres del Corpus en una caja flexible o en línea-bloque rebajan su mínimo para partir', async () => {
+    for (const fichero of ['src/components/Chips.astro', 'src/pages/index.astro', 'src/pages/404.astro', 'src/pages/buscar.astro']) {
+      const css = await readFile(join(RAIZ, fichero), 'utf8');
+      expect(declaraciones(css, '.chip')['overflow-wrap'], `${fichero}: .chip`).toBe('anywhere');
+    }
+    for (const [fichero, selector] of [
+      ['src/pages/index.astro', '.autores a'],
+      ['src/components/Atribucion.astro', '.autor a'],
+      ['src/pages/obra/[autor]/[slug]/[...page].astro', '.de a'],
+    ]) {
+      const css = await readFile(join(RAIZ, fichero), 'utf8');
+      expect(declaraciones(css, selector)['overflow-wrap'], `${fichero}: ${selector}`).toBe('anywhere');
+    }
+  });
+});
+
 describe('Historia 22.10 — el aviso de pestaña nueva tiene un solo dueño', () => {
   it('los tres enlaces que abren pestaña nueva lo toman de `src/lib/accesibilidad.ts`', async () => {
     for (const componente of [

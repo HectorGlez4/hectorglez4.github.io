@@ -82,6 +82,10 @@ const enlaceDeObra = cita.obra === undefined ? undefined : rutaDeLaObra(cita.obr
    */
   .autor a {
     display: inline-block;
+    /* NFR-8, Historia 26.9 — el nombre del Autor es del Corpus: con el texto al 200 % una palabra
+     * más ancha que la columna se parte. En un `inline-block`, `break-word` no basta: no rebaja
+     * el ancho mínimo de la caja. */
+    overflow-wrap: anywhere;
     padding-block: calc(var(--zona-de-toque) / 2 + var(--unidad) / 4) calc(var(--unidad) / 4);
     margin-block: calc(var(--zona-de-toque) / -2 - var(--unidad) / 4) calc(var(--unidad) / -4);
   }

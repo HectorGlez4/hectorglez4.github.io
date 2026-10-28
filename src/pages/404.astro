@@ -190,5 +190,9 @@ const autorDelDia = seleccion
     font-size: var(--cuerpo-md);
     color: var(--tinta);
     text-decoration: none;
+    /* NFR-8, Historia 26.9 — el nombre del chip es del Corpus: con el texto al 200 % una palabra
+     * más ancha que la columna se parte. El chip es un elemento flexible y `break-word` no rebaja
+     * su ancho mínimo; `anywhere` sí. */
+    overflow-wrap: anywhere;
   }
 </style>
