@@ -16,7 +16,7 @@
 import { z } from 'astro/zod';
 import { MAX_CARACTERES_CRITERIO, MAX_CARACTERES_NOTA_DE_OBRA } from './umbrales.ts';
 import { inicialDeClave, normalizar } from './normalizar.ts';
-import { esJornada } from './citaDelDia.ts';
+import { esJornada } from './jornada.ts';
 import { FORMATOS_DE_EDICION, TIENDAS, esDelDominio, tiendaDe, type Tienda } from './ingreso.ts';
 
 /**
