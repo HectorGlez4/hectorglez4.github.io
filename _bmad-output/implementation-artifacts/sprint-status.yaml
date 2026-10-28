@@ -29,7 +29,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 # - Retrospective appends its action items to action_items; the status view surfaces open ones
 generated: 08-11-2026 09:00
-last_updated: 10-28-2026 06:16
+last_updated: 10-28-2026 08:51
 project: brainlySabiduria
 project_key: NOKEY
 tracking_system: file-system
@@ -415,7 +415,7 @@ development_status:
   26-1-todo-autor-publicado-tiene-su-clave-de-orden: review  # tras la 24.8: sin la relación por campos, el lote de claves refecharía todo el sitio · v8-ralph 2026-10-28: el build rompe ante un autor publicado sin clave de orden; órdenes y lote de claves la escriben; sin diferidos para Héctor
   26-2-el-tipo-de-un-resultado-no-casa-como-texto-y-la-portada-tien: review  # v8-ralph 2026-10-28: el tipo de un resultado viaja como filtro de pagefind y la portada responde solo por su título; sin diferidos para Héctor
   26-3-todos-los-autores-de-la-a-a-la-z: review  # v8-ralph 2026-10-28: directorio /autores/ de la a a la z con letras de salto, Tarjeta y Pagefind; diferido para Héctor: tokens de peso e interlineado en tokens.css y DESIGN.md (bmad-ux)
-  26-4-todas-las-obras-bajo-su-autor: backlog
+  26-4-todas-las-obras-bajo-su-autor: review # v8-ralph 2026-10-28: /obras/ recorre todas las obras bajo su autor, fechada solo por lo que pinta; sin diferidos para Héctor
   26-5-la-cabecera-lleva-a-autores-obras-y-buscar: backlog
   26-6-el-directorio-filtra-al-teclear-sin-pensar-en-tildes: backlog
   26-7-los-directorios-se-miden-como-familia-propia: backlog
