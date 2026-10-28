@@ -353,6 +353,26 @@ export function titularDeAlcance(veredicto: VeredictoDeAlcance): string {
   );
 }
 
+/**
+ * El aviso del build cuando el **modelo** deja Citas a más del tope aunque `dist/` las alcance:
+ * hoy las acerca la lista de Autores de la portada, que el modelo no lleva porque la Épica 28 la
+ * quita (`grafoDelModelo`). No rompe —`dist/` cumple NFR-5—, pero sin decirlo serían invisibles:
+ * las órdenes que retiran las cuentan como «ya fuera» y no las bloquean. `undefined` si no hay
+ * ninguna. No depende de la jornada.
+ */
+export function avisoDeFueraDelModelo(modelo: ModeloDelCorpus): string | undefined {
+  const citas = citasPorRuta(modelo.conjunto);
+  const fuera = citasFueraDelModelo(modelo).map((ruta) => superficieFuera(ruta, modelo.conjunto, citas));
+  if (fuera.length === 0) return undefined;
+  return [
+    `NFR-5 en el modelo: ${enNumero(fuera.length, 'Cita queda', 'Citas quedan')} a más de ` +
+      `${MAX_SALTOS_DESDE_LA_PORTADA} saltos de la portada sin la lista de Autores que quitará la ` +
+      'Épica 28. Hoy esa lista las alcanza y el build pasa; las órdenes que retiran no las ' +
+      'bloquean porque ya estaban fuera:',
+    ...fuera.map(lineaDeFuera),
+  ].join('\n');
+}
+
 // ─── Las órdenes que retiran ─────────────────────────────────────────────────
 
 /** Una Cita que un cambio dejaría fuera de alcance, con sus Temas bajo umbral tras el cambio. */
@@ -387,23 +407,28 @@ export async function fueraDeAlcanceTras(
   rutas: Rutas,
   cambio: (datos: DatosDelCorpus) => DatosDelCorpus,
 ): Promise<{ ok: true; fuera: CitaFueraDeAlcance[] } | { ok: false; motivos: string[] }> {
-  let datos: DatosDelCorpus;
-  let posiciones: PosicionesDeCitas;
+  /*
+   * Leer el Corpus y componer los dos modelos van en el mismo `try`: una ficha con un nombre que
+   * `segmentosDeObra` no parte, o una Obra sin sus Citas, lanzan al componer y no al leer, y la
+   * orden tiene que negarse diciéndolo en vez de salir por una traza.
+   */
+  let antes: Set<string>;
+  let despues: ModeloDelCorpus;
   try {
-    datos = await leerDatosDelCorpus(rutas);
-    posiciones = posicionesDeCitas(datos.citas, await leerDocumentosDeFuente(rutas));
+    const datos = await leerDatosDelCorpus(rutas);
+    const posiciones = posicionesDeCitas(datos.citas, await leerDocumentosDeFuente(rutas));
+    antes = new Set(citasFueraDelModelo(modeloDeLosDatos(datos, posiciones)));
+    despues = modeloDeLosDatos(cambio(datos), posiciones);
   } catch (fallo) {
     return {
       ok: false,
       motivos: [
-        `No se puede leer el Corpus para comprobar que ninguna Cita queda fuera de alcance (NFR-5): ` +
-          `${fallo instanceof Error ? fallo.message : String(fallo)}`,
+        `No se puede componer el modelo del Corpus para comprobar que ninguna Cita queda fuera de ` +
+          `alcance (NFR-5): ${fallo instanceof Error ? fallo.message : String(fallo)}`,
         'No se ha escrito nada.',
       ],
     };
   }
-  const antes = new Set(citasFueraDelModelo(modeloDeLosDatos(datos, posiciones)));
-  const despues = modeloDeLosDatos(cambio(datos), posiciones);
   const citas = citasPorRuta(despues.conjunto);
   const fuera = citasFueraDelModelo(despues)
     .filter((ruta) => !antes.has(ruta))

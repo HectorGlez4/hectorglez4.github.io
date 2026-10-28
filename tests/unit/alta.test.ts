@@ -329,7 +329,8 @@ describe('Historia 26.8 — el alta no publica una Cita sin Tema publicado', () 
     expect(informe.enRevision).toEqual([]);
     expect(informe.rechazadasPorTema).toHaveLength(1);
     expect(informe.rechazadasPorTema[0].texto).toMatch(/^Entrada número 1/);
-    expect(informe.rechazadasPorTema[0].slug).toMatch(/^seneca-entrada-numero-1/);
+    // Se nombra por su texto: no se escribe, así que no tiene slug.
+    expect(informe.rechazadasPorTema[0]).not.toHaveProperty('slug');
     expect(informe.rechazadasPorTema[0].motivos.join(' ')).toMatch(/no declara ningún Tema/);
     expect(await readdir(rutas.citas)).toHaveLength(MIN_CITAS_POR_TEMA);
     expect(await readdir(rutas.revision)).toEqual([]);
@@ -345,6 +346,29 @@ describe('Historia 26.8 — el alta no publica una Cita sin Tema publicado', () 
       { slug: 'el-tiempo', nombre: 'El tiempo', citas: MIN_CITAS_POR_TEMA - 1 },
     ]);
     expect(await readdir(rutas.citas)).toHaveLength(MIN_CITAS_POR_TEMA - 3);
+    expect(await readdir(rutas.revision)).toEqual([]);
+  });
+
+  it('dos copias del mismo texto sin Tema publicado: apartar la primera no deja pasar la segunda', async () => {
+    /*
+     * En el primer ensayo la segunda es «posible duplicado (el propio lote)» de la primera; al
+     * apartar la primera deja de serlo, y solo un segundo ensayo la ve sin Tema. Con una sola
+     * vuelta se escribiría en corpus/citas/ y la diría después `publicadasSinTema`.
+     */
+    const rutas = await corpusDelTiempo(MIN_CITAS_POR_TEMA - 2);
+    const primera = entrada(1, ['El tiempo']);
+    const segunda = { ...primera, texto: (primera.texto ?? '').replace(':', ',').replace(/\.$/u, '') };
+    const informe = await darDeAltaLote([primera, segunda], rutas);
+
+    expect(informe.publicadas).toEqual([]);
+    expect(informe.posiblesDuplicados).toEqual([]);
+    expect(informe.rechazadasPorTema.map((r) => r.texto)).toEqual([primera.texto, segunda.texto]);
+    // Cada una con el recuento de la vuelta que la apartó: ninguna pasada publica las dos.
+    for (const rechazada of informe.rechazadasPorTema) {
+      expect(rechazada.temas).toEqual([{ slug: 'el-tiempo', nombre: 'El tiempo', citas: MIN_CITAS_POR_TEMA - 1 }]);
+    }
+    expect(informe.publicadasSinTema).toBeUndefined();
+    expect(await readdir(rutas.citas)).toHaveLength(MIN_CITAS_POR_TEMA - 2);
     expect(await readdir(rutas.revision)).toEqual([]);
   });
 

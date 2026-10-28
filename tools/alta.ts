@@ -43,7 +43,7 @@ import {
 } from './lib/corpus.ts';
 import { aplicarFichaDeObra, resolverFichaDeObra, type PlanDeFicha } from './lib/obras.ts';
 import { motivoSinTemaPublicado, temaPublicadoConLaPasada } from './lib/alcance.ts';
-import { temasBajoUmbralDe, type TemaBajoUmbral } from '../src/lib/publicado.ts';
+import type { TemaBajoUmbral } from '../src/lib/publicado.ts';
 
 /** Una entrada del lote, tal como la escribe el editor. Sin slug: lo genera el alta. */
 export interface EntradaDeLote {
@@ -106,9 +106,11 @@ export interface InformeDeAlta {
    * Entradas que se publicarían pero no tendrían **ningún Tema publicado** —contando las
    * publicadas y las que este mismo lote publica— — Historia 26.8, NFR-5. **No se escriben en
    * ningún sitio**, ni en `corpus/citas/` ni en `corpus/_revision/`: el lote se corrige y se
-   * vuelve a pasar. Con alguna, la orden sale con 1, también en seco.
+   * vuelve a pasar. Con alguna, la orden sale con 1, también en seco. Se nombran por su texto y
+   * no por un slug: no se escriben, así que no tienen ninguno, y el que tuvieron en el ensayo lo
+   * puede llevar ya otra entrada del lote que sí se publicó.
    */
-  rechazadasPorTema: { texto: string; slug: string; temas: TemaBajoUmbral[]; motivos: string[] }[];
+  rechazadasPorTema: { texto: string; temas: TemaBajoUmbral[]; motivos: string[] }[];
   /**
    * Publicadas que se quedaron sin ningún Tema publicado porque la pasada que escribe discrepó del
    * ensayo —una colisión entre dos Fichas de Obra nuevas del mismo lote mandó a revisión a otra
@@ -150,7 +152,8 @@ export async function darDeAltaLote(
    * discrepar: esa entrada va a revisión con el motivo, como siempre, y lo que la pasada real dejó
    * publicado se vuelve a juzgar al final (`publicadasSinTema`).
    */
-  const apartadas = new Map<number, { texto: string; slug: string; temas: string[] }>();
+  /** Las apartadas, con el recuento de sus Temas en la vuelta del ensayo que las apartó. */
+  const apartadas = new Map<number, { texto: string; temas: TemaBajoUmbral[] }>();
   let ensayo = await recorrer(false);
   for (;;) {
     const { rechazadas } = temaPublicadoConLaPasada(
@@ -161,7 +164,7 @@ export async function darDeAltaLote(
     if (rechazadas.length === 0) break;
     for (const rechazada of rechazadas) {
       const apartada = ensayo.aPublicar.find((p) => p.indice === rechazada.clave)!;
-      apartadas.set(rechazada.clave, apartada);
+      apartadas.set(rechazada.clave, { texto: apartada.texto, temas: rechazada.temas });
     }
     ensayo = await recorrer(false);
   }
@@ -180,18 +183,16 @@ export async function darDeAltaLote(
       }));
     }
   }
-  // El recuento del parte, sobre lo publicado más el lote entero, como `temaPublicadoConLaPasada`.
-  const conElLote = [
-    ...yaPublicadas,
-    ...aPublicar.map((p) => ({ temas: p.temas })),
-    ...[...apartadas.values()].map((a) => ({ temas: a.temas })),
-  ];
+  /*
+   * El recuento del parte es el de la vuelta del ensayo que apartó a cada una —lo publicado más
+   * lo que esa vuelta publicaba, la propia incluida—, como en `aprobar`: «tendría 14» quiere decir
+   * que ni con todo lo que se pidió llega. No se recalcula al final sumando las apartadas de
+   * vueltas distintas: la de una vuelta puede ser el duplicado de la de otra, y sumarlas daría un
+   * recuento que ninguna pasada alcanza.
+   */
   informe.rechazadasPorTema = [...apartadas.entries()]
     .sort(([a], [b]) => a - b)
-    .map(([, apartada]) => {
-      const suyos = temasBajoUmbralDe({ temas: apartada.temas }, conElLote, temas);
-      return { texto: apartada.texto, slug: apartada.slug, temas: suyos, motivos: [motivoSinTemaPublicado(suyos)] };
-    });
+    .map(([, { texto, temas: suyos }]) => ({ texto, temas: suyos, motivos: [motivoSinTemaPublicado(suyos)] }));
   return informe;
 
   /**
@@ -436,7 +437,7 @@ export function formatearInforme(informe: InformeDeAlta): string {
   if (informe.rechazadasPorTema.length > 0) {
     lineas.push('', `Sin Tema publicado, no escritas: ${informe.rechazadasPorTema.length}`);
     for (const c of informe.rechazadasPorTema) {
-      lineas.push(`  ✕ «${recortar(c.texto)}» (${c.slug})`);
+      lineas.push(`  ✕ «${recortar(c.texto)}»`);
       for (const motivo of c.motivos) lineas.push(`      ${motivo}`);
     }
     lineas.push('  No se han escrito ni en corpus/citas/ ni en corpus/_revision/: corrija sus Temas en el lote.');

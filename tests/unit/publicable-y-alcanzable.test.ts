@@ -1,7 +1,7 @@
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { readFile, readdir } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
-import { join, resolve } from 'node:path';
+import { join, relative, resolve, sep } from 'node:path';
 import {
   AUTOR_VALIDO,
   RAIZ,
@@ -15,6 +15,7 @@ import {
 import { rutasPublicadas, superficiesInalcanzables } from '../../src/lib/publicado.ts';
 import { conjuntoDelCorpus, grafoDeDist } from '../../tools/lib/alcance.ts';
 import { rutasDelCorpus } from '../../tools/lib/corpus.ts';
+import { rutaDeFicheroHtml } from '../../tools/lib/indexables.ts';
 import {
   SUPERFICIES,
   anunciableEnElSitemap,
@@ -338,8 +339,9 @@ describe('Historia 12.1 — sobre un sitio construido de verdad', () => {
         (await readdir(dist, { recursive: true, withFileTypes: true }))
           .filter((e) => e.isFile() && e.name.endsWith('.html'))
           .map(async (e) => {
-            const relativa = join(e.parentPath, e.name).slice(dist.length + 1).replace(/\.html$/, '');
-            const ruta = relativa === 'index' ? '/' : `/${relativa.replace(/\/?index$/, '')}`;
+            // La misma ruta que da la integración: si las dos la calcularan distinto, esto no
+            // mediría lo mismo que la puerta del build.
+            const ruta = rutaDeFicheroHtml(relative(dist, join(e.parentPath, e.name)).split(sep).join('/'));
             return { ruta, html: await readFile(join(e.parentPath, e.name), 'utf8') };
           }),
       );

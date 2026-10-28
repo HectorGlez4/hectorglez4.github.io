@@ -30,6 +30,7 @@
 import { rutasDelCorpus } from './lib/corpus.ts';
 import { aprobar, formatearLote, loteEnRevision, rechazar } from './lib/revision.ts';
 import { raizDeCorpusDe } from './lib/cli.ts';
+import { MIN_CITAS_POR_TEMA } from '../src/lib/umbrales.ts';
 
 const argumentos = process.argv.slice(2);
 const rutas = rutasDelCorpus(raizDeCorpusDe(argumentos));
@@ -140,6 +141,16 @@ if (aAprobar.length > 0) {
     fallo = true;
     lineas.push(`  ✕ ${rechazada.slug} — sigue en revisión: no tendría ningún Tema publicado.`);
     for (const motivo of rechazada.motivos) lineas.push(`      ${motivo}`);
+  }
+  if (resultado.rechazadasPorTema.length > 0) {
+    /*
+     * Cómo se sale de ahí: un Tema que ya tiene página, o aprobar en la misma pasada las que hacen
+     * falta para que el suyo llegue. Un Tema nuevo crece así, de una pasada que lo completa.
+     */
+    lineas.push(
+      `    Para publicarlas: añada con «--temas» un Tema que ya se publique, o apruebe en la misma ` +
+        `pasada las candidatas de su Tema hasta que llegue a ${MIN_CITAS_POR_TEMA}.`,
+    );
   }
   for (const pendiente of resultado.fichasSinAsegurar) {
     fallo = true;

@@ -16,10 +16,12 @@ import { MARCA_DE_JORNADA } from '../../tools/lib/alcance.ts';
 /**
  * Historia 26.8 — la puerta de NFR-5 del build, sobre sitios construidos de verdad.
  *
- * Tres construcciones: la sana, que informa con una línea fija; una con la portada parcheada
+ * Tres construcciones: la sana, que informa con una línea fija —y avisa de la Cita que solo la
+ * lista de Autores de la portada alcanza—; una con la portada parcheada
  * sin su lista de Autores —lo que la Épica 28 hará—, que deja una Cita de la página 2 de su
  * Autor a cuatro saltos y rompe nombrándola con su Tema bajo umbral; y una con la Paginación
- * parcheada sin los números, que rompe nombrando las aristas del modelo que faltan.
+ * sin los números y la Fila de Autor sin enlace, que rompe nombrando las aristas del modelo que
+ * faltan.
  */
 
 const pad = (n: number) => String(n).padStart(3, '0');
@@ -106,6 +108,16 @@ describe('Historia 26.8 — el build sano', () => {
     );
   });
 
+  it('avisa, sin romper, de la Cita que solo alcanza la lista de Autores de la portada', () => {
+    // La 051 está en la página 2 de Séneca y de su Obra, y «La ira» no llega: en el modelo
+    // —sin esa lista, como la dejará la Épica 28— queda a cuatro saltos.
+    expect(salida).toMatch(/NFR-5 en el modelo: 1 Cita queda a más de 3 saltos de la portada/);
+    expect(salida).toContain(
+      `/cita/seneca-fragmento-051 — su Tema «La ira» (la-ira) tiene 3 Citas, por debajo de ` +
+        `MIN_CITAS_POR_TEMA (${MIN_CITAS_POR_TEMA})`,
+    );
+  });
+
   it('data-jornada va solo en la portada y el 404, una vez, con «Ver esta cita» dentro', async () => {
     const paginas = await htmlDe(join(proyecto, 'dist'));
     const conMarca = [...paginas].filter(([, html]) => html.includes('data-jornada'));
@@ -170,7 +182,7 @@ describe('Historia 26.8 — la portada sin su lista de Autores', () => {
   });
 });
 
-describe('Historia 26.8 — la Paginación sin los números', () => {
+describe('Historia 26.8 — la Paginación sin los números y el Directorio de Autores sin enlaces', () => {
   let proyecto: string | undefined;
 
   afterAll(async () => {
@@ -180,9 +192,16 @@ describe('Historia 26.8 — la Paginación sin los números', () => {
   it('rompe nombrando cada arista origen → destino que el modelo pide y dist/ no tiene', async () => {
     const paginacion = readFileSync(join(RAIZ, 'src/components/Paginacion.astro'), 'utf8');
     const sinNumeros = paginacion.replace(/<ol class="numeros">[\s\S]*?<\/ol>/u, '');
+    // Y la Fila de Autor sin su enlace: la fila de `/autores/` sigue, pero ya no lleva a ninguna parte.
+    const fila = readFileSync(join(RAIZ, 'src/components/FilaDeAutor.astro'), 'utf8');
+    const filaSinEnlace = fila.replace('<FilaDeBloque href={ruta} ', '<FilaDeBloque href={undefined} ');
+    expect(filaSinEnlace).not.toBe(fila);
     const resultado = await construirConCorpus(corpusDeSeneca(101), {
       jornada: '2026-10-28',
-      ficheros: { 'src/components/Paginacion.astro': sinNumeros },
+      ficheros: {
+        'src/components/Paginacion.astro': sinNumeros,
+        'src/components/FilaDeAutor.astro': filaSinEnlace,
+      },
     });
     proyecto = resultado.proyecto;
 
@@ -193,6 +212,9 @@ describe('Historia 26.8 — la Paginación sin los números', () => {
       '/autor/seneca → /autor/seneca/3',
       '/autor/seneca/3 → /autor/seneca',
       '/obra/seneca/sobre-la-brevedad-de-la-vida → /obra/seneca/sobre-la-brevedad-de-la-vida/3',
+      // La fila del Directorio: la portada sigue llevando a Séneca, pero el modelo pide esta.
+      '/autores → /autor/seneca',
+      '/autores → /autor/epicteto',
     ]) {
       expect(resultado.salida).toContain(`  · ${arista}`);
     }

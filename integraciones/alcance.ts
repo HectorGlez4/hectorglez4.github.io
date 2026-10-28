@@ -12,6 +12,9 @@
  *   3. corre `superficiesInalcanzables` sobre `rutasPublicadas` —también la Obra que no se
  *      indexa— con el tope de siempre, `MAX_SALTOS_DESDE_LA_PORTADA`.
  *
+ * Avisa, sin romper, de las Citas que solo la lista de Autores de la portada deja a ≤3 saltos: el
+ * modelo no la lleva (la quita la Épica 28), y sin el aviso nadie las vería hasta entonces.
+ *
  * Si todo se sostiene escribe una línea fija, que no depende de la jornada; si no, el detalle va
  * al registro —cada superficie fuera, con el Tema que cayó bajo su umbral y su recuento, y cada
  * arista `origen → destino` que falta— y la excepción corta el build con los dos números. El
@@ -29,6 +32,7 @@ import type { AstroIntegration } from 'astro';
 import { rutasDelCorpus } from '../tools/lib/corpus.ts';
 import { rutaDeFicheroHtml } from '../tools/lib/indexables.ts';
 import {
+  avisoDeFueraDelModelo,
   detalleDeAlcance,
   grafoDeDist,
   informeDeAlcance,
@@ -76,6 +80,9 @@ export default function alcanceDesdeLaPortada(): AstroIntegration {
 
         const modelo = await modeloDelCorpus(rutasDelCorpus(join(raiz, 'corpus')));
         const veredicto = veredictoDeAlcance(modelo.conjunto, modelo.grafo, construido);
+        // Lo que `dist/` alcanza solo por la lista de Autores de la portada: avisa, no rompe.
+        const aviso = avisoDeFueraDelModelo(modelo);
+        if (aviso !== undefined) logger.warn(aviso);
 
         if (!rompeElBuild(veredicto)) {
           logger.info(informeDeAlcance(veredicto));

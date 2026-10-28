@@ -18,6 +18,8 @@ import {
   detalleDeAlcance,
   enlacesInternos,
   fueraDeAlcanceTras,
+  avisoDeFueraDelModelo,
+  modeloDelCorpus,
   grafoDeDist,
   informeDeAlcance,
   lineaDeFuera,
@@ -377,5 +379,29 @@ describe('Historia 26.8 — las órdenes que retiran miden solo lo que ellas dej
     if (!comprobacion.ok) return;
     expect(comprobacion.fuera.map((f) => f.slug)).toEqual([EN_LA_IRA]);
     expect(comprobacion.fuera.map((f) => f.slug)).not.toContain(yaFuera);
+  });
+
+  it('un modelo que no se deja componer niega con su motivo, sin lanzar', async () => {
+    const { rutas } = await conUnaYaFuera();
+    const comprobacion = await fueraDeAlcanceTras(rutas, () => {
+      throw new Error('«sin-separador» no tiene forma de nombre de Ficha de Obra');
+    });
+    expect(comprobacion.ok).toBe(false);
+    if (comprobacion.ok) return;
+    expect(comprobacion.motivos.join('\n')).toMatch(/No se puede componer el modelo del Corpus.*sin-separador/su);
+    expect(comprobacion.motivos).toContain('No se ha escrito nada.');
+  });
+
+  it('el build avisa de la que ya estaba fuera del modelo, y de nada sin ella', async () => {
+    const { rutas, yaFuera } = await conUnaYaFuera();
+    const aviso = avisoDeFueraDelModelo(await modeloDelCorpus(rutas));
+    expect(aviso).toMatch(/^NFR-5 en el modelo: 1 Cita queda a más de 3 saltos/u);
+    expect(aviso).toContain(`  · /cita/${yaFuera} — no declara ningún Tema`);
+
+    const raiz = await mkdtemp(join(tmpdir(), 'sabiduria-al-limite-'));
+    temporales.push(raiz);
+    const alLimite = rutasDelCorpus(join(raiz, 'corpus'));
+    await sembrarCorpusAlLimite(alLimite);
+    expect(avisoDeFueraDelModelo(await modeloDelCorpus(alLimite))).toBeUndefined();
   });
 });

@@ -548,4 +548,72 @@ describe('Historia 26.8 — aprobar no publica una Cita sin Tema publicado', () 
     expect((await readdir(rutas.revision)).sort()).toEqual([`${a.slug}.md`, `${b.slug}.md`].sort());
     expect(await ficherosPublicados(rutas)).toHaveLength(MIN_CITAS_POR_TEMA - 2);
   });
+
+  describe('dos Fichas de Obra nuevas de la misma pasada que chocan al escribir', () => {
+    /*
+     * «Col·loquis» y «Col loquis» son formas distintas (`formaDeObra`) que se nombrarían igual,
+     * `seneca--col-loquis`: planificadas contra el disco de antes, las dos se pueden asegurar;
+     * escrita la de A, la de B choca. A tiene su Tema por el relleno; C solo llega al umbral de
+     * «El tiempo» contando a B.
+     */
+    const a = { ...candidata(1, [TEMA_PUBLICADO]), procedencia: { obra: 'Col·loquis', año: 49 } };
+    const b = { ...candidata(2, ['el-tiempo']), procedencia: { obra: 'Col loquis', año: 49 } };
+    const c = candidata(3, ['el-tiempo']);
+    async function corpusDeLaColision(): Promise<Rutas> {
+      const rutas = await corpusDelTiempo([a, b, c], MIN_CITAS_POR_TEMA - 2);
+      await sembrarTemaPublicado(rutas);
+      return rutas;
+    }
+
+    it('la que dependía de la que choca, si va detrás, sigue en revisión intacta', async () => {
+      const rutas = await corpusDeLaColision();
+      const ruta = join(rutas.revision, `${c.slug}.md`);
+      const antes = await readFile(ruta, 'utf8');
+
+      const resultado = await aprobar(rutas, [a.slug, b.slug, c.slug]);
+
+      expect(resultado.publicadas).toEqual([a.slug]);
+      expect(resultado.rechazadasPorFicha.map((r) => r.slug)).toEqual([b.slug]);
+      expect(resultado.rechazadasPorTema.map((r) => r.slug)).toEqual([c.slug]);
+      expect(resultado.rechazadasPorTema[0].temas).toEqual([
+        { slug: 'el-tiempo', nombre: 'El tiempo', citas: MIN_CITAS_POR_TEMA - 1 },
+      ]);
+      expect(resultado.publicadasSinTema).toEqual([]);
+      expect(await readFile(ruta, 'utf8')).toBe(antes);
+    });
+
+    it('si ya se escribió, se dice en publicadasSinTema y la orden sale con 1', async () => {
+      const rutas = await corpusDeLaColision();
+
+      const resultado = await aprobar(rutas, [a.slug, c.slug, b.slug]);
+
+      expect(resultado.publicadas).toEqual([a.slug, c.slug]);
+      expect(resultado.rechazadasPorFicha.map((r) => r.slug)).toEqual([b.slug]);
+      expect(resultado.publicadasSinTema.map((s) => s.slug)).toEqual([c.slug]);
+      expect(resultado.publicadasSinTema[0].temas).toEqual([
+        { slug: 'el-tiempo', nombre: 'El tiempo', citas: MIN_CITAS_POR_TEMA - 1 },
+      ]);
+
+      // La orden lo dice con «!» y sale con 1, sobre otro Corpus igual.
+      const otro = await corpusDeLaColision();
+      const { execFile } = await import('node:child_process');
+      const { promisify } = await import('node:util');
+      const { resolve } = await import('node:path');
+      const raiz = resolve(import.meta.dirname, '../..');
+      let codigo = 0;
+      let salida = '';
+      try {
+        ({ stdout: salida } = await promisify(execFile)(
+          'npx',
+          ['tsx', join(raiz, 'tools/revisar.ts'), '--corpus', otro.raiz, '--aprobar', a.slug, c.slug, b.slug],
+          { cwd: raiz },
+        ));
+      } catch (fallo) {
+        codigo = (fallo as { code?: number }).code ?? 1;
+        salida = (fallo as { stdout?: string }).stdout ?? '';
+      }
+      expect(codigo, salida).toBe(1);
+      expect(salida).toContain(`! ${c.slug} — publicada, pero se quedó sin ningún Tema publicado`);
+    });
+  });
 });

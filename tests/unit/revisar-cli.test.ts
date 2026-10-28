@@ -140,6 +140,8 @@ describe('Historia 9.2 — sembrar es una sesión, no treinta', () => {
     expect(resultado.salida).toMatch(/Publicadas: 0/);
     expect(resultado.salida).toContain(`✕ ${primera} — sigue en revisión: no tendría ningún Tema publicado.`);
     expect(resultado.salida).toMatch(/no declara ningún Tema/);
+    // Y dice cómo salir de ahí.
+    expect(resultado.salida).toMatch(/Para publicarlas: añada con «--temas» un Tema que ya se publique/);
     expect(await ficherosPublicados({ citas: join(dir, 'citas') })).toHaveLength(0);
     expect(await readdir(join(dir, '_revision'))).toHaveLength(3);
   });
