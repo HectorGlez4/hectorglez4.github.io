@@ -226,8 +226,20 @@ test.describe('Historia 2.7 — nada huérfano', () => {
      * La aserción, el tope y lo que se cuenta como enlace son los de antes; lo que cambia es que
      * no se abre lo que no puede cambiar el veredicto.
      */
+    /*
+     * Y se deja de abrir en cuanto lo abierto ya alcanza todo lo publicado — puerta de la fusión
+     * de las Épicas 24 y 26.
+     *
+     * Por lo mismo: `superficiesInalcanzables` es monótona en los enlaces que se le dan —una
+     * página más abierta añade aristas, y una arista solo acorta caminos—, así que si con lo
+     * abierto ya no queda ninguna inalcanzable, abrir el resto no puede volver a dejar ninguna.
+     * Con 4.875 rutas en el sitemap el recorrido abría 3.730 páginas y en la tanda completa
+     * llegaba a los 90 s de `test.slow()` sin evaluar la aserción; todo queda alcanzado tras
+     * 1.758 de las 3.549 del último salto que se abre. Si alguna no se alcanza, la pregunta no se
+     * contesta antes y el recorrido sigue entero, como siempre: el rojo es el mismo.
+     */
     let frontera = ['/'];
-    for (let salto = 0; salto < MAX_SALTOS_DESDE_LA_PORTADA && frontera.length > 0; salto += 1) {
+    recorrido: for (let salto = 0; salto < MAX_SALTOS_DESDE_LA_PORTADA && frontera.length > 0; salto += 1) {
       const pendientes = frontera.filter((ruta) => !enlaces.has(ruta));
       const siguiente: string[] = [];
 
@@ -239,6 +251,7 @@ test.describe('Historia 2.7 — nada huérfano', () => {
 
         tanda.forEach((ruta, i) => enlaces.set(ruta, salientesDeLaTanda[i]));
         siguiente.push(...salientesDeLaTanda.flat());
+        if (superficiesInalcanzables(publicadas, enlaces).length === 0) break recorrido;
       }
 
       frontera = [...new Set(siguiente)].filter((enlace) => !enlaces.has(enlace));
