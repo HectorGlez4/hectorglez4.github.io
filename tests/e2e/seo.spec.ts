@@ -240,5 +240,11 @@ test.describe('Historia 2.7 — nada huérfano', () => {
 
     const inalcanzables = superficiesInalcanzables(publicadas, enlaces);
     expect(inalcanzables, `no se alcanzan en ${MAX_SALTOS_DESDE_LA_PORTADA} saltos`).toEqual([]);
+    /*
+     * Y la exención caduca sola, como su gemela de `tests/unit/publicable-y-alcanzable.test.ts`:
+     * mientras exista, el Directorio tiene que seguir sin alcanzarse. El día que la cabecera de la
+     * 26.5 lo enlace, esto falla y obliga a quitar la exención en vez de dejarla viva.
+     */
+    expect(superficiesInalcanzables(delSitemap, enlaces), 'la exención del Directorio ya sobra').toEqual([exenta]);
   });
 });

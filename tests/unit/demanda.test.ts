@@ -17,8 +17,11 @@ import {
 import {
   SALIDA_SIN_CREDENCIALES,
   VARIABLE_DE_CREDENCIALES,
+  censoPorFamilia,
   type CensoPorFamilia,
 } from '../../tools/lib/indexacion.ts';
+import { conjuntoDelCorpus } from '../../tools/indexacion.ts';
+import { rutasPublicadas } from '../../src/lib/publicado.ts';
 import { FILAS_POR_PAGINA, type FilaDeTrafico, type PeticionDeTrafico } from '../../tools/lib/trafico.ts';
 import { autorPorPrefijo } from '../../tools/lib/autoria.ts';
 import {
@@ -288,6 +291,22 @@ describe('el reparto de una ventana', () => {
         ventana: { desde: '2026-09-09', hasta: '2026-10-06', clase: '28-dias' },
       }),
     ).toThrow(/contada en un sitio y no en el otro/);
+  });
+});
+
+describe('Historia 26.3 — el Directorio de Autores en la demanda', () => {
+  it('publicado y sin familia hasta la 26.7: con el censo real de un corpus cae en fueraDelCenso, nunca en Autor', async () => {
+    const conjunto = await conjuntoDelCorpus(rutasDelCorpus(await corpusDePrueba()));
+    expect(rutasPublicadas(conjunto)).toContain('/autores/');
+    const { familias, fueraDelCenso, autores, sinAutor } = agregarDemanda(
+      [{ keys: [URL('/autores/')], clicks: 2, impressions: 9, position: 3 }],
+      { ...OPCIONES, censo: censoPorFamilia(conjunto) },
+    );
+    expect(fueraDelCenso).toEqual({ clics: 2, impresiones: 9 });
+    expect(familias.autor).toMatchObject({ clics: 0, impresiones: 0 });
+    // No es una ruta de Cita: no se atribuye a ningún Autor ni se cuenta sin Autor.
+    expect(autores).toEqual([]);
+    expect(sinAutor).toEqual({ rutas: 0, clics: 0, impresiones: 0 });
   });
 });
 

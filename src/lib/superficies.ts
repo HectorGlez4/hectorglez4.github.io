@@ -154,7 +154,8 @@ const PAGINA_DE_OBRA = 'obra/[autor]/[slug]/[...page].astro';
  * Página de Obra. Hoy uno, `/autores/`; la 26.4 añade `obras.astro`. De aquí sale el único
  * predicado que dice si una ruta es de un Directorio (`esRutaDeDirectorio`).
  */
-export const PAGINAS_DE_DIRECTORIO: readonly string[] = ['autores.astro'];
+const PAGINA_DEL_DIRECTORIO_DE_AUTORES = 'autores.astro';
+export const PAGINAS_DE_DIRECTORIO: readonly string[] = [PAGINA_DEL_DIRECTORIO_DE_AUTORES];
 
 export const SUPERFICIES: readonly Superficie[] = [
   {
@@ -227,7 +228,7 @@ export const SUPERFICIES: readonly Superficie[] = [
   },
   {
     nombre: 'el Directorio de Autores',
-    pagina: 'autores.astro',
+    pagina: PAGINA_DEL_DIRECTORIO_DE_AUTORES,
     // Historia 26.3 — una ruta literal y sin páginas 2+: lista entera, sin paginar. Por eso no
     // declara `noPublicableEn`, y `/autores/2` no la reconoce nadie.
     reconoce: /^\/autores$/,

@@ -321,7 +321,8 @@ export function desplazarSemana(semana: string, n: number): string {
  *     criterio de familia divergiría del de la serie de indexación.
  *   · La portada es la superficie que `src/lib/superficies.ts` declara como tal, y solo si
  *     el sitio la publica hoy.
- *   · «otra» es lo publicable que no es ninguna de esas cuatro —hoy, la Página de Tema—.
+ *   · «otra» es lo publicable que no es ninguna de esas cuatro —hoy, la Página de Tema y,
+ *     hasta que la 26.7 le dé familia, el Directorio de Autores (Historia 26.3)—.
  *   · «ya no se publica» es una ruta que se anotó publicada y que hoy el sitio no publica.
  *     El registro es permanente y el censo es de hoy; sin esta clase, una Cita retirada
  *     contaría como «otra» y parecería que se enlazó algo que no era una Cita.

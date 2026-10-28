@@ -59,7 +59,7 @@ const cita = (slug: string, deAutor: string): Cita => ({
 
 /** Los slugs del Directorio, en orden, agrupados por inicial. */
 const porGrupos = (autores: Autor[], citas: Cita[]) =>
-  directorioDeAutores(autores, citas).grupos.map((g) => [g.inicial, g.autores.map((a) => a.slug)]);
+  directorioDeAutores(autores, citas).grupos.map((g) => [g.inicial, g.entradas.map((a) => a.slug)]);
 
 describe('Historia 26.3 — el orden y los grupos del Directorio de Autores', () => {
   it('ordena por la clave y no por el nombre: Cervantes va en la C', () => {
@@ -84,7 +84,7 @@ describe('Historia 26.3 — el orden y los grupos del Directorio de Autores', ()
     ];
     const citas = autores.map((a) => cita(`${a.slug}-x`, a.slug));
     const directorio = directorioDeAutores(autores, citas);
-    expect(directorio.grupos.map((g) => [g.inicial, g.ancla, g.autores.map((a) => a.slug)])).toEqual([
+    expect(directorio.grupos.map((g) => [g.inicial, g.ancla, g.entradas.map((a) => a.slug)])).toEqual([
       ['N', 'letra-n', ['nuno']],
       ['Ñ', 'letra-ñ', ['nandu']],
       ['O', 'letra-o', ['ocampo']],
@@ -121,7 +121,7 @@ describe('Historia 26.3 — el orden y los grupos del Directorio de Autores', ()
       cita('seneca-x', 'seneca'),
     ];
     const directorio = directorioDeAutores(autores, citas);
-    const filas = directorio.grupos.flatMap((g) => g.autores);
+    const filas = directorio.grupos.flatMap((g) => g.entradas);
     expect(filas).toEqual([
       { slug: 'miguel-de-cervantes', nombre: 'Miguel de Cervantes', ruta: '/autor/miguel-de-cervantes/', años: '1547–1616', recuento: '12 citas' },
       { slug: 'seneca', nombre: 'Séneca', ruta: '/autor/seneca/', años: 'Fallecido en 65', recuento: '1 cita' },
@@ -144,6 +144,15 @@ describe('Historia 26.3 — el orden y los grupos del Directorio de Autores', ()
     expect(() => directorioDeAutores(autores, [cita('horacio-x', 'horacio')])).toThrow(/«horacio».*proponer-claves/su);
     // Sin Citas publicadas no hace falta clave: no figura.
     expect(directorioDeAutores(autores, []).grupos).toEqual([]);
+  });
+
+  it('una clave que no da inicial —cifra, signo o espacio delante— lanza nombrando el slug, sin inventarle una letra', () => {
+    for (const clave of ['1984', '¡Ay', ' Horacio']) {
+      const autores = [autor('horacio', 'Horacio', clave)];
+      expect(() => directorioDeAutores(autores, [cita('horacio-x', 'horacio')]), clave).toThrow(
+        /«horacio».*no da inicial/su,
+      );
+    }
   });
 
   it('con el Corpus vacío no hay letras ni grupos, y la descripción dice ceros', () => {
@@ -298,6 +307,23 @@ describe('Historia 26.3 — `/autores/` construido', () => {
     expect(html.match(/(?<!aria-hidden="true"[^>]*>) · /gu) ?? []).toEqual([]);
   });
 
+  it('el texto de cada fila, entero y sin espacios de más: el marcado de la fila no mete huecos', () => {
+    /*
+     * `FilaDeAutor.astro` va en una sola línea porque Astro conserva un espacio donde hay salto:
+     * un formateador que la partiera diría «1850–1910  · 1 cita». Se mira el texto de **todas**
+     * las filas, con lo que oye el lector («, ») y lo que ve la vista (« · »).
+     */
+    const textos = filas().map((fila) => fila.replace(/<[^>]+>/gu, ''));
+    expect(textos).toEqual([
+      'Ana Álvarez, 1850–1910 · , 1 cita',
+      'Gonzalo Nuño, Fallecido en 1600 · , 1 cita',
+      'Pedro Ñandú, 1500–1560 · , 1 cita',
+      'Séneca, 4 a. C.–65 d. C. · , 2 citas',
+      'Séneca el Viejo, 54 a. C.–39 d. C. · , 1 cita',
+    ]);
+    for (const texto of textos) expect(texto, texto).not.toMatch(/\s{2}/u);
+  });
+
   it('las letras: una por inicial con Autor, con su nombre accesible, y su grupo con un `h2` destino', () => {
     const letras = [...html.matchAll(/<a href="#(letra-[^"]+)"[^>]*><span class="solo-para-lectores"[^>]*>Autores por la <\/span>([^<]+)<\/a>/gu)].map(
       (m) => [m[1], m[2]],
@@ -365,16 +391,18 @@ describe('Historia 26.3 — `/autores/` construido', () => {
     expect(construido.equals(esperado)).toBe(true);
   });
 
-  it('ninguna superficie sin semblanza reproduce la de ningún Autor, ni dice «frases»', () => {
+  it('ninguna superficie sin semblanza reproduce la de ningún Autor, ni dice «frases»', async () => {
     for (const ruta of SUPERFICIES_SIN_SEMBLANZA) {
       if (ruta.endsWith('.png')) {
         /*
-         * La imagen no se deja leer como texto: se juzga el SVG que la compone, y la prueba de
-         * arriba exige que el PNG construido sea byte a byte su rasterizado. Así lo que se mira es
-         * lo que sale del build, no una llamada que la prueba se inventa.
+         * La imagen no se deja leer como texto: se juzga el SVG que la compone, y aquí mismo se
+         * exige que el PNG construido sea byte a byte su rasterizado. Así lo que se mira es lo que
+         * sale del build aunque otra prueba se omita o se reordene, no una llamada que la prueba
+         * se inventa.
          */
-        expect(existsSync(join(proyecto, 'dist', ...ruta.split('/').filter(Boolean))), ruta).toBe(true);
+        const construido = readFileSync(join(proyecto, 'dist', ...ruta.split('/').filter(Boolean)));
         const svg = svgEsperado();
+        expect(construido.equals(await sharp(Buffer.from(svg)).png().toBuffer()), ruta).toBe(true);
         for (const semblanza of Object.values(SEMBLANZAS)) expect(svg, ruta).not.toContain(semblanza);
         expect(svg.toLowerCase(), ruta).not.toContain('frase');
         continue;

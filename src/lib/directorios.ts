@@ -24,19 +24,26 @@ export interface FilaDelDirectorioDeAutores {
   slug: string;
   nombre: string;
   ruta: string;
-  /** «1547–1616», «Fallecido en 65»; ausente si no consta ningún año. */
+  /**
+   * «1547–1616», «Fallecido en 65»; ausente si no consta el año de **fallecimiento**
+   * (`hechosDeFilaDeAutor`): un nacimiento solo no se pinta. El esquema exige el fallecimiento,
+   * así que con el Corpus siempre consta.
+   */
   años?: string;
   /** «12 citas», «1 cita». */
   recuento: string;
 }
 
-/** Un grupo de letra: su inicial, el ancla a la que salta su letra y sus Autores en orden. */
+/**
+ * Un grupo de letra: su inicial, el ancla a la que salta su letra y sus entradas en orden. Es de
+ * cualquier Directorio —Autores hoy, Obras en la 26.4—, y por eso sus miembros son `entradas`.
+ */
 export interface GrupoDeLetra<T> {
   /** La inicial de la clave: de la A a la Z sin tilde, o la Ñ. */
   inicial: string;
   /** El `id` del rótulo del grupo: «letra-» y la inicial en minúscula («letra-ñ»). */
   ancla: string;
-  autores: T[];
+  entradas: T[];
 }
 
 export interface DirectorioDeAutores {
@@ -98,7 +105,7 @@ export function directorioDeAutores(autores: readonly Autor[], citas: readonly C
     };
     const ultimo = grupos.at(-1);
     if (ultimo !== undefined && ultimo.inicial === inicial) {
-      ultimo.autores.push(fila);
+      ultimo.entradas.push(fila);
     } else {
       /*
        * Los grupos se abren en el orden de `compararPorClave`, así que dependen de que ese orden
@@ -114,7 +121,7 @@ export function directorioDeAutores(autores: readonly Autor[], citas: readonly C
             'concuerdan, y `src/lib/normalizar.ts` es quien tiene que volver a ponerlos de acuerdo.',
         );
       }
-      grupos.push({ inicial, ancla: anclaDeLetra(inicial), autores: [fila] });
+      grupos.push({ inicial, ancla: anclaDeLetra(inicial), entradas: [fila] });
     }
   }
 

@@ -1,7 +1,7 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { createHash } from 'node:crypto';
 import { createServer, type Server } from 'node:http';
-import { readFile, readdir, writeFile } from 'node:fs/promises';
+import { readFile, readdir } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 import {
   AUTOR_VALIDO,
@@ -9,7 +9,6 @@ import {
   TEMA_VALIDO,
   citaValida,
   construirConCorpus,
-  construirProyecto,
   fuenteConAdmisionAnadida,
   fuenteConDonacionesEncendidas,
   fuenteConModeloEncendido,
@@ -798,17 +797,26 @@ describe('Historia 17.5 — el tope de guion, con todo encendido donde se admite
     paginas = await paginasDe(join(build.proyecto, 'dist'));
 
     /*
-     * Historia 26.3 (FR-55, UX-DR110) — la misma copia, otra vez: el mismo corpus, la misma tienda
-     * y el mismo `MEDICION_ENDPOINT`, con todos los Modelos apagados. Lo único que cambia entre las
-     * dos construcciones es el encendido, así que una diferencia en `/autores/` solo puede venir de
-     * un Modelo.
+     * Historia 26.3 (FR-55, UX-DR110) — otra copia del mismo corpus, con la misma tienda y el mismo
+     * `MEDICION_ENDPOINT`, y con **todos** los Modelos apagados en la copia: lo que el árbol tenga
+     * encendido se apaga ahí, así que encender un Modelo en el repositorio no tumba esta prueba.
+     * Lo único que cambia entre las dos construcciones es el encendido, así que una diferencia en
+     * `/autores/` solo puede venir de un Modelo. Va en su propia copia, y no sobre el `dist/` de la
+     * encendida, para que ninguna prueba de este bloque pueda leer una construcción por la otra.
      */
-    const apagada = fuenteConTiendaDePrueba(await readFile(resolve(RAIZ, 'src/lib/ingreso.ts'), 'utf8'));
-    expect(MODELOS.every((m) => !m.encendido), 'el árbol ya enciende algún Modelo').toBe(true);
-    await writeFile(join(build.proyecto, 'src/lib/ingreso.ts'), apagada, 'utf8');
-    const otra = await construirProyecto(build.proyecto, { jornada: JORNADA, entorno });
+    const apagada = fuenteConTiendaDePrueba(await readFile(resolve(RAIZ, 'src/lib/ingreso.ts'), 'utf8'))
+      .replaceAll('encendido: true,', 'encendido: false,');
+    expect((apagada.match(/encendido: false,/g) ?? []).length, 'un `encendido: false,` por Modelo').toBe(
+      MODELOS.length,
+    );
+    const otra = await construirConCorpus(CORPUS_CON_EDICIONES, {
+      jornada: JORNADA,
+      entorno,
+      ficheros: { 'src/lib/ingreso.ts': apagada },
+    });
+    aLimpiar.push(otra.proyecto);
     expect(otra.codigo, otra.salida).toBe(0);
-    directorioApagado = await readFile(join(build.proyecto, 'dist', 'autores', 'index.html'), 'utf8');
+    directorioApagado = await readFile(join(otra.proyecto, 'dist', 'autores', 'index.html'), 'utf8');
   }, 480_000);
 
   afterAll(async () => {

@@ -197,6 +197,10 @@ suelo de las demás —si no caben, se muestrean y se dice—, y el informe da l
 frente a Autor de la misma lectura y, desde `PRIMER_DESPLIEGUE_DE_OBRAS` más
 `SEMANAS_HASTA_JUZGAR_SM11`, «toca juzgar SM-11: lo decide Héctor».
 
+**El Directorio de Autores** (`/autores/`, Historia 26.3) está en el sitemap y en ninguna familia
+de esta serie hasta que la 26.7 cree la familia `directorio`: no se inspecciona ni sale en
+`sinLeer`, porque no es una familia que falte, sino una que aún no existe.
+
 ## Leer el tráfico orgánico
 
 Un sustituto de SM-2 sale de Search Console por mes, y se versiona igual que la indexación:
@@ -226,8 +230,10 @@ La familia de una URL sale **del censo de lo publicado**, nunca del prefijo de l
 casa —la portada, páginas 2+, Citas retiradas, otro host como `www.`— se suma en
 `fueraDelCenso`, que se escribe y se informa: nunca se descarta en silencio. La familia Obra no
 se cuenta todavía, ni una familia sin URL publicadas. El Directorio de Autores (`/autores/`,
-Historia 26.3) tampoco tiene familia hasta la 26.7: en tráfico y demanda cae en `fueraDelCenso`,
-en el rastreo sale «sin familia» como la portada, y no es un fallo. **Cada pasada reatribuye los meses
+Historia 26.3) no tiene familia **en las series** —indexación, tráfico, demanda, rastreo, canal—
+hasta la 26.7, y aquí cae en `fueraDelCenso`; no es un fallo. (En el aviso y el ensayo de
+`tools/avisar.ts` sí es ya la familia **de ruta** `directorio`: esa tabla reparte lo que se
+avisa, no es una serie.) **Cada pasada reatribuye los meses
 pasados con el censo de hoy**: una Cita retirada desde entonces pasa a `fueraDelCenso`.
 
 **Ausencia antes que cero.** Un mes cuya consulta falla no se escribe y conserva su entrada
@@ -276,7 +282,8 @@ Autor. Una ruta de Cita sin prefijo de Autor va a `sinAutor` y el informe la nom
 con menos de `MIN_IMPRESIONES_POR_FILA` (5) impresiones no se versiona en `citas`: se suma en
 `resto` —cuyo `filas` cuenta Citas, no filas de la fuente—, y sí cuenta en su Autor. El reparto por familia es el de la serie de tráfico
 (`agregarPorFamilia`, con su `fueraDelCenso`), así que una Cita retirada cuenta en su Autor y,
-por familia, fuera del censo.
+por familia, fuera del censo. El Directorio de Autores (`/autores/`) no es ruta de Cita ni tiene
+familia hasta la 26.7: no cuenta en ningún Autor y, por familia, va a `fueraDelCenso`.
 
 **Ausencia antes que cero.** Una ventana cuya consulta falla, o cuyo reparto no se puede
 componer, no se escribe —se conserva la entrada anterior si la había— y sale en el `sinLeer`
@@ -392,7 +399,9 @@ búsqueda— y a anotar más de diez de golpe, porque §4.17 declara que pedir r
 URL no es una petición, es ruido. Un rechazo sale con código 1; una bandera mal escrita, con
 2. No se anota nada que no corresponda a una petición real: una entrada inventada es peor que
 no tener el registro. Mientras la familia Obra esté congelada (`CONGELACION_DE_OBRAS`, Historia
-22.8), toda URL de Obra se rechaza con 1, nombrando la congelación.
+22.8), toda URL de Obra se rechaza con 1, nombrando la congelación. Una petición de
+`/autores/` (Historia 26.3) se anota —el sitio la publica— y la consulta la cuenta «sin familia»,
+como la portada, hasta que la 26.7 cree la familia `directorio`.
 
 ## Anotar lo que se publica en el canal
 
@@ -432,7 +441,7 @@ escribe por `appendFile` tras validar el fichero y la entrada, y se relee despu�
 comprobar que la última entrada es la nueva; un fichero ilegible —o una entrada a mano con una
 red, un formato o una fecha imposibles— se niega sin tocarlo. La consulta desglosa a dónde
 enlaza cada semana y red —Cita, Autor, Colección, portada, «otra», «ya no se publica» y «sin
-enlace»— con la familia sacada del censo, cuenta los días con `foto` y los enlaces marcados, y
+enlace»— con la familia sacada del censo (un enlace a `/autores/` cae en «otra» hasta la 26.7), cuenta los días con `foto` y los enlaces marcados, y
 da por red la racha actual y la máxima de semanas ISO **consecutivas** con foto los 7 días y
 todo enlace marcado: «La 18.2 se cierra con 4: lleva N». Ningún módulo de `src/lib/` lo lee
 (AD-24), y el fichero se versiona con su cabecera y la lista vacía: ningún agente anota

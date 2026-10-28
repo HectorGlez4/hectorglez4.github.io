@@ -80,6 +80,8 @@ test.describe('Historia 26.3 — las letras de salto', () => {
     for (const [ancho, alto] of medida.lados) {
       expect(ancho).toBeGreaterThanOrEqual(44);
       expect(alto).toBeGreaterThanOrEqual(44);
+      // Cuadradas: la zona de toque entera en los dos lados.
+      expect(ancho).toBe(alto);
     }
   });
 });
@@ -118,7 +120,7 @@ test.describe('Historia 26.3 — los tokens y el ritmo del Directorio', () => {
         d.style.cssText = css;
         document.body.append(d);
         const c = getComputedStyle(d);
-        const r = { familia: c.fontFamily, cuerpo: c.fontSize, color: c.color, ancho: c.width };
+        const r = { familia: c.fontFamily, cuerpo: c.fontSize, color: c.color, ancho: c.width, altoMinimo: c.minHeight };
         d.remove();
         return r;
       };
@@ -128,6 +130,12 @@ test.describe('Historia 26.3 — los tokens y el ritmo del Directorio', () => {
         if (e === null) throw new Error(`no hay ${selector}`);
         const c = getComputedStyle(e);
         return {
+          alto: e.getBoundingClientRect().height,
+          altoMinimo: c.minHeight,
+          anchoMaximo: c.maxWidth,
+          partir: c.overflowWrap,
+          fondo: c.backgroundColor,
+          bordes: [c.borderTopStyle, c.borderRightStyle, c.borderBottomStyle, c.borderLeftStyle],
           familia: c.fontFamily,
           cuerpo: c.fontSize,
           peso: c.fontWeight,
@@ -141,6 +149,17 @@ test.describe('Historia 26.3 — los tokens y el ritmo del Directorio', () => {
         };
       };
       const grupos = [...document.querySelectorAll('section.grupo')].map((g) => getComputedStyle(g).marginTop);
+      /*
+       * La medida de prosa se sondea junto a `.prosa`, no en el `body`: si se escribe en `ch`, la
+       * resuelve la letra del sitio donde se aplica.
+       */
+      const prosa = document.querySelector('.prosa');
+      if (prosa === null || prosa.parentElement === null) throw new Error('no hay .prosa');
+      const sondaDeMedida = document.createElement('div');
+      sondaDeMedida.style.cssText = 'max-width: var(--medida-prosa)';
+      prosa.parentElement.append(sondaDeMedida);
+      const medidaProsa = getComputedStyle(sondaDeMedida).maxWidth;
+      sondaDeMedida.remove();
       return {
         tokens: {
           serif: sonda('font-family: var(--serif)').familia,
@@ -156,7 +175,10 @@ test.describe('Historia 26.3 — los tokens y el ritmo del Directorio', () => {
           u2: unidad(2),
           u4: unidad(4),
           u5: unidad(5),
+          zonaDeToque: sonda('min-height: var(--zona-de-toque)').altoMinimo,
+          medidaProsa,
         },
+        prosa: de('.prosa'),
         h1: de('main h1'),
         nombre: de('li.fila-de-bloque .nombre'),
         hechos: de('li.fila-de-bloque .hechos'),
@@ -180,6 +202,17 @@ test.describe('Historia 26.3 — los tokens y el ritmo del Directorio', () => {
     expect(m.letra).toMatchObject({ familia: t.sans, cuerpo: t.cuerpoMd, peso: '600', color: t.siena, subrayado: 'none' });
     expect(m.volver).toMatchObject({ familia: t.sans, cuerpo: t.cuerpoMd, color: t.siena, subrayado: 'underline' });
     expect(m.fila.subrayado).toBe('none');
+
+    // El nombre parte palabras antes que desbordar la fila.
+    expect(m.nombre.partir).toBe('anywhere');
+    // Las letras, sin caja: ni fondo ni borde.
+    expect(m.letra.fondo).toBe('rgba(0, 0, 0, 0)');
+    expect(m.letra.bordes).toEqual(['none', 'none', 'none', 'none']);
+    // «Volver a las letras», con su zona de toque entera.
+    expect(m.volver.altoMinimo).toBe(t.zonaDeToque);
+    expect(m.volver.alto).toBeGreaterThanOrEqual(44);
+    // Todo dentro de la medida de prosa.
+    expect(m.prosa.anchoMaximo).toBe(t.medidaProsa);
 
     // El ritmo: rejilla a `--unidad`; primer grupo a 4×, los demás a 5×; lista a 2× con filete;
     // «Volver» a 2×; y el rótulo deja 2× de aire al recibir el salto.

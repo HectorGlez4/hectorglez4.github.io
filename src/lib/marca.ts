@@ -37,11 +37,18 @@ export function tituloDe(parte?: string): string {
 }
 
 /**
+ * El nombre del Directorio de Autores — Historia 26.3: «Autores». Un solo dueño para su `h1`, el
+ * nombre accesible de sus letras («Autores por la C»), el título de su Tarjeta Social y su título
+ * de pestaña, que no pueden llamarlo de dos maneras.
+ */
+export const NOMBRE_DEL_DIRECTORIO_DE_AUTORES = 'Autores';
+
+/**
  * El título de pestaña del Directorio de Autores — Historia 26.3, UX-DR80: «Autores, de la A a la
  * Z | Sabiduría de Bolsillo», sin la palabra «citas» ni «frases».
  */
 export function tituloDelDirectorioDeAutores(): string {
-  return tituloDe('Autores, de la A a la Z');
+  return tituloDe(`${NOMBRE_DEL_DIRECTORIO_DE_AUTORES}, de la A a la Z`);
 }
 
 /**

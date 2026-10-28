@@ -17,7 +17,7 @@
  */
 
 import { PALETA, SANS, SERIF, escapar, repartirEnLineas } from './lienzo.ts';
-import { MARCA } from './marca.ts';
+import { MARCA, NOMBRE_DEL_DIRECTORIO_DE_AUTORES } from './marca.ts';
 import { tramoDe } from './tramos.ts';
 import { añoLegible, añosDeAutor, recuentoDeAutores, recuentoDeCitas, recuentoDeDocumentadas } from './atribucion.ts';
 import { citasDocumentadasDeAutor, type Autor, type Cita } from './publicado.ts';
@@ -308,7 +308,7 @@ export function datosDeTarjetaDeObra(
  */
 export function datosDeTarjetaDelDirectorioDeAutores(autores: number): DatosDeTarjetaDeListado {
   return {
-    titulo: 'Autores',
+    titulo: NOMBRE_DEL_DIRECTORIO_DE_AUTORES,
     hechos: [recuentoDeAutores(autores)],
     familiaDelTitulo: 'sans',
   };

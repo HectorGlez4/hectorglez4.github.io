@@ -23,7 +23,7 @@ import FilaDeAutor from '../components/FilaDeAutor.astro';
 import { conjuntoPublicable } from '../lib/publicado.ts';
 import { directorioDeAutores } from '../lib/directorios.ts';
 import { descripcionDelDirectorioDeAutores } from '../lib/atribucion.ts';
-import { tituloDelDirectorioDeAutores } from '../lib/marca.ts';
+import { NOMBRE_DEL_DIRECTORIO_DE_AUTORES, tituloDelDirectorioDeAutores } from '../lib/marca.ts';
 import { TARJETA_DEL_DIRECTORIO_DE_AUTORES, rutaDelDirectorioDeAutores } from '../lib/superficies.ts';
 
 const conjunto = await conjuntoPublicable();
@@ -40,14 +40,14 @@ const descripcion = descripcionDelDirectorioDeAutores(directorio);
 >
   <div class="pagina contenedor">
     <div class="prosa">
-      <h1>Autores</h1>
+      <h1>{NOMBRE_DEL_DIRECTORIO_DE_AUTORES}</h1>
 
       <div class="listado" data-pagefind-ignore="all">
-        {directorio.grupos.length > 0 && <LetrasDeSalto letras={directorio.grupos} entidades="Autores" />}
+        {directorio.grupos.length > 0 && <LetrasDeSalto letras={directorio.grupos} entidades={NOMBRE_DEL_DIRECTORIO_DE_AUTORES} />}
         {directorio.grupos.map((grupo) => (
           <GrupoDeLetra inicial={grupo.inicial} ancla={grupo.ancla}>
             <ul role="list">
-              {grupo.autores.map((autor) => (
+              {grupo.entradas.map((autor) => (
                 <FilaDeAutor ruta={autor.ruta} nombre={autor.nombre} años={autor.años} recuento={autor.recuento} />
               ))}
             </ul>
