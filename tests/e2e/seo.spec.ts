@@ -2,7 +2,7 @@ import { expect, test, type Page } from '@playwright/test';
 import { superficiesInalcanzables } from '../../src/lib/publicado.ts';
 import { MAX_SALTOS_DESDE_LA_PORTADA } from '../../src/lib/umbrales.ts';
 import { procedenciaDe, temaBajoUmbral } from './ayuda/corpus.ts';
-import { rutaDeTema, rutaDelDirectorioDeAutores } from '../../src/lib/superficies.ts';
+import { rutaDeTema, rutaDelDirectorioDeAutores, rutaDelDirectorioDeObras } from '../../src/lib/superficies.ts';
 import { apuntarGuiones, fueraDeLaListaAlCargar } from './ayuda/guiones.ts';
 
 /** Historia 2.7 — fundamentos de SEO. */
@@ -156,16 +156,17 @@ test.describe('Historia 2.7 — nada huérfano', () => {
     test.slow();
 
     /*
-     * Exención transitoria, **por su ruta** (Historias 26.3 a 26.5): el Directorio de Autores se
-     * publica desde la 26.3 y el enlace que lo alcanza es la cabecera de la 26.5; hasta entonces
-     * no lo enlaza ninguna página. Se exime él y nadie más, y la 26.5 quita la exención aquí y en
-     * `tests/unit/publicable-y-alcanzable.test.ts`. La rama no entra en la principal hasta la
-     * 26.11, así que no llega al sitio en vivo (decisión de Héctor del 2026-10-19).
+     * Exención transitoria, **por su ruta** (Historias 26.3 a 26.5): los Directorios se publican
+     * desde la 26.3 (`/autores/`) y la 26.4 (`/obras/`), y el enlace que los alcanza es la cabecera
+     * de la 26.5; hasta entonces no los enlaza ninguna página. Se eximen ellos dos y nadie más, y
+     * la 26.5 quita la exención aquí y en `tests/unit/publicable-y-alcanzable.test.ts`. La rama no
+     * entra en la principal hasta la 26.11, así que no llega al sitio en vivo (decisión de Héctor
+     * del 2026-10-19).
      */
-    const exenta = rutaDelDirectorioDeAutores();
+    const exentas = [rutaDelDirectorioDeAutores(), rutaDelDirectorioDeObras()];
     const delSitemap = await rutasDelSitemap(request);
-    expect(delSitemap).toContain(exenta);
-    const publicadas = delSitemap.filter((ruta) => ruta !== exenta);
+    for (const exenta of exentas) expect(delSitemap).toContain(exenta);
+    const publicadas = delSitemap.filter((ruta) => !exentas.includes(ruta));
     const enlaces = new Map<string, string[]>();
 
     /*
@@ -241,10 +242,14 @@ test.describe('Historia 2.7 — nada huérfano', () => {
     const inalcanzables = superficiesInalcanzables(publicadas, enlaces);
     expect(inalcanzables, `no se alcanzan en ${MAX_SALTOS_DESDE_LA_PORTADA} saltos`).toEqual([]);
     /*
-     * Y la exención caduca sola, como su gemela de `tests/unit/publicable-y-alcanzable.test.ts`:
-     * mientras exista, el Directorio tiene que seguir sin alcanzarse. El día que la cabecera de la
-     * 26.5 lo enlace, esto falla y obliga a quitar la exención en vez de dejarla viva.
+     * Y la exención caduca sola, como su gemela de `tests/unit/publicable-y-alcanzable.test.ts`, y
+     * exime exactamente esas dos rutas: mientras exista, los Directorios tienen que seguir sin
+     * alcanzarse. El día que la cabecera de la 26.5 los enlace, esto falla y obliga a quitar la
+     * exención en vez de dejarla viva.
      */
-    expect(superficiesInalcanzables(delSitemap, enlaces), 'la exención del Directorio ya sobra').toEqual([exenta]);
+    expect(
+      [...superficiesInalcanzables(delSitemap, enlaces)].sort(),
+      'la exención de los Directorios ya sobra',
+    ).toEqual([...exentas].sort());
   });
 });

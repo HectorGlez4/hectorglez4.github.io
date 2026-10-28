@@ -405,7 +405,7 @@ function normalizadaOTalCual(ruta: string): string {
  *
  *   · `familia`      — el censo la reparte, y es el caso normal.
  *   · `suelta`       — el sitio la publica y el censo la deja fuera: la portada y, desde la
- *                      26.3 y hasta que la 26.7 les dé familia, los Directorios (`/autores/`).
+ *                      26.3 y hasta que la 26.7 les dé familia, los Directorios (`/autores/` y `/obras/`).
  *   · `despublicada` — el sitio ya no la publica. Ocurrió, y por eso sigue anotada.
  */
 export type DestinoDePeticion =

@@ -22,6 +22,7 @@ import {
   esRutaDeDirectorio,
   olvidarRutasIndexables,
   rutaDelDirectorioDeAutores,
+  rutaDelDirectorioDeObras,
   rutaNormalizada,
   superficiesDelBarrido,
 } from '../../src/lib/superficies.ts';
@@ -315,14 +316,15 @@ describe('Historia 12.1 — sobre un sitio construido de verdad', () => {
   }
 
   /*
-   * Exención transitoria de alcance, **por su ruta** (Historias 26.3 a 26.5): el Directorio de
-   * Autores existe desde la 26.3, pero el enlace que lo alcanza es la cabecera de la 26.5. Mientras
-   * tanto ninguna página lo enlaza y se exime aquí, y solo él: ninguna otra superficie se exime. La
-   * rama no entra en la principal hasta la 26.11, así que la exención no llega al sitio en vivo
-   * (decisión de Héctor del 2026-10-19). La 26.5 la quita, aquí y en `tests/e2e/seo.spec.ts`.
+   * Exención transitoria de alcance, **por su ruta** (Historias 26.3 a 26.5): los Directorios
+   * existen desde la 26.3 (`/autores/`) y la 26.4 (`/obras/`), pero el enlace que los alcanza es la
+   * cabecera de la 26.5. Mientras tanto ninguna página los enlaza y se eximen aquí, y solo ellos:
+   * ninguna otra superficie se exime. La rama no entra en la principal hasta la 26.11, así que la
+   * exención no llega al sitio en vivo (decisión de Héctor del 2026-10-19). La 26.5 la quita, aquí
+   * y en `tests/e2e/seo.spec.ts`.
    */
-  const EXENTA_DE_ALCANCE = rutaNormalizada(rutaDelDirectorioDeAutores());
-  const alcanzables = (publicables: string[]) => publicables.filter((ruta) => ruta !== EXENTA_DE_ALCANCE);
+  const EXENTAS_DE_ALCANCE = [rutaDelDirectorioDeAutores(), rutaDelDirectorioDeObras()].map(rutaNormalizada);
+  const alcanzables = (publicables: string[]) => publicables.filter((ruta) => !EXENTAS_DE_ALCANCE.includes(ruta));
 
   /** Las rutas que el sitio construyó, que es lo que consumen el barrido y el sitemap. */
   async function rutasConstruidas(): Promise<string[]> {
@@ -336,14 +338,15 @@ describe('Historia 12.1 — sobre un sitio construido de verdad', () => {
 
       // Sin esto la comprobación pasaría sobre un sitio vacío sin decir nada.
       expect(publicables.length).toBeGreaterThan(2);
-      expect(publicables).toContain(EXENTA_DE_ALCANCE);
+      for (const exenta of EXENTAS_DE_ALCANCE) expect(publicables).toContain(exenta);
       expect(superficiesInalcanzables(alcanzables(publicables), enlaces)).toEqual([]);
       /*
-       * Y la exención caduca sola: mientras exista, el Directorio tiene que seguir sin alcanzarse.
-       * El día que la cabecera de la 26.5 lo enlace, esta línea falla y obliga a quitarla aquí y en
-       * `tests/e2e/seo.spec.ts`, en vez de dejarla viva eximiendo algo que ya no lo necesita.
+       * Y la exención caduca sola, y exime exactamente esas dos rutas: mientras exista, los dos
+       * Directorios tienen que seguir sin alcanzarse, y nada más. El día que la cabecera de la 26.5
+       * los enlace, esta línea falla y obliga a quitarla aquí y en `tests/e2e/seo.spec.ts`, en vez
+       * de dejarla viva eximiendo algo que ya no lo necesita.
        */
-      expect(superficiesInalcanzables(publicables, enlaces)).toEqual([EXENTA_DE_ALCANCE]);
+      expect([...superficiesInalcanzables(publicables, enlaces)].sort()).toEqual([...EXENTAS_DE_ALCANCE].sort());
     });
 
     it('toda ruta construida tiene declaración: el build no genera nada anónimo', async () => {
@@ -364,6 +367,7 @@ describe('Historia 12.1 — sobre un sitio construido de verdad', () => {
         '/kit',
         '/lote',
         '/autores',
+        '/obras',
         '/tema/el-tiempo',
         '/coleccion/frases-cortas',
         OBRA_INDEXABLE,
@@ -522,8 +526,9 @@ describe('Historia 12.1 — sobre un sitio construido de verdad', () => {
       const rutas = await anunciadas();
       expect(rutas).toContain('/');
       expect(rutas).toContain('/autor/seneca');
-      // Historia 26.3 — el Directorio de Autores, por su declaración.
+      // Historias 26.3 y 26.4 — los Directorios, por su declaración.
       expect(rutas).toContain('/autores');
+      expect(rutas).toContain('/obras');
       expect(rutas).toContain('/tema/el-tiempo');
       // Historia 12.3 — sale de la misma declaración que el `noindex` y el barrido.
       expect(rutas).toContain('/coleccion/frases-cortas');

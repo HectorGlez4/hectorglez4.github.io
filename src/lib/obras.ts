@@ -123,6 +123,27 @@ export function rutaDeLaObra(obra: Pick<ObraResuelta, 'nombre'>, pagina = 1): st
 }
 
 /**
+ * El orden de la Lista de Obras — Historias 17.3 y 26.4, AD-25.
+ *
+ * Es el **único** dueño del orden en que se listan las Obras de un Autor, y lo usan las dos
+ * superficies que pintan esa lista —su Página de Autor y su grupo de `/obras/`— por la misma
+ * llamada (`obrasDelAutor` en `src/lib/publicado.ts`, que lo reexporta): un grupo de `/obras/`
+ * repite la secuencia de la Página de su Autor porque no hay un segundo orden que pueda
+ * divergir. De más a menos Citas publicadas, por título a igualdad y, al final, por nombre de
+ * ficha, para que no dependa del orden de entrada. Devuelve una copia: no toca la que recibe.
+ */
+export function ordenDeLaListaDeObras<O extends Pick<ObraResuelta, 'nombre' | 'titulo' | 'recuento'>>(
+  obras: readonly O[],
+): O[] {
+  return [...obras].sort(
+    (a, b) =>
+      b.recuento - a.recuento ||
+      a.titulo.localeCompare(b.titulo, 'es') ||
+      a.nombre.localeCompare(b.nombre, 'es'),
+  );
+}
+
+/**
  * Si la página de una Obra se indexa — FR-52, Historia 22.4.
  *
  * Al menos `MIN_CITAS_OBRA_INDEXABLE` Citas publicadas y **menos** de

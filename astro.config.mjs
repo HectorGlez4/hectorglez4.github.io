@@ -11,6 +11,7 @@ import formaDeLasColecciones from './integraciones/colecciones.ts';
 import fichasDeObra from './integraciones/obras.ts';
 import coberturaTipografica from './integraciones/cobertura.ts';
 import rutasIndexablesDelCorpus from './integraciones/indexables.ts';
+import tamañoDelDirectorioDeObras from './integraciones/directorios.ts';
 
 // El dominio no se escribe aquí: sale de `public/CNAME`, el fichero que el hospedaje
 // exige, a través de `src/lib/dominio.ts`. La canónica de cada página y el sitemap lo
@@ -192,6 +193,14 @@ export default defineConfig({
      * de arriba acaba de escribir en ese mismo gancho.
      */
     rutasIndexablesDelCorpus(),
+
+    /*
+     * Historia 26.4 — cuánto pesa `/obras/`, que es una sola página con todas las Obras.
+     *
+     * En `astro:build:done` informa del tamaño de `dist/obras/index.html` y, si pasa de
+     * `MAX_BYTES_DEL_DIRECTORIO_DE_OBRAS`, avisa de que toca reabrir paginarla. Nunca rompe.
+     */
+    tamañoDelDirectorioDeObras(),
   ],
 
   /*

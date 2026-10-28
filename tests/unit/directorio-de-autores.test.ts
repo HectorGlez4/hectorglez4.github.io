@@ -15,7 +15,9 @@ import { datosDeTarjetaDelDirectorioDeAutores, svgDeTarjetaDeListado } from '../
 import { tituloDelDirectorioDeAutores } from '../../src/lib/marca.ts';
 import {
   TARJETA_DEL_DIRECTORIO_DE_AUTORES,
+  TARJETA_DEL_DIRECTORIO_DE_OBRAS,
   rutaDelDirectorioDeAutores,
+  rutaDelDirectorioDeObras,
 } from '../../src/lib/superficies.ts';
 import type { Autor, Cita } from '../../src/lib/publicado.ts';
 import {
@@ -197,9 +199,19 @@ describe('Historia 26.3 — los textos del Directorio de Autores', () => {
     expect(datosDeTarjetaDelDirectorioDeAutores(1).hechos).toEqual(['1 autor']);
   });
 
-  it('la lista de superficies sin semblanza: el Directorio y su Tarjeta, aparte de las que consultan', () => {
-    expect([...SUPERFICIES_SIN_SEMBLANZA]).toEqual(['/autores/', '/tarjeta/directorio/autores.png']);
-    expect(SUPERFICIES_SIN_SEMBLANZA).toEqual([rutaDelDirectorioDeAutores(), TARJETA_DEL_DIRECTORIO_DE_AUTORES]);
+  it('la lista de superficies sin semblanza: los dos Directorios y sus Tarjetas, aparte de las que consultan', () => {
+    expect([...SUPERFICIES_SIN_SEMBLANZA]).toEqual([
+      '/autores/',
+      '/tarjeta/directorio/autores.png',
+      '/obras/',
+      '/tarjeta/directorio/obras.png',
+    ]);
+    expect(SUPERFICIES_SIN_SEMBLANZA).toEqual([
+      rutaDelDirectorioDeAutores(),
+      TARJETA_DEL_DIRECTORIO_DE_AUTORES,
+      rutaDelDirectorioDeObras(),
+      TARJETA_DEL_DIRECTORIO_DE_OBRAS,
+    ]);
     for (const superficie of SUPERFICIES_SIN_SEMBLANZA) {
       expect((SUPERFICIES_DE_LA_SEMBLANZA as readonly string[]).includes(superficie)).toBe(false);
     }
@@ -392,7 +404,15 @@ describe('Historia 26.3 — `/autores/` construido', () => {
   });
 
   it('ninguna superficie sin semblanza reproduce la de ningún Autor, ni dice «frases»', async () => {
-    for (const ruta of SUPERFICIES_SIN_SEMBLANZA) {
+    /*
+     * Las del Directorio de Autores: las de `/obras/` y su Tarjeta las juzga, con su propio
+     * corpus y su propio SVG, `tests/unit/directorio-de-obras.test.ts` (Historia 26.4).
+     */
+    const deAutores = SUPERFICIES_SIN_SEMBLANZA.filter(
+      (ruta) => ruta === rutaDelDirectorioDeAutores() || ruta === TARJETA_DEL_DIRECTORIO_DE_AUTORES,
+    );
+    expect(deAutores).toHaveLength(2);
+    for (const ruta of deAutores) {
       if (ruta.endsWith('.png')) {
         /*
          * La imagen no se deja leer como texto: se juzga el SVG que la compone, y aquí mismo se

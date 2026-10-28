@@ -1,0 +1,134 @@
+---
+/**
+ * El Directorio de Obras — Historia 26.4, FR-55, UX-DR80 a UX-DR84.
+ *
+ * Toda Obra con al menos una Cita publicada (`obrasPublicadas`), una vez, bajo su Autor: los
+ * Autores en el orden del Directorio de Autores —por su clave de orden, agrupados por su
+ * inicial—, cada uno con su cabecera de grupo enlazada a su Página de Autor y, debajo, su Lista
+ * de Obras, el mismo componente y el mismo orden que en esa página. Lo que se lista, en qué orden
+ * y con qué cifras lo decide `src/lib/directorios.ts` (`directorioDeObras`); esta página solo lo
+ * pinta.
+ *
+ * Una Obra que no se indexa —o que la congelación deja fuera (`CONGELACION_DE_OBRAS`)— va
+ * exactamente igual que las demás: el Directorio dice qué hay, no lo que ve el buscador. Ninguna
+ * regla de Obra alcanza a esta página, que no es una Página de Obra.
+ *
+ * Es producto (`src/lib/superficies.ts`), como `/autores/`: sitemap, canónica sin `noindex`,
+ * Pagefind por su título —el listado entero va en `data-pagefind-ignore="all"`, para que buscar
+ * el título de una Obra devuelva su página y no ésta— y vista de superficie. Una sola página,
+ * sin 2+; si su HTML crece más de lo que nombra `MAX_BYTES_DEL_DIRECTORIO_DE_OBRAS`, el build lo
+ * avisa (`integraciones/directorios.ts`) y reabre paginarla.
+ *
+ * Sin campo de filtro, región de recuento ni guion: los trae la 26.6. Sin ningún Modelo de
+ * Ingreso (`SUPERFICIES_SIN_INGRESO`) y sin semblanzas, Citas ni notas de Ficha de Obra
+ * (`SUPERFICIES_SIN_SEMBLANZA`): lista entidades y dice hechos del Corpus. Ni la línea de Citas
+ * sin obra de la Página de Autor, ni ningún glifo de avance.
+ */
+import Armazon from '../components/Armazon.astro';
+import LetrasDeSalto from '../components/LetrasDeSalto.astro';
+import GrupoDeLetra from '../components/GrupoDeLetra.astro';
+import ListaDeObras from '../components/ListaDeObras.astro';
+import { conjuntoPublicable } from '../lib/publicado.ts';
+import { directorioDeObras } from '../lib/directorios.ts';
+import { descripcionDelDirectorioDeObras } from '../lib/atribucion.ts';
+import { NOMBRE_DEL_DIRECTORIO_DE_OBRAS, tituloDelDirectorioDeObras } from '../lib/marca.ts';
+import { TARJETA_DEL_DIRECTORIO_DE_OBRAS, rutaDelDirectorioDeObras } from '../lib/superficies.ts';
+
+const conjunto = await conjuntoPublicable();
+const directorio = directorioDeObras(conjunto.autores, conjunto.citas);
+const descripcion = descripcionDelDirectorioDeObras(directorio);
+
+/** El nombre accesible de las letras: «Obras de autores por la S». */
+const ENTIDADES_DE_LAS_LETRAS = 'Obras de autores';
+---
+
+<Armazon
+  titulo={tituloDelDirectorioDeObras()}
+  descripcion={descripcion}
+  tarjeta={TARJETA_DEL_DIRECTORIO_DE_OBRAS}
+  ruta={rutaDelDirectorioDeObras()}
+  tipo="directorio"
+>
+  <div class="pagina contenedor">
+    <div class="prosa">
+      <h1>{NOMBRE_DEL_DIRECTORIO_DE_OBRAS}</h1>
+
+      <div class="listado" data-pagefind-ignore="all">
+        {directorio.grupos.length > 0 && <LetrasDeSalto letras={directorio.grupos} entidades={ENTIDADES_DE_LAS_LETRAS} />}
+        {directorio.grupos.map((grupo) => (
+          <GrupoDeLetra inicial={grupo.inicial} ancla={grupo.ancla}>
+            {grupo.entradas.map((autor) => (
+              <section class="autor">
+                <h3 data-zona="directorio"><a href={autor.ruta}>{autor.nombre}</a></h3>
+                <ListaDeObras obras={autor.obras} zona="directorio" />
+              </section>
+            ))}
+          </GrupoDeLetra>
+        ))}
+      </div>
+    </div>
+  </div>
+</Armazon>
+
+<style>
+  .pagina {
+    padding-block: var(--respiracion);
+  }
+
+  /* Todo dentro de la medida de prosa. */
+  .prosa {
+    max-width: var(--medida-prosa);
+  }
+
+  /* El Encabezado del Directorio: Inter, nunca la serif; sin enlace, bajada ni recuento. */
+  h1 {
+    margin: 0;
+    font-family: var(--sans);
+    font-size: var(--titular-md);
+    font-weight: 600;
+    color: var(--tinta);
+  }
+
+  /* Las letras a 3 × `--unidad` del `h1`: ahí insertará el campo la 26.6. */
+  .listado {
+    margin-top: calc(var(--unidad) * 3);
+  }
+
+  /* Entre Autores, 4 × `--unidad`; el primero de su grupo, a 2 × del rótulo de la letra. */
+  .autor {
+    margin-top: calc(var(--unidad) * 4);
+  }
+
+  .autor:first-of-type {
+    margin-top: calc(var(--unidad) * 2);
+  }
+
+  /*
+   * La cabecera de grupo (UX-DR, variante 5B): el nombre del Autor —la única serif de la página—
+   * al cuerpo y peso del titular pequeño, en tinta y subrayado siempre.
+   */
+  h3 {
+    margin: 0;
+    font-family: var(--serif);
+    font-size: var(--titular-sm);
+    font-weight: 600;
+    line-height: 1.3;
+  }
+
+  /*
+   * El enlace es un bloque de la zona de toque entera, sin relleno ni margen negativo: así la
+   * lista, a `--unidad` del bloque, queda de verdad a `--unidad` de su zona.
+   */
+  h3 a {
+    display: flex;
+    align-items: center;
+    min-height: var(--zona-de-toque);
+    color: var(--tinta);
+    text-decoration: underline;
+    overflow-wrap: anywhere;
+  }
+
+  .autor > :global(.lista-de-obras) {
+    margin-top: var(--unidad);
+  }
+</style>

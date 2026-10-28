@@ -30,6 +30,7 @@ import {
   colgarObras,
   congelacionVigente,
   esObraIndexable,
+  ordenDeLaListaDeObras,
   ordenDelLibro,
   rutaDeLaObra,
   type AparicionDeCita,
@@ -44,8 +45,13 @@ import {
   rutaDeCita,
   rutaDeColeccion,
   rutaDelDirectorioDeAutores,
+  rutaDelDirectorioDeObras,
   rutaDeTema,
 } from './superficies.ts';
+
+// AD-25 — el orden de la Lista de Obras es de `src/lib/obras.ts`; se reexporta junto a
+// `obrasDelAutor`, que es por donde lo toman las dos superficies que la pintan.
+export { ordenDeLaListaDeObras };
 
 // ─── Formas planas, independientes de Astro ──────────────────────────────────
 
@@ -689,10 +695,11 @@ export function siguienteCita(
  * página de cada listado paginado aparece; las 2+ son `servicio` por la declaración de
  * `src/lib/superficies.ts`.
  *
- * Desde la Historia 26.3 enumera también el Directorio de Autores, **siempre**: es una página
- * estática que existe aunque el Corpus esté vacío (entonces solo lleva su `h1`). Va tras los
- * Autores, y por ella la hereda `rutasIndexables`. No es de ninguna familia: las series la dejan
- * fuera del censo hasta que la 26.7 cree la familia `directorio`.
+ * Desde la Historia 26.3 enumera también el Directorio de Autores y, desde la 26.4, el de Obras
+ * justo detrás, **siempre**: son páginas estáticas que existen aunque el Corpus esté vacío
+ * (entonces solo llevan su `h1`). Van tras los Autores, y por ellas las hereda `rutasIndexables`.
+ * No son de ninguna familia: las series las dejan fuera del censo hasta que la 26.7 cree la
+ * familia `directorio`.
  */
 export function rutasPublicadas(conjunto: ConjuntoPublicable): string[] {
   return [
@@ -700,6 +707,7 @@ export function rutasPublicadas(conjunto: ConjuntoPublicable): string[] {
     ...conjunto.citas.map((c) => rutaDeCita(c.slug)),
     ...autoresPublicados(conjunto.autores, conjunto.citas).map((a) => rutaDeAutor(a.slug)),
     rutaDelDirectorioDeAutores(),
+    rutaDelDirectorioDeObras(),
     ...temasPublicados(conjunto.temas, conjunto.citas).map((t) => rutaDeTema(t.slug)),
     ...conjunto.colecciones.map((c) => rutaDeColeccion(c.slug)),
     // Historia 22.4 — **todas** las Obras, indexables o no: existir no es indexarse (AD-11).
@@ -740,20 +748,15 @@ export interface ObrasDelAutor {
  * Las Obras de un Autor para su página — Historia 17.3, UX-DR46.
  *
  * Salen de las Obras **resueltas** de sus Citas publicadas (`obrasDeLasCitas`), nunca de la
- * Procedencia: una ficha sin Citas publicadas no añade entrada (FR-42). El orden es el de
- * `temasDeLaObra` —de más a menos Citas, por título a igualdad y, al final, por nombre de
- * ficha— y el que dibuja la maqueta.
+ * Procedencia: una ficha sin Citas publicadas no añade entrada (FR-42). El orden es
+ * `ordenDeLaListaDeObras` (AD-25) —de más a menos Citas, por título a igualdad y, al final, por
+ * nombre de ficha—, el que dibuja la maqueta. La misma llamada da el grupo de cada Autor en
+ * `/obras/` (Historia 26.4), así que los dos listados no pueden ordenar distinto.
  * `sinObra` cuenta las Citas sin Obra resuelta, que la página dice al pie y no enumera.
  */
 export function obrasDelAutor(citas: readonly CitaConSuObra[], slugAutor: string): ObrasDelAutor {
   const suyas = citas.filter((cita) => cita.autor === slugAutor);
-  const obras = obrasDeLasCitas(suyas).sort(
-    (a, b) =>
-      b.recuento - a.recuento ||
-      a.titulo.localeCompare(b.titulo, 'es') ||
-      // Último desempate, por la identidad de la ficha: el orden no depende del de entrada.
-      a.nombre.localeCompare(b.nombre, 'es'),
-  );
+  const obras = ordenDeLaListaDeObras(obrasDeLasCitas(suyas));
   return { obras, sinObra: suyas.filter((cita) => cita.obra === undefined).length };
 }
 

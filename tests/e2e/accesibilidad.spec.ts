@@ -523,6 +523,15 @@ test.describe('Historia 2.8 — foco', () => {
    * cuando el foco llega por teclado— y se mira el estilo del elemento que tiene el foco.
    */
   test('el indicador de foco no está suprimido en ningún elemento', async ({ page }) => {
+    /*
+     * Historia 26.4 — es una prueba de barrido, como la de alcance de `seo.spec.ts`: tabula cada
+     * enfocable de cada superficie, y `/obras/` trae unos 700 (cada Obra publicada, cada Autor con
+     * Obras, las letras y sus «Volver»). Medido el 2026-10-28: unos 10 s antes de `/obras/`, 29,4 s
+     * en escritorio y más de 30 en móvil con ella. `test.slow()` triplica el presupuesto de ésta y
+     * solo de ésta; no toca ningún umbral del producto ni lo que se comprueba. Se revierte borrando
+     * la línea.
+     */
+    test.slow();
     for (const ruta of SUPERFICIES) {
       await page.goto(ruta);
       /*

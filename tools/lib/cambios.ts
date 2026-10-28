@@ -50,6 +50,12 @@
  *     Cita, solo su `autor`, porque el Directorio cuenta Citas por Autor: un alta, una baja o un
  *     cambio de Autor lo mueven, un cambio de texto no. La semblanza, la tradición, la biografía y
  *     `ordenRevisado` no lo fechan.
+ *   · **Directorio de Obras** (Historia 26.4) — lo que pinta: de cada Cita, su `autor` y su
+ *     `procedencia` —de donde salen su Obra y el año de la Obra—, porque el Directorio cuenta
+ *     Citas por Obra; de cada ficha de Obra de esas Citas, el `titulo` y las `formas` —que deciden
+ *     qué Citas cuentan en ella—; del Autor de cada Cita con Obra, el nombre y la clave de orden.
+ *     Los años y la semblanza de un Autor, un Autor sin Obras, la `nota`, las `ediciones` y
+ *     `distintaDe` de una ficha y `ordenRevisado` no lo fechan.
  *
  * ── Un comparador, dos lecturas ──────────────────────────────────────────────────────
  *
@@ -65,7 +71,7 @@
  * Un fichero que ya no está en el Corpus —su última transición es un borrado: mover una Cita a
  * `corpus/_revision/` o una ficha a `corpus/_obras-retiradas/` lo es— entra con su última versión
  * como **baja** y fecha, con el instante del commit que lo sacó, las superficies **vivas** que
- * compondría: una Cita, su Autor, el Directorio de Autores, sus Temas, sus Colecciones (por
+ * compondría: una Cita, su Autor, los dos Directorios, sus Temas, sus Colecciones (por
  * `miembros`) y su Obra (resuelta por Autor y forma contra las fichas de hoy); una ficha, las Páginas de Cita y los
  * listados de las Citas de hoy cuya forma reclamaba; un documento, la Obra cuyas Citas lo
  * casarían. Una baja nunca declara la página de sí misma. Un Autor, un Tema o una Colección que
@@ -94,6 +100,7 @@ import {
   rutaDeCita,
   rutaDeColeccion,
   rutaDelDirectorioDeAutores,
+  rutaDelDirectorioDeObras,
   rutaDeTema,
   rutaNormalizada,
 } from '../../src/lib/superficies.ts';
@@ -195,17 +202,33 @@ const CAMPOS_DE_CITA = ['texto', 'autor', 'temas', 'procedencia', 'fuente', 'slu
 const CAMPOS_DEL_AUTOR_FUERA = ['nombre', 'añoNacimiento', 'añoFallecimiento'] as const;
 
 /**
- * Qué campos de cada familia de fichero pinta cada familia de superficie — AD-27, Historia 24.8.
+ * Las columnas de la tabla de campos — Historia 26.4: una por familia de ruta, salvo la de los
+ * Directorios, que se desdobla en una por superficie.
+ *
+ * Los dos Directorios son la misma familia (`directorio`, la del aviso, el ensayo y, en la 26.7,
+ * las series), pero no pintan lo mismo: `/autores/` pinta los años de un Autor y `/obras/` no;
+ * `/obras/` pinta el título de una ficha y la Procedencia de una Cita y `/autores/` no. Por eso
+ * la tabla no se indexa por familia sino por columna, y cada superficie declara la suya
+ * (`declarar`); para las demás, la columna es su familia.
+ */
+export type Columna = Exclude<FamiliaDeRuta, 'directorio'> | 'directorioDeAutores' | 'directorioDeObras';
+
+/**
+ * Qué campos de cada familia de fichero pinta cada columna de superficie — AD-27, Historias 24.8
+ * y 26.4.
  *
  * Es la tabla entera: una casilla que falta es «este fichero no compone esa superficie». Se
- * leen por (familia de fichero → familia de ruta), y la relación las aplica sin excepción.
+ * leen por (familia de fichero → columna), y la relación las aplica sin excepción.
  *
  *   · la **semblanza** y la **biografía** de un Autor solo las pinta su página (1);
  *   · la ficha de Obra pinta su `titulo` en la Página de Cita y en los listados, y en su propia
  *     página además `autor`, `formas` —qué Citas reúne—, `nota` y `ediciones`;
  *   · un documento, cualquier cambio, y solo en la Página de Obra;
  *   · el Directorio de Autores (26.3) pinta de un Autor el nombre, los años y su clave de orden,
- *     y de una Cita solo su `autor`: la cuenta por Autor.
+ *     y de una Cita solo su `autor`: la cuenta por Autor;
+ *   · el Directorio de Obras (26.4) pinta de un Autor el nombre y la clave —no los años—, de una
+ *     Cita su `autor` y su `procedencia` —su Obra y el año de la Obra— y de una ficha el `titulo`
+ *     y las `formas`, que deciden qué Citas cuenta cada Obra; nunca la `nota` ni las `ediciones`.
  *
  * Las biografías de `corpus/biografias/` **no** son una familia, y tampoco es un olvido: la
  * Página de Autor pinta de ellas la atribución de la semblanza (título, revisión, licencia),
@@ -220,7 +243,8 @@ export const CAMPOS_QUE_PINTA = {
     tema: CAMPOS_DE_CITA,
     coleccion: CAMPOS_DE_CITA,
     obra: CAMPOS_DE_CITA,
-    directorio: ['autor'],
+    directorioDeAutores: ['autor'],
+    directorioDeObras: ['autor', 'procedencia'],
   },
   autor: {
     cita: CAMPOS_DEL_AUTOR_FUERA,
@@ -228,7 +252,8 @@ export const CAMPOS_QUE_PINTA = {
     tema: CAMPOS_DEL_AUTOR_FUERA,
     coleccion: CAMPOS_DEL_AUTOR_FUERA,
     obra: CAMPOS_DEL_AUTOR_FUERA,
-    directorio: [...CAMPOS_DEL_AUTOR_FUERA, 'ordenAlfabetico'],
+    directorioDeAutores: [...CAMPOS_DEL_AUTOR_FUERA, 'ordenAlfabetico'],
+    directorioDeObras: ['nombre', 'ordenAlfabetico'],
   },
   tema: {
     cita: ['nombre'],
@@ -243,11 +268,12 @@ export const CAMPOS_QUE_PINTA = {
     tema: ['titulo'],
     coleccion: ['titulo'],
     obra: ['autor', 'titulo', 'formas', 'nota', 'ediciones'],
+    directorioDeObras: ['titulo', 'formas'],
   },
   documento: {
     obra: CUALQUIER_CAMBIO,
   },
-} as const satisfies Record<FamiliaDeFichero, Partial<Record<FamiliaDeRuta, Campos>>>;
+} as const satisfies Record<FamiliaDeFichero, Partial<Record<Columna, Campos>>>;
 
 /**
  * Los campos que el sitio lee y **ninguna** superficie afirma: no fechan ni avisan nada.
@@ -258,8 +284,8 @@ export const CAMPOS_QUE_PINTA = {
  *   · `tradicion` es del suelo del 40 % de tradición latinoamericana (§6.1);
  *   · `distintaDe` solo silencia un aviso del build (22.2).
  *   · `ordenRevisado` (26.1) solo dice que una persona revisó la clave: no lo pinta ninguna
- *     superficie, nunca. La clave, `ordenAlfabetico`, sí: la pinta el Directorio de Autores desde
- *     la 26.3, y por eso está en la tabla y no aquí.
+ *     superficie, nunca. La clave, `ordenAlfabetico`, sí: la pintan los dos Directorios (26.3,
+ *     26.4), y por eso está en la tabla y no aquí.
  *
  * Está escrita para que un campo no fechable sea una decisión con nombre y no un olvido: la
  * prueba de clasificación exige que cada clave de los esquemas esté aquí o en la tabla.
@@ -347,7 +373,10 @@ export interface Componente {
   campos: Campos;
 }
 
-/** Una superficie de la relación: su familia de ruta y lo que la compone. */
+/**
+ * Una superficie de la relación: su familia de ruta y lo que la compone. La columna de la tabla
+ * con que se compuso no viaja: solo sirve para componer (26.4).
+ */
 export interface Superficie {
   familia: FamiliaDeRuta;
   componentes: readonly Componente[];
@@ -398,17 +427,27 @@ export function relacionDeSuperficies(corpus: CorpusParaFechar): Map<string, Sup
     ];
   };
 
-  const porSuperficie = new Map<string, { familia: FamiliaDeRuta; campos: Map<string, Campos> }>();
-  const declarar = (ruta: string, familia: FamiliaDeRuta) => {
-    if (!porSuperficie.has(ruta)) porSuperficie.set(ruta, { familia, campos: new Map() });
+  const porSuperficie = new Map<
+    string,
+    { familia: FamiliaDeRuta; columna: Columna; campos: Map<string, Campos> }
+  >();
+  /**
+   * Declara una superficie con su familia y la columna de la tabla con que se compone: la de su
+   * familia, salvo un Directorio, que nombra la suya (26.4).
+   */
+  const declarar = (ruta: string, familia: FamiliaDeRuta, columna?: Columna) => {
+    if (porSuperficie.has(ruta)) return;
+    const deLaTabla = columna ?? (familia === 'directorio' ? undefined : familia);
+    if (deLaTabla === undefined) {
+      throw new Error(`El Directorio «${ruta}» tiene que nombrar su columna de CAMPOS_QUE_PINTA.`);
+    }
+    porSuperficie.set(ruta, { familia, columna: deLaTabla, campos: new Map() });
   };
   /** Añade un fichero a una superficie ya declarada, con los campos que la tabla le da. */
   const componer = (ruta: string, fichero: string | undefined, deFamilia: FamiliaDeFichero) => {
     const superficie = porSuperficie.get(ruta);
     if (superficie === undefined || fichero === undefined) return;
-    const campos = (CAMPOS_QUE_PINTA[deFamilia] as Partial<Record<FamiliaDeRuta, Campos>>)[
-      superficie.familia
-    ];
+    const campos = (CAMPOS_QUE_PINTA[deFamilia] as Partial<Record<Columna, Campos>>)[superficie.columna];
     if (campos === undefined) return;
     const previos = superficie.campos.get(fichero);
     superficie.campos.set(fichero, previos === undefined ? campos : unir(previos, campos));
@@ -463,11 +502,28 @@ export function relacionDeSuperficies(corpus: CorpusParaFechar): Map<string, Sup
    * pinta el `autor`. Un Autor sin Citas no la compone: no figura.
    */
   const directorio = rutaDelDirectorioDeAutores();
-  declarar(directorio, 'directorio');
+  declarar(directorio, 'directorio', 'directorioDeAutores');
   for (const slug of new Set(corpus.citas.map((cita) => cita.autor))) {
     componer(directorio, ficheroDeAutor.get(slug), 'autor');
   }
   for (const cita of corpus.citas) componer(directorio, cita.ruta, 'cita');
+
+  /*
+   * El Directorio de Obras (Historia 26.4): estático y declarado siempre, de la familia
+   * `directorio` y con su propia columna. Lo componen todas las Citas —su `autor` y su
+   * `procedencia`: una Cita sin Obra que pasa a declarar una entra en él—, las fichas de Obra
+   * cuyo título pintan (las vivas y las de baja que las reclamaban) y los Autores de las Citas con
+   * Obra, que son los que tienen grupo. Un Autor sin Obras no lo compone: no figura.
+   */
+  const directorioDeObras = rutaDelDirectorioDeObras();
+  declarar(directorioDeObras, 'directorio', 'directorioDeObras');
+  for (const cita of corpus.citas) {
+    componer(directorioDeObras, cita.ruta, 'cita');
+    for (const ficha of fichasDeLaCita(cita)) componer(directorioDeObras, ficha, 'obra');
+  }
+  for (const slug of new Set(corpus.citas.filter((cita) => cita.obra !== undefined).map((cita) => cita.autor))) {
+    componer(directorioDeObras, ficheroDeAutor.get(slug), 'autor');
+  }
 
   // La Página de Obra: su ficha, sus Citas, su Autor y sus documentos. Sin Citas no tiene página.
   for (const obra of fichas) {
@@ -487,7 +543,7 @@ export function relacionDeSuperficies(corpus: CorpusParaFechar): Map<string, Sup
   }
 
   /*
-   * Las bajas de Cita fechan lo vivo que compondrían —su Autor, el Directorio de Autores, sus
+   * Las bajas de Cita fechan lo vivo que compondrían —su Autor, los dos Directorios, sus
    * Temas, sus Colecciones y su Obra— y nunca declaran su propia página: `componer` no declara nada. La Obra se resuelve
    * contra las fichas de hoy, por (Autor, forma).
    */
@@ -500,6 +556,8 @@ export function relacionDeSuperficies(corpus: CorpusParaFechar): Map<string, Sup
     componer(rutaDeAutor(baja.autor), baja.ruta, 'cita');
     // El Directorio la contaba en su Autor: la baja mueve el recuento (26.3).
     componer(directorio, baja.ruta, 'cita');
+    // Y el de Obras la contaba en su Obra, si declaraba una: la baja mueve su recuento (26.4).
+    componer(directorioDeObras, baja.ruta, 'cita');
     for (const tema of baja.temas ?? []) componer(rutaDeTema(tema), baja.ruta, 'cita');
     for (const ruta of coleccionesDe.get(baja.slug) ?? []) componer(ruta, baja.ruta, 'cita');
     const forma = formaDe(baja);

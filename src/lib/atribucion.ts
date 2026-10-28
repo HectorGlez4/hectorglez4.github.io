@@ -13,7 +13,12 @@
 import type { Cita, Autor, SiguienteCita } from './publicado.ts';
 import type { ObraResuelta } from './obras.ts';
 import { MARCA } from './marca.ts';
-import { TARJETA_DEL_DIRECTORIO_DE_AUTORES, rutaDelDirectorioDeAutores } from './superficies.ts';
+import {
+  TARJETA_DEL_DIRECTORIO_DE_AUTORES,
+  TARJETA_DEL_DIRECTORIO_DE_OBRAS,
+  rutaDelDirectorioDeAutores,
+  rutaDelDirectorioDeObras,
+} from './superficies.ts';
 
 /**
  * La procedencia compuesta —título de la Obra y año de la Cita, en ese orden— o `undefined`
@@ -140,11 +145,13 @@ export function semblanzaEn(
  * la llevan nunca. Un Directorio lista entidades y dice hechos del Corpus —nombre, años, recuento—,
  * y no compone prosa sobre ninguna persona. Se nombran por su ruta y por la de su Tarjeta Social, y
  * una prueba exige sobre `dist/` que ninguna contenga la `semblanza` de ningún Autor. La 26.4 añade
- * `/obras/` y la suya.
+ * `/obras/` y la suya, que tampoco llevan la `nota` de ninguna Ficha de Obra.
  */
 export const SUPERFICIES_SIN_SEMBLANZA: readonly string[] = [
   rutaDelDirectorioDeAutores(),
   TARJETA_DEL_DIRECTORIO_DE_AUTORES,
+  rutaDelDirectorioDeObras(),
+  TARJETA_DEL_DIRECTORIO_DE_OBRAS,
 ];
 
 /**
@@ -197,8 +204,40 @@ export function recuentoDeAutores(m: number): string {
  * un segundo dueño del mismo hecho. Nunca «frases».
  */
 export function descripcionDelDirectorioDeAutores(directorio: { autores: number; citas: number }): string {
-  const deCitas = directorio.citas === 1 ? '1 cita publicada' : `${directorio.citas} citas publicadas`;
-  return `${recuentoDeAutores(directorio.autores)}, de la A a la Z, con ${deCitas}.`;
+  return `${recuentoDeAutores(directorio.autores)}, de la A a la Z, con ${recuentoDeCitasPublicadas(directorio.citas)}.`;
+}
+
+/**
+ * «1 cita publicada», «54 citas publicadas»: la concordancia que comparten las metas de los dos
+ * Directorios (26.3, 26.4), que dicen la misma unidad y no pueden escribirla de dos maneras.
+ */
+function recuentoDeCitasPublicadas(n: number): string {
+  return n === 1 ? '1 cita publicada' : `${n} citas publicadas`;
+}
+
+/**
+ * «1 obra», «5 obras»: el recuento de Obras con su unidad, en singular cuando es una — Historia
+ * 26.4. Un solo dueño para la meta del Directorio de Obras y su Tarjeta Social.
+ */
+export function recuentoDeObras(k: number): string {
+  return k === 1 ? '1 obra' : `${k} obras`;
+}
+
+/**
+ * El `<meta description>` del Directorio de Obras — Historia 26.4, UX-DR80, UX-DR107:
+ * «{k} obras de {m} autores, con {n} citas publicadas.», con los singulares obligatorios —«1
+ * obra», «1 autor», «1 cita publicada»—.
+ *
+ * Como la de Autores, **sin contar aquí** (AD-11): las tres cifras salen de `directorioDeObras`,
+ * la misma derivación que pinta la página. {k} son las Obras listadas; {m}, los Autores que tienen
+ * grupo; {n}, la suma de los recuentos que la página pinta —las Citas de esas Obras, no todas las
+ * publicadas: las que no declaran obra no figuran en `/obras/`—. Nunca «frases».
+ */
+export function descripcionDelDirectorioDeObras(directorio: { obras: number; autores: number; citas: number }): string {
+  return (
+    `${recuentoDeObras(directorio.obras)} de ${recuentoDeAutores(directorio.autores)}, ` +
+    `con ${recuentoDeCitasPublicadas(directorio.citas)}.`
+  );
 }
 
 /** Un año como lo lee una persona: los negativos, sin signo y «a. C.». */

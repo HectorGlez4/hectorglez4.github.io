@@ -294,15 +294,19 @@ describe('el reparto de una ventana', () => {
   });
 });
 
-describe('Historia 26.3 — el Directorio de Autores en la demanda', () => {
-  it('publicado y sin familia hasta la 26.7: con el censo real de un corpus cae en fueraDelCenso, nunca en Autor', async () => {
+describe('Historias 26.3 y 26.4 — los Directorios en la demanda', () => {
+  it('publicados y sin familia hasta la 26.7: con el censo real de un corpus caen en fueraDelCenso, nunca en Autor', async () => {
     const conjunto = await conjuntoDelCorpus(rutasDelCorpus(await corpusDePrueba()));
     expect(rutasPublicadas(conjunto)).toContain('/autores/');
+    expect(rutasPublicadas(conjunto)).toContain('/obras/');
     const { familias, fueraDelCenso, autores, sinAutor } = agregarDemanda(
-      [{ keys: [URL('/autores/')], clicks: 2, impressions: 9, position: 3 }],
+      [
+        { keys: [URL('/autores/')], clicks: 2, impressions: 9, position: 3 },
+        { keys: [URL('/obras/')], clicks: 1, impressions: 4, position: 5 },
+      ],
       { ...OPCIONES, censo: censoPorFamilia(conjunto) },
     );
-    expect(fueraDelCenso).toEqual({ clics: 2, impresiones: 9 });
+    expect(fueraDelCenso).toEqual({ clics: 3, impresiones: 13 });
     expect(familias.autor).toMatchObject({ clics: 0, impresiones: 0 });
     // No es una ruta de Cita: no se atribuye a ningún Autor ni se cuenta sin Autor.
     expect(autores).toEqual([]);

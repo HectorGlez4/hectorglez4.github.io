@@ -17,10 +17,12 @@ import {
   declararRutasIndexables,
   elBarridoLaCorre,
   esRutaDeDirectorio,
+  esRutaDeObra,
   esServicioPorForma,
   etiquetaDeAxe,
   olvidarRutasIndexables,
   rutaDelDirectorioDeAutores,
+  rutaDelDirectorioDeObras,
   rutaNormalizada,
   superficieDeLineaBase,
   superficieDeclaradaDe,
@@ -1128,7 +1130,7 @@ describe('Historia 23.10 — la superficie de línea base', () => {
   });
 
   it('una línea base declarada junta al menos dos superficies, y no se llama como otra superficie ni como la de las búsquedas', () => {
-    // Desde la 26.3 la declara `/autores/`; `/obras/` la declarará con la 26.4.
+    // La declaran `/autores/` (26.3) y `/obras/` (26.4): ya sin exención.
     const nombres = new Set(SUPERFICIES.map((s) => s.nombre));
     for (const superficie of SUPERFICIES) {
       // La unidad de las búsquedas no es una superficie: unas lecturas que se llamaran así se medirían
@@ -1136,24 +1138,16 @@ describe('Historia 23.10 — la superficie de línea base', () => {
       expect(superficieDeLineaBase(superficie), superficie.nombre).not.toBe(UNIDAD_DE_LAS_BUSQUEDAS);
       if (superficie.lineaBase === undefined) continue;
       expect(nombres.has(superficie.lineaBase), superficie.nombre).toBe(false);
-      /*
-       * Exención transitoria (Historia 26.3): «los Directorios» la declara solo `/autores/` hasta
-       * que `/obras/` exista. La 26.4 quita esta exención.
-       */
-      if (superficie.lineaBase === LINEA_BASE_DE_LOS_DIRECTORIOS) {
-        // Y caduca sola: cuando una segunda superficie la declare, esto falla y obliga a quitarla.
-        expect(
-          SUPERFICIES.filter((s) => s.lineaBase === LINEA_BASE_DE_LOS_DIRECTORIOS).map((s) => s.pagina),
-          'la exención de «los Directorios» ya no hace falta: quítala',
-        ).toEqual(['autores.astro']);
-        continue;
-      }
       expect(SUPERFICIES.filter((s) => s.lineaBase === superficie.lineaBase).length, superficie.nombre).toBeGreaterThan(1);
     }
   });
 
-  it('el Directorio de Autores declara «los Directorios» (26.3)', () => {
+  it('los dos Directorios declaran «los Directorios» (26.3, 26.4), y nadie más', () => {
     expect(superficieDeclaradaDe('/autores/')?.lineaBase).toBe(LINEA_BASE_DE_LOS_DIRECTORIOS);
+    expect(superficieDeclaradaDe('/obras/')?.lineaBase).toBe(LINEA_BASE_DE_LOS_DIRECTORIOS);
+    expect(
+      SUPERFICIES.filter((s) => s.lineaBase === LINEA_BASE_DE_LOS_DIRECTORIOS).map((s) => s.pagina),
+    ).toEqual(['autores.astro', 'obras.astro']);
   });
 });
 
@@ -1169,8 +1163,27 @@ describe('Historia 26.3 — el Directorio de Autores', () => {
     expect(esRutaDeDirectorio('/autores')).toBe(true);
     expect(esRutaDeDirectorio('https://ejemplo.org/autores/')).toBe(true);
     expect(esRutaDeDirectorio('/autor/seneca/')).toBe(false);
-    expect(esRutaDeDirectorio('/obras/')).toBe(false);
+    expect(esRutaDeDirectorio('/obras/')).toBe(true);
+    expect(esRutaDeDirectorio('/obra/seneca/de-la-ira/')).toBe(false);
     expect(esRutaDeDirectorio('/autores/2/')).toBe(false);
-    expect(PAGINAS_DE_DIRECTORIO).toEqual(['autores.astro']);
+    expect(esRutaDeDirectorio('/obras/2/')).toBe(false);
+    expect(PAGINAS_DE_DIRECTORIO).toEqual(['autores.astro', 'obras.astro']);
+  });
+});
+
+describe('Historia 26.4 — el Directorio de Obras', () => {
+  it('es producto, emite la vista de superficie y no tiene páginas 2+', () => {
+    expect(rutaDelDirectorioDeObras()).toBe('/obras/');
+    expect(superficieDeclaradaDe(rutaDelDirectorioDeObras())?.pagina).toBe('obras.astro');
+    expect(caracterDe(rutaDelDirectorioDeObras())).toBe('producto');
+    expect(consecuenciasDe(rutaDelDirectorioDeObras()).vistas).toEqual([EVENTOS.vistaDeSuperficie]);
+    expect(superficieDeclaradaDe('/obras/2/')).toBeUndefined();
+  });
+
+  it('no es una Página de Obra: ninguna regla de Obra la alcanza', () => {
+    expect(esRutaDeObra('/obras/')).toBe(false);
+    expect(esRutaDeObra('/obras')).toBe(false);
+    expect(superficieDeclaradaDe('/obras/')?.indexablePorContenido).toBeUndefined();
+    expect(superficieDeclaradaDe('/obras/')?.noPublicableEn).toBeUndefined();
   });
 });

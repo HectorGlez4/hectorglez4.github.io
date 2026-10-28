@@ -543,6 +543,21 @@ export const TOPE_DE_PESO_DE_DIST = 900 * 1024 * 1024;
 export const TOPE_DE_PNG_DE_DIST: number | undefined = undefined;
 
 /**
+ * Bytes del HTML de `/obras/` por encima de los cuales el build avisa — Historia 26.4, AD-9.
+ *
+ * El Directorio de Obras es una sola página, sin 2+, con todas las Obras publicadas: crece con
+ * cada Obra nueva, y paginarlo está aplazado. Este tope es lo que lo reabre. Mide los bytes de
+ * `dist/obras/index.html` tal como sale de Astro, en `astro:build:done`
+ * (`integraciones/directorios.ts`). Pasarlo **avisa y nunca rompe**: el build termina con 0,
+ * con el tamaño medido y «reabre paginar `/obras/`»; qué hacer lo decide Héctor.
+ *
+ * El valor es lo medido sobre `npm run build` el 2026-10-28 —230.455 bytes, con 517 Obras
+ * publicadas— más un 25 % (288.069), redondeado arriba a 10 KiB: 290 KiB. La medida va también
+ * en el mensaje del commit que lo fija.
+ */
+export const MAX_BYTES_DEL_DIRECTORIO_DE_OBRAS = 290 * 1024;
+
+/**
  * Filas que D1 deja escribir al día en el plan gratuito — AD-9, AD-13, Historia 23.2.
  *
  * Es la cuota de escritura de «Cuotas del receptor» de la espina, y no la decide nadie del

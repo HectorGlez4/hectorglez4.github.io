@@ -123,8 +123,8 @@ export interface Superficie {
    * superficie es su propia unidad (`superficieDeLineaBase`). La lectura de la línea base lo lee de
    * forma genérica y no nombra ninguna ruta, y cada superficie se informa también por separado.
    *
-   * Desde la Historia 26.3 lo declara `/autores/`, con `LINEA_BASE_DE_LOS_DIRECTORIOS`; `/obras/`
-   * lo declarará igual cuando exista (26.4), y entonces las dos juntan sus lecturas.
+   * Lo declaran los dos Directorios, `/autores/` (26.3) y `/obras/` (26.4), con
+   * `LINEA_BASE_DE_LOS_DIRECTORIOS`: las dos juntan sus lecturas.
    */
   lineaBase?: string;
 }
@@ -150,12 +150,17 @@ export function superficieDeLineaBase(superficie: Pick<Superficie, 'nombre' | 'l
 const PAGINA_DE_OBRA = 'obra/[autor]/[slug]/[...page].astro';
 
 /**
- * Los ficheros de los Directorios — Historia 26.3: su identidad en la declaración, como la de la
- * Página de Obra. Hoy uno, `/autores/`; la 26.4 añade `obras.astro`. De aquí sale el único
- * predicado que dice si una ruta es de un Directorio (`esRutaDeDirectorio`).
+ * Los ficheros de los Directorios — Historias 26.3 y 26.4: su identidad en la declaración, como
+ * la de la Página de Obra. Dos, `/autores/` y `/obras/`. De aquí sale el único predicado que dice
+ * si una ruta es de un Directorio (`esRutaDeDirectorio`), y `src/lib/ingreso.ts` los deja sin
+ * ningún Modelo (`SUPERFICIES_SIN_INGRESO`).
  */
 const PAGINA_DEL_DIRECTORIO_DE_AUTORES = 'autores.astro';
-export const PAGINAS_DE_DIRECTORIO: readonly string[] = [PAGINA_DEL_DIRECTORIO_DE_AUTORES];
+const PAGINA_DEL_DIRECTORIO_DE_OBRAS = 'obras.astro';
+export const PAGINAS_DE_DIRECTORIO: readonly string[] = [
+  PAGINA_DEL_DIRECTORIO_DE_AUTORES,
+  PAGINA_DEL_DIRECTORIO_DE_OBRAS,
+];
 
 export const SUPERFICIES: readonly Superficie[] = [
   {
@@ -234,7 +239,20 @@ export const SUPERFICIES: readonly Superficie[] = [
     reconoce: /^\/autores$/,
     caracter: 'producto',
     vista: EVENTOS.vistaDeSuperficie,
-    // FR-56 — «los Directorios» son una sola unidad de línea base; `/obras/` la compartirá (26.4).
+    // FR-56 — «los Directorios» son una sola unidad de línea base, con `/obras/` (26.4).
+    lineaBase: LINEA_BASE_DE_LOS_DIRECTORIOS,
+  },
+  {
+    nombre: 'el Directorio de Obras',
+    pagina: PAGINA_DEL_DIRECTORIO_DE_OBRAS,
+    // Historia 26.4 — literal y sin páginas 2+, como `/autores/`: lista entera, sin paginar
+    // (paginarla está aplazado; lo reabre el aviso de tamaño de `integraciones/directorios.ts`).
+    // `/obras` no es una Página de Obra: `esRutaDeObra` no la reconoce y ninguna regla de Obra
+    // —FR-52, congelación, ediciones— la alcanza.
+    reconoce: /^\/obras$/,
+    caracter: 'producto',
+    vista: EVENTOS.vistaDeSuperficie,
+    // FR-56 — la misma unidad de línea base que `/autores/`: «los Directorios».
     lineaBase: LINEA_BASE_DE_LOS_DIRECTORIOS,
   },
   {
@@ -370,6 +388,17 @@ export function rutaDelDirectorioDeAutores(): string {
  */
 export const TARJETA_DEL_DIRECTORIO_DE_AUTORES = '/tarjeta/directorio/autores.png';
 
+/**
+ * La ruta del Directorio de Obras — Historia 26.4. Literal y con barra final, sin paginación,
+ * como la de Autores.
+ */
+export function rutaDelDirectorioDeObras(): string {
+  return '/obras/';
+}
+
+/** La Tarjeta Social del Directorio de Obras — Historia 26.4, UX-DR79, junto a la de Autores. */
+export const TARJETA_DEL_DIRECTORIO_DE_OBRAS = '/tarjeta/directorio/obras.png';
+
 /** Las consecuencias de declarar una superficie que salen solo de su carácter. */
 export interface Consecuencias {
   /** Se anuncia en el sitemap. */
@@ -499,7 +528,7 @@ export function esRutaDeObra(rutaOUrl: string): boolean {
 }
 
 /**
- * Si una ruta es de un Directorio —`/autores/`, y `/obras/` desde la 26.4—, por la declaración y
+ * Si una ruta es de un Directorio —`/autores/` o `/obras/`—, por la declaración y
  * nunca por el prefijo — Historia 26.3. `/autor/x/` no lo es aunque empiece igual. Lo usan las
  * pruebas que eximen los Directorios del censo de las series hasta que la 26.7 les dé familia.
  */

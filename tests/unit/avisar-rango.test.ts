@@ -284,11 +284,12 @@ describe('Historia 24.8 — el aviso de un rango, por campos', () => {
     expect(avisos).toEqual([]);
   });
 
-  it('un rango que solo añade una Cita avisa su Cita, su Autor, su Tema, su Obra y el Directorio; ninguna otra', async () => {
+  it('un rango que solo añade una Cita avisa su Cita, su Autor, su Tema, su Obra y los Directorios; ninguna otra', async () => {
     const { rutas, avisos } = await rango('documento', 'cita-nueva', [CARTAS, BREVEDAD]);
-    // Historia 26.3 — el Directorio de Autores cuenta las Citas de cada Autor: un alta lo mueve.
+    // Historias 26.3 y 26.4 — los Directorios cuentan las Citas de cada Autor y de cada Obra: un
+    // alta los mueve.
     expect(rutas.sort()).toEqual(
-      ['/', '/autor/seneca/', '/autores/', '/cita/seneca-brevedad-5/', '/tema/el-tiempo/', BREVEDAD].sort(),
+      ['/', '/autor/seneca/', '/autores/', '/obras/', '/cita/seneca-brevedad-5/', '/tema/el-tiempo/', BREVEDAD].sort(),
     );
     expect(avisos).toEqual([]);
   });
@@ -366,9 +367,9 @@ describe('Historia 24.8 — lo que la revisión arregló, con git de verdad', ()
     try {
       const { rutas, avisos } = await rango('tope-restituido', 'apta', [CARTAS, BREVEDAD]);
       // Sin roturas, este rango avisa solo la portada; con ellas, todo lo que compone la Cita,
-      // también el Directorio de Autores (26.3), que la cuenta en su Autor.
+      // también los Directorios (26.3, 26.4), que la cuentan en su Autor y en su Obra.
       expect(rutas.sort()).toEqual(
-        ['/', '/autor/seneca/', '/autores/', '/cita/seneca-brevedad-0/', '/tema/el-tiempo/', BREVEDAD].sort(),
+        ['/', '/autor/seneca/', '/autores/', '/obras/', '/cita/seneca-brevedad-0/', '/tema/el-tiempo/', BREVEDAD].sort(),
       );
       expect(avisos.join('\n')).toMatch(/no se pudieron leer las versiones del rango/);
     } finally {
@@ -376,13 +377,15 @@ describe('Historia 24.8 — lo que la revisión arregló, con git de verdad', ()
     }
   });
 
-  it('retitular una ficha avisa su Obra, sus Páginas de Cita y los listados de esas Citas', async () => {
+  it('retitular una ficha avisa su Obra, sus Páginas de Cita, los listados de esas Citas y `/obras/`', async () => {
     const { rutas, avisos } = await rango('modo', 'titulada', [CARTAS, BREVEDAD]);
     expect(rutas.sort()).toEqual(
       [
         '/',
         '/autor/seneca/',
         '/tema/el-tiempo/',
+        // Historia 26.4 — `/obras/` pinta el título de cada ficha.
+        '/obras/',
         BREVEDAD,
         ...[0, 1, 2, 3, 4, 5].map((i) => `/cita/seneca-brevedad-${i}/`),
       ].sort(),

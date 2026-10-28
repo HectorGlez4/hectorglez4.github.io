@@ -1,6 +1,10 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { formaDeObra } from '../../src/lib/obras.ts';
-import { olvidarRutasIndexables, rutaDelDirectorioDeAutores } from '../../src/lib/superficies.ts';
+import {
+  olvidarRutasIndexables,
+  rutaDelDirectorioDeAutores,
+  rutaDelDirectorioDeObras,
+} from '../../src/lib/superficies.ts';
 import { mkdtemp, mkdir, readFile, writeFile } from 'node:fs/promises';
 import { existsSync, readFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
@@ -409,15 +413,16 @@ describe('el cruce con la serie', () => {
     ).toHaveLength(1);
   });
 
-  it('el Directorio de Autores se publica sin familia hasta la 26.7: suelta, como la portada, y el informe lo dice', async () => {
+  it('los Directorios se publican sin familia hasta la 26.7: sueltos, como la portada, y el informe lo dice', async () => {
     const conjunto = await conjuntoDelCorpus(rutasDelCorpus(await corpusConCitas(MIN_CITAS_POR_TEMA)));
     const censo = censoPorFamilia(conjunto);
     const publicadas = rutasPublicadas(conjunto);
-    const directorio = rutaDelDirectorioDeAutores();
-    expect(publicadas).toContain(directorio);
-    expect(destinoDePeticion(directorio, censo, publicadas)).toEqual({ clase: 'suelta' });
-    const lineas = lineasDeRegistro([{ fecha: HOY, ruta: directorio }], censo, publicadas).join('\n');
-    expect(lineas).toMatch(/Sin familia —la portada y los Directorios no son de ninguna—: 1/);
+    for (const directorio of [rutaDelDirectorioDeAutores(), rutaDelDirectorioDeObras()]) {
+      expect(publicadas, directorio).toContain(directorio);
+      expect(destinoDePeticion(directorio, censo, publicadas), directorio).toEqual({ clase: 'suelta' });
+      const lineas = lineasDeRegistro([{ fecha: HOY, ruta: directorio }], censo, publicadas).join('\n');
+      expect(lineas, directorio).toMatch(/Sin familia —la portada y los Directorios no son de ninguna—: 1/);
+    }
   });
 
   it('una petición cuya URL se despublicó no es la portada, y se nombra por lo que es', async () => {
@@ -831,8 +836,8 @@ describe('Historia 22.4 — pedir rastreo de una Página de Obra', () => {
     const juzgar = (ruta: string) =>
       componerPeticiones({
         seleccion: [ruta],
-        publicadas: [...PUBLICADAS, '/obra/a/b/'],
-        indexables: [...PUBLICADAS, '/obra/a/b/'],
+        publicadas: [...PUBLICADAS, '/obra/a/b/', '/obras/'],
+        indexables: [...PUBLICADAS, '/obra/a/b/', '/obras/'],
         fecha: HOY,
         hoy: HOY,
         congelacion,
@@ -841,8 +846,9 @@ describe('Historia 22.4 — pedir rastreo de una Página de Obra', () => {
     const obra = juzgar('/obra/a/b/');
     expect(obra.ok).toBe(false);
     expect(obra.ok ? '' : obra.motivos.join()).toMatch(/congelada desde el 2026-12-06.*CONGELACION_DE_OBRAS/s);
-    // Lo demás se sigue pudiendo pedir.
+    // Lo demás se sigue pudiendo pedir, también `/obras/`, que no es una Obra (26.4).
     expect(juzgar('/autor/autor-0/').ok).toBe(true);
+    expect(juzgar(rutaDelDirectorioDeObras()).ok).toBe(true);
     // Una errata recibe primero lo que hay que corregir: que esa ruta no se publica.
     const errata = juzgar('/obra/a/zz/');
     expect(errata.ok ? '' : errata.motivos.join()).toMatch(/no la publica el sitio/);

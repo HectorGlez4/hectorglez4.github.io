@@ -395,17 +395,21 @@ describe('la orden', () => {
     expect(censo.tema).toContain('/tema/la-vida/');
   });
 
-  it('Historia 26.3 — el Directorio de Autores, publicado, cae en fueraDelCenso hasta que la 26.7 le dé familia', async () => {
+  it('Historias 26.3 y 26.4 — los Directorios, publicados, caen en fueraDelCenso hasta que la 26.7 les dé familia', async () => {
     const corpus = await corpusConCitas(MIN_CITAS_POR_TEMA);
     const conjunto = await conjuntoDelCorpus(rutasDelCorpus(corpus));
     const censo = censoPorFamilia(conjunto);
     expect(rutasPublicadas(conjunto)).toContain('/autores/');
+    expect(rutasPublicadas(conjunto)).toContain('/obras/');
     const { familias, fueraDelCenso } = agregarPorFamilia(
-      [{ keys: [URL('/autores/')], clicks: 2, impressions: 9, position: 3 }],
+      [
+        { keys: [URL('/autores/')], clicks: 2, impressions: 9, position: 3 },
+        { keys: [URL('/obras/')], clicks: 1, impressions: 4, position: 5 },
+      ],
       censo,
       DOMINIO,
     );
-    expect(fueraDelCenso).toEqual({ clics: 2, impresiones: 9 });
+    expect(fueraDelCenso).toEqual({ clics: 3, impresiones: 13 });
     expect(familias.autor).toEqual({ clics: 0, impresiones: 0 });
   });
 

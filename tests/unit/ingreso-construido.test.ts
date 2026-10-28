@@ -265,8 +265,13 @@ describe('Historia 14.1 — el sitio con los cuatro Modelos apagados', () => {
     }
   });
 
-  it('Historia 26.3 — el Directorio de Autores y su Tarjeta entran en la huella: dos construcciones, los mismos bytes', () => {
-    for (const fichero of ['autores/index.html', 'tarjeta/directorio/autores.png']) {
+  it('Historias 26.3 y 26.4 — los dos Directorios y sus Tarjetas entran en la huella: dos construcciones, los mismos bytes', () => {
+    for (const fichero of [
+      'autores/index.html',
+      'tarjeta/directorio/autores.png',
+      'obras/index.html',
+      'tarjeta/directorio/obras.png',
+    ]) {
       expect(primera, fichero).toHaveProperty([fichero]);
       expect(segunda[fichero], fichero).toBe(primera[fichero]);
     }
@@ -760,6 +765,8 @@ describe('Historia 17.5 — el tope de guion, con todo encendido donde se admite
 
   /** El Directorio de Autores de la copia con todo apagado (Historia 26.3), para compararlo. */
   let directorioApagado = '';
+  /** Y el de Obras (Historia 26.4), de la misma copia apagada. */
+  let directorioDeObrasApagado = '';
 
   /*
    * Historia 22.9 — la afiliación ya se admite en la Página de Obra, así que se mide encendida
@@ -817,6 +824,7 @@ describe('Historia 17.5 — el tope de guion, con todo encendido donde se admite
     aLimpiar.push(otra.proyecto);
     expect(otra.codigo, otra.salida).toBe(0);
     directorioApagado = await readFile(join(otra.proyecto, 'dist', 'autores', 'index.html'), 'utf8');
+    directorioDeObrasApagado = await readFile(join(otra.proyecto, 'dist', 'obras', 'index.html'), 'utf8');
   }, 480_000);
 
   afterAll(async () => {
@@ -833,6 +841,19 @@ describe('Historia 17.5 — el tope de guion, con todo encendido donde se admite
     expect(directorioApagado).not.toBe('');
     expect(modelosMarcadosEn(encendido)).toEqual([]);
     expect(encendido).toBe(directorioApagado);
+  });
+
+  it('Historia 26.4 — `/obras/` sale idéntico byte a byte con todo encendido y con todo apagado, sin enlace de edición', () => {
+    const encendido = paginas['obras/index.html'];
+    expect(encendido, 'la copia encendida no construyó /obras/').toBeDefined();
+    expect(directorioDeObrasApagado).not.toBe('');
+    expect(modelosMarcadosEn(encendido)).toEqual([]);
+    expect(encendido).toBe(directorioDeObrasApagado);
+    // La Obra de la copia declara una edición en venta y la afiliación está encendida: su Página
+    // de Obra la enlaza, y `/obras/` —que no es una Página de Obra— no.
+    expect(encendido).toContain('/obra/seneca/sobre-la-brevedad-de-la-vida/');
+    expect(encendido).not.toContain(TIENDA_DE_PRUEBA.dominio);
+    expect(paginas['obra/seneca/sobre-la-brevedad-de-la-vida/index.html']).toContain(TIENDA_DE_PRUEBA.dominio);
   });
 
   it('lo marcado en cada ruta es exactamente lo encendido y admitido en esa ruta', () => {

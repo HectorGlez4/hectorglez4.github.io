@@ -150,6 +150,22 @@ test.describe('Historia 17.3 — la Lista de Obras', () => {
     }
   });
 
+  test('Historia 26.4 — cada entrada enseña la unidad: «N citas», o «1 cita»', async ({ page }) => {
+    await page.goto(UNAMUNO);
+    // Lo que se ve: sin la coma oculta, que es solo para el lector de pantalla.
+    const recuentos = await page.locator('.lista-de-obras li .recuento').evaluateAll((ns) =>
+      ns.map((n) => {
+        const copia = n.cloneNode(true) as HTMLElement;
+        copia.querySelectorAll('.oculto').forEach((o) => o.remove());
+        return (copia.textContent ?? '').trim();
+      }),
+    );
+    expect(recuentos.length).toBeGreaterThan(0);
+    for (const recuento of recuentos) {
+      expect(recuento).toMatch(/^(1 cita|(?!1 )\d+ citas)$/u);
+    }
+  });
+
   test('la página 2 no la lleva', async ({ page, request }) => {
     const segunda = '/autor/miguel-de-unamuno/2/';
     test.skip((await request.get(segunda)).status() !== 200, 'Unamuno cabe hoy en una sola página.');

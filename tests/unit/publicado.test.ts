@@ -115,7 +115,7 @@ describe('Historia 2.1 / AD-11 — agrupaciones y rutas', () => {
     expect(rutas.filter((r) => r.startsWith('/cita/'))).toHaveLength(MIN_CITAS_POR_TEMA);
   });
 
-  it('Historia 26.3 — el Directorio de Autores se enumera siempre, tras los Autores, y lo hereda `rutasIndexables`', () => {
+  it('Historias 26.3 y 26.4 — los Directorios se enumeran siempre, tras los Autores, y los hereda `rutasIndexables`', () => {
     const conjunto = {
       citas: [...nCitas(MIN_CITAS_POR_TEMA, 't')],
       autores: [autor('a')],
@@ -126,8 +126,12 @@ describe('Historia 2.1 / AD-11 — agrupaciones y rutas', () => {
     expect(rutas.filter((r) => r === '/autores/')).toHaveLength(1);
     expect(rutas.indexOf('/autores/')).toBe(rutas.indexOf('/autor/a/') + 1);
     expect(rutasIndexables(conjunto)).toContain('/autores/');
-    // Una página estática: también con el Corpus vacío.
-    expect(rutasPublicadas({ citas: [], autores: [], temas: [], colecciones: [] })).toEqual(['/', '/autores/']);
+    // `/obras/` justo detrás de `/autores/`, una vez, y también indexable.
+    expect(rutas.filter((r) => r === '/obras/')).toHaveLength(1);
+    expect(rutas.indexOf('/obras/')).toBe(rutas.indexOf('/autores/') + 1);
+    expect(rutasIndexables(conjunto)).toContain('/obras/');
+    // Páginas estáticas: también con el Corpus vacío.
+    expect(rutasPublicadas({ citas: [], autores: [], temas: [], colecciones: [] })).toEqual(['/', '/autores/', '/obras/']);
   });
 
   it('un Tema bajo umbral no aparece entre las rutas', () => {

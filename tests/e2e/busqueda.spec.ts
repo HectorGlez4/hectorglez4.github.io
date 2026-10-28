@@ -670,3 +670,62 @@ test.describe('Historia 26.3 — el Directorio de Autores en la búsqueda', () =
   });
 });
 
+
+/*
+ * Historia 26.4, NFR-13 — el Directorio de Obras responde por su título, como el de Autores, y su
+ * listado va fuera del índice: el título de una Obra da su Página de Obra, nunca `/obras/`.
+ */
+test.describe('Historia 26.4 — el Directorio de Obras en la búsqueda', () => {
+  /** Todas las direcciones del índice real para un término, con las opciones de la búsqueda propia. */
+  async function direcciones(page: Page, termino: string): Promise<string[]> {
+    return page.evaluate(
+      async ({ termino, opciones }) => {
+        const pf = await import('/pagefind/pagefind.js' as string);
+        await pf.init();
+        await pf.options(opciones);
+        const { results } = await pf.search(termino);
+        const urls: string[] = [];
+        for (let i = 0; i < results.length; i += 200) {
+          const datos = await Promise.all(results.slice(i, i + 200).map((r: { data: () => Promise<unknown> }) => r.data()));
+          for (const dato of datos as { url: string }[]) urls.push(dato.url.replace(/\/?$/, '/'));
+        }
+        return urls;
+      },
+      { termino, opciones: OPCIONES_DE_PAGEFIND },
+    );
+  }
+
+  test('buscar «obras» devuelve `/obras/`, rotulado «Directorio»', async ({ page }) => {
+    await buscar(page, 'obras');
+    const directorio = (await resultados(page)).find((r) => r.href.replace(/\/?$/, '/') === '/obras/');
+    expect(directorio, '«obras» no devuelve el Directorio entre los resultados pintados').toBeDefined();
+    expect(directorio!.tipo).toBe('directorio');
+    expect(directorio!.etiqueta).toBe(ETIQUETAS_DE_RESULTADO.directorio);
+    expect(directorio!.titulo).toBe('Obras');
+  });
+
+  test('el título de una Obra indexable leído de `/obras/` da su Página de Obra, y no el Directorio', async ({ page, request }) => {
+    test.setTimeout(120_000);
+    await page.goto('/obras/');
+    const filas = page.locator('main ul.lista-de-obras[data-zona="directorio"] a');
+    const total = await filas.count();
+    expect(total).toBeGreaterThan(0);
+
+    // La primera fila cuya Página de Obra se indexa, leída de lo servido: ninguna lista fija.
+    let elegida: { titulo: string; href: string } | undefined;
+    for (let i = 0; i < total && elegida === undefined; i += 1) {
+      const fila = filas.nth(i);
+      const href = (await fila.getAttribute('href'))!;
+      const html = await (await request.get(href)).text();
+      if (/<meta name="robots" content="noindex/.test(html)) continue;
+      elegida = { titulo: (await fila.locator('.titulo').evaluate((e) => e.firstChild?.textContent ?? '')).trim(), href };
+    }
+    expect(elegida, 'ninguna Obra de `/obras/` se indexa').toBeDefined();
+    expect(elegida!.titulo).not.toBe('');
+
+    await page.goto('/buscar/');
+    const urls = await direcciones(page, elegida!.titulo);
+    expect(urls, elegida!.titulo).toContain(elegida!.href.replace(/\/?$/, '/'));
+    expect(urls, elegida!.titulo).not.toContain('/obras/');
+  });
+});

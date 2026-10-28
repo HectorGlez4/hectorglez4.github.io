@@ -17,9 +17,16 @@
  */
 
 import { PALETA, SANS, SERIF, escapar, repartirEnLineas } from './lienzo.ts';
-import { MARCA, NOMBRE_DEL_DIRECTORIO_DE_AUTORES } from './marca.ts';
+import { MARCA, NOMBRE_DEL_DIRECTORIO_DE_AUTORES, NOMBRE_DEL_DIRECTORIO_DE_OBRAS } from './marca.ts';
 import { tramoDe } from './tramos.ts';
-import { añoLegible, añosDeAutor, recuentoDeAutores, recuentoDeCitas, recuentoDeDocumentadas } from './atribucion.ts';
+import {
+  añoLegible,
+  añosDeAutor,
+  recuentoDeAutores,
+  recuentoDeCitas,
+  recuentoDeDocumentadas,
+  recuentoDeObras,
+} from './atribucion.ts';
 import { citasDocumentadasDeAutor, type Autor, type Cita } from './publicado.ts';
 import type { ObraResuelta } from './obras.ts';
 
@@ -310,6 +317,21 @@ export function datosDeTarjetaDelDirectorioDeAutores(autores: number): DatosDeTa
   return {
     titulo: NOMBRE_DEL_DIRECTORIO_DE_AUTORES,
     hechos: [recuentoDeAutores(autores)],
+    familiaDelTitulo: 'sans',
+  };
+}
+
+/**
+ * Los datos de la Tarjeta Social del Directorio de Obras — Historia 26.4, UX-DR79, AD-28.
+ *
+ * La misma de listado que la de Autores: «Obras» en la sans y un solo hecho, cuántas Obras lista
+ * («1 obra» en singular, por `recuentoDeObras`, como la meta). Recibe la cifra y nada más: ni
+ * títulos, ni notas de ficha, ni Autores, ni ediciones.
+ */
+export function datosDeTarjetaDelDirectorioDeObras(obras: number): DatosDeTarjetaDeListado {
+  return {
+    titulo: NOMBRE_DEL_DIRECTORIO_DE_OBRAS,
+    hechos: [recuentoDeObras(obras)],
     familiaDelTitulo: 'sans',
   };
 }

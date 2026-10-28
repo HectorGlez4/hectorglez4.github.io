@@ -318,9 +318,13 @@ describe('Historia 23.10 — el censo, nunca el prefijo', () => {
     // Cada una por separado…
     expect(superficie(l, 'la prueba uno')).toMatchObject({ unidad: 'lo de prueba', lecturas: 3, continuacion: calculada(1, 3) });
     expect(superficie(l, 'la prueba dos')).toMatchObject({ unidad: 'lo de prueba', lecturas: 4, continuacion: calculada(3, 4) });
-    // …y juntas en su línea base.
-    expect(l.unidades).toEqual([
+    // …y juntas en su línea base. La otra unidad compartida es la de los dos Directorios (26.4).
+    expect(l.unidades.filter((u) => u.unidad === 'lo de prueba')).toEqual([
       { unidad: 'lo de prueba', superficies: ['la prueba uno', 'la prueba dos'], lecturas: 7, continuacion: calculada(4, 7) },
+    ]);
+    expect(l.unidades.find((u) => u.unidad === 'los Directorios')?.superficies).toEqual([
+      'el Directorio de Autores',
+      'el Directorio de Obras',
     ]);
     const base = l.lineasBase.find((b) => b.unidad === 'lo de prueba')!;
     expect(base).toMatchObject({ superficies: ['la prueba uno', 'la prueba dos'], estado: 'sin-minimo', acumulado: 7 });
@@ -948,16 +952,8 @@ describe('Historia 23.10 — las ventanas', () => {
 
   it('los Directorios: la línea base empieza tras la llegada que los hace medibles, y las ventanas se juzgan frente a ella', () => {
     const DIRECTORIOS = JUICIOS_POR_VENTANAS.find((j) => j.nombre === 'la continuación de los Directorios')!;
-    const directorio = (nombre: string, ruta: string): Superficie => ({
-      nombre,
-      pagina: `${ruta}.astro`,
-      reconoce: new RegExp(`^/${ruta}$`),
-      caracter: 'producto',
-      vista: EVENTOS.vistaDeSuperficie,
-      lineaBase: DIRECTORIOS.unidad,
-    });
-    // Historia 26.3 — `/autores/` ya la declara `SUPERFICIES`; `/obras/` llega con la 26.4.
-    const superficies = [...SUPERFICIES, directorio('las obras', 'obras')];
+    // Historias 26.3 y 26.4 — los dos Directorios ya la declaran en `SUPERFICIES`.
+    const superficies = SUPERFICIES;
     const censo = [...CENSO, '/autores/', '/obras/'];
     const llegada = D2; // 2026-11-03: los Directorios no existen antes.
     const despues = DIAS.slice(2);
@@ -984,7 +980,7 @@ describe('Historia 23.10 — las ventanas', () => {
       'la línea base no ha empezado: espera DESPLIEGUE_DE_OBRA_Y_DIRECTORIOS, la llegada que la hace medible',
     );
     expect(texto(sinLlegada)).toContain(
-      'los Directorios (el Directorio de Autores y las obras): no ha empezado: empieza la primera jornada UTC completa tras ' +
+      'los Directorios (el Directorio de Autores y el Directorio de Obras): no ha empezado: empieza la primera jornada UTC completa tras ' +
         'DESPLIEGUE_DE_OBRA_Y_DIRECTORIOS, la llegada que la hace medible.',
     );
   });
@@ -1318,16 +1314,8 @@ describe('Historia 23.10 — segunda revisión: lo que una consulta sin leer dej
 
   it('la llegada que hace medibles los Directorios, si es anterior al tramo vigente, no retrasa su línea base', () => {
     const DIRECTORIOS = JUICIOS_POR_VENTANAS.find((j) => j.nombre === 'la continuación de los Directorios')!;
-    const directorio = (nombre: string, ruta: string): Superficie => ({
-      nombre,
-      pagina: `${ruta}.astro`,
-      reconoce: new RegExp(`^/${ruta}$`),
-      caracter: 'producto',
-      vista: EVENTOS.vistaDeSuperficie,
-      lineaBase: DIRECTORIOS.unidad,
-    });
-    // Historia 26.3 — `/autores/` ya la declara `SUPERFICIES`; `/obras/` llega con la 26.4.
-    const superficies = [...SUPERFICIES, directorio('las obras', 'obras')];
+    // Historias 26.3 y 26.4 — los dos Directorios ya la declaran en `SUPERFICIES`.
+    const superficies = SUPERFICIES;
     const l = leer(
       { vistasYLecturas: DIAS.map((dia) => lectura(dia, '/autores/', 60)) },
       { superficies, minimo: 300, juicios: [{ ...DIRECTORIOS, llegada: '2026-10-20' }] },

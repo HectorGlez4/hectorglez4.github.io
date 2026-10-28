@@ -149,9 +149,10 @@ describe('el censo por familia', () => {
      * Se excluye aquí por su nombre.
      */
     /*
-     * Historia 26.3 — el Directorio de Autores tampoco es de ninguna familia hasta que la 26.7
-     * cree `directorio`: se exime por su declaración en `superficies.ts`, nunca por el prefijo
-     * (`/autores/` empieza como `/autor/x/`, y un prefijo lo contaría como Autor).
+     * Historias 26.3 y 26.4 — los Directorios tampoco son de ninguna familia hasta que la 26.7
+     * cree `directorio`: se eximen por su declaración en `superficies.ts`, nunca por el prefijo
+     * (`/autores/` empieza como `/autor/x/` y `/obras/` como `/obra/x/y/`: un prefijo los contaría
+     * como Autor y como Obra).
      */
     const publicadas = rutasPublicadas(conjunto)
       .filter((r) => r !== '/')
@@ -161,7 +162,7 @@ describe('el censo por familia', () => {
 
     expect(rutasPublicadas(conjunto)).toContain('/obra/autor-0/una-obra/');
     expect(delCenso.filter((r) => r.startsWith('/obra/'))).toEqual([]);
-    expect(rutasPublicadas(conjunto).filter(esRutaDeDirectorio)).toEqual(['/autores/']);
+    expect(rutasPublicadas(conjunto).filter(esRutaDeDirectorio)).toEqual(['/autores/', '/obras/']);
     for (const familia of FAMILIAS) expect(censo[familia].filter(esRutaDeDirectorio), familia).toEqual([]);
     expect(delCenso).toEqual(publicadas);
     // La portada no es de ninguna familia y se queda fuera a propósito: es una URL suelta

@@ -2273,10 +2273,11 @@ describe('Historia 23.1 — la Página de Cita no pierde su listón', () => {
     const proyecto = await sitioMedido();
     const paginas = paginasDe(proyecto);
     const barrido = superficiesDelBarrido([...paginas.keys()]);
-    // Portada, Cita, Autor, Tema, Colección, Obra, el Directorio de Autores (26.3), búsqueda y
+    // Portada, Cita, Autor, Tema, Colección, Obra, los dos Directorios (26.3, 26.4), búsqueda y
     // 404: una por familia pública.
-    expect(barrido).toHaveLength(9);
+    expect(barrido).toHaveLength(10);
     expect(barrido).toContain('/autores');
+    expect(barrido).toContain('/obras');
     const muestra = [...barrido, CITA_SIN_IMAGEN];
 
     const huecos: string[] = [];

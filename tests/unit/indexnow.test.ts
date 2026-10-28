@@ -357,7 +357,7 @@ describe('FR-38 — el aviso de las Obras (la matriz de la 22.8)', () => {
     };
   };
 
-  it('Cita nueva en Obra indexable: la Cita, su Autor, sus Temas, la Obra y el Directorio; ninguna hermana', () => {
+  it('Cita nueva en Obra indexable: la Cita, su Autor, sus Temas, la Obra y los Directorios; ninguna hermana', () => {
     const antes = corpusDeEjemplo({ cartas: 2 });
     const despues = corpusDeEjemplo({ cartas: 3 });
     const { rutas } = componerAviso({
@@ -368,9 +368,10 @@ describe('FR-38 — el aviso de las Obras (la matriz de la 22.8)', () => {
       indexablesDespues: indexablesDe(despues),
     });
     expect(indexablesDe(antes).rutas).toContain(CARTAS);
-    // Historia 26.3 — el Directorio de Autores cuenta las Citas de cada Autor: un alta lo mueve.
+    // Historias 26.3 y 26.4 — los Directorios cuentan las Citas de cada Autor y de cada Obra: un
+    // alta los mueve.
     expect(rutas.sort()).toEqual(
-      ['/', '/cita/seneca-cartas-2/', '/autor/seneca/', '/autores/', '/tema/el-tiempo/', CARTAS].sort(),
+      ['/', '/cita/seneca-cartas-2/', '/autor/seneca/', '/autores/', '/obras/', '/tema/el-tiempo/', CARTAS].sort(),
     );
   });
 
@@ -539,7 +540,7 @@ describe('Historia 24.8 — el aviso lee la relación por campos', () => {
     colecciones: corpus.colecciones.map((c) => ({ ...c, miembros: [...c.miembros, slug] })),
   });
 
-  it('un rango que solo añade una Cita avisa solo su Cita, su Autor, sus Temas, sus Colecciones, su Obra y el Directorio', () => {
+  it('un rango que solo añade una Cita avisa solo su Cita, su Autor, sus Temas, sus Colecciones, su Obra y los Directorios', () => {
     const antes = conMiembro(corpusDeEjemplo({ cartas: 2 }), 'seneca-cartas-2');
     const despues = conMiembro(corpusDeEjemplo({ cartas: 3 }), 'seneca-cartas-2');
     const { rutas, avisos } = componerAviso({
@@ -550,7 +551,7 @@ describe('Historia 24.8 — el aviso lee la relación por campos', () => {
       indexablesDespues: indexables(despues),
     });
     expect(rutas.sort()).toEqual(
-      ['/', '/cita/seneca-cartas-2/', '/autor/seneca/', '/autores/', '/tema/el-tiempo/', '/coleccion/breves/', CARTAS].sort(),
+      ['/', '/cita/seneca-cartas-2/', '/autor/seneca/', '/autores/', '/obras/', '/tema/el-tiempo/', '/coleccion/breves/', CARTAS].sort(),
     );
     expect(avisos).toEqual([]);
   });

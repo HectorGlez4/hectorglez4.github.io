@@ -52,6 +52,20 @@ export function tituloDelDirectorioDeAutores(): string {
 }
 
 /**
+ * El nombre del Directorio de Obras — Historia 26.4: «Obras». El mismo dueño único que el de
+ * Autores para su `h1`, el título de su Tarjeta Social y su título de pestaña.
+ */
+export const NOMBRE_DEL_DIRECTORIO_DE_OBRAS = 'Obras';
+
+/**
+ * El título de pestaña del Directorio de Obras — Historia 26.4, UX-DR80: «Obras, por autor |
+ * Sabiduría de Bolsillo», sin «citas» ni «frases».
+ */
+export function tituloDelDirectorioDeObras(): string {
+  return tituloDe(`${NOMBRE_DEL_DIRECTORIO_DE_OBRAS}, por autor`);
+}
+
+/**
  * El título de una Página de Autor en el resultado de búsqueda.
  *
  * La primera página no se llama «página 1»: ésa es una coordenada de implementación,
