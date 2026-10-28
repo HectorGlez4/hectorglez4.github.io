@@ -25,10 +25,15 @@ import { esJornada } from '../../src/lib/citaDelDia.ts';
 import { DESTINOS_VALIDOS, esDestinoValido } from '../../src/lib/destinos.ts';
 import { DOMINIO } from '../../src/lib/dominio.ts';
 import { PARAMETRO_DE_ORIGEN, REDES_VALIDAS, esRedValida, type Red } from '../../src/lib/redes.ts';
-import { esServicioPorForma, rutaNormalizada, superficieDeclaradaDe } from '../../src/lib/superficies.ts';
+import {
+  FAMILIAS,
+  esServicioPorForma,
+  rutaNormalizada,
+  superficieDeclaradaDe,
+} from '../../src/lib/superficies.ts';
 import { PARAMETRO_DE_DIFUSION } from '../../src/lib/vocabulario.ts';
-import type { CensoPorFamilia } from './indexacion.ts';
-import { PRIMERA_JORNADA_ANOTABLE, familiaDeRuta, hostAjeno } from './rastreo.ts';
+import type { CensoPorFamilia, FamiliaDelCenso } from './indexacion.ts';
+import { PRIMERA_JORNADA_ANOTABLE, hostAjeno } from './rastreo.ts';
 
 /**
  * Los formatos que se publican. Un conjunto cerrado por lo mismo que las redes: con texto
@@ -315,15 +320,39 @@ export function desplazarSemana(semana: string, n: number): string {
 }
 
 /**
+ * Las familias que reparte **este registro**: todas menos la Obra — Historia 26.7, AD-24.
+ *
+ * Derivadas de `FAMILIAS` (`src/lib/superficies.ts`), nunca reescritas: el día que el canal
+ * cuente la Obra cambia esta constante y ninguna otra. Una Obra publicada se anota igual —una
+ * publicación puede enlazarla— y se desglosa como «otra».
+ */
+export const FAMILIAS_DEL_CANAL: readonly FamiliaDelCenso[] = FAMILIAS.filter(
+  (f): f is FamiliaDelCenso => f !== 'obra',
+);
+
+/**
+ * Las familias del canal que son destino con nombre propio: todas menos el Tema, que el
+ * desglose sigue llamando «otra» como desde la 18.2.
+ */
+const FAMILIAS_CON_DESTINO = FAMILIAS_DEL_CANAL.filter(
+  (f): f is Exclude<FamiliaDelCenso, 'tema'> => f !== 'tema',
+);
+
+/** La familia de una ruta en el canal, por el censo y nunca por el prefijo. */
+function familiaDelCanal(censo: CensoPorFamilia, ruta: string): FamiliaDelCenso | undefined {
+  return FAMILIAS_DEL_CANAL.find((familia) => censo[familia]?.includes(ruta));
+}
+
+/**
  * A dónde lleva una publicación.
  *
- *   · Cita, Autor y Colección salen del **censo**, no del prefijo de la ruta: un segundo
- *     criterio de familia divergiría del de la serie de indexación.
+ *   · Cita, Autor, Colección y Directorio salen del **censo**, no del prefijo de la ruta: un
+ *     segundo criterio de familia divergiría del de la serie de indexación. «Directorio» son
+ *     los dos, `/autores/` y `/obras/` (Historia 26.7): ni Autor ni Obra.
  *   · La portada es la superficie que `src/lib/superficies.ts` declara como tal, y solo si
  *     el sitio la publica hoy.
- *   · «otra» es lo publicable que no es ninguna de esas cuatro —hoy, la Página de Tema y,
- *     hasta que la 26.7 les dé familia, los Directorios (`/autores/` y `/obras/`, Historias 26.3 y
- *     26.4)—.
+ *   · «otra» es lo publicable que no es ninguno de esos destinos —hoy, la Página de Tema y la
+ *     Página de Obra, que el canal no cuenta todavía—.
  *   · «ya no se publica» es una ruta que se anotó publicada y que hoy el sitio no publica.
  *     El registro es permanente y el censo es de hoy; sin esta clase, una Cita retirada
  *     contaría como «otra» y parecería que se enlazó algo que no era una Cita.
@@ -333,6 +362,7 @@ export type Destino =
   | 'cita'
   | 'autor'
   | 'coleccion'
+  | 'directorio'
   | 'portada'
   | 'otra'
   | 'yaNoSePublica'
@@ -342,6 +372,7 @@ export const DESTINOS: readonly Destino[] = [
   'cita',
   'autor',
   'coleccion',
+  'directorio',
   'portada',
   'otra',
   'yaNoSePublica',
@@ -352,6 +383,7 @@ export const NOMBRE_DEL_DESTINO: Readonly<Record<Destino, string>> = {
   cita: 'Cita',
   autor: 'Autor',
   coleccion: 'Colección',
+  directorio: 'Directorio',
   portada: 'portada',
   otra: 'otra',
   yaNoSePublica: 'ya no se publica',
@@ -374,8 +406,9 @@ export function destinoDePublicacion(
   publicadas: readonly string[],
 ): Destino {
   if (ruta === SIN_ENLACE) return 'sinEnlace';
-  const familia = familiaDeRuta(censo, ruta);
-  if (familia === 'cita' || familia === 'autor' || familia === 'coleccion') return familia;
+  const familia = familiaDelCanal(censo, ruta);
+  const conDestino = FAMILIAS_CON_DESTINO.find((f) => f === familia);
+  if (conDestino !== undefined) return conDestino;
 
   const normalizada = normalizadaOVacia(ruta);
   if (normalizada === undefined || !publicadas.some((p) => normalizadaOVacia(p) === normalizada)) {

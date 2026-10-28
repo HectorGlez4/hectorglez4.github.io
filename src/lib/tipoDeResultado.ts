@@ -1,3 +1,5 @@
+import type { Familia } from './superficies.ts';
+
 /**
  * Qué clase de superficie es un resultado de la búsqueda propia, y cómo se rotula.
  *
@@ -16,6 +18,11 @@
  * Esto no decide **si** una superficie se indexa —eso sale entero de
  * `src/lib/superficies.ts`, y sigue siendo un solo sitio—, sino cómo se lee su resultado
  * cuando ya está indexada.
+ *
+ * Desde la Historia 26.7 las claves son **las familias con resultado más `portada`**, y lo ata el
+ * `satisfies`: las familias las declara `src/lib/superficies.ts` (`FAMILIAS`) y una familia nueva
+ * sin rótulo para `astro check`. La importación es solo de tipo, así que esta tabla no arrastra
+ * `superficies.ts` al guion de `/buscar/`.
  */
 export const ETIQUETAS_DE_RESULTADO = {
   cita: 'Cita',
@@ -31,7 +38,7 @@ export const ETIQUETAS_DE_RESULTADO = {
   // repite, y su título en el índice sale de ese `h1`, no de esta tabla.
   directorio: 'Directorio',
   portada: 'Portada',
-} as const;
+} as const satisfies Record<Familia | 'portada', string>;
 
 /** Los tipos que existen, derivados de la tabla y no declarados aparte. */
 export type TipoDeResultado = keyof typeof ETIQUETAS_DE_RESULTADO;

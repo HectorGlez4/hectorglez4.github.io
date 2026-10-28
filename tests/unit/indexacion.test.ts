@@ -12,7 +12,14 @@ import {
   type ConjuntoPublicable,
 } from '../../src/lib/publicado.ts';
 import { MIN_CITAS_POR_TEMA } from '../../src/lib/umbrales.ts';
-import { esRutaDeDirectorio } from '../../src/lib/superficies.ts';
+import {
+  FAMILIAS,
+  esRutaDeDirectorio,
+  esRutaDeObra,
+  rutaDelDirectorioDeAutores,
+  rutaDelDirectorioDeObras,
+  type Familia,
+} from '../../src/lib/superficies.ts';
 import {
   CABECERA_DE_INDEXACION,
   FICHERO_DE_INDEXACION,
@@ -22,9 +29,13 @@ import {
   rutasDelCorpus,
 } from '../../tools/lib/corpus.ts';
 import {
+  CENSO_DE_FAMILIA,
   ESTADO_SIN_DECLARAR,
-  FAMILIAS,
+  FAMILIAS_DEL_CENSO,
+  FAMILIAS_DEL_TOTAL,
+  FAMILIAS_DE_LA_SERIE,
   MUESTRA_MINIMA_POR_FAMILIA,
+  NOMBRE_DE_FAMILIA,
   SALIDA_SIN_CREDENCIALES,
   TECHO_DIARIO_DE_INSPECCIONES,
   TOPE_DE_MOTIVO,
@@ -46,7 +57,7 @@ import {
   jornadaDeJuzgarSm11,
   lineasDeLectura,
   lineasDeSm11,
-  type Familia,
+  type FamiliaDelCenso,
   type Inspeccion,
 } from '../../tools/lib/indexacion.ts';
 import { rutasDeObraDelSitemap } from '../../tools/lib/avisar.ts';
@@ -138,7 +149,7 @@ describe('el censo por familia', () => {
     };
     const censo = censoPorFamilia(conjunto);
 
-    const delCenso = FAMILIAS.flatMap((f) => [...censo[f]]).sort();
+    const delCenso = FAMILIAS_DEL_CENSO.flatMap((f) => [...censo[f]]).sort();
     /*
      * La comparación con `rutasPublicadas` es la puerta de AD-11: si mañana se añade una
      * quinta familia al dueño del conjunto publicable y nadie la añade al censo, esta
@@ -146,24 +157,24 @@ describe('el censo por familia', () => {
      *
      * Historia 22.4 — la Obra es la excepción escrita: `rutasPublicadas` la enumera también con
      * `noindex`, y la serie la mide aparte con el censo del sitemap (`censoDeLaSerie`, 22.8).
-     * Se excluye aquí por su nombre.
-     */
-    /*
-     * Historias 26.3 y 26.4 — los Directorios tampoco son de ninguna familia hasta que la 26.7
-     * cree `directorio`: se eximen por su declaración en `superficies.ts`, nunca por el prefijo
-     * (`/autores/` empieza como `/autor/x/` y `/obras/` como `/obra/x/y/`: un prefijo los contaría
-     * como Autor y como Obra).
+     * Se excluye aquí por su declaración (`esRutaDeObra`), nunca por el prefijo.
+     *
+     * Historia 26.7 — los Directorios ya no se eximen: son la familia `directorio`. `/autores/`
+     * empieza como `/autor/x/` y `/obras/` como `/obra/x/y/`, y un prefijo los contaría como
+     * Autor y como Obra; el censo los compone con sus constructores.
      */
     const publicadas = rutasPublicadas(conjunto)
       .filter((r) => r !== '/')
-      .filter((r) => !r.startsWith('/obra/'))
-      .filter((r) => !esRutaDeDirectorio(r))
+      .filter((r) => !esRutaDeObra(r))
       .sort();
 
     expect(rutasPublicadas(conjunto)).toContain('/obra/autor-0/una-obra/');
-    expect(delCenso.filter((r) => r.startsWith('/obra/'))).toEqual([]);
-    expect(rutasPublicadas(conjunto).filter(esRutaDeDirectorio)).toEqual(['/autores/', '/obras/']);
-    for (const familia of FAMILIAS) expect(censo[familia].filter(esRutaDeDirectorio), familia).toEqual([]);
+    expect(delCenso.filter(esRutaDeObra)).toEqual([]);
+    expect(censo.directorio).toEqual(['/autores/', '/obras/']);
+    expect(rutasPublicadas(conjunto).filter(esRutaDeDirectorio)).toEqual(censo.directorio);
+    for (const familia of FAMILIAS_DEL_CENSO.filter((f) => f !== 'directorio')) {
+      expect(censo[familia].filter(esRutaDeDirectorio), familia).toEqual([]);
+    }
     expect(delCenso).toEqual(publicadas);
     // La portada no es de ninguna familia y se queda fuera a propósito: es una URL suelta
     // y lo que esta serie compara es el reparto por familia.
@@ -172,7 +183,7 @@ describe('el censo por familia', () => {
 
   it('compone las rutas con barra final, que es la forma canónica que el sitio anuncia', () => {
     const censo = censoPorFamilia(conjuntoDe(MIN_CITAS_POR_TEMA));
-    for (const familia of FAMILIAS) {
+    for (const familia of FAMILIAS_DEL_CENSO) {
       for (const ruta of censo[familia]) expect(ruta.endsWith('/')).toBe(true);
     }
   });
@@ -187,9 +198,12 @@ describe('el censo por familia', () => {
 // ─── El plan: el eje del diseño ──────────────────────────────────────────────────────
 
 /** Un censo hecho a mano, para poder mover los tamaños sin fabricar un corpus. */
-function censoDe(tamaños: Partial<Record<Familia, number>>) {
-  const censo = { cita: [], autor: [], tema: [], coleccion: [] } as Record<Familia, string[]>;
-  for (const familia of FAMILIAS) {
+function censoDe(tamaños: Partial<Record<FamiliaDelCenso, number>>) {
+  const censo = { cita: [], autor: [], tema: [], coleccion: [], directorio: [] } as Record<
+    FamiliaDelCenso,
+    string[]
+  >;
+  for (const familia of FAMILIAS_DEL_CENSO) {
     censo[familia] = Array.from(
       { length: tamaños[familia] ?? 0 },
       (_, i) => `/${familia}/${String(i).padStart(5, '0')}/`,
@@ -378,7 +392,7 @@ describe('la petición a la fuente', () => {
 
   it('toda ruta del censo real compone una petición válida', () => {
     const censo = censoPorFamilia(conjuntoDe(MIN_CITAS_POR_TEMA));
-    for (const familia of FAMILIAS) {
+    for (const familia of FAMILIAS_DEL_CENSO) {
       for (const ruta of censo[familia]) {
         const peticion = peticionDeInspeccion(DOMINIO, ruta);
         expect(peticion.inspectionUrl).toBe(`https://${DOMINIO}${ruta}`);
@@ -965,9 +979,10 @@ describe('la orden', () => {
     expect(new Date(informe.lectura.momento ?? '').getTime()).toBeLessThanOrEqual(Date.now());
     expect(informe.lectura.propiedad).toBe(propiedadDeDominio(DOMINIO));
     expect(informe.lectura.publicadas).toBe(MIN_CITAS_POR_TEMA + 2);
-    expect(Object.keys(informe.lectura.familias).sort()).toEqual(['autor', 'cita', 'tema']);
+    // Historia 26.7 — el Directorio se lee como familia, y no suma en el total de la entrada.
+    expect(Object.keys(informe.lectura.familias).sort()).toEqual(['autor', 'cita', 'directorio', 'tema']);
     expect(informe.plan.presupuesto).toBe(TECHO_DIARIO_DE_INSPECCIONES);
-    expect(informe.plan.inspecciones).toBe(MIN_CITAS_POR_TEMA + 2);
+    expect(informe.plan.inspecciones).toBe(MIN_CITAS_POR_TEMA + 2 + 2);
   });
 
   it('el informe de pantalla nombra lo leído y lo no leído, y no inventa un cero', async () => {
@@ -1466,5 +1481,117 @@ describe('Historia 22.8 — la familia Obra en la serie', () => {
       vi.doUnmock('../../src/lib/umbrales.ts');
       vi.resetModules();
     }
+  });
+});
+
+describe('Historia 26.7 — los Directorios se miden como familia propia', () => {
+  const DIRECTORIOS = [rutaDelDirectorioDeAutores(), rutaDelDirectorioDeObras()];
+
+  it('la serie mide un subconjunto de las seis familias, con el Directorio y la Obra', () => {
+    // Subconjunto, no igualdad: una séptima familia no rompe esta prueba si la serie no la cuenta.
+    for (const familia of FAMILIAS_DE_LA_SERIE) expect(FAMILIAS).toContain(familia);
+    expect(FAMILIAS_DE_LA_SERIE).toContain('directorio');
+    expect(FAMILIAS_DE_LA_SERIE).toContain('obra');
+    expect(NOMBRE_DE_FAMILIA.directorio).toBe('Directorio');
+    expect(CENSO_DE_FAMILIA.directorio).toBe('publicadas');
+    // El censo de lo publicado es todo menos la Obra, que se mide con el sitemap (22.8).
+    for (const familia of FAMILIAS_DEL_CENSO) expect(FAMILIAS).toContain(familia);
+    expect(FAMILIAS_DEL_CENSO).toContain('directorio');
+    expect(FAMILIAS_DEL_CENSO).not.toContain('obra');
+    // El total de la entrada sigue siendo el de las cuatro de siempre.
+    expect(FAMILIAS_DEL_TOTAL).toEqual(['cita', 'autor', 'tema', 'coleccion']);
+  });
+
+  it('el censo da los dos Directorios en `directorio`, ni en Autor ni en Obra', () => {
+    const censo = censoPorFamilia(conjuntoDe(MIN_CITAS_POR_TEMA));
+    expect(censo.directorio).toEqual(['/autores/', '/obras/']);
+    expect(censo.autor).not.toContain('/autores/');
+    expect(censoDeLaSerie(conjuntoDe(MIN_CITAS_POR_TEMA), ['/obra/a/b/']).obra).not.toContain('/obras/');
+  });
+
+  it('con SM-11 y un censo realista, Autor y Obra siguen enteras y el Directorio se lee entero', () => {
+    const censo = {
+      cita: Array.from({ length: 3500 }, (_, i) => `/cita/c-${String(i).padStart(5, '0')}/`),
+      autor: Array.from({ length: 150 }, (_, i) => `/autor/a-${i}/`),
+      tema: Array.from({ length: 60 }, (_, i) => `/tema/t-${i}/`),
+      coleccion: [],
+      obra: Array.from({ length: 80 }, (_, i) => `/obra/a/o-${i}/`),
+      directorio: DIRECTORIOS,
+    };
+    const plan = planDeInspeccion(censo, TECHO_DIARIO_DE_INSPECCIONES, ['autor', 'obra']);
+    const de = (f: string) => plan.familias.find((x) => x.familia === f);
+    expect(de('autor')).toMatchObject({ publicadas: 150, muestreada: false });
+    expect(de('autor')?.rutas).toHaveLength(150);
+    expect(de('obra')).toMatchObject({ publicadas: 80, muestreada: false });
+    expect(de('directorio')).toMatchObject({ publicadas: 2, muestreada: false, rutas: DIRECTORIOS });
+    expect(DIRECTORIOS.length).toBeLessThan(MUESTRA_MINIMA_POR_FAMILIA);
+    expect(plan.enteras).toEqual(['autor', 'obra']);
+    expect(plan.inspecciones).toBe(TECHO_DIARIO_DE_INSPECCIONES);
+  });
+
+  it('la lectura anota `directorio` con su censo de lo publicado, fuera del total de la entrada', async () => {
+    const { lectura } = await leerIndexacion({
+      conjunto: conjuntoDe(MIN_CITAS_POR_TEMA),
+      propiedad: 'sc-domain:x',
+      presupuesto: TECHO_DIARIO_DE_INSPECCIONES,
+      inspeccionar: inspectorQueContesta((r) => (r === '/autores/' ? 'PASS' : 'FAIL')),
+      pasoMs: 0,
+      obras: { rutas: ['/obra/autor-0/una/'] },
+    });
+    expect(lectura.familias.directorio).toMatchObject({
+      publicadas: 2,
+      muestra: 2,
+      indexadas: 1,
+      noIndexadas: 1,
+      censo: 'publicadas',
+    });
+    // Las cuatro de siempre: MIN Citas, 3 Autores, 1 Tema. Ni la Obra ni el Directorio.
+    expect(lectura.publicadas).toBe(MIN_CITAS_POR_TEMA + 3 + 1);
+    expect(lineasDeLectura(lectura).join('\n')).toMatch(/^Directorio: 1 indexadas de 2, 1 no\.$/m);
+  });
+
+  it('si el inspector falla en un Directorio, `directorio` va a sinLeer con su motivo y jamás a cero', async () => {
+    const { lectura } = await leerIndexacion({
+      conjunto: conjuntoDe(MIN_CITAS_POR_TEMA),
+      propiedad: 'sc-domain:x',
+      presupuesto: TECHO_DIARIO_DE_INSPECCIONES,
+      inspeccionar: async (ruta) => {
+        // Una cuota agotada no se reintenta: la familia cae entera, sin esperas en la prueba.
+        if (ruta === '/autores/') throw Object.assign(new Error('agotada'), { code: 429 });
+        return { ruta, veredicto: 'FAIL', estado: 'Discovered - currently not indexed' };
+      },
+      pasoMs: 0,
+      obras: { rutas: ['/obra/autor-0/una/'] },
+    });
+    expect(lectura.familias.directorio).toBeUndefined();
+    expect(lectura.sinLeer.directorio).toBe('lectura interrumpida tras 0 de 2: cuota agotada (429)');
+    expect(lectura.familias.autor).toBeDefined();
+    expect(lineasDeLectura(lectura).join('\n')).toMatch(/^ {2}Directorio: lectura interrumpida/m);
+  });
+
+  it('la orden registra `directorio` en la entrada, y una entrada vieja sin él se sigue leyendo', async () => {
+    const corpus = await corpusConCitas(MIN_CITAS_POR_TEMA);
+    await writeFile(
+      join(corpus, FICHERO_DE_INDEXACION),
+      `${CABECERA_DE_INDEXACION}  - fecha: "2026-09-01"\n    propiedad: sc-domain:x\n    publicadas: 1\n` +
+        '    inspeccionadas: 1\n    familias:\n      cita:\n        publicadas: 1\n        muestra: 1\n' +
+        '        indexadas: 0\n        noIndexadas: 1\n',
+      'utf8',
+    );
+    capturarSalida();
+    const codigo = await principal(
+      ['--corpus', corpus, '--registrar'],
+      async () => inspectorQueContesta(() => 'FAIL'),
+      CREDENCIAL,
+      SIN_OBRAS,
+    );
+    expect(codigo).toBe(0);
+    const serie = await leerSerieDeIndexacion(rutasDelCorpus(corpus));
+    const vieja = serie.find((e) => e.fecha === '2026-09-01');
+    const nueva = serie.find((e) => e.fecha === fechaLocal(new Date()));
+    expect(vieja?.familias?.directorio).toBeUndefined();
+    expect(vieja?.familias?.cita.publicadas).toBe(1);
+    expect(nueva?.familias?.directorio).toMatchObject({ publicadas: 2, muestra: 2, censo: 'publicadas' });
+    expect(nueva?.publicadas).toBe(MIN_CITAS_POR_TEMA + 1 + 1);
   });
 });

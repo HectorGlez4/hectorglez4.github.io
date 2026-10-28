@@ -13,7 +13,7 @@
  * no toca disco ni red.
  */
 import { SITIO } from '../../src/lib/dominio.ts';
-import { esRutaDeObra, rutaNormalizada } from '../../src/lib/superficies.ts';
+import { FAMILIAS, esRutaDeObra, rutaNormalizada, type Familia } from '../../src/lib/superficies.ts';
 import {
   cambiaronLosCampos,
   type CambioDeFichero,
@@ -29,6 +29,11 @@ import {
  * aviso e invisible para la otra. Las Fichas de Obra entran desde la 22.8; los documentos de
  * Fuente, desde la 24.8, porque ordenan las Citas de la Página de Obra (24.1) y solo la fechan a
  * ella.
+ *
+ * Desde la Historia 26.7 la tabla se juzga contra `Familia` (`src/lib/superficies.ts`): son las
+ * cinco familias con directorio en el Corpus —el Directorio no tiene fichero propio y entra por
+ * sus páginas— más `documento`, que no es familia de ruta. `src/lib/umbrales.ts` también llega al
+ * aviso, pero sin familia: mueve listas de Obras indexables, no ficheros.
  */
 export const FAMILIAS_DE_FICHERO = [
   ['corpus/citas', 'cita'],
@@ -37,24 +42,23 @@ export const FAMILIAS_DE_FICHERO = [
   ['corpus/colecciones', 'coleccion'],
   ['corpus/obras', 'obra'],
   ['corpus/fuentes', 'documento'],
-] as const;
+] as const satisfies readonly (readonly [string, Exclude<Familia, 'directorio'> | 'documento'])[];
 
 export type FamiliaDeFichero = (typeof FAMILIAS_DE_FICHERO)[number][1];
 
 /**
- * Las familias de **ruta**: las superficies que la relación declara. La portada no es ninguna:
+ * Las familias de **ruta**: las superficies que la relación declara — las seis de `FAMILIAS`
+ * (`src/lib/superficies.ts`, Historia 26.7), que es quien las declara. La portada no es ninguna:
  * no lleva fecha y se avisa aparte. La familia de una ruta la pone su entrada en la relación,
  * nunca el prefijo de la ruta.
  *
- * `directorio` entra con la Historia 26.3: `/autores/` no es un Autor, y contarlo en la familia
- * `autor` lo sumaría a los Autores en el ensayo (FR-40). Es familia **del aviso y del ensayo**,
- * nada más: las series de `tools/` —indexación, tráfico, demanda, rastreo, canal— siguen leyendo
- * su censo, donde el Directorio cae fuera de toda familia hasta que la 26.7 las mude a
- * `src/lib/superficies.ts`.
+ * `directorio` entró con la Historia 26.3: `/autores/` no es un Autor, y contarlo en la familia
+ * `autor` lo sumaría a los Autores en el ensayo (FR-40). Desde la 26.7 es también familia de las
+ * series de `tools/`, que la sacan de su censo.
  */
-export const FAMILIAS_DE_RUTA = ['cita', 'autor', 'tema', 'coleccion', 'obra', 'directorio'] as const;
+export const FAMILIAS_DE_RUTA: readonly Familia[] = FAMILIAS;
 
-export type FamiliaDeRuta = (typeof FAMILIAS_DE_RUTA)[number];
+export type FamiliaDeRuta = Familia;
 
 /** Reconoce solo las familias publicables; el metadato vecino no emite aviso. */
 export function familiaDeFichero(fichero: string): FamiliaDeFichero | undefined {

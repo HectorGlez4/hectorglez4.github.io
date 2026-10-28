@@ -222,8 +222,8 @@ const CAMPOS_DEL_AUTOR_FUERA = ['nombre', 'añoNacimiento', 'añoFallecimiento']
  * Las columnas de la tabla de campos — Historia 26.4: una por familia de ruta, salvo la de los
  * Directorios, que se desdobla en una por superficie.
  *
- * Los dos Directorios son la misma familia (`directorio`, la del aviso, el ensayo y, en la 26.7,
- * las series), pero no pintan lo mismo: `/autores/` pinta los años de un Autor y `/obras/` no;
+ * Los dos Directorios son la misma familia (`directorio`, la del aviso, el ensayo y, desde la
+ * 26.7, las series), pero no pintan lo mismo: `/autores/` pinta los años de un Autor y `/obras/` no;
  * `/obras/` pinta el título de una ficha y la Procedencia de una Cita y `/autores/` no. Por eso
  * la tabla no se indexa por familia sino por columna, y cada superficie declara la suya
  * (`declarar`); para las demás, la columna es su familia.

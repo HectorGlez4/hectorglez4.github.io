@@ -7,6 +7,7 @@ import { join, resolve } from 'node:path';
 import { promisify } from 'node:util';
 import { parse as parsearYaml } from 'yaml';
 import { DOMINIO } from '../../src/lib/dominio.ts';
+import { FAMILIAS } from '../../src/lib/superficies.ts';
 import {
   CABECERA_DE_DEMANDA,
   FICHERO_DE_DEMANDA,
@@ -25,9 +26,11 @@ import { rutasPublicadas } from '../../src/lib/publicado.ts';
 import { FILAS_POR_PAGINA, type FilaDeTrafico, type PeticionDeTrafico } from '../../tools/lib/trafico.ts';
 import { autorPorPrefijo } from '../../tools/lib/autoria.ts';
 import {
+  FAMILIAS_DE_LA_DEMANDA,
   MIN_IMPRESIONES_POR_FILA,
   agregarDemanda,
   componerLecturaDeDemanda,
+  lineasDeDemanda,
   ventanasALeer,
 } from '../../tools/lib/demanda.ts';
 import { principal } from '../../tools/demanda.ts';
@@ -182,6 +185,8 @@ const CENSO: CensoPorFamilia = {
   autor: ['/autor/seneca/', '/autor/seneca-el-viejo/'],
   tema: [],
   coleccion: [],
+  // Sin Directorios a propósito: los de la Historia 26.7 usan el censo real de un corpus.
+  directorio: [],
 };
 const OPCIONES = { slugsDeAutores: ['seneca', 'seneca-el-viejo'], censo: CENSO, dominio: DOMINIO };
 
@@ -294,8 +299,14 @@ describe('el reparto de una ventana', () => {
   });
 });
 
-describe('Historias 26.3 y 26.4 — los Directorios en la demanda', () => {
-  it('publicados y sin familia hasta la 26.7: con el censo real de un corpus caen en fueraDelCenso, nunca en Autor', async () => {
+describe('Historias 26.3, 26.4 y 26.7 — los Directorios en la demanda', () => {
+  it('la serie cuenta un subconjunto de las seis, con el Directorio y sin la Obra', () => {
+    for (const familia of FAMILIAS_DE_LA_DEMANDA) expect(FAMILIAS).toContain(familia);
+    expect(FAMILIAS_DE_LA_DEMANDA).toContain('directorio');
+    expect(FAMILIAS_DE_LA_DEMANDA).not.toContain('obra');
+  });
+
+  it('con el censo real de un corpus cuentan en `directorio`: ni fueraDelCenso, ni Autor, ni Obra', async () => {
     const conjunto = await conjuntoDelCorpus(rutasDelCorpus(await corpusDePrueba()));
     expect(rutasPublicadas(conjunto)).toContain('/autores/');
     expect(rutasPublicadas(conjunto)).toContain('/obras/');
@@ -306,11 +317,34 @@ describe('Historias 26.3 y 26.4 — los Directorios en la demanda', () => {
       ],
       { ...OPCIONES, censo: censoPorFamilia(conjunto) },
     );
-    expect(fueraDelCenso).toEqual({ clics: 3, impresiones: 13 });
+    expect(familias.directorio).toMatchObject({ clics: 3, impresiones: 13 });
+    expect(fueraDelCenso).toEqual({ clics: 0, impresiones: 0 });
     expect(familias.autor).toMatchObject({ clics: 0, impresiones: 0 });
+    expect(Object.keys(familias)).not.toContain('obra');
     // No es una ruta de Cita: no se atribuye a ningún Autor ni se cuenta sin Autor.
     expect(autores).toEqual([]);
     expect(sinAutor).toEqual({ rutas: 0, clics: 0, impresiones: 0 });
+  });
+
+  it('el informe rotula «Directorio» con la columna de cifras alineada', async () => {
+    const conjunto = await conjuntoDelCorpus(rutasDelCorpus(await corpusDePrueba()));
+    const agregado = agregarDemanda(
+      [
+        { keys: [URL('/autores/')], clicks: 2, impressions: 9, position: 3 },
+        { keys: [URL('/autor/seneca/')], clicks: 1, impressions: 6, position: 4 },
+      ],
+      { ...OPCIONES, censo: censoPorFamilia(conjunto) },
+    );
+    const lectura = componerLecturaDeDemanda({
+      agregado,
+      ventana: { desde: '2026-09-09', hasta: '2026-10-06', clase: '28-dias' },
+      momento: HOY,
+      propiedad: 'sc-domain:x',
+    });
+    const texto = lineasDeDemanda({ propiedad: 'sc-domain:x', leidoEl: '2026-10-09', primeraLectura: false, ventanas: [lectura], sinLeer: [] }).join('\n');
+    const columna = (rotulo: string) => new RegExp(`^ {4}${rotulo} +\\d`, 'm').exec(texto)?.[0].length;
+    expect(texto).toMatch(/^ {4}Directorio: 2 clics, 9 impresiones/m);
+    expect(columna('Directorio:')).toBe(columna('Autor:'));
   });
 });
 
@@ -412,7 +446,8 @@ describe('la orden', () => {
     expect(movil.sinAutor).toEqual({ rutas: 1, clics: 0, impresiones: 7 });
     expect(movil.resto).toEqual({ filas: 1, clics: 1, impresiones: 3 });
     expect(movil.fueraDelCenso).toEqual({ clics: 6, impresiones: 60 });
-    expect(Object.keys(movil.familias)).toEqual(['cita', 'autor']);
+    // Historia 26.7 — el Directorio se publica siempre: sale leído, aunque sin filas sea un cero.
+    expect(Object.keys(movil.familias)).toEqual(['cita', 'autor', 'directorio']);
     // Lo que es solo del informe no se escribe.
     expect(escrito).not.toMatch(/slugsSinAutor|citasConClic/);
   });

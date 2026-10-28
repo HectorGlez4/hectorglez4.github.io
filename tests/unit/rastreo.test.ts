@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { formaDeObra } from '../../src/lib/obras.ts';
 import {
+  FAMILIAS,
   olvidarRutasIndexables,
   rutaDelDirectorioDeAutores,
   rutaDelDirectorioDeObras,
@@ -24,6 +25,7 @@ import {
 } from '../../tools/lib/corpus.ts';
 import { censoPorFamilia } from '../../tools/lib/indexacion.ts';
 import {
+  FAMILIAS_DEL_RASTREO,
   PRIMERA_JORNADA_ANOTABLE,
   TOPE_DE_LA_PETICION,
   componerPeticiones,
@@ -413,15 +415,54 @@ describe('el cruce con la serie', () => {
     ).toHaveLength(1);
   });
 
-  it('los Directorios se publican sin familia hasta la 26.7: sueltos, como la portada, y el informe lo dice', async () => {
+  it('Historia 26.7 — el registro reparte un subconjunto de las seis, con el Directorio y sin la Obra', () => {
+    for (const familia of FAMILIAS_DEL_RASTREO) expect(FAMILIAS).toContain(familia);
+    expect(FAMILIAS_DEL_RASTREO).toContain('directorio');
+    expect(FAMILIAS_DEL_RASTREO).not.toContain('obra');
+  });
+
+  it('Historia 26.7 — los Directorios son la familia `directorio`, no sueltos como la portada', async () => {
     const conjunto = await conjuntoDelCorpus(rutasDelCorpus(await corpusConCitas(MIN_CITAS_POR_TEMA)));
     const censo = censoPorFamilia(conjunto);
     const publicadas = rutasPublicadas(conjunto);
     for (const directorio of [rutaDelDirectorioDeAutores(), rutaDelDirectorioDeObras()]) {
       expect(publicadas, directorio).toContain(directorio);
-      expect(destinoDePeticion(directorio, censo, publicadas), directorio).toEqual({ clase: 'suelta' });
+      expect(familiaDeRuta(censo, directorio), directorio).toBe('directorio');
+      expect(destinoDePeticion(directorio, censo, publicadas), directorio).toEqual({
+        clase: 'familia',
+        familia: 'directorio',
+      });
       const lineas = lineasDeRegistro([{ fecha: HOY, ruta: directorio }], censo, publicadas).join('\n');
-      expect(lineas, directorio).toMatch(/Sin familia —la portada y los Directorios no son de ninguna—: 1/);
+      expect(lineas, directorio).toMatch(new RegExp(`${directorio}  \\(Directorio\\)`));
+      expect(lineas, directorio).toMatch(/^ {2}Directorio: 1 pedidas de 2 publicadas$/m);
+      expect(lineas, directorio).not.toMatch(/Sin familia/);
+    }
+    // La portada sigue suelta, y el informe ya no nombra a los Directorios con ella.
+    const portada = lineasDeRegistro([{ fecha: HOY, ruta: '/' }], censo, publicadas).join('\n');
+    expect(portada).toMatch(/Sin familia —la portada no es de ninguna—: 1/);
+  });
+
+  it('Historia 26.7 — con la Obra congelada, `/obras/` se anota y la consulta la cuenta en «Directorio»', async () => {
+    vi.resetModules();
+    vi.doMock('../../src/lib/umbrales.ts', async (importOriginal) => ({
+      ...(await importOriginal<typeof import('../../src/lib/umbrales.ts')>()),
+      CONGELACION_DE_OBRAS: { desde: '2026-09-01', indexables: [] },
+    }));
+    try {
+      const { principal: conCongelacion } = await import('../../tools/rastreo.ts');
+      const { congelacionVigente } = await import('../../src/lib/obras.ts');
+      expect(congelacionVigente()).toBeDefined();
+      const corpus = await corpusConCitas(MIN_CITAS_POR_TEMA);
+      const salida = capturarSalida();
+      expect(await conCongelacion(['--corpus', corpus, '--registrar', rutaDelDirectorioDeObras()])).toBe(0);
+      expect(await leerPeticionesDeRastreo(rutasDelCorpus(corpus))).toEqual([
+        { fecha: fechaLocal(new Date()), ruta: '/obras/' },
+      ]);
+      expect(salida.join('')).toMatch(/^ {2}Directorio: 1 pedidas de 2 publicadas$/m);
+      expect(salida.join('')).not.toMatch(/congelada/);
+    } finally {
+      vi.doUnmock('../../src/lib/umbrales.ts');
+      vi.resetModules();
     }
   });
 

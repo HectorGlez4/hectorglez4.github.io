@@ -698,8 +698,8 @@ export function siguienteCita(
  * Desde la Historia 26.3 enumera también el Directorio de Autores y, desde la 26.4, el de Obras
  * justo detrás, **siempre**: son páginas estáticas que existen aunque el Corpus esté vacío
  * (entonces solo llevan su `h1`). Van tras los Autores, y por ellas las hereda `rutasIndexables`.
- * No son de ninguna familia: las series las dejan fuera del censo hasta que la 26.7 cree la
- * familia `directorio`.
+ * Son la familia `directorio` (Historia 26.7): el censo de las series
+ * (`censoPorFamilia`, en `tools/`) los compone con los mismos constructores.
  */
 export function rutasPublicadas(conjunto: ConjuntoPublicable): string[] {
   return [

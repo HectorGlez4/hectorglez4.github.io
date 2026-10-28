@@ -24,14 +24,9 @@
  * su Autor: cuenta en la familia Autor, que es otra pregunta.
  */
 
-import { rutaNormalizada } from '../../src/lib/superficies.ts';
+import { FAMILIAS, rutaNormalizada } from '../../src/lib/superficies.ts';
 import { autorPorPrefijo } from './autoria.ts';
-import {
-  FAMILIAS,
-  NOMBRE_DE_FAMILIA,
-  type CensoPorFamilia,
-  type Familia,
-} from './indexacion.ts';
+import { type CensoPorFamilia, type FamiliaDelCenso } from './indexacion.ts';
 import {
   MESES_QUE_CONSERVA_LA_FUENTE,
   RETARDO_DE_DATOS_FINALES_EN_DIAS,
@@ -40,6 +35,7 @@ import {
   lineaDeMetricas,
   mesesALeer,
   motivosSinCredenciales,
+  rotuloDeFamilia,
   type FilaDeTrafico,
   type FueraDelCenso,
   type Metricas,
@@ -53,6 +49,17 @@ import {
  * `resto`, que dice cuántas Citas, clics e impresiones se quedaron fuera.
  */
 export const MIN_IMPRESIONES_POR_FILA = 5;
+
+/**
+ * Las familias que cuenta **esta serie**: todas menos la Obra — Historia 26.7, AD-24.
+ *
+ * Derivadas de `FAMILIAS` (`src/lib/superficies.ts`) y propias aunque hoy coincidan con las del
+ * tráfico: si una de las dos empieza a contar la Obra, cambia solo la suya. El reparto lo hace
+ * `agregarPorFamilia` del tráfico, que recibe este subconjunto.
+ */
+export const FAMILIAS_DE_LA_DEMANDA: readonly FamiliaDelCenso[] = FAMILIAS.filter(
+  (f): f is FamiliaDelCenso => f !== 'obra',
+);
 
 /** Los días de la ventana móvil. */
 export const DIAS_DE_LA_VENTANA = 28;
@@ -160,7 +167,7 @@ export interface AgregadoDeDemanda {
   citas: DemandaDeCita[];
   sinAutor: SinAutor;
   resto: Resto;
-  familias: Partial<Record<Familia, Metricas>>;
+  familias: Partial<Record<FamiliaDelCenso, Metricas>>;
   fueraDelCenso: FueraDelCenso;
   /** Solo para el informe —no se escribe—: los slugs que fueron a `sinAutor`. */
   slugsSinAutor: string[];
@@ -212,7 +219,12 @@ export function agregarDemanda(
   filas: readonly FilaDeTrafico[],
   opciones: { slugsDeAutores: readonly string[]; censo: CensoPorFamilia; dominio: string },
 ): AgregadoDeDemanda {
-  const { familias, fueraDelCenso } = agregarPorFamilia(filas, opciones.censo, opciones.dominio);
+  const { familias, fueraDelCenso } = agregarPorFamilia(
+    filas,
+    opciones.censo,
+    opciones.dominio,
+    FAMILIAS_DE_LA_DEMANDA,
+  );
 
   const porCita = new Map<string, { clics: number; impresiones: number }>();
   for (const fila of filas) {
@@ -400,10 +412,10 @@ export function lineasDeDemanda(lectura: LecturaDeDemanda): string[] {
     }
 
     lineas.push('  Por familia:');
-    for (const familia of FAMILIAS) {
+    for (const familia of FAMILIAS_DE_LA_DEMANDA) {
       const m = v.familias[familia];
       if (m !== undefined) {
-        lineas.push(`    ${`${NOMBRE_DE_FAMILIA[familia]}:`.padEnd(10)} ${lineaDeMetricas(m)}`);
+        lineas.push(`    ${rotuloDeFamilia(familia, FAMILIAS_DE_LA_DEMANDA)} ${lineaDeMetricas(m)}`);
       }
     }
     lineas.push(

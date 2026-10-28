@@ -6,6 +6,7 @@ import {
   CRITERIOS_QUE_AÑADE_WCAG_22,
   ETIQUETAS_DEL_BARRIDO,
   ETIQUETAS_QUE_AXE_NO_CORRE,
+  FAMILIAS,
   LINEA_BASE_DE_LOS_DIRECTORIOS,
   PAGINAS_DE_DIRECTORIO,
   SUPERFICIES,
@@ -1170,6 +1171,42 @@ describe('Historia 26.3 — el Directorio de Autores', () => {
     expect(esRutaDeDirectorio('/autores/2/')).toBe(false);
     expect(esRutaDeDirectorio('/obras/2/')).toBe(false);
     expect(PAGINAS_DE_DIRECTORIO).toEqual(['autores.astro', 'obras.astro']);
+  });
+});
+
+describe('Historia 26.7 — las familias tienen un solo dueño', () => {
+  const RAIZ = join(import.meta.dirname, '..', '..');
+
+  it('son seis, en este orden, con una sola para los dos Directorios', () => {
+    expect(FAMILIAS).toEqual(['cita', 'autor', 'tema', 'coleccion', 'obra', 'directorio']);
+  });
+
+  it('ningún otro fichero de src/, tools/, integraciones/ ni medicion/ declara la lista ni la unión', () => {
+    /*
+     * Una lista literal de familias o una unión escrita a mano fuera de aquí es la segunda
+     * declaración que la 26.7 vino a quitar: `tools/lib/indexacion.ts` declaraba cuatro (más
+     * `obra`) y `tools/lib/avisar.ts` seis. Los subconjuntos se derivan de `FAMILIAS`.
+     */
+    const declaraciones = [
+      /'cita',\s*'autor',\s*'tema'/,
+      /'cita'\s*\|\s*'autor'\s*\|\s*'tema'/,
+      /\btype\s+Familia\s*=/,
+    ];
+    const ficheros: string[] = [];
+    const recorrer = (dir: string) => {
+      for (const entrada of readdirSync(dir)) {
+        if (entrada === 'node_modules' || entrada.startsWith('.')) continue;
+        const completa = join(dir, entrada);
+        if (statSync(completa).isDirectory()) recorrer(completa);
+        else if (/\.(?:[cm]?[jt]s|astro)$/.test(entrada)) ficheros.push(relative(RAIZ, completa));
+      }
+    };
+    for (const dir of ['src', 'tools', 'integraciones', 'medicion']) recorrer(join(RAIZ, dir));
+    const declaran = ficheros.filter((fichero) => {
+      const texto = readFileSync(join(RAIZ, fichero), 'utf8');
+      return declaraciones.some((patron) => patron.test(texto));
+    });
+    expect(declaran).toEqual([join('src', 'lib', 'superficies.ts')]);
   });
 });
 

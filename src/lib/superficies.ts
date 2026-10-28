@@ -293,6 +293,30 @@ export const SUPERFICIES: readonly Superficie[] = [
   },
 ];
 
+/**
+ * Las familias del sitio — Historia 26.7, AD-17. Seis, y este es el único sitio que las declara.
+ *
+ * Una familia es el grupo de URL publicadas que una serie compara entre jornadas: Cita, Autor,
+ * Tema, Colección, Obra y Directorio. **Directorio es una para los dos**, `/autores/` y
+ * `/obras/`: dos URL de índice que, contadas en Autor o en Obra, falsearían el reparto de lo que
+ * listan mientras se juzga SM-11. La portada no es de ninguna, y es deliberado: es una URL suelta
+ * y meterla en una familia la falsearía sin que nadie lo notara.
+ *
+ * Aquí solo están la lista y la unión. **Qué URL es de qué familia lo dice el censo**
+ * (`censoPorFamilia`, en `tools/`), compuesto con los constructores de ruta de
+ * abajo, nunca un prefijo. Y **qué familias cuenta cada serie** lo declara cada una con su
+ * subconjunto con nombre, derivado de esta lista (`FAMILIAS_DE_LA_SERIE`, `FAMILIAS_DEL_TRAFICO`,
+ * `FAMILIAS_DE_RUTA`…): si una serie deja de excluir una familia, cambia solo la suya. Ningún
+ * módulo de `src/` lee ni recibe una serie (AD-24): esto es una constante y un tipo, nada más.
+ *
+ * El orden es el del PRD, con las dos que llegaron después al final: es en el que se nombran
+ * y se reparten.
+ */
+export const FAMILIAS = ['cita', 'autor', 'tema', 'coleccion', 'obra', 'directorio'] as const;
+
+/** Una familia del sitio. La unión sale de `FAMILIAS` y no se escribe en ningún otro sitio. */
+export type Familia = (typeof FAMILIAS)[number];
+
 /*
  * Los constructores de ruta — uno por familia, todos aquí.
  *
@@ -548,7 +572,8 @@ export function esRutaDeObra(rutaOUrl: string): boolean {
 /**
  * Si una ruta es de un Directorio —`/autores/` o `/obras/`—, por la declaración y
  * nunca por el prefijo — Historia 26.3. `/autor/x/` no lo es aunque empiece igual. Lo usan las
- * pruebas que eximen los Directorios del censo de las series hasta que la 26.7 les dé familia.
+ * pruebas; la familia `directorio` de las series no sale de aquí sino del censo
+ * (`censoPorFamilia`, Historia 26.7), compuesto con los dos constructores de ruta.
  */
 export function esRutaDeDirectorio(rutaOUrl: string): boolean {
   const pagina = superficieDeclaradaDe(rutaOUrl)?.pagina;

@@ -31,7 +31,7 @@ import {
   type TransicionFechada,
   type Version,
 } from '../../tools/lib/cambios.ts';
-import { rutaNormalizada } from '../../src/lib/superficies.ts';
+import { FAMILIAS, rutaNormalizada } from '../../src/lib/superficies.ts';
 import { esObraIndexable } from '../../src/lib/obras.ts';
 
 /**
@@ -165,6 +165,12 @@ describe('las familias del Corpus', () => {
   it('las familias de ruta son las seis superficies que la relación declara, y la pone la relación', () => {
     // Historia 26.3 — `directorio`: `/autores/` no es un Autor, y la relación le da su familia.
     expect(FAMILIAS_DE_RUTA).toEqual(['cita', 'autor', 'tema', 'coleccion', 'obra', 'directorio']);
+    // Historia 26.7 — no las declara el aviso: son las de `src/lib/superficies.ts`, su único dueño.
+    expect(FAMILIAS_DE_RUTA).toBe(FAMILIAS);
+    // Las de fichero son las cinco con directorio en el Corpus —el Directorio no tiene fichero—
+    // más `documento`, que no es familia de ruta.
+    const deFichero = FAMILIAS_DE_FICHERO.map(([, familia]) => familia);
+    expect(deFichero.filter((f) => f !== 'documento')).toEqual(FAMILIAS.filter((f) => f !== 'directorio'));
     const familias = new Set([...relacionDeSuperficies(corpusDeEjemplo()).values()].map((s) => s.familia));
     expect([...familias].sort()).toEqual([...FAMILIAS_DE_RUTA].sort());
   });
@@ -376,6 +382,26 @@ describe('FR-38 — el aviso de las Obras (la matriz de la 22.8)', () => {
     expect(rutas.sort()).toEqual(
       ['/', '/cita/seneca-cartas-2/', '/autor/seneca/', '/autores/', '/obras/', '/tema/el-tiempo/', CARTAS].sort(),
     );
+  });
+
+  it('Historia 26.7 — la familia de lo avisado la pone la relación: los Directorios son `directorio` y la portada ninguna', () => {
+    const antes = corpusDeEjemplo({ cartas: 2 });
+    const despues = corpusDeEjemplo({ cartas: 3 });
+    const relacionDespues = relacionDeSuperficies(despues);
+    const { rutas } = componerAviso({
+      cambios: [alta('corpus/citas/seneca-cartas-2.md')],
+      relacionAntes: relacionDeSuperficies(antes),
+      relacionDespues,
+      indexablesAntes: indexablesDe(antes),
+      indexablesDespues: indexablesDe(despues),
+    });
+    for (const directorio of ['/autores/', '/obras/']) {
+      expect(rutas, directorio).toContain(directorio);
+      expect(relacionDespues.get(directorio)?.familia, directorio).toBe('directorio');
+    }
+    // La portada se avisa siempre, sin familia: no está en la relación.
+    expect(rutas).toContain('/');
+    expect(relacionDespues.has('/')).toBe(false);
   });
 
   it('una hermana que cambia de estado se avisa: las Citas nuevas bajan Brevedad del 90 %', () => {

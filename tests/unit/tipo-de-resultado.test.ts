@@ -2,6 +2,7 @@ import { readdir, readFile } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { MARCA } from '../../src/lib/marca.ts';
+import { FAMILIAS } from '../../src/lib/superficies.ts';
 import {
   ETIQUETAS_DE_RESULTADO,
   FILTRO_DE_TIPO,
@@ -45,7 +46,7 @@ const sinComentarios = (fuente: string) =>
 const META_CON_TIPO = /data-pagefind-meta\s*=\s*(?:"[^"]*\btipo\b[^"]*"|'[^']*\btipo\b[^']*'|\{[^}]*\btipo\b[^}]*\})/u;
 
 describe('Historia 26.2 — la tabla de tipos de resultado', () => {
-  it('son exactamente siete, con sus rótulos', () => {
+  it('son las seis familias más la portada, con sus rótulos', () => {
     expect(ETIQUETAS_DE_RESULTADO).toEqual({
       cita: 'Cita',
       autor: 'Autor',
@@ -56,6 +57,9 @@ describe('Historia 26.2 — la tabla de tipos de resultado', () => {
       portada: 'Portada',
     });
     expect(TIPO_POR_OMISION).toBe('cita');
+    // Historia 26.7 — los tipos son las familias con resultado (`FAMILIAS`, su único dueño) más
+    // `portada`, en ese orden.
+    expect(Object.keys(ETIQUETAS_DE_RESULTADO)).toEqual([...FAMILIAS, 'portada']);
   });
 
   it('el rótulo de la portada no repite la marca: su título sale del `h1`', () => {

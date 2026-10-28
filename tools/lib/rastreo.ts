@@ -39,13 +39,25 @@ import { esJornada } from '../../src/lib/citaDelDia.ts';
  */
 import { DOMINIO } from '../../src/lib/dominio.ts';
 import {
+  FAMILIAS,
   esRutaDeObra,
   esServicioPorForma,
   rutaNormalizada,
   superficieDeclaradaDe,
 } from '../../src/lib/superficies.ts';
-import { FAMILIAS, NOMBRE_DE_FAMILIA, type CensoPorFamilia, type Familia } from './indexacion.ts';
+import { NOMBRE_DE_FAMILIA, type CensoPorFamilia, type FamiliaDelCenso } from './indexacion.ts';
 import type { CongelacionDeObras } from '../../src/lib/umbrales.ts';
+
+/**
+ * Las familias que reparte **este registro**: todas menos la Obra — Historia 26.7, AD-24.
+ *
+ * Derivadas de `FAMILIAS` (`src/lib/superficies.ts`), nunca reescritas. El Directorio cuenta
+ * desde la 26.7: `/autores/` y `/obras/` se piden como cualquier URL publicada, y `/obras/` se
+ * admite con la Obra congelada porque no es una Obra (`esRutaDeObra` lo dice por la declaración).
+ */
+export const FAMILIAS_DEL_RASTREO: readonly FamiliaDelCenso[] = FAMILIAS.filter(
+  (f): f is FamiliaDelCenso => f !== 'obra',
+);
 
 /**
  * Cuántas URL caben en una petición. **La decena, no el millar** — §4.17, FR-46.
@@ -342,13 +354,13 @@ export function componerPeticiones(entrada: {
 }
 
 /** La familia de una ruta, según el censo que reparte lo publicado. `undefined` si de ninguna. */
-export function familiaDeRuta(censo: CensoPorFamilia, ruta: string): Familia | undefined {
-  return FAMILIAS.find((familia) => censo[familia]?.includes(ruta));
+export function familiaDeRuta(censo: CensoPorFamilia, ruta: string): FamiliaDelCenso | undefined {
+  return FAMILIAS_DEL_RASTREO.find((familia) => censo[familia]?.includes(ruta));
 }
 
 /** Lo pedido de una familia, frente a lo que esa familia publica. */
 export interface RepartoDeFamilia {
-  familia: Familia;
+  familia: FamiliaDelCenso;
   /** Cuántas URL publica hoy la familia. Es el denominador de la comparación. */
   publicadas: number;
   /** Cuántas URL distintas suyas se han pedido alguna vez. */
@@ -374,7 +386,7 @@ export function repartoPorFamilia(
   peticiones: readonly PeticionDeRastreo[],
   censo: CensoPorFamilia,
 ): RepartoDeFamilia[] {
-  return FAMILIAS.map((familia) => {
+  return FAMILIAS_DEL_RASTREO.map((familia) => {
     const suyas = peticiones.filter((p) => familiaDeRuta(censo, p.ruta) === familia);
     return {
       familia,
@@ -404,12 +416,13 @@ function normalizadaOTalCual(ruta: string): string {
  * y afirmaba que lo que sobraba era la portada, con la petición escrita en el fichero.
  *
  *   · `familia`      — el censo la reparte, y es el caso normal.
- *   · `suelta`       — el sitio la publica y el censo la deja fuera: la portada y, desde la
- *                      26.3 y hasta que la 26.7 les dé familia, los Directorios (`/autores/` y `/obras/`).
+ *   · `suelta`       — el sitio la publica y el censo la deja fuera: la portada. Los
+ *                      Directorios (`/autores/` y `/obras/`) lo fueron de la 26.3 a la 26.7,
+ *                      que les dio familia: `directorio`.
  *   · `despublicada` — el sitio ya no la publica. Ocurrió, y por eso sigue anotada.
  */
 export type DestinoDePeticion =
-  | { clase: 'familia'; familia: Familia }
+  | { clase: 'familia'; familia: FamiliaDelCenso }
   | { clase: 'suelta' }
   | { clase: 'despublicada' };
 
@@ -438,7 +451,7 @@ export function nombreDelDestino(destino: DestinoDePeticion): string {
  *
  * La portada se publica y se puede pedir, pero el censo la deja fuera a propósito: es una
  * URL suelta y lo que la serie compara es el reparto por familia. Se cuenta aparte en vez
- * de repartirla en cualquiera de las cuatro, que falsearía esa familia sin que se notara. Y
+ * de repartirla en cualquiera de las familias, que falsearía esa familia sin que se notara. Y
  * aparte de ella van las que el sitio dejó de publicar, que no son la portada ni son nada
  * que se pueda cruzar con la serie: son una petición que ocurrió sobre una URL que ya no
  * existe, y solo diciéndolo se entiende por qué su familia cuenta una menos.
@@ -564,7 +577,7 @@ export function lineasDeRegistro(
   const fuera = peticionesFueraDelCenso(peticiones, censo, publicadas);
   if (fuera.sueltas.length > 0) {
     lineas.push(
-      `  Sin familia —la portada y los Directorios no son de ninguna—: ${new Set(fuera.sueltas.map((p) => p.ruta)).size}`,
+      `  Sin familia —la portada no es de ninguna—: ${new Set(fuera.sueltas.map((p) => p.ruta)).size}`,
     );
   }
   if (fuera.despublicadas.length > 0) {

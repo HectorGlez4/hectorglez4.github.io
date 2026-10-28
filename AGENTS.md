@@ -198,9 +198,15 @@ suelo de las demás —si no caben, se muestrean y se dice—, y el informe da l
 frente a Autor de la misma lectura y, desde `PRIMER_DESPLIEGUE_DE_OBRAS` más
 `SEMANAS_HASTA_JUZGAR_SM11`, «toca juzgar SM-11: lo decide Héctor».
 
-**Los Directorios** (`/autores/` y `/obras/`, Historias 26.3 y 26.4) están en el sitemap y en ninguna familia
-de esta serie hasta que la 26.7 cree la familia `directorio`: no se inspecciona ni sale en
-`sinLeer`, porque no es una familia que falte, sino una que aún no existe.
+**Los Directorios** (`/autores/` y `/obras/`) son una familia propia, `directorio` (Historia
+26.7): nunca Autor ni Obra. Las seis familias las declara solo `src/lib/superficies.ts`
+(`FAMILIAS`), y cada serie deriva de ahí su subconjunto con nombre (`FAMILIAS_DE_LA_SERIE`, las
+seis, aquí). El Directorio se mide con su censo de lo publicado y se anota con
+`censo: publicadas`; son dos URL, así que se lee entera y entra en el suelo de las demás sin
+quitárselo a Autor ni a Obra mientras rija SM-11. **El `publicadas` de la entrada sigue sumando
+solo las cuatro de siempre** —Cita, Autor, Tema y Colección—: la Obra y el Directorio van cada
+una en su familia, para que el total siga siendo comparable. Una lectura fallida va a `sinLeer`
+con su motivo, jamás a cero, y las entradas anteriores, sin `directorio`, se siguen leyendo.
 
 ## Leer el tráfico orgánico
 
@@ -230,12 +236,12 @@ total agrega por propiedad (la suma puede quedar por encima).
 La familia de una URL sale **del censo de lo publicado**, nunca del prefijo de la ruta. Lo que no
 casa —la portada, páginas 2+, Citas retiradas, otro host como `www.`— se suma en
 `fueraDelCenso`, que se escribe y se informa: nunca se descarta en silencio. La familia Obra no
-se cuenta todavía, ni una familia sin URL publicadas. Los Directorios (`/autores/` y `/obras/`,
-Historias 26.3 y 26.4) no tienen familia **en las series** —indexación, tráfico, demanda, rastreo, canal—
-hasta la 26.7, y aquí caen en `fueraDelCenso`; no es un fallo. (En el aviso y el ensayo de
-`tools/avisar.ts` sí es ya la familia **de ruta** `directorio`: esa tabla reparte lo que se
-avisa, no es una serie.) **Cada pasada reatribuye los meses
-pasados con el censo de hoy**: una Cita retirada desde entonces pasa a `fueraDelCenso`.
+se cuenta todavía (`FAMILIAS_DEL_TRAFICO` son todas menos `obra`), ni una familia sin URL
+publicadas. Los Directorios (`/autores/` y `/obras/`) cuentan desde la Historia 26.7 en su
+familia, `directorio` («Directorio» en el informe), y no en Autor ni en Obra. **Cada pasada
+reatribuye los meses pasados con el censo de hoy**: una Cita retirada desde entonces pasa a
+`fueraDelCenso`, y lo que de los Directorios estaba en `fueraDelCenso` pasa a `directorio` en
+la primera pasada tras la 26.7.
 
 **Ausencia antes que cero.** Un mes cuya consulta falla no se escribe y conserva su entrada
 anterior; sale nombrado en `sinLeer` del informe con su motivo. Una familia cuya consulta por
@@ -283,8 +289,9 @@ Autor. Una ruta de Cita sin prefijo de Autor va a `sinAutor` y el informe la nom
 con menos de `MIN_IMPRESIONES_POR_FILA` (5) impresiones no se versiona en `citas`: se suma en
 `resto` —cuyo `filas` cuenta Citas, no filas de la fuente—, y sí cuenta en su Autor. El reparto por familia es el de la serie de tráfico
 (`agregarPorFamilia`, con su `fueraDelCenso`), así que una Cita retirada cuenta en su Autor y,
-por familia, fuera del censo. Los Directorios (`/autores/` y `/obras/`) no son ruta de Cita ni tienen
-familia hasta la 26.7: no cuentan en ningún Autor y, por familia, van a `fueraDelCenso`.
+por familia, fuera del censo. Los Directorios (`/autores/` y `/obras/`) no son ruta de Cita: no
+cuentan en ningún Autor y, por familia, cuentan en `directorio` (Historia 26.7;
+`FAMILIAS_DE_LA_DEMANDA`, todas menos `obra`), que la pasada reatribuye como el tráfico.
 
 **Ausencia antes que cero.** Una ventana cuya consulta falla, o cuyo reparto no se puede
 componer, no se escribe —se conserva la entrada anterior si la había— y sale en el `sinLeer`
@@ -401,9 +408,9 @@ URL no es una petición, es ruido. Un rechazo sale con código 1; una bandera ma
 2. No se anota nada que no corresponda a una petición real: una entrada inventada es peor que
 no tener el registro. Mientras la familia Obra esté congelada (`CONGELACION_DE_OBRAS`, Historia
 22.8), toda URL de Obra se rechaza con 1, nombrando la congelación. Una petición de uno de los
-Directorios (`/autores/` y `/obras/`, Historias 26.3 y 26.4) se anota —el sitio la publica, y
-`/obras/` no es una Obra: la congelación no la alcanza— y la consulta la cuenta «sin familia»,
-como la portada, hasta que la 26.7 cree la familia `directorio`.
+Directorios (`/autores/` y `/obras/`) se anota —el sitio la publica, y `/obras/` no es una Obra:
+la congelación no la alcanza— y la consulta la cuenta en su familia, «Directorio» (Historia
+26.7, `FAMILIAS_DEL_RASTREO`); «sin familia» queda solo para la portada.
 
 ## Anotar lo que se publica en el canal
 
@@ -442,8 +449,10 @@ revés que las series: dos fotos el mismo día en la misma cuenta son dos public
 escribe por `appendFile` tras validar el fichero y la entrada, y se relee después para
 comprobar que la última entrada es la nueva; un fichero ilegible —o una entrada a mano con una
 red, un formato o una fecha imposibles— se niega sin tocarlo. La consulta desglosa a dónde
-enlaza cada semana y red —Cita, Autor, Colección, portada, «otra», «ya no se publica» y «sin
-enlace»— con la familia sacada del censo (un enlace a los Directorios —`/autores/` y `/obras/`— cae en «otra» hasta la 26.7), cuenta los días con `foto` y los enlaces marcados, y
+enlaza cada semana y red —Cita, Autor, Colección, Directorio, portada, «otra», «ya no se publica» y
+«sin enlace»— con la familia sacada del censo (`FAMILIAS_DEL_CANAL`; un enlace a los Directorios
+—`/autores/` y `/obras/`— sale como «Directorio» desde la 26.7, y uno a un Tema o a una Obra,
+como «otra»), cuenta los días con `foto` y los enlaces marcados, y
 da por red la racha actual y la máxima de semanas ISO **consecutivas** con foto los 7 días y
 todo enlace marcado: «La 18.2 se cierra con 4: lleva N». Ningún módulo de `src/lib/` lo lee
 (AD-24), y el fichero se versiona con su cabecera y la lista vacía: ningún agente anota

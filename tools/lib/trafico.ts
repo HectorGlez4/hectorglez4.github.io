@@ -22,15 +22,41 @@
  * lo que la fuente dijo. `componerLecturaDeTrafico` es la puerta que lo garantiza.
  */
 
-import { rutaNormalizada } from '../../src/lib/superficies.ts';
+import { FAMILIAS, rutaNormalizada } from '../../src/lib/superficies.ts';
 import {
-  FAMILIAS,
   NOMBRE_DE_FAMILIA,
   VARIABLE_DE_CREDENCIALES,
   type CensoPorFamilia,
-  type Familia,
+  type FamiliaDelCenso,
   type FamiliaSinLeer,
 } from './indexacion.ts';
+
+/**
+ * Las familias que cuenta **esta serie**: todas menos la Obra — Historia 26.7, AD-24.
+ *
+ * Derivadas de `FAMILIAS` (`src/lib/superficies.ts`), nunca reescritas: el día que el tráfico
+ * cuente la Obra cambia esta constante y ninguna otra. El Directorio cuenta desde la 26.7, y como
+ * cada pasada reatribuye los meses pasados con el censo de hoy, lo que de `/autores/` y `/obras/`
+ * estaba en `fueraDelCenso` pasa a su familia.
+ */
+export const FAMILIAS_DEL_TRAFICO: readonly FamiliaDelCenso[] = FAMILIAS.filter(
+  (f): f is FamiliaDelCenso => f !== 'obra',
+);
+
+/**
+ * El rótulo de una familia en un informe, relleno hasta el más largo de las que se listan.
+ *
+ * «Directorio:» mide 11 y un relleno fijo de 10 torcía la columna; el ancho sale de los nombres
+ * del subconjunto, así que una familia nueva no lo descuadra. Lo comparte la demanda.
+ */
+export function rotuloDeFamilia(familia: FamiliaDelCenso, familias: readonly FamiliaDelCenso[]): string {
+  return `${NOMBRE_DE_FAMILIA[familia]}:`.padEnd(anchoDeRotulo(familias));
+}
+
+/** El ancho de la columna de rótulos: el del nombre más largo, con sus dos puntos. */
+export function anchoDeRotulo(familias: readonly FamiliaDelCenso[]): number {
+  return Math.max(0, ...familias.map((f) => `${NOMBRE_DE_FAMILIA[f]}:`.length));
+}
 
 /**
  * Los meses que conserva la fuente — restricción externa. Search Analytics guarda 16 meses
@@ -291,9 +317,12 @@ export function metricasDeTotal(filas: readonly FilaDeTrafico[]): Metricas | und
  * Los dos lados pasan por `rutaNormalizada` —el censo lleva barra final y la clave `page`
  * es una URL completa—, así que se comparan en la misma forma.
  */
-function familiaPorRuta(censo: CensoPorFamilia): Map<string, Familia> {
-  const mapa = new Map<string, Familia>();
-  for (const familia of FAMILIAS) {
+function familiaPorRuta(
+  censo: CensoPorFamilia,
+  familias: readonly FamiliaDelCenso[],
+): Map<string, FamiliaDelCenso> {
+  const mapa = new Map<string, FamiliaDelCenso>();
+  for (const familia of familias) {
     for (const ruta of censo[familia] ?? []) mapa.set(rutaNormalizada(ruta), familia);
   }
   return mapa;
@@ -307,10 +336,10 @@ function familiaPorRuta(censo: CensoPorFamilia): Map<string, Familia> {
  * publicada aunque la ruta coincida, y van fuera del censo.
  */
 function familiaDePagina(
-  mapa: Map<string, Familia>,
+  mapa: Map<string, FamiliaDelCenso>,
   dominio: string,
   pagina: string | undefined,
-): Familia | undefined {
+): FamiliaDelCenso | undefined {
   if (pagina === undefined) return undefined;
   try {
     const url = new URL(pagina);
@@ -322,9 +351,15 @@ function familiaDePagina(
   }
 }
 
-/** Las familias con alguna URL publicada. Una sin publicar no tiene tráfico que medir. */
-export function familiasPublicadas(censo: CensoPorFamilia): Familia[] {
-  return FAMILIAS.filter((f) => (censo[f]?.length ?? 0) > 0);
+/**
+ * Las familias con alguna URL publicada. Una sin publicar no tiene tráfico que medir.
+ * `familias` es el subconjunto que cuenta la serie: el del tráfico por omisión.
+ */
+export function familiasPublicadas(
+  censo: CensoPorFamilia,
+  familias: readonly FamiliaDelCenso[] = FAMILIAS_DEL_TRAFICO,
+): FamiliaDelCenso[] {
+  return familias.filter((f) => (censo[f]?.length ?? 0) > 0);
 }
 
 /**
@@ -335,15 +370,20 @@ export function familiasPublicadas(censo: CensoPorFamilia): Familia[] {
  * familia **sin** URL publicadas se omite, como en la indexación, para que «sin publicar»
  * no se lea como «sin tráfico». Lo que no casa con el censo —la portada, una página 2, una
  * Cita retirada, otro host— se suma aparte en `fueraDelCenso`.
+ *
+ * `familias` es el subconjunto que cuenta la serie que llama —el del tráfico por omisión; la
+ * demanda pasa el suyo—: una ruta del censo de una familia que la serie no cuenta va también
+ * a `fueraDelCenso`, nunca a otra familia.
  */
 export function agregarPorFamilia(
   filas: readonly FilaDeTrafico[],
   censo: CensoPorFamilia,
   dominio: string,
-): { familias: Partial<Record<Familia, Metricas>>; fueraDelCenso: FueraDelCenso } {
-  const mapa = familiaPorRuta(censo);
-  const acumulados = Object.fromEntries(FAMILIAS.map((f) => [f, vacio()])) as Record<
-    Familia,
+  familias: readonly FamiliaDelCenso[] = FAMILIAS_DEL_TRAFICO,
+): { familias: Partial<Record<FamiliaDelCenso, Metricas>>; fueraDelCenso: FueraDelCenso } {
+  const mapa = familiaPorRuta(censo, familias);
+  const acumulados = Object.fromEntries(familias.map((f) => [f, vacio()])) as Record<
+    FamiliaDelCenso,
     Acumulado
   >;
   const fuera = vacio();
@@ -355,8 +395,8 @@ export function agregarPorFamilia(
 
   return {
     familias: Object.fromEntries(
-      familiasPublicadas(censo).map((f) => [f, metricasDe(acumulados[f])]),
-    ) as Partial<Record<Familia, Metricas>>,
+      familiasPublicadas(censo, familias).map((f) => [f, metricasDe(acumulados[f])]),
+    ) as Partial<Record<FamiliaDelCenso, Metricas>>,
     fueraDelCenso: { clics: fuera.clics, impresiones: fuera.impresiones },
   };
 }
@@ -372,11 +412,11 @@ export interface LecturaDeMes {
   parcial?: true;
   total: Metricas;
   /** Solo las familias leídas. */
-  familias: Partial<Record<Familia, Metricas>>;
+  familias: Partial<Record<FamiliaDelCenso, Metricas>>;
   /** Ausente cuando la consulta por página no se leyó. */
   fueraDelCenso?: FueraDelCenso;
   /** Solo las familias que no se leyeron, con su motivo. */
-  sinLeer: Partial<Record<Familia, string>>;
+  sinLeer: Partial<Record<FamiliaDelCenso, string>>;
 }
 
 /** Un mes entero que no se leyó, con su motivo. No se escribe: se informa. */
@@ -408,11 +448,11 @@ export function componerLecturaDeTrafico(entrada: {
   censo: CensoPorFamilia;
   total: Metricas;
   /** El reparto por página, si se leyó. */
-  porPagina?: { familias: Partial<Record<Familia, Metricas>>; fueraDelCenso: FueraDelCenso };
+  porPagina?: { familias: Partial<Record<FamiliaDelCenso, Metricas>>; fueraDelCenso: FueraDelCenso };
   sinLeer: readonly FamiliaSinLeer[];
 }): LecturaDeMes {
-  const familias: Partial<Record<Familia, Metricas>> = { ...(entrada.porPagina?.familias ?? {}) };
-  const sinLeer: Partial<Record<Familia, string>> = {};
+  const familias: Partial<Record<FamiliaDelCenso, Metricas>> = { ...(entrada.porPagina?.familias ?? {}) };
+  const sinLeer: Partial<Record<FamiliaDelCenso, string>> = {};
 
   for (const { familia, motivo } of entrada.sinLeer) {
     if (motivo.trim() === '') {
@@ -432,7 +472,7 @@ export function componerLecturaDeTrafico(entrada: {
   }
 
   const publicadas = familiasPublicadas(entrada.censo);
-  for (const familia of FAMILIAS) {
+  for (const familia of FAMILIAS_DEL_TRAFICO) {
     if (!publicadas.includes(familia)) {
       if (familias[familia] !== undefined || sinLeer[familia] !== undefined) {
         throw new Error(
@@ -490,11 +530,11 @@ export function lineasDeTrafico(lectura: LecturaDeTrafico): string[] {
       '',
       `${mes.mes}${mes.parcial ? ' (parcial: mes en curso o dentro del retardo de los datos)' : ''}`,
     );
-    lineas.push(`  Total:     ${lineaDeMetricas(mes.total)}`);
-    for (const familia of FAMILIAS) {
+    lineas.push(`  ${'Total:'.padEnd(anchoDeRotulo(FAMILIAS_DEL_TRAFICO))} ${lineaDeMetricas(mes.total)}`);
+    for (const familia of FAMILIAS_DEL_TRAFICO) {
       const leida = mes.familias[familia];
       if (leida !== undefined) {
-        lineas.push(`  ${`${NOMBRE_DE_FAMILIA[familia]}:`.padEnd(10)} ${lineaDeMetricas(leida)}`);
+        lineas.push(`  ${rotuloDeFamilia(familia, FAMILIAS_DEL_TRAFICO)} ${lineaDeMetricas(leida)}`);
       }
     }
     if (mes.fueraDelCenso !== undefined) {
@@ -503,7 +543,7 @@ export function lineasDeTrafico(lectura: LecturaDeTrafico): string[] {
           `${mes.fueraDelCenso.impresiones} impresiones (portada, páginas 2+, retiradas, otro host…)`,
       );
     }
-    for (const familia of FAMILIAS) {
+    for (const familia of FAMILIAS_DEL_TRAFICO) {
       const motivo = mes.sinLeer[familia];
       if (motivo !== undefined) {
         lineas.push(`  ${NOMBRE_DE_FAMILIA[familia]} sin leer —no se escribe como cero—: ${motivo}`);
