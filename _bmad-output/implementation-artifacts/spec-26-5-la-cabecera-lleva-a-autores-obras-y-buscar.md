@@ -5,12 +5,19 @@ created: '2026-10-28'
 status: 'done'
 baseline_revision: '58d866a833b95a9f0268946f793279bf21a825ee'
 review_loop_iteration: 0
-followup_review_recommended: false
+followup_review_recommended: true
 context:
   - '{project-root}/_bmad-output/implementation-artifacts/epic-26-context.md'
   - '{project-root}/_bmad-output/planning-artifacts/ux-designs/ux-brainlySabiduria-2026-08-10/DESIGN.md'
 warnings: ['oversized']
-deferred: []
+deferred:
+  - summary: >-
+      A 320 px con el texto al 200 % (zoom 2 sobre `<html>`) la Página de Cita se desplaza en horizontal por su contenido, no por la cabecera.
+    evidence: |-
+      Medido el 2026-10-28 sobre lo construido: `scrollWidth` 340 frente a 320 en `/cita/miguel-de-cervantes-la-libertad-sancho-es-uno-de-los/`; desbordan `h1.texto`, «Compartir en» y las Rutas de salida, que esta historia no toca. La cabecera no desborda y parte sus enlaces con 8 px entre filas (`tests/e2e/cabecera.spec.ts`). `epics.md` (Historia 26.5) asigna a la 26.9 extender la simulación del 200 % a toda superficie: es su puerta, y hoy fallaría en la Página de Cita.
+    location: >-
+      Página de Cita (contenido de `main`); Historia 26.9
+    severity: medium
 ---
 
 <intent-contract>
@@ -107,6 +114,26 @@ deferred: []
 
 (Primera pasada de este bucle: las capas de revisión son externas y el orquestador no ha traído hallazgos todavía; la revisión independiente viene después.)
 
+### 2026-10-28 — Review pass
+- intent_gap: 0
+- bad_spec: 0
+- patch: 8: (high 0, medium 1, low 7)
+- defer: 1: (high 0, medium 1, low 0)
+- reject: 14: (high 0, medium 0, low 14)
+- addressed_findings:
+  - `[medium]` `[patch]` La medición de la cabecera solo se probaba con un clic en «Autores» (blind-hunter, intent-alignment R6, ac-auditor 6): `receptor.spec.ts` prueba ahora los cuatro —la marca, «Autores», «Obras» y «Buscar»—, cada uno en una página nueva, con `salida-interna` y zona `cabecera`.
+  - `[low]` `[patch]` La tipografía de la marca no se afirmaba (ac-auditor 1): `cabecera.spec.ts` exige familia y cuerpo de `--sans`/`--autor`, peso 600, 0,09em y mayúsculas, por sonda; y que la familia sea Inter.
+  - `[low]` `[patch]` El subrayado de la marca al pasar el cursor no se probaba (ac-auditor 2): `hover` y `text-decoration-line: underline`.
+  - `[low]` `[patch]` El cuerpo `body-md` de los enlaces no se probaba (ac-auditor 3): los tres al `--cuerpo-md` de la sonda.
+  - `[low]` `[patch]` El `{spacing.unit}` horizontal entre zonas y el relleno lateral no se medían (blind-hunter, ac-auditor 4): los dos puntos de ancho `--unidad`, 8 px entre zonas de enlace contiguas y `padding-inline` de `--unidad` en cada enlace.
+  - `[low]` `[patch]` Los puntos heredaban el `--cuerpo-lg` del `body` en vez del cuerpo de los enlaces (blind-hunter): `.punto` va a `--cuerpo-md` en `Armazon.astro`, y la prueba lo fija.
+  - `[low]` `[patch]` Desde 600 px no se probaba que los enlaces vayan al borde derecho ni el aire de abajo, ni el borde 599 de la media query (blind-hunter, ac-auditor 5): el último enlace pegado al borde derecho del contenido (± 1 px), 2 × `--unidad` abajo, y 599 px entre los anchos de dos filas.
+  - `[low]` `[patch]` Faltaban en `dist/` la navegación «Principal» única y los puntos ocultos en toda superficie (blind-hunter); sobraba el alias `publicadas = delSitemap` en `seo.spec.ts`: la prueba de `dist/` exige una sola `nav[aria-label="Principal"]` y dos `.punto` con `aria-hidden="true"` dentro de su `<li>` en cada página; el alias se quita.
+
+Diferido: el desplazamiento horizontal de la **página** de Cita a 320 px con el texto al 200 % (blind-hunter, intent-alignment R3, ac-auditor 8), que causa su contenido y no la cabecera, y que `epics.md` asigna a la 26.9 al extender la simulación a toda superficie.
+
+Rechazados, con su razón: el spec cerrado antes de la revisión (proceso; esta es la revisión); la comprobación del 200 % acotada a la cabecera sin entrada en el Spec Change Log (`epics.md` reserva a la 26.9 el reflujo de toda superficie con la misma simulación, y lo que desborda la página está diferido); el retranqueo cuando la navegación se parte desde 600 px con el texto ampliado (blind-hunter, edge-case-hunter: el contrato dice «sin retranqueo» desde 600 px y el desfase de 8 px solo aparece con el texto ampliado entre 600 px y el ancho en que la fila cabe; cosmético); las comprobaciones pintadas en una sola superficie y sin modo oscuro (la cabecera es el mismo marcado en toda página —lo fija `dist/`— y el barrido axe recorre toda superficie); sin marca visible de `aria-current` (ni `DESIGN.md` ni `EXPERIENCE.md` la piden); `seo.spec.ts` con `--workers=1` (así se corre desde la 26.3, rechazado ya en su revisión); los 153 px solo como «primera pantalla» (el AC dice «hacia los 153 px», el alto de la cabecera va fijado a 113 ± 1 y la cifra se anota); `sprint-status.yaml` y las precondiciones en `review` (lo lleva el orquestador); la prueba de `dist/` sobre todo `.html` (`public/` no trae ninguno y es deliberado: toda página construida lleva el armazón); el recorrido de `dist/` repetido en tres pruebas (coste menor); la Cita fija de `cabecera.spec.ts` (es la que comparten las pruebas del armazón: `pagina-de-cita`, `marca`, `seo`, `accesibilidad`…); un constructor de ruta con `?` o `#` (los cuatro devuelven literales sin ellos); el alcance juzgado en el fixture y a 3 saltos en el sitio real (el AC dice «el sitio de prueba construido»; las páginas 2+ de Autor cuelgan de su página 1); y el barrido axe sin prueba nueva (lo cubre `accesibilidad.spec.ts` en toda superficie).
+
 ## Design Notes
 
 El punto va **dentro** del `<li>` del enlace anterior para que la lista siga teniendo tres elementos para el lector de pantalla y, al partirse a 320 × 200 %, una fila nunca empiece por «·».
@@ -175,3 +202,25 @@ Blocking condition: ninguna.
 **Auditoría de la matriz.** Portada, Directorios y Resto: prueba (b) de `publicable-y-alcanzable` sobre toda página de `dist/` y `cabecera.spec.ts` («`aria-current`… solo en su página»). Búsqueda con `?q=tiempo`: `cabecera.spec.ts`. 320 px al 200 %: `cabecera.spec.ts` (filas con 8 px, la cabecera con `scrollWidth ≤ clientWidth` y nada suyo fuera del borde, sin `nowrap`). Todas corrieron y pasaron.
 
 **Riesgos.** La comprobación de reflujo al 200 % juzga la cabecera, no la página: la Página de Cita sí se desplaza 20 px con zoom 2 por su contenido (ver `## Medidas`), que es lo que cierra la 26.9. Las cuatro pruebas de recorrido del sitemap de `seo.spec.ts` dependen de correr solas (`--workers=1`). `sprint-status.yaml` no se ha tocado.
+
+### Pasada de revisión con las capas externas (2026-10-28)
+
+**Resumen.** Se triaron los hallazgos de las cinco capas externas (blind-hunter, edge-case-hunter, verification-gap —sin hallazgos—, intent-alignment y ac-auditor): 0 intent_gap, 0 bad_spec, 8 parches (1 medium, 7 low), 1 diferido y 14 rechazados (razones en el Review Triage Log). Sin vuelta atrás por el spec.
+
+**Ficheros de esta pasada.**
+- `src/components/Armazon.astro` — `.punto` al `--cuerpo-md` de los enlaces que separa (heredaba el `--cuerpo-lg` del `body`).
+- `tests/e2e/cabecera.spec.ts` — tipografía de la marca (Inter, `--autor`, 600, 0,09em, mayúsculas) y su subrayado al pasar el cursor; `--cuerpo-md` en los tres enlaces y en los puntos; puntos de ancho `--unidad`, 8 px entre zonas de enlace y `padding-inline` de `--unidad`; 599 px entre los anchos de dos filas; desde 600 px, enlaces al borde derecho del contenido y 2 × `--unidad` abajo.
+- `tests/e2e/receptor.spec.ts` — la salida `cabecera` se prueba con un clic en la marca, «Autores», «Obras» y «Buscar», una página nueva por enlace.
+- `tests/unit/publicable-y-alcanzable.test.ts` — en toda página de `dist/`, una sola `nav[aria-label="Principal"]` y dos `.punto` con `aria-hidden="true"` dentro de su `<li>`.
+- `tests/e2e/seo.spec.ts` — sin el alias `publicadas = delSitemap`.
+
+**Revisión.** Parches aplicados: 8 (high 0, medium 1, low 7). Diferidos: 1 (el desplazamiento de la Página de Cita a 320 px con el texto al 200 %, de la 26.9). Rechazados: 14. `followup_review_recommended: true` (puntuación 3 × 1 + 1 × 7 = 10 ≥ 5).
+
+**Verificación.**
+- `npx vitest run tests/unit/publicable-y-alcanzable.test.ts` — 37/37; `tests/unit/superficies.test.ts` — 107/107; `tests/unit/medicion.test.ts` — 532/532.
+- `npx astro check` — 0 errores, 0 avisos, 8 sugerencias previas.
+- `npx playwright test tests/e2e/cabecera.spec.ts tests/e2e/pagina-de-cita.spec.ts tests/e2e/receptor.spec.ts tests/e2e/pagina-404.spec.ts tests/e2e/marca.spec.ts tests/e2e/portada.spec.ts --project=movil --project=escritorio` (construye y sirve con `tests/servidor.mjs`) — 204 verdes, 70 omitidas por diseño (perfil único de `receptor`, `test.skip` por proyecto), 0 rojas; incluye los cuatro clics de cabecera.
+- `npx playwright test tests/e2e/accesibilidad.spec.ts --project=movil --project=escritorio` — 138/138 (axe WCAG 2.2 AA en toda superficie; la primera Cita de toda página 1 de Obra sigue en la primera pantalla de 360 × 640: el Block If no se dispara).
+- `npx playwright test tests/e2e/seo.spec.ts --project=movil --project=escritorio --workers=1` — 20/20, con el recorrido de alcance del sitemap entero.
+
+**Riesgos residuales.** La Página de Cita se desplaza 20 px a 320 px con el texto al 200 % por su contenido (diferido a la 26.9). Con el texto ampliado entre 600 px y el ancho en que la fila cabe, la navegación puede partirse bajo la marca sin retranqueo (8 px de desfase; el contrato fija «sin retranqueo» desde 600 px). `seo.spec.ts` sigue necesitando `--workers=1` para los recorridos del sitemap. `sprint-status.yaml` no se ha tocado (lo lleva el orquestador).
