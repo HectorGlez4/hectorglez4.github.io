@@ -5,12 +5,19 @@ created: '2026-10-28'
 status: 'done'
 baseline_revision: 'f76705484235051b73db2c17247ee4a3e510fd94'
 review_loop_iteration: 0
-followup_review_recommended: false
+followup_review_recommended: true
 context:
   - '{project-root}/_bmad-output/implementation-artifacts/epic-26-context.md'
   - '{project-root}/_bmad-output/planning-artifacts/ux-designs/ux-brainlySabiduria-2026-08-10/DESIGN.md'
 warnings: ['oversized']
-deferred: []
+deferred:
+  - summary: >-
+      En Safari/WebKit, sin anclaje de desplazamiento, una página ya desplazada salta lo que mide el campo al insertarlo.
+    evidence: |-
+      DESIGN.md y EXPERIENCE.md confían el «no se mueve» al anclaje de desplazamiento del navegador [ASSUMPTION], y la implementación hace exactamente eso (`overflow-anchor` por omisión). WebKit no implementa el anclaje, y los dos proyectos de Playwright son Chromium, así que en iOS Safari —el que importa para la comprobación a 360 px— un visitante desplazado a un grupo antes de que llegue el guion ve la lista bajar lo que mide el campo. Compensarlo en el guion (sumar a `scrollY` lo insertado cuando la página ya está desplazada y el navegador no ancla) es decisión de diseño, porque contradice lo que el diseño declara; pendiente de Héctor (bmad-ux), sin tocar `_bmad-output/planning-artifacts/`.
+    location: >-
+      src/components/FiltroDelDirectorio.astro (raiz.insertBefore(campo, region))
+    severity: medium
 ---
 
 <intent-contract>
@@ -123,6 +130,27 @@ deferred: []
 
 Las capas de revisión de esta pasada son externas (blind-hunter, edge-case-hunter, verification-gap, intent-alignment, ac-auditor) y no traían hallazgos todavía: la revisión independiente viene después.
 
+### 2026-10-28 — Review pass
+- intent_gap: 0
+- bad_spec: 0
+- patch: 11 (high 0, medium 3, low 8)
+- defer: 1 (high 0, medium 1, low 0)
+- reject: 11 (high 0, medium 0, low 11)
+- addressed_findings:
+  - `[medium]` `[patch]` El enlace a cero y la lista saltaban ~700 ms después de pintarse, cuando la frase llegaba a la región vacía (blind-hunter, intent-alignment f). Un primer arreglo con un renglón reservado (`min-height: 1lh`) no bastaba: en `movil` la frase a cero con lo hostil ocupa varias líneas y el enlace seguía bajando 43 px. Arreglo final: una **sombra** del recuento (`p.sombra[aria-hidden]` en la plantilla, `visibility: hidden`) que comparte fila de rejilla con la región y recibe la frase al teclear; la fila toma su alto con la lista y el enlace, y cuando la frase llega a la región no se mueve nada. Sin guion la rejilla solo tiene la región vacía y no mide nada.
+  - `[medium]` `[patch]` El pegamento del guion (modelo leído del DOM, `hidden` por posición, letras y «Volver», enlace a cero, región) solo lo probaba Playwright, que el CI no corre (blind-hunter, verification-gap, intent-alignment d/k). Nuevo `tests/unit/ayuda/filtroEjecutado.ts`: ejecuta en `node:vm` el fichero **construido** de `/_astro/` contra un DOM de mentira con la forma del `dist/` de la prueba (cuya lectura fija además el contrato de marcado: `li.fila-de-bloque` con `.nombre`, `h3` que solo lleva el enlace del Autor, el título como primer nodo de texto de `.titulo`), con reloj fingido y lo esperado calculado con `normalizar` sin `filtroDe`. Corre en `directorio-de-autores.test.ts` y `directorio-de-obras.test.ts`. Comprobado por mutación: cambiar `ritmo.anunciar(...)` por `ritmo.vaciar()` lo pone en rojo.
+  - `[medium]` `[patch]` Criterios sin prueba automática (ac-auditor 1-5, intent-alignment a, blind-hunter «el destino del enlace»): nuevas e2e de subcadena dentro de palabra («mar» sobre la lista servida), de `/obras/` con coincidencias (sin letras ni «Volver», cada grupo con su letra, primer Autor visible a 2 × del rótulo y su primera Obra visible sin filete —el criterio del spec que solo se había mirado a mano—), del campo en reposo (filete `--grosor-filete` en `--contorno`, sin caja, sombra, radio ni fondo; etiqueta a `--unidad`), del enlace a cero (a `--unidad` bajo la fila del recuento antes y después de la frase, sin moverse; `--cuerpo-md` en la sans) y del enlace seguido hasta `/buscar/?q=` con lo tecleado en `#consulta`.
+  - `[low]` `[patch]` El filete del foco era un `2px` literal: ahora `calc(var(--grosor-filete) * 2)`; el alto lo da `min-height` con `border-box`, así que no mueve nada.
+  - `[low]` `[patch]` El modelo se leía con `li` y `h3` a secas: ahora `li.fila-de-bloque`, `h3 a` y `.lista-de-obras > li`, también en los ayudantes de la e2e.
+  - `[low]` `[patch]` La prueba «toda isla que anuncia» contaba la etiqueta del filtro como anunciante por estar: ahora exige que el fichero descargado busque `[role="status"]`, programe con `setTimeout` y escriba `textContent`.
+  - `[low]` `[patch]` El comentario de la prueba del `700` decía más de lo que la prueba mira: corregido; y la ventana se veda también por `self`/`globalThis` y cualquier escucha `"click"`.
+  - `[low]` `[patch]` El campo lleva `autocapitalize="none"` y `autocorrect="off"`, además de `spellcheck="false"`, para que el teclado del móvil no cambie un trozo de nombre por otra palabra. (`enterkeyhint` y un Intro que quite el foco, rechazados: el campo no envía nada y la 27 le pondrá su botón.)
+  - `[low]` `[patch]` La e2e de `/obras/` usaba `find(...)!`: ahora exige el ejemplo con un mensaje que dice qué falta.
+  - `[low]` `[patch]` `tests/unit/ayuda/filtro.ts` contaba regiones, plantillas e `<input>` en toda la página: ahora dentro de `main` y del contenedor del filtro.
+  - `[low]` `[patch]` `AGENTS.md`, «Known pitfalls»: todo `<script>` procesado sale como fichero y entra en `GUIONES_EXTERNOS` con su tope, y una constante calculada en `src/lib/umbrales.ts` lleva `/* @__PURE__ */` porque el filtro la importa.
+
+Rechazados: la frase visible del recuento va por detrás de la lista durante la pausa (es el diseño: «la lista se repinta al teclear, y la frase llega después», y vaciar la región en cada tecla rompería «solo si cambió»); `data-buscar` ausente (lo pone siempre el build); `sprint-status.yaml` y el cierre sin revisión (lo lleva el orquestador del bucle, y esta es la revisión); frases sin tope de longitud o con «» tecleadas (cosmético; el enlace parte línea con `overflow-wrap: anywhere`); el orden de tabulación a cero (lo oculto va con `display: none` y el enlace sigue a la región en el DOM); `:global(.listado [hidden])` (es lo que `hidden` significa en el listado); las pruebas de `dist/` sobre corpus de prueba (el guion no lleva Corpus); el Campo de búsqueda probado solo dentro del filtro (su reutilización es de la 27); `@__PURE__` en `umbrales.ts` (dentro de lo que el contrato permite); la lectura «comparar con la región» frente a «con lo último anunciado» (nada más escribe en la región); `define:vars` y singulares en el navegador (la fuente no lleva `define:vars` y los singulares los fija la prueba pura).
+
 ## Design Notes
 
 - **Plantilla y no `createElement`:** etiqueta y enlace salen del build con los estilos de ámbito del componente, y el guion queda genérico y sin contenido. El `<template>` es inerte (la 26.8 ya prevé ignorarlo en el grafo) y su `<a>` no lleva `href` hasta la frase a cero, así que no es enlace interno para la prueba de zonas.
@@ -185,5 +213,17 @@ Las capas de revisión de esta pasada son externas (blind-hunter, edge-case-hunt
 
 **Matriz.** Cada fila tiene prueba que corrió y pasó: la pura en `filtro-del-directorio.test.ts` (casar, tildes, eñe, Autor y Obra en `/obras/`, recuento y singulares, misma frase, cero, hostil, signos, vaciar con temporizadores falsos) y la de navegador en `filtro-del-directorio.spec.ts` (todas, más sin guion y con el fichero abortado).
 
-**Riesgos.** El nombre del fichero que emite Astro (`…astro_astro_type_script_index_0_lang…`) es interno de Astro: si cambia al subir de versión, `reconoce` deja de casar y `medicion.test.ts` sale en rojo (lo pide una página y no está en la lista), que es lo que se quiere. Lo mismo `assetsInlineLimit`: si Astro dejara de consultarlo, el guion volvería en línea y lo diría la prueba de `dist/`. El anclaje del desplazamiento es del navegador (`overflow-anchor`), comprobado en Chromium; no en Safari ni Firefox.
+**Revisión 1 (2026-10-28).** 11 parches (0 altos, 3 medios, 8 bajos), 1 diferido, 11 rechazados; `followup_review_recommended: true` (puntuación 3 × 3 + 8 = 17). Lo que cambió:
+- `src/components/FiltroDelDirectorio.astro` — la sombra del recuento (`p.sombra[aria-hidden]` en la plantilla) en la misma fila de rejilla que la región, que recibe la frase al teclear: nada salta cuando la frase llega; el modelo, por `li.fila-de-bloque`, `h3 a` y `.lista-de-obras > li`.
+- `src/components/CampoDeBusqueda.astro` — filete del foco con el token (`calc(var(--grosor-filete) * 2)`); `autocapitalize="none"` y `autocorrect="off"`.
+- `src/lib/umbrales.ts` — el docblock del tope con la medida nueva (3.098 bytes; el tope no se movió).
+- `tests/unit/ayuda/filtroEjecutado.ts` (nuevo) — el guion construido, ejecutado en `node:vm` sobre el DOM del `dist/`; lo llaman `directorio-de-autores.test.ts` y `directorio-de-obras.test.ts`.
+- `tests/unit/ayuda/filtro.ts` — recuentos dentro de `main`/del filtro, la sombra y los atributos nuevos del campo.
+- `tests/unit/medicion.test.ts` — el filtro cuenta como anunciante solo si su fichero anuncia; ventana por cualquier nombre y `click`; comentario del `700` corregido.
+- `tests/e2e/filtro-del-directorio.spec.ts` — subcadena dentro de palabra, `/obras/` con coincidencias y su ritmo, campo en reposo, enlace a cero quieto y en `--cuerpo-md`, enlace seguido hasta `/buscar/`.
+- `AGENTS.md` — el escollo de los guiones procesados y de `umbrales.ts` en el cliente.
+
+Verificación de la revisión: `npx vitest run tests/unit/directorio-de-autores.test.ts tests/unit/directorio-de-obras.test.ts tests/unit/filtro-del-directorio.test.ts` 83/83; `npx vitest run tests/unit/medicion.test.ts` 543/543; `npx vitest run tests/unit/superficies.test.ts tests/unit/ingreso-construido.test.ts` 148/148; `npx astro check` 0 errores, 0 avisos; `npx playwright test tests/e2e/filtro-del-directorio.spec.ts tests/e2e/directorio-de-autores.spec.ts tests/e2e/directorio-de-obras.spec.ts` 64/64 en `movil` y `escritorio` (el primer intento, con el renglón reservado, dio 2 rojos en `movil`, que llevaron a la sombra); `npx playwright test tests/e2e/accesibilidad.spec.ts --project=escritorio` 69/69. El fichero del filtro mide 3.098 bytes, bajo los 3.370.
+
+**Riesgos.** La sombra iguala el alto de la fila al de la frase que vendrá, así que lo que salta, salta al teclear y no después; la frase visible sigue mostrando la cifra anterior durante la pausa, como dice el diseño. El anclaje en Safari queda diferido. El nombre del fichero que emite Astro (`…astro_astro_type_script_index_0_lang…`) es interno de Astro: si cambia al subir de versión, `reconoce` deja de casar y `medicion.test.ts` sale en rojo (lo pide una página y no está en la lista), que es lo que se quiere. Lo mismo `assetsInlineLimit`: si Astro dejara de consultarlo, el guion volvería en línea y lo diría la prueba de `dist/`. El anclaje del desplazamiento es del navegador (`overflow-anchor`), comprobado en Chromium; no en Safari ni Firefox.
 
