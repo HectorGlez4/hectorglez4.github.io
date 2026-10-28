@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   ETIQUETA_DEL_FILTRO,
@@ -232,5 +233,25 @@ describe('Historia 26.6 — el segundo ritmo', () => {
     expect(region.textContent).toBe('');
     vi.advanceTimersByTime(PAUSA_DE_TECLEO_MS * 2);
     expect(region.textContent).toBe('');
+  });
+});
+
+describe('Historia 26.6 — el guion del filtro importa sus dueños, nunca los copia', () => {
+  // `dist/` no distingue un `700` importado de uno copiado: lo mira la fuente. El ritmo y la
+  // pausa llegan por importación (AD-6, AD-9) y nada viaja por `define:vars`.
+  const fuente = readFileSync(new URL('../../src/components/FiltroDelDirectorio.astro', import.meta.url), 'utf8');
+  const guion = /^<script>$([\s\S]*?)^<\/script>$/mu.exec(fuente)?.[1] ?? '';
+
+  it('el componente tiene un `<script>` procesado, sin `define:vars` ni `is:inline`', () => {
+    expect(guion).not.toBe('');
+    expect(fuente).not.toMatch(/define:vars|is:inline/u);
+  });
+
+  it('importa `ritmoDeTecleo`, `PAUSA_DE_TECLEO_MS` y la decisión pura, y no lleva la pausa escrita', () => {
+    expect(guion).toMatch(/import \{ ritmoDeTecleo \} from '\.\.\/lib\/anuncio\.ts';/u);
+    expect(guion).toMatch(/import \{ PAUSA_DE_TECLEO_MS \} from '\.\.\/lib\/umbrales\.ts';/u);
+    expect(guion).toMatch(/from '\.\.\/lib\/filtroDelDirectorio\.ts';/u);
+    expect(guion).not.toMatch(new RegExp(`\\b${PAUSA_DE_TECLEO_MS}\\b`, 'u'));
+    expect(guion).not.toMatch(/setTimeout|normalize\(/u);
   });
 });

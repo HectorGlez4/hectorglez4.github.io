@@ -53,10 +53,11 @@ const { directorio } = Astro.props;
 <style>
   /*
    * Tres filas: el campo, el recuento y el enlace a cero. La región y su sombra comparten la del
-   * recuento, y la fila mide lo que la mayor de las dos (ver `.sombra`). Sin guion solo está la
-   * región, vacía: la rejilla no mide nada.
+   * recuento, y la fila mide lo que la sombra (ver `.recuento` y `.sombra`). Sin guion solo está
+   * la región, vacía y fuera del flujo: la rejilla no mide nada.
    */
   .filtro {
+    position: relative;
     display: grid;
     grid-template-columns: minmax(0, 1fr);
   }
@@ -76,6 +77,20 @@ const { directorio } = Astro.props;
     font-family: var(--sans);
     font-size: var(--pie);
     color: var(--tinta-apagada);
+    /* Lo tecleado va entre comillas en la frase a cero: una palabra larga no ensancha la página. */
+    overflow-wrap: anywhere;
+  }
+
+  /*
+   * La región no da alto a la fila: se pinta encima de la sombra, en su sitio, y el alto lo da
+   * solo la sombra, que cambia al teclear. Si la región lo diera, una frase más corta que la que
+   * había —la frase a cero de dos líneas que pasa a «14 autores.»— dejaría la fila alta durante la
+   * pausa y la lista subiría 700 ms después, bajo el dedo.
+   */
+  .recuento {
+    position: absolute;
+    inset-inline: 0;
+    top: 0;
   }
 
   /* Vacía no ocupa sitio, pero sigue en el árbol de accesibilidad: no lleva `hidden`. */
@@ -87,8 +102,9 @@ const { directorio } = Astro.props;
   /*
    * La sombra lleva, al teclear, la frase que la región escribirá tras la pausa, invisible y
    * fuera del árbol de accesibilidad: la fila del recuento toma su alto al momento, con la lista
-   * y el enlace a cero, y cuando la frase llega a la región no se mueve nada. Sin ella la frase
-   * empujaría hacia abajo, 700 ms después, la lista y el enlace que el visitante ya iba a tocar.
+   * y el enlace a cero, y cuando la frase llega a la región no se mueve nada, ni al crecer ni al
+   * menguar. Sin ella la frase movería, 700 ms después, la lista y el enlace que el visitante ya
+   * iba a tocar.
    */
   .sombra {
     visibility: hidden;
@@ -203,7 +219,7 @@ const { directorio } = Astro.props;
     raiz.insertBefore(sombra, region);
     region.after(aCero);
 
-    entrada.addEventListener('input', () => {
+    const alTeclear = () => {
       const tecleado = entrada.value;
       const resultado = filtrar(tecleado);
       pintables.forEach((pintable, g) => {
@@ -232,7 +248,15 @@ const { directorio } = Astro.props;
       sombra.textContent = frase;
       if (resultado.vacia) ritmo.vaciar();
       else ritmo.anunciar(frase);
+    };
+
+    // Mientras se compone una letra —la tecla muerta de la tilde, un IME—, el valor lleva el signo
+    // suelto («gonz´»), que no casa con nada: se espera a la letra compuesta, que llega con
+    // `compositionend` (o con el `input` que lo sigue, según el navegador; repetirla no cambia nada).
+    entrada.addEventListener('input', (e) => {
+      if (!(e as InputEvent).isComposing) alTeclear();
     });
+    entrada.addEventListener('compositionend', alTeclear);
   }
 
   const raiz = document.querySelector<HTMLElement>('[data-filtro]');

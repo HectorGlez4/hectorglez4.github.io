@@ -1,13 +1,15 @@
 import { expect } from 'vitest';
 import { ETIQUETA_DEL_FILTRO, type DirectorioFiltrable } from '../../../src/lib/filtroDelDirectorio.ts';
+import { rutaDeLaBusqueda } from '../../../src/lib/superficies.ts';
 
 /**
  * Historia 26.6 — lo que el filtro deja en el HTML inicial de un Directorio construido, el mismo
  * juicio para `/autores/` y `/obras/`: sin guion la página tiene que estar entera y sin campo, y
  * la región del recuento tiene que existir antes del primer mensaje.
  *
- *   · entre el `h1` y el listado, el contenedor del filtro, fuera de Pagefind, con la región
- *     `role="status"` vacía y sin `hidden`, y la `/buscar/` del enlace a cero en `data-buscar`;
+ *   · entre el `h1` y el listado, y hermano de este, el contenedor del filtro, fuera de Pagefind,
+ *     con la región `role="status"` vacía y sin `hidden`, y la `/buscar/` del enlace a cero en
+ *     `data-buscar`;
  *   · ningún `<input>` en `main` fuera de la plantilla: el campo lo inserta el guion;
  *   · la plantilla con la etiqueta visible del Directorio, un `type="search"` sin `placeholder`,
  *     sin botón ni formulario, y un enlace a cero sin `href`;
@@ -22,7 +24,13 @@ export function comprobarFiltroEnElHtml(html: string, directorio: DirectorioFilt
   expect(listado, 'el listado no sigue al filtro').toBeGreaterThan(filtro);
 
   const contenedor = html.slice(filtro, listado);
-  expect(contenedor).toMatch(/^<div class="filtro" data-filtro="[a-z]+" data-buscar="\/buscar\/" data-pagefind-ignore="all"/u);
+  expect(contenedor.startsWith(`<div class="filtro" data-filtro="${directorio}" data-buscar="${rutaDeLaBusqueda()}" data-pagefind-ignore="all"`)).toBe(true);
+  // El filtro y el listado son hermanos: el guion busca el listado en el padre del filtro y, si
+  // no lo encuentra, no inserta nada. Entre el cierre del filtro y el listado no hay otro
+  // contenedor que los separe: solo la petición del guion.
+  expect(contenedor, 'el filtro no se cierra justo antes del listado').toMatch(
+    /<\/template>\s*<p class="recuento" role="status"[^>]*><\/p>\s*<\/div>\s*(?:<script\b[^>]*><\/script>\s*)*$/u,
+  );
 
   // Lo que se cuenta, dentro de `main`: una región, una plantilla o un campo del armazón no son
   // del filtro, y no tienen por qué romper esta prueba.

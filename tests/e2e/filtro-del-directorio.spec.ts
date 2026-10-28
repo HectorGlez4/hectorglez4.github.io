@@ -105,10 +105,13 @@ test.describe('Historia 26.6 — cómo filtra, en los dos Directorios', () => {
     await expect(page.getByRole('link', { name: 'Volver a las letras' })).toHaveCount(0);
     // Los grupos sin coincidencias salen enteros, con su letra; los que quedan conservan la suya.
     const grupos = await page.locator('section.grupo').evaluateAll((gs) =>
-      gs.filter((g) => (g as HTMLElement).checkVisibility()).map((g) => g.querySelector('h2')?.textContent),
+      gs
+        .filter((g) => (g as HTMLElement).checkVisibility())
+        .map((g) => (g.querySelector(':scope > h2') as HTMLElement | null)?.checkVisibility() ?? false),
     );
     expect(grupos.length).toBeGreaterThan(0);
     expect(grupos.length).toBeLessThan(await page.locator('section.grupo').count());
+    for (const letra of grupos) expect(letra, 'un grupo que queda sin su letra').toBe(true);
 
     // «MARTÍ» y «marti», el mismo conjunto, con José Martí.
     await campo(page, 'autores').fill('MARTÍ');
@@ -125,7 +128,7 @@ test.describe('Historia 26.6 — cómo filtra, en los dos Directorios', () => {
     expect(lista.length, 'el Directorio no lista ninguna Obra').toBeGreaterThan(0);
 
     const espana = esperadas(lista, 'espana');
-    expect(espana.some((titulo) => titulo.includes('España'))).toBe(true);
+    expect(espana).toContain('Historia de la decadencia de España');
     await campo(page, 'obras').fill('espana');
     expect(await visibles(page, 'obras')).toEqual(espana);
 
@@ -280,6 +283,16 @@ test.describe('Historia 26.6 — cómo filtra, en los dos Directorios', () => {
       expect(m.subrayado).toBe('underline');
       expect(m.zona).toBe('directorio');
 
+      // De la frase a cero, de varias líneas, a una con coincidencias: lo que queda se coloca al
+      // teclear, y cuando la frase corta llega a la región no sube nada.
+      await campo(page, directorio).fill('a');
+      const primero = () =>
+        page.evaluate(() => [...document.querySelectorAll<HTMLElement>('section.grupo')].find((g) => g.checkVisibility())!.getBoundingClientRect().top);
+      const alTeclear = await primero();
+      await page.clock.runFor(PAUSA_DE_TECLEO_MS);
+      await expect(region(page)).not.toHaveText(/«/u);
+      expect(await primero()).toBeCloseTo(alTeclear, 0);
+
       // Al dejar de estar a cero, el enlace se va y deja de ser enlace.
       await campo(page, directorio).fill('');
       await expect(page.locator('.a-cero')).toBeHidden();
@@ -292,20 +305,12 @@ test.describe('Historia 26.6 — por subcadena, y `/obras/` con coincidencias', 
   test('`/autores/`: «mar» casa también dentro de una palabra, como `normalizar` sobre la lista servida', async ({ page }) => {
     await abrir(page, AUTORES, 'autores');
     const lista = await listado(page, 'autores');
-    // Un trozo que casa dentro de una palabra y no al principio de ninguna: «mar» si la página lo
-    // trae así —Josefa Amar y Borbón, con el Corpus del 2026-10-18—, y si no, uno de la lista.
-    const dentro = (consulta: string) =>
-      lista.find((e) => {
-        const t = normalizar(e.fila);
-        return t.includes(consulta) && !new RegExp(`(^| )${consulta}`, 'u').test(t);
-      });
-    const consulta =
-      ['mar', ...lista.map((e) => normalizar(e.fila).replace(/ /gu, '').slice(2, 5))].find(
-        (c) => c.length === 3 && dentro(c) !== undefined,
-      ) ?? '';
-    expect(consulta, 'ningún nombre de la página sirve de ejemplo dentro de una palabra').not.toBe('');
+    // «mar», que casa dentro de una palabra y no al principio de ella: Josefa Amar y Borbón, el
+    // caso de la historia.
+    const consulta = 'mar';
     const esperado = esperadas(lista, consulta);
-    expect(esperado).toContain(dentro(consulta)!.fila);
+    expect(esperado).toContain('Josefa Amar y Borbón');
+    expect(normalizar('Josefa Amar y Borbón')).not.toMatch(/(^| )mar/u);
     await campo(page, 'autores').fill(consulta);
     expect(await visibles(page, 'autores')).toEqual(esperado);
     await page.clock.runFor(PAUSA_DE_TECLEO_MS);
@@ -385,6 +390,70 @@ test.describe('Historia 26.6 — por subcadena, y `/obras/` con coincidencias', 
     expect(m.filasAntesOcultas && m.primeraFila, 'la Obra del ejemplo no es la primera visible de su Autor').toBe(true);
     expect(m.filete).toBe(0);
   });
+
+  for (const [ruta, directorio] of [
+    [AUTORES, 'autores'],
+    [OBRAS, 'obras'],
+  ] as const) {
+    test(`${ruta}: tras grupos ocultos, el primer grupo visible va a 4 × --unidad y los siguientes a 5 ×`, async ({ page }) => {
+      await abrir(page, ruta, directorio);
+      // Una fila del último grupo, entera: casa con ella y deja fuera los grupos de delante.
+      const ultimo = await page.locator('section.grupo').last().evaluate((g, directorio) => {
+        const fila = g.querySelector(directorio === 'autores' ? 'li.fila-de-bloque' : '.lista-de-obras > li');
+        return directorio === 'autores' ? (fila?.querySelector('.nombre')?.textContent ?? '') : (fila?.querySelector('.titulo')?.firstChild?.nodeValue ?? '');
+      }, directorio);
+      expect(ultimo, 'el último grupo no tiene filas').not.toBe('');
+      // Y, si cabe, una consulta que deja más de un grupo: la primera letra de esa fila.
+      for (const consulta of [ultimo, normalizar(ultimo).slice(0, 2)]) {
+        await campo(page, directorio).fill(consulta);
+        const m = await page.evaluate(() => {
+          const sonda = (css: string) => {
+            const d = document.createElement('div');
+            d.style.cssText = css;
+            document.body.append(d);
+            const ancho = getComputedStyle(d).width;
+            d.remove();
+            return ancho;
+          };
+          const grupos = [...document.querySelectorAll<HTMLElement>('section.grupo')];
+          const visibles = grupos.filter((g) => g.checkVisibility());
+          return {
+            u4: sonda('width: calc(var(--unidad) * 4)'),
+            u5: sonda('width: calc(var(--unidad) * 5)'),
+            primeroOculto: !grupos[0].checkVisibility(),
+            margenes: visibles.map((g) => getComputedStyle(g).marginTop),
+          };
+        });
+        expect(m.margenes.length, `«${consulta}» no deja ningún grupo`).toBeGreaterThan(0);
+        if (consulta === ultimo) expect(m.primeroOculto, `«${consulta}» deja el primer grupo a la vista`).toBe(true);
+        expect(m.margenes).toEqual([m.u4, ...m.margenes.slice(1).map(() => m.u5)]);
+      }
+    });
+
+    test(`${ruta}: una letra a medio componer no filtra; la compuesta, sí`, async ({ page }) => {
+      await abrir(page, ruta, directorio);
+      const lista = await listado(page, directorio);
+      const trozo = normalizar(lista[0].fila).slice(0, 3);
+      await campo(page, directorio).fill(trozo);
+      const antes = await visibles(page, directorio);
+      expect(antes.length).toBeGreaterThan(0);
+      // La tecla muerta de la tilde: el valor lleva el signo suelto mientras se compone.
+      await campo(page, directorio).evaluate((e: HTMLInputElement, valor) => {
+        e.value = valor;
+        e.dispatchEvent(new InputEvent('input', { bubbles: true, isComposing: true }));
+      }, `${trozo}´`);
+      expect(await visibles(page, directorio)).toEqual(antes);
+      await expect(page.locator('.a-cero')).toBeHidden();
+      await expect(page.locator('.sombra')).toHaveText(recuento(directorio, antes.length));
+      // La letra compuesta llega con `compositionend`.
+      const compuesta = normalizar(lista[0].fila).slice(0, 4);
+      await campo(page, directorio).evaluate((e: HTMLInputElement, valor) => {
+        e.value = valor;
+        e.dispatchEvent(new CompositionEvent('compositionend', { bubbles: true, data: valor.slice(-1) }));
+      }, compuesta);
+      expect(await visibles(page, directorio)).toEqual(esperadas(lista, compuesta));
+    });
+  }
 
   test('«Buscar … en las citas» lleva a `/buscar/` con lo tecleado en su campo', async ({ page }) => {
     await abrir(page, AUTORES, 'autores', false);
@@ -494,11 +563,17 @@ test.describe('Historia 26.6 — el campo, su sitio y su foco', () => {
         document.body.append(sonda);
         const siena = getComputedStyle(sonda).color;
         sonda.remove();
+        const doble = document.createElement('div');
+        doble.style.width = 'calc(var(--grosor-filete) * 2)';
+        document.body.append(doble);
+        const dobleDelFilete = getComputedStyle(doble).width;
+        doble.remove();
         const c = getComputedStyle(e);
         return {
           anillo: c.outlineStyle,
           colorDelAnillo: c.outlineColor,
           filete: c.borderBottomWidth,
+          dobleDelFilete,
           colorDelFilete: c.borderBottomColor,
           siena,
           visible: e.matches(':focus-visible'),
@@ -507,7 +582,7 @@ test.describe('Historia 26.6 — el campo, su sitio y su foco', () => {
       expect(foco.visible).toBe(true);
       expect(foco.anillo).toBe('solid');
       expect(foco.colorDelAnillo).toBe(foco.siena);
-      expect(foco.filete).toBe('2px');
+      expect(foco.filete).toBe(foco.dobleDelFilete);
       expect(foco.colorDelFilete).toBe(foco.siena);
 
       await page.keyboard.press('Tab');
@@ -588,46 +663,56 @@ test.describe('Historia 26.6 — sin guion, el Directorio entero', () => {
 });
 
 test.describe('Historia 26.6 — el campo entra sin mover lo que se está leyendo', () => {
-  test('desplazada a un grupo antes de que llegue el guion, el grupo no se mueve al insertarse el campo', async ({ page }) => {
-    let soltar: () => void = () => {};
-    const retenido = new Promise<void>((r) => (soltar = r));
-    await page.route(FICHERO, async (peticion) => {
-      await retenido;
-      await peticion.continue();
+  for (const [ruta, directorio] of [
+    [AUTORES, 'autores'],
+    [OBRAS, 'obras'],
+  ] as const) {
+    test(`${ruta}: desplazada a un grupo antes de que llegue el guion, el grupo no se mueve al insertarse el campo`, async ({ page }) => {
+      let soltar: () => void = () => {};
+      const retenido = new Promise<void>((r) => (soltar = r));
+      await page.route(FICHERO, async (peticion) => {
+        await retenido;
+        await peticion.continue();
+      });
+      // El guion de módulo es diferido y retiene `DOMContentLoaded`: se espera a que el analizador
+      // termine (`interactive`), que es antes de ejecutarlo.
+      await page.goto(ruta, { waitUntil: 'commit' });
+      await page.waitForFunction(() => document.readyState === 'interactive');
+      const grupo = page.locator('section.grupo').nth(3);
+      await grupo.evaluate((g) => g.scrollIntoView({ block: 'start' }));
+      await expect(campo(page, directorio)).toHaveCount(0);
+      const antes = await grupo.evaluate((g) => g.getBoundingClientRect().top);
+      soltar();
+      await expect(campo(page, directorio)).toBeAttached();
+      // Un fotograma para que el anclaje del navegador haga su trabajo.
+      await page.evaluate(() => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))));
+      const despues = await grupo.evaluate((g) => g.getBoundingClientRect().top);
+      expect(Math.abs(despues - antes)).toBeLessThanOrEqual(1);
     });
-    // El guion de módulo es diferido y retiene `DOMContentLoaded`: se espera a que el analizador
-    // termine (`interactive`), que es antes de ejecutarlo.
-    await page.goto(AUTORES, { waitUntil: 'commit' });
-    await page.waitForFunction(() => document.readyState === 'interactive');
-    const grupo = page.locator('section.grupo').nth(3);
-    await grupo.evaluate((g) => g.scrollIntoView({ block: 'start' }));
-    await expect(campo(page, 'autores')).toHaveCount(0);
-    const antes = await grupo.evaluate((g) => g.getBoundingClientRect().top);
-    soltar();
-    await expect(campo(page, 'autores')).toBeAttached();
-    // Un fotograma para que el anclaje del navegador haga su trabajo.
-    await page.evaluate(() => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))));
-    const despues = await grupo.evaluate((g) => g.getBoundingClientRect().top);
-    expect(Math.abs(despues - antes)).toBeLessThanOrEqual(1);
-  });
 
-  test('sin desplazar, las letras bajan lo que mide el campo', async ({ page }) => {
-    let soltar: () => void = () => {};
-    const retenido = new Promise<void>((r) => (soltar = r));
-    await page.route(FICHERO, async (peticion) => {
-      await retenido;
-      await peticion.continue();
+    test(`${ruta}: sin desplazar, las letras y la lista bajan lo que mide el campo`, async ({ page }) => {
+      let soltar: () => void = () => {};
+      const retenido = new Promise<void>((r) => (soltar = r));
+      await page.route(FICHERO, async (peticion) => {
+        await retenido;
+        await peticion.continue();
+      });
+      await page.goto(ruta, { waitUntil: 'commit' });
+      await page.waitForFunction(() => document.readyState === 'interactive');
+      const arriba = () =>
+        page.evaluate(() => ({
+          letras: document.querySelector('#letras')!.getBoundingClientRect().top,
+          lista: document.querySelector('section.grupo')!.getBoundingClientRect().top,
+        }));
+      const antes = await arriba();
+      soltar();
+      await expect(campo(page, directorio)).toBeAttached();
+      const despues = await arriba();
+      const mide = await page.locator('.campo').evaluate((c) => c.getBoundingClientRect().height + parseFloat(getComputedStyle(c).marginTop));
+      expect(despues.letras - antes.letras).toBeCloseTo(mide, 0);
+      expect(despues.lista - antes.lista).toBeCloseTo(mide, 0);
     });
-    await page.goto(OBRAS, { waitUntil: 'commit' });
-    await page.waitForFunction(() => document.readyState === 'interactive');
-    const letras = page.locator('#letras');
-    const antes = await letras.evaluate((l) => l.getBoundingClientRect().top);
-    soltar();
-    await expect(campo(page, 'obras')).toBeAttached();
-    const despues = await letras.evaluate((l) => l.getBoundingClientRect().top);
-    const mide = await page.locator('.campo').evaluate((c) => c.getBoundingClientRect().height + parseFloat(getComputedStyle(c).marginTop));
-    expect(despues - antes).toBeCloseTo(mide, 0);
-  });
+  }
 });
 
 test.describe('Historia 26.6 — WCAG 2.2 AA con el campo', () => {

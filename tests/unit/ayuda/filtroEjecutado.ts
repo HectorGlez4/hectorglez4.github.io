@@ -99,7 +99,7 @@ class Elemento {
   escrituras = 0;
   readonly content: Elemento | undefined;
   private readonly atributos = new Map<string, string>();
-  private readonly escuchas = new Map<string, (() => void)[]>();
+  private readonly escuchas = new Map<string, ((evento: { isComposing: boolean }) => void)[]>();
 
   constructor(
     readonly tagName: string,
@@ -184,12 +184,12 @@ class Elemento {
     return copia;
   }
 
-  addEventListener(tipo: string, escucha: () => void): void {
+  addEventListener(tipo: string, escucha: (evento: { isComposing: boolean }) => void): void {
     this.escuchas.set(tipo, [...(this.escuchas.get(tipo) ?? []), escucha]);
   }
-  /** Dispara un evento sin argumentos, como un `input` del navegador. */
-  disparar(tipo: string): void {
-    for (const escucha of this.escuchas.get(tipo) ?? []) escucha();
+  /** Dispara un evento, como un `input` del navegador: compuesto o no. */
+  disparar(tipo: string, isComposing = false): void {
+    for (const escucha of this.escuchas.get(tipo) ?? []) escucha({ isComposing });
   }
   /** Los tipos con alguna escucha. */
   escuchados(): string[] {
@@ -416,7 +416,7 @@ export function comprobarFiltroEjecutado(html: string, guion: string, directorio
     'a-cero',
   ]);
   const sombra = raiz.querySelector('.sombra')!;
-  expect(entrada!.escuchados()).toEqual(['input']);
+  expect(entrada!.escuchados()).toEqual(['input', 'compositionend']);
   expect(region.textContent).toBe('');
 
   const listado = documento.querySelector('.listado')!;
@@ -517,4 +517,16 @@ export function comprobarFiltroEjecutado(html: string, guion: string, directorio
   avanzar(PAUSA_DE_TECLEO_MS * 2);
   expect(region.textContent).toBe('');
   juzgar('  ¿? ');
+
+  // Una letra a medio componer —la tecla muerta de la tilde— no filtra: el signo suelto no casa
+  // con nada, y la lista no se vacía ni asoma el enlace a cero mientras llega la letra. La letra
+  // compuesta filtra con `compositionend`.
+  const trozo = consultas[1];
+  teclear(trozo);
+  entrada!.value = `${trozo}´`;
+  entrada!.disparar('input', true);
+  juzgar(trozo);
+  entrada!.value = trozo.toUpperCase();
+  entrada!.disparar('compositionend');
+  juzgar(trozo.toUpperCase());
 }
