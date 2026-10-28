@@ -198,6 +198,12 @@ const CAMPOS_DEL_AUTOR_FUERA = ['nombre', 'añoNacimiento', 'añoFallecimiento']
  *   · la ficha de Obra pinta su `titulo` en la Página de Cita y en los listados, y en su propia
  *     página además `autor`, `formas` —qué Citas reúne—, `nota` y `ediciones`;
  *   · un documento, cualquier cambio, y solo en la Página de Obra.
+ *
+ * Las biografías de `corpus/biografias/` **no** son una familia, y tampoco es un olvido: la
+ * Página de Autor pinta de ellas la atribución de la semblanza (título, revisión, licencia),
+ * pero cada documento es **una revisión** de una Fuente mutable y no se reescribe —otra revisión
+ * es otro fichero, que la ficha apunta con `tools/autor.ts biografia`—. Cambiar de biografía es
+ * cambiar el campo `biografia` del Autor, que su página ya pinta y fecha.
  */
 export const CAMPOS_QUE_PINTA = {
   cita: {
@@ -528,7 +534,9 @@ function fechaDelComponente(
   historial: Historial,
   memoria: Map<string, FechaDeCambio | undefined>,
 ): FechaDeCambio | undefined {
-  const llave = `${fichero}\u0000${campos === CUALQUIER_CAMBIO ? '*' : campos.join(',')}`;
+  // Ordenados: `unir` compone los campos en el orden en que llegan, y el mismo conjunto tiene
+  // que dar la misma llave.
+  const llave = `${fichero}\u0000${campos === CUALQUIER_CAMBIO ? '*' : [...campos].sort().join(',')}`;
   if (memoria.has(llave)) return memoria.get(llave);
   let masReciente: FechaDeCambio | undefined;
   for (const transicion of historial.get(fichero) ?? []) {
@@ -619,7 +627,7 @@ export function bajasDelHistorial(
       const { autor, formas } = version as Record<string, unknown>;
       if (typeof autor !== 'string' || !Array.isArray(formas)) continue;
       obras.push({
-        nombre: nombreDeDocumento(fichero).replace(/\.ya?ml$/u, ''),
+        nombre: nombreDeFicha(fichero),
         autor,
         formas: formas.filter((f): f is string => typeof f === 'string'),
         ruta: fichero,
@@ -737,6 +745,11 @@ function clave(autor: string, forma: string): string {
 /** El nombre de un fichero sin directorio y, si es un documento, sin su `.txt`. */
 function nombreDeDocumento(ruta: string): string {
   return (ruta.split(/[\\/]/u).pop() ?? ruta).replace(/\.txt$/u, '');
+}
+
+/** El nombre de una ficha de Obra —`autor--obra`—: su fichero sin directorio ni `.yml`/`.yaml`. */
+function nombreDeFicha(ruta: string): string {
+  return (ruta.split(/[\\/]/u).pop() ?? ruta).replace(/\.ya?ml$/u, '');
 }
 
 function unir(a: Campos, b: Campos): Campos {

@@ -33,6 +33,13 @@ deferred:
     location: >-
       src/lib/obras.ts (tituloEfectivo), tools/lib/cambios.ts
     severity: low
+  - summary: >-
+      Cuando una Cita nueva o retirada hace cruzar a un Tema su umbral de publicación (MIN_CITAS_POR_TEMA), el chip de ese Tema aparece o desaparece en las demás Páginas de Cita que lo declaran sin fecharlas ni avisarlas — pendiente de Héctor (bmad-create-epics-and-stories): decidir si el chip es navegación o parte de «sus Temas».
+    evidence: |-
+      Los chips salen de `temasPublicados` (src/lib/publicado.ts) en RutasDeSalida.astro, y que un Tema esté publicado depende del recuento de Citas hermanas, que la relación nunca compone en la Página de Cita. El AC cuenta «sus Temas» entre lo que la página afirma y declara navegación la Tarjeta de Obra, «Siguiente», «De la misma obra», «Más de» y los recuentos, sin nombrar el chip: es el caso del Block If. La relación por ficheros de la 22.8 tampoco componía hermanas, así que es anterior a la 24.8.
+    location: >-
+      tools/lib/cambios.ts (relacionDeSuperficies), src/components/RutasDeSalida.astro
+    severity: low
 ---
 
 <intent-contract>
@@ -236,10 +243,53 @@ revisión independiente.
 
 Diferidos (frontmatter): los chips de Tema de la Página de Obra fuera de su composición —choca con la composición que fija el AC; pendiente de Héctor (bmad-create-epics-and-stories)— y el título efectivo que cae a las grafías de las hermanas. Rechazados: `estadoDerechos` (literal: cambiarlo rompe el build, no despublica), el cuerpo Markdown (el texto vive en el frontmatter y ninguna página renderiza el cuerpo), `TOPE_DE_SALIDA` (128 MB frente a ~1,3 MB), el blob analizado por la extensión del primer fichero (solo coincidiría el blob vacío), las medidas iguales y el guion borrado (lo pedía el spec; el AC solo pide anotar las cifras), el `lastmod` que retrocede (es el valor verdadero), el registro de la pasada vacía (esta es la revisión), `sprint-status.yaml` (lo lleva el orquestador), el orden de las pruebas de `avisar-rango` (cada caso hace su `checkout`), la Colección que quita el miembro en el mismo commit (`miembros` cambia y fecha), `CAMPOS_DE_CITA` en los listados y la resolución de bajas contra las fichas de hoy (los fija el intent-contract), las fechas de committer no monótonas, la prueba de inversas frente a `componerAviso`, el recuento que baja sin baja (ya diferido), la 21.2 delante de Héctor (los datos están en este spec), las precondiciones en `review` y el titular probado solo en puro (ahora también con git).
 
+### 2026-10-28 — Review pass
+- intent_gap: 0
+- bad_spec: 0
+- patch: 16: (high 0, medium 2, low 14)
+- defer: 1: (high 0, medium 0, low 1)
+- reject: 20: (high 0, medium 0, low 20)
+- addressed_findings:
+  - `[medium]` `[patch]` La promesa de la historia solo se probaba sobre el modelo puro: `fecha-de-cambio-build.test.ts` siembra ahora una Cita de la misma Obra, Autor y Tema sobre un sitio construido, comprueba la premisa (alguna hermana enlaza la nueva en su HTML), que ninguna otra Página de Cita mueve su `lastmod`, y que `rutasTocadas` del mismo commit con git de verdad da exactamente las rutas que el sitemap refecha, más la portada.
+  - `[medium]` `[patch]` La inversa universal solo se probaba con altas: `indexnow.test.ts` recorre cada fichero del ejemplo y cada campo clasificado de su familia (también los que no fechan) y exige que un cambio solo de ese campo avise exactamente lo que refecha. Mutación: fechar con `CUALQUIER_CAMBIO` la tumba.
+  - `[low]` `[patch]` El ensayo daba ceros cuando los extremos del rango no diferían aunque el historial se hubiera movido: `leerRango` acepta `aunSinCambios` y el ensayo lee siempre el historial; prueba con una nota puesta y quitada (mutación comprobada).
+  - `[low]` `[patch]` Un ensayo que no podía leer el rango salía con 0 y decía «ningún cambio publicable»: ahora sale con 1 y lo dice por la salida de error; prueba de la orden entera con `tsx` (mutación comprobada).
+  - `[low]` `[patch]` Sin `--ensayo`, un fallo al leer el rango —p. ej. al extraer `hasta`— perdía el aviso entero: ahora avisa la portada y lo dice, sin tumbar el despliegue.
+  - `[low]` `[patch]` `soloDeModo` sin prueba: commit de `chmod` sobre un documento y una Cita; ni aviso ni fecha (mutación en las dos lecturas comprobada).
+  - `[low]` `[patch]` El respaldo de `cat-file` en el aviso sin prueba: `vi.mock` lo rompe y el rango avisa de más con su aviso en el registro (mutación comprobada).
+  - `[low]` `[patch]` La baja de un documento no se probaba en el aviso: commit que lo borra, avisa solo su Obra por la relación de antes (mutación comprobada).
+  - `[low]` `[patch]` `--no-renames` sin fijar: renombrado dentro de `corpus/citas/` que da baja del viejo y alta del nuevo (mutación comprobada).
+  - `[low]` `[patch]` El triaje anterior daba por probado con git el retitulado, que no lo estaba: commit que retitula una ficha y avisa su Obra, sus seis Páginas de Cita y los listados.
+  - `[low]` `[patch]` La prueba de cruce de Autores componía el aviso con el Corpus de después en los dos lados: usa el de antes de verdad, y la premisa de la navegación queda en la prueba construida.
+  - `[low]` `[patch]` `AGENTS.md` presentaba la composición como exhaustiva: nombra lo que la relación todavía no compone (chips de Tema en la Obra, título por grafías hermanas, chip que cruza el umbral) y por qué las biografías no son familia; y documenta el código de salida del ensayo.
+  - `[low]` `[patch]` Por qué `corpus/biografias/` no es familia, escrito junto a `CAMPOS_QUE_PINTA`.
+  - `[low]` `[patch]` `DIRECTORIO_DE_DOCUMENTOS` tenía un literal de respaldo: sin la familia `documento` la orden no arranca.
+  - `[low]` `[patch]` La llave de memoria de `fechaDelComponente` dependía del orden de los campos (ahora ordenados), y el nombre de una ficha baja salía de un ayudante de documentos (`nombreDeFicha`).
+  - `[low]` `[patch]` Las secciones de resultado del spec se contradecían: cada pasada queda marcada como histórica y la vigente es la última.
+
+Diferido (frontmatter): el chip de un Tema que cruza su umbral de publicación aparece o desaparece
+en las demás Páginas de Cita sin fecharlas —pendiente de Héctor, como los chips de la Obra—.
+Rechazados: el `cat-file` fallido en el build (el contrato del intent manda avisar y devolver el
+mapa vacío), los valores por omisión del esquema y las claves anidadas (fechan de más, y el
+intent fija la comparación), la portada por campos (el intent la deja «como hoy»), las medidas que
+no difieren y el guion borrado (el AC pide las dos cifras sobre una siembra real, y están), el
+`lastmod` que retrocede, `--hasta` sin `--ensayo` (es anterior a la historia), el coste del build
+y el clon parcial (el CI clona entero), el aviso del ensayo descartado al fallar el historial
+(sale con 1), el orden de las bajas por instante con fechas de committer torcidas, un documento
+de biografía dentro de `corpus/fuentes/`, lo ya diferido (lo que la Obra deriva de otros ficheros
+y el listado que una Cita abandona), el superconjunto de «cambian de fecha» (dicho), los
+listados que fechan de más (lo fija el intent), las precondiciones en `review` y
+`sprint-status.yaml` (los lleva el orquestador) y la baja ilegible (riesgo declarado).
+
 ## Auto Run Result
 
 Status: done
 Blocking condition: ninguna.
+
+Las pasadas se anotan en orden y cada una sustituye el estado de la anterior: la vigente es la
+última. `review_loop_iteration` solo cuenta vueltas por `bad_spec`, y no ha habido ninguna.
+
+### Implementación y primera pasada de revisión (histórico)
 
 **Qué se hizo.** La relación de AD-27 pasa de «superficie → ficheros» a «superficie → (fichero,
 campos que pinta)», con la familia de la ruta, y un solo comparador puro (`cambiaronLosCampos`)
@@ -299,7 +349,7 @@ Seguimiento recomendado: `false` (0 parches; puntuación 0).
   no fecha el listado que abandona; FR-51 frente a AD-27 (pendiente de Héctor, `bmad-prd`); las
   fusiones con conflictos en `corpus/` siguen invisibles para el historial.
 
-### Pasada de revisión del 2026-10-28 (capas externas)
+### Segunda pasada de revisión, 2026-10-28 (capas externas; histórico)
 
 **Qué cambió.** Catorce parches, ninguno de contrato: el camino del sitemap toma sus ámbitos y
 familias de `FAMILIAS_DE_FICHERO`; `git cat-file` ya no puede tumbar el proceso por EPIPE y, en el
@@ -342,3 +392,53 @@ recomendado: `true` (puntuación 3 × 4 + 10 = 22).
 **Riesgos residuales.** Los diferidos del frontmatter: los chips de Tema de la Página de Obra
 (pendiente de Héctor), el título efectivo por grafías hermanas, el recuento que baja sin baja,
 FR-51 frente a AD-27 y las fusiones con conflictos en `corpus/`.
+
+### Tercera pasada de revisión, 2026-10-28 (capas externas; vigente)
+
+**Qué cambió.** Dieciséis parches, ninguno de contrato. La promesa de la historia se comprueba
+ahora sobre la superficie: un sitio construido siembra una Cita de la misma Obra, Autor y Tema,
+alguna hermana pasa a enlazarla en su HTML y ninguna mueve su `lastmod`, y el aviso del mismo
+commit, con git de verdad, nombra exactamente lo que el sitemap refecha más la portada. La inversa
+se prueba campo a campo para cada fichero y cada campo clasificado. El ensayo lee el historial aunque
+los extremos del rango no difieran y sale con 1 si no puede leer el rango; sin `--ensayo`, un fallo
+de lectura avisa la portada en vez de nada. Pruebas con git de verdad para lo que la pasada anterior
+arregló sin probar: cambio solo de modo, `cat-file` roto, baja de un documento, renombrado dentro de
+un ámbito y retitulado de una ficha. `AGENTS.md` dice qué no compone todavía la relación.
+
+**Ficheros.**
+- `tools/avisar.ts` — `DIRECTORIO_DE_DOCUMENTOS` sin literal de respaldo; `leerRango` con
+  `aunSinCambios`; el ensayo lee siempre el historial; `principal` sale con 1 en un ensayo fallido y
+  avisa la portada en un aviso fallido.
+- `tools/lib/cambios.ts` — llave de memoria con los campos ordenados; `nombreDeFicha`; por qué
+  `corpus/biografias/` no es familia.
+- `tests/unit/fecha-de-cambio-build.test.ts` — la siembra de una Cita sobre el sitio construido y
+  el aviso del mismo commit.
+- `tests/unit/indexnow.test.ts` — la inversa campo a campo.
+- `tests/unit/avisar-rango.test.ts` — commits de modo, retitulado, documento borrado, renombrado y
+  nota puesta y quitada; `cat-file` roto por `vi.mock`; la orden del ensayo de punta a punta.
+- `tests/unit/fecha-de-cambio.test.ts` — el cruce de Autores con el Corpus de antes de verdad.
+- `AGENTS.md` — lo que la relación no compone, las biografías y el código de salida del ensayo.
+
+**Revisión.** 16 parches (2 medios, 14 bajos), 1 diferido, 20 rechazados. Seguimiento
+recomendado: `true` (puntuación 3 × 2 + 14 = 20).
+
+**Verificación.**
+- `npx vitest run tests/unit/avisar-rango.test.ts` — 30/30 verde; mutaciones, cada una tumba su
+  prueba: sin `soloDeModo` en el diff o en el historial, sin el respaldo de `cat-file`, con la
+  relación de antes sin documentos, sin `aunSinCambios`, sin `--no-renames`, con el ensayo fallido
+  saliendo con 0.
+- `npx vitest run tests/unit/indexnow.test.ts tests/unit/fecha-de-cambio.test.ts` — 95/95 verde;
+  fechar con `CUALQUIER_CAMBIO` tumba la inversa campo a campo y la de altas y bajas.
+- `npx vitest run tests/unit/fecha-de-cambio-build.test.ts` — 14/14 verde (construye; git real).
+- `npx astro check` — 0 errores, 0 avisos, 8 pistas ajenas a esta historia.
+- `npx tsx tools/avisar.ts --ensayo --desde fd2c295d0f^ --hasta fd2c295d0f --sitemap
+  dist/sitemap-0.xml` — el mismo reparto de «Medidas» (16/16, 4/4, 8/8, 0/0, 6/4, portada 1),
+  «Ensayo: no se ha enviado nada.», 6,6 s, código 0.
+- `npm test` desacoplado — 137 ficheros, 6.312 pruebas, verde (773 s).
+
+**Riesgos residuales.** Los diferidos del frontmatter —los chips de Tema de la Página de Obra, el
+chip de un Tema que cruza su umbral en las demás Páginas de Cita, el título efectivo por grafías
+hermanas, el listado que una Cita viva abandona, FR-51 frente a AD-27 y las fusiones con
+conflictos en `corpus/`—. Las medidas sobre siembras reales siguen sin mostrar diferencia (solo
+añaden Citas, y la relación vieja ya no refechaba hermanas en las altas); lo que la relación por
+campos cambia lo muestran las pruebas y la comparación del `lastmod` del Corpus entero.

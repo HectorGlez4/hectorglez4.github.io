@@ -518,12 +518,18 @@ describe('Historia 24.8 — la matriz: qué cambia de fecha', () => {
   });
 
   it('cruce de Autores: la Cita de otro Autor en el mismo Tema no cambia de fecha', () => {
-    const h = historial({ 'corpus/citas/x--b.md': { antes: null, despues: VERSIONES['corpus/citas/x--b.md'] as Version } }, ['corpus/citas/x--b.md']);
+    /*
+     * `y-b` es la única Cita de su Obra y su primer Tema es `t`: su «Siguiente» sigue por `t` y
+     * la entrada de `x-b`, de otro Autor, puede cambiarlo. Que esa navegación cambie de verdad el
+     * HTML sin cambiar la fecha se comprueba sobre un sitio construido en
+     * `fecha-de-cambio-build.test.ts`; aquí, que la relación no compone hermanas.
+     */
+    const enT1 = { 'corpus/citas/x--b.md': { antes: null, despues: VERSIONES['corpus/citas/x--b.md'] as Version } };
+    const h = historial(enT1, ['corpus/citas/x--b.md']);
     const fechas = fechasPorSuperficie(corpusDeEjemplo(), h);
     expect(fechas.get('/cita/y-b')).toBe(T0);
-    expect(
-      avisadas({ 'corpus/citas/x--b.md': { antes: null, despues: VERSIONES['corpus/citas/x--b.md'] as Version } }, corpusDeEjemplo()),
-    ).not.toContain('/cita/y-b');
+    // El aviso, con el Corpus de antes de verdad: sin `x-b`.
+    expect(avisadas(enT1, corpusDeEjemplo(), corpusDeEjemplo(['corpus/citas/x--b.md']))).not.toContain('/cita/y-b');
     // Ni la hermana de la misma Obra, aunque su «Siguiente» y su recuento cambien.
     expect(fechas.get('/cita/x-a')).toBe(T0);
   });

@@ -109,8 +109,17 @@ import {
 
 const ejecutar = promisify(execFile);
 
-/** El directorio de los documentos de Fuente: se lista con git, nunca se extrae (155 MB). */
-const DIRECTORIO_DE_DOCUMENTOS = FAMILIAS_DE_FICHERO.find(([, familia]) => familia === 'documento')?.[0] ?? 'corpus/fuentes';
+/**
+ * El directorio de los documentos de Fuente: se lista con git, nunca se extrae (155 MB). Sale de
+ * `FAMILIAS_DE_FICHERO` y de ningún literal: si la familia cambiara de nombre o de directorio,
+ * un respaldo escrito aquí seguiría listando el viejo mientras el diff y el historial miran el
+ * nuevo, que es justo la divergencia que esa tabla única impide. Sin la familia, la orden no arranca.
+ */
+const DIRECTORIO_DE_DOCUMENTOS: string = (() => {
+  const familia = FAMILIAS_DE_FICHERO.find(([, nombre]) => nombre === 'documento');
+  if (familia === undefined) throw new Error('FAMILIAS_DE_FICHERO no declara la familia «documento»');
+  return familia[0];
+})();
 
 /** Los directorios del Corpus que se extraen de una revisión: todos menos los documentos. */
 const DIRECTORIOS_QUE_SE_EXTRAEN = FAMILIAS_DE_FICHERO.filter(([, familia]) => familia !== 'documento').map(
@@ -314,6 +323,7 @@ async function leerRango(
   desde: string,
   hasta: string,
   avisar: (linea: string) => void,
+  opciones: { aunSinCambios?: boolean } = {},
 ): Promise<LecturaDelRango | undefined> {
   const { stdout } = await ejecutar(
     'git',
@@ -337,7 +347,9 @@ async function leerRango(
     .filter((entrada) => !soloDeModo(entrada));
   const reglaCambiada = entradas.some((e) => e.fichero === FICHERO_DE_LA_REGLA);
   const delCorpus = entradas.filter((e) => e.fichero !== FICHERO_DE_LA_REGLA);
-  if (delCorpus.length === 0 && !reglaCambiada) return undefined;
+  // Sin nada que avisar entre los extremos, el aviso no lee nada más. El ensayo sí: el historial
+  // del rango puede haber cambiado de fecha algo que el propio rango deshizo.
+  if (delCorpus.length === 0 && !reglaCambiada && opciones.aunSinCambios !== true) return undefined;
 
   const pedidos = new Map<string, string>();
   for (const e of delCorpus) {
@@ -483,8 +495,12 @@ export async function ensayoDelRango(
   const reparto = Object.fromEntries(
     FAMILIAS_DE_RUTA.map((familia) => [familia, { cambianDeFecha: 0, seAvisarian: 0 }]),
   ) as RepartoPorFamilia;
-  const lectura = await leerRango(raiz, desde, hasta, avisar);
-  if (lectura === undefined) return { aviso: { rutas: [], avisos: [] }, reparto, portada: false, msDelHistorial: 0 };
+  /*
+   * Se lee el rango **aunque sus extremos no difieran**: un cambio que el rango hace y deshace no
+   * se avisa, pero sí cambia de fecha, y la cifra tiene que decirlo y no salir a cero.
+   */
+  const lectura = await leerRango(raiz, desde, hasta, avisar, { aunSinCambios: true });
+  if (lectura === undefined) throw new Error(`el rango ${desde}..${hasta} no se leyó`);
   const aviso = avisoDelRango(lectura, despues);
 
   const inicio = performance.now();
@@ -592,7 +608,20 @@ async function principal(argumentos: string[]): Promise<number> {
         for (const linea of aviso.avisos) console.warn(`Aviso: ${linea}`);
       }
     } catch (error) {
-      console.warn(`Aviso: no se pudo leer el rango ${desde}..${hasta} — ${String(error)}`);
+      if (ensayo) {
+        /*
+         * El ensayo existe para dar las cifras: sin ellas no puede salir con 0 ni decir «ningún
+         * cambio publicable», que es lo que diría un rango que de verdad no cambió nada.
+         */
+        console.error(`Ensayo: no se pudo leer el rango ${desde}..${hasta}, y no hay reparto — ${String(error)}`);
+        return 1;
+      }
+      /*
+       * El aviso, en cambio, no tumba el despliegue que lo llama. Pero tampoco calla: no se sabe
+       * qué cambió, y la portada —que la reconstrucción programada avisa siempre— va igual.
+       */
+      console.warn(`Aviso: no se pudo leer el rango ${desde}..${hasta}; se avisa solo la portada — ${String(error)}`);
+      rutas.add('/');
     }
   } else {
     // Reconstrucción programada: aunque git no cambie, la Cita del Día sí cambia.

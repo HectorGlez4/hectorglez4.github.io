@@ -16,6 +16,9 @@ import {
   rutasAvisadasPor,
 } from '../../tools/lib/avisar.ts';
 import {
+  CAMPOS_QUE_NO_FECHAN,
+  CAMPOS_QUE_PINTA,
+  CUALQUIER_CAMBIO,
   bajasDelHistorial,
   componentesPorSuperficie,
   fechasPorSuperficie,
@@ -247,6 +250,52 @@ describe('AD-27 — el aviso es la lectura inversa de la relación que fecha el 
       // Y nada que la relación no declare, salvo la portada.
       for (const ruta of rutas) expect(ruta === '/' || relacion.has(ruta), ruta).toBe(true);
     }
+  });
+
+  it('para todo fichero y todo campo clasificado de su familia: lo que avisa un cambio solo de ese campo es lo que refecha', () => {
+    /*
+     * Historia 24.8 — la inversa campo a campo. La de arriba usa altas, que cambian todos los
+     * campos; ésta cambia **uno solo** en un fichero y exige que el aviso y la fecha den las mismas
+     * rutas. Es la garantía de la historia: si una lectura mirara otros campos que la otra, aquí
+     * se vería con el nombre del fichero y del campo.
+     */
+    const T0 = '2026-01-01T00:00:00.000Z';
+    const T1 = '2026-02-01T00:00:00.000Z';
+    const corpus = corpusDeEjemplo();
+    const relacion = relacionDeSuperficies(corpus);
+    const ficheros = ficherosDelCorpus(corpus);
+    const noFechan = CAMPOS_QUE_NO_FECHAN as Partial<Record<string, readonly string[]>>;
+    let conRutas = 0;
+    let sinRutas = 0;
+    for (const fichero of ficheros) {
+      const familia = familiaDeFichero(fichero);
+      if (familia === undefined) throw new Error(`${fichero} sin familia`);
+      const campos = new Set([
+        ...Object.values(CAMPOS_QUE_PINTA[familia]).flatMap((c) =>
+          c === CUALQUIER_CAMBIO ? [] : [...(c as readonly string[])],
+        ),
+        ...(noFechan[familia] ?? []),
+      ]);
+      for (const campo of campos) {
+        const antes: Version = { [campo]: 'a' };
+        const despues: Version = { [campo]: 'b' };
+        const historial = new Map<string, TransicionFechada[]>(
+          ficheros.map((f) => [f, [{ fecha: T0, antes: null, despues: antes }]]),
+        );
+        historial.set(fichero, [{ fecha: T0, antes: null, despues: antes }, { fecha: T1, antes, despues }]);
+        const refechadas = [...fechasPorSuperficie(corpus, historial)]
+          .filter(([, fecha]) => fecha === T1)
+          .map(([ruta]) => ruta)
+          .sort();
+        const avisadas = [...rutasAvisadasPor([{ fichero, antes, despues }], relacion)].map(rutaNormalizada).sort();
+        expect(avisadas, `${fichero} · ${campo}`).toEqual(refechadas);
+        if (refechadas.length > 0) conRutas += 1;
+        else sinRutas += 1;
+      }
+    }
+    // Mide algo en los dos sentidos: campos que mueven rutas y campos que no mueven ninguna.
+    expect(conRutas).toBeGreaterThan(20);
+    expect(sinRutas).toBeGreaterThan(3);
   });
 
   it('la lectura de fechas es la misma relación, por ruta normalizada', () => {

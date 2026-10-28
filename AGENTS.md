@@ -783,6 +783,15 @@ analizar cuenta como cambio de todo; un campo ausente es `undefined`; el orden d
 - **Página de Obra** = su ficha (`autor`, `titulo`, `formas`, `nota`, `ediciones`), sus Citas, su
   Autor y **sus documentos**: la unión de `documentosDeCita` de sus Citas sobre los nombres de
   `corpus/fuentes/`. `nota` y `ediciones` solo fechan la Página de Obra.
+- **Lo que la relación todavía no compone**, y no conviene dar por exhaustivo (diferido en el spec
+  de la 24.8): la Página de Obra pinta el nombre de los Temas de sus Citas y no compone sus
+  ficheros de Tema —renombrar un Tema no la fecha ni la avisa; decidirlo es de Héctor—; el título
+  efectivo de una Obra cuyo `titulo` ya no declara ninguna Cita sale de las grafías de sus Citas
+  (`grafiaPorOmision`), y esas hermanas no componen la Página de Cita; y el chip de un Tema
+  aparece o desaparece en las demás Páginas de Cita cuando una Cita lo cruza por su umbral de
+  publicación, sin fecharlas. Las biografías de `corpus/biografias/` no son familia porque cada
+  documento es una revisión que no se reescribe: cambiar de biografía es cambiar el campo
+  `biografia` del Autor.
 - **Bajas.** Un fichero cuya última transición es un borrado —mover una Cita a
   `corpus/_revision/` o una ficha a `corpus/_obras-retiradas/` lo es— fecha con el instante de
   ese commit lo vivo que compondría: una Cita, su Autor, sus Temas, sus Colecciones (por
@@ -811,7 +820,9 @@ sobre `git log --raw A..B`, el Corpus de `B` y las bajas del rango) y cuántas *
 más la portada aparte, y lo que tardó la lectura del historial del rango. «Cambian de fecha»
 cuenta toda superficie de la relación —también las Obras `noindex`, que el sitemap no publica—
 y ve cada commit intermedio: un cambio que el propio rango deshace cambia de fecha y no se
-avisa, porque el aviso compara solo `A` y `B`. El Corpus de después es el árbol si `B` es su
+avisa, porque el aviso compara solo `A` y `B` —también cuando `A` y `B` no difieren en nada—.
+Si no puede leer el rango, el ensayo no imprime «ningún cambio» y sale con **1**; la orden sin
+`--ensayo` no tumba el despliegue que la llama, sale con 0 y avisa solo la portada. El Corpus de después es el árbol si `B` es su
 commit y `corpus/` está limpio —sin una siembra a medias—, o una copia de `B`; `corpus/fuentes`
 se lista con `git ls-tree` y nunca se extrae. Sin `--sitemap` pide el sitemap publicado para
 saber qué Obras se indexan.
