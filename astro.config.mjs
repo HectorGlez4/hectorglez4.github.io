@@ -67,6 +67,29 @@ export default defineConfig({
 
   server: { port: PUERTO_DEL_SERVIDOR },
   build: { format: 'directory' },
+
+  vite: {
+    build: {
+      /*
+       * AD-6, Historia 26.6 — ningún guion empaquetado va en línea.
+       *
+       * Astro mete en el HTML, como `<script type="module">` con cuerpo, el `<script>` procesado
+       * de un componente que cabe en `assetsInlineLimit` (4 KiB por omisión). El filtro de los
+       * Directorios cabría, y en línea contaría en `MAX_BYTES_DE_GUION` de `/autores/` y `/obras/`
+       * y se repetiría en cada carga en vez de cachearse: tiene que ser un fichero de `/_astro/`,
+       * en la lista cerrada de `src/lib/guiones.ts` con su tope. Así que para los `.js` se dice
+       * `false` —nunca en línea—, y para lo demás `undefined`, que deja la regla por omisión.
+       *
+       * Comprobado en Astro 7.2.0: `shouldInlineScriptChunk` de
+       * `astro/dist/core/build/plugins/plugin-scripts.js` pasa el código del guion y su nombre
+       * de fichero a `shouldInlineAsset` (`plugins/util.js`), que llama a esta función y, si no
+       * devuelve `undefined`, obedece. **Se reverifica al subir de versión**: si Astro dejara de
+       * consultarla, el guion volvería a ir en línea, y lo diría `tests/unit/medicion.test.ts`,
+       * que exige que ningún `<script type="module">` de `dist/` lleve cuerpo.
+       */
+      assetsInlineLimit: (fichero) => (fichero.endsWith('.js') ? false : undefined),
+    },
+  },
   integrations: [
     /*
      * Historia 11.2 — ninguna Cita se publica sin aparecer en su documento.

@@ -37,6 +37,7 @@ import {
   MAX_BYTES_GUION_DE_MEDICION,
   MAX_CARACTERES_IMAGEN,
   MIN_MS_VISIBLES_PARA_LA_LECTURA,
+  PAUSA_DE_TECLEO_MS,
 } from '../../src/lib/umbrales.ts';
 import {
   DESTINOS_DE_DESCARGA,
@@ -66,6 +67,8 @@ import {
   consecuenciasDe,
   declararRutasIndexables,
   olvidarRutasIndexables,
+  rutaDelDirectorioDeAutores,
+  rutaDelDirectorioDeObras,
   superficieDeclaradaDe,
   superficiesDelBarrido,
 } from '../../src/lib/superficies.ts';
@@ -92,6 +95,13 @@ import {
 
 const RAIZ = resolve(import.meta.dirname, '../..');
 const aLimpiar: string[] = [];
+
+/**
+ * Historia 26.6 — el fichero que Astro emite para el `<script>` de `FiltroDelDirectorio.astro`,
+ * sin su resumen, y las dos páginas que lo piden.
+ */
+const FICHERO_DEL_FILTRO = 'FiltroDelDirectorio.astro_astro_type_script_index_0_lang';
+const RUTAS_DEL_FILTRO = [rutaDelDirectorioDeAutores(), rutaDelDirectorioDeObras()];
 
 /** Espacios colapsados: Vitest y el build transforman `anunciar` con el mismo esbuild. */
 const colapsado = (texto: string) => texto.replace(/\s+/g, ' ').trim();
@@ -1755,7 +1765,7 @@ describe('Historia 23.1 — la versión del fichero sale de su contenido', () =>
 
 describe('Historia 23.1 — la lista cerrada de guiones externos', () => {
   it('cada entrada tiene un tope entero positivo y un nombre propio', () => {
-    expect(GUIONES_EXTERNOS.map((g) => g.id).sort()).toEqual(['imagen', 'medicion', 'pagefind']);
+    expect(GUIONES_EXTERNOS.map((g) => g.id).sort()).toEqual(['filtro', 'imagen', 'medicion', 'pagefind']);
     for (const guion of GUIONES_EXTERNOS) {
       expect(Number.isInteger(guion.tope) && guion.tope > 0, `${guion.id}: ${guion.tope}`).toBe(true);
       expect(guion.reconoce.global, guion.id).toBe(false);
@@ -1767,7 +1777,14 @@ describe('Historia 23.1 — la lista cerrada de guiones externos', () => {
     expect(guionExternoDe('/islas/imagen.js')?.id).toBe('imagen');
     expect(guionExternoDe('/islas/imagen.js?2')?.id).toBe('imagen');
     expect(guionExternoDe('/pagefind/pagefind.js')?.id).toBe('pagefind');
+    // Historia 26.6 — el filtro de los Directorios, con el resumen que Astro le ponga.
+    expect(guionExternoDe(`/_astro/${FICHERO_DEL_FILTRO}.C2e0gZJx.js`)?.id).toBe('filtro');
+    expect(guionExternoDe(`/_astro/${FICHERO_DEL_FILTRO}.Ab-_9.js?v=1`)?.id).toBe('filtro');
     for (const ajeno of [
+      '/_astro/OtroComponente.astro_astro_type_script_index_0_lang.C2e0gZJx.js',
+      `/_astro/${FICHERO_DEL_FILTRO}.js`,
+      `/_astro/${FICHERO_DEL_FILTRO}.a/b.js`,
+      `https://sabiduriadebolsillo.net/_astro/${FICHERO_DEL_FILTRO}.C2e0gZJx.js`,
       'https://sabiduriadebolsillo.net/islas/imagen.js',
       '//cdn.ejemplo.org/islas/imagen.js',
       'islas/imagen.js',
@@ -2205,7 +2222,11 @@ describe('Historia 2.9 y 23.1 — sin punto final, el sitio no pide ni envía na
       expect(guionesExternosDe(html).filter((e) => guionExternoDe(e)?.id === 'medicion'), ruta).toEqual([]);
       // Ninguna etiqueta de guion, de la medición ni de nada: es la mitad «sin él, ninguno» de
       // los criterios de JavaScript de las Historias 2.1 y 4.1, que se juzgaba en el navegador.
-      expect(etiquetasDeGuionExterno(html), ruta).toEqual([]);
+      // Salvo el filtro de los Directorios (26.6), que no es medición y va con o sin punto final,
+      // y solo en sus dos páginas.
+      const ajenasAlFiltro = etiquetasDeGuionExterno(html).filter((e) => guionExternoDe(e.src)?.id !== 'filtro');
+      expect(ajenasAlFiltro, ruta).toEqual([]);
+      if (!RUTAS_DEL_FILTRO.includes(ruta)) expect(etiquetasDeGuionExterno(html), ruta).toEqual([]);
       expect(html, ruta).not.toContain('sendBeacon');
       expect(guionesEnLinea(html), ruta).toContain(ARRANQUE_DE_MEDICION);
     }
@@ -2233,7 +2254,8 @@ describe('Historia 23.1 — lo que se descarga está en la lista y cabe en su to
       }
     }
 
-    // Las tres entradas se piden en este sitio: si una no se viera, su tope no se mediría.
+    // Las cuatro entradas se piden en este sitio —el filtro, en `/autores/` y `/obras/` (26.6)—:
+    // si una no se viera, su tope no se mediría.
     expect([...vistos.keys()].sort()).toEqual(GUIONES_EXTERNOS.map((g) => g.id).sort());
 
     for (const guion of GUIONES_EXTERNOS) {
@@ -2258,6 +2280,72 @@ describe('Historia 23.1 — lo que se descarga está en la lista y cabe en su to
     expect(GUIONES_EXTERNOS.find((g) => g.id === 'pagefind')!.arranca).toEqual([
       { como: 'new Worker', ruta: '/pagefind/pagefind-worker.js' },
     ]);
+  }, 240_000);
+});
+
+/*
+ * Historia 26.6 — el primer guion empaquetado de la v8 (AD-6).
+ *
+ * El filtro de los Directorios es un `<script>` procesado por Astro, y Astro lo metería en línea
+ * —un `<script type="module">` con cuerpo— si cupiera en `assetsInlineLimit`. `astro.config.mjs`
+ * lo impide para todo `.js`, y esto es lo que lo vigila sobre lo construido: si una versión nueva
+ * de Astro dejara de consultar esa opción, el guion volvería en línea y esto saldría en rojo.
+ */
+describe('Historia 26.6 — el filtro de los Directorios es un fichero, y solo en sus dos páginas', () => {
+  it('ningún `<script type="module">` de las dos construcciones lleva cuerpo', async () => {
+    let paginas = 0;
+    for (const proyecto of [await sitioMedido(), await sitioSinMedir()]) {
+      for (const [ruta, html] of paginasDe(proyecto)) {
+        paginas++;
+        const enLinea = guionesEnLineaConTipo(html).filter((g) => g.modulo);
+        expect(enLinea.map((g) => g.cuerpo.slice(0, 80)), ruta).toEqual([]);
+      }
+    }
+    expect(paginas).toBeGreaterThan(SLUGS.length);
+  }, 240_000);
+
+  it('`/autores/` y `/obras/`, y ninguna otra página, piden el filtro una vez con `<script type="module" src>`', async () => {
+    for (const proyecto of [await sitioMedido(), await sitioSinMedir()]) {
+      const paginas = paginasDe(proyecto);
+      for (const ruta of RUTAS_DEL_FILTRO) expect(paginas.has(ruta), ruta).toBe(true);
+      for (const [ruta, html] of paginas) {
+        const delFiltro = etiquetasDeGuionExterno(html).filter((e) => guionExternoDe(e.src)?.id === 'filtro');
+        if (!RUTAS_DEL_FILTRO.includes(ruta)) {
+          expect(delFiltro, ruta).toEqual([]);
+          continue;
+        }
+        expect(delFiltro, ruta).toHaveLength(1);
+        expect(delFiltro[0].etiqueta, ruta).toMatch(/\btype="module"/);
+        expect(delFiltro[0].src, ruta).toMatch(new RegExp(`^/_astro/${FICHERO_DEL_FILTRO}\\.`));
+        expect(existsSync(join(proyecto, 'dist', delFiltro[0].src)), delFiltro[0].src).toBe(true);
+      }
+    }
+  }, 240_000);
+
+  it('el fichero del filtro no lleva contenido, ni toca la dirección, el historial o la ventana', async () => {
+    const ficheros = (await ficherosDescargados()).get('filtro');
+    expect(ficheros, 'nadie pide el filtro').toBeDefined();
+    const fuente = [...ficheros!.values()].join('\n');
+    // El Corpus de la prueba entero —slugs, textos, el Autor, las Obras, el Tema, la Colección—:
+    // el modelo lo lee de la página, nunca lo lleva dentro.
+    for (const dato of [
+      ...SLUGS_DE_CITA,
+      ...TEXTOS_DE_CITA,
+      'Séneca',
+      'Sobre la brevedad de la vida',
+      'Cartas a Lucilio',
+      'El tiempo',
+      'Frases cortas para reflexionar',
+    ]) {
+      expect(fuente, `el filtro lleva «${dato}»`).not.toContain(dato);
+    }
+    expect(fuente).not.toMatch(/\blocation\b/);
+    expect(fuente).not.toMatch(/\bhistory\b/);
+    expect(fuente).not.toContain('requestAnimationFrame');
+    expect(fuente).not.toMatch(/\bwindow\b/);
+    expect(fuente).not.toMatch(/innerHTML|outerHTML|insertAdjacentHTML|document\.write/);
+    // Y lleva lo que importa: la pausa de tecleo con nombre, no un número suelto que diverja.
+    expect(fuente).toMatch(new RegExp(`\\b${PAUSA_DE_TECLEO_MS}\\b`));
   }, 240_000);
 });
 
@@ -3055,9 +3143,16 @@ describe('Historia 23.1 — toda isla que anuncia lleva `anunciar`', () => {
     let regionesVistas = 0;
     for (const [ruta, html] of paginasDe(await sitioMedido())) {
       const regiones = (html.match(/\brole\s*=\s*["']?status\b/gi) ?? []).length;
-      const anunciantes = guionesEnLinea(html).filter(
-        (g) => colapsado(g).includes(ANUNCIAR) && /\banunciar\(/.test(sinAnunciar(g)),
-      ).length;
+      /*
+       * Historia 26.6 — el filtro de los Directorios anuncia su recuento con el segundo ritmo
+       * (`ritmoDeTecleo`), desde un fichero y no en línea: la página que lo pide cuenta su guion
+       * como anunciante de la región que lleva en el HTML inicial.
+       */
+      const delFiltro = etiquetasDeGuionExterno(html).filter((e) => guionExternoDe(e.src)?.id === 'filtro').length;
+      const anunciantes =
+        delFiltro +
+        guionesEnLinea(html).filter((g) => colapsado(g).includes(ANUNCIAR) && /\banunciar\(/.test(sinAnunciar(g)))
+          .length;
       regionesVistas += regiones;
       expect(anunciantes, `${ruta}: ${regiones} regiones de estado y ${anunciantes} guiones con anunciar`).toBeGreaterThanOrEqual(
         regiones,

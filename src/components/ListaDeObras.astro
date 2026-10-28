@@ -65,8 +65,12 @@ const { obras, zona } = Astro.props;
     padding: 0;
   }
 
-  /* Filete entre entradas, no por encima de la primera (la maqueta, orden B). */
-  .lista-de-obras li + li {
+  /*
+   * Filete entre entradas, no por encima de la primera (la maqueta, orden B). «La primera» es la
+   * primera **visible**: el filtro de `/obras/` (26.6) aparta entradas con `hidden`, y la que queda
+   * primera no lleva filete encima. Sin filtro es lo mismo que `li + li`.
+   */
+  .lista-de-obras li:not([hidden]) ~ li {
     border-top: var(--grosor-filete) solid var(--filete);
   }
 

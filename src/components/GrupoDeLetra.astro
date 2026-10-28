@@ -9,7 +9,8 @@
  *
  * El ritmo: el primer grupo a 4 × `--unidad` de las letras y los demás a 5 × del cierre anterior;
  * la lista a 2 × del rótulo, con filete superior, y «Volver a las letras» a 2 × de la última fila.
- * Lo reutilizará `/obras/` (26.4).
+ * Lo reutiliza `/obras/` (26.4). El «primer grupo» es el primero **visible**: el filtro de la 26.6
+ * aparta grupos con `hidden`, y el que queda primero va a 4 ×, no a 5 ×.
  */
 import Rotulo from './Rotulo.astro';
 
@@ -28,12 +29,13 @@ const { inicial, ancla } = Astro.props;
 </section>
 
 <style>
+  /* Todos al ritmo del primero, y a 5 × solo el que sigue a un grupo visible. */
   .grupo {
-    margin-top: calc(var(--unidad) * 5);
+    margin-top: calc(var(--unidad) * 4);
   }
 
-  .grupo:first-of-type {
-    margin-top: calc(var(--unidad) * 4);
+  .grupo:not([hidden]) ~ .grupo {
+    margin-top: calc(var(--unidad) * 5);
   }
 
   /* La lista del grupo, sea cual sea su marcado: a 2 × del rótulo y con filete encima. */

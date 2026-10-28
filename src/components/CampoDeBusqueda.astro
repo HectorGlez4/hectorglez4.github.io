@@ -1,0 +1,70 @@
+---
+/**
+ * El Campo de búsqueda de la v8 — Historia 26.6, UX-DR58, UX-DR81, `DESIGN.md § Búsqueda → Campo
+ * de búsqueda`.
+ *
+ * Nace aquí, con su primer uso: el filtro de los Directorios (`FiltroDelDirectorio.astro`), que lo
+ * inserta desde un `<template>` al cargar. La Épica 27 lo lleva a `/buscar/`, la portada, el 404 y
+ * «Buscar en…», y la 27 y la 28 le añaden lo que esos usos piden —el botón «Buscar» y el `name`
+ * que envía—; el filtro, que responde al teclear, no lleva ni botón ni formulario.
+ *
+ * La etiqueta, visible y encima, en el pie y la tinta apagada, a `--unidad` del campo. Lo tecleado
+ * va en Inter, al cuerpo grande y en tinta —nunca la serif, que es solo para texto de Cita y
+ * nombres—, sin caja, sin sombra, sin radio, sin icono y sin `placeholder`: un filete inferior en
+ * el contorno, que al recibir el foco pasa a 2px siena **además** del anillo global de
+ * `tokens.css`, nunca en su lugar. Sin la cruz nativa de `type="search"`, que sería un botón.
+ * El alto mínimo es la zona de toque.
+ */
+interface Props {
+  /** El `id` del campo, al que apunta su etiqueta. */
+  id: string;
+  /** La etiqueta visible: «Escribe parte del nombre.». */
+  etiqueta: string;
+}
+
+const { id, etiqueta } = Astro.props;
+---
+
+<div class="campo-de-busqueda">
+  <label for={id}>{etiqueta}</label>
+  <input id={id} type="search" autocomplete="off" spellcheck="false" />
+</div>
+
+<style>
+  label {
+    display: block;
+    margin-bottom: var(--unidad);
+    font-family: var(--sans);
+    font-size: var(--pie);
+    color: var(--tinta-apagada);
+  }
+
+  input {
+    display: block;
+    box-sizing: border-box;
+    width: 100%;
+    min-height: var(--zona-de-toque);
+    margin: 0;
+    padding: var(--unidad) 0;
+    font-family: var(--sans);
+    font-size: var(--cuerpo-lg);
+    color: var(--tinta);
+    background: transparent;
+    border: 0;
+    border-bottom: var(--grosor-filete) solid var(--contorno);
+    border-radius: 0;
+    box-shadow: none;
+    appearance: none;
+  }
+
+  /* Sin la cruz ni la lupa nativas de `type="search"`: ni botón ni icono. */
+  input::-webkit-search-cancel-button,
+  input::-webkit-search-decoration {
+    appearance: none;
+  }
+
+  /* El filete pasa a 2px siena al recibir el foco, sumado al anillo global de `:focus-visible`. */
+  input:focus {
+    border-bottom: 2px solid var(--siena);
+  }
+</style>

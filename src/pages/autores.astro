@@ -11,15 +11,17 @@
  * —el listado entero va en `data-pagefind-ignore="all"`, para que buscar el nombre de un Autor
  * devuelva su página y no ésta— y vista de superficie. Una sola página, sin 2+.
  *
- * Sin campo de filtro todavía, ni región de recuento, ni guion: los trae la 26.6, que insertará el
- * campo entre el `h1` y las letras. Sin ningún Modelo de Ingreso (`SUPERFICIES_SIN_INGRESO`): la
- * página sale idéntica con todos encendidos o apagados. Sin semblanzas ni Citas
+ * Entre el `h1` y las letras, el filtro de la 26.6 (`FiltroDelDirectorio`): la región del recuento
+ * va en el HTML, vacía y sin alto, y el guion inserta el campo al cargar —sin guion, la lista entera
+ * y las letras, como antes—. Sin ningún Modelo de Ingreso (`SUPERFICIES_SIN_INGRESO`): la página
+ * sale idéntica con todos encendidos o apagados. Sin semblanzas ni Citas
  * (`SUPERFICIES_SIN_SEMBLANZA`): lista entidades y dice hechos del Corpus.
  */
 import Armazon from '../components/Armazon.astro';
 import LetrasDeSalto from '../components/LetrasDeSalto.astro';
 import GrupoDeLetra from '../components/GrupoDeLetra.astro';
 import FilaDeAutor from '../components/FilaDeAutor.astro';
+import FiltroDelDirectorio from '../components/FiltroDelDirectorio.astro';
 import { conjuntoPublicable } from '../lib/publicado.ts';
 import { directorioDeAutores } from '../lib/directorios.ts';
 import { descripcionDelDirectorioDeAutores } from '../lib/atribucion.ts';
@@ -41,6 +43,8 @@ const descripcion = descripcionDelDirectorioDeAutores(directorio);
   <div class="pagina contenedor">
     <div class="prosa">
       <h1>{NOMBRE_DEL_DIRECTORIO_DE_AUTORES}</h1>
+
+      <FiltroDelDirectorio directorio="autores" />
 
       <div class="listado" data-pagefind-ignore="all">
         {directorio.grupos.length > 0 && <LetrasDeSalto letras={directorio.grupos} entidades={NOMBRE_DEL_DIRECTORIO_DE_AUTORES} />}
@@ -77,7 +81,10 @@ const descripcion = descripcionDelDirectorioDeAutores(directorio);
     color: var(--tinta);
   }
 
-  /* Las letras a 3 × `--unidad` del `h1`: ahí insertará el campo la 26.6. */
+  /*
+   * Las letras a 3 × `--unidad` de lo que tienen encima: del `h1` sin guion —la región vacía no
+   * ocupa alto—, y del campo o del recuento con él (26.6).
+   */
   .listado {
     margin-top: calc(var(--unidad) * 3);
   }

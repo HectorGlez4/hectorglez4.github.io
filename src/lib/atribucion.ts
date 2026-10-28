@@ -13,12 +13,20 @@
 import type { Cita, Autor, SiguienteCita } from './publicado.ts';
 import type { ObraResuelta } from './obras.ts';
 import { MARCA } from './marca.ts';
+import { recuentoDeAutores, recuentoDeObras } from './recuentos.ts';
 import {
   TARJETA_DEL_DIRECTORIO_DE_AUTORES,
   TARJETA_DEL_DIRECTORIO_DE_OBRAS,
   rutaDelDirectorioDeAutores,
   rutaDelDirectorioDeObras,
 } from './superficies.ts';
+
+/*
+ * Los recuentos de Autores y de Obras viven en `src/lib/recuentos.ts` desde la Historia 26.6, sin
+ * importaciones, porque el guion del filtro del Directorio los lleva al navegador; aquí se
+ * reexportan para la meta, la Tarjeta Social y las pruebas, que los siguen pidiendo a este módulo.
+ */
+export { recuentoDeAutores, recuentoDeObras };
 
 /**
  * La procedencia compuesta —título de la Obra y año de la Cita, en ese orden— o `undefined`
@@ -185,15 +193,6 @@ export function hechosDeFilaDeAutor(
 }
 
 /**
- * «1 autor», «135 autores»: el recuento de Autores con su unidad, en singular cuando es uno —
- * Historia 26.3. Un solo dueño para la meta del Directorio de Autores y su Tarjeta Social, que
- * dicen la misma cifra y no pueden escribirla de dos maneras.
- */
-export function recuentoDeAutores(m: number): string {
-  return m === 1 ? '1 autor' : `${m} autores`;
-}
-
-/**
  * El `<meta description>` del Directorio de Autores — Historia 26.3, UX-DR80, UX-DR107:
  * «{m} autores, de la A a la Z, con {n} citas publicadas.», en singular cuando la cifra es una
  * —«1 autor», «1 cita publicada»—, con la redacción que aprobó Héctor el 2026-10-19.
@@ -213,14 +212,6 @@ export function descripcionDelDirectorioDeAutores(directorio: { autores: number;
  */
 function recuentoDeCitasPublicadas(n: number): string {
   return n === 1 ? '1 cita publicada' : `${n} citas publicadas`;
-}
-
-/**
- * «1 obra», «5 obras»: el recuento de Obras con su unidad, en singular cuando es una — Historia
- * 26.4. Un solo dueño para la meta del Directorio de Obras y su Tarjeta Social.
- */
-export function recuentoDeObras(k: number): string {
-  return k === 1 ? '1 obra' : `${k} obras`;
 }
 
 /**

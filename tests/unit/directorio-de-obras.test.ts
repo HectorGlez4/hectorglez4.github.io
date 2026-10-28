@@ -35,6 +35,7 @@ import {
   limpiar,
   paginaConstruida,
 } from './ayuda/construir.js';
+import { comprobarFiltroEnElHtml } from './ayuda/filtro.js';
 
 /**
  * Historia 26.4 — Todas las Obras, bajo su Autor.
@@ -613,5 +614,9 @@ describe('Historia 26.4 — `/obras/` construido', () => {
     expect(html).not.toContain('sin obra documentada');
     expect(main()).not.toMatch(/[→›]/u);
     expect(html).not.toContain('data-ingreso');
+  });
+
+  it('Historia 26.6 — sin guion, ni campo ni hueco: la región del recuento vacía, la plantilla inerte y la lista entera', () => {
+    comprobarFiltroEnElHtml(html, 'obras');
   });
 });

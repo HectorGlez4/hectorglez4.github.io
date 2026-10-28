@@ -28,6 +28,7 @@ import {
   limpiar,
   paginaConstruida,
 } from './ayuda/construir.js';
+import { comprobarFiltroEnElHtml } from './ayuda/filtro.js';
 
 /**
  * Historia 26.3 — Todos los Autores, de la A a la Z.
@@ -432,5 +433,9 @@ describe('Historia 26.3 — `/autores/` construido', () => {
       // El texto de las Citas de la prueba dice «Frase número…», y tampoco se reproduce aquí.
       expect(pagina.toLowerCase(), ruta).not.toContain('frase');
     }
+  });
+
+  it('Historia 26.6 — sin guion, ni campo ni hueco: la región del recuento vacía, la plantilla inerte y la lista entera', () => {
+    comprobarFiltroEnElHtml(html, 'autores');
   });
 });

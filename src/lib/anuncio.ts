@@ -5,8 +5,8 @@
  * el fallo del generador, el recuento de `/buscar/`— se anuncia por una región `role="status"`
  * que está en el marcado desde la carga, vacía y sin `hidden`. Para que el mismo mensaje dos
  * veces seguidas se vuelva a anunciar, se vacía la región y el texto se escribe en el
- * fotograma siguiente: escrito sobre sí mismo no es un cambio y ningún lector lo dice. (El
- * segundo ritmo, el del tecleo, es de la Épica 26 y vivirá aquí también.)
+ * fotograma siguiente: escrito sobre sí mismo no es un cambio y ningún lector lo dice. El
+ * segundo ritmo, el del tecleo, vive aquí también: `ritmoDeTecleo`, más abajo (Historia 26.6).
  *
  * Hasta la 23.1 esto estaba escrito tres veces —en `CopiarCita`, en `ImagenDeCita` y en
  * `/buscar/`—, a mano y cada una a su manera. Ahora hay un solo dueño, y las tres islas lo
@@ -65,4 +65,41 @@ export function guionQueAnuncia(constantes: Record<string, unknown>, cuerpo: str
     throw new Error('guionQueAnuncia: el guion contiene «</script» o «<!--» y cerraría el <script> en el HTML.');
   }
   return guion;
+}
+
+/**
+ * El **segundo ritmo** de un mensaje de estado — UX-DR58, UX-DR86, WCAG 4.1.3, Historia 26.6.
+ *
+ * El primer ritmo, `anunciar`, es para lo que el visitante provoca con un gesto y se anuncia al
+ * momento, aunque se repita. Este es para lo que cambia **mientras teclea** —el recuento del
+ * filtro de los Directorios, y en la Épica 27 el de `/buscar/`—: decir una cifra por tecla sería
+ * ruido, así que la frase se escribe cuando el visitante lleva `pausa` milisegundos sin teclear
+ * (`PAUSA_DE_TECLEO_MS`), y **solo si cambió**: «gonz» y «gonza» con la misma cifra no vuelven a
+ * anunciarse. Por eso aquí no se vacía antes de escribir, que es justo lo que el primer ritmo
+ * hace para que lo repetido se oiga.
+ *
+ * `anunciar(texto)` reprograma la escritura con cada tecla; `vaciar()` la cancela y deja la
+ * región vacía al momento, como al cargar: es lo que pasa al vaciar el campo.
+ *
+ * No viaja como texto, como `anunciar`: el guion del filtro es un `<script>` empaquetado y la
+ * importa (AD-6), nunca por `define:vars`. Tampoco usa `requestAnimationFrame`, que la prueba de
+ * `dist/` reserva a `anunciar`.
+ */
+export function ritmoDeTecleo(
+  region: { textContent: string | null },
+  pausa: number,
+): { anunciar(texto: string): void; vaciar(): void } {
+  let espera: ReturnType<typeof setTimeout> | undefined;
+  return {
+    anunciar(texto: string) {
+      clearTimeout(espera);
+      espera = setTimeout(() => {
+        if (region.textContent !== texto) region.textContent = texto;
+      }, pausa);
+    },
+    vaciar() {
+      clearTimeout(espera);
+      region.textContent = '';
+    },
+  };
 }

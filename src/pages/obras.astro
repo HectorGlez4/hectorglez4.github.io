@@ -19,8 +19,9 @@
  * sin 2+; si su HTML crece más de lo que nombra `MAX_BYTES_DEL_DIRECTORIO_DE_OBRAS`, el build lo
  * avisa (`integraciones/directorios.ts`) y reabre paginarla.
  *
- * Sin campo de filtro, región de recuento ni guion: los trae la 26.6. Sin ningún Modelo de
- * Ingreso (`SUPERFICIES_SIN_INGRESO`) y sin semblanzas, Citas ni notas de Ficha de Obra
+ * Entre el `h1` y las letras, el filtro de la 26.6 (`FiltroDelDirectorio`), que casa con el título
+ * de cada Obra y con el nombre de su Autor; sin guion, la lista entera y las letras. Sin ningún
+ * Modelo de Ingreso (`SUPERFICIES_SIN_INGRESO`) y sin semblanzas, Citas ni notas de Ficha de Obra
  * (`SUPERFICIES_SIN_SEMBLANZA`): lista entidades y dice hechos del Corpus. Ni la línea de Citas
  * sin obra de la Página de Autor, ni ningún glifo de avance.
  */
@@ -28,6 +29,7 @@ import Armazon from '../components/Armazon.astro';
 import LetrasDeSalto from '../components/LetrasDeSalto.astro';
 import GrupoDeLetra from '../components/GrupoDeLetra.astro';
 import ListaDeObras from '../components/ListaDeObras.astro';
+import FiltroDelDirectorio from '../components/FiltroDelDirectorio.astro';
 import { conjuntoPublicable } from '../lib/publicado.ts';
 import { directorioDeObras } from '../lib/directorios.ts';
 import { descripcionDelDirectorioDeObras } from '../lib/atribucion.ts';
@@ -52,6 +54,8 @@ const ENTIDADES_DE_LAS_LETRAS = 'Obras de autores';
   <div class="pagina contenedor">
     <div class="prosa">
       <h1>{NOMBRE_DEL_DIRECTORIO_DE_OBRAS}</h1>
+
+      <FiltroDelDirectorio directorio="obras" />
 
       <div class="listado" data-pagefind-ignore="all">
         {directorio.grupos.length > 0 && <LetrasDeSalto letras={directorio.grupos} entidades={ENTIDADES_DE_LAS_LETRAS} />}
@@ -89,18 +93,25 @@ const ENTIDADES_DE_LAS_LETRAS = 'Obras de autores';
     color: var(--tinta);
   }
 
-  /* Las letras a 3 × `--unidad` del `h1`: ahí insertará el campo la 26.6. */
+  /*
+   * Las letras a 3 × `--unidad` de lo que tienen encima: del `h1` sin guion —la región vacía no
+   * ocupa alto—, y del campo o del recuento con él (26.6).
+   */
   .listado {
     margin-top: calc(var(--unidad) * 3);
   }
 
-  /* Entre Autores, 4 × `--unidad`; el primero de su grupo, a 2 × del rótulo de la letra. */
+  /*
+   * Entre Autores, 4 × `--unidad`; el primero **visible** de su grupo, a 2 × del rótulo de la
+   * letra. Todos llevan el ritmo del primero y el de los demás solo quien sigue a uno visible: con
+   * el filtro de la 26.6 apartando al primer Autor, el siguiente pasa a estar a 2 × del rótulo.
+   */
   .autor {
-    margin-top: calc(var(--unidad) * 4);
+    margin-top: calc(var(--unidad) * 2);
   }
 
-  .autor:first-of-type {
-    margin-top: calc(var(--unidad) * 2);
+  .autor:not([hidden]) ~ .autor {
+    margin-top: calc(var(--unidad) * 4);
   }
 
   /*
