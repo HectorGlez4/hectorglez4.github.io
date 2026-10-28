@@ -29,7 +29,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 # - Retrospective appends its action items to action_items; the status view surfaces open ones
 generated: 08-11-2026 09:00
-last_updated: 10-28-2026 16:25
+last_updated: 10-28-2026 17:57
 project: brainlySabiduria
 project_key: NOKEY
 tracking_system: file-system
@@ -420,7 +420,7 @@ development_status:
   26-6-el-directorio-filtra-al-teclear-sin-pensar-en-tildes: review # v8-ralph 2026-10-28 12:12 UTC: filtro del directorio al teclear, insensible a tildes, con recuento anunciado; diferido: anclaje en Safari
   26-7-los-directorios-se-miden-como-familia-propia: review # v8-ralph 2026-10-28: los directorios se miden como familia propia en indexación, tráfico, demanda y rastreo, con suelo propio y reatribución dicha en los informes; sin diferidos para Héctor
   26-8-ninguna-cita-queda-a-más-de-tres-saltos-y-el-build-lo-compru: review  # v8-ralph 2026-10-28: entra el modelo de alcance en el build (aviso de Citas a más de tres saltos) y las órdenes que retiran y publican lo comprueban; diferidos para Héctor: órdenes que añaden o reordenan listados sin comprobar el tramo, y tema --corpus tomado como slug
-  26-9-ninguna-página-obliga-a-desplazarse-en-horizontal-a-320-px: backlog
+  26-9-ninguna-página-obliga-a-desplazarse-en-horizontal-a-320-px: review  # v8-ralph 2026-10-28 17:57 UTC: ninguna superficie pide desplazamiento horizontal a 320 px (texto al 200 % y espaciado 1.4.12), nombres largos se parten y el barrido e2e de 320 px cubre /buscar/; sin diferidos para Héctor
   26-10-una-persona-revisa-las-claves-de-orden-operativa-no-bloquea: backlog  # operativa: acto de Héctor (revisar las claves del lote inicial; se cierra con él, y las de los Autores nuevos pasan a la sesión de sembrado)
   26-11-la-obra-y-los-directorios-llegan-juntos-al-sitio-en-vivo-y-s: backlog  # operativa: acto de Héctor (merge conjunto 24+26; fechas de SM-11 y SM-8 de llegada en vivo)
   epic-26-retrospective: optional
