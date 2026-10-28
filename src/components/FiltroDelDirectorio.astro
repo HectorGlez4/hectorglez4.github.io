@@ -5,7 +5,8 @@
  *
  * Lo usan `/autores/` y `/obras/`, entre el `h1` y las letras, y nadie más. Pinta tres cosas:
  *
- *   · un `<template>` con el Campo de búsqueda y el párrafo del enlace a cero, inertes: el guion
+ *   · un `<template>` con el Campo de búsqueda, la sombra del recuento y el párrafo del enlace a
+ *     cero, inertes: el guion
  *     los inserta al cargar, sin hueco reservado (UX-DR35). Sin guion —o si el fichero no llega—
  *     no hay campo, la lista está entera y las letras saltan, porque son anclas. Ir en plantilla y
  *     no en `createElement` deja la etiqueta, el enlace y sus estilos de ámbito en el build, y el
@@ -43,19 +44,34 @@ const { directorio } = Astro.props;
 <div class="filtro" data-filtro={directorio} data-buscar={rutaDeLaBusqueda()} data-pagefind-ignore="all">
   <template>
     <div class="campo"><CampoDeBusqueda id={`filtro-de-${directorio}`} etiqueta={ETIQUETA_DEL_FILTRO[directorio]} /></div>
+    <p class="sombra" aria-hidden="true"></p>
     <p class="a-cero" data-zona="directorio" hidden><a></a></p>
   </template>
   <p class="recuento" role="status"></p>
 </div>
 
 <style>
+  /*
+   * Tres filas: el campo, el recuento y el enlace a cero. La región y su sombra comparten la del
+   * recuento, y la fila mide lo que la mayor de las dos (ver `.sombra`). Sin guion solo está la
+   * región, vacía: la rejilla no mide nada.
+   */
+  .filtro {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
   /* El campo, a 3 × `--unidad` del `h1`. */
   .campo {
+    grid-row: 1;
     margin-top: calc(var(--unidad) * 3);
   }
 
   /* El recuento, a 2 × bajo el campo, en el pie y la tinta apagada, a la vista. */
-  .recuento {
+  .recuento,
+  .sombra {
+    grid-row: 2;
+    grid-column: 1;
     margin: calc(var(--unidad) * 2) 0 0;
     font-family: var(--sans);
     font-size: var(--pie);
@@ -63,11 +79,23 @@ const { directorio } = Astro.props;
   }
 
   /* Vacía no ocupa sitio, pero sigue en el árbol de accesibilidad: no lleva `hidden`. */
-  .recuento:empty {
+  .recuento:empty,
+  .sombra:empty {
     margin: 0;
   }
 
+  /*
+   * La sombra lleva, al teclear, la frase que la región escribirá tras la pausa, invisible y
+   * fuera del árbol de accesibilidad: la fila del recuento toma su alto al momento, con la lista
+   * y el enlace a cero, y cuando la frase llega a la región no se mueve nada. Sin ella la frase
+   * empujaría hacia abajo, 700 ms después, la lista y el enlace que el visitante ya iba a tocar.
+   */
+  .sombra {
+    visibility: hidden;
+  }
+
   .a-cero {
+    grid-row: 3;
     margin: var(--unidad) 0 0;
   }
 
@@ -111,7 +139,13 @@ const { directorio } = Astro.props;
     bloques: { bloque?: HTMLElement; filas: HTMLElement[] }[];
   }
 
-  /** El texto de una fila: el nombre en `/autores/`; en `/obras/`, el título sin año ni recuento. */
+  /**
+   * El texto de una fila: el nombre en `/autores/`; en `/obras/`, el título sin año ni recuento.
+   * Lo que se lee aquí —`li.fila-de-bloque` con su `.nombre`; `section.autor` con `h3 a` y
+   * `.lista-de-obras > li` con el título como primer nodo de texto de `.titulo`— lo fija sobre el
+   * `dist/` `tests/unit/ayuda/filtro.ts`, y el guion construido lo ejecuta
+   * `tests/unit/ayuda/filtroEjecutado.ts`: un cambio de marcado no deja el filtro mudo en verde.
+   */
   function textoDeFila(directorio: DirectorioFiltrable, fila: HTMLElement): string {
     if (directorio === 'autores') return fila.querySelector('.nombre')?.textContent ?? '';
     // El título es el primer nodo de texto de `.titulo`: detrás van el año y el recuento ocultos.
@@ -125,11 +159,12 @@ const { directorio } = Astro.props;
     for (const grupo of listado.querySelectorAll<HTMLElement>('section.grupo')) {
       const bloques =
         directorio === 'autores'
-          ? [{ bloque: undefined, cabecera: undefined, filas: [...grupo.querySelectorAll<HTMLElement>('li')] }]
+          ? [{ bloque: undefined, cabecera: undefined, filas: [...grupo.querySelectorAll<HTMLElement>('li.fila-de-bloque')] }]
           : [...grupo.querySelectorAll<HTMLElement>('section.autor')].map((bloque) => ({
               bloque,
-              cabecera: bloque.querySelector('h3')?.textContent ?? '',
-              filas: [...bloque.querySelectorAll<HTMLElement>('li')],
+              // El nombre del Autor es el texto de su enlace, no el del `h3` entero.
+              cabecera: bloque.querySelector('h3 a')?.textContent ?? '',
+              filas: [...bloque.querySelectorAll<HTMLElement>('.lista-de-obras > li')],
             }));
       modelo.push({
         bloques: bloques.map(({ cabecera, filas }) => ({
@@ -153,9 +188,10 @@ const { directorio } = Astro.props;
     const contenido = plantilla.content.cloneNode(true) as DocumentFragment;
     const campo = contenido.querySelector<HTMLElement>('.campo');
     const entrada = contenido.querySelector<HTMLInputElement>('input');
+    const sombra = contenido.querySelector<HTMLElement>('.sombra');
     const aCero = contenido.querySelector<HTMLElement>('.a-cero');
     const enlace = aCero?.querySelector('a');
-    if (campo === null || entrada === null || aCero === null || enlace == null) return;
+    if (campo === null || entrada === null || sombra === null || aCero === null || enlace == null) return;
 
     const { modelo, pintables } = leer(directorio, listado);
     const filtrar = filtroDe(modelo);
@@ -164,6 +200,7 @@ const { directorio } = Astro.props;
     const volveres = [...listado.querySelectorAll<HTMLElement>('p.volver')];
 
     raiz.insertBefore(campo, region);
+    raiz.insertBefore(sombra, region);
     region.after(aCero);
 
     entrada.addEventListener('input', () => {
@@ -191,8 +228,10 @@ const { directorio } = Astro.props;
         enlace.removeAttribute('href');
       }
 
+      const frase = resultado.vacia ? '' : fraseDelFiltro(directorio, resultado.filas, tecleado);
+      sombra.textContent = frase;
       if (resultado.vacia) ritmo.vaciar();
-      else ritmo.anunciar(fraseDelFiltro(directorio, resultado.filas, tecleado));
+      else ritmo.anunciar(frase);
     });
   }
 

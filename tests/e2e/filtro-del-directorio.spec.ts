@@ -35,15 +35,15 @@ const FICHERO = '**/_astro/FiltroDelDirectorio.astro_astro_type_script_index_0_l
 async function listado(page: Page, directorio: DirectorioFiltrable) {
   return page.evaluate((directorio) => {
     if (directorio === 'autores') {
-      return [...document.querySelectorAll('section.grupo li')].map((li) => ({
+      return [...document.querySelectorAll('section.grupo li.fila-de-bloque')].map((li) => ({
         fila: li.querySelector('.nombre')?.textContent ?? '',
         cabecera: '',
       }));
     }
     return [...document.querySelectorAll('section.autor')].flatMap((autor) =>
-      [...autor.querySelectorAll('li')].map((li) => ({
+      [...autor.querySelectorAll('.lista-de-obras > li')].map((li) => ({
         fila: li.querySelector('.titulo')?.firstChild?.nodeValue ?? '',
-        cabecera: autor.querySelector('h3')?.textContent ?? '',
+        cabecera: autor.querySelector('h3 a')?.textContent ?? '',
       })),
     );
   }, directorio);
@@ -52,7 +52,9 @@ async function listado(page: Page, directorio: DirectorioFiltrable) {
 /** Las filas que se ven ahora, en orden. */
 async function visibles(page: Page, directorio: DirectorioFiltrable): Promise<string[]> {
   return page.evaluate((directorio) => {
-    const filas = [...document.querySelectorAll<HTMLElement>('section.grupo li')].filter((li) => li.checkVisibility());
+    const filas = [
+      ...document.querySelectorAll<HTMLElement>(directorio === 'autores' ? 'section.grupo li.fila-de-bloque' : 'section.autor .lista-de-obras > li'),
+    ].filter((li) => li.checkVisibility());
     return filas.map((li) =>
       directorio === 'autores'
         ? (li.querySelector('.nombre')?.textContent ?? '')
@@ -136,7 +138,9 @@ test.describe('Historia 26.6 — cómo filtra, en los dos Directorios', () => {
     await expect(page.locator('section.autor h3').filter({ hasText: autor.cabecera }).first()).toBeVisible();
 
     // Una Obra cuyo título casa y el nombre de su Autor no: su cabecera y esa Obra.
-    const titulo = lista.find((e) => e.fila.length > 12 && !normalizar(e.cabecera).includes(normalizar(e.fila)))!;
+    const titulo = lista.find((e) => e.fila.length > 12 && !normalizar(e.cabecera).includes(normalizar(e.fila)));
+    expect(titulo, 'la página no lista ninguna Obra de más de 12 caracteres que no esté en el nombre de su Autor').toBeDefined();
+    if (titulo === undefined) return;
     await campo(page, 'obras').fill(titulo.fila);
     expect(await visibles(page, 'obras')).toEqual(esperadas(lista, titulo.fila));
     const cabeceras = await page
@@ -217,12 +221,32 @@ test.describe('Historia 26.6 — cómo filtra, en los dos Directorios', () => {
       await expect(enlace).toHaveAttribute('href', `${rutaDeLaBusqueda()}?q=${encodeURIComponent(hostil)}`);
       await expect(enlace).not.toHaveAttribute('target', /.*/);
       await expect(region(page)).toHaveText('');
+      // El enlace, a `--unidad` bajo la fila del recuento, que toma su alto al teclear —la sombra
+      // lleva ya la frase—: cuando la frase llega a la región no se mueve nada, aunque ocupe varias
+      // líneas, como lo hostil en el móvil.
+      const posicion = () =>
+        page.evaluate(() => {
+          const d = document.createElement('div');
+          d.style.width = 'var(--unidad)';
+          document.body.append(d);
+          const u1 = parseFloat(getComputedStyle(d).width);
+          d.remove();
+          const r = document.querySelector('.sombra')!.getBoundingClientRect();
+          const p = document.querySelector('.a-cero')!.getBoundingClientRect();
+          return { u1, hueco: p.top - r.bottom, arriba: p.top, alto: r.height };
+        });
+      const antesDeLaFrase = await posicion();
+      expect(antesDeLaFrase.alto).toBeGreaterThan(0);
+      expect(antesDeLaFrase.hueco).toBeCloseTo(antesDeLaFrase.u1, 0);
       await page.clock.runFor(PAUSA_DE_TECLEO_MS);
       await expect(region(page)).toHaveText(
         directorio === 'autores'
           ? `Ningún autor tiene «${hostil}» en el nombre.`
           : `Ninguna obra tiene «${hostil}» en el título ni en su autor.`,
       );
+      const conLaFrase = await posicion();
+      expect(conLaFrase.hueco).toBeCloseTo(conLaFrase.u1, 0);
+      expect(conLaFrase.arriba).toBeCloseTo(antesDeLaFrase.arriba, 0);
       // Ningún elemento creado ni código ejecutado.
       expect(await page.locator('main img').count()).toBe(0);
       expect(await page.evaluate(() => (window as unknown as { __hostil?: number }).__hostil)).toBeUndefined();
@@ -235,8 +259,15 @@ test.describe('Historia 26.6 — cómo filtra, en los dos Directorios', () => {
         const siena = getComputedStyle(sonda).color;
         sonda.remove();
         const c = getComputedStyle(a);
+        const medida = document.createElement('span');
+        medida.style.cssText = 'font-size: var(--cuerpo-md); font-family: var(--sans)';
+        document.body.append(medida);
+        const md = { cuerpo: getComputedStyle(medida).fontSize, familia: getComputedStyle(medida).fontFamily };
+        medida.remove();
         return {
           alto: a.getBoundingClientRect().height,
+          letra: { cuerpo: c.fontSize, familia: c.fontFamily },
+          md,
           color: c.color,
           siena,
           subrayado: c.textDecorationLine,
@@ -244,6 +275,7 @@ test.describe('Historia 26.6 — cómo filtra, en los dos Directorios', () => {
         };
       });
       expect(m.alto).toBeGreaterThanOrEqual(44);
+      expect(m.letra).toEqual(m.md);
       expect(m.color).toBe(m.siena);
       expect(m.subrayado).toBe('underline');
       expect(m.zona).toBe('directorio');
@@ -254,6 +286,113 @@ test.describe('Historia 26.6 — cómo filtra, en los dos Directorios', () => {
       await expect(page.locator('.a-cero a')).not.toHaveAttribute('href', /.*/);
     });
   }
+});
+
+test.describe('Historia 26.6 — por subcadena, y `/obras/` con coincidencias', () => {
+  test('`/autores/`: «mar» casa también dentro de una palabra, como `normalizar` sobre la lista servida', async ({ page }) => {
+    await abrir(page, AUTORES, 'autores');
+    const lista = await listado(page, 'autores');
+    // Un trozo que casa dentro de una palabra y no al principio de ninguna: «mar» si la página lo
+    // trae así —Josefa Amar y Borbón, con el Corpus del 2026-10-18—, y si no, uno de la lista.
+    const dentro = (consulta: string) =>
+      lista.find((e) => {
+        const t = normalizar(e.fila);
+        return t.includes(consulta) && !new RegExp(`(^| )${consulta}`, 'u').test(t);
+      });
+    const consulta =
+      ['mar', ...lista.map((e) => normalizar(e.fila).replace(/ /gu, '').slice(2, 5))].find(
+        (c) => c.length === 3 && dentro(c) !== undefined,
+      ) ?? '';
+    expect(consulta, 'ningún nombre de la página sirve de ejemplo dentro de una palabra').not.toBe('');
+    const esperado = esperadas(lista, consulta);
+    expect(esperado).toContain(dentro(consulta)!.fila);
+    await campo(page, 'autores').fill(consulta);
+    expect(await visibles(page, 'autores')).toEqual(esperado);
+    await page.clock.runFor(PAUSA_DE_TECLEO_MS);
+    await expect(region(page)).toHaveText(recuento('autores', esperado.length));
+  });
+
+  test('`/obras/` con coincidencias: sin letras ni «Volver», cada grupo que queda con su letra, y el primer Autor y la primera Obra visibles a su ritmo', async ({ page }) => {
+    await abrir(page, OBRAS, 'obras');
+    // Una Obra que no es la primera de su Autor, de un Autor que no es el primero de su grupo, y
+    // cuyo título entero no casa con nada de lo que tiene delante en su grupo: filtrada por él,
+    // el primer Autor visible del grupo y su primera Obra visible siguen a otros ocultos.
+    const ejemplo = await page.evaluate(() =>
+      [...document.querySelectorAll('section.grupo')].flatMap((grupo, g) =>
+        [...grupo.querySelectorAll('section.autor')].map((autor, a) => ({
+          g,
+          a,
+          cabecera: autor.querySelector('h3 a')?.textContent ?? '',
+          titulos: [...autor.querySelectorAll('.lista-de-obras > li')].map((li) => li.querySelector('.titulo')?.firstChild?.nodeValue ?? ''),
+          antes: [...grupo.querySelectorAll('section.autor')].slice(0, a).flatMap((otro) => [
+            otro.querySelector('h3 a')?.textContent ?? '',
+            ...[...otro.querySelectorAll('.lista-de-obras > li')].map((li) => li.querySelector('.titulo')?.firstChild?.nodeValue ?? ''),
+          ]),
+        })),
+      ),
+    );
+    const caso = ejemplo
+      .filter((e) => e.a > 0)
+      .flatMap((e) => e.titulos.slice(1).map((t, i) => ({ ...e, titulo: t, o: i + 1 })))
+      .find((e) => {
+        const n = normalizar(e.titulo);
+        return (
+          n.length > 0 &&
+          !normalizar(e.cabecera).includes(n) &&
+          e.antes.every((x) => !normalizar(x).includes(n)) &&
+          e.titulos.slice(0, e.o).every((x) => !normalizar(x).includes(n))
+        );
+      });
+    expect(caso, 'la página no trae ninguna Obra que sirva de ejemplo').toBeDefined();
+    if (caso === undefined) return;
+
+    await campo(page, 'obras').fill(caso.titulo);
+    await expect(page.locator('#letras')).toBeHidden();
+    await expect(page.locator('p.volver:visible')).toHaveCount(0);
+    const grupos = await page.locator('section.grupo').evaluateAll((gs) =>
+      gs.map((g) => ({ visible: (g as HTMLElement).checkVisibility(), letra: (g.querySelector(':scope > h2') as HTMLElement | null)?.checkVisibility() ?? false })),
+    );
+    const quedan = grupos.filter((g) => g.visible);
+    expect(quedan.length).toBeGreaterThan(0);
+    expect(quedan.length).toBeLessThan(grupos.length);
+    for (const g of quedan) expect(g.letra, 'un grupo que queda sin su letra').toBe(true);
+
+    const m = await page.evaluate(({ g, a, o }) => {
+      const sonda = (css: string) => {
+        const d = document.createElement('div');
+        d.style.cssText = css;
+        document.body.append(d);
+        const ancho = parseFloat(getComputedStyle(d).width);
+        d.remove();
+        return ancho;
+      };
+      const grupo = document.querySelectorAll('section.grupo')[g];
+      const autores = [...grupo.querySelectorAll<HTMLElement>('section.autor')];
+      const autor = autores[a];
+      const filas = [...autor.querySelectorAll<HTMLElement>('.lista-de-obras > li')];
+      return {
+        u2: sonda('width: calc(var(--unidad) * 2)'),
+        antesOcultos: autores.slice(0, a).every((x) => !x.checkVisibility()),
+        primeroVisible: autores.find((x) => x.checkVisibility()) === autor,
+        bajoElRotulo: autor.getBoundingClientRect().top - grupo.querySelector(':scope > h2')!.getBoundingClientRect().bottom,
+        filasAntesOcultas: filas.slice(0, o).every((x) => !x.checkVisibility()),
+        primeraFila: filas.find((x) => x.checkVisibility()) === filas[o],
+        filete: getComputedStyle(filas[o]).borderTopStyle === 'none' ? 0 : parseFloat(getComputedStyle(filas[o]).borderTopWidth),
+      };
+    }, { g: caso.g, a: caso.a, o: caso.o });
+    expect(m.antesOcultos && m.primeroVisible, 'el Autor del ejemplo no es el primero visible de su grupo').toBe(true);
+    expect(m.bajoElRotulo).toBeCloseTo(m.u2, 0);
+    expect(m.filasAntesOcultas && m.primeraFila, 'la Obra del ejemplo no es la primera visible de su Autor').toBe(true);
+    expect(m.filete).toBe(0);
+  });
+
+  test('«Buscar … en las citas» lleva a `/buscar/` con lo tecleado en su campo', async ({ page }) => {
+    await abrir(page, AUTORES, 'autores', false);
+    await campo(page, 'autores').fill('qqqqzzzz');
+    await page.getByRole('link', { name: 'Buscar «qqqqzzzz» en las citas' }).click();
+    await expect(page).toHaveURL(new RegExp(`${rutaDeLaBusqueda()}\\?q=qqqqzzzz$`));
+    await expect(page.locator('#consulta')).toHaveValue('qqqqzzzz');
+  });
 });
 
 test.describe('Historia 26.6 — el campo, su sitio y su foco', () => {
@@ -269,6 +408,38 @@ test.describe('Historia 26.6 — el campo, su sitio y su foco', () => {
       await expect(page.locator('main form')).toHaveCount(0);
       await expect(page.locator('.filtro button, .filtro [role="button"]')).toHaveCount(0);
       await expect(page.getByText(ETIQUETA_DEL_FILTRO[directorio], { exact: true })).toBeVisible();
+
+      // Sin foco: filete inferior de `--grosor-filete` en `--contorno`, y nada más; la etiqueta,
+      // a `--unidad` encima.
+      const reposo = await entrada.evaluate((e) => {
+        const sonda = (css: string) => {
+          const d = document.createElement('div');
+          d.style.cssText = css;
+          document.body.append(d);
+          const c = getComputedStyle(d);
+          const r = { ancho: c.width, color: c.color };
+          d.remove();
+          return r;
+        };
+        const c = getComputedStyle(e);
+        return {
+          grosor: sonda('width: var(--grosor-filete)').ancho,
+          contorno: sonda('color: var(--contorno)').color,
+          u1: parseFloat(sonda('width: var(--unidad)').ancho),
+          abajo: { ancho: c.borderBottomWidth, estilo: c.borderBottomStyle, color: c.borderBottomColor },
+          otros: [c.borderTopWidth, c.borderLeftWidth, c.borderRightWidth],
+          sombra: c.boxShadow,
+          radio: c.borderRadius,
+          fondo: c.backgroundColor,
+          etiqueta: e.getBoundingClientRect().top - document.querySelector(`label[for="${e.id}"]`)!.getBoundingClientRect().bottom,
+        };
+      });
+      expect(reposo.abajo).toEqual({ ancho: reposo.grosor, estilo: 'solid', color: reposo.contorno });
+      expect(reposo.otros).toEqual(['0px', '0px', '0px']);
+      expect(reposo.sombra).toBe('none');
+      expect(reposo.radio).toBe('0px');
+      expect(reposo.fondo).toBe('rgba(0, 0, 0, 0)');
+      expect(reposo.etiqueta).toBeCloseTo(reposo.u1, 0);
 
       await entrada.fill('a');
       await page.clock.runFor(PAUSA_DE_TECLEO_MS);

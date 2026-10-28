@@ -505,7 +505,9 @@ export const MAX_BYTES_GUION_DE_PAGEFIND = 87200;
  * porque no lleva contenido. Más unos 400 de margen, como los demás topes de la lista. La medida
  * cuenta con las dos llamadas de nivel superior de este módulo marcadas `@__PURE__`
  * (`CORTES_DE_SERIE`, `CORTES_DE_SM8`): sin la marca, el fichero arrastraba la lista de cortes
- * entera y medía 3.510.
+ * entera y medía 3.510. Tras la revisión de la historia —la sombra que guarda el alto del
+ * recuento y la lectura del modelo por los selectores de cada fila— mide **3.098 bytes**; el tope
+ * no se movió, y el margen que queda son unos 270.
  */
 export const MAX_BYTES_GUION_DEL_FILTRO = 3370;
 

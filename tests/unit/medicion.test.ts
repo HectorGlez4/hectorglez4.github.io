@@ -2342,9 +2342,14 @@ describe('Historia 26.6 — el filtro de los Directorios es un fichero, y solo e
     expect(fuente).not.toMatch(/\blocation\b/);
     expect(fuente).not.toMatch(/\bhistory\b/);
     expect(fuente).not.toContain('requestAnimationFrame');
-    expect(fuente).not.toMatch(/\bwindow\b/);
+    // Ni la ventana por ningún nombre, ni ninguna escucha de `click`: escucha `input` en su campo.
+    expect(fuente).not.toMatch(/\b(?:window|self|globalThis)\b/);
+    expect(fuente).not.toMatch(/(["'`])click\1/);
     expect(fuente).not.toMatch(/innerHTML|outerHTML|insertAdjacentHTML|document\.write/);
-    // Y lleva lo que importa: la pausa de tecleo con nombre, no un número suelto que diverja.
+    // Y la pausa de tecleo, el valor de `PAUSA_DE_TECLEO_MS` que el empaquetado copia en el
+    // fichero. Esto no distingue la constante de un `700` escrito a mano —después de empaquetar
+    // son lo mismo—: que el guion la importe lo dice su fuente, y el valor lo fija la prueba de
+    // `filtro-del-directorio.test.ts`; esto solo vigila que el número que viaja sea ese.
     expect(fuente).toMatch(new RegExp(`\\b${PAUSA_DE_TECLEO_MS}\\b`));
   }, 240_000);
 });
@@ -3141,14 +3146,23 @@ describe('Historia 23.1 — toda isla que anuncia lleva `anunciar`', () => {
      * `anunciar`, no el que solo lleva su texto, que `guionQueAnuncia` mete siempre.
      */
     let regionesVistas = 0;
+    /*
+     * Historia 26.6 — el filtro de los Directorios anuncia su recuento con el segundo ritmo
+     * (`ritmoDeTecleo`), desde un fichero y no en línea: la página que lo pide cuenta su guion
+     * como anunciante de la región que lleva en el HTML inicial, **si el fichero anuncia**: busca
+     * la región `role="status"`, programa la frase y escribe su `textContent`. Lo que hace con
+     * ella lo juzga ejecutándolo `tests/unit/ayuda/filtroEjecutado.ts`; aquí basta con que una
+     * etiqueta sola no cuente como anunciante.
+     */
+    const fuenteDelFiltro = [...((await ficherosDescargados()).get('filtro')?.values() ?? [])].join('\n');
+    const filtroAnuncia =
+      fuenteDelFiltro.includes('[role="status"]') && /\bsetTimeout\(/.test(fuenteDelFiltro) && /\.textContent\s*=(?!=)/.test(fuenteDelFiltro);
+    expect(filtroAnuncia, 'el fichero del filtro no anuncia por su región').toBe(true);
     for (const [ruta, html] of paginasDe(await sitioMedido())) {
       const regiones = (html.match(/\brole\s*=\s*["']?status\b/gi) ?? []).length;
-      /*
-       * Historia 26.6 — el filtro de los Directorios anuncia su recuento con el segundo ritmo
-       * (`ritmoDeTecleo`), desde un fichero y no en línea: la página que lo pide cuenta su guion
-       * como anunciante de la región que lleva en el HTML inicial.
-       */
-      const delFiltro = etiquetasDeGuionExterno(html).filter((e) => guionExternoDe(e.src)?.id === 'filtro').length;
+      const delFiltro = filtroAnuncia
+        ? etiquetasDeGuionExterno(html).filter((e) => guionExternoDe(e.src)?.id === 'filtro').length
+        : 0;
       const anunciantes =
         delFiltro +
         guionesEnLinea(html).filter((g) => colapsado(g).includes(ANUNCIAR) && /\banunciar\(/.test(sinAnunciar(g)))

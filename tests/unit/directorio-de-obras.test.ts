@@ -36,6 +36,7 @@ import {
   paginaConstruida,
 } from './ayuda/construir.js';
 import { comprobarFiltroEnElHtml } from './ayuda/filtro.js';
+import { comprobarFiltroEjecutado, guionDelFiltro } from './ayuda/filtroEjecutado.js';
 
 /**
  * Historia 26.4 — Todas las Obras, bajo su Autor.
@@ -618,5 +619,9 @@ describe('Historia 26.4 — `/obras/` construido', () => {
 
   it('Historia 26.6 — sin guion, ni campo ni hueco: la región del recuento vacía, la plantilla inerte y la lista entera', () => {
     comprobarFiltroEnElHtml(html, 'obras');
+  });
+
+  it('Historia 26.6 — el guion construido, ejecutado sobre este Directorio: oculta, aparta las letras, anuncia tras la pausa y ofrece buscar a cero', () => {
+    comprobarFiltroEjecutado(html, guionDelFiltro(proyecto, html), 'obras');
   });
 });

@@ -8,7 +8,7 @@ import { ETIQUETA_DEL_FILTRO, type DirectorioFiltrable } from '../../../src/lib/
  *
  *   · entre el `h1` y el listado, el contenedor del filtro, fuera de Pagefind, con la región
  *     `role="status"` vacía y sin `hidden`, y la `/buscar/` del enlace a cero en `data-buscar`;
- *   · ningún `<input>` fuera de un `<template>`: el campo lo inserta el guion;
+ *   · ningún `<input>` en `main` fuera de la plantilla: el campo lo inserta el guion;
  *   · la plantilla con la etiqueta visible del Directorio, un `type="search"` sin `placeholder`,
  *     sin botón ni formulario, y un enlace a cero sin `href`;
  *   · nada oculto en el listado: todas las filas, las letras y los «Volver» están a la vista.
@@ -24,28 +24,32 @@ export function comprobarFiltroEnElHtml(html: string, directorio: DirectorioFilt
   const contenedor = html.slice(filtro, listado);
   expect(contenedor).toMatch(/^<div class="filtro" data-filtro="[a-z]+" data-buscar="\/buscar\/" data-pagefind-ignore="all"/u);
 
-  const regiones = [...html.matchAll(/<p\b[^>]*\brole="status"[^>]*>([\s\S]*?)<\/p>/gu)];
-  expect(regiones, 'una sola región de estado').toHaveLength(1);
+  // Lo que se cuenta, dentro de `main`: una región, una plantilla o un campo del armazón no son
+  // del filtro, y no tienen por qué romper esta prueba.
+  const principal = html.slice(html.indexOf('<main'), html.indexOf('</main>'));
+  const regiones = [...principal.matchAll(/<p\b[^>]*\brole="status"[^>]*>([\s\S]*?)<\/p>/gu)];
+  expect(regiones, 'una sola región de estado en main').toHaveLength(1);
   expect(regiones[0][0]).toMatch(/^<p class="recuento" role="status"/u);
   expect(regiones[0][1], 'la región no está vacía').toBe('');
   expect(regiones[0][0]).not.toMatch(/\shidden[\s>=]/u);
   expect(contenedor).toContain(regiones[0][0]);
 
-  const plantillas = [...html.matchAll(/<template\b[^>]*>([\s\S]*?)<\/template>/gu)].map((m) => m[1]);
-  expect(plantillas).toHaveLength(1);
+  const plantillas = [...contenedor.matchAll(/<template\b[^>]*>([\s\S]*?)<\/template>/gu)].map((m) => m[1]);
+  expect(plantillas, 'una sola plantilla en el filtro').toHaveLength(1);
   const [plantilla] = plantillas;
-  expect(contenedor).toContain(plantilla);
-  expect(html.replace(/<template\b[\s\S]*?<\/template>/gu, ''), 'un <input> fuera de la plantilla').not.toMatch(/<input\b/u);
+  expect(principal.replace(/<template\b[\s\S]*?<\/template>/gu, ''), 'un <input> en main fuera de la plantilla').not.toMatch(/<input\b/u);
 
   const id = `filtro-de-${directorio}`;
   expect(plantilla).toMatch(new RegExp(`<label for="${id}"[^>]*>${ETIQUETA_DEL_FILTRO[directorio]}</label>`, 'u'));
-  expect(plantilla).toMatch(new RegExp(`<input id="${id}" type="search" autocomplete="off"`, 'u'));
+  expect(plantilla).toMatch(new RegExp(`<input id="${id}" type="search" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false"`, 'u'));
   expect(plantilla).not.toContain('placeholder');
   expect(plantilla).not.toMatch(/<button\b|<form\b|\bname=/u);
   const enlaces = [...plantilla.matchAll(/<a\b([^>]*)>/gu)].map((m) => m[1]);
   expect(enlaces).toHaveLength(1);
   expect(enlaces[0], 'el enlace a cero lleva href desde el build').not.toMatch(/\bhref=/u);
   expect(plantilla).toMatch(/<p class="a-cero" data-zona="directorio" hidden/u);
+  // La sombra del recuento: guarda su alto mientras la frase espera la pausa, fuera del árbol.
+  expect(plantilla).toMatch(/<p class="sombra" aria-hidden="true"[^>]*><\/p>/u);
 
   const delListado = html.slice(listado, html.indexOf('</main>', listado));
   expect(delListado, 'algo del listado sale oculto sin filtrar').not.toMatch(/\shidden[\s>=]/u);
