@@ -7,6 +7,7 @@ import {
   fichasDeObraPorCita,
   temaBajoUmbral,
 } from './ayuda/corpus.ts';
+import { pedir, porTandas } from './ayuda/tandas.ts';
 
 /**
  * Historia 2.6 — rutas de salida desde cada Cita; Historia 24.6 — al pie, más de la misma obra y
@@ -157,30 +158,42 @@ test.describe('Historia 2.6 — hacia dónde seguir', () => {
     return [...sitemap.matchAll(/<loc>[^<]*(\/cita\/[^<]+)<\/loc>/g)].map((m) => m[1]);
   }
 
-  test('ninguna Página de Cita publicada queda sin enlaces salientes', async ({ request }) => {
+  /*
+   * Y piden con el `fetch` de Node, por tandas, anotando lo que falla para afirmarlo una vez:
+   * con 4.420 Páginas de Cita, el `request` de Playwright y un `expect` por ruta las llevaban por
+   * encima de su tiempo en la tanda completa (`tests/e2e/ayuda/tandas.ts`). Lo que se mira de
+   * cada página y de cada destino es lo mismo.
+   */
+  test('ninguna Página de Cita publicada queda sin enlaces salientes', async ({ request, baseURL }) => {
     const rutas = await rutasDeCita(request);
     expect(rutas.length).toBeGreaterThan(30);
 
-    for (const ruta of rutas) {
-      const internos = enlacesInternosDe(await (await request.get(ruta)).text());
-      expect(internos.length, `${ruta} no tiene enlaces salientes`).toBeGreaterThan(0);
-    }
+    const sinSalientes: string[] = [];
+    await porTandas(rutas, async (ruta) => {
+      const internos = enlacesInternosDe(await (await pedir(baseURL, ruta)).text());
+      if (internos.length === 0) sinSalientes.push(ruta);
+    });
+    expect(sinSalientes, 'Páginas de Cita sin enlaces salientes').toEqual([]);
   });
 
-  test('ningún enlace saliente apunta a una página que no existe', async ({ request }) => {
+  test('ningún enlace saliente apunta a una página que no existe', async ({ request, baseURL }) => {
     // Pide cada Página de Cita y cada destino: desde la 24.6 el pie de cada una enlaza hasta nueve
     // páginas, y con el resto del fichero en marcha el recorrido pasaba de los 30 s por omisión.
     test.setTimeout(180_000);
     const destinos = new Set<string>();
-    for (const ruta of await rutasDeCita(request)) {
-      for (const href of enlacesInternosDe(await (await request.get(ruta)).text())) {
+    await porTandas(await rutasDeCita(request), async (ruta) => {
+      for (const href of enlacesInternosDe(await (await pedir(baseURL, ruta)).text())) {
         destinos.add(href);
       }
-    }
+    });
 
     expect(destinos.size).toBeGreaterThan(0);
-    for (const destino of destinos) {
-      expect((await request.get(destino, { maxRedirects: 0 })).status(), destino).toBe(200);
-    }
+    const rotos: string[] = [];
+    await porTandas([...destinos], async (destino) => {
+      const respuesta = await pedir(baseURL, destino, { seguir: false });
+      await respuesta.arrayBuffer();
+      if (respuesta.status !== 200) rotos.push(`${destino}: ${respuesta.status}`);
+    });
+    expect(rotos, 'destinos que no responden 200').toEqual([]);
   });
 });
