@@ -216,3 +216,30 @@ Veredicto con la cabecera del alojamiento: **igual**. LCP 1.802 ms en las dos; l
 7.274 bytes más (el HTML de la Tarjeta de Obra y del pie), sin efecto medible en LCP. La puerta
 de NFR-7 del bucle mide desde hoy con `SERVIDOR_CACHE_CONTROL=max-age=600` y comprueba en cada
 informe que cada `woff2` se pide una sola vez.
+
+### 2026-10-29 00:50 UTC — preparación previa al merge, repetida (bucle v8-ralph)
+
+Repetida sobre 519432fafd, la punta de la rama tras la vuelta a medir NFR-7.
+
+**(a) La rama al día con la principal.** `git fetch origin` y `git merge origin/main`:
+«Already up to date». `origin/main` sigue en 881949f4d6, antecesor de la rama; no hay commit
+de merge. La rama lleva 133 commits sobre la base.
+
+**(b) Lote de claves de orden.** `npx tsx tools/autor.ts proponer-claves`: «Ninguna clave
+nueva: no falta ninguna que la regla sepa proponer». Los 171 Autores de `corpus/autores/`
+tienen clave, todos «sin revisar» (la 26.10 sigue pendiente de Héctor y no bloquea). El
+árbol no cambia: no hay commit de claves.
+
+**(c) Ensayo del aviso.** `npx tsx tools/avisar.ts --ensayo --desde $(git merge-base
+origin/main HEAD) --hasta HEAD` (salida 0, 0,07 s de lectura del historial): el mismo reparto
+que el 2026-10-28 —cita 0, autor 0, tema 0, coleccion 0, obra 0, directorio 2/2, portada 1—.
+IndexNow avisaría **3 URL**: `/`, `/autores/` y `/obras/`. No se envió nada. Los commits
+nuevos del rango (pruebas e2e, la prueba del D1 local y este registro) no tocan ninguna
+superficie.
+
+**(d) `npm run test:e2e` lleva los dos barridos.** `test:e2e` es `playwright test` y
+`playwright.config.ts` toma todo `tests/e2e/` sin filtro (`npx playwright test --list`: 1.004
+pruebas en 27 ficheros). En `tests/e2e/accesibilidad.spec.ts`, el barrido WCAG 2.2 AA
+(`ETIQUETAS_DEL_BARRIDO` con `wcag22aa`; 54 pruebas entre los dos proyectos) y el bloque
+«Historia 26.9 — reflujo a 320 px» (124 pruebas entre los dos proyectos) están en la lista,
+sin `test.only` ni `fixme`.
