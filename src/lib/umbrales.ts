@@ -247,7 +247,9 @@ export interface PasadaEnProduccion {
   readonly rutas: readonly string[];
 }
 
-export const PASADAS_QUE_ESCRIBEN_EN_PRODUCCION: readonly PasadaEnProduccion[] = [];
+export const PASADAS_QUE_ESCRIBEN_EN_PRODUCCION: readonly PasadaEnProduccion[] = [
+  { pasada: '25.3', jornada: '2026-10-29', rutas: ['/cita/jose-marti-cultivo-una-rosa-blanca-en-junio-como/'] },
+];
 
 /**
  * Lecturas de su superficie que cierran una línea base — AD-9, FR-56, Historia 23.10.
