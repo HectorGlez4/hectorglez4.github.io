@@ -2354,6 +2354,30 @@ test.describe('Historia 27.6 — sin resultados, los ocho Autores con más Citas
       .locator('[data-salida] a[href^="/autor/"]')
       .evaluateAll((ns) => ns.map((n) => ({ href: n.getAttribute('href'), texto: n.textContent?.trim(), target: n.getAttribute('target') })));
     expect(chips).toEqual(esperado.map((a) => ({ href: rutaDeAutor(a.slug), texto: a.nombre, target: null })));
+    // Cada grupo bajo su `h2`, y los de Autor con el tratamiento del Chip de Tema: la serif a
+    // `body-md`, comparados con lo que los tokens dan computado en la misma página.
+    const forma = await page.evaluate(() => {
+      const sonda = document.createElement('span');
+      sonda.style.cssText = 'font-family: var(--serif); font-size: var(--cuerpo-md)';
+      document.body.append(sonda);
+      const token = { familia: getComputedStyle(sonda).fontFamily, tamano: getComputedStyle(sonda).fontSize };
+      sonda.remove();
+      const secciones = [...document.querySelectorAll('[data-salida] > section')];
+      const deAutores = secciones.find((s) => s.querySelector('a[href^="/autor/"]') !== null);
+      return {
+        token,
+        grupos: secciones.map((s) => s.querySelector(':scope > h2')?.textContent?.trim()),
+        cabeceraDeAutores: deAutores?.querySelector(':scope > h2')?.textContent?.trim(),
+        chips: [...(deAutores?.querySelectorAll('a.chip') ?? [])].map((a) => ({
+          familia: getComputedStyle(a).fontFamily,
+          tamano: getComputedStyle(a).fontSize,
+        })),
+      };
+    });
+    expect(forma.grupos.every((g) => g !== undefined && g !== '')).toBe(true);
+    expect(forma.cabeceraDeAutores).toBe('Autores');
+    expect(forma.chips).toHaveLength(esperado.length);
+    for (const chip of forma.chips) expect(chip).toEqual(forma.token);
     // Fuera de la Zona de resultados, exentos por escrito.
     expect(await page.locator('[data-zona="resultado"] [data-salida]').count()).toBe(0);
     await expect(page.locator('[data-salida]')).toHaveAttribute('data-sin-zona', 'salidas-sin-resultados');

@@ -5,7 +5,7 @@ created: '2026-10-29'
 status: 'done'
 baseline_revision: '79919bfebcab8c7b2cc5b99b546e133d9c1279aa'
 review_loop_iteration: 0
-followup_review_recommended: true
+followup_review_recommended: false
 context:
   - '{project-root}/_bmad-output/implementation-artifacts/epic-27-context.md'
   - '{project-root}/_bmad-output/planning-artifacts/architecture/architecture-brainlySabiduria-2026-08-10/ARCHITECTURE-SPINE.md'
@@ -152,6 +152,17 @@ Las capas de revisión son externas (bucle v8-ralph) y en esta pasada no llegaro
 
 Rechazados, en resumen: el estado del tablero y el commit de la spec (los lleva el bucle); la revisión «ya hecha» (esta es); `esLatinoamericano` es el valor del enum, no un predicado; `hispanicos` ante un valor fuera del enum (el esquema lo excluye y la salida de `npm run huecos` es idéntica); `tradicion` no viaja a la isla (sus props son `OpcionPorNombre`); la `.sugerencia` rancia y el camino del `catch` (la salida se oculta antes de cada búsqueda y un fallo deja el estado anterior, como el recuento; el índice que no carga es de la 27.7); la `.sugerencia` ausente (está en el marcado y lo fija la prueba construida); la Obra o el Autor sin nombre (solo se usan filtros con opción en el selector); dos órdenes en la página, título sin comillas y frase sin «menos palabras» con filtros (los fija el contrato); los 66 bytes del guion (la regla solo rederiva al pasar del tope); dos builds frente a la permutación pura; la sección Autores condicional; la tipografía de los chips (CSS anterior sin tocar); Obra + Tema sin texto en la isla (la composición es la pura, probada).
 
+### 2026-10-29 — Review pass
+- intent_gap: 0
+- bad_spec: 0
+- patch: 1 (high 0, medium 0, low 1)
+- defer: 0
+- reject: 24 (high 0, medium 0, low 24)
+- addressed_findings:
+  - `[low]` `[patch]` Ninguna prueba miraba sobre la superficie construida el tratamiento de los chips de Autor ni la agrupación bajo `h2` que pide el AC (solo el CSS sin tocar lo sostenía): la prueba de Playwright (a) exige ahora que cada grupo de `[data-salida]` tenga su `h2`, que el de los Autores diga «Autores» y que cada chip de Autor compute la misma familia y el mismo cuerpo que `var(--serif)`/`var(--cuerpo-md)` en la misma página.
+
+Rechazados, en resumen: la `.sugerencia` ausente (está en el marcado y la fija la prueba construida); el aviso de la 27.4 en la `.sugerencia` a cero (es el cierre del diferido, razonado en Design Notes); la salida estática ante el filtro activo, sin enlace al Directorio y sin «siguiente paso» en las frases con filtro (la intención fija la salida —«cambia la regla, no el componente»— y las plantillas); lo tecleado sin tope ni normalización (la intención fija «{texto}» literal); texto vacío sin filtros (inalcanzable: sin texto ni filtros no se busca); `hispanicos` ante un valor fuera del enum, también del edge-case-hunter (el esquema del build lo excluye y la salida de `npm run huecos` es idéntica); el acoplamiento `publicado.ts` → `huecos.ts` (lo fija el contrato); la fragilidad de la prueba de dueño único y del ancho ≤ 1 de la región; (a) que compara con la propia función y la falta de cesiones en el sitio construido (la regla la fija Vitest, como pide el AC, y `aplanarAutor` está probado); los 66 bytes del guion (la regla solo rederiva al pasar del tope); el lanzamiento sin `ordenAlfabetico` (lo pide el contrato; `ingreso-construido` y e2e pasan); la clave «Prada» (ya diferida en el frontmatter); el tablero, `review_loop_iteration` y las líneas del Code Map (el tablero lo lleva el bucle; no hubo vueltas por `bad_spec`; el Code Map es el mapa previo); la tabulación solo en Chromium (patrón de la suite); un nombre vacío en la frase (solo se usan filtros con opción en el selector, 27.4); dos builds frente a la permutación pura; Autor + Obra + Tema sin texto en la isla y texto + Obra en el navegador (la composición es la pura, probada, y la isla pasa la Obra, probado con texto); el Pagefind servido por `page.route` en (c) y (d) (lo que se prueba es el guion de la página); «Quitar los filtros» anterior al diff (las pruebas lo fijan sobre lo construido).
+
 ## Design Notes
 
 - **Por qué a cero la región siempre se aparta.** La 27.4 dejaba la región visible con aviso para que el aviso se viera, y la `.sugerencia` repetía la frase. Con la frase en `.sugerencia` compuesta por la isla, el aviso va delante en el mismo párrafo visible y la región solo anuncia: cumple «sin pintarse dos veces» (22.10) y cierra el diferido.
@@ -186,7 +197,7 @@ Blocking condition: ninguna
 - `tests/unit/autores-destacados.test.ts` (nuevo) — la matriz de destacados, permutaciones y el dueño único del predicado.
 - `tests/unit/huecos.test.ts`, `tests/unit/busqueda-con-filtros.test.ts`, `tests/unit/medicion.test.ts`, `tests/unit/ayuda/busqueda.ts`, `tests/e2e/busqueda.spec.ts` — pruebas puras, construidas, de la isla y de Playwright de la 27.6, y los casos a cero de la 27.2 y la 27.4 al día.
 
-**Hallazgos de revisión.** Primera pasada (capas externas sin hallazgos): 0 parches, 0 diferidos, 0 rechazados. Segunda pasada (blind-hunter, edge-case-hunter, verification-gap, intent-alignment, ac-auditor): 9 parches, 1 diferido (la clave «Prada» de González Prada, pendiente de Héctor), 22 rechazados; sin `bad_spec` ni `intent_gap`.
+**Hallazgos de revisión.** Tercera pasada (las cinco capas externas de nuevo): 1 parche (low), 0 diferidos, 24 rechazados; sin `bad_spec` ni `intent_gap`. Fichero: `tests/e2e/busqueda.spec.ts` — la prueba (a) exige el `h2` de cada grupo de la salida, «Autores» en el de los Autores y los chips de Autor a la serif en `body-md`, comparados con los tokens computados. Pasadas anteriores: primera pasada (capas externas sin hallazgos): 0 parches, 0 diferidos, 0 rechazados. Segunda pasada (blind-hunter, edge-case-hunter, verification-gap, intent-alignment, ac-auditor): 9 parches, 1 diferido (la clave «Prada» de González Prada, pendiente de Héctor), 22 rechazados; sin `bad_spec` ni `intent_gap`.
 
 Ficheros de la segunda pasada:
 - `tests/unit/autores-destacados.test.ts` — `aplanarAutor` con y sin `tradicion` y por el suelo; dueño único sobre `src/`, `tools/` e `integraciones/`; `barajar` en 32 bits.
@@ -194,7 +205,7 @@ Ficheros de la segunda pasada:
 - `tests/unit/medicion.test.ts` — aviso a cero con un filtro que sí se usa.
 - `src/pages/buscar.astro` — un renglón de comentario reenvuelto.
 
-**Revisión de seguimiento.** `followup_review_recommended: true` — parches de la segunda pasada: 0 high, 1 medium, 8 low; puntuación 3 × 1 + 8 = 11.
+**Revisión de seguimiento.** `followup_review_recommended: false` — parches de la tercera pasada: 0 high, 0 medium, 1 low; puntuación 3 × 0 + 1 = 1. (La segunda pasada había dado 0 high, 1 medium, 8 low; puntuación 11, y por eso esta tercera.)
 
 **Verificación.**
 - `npx vitest run tests/unit/autores-destacados.test.ts tests/unit/huecos.test.ts` — 63 pasan; `tests/unit/objetivo.test.ts tests/unit/meta-de-corpus.test.ts` — 76 pasan.
@@ -207,6 +218,8 @@ Ficheros de la segunda pasada:
 - `npx playwright test tests/e2e/busqueda.spec.ts --project=escritorio` — 74 pasan, 4 saltadas (las de antes: «el índice no contiene nada no publicado», las dos de 360 px y «un Autor sin Obras»), incluidas 3.2, 22.10 y las tres de la 27.6.
 - Guion de la búsqueda: 17.227 bytes de 17.293 (medido por la prueba de la 23.1); no pasa del tope, así que `MAX_BYTES_GUION_DE_LA_BUSQUEDA` no se toca.
 - Segunda pasada (sin cambios en `src/lib` ni en la isla): puras (`autores-destacados`, `huecos`, `objetivo`, `meta-de-corpus`) 143 pasan; `busqueda-con-filtros` 61; `medicion` 663; `ingreso-construido` 41; `npx astro check` 0 errores; `npm run build` verde; `npx playwright test tests/e2e/busqueda.spec.ts --project=escritorio` 75 pasan y 4 saltadas (las mismas), incluidas las cuatro de la 27.6. Las dos pruebas nuevas de dueño único y de `aplanarAutor` se comprobaron en rojo con la regresión plantada. `npm run huecos` no se repite: `huecos.ts` no cambia en esta pasada.
+
+- Tercera pasada (solo cambia `tests/e2e/busqueda.spec.ts`): `npx playwright test tests/e2e/busqueda.spec.ts --project=escritorio` — 75 pasan y 4 saltadas (las mismas); la aserción nueva se comprobó en rojo con `.chip` plantado a `var(--sans)` en `buscar.astro` y, revertido, las cuatro de la 27.6 vuelven a pasar; `npx astro check` — 0 errores, 0 avisos. No se repiten las pruebas unitarias ni `npm run huecos`: ni `src/` ni las pruebas unitarias cambian en esta pasada.
 
 **Riesgos residuales.**
 - El guion de la búsqueda queda a 66 bytes de su tope: la próxima historia que lo toque (27.7, 27.8) casi seguro tendrá que rederivarlo con su regla.
