@@ -333,3 +333,30 @@ cifra por otra y se descartó sin commit.
 
 Desde hoy la puerta del bucle mide 10 corridas por construcción, alternando principal y rama, y
 compara **medias** de LCP y de FCP con la tolerancia de siempre, max(100 ms, 5 %).
+
+### 2026-10-29 01:54 UTC — preparación previa al merge, tercera pasada (bucle v8-ralph)
+
+Repetida sobre 6d6a0348ed, la punta de la rama tras el veredicto de NFR-7 por medias.
+
+**(a) La rama al día con la principal.** `git fetch origin` y `git merge origin/main`:
+«Already up to date». `origin/main` sigue en 881949f4d6, antecesor de la rama; no hay commit
+de merge ni conflicto que resolver. La rama lleva 136 commits sobre la base.
+
+**(b) Lote de claves de orden.** `npx tsx tools/autor.ts proponer-claves` (salida 0):
+«Ninguna clave nueva: no falta ninguna que la regla sepa proponer». Los 171 Autores de
+`corpus/autores/` tienen clave; «Sin revisar: 171 de 171», 78 de ellos con nombres de tres
+palabras o más (la 26.10 sigue pendiente de Héctor y no bloquea). El árbol no cambia: no hay
+commit de claves.
+
+**(c) Ensayo del aviso.** `npx tsx tools/avisar.ts --ensayo --desde $(git merge-base
+origin/main HEAD) --hasta HEAD` (salida 0, 0,07 s de lectura del historial): cita 0/0, autor
+0/0, tema 0/0, coleccion 0/0, obra 0/0, directorio 2/2, portada —/1. IndexNow avisaría
+**3 URL** de `sabiduriadebolsillo.net`: `/`, `/autores/` y `/obras/`. No se envió nada. Los
+commits nuevos del rango (registros de esta historia) no tocan ninguna superficie.
+
+**(d) `npm run test:e2e` lleva los dos barridos.** `test:e2e` es `playwright test`, con
+`testDir: './tests/e2e'` y sin filtro (`npx playwright test --list`: 1.004 pruebas en 27
+ficheros). En `tests/e2e/accesibilidad.spec.ts` están el barrido WCAG 2.2 AA
+(`ETIQUETAS_DEL_BARRIDO` de `src/lib/superficies.ts` con `wcag22aa`; 54 pruebas entre los
+dos proyectos) y el bloque «Historia 26.9 — reflujo a 320 px» (124 pruebas entre los dos
+proyectos), sin `test.only` ni `fixme`.
