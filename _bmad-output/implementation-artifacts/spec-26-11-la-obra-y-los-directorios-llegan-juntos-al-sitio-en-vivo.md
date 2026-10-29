@@ -304,3 +304,32 @@ bytes). El 2026-10-28, con el mismo método, las dos midieron 1.802 ms.
 Resultado: CI y barrido en verde; NFR-7 **se degrada** según la regla frente a la principal del
 mismo día (+149 ms de mediana, sobre un LCP bimodal), así que el merge espera a Héctor o a la
 corrección.
+
+## NFR-7, la mediana de cinco no decide — 2026-10-29
+
+El «peor» de la puerta del 29/10 (rama 1.802 ms frente a 1.653 ms) es la moneda, no la rama. Con
+`max-age=600`, el LCP simulado de esta página cae siempre en uno de dos valores, unos 1.652 o
+unos 1.802 ms, en las dos construcciones y con las mismas peticiones y bytes en cada corrida.
+La mediana de cinco depende entonces de cuántas caen abajo: el 28/10 dio 1.802 en las dos, y
+el 29/10, 1.653 frente a 1.802.
+
+Misma página y mismo método (`lighthouse@13.5.0`, móvil, 4G simulado, Chrome 156,
+`SERVIDOR_CACHE_CONTROL=max-age=600`, principal 881949f4d6 y rama 320181a435 construidas hoy
+en local). Se juntan las 5 corridas de la regla de la puerta y 10 más de cada una en otra
+sesión, la misma para las dos:
+
+| construcción | corridas | LCP mediana | LCP media | corridas en el valor bajo |
+|---|---|---|---|---|
+| `origin/main` | 15 | 1.802 ms | 1.743 ms | 6 |
+| rama | 15 | 1.801 ms | 1.742 ms | 6 |
+
+Con las 10 corridas de más que tomó la puerta (fuera de la regla), la principal cae abajo
+12 de 25 veces y la rama 9 de 25, y la diferencia de medias es de unos 18 ms. Veredicto:
+**dentro de la tolerancia**. Los 7 KB más de HTML no mueven el LCP de forma medible.
+
+Se probó además precargar solo la serif, que es la letra del `<h1>` de la Cita, elemento del
+LCP. El LCP baja a 1.652 ms de mediana, pero el FCP sube de unos 1.065 a 1.352 ms: cambia una
+cifra por otra y se descartó sin commit.
+
+Desde hoy la puerta del bucle mide 10 corridas por construcción, alternando principal y rama, y
+compara **medias** de LCP y de FCP con la tolerancia de siempre, max(100 ms, 5 %).
