@@ -1390,6 +1390,10 @@ test.describe('Historia 27.3 — la búsqueda se acota también por una Obra del
     await page.locator('[data-consulta]').focus();
     await page.locator('[data-consulta]').fill('camino');
     await page.locator('[data-consulta]').fill('vida');
+    await expect(page.locator('[data-estado]')).not.toBeEmpty({ timeout: 10_000 });
+    await page.waitForTimeout(500);
+    // Sin Autor ni filtro, tampoco `filters()`: ningún fichero de filtros de Pagefind pedido aún.
+    expect(pedidos.filter((p) => p.startsWith('/pagefind/filter/'))).toEqual([]);
     // El Tema con más Citas: con «vida» da resultados, y el recuento lo nombra.
     const tema = [...filtrosDeLaBusqueda(await conjunto()).temas].sort((a, b) => b.recuento - a.recuento || porValor(a, b))[0];
     await page.locator(TEMA).selectOption(tema.valor);
@@ -1422,6 +1426,13 @@ test.describe('Historia 27.3 — la búsqueda se acota también por una Obra del
       'filtro-de-tema',
     ]);
     await expect(page.locator(`label[for="filtro-de-obra"]`)).toHaveText('Obra');
+    // El título de la Obra va en Inter, y el valor a 17 px, como los otros selectores.
+    const estilo = await page.locator(OBRA).evaluate((s) => {
+      const c = getComputedStyle(s);
+      return { familia: c.fontFamily, cuerpo: c.fontSize };
+    });
+    expect(estilo.familia).toMatch(/^["']?Inter\b/u);
+    expect(estilo.cuerpo).toBe('17px');
     expect(await opcionesDeObra(page)).toEqual([
       { valor: '', rotulo: 'Todas sus obras' },
       ...autor.obras.map((o) => ({ valor: o.valor, rotulo: `${o.titulo} (${recuentoDeCitas(o.recuento)})` })),
@@ -1462,10 +1473,12 @@ test.describe('Historia 27.3 — la búsqueda se acota también por una Obra del
     await expect(page.locator(OBRA)).toBeVisible({ timeout: 10_000 });
     await page.locator(OBRA).selectOption(filtros.mapaDeObras[primero][0][0]);
     await expect(page.locator('[data-estado]')).toHaveText(/ en /u, { timeout: 10_000 });
-    // Otro Autor: la Obra fuera al momento, y de vuelta con las del nuevo.
+    // Otro Autor: la Obra fuera al momento, y de vuelta con las del nuevo, sin mover el foco.
+    await page.locator(AUTOR).focus();
     await page.locator(AUTOR).selectOption(segundo);
     expect(await page.locator(OBRA).count()).toBe(0);
     await expect(page.locator(OBRA)).toBeVisible({ timeout: 10_000 });
+    await expect(page.locator(AUTOR)).toBeFocused();
     expect((await opcionesDeObra(page)).slice(1).map((o) => o.valor)).toEqual(filtros.mapaDeObras[segundo].map(([valor]) => valor));
     await expect(page.locator(OBRA)).toHaveValue('');
     // Sin Autor, sin Obra.

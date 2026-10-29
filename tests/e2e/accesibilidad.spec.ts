@@ -2260,7 +2260,7 @@ test.describe('Historia 27.3 — /buscar/ con una Obra elegida', () => {
     await page.waitForFunction(() => document.querySelector('[data-resultados]')!.children.length > 0, null, { timeout: 10_000 });
   };
 
-  test('a 320 px, en las tres condiciones, no desborda ni lleva nowrap en el formulario', async ({ page }) => {
+  test('a 320 px, en las tres condiciones, no desborda ni lleva nowrap en el formulario ni en los resultados', async ({ page }) => {
     test.setTimeout(120_000);
     const { titulo } = await laObraMasLarga();
     expect(titulo.length).toBeGreaterThan(40);
@@ -2271,7 +2271,7 @@ test.describe('Historia 27.3 — /buscar/ con una Obra elegida', () => {
       expect.soft(m.scroll, `${donde} desborda: ${m.scroll} frente a ${m.ventana}`).toBeLessThanOrEqual(m.ventana);
       expect.soft(await contenedoresQueRecortan(page), `${donde}: contenedores que se desplazan o recortan en horizontal`).toEqual([]);
       const conNowrap = await page.evaluate(() =>
-        [...document.querySelectorAll('form *')]
+        [...document.querySelectorAll('form *, [data-resultados] *')]
           .filter((e) => {
             const r = e.getBoundingClientRect();
             if (r.width <= 1 || r.height <= 1 || e.closest('.solo-para-lectores, .oculto')) return false;
@@ -2280,13 +2280,16 @@ test.describe('Historia 27.3 — /buscar/ con una Obra elegida', () => {
           })
           .map((e) => e.tagName.toLowerCase() + (e.id ? `#${e.id}` : '')),
       );
-      expect.soft(conNowrap, `${donde}: controles visibles con nowrap`).toEqual([]);
-      // El selector de Obra, con el título más largo elegido, cabe en la columna.
+      expect.soft(conNowrap, `${donde}: controles o resultados visibles con nowrap`).toEqual([]);
+      // El selector de Obra, con el título más largo elegido, cabe en la columna y no se desplaza
+      // por dentro. El valor puede recortarse en el control cerrado: la lista lo muestra entero
+      // (EXPERIENCE.md § Búsqueda, Selectores de filtro).
       const obra = await page.evaluate(() => {
-        const s = document.querySelector('#filtro-de-obra')!.getBoundingClientRect();
-        return { derecha: s.right, ventana: document.documentElement.clientWidth };
+        const s = document.querySelector<HTMLSelectElement>('#filtro-de-obra')!;
+        return { derecha: s.getBoundingClientRect().right, ventana: document.documentElement.clientWidth, scroll: s.scrollWidth, ancho: s.clientWidth };
       });
       expect.soft(obra.derecha, `${donde}: el selector de Obra se sale`).toBeLessThanOrEqual(obra.ventana);
+      expect.soft(obra.scroll, `${donde}: el selector de Obra desborda por dentro`).toBeLessThanOrEqual(obra.ancho);
     }
   });
 

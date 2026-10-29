@@ -174,6 +174,13 @@ describe('Historia 27.3 — lo puro: la Obra', () => {
     ).toBe('4 citas de José Martí en Maestros ambulantes sobre el saber con «escuela».');
   });
 
+  it('la Obra no se nombra sin su Autor, ni con un título vacío: nunca «… en .»', () => {
+    expect(fraseDelRecuento({ total: 23, texto: '', autor: 'José Martí', obra: '' })).toBe('23 citas de José Martí.');
+    expect(fraseDelRecuento({ total: 23, texto: '', autor: 'José Martí', obra: '  ' })).toBe('23 citas de José Martí.');
+    expect(fraseDelRecuento({ total: 2, texto: '', obra: 'Cartas', tema: 'La vida' })).toBe('2 citas sobre la vida.');
+    expect(fraseDelRecuento({ total: 2, texto: 'x', obra: 'Cartas' })).toBe('2 resultados.');
+  });
+
   it('`filters` con Obra; la Obra sin Autor no cuenta en nada', () => {
     const conObra = { autor: 'jose-marti', obra: 'jose-marti--maestros-ambulantes', tema: '' };
     expect(filtrosDePagefind(conObra)).toEqual({
@@ -242,6 +249,11 @@ describe('Historia 27.3 — lo puro: la Obra', () => {
     const raro = { 'jose-marti': [['jose-marti--cartas'], 'x', ['jose-marti--cartas', 'Cartas']] } as unknown as MapaDeObras;
     expect(opcionesDeObra(raro, recuentos, 'jose-marti')).toEqual([{ valor: 'jose-marti--cartas', titulo: 'Cartas', recuento: 1 }]);
     expect(opcionesDeObra({ 'jose-marti': 'no' } as unknown as MapaDeObras, recuentos, 'jose-marti')).toEqual([]);
+    // Un nombre o un título vacíos no se ofrecen: ni «Todas sus obras» dos veces ni « (1 cita)».
+    const vacios: MapaDeObras = { 'jose-marti': [['', 'Cartas'], ['jose-marti--cartas', '  '], ['jose-marti--ismaelillo', 'Ismaelillo']] };
+    expect(opcionesDeObra(vacios, { '': 3, 'jose-marti--cartas': 1, 'jose-marti--ismaelillo': 2 }, 'jose-marti')).toEqual([
+      { valor: 'jose-marti--ismaelillo', titulo: 'Ismaelillo', recuento: 2 },
+    ]);
   });
 
   it('el rótulo, «Título (23 citas)» y «(1 cita)», con `recuentoDeCitas`: una sola concordancia', () => {

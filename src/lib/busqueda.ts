@@ -129,7 +129,8 @@ export function fraseDelRecuento({ total, texto, autor, obra, tema }: DatosDelRe
   return (
     (total === 1 ? 'Una cita' : `${total} citas`) +
     (autor !== undefined ? ` de ${autor}` : '') +
-    (obra !== undefined ? ` en ${obra}` : '') +
+    // La Obra nunca va sin su Autor, y un título vacío no se nombra: «… en .» no es una frase.
+    (obra !== undefined && obra.trim() !== '' && autor !== undefined ? ` en ${obra}` : '') +
     (tema !== undefined ? ` sobre ${temaEnFrase(tema)}` : '') +
     (recortado !== '' ? ` con «${recortado}»` : '') +
     '.'
@@ -169,7 +170,7 @@ export interface OpcionDelSelectorDeObra {
  * cambia con el texto ni con los otros filtros. Sin ninguna, la lista vacía: no hay selector.
  *
  * El mapa llega de la red, así que una forma inesperada —un Autor sin lista, un par que no es de
- * dos cadenas— no rompe: no ofrece nada de lo que no entiende.
+ * dos cadenas, un nombre o un título vacíos— no rompe: no ofrece nada de lo que no entiende.
  */
 export function opcionesDeObra(
   mapa: MapaDeObras,
@@ -182,6 +183,9 @@ export function opcionesDeObra(
   const opciones: OpcionDelSelectorDeObra[] = [];
   for (const par of lista as unknown[]) {
     if (!Array.isArray(par) || typeof par[0] !== 'string' || typeof par[1] !== 'string') continue;
+    // Un nombre o un título vacíos no se ofrecen: «Todas sus obras» ya tiene el valor vacío, y un
+    // rótulo « (n citas)» no nombra nada.
+    if (par[0] === '' || par[1].trim() === '') continue;
     const [valor, titulo] = par as [string, string];
     if (!Object.prototype.hasOwnProperty.call(recuentos, valor)) continue;
     const recuento = recuentos[valor];

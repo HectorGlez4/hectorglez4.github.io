@@ -107,8 +107,8 @@ export interface OpcionesDeLaIsla {
   mapaManual?: boolean;
   /** Los recuentos de `obra` que da `filters()`. Por omisión, ninguno (`{}`). */
   recuentosDeObra?: Record<string, number>;
-  /** Si `filters()` rechaza. */
-  fallanLosFiltros?: boolean;
+  /** Si `filters()` rechaza, o (`'sin-obra'`) si responde sin el filtro `obra`. */
+  fallanLosFiltros?: boolean | 'sin-obra';
   /** Si `filters()` espera a `responderAFiltros()`. */
   filtrosManuales?: boolean;
 }
@@ -505,7 +505,7 @@ export function islaDeBusquedaEnUnSandbox(guion: string, opciones: OpcionesDeLaI
   // El índice de mentira. Dónde falla se puede cambiar a mitad de prueba, con `fallar`.
   let falla = opciones.falla;
   // Historia 27.3 — `filters()` y el mapa de rótulos, configurables a mitad de prueba.
-  let fallanLosFiltros = opciones.fallanLosFiltros === true;
+  let fallanLosFiltros: boolean | 'sin-obra' = opciones.fallanLosFiltros ?? false;
   let recuentosDeObra: Record<string, number> = opciones.recuentosDeObra ?? {};
   const filtrosEsperando: (() => void)[] = [];
   let fallaElMapa = opciones.fallaElMapa;
@@ -573,7 +573,11 @@ export function islaDeBusquedaEnUnSandbox(guion: string, opciones: OpcionesDeLaI
     filters: () => {
       llamadasAlIndice.push(['filters']);
       const responder = () =>
-        fallanLosFiltros ? Promise.reject(new Error('los filtros no llegan')) : Promise.resolve({ obra: { ...recuentosDeObra } });
+        fallanLosFiltros === 'sin-obra'
+          ? Promise.resolve({ autor: { 'jose-marti': 222 } })
+          : fallanLosFiltros
+            ? Promise.reject(new Error('los filtros no llegan'))
+            : Promise.resolve({ obra: { ...recuentosDeObra } });
       if (!opciones.filtrosManuales) return responder();
       return new Promise((resolver, rechazar) => filtrosEsperando.push(() => responder().then(resolver, rechazar)));
     },
@@ -742,8 +746,8 @@ export function islaDeBusquedaEnUnSandbox(guion: string, opciones: OpcionesDeLaI
     fallarElMapa: (como?: OpcionesDeLaIsla['fallaElMapa']) => {
       fallaElMapa = como;
     },
-    /** Desde ahora `filters()` rechaza (o deja de rechazar). */
-    fallarLosFiltros: (si = true) => {
+    /** Desde ahora `filters()` rechaza —o responde sin `obra`— (o deja de hacerlo). */
+    fallarLosFiltros: (si: boolean | 'sin-obra' = true) => {
       fallanLosFiltros = si;
     },
     /** Cambia lo que darán el mapa y `filters()` a partir de ahora: otro despliegue. */

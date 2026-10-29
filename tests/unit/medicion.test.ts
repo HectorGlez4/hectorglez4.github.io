@@ -4860,6 +4860,8 @@ describe('Historia 23.8 — una búsqueda cuenta una vez, cuando se asienta', ()
         // Elegir Tema no recompone el de Obra.
         expect(entorno.obra()).toMatchObject({ enElDom: true, opciones: DE_MARTI, valor: 'jose-marti--maestros-ambulantes' });
         await entorno.teclear('patria');
+        // El recuento de cada Obra es su total en el índice: el texto no lo cambia.
+        expect(entorno.obra()).toMatchObject({ enElDom: true, opciones: DE_MARTI, valor: 'jose-marti--maestros-ambulantes' });
         expect(ultimaBusqueda(entorno)).toEqual([
           'search',
           'patria',
@@ -4921,6 +4923,7 @@ describe('Historia 23.8 — una búsqueda cuenta una vez, cuando se asienta', ()
         ['un JSON que no se lee', { fallaElMapa: 'json' as const }],
         ['un mapa que no es un objeto', { mapa: ['no'] }],
         ['`filters()` que rechaza', { fallanLosFiltros: true }],
+        ['`filters()` sin el filtro `obra`', { fallanLosFiltros: 'sin-obra' as const }],
         ['el índice que no carga', { falla: 'importacion' as const }],
       ])('fallo de %s: sin selector de Obra ni rechazos, la búsqueda por Autor sigue y el siguiente Autor lo reintenta', async (_, fallo) => {
         const entorno = await conObras(fallo);

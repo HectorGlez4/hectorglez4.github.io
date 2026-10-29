@@ -329,6 +329,15 @@ describe('AD-22 — la red vive solo en la cáscara exterior de tools/', () => {
     expect(tieneLlamadaDeRed(readFileSync(resolve(raiz, ruta), 'utf8'))).toBe(true);
   });
 
+  it('la excepción del guion de /buscar/ es una sola petición, la del mapa de rótulos (Historia 27.3)', () => {
+    // La excepción se declara por fichero; esto la estrecha a la llamada: otra petición en ese
+    // componente —a otro sitio, o a otra ruta— tiene que ser otro cambio deliberado de esta prueba.
+    const codigo = sinComentarios(readFileSync(resolve(raiz, 'src/components/Busqueda.astro'), 'utf8'));
+    const delMapa = /\bfetch\s*\(\s*RUTA_DEL_MAPA_DE_OBRAS\s*\)/gu;
+    expect(codigo.match(delMapa)).toHaveLength(1);
+    expect(tieneLlamadaDeRed(codigo.replace(delMapa, ''))).toBe(false);
+  });
+
   it('no hay más excepciones que esas nueve', () => {
     // Añadir una décima tiene que ser un cambio deliberado de esta prueba. La octava,
     // `tools/medicion.ts`, la añadió la Historia 23.2; la novena, el guion de `/buscar/`, la

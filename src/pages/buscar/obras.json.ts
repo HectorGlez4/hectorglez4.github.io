@@ -16,9 +16,14 @@
  * mide el paso final de `npm run build` contra `AVISO_DE_BYTES_DE_FILTROS_Y_MAPA` (avisa, no rompe).
  */
 import type { APIRoute } from 'astro';
+import type { MapaDeObras } from '../../lib/busqueda.ts';
 import { conjuntoPublicable, filtrosDeLaBusqueda } from '../../lib/publicado.ts';
 
-export const GET: APIRoute = async () =>
-  new Response(JSON.stringify(filtrosDeLaBusqueda(await conjuntoPublicable()).mapaDeObras), {
+export const GET: APIRoute = async () => {
+  // Lo que se escribe pasa por el tipo que lee la isla: si la forma del build (`MapaDeObrasPorAutor`)
+  // y la del cliente (`MapaDeObras`) se separan, `astro check` lo dice aquí y no el visitante.
+  const mapa: MapaDeObras = filtrosDeLaBusqueda(await conjuntoPublicable()).mapaDeObras;
+  return new Response(JSON.stringify(mapa), {
     headers: { 'Content-Type': 'application/json; charset=utf-8' },
   });
+};

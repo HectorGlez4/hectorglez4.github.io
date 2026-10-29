@@ -5,12 +5,19 @@ created: '2026-10-29'
 status: 'done'
 baseline_revision: '1a4efabe8999c61d4e777d940058534fa008f740'
 review_loop_iteration: 0
-followup_review_recommended: false
+followup_review_recommended: true
 context:
   - '{project-root}/_bmad-output/implementation-artifacts/epic-27-context.md'
   - '{project-root}/_bmad-output/planning-artifacts/architecture/architecture-brainlySabiduria-2026-08-10/ARCHITECTURE-SPINE.md'
 warnings: ['oversized']
-deferred: []
+deferred:
+  - summary: >-
+      La excepción de red del guion de /buscar/ (AD-22) no figura en el texto de la espina: AD-22 habla de la cáscara de tools/, y el fetch del mapa corre en el navegador.
+    evidence: |-
+      tests/unit/andamiaje.test.ts declara src/components/Busqueda.astro como novena excepción (estrechada en esta revisión a una sola llamada, fetch(RUTA_DEL_MAPA_DE_OBRAS)), pero ARCHITECTURE-SPINE.md no recoge que un guion del cliente pida al propio sitio un JSON del build. Un agente no edita la espina: pendiente de Héctor (bmad-architecture).
+    location: >-
+      tests/unit/andamiaje.test.ts; _bmad-output/planning-artifacts/architecture/architecture-brainlySabiduria-2026-08-10/ARCHITECTURE-SPINE.md (AD-22)
+    severity: low
 ---
 
 <intent-contract>
@@ -118,6 +125,27 @@ deferred: []
 
 Las capas de revisión de este pase son externas (bucle v8-ralph) y no traían hallazgos todavía: la revisión independiente viene después.
 
+### 2026-10-29 — Review pass
+- intent_gap: 0
+- bad_spec: 0
+- patch: 11: (high 0, medium 1, low 10)
+- defer: 1: (high 0, medium 0, low 1)
+- reject: 23: (high 0, medium 3, low 20)
+- addressed_findings:
+  - `[medium]` `[patch]` Un `filters()` sin el filtro `obra` se guardaba como éxito (`recuentos = {}`) y bloqueaba el selector de Obra el resto de la carga (blind-hunter, edge-case-hunter, intent-alignment): ahora lanza y cuenta como fallo, sin promesa rechazada, y se reintenta al siguiente Autor. Nueva fila en la tabla de fallos de `medicion.test.ts` (opción `fallanLosFiltros: 'sin-obra'` del entorno simulado).
+  - `[low]` `[patch]` Un título ausente daba «… en .»: `buscar` ya no pasa `obra` sin título conocido, `fraseDelRecuento` no nombra una Obra vacía ni una Obra sin su Autor, y `opcionesDeObra` no ofrece un par con nombre o título vacíos. Pruebas puras en `busqueda-con-filtros.test.ts`.
+  - `[low]` `[patch]` `pedirDatosDeObra().then(componerObra)` podía dejar un rechazo sin manejar si `componerObra` lanzaba: se le añade `.catch(() => {})`.
+  - `[low]` `[patch]` Los dos tipos del mapa (`MapaDeObrasPorAutor` del build y `MapaDeObras` del cliente) no estaban atados: `src/pages/buscar/obras.json.ts` escribe ahora un valor anotado con `MapaDeObras`, y `astro check` falla si se separan.
+  - `[low]` `[patch]` El docblock de `AVISO_DE_BYTES_DE_FILTROS_Y_MAPA` hablaba de «lo que la isla descarga» y suma bytes en disco de ficheros comprimidos (`.pf_filter`) y sin comprimir (el mapa): dice ahora que son bytes en disco y una cota por arriba de la transferencia.
+  - `[low]` `[patch]` La excepción de AD-22 cubría todo `Busqueda.astro`: una prueba nueva de `andamiaje.test.ts` la estrecha a una sola llamada, `fetch(RUTA_DEL_MAPA_DE_OBRAS)`, y cualquier otra petición en el componente vuelve a dar rojo.
+  - `[low]` `[patch]` La prueba de punta a punta «sin Autor» no comprobaba `filters()`: ahora exige que no se haya pedido ningún fichero de `/pagefind/filter/` tras cargar, enfocar y teclear (antes del Tema, que filtra y sí los carga).
+  - `[low]` `[patch]` Nada afirmaba Inter ni los 17 px del selector de Obra: la prueba de aparición lee su estilo calculado.
+  - `[low]` `[patch]` Nada comprobaba que cambiar el Autor no mueve el foco: la prueba de cambio de Autor lo exige al rehacerse el selector.
+  - `[low]` `[patch]` Nada comprobaba que el recuento de cada opción no cambia con el texto: la prueba simulada de Obra, Tema y texto lo mira tras teclear.
+  - `[low]` `[patch]` El barrido de `nowrap` a 320 px miraba solo `form *` y la comprobación del borde derecho del selector no podía fallar: ahora barre también `[data-resultados] *` y exige que el selector de Obra no se desplace por dentro (`scrollWidth ≤ clientWidth`).
+
+Rechazados, con su motivo: el valor recortado en el selector cerrado a 320 px (ac-auditor, criterio 12) lo permite `EXPERIENCE.md § Búsqueda` —«El valor elegido puede recortarse en el control cerrado; la lista lo muestra entero»— y la prueba ya exige no desbordar; quitar el selector al momento al recorrer Autores con flechas lo manda el contrato; anunciar la aparición del selector no lo pide ningún artefacto de UX y el selector aparece detrás del foco en el orden de tabulación; el alto de 312,3 px a 360 px está anotado, que es lo que pide la historia; el mapa en caché tras retitular es un desfase de ≤ 600 s que el contrato asume; el mapa ausente en `dist/` ya lo nombra el parte («sin suma ni veredicto») y lo fija la prueba construida; el recálculo de `obrasDelAutor` y el prefijo repetido del mapa son de coste y forma sin defecto observable; la prueba que depende del Corpus, la fila «Autor sin Obras» sin punta a punta y la lectura de la Página de Obra ya están acotadas o anotadas; el estado `done` previo y la línea de verificación se rehacen en este pase; la documentación del aviso vive en su docblock; el disparo solo al elegir Autor, el mapa por Autor, el Autor vigente y el CI sin punta a punta son decisiones del contrato o del proyecto.
+
 ## Design Notes
 
 **Por qué el selector vive en la plantilla y se separa.** Así su marcado y su estilo de ámbito salen del build como los de la 27.2, y el guion no lleva contenido; separado del clon, «no existe» es literal (UX-DR87) y reinsertarlo en su hueco lo deja entre Autor y Tema sin calcular posiciones.
@@ -170,10 +198,28 @@ Planificada el 2026-10-29 y detenida tras planificar. Implementada el 2026-10-29
 - `npm run check` — 0 errores, 0 avisos.
 - `npm run build` — sale con 0 e informa «Filtros de Pagefind y mapa de Obras de /buscar/: … suman 97.018 bytes (94,7 KiB); aviso en 122.880 bytes (120 KiB)».
 - `npx vitest run` uno a uno: `busqueda-con-filtros` (34), `filtros-de-busqueda` (14), `medicion` (598), `peso` (63), `peso-construido` (14), `filtros-de-cita` (9), `tipo-de-resultado` (11), `ingreso-construido` (41), `espinas-de-ux` (14), `siguiente` (20), `publicable-y-alcanzable` (39), `filtro-del-directorio` (22), `directorio-de-autores` (28), `andamiaje` (40) — todos verdes.
-- Playwright: `busqueda.spec.ts --project=escritorio` (47 verdes y 1 fallo de la prueba nueva, corregida y vuelta a correr), `busqueda.spec.ts -g "27.3"` en los dos proyectos (11 verdes, 3 omitidas: el Autor sin Obras —el Corpus no tiene ninguno— y la de 360 px en escritorio), `accesibilidad.spec.ts -g "buscar"` (22 verdes), `receptor.spec.ts -g "busca"` (8 verdes, 8 omitidas por proyecto).
+- Playwright: `busqueda.spec.ts --project=escritorio` (primera pasada: 47 verdes y 1 fallo de la prueba nueva; corregida, se volvió a correr solo esa prueba, en verde; el fichero entero se repasó en verde en el pase de revisión, abajo), `busqueda.spec.ts -g "27.3"` en los dos proyectos (11 verdes, 3 omitidas: el Autor sin Obras —el Corpus no tiene ninguno— y la de 360 px en escritorio), `accesibilidad.spec.ts -g "buscar"` (22 verdes), `receptor.spec.ts -g "busca"` (8 verdes, 8 omitidas por proyecto).
 - `npm test` entero con `correr.sh`: primera pasada 149/150 ficheros verdes, con `andamiaje.test.ts` en rojo por el `fetch` nuevo (AD-22); con la excepción añadida, segunda pasada **150/150 ficheros, 6.866 pruebas verdes** (875 s).
 
 **Riesgos y notas.**
 - El andamio de las pruebas construidas no admite un Autor sin ninguna Obra (sus Citas irían sin documento y el censo de cotejo es cerrado): esa fila de la matriz la cubren `filtros-de-busqueda.test.ts`, el entorno simulado de `medicion.test.ts` y, si el Corpus tuviera uno, `busqueda.spec.ts` (hoy se omite: los 135 Autores tienen Obra).
 - El selector de Obra solo aparece cuando la búsqueda del Autor se lanza (pausa de los selectores, tecleo o Enter): es el «Autor vigente». Si se teclea dentro de la pausa, la búsqueda tecleada hace vigente al Autor y el selector aparece con ella.
 - La excepción de AD-22 para `Busqueda.astro` es una decisión de esta historia (el `fetch` lo exige AD-11); si Héctor prefiere otra forma de pedir el JSON, se revisa ahí.
+
+### Pase de revisión del 2026-10-29 (capas externas)
+
+**Qué cambió.** Once parches, ninguno de contrato (detalle en el Review Triage Log): un `filters()` sin el filtro `obra` cuenta como fallo y se reintenta, en vez de quedar guardado como «ninguna Obra»; la Obra no se nombra en el recuento sin título ni sin Autor, y `opcionesDeObra` no ofrece pares con nombre o título vacíos; `componerObra` no puede dejar un rechazo sin manejar; el endpoint del mapa escribe un valor tipado con `MapaDeObras`; el docblock del aviso dice que son bytes en disco; la excepción de AD-22 se estrecha a la llamada `fetch(RUTA_DEL_MAPA_DE_OBRAS)`; y las pruebas cubren `filters()` sin pedir antes de un Autor, Inter y 17 px, el foco al cambiar de Autor, el recuento que no cambia con el texto, `nowrap` también en los resultados y el selector de Obra que no se desplaza por dentro a 320 px.
+
+**Ficheros de este pase.** `src/components/Busqueda.astro`, `src/lib/busqueda.ts`, `src/lib/umbrales.ts` (solo docblock), `src/pages/buscar/obras.json.ts`, `tests/unit/andamiaje.test.ts`, `tests/unit/ayuda/busqueda.ts`, `tests/unit/medicion.test.ts`, `tests/unit/busqueda-con-filtros.test.ts`, `tests/e2e/busqueda.spec.ts`, `tests/e2e/accesibilidad.spec.ts`.
+
+**Hallazgos.** 11 parches (1 medio, 10 bajos), 1 aplazado (AD-22 en la espina, pendiente de Héctor), 23 rechazados. `followup_review_recommended: true`: parches medios 1 y bajos 10, puntuación 3 × 1 + 10 = 13 (≥ 5).
+
+**Verificación del pase.**
+- `npm run check` — 0 errores, 0 avisos.
+- `npx vitest run tests/unit/andamiaje.test.ts` (41) y `tests/unit/busqueda-con-filtros.test.ts` (35) — verdes; `tests/unit/medicion.test.ts -t "27.3"` (19) — verde.
+- `npm run build` — sale con 0; «filtros 52.542 bytes en 4 ficheros; mapa 44.393 bytes; suman 96.935 bytes (94,7 KiB); aviso en 122.880 bytes». El guion de la búsqueda mide 10.358 + 552 del trozo = 10.910 bytes, bajo `MAX_BYTES_GUION_DE_LA_BUSQUEDA` (11.210), que no se mueve.
+- Playwright sobre lo construido: `busqueda.spec.ts --project=escritorio` (48 verdes, 4 omitidas), `busqueda.spec.ts --project=movil -g "27.3"` (6 verdes, 1 omitida; el `fieldset` vuelve a medir 312,3 px a 360 px), `accesibilidad.spec.ts -g "buscar"` (22 verdes, incluidas las dos de la 27.3 en los dos proyectos), `receptor.spec.ts -g "busca"` (8 verdes, 8 omitidas). Puertos libres al terminar.
+- `npm test` entero con `correr.sh` — **150/150 ficheros, 6.869 pruebas verdes** (877 s).
+
+**Riesgos.** El valor elegido del selector de Obra se recorta en el control cerrado con un título largo a 320 px; lo admite `EXPERIENCE.md` y la lista lo muestra entero. La excepción de red del guion queda por escribir en la espina (aplazado).
+

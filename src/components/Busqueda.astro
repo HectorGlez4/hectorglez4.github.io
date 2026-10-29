@@ -71,8 +71,9 @@
  *         `.selector` de Autor, sin mover el foco;
  *       - el mapa y `filters()` se piden solo al elegir un Autor (no al cargar, ni al enfocar, ni
  *         con `?q=` sin Autor), con `Promise.all`; un éxito se guarda para la carga. Un fallo de
- *         cualquiera de los dos no deja promesa rechazada, no pinta el selector, no toca la
- *         búsqueda en curso y se reintenta al siguiente Autor elegido;
+ *         cualquiera de los dos —también un `filters()` sin el filtro `obra`— no deja promesa
+ *         rechazada, no pinta el selector, no toca la búsqueda en curso y se reintenta al
+ *         siguiente Autor elegido;
  *       - se compone cuando están a la vez el **Autor vigente** —el de la última búsqueda
  *         lanzada— y los datos: las Obras del Autor en el orden del mapa (el de su Lista de
  *         Obras, hecho en el build), solo las que `filters().obra` cuenta con al menos una Cita
@@ -469,8 +470,10 @@ const { autores, temas } = Astro.props;
               return pf.filters();
             })
             .then((todos) => {
+              // Un índice sin el filtro `obra` no es «ninguna Obra»: es que no llegó, y se reintenta.
               const deObra = todos?.[FILTROS_DE_CITA.obra];
-              return (recuentos = typeof deObra === 'object' && deObra !== null ? deObra : {});
+              if (typeof deObra !== 'object' || deObra === null) throw new Error('obra');
+              return (recuentos = deObra);
             });
       return (pidiendo = Promise.all([delMapa, deFiltros])
         .then(([m, r]) => ({ mapa: m, recuentos: r }))
@@ -596,10 +599,11 @@ const { autores, temas } = Astro.props;
       }
 
       // Los nombres, de lo elegido al lanzar la búsqueda: el recuento dice lo que se buscó.
+      // El título del mapa, nunca el rótulo de la opción con su recuento; sin título, no se nombra.
+      const tituloDeObra = filtros.obra ? titulos.get(filtros.obra) : undefined;
       const nombres = {
         ...(filtros.autor ? { autor: nombreDe(autor!) } : {}),
-        // El título del mapa, nunca el rótulo de la opción con su recuento.
-        ...(filtros.obra ? { obra: titulos.get(filtros.obra) ?? '' } : {}),
+        ...(tituloDeObra ? { obra: tituloDeObra } : {}),
         ...(filtros.tema ? { tema: nombreDe(tema!) } : {}),
       };
       const filters = filtrosDePagefind(filtros);
@@ -664,7 +668,7 @@ const { autores, temas } = Astro.props;
     const alCambiarElAutor = () => {
       vigente = '';
       if (obraEnElDom()) quitarObra();
-      if (autor.value !== '') pedirDatosDeObra().then(componerObra);
+      if (autor.value !== '') pedirDatosDeObra().then(componerObra).catch(() => {});
     };
     for (const selector of [autor, obra, tema]) {
       const alCambiar =

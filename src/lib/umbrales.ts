@@ -691,6 +691,11 @@ export const MAX_BYTES_DEL_DIRECTORIO_DE_OBRAS = 290 * 1024;
  * `dist/buscar/obras.json`. Pasarlo **avisa y nunca rompe**; el parte da las dos partes para que se
  * vea cuál crece, y si falta una no suma ni escribe cero.
  *
+ * Son **bytes en disco**, no bytes transferidos: los `.pf_filter` de Pagefind ya se escriben
+ * comprimidos, y el mapa se escribe en claro y lo comprime el anfitrión al servirlo. La suma es
+ * por eso una cota por arriba de lo que descarga la isla, y sirve para ver crecer lo desplegado
+ * entre construcciones, no para estimar la transferencia.
+ *
  * El 2026-10-17 los filtros medían unos 41 KB. El valor es lo medido sobre `npm run build` el
  * 2026-10-29 —97.018 bytes: 52.625 de los filtros, en 4 ficheros, y 44.393 del mapa, con 517 Obras
  * de 135 Autores; los filtros varían unos cien bytes de una construcción a otra con el mismo
