@@ -1,0 +1,1264 @@
+diff --git a/src/components/BuscarEn.astro b/src/components/BuscarEn.astro
+new file mode 100644
+index 0000000000..7d7edd0685
+--- /dev/null
++++ b/src/components/BuscarEn.astro
+@@ -0,0 +1,56 @@
++---
++/**
++ * «Buscar en esta obra», «Buscar en {Autor}» y «Buscar en este tema» — Historia 27.8, FR-4, FR-6,
++ * FR-7, FR-51, UX-DR94, `DESIGN.md § Búsqueda → Buscar en esta obra / en {Autor} / en este Tema`.
++ *
++ * El componente único que la página 1 de una Obra, de un Autor y de un Tema pone justo encima del
++ * listado que filtra: con 12 páginas en el Tema mayor, es la forma de encontrar una Cita concreta
++ * sin pasarlas. Es un **formulario GET sin guion** a `/buscar/` (`rutaDeLaBusqueda`): el navegador
++ * compone la dirección y la isla de `/buscar/` la lee al llegar (Historia 27.4); ninguna
++ * combinación crea una ruta ni una página indexable, porque `/buscar/` es un solo HTML `noindex`.
++ * Va en la misma pestaña, sin `target`.
++ *
++ * Dentro, el Campo de búsqueda de la 26.6 con su botón «Buscar» (`CampoDeBusqueda`, `boton`): su
++ * etiqueta visible es el rótulo, sin texto de ejemplo —un ejemplo de Machado dentro de «Buscar en
++ * José Martí» daría cero resultados—, y lo tecleado viaja como `q`. **Después del campo** van los
++ * filtros en campos ocultos, con los nombres y en el orden de `PARAMETROS_DE_LA_BUSQUEDA`: el GET
++ * compone la dirección en orden de documento, así que sale `?q=&autor=&obra=` o `?q=&tema=`, el
++ * orden de `direccionDeLaBusqueda`. En la Obra van dos, `autor` y `obra` —el nombre de la ficha,
++ * nunca el título—: se llega con los dos selectores elegidos (decisión de Héctor del 18/10).
++ *
++ * `data-pagefind-ignore`: «Buscar en José Martí Buscar» no es texto buscable de la página 1
++ * indexable, por el mismo criterio que el salto de la 24.7. **Sin zona**: ni el formulario ni sus
++ * antepasados llevan `data-zona` ni `data-sin-zona` —la escucha de la medición solo mira enlaces y
++ * enviar un formulario no es salida (`EXENCIONES_DE_ZONA`, `src/lib/medicion.ts`)—. Sin `<script>`.
++ */
++import CampoDeBusqueda from './CampoDeBusqueda.astro';
++import { PARAMETROS_DE_LA_BUSQUEDA } from '../lib/busqueda.ts';
++import { rutaDeLaBusqueda } from '../lib/superficies.ts';
++
++interface Props {
++  /** El `id` del campo, único en la página: al que apunta su etiqueta. */
++  id: string;
++  /** El rótulo, que es la etiqueta visible del campo (`src/lib/busqueda.ts`). */
++  rotulo: string;
++  /** Los filtros que viajan ocultos: el slug del Autor, el nombre de la ficha de la Obra, el slug del Tema. */
++  filtros: { autor?: string; obra?: string; tema?: string };
++}
++
++const { id, rotulo, filtros } = Astro.props;
++
++// En el orden de `PARAMETROS_DE_LA_BUSQUEDA`, y solo los que lleva esta página.
++const ocultos = (['autor', 'obra', 'tema'] as const)
++  .filter((campo) => filtros[campo] !== undefined)
++  .map((campo) => ({ nombre: PARAMETROS_DE_LA_BUSQUEDA[campo], valor: filtros[campo]! }));
++---
++
++<form class="buscar-en" role="search" method="get" action={rutaDeLaBusqueda()} data-pagefind-ignore>
++  <CampoDeBusqueda id={id} etiqueta={rotulo} nombre={PARAMETROS_DE_LA_BUSQUEDA.texto} boton />
++  {ocultos.map((oculto) => <input type="hidden" name={oculto.nombre} value={oculto.valor} />)}
++</form>
++
++<style>
++  .buscar-en {
++    max-width: var(--medida-prosa);
++  }
++</style>
+diff --git a/src/components/CampoDeBusqueda.astro b/src/components/CampoDeBusqueda.astro
+index f6b14b1233..d56454d28b 100644
+--- a/src/components/CampoDeBusqueda.astro
++++ b/src/components/CampoDeBusqueda.astro
+@@ -21,7 +21,18 @@
+  * ellas el campo sale como antes: el `name` que envía su formulario (`nombre`, «q»), un texto de
+  * ejemplo (`ejemplo`, el `placeholder`, en la tinta apagada) y la marca `data-consulta` por la que
+  * lo encuentran su guion y las pruebas (`consulta`).
++ *
++ * Historia 27.8, UX-DR94, UX-DR108 — el botón «Buscar» (`boton`), decisión de Héctor del 18/10: lo
++ * llevan los campos que **envían** a `/buscar/` —«Buscar en…», el 404 y, en la Épica 28, la
++ * portada—, para que quien usa control por voz o conmutadores tenga qué pulsar. Va debajo del
++ * campo, a 2 × `--unidad` y a su ancho, con el tratamiento del secundario siena de UX-DR9 —el de
++ * «Quitar los filtros» de `Busqueda.astro`—, y el campo pide al teclado del móvil la tecla de
++ * buscar (`enterkeyhint="search"`), que lo envía igual que Intro. Es un `submit` sin `name`: no
++ * añade nada a la dirección. El formulario lo pone quien lo usa; ni `/buscar/` ni el filtro de los
++ * Directorios, que responden al teclear, llevan botón.
+  */
++import { BOTON_DE_BUSCAR } from '../lib/busqueda.ts';
++
+ interface Props {
+   /** El `id` del campo, al que apunta su etiqueta. */
+   id: string;
+@@ -33,9 +44,11 @@ interface Props {
+   ejemplo?: string;
+   /** Si el campo lleva la marca `data-consulta`. */
+   consulta?: boolean;
++  /** Si el campo lleva debajo el botón «Buscar» que envía su formulario (Historia 27.8). */
++  boton?: boolean;
+ }
+ 
+-const { id, etiqueta, nombre, ejemplo, consulta = false } = Astro.props;
++const { id, etiqueta, nombre, ejemplo, consulta = false, boton = false } = Astro.props;
+ ---
+ 
+ <div class="campo-de-busqueda">
+@@ -50,7 +63,9 @@ const { id, etiqueta, nombre, ejemplo, consulta = false } = Astro.props;
+     spellcheck="false"
+     placeholder={ejemplo}
+     data-consulta={consulta ? '' : undefined}
++    enterkeyhint={boton ? 'search' : undefined}
+   />
++  {boton && <button type="submit" class="buscar">{BOTON_DE_BUSCAR}</button>}
+ </div>
+ 
+ <style>
+@@ -100,4 +115,31 @@ const { id, etiqueta, nombre, ejemplo, consulta = false } = Astro.props;
+   input:focus {
+     border-bottom: calc(var(--grosor-filete) * 2) solid var(--siena);
+   }
++
++  /*
++   * Historia 27.8, UX-DR9 — el botón secundario: texto en siena con filete, a su ancho, a la zona de
++   * toque y a 2 × `--unidad` bajo el campo; el mismo tratamiento que «Quitar los filtros» de
++   * `Busqueda.astro`. Sin `nowrap` (NFR-8, Historia 26.9).
++   */
++  .buscar {
++    display: block;
++    max-width: 100%;
++    margin-top: calc(var(--unidad) * 2);
++    font-family: var(--sans);
++    font-size: var(--cuerpo-md);
++    color: var(--siena);
++    background: transparent;
++    border: var(--grosor-filete) solid var(--siena);
++    border-radius: var(--radio);
++    min-height: var(--zona-de-toque);
++    padding-inline: calc(var(--unidad) * 3);
++    cursor: pointer;
++    /* UX-DR22 — solo opacidad y color, y como máximo 150 ms. */
++    transition: background-color 150ms, color 150ms;
++  }
++
++  .buscar:hover {
++    background: var(--siena);
++    color: var(--sobre-siena);
++  }
+ </style>
+diff --git a/src/lib/busqueda.ts b/src/lib/busqueda.ts
+index 12ecd3d445..3fa2a3d8ee 100644
+--- a/src/lib/busqueda.ts
++++ b/src/lib/busqueda.ts
+@@ -34,6 +34,33 @@ export const TEXTO_DE_EJEMPLO_DE_LA_BUSQUEDA = `Por ejemplo: ${EJEMPLO_DE_LA_BUS
+ /** La etiqueta visible del campo de `/buscar/`. */
+ export const ETIQUETA_DE_LA_BUSQUEDA = 'Escribe un fragmento, un autor o un tema.';
+ 
++/*
++ * Historia 27.8, UX-DR94 — los rótulos de «Buscar en…», el formulario que la página 1 de una Obra,
++ * de un Autor y de un Tema pone encima de su listado, y el del botón que lo envía. Un solo dueño de
++ * los textos: los pinta `src/components/BuscarEn.astro` y los leen las pruebas. Las entidades van
++ * en minúscula, como nombres comunes (`EXPERIENCE.md § Voice and Tone`): «esta obra», «este tema».
++ * El rótulo es la etiqueta visible del campo; no lleva texto de ejemplo, que en «Buscar en José
++ * Martí» daría cero resultados y enseñaría a fallar.
++ */
++
++/** El rótulo de «Buscar en…» en la página 1 de una Obra. */
++export const ROTULO_BUSCAR_EN_ESTA_OBRA = 'Buscar en esta obra';
++
++/** El rótulo de «Buscar en…» en la página 1 de un Autor: «Buscar en José Martí». */
++export function rotuloBuscarEnAutor(nombre: string): string {
++  return `Buscar en ${nombre}`;
++}
++
++/** El rótulo de «Buscar en…» en la página 1 de un Tema. */
++export const ROTULO_BUSCAR_EN_ESTE_TEMA = 'Buscar en este tema';
++
++/**
++ * El botón secundario que envía a `/buscar/` el Campo de búsqueda que lo lleva —«Buscar en…», el
++ * 404 y, en la Épica 28, la portada—: decisión de Héctor del 18/10, para que quien usa control por
++ * voz o conmutadores tenga qué pulsar.
++ */
++export const BOTON_DE_BUSCAR = 'Buscar';
++
+ /**
+  * Lo que está elegido en los selectores: el **valor** de cada filtro (el slug del Autor, el nombre
+  * de la ficha de la Obra, el slug del Tema), vacío si está en «Todos…». `obra` se omite —o va
+diff --git a/src/pages/404.astro b/src/pages/404.astro
+index 30c2951696..1bca3d565e 100644
+--- a/src/pages/404.astro
++++ b/src/pages/404.astro
+@@ -10,16 +10,23 @@
+  * Sin texto de error técnico. Ni el código, ni «la página solicitada no existe», ni nada
+  * que suene a registro de servidor. El visitante ya sabe que algo no salió; lo que
+  * necesita es por dónde seguir.
++ *
++ * Historia 27.8, UX-DR108 — el campo es el Campo de búsqueda de la 26.6 (`CampoDeBusqueda`) con su
++ * botón «Buscar»: antes se enviaba solo con Intro, sin control visible, y lo tecleado iba en la
++ * serif, que es solo para texto de Cita y nombres. Ahora lo tecleado va en Inter al cuerpo grande,
++ * con la etiqueta y el ejemplo de `/buscar/`, y el formulario sigue siendo un GET sin guion.
+  */
+ import Armazon from '../components/Armazon.astro';
++import CampoDeBusqueda from '../components/CampoDeBusqueda.astro';
+ import CitaDelDia from '../components/CitaDelDia.astro';
+ import Sostener from '../components/Sostener.astro';
+ import portada from '../../corpus/portada.json';
++import { ETIQUETA_DE_LA_BUSQUEDA, TEXTO_DE_EJEMPLO_DE_LA_BUSQUEDA } from '../lib/busqueda.ts';
+ import { aptasParaPortada, citaDelDia, jornadaDelBuild } from '../lib/citaDelDia.ts';
+ import { modelosEnRuta } from '../lib/ingreso.ts';
+ import { tituloDe } from '../lib/marca.ts';
+ import { conjuntoPublicable, temasPublicados } from '../lib/publicado.ts';
+-import { rutaDeTema } from '../lib/superficies.ts';
++import { rutaDeLaBusqueda, rutaDeTema } from '../lib/superficies.ts';
+ 
+ const conjunto = await conjuntoPublicable();
+ const temas = temasPublicados(conjunto.temas, conjunto.citas);
+@@ -40,14 +47,13 @@ const autorDelDia = seleccion
+     <h1>Esa página no está aquí.</h1>
+     <p class="entrada">Puede que el enlace fuera antiguo. Busca la frase que te trajo.</p>
+ 
+-    <form class="formulario" role="search" action="/buscar/" method="get">
+-      <label for="consulta">Escribe un fragmento, un autor o un tema.</label>
+-      <input
++    <form class="formulario" role="search" action={rutaDeLaBusqueda()} method="get">
++      <CampoDeBusqueda
+         id="consulta"
+-        name="q"
+-        type="search"
+-        autocomplete="off"
+-        placeholder="Por ejemplo: no hay camino"
++        etiqueta={ETIQUETA_DE_LA_BUSQUEDA}
++        nombre="q"
++        ejemplo={TEXTO_DE_EJEMPLO_DE_LA_BUSQUEDA}
++        boton
+       />
+     </form>
+ 
+@@ -123,33 +129,7 @@ const autorDelDia = seleccion
+     max-width: var(--medida-prosa);
+   }
+ 
+-  label {
+-    display: block;
+-    font-size: var(--pie);
+-    color: var(--tinta-apagada);
+-    margin-bottom: var(--unidad);
+-  }
+-
+-  /* UX-DR10 — el mismo campo que la página de búsqueda: filete inferior que pasa a 2px
+-     siena al recibir foco, sin caja y sin icono decorativo. */
+-  input {
+-    width: 100%;
+-    min-height: var(--zona-de-toque);
+-    font-family: var(--serif);
+-    font-size: var(--titular-sm);
+-    color: var(--tinta);
+-    background: transparent;
+-    border: 0;
+-    border-bottom: var(--grosor-filete) solid var(--contorno);
+-    border-radius: 0;
+-    padding: var(--unidad) 0;
+-    transition: border-color 150ms;
+-  }
+-
+-  /* Historia 22.10 — el filete se suma al anillo global de UX-DR23; no lo sustituye. */
+-  input:focus {
+-    border-bottom: 2px solid var(--siena);
+-  }
++  /* Historia 27.8 — la etiqueta, el campo y el botón los estiliza `CampoDeBusqueda.astro`. */
+ 
+   section {
+     margin-top: calc(var(--unidad) * 6);
+diff --git a/src/pages/autor/[slug]/[...page].astro b/src/pages/autor/[slug]/[...page].astro
+index 3db7e1c7eb..12f87ca466 100644
+--- a/src/pages/autor/[slug]/[...page].astro
++++ b/src/pages/autor/[slug]/[...page].astro
+@@ -16,6 +16,7 @@
+  * que ve el visitante y en los identificadores del dominio.
+  */
+ import Armazon from '../../../components/Armazon.astro';
++import BuscarEn from '../../../components/BuscarEn.astro';
+ import DatosDeAutor from '../../../components/DatosDeAutor.astro';
+ import Paginacion from '../../../components/Paginacion.astro';
+ import TarjetaDeCita from '../../../components/TarjetaDeCita.astro';
+@@ -31,6 +32,7 @@ import {
+   type Cita,
+ } from '../../../lib/publicado.ts';
+ import { añosDeAutor, descripcionDeAutor, semblanzaEn } from '../../../lib/atribucion.ts';
++import { rotuloBuscarEnAutor } from '../../../lib/busqueda.ts';
+ import { CITAS_POR_PAGINA } from '../../../lib/umbrales.ts';
+ import { tituloDeAutor } from '../../../lib/marca.ts';
+ import type { GetStaticPaths } from 'astro';
+@@ -157,6 +159,16 @@ const pieDeObras =
+     }
+     <h2 class="rotulo">Citas documentadas</h2>
+ 
++    {
++      /*
++       * Historia 27.8, UX-DR94 — «Buscar en {Autor}», solo en la página 1: al empezar el catálogo,
++       * bajo el rótulo y fuera de la Ficha, que queda entera; justo encima del listado que filtra.
++       * A 2 × `--unidad` del rótulo, y el listado 3 × más abajo. Las 2+ no lo llevan, y su listado
++       * sigue a 2 × del rótulo.
++       */
++      primera && <BuscarEn id="buscar-en-el-autor" rotulo={rotuloBuscarEnAutor(autor.nombre)} filtros={{ autor: autor.slug }} />
++    }
++
+     {/*
+       * UX-DR25 — los listados son listas reales. Cada tarjeta lleva el título de su Obra y no el
+       * Autor, que es el mismo en todas y ya dice el `h1` (`atribucion="obra"`, Historia 24.3).
+@@ -226,10 +238,20 @@ const pieDeObras =
+     color: var(--tinta-apagada);
+   }
+ 
++  /* Historia 27.8 — «Buscar en {Autor}», a 2 × `--unidad` del rótulo. */
++  .pagina > :global(.buscar-en) {
++    margin-top: calc(var(--unidad) * 2);
++  }
++
+   .listado {
+     list-style: none;
+     margin: calc(var(--unidad) * 2) 0 0;
+     padding: 0;
+     border-top: var(--grosor-filete) solid var(--filete);
+   }
++
++  /* En la página 1, el listado empieza 3 × `--unidad` bajo «Buscar en {Autor}». */
++  :global(.buscar-en) + .listado {
++    margin-top: calc(var(--unidad) * 3);
++  }
+ </style>
+diff --git a/src/pages/obra/[autor]/[slug]/[...page].astro b/src/pages/obra/[autor]/[slug]/[...page].astro
+index e5cc7f675e..6b546d724c 100644
+--- a/src/pages/obra/[autor]/[slug]/[...page].astro
++++ b/src/pages/obra/[autor]/[slug]/[...page].astro
+@@ -8,8 +8,9 @@
+  * la declaración de `src/lib/superficies.ts`. Una Obra que no se indexa es esta misma página,
+  * sin marca ni aviso, con `noindex, follow` y fuera del sitemap y de Pagefind.
+  *
+- * Página 1: Cabecera con el salto «Dónde leer esta obra ↓» (Historia 24.7), Listado, Temas,
+- * «Dónde leer esta obra» y, si la ficha la trae, su nota (Historia 22.6). Páginas 2+: solo
++ * Página 1: Cabecera con el salto «Dónde leer esta obra ↓» (Historia 24.7), «Buscar en esta obra»
++ * (Historia 27.8), Listado, Temas, «Dónde leer esta obra» y, si la ficha la trae, su nota
++ * (Historia 22.6). Páginas 2+: solo
+  * Cabecera, sin salto, y Listado, y `noindex` por forma. Nada de prosa compuesta (FR-51): ni
+  * sinopsis, ni contexto, ni adjetivos; todo lo que se dice sale de hechos del Corpus, salvo la
+  * nota, que escribe Héctor a mano.
+@@ -18,6 +19,7 @@
+  * Autor; los dos segmentos públicos salen del nombre de la ficha (`segmentosDeObra`).
+  */
+ import Armazon from '../../../../components/Armazon.astro';
++import BuscarEn from '../../../../components/BuscarEn.astro';
+ import Chips from '../../../../components/Chips.astro';
+ import DondeLeer from '../../../../components/DondeLeer.astro';
+ import Rotulo from '../../../../components/Rotulo.astro';
+@@ -41,6 +43,7 @@ import {
+ } from '../../../../lib/obras.ts';
+ import { edicionesEnVenta, modelosEnRuta } from '../../../../lib/ingreso.ts';
+ import { descripcionDeObra } from '../../../../lib/atribucion.ts';
++import { ROTULO_BUSCAR_EN_ESTA_OBRA } from '../../../../lib/busqueda.ts';
+ import { CITAS_POR_PAGINA } from '../../../../lib/umbrales.ts';
+ import { tituloDeObra } from '../../../../lib/marca.ts';
+ import { rutaDeAutor, rutaDeTema } from '../../../../lib/superficies.ts';
+@@ -166,6 +169,19 @@ const enVenta =
+       }
+     </header>
+ 
++    {
++      /*
++       * Historia 27.8, UX-DR94 — «Buscar en esta obra», solo en la página 1 —se indexe la Obra o
++       * no, y con la familia congelada o sin congelar—, entre la Cabecera y el listado que filtra:
++       * 4 × `--unidad` bajo el salto y el listado 4 × más abajo. Lleva los dos filtros, el Autor y
++       * la Obra por el nombre de su ficha, que es su interfaz pública (nunca el título). Las 2+ no
++       * lo llevan y conservan su distancia de siempre.
++       */
++      primera && (
++        <BuscarEn id="buscar-en-esta-obra" rotulo={ROTULO_BUSCAR_EN_ESTA_OBRA} filtros={{ autor: autor.slug, obra: obra.nombre }} />
++      )
++    }
++
+     {/*
+       * UX-DR40 — el listado de la Obra: las Tarjetas **sin** el Autor ni el título, que ya dice la
+       * Cabecera (`atribucion="ninguna"`, FR-51, Historia 24.3).
+@@ -281,6 +297,12 @@ const enVenta =
+     white-space: nowrap;
+   }
+ 
++  /* Historia 27.8 — «Buscar en esta obra», a 4 × `--unidad` del salto. */
++  .pagina > :global(.buscar-en) {
++    margin-top: calc(var(--unidad) * 4);
++  }
++
++  /* Bajo la Cabecera en las 2+ y bajo «Buscar en esta obra» en la 1, a la misma distancia. */
+   .listado {
+     list-style: none;
+     margin: calc(var(--unidad) * 4) 0 0;
+diff --git a/src/pages/tema/[slug]/[...page].astro b/src/pages/tema/[slug]/[...page].astro
+index 0e5daeeb65..f0970df6d9 100644
+--- a/src/pages/tema/[slug]/[...page].astro
++++ b/src/pages/tema/[slug]/[...page].astro
+@@ -10,8 +10,13 @@
+  * A diferencia de la Página de Autor, aquí cada tarjeta lleva el nombre del Autor y el título
+  * de su Obra (`atribucion="autor-y-obra"`, Historia 24.3): el Tema agrupa a varios y sin el
+  * nombre el listado no dice de quién es cada frase, ni sin el título de dónde sale.
++ *
++ * Historia 27.8, UX-DR94 — la página 1 lleva «Buscar en este tema» bajo el `h1` y encima del
++ * listado: la excepción declarada a que la Página de Tema empiece por su contenido (`DESIGN.md §
++ * Do's and Don'ts`, decisión de Héctor del 18/10), y la primera Cita sigue en la primera pantalla.
+  */
+ import Armazon from '../../../components/Armazon.astro';
++import BuscarEn from '../../../components/BuscarEn.astro';
+ import DatosDeTema from '../../../components/DatosDeTema.astro';
+ import Paginacion from '../../../components/Paginacion.astro';
+ import TarjetaDeCita from '../../../components/TarjetaDeCita.astro';
+@@ -22,6 +27,7 @@ import {
+   type Autor,
+   type Cita,
+ } from '../../../lib/publicado.ts';
++import { ROTULO_BUSCAR_EN_ESTE_TEMA } from '../../../lib/busqueda.ts';
+ import { CITAS_POR_PAGINA } from '../../../lib/umbrales.ts';
+ import { tituloDeTema } from '../../../lib/marca.ts';
+ import type { GetStaticPaths } from 'astro';
+@@ -45,6 +51,7 @@ const pagina = Astro.props.page as import('astro').Page<Cita>;
+ 
+ const ruta = rutaDeTema(tema.slug, pagina.currentPage);
+ const canonica = new URL(ruta, Astro.site).href;
++const primera = pagina.currentPage === 1;
+ ---
+ 
+ <Armazon
+@@ -64,6 +71,14 @@ const canonica = new URL(ruta, Astro.site).href;
+   <div class="pagina contenedor">
+     <h1>{tema.nombre}</h1>
+ 
++    {
++      /*
++       * Historia 27.8 — «Buscar en este tema», solo en la página 1: a 4 × `--unidad` del `h1`, y el
++       * listado 4 × más abajo. En las 2+ el listado sigue a 4 × del `h1`.
++       */
++      primera && <BuscarEn id="buscar-en-este-tema" rotulo={ROTULO_BUSCAR_EN_ESTE_TEMA} filtros={{ tema: tema.slug }} />
++    }
++
+     <ul class="listado">
+       {pagina.data.map((cita) => <TarjetaDeCita cita={cita} atribucion="autor-y-obra" autor={autores.get(cita.autor)} zona="listado" />)}
+     </ul>
+@@ -86,6 +101,11 @@ const canonica = new URL(ruta, Astro.site).href;
+     margin: 0;
+   }
+ 
++  /* Historia 27.8 — «Buscar en este tema», a 4 × `--unidad` del `h1`. */
++  .pagina > :global(.buscar-en) {
++    margin-top: calc(var(--unidad) * 4);
++  }
++
+   .listado {
+     list-style: none;
+     margin: calc(var(--unidad) * 4) 0 0;
+diff --git a/tests/e2e/accesibilidad.spec.ts b/tests/e2e/accesibilidad.spec.ts
+index 2004b387a9..f5ec0eec99 100644
+--- a/tests/e2e/accesibilidad.spec.ts
++++ b/tests/e2e/accesibilidad.spec.ts
+@@ -26,7 +26,13 @@ import { leerTarjetaDeObra, tarjetaDeObraDe } from '../unit/ayuda/tarjeta-de-obr
+ import { filtrosDeLaBusqueda } from '../../src/lib/publicado.ts';
+ import { conjuntoDeLosDatos, leerDatosDelCorpus } from '../../tools/lib/alcance.ts';
+ import { rutasDelCorpus } from '../../tools/lib/corpus.ts';
+-import { ANUNCIO_DEL_FALLO_DE_LA_BUSQUEDA, FALLO_DE_LA_TANDA } from '../../src/lib/busqueda.ts';
++import {
++  ANUNCIO_DEL_FALLO_DE_LA_BUSQUEDA,
++  BOTON_DE_BUSCAR,
++  FALLO_DE_LA_TANDA,
++  ROTULO_BUSCAR_EN_ESTA_OBRA,
++  ROTULO_BUSCAR_EN_ESTE_TEMA,
++} from '../../src/lib/busqueda.ts';
+ import { guionExternoDe } from '../../src/lib/guiones.ts';
+ import { TANDA_DE_RESULTADOS } from '../../src/lib/umbrales.ts';
+ 
+@@ -316,6 +322,32 @@ test('el barrido cubre las superficies del sitio y no el Kit', () => {
+   expect(SUPERFICIES).not.toContain('/kit');
+ });
+ 
++/** El HTML construido de una ruta del barrido: con barra final o sin ella, y el 404 en la raíz. */
++const delBarrido = (ruta: string) =>
++  readFileSync(
++    sinBarra(ruta) === '/404' ? join(dist, '404.html') : join(dist, ...ruta.split('/').filter(Boolean), 'index.html'),
++    'utf8',
++  );
++
++/** Si una ruta es una página 2+ de un listado. */
++const esPaginaSegunda = (ruta: string) => /\/\d+\/?$/.test(ruta);
++
++/** La primera página 1 del barrido de una familia, o `undefined`. */
++const primeraDelBarrido = (prefijo: string) => SUPERFICIES.find((r) => r.startsWith(prefijo) && !esPaginaSegunda(r));
++
++test('27.8 — el barrido incluye la página 1 de una Obra, un Autor y un Tema con «Buscar en…», y el 404 con su botón', () => {
++  // Si la derivación diera solo páginas 2+, el barrido axe y el reflujo de la 26.9 no verían el
++  // formulario: aquí se exige que lo vean.
++  for (const prefijo of ['/obra/', '/autor/', '/tema/']) {
++    const ruta = primeraDelBarrido(prefijo);
++    expect(ruta, `ninguna página 1 de ${prefijo} en el barrido`).toBeDefined();
++    expect(delBarrido(ruta!), ruta).toMatch(/<form class="buscar-en"[^>]*\brole="search"/);
++  }
++  expect(delBarrido(OBRAS.noIndexable), OBRAS.noIndexable).toMatch(/<form class="buscar-en"/);
++  expect(delBarrido(OBRAS.segunda), OBRAS.segunda).not.toMatch(/<form class="buscar-en"/);
++  expect(delBarrido('/404')).toMatch(new RegExp(`<button\\b[^>]*\\btype="submit"[^>]*>${BOTON_DE_BUSCAR}</button>`));
++});
++
+ test.describe('Historia 2.8, elevada por la 23.4 — WCAG 2.2 AA', () => {
+   for (const ruta of SUPERFICIES) {
+     test(`${ruta} pasa la auditoría automática`, async ({ page }) => {
+@@ -2121,6 +2153,12 @@ test.describe('Historia 24.7 — el salto «Dónde leer esta obra ↓»', () =>
+         peor = { ruta, fin: medida.fin };
+       }
+     }
++    // Historia 27.8 — con «Buscar en esta obra» encima del listado, la peor medida queda anotada.
++    test.info().annotations.push({
++      type: 'peor fin de la primera línea de la primera Cita a 360 × 640, página 1 de Obra',
++      description: `${peor.fin} px en ${peor.ruta}`,
++    });
++    console.log(`Historia 27.8 — página 1 de Obra a 360 × 640: la peor, ${peor.ruta}, ${peor.fin} px`);
+     expect(fuera, `fuera de la primera pantalla (la peor de las que caben: ${peor.ruta}, ${peor.fin} px)`).toEqual([]);
+   });
+ 
+@@ -2140,14 +2178,22 @@ test.describe('Historia 24.7 — el salto «Dónde leer esta obra ↓»', () =>
+     expect(Math.abs(medido! - esperado), `${que}: ${medido} px en vez de ${esperado}`).toBeLessThanOrEqual(0.5);
+   };
+ 
+-  test('la Cabecera: el listado a 32 px del salto en la página 1, y de «de {Autor}» en la 2', async ({ page }) => {
++  /*
++   * Historia 27.8 — en la página 1, «Buscar en esta obra» va entre el salto y el listado: 4 ×
++   * `--unidad` bajo el salto y el listado 4 × más abajo. Las 2+, sin formulario, como estaban.
++   */
++  test('la Cabecera: «Buscar en esta obra» a 32 px del salto y el listado 32 px más abajo en la página 1, y de «de {Autor}» en la 2', async ({
++    page,
++  }) => {
+     for (const ruta of [OBRAS.indexable, OBRAS.noIndexable, PIE().conPaginacion]) {
+       await page.goto(ruta);
+-      cerca(await hueco(page, '.cabecera-de-obra .salto', 'ul.listado'), 32, `${ruta}, salto → listado`);
++      cerca(await hueco(page, '.cabecera-de-obra .salto', 'form.buscar-en'), 32, `${ruta}, salto → «Buscar en esta obra»`);
++      cerca(await hueco(page, 'form.buscar-en', 'ul.listado'), 32, `${ruta}, «Buscar en esta obra» → listado`);
+     }
+     await page.goto(OBRAS.segunda);
+     expect(await page.locator('.salto').count(), OBRAS.segunda).toBe(0);
+     expect(await page.locator(`[href="#${ANCLA}"], #${ANCLA}`).count(), OBRAS.segunda).toBe(0);
++    expect(await page.locator('form.buscar-en').count(), OBRAS.segunda).toBe(0);
+     cerca(await hueco(page, '.cabecera-de-obra .de', 'ul.listado'), 32, `${OBRAS.segunda}, «de» → listado`);
+   });
+ 
+@@ -2201,6 +2247,190 @@ test.describe('Historia 24.7 — el salto «Dónde leer esta obra ↓»', () =>
+   });
+ });
+ 
++/**
++ * Historia 27.8 — «Buscar en esta obra / en {Autor} / en este tema» y el campo del 404 (UX-DR94,
++ * UX-DR108, NFR-8, NFR-9, `DESIGN.md § Búsqueda`). Las páginas salen del barrido (`SUPERFICIES`,
++ * páginas 1 de cada familia) y del `dist/`, nunca escritas a mano. Medio píxel de holgura, como en
++ * la 24.7. El barrido axe y el reflujo de la 26.9 de arriba ya pasan por estas mismas páginas (lo
++ * exige la guarda de la 27.8); aquí, las distancias, los estilos y la primera pantalla del Tema.
++ */
++test.describe('Historia 27.8 — «Buscar en…» y el botón del 404', () => {
++  const RUTA_404 = '/una-ruta-que-no-existe/';
++
++  /** Las páginas con el formulario: la Obra, el Autor y el Tema del barrido, en su página 1. */
++  const conFormulario = () => ({
++    obra: OBRAS.indexable,
++    autor: obligatoria(primeraDelBarrido('/autor/'), 'ninguna página 1 de Autor en el barrido'),
++    tema: obligatoria(primeraDelBarrido('/tema/'), 'ninguna página 1 de Tema en el barrido'),
++  });
++
++  /** El hueco entre el borde inferior de lo que va justo antes del formulario y el formulario. */
++  const huecoSobreElFormulario = (page: Page) =>
++    page.evaluate(() => {
++      const formulario = document.querySelector('form.buscar-en')!;
++      const antes = formulario.previousElementSibling!;
++      return {
++        antes: `${antes.tagName.toLowerCase()}.${antes.className}`,
++        hueco: formulario.getBoundingClientRect().top - antes.getBoundingClientRect().bottom,
++      };
++    });
++
++  const huecoBajoElFormulario = (page: Page) =>
++    page.evaluate(() => {
++      const formulario = document.querySelector('form.buscar-en')!;
++      const listado = document.querySelector('ul.listado')!;
++      return listado.getBoundingClientRect().top - formulario.getBoundingClientRect().bottom;
++    });
++
++  const casi = (medido: number, esperado: number, que: string) =>
++    expect(Math.abs(medido - esperado), `${que}: ${medido} px en vez de ${esperado}`).toBeLessThanOrEqual(0.5);
++
++  test('las distancias: Obra 32 y 32, Autor 16 bajo el rótulo y 24, Tema 32 bajo el h1 y 32; campo → botón 16', async ({ page }) => {
++    const { obra, autor, tema } = conFormulario();
++    for (const [ruta, antes, sobre, bajo] of [
++      [obra, /^header\.cabecera-de-obra/, 32, 32],
++      [autor, /^h2\.rotulo/, 16, 24],
++      [tema, /^h1/, 32, 32],
++    ] as const) {
++      await page.goto(ruta);
++      const encima = await huecoSobreElFormulario(page);
++      expect(encima.antes, ruta).toMatch(antes);
++      casi(encima.hueco, sobre, `${ruta}, ${encima.antes} → formulario`);
++      casi(await huecoBajoElFormulario(page), bajo, `${ruta}, formulario → listado`);
++    }
++    for (const ruta of [obra, autor, tema, RUTA_404]) {
++      await page.goto(ruta);
++      const hueco = await page.evaluate(() => {
++        const formulario = document.querySelector('form[role="search"]')!;
++        const campo = formulario.querySelector('input[name="q"]')!.getBoundingClientRect();
++        const boton = formulario.querySelector('button[type="submit"]')!.getBoundingClientRect();
++        return boton.top - campo.bottom;
++      });
++      casi(hueco, 16, `${ruta}, campo → botón`);
++    }
++  });
++
++  test('las páginas 2+ conservan sus distancias: Autor 16 bajo el rótulo, Tema 32 bajo el h1', async ({ page }) => {
++    const segunda = (prefijo: string) => rutasConstruidas().filter((r) => r.startsWith(prefijo) && esPaginaSegunda(r)).sort()[0];
++    for (const [ruta, sobre, esperado] of [
++      [segunda('/autor/'), 'h2.rotulo', 16],
++      [segunda('/tema/'), 'h1', 32],
++    ] as const) {
++      expect(ruta, 'una página 2 en el dist/').toBeDefined();
++      await page.goto(ruta!);
++      expect(await page.locator('form.buscar-en').count(), ruta).toBe(0);
++      const medido = await page.evaluate(
++        (selector) =>
++          document.querySelector('ul.listado')!.getBoundingClientRect().top -
++          document.querySelector(selector)!.getBoundingClientRect().bottom,
++        sobre,
++      );
++      casi(medido, esperado, `${ruta}, ${sobre} → listado`);
++    }
++  });
++
++  test('lo tecleado va en Inter al cuerpo grande, y el botón es el secundario siena con filete y 44 px', async ({ page }) => {
++    const { obra, autor, tema } = conFormulario();
++    for (const ruta of [obra, autor, tema, RUTA_404]) {
++      await page.goto(ruta);
++      const estilo = await page.evaluate(() => {
++        const formulario = document.querySelector('form[role="search"]')!;
++        const campo = getComputedStyle(formulario.querySelector('input[name="q"]')!);
++        const nodo = formulario.querySelector('button[type="submit"]') as HTMLElement;
++        const boton = getComputedStyle(nodo);
++        const raiz = getComputedStyle(document.documentElement);
++        const resolver = (propiedad: 'color' | 'fontSize' | 'borderTopWidth', valor: string) => {
++          const prueba = document.createElement('span');
++          prueba.style.borderTopStyle = 'solid';
++          prueba.style[propiedad] = valor;
++          document.body.append(prueba);
++          const resuelto = getComputedStyle(prueba)[propiedad];
++          prueba.remove();
++          return resuelto;
++        };
++        return {
++          familia: campo.fontFamily,
++          cuerpo: campo.fontSize,
++          cuerpoLg: resolver('fontSize', raiz.getPropertyValue('--cuerpo-lg').trim()),
++          siena: resolver('color', raiz.getPropertyValue('--siena').trim()),
++          filete: resolver('borderTopWidth', raiz.getPropertyValue('--grosor-filete').trim()),
++          boton: {
++            texto: nodo.textContent!.trim(),
++            color: boton.color,
++            borde: [boton.borderTopStyle, boton.borderTopWidth, boton.borderTopColor],
++            alto: nodo.getBoundingClientRect().height,
++            ancho: nodo.getBoundingClientRect().width,
++            familia: boton.fontFamily,
++            espacio: boton.whiteSpace,
++          },
++          anchoDelFormulario: formulario.getBoundingClientRect().width,
++        };
++      });
++      expect(estilo.familia, ruta).toMatch(/^["']?Inter\b/u);
++      expect(estilo.cuerpo, ruta).toBe(estilo.cuerpoLg);
++      expect(estilo.boton.texto, ruta).toBe(BOTON_DE_BUSCAR);
++      expect(estilo.boton.color, ruta).toBe(estilo.siena);
++      expect(estilo.boton.borde, ruta).toEqual(['solid', estilo.filete, estilo.siena]);
++      expect(estilo.boton.alto, ruta).toBeGreaterThanOrEqual(44);
++      expect(estilo.boton.familia, ruta).toMatch(/^["']?Inter\b/u);
++      expect(estilo.boton.espacio, ruta).not.toMatch(/nowrap/);
++      // A su ancho: no ocupa la medida entera.
++      expect(estilo.boton.ancho, ruta).toBeLessThan(estilo.anchoDelFormulario);
++    }
++  });
++
++  test('los rótulos son las etiquetas visibles, y con el enlace de la cabecera hay dos «Buscar»', async ({ page }) => {
++    const { obra, autor, tema } = conFormulario();
++    for (const [ruta, rotulo] of [
++      [obra, ROTULO_BUSCAR_EN_ESTA_OBRA],
++      [autor, undefined],
++      [tema, ROTULO_BUSCAR_EN_ESTE_TEMA],
++    ] as const) {
++      await page.goto(ruta);
++      const etiqueta = page.locator('form.buscar-en label');
++      if (rotulo !== undefined) await expect(etiqueta, ruta).toHaveText(rotulo);
++      else await expect(etiqueta, ruta).toHaveText(/^Buscar en \S/u);
++      await expect(page.getByLabel(await etiqueta.innerText(), { exact: true }), ruta).toBeVisible();
++      await expect(page.getByRole('link', { name: BOTON_DE_BUSCAR, exact: true }), ruta).toHaveCount(1);
++      await expect(page.getByRole('button', { name: BOTON_DE_BUSCAR, exact: true }), ruta).toHaveCount(1);
++    }
++  });
++
++  test('a 360 × 640, la primera Cita sigue empezando en la primera pantalla de toda página 1 de Tema', async ({ page }) => {
++    const primeras = rutasConstruidas()
++      .filter((ruta) => /^\/tema\/[^/]+\/$/.test(ruta))
++      .sort((a, b) => a.localeCompare(b, 'es'));
++    expect(primeras.length, 'páginas 1 de Tema en el dist/').toBeGreaterThan(0);
++    test.setTimeout(60_000 + primeras.length * 500);
++    await page.setViewportSize({ width: 360, height: 640 });
++    const fuera: string[] = [];
++    let peor = { ruta: '', fin: 0 };
++    for (const ruta of primeras) {
++      await page.goto(ruta);
++      const medida = await page.evaluate(async () => {
++        await document.fonts.ready;
++        const fragmento = document.querySelector<HTMLElement>('.listado .fragmento');
++        if (fragmento === null || document.querySelector('form.buscar-en') === null) return null;
++        return {
++          desplazada: window.scrollY,
++          fin: fragmento.getBoundingClientRect().top + parseFloat(getComputedStyle(fragmento).lineHeight),
++        };
++      });
++      if (medida === null || medida.desplazada !== 0 || medida.fin > 640) {
++        fuera.push(`${ruta}: ${JSON.stringify(medida)}`);
++      } else if (medida.fin > peor.fin) {
++        peor = { ruta, fin: medida.fin };
++      }
++    }
++    test.info().annotations.push({
++      type: 'peor fin de la primera línea de la primera Cita a 360 × 640, página 1 de Tema',
++      description: `${peor.fin} px en ${peor.ruta}`,
++    });
++    console.log(`Historia 27.8 — página 1 de Tema a 360 × 640: la peor, ${peor.ruta}, ${peor.fin} px`);
++    expect(fuera, `fuera de la primera pantalla (la peor de las que caben: ${peor.ruta}, ${peor.fin} px)`).toEqual([]);
++  });
++});
++
+ /**
+  * Historia 27.2 — el barrido de `/buscar/` de arriba mira la página vacía: los selectores, «Quitar
+  * los filtros», los resultados de un filtrado (todos Citas, con su línea de Autor) y la salida a cero
+diff --git a/tests/e2e/busqueda.spec.ts b/tests/e2e/busqueda.spec.ts
+index d9a6fdcad1..d8b28cbff0 100644
+--- a/tests/e2e/busqueda.spec.ts
++++ b/tests/e2e/busqueda.spec.ts
+@@ -17,16 +17,26 @@ import {
+   AVISO_DEL_FALLO,
+   AVISO_PREVIO,
+   AVISO_SIN_GUION,
++  BOTON_DE_BUSCAR,
+   FALLO_DE_LA_TANDA,
++  ROTULO_BUSCAR_EN_ESTA_OBRA,
++  ROTULO_BUSCAR_EN_ESTE_TEMA,
+   RUTA_DEL_MAPA_DE_OBRAS,
+   SUGERENCIA_SIN_FILTROS,
+   avisoDeLaDireccion,
+   fraseDelRecuento,
++  rotuloBuscarEnAutor,
+   rotuloDeMostrarMas,
+   sugerenciaSinResultados,
+ } from '../../src/lib/busqueda.ts';
+ import { ETIQUETA_DEL_FILTRO } from '../../src/lib/filtroDelDirectorio.ts';
+-import { rutaDeAutor, rutaDeLaBusqueda, rutaDelDirectorioDeAutores, rutaDelDirectorioDeObras } from '../../src/lib/superficies.ts';
++import {
++  rutaDeAutor,
++  rutaDeLaBusqueda,
++  rutaDeTema,
++  rutaDelDirectorioDeAutores,
++  rutaDelDirectorioDeObras,
++} from '../../src/lib/superficies.ts';
+ import { guionExternoDe } from '../../src/lib/guiones.ts';
+ import { citaConLosDosBloques, temaBajoUmbral, textoDe } from './ayuda/corpus.ts';
+ import {
+@@ -34,6 +44,7 @@ import {
+   citasPorObra,
+   filtrosDeLaBusqueda,
+   obrasDelAutor,
++  rutasIndexables,
+   type ConjuntoPublicable,
+ } from '../../src/lib/publicado.ts';
+ import { clavesDeOrden, ordenDeLaListaDeObras, porSlug as porSlugDeCita, rutaDeLaObra } from '../../src/lib/obras.ts';
+@@ -2852,6 +2863,180 @@ test.describe('Historia 27.7 — sin JavaScript, la búsqueda lleva a los Direct
+   });
+ });
+ 
++/*
++ * Historia 27.8 (FR-4, FR-6, FR-7, FR-51, UX-DR94, UX-DR108) — «Buscar en esta obra», «Buscar en
++ * {Autor}» y «Buscar en este tema» llegan a `/buscar/` con el filtro puesto, en el navegador y con
++ * el índice de verdad; y el 404 envía con su botón. Lo esperado sale del Corpus en disco por los
++ * dueños del build (`filtrosDeLaBusqueda`, `rutasIndexables`), como en la 27.3: ningún nombre ni
++ * ninguna cifra escritos aquí. Cada origen se elige con todas sus Citas en la página 1 (como mucho
++ * `CITAS_POR_PAGINA`), así que el recuento de `/buscar/` es el número de Tarjetas de su listado.
++ */
++test.describe('Historia 27.8 — buscar en esta obra, en un Autor o en un tema', () => {
++  const RAIZ_DEL_CORPUS = join(new URL('../..', import.meta.url).pathname, 'corpus');
++  let leido: Promise<ConjuntoPublicable> | undefined;
++  const conjunto = () =>
++    (leido ??= (async () => conjuntoDeLosDatos(await leerDatosDelCorpus(rutasDelCorpus(RAIZ_DEL_CORPUS))))());
++  const porValor = (a: { valor: string }, b: { valor: string }) => (a.valor < b.valor ? -1 : a.valor > b.valor ? 1 : 0);
++  /** De más a menos Citas que quepan en la página 1, con desempate por valor. */
++  const enUnaPagina = <T extends { valor: string; recuento: number }>(opciones: readonly T[], minimo = 2) =>
++    [...opciones]
++      .filter((o) => o.recuento >= minimo && o.recuento <= CITAS_POR_PAGINA)
++      .sort((a, b) => b.recuento - a.recuento || porValor(a, b));
++
++  interface Origen {
++    nombre: string;
++    ruta: string;
++    rotulo: string;
++    /** Los ocultos esperados, en su orden. */
++    ocultos: [string, string][];
++    recuento: number;
++    /** El recuento de `/buscar/` sin texto. */
++    frase: string;
++    /** Los selectores elegidos al llegar. */
++    elegidos: Record<string, string>;
++  }
++
++  async function origenes(): Promise<Origen[]> {
++    const datos = await conjunto();
++    const filtros = filtrosDeLaBusqueda(datos);
++    const indexables = new Set(rutasIndexables(datos));
++    const nombreDe = (slug: string) => filtros.autores.find((a) => a.valor === slug)!.rotulo;
++    const tituloDe = (obra: string) =>
++      Object.values(filtros.mapaDeObras)
++        .flat()
++        .find(([valor]) => valor === obra)![1];
++    const deObra = (obra: (typeof filtros.obras)[number], nombre: string): Origen => ({
++      nombre,
++      ruta: rutaDeLaObra({ nombre: obra.valor }),
++      rotulo: ROTULO_BUSCAR_EN_ESTA_OBRA,
++      ocultos: [
++        ['autor', obra.autor],
++        ['obra', obra.valor],
++      ],
++      recuento: obra.recuento,
++      frase: fraseDelRecuento({ total: obra.recuento, texto: '', autor: nombreDe(obra.autor), obra: tituloDe(obra.valor) }),
++      elegidos: { 'filtro-de-autor': obra.autor, 'filtro-de-obra': obra.valor },
++    });
++    const obras = enUnaPagina(filtros.obras, 1);
++    const indexable = obras.find((o) => indexables.has(rutaDeLaObra({ nombre: o.valor })));
++    const sinIndexar = obras.find((o) => !indexables.has(rutaDeLaObra({ nombre: o.valor })));
++    expect(indexable, 'una Obra indexable de una sola página').toBeDefined();
++    expect(sinIndexar, 'una Obra `noindex` de una sola página').toBeDefined();
++    const autor = enUnaPagina(filtros.autores)[0];
++    const tema = enUnaPagina(filtros.temas)[0];
++    expect(autor, 'un Autor de una sola página').toBeDefined();
++    expect(tema, 'un Tema de una sola página').toBeDefined();
++    return [
++      deObra(indexable!, 'Obra indexable'),
++      deObra(sinIndexar!, 'Obra `noindex`'),
++      {
++        nombre: 'Autor',
++        ruta: rutaDeAutor(autor!.valor),
++        rotulo: rotuloBuscarEnAutor(autor!.rotulo),
++        ocultos: [['autor', autor!.valor]],
++        recuento: autor!.recuento,
++        frase: fraseDelRecuento({ total: autor!.recuento, texto: '', autor: autor!.rotulo }),
++        elegidos: { 'filtro-de-autor': autor!.valor },
++      },
++      {
++        nombre: 'Tema',
++        ruta: rutaDeTema(tema!.valor),
++        rotulo: ROTULO_BUSCAR_EN_ESTE_TEMA,
++        ocultos: [['tema', tema!.valor]],
++        recuento: tema!.recuento,
++        frase: fraseDelRecuento({ total: tema!.recuento, texto: '', tema: tema!.rotulo }),
++        elegidos: { 'filtro-de-tema': tema!.valor },
++      },
++    ];
++  }
++
++  /** La navegación a `/buscar/` que dispara `accion`, con la dirección que pidió el navegador. */
++  async function llegarConEnvio(page: Page, accion: () => Promise<void>): Promise<URL> {
++    const peticion = page.waitForRequest((r) => r.isNavigationRequest() && new URL(r.url()).pathname === rutaDeLaBusqueda());
++    await accion();
++    const url = new URL((await peticion).url());
++    await page.waitForURL((u) => u.pathname === rutaDeLaBusqueda());
++    return url;
++  }
++
++  test('«Buscar» sin texto desde la página 1 llega con los ocultos, los selectores elegidos, «Quitar los filtros» y el recuento del listado', async ({
++    page,
++  }) => {
++    test.setTimeout(120_000);
++    for (const origen of await origenes()) {
++      await page.goto(origen.ruta);
++      const formulario = page.locator('form[role="search"]');
++      await expect(formulario, origen.nombre).toHaveCount(1);
++      await expect(formulario.getByLabel(origen.rotulo, { exact: true }), origen.nombre).toHaveAttribute('name', 'q');
++      // N es el de su listado: todas sus Citas caben en la página 1.
++      await expect(page.locator('ul.listado > li'), origen.nombre).toHaveCount(origen.recuento);
++      const boton = formulario.getByRole('button', { name: BOTON_DE_BUSCAR, exact: true });
++      await expect(boton, origen.nombre).toBeVisible();
++      const url = await llegarConEnvio(page, () => boton.click());
++      expect(url.search, origen.nombre).toBe(`?q=${origen.ocultos.map(([n, v]) => `&${n}=${encodeURIComponent(v)}`).join('')}`);
++      await expect(page.locator('[data-estado]'), origen.nombre).toHaveText(origen.frase, { timeout: 15_000 });
++      for (const [id, valor] of Object.entries(origen.elegidos)) {
++        await expect(page.locator(`#${id}`), `${origen.nombre}: ${id}`).toHaveValue(valor, { timeout: 10_000 });
++      }
++      await expect(page.locator('[data-quitar]'), origen.nombre).toBeVisible();
++      await expect(page.locator('[data-consulta]'), origen.nombre).toHaveValue('');
++    }
++  });
++
++  test('con texto e Intro llega en la misma pestaña con el texto en el campo, y «atrás» vuelve al origen', async ({ page, context }) => {
++    test.setTimeout(120_000);
++    for (const origen of await origenes()) {
++      await page.goto(origen.ruta);
++      const campo = page.getByLabel(origen.rotulo, { exact: true });
++      await campo.fill('tiempo');
++      const url = await llegarConEnvio(page, () => campo.press('Enter'));
++      expect(url.searchParams.get('q'), origen.nombre).toBe('tiempo');
++      for (const [nombre, valor] of origen.ocultos) expect(url.searchParams.get(nombre), origen.nombre).toBe(valor);
++      expect(context.pages(), origen.nombre).toHaveLength(1);
++      await expect(page.locator('[data-consulta]'), origen.nombre).toHaveValue('tiempo', { timeout: 10_000 });
++      await expect(page.locator('[data-estado]'), origen.nombre).not.toBeEmpty({ timeout: 15_000 });
++      await page.goBack();
++      await page.waitForURL((u) => u.pathname === origen.ruta);
++      await expect(page.getByLabel(origen.rotulo, { exact: true }), origen.nombre).toBeVisible();
++    }
++  });
++
++  test('las páginas 2+ no lo llevan', async ({ page }) => {
++    const datos = await conjunto();
++    const filtros = filtrosDeLaBusqueda(datos);
++    const mayor = <T extends { valor: string; recuento: number }>(opciones: readonly T[]) =>
++      [...opciones].sort((a, b) => b.recuento - a.recuento || porValor(a, b))[0];
++    const autor = mayor(filtros.autores);
++    const tema = mayor(filtros.temas);
++    const obra = mayor(filtros.obras);
++    for (const [ruta, recuento] of [
++      [rutaDeAutor(autor.valor, 2), autor.recuento],
++      [rutaDeTema(tema.valor, 2), tema.recuento],
++      [rutaDeLaObra({ nombre: obra.valor }, 2), obra.recuento],
++    ] as const) {
++      // Sin página 2 no hay nada que mirar: el Corpus de hoy pagina las tres familias.
++      expect(recuento, ruta).toBeGreaterThan(CITAS_POR_PAGINA);
++      await page.goto(ruta);
++      await expect(page.locator('ul.listado > li').first(), ruta).toBeVisible();
++      await expect(page.locator('form.buscar-en'), ruta).toHaveCount(0);
++      await expect(page.getByRole('button', { name: BOTON_DE_BUSCAR, exact: true }), ruta).toHaveCount(0);
++    }
++  });
++
++  test('el 404 envía con su botón «Buscar» a `/buscar/?q=…`', async ({ page }) => {
++    await page.goto('/esta-ruta-no-existe-en-el-sitio/');
++    const campo = page.locator('form[role="search"] input[name="q"]');
++    await expect(campo).toHaveAttribute('placeholder', 'Por ejemplo: no hay camino');
++    await campo.fill('no hay camino');
++    const url = await llegarConEnvio(page, () =>
++      page.locator('form[role="search"]').getByRole('button', { name: BOTON_DE_BUSCAR, exact: true }).click(),
++    );
++    expect(url.search).toBe('?q=no+hay+camino');
++    await expect(page.locator('[data-consulta]')).toHaveValue('no hay camino', { timeout: 10_000 });
++    await expect(page.locator('[data-resultados] .resultado').first()).toBeVisible({ timeout: 15_000 });
++  });
++});
++
+ /** Escapa un texto para usarlo dentro de una expresión regular. */
+ function escaparRegex(texto: string) {
+   return texto.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+diff --git a/tests/unit/buscar-en.test.ts b/tests/unit/buscar-en.test.ts
+new file mode 100644
+index 0000000000..cab2af61d5
+--- /dev/null
++++ b/tests/unit/buscar-en.test.ts
+@@ -0,0 +1,261 @@
++import { afterAll, beforeAll, describe, expect, it } from 'vitest';
++import { readFile } from 'node:fs/promises';
++import { join } from 'node:path';
++import {
++  AUTOR_VALIDO,
++  RAIZ,
++  TEMA_VALIDO,
++  citaValida,
++  construirConCorpus,
++  limpiar,
++  paginaConstruida,
++} from './ayuda/construir.js';
++import { guionesEnLinea, guionesExternosDe } from './ayuda/guion.js';
++import { recorrerElementos, type Elemento } from '../../tools/lib/html.ts';
++import {
++  BOTON_DE_BUSCAR,
++  ETIQUETA_DE_LA_BUSQUEDA,
++  ROTULO_BUSCAR_EN_ESTA_OBRA,
++  ROTULO_BUSCAR_EN_ESTE_TEMA,
++  TEXTO_DE_EJEMPLO_DE_LA_BUSQUEDA,
++  rotuloBuscarEnAutor,
++} from '../../src/lib/busqueda.ts';
++import { ARRANQUE_DE_MEDICION, ATRIBUTO_SIN_ZONA } from '../../src/lib/medicion.ts';
++
++/**
++ * Historia 27.8 — «Buscar en esta obra», «Buscar en {Autor}» y «Buscar en este tema», sobre `dist/`.
++ *
++ * El corpus es el de `obra-pagina.test.ts` sin Epicteto: Séneca, 55 Citas, todas con «El tiempo»
++ * —así el Autor y el Tema paginan—; «Sobre la brevedad de la vida» 51 (pagina y no se indexa,
++ * 93 %), «Cartas a Lucilio» 3 (se indexa) y «De la ira» 1 (no se indexa). Una segunda construcción
++ * congela la familia Obra con `CONGELACION_DE_OBRAS` parcheada en su `umbrales.ts` (nunca el del
++ * árbol, AD-21): ninguna Obra se indexa, y todas siguen llevando el formulario.
++ */
++
++const aLimpiar: string[] = [];
++afterAll(async () => {
++  await Promise.all(aLimpiar.map(limpiar));
++});
++
++const BREVEDAD = '/obra/seneca/sobre-la-brevedad-de-la-vida/';
++const CARTAS = '/obra/seneca/cartas-a-lucilio/';
++const IRA = '/obra/seneca/de-la-ira/';
++const AUTOR = '/autor/seneca/';
++const TEMA = '/tema/el-tiempo/';
++
++const fuente = (pagina: string) => ({ id: 'wikisource-es', url: `https://es.wikisource.org/wiki/${pagina}` });
++
++function corpus(): Record<string, string> {
++  const citas: Record<string, string> = {};
++  for (let i = 0; i < 51; i += 1) {
++    citas[`citas/seneca--brevedad-${i}.md`] = citaValida({
++      slug: `seneca-brevedad-${i}`,
++      texto: `La brevedad ${i}: la vida es larga si se sabe usar, dijo el filósofo.`,
++      temas: ['el-tiempo'],
++      procedencia: { obra: 'Sobre la brevedad de la vida', año: 49 },
++      fuente: fuente('Sobre_la_brevedad_de_la_vida'),
++    });
++  }
++  for (let i = 0; i < 3; i += 1) {
++    citas[`citas/seneca--cartas-${i}.md`] = citaValida({
++      slug: `seneca-cartas-${i}`,
++      texto: `Carta ${i}: nadie se hace sabio por casualidad, y hay que aprenderlo.`,
++      temas: ['el-tiempo'],
++      procedencia: { obra: 'Cartas a Lucilio', año: 64 },
++      fuente: fuente('Cartas_a_Lucilio'),
++    });
++  }
++  citas['citas/seneca--ira-0.md'] = citaValida({
++    slug: 'seneca-ira-0',
++    texto: 'La ira es una locura breve que conviene evitar siempre.',
++    temas: ['el-tiempo'],
++    procedencia: { obra: 'De la ira', año: 41 },
++    fuente: fuente('De_la_ira'),
++  });
++  return { 'autores/seneca.yml': AUTOR_VALIDO, 'temas/el-tiempo.yml': TEMA_VALIDO, ...citas };
++}
++
++/** Lo que cada página 1 tiene que llevar: rótulo y ocultos, en su orden. */
++const ESPERADO: { ruta: string; rotulo: string; ocultos: [string, string][] }[] = [
++  { ruta: BREVEDAD, rotulo: ROTULO_BUSCAR_EN_ESTA_OBRA, ocultos: [['autor', 'seneca'], ['obra', 'seneca--sobre-la-brevedad-de-la-vida']] },
++  { ruta: CARTAS, rotulo: ROTULO_BUSCAR_EN_ESTA_OBRA, ocultos: [['autor', 'seneca'], ['obra', 'seneca--cartas-a-lucilio']] },
++  { ruta: IRA, rotulo: ROTULO_BUSCAR_EN_ESTA_OBRA, ocultos: [['autor', 'seneca'], ['obra', 'seneca--de-la-ira']] },
++  { ruta: AUTOR, rotulo: rotuloBuscarEnAutor('Séneca'), ocultos: [['autor', 'seneca']] },
++  { ruta: TEMA, rotulo: ROTULO_BUSCAR_EN_ESTE_TEMA, ocultos: [['tema', 'el-tiempo']] },
++];
++
++const PAGINAS_2 = [`${BREVEDAD}2/`, `${AUTOR}2/`, `${TEMA}2/`];
++
++const NOINDEX = /<meta name="robots" content="noindex, follow"/;
++
++const ENTIDADES: Record<string, string> = { amp: '&', quot: '"', lt: '<', gt: '>', '#39': "'" };
++const texto = (html: string) =>
++  html
++    .replace(/<[^>]+>/g, '')
++    .replace(/&(amp|quot|lt|gt|#39);/g, (_, e: string) => ENTIDADES[e])
++    .replace(/\s+/g, ' ')
++    .trim();
++
++/** Los formularios de búsqueda de una página, enteros. */
++const formulariosDeBusqueda = (html: string) =>
++  [...html.matchAll(/<form\b[^>]*\brole="search"[^>]*>[\s\S]*?<\/form>/g)].map((m) => m[0]);
++
++/** Los antepasados del `<form role="search">`, del más lejano al más cercano. */
++function antepasadosDelFormulario(html: string): readonly Elemento[] {
++  let encontrados: readonly Elemento[] | undefined;
++  recorrerElementos(html, (elemento, antepasados) => {
++    if (elemento.etiqueta === 'form' && elemento.atributos.get('role') === 'search') encontrados = [...antepasados];
++  });
++  if (encontrados === undefined) throw new Error('No hay formulario de búsqueda.');
++  return encontrados;
++}
++
++/** Comprueba un «Buscar en…» entero contra lo esperado. */
++function comprobarBuscarEn(html: string, esperado: (typeof ESPERADO)[number]): void {
++  const { ruta, rotulo, ocultos } = esperado;
++  const formularios = formulariosDeBusqueda(html);
++  expect(formularios, ruta).toHaveLength(1);
++  const formulario = formularios[0];
++  const apertura = /^<form\b[^>]*>/.exec(formulario)![0];
++  expect(apertura, ruta).toMatch(/\bmethod="get"/);
++  expect(apertura, ruta).toMatch(/\baction="\/buscar\/"/);
++  expect(apertura, ruta).toMatch(/\bdata-pagefind-ignore\b/);
++  expect(apertura, ruta).not.toMatch(/\btarget=/);
++
++  // La etiqueta es el rótulo, y apunta al campo `q`, que no lleva ejemplo.
++  const etiqueta = /<label\b[^>]*\bfor="([^"]+)"[^>]*>([\s\S]*?)<\/label>/.exec(formulario);
++  expect(etiqueta, ruta).not.toBeNull();
++  expect(texto(etiqueta![2]), ruta).toBe(rotulo);
++  const campos = [...formulario.matchAll(/<input\b[^>]*>/g)].map((m) => m[0]);
++  const campo = campos.find((c) => /\bname="q"/.test(c));
++  expect(campo, ruta).toBeDefined();
++  expect(campo, ruta).toContain(`id="${etiqueta![1]}"`);
++  expect(campo, ruta).toMatch(/\btype="search"/);
++  expect(campo, ruta).toMatch(/\benterkeyhint="search"/);
++  expect(campo, ruta).not.toMatch(/\bplaceholder=/);
++  // El `id` es único en la página.
++  expect(html.split(`id="${etiqueta![1]}"`).length - 1, ruta).toBe(1);
++
++  // El botón «Buscar», `submit`, tras el campo.
++  const botones = [...formulario.matchAll(/<button\b([^>]*)>([\s\S]*?)<\/button>/g)];
++  expect(botones, ruta).toHaveLength(1);
++  expect(botones[0][1], ruta).toMatch(/\btype="submit"/);
++  expect(botones[0][1], ruta).not.toMatch(/\bname=/);
++  expect(texto(botones[0][2]), ruta).toBe(BOTON_DE_BUSCAR);
++  expect(formulario.indexOf('<button'), ruta).toBeGreaterThan(formulario.indexOf(campo!));
++
++  // Los ocultos, exactos y en su orden, después del campo.
++  const deOcultos = campos.filter((c) => /\btype="hidden"/.test(c));
++  expect(
++    deOcultos.map((c) => [/\bname="([^"]*)"/.exec(c)?.[1], /\bvalue="([^"]*)"/.exec(c)?.[1]]),
++    ruta,
++  ).toEqual(ocultos);
++  expect(campos.indexOf(campo!), ruta).toBe(0);
++
++  // Sin zona: ningún antepasado la declara ni la exime.
++  for (const antepasado of antepasadosDelFormulario(html)) {
++    expect(antepasado.atributos.has('data-zona'), `${ruta}: <${antepasado.etiqueta}>`).toBe(false);
++    expect(antepasado.atributos.has(ATRIBUTO_SIN_ZONA), `${ruta}: <${antepasado.etiqueta}>`).toBe(false);
++  }
++  expect(apertura).not.toMatch(/\bdata-zona=|\bdata-sin-zona=/);
++}
++
++describe('Historia 27.8 — «Buscar en…», construido', () => {
++  let proyecto = '';
++  const html = (ruta: string) => readFile(paginaConstruida(proyecto, ruta), 'utf8');
++
++  beforeAll(async () => {
++    const resultado = await construirConCorpus(corpus());
++    aLimpiar.push(resultado.proyecto);
++    expect(resultado.codigo, resultado.salida).toBe(0);
++    proyecto = resultado.proyecto;
++  }, 300_000);
++
++  it('la página 1 de cada Obra —indexable o no—, del Autor y del Tema lleva un solo «Buscar en…» con sus filtros', async () => {
++    // Las tres Obras: «Cartas» se indexa; «Brevedad» e «Ira», no.
++    expect(await html(CARTAS)).not.toMatch(NOINDEX);
++    expect(await html(BREVEDAD)).toMatch(NOINDEX);
++    expect(await html(IRA)).toMatch(NOINDEX);
++    for (const esperado of ESPERADO) comprobarBuscarEn(await html(esperado.ruta), esperado);
++  });
++
++  it('las páginas 2 no lo llevan, ni cargan un guion distinto de su página 1', async () => {
++    for (const ruta of PAGINAS_2) {
++      const segunda = await html(ruta);
++      expect(formulariosDeBusqueda(segunda), ruta).toEqual([]);
++      expect(segunda, ruta).not.toContain('class="buscar-en');
++      const primera = await html(ruta.replace(/2\/$/, ''));
++      expect(guionesEnLinea(primera), ruta).toEqual(guionesEnLinea(segunda));
++      expect(guionesExternosDe(primera), ruta).toEqual(guionesExternosDe(segunda));
++    }
++  });
++
++  it('el formulario va justo encima del listado que filtra', async () => {
++    for (const { ruta } of ESPERADO) {
++      const pagina = await html(ruta);
++      const fin = pagina.indexOf('</form>', pagina.indexOf('class="buscar-en'));
++      const despues = pagina.slice(fin + '</form>'.length).trimStart();
++      expect(despues, ruta).toMatch(/^<ul class="listado"/);
++    }
++  });
++
++  it('ninguna ruta nueva: el sitemap no anuncia `/buscar/` y la búsqueda no entra en Pagefind', async () => {
++    const xml = await readFile(join(proyecto, 'dist', 'sitemap-0.xml'), 'utf8');
++    expect(xml).not.toContain('/buscar');
++    expect(xml).not.toMatch(/\?q=/);
++  });
++
++  it('el 404 lleva el Campo con su ejemplo y el botón, y sigue sin guion propio', async () => {
++    const pagina = await html('/404');
++    const formularios = formulariosDeBusqueda(pagina);
++    expect(formularios).toHaveLength(1);
++    const formulario = formularios[0];
++    expect(formulario).toMatch(/^<form\b[^>]*\baction="\/buscar\/"/);
++    expect(formulario).toMatch(/^<form\b[^>]*\bmethod="get"/);
++    expect(texto(/<label\b[^>]*\bfor="consulta"[^>]*>([\s\S]*?)<\/label>/.exec(formulario)![1])).toBe(
++      ETIQUETA_DE_LA_BUSQUEDA,
++    );
++    const campo = /<input\b[^>]*\bid="consulta"[^>]*>/.exec(formulario)![0];
++    expect(campo).toMatch(/\bname="q"/);
++    expect(campo).toContain(`placeholder="${TEXTO_DE_EJEMPLO_DE_LA_BUSQUEDA}"`);
++    expect(campo).toMatch(/\benterkeyhint="search"/);
++    const boton = /<button\b([^>]*)>([\s\S]*?)<\/button>/.exec(formulario);
++    expect(boton).not.toBeNull();
++    expect(boton![1]).toMatch(/\btype="submit"/);
++    expect(texto(boton![2])).toBe(BOTON_DE_BUSCAR);
++    expect(guionesEnLinea(pagina)).toEqual([ARRANQUE_DE_MEDICION]);
++    expect(guionesExternosDe(pagina)).toEqual([]);
++  });
++
++  it('el Campo sin botón sale como antes: `/buscar/` no lleva «Buscar» ni tecla de buscar', async () => {
++    const pagina = await html('/buscar/');
++    expect(pagina).not.toMatch(/<button\b[^>]*\btype="submit"/);
++    expect(pagina).not.toMatch(/\benterkeyhint=/);
++  });
++});
++
++describe('Historia 27.8 — «Buscar en…» con la familia Obra congelada', () => {
++  let proyecto = '';
++  const html = (ruta: string) => readFile(paginaConstruida(proyecto, ruta), 'utf8');
++
++  beforeAll(async () => {
++    const original = await readFile(join(RAIZ, 'src/lib/umbrales.ts'), 'utf8');
++    const declaracion = 'export const CONGELACION_DE_OBRAS: CongelacionDeObras | undefined = undefined;';
++    expect(original).toContain(declaracion);
++    const congelado = original.replace(
++      declaracion,
++      "export const CONGELACION_DE_OBRAS: CongelacionDeObras | undefined = {\n  desde: '2026-12-06',\n  indexables: [\n    'seneca--sobre-la-brevedad-de-la-vida',\n  ],\n};",
++    );
++    const resultado = await construirConCorpus(corpus(), { ficheros: { 'src/lib/umbrales.ts': congelado } });
++    aLimpiar.push(resultado.proyecto);
++    expect(resultado.codigo, resultado.salida).toBe(0);
++    proyecto = resultado.proyecto;
++  }, 300_000);
++
++  it('toda página 1 de Obra lleva el formulario, también la que dejó de indexarse por la congelación', async () => {
++    // «Cartas» cumple FR-52 y no está en la lista congelada: `noindex`, y con su «Buscar en esta obra».
++    expect(await html(CARTAS)).toMatch(NOINDEX);
++    for (const esperado of ESPERADO) comprobarBuscarEn(await html(esperado.ruta), esperado);
++    expect(formulariosDeBusqueda(await html(`${BREVEDAD}2/`))).toEqual([]);
++  });
++});
+diff --git a/tests/unit/obra-pagina.test.ts b/tests/unit/obra-pagina.test.ts
+index 9c074a6ec5..bc4ef74c8d 100644
+--- a/tests/unit/obra-pagina.test.ts
++++ b/tests/unit/obra-pagina.test.ts
+@@ -165,6 +165,12 @@ const posiciones = Object.fromEntries((await getCollection('posiciones')).map((e
+ const escapar = (texto: string) => texto.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+ 
+ const html = (proyecto: string, ruta: string) => readFile(paginaConstruida(proyecto, ruta), 'utf8');
++/**
++ * Historia 27.8 — de la Cabecera al listado de la página 1 no hay más que «Buscar en esta obra»: el
++ * formulario sin texto propio fuera de su campo y su botón. Las 2+ siguen sin nada en medio.
++ */
++const SIN_NADA_ANTES_DEL_LISTADO_EN_LA_PRIMERA =
++  /<\/header>\s*<form class="buscar-en"[^>]*>(?:(?!<\/form>)[\s\S])*<\/form>\s*<ul class="listado"/;
+ const NOINDEX = /<meta name="robots" content="noindex, follow"/;
+ 
+ /**
+@@ -455,7 +461,8 @@ describe('Historia 22.4 — la Página de Obra, construida', () => {
+     expect(enlaces).toEqual(['/cita/seneca-cartas-2/', '/cita/seneca-cartas-1/', '/cita/seneca-cartas-0/']);
+     expect(listado).not.toContain('class="autor"');
+     // Indexable también: ninguna línea nombra el orden, y las Tarjetas no llevan el título de la Obra.
+-    expect(pagina).toMatch(/<\/header>\s*<ul class="listado"/);
++    // Historia 27.8 — en la página 1, entre la Cabecera y el listado va solo «Buscar en esta obra».
++    expect(pagina).toMatch(SIN_NADA_ANTES_DEL_LISTADO_EN_LA_PRIMERA);
+     expect(listado).not.toContain('Cartas a Lucilio');
+     // Y los datos estructurados enumeran las Citas en ese mismo orden.
+     const lista = jsonLd(pagina).find((b) => b['@type'] === 'CollectionPage')?.mainEntity as {
+@@ -511,8 +518,9 @@ describe('Historia 22.4 — la Página de Obra, construida', () => {
+       expect([...listado.matchAll(/href="([^"]+)"/g)].map((m) => m[1]), ruta).toEqual(citas);
+       expect(listado, ruta).not.toContain('class="autor"');
+       expect(listado, ruta).not.toContain('Sobre la brevedad de la vida');
+-      // Ninguna línea que nombre el orden: de la Cabecera al Listado no hay nada.
+-      expect(pagina, ruta).toMatch(/<\/header>\s*<ul class="listado"/);
++      // Ninguna línea que nombre el orden: de la Cabecera al Listado no hay nada (en la página 1,
++      // solo «Buscar en esta obra», Historia 27.8).
++      expect(pagina, ruta).toMatch(desde === 1 ? SIN_NADA_ANTES_DEL_LISTADO_EN_LA_PRIMERA : /<\/header>\s*<ul class="listado"/);
+       const lista = jsonLd(pagina).find((b) => b['@type'] === 'CollectionPage')?.mainEntity as {
+         itemListElement: { position: number; url: string }[];
+       };
+@@ -777,7 +785,7 @@ describe('Historia 22.4 — la Página de Obra, construida', () => {
+    * Historia 24.7 — el salto «Dónde leer esta obra ↓» en la Cabecera de la página 1. El bloque no
+    * se mueve: las pruebas de la 22.6 de arriba («va después del Listado, la Paginación y los
+    * Temas», «página 2: ni la sección ni la nota») y la de la 24.1 (`</header>` seguido del
+-   * listado) siguen pasando sin tocarlas.
++   * listado; desde la 27.8, en la página 1, con «Buscar en esta obra» en medio) siguen pasando.
+    */
+   describe('24.7 — el salto «Dónde leer esta obra ↓»', () => {
+     it('toda página 1 lleva un salto a su `h2` enfocable, y ninguna 2+', async () => {
