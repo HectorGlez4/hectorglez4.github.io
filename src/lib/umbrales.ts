@@ -537,8 +537,13 @@ export const MAX_BYTES_GUION_DE_PAGEFIND = 87200;
  * (2026-10-29): 2.963 de su fichero y 497 del trozo. Tope: 3.460 más unos 400. Tras las dos
  * revisiones de la 27.2 el trozo mide 501 y el filtro **3.464** (2026-10-29): sigue a ~400 del tope,
  * que no se mueve.
+ *
+ * Historia 27.3 — el trozo compartido cambia: `recuentoDeCitas` se muda a `src/lib/recuentos.ts`
+ * para el rótulo de cada Obra del selector de `/buscar/`, y el trozo pasa a medir 552. El filtro
+ * mide **3.515 bytes** (2026-10-29): 2.963 de su fichero y 552 del trozo. Tope, con la misma
+ * regla: 3.515 más unos 400.
  */
-export const MAX_BYTES_GUION_DEL_FILTRO = 3860;
+export const MAX_BYTES_GUION_DEL_FILTRO = 3915;
 
 /**
  * La búsqueda de `/buscar/`, el `<script>` de `src/components/Busqueda.astro` que Astro emite como
@@ -568,8 +573,14 @@ export const MAX_BYTES_GUION_DEL_FILTRO = 3860;
  * cuenta de la pausa desde la última tecla, que una pausa cancele la otra, la sugerencia a cero que
  * no pisa un recuento y el recuento que Enter escribe ya lo llevan a **8.912 bytes** (2026-10-29)
  * —8.411 del fichero de entrada y 501 del trozo—. Tope: 8.912 más unos 400.
+ *
+ * Historia 27.3 — rederivado con la misma regla. El selector de Obra trae a la búsqueda la petición
+ * del mapa de rótulos y de `filters()`, la composición de sus opciones (`opcionesDeObra`,
+ * `rotuloDeObra` y `recuentoDeCitas`, que se muda al trozo compartido) y la Obra en los filtros,
+ * el recuento y el asentamiento: **10.810 bytes** (2026-10-29) —10.258 del fichero de entrada y 552
+ * del trozo—. Tope: 10.810 más unos 400.
  */
-export const MAX_BYTES_GUION_DE_LA_BUSQUEDA = 9312;
+export const MAX_BYTES_GUION_DE_LA_BUSQUEDA = 11210;
 
 /**
  * La pausa de tecleo, en milisegundos — AD-9, UX-DR58, UX-DR86, Historia 26.6.
@@ -668,6 +679,25 @@ export const TOPE_DE_PNG_DE_DIST: number | undefined = undefined;
  * en el mensaje del commit que lo fija.
  */
 export const MAX_BYTES_DEL_DIRECTORIO_DE_OBRAS = 290 * 1024;
+
+/**
+ * Bytes de los filtros de Pagefind más el mapa de rótulos de las Obras por encima de los cuales el
+ * build avisa — Historia 27.3, AD-9, AD-11.
+ *
+ * Es **una sola cifra** porque la isla de `/buscar/` los descarga juntos al elegir un Autor
+ * (`filters()` y `/buscar/obras.json`), y trocearlos —por Autor— es la misma decisión aplazada para
+ * los dos. Lo mide el paso final de `npm run build`, después de Pagefind (`integraciones/peso.ts`,
+ * con la decisión en `tools/lib/peso.ts`): la suma de `dist/pagefind/filter/**` y
+ * `dist/buscar/obras.json`. Pasarlo **avisa y nunca rompe**; el parte da las dos partes para que se
+ * vea cuál crece, y si falta una no suma ni escribe cero.
+ *
+ * El 2026-10-17 los filtros medían unos 41 KB. El valor es lo medido sobre `npm run build` el
+ * 2026-10-29 —97.018 bytes: 52.625 de los filtros, en 4 ficheros, y 44.393 del mapa, con 517 Obras
+ * de 135 Autores; los filtros varían unos cien bytes de una construcción a otra con el mismo
+ * Corpus— más un 25 % (121.273), redondeado arriba a 10 KiB, con la regla de
+ * `MAX_BYTES_DEL_DIRECTORIO_DE_OBRAS`: 120 KiB.
+ */
+export const AVISO_DE_BYTES_DE_FILTROS_Y_MAPA = 120 * 1024;
 
 /**
  * El ancho de cada rango de la clave de orden de la búsqueda — Historia 27.1, AD-25, AD-9.

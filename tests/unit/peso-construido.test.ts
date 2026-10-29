@@ -40,7 +40,7 @@ const UMBRALES_DEL_ARBOL = readFileSync(join(RAIZ, 'src/lib/umbrales.ts'), 'utf8
  * encontrar su línea exactamente una vez: si la declaración cambiara de forma, el parche no
  * pondría nada y la prueba mediría los valores de siempre creyendo medir otros.
  */
-function umbralesCon(cambios: { aviso?: number; tope?: number; png?: number }): string {
+function umbralesCon(cambios: { aviso?: number; tope?: number; png?: number; filtros?: number }): string {
   const lineas: [RegExp, string | undefined][] = [
     [
       /^export const AVISO_DE_PESO_DE_DIST = .*;$/mu,
@@ -55,6 +55,10 @@ function umbralesCon(cambios: { aviso?: number; tope?: number; png?: number }): 
       cambios.png === undefined
         ? undefined
         : `export const TOPE_DE_PNG_DE_DIST: number | undefined = ${cambios.png};`,
+    ],
+    [
+      /^export const AVISO_DE_BYTES_DE_FILTROS_Y_MAPA = .*;$/mu,
+      cambios.filtros === undefined ? undefined : `export const AVISO_DE_BYTES_DE_FILTROS_Y_MAPA = ${cambios.filtros};`,
     ],
   ];
   let fuente = UMBRALES_DEL_ARBOL;
@@ -264,6 +268,24 @@ describe('Historia 24.2 — el peso de dist/, construido', () => {
     expect(salida.stderr).toContain(`Aviso de PNG: dist/ trae ${milesEnEspañol(png)} PNG`);
     expect(salida.stderr).toContain('TOPE_DE_PNG_DE_DIST');
     expect(salida.stderr).not.toContain('Aviso de peso');
+  });
+
+  it('Historia 27.3 — informa los filtros de Pagefind y el mapa; con el aviso por debajo de lo medido, avisa y sale con 0', async () => {
+    await writeFile(join(proyecto, 'src/lib/umbrales.ts'), UMBRALES_DEL_ARBOL, 'utf8');
+    const conValores = await correrElPaso(paso, proyecto);
+    expect(conValores.codigo, conValores.stderr).toBe(0);
+    expect(conValores.stdout).toMatch(/^Filtros de Pagefind y mapa de Obras de \/buscar\/: filtros \(pagefind\/filter\/\) [\d.]+ bytes/mu);
+    expect(conValores.stdout).toContain('mapa (buscar/obras.json) ');
+    expect(conValores.stdout).toContain('(AVISO_DE_BYTES_DE_FILTROS_Y_MAPA).');
+    expect(conValores.stderr).not.toContain('Aviso de filtros y mapa');
+
+    await conUmbrales(proyecto, { filtros: 1 });
+    const bajo = await correrElPaso(paso, proyecto);
+    expect(bajo.codigo, bajo.stderr).toBe(0);
+    expect(bajo.stderr).toMatch(/^Aviso de filtros y mapa: /mu);
+    const anotado = await correrElPaso(paso, proyecto, EN_ACTIONS);
+    expect(anotado.codigo, anotado.stderr).toBe(0);
+    expect(anotado.stderr).toMatch(/^::warning::Aviso de filtros y mapa: /mu);
   });
 
   it('el paso no altera dist/: mismos ficheros, tamaños y contenido antes y después', async () => {

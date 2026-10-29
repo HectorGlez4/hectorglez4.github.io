@@ -23,6 +23,9 @@ import {
   citasDeObraDeUnaCita,
 } from './ayuda/corpus.ts';
 import { leerTarjetaDeObra, tarjetaDeObraDe } from '../unit/ayuda/tarjeta-de-obra.js';
+import { filtrosDeLaBusqueda } from '../../src/lib/publicado.ts';
+import { conjuntoDeLosDatos, leerDatosDelCorpus } from '../../tools/lib/alcance.ts';
+import { rutasDelCorpus } from '../../tools/lib/corpus.ts';
 
 /**
  * Historia 2.8 — accesibilidad y comportamiento responsive.
@@ -2224,5 +2227,77 @@ test.describe('Historia 27.2 — /buscar/ con filtros pasa la auditoría automá
     await expect(page.locator('[data-salida]')).toBeVisible({ timeout: 10_000 });
     await expect(page.locator('[data-quitar]')).toBeVisible();
     await barrer(page, 'con un filtro a cero');
+  });
+});
+
+/**
+ * Historia 27.3 — `/buscar/` con los tres selectores: un Autor elegido, **la Obra del título más
+ * largo del Corpus** elegida (de `filtrosDeLaBusqueda`, el mismo dueño que el mapa de rótulos),
+ * «Quitar los filtros» y los resultados. A 320 px en las tres condiciones de la 26.9, sin
+ * desbordar ni `nowrap` en lo visible del formulario, y el barrido 2.2 AA en ese estado.
+ */
+test.describe('Historia 27.3 — /buscar/ con una Obra elegida', () => {
+  let elegida: Promise<{ autor: string; obra: string; titulo: string }> | undefined;
+  /** La Obra con el título más largo (desempate por nombre de ficha) y su Autor. */
+  const laObraMasLarga = () =>
+    (elegida ??= (async () => {
+      const raiz = join(new URL('../..', import.meta.url).pathname, 'corpus');
+      const { mapaDeObras } = filtrosDeLaBusqueda(conjuntoDeLosDatos(await leerDatosDelCorpus(rutasDelCorpus(raiz))));
+      const [obra, titulo, autor] = Object.entries(mapaDeObras)
+        .flatMap(([autor, obras]) => obras.map(([obra, titulo]) => [obra, titulo, autor] as const))
+        .sort((a, b) => b[1].length - a[1].length || (a[0] < b[0] ? -1 : 1))[0];
+      return { autor, obra, titulo };
+    })());
+
+  /** Elige el Autor y la Obra, y espera a que la búsqueda pinte. */
+  const elegirLaObra = async (page: Page) => {
+    const { autor, obra, titulo } = await laObraMasLarga();
+    await page.locator('#filtro-de-autor').selectOption(autor);
+    await expect(page.locator('#filtro-de-obra')).toBeVisible({ timeout: 10_000 });
+    await page.locator('#filtro-de-obra').selectOption(obra);
+    await expect(page.locator('[data-estado]')).toContainText(` en ${titulo}`, { timeout: 10_000 });
+    await expect(page.locator('[data-quitar]')).toBeVisible();
+    await page.waitForFunction(() => document.querySelector('[data-resultados]')!.children.length > 0, null, { timeout: 10_000 });
+  };
+
+  test('a 320 px, en las tres condiciones, no desborda ni lleva nowrap en el formulario', async ({ page }) => {
+    test.setTimeout(120_000);
+    const { titulo } = await laObraMasLarga();
+    expect(titulo.length).toBeGreaterThan(40);
+    for (const condicion of CONDICIONES) {
+      if (!(await cargarEn320(page, '/buscar/', condicion, elegirLaObra))) continue;
+      const donde = `/buscar/ con «${titulo}» elegida (${condicion})`;
+      const m = await anchoDeLaPagina(page);
+      expect.soft(m.scroll, `${donde} desborda: ${m.scroll} frente a ${m.ventana}`).toBeLessThanOrEqual(m.ventana);
+      expect.soft(await contenedoresQueRecortan(page), `${donde}: contenedores que se desplazan o recortan en horizontal`).toEqual([]);
+      const conNowrap = await page.evaluate(() =>
+        [...document.querySelectorAll('form *')]
+          .filter((e) => {
+            const r = e.getBoundingClientRect();
+            if (r.width <= 1 || r.height <= 1 || e.closest('.solo-para-lectores, .oculto')) return false;
+            const c = getComputedStyle(e) as CSSStyleDeclaration & { textWrapMode?: string };
+            return c.whiteSpace.includes('nowrap') || c.textWrapMode === 'nowrap';
+          })
+          .map((e) => e.tagName.toLowerCase() + (e.id ? `#${e.id}` : '')),
+      );
+      expect.soft(conNowrap, `${donde}: controles visibles con nowrap`).toEqual([]);
+      // El selector de Obra, con el título más largo elegido, cabe en la columna.
+      const obra = await page.evaluate(() => {
+        const s = document.querySelector('#filtro-de-obra')!.getBoundingClientRect();
+        return { derecha: s.right, ventana: document.documentElement.clientWidth };
+      });
+      expect.soft(obra.derecha, `${donde}: el selector de Obra se sale`).toBeLessThanOrEqual(obra.ventana);
+    }
+  });
+
+  test('pasa la auditoría automática con Autor, Obra, «Quitar los filtros» y resultados', async ({ page }) => {
+    test.setTimeout(60_000);
+    await page.goto('/buscar/');
+    await elegirLaObra(page);
+    const resultado = await new AxeBuilder({ page }).withTags([...ETIQUETAS_DEL_BARRIDO]).analyze();
+    const resumen = resultado.violations.map((v) => `${v.id}: ${v.help} (${v.nodes.length})`);
+    expect(resumen, `/buscar/ con una Obra elegida\n${resumen.join('\n')}`).toEqual([]);
+    const dudas = sinDecidir(resultado);
+    expect(dudas, `/buscar/ con una Obra elegida: axe no supo decidir\n${dudas.join('\n')}`).toEqual([]);
   });
 });

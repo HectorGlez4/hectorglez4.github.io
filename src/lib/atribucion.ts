@@ -13,7 +13,7 @@
 import type { Cita, Autor, SiguienteCita } from './publicado.ts';
 import type { ObraResuelta } from './obras.ts';
 import { MARCA } from './marca.ts';
-import { recuentoDeAutores, recuentoDeObras, temaEnFrase } from './recuentos.ts';
+import { recuentoDeAutores, recuentoDeCitas, recuentoDeObras, temaEnFrase } from './recuentos.ts';
 import {
   TARJETA_DEL_DIRECTORIO_DE_AUTORES,
   TARJETA_DEL_DIRECTORIO_DE_OBRAS,
@@ -27,8 +27,11 @@ import {
  * reexportan para la meta, la Tarjeta Social y las pruebas, que los siguen pidiendo a este módulo.
  * `temaEnFrase` se mudó con ellos en la Historia 27.2: el recuento de `/buscar/` la lleva al
  * navegador, y la «Siguiente cita sobre…» de la 24.5 la sigue usando desde aquí. Una sola regla.
+ * `recuentoDeCitas` se mudó en la Historia 27.3: el rótulo de cada Obra del selector de `/buscar/`
+ * —«Maestros ambulantes (23 citas)»— la lleva al navegador, y la Tarjeta de Obra, la Tarjeta Social
+ * y la Lista de Obras la siguen pidiendo aquí. Una sola concordancia.
  */
-export { recuentoDeAutores, recuentoDeObras, temaEnFrase };
+export { recuentoDeAutores, recuentoDeCitas, recuentoDeObras, temaEnFrase };
 
 /**
  * La procedencia compuesta —título de la Obra y año de la Cita, en ese orden— o `undefined`
@@ -163,15 +166,6 @@ export const SUPERFICIES_SIN_SEMBLANZA: readonly string[] = [
   rutaDelDirectorioDeObras(),
   TARJETA_DEL_DIRECTORIO_DE_OBRAS,
 ];
-
-/**
- * «1 cita», «12 citas»: el recuento de Citas con su unidad, en singular cuando es una — Historia
- * 26.3. Un solo dueño para la Tarjeta de Obra, la Tarjeta Social de Obra y la Fila de Autor del
- * Directorio, que antes escribían cada una su «1 cita».
- */
-export function recuentoDeCitas(n: number): string {
-  return n === 1 ? '1 cita' : `${n} citas`;
-}
 
 /**
  * Los hechos de una Fila de Autor del Directorio — Historia 26.3, FR-55, UX-DR84: sus años, si

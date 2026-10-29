@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import type { ObraResuelta } from '../../src/lib/obras.ts';
 import {
   filtrosDeLaBusqueda,
+  obrasDelAutor,
   obrasIndexables,
   type Autor,
   type Cita,
@@ -126,5 +127,81 @@ describe('Historia 27.1 — los filtros de la búsqueda', () => {
     expect(() => filtrosDeLaBusqueda({ ...datos, citas: [...datos.citas, cita('fantasma-x', 'fantasma', [])] })).toThrow(
       /«fantasma-x» nombra al Autor «fantasma»/u,
     );
+  });
+});
+
+describe('Historia 27.3 — el mapa de rótulos de las Obras', () => {
+  // Horacio, con dos Obras: «Sátiras» con tres Citas y «Odas» con dos (y una sin Obra). Rubén Darío,
+  // con «Odas» de una sola Cita —homónima de la de Horacio— y el resto sin Obra. Nadie, sin Citas.
+  const SATIRAS = obra('horacio--satiras', 'horacio', 'Sátiras', 3);
+  function conDosObras() {
+    const datos = conjunto();
+    return {
+      ...datos,
+      citas: [
+        ...datos.citas,
+        cita('horacio-satira-1', 'horacio', ['el-tiempo'], SATIRAS),
+        cita('horacio-satira-2', 'horacio', [], SATIRAS),
+        cita('horacio-satira-3', 'horacio', [], SATIRAS),
+      ],
+    };
+  }
+
+  it('por Autor, sus Obras en el orden de `obrasDelAutor`, como pares [nombre de ficha, título]', () => {
+    const datos = conDosObras();
+    const { mapaDeObras } = filtrosDeLaBusqueda(datos);
+    expect(mapaDeObras).toEqual({
+      horacio: [
+        ['horacio--satiras', 'Sátiras'],
+        ['horacio--odas', 'Odas'],
+      ],
+      'ruben-dario': [['ruben-dario--odas', 'Odas']],
+    });
+    for (const [autor, obras] of Object.entries(mapaDeObras)) {
+      expect(obras.map(([nombre]) => nombre), autor).toEqual(obrasDelAutor(datos.citas, autor).obras.map((o) => o.nombre));
+    }
+  });
+
+  it('los Autores van por slug, y el que no tiene Obras —o no tiene Citas— no tiene clave', () => {
+    const datos = conDosObras();
+    // Rubén Darío primero en la entrada: el mapa sigue saliendo por slug.
+    const { mapaDeObras } = filtrosDeLaBusqueda({ ...datos, citas: [...datos.citas].reverse() });
+    expect(Object.keys(mapaDeObras)).toEqual(['horacio', 'ruben-dario']);
+    const sinObras = filtrosDeLaBusqueda({
+      ...datos,
+      citas: datos.citas.filter((c) => c.autor !== 'ruben-dario' || c.obra === undefined),
+    }).mapaDeObras;
+    expect(Object.keys(sinObras)).toEqual(['horacio']);
+    expect('nadie' in sinObras).toBe(false);
+  });
+
+  it('homónimas: cada «Odas» en su Autor, con su nombre de ficha', () => {
+    const { mapaDeObras } = filtrosDeLaBusqueda(conDosObras());
+    expect(mapaDeObras.horacio).toContainEqual(['horacio--odas', 'Odas']);
+    expect(mapaDeObras['ruben-dario']).toEqual([['ruben-dario--odas', 'Odas']]);
+  });
+
+  it('toda Obra con Citas publicadas: también la de una Cita, que no se indexa, y la que la congelación deja fuera', () => {
+    const datos = conDosObras();
+    expect(obrasIndexables(datos.citas, null).map((o) => o.nombre)).not.toContain('ruben-dario--odas');
+    // Congelada con solo «Sátiras» en la lista: «Odas» de Horacio deja de indexarse.
+    const congelada = obrasIndexables(datos.citas, { desde: '2026-10-01', indexables: ['horacio--satiras'] });
+    expect(congelada.map((o) => o.nombre)).not.toContain('horacio--odas');
+    const nombres = Object.values(filtrosDeLaBusqueda(datos).mapaDeObras).flatMap((obras) => obras.map(([nombre]) => nombre));
+    expect(nombres.sort()).toEqual(['horacio--odas', 'horacio--satiras', 'ruben-dario--odas']);
+  });
+
+  it('retitular cambia el título, nunca el nombre ni el orden de la lista a igualdad de recuento', () => {
+    const antes = filtrosDeLaBusqueda(conDosObras()).mapaDeObras;
+    const datos = conjunto({ ...ODAS_H, titulo: 'Carmina' });
+    const despues = filtrosDeLaBusqueda(datos).mapaDeObras;
+    expect(despues.horacio).toEqual([['horacio--odas', 'Carmina']]);
+    expect(antes.horacio.map(([nombre]) => nombre)).toContain('horacio--odas');
+  });
+
+  it('el mapa y las opciones de Obra dicen las mismas Obras', () => {
+    const { mapaDeObras, obras } = filtrosDeLaBusqueda(conDosObras());
+    const delMapa = Object.entries(mapaDeObras).flatMap(([autor, lista]) => lista.map(([nombre, titulo]) => [nombre, titulo, autor]));
+    expect(delMapa.sort()).toEqual(obras.map((o) => [o.valor, o.rotulo, o.autor]).sort());
   });
 });

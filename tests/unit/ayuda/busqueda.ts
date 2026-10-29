@@ -1,7 +1,7 @@
 import { createContext, runInContext } from 'node:vm';
 
 /**
- * La isla de `/buscar/`, ejecutada — Historias 23.8 y 27.2.
+ * La isla de `/buscar/`, ejecutada — Historias 23.8, 27.2 y 27.3.
  *
  * Es el «ejecutándola» que pedía la prueba de la 23.6. Desde la 27.2 la isla es el `<script>`
  * empaquetado de `src/components/Busqueda.astro`, un fichero de `/_astro/` que se aplana a guion
@@ -41,6 +41,14 @@ import { createContext, runInContext } from 'node:vm';
  *     también `options`, y `llamadas()` da en orden cada llamada al módulo (`options` con su
  *     argumento, `init`, `search` con su consulta —y, si las lleva, sus opciones: los `filters` y
  *     el `sort` de la 27.2— y `destroy`).
+ *   · Historia 27.3 — el `.selector` de Obra: cada selector va en su caja (`parentElement`) dentro
+ *     del formulario, y la de Obra se puede quitar (`remove`) y volver a poner tras la de Autor
+ *     (`after`); su `<select>` cambia de opciones con `replaceChildren` y `new Option`. El
+ *     `fetch` del mapa de rótulos —solo de `/buscar/obras.json`; otra dirección lanza— responde
+ *     con el mapa configurado (por omisión, `{}`), puede fallar, dar un JSON que no se lee o
+ *     esperar a `responderAlMapa()`; cada petición se apunta. `filters()` de Pagefind da
+ *     `{ obra: recuentosDeObra }` (por omisión, `{}`), puede rechazar o esperar a
+ *     `responderAFiltros()`, y se apunta en `llamadas()` como `['filters']`.
  *
  * `analizado()` es lo que la isla hizo **al evaluarse**, antes de ninguna escucha ni de ninguna
  * promesa: ahí no puede haber ni medición ni escritura en el historial. `rechazos()` son las
@@ -91,6 +99,18 @@ export interface OpcionesDeLaIsla {
   /** Las opciones de los selectores (sin la primera, «Todos…»). Por omisión, `AUTORES` y `TEMAS`. */
   autores?: OpcionDeSelector[];
   temas?: OpcionDeSelector[];
+  /** Historia 27.3 — lo que da el `fetch` del mapa de rótulos, como JSON. Por omisión, `{}`. */
+  mapa?: unknown;
+  /** Cómo falla el mapa: la red (`fetch` rechaza), un estado que no es 2xx o un JSON que no se lee. */
+  fallaElMapa?: 'red' | 'estado' | 'json';
+  /** Si el mapa espera a `responderAlMapa()`. */
+  mapaManual?: boolean;
+  /** Los recuentos de `obra` que da `filters()`. Por omisión, ninguno (`{}`). */
+  recuentosDeObra?: Record<string, number>;
+  /** Si `filters()` rechaza. */
+  fallanLosFiltros?: boolean;
+  /** Si `filters()` espera a `responderAFiltros()`. */
+  filtrosManuales?: boolean;
 }
 
 /** Lo que `search` recibe como segundo argumento, si lo recibe. */
@@ -157,6 +177,25 @@ class Elemento {
 
   get children() {
     return this.hijos;
+  }
+
+  get parentElement() {
+    return this.padre;
+  }
+
+  /** Se quita de su padre; sin padre, no hace nada, como en el navegador. */
+  remove() {
+    if (this.padre === null) return;
+    this.padre.hijos.splice(this.padre.hijos.indexOf(this), 1);
+    this.padre = null;
+  }
+
+  /** Pone `nodo` justo detrás de este elemento, en su padre (quitándolo antes de donde esté). */
+  after(nodo: Elemento) {
+    if (this.padre === null) throw new Error(`el entorno no sabe poner nada detrás de <${this.tagName}> sin padre`);
+    nodo.remove();
+    nodo.padre = this.padre;
+    this.padre.hijos.splice(this.padre.hijos.indexOf(this) + 1, 0, nodo);
   }
 
   append(...nodos: Elemento[]) {
@@ -249,6 +288,40 @@ function selector(id: string, primera: string, opciones: OpcionDeSelector[]) {
   return elemento;
 }
 
+/**
+ * Historia 27.3 — el `<select>` de Obra: sus opciones son sus hijos, que la isla cambia con
+ * `replaceChildren`; su valor es el de la opción elegida, y escribirlo elige otra.
+ */
+function selectorDinamico(id: string, primera: string) {
+  const elemento = new Elemento('select');
+  elemento.dataset.selector = id;
+  const todas = new Elemento('option');
+  todas.value = '';
+  todas.textContent = primera;
+  elemento.append(todas);
+  let elegida = 0;
+  Object.defineProperty(elemento, 'options', { get: () => elemento.hijos });
+  Object.defineProperty(elemento, 'selectedIndex', {
+    get: () => elegida,
+    set: (i: number) => {
+      elegida = i;
+    },
+  });
+  Object.defineProperty(elemento, 'value', {
+    get: () => elemento.hijos[elegida]?.value ?? '',
+    set: (valor: unknown) => {
+      elegida = elemento.hijos.findIndex((o) => o.value === String(valor));
+    },
+  });
+  const reemplazar = elemento.replaceChildren.bind(elemento);
+  elemento.replaceChildren = (...nodos: Elemento[]) => {
+    reemplazar(...nodos);
+    // Como en el navegador: al cambiar las opciones, la elegida pasa a ser la primera.
+    elegida = nodos.length > 0 ? 0 : -1;
+  };
+  return elemento;
+}
+
 export function islaDeBusquedaEnUnSandbox(guion: string, opciones: OpcionesDeLaIsla = {}) {
   /*
    * La sustitución del `import(` se comprueba: un guion con otro especificador, o con más de una
@@ -313,11 +386,22 @@ export function islaDeBusquedaEnUnSandbox(guion: string, opciones: OpcionesDeLaI
   salida.dentro.set('.sugerencia', sugerencia);
   const formulario = new Elemento('form');
   const autor = selector('autor', 'Todos los autores', opciones.autores ?? AUTORES);
+  const obra = selectorDinamico('obra', 'Todas sus obras');
   const tema = selector('tema', 'Todos los temas', opciones.temas ?? TEMAS);
   const quitar = new Elemento('button');
   quitar.hidden = true;
   const sombra = new Elemento('p');
-  formulario.append(campo, autor, tema, quitar);
+  // Historia 27.3 — cada selector en su caja, como el `.selector` de la plantilla.
+  const caja = (dentro: Elemento) => {
+    const div = new Elemento('div');
+    div.className = 'selector';
+    div.append(dentro);
+    return div;
+  };
+  const cajaDeAutor = caja(autor);
+  const cajaDeObra = caja(obra);
+  const cajaDeTema = caja(tema);
+  formulario.append(campo, cajaDeAutor, cajaDeObra, cajaDeTema, quitar);
   // El contenido de la plantilla: lo que la isla saca de su clon, y nada más.
   const clon = new Elemento('#fragmento');
   clon.append(formulario, sombra);
@@ -325,6 +409,7 @@ export function islaDeBusquedaEnUnSandbox(guion: string, opciones: OpcionesDeLaI
     ['form', formulario],
     ['[data-consulta]', campo],
     ['[data-selector-de-autor]', autor],
+    ['[data-selector-de-obra]', obra],
     ['[data-selector-de-tema]', tema],
     ['[data-quitar]', quitar],
     ['.sombra', sombra],
@@ -419,6 +504,30 @@ export function islaDeBusquedaEnUnSandbox(guion: string, opciones: OpcionesDeLaI
 
   // El índice de mentira. Dónde falla se puede cambiar a mitad de prueba, con `fallar`.
   let falla = opciones.falla;
+  // Historia 27.3 — `filters()` y el mapa de rótulos, configurables a mitad de prueba.
+  let fallanLosFiltros = opciones.fallanLosFiltros === true;
+  let recuentosDeObra: Record<string, number> = opciones.recuentosDeObra ?? {};
+  const filtrosEsperando: (() => void)[] = [];
+  let fallaElMapa = opciones.fallaElMapa;
+  let mapa: unknown = opciones.mapa ?? {};
+  const pedidosDelMapa: string[] = [];
+  const mapaEsperando: (() => void)[] = [];
+  const pedirElMapa = (direccion: unknown) => {
+    if (direccion !== '/buscar/obras.json') throw new Error(`el entorno no sabe pedir «${String(direccion)}» con fetch`);
+    pedidosDelMapa.push(direccion);
+    const responder = () => {
+      if (fallaElMapa === 'red') return Promise.reject(new TypeError('Failed to fetch'));
+      const ok = fallaElMapa !== 'estado';
+      const copia = JSON.parse(JSON.stringify(mapa)) as unknown;
+      return Promise.resolve({
+        ok,
+        status: ok ? 200 : 404,
+        json: () => (fallaElMapa === 'json' ? Promise.reject(new SyntaxError('Unexpected token')) : Promise.resolve(copia)),
+      });
+    };
+    if (!opciones.mapaManual) return responder();
+    return new Promise((resolver, rechazar) => mapaEsperando.push(() => responder().then(resolver, rechazar)));
+  };
   let destrucciones = 0;
   /** Cada llamada al módulo, en orden: `['options', o]`, `['init']`, `['search', consulta]`, `['destroy']`. */
   const llamadasAlIndice: unknown[][] = [];
@@ -461,6 +570,13 @@ export function islaDeBusquedaEnUnSandbox(guion: string, opciones: OpcionesDeLaI
       llamadasAlIndice.push(['destroy']);
       destrucciones++;
     },
+    filters: () => {
+      llamadasAlIndice.push(['filters']);
+      const responder = () =>
+        fallanLosFiltros ? Promise.reject(new Error('los filtros no llegan')) : Promise.resolve({ obra: { ...recuentosDeObra } });
+      if (!opciones.filtrosManuales) return responder();
+      return new Promise((resolver, rechazar) => filtrosEsperando.push(() => responder().then(resolver, rechazar)));
+    },
   };
   const importar = (especificador: string) => {
     pedidas.push(especificador);
@@ -483,6 +599,15 @@ export function islaDeBusquedaEnUnSandbox(guion: string, opciones: OpcionesDeLaI
       deLaVentana.push({ tipo, oyente, unaVez: typeof ajustes === 'object' && ajustes.once === true }),
     __medir: (...argumentos: unknown[]) => void emitidos.push(argumentos),
     __importar: importar,
+    fetch: pedirElMapa,
+    /** `new Option(texto, valor)`, como en el navegador. */
+    Option: class extends Elemento {
+      constructor(texto = '', valor = '') {
+        super('option');
+        this.textContent = String(texto);
+        this.value = String(valor);
+      }
+    },
     Event,
     dispatchEvent: () => true,
   };
@@ -582,6 +707,50 @@ export function islaDeBusquedaEnUnSandbox(guion: string, opciones: OpcionesDeLaI
     foco: () => (enfocado === campo ? 'campo' : null),
     /** El valor elegido en cada selector. */
     elegidos: () => ({ autor: autor.value, tema: tema.value }),
+    /**
+     * Historia 27.3 — el selector de Obra: si está en el formulario, el orden de las cajas del
+     * formulario (`campo`, `autor`, `obra`, `tema`, `quitar`), sus opciones (valor y rótulo) y el
+     * valor elegido.
+     */
+    obra: () => ({
+      enElDom: cajaDeObra.padre === formulario,
+      orden: formulario.hijos.map((h) =>
+        h === campo ? 'campo' : h === cajaDeAutor ? 'autor' : h === cajaDeObra ? 'obra' : h === cajaDeTema ? 'tema' : h === quitar ? 'quitar' : h.tagName.toLowerCase(),
+      ),
+      opciones: obra.hijos.map((o) => ({ valor: o.value, rotulo: o.textContent })),
+      valor: obra.value,
+    }),
+    /** Las peticiones del mapa de rótulos, en orden. */
+    pedidosDelMapa: () => [...pedidosDelMapa],
+    /** Resuelve la primera petición del mapa que espera (con `mapaManual`) y deja correr las promesas. */
+    responderAlMapa: async () => {
+      await vaciar();
+      const siguiente = mapaEsperando.shift();
+      if (!siguiente) throw new Error('no hay ninguna petición del mapa esperando');
+      siguiente();
+      await vaciar();
+    },
+    /** Resuelve el primer `filters()` que espera (con `filtrosManuales`) y deja correr las promesas. */
+    responderAFiltros: async () => {
+      await vaciar();
+      const siguiente = filtrosEsperando.shift();
+      if (!siguiente) throw new Error('no hay ningún filters() esperando');
+      siguiente();
+      await vaciar();
+    },
+    /** Desde ahora el mapa falla así (o deja de fallar, sin argumento), y da este mapa. */
+    fallarElMapa: (como?: OpcionesDeLaIsla['fallaElMapa']) => {
+      fallaElMapa = como;
+    },
+    /** Desde ahora `filters()` rechaza (o deja de rechazar). */
+    fallarLosFiltros: (si = true) => {
+      fallanLosFiltros = si;
+    },
+    /** Cambia lo que darán el mapa y `filters()` a partir de ahora: otro despliegue. */
+    cambiarDatosDeObra: (nuevo: { mapa?: unknown; recuentosDeObra?: Record<string, number> }) => {
+      if (nuevo.mapa !== undefined) mapa = nuevo.mapa;
+      if (nuevo.recuentosDeObra !== undefined) recuentosDeObra = nuevo.recuentosDeObra;
+    },
     /** Lo que la isla insertó: los hijos de la raíz y del contenedor del recuento, por etiqueta. */
     insertado: () => ({
       raiz: raiz.hijos.map((h) => h.tagName.toLowerCase()),
@@ -591,8 +760,9 @@ export function islaDeBusquedaEnUnSandbox(guion: string, opciones: OpcionesDeLaI
      * Elige en un selector —como el visitante, que da `input` y `change`— sin dejar pasar el tiempo.
      * `''` es «Todos…».
      */
-    elegir: (cual: 'autor' | 'tema', valor: string) => {
-      const elemento = cual === 'autor' ? autor : tema;
+    elegir: (cual: 'autor' | 'obra' | 'tema', valor: string) => {
+      if (cual === 'obra' && cajaDeObra.padre !== formulario) throw new Error('el selector de Obra no está en el DOM');
+      const elemento = cual === 'autor' ? autor : cual === 'obra' ? obra : tema;
       elemento.value = valor;
       if ((elemento as unknown as { selectedIndex: number }).selectedIndex < 0) {
         throw new Error(`el selector de ${cual} no tiene la opción «${valor}»`);
@@ -683,6 +853,7 @@ export function islaDeBusquedaEnUnSandbox(guion: string, opciones: OpcionesDeLaI
       lista: lista.oyentes.map((o) => o.tipo),
       formulario: formulario.oyentes.map((o) => o.tipo),
       autor: autor.oyentes.map((o) => o.tipo),
+      obra: obra.oyentes.map((o) => o.tipo),
       tema: tema.oyentes.map((o) => o.tipo),
       quitar: quitar.oyentes.map((o) => o.tipo),
     }),

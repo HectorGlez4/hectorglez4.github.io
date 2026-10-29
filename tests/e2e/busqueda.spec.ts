@@ -9,9 +9,10 @@ import {
 import { MARCA } from '../../src/lib/marca.ts';
 import { ASENTAMIENTO_DE_BUSQUEDA, EVENTOS } from '../../src/lib/medicion.ts';
 import { tramoDe } from '../../src/lib/vocabulario.ts';
-import { temaEnFrase } from '../../src/lib/recuentos.ts';
+import { recuentoDeCitas, temaEnFrase } from '../../src/lib/recuentos.ts';
+import { RUTA_DEL_MAPA_DE_OBRAS } from '../../src/lib/busqueda.ts';
 import { citaConLosDosBloques, temaBajoUmbral, textoDe } from './ayuda/corpus.ts';
-import { citasPorObra, filtrosDeLaBusqueda, type ConjuntoPublicable } from '../../src/lib/publicado.ts';
+import { citasPorObra, filtrosDeLaBusqueda, obrasDelAutor, type ConjuntoPublicable } from '../../src/lib/publicado.ts';
 import { clavesDeOrden, ordenDeLaListaDeObras, porSlug as porSlugDeCita, rutaDeLaObra } from '../../src/lib/obras.ts';
 import { CITAS_POR_PAGINA } from '../../src/lib/umbrales.ts';
 import { conjuntoDeLosDatos, leerDatosDelCorpus } from '../../tools/lib/alcance.ts';
@@ -970,8 +971,10 @@ test.describe('Historia 27.1 — la Cita declara sus filtros y su resultado llev
     expect(citas.map((c) => slugDe(c.href)), FRASE).toContain(elegida!.slug);
     // La línea de Autor no ensancha la página: tampoco en el móvil, donde también corre.
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
-    // Desde la 27.2, los dos selectores de Autor y de Tema, y ningún otro control de filtro (Obra es la 27.3).
+    // Desde la 27.2, los dos selectores de Autor y de Tema, y ningún otro control de filtro: el de
+    // Obra (27.3) solo existe con un Autor elegido.
     expect(await page.locator('fieldset select').count()).toBe(2);
+    expect(await page.locator('#filtro-de-obra').count()).toBe(0);
     expect(await page.locator('input[type="checkbox"], input[type="radio"]').count()).toBe(0);
   });
 
@@ -1191,11 +1194,14 @@ test.describe('Historia 27.2 — la búsqueda se acota por Autor y por Tema', ()
   test('la tabulación sigue el orden del documento: campo, Autor, Tema, «Quitar los filtros» y los resultados', async ({ page, browserName }) => {
     test.skip(browserName !== 'chromium', 'El orden de tabulación se mira en Chromium.');
     const autor = await elAutorMayor();
+    // Historia 27.3 — si el Autor tiene Obras, su selector va entre el de Autor y el de Tema.
+    const conObras = autor.valor in filtrosDeLaBusqueda(await conjunto()).mapaDeObras;
     await page.goto('/buscar/');
     await page.locator(AUTOR).selectOption(autor.valor);
     await expect(page.locator('[data-estado]')).toHaveText(/ de /u, { timeout: 10_000 });
+    if (conObras) await expect(page.locator('#filtro-de-obra')).toBeVisible({ timeout: 10_000 });
     await page.locator('[data-consulta]').focus();
-    for (const siguiente of [AUTOR, TEMA, QUITAR, '[data-resultados] .resultado a >> nth=0']) {
+    for (const siguiente of [AUTOR, ...(conObras ? ['#filtro-de-obra'] : []), TEMA, QUITAR, '[data-resultados] .resultado a >> nth=0']) {
       await page.keyboard.press('Tab');
       await expect(page.locator(siguiente)).toBeFocused();
     }
@@ -1334,6 +1340,205 @@ test.describe('Historia 27.2 — la búsqueda se acota por Autor y por Tema', ()
     expect(medidas.desborda).toBe(false);
     for (const select of medidas.selects) {
       expect(select.cuerpo).toBe('17px');
+      expect(select.alto).toBeGreaterThanOrEqual(44);
+      expect(Math.abs(select.ancho - medidas.anchoDelCampo)).toBeLessThanOrEqual(1);
+    }
+    expect(medidas.quitar).toBeGreaterThanOrEqual(44);
+  });
+});
+
+/*
+ * Historia 27.3 (FR-7, AD-11, UX-DR87) — la búsqueda se acota también por una Obra del Autor
+ * elegido. Lo esperado sale del Corpus en disco con los dueños del build: el mapa y los recuentos
+ * de `filtrosDeLaBusqueda`, el orden de la Lista de Obras de `obrasDelAutor`, y el orden de las
+ * Citas de una Obra de su propia Página de Obra, la superficie que la búsqueda tiene que repetir.
+ */
+test.describe('Historia 27.3 — la búsqueda se acota también por una Obra del Autor elegido', () => {
+  const RAIZ_DEL_CORPUS = join(new URL('../..', import.meta.url).pathname, 'corpus');
+  let leido: Promise<ConjuntoPublicable> | undefined;
+  const conjunto = () =>
+    (leido ??= (async () => conjuntoDeLosDatos(await leerDatosDelCorpus(rutasDelCorpus(RAIZ_DEL_CORPUS))))());
+
+  const AUTOR = '#filtro-de-autor';
+  const OBRA = '#filtro-de-obra';
+  const TEMA = '#filtro-de-tema';
+  const QUITAR = '[data-quitar]';
+  const slugDe = (href: string) => new URL(href, 'http://x').pathname.split('/')[2];
+  const porValor = (a: { valor: string }, b: { valor: string }) => (a.valor < b.valor ? -1 : a.valor > b.valor ? 1 : 0);
+
+  /** El Autor con más Obras (desempate por slug), sus opciones esperadas y su nombre. */
+  async function elAutorConMasObras() {
+    const filtros = filtrosDeLaBusqueda(await conjunto());
+    const [slug, obras] = Object.entries(filtros.mapaDeObras).sort((a, b) => b[1].length - a[1].length || (a[0] < b[0] ? -1 : 1))[0];
+    const recuento = new Map(filtros.obras.map((o) => [o.valor, o.recuento]));
+    return {
+      slug,
+      nombre: filtros.autores.find((a) => a.valor === slug)!.rotulo,
+      obras: obras.map(([valor, titulo]) => ({ valor, titulo, recuento: recuento.get(valor)! })),
+    };
+  }
+
+  /** Las opciones del selector de Obra como se ven: valor y texto. */
+  const opcionesDeObra = (page: Page) =>
+    page.locator(`${OBRA} option`).evaluateAll((os) => os.map((o) => ({ valor: (o as HTMLOptionElement).value, rotulo: o.textContent })));
+
+  test('sin Autor no hay selector de Obra ni se pide el mapa: al cargar, al enfocar, al teclear ni con un Tema', async ({ page }) => {
+    const pedidos: string[] = [];
+    page.on('request', (r) => pedidos.push(new URL(r.url()).pathname));
+    await page.goto('/buscar/?q=vida', { waitUntil: 'networkidle' });
+    await expect(page.locator('[data-estado]')).not.toBeEmpty({ timeout: 10_000 });
+    await page.locator('[data-consulta]').focus();
+    await page.locator('[data-consulta]').fill('camino');
+    await page.locator('[data-consulta]').fill('vida');
+    // El Tema con más Citas: con «vida» da resultados, y el recuento lo nombra.
+    const tema = [...filtrosDeLaBusqueda(await conjunto()).temas].sort((a, b) => b.recuento - a.recuento || porValor(a, b))[0];
+    await page.locator(TEMA).selectOption(tema.valor);
+    await expect(page.locator('[data-estado]')).toHaveText(/ sobre /u, { timeout: 10_000 });
+    await page.waitForTimeout(500);
+    expect(await page.locator(OBRA).count()).toBe(0);
+    expect(pedidos).not.toContain(RUTA_DEL_MAPA_DE_OBRAS);
+    // El HTML no trae ni el mapa ni ninguna opción de Obra.
+    const html = await (await page.request.get('/buscar/')).text();
+    const { obras } = await elAutorConMasObras();
+    for (const obra of obras) expect(html, obra.valor).not.toContain(obra.valor);
+  });
+
+  test('al elegir un Autor, «Obra» aparece entre Autor y Tema con sus Obras en el orden de su lista y su recuento, sin mover el foco', async ({ page }) => {
+    test.setTimeout(60_000);
+    const autor = await elAutorConMasObras();
+    expect(autor.obras.length).toBeGreaterThan(1);
+    // El orden del mapa es el de `obrasDelAutor`: el de su Página de Autor.
+    expect(autor.obras.map((o) => o.valor)).toEqual(obrasDelAutor((await conjunto()).citas, autor.slug).obras.map((o) => o.nombre));
+    const mapa = page.waitForResponse((r) => new URL(r.url()).pathname === RUTA_DEL_MAPA_DE_OBRAS, { timeout: 10_000 });
+    await page.goto('/buscar/');
+    await page.locator(AUTOR).focus();
+    await page.locator(AUTOR).selectOption(autor.slug);
+    expect((await mapa).headers()['content-type']).toMatch(/^application\/json/u);
+    await expect(page.locator(OBRA)).toBeVisible({ timeout: 10_000 });
+    await expect(page.locator(AUTOR)).toBeFocused();
+    expect(await page.locator('fieldset select').evaluateAll((ss) => ss.map((s) => s.id))).toEqual([
+      'filtro-de-autor',
+      'filtro-de-obra',
+      'filtro-de-tema',
+    ]);
+    await expect(page.locator(`label[for="filtro-de-obra"]`)).toHaveText('Obra');
+    expect(await opcionesDeObra(page)).toEqual([
+      { valor: '', rotulo: 'Todas sus obras' },
+      ...autor.obras.map((o) => ({ valor: o.valor, rotulo: `${o.titulo} (${recuentoDeCitas(o.recuento)})` })),
+    ]);
+  });
+
+  test('elegir una Obra da «N citas de {Autor} en {título}.» y solo sus Citas, en el orden de su Página de Obra', async ({ page }) => {
+    test.setTimeout(60_000);
+    const filtros = filtrosDeLaBusqueda(await conjunto());
+    // La Obra con más Citas que quepan en una tanda (y en la página 1 de su Página de Obra).
+    const obra = [...filtros.obras]
+      .filter((o) => o.recuento >= 2 && o.recuento <= Math.min(30, CITAS_POR_PAGINA))
+      .sort((a, b) => b.recuento - a.recuento || porValor(a, b))[0];
+    const titulo = Object.values(filtros.mapaDeObras)
+      .flat()
+      .find(([valor]) => valor === obra.valor)![1];
+    const nombre = filtros.autores.find((a) => a.valor === obra.autor)!.rotulo;
+    const pagina = await (await page.request.get(rutaDeLaObra({ nombre: obra.valor }))).text();
+    const delLibro = [...new Set([...pagina.matchAll(/href="\/cita\/([^"/#?]+)\/?"/gu)].map((m) => decodeURIComponent(m[1])))];
+    expect(delLibro).toHaveLength(obra.recuento);
+
+    await page.goto('/buscar/');
+    await page.locator(AUTOR).selectOption(obra.autor);
+    await expect(page.locator(OBRA)).toBeVisible({ timeout: 10_000 });
+    await page.locator(OBRA).selectOption(obra.valor);
+    await expect(page.locator('[data-estado]')).toHaveText(`${obra.recuento} citas de ${nombre} en ${titulo}.`, { timeout: 10_000 });
+    const pintados = await resultados(page);
+    expect(pintados.every((r) => r.tipo === 'cita')).toBe(true);
+    expect(pintados.map((r) => slugDe(r.href))).toEqual(delLibro);
+  });
+
+  test('cambiar el Autor rehace el selector con las suyas; quitarlo, o «Quitar los filtros», lo quita', async ({ page }) => {
+    test.setTimeout(60_000);
+    const filtros = filtrosDeLaBusqueda(await conjunto());
+    const [primero, segundo] = Object.keys(filtros.mapaDeObras).sort();
+    await page.goto('/buscar/');
+    await page.locator(AUTOR).selectOption(primero);
+    await expect(page.locator(OBRA)).toBeVisible({ timeout: 10_000 });
+    await page.locator(OBRA).selectOption(filtros.mapaDeObras[primero][0][0]);
+    await expect(page.locator('[data-estado]')).toHaveText(/ en /u, { timeout: 10_000 });
+    // Otro Autor: la Obra fuera al momento, y de vuelta con las del nuevo.
+    await page.locator(AUTOR).selectOption(segundo);
+    expect(await page.locator(OBRA).count()).toBe(0);
+    await expect(page.locator(OBRA)).toBeVisible({ timeout: 10_000 });
+    expect((await opcionesDeObra(page)).slice(1).map((o) => o.valor)).toEqual(filtros.mapaDeObras[segundo].map(([valor]) => valor));
+    await expect(page.locator(OBRA)).toHaveValue('');
+    // Sin Autor, sin Obra.
+    await page.locator(AUTOR).selectOption('');
+    await expect(page.locator(OBRA)).toHaveCount(0);
+    // «Quitar los filtros» también la quita.
+    await page.locator(AUTOR).selectOption(primero);
+    await expect(page.locator(OBRA)).toBeVisible({ timeout: 10_000 });
+    await page.locator(QUITAR).click();
+    await expect(page.locator(OBRA)).toHaveCount(0);
+    await expect(page.locator('[data-consulta]')).toBeFocused();
+  });
+
+  test('un Autor sin Obras no tiene selector de Obra', async ({ page }) => {
+    const filtros = filtrosDeLaBusqueda(await conjunto());
+    const sinObras = filtros.autores.filter((a) => !(a.valor in filtros.mapaDeObras)).sort(porValor)[0];
+    test.skip(sinObras === undefined, 'El Corpus no tiene hoy ningún Autor sin Obras: lo cubre el entorno simulado de medicion.test.ts.');
+    await page.goto('/buscar/');
+    await page.locator(AUTOR).selectOption(sinObras!.valor);
+    await expect(page.locator('[data-estado]')).toContainText(` de ${sinObras!.rotulo}.`, { timeout: 10_000 });
+    await page.waitForTimeout(1_000);
+    await expect(page.locator(OBRA)).toHaveCount(0);
+  });
+
+  test('la tabulación con Obra: campo, Autor, Obra, Tema, «Quitar los filtros» y los resultados', async ({ page, browserName }) => {
+    test.skip(browserName !== 'chromium', 'El orden de tabulación se mira en Chromium.');
+    const autor = await elAutorConMasObras();
+    await page.goto('/buscar/');
+    await page.locator(AUTOR).selectOption(autor.slug);
+    await expect(page.locator(OBRA)).toBeVisible({ timeout: 10_000 });
+    await page.locator(OBRA).selectOption(autor.obras[0].valor);
+    await expect(page.locator('[data-estado]')).toHaveText(/ en /u, { timeout: 10_000 });
+    await page.locator('[data-consulta]').focus();
+    for (const siguiente of [AUTOR, OBRA, TEMA, QUITAR, '[data-resultados] .resultado a >> nth=0']) {
+      await page.keyboard.press('Tab');
+      await expect(page.locator(siguiente)).toBeFocused();
+    }
+  });
+
+  test('a 360 px: los tres selectores y «Quitar los filtros», a todo el ancho y sin desplazamiento lateral; se anota su alto', async ({ page }) => {
+    test.skip(page.viewportSize()?.width !== 360, 'Se mide en el proyecto móvil, a 360 px.');
+    const autor = await elAutorConMasObras();
+    await page.goto('/buscar/');
+    await page.locator(AUTOR).selectOption(autor.slug);
+    await expect(page.locator(OBRA)).toBeVisible({ timeout: 10_000 });
+    await expect(page.locator(QUITAR)).toBeVisible();
+    const medidas = await page.evaluate(() => {
+      const fieldset = document.querySelector('fieldset')!;
+      const campo = document.querySelector('[data-consulta]')!;
+      return {
+        fieldset: fieldset.getBoundingClientRect().height,
+        anchoDelCampo: campo.getBoundingClientRect().width,
+        selects: [...fieldset.querySelectorAll('select')].map((s) => ({
+          ancho: s.getBoundingClientRect().width,
+          alto: s.getBoundingClientRect().height,
+        })),
+        quitar: document.querySelector('[data-quitar]')!.getBoundingClientRect().height,
+        desborda: document.documentElement.scrollWidth > window.innerWidth,
+        // Lo visible del formulario: las opciones de un selector cerrado no se pintan.
+        nowrap: [...fieldset.querySelectorAll('*')].filter((e) => {
+          const r = e.getBoundingClientRect();
+          if (r.width <= 1 || r.height <= 1 || e.closest('.solo-para-lectores')) return false;
+          return getComputedStyle(e).whiteSpace.includes('nowrap');
+        }).length,
+      };
+    });
+    // UX-DR87 estimó unos 252 px para los tres selectores y «Quitar los filtros».
+    test.info().annotations.push({ type: 'alto del fieldset con tres selectores a 360 px', description: `${medidas.fieldset} px` });
+    console.log(`Historia 27.3 — fieldset con tres selectores a 360 px: ${medidas.fieldset} px de alto (${JSON.stringify(medidas)})`);
+    expect(medidas.selects).toHaveLength(3);
+    expect(medidas.desborda).toBe(false);
+    expect(medidas.nowrap).toBe(0);
+    for (const select of medidas.selects) {
       expect(select.alto).toBeGreaterThanOrEqual(44);
       expect(Math.abs(select.ancho - medidas.anchoDelCampo)).toBeLessThanOrEqual(1);
     }

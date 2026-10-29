@@ -815,12 +815,26 @@ export interface OpcionDeObra extends OpcionDeFiltro {
   autor: string;
 }
 
+/**
+ * El mapa de rótulos de las Obras de la búsqueda — Historia 27.3, AD-11: por slug de Autor, sus
+ * Obras como pares `[nombre de ficha, título]`, en el orden de su Lista de Obras. Es lo que
+ * `src/pages/buscar/obras.json.ts` escribe en `/buscar/obras.json`; el tipo del cliente,
+ * `MapaDeObras`, vive en `src/lib/busqueda.ts`.
+ */
+export type MapaDeObrasPorAutor = Record<string, [nombre: string, titulo: string][]>;
+
 /** Los filtros de cada Cita y las opciones de los filtros de `/buscar/`, de una sola vez. */
 export interface FiltrosDeLaBusqueda {
   porCita: ReadonlyMap<string, FiltrosDeCita>;
   autores: readonly OpcionDeFiltro[];
   obras: readonly OpcionDeObra[];
   temas: readonly OpcionDeFiltro[];
+  /**
+   * Historia 27.3 — por Autor con Obras, en orden de slug, sus Obras en el orden de
+   * `obrasDelAutor` (`ordenDeLaListaDeObras`): **toda** Obra con Citas publicadas, también las
+   * `noindex` y las de la familia congelada. Un Autor sin Obras no tiene clave.
+   */
+  mapaDeObras: MapaDeObrasPorAutor;
 }
 
 const porValor = (a: OpcionDeFiltro, b: OpcionDeFiltro): number =>
@@ -844,6 +858,11 @@ const porValor = (a: OpcionDeFiltro, b: OpcionDeFiltro): number =>
  *
  * Cada opción lleva cuántas Citas tienen ese valor, que es lo que `filters()` de Pagefind cuenta
  * por página. Van por `valor`, en unidades de código: el orden que se enseña es de quien las pinta.
+ *
+ * Historia 27.3 — compone además el **mapa de rótulos** de las Obras (`mapaDeObras`), que el build
+ * escribe como JSON aparte y la isla de `/buscar/` pide al elegir un Autor, nunca en el HTML. Cada
+ * lista sale de `obrasDelAutor`, la misma llamada que ordena la Página de Autor y `/obras/`
+ * (AD-25): el selector de Obra no ordena por su cuenta.
  */
 export function filtrosDeLaBusqueda(
   conjunto: Pick<ConjuntoPublicable, 'citas' | 'autores' | 'temas'>,
@@ -890,11 +909,24 @@ export function filtrosDeLaBusqueda(
     }
   }
 
+  const citasPorAutor = new Map<string, (typeof conjunto.citas)[number][]>();
+  for (const cita of conjunto.citas) {
+    const suyas = citasPorAutor.get(cita.autor);
+    if (suyas === undefined) citasPorAutor.set(cita.autor, [cita]);
+    else suyas.push(cita);
+  }
+  const mapaDeObras: MapaDeObrasPorAutor = {};
+  for (const slug of [...citasPorAutor.keys()].sort()) {
+    const { obras } = obrasDelAutor(citasPorAutor.get(slug)!, slug);
+    if (obras.length > 0) mapaDeObras[slug] = obras.map((o) => [o.nombre, o.titulo]);
+  }
+
   return {
     porCita,
     autores: [...deAutor.values()].sort(porValor),
     obras: [...deObra.values()].sort(porValor),
     temas: [...deTema.values()].sort(porValor),
+    mapaDeObras,
   };
 }
 

@@ -14,6 +14,11 @@
  * recuerda en dos sitios. Queda una excepción de unos bytes hasta la 26.2: la Cita del Día de
  * la portada entra en el índice de Pagefind, y `dist/pagefind/` cuenta en lo juzgado.
  *
+ * Historia 27.3 — mide además, del mismo listado, lo que la isla de `/buscar/` descarga junto al
+ * elegir un Autor: los filtros de Pagefind (`pagefind/filter/`) y el mapa de rótulos de las Obras
+ * (`buscar/obras.json`), una sola cifra frente a `AVISO_DE_BYTES_DE_FILTROS_Y_MAPA`. Pasarlo
+ * avisa y nunca cambia el código de salida: reabre el aplazado de trocearlos (AD-9).
+ *
  * Puro (AD-5): recibe rutas y tamaños, devuelve cifras y texto. Quien lee `dist/`, escribe
  * por la salida y decide el código de salida es `integraciones/peso.ts`, el paso final de
  * `npm run build`, después de Pagefind.
@@ -36,6 +41,19 @@ export const FICHEROS_QUE_ROTAN_CON_LA_JORNADA: readonly string[] = [
   'lote/index.html',
   'rss.xml',
 ];
+
+/**
+ * Dónde escribe Pagefind sus filtros dentro de `dist/`: un fichero por trozo, que `filters()`
+ * descarga entero (Historia 27.3).
+ */
+export const DIRECTORIO_DE_LOS_FILTROS = 'pagefind/filter/';
+
+/**
+ * El mapa de rótulos de las Obras dentro de `dist/` (Historia 27.3). Es `RUTA_DEL_MAPA_DE_OBRAS`
+ * de `src/lib/busqueda.ts` sin la barra: aquí no se importa para que el paso siga sin traer nada
+ * más que lo puro, y `tests/unit/peso.test.ts` fija que las dos dicen lo mismo.
+ */
+export const MAPA_DE_OBRAS_EN_DIST = 'buscar/obras.json';
 
 /** Un fichero regular de `dist/`: su ruta relativa a `dist/`, con `/`, y su tamaño. */
 export interface FicheroDeDist {
@@ -84,17 +102,27 @@ export interface MedidaDeDist {
    * primera línea de cifras no diga «pagefind/ incluido» sobre un `dist/` que no lo trae.
    */
   pagefind: Recuento;
+  /** Historia 27.3 — los filtros de Pagefind (`pagefind/filter/…`), una parte de `pagefind`. */
+  filtros: Recuento;
+  /** Historia 27.3 — el mapa de rótulos de las Obras (`buscar/obras.json`), o cero ficheros si no está. */
+  mapa: Recuento;
 }
 
-/** El aviso y el tope del peso, en bytes, y el tope del número de PNG, si lo hay. */
+/**
+ * El aviso y el tope del peso, en bytes, el tope del número de PNG, si lo hay, y el aviso de los
+ * filtros de Pagefind con el mapa de rótulos (Historia 27.3).
+ */
 export interface UmbralesDePeso {
   aviso: number;
   tope: number;
   topeDePng: number | undefined;
+  avisoDeFiltrosYMapa: number;
 }
 
 export type VeredictoDePeso = 'por-debajo' | 'aviso' | 'sobre-el-tope';
 export type VeredictoDePng = 'sin-tope' | 'dentro' | 'sobre-el-tope';
+/** Sin una de las dos partes no hay suma, y sin suma no hay veredicto: `sin-medir`. */
+export type VeredictoDeFiltrosYMapa = 'por-debajo' | 'aviso' | 'sin-medir';
 
 /**
  * Reparte el listado de `dist/`. La única función que sabe qué rota con la jornada.
@@ -110,8 +138,18 @@ export function medirDist(ficheros: readonly FicheroDeDist[]): MedidaDeDist {
   const juzgado = { bytes: 0, ficheros: 0, png: 0 };
   const tarjetas = { bytes: 0, ficheros: 0 };
   const pagefind = { bytes: 0, ficheros: 0 };
+  const filtros = { bytes: 0, ficheros: 0 };
+  const mapa = { bytes: 0, ficheros: 0 };
 
   for (const { ruta, bytes } of ficheros) {
+    if (ruta.startsWith(DIRECTORIO_DE_LOS_FILTROS)) {
+      filtros.bytes += bytes;
+      filtros.ficheros += 1;
+    }
+    if (ruta === MAPA_DE_OBRAS_EN_DIST) {
+      mapa.bytes += bytes;
+      mapa.ficheros += 1;
+    }
     desplegado.bytes += bytes;
     desplegado.ficheros += 1;
     if (queRotan.has(ruta)) {
@@ -140,6 +178,8 @@ export function medirDist(ficheros: readonly FicheroDeDist[]): MedidaDeDist {
     juzgado: juzgado as Juzgado,
     tarjetas,
     pagefind,
+    filtros,
+    mapa,
   };
 }
 
@@ -165,6 +205,19 @@ export function veredictoDePng(juzgado: Juzgado, tope: number | undefined): Vere
   return juzgado.png > tope ? 'sobre-el-tope' : 'dentro';
 }
 
+/**
+ * El veredicto de los filtros de Pagefind con el mapa de rótulos (Historia 27.3). Igualar el aviso
+ * no avisa; pasarlo avisa. Nunca rompe. Sin filtros o sin mapa no hay suma que juzgar: una parte
+ * ausente no se cuenta como cero.
+ */
+export function veredictoDeFiltrosYMapa(
+  medida: Pick<MedidaDeDist, 'filtros' | 'mapa'>,
+  aviso: number,
+): VeredictoDeFiltrosYMapa {
+  if (medida.filtros.ficheros === 0 || medida.mapa.ficheros === 0) return 'sin-medir';
+  return medida.filtros.bytes + medida.mapa.bytes > aviso ? 'aviso' : 'por-debajo';
+}
+
 /** Lo que el paso escribe: las cifras por stdout, lo que cruza un umbral por stderr. */
 export interface ParteDePeso {
   /**
@@ -183,7 +236,7 @@ export interface ParteDePeso {
    * Los dos veredictos, cuando hay algo que juzgar. Sin nada que juzgar se omiten, igual que
    * las cifras: un «por debajo» sobre cero bytes sería un veredicto inventado.
    */
-  veredictos?: { peso: VeredictoDePeso; png: VeredictoDePng };
+  veredictos?: { peso: VeredictoDePeso; png: VeredictoDePng; filtrosYMapa: VeredictoDeFiltrosYMapa };
 }
 
 const MIB = 1024 * 1024;
@@ -204,6 +257,36 @@ export function enMiB(bytes: number): string {
 /** «466.839.655 bytes (445,2 MiB)». */
 function bytesYMiB(bytes: number): string {
   return `${milesEnEspañol(bytes)} ${bytes === 1 ? 'byte' : 'bytes'} (${enMiB(bytes)})`;
+}
+
+/** «41.234 bytes (40,3 KiB)»: la escala de los filtros y del mapa, que en MiB serían «<0,1». */
+function bytesYKiB(bytes: number): string {
+  const decimas = Math.round((bytes / 1024) * 10);
+  const resto = decimas % 10;
+  const entero = milesEnEspañol((decimas - resto) / 10);
+  const kib = decimas === 0 && bytes > 0 ? '<0,1' : resto === 0 ? entero : `${entero},${resto}`;
+  return `${milesEnEspañol(bytes)} ${bytes === 1 ? 'byte' : 'bytes'} (${kib} KiB)`;
+}
+
+/**
+ * La línea de cifras de los filtros y el mapa (Historia 27.3): las dos partes, su suma y el aviso.
+ * Sin una de las dos, la nombra y no suma: ausencia antes que cero.
+ */
+function cifraDeFiltrosYMapa(medida: MedidaDeDist, aviso: number): string {
+  const { filtros, mapa } = medida;
+  const deFiltros =
+    filtros.ficheros === 0
+      ? `sin ${DIRECTORIO_DE_LOS_FILTROS}: no hay filtros de Pagefind que medir`
+      : `filtros (${DIRECTORIO_DE_LOS_FILTROS}) ${bytesYKiB(filtros.bytes)} en ${ficheros(filtros.ficheros)}`;
+  const deMapa =
+    mapa.ficheros === 0
+      ? `sin ${MAPA_DE_OBRAS_EN_DIST}: no hay mapa de Obras que medir`
+      : `mapa (${MAPA_DE_OBRAS_EN_DIST}) ${bytesYKiB(mapa.bytes)}`;
+  const cabeza = `Filtros de Pagefind y mapa de Obras de /buscar/: ${deFiltros}; ${deMapa}; `;
+  if (filtros.ficheros === 0 || mapa.ficheros === 0) {
+    return `${cabeza}sin suma ni veredicto frente al aviso de ${bytesYKiB(aviso)} (AVISO_DE_BYTES_DE_FILTROS_Y_MAPA): falta una parte.`;
+  }
+  return `${cabeza}suman ${bytesYKiB(filtros.bytes + mapa.bytes)}; aviso en ${bytesYKiB(aviso)} (AVISO_DE_BYTES_DE_FILTROS_Y_MAPA).`;
 }
 
 /** «15.334 ficheros», «1 fichero». */
@@ -277,6 +360,7 @@ export function parteDePeso(
 
   const peso = veredictoDePeso(juzgado, umbrales);
   const png = veredictoDePng(juzgado, umbrales.topeDePng);
+  const filtrosYMapa = veredictoDeFiltrosYMapa(medida, umbrales.avisoDeFiltrosYMapa);
   const cifras = [
     `Peso de dist/: ${bytesYMiB(desplegado.bytes)} en ${ficheros(desplegado.ficheros)}, ` +
       (pagefind.ficheros > 0 ? 'pagefind/ incluido.' : 'sin pagefind/: no trae índice de búsqueda.'),
@@ -295,6 +379,7 @@ export function parteDePeso(
     umbrales.topeDePng === undefined
       ? `PNG: ${milesEnEspañol(juzgado.png)}, sin tope (TOPE_DE_PNG_DE_DIST no tiene valor): solo se informa.`
       : `PNG: ${milesEnEspañol(juzgado.png)}, tope en ${milesEnEspañol(umbrales.topeDePng)}.`,
+    cifraDeFiltrosYMapa(medida, umbrales.avisoDeFiltrosYMapa),
   ];
 
   const avisos: string[] = [];
@@ -327,10 +412,22 @@ export function parteDePeso(
     );
   }
 
+  if (filtrosYMapa === 'aviso') {
+    const { filtros, mapa } = medida;
+    avisos.push(
+      `Aviso de filtros y mapa: los filtros de Pagefind (${bytesYKiB(filtros.bytes)}) y el mapa de ` +
+        `Obras (${bytesYKiB(mapa.bytes)}) suman ${bytesYKiB(filtros.bytes + mapa.bytes)}, por encima ` +
+        `del aviso de ${bytesYKiB(umbrales.avisoDeFiltrosYMapa)} (AVISO_DE_BYTES_DE_FILTROS_Y_MAPA en ` +
+        'src/lib/umbrales.ts). Es lo que /buscar/ descarga junto al elegir un Autor. No detiene la ' +
+        'construcción: reabre el aplazado de trocear los filtros y el mapa (AD-9), y qué hacer lo ' +
+        'decide Héctor.',
+    );
+  }
+
   return {
     cifras,
     avisos: avisos.map((aviso) => anotado('warning', aviso, opciones.anotar)),
     ...(error === undefined ? {} : { error: anotado('error', error, opciones.anotar) }),
-    veredictos: { peso, png },
+    veredictos: { peso, png, filtrosYMapa },
   };
 }

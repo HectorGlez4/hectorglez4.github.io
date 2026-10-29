@@ -1,7 +1,7 @@
 ---
 /**
- * La búsqueda de `/buscar/` — Historia 27.2, FR-7, FR-8, AD-6, UX-DR87, UX-DR88, UX-DR89, UX-DR91,
- * UX-DR99, UX-DR100, UX-DR101; `DESIGN.md § Búsqueda` y `EXPERIENCE.md § Búsqueda`.
+ * La búsqueda de `/buscar/` — Historias 27.2 y 27.3, FR-7, FR-8, AD-6, AD-11, UX-DR87, UX-DR88,
+ * UX-DR89, UX-DR91, UX-DR99, UX-DR100, UX-DR101; `DESIGN.md § Búsqueda` y `EXPERIENCE.md § Búsqueda`.
  *
  * El índice lo produce Pagefind sobre `dist/` después del build, así que solo contiene lo que las
  * páginas publican: si una Cita no tiene página, no hay nada que indexar. El conjunto publicable de
@@ -10,8 +10,9 @@
  * Lo usa solo `/buscar/`, entre el `h1` y la región del recuento, y pinta dos cosas:
  *
  *   · un `<template>` con el formulario —el Campo de búsqueda de la 26.6 con su `name`, su
- *     ejemplo y la marca `data-consulta`, y un `fieldset` con los selectores de Autor y de Tema y
- *     «Quitar los filtros»— y la sombra del recuento, inertes: el guion los inserta al cargar. Ir en
+ *     ejemplo y la marca `data-consulta`, y un `fieldset` con los selectores de Autor, de Obra
+ *     (27.3) y de Tema y «Quitar los filtros»— y la sombra del recuento, inertes: el guion los
+ *     inserta al cargar, salvo el `.selector` de Obra, que separa del clon (abajo). Ir en
  *     plantilla deja el marcado, las opciones del build y sus estilos de ámbito en el HTML, y el
  *     guion sin una palabra de contenido. Sin guion la página queda en el `h1` (hasta la 27.7);
  *   · el `<script>`, que Astro empaqueta en un fichero de `/_astro/` (AD-6) y que nunca va en línea
@@ -23,6 +24,11 @@
  * `buscar.astro`—, ya ordenadas por `ordenDeAutoresPorNombre` y `ordenDeTemasPorNombre` de
  * `src/lib/normalizar.ts`: el selector no ordena, y el guion no lleva ningún dato del Corpus; lee
  * el nombre de la opción elegida. El rótulo de cada opción es el nombre, sin recuento.
+ *
+ * El selector de Obra (Historia 27.3) es la excepción: sus opciones dependen del Autor elegido, y
+ * no van en el HTML. Las compone el guion con dos datos que pide **al elegir un Autor**, juntos: el
+ * mapa de rótulos del build (`RUTA_DEL_MAPA_DE_OBRAS`, que escribe `src/pages/buscar/obras.json.ts`
+ * desde `filtrosDeLaBusqueda`, AD-11) y los recuentos de `filters()` de Pagefind.
  *
  * Lo que hay que saber al leer el guion:
  *
@@ -56,8 +62,31 @@
  *     ritmo. Enviar (Enter) cancela las dos pausas y busca el estado de ese momento; enviar es un
  *     gesto, así que si lo enviado es lo que se ve, su recuento se escribe ya (`ahora`), también
  *     el de una búsqueda tecleada que aún esperaba su pausa.
- *     «Quitar los filtros» vuelve los dos a «Todos…», rehace la búsqueda al momento (o la vacía, sin
- *     texto) y lleva el foco al campo.
+ *     «Quitar los filtros» vuelve los selectores a «Todos…» (y quita el de Obra, 27.3), rehace la
+ *     búsqueda al momento (o la vacía, sin texto) y lleva el foco al campo.
+ *   · Historia 27.3 — la búsqueda se acota también por una Obra del Autor elegido:
+ *       - el `.selector` de Obra va en la plantilla entre los de Autor y Tema, y el guion lo
+ *         **separa** del clon antes de insertar: sin Autor, con un Autor sin Obras que ofrecer o
+ *         sin datos, no existe en el DOM vivo. Cuando hace falta lo reinserta en su hueco, tras el
+ *         `.selector` de Autor, sin mover el foco;
+ *       - el mapa y `filters()` se piden solo al elegir un Autor (no al cargar, ni al enfocar, ni
+ *         con `?q=` sin Autor), con `Promise.all`; un éxito se guarda para la carga. Un fallo de
+ *         cualquiera de los dos no deja promesa rechazada, no pinta el selector, no toca la
+ *         búsqueda en curso y se reintenta al siguiente Autor elegido;
+ *       - se compone cuando están a la vez el **Autor vigente** —el de la última búsqueda
+ *         lanzada— y los datos: las Obras del Autor en el orden del mapa (el de su Lista de
+ *         Obras, hecho en el build), solo las que `filters().obra` cuenta con al menos una Cita
+ *         (`opcionesDeObra`); la primera, «Todas sus obras»; cada una «{título} ({n citas})» por
+ *         `new Option`, con el total del índice. Sin ninguna, no aparece;
+ *       - cambiar el Autor vacía la Obra y quita el selector al momento; se rehace para el Autor
+ *         nuevo al cumplirse la pausa de los selectores, si los datos están, o al llegar, si el
+ *         Autor sigue siendo el mismo. Elegir Obra o Tema no lo recompone. «Quitar los filtros»
+ *         quita los tres y el selector de Obra;
+ *       - con Obra se busca con `filters.obra` (y, sin texto, en el orden de `orden`: el de su
+ *         Página de Obra); el recuento nombra la Obra por su **título**, nunca por el rótulo con
+ *         su recuento («23 citas de José Martí en Maestros ambulantes.»), y la combinación que
+ *         viaja es `autor-obra` o `autor-obra-tema`. El selector de Obra comparte la pausa de los
+ *         selectores y el segundo ritmo (`ahora`).
  *   · Historia 23.8 (FR-56, FR-8, AD-13) — una búsqueda **cuenta una vez, cuando se asienta**, y
  *     no por tecla ni por repintado. Lo que se asienta es el **estado que se ve**: el texto y los
  *     filtros de la última búsqueda que se pintó, con el total de la respuesta de Pagefind
@@ -146,6 +175,18 @@ const { autores, temas } = Astro.props;
           <select id="filtro-de-autor" data-selector-de-autor>
             <option value="">Todos los autores</option>
             {autores.map((opcion) => <option value={opcion.valor}>{opcion.rotulo}</option>)}
+          </select>
+        </div>
+        {/*
+          * Historia 27.3 — el selector de Obra va en la plantilla, entre Autor y Tema, con solo su
+          * primera opción: el guion lo separa del clon antes de insertar el formulario y lo
+          * reinserta en este hueco cuando hay un Autor elegido con Obras que ofrecer. Sus opciones
+          * llegan del mapa de rótulos (`/buscar/obras.json`) y de `filters()`, nunca del HTML.
+          */}
+        <div class="selector">
+          <label for="filtro-de-obra">Obra</label>
+          <select id="filtro-de-obra" data-selector-de-obra>
+            <option value="">Todas sus obras</option>
           </select>
         </div>
         <div class="selector">
@@ -263,17 +304,22 @@ const { autores, temas } = Astro.props;
 <script>
   import { anunciar, ritmoDeTecleo } from '../lib/anuncio.ts';
   import {
+    RUTA_DEL_MAPA_DE_OBRAS,
     combinacionDeFiltros,
     filtrosDePagefind,
     fraseDelRecuento,
     hayFiltros,
+    opcionesDeObra,
+    rotuloDeObra,
     valoresDeFiltros,
     type FiltrosElegidos,
+    type MapaDeObras,
   } from '../lib/busqueda.ts';
   import { ASENTAMIENTO_DE_BUSQUEDA, asentamientoDeBusqueda, type EstadoDeBusqueda } from '../lib/medicion.ts';
   import {
     ETIQUETAS_DE_RESULTADO,
     FILTRO_DE_TIPO,
+    FILTROS_DE_CITA,
     OPCIONES_DE_PAGEFIND,
     ORDEN_DE_CITA,
     TIPO_POR_OMISION,
@@ -302,6 +348,14 @@ const { autores, temas } = Astro.props;
       opciones?: { filters: Record<string, string>; sort?: Record<string, 'asc'> },
     ): Promise<{ results: { data(): Promise<DatoDeResultado> }[] }>;
     destroy?(): Promise<void>;
+    /** Historia 27.3 — los recuentos de cada valor de cada filtro, sobre el índice entero. */
+    filters(): Promise<Record<string, Record<string, number> | undefined>>;
+  }
+
+  /** Lo que el selector de Obra necesita de la red: el mapa de rótulos y los recuentos de `obra`. */
+  interface DatosDeObra {
+    mapa: MapaDeObras;
+    recuentos: Record<string, number>;
   }
 
   /** Por dónde llega una búsqueda: decide con qué ritmo se escribe su recuento. */
@@ -318,10 +372,17 @@ const { autores, temas } = Astro.props;
     const formulario = contenido.querySelector('form');
     const campo = contenido.querySelector<HTMLInputElement>('[data-consulta]');
     const autor = contenido.querySelector<HTMLSelectElement>('[data-selector-de-autor]');
+    const obra = contenido.querySelector<HTMLSelectElement>('[data-selector-de-obra]');
     const tema = contenido.querySelector<HTMLSelectElement>('[data-selector-de-tema]');
     const quitar = contenido.querySelector<HTMLButtonElement>('[data-quitar]');
     const sombra = contenido.querySelector<HTMLElement>('.sombra');
-    if (!formulario || !campo || !autor || !tema || !quitar || !sombra) return;
+    if (!formulario || !campo || !autor || !obra || !tema || !quitar || !sombra) return;
+    // Historia 27.3 — el `.selector` de Obra sale del clon: sin Autor con Obras, no existe.
+    const cajaDeAutor = autor.parentElement;
+    const cajaDeObra = obra.parentElement;
+    const todasSusObras = obra.options[0];
+    if (!cajaDeAutor || !cajaDeObra || !todasSusObras) return;
+    cajaDeObra.remove();
     raiz.append(formulario);
     estado.before(sombra);
 
@@ -342,8 +403,25 @@ const { autores, temas } = Astro.props;
     let tecla = 0;
     /** Cuántas veces se pintó o se vació la lista: la sugerencia a cero solo cae si no cambió. */
     let pintadas = 0;
+    /** Historia 27.3 — el mapa de rótulos, guardado para la carga tras el primer éxito. */
+    let mapa: MapaDeObras | null = null;
+    /** Los recuentos de `obra` de `filters()`, guardados para la carga tras el primer éxito. */
+    let recuentos: Record<string, number> | null = null;
+    /** La petición de los dos en curso, si la hay: dos Autores seguidos no la piden dos veces. */
+    let pidiendo: Promise<DatosDeObra | null> | null = null;
+    /** El Autor vigente: el de la última búsqueda lanzada; un cambio de Autor lo vacía al momento. */
+    let vigente = '';
+    /** El Autor para el que está compuesto el selector de Obra que se ve; `null`, ninguno. */
+    let compuestoPara: string | null = null;
+    /** Los títulos de las Obras ofrecidas, por nombre de ficha: el recuento dice el título. */
+    let titulos = new Map<string, string>();
 
-    const elegidos = (): FiltrosElegidos => ({ autor: autor.value, tema: tema.value });
+    const obraEnElDom = () => compuestoPara !== null;
+    const elegidos = (): FiltrosElegidos => ({
+      autor: autor.value,
+      ...(obraEnElDom() && obra.value !== '' ? { obra: obra.value } : {}),
+      tema: tema.value,
+    });
     /** El nombre de la opción elegida, tal como se lee. */
     const nombreDe = (selector: HTMLSelectElement) => selector.options[selector.selectedIndex]?.textContent?.trim() ?? '';
 
@@ -361,6 +439,70 @@ const { autores, temas } = Astro.props;
           });
       }
       return indice;
+    }
+
+    /**
+     * Historia 27.3 — el mapa de rótulos y `filters()`, juntos y solo con intención: al elegir un
+     * Autor. Un éxito se guarda para la carga; un fallo de cualquiera de los dos da `null`, sin
+     * promesa rechazada, y el siguiente Autor elegido lo vuelve a pedir —el mapa, con otro `fetch`;
+     * Pagefind, con el reintento de `cargar`—.
+     */
+    function pedirDatosDeObra(): Promise<DatosDeObra | null> {
+      if (mapa && recuentos) return Promise.resolve({ mapa, recuentos });
+      if (pidiendo) return pidiendo;
+      const delMapa: Promise<MapaDeObras> = mapa
+        ? Promise.resolve(mapa)
+        : fetch(RUTA_DEL_MAPA_DE_OBRAS)
+            .then((r) => {
+              if (!r.ok) throw new Error(String(r.status));
+              return r.json();
+            })
+            .then((leido: unknown) => {
+              if (typeof leido !== 'object' || leido === null || Array.isArray(leido)) throw new Error('mapa');
+              return (mapa = leido as MapaDeObras);
+            });
+      const deFiltros: Promise<Record<string, number>> = recuentos
+        ? Promise.resolve(recuentos)
+        : cargar()
+            .then((pf) => {
+              if (!pf) throw new Error('índice');
+              return pf.filters();
+            })
+            .then((todos) => {
+              const deObra = todos?.[FILTROS_DE_CITA.obra];
+              return (recuentos = typeof deObra === 'object' && deObra !== null ? deObra : {});
+            });
+      return (pidiendo = Promise.all([delMapa, deFiltros])
+        .then(([m, r]) => ({ mapa: m, recuentos: r }))
+        .catch(() => null)
+        .finally(() => {
+          pidiendo = null;
+        }));
+    }
+
+    /** Quita el selector de Obra y vacía su elección. No mueve el foco. */
+    function quitarObra() {
+      obra!.value = '';
+      compuestoPara = null;
+      titulos = new Map();
+      cajaDeObra!.remove();
+    }
+
+    /**
+     * Compone el selector de Obra si están a la vez el Autor vigente y los datos, y no está ya
+     * compuesto para él: elegir Obra o Tema no lo recompone. Las opciones, en el orden del mapa y
+     * con los recuentos de `filters()` (`opcionesDeObra`); sin ninguna, no aparece. Insertarlo en
+     * su hueco, tras el `.selector` de Autor, no mueve el foco.
+     */
+    function componerObra() {
+      if (vigente === '' || vigente !== autor!.value || compuestoPara === vigente || !mapa || !recuentos) return;
+      const opciones = opcionesDeObra(mapa, recuentos, vigente);
+      if (opciones.length === 0) return;
+      obra!.replaceChildren(todasSusObras!, ...opciones.map((o) => new Option(rotuloDeObra(o), o.valor)));
+      obra!.value = '';
+      titulos = new Map(opciones.map((o) => [o.valor, o.titulo]));
+      compuestoPara = vigente;
+      cajaDeAutor!.after(cajaDeObra!);
     }
 
     function pintar(resultados: DatoDeResultado[], frase: string, origen: Origen) {
@@ -431,9 +573,12 @@ const { autores, temas } = Astro.props;
     }
 
     function buscar(origen: Origen): Promise<void> {
+      // El Autor de esta búsqueda pasa a ser el vigente: con los datos ya aquí, su Obra aparece.
+      vigente = autor!.value;
+      componerObra();
       const texto = campo!.value;
       const filtros = elegidos();
-      const clave = JSON.stringify([texto, filtros.autor, filtros.tema]);
+      const clave = JSON.stringify([texto, filtros.autor, filtros.obra ?? '', filtros.tema]);
       if (clave === ultima) return pendiente;
       ultima = clave;
       const mio = ++turno;
@@ -453,6 +598,8 @@ const { autores, temas } = Astro.props;
       // Los nombres, de lo elegido al lanzar la búsqueda: el recuento dice lo que se buscó.
       const nombres = {
         ...(filtros.autor ? { autor: nombreDe(autor!) } : {}),
+        // El título del mapa, nunca el rótulo de la opción con su recuento.
+        ...(filtros.obra ? { obra: titulos.get(filtros.obra) ?? '' } : {}),
         ...(filtros.tema ? { tema: nombreDe(tema!) } : {}),
       };
       const filters = filtrosDePagefind(filtros);
@@ -509,14 +656,33 @@ const { autores, temas } = Astro.props;
       clearTimeout(eleccion);
       eleccion = setTimeout(() => buscar('gesto'), PAUSA_DE_LOS_SELECTORES_MS);
     };
-    for (const selector of [autor, tema]) {
-      selector.addEventListener('change', alElegir);
-      selector.addEventListener('input', alElegir);
+    /*
+     * Historia 27.3 — cambiar el Autor quita la Obra al momento (elegida y selector) y pide, si hay
+     * Autor, el mapa y `filters()`; el selector se rehace para el Autor nuevo cuando su pausa se
+     * cumple y los datos están. Una respuesta tardía solo pinta si el Autor sigue siendo el mismo.
+     */
+    const alCambiarElAutor = () => {
+      vigente = '';
+      if (obraEnElDom()) quitarObra();
+      if (autor.value !== '') pedirDatosDeObra().then(componerObra);
+    };
+    for (const selector of [autor, obra, tema]) {
+      const alCambiar =
+        selector === autor
+          ? () => {
+              alCambiarElAutor();
+              alElegir();
+            }
+          : alElegir;
+      selector.addEventListener('change', alCambiar);
+      selector.addEventListener('input', alCambiar);
     }
 
     quitar.addEventListener('click', () => {
       autor.value = '';
       tema.value = '';
+      vigente = '';
+      if (obraEnElDom()) quitarObra();
       quitar.hidden = true;
       clearTimeout(tecleo);
       clearTimeout(eleccion);

@@ -3540,6 +3540,11 @@ describe('Historia 23.8 — una búsqueda cuenta una vez, cuando se asienta', ()
       });
       if (texto === 'única') return { total: 1, datos };
       if (texto.startsWith('zzz')) return { total: 0 };
+      // Historia 27.3 — con Obra: «Maestros ambulantes» da 23, y sobre la prudencia, una.
+      const obra = filtros[FILTROS_DE_CITA.obra];
+      if (obra === 'jose-marti--maestros-ambulantes' && tema === 'la-prudencia') return { total: 1, datos };
+      if (obra === 'jose-marti--maestros-ambulantes') return { total: 23, datos };
+      if (obra !== undefined) return { total: 2, datos };
       if (autor === 'seneca' && tema === 'la-prudencia') return { total: 0 };
       if (tema === 'el-saber' && texto === 'escuela') return { total: 6, datos };
       if (autor === 'jose-marti' && tema === 'la-prudencia') return { total: 8, datos };
@@ -4684,6 +4689,277 @@ describe('Historia 23.8 — una búsqueda cuenta una vez, cuando se asienta', ()
         await entorno.responder(null);
         expect(entorno.region().texto).toBe('222 citas de José Martí.');
         expect(entorno.sombra()).toBe('222 citas de José Martí.');
+      }, 240_000);
+    });
+
+    /*
+     * Historia 27.3 — la búsqueda se acota también por una Obra del Autor elegido: la matriz de la
+     * historia, sobre el fichero de `dist/`. El mapa de rótulos y los recuentos de `filters()` son
+     * los del entorno: «Ismaelillo» tiene más Citas que «Maestros ambulantes», pero el mapa la pone
+     * detrás —el orden es el del mapa, no el de los recuentos—; las dos «Cartas» son homónimas.
+     */
+    describe('Historia 27.3 — la búsqueda se acota también por una Obra del Autor elegido', () => {
+      const AUTOR = FILTROS_DE_CITA.autor;
+      const OBRA = FILTROS_DE_CITA.obra;
+      const TEMA = FILTROS_DE_CITA.tema;
+      const ORDEN = { [ORDEN_DE_CITA]: 'asc' };
+      const MAPA = {
+        'jose-marti': [
+          ['jose-marti--maestros-ambulantes', 'Maestros ambulantes'],
+          ['jose-marti--cartas', 'Cartas'],
+          ['jose-marti--ismaelillo', 'Ismaelillo'],
+        ],
+        seneca: [['seneca--cartas', 'Cartas']],
+      };
+      const RECUENTOS = {
+        'jose-marti--maestros-ambulantes': 23,
+        'jose-marti--cartas': 1,
+        'jose-marti--ismaelillo': 40,
+        'seneca--cartas': 9,
+      };
+      const CON_OBRAS: OpcionesDeLaIsla = {
+        mapa: MAPA,
+        recuentosDeObra: RECUENTOS,
+        autores: [
+          { valor: 'amado-nervo', rotulo: 'Amado Nervo' },
+          { valor: 'jose-marti', rotulo: 'José Martí' },
+          { valor: 'seneca', rotulo: 'Séneca' },
+        ],
+      };
+      const DE_MARTI = [
+        { valor: '', rotulo: 'Todas sus obras' },
+        { valor: 'jose-marti--maestros-ambulantes', rotulo: 'Maestros ambulantes (23 citas)' },
+        { valor: 'jose-marti--cartas', rotulo: 'Cartas (1 cita)' },
+        { valor: 'jose-marti--ismaelillo', rotulo: 'Ismaelillo (40 citas)' },
+      ];
+      const DE_SENECA = [
+        { valor: '', rotulo: 'Todas sus obras' },
+        { valor: 'seneca--cartas', rotulo: 'Cartas (9 citas)' },
+      ];
+      type Entorno = Awaited<ReturnType<typeof isla>>;
+      const busquedas = (entorno: Entorno) => entorno.llamadas().filter((l) => l[0] === 'search');
+      const ultimaBusqueda = (entorno: Entorno) => busquedas(entorno).at(-1);
+      const filtrosPedidos = (entorno: Entorno) => entorno.llamadas().filter((l) => l[0] === 'filters').length;
+      const conObras = (mas: OpcionesDeLaIsla = {}) => isla({ ...CON_OBRAS, ...mas });
+      const elegirYEsperar = async (entorno: Entorno, cual: 'autor' | 'obra' | 'tema', valor: string) => {
+        entorno.elegir(cual, valor);
+        entorno.avanzar(PAUSA_DE_LOS_SELECTORES_MS);
+        await entorno.vaciar();
+      };
+      const FUERA = { enElDom: false, orden: ['campo', 'autor', 'tema', 'quitar'] };
+
+      it('sin Autor: ni selector de Obra en el DOM, ni mapa, ni `filters()` — al cargar, al enfocar, con `?q=` ni con un Tema', async () => {
+        const entorno = await conObras();
+        expect(entorno.obra()).toMatchObject(FUERA);
+        entorno.enfocar();
+        await entorno.teclear('vida');
+        await elegirYEsperar(entorno, 'tema', 'el-saber');
+        expect(entorno.obra()).toMatchObject(FUERA);
+        expect(entorno.pedidosDelMapa()).toEqual([]);
+        expect(filtrosPedidos(entorno)).toBe(0);
+        const conConsulta = await conObras({ busqueda: '?q=viento' });
+        expect(conConsulta.obra()).toMatchObject(FUERA);
+        expect(conConsulta.pedidosDelMapa()).toEqual([]);
+        expect(filtrosPedidos(conConsulta)).toBe(0);
+        expect(entorno.escuchas()).toMatchObject({ autor: ['change', 'input'], obra: ['change', 'input'] });
+      }, 240_000);
+
+      it('un Autor con Obras: tras la pausa y los datos, «Obra» entre Autor y Tema, en el orden del mapa, con su recuento, sin mover el foco', async () => {
+        const entorno = await conObras();
+        entorno.elegir('autor', 'jose-marti');
+        await entorno.vaciar();
+        // Los datos ya están, la pausa no: todavía no.
+        expect(entorno.pedidosDelMapa()).toEqual(['/buscar/obras.json']);
+        expect(filtrosPedidos(entorno)).toBe(1);
+        expect(entorno.obra().enElDom).toBe(false);
+        entorno.avanzar(PAUSA_DE_LOS_SELECTORES_MS);
+        await entorno.vaciar();
+        expect(entorno.obra()).toEqual({
+          enElDom: true,
+          orden: ['campo', 'autor', 'obra', 'tema', 'quitar'],
+          opciones: DE_MARTI,
+          valor: '',
+        });
+        expect(entorno.foco()).toBe(null);
+        // La búsqueda del Autor, como en la 27.2, sin Obra.
+        expect(busquedas(entorno)).toEqual([['search', null, { filters: { [AUTOR]: 'jose-marti' }, sort: ORDEN }]]);
+      }, 240_000);
+
+      it('los datos que llegan tras la pausa pintan al llegar; los de un Autor ya cambiado, no', async () => {
+        const tarde = await conObras({ mapaManual: true });
+        await elegirYEsperar(tarde, 'autor', 'jose-marti');
+        expect(tarde.obra().enElDom).toBe(false);
+        await tarde.responderAlMapa();
+        expect(tarde.obra()).toMatchObject({ enElDom: true, opciones: DE_MARTI });
+        // Otro Autor mientras los datos van en vuelo: llegan con el Autor nuevo dentro de su pausa.
+        const cambiado = await conObras({ filtrosManuales: true });
+        await elegirYEsperar(cambiado, 'autor', 'jose-marti');
+        cambiado.elegir('autor', 'seneca');
+        await cambiado.responderAFiltros();
+        expect(cambiado.obra().enElDom).toBe(false);
+        cambiado.avanzar(PAUSA_DE_LOS_SELECTORES_MS);
+        await cambiado.vaciar();
+        expect(cambiado.obra()).toMatchObject({ enElDom: true, opciones: DE_SENECA });
+      }, 240_000);
+
+      it('un Autor sin Obras que ofrecer no tiene selector de Obra', async () => {
+        const entorno = await conObras();
+        await elegirYEsperar(entorno, 'autor', 'amado-nervo');
+        expect(entorno.obra()).toMatchObject(FUERA);
+        // Ni uno cuyas Obras cuenten cero en el índice.
+        const aCero = await conObras({ recuentosDeObra: { 'seneca--cartas': 0 } });
+        await elegirYEsperar(aCero, 'autor', 'seneca');
+        expect(aCero.obra()).toMatchObject(FUERA);
+      }, 240_000);
+
+      it('homónimas: cada Autor ofrece solo su «Cartas»', async () => {
+        const entorno = await conObras();
+        await elegirYEsperar(entorno, 'autor', 'seneca');
+        expect(entorno.obra().opciones).toEqual(DE_SENECA);
+      }, 240_000);
+
+      it('desfase de despliegues: la Obra que el mapa no nombra, o que `filters()` no cuenta, se omite', async () => {
+        const entorno = await conObras({
+          recuentosDeObra: { 'jose-marti--maestros-ambulantes': 23, 'jose-marti--ismaelillo': 40, 'jose-marti--versos-libres': 5 },
+        });
+        await elegirYEsperar(entorno, 'autor', 'jose-marti');
+        expect(entorno.obra().opciones.map((o) => o.valor)).toEqual(['', 'jose-marti--maestros-ambulantes', 'jose-marti--ismaelillo']);
+      }, 240_000);
+
+      it('Obra elegida, sin texto: `search(null)` con Autor y Obra y la clave de orden, el título en el recuento y `autor-obra` al asentar', async () => {
+        const entorno = await conObras();
+        await elegirYEsperar(entorno, 'autor', 'jose-marti');
+        await elegirYEsperar(entorno, 'obra', 'jose-marti--maestros-ambulantes');
+        expect(ultimaBusqueda(entorno)).toEqual([
+          'search',
+          null,
+          { filters: { [AUTOR]: 'jose-marti', [OBRA]: 'jose-marti--maestros-ambulantes' }, sort: ORDEN },
+        ]);
+        // El título del mapa, nunca el rótulo con su recuento; al llegar, sin otra espera.
+        expect(entorno.region()).toEqual({ texto: '23 citas de José Martí en Maestros ambulantes.', apartada: false });
+        expect(entorno.quitarVisible()).toBe(true);
+        await entorno.enviar();
+        expect(entorno.emitidos()).toEqual([[BUSQUEDA, '10-29', 'autor-obra']]);
+        // Otra Obra del mismo Autor es otro estado: otra `busqueda`.
+        await elegirYEsperar(entorno, 'obra', 'jose-marti--cartas');
+        await entorno.enviar();
+        expect(entorno.emitidos()).toEqual([
+          [BUSQUEDA, '10-29', 'autor-obra'],
+          [BUSQUEDA, '1-9', 'autor-obra'],
+        ]);
+        // Elegir Obra no recompuso el selector: sigue con sus opciones y la elegida.
+        expect(entorno.obra()).toMatchObject({ enElDom: true, opciones: DE_MARTI, valor: 'jose-marti--cartas' });
+      }, 240_000);
+
+      it('Obra, Tema y texto: `search(texto)` con los tres filtros, «Una cita de José Martí en Maestros ambulantes sobre la prudencia con «…».» y `autor-obra-tema`', async () => {
+        const entorno = await conObras();
+        await elegirYEsperar(entorno, 'autor', 'jose-marti');
+        entorno.elegir('obra', 'jose-marti--maestros-ambulantes');
+        await elegirYEsperar(entorno, 'tema', 'la-prudencia');
+        expect(entorno.region().texto).toBe('Una cita de José Martí en Maestros ambulantes sobre la prudencia.');
+        // Elegir Tema no recompone el de Obra.
+        expect(entorno.obra()).toMatchObject({ enElDom: true, opciones: DE_MARTI, valor: 'jose-marti--maestros-ambulantes' });
+        await entorno.teclear('patria');
+        expect(ultimaBusqueda(entorno)).toEqual([
+          'search',
+          'patria',
+          { filters: { [AUTOR]: 'jose-marti', [OBRA]: 'jose-marti--maestros-ambulantes', [TEMA]: 'la-prudencia' } },
+        ]);
+        entorno.avanzar(PAUSA_DE_TECLEO_MS);
+        expect(entorno.region().texto).toBe('Una cita de José Martí en Maestros ambulantes sobre la prudencia con «patria».');
+        await entorno.enviar();
+        expect(entorno.emitidos()).toEqual([[BUSQUEDA, '1-9', 'autor-obra-tema']]);
+        const fichero = medicionEnUnSandbox({ ruta: '/buscar/' });
+        for (const llamada of entorno.emitidos()) fichero.emitir(...(llamada as [string, string, string]));
+        expect(fichero.balizas()[0]).toEqual({ evento: BUSQUEDA, ruta: '/buscar/', tramo: '1-9', filtros: 'autor-obra-tema' });
+      }, 240_000);
+
+      it('cambiar el Autor quita la Obra al momento y rehace el selector con las del nuevo tras la pausa', async () => {
+        const entorno = await conObras();
+        await elegirYEsperar(entorno, 'autor', 'jose-marti');
+        await elegirYEsperar(entorno, 'obra', 'jose-marti--maestros-ambulantes');
+        entorno.elegir('autor', 'seneca');
+        expect(entorno.obra()).toMatchObject({ ...FUERA, valor: '' });
+        entorno.avanzar(PAUSA_DE_LOS_SELECTORES_MS);
+        await entorno.vaciar();
+        expect(entorno.obra()).toMatchObject({ enElDom: true, orden: ['campo', 'autor', 'obra', 'tema', 'quitar'], opciones: DE_SENECA, valor: '' });
+        // La búsqueda va sin la Obra del Autor anterior; los datos no se volvieron a pedir.
+        expect(ultimaBusqueda(entorno)).toEqual(['search', null, { filters: { [AUTOR]: 'seneca' }, sort: ORDEN }]);
+        expect(entorno.region().texto).toBe('4 citas de Séneca.');
+        expect(entorno.pedidosDelMapa()).toHaveLength(1);
+        expect(filtrosPedidos(entorno)).toBe(1);
+      }, 240_000);
+
+      it('quitar el Autor —o «Quitar los filtros»— quita el selector de Obra, y la búsqueda sigue como en la 27.2', async () => {
+        const entorno = await conObras();
+        await entorno.teclear('vida');
+        await elegirYEsperar(entorno, 'autor', 'jose-marti');
+        await elegirYEsperar(entorno, 'obra', 'jose-marti--cartas');
+        await elegirYEsperar(entorno, 'autor', '');
+        expect(entorno.obra()).toMatchObject({ ...FUERA, valor: '' });
+        expect(ultimaBusqueda(entorno)).toEqual(['search', 'vida']);
+        expect(entorno.quitarVisible()).toBe(false);
+
+        const quitando = await conObras();
+        await elegirYEsperar(quitando, 'autor', 'jose-marti');
+        quitando.elegir('obra', 'jose-marti--cartas');
+        await elegirYEsperar(quitando, 'tema', 'el-saber');
+        quitando.quitarFiltros();
+        await quitando.vaciar();
+        expect(quitando.obra()).toMatchObject({ ...FUERA, valor: '' });
+        expect(quitando.elegidos()).toEqual({ autor: '', tema: '' });
+        expect(quitando.foco()).toBe('campo');
+        // Volver a elegir el Autor lo rehace, sin pedir otra vez los datos.
+        await elegirYEsperar(quitando, 'autor', 'jose-marti');
+        expect(quitando.obra()).toMatchObject({ enElDom: true, opciones: DE_MARTI, valor: '' });
+        expect(quitando.pedidosDelMapa()).toHaveLength(1);
+      }, 240_000);
+
+      it.each([
+        ['la red del mapa', { fallaElMapa: 'red' as const }],
+        ['un estado que no es 2xx', { fallaElMapa: 'estado' as const }],
+        ['un JSON que no se lee', { fallaElMapa: 'json' as const }],
+        ['un mapa que no es un objeto', { mapa: ['no'] }],
+        ['`filters()` que rechaza', { fallanLosFiltros: true }],
+        ['el índice que no carga', { falla: 'importacion' as const }],
+      ])('fallo de %s: sin selector de Obra ni rechazos, la búsqueda por Autor sigue y el siguiente Autor lo reintenta', async (_, fallo) => {
+        const entorno = await conObras(fallo);
+        await elegirYEsperar(entorno, 'autor', 'jose-marti');
+        expect(entorno.obra()).toMatchObject(FUERA);
+        if (!('falla' in fallo)) {
+          expect(entorno.pintados()).toHaveLength(30);
+          expect(entorno.region().texto).toBe('222 citas de José Martí.');
+        }
+        // Se arregla, y el siguiente Autor elegido vuelve a pedirlo.
+        entorno.fallarElMapa();
+        entorno.fallarLosFiltros(false);
+        entorno.fallar();
+        entorno.cambiarDatosDeObra({ mapa: MAPA });
+        await elegirYEsperar(entorno, 'autor', 'seneca');
+        expect(entorno.obra()).toMatchObject({ enElDom: true, opciones: DE_SENECA });
+        expect(entorno.region().texto).toBe('4 citas de Séneca.');
+      }, 240_000);
+
+      it('un éxito se guarda para la carga: el segundo Autor no vuelve a pedir el mapa ni `filters()`', async () => {
+        const entorno = await conObras();
+        await elegirYEsperar(entorno, 'autor', 'jose-marti');
+        await elegirYEsperar(entorno, 'autor', 'seneca');
+        await elegirYEsperar(entorno, 'autor', 'jose-marti');
+        expect(entorno.pedidosDelMapa()).toHaveLength(1);
+        expect(filtrosPedidos(entorno)).toBe(1);
+        expect(entorno.obra().opciones).toEqual(DE_MARTI);
+      }, 240_000);
+
+      it('el recuento nombra la Obra elegida al lanzar la búsqueda', async () => {
+        const entorno = await conObras({ manual: true });
+        entorno.elegir('autor', 'jose-marti');
+        entorno.avanzar(PAUSA_DE_LOS_SELECTORES_MS);
+        await entorno.responder(null);
+        entorno.elegir('obra', 'jose-marti--maestros-ambulantes');
+        entorno.avanzar(PAUSA_DE_LOS_SELECTORES_MS);
+        entorno.elegir('obra', 'jose-marti--cartas');
+        await entorno.responder(null);
+        expect(entorno.region().texto).toBe('23 citas de José Martí en Maestros ambulantes.');
       }, 240_000);
     });
   });
