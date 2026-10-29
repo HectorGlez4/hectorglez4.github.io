@@ -29,7 +29,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 # - Retrospective appends its action items to action_items; the status view surfaces open ones
 generated: 08-11-2026 09:00
-last_updated: 10-29-2026 05:24
+last_updated: 10-29-2026 08:35
 project: brainlySabiduria
 project_key: NOKEY
 tracking_system: file-system
@@ -439,7 +439,7 @@ development_status:
   # Épica 27 — buscar con filtros. Tras la 23 y la 26; antes o después de la 25.
   epic-27: in-progress
   27-1-cada-resultado-de-cita-lleva-su-autor-y-la-cita-declara-sus: review # v8-ralph 2026-10-29: cada resultado de Cita lleva su Autor y la Cita declara sus filtros, con clave de orden de dos rangos de 4096; diferidos para Héctor: valor de AVISO_DE_RANGO_DE_LA_CLAVE_DE_ORDEN y alinear el AC de «tres rangos» (bmad-create-epics-and-stories)
-  27-2-la-búsqueda-se-acota-por-autor-y-por-tema: backlog
+  27-2-la-búsqueda-se-acota-por-autor-y-por-tema: review  # v8-ralph 2026-10-29 08:35 UTC: entró el acotado de /buscar/ por Autor y por Tema desde un guion empaquetado, con recuento y región de estado corregidos; sin diferidos
   27-3-la-búsqueda-se-acota-también-por-una-obra-del-autor-elegido: backlog
   27-4-la-búsqueda-vive-en-la-dirección-y-atrás-la-devuelve: backlog
   27-5-los-resultados-llegan-de-30-en-30: backlog
