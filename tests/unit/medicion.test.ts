@@ -83,7 +83,13 @@ import {
   type Respuesta,
 } from './ayuda/busqueda.js';
 import { aplanar } from './ayuda/aplanar.js';
-import { CLAVE_DEL_ESTADO_EN_LA_ENTRADA, FALLO_DE_LA_TANDA, rotuloDeMostrarMas } from '../../src/lib/busqueda.ts';
+import {
+  ANUNCIO_DEL_FALLO_DE_LA_BUSQUEDA,
+  CLAVE_DEL_ESTADO_EN_LA_ENTRADA,
+  FALLO_DE_LA_TANDA,
+  avisoDeLaDireccion,
+  rotuloDeMostrarMas,
+} from '../../src/lib/busqueda.ts';
 import {
   ETIQUETAS_DE_RESULTADO,
   FILTRO_DE_TIPO,
@@ -1275,7 +1281,8 @@ describe('Historia 23.7 — cada salida interna dice desde qué zona', () => {
     // Los atributos y las exenciones, con su nombre: el fichero los compone, nunca los escribe.
     expect(ATRIBUTO_DE_ZONA).toBe('data-zona');
     expect(ATRIBUTO_SIN_ZONA).toBe('data-sin-zona');
-    expect([...EXENCIONES_DE_ZONA]).toEqual(['chips-del-404', 'salidas-sin-resultados']);
+    // Historia 27.7 — y los Directorios de los avisos de `/buscar/` (decisión de Héctor del 2026-10-22).
+    expect([...EXENCIONES_DE_ZONA]).toEqual(['chips-del-404', 'salidas-sin-resultados', 'directorios-del-aviso']);
     // Ninguna exención se llama como una zona: la prueba de `dist/` las distingue por su atributo,
     // pero un motivo con nombre de zona confundiría a quien lee el marcado.
     for (const exencion of EXENCIONES_DE_ZONA) expect(ZONAS as readonly string[]).not.toContain(exencion);
@@ -2899,6 +2906,18 @@ describe('Historia 23.7 — toda salida interna de `dist/` dice su zona', () => 
   const SITIO_DE_LA_EXENCION: Record<ExencionDeZona, { ruta: string; etiqueta: string; marca: (e: Elemento) => boolean }> = {
     'chips-del-404': { ruta: '/404', etiqueta: 'ul', marca: (e) => (e.atributos.get('class') ?? '').split(/\s+/).includes('chips') },
     'salidas-sin-resultados': { ruta: '/buscar/', etiqueta: 'div', marca: (e) => e.atributos.has('data-salida') },
+    // Historia 27.7 — la raíz de cada aviso de `/buscar/`: el de `<noscript>`, el previo y el de la plantilla del fallo.
+    'directorios-del-aviso': {
+      ruta: '/buscar/',
+      etiqueta: 'div',
+      marca: (e) => (e.atributos.get('class') ?? '').split(/\s+/).includes('aviso-de-la-busqueda'),
+    },
+  };
+  /** Cuántas veces sale cada exención en `dist/`: el aviso de `/buscar/` sale tres veces (27.7). */
+  const VECES_DE_LA_EXENCION: Record<ExencionDeZona, number> = {
+    'chips-del-404': 1,
+    'salidas-sin-resultados': 1,
+    'directorios-del-aviso': 3,
   };
   /**
    * La única exención que nombra esta prueba, y no el marcado: un ancla de la propia página
@@ -3116,6 +3135,9 @@ describe('Historia 23.7 — toda salida interna de `dist/` dice su zona', () => 
     ['/buscar/', '/tema/el-tiempo/', [{ sinZona: 'salidas-sin-resultados' }]],
     ['/buscar/', '/coleccion/frases-cortas/', [{ sinZona: 'salidas-sin-resultados' }]],
     ['/buscar/', '/autor/seneca/', [{ sinZona: 'salidas-sin-resultados' }]],
+    // Historia 27.7 — los Directorios de los avisos, exentos y fuera del contenedor `resultado`.
+    ['/buscar/', '/autores/', [{ sinZona: 'directorios-del-aviso' }]],
+    ['/buscar/', '/obras/', [{ sinZona: 'directorios-del-aviso' }]],
   ];
 
   it.each(COLOCACION.map(([ruta, enlace, esperadas]) => [ruta, String(enlace), enlace, esperadas] as const))(
@@ -3180,7 +3202,7 @@ describe('Historia 23.7 — toda salida interna de `dist/` dice su zona', () => 
     expect(enEnlaces.map(({ ruta }) => ruta)).toEqual([]);
   }, 240_000);
 
-  it('en todo `dist/` las exenciones son de su conjunto, están las dos y cada una en su sitio', async () => {
+  it('en todo `dist/` las exenciones son de su conjunto, están las tres y cada una en su sitio', async () => {
     const exenciones = (await declaracionesDelSitio()).flatMap(({ ruta, elemento, declaracion }) =>
       'sinZona' in declaracion ? [{ ruta, elemento, motivo: declaracion.sinZona }] : [],
     );
@@ -3192,8 +3214,11 @@ describe('Historia 23.7 — toda salida interna de `dist/` dice su zona', () => 
       expect(elemento.etiqueta, motivo).toBe(sitio.etiqueta);
       expect(sitio.marca(elemento), motivo).toBe(true);
     }
-    // Una vez cada una: el 404 tiene una lista de Temas y `/buscar/`, un bloque de salidas.
-    expect(exenciones).toHaveLength(EXENCIONES_DE_ZONA.length);
+    // El 404 tiene una lista de Temas y `/buscar/`, un bloque de salidas y, desde la 27.7, los tres avisos.
+    for (const motivo of EXENCIONES_DE_ZONA) {
+      expect(exenciones.filter((e) => e.motivo === motivo), motivo).toHaveLength(VECES_DE_LA_EXENCION[motivo]);
+    }
+    expect(exenciones).toHaveLength(Object.values(VECES_DE_LA_EXENCION).reduce((a, b) => a + b, 0));
   }, 240_000);
 
   it('la cabecera de cada página lleva `cabecera`, y la lista de resultados de `/buscar/`, `resultado`', async () => {
@@ -4032,16 +4057,20 @@ describe('Historia 23.8 — una búsqueda cuenta una vez, cuando se asienta', ()
       240_000,
     );
 
-    it('una búsqueda que falla no cambia el estado que se ve: se sigue asentando el anterior', async () => {
+    it('Historia 27.7 — una búsqueda que falla pone el aviso en lugar de lo que se veía: ni enviar ni ocultarse asientan lo anterior', async () => {
       const entorno = await isla();
       await entorno.teclear('viento');
+      expect(entorno.pintados()).toHaveLength(3);
       entorno.fallar('search');
       await entorno.teclear('zzz');
-      expect(entorno.pintados()).toHaveLength(3);
+      expect(entorno.pintados()).toEqual([]);
+      expect(entorno.avisoDeFallo()).toMatchObject({ enElDom: true, antesDeLaLista: true, veces: 1 });
       await entorno.enviar();
       expect(entorno.emitidos()).toEqual([]);
       entorno.ocultar();
-      expect(entorno.emitidos()).toEqual([VIENTO]);
+      entorno.pagehide();
+      expect(entorno.emitidos()).toEqual([]);
+      expect(entorno.marcas()).toEqual([]);
     }, 240_000);
 
     it('llegada con `?q=` sin registrar: busca al cargar y no emite hasta asentarse', async () => {
@@ -5456,6 +5485,12 @@ describe('Historia 23.8 — una búsqueda cuenta una vez, cuando se asienta', ()
           expect(busquedas(entorno)).toEqual([]);
           expect(entorno.region().texto).toBe('');
           expect(entorno.historial()).toEqual([]);
+          // Historia 27.7 — es el estado del índice que no carga: su aviso, y ninguna frase de la 27.4.
+          expect(entorno.avisoDeFallo()).toMatchObject({ enElDom: true, antesDeLaLista: true, veces: 1 });
+          entorno.avanzar(16);
+          expect(entorno.region()).toEqual({ texto: ANUNCIO_DEL_FALLO_DE_LA_BUSQUEDA, apartada: true });
+          expect(entorno.sombra()).toBe('');
+          expect(entorno.historial()).toEqual([]);
           expect(entorno.valor()).toBe('vida');
           expect(entorno.elegidos()).toEqual({ autor: 'jose-marti', tema: '' });
           expect(entorno.obra().enElDom).toBe(false);
@@ -5464,6 +5499,7 @@ describe('Historia 23.8 — una búsqueda cuenta una vez, cuando se asienta', ()
           entorno.mostrar();
           await entorno.enviar();
           expect(entorno.region().texto).toBe('222 citas de José Martí con «vida».');
+          expect(entorno.avisoDeFallo().enElDom).toBe(false);
           expect(entorno.emitidos()).toEqual([[BUSQUEDA, '30+', 'autor']]);
         },
         240_000,
@@ -6049,7 +6085,7 @@ describe('Historia 23.8 — una búsqueda cuenta una vez, cuando se asienta', ()
         expect(entorno.foco()).toBe(`resultado:${TANDA_DE_RESULTADOS}`);
       }, 240_000);
 
-      it('vaciar la lista porque los datos de Obra no llegan (`sinDatos`) también se lleva el bloque', async () => {
+      it('vaciar la lista porque los datos de Obra no llegan (`sinDatos`) también se lleva el bloque, y pone el aviso del fallo', async () => {
         const MAESTROS = 'jose-marti--maestros-ambulantes';
         const MAPA = { 'jose-marti': [[MAESTROS, 'Maestros ambulantes']] };
         const RECUENTOS = { [MAESTROS]: 23 };
@@ -6062,6 +6098,7 @@ describe('Historia 23.8 — una búsqueda cuenta una vez, cuando se asienta', ()
         expect(entorno.direccion()).toBe(`/buscar/?autor=jose-marti&obra=${MAESTROS}`);
         expect(entorno.pintados()).toEqual([]);
         expect(entorno.mas()).toEqual({ enElDom: false, detrasDeLaLista: false, rotulo: `Mostrar ${TANDA_DE_RESULTADOS} más`, fallo: '' });
+        expect(entorno.avisoDeFallo()).toMatchObject({ enElDom: true, antesDeLaLista: true, veces: 1 });
       }, 240_000);
 
       it('una tanda que un gesto dejó atrás y luego falla calla, pero la pulsación siguiente rehace la búsqueda', async () => {
@@ -6083,23 +6120,46 @@ describe('Historia 23.8 — una búsqueda cuenta una vez, cuando se asienta', ()
         expect(titulos(entorno)).toEqual(deCitas(0, 60));
       }, 240_000);
 
-      it('una búsqueda nueva que falla con la lista de antes a la vista: la tanda siguiente rehace la búsqueda que se ve', async () => {
+      it('Historia 27.7 — una búsqueda nueva que falla con la lista de antes a la vista: el aviso la sustituye, y se lleva el bloque', async () => {
         const entorno = await isla();
         await elegirYEsperar(entorno, 'autor', 'jose-marti');
+        expect(entorno.mas().enElDom).toBe(true);
         entorno.fallar('search');
         await entorno.teclear('vida');
-        expect(entorno.region().texto).toBe('222 citas de José Martí.');
-        expect(entorno.mas().enElDom).toBe(true);
         expect(entorno.destrucciones()).toBe(1);
+        expect(entorno.pintados()).toEqual([]);
+        expect(entorno.mas().enElDom).toBe(false);
+        expect(entorno.avisoDeFallo()).toMatchObject({ enElDom: true, antesDeLaLista: true });
+      }, 240_000);
+
+      it('una búsqueda ya superada que falla con la lista de antes a la vista no pinta el aviso, y la tanda siguiente rehace la búsqueda que se ve', async () => {
+        const entorno = await isla({ manual: true });
+        entorno.elegir('autor', 'jose-marti');
+        entorno.avanzar(PAUSA_DE_LOS_SELECTORES_MS);
+        await entorno.responder(null);
+        expect(entorno.mas().enElDom).toBe(true);
+        // «vida» en vuelo, superada por «viento» antes de llegar; y llega fallando.
+        await entorno.teclear('vida');
+        await entorno.teclear('viento');
+        entorno.fallar('data');
+        await entorno.responder('vida');
+        expect(entorno.destrucciones()).toBe(1);
+        expect(entorno.avisoDeFallo().enElDom).toBe(false);
+        expect(titulos(entorno)).toEqual(deCitas(0, TANDA_DE_RESULTADOS));
+        expect(entorno.mas().enElDom).toBe(true);
         entorno.fallar();
         const desde = entorno.llamadas().length;
-        await pulsarYEsperar(entorno);
+        entorno.pulsarMas();
+        await entorno.responder(null);
         expect(entorno.llamadas().slice(desde)).toEqual([
           ['options', OPCIONES_DE_PAGEFIND],
           ['search', null, { filters: { [AUTOR]: 'jose-marti' }, sort: ORDEN }],
         ]);
         expect(titulos(entorno)).toEqual(deCitas(0, 60));
         expect(entorno.mas().fallo).toBe('');
+        await entorno.responder('viento');
+        expect(entorno.avisoDeFallo().enElDom).toBe(false);
+        expect(entorno.pintados().length).toBeGreaterThan(0);
       }, 240_000);
 
       it('un reintento cuyo `results` cambió (el índice cambió): las tandas siguen del `results` nuevo, sin rehacer la búsqueda ni tocar el recuento', async () => {
@@ -6215,6 +6275,132 @@ describe('Historia 23.8 — una búsqueda cuenta una vez, cuando se asienta', ()
         // Pulsar un resultado de la segunda tanda sí asienta, como cualquier otro.
         entorno.pulsarResultado(45);
         expect(entorno.emitidos().length).toBeGreaterThan(antes.emitidos.length);
+      }, 240_000);
+    });
+
+    /*
+     * Historia 27.7 — cuando la búsqueda no puede correr: el aviso previo que la isla retira al
+     * arrancar y el aviso del fallo, clonado una vez de su plantilla, que va justo antes de la lista
+     * en lugar de los resultados y se anuncia una vez por la región del recuento, apartada.
+     */
+    describe('Historia 27.7 — sin JavaScript, la búsqueda lleva a los Directorios', () => {
+      const VIENTO_Y_3 = '3 resultados.';
+
+      it('al arrancar, la isla quita el aviso previo antes de poner el formulario, y el del fallo no está', async () => {
+        const entorno = await isla();
+        expect(entorno.avisoPrevio()).toBe(false);
+        expect(entorno.insertado().raiz).toEqual(['template', 'form']);
+        expect(entorno.avisoDeFallo()).toEqual({ enElDom: false, antesDeLaLista: false, veces: 0, clonado: true });
+        expect(entorno.analizado()).toEqual({ emitidos: [], historial: [], violaciones: [] });
+      }, 240_000);
+
+      it.each(['importacion', 'init', 'search', 'data'] as const)(
+        'el índice que falla en %s: el aviso en lugar de los resultados, la región apartada que lo dice una vez, y nada asentable',
+        async (falla) => {
+          const entorno = await isla({ falla });
+          entorno.enfocar();
+          await entorno.teclear('viento');
+          expect(entorno.pintados()).toEqual([]);
+          expect(entorno.avisoDeFallo()).toEqual({ enElDom: true, antesDeLaLista: true, veces: 1, clonado: true });
+          expect(entorno.mas().enElDom).toBe(false);
+          expect(entorno.salidaVisible()).toBe(false);
+          expect(entorno.sombra()).toBe('');
+          // El primer ritmo: vacía y escribe en el fotograma siguiente.
+          expect(entorno.region()).toEqual({ texto: '', apartada: true });
+          entorno.avanzar(16);
+          expect(entorno.region()).toEqual({ texto: ANUNCIO_DEL_FALLO_DE_LA_BUSQUEDA, apartada: true });
+          // Otra que falla: el mismo aviso, una sola vez, y otra vez anunciado.
+          await entorno.teclear('lluvia');
+          entorno.avanzar(16);
+          expect(entorno.avisoDeFallo()).toMatchObject({ enElDom: true, veces: 1 });
+          expect(entorno.region()).toEqual({ texto: ANUNCIO_DEL_FALLO_DE_LA_BUSQUEDA, apartada: true });
+          await entorno.enviar();
+          entorno.ocultar();
+          entorno.pagehide();
+          await entorno.vaciar();
+          expect(entorno.emitidos()).toEqual([]);
+          expect(entorno.marcas()).toEqual([]);
+        },
+        240_000,
+      );
+
+      it.each(['importacion', 'init', 'search', 'data'] as const)(
+        'tras el fallo en %s, el reintento que llega quita el aviso, vacía la región antes del recuento y pinta',
+        async (falla) => {
+          const entorno = await isla({ falla });
+          await entorno.teclear('lluvia');
+          entorno.avanzar(16);
+          expect(entorno.region().texto).toBe(ANUNCIO_DEL_FALLO_DE_LA_BUSQUEDA);
+          entorno.fallar();
+          await entorno.teclear('viento');
+          expect(entorno.avisoDeFallo().enElDom).toBe(false);
+          expect(entorno.pintados()).toHaveLength(3);
+          expect(entorno.region()).toEqual({ texto: '', apartada: false });
+          entorno.avanzar(PAUSA_DE_TECLEO_MS);
+          expect(entorno.region()).toEqual({ texto: VIENTO_Y_3, apartada: false });
+          await entorno.enviar();
+          expect(entorno.emitidos()).toEqual([VIENTO]);
+          // Tras una importación fallida, la siguiente pide otra dirección (`?1`).
+          if (falla === 'importacion') expect(entorno.importaciones()).toEqual(['/pagefind/pagefind.js', '/pagefind/pagefind.js?1']);
+        },
+        240_000,
+      );
+
+      it('vaciar la búsqueda tras el fallo quita el aviso y deja la región vacía', async () => {
+        const entorno = await isla({ falla: 'search' });
+        await entorno.teclear('viento');
+        entorno.avanzar(16);
+        expect(entorno.avisoDeFallo().enElDom).toBe(true);
+        await entorno.teclear('');
+        entorno.avanzar(16);
+        expect(entorno.avisoDeFallo().enElDom).toBe(false);
+        expect(entorno.region().texto).toBe('');
+        expect(entorno.pintados()).toEqual([]);
+        expect(entorno.salidaVisible()).toBe(false);
+      }, 240_000);
+
+      it('el aviso de un fallo no lo pisa el anuncio tardío si otra búsqueda ya pintó antes del fotograma', async () => {
+        const entorno = await isla({ falla: 'search' });
+        entorno.escribir('viento');
+        entorno.avanzar(150);
+        await entorno.vaciar();
+        // El fallo se anuncia en el fotograma siguiente; antes, otra búsqueda llega y pinta.
+        entorno.fallar();
+        await entorno.enviar();
+        entorno.avanzar(16);
+        expect(entorno.avisoDeFallo().enElDom).toBe(false);
+        expect(entorno.region().texto).not.toBe(ANUNCIO_DEL_FALLO_DE_LA_BUSQUEDA);
+      }, 240_000);
+
+      it('tras el fallo, una búsqueda a cero también quita el aviso: sale al pintar cualquier búsqueda', async () => {
+        const entorno = await isla({ falla: 'search' });
+        await entorno.teclear('viento');
+        entorno.fallar();
+        await entorno.teclear('zzz');
+        expect(entorno.avisoDeFallo().enElDom).toBe(false);
+        expect(entorno.salidaVisible()).toBe(true);
+        entorno.avanzar(16);
+        expect(entorno.region().apartada).toBe(true);
+        expect(entorno.region().texto).not.toBe(ANUNCIO_DEL_FALLO_DE_LA_BUSQUEDA);
+      }, 240_000);
+
+      it('con una `obra` en la dirección y el mapa sin llegar: el aviso del fallo, sin la frase del filtro que no se puede usar y sin escribir la dirección', async () => {
+        const MAESTROS = 'jose-marti--maestros-ambulantes';
+        const MAPA = { 'jose-marti': [[MAESTROS, 'Maestros ambulantes']] };
+        const entorno = await isla({ mapa: MAPA, recuentosDeObra: { [MAESTROS]: 23 }, fallaElMapa: 'red', busqueda: `?autor=jose-marti&obra=${MAESTROS}` });
+        entorno.avanzar(16);
+        expect(entorno.avisoDeFallo()).toMatchObject({ enElDom: true, antesDeLaLista: true, veces: 1 });
+        expect(entorno.region()).toEqual({ texto: ANUNCIO_DEL_FALLO_DE_LA_BUSQUEDA, apartada: true });
+        for (const frase of [avisoDeLaDireccion(1, true), avisoDeLaDireccion(1, false)]) {
+          expect(frase).not.toBe('');
+          expect(entorno.region().texto).not.toContain(frase);
+          expect(entorno.sugerencia()).not.toContain(frase);
+        }
+        expect(entorno.salidaVisible()).toBe(false);
+        expect(entorno.direccion()).toBe(`/buscar/?autor=jose-marti&obra=${MAESTROS}`);
+        expect(entorno.historial()).toEqual([]);
+        entorno.ocultar();
+        expect(entorno.emitidos()).toEqual([]);
       }, 240_000);
     });
   });

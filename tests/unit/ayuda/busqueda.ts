@@ -2,7 +2,7 @@ import { createContext, runInContext } from 'node:vm';
 import { TANDA_DE_RESULTADOS } from '../../../src/lib/umbrales.ts';
 
 /**
- * La isla de `/buscar/`, ejecutada — Historias 23.8, 27.2, 27.3, 27.4 y 27.5.
+ * La isla de `/buscar/`, ejecutada — Historias 23.8, 27.2, 27.3, 27.4, 27.5 y 27.7.
  *
  * Es el «ejecutándola» que pedía la prueba de la 23.6. Desde la 27.2 la isla es el `<script>`
  * empaquetado de `src/components/Busqueda.astro`, un fichero de `/_astro/` que se aplana a guion
@@ -30,6 +30,11 @@ import { TANDA_DE_RESULTADOS } from '../../../src/lib/umbrales.ts';
  *     que se escribió en la región del recuento y en su sombra. `falla: 'tanda'` rechaza `data()`
  *     de los resultados desde `TANDA_DE_RESULTADOS`, y con `tandaManual` esos `data()` esperan a
  *     `responderALaTanda()`;
+ *   · Historia 27.7 — el aviso previo (`[data-aviso-previo]`) en la raíz, delante de la plantilla,
+ *     y la plantilla del aviso del fallo (`[data-plantilla-del-fallo]`) en la columna, entre la raíz
+ *     y el recuento, cuyo único elemento se clona —en profundidad— una sola vez: clonarlo dos veces
+ *     lanza. `avisoPrevio()` dice si el previo sigue en el documento y `avisoDeFallo()` si el del
+ *     fallo está, si va justo delante de la lista, cuántas veces y si la plantilla se clonó;
  *   · `document.createElement` con lo que usa para pintar un resultado;
  *   · un reloj fingido —`setTimeout`, `clearTimeout`, `requestAnimationFrame`, `performance.now`—
  *     que solo avanza con `avanzar(ms)`;
@@ -490,18 +495,40 @@ export function islaDeBusquedaEnUnSandbox(guion: string, opciones: OpcionesDeLaI
       },
     }),
   });
+  // Historia 27.7 — el aviso previo, en la raíz delante de la plantilla, como lo pinta el build.
+  const avisoPrevio = new Elemento('div');
+  avisoPrevio.className = 'aviso-de-la-busqueda';
   const raiz = new Elemento('div');
-  raiz.append(plantilla);
+  raiz.append(avisoPrevio, plantilla);
   raiz.dentro.set('template', plantilla);
+  raiz.dentro.set('[data-aviso-previo]', avisoPrevio);
+  // Historia 27.7 — la plantilla del aviso del fallo, fuera de la raíz: su único elemento, clonable una vez.
+  const avisoDelFallo = new Elemento('div');
+  avisoDelFallo.className = 'aviso-de-la-busqueda';
+  let falloClonado = false;
+  const plantillaDelFallo = new Elemento('template');
+  Object.defineProperty(plantillaDelFallo, 'content', {
+    get: () => ({
+      firstElementChild: {
+        cloneNode: (profundo?: boolean) => {
+          if (profundo !== true) throw new Error('la isla clona el aviso del fallo sin su contenido');
+          if (falloClonado) throw new Error('la isla clona el aviso del fallo dos veces');
+          falloClonado = true;
+          return avisoDelFallo;
+        },
+      },
+    }),
+  });
   // Historia 27.5 — la columna de la página, en el orden de `buscar.astro`.
   const columna = new Elemento('div');
   columna.esDocumento = true;
-  columna.append(raiz, recuento, lista, salida);
+  columna.append(raiz, plantillaDelFallo, recuento, lista, salida);
   const porSelector = new Map<string, Elemento>([
     ['[data-busqueda]', raiz],
     ['[data-resultados]', lista],
     ['[data-estado]', estado],
     ['[data-salida]', salida],
+    ['[data-plantilla-del-fallo]', plantillaDelFallo],
   ]);
   let enfocado: Elemento | null = null;
   campo.focus = () => {
@@ -980,6 +1007,21 @@ export function islaDeBusquedaEnUnSandbox(guion: string, opciones: OpcionesDeLaI
       if (nuevo.mapa !== undefined) mapa = nuevo.mapa;
       if (nuevo.recuentosDeObra !== undefined) recuentosDeObra = nuevo.recuentosDeObra;
     },
+    /** Historia 27.7 — si el aviso previo sigue en el documento. */
+    avisoPrevio: () => avisoPrevio.isConnected,
+    /**
+     * Historia 27.7 — el aviso del fallo: si está en el documento, si va justo delante de la lista
+     * (su hermano anterior), cuántas veces está en la columna y si la plantilla se clonó.
+     */
+    avisoDeFallo: () => ({
+      enElDom: avisoDelFallo.isConnected,
+      antesDeLaLista:
+        avisoDelFallo.padre !== null &&
+        avisoDelFallo.padre === lista.padre &&
+        avisoDelFallo.padre.hijos.indexOf(avisoDelFallo) === avisoDelFallo.padre.hijos.indexOf(lista) - 1,
+      veces: columna.hijos.filter((h) => h === avisoDelFallo).length,
+      clonado: falloClonado,
+    }),
     /** Lo que la isla insertó: los hijos de la raíz y del contenedor del recuento, por etiqueta. */
     insertado: () => ({
       raiz: raiz.hijos.map((h) => h.tagName.toLowerCase()),

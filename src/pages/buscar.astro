@@ -20,6 +20,11 @@
  * ordenadas por `ordenDeAutoresPorNombre` y `ordenDeTemasPorNombre` de `src/lib/normalizar.ts`.
  * Así no hay opción sin Citas que la filtren, ni Tema bajo su umbral.
  *
+ * Historia 27.7 — cuando la búsqueda no puede correr, `Busqueda.astro` pinta los avisos con los dos
+ * Directorios (sin guion, antes de arrancar y el del índice que no carga, que la isla pone justo
+ * antes de la lista). Sus filas son resultados de tipo «Directorio» con el mismo marcado que las de
+ * la isla, y toman de aquí las mismas reglas: la lista lleva `filas-de-resultado`.
+ *
  * Historia 27.6 — la salida sin resultados ofrece los Autores destacados (`autoresDestacados`), y su
  * `.sugerencia` lleva la frase sin filtros (`SUGERENCIA_SIN_FILTROS`). La isla la reescribe a cero
  * con `sugerenciaSinResultados`, que nombra lo filtrado, y la anuncia por la región del recuento,
@@ -97,7 +102,7 @@ const temasDelFiltro = ordenDeTemasPorNombre(filtros.temas.map(opciones));
       * build vacía: los `li.resultado` que mete la isla la heredan sin saber de zonas. Historia
       * 27.2 — `role="list"`: sin viñetas, algún lector deja de anunciarla como lista.
       */}
-    <ul class="resultados" role="list" data-resultados data-zona="resultado"></ul>
+    <ul class="resultados filas-de-resultado" role="list" data-resultados data-zona="resultado"></ul>
 
     {/* FR-8 — la salida siempre está, en el HTML inicial. Se muestra al no haber nada. */}
     {/*
@@ -231,11 +236,18 @@ const temasDelFiltro = ordenDeTemasPorNombre(filtros.temas.map(opciones));
     padding: 0;
   }
 
-  .resultados :global(.resultado) {
+  /*
+   * La fila de resultado — un solo juego de reglas para las dos listas que la llevan
+   * (`.filas-de-resultado`): la de resultados, cuyas filas inserta la isla, y, desde la Historia
+   * 27.7, la de los Directorios de los avisos (`AvisoDeLaBusqueda.astro`), con el mismo marcado.
+   * Globales y bajo la clase de la lista, porque las dos las pintan otros componentes.
+   */
+
+  :global(.filas-de-resultado .resultado) {
     border-bottom: var(--grosor-filete) solid var(--filete);
   }
 
-  .resultados :global(.resultado a) {
+  :global(.filas-de-resultado .resultado a) {
     display: flex;
     flex-direction: column;
     gap: var(--unidad);
@@ -245,7 +257,7 @@ const temasDelFiltro = ordenDeTemasPorNombre(filtros.temas.map(opciones));
     color: inherit;
   }
 
-  .resultados :global(.clase) {
+  :global(.filas-de-resultado .clase) {
     font-family: var(--sans);
     font-size: var(--pie);
     letter-spacing: 0.09em;
@@ -253,7 +265,7 @@ const temasDelFiltro = ordenDeTemasPorNombre(filtros.temas.map(opciones));
     color: var(--tinta-apagada);
   }
 
-  .resultados :global(.titulo) {
+  :global(.filas-de-resultado .titulo) {
     font-family: var(--serif);
     font-size: var(--titular-sm);
     color: var(--tinta);
@@ -263,13 +275,13 @@ const temasDelFiltro = ordenDeTemasPorNombre(filtros.temas.map(opciones));
    * Historias 22.7 y 26.2 — el título de una Obra, de un Directorio y de la portada va en Inter:
    * mismo cuerpo y peso, solo cambia la familia.
    */
-  .resultados :global(.titulo.en-sans) {
+  :global(.filas-de-resultado .titulo.en-sans) {
     font-family: var(--sans);
   }
 
   /* El Autor bajo el título de una Obra o una Cita, con el estilo `author`, como en la Tarjeta
      de Cita. */
-  .resultados :global(.r-autor) {
+  :global(.filas-de-resultado .r-autor) {
     font-family: var(--sans);
     font-size: var(--autor);
     font-weight: 600;

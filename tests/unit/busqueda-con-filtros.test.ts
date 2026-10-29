@@ -20,11 +20,16 @@ import {
   EJEMPLO_DE_LA_BUSQUEDA,
   ESTADO_VACIO,
   ETIQUETA_DE_LA_BUSQUEDA,
+  ANUNCIO_DEL_FALLO_DE_LA_BUSQUEDA,
+  AVISO_DEL_FALLO,
+  AVISO_PREVIO,
+  AVISO_SIN_GUION,
   FALLO_DE_LA_TANDA,
   PARAMETROS_DE_LA_BUSQUEDA,
   RUTA_DEL_MAPA_DE_OBRAS,
   SUGERENCIA_SIN_FILTROS,
   TEXTO_DE_EJEMPLO_DE_LA_BUSQUEDA,
+  VOLVER_ATRAS_A_LAS_CITAS,
   autorDeLaObra,
   avisoDeLaDireccion,
   combinacionDeFiltros,
@@ -50,8 +55,9 @@ import {
 } from '../../src/lib/busqueda.ts';
 import { filtrosDeLaBusqueda } from '../../src/lib/publicado.ts';
 import { MAPA_DE_OBRAS_EN_DIST } from '../../tools/lib/peso.ts';
-import { MARCA_DE_BUSQUEDA_ASENTADA } from '../../src/lib/medicion.ts';
-import { rutaDeLaBusqueda } from '../../src/lib/superficies.ts';
+import { EXENCIONES_DE_ZONA, MARCA_DE_BUSQUEDA_ASENTADA } from '../../src/lib/medicion.ts';
+import { rutaDeLaBusqueda, rutaDelDirectorioDeAutores, rutaDelDirectorioDeObras } from '../../src/lib/superficies.ts';
+import { NOMBRE_DEL_DIRECTORIO_DE_AUTORES, NOMBRE_DEL_DIRECTORIO_DE_OBRAS } from '../../src/lib/marca.ts';
 import { guionExternoDe } from '../../src/lib/guiones.ts';
 import { ARRANQUE_DE_MEDICION, rutaDelGuionDeMedicion } from '../../src/lib/medicion.ts';
 import {
@@ -65,7 +71,7 @@ import {
   recuentoDeCitas as recuentoDeCitasDeAtribucion,
   temaEnFrase as temaEnFraseDeAtribucion,
 } from '../../src/lib/atribucion.ts';
-import { FILTROS_DE_CITA, FILTRO_DE_TIPO, ORDEN_DE_CITA } from '../../src/lib/tipoDeResultado.ts';
+import { ETIQUETAS_DE_RESULTADO, FILTROS_DE_CITA, FILTRO_DE_TIPO, ORDEN_DE_CITA } from '../../src/lib/tipoDeResultado.ts';
 import { MIN_CITAS_POR_TEMA, TANDA_DE_RESULTADOS } from '../../src/lib/umbrales.ts';
 import { decodificar } from './ayuda/listado.ts';
 
@@ -827,7 +833,7 @@ describe('Historia 27.2 — lo construido', () => {
     expect(botones[1].has('data-mostrar-mas')).toBe(true);
     expect(plantilla).toMatch(/<button\b[^>]*>Quitar los filtros<\/button>/u);
     // La lista de resultados es una lista, con su zona; la región está desde la carga, vacía.
-    expect(html).toMatch(/<ul class="resultados" role="list" data-resultados data-zona="resultado"/u);
+    expect(html).toMatch(/<ul class="resultados filas-de-resultado" role="list" data-resultados data-zona="resultado"/u);
     expect(html).toMatch(/<p class="estado" role="status" data-estado[^>]*><\/p>/u);
   });
 
@@ -857,7 +863,17 @@ describe('Historia 27.2 — lo construido', () => {
       '[data-mostrar-mas]',
       '[data-fallo-de-la-tanda]',
     ];
-    const EN_LA_PAGINA = ['[data-busqueda]', 'template', '[data-resultados]', '[data-estado]', '[data-salida]', '.sugerencia'];
+    // Historia 27.7 — el aviso previo, en la raíz, y la plantilla del aviso del fallo, en la página.
+    const EN_LA_PAGINA = [
+      '[data-busqueda]',
+      'template',
+      '[data-resultados]',
+      '[data-estado]',
+      '[data-salida]',
+      '.sugerencia',
+      '[data-aviso-previo]',
+      '[data-plantilla-del-fallo]',
+    ];
     expect([...buscados].sort()).toEqual([...EN_LA_PLANTILLA, ...EN_LA_PAGINA].sort());
 
     const tieneClase = (elemento: { atributos: ReadonlyMap<string, string> }, clase: string) =>
@@ -899,6 +915,9 @@ describe('Historia 27.2 — lo construido', () => {
     expect(vistos.get('[data-salida]')?.[0]).toEqual({ plantilla: false, raiz: false, recuento: false, salida: false });
     // La sugerencia que se anuncia a cero, dentro de la salida.
     expect(vistos.get('.sugerencia')?.[0]).toEqual({ plantilla: false, raiz: false, recuento: false, salida: true });
+    // Historia 27.7 — el aviso previo en la raíz, fuera de toda plantilla; la del fallo, fuera de la raíz.
+    expect(vistos.get('[data-aviso-previo]')).toEqual([{ plantilla: false, raiz: true, recuento: false, salida: false }]);
+    expect(vistos.get('[data-plantilla-del-fallo]')).toEqual([{ plantilla: false, raiz: false, recuento: false, salida: false }]);
   });
 
   it('Historia 27.3 — `dist/buscar/obras.json` es el mapa de `filtrosDeLaBusqueda`, y no va en el HTML', async () => {
@@ -1006,6 +1025,124 @@ describe('Historia 27.2 — lo construido', () => {
     expect(cajas[1]).toMatch(/id="filtro-de-obra"/u);
   });
 
+  it('Historia 27.7 — `/buscar/` lleva el aviso tres veces, del mismo componente: en `<noscript>`, el previo y el de la plantilla del fallo, con sus frases y los dos Directorios, fuera de la Zona `resultado`', () => {
+    interface Aviso {
+      donde: 'noscript' | 'previo' | 'fallo';
+      sinZona: string | undefined;
+      enResultado: boolean;
+      parrafos: string[];
+      filas: { li: string; aria: string | undefined; href: string | undefined; target: string | undefined; clase: string; titulo: string; tituloClase: string }[];
+      listaRole: string | undefined;
+      listaClase: string;
+    }
+    const avisos: Aviso[] = [];
+    const tieneClase = (atributos: ReadonlyMap<string, string>, clase: string) => (atributos.get('class') ?? '').split(/\s+/u).includes(clase);
+    // La raíz de cada aviso, con sus antepasados: dónde está.
+    const raices: { antepasados: readonly { etiqueta: string; atributos: ReadonlyMap<string, string> }[]; atributos: ReadonlyMap<string, string> }[] = [];
+    recorrerElementos(html, (elemento, antepasados) => {
+      if (elemento.etiqueta === 'div' && tieneClase(elemento.atributos, 'aviso-de-la-busqueda')) {
+        raices.push({ antepasados: [...antepasados], atributos: elemento.atributos });
+      }
+    });
+    expect(raices).toHaveLength(3);
+    // El marcado de cada uno, en orden de aparición.
+    const marcados = [...html.matchAll(/<div\b[^>]*\bclass="aviso-de-la-busqueda\b[^"]*"[^>]*>([\s\S]*?)<\/ul>\s*<\/div>/gu)].map((m) => m[0]);
+    expect(marcados).toHaveLength(3);
+    const texto = (fragmento: string) => decodificar(fragmento.replace(/<[^>]+>/gu, '')).trim();
+    raices.forEach((raiz, i) => {
+      const marcado = marcados[i];
+      const donde = raiz.antepasados.some((a) => a.etiqueta === 'noscript')
+        ? 'noscript'
+        : raiz.antepasados.some((a) => a.etiqueta === 'template')
+          ? 'fallo'
+          : 'previo';
+      const filas: Aviso['filas'] = [];
+      let listaRole: string | undefined;
+      let listaClase = '';
+      recorrerElementos(marcado, (elemento, antepasados) => {
+        if (elemento.etiqueta === 'ul') {
+          listaRole = elemento.atributos.get('role');
+          listaClase = elemento.atributos.get('class') ?? '';
+        }
+        if (elemento.etiqueta === 'a') {
+          const li = antepasados.at(-1);
+          filas.push({
+            li: li?.etiqueta === 'li' && tieneClase(li.atributos, 'resultado') ? 'li.resultado' : String(li?.etiqueta),
+            aria: elemento.atributos.get('aria-label'),
+            href: elemento.atributos.get('href'),
+            target: elemento.atributos.get('target'),
+            clase: '',
+            titulo: '',
+            tituloClase: '',
+          });
+        }
+      });
+      const spans = [...marcado.matchAll(/<span\b([^>]*)>([^<]*)<\/span>/gu)];
+      spans.forEach(([, atributos, contenido], k) => {
+        const fila = filas[Math.floor(k / 2)];
+        if (k % 2 === 0) fila.clase = /\bclass="clase\b/u.test(atributos) && /\bdata-tipo="directorio"/u.test(atributos) ? decodificar(contenido) : '¿?';
+        else {
+          fila.titulo = decodificar(contenido);
+          fila.tituloClase = /\bclass="([^"]*)"/u.exec(atributos)?.[1] ?? '';
+        }
+      });
+      avisos.push({
+        donde,
+        sinZona: raiz.atributos.get('data-sin-zona'),
+        enResultado: raiz.antepasados.some((a) => a.atributos.get('data-zona') === 'resultado'),
+        parrafos: [...marcado.matchAll(/<p\b[^>]*>([\s\S]*?)<\/p>/gu)].map((m) => texto(m[1])),
+        filas,
+        listaRole,
+        listaClase,
+      });
+      // El previo, y solo él, lleva su marca; el de la plantilla, la suya.
+      expect(raiz.atributos.has('data-aviso-previo'), donde).toBe(donde === 'previo');
+      if (donde === 'fallo') {
+        expect(raiz.antepasados.some((a) => a.etiqueta === 'template' && a.atributos.has('data-plantilla-del-fallo'))).toBe(true);
+      }
+      // El de `<noscript>` y el previo, en la raíz de la búsqueda; el del fallo, fuera.
+      expect(raiz.antepasados.some((a) => a.atributos.has('data-busqueda')), donde).toBe(donde !== 'fallo');
+    });
+
+    expect(avisos.map((a) => a.donde)).toEqual(['noscript', 'previo', 'fallo']);
+    const FRASES = { noscript: AVISO_SIN_GUION, previo: AVISO_PREVIO, fallo: AVISO_DEL_FALLO };
+    for (const aviso of avisos) {
+      expect(aviso.sinZona, aviso.donde).toBe('directorios-del-aviso');
+      expect(EXENCIONES_DE_ZONA).toContain(aviso.sinZona);
+      expect(aviso.enResultado, aviso.donde).toBe(false);
+      expect(aviso.parrafos, aviso.donde).toEqual([FRASES[aviso.donde].lema, FRASES[aviso.donde].sigue]);
+      expect(aviso.listaRole, aviso.donde).toBe('list');
+      expect(aviso.listaClase.split(/\s+/u), aviso.donde).toContain('filas-de-resultado');
+      expect(aviso.filas, aviso.donde).toEqual(
+        [
+          [NOMBRE_DEL_DIRECTORIO_DE_AUTORES, rutaDelDirectorioDeAutores()],
+          [NOMBRE_DEL_DIRECTORIO_DE_OBRAS, rutaDelDirectorioDeObras()],
+        ].map(([titulo, href]) => ({
+          li: 'li.resultado',
+          aria: `${ETIQUETAS_DE_RESULTADO.directorio}: ${titulo}`,
+          href,
+          target: undefined,
+          clase: ETIQUETAS_DE_RESULTADO.directorio,
+          titulo,
+          tituloClase: expect.stringMatching(/^titulo en-sans\b/u),
+        })),
+      );
+    }
+    // La frase de volver atrás es una sola cadena, en los tres.
+    for (const aviso of [AVISO_SIN_GUION, AVISO_PREVIO, AVISO_DEL_FALLO]) expect(aviso.sigue.endsWith(VOLVER_ATRAS_A_LAS_CITAS)).toBe(true);
+    expect(ANUNCIO_DEL_FALLO_DE_LA_BUSQUEDA).toBe(`${AVISO_DEL_FALLO.lema} ${AVISO_DEL_FALLO.sigue}`);
+  });
+
+  it('Historia 27.7 — ninguna otra página lleva el aviso de la búsqueda', () => {
+    const dist = join(proyecto, 'dist');
+    const conAviso: string[] = [];
+    for (const fichero of readdirSync(dist, { recursive: true }).map(String)) {
+      if (!fichero.endsWith('.html')) continue;
+      if (readFileSync(join(dist, fichero), 'utf8').includes('aviso-de-la-busqueda')) conAviso.push(fichero);
+    }
+    expect(conAviso).toEqual(['buscar/index.html']);
+  });
+
   describe('en el índice generado por Pagefind', () => {
     const datos = async (respuesta: Awaited<ReturnType<IndiceDePagefind['search']>>) =>
       Promise.all(respuesta.results.map((r) => r.data()));
@@ -1103,6 +1240,18 @@ describe('Historia 27.2 — lo construido', () => {
       // Por su título, sale la «Cartas» indexable de Séneca, y la de Martí no.
       const deObra = (await datos(await indice!.search('Cartas'))).filter((d) => d.filters[FILTRO_DE_TIPO]?.[0] === 'obra');
       expect(deObra.map((d) => rutaDe(d.url))).toEqual(['/obra/seneca/cartas/']);
+    });
+
+    it('Historia 27.7 — los Directorios del aviso salen en Pagefind con el mismo rótulo y el mismo título', async () => {
+      for (const [ruta, titulo] of [
+        [rutaDelDirectorioDeAutores(), NOMBRE_DEL_DIRECTORIO_DE_AUTORES],
+        [rutaDelDirectorioDeObras(), NOMBRE_DEL_DIRECTORIO_DE_OBRAS],
+      ] as const) {
+        const dato = (await datos(await indice!.search(titulo))).find((d) => rutaDe(d.url) === ruta);
+        expect(dato, ruta).toBeDefined();
+        expect(dato!.meta.title, ruta).toBe(titulo);
+        expect(dato!.filters[FILTRO_DE_TIPO]?.[0], ruta).toBe('directorio');
+      }
     });
 
     it('un Tema bajo su umbral no filtra nada: no es filtro', async () => {

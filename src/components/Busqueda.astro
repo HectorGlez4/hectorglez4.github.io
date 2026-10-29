@@ -1,22 +1,29 @@
 ---
 /**
- * La búsqueda de `/buscar/` — Historias 27.2, 27.3, 27.4, 27.5 y 27.6, FR-7, FR-8, NFR-4, AD-6, AD-11,
- * AD-13, UX-DR87, UX-DR88, UX-DR89, UX-DR90, UX-DR91, UX-DR93, UX-DR99, UX-DR100, UX-DR101,
+ * La búsqueda de `/buscar/` — Historias 27.2, 27.3, 27.4, 27.5, 27.6 y 27.7, FR-7, FR-8, NFR-4, AD-6, AD-11,
+ * AD-13, UX-DR87, UX-DR88, UX-DR89, UX-DR90, UX-DR91, UX-DR92, UX-DR93, UX-DR99, UX-DR100, UX-DR101,
  * UX-DR112; `DESIGN.md § Búsqueda` y `EXPERIENCE.md § Búsqueda`.
  *
  * El índice lo produce Pagefind sobre `dist/` después del build, así que solo contiene lo que las
  * páginas publican: si una Cita no tiene página, no hay nada que indexar. El conjunto publicable de
  * AD-11 gobierna la búsqueda sin que la búsqueda sepa que existe.
  *
- * Lo usa solo `/buscar/`, entre el `h1` y la región del recuento, y pinta dos cosas:
+ * Lo usa solo `/buscar/`, entre el `h1` y la región del recuento, y pinta tres cosas:
  *
+ *   · Historia 27.7 (FR-7, NFR-2, UX-DR92) — los avisos de cuando la búsqueda no puede correr, los
+ *     tres del mismo componente (`AvisoDeLaBusqueda.astro`), con los dos Directorios debajo: en
+ *     `<noscript>`, el de sin guion; en el HTML inicial, el **aviso previo** (`data-aviso-previo`),
+ *     que su CSS oculta sin guion y la isla quita del DOM al arrancar —si el paquete no llega a
+ *     ejecutar, se queda—; y, fuera de `[data-busqueda]`, en `<template data-plantilla-del-fallo>`,
+ *     el del índice que no carga, que la isla inserta (abajo). Ninguno cuelga de la Zona
+ *     `resultado`: van exentos por escrito (`directorios-del-aviso`);
  *   · un `<template>` con el formulario —el Campo de búsqueda de la 26.6 con su `name`, su
  *     ejemplo y la marca `data-consulta`, y un `fieldset` con los selectores de Autor, de Obra
  *     (27.3) y de Tema y «Quitar los filtros»—, la sombra del recuento y, desde la 27.5, el bloque
  *     de «Mostrar 30 más» con su región de estado, inertes: el guion los inserta al cargar, salvo
  *     el `.selector` de Obra y el bloque, que separa del clon (abajo). Ir en
  *     plantilla deja el marcado, las opciones del build y sus estilos de ámbito en el HTML, y el
- *     guion sin una palabra de contenido. Sin guion la página queda en el `h1` (hasta la 27.7);
+ *     guion sin una palabra de contenido. Sin guion, lo que se ve es el aviso de `<noscript>`;
  *   · el `<script>`, que Astro empaqueta en un fichero de `/_astro/` (AD-6) y que nunca va en línea
  *     (`assetsInlineLimit` en `astro.config.mjs`). Está en la lista cerrada de
  *     `src/lib/guiones.ts` con su tope, `MAX_BYTES_GUION_DE_LA_BUSQUEDA`, y es el único guion de la
@@ -197,8 +204,14 @@
  *       - pintar otra búsqueda, o vaciar la lista, quita el bloque, vacía su región y olvida la
  *         tanda en vuelo y su avería.
  *   · La búsqueda que no corre —el índice no carga, o `init`, `search` o los datos de un
- *     resultado fallan— no pinta, no cambia el estado que se ve y no deja ninguna promesa rechazada
- *     sin manejar; no se asienta. La siguiente vuelve a pedir el índice, también con el mismo estado
+ *     resultado fallan— no deja ninguna promesa rechazada sin manejar y no se asienta. Desde la
+ *     Historia 27.7, si es la última lanzada, pinta el **aviso del fallo** en lugar de los
+ *     resultados (`mostrarFallo`): el clon único de la plantilla justo antes de la lista, la lista
+ *     vacía, sin «Mostrar 30 más», sin salida ni sombra, y la región apartada que lo anuncia una vez
+ *     con el primer ritmo; lo que se veía deja de ser asentable —con el aviso a la vista no hay
+ *     búsqueda que asentar, y un fallo no es un tramo 0—. Lo mismo cuando una `obra` de la dirección
+ *     no tiene mapa ni `filters()` (`sinDatos`). El aviso sale al pintar cualquier búsqueda y al
+ *     vaciarla, y la región se vacía antes del recuento, como al salir de cero. La siguiente vuelve a pedir el índice, también con el mismo estado
  *     (Enter otra vez), y lo pide de verdad: tras una importación fallida, con `?{n}` en la
  *     dirección, porque el navegador recuerda el fallo de un módulo por su URL; tras un fallo de
  *     Pagefind, con `destroy()`, porque Pagefind guarda el error de su índice en su instancia —
@@ -222,6 +235,7 @@
  *     Enter buscará. Con estado en la dirección, la búsqueda se ejecuta al cargar.
  *   · Lo tecleado vuelve a la página solo por `textContent` y `value`, nunca como HTML.
  */
+import AvisoDeLaBusqueda from './AvisoDeLaBusqueda.astro';
 import CampoDeBusqueda from './CampoDeBusqueda.astro';
 import {
   ETIQUETA_DE_LA_BUSQUEDA,
@@ -241,6 +255,14 @@ const { autores, temas } = Astro.props;
 ---
 
 <div data-busqueda>
+  {/*
+    * Historia 27.7 — sin guion, el aviso de `<noscript>`; con guion, hasta que la isla arranca, el
+    * aviso previo, que su propio CSS oculta sin guion y la isla quita del DOM al arrancar. Los dos,
+    * antes de la plantilla del formulario: el `<noscript>`, con guion, es texto y no lleva
+    * `<template>`, así que `raiz.querySelector('template')` sigue siendo la del formulario.
+    */}
+  <noscript><AvisoDeLaBusqueda caso="sin-guion" /></noscript>
+  <AvisoDeLaBusqueda caso="antes-de-arrancar" />
   <template>
     <form class="formulario" role="search" action={rutaDeLaBusqueda()} method="get">
       <CampoDeBusqueda
@@ -300,6 +322,12 @@ const { autores, temas } = Astro.props;
     </div>
   </template>
 </div>
+{/*
+  * Historia 27.7 — el aviso del índice que no carga, fuera de `[data-busqueda]`: la isla lo clona
+  * una vez y lo pone justo antes de la lista —bajo el formulario y el recuento, fuera de la Zona
+  * `resultado`— cuando la búsqueda no puede correr.
+  */}
+<template data-plantilla-del-fallo><AvisoDeLaBusqueda caso="fallo" /></template>
 
 <style>
   .formulario {
@@ -433,6 +461,7 @@ const { autores, temas } = Astro.props;
 <script>
   import { anunciar, ritmoDeTecleo } from '../lib/anuncio.ts';
   import {
+    ANUNCIO_DEL_FALLO_DE_LA_BUSQUEDA,
     FALLO_DE_LA_TANDA,
     RUTA_DEL_MAPA_DE_OBRAS,
     autorDeLaObra,
@@ -514,7 +543,10 @@ const { autores, temas } = Astro.props;
     const lista = document.querySelector<HTMLElement>('[data-resultados]');
     const estado = document.querySelector<HTMLElement>('[data-estado]');
     const salida = document.querySelector<HTMLElement>('[data-salida]');
-    if (!plantilla || !lista || !estado || !salida) return;
+    // Historia 27.7 — el aviso del índice que no carga, clonado una vez y reutilizado.
+    const delFallo = document.querySelector<HTMLTemplateElement>('[data-plantilla-del-fallo]');
+    const avisoDelFallo = delFallo?.content.firstElementChild?.cloneNode(true) as HTMLElement | undefined;
+    if (!plantilla || !lista || !estado || !salida || !avisoDelFallo) return;
 
     const contenido = plantilla.content.cloneNode(true) as DocumentFragment;
     const formulario = contenido.querySelector('form');
@@ -539,6 +571,8 @@ const { autores, temas } = Astro.props;
     cajaDeObra.remove();
     // Historia 27.5 — el bloque sale del clon: solo está, detrás de la lista, si quedan resultados.
     mas.remove();
+    // Historia 27.7 — con todo lo necesario a mano, el aviso previo sale antes que entre el formulario.
+    raiz.querySelector('[data-aviso-previo]')?.remove();
     raiz.append(formulario);
     estado.before(sombra);
 
@@ -752,6 +786,43 @@ const { autores, temas } = Astro.props;
     }
 
     /**
+     * Historia 27.7 — la búsqueda que no puede correr: el aviso del fallo justo antes de la lista
+     * —bajo el formulario y el recuento, fuera de la Zona `resultado`—, en lugar de los resultados.
+     * Lista vacía, sin «Mostrar 30 más», sin salida y sin sombra; la región se aparta de la vista y
+     * lo anuncia una vez con el primer ritmo, como a cero. Nada asentable: con el aviso a la vista
+     * no hay búsqueda que asentar, y un fallo no es un tramo 0.
+     */
+    function mostrarFallo() {
+      const vez = ++pintadas;
+      lista!.replaceChildren();
+      quitarMas();
+      salida!.hidden = true;
+      sombra!.textContent = '';
+      aCero = false;
+      visto = null;
+      estadoVisto = null;
+      controlDelVisto = null;
+      if (!avisoDelFallo!.isConnected) lista!.before(avisoDelFallo!);
+      estado!.classList.add('solo-para-lectores');
+      ritmo.vaciar();
+      anunciar(
+        {
+          set textContent(texto: string | null) {
+            if (vez === pintadas) estado!.textContent = texto;
+          },
+        },
+        ANUNCIO_DEL_FALLO_DE_LA_BUSQUEDA,
+      );
+    }
+
+    /** Historia 27.7 — quita el aviso del fallo, si está. Devuelve si estaba. */
+    function quitarFallo(): boolean {
+      if (!avisoDelFallo!.isConnected) return false;
+      avisoDelFallo!.remove();
+      return true;
+    }
+
+    /**
      * Pinta una búsqueda con los datos de su recuento —el total, el texto y los nombres de lo
      * filtrado—. `aviso` es la frase de la 27.4 de los filtros de la dirección que no se pueden
      * usar: va delante del recuento, con un espacio, en la región y en la sombra.
@@ -764,6 +835,8 @@ const { autores, temas } = Astro.props;
     function pintar(resultados: DatoDeResultado[], datos: DatosDelRecuento, origen: Origen, aviso = '') {
       lista!.replaceChildren();
       quitarMas();
+      // Historia 27.7 — al salir del aviso del fallo, la región dice todavía su frase: se vacía antes.
+      const desdeElFallo = quitarFallo();
       const vez = ++pintadas;
       const conAviso = (texto: string) => (aviso ? aviso + ' ' + texto : texto);
 
@@ -789,8 +862,8 @@ const { autores, temas } = Astro.props;
       }
 
       salida!.hidden = true;
-      // Al salir de cero, la región dice todavía la sugerencia: se vacía antes de la pausa.
-      if (aCero) ritmo.vaciar();
+      // Al salir de cero o del fallo, la región dice todavía su frase: se vacía antes de la pausa.
+      if (aCero || desdeElFallo) ritmo.vaciar();
       aCero = false;
       const frase = conAviso(fraseDelRecuento(datos));
       sombra!.textContent = frase;
@@ -862,6 +935,7 @@ const { autores, temas } = Astro.props;
         pintadas++;
         lista!.replaceChildren();
         quitarMas();
+        quitarFallo();
         ritmo.vaciar();
         sombra!.textContent = '';
         salida!.hidden = true;
@@ -899,11 +973,17 @@ const { autores, temas } = Astro.props;
           respuesta = await pedir(await conOpciones(pf));
           resultados = await Promise.all(respuesta.results.slice(0, TANDA_DE_RESULTADOS).map((r) => r.data()));
         } catch {
-          if (mio === turno) ultima = null;
           const destruccion = pf?.destroy?.().catch(() => {});
-          // Historia 27.5 — si sigue a la vista una lista con su bloque, sus `results` son del índice
-          // que se acaba de destruir: la tanda siguiente rehace su búsqueda, como tras un fallo suyo.
-          if (mas!.isConnected) averiada = destruccion || Promise.resolve();
+          const conMas = mas!.isConnected;
+          // Historia 27.7 — la última búsqueda lanzada no pudo correr: el aviso del fallo en lugar de
+          // los resultados. Una ya superada por otra no pinta nada.
+          if (mio === turno) {
+            ultima = null;
+            mostrarFallo();
+          }
+          // Historia 27.5 — si seguía a la vista una lista con su bloque, sus `results` eran del índice
+          // que se acaba de destruir: lo siguiente espera la destrucción, como tras un fallo de tanda.
+          if (conMas) averiada = destruccion || Promise.resolve();
           return;
         }
         if (mio !== turno) return;
@@ -1215,23 +1295,17 @@ const { autores, temas } = Astro.props;
     }
 
     /**
-     * Historia 27.4 — con Obra en lo leído y sin el mapa o `filters()`, no se sabe si la Obra existe
-     * (27.7): ni búsqueda, ni frase, ni escritura de la dirección, ni nada asentable. Quedan el
-     * campo y los selectores de Autor y de Tema que se pueden juzgar, y la lista vacía; el gesto
-     * siguiente busca con lo que se vea.
+     * Historia 27.4 — con Obra en lo leído y sin el mapa o `filters()`, no se sabe si la Obra existe:
+     * ni búsqueda, ni frase de `avisoDeLaDireccion`, ni escritura de la dirección, ni nada
+     * asentable. Quedan el campo y los selectores de Autor y de Tema que se pueden juzgar y, desde
+     * la 27.7, el aviso del fallo en lugar de los resultados: es el estado del índice que no carga.
+     * El gesto siguiente busca con lo que se vea.
      */
     function sinDatos(leido: EstadoDeLaBusqueda) {
       ponerEstado({ ...leido, obra: '' });
       turno++;
       ultima = null;
-      pintadas++;
-      lista!.replaceChildren();
-      quitarMas();
-      ritmo.vaciar();
-      sombra!.textContent = '';
-      salida!.hidden = true;
-      visto = null;
-      estadoVisto = null;
+      mostrarFallo();
     }
 
     /**

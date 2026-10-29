@@ -612,10 +612,18 @@ export const MAX_BYTES_GUION_DEL_FILTRO = 3915;
  * 27.5 —el reintento que sigue del `results` nuevo sin rehacer la búsqueda, el foco al último
  * resultado si ya no trae nada, la destrucción que no cae bajo otra búsqueda en vuelo, la búsqueda
  * que espera la destrucción en curso y el fallo diferido que un reintento logrado ya no escribe—
- * mide **16.893 bytes** (2026-10-29): 16.341 del fichero de entrada y 552 del trozo, que no cambia.
- * **Tope vigente**, con la misma regla: 16.893 más unos 400.
+ * mide **16.893 bytes** (2026-10-29): 16.341 del fichero de entrada y 552 del trozo, que no cambia
+ * (el tope de entonces, 17.293, ya no rige).
+ *
+ * Historia 27.7 — rederivado con la misma regla. La búsqueda que no puede correr pinta el aviso del
+ * fallo: retirar el aviso previo al arrancar, clonar una vez la plantilla del fallo, ponerlo y
+ * quitarlo (`mostrarFallo`, `quitarFallo`) desde el fallo de `buscar`, `sinDatos`, `pintar` y la
+ * búsqueda vacía, con la frase que anuncia la región (`ANUNCIO_DEL_FALLO_DE_LA_BUSQUEDA`, de
+ * `src/lib/busqueda.ts`): **17.896 bytes** (2026-10-29), el fichero de entrada con el trozo de
+ * `recuentos`, medidos por `tests/unit/medicion.test.ts`. **Tope vigente**, con la misma regla:
+ * 17.896 más unos 400.
  */
-export const MAX_BYTES_GUION_DE_LA_BUSQUEDA = 17293;
+export const MAX_BYTES_GUION_DE_LA_BUSQUEDA = 18296;
 
 /**
  * La pausa de tecleo, en milisegundos — AD-9, UX-DR58, UX-DR86, Historia 26.6.

@@ -11,6 +11,10 @@ import { ASENTAMIENTO_DE_BUSQUEDA, EVENTOS } from '../../src/lib/medicion.ts';
 import { tramoDe } from '../../src/lib/vocabulario.ts';
 import { recuentoDeCitas, temaEnFrase } from '../../src/lib/recuentos.ts';
 import {
+  ANUNCIO_DEL_FALLO_DE_LA_BUSQUEDA,
+  AVISO_DEL_FALLO,
+  AVISO_PREVIO,
+  AVISO_SIN_GUION,
   FALLO_DE_LA_TANDA,
   RUTA_DEL_MAPA_DE_OBRAS,
   SUGERENCIA_SIN_FILTROS,
@@ -20,7 +24,8 @@ import {
   sugerenciaSinResultados,
 } from '../../src/lib/busqueda.ts';
 import { ETIQUETA_DEL_FILTRO } from '../../src/lib/filtroDelDirectorio.ts';
-import { rutaDeAutor, rutaDeLaBusqueda, rutaDelDirectorioDeAutores } from '../../src/lib/superficies.ts';
+import { rutaDeAutor, rutaDeLaBusqueda, rutaDelDirectorioDeAutores, rutaDelDirectorioDeObras } from '../../src/lib/superficies.ts';
+import { guionExternoDe } from '../../src/lib/guiones.ts';
 import { citaConLosDosBloques, temaBajoUmbral, textoDe } from './ayuda/corpus.ts';
 import {
   autoresDestacados,
@@ -2492,6 +2497,252 @@ test.describe('Historia 27.6 — sin resultados, los ocho Autores con más Citas
       visto,
     );
     expect(laDicen).toEqual([expect.stringContaining('sugerencia')]);
+  });
+});
+
+/*
+ * Historia 27.7 — sin JavaScript, la búsqueda lleva a los Directorios: el aviso de `<noscript>`, el
+ * aviso previo que la isla retira al arrancar (y que se queda si el paquete no llega) y el aviso del
+ * índice que no carga, los tres del mismo componente, con `/autores/` y `/obras/` como resultados de
+ * tipo «Directorio», fuera de la Zona `resultado`.
+ */
+test.describe('Historia 27.7 — sin JavaScript, la búsqueda lleva a los Directorios', () => {
+  const RAIZ_DEL_CORPUS = join(new URL('../..', import.meta.url).pathname, 'corpus');
+  let leido: Promise<ConjuntoPublicable> | undefined;
+  const conjunto = () =>
+    (leido ??= (async () => conjuntoDeLosDatos(await leerDatosDelCorpus(rutasDelCorpus(RAIZ_DEL_CORPUS))))());
+  const DIRECTORIOS = [rutaDelDirectorioDeAutores(), rutaDelDirectorioDeObras()];
+
+  /** Las filas de un aviso, como las lee `resultados`. */
+  const filasDe = (aviso: import('@playwright/test').Locator) =>
+    aviso.locator('li.resultado').evaluateAll((ns) =>
+      ns.map((n) => ({
+        tipo: n.querySelector('.clase')!.getAttribute('data-tipo')!,
+        etiqueta: n.querySelector('.clase')!.textContent!.trim(),
+        titulo: n.querySelector('.titulo')!.textContent!.trim(),
+        href: n.querySelector('a')!.getAttribute('href')!,
+        target: n.querySelector('a')!.getAttribute('target'),
+        enSans: n.querySelector('.titulo')!.classList.contains('en-sans'),
+      })),
+    );
+
+  /** Lo que el índice real da para cada Directorio: su tipo, su rótulo y su título. */
+  async function directoriosEnPagefind(page: Page) {
+    await page.goto('/buscar/');
+    const datos = await page.evaluate(
+      async ({ opciones, rutas }) => {
+        const pf = await import('/pagefind/pagefind.js' as string);
+        await pf.init();
+        await pf.options(opciones);
+        const encontrados: { url: string; tipo: string; titulo: string }[] = [];
+        for (const termino of ['autores', 'obras']) {
+          const { results } = await pf.search(termino);
+          const todos = (await Promise.all(results.map((r: { data: () => Promise<unknown> }) => r.data()))) as {
+            url: string;
+            meta: { title: string };
+            filters: Record<string, string[]>;
+          }[];
+          for (const d of todos) {
+            const url = d.url.replace(/\/?$/, '/');
+            if (rutas.includes(url)) encontrados.push({ url, tipo: d.filters.tipo?.[0], titulo: d.meta.title });
+          }
+        }
+        return encontrados;
+      },
+      { opciones: OPCIONES_DE_PAGEFIND, rutas: DIRECTORIOS },
+    );
+    return DIRECTORIOS.map((ruta) => {
+      const dato = datos.find((d) => d.url === ruta);
+      expect(dato, `${ruta} no sale en Pagefind`).toBeDefined();
+      return {
+        tipo: dato!.tipo,
+        etiqueta: ETIQUETAS_DE_RESULTADO[dato!.tipo as keyof typeof ETIQUETAS_DE_RESULTADO],
+        titulo: dato!.titulo,
+        href: ruta,
+        target: null,
+        enSans: true,
+      };
+    });
+  }
+
+  /** Lo que la isla pasa a `__medir` y lo que sale por `sendBeacon`, acumulado en `sessionStorage`. */
+  async function espiarConBalizas(page: Page) {
+    await page.addInitScript(() => {
+      const apuntar = (clave: string, valor: unknown) => {
+        try {
+          sessionStorage.setItem(clave, JSON.stringify([...(JSON.parse(sessionStorage.getItem(clave) ?? '[]') as unknown[]), valor]));
+        } catch {
+          // Sin almacenamiento no habrá nada que contar, y la prueba lo dirá.
+        }
+      };
+      let real: ((...argumentos: unknown[]) => void) | undefined;
+      const espia = function (...argumentos: unknown[]) {
+        apuntar('__medidos', argumentos.map((a) => a ?? null));
+        if (real) real(...argumentos);
+      };
+      Object.defineProperty(window, '__medir', {
+        configurable: true,
+        get: () => espia,
+        set: (funcion) => {
+          real = funcion;
+        },
+      });
+      const original = navigator.sendBeacon.bind(navigator);
+      navigator.sendBeacon = (url: string | URL, datos?: BodyInit | null) => {
+        try {
+          apuntar('__balizas', JSON.parse(String(datos)));
+        } catch {
+          apuntar('__balizas', { sinInterpretar: String(datos) });
+        }
+        return original(url, datos);
+      };
+    });
+  }
+  const medidos = (page: Page) => page.evaluate(() => JSON.parse(sessionStorage.getItem('__medidos') ?? '[]') as unknown[][]);
+  const balizas = (page: Page) =>
+    page.evaluate(() => JSON.parse(sessionStorage.getItem('__balizas') ?? '[]') as Record<string, unknown>[]);
+  /** La página se oculta, como una pestaña que pasa a segundo plano. */
+  const ocultar = (page: Page) =>
+    page.evaluate(() => {
+      Object.defineProperty(document, 'visibilityState', { configurable: true, get: () => 'hidden' });
+      Object.defineProperty(document, 'hidden', { configurable: true, get: () => true });
+      document.dispatchEvent(new Event('visibilitychange'));
+    });
+  /** Si un elemento cuelga del contenedor de la zona `resultado`. */
+  const enResultado = (aviso: import('@playwright/test').Locator) => aviso.evaluate((n) => n.closest('[data-zona="resultado"]') !== null);
+
+  test('sin guion: se ve el aviso de `<noscript>` con los dos Directorios como en Pagefind; ni campo, ni selectores, ni aviso previo', async ({ browser, page }) => {
+    const esperadas = await directoriosEnPagefind(page);
+    const contexto = await browser.newContext({ javaScriptEnabled: false });
+    try {
+      const sinGuion = await contexto.newPage();
+      await sinGuion.goto('/buscar/');
+      const aviso = sinGuion.locator('noscript .aviso-de-la-busqueda');
+      await expect(aviso).toBeVisible();
+      await expect(aviso.locator('p')).toHaveText([AVISO_SIN_GUION.lema, AVISO_SIN_GUION.sigue]);
+      expect(await filasDe(aviso)).toEqual(esperadas);
+      expect(await enResultado(aviso)).toBe(false);
+      await expect(aviso).toHaveAttribute('data-sin-zona', 'directorios-del-aviso');
+      // La página dice una sola de las dos cosas: el previo, oculto por su CSS.
+      await expect(sinGuion.locator('[data-aviso-previo]')).toBeHidden();
+      await expect(sinGuion.getByText(AVISO_PREVIO.lema)).toBeHidden();
+      await expect(sinGuion.locator('[data-consulta]')).toHaveCount(0);
+      await expect(sinGuion.locator('select')).toHaveCount(0);
+      // Los dos párrafos en `--cuerpo-lg`, a 3 × y 2 × `--unidad`; la lista, a 2 ×.
+      const forma = await aviso.evaluate((raiz) => {
+        const sonda = document.createElement('span');
+        sonda.style.cssText = 'font-size: var(--cuerpo-lg); width: var(--unidad); display: block';
+        document.body.append(sonda);
+        const token = { cuerpo: getComputedStyle(sonda).fontSize, unidad: parseFloat(getComputedStyle(sonda).width) };
+        sonda.remove();
+        const [p1, p2] = [...raiz.querySelectorAll('p')];
+        const lista = raiz.querySelector('ul')!;
+        return {
+          token,
+          tamanos: [getComputedStyle(p1).fontSize, getComputedStyle(p2).fontSize],
+          margenes: [p1, p2, lista].map((n) => parseFloat(getComputedStyle(n).marginTop)),
+        };
+      });
+      expect(forma.tamanos).toEqual([forma.token.cuerpo, forma.token.cuerpo]);
+      expect(forma.margenes).toEqual([3 * forma.token.unidad, 2 * forma.token.unidad, 2 * forma.token.unidad]);
+    } finally {
+      await contexto.close();
+    }
+  });
+
+  test('con el paquete de la búsqueda cortado: se ve el aviso previo con sus Directorios, sin campo ni el texto de `<noscript>`', async ({ page }) => {
+    const cortados: string[] = [];
+    await page.route(
+      (url) => guionExternoDe(url.pathname)?.id === 'busqueda',
+      (ruta) => {
+        cortados.push(new URL(ruta.request().url()).pathname);
+        return ruta.abort();
+      },
+    );
+    await page.goto('/buscar/');
+    const aviso = page.locator('[data-aviso-previo]');
+    await expect(aviso).toBeVisible();
+    await expect(aviso.locator('p')).toHaveText([AVISO_PREVIO.lema, AVISO_PREVIO.sigue]);
+    expect((await filasDe(aviso)).map((f) => [f.etiqueta, f.titulo, f.href])).toEqual([
+      [ETIQUETAS_DE_RESULTADO.directorio, 'Autores', rutaDelDirectorioDeAutores()],
+      [ETIQUETAS_DE_RESULTADO.directorio, 'Obras', rutaDelDirectorioDeObras()],
+    ]);
+    expect(await enResultado(aviso)).toBe(false);
+    expect(cortados.length).toBeGreaterThan(0);
+    await expect(page.locator('[data-consulta]')).toHaveCount(0);
+    await expect(page.getByText(AVISO_SIN_GUION.lema)).toBeHidden();
+  });
+
+  test('con el paquete en marcha, no queda nada del aviso previo y el formulario está en su sitio', async ({ page }) => {
+    await page.goto('/buscar/');
+    await expect(page.locator('[data-consulta]')).toBeVisible();
+    await expect(page.locator('[data-aviso-previo]')).toHaveCount(0);
+    await expect(page.locator('[data-aviso-del-fallo]')).toHaveCount(0);
+    await expect(page.getByText(AVISO_SIN_GUION.lema)).toBeHidden();
+  });
+
+  test('el índice que no carga: el aviso del fallo bajo el formulario y fuera de la zona, la región lo dice, y ni ocultar ni pulsar «Autores» miden', async ({ page }) => {
+    await espiarConBalizas(page);
+    await page.route('**/pagefind/pagefind.js*', (ruta) => ruta.abort());
+    await page.goto('/buscar/');
+    await page.locator('[data-consulta]').fill('viento');
+    const aviso = page.locator('[data-aviso-del-fallo]');
+    await expect(aviso).toBeVisible({ timeout: 10_000 });
+    await expect(aviso).toHaveCount(1);
+    await expect(aviso.locator('p')).toHaveText([AVISO_DEL_FALLO.lema, AVISO_DEL_FALLO.sigue]);
+    expect(await enResultado(aviso)).toBe(false);
+    // Justo antes de la lista, que está vacía; debajo del formulario.
+    const sitio = await aviso.evaluate((n) => ({
+      antesDeLaLista: n.nextElementSibling?.hasAttribute('data-resultados') ?? false,
+      bajoElFormulario: (document.querySelector('form')!.compareDocumentPosition(n) & Node.DOCUMENT_POSITION_FOLLOWING) !== 0,
+      filas: document.querySelectorAll('[data-resultados] > *').length,
+    }));
+    expect(sitio).toEqual({ antesDeLaLista: true, bajoElFormulario: true, filas: 0 });
+    const region = page.locator('[data-estado]');
+    await expect(region).toHaveText(ANUNCIO_DEL_FALLO_DE_LA_BUSQUEDA);
+    expect(await region.evaluate((n) => n.getBoundingClientRect().width)).toBeLessThanOrEqual(1);
+    await page.locator('[data-consulta]').press('Enter');
+    await ocultar(page);
+    expect((await medidos(page)).filter((m) => m[0] === EVENTOS.busqueda || m[0] === EVENTOS.busquedaSinResultados)).toEqual([]);
+    await aviso.getByRole('link', { name: `${ETIQUETAS_DE_RESULTADO.directorio}: Autores` }).click();
+    await page.waitForURL('**/autores/');
+    expect((await medidos(page)).filter((m) => m[0] === EVENTOS.busqueda || m[0] === EVENTOS.busquedaSinResultados)).toEqual([]);
+    expect((await balizas(page)).filter((b) => b.evento === EVENTOS.salidaInterna)).toEqual([]);
+  });
+
+  test('tras el índice que no cargó, se reintenta de verdad: otra petición a la red, resultados y el aviso fuera', async ({ page }) => {
+    const pedidas: string[] = [];
+    page.on('request', (r) => {
+      const url = new URL(r.url());
+      if (url.pathname === '/pagefind/pagefind.js') pedidas.push(url.pathname + url.search);
+    });
+    await page.route('**/pagefind/pagefind.js*', (ruta) => ruta.abort());
+    await page.goto('/buscar/');
+    await page.locator('[data-consulta]').fill('viento');
+    await expect(page.locator('[data-aviso-del-fallo]')).toBeVisible({ timeout: 10_000 });
+    await page.unroute('**/pagefind/pagefind.js*');
+    await page.locator('[data-consulta]').fill('no hay camino');
+    await expect(page.locator('[data-resultados] .resultado').first()).toBeVisible({ timeout: 10_000 });
+    await expect(page.locator('[data-aviso-del-fallo]')).toHaveCount(0);
+    await expect(page.locator('[data-estado]')).not.toHaveText(ANUNCIO_DEL_FALLO_DE_LA_BUSQUEDA);
+    expect(pedidas.length).toBeGreaterThanOrEqual(2);
+    expect(new Set(pedidas).size).toBe(pedidas.length);
+  });
+
+  test('con `?autor=&obra=` y el mapa que no llega: el aviso del fallo, sin la frase del filtro que no se puede usar, y la dirección intacta', async ({ page }) => {
+    const filtros = filtrosDeLaBusqueda(await conjunto());
+    const [autor, obras] = Object.entries(filtros.mapaDeObras).sort((a, b) => (a[0] < b[0] ? -1 : 1))[0];
+    const consulta = `?autor=${autor}&obra=${obras[0][0]}`;
+    await page.route(`**${RUTA_DEL_MAPA_DE_OBRAS}`, (ruta) => ruta.abort());
+    await page.goto(`/buscar/${consulta}`);
+    const aviso = page.locator('[data-aviso-del-fallo]');
+    await expect(aviso).toBeVisible({ timeout: 10_000 });
+    await expect(page.locator('[data-estado]')).toHaveText(ANUNCIO_DEL_FALLO_DE_LA_BUSQUEDA);
+    for (const frase of [avisoDeLaDireccion(1, true), avisoDeLaDireccion(1, false)]) {
+      await expect(page.getByText(frase)).toHaveCount(0);
+    }
+    expect(new URL(page.url()).search).toBe(consulta);
+    await expect(page.locator('[data-resultados] .resultado')).toHaveCount(0);
   });
 });
 

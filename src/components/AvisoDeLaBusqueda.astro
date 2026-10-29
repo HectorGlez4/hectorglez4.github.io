@@ -1,0 +1,114 @@
+---
+/**
+ * El aviso de `/buscar/` cuando la búsqueda no puede correr — Historia 27.7, FR-7, NFR-2, AD-6,
+ * AD-13, UX-DR92, UX-DR111; `DESIGN.md § /buscar/ sin JavaScript` y `EXPERIENCE.md § State
+ * Patterns`.
+ *
+ * Un solo componente para los tres casos, que `src/components/Busqueda.astro` pinta los tres en
+ * `/buscar/` y en ninguna otra página:
+ *
+ *   · `sin-guion`, dentro de `<noscript>`: el navegador no ejecuta JavaScript. Con guion es texto y
+ *     no se ve;
+ *   · `antes-de-arrancar`, en el HTML inicial (`data-aviso-previo`): lo que se ve con guion hasta
+ *     que arranca la isla, que lo quita del DOM al arrancar, sin dejar hueco. Si el paquete no
+ *     llega a ejecutar, se queda, y su frase es condicional para ser cierta en los dos casos. Sin
+ *     guion lo oculta **este** CSS (`@media (scripting: none)`): ni guion en línea, ni clase puesta
+ *     por guion, ni el armazón. Un navegador sin esa característica y sin guion vería los dos
+ *     avisos, el de `<noscript>` y este: coste aceptado, porque cualquier otra salida pide guion;
+ *   · `fallo`, dentro de un `<template>`: la isla lo inserta, en lugar de los resultados, cuando
+ *     el índice no carga al buscar.
+ *
+ * La composición es la de `DESIGN.md`: los dos párrafos en `--cuerpo-lg`, el primero a 3 ×
+ * `--unidad` de lo de encima y el segundo a 2 ×; debajo, a 2 ×, los dos Directorios como
+ * resultados de tipo «Directorio», con el mismo marcado que la fila que pinta la isla
+ * (`li.resultado > a > span.clase + span.titulo.en-sans`), el rótulo de `ETIQUETAS_DE_RESULTADO`
+ * y el título con que salen en Pagefind, que es su `h1` (`NOMBRE_DEL_DIRECTORIO_DE_*`). La fila no
+ * tiene reglas propias aquí: la lista lleva `filas-de-resultado`, y las reglas de la fila son las
+ * de la lista de resultados, un solo juego en `src/pages/buscar.astro`.
+ *
+ * Los Directorios del aviso no son resultados de ninguna búsqueda asentada: la raíz va exenta de
+ * zona por escrito (`directorios-del-aviso`, decisión de Héctor del 2026-10-22) y nunca cuelga de
+ * `[data-zona="resultado"]`, donde SM-13 sumaría salidas sin denominador (AD-13). Las frases son
+ * de `src/lib/busqueda.ts`, su único dueño.
+ */
+import {
+  AVISO_DEL_FALLO,
+  AVISO_PREVIO,
+  AVISO_SIN_GUION,
+  type AvisoDeLaBusqueda,
+} from '../lib/busqueda.ts';
+import { NOMBRE_DEL_DIRECTORIO_DE_AUTORES, NOMBRE_DEL_DIRECTORIO_DE_OBRAS } from '../lib/marca.ts';
+import type { ExencionDeZona } from '../lib/medicion.ts';
+import { rutaDelDirectorioDeAutores, rutaDelDirectorioDeObras } from '../lib/superficies.ts';
+import { ETIQUETAS_DE_RESULTADO } from '../lib/tipoDeResultado.ts';
+
+interface Props {
+  caso: 'sin-guion' | 'antes-de-arrancar' | 'fallo';
+}
+
+const { caso } = Astro.props;
+
+const AVISOS: Record<Props['caso'], AvisoDeLaBusqueda> = {
+  'sin-guion': AVISO_SIN_GUION,
+  'antes-de-arrancar': AVISO_PREVIO,
+  fallo: AVISO_DEL_FALLO,
+};
+const aviso = AVISOS[caso];
+const exencion: ExencionDeZona = 'directorios-del-aviso';
+const rotulo = ETIQUETAS_DE_RESULTADO.directorio;
+const directorios = [
+  { titulo: NOMBRE_DEL_DIRECTORIO_DE_AUTORES, href: rutaDelDirectorioDeAutores() },
+  { titulo: NOMBRE_DEL_DIRECTORIO_DE_OBRAS, href: rutaDelDirectorioDeObras() },
+];
+---
+
+<div
+  class="aviso-de-la-busqueda"
+  data-sin-zona={exencion}
+  data-aviso-previo={caso === 'antes-de-arrancar' ? '' : undefined}
+  data-aviso-del-fallo={caso === 'fallo' ? '' : undefined}
+>
+  <p>{aviso.lema}</p>
+  <p>{aviso.sigue}</p>
+  <ul class="filas-de-resultado" role="list">
+    {
+      directorios.map(({ titulo, href }) => (
+        <li class="resultado">
+          <a href={href} aria-label={`${rotulo}: ${titulo}`}>
+            {/*
+              * Un espacio entre el rótulo y el título: la fila es flexible y no se ve, pero sin él el
+              * texto visible del enlace sería «DirectorioAutores», que no está en su nombre
+              * accesible («Directorio: Autores»), y axe lo marca (`label-content-name-mismatch`).
+              */}
+            <span class="clase" data-tipo="directorio">{rotulo}</span>{' '}<span class="titulo en-sans">{titulo}</span>
+          </a>
+        </li>
+      ))
+    }
+  </ul>
+</div>
+
+<style>
+  .aviso-de-la-busqueda p {
+    margin: calc(var(--unidad) * 3) 0 0;
+    font-size: var(--cuerpo-lg);
+    overflow-wrap: anywhere;
+  }
+
+  .aviso-de-la-busqueda p + p {
+    margin-top: calc(var(--unidad) * 2);
+  }
+
+  .aviso-de-la-busqueda ul {
+    list-style: none;
+    margin: calc(var(--unidad) * 2) 0 0;
+    padding: 0;
+  }
+
+  /* Sin guion lo dice el aviso de `<noscript>`: la página dice una sola de las dos cosas. */
+  @media (scripting: none) {
+    [data-aviso-previo] {
+      display: none;
+    }
+  }
+</style>

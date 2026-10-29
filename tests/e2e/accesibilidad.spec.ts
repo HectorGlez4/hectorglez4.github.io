@@ -26,7 +26,8 @@ import { leerTarjetaDeObra, tarjetaDeObraDe } from '../unit/ayuda/tarjeta-de-obr
 import { filtrosDeLaBusqueda } from '../../src/lib/publicado.ts';
 import { conjuntoDeLosDatos, leerDatosDelCorpus } from '../../tools/lib/alcance.ts';
 import { rutasDelCorpus } from '../../tools/lib/corpus.ts';
-import { FALLO_DE_LA_TANDA } from '../../src/lib/busqueda.ts';
+import { ANUNCIO_DEL_FALLO_DE_LA_BUSQUEDA, FALLO_DE_LA_TANDA } from '../../src/lib/busqueda.ts';
+import { guionExternoDe } from '../../src/lib/guiones.ts';
 import { TANDA_DE_RESULTADOS } from '../../src/lib/umbrales.ts';
 
 /**
@@ -2419,4 +2420,78 @@ test.describe('Historia 27.5 — /buscar/ con «Mostrar 30 más»', () => {
     const dudas = sinDecidir(resultado);
     expect(dudas, `/buscar/ con «Mostrar 30 más»: axe no supo decidir\n${dudas.join('\n')}`).toEqual([]);
   });
+});
+
+/*
+ * Historia 27.7 — los avisos de `/buscar/` cuando la búsqueda no puede correr pasan el barrido WCAG
+ * 2.2 AA del fichero y el reflujo a 320 px en las tres condiciones: sin guion (el de `<noscript>`),
+ * con el paquete de la búsqueda cortado (el aviso previo) y con el índice que no carga (el del
+ * fallo, que la isla inserta). NFR-8, NFR-9.
+ */
+test.describe('Historia 27.7 — los avisos de /buscar/ pasan la auditoría y no desbordan a 320 px', () => {
+  const ESTADOS = [
+    /*
+     * axe corre en la página y espera promesas, que no se resuelven en un contexto sin JavaScript.
+     * Así que el DOM sin guion se reconstruye en uno con guion y sin ningún fichero de guion: el
+     * contenido de cada `<noscript>` se analiza como marcado —lo que hace el navegador sin guion— y
+     * el aviso previo sale, como lo oculta su CSS sin guion. Que sin guion se ve eso y solo eso, y
+     * nada más, lo prueba `busqueda.spec.ts` en un contexto sin JavaScript de verdad.
+     */
+    {
+      cual: 'sin guion',
+      aviso: '.sin-guion .aviso-de-la-busqueda',
+      preparar: async (page: Page) => {
+        await page.evaluate(() => {
+          for (const n of document.querySelectorAll('noscript')) {
+            const caja = document.createElement('div');
+            caja.className = 'sin-guion';
+            caja.innerHTML = n.textContent ?? '';
+            n.replaceWith(caja);
+          }
+          document.querySelector('[data-aviso-previo]')?.remove();
+        });
+        await expect(page.locator('[data-consulta]')).toHaveCount(0);
+      },
+      cortar: (page: Page) => page.route('**/*.js', (r) => r.abort()),
+    },
+    {
+      cual: 'con el paquete de la búsqueda cortado',
+      aviso: '[data-aviso-previo]',
+      preparar: async (_: Page) => {},
+      cortar: (page: Page) => page.route((url) => guionExternoDe(url.pathname)?.id === 'busqueda', (r) => r.abort()),
+    },
+    {
+      cual: 'con el índice que no carga',
+      aviso: '[data-aviso-del-fallo]',
+      preparar: async (page: Page) => {
+        await page.locator('[data-consulta]').fill('viento');
+        await expect(page.locator('[data-aviso-del-fallo]')).toBeVisible({ timeout: 10_000 });
+        await expect(page.locator('[data-estado]')).toHaveText(ANUNCIO_DEL_FALLO_DE_LA_BUSQUEDA);
+      },
+      cortar: (page: Page) => page.route('**/pagefind/pagefind.js*', (r) => r.abort()),
+    },
+  ];
+
+  for (const { cual, aviso, preparar, cortar } of ESTADOS) {
+    test(`/buscar/ ${cual}: el aviso pasa el barrido y no desborda a 320 px en las tres condiciones`, async ({ page }) => {
+      test.setTimeout(90_000);
+      await cortar(page);
+      await page.goto('/buscar/');
+      await preparar(page);
+      await expect(page.locator(aviso)).toBeVisible();
+      const resultado = await new AxeBuilder({ page }).withTags([...ETIQUETAS_DEL_BARRIDO]).analyze();
+      const resumen = resultado.violations.map((v) => `${v.id}: ${v.help} (${v.nodes.map((n) => n.target.join(' ')).join(', ')})`);
+      expect.soft(resumen, `/buscar/ ${cual}\n${resumen.join('\n')}`).toEqual([]);
+      const dudas = sinDecidir(resultado);
+      expect.soft(dudas, `/buscar/ ${cual}: axe no supo decidir\n${dudas.join('\n')}`).toEqual([]);
+      for (const condicion of CONDICIONES) {
+        if (!(await cargarEn320(page, '/buscar/', condicion, preparar))) continue;
+        await expect(page.locator(aviso)).toBeVisible();
+        const donde = `/buscar/ ${cual} (${condicion})`;
+        const m = await anchoDeLaPagina(page);
+        expect.soft(m.scroll, `${donde} desborda: ${m.scroll} frente a ${m.ventana}`).toBeLessThanOrEqual(m.ventana);
+        expect.soft(await contenedoresQueRecortan(page), `${donde}: contenedores que se desplazan o recortan en horizontal`).toEqual([]);
+      }
+    });
+  }
 });

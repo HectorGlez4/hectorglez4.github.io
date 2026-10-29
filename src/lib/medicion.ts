@@ -285,13 +285,17 @@ export const ATRIBUTO_SIN_ZONA = 'data-sin-zona';
  *   · `chips-del-404` — los Chips de Tema del 404;
  *   · `salidas-sin-resultados` — las salidas que `/buscar/` enseña cuando una búsqueda no
  *     encuentra nada (`[data-salida]`: Temas, Colecciones y Autores), fuera del contenedor de
- *     resultados.
+ *     resultados;
+ *   · `directorios-del-aviso` — Historia 27.7, decisión de Héctor del 2026-10-22 (epics § 27.7 y
+ *     § Épica 23): los dos Directorios de los avisos de `/buscar/` —sin guion, antes de que
+ *     arranque la isla y el del índice que no carga—, fuera del contenedor `resultado`. Esa
+ *     búsqueda no corrió y no se asienta: en `resultado`, SM-13 sumaría salidas sin denominador.
  *
  * Los formularios —«Buscar en…», el campo de la portada y el del 404— no necesitan exención: la
  * escucha solo mira enlaces, y enviarlos no es salida. Tampoco las anclas de la propia página ni
  * los enlaces a otro origen, que la escucha descarta por sí misma.
  */
-export const EXENCIONES_DE_ZONA = ['chips-del-404', 'salidas-sin-resultados'] as const;
+export const EXENCIONES_DE_ZONA = ['chips-del-404', 'salidas-sin-resultados', 'directorios-del-aviso'] as const;
 
 /** Un motivo de exención de zona (`EXENCIONES_DE_ZONA`). */
 export type ExencionDeZona = (typeof EXENCIONES_DE_ZONA)[number];

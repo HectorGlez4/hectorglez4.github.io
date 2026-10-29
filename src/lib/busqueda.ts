@@ -545,3 +545,55 @@ export function rotuloDeMostrarMas(quedan: number): string | null {
  * del recuento, que no cambia: lo pintado sigue siendo cierto.
  */
 export const FALLO_DE_LA_TANDA = 'No se han podido cargar más resultados.';
+
+/**
+ * Los avisos de `/buscar/` cuando la búsqueda no puede correr — Historia 27.7, FR-7, NFR-2,
+ * UX-DR92, `DESIGN.md § /buscar/ sin JavaScript`.
+ *
+ * Son tres casos y una sola composición (`src/components/AvisoDeLaBusqueda.astro`): dos párrafos
+ * —`lema`, lo que pasa, y `sigue`, por dónde seguir— y, debajo, los dos Directorios como
+ * resultados de tipo «Directorio». El componente pinta estas cadenas y la isla anuncia la del
+ * fallo (`ANUNCIO_DEL_FALLO_DE_LA_BUSQUEDA`): ninguna se escribe dos veces.
+ *
+ *   · `AVISO_SIN_GUION` — el del `<noscript>`: el navegador no ejecuta JavaScript;
+ *   · `AVISO_PREVIO` — el del HTML inicial, oculto sin guion, hasta que arranca la isla. Es
+ *     **condicional** porque se pinta en cada carga: una frase de fallo sería falsa en cada carga
+ *     normal, y esta es cierta mientras carga y también si el paquete no llega a ejecutar;
+ *   · `AVISO_DEL_FALLO` — el del índice que no carga al buscar (`pagefind.js`, su `init`, `search`,
+ *     los datos, o el mapa y `filters()` que pide una `obra` de la dirección).
+ *
+ * La frase de volver atrás, `VOLVER_ATRAS_A_LAS_CITAS`, es la misma en los tres.
+ */
+export const VOLVER_ATRAS_A_LAS_CITAS =
+  'Si llegaste desde la página de un autor, de una obra o de un tema, vuelve atrás: allí están sus citas.';
+
+/** Los dos párrafos de un aviso de `/buscar/`: lo que pasa y por dónde seguir. */
+export interface AvisoDeLaBusqueda {
+  readonly lema: string;
+  readonly sigue: string;
+}
+
+/** El aviso sin guion, en `<noscript>` — Historia 27.7. */
+export const AVISO_SIN_GUION: AvisoDeLaBusqueda = {
+  lema: 'Buscar y filtrar necesitan JavaScript, y este navegador no lo está ejecutando.',
+  sigue: `Sin él, todos los autores y todas las obras se leen en sus directorios. ${VOLVER_ATRAS_A_LAS_CITAS}`,
+};
+
+/** El aviso previo, en el HTML inicial hasta que arranca la isla — Historia 27.7. */
+export const AVISO_PREVIO: AvisoDeLaBusqueda = {
+  lema: 'Si la búsqueda no aparece, todos los autores y todas las obras se leen en sus directorios.',
+  sigue: VOLVER_ATRAS_A_LAS_CITAS,
+};
+
+/** El aviso del índice que no carga, que la isla inserta en lugar de los resultados — Historia 27.7. */
+export const AVISO_DEL_FALLO: AvisoDeLaBusqueda = {
+  lema: 'No se ha podido cargar la búsqueda.',
+  sigue: `Todos los autores y todas las obras se leen en sus directorios. ${VOLVER_ATRAS_A_LAS_CITAS}`,
+};
+
+/**
+ * Lo que la región del recuento anuncia al pintar el aviso del fallo — Historia 27.7: los dos
+ * párrafos, con un espacio. Se escribe con el primer ritmo (`anunciar`) y la región se aparta de
+ * la vista, como a cero: se ve una vez, en el aviso, y se lee una.
+ */
+export const ANUNCIO_DEL_FALLO_DE_LA_BUSQUEDA = `${AVISO_DEL_FALLO.lema} ${AVISO_DEL_FALLO.sigue}`;
