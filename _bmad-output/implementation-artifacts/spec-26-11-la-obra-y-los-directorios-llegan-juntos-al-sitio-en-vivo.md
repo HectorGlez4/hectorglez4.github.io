@@ -360,3 +360,57 @@ ficheros). En `tests/e2e/accesibilidad.spec.ts` están el barrido WCAG 2.2 AA
 (`ETIQUETAS_DEL_BARRIDO` de `src/lib/superficies.ts` con `wcag22aa`; 54 pruebas entre los
 dos proyectos) y el bloque «Historia 26.9 — reflujo a 320 px» (124 pruebas entre los dos
 proyectos), sin `test.only` ni `fixme`.
+
+## Verificación previa a la fusión — 2026-10-29 (UTC)
+
+Puerta previa al merge (bucle v8-ralph, etapa s-24-26, intento 1), sobre 0cdf59b389. Disco
+libre al empezar: 108 GB. Puertos 4321, 4399, 4400, 4402 y 8787 libres.
+
+**Sincronía.** `git fetch origin`: `origin/main` (881949f4d6) ya es antecesor de la rama; no
+hubo merge, ni Autores nuevos, ni lote de claves.
+
+**Equivalente del CI** (`.github/workflows/publicar.yml`, en este orden):
+
+| orden | resultado |
+|---|---|
+| `npm ci` | no se corrió: `node_modules/` se instaló después del último cambio de `package-lock.json` |
+| `npm run build` | **verde** — 5.290 páginas, 4.875 rutas indexables (517 Obras publicadas, 277 indexables); `dist/` 476,7 MiB en 15.348 ficheros |
+| `npx astro check` | **verde** — 386 ficheros, 0 errores, 0 avisos, 8 pistas |
+| `npm test` | **verde** — 146 ficheros, 6.697 pruebas, todas pasan (859 s) |
+
+**`npm run test:e2e` entero** (los dos proyectos, con `wrangler dev` y el D1 local que levanta
+`playwright.config.ts`; nada contra producción): **verde** — 1.004 pruebas con 5 trabajadores:
+909 pasan, 95 se saltan, 0 fallan, 0 inestables (5,7 min). No hubo que repetir ningún fichero.
+
+**NFR-7 con Lighthouse** (`npx -y lighthouse@13.5.0`, perfil móvil, `--throttling-method=simulate`
+—4G simulado—, solo rendimiento; Google Chrome 156.0.8078.73 sin cabeza por `CHROME_PATH`). Las
+dos construcciones, de hoy y en local, con `MEDICION_ENDPOINT=http://localhost:8787/` apuntando a
+un receptor de prueba que contesta 204 a todo: `git switch --detach origin/main` (881949f4d6),
+`npm run build` y copia de `dist/` aparte; `git switch v8/epicas-24-26` (0cdf59b389) y
+`npm run build`. Servidas a la vez con `node tests/servidor.mjs` (`DIST`, `PUERTO` 4399 la
+principal y 4400 la rama, `SERVIDOR_CACHE_CONTROL=max-age=600`). 10 corridas por construcción,
+**alternando** principal y rama corrida a corrida. En todos los informes cada `woff2` se pide
+**una sola vez** (2 peticiones, 2 ficheros).
+
+Página medida: `/cita/seneca-a-cuantos-son-molestas-sus-mismas-riquezas/`, con la Tarjeta de
+Obra, «Siguiente» y los bloques del pie en la rama. `/autores/` solo en la rama (en la principal
+da 404).
+
+| página | construcción | LCP media | LCP mediana | FCP media | FCP mediana | rendimiento | bytes |
+|---|---|---|---|---|---|---|---|
+| Página de Cita | `origin/main` | 1.742 ms | 1.802 ms | 1.065 ms | 1.064 ms | 99–100 | 137.347 |
+| Página de Cita | rama | **1.727 ms** | 1.727 ms | 1.066 ms | 1.066 ms | 99–100 | 144.621 |
+| `/autores/` | rama | 2.102 ms | 2.102 ms | 1.373 ms | 1.373 ms | 99 | 203.441 |
+
+LCP de cada corrida, en orden: principal 1803, 1653, 1802, 1802, 1652, 1802, 1654, 1802, 1651,
+1801 (4 en el valor bajo); rama 1803, 1652, 1802, 1802, 1652, 1802, 1652, 1652, 1802, 1652
+(5 en el valor bajo); `/autores/` 2102, 2102, 2103, 2102, 2102, 2102, 2103, 2102, 2102, 2102.
+
+Veredicto según la regla de la puerta: **dentro de la tolerancia**. La media de LCP de la rama
+(1.727 ms) queda por debajo de 2.500 ms y por debajo de la de la principal más max(100 ms, 5 %)
+(1.742 + 100 = 1.842 ms); la media de FCP (1.066 ms) no pasa de 1.065 + 100 ms.
+
+Una nota fuera del veredicto: el FCP de `/autores/` sale hoy en 1.373 ms, frente a los 1.203 ms
+de mediana de la puerta anterior, con los mismos bytes (203.441); el LCP es el mismo (2.102 ms).
+
+Resultado: CI, barrido de punta a punta y NFR-7 en verde. El árbol queda en `v8/epicas-24-26`.
