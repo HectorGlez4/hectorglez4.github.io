@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import type { ObraResuelta } from '../../src/lib/obras.ts';
 import {
   filtrosDeLaBusqueda,
@@ -181,22 +181,60 @@ describe('Historia 27.3 — el mapa de rótulos de las Obras', () => {
     expect(mapaDeObras['ruben-dario']).toEqual([['ruben-dario--odas', 'Odas']]);
   });
 
-  it('toda Obra con Citas publicadas: también la de una Cita, que no se indexa, y la que la congelación deja fuera', () => {
+  it('toda Obra con Citas publicadas: también la de una Cita, que no se indexa', () => {
     const datos = conDosObras();
     expect(obrasIndexables(datos.citas, null).map((o) => o.nombre)).not.toContain('ruben-dario--odas');
-    // Congelada con solo «Sátiras» en la lista: «Odas» de Horacio deja de indexarse.
-    const congelada = obrasIndexables(datos.citas, { desde: '2026-10-01', indexables: ['horacio--satiras'] });
-    expect(congelada.map((o) => o.nombre)).not.toContain('horacio--odas');
     const nombres = Object.values(filtrosDeLaBusqueda(datos).mapaDeObras).flatMap((obras) => obras.map(([nombre]) => nombre));
     expect(nombres.sort()).toEqual(['horacio--odas', 'horacio--satiras', 'ruben-dario--odas']);
   });
 
-  it('retitular cambia el título, nunca el nombre ni el orden de la lista a igualdad de recuento', () => {
-    const antes = filtrosDeLaBusqueda(conDosObras()).mapaDeObras;
-    const datos = conjunto({ ...ODAS_H, titulo: 'Carmina' });
-    const despues = filtrosDeLaBusqueda(datos).mapaDeObras;
-    expect(despues.horacio).toEqual([['horacio--odas', 'Carmina']]);
-    expect(antes.horacio.map(([nombre]) => nombre)).toContain('horacio--odas');
+  it('con la familia congelada en `umbrales.ts`, también la Obra que la congelación deja fuera', async () => {
+    // La congelación se declara por el mismo camino que en el build —`CONGELACION_DE_OBRAS`, leída
+    // por `congelacionVigente()`—, así que una regresión que la metiera en el mapa daría rojo aquí.
+    vi.resetModules();
+    vi.doMock('../../src/lib/umbrales.ts', async (original) => ({
+      ...(await original<typeof import('../../src/lib/umbrales.ts')>()),
+      CONGELACION_DE_OBRAS: { desde: '2026-10-01', indexables: ['horacio--satiras'] },
+    }));
+    try {
+      const congelado = await import('../../src/lib/publicado.ts');
+      const datos = conDosObras();
+      // La congelación rige: «Odas» de Horacio, que cumple FR-52, deja de indexarse.
+      expect(obrasIndexables(datos.citas, null).map((o) => o.nombre)).toContain('horacio--odas');
+      expect(congelado.obrasIndexables(datos.citas).map((o) => o.nombre)).not.toContain('horacio--odas');
+      const nombres = Object.values(congelado.filtrosDeLaBusqueda(datos).mapaDeObras).flatMap((obras) =>
+        obras.map(([nombre]) => nombre),
+      );
+      expect(nombres.sort()).toEqual(['horacio--odas', 'horacio--satiras', 'ruben-dario--odas']);
+    } finally {
+      vi.doUnmock('../../src/lib/umbrales.ts');
+      vi.resetModules();
+    }
+  });
+
+  it('retitular cambia el título, nunca el nombre, y el orden sigue siendo el de la Lista de Obras', () => {
+    // Dos Obras de Horacio con el mismo recuento: a igualdad, la Lista de Obras ordena por título.
+    const EPODOS = obra('horacio--epodos', 'horacio', 'Epodos', 2);
+    const conEpodos = (odas: ObraResuelta) => {
+      const datos = conjunto(odas);
+      return {
+        ...datos,
+        citas: [...datos.citas, cita('horacio-epodo-1', 'horacio', [], EPODOS), cita('horacio-epodo-2', 'horacio', [], EPODOS)],
+      };
+    };
+    const antes = conEpodos(ODAS_H);
+    expect(filtrosDeLaBusqueda(antes).mapaDeObras.horacio).toEqual([
+      ['horacio--epodos', 'Epodos'],
+      ['horacio--odas', 'Odas'],
+    ]);
+    const despues = conEpodos({ ...ODAS_H, titulo: 'Carmina' });
+    const mapa = filtrosDeLaBusqueda(despues).mapaDeObras;
+    // El nombre de ficha no cambia; el orden es el que la Lista de Obras da al título nuevo.
+    expect(mapa.horacio).toEqual([
+      ['horacio--odas', 'Carmina'],
+      ['horacio--epodos', 'Epodos'],
+    ]);
+    expect(mapa.horacio.map(([nombre]) => nombre)).toEqual(obrasDelAutor(despues.citas, 'horacio').obras.map((o) => o.nombre));
   });
 
   it('el mapa y las opciones de Obra dicen las mismas Obras', () => {

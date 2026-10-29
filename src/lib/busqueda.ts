@@ -84,7 +84,10 @@ export function combinacionDeFiltros(elegidos: FiltrosElegidos): Filtros {
  * Los valores de los filtros en una cadena, para la clave del asentamiento
  * (`asentamientoDeBusqueda`): otro Autor —u otra Obra— con la misma combinación es otro estado.
  * Sin filtros, `undefined`, y la clave queda como la de la 23.8. Sin Obra, `autor|tema`, como en
- * la 27.2; con Obra, `autor|tema|obra`.
+ * la 27.2; con Obra, `autor|tema|obra` —`a||a--o` sin Tema—. El orden **no** es el del nombre de
+ * la combinación (`autor-obra-tema`, de `src/lib/vocabulario.ts`) a propósito: la Obra va al final
+ * para que la clave de un estado sin Obra siga siendo la misma que escribía la 27.2. La clave solo
+ * distingue estados, y nadie la parte.
  */
 export function valoresDeFiltros(elegidos: FiltrosElegidos): string | undefined {
   if (!hayFiltros(elegidos)) return undefined;
@@ -126,15 +129,16 @@ export function fraseDelRecuento({ total, texto, autor, obra, tema }: DatosDelRe
     return total === 1 ? 'Un resultado.' : `${total} resultados.`;
   }
   const recortado = texto.trim();
-  return (
+  const frase =
     (total === 1 ? 'Una cita' : `${total} citas`) +
     (autor !== undefined ? ` de ${autor}` : '') +
     // La Obra nunca va sin su Autor, y un título vacío no se nombra: «… en .» no es una frase.
     (obra !== undefined && obra.trim() !== '' && autor !== undefined ? ` en ${obra}` : '') +
     (tema !== undefined ? ` sobre ${temaEnFrase(tema)}` : '') +
-    (recortado !== '' ? ` con «${recortado}»` : '') +
-    '.'
-  );
+    (recortado !== '' ? ` con «${recortado}»` : '');
+  // Un título que cierra con «!», «?», «…» o el punto de una abreviatura ya cierra la frase: tras
+  // ellos no se escribe otro punto («… en ¡Adentro!», nunca «¡Adentro!.»).
+  return /[.?!…]$/u.test(frase) ? frase : frase + '.';
 }
 
 // ─── El selector de Obra (Historia 27.3) ─────────────────────────────────────

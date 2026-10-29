@@ -1,7 +1,8 @@
 /**
  * El paso final de `npm run build`: cuánto pesa lo que se despliega — Historia 24.2, AD-9, AD-16;
- * y, desde la 27.3, cuánto descarga `/buscar/` al elegir un Autor (los filtros de Pagefind con el
- * mapa de rótulos de las Obras), frente a `AVISO_DE_BYTES_DE_FILTROS_Y_MAPA`: avisa, no rompe.
+ * y, desde la 27.3, cuántos bytes en disco ocupa lo que `/buscar/` pide al elegir un Autor (los
+ * filtros de Pagefind con el mapa de rótulos de las Obras; una cota por arriba de lo que se
+ * transfiere), frente a `AVISO_DE_BYTES_DE_FILTROS_Y_MAPA`: avisa, no rompe.
  *
  * Vive en `integraciones/` sin ser una integración de Astro. No puede serlo: corre **después
  * de Pagefind**, que es cuando `dist/` es exactamente lo que sube el despliegue —su índice

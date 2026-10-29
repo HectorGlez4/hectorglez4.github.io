@@ -1417,7 +1417,9 @@ test.describe('Historia 27.3 — la búsqueda se acota también por una Obra del
     await page.goto('/buscar/');
     await page.locator(AUTOR).focus();
     await page.locator(AUTOR).selectOption(autor.slug);
-    expect((await mapa).headers()['content-type']).toMatch(/^application\/json/u);
+    // El mapa llega (2xx). Su tipo no lo fija el endpoint —un build estático solo escribe el
+    // cuerpo—, sino el anfitrión por la extensión; aquí no se juzga.
+    expect((await mapa).ok()).toBe(true);
     await expect(page.locator(OBRA)).toBeVisible({ timeout: 10_000 });
     await expect(page.locator(AUTOR)).toBeFocused();
     expect(await page.locator('fieldset select').evaluateAll((ss) => ss.map((s) => s.id))).toEqual([
@@ -1528,12 +1530,17 @@ test.describe('Historia 27.3 — la búsqueda se acota también por una Obra del
     const medidas = await page.evaluate(() => {
       const fieldset = document.querySelector('fieldset')!;
       const campo = document.querySelector('[data-consulta]')!;
+      // Los tres selectores solos, con su etiqueta: de lo alto del primer `.selector` a lo bajo del
+      // último, que es lo que UX-DR87 estimó («a 360 los tres ocupan unos 252px»).
+      const cajas = [...fieldset.querySelectorAll('.selector')].map((c) => c.getBoundingClientRect());
       return {
         fieldset: fieldset.getBoundingClientRect().height,
+        tresSelectores: cajas.length > 0 ? cajas.at(-1)!.bottom - cajas[0]!.top : 0,
         anchoDelCampo: campo.getBoundingClientRect().width,
         selects: [...fieldset.querySelectorAll('select')].map((s) => ({
           ancho: s.getBoundingClientRect().width,
           alto: s.getBoundingClientRect().height,
+          cuerpo: getComputedStyle(s).fontSize,
         })),
         quitar: document.querySelector('[data-quitar]')!.getBoundingClientRect().height,
         desborda: document.documentElement.scrollWidth > window.innerWidth,
@@ -1545,10 +1552,17 @@ test.describe('Historia 27.3 — la búsqueda se acota también por una Obra del
         }).length,
       };
     });
-    // UX-DR87 estimó unos 252 px para los tres selectores y «Quitar los filtros».
+    // UX-DR87 estimó unos 252 px para los tres selectores, con el valor a 17 px; el `fieldset` suma
+    // además «Quitar los filtros». Se anotan las dos cifras.
+    test.info().annotations.push({ type: 'alto de los tres selectores a 360 px', description: `${medidas.tresSelectores} px` });
     test.info().annotations.push({ type: 'alto del fieldset con tres selectores a 360 px', description: `${medidas.fieldset} px` });
-    console.log(`Historia 27.3 — fieldset con tres selectores a 360 px: ${medidas.fieldset} px de alto (${JSON.stringify(medidas)})`);
+    console.log(
+      `Historia 27.3 — a 360 px: los tres selectores ${medidas.tresSelectores} px; el fieldset, con «Quitar los filtros», ` +
+        `${medidas.fieldset} px (${JSON.stringify(medidas)})`,
+    );
     expect(medidas.selects).toHaveLength(3);
+    expect(medidas.tresSelectores).toBeGreaterThan(0);
+    for (const select of medidas.selects) expect(select.cuerpo).toBe('17px');
     expect(medidas.desborda).toBe(false);
     expect(medidas.nowrap).toBe(0);
     for (const select of medidas.selects) {

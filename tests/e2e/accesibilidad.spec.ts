@@ -2234,7 +2234,8 @@ test.describe('Historia 27.2 — /buscar/ con filtros pasa la auditoría automá
  * Historia 27.3 — `/buscar/` con los tres selectores: un Autor elegido, **la Obra del título más
  * largo del Corpus** elegida (de `filtrosDeLaBusqueda`, el mismo dueño que el mapa de rótulos),
  * «Quitar los filtros» y los resultados. A 320 px en las tres condiciones de la 26.9, sin
- * desbordar ni `nowrap` en lo visible del formulario, y el barrido 2.2 AA en ese estado.
+ * desbordar ni `nowrap` en lo visible del formulario, y el barrido 2.2 AA en ese estado: a 320 px
+ * en cada condición y, aparte, a la anchura del proyecto.
  */
 test.describe('Historia 27.3 — /buscar/ con una Obra elegida', () => {
   let elegida: Promise<{ autor: string; obra: string; titulo: string }> | undefined;
@@ -2260,8 +2261,8 @@ test.describe('Historia 27.3 — /buscar/ con una Obra elegida', () => {
     await page.waitForFunction(() => document.querySelector('[data-resultados]')!.children.length > 0, null, { timeout: 10_000 });
   };
 
-  test('a 320 px, en las tres condiciones, no desborda ni lleva nowrap en el formulario ni en los resultados', async ({ page }) => {
-    test.setTimeout(120_000);
+  test('a 320 px, en las tres condiciones, no desborda ni lleva nowrap en el formulario ni en los resultados, y pasa axe', async ({ page }) => {
+    test.setTimeout(180_000);
     const { titulo } = await laObraMasLarga();
     expect(titulo.length).toBeGreaterThan(40);
     for (const condicion of CONDICIONES) {
@@ -2290,6 +2291,12 @@ test.describe('Historia 27.3 — /buscar/ con una Obra elegida', () => {
       });
       expect.soft(obra.derecha, `${donde}: el selector de Obra se sale`).toBeLessThanOrEqual(obra.ventana);
       expect.soft(obra.scroll, `${donde}: el selector de Obra desborda por dentro`).toBeLessThanOrEqual(obra.ancho);
+      // El barrido 2.2 AA en ese mismo estado: a 320 px y con la condición puesta.
+      const resultado = await new AxeBuilder({ page }).withTags([...ETIQUETAS_DEL_BARRIDO]).analyze();
+      const resumen = resultado.violations.map((v) => `${v.id}: ${v.help} (${v.nodes.length})`);
+      expect.soft(resumen, `${donde}\n${resumen.join('\n')}`).toEqual([]);
+      const dudas = sinDecidir(resultado);
+      expect.soft(dudas, `${donde}: axe no supo decidir\n${dudas.join('\n')}`).toEqual([]);
     }
   });
 

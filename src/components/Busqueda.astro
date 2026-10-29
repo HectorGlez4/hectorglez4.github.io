@@ -410,6 +410,8 @@ const { autores, temas } = Astro.props;
     let recuentos: Record<string, number> | null = null;
     /** La petición de los dos en curso, si la hay: dos Autores seguidos no la piden dos veces. */
     let pidiendo: Promise<DatosDeObra | null> | null = null;
+    /** El Autor que empezó la petición en curso. */
+    let pedidaPara = '';
     /** El Autor vigente: el de la última búsqueda lanzada; un cambio de Autor lo vacía al momento. */
     let vigente = '';
     /** El Autor para el que está compuesto el selector de Obra que se ve; `null`, ninguno. */
@@ -448,9 +450,10 @@ const { autores, temas } = Astro.props;
      * promesa rechazada, y el siguiente Autor elegido lo vuelve a pedir —el mapa, con otro `fetch`;
      * Pagefind, con el reintento de `cargar`—.
      */
-    function pedirDatosDeObra(): Promise<DatosDeObra | null> {
+    function pedirDatosDeObra(para: string): Promise<DatosDeObra | null> {
       if (mapa && recuentos) return Promise.resolve({ mapa, recuentos });
       if (pidiendo) return pidiendo;
+      pedidaPara = para;
       const delMapa: Promise<MapaDeObras> = mapa
         ? Promise.resolve(mapa)
         : fetch(RUTA_DEL_MAPA_DE_OBRAS)
@@ -664,11 +667,20 @@ const { autores, temas } = Astro.props;
      * Historia 27.3 — cambiar el Autor quita la Obra al momento (elegida y selector) y pide, si hay
      * Autor, el mapa y `filters()`; el selector se rehace para el Autor nuevo cuando su pausa se
      * cumple y los datos están. Una respuesta tardía solo pinta si el Autor sigue siendo el mismo.
+     * Un Autor elegido con la petición de otro ya en vuelo se suma a ella; si esa falla y él sigue
+     * elegido, es «el siguiente Autor» del reintento y la pide otra vez, una sola. (Elegir da
+     * `input` y `change`: el segundo se suma a la petición del mismo Autor, y no cuenta.)
      */
     const alCambiarElAutor = () => {
       vigente = '';
       if (obraEnElDom()) quitarObra();
-      if (autor.value !== '') pedirDatosDeObra().then(componerObra).catch(() => {});
+      if (autor.value === '') return;
+      const elegido = autor.value;
+      const deOtro = pidiendo !== null && pedidaPara !== elegido;
+      pedirDatosDeObra(elegido)
+        .then((datos) => (datos === null && deOtro && autor!.value === elegido ? pedirDatosDeObra(elegido) : datos))
+        .then(componerObra)
+        .catch(() => {});
     };
     for (const selector of [autor, obra, tema]) {
       const alCambiar =

@@ -23,7 +23,7 @@ export const GET: APIRoute = async () => {
   // Lo que se escribe pasa por el tipo que lee la isla: si la forma del build (`MapaDeObrasPorAutor`)
   // y la del cliente (`MapaDeObras`) se separan, `astro check` lo dice aquí y no el visitante.
   const mapa: MapaDeObras = filtrosDeLaBusqueda(await conjuntoPublicable()).mapaDeObras;
-  return new Response(JSON.stringify(mapa), {
-    headers: { 'Content-Type': 'application/json; charset=utf-8' },
-  });
+  // En un build estático solo se escribe el cuerpo: el tipo con que se sirve lo decide el
+  // anfitrión por la extensión `.json` (y, en las pruebas, `tests/servidor.mjs`), no una cabecera.
+  return new Response(JSON.stringify(mapa));
 };

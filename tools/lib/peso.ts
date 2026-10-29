@@ -14,9 +14,10 @@
  * recuerda en dos sitios. Queda una excepción de unos bytes hasta la 26.2: la Cita del Día de
  * la portada entra en el índice de Pagefind, y `dist/pagefind/` cuenta en lo juzgado.
  *
- * Historia 27.3 — mide además, del mismo listado, lo que la isla de `/buscar/` descarga junto al
+ * Historia 27.3 — mide además, del mismo listado, lo que la isla de `/buscar/` pide junto al
  * elegir un Autor: los filtros de Pagefind (`pagefind/filter/`) y el mapa de rótulos de las Obras
- * (`buscar/obras.json`), una sola cifra frente a `AVISO_DE_BYTES_DE_FILTROS_Y_MAPA`. Pasarlo
+ * (`buscar/obras.json`), una sola cifra en bytes en disco —una cota por arriba de lo que se
+ * transfiere— frente a `AVISO_DE_BYTES_DE_FILTROS_Y_MAPA`. Pasarlo
  * avisa y nunca cambia el código de salida: reabre el aplazado de trocearlos (AD-9).
  *
  * Puro (AD-5): recibe rutas y tamaños, devuelve cifras y texto. Quien lee `dist/`, escribe
@@ -418,7 +419,8 @@ export function parteDePeso(
       `Aviso de filtros y mapa: los filtros de Pagefind (${bytesYKiB(filtros.bytes)}) y el mapa de ` +
         `Obras (${bytesYKiB(mapa.bytes)}) suman ${bytesYKiB(filtros.bytes + mapa.bytes)}, por encima ` +
         `del aviso de ${bytesYKiB(umbrales.avisoDeFiltrosYMapa)} (AVISO_DE_BYTES_DE_FILTROS_Y_MAPA en ` +
-        'src/lib/umbrales.ts). Es lo que /buscar/ descarga junto al elegir un Autor. No detiene la ' +
+        'src/lib/umbrales.ts). Son bytes en disco de lo que /buscar/ pide junto al elegir un Autor, ' +
+        'una cota por arriba de lo que se transfiere. No detiene la ' +
         'construcción: reabre el aplazado de trocear los filtros y el mapa (AD-9), y qué hacer lo ' +
         'decide Héctor.',
     );

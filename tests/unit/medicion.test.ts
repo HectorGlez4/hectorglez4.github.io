@@ -4941,6 +4941,37 @@ describe('Historia 23.8 — una búsqueda cuenta una vez, cuando se asienta', ()
         await elegirYEsperar(entorno, 'autor', 'seneca');
         expect(entorno.obra()).toMatchObject({ enElDom: true, opciones: DE_SENECA });
         expect(entorno.region().texto).toBe('4 citas de Séneca.');
+        // La mitad que llegó se guardó: el reintento pide solo la que falló.
+        const fallaElMapa = 'fallaElMapa' in fallo || 'mapa' in fallo;
+        const fallanLosFiltros = 'fallanLosFiltros' in fallo;
+        expect(entorno.pedidosDelMapa()).toHaveLength(fallaElMapa ? 2 : 1);
+        expect(filtrosPedidos(entorno)).toBe(fallanLosFiltros ? 2 : 1);
+      }, 240_000);
+
+      it('un Autor elegido con la petición en vuelo se suma a ella; si falla y sigue elegido, la repite', async () => {
+        const entorno = await conObras({ mapaManual: true, fallaElMapa: 'red' });
+        entorno.elegir('autor', 'jose-marti');
+        await entorno.vaciar();
+        entorno.elegir('autor', 'seneca');
+        await entorno.vaciar();
+        expect(entorno.pedidosDelMapa()).toHaveLength(1);
+        // Falla la petición compartida: Séneca, que sigue elegido, la vuelve a pedir, una vez.
+        await entorno.responderAlMapa();
+        expect(entorno.pedidosDelMapa()).toHaveLength(2);
+        entorno.fallarElMapa();
+        await entorno.responderAlMapa();
+        entorno.avanzar(PAUSA_DE_LOS_SELECTORES_MS);
+        await entorno.vaciar();
+        expect(entorno.obra()).toMatchObject({ enElDom: true, opciones: DE_SENECA });
+        expect(entorno.pedidosDelMapa()).toHaveLength(2);
+        // El que la empezó no la repite: un Autor solo, con un fallo, espera al siguiente.
+        const solo = await conObras({ mapaManual: true, fallaElMapa: 'red' });
+        solo.elegir('autor', 'jose-marti');
+        await solo.responderAlMapa();
+        solo.avanzar(PAUSA_DE_LOS_SELECTORES_MS);
+        await solo.vaciar();
+        expect(solo.pedidosDelMapa()).toHaveLength(1);
+        expect(solo.obra()).toMatchObject(FUERA);
       }, 240_000);
 
       it('un éxito se guarda para la carga: el segundo Autor no vuelve a pedir el mapa ni `filters()`', async () => {

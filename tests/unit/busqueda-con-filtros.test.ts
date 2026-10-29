@@ -172,6 +172,23 @@ describe('Historia 27.3 — lo puro: la Obra', () => {
     expect(
       fraseDelRecuento({ total: 4, texto: ' escuela ', autor: 'José Martí', obra: 'Maestros ambulantes', tema: 'El saber' }),
     ).toBe('4 citas de José Martí en Maestros ambulantes sobre el saber con «escuela».');
+    // El singular sin Tema ni texto.
+    expect(fraseDelRecuento({ total: 1, texto: '', autor: 'José Martí', obra: 'Maestros ambulantes' })).toBe(
+      'Una cita de José Martí en Maestros ambulantes.',
+    );
+  });
+
+  it('un título que ya cierra la frase no lleva otro punto detrás', () => {
+    expect(fraseDelRecuento({ total: 3, texto: '', autor: 'Pío Baroja', obra: '¡Adentro!' })).toBe('3 citas de Pío Baroja en ¡Adentro!');
+    expect(fraseDelRecuento({ total: 1, texto: '', autor: 'X', obra: '¿Qué es la patria?' })).toBe('Una cita de X en ¿Qué es la patria?');
+    expect(fraseDelRecuento({ total: 2, texto: '', autor: 'X', obra: 'Obras completas. Tomo I.' })).toBe(
+      '2 citas de X en Obras completas. Tomo I.',
+    );
+    // Lo que va detrás del título cierra con su propio punto.
+    expect(fraseDelRecuento({ total: 2, texto: '', autor: 'X', obra: '¡Adentro!', tema: 'La vida' })).toBe(
+      '2 citas de X en ¡Adentro! sobre la vida.',
+    );
+    expect(fraseDelRecuento({ total: 2, texto: 'mar', autor: 'X', obra: '¡Adentro!' })).toBe('2 citas de X en ¡Adentro! con «mar».');
   });
 
   it('la Obra no se nombra sin su Autor, ni con un título vacío: nunca «… en .»', () => {

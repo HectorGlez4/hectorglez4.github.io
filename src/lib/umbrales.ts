@@ -578,9 +578,13 @@ export const MAX_BYTES_GUION_DEL_FILTRO = 3915;
  * del mapa de rótulos y de `filters()`, la composición de sus opciones (`opcionesDeObra`,
  * `rotuloDeObra` y `recuentoDeCitas`, que se muda al trozo compartido) y la Obra en los filtros,
  * el recuento y el asentamiento: **10.810 bytes** (2026-10-29) —10.258 del fichero de entrada y 552
- * del trozo—. Tope: 10.810 más unos 400.
+ * del trozo—. Tope: 10.810 más unos 400. Tras las dos revisiones de la 27.3 —un `filters()` sin el
+ * filtro `obra` que cuenta como fallo, la Obra sin título que no se nombra, el reintento del Autor
+ * que se sumó a una petición ajena que falló y la frase que no dobla el punto tras un título que ya
+ * cierra— mide **11.034 bytes** (2026-10-29): 10.482 del fichero de entrada y 552 del trozo, que no
+ * cambia. Tope, con la misma regla: 11.034 más unos 400.
  */
-export const MAX_BYTES_GUION_DE_LA_BUSQUEDA = 11210;
+export const MAX_BYTES_GUION_DE_LA_BUSQUEDA = 11434;
 
 /**
  * La pausa de tecleo, en milisegundos — AD-9, UX-DR58, UX-DR86, Historia 26.6.
@@ -684,7 +688,7 @@ export const MAX_BYTES_DEL_DIRECTORIO_DE_OBRAS = 290 * 1024;
  * Bytes de los filtros de Pagefind más el mapa de rótulos de las Obras por encima de los cuales el
  * build avisa — Historia 27.3, AD-9, AD-11.
  *
- * Es **una sola cifra** porque la isla de `/buscar/` los descarga juntos al elegir un Autor
+ * Es **una sola cifra** porque la isla de `/buscar/` los pide juntos al elegir un Autor
  * (`filters()` y `/buscar/obras.json`), y trocearlos —por Autor— es la misma decisión aplazada para
  * los dos. Lo mide el paso final de `npm run build`, después de Pagefind (`integraciones/peso.ts`,
  * con la decisión en `tools/lib/peso.ts`): la suma de `dist/pagefind/filter/**` y

@@ -146,6 +146,29 @@ Las capas de revisión de este pase son externas (bucle v8-ralph) y no traían h
 
 Rechazados, con su motivo: el valor recortado en el selector cerrado a 320 px (ac-auditor, criterio 12) lo permite `EXPERIENCE.md § Búsqueda` —«El valor elegido puede recortarse en el control cerrado; la lista lo muestra entero»— y la prueba ya exige no desbordar; quitar el selector al momento al recorrer Autores con flechas lo manda el contrato; anunciar la aparición del selector no lo pide ningún artefacto de UX y el selector aparece detrás del foco en el orden de tabulación; el alto de 312,3 px a 360 px está anotado, que es lo que pide la historia; el mapa en caché tras retitular es un desfase de ≤ 600 s que el contrato asume; el mapa ausente en `dist/` ya lo nombra el parte («sin suma ni veredicto») y lo fija la prueba construida; el recálculo de `obrasDelAutor` y el prefijo repetido del mapa son de coste y forma sin defecto observable; la prueba que depende del Corpus, la fila «Autor sin Obras» sin punta a punta y la lectura de la Página de Obra ya están acotadas o anotadas; el estado `done` previo y la línea de verificación se rehacen en este pase; la documentación del aviso vive en su docblock; el disparo solo al elegir Autor, el mapa por Autor, el Autor vigente y el CI sin punta a punta son decisiones del contrato o del proyecto.
 
+### 2026-10-29 — Review pass
+- intent_gap: 0
+- bad_spec: 0
+- patch: 13: (high 0, medium 0, low 13)
+- defer: 0
+- reject: 20: (high 0, medium 2, low 18)
+- addressed_findings:
+  - `[low]` `[patch]` Un Autor elegido mientras iba en vuelo la petición de otro se sumaba a ella y, si fallaba, no se reintentaba hasta otro cambio de Autor (edge-case-hunter): ahora el Autor que se sumó a la petición de **otro** y sigue elegido la repite una vez (`pedidaPara` en `Busqueda.astro`; el segundo evento —`input` y `change`— del mismo Autor no cuenta). Prueba nueva en `medicion.test.ts`, con el caso del Autor solo, que no repite.
+  - `[low]` `[patch]` Nada comprobaba que el reintento pide solo la mitad que falló (verification-gap): la tabla de fallos de `medicion.test.ts` exige ahora dos peticiones del mapa solo cuando falló el mapa y dos `filters()` solo cuando fallaron los filtros.
+  - `[low]` `[patch]` Un título que cierra con «!», «?», «…» o el punto de una abreviatura daba «¡Adentro!.» (blind-hunter; el Corpus tiene «¡Adentro!» y un «Discurso … de 1842.»): `fraseDelRecuento` no añade otro punto tras ellos. Pruebas puras nuevas, y el singular sin Tema afirmado literal (ac-auditor).
+  - `[low]` `[patch]` El docblock de `MAX_BYTES_GUION_DE_LA_BUSQUEDA` decía 10.810 bytes y el guion mide ya 11.034 tras las dos revisiones (blind-hunter): rederivado con la regla de la 27.2, 11.034 + ~400 = **11.434**, con fecha y motivo. `MAX_BYTES_GUION_DEL_FILTRO` no se mueve (el trozo sigue en 552).
+  - `[low]` `[patch]` El aviso de `tools/lib/peso.ts` y los docblocks de `tools/lib/peso.ts`, `integraciones/peso.ts` y `AVISO_DE_BYTES_DE_FILTROS_Y_MAPA` seguían diciendo «descarga» (blind-hunter): dicen ahora bytes en disco, cota por arriba de lo transferido.
+  - `[low]` `[patch]` La cabecera `Content-Type` del endpoint del mapa no tiene efecto en un build estático y la prueba de punta a punta que la miraba juzgaba la extensión en `tests/servidor.mjs` (blind-hunter): se quita, con el comentario de que el tipo lo pone el anfitrión por la extensión, y la prueba comprueba que el mapa llega.
+  - `[low]` `[patch]` La prueba «retitular … nunca el orden» no tenía dos Obras a igualdad de recuento, y la Lista de Obras desempata por título (blind-hunter): fixture con «Epodos» y «Odas» a dos Citas; retitular «Odas» como «Carmina» conserva el nombre y el orden sigue a `obrasDelAutor`.
+  - `[low]` `[patch]` La prueba de la familia congelada no metía la congelación por el camino del build (blind-hunter): ahora declara `CONGELACION_DE_OBRAS` con `vi.doMock` de `umbrales.ts`, comprueba que rige (`obrasIndexables` deja fuera «Odas») y que el mapa la sigue ofreciendo.
+  - `[low]` `[patch]` La clave del asentamiento ordena `autor|tema|obra` y la combinación `autor-obra-tema` sin decir por qué (blind-hunter): docblock de `valoresDeFiltros` con el motivo (la clave sin Obra sigue siendo la de la 27.2).
+  - `[low]` `[patch]` A 360 px se anotaba solo el `fieldset` con «Quitar los filtros», no lo que UX-DR87 estimó (intent-alignment): la prueba anota también los tres selectores solos con su etiqueta —**252,3 px**, lo estimado— y exige 17 px en el valor de los tres.
+  - `[low]` `[patch]` El barrido axe con la Obra del título más largo no corría a 320 px ni en las condiciones de la 26.9 (ac-auditor): corre ahora dentro del bucle de `CONDICIONES` de `accesibilidad.spec.ts`, además del de la anchura del proyecto.
+  - `[low]` `[patch]` El Auto Run Result decía «Pase sin hallazgos … `followup_review_recommended: false`» junto al pase que lo contradice (blind-hunter): la línea remite ya a los pases de revisión.
+  - `[low]` `[patch]` (ac-auditor) La frase singular sin Tema ni texto, «Una cita de José Martí en Maestros ambulantes.», se afirma literal en `busqueda-con-filtros.test.ts`.
+
+Rechazados, con su motivo: el salto del diseño al insertarse el selector de Obra lo manda el contrato y UX-DR87 («no existe» sin Autor; reservar el hueco lo contradiría); reintentar solo al elegir Autor es el contrato; el mapa ausente en `dist/` lo nombra el parte y lo fijan `busqueda-con-filtros.test.ts` y la prueba de punta a punta, que fallan sin él (ya rechazado en el pase anterior); el margen del aviso de 120 KiB es la regla del contrato y avisar es lo que debe pasar cuando crezca; las pruebas que dependen del Corpus y las filas sin punta a punta («Autor sin Obras», homónimas, desfase, fallo, Enter con Obra, combinación en el receptor) ya están cubiertas en el entorno simulado sobre el guion de `dist/` o en el índice construido, y la del receptor es la misma laguna que la 27.2; AGENTS.md y la política de caché del mapa no los pide ningún artefacto de la historia, y la excepción de AD-22 ya está aplazada; los títulos con espacios a los lados no salen del build; el disparo solo al elegir Autor, el Autor vigente, el mapa por Autor, una sola cifra de aviso, el valor recortado en el control cerrado (EXPERIENCE.md) y la congelación probada en lo puro son lecturas que fija el contrato; la comprobación simulada del foco no es trivial, porque el entorno lanza ante `focus()` en cualquier elemento que no sea el campo.
+
 ## Design Notes
 
 **Por qué el selector vive en la plantilla y se separa.** Así su marcado y su estilo de ámbito salen del build como los de la 27.2, y el guion no lleva contenido; separado del clon, «no existe» es literal (UX-DR87) y reinsertarlo en su hueco lo deja entre Autor y Tema sin calcular posiciones.
@@ -192,7 +215,7 @@ Planificada el 2026-10-29 y detenida tras planificar. Implementada el 2026-10-29
 - `tests/e2e/busqueda.spec.ts` — describe «Historia 27.3» y la tabulación de la 27.2 con Obra.
 - `tests/e2e/accesibilidad.spec.ts` — `/buscar/` con la Obra del título más largo: reflujo a 320 px en las tres condiciones y axe 2.2 AA.
 
-**Revisión.** Pase sin hallazgos (capas externas pendientes): 0 parches, 0 aplazados, 0 rechazados. `followup_review_recommended: false` (0 parches; puntuación 0).
+**Revisión.** El primer pase no traía hallazgos (capas externas pendientes); los dos pases con capas externas están más abajo, cada uno con su recuento y su `followup_review_recommended`.
 
 **Verificación.**
 - `npm run check` — 0 errores, 0 avisos.
@@ -223,3 +246,56 @@ Planificada el 2026-10-29 y detenida tras planificar. Implementada el 2026-10-29
 
 **Riesgos.** El valor elegido del selector de Obra se recorta en el control cerrado con un título largo a 320 px; lo admite `EXPERIENCE.md` y la lista lo muestra entero. La excepción de red del guion queda por escribir en la espina (aplazado).
 
+
+### Segundo pase de revisión del 2026-10-29 (capas externas)
+
+**Qué cambió.** Trece parches bajos, ninguno de contrato (detalle en el Review Triage Log): el Autor que se suma a la petición en vuelo de otro Autor y la ve fallar la repite una vez; la frase del recuento no dobla el punto tras un título que ya cierra («… en ¡Adentro!»); el tope del guion de la búsqueda se rederiva a 11.434 (11.034 medidos + ~400); los textos del aviso de filtros y mapa hablan de bytes en disco; el endpoint del mapa deja de poner una cabecera que el build estático tira; y las pruebas cubren el reintento que pide solo la mitad fallida, la congelación metida por `umbrales.ts`, el orden tras retitular a igualdad de recuento, el singular sin Tema, los tres selectores solos a 360 px y axe a 320 px en las tres condiciones.
+
+**Ficheros de este pase.**
+- `src/components/Busqueda.astro`: el reintento del Autor que se sumó a una petición ajena (`pedidaPara`).
+- `src/lib/busqueda.ts`: `fraseDelRecuento` sin doble punto, y el docblock de `valoresDeFiltros` con el orden de la clave.
+- `src/lib/umbrales.ts`: `MAX_BYTES_GUION_DE_LA_BUSQUEDA` = 11.434, y «pide» en el docblock del aviso.
+- `src/pages/buscar/obras.json.ts`: sin la cabecera `Content-Type`.
+- `tools/lib/peso.ts`, `integraciones/peso.ts`: el texto del aviso y los docblocks.
+- `tests/unit/medicion.test.ts`: la mitad fallida y el reintento del Autor sumado.
+- `tests/unit/busqueda-con-filtros.test.ts`: el doble punto y el singular.
+- `tests/unit/filtros-de-busqueda.test.ts`: la congelación y el retitulado.
+- `tests/e2e/busqueda.spec.ts`: las dos alturas a 360 px y el mapa sin juzgar su cabecera.
+- `tests/e2e/accesibilidad.spec.ts`: axe en cada condición a 320 px.
+
+**Cifras (2026-10-29).**
+- Guion de la búsqueda: **11.034 bytes**, 10.482 del fichero de entrada y 552 del trozo. El tope pasa a 11.434 y el del filtro no se mueve.
+- Filtros y mapa (`npm run build`): filtros 52.583 bytes en 4 ficheros y mapa 44.393, que suman 96.976 bytes frente al aviso de 122.880.
+- A 360 px (`--project=movil`), los **tres selectores solos, con su etiqueta, miden 252,3 px**, lo que estimó UX-DR87. El `fieldset` con «Quitar los filtros» mide 312,3 px. Los tres van a 17 px.
+
+**Hallazgos.** 13 parches (0 altos, 0 medios, 13 bajos), 0 aplazados y 20 rechazados.
+
+**Recomendación de seguimiento.** `followup_review_recommended: true`. La puntuación es 3 × 0 + 13 = 13, que es ≥ 5.
+
+**Verificación del pase.** Todo en verde:
+- `npm run check`: 0 errores y 0 avisos.
+- `npm run build`: sale con 0 e informa filtros y mapa.
+- `npx vitest run`, un fichero por llamada:
+
+  | Fichero | Pruebas |
+  |---|---|
+  | `busqueda-con-filtros` | 36 |
+  | `filtros-de-busqueda` | 15 |
+  | `peso` | 63 |
+  | `peso-construido` | 14 |
+  | `andamiaje` | 41 |
+  | `medicion -t "27.3"` | 20 |
+
+- Playwright sobre lo construido:
+
+  | Orden | Verdes | Omitidas |
+  |---|---|---|
+  | `busqueda.spec.ts --project=escritorio` | 48 | 4 |
+  | `busqueda.spec.ts --project=movil -g "27.3"` | 6 | 1 |
+  | `accesibilidad.spec.ts -g "buscar"`, con axe a 320 px en las tres condiciones | 22 | 0 |
+  | `receptor.spec.ts -g "busca"` | 8 | 8 |
+
+  Al terminar, los puertos quedaron libres.
+- `npm test` entero con `correr.sh`: **150 de 150 ficheros y 6.872 pruebas en verde** (871 s).
+
+**Riesgos.** Los mismos del primer pase. La excepción de red del guion sigue aplazada a la espina (pendiente de Héctor).
