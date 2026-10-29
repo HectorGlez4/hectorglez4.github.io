@@ -243,3 +243,64 @@ pruebas en 27 ficheros). En `tests/e2e/accesibilidad.spec.ts`, el barrido WCAG 2
 (`ETIQUETAS_DEL_BARRIDO` con `wcag22aa`; 54 pruebas entre los dos proyectos) y el bloque
 «Historia 26.9 — reflujo a 320 px» (124 pruebas entre los dos proyectos) están en la lista,
 sin `test.only` ni `fixme`.
+
+## Verificación previa a la fusión — 2026-10-29 (UTC)
+
+Puerta previa al merge (bucle v8-ralph, etapa s-24-26, intento 1 de esta tanda), sobre
+bd0c7a7f73. Disco libre al empezar: 109 GB. Puertos 4321, 4399, 4400, 4402 y 8787 libres.
+
+**Sincronía.** `git fetch origin`: `origin/main` (881949f4d6) ya es antecesor de la rama; no
+hubo merge, ni Autores nuevos, ni lote de claves.
+
+**Equivalente del CI** (`.github/workflows/publicar.yml`, en este orden):
+
+| orden | resultado |
+|---|---|
+| `npm ci` | no se corrió: `node_modules/` se instaló después del último cambio de `package-lock.json` |
+| `npm run build` | **verde** — 5.290 páginas, 4.875 rutas indexables (517 Obras publicadas, 277 indexables); `dist/` 476,7 MiB en 15.348 ficheros (aviso en 750 MiB, tope en 900 MiB) |
+| `npx astro check` | **verde** — 386 ficheros, 0 errores, 0 avisos, 8 pistas |
+| `npm test` | **verde** — 146 ficheros, 6.697 pruebas, todas pasan (862 s) |
+
+**`npm run test:e2e` entero** (los dos proyectos, con `wrangler dev` y el D1 local que levanta
+`playwright.config.ts`; nada contra producción): **verde** — 1.004 pruebas con 5
+trabajadores: 909 pasan, 95 se saltan, 0 fallan, 0 inestables (5,9 min). No hubo que repetir
+ningún fichero.
+
+**NFR-7 con Lighthouse** (`npx -y lighthouse@13.5.0`, perfil móvil, `--throttling-method=simulate`
+—4G simulado—, solo rendimiento; Google Chrome 156.0.8078.73 sin cabeza por `CHROME_PATH`). Las
+dos construcciones, de hoy y en local, con `MEDICION_ENDPOINT=http://localhost:8787/` apuntando
+a un receptor de prueba que contesta 204 a todo; servidas con `node tests/servidor.mjs`
+(`DIST`, `PUERTO=4399`, `SERVIDOR_CACHE_CONTROL=max-age=600`, la cabecera del alojamiento).
+Primero `git switch --detach origin/main` (881949f4d6), `npm run build` y 5 corridas; después
+`git switch v8/epicas-24-26` (bd0c7a7f73), `npm run build` y 5 corridas.
+
+Página medida: `/cita/seneca-a-cuantos-son-molestas-sus-mismas-riquezas/`, que en la rama lleva
+la Tarjeta de Obra, «Siguiente», «De la misma obra» y las rutas de salida. `/autores/` solo se
+mide en la rama: en la principal da 404. En todos los informes cada `woff2` se pide **una sola
+vez** (2 peticiones, 2 ficheros).
+
+| página | construcción | LCP mediana | FCP mediana | LCP de las 5 | rendimiento | bytes |
+|---|---|---|---|---|---|---|
+| Página de Cita | `origin/main` | 1.653 ms | 1.064 ms | 1653, 1802, 1651, 1802, 1652 | 100 | 137.347 |
+| Página de Cita | rama | **1.802 ms** | 1.066 ms | 1802, 1652, 1802, 1652, 1802 | 99–100 | 144.621 |
+| `/autores/` | rama | 2.102 ms | 1.203 ms | 1953, 2102, 2101, 2103, 2102 | 98–99 | 203.441 |
+
+Veredicto según la regla de la puerta: **peor**. La mediana de LCP de la rama queda por debajo
+de 2.500 ms, pero sube 149 ms sobre la principal, por encima de la tolerancia de
+max(100 ms, 5 % = 83 ms) = 100 ms.
+
+Lo que dicen los informes, como pista y no como diagnóstico cerrado: el LCP de las dos
+construcciones es **bimodal** —1.652 o 1.802 ms, nada en medio—, con el mismo elemento (el
+`<h1>` de la Cita), las mismas peticiones y los mismos bytes en cada corrida de una misma
+construcción; FCP no se mueve (1.064 frente a 1.066 ms). Lo que cambia es cuántas corridas caen
+en el modo alto. Diez corridas más de cada una, fuera de la regla y solo para ver el reparto
+(misma cabecera, mismas construcciones): principal 1804, 1802, 1652, 1652, 1803, 1652, 1802,
+1654, 1652, 1652 (mediana 1.654 ms); rama 1802, 1802, 1803, 1652, 1802, 1653, 1802, 1802, 1802,
+1652 (mediana 1.802 ms). En las 15 de cada una: la principal cae en el modo bajo 9 veces, la
+rama 5. La rama pesa 7.274 bytes más (el HTML de la Tarjeta de Obra y del pie: 28.158 → 35.249
+bytes transferidos), y la hoja bloqueante sigue siendo una (`_slug_.*.css`, 4.858 → 5.041
+bytes). El 2026-10-28, con el mismo método, las dos midieron 1.802 ms.
+
+Resultado: CI y barrido en verde; NFR-7 **se degrada** según la regla frente a la principal del
+mismo día (+149 ms de mediana, sobre un LCP bimodal), así que el merge espera a Héctor o a la
+corrección.
