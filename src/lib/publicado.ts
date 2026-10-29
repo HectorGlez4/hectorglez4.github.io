@@ -17,16 +17,21 @@
  */
 
 import type { CollectionEntry } from 'astro:content';
+import type { z } from 'astro/zod';
 import {
+  AUTORES_DESTACADOS,
   CITAS_POR_PAGINA,
   MAX_CITAS_DE_LA_MISMA_OBRA,
   MAX_CITAS_RELACIONADAS,
   MAX_SALTOS_DESDE_LA_PORTADA,
   MIN_CITAS_POR_COLECCION,
   MIN_CITAS_POR_TEMA,
+  SUELO_TRADICION_LATINOAMERICANA,
   type CongelacionDeObras,
 } from './umbrales.ts';
-import type { FuenteDeCita, Procedencia } from './admision.ts';
+import type { FuenteDeCita, Procedencia, tradicion } from './admision.ts';
+import { cuentaParaElSuelo } from './huecos.ts';
+import { compararPorClave } from './normalizar.ts';
 import {
   colgarObras,
   congelacionVigente,
@@ -108,6 +113,12 @@ export interface Autor {
    * Citas puede no tenerla. Sin valor se omite.
    */
   ordenAlfabetico?: string;
+  /**
+   * La tradición del Autor — Historia 27.6, §6.1 del PRD: con el tipo del esquema (`tradicion` de
+   * `src/lib/admision.ts`), opcional como allí y omitida sin valor. La lee `autoresDestacados`
+   * para el suelo latinoamericano de FR-8; ninguna superficie la pinta.
+   */
+  tradicion?: z.infer<typeof tradicion>;
 }
 
 export interface Tema {
@@ -161,6 +172,78 @@ export function autoresPublicados(autores: Autor[], citas: Cita[]): Autor[] {
   return autores
     .filter((a) => conCitas.has(a.slug))
     .sort((a, b) => a.nombre.localeCompare(b.nombre, 'es'));
+}
+
+/**
+ * Los ocho Autores destacados — FR-8, AD-11, AD-3, UX-DR62, Historia 27.6.
+ *
+ * Es la **única** regla de los Autores que ofrece la búsqueda sin resultados de `/buscar/`, y la
+ * reutiliza la portada en la 28.4: dos superficies, una función, y ninguna corta una lista por su
+ * cuenta. Hasta la 27.6 la salida tomaba los ocho primeros del alfabeto, sin regla ni suelo.
+ *
+ *   1. Se publican los Autores con al menos una Cita en `citas`; se cuentan las de cada uno.
+ *   2. **Una sola clasificación**: más Citas primero y, a igualdad, el orden del Directorio
+ *      (`compararPorClave` de `src/lib/normalizar.ts`: la clave de orden y, si empatan, el slug).
+ *      Es total, así que el resultado no depende del orden de entrada.
+ *   3. Se eligen los `AUTORES_DESTACADOS` primeros.
+ *   4. **El suelo** de `SUELO_TRADICION_LATINOAMERICANA`, por razón exacta y en enteros —nunca un
+ *      porcentaje redondeado—, sobre los elegidos que **cuentan para el suelo**
+ *      (`cuentaParaElSuelo` de `src/lib/huecos.ts`, su único dueño: todos menos los de tradición
+ *      `otra`, también el que no la declara). Mientras no se alcance, cede el **último** elegido
+ *      en la clasificación que cuenta y no es latinoamericano —un peninsular o uno sin declarar,
+ *      nunca uno de `otra`, que no escora el reparto— y entra el **primero** de fuera que es
+ *      latinoamericano. Si falta uno de los dos, se para: el suelo no se fuerza con lo que no hay.
+ *   5. Se devuelven en el **orden del Directorio**, nunca por recuento: la lista se lee como una
+ *      lista de nombres, no como un ranking.
+ *
+ * Con menos de ocho publicados, todos. Pura: no muta la entrada. **Lanza** si un Autor publicado no
+ * tiene clave de orden, como `agruparPorClave` de `src/lib/directorios.ts`: el build ya lo para
+ * antes, en `integraciones/claves.ts`, y adivinarle un sitio escondería el fallo.
+ */
+export function autoresDestacados(autores: readonly Autor[], citas: readonly Pick<Cita, 'autor'>[]): Autor[] {
+  const recuento = new Map<string, number>();
+  for (const cita of citas) recuento.set(cita.autor, (recuento.get(cita.autor) ?? 0) + 1);
+
+  const publicados = autores
+    .filter((autor) => (recuento.get(autor.slug) ?? 0) > 0)
+    .map((autor) => {
+      if (autor.ordenAlfabetico === undefined) {
+        throw new Error(
+          [
+            `El Autor «${autor.slug}» tiene Citas publicadas y no tiene clave de orden (ordenAlfabetico),`,
+            'así que los Autores destacados no saben dónde ponerlo.',
+            'Lo para antes `integraciones/claves.ts`; si se llega aquí, esa puerta no corrió.',
+            'La clave la propone `npx tsx tools/autor.ts proponer-claves`.',
+          ].join(' '),
+        );
+      }
+      return { autor, clave: autor.ordenAlfabetico, citas: recuento.get(autor.slug) ?? 0 };
+    });
+
+  type Clasificado = (typeof publicados)[number];
+  const porDirectorio = (a: Clasificado, b: Clasificado) =>
+    compararPorClave({ clave: a.clave, slug: a.autor.slug }, { clave: b.clave, slug: b.autor.slug });
+  const clasificacion = [...publicados].sort((a, b) => b.citas - a.citas || porDirectorio(a, b));
+
+  const elegidos = clasificacion.slice(0, AUTORES_DESTACADOS);
+  const fuera = clasificacion.slice(AUTORES_DESTACADOS);
+  const esLatinoamericano = (x: Clasificado) => x.autor.tradicion === 'latinoamericana';
+  const puedeCeder = (x: Clasificado) => cuentaParaElSuelo(x.autor) && !esLatinoamericano(x);
+
+  for (;;) {
+    const cuentan = elegidos.filter((x) => cuentaParaElSuelo(x.autor)).length;
+    const latinoamericanos = elegidos.filter(esLatinoamericano).length;
+    if (100 * latinoamericanos >= SUELO_TRADICION_LATINOAMERICANA * cuentan) break;
+    const cede = elegidos.findLastIndex(puedeCeder);
+    const entra = fuera.findIndex(esLatinoamericano);
+    if (cede === -1 || entra === -1) break;
+    elegidos.splice(cede, 1);
+    // Entra detrás de los elegidos: tiene menos Citas que todos los que no han cedido, y más (o va
+    // antes en el Directorio) que los que quedan fuera. La clasificación sigue en orden.
+    elegidos.push(...fuera.splice(entra, 1));
+  }
+
+  return elegidos.sort(porDirectorio).map((x) => x.autor);
 }
 
 /** Un Tema se publica al alcanzar `MIN_CITAS_POR_TEMA` Citas publicadas — FR-6. */
@@ -1263,7 +1346,7 @@ export function aplanarCita(entrada: EntradaCita): Cita {
  * `resolverAtribuciones`.
  */
 export function aplanarAutor(entrada: EntradaAutor): Autor {
-  const { nombre, semblanza, añoNacimiento, añoFallecimiento, ordenAlfabetico } = entrada.data;
+  const { nombre, semblanza, añoNacimiento, añoFallecimiento, ordenAlfabetico, tradicion } = entrada.data;
   return {
     slug: entrada.id,
     nombre,
@@ -1272,6 +1355,8 @@ export function aplanarAutor(entrada: EntradaAutor): Autor {
     añoFallecimiento,
     // Historia 26.3 — la clave viaja para el Directorio; `ordenRevisado` no, que no lo pinta nadie.
     ...(ordenAlfabetico !== undefined ? { ordenAlfabetico } : {}),
+    // Historia 27.6 — la tradición viaja para el suelo de los destacados; sin declarar, se omite.
+    ...(tradicion !== undefined ? { tradicion } : {}),
   };
 }
 

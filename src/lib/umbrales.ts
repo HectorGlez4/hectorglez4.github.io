@@ -655,6 +655,17 @@ export const PAUSA_DE_LOS_SELECTORES_MS = 400;
 export const TANDA_DE_RESULTADOS = 30;
 
 /**
+ * Cuántos Autores destacados ofrece la búsqueda sin resultados — AD-9, FR-8, UX-DR62, Historia 27.6.
+ *
+ * Los elige `autoresDestacados` de `src/lib/publicado.ts`: los que más Citas publicadas tienen, con
+ * el suelo de `SUELO_TRADICION_LATINOAMERICANA` aplicado sobre los que cuentan para él, y se
+ * presentan en el orden del Directorio de Autores. Hasta la 27.6 la salida de `/buscar/` cortaba la
+ * lista alfabética en un `8` literal, sin regla. La misma cifra la reutiliza la portada en la 28.4:
+ * un solo dueño para las dos superficies, y ninguna lo escribe.
+ */
+export const AUTORES_DESTACADOS = 8;
+
+/**
  * El techo de lo que el alojamiento admite por sitio — Historia 24.2, Entorno operativo.
  *
  * GitHub Pages admite 1 GB por sitio publicado. Se lee en decimal —mil millones de bytes y no

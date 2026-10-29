@@ -134,16 +134,65 @@ export function fraseDelRecuento({ total, texto, autor, obra, tema }: DatosDelRe
     return total === 1 ? 'Un resultado.' : `${total} resultados.`;
   }
   const recortado = texto.trim();
-  const frase =
+  return cerrarFrase(
     (total === 1 ? 'Una cita' : `${total} citas`) +
+      loFiltrado({ autor, obra, tema }) +
+      (recortado !== '' ? ` con «${recortado}»` : ''),
+  );
+}
+
+/**
+ * Lo filtrado, tal como lo nombran el recuento y la frase a cero — Historias 27.2, 27.3 y 27.6:
+ * « de {Autor}», « en {Obra}» y « sobre {tema}», en ese orden y cada uno solo si está. Un solo
+ * sitio para las dos frases: si una nombrara la Obra y la otra no, el visitante leería dos
+ * búsquedas distintas.
+ */
+function loFiltrado({ autor, obra, tema }: Omit<DatosDelRecuento, 'total' | 'texto'>): string {
+  return (
     (autor !== undefined ? ` de ${autor}` : '') +
     // La Obra nunca va sin su Autor, y un título vacío no se nombra: «… en .» no es una frase.
     (obra !== undefined && obra.trim() !== '' && autor !== undefined ? ` en ${obra}` : '') +
-    (tema !== undefined ? ` sobre ${temaEnFrase(tema)}` : '') +
-    (recortado !== '' ? ` con «${recortado}»` : '');
-  // Un título que cierra con «!», «?», «…» o el punto de una abreviatura ya cierra la frase: tras
-  // ellos no se escribe otro punto («… en ¡Adentro!», nunca «¡Adentro!.»).
+    (tema !== undefined ? ` sobre ${temaEnFrase(tema)}` : '')
+  );
+}
+
+/**
+ * Cierra una frase con su punto. Un título que cierra con «!», «?», «…» o el punto de una
+ * abreviatura ya la cierra: tras ellos no se escribe otro punto («… en ¡Adentro!», nunca
+ * «¡Adentro!.»).
+ */
+function cerrarFrase(frase: string): string {
   return /[.?!…]$/u.test(frase) ? frase : frase + '.';
+}
+
+/**
+ * La frase de la búsqueda sin resultados sin filtros — FR-8, UX-DR62. Es también la que pinta el
+ * build en la salida de `/buscar/`, antes de que la isla la componga: una sola cadena para las dos.
+ */
+export const SUGERENCIA_SIN_FILTROS = 'No encontramos esa frase. Prueba con menos palabras.';
+
+/**
+ * La frase de la búsqueda que se asienta a cero — Historia 27.6, FR-8, UX-DR93, UX-DR99,
+ * `EXPERIENCE.md § Búsqueda`.
+ *
+ * Sin filtros, la de siempre, `SUGERENCIA_SIN_FILTROS`: quien solo escribió texto puede probar con
+ * menos palabras. Con filtros, nombra lo filtrado con la misma composición que el recuento
+ * (`loFiltrado`) y no le pide a nadie que quite palabras que no escribió:
+ *
+ *   · con texto —recortado en sus extremos, entre comillas angulares—: «No encontramos «escuela»
+ *     entre las citas de José Martí en Maestros ambulantes.»;
+ *   · sin texto: «No hay citas de José Martí sobre la prudencia.».
+ *
+ * Las dos cierran con punto salvo que ya cierren (`cerrarFrase`). Lo tecleado entra tal cual: la
+ * frase se pinta **solo por `textContent`**, así que aquí no se escapa nada.
+ */
+export function sugerenciaSinResultados({ texto, autor, obra, tema }: Omit<DatosDelRecuento, 'total'>): string {
+  if (autor === undefined && tema === undefined) return SUGERENCIA_SIN_FILTROS;
+  const recortado = texto.trim();
+  const filtrado = loFiltrado({ autor, obra, tema });
+  return cerrarFrase(
+    recortado !== '' ? `No encontramos «${recortado}» entre las citas${filtrado}` : `No hay citas${filtrado}`,
+  );
 }
 
 // ─── El selector de Obra (Historia 27.3) ─────────────────────────────────────

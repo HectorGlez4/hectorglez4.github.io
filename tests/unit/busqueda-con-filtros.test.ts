@@ -23,6 +23,7 @@ import {
   FALLO_DE_LA_TANDA,
   PARAMETROS_DE_LA_BUSQUEDA,
   RUTA_DEL_MAPA_DE_OBRAS,
+  SUGERENCIA_SIN_FILTROS,
   TEXTO_DE_EJEMPLO_DE_LA_BUSQUEDA,
   autorDeLaObra,
   avisoDeLaDireccion,
@@ -43,6 +44,7 @@ import {
   opcionesDeObra,
   rotuloDeMostrarMas,
   rotuloDeObra,
+  sugerenciaSinResultados,
   valoresDeFiltros,
   type MapaDeObras,
 } from '../../src/lib/busqueda.ts';
@@ -144,6 +146,67 @@ describe('Historia 27.2 — lo puro: la frase del recuento', () => {
 
   it('lo tecleado va tal cual: la frase no escapa nada porque se pinta por `textContent`', () => {
     expect(fraseDelRecuento({ total: 2, texto: '<b>vida</b>', autor: 'Séneca' })).toBe('2 citas de Séneca con «<b>vida</b>».');
+  });
+
+  it('Historia 27.6 — el recuento con Obra no cambia al compartir la composición con la frase a cero', () => {
+    expect(fraseDelRecuento({ total: 23, texto: '', autor: 'José Martí', obra: 'Maestros ambulantes' })).toBe(
+      '23 citas de José Martí en Maestros ambulantes.',
+    );
+    expect(fraseDelRecuento({ total: 1, texto: 'x', autor: 'José Martí', obra: '¡Adentro!' })).toBe(
+      'Una cita de José Martí en ¡Adentro! con «x».',
+    );
+    expect(fraseDelRecuento({ total: 2, texto: '', autor: 'José Martí', obra: '¡Adentro!' })).toBe('2 citas de José Martí en ¡Adentro!');
+    expect(fraseDelRecuento({ total: 2, texto: '', tema: 'La vida', obra: 'Sin Autor' })).toBe('2 citas sobre la vida.');
+  });
+});
+
+describe('Historia 27.6 — lo puro: la frase a cero', () => {
+  it('sin Autor ni Tema, la de siempre, la misma constante que pinta el build', () => {
+    expect(SUGERENCIA_SIN_FILTROS).toBe('No encontramos esa frase. Prueba con menos palabras.');
+    expect(sugerenciaSinResultados({ texto: 'zzz' })).toBe(SUGERENCIA_SIN_FILTROS);
+    expect(sugerenciaSinResultados({ texto: '' })).toBe(SUGERENCIA_SIN_FILTROS);
+    // Una Obra sin su Autor no es filtro que nombrar.
+    expect(sugerenciaSinResultados({ texto: 'zzz', obra: 'Maestros ambulantes' })).toBe(SUGERENCIA_SIN_FILTROS);
+  });
+
+  it('con filtros y texto: qué no se encontró y entre qué citas, en el orden del recuento', () => {
+    expect(
+      sugerenciaSinResultados({ texto: 'escuela', autor: 'José Martí', obra: 'Maestros ambulantes' }),
+    ).toBe('No encontramos «escuela» entre las citas de José Martí en Maestros ambulantes.');
+    expect(sugerenciaSinResultados({ texto: '  zzz nada ', autor: 'José Martí' })).toBe(
+      'No encontramos «zzz nada» entre las citas de José Martí.',
+    );
+    expect(sugerenciaSinResultados({ texto: 'zzz', tema: 'La prudencia' })).toBe(
+      'No encontramos «zzz» entre las citas sobre la prudencia.',
+    );
+    expect(sugerenciaSinResultados({ texto: 'zzz', autor: 'Séneca', obra: 'Cartas', tema: 'El tiempo' })).toBe(
+      'No encontramos «zzz» entre las citas de Séneca en Cartas sobre el tiempo.',
+    );
+  });
+
+  it('con filtros y sin texto —vacío o solo espacios—: «No hay citas…»', () => {
+    expect(sugerenciaSinResultados({ texto: '', autor: 'José Martí', tema: 'La prudencia' })).toBe(
+      'No hay citas de José Martí sobre la prudencia.',
+    );
+    expect(sugerenciaSinResultados({ texto: '   ', autor: 'José Martí', obra: 'Maestros ambulantes', tema: 'La prudencia' })).toBe(
+      'No hay citas de José Martí en Maestros ambulantes sobre la prudencia.',
+    );
+    expect(sugerenciaSinResultados({ texto: '', tema: 'Ñandú' })).toBe(`No hay citas sobre ${temaEnFrase('Ñandú')}.`);
+  });
+
+  it('la Obra sin Autor o con título vacío no se nombra; un título que cierra con «!» no lleva otro punto', () => {
+    expect(sugerenciaSinResultados({ texto: '', tema: 'La vida', obra: 'Maestros ambulantes' })).toBe('No hay citas sobre la vida.');
+    expect(sugerenciaSinResultados({ texto: '', autor: 'José Martí', obra: '  ' })).toBe('No hay citas de José Martí.');
+    expect(sugerenciaSinResultados({ texto: '', autor: 'José Martí', obra: '¡Adentro!' })).toBe('No hay citas de José Martí en ¡Adentro!');
+    expect(sugerenciaSinResultados({ texto: 'zzz', autor: 'José Martí', obra: '¿Quién?' })).toBe(
+      'No encontramos «zzz» entre las citas de José Martí en ¿Quién?',
+    );
+  });
+
+  it('lo tecleado entra tal cual, recortado y sin escapar: se pinta por `textContent`', () => {
+    expect(sugerenciaSinResultados({ texto: ' <b>zzz</b> ', autor: 'Séneca' })).toBe(
+      'No encontramos «<b>zzz</b>» entre las citas de Séneca.',
+    );
   });
 });
 
@@ -910,6 +973,24 @@ describe('Historia 27.2 — lo construido', () => {
     expect(guion).toContain('TANDA_DE_RESULTADOS');
     expect(guion).not.toMatch(/(?<![\w.])30(?![\w.])/u);
     expect(guion).toMatch(/\.slice\(0, TANDA_DE_RESULTADOS\)/u);
+  });
+
+  it('Historia 27.6 — la salida sin resultados ofrece los destacados en el orden del Directorio, sin `target`, y la frase sin filtros', () => {
+    const enlaces: { href: string; target: string | undefined }[] = [];
+    recorrerElementos(html, (elemento, antepasados) => {
+      if (elemento.etiqueta !== 'a' || !antepasados.some((a) => a.atributos.has('data-salida'))) return;
+      const href = elemento.atributos.get('href') ?? '';
+      if (href.startsWith('/autor/')) enlaces.push({ href, target: elemento.atributos.get('target') });
+    });
+    // Martí, Nervo, Séneca: el orden del Directorio («Martí», «Nervo», «Séneca»), no el de los
+    // nombres (Amado, José, Séneca) ni el de las Citas (9, 7, 4). Fray Luis, sin Citas, nunca.
+    expect(enlaces).toEqual([
+      { href: '/autor/jose-marti/', target: undefined },
+      { href: '/autor/amado-nervo/', target: undefined },
+      { href: '/autor/seneca/', target: undefined },
+    ]);
+    const sugerencia = /<p\b[^>]*class="sugerencia[^"]*"[^>]*>([^<]*)<\/p>/u.exec(html);
+    expect(sugerencia?.[1]).toBe(SUGERENCIA_SIN_FILTROS);
   });
 
   it('Historia 27.3 — en la plantilla, el `.selector` de Obra va entre el de Autor y el de Tema', () => {

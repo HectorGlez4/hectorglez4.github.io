@@ -19,15 +19,21 @@
  * `filtrosDeLaBusqueda` —la misma función que escribe los filtros de cada Página de Cita (27.1)—,
  * ordenadas por `ordenDeAutoresPorNombre` y `ordenDeTemasPorNombre` de `src/lib/normalizar.ts`.
  * Así no hay opción sin Citas que la filtren, ni Tema bajo su umbral.
+ *
+ * Historia 27.6 — la salida sin resultados ofrece los Autores destacados (`autoresDestacados`), y su
+ * `.sugerencia` lleva la frase sin filtros (`SUGERENCIA_SIN_FILTROS`). La isla la reescribe a cero
+ * con `sugerenciaSinResultados`, que nombra lo filtrado, y la anuncia por la región del recuento,
+ * apartada de la vista: la frase se lee una vez y se ve una vez, en la salida.
  */
 import Armazon from '../components/Armazon.astro';
 import Busqueda from '../components/Busqueda.astro';
 import Sostener from '../components/Sostener.astro';
 import { modelosEnRuta } from '../lib/ingreso.ts';
 import { tituloDe } from '../lib/marca.ts';
+import { SUGERENCIA_SIN_FILTROS } from '../lib/busqueda.ts';
 import { ordenDeAutoresPorNombre, ordenDeTemasPorNombre } from '../lib/normalizar.ts';
 import {
-  autoresPublicados,
+  autoresDestacados,
   conjuntoPublicable,
   filtrosDeLaBusqueda,
   temasPublicados,
@@ -36,7 +42,12 @@ import { rutaDeAutor, rutaDeColeccion, rutaDeTema } from '../lib/superficies.ts'
 
 const conjunto = await conjuntoPublicable();
 const temas = temasPublicados(conjunto.temas, conjunto.citas);
-const autores = autoresPublicados(conjunto.autores, conjunto.citas).slice(0, 8);
+/*
+ * Historia 27.6 — los Autores de la salida son los destacados (FR-8): los `AUTORES_DESTACADOS` con
+ * más Citas, con el suelo latinoamericano, en el orden del Directorio. La regla es de
+ * `autoresDestacados`, la misma que tomará la portada; esta página no corta ninguna lista.
+ */
+const autores = autoresDestacados(conjunto.autores, conjunto.citas);
 /*
  * Las Colecciones publicadas también son salida — Historia 12.3.
  *
@@ -72,7 +83,8 @@ const temasDelFiltro = ordenDeTemasPorNombre(filtros.temas.map(opciones));
       * Historia 22.10 — WCAG 4.1.3: el recuento y la búsqueda sin resultados se anuncian por
       * esta región, que está desde la carga, vacía y sin `hidden`: lo que se anuncia es un
       * cambio de contenido, no de visibilidad. Sin resultados dice la frase de la salida y se
-      * aparta de la vista, para no pintarla dos veces. Historia 27.2 — la región va encima de su
+      * aparta de la vista, para no pintarla dos veces; desde la 27.6, también con el aviso de la
+      * dirección (27.4), que va delante de la frase en la `.sugerencia`. Historia 27.2 — la región va encima de su
       * sombra (que pone el guion, en la misma celda) y no da alto: el recuento que llega tras la
       * pausa no mueve la lista.
       */}
@@ -95,9 +107,7 @@ const temasDelFiltro = ordenDeTemasPorNombre(filtros.temas.map(opciones));
       * huella de AD-14 y otro despliegue del receptor—. Se revisa en la pasada de métricas.
       */}
     <div class="salida" data-salida hidden data-sin-zona="salidas-sin-resultados">
-      <p class="sugerencia">
-        No encontramos esa frase. Prueba con menos palabras.
-      </p>
+      <p class="sugerencia">{SUGERENCIA_SIN_FILTROS}</p>
 
       {
         temas.length > 0 && (
@@ -133,20 +143,22 @@ const temasDelFiltro = ordenDeTemasPorNombre(filtros.temas.map(opciones));
         )
       }
 
-      <section>
-        <h2>Autores</h2>
-        <ul class="chips">
-          {
-            autores.map((autor) => (
-              <li>
-                <a class="chip" href={rutaDeAutor(autor.slug)}>
-                  {autor.nombre}
-                </a>
-              </li>
-            ))
-          }
-        </ul>
-      </section>
+      {
+        autores.length > 0 && (
+          <section>
+            <h2>Autores</h2>
+            <ul class="chips">
+              {autores.map((autor) => (
+                <li>
+                  <a class="chip" href={rutaDeAutor(autor.slug)}>
+                    {autor.nombre}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )
+      }
     </div>
 
     {

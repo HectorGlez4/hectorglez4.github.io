@@ -1,6 +1,6 @@
 ---
 /**
- * La búsqueda de `/buscar/` — Historias 27.2, 27.3, 27.4 y 27.5, FR-7, FR-8, NFR-4, AD-6, AD-11,
+ * La búsqueda de `/buscar/` — Historias 27.2, 27.3, 27.4, 27.5 y 27.6, FR-7, FR-8, NFR-4, AD-6, AD-11,
  * AD-13, UX-DR87, UX-DR88, UX-DR89, UX-DR90, UX-DR91, UX-DR93, UX-DR99, UX-DR100, UX-DR101,
  * UX-DR112; `DESIGN.md § Búsqueda` y `EXPERIENCE.md § Búsqueda`.
  *
@@ -56,6 +56,11 @@
  *     lleva la frase al momento, invisible, y reserva el alto: la lista no se mueve cuando la frase
  *     llega. Sin resultados, la sugerencia de la salida con el **primer ritmo** (`anunciar`), que
  *     vacía y escribe en el fotograma siguiente, como en la 22.10; la región se aparta de la vista.
+ *     Desde la 27.6 esa frase la compone la isla (`sugerenciaSinResultados`): sin filtros, «No
+ *     encontramos esa frase. Prueba con menos palabras.»; con filtros nombra lo filtrado («No
+ *     encontramos «escuela» entre las citas de José Martí.», «No hay citas de José Martí sobre la
+ *     prudencia.»). Se escribe por `textContent` en la `.sugerencia`, con el aviso de la 27.4
+ *     delante si lo hay, y la región se aparta también con aviso: se ve una vez y se lee una.
  *     Esa escritura del fotograma siguiente solo cae si nada se pintó entretanto: un recuento
  *     escrito antes no lo pisa la sugerencia de la búsqueda anterior.
  *   · Historia 27.2 — cada cambio de un selector reinicia `PAUSA_DE_LOS_SELECTORES_MS`, y la
@@ -447,8 +452,10 @@ const { autores, temas } = Astro.props;
     resolverEstado,
     rotuloDeMostrarMas,
     rotuloDeObra,
+    sugerenciaSinResultados,
     valoresDeFiltros,
     type ControlDeLaBusqueda,
+    type DatosDelRecuento,
     type EstadoDeLaBusqueda,
     type FiltrosElegidos,
     type MapaDeObras,
@@ -745,23 +752,29 @@ const { autores, temas } = Astro.props;
     }
 
     /**
-     * Pinta una búsqueda. `aviso` es la frase de la 27.4 de los filtros de la dirección que no se
-     * pueden usar: va delante del recuento (o de la sugerencia a cero), con un espacio, en la
-     * región y en la sombra. A cero con aviso la región no se aparta de la vista: el aviso no lo
-     * dice nada más.
+     * Pinta una búsqueda con los datos de su recuento —el total, el texto y los nombres de lo
+     * filtrado—. `aviso` es la frase de la 27.4 de los filtros de la dirección que no se pueden
+     * usar: va delante del recuento, con un espacio, en la región y en la sombra.
+     *
+     * Historia 27.6 — a cero, la frase la compone `sugerenciaSinResultados` (nombra lo filtrado) y
+     * se escribe, con el aviso delante, en la `.sugerencia` de la salida por `textContent`: es el
+     * único sitio donde se ve. La región la anuncia una vez con el primer ritmo y queda **siempre**
+     * apartada de la vista, con aviso o sin él, y la sombra vacía: la frase no se pinta dos veces.
      */
-    function pintar(resultados: DatoDeResultado[], recuento: string, origen: Origen, aviso = '') {
+    function pintar(resultados: DatoDeResultado[], datos: DatosDelRecuento, origen: Origen, aviso = '') {
       lista!.replaceChildren();
       quitarMas();
       const vez = ++pintadas;
       const conAviso = (texto: string) => (aviso ? aviso + ' ' + texto : texto);
 
       const vacio = resultados.length === 0;
-      estado!.classList.toggle('solo-para-lectores', vacio && !aviso);
+      estado!.classList.toggle('solo-para-lectores', vacio);
       if (vacio) {
         aCero = true;
-        const sugerencia = conAviso(salida!.querySelector('.sugerencia')?.textContent?.trim() || 'Ningún resultado.');
-        sombra!.textContent = aviso ? sugerencia : '';
+        const sugerencia = conAviso(sugerenciaSinResultados(datos));
+        const enLaSalida = salida!.querySelector('.sugerencia');
+        if (enLaSalida) enLaSalida.textContent = sugerencia;
+        sombra!.textContent = '';
         ritmo.vaciar();
         anunciar(
           {
@@ -779,7 +792,7 @@ const { autores, temas } = Astro.props;
       // Al salir de cero, la región dice todavía la sugerencia: se vacía antes de la pausa.
       if (aCero) ritmo.vaciar();
       aCero = false;
-      const frase = conAviso(recuento);
+      const frase = conAviso(fraseDelRecuento(datos));
       sombra!.textContent = frase;
       if (origen === 'tecleo') ritmo.anunciar(frase, Math.max(0, tecla + PAUSA_DE_TECLEO_MS - performance.now()));
       else ritmo.ahora(frase);
@@ -902,7 +915,7 @@ const { autores, temas } = Astro.props;
         controlDelVisto = control;
         todos = respuesta.results;
         repetir = pedir;
-        pintar(resultados, fraseDelRecuento({ total, texto, ...nombres }), origen, aviso);
+        pintar(resultados, { total, texto, ...nombres }, origen, aviso);
       })());
     }
 

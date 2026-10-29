@@ -13,14 +13,22 @@ import { recuentoDeCitas, temaEnFrase } from '../../src/lib/recuentos.ts';
 import {
   FALLO_DE_LA_TANDA,
   RUTA_DEL_MAPA_DE_OBRAS,
+  SUGERENCIA_SIN_FILTROS,
   avisoDeLaDireccion,
   fraseDelRecuento,
   rotuloDeMostrarMas,
+  sugerenciaSinResultados,
 } from '../../src/lib/busqueda.ts';
 import { ETIQUETA_DEL_FILTRO } from '../../src/lib/filtroDelDirectorio.ts';
-import { rutaDeLaBusqueda, rutaDelDirectorioDeAutores } from '../../src/lib/superficies.ts';
+import { rutaDeAutor, rutaDeLaBusqueda, rutaDelDirectorioDeAutores } from '../../src/lib/superficies.ts';
 import { citaConLosDosBloques, temaBajoUmbral, textoDe } from './ayuda/corpus.ts';
-import { citasPorObra, filtrosDeLaBusqueda, obrasDelAutor, type ConjuntoPublicable } from '../../src/lib/publicado.ts';
+import {
+  autoresDestacados,
+  citasPorObra,
+  filtrosDeLaBusqueda,
+  obrasDelAutor,
+  type ConjuntoPublicable,
+} from '../../src/lib/publicado.ts';
 import { clavesDeOrden, ordenDeLaListaDeObras, porSlug as porSlugDeCita, rutaDeLaObra } from '../../src/lib/obras.ts';
 import { CITAS_POR_PAGINA, PAUSA_DE_TECLEO_MS, TANDA_DE_RESULTADOS } from '../../src/lib/umbrales.ts';
 import { conjuntoDeLosDatos, leerDatosDelCorpus } from '../../tools/lib/alcance.ts';
@@ -2320,6 +2328,110 @@ test.describe('Historia 27.5 — los resultados llegan de 30 en 30', () => {
     await expect(page.locator(BLOQUE)).toHaveCount(0);
     await expect(page.locator('[data-consulta]')).toBeFocused();
     await page.unroute(FRAGMENTOS);
+  });
+});
+
+/*
+ * Historia 27.6 (FR-8, UX-DR62, UX-DR93, UX-DR99, UX-DR112) — sin resultados, los ocho Autores con
+ * más Citas, y la frase que nombra lo filtrado. Sobre el sitio construido con el Corpus de la rama.
+ */
+test.describe('Historia 27.6 — sin resultados, los ocho Autores con más Citas', () => {
+  const RAIZ_DEL_CORPUS = join(new URL('../..', import.meta.url).pathname, 'corpus');
+  let leido: Promise<ConjuntoPublicable> | undefined;
+  const conjunto = () =>
+    (leido ??= (async () => conjuntoDeLosDatos(await leerDatosDelCorpus(rutasDelCorpus(RAIZ_DEL_CORPUS))))());
+
+  const AUTOR = '#filtro-de-autor';
+  const TEMA = '#filtro-de-tema';
+  const QUITAR = '[data-quitar]';
+
+  test('los chips de Autor de la salida son `autoresDestacados` del Corpus, en su orden, a su Página de Autor y en la misma pestaña', async ({ page }) => {
+    const { autores, citas } = await conjunto();
+    const esperado = autoresDestacados(autores, citas);
+    expect(esperado.length).toBeGreaterThan(0);
+    await page.goto('/buscar/');
+    const chips = await page
+      .locator('[data-salida] a[href^="/autor/"]')
+      .evaluateAll((ns) => ns.map((n) => ({ href: n.getAttribute('href'), texto: n.textContent?.trim(), target: n.getAttribute('target') })));
+    expect(chips).toEqual(esperado.map((a) => ({ href: rutaDeAutor(a.slug), texto: a.nombre, target: null })));
+    // Fuera de la Zona de resultados, exentos por escrito.
+    expect(await page.locator('[data-zona="resultado"] [data-salida]').count()).toBe(0);
+    await expect(page.locator('[data-salida]')).toHaveAttribute('data-sin-zona', 'salidas-sin-resultados');
+  });
+
+  test('Autor y Tema sin cruce: «No hay citas de {Autor} sobre {tema}.» se ve una vez, la región la dice apartada, y Tab lleva de «Quitar los filtros» a la salida', async ({ page, browserName }) => {
+    test.setTimeout(60_000);
+    const filtros = filtrosDeLaBusqueda(await conjunto());
+    const cruzan = new Set<string>();
+    for (const deCita of filtros.porCita.values()) for (const tema of deCita.temas) cruzan.add(`${deCita.autor}|${tema}`);
+    const porValor = (a: { valor: string }, b: { valor: string }) => (a.valor < b.valor ? -1 : a.valor > b.valor ? 1 : 0);
+    let par: { autor: { valor: string; rotulo: string }; tema: { valor: string; rotulo: string } } | undefined;
+    for (const autor of [...filtros.autores].sort(porValor)) {
+      const tema = [...filtros.temas].sort(porValor).find((t) => !cruzan.has(`${autor.valor}|${t.valor}`));
+      if (tema) {
+        par = { autor, tema };
+        break;
+      }
+    }
+    test.skip(par === undefined, 'Todo Autor del Corpus tiene Citas en todo Tema publicado: no hay par sin cruce.');
+    const frase = sugerenciaSinResultados({ texto: '', autor: par!.autor.rotulo, tema: par!.tema.rotulo });
+    expect(frase).toBe(`No hay citas de ${par!.autor.rotulo} sobre ${temaEnFrase(par!.tema.rotulo)}.`);
+
+    await page.goto('/buscar/');
+    await page.locator(AUTOR).selectOption(par!.autor.valor);
+    await page.locator(TEMA).selectOption(par!.tema.valor);
+    await expect(page.locator('[data-salida]')).toBeVisible({ timeout: 10_000 });
+    await expect(page.locator('.sugerencia')).toHaveText(frase);
+    const region = page.locator('[data-estado]');
+    await expect(region).toHaveText(frase);
+    expect(await region.evaluate((n) => n.getBoundingClientRect().width)).toBeLessThanOrEqual(1);
+    // Se ve una vez: la sombra queda vacía, y de lo que la dice solo la `.sugerencia` ocupa sitio.
+    await expect(page.locator('.sombra')).toHaveText('');
+    const laDicen = await page.locator('main').evaluate(
+      (m, f) =>
+        [...m.querySelectorAll('*')]
+          .filter((n) => n.children.length === 0 && n.textContent?.trim() === f && n.getBoundingClientRect().width > 1)
+          .map((n) => n.className),
+      frase,
+    );
+    expect(laDicen).toEqual([expect.stringContaining('sugerencia')]);
+    // «Quitar los filtros» se ve, encima de la frase, y es lo último enfocable antes de la salida.
+    await expect(page.locator(QUITAR)).toBeVisible();
+    const encima = await page.evaluate(
+      () =>
+        document.querySelector('[data-quitar]')!.getBoundingClientRect().bottom <=
+        document.querySelector('.sugerencia')!.getBoundingClientRect().top,
+    );
+    expect(encima).toBe(true);
+    test.skip(browserName !== 'chromium', 'El orden de tabulación se mira en Chromium.');
+    await page.locator(QUITAR).focus();
+    await page.keyboard.press('Tab');
+    await expect(page.locator('[data-salida] a >> nth=0')).toBeFocused();
+  });
+
+  test('lo tecleado con marcado entra literal en la frase, y en la salida no hay ningún elemento suyo', async ({ page }) => {
+    const { autores } = filtrosDeLaBusqueda(await conjunto());
+    const autor = [...autores].sort((a, b) => b.recuento - a.recuento || (a.valor < b.valor ? -1 : 1))[0];
+    // Un Pagefind que no encuentra nada y da `filters()`: lo que se ejecuta es el guion de la página.
+    await page.route('**/pagefind/pagefind.js', (ruta) =>
+      ruta.fulfill({
+        contentType: 'text/javascript',
+        body: [
+          'export async function options() {}',
+          'export async function init() {}',
+          'export async function search() { return { results: [] }; }',
+          'export async function filters() { return { autor: {}, obra: {}, tema: {} }; }',
+        ].join('\n'),
+      }),
+    );
+    await page.goto(`/buscar/?q=${encodeURIComponent('<b>zzz</b>')}&autor=${autor.valor}`);
+    await expect(page.locator('[data-salida]')).toBeVisible({ timeout: 10_000 });
+    const frase = `No encontramos «<b>zzz</b>» entre las citas de ${autor.rotulo}.`;
+    expect(sugerenciaSinResultados({ texto: '<b>zzz</b>', autor: autor.rotulo })).toBe(frase);
+    await expect(page.locator('.sugerencia')).toHaveText(frase);
+    await expect(page.locator('[data-estado]')).toHaveText(frase);
+    expect(await page.locator('[data-salida] b').count()).toBe(0);
+    expect(frase).not.toBe(SUGERENCIA_SIN_FILTROS);
   });
 });
 

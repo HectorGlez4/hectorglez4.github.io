@@ -4579,11 +4579,14 @@ describe('Historia 23.8 — una búsqueda cuenta una vez, cuando se asienta', ()
         await elegirYEsperar(entorno, 'tema', 'la-prudencia');
         expect(entorno.salidaVisible()).toBe(true);
         expect(entorno.pintados()).toEqual([]);
+        // Historia 27.6 — sin texto, la frase nombra lo filtrado y se ve una vez, en la salida.
+        const NO_HAY = 'No hay citas de Séneca sobre la prudencia.';
+        expect(entorno.sugerencia()).toBe(NO_HAY);
         // Primer ritmo: vacía, y escribe en el fotograma siguiente.
         expect(entorno.region()).toEqual({ texto: '', apartada: true });
         expect(entorno.sombra()).toBe('');
         entorno.avanzar(16);
-        expect(entorno.region()).toEqual({ texto: SUGERENCIA, apartada: true });
+        expect(entorno.region()).toEqual({ texto: NO_HAY, apartada: true });
         await elegirYEsperar(entorno, 'autor', 'jose-marti');
         expect(entorno.salidaVisible()).toBe(false);
         expect(entorno.region()).toEqual({ texto: '8 citas de José Martí sobre la prudencia.', apartada: false });
@@ -4617,11 +4620,34 @@ describe('Historia 23.8 — una búsqueda cuenta una vez, cuando se asienta', ()
         await elegirYEsperar(entorno, 'autor', 'jose-marti');
         await entorno.teclear('zzz nada');
         expect(entorno.salidaVisible()).toBe(true);
+        // Historia 27.6 — con texto, la frase dice qué no se encontró y entre qué citas.
+        const FRASE = 'No encontramos «zzz nada» entre las citas de José Martí.';
+        expect(entorno.sugerencia()).toBe(FRASE);
+        expect(entorno.sombra()).toBe('');
+        entorno.avanzar(16);
+        expect(entorno.region()).toEqual({ texto: FRASE, apartada: true });
         await entorno.enviar();
         expect(entorno.emitidos()).toEqual([
           [BUSQUEDA, '0', 'autor'],
           [SIN_RESULTADOS, 'zzz nada'],
         ]);
+      }, 240_000);
+
+      it('Historia 27.6 — sin filtros, la frase de siempre; y lo tecleado entra en la frase tal cual, sin marcado', async () => {
+        const entorno = await isla();
+        await entorno.teclear('zzz');
+        expect(entorno.sugerencia()).toBe(SUGERENCIA);
+        entorno.avanzar(16);
+        expect(entorno.region()).toEqual({ texto: SUGERENCIA, apartada: true });
+        await entorno.enviar();
+        expect(entorno.emitidos()).toEqual([
+          [BUSQUEDA, '0', NINGUNO],
+          [SIN_RESULTADOS, 'zzz'],
+        ]);
+        const conMarcado = await isla();
+        await elegirYEsperar(conMarcado, 'autor', 'jose-marti');
+        await conMarcado.teclear('  zzz <b>uno</b>  ');
+        expect(conMarcado.sugerencia()).toBe('No encontramos «zzz <b>uno</b>» entre las citas de José Martí.');
       }, 240_000);
 
       it('al salir de cero tecleando, la región no dice la sugerencia durante la pausa', async () => {
@@ -4836,6 +4862,19 @@ describe('Historia 23.8 — una búsqueda cuenta una vez, cuando se asienta', ()
         const aCero = await conObras({ recuentosDeObra: { 'seneca--cartas': 0 } });
         await elegirYEsperar(aCero, 'autor', 'seneca');
         expect(aCero.obra()).toMatchObject(FUERA);
+      }, 240_000);
+
+      it('Historia 27.6 — con Obra y texto a cero: la frase nombra la Obra por su título, y se ve una vez', async () => {
+        const entorno = await conObras();
+        await elegirYEsperar(entorno, 'autor', 'jose-marti');
+        await elegirYEsperar(entorno, 'obra', 'jose-marti--maestros-ambulantes');
+        await entorno.teclear('zzz escuela');
+        const FRASE = 'No encontramos «zzz escuela» entre las citas de José Martí en Maestros ambulantes.';
+        expect(entorno.salidaVisible()).toBe(true);
+        expect(entorno.sugerencia()).toBe(FRASE);
+        expect(entorno.sombra()).toBe('');
+        entorno.avanzar(16);
+        expect(entorno.region()).toEqual({ texto: FRASE, apartada: true });
       }, 240_000);
 
       it('homónimas: cada Autor ofrece solo su «Cartas»', async () => {
@@ -5368,10 +5407,14 @@ describe('Historia 23.8 — una búsqueda cuenta una vez, cuando se asienta', ()
         const tres = await isla({ ...CON_OBRAS, busqueda: '?q=vida&autor=x&obra=nada--nada&tema=y' });
         expect(tres.region().texto).toBe(`${TRES} 3 resultados.`);
         expect(escritas(tres)).toEqual([['replaceState', '/buscar/?q=vida']]);
-        // Un aviso a cero va delante de la sugerencia, y la región no se aparta: el aviso no lo dice nadie más.
+        // Historia 27.6 — un aviso a cero va delante de la sugerencia, en la salida, que es donde se
+        // ve; la región dice lo mismo apartada de la vista, y la sombra queda vacía: se ve una vez.
         const aCero = await isla({ ...CON_OBRAS, busqueda: '?q=zzz&tema=y' });
+        const CON_AVISO = `${UNO} No encontramos esa frase. Prueba con menos palabras.`;
+        expect(aCero.sugerencia()).toBe(CON_AVISO);
+        expect(aCero.sombra()).toBe('');
         aCero.avanzar(16);
-        expect(aCero.region()).toEqual({ texto: `${UNO} No encontramos esa frase. Prueba con menos palabras.`, apartada: false });
+        expect(aCero.region()).toEqual({ texto: CON_AVISO, apartada: true });
         expect(aCero.salidaVisible()).toBe(true);
       }, 240_000);
 

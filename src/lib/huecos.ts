@@ -45,6 +45,21 @@ export interface AutorParaHuecos {
   tradicion?: 'latinoamericana' | 'peninsular' | 'otra';
 }
 
+/**
+ * Si un Autor **cuenta para el suelo** panhispánico — FR-8, FR-49, AD-11, Historia 27.6.
+ *
+ * Es el predicado del denominador del suelo (`EquilibrioDeTradicion.hispanicos`): todo Autor
+ * salvo los de tradición `otra`, **también el que no la declara** —un dato que falta no puede
+ * volver el reparto más favorable de lo medido; el porqué está escrito en `hispanicos`—. Tiene
+ * un solo dueño, este módulo, y dos consumidores que no pueden discrepar: `verHuecos`, que cuenta
+ * el reparto del Corpus, y `autoresDestacados` de `src/lib/publicado.ts`, que aplica el mismo
+ * suelo a los ocho Autores destacados de `/buscar/` y de la portada. Ningún otro módulo escribe
+ * su propia comparación con `otra`.
+ */
+export function cuentaParaElSuelo(autor: Pick<AutorParaHuecos, 'tradicion'>): boolean {
+  return autor.tradicion !== 'otra';
+}
+
 export interface CitaParaHuecos {
   slug: string;
   autor: string;
@@ -501,9 +516,10 @@ export function verHuecos(
    *
    * Los que no declaran tradición **siguen dentro**, que es la opción conservadora: un dato
    * que falta no puede volver el indicador más favorable de lo que se ha medido. Ver el
-   * comentario de `EquilibrioDeTradicion.hispanicos`.
+   * comentario de `EquilibrioDeTradicion.hispanicos`. Historia 27.6 — el predicado tiene nombre,
+   * `cuentaParaElSuelo`, porque los destacados de `publicado.ts` aplican el mismo suelo.
    */
-  const hispanicos = latinoamericana + peninsular + sinDeclarar;
+  const hispanicos = autores.filter(cuentaParaElSuelo).length;
   /*
    * A una décima, y **el empate cae hacia abajo**: un suelo no se alcanza por redondeo. 18 de
    * 32 es el 56,25 % exacto, y `Math.round` lo escribiría 56,3 — media décima de compromiso

@@ -434,7 +434,8 @@ export function islaDeBusquedaEnUnSandbox(guion: string, opciones: OpcionesDeLaI
   const salida = new Elemento('div');
   salida.hidden = true;
   const sugerencia = new Elemento('p');
-  sugerencia.textContent = '\n        No encontramos esa frase. Prueba con menos palabras.\n      ';
+  // Historia 27.6 — como la pinta el build: `SUGERENCIA_SIN_FILTROS`, sin espacios alrededor.
+  sugerencia.textContent = 'No encontramos esa frase. Prueba con menos palabras.';
   salida.dentro.set('.sugerencia', sugerencia);
   const formulario = new Elemento('form');
   // Historia 27.4 — el `action` del formulario es la ruta de la dirección (`rutaDeLaBusqueda()`).
@@ -881,6 +882,8 @@ export function islaDeBusquedaEnUnSandbox(guion: string, opciones: OpcionesDeLaI
     sombra: () => sombra.textContent,
     /** Si la salida sin resultados está a la vista. */
     salidaVisible: () => !salida.hidden,
+    /** Historia 27.6 — la frase que la salida sin resultados enseña, en su `.sugerencia`. */
+    sugerencia: () => sugerencia.textContent,
     /** Si «Quitar los filtros» está a la vista. */
     quitarVisible: () => !quitar.hidden,
     /**
