@@ -921,11 +921,12 @@ export function islaDeBusquedaEnUnSandbox(guion: string, opciones: OpcionesDeLaI
     /**
      * Historia 27.5 — suelta los `data()` de la tanda que esperan (con `tandaManual`), deja correr
      * las promesas y devuelve cuántos soltó: un lote de una tanda son `TANDA_DE_RESULTADOS` o menos.
+     * Con `cuantos`, solo los `cuantos` primeros en esperar: el lote de la tanda más vieja.
      */
-    responderALaTanda: async () => {
+    responderALaTanda: async (cuantos?: number) => {
       await vaciar();
       if (tandaEsperando.length === 0) throw new Error('no hay ninguna tanda esperando');
-      const soltados = tandaEsperando.splice(0);
+      const soltados = tandaEsperando.splice(0, cuantos ?? tandaEsperando.length);
       soltados.forEach((r) => r());
       await vaciar();
       return soltados.length;

@@ -608,9 +608,14 @@ export const MAX_BYTES_GUION_DEL_FILTRO = 3915;
  * repite la búsqueda —con las opciones de Pagefind aplicadas en un solo sitio para las dos
  * búsquedas—, y el rótulo y la frase de `src/lib/busqueda.ts` con `TANDA_DE_RESULTADOS`:
  * **16.740 bytes** (2026-10-29) —16.188 del fichero de entrada y 552 del trozo, que no cambia (el
- * del filtro tampoco)—. **Tope vigente**, con la misma regla: 16.740 más unos 400.
+ * del filtro tampoco)— (el tope de entonces, 17.140, ya no rige). Tras las dos revisiones de la
+ * 27.5 —el reintento que sigue del `results` nuevo sin rehacer la búsqueda, el foco al último
+ * resultado si ya no trae nada, la destrucción que no cae bajo otra búsqueda en vuelo, la búsqueda
+ * que espera la destrucción en curso y el fallo diferido que un reintento logrado ya no escribe—
+ * mide **16.893 bytes** (2026-10-29): 16.341 del fichero de entrada y 552 del trozo, que no cambia.
+ * **Tope vigente**, con la misma regla: 16.893 más unos 400.
  */
-export const MAX_BYTES_GUION_DE_LA_BUSQUEDA = 17140;
+export const MAX_BYTES_GUION_DE_LA_BUSQUEDA = 17293;
 
 /**
  * La pausa de tecleo, en milisegundos — AD-9, UX-DR58, UX-DR86, Historia 26.6.

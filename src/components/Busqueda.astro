@@ -180,15 +180,15 @@
  *         (`FALLO_DE_LA_TANDA`) va a la región del botón con el primer ritmo, solo si el bloque
  *         sigue siendo el de esa búsqueda y la tanda sigue siendo la vigente (una que un gesto u
  *         otra tanda dejaron atrás calla). Si la búsqueda sigue siendo la que se ve y no hay otra
- *         tanda en vuelo, se destruye el índice, como en el fallo de abajo: Pagefind guarda en su
+ *         tanda ni otra búsqueda en vuelo, se destruye el índice, como en el fallo de abajo: Pagefind guarda en su
  *         instancia la promesa rechazada de cada fragmento, así que la pulsación siguiente espera
  *         la destrucción, aplica las opciones, repite el `search` con los mismos argumentos de la
  *         búsqueda que se ve y toma la tanda de ese `results` nuevo, que pasa a ser el de las
  *         siguientes. Lo mismo tras una búsqueda nueva que falla con la lista de antes y su
- *         bloque a la vista: su índice ya está destruido. Si el `results` del reintento no es el
- *         que se ve (otro largo u otros `id`: el índice cambió con un despliegue), no se sigue de
- *         él —saltaría o repetiría bajo un recuento viejo—: la búsqueda se rehace entera, con su
- *         recuento, y el foco va a su primer resultado;
+ *         bloque a la vista: su índice ya está destruido. Ni la búsqueda que se ve ni su recuento
+ *         se rehacen: si el índice cambió con un despliegue, las tandas siguen del `results` nuevo
+ *         bajo el recuento que se anunció (y, si ya no trae nada más, el bloque sale y el foco va
+ *         al último resultado). Una búsqueda nueva espera la destrucción en curso antes de buscar;
  *       - pintar otra búsqueda, o vaciar la lista, quita el bloque, vacía su región y olvida la
  *         tanda en vuelo y su avería.
  *   · La búsqueda que no corre —el índice no carga, o `init`, `search` o los datos de un
@@ -598,6 +598,10 @@ const { autores, temas } = Astro.props;
      */
     let tanda = 0;
     let tandas = 0;
+    /** La tanda cuyo fallo se está diciendo (0, ninguna): una que llega después lo deja sin escribir. */
+    let fallida = 0;
+    /** El `turno` de la búsqueda que se ve: si otro posterior está en vuelo, el índice no se destruye bajo él. */
+    let turnoVisto = 0;
     /**
      * Historia 27.4 — la búsqueda (como estado, no como cadena) y el fragmento de la dirección de la
      * entrada actual: un salto de ancla cambia el fragmento y no la búsqueda.
@@ -728,12 +732,6 @@ const { autores, temas } = Astro.props;
       fallo!.textContent = '';
       mas!.remove();
     }
-
-    /**
-     * Historia 27.5 — si `nuevos` es el mismo `results` que se ve: mismos resultados en el mismo
-     * orden (`id`, el del fragmento). El de un reintento puede no serlo si el índice cambió.
-     */
-    const mismosResultados = (nuevos: Resultados) => nuevos === todos || (nuevos.length === todos.length && nuevos.every((r, i) => r.id === todos[i]!.id));
 
     /**
      * Historia 27.5 — pone el bloque detrás de la lista con el rótulo de lo que queda del mismo
@@ -882,6 +880,8 @@ const { autores, temas } = Astro.props;
         let respuesta: Awaited<ReturnType<Pagefind['search']>>;
         let resultados: DatoDeResultado[];
         try {
+          // Historia 27.5 — si una tanda fallida destruye el índice, se espera: no se busca a medio destruir.
+          if (averiada) await averiada;
           pf = await cargar();
           respuesta = await pedir(await conOpciones(pf));
           resultados = await Promise.all(respuesta.results.slice(0, TANDA_DE_RESULTADOS).map((r) => r.data()));
@@ -894,6 +894,7 @@ const { autores, temas } = Astro.props;
           return;
         }
         if (mio !== turno) return;
+        turnoVisto = mio;
         const total = respuesta.results.length;
         const valores = valoresDeFiltros(filtros);
         visto = { texto, filtros: combinacionDeFiltros(filtros), total, ...(valores ? { valores } : {}) };
@@ -1077,27 +1078,26 @@ const { autores, temas } = Astro.props;
       const mio = turno;
       const desde = enLaLista;
       let nuevos = todos;
-      let datos: DatoDeResultado[] = [];
+      let datos: DatoDeResultado[];
       try {
         if (averiada) {
           await averiada;
           nuevos = (await repetir!(await conOpciones(await cargar()))).results;
         }
-        // Si el `results` del reintento no es el que se ve —el índice cambió con un despliegue—,
-        // seguir de él saltaría o repetiría resultados bajo un recuento viejo: se rehace la búsqueda.
-        if (mismosResultados(nuevos)) datos = await Promise.all(nuevos.slice(desde, desde + TANDA_DE_RESULTADOS).map((r) => r.data()));
+        datos = await Promise.all(nuevos.slice(desde, desde + TANDA_DE_RESULTADOS).map((r) => r.data()));
       } catch {
         // Solo la tanda vigente lo dice; una que un gesto o otra tanda dejaron atrás calla. Y el
-        // índice no se destruye bajo otra tanda en vuelo: si falla, lo hará ella.
+        // índice no se destruye bajo otra tanda ni bajo otra búsqueda en vuelo: si fallan, lo harán ellas.
         const vigente = tanda === mia;
         if (vigente) tanda = 0;
         if (vez !== pintadas) return;
-        if (mio === turno && !tanda) averiada = cargar().then((pf) => pf?.destroy?.()).catch(() => {});
+        if (mio === turno && turno === turnoVisto && !tanda) averiada = cargar().then((pf) => pf?.destroy?.()).catch(() => {});
         if (!vigente) return;
+        fallida = mia;
         anunciar(
           {
             set textContent(texto: string | null) {
-              if (vez === pintadas) fallo.textContent = texto;
+              if (vez === pintadas && fallida === mia) fallo.textContent = texto;
             },
           },
           FALLO_DE_LA_TANDA,
@@ -1105,18 +1105,13 @@ const { autores, temas } = Astro.props;
         return;
       }
       if (tanda !== mia || vez !== pintadas) return;
-      tanda = 0;
+      tanda = fallida = 0;
       averiada = null;
-      if (!mismosResultados(nuevos)) {
-        ultima = null;
-        await buscar('gesto', controlDelVisto);
-        // El botón, con el foco, salió con la lista vieja: el foco va al primer resultado nuevo.
-        if (pintadas === vez + 1) (lista!.children[0]?.children[0] as HTMLElement | undefined)?.focus();
-        return;
-      }
+      // El `results` del reintento pasa a ser el de las tandas siguientes.
       todos = nuevos;
       fallo.textContent = '';
-      datos.map(filaDeResultado)[0]?.focus();
+      // Sin filas nuevas —el `results` del reintento es más corto—, el bloque sale con el foco: va al último resultado.
+      (datos.map(filaDeResultado)[0] ?? (lista!.children[enLaLista - 1]?.children[0] as HTMLElement | undefined))?.focus();
       enLaLista += datos.length;
       ponerMas();
     });

@@ -6052,7 +6052,7 @@ describe('Historia 23.8 — una búsqueda cuenta una vez, cuando se asienta', ()
         expect(entorno.mas().fallo).toBe('');
       }, 240_000);
 
-      it('un reintento cuyo `results` no es el que se ve (el índice cambió): no sigue de él, rehace la búsqueda con su recuento y el foco va a su primer resultado', async () => {
+      it('un reintento cuyo `results` cambió (el índice cambió): las tandas siguen del `results` nuevo, sin rehacer la búsqueda ni tocar el recuento', async () => {
         let pedidas = 0;
         const entorno = await isla({ falla: 'tanda', respuestas: () => conTotal(pedidas++ === 0 ? 42 : 45)() });
         await entorno.teclear('vida');
@@ -6062,18 +6062,80 @@ describe('Historia 23.8 — una búsqueda cuenta una vez, cuando se asienta', ()
         entorno.avanzar(16);
         expect(entorno.mas().fallo).toBe(FALLO_DE_LA_TANDA);
         entorno.fallar();
-        const escrituras = entorno.escrituras();
+        const antes = { escrituras: entorno.escrituras(), region: entorno.region() };
+        await pulsarYEsperar(entorno);
+        entorno.avanzar(16);
+        expect(titulos(entorno)).toEqual(deCitas(0, 45));
+        expect(entorno.region()).toEqual(antes.region);
+        expect(entorno.escrituras()).toEqual(antes.escrituras);
+        expect(entorno.foco()).toBe('resultado:30');
+        expect(entorno.mas().enElDom).toBe(false);
+      }, 240_000);
+
+      it('un reintento cuyo `results` ya no trae nada más: el bloque sale y el foco va al último resultado, no al documento', async () => {
+        let pedidas = 0;
+        const entorno = await isla({ falla: 'tanda', respuestas: () => conTotal(pedidas++ === 0 ? 42 : 25)() });
+        await entorno.teclear('vida');
+        entorno.avanzar(PAUSA_DE_TECLEO_MS);
+        await pulsarYEsperar(entorno);
+        entorno.avanzar(16);
+        entorno.fallar();
+        const antes = entorno.escrituras();
         await pulsarYEsperar(entorno);
         entorno.avanzar(16);
         expect(titulos(entorno)).toEqual(deCitas(0, 30));
-        expect(entorno.region().texto).toMatch(/^45 /u);
-        expect(entorno.escrituras().estado).toBeGreaterThan(escrituras.estado);
-        expect(entorno.mas()).toEqual({ enElDom: true, detrasDeLaLista: true, rotulo: 'Mostrar las 15 que faltan', fallo: '' });
-        expect(entorno.foco()).toBe('resultado:0');
-        // Y la tanda siguiente sale del `results` rehecho.
-        await pulsarYEsperar(entorno);
-        expect(titulos(entorno)).toEqual(deCitas(0, 45));
+        expect(entorno.escrituras()).toEqual(antes);
         expect(entorno.mas().enElDom).toBe(false);
+        expect(entorno.foco()).toBe('resultado:29');
+      }, 240_000);
+
+      it('una tanda dejada atrás que falla con otra en vuelo no destruye el índice bajo ella; la vigente, al fallar, sí', async () => {
+        const entorno = await isla({ tandaManual: true, falla: 'tanda' });
+        await elegirYEsperar(entorno, 'autor', 'jose-marti');
+        entorno.pulsarMas();
+        await entorno.vaciar();
+        // Un gesto que no cambia la búsqueda deja atrás la primera; la segunda pulsación, en vuelo a la vez.
+        await elegirYEsperar(entorno, 'autor', 'jose-marti');
+        entorno.pulsarMas();
+        await entorno.vaciar();
+        expect(await entorno.responderALaTanda(TANDA_DE_RESULTADOS)).toBe(TANDA_DE_RESULTADOS);
+        entorno.avanzar(16);
+        expect(entorno.destrucciones()).toBe(0);
+        expect(entorno.mas().fallo).toBe('');
+        expect(await entorno.responderALaTanda()).toBe(TANDA_DE_RESULTADOS);
+        entorno.avanzar(16);
+        expect(entorno.destrucciones()).toBe(1);
+        expect(entorno.mas().fallo).toBe(FALLO_DE_LA_TANDA);
+      }, 240_000);
+
+      it('una tanda que falla con otra búsqueda ya lanzada no destruye el índice bajo esa búsqueda, que pinta', async () => {
+        const entorno = await isla({ tandaManual: true, falla: 'tanda', manual: true });
+        entorno.elegir('autor', 'jose-marti');
+        entorno.avanzar(PAUSA_DE_LOS_SELECTORES_MS);
+        await entorno.responder(null);
+        // Una búsqueda nueva lanzada, aún sin pintar; la tanda se pide con ella en vuelo, y falla.
+        await entorno.teclear('vida');
+        entorno.pulsarMas();
+        await entorno.vaciar();
+        await entorno.responderALaTanda();
+        entorno.avanzar(16);
+        expect(entorno.destrucciones()).toBe(0);
+        await entorno.responder('vida');
+        entorno.avanzar(PAUSA_DE_TECLEO_MS);
+        expect(entorno.region().texto).toMatch(/vida/u);
+        expect(entorno.mas().fallo).toBe('');
+      }, 240_000);
+
+      it('el fallo de una tanda que se anuncia no se escribe si un reintento ya trajo la tanda antes del fotograma', async () => {
+        const entorno = await isla({ falla: 'tanda' });
+        await elegirYEsperar(entorno, 'autor', 'jose-marti');
+        entorno.avanzar(PAUSA_DE_TECLEO_MS);
+        await pulsarYEsperar(entorno);
+        entorno.fallar();
+        await pulsarYEsperar(entorno);
+        entorno.avanzar(16);
+        expect(titulos(entorno)).toEqual(deCitas(0, 60));
+        expect(entorno.mas().fallo).toBe('');
       }, 240_000);
 
       it('con texto, por relevancia: las tandas siguen el orden del mismo `results`, sin repetir ni saltar', async () => {
