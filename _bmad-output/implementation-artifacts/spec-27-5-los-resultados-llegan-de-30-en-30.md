@@ -5,7 +5,7 @@ created: '2026-10-29'
 status: 'done'
 baseline_revision: '41962e767018af4b0ed7e3d0ed5746f7fe18030d'
 review_loop_iteration: 0
-followup_review_recommended: false
+followup_review_recommended: true
 context:
   - '{project-root}/_bmad-output/implementation-artifacts/epic-27-context.md'
   - '{project-root}/_bmad-output/planning-artifacts/architecture/architecture-brainlySabiduria-2026-08-10/ARCHITECTURE-SPINE.md'
@@ -117,6 +117,30 @@ deferred: []
 
 (Las capas de revisión son externas en el bucle v8-ralph y en esta pasada no traían hallazgos; la revisión independiente viene después.)
 
+### 2026-10-29 — Review pass
+- intent_gap: 0
+- bad_spec: 0
+- patch: 17: (high 0, medium 1, low 16)
+- defer: 0
+- reject: 22: (high 0, medium 0, low 22)
+- addressed_findings:
+  - `[medium]` `[patch]` El reintento tras un fallo seguía del `results` nuevo aunque no fuera el que se ve (índice cambiado por un despliegue: otro largo u otro orden), y saltaba o repetía filas bajo un recuento viejo (blind-hunter, edge-case-hunter). Ahora `mismosResultados` compara largo e `id`; si no casan, la búsqueda se rehace entera con su recuento y el foco va a su primer resultado. Prueba unitaria nueva (42 → 45).
+  - `[low]` `[patch]` Un reintento que no traía filas dejaba el foco en `<body>` al quitar el bloque (edge-case-hunter): lo cubre el mismo camino de rehacer la búsqueda.
+  - `[low]` `[patch]` El fallo de una tanda que un gesto u otra tanda dejaron atrás se anunciaba y podía destruir el índice bajo otra tanda en vuelo (edge-case-hunter): solo la tanda vigente lo dice, y la destrucción solo se arma si no hay otra en vuelo. Prueba unitaria nueva.
+  - `[low]` `[patch]` Una búsqueda nueva que fallaba con la lista de antes y su bloque a la vista destruía el índice sin armar el reintento, y la tanda siguiente fallaba una vez de más (edge-case-hunter, intent-alignment): el `catch` de `buscar` arma `averiada` si el bloque está puesto. Prueba unitaria nueva.
+  - `[low]` `[patch]` El camino de éxito de la tanda no tenía guarda propia de `pintadas` (verification-gap): `if (tanda !== mia || vez !== pintadas) return;`.
+  - `[low]` `[patch]` Sin prueba de que pintar otra búsqueda vacía una frase de fallo a la vista y olvida la avería (verification-gap): prueba unitaria nueva.
+  - `[low]` `[patch]` Sin prueba de que `sinDatos` quita el bloque (verification-gap): prueba unitaria nueva con atrás a una entrada con Obra y el mapa caído.
+  - `[low]` `[patch]` La prueba e2e de la tanda obsoleta no podía detectar una guarda rota ni miraba el foco (ac-auditor, blind-hunter, intent-alignment): la tanda se retiene hasta que la búsqueda nueva está pintada (el Tema se elige sin fragmentos en común con la tanda), se suelta después y se mira el foco; caso nuevo de texto. Comprobado contra un mutante sin guarda: las dos fallan (33 filas en vez de 3).
+  - `[low]` `[patch]` El aspecto de la frase del fallo no se probaba y su interlineado heredaba 1,65 (ac-auditor, intent-alignment): `line-height: 1.5` (caption) y comprobación e2e de familia, cuerpo, interlineado, color y margen de 2× unidad.
+  - `[low]` `[patch]` Sin prueba del reanuncio de un fallo repetido (ac-auditor): la prueba del reintento mira la región vacía antes del fotograma.
+  - `[low]` `[patch]` «El recuento sigue a la vista» no se afirmaba (ac-auditor): `toBeVisible` en la prueba del fallo.
+  - `[low]` `[patch]` Ninguna prueba e2e pulsaba con el teclado (blind-hunter): la segunda tanda se pide con Enter y el reintento con la barra espaciadora.
+  - `[low]` `[patch]` El comentario de la 27.4 quedó encima del de la 27.5 (blind-hunter): reordenado.
+  - `[low]` `[patch]` `tanda`/`tandas` sin explicar (blind-hunter): docblock.
+  - `[low]` `[patch]` El contrato nombra `filaDeResultado` y el código `fila` (blind-hunter): renombrada.
+  - `[low]` `[patch]` El Auto Run Result terminaba con un párrafo rancio de la pasada de planificación (blind-hunter): reescrito.
+
 ## Design Notes
 
 **Por qué el reintento rehace la búsqueda.** `data()` de un resultado llama a `loadFragment`, que guarda la promesa en `loaded_fragments[hash]` antes de esperarla: si el fragmento falló, esa instancia lo seguirá dando por fallido. `destroy()` (ya usado en el fallo de la 23.8) tira la instancia; el módulo crea otra en la llamada siguiente. Los `results` viejos apuntan a la instancia muerta, así que el reintento repite el `search` y sigue con su `results`. Mismo índice y mismos argumentos dan el mismo orden: la tanda no salta ni repite.
@@ -146,22 +170,22 @@ Status: done
 
 Implementada el 2026-10-29 en la rama `v8/epica-27` sobre `41962e767018af4b0ed7e3d0ed5746f7fe18030d`.
 
-**Qué cambió.** La isla de `/buscar/` deja de cortar en un `30` literal: pinta la primera tanda de `TANDA_DE_RESULTADOS` y, si quedan resultados del mismo `results`, pone detrás de la lista (fuera de ella y de su Zona `resultado`) el bloque de la plantilla `[data-mas]` con «Mostrar 30 más» / «Mostrar las {n} que faltan» / «Mostrar la que falta» (`rotuloDeMostrarMas`) y su región `role="status"` vacía. Pulsar pide los `data()` de la tanda siguiente con `Promise.all`, sin otro `search`; una pulsación con la tanda en vuelo no hace nada (sin `disabled`). La tanda solo se pinta si nada la dejó sin efecto (un gesto, una búsqueda lanzada o pintada ponen `tanda = 0`), con la misma función de fila que la primera (`fila`), el foco al enlace de la primera fila nueva y el rótulo al día o el bloque fuera. Ni recuento, ni sombra, ni dirección, ni historial, ni `__medir` cambian. Un fallo no pinta nada, deja el foco en el botón, escribe `FALLO_DE_LA_TANDA` con `anunciar` en la región del botón (solo si el bloque sigue siendo el de esa búsqueda) y, si la búsqueda sigue siendo la que se ve, destruye el índice; la pulsación siguiente espera esa destrucción, aplica las opciones y repite el `search` con los mismos argumentos (`repetir`), y su `results` pasa a ser el de las tandas siguientes. Las opciones de Pagefind se aplican en un solo sitio (`conOpciones`) para la búsqueda y el reintento: `tipo-de-resultado.test.ts` exige una sola llamada a `.options(`.
+**Qué cambió.** La isla de `/buscar/` deja de cortar en un `30` literal: pinta la primera tanda de `TANDA_DE_RESULTADOS` y, si quedan resultados del mismo `results`, pone detrás de la lista (fuera de ella y de su Zona `resultado`) el bloque de la plantilla `[data-mas]` con «Mostrar 30 más» / «Mostrar las {n} que faltan» / «Mostrar la que falta» (`rotuloDeMostrarMas`) y su región `role="status"` vacía. Pulsar pide los `data()` de la tanda siguiente con `Promise.all`, sin otro `search`; una pulsación con la tanda en vuelo no hace nada (sin `disabled`). La tanda solo se pinta si nada la dejó sin efecto (un gesto, una búsqueda lanzada o pintada ponen `tanda = 0`, y la vista tiene que ser la misma: `pintadas`), con la misma función de fila que la primera (`filaDeResultado`), el foco al enlace de la primera fila nueva y el rótulo al día o el bloque fuera. Ni recuento, ni sombra, ni dirección, ni historial, ni `__medir` cambian. Un fallo no pinta nada, deja el foco en el botón, escribe `FALLO_DE_LA_TANDA` con `anunciar` en la región del botón (solo si el bloque sigue siendo el de esa búsqueda y la tanda es la vigente) y, si la búsqueda sigue siendo la que se ve y no hay otra tanda en vuelo, destruye el índice; la pulsación siguiente espera esa destrucción, aplica las opciones y repite el `search` con los mismos argumentos (`repetir`), y su `results` pasa a ser el de las tandas siguientes — si es el mismo que se ve (`mismosResultados`: largo e `id`); si no, el índice cambió y la búsqueda se rehace entera, con su recuento y el foco en su primer resultado. Una búsqueda nueva que falla con la lista de antes y su bloque a la vista arma el mismo reintento. Las opciones de Pagefind se aplican en un solo sitio (`conOpciones`) para la búsqueda y el reintento: `tipo-de-resultado.test.ts` exige una sola llamada a `.options(`.
 
 **Ficheros.**
 - `src/lib/umbrales.ts` — `TANDA_DE_RESULTADOS = 30` con docblock junto a las pausas; `MAX_BYTES_GUION_DE_LA_BUSQUEDA` rederivado (16.051 ya no rige → 17.140).
 - `src/lib/busqueda.ts` — `rotuloDeMostrarMas(quedan)` y `FALLO_DE_LA_TANDA`, puros; importa `TANDA_DE_RESULTADOS` (`umbrales.ts` ya estaba en el grafo fijado).
-- `src/components/Busqueda.astro` — el bloque en la `<template>` (fuera del `form`), sus estilos con tokens (el botón con el tratamiento de `.quitar`), y en la isla: `fila`, `quitarMas`/`ponerMas`, `conOpciones`, la búsqueda repetible, la escucha del botón con guarda de vuelo, foco, fallo y reintento; docblock al día.
+- `src/components/Busqueda.astro` — el bloque en la `<template>` (fuera del `form`), sus estilos con tokens (el botón con el tratamiento de `.quitar`; la región en caption con interlineado 1,5), y en la isla: `filaDeResultado`, `quitarMas`/`ponerMas`, `mismosResultados`, `conOpciones`, la búsqueda repetible, la escucha del botón con guarda de vuelo, foco, fallo, reintento y búsqueda rehecha; docblock al día.
 - `src/pages/buscar.astro` — solo el docblock.
 - `tests/unit/ayuda/busqueda.ts` — columna de la página (`isConnected`, `after` tras la lista), el bloque en el clon, foco en el botón y en los enlaces, `foco()` con `mas` y `resultado:{i}`, `pulsarMas()`, `mas()`, `escrituras()`, `falla: 'tanda'`, `tandaManual` y `responderALaTanda()`.
-- `tests/unit/medicion.test.ts` — describe «Historia 27.5» con la matriz entera (12 pruebas); José Martí sin el recorte `pintados: 30`; la prueba de regiones y anunciantes cuenta la región de la tanda.
+- `tests/unit/medicion.test.ts` — describe «Historia 27.5» con la matriz entera y lo de la revisión (17 pruebas); José Martí sin el recorte `pintados: 30`; la prueba de regiones y anunciantes cuenta la región de la tanda.
 - `tests/unit/busqueda-con-filtros.test.ts` — rótulos (0, 1, 2, 12, 29, 30, 31, 222, con la cifra de la constante) y la frase; lo construido: el bloque en la plantilla fuera del `form`, botón `type="button"` vacío, región vacía sin `hidden` ni enlaces; el guion sin un `30` literal; los selectores nuevos en el cruce de lo que busca el guion.
 - `tests/unit/espinas-de-ux.test.ts` — dos regiones en `/buscar/`: la del recuento fuera de la plantilla y la del botón dentro.
-- `tests/e2e/busqueda.spec.ts` — describe «Historia 27.5» (8 pruebas, índice real, fragmentos retrasados o cortados con `page.route`); la prueba de la 22.10 lee el recuento por `[data-estado]` (con 41 resultados hay dos regiones).
+- `tests/e2e/busqueda.spec.ts` — describe «Historia 27.5» (9 pruebas, índice real, fragmentos retrasados, retenidos o cortados con `page.route`; Enter y espacio en el botón; aspecto de la frase del fallo); la prueba de la 22.10 lee el recuento por `[data-estado]` (con 41 resultados hay dos regiones).
 - `tests/e2e/accesibilidad.spec.ts` — describe «Historia 27.5»: tres estados × tres condiciones a 320 px y el barrido a la anchura del proyecto; el puntero se aparta antes del barrido para que axe no mida a medio camino de la transición de 150 ms.
 - `tests/e2e/busqueda-historial.spec.ts` — `TANDA` sale de `TANDA_DE_RESULTADOS`.
 
-**Tamaño del guion.** `npm run build` (2026-10-29): fichero de entrada 16.188 bytes + trozo compartido 552 = **16.740**; tope 17.140 (regla «medido + ~400»). El trozo no cambia, así que `MAX_BYTES_GUION_DEL_FILTRO` tampoco.
+**Tamaño del guion.** `npm run build` (2026-10-29): fichero de entrada 16.188 bytes + trozo compartido 552 = **16.740**; tope 17.140 (regla «medido + ~400»). El trozo no cambia, así que `MAX_BYTES_GUION_DEL_FILTRO` tampoco. Tras los parches de la revisión: 16.434 + 552 = **16.986**, bajo el mismo tope (no se rederiva).
 
 **Verificación.**
 - `npm run build` — 0.
@@ -172,8 +196,10 @@ Implementada el 2026-10-29 en la rama `v8/epica-27` sobre `41962e767018af4b0ed7e
 - Auditoría de la matriz: cada fila tiene su prueba en el describe 27.5 de `medicion.test.ts` (una tanda, muchas, segunda tanda, última nombrada, doble pulsación, fallo, reintento, tanda obsoleta, con texto, medición), y corrió en verde.
 - El diff no toca `src/lib/ingreso.ts`, `MAX_BYTES_DE_GUION`, `MAX_BYTES_GUION_DE_PAGEFIND` ni nada de `_bmad-output/planning-artifacts/` o `_bmad-output/specs/`.
 
-**Revisión.** Parches: 0; diferidos: 0; rechazados: 0. `followup_review_recommended: false` (0 parches; puntuación 0).
+**Verificación de la revisión (2026-10-29).** `npm run build` — 0. `medicion -t "27\.[2-5]|23\.[18]|isla"` 257 pasadas; `busqueda-con-filtros` 54/54; `espinas-de-ux` 14/14; `peso` 63/63; `filtros-de-busqueda` 15/15; `filtro-del-directorio` 22/22; `tipo-de-resultado` 11/11; `npm run check` 0 errores, 0 avisos. Playwright: `busqueda.spec.ts --project=escritorio` 71 pasadas (4 omitidas); `-g "27.5" --project=movil` 9/9; `accesibilidad.spec.ts -g "27\.[2-5]|buscar"` 26/26; `busqueda-historial.spec.ts` 3 (3 omitidas); `receptor.spec.ts -g "busca|23\.8"` 20 (20 omitidas). `npm test` entero — 150 ficheros, 6.949 pruebas, verde (886 s).
 
-**Riesgos residuales.** La guarda de vigencia de la tanda es más estricta que «`turno` sin cambiar»: cualquier gesto (también uno que no cambia la búsqueda) deja sin efecto la tanda en vuelo, y hay que volver a pulsar; así el foco nunca salta a la lista mientras se teclea. El fallo de una tanda que se quedó obsoleta por una búsqueda lanzada y aún no pintada no destruye el índice: si esa búsqueda también falla, la tanda siguiente vuelve a fallar una vez antes de rehacer el `search`.
+**Revisión.** Primera pasada: parches 0, diferidos 0, rechazados 0. Segunda pasada (hallazgos externos): parches 17 (1 medio, 16 bajos), diferidos 0, rechazados 22. `followup_review_recommended: true` (puntuación 3 × 1 + 16 = 19).
 
-Planificada el 2026-10-29 sobre `41962e767018af4b0ed7e3d0ed5746f7fe18030d` (rama `v8/epica-27`, bucle v8-ralph) y detenida tras planificar, como pedía la invocación. Sin condición de bloqueo. Contexto: `epic-27-context.md` (válido) y la continuidad de la 27.4 (`done`).
+**Riesgos residuales.** La guarda de vigencia de la tanda es más estricta que «`turno` sin cambiar» (el contrato dice «solo si», condición necesaria): cualquier gesto, también uno que no cambia la búsqueda, deja sin efecto la tanda en vuelo, y hay que volver a pulsar; así el foco nunca salta a la lista mientras se teclea. Las tandas no viven en la dirección: volver atrás sin bfcache repinta solo la primera. Un `results` rehecho con el mismo largo y los mismos `id` se da por el mismo aunque cambiara el contenido de un fragmento. `/buscar/` sigue sin `aria-busy` mientras llega una tanda (no lo pide la historia).
+
+Planificada el 2026-10-29 sobre `41962e767018af4b0ed7e3d0ed5746f7fe18030d` (rama `v8/epica-27`, bucle v8-ralph). Contexto: `epic-27-context.md` (válido) y la continuidad de la 27.4 (`done`).

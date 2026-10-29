@@ -22,7 +22,7 @@ import { rutaDeLaBusqueda, rutaDelDirectorioDeAutores } from '../../src/lib/supe
 import { citaConLosDosBloques, temaBajoUmbral, textoDe } from './ayuda/corpus.ts';
 import { citasPorObra, filtrosDeLaBusqueda, obrasDelAutor, type ConjuntoPublicable } from '../../src/lib/publicado.ts';
 import { clavesDeOrden, ordenDeLaListaDeObras, porSlug as porSlugDeCita, rutaDeLaObra } from '../../src/lib/obras.ts';
-import { CITAS_POR_PAGINA, PAUSA_DE_LOS_SELECTORES_MS, PAUSA_DE_TECLEO_MS, TANDA_DE_RESULTADOS } from '../../src/lib/umbrales.ts';
+import { CITAS_POR_PAGINA, PAUSA_DE_TECLEO_MS, TANDA_DE_RESULTADOS } from '../../src/lib/umbrales.ts';
 import { conjuntoDeLosDatos, leerDatosDelCorpus } from '../../tools/lib/alcance.ts';
 import { leerDocumentosDeFuente, rutasDelCorpus } from '../../tools/lib/corpus.ts';
 import { posicionesDeCitas } from '../../tools/lib/posiciones.ts';
@@ -2094,7 +2094,9 @@ test.describe('Historia 27.5 — los resultados llegan de 30 en 30', () => {
     const largo = await page.evaluate(() => history.length);
     const recuento = await page.locator(ESTADO).textContent();
     await vigilarElRecuento(page);
-    await page.locator(BOTON).click();
+    // Con el teclado: el foco en el primer resultado nuevo es para quien no usa el ratón.
+    await page.locator(BOTON).focus();
+    await page.keyboard.press('Enter');
     await expect(page.locator(RESULTADOS)).toHaveCount(2 * T, { timeout: 10_000 });
     await expect(page.locator(`${RESULTADOS} a`).nth(T)).toBeFocused();
     await page.waitForTimeout(PAUSA_DE_TECLEO_MS + 200);
@@ -2186,9 +2188,35 @@ test.describe('Historia 27.5 — los resultados llegan de 30 en 30', () => {
       return fallo.top >= boton.bottom && fallo.height > 0;
     });
     expect(debajo).toBe(true);
+    // En `{typography.caption}` (la sans, 13px, interlineado 1,5) y `{colors.on-surface}`, a 2× unidad del botón.
+    const aspecto = await page.evaluate(() => {
+      const fallo = document.querySelector('[data-fallo-de-la-tanda]')!;
+      const prueba = document.createElement('div');
+      prueba.style.color = 'var(--tinta)';
+      prueba.style.fontFamily = 'var(--sans)';
+      prueba.style.fontSize = 'var(--pie)';
+      prueba.style.marginTop = 'calc(var(--unidad) * 2)';
+      document.body.append(prueba);
+      const esperado = getComputedStyle(prueba);
+      const de = { color: esperado.color, familia: esperado.fontFamily, cuerpo: esperado.fontSize, margen: esperado.marginTop };
+      prueba.remove();
+      const visto = getComputedStyle(fallo);
+      return {
+        color: visto.color === de.color,
+        familia: visto.fontFamily === de.familia,
+        cuerpo: visto.fontSize,
+        interlineado: parseFloat(visto.lineHeight) / parseFloat(visto.fontSize),
+        margen: visto.marginTop === de.margen,
+      };
+    });
+    expect(aspecto).toEqual({ color: true, familia: true, cuerpo: '13px', interlineado: 1.5, margen: true });
+    // El recuento sigue a la vista.
+    await expect(page.locator(ESTADO)).toBeVisible();
+    await expect(page.locator(ESTADO)).toHaveText(recuento!);
 
     await page.unroute(FRAGMENTOS);
-    await page.locator(BOTON).click();
+    // Con el foco en el botón, la barra espaciadora lo vuelve a pedir.
+    await page.keyboard.press('Space');
     await expect(page.locator(RESULTADOS)).toHaveCount(2 * T, { timeout: 10_000 });
     await expect(page.locator(FALLO)).toHaveText('');
     await expect(page.locator(`${RESULTADOS} a`).nth(T)).toBeFocused();
@@ -2198,31 +2226,100 @@ test.describe('Historia 27.5 — los resultados llegan de 30 en 30', () => {
     expect(await hrefs(page)).toEqual((await delIndice(page, null, { [FILTROS_DE_CITA.autor]: autor.valor })).slice(0, 2 * T));
   });
 
-  test('cambiar el filtro con una tanda retrasada en vuelo: la tanda no se pinta', async ({ page }) => {
-    test.setTimeout(60_000);
-    const autor = await conElAutor(page);
+  /**
+   * Retiene los fragmentos que pida la tanda desde ahora y devuelve con qué soltarlos. Lo que se pida
+   * después de `dejarPasar()` llega sin espera: así la búsqueda nueva se pinta **antes** de que
+   * llegue la tanda vieja, que es lo que la guarda tiene que resistir.
+   */
+  async function retenerLaTanda(page: Page) {
+    let retener = true;
+    const retenidos: (() => void)[] = [];
+    await page.route(FRAGMENTOS, async (ruta) => {
+      if (retener) await new Promise<void>((r) => retenidos.push(r));
+      await ruta.continue().catch(() => {});
+    });
+    return {
+      retenidos: () => retenidos.length,
+      dejarPasar: () => {
+        retener = false;
+      },
+      soltar: () => retenidos.splice(0).forEach((r) => r()),
+    };
+  }
+
+  /** Las URL de `search` en otra pestaña: su índice no comparte fragmentos cargados con el de la isla. */
+  async function enOtraPestana(page: Page, texto: string | null, filtros: Record<string, string>) {
+    const otra = await page.context().newPage();
+    try {
+      await otra.goto('/buscar/');
+      return await delIndice(otra, texto, filtros);
+    } finally {
+      await otra.close();
+    }
+  }
+
+  test('cambiar el filtro con una tanda retenida en vuelo: la búsqueda nueva se pinta, la tanda llega después y no se pinta, y el foco sigue en el filtro', async ({ page }) => {
+    test.setTimeout(120_000);
+    const autor = await elAutor();
     const filtros = filtrosDeLaBusqueda(await conjunto());
-    // Un Tema con Citas del Autor, para que la búsqueda nueva pinte algo.
+    // La tanda que se retiene son los resultados 30–59 del Autor. El Tema elegido da una búsqueda
+    // que no comparte con ella ningún fragmento: si lo compartiera, la búsqueda nueva esperaría al
+    // retenido y la tanda vieja llegaría antes que ella.
+    const delAutor = { [FILTROS_DE_CITA.autor]: autor.valor };
+    const laTanda = new Set((await enOtraPestana(page, null, delAutor)).slice(T, 2 * T));
     const temas = new Map<string, number>();
     for (const [, deCita] of filtros.porCita) {
       if (deCita.autor !== autor.valor) continue;
       for (const tema of deCita.temas) temas.set(tema, (temas.get(tema) ?? 0) + 1);
     }
-    const [tema, cuantas] = [...temas.entries()].sort((a, b) => b[1] - a[1] || (a[0] < b[0] ? -1 : 1))[0];
-    await page.route(FRAGMENTOS, async (ruta) => {
-      await new Promise((r) => setTimeout(r, 2_500));
-      await ruta.continue().catch(() => {});
-    });
+    let elegido: { tema: string; cuantas: number; primeras: string[] } | undefined;
+    for (const [tema, cuantas] of [...temas.entries()].sort((a, b) => b[1] - a[1] || (a[0] < b[0] ? -1 : 1))) {
+      const primeras = (await enOtraPestana(page, null, { ...delAutor, [FILTROS_DE_CITA.tema]: tema })).slice(0, T);
+      if (primeras.every((url) => !laTanda.has(url))) {
+        elegido = { tema, cuantas, primeras };
+        break;
+      }
+    }
+    expect(elegido, 'Ningún Tema del Autor da una búsqueda sin fragmentos en común con su segunda tanda.').toBeDefined();
+    const { tema, cuantas, primeras } = elegido!;
+
+    await conElAutor(page);
+    const tanda = await retenerLaTanda(page);
     await page.locator(BOTON).click();
+    await expect.poll(tanda.retenidos, { timeout: 10_000 }).toBeGreaterThan(0);
+    tanda.dejarPasar();
+    await page.locator(TEMA).focus();
     await page.locator(TEMA).selectOption(tema);
-    await page.waitForTimeout(PAUSA_DE_LOS_SELECTORES_MS);
     await expect(page.locator(ESTADO)).toHaveText(new RegExp(`^(?:${cuantas} citas|Una cita) de `, 'u'), { timeout: 15_000 });
-    await page.waitForTimeout(3_000);
     await expect(page.locator(RESULTADOS)).toHaveCount(Math.min(cuantas, T));
-    await page.unroute(FRAGMENTOS);
-    const delCruce = await delIndice(page, null, { [FILTROS_DE_CITA.autor]: autor.valor, [FILTROS_DE_CITA.tema]: tema });
-    expect(await hrefs(page)).toEqual(delCruce.slice(0, T));
+    expect(await hrefs(page)).toEqual(primeras);
+    // Ahora llega la tanda vieja.
+    tanda.soltar();
+    await page.waitForTimeout(1_500);
+    await expect(page.locator(RESULTADOS)).toHaveCount(Math.min(cuantas, T));
+    expect(await hrefs(page)).toEqual(primeras);
+    await expect(page.locator(TEMA)).toBeFocused();
     await expect(page.locator(BLOQUE)).toHaveCount(cuantas > T ? 1 : 0);
+    await page.unroute(FRAGMENTOS);
+  });
+
+  test('teclear con una tanda retenida en vuelo: la búsqueda nueva se pinta, la tanda llega después y no se pinta, y el foco sigue en el campo', async ({ page }) => {
+    test.setTimeout(60_000);
+    await conElAutor(page);
+    const tanda = await retenerLaTanda(page);
+    await page.locator(BOTON).click();
+    await expect.poll(tanda.retenidos, { timeout: 10_000 }).toBeGreaterThan(0);
+    tanda.dejarPasar();
+    // Un texto que con el Autor no da nada: la búsqueda nueva se pinta sin pedir fragmentos.
+    await page.locator('[data-consulta]').fill('qzxjvw');
+    await expect(page.locator('[data-salida]')).toBeVisible({ timeout: 15_000 });
+    await expect(page.locator(RESULTADOS)).toHaveCount(0);
+    tanda.soltar();
+    await page.waitForTimeout(1_500);
+    await expect(page.locator(RESULTADOS)).toHaveCount(0);
+    await expect(page.locator(BLOQUE)).toHaveCount(0);
+    await expect(page.locator('[data-consulta]')).toBeFocused();
+    await page.unroute(FRAGMENTOS);
   });
 });
 
