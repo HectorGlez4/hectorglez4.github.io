@@ -19,6 +19,26 @@ deferred:
     location: >-
       _bmad-output/planning-artifacts/ux-designs/ux-brainlySabiduria-2026-08-10/EXPERIENCE.md
     severity: low
+  - summary: >-
+      La fila de resultado que pinta la isla (`filaDeResultado`) junta rótulo y título sin espacio, con un `aria-label` propio en Obra, Directorio, portada y Cita con Autor; la del aviso lleva el espacio para pasar `label-content-name-mismatch` de axe.
+    evidence: |-
+      Al barrer los avisos de la 27.7, axe marcó `label-content-name-mismatch` en la fila sin el espacio
+      («DirectorioAutores» no está en «Directorio: Autores»), y la fila de la isla tiene esa misma forma
+      desde la 26.x. Ningún barrido axe de `/buscar/` alcanza hoy una fila de la isla con `aria-label`.
+      No lo causa la 27.7: el aviso se apartó del marcado de la isla en un nodo de texto para no heredarlo.
+    location: >-
+      src/components/Busqueda.astro filaDeResultado (a.append(clase, titulo))
+    severity: low
+  - summary: >-
+      Una llegada con filtros de la dirección que no se pueden usar (frase de la 27.4) cuya búsqueda luego falla pinta el aviso del fallo y la frase de la 27.4 no se ve ni se anuncia, aunque la dirección ya se reescribió sin esos filtros.
+    evidence: |-
+      `resolverYBuscar` reemplaza la entrada y pasa `aviso` a `buscar`; si la búsqueda falla, el `catch`
+      llama a `mostrarFallo()` sin él. Antes de la 27.7 el fallo no pintaba nada y la frase se perdía
+      igual: es de la 27.4, solo que ahora el estado del fallo sí se ve. Decidir si la frase precede al
+      anuncio del fallo cambia la frase literal que fija el intent-contract de la 27.7.
+    location: >-
+      src/components/Busqueda.astro resolverYBuscar / catch de buscar
+    severity: low
 ---
 
 <intent-contract>
@@ -117,6 +137,18 @@ deferred:
 - addressed_findings:
   - none
 
+### 2026-10-29 — Review pass
+- intent_gap: 0
+- bad_spec: 0
+- patch: 4: (high 0, medium 0, low 4)
+- defer: 2: (high 0, medium 0, low 2)
+- reject: 22: (high 0, medium 1, low 21)
+- addressed_findings:
+  - `[low]` `[patch]` verification-gap (+ blind-hunter «especificidad de las reglas compartidas», intent-alignment h, ac-auditor 5): nada miraba que las filas del aviso tomen de verdad las reglas de `.filas-de-resultado`. `busqueda.spec.ts` compara ahora, por estilo calculado, filete, enlace, rótulo y título de cada fila del aviso de `<noscript>` con los tokens (`--grosor-filete`, `--filete`, `--unidad`, `--sans`, `--pie`, `--titular-sm`…), y las del aviso del fallo con una fila «Directorio» pintada por la isla; y mide la composición (`--cuerpo-lg`, 3×/2×/2× `--unidad`) también en el aviso del fallo.
+  - `[low]` `[patch]` ac-auditor 2 (+ intent-alignment c, ac-auditor 4): «lo visto y luego el fallo» solo se probaba en el DOM simulado. Caso nuevo en `busqueda.spec.ts`: «autores» pintada, los fragmentos de Pagefind cortados, «viento» falla (`data()`), aviso en lugar de los resultados con la región diciendo la frase; ni ocultar ni pulsar «Autores» emiten `busqueda`, `busqueda-sin-resultados` ni salida.
+  - `[low]` `[patch]` edge-case-hunter 1: tras un fallo de `search`/`data()` sin bloque «Mostrar 30 más», el reintento buscaba en el índice mientras `destroy()` seguía en curso (Pagefind suelta la instancia solo al acabar). El `catch` de `buscar` deja ahora la destrucción en `averiada` también cuando pinta el aviso (`mio === turno`), y la búsqueda siguiente la espera.
+  - `[low]` `[patch]` blind-hunter «dos campos fijados a mano»: el `en-sans` del título del aviso y el `enSans` esperado del e2e salen ahora de `TIPOS_CON_TITULO_EN_SANS`, la tabla de la fila de la isla, en vez de escribirse a mano.
+
 ## Design Notes
 
 - **Por qué `@media (scripting: none)`:** es CSS del componente, sin guion en línea (AD-6, tope de `MAX_BYTES_DE_GUION`) y sin tocar el armazón. Los dos proyectos de Playwright son Chromium (≥ 120 lo evalúa). Un navegador sin la característica y sin guion vería los dos avisos: coste aceptado y escrito en el docblock.
@@ -177,3 +209,21 @@ propia historia: la alineación de EXPERIENCE.md § Zonas, pendiente de Héctor 
 - axe no corre sin JavaScript (sus promesas no se resuelven): el barrido «sin guion» reconstruye en una página con guion y sin ficheros de guion el DOM sin guion (el `<noscript>` analizado como marcado y el previo fuera). Lo que se ve de verdad sin guion lo prueba `busqueda.spec.ts` en un contexto sin JavaScript.
 - La fila del aviso lleva un espacio entre rótulo y título (`label-content-name-mismatch` de axe); la que pinta la isla (`filaDeResultado`) no lo lleva, y una fila de tipo con nombre accesible propio podría dar el mismo aviso de axe si un barrido la alcanza. No se ha tocado la isla.
 
+### Segunda pasada de revisión (2026-10-29, hallazgos externos)
+
+**Cambio.** Cuatro parches, todos bajos:
+- `src/components/Busqueda.astro` — el `catch` de `buscar` guarda la destrucción del índice en `averiada` también cuando pinta el aviso del fallo: el reintento espera a que `destroy()` acabe en vez de buscar en un índice a medio destruir.
+- `src/components/AvisoDeLaBusqueda.astro` — el `en-sans` del título sale de `TIPOS_CON_TITULO_EN_SANS`, la tabla de `filaDeResultado`.
+- `tests/e2e/busqueda.spec.ts` — `presentacionDe` y `presentacionDeLosTokens`: las filas del aviso de `<noscript>` se comparan, por estilo calculado, con los tokens de la fila; caso nuevo «lo visto y luego el fallo» (fragmentos cortados tras «autores»): aviso en lugar de los resultados, filas iguales a una fila «Directorio» de la isla, composición medida, y ni ocultar ni pulsar «Autores» miden; `enSans` esperado derivado de la tabla.
+
+**Hallazgos.** 4 parches (high 0, medium 0, low 4), 2 diferidos (la fila de la isla sin espacio ante axe; la frase de la 27.4 perdida cuando la búsqueda de la llegada falla), 22 rechazados (entre ellos: el desplazamiento del previo y el mensaje de `sinDatos`, que manda el intent-contract; la puerta de NFR-5, que corre en cada build y solo gana aristas; el barrido axe reconstruido, porque axe no corre sin JavaScript; el estado de `sprint-status.yaml`, que lleva el orquestador).
+
+**Recomendación de revisión posterior:** `false` — parches high 0, medium 0, low 4; puntuación 3 × 0 + 4 = 4 < 5.
+
+**Verificación.**
+- `npx astro check` — 0 errores, 0 avisos.
+- `npx vitest run tests/unit/busqueda-con-filtros.test.ts tests/unit/alcance.test.ts` — 89 verdes.
+- `npx vitest run tests/unit/medicion.test.ts` — 681 verdes, guion bajo `MAX_BYTES_GUION_DE_LA_BUSQUEDA`.
+- `npx playwright test tests/e2e/busqueda.spec.ts tests/e2e/accesibilidad.spec.ts -g "27\.7" --project=escritorio --project=movil` — 20 verdes (2,1 min).
+
+**Riesgos residuales.** Los de la primera pasada siguen; además, la búsqueda que sigue a un vaciado tras el fallo ya no espera la destrucción (`quitarMas` olvida `averiada`), lo que solo importa si se vacía y se vuelve a buscar dentro de lo que tarda `destroy()`.

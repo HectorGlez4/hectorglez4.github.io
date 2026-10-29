@@ -983,7 +983,9 @@ const { autores, temas } = Astro.props;
           }
           // Historia 27.5 — si seguía a la vista una lista con su bloque, sus `results` eran del índice
           // que se acaba de destruir: lo siguiente espera la destrucción, como tras un fallo de tanda.
-          if (conMas) averiada = destruccion || Promise.resolve();
+          // Historia 27.7 — y tras el aviso del fallo, el reintento también la espera: no busca en un
+          // índice a medio destruir (Pagefind lo suelta solo al acabar `destroy()`).
+          if (conMas || mio === turno) averiada = destruccion || Promise.resolve();
           return;
         }
         if (mio !== turno) return;

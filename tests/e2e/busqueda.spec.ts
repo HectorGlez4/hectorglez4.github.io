@@ -5,6 +5,8 @@ import {
   FILTROS_DE_CITA,
   OPCIONES_DE_PAGEFIND,
   ORDEN_DE_CITA,
+  TIPOS_CON_TITULO_EN_SANS,
+  type TipoDeResultado,
 } from '../../src/lib/tipoDeResultado.ts';
 import { MARCA } from '../../src/lib/marca.ts';
 import { ASENTAMIENTO_DE_BUSQUEDA, EVENTOS } from '../../src/lib/medicion.ts';
@@ -2559,8 +2561,9 @@ test.describe('Historia 27.7 — sin JavaScript, la búsqueda lleva a los Direct
         etiqueta: ETIQUETAS_DE_RESULTADO[dato!.tipo as keyof typeof ETIQUETAS_DE_RESULTADO],
         titulo: dato!.titulo,
         href: ruta,
+        // Misma pestaña (Historia 22.10), y la familia del título de la tabla que usa la isla.
         target: null,
-        enSans: true,
+        enSans: TIPOS_CON_TITULO_EN_SANS.includes(dato!.tipo as TipoDeResultado),
       };
     });
   }
@@ -2608,6 +2611,55 @@ test.describe('Historia 27.7 — sin JavaScript, la búsqueda lleva a los Direct
       Object.defineProperty(document, 'hidden', { configurable: true, get: () => true });
       document.dispatchEvent(new Event('visibilitychange'));
     });
+  /**
+   * La presentación de una fila de resultado —la del filete, la del enlace, la del rótulo y la del
+   * título—, para ver que la fila del aviso toma de verdad las reglas de `.filas-de-resultado` y no
+   * solo la clase: sin ellas, el marcado sería el mismo y se verían dos enlaces sueltos.
+   */
+  const presentacionDe = (fila: import('@playwright/test').Locator) =>
+    fila.evaluate((li) => {
+      const [cl, ca, ct, ti] = [li, li.querySelector('a')!, li.querySelector('.clase')!, li.querySelector('.titulo')!].map((n) =>
+        getComputedStyle(n),
+      );
+      return {
+        filete: [cl.borderBottomStyle, cl.borderBottomWidth, cl.borderBottomColor],
+        enlace: [ca.display, ca.flexDirection, ca.rowGap],
+        rotulo: [ct.fontFamily, ct.fontSize, ct.letterSpacing, ct.color],
+        titulo: [ti.fontFamily, ti.fontSize, ti.color],
+      };
+    });
+  /** La presentación que dan los tokens a una fila de tipo «Directorio» (`buscar.astro`), por sondas. */
+  const presentacionDeLosTokens = (page: Page) =>
+    page.evaluate(() => {
+      const sonda = (css: string) => {
+        const n = document.createElement('span');
+        n.style.cssText = css;
+        document.body.append(n);
+        const c = getComputedStyle(n);
+        const r = {
+          familia: c.fontFamily,
+          tamano: c.fontSize,
+          color: c.color,
+          espacio: c.letterSpacing,
+          borde: c.borderBottomWidth,
+          bordeColor: c.borderBottomColor,
+          ancho: c.width,
+        };
+        n.remove();
+        return r;
+      };
+      const filete = sonda('display: block; border-bottom: var(--grosor-filete) solid var(--filete)');
+      const unidad = sonda('display: block; width: var(--unidad)');
+      const rotulo = sonda('font-family: var(--sans); font-size: var(--pie); letter-spacing: 0.09em; color: var(--tinta-apagada)');
+      const titulo = sonda('font-family: var(--sans); font-size: var(--titular-sm); color: var(--tinta)');
+      return {
+        filete: ['solid', filete.borde, filete.bordeColor],
+        enlace: ['flex', 'column', unidad.ancho],
+        rotulo: [rotulo.familia, rotulo.tamano, rotulo.espacio, rotulo.color],
+        titulo: [titulo.familia, titulo.tamano, titulo.color],
+      };
+    });
+
   /** Si un elemento cuelga del contenedor de la zona `resultado`. */
   const enResultado = (aviso: import('@playwright/test').Locator) => aviso.evaluate((n) => n.closest('[data-zona="resultado"]') !== null);
 
@@ -2645,6 +2697,11 @@ test.describe('Historia 27.7 — sin JavaScript, la búsqueda lleva a los Direct
       });
       expect(forma.tamanos).toEqual([forma.token.cuerpo, forma.token.cuerpo]);
       expect(forma.margenes).toEqual([3 * forma.token.unidad, 2 * forma.token.unidad, 2 * forma.token.unidad]);
+      // Las filas toman las reglas de la fila de resultado de `buscar.astro`, no solo su clase.
+      const filas = aviso.locator('li.resultado');
+      await expect(filas).toHaveCount(2);
+      const deLosTokens = await presentacionDeLosTokens(sinGuion);
+      for (const fila of await filas.all()) expect(await presentacionDe(fila)).toEqual(deLosTokens);
     } finally {
       await contexto.close();
     }
@@ -2707,6 +2764,55 @@ test.describe('Historia 27.7 — sin JavaScript, la búsqueda lleva a los Direct
     await aviso.getByRole('link', { name: `${ETIQUETAS_DE_RESULTADO.directorio}: Autores` }).click();
     await page.waitForURL('**/autores/');
     expect((await medidos(page)).filter((m) => m[0] === EVENTOS.busqueda || m[0] === EVENTOS.busquedaSinResultados)).toEqual([]);
+    expect((await balizas(page)).filter((b) => b.evento === EVENTOS.salidaInterna)).toEqual([]);
+  });
+
+  test('lo visto y luego el fallo: el aviso en lugar de los resultados, con la fila de la isla y su composición, y ni ocultar ni pulsar «Autores» miden', async ({ page }) => {
+    await espiarConBalizas(page);
+    await page.goto('/buscar/');
+    // Una búsqueda que corre y pinta, con una fila de tipo «Directorio» de la isla como referencia.
+    await page.locator('[data-consulta]').fill('autores');
+    const directorio = page
+      .locator('[data-resultados] .resultado')
+      .filter({ has: page.locator('.clase[data-tipo="directorio"]') })
+      .first();
+    await expect(directorio).toBeVisible({ timeout: 10_000 });
+    const deLaIsla = await presentacionDe(directorio);
+    expect(deLaIsla).toEqual(await presentacionDeLosTokens(page));
+    // La siguiente no puede correr: los datos de sus resultados no llegan.
+    await page.route('**/pagefind/fragment/**', (ruta) => ruta.abort());
+    await page.locator('[data-consulta]').fill('viento');
+    const aviso = page.locator('[data-aviso-del-fallo]');
+    await expect(aviso).toBeVisible({ timeout: 10_000 });
+    await expect(aviso).toHaveCount(1);
+    await expect(page.locator('[data-resultados] > *')).toHaveCount(0);
+    await expect(page.locator('[data-estado]')).toHaveText(ANUNCIO_DEL_FALLO_DE_LA_BUSQUEDA);
+    // La misma fila que pinta la isla, y la composición del aviso: `--cuerpo-lg`, 3 ×, 2 × y 2 × `--unidad`.
+    for (const fila of await aviso.locator('li.resultado').all()) expect(await presentacionDe(fila)).toEqual(deLaIsla);
+    const forma = await aviso.evaluate((raiz) => {
+      const sonda = document.createElement('span');
+      sonda.style.cssText = 'font-size: var(--cuerpo-lg); width: var(--unidad); display: block';
+      document.body.append(sonda);
+      const token = { cuerpo: getComputedStyle(sonda).fontSize, unidad: parseFloat(getComputedStyle(sonda).width) };
+      sonda.remove();
+      const [p1, p2] = [...raiz.querySelectorAll('p')];
+      return {
+        token,
+        tamanos: [getComputedStyle(p1).fontSize, getComputedStyle(p2).fontSize],
+        margenes: [p1, p2, raiz.querySelector('ul')!].map((n) => parseFloat(getComputedStyle(n).marginTop)),
+      };
+    });
+    expect(forma.tamanos).toEqual([forma.token.cuerpo, forma.token.cuerpo]);
+    expect(forma.margenes).toEqual([3 * forma.token.unidad, 2 * forma.token.unidad, 2 * forma.token.unidad]);
+    // Con el aviso a la vista no hay búsqueda que asentar: ni al ocultar ni al pulsar un Directorio.
+    const deBusqueda = async () =>
+      (await medidos(page)).filter((m) => m[0] === EVENTOS.busqueda || m[0] === EVENTOS.busquedaSinResultados);
+    const antes = await deBusqueda();
+    await ocultar(page);
+    expect(await deBusqueda()).toEqual(antes);
+    await aviso.getByRole('link', { name: `${ETIQUETAS_DE_RESULTADO.directorio}: Autores` }).click();
+    await page.waitForURL('**/autores/');
+    expect(await deBusqueda()).toEqual(antes);
     expect((await balizas(page)).filter((b) => b.evento === EVENTOS.salidaInterna)).toEqual([]);
   });
 

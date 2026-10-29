@@ -40,7 +40,7 @@ import {
 import { NOMBRE_DEL_DIRECTORIO_DE_AUTORES, NOMBRE_DEL_DIRECTORIO_DE_OBRAS } from '../lib/marca.ts';
 import type { ExencionDeZona } from '../lib/medicion.ts';
 import { rutaDelDirectorioDeAutores, rutaDelDirectorioDeObras } from '../lib/superficies.ts';
-import { ETIQUETAS_DE_RESULTADO } from '../lib/tipoDeResultado.ts';
+import { ETIQUETAS_DE_RESULTADO, TIPOS_CON_TITULO_EN_SANS } from '../lib/tipoDeResultado.ts';
 
 interface Props {
   caso: 'sin-guion' | 'antes-de-arrancar' | 'fallo';
@@ -56,6 +56,8 @@ const AVISOS: Record<Props['caso'], AvisoDeLaBusqueda> = {
 const aviso = AVISOS[caso];
 const exencion: ExencionDeZona = 'directorios-del-aviso';
 const rotulo = ETIQUETAS_DE_RESULTADO.directorio;
+// La familia del título, de la misma tabla que la fila de la isla (`filaDeResultado`): sin copia.
+const enSans = TIPOS_CON_TITULO_EN_SANS.includes('directorio');
 const directorios = [
   { titulo: NOMBRE_DEL_DIRECTORIO_DE_AUTORES, href: rutaDelDirectorioDeAutores() },
   { titulo: NOMBRE_DEL_DIRECTORIO_DE_OBRAS, href: rutaDelDirectorioDeObras() },
@@ -80,7 +82,7 @@ const directorios = [
               * texto visible del enlace sería «DirectorioAutores», que no está en su nombre
               * accesible («Directorio: Autores»), y axe lo marca (`label-content-name-mismatch`).
               */}
-            <span class="clase" data-tipo="directorio">{rotulo}</span>{' '}<span class="titulo en-sans">{titulo}</span>
+            <span class="clase" data-tipo="directorio">{rotulo}</span>{' '}<span class:list={['titulo', { 'en-sans': enSans }]}>{titulo}</span>
           </a>
         </li>
       ))
