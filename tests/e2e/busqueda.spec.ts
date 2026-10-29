@@ -2409,11 +2409,9 @@ test.describe('Historia 27.6 — sin resultados, los ocho Autores con más Citas
     await expect(page.locator('[data-salida] a >> nth=0')).toBeFocused();
   });
 
-  test('lo tecleado con marcado entra literal en la frase, y en la salida no hay ningún elemento suyo', async ({ page }) => {
-    const { autores } = filtrosDeLaBusqueda(await conjunto());
-    const autor = [...autores].sort((a, b) => b.recuento - a.recuento || (a.valor < b.valor ? -1 : 1))[0];
-    // Un Pagefind que no encuentra nada y da `filters()`: lo que se ejecuta es el guion de la página.
-    await page.route('**/pagefind/pagefind.js', (ruta) =>
+  /** Un Pagefind que no encuentra nada y da `filters()`: lo que se ejecuta es el guion de la página. */
+  const sinNada = (page: Page) =>
+    page.route('**/pagefind/pagefind.js', (ruta) =>
       ruta.fulfill({
         contentType: 'text/javascript',
         body: [
@@ -2424,14 +2422,52 @@ test.describe('Historia 27.6 — sin resultados, los ocho Autores con más Citas
         ].join('\n'),
       }),
     );
-    await page.goto(`/buscar/?q=${encodeURIComponent('<b>zzz</b>')}&autor=${autor.valor}`);
+
+  test('lo tecleado con marcado entra literal en la frase, en la salida no hay ningún elemento suyo, y «Quitar los filtros» va encima', async ({ page, browserName }) => {
+    const { autores } = filtrosDeLaBusqueda(await conjunto());
+    const autor = [...autores].sort((a, b) => b.recuento - a.recuento || (a.valor < b.valor ? -1 : 1))[0];
+    await sinNada(page);
+    await page.goto(`/buscar/?q=${encodeURIComponent('<b>zzz</b>')}&autor=${encodeURIComponent(autor.valor)}`);
     await expect(page.locator('[data-salida]')).toBeVisible({ timeout: 10_000 });
     const frase = `No encontramos «<b>zzz</b>» entre las citas de ${autor.rotulo}.`;
     expect(sugerenciaSinResultados({ texto: '<b>zzz</b>', autor: autor.rotulo })).toBe(frase);
     await expect(page.locator('.sugerencia')).toHaveText(frase);
     await expect(page.locator('[data-estado]')).toHaveText(frase);
     expect(await page.locator('[data-salida] b').count()).toBe(0);
-    expect(frase).not.toBe(SUGERENCIA_SIN_FILTROS);
+    // Con texto y filtro, «Quitar los filtros» también se ve encima de la frase y es lo último
+    // enfocable antes de la salida.
+    await expect(page.locator(QUITAR)).toBeVisible();
+    const encima = await page.evaluate(
+      () =>
+        document.querySelector('[data-quitar]')!.getBoundingClientRect().bottom <=
+        document.querySelector('.sugerencia')!.getBoundingClientRect().top,
+    );
+    expect(encima).toBe(true);
+    test.skip(browserName !== 'chromium', 'El orden de tabulación se mira en Chromium.');
+    await page.locator(QUITAR).focus();
+    await page.keyboard.press('Tab');
+    await expect(page.locator('[data-salida] a >> nth=0')).toBeFocused();
+  });
+
+  test('con el aviso de la dirección (27.4) a cero, el aviso y la frase se ven una vez, en la `.sugerencia`, y la región los dice apartada', async ({ page }) => {
+    await sinNada(page);
+    await page.goto(`/buscar/?q=zzz&tema=${encodeURIComponent('tema-inventado-de-la-27-6')}`);
+    await expect(page.locator('[data-salida]')).toBeVisible({ timeout: 10_000 });
+    // El Tema inventado no se usa: la búsqueda va con el texto solo, y la frase es la de sin filtros.
+    const visto = `${avisoDeLaDireccion(1, true)} ${SUGERENCIA_SIN_FILTROS}`;
+    await expect(page.locator('.sugerencia')).toHaveText(visto);
+    const region = page.locator('[data-estado]');
+    await expect(region).toHaveText(visto);
+    expect(await region.evaluate((n) => n.getBoundingClientRect().width)).toBeLessThanOrEqual(1);
+    await expect(page.locator('.sombra')).toHaveText('');
+    const laDicen = await page.locator('main').evaluate(
+      (m, f) =>
+        [...m.querySelectorAll('*')]
+          .filter((n) => n.children.length === 0 && n.textContent?.trim() === f && n.getBoundingClientRect().width > 1)
+          .map((n) => n.className),
+      visto,
+    );
+    expect(laDicen).toEqual([expect.stringContaining('sugerencia')]);
   });
 });
 

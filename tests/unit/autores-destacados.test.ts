@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { readFileSync, readdirSync } from 'node:fs';
 import { join, resolve } from 'node:path';
-import { autoresDestacados, type Autor } from '../../src/lib/publicado.ts';
+import { aplanarAutor, autoresDestacados, type Autor } from '../../src/lib/publicado.ts';
 import { compararPorClave } from '../../src/lib/normalizar.ts';
 import { AUTORES_DESTACADOS, SUELO_TRADICION_LATINOAMERICANA } from '../../src/lib/umbrales.ts';
 
@@ -57,13 +57,17 @@ const enDirectorio = (descritos: readonly Descrito[], slugs: readonly string[]) 
     .sort((a, b) => compararPorClave({ clave: a.clave, slug: a.slug }, { clave: b.clave, slug: b.slug }))
     .map((d) => d.slug);
 
-/** Una permutación determinista: baraja con una semilla, sin `Math.random`. */
+/**
+ * Una permutación determinista: baraja con una semilla, sin `Math.random`. El congruencial va en
+ * enteros de 32 bits (`Math.imul` y `>>> 0`): en coma flotante, `s · 1103515245` pasa de 2^53 y
+ * pierde los bits bajos, y las permutaciones saldrían sesgadas.
+ */
 function barajar<T>(lista: readonly T[], semilla: number): T[] {
   const copia = [...lista];
-  let s = semilla;
+  let s = semilla >>> 0;
   for (let i = copia.length - 1; i > 0; i--) {
-    s = (s * 1103515245 + 12345) % 2147483648;
-    const j = s % (i + 1);
+    s = (Math.imul(s, 1103515245) + 12345) >>> 0;
+    const j = (s >>> 16) % (i + 1);
     [copia[i], copia[j]] = [copia[j], copia[i]];
   }
   return copia;
@@ -257,6 +261,12 @@ describe('Historia 27.6 — los ocho Autores destacados', () => {
     expect(esperado).toEqual(['l1', 'l3', 'l4', 'o1', 'p1', 'p2', 'p3', 'p4']);
   });
 
+  it('las permutaciones de prueba son de verdad distintas', () => {
+    const lista = Array.from({ length: 12 }, (_, i) => i);
+    const distintas = new Set(Array.from({ length: 25 }, (_, k) => barajar(lista, k + 1).join(',')));
+    expect(distintas.size).toBe(25);
+  });
+
   it('devuelve los Autores tal cual, con su tradición', () => {
     const { autores, citas } = entradas([lat('l0', 'L0', 1), sinDeclarar('s0', 'S0', 1)]);
     const resultado = autoresDestacados(autores, citas);
@@ -271,13 +281,69 @@ describe('Historia 27.6 — el predicado «cuenta para el suelo» tiene un solo 
     expect(fuente).toMatch(/import \{[^}]*\bcuentaParaElSuelo\b[^}]*\} from '\.\/huecos\.ts';/u);
   });
 
-  it('ningún módulo de `src/lib` salvo `huecos.ts` (y el esquema, `admision.ts`) compara una tradición con `otra`', () => {
-    const DUENOS = new Set(['huecos.ts', 'admision.ts']);
-    const comparaConOtra = /[!=]==\s*'otra'|'otra'\s*[!=]==/u;
-    const infractores = readdirSync(join(RAIZ, 'src/lib'))
-      .filter((f) => f.endsWith('.ts') && !DUENOS.has(f))
-      .filter((f) => comparaConOtra.test(readFileSync(join(RAIZ, 'src/lib', f), 'utf8')));
+  it('ningún módulo de `src/`, `tools/` ni `integraciones/` salvo `huecos.ts` compara una tradición con `otra`', () => {
+    /*
+     * El dueño es `huecos.ts`; `admision.ts` declara el enum. `tools/auditoria.ts` filtra los
+     * Autores de tradición `otra` para otra cosa —las Citas traducidas sin traductor (19.1)—, no
+     * el denominador del suelo: se exime con su motivo y no por su forma.
+     */
+    const EXENTOS = new Set(['src/lib/huecos.ts', 'src/lib/admision.ts', 'tools/auditoria.ts']);
+    // Cualquier comparación con el valor: `===`, `==`, `!==`, `!=`, `case`, `.includes(`, `.has(`, con
+    // comilla simple o doble. Solo cuenta en un fichero que habla de `tradicion`.
+    const comparaConOtra = /(?:[!=]==?|\bcase|\.includes\(|\.has\()\s*['"]otra['"]|['"]otra['"]\s*[!=]==?/u;
+    const ficheros = (dir: string): string[] =>
+      readdirSync(join(RAIZ, dir), { withFileTypes: true }).flatMap((e) => {
+        const ruta = `${dir}/${e.name}`;
+        if (e.isDirectory()) return e.name === 'node_modules' ? [] : ficheros(ruta);
+        return /\.(?:ts|mts|mjs|js|astro)$/u.test(e.name) ? [ruta] : [];
+      });
+    const infractores = ['src', 'tools', 'integraciones']
+      .flatMap(ficheros)
+      .filter((f) => !EXENTOS.has(f))
+      .filter((f) => {
+        const fuente = readFileSync(join(RAIZ, f), 'utf8');
+        return /tradicion/u.test(fuente) && comparaConOtra.test(fuente);
+      });
     expect(infractores).toEqual([]);
     expect(readFileSync(join(RAIZ, 'src/lib/huecos.ts'), 'utf8')).toMatch(/tradicion !== 'otra'/u);
+    // La exención no tapa una definición nueva: la de la auditoría sigue siendo la que era.
+    expect(readFileSync(join(RAIZ, 'tools/auditoria.ts'), 'utf8').match(/['"]otra['"]/gu)).toHaveLength(1);
+  });
+});
+
+describe('Historia 27.6 — la tradición llega al build por `aplanarAutor`', () => {
+  /*
+   * `autoresDestacados` lee `autor.tradicion`; en el build, el Autor le llega por `aplanarAutor`
+   * (`conjuntoPublicable`). Si el aplanado la perdiera, todos contarían como sin declarar, ninguno
+   * como latinoamericano y el suelo dejaría de actuar en `/buscar/` sin que el Corpus de hoy —que
+   * cumple el suelo sin cesiones— lo dejara ver.
+   */
+  const entrada = (data: Record<string, unknown>) =>
+    ({ id: 'jose-marti', collection: 'autores', data }) as unknown as Parameters<typeof aplanarAutor>[0];
+  const base = { nombre: 'José Martí', añoNacimiento: 1853, añoFallecimiento: 1895, ordenAlfabetico: 'Martí' };
+
+  it('copia la tradición declarada', () => {
+    expect(aplanarAutor(entrada({ ...base, tradicion: 'latinoamericana' })).tradicion).toBe('latinoamericana');
+    expect(aplanarAutor(entrada({ ...base, tradicion: 'otra' })).tradicion).toBe('otra');
+  });
+
+  it('sin tradición declarada, la omite (convención de ausencia)', () => {
+    expect(aplanarAutor(entrada(base))).not.toHaveProperty('tradicion');
+  });
+
+  it('un Autor aplanado entra por el suelo como en la prueba pura', () => {
+    // Ocho peninsulares con más Citas y un latinoamericano fuera: con la tradición aplanada, entra.
+    const autores = [
+      ...Array.from({ length: 8 }, (_, i) =>
+        aplanarAutor({
+          id: `p${i}`,
+          collection: 'autores',
+          data: { nombre: `P${i}`, añoFallecimiento: 1900, ordenAlfabetico: `P${i}`, tradicion: 'peninsular' },
+        } as unknown as Parameters<typeof aplanarAutor>[0]),
+      ),
+      aplanarAutor(entrada({ ...base, tradicion: 'latinoamericana' })),
+    ];
+    const citas = autores.flatMap((a, i) => Array.from({ length: 20 - i }, () => ({ autor: a.slug })));
+    expect(autoresDestacados(autores, citas).map((a) => a.slug)).toContain('jose-marti');
   });
 });

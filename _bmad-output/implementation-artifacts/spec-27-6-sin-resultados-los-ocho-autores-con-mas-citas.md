@@ -5,12 +5,19 @@ created: '2026-10-29'
 status: 'done'
 baseline_revision: '79919bfebcab8c7b2cc5b99b546e133d9c1279aa'
 review_loop_iteration: 0
-followup_review_recommended: false
+followup_review_recommended: true
 context:
   - '{project-root}/_bmad-output/implementation-artifacts/epic-27-context.md'
   - '{project-root}/_bmad-output/planning-artifacts/architecture/architecture-brainlySabiduria-2026-08-10/ARCHITECTURE-SPINE.md'
 warnings: ['oversized']
-deferred: []
+deferred:
+  - summary: >-
+      La clave de orden de Manuel González Prada es «Prada», así que el Directorio y los Autores destacados lo ordenan bajo la P y no bajo la G de su primer apellido.
+    evidence: |-
+      corpus/autores/manuel-gonzalez-prada.yml declara ordenAlfabetico: "Prada" desde 908ee84fc1 (26.1, la regla de proponer-claves toma la última palabra). Con un apellido compuesto la convención es «González Prada, Manuel». La 27.6 lo hace visible en /buscar/ (Martí antes que González Prada) pero no lo causa. Corregir la clave es de Héctor (ordenRevisado), no de un agente.
+    location: >-
+      corpus/autores/manuel-gonzalez-prada.yml:6
+    severity: medium
 ---
 
 <intent-contract>
@@ -126,6 +133,25 @@ deferred: []
 
 Las capas de revisión son externas (bucle v8-ralph) y en esta pasada no llegaron hallazgos: la revisión independiente sigue a este commit.
 
+### 2026-10-29 — Review pass
+- intent_gap: 0
+- bad_spec: 0
+- patch: 9 (high 0, medium 1, low 8)
+- defer: 1 (high 0, medium 1, low 0)
+- reject: 22 (high 0, medium 0, low 22)
+- addressed_findings:
+  - `[medium]` `[patch]` Nada veía perderse `tradicion` en `aplanarAutor` (el Corpus de hoy cumple el suelo sin cesiones, así que `dist/buscar/` saldría igual): `autores-destacados.test.ts` prueba que `aplanarAutor` la copia, la omite sin declarar y que un Autor aplanado entra por el suelo; comprobado que falla al quitar la línea.
+  - `[low]` `[patch]` La prueba de dueño único solo recorría `src/lib` y `===`/`!==` con comilla simple: ahora recorre `src/`, `tools/` e `integraciones/` con `==`/`!=`/`case`/`.includes(`/`.has(` y las dos comillas, en ficheros que hablan de `tradicion`; `tools/auditoria.ts` (Citas traducidas, 19.1) queda exento con su motivo y su única aparición fijada; comprobado que falla con un predicado plantado en `tools/`.
+  - `[low]` `[patch]` `barajar` multiplicaba en coma flotante más allá de 2^53: congruencial en 32 bits (`Math.imul`, `>>> 0`) y una prueba de que las 25 permutaciones son distintas.
+  - `[low]` `[patch]` La prueba de Playwright (c) tenía una aserción que no podía fallar (`frase` frente a `SUGERENCIA_SIN_FILTROS`): sustituida por lo que faltaba, «Quitar los filtros» visible encima de la frase y Tab hasta la salida con texto y filtro.
+  - `[low]` `[patch]` La prueba (c) componía `&autor=` sin codificar: `encodeURIComponent`.
+  - `[low]` `[patch]` «Quitar los filtros» con texto y filtro a cero no lo miraba nadie: cubierto en la prueba (c).
+  - `[low]` `[patch]` El aviso de la 27.4 a cero solo se miraba en la isla simulada: prueba de Playwright nueva (`?q=zzz&tema=<inventado>` con un Pagefind sin resultados) que exige aviso y frase una vez en la `.sugerencia`, la región igual y apartada, y la sombra vacía.
+  - `[low]` `[patch]` Aviso a cero con un filtro que sí se usa, sin prueba: caso de la isla en `medicion.test.ts` (`?q=zzz&autor=jose-marti&tema=y` → «Uno… No encontramos «zzz» entre las citas de José Martí.»).
+  - `[low]` `[patch]` Un renglón del comentario de la región en `buscar.astro` pasaba del ancho: reenvuelto (no llega a `dist/`).
+
+Rechazados, en resumen: el estado del tablero y el commit de la spec (los lleva el bucle); la revisión «ya hecha» (esta es); `esLatinoamericano` es el valor del enum, no un predicado; `hispanicos` ante un valor fuera del enum (el esquema lo excluye y la salida de `npm run huecos` es idéntica); `tradicion` no viaja a la isla (sus props son `OpcionPorNombre`); la `.sugerencia` rancia y el camino del `catch` (la salida se oculta antes de cada búsqueda y un fallo deja el estado anterior, como el recuento; el índice que no carga es de la 27.7); la `.sugerencia` ausente (está en el marcado y lo fija la prueba construida); la Obra o el Autor sin nombre (solo se usan filtros con opción en el selector); dos órdenes en la página, título sin comillas y frase sin «menos palabras» con filtros (los fija el contrato); los 66 bytes del guion (la regla solo rederiva al pasar del tope); dos builds frente a la permutación pura; la sección Autores condicional; la tipografía de los chips (CSS anterior sin tocar); Obra + Tema sin texto en la isla (la composición es la pura, probada).
+
 ## Design Notes
 
 - **Por qué a cero la región siempre se aparta.** La 27.4 dejaba la región visible con aviso para que el aviso se viera, y la `.sugerencia` repetía la frase. Con la frase en `.sugerencia` compuesta por la isla, el aviso va delante en el mismo párrafo visible y la región solo anuncia: cumple «sin pintarse dos veces» (22.10) y cierra el diferido.
@@ -160,9 +186,15 @@ Blocking condition: ninguna
 - `tests/unit/autores-destacados.test.ts` (nuevo) — la matriz de destacados, permutaciones y el dueño único del predicado.
 - `tests/unit/huecos.test.ts`, `tests/unit/busqueda-con-filtros.test.ts`, `tests/unit/medicion.test.ts`, `tests/unit/ayuda/busqueda.ts`, `tests/e2e/busqueda.spec.ts` — pruebas puras, construidas, de la isla y de Playwright de la 27.6, y los casos a cero de la 27.2 y la 27.4 al día.
 
-**Hallazgos de revisión.** Ninguno en esta pasada (capas externas sin hallazgos): 0 parches, 0 diferidos, 0 rechazados.
+**Hallazgos de revisión.** Primera pasada (capas externas sin hallazgos): 0 parches, 0 diferidos, 0 rechazados. Segunda pasada (blind-hunter, edge-case-hunter, verification-gap, intent-alignment, ac-auditor): 9 parches, 1 diferido (la clave «Prada» de González Prada, pendiente de Héctor), 22 rechazados; sin `bad_spec` ni `intent_gap`.
 
-**Revisión de seguimiento.** `followup_review_recommended: false` — parches: 0 high, 0 medium, 0 low; puntuación 0.
+Ficheros de la segunda pasada:
+- `tests/unit/autores-destacados.test.ts` — `aplanarAutor` con y sin `tradicion` y por el suelo; dueño único sobre `src/`, `tools/` e `integraciones/`; `barajar` en 32 bits.
+- `tests/e2e/busqueda.spec.ts` — (c) con `encodeURIComponent` y «Quitar los filtros» encima y antes de la salida; (d) nueva, el aviso de la 27.4 a cero sobre el sitio construido.
+- `tests/unit/medicion.test.ts` — aviso a cero con un filtro que sí se usa.
+- `src/pages/buscar.astro` — un renglón de comentario reenvuelto.
+
+**Revisión de seguimiento.** `followup_review_recommended: true` — parches de la segunda pasada: 0 high, 1 medium, 8 low; puntuación 3 × 1 + 8 = 11.
 
 **Verificación.**
 - `npx vitest run tests/unit/autores-destacados.test.ts tests/unit/huecos.test.ts` — 63 pasan; `tests/unit/objetivo.test.ts tests/unit/meta-de-corpus.test.ts` — 76 pasan.
@@ -174,6 +206,7 @@ Blocking condition: ninguna
 - `npm run build` — verde; `dist/buscar/` ofrece Arenal, Gracián, Ingenieros, Martí, González Prada, Quevedo, Séneca y Unamuno, en ese orden, y la `.sugerencia` sin filtros.
 - `npx playwright test tests/e2e/busqueda.spec.ts --project=escritorio` — 74 pasan, 4 saltadas (las de antes: «el índice no contiene nada no publicado», las dos de 360 px y «un Autor sin Obras»), incluidas 3.2, 22.10 y las tres de la 27.6.
 - Guion de la búsqueda: 17.227 bytes de 17.293 (medido por la prueba de la 23.1); no pasa del tope, así que `MAX_BYTES_GUION_DE_LA_BUSQUEDA` no se toca.
+- Segunda pasada (sin cambios en `src/lib` ni en la isla): puras (`autores-destacados`, `huecos`, `objetivo`, `meta-de-corpus`) 143 pasan; `busqueda-con-filtros` 61; `medicion` 663; `ingreso-construido` 41; `npx astro check` 0 errores; `npm run build` verde; `npx playwright test tests/e2e/busqueda.spec.ts --project=escritorio` 75 pasan y 4 saltadas (las mismas), incluidas las cuatro de la 27.6. Las dos pruebas nuevas de dueño único y de `aplanarAutor` se comprobaron en rojo con la regresión plantada. `npm run huecos` no se repite: `huecos.ts` no cambia en esta pasada.
 
 **Riesgos residuales.**
 - El guion de la búsqueda queda a 66 bytes de su tope: la próxima historia que lo toque (27.7, 27.8) casi seguro tendrá que rederivarlo con su regla.

@@ -5416,6 +5416,13 @@ describe('Historia 23.8 — una búsqueda cuenta una vez, cuando se asienta', ()
         aCero.avanzar(16);
         expect(aCero.region()).toEqual({ texto: CON_AVISO, apartada: true });
         expect(aCero.salidaVisible()).toBe(true);
+        // Y con un filtro que sí se usa, el aviso va delante de la frase que lo nombra.
+        const conFiltro = await isla({ ...CON_OBRAS, busqueda: '?q=zzz&autor=jose-marti&tema=y' });
+        const AVISO_Y_FILTRO = `${UNO} No encontramos «zzz» entre las citas de José Martí.`;
+        expect(conFiltro.sugerencia()).toBe(AVISO_Y_FILTRO);
+        expect(conFiltro.sombra()).toBe('');
+        conFiltro.avanzar(16);
+        expect(conFiltro.region()).toEqual({ texto: AVISO_Y_FILTRO, apartada: true });
       }, 240_000);
 
       it('nada con que buscar: «El filtro… ya no existe.» o «Los filtros… ya no existen.», sin recuento, salida ni búsqueda', async () => {
