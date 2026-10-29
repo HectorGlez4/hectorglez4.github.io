@@ -31,7 +31,8 @@ export const ETIQUETAS_DE_RESULTADO = {
   coleccion: 'Colección',
   // Historia 22.4 — las Obras indexables entran en Pagefind con su tipo. Desde la 22.7 el
   // resultado lleva el título en Inter y el Autor debajo (metadato `autor` de la Cabecera de
-  // Obra), y se lee «Obra: {título}, de {Autor}»; lo pinta `src/pages/buscar.astro`.
+  // Obra), y se lee «Obra: {título}, de {Autor}»; lo pinta `src/pages/buscar.astro`. Desde la
+  // 27.1 la Cita lleva también su Autor debajo (`TIPOS_CON_LINEA_DE_AUTOR`).
   obra: 'Obra',
   // Historia 26.2 — los Directorios (`/autores/` y `/obras/`, desde la 26.3) y la portada. La
   // portada responde solo por su `h1`, que es `MARCA` (`src/lib/marca.ts`): el rótulo no la
@@ -69,19 +70,51 @@ export const FILTRO_DE_TIPO = 'tipo';
  * La serif es solo para texto de Cita, nombre de Autor y nombre de Tema, y el título de una Obra
  * (Historia 22.7), el de un Directorio y el de la portada —la marca— no son ninguno de los tres.
  * Su resultado se pinta como el de Obra —mismo cuerpo y peso, otra familia— y se lee
- * «{rótulo}: {título}»; solo la Obra añade la línea de su Autor y el «, de {Autor}».
+ * «{rótulo}: {título}». La línea del Autor no va por aquí: la decide `TIPOS_CON_LINEA_DE_AUTOR`.
  */
 export const TIPOS_CON_TITULO_EN_SANS: readonly TipoDeResultado[] = ['obra', 'directorio', 'portada'];
+
+/**
+ * Los tipos cuyo resultado lleva el Autor debajo del título — Historias 22.7 y 27.1, FR-7,
+ * UX-DR91.
+ *
+ * El Autor sale del metadato `autor` del resultado: lo escriben la Cabecera de Obra (22.7) y,
+ * desde la 27.1, `src/components/FiltrosDeLaCita.astro` en toda Página de Cita. Con el metadato,
+ * `src/pages/buscar.astro` pinta la línea `.r-autor` y el nombre accesible lo nombra: «Cita:
+ * {título}, {Autor}» y, hasta la 27.2, «Obra: {título}, de {Autor}». Sin él —un índice viejo—,
+ * ni línea ni nombre accesible propio en la Cita. Las dos con el mismo código.
+ */
+export const TIPOS_CON_LINEA_DE_AUTOR: readonly TipoDeResultado[] = ['obra', 'cita'];
+
+/**
+ * Los nombres de los filtros de Pagefind que lleva cada Página de Cita — Historia 27.1, AD-11.
+ *
+ * Los valores los compone `filtrosDeLaBusqueda` de `src/lib/publicado.ts` (slug del Autor,
+ * nombre de la ficha de la Obra, slug de cada Tema publicado) y los escribe solo
+ * `src/components/FiltrosDeLaCita.astro`. No llevan tilde ni mayúscula: son claves de
+ * `filters()`, no texto que se lea. El del tipo (`FILTRO_DE_TIPO`) va aparte, en el armazón.
+ */
+export const FILTROS_DE_CITA = { autor: 'autor', obra: 'obra', tema: 'tema' } as const;
+
+/**
+ * El nombre de la clave de orden de Pagefind de toda Página de Cita — Historia 27.1, AD-25.
+ *
+ * `data-pagefind-sort="orden:NNNNNNNN"`, con la clave que compone `clavesDeOrden` de
+ * `src/lib/obras.ts`; la escribe solo `src/components/FiltrosDeLaCita.astro`. Se usa en
+ * `search(null, { filters, sort: { orden: 'asc' } })`.
+ */
+export const ORDEN_DE_CITA = 'orden';
 
 /**
  * Las opciones con que la búsqueda propia configura Pagefind — el único sitio donde se hace.
  *
  * Pagefind 1.5 busca la metadata, y todo `data-pagefind-meta` salvo `title` declara aquí su
  * peso (lo exige una prueba sobre `dist/` de `tests/unit/publicable-y-alcanzable.test.ts`). Hoy es
- * uno: `autor`, que la Cabecera de Obra escribe para pintar la línea del resultado (Historia 22.7)
- * y pesa 0; la Épica 27 lo usará igual para el Autor bajo la Cita, con el mismo campo y por la
- * misma razón. Un peso 0 quita la **puntuación**, no la coincidencia: `autor` no estorba solo
- * porque su texto ya está en el cuerpo indexado, y un valor que no deba casar como texto va en un
+ * uno: `autor`, que pesa 0 y cubre a los dos que lo escriben para pintar la línea del resultado:
+ * la Cabecera de Obra (Historia 22.7) y, desde la 27.1, la Página de Cita
+ * (`src/components/FiltrosDeLaCita.astro`), con el mismo campo y por la misma razón. Un peso 0
+ * quita la **puntuación**, no la coincidencia: `autor` no estorba solo porque su texto ya está en
+ * el cuerpo indexado —en la Cita, en su Atribución—, y un valor que no deba casar como texto va en un
  * filtro o bajo `data-pagefind-ignore`, nunca en un metadato. `title` no se nombra: conserva el 5
  * que Pagefind le da por omisión. El tipo no está aquí porque no es metadato sino filtro
  * (`FILTRO_DE_TIPO`), y un filtro no se busca.

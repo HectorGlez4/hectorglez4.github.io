@@ -79,6 +79,7 @@ import {
   ETIQUETAS_DE_RESULTADO,
   FILTRO_DE_TIPO,
   OPCIONES_DE_PAGEFIND,
+  TIPOS_CON_LINEA_DE_AUTOR,
   TIPOS_CON_TITULO_EN_SANS,
 } from '../../src/lib/tipoDeResultado.ts';
 import { MARCA as MARCA_DEL_SITIO } from '../../src/lib/marca.ts';
@@ -3990,14 +3991,20 @@ describe('Historia 23.8 — una búsqueda cuenta una vez, cuando se asienta', ()
           { url: '/obra/seneca/cartas/', meta: { title: 'Cartas' }, filters: { tipo: ['obra'] } },
           { tipo: 'obra', rotulo: 'Obra', titulo: 'Cartas', clases: ['titulo', 'en-sans'], autor: undefined, nombre: 'Obra: Cartas' },
         ],
+        // Historia 27.1 — la Cita lleva su Autor debajo, con el mismo código que la Obra y sin «de».
         [
           'Cita',
-          { url: '/cita/una/', meta: { title: 'Una', autor: 'Nadie' }, filters: { tipo: ['cita'] } },
+          { url: '/cita/una/', meta: { title: 'Una', autor: ' Nadie ' }, filters: { tipo: ['cita'] } },
+          { tipo: 'cita', rotulo: 'Cita', titulo: 'Una', clases: ['titulo'], autor: 'Nadie', nombre: 'Cita: Una, Nadie' },
+        ],
+        [
+          'Cita sin Autor',
+          { url: '/cita/una/', meta: { title: 'Una' }, filters: { tipo: ['cita'] } },
           { tipo: 'cita', rotulo: 'Cita', titulo: 'Una', ...SERIF },
         ],
         [
-          'Autor',
-          { url: '/autor/seneca/', meta: { title: 'Séneca' }, filters: { tipo: ['autor'] } },
+          'Autor, aunque traiga el metadato',
+          { url: '/autor/seneca/', meta: { title: 'Séneca', autor: 'Séneca' }, filters: { tipo: ['autor'] } },
           { tipo: 'autor', rotulo: 'Autor', titulo: 'Séneca', ...SERIF },
         ],
         [
@@ -4052,6 +4059,7 @@ describe('Historia 23.8 — una búsqueda cuenta una vez, cuando se asienta', ()
         expect(guion).toContain(`const PAGEFIND = ${JSON.stringify(OPCIONES_DE_PAGEFIND)};`);
         expect(guion).toContain(`const FILTRO = ${JSON.stringify(FILTRO_DE_TIPO)};`);
         expect(guion).toContain(`const EN_SANS = ${JSON.stringify(TIPOS_CON_TITULO_EN_SANS)};`);
+        expect(guion).toContain(`const CON_AUTOR = ${JSON.stringify(TIPOS_CON_LINEA_DE_AUTOR)};`);
       }, 240_000);
 
       it('toda búsqueda va precedida de `options` con las opciones de Pagefind', async () => {

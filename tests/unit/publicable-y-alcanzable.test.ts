@@ -31,7 +31,12 @@ import {
 } from '../../src/lib/superficies.ts';
 import { CITAS_POR_PAGINA, MAX_SALTOS_DESDE_LA_PORTADA } from '../../src/lib/umbrales.ts';
 import { MARCA } from '../../src/lib/marca.ts';
-import { FILTRO_DE_TIPO, OPCIONES_DE_PAGEFIND } from '../../src/lib/tipoDeResultado.ts';
+import {
+  FILTRO_DE_TIPO,
+  FILTROS_DE_CITA,
+  OPCIONES_DE_PAGEFIND,
+  ORDEN_DE_CITA,
+} from '../../src/lib/tipoDeResultado.ts';
 import { declaracionDe, recorrerElementos, type Declaracion, type Elemento } from './ayuda/enlaces.js';
 import { conClase, exposicionDeLaPortada } from './ayuda/portada.js';
 
@@ -836,12 +841,46 @@ describe('Historia 12.1 — sobre un sitio construido de verdad', () => {
         conCuerpo++;
         const tipo = tipoDeLaRuta(ruta);
         expect(tipo, `${ruta}: una página con cuerpo de Pagefind fuera de toda familia`).toBeDefined();
-        expect(filtros, ruta).toEqual([{ etiqueta: 'main', valor: `${FILTRO_DE_TIPO}:${tipo}` }]);
+        // Solo la clave del tipo: los filtros de la Cita (27.1) los mira su propia prueba.
+        const delTipo = filtros.filter((f) => f.valor.split(':')[0] === FILTRO_DE_TIPO);
+        expect(delTipo, ruta).toEqual([{ etiqueta: 'main', valor: `${FILTRO_DE_TIPO}:${tipo}` }]);
         vistas.add(tipo!);
       }
       // Sin esto pasaría sobre un sitio sin nada indexado. El corpus trae las seis familias.
       expect(conCuerpo).toBeGreaterThan(6);
       expect([...vistas].sort()).toEqual(['autor', 'cita', 'coleccion', 'directorio', 'obra', 'portada', 'tema']);
+    });
+
+    /*
+     * Historia 27.1, AD-11, AD-25 — los filtros `autor`, `obra` y `tema` y la clave de orden los
+     * lleva solo la Página de Cita, y toda Página de Cita lleva su clave: Pagefind saca de los
+     * resultados ordenados a la página que no la trae. El tipo de la 26.2 queda exento por nombre.
+     */
+    it('fuera de `/cita/…` ningún HTML lleva filtro `autor`, `obra` ni `tema` ni clave de orden, y toda Página de Cita lleva la suya', async () => {
+      const deCita = new Set<string>(Object.values(FILTROS_DE_CITA));
+      const fuera: string[] = [];
+      const claves = new Map<string, string[]>();
+      for (const [ruta, html] of await paginas()) {
+        const esCita = /^\/cita\/[^/]+$/.test(ruta);
+        const deLaPagina: string[] = [];
+        recorrerElementos(html, (elemento) => {
+          const filtro = elemento.atributos.get('data-pagefind-filter');
+          const sort = elemento.atributos.get('data-pagefind-sort');
+          if (sort !== undefined) deLaPagina.push(sort);
+          if (esCita) return;
+          if (sort !== undefined) fuera.push(`${ruta}: data-pagefind-sort="${sort}"`);
+          if (filtro !== undefined && deCita.has(filtro.split(':')[0])) fuera.push(`${ruta}: data-pagefind-filter="${filtro}"`);
+        });
+        if (esCita) claves.set(ruta, deLaPagina);
+      }
+      expect(fuera).toEqual([]);
+      // No en vacío: el corpus trae Citas, y cada una con una sola clave numérica de ocho cifras.
+      expect(claves.size).toBeGreaterThan(CITAS_POR_PAGINA);
+      for (const [ruta, deLaPagina] of claves) {
+        expect(deLaPagina, ruta).toHaveLength(1);
+        expect(deLaPagina[0], ruta).toMatch(new RegExp(`^${ORDEN_DE_CITA}:\\d{8}$`, 'u'));
+      }
+      expect(new Set([...claves.values()].map((c) => c[0])).size).toBe(claves.size);
     });
 
     it('todo `data-pagefind-meta` construido que no sea `title` declara su peso en `OPCIONES_DE_PAGEFIND`', async () => {

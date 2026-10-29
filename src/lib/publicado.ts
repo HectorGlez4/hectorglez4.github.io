@@ -791,6 +791,113 @@ export function obrasPublicadas(conjunto: Pick<ConjuntoPublicable, 'citas' | 'au
   return obrasDelConjunto(conjunto.citas, conjunto.autores).publicadas;
 }
 
+// ─── Los filtros de la búsqueda (Historia 27.1, FR-7) ────────────────────────
+
+/** Los valores de filtro de una Cita: su Autor, su Obra si la tiene y sus Temas publicados. */
+export interface FiltrosDeCita {
+  /** El slug del Autor. */
+  autor: string;
+  /** El nombre de la ficha de su Obra —nunca el título—; sin Obra resuelta, se omite. */
+  obra?: string;
+  /** Sus Temas publicados, sin repetir, en el orden en que la Cita los declara. */
+  temas: readonly string[];
+}
+
+/** Una opción de un filtro de `/buscar/`: el valor que viaja, lo que se lee y cuántas Citas lo llevan. */
+export interface OpcionDeFiltro {
+  valor: string;
+  rotulo: string;
+  recuento: number;
+}
+
+/** Una opción del filtro de Obra, con el slug de su Autor: la Obra se elige dentro de un Autor. */
+export interface OpcionDeObra extends OpcionDeFiltro {
+  autor: string;
+}
+
+/** Los filtros de cada Cita y las opciones de los filtros de `/buscar/`, de una sola vez. */
+export interface FiltrosDeLaBusqueda {
+  porCita: ReadonlyMap<string, FiltrosDeCita>;
+  autores: readonly OpcionDeFiltro[];
+  obras: readonly OpcionDeObra[];
+  temas: readonly OpcionDeFiltro[];
+}
+
+const porValor = (a: OpcionDeFiltro, b: OpcionDeFiltro): number =>
+  a.valor < b.valor ? -1 : a.valor > b.valor ? 1 : 0;
+
+/**
+ * Los filtros de la búsqueda — Historia 27.1, FR-7, AD-11, AD-25.
+ *
+ * Una sola función compone a la vez el `data-pagefind-filter` de cada Cita (`porCita`, que
+ * escribe `src/components/FiltrosDeLaCita.astro`) y las opciones de los filtros de `/buscar/`,
+ * así que un valor y su recuento no pueden salir de dos cálculos que discrepen:
+ *
+ * - `autor` es el slug del Autor; las opciones, los Autores con Citas publicadas, rotulados con
+ *   su nombre;
+ * - `obra` es el nombre de la ficha de su Obra (`cita.obra.nombre`, interfaz pública): retitular
+ *   no lo cambia, y dos Obras homónimas de Autores distintos no se confunden. Las opciones son
+ *   **toda** Obra con Citas publicadas —también las `noindex` y las congeladas—, rotuladas con
+ *   su título y con el slug de su Autor;
+ * - `tema`, uno por Tema **publicado** de la Cita (`temasPublicados`), sin repetir y en el orden
+ *   de `cita.temas`; un Tema bajo su umbral no tiene página ni filtro.
+ *
+ * Cada opción lleva cuántas Citas tienen ese valor, que es lo que `filters()` de Pagefind cuenta
+ * por página. Van por `valor`, en unidades de código: el orden que se enseña es de quien las pinta.
+ */
+export function filtrosDeLaBusqueda(
+  conjunto: Pick<ConjuntoPublicable, 'citas' | 'autores' | 'temas'>,
+): FiltrosDeLaBusqueda {
+  const autores = new Map(conjunto.autores.map((autor) => [autor.slug, autor]));
+  const temas = new Map(temasPublicados(conjunto.temas, conjunto.citas).map((tema) => [tema.slug, tema]));
+
+  const porCita = new Map<string, FiltrosDeCita>();
+  const deAutor = new Map<string, OpcionDeFiltro>();
+  const deObra = new Map<string, OpcionDeObra>();
+  const deTema = new Map<string, OpcionDeFiltro>();
+
+  for (const cita of conjunto.citas) {
+    const autor = autores.get(cita.autor);
+    if (autor === undefined) {
+      throw new Error(`La Cita «${cita.slug}» nombra al Autor «${cita.autor}», que no está en el Corpus.`);
+    }
+    const suyos = [...new Set(cita.temas)].filter((slug) => temas.has(slug));
+    porCita.set(cita.slug, {
+      autor: autor.slug,
+      ...(cita.obra !== undefined ? { obra: cita.obra.nombre } : {}),
+      temas: suyos,
+    });
+
+    const opcionDeAutor = deAutor.get(autor.slug) ?? { valor: autor.slug, rotulo: autor.nombre, recuento: 0 };
+    opcionDeAutor.recuento++;
+    deAutor.set(autor.slug, opcionDeAutor);
+
+    if (cita.obra !== undefined) {
+      const opcionDeObra = deObra.get(cita.obra.nombre) ?? {
+        valor: cita.obra.nombre,
+        rotulo: cita.obra.titulo,
+        recuento: 0,
+        autor: cita.obra.autor,
+      };
+      opcionDeObra.recuento++;
+      deObra.set(cita.obra.nombre, opcionDeObra);
+    }
+
+    for (const slug of suyos) {
+      const opcionDeTema = deTema.get(slug) ?? { valor: slug, rotulo: temas.get(slug)!.nombre, recuento: 0 };
+      opcionDeTema.recuento++;
+      deTema.set(slug, opcionDeTema);
+    }
+  }
+
+  return {
+    porCita,
+    autores: [...deAutor.values()].sort(porValor),
+    obras: [...deObra.values()].sort(porValor),
+    temas: [...deTema.values()].sort(porValor),
+  };
+}
+
 /** Las Obras con página y las que se indexan, sobre Citas que ya llevan su Obra colgada. */
 export interface ObrasDelSitio {
   publicadas: ObraResuelta[];

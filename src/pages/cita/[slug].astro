@@ -19,10 +19,12 @@ import ImagenDeCita from '../../islands/ImagenDeCita.astro';
 import CompartirEnlace from '../../islands/CompartirEnlace.astro';
 import RutasDeSalida from '../../components/RutasDeSalida.astro';
 import DatosEstructurados from '../../components/DatosEstructurados.astro';
+import FiltrosDeLaCita from '../../components/FiltrosDeLaCita.astro';
 import {
   citasDeLasObras,
   citasDeTema,
   conjuntoPublicable,
+  filtrosDeLaBusqueda,
   rutasDeSalidaDeCita,
   siguienteCita,
   temasPublicados,
@@ -30,6 +32,7 @@ import {
 import { tituloDe } from '../../lib/marca.ts';
 import type { GetStaticPaths } from 'astro';
 import { rutaDeCita } from '../../lib/superficies.ts';
+import { clavesDeOrden } from '../../lib/obras.ts';
 
 export const getStaticPaths = (async () => {
   const conjunto = await conjuntoPublicable();
@@ -43,6 +46,14 @@ export const getStaticPaths = (async () => {
    */
   const porObra = await citasDeLasObras(conjunto);
   const listados = new Map(publicados.map((tema) => [tema.slug, citasDeTema(conjunto.citas, tema.slug)]));
+  /*
+   * Historia 27.1 — los filtros de Pagefind de cada Cita y su clave de orden, calculados una vez
+   * para todas: los filtros, de la misma función que compone las opciones de `/buscar/`
+   * (`filtrosDeLaBusqueda`); la clave, de `clavesDeOrden` sobre el mismo orden del libro
+   * (`porObra`) que pinta la Página de Obra. Una clave que no cabe rompe aquí el build.
+   */
+  const { porCita } = filtrosDeLaBusqueda(conjunto);
+  const claves = clavesDeOrden(conjunto.autores, conjunto.citas, porObra);
 
   return conjunto.citas.map((cita) => {
     const siguiente = siguienteCita(cita, porObra, publicados, listados);
@@ -58,12 +69,14 @@ export const getStaticPaths = (async () => {
          * `siguiente` que la tarjeta, para que ninguna repita la Cita que «Siguiente» ya ofrece.
          */
         rutas: rutasDeSalidaDeCita(cita, conjunto.citas, porObra, publicados, siguiente),
+        filtros: porCita.get(cita.slug)!,
+        clave: claves.get(cita.slug)!,
       },
     };
   });
 }) satisfies GetStaticPaths;
 
-const { cita, autor, siguiente, rutas } = Astro.props;
+const { cita, autor, siguiente, rutas, filtros, clave } = Astro.props;
 
 /**
  * El título de pestaña y la meta descripción llevan la Cita entera si cabe. Quien llega
@@ -109,6 +122,12 @@ const canonica = new URL(rutaDeCita(cita.slug), Astro.site).href;
       * nada, y sin ninguno no hay `nav`: la Atribución sigue enlazando al Autor y a la Obra.
       */}
     <RutasDeSalida autor={autor} rutas={rutas} zona="rutas-de-salida" />
+    {/*
+      * Historia 27.1 — lo que la Cita declara a Pagefind: sus filtros, su metadato `autor` y su
+      * clave de orden. El último hijo de `<article>`, fuera de todo bloque que se repite en otra
+      * página; lo escribe solo este componente.
+      */}
+    <FiltrosDeLaCita filtros={filtros} clave={clave} nombreDelAutor={autor.nombre} />
   </article>
 </Armazon>
 

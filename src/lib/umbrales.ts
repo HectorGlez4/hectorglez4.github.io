@@ -390,6 +390,11 @@ export const META_AUTORES_DE_OTRA_TRADICION: number | undefined = undefined;
  * opciones de `OPCIONES_DE_PAGEFIND` antes de cada búsqueda y pinta Directorio y Portada con el
  * bloque de Obra, que pasó a ser compartido (`TIPOS_CON_TITULO_EN_SANS`). La Página de Cita con
  * Imagen sigue en 5.630.
+ *
+ * Medido otra vez en la Historia 27.1, sin moverlo: `/buscar/` lleva **6.622 bytes** con la
+ * medición puesta (34 libres), porque pinta la línea del Autor también bajo el resultado de Cita
+ * (`TIPOS_CON_LINEA_DE_AUTOR`), con el mismo código que la de Obra. Es lo último que cabe en
+ * línea: la 27.2 saca el guion de `/buscar/` a un fichero empaquetado con su propio tope (AD-6).
  */
 export const MAX_BYTES_DE_GUION = 6656;
 
@@ -606,6 +611,40 @@ export const TOPE_DE_PNG_DE_DIST: number | undefined = undefined;
  * en el mensaje del commit que lo fija.
  */
 export const MAX_BYTES_DEL_DIRECTORIO_DE_OBRAS = 290 * 1024;
+
+/**
+ * El ancho de cada rango de la clave de orden de la búsqueda — Historia 27.1, AD-25, AD-9.
+ *
+ * Toda Página de Cita lleva `data-pagefind-sort="orden:NNNNNNNN"`, que compone `clavesDeOrden`
+ * de `src/lib/obras.ts` como `a·B + p`: `a` es la posición del Autor en el orden del Directorio
+ * y `p` la de la Cita dentro de su Autor (sus Obras en el orden de su lista de obras, cada una en
+ * el del libro, y al final las que no tienen Obra). `B` es este número.
+ *
+ * **Por qué 4096 y dos rangos, y no tres.** Pagefind 1.5.2 ordena las claves numéricas como
+ * `f32`, que representa exactos los enteros solo hasta 2^24 = 16.777.216: por encima, dos claves
+ * vecinas empatan y el orden se pierde sin que nada falle. Un 3+2+3 decimal (Autor, Obra, posición
+ * en el libro) llega a ~17,1 millones y ya empata; tres campos binarios no caben con holgura (hoy
+ * 135 Autores, 57 Obras y 231 Citas por Obra como máximos). Con dos de 2^12 la clave mayor es
+ * `B² − 1` = 16.777.215, exacta por construcción. Holgura el 2026-10-29: 30× en Autores (135) y
+ * 13× en Citas de un Autor (308).
+ *
+ * Un rango cuyo recuento llega a este número —4096 Autores, o 4096 Citas de un Autor— **rompe
+ * el build** nombrando el rango («Autor» o «posición dentro de {slug}»), el recuento y el tope;
+ * es el mismo «≥» con que avisa `AVISO_DE_RANGO_DE_LA_CLAVE_DE_ORDEN`. Subirlo no es una opción:
+ * 4096² ya es el techo de `f32`. Lo que lo reabre es trocear la clave, o cambiar de rangos.
+ */
+export const MAX_POR_RANGO_DE_LA_CLAVE_DE_ORDEN = 4096;
+
+/**
+ * El recuento de un rango de la clave de orden a partir del cual el build avisa — Historia 27.1.
+ *
+ * Es el aviso previo a `MAX_POR_RANGO_DE_LA_CLAVE_DE_ORDEN`, al modo del de la 24.2 con el peso de
+ * `dist/`: avisa por `console.warn` nombrando el rango y su recuento, y nunca rompe.
+ *
+ * **Sin poner, y a propósito**: es un listón, y el listón lo pone Héctor en un diff visible.
+ * `undefined` significa eso: no avisa, y el tope sigue rompiendo.
+ */
+export const AVISO_DE_RANGO_DE_LA_CLAVE_DE_ORDEN: number | undefined = undefined;
 
 /**
  * Filas que D1 deja escribir al día en el plan gratuito — AD-9, AD-13, Historia 23.2.

@@ -18,11 +18,13 @@
  */
 
 import type { FormatoDeEdicion } from './ediciones.ts';
-import { normalizar } from './normalizar.ts';
+import { compararPorClave, normalizar } from './normalizar.ts';
 import { slugDeObra } from './slug.ts';
 import { rutaDeObra } from './superficies.ts';
 import {
+  AVISO_DE_RANGO_DE_LA_CLAVE_DE_ORDEN,
   CONGELACION_DE_OBRAS,
+  MAX_POR_RANGO_DE_LA_CLAVE_DE_ORDEN,
   MAX_PROPORCION_OBRA_DEL_AUTOR,
   MIN_CITAS_OBRA_INDEXABLE,
   type CongelacionDeObras,
@@ -1324,4 +1326,184 @@ export function dondeLeer(citas: readonly CitaParaDondeLeer[]): ResumenDondeLeer
   );
 
   return { lineas, citasSinDocumento, total: citas.length };
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// La clave de orden de la búsqueda — Historia 27.1, AD-25
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** El entero mayor que `f32` representa exacto: 2^24. Pagefind 1.5.2 ordena las claves así. */
+const MAYOR_EXACTO_EN_F32 = 2 ** 24;
+
+/** Las cifras de la clave: las de `MAYOR_EXACTO_EN_F32 − 1` (16.777.215), siempre las mismas. */
+const CIFRAS_DE_LA_CLAVE = String(MAYOR_EXACTO_EN_F32 - 1).length;
+
+/** El tope y el aviso de cada rango de la clave, por parámetro para las pruebas. */
+export interface LimitesDeLaClaveDeOrden {
+  /** El ancho de cada rango: un rango con tantas posiciones o más rompe. */
+  tope: number;
+  /** El recuento a partir del cual se avisa sin romper; `undefined`, no se avisa. */
+  aviso: number | undefined;
+}
+
+/** Lo que de un Autor hace falta para su rango: su slug y su clave del Directorio. */
+export interface AutorParaLaClave {
+  slug: string;
+  ordenAlfabetico?: string;
+}
+
+/** Lo que de una Cita hace falta para su clave: su Autor y, si la tiene, su Obra resuelta. */
+export interface CitaParaLaClave {
+  slug: string;
+  autor: string;
+  obra?: Pick<ObraResuelta, 'nombre' | 'titulo' | 'recuento'>;
+}
+
+/**
+ * La clave de orden de cada Cita para `data-pagefind-sort` — Historia 27.1, AD-25.
+ *
+ * Es la **única** dueña de la clave: la escribe `src/components/FiltrosDeLaCita.astro` en toda
+ * Página de Cita y nada más la compone. Filtrar por una Obra y ordenar por ella devuelve sus
+ * Citas en el orden de su Página de Obra; filtrar por un Autor, en el de su lista de obras.
+ *
+ * Dos rangos de `B = limites.tope`: `clave = a·B + p`.
+ *
+ * - `a`, la posición del Autor en el orden del Directorio: `compararPorClave` de
+ *   `src/lib/normalizar.ts` sobre su `ordenAlfabetico`, la función hermana de AD-3. Solo cuentan
+ *   los Autores con alguna Cita en `citas`.
+ * - `p`, la posición de la Cita dentro de su Autor: sus Obras en `ordenDeLaListaDeObras`, cada
+ *   una en el orden que trae su lista de `porObra` —el del libro, con las Citas sin documento
+ *   detrás por slug, que es la cola que ya da `ordenDelLibro`—, y al final el hueco «sin Obra»:
+ *   las Citas sin Obra resuelta (también las de obra «…»), por slug.
+ *
+ * Se escribe en decimal con ceros hasta ocho cifras (`'00012345'`): Pagefind lee el entero, y
+ * con un valor que no fuera numérico ordenaría como texto. La mayor posible es `B² − 1`, que con
+ * `B ≤ 4096` es exacta en `f32` (ver `MAX_POR_RANGO_DE_LA_CLAVE_DE_ORDEN`).
+ *
+ * Pura y determinista ante el orden de la entrada. **Lanza**:
+ *
+ * - si el recuento de un rango alcanza su tope —como el aviso, «≥»—, nombrando el rango
+ *   («Autor» o «posición dentro de {slug}»), el recuento y el tope: el build se para;
+ * - si la lista de una Obra no casa con sus Citas —una Cita con Obra que falta en la lista de su
+ *   Obra, o una lista que trae una Cita ajena—, nombrando la Obra y el slug;
+ * - si un Autor con Citas no tiene clave de orden, o una Cita nombra un Autor que no está, como
+ *   `agruparPorClave` del Directorio;
+ * - si el tope no deja la clave mayor dentro de lo exacto en `f32`.
+ *
+ * Con `limites.aviso` definido, cada rango cuyo recuento lo alcanza avisa por `console.warn`
+ * nombrando el rango y el recuento, y el build sigue.
+ */
+export function clavesDeOrden(
+  autores: readonly AutorParaLaClave[],
+  citas: readonly CitaParaLaClave[],
+  porObra: ReadonlyMap<string, readonly { slug: string }[]>,
+  limites: LimitesDeLaClaveDeOrden = {
+    tope: MAX_POR_RANGO_DE_LA_CLAVE_DE_ORDEN,
+    aviso: AVISO_DE_RANGO_DE_LA_CLAVE_DE_ORDEN,
+  },
+): Map<string, string> {
+  const { tope, aviso } = limites;
+  if (!Number.isInteger(tope) || tope < 1 || tope * tope > MAYOR_EXACTO_EN_F32) {
+    throw new Error(
+      `El tope de la clave de orden (${tope}) tiene que ser un entero entre 1 y ` +
+        `${Math.sqrt(MAYOR_EXACTO_EN_F32)}: con dos rangos, la clave mayor es tope² − 1, y por ` +
+        `encima de ${MAYOR_EXACTO_EN_F32} Pagefind, que ordena como f32, empataría claves vecinas.`,
+    );
+  }
+
+  /** Comprueba un rango: rompe si su recuento alcanza el tope, avisa si alcanza el aviso. */
+  const medir = (rango: string, recuento: number): void => {
+    if (recuento >= tope) {
+      throw new Error(
+        `La clave de orden de la búsqueda no cabe: el rango «${rango}» tiene ${recuento} ` +
+          `posiciones y el tope es ${tope} (MAX_POR_RANGO_DE_LA_CLAVE_DE_ORDEN, ` +
+          'src/lib/umbrales.ts). Con dos rangos ya está en el techo de f32: hay que trocear la clave.',
+      );
+    }
+    if (aviso !== undefined && recuento >= aviso) {
+      console.warn(
+        `Aviso: el rango «${rango}» de la clave de orden de la búsqueda tiene ${recuento} ` +
+          `posiciones (aviso en ${aviso}, tope en ${tope}; AVISO_DE_RANGO_DE_LA_CLAVE_DE_ORDEN).`,
+      );
+    }
+  };
+
+  const delAutor = new Map<string, CitaParaLaClave[]>();
+  for (const cita of citas) {
+    const suyas = delAutor.get(cita.autor);
+    if (suyas === undefined) delAutor.set(cita.autor, [cita]);
+    else suyas.push(cita);
+  }
+
+  const porSlugDeAutor = new Map(autores.map((autor) => [autor.slug, autor]));
+  const ordenables = [...delAutor.keys()].map((slug) => {
+    const autor = porSlugDeAutor.get(slug);
+    const clave = autor?.ordenAlfabetico;
+    if (autor === undefined || clave === undefined) {
+      throw new Error(
+        [
+          autor === undefined
+            ? `Hay Citas del Autor «${slug}», que no está entre los Autores,`
+            : `El Autor «${slug}» tiene Citas publicadas y no tiene clave de orden (ordenAlfabetico),`,
+          'así que la clave de orden de la búsqueda no sabe dónde ponerlo.',
+          'Lo para antes `integraciones/claves.ts`; si se llega aquí, esa puerta no corrió.',
+          'La clave la propone `npx tsx tools/autor.ts proponer-claves`.',
+        ].join(' '),
+      );
+    }
+    return { clave, slug };
+  });
+  ordenables.sort(compararPorClave);
+  medir('Autor', ordenables.length);
+
+  const claves = new Map<string, string>();
+  ordenables.forEach(({ slug: slugDeAutor }, a) => {
+    const suyas = delAutor.get(slugDeAutor) ?? [];
+    const conObra = new Map<string, CitaParaLaClave[]>();
+    const sinObra: CitaParaLaClave[] = [];
+    const obras = new Map<string, Pick<ObraResuelta, 'nombre' | 'titulo' | 'recuento'>>();
+    for (const cita of suyas) {
+      if (cita.obra === undefined) {
+        sinObra.push(cita);
+        continue;
+      }
+      obras.set(cita.obra.nombre, cita.obra);
+      const deLaObra = conObra.get(cita.obra.nombre);
+      if (deLaObra === undefined) conObra.set(cita.obra.nombre, [cita]);
+      else deLaObra.push(cita);
+    }
+
+    const enOrden: string[] = [];
+    for (const obra of ordenDeLaListaDeObras([...obras.values()])) {
+      const propias = new Set((conObra.get(obra.nombre) ?? []).map((cita) => cita.slug));
+      const lista = porObra.get(obra.nombre) ?? [];
+      const vistas = new Set<string>();
+      for (const { slug } of lista) {
+        if (!propias.has(slug) || vistas.has(slug)) {
+          throw new Error(
+            `La lista de la Obra «${obra.nombre}» trae «${slug}», que ${
+              vistas.has(slug) ? 'ya estaba en ella' : `no es una Cita de esa Obra de ${slugDeAutor}`
+            }: la clave de orden de la búsqueda no sabe dónde ponerla.`,
+          );
+        }
+        vistas.add(slug);
+        enOrden.push(slug);
+      }
+      for (const slug of [...propias].sort()) {
+        if (!vistas.has(slug)) {
+          throw new Error(
+            `La Cita «${slug}» es de la Obra «${obra.nombre}» y falta en su lista (citasDeLasObras): ` +
+              'la clave de orden de la búsqueda no sabe dónde ponerla.',
+          );
+        }
+      }
+    }
+    for (const cita of [...sinObra].sort(porSlug)) enOrden.push(cita.slug);
+
+    medir(`posición dentro de ${slugDeAutor}`, enOrden.length);
+    enOrden.forEach((slug, p) => {
+      claves.set(slug, String(a * tope + p).padStart(CIFRAS_DE_LA_CLAVE, '0'));
+    });
+  });
+  return claves;
 }
