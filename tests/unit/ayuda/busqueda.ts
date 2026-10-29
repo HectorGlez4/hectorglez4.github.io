@@ -747,6 +747,19 @@ export function islaDeBusquedaEnUnSandbox(guion: string, opciones: OpcionesDeLaI
       irA(1);
       await vaciar();
     },
+    /**
+     * Un salto de ancla —el enlace «Saltar al contenido»—, como lo hace el navegador: una entrada
+     * nueva con la misma dirección y otro fragmento, sin objeto, y `popstate`.
+     */
+    saltarAlAncla: async (ancla: string) => {
+      const direccion = new URL(entrada().direccion);
+      direccion.hash = ancla;
+      entradas.splice(actual + 1);
+      entradas.push({ estado: null, direccion });
+      actual = entradas.length - 1;
+      despachar(deLaVentana, 'popstate', { type: 'popstate', state: null });
+      await vaciar();
+    },
     /** Lo que la isla no debe hacer nunca: abrir entradas, escribir la dirección, parar la propagación. */
     violaciones: () => [...violaciones],
     /** Las promesas rechazadas sin manejar desde que se abrió el entorno. */

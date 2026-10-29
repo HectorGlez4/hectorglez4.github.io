@@ -3767,7 +3767,10 @@ describe('Historia 23.8 — una búsqueda cuenta una vez, cuando se asienta', ()
       entorno.ocultar();
       entorno.pagehide();
       expect(entorno.emitidos()).toEqual([VIENTO, VIENTO]);
-      expect(entorno.marcas()).toHaveLength(2);
+      // Historia 27.4 — tres marcas: la entrada nueva de «viento» lleva objeto, y se marca aunque
+      // «viento» ya se emitiera en la carga (si no, recargarla lo reemitiría). Enter otra vez, «viento »,
+      // el resultado y ocultarse no vuelven a marcar una entrada ya marcada.
+      expect(entorno.marcas()).toHaveLength(3);
       // Otro estado, con otras mayúsculas, sí es otro.
       await entorno.teclear('Viento');
       await entorno.enviar();
@@ -5462,6 +5465,133 @@ describe('Historia 23.8 — una búsqueda cuenta una vez, cuando se asienta', ()
         const entorno = await isla({ busqueda: '?q=vida&otra=1&de=instagram#ancla' });
         await elegirYEsperar(entorno, 'tema', 'el-saber');
         expect(escritas(entorno)).toEqual([['pushState', '/buscar/?q=vida&tema=el-saber']]);
+      }, 240_000);
+
+      it('un estado ya emitido que vuelve en otra entrada se marca en ella: recargarla no lo reemite', async () => {
+        const entorno = await isla();
+        await elegirYEsperar(entorno, 'autor', 'jose-marti');
+        await entorno.enviar();
+        await elegirYEsperar(entorno, 'tema', 'la-prudencia');
+        await elegirYEsperar(entorno, 'tema', '');
+        expect(escritas(entorno).at(-1)).toEqual(['replaceState', '/buscar/?autor=jose-marti']);
+        expect(entorno.longitud()).toBe(3);
+        // Ya emitido en la carga y ya en la dirección: no se emite, pero su entrada se marca.
+        await entorno.enviar();
+        expect(entorno.emitidos()).toEqual([[BUSQUEDA, '30+', 'autor']]);
+        const estado = plano(entorno.estadoDelHistorial());
+        expect(estado).toEqual({ [CLAVE_DEL_ESTADO_EN_LA_ENTRADA]: { autor: 'jose-marti' }, [MARCA]: true });
+        // Marcada una vez: asentar otra vez la misma entrada no la vuelve a escribir.
+        const marcas = entorno.marcas().length;
+        entorno.pulsarResultado(0);
+        expect(entorno.marcas()).toHaveLength(marcas);
+        // Recargarla —o volver a ella sin la caché— la da por registrada.
+        const recargada = await isla({ busqueda: '?autor=jose-marti', estado, navegacion: 'reload' });
+        await recargada.enviar();
+        recargada.pulsarResultado(0);
+        recargada.ocultar();
+        expect(recargada.emitidos()).toEqual([]);
+      }, 240_000);
+
+      it('si la dirección no pudo decir lo que se ve, asentar emite pero no marca una entrada que dice otra búsqueda', async () => {
+        const entorno = await isla({ busqueda: '?q=lluvia', historialQueLanza: { pushState: 1 } });
+        await entorno.teclear('viento');
+        entorno.pulsarResultado(0);
+        expect(entorno.emitidos()).toEqual([VIENTO]);
+        expect(entorno.direccion()).toBe('/buscar/?q=lluvia');
+        expect(entorno.marcas()).toEqual([]);
+        expect(entorno.estadoDelHistorial()).toBeNull();
+      }, 240_000);
+
+      it('lo que pintó una llegada cuyo reemplazo lanzó se asienta reemplazando su entrada, sin abrir otra', async () => {
+        const entorno = await isla({ busqueda: '?q=viento&tema=y', historialQueLanza: { replaceState: 1 } });
+        expect(entorno.direccion()).toBe('/buscar/?q=viento&tema=y');
+        entorno.pulsarResultado(0);
+        expect(escritas(entorno)).toEqual([
+          ['replaceState', '/buscar/?q=viento'],
+          ['replaceState', '/buscar/?q=viento'],
+        ]);
+        expect(entorno.longitud()).toBe(1);
+        expect(plano(entorno.estadoDelHistorial())).toEqual({ [CLAVE_DEL_ESTADO_EN_LA_ENTRADA]: { q: 'viento' }, [MARCA]: true });
+        expect(entorno.emitidos()).toEqual([VIENTO]);
+      }, 240_000);
+
+      it('un salto de ancla no es una llegada: ni repinta, ni busca, ni escribe, ni se lleva lo tecleado', async () => {
+        const entorno = await isla();
+        await teclearYEsperar(entorno, 'viento');
+        await entorno.enviar();
+        const antes = { buscadas: busquedas(entorno).length, escrituras: entorno.historial().length, region: entorno.region() };
+        await entorno.saltarAlAncla('contenido');
+        expect(busquedas(entorno)).toHaveLength(antes.buscadas);
+        expect(entorno.historial()).toHaveLength(antes.escrituras);
+        expect(entorno.region()).toEqual(antes.region);
+        expect(entorno.valor()).toBe('viento');
+        // Volver del ancla a la entrada de la que salió, tampoco.
+        await entorno.atras();
+        expect(busquedas(entorno)).toHaveLength(antes.buscadas);
+        expect(entorno.historial()).toHaveLength(antes.escrituras);
+        // Lo tecleado que esperaba su pausa sigue esperándola, y abre su entrada.
+        await entorno.adelante();
+        entorno.escribir('vientos');
+        await entorno.saltarAlAncla('arriba');
+        entorno.avanzar(150);
+        await entorno.vaciar();
+        entorno.avanzar(PAUSA_DE_TECLEO_MS - 150);
+        await entorno.vaciar();
+        expect(entorno.valor()).toBe('vientos');
+        expect(escritas(entorno).at(-1)).toEqual(['pushState', '/buscar/?q=vientos']);
+        expect(entorno.emitidos()).toEqual([VIENTO]);
+      }, 240_000);
+
+      it('un gesto mientras la llegada con Obra espera sus datos gana: la llegada tardía no pinta ni pisa lo tecleado', async () => {
+        const entorno = await isla({ ...CON_OBRAS, mapaManual: true, busqueda: `?q=vida&autor=jose-marti&obra=${MAESTROS}` });
+        expect(busquedas(entorno)).toEqual([]);
+        await teclearYEsperar(entorno, 'viento');
+        await entorno.responderAlMapa();
+        expect(entorno.valor()).toBe('viento');
+        expect(entorno.elegidos()).toEqual({ autor: '', tema: '' });
+        expect(entorno.obra().valor).toBe('');
+        expect(entorno.region().texto).toBe('3 resultados.');
+        expect(escritas(entorno)).toEqual([['pushState', '/buscar/?q=viento']]);
+      }, 240_000);
+
+      it('«atrás» a una entrada con Obra aún sin datos y «adelante» antes de que lleguen: gana la llegada de después', async () => {
+        const entorno = await isla({ ...CON_OBRAS, mapaManual: true, busqueda: `?q=vida&autor=jose-marti&obra=${MAESTROS}` });
+        await teclearYEsperar(entorno, 'viento');
+        await entorno.atras();
+        expect(busquedas(entorno)).toHaveLength(1);
+        await entorno.adelante();
+        await entorno.responderAlMapa();
+        expect(entorno.direccion()).toBe('/buscar/?q=viento');
+        expect(entorno.valor()).toBe('viento');
+        expect(entorno.elegidos()).toEqual({ autor: '', tema: '' });
+        expect(entorno.region().texto).toBe('3 resultados.');
+        expect(escritas(entorno)).toEqual([['pushState', '/buscar/?q=viento']]);
+        expect(entorno.longitud()).toBe(2);
+      }, 240_000);
+
+      it('ocultarse mientras un `popstate` aún busca no asienta lo de la entrada que se dejó en la nueva', async () => {
+        const entorno = await isla({ manual: true });
+        entorno.escribir('viento');
+        entorno.avanzar(150);
+        await entorno.responder('viento');
+        entorno.avanzar(PAUSA_DE_TECLEO_MS);
+        entorno.escribir('lluvia');
+        entorno.avanzar(150);
+        await entorno.responder('lluvia');
+        entorno.avanzar(PAUSA_DE_TECLEO_MS);
+        expect(escritas(entorno)).toEqual([
+          ['pushState', '/buscar/?q=viento'],
+          ['replaceState', '/buscar/?q=lluvia'],
+        ]);
+        await entorno.enviar();
+        await teclearYEsperar(entorno, 'nieve');
+        await entorno.responder('nieve');
+        const escrituras = entorno.historial().length;
+        await entorno.atras();
+        entorno.ocultar();
+        expect(entorno.historial()).toHaveLength(escrituras);
+        expect(entorno.longitud()).toBe(3);
+        expect(entorno.direccion()).toBe('/buscar/?q=lluvia');
       }, 240_000);
     });
   });

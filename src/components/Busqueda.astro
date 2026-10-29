@@ -133,7 +133,13 @@
  *         lanza, la búsqueda, el asentamiento y la emisión siguen, y la escritura siguiente reintenta;
  *       - asentar no abre entrada: si lo que se ve no es lo que dice la dirección (su escritura
  *         esperaba la pausa), primero se escribe con su regla —el gesto termina la pausa, como
- *         Enter— y después la marca. Un estado asentado no se reescribe nunca;
+ *         Enter; lo que pintó una llegada o un `popstate` reemplaza su propia entrada— y después la
+ *         marca. La marca se escribe en toda entrada que diga lo que se ve y no la lleve, también si
+ *         ese estado ya se emitió en la carga: toda entrada que escribe la isla lleva objeto, así que
+ *         el respaldo de Navigation Timing («sin objeto de estado») ya solo cubre la entrada de
+ *         llegada, y sin la marca una recarga o una vuelta sin caché la daría por no registrada. Si
+ *         la dirección no pudo decir lo que se ve (el historial lanzó), no se marca una entrada que
+ *         dice otra búsqueda. Un estado asentado no se reescribe nunca;
  *       - la carga (tras una microtarea) y `popstate` llegan por la misma función, `llegar`: la carga
  *         lee la dirección; `popstate`, el objeto de la entrada y, sin él, la dirección. Cancela las
  *         pausas, resuelve en el orden fijo de `resolverEstado` (Autor y Tema que no son opción,
@@ -144,7 +150,10 @@
  *         frase sola. Con Obra en lo leído, la resolución espera al mapa y a `filters()`; si no
  *         llegan, no se busca, no se dice nada y no se escribe (27.7);
  *       - `popstate` juzga lo ya registrado solo por la marca de su entrada: Navigation Timing
- *         describe la carga del documento, no la entrada a la que se vuelve.
+ *         describe la carga del documento, no la entrada a la que se vuelve. Un `popstate` que no
+ *         cambia la búsqueda de la dirección —un salto de ancla, como «Saltar al contenido»— no es
+ *         una llegada: no se repinta ni se anuncia nada. Mientras una llegada busca, lo que se veía
+ *         es de la entrada que se dejó y no se asienta en la nueva.
  *   · La búsqueda que no corre —el índice no carga, o `init`, `search` o los datos de un
  *     resultado fallan— no pinta, no cambia el estado que se ve y no deja ninguna promesa rechazada
  *     sin manejar; no se asienta. La siguiente vuelve a pedir el índice, también con el mismo estado
@@ -480,6 +489,8 @@ const { autores, temas } = Astro.props;
     let estadoVisto: EstadoDeLaBusqueda | null = null;
     /** La llegada en curso: un gesto o una llegada posterior la dejan sin efecto si espera datos. */
     let llegada = 0;
+    /** Historia 27.4 — la búsqueda de la dirección de la entrada actual, para reconocer un salto de ancla. */
+    let busquedaDeLaEntrada = location.search;
 
     const obraEnElDom = () => compuestoPara !== null;
     const elegidos = (): FiltrosElegidos => ({
@@ -740,7 +751,19 @@ const { autores, temas } = Astro.props;
       } catch {
         return false;
       }
+      busquedaDeLaEntrada = location.search;
       controlDeLaEntrada = control;
+      return true;
+    }
+
+    /** Historia 27.4 — reemplaza la entrada actual por `nuevo`, sin abrir otra. En `try`; devuelve si escribió. */
+    function reemplazar(nuevo: EstadoDeLaBusqueda): boolean {
+      try {
+        history.replaceState(entradaConEstado(history.state, nuevo), '', direccionDeLaBusqueda(nuevo, ruta!));
+      } catch {
+        return false;
+      }
+      busquedaDeLaEntrada = location.search;
       return true;
     }
 
@@ -754,22 +777,28 @@ const { autores, temas } = Astro.props;
        * la dirección —su escritura aún esperaba la pausa—, el gesto termina la pausa, como Enter:
        * primero se escribe con su regla, y después la marca.
        */
-      let escrita = false;
+      let enLaDireccion = true;
       if (estadoVisto && !mismoEstado(estadoVisto, estadoDeLaDireccion(location.search))) {
-        const control = controlDelVisto ?? 'campo';
         if (pendienteDe !== null && mismoEstado(estadoVisto, estadoDeLaIsla())) {
           clearTimeout(escritura);
           clearTimeout(eleccion);
           pendienteDe = null;
         }
-        escrita = escribir(control, estadoVisto);
+        // Lo que pintó una llegada o un `popstate` (sin control) es de su entrada: la reemplaza.
+        enLaDireccion = controlDelVisto === null ? reemplazar(estadoVisto) : escribir(controlDelVisto, estadoVisto);
       }
       controlDeLaEntrada = null;
       if (r) {
         hechos.push(r.clave);
         r.eventos.forEach((x) => __medir(...x));
       }
-      if (!r && !escrita) return;
+      // La marca va en toda entrada con objeto que diga lo que se ve y no la lleve, aunque ese
+      // estado ya se emitiera en la carga: sin la marca, una recarga lo reemitiría. Una entrada sin
+      // objeto solo se marca al emitir: si no, ya la cubre Navigation Timing. Y si la dirección no
+      // pudo decir lo que se ve, no se marca una entrada que dice otra búsqueda.
+      const conObjeto = typeof history.state === 'object' && history.state !== null;
+      if (!enLaDireccion && !estadoSinNada(estadoDeLaDireccion(location.search))) return;
+      if (A.yaRegistrada(history.state) || (!r && !conObjeto)) return;
       try {
         history.replaceState(A.marcada(history.state), '');
       } catch {}
@@ -925,15 +954,12 @@ const { autores, temas } = Astro.props;
       const registrada = A.yaRegistrada(history.state, tipo);
       ponerEstado(resuelto);
       const puesto = estadoDeLaIsla();
-      if (!mismoEstado(puesto, leido)) {
-        try {
-          history.replaceState(entradaConEstado(history.state, puesto), '', direccionDeLaBusqueda(puesto, ruta!));
-        } catch {}
-      }
+      if (!mismoEstado(puesto, leido)) reemplazar(puesto);
       const quedaAlgo = !estadoSinNada(puesto);
       const aviso = avisoDeLaDireccion(noSeUsan, quedaAlgo);
       const f = elegidos();
-      if (registrada && quedaAlgo) hechos.push(A.clave(puesto.texto, combinacionDeFiltros(f), valoresDeFiltros(f)));
+      const clave = A.clave(puesto.texto, combinacionDeFiltros(f), valoresDeFiltros(f));
+      if (registrada && quedaAlgo && !hechos.includes(clave)) hechos.push(clave);
       // Una llegada siempre busca, aunque sea lo último que se buscó: pinta su estado y su aviso.
       ultima = null;
       buscar('gesto', null, aviso);
@@ -974,6 +1000,10 @@ const { autores, temas } = Astro.props;
       gesto();
       const mia = llegada;
       controlDeLaEntrada = null;
+      // Lo que se veía es de la entrada que se dejó: hasta que la llegada pinte, no hay nada asentable.
+      visto = null;
+      estadoVisto = null;
+      controlDelVisto = null;
       if (estadoSinNada(leido)) {
         resolverYBuscar(leido, null, tipo);
         return;
@@ -994,8 +1024,16 @@ const { autores, temas } = Astro.props;
         .catch(() => {});
     }
 
-    // `popstate` lee el objeto de la entrada y, sin él, la dirección. Nunca Navigation Timing.
-    addEventListener('popstate', () => llegar(estadoDeLaEntrada(history.state) ?? estadoDeLaDireccion(location.search)));
+    // `popstate` lee el objeto de la entrada y, sin él, la dirección. Nunca Navigation Timing. Un
+    // `popstate` que no cambia la búsqueda de la dirección es un salto de ancla: no es una llegada.
+    addEventListener('popstate', () => {
+      if (location.search === busquedaDeLaEntrada) {
+        controlDeLaEntrada = null;
+        return;
+      }
+      busquedaDeLaEntrada = location.search;
+      llegar(estadoDeLaEntrada(history.state) ?? estadoDeLaDireccion(location.search));
+    });
 
     // La carga: tras una microtarea, para que al evaluarse el guion no se escriba ni se mida nada.
     Promise.resolve().then(() => {

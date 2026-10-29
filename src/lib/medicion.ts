@@ -472,8 +472,10 @@ export function asentamientoDeBusqueda(c: ConstantesDelAsentamiento) {
  * dirección de la barra o volver a ella no cuentan otra vez la misma llegada. Se quitan también
  * en una página sin vista —páginas 2+, `/buscar/`, 404—, donde ningún evento las lleva. Las lee
  * y las quita **solo el fichero**: ninguna isla las lee, la única que lee la dirección es la de la
- * búsqueda —su estado, `?q=&autor=&obra=&tema=`, que lee tras una microtarea, cuando este fichero,
- * que va antes en el documento, ya las quitó— y la única que escribe además en el historial es
+ * búsqueda —su estado, `?q=&autor=&obra=&tema=`, cuando este fichero ya las quitó: lo garantiza el
+ * orden del documento, no la microtarea tras la que lee, porque este fichero (`defer`) va antes que
+ * el guion de la búsqueda (`type="module"`) y los dos corren en ese orden; lo fija una prueba de
+ * `tests/unit/medicion.test.ts`— y la única que escribe además en el historial es
  * ella: `history.replaceState` con la marca de su búsqueda asentada
  * (`MARCA_DE_BUSQUEDA_ASENTADA`) en el objeto de estado, sin dirección (Historia 23.8), y, desde la
  * Historia 27.4, `history.pushState` y `history.replaceState` con la dirección **compuesta desde su

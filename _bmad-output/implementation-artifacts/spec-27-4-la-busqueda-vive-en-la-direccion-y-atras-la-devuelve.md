@@ -5,12 +5,19 @@ created: '2026-10-29'
 status: 'done'
 baseline_revision: 'de5230938c38d2a4a5e75626288ddd37a35d01b8'
 review_loop_iteration: 0
-followup_review_recommended: false
+followup_review_recommended: true
 context:
   - '{project-root}/_bmad-output/implementation-artifacts/epic-27-context.md'
   - '{project-root}/_bmad-output/planning-artifacts/architecture/architecture-brainlySabiduria-2026-08-10/ARCHITECTURE-SPINE.md'
 warnings: ['oversized']
-deferred: []
+deferred:
+  - summary: >-
+      A cero resultados con aviso de la dirección, la sugerencia se ve dos veces: en la región del recuento, que no se aparta para que el aviso se vea, y en la salida.
+    evidence: |-
+      `pintar` en `src/components/Busqueda.astro` deja la región visible con «aviso + sugerencia» cuando hay aviso, y `salida` se enseña con la misma `.sugerencia`. El propio pase lo anotó en Riesgos; la épica asigna las frases a cero a la Historia 27.6, que las rehace, y la decisión de cómo enseñar el aviso a cero es de esa historia.
+    location: >-
+      src/components/Busqueda.astro (pintar)
+    severity: low
 ---
 
 <intent-contract>
@@ -119,6 +126,30 @@ deferred: []
 - addressed_findings:
   - none
 
+### 2026-10-29 — Review pass
+- intent_gap: 0
+- bad_spec: 0
+- patch: 14: (high 1, medium 2, low 11)
+- defer: 1: (low 1)
+- reject: 23: (medium 2, low 21)
+- addressed_findings:
+  - `[high]` `[patch]` Una entrada con objeto cuyo estado ya se había emitido en la carga quedaba sin marca al asentarse («Autor, Enter, Tema, Todos los temas, Enter, recargar» emitía otra `busqueda`; blind-hunter, edge-case-hunter, ac-auditor). `asentar` marca ahora toda entrada con objeto que diga lo que se ve y no la lleve; la entrada sin objeto solo al emitir (la cubre Navigation Timing), y nunca dos veces. Pruebas: simulada en `medicion.test.ts` y en el navegador en `busqueda-historial.spec.ts`; la de la 23.8 «repetir…» pasa de 2 a 3 marcas, la tercera es justo la entrada que faltaba.
+  - `[medium]` `[patch]` Un `popstate` de salto de ancla («Saltar al contenido») se trataba como llegada: repintaba, reanunciaba y cancelaba lo tecleado. La isla recuerda la búsqueda de la dirección de su entrada y no llega si `popstate` no la cambia (deja la entrada sin control). Prueba simulada con `saltarAlAncla` nuevo en `tests/unit/ayuda/busqueda.ts`.
+  - `[medium]` `[patch]` Ocultarse entre un `popstate` y su pintado asentaba en la entrada nueva lo de la entrada que se dejó (y con `pushState` truncaba el historial). `llegar` deja `visto`, `estadoVisto` y `controlDelVisto` en nulo hasta que la llegada pinte. Prueba simulada.
+  - `[low]` `[patch]` Al asentar lo que pintó una llegada cuyo `replaceState` lanzó, se abría entrada con el control de respaldo `'campo'`. Ahora reemplaza su entrada (`reemplazar`). Prueba simulada.
+  - `[low]` `[patch]` Si la escritura de lo que se ve lanzaba, la marca caía en una entrada que dice otra búsqueda. Ahora no se marca una entrada cuya dirección tiene otra búsqueda no vacía. Prueba simulada.
+  - `[low]` `[patch]` `hechos` crecía con claves repetidas en cada `popstate` a una entrada registrada: se añade solo si no está.
+  - `[low]` `[patch]` `resolverEstado` aceptaba una Obra cuyo Autor del mapa no es opción del selector de Autor (datos de otra construcción): ahora se descarta y se cuenta. Prueba pura.
+  - `[low]` `[patch]` La prueba de lo construido no fijaba `autocomplete="off"` en los tres selectores: añadida en `busqueda-con-filtros.test.ts`.
+  - `[low]` `[patch]` La prueba de `dist/` de la 27.4 no afirmaba que `/buscar/` queda fuera de Pagefind: afirma que no lleva `data-pagefind-body`.
+  - `[low]` `[patch]` Faltaba la prueba de un gesto o de «atrás»/«adelante» mientras una llegada con Obra espera sus datos: dos pruebas simuladas con `mapaManual`.
+  - `[low]` `[patch]` El docblock de la isla no decía que el respaldo de Navigation Timing ya solo cubre la entrada de llegada: dicho, con la regla de la marca, el salto de ancla y la llegada que deja sin asentar lo anterior.
+  - `[low]` `[patch]` El docblock de `src/lib/medicion.ts` atribuía el orden a la microtarea: lo garantiza el orden del documento (`defer` antes que el módulo), que ya fija la prueba de la 23.6.
+  - `[low]` `[patch]` `busqueda-historial.spec.ts` suponía un `dist/` sin comprobarlo y no esperaba a que el servidor saliera: error claro si no hay `dist/buscar/index.html`, y `afterAll` espera la salida.
+  - `[low]` `[patch]` `busqueda-historial.spec.ts` componía la raíz con `URL.pathname` (codificado): `fileURLToPath`.
+  - Nota: tras los parches, `MAX_BYTES_GUION_DE_LA_BUSQUEDA` se rederiva con la regla de la 27.2 (15.425 medidos, tope 15.825).
+  - Rechazados (por qué, en breve): pedir mapa y `filters()` con cualquier estado y con filtros que no existen (el contrato lo pide así y la épica pide el mapa con todo estado usable); la regla «no asentada» fuera de la función pura; coste de `autorDeLaObra`; la prueba con caché que puede saltarse (no se saltó; el Block-If lo vigila); `fileURLToPath` en `busqueda.spec.ts` (preexistente); datos de prueba sacados del Corpus; el parámetro ajeno que sobrevive a la llegada (el contrato reemplaza solo si lo resuelto difiere); Enter tras cambiar un selector dentro de su pausa (conforme al contrato: Enter es el campo); el registro de revisión vacío y el crecimiento del tope (procedimiento); `estadoDeLaEntrada` estricta (decisión del contrato); llegada que nunca se resuelve si la red cuelga (27.7); `pushState` durante `pagehide` (especulativo, en `try`); y las lecturas de intent-alignment (asentar que escribe antes de marcar —Design Notes—, límite real del navegador, hostil, retitulado, filtros muertos y caché del alojamiento probados por representación, dist sin servidor) y del ac-auditor (retitulado de punta a punta, dos comportamientos solo simulados).
+
 ## Design Notes
 
 **Por qué la escritura pendiente se adelanta al asentar.** La dirección de lo tecleado espera 700 ms y un clic en un resultado puede llegar antes. Marcar entonces la entrada vieja la daría por asentada con un estado que no se asentó, y «atrás» desde la Cita devolvería la búsqueda anterior a la pulsada. El gesto que asienta termina la pausa, como ya lo hace Enter (27.2): el estado entra en el historial por su regla de siempre y después se marca. Asentar sigue sin abrir entradas por sí mismo.
@@ -180,3 +211,30 @@ Planificada el 2026-10-29 sobre `de5230938c38d2a4a5e75626288ddd37a35d01b8` y det
 - Con el índice de verdad lo hostil no encuentra nada, así que el recuento con lo hostil dentro solo lo prueba el entorno simulado; en el navegador se prueba el campo y la región sin elementos.
 - El guion de la búsqueda crece ~4 KB (11.034 → 15.087) y su tope se rederiva con la regla de la 27.2; no toca ningún tope de página.
 - Escribir en la dirección al ocultarse la página (asentar por `visibilitychange`) adelanta la escritura pendiente de lo que se ve, como pide el contrato; cambiar de pestaña con una búsqueda tecleada deja su entrada escrita y marcada.
+
+### Pase de revisión 1 (2026-10-29, hallazgos externos)
+
+**Qué cambió.** La isla de `Busqueda.astro` marca ahora toda entrada con objeto que diga lo que se ve y no lleve la marca, también si ese estado ya se emitió en la carga (la entrada sin objeto, solo al emitir: la cubre Navigation Timing); no marca una entrada cuya dirección dice otra búsqueda cuando el historial lanzó; al asentar lo que pintó una llegada cuyo reemplazo lanzó, reemplaza su entrada (`reemplazar`) en vez de abrir otra; un `popstate` que no cambia la búsqueda de la dirección (un salto de ancla) no es llegada; `llegar` deja sin nada asentable lo de la entrada que se dejó hasta pintar; `hechos` no repite claves. `resolverEstado` descarta la Obra cuyo Autor del mapa no es opción del selector de Autor.
+
+**Ficheros.**
+- `src/components/Busqueda.astro` — `asentar` (regla de la marca, `reemplazar`), `busquedaDeLaEntrada` y la guarda de `popstate`, `llegar` sin estado visto, `hechos` sin repetidos, docblock.
+- `src/lib/busqueda.ts` — `resolverEstado`: la Obra cuyo Autor no es opción se descarta.
+- `src/lib/medicion.ts` — docblock: el orden lo da el documento, no la microtarea.
+- `src/lib/umbrales.ts` — `MAX_BYTES_GUION_DE_LA_BUSQUEDA` = 15.825 (medido 15.425: 14.873 + 552, 2026-10-29).
+- `tests/unit/ayuda/busqueda.ts` — `saltarAlAncla`.
+- `tests/unit/medicion.test.ts` — siete pruebas nuevas en «Historia 27.4»; «repetir…» de la 23.8 espera 3 marcas.
+- `tests/unit/busqueda-con-filtros.test.ts` — la Obra de un Autor que no es opción; `autocomplete="off"` en los tres selectores; sin `data-pagefind-body`.
+- `tests/e2e/busqueda-historial.spec.ts` — prueba nueva en el navegador del estado repetido en otra entrada y la recarga; `fileURLToPath`, `dist/` comprobado, `afterAll` que espera.
+
+**Hallazgos.** 14 parches (1 alto, 2 medios, 11 bajos), 1 aplazado (la sugerencia doble a cero con aviso, a la 27.6), 23 rechazados. `followup_review_recommended: true` (un parche alto; puntuación 3×2 + 11 = 17).
+
+**Verificación.**
+- `npx vitest run tests/unit/busqueda-con-filtros.test.ts` — 49 verdes.
+- `npx vitest run tests/unit/medicion.test.ts -t "23\.6|23\.8|27\.2|27\.3|27\.4|isla"` — 216 verdes.
+- `npm run check` — 0 errores, 0 avisos. `npm run build` — 0; guion de la búsqueda 15.425 bytes.
+- Playwright (escritorio): `busqueda.spec.ts busqueda-historial.spec.ts filtro-del-directorio.spec.ts` 89 verdes, 4 omitidas preexistentes; `busqueda-historial.spec.ts` solo, 3 verdes con la de la caché **pasada, no saltada**; `busqueda.spec.ts -g "27.4" --project=movil` 11 verdes; `receptor.spec.ts accesibilidad.spec.ts -g "busca|buscar|23.7|23.8"` 38 verdes.
+- `npm test` entero con `correr.sh` — 150/150 ficheros, 6.920 pruebas verdes (878 s).
+- Puertos 4321, 4399, 4400, 4402, 4403 y 8787 libres al terminar.
+
+**Riesgos.** La guarda del salto de ancla compara `location.search`: dos entradas seguidas con la misma búsqueda y objetos distintos no se repintan al pasar entre ellas (la isla no escribe dos iguales seguidas, así que solo las crea un ancla). El tope del guion se rederiva otra vez (+338 bytes sobre el de la implementación).
+

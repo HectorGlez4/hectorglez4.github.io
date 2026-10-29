@@ -407,7 +407,8 @@ export function resolverEstado(
     noSeUsan++;
   }
   const deLaObra = estado.obra !== '' ? sitio.autorDeLaObra(estado.obra) : null;
-  if (estado.obra !== '' && deLaObra === null) {
+  // Una Obra cuyo Autor no es opción del selector de Autor (datos de otra construcción) tampoco se ofrece.
+  if (estado.obra !== '' && (deLaObra === null || !sitio.autores.includes(deLaObra))) {
     estado.obra = '';
     noSeUsan++;
   }

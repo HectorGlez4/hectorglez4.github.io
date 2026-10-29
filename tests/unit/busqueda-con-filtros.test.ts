@@ -449,6 +449,11 @@ describe('Historia 27.4 — lo puro: la búsqueda en la dirección', () => {
       estado: estado({ texto: 'vida' }),
       noSeUsan: 3,
     });
+    // Una Obra cuyo Autor no es opción del selector (datos de otra construcción) no se ofrece.
+    expect(resolverEstado(estado({ obra: 'jose-marti--cartas' }), { ...SITIO, autores: ['seneca'] })).toEqual({
+      estado: estado({}),
+      noSeUsan: 1,
+    });
     // Una Obra absorbida al reunir —fuera del mapa— no se traduce a la que la absorbió.
     expect(resolverEstado(estado({ autor: 'jose-marti', obra: 'jose-marti--maestros' }), SITIO)).toEqual({
       estado: estado({ autor: 'jose-marti' }),
@@ -829,6 +834,16 @@ describe('Historia 27.2 — lo construido', () => {
     expect(canonica).not.toContain('?');
     // El formulario sin guion envía a la misma ruta: su `action` es la que la isla compone.
     expect(html).toMatch(new RegExp(`<form\\b[^>]*\\baction="${rutaDeLaBusqueda()}"`, 'u'));
+    // Y fuera del índice de Pagefind: ninguna parte de la página es cuerpo indexable.
+    expect(html).not.toContain('data-pagefind-body');
+  });
+
+  it('Historia 27.4 — los tres selectores llevan `autocomplete="off"`, como el campo: si no, al volver sin la caché el navegador restaura su valor después de la llegada', () => {
+    for (const id of ['filtro-de-autor', 'filtro-de-obra', 'filtro-de-tema']) {
+      const select = new RegExp(`<select\\b[^>]*\\bid="${id}"[^>]*>`, 'u').exec(html)?.[0];
+      expect(select, id).toBeDefined();
+      expect(select, id).toMatch(/\bautocomplete="off"/u);
+    }
   });
 
   it('Historia 27.3 — en la plantilla, el `.selector` de Obra va entre el de Autor y el de Tema', () => {

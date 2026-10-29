@@ -1,7 +1,9 @@
 import { spawn, type ChildProcess } from 'node:child_process';
+import { existsSync } from 'node:fs';
 import { join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { expect, test, type BrowserContext, type Page } from '@playwright/test';
-import { EVENTOS } from '../../src/lib/medicion.ts';
+import { EVENTOS, MARCA_DE_BUSQUEDA_ASENTADA } from '../../src/lib/medicion.ts';
 import { combinacionDeFiltros, fraseDelRecuento } from '../../src/lib/busqueda.ts';
 import { filtrosDeLaBusqueda } from '../../src/lib/publicado.ts';
 import { rutaDeLaBusqueda } from '../../src/lib/superficies.ts';
@@ -25,7 +27,7 @@ const PERFIL = 'escritorio';
 const PUERTO = 4403;
 const SITIO = `http://localhost:${PUERTO}`;
 const RUTA = rutaDeLaBusqueda();
-const RAIZ = new URL('../..', import.meta.url).pathname;
+const RAIZ = fileURLToPath(new URL('../..', import.meta.url));
 const RESULTADOS = '[data-resultados] .resultado a';
 const ESTADO = '[data-estado]';
 
@@ -43,6 +45,10 @@ test.beforeAll(async ({}, info) => {
   );
   if (ocupado) {
     throw new Error(`Alguien responde ya en ${PUERTO}. Comprueba quién con \`lsof -nP -iTCP:${PUERTO} -sTCP:LISTEN\`.`);
+  }
+  // Sirve lo que ya está construido: sin `dist/`, el fallo diría otra cosa.
+  if (!existsSync(join(RAIZ, 'dist', 'buscar', 'index.html'))) {
+    throw new Error('No hay `dist/buscar/index.html`: construye antes el sitio (`npm run build`).');
   }
   servidor = spawn('node', [join(RAIZ, 'tests', 'servidor.mjs')], {
     env: { ...process.env, DIST: join(RAIZ, 'dist'), PUERTO: String(PUERTO), SERVIDOR_CACHE_CONTROL: 'max-age=600' },
@@ -63,8 +69,14 @@ test.beforeAll(async ({}, info) => {
   throw new Error(`El \`dist/\` no llegó a servir ${RUTA} en ${PUERTO}${muerto !== null ? ` (el servidor salió con ${muerto})` : ''}.`);
 });
 
-test.afterAll(() => {
-  servidor?.kill();
+test.afterAll(async () => {
+  // Espera a que salga: el puerto queda libre al terminar, no un rato después.
+  const proceso = servidor;
+  if (!proceso || proceso.exitCode !== null || proceso.signalCode !== null) return;
+  await new Promise<void>((listo) => {
+    proceso.once('exit', () => listo());
+    proceso.kill();
+  });
 });
 
 test.beforeEach(({}, info) => {
@@ -237,6 +249,32 @@ test.describe('Historia 27.4 — «atrás» devuelve la búsqueda, con la caché
         expect(await pagina.evaluate(() => (window as unknown as { __restaurada?: boolean }).__restaurada)).toBe(true);
       });
     });
+  });
+
+  test('un estado ya asentado que vuelve en otra entrada se marca en ella: recargarla no lo cuenta otra vez', async ({ page }) => {
+    test.setTimeout(120_000);
+    const cruce = await elCruce();
+    await espiar(page);
+    await page.goto(`${SITIO}${RUTA}`);
+    await page.locator('#filtro-de-autor').selectOption(cruce.autor);
+    await direccion(page, `?autor=${cruce.autor}`);
+    await page.locator('[data-consulta]').press('Enter');
+    await expect.poll(() => busquedas(page)).toEqual([COMBINACION.autor]);
+    // Tema (otra entrada) y de vuelta a «Todos los temas», que reemplaza esa entrada por el Autor solo.
+    await page.locator('#filtro-de-tema').selectOption(cruce.tema);
+    await direccion(page, `?autor=${cruce.autor}&tema=${cruce.tema}`);
+    await page.locator('#filtro-de-tema').selectOption('');
+    await direccion(page, `?autor=${cruce.autor}`);
+    await seVe(page, cruce.autor, '', cruce.soloAutor);
+    await page.locator('[data-consulta]').press('Enter');
+    await expect
+      .poll(() => page.evaluate((marca) => (history.state as Record<string, unknown> | null)?.[marca], MARCA_DE_BUSQUEDA_ASENTADA))
+      .toBe(true);
+    await page.reload();
+    await seVe(page, cruce.autor, '', cruce.soloAutor);
+    await page.locator('[data-consulta]').press('Enter');
+    await page.waitForTimeout(400);
+    expect(await busquedas(page)).toEqual([COMBINACION.autor]);
   });
 
   test('Autor, Tema, resultado, atrás, atrás —sin la caché—: la vuelta es otra carga, `back_forward`, y no asienta otra', async ({
