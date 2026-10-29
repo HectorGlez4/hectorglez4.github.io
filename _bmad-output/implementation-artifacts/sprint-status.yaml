@@ -422,7 +422,7 @@ development_status:
   26-8-ninguna-cita-queda-a-más-de-tres-saltos-y-el-build-lo-compru: review  # v8-ralph 2026-10-28: entra el modelo de alcance en el build (aviso de Citas a más de tres saltos) y las órdenes que retiran y publican lo comprueban; diferidos para Héctor: órdenes que añaden o reordenan listados sin comprobar el tramo, y tema --corpus tomado como slug
   26-9-ninguna-página-obliga-a-desplazarse-en-horizontal-a-320-px: review  # v8-ralph 2026-10-28 17:57 UTC: ninguna superficie pide desplazamiento horizontal a 320 px (texto al 200 % y espaciado 1.4.12), nombres largos se parten y el barrido e2e de 320 px cubre /buscar/; sin diferidos para Héctor
   26-10-una-persona-revisa-las-claves-de-orden-operativa-no-bloquea: backlog  # operativa: acto de Héctor (revisar las claves del lote inicial; se cierra con él, y las de los Autores nuevos pasan a la sesión de sembrado)
-  26-11-la-obra-y-los-directorios-llegan-juntos-al-sitio-en-vivo-y-s: backlog  # operativa: acto de Héctor (merge conjunto 24+26; fechas de SM-11 y SM-8 de llegada en vivo)
+  26-11-la-obra-y-los-directorios-llegan-juntos-al-sitio-en-vivo-y-s: review  # operativa: fusionada y desplegada por el bucle v8-ralph con autorización de Héctor del 2026-10-24; llegada 2026-10-29
   epic-26-retrospective: optional
 
   # Épica 25 — compartir donde se publica. La matriz de dispositivos corre dos veces, y cada una es puerta.
