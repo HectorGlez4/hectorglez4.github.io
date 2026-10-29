@@ -105,8 +105,17 @@ export const SEMANAS_HASTA_JUZGAR_SM11 = 8;
 /** La reparación de la publicación, en rojo del 2026-10-11 al 2026-10-19 (Publicar, 09:22 UTC). */
 export const DESPLIEGUE_DE_LA_REPARACION = '2026-10-19';
 
-/** La Tarjeta de Obra con los Directorios y la cabecera: las Épicas 24 y 26, juntas (26.11). */
-export const DESPLIEGUE_DE_OBRA_Y_DIRECTORIOS: string | undefined = undefined;
+/**
+ * La Tarjeta de Obra con los Directorios y la cabecera: las Épicas 24 y 26, juntas (26.11).
+ *
+ * **Llegó el 2026-10-29**: el merge `abb822c6ab` («merge: las Épicas 24 y 26, la Obra se ve y la
+ * Cita sigue, con los Directorios y la cabecera») y su «Desplegar» de Publicar (ejecución
+ * `40806576362`), que terminó a las 02:55:24 UTC de esa jornada. De ella se compone la segunda
+ * entrada de `CORTES_DE_SM8`; la jornada de llegada se informa como «cambió» y el tramo nuevo de
+ * SM-8 empieza la siguiente, la 2026-10-30. La escribió el bucle v8-ralph con la autorización de
+ * Héctor del 2026-10-24.
+ */
+export const DESPLIEGUE_DE_OBRA_Y_DIRECTORIOS: string | undefined = '2026-10-29';
 
 /** La portada de retorno, si llega antes del juicio de SM-11 (Historia 28.5). */
 export const DESPLIEGUE_DE_LA_PORTADA_DE_RETORNO: string | undefined = undefined;
