@@ -20,8 +20,8 @@ import { createContext, runInContext } from 'node:vm';
  *     búsqueda, y como en el navegador quita los saltos de línea de lo que se le escribe; un
  *     selector cambia de opción al escribirle el valor, como uno nativo, y el foco se apunta;
  *   · `document.createElement` con lo que usa para pintar un resultado;
- *   · un reloj fingido —`setTimeout`, `clearTimeout`, `requestAnimationFrame`— que solo avanza con
- *     `avanzar(ms)`;
+ *   · un reloj fingido —`setTimeout`, `clearTimeout`, `requestAnimationFrame`, `performance.now`—
+ *     que solo avanza con `avanzar(ms)`;
  *   · `location` de solo lectura —escribir en ella o llamar a `assign`/`replace` se apunta como
  *     violación—, `history` con su `state` inicial, un `replaceState` que apunta cada llamada con
  *     sus argumentos tal como llegaron (y puede lanzar) —con argumento de dirección, además, es una
@@ -410,7 +410,8 @@ export function islaDeBusquedaEnUnSandbox(guion: string, opciones: OpcionesDeLaI
     },
   };
 
-  const rendimiento: Record<string, unknown> = {};
+  // `now()` da el reloj fingido: la pausa del recuento de lo tecleado cuenta desde la última tecla.
+  const rendimiento: Record<string, unknown> = { now: () => ahora };
   if (!opciones.sinNavigationTiming) {
     rendimiento.getEntriesByType = (tipo: string) =>
       tipo !== 'navigation' || opciones.navegacion === null ? [] : [{ type: opciones.navegacion ?? 'navigate' }];

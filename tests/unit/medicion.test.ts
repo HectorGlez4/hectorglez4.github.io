@@ -2415,13 +2415,16 @@ describe('Historia 26.6 — el filtro de los Directorios es un fichero, y solo e
     ]) {
       expect(todos, `el filtro lleva «${dato}»`).not.toContain(dato);
     }
-    expect(fuente).not.toMatch(/\blocation\b/);
-    expect(fuente).not.toMatch(/\bhistory\b/);
+    // Lo que el filtro no toca no lo toca ninguno de sus ficheros, trozos compartidos incluidos: lo
+    // que se mude a un trozo no escapa de aquí. Solo `requestAnimationFrame` se mira en el suyo,
+    // porque el trozo lleva `anunciar` para la búsqueda.
+    expect(todos).not.toMatch(/\blocation\b/);
+    expect(todos).not.toMatch(/\bhistory\b/);
     expect(fuente).not.toContain('requestAnimationFrame');
     // Ni la ventana por ningún nombre, ni ninguna escucha de `click`: escucha `input` en su campo.
-    expect(fuente).not.toMatch(/\b(?:window|self|globalThis)\b/);
-    expect(fuente).not.toMatch(/(["'`])click\1/);
-    expect(fuente).not.toMatch(/innerHTML|outerHTML|insertAdjacentHTML|document\.write/);
+    expect(todos).not.toMatch(/\b(?:window|self|globalThis)\b/);
+    expect(todos).not.toMatch(/(["'`])click\1/);
+    expect(todos).not.toMatch(/innerHTML|outerHTML|insertAdjacentHTML|document\.write/);
     // Y la pausa de tecleo, el valor de `PAUSA_DE_TECLEO_MS` que el empaquetado copia en el
     // fichero. Esto no distingue la constante de un `700` escrito a mano —después de empaquetar
     // son lo mismo—: que el guion la importe lo dice su fuente, y el valor lo fija la prueba de
@@ -3522,7 +3525,8 @@ describe('Historia 23.8 — una búsqueda cuenta una vez, cuando se asienta', ()
     };
     /**
      * Historia 27.2 — con filtros: José Martí da 222 (y pinta 30), José Martí sobre la prudencia
-     * 8, sobre el saber con «escuela» 6, Séneca sobre la prudencia ninguna, y una sola con «única».
+     * 8, sobre el saber con «escuela» 6, Séneca sobre la prudencia ninguna, ninguna con «zzz…» y
+     * una sola con «única».
      * Todas Citas, con su Autor.
      */
     const CON_FILTROS = (consulta: string | null, filtros: Record<string, string>): Respuesta => {
@@ -3535,6 +3539,7 @@ describe('Historia 23.8 — una búsqueda cuenta una vez, cuando se asienta', ()
         filters: { tipo: ['cita'] },
       });
       if (texto === 'única') return { total: 1, datos };
+      if (texto.startsWith('zzz')) return { total: 0 };
       if (autor === 'seneca' && tema === 'la-prudencia') return { total: 0 };
       if (tema === 'el-saber' && texto === 'escuela') return { total: 6, datos };
       if (autor === 'jose-marti' && tema === 'la-prudencia') return { total: 8, datos };
@@ -4372,11 +4377,20 @@ describe('Historia 23.8 — una búsqueda cuenta una vez, cuando se asienta', ()
         // La sombra ya dice la frase nueva; la región, todavía la de antes.
         expect(entorno.sombra()).toBe('222 citas de José Martí con «vida».');
         expect(entorno.region().texto).toBe('222 citas de José Martí.');
-        // La pausa cuenta desde que se pinta la búsqueda de lo tecleado.
-        entorno.avanzar(PAUSA_DE_TECLEO_MS - 1);
+        // La pausa cuenta desde la última tecla: la búsqueda llegó 150 ms después y espera lo que falta.
+        entorno.avanzar(PAUSA_DE_TECLEO_MS - 150 - 1);
         expect(entorno.region().texto).toBe('222 citas de José Martí.');
         entorno.avanzar(1);
         expect(entorno.region().texto).toBe('222 citas de José Martí con «vida».');
+        // Una búsqueda que llega cuando la pausa ya se cumplió se escribe al llegar, sin otra espera.
+        const lenta = await isla({ manual: true });
+        lenta.escribir('vida');
+        lenta.avanzar(150);
+        lenta.avanzar(PAUSA_DE_TECLEO_MS);
+        await lenta.responder('vida');
+        expect(lenta.sombra()).toBe('3 resultados.');
+        lenta.avanzar(0);
+        expect(lenta.region().texto).toBe('3 resultados.');
         // Sin filtros, la de siempre, con el total y no los pintados.
         const sinFiltros = await isla();
         await sinFiltros.teclear('muchas');
@@ -4416,6 +4430,34 @@ describe('Historia 23.8 — una búsqueda cuenta una vez, cuando se asienta', ()
         await entorno.vaciar();
         expect(busquedas(entorno)).toEqual([['search', null, { filters: { [AUTOR]: 'jose-marti' }, sort: ORDEN }]]);
         expect(PAUSA_DE_LOS_SELECTORES_MS).toBe(400);
+      }, 240_000);
+
+      it('una pausa cancela la otra: la búsqueda la lanza el último gesto, una sola vez y con su ritmo', async () => {
+        // Teclear y elegir antes de que se cumpla la pausa del tecleo: busca la elección, al llegar.
+        const eligiendo = await isla();
+        await elegirYEsperar(eligiendo, 'autor', 'jose-marti');
+        eligiendo.escribir('vida');
+        eligiendo.avanzar(100);
+        eligiendo.elegir('autor', 'seneca');
+        eligiendo.avanzar(PAUSA_DE_LOS_SELECTORES_MS);
+        await eligiendo.vaciar();
+        expect(busquedas(eligiendo)).toEqual([
+          ['search', null, { filters: { [AUTOR]: 'jose-marti' }, sort: ORDEN }],
+          ['search', 'vida', { filters: { [AUTOR]: 'seneca' } }],
+        ]);
+        expect(eligiendo.region().texto).toBe('4 citas de Séneca con «vida».');
+        // Elegir y teclear antes de que se cumpla la de los selectores: busca lo tecleado, con su pausa.
+        const tecleando = await isla();
+        tecleando.elegir('autor', 'jose-marti');
+        tecleando.avanzar(100);
+        await tecleando.teclear('vida');
+        tecleando.avanzar(PAUSA_DE_LOS_SELECTORES_MS);
+        await tecleando.vaciar();
+        expect(busquedas(tecleando)).toEqual([['search', 'vida', { filters: { [AUTOR]: 'jose-marti' } }]]);
+        expect(tecleando.sombra()).toBe('222 citas de José Martí con «vida».');
+        expect(tecleando.region().texto).toBe('');
+        tecleando.avanzar(PAUSA_DE_TECLEO_MS);
+        expect(tecleando.region().texto).toBe('222 citas de José Martí con «vida».');
       }, 240_000);
 
       it('Pagefind se pide al elegir un filtro, sin enfocar el campo ni esperar la pausa', async () => {
@@ -4516,6 +4558,41 @@ describe('Historia 23.8 — una búsqueda cuenta una vez, cuando se asienta', ()
         await elegirYEsperar(entorno, 'autor', 'jose-marti');
         expect(entorno.salidaVisible()).toBe(false);
         expect(entorno.region()).toEqual({ texto: '8 citas de José Martí sobre la prudencia.', apartada: false });
+      }, 240_000);
+
+      it('la sugerencia a cero no pisa un recuento pintado antes de su fotograma', async () => {
+        const entorno = await isla();
+        await entorno.teclear('vida');
+        entorno.elegir('autor', 'seneca');
+        await elegirYEsperar(entorno, 'tema', 'la-prudencia');
+        expect(entorno.region()).toEqual({ texto: '', apartada: true });
+        // Antes del fotograma siguiente, otra búsqueda con resultados se pinta y escribe su recuento.
+        entorno.quitarFiltros();
+        await entorno.vaciar();
+        expect(entorno.region()).toEqual({ texto: '3 resultados.', apartada: false });
+        entorno.avanzar(16);
+        expect(entorno.region()).toEqual({ texto: '3 resultados.', apartada: false });
+        // Y quitar los filtros sin texto, que deja la página sin búsqueda, tampoco la deja llegar después.
+        const sinTexto = await isla();
+        sinTexto.elegir('autor', 'seneca');
+        await elegirYEsperar(sinTexto, 'tema', 'la-prudencia');
+        sinTexto.quitarFiltros();
+        await sinTexto.vaciar();
+        sinTexto.avanzar(16);
+        expect(sinTexto.region().texto).toBe('');
+        expect(sinTexto.salidaVisible()).toBe(false);
+      }, 240_000);
+
+      it('con texto y filtro a cero: la `busqueda` con su combinación y la `busqueda-sin-resultados` solo con el texto', async () => {
+        const entorno = await isla();
+        await elegirYEsperar(entorno, 'autor', 'jose-marti');
+        await entorno.teclear('zzz nada');
+        expect(entorno.salidaVisible()).toBe(true);
+        await entorno.enviar();
+        expect(entorno.emitidos()).toEqual([
+          [BUSQUEDA, '0', 'autor'],
+          [SIN_RESULTADOS, 'zzz nada'],
+        ]);
       }, 240_000);
 
       it('al salir de cero tecleando, la región no dice la sugerencia durante la pausa', async () => {

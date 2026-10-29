@@ -146,8 +146,12 @@ describe('Historia 27.2 — los órdenes de los selectores', () => {
     const esperado = ordenDeAutoresPorNombre(autores).map((a) => a.valor);
     expect(esperado).toEqual(['e', 'c', 'd', 'a', 'b']);
     const copia = [...autores];
-    for (let i = 0; i < 20; i++) {
-      const permutada = [...autores].sort(() => Math.random() - 0.5);
+    // Las 120 permutaciones, todas: reproducible, y sin dejar ninguna al azar.
+    const permutaciones = <T,>(lista: readonly T[]): T[][] =>
+      lista.length <= 1 ? [[...lista]] : lista.flatMap((x, i) => permutaciones([...lista.slice(0, i), ...lista.slice(i + 1)]).map((resto) => [x, ...resto]));
+    const todas = permutaciones(autores);
+    expect(todas).toHaveLength(120);
+    for (const permutada of todas) {
       expect(ordenDeAutoresPorNombre(permutada).map((a) => a.valor)).toEqual(esperado);
       expect(ordenDeTemasPorNombre(permutada).map((a) => a.valor)).toEqual(esperado);
     }
@@ -322,6 +326,65 @@ describe('Historia 27.2 — lo construido', () => {
     // La lista de resultados es una lista, con su zona; la región está desde la carga, vacía.
     expect(html).toMatch(/<ul class="resultados" role="list" data-resultados data-zona="resultado"/u);
     expect(html).toMatch(/<p class="estado" role="status" data-estado[^>]*><\/p>/u);
+  });
+
+  it('cada elemento que busca el fichero de la búsqueda está en lo construido, donde lo busca', () => {
+    /*
+     * Revisión de la 27.2 — el guion encuentra lo que usa por selectores y, si falta uno, no
+     * arranca: `/buscar/` se queda en el `h1`. El entorno simulado de `medicion.test.ts` sirve sus
+     * propios elementos, así que aquí se cruzan los selectores que lleva el fichero construido con
+     * el HTML construido. Un selector nuevo en el guion pone esto en rojo hasta decir dónde va.
+     */
+    const etiqueta = etiquetasDeGuionExterno(html).find((e) => guionExternoDe(e.src)?.id === 'busqueda');
+    expect(etiqueta).toBeDefined();
+    const guion = readFileSync(join(proyecto, 'dist', etiqueta!.src), 'utf8');
+    const buscados = new Set([...guion.matchAll(/\.querySelector(?:All)?\(\s*(["'`])([^"'`]+)\1\s*\)/gu)].map((m) => m[2]));
+    // La del `nonce` la busca el envoltorio que el empaquetado pone a todo `import()`, no la isla.
+    buscados.delete('meta[property=csp-nonce]');
+    // Lo que busca en lo que clona de la plantilla, y lo que busca en la página.
+    const EN_LA_PLANTILLA = ['form', '[data-consulta]', '[data-selector-de-autor]', '[data-selector-de-tema]', '[data-quitar]', '.sombra'];
+    const EN_LA_PAGINA = ['[data-busqueda]', 'template', '[data-resultados]', '[data-estado]', '[data-salida]', '.sugerencia'];
+    expect([...buscados].sort()).toEqual([...EN_LA_PLANTILLA, ...EN_LA_PAGINA].sort());
+
+    const tieneClase = (elemento: { atributos: ReadonlyMap<string, string> }, clase: string) =>
+      (elemento.atributos.get('class') ?? '').split(/\s+/u).includes(clase);
+    const casa = (selector: string, elemento: { etiqueta: string; atributos: ReadonlyMap<string, string> }) =>
+      selector.startsWith('[')
+        ? elemento.atributos.has(selector.slice(1, -1))
+        : selector.startsWith('.')
+          ? tieneClase(elemento, selector.slice(1))
+          : elemento.etiqueta === selector;
+    type Visto = { plantilla: boolean; raiz: boolean; recuento: boolean; salida: boolean };
+    const vistos = new Map<string, Visto[]>();
+    recorrerElementos(html, (elemento, antepasados) => {
+      for (const selector of buscados) {
+        if (!casa(selector, elemento)) continue;
+        vistos.set(selector, [
+          ...(vistos.get(selector) ?? []),
+          {
+            plantilla: antepasados.some((a) => a.etiqueta === 'template'),
+            raiz: antepasados.some((a) => a.atributos.has('data-busqueda')),
+            recuento: antepasados.some((a) => tieneClase(a, 'recuento')),
+            salida: antepasados.some((a) => a.atributos.has('data-salida')),
+          },
+        ]);
+      }
+    });
+    // Cada uno de la plantilla, una vez dentro de ella, y ella dentro de la raíz.
+    for (const selector of EN_LA_PLANTILLA) {
+      expect(vistos.get(selector)?.filter((v) => v.plantilla), selector).toEqual([
+        { plantilla: true, raiz: true, recuento: false, salida: false },
+      ]);
+    }
+    expect(vistos.get('template')?.[0]).toEqual({ plantilla: false, raiz: true, recuento: false, salida: false });
+    // Lo de la página, el primero que encuentra `document.querySelector`, fuera de la plantilla; la
+    // región dentro de `.recuento`, la rejilla donde la sombra le reserva el alto.
+    expect(vistos.get('[data-busqueda]')?.[0]).toEqual({ plantilla: false, raiz: false, recuento: false, salida: false });
+    expect(vistos.get('[data-resultados]')?.[0]).toEqual({ plantilla: false, raiz: false, recuento: false, salida: false });
+    expect(vistos.get('[data-estado]')?.[0]).toEqual({ plantilla: false, raiz: false, recuento: true, salida: false });
+    expect(vistos.get('[data-salida]')?.[0]).toEqual({ plantilla: false, raiz: false, recuento: false, salida: false });
+    // La sugerencia que se anuncia a cero, dentro de la salida.
+    expect(vistos.get('.sugerencia')?.[0]).toEqual({ plantilla: false, raiz: false, recuento: false, salida: true });
   });
 
   describe('en el índice generado por Pagefind', () => {

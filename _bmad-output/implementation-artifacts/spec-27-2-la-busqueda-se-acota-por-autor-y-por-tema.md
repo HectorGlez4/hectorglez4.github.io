@@ -5,7 +5,7 @@ created: '2026-10-29'
 status: 'done'
 baseline_revision: '5b37b9e042d28bd4f94df060582d82d65f7c868f'
 review_loop_iteration: 0
-followup_review_recommended: false
+followup_review_recommended: true
 context:
   - '{project-root}/_bmad-output/implementation-artifacts/epic-27-context.md'
   - '{project-root}/_bmad-output/planning-artifacts/architecture/architecture-brainlySabiduria-2026-08-10/ARCHITECTURE-SPINE.md'
@@ -130,6 +130,25 @@ deferred: []
 
 Las capas de revisión son externas en este bucle y la revisión independiente viene después: esta pasada no tenía hallazgos que clasificar.
 
+### 2026-10-29 — Review pass
+- intent_gap: 0
+- bad_spec: 0
+- patch: 9 (high 0, medium 2, low 7)
+- defer: 0
+- reject: 18 (high 0, medium 3, low 15)
+- addressed_findings:
+  - `[medium]` `[patch]` Los ganchos que el fichero de la búsqueda busca (`[data-busqueda]`, la plantilla con `form`, `[data-consulta]`, los dos selectores, `[data-quitar]` y `.sombra`; la región dentro de `.recuento`, la lista, la salida y su `.sugerencia`) solo los miraba el Playwright local: `busqueda-con-filtros.test.ts` cruza ahora los selectores que lleva el fichero construido con el HTML construido, y dónde los busca (comprobado en rojo renombrando `data-quitar` en la plantilla). Cubre también el arranque mudo y el acoplamiento página–componente (blind-hunter, verification-gap).
+  - `[medium]` `[patch]` El recuento de lo tecleado se escribía `PAUSA_DE_TECLEO_MS` después de **pintarse** la búsqueda (~850 ms + latencia tras la tecla), no «unos 700 ms sin teclear»: `ritmoDeTecleo().anunciar(texto, espera?)` admite la espera que falta y la búsqueda cuenta la pausa desde la última tecla (`performance.now()`); si la búsqueda llega más tarde, se escribe al llegar. Prueba del entorno simulado ajustada y ampliada con la búsqueda lenta (intent-alignment R3, ac-auditor).
+  - `[low]` `[patch]` Teclear y elegir dentro de la pausa del otro dejaba los dos temporizadores vivos: el del tecleo buscaba la elección con el ritmo equivocado. Ahora una pausa cancela la otra y busca el último gesto, con su ritmo; prueba nueva (blind-hunter, edge-case-hunter).
+  - `[low]` `[patch]` La sugerencia a cero, escrita por `anunciar` en el fotograma siguiente, podía pisar un recuento pintado antes de ese fotograma o caer en una página ya sin búsqueda: la escritura solo cae si nada se pintó ni se vació entretanto; prueba nueva con «Quitar los filtros» (otros hallazgos, blind-hunter).
+  - `[low]` `[patch]` Las comprobaciones de que el filtro no toca dirección, historial, ventana, `click` ni HTML miraban solo su fichero de entrada: ahora miran también el trozo compartido; `requestAnimationFrame` sigue mirándose solo en el suyo (blind-hunter).
+  - `[low]` `[patch]` Faltaba la prueba de texto con filtro a cero: `busqueda` `'0'` con su combinación y `busqueda-sin-resultados` solo con el texto (ac-auditor).
+  - `[low]` `[patch]` `ingreso-construido.test.ts` no decía que `/buscar/`, con los Modelos encendidos, pide la entrada `busqueda`: ya lo afirma (ac-auditor).
+  - `[low]` `[patch]` La prueba de los órdenes permutaba con `Math.random`: recorre ahora las 120 permutaciones (blind-hunter).
+  - `[low]` `[patch]` `AGENTS.md` ponía «el recuento de `/buscar/`» entre los mensajes del primer ritmo: ya dice que la búsqueda sin resultados va por `anunciar` y el recuento por el segundo ritmo, que solo anuncia si la frase cambió —lo que pide la historia; el mismo recuento con otra búsqueda no se vuelve a anunciar a propósito— (blind-hunter).
+
+Rechazados (18), con su motivo: la frase visible anterior durante la pausa y su solape con la sombra (el diseño de la 26.6 que el spec adopta: la sombra reserva el alto de la frase nueva); sin JavaScript la página queda en el `h1` (la historia pone el campo en el guion; `<noscript>` y el aviso son de la 27.7); el filtro paga el trozo compartido y su tope se rederivó (la historia cuenta los trozos compartidos en el tope); la guarda textual de la región de `/buscar/` (el entorno simulado ejecuta el fichero y prueba qué se escribe y cuándo); `TROZO_COMPARTIDO` y su atribución (un trozo de una palabra solo sale de partir entradas declaradas, uno con otro nombre falla en rojo, y la atribución en las pruebas de red es de rótulo); los literales 150 y 30 (ya estaban; la tanda es de la 27.5); la e2e de Tema y texto (el entorno simulado lo comprueba sobre el fichero construido); `ficherosDescargados` sin `trozos` (lo juzga la prueba de los topes); la llegada con filtros y la caché de atrás y adelante (la clave con valores ya distingue el estado; la caché conserva el DOM); el `select` cerrado que no parte (control nativo, que la historia exige); `aria-controls` y la etiqueta del campo (la etiqueta la fija la historia); el registro de la pasada anterior (esta es la revisión); `vite:preloadError` (nada lo escucha en `dist/`); 30 pintadas de 222 (la tanda sigue en 30 hasta la 27.5, y el recuento dice el total); «Quitar los filtros» con `hidden` (fuera del árbol y sin pintarse); NFR-2 sobre un fixture de una página (lo garantiza el listado del Autor, que prueba `publicable-y-alcanzable`); los estilos por tokens sin prueba de estilo calculado (están en el componente, por tokens, y los barre axe); los comportamientos de plataforma (no hay lector de pantalla ni iOS en el CI).
+
 ## Design Notes
 
 **Por qué un `<template>`.** Como en el filtro de los Directorios: el marcado, las opciones del build y sus estilos de ámbito salen en el HTML, inertes, y el guion no lleva contenido (`medicion.test.ts` «ningún guion lleva contenido»). Sin guion la página queda en el `h1` hasta la 27.7, que la rama no fusiona antes.
@@ -197,6 +216,30 @@ Status: done
 - Vite rodea todo `import()` dinámico del cliente con `__vitePreload` (~1.100 bytes, lista de dependencias vacía); no hay opción que lo quite. Ante una importación fallida emite `vite:preloadError` en la ventana y vuelve a lanzar: el `catch` de `cargar` sigue manejándolo y el reintento con `?{n}` funciona (lo prueba el entorno simulado).
 - Quedan ~400 bytes de lecturas de propiedades de las tablas del vocabulario que el empaquetado conserva por si tuvieran efectos; están medidos en el tope.
 - El trozo compartido se reconoce por forma de nombre (`/_astro/{módulo}.{resumen}.js`, módulo de una palabra): un trozo con otro nombre haría fallar en rojo la prueba de `dist/`, no pasar en silencio.
-- El recuento de lo tecleado llega `PAUSA_DE_TECLEO_MS` después de pintarse la búsqueda (que corre 150 ms tras la última tecla), no 700 ms después de la tecla.
+- ~~El recuento de lo tecleado llega `PAUSA_DE_TECLEO_MS` después de pintarse la búsqueda~~ — corregido en la pasada de revisión: cuenta desde la última tecla.
 - Sin JavaScript `/buscar/` queda en el `h1` (el formulario va en la plantilla) hasta la 27.7, como dice la historia.
 
+### Pasada de revisión 1 (2026-10-29)
+
+**Qué cambió.** Nueve parches, ninguno sobre el contrato:
+- `src/components/Busqueda.astro` — el recuento de lo tecleado cuenta `PAUSA_DE_TECLEO_MS` desde la última tecla (`performance.now()`), y si la búsqueda llega después se escribe al llegar; la pausa del tecleo y la de los selectores se cancelan entre sí (busca el último gesto, con su ritmo); la sugerencia a cero que `anunciar` escribe en el fotograma siguiente solo cae si nada se pintó ni se vació entretanto. Docblock al día.
+- `src/lib/anuncio.ts` — `ritmoDeTecleo().anunciar(texto, espera?)`: la espera que falta, por omisión la pausa entera (el filtro no cambia).
+- `tests/unit/busqueda-con-filtros.test.ts` — prueba nueva que cruza los selectores del fichero construido con el HTML construido y dónde se buscan; las 120 permutaciones en vez de `Math.random`.
+- `tests/unit/medicion.test.ts` — tres pruebas nuevas en «Historia 27.2» (una pausa cancela la otra; la sugerencia no pisa un recuento; texto y filtro a cero), la del recuento de lo tecleado cuenta desde la tecla y añade la búsqueda lenta; las guardas del filtro (dirección, historial, ventana, `click`, HTML) miran también el trozo compartido.
+- `tests/unit/ayuda/busqueda.ts` — `performance.now()` del reloj fingido.
+- `tests/unit/ingreso-construido.test.ts` — `/buscar/` pide la entrada `busqueda` con los Modelos encendidos.
+- `AGENTS.md` — la convención de las regiones de estado dice ya qué va por cada ritmo en `/buscar/`.
+
+**Hallazgos.** 9 parches (0 altos, 2 medios, 7 bajos), 0 diferidos, 18 rechazados; el detalle, en el Review Triage Log.
+
+**Revisión de seguimiento recomendada:** sí — parches 0 altos, 2 medios, 7 bajos; puntuación 3 × 2 + 7 = 13 (≥ 5).
+
+**Verificación.**
+- `npm run check` — 0 errores, 0 avisos.
+- `npx vitest run tests/unit/busqueda-con-filtros.test.ts` — 21/21; con `data-quitar` renombrado en la plantilla, la prueba nueva sale en rojo.
+- `npx vitest run tests/unit/medicion.test.ts` — 574/574; `ingreso-construido` 41/41; `tipo-de-resultado` 11/11.
+- `npm test` entero con `correr.sh` — 150 ficheros, 6.812 pruebas, verde.
+- `npx playwright test tests/e2e/busqueda.spec.ts --project=escritorio` — 42 pasan, 2 saltadas (360 px); `--project=movil -g "27.2"` — 10; `tests/e2e/receptor.spec.ts -g "busca"` — 8; `tests/e2e/accesibilidad.spec.ts -g "buscar"` — 16.
+- Bytes tras los parches: búsqueda 8.366 + trozo 501 = 8.867 (tope 9.112); filtro 2.963 + 501 = 3.464 (tope 3.860).
+
+**Riesgos que quedan.** Los de arriba, salvo el del ritmo del recuento. La frase visible anterior sigue a la vista durante la pausa, sobre la sombra de la nueva (el diseño de la 26.6).

@@ -81,7 +81,10 @@ export function guionQueAnuncia(constantes: Record<string, unknown>, cuerpo: str
  * hace para que lo repetido se oiga.
  *
  * `anunciar(texto)` reprograma la escritura con cada tecla; `vaciar()` la cancela y deja la
- * región vacía al momento, como al cargar: es lo que pasa al vaciar el campo. `ahora(texto)`
+ * región vacía al momento, como al cargar: es lo que pasa al vaciar el campo. `anunciar(texto,
+ * espera)` escribe tras `espera` en vez de tras `pausa`: es el recuento de `/buscar/`, cuya
+ * búsqueda llega un rato después de la última tecla y espera solo lo que le falta a la pausa
+ * contada desde ella (Historia 27.2, revisión). `ahora(texto)`
  * cancela lo programado y escribe al momento, también **solo si cambió** (Historia 27.2): es el
  * recuento de `/buscar/` cuando lo provoca un selector, que ya esperó su propia pausa
  * (`PAUSA_DE_LOS_SELECTORES_MS`) y no tiene que esperar otra.
@@ -93,15 +96,15 @@ export function guionQueAnuncia(constantes: Record<string, unknown>, cuerpo: str
 export function ritmoDeTecleo(
   region: { textContent: string | null },
   pausa: number,
-): { anunciar(texto: string): void; ahora(texto: string): void; vaciar(): void } {
+): { anunciar(texto: string, espera?: number): void; ahora(texto: string): void; vaciar(): void } {
   let espera: ReturnType<typeof setTimeout> | undefined;
   const escribir = (texto: string) => {
     if (region.textContent !== texto) region.textContent = texto;
   };
   return {
-    anunciar(texto: string) {
+    anunciar(texto: string, tras = pausa) {
       clearTimeout(espera);
-      espera = setTimeout(() => escribir(texto), pausa);
+      espera = setTimeout(() => escribir(texto), tras);
     },
     ahora(texto: string) {
       clearTimeout(espera);

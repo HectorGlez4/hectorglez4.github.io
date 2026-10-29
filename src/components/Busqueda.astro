@@ -41,14 +41,19 @@
  *     declara esos filtros. Sin texto ni filtros no hay búsqueda, ni recuento, ni salida.
  *   · Historia 27.2 — el recuento dice cuántos hay y, con filtros, qué se filtró
  *     (`fraseDelRecuento`, de `src/lib/busqueda.ts`), y se escribe con el **segundo ritmo**
- *     (`ritmoDeTecleo`): la de lo tecleado, tras `PAUSA_DE_TECLEO_MS` y solo si cambió; la de un
- *     selector, al llegar la búsqueda que lanzó su pausa, sin otra espera (`ahora`). La sombra
+ *     (`ritmoDeTecleo`): la de lo tecleado, cuando se cumple `PAUSA_DE_TECLEO_MS` contada desde la
+ *     última tecla —la búsqueda llega 150 ms y su latencia después, y espera solo lo que falta; si
+ *     llega más tarde, se escribe al llegar— y solo si cambió; la de un selector, al llegar la
+ *     búsqueda que lanzó su pausa, sin otra espera (`ahora`). La sombra
  *     lleva la frase al momento, invisible, y reserva el alto: la lista no se mueve cuando la frase
  *     llega. Sin resultados, la sugerencia de la salida con el **primer ritmo** (`anunciar`), que
  *     vacía y escribe en el fotograma siguiente, como en la 22.10; la región se aparta de la vista.
+ *     Esa escritura del fotograma siguiente solo cae si nada se pintó entretanto: un recuento
+ *     escrito antes no lo pisa la sugerencia de la búsqueda anterior.
  *   · Historia 27.2 — cada cambio de un selector reinicia `PAUSA_DE_LOS_SELECTORES_MS`, y la
  *     búsqueda se rehace una vez al cumplirse: las flechas sobre un selector cerrado no lanzan una
- *     búsqueda por opción. Enviar (Enter) cancela las dos pausas y busca el estado de ese momento.
+ *     búsqueda por opción. Una pausa cancela la otra: la búsqueda la lanza el último gesto, con su
+ *     ritmo. Enviar (Enter) cancela las dos pausas y busca el estado de ese momento.
  *     «Quitar los filtros» vuelve los dos a «Todos…», rehace la búsqueda al momento (o la vacía, sin
  *     texto) y lleva el foco al campo.
  *   · Historia 23.8 (FR-56, FR-8, AD-13) — una búsqueda **cuenta una vez, cuando se asienta**, y
@@ -331,6 +336,10 @@ const { autores, temas } = Astro.props;
     let aCero = false;
     let tecleo: ReturnType<typeof setTimeout> | undefined;
     let eleccion: ReturnType<typeof setTimeout> | undefined;
+    /** Cuándo fue la última tecla: la pausa del recuento de lo tecleado cuenta desde ella. */
+    let tecla = 0;
+    /** Cuántas veces se pintó o se vació la lista: la sugerencia a cero solo cae si no cambió. */
+    let pintadas = 0;
 
     const elegidos = (): FiltrosElegidos => ({ autor: autor.value, tema: tema.value });
     /** El nombre de la opción elegida, tal como se lee. */
@@ -354,6 +363,7 @@ const { autores, temas } = Astro.props;
 
     function pintar(resultados: DatoDeResultado[], frase: string, origen: Origen) {
       lista!.replaceChildren();
+      const vez = ++pintadas;
 
       const vacio = resultados.length === 0;
       estado!.classList.toggle('solo-para-lectores', vacio);
@@ -361,7 +371,14 @@ const { autores, temas } = Astro.props;
         aCero = true;
         sombra!.textContent = '';
         ritmo.vaciar();
-        anunciar(estado!, salida!.querySelector('.sugerencia')?.textContent?.trim() || 'Ningún resultado.');
+        anunciar(
+          {
+            set textContent(texto: string | null) {
+              if (vez === pintadas) estado!.textContent = texto;
+            },
+          },
+          salida!.querySelector('.sugerencia')?.textContent?.trim() || 'Ningún resultado.',
+        );
         salida!.hidden = false;
         return;
       }
@@ -371,7 +388,7 @@ const { autores, temas } = Astro.props;
       if (aCero) ritmo.vaciar();
       aCero = false;
       sombra!.textContent = frase;
-      if (origen === 'tecleo') ritmo.anunciar(frase);
+      if (origen === 'tecleo') ritmo.anunciar(frase, Math.max(0, tecla + PAUSA_DE_TECLEO_MS - performance.now()));
       else ritmo.ahora(frase);
 
       for (const dato of resultados) {
@@ -422,6 +439,7 @@ const { autores, temas } = Astro.props;
       const sinTexto = texto.trim() === '';
 
       if (sinTexto && !conFiltros) {
+        pintadas++;
         lista!.replaceChildren();
         ritmo.vaciar();
         sombra!.textContent = '';
@@ -476,6 +494,8 @@ const { autores, temas } = Astro.props;
 
     campo.addEventListener('focus', cargar, { once: true });
     campo.addEventListener('input', () => {
+      tecla = performance.now();
+      clearTimeout(eleccion);
       clearTimeout(tecleo);
       tecleo = setTimeout(() => buscar('tecleo'), 150);
     });
@@ -483,6 +503,7 @@ const { autores, temas } = Astro.props;
     const alElegir = () => {
       quitar.hidden = !hayFiltros(elegidos());
       cargar();
+      clearTimeout(tecleo);
       clearTimeout(eleccion);
       eleccion = setTimeout(() => buscar('gesto'), PAUSA_DE_LOS_SELECTORES_MS);
     };
