@@ -1,0 +1,79 @@
+---
+/**
+ * Fila de bloque — UX-DR105, UX-DR106, Historia 24.4.
+ *
+ * Un enlace que ocupa su fila entera: alto mínimo de toque, filete debajo, en tinta y sin
+ * subrayado —lo identifican su forma y su posición (EXPERIENCE.md, «Subrayado siempre
+ * visible»)—, en la misma pestaña y con el glifo de avance oculto al lector de pantalla. Es el trato de
+ * la Lista de Obras (17.3), escrito **una vez**: la Lista conserva su marcado —dos columnas, el
+ * filete solo entre entradas y la zona en el `ul`—, y lo que se toma de ella es el trato, no
+ * el marcado.
+ *
+ * Es la forma de «Ver la obra» en la Tarjeta de Obra (24.4), y la reutilizarán «Siguiente»
+ * (24.5), los cierres «Las {n} citas de… ›» de las Rutas de salida (24.6), las filas de los
+ * Directorios (26) y las de la portada (28). Dos copias divergirían a la primera corrección.
+ *
+ * La clase `fila-de-bloque` es también por la que la 24.5, la primera que apila dos, eximirá a
+ * las filas apiladas de los 8 px de separación de la prueba de toque: la exención va por
+ * componente, no por ruta.
+ *
+ * El glifo de avance es «›» (U+203A), UX-DR107 en la v8.3: un glifo tipográfico del rótulo,
+ * nunca un icono, un SVG ni un `content` de CSS, en un `span` `aria-hidden` —el nombre accesible
+ * del enlace es solo su texto— y pegado a él con `&nbsp;` para que nunca quede solo en una línea.
+ * Texto y glifo van juntos en un único `span`, el único hijo del enlace: el enlace es flexible, y
+ * un glifo hermano del texto sería otro elemento flexible, que al partirse el texto se quedaría en
+ * su propia columna, centrado al lado, en vez de seguir a la última palabra.
+ * No es la flecha «→» (U+2192) porque esa no está en el subconjunto `latin` de Inter ni de Source
+ * Serif 4, y la puerta de cobertura tipográfica pararía todas las Páginas de Cita; «›» sí lo está
+ * (`U+2000-206F`). Lo decidió Héctor el 2026-10-27, y lo heredan todos los usos de la fila.
+ *
+ * El texto se escribe **en la misma línea** que las etiquetas de la fila
+ * (`<FilaDeBloque …>{texto}</FilaDeBloque>`): Astro conserva un espacio donde hay salto de línea,
+ * y un salto antes del cierre dejaría «texto ␠&nbsp;›», con el glifo libre de quedarse solo en la
+ * línea de abajo. La fila no recorta el contenido de su `slot`.
+ *
+ * Pinta un `<li>`: quien la usa la mete en su lista, que es quien pone el filete de encima de
+ * la primera. La zona va en el `<li>`, el contenedor que pinta el build (Historia 23.7).
+ */
+import type { Zona } from '../lib/vocabulario.ts';
+
+interface Props {
+  /** A dónde lleva: una ruta del sitio, en la misma pestaña. */
+  href: string;
+  /**
+   * La Zona de salida interna de su enlace (FR-56, UX-DR111, Historia 23.7). Obligatoria: cada
+   * uso dice desde qué zona se sale, y un uso nuevo que la olvide no pasa `astro check`.
+   */
+  zona: Zona;
+  /** El glifo de avance « ›» detrás del texto, oculto al lector de pantalla. */
+  avance?: boolean;
+}
+
+const { href, zona, avance } = Astro.props;
+---
+
+<li class="fila-de-bloque" data-zona={zona}><a href={href}><span><slot />{avance && <span aria-hidden="true">&nbsp;›</span>}</span></a></li>
+
+<style>
+  /* UX-DR13 — el filete de 1px es el único separador. */
+  .fila-de-bloque {
+    border-bottom: var(--grosor-filete) solid var(--filete);
+  }
+
+  /* La fila entera es la zona de toque (UX-DR22). */
+  .fila-de-bloque a {
+    display: flex;
+    align-items: center;
+    box-sizing: border-box;
+    min-height: var(--zona-de-toque);
+    padding-block: calc(var(--unidad) * 1.25);
+    font-family: var(--sans);
+    font-size: var(--cuerpo-md);
+    line-height: 1.4;
+    color: var(--tinta);
+    text-decoration: none;
+    /* Parte palabras antes que desbordar: `anywhere` y no `break-word`, porque en un elemento
+     * flexible solo `anywhere` rebaja el ancho mínimo del texto y le deja partir. */
+    overflow-wrap: anywhere;
+  }
+</style>

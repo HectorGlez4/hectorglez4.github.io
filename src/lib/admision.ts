@@ -15,7 +15,8 @@
 
 import { z } from 'astro/zod';
 import { MAX_CARACTERES_CRITERIO, MAX_CARACTERES_NOTA_DE_OBRA } from './umbrales.ts';
-import { normalizar } from './normalizar.ts';
+import { inicialDeClave, normalizar } from './normalizar.ts';
+import { esJornada } from './jornada.ts';
 import { FORMATOS_DE_EDICION, TIENDAS, esDelDominio, tiendaDe, type Tienda } from './ingreso.ts';
 
 /**
@@ -300,6 +301,41 @@ export const biografia = z
     }
   });
 
+/**
+ * La clave de orden del Autor — Historia 26.1, FR-15, AD-1.
+ *
+ * Es la palabra por la que el Directorio de Autores pone a Cervantes en la C. **Su forma** es
+ * puerta del esquema: tiene que dar, con `inicialDeClave` (la hermana de `normalizar`, AD-3),
+ * una inicial de la A a la Z o la Ñ, porque el Directorio no reparte letras imposibles. En
+ * blanco, con un espacio delante o empezando por cifra o signo, no tiene forma. No se recorta
+ * ni se reescribe: lo mal escrito se rechaza, no se arregla a espaldas de nadie (NFR-12).
+ *
+ * Es opcional aquí porque **su presencia** no es de un fichero sino de la relación con las
+ * Citas: solo se exige al Autor publicado, y eso lo comprueba la puerta del build
+ * (`integraciones/claves.ts`). La propone `tools/autor.ts` y no se teclea.
+ *
+ * Lo usan, este mismo y no una copia, `autorAdmisible`, la colección `autores`, la puerta del
+ * build y la orden `clave`.
+ */
+export const REGLA_DE_CLAVE_DE_ORDEN =
+  'Regla incumplida: la clave de orden (ordenAlfabetico) tiene que empezar por una letra de ' +
+  'la A a la Z o la Ñ; no puede estar en blanco ni empezar por un espacio, una cifra o un signo.';
+
+export const ordenAlfabetico = z
+  .string({ message: REGLA_DE_CLAVE_DE_ORDEN })
+  .refine((clave) => inicialDeClave(clave) !== undefined, REGLA_DE_CLAVE_DE_ORDEN);
+
+/**
+ * La jornada en que una persona confirmó o corrigió la clave de orden — Historia 26.1.
+ *
+ * Presente solo cuando alguien la revisó, y solo la escribe `npx tsx tools/autor.ts clave`.
+ * «Sin revisar» es su ausencia: el build no la lee y nadie consulta git para decirlo. La
+ * forma de jornada es la de `esJornada`, la única dueña de qué es una jornada.
+ */
+export const ordenRevisado = z
+  .string({ message: 'Regla incumplida: ordenRevisado es una jornada AAAA-MM-DD.' })
+  .refine(esJornada, 'Regla incumplida: ordenRevisado es una jornada AAAA-MM-DD que existe.');
+
 export const autorAdmisible = z.object({
   nombre: nombre('Autor'),
   añoFallecimiento,
@@ -307,6 +343,8 @@ export const autorAdmisible = z.object({
   semblanza,
   tradicion: tradicion.optional(),
   biografia: biografia.optional(),
+  ordenAlfabetico: ordenAlfabetico.optional(),
+  ordenRevisado: ordenRevisado.optional(),
 });
 
 export type AutorAdmisible = z.infer<typeof autorAdmisible>;

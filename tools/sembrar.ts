@@ -9,11 +9,13 @@
  * herramientas y podría contener cosas que el alta habría rechazado.
  *
  * Es idempotente: lo que ya existe se salta sin error, así que puede volver a ejecutarse.
+ *
+ * Sale con 1, como el alta, si alguna Cita se queda sin Tema publicado (Historia 26.8).
  */
 
 import { readFile } from 'node:fs/promises';
 import { parse as parsearYaml } from 'yaml';
-import { darDeAltaLote, formatearInforme, type EntradaDeLote } from './alta.ts';
+import { darDeAltaLote, formatearInforme, sinTemaPublicado, type EntradaDeLote } from './alta.ts';
 import { crearAutor, crearTema } from './lib/gestion.ts';
 import { rutasDelCorpus } from './lib/corpus.ts';
 import { raizDeCorpusDe } from './lib/cli.ts';
@@ -79,4 +81,12 @@ if (informe.enRevision.length > 0) {
   process.stdout.write(
     '\nLa siembra deja Citas en revisión. Revise los motivos de arriba antes de publicar.\n',
   );
+}
+
+// Historia 26.8 — como el alta: una Cita sin Tema publicado no se escribe, y la siembra sale con 1.
+if (sinTemaPublicado(informe)) {
+  process.stdout.write(
+    '\nLa siembra deja Citas sin Tema publicado. Corrija sus Temas en la semilla y vuelva a sembrar.\n',
+  );
+  process.exit(1);
 }

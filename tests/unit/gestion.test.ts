@@ -1,7 +1,9 @@
 import { afterEach, describe, expect, it } from 'vitest';
 import { cp, mkdtemp, mkdir, readFile, readdir, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
-import { join, resolve } from 'node:path';
+import { dirname, join, resolve } from 'node:path';
+import { execFile } from 'node:child_process';
+import { promisify } from 'node:util';
 import { parse as parsearYaml } from 'yaml';
 import { RAIZ } from './ayuda/construir.js';
 import { darDeAltaLote } from '../../tools/alta.ts';
@@ -13,7 +15,9 @@ import {
   crearTema,
   editarAutor,
   eliminarTema,
+  fijarClave,
   marcarAptaParaPortada,
+  proponerClaves,
   retirarAutor,
 } from '../../tools/lib/gestion.ts';
 import {
@@ -26,6 +30,20 @@ import {
 } from '../../tools/lib/corpus.ts';
 import { slugsSembrados } from '../../tools/lib/epocas.ts';
 import { temasPublicados, type Cita, type Tema } from '../../src/lib/publicado.ts';
+import {
+  NOMBRE_DEL_TEMA_PUBLICADO,
+  TEMA_PUBLICADO,
+  ficherosPublicados,
+  sembrarTemaPublicado,
+  sinRelleno,
+} from './ayuda/relleno.ts';
+import {
+  DE_EPICTETO,
+  EN_LA_IRA,
+  SIN_EFECTO,
+  instantaneaDe,
+  sembrarCorpusAlLimite,
+} from './ayuda/al-limite.ts';
 
 const temporales: string[] = [];
 afterEach(async () => {
@@ -135,18 +153,20 @@ describe('Historia 1.7 — Temas', () => {
     const rutas = await corpusVacio();
     await crearAutor(rutas, SENECA);
     await crearTema(rutas, 'El tiempo');
+    // Historia 26.8 — con un segundo Tema que ya tiene página: sin él, el alta no publica.
+    await sembrarTemaPublicado(rutas);
     await darDeAltaLote(
       [
         {
           texto: 'No es que tengamos poco tiempo, es que perdemos mucho.',
           autor: 'Séneca',
-          temas: ['El tiempo'],
+          temas: ['El tiempo', NOMBRE_DEL_TEMA_PUBLICADO],
           procedencia: { obra: 'Sobre la brevedad de la vida', año: 49 },
         },
         {
           texto: 'La vida, si sabes usarla, es larga.',
           autor: 'Séneca',
-          temas: ['El tiempo'],
+          temas: ['El tiempo', NOMBRE_DEL_TEMA_PUBLICADO],
           procedencia: { obra: 'Sobre la brevedad de la vida', año: 49 },
         },
       ],
@@ -158,7 +178,7 @@ describe('Historia 1.7 — Temas', () => {
     if (resultado.ok) return;
     expect(resultado.motivos[0]).toMatch(/2 Citas publicadas/);
     // El Tema sigue ahí.
-    expect(await readdir(rutas.temas)).toEqual(['el-tiempo.yml']);
+    expect(await readdir(rutas.temas)).toEqual([`${TEMA_PUBLICADO}.yml`, 'el-tiempo.yml']);
   });
 
   it('eliminar un Tema que no existe se rechaza', async () => {
@@ -172,11 +192,14 @@ describe('Historia 1.7 — marcado de Cita apta para portada', () => {
   async function corpusConUnaCita(): Promise<{ rutas: Rutas; slug: string }> {
     const rutas = await corpusVacio();
     await crearAutor(rutas, SENECA);
+    // Historia 26.8 — con un Tema que tiene página: sin él, el alta no publica.
+    await sembrarTemaPublicado(rutas);
     const informe = await darDeAltaLote(
       [
         {
           texto: 'La vida, si sabes usarla, es larga.',
           autor: 'Séneca',
+          temas: [NOMBRE_DEL_TEMA_PUBLICADO],
           procedencia: { obra: 'Sobre la brevedad de la vida', año: 49 },
         },
       ],
@@ -190,7 +213,7 @@ describe('Historia 1.7 — marcado de Cita apta para portada', () => {
     const resultado = await marcarAptaParaPortada(rutas, slug, true);
 
     expect(resultado.ok).toBe(true);
-    const [fichero] = await readdir(rutas.citas);
+    const [fichero] = await ficherosPublicados(rutas);
     const contenido = await readFile(join(rutas.citas, fichero), 'utf8');
     expect(contenido).toContain('aptaParaPortada: true');
   });
@@ -200,14 +223,14 @@ describe('Historia 1.7 — marcado de Cita apta para portada', () => {
     await marcarAptaParaPortada(rutas, slug, true);
     await marcarAptaParaPortada(rutas, slug, false);
 
-    const [fichero] = await readdir(rutas.citas);
+    const [fichero] = await ficherosPublicados(rutas);
     const contenido = await readFile(join(rutas.citas, fichero), 'utf8');
     expect(contenido).not.toContain('aptaParaPortada');
   });
 
   it('marcar no altera el texto ni el resto del fichero', async () => {
     const { rutas, slug } = await corpusConUnaCita();
-    const [fichero] = await readdir(rutas.citas);
+    const [fichero] = await ficherosPublicados(rutas);
     const antes = await readFile(join(rutas.citas, fichero), 'utf8');
 
     await marcarAptaParaPortada(rutas, slug, true);
@@ -345,6 +368,7 @@ describe('editar un Autor conserva los campos que el esquema no nombra', () => {
         'semblanza: "El Buda."',
         'tradicion: "otra"',
         'tituloEnFuente: "Buda Gautama"',
+        'ordenAlfabetico: "Gautama"',
         'campoQueNadieNombra: "sigue aquí"',
         '',
       ].join('\n'),
@@ -366,6 +390,7 @@ describe('editar un Autor conserva los campos que el esquema no nombra', () => {
       semblanza: 'El Buda, fundador del budismo.',
       tradicion: 'otra',
       tituloEnFuente: 'Buda Gautama',
+      ordenAlfabetico: 'Gautama',
       campoQueNadieNombra: 'sigue aquí',
     });
   });
@@ -430,10 +455,13 @@ describe('Historia 15.5 — asignar un Tema a Citas ya publicadas', () => {
     await crearAutor(rutas, SENECA);
     await crearTema(rutas, 'El tiempo');
     await crearTema(rutas, 'La verdad');
+    // Historia 26.8 — con un Tema que tiene página: sin él, el alta no publica.
+    await sembrarTemaPublicado(rutas);
+    const temas = ['El tiempo', NOMBRE_DEL_TEMA_PUBLICADO];
     const informe = await darDeAltaLote(
       [
-        { texto: PRIMERA, autor: 'Séneca', temas: ['El tiempo'], procedencia: { obra: 'De la brevedad de la vida' }, fuente: FUENTE },
-        { texto: SEGUNDA, autor: 'Séneca', temas: ['El tiempo'], procedencia: { obra: 'De la brevedad de la vida' }, fuente: FUENTE },
+        { texto: PRIMERA, autor: 'Séneca', temas, procedencia: { obra: 'De la brevedad de la vida' }, fuente: FUENTE },
+        { texto: SEGUNDA, autor: 'Séneca', temas, procedencia: { obra: 'De la brevedad de la vida' }, fuente: FUENTE },
       ],
       rutas,
     );
@@ -447,7 +475,7 @@ describe('Historia 15.5 — asignar un Tema a Citas ya publicadas', () => {
     const resultado = await asignarTema(rutas, 'la-verdad', slugs);
 
     expect(resultado.ok, resultado.ok ? '' : resultado.motivos.join(' ')).toBe(true);
-    const citas = await leerCitas(rutas.citas);
+    const citas = sinRelleno(await leerCitas(rutas.citas));
     for (const cita of citas) {
       expect(cita.temas).toContain('la-verdad');
       expect(cita.temas).toContain('el-tiempo');
@@ -456,11 +484,11 @@ describe('Historia 15.5 — asignar un Tema a Citas ya publicadas', () => {
 
   it('no toca el texto de la Cita, que es lo que NFR-12 protege', async () => {
     const { rutas, slugs } = await corpusConDosCitas();
-    const antes = (await leerCitas(rutas.citas)).map((c) => c.texto).sort();
+    const antes = sinRelleno(await leerCitas(rutas.citas)).map((c) => c.texto).sort();
 
     await asignarTema(rutas, 'la-verdad', slugs);
 
-    expect((await leerCitas(rutas.citas)).map((c) => c.texto).sort()).toEqual(antes);
+    expect(sinRelleno(await leerCitas(rutas.citas)).map((c) => c.texto).sort()).toEqual(antes);
   });
 
   it('marca la Cita cuyo slug contiene el slug del Tema, que es donde falló el script a mano', async () => {
@@ -472,7 +500,7 @@ describe('Historia 15.5 — asignar un Tema a Citas ya publicadas', () => {
 
     await asignarTema(rutas, 'la-verdad', [conTrampa!]);
 
-    const cita = (await leerCitas(rutas.citas)).find((c) => c.slug === conTrampa);
+    const cita = sinRelleno(await leerCitas(rutas.citas)).find((c) => c.slug === conTrampa);
     expect(cita?.temas).toContain('la-verdad');
   });
 
@@ -484,7 +512,7 @@ describe('Historia 15.5 — asignar un Tema a Citas ya publicadas', () => {
     expect(segunda.ok).toBe(true);
     if (!segunda.ok) return;
     expect(segunda.mensaje).toMatch(/ya lo ten|0 Citas/i);
-    const cita = (await leerCitas(rutas.citas))[0]!;
+    const cita = sinRelleno(await leerCitas(rutas.citas))[0]!;
     expect(cita.temas!.filter((t) => t === 'la-verdad')).toHaveLength(1);
   });
 
@@ -495,7 +523,7 @@ describe('Historia 15.5 — asignar un Tema a Citas ya publicadas', () => {
     expect(resultado.ok).toBe(false);
     if (resultado.ok) return;
     expect(resultado.motivos.join(' ')).toMatch(/la-muerte/);
-    expect((await leerCitas(rutas.citas))[0]!.temas).not.toContain('la-muerte');
+    expect(sinRelleno(await leerCitas(rutas.citas))[0]!.temas).not.toContain('la-muerte');
   });
 
   it('una Cita que no existe se rechaza nombrándola, y ninguna otra se modifica', async () => {
@@ -506,7 +534,7 @@ describe('Historia 15.5 — asignar un Tema a Citas ya publicadas', () => {
     if (resultado.ok) return;
     expect(resultado.motivos.join(' ')).toContain('seneca-no-existe');
     // Se comprueba antes de escribir: un lote con una errata no deja el corpus a medias.
-    for (const cita of await leerCitas(rutas.citas)) {
+    for (const cita of sinRelleno(await leerCitas(rutas.citas))) {
       expect(cita.temas).not.toContain('la-verdad');
     }
   });
@@ -539,7 +567,7 @@ describe('Historia 15.5 — asignar un Tema a Citas ya publicadas', () => {
       const resultado = await quitarTema(rutas, 'la-verdad', slugs);
 
       expect(resultado.ok, resultado.ok ? '' : resultado.motivos.join(' ')).toBe(true);
-      for (const cita of await leerCitas(rutas.citas)) {
+      for (const cita of sinRelleno(await leerCitas(rutas.citas))) {
         expect(cita.temas).not.toContain('la-verdad');
         expect(cita.temas).toContain('el-tiempo');
       }
@@ -547,11 +575,11 @@ describe('Historia 15.5 — asignar un Tema a Citas ya publicadas', () => {
 
     it('no toca el texto de la Cita, que es lo que NFR-12 protege', async () => {
       const { rutas, slugs } = await corpusConDosCitasEnDosTemas();
-      const antes = (await leerCitas(rutas.citas)).map((c) => c.texto).sort();
+      const antes = sinRelleno(await leerCitas(rutas.citas)).map((c) => c.texto).sort();
 
       await quitarTema(rutas, 'la-verdad', slugs);
 
-      expect((await leerCitas(rutas.citas)).map((c) => c.texto).sort()).toEqual(antes);
+      expect(sinRelleno(await leerCitas(rutas.citas)).map((c) => c.texto).sort()).toEqual(antes);
     });
 
     it('quitar dos veces no es un fallo: la segunda dice que ya no lo tenían', async () => {
@@ -569,7 +597,7 @@ describe('Historia 15.5 — asignar un Tema a Citas ya publicadas', () => {
 
       expect(resultado.ok).toBe(false);
       // Y las Citas siguen con los suyos: el rechazo es antes de escribir.
-      for (const cita of await leerCitas(rutas.citas)) expect(cita.temas).toContain('la-verdad');
+      for (const cita of sinRelleno(await leerCitas(rutas.citas))) expect(cita.temas).toContain('la-verdad');
     });
 
     it('si una Cita del lote no está publicada, no se desmarca ninguna', async () => {
@@ -577,7 +605,7 @@ describe('Historia 15.5 — asignar un Tema a Citas ya publicadas', () => {
       const resultado = await quitarTema(rutas, 'la-verdad', [...slugs, 'seneca-no-existe']);
 
       expect(resultado.ok).toBe(false);
-      for (const cita of await leerCitas(rutas.citas)) expect(cita.temas).toContain('la-verdad');
+      for (const cita of sinRelleno(await leerCitas(rutas.citas))) expect(cita.temas).toContain('la-verdad');
     });
 
     /*
@@ -591,8 +619,12 @@ describe('Historia 15.5 — asignar un Tema a Citas ya publicadas', () => {
       const { rutas, slugs } = await corpusConDosCitas();
       const resultado = await quitarTema(rutas, 'el-tiempo', [slugs[0]!]);
       expect(resultado.ok, resultado.ok ? '' : resultado.motivos.join(' ')).toBe(true);
+      // Historia 26.8 — y el de relleno, que es el último. La Cita sigue al alcance por la
+      // página 1 de su Autor, así que la puerta de NFR-5 lo deja pasar.
+      const ultimo = await quitarTema(rutas, TEMA_PUBLICADO, [slugs[0]!]);
+      expect(ultimo.ok, ultimo.ok ? '' : ultimo.motivos.join(' ')).toBe(true);
 
-      const citas = await leerCitas(rutas.citas);
+      const citas = sinRelleno(await leerCitas(rutas.citas));
       expect(citas.find((c) => c.slug === slugs[0])?.temas).toEqual([]);
       expect(() =>
         temasPublicados(
@@ -625,6 +657,7 @@ describe('AD-2 — retirar un Autor mueve su ficha, y solo cuando nada apunta a 
       `nombre: "${nombre}"`,
       'añoFallecimiento: 65',
       'semblanza: "Una semblanza cualquiera."',
+      `ordenAlfabetico: "${nombre.split(' ').at(-1)}"`,
       ...extra,
       '',
     ].join('\n');
@@ -876,5 +909,184 @@ describe('AD-2 — retirar un Autor mueve su ficha, y solo cuando nada apunta a 
       expect(resultado.ok, resultado.ok ? '' : resultado.motivos.join(' ')).toBe(true);
       expect(resultado.ok && resultado.mensaje).toMatch(/epocas\.ts --descartar \S+ --motivo/);
     });
+  });
+});
+
+describe('Historia 26.1 — la clave de orden en las funciones de gestión', () => {
+  it('crear escribe la clave propuesta como último campo, con la forma de aYaml', async () => {
+    const rutas = await corpusVacio();
+    const resultado = await crearAutor(rutas, { ...SENECA, nombre: 'Lucio Anneo Séneca', tradicion: 'otra' });
+    expect(resultado.ok).toBe(true);
+    const contenido = await readFile(join(rutas.autores, 'lucio-anneo-seneca.yml'), 'utf8');
+    expect(contenido.endsWith('tradicion: "otra"\nordenAlfabetico: "Séneca"\n')).toBe(true);
+    expect(contenido).not.toContain('ordenRevisado');
+    if (resultado.ok) expect(resultado.mensaje).toContain('tres palabras o más');
+  });
+
+  it('editar conserva la clave y la revisión, y no las recalcula con el nombre', async () => {
+    const rutas = await corpusVacio();
+    await crearAutor(rutas, SENECA);
+    await fijarClave(rutas, 'seneca', undefined, '2026-10-28');
+    const resultado = await editarAutor(rutas, 'seneca', { nombre: 'Lucio Anneo Séneca' });
+    expect(resultado.ok).toBe(true);
+    const leido = parsearYaml(await readFile(join(rutas.autores, 'seneca.yml'), 'utf8'));
+    expect(leido.ordenAlfabetico).toBe('Séneca');
+    expect(leido.ordenRevisado).toBe('2026-10-28');
+    if (resultado.ok) expect(resultado.mensaje).toContain('revisada el 2026-10-28');
+  });
+
+  it('proponerClaves es idempotente y nunca escribe ordenRevisado', async () => {
+    const rutas = await corpusVacio();
+    const SIN_CLAVE = 'nombre: "José Martí"\nañoFallecimiento: 1895\nsemblanza: "Poeta."\n';
+    await writeFile(join(rutas.autores, 'jose-marti.yml'), SIN_CLAVE, 'utf8');
+
+    const primera = await proponerClaves(rutas);
+    const tras = await readFile(join(rutas.autores, 'jose-marti.yml'), 'utf8');
+    const segunda = await proponerClaves(rutas);
+
+    expect(primera.ok && segunda.ok).toBe(true);
+    expect(tras).toBe(`${SIN_CLAVE}ordenAlfabetico: "Martí"\n`);
+    expect(await readFile(join(rutas.autores, 'jose-marti.yml'), 'utf8')).toBe(tras);
+    if (segunda.ok) expect(segunda.mensaje).toContain('Ninguna clave nueva');
+  });
+
+  it('proponerClaves nombra el fichero que no se deja escribir, escribe los demás y sale con rechazo', async () => {
+    const rutas = await corpusVacio();
+    const MARTI = 'nombre: "José Martí"\nañoFallecimiento: 1895\nsemblanza: "Poeta."\n';
+    // Con marca de fin de documento: añadir la clave al final la dejaría fuera del documento.
+    const CON_FIN = 'nombre: "Rubén Darío"\nañoFallecimiento: 1916\nsemblanza: "Poeta."\n...\n';
+    await writeFile(join(rutas.autores, 'jose-marti.yml'), MARTI, 'utf8');
+    await writeFile(join(rutas.autores, 'ruben-dario.yml'), CON_FIN, 'utf8');
+
+    const resultado = await proponerClaves(rutas);
+    expect(resultado.ok).toBe(false);
+    if (!resultado.ok) expect(resultado.motivos.join('\n')).toMatch(/No se pudo escribir la clave de 1 Autor:\n {2}ruben-dario\t/u);
+    expect(await readFile(join(rutas.autores, 'ruben-dario.yml'), 'utf8')).toBe(CON_FIN);
+    expect(await readFile(join(rutas.autores, 'jose-marti.yml'), 'utf8')).toBe(`${MARTI}ordenAlfabetico: "Martí"\n`);
+  });
+
+  it('proponerClaves no completa una revisión sin clave: la nombra, no la toca y sale con 1', async () => {
+    const rutas = await corpusVacio();
+    const HUERFANA = 'nombre: "José Martí"\nañoFallecimiento: 1895\nsemblanza: "Poeta."\nordenRevisado: "2026-10-01"\n';
+    await writeFile(join(rutas.autores, 'jose-marti.yml'), HUERFANA, 'utf8');
+    await crearAutor(rutas, SENECA);
+    await writeFile(
+      join(rutas.autores, 'seneca.yml'),
+      (await readFile(join(rutas.autores, 'seneca.yml'), 'utf8')).replace(/ordenAlfabetico:.*\n/u, ''),
+      'utf8',
+    );
+
+    for (const pasada of [1, 2]) {
+      const resultado = await proponerClaves(rutas);
+      expect(resultado.ok, `pasada ${pasada}`).toBe(false);
+      if (!resultado.ok) {
+        const parte = resultado.motivos.join('\n');
+        expect(parte).toContain('jose-marti\tordenRevisado sin ordenAlfabetico');
+        expect(parte).toContain('npx tsx tools/autor.ts clave jose-marti');
+        expect(parte).not.toContain('revisada el 2026-10-01');
+      }
+      // El fichero huérfano sigue como estaba; el sano sí recibe su clave en la primera pasada.
+      expect(await readFile(join(rutas.autores, 'jose-marti.yml'), 'utf8')).toBe(HUERFANA);
+      expect(parsearYaml(await readFile(join(rutas.autores, 'seneca.yml'), 'utf8')).ordenAlfabetico).toBe('Séneca');
+    }
+  });
+
+  it('proponerClaves y fijarClave ante un Autor ilegible salen con motivo, sin traza', async () => {
+    const rutas = await corpusVacio();
+    await writeFile(join(rutas.autores, 'roto.yml'), 'nombre: "Roto\n  : [\n', 'utf8');
+    const lote = await proponerClaves(rutas);
+    expect(lote.ok).toBe(false);
+    const clave = await fijarClave(rutas, 'roto', 'Roto', '2026-10-28');
+    expect(clave.ok).toBe(false);
+  });
+
+  it('fijarClave sobre un fichero que no se deja escribir se niega con motivo y no lo toca', async () => {
+    const rutas = await corpusVacio();
+    const CON_FIN = 'nombre: "Rubén Darío"\nañoFallecimiento: 1916\nsemblanza: "Poeta."\n...\n';
+    await writeFile(join(rutas.autores, 'ruben-dario.yml'), CON_FIN, 'utf8');
+    const resultado = await fijarClave(rutas, 'ruben-dario', 'Darío', '2026-10-28');
+    expect(resultado.ok).toBe(false);
+    if (!resultado.ok) expect(resultado.motivos.join(' ')).toContain('ruben-dario.yml');
+    expect(await readFile(join(rutas.autores, 'ruben-dario.yml'), 'utf8')).toBe(CON_FIN);
+  });
+
+  it('fijarClave corrige, confirma, y se niega sin escribir ante lo que no vale', async () => {
+    const rutas = await corpusVacio();
+    await crearAutor(rutas, SENECA);
+    const ruta = join(rutas.autores, 'seneca.yml');
+
+    const corregida = await fijarClave(rutas, 'seneca', 'Lucio', '2026-10-27');
+    expect(corregida.ok).toBe(true);
+    let leido = parsearYaml(await readFile(ruta, 'utf8'));
+    expect([leido.ordenAlfabetico, leido.ordenRevisado]).toEqual(['Lucio', '2026-10-27']);
+
+    const confirmada = await fijarClave(rutas, 'seneca', undefined, '2026-10-28');
+    expect(confirmada.ok).toBe(true);
+    leido = parsearYaml(await readFile(ruta, 'utf8'));
+    expect([leido.ordenAlfabetico, leido.ordenRevisado]).toEqual(['Lucio', '2026-10-28']);
+
+    const antes = await readFile(ruta, 'utf8');
+    expect((await fijarClave(rutas, 'seneca', '1984', '2026-10-29')).ok).toBe(false);
+    expect((await fijarClave(rutas, 'nadie', 'Nadie', '2026-10-29')).ok).toBe(false);
+    expect(await readFile(ruta, 'utf8')).toBe(antes);
+  });
+});
+
+/** Historia 26.8 — un Corpus al límite en un directorio temporal propio (`ayuda/al-limite.ts`). */
+const alLimite: string[] = [];
+afterEach(async () => {
+  await Promise.all(alLimite.splice(0).map((d) => rm(d, { recursive: true, force: true })));
+});
+async function corpusAlLimite() {
+  const raiz = await mkdtemp(join(tmpdir(), 'sabiduria-al-limite-'));
+  alLimite.push(raiz);
+  const rutas = rutasDelCorpus(join(raiz, 'corpus'));
+  await sembrarCorpusAlLimite(rutas);
+  return rutas;
+}
+
+describe('Historia 26.8 — quitar un Tema no deja una Cita fuera de alcance', () => {
+  it('quitarlo de otra Cita que deja el Tema bajo su umbral se niega con el recuento', async () => {
+    const rutas = await corpusAlLimite();
+    const antes = await instantaneaDe(rutas.raiz);
+
+    const resultado = await quitarTema(rutas, 'la-ira', [DE_EPICTETO[3]!]);
+
+    expect(resultado.ok).toBe(false);
+    if (resultado.ok) return;
+    expect(resultado.motivos.join('\n')).toContain(`/cita/${EN_LA_IRA}/ — su Tema «La ira» (la-ira) tiene 14 Citas`);
+    expect(await instantaneaDe(rutas.raiz)).toEqual(antes);
+  });
+
+  it('quitárselo a la propia Cita, que se queda sin camino, también se niega', async () => {
+    const rutas = await corpusAlLimite();
+    const antes = await instantaneaDe(rutas.raiz);
+    const resultado = await quitarTema(rutas, 'la-ira', [EN_LA_IRA]);
+    expect(resultado.ok).toBe(false);
+    expect(resultado.ok ? '' : resultado.motivos.join('\n')).toContain(`/cita/${EN_LA_IRA}/ — no declara ningún Tema`);
+    expect(await instantaneaDe(rutas.raiz)).toEqual(antes);
+  });
+
+  it('la orden `tema quitar` sale con 1, nombra la Cita y el Tema, y no escribe', async () => {
+    const rutas = await corpusAlLimite();
+    const antes = await instantaneaDe(rutas.raiz);
+    // Desde el directorio del Corpus de prueba, sin `--corpus` (que `quitar` tomaría por slug).
+    const fallo = await promisify(execFile)(
+      join(RAIZ, 'node_modules', '.bin', 'tsx'),
+      [join(RAIZ, 'tools', 'tema.ts'), 'quitar', 'la-ira', DE_EPICTETO[3]!],
+      { cwd: dirname(rutas.raiz) },
+    ).then(
+      () => ({ codigo: 0, error: '' }),
+      (e: { code?: number; stderr?: string }) => ({ codigo: e.code ?? 1, error: e.stderr ?? '' }),
+    );
+    expect(fallo.codigo).toBe(1);
+    expect(fallo.error).toContain(`/cita/${EN_LA_IRA}/ — su Tema «La ira» (la-ira) tiene 14 Citas`);
+    expect(await instantaneaDe(rutas.raiz)).toEqual(antes);
+  });
+
+  it('quitar un Tema que no sostiene a nadie funciona como siempre', async () => {
+    const rutas = await corpusAlLimite();
+    const resultado = await quitarTema(rutas, 'el-tiempo', [SIN_EFECTO]);
+    expect(resultado.ok, resultado.ok ? '' : resultado.motivos.join('\n')).toBe(true);
   });
 });

@@ -1,5 +1,5 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { readFile } from 'node:fs/promises';
+import { readFile, readdir } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import { join } from 'node:path';
 import {
@@ -13,7 +13,10 @@ import {
 } from './ayuda/construir.js';
 import { obrasDelCorpusEnDisco } from '../../integraciones/indexables.ts';
 import { componerDocumento } from '../../tools/lib/documento.ts';
-import { rutaDeLaObra } from '../../src/lib/obras.ts';
+import { ANCLA_DE_DONDE_LEER, rutaDeLaObra } from '../../src/lib/obras.ts';
+import { enlacesDe } from './ayuda/enlaces.js';
+import { obraDeLaTarjeta, tarjetasDelListado } from './ayuda/listado.js';
+import { tarjetaDeObraDe } from './ayuda/tarjeta-de-obra.js';
 import { EVENTOS } from '../../src/lib/medicion.ts';
 import { marcasDePagina } from '../../tools/lib/indexables.ts';
 import { MARCAS_DE_OBRA } from '../../src/lib/vocabulario.ts';
@@ -44,6 +47,7 @@ const EPICTETO = [
   'añoNacimiento: 50',
   'añoFallecimiento: 135',
   'semblanza: Filósofo estoico griego.',
+  'ordenAlfabetico: Epicteto',
   '',
 ].join('\n');
 
@@ -69,8 +73,11 @@ function citasDeSeneca(): Record<string, string> {
   }
   // «Cartas a Lucilio»: La vida en las tres, El tiempo en una y La ira —sin publicar— en otra.
   // Por recuento el orden es La vida, El tiempo; por nombre sería el contrario.
+  // Historia 24.1 — se insertan 2, 1, 0: el andamio escribe su documento con los textos en ese
+  // orden, así que el orden del libro es el contrario del de los slugs.
   const temasDeCartas = [['la-vida', 'el-tiempo'], ['la-vida', 'la-ira'], ['la-vida']];
-  temasDeCartas.forEach((temas, i) => {
+  [2, 1, 0].forEach((i) => {
+    const temas = temasDeCartas[i];
     corpus[`citas/seneca--cartas-${i}.md`] = citaValida({
       slug: `seneca-cartas-${i}`,
       texto: `Carta ${i}: nadie se hace sabio por casualidad, y hay que aprenderlo.`,
@@ -138,6 +145,7 @@ async function anunciadas(proyecto: string): Promise<string[]> {
  * misma llamada que hace el armazón. Se compara con lo que calcula la integración de disco.
  */
 const SONDA = `---
+import { getCollection } from 'astro:content';
 import { conjuntoPublicable, obrasPublicadas, rutasIndexables } from '../lib/publicado.ts';
 import { rutaDeLaObra } from '../lib/obras.ts';
 const conjunto = await conjuntoPublicable();
@@ -145,10 +153,12 @@ const datos = {
   publicadas: obrasPublicadas(conjunto).map((o) => rutaDeLaObra(o)),
   indexables: rutasIndexables(conjunto).filter((r) => r.startsWith('/obra/')),
 };
+// Historia 24.1 — la colección \`posiciones\` tal y como la deja el cargador.
+const posiciones = Object.fromEntries((await getCollection('posiciones')).map((e) => [e.id, e.data]));
 ---
 <!doctype html>
 <html lang="es"><head><meta charset="utf-8" /><title>Sonda</title></head>
-<body><pre id="obras">{JSON.stringify(datos)}</pre></body></html>
+<body><pre id="obras">{JSON.stringify(datos)}</pre><pre id="posiciones">{JSON.stringify(posiciones)}</pre></body></html>
 `;
 
 /** Una ruta como literal de expresión regular: `/obra/…/` lleva barras y puede llevar puntos. */
@@ -192,10 +202,110 @@ const lineasDe = (donde: string) =>
   );
 const EN_PAGEFIND = /<main[^>]*data-pagefind-body/;
 
+/**
+ * Las reglas de la hoja que el build emite en una página —en línea, en sus `<style>`— como
+ * `selector → cuerpo`, sin el atributo de ámbito de Astro. Es la guardia que corre en CI de lo
+ * que las pruebas de punta a punta miden en el navegador (22.5, 24.7). Cuidado: una regla de
+ * dentro de un `@media` o un `@supports` sale sin su condición, como si valiera siempre; quien
+ * busque una regla con `find` se queda con la primera, así que una guardia que deba ver también
+ * las anulaciones cuenta todas las reglas de su selector.
+ */
+async function reglasDe(proyecto: string, ruta: string): Promise<{ selector: string; cuerpo: string }[]> {
+  const pagina = await html(proyecto, ruta);
+  return [...pagina.matchAll(/<style>([\s\S]*?)<\/style>/g)].flatMap((m) =>
+    [...m[1].matchAll(/([^{}]+)\{([^{}]*)\}/g)].map((r) => ({
+      selector: r[1].replace(/\[data-astro-cid-[\w-]+\]/g, '').trim(),
+      cuerpo: r[2],
+    })),
+  );
+}
+const declaraciones = (cuerpo: string) =>
+  new Map(
+    cuerpo
+      .split(';')
+      .filter((d) => d.includes(':'))
+      .map((d) => [d.slice(0, d.indexOf(':')).trim(), d.slice(d.indexOf(':') + 1).trim()] as const),
+  );
+
+/** Historia 24.7 — el `href` del salto: el fragmento de «Dónde leer esta obra». */
+const SALTO = `#${ANCLA_DE_DONDE_LEER}`;
+
+/** Historia 24.7 — todas las Páginas de Obra que la construcción escribió, con su número. */
+async function paginasDeObra(proyecto: string): Promise<{ ruta: string; numero: number; pagina: string }[]> {
+  const raiz = join(proyecto, 'dist', 'obra');
+  const ficheros = (await readdir(raiz, { recursive: true })).filter((f) => /(^|\/)index\.html$/.test(f)).sort();
+  return Promise.all(
+    ficheros.map(async (fichero) => {
+      const ruta = `/obra/${fichero.replace(/index\.html$/, '')}`;
+      const numero = Number(/^\/obra\/[^/]+\/[^/]+\/(\d+)\/$/.exec(ruta)?.[1] ?? 1);
+      return { ruta, numero, pagina: await readFile(join(raiz, fichero), 'utf8') };
+    }),
+  );
+}
+
+/**
+ * Historia 24.7 — el salto en cada Página de Obra de una construcción. Toda página 1 lleva
+ * exactamente un ancla de la propia página además del enlace de salto del armazón, y es el salto:
+ * a `#donde-leer-esta-obra`, sin `target`, dentro de `main` y sin zona —el ancla ya está exenta
+ * (AD-13)—; su destino es un `id` que la página lleva una sola vez, en el `h2` enfocable. Ninguna
+ * 2+ lleva ni el salto, ni su párrafo, ni el `id`. Devuelve las rutas que miró, para que cada
+ * prueba diga qué caras cubrió.
+ */
+async function comprobarSaltos(proyecto: string): Promise<{ primeras: string[]; segundas: string[] }> {
+  const vistas = { primeras: [] as string[], segundas: [] as string[] };
+  for (const { ruta, numero, pagina } of await paginasDeObra(proyecto)) {
+    const anclas = enlacesDe(pagina).filter((e) => e.href?.startsWith('#') && e.href !== '#contenido');
+    if (numero === 1) {
+      expect(anclas, ruta).toStrictEqual([{ href: SALTO, enMain: true, declaracion: null }]);
+      expect(pagina.split(`id="${ANCLA_DE_DONDE_LEER}"`), ruta).toHaveLength(2);
+      expect(pagina, ruta).toContain(`<h2 class="rotulo" id="${ANCLA_DE_DONDE_LEER}" tabindex="-1"`);
+      // El salto se llama como el encabezado al que lleva: lo que oye el lector en el enlace —sin
+      // la flecha oculta— es el texto del `h2` de destino. El `span` lleva el ámbito de Astro.
+      const texto = (marcado: string) =>
+        marcado
+          .replace(/<span aria-hidden="true"[^>]*>[\s\S]*?<\/span>/g, '')
+          .replace(/<[^>]+>/g, '')
+          .trim();
+      const enlace = /<p class="salto"[^>]*>\s*<a\b[^>]*>([\s\S]*?)<\/a>/.exec(pagina)?.[1];
+      const rotulo = new RegExp(`<h2 class="rotulo" id="${ANCLA_DE_DONDE_LEER}"[^>]*>([\\s\\S]*?)</h2>`).exec(pagina)?.[1];
+      expect(enlace, ruta).toBeDefined();
+      expect(rotulo, ruta).toBeDefined();
+      expect(texto(enlace!), ruta).toBe(texto(rotulo!));
+      vistas.primeras.push(ruta);
+    } else {
+      expect(anclas, ruta).toEqual([]);
+      expect(pagina, ruta).not.toContain('class="salto"');
+      expect(pagina, ruta).not.toContain(ANCLA_DE_DONDE_LEER);
+      vistas.segundas.push(ruta);
+    }
+  }
+  return vistas;
+}
+
 function jsonLd(pagina: string): Record<string, unknown>[] {
   return [...pagina.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)].map(
     (m) => JSON.parse(m[1]) as Record<string, unknown>,
   );
+}
+
+/**
+ * La construcción abierta de `corpus(1)` con la sonda, memorizada para el fichero: la comparten
+ * la `describe` de la 22.4 y la prueba de la 24.4 de la congelada, que compara las Tarjetas de
+ * Obra de las dos sin construir otra vez. Es de solo lectura, y la borra el `afterAll` del
+ * fichero, que corre después de la última prueba de todas sus `describe`.
+ */
+let abiertaMemorizada: Promise<Awaited<ReturnType<typeof construirConCorpus>>> | undefined;
+function construidaAbierta(): Promise<Awaited<ReturnType<typeof construirConCorpus>>> {
+  abiertaMemorizada ??= (async () => {
+    const resultado = await construirConCorpus(corpus(1), { paginas: { 'sonda.astro': SONDA } });
+    aLimpiar.push(resultado.proyecto);
+    return resultado;
+  })().catch((error: unknown) => {
+    // Un rechazo no se memoriza: la siguiente `describe` vuelve a intentarlo en vez de heredarlo.
+    abiertaMemorizada = undefined;
+    throw error;
+  });
+  return abiertaMemorizada;
 }
 
 describe('Historia 22.4 — la Página de Obra, construida', () => {
@@ -203,8 +313,7 @@ describe('Historia 22.4 — la Página de Obra, construida', () => {
   let salida = '';
 
   beforeAll(async () => {
-    const resultado = await construirConCorpus(corpus(1), { paginas: { 'sonda.astro': SONDA } });
-    aLimpiar.push(resultado.proyecto);
+    const resultado = await construidaAbierta();
     expect(resultado.codigo, resultado.salida).toBe(0);
     proyecto = resultado.proyecto;
     salida = resultado.salida;
@@ -233,7 +342,9 @@ describe('Historia 22.4 — la Página de Obra, construida', () => {
     const pagina = await html(proyecto, CARTAS);
     expect(pagina).not.toMatch(NOINDEX);
     expect(pagina).toMatch(EN_PAGEFIND);
-    expect(pagina).toContain('data-pagefind-meta="tipo:obra"');
+    // Historia 26.2 — el tipo viaja como filtro de Pagefind, que no casa como texto.
+    expect(pagina).toContain('data-pagefind-filter="tipo:obra"');
+    expect(pagina).not.toMatch(/data-pagefind-meta="tipo:/);
     expect(await anunciadas(proyecto)).toContain(CARTAS);
   });
 
@@ -337,12 +448,105 @@ describe('Historia 22.4 — la Página de Obra, construida', () => {
     expect(de).not.toContain('Pablo de Prado');
   });
 
-  it('el listado: Tarjetas sin el Autor, en el orden de la Página de Autor', async () => {
+  it('el listado: Tarjetas sin el Autor, en el orden del libro (24.1)', async () => {
     const pagina = await html(proyecto, CARTAS);
     const listado = /<ul class="listado"[^>]*>([\s\S]*?)<\/ul>/.exec(pagina)?.[1] ?? '';
     const enlaces = [...listado.matchAll(/href="([^"]+)"/g)].map((m) => m[1]);
-    expect(enlaces).toEqual(['/cita/seneca-cartas-0/', '/cita/seneca-cartas-1/', '/cita/seneca-cartas-2/']);
+    expect(enlaces).toEqual(['/cita/seneca-cartas-2/', '/cita/seneca-cartas-1/', '/cita/seneca-cartas-0/']);
     expect(listado).not.toContain('class="autor"');
+    // Indexable también: ninguna línea nombra el orden, y las Tarjetas no llevan el título de la Obra.
+    expect(pagina).toMatch(/<\/header>\s*<ul class="listado"/);
+    expect(listado).not.toContain('Cartas a Lucilio');
+    // Y los datos estructurados enumeran las Citas en ese mismo orden.
+    const lista = jsonLd(pagina).find((b) => b['@type'] === 'CollectionPage')?.mainEntity as {
+      itemListElement: { position: number; url: string }[];
+    };
+    expect(lista.itemListElement.map((e) => new URL(e.url).pathname)).toEqual(enlaces);
+    expect(lista.itemListElement.map((e) => e.position)).toEqual([1, 2, 3]);
+  });
+
+  it('24.1 — la colección `posiciones`, leída tras construir: el slug del frontmatter, sin texto', async () => {
+    const sonda = await html(proyecto, '/sonda/');
+    const posiciones = JSON.parse(
+      (/<pre id="posiciones">([\s\S]*?)<\/pre>/.exec(sonda)?.[1] ?? '{}').replace(/&quot;/g, '"'),
+    ) as Record<string, { apariciones: { documento: string; posicion: number }[] }>;
+    // La clave es el slug (`seneca-cartas-2`), no el nombre del fichero (`seneca--cartas-2.md`).
+    const slugs = Object.values(corpus(1)).flatMap((f) => {
+      const declarado = /^slug: (.+)$/m.exec(f)?.[1];
+      return declarado === undefined ? [] : [JSON.parse(declarado) as string];
+    });
+    // Cada fichero de Cita del fixture declara su slug, y son más de las 50 de una página.
+    expect(slugs).toHaveLength(Object.keys(corpus(1)).filter((ruta) => ruta.startsWith('citas/')).length);
+    expect(slugs.length).toBeGreaterThan(50);
+    expect(Object.keys(posiciones).sort()).toEqual([...slugs].sort());
+    for (const [slug, entrada] of Object.entries(posiciones)) {
+      expect(Object.keys(entrada), slug).toEqual(['apariciones']);
+      expect(entrada.apariciones, slug).toHaveLength(1);
+      for (const aparicion of entrada.apariciones) expect(Object.keys(aparicion).sort(), slug).toEqual(['documento', 'posicion']);
+    }
+    const cartas = [2, 1, 0].map((i) => posiciones[`seneca-cartas-${i}`].apariciones[0]);
+    expect(cartas.map((a) => a.documento)).toEqual(Array(3).fill('wikisource-es--cartas-a-lucilio'));
+    expect(cartas.map((a) => a.posicion)).toEqual([...cartas.map((a) => a.posicion)].sort((a, b) => a - b));
+    // Nada del texto de ninguna Cita.
+    expect(sonda).not.toContain('nadie se hace sabio');
+    expect(sonda).not.toContain('la vida es larga');
+  });
+
+  /*
+   * Historia 24.1 — una Obra con `noindex` y paginada sigue el orden del libro en todas sus
+   * páginas y en sus datos estructurados. Las 51 de «Sobre la brevedad» se insertan 0…50, así
+   * que su documento las trae en orden numérico, que no es el de los slugs («…-10» antes que
+   * «…-2»): la 2 empieza por la Cita 51 del libro.
+   */
+  it('24.1 — paginada y `noindex`: el orden del libro en cada página y en su ItemList, sin decirlo', async () => {
+    const delLibro = Array.from({ length: 51 }, (_, i) => `/cita/seneca-brevedad-${i}/`);
+    const paginas = [
+      { ruta: BREVEDAD, citas: delLibro.slice(0, 50), desde: 1 },
+      { ruta: `${BREVEDAD}2/`, citas: delLibro.slice(50), desde: 51 },
+    ];
+    for (const { ruta, citas, desde } of paginas) {
+      const pagina = await html(proyecto, ruta);
+      expect(pagina, ruta).toMatch(NOINDEX);
+      const listado = /<ul class="listado"[^>]*>([\s\S]*?)<\/ul>/.exec(pagina)?.[1] ?? '';
+      expect([...listado.matchAll(/href="([^"]+)"/g)].map((m) => m[1]), ruta).toEqual(citas);
+      expect(listado, ruta).not.toContain('class="autor"');
+      expect(listado, ruta).not.toContain('Sobre la brevedad de la vida');
+      // Ninguna línea que nombre el orden: de la Cabecera al Listado no hay nada.
+      expect(pagina, ruta).toMatch(/<\/header>\s*<ul class="listado"/);
+      const lista = jsonLd(pagina).find((b) => b['@type'] === 'CollectionPage')?.mainEntity as {
+        itemListElement: { position: number; url: string }[];
+      };
+      const urls = lista.itemListElement.map((e) => new URL(e.url).pathname);
+      expect(urls, ruta).toEqual(citas);
+      expect(lista.itemListElement.map((e) => e.position), ruta).toEqual(citas.map((_, i) => desde + i));
+    }
+  });
+
+  it('24.1 — construir no escribe nada en corpus/', async () => {
+    const fixture = corpus(1);
+    const deCitas = Object.keys(fixture).filter((ruta) => ruta.startsWith('citas/'));
+    const { readdir, stat } = await import('node:fs/promises');
+    const enDisco = (await readdir(join(proyecto, 'corpus', 'citas'), { recursive: true })).filter((f) => f.endsWith('.md'));
+    expect(enDisco.map((f) => `citas/${f}`).sort()).toEqual(deCitas.sort());
+    // Los ficheros de Cita, byte a byte, y lo demás que trae el fixture.
+    for (const [ruta, contenido] of Object.entries(fixture)) {
+      expect(await readFile(join(proyecto, 'corpus', ruta), 'utf8'), ruta).toBe(contenido);
+    }
+    /*
+     * Y nada de `corpus/` —tampoco lo que siembra el andamio: documentos de Fuente, fichas,
+     * `portada.json`— se escribe ni aparece después de que empiece la construcción. El andamio
+     * escribe la sonda de `src/pages/` después de todo el corpus y antes de construir, así que
+     * ningún fichero de `corpus/` puede ser más reciente que ella.
+     */
+    const antesDeConstruir = (await stat(join(proyecto, 'src', 'pages', 'sonda.astro'))).mtimeMs;
+    const todos = (await readdir(join(proyecto, 'corpus'), { recursive: true, withFileTypes: true })).filter((e) => e.isFile());
+    expect(todos.length).toBeGreaterThan(Object.keys(fixture).length);
+    const posteriores: string[] = [];
+    for (const e of todos) {
+      const ruta = join(e.parentPath, e.name);
+      if ((await stat(ruta)).mtimeMs > antesDeConstruir) posteriores.push(ruta);
+    }
+    expect(posteriores).toEqual([]);
   });
 
   it('los Temas: solo los publicados, por recuento de la Obra, sin recuento visible', async () => {
@@ -406,22 +610,7 @@ describe('Historia 22.4 — la Página de Obra, construida', () => {
    */
   describe('la hoja emitida — 22.5', () => {
     /** Las reglas de la página como `selector → cuerpo`, sin el atributo de ámbito de Astro. */
-    async function reglas(ruta: string): Promise<{ selector: string; cuerpo: string }[]> {
-      const pagina = await html(proyecto, ruta);
-      return [...pagina.matchAll(/<style>([\s\S]*?)<\/style>/g)].flatMap((m) =>
-        [...m[1].matchAll(/([^{}]+)\{([^{}]*)\}/g)].map((r) => ({
-          selector: r[1].replace(/\[data-astro-cid-[\w-]+\]/g, '').trim(),
-          cuerpo: r[2],
-        })),
-      );
-    }
-    const declaraciones = (cuerpo: string) =>
-      new Map(
-        cuerpo
-          .split(';')
-          .filter((d) => d.includes(':'))
-          .map((d) => [d.slice(0, d.indexOf(':')).trim(), d.slice(d.indexOf(':') + 1).trim()] as const),
-      );
+    const reglas = (ruta: string) => reglasDe(proyecto, ruta);
 
     it('existe `.enlace-en-tinta`: tinta, subrayado y grosor del filete', async () => {
       for (const ruta of ['/cita/seneca-cartas-0/', CARTAS]) {
@@ -584,6 +773,89 @@ describe('Historia 22.4 — la Página de Obra, construida', () => {
     });
   });
 
+  /*
+   * Historia 24.7 — el salto «Dónde leer esta obra ↓» en la Cabecera de la página 1. El bloque no
+   * se mueve: las pruebas de la 22.6 de arriba («va después del Listado, la Paginación y los
+   * Temas», «página 2: ni la sección ni la nota») y la de la 24.1 (`</header>` seguido del
+   * listado) siguen pasando sin tocarlas.
+   */
+  describe('24.7 — el salto «Dónde leer esta obra ↓»', () => {
+    it('toda página 1 lleva un salto a su `h2` enfocable, y ninguna 2+', async () => {
+      const { primeras, segundas } = await comprobarSaltos(proyecto);
+      // La indexable, las `noindex` —una Cita, el 93 %, el 90 % exacto, traducida— y la 2 paginada.
+      expect(primeras.sort()).toEqual([BREVEDAD, CARTAS, DISERTACIONES, ENQUIRIDION, IRA].sort());
+      expect(segundas).toEqual([`${BREVEDAD}2/`]);
+    });
+
+    it('su marcado exacto, en su propia línea dentro de la Cabecera y tras «de {Autor}»', async () => {
+      for (const ruta of [CARTAS, IRA, BREVEDAD]) {
+        const pagina = await html(proyecto, ruta);
+        const cabecera = /<header class="cabecera-de-obra"[^>]*>([\s\S]*?)<\/header>/.exec(pagina)?.[1] ?? '';
+        // Sin el atributo de ámbito de Astro, que lleva todo elemento de la plantilla.
+        const marcado = cabecera.replace(/\s+data-astro-cid-[\w-]+(?:="[^"]*")?/g, '');
+        expect(marcado, ruta).toMatch(
+          /<\/p>\s*<p class="salto" data-pagefind-ignore><a href="#donde-leer-esta-obra">Dónde leer esta obra<span aria-hidden="true">(?:&nbsp;|\u00a0)↓<\/span><\/a><\/p>\s*$/u,
+        );
+        // Detrás de `p.de` y nunca dentro de él, que declara la zona de la Atribución.
+        const de = /<p class="de"[^>]*>([\s\S]*?)<\/p>/.exec(marcado)?.[1] ?? '';
+        expect(de, ruta).toMatch(/^de <a /);
+        expect(de, ruta).not.toContain(SALTO);
+        expect(marcado.indexOf('<p class="de"'), ruta).toBeLessThan(marcado.indexOf('<p class="salto"'));
+        // Lo que oye el lector: el texto del enlace sin la flecha oculta.
+        const enlace = /<p class="salto"[^>]*><a\b[^>]*>([\s\S]*?)<\/a>/.exec(marcado)?.[1] ?? '';
+        const nombre = enlace.replace(/<span aria-hidden="true">[\s\S]*?<\/span>/g, '').replace(/<[^>]+>/g, '');
+        expect(nombre, ruta).toBe('Dónde leer esta obra');
+      }
+    });
+
+    it('el `h2` «Temas» y los de la Lista de Obras siguen sin `tabindex`', async () => {
+      const temas = /<h2 class="rotulo" id="temas-de-la-obra"[^>]*>/.exec(await html(proyecto, CARTAS))?.[0];
+      expect(temas).toBeDefined();
+      expect(temas).not.toContain('tabindex');
+      const rotulosDeAutor = [...(await html(proyecto, '/autor/seneca/')).matchAll(/<h2 class="rotulo"[^>]*>/g)].map(
+        (m) => m[0],
+      );
+      expect(rotulosDeAutor.length).toBeGreaterThan(0);
+      for (const rotulo of rotulosDeAutor) expect(rotulo).not.toContain('tabindex');
+    });
+
+    it('la hoja emitida: el salto a 3 × `--unidad`, en `--cuerpo-md`, siena y subrayado; el destino a 2 ×', async () => {
+      const todas = await reglasDe(proyecto, CARTAS);
+      const de = (selector: string) => {
+        const regla = todas.find((r) => r.selector === selector);
+        expect(regla, selector).toBeDefined();
+        return declaraciones(regla!.cuerpo);
+      };
+      const salto = de('.salto');
+      expect(salto.get('margin')).toBe('calc(var(--unidad) * 3) 0 0');
+      expect(salto.get('font-family')).toBe('var(--sans)');
+      expect(salto.get('font-size')).toBe('var(--cuerpo-md)');
+      expect(salto.get('line-height')).toBe('1.6');
+      const enlace = de('.salto a');
+      expect(enlace.get('display')).toBe('inline-flex');
+      expect(enlace.get('align-items')).toBe('center');
+      expect(enlace.get('min-height')).toBe('var(--zona-de-toque)');
+      expect(enlace.get('color')).toBe('var(--siena)');
+      expect(enlace.get('text-decoration-line')).toBe('underline');
+      expect(enlace.get('text-decoration-thickness')).toBe('var(--grosor-filete)');
+      // Subrayado siempre: en la hoja de la página, ninguna otra regla nombra el salto —ni de
+      // cursor o foco, ni una que `reglasDe` haya sacado de un `@media`, que leería como
+      // incondicional—. Solo estas dos. Lo que esta guardia no ve —una regla global de `a` en
+      // `tokens.css`, o una de un antepasado como `.cabecera-de-obra a`— lo mide la prueba de
+      // punta a punta de la 24.7 en el estilo calculado, también bajo el puntero.
+      expect(todas.map((r) => r.selector).filter((selector) => /\.salto(?![\w-])/.test(selector))).toEqual([
+        '.salto',
+        '.salto a',
+      ]);
+      // El destino: `scroll-margin-top` de 2 × `--unidad`, solo en el rótulo enfocable.
+      const destino = todas.filter((r) => /^\.rotulo\[tabindex=(['"]?)-1\1\]$/.test(r.selector));
+      expect(destino).toHaveLength(1);
+      expect(declaraciones(destino[0].cuerpo).get('scroll-margin-top')).toBe('calc(var(--unidad) * 2)');
+      // El listado sigue a 4 × de la Cabecera: sin hueco reservado para nada más.
+      expect(de('.listado').get('margin')).toBe('calc(var(--unidad) * 4) 0 0');
+    });
+  });
+
   describe('se corrige sola', () => {
     let segundo = '';
 
@@ -720,6 +992,8 @@ describe('Historia 22.6 — «Dónde leer esta obra» y la nota, construidas', (
   const URL_CONSTANCIA = 'https://es.wikisource.org/wiki/De_la_constancia_del_sabio';
   // El censo es cerrado (11.2): solo admite slugs del censo de partida, así que las Citas sin
   // documento son cuatro de las de Séneca que de verdad están en él.
+  // Historia 24.1 — la Cita cotejada de Cartas se llama de forma que por slug iría la última.
+  const CARTAS_COTEJADA = 'seneca-sabio-por-casualidad';
   const BREVEDAD_SIN = 'seneca-la-vida-si-sabes-usarla-es-larga';
   const CARTAS_SIN_1 = 'seneca-mientras-esperamos-vivir-la-vida-pasa';
   const CARTAS_SIN_2 = 'seneca-ninguna-cosa-se-parece-tanto-a-la';
@@ -740,7 +1014,7 @@ describe('Historia 22.6 — «Dónde leer esta obra» y la nota, construidas', (
       'citas/seneca--brevedad-1.md': cotejada('seneca-brevedad-1', B1, 'Sobre la brevedad de la vida', URL_BREVEDAD),
       'citas/seneca--brevedad-2.md': cotejada('seneca-brevedad-2', B2, 'Sobre la brevedad de la vida', URL_BREVEDAD),
       [fichero(BREVEDAD_SIN)]: sinDocumento(BREVEDAD_SIN, 'La vida, si sabes usarla, es larga.', 'Sobre la brevedad de la vida'),
-      'citas/seneca--cartas-1.md': cotejada('seneca-cartas-1', C1, 'Cartas a Lucilio', URL_CARTAS),
+      [fichero(CARTAS_COTEJADA)]: cotejada(CARTAS_COTEJADA, C1, 'Cartas a Lucilio', URL_CARTAS),
       [fichero(CARTAS_SIN_1)]: sinDocumento(CARTAS_SIN_1, 'Mientras esperamos vivir, la vida pasa.', 'Cartas a Lucilio'),
       [fichero(CARTAS_SIN_2)]: sinDocumento(
         CARTAS_SIN_2,
@@ -748,16 +1022,28 @@ describe('Historia 22.6 — «Dónde leer esta obra» y la nota, construidas', (
         'Cartas a Lucilio',
       ),
       [fichero(IRA_SIN)]: sinDocumento(IRA_SIN, 'No hay viento favorable para el que no sabe adónde va.', 'De la ira'),
+      // Historia 24.1 — el documento trae B2 antes que B1: el orden del libro no es el de los slugs.
       'fuentes/wikisource-es--sobre-la-brevedad-de-la-vida.txt': documento(
         'Sobre la brevedad de la vida',
         URL_BREVEDAD,
-        [B1, B2],
+        [B2, B1],
       ),
       'fuentes/wikisource-es--cartas-a-lucilio.txt': documento('Cartas a Lucilio', URL_CARTAS, [C1]),
       // Dos subpáginas del mismo `Padre`: tiene entrada.
       'citas/seneca--epistolas-1.md': cotejada('seneca-epistolas-1', E1, 'Epístolas morales', `${URL_EPISTOLAS}/1`),
       'citas/seneca--epistolas-2.md': cotejada('seneca-epistolas-2', E2, 'Epístolas morales', `${URL_EPISTOLAS}/2`),
-      'fuentes/wikisource-es--epistolas-morales.txt': documento('Epístolas morales', `${URL_EPISTOLAS}/1`, [E1, E2]),
+      // Historia 24.1 — una página por carta: la x trae E1 y la ii trae E2, así que el orden del
+      // libro —ii antes que x, por su valor— es el contrario del de los slugs.
+      'fuentes/wikisource-es--epistolas-morales--epistolas-morales-carta-x.txt': documento(
+        'Epístolas morales',
+        `${URL_EPISTOLAS}/1`,
+        [E1],
+      ),
+      'fuentes/wikisource-es--epistolas-morales--epistolas-morales-carta-ii.txt': documento(
+        'Epístolas morales',
+        `${URL_EPISTOLAS}/2`,
+        [E2],
+      ),
       // Dos páginas de primer nivel: ninguna es la entrada de la otra.
       'citas/seneca--dialogos-1.md': cotejada('seneca-dialogos-1', D1, 'Diálogos', URL_PROVIDENCIA),
       'citas/seneca--dialogos-2.md': cotejada('seneca-dialogos-2', D2, 'Diálogos', URL_CONSTANCIA),
@@ -813,6 +1099,50 @@ describe('Historia 22.6 — «Dónde leer esta obra» y la nota, construidas', (
     expect(lineas(donde)).toEqual(['Ninguna de sus citas tiene todavía documento cotejado.']);
     expect(donde).not.toContain('<h3');
     expect(donde).not.toContain('<a ');
+  });
+
+  it('24.1 — el orden del libro: las cotejadas por documento y posición, las del censo al final', async () => {
+    const listado = async (ruta: string) => {
+      const pagina = await html(proyecto, ruta);
+      const ul = /<ul class="listado"[^>]*>([\s\S]*?)<\/ul>/.exec(pagina)?.[1] ?? '';
+      return [...ul.matchAll(/href="\/cita\/([^/"]+)\/"/g)].map((m) => m[1]);
+    };
+    expect(await listado('/obra/seneca/sobre-la-brevedad-de-la-vida/')).toEqual([
+      'seneca-brevedad-2',
+      'seneca-brevedad-1',
+      BREVEDAD_SIN,
+    ]);
+    expect(await listado('/obra/seneca/epistolas-morales/')).toEqual(['seneca-epistolas-2', 'seneca-epistolas-1']);
+    expect(await listado('/obra/seneca/cartas-a-lucilio/')).toEqual([CARTAS_COTEJADA, CARTAS_SIN_1, CARTAS_SIN_2]);
+  });
+
+  it('24.7 — el salto en toda página 1, también la de una Obra sin cotejo (c)', async () => {
+    const { primeras, segundas } = await comprobarSaltos(proyecto);
+    expect(primeras).toContain('/obra/seneca/de-la-ira/');
+    expect(primeras).toContain('/obra/seneca/sobre-la-brevedad-de-la-vida/');
+    expect(primeras).toHaveLength(5);
+    expect(segundas).toEqual([]);
+    // Sin cotejo: bajo el `h2` de destino, solo la frase de la 22.6.
+    const donde = await seccion('/obra/seneca/de-la-ira/');
+    expect(donde).toMatch(/<h2 class="rotulo" id="donde-leer-esta-obra" tabindex="-1"[^>]*>Dónde leer esta obra<\/h2>/);
+    expect(lineas(donde)).toEqual(['Ninguna de sus citas tiene todavía documento cotejado.']);
+  });
+
+  it('24.7 — la hoja emitida del pie, con nota: 5 ×, 4 ×, 2 ×, 1 × y la nota 4 × / 3 ×', async () => {
+    const todas = await reglasDe(proyecto, '/obra/seneca/sobre-la-brevedad-de-la-vida/');
+    const de = (selector: string) => {
+      const regla = todas.find((r) => r.selector === selector);
+      expect(regla, selector).toBeDefined();
+      return declaraciones(regla!.cuerpo);
+    };
+    expect(de('.temas').get('margin-top')).toBe('calc(var(--unidad) * 5)');
+    expect(de('.donde-leer').get('margin-top')).toBe('calc(var(--unidad) * 4)');
+    expect(de('.tras-el-rotulo').get('margin-top')).toBe('calc(var(--unidad) * 2)');
+    expect(de('.linea').get('margin')).toBe('var(--unidad) 0 0');
+    const nota = de('.nota-de-la-ficha');
+    expect(nota.get('margin')).toBe('calc(var(--unidad) * 4) 0 0');
+    expect(nota.get('padding-top')).toBe('calc(var(--unidad) * 3)');
+    expect(nota.get('border-top')).toBe('var(--grosor-filete) solid var(--filete)');
   });
 
   it('la nota: tras la sección, fuera de ella, sin encabezado; nunca en la meta', async () => {
@@ -889,8 +1219,77 @@ describe('Historia 22.8 — la congelación declarada, construida', () => {
     // Cartas cumple FR-52 y no estaba en la lista: la misma página, con `noindex`.
     const cartas = await html(proyecto, CARTAS);
     expect(cartas).toMatch(NOINDEX);
+    // Historia 24.1 — congelada fuera, el mismo orden del libro.
+    const listado = /<ul class="listado"[^>]*>([\s\S]*?)<\/ul>/.exec(cartas)?.[1] ?? '';
+    const enlaces = [...listado.matchAll(/href="([^"]+)"/g)].map((m) => m[1]);
+    expect(enlaces).toEqual(['/cita/seneca-cartas-2/', '/cita/seneca-cartas-1/', '/cita/seneca-cartas-0/']);
+    const lista = jsonLd(cartas).find((b) => b['@type'] === 'CollectionPage')?.mainEntity as {
+      itemListElement: { url: string }[];
+    };
+    expect(lista.itemListElement.map((e) => new URL(e.url).pathname)).toEqual(enlaces);
     // Historia 23.9 — y la marca la sigue: no indexable, y solo la vista de Obra.
     expect(marcaDe(cartas)).toBe(NO_INDEXABLE);
     expect(vistasDe(cartas)).toBe(EVENTOS.vistaDeObra);
+  });
+
+  it('24.3 — congelada fuera, sus Citas dicen su Obra en el listado de Tema', async () => {
+    // Cartas y Brevedad, las dos fuera de la lista indexable: la congelación no alcanza a la
+    // navegación, y la Tarjeta de Cita del Tema nombra su Obra igual que con la familia abierta.
+    expect(await html(proyecto, CARTAS)).toMatch(NOINDEX);
+    expect(await html(proyecto, BREVEDAD)).toMatch(NOINDEX);
+    // Todas las páginas del Tema, no solo la primera: lo que se compara es el conjunto de sus
+    // Citas, no cuántas caben en una página ni en qué orden salen.
+    const obraDe = new Map<string, string | undefined>();
+    for (let n = 1; ; n += 1) {
+      const ruta = n === 1 ? '/tema/la-vida/' : `/tema/la-vida/${n}/`;
+      if (n > 1 && !existsSync(paginaConstruida(proyecto, ruta))) break;
+      for (const tarjeta of tarjetasDelListado(await html(proyecto, ruta), ruta)) {
+        obraDe.set(tarjeta.slug, obraDeLaTarjeta(tarjeta));
+      }
+    }
+    const esperadas = new Map([
+      ...[0, 1, 2].map((i) => [`seneca-cartas-${i}`, 'Cartas a Lucilio'] as const),
+      ...Array.from({ length: 20 }, (_, i) => [`seneca-brevedad-${i}`, 'Sobre la brevedad de la vida'] as const),
+    ]);
+    expect(obraDe).toEqual(esperadas);
+  });
+
+  it('24.4 — congelada, la Tarjeta de Obra de cada Página de Cita es la de la familia abierta', async () => {
+    // La congelación no alcanza a la navegación: la misma tarjeta, byte a byte, y a la página 1
+    // de su Obra aunque esa Obra salga de la lista indexable.
+    const abierta = await construidaAbierta();
+    expect(abierta.codigo, abierta.salida).toBe(0);
+    expect(CARTAS).toBe('/obra/seneca/cartas-a-lucilio/');
+    const citas = (await readdir(join(proyecto, 'dist', 'cita'))).sort();
+    expect(citas).toEqual((await readdir(join(abierta.proyecto, 'dist', 'cita'))).sort());
+    // Una Página de Cita por cada fichero de Cita del fixture: ninguna se queda sin comparar.
+    expect(citas).toHaveLength(Object.keys(corpus(1)).filter((ruta) => ruta.startsWith('citas/')).length);
+    let conSiguiente = 0;
+    for (const slug of citas) {
+      const ruta = `/cita/${slug}/`;
+      const congelada = tarjetaDeObraDe(await html(proyecto, ruta));
+      expect(congelada, ruta).toBeDefined();
+      expect(congelada, ruta).toBe(tarjetaDeObraDe(await html(abierta.proyecto, ruta)));
+      if (congelada!.includes('<li class="fila-de-bloque" data-zona="siguiente"')) conSiguiente += 1;
+    }
+    // Historia 24.5 — la igualdad cubre también «Siguiente…»: alguna tarjeta comparada lo lleva.
+    expect(conSiguiente).toBeGreaterThan(0);
+    // Cartas: indexable con la familia abierta, `noindex` congelada; la tarjeta enlaza igual.
+    expect(await html(abierta.proyecto, CARTAS)).not.toMatch(NOINDEX);
+    expect(await html(proyecto, CARTAS)).toMatch(NOINDEX);
+    const tarjeta = tarjetaDeObraDe(await html(proyecto, '/cita/seneca-cartas-0/'))!;
+    const enlaces = enlacesDe(tarjeta).map((e) => ({ href: e.href, declaracion: e.declaracion }));
+    // Delante, «Siguiente…» a otra Cita de Cartas (24.5); detrás, la fila de su Obra.
+    expect(enlaces).toHaveLength(2);
+    expect(enlaces[0].declaracion).toEqual({ zona: 'siguiente' });
+    // `seneca-cartas-0` es la última en el orden del libro (2, 1, 0): vuelve a la primera.
+    expect(enlaces[0].href).toBe('/cita/seneca-cartas-2/');
+    expect(enlaces[1]).toEqual({ href: CARTAS, declaracion: { zona: 'tarjeta-de-obra' } });
+  }, 300_000);
+
+  it('24.7 — congelada, toda página 1 sigue llevando el salto, y la 2 no', async () => {
+    const { primeras, segundas } = await comprobarSaltos(proyecto);
+    expect(primeras.sort()).toEqual([BREVEDAD, CARTAS, DISERTACIONES, ENQUIRIDION, IRA].sort());
+    expect(segundas).toEqual([`${BREVEDAD}2/`]);
   });
 });

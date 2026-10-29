@@ -1,28 +1,33 @@
 ---
 /**
- * Lista de Obras de la Página de Autor — Historia 17.3, UX-DR46.
+ * Lista de Obras — Historias 17.3 y 26.4, UX-DR46, AD-25.
  *
- * Una entrada por Obra del Autor, enlazada a su Página de Obra —también si esta no se indexa—,
- * con el título de la ficha a la izquierda y el recuento de Citas publicadas a la derecha. Las
- * Obras llegan ya resueltas y ordenadas (`obrasDelAutor` en `src/lib/publicado.ts`): aquí no se
- * deriva nada, y nunca se lee la Procedencia. Enumera Obras, no Citas (AD-19).
+ * Un solo componente con dos usos: la Lista de Obras de la Página de Autor (página 1, bajo su
+ * rótulo «Su obra en este Corpus», zona `lista-de-obras`) y la de cada Autor en `/obras/` (zona
+ * `directorio`). Pinta solo la lista: el rótulo, la línea de Citas sin obra y el espacio de encima
+ * son de quien la usa, porque no son comunes a los dos.
+ *
+ * Una entrada por Obra, enlazada a su Página de Obra —también si esta no se indexa, y sin nada
+ * que la distinga—, con el título de la ficha a la izquierda y el recuento de Citas publicadas a
+ * la derecha, con su unidad («27 citas», «1 cita»). Las Obras llegan ya resueltas y ordenadas
+ * (`obrasDelAutor` en `src/lib/publicado.ts`, con `ordenDeLaListaDeObras`): aquí no se deriva ni
+ * se ordena nada, y nunca se lee la Procedencia. Enumera Obras, no Citas (AD-19).
  *
  * El año es el de la Obra —omitido si sus Citas discrepan o no lo dicen, nunca el de una
  * traducción—, con la forma de la Cabecera de Obra: el punto medio es decoración y el lector de
- * pantalla oye una coma. Antes de Cristo, «350 a. C.» (`añoLegible`), nunca «-350». Al pie,
- * cuántas Citas no declaran obra; con ninguna, nada.
+ * pantalla oye una coma. Antes de Cristo, «350 a. C.» (`añoLegible`), nunca «-350». El recuento
+ * se oye una vez, tras una coma oculta: «Cartas a Lucilio, 64, 3 citas».
  *
- * Fuera del índice de Pagefind: la lista no es contenido propio de la página. Sin guion y sin
- * enlace comercial: la Página de Autor no admite ningún Modelo.
+ * Nada se recorta (NFR-12): el título parte palabras y, si no cabe a su lado, el recuento baja a
+ * la línea siguiente sin encogerse. Sin guion y sin enlace comercial: ninguna de sus dos
+ * superficies admite un Modelo.
  */
-import Rotulo from './Rotulo.astro';
 import { rutaDeLaObra, type ObraResuelta } from '../lib/obras.ts';
-import { añoLegible } from '../lib/atribucion.ts';
+import { añoLegible, recuentoDeCitas } from '../lib/atribucion.ts';
 import type { Zona } from '../lib/vocabulario.ts';
 
 interface Props {
   obras: readonly ObraResuelta[];
-  sinObra: number;
   /**
    * La Zona de salida interna de sus enlaces (FR-56, UX-DR111, Historia 23.7). Obligatoria: cada
    * uso dice desde qué zona se sale, y un uso nuevo que la olvide no pasa `astro check`.
@@ -30,74 +35,56 @@ interface Props {
   zona: Zona;
 }
 
-const { obras, sinObra, zona } = Astro.props;
-
-/*
- * «Y …» solo cuando sigue a la lista: sin ninguna Obra, la línea va sola bajo el rótulo y no
- * puede empezar por «Y».
- */
-const conLista = obras.length > 0;
-const pie =
-  sinObra === 0
-    ? undefined
-    : sinObra === 1
-      ? `${conLista ? 'Y una' : 'Una'} cita sin obra documentada.`
-      : `${conLista ? 'Y ' : ''}${sinObra} citas sin obra documentada.`;
-
-const citas = (n: number) => (n === 1 ? 'una cita' : `${n} citas`);
+const { obras, zona } = Astro.props;
 ---
 
 {
-  (obras.length > 0 || pie !== undefined) && (
-    <section class="obras-del-autor" aria-labelledby="su-obra" data-pagefind-ignore>
-      <Rotulo id="su-obra">Su obra en este Corpus</Rotulo>
-      {obras.length > 0 && (
-        <ul class="lista-de-obras" data-zona={zona}>
-          {obras.map((obra) => (
-            <li>
-              <a href={rutaDeLaObra(obra)}>
-                <span class="titulo">{obra.titulo}{
-                  obra.año !== undefined && (
-                    <><span aria-hidden="true"> · </span><span class="oculto">, </span>{añoLegible(obra.año)}</>
-                  )
-                }</span>
-                <span class="recuento"><span aria-hidden="true">{obra.recuento}</span><span class="oculto">, {citas(obra.recuento)}</span></span>
-              </a>
-            </li>
-          ))}
-        </ul>
-      )}
-      {pie !== undefined && <p class="sin-obra">{pie}</p>}
-    </section>
+  obras.length > 0 && (
+    <ul class="lista-de-obras" data-zona={zona}>
+      {obras.map((obra) => (
+        <li>
+          <a href={rutaDeLaObra(obra)}>
+            <span class="titulo">{obra.titulo}{
+              obra.año !== undefined && (
+                <><span aria-hidden="true"> · </span><span class="oculto">, </span>{añoLegible(obra.año)}</>
+              )
+            }</span>
+            <span class="recuento"><span class="oculto">, </span>{recuentoDeCitas(obra.recuento)}</span>
+          </a>
+        </li>
+      ))}
+    </ul>
   )
 }
 
 <style>
-  .obras-del-autor {
-    margin-top: calc(var(--unidad) * 5);
-    max-width: var(--medida-prosa);
-  }
-
+  /* El espacio de encima lo pone quien la usa: no es el mismo en sus dos superficies. */
   .lista-de-obras {
     list-style: none;
-    margin: calc(var(--unidad) * 2) 0 0;
+    margin: 0;
     padding: 0;
   }
 
-  /* Filete entre entradas, no por encima de la primera (la maqueta, orden B). */
-  .lista-de-obras li + li {
+  /*
+   * Filete entre entradas, no por encima de la primera (la maqueta, orden B). «La primera» es la
+   * primera **visible**: el filtro de `/obras/` (26.6) aparta entradas con `hidden`, y la que queda
+   * primera no lleva filete encima. Sin filtro es lo mismo que `li + li`.
+   */
+  .lista-de-obras li:not([hidden]) ~ li {
     border-top: var(--grosor-filete) solid var(--filete);
   }
 
   /*
    * Enlace de bloque: sin subrayado, lo identifican su forma y su posición (EXPERIENCE.md,
-   * «Subrayado siempre visible»). La fila entera es la zona de toque.
+   * «Subrayado siempre visible»). La fila entera es la zona de toque. Con `flex-wrap`, un
+   * recuento que no cabe junto al título baja entero bajo él en vez de encogerse.
    */
   .lista-de-obras a {
     display: flex;
+    flex-wrap: wrap;
     justify-content: space-between;
     align-items: baseline;
-    gap: calc(var(--unidad) * 1.5);
+    column-gap: calc(var(--unidad) * 1.5);
     box-sizing: border-box;
     min-height: var(--zona-de-toque);
     padding-block: calc(var(--unidad) * 1.25);
@@ -105,27 +92,30 @@ const citas = (n: number) => (n === 1 ? 'una cita' : `${n} citas`);
     text-decoration: none;
   }
 
+  /*
+   * Base 0 y crecimiento: ocupa lo que deja el recuento. Sin `min-width: 0`, su mínimo es su
+   * palabra más larga (`break-word` no la cuenta partida), así que cuando esa palabra y el recuento
+   * no caben juntos el recuento baja de línea antes que aplastar el título. `max-width: 100%` topa
+   * ese mínimo en el ancho de la fila: una palabra más larga que la fila entera se parte
+   * (`overflow-wrap`) en vez de salirse y abrir un desplazamiento horizontal (`anywhere` también
+   * la partiría, pero el recuento ya no bajaría nunca).
+   */
   .titulo {
+    flex: 1 1 0%;
+    max-width: 100%;
     font-family: var(--sans);
     font-size: var(--cuerpo-md);
     line-height: 1.4;
     overflow-wrap: break-word;
-    min-width: 0;
   }
 
+  /* Ni crece ni encoge: «27 citas» se lee entero, en su línea o bajo el título. */
   .recuento {
+    flex: none;
     font-family: var(--sans);
     font-size: var(--pie);
     color: var(--tinta-apagada);
     font-variant-numeric: tabular-nums;
-    white-space: nowrap;
-  }
-
-  .sin-obra {
-    margin: calc(var(--unidad) * 2) 0 0;
-    font-family: var(--sans);
-    font-size: var(--pie);
-    color: var(--tinta-apagada);
   }
 
   /* Sin clase global para esto: la misma regla que la Cabecera de Obra declara para sí. */

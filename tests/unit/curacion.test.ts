@@ -22,6 +22,13 @@ import { lineaDeHueco } from '../../src/lib/formato.ts';
 import { verHuecos } from '../../src/lib/huecos.ts';
 import type { Cita } from '../../src/lib/publicado.ts';
 import { MIN_CITAS_POR_COLECCION } from '../../src/lib/umbrales.ts';
+import {
+  COLECCION,
+  DE_EPICTETO,
+  EN_LA_COLECCION,
+  instantaneaDe,
+  sembrarCorpusAlLimite,
+} from './ayuda/al-limite.ts';
 
 /**
  * Historia 12.4 — la curación de una Colección, sobre la matriz de entrada y salida.
@@ -768,5 +775,52 @@ describe('Historia 15.2 — el inventario enseña el solape de cada Colección',
     const vacia = inventario.find((c) => c.slug === 'vacia-del-todo');
     expect(vacia, 'la Colección sin miembros sigue en el inventario').toBeDefined();
     expect(vacia?.solape?.mayor).toBeUndefined();
+  });
+});
+
+/** Historia 26.8 — un Corpus al límite en un directorio temporal propio (`ayuda/al-limite.ts`). */
+const alLimite: string[] = [];
+afterEach(async () => {
+  await Promise.all(alLimite.splice(0).map((d) => rm(d, { recursive: true, force: true })));
+});
+async function corpusAlLimite() {
+  const raiz = await mkdtemp(join(tmpdir(), 'sabiduria-al-limite-'));
+  alLimite.push(raiz);
+  const rutas = rutasDelCorpus(join(raiz, 'corpus'));
+  await sembrarCorpusAlLimite(rutas);
+  return rutas;
+}
+
+describe('Historia 26.8 — quitar o despublicar no deja una Cita fuera de alcance', () => {
+  it('quitar un miembro que deja la Colección bajo su umbral se niega y nombra la Cita', async () => {
+    const rutas = await corpusAlLimite();
+    const antes = await instantaneaDe(rutas.raiz);
+
+    const resultado = await quitarCitas(rutas, COLECCION, [DE_EPICTETO[2]!]);
+
+    expect(resultado.ok).toBe(false);
+    if (resultado.ok) return;
+    expect(resultado.motivos.join('\n')).toContain(`/cita/${EN_LA_COLECCION}/ — no declara ningún Tema`);
+    expect(await instantaneaDe(rutas.raiz)).toEqual(antes);
+  });
+
+  it('despublicar la única Colección que la alcanza se niega sin mover el fichero', async () => {
+    const rutas = await corpusAlLimite();
+    const antes = await instantaneaDe(rutas.raiz);
+
+    const resultado = await despublicarColeccion(rutas, COLECCION);
+
+    expect(resultado.ok).toBe(false);
+    if (resultado.ok) return;
+    expect(resultado.motivos.join('\n')).toContain(`/cita/${EN_LA_COLECCION}/`);
+    expect(await instantaneaDe(rutas.raiz)).toEqual(antes);
+    expect(existsSync(rutas.coleccionesRetiradas)).toBe(false);
+  });
+
+  it('quitar un miembro que sobra no deja a nadie fuera, y se escribe', async () => {
+    const rutas = await corpusAlLimite();
+    expect((await asignarCitas(rutas, COLECCION, ['seneca-a-001'])).ok).toBe(true);
+    const resultado = await quitarCitas(rutas, COLECCION, ['seneca-a-001']);
+    expect(resultado.ok, resultado.ok ? '' : resultado.motivos.join('\n')).toBe(true);
   });
 });

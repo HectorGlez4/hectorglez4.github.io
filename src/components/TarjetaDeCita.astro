@@ -1,13 +1,16 @@
 ---
 /**
- * Tarjeta de Cita para listados — UX-DR11.
+ * Tarjeta de Cita para listados — UX-DR70 (enmienda UX-DR11), Historia 24.3.
  *
- * Fragmento más autor, filete divisorio, fondo a `surface-container-low` al pasar el
- * cursor. Toda la tarjeta es zona de toque, con 44px mínimo de alto. Sin imagen, sin
- * fondo propio y sin sombra al pasar el cursor.
+ * El fragmento y, debajo, lo que su contexto no da por sabido: el Autor y el título de la Obra
+ * de la que sale. Filete divisorio, fondo a `surface-container-low` al pasar el cursor. Toda
+ * la tarjeta es zona de toque, con 44px mínimo de alto. Sin imagen, sin fondo propio y sin
+ * sombra al pasar el cursor. Es la **única** Tarjeta de Cita (AD-19): sin tamaño compacto ni
+ * variante, y lo que cambia de un sitio a otro lo declara cada uso con `atribucion`.
  *
  * El enlace envuelve la tarjeta entera en lugar de ir solo en el fragmento: en móvil,
- * acertarle a una línea de texto con el pulgar es justo el gesto que UJ-1 no concede.
+ * acertarle a una línea de texto con el pulgar es justo el gesto que UJ-1 no concede. Por eso
+ * la Obra es texto y nunca un segundo enlace.
  */
 import type { Cita, Autor } from '../lib/publicado.ts';
 import { rutaDeCita } from '../lib/superficies.ts';
@@ -15,7 +18,31 @@ import type { Zona } from '../lib/vocabulario.ts';
 
 interface Props {
   cita: Cita;
-  /** Se omite en la Página de Autor, donde el autor es el mismo en todas las tarjetas. */
+  /**
+   * Qué atribución pinta la tarjeta bajo el fragmento (UX-DR70). Conjunto cerrado y
+   * **obligatorio, sin valor por omisión**: cada uso dice lo que su contexto no da por sabido,
+   * y un uso nuevo que lo olvide no pasa `astro check`.
+   *
+   *   · `'autor-y-obra'` — el Autor y el título de la Obra: la Página de Tema y la de Colección,
+   *     que reúnen a varios Autores (FR-6, FR-26).
+   *   · `'obra'` — solo el título de la Obra: la Página de Autor (FR-4), donde el Autor es el
+   *     mismo en todas las tarjetas, y «Más de {Autor}» al pie de la Página de Cita (24.6).
+   *   · `'ninguna'` — solo el fragmento: el Listado de Obra (FR-51), cuya Cabecera ya dice el
+   *     Autor y el título, y «De la misma obra» al pie de la Página de Cita (24.6).
+   *
+   * Los dos bloques del pie de la Página de Cita los pinta `RutasDeSalida.astro` con esta
+   * tarjeta desde la Historia 24.6.
+   *
+   * La línea de Obra es `cita.obra.titulo`, el título de su Ficha de Obra (AD-25, Historia
+   * 22.3). Una Cita sin Obra no la lleva: ni hueco, ni rótulo, ni pausa.
+   */
+  atribucion: 'autor-y-obra' | 'obra' | 'ninguna';
+  /**
+   * El Autor de la Cita, **solo** con `atribucion="autor-y-obra"`; con las otras dos ni se lee
+   * ni se pasa. Con `autor-y-obra`, que falte o que no sea el que declara la Cita detiene la
+   * construcción: la integridad del conjunto publicable garantiza que toda Cita resuelve su
+   * Autor, así que cualquiera de las dos cosas es un uso roto, no un caso que pintar.
+   */
   autor?: Autor;
   /**
    * La Zona de salida interna de sus enlaces (FR-56, UX-DR111, Historia 23.7). Obligatoria: cada
@@ -24,7 +51,63 @@ interface Props {
   zona: Zona;
 }
 
-const { cita, autor, zona } = Astro.props;
+const { cita, atribucion, autor, zona } = Astro.props;
+
+/**
+ * Sin valor por omisión también al construir. `astro check` rechaza el uso que no declara
+ * `atribucion`, pero `astro build` no comprueba tipos: sin esta guarda, un uso que la olvidara
+ * se pintaría en silencio como `'obra'`, que sería un valor por omisión escondido.
+ *
+ * La lista es la de la unión de `Props`, atada a ella: `satisfies` no deja escribir aquí un
+ * valor que la unión no tenga, y `tests/unit/tarjeta-de-cita.test.ts` exige que tenga todos
+ * los de la unión.
+ */
+const ATRIBUCIONES = ['autor-y-obra', 'obra', 'ninguna'] as const satisfies readonly Props['atribucion'][];
+if (!ATRIBUCIONES.includes(atribucion)) {
+  const declarada =
+    atribucion === undefined
+      ? 'sin `atribucion`'
+      : `con atribucion=${JSON.stringify(atribucion)}, fuera del conjunto (${ATRIBUCIONES.join(', ')})`;
+  throw new Error(
+    `TarjetaDeCita: la Cita «${cita.slug}» se pinta en ${Astro.url.pathname} ${declarada}. ` +
+      'Cada uso declara la suya, sin valor por omisión (Historia 24.3).',
+  );
+}
+
+/**
+ * El nombre del Autor, solo donde el contexto lo pide. Sin él, o con el de otro, la tarjeta no
+ * sale: un Tema o una Colección que enseñara una Cita sin decir de quién es —o atribuyéndosela
+ * a quien no la firma— sería justo lo que el contexto declara que no puede pasar.
+ */
+let nombre: string | undefined;
+if (atribucion === 'autor-y-obra') {
+  if (autor === undefined) {
+    throw new Error(
+      `TarjetaDeCita: la Cita «${cita.slug}» se pinta en ${Astro.url.pathname} con ` +
+        `atribucion="autor-y-obra" y sin Autor. Ese contexto declara el Autor de cada tarjeta, ` +
+        `y la tarjeta no sale sin él: pásale el Autor que declara la Cita, «${cita.autor}».`,
+    );
+  }
+  if (autor.slug !== cita.autor) {
+    throw new Error(
+      `TarjetaDeCita: la Cita «${cita.slug}» se pinta en ${Astro.url.pathname} con ` +
+        `atribucion="autor-y-obra" y el Autor «${autor.slug}», pero la Cita declara «${cita.autor}».`,
+    );
+  }
+  nombre = autor.nombre;
+}
+
+/** El título de su Obra, que la tarjeta no recorta nunca (NFR-12). */
+const titulo = atribucion === 'ninguna' ? undefined : cita.obra?.titulo;
+
+/**
+ * Las partes que siguen al fragmento, en su orden. Cada una lleva delante su pausa solo para
+ * lectores, y es la única regla: ninguna pausa al final, ninguna en una tarjeta de una parte.
+ */
+const partes = [
+  { clase: 'autor', texto: nombre },
+  { clase: 'obra', texto: titulo },
+].filter((parte): parte is { clase: string; texto: string } => parte.texto !== undefined);
 
 /**
  * El fragmento. Una Cita larga se recorta **para el listado**, que no es publicarla
@@ -38,12 +121,25 @@ const fragmento =
     : cita.texto;
 ---
 
-{/* La zona va en el `<li>`, no en el enlace: el contenedor que pinta el build (Historia 23.7). */}
+{/*
+  * La zona va en el `<li>`, no en el enlace: el contenedor que pinta el build (Historia 23.7).
+  *
+  * Las partes van pegadas, sin espacio entre etiquetas: Astro conserva uno donde hay salto de
+  * línea, y el texto del enlace sería «…» , Séneca. La pausa «, » solo para lectores va como
+  * hermana de cada parte que sigue —nunca dentro de `.fragmento`, que la pasaría a la serif—, y
+  * como es `position: absolute` queda fuera del flujo flexible: el `gap` sigue siendo el de las
+  * partes visibles. El nombre de la tarjeta es su texto visible, en su orden y sin ninguna
+  * palabra más (WCAG 2.5.3).
+  *
+  * Pegarlas fija el texto, no el nombre que calcula el navegador: las partes son elementos de
+  * flujo flexible, de bloque, y Chromium separa cada bloque con un espacio al componer el nombre
+  * accesible, así que lo anuncia como «…» , Séneca , Cartas a Lucilio. No se oye —el lector hace
+  * la pausa en la coma— y es lo mismo que ya hace `ListaDeObras.astro`. Las pruebas de punta a
+  * punta de los listados fijan lo que sí importa: las partes visibles, en su orden, unidas por
+  * comas y nada más.
+  */}
 <li class="tarjeta" data-zona={zona}>
-  <a href={rutaDeCita(cita.slug)}>
-    <span class="fragmento">«{fragmento}»</span>
-    {autor && <span class="autor">{autor.nombre}</span>}
-  </a>
+  <a href={rutaDeCita(cita.slug)}><span class="fragmento">«{fragmento}»</span>{partes.map((parte) => (<><span class="solo-para-lectores">, </span><span class={parte.clase}>{parte.texto}</span></>))}</a>
 </li>
 
 <style>
@@ -87,5 +183,18 @@ const fragmento =
     letter-spacing: 0.09em;
     text-transform: uppercase;
     color: var(--tinta-apagada);
+  }
+
+  /*
+   * UX-DR70 — el título de la Obra: Inter pequeña y apagada, sin versalitas. Nunca se recorta:
+   * un título largo ocupa más líneas, y una palabra que no cabe se parte antes que desbordar.
+   */
+  .obra {
+    font-family: var(--sans);
+    font-size: var(--pie);
+    font-weight: 400;
+    line-height: 1.5;
+    color: var(--tinta-apagada);
+    overflow-wrap: anywhere;
   }
 </style>

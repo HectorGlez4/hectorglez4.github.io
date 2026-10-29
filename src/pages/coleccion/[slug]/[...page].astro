@@ -24,8 +24,9 @@
  * camino que permitiría saltárselo —el conjunto publicable ya no reparte la lista
  * declarada—, así que no hay nada que rodear ni tentación que resistir.
  *
- * Como el Tema, y a diferencia del Autor, cada tarjeta lleva el nombre de su Autor: una
- * Colección reúne a varios y sin el nombre el listado no dice de quién es cada frase.
+ * Como el Tema, y a diferencia del Autor, cada tarjeta lleva el nombre de su Autor y el título
+ * de su Obra (`atribucion="autor-y-obra"`, Historia 24.3): una Colección reúne a varios y sin
+ * el nombre el listado no dice de quién es cada frase, ni sin el título de dónde sale.
  *
  * **No hay enlace de vuelta desde la Página de Cita, y es deliberado.** FR-28 dice que la
  * Colección enlaza a las Citas y no al revés, y UX-DR34 se recortó en validación por eso.
@@ -140,7 +141,7 @@ const canonica = new URL(ruta, Astro.site).href;
       */}
     {/* UX-DR25 — los listados son listas reales. */}
     <ul class="listado">
-      {pagina.data.map((cita) => <TarjetaDeCita cita={cita} autor={autores.get(cita.autor)} zona="listado" />)}
+      {pagina.data.map((cita) => <TarjetaDeCita cita={cita} atribucion="autor-y-obra" autor={autores.get(cita.autor)} zona="listado" />)}
     </ul>
 
     <Paginacion pagina={pagina} zona="paginacion" />

@@ -114,6 +114,16 @@ body {
   line-height: 1.65;
   /* NFR-8: el contenido se enmarca, nunca sangra al borde de la pantalla. */
   -webkit-text-size-adjust: 100%;
+  /*
+   * NFR-8, Historia 26.9 — una palabra que no cabe en su línea se parte antes que desbordar
+   * (DESIGN.md § Layout & Spacing, «Reflujo sin desbordar»). Con el texto al 200 % la columna
+   * útil a 320 px es de 120 px CSS, y la Cita del Día, un `h1` o un fragmento traen palabras
+   * más anchas. Por omisión no cambia nada: `break-word` solo actúa cuando la palabra no cabe, y
+   * no baja el min-content, así que ningún recuento ni número se encoge por ella. Donde un ítem
+   * flex o de rejilla fija su mínimo por contenido, se corrige ese ítem. Sin `hyphens`: el texto
+   * de una Cita es literal y se parte sin guion.
+   */
+  overflow-wrap: break-word;
 }
 
 /*

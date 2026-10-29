@@ -101,7 +101,7 @@ const jornadas = lote.map((dia) => ({
 
     {
       jornadas.map((dia) => (
-        <section class="jornada" data-jornada={dia.jornada}>
+        <section class="jornada" data-dia-del-lote={dia.jornada}>
           <h2>{dia.jornada}</h2>
 
           {dia.material !== null && !dia.honrada && (

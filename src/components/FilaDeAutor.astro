@@ -1,0 +1,47 @@
+---
+/**
+ * La Fila de Autor del Directorio — Historia 26.3, UX-DR84, UX-DR104, variante 2A.
+ *
+ * Una Fila de bloque a la Página de Autor, en la misma pestaña, sin subrayado y sin glifo de
+ * avance, con la zona `directorio` en su `<li>` (AD-13). Dentro, el nombre tal como se escribe
+ * —la serif, porque es nombre de Autor— y debajo sus hechos, «{años} · {n} citas», en el pie y
+ * con cifras tabulares. El punto medio es decoración y el lector oye una coma; entre las dos
+ * líneas, una pausa «, » solo para lectores (UX-DR101). Sin años, la línea es solo el recuento:
+ * ni punto medio ni hueco.
+ *
+ * Todo va en una sola línea de marcado: Astro conserva un espacio donde hay salto de línea, y la
+ * vista diría «1547–1616  · 12 citas». Lo que pinta lo compone `src/lib/directorios.ts`; aquí no
+ * se cuenta ni se ordena nada.
+ */
+import FilaDeBloque from './FilaDeBloque.astro';
+
+interface Props {
+  ruta: string;
+  nombre: string;
+  años?: string;
+  recuento: string;
+}
+
+const { ruta, nombre, años, recuento } = Astro.props;
+---
+
+<FilaDeBloque href={ruta} zona="directorio"><span class="nombre">{nombre}</span><span class="solo-para-lectores">, </span><span class="hechos">{años !== undefined && (<>{años}<span aria-hidden="true"> · </span><span class="solo-para-lectores">, </span></>)}{recuento}</span></FilaDeBloque>
+
+<style>
+  .nombre {
+    display: block;
+    font-family: var(--serif);
+    font-size: var(--titular-sm);
+    font-weight: 400;
+    color: var(--tinta);
+    overflow-wrap: anywhere;
+  }
+
+  .hechos {
+    display: block;
+    font-family: var(--sans);
+    font-size: var(--pie);
+    color: var(--tinta-apagada);
+    font-variant-numeric: tabular-nums;
+  }
+</style>

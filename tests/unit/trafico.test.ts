@@ -7,7 +7,9 @@ import { join, resolve } from 'node:path';
 import { promisify } from 'node:util';
 import { parse as parsearYaml } from 'yaml';
 import { MIN_CITAS_POR_TEMA } from '../../src/lib/umbrales.ts';
+import { rutasPublicadas } from '../../src/lib/publicado.ts';
 import { DOMINIO } from '../../src/lib/dominio.ts';
+import { FAMILIAS } from '../../src/lib/superficies.ts';
 import {
   CABECERA_DE_TRAFICO,
   FICHERO_DE_TRAFICO,
@@ -23,6 +25,7 @@ import {
 } from '../../tools/lib/indexacion.ts';
 import {
   ESTADO_DE_LOS_DATOS,
+  FAMILIAS_DEL_TRAFICO,
   FILAS_POR_PAGINA,
   MOTIVO_SIN_DATOS_DEFINITIVOS,
   agregarPorFamilia,
@@ -69,7 +72,7 @@ async function corpusConCitas(cuantas: number): Promise<string> {
   }
   await writeFile(
     join(corpus, 'autores', 'autor-0.yml'),
-    'nombre: "Autor Cero"\nañoFallecimiento: 65\nsemblanza: "Semblanza de prueba."\ntradicion: "peninsular"\n',
+    'nombre: "Autor Cero"\nañoFallecimiento: 65\nsemblanza: "Semblanza de prueba."\ntradicion: "peninsular"\nordenAlfabetico: "Cero"\n',
     'utf8',
   );
   await writeFile(join(corpus, 'temas', 'la-vida.yml'), 'nombre: "La vida"\n', 'utf8');
@@ -213,16 +216,21 @@ describe('los meses y las peticiones', () => {
   });
 });
 
+/**
+ * Un censo a mano. Sin Directorios a propósito: los casos de abajo miran las cuatro de siempre,
+ * y los de la Historia 26.7 usan el censo real de un corpus, que siempre los publica.
+ */
 const CENSO: CensoPorFamilia = {
   cita: ['/cita/cita-0/', '/cita/cita-1/'],
   autor: ['/autor/autor-0/'],
   tema: ['/tema/la-vida/'],
   coleccion: ['/coleccion/sin-trafico/'],
+  directorio: [],
 };
 
 describe('el reparto por familia', () => {
   it('suma clics e impresiones, CTR = clics/impresiones y posición ponderada por impresiones', () => {
-    const { familias } = agregarPorFamilia(FILAS_POR_PAGINA_FIJAS, CENSO, DOMINIO);
+    const { familias } = agregarPorFamilia(FILAS_POR_PAGINA_FIJAS, CENSO, DOMINIO, FAMILIAS_DEL_TRAFICO);
     // (10·100 + 20·300) / 400 = 17,5
     expect(familias.cita).toEqual({ clics: 4, impresiones: 400, ctr: 0.01, posicion: 17.5 });
     expect(familias.autor).toEqual({ clics: 2, impresiones: 50, ctr: 0.04, posicion: 5 });
@@ -230,7 +238,7 @@ describe('el reparto por familia', () => {
   });
 
   it('una familia leída sin filas es un cero real, sin CTR ni posición', () => {
-    const { familias } = agregarPorFamilia(FILAS_POR_PAGINA_FIJAS, CENSO, DOMINIO);
+    const { familias } = agregarPorFamilia(FILAS_POR_PAGINA_FIJAS, CENSO, DOMINIO, FAMILIAS_DEL_TRAFICO);
     expect(familias.coleccion).toEqual({ clics: 0, impresiones: 0 });
   });
 
@@ -239,6 +247,7 @@ describe('el reparto por familia', () => {
       FILAS_POR_PAGINA_FIJAS,
       { ...CENSO, coleccion: [] },
       DOMINIO,
+      FAMILIAS_DEL_TRAFICO,
     );
     expect(Object.keys(familias)).toEqual(['cita', 'autor', 'tema']);
   });
@@ -251,6 +260,7 @@ describe('el reparto por familia', () => {
       ],
       CENSO,
       DOMINIO,
+      FAMILIAS_DEL_TRAFICO,
     );
     expect(familias.cita).toEqual({ clics: 0, impresiones: 1000, ctr: 0, posicion: 10 });
   });
@@ -264,13 +274,14 @@ describe('el reparto por familia', () => {
       ],
       CENSO,
       DOMINIO,
+      FAMILIAS_DEL_TRAFICO,
     );
     expect(familias.cita).toEqual({ clics: 0, impresiones: 0 });
     expect(fueraDelCenso).toEqual({ clics: 3, impresiones: 6 });
   });
 
   it('lo que no casa con el censo va a fueraDelCenso: la portada y un Autor que no existe', () => {
-    const { fueraDelCenso } = agregarPorFamilia(FILAS_POR_PAGINA_FIJAS, CENSO, DOMINIO);
+    const { fueraDelCenso } = agregarPorFamilia(FILAS_POR_PAGINA_FIJAS, CENSO, DOMINIO, FAMILIAS_DEL_TRAFICO);
     expect(fueraDelCenso).toEqual({ clics: 5, impresiones: 47 });
   });
 
@@ -283,6 +294,7 @@ describe('el reparto por familia', () => {
       ],
       CENSO,
       DOMINIO,
+      FAMILIAS_DEL_TRAFICO,
     );
     expect(familias.autor).toEqual({ clics: 0, impresiones: 0 });
     expect(fueraDelCenso).toEqual({ clics: 3, impresiones: 15 });
@@ -303,7 +315,7 @@ describe('el reparto por familia', () => {
 describe('la puerta de «ausencia antes que cero»', () => {
   const [mes] = mesesALeer(HOY, 1);
   const total = { clics: 1, impresiones: 2 };
-  const porPagina = agregarPorFamilia([], CENSO, DOMINIO);
+  const porPagina = agregarPorFamilia([], CENSO, DOMINIO, FAMILIAS_DEL_TRAFICO);
 
   it('se niega a una familia a la vez leída y sin leer', () => {
     expect(() =>
@@ -394,6 +406,82 @@ describe('la orden', () => {
     expect(censo.tema).toContain('/tema/la-vida/');
   });
 
+  it('Historia 26.7 — los Directorios cuentan en `directorio`, no en fueraDelCenso ni en Autor u Obra', async () => {
+    const corpus = await corpusConCitas(MIN_CITAS_POR_TEMA);
+    const conjunto = await conjuntoDelCorpus(rutasDelCorpus(corpus));
+    const censo = censoPorFamilia(conjunto);
+    expect(rutasPublicadas(conjunto)).toContain('/autores/');
+    expect(rutasPublicadas(conjunto)).toContain('/obras/');
+    const { familias, fueraDelCenso } = agregarPorFamilia(
+      [
+        { keys: [URL('/autores/')], clicks: 2, impressions: 9, position: 3 },
+        { keys: [URL('/obras/')], clicks: 1, impressions: 4, position: 5 },
+      ],
+      censo,
+      DOMINIO,
+      FAMILIAS_DEL_TRAFICO,
+    );
+    expect(familias.directorio).toMatchObject({ clics: 3, impresiones: 13 });
+    expect(fueraDelCenso).toEqual({ clics: 0, impresiones: 0 });
+    expect(familias.autor).toEqual({ clics: 0, impresiones: 0 });
+    expect(Object.keys(familias)).not.toContain('obra');
+  });
+
+  it('Historia 26.7 — la serie cuenta un subconjunto de las seis, con el Directorio y sin la Obra', () => {
+    for (const familia of FAMILIAS_DEL_TRAFICO) expect(FAMILIAS).toContain(familia);
+    expect(FAMILIAS_DEL_TRAFICO).toContain('directorio');
+    expect(FAMILIAS_DEL_TRAFICO).not.toContain('obra');
+  });
+
+  it('Historia 26.7 — la orden reatribuye a `directorio` lo que antes iba fuera del censo, y lo rotula alineado', async () => {
+    const corpus = await corpusConCitas(MIN_CITAS_POR_TEMA);
+    // La serie de antes de la 26.7: sin `directorio`, con los Directorios en `fueraDelCenso`.
+    const anterior = (mes: string) => ({
+      mes,
+      leidoEl: '2026-10-05',
+      propiedad: `sc-domain:${DOMINIO}`,
+      total: { clics: 4, impresiones: 23 },
+      familias: { cita: { clics: 1, impresiones: 10 } },
+      fueraDelCenso: { clics: 3, impresiones: 13 },
+      sinLeer: {},
+    });
+    await registrarLecturaDeTrafico(rutasDelCorpus(corpus), {
+      propiedad: `sc-domain:${DOMINIO}`,
+      leidoEl: '2026-10-05',
+      meses: [anterior('2026-09'), anterior('2026-10')],
+      sinLeer: [],
+    });
+    const salida = capturarSalida();
+    const consultar: Consultar = async (peticion) => {
+      if (peticion.dimensions === undefined) return TOTAL_FIJO;
+      if ((peticion.startRow ?? 0) > 0) return [];
+      return [
+        { keys: [URL('/autores/')], clicks: 2, impressions: 9, position: 3 },
+        { keys: [URL('/obras/')], clicks: 1, impressions: 4, position: 5 },
+        { keys: [URL('/cita/cita-0/')], clicks: 1, impressions: 10, position: 2 },
+      ];
+    };
+    const codigo = await principal(['--corpus', corpus, '--meses', '1', '--registrar'], conCliente(consultar), CREDENCIAL, HOY);
+    expect(codigo).toBe(0);
+    const serie = await leerSerieDeTrafico(rutasDelCorpus(corpus));
+    expect(serie.map((m) => m.mes)).toEqual(['2026-09', '2026-10']);
+    const [septiembre, entrada] = serie;
+    // Solo se reatribuye el mes releído: septiembre, fuera de `--meses 1`, se sigue leyendo
+    // con la atribución de antes, sin `directorio`.
+    expect(septiembre.familias).not.toHaveProperty('directorio');
+    expect(septiembre.fueraDelCenso).toEqual({ clics: 3, impresiones: 13 });
+    expect(entrada.mes).toBe('2026-10');
+    expect(entrada.familias?.directorio).toMatchObject({ clics: 3, impresiones: 13 });
+    expect(entrada.fueraDelCenso).toEqual({ clics: 0, impresiones: 0 });
+    expect(entrada.familias?.autor).toMatchObject({ clics: 0, impresiones: 0 });
+    expect(entrada.familias).not.toHaveProperty('obra');
+    // «Directorio:» mide 11: la columna de cifras empieza en el mismo sitio en todas las líneas.
+    const texto = salida.join('');
+    const columna = (rotulo: string) => new RegExp(`^ {2}${rotulo} +\\d`, 'm').exec(texto)?.[0].length;
+    expect(columna('Directorio:')).toBe(columna('Cita:'));
+    expect(columna('Total:')).toBe(columna('Cita:'));
+  });
+
   it('registrar: cabecera y una entrada por mes, con parcial solo en el mes en curso', async () => {
     const corpus = await corpusConCitas(MIN_CITAS_POR_TEMA);
     capturarSalida();
@@ -421,7 +509,8 @@ describe('la orden', () => {
     expect(octubre.parcial).toBe(true);
     expect(septiembre.propiedad).toMatch(/^sc-domain:/);
     expect(septiembre.total).toEqual({ clics: 12, impresiones: 600, ctr: 0.02, posicion: 14.3 });
-    expect(Object.keys(septiembre.familias)).toEqual(['cita', 'autor', 'tema']);
+    // Historia 26.7 — el Directorio es familia publicada: sale leído, aunque sin filas sea un cero.
+    expect(Object.keys(septiembre.familias)).toEqual(['cita', 'autor', 'tema', 'directorio']);
     expect(septiembre.fueraDelCenso).toEqual({ clics: 5, impresiones: 47 });
     expect(septiembre.sinLeer).toBeUndefined();
   });
@@ -501,7 +590,7 @@ describe('la orden', () => {
     expect(octubre.total.clics).toBe(12);
     expect(octubre.familias).toBeUndefined();
     expect(octubre.fueraDelCenso).toBeUndefined();
-    expect(Object.keys(octubre.sinLeer ?? {})).toEqual(['cita', 'autor', 'tema']);
+    expect(Object.keys(octubre.sinLeer ?? {})).toEqual(['cita', 'autor', 'tema', 'directorio']);
     expect(octubre.sinLeer?.cita).toMatch(/la fuente no respondió/);
 
     const texto = salida.join('');

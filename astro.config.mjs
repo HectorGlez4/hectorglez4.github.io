@@ -6,10 +6,13 @@ import { anunciableEnElSitemap } from './src/lib/superficies.ts';
 import { fechaDeLaEntrada } from './tools/lib/cambios.ts';
 import historialDelCorpus, { fechasDelSitemap } from './integraciones/historial.ts';
 import cotejoDeCitas from './integraciones/cotejo.ts';
+import clavesDeOrden from './integraciones/claves.ts';
 import formaDeLasColecciones from './integraciones/colecciones.ts';
 import fichasDeObra from './integraciones/obras.ts';
 import coberturaTipografica from './integraciones/cobertura.ts';
 import rutasIndexablesDelCorpus from './integraciones/indexables.ts';
+import tamañoDelDirectorioDeObras from './integraciones/directorios.ts';
+import alcanceDesdeLaPortada from './integraciones/alcance.ts';
 
 // El dominio no se escribe aquí: sale de `public/CNAME`, el fichero que el hospedaje
 // exige, a través de `src/lib/dominio.ts`. La canónica de cada página y el sitemap lo
@@ -65,6 +68,40 @@ export default defineConfig({
 
   server: { port: PUERTO_DEL_SERVIDOR },
   build: { format: 'directory' },
+
+  vite: {
+    build: {
+      /*
+       * AD-6, Historia 26.6 — ningún guion empaquetado va en línea.
+       *
+       * Astro mete en el HTML, como `<script type="module">` con cuerpo, el `<script>` procesado
+       * de un componente que cabe en `assetsInlineLimit` (4 KiB por omisión). El filtro de los
+       * Directorios cabría, y en línea contaría en `MAX_BYTES_DE_GUION` de `/autores/` y `/obras/`
+       * y se repetiría en cada carga en vez de cachearse: tiene que ser un fichero de `/_astro/`,
+       * en la lista cerrada de `src/lib/guiones.ts` con su tope. Así que para los `.js` se dice
+       * `false` —nunca en línea—, y para lo demás `undefined`, que deja la regla por omisión.
+       *
+       * Comprobado en Astro 7.2.0: `shouldInlineScriptChunk` de
+       * `astro/dist/core/build/plugins/plugin-scripts.js` pasa el código del guion y su nombre
+       * de fichero a `shouldInlineAsset` (`plugins/util.js`), que llama a esta función y, si no
+       * devuelve `undefined`, obedece. **Se reverifica al subir de versión**: si Astro dejara de
+       * consultarla, el guion volvería a ir en línea, y lo diría `tests/unit/medicion.test.ts`,
+       * que exige que ningún `<script type="module">` de `dist/` lleve cuerpo.
+       *
+       * NFR-7 — la hoja del Armazón va siempre en línea. Es la que trae los tokens, el cuerpo,
+       * la cabecera y el pie: toda página la necesita para su primera pintura. Cabía en los
+       * 4 KiB por omisión hasta que la cabecera de la 26.5 la llevó a 4.176 bytes, y entonces
+       * salió a `/_astro/Armazon.*.css` y toda página —la portada incluida, que no pedía
+       * ninguna hoja— ganó una petición que bloquea el pintado. En línea vuelve a ser lo que
+       * era, y el peso de `dist/` el que midió la 24.2. Las hojas de cada página siguen la
+       * regla por omisión. Lo vigila `tests/unit/obra-pagina.test.ts` («existe
+       * `.enlace-en-tinta`»), que lee la regla en los `<style>` de la página: si el trozo
+       * cambiara de nombre, volvería a salir a fichero y esa prueba se pondría en rojo.
+       */
+      assetsInlineLimit: (fichero) =>
+        fichero.endsWith('.js') ? false : /(^|\/)Armazon\.[\w-]+\.css$/.test(fichero) ? true : undefined,
+    },
+  },
   integrations: [
     /*
      * Historia 11.2 — ninguna Cita se publica sin aparecer en su documento.
@@ -82,6 +119,15 @@ export default defineConfig({
      * una relación entre ficheros, que sin puerta se pierde en silencio.
      */
     formaDeLasColecciones(),
+
+    /*
+     * Historia 26.1 — todo Autor publicado tiene clave de orden, y toda clave tiene forma.
+     *
+     * La forma la juzga también el esquema, fichero a fichero; la presencia es una relación con
+     * las Citas publicadas (`autoresPublicados`) y solo se puede ver aquí. Rompe nombrando el
+     * fichero y la orden que la propone.
+     */
+    clavesDeOrden(),
 
     /*
      * Historia 22.1 — toda Obra publicada tiene Ficha de Obra (AD-25).
@@ -182,6 +228,25 @@ export default defineConfig({
      * de arriba acaba de escribir en ese mismo gancho.
      */
     rutasIndexablesDelCorpus(),
+
+    /*
+     * Historia 26.8 — NFR-5 con puerta: ninguna superficie de `rutasPublicadas` queda a más de
+     * `MAX_SALTOS_DESDE_LA_PORTADA` saltos de la portada, y el `dist/` contiene el grafo del
+     * modelo (`grafoDelModelo`).
+     *
+     * En `astro:build:done`, sobre el grafo de enlaces del `dist/` real sin lo que rota con la
+     * jornada (`data-jornada`, `<template>`, `<noscript>`). Rompe nombrando cada superficie fuera
+     * —con el Tema que cayó bajo su umbral— y cada arista que falta; si no, escribe una línea.
+     */
+    alcanceDesdeLaPortada(),
+
+    /*
+     * Historia 26.4 — cuánto pesa `/obras/`, que es una sola página con todas las Obras.
+     *
+     * En `astro:build:done` informa del tamaño de `dist/obras/index.html` y, si pasa de
+     * `MAX_BYTES_DEL_DIRECTORIO_DE_OBRAS`, avisa de que toca reabrir paginarla. Nunca rompe.
+     */
+    tamañoDelDirectorioDeObras(),
   ],
 
   /*

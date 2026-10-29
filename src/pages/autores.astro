@@ -1,0 +1,91 @@
+---
+/**
+ * El Directorio de Autores — Historia 26.3, FR-55, UX-DR80 a UX-DR84.
+ *
+ * Todo Autor con al menos una Cita publicada, de la A a la Z por su clave de orden —Cervantes en
+ * la C—, agrupado por la inicial de la clave, con letras de salto que funcionan sin guion. Lo que
+ * se lista, en qué orden y con qué hechos lo decide `src/lib/directorios.ts`; esta página solo lo
+ * pinta.
+ *
+ * Es producto (`src/lib/superficies.ts`): sitemap, canónica sin `noindex`, Pagefind por su título
+ * —el listado entero va en `data-pagefind-ignore="all"`, para que buscar el nombre de un Autor
+ * devuelva su página y no ésta— y vista de superficie. Una sola página, sin 2+.
+ *
+ * Entre el `h1` y las letras, el filtro de la 26.6 (`FiltroDelDirectorio`): la región del recuento
+ * va en el HTML, vacía y sin alto, y el guion inserta el campo al cargar —sin guion, la lista entera
+ * y las letras, como antes—. Sin ningún Modelo de Ingreso (`SUPERFICIES_SIN_INGRESO`): la página
+ * sale idéntica con todos encendidos o apagados. Sin semblanzas ni Citas
+ * (`SUPERFICIES_SIN_SEMBLANZA`): lista entidades y dice hechos del Corpus.
+ */
+import Armazon from '../components/Armazon.astro';
+import LetrasDeSalto from '../components/LetrasDeSalto.astro';
+import GrupoDeLetra from '../components/GrupoDeLetra.astro';
+import FilaDeAutor from '../components/FilaDeAutor.astro';
+import FiltroDelDirectorio from '../components/FiltroDelDirectorio.astro';
+import { conjuntoPublicable } from '../lib/publicado.ts';
+import { directorioDeAutores } from '../lib/directorios.ts';
+import { descripcionDelDirectorioDeAutores } from '../lib/atribucion.ts';
+import { NOMBRE_DEL_DIRECTORIO_DE_AUTORES, tituloDelDirectorioDeAutores } from '../lib/marca.ts';
+import { TARJETA_DEL_DIRECTORIO_DE_AUTORES, rutaDelDirectorioDeAutores } from '../lib/superficies.ts';
+
+const conjunto = await conjuntoPublicable();
+const directorio = directorioDeAutores(conjunto.autores, conjunto.citas);
+const descripcion = descripcionDelDirectorioDeAutores(directorio);
+---
+
+<Armazon
+  titulo={tituloDelDirectorioDeAutores()}
+  descripcion={descripcion}
+  tarjeta={TARJETA_DEL_DIRECTORIO_DE_AUTORES}
+  ruta={rutaDelDirectorioDeAutores()}
+  tipo="directorio"
+>
+  <div class="pagina contenedor">
+    <div class="prosa">
+      <h1>{NOMBRE_DEL_DIRECTORIO_DE_AUTORES}</h1>
+
+      <FiltroDelDirectorio directorio="autores" />
+
+      <div class="listado" data-pagefind-ignore="all">
+        {directorio.grupos.length > 0 && <LetrasDeSalto letras={directorio.grupos} entidades={NOMBRE_DEL_DIRECTORIO_DE_AUTORES} />}
+        {directorio.grupos.map((grupo) => (
+          <GrupoDeLetra inicial={grupo.inicial} ancla={grupo.ancla}>
+            <ul role="list">
+              {grupo.entradas.map((autor) => (
+                <FilaDeAutor ruta={autor.ruta} nombre={autor.nombre} años={autor.años} recuento={autor.recuento} />
+              ))}
+            </ul>
+          </GrupoDeLetra>
+        ))}
+      </div>
+    </div>
+  </div>
+</Armazon>
+
+<style>
+  .pagina {
+    padding-block: var(--respiracion);
+  }
+
+  /* Todo dentro de la medida de prosa. */
+  .prosa {
+    max-width: var(--medida-prosa);
+  }
+
+  /* El Encabezado del Directorio: Inter, nunca la serif; sin enlace, bajada ni recuento. */
+  h1 {
+    margin: 0;
+    font-family: var(--sans);
+    font-size: var(--titular-md);
+    font-weight: 600;
+    color: var(--tinta);
+  }
+
+  /*
+   * Las letras a 3 × `--unidad` de lo que tienen encima: del `h1` sin guion —la región vacía no
+   * ocupa alto—, y del campo o del recuento con él (26.6).
+   */
+  .listado {
+    margin-top: calc(var(--unidad) * 3);
+  }
+</style>

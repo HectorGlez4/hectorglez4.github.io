@@ -195,8 +195,15 @@ export function cortesQueLlegaron(declarados: readonly CorteDeSerie[]): CorteLle
     .sort((a, b) => (a.jornada < b.jornada ? -1 : a.jornada > b.jornada ? 1 : 0));
 }
 
-/** La lista de cortes de serie, solo con los que llegaron y en orden. */
-export const CORTES_DE_SERIE: readonly CorteLlegado[] = cortesQueLlegaron(CORTES_DE_SERIE_DECLARADOS);
+/**
+ * La lista de cortes de serie, solo con los que llegaron y en orden.
+ *
+ * La llamada va marcada `@__PURE__` (y la de `CORTES_DE_SM8`, abajo) desde la Historia 26.6: el
+ * guion del filtro de los Directorios importa `PAUSA_DE_TECLEO_MS` de este módulo, y el
+ * empaquetado no sabe por sí solo que una llamada de nivel superior no tiene efectos, así que
+ * metía en el fichero del navegador la lista de cortes entera, que nadie lee allí.
+ */
+export const CORTES_DE_SERIE: readonly CorteLlegado[] = /* @__PURE__ */ cortesQueLlegaron(CORTES_DE_SERIE_DECLARADOS);
 
 /**
  * Su proyección sobre SM-8 — las entradas que parten la serie del canal propio, en el mismo orden
@@ -204,7 +211,7 @@ export const CORTES_DE_SERIE: readonly CorteLlegado[] = cortesQueLlegaron(CORTES
  * Desde la 23.11 su primera entrada es la llegada de la Épica 23, compuesta de
  * `DESPLIEGUE_DE_LA_LECTURA`; la segunda llega con `DESPLIEGUE_DE_OBRA_Y_DIRECTORIOS` (26.11).
  */
-export const CORTES_DE_SM8: readonly CorteLlegado[] = CORTES_DE_SERIE.filter((corte) =>
+export const CORTES_DE_SM8: readonly CorteLlegado[] = /* @__PURE__ */ CORTES_DE_SERIE.filter((corte) =>
   corte.series.includes('sm8'),
 );
 
@@ -272,8 +279,26 @@ export const SM12_CON_FACEBOOK = false;
  */
 export const MIN_RUTAS_DE_CITA_EN_RAFAGA = 100;
 
-/** Citas del mismo Autor que ofrece una Página de Cita como ruta de salida — UX-DR17. */
+/**
+ * Citas del mismo Autor que ofrece una Página de Cita en «Más de {Autor}» — UX-DR17, UX-DR69.
+ *
+ * Del Autor, **sin las de su Obra**, que ya tiene su propio bloque (`MAX_CITAS_DE_LA_MISMA_OBRA`),
+ * ni la propia ni la que ofrece «Siguiente» (Historia 24.6). Las elige `citasRelacionadas`.
+ *
+ * Un entero de 2 o más: lo reparte `repartir`, que con menos lanza y para la construcción.
+ */
 export const MAX_CITAS_RELACIONADAS = 4;
+
+/**
+ * Citas de la misma Obra que ofrece una Página de Cita en «De la misma obra» — UX-DR68, AD-9,
+ * Historia 24.6.
+ *
+ * En el orden del libro, sin la propia ni la que ofrece «Siguiente». Una Página de Cita lleva
+ * al pie como mucho esta cifra más `MAX_CITAS_RELACIONADAS` Tarjetas (hoy, 3 + 4). Las elige
+ * `citasDeLaMismaObra`; moverlo lo decide Héctor, en un diff visible. Un entero de 2 o más: lo
+ * reparte `repartir`, que con menos lanza y para la construcción.
+ */
+export const MAX_CITAS_DE_LA_MISMA_OBRA = 3;
 
 /**
  * Saltos de enlace interno desde la portada en los que toda superficie publicada debe
@@ -350,6 +375,12 @@ export const META_AUTORES_DE_OTRA_TRADICION: number | undefined = undefined;
  * sitio: la Página de Cita con Imagen sigue en 5.630 (1.026 libres). Lo que la Épica 27 le añada
  * (los filtros, «Mostrar 30 más», el aviso del índice) no cabe en ese hueco: sube el tope en el
  * mismo diff, con la medida, o compacta antes el texto de la parte pura al construir.
+ *
+ * Medido otra vez en la Historia 26.2, sin moverlo: `/buscar/` lleva **6.554 bytes** con la
+ * medición puesta (102 libres), porque su isla lee el tipo del filtro de Pagefind, aplica las
+ * opciones de `OPCIONES_DE_PAGEFIND` antes de cada búsqueda y pinta Directorio y Portada con el
+ * bloque de Obra, que pasó a ser compartido (`TIPOS_CON_TITULO_EN_SANS`). La Página de Cita con
+ * Imagen sigue en 5.630.
  */
 export const MAX_BYTES_DE_GUION = 6656;
 
@@ -459,6 +490,40 @@ export const MAX_BYTES_GUION_DE_IMAGEN = 7550;
 export const MAX_BYTES_GUION_DE_PAGEFIND = 87200;
 
 /**
+ * El filtro de los Directorios, el `<script>` de `src/components/FiltroDelDirectorio.astro` que
+ * Astro emite como fichero en `/_astro/` — AD-6, Historia 26.6.
+ *
+ * Es el primer guion **empaquetado** de la v8: un `<script>` procesado, que solo piden `/autores/`
+ * y `/obras/` con `<script type="module" src>`, y que nunca va en línea (`assetsInlineLimit` en
+ * `astro.config.mjs`). Lleva dentro, por importación, `normalizar` (AD-3), los recuentos de
+ * `src/lib/recuentos.ts`, la decisión de `src/lib/filtroDelDirectorio.ts`, el segundo ritmo de
+ * `src/lib/anuncio.ts` y `PAUSA_DE_TECLEO_MS`; el tope cuenta el fichero con lo que importe de
+ * forma estática, y lo vigila `tests/unit/medicion.test.ts` sobre `dist/`.
+ *
+ * Medido el 2026-10-28: **2.969 bytes**, un solo fichero sin importaciones —el empaquetado mete
+ * dentro lo que importa—, el mismo en `/autores/` y `/obras/` y con o sin punto final de medición,
+ * porque no lleva contenido. Más unos 400 de margen, como los demás topes de la lista. La medida
+ * cuenta con las dos llamadas de nivel superior de este módulo marcadas `@__PURE__`
+ * (`CORTES_DE_SERIE`, `CORTES_DE_SM8`): sin la marca, el fichero arrastraba la lista de cortes
+ * entera y medía 3.510. Tras las dos revisiones de la historia —la sombra que guarda el alto del
+ * recuento, la lectura del modelo por los selectores de cada fila y la espera a la letra compuesta
+ * (`compositionend`)— mide **3.167 bytes** (2026-10-28), y el tope se rederiva con la misma regla:
+ * 3.167 más unos 400.
+ */
+export const MAX_BYTES_GUION_DEL_FILTRO = 3570;
+
+/**
+ * La pausa de tecleo, en milisegundos — AD-9, UX-DR58, UX-DR86, Historia 26.6.
+ *
+ * Es el **segundo ritmo** de los mensajes de estado (`ritmoDeTecleo` en `src/lib/anuncio.ts`):
+ * lo que cambia mientras el visitante teclea —el recuento del filtro de los Directorios— se
+ * anuncia cuando lleva esta pausa sin teclear, y solo si la frase cambió. La lista se repinta al
+ * momento; la frase llega después, para que el lector de pantalla no diga una cifra por tecla.
+ * La reutiliza `/buscar/` en la Épica 27. `DESIGN.md` dice «unos 700 ms».
+ */
+export const PAUSA_DE_TECLEO_MS = 700;
+
+/**
  * El techo de lo que el alojamiento admite por sitio — Historia 24.2, Entorno operativo.
  *
  * GitHub Pages admite 1 GB por sitio publicado. Se lee en decimal —mil millones de bytes y no
@@ -517,6 +582,21 @@ export const TOPE_DE_PESO_DE_DIST = 900 * 1024 * 1024;
  * tiene tope, en vez de inventárselo.
  */
 export const TOPE_DE_PNG_DE_DIST: number | undefined = undefined;
+
+/**
+ * Bytes del HTML de `/obras/` por encima de los cuales el build avisa — Historia 26.4, AD-9.
+ *
+ * El Directorio de Obras es una sola página, sin 2+, con todas las Obras publicadas: crece con
+ * cada Obra nueva, y paginarlo está aplazado. Este tope es lo que lo reabre. Mide los bytes de
+ * `dist/obras/index.html` tal como sale de Astro, en `astro:build:done`
+ * (`integraciones/directorios.ts`). Pasarlo **avisa y nunca rompe**: el build termina con 0,
+ * con el tamaño medido y «reabre paginar `/obras/`»; qué hacer lo decide Héctor.
+ *
+ * El valor es lo medido sobre `npm run build` el 2026-10-28 —230.455 bytes, con 517 Obras
+ * publicadas— más un 25 % (288.069), redondeado arriba a 10 KiB: 290 KiB. La medida va también
+ * en el mensaje del commit que lo fija.
+ */
+export const MAX_BYTES_DEL_DIRECTORIO_DE_OBRAS = 290 * 1024;
 
 /**
  * Filas que D1 deja escribir al día en el plan gratuito — AD-9, AD-13, Historia 23.2.

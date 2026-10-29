@@ -113,6 +113,22 @@ describe('Historia 17.3 — la regla del enlace de bloque (el CI no corre e2e)',
     expect(declaraciones.get('display')).toBe('flex');
     expect(declaraciones.get('min-height')).toBe('var(--zona-de-toque)');
     expect(declaraciones.get('text-decoration')).toBe('none');
+    // Historia 26.4 — si no caben, el recuento baja bajo el título en vez de recortar nada.
+    expect(declaraciones.get('flex-wrap')).toBe('wrap');
+  });
+
+  it('26.4 — nada se recorta: el título parte palabras y el recuento no se encoge ni se queda en una línea forzada', async () => {
+    const fuente = await readFile(join(RAIZ, 'src/components/ListaDeObras.astro'), 'utf8');
+    const regla = (selector: string) => /\{([^}]*)\}/.exec(fuente.slice(fuente.indexOf(`  ${selector} {`)))?.[1] ?? '';
+    const titulo = regla('.titulo');
+    expect(titulo).toMatch(/flex:\s*1 1 0%/);
+    expect(titulo).toMatch(/overflow-wrap:\s*break-word/);
+    expect(titulo).not.toMatch(/min-width/);
+    // Una palabra más larga que la fila se parte en vez de desbordarla (lo mide el e2e de 26.4).
+    expect(titulo).toMatch(/max-width:\s*100%/);
+    const recuento = regla('.recuento');
+    expect(recuento).toMatch(/flex:\s*none/);
+    expect(recuento).not.toMatch(/nowrap/);
   });
 });
 
@@ -125,9 +141,9 @@ describe('Historia 17.3 — la Lista de Obras, construida', () => {
       textos.join('\n\n'),
     );
 
-  const EPICTETO = 'nombre: Epicteto\nañoNacimiento: 50\nañoFallecimiento: 135\nsemblanza: Filósofo estoico griego.\n';
+  const EPICTETO = 'nombre: Epicteto\nañoNacimiento: 50\nañoFallecimiento: 135\nsemblanza: Filósofo estoico griego.\nordenAlfabetico: Epicteto\n';
   const MACHADO =
-    'nombre: Antonio Machado\nañoNacimiento: 1875\nañoFallecimiento: 1939\nsemblanza: Poeta sevillano de la generación del 98.\n';
+    'nombre: Antonio Machado\nañoNacimiento: 1875\nañoFallecimiento: 1939\nsemblanza: Poeta sevillano de la generación del 98.\nordenAlfabetico: Machado\n';
 
   // El censo es cerrado (11.2): las Citas sin obra —sin Fuente— tienen que ser slugs suyos.
   const SIN_OBRA_SENECA = ['seneca-mientras-esperamos-vivir-la-vida-pasa', 'seneca-ninguna-cosa-se-parece-tanto-a-la'];
@@ -220,6 +236,10 @@ describe('Historia 17.3 — la Lista de Obras, construida', () => {
     if (proyecto !== '') await limpiar(proyecto);
   });
 
+  /*
+   * Historia 26.4 — la unidad a la vista: «45 citas», «1 cita». El lector oye el recuento una sola
+   * vez, tras una coma oculta: antes oía la cifra sola, oculta a la vista no, y la frase entera.
+   */
   it('Séneca: el rótulo, sus cuatro Obras en orden y enlazadas a su página', async () => {
     const s = seccion(await html('/autor/seneca/'));
     expect(s).toContain('Su obra en este Corpus');
@@ -227,24 +247,30 @@ describe('Historia 17.3 — la Lista de Obras, construida', () => {
     expect(entradas(s)).toEqual([
       {
         href: '/obra/seneca/sobre-la-brevedad-de-la-vida/',
-        texto: 'Sobre la brevedad de la vida · 49 45',
+        texto: 'Sobre la brevedad de la vida · 49 45 citas',
         lector: 'Sobre la brevedad de la vida, 49, 45 citas',
       },
-      { href: '/obra/seneca/cartas-a-lucilio/', texto: 'Cartas a Lucilio · 64 3', lector: 'Cartas a Lucilio, 64, 3 citas' },
-      { href: '/obra/seneca/de-la-ira/', texto: 'De la ira 3', lector: 'De la ira, 3 citas' },
-      // Años discrepantes: sin año, nunca uno elegido.
-      { href: '/obra/seneca/de-la-providencia/', texto: 'De la providencia 2', lector: 'De la providencia, 2 citas' },
+      { href: '/obra/seneca/cartas-a-lucilio/', texto: 'Cartas a Lucilio · 64 3 citas', lector: 'Cartas a Lucilio, 64, 3 citas' },
+      { href: '/obra/seneca/de-la-ira/', texto: 'De la ira 3 citas', lector: 'De la ira, 3 citas' },
+      // Años discrepantes: sin año ni «·», nunca uno elegido.
+      { href: '/obra/seneca/de-la-providencia/', texto: 'De la providencia 2 citas', lector: 'De la providencia, 2 citas' },
     ]);
   });
 
-  it('un año antes de Cristo se escribe «50 a. C.», también para el lector', async () => {
+  it('un año antes de Cristo se escribe «50 a. C.», y una sola Cita es «1 cita», también para el lector', async () => {
     expect(entradas(seccion(await html('/autor/epicteto/')))).toEqual([
       {
         href: '/obra/epicteto/enquiridion/',
-        texto: 'Enquiridión · 50 a. C. 1',
-        lector: 'Enquiridión, 50 a. C., una cita',
+        texto: 'Enquiridión · 50 a. C. 1 cita',
+        lector: 'Enquiridión, 50 a. C., 1 cita',
       },
     ]);
+  });
+
+  it('26.4 — el recuento se oye una vez: una sola aparición de «citas» por entrada para el lector', async () => {
+    for (const { lector } of entradas(seccion(await html('/autor/seneca/')))) {
+      expect(lector.match(/\bcitas?\b/g), lector).toHaveLength(1);
+    }
   });
 
   it('cada entrada lleva a una Página de Obra que existe, también la que no se indexa', async () => {

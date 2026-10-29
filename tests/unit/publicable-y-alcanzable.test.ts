@@ -1,7 +1,7 @@
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { readFile, readdir } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
-import { join, resolve } from 'node:path';
+import { join, relative, resolve, sep } from 'node:path';
 import {
   AUTOR_VALIDO,
   RAIZ,
@@ -12,18 +12,28 @@ import {
   limpiar,
   paginaConstruida,
 } from './ayuda/construir.js';
-import { superficiesInalcanzables } from '../../src/lib/publicado.ts';
+import { rutasPublicadas, superficiesInalcanzables } from '../../src/lib/publicado.ts';
+import { conjuntoDelCorpus, grafoDeDist } from '../../tools/lib/alcance.ts';
+import { rutasDelCorpus } from '../../tools/lib/corpus.ts';
+import { rutaDeFicheroHtml } from '../../tools/lib/indexables.ts';
 import {
   SUPERFICIES,
   anunciableEnElSitemap,
   caracterDe,
   consecuenciasDelCaracter,
   declararRutasIndexables,
+  esRutaDeDirectorio,
   olvidarRutasIndexables,
+  rutaDelDirectorioDeAutores,
+  rutaDelDirectorioDeObras,
   rutaNormalizada,
   superficiesDelBarrido,
 } from '../../src/lib/superficies.ts';
 import { CITAS_POR_PAGINA, MAX_SALTOS_DESDE_LA_PORTADA } from '../../src/lib/umbrales.ts';
+import { MARCA } from '../../src/lib/marca.ts';
+import { FILTRO_DE_TIPO, OPCIONES_DE_PAGEFIND } from '../../src/lib/tipoDeResultado.ts';
+import { declaracionDe, recorrerElementos, type Declaracion, type Elemento } from './ayuda/enlaces.js';
+import { conClase, exposicionDeLaPortada } from './ayuda/portada.js';
 
 /**
  * Historia 12.1 — publicable y alcanzable son el mismo conjunto.
@@ -240,6 +250,12 @@ const CORPUS_COMPLETO: Record<string, string> = {
         texto: `Carta ${i + 1}: nadie se hace sabio por casualidad, y hay que aprenderlo.`,
         procedencia: { obra: 'Cartas a Lucilio', año: 64 },
         fuente: { id: 'wikisource-es', url: 'https://es.wikisource.org/wiki/Cartas_a_Lucilio' },
+        /*
+         * Historia 26.2 — una Cita apta para portada, para que la portada construida pinte la Cita
+         * del Día, que es lo que lleva en producción: sin ninguna apta pinta la entrada, y la
+         * prueba de que la portada solo expone su `h1` no vería nunca `section.del-dia`.
+         */
+        aptaParaPortada: i === 0 ? true : undefined,
       }),
     ]),
   ),
@@ -247,11 +263,13 @@ const CORPUS_COMPLETO: Record<string, string> = {
 
 describe('Historia 12.1 — sobre un sitio construido de verdad', () => {
   let proyecto: string;
+  let salidaDelBuild: string;
 
   beforeAll(async () => {
     const resultado = await construirConCorpus(CORPUS_COMPLETO);
     expect(resultado.codigo, resultado.salida).toBe(0);
     proyecto = resultado.proyecto;
+    salidaDelBuild = resultado.salida;
     /*
      * Historia 22.4 — `caracterDe` y el filtro del sitemap preguntan por la Obra a la lista de
      * rutas indexables, y en este proceso no la ha declarado nadie. Se declara la que FR-52 da
@@ -308,13 +326,41 @@ describe('Historia 12.1 — sobre un sitio construido de verdad', () => {
   }
 
   describe('nada publicado queda huérfano', () => {
-    it('las superficies publicables del sitio se alcanzan desde la portada', async () => {
-      const enlaces = await sitioConstruido();
-      const publicables = [...enlaces.keys()].filter((ruta) => caracterDe(ruta) === 'producto');
+    it('las superficies de rutasPublicadas se alcanzan desde la portada, y el build lo dice', async () => {
+      /*
+       * Historia 26.8 — lo publicable es `rutasPublicadas`, también la Obra que no se indexa, y
+       * no `caracterDe(ruta) === 'producto'`. El grafo es el que lee la puerta del build
+       * (`grafoDeDist`): sin lo que rota con la jornada, `<template>` ni `<noscript>`.
+       */
+      const conjunto = await conjuntoDelCorpus(rutasDelCorpus(join(proyecto, 'corpus')));
+      const publicadas = [...new Set(rutasPublicadas(conjunto).map((r) => rutaNormalizada(r)))];
+      const dist = join(proyecto, 'dist');
+      const paginas = await Promise.all(
+        (await readdir(dist, { recursive: true, withFileTypes: true }))
+          .filter((e) => e.isFile() && e.name.endsWith('.html'))
+          .map(async (e) => {
+            // La misma ruta que da la integración: si las dos la calcularan distinto, esto no
+            // mediría lo mismo que la puerta del build.
+            const ruta = rutaDeFicheroHtml(relative(dist, join(e.parentPath, e.name)).split(sep).join('/'));
+            return { ruta, html: await readFile(join(e.parentPath, e.name), 'utf8') };
+          }),
+      );
+      const enlaces = grafoDeDist(paginas);
 
       // Sin esto la comprobación pasaría sobre un sitio vacío sin decir nada.
-      expect(publicables.length).toBeGreaterThan(2);
-      expect(superficiesInalcanzables(publicables, enlaces)).toEqual([]);
+      expect(publicadas.length).toBeGreaterThan(2);
+      expect(publicadas).toContain(OBRA_NO_INDEXABLE);
+      expect(caracterDe(OBRA_NO_INDEXABLE)).not.toBe('producto');
+      /*
+       * Historia 26.5 — los Directorios entran sin exención: la cabecera los enlaza desde toda
+       * página. La exención por ruta que la 26.3 y la 26.4 dejaron aquí ya no existe.
+       */
+      for (const directorio of [rutaDelDirectorioDeAutores(), rutaDelDirectorioDeObras()]) {
+        expect(publicadas).toContain(rutaNormalizada(directorio));
+      }
+      expect(superficiesInalcanzables(publicadas, enlaces)).toEqual([]);
+      // Y la puerta del build midió lo mismo y lo dejó escrito.
+      expect(salidaDelBuild).toContain(`NFR-5: ${publicadas.length} superficies publicadas, todas a 3 saltos`);
     });
 
     it('toda ruta construida tiene declaración: el build no genera nada anónimo', async () => {
@@ -334,6 +380,8 @@ describe('Historia 12.1 — sobre un sitio construido de verdad', () => {
         '/404',
         '/kit',
         '/lote',
+        '/autores',
+        '/obras',
         '/tema/el-tiempo',
         '/coleccion/frases-cortas',
         OBRA_INDEXABLE,
@@ -344,6 +392,191 @@ describe('Historia 12.1 — sobre un sitio construido de verdad', () => {
       }
       expect(rutas.some((r) => r.startsWith('/cita/'))).toBe(true);
       expect(rutas.filter((r) => PAGINA_SEGUNDA.test(r)).length).toBeGreaterThan(0);
+    });
+  });
+
+  /**
+   * Historia 26.5 — la cabecera lleva a Autores, Obras y Buscar (UX-DR54, UX-DR101, UX-DR106,
+   * FR-55).
+   *
+   * Sobre el `dist/` de este mismo build, porque el CI no corre Playwright: lo que se fija aquí es
+   * lo que el HTML dice —los cuatro enlaces, su orden, sus destinos, su zona y `aria-current`—, y
+   * que la cabecera y los Directorios bastan para dejar todo Autor y toda Obra a dos saltos. Lo que
+   * solo se ve pintado (medidas, colores, foco) está en `tests/e2e/cabecera.spec.ts`.
+   */
+  describe('Historia 26.5 — la cabecera lleva a Autores, Obras y Buscar', () => {
+    const DESTINOS = ['/', '/autores/', '/obras/', '/buscar/'];
+    const ROTULOS = [MARCA, 'Autores', 'Obras', 'Buscar'];
+    /** La página donde cada destino lleva `aria-current`, por su ruta normalizada. */
+    const ACTUAL_EN = new Map(DESTINOS.map((destino) => [rutaNormalizada(destino), destino]));
+
+    interface EnlaceDeCabecera {
+      elemento: Elemento;
+      antepasados: readonly Elemento[];
+      declaracion: Declaracion | null;
+    }
+
+    /** Cada página HTML construida, por su ruta normalizada, con su marcado. */
+    async function paginasConstruidas(): Promise<Map<string, string>> {
+      const dist = join(proyecto, 'dist');
+      const paginas = new Map<string, string>();
+      async function recorrer(dir: string, prefijo: string) {
+        for (const entrada of await readdir(dir, { withFileTypes: true })) {
+          const completa = join(dir, entrada.name);
+          if (entrada.isDirectory()) {
+            await recorrer(completa, `${prefijo}/${entrada.name}`);
+            continue;
+          }
+          if (!entrada.name.endsWith('.html')) continue;
+          const sinExtension = entrada.name.replace(/\.html$/, '');
+          const ruta = rutaNormalizada(sinExtension === 'index' ? `${prefijo}/` : `${prefijo}/${sinExtension}`);
+          // `x.html` y `x/index.html` son la misma ruta: el segundo taparía al primero sin mirarlo.
+          if (paginas.has(ruta)) throw new Error(`dos ficheros de dist/ para ${ruta}`);
+          paginas.set(ruta, await readFile(completa, 'utf8'));
+        }
+      }
+      await recorrer(dist, '');
+      return paginas;
+    }
+
+    /**
+     * El texto de cada `<a>` de la cabecera del armazón, sin etiquetas y con los espacios
+     * colapsados. El tokenizador no guarda texto, y la cabecera es marcado plano de Astro.
+     */
+    function rotulosDeLaCabecera(html: string): string[] {
+      const cabecera = /<header class="cabecera[^"]*"[^>]*>([\s\S]*?)<\/header>/.exec(html);
+      if (cabecera === null) return [];
+      return [...cabecera[1].matchAll(/<a\b[^>]*>([\s\S]*?)<\/a>/g)].map((m) =>
+        m[1].replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim(),
+      );
+    }
+
+    /** La única cabecera de fuera de `main` de una página, o un fallo que nombra la ruta. */
+    function cabeceraDe(ruta: string, html: string | undefined) {
+      expect(html, `${ruta}: no se construyó`).toBeDefined();
+      const [primera, ...otras] = cabecerasDe(html!);
+      expect(primera, `${ruta}: sin cabecera fuera de main`).toBeDefined();
+      expect(otras, `${ruta}: más de una cabecera fuera de main`).toEqual([]);
+      return primera;
+    }
+
+    /** Las cabeceras de fuera de `main` de una página, cada una con sus enlaces. */
+    function cabecerasDe(html: string): { cabecera: Elemento; enlaces: EnlaceDeCabecera[] }[] {
+      const cabeceras: { cabecera: Elemento; enlaces: EnlaceDeCabecera[] }[] = [];
+      recorrerElementos(html, (elemento, antepasados) => {
+        if (antepasados.some((e) => e.etiqueta === 'main')) return;
+        if (elemento.etiqueta === 'header') {
+          cabeceras.push({ cabecera: elemento, enlaces: [] });
+          return;
+        }
+        if (elemento.etiqueta !== 'a') return;
+        const cabecera = antepasados.find((e) => e.etiqueta === 'header');
+        if (cabecera === undefined) return;
+        let declaracion: Declaracion | null = null;
+        for (const candidato of [elemento, ...[...antepasados].reverse()]) {
+          declaracion = declaracionDe(candidato);
+          if (declaracion !== null) break;
+        }
+        cabeceras.find((c) => c.cabecera === cabecera)!.enlaces.push({ elemento, antepasados, declaracion });
+      });
+      return cabeceras;
+    }
+
+    it('toda página lleva los cuatro enlaces, en orden, con zona `cabecera` y a páginas construidas', async () => {
+      const paginas = await paginasConstruidas();
+      // La premisa: el sitio trae las familias, también las que la cabecera no tocaba antes.
+      expect(paginas.size).toBeGreaterThan(10);
+      for (const exigida of ['/', '/autores', '/obras', '/buscar', '/404', '/kit', '/lote', OBRA_NO_INDEXABLE]) {
+        expect([...paginas.keys()], exigida).toContain(exigida);
+      }
+
+      for (const [ruta, html] of paginas) {
+        const cabeceras = cabecerasDe(html);
+        expect(cabeceras, ruta).toHaveLength(1);
+        const [{ enlaces }] = cabeceras;
+        expect(enlaces.map((e) => e.elemento.atributos.get('href')), ruta).toEqual(DESTINOS);
+        // Y lo que dicen: «Sabiduría de Bolsillo · Autores · Obras · Buscar».
+        expect(rotulosDeLaCabecera(html), ruta).toEqual(ROTULOS);
+
+        for (const [i, { elemento, antepasados, declaracion }] of enlaces.entries()) {
+          const href = elemento.atributos.get('href')!;
+          expect(elemento.atributos.has('target'), `${ruta} → ${href} abre otra pestaña`).toBe(false);
+          expect(declaracion, `${ruta} → ${href}`).toEqual({ zona: 'cabecera' });
+          expect(paginas.has(rutaNormalizada(href)), `${ruta} → ${href} no tiene página en dist/`).toBe(true);
+
+          const nav = antepasados.findIndex(
+            (e) => e.etiqueta === 'nav' && e.atributos.get('aria-label') === 'Principal',
+          );
+          if (i === 0) {
+            // La marca va fuera de la navegación «Principal», y no es un `h1` (eso es de la 28.1).
+            expect(nav, `${ruta}: la marca dentro de la navegación`).toBe(-1);
+            expect(antepasados.some((e) => /^h[1-6]$/.test(e.etiqueta)), `${ruta}: la marca en un encabezado`).toBe(false);
+            continue;
+          }
+          // nav[aria-label="Principal"] > ul[role="list"] > li > a
+          expect(nav, `${ruta} → ${href} fuera de la navegación «Principal»`).toBeGreaterThanOrEqual(0);
+          expect(antepasados.slice(nav + 1).map((e) => e.etiqueta), `${ruta} → ${href}`).toEqual(['ul', 'li']);
+          expect(antepasados[nav + 1].atributos.get('role'), `${ruta} → ${href}`).toBe('list');
+        }
+
+        // Una sola navegación «Principal» en la página, y sus dos puntos medios ocultos al lector,
+        // cada uno dentro del `<li>` del enlace anterior (UX-DR101).
+        let principales = 0;
+        const puntos: (string | undefined)[] = [];
+        recorrerElementos(html, (elemento, antepasados) => {
+          if (elemento.etiqueta === 'nav' && elemento.atributos.get('aria-label') === 'Principal') principales += 1;
+          if (!(elemento.atributos.get('class') ?? '').split(/\s+/).includes('punto')) return;
+          if (!antepasados.some((e) => e.etiqueta === 'header')) return;
+          expect(antepasados.at(-1)?.etiqueta, `${ruta}: un punto fuera de su <li>`).toBe('li');
+          puntos.push(elemento.atributos.get('aria-hidden'));
+        });
+        expect(principales, `${ruta}: navegaciones «Principal»`).toBe(1);
+        expect(puntos, `${ruta}: puntos medios de la cabecera`).toEqual(['true', 'true']);
+      }
+    });
+
+    it('`aria-current="page"` solo en su página, y solo en el enlace que toca', async () => {
+      const paginas = await paginasConstruidas();
+      for (const [ruta, html] of paginas) {
+        const actuales = cabeceraDe(ruta, html).enlaces
+          .filter(({ elemento }) => elemento.atributos.has('aria-current'))
+          .map(({ elemento }) => [elemento.atributos.get('href'), elemento.atributos.get('aria-current')]);
+        const esperado = ACTUAL_EN.get(ruta);
+        expect(actuales, ruta).toEqual(esperado === undefined ? [] : [[esperado, 'page']]);
+      }
+      // Y que la comprobación vea las cuatro páginas que sí lo llevan.
+      for (const ruta of ACTUAL_EN.keys()) expect(paginas.has(ruta), ruta).toBe(true);
+    });
+
+    it('toda Página de Autor y toda página 1 de Obra quedan a dos saltos, por la cabecera y su Directorio', async () => {
+      const paginas = await paginasConstruidas();
+      const enlaces = await sitioConstruido();
+      /*
+       * Un grafo con solo esos caminos: de la portada, nada más que lo que enlaza su cabecera; de
+       * los dos Directorios, todo lo suyo. Si alcanza aquí, alcanza en el sitio, que enlaza más.
+       */
+      const deLaCabecera = cabeceraDe('/', paginas.get('/')).enlaces.map(({ elemento }) =>
+        rutaNormalizada(elemento.atributos.get('href')!),
+      );
+      const directorios = [rutaDelDirectorioDeAutores(), rutaDelDirectorioDeObras()].map((d) => rutaNormalizada(d));
+      // Sin esto, una ruta normalizada de otra forma daría una lista vacía y un «inalcanzable» engañoso.
+      for (const directorio of directorios) expect(enlaces.get(directorio), `${directorio}: sin enlaces`).toBeDefined();
+      const grafo = new Map<string, string[]>([
+        ['/', deLaCabecera],
+        ...directorios.map((d): [string, string[]] => [d, enlaces.get(d)!]),
+      ]);
+
+      const autores = [...paginas.keys()].filter((ruta) => /^\/autor\/[^/]+$/.test(ruta));
+      const obras = [...paginas.keys()].filter((ruta) => /^\/obra\/[^/]+\/[^/]+$/.test(ruta));
+      // La premisa: las dos Obras de este corpus, también la que no se indexa, y el Autor.
+      expect(autores).toContain('/autor/seneca');
+      expect(obras.sort()).toEqual([OBRA_INDEXABLE, OBRA_NO_INDEXABLE].sort());
+
+      expect(superficiesInalcanzables([...autores, ...obras], grafo, { maximoDeSaltos: 2 })).toEqual([]);
+      // Y no en uno: es la cabecera y luego el Directorio, no un atajo que esta prueba no vería.
+      expect(superficiesInalcanzables([...autores, ...obras], grafo, { maximoDeSaltos: 1 }).sort()).toEqual(
+        [...autores, ...obras].sort(),
+      );
     });
   });
 
@@ -492,6 +725,9 @@ describe('Historia 12.1 — sobre un sitio construido de verdad', () => {
       const rutas = await anunciadas();
       expect(rutas).toContain('/');
       expect(rutas).toContain('/autor/seneca');
+      // Historias 26.3 y 26.4 — los Directorios, por su declaración.
+      expect(rutas).toContain('/autores');
+      expect(rutas).toContain('/obras');
       expect(rutas).toContain('/tema/el-tiempo');
       // Historia 12.3 — sale de la misma declaración que el `noindex` y el barrido.
       expect(rutas).toContain('/coleccion/frases-cortas');
@@ -517,6 +753,140 @@ describe('Historia 12.1 — sobre un sitio construido de verdad', () => {
       for (const ruta of await anunciadas()) {
         expect(caracterDe(ruta), ruta).toBe('producto');
       }
+    });
+  });
+
+  /*
+   * Historia 26.2 (AD-17, AD-19) — el tipo de un resultado viaja como filtro de Pagefind, que no
+   * casa como texto, y la portada responde solo por su título.
+   *
+   * Hasta la 26.2 el tipo iba en `data-pagefind-meta="tipo:…"`, y desde Pagefind 1.5 la metadata
+   * se busca: «obra» devolvía toda Obra. Lo que se mira aquí es el `dist/` que indexa Pagefind.
+   */
+  describe('Historia 26.2 — el tipo viaja como filtro y la portada solo expone su título', () => {
+    /** Las páginas construidas, con su ruta pública y su HTML. */
+    async function paginas(): Promise<Map<string, string>> {
+      const resultado = new Map<string, string>();
+      async function recorrer(dir: string, prefijo: string) {
+        for (const entrada of await readdir(dir, { withFileTypes: true })) {
+          const completa = join(dir, entrada.name);
+          if (entrada.isDirectory()) {
+            await recorrer(completa, `${prefijo}/${entrada.name}`);
+            continue;
+          }
+          if (!entrada.name.endsWith('.html')) continue;
+          const sinExtension = entrada.name.replace(/\.html$/, '');
+          const ruta = sinExtension === 'index' ? rutaNormalizada(`${prefijo}/`) : `${prefijo}/${sinExtension}`;
+          resultado.set(rutaNormalizada(ruta), await readFile(completa, 'utf8'));
+        }
+      }
+      await recorrer(join(proyecto, 'dist'), '');
+      return resultado;
+    }
+
+    /** El tipo que le toca a una ruta por su familia. */
+    const tipoDeLaRuta = (ruta: string): string | undefined => {
+      if (ruta === '/') return 'portada';
+      // Historia 26.3 — por su declaración, no por el prefijo: `/autores` empieza como `/autor/`.
+      if (esRutaDeDirectorio(ruta)) return 'directorio';
+      return /^\/(cita|autor|tema|coleccion|obra)\//.exec(ruta)?.[1];
+    };
+
+    /** Cada elemento con su `data-pagefind-filter`, con la etiqueta en que va. */
+    const filtrosDe = (html: string) => {
+      const filtros: { etiqueta: string; valor: string }[] = [];
+      recorrerElementos(html, (elemento) => {
+        const valor = elemento.atributos.get('data-pagefind-filter');
+        if (valor !== undefined) filtros.push({ etiqueta: elemento.etiqueta, valor });
+      });
+      return filtros;
+    };
+
+    /**
+     * Las claves de un `data-pagefind-meta` («clave:valor, otra:valor»), sin sus valores: un
+     * título que diga «tipo» no es el metadato `tipo`. Un valor con coma da una clave de más, que
+     * sobra en las dos pruebas que lo usan: o no es `tipo`, o sale como clave sin peso y se ve.
+     */
+    const clavesDeMeta = (meta: string) =>
+      meta
+        .split(',')
+        .map((parte) => parte.trim().split(/[:[]/)[0].trim())
+        .filter((clave) => clave !== '');
+
+    it('ningún `data-pagefind-meta` lleva el tipo', async () => {
+      const conTipo: string[] = [];
+      for (const [ruta, html] of await paginas()) {
+        recorrerElementos(html, (elemento) => {
+          const meta = elemento.atributos.get('data-pagefind-meta');
+          if (meta !== undefined && clavesDeMeta(meta).includes(FILTRO_DE_TIPO)) conTipo.push(`${ruta}: ${meta}`);
+        });
+      }
+      expect(conTipo).toEqual([]);
+    });
+
+    it('toda página con `data-pagefind-body` lleva su tipo una vez, en `<main>`, por el filtro; ninguna otra lo lleva', async () => {
+      const vistas = new Set<string>();
+      let conCuerpo = 0;
+      for (const [ruta, html] of await paginas()) {
+        const filtros = filtrosDe(html);
+        if (!/<main[^>]*\sdata-pagefind-body/.test(html)) {
+          expect(filtros, ruta).toEqual([]);
+          continue;
+        }
+        conCuerpo++;
+        const tipo = tipoDeLaRuta(ruta);
+        expect(tipo, `${ruta}: una página con cuerpo de Pagefind fuera de toda familia`).toBeDefined();
+        expect(filtros, ruta).toEqual([{ etiqueta: 'main', valor: `${FILTRO_DE_TIPO}:${tipo}` }]);
+        vistas.add(tipo!);
+      }
+      // Sin esto pasaría sobre un sitio sin nada indexado. El corpus trae las seis familias.
+      expect(conCuerpo).toBeGreaterThan(6);
+      expect([...vistas].sort()).toEqual(['autor', 'cita', 'coleccion', 'directorio', 'obra', 'portada', 'tema']);
+    });
+
+    it('todo `data-pagefind-meta` construido que no sea `title` declara su peso en `OPCIONES_DE_PAGEFIND`', async () => {
+      /*
+       * Un metadato se busca y puntúa por omisión desde Pagefind 1.5. El que llegue sin peso
+       * declarado puntúa con el de Pagefind sin que nadie lo haya decidido: la regla de AGENTS.md
+       * se cumple aquí, sobre lo que indexa Pagefind, y no de memoria.
+       */
+      const pesos = OPCIONES_DE_PAGEFIND.ranking.metaWeights as Record<string, number>;
+      const vistas = new Set<string>();
+      const sinPeso: string[] = [];
+      for (const [ruta, html] of await paginas()) {
+        recorrerElementos(html, (elemento) => {
+          const meta = elemento.atributos.get('data-pagefind-meta');
+          if (meta === undefined) return;
+          for (const clave of clavesDeMeta(meta)) {
+            vistas.add(clave);
+            if (clave !== 'title' && !Object.hasOwn(pesos, clave)) sinPeso.push(`${ruta}: ${clave}`);
+          }
+        });
+      }
+      expect(sinPeso).toEqual([]);
+      // No en vacío: la Cabecera de la Obra indexable escribe `autor`.
+      expect(vistas).toContain('autor');
+    });
+
+    it('la portada solo expone su `h1`, que es la marca: todo lo demás de `main` queda fuera del índice', async () => {
+      const portada = (await paginas()).get('/')!;
+      expect(portada).toBeDefined();
+      const { enMain, titulos, textoDelTitulo, expuestos, fueraDelIndice } = exposicionDeLaPortada(portada);
+      expect(titulos).toBe(1);
+      expect(textoDelTitulo).toBe(MARCA);
+      expect(expuestos).toEqual([]);
+      // La Cita del Día —el estado de producción, con alguna Cita apta— está en la portada y
+      // fuera del índice: buscar su texto daba también la portada. La otra rama, la entrada sin
+      // ninguna Cita apta, la mira la construcción «sin ninguna Colección» de
+      // `coleccion-pagina.test.ts`, con la misma regla.
+      const delDia = conClase(enMain, 'section', 'del-dia');
+      expect(delDia).toHaveLength(1);
+      expect(fueraDelIndice(delDia[0])).toBe(true);
+      // Y no en vacío: la portada trae la Cita del Día, los Temas y los Autores.
+      expect(enMain.length).toBeGreaterThan(10);
+      expect(enMain.filter(({ elemento }) => elemento.atributos.get('data-pagefind-ignore') === 'all').length).toBeGreaterThanOrEqual(3);
+      // Y al compartirse dice ser un sitio, no un artículo (FR-19): su tipo no cambia esa regla.
+      expect(portada).toContain('<meta property="og:type" content="website">');
     });
   });
 });

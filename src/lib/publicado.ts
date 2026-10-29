@@ -18,6 +18,9 @@
 
 import type { CollectionEntry } from 'astro:content';
 import {
+  CITAS_POR_PAGINA,
+  MAX_CITAS_DE_LA_MISMA_OBRA,
+  MAX_CITAS_RELACIONADAS,
   MAX_SALTOS_DESDE_LA_PORTADA,
   MIN_CITAS_POR_COLECCION,
   MIN_CITAS_POR_TEMA,
@@ -28,13 +31,31 @@ import {
   colgarObras,
   congelacionVigente,
   esObraIndexable,
+  ordenDeLaListaDeObras,
+  ordenDelLibro,
   rutaDeLaObra,
+  type AparicionDeCita,
   type CitaParaObra,
   type FichaDeObra,
   type ObraResuelta,
+  type PosicionesDeCitas,
 } from './obras.ts';
 import { atribucionDeBiografia, type AtribucionDeSemblanza } from './biografia.ts';
-import { rutaDeAutor, rutaDeCita, rutaDeColeccion, rutaDeTema } from './superficies.ts';
+import {
+  rutaDeAutor,
+  rutaDeCita,
+  rutaDeColeccion,
+  rutaDelDirectorioDeAutores,
+  rutaDelDirectorioDeObras,
+  rutaDeLaBusqueda,
+  rutaDeLaPortada,
+  rutaDeTema,
+  rutaNormalizada,
+} from './superficies.ts';
+
+// AD-25 — el orden de la Lista de Obras es de `src/lib/obras.ts`; se reexporta junto a
+// `obrasDelAutor`, que es por donde lo toman las dos superficies que la pintan.
+export { ordenDeLaListaDeObras };
 
 // ─── Formas planas, independientes de Astro ──────────────────────────────────
 
@@ -80,6 +101,13 @@ export interface Autor {
    * Ausente, la semblanza es la breve del editor y se publica como siempre.
    */
   atribucion?: AtribucionDeSemblanza;
+  /**
+   * La clave de orden — Historia 26.1: por ella se ordena y se agrupa el Directorio de Autores
+   * (26.3), con `compararPorClave` e `inicialDeClave` de `src/lib/normalizar.ts`. Opcional como en
+   * el esquema: todo Autor **publicado** la tiene (lo para `integraciones/claves.ts`), uno sin
+   * Citas puede no tenerla. Sin valor se omite.
+   */
+  ordenAlfabetico?: string;
 }
 
 export interface Tema {
@@ -163,7 +191,7 @@ export function citasDocumentadasDeAutor(citas: readonly Cita[], slugAutor: stri
 }
 
 /** Las Citas de un Autor, en orden estable para que el build sea reproducible. */
-export function citasDeAutor(citas: Cita[], slugAutor: string): Cita[] {
+export function citasDeAutor(citas: readonly Cita[], slugAutor: string): Cita[] {
   return citas.filter((c) => c.autor === slugAutor).sort((a, b) => a.slug.localeCompare(b.slug, 'es'));
 }
 
@@ -177,7 +205,7 @@ export function citasDeTema(citas: Cita[], slugTema: string): Cita[] {
  * Es la función que impide el chip que enlaza a un 404: una Cita puede pertenecer a un
  * Tema de cuatro Citas, y ese Tema no tiene página. El chip no debe renderizarse.
  */
-export function temasDeLaCita(cita: Cita, publicados: Tema[]): Tema[] {
+export function temasDeLaCita(cita: Cita, publicados: readonly Tema[]): Tema[] {
   const porSlug = new Map(publicados.map((t) => [t.slug, t]));
   return cita.temas.map((s) => porSlug.get(s)).filter((t): t is Tema => t !== undefined);
 }
@@ -371,39 +399,284 @@ export function desajustesDeColecciones(
 }
 
 /**
- * Otras Citas del mismo Autor — FR-12, UX-DR17.
+ * El reparto de las rutas de salida — FR-12, AD-11, Historia 24.6. **El único**: lo usan «Más de
+ * {Autor}» (`citasRelacionadas`) y «De la misma obra» (`citasDeLaMismaObra`), y no hay otra
+ * aritmética que elija cuáles de una lista se enseñan.
  *
- * Se deriva de Autor y de Tema, sin motor de recomendación: primero las del mismo Autor
- * que además comparten algún Tema con esta, y después el resto de las suyas. Ordenar así
- * no es «recomendar»; es preferir la vecindad más estrecha de las dos que ya existen.
+ * **Repartidas, no las primeras.** Antes «Más de {Autor}» era `.slice(0, maximo)` sobre una lista
+ * ordenada por slug, es decir las primeras del alfabeto. Y slugs contiguos son casi siempre textos
+ * casi iguales, así que enseñaba variantes de lo mismo. Visto en una página de verdad:
+ *
+ *     «Caminante, no hay camino, se hace camino al andar.»
+ *     «Caminante, no hay camino, sino estelas en la mar.»
+ *
+ * UX-DR17 declara **cuántas** y **de quién**; cuáles es de aquí. Se toman a pasos iguales a lo
+ * largo de las candidatas, lo que da Citas distintas entre sí y hace que la cola de una lista
+ * larga —que en un listado de tres páginas no se veía nunca— aparezca. Conserva el orden de
+ * entrada: «De la misma obra» sale en el orden del libro porque entra en él.
+ *
+ * El paso se calcula sobre `length - 1` para que la primera y la última entren siempre: la última
+ * es la que ninguna otra superficie alcanza. Y es aritmética pura, sin azar: dos construcciones
+ * del mismo commit tienen que dar el mismo sitio.
+ *
+ * `maximo` es un entero de 2 o más: con 1 el paso dividiría por cero, y con menos no hay reparto.
  */
-export function citasRelacionadas(citas: Cita[], cita: Cita, maximo: number): Cita[] {
-  const suyas = citasDeAutor(citas, cita.autor).filter((c) => c.slug !== cita.slug);
+export function repartir<T>(candidatas: readonly T[], maximo: number): T[] {
+  if (!Number.isInteger(maximo) || maximo < 2) {
+    throw new Error(`repartir: el máximo tiene que ser un entero de 2 o más, y es ${maximo}.`);
+  }
+  if (candidatas.length <= maximo) return [...candidatas];
+  const paso = (candidatas.length - 1) / (maximo - 1);
+  return Array.from({ length: maximo }, (_, i) => candidatas[Math.round(i * paso)]);
+}
+
+/**
+ * «Más de {Autor}» — FR-12, UX-DR17, UX-DR69, Historia 24.6.
+ *
+ * Se deriva de Autor y de Tema, sin motor de recomendación: primero las del mismo Autor que además
+ * comparten algún Tema con esta, y después el resto de las suyas. Ordenar así no es «recomendar»;
+ * es preferir la vecindad más estrecha de las dos que ya existen.
+ *
+ * Desde la 24.6, **sin las de su Obra** —que tienen «De la misma obra»—, sin la propia y sin la
+ * que ofrece «Siguiente» (`siguiente`, obligatorio: quien llama dice si la hay). Una Cita sin Obra
+ * no excluye por Obra: elige entre todas las demás de su Autor. Cuáles, lo decide `repartir`.
+ */
+export function citasRelacionadas(
+  citas: readonly Cita[],
+  cita: Cita,
+  maximo: number,
+  siguiente: Cita | undefined,
+): Cita[] {
+  const obra = cita.obra?.nombre;
+  const suyas = citasDeAutor(citas, cita.autor).filter(
+    (c) =>
+      c.slug !== cita.slug &&
+      c.slug !== siguiente?.slug &&
+      (obra === undefined || c.obra?.nombre !== obra),
+  );
   const temas = new Set(cita.temas);
   const comparteTema = (c: Cita) => c.temas.some((t) => temas.has(t));
 
-  const candidatas = [...suyas.filter(comparteTema), ...suyas.filter((c) => !comparteTema(c))];
-  if (candidatas.length <= maximo) return candidatas;
+  return repartir([...suyas.filter(comparteTema), ...suyas.filter((c) => !comparteTema(c))], maximo);
+}
 
-  /*
-   * **Repartidas, no las primeras.** Antes esto era `.slice(0, maximo)` sobre una lista ordenada
-   * por slug, es decir las primeras del alfabeto. Y slugs contiguos son casi siempre textos casi
-   * iguales, así que «Más de este Autor» enseñaba variantes de lo mismo. Visto en una página de
-   * verdad:
-   *
-   *     «Caminante, no hay camino, se hace camino al andar.»
-   *     «Caminante, no hay camino, sino estelas en la mar.»
-   *
-   * UX-DR17 declara **cuántas** y **de quién**; cuáles es de aquí. Se toman a pasos iguales a lo
-   * largo de las candidatas, lo que da cuatro Citas distintas entre sí y hace que la cola de un
-   * Autor con muchas —que en un listado de tres páginas no se veía nunca— aparezca.
-   *
-   * El paso se calcula sobre `length - 1` para que la última entre siempre: es la que ninguna
-   * otra superficie alcanza. Y es aritmética pura, sin azar: dos construcciones del mismo commit
-   * tienen que dar el mismo sitio.
+/**
+ * «De la misma obra» — FR-12, UX-DR68, AD-25, Historia 24.6.
+ *
+ * Las Citas de la Obra de esta, **en el orden del libro**, sin la propia ni la que ofrece
+ * «Siguiente», repartidas con `repartir` hasta `maximo`. `porObra` es el mapa de
+ * `citasDeLasObras`, ya en ese orden: aquí no se ordena ni se agrupa nada (AD-25, AD-11).
+ *
+ * Sin Obra, ninguna. Que la Cita no esté en el grupo de su Obra es un uso roto —`citasPorObra`
+ * agrupa toda Cita con Obra—, y para el build como en `siguienteCita`.
+ */
+export function citasDeLaMismaObra(
+  cita: Cita,
+  porObra: ReadonlyMap<string, readonly Cita[]>,
+  siguiente: Cita | undefined,
+  maximo: number,
+): Cita[] {
+  if (cita.obra === undefined) return [];
+  const grupo = porObra.get(cita.obra.nombre);
+  if (grupo === undefined || !grupo.some((c) => c.slug === cita.slug)) {
+    throw new Error(
+      `citasDeLaMismaObra: la Cita «${cita.slug}» no está entre las Citas de su Obra ` +
+        `(ficha «${cita.obra.nombre}»). citasDeLasObras agrupa toda Cita con Obra: el mapa no ` +
+        'es el de este conjunto.',
+    );
+  }
+  return repartir(
+    grupo.filter((c) => c.slug !== cita.slug && c.slug !== siguiente?.slug),
+    maximo,
+  );
+}
+
+/**
+ * Lo que pintan las Rutas de salida de una Página de Cita — Historia 24.6. Un grupo sin Citas es
+ * `undefined`, nunca una lista vacía: un grupo que no está no deja rótulo, filete ni hueco.
+ */
+export interface RutasDeSalidaDeCita {
+  /** «De la misma obra»: la Obra (su `recuento` y su ruta, para el cierre) y sus Citas. */
+  mismaObra: { obra: ObraResuelta; citas: Cita[] } | undefined;
+  /**
+   * «Más de {Autor}»: cuántas Citas publicadas tiene el Autor —todas, la propia incluida: las que
+   * lista su Página de Autor, a la que lleva el cierre— y las elegidas.
    */
-  const paso = (candidatas.length - 1) / (maximo - 1);
-  return Array.from({ length: maximo }, (_, i) => candidatas[Math.round(i * paso)]);
+  delAutor: { recuento: number; citas: Cita[] } | undefined;
+  /** Los Temas publicados de la Cita, en el orden en que los declara. */
+  temas: Tema[];
+}
+
+/**
+ * Las Rutas de salida de una Página de Cita — FR-12, UX-DR67–69, AD-11, Historia 24.6.
+ *
+ * Tres grupos, de lo más cercano a lo más amplio: «De la misma obra» (hasta
+ * `MAX_CITAS_DE_LA_MISMA_OBRA`, en el orden del libro), «Más de {Autor}» (hasta
+ * `MAX_CITAS_RELACIONADAS`, sin las de su Obra) y los Temas. Ninguna Cita sale en los dos grupos,
+ * ni la propia, ni la que ofrece «Siguiente» (`siguiente`, de `siguienteCita`).
+ *
+ * Pura, y solo de lo publicado: no depende de la jornada, el visitante, la indexabilidad, la
+ * congelación ni la afiliación. Dos construcciones del mismo commit dan las mismas rutas, y el
+ * orden de `citas` no cuenta. El componente pinta lo que esto decide y no cuenta nada (AD-11).
+ *
+ * Una Obra de dos Citas no tiene «De la misma obra», y no por una regla de tamaño: quitadas la
+ * propia y la de «Siguiente» no queda ninguna, porque en una Obra de dos o más `siguienteCita`
+ * da siempre la que sigue en el libro, con vuelta al principio —la otra de las dos—. Si
+ * «Siguiente» dejara de recorrer la Obra entera, el bloque aparecería con una sola tarjeta y un
+ * cierre de dos; lo mira, en `dist/`, la Obra de dos del fixture de `rutas-de-salida.test.ts`.
+ */
+export function rutasDeSalidaDeCita(
+  cita: Cita,
+  citas: readonly Cita[],
+  porObra: ReadonlyMap<string, readonly Cita[]>,
+  publicados: readonly Tema[],
+  siguiente: SiguienteCita | undefined,
+): RutasDeSalidaDeCita {
+  const otra = siguiente?.cita;
+  const deLaObra = citasDeLaMismaObra(cita, porObra, otra, MAX_CITAS_DE_LA_MISMA_OBRA);
+  const delAutor = citasRelacionadas(citas, cita, MAX_CITAS_RELACIONADAS, otra);
+  return {
+    mismaObra: cita.obra !== undefined && deLaObra.length > 0 ? { obra: cita.obra, citas: deLaObra } : undefined,
+    delAutor:
+      delAutor.length > 0
+        ? { recuento: citas.filter((c) => c.autor === cita.autor).length, citas: delAutor }
+        : undefined,
+    temas: temasDeLaCita(cita, publicados),
+  };
+}
+
+/**
+ * Lo que tendría de falso un pie que no venga de `rutasDeSalidaDeCita` — Historia 24.6.
+ *
+ * `RutasDeSalida.astro` lo pregunta antes de pintar y para la construcción con lo que diga: un
+ * uso nuevo (la portada, 28.2) que arme sus rutas a mano no puede prometer en un cierre menos
+ * Citas de las que enseña, ni un grupo vacío, ni más tarjetas de las que admiten
+ * `MAX_CITAS_DE_LA_MISMA_OBRA` y `MAX_CITAS_RELACIONADAS`, ni una Cita de otra Obra u otro Autor,
+ * ni la misma Cita dos veces. Vive aquí, y no en el componente, porque contar es de aquí (AD-11).
+ *
+ * Que ninguna sea la propia ni la de «Siguiente» no se puede mirar con esto —las rutas no las
+ * traen—: lo garantiza solo `rutasDeSalidaDeCita`. `undefined` si no hay nada que objetar.
+ */
+export function problemaDeRutasDeSalida(
+  autor: Pick<Autor, 'slug' | 'nombre'>,
+  rutas: RutasDeSalidaDeCita,
+): string | undefined {
+  const { mismaObra, delAutor } = rutas;
+  if (mismaObra !== undefined) {
+    const { obra, citas: deLaObra } = mismaObra;
+    if (deLaObra.length === 0) return '«De la misma obra» llega sin Citas: un grupo vacío es `undefined`.';
+    if (obra.autor !== autor.slug) {
+      return `«De la misma obra» es de la Obra «${obra.nombre}», de «${obra.autor}» y no de «${autor.slug}».`;
+    }
+    if (deLaObra.length > MAX_CITAS_DE_LA_MISMA_OBRA) {
+      return `«De la misma obra» lleva ${deLaObra.length} Citas, y no caben más de ${MAX_CITAS_DE_LA_MISMA_OBRA}.`;
+    }
+    for (const otra of deLaObra) {
+      if (otra.obra?.nombre !== obra.nombre) {
+        return `«De la misma obra» lleva la Cita «${otra.slug}», que no es de la Obra «${obra.nombre}».`;
+      }
+    }
+    if (obra.recuento < deLaObra.length + 1) {
+      return (
+        `el cierre de «De la misma obra» cuenta ${obra.recuento} Citas de «${obra.nombre}», ` +
+        `y el pie enseña ${deLaObra.length} más la que se lee.`
+      );
+    }
+  }
+  if (delAutor !== undefined) {
+    const { recuento, citas: suyas } = delAutor;
+    if (suyas.length === 0) return `«Más de ${autor.nombre}» llega sin Citas: un grupo vacío es \`undefined\`.`;
+    if (suyas.length > MAX_CITAS_RELACIONADAS) {
+      return `«Más de ${autor.nombre}» lleva ${suyas.length} Citas, y no caben más de ${MAX_CITAS_RELACIONADAS}.`;
+    }
+    for (const otra of suyas) {
+      if (otra.autor !== autor.slug) {
+        return `«Más de ${autor.nombre}» lleva la Cita «${otra.slug}», que es de «${otra.autor}» y no de «${autor.slug}».`;
+      }
+    }
+    if (recuento < suyas.length + 1) {
+      return (
+        `el cierre de «Más de ${autor.nombre}» cuenta ${recuento} Citas, ` +
+        `y el pie enseña ${suyas.length} más la que se lee.`
+      );
+    }
+  }
+  const vistas = new Set<string>();
+  for (const otra of [...(mismaObra?.citas ?? []), ...(delAutor?.citas ?? [])]) {
+    if (vistas.has(otra.slug)) return `la Cita «${otra.slug}» sale dos veces en las Rutas de salida.`;
+    vistas.add(otra.slug);
+  }
+  return undefined;
+}
+
+/**
+ * A dónde lleva «Siguiente…» de la Tarjeta de Obra, y por qué: por el orden de la Obra o por
+ * el listado de un Tema, que es lo que cambia el texto de la fila (`textoDeSiguiente`).
+ */
+export type SiguienteCita = { por: 'obra'; cita: Cita } | { por: 'tema'; cita: Cita; tema: Tema };
+
+/**
+ * La Cita que sigue a esta — FR-12, UX-DR65, UX-DR109, Historia 24.5.
+ *
+ * Quien acaba de leer una Cita y quiere seguir con ese libro no vuelve al listado: la Tarjeta de
+ * Obra le ofrece la siguiente. La decisión es una sola y vive aquí, pura y sin construir:
+ *
+ *   · **Obra de dos Citas o más** — la que sigue en el orden del libro, y de la última a la
+ *     primera. `porObra` es el mapa de `citasDeLasObras`, ya en ese orden: aquí no se ordena ni
+ *     se agrupa nada, solo se busca la posición (AD-25, AD-11). Que la Cita no esté en el grupo
+ *     de su Obra es un uso roto —`citasPorObra` agrupa toda Cita con Obra— y para el build.
+ *   · **Obra de una Cita** — no hay libro que seguir, y se sigue por su **primer Tema
+ *     publicado**, en el orden en que la Cita los declara (`temasDeLaCita`: un Tema bajo su
+ *     umbral no tiene página y no cuenta). En el listado que pinta la Página de Tema
+ *     (`listados`, por slug, de `citasDeTema`), la primera Cita de **otro Autor** que le sigue,
+ *     con vuelta al principio: «siguiente sobre la vida» no puede ser más del mismo, que ya
+ *     tiene «Más de {Autor}». Sin Tema publicado, o sin otro Autor en él, no hay fila; no se
+ *     mira un segundo Tema. Que la Cita no esté en el listado de su Tema es, como en la Obra, un
+ *     uso roto, y para el build.
+ *   · **Sin Obra** — no hay Tarjeta de Obra, y nada que decidir.
+ *
+ * No depende del visitante, de la jornada, de la indexabilidad, de la congelación ni de la
+ * afiliación: dos construcciones del mismo commit dan el mismo destino.
+ */
+export function siguienteCita(
+  cita: Cita,
+  porObra: ReadonlyMap<string, readonly Cita[]>,
+  publicados: readonly Tema[],
+  listados: ReadonlyMap<string, readonly Cita[]>,
+): SiguienteCita | undefined {
+  if (cita.obra === undefined) return undefined;
+  const grupo = porObra.get(cita.obra.nombre);
+  const i = grupo?.findIndex((c) => c.slug === cita.slug) ?? -1;
+  if (grupo === undefined || i < 0) {
+    throw new Error(
+      `siguienteCita: la Cita «${cita.slug}» no está entre las Citas de su Obra ` +
+        `(ficha «${cita.obra.nombre}»). citasDeLasObras agrupa toda Cita con Obra: el mapa no ` +
+        'es el de este conjunto.',
+    );
+  }
+  if (grupo.length >= 2) return { por: 'obra', cita: grupo[(i + 1) % grupo.length] };
+
+  const tema = temasDeLaCita(cita, publicados)[0];
+  if (tema === undefined) return undefined;
+  const listado = listados.get(tema.slug);
+  const aqui = listado?.findIndex((c) => c.slug === cita.slug) ?? -1;
+  if (listado === undefined || aqui < 0) {
+    // Como el grupo roto de la Obra: `citasDeTema` lista toda Cita que declara el Tema, y este
+    // Tema sale de los que la Cita declara. Si falta, el mapa no es el de este conjunto, y
+    // recorrer desde -1 daría un destino que no es «la que sigue».
+    throw new Error(
+      `siguienteCita: la Cita «${cita.slug}» no está en el listado de su Tema «${tema.slug}». ` +
+        'citasDeTema lista toda Cita que lo declara: el mapa no es el de este conjunto.',
+    );
+  }
+  // Una vuelta entera desde la siguiente: la propia Cita cae la última y no cuenta.
+  for (let paso = 1; paso <= listado.length; paso++) {
+    const candidata = listado[(aqui + paso) % listado.length];
+    if (candidata.slug !== cita.slug && candidata.autor !== cita.autor) {
+      return { por: 'tema', cita: candidata, tema };
+    }
+  }
+  return undefined;
 }
 
 /**
@@ -425,12 +698,20 @@ export function citasRelacionadas(citas: Cita[], cita: Cita, maximo: number): Ci
  * segundo criterio sería el segundo cómputo que AD-11 existe para impedir. Solo la primera
  * página de cada listado paginado aparece; las 2+ son `servicio` por la declaración de
  * `src/lib/superficies.ts`.
+ *
+ * Desde la Historia 26.3 enumera también el Directorio de Autores y, desde la 26.4, el de Obras
+ * justo detrás, **siempre**: son páginas estáticas que existen aunque el Corpus esté vacío
+ * (entonces solo llevan su `h1`). Van tras los Autores, y por ellas las hereda `rutasIndexables`.
+ * Son la familia `directorio` (Historia 26.7): el censo de las series
+ * (`censoPorFamilia`, en `tools/`) los compone con los mismos constructores.
  */
 export function rutasPublicadas(conjunto: ConjuntoPublicable): string[] {
   return [
     '/',
     ...conjunto.citas.map((c) => rutaDeCita(c.slug)),
     ...autoresPublicados(conjunto.autores, conjunto.citas).map((a) => rutaDeAutor(a.slug)),
+    rutaDelDirectorioDeAutores(),
+    rutaDelDirectorioDeObras(),
     ...temasPublicados(conjunto.temas, conjunto.citas).map((t) => rutaDeTema(t.slug)),
     ...conjunto.colecciones.map((c) => rutaDeColeccion(c.slug)),
     // Historia 22.4 — **todas** las Obras, indexables o no: existir no es indexarse (AD-11).
@@ -471,21 +752,38 @@ export interface ObrasDelAutor {
  * Las Obras de un Autor para su página — Historia 17.3, UX-DR46.
  *
  * Salen de las Obras **resueltas** de sus Citas publicadas (`obrasDeLasCitas`), nunca de la
- * Procedencia: una ficha sin Citas publicadas no añade entrada (FR-42). El orden es el de
- * `temasDeLaObra` —de más a menos Citas, por título a igualdad y, al final, por nombre de
- * ficha— y el que dibuja la maqueta.
+ * Procedencia: una ficha sin Citas publicadas no añade entrada (FR-42). El orden es
+ * `ordenDeLaListaDeObras` (AD-25) —de más a menos Citas, por título a igualdad y, al final, por
+ * nombre de ficha—, el que dibuja la maqueta. La misma llamada da el grupo de cada Autor en
+ * `/obras/` (Historia 26.4), así que los dos listados no pueden ordenar distinto.
  * `sinObra` cuenta las Citas sin Obra resuelta, que la página dice al pie y no enumera.
  */
 export function obrasDelAutor(citas: readonly CitaConSuObra[], slugAutor: string): ObrasDelAutor {
   const suyas = citas.filter((cita) => cita.autor === slugAutor);
-  const obras = obrasDeLasCitas(suyas).sort(
-    (a, b) =>
-      b.recuento - a.recuento ||
-      a.titulo.localeCompare(b.titulo, 'es') ||
-      // Último desempate, por la identidad de la ficha: el orden no depende del de entrada.
-      a.nombre.localeCompare(b.nombre, 'es'),
-  );
+  const obras = ordenDeLaListaDeObras(obrasDeLasCitas(suyas));
   return { obras, sinObra: suyas.filter((cita) => cita.obra === undefined).length };
+}
+
+/**
+ * Las Citas de cada Obra, por nombre de ficha y **en el orden del libro** — Historia 24.1.
+ *
+ * Agrupa por la Obra resuelta de cada Cita (`cita.obra.nombre`) y ordena cada grupo con
+ * `ordenDelLibro`, el único que ordena las Citas de una Obra (AD-25). Pura: las posiciones
+ * llegan por parámetro. Lo que la Página de Obra pagina —y después «Siguiente» y «De la misma
+ * obra»— sale de aquí, nunca de un agrupado propio (AD-11).
+ */
+export function citasPorObra<C extends Pick<Cita, 'slug' | 'fuente' | 'obra'>>(
+  citas: readonly C[],
+  posiciones: PosicionesDeCitas,
+): Map<string, C[]> {
+  const porObra = new Map<string, C[]>();
+  for (const cita of citas) {
+    if (cita.obra === undefined) continue;
+    const suyas = porObra.get(cita.obra.nombre);
+    if (suyas === undefined) porObra.set(cita.obra.nombre, [cita]);
+    else suyas.push(cita);
+  }
+  return new Map([...porObra].map(([nombre, suyas]) => [nombre, ordenDelLibro(suyas, posiciones)]));
 }
 
 /** Las Obras con página: las que resuelve alguna Cita publicada de un Autor publicado. */
@@ -633,6 +931,131 @@ export function superficiesInalcanzables(
 }
 
 /**
+ * El grafo de enlaces del **modelo** — Historia 26.8, AD-11.
+ *
+ * Qué enlaces tiene que llevar el sitio construido, compuesto con **las mismas enumeraciones que
+ * pintan las páginas** —`temasPublicados` y `citasDeTema`, `conjunto.colecciones[].citas`,
+ * `autoresPublicados`, `citasDeAutor` y `obrasDelAutor`, `obrasPublicadas` y las Citas de cada
+ * Obra en el orden del libro—, paginadas por `CITAS_POR_PAGINA` con los constructores de ruta de
+ * `src/lib/superficies.ts`. Es la única función que lo compone, y la usan las dos puertas de
+ * NFR-5: el build exige que el grafo de `dist/` **contenga** este (`integraciones/alcance.ts`), y
+ * las órdenes que retiran comparan este grafo antes y después de escribir (`tools/lib/alcance.ts`).
+ *
+ * Las aristas, todas con la ruta normalizada (`rutaNormalizada`, sin barra final):
+ *
+ *   · la portada → cada Tema publicado y cada Colección publicada (su página 1);
+ *   · la cabecera de **todo** nodo → la portada, `/autores/`, `/obras/` y `/buscar/`;
+ *   · cada página k de un listado → cada página j ≠ k del mismo listado (la Paginación pinta
+ *     todos los números) y → las Citas de su tramo;
+ *   · la página 1 de un Autor → sus Obras (la Lista de Obras va solo en la página 1);
+ *   · `/autores/` → todo Autor publicado; `/obras/` → toda Obra publicada.
+ *
+ * **Ni la portada → los Autores** —la lista de la portada se va en la Épica 28, y esta historia
+ * existe para que quitarla no deje nada fuera sin verse— **ni Cita → Cita**: las Rutas de salida
+ * de una Cita dependen de sus vecinas y no las promete ninguna enumeración. Lo que el sitio
+ * enlace de más no estorba: el modelo es lo que **tiene** que estar.
+ *
+ * Pura (AD-5): las Citas de cada Obra llegan ya ordenadas (`citasPorObra`), por nombre de ficha.
+ */
+export function grafoDelModelo(
+  conjunto: ConjuntoPublicable,
+  citasDeCadaObra: ReadonlyMap<string, readonly Pick<Cita, 'slug'>[]>,
+): Map<string, string[]> {
+  const grafo = new Map<string, Set<string>>();
+  const enlazar = (origen: string, destino: string) => {
+    const desde = rutaNormalizada(origen);
+    let salientes = grafo.get(desde);
+    if (salientes === undefined) {
+      salientes = new Set();
+      grafo.set(desde, salientes);
+    }
+    salientes.add(rutaNormalizada(destino));
+  };
+  const nodo = (ruta: string) => {
+    if (!grafo.has(rutaNormalizada(ruta))) grafo.set(rutaNormalizada(ruta), new Set());
+  };
+
+  /** Un listado paginado: sus páginas se enlazan entre sí y cada una con las Citas de su tramo. */
+  const listado = (rutaDePagina: (n: number) => string, citas: readonly Pick<Cita, 'slug'>[]) => {
+    const paginas = Math.max(1, Math.ceil(citas.length / CITAS_POR_PAGINA));
+    for (let k = 1; k <= paginas; k += 1) {
+      nodo(rutaDePagina(k));
+      for (let j = 1; j <= paginas; j += 1) if (j !== k) enlazar(rutaDePagina(k), rutaDePagina(j));
+      for (const cita of citas.slice((k - 1) * CITAS_POR_PAGINA, k * CITAS_POR_PAGINA)) {
+        enlazar(rutaDePagina(k), rutaDeCita(cita.slug));
+      }
+    }
+  };
+
+  const portada = rutaDeLaPortada();
+  nodo(portada);
+  nodo(rutaDelDirectorioDeAutores());
+  nodo(rutaDelDirectorioDeObras());
+
+  const temas = temasPublicados(conjunto.temas, conjunto.citas);
+  for (const tema of temas) {
+    enlazar(portada, rutaDeTema(tema.slug));
+    listado((n) => rutaDeTema(tema.slug, n), citasDeTema(conjunto.citas, tema.slug));
+  }
+  for (const coleccion of conjunto.colecciones) {
+    enlazar(portada, rutaDeColeccion(coleccion.slug));
+    listado((n) => rutaDeColeccion(coleccion.slug, n), coleccion.citas);
+  }
+  for (const autor of autoresPublicados(conjunto.autores, conjunto.citas)) {
+    enlazar(rutaDelDirectorioDeAutores(), rutaDeAutor(autor.slug));
+    listado((n) => rutaDeAutor(autor.slug, n), citasDeAutor(conjunto.citas, autor.slug));
+    for (const obra of obrasDelAutor(conjunto.citas, autor.slug).obras) {
+      enlazar(rutaDeAutor(autor.slug), rutaDeLaObra(obra));
+    }
+  }
+  for (const obra of obrasPublicadas(conjunto)) {
+    enlazar(rutaDelDirectorioDeObras(), rutaDeLaObra(obra));
+    const suyas = citasDeCadaObra.get(obra.nombre);
+    // Una Obra publicada tiene Citas: sin ellas en el mapa, el modelo callaría todas sus aristas.
+    if (suyas === undefined) throw new Error(`grafoDelModelo: la Obra ${obra.nombre} no trae sus Citas en citasDeCadaObra.`);
+    listado((n) => rutaDeLaObra(obra, n), suyas);
+  }
+  for (const cita of conjunto.citas) nodo(rutaDeCita(cita.slug));
+
+  // La cabecera, en toda página del modelo.
+  const cabecera = [portada, rutaDelDirectorioDeAutores(), rutaDelDirectorioDeObras(), rutaDeLaBusqueda()];
+  for (const origen of [...grafo.keys()]) for (const destino of cabecera) enlazar(origen, destino);
+
+  return new Map([...grafo].map(([origen, destinos]) => [origen, [...destinos]]));
+}
+
+/** Un Tema declarado por una Cita que no se publica, con cuántas Citas publicadas tiene. */
+export interface TemaBajoUmbral {
+  slug: string;
+  nombre: string;
+  citas: number;
+}
+
+/**
+ * Los Temas que una Cita declara y que **no** se publican, con su recuento — Historia 26.8.
+ *
+ * Es lo que la puerta de NFR-5 dice al nombrar una Cita fuera de alcance: casi siempre está
+ * fuera porque su Tema cayó bajo `MIN_CITAS_POR_TEMA`, y el número dice cuánto le falta. Cuenta
+ * sobre `citas` —las publicadas del conjunto que se juzga— con la misma regla que
+ * `temasPublicados`, en el orden en que la Cita los declara. Un Tema que no existe en `temas` se
+ * nombra por su slug.
+ */
+export function temasBajoUmbralDe(
+  cita: Pick<Cita, 'temas'>,
+  citas: readonly Pick<Cita, 'temas'>[],
+  temas: readonly Tema[],
+): TemaBajoUmbral[] {
+  const nombres = new Map(temas.map((t) => [t.slug, t.nombre]));
+  return [...new Set(cita.temas)].flatMap((slug) => {
+    // Por aparición, como cuenta `temasPublicados`: los dos recuentos no pueden discrepar.
+    const recuento = citas.reduce((n, c) => n + c.temas.filter((t) => t === slug).length, 0);
+    return nombres.has(slug) && recuento >= MIN_CITAS_POR_TEMA
+      ? []
+      : [{ slug, nombre: nombres.get(slug) ?? slug, citas: recuento }];
+  });
+}
+
+/**
  * Integridad referencial — se comprueba en el build y **rompe** si falla.
  *
  * Astro valida las referencias de forma perezosa: una Cita que apunta a un Autor
@@ -701,13 +1124,15 @@ export function aplanarCita(entrada: EntradaCita): Cita {
  * `resolverAtribuciones`.
  */
 export function aplanarAutor(entrada: EntradaAutor): Autor {
-  const { nombre, semblanza, añoNacimiento, añoFallecimiento } = entrada.data;
+  const { nombre, semblanza, añoNacimiento, añoFallecimiento, ordenAlfabetico } = entrada.data;
   return {
     slug: entrada.id,
     nombre,
     semblanza,
     ...(añoNacimiento !== undefined ? { añoNacimiento } : {}),
     añoFallecimiento,
+    // Historia 26.3 — la clave viaja para el Directorio; `ordenRevisado` no, que no lo pinta nadie.
+    ...(ordenAlfabetico !== undefined ? { ordenAlfabetico } : {}),
   };
 }
 
@@ -849,6 +1274,35 @@ export function avisoDeDesajustes(
     '  Una Cita retirada a corpus/_revision/ sale de sus Colecciones sin romper nada; un',
     '  slug con errata se comporta igual. Si no esperaba este número, revise los slugs.',
   ].join('\n');
+}
+
+const citasDeLasObrasPorConjunto = new WeakMap<ConjuntoPublicable, Promise<ReadonlyMap<string, Cita[]>>>();
+
+/**
+ * Las Citas de cada Obra del conjunto, en el orden del libro — Historia 24.1.
+ *
+ * Es la fachada de `citasPorObra`: lee las posiciones de la colección `posiciones` (el cargador
+ * de `src/content.config.ts`) y se memoriza por conjunto, como `rutasIndexables`, porque cada
+ * página que la pida comparte el mismo. Sin ninguna Cita con Obra no consulta la colección.
+ */
+export function citasDeLasObras(conjunto: ConjuntoPublicable): Promise<ReadonlyMap<string, Cita[]>> {
+  const memorizada = citasDeLasObrasPorConjunto.get(conjunto);
+  if (memorizada !== undefined) return memorizada;
+  const calculo = (async (): Promise<ReadonlyMap<string, Cita[]>> => {
+    if (!conjunto.citas.some((cita) => cita.obra !== undefined)) return new Map();
+    const { getCollection } = await import('astro:content');
+    const posiciones = new Map<string, readonly AparicionDeCita[]>(
+      (await getCollection('posiciones')).map((entrada) => [entrada.id, entrada.data.apariciones]),
+    );
+    return citasPorObra(conjunto.citas, posiciones);
+  })();
+  citasDeLasObrasPorConjunto.set(conjunto, calculo);
+  // Un fallo no se memoriza: la siguiente página que la pida vuelve a intentarlo, como
+  // `conjuntoPublicable`, que solo guarda lo que terminó bien.
+  calculo.catch(() => {
+    if (citasDeLasObrasPorConjunto.get(conjunto) === calculo) citasDeLasObrasPorConjunto.delete(conjunto);
+  });
+  return calculo;
 }
 
 let memoria: ConjuntoPublicable | undefined;

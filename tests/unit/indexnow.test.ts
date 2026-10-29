@@ -9,18 +9,29 @@ import {
   avisoDeIndexNow,
 } from '../../src/lib/buscadores.ts';
 import {
-  DIRECTORIOS_AVISABLES,
+  FAMILIAS_DE_FICHERO,
+  FAMILIAS_DE_RUTA,
   componerAviso,
   familiaDeFichero,
   rutasAvisadasPor,
 } from '../../tools/lib/avisar.ts';
 import {
+  CAMPOS_QUE_NO_FECHAN,
+  CAMPOS_QUE_PINTA,
+  CUALQUIER_CAMBIO,
+  bajasDelHistorial,
+  componentesPorSuperficie,
+  fechasPorSuperficie,
   ficherosDelCorpus,
-  ficherosPorSuperficie,
   relacionDeSuperficies,
+  type CambioDeFichero,
   type CitaParaFechar,
   type CorpusParaFechar,
+  type Relacion,
+  type TransicionFechada,
+  type Version,
 } from '../../tools/lib/cambios.ts';
+import { FAMILIAS, rutaNormalizada } from '../../src/lib/superficies.ts';
 import { esObraIndexable } from '../../src/lib/obras.ts';
 
 /**
@@ -133,19 +144,37 @@ describe('el cuerpo del aviso', () => {
 });
 
 describe('las familias del Corpus', () => {
-  it('comparte una sola declaración entre el filtro de git y el reconocimiento', () => {
-    expect(DIRECTORIOS_AVISABLES).toEqual([
+  it('comparte una sola declaración de familias de fichero entre el filtro de git y el reconocimiento', () => {
+    // Historia 24.8 — los documentos de Fuente entran como familia de fichero: ordenan la Obra.
+    expect(FAMILIAS_DE_FICHERO).toEqual([
       ['corpus/citas', 'cita'],
       ['corpus/autores', 'autor'],
       ['corpus/temas', 'tema'],
       ['corpus/colecciones', 'coleccion'],
       ['corpus/obras', 'obra'],
+      ['corpus/fuentes', 'documento'],
     ]);
-    for (const [directorio, familia] of DIRECTORIOS_AVISABLES) {
+    for (const [directorio, familia] of FAMILIAS_DE_FICHERO) {
       expect(familiaDeFichero(`${directorio}/ejemplo.md`)).toBe(familia);
     }
     expect(familiaDeFichero('corpus/indexacion.yml')).toBeUndefined();
     expect(familiaDeFichero('corpus/sesiones-de-sembrado.yml')).toBeUndefined();
+    expect(familiaDeFichero('corpus/_revision/x.md')).toBeUndefined();
+    // Historia 26.7 — los umbrales llegan al aviso, pero sin familia.
+    expect(familiaDeFichero('src/lib/umbrales.ts')).toBeUndefined();
+  });
+
+  it('las familias de ruta son las seis superficies que la relación declara, y la pone la relación', () => {
+    // Historia 26.3 — `directorio`: `/autores/` no es un Autor, y la relación le da su familia.
+    expect(FAMILIAS_DE_RUTA).toEqual(['cita', 'autor', 'tema', 'coleccion', 'obra', 'directorio']);
+    // Historia 26.7 — no las declara el aviso: son las de `src/lib/superficies.ts`, su único dueño.
+    expect(FAMILIAS_DE_RUTA).toBe(FAMILIAS);
+    // Las de fichero son las cinco con directorio en el Corpus —el Directorio no tiene fichero—
+    // más `documento`, que no es familia de ruta.
+    const deFichero = FAMILIAS_DE_FICHERO.map(([, familia]) => familia);
+    expect(deFichero.filter((f) => f !== 'documento')).toEqual(FAMILIAS.filter((f) => f !== 'directorio'));
+    const familias = new Set([...relacionDeSuperficies(corpusDeEjemplo()).values()].map((s) => s.familia));
+    expect([...familias].sort()).toEqual([...FAMILIAS_DE_RUTA].sort());
   });
 });
 
@@ -190,6 +219,20 @@ const BREVEDAD = '/obra/seneca/brevedad/';
 const IRA = '/obra/seneca/ira/';
 const NIEBLA = '/obra/unamuno/niebla/';
 
+/** Una versión cualquiera, distinta en todos los campos que alguna superficie pinta. */
+const versionDe = (marca: string): Version =>
+  Object.fromEntries(
+    ['texto', 'autor', 'temas', 'slug', 'procedencia', 'fuente', 'nombre', 'añoNacimiento', 'añoFallecimiento',
+      'semblanza', 'biografia', 'criterio', 'miembros', 'titulo', 'formas', 'nota', 'ediciones'].map((c) => [c, marca]),
+  );
+const alta = (fichero: string): CambioDeFichero => ({ fichero, antes: null, despues: versionDe('b') });
+const baja = (fichero: string): CambioDeFichero => ({ fichero, antes: versionDe('a'), despues: null });
+const editado = (fichero: string): CambioDeFichero => ({ fichero, antes: versionDe('a'), despues: versionDe('b') });
+
+/** Los ficheros que componen una superficie de la relación. */
+const ficherosDe = (relacion: Relacion, ruta: string): string[] =>
+  (relacion.get(ruta)?.componentes ?? []).map((c) => c.fichero);
+
 describe('AD-27 — el aviso es la lectura inversa de la relación que fecha el sitemap', () => {
   it('para todo fichero F y ruta R: F ∈ ficheros(R) ⇔ R se avisa por un cambio de F', () => {
     const corpus = corpusDeEjemplo();
@@ -203,34 +246,83 @@ describe('AD-27 — el aviso es la lectura inversa de la relación que fecha el 
     const todas = { rutas: obras };
     for (const fichero of ficherosDelCorpus(corpus)) {
       const { rutas } = componerAviso({
-        cambiados: [fichero],
+        cambios: [alta(fichero)],
         relacionDespues: relacion,
         relacionAntes: relacion,
         indexablesAntes: todas,
         indexablesDespues: todas,
       });
       expect(rutas).toContain('/');
-      for (const [ruta, ficheros] of relacion) {
-        expect(rutas.includes(ruta), `${fichero} → ${ruta}`).toBe(ficheros.includes(fichero));
+      for (const [ruta, { componentes }] of relacion) {
+        expect(rutas.includes(ruta), `${fichero} → ${ruta}`).toBe(componentes.some((c) => c.fichero === fichero));
       }
       // Y nada que la relación no declare, salvo la portada.
       for (const ruta of rutas) expect(ruta === '/' || relacion.has(ruta), ruta).toBe(true);
     }
   });
 
+  it('para todo fichero y todo campo clasificado de su familia: lo que avisa un cambio solo de ese campo es lo que refecha', () => {
+    /*
+     * Historia 24.8 — la inversa campo a campo. La de arriba usa altas, que cambian todos los
+     * campos; ésta cambia **uno solo** en un fichero y exige que el aviso y la fecha den las mismas
+     * rutas. Es la garantía de la historia: si una lectura mirara otros campos que la otra, aquí
+     * se vería con el nombre del fichero y del campo.
+     */
+    const T0 = '2026-01-01T00:00:00.000Z';
+    const T1 = '2026-02-01T00:00:00.000Z';
+    const corpus = corpusDeEjemplo();
+    const relacion = relacionDeSuperficies(corpus);
+    const ficheros = ficherosDelCorpus(corpus);
+    const noFechan = CAMPOS_QUE_NO_FECHAN as Partial<Record<string, readonly string[]>>;
+    let conRutas = 0;
+    let sinRutas = 0;
+    for (const fichero of ficheros) {
+      const familia = familiaDeFichero(fichero);
+      if (familia === undefined) throw new Error(`${fichero} sin familia`);
+      const campos = new Set([
+        ...Object.values(CAMPOS_QUE_PINTA[familia]).flatMap((c) =>
+          c === CUALQUIER_CAMBIO ? [] : [...(c as readonly string[])],
+        ),
+        ...(noFechan[familia] ?? []),
+      ]);
+      for (const campo of campos) {
+        // Un subcampo —`procedencia.obra`, 26.4— va anidado en su clave.
+        const version = (valor: string): Version =>
+          campo.split('.').reduceRight<unknown>((dentro, clave) => ({ [clave]: dentro }), valor) as Version;
+        const antes: Version = version('a');
+        const despues: Version = version('b');
+        const historial = new Map<string, TransicionFechada[]>(
+          ficheros.map((f) => [f, [{ fecha: T0, antes: null, despues: antes }]]),
+        );
+        historial.set(fichero, [{ fecha: T0, antes: null, despues: antes }, { fecha: T1, antes, despues }]);
+        const refechadas = [...fechasPorSuperficie(corpus, historial)]
+          .filter(([, fecha]) => fecha === T1)
+          .map(([ruta]) => ruta)
+          .sort();
+        const avisadas = [...rutasAvisadasPor([{ fichero, antes, despues }], relacion)].map(rutaNormalizada).sort();
+        expect(avisadas, `${fichero} · ${campo}`).toEqual(refechadas);
+        if (refechadas.length > 0) conRutas += 1;
+        else sinRutas += 1;
+      }
+    }
+    // Mide algo en los dos sentidos: campos que mueven rutas y campos que no mueven ninguna.
+    expect(conRutas).toBeGreaterThan(20);
+    expect(sinRutas).toBeGreaterThan(3);
+  });
+
   it('la lectura de fechas es la misma relación, por ruta normalizada', () => {
     const corpus = corpusDeEjemplo();
     const relacion = relacionDeSuperficies(corpus);
-    const fechas = ficherosPorSuperficie(corpus);
+    const fechas = componentesPorSuperficie(corpus);
     expect(fechas.size).toBe(relacion.size);
-    for (const [ruta, ficheros] of relacion) {
-      expect(fechas.get(ruta.replace(/\/$/u, '') || '/')).toEqual(ficheros);
+    for (const [ruta, { componentes }] of relacion) {
+      expect(fechas.get(ruta.replace(/\/$/u, '') || '/')).toEqual(componentes);
     }
   });
 
-  it('la Página de Obra es su ficha, sus Citas y el fichero de su Autor', () => {
+  it('la Página de Obra es su ficha, sus Citas y el fichero de su Autor (aquí sin documentos, que prueba fecha-de-cambio)', () => {
     const relacion = relacionDeSuperficies(corpusDeEjemplo());
-    expect([...(relacion.get(NIEBLA) ?? [])].sort()).toEqual(
+    expect(ficherosDe(relacion, NIEBLA).sort()).toEqual(
       [
         'corpus/obras/unamuno--niebla.yml',
         'corpus/citas/unamuno-niebla-0.md',
@@ -242,7 +334,7 @@ describe('AD-27 — el aviso es la lectura inversa de la relación que fecha el 
 
   it('la rutasAvisadasPor sola es la inversa, sin la portada ni la indexabilidad', () => {
     const relacion = relacionDeSuperficies(corpusDeEjemplo());
-    expect([...rutasAvisadasPor(['corpus/temas/la-ira.yml'], relacion)].sort()).toEqual(
+    expect([...rutasAvisadasPor([editado('corpus/temas/la-ira.yml')], relacion)].sort()).toEqual(
       ['/cita/seneca-ira-0/', '/tema/la-ira/'].sort(),
     );
   });
@@ -251,7 +343,7 @@ describe('AD-27 — el aviso es la lectura inversa de la relación que fecha el 
     const relacion = relacionDeSuperficies(corpusDeEjemplo());
     expect(
       componerAviso({
-        cambiados: [],
+        cambios: [],
         relacionDespues: relacion,
         indexablesAntes: { rutas: [] },
         indexablesDespues: { rutas: [] },
@@ -276,18 +368,42 @@ describe('FR-38 — el aviso de las Obras (la matriz de la 22.8)', () => {
     };
   };
 
-  it('Cita nueva en Obra indexable: la Cita, su Autor, sus Temas y la Obra; ninguna hermana', () => {
+  it('Cita nueva en Obra indexable: la Cita, su Autor, sus Temas, la Obra y los Directorios; ninguna hermana', () => {
     const antes = corpusDeEjemplo({ cartas: 2 });
     const despues = corpusDeEjemplo({ cartas: 3 });
     const { rutas } = componerAviso({
-      cambiados: ['corpus/citas/seneca-cartas-2.md'],
+      cambios: [alta('corpus/citas/seneca-cartas-2.md')],
       relacionAntes: relacionDeSuperficies(antes),
       relacionDespues: relacionDeSuperficies(despues),
       indexablesAntes: indexablesDe(antes),
       indexablesDespues: indexablesDe(despues),
     });
     expect(indexablesDe(antes).rutas).toContain(CARTAS);
-    expect(rutas.sort()).toEqual(['/', '/cita/seneca-cartas-2/', '/autor/seneca/', '/tema/el-tiempo/', CARTAS].sort());
+    // Historias 26.3 y 26.4 — los Directorios cuentan las Citas de cada Autor y de cada Obra: un
+    // alta los mueve.
+    expect(rutas.sort()).toEqual(
+      ['/', '/cita/seneca-cartas-2/', '/autor/seneca/', '/autores/', '/obras/', '/tema/el-tiempo/', CARTAS].sort(),
+    );
+  });
+
+  it('Historia 26.7 — la familia de lo avisado la pone la relación: los Directorios son `directorio` y la portada ninguna', () => {
+    const antes = corpusDeEjemplo({ cartas: 2 });
+    const despues = corpusDeEjemplo({ cartas: 3 });
+    const relacionDespues = relacionDeSuperficies(despues);
+    const { rutas } = componerAviso({
+      cambios: [alta('corpus/citas/seneca-cartas-2.md')],
+      relacionAntes: relacionDeSuperficies(antes),
+      relacionDespues,
+      indexablesAntes: indexablesDe(antes),
+      indexablesDespues: indexablesDe(despues),
+    });
+    for (const directorio of ['/autores/', '/obras/']) {
+      expect(rutas, directorio).toContain(directorio);
+      expect(relacionDespues.get(directorio)?.familia, directorio).toBe('directorio');
+    }
+    // La portada se avisa siempre, sin familia: no está en la relación.
+    expect(rutas).toContain('/');
+    expect(relacionDespues.has('/')).toBe(false);
   });
 
   it('una hermana que cambia de estado se avisa: las Citas nuevas bajan Brevedad del 90 %', () => {
@@ -300,7 +416,7 @@ describe('FR-38 — el aviso de las Obras (la matriz de la 22.8)', () => {
     expect(a).not.toContain(BREVEDAD);
     expect(d).toContain(BREVEDAD);
     const { rutas } = componerAviso({
-      cambiados: ['corpus/citas/seneca-cartas-1.md', 'corpus/citas/seneca-cartas-2.md'],
+      cambios: [alta('corpus/citas/seneca-cartas-1.md'), alta('corpus/citas/seneca-cartas-2.md')],
       relacionAntes: relacionDeSuperficies(antes),
       relacionDespues: relacionDeSuperficies(despues),
       indexablesAntes: { rutas: a },
@@ -317,7 +433,7 @@ describe('FR-38 — el aviso de las Obras (la matriz de la 22.8)', () => {
     const antes = corpusDeEjemplo();
     const despues = corpusDeEjemplo({ cartas: 0 });
     const { rutas } = componerAviso({
-      cambiados: ['corpus/citas/seneca-cartas-0.md', 'corpus/citas/seneca-cartas-1.md', 'corpus/citas/seneca-cartas-2.md'],
+      cambios: ['corpus/citas/seneca-cartas-0.md', 'corpus/citas/seneca-cartas-1.md', 'corpus/citas/seneca-cartas-2.md'].map(baja),
       relacionAntes: relacionDeSuperficies(antes),
       relacionDespues: relacionDeSuperficies(despues),
       indexablesAntes: indexablesDe(antes),
@@ -332,7 +448,7 @@ describe('FR-38 — el aviso de las Obras (la matriz de la 22.8)', () => {
     const antes = corpusDeEjemplo();
     const despues = corpusDeEjemplo({ ira: false });
     const { rutas, avisos } = componerAviso({
-      cambiados: ['corpus/citas/seneca-ira-0.md'],
+      cambios: [baja('corpus/citas/seneca-ira-0.md')],
       relacionAntes: relacionDeSuperficies(antes),
       relacionDespues: relacionDeSuperficies(despues),
       indexablesAntes: indexablesDe(antes),
@@ -348,7 +464,7 @@ describe('FR-38 — el aviso de las Obras (la matriz de la 22.8)', () => {
     const antes = corpusDeEjemplo({ ira: false });
     const despues = corpusDeEjemplo();
     const { rutas } = componerAviso({
-      cambiados: ['corpus/citas/seneca-ira-0.md', 'corpus/obras/seneca--ira.yml'],
+      cambios: [alta('corpus/citas/seneca-ira-0.md'), alta('corpus/obras/seneca--ira.yml')],
       relacionAntes: relacionDeSuperficies(antes),
       relacionDespues: relacionDeSuperficies(despues),
       indexablesAntes: indexablesDe(antes),
@@ -360,7 +476,7 @@ describe('FR-38 — el aviso de las Obras (la matriz de la 22.8)', () => {
   it('una Obra tocada `noindex` sin saber si lo era antes no se calla: se nombra', () => {
     const corpus = corpusDeEjemplo();
     const { rutas, avisos } = componerAviso({
-      cambiados: ['corpus/citas/seneca-ira-0.md'],
+      cambios: [editado('corpus/citas/seneca-ira-0.md')],
       relacionDespues: relacionDeSuperficies(corpus),
       indexablesAntes: { motivo: 'Corpus de abc ilegible' },
       indexablesDespues: indexablesDe(corpus),
@@ -373,7 +489,7 @@ describe('FR-38 — el aviso de las Obras (la matriz de la 22.8)', () => {
     const corpus = corpusDeEjemplo();
     const relacion = relacionDeSuperficies(corpus);
     const { rutas } = componerAviso({
-      cambiados: [],
+      cambios: [],
       reglaCambiada: true,
       relacionAntes: relacion,
       relacionDespues: relacion,
@@ -385,15 +501,15 @@ describe('FR-38 — el aviso de las Obras (la matriz de la 22.8)', () => {
 
   it('la Página de Cita incluye la ficha de su Obra: retitular la Obra avisa sus Citas', () => {
     const relacion = relacionDeSuperficies(corpusDeEjemplo());
-    expect(relacion.get('/cita/unamuno-niebla-0/')).toContain('corpus/obras/unamuno--niebla.yml');
-    expect(relacion.get('/cita/unamuno-suelta/')).not.toContain('corpus/obras/unamuno--niebla.yml');
+    expect(ficherosDe(relacion, '/cita/unamuno-niebla-0/')).toContain('corpus/obras/unamuno--niebla.yml');
+    expect(ficherosDe(relacion, '/cita/unamuno-suelta/')).not.toContain('corpus/obras/unamuno--niebla.yml');
   });
 
   it('una Obra `noindex` antes y después no se avisa aunque se toque', () => {
     const corpus = corpusDeEjemplo();
     const relacion = relacionDeSuperficies(corpus);
     const { rutas } = componerAviso({
-      cambiados: ['corpus/citas/seneca-ira-0.md'],
+      cambios: [editado('corpus/citas/seneca-ira-0.md')],
       relacionAntes: relacion,
       relacionDespues: relacion,
       indexablesAntes: indexablesDe(corpus),
@@ -407,7 +523,7 @@ describe('FR-38 — el aviso de las Obras (la matriz de la 22.8)', () => {
     const antes = corpusDeEjemplo({ cartas: 2 });
     const relacion = relacionDeSuperficies(antes);
     const { rutas } = componerAviso({
-      cambiados: ['corpus/obras/seneca--cartas.yml'],
+      cambios: [editado('corpus/obras/seneca--cartas.yml')],
       relacionAntes: relacion,
       relacionDespues: relacion,
       indexablesAntes: { rutas: [CARTAS] },
@@ -420,7 +536,7 @@ describe('FR-38 — el aviso de las Obras (la matriz de la 22.8)', () => {
     const antes = corpusDeEjemplo({ cartas: 1, brevedad: 28 });
     const despues = corpusDeEjemplo({ cartas: 3, brevedad: 28 });
     const { rutas, avisos } = componerAviso({
-      cambiados: ['corpus/citas/seneca-cartas-1.md', 'corpus/citas/seneca-cartas-2.md'],
+      cambios: [alta('corpus/citas/seneca-cartas-1.md'), alta('corpus/citas/seneca-cartas-2.md')],
       relacionAntes: relacionDeSuperficies(antes),
       relacionDespues: relacionDeSuperficies(despues),
       indexablesAntes: indexablesDe(antes),
@@ -435,11 +551,144 @@ describe('FR-38 — el aviso de las Obras (la matriz de la 22.8)', () => {
   it('sin el Corpus de antes: tampoco hermanas, y se dice', () => {
     const despues = corpusDeEjemplo();
     const { avisos } = componerAviso({
-      cambiados: ['corpus/citas/seneca-cartas-0.md'],
+      cambios: [editado('corpus/citas/seneca-cartas-0.md')],
       relacionDespues: relacionDeSuperficies(despues),
       indexablesAntes: { motivo: 'Corpus de abc ilegible' },
       indexablesDespues: indexablesDe(despues),
     });
     expect(avisos.join('\n')).toMatch(/ninguna Obra hermana.*antes: Corpus de abc ilegible/su);
+  });
+});
+
+// ─── Historia 24.8 — el aviso por campos ─────────────────────────────────────────────
+
+describe('Historia 24.8 — el aviso lee la relación por campos', () => {
+  const indexables = (corpus: CorpusParaFechar) => ({
+    rutas: [...relacionDeSuperficies(corpus).keys()].filter((r) => r.startsWith('/obra/')),
+  });
+  const conMiembro = (corpus: CorpusParaFechar, slug: string): CorpusParaFechar => ({
+    ...corpus,
+    colecciones: corpus.colecciones.map((c) => ({ ...c, miembros: [...c.miembros, slug] })),
+  });
+
+  it('un rango que solo añade una Cita avisa solo su Cita, su Autor, sus Temas, sus Colecciones, su Obra y los Directorios', () => {
+    const antes = conMiembro(corpusDeEjemplo({ cartas: 2 }), 'seneca-cartas-2');
+    const despues = conMiembro(corpusDeEjemplo({ cartas: 3 }), 'seneca-cartas-2');
+    const { rutas, avisos } = componerAviso({
+      cambios: [alta('corpus/citas/seneca-cartas-2.md')],
+      relacionAntes: relacionDeSuperficies(antes),
+      relacionDespues: relacionDeSuperficies(despues),
+      indexablesAntes: indexables(antes),
+      indexablesDespues: indexables(despues),
+    });
+    expect(rutas.sort()).toEqual(
+      ['/', '/cita/seneca-cartas-2/', '/autor/seneca/', '/autores/', '/obras/', '/tema/el-tiempo/', '/coleccion/breves/', CARTAS].sort(),
+    );
+    expect(avisos).toEqual([]);
+  });
+
+  it('un cambio que solo toca `aptaParaPortada` avisa la portada y nada más', () => {
+    const corpus = corpusDeEjemplo();
+    const relacion = relacionDeSuperficies(corpus);
+    const v = { slug: 'seneca-cartas-0', autor: 'seneca', texto: 'T', aptaParaPortada: false };
+    const { rutas } = componerAviso({
+      cambios: [{ fichero: 'corpus/citas/seneca-cartas-0.md', antes: v, despues: { ...v, aptaParaPortada: true } }],
+      relacionAntes: relacion,
+      relacionDespues: relacion,
+      indexablesAntes: indexables(corpus),
+      indexablesDespues: indexables(corpus),
+    });
+    expect(rutas).toEqual(['/']);
+  });
+
+  it('un documento nuevo avisa su Obra y no la portada', () => {
+    const corpus: CorpusParaFechar = {
+      ...corpusDeEjemplo(),
+      citas: corpusDeEjemplo().citas.map((c) =>
+        c.obra === 'unamuno--niebla' ? { ...c, fuente: 'gutenberg', obraDeclarada: 'Niebla' } : c,
+      ),
+      documentos: ['corpus/fuentes/gutenberg--niebla.txt'],
+    };
+    const relacion = relacionDeSuperficies(corpus);
+    expect(ficherosDe(relacion, NIEBLA)).toContain('corpus/fuentes/gutenberg--niebla.txt');
+    const { rutas } = componerAviso({
+      cambios: [{ fichero: 'corpus/fuentes/gutenberg--niebla.txt', antes: null, despues: versionDe('x') }],
+      relacionAntes: relacion,
+      relacionDespues: relacion,
+      indexablesAntes: indexables(corpus),
+      indexablesDespues: indexables(corpus),
+    });
+    expect(rutas).toEqual([NIEBLA]);
+  });
+
+  it('inversas: lo avisado de después, más lo de antes que sigue vivo, es exactamente lo que el commit refecha', () => {
+    /*
+     * Un solo commit con un alta, una baja y tres cambios de campos —uno que solo fecha el Autor,
+     * uno que no fecha nada y un retitulado—. La fecha sale del historial con las bajas; el aviso,
+     * de las dos relaciones. Si las dos lecturas divergieran en una sola ruta, esto lo diría.
+     */
+    const T0 = '2026-01-01T00:00:00.000Z';
+    const T1 = '2026-02-01T00:00:00.000Z';
+    const antes = corpusDeEjemplo();
+    const despues = corpusDeEjemplo({ ira: false, cartas: 4 });
+
+    const citas = new Map([...antes.citas, ...despues.citas].map((c) => [c.ruta, c]));
+    const version = (fichero: string): Record<string, unknown> => {
+      const cita = citas.get(fichero);
+      return cita === undefined
+        ? (versionDe(fichero) as Record<string, unknown>)
+        : { slug: cita.slug, autor: cita.autor, temas: cita.temas, texto: fichero, aptaParaPortada: false };
+    };
+    const enT1: CambioDeFichero[] = [
+      { fichero: 'corpus/citas/seneca-cartas-3.md', antes: null, despues: version('corpus/citas/seneca-cartas-3.md') },
+      { fichero: 'corpus/citas/seneca-ira-0.md', antes: version('corpus/citas/seneca-ira-0.md'), despues: null },
+      {
+        fichero: 'corpus/autores/unamuno.yml',
+        antes: version('corpus/autores/unamuno.yml'),
+        despues: { ...version('corpus/autores/unamuno.yml'), semblanza: 'otra' },
+      },
+      {
+        fichero: 'corpus/citas/seneca-suelta.md',
+        antes: version('corpus/citas/seneca-suelta.md'),
+        despues: { ...version('corpus/citas/seneca-suelta.md'), aptaParaPortada: true },
+      },
+      {
+        fichero: 'corpus/obras/unamuno--niebla.yml',
+        antes: version('corpus/obras/unamuno--niebla.yml'),
+        despues: { ...version('corpus/obras/unamuno--niebla.yml'), titulo: 'otro' },
+      },
+    ];
+
+    const historial = new Map<string, TransicionFechada[]>();
+    for (const fichero of new Set([...ficherosDelCorpus(antes), ...ficherosDelCorpus(despues)])) {
+      if (fichero === 'corpus/citas/seneca-cartas-3.md') continue;
+      historial.set(fichero, [{ fecha: T0, antes: null, despues: version(fichero) }]);
+    }
+    for (const cambio of enT1) {
+      historial.set(cambio.fichero, [{ fecha: T1, antes: cambio.antes, despues: cambio.despues }, ...(historial.get(cambio.fichero) ?? [])]);
+    }
+
+    const conBajas: CorpusParaFechar = {
+      ...despues,
+      bajas: bajasDelHistorial(historial, familiaDeFichero, new Set(ficherosDelCorpus(despues))),
+    };
+    const refechadas = [...fechasPorSuperficie(conBajas, historial)]
+      .filter(([, fecha]) => fecha === T1)
+      .map(([ruta]) => ruta)
+      .sort();
+
+    const relacionDespues = relacionDeSuperficies(despues);
+    const rutasDespues = new Set(relacionDespues.keys());
+    const avisadas = new Set([
+      ...rutasAvisadasPor(enT1, relacionDespues),
+      ...[...rutasAvisadasPor(enT1, relacionDeSuperficies(antes))].filter((r) => rutasDespues.has(r)),
+    ]);
+    expect([...avisadas].map(rutaNormalizada).sort()).toEqual(refechadas);
+    // Y no es el conjunto vacío ni el sitio entero: la prueba mide algo.
+    expect(refechadas).toContain('/autor/unamuno');
+    expect(refechadas).toContain('/coleccion/breves');
+    expect(refechadas).toContain('/cita/unamuno-niebla-1');
+    expect(refechadas).not.toContain('/cita/seneca-suelta');
+    expect(refechadas).not.toContain('/cita/seneca-cartas-0');
   });
 });

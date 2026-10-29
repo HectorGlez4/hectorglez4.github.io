@@ -17,9 +17,16 @@
  */
 
 import { PALETA, SANS, SERIF, escapar, repartirEnLineas } from './lienzo.ts';
-import { MARCA } from './marca.ts';
+import { MARCA, NOMBRE_DEL_DIRECTORIO_DE_AUTORES, NOMBRE_DEL_DIRECTORIO_DE_OBRAS } from './marca.ts';
 import { tramoDe } from './tramos.ts';
-import { añoLegible, añosDeAutor, recuentoDeDocumentadas } from './atribucion.ts';
+import {
+  añoLegible,
+  añosDeAutor,
+  recuentoDeAutores,
+  recuentoDeCitas,
+  recuentoDeDocumentadas,
+  recuentoDeObras,
+} from './atribucion.ts';
 import { citasDocumentadasDeAutor, type Autor, type Cita } from './publicado.ts';
 import type { ObraResuelta } from './obras.ts';
 
@@ -274,7 +281,7 @@ export function bajadaDeTarjetaDeObra(
   obra: Pick<ObraResuelta, 'recuento' | 'año'>,
   autor: Pick<Autor, 'nombre'>,
 ): string {
-  const citas = obra.recuento === 1 ? '1 cita' : `${obra.recuento} citas`;
+  const citas = recuentoDeCitas(obra.recuento);
   const año = obra.año === undefined ? '' : `, ${añoLegible(obra.año)}`;
   return `${citas} de ${autor.nombre}${año}`;
 }
@@ -294,6 +301,37 @@ export function datosDeTarjetaDeObra(
   return {
     titulo: obra.titulo,
     hechos: [bajadaDeTarjetaDeObra(obra, autor)],
+    familiaDelTitulo: 'sans',
+  };
+}
+
+/**
+ * Los datos de la Tarjeta Social del Directorio de Autores — Historia 26.3, UX-DR79, AD-28.
+ *
+ * La de listado con «Autores» en la familia de la interfaz —no es nombre de Autor, Tema ni
+ * Colección— y un solo hecho del Corpus: cuántos Autores lista, con su unidad («1 autor» en
+ * singular, por `recuentoDeAutores`, como la meta). Sin bajada ni prosa, y sin ninguna semblanza:
+ * recibe la cifra y nada más.
+ */
+export function datosDeTarjetaDelDirectorioDeAutores(autores: number): DatosDeTarjetaDeListado {
+  return {
+    titulo: NOMBRE_DEL_DIRECTORIO_DE_AUTORES,
+    hechos: [recuentoDeAutores(autores)],
+    familiaDelTitulo: 'sans',
+  };
+}
+
+/**
+ * Los datos de la Tarjeta Social del Directorio de Obras — Historia 26.4, UX-DR79, AD-28.
+ *
+ * La misma de listado que la de Autores: «Obras» en la sans y un solo hecho, cuántas Obras lista
+ * («1 obra» en singular, por `recuentoDeObras`, como la meta). Recibe la cifra y nada más: ni
+ * títulos, ni notas de ficha, ni Autores, ni ediciones.
+ */
+export function datosDeTarjetaDelDirectorioDeObras(obras: number): DatosDeTarjetaDeListado {
+  return {
+    titulo: NOMBRE_DEL_DIRECTORIO_DE_OBRAS,
+    hechos: [recuentoDeObras(obras)],
     familiaDelTitulo: 'sans',
   };
 }

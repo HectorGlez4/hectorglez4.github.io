@@ -11,7 +11,12 @@ import { MIN_CITAS_POR_COLECCION, MIN_CITAS_POR_TEMA } from '../../src/lib/umbra
 import { DOMINIO } from '../../src/lib/dominio.ts';
 import { DESTINOS_VALIDOS, esDestinoValido } from '../../src/lib/destinos.ts';
 import { CAMPOS_DE_EVENTO, EVENTOS_VALIDOS } from '../../src/lib/vocabulario.ts';
-import { rutaDeColeccion } from '../../src/lib/superficies.ts';
+import {
+  FAMILIAS,
+  rutaDeColeccion,
+  rutaDelDirectorioDeAutores,
+  rutaDelDirectorioDeObras,
+} from '../../src/lib/superficies.ts';
 import {
   CABECERA_DE_PUBLICACIONES,
   CABECERA_DE_SENALES,
@@ -25,6 +30,7 @@ import {
 } from '../../tools/lib/corpus.ts';
 import { censoPorFamilia } from '../../tools/lib/indexacion.ts';
 import {
+  FAMILIAS_DEL_CANAL,
   FORMATOS,
   cierreDe18_2,
   componerPublicacion,
@@ -72,7 +78,7 @@ async function corpusConCitas(cuantas: number, { conColeccion = false } = {}): P
   }
   await writeFile(
     join(corpus, 'autores', 'autor-0.yml'),
-    'nombre: "Autor Cero"\nañoFallecimiento: 65\nsemblanza: "Semblanza de prueba."\ntradicion: "peninsular"\n',
+    'nombre: "Autor Cero"\nañoFallecimiento: 65\nsemblanza: "Semblanza de prueba."\ntradicion: "peninsular"\nordenAlfabetico: "Cero"\n',
     'utf8',
   );
   await writeFile(join(corpus, 'temas', 'la-vida.yml'), 'nombre: "La vida"\n', 'utf8');
@@ -291,7 +297,16 @@ describe('el resumen por semana y red', () => {
       semana: '2026-W41',
       red: 'facebook',
       publicaciones: 2,
-      destinos: { cita: 1, portada: 1, autor: 0, coleccion: 0, otra: 0, yaNoSePublica: 0, sinEnlace: 0 },
+      destinos: {
+        cita: 1,
+        portada: 1,
+        autor: 0,
+        coleccion: 0,
+        directorio: 0,
+        otra: 0,
+        yaNoSePublica: 0,
+        sinEnlace: 0,
+      },
       diasConFoto: 2,
       conEnlace: 2,
       marcadas: 1,
@@ -329,9 +344,37 @@ describe('el resumen por semana y red', () => {
     expect(destinoDePublicacion(rutaDeColeccion(SLUG_DE_COLECCION), censo, publicadas)).toBe('coleccion');
     expect(destinoDePublicacion('/', censo, publicadas)).toBe('portada');
     expect(destinoDePublicacion('/tema/la-vida/', censo, publicadas)).toBe('otra');
+    // Historia 26.7 — los dos Directorios son «Directorio»: ni Autor, ni Obra, ni «otra».
+    expect(destinoDePublicacion(rutaDelDirectorioDeAutores(), censo, publicadas)).toBe('directorio');
+    expect(destinoDePublicacion(rutaDelDirectorioDeObras(), censo, publicadas)).toBe('directorio');
     // Anotada cuando se publicaba; hoy el sitio ya no la publica.
     expect(destinoDePublicacion('/cita/retirada/', censo, publicadas)).toBe('yaNoSePublica');
     expect(destinoDePublicacion('-', censo, publicadas)).toBe('sinEnlace');
+  });
+});
+
+describe('Historia 26.7 — los Directorios en el canal', () => {
+  it('el registro reparte un subconjunto de las seis, con el Directorio y sin la Obra', () => {
+    for (const familia of FAMILIAS_DEL_CANAL) expect(FAMILIAS).toContain(familia);
+    expect(FAMILIAS_DEL_CANAL).toContain('directorio');
+    expect(FAMILIAS_DEL_CANAL).not.toContain('obra');
+  });
+
+  it('una publicación a `/autores/` y una señal a `/obras/` se desglosan como «Directorio»', async () => {
+    const corpus = await corpusConCitas(MIN_CITAS_POR_TEMA);
+    capturarSalida();
+    expect(
+      await principal(['--corpus', corpus, 'anotar', 'facebook', 'foto', '/autores/?de=facebook', '--fecha', '2026-10-05'], AHORA),
+    ).toBe(0);
+    expect(
+      await principal(['--corpus', corpus, 'senal', 'https://blog.ejemplo/post', '/obras/', '--tipo', 'ajena'], AHORA),
+    ).toBe(0);
+    const salida = capturarSalida();
+    expect(await principal(['--corpus', corpus], AHORA)).toBe(0);
+    const texto = salida.join('');
+    expect(texto).toMatch(/2026-W41\n {2}facebook: 1 {2}\(Directorio 1\)/);
+    expect(texto).toMatch(/https:\/\/blog\.ejemplo\/post {2}→ {2}\/obras\/ {2}\(Directorio\)/);
+    expect(texto).not.toMatch(/\(otra\b/);
   });
 });
 
@@ -339,7 +382,7 @@ describe('el cierre de la 18.2', () => {
   it('cuatro semanas ISO consecutivas con foto los 7 días y todo marcado la cierran', () => {
     // De 2026-W38 (lunes 14/09) a 2026-W41 (domingo 11/10).
     const publicaciones = fotosDiarias('2026-09-14', 28);
-    const resumen = resumenPorSemana(publicaciones, { cita: [], autor: [], tema: [], coleccion: [] }, ['/']);
+    const resumen = resumenPorSemana(publicaciones, { cita: [], autor: [], tema: [], coleccion: [], directorio: [] }, ['/']);
     expect(resumen.every((f) => f.diasConFoto === 7 && f.cuentaPara18_2)).toBe(true);
 
     // El lunes de la W42 todavía no rompe la racha: la semana en curso no puede tener 7 días.
@@ -360,7 +403,7 @@ describe('el cierre de la 18.2', () => {
     ];
     // …salvo que en la W41 una publicación con enlace va sin marcar.
     publicaciones.push({ fecha: '2026-10-07', red: 'facebook', formato: 'reel', ruta: '/', marcado: false });
-    const resumen = resumenPorSemana(publicaciones, { cita: [], autor: [], tema: [], coleccion: [] }, ['/']);
+    const resumen = resumenPorSemana(publicaciones, { cita: [], autor: [], tema: [], coleccion: [], directorio: [] }, ['/']);
     expect(resumen.map((f) => f.cuentaPara18_2)).toEqual([true, true, false, false]);
     expect(rachasPorRed(resumen, '2026-10-12')).toEqual([{ red: 'facebook', actual: 0, maxima: 2 }]);
   });
@@ -370,7 +413,7 @@ describe('el cierre de la 18.2', () => {
       const { marcado: _, ...sinMarca } = p;
       return { ...sinMarca, ruta: '-' };
     });
-    const [fila] = resumenPorSemana(publicaciones, { cita: [], autor: [], tema: [], coleccion: [] }, ['/']);
+    const [fila] = resumenPorSemana(publicaciones, { cita: [], autor: [], tema: [], coleccion: [], directorio: [] }, ['/']);
     expect(fila).toMatchObject({ diasConFoto: 7, conEnlace: 0, todasMarcadas: true, cuentaPara18_2: false });
   });
 });
@@ -818,7 +861,7 @@ describe('componer una señal externa', () => {
 
 describe('el resumen de señales', () => {
   it('sin señales lo dice, y dice que todavía no hay ajena', () => {
-    const resumen = resumenDeSenales([], { cita: [], autor: [], tema: [], coleccion: [] }, ['/'], HOY);
+    const resumen = resumenDeSenales([], { cita: [], autor: [], tema: [], coleccion: [], directorio: [] }, ['/'], HOY);
     expect(resumen).toEqual({
       propias: [],
       ajenas: [],
@@ -856,7 +899,7 @@ describe('el resumen de señales', () => {
   });
 
   it('ordena por fecha y, a igual fecha, por orden del fichero; la primera ajena es la más temprana', () => {
-    const censo = { cita: [], autor: [], tema: [], coleccion: [] };
+    const censo = { cita: [], autor: [], tema: [], coleccion: [], directorio: [] };
     const senales: SenalExterna[] = [
       { fecha: '2026-10-09', tipo: 'ajena', origen: 'https://b.example/', destino: '/' },
       { fecha: '2026-10-08', tipo: 'ajena', origen: 'https://c.example/', destino: '/' },
@@ -868,7 +911,7 @@ describe('el resumen de señales', () => {
   });
 
   it('cuenta enlaces distintos, no entradas, y no cuenta lo retirado ni la corrección', () => {
-    const censo = { cita: [], autor: [], tema: [], coleccion: [] };
+    const censo = { cita: [], autor: [], tema: [], coleccion: [], directorio: [] };
     const a: SenalExterna = { fecha: '2026-10-05', tipo: 'propia', origen: 'https://www.tiktok.com/@x', destino: '/' };
     const ajena: SenalExterna = { fecha: '2026-10-06', tipo: 'ajena', origen: 'https://a.example/', destino: '/' };
     const resumen = resumenDeSenales(
@@ -889,7 +932,7 @@ describe('el resumen de señales', () => {
   });
 
   it('la comprobación de Search Console toca a los 14 días de la primera propia', () => {
-    const censo = { cita: [], autor: [], tema: [], coleccion: [] };
+    const censo = { cita: [], autor: [], tema: [], coleccion: [], directorio: [] };
     const propia: SenalExterna = { fecha: '2026-09-26', tipo: 'propia', origen: 'https://linktr.ee/x', destino: '/' };
     expect(resumenDeSenales([propia], censo, ['/'], '2026-10-09').comprobacionDeSearchConsole).toEqual({
       estado: 'aunNoToca',
@@ -1404,7 +1447,7 @@ describe('Historia 23.6 — la Marca de difusión en el canal', () => {
   });
 
   it('la consulta avisa «copia un enlace compartido» en la ajena con `compartido`, junto al del Kit si lleva las dos', () => {
-    const censo = { cita: [], autor: [], tema: [], coleccion: [] };
+    const censo = { cita: [], autor: [], tema: [], coleccion: [], directorio: [] };
     const senales: SenalExterna[] = [
       { fecha: '2026-10-08', tipo: 'ajena', origen: 'https://a.example/', destino: '/', compartido: true },
       { fecha: '2026-10-09', tipo: 'ajena', origen: 'https://b.example/', destino: '/', marcado: true, compartido: true },
@@ -1591,7 +1634,7 @@ describe('Historia 23.6 — la Marca de difusión en el canal', () => {
   });
 
   it('la consulta: un mismo enlace anotado sin marcas y luego con ellas lleva los avisos, en el orden que sea', () => {
-    const censo = { cita: [], autor: [], tema: [], coleccion: [] };
+    const censo = { cita: [], autor: [], tema: [], coleccion: [], directorio: [] };
     const base = { tipo: 'ajena' as const, origen: 'https://a.example/', destino: '/' };
     for (const senales of [
       [

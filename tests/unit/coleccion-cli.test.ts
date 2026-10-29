@@ -7,6 +7,8 @@ import { dirname, join } from 'node:path';
 import { promisify } from 'node:util';
 import { AUTOR_VALIDO, RAIZ, TEMA_VALIDO, citaValida, construirConCorpus, limpiar, paginaConstruida, type CorpusDePrueba } from './ayuda/construir.js';
 import { MIN_CITAS_POR_COLECCION } from '../../src/lib/umbrales.ts';
+import { rutasDelCorpus } from '../../tools/lib/corpus.ts';
+import { COLECCION, DE_EPICTETO, EN_LA_COLECCION, instantaneaDe, sembrarCorpusAlLimite } from './ayuda/al-limite.ts';
 
 const ejecutar = promisify(execFile);
 
@@ -399,5 +401,38 @@ describe('Historia 12.4 — comodidad, no puerta', () => {
     expect(resultado.codigo).not.toBe(0);
     expect(resultado.salida).toContain(SLUG);
     expect(resultado.salida).toContain('falta el criterio de la Colección');
+  });
+});
+
+/** Historia 26.8 — un Corpus al límite en un directorio temporal propio (`ayuda/al-limite.ts`). */
+const alLimite: string[] = [];
+afterEach(async () => {
+  await Promise.all(alLimite.splice(0).map((d) => rm(d, { recursive: true, force: true })));
+});
+async function corpusAlLimite() {
+  const raiz = await mkdtemp(join(tmpdir(), 'sabiduria-al-limite-'));
+  alLimite.push(raiz);
+  const rutas = rutasDelCorpus(join(raiz, 'corpus'));
+  await sembrarCorpusAlLimite(rutas);
+  return rutas;
+}
+
+describe('Historia 26.8 — quitar y despublicar no dejan una Cita fuera de alcance', () => {
+  it('quitar el miembro que deja la Colección bajo su umbral sale con 1 sin escribir', async () => {
+    const rutas = await corpusAlLimite();
+    const antes = await instantaneaDe(rutas.raiz);
+    const resultado = await correr(rutas.raiz, ['quitar', COLECCION, DE_EPICTETO[2]!]);
+    expect(resultado.codigo).toBe(1);
+    expect(resultado.error).toContain(`/cita/${EN_LA_COLECCION}/ — no declara ningún Tema`);
+    expect(await instantaneaDe(rutas.raiz)).toEqual(antes);
+  });
+
+  it('despublicar la única Colección que la alcanza sale con 1 sin mover el fichero', async () => {
+    const rutas = await corpusAlLimite();
+    const antes = await instantaneaDe(rutas.raiz);
+    const resultado = await correr(rutas.raiz, ['despublicar', COLECCION]);
+    expect(resultado.codigo).toBe(1);
+    expect(resultado.error).toContain(`/cita/${EN_LA_COLECCION}/`);
+    expect(await instantaneaDe(rutas.raiz)).toEqual(antes);
   });
 });

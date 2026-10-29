@@ -24,7 +24,7 @@ afterAll(async () => {
 const BASE = {
   'autores/seneca.yml': AUTOR_VALIDO,
   'autores/horacio.yml':
-    'nombre: Horacio\nañoFallecimiento: -8\nsemblanza: Poeta latino.\n',
+    'nombre: Horacio\nañoFallecimiento: -8\nsemblanza: Poeta latino.\nordenAlfabetico: Horacio\n',
   'temas/el-tiempo.yml': TEMA_VALIDO,
   'citas/seneca--no-es-que-tengamos-poco-tiempo.md': citaValida(),
 };
@@ -138,7 +138,7 @@ describe('Historia 22.2 — una obra, un nombre', () => {
 
   const BASE_SOR = {
     [`autores/${SOR}.yml`]:
-      'nombre: Sor Juana Inés de la Cruz\nañoFallecimiento: 1695\nsemblanza: Poeta novohispana.\n',
+      'nombre: Sor Juana Inés de la Cruz\nañoFallecimiento: 1695\nsemblanza: Poeta novohispana.\nordenAlfabetico: Cruz\n',
     'temas/el-tiempo.yml': TEMA_VALIDO,
     'pendientes-de-cotejo.yml': `citas:\n  - ${CENSADA}\n`,
     [`citas/${SOR}--yo-no-estudio-para-saber-mas-sino.md`]: citaValida({

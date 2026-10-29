@@ -12,14 +12,14 @@
  * recorrible desde ella.
  */
 import Armazon from '../components/Armazon.astro';
-import BloqueDeCita from '../components/BloqueDeCita.astro';
+import CitaDelDia from '../components/CitaDelDia.astro';
 import DatosDelSitio from '../components/DatosDelSitio.astro';
 import Sostener from '../components/Sostener.astro';
 import portada from '../../corpus/portada.json';
 import { aptasParaPortada, citaDelDia, jornadaDelBuild } from '../lib/citaDelDia.ts';
 import { modelosEnRuta } from '../lib/ingreso.ts';
 import { DESCRIPCION_DEL_SITIO, MARCA } from '../lib/marca.ts';
-import { rutaDeAutor, rutaDeCita, rutaDeColeccion, rutaDeTema } from '../lib/superficies.ts';
+import { rutaDeAutor, rutaDeColeccion, rutaDeTema } from '../lib/superficies.ts';
 import {
   autoresPublicados,
   conjuntoPublicable,
@@ -58,24 +58,30 @@ const DESCRIPCION = DESCRIPCION_DEL_SITIO;
   descripcion={DESCRIPCION}
   tarjeta="/tarjeta/portada.png"
   ruta="/"
+  tipo="portada"
 >
   <DatosDelSitio slot="cabeza" descripcion={DESCRIPCION} />
 
   <div class="pagina contenedor">
+    {
+      /*
+       * Historia 26.2 (AD-17, AD-19) — en la búsqueda propia la portada responde solo por su
+       * título: este `h1`, que es la marca y del que Pagefind saca el título del resultado. Todo lo
+       * demás —la Cita del Día, la entrada, los chips y la lista de Autores— va bajo
+       * `data-pagefind-ignore="all"`, porque ya tiene su propia página en el índice: sin esto, buscar
+       * el texto del día o cualquier Autor devolvía también la portada. La invitación a sostener
+       * lleva su propio `data-pagefind-ignore` en `Sostener.astro`. Cuando la 28.1 saque el `h1`
+       * de `main`, la portada declarará su título con `data-pagefind-meta="title:…"`.
+       */
+    }
     <h1 class="marca-portada">{MARCA}</h1>
 
     {
       seleccion && autorDelDia ? (
-        <section class="del-dia">
-          <h2>La cita de hoy</h2>
-          <BloqueDeCita cita={seleccion.cita} autor={autorDelDia} />
-          {/* Historia 23.7 — las Zonas de salida interna van en los contenedores de la portada. */}
-          <p class="ir" data-zona="cita-del-dia">
-            <a href={rutaDeCita(seleccion.cita.slug)}>Ver esta cita</a>
-          </p>
-        </section>
+        /* Historia 26.8 — el bloque, y su marca de lo que rota, los pinta un solo componente. */
+        <CitaDelDia cita={seleccion.cita} autor={autorDelDia} />
       ) : (
-        <p class="entrada">
+        <p class="entrada" data-pagefind-ignore="all">
           Citas en español, cada una en su página, con el autor y la obra de la que
           procede. Solo se publica lo que se puede documentar.
         </p>
@@ -84,7 +90,7 @@ const DESCRIPCION = DESCRIPCION_DEL_SITIO;
 
     {
       temas.length > 0 && (
-        <section>
+        <section data-pagefind-ignore="all">
           <h2>Temas</h2>
           <ul class="chips" data-zona="chip-de-tema">
             {temas.map((tema) => (
@@ -123,7 +129,7 @@ const DESCRIPCION = DESCRIPCION_DEL_SITIO;
     }
     {
       colecciones.length > 0 && (
-        <section>
+        <section data-pagefind-ignore="all">
           <h2>Colecciones</h2>
           {/* Chip idéntico al de Tema: la Colección es navegación lateral, no jerarquía. */}
           <ul class="chips" data-zona="colecciones">
@@ -139,7 +145,7 @@ const DESCRIPCION = DESCRIPCION_DEL_SITIO;
       )
     }
 
-    <section>
+    <section data-pagefind-ignore="all">
       <h2>Autores</h2>
       <ul class="autores" data-zona="autores-de-portada">
         {
@@ -193,17 +199,9 @@ const DESCRIPCION = DESCRIPCION_DEL_SITIO;
     margin: 0;
   }
 
-  .del-dia {
+  /* La Cita del Día (su rótulo y «Ver esta cita» los estiliza `CitaDelDia.astro`). */
+  .pagina > :global(.del-dia) {
     margin-top: calc(var(--unidad) * 4);
-  }
-
-  .del-dia h2 {
-    margin-bottom: calc(var(--unidad) * 3);
-  }
-
-  .ir {
-    margin: calc(var(--unidad) * 3) 0 0;
-    font-size: var(--cuerpo-md);
   }
 
   .entrada {
@@ -245,6 +243,10 @@ const DESCRIPCION = DESCRIPCION_DEL_SITIO;
     font-size: var(--cuerpo-md);
     color: var(--tinta);
     text-decoration: none;
+    /* NFR-8, Historia 26.9 — el nombre del Tema o de la Colección es del Corpus: con el texto al
+     * 200 % una palabra más ancha que la columna se parte. El chip es un elemento flexible y
+     * `break-word` no rebaja su ancho mínimo; `anywhere` sí. */
+    overflow-wrap: anywhere;
   }
 
   .autores {
@@ -267,6 +269,10 @@ const DESCRIPCION = DESCRIPCION_DEL_SITIO;
     font-size: var(--titular-sm);
     color: var(--tinta);
     text-decoration: none;
+    /* NFR-8, Historia 26.9 — el nombre del Autor es del Corpus y va en una caja flexible, donde
+     * `break-word` no rebaja el ancho mínimo: con el texto al 200 % una palabra más ancha que la
+     * columna se parte en vez de desbordar. */
+    overflow-wrap: anywhere;
   }
 
   .autores a:hover {

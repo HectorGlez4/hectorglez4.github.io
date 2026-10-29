@@ -1,0 +1,67 @@
+---
+/**
+ * Las letras de salto de un Directorio — Historia 26.3, UX-DR82, UX-DR105.
+ *
+ * Una navegación «Letras» con una letra por inicial con alguna entrada, en una rejilla que se
+ * ajusta al ancho: columnas de `--zona-de-toque` como mínimo y `--unidad` entre zonas, seis por
+ * fila a 360 px. Cada letra es un ancla de la propia página al rótulo de su grupo, así que
+ * funciona sin guion; el rótulo la recibe con el foco (`tabindex="-1"` en `Rotulo`).
+ *
+ * El nombre accesible es «{entidades} por la {letra}» —«Autores por la C»—, con la letra visible
+ * dentro y el resto en `.solo-para-lectores`. La `nav` es a su vez el destino de «Volver a las
+ * letras»: `tabindex="-1"` para recibir el foco y `scroll-margin-top` para el aire de arriba.
+ *
+ * Mueve dentro de la página, y eso es actuar: siena, sin subrayado ni caja, como los números de
+ * la Paginación. Las anclas son de la misma página y no llevan zona (AD-13, una de las exenciones
+ * escritas de la prueba de zonas). La reutilizará `/obras/` (26.4).
+ */
+interface Props {
+  letras: readonly { inicial: string; ancla: string }[];
+  /** Lo que lista el Directorio, con mayúscula: «Autores», «Obras». */
+  entidades: string;
+}
+
+const { letras, entidades } = Astro.props;
+---
+
+<nav id="letras" class="letras" aria-label="Letras" tabindex="-1">
+  <ul role="list">
+    {letras.map(({ inicial, ancla }) => (
+      <li><a href={`#${ancla}`}><span class="solo-para-lectores">{entidades} por la </span>{inicial}</a></li>
+    ))}
+  </ul>
+</nav>
+
+<style>
+  .letras {
+    scroll-margin-top: calc(var(--unidad) * 2);
+  }
+
+  ul {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(var(--zona-de-toque), 1fr));
+    gap: var(--unidad);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  /* El texto oculto se posiciona respecto a su letra, no a la página. */
+  li {
+    position: relative;
+  }
+
+  a {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--zona-de-toque);
+    height: var(--zona-de-toque);
+    font-family: var(--sans);
+    font-size: var(--cuerpo-md);
+    font-weight: 600;
+    line-height: 1;
+    color: var(--siena);
+    text-decoration: none;
+  }
+</style>

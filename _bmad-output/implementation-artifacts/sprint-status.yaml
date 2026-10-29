@@ -29,7 +29,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 # - Retrospective appends its action items to action_items; the status view surfaces open ones
 generated: 08-11-2026 09:00
-last_updated: 10-25-2026 15:17
+last_updated: 10-28-2026 17:57
 project: brainlySabiduria
 project_key: NOKEY
 tracking_system: file-system
@@ -401,26 +401,26 @@ development_status:
 
   # Épicas 24 y 26 — una sola rama y un solo merge, por SM-11. La 24.8 se construye antes que la 26.1.
   epic-24: in-progress
-  24-1-la-página-de-obra-lista-sus-citas-en-el-orden-del-libro: backlog  # el cargador de posiciones va primero; pasa z a astro/zod (Héctor, 19/10)
+  24-1-la-página-de-obra-lista-sus-citas-en-el-orden-del-libro: review  # el cargador de posiciones va primero; pasa z a astro/zod (Héctor, 19/10) · v8-ralph 2026-10-25: la Página de Obra ordena sus Citas por posición en el documento cotejado (cargador de posiciones, z de astro/zod); diferidos para Héctor: Obras con nombre de capítulo ya en orden alfabético, y la enmienda de épicas (bmad-create-epics-and-stories)
   24-2-el-build-avisa-antes-de-que-dist-llegue-al-techo-del-alojami: review  # v8-ralph 2026-10-24 12:40 UTC: el paso del build mide dist/ sin lo que rota y avisa a 750 MiB y para a 900 MiB; diferidos para Héctor: enmienda de épica con el contexto de la Épica 24 (bmad-create-epics-and-stories) y la deriva de Pagefind entre jornadas (26.2)
-  24-3-cada-cita-de-un-listado-dice-de-qué-obra-es: backlog
-  24-4-bajo-la-cita-la-obra-de-la-que-sale: backlog
-  24-5-de-una-cita-a-la-siguiente-del-libro: backlog
-  24-6-al-pie-más-de-la-misma-obra-y-más-del-autor: backlog
-  24-7-la-obra-salta-a-dónde-leerla: backlog
-  24-8-una-cita-nueva-no-refecha-las-demás-páginas-de-cita: backlog
+  24-3-cada-cita-de-un-listado-dice-de-qué-obra-es: review  # v8-ralph 2026-10-26: la Tarjeta de Cita nombra su Obra en los listados de Tema, Autor, Colección y Obra; sin diferidos
+  24-4-bajo-la-cita-la-obra-de-la-que-sale: review  # desbloqueada por Héctor el 2026-10-27: el glifo de avance es «›» (U+203A, v8.3) · v8-ralph 2026-10-27: la Tarjeta de Obra bajo la Cita, entre la Fuente y Copiar, con la Fila de bloque escrita una vez; 3 diferidos bajos en el spec (hermanas sin fecha ni aviso, 24.8; tiempo de rutas-de-salida.spec.ts:98 en movil; interlineado 1,4 frente al 1,6 de body-md)
+  24-5-de-una-cita-a-la-siguiente-del-libro: review  # v8-ralph 2026-10-27: la Tarjeta de Obra lleva a la siguiente Cita del libro, o del primer Tema publicado si la Obra tiene una sola; sin diferidos
+  24-6-al-pie-más-de-la-misma-obra-y-más-del-autor: review  # v8-ralph 2026-10-27: al pie de la Página de Cita, «De la misma obra» (3), «Más de {Autor}» (4, sin su Obra) y Temas, con cierres «Las {n} citas de… ›»; PARA HÉCTOR: la proyección de peso (≈7.426/9.026/9.598 Citas hasta aviso/tope/1 GB, frente a ~7.790/9.440/10.030 de la 24.2), NFR-7 (LCP 1.953→2.252 ms) y el alto a 360 (1.805→3.078 px) están en el Auto Run Result de spec-24-6, para revisar los valores de la 24.2; el docblock de Chips se corrigió en la revisión
+  24-7-la-obra-salta-a-dónde-leerla: review  # v8-ralph 2026-10-25: la página 1 de una Obra salta a «Dónde leer esta obra», medido en navegador; diferido para Héctor: verificar el salto en WebKit
+  24-8-una-cita-nueva-no-refecha-las-demás-páginas-de-cita: review  # v8-ralph 2026-10-28 00:29 UTC: la relación de AD-27 va por campos y una Cita nueva no refecha las demás páginas de Cita; sin diferidos para Héctor
   epic-24-retrospective: optional
 
-  epic-26: backlog
-  26-1-todo-autor-publicado-tiene-su-clave-de-orden: backlog  # tras la 24.8: sin la relación por campos, el lote de claves refecharía todo el sitio
-  26-2-el-tipo-de-un-resultado-no-casa-como-texto-y-la-portada-tien: backlog
-  26-3-todos-los-autores-de-la-a-a-la-z: backlog
-  26-4-todas-las-obras-bajo-su-autor: backlog
-  26-5-la-cabecera-lleva-a-autores-obras-y-buscar: backlog
-  26-6-el-directorio-filtra-al-teclear-sin-pensar-en-tildes: backlog
-  26-7-los-directorios-se-miden-como-familia-propia: backlog
-  26-8-ninguna-cita-queda-a-más-de-tres-saltos-y-el-build-lo-compru: backlog
-  26-9-ninguna-página-obliga-a-desplazarse-en-horizontal-a-320-px: backlog
+  epic-26: in-progress
+  26-1-todo-autor-publicado-tiene-su-clave-de-orden: review  # tras la 24.8: sin la relación por campos, el lote de claves refecharía todo el sitio · v8-ralph 2026-10-28: el build rompe ante un autor publicado sin clave de orden; órdenes y lote de claves la escriben; sin diferidos para Héctor
+  26-2-el-tipo-de-un-resultado-no-casa-como-texto-y-la-portada-tien: review  # v8-ralph 2026-10-28: el tipo de un resultado viaja como filtro de pagefind y la portada responde solo por su título; sin diferidos para Héctor
+  26-3-todos-los-autores-de-la-a-a-la-z: review  # v8-ralph 2026-10-28: directorio /autores/ de la a a la z con letras de salto, Tarjeta y Pagefind; diferido para Héctor: tokens de peso e interlineado en tokens.css y DESIGN.md (bmad-ux)
+  26-4-todas-las-obras-bajo-su-autor: review # v8-ralph 2026-10-28: /obras/ recorre todas las obras bajo su autor, fechada solo por lo que pinta; sin diferidos para Héctor
+  26-5-la-cabecera-lleva-a-autores-obras-y-buscar: review  # v8-ralph 2026-10-28: la cabecera lleva a autores, obras y buscar, con navegación partida desde 600 px; diferido a la 26.9 el desplazamiento horizontal de la Página de Cita a 320 px con el texto al 200 %
+  26-6-el-directorio-filtra-al-teclear-sin-pensar-en-tildes: review # v8-ralph 2026-10-28 12:12 UTC: filtro del directorio al teclear, insensible a tildes, con recuento anunciado; diferido: anclaje en Safari
+  26-7-los-directorios-se-miden-como-familia-propia: review # v8-ralph 2026-10-28: los directorios se miden como familia propia en indexación, tráfico, demanda y rastreo, con suelo propio y reatribución dicha en los informes; sin diferidos para Héctor
+  26-8-ninguna-cita-queda-a-más-de-tres-saltos-y-el-build-lo-compru: review  # v8-ralph 2026-10-28: entra el modelo de alcance en el build (aviso de Citas a más de tres saltos) y las órdenes que retiran y publican lo comprueban; diferidos para Héctor: órdenes que añaden o reordenan listados sin comprobar el tramo, y tema --corpus tomado como slug
+  26-9-ninguna-página-obliga-a-desplazarse-en-horizontal-a-320-px: review  # v8-ralph 2026-10-28 17:57 UTC: ninguna superficie pide desplazamiento horizontal a 320 px (texto al 200 % y espaciado 1.4.12), nombres largos se parten y el barrido e2e de 320 px cubre /buscar/; sin diferidos para Héctor
   26-10-una-persona-revisa-las-claves-de-orden-operativa-no-bloquea: backlog  # operativa: acto de Héctor (revisar las claves del lote inicial; se cierra con él, y las de los Autores nuevos pasan a la sesión de sembrado)
   26-11-la-obra-y-los-directorios-llegan-juntos-al-sitio-en-vivo-y-s: backlog  # operativa: acto de Héctor (merge conjunto 24+26; fechas de SM-11 y SM-8 de llegada en vivo)
   epic-26-retrospective: optional

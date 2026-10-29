@@ -5,6 +5,8 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { aprobar, loteEnRevision, rechazar } from '../../tools/lib/revision.ts';
 import { leerCitas, nombreDeFicheroDeCita, rutasDelCorpus, type Rutas } from '../../tools/lib/corpus.ts';
+import { MIN_CITAS_POR_TEMA } from '../../src/lib/umbrales.ts';
+import { TEMA_PUBLICADO, ficherosPublicados, sembrarTemaPublicado, sinRelleno } from './ayuda/relleno.ts';
 
 /** Historia 9.2 — aprobación por lote. */
 
@@ -29,7 +31,8 @@ function ficheroDeCita(campos: Record<string, unknown>): string {
 const CANDIDATA_COMPLETA = {
   texto: 'No es que tengamos poco tiempo, es que perdemos mucho.',
   autor: 'seneca',
-  temas: [],
+  // Historia 26.8 — con un Tema publicado: sin él, aprobar no la publica (NFR-5).
+  temas: [TEMA_PUBLICADO],
   slug: 'seneca-no-es-que-tengamos-poco-tiempo',
   procedencia: { obra: 'Sobre la brevedad de la vida', año: 49 },
   estadoDerechos: 'dominio-público',
@@ -55,6 +58,8 @@ const CANDIDATA_SIN_PROCEDENCIA = {
 async function corpusCon(
   candidatas: Record<string, unknown>[],
   publicadas: Record<string, unknown>[] = [],
+  /** Historia 26.8 — el Tema publicado de relleno (`ayuda/relleno.ts`); `false` sin él. */
+  conRelleno = true,
 ): Promise<Rutas> {
   const raiz = await mkdtemp(join(tmpdir(), 'sabiduria-revision-'));
   temporales.push(raiz);
@@ -62,6 +67,7 @@ async function corpusCon(
   for (const dir of [rutas.citas, rutas.autores, rutas.temas, rutas.revision]) {
     await mkdir(dir, { recursive: true });
   }
+  if (conRelleno) await sembrarTemaPublicado(rutas);
   for (const candidata of candidatas) {
     await writeFile(join(rutas.revision, `${candidata.slug}.md`), ficheroDeCita(candidata), 'utf8');
   }
@@ -80,7 +86,7 @@ describe('Historia 9.2 — aprobar es pedir que se publique, no publicar', () =>
     const resultado = await aprobar(rutas, [CANDIDATA_COMPLETA.slug as string]);
 
     expect(resultado.publicadas).toEqual([CANDIDATA_COMPLETA.slug]);
-    expect(await readdir(rutas.citas)).toHaveLength(1);
+    expect(await ficherosPublicados(rutas)).toHaveLength(1);
     expect(await readdir(rutas.revision)).toHaveLength(0);
   });
 
@@ -91,7 +97,7 @@ describe('Historia 9.2 — aprobar es pedir que se publique, no publicar', () =>
     expect(resultado.publicadas).toEqual([]);
     expect(resultado.rechazadasPorAdmision).toHaveLength(1);
     // Y sigue donde estaba, no se pierde por haberla aprobado.
-    expect(await readdir(rutas.citas)).toHaveLength(0);
+    expect(await ficherosPublicados(rutas)).toHaveLength(0);
     expect(await readdir(rutas.revision)).toHaveLength(1);
   });
 
@@ -136,7 +142,7 @@ describe('Historia 9.2 — aprobar es pedir que se publique, no publicar', () =>
    * nadie pidió borrar.
    */
   it('una candidata que ya trae Temas no acaba con dos bloques «temas:»', async () => {
-    const conTemas = { ...CANDIDATA_COMPLETA, temas: ['el-tiempo'] };
+    const conTemas = { ...CANDIDATA_COMPLETA, temas: ['el-tiempo', TEMA_PUBLICADO] };
     const rutas = await corpusCon([conTemas]);
     // El Tema tiene que existir: `aprobar` rechaza el lote entero si no lo conoce.
     await writeFile(join(rutas.temas, 'el-saber.yml'), 'nombre: "El saber"\n', 'utf8');
@@ -148,8 +154,8 @@ describe('Historia 9.2 — aprobar es pedir que se publique, no publicar', () =>
     );
     expect(bruto.split('\n').filter((l) => l.startsWith('temas:'))).toHaveLength(1);
 
-    const publicadas = await leerCitas(rutas.citas);
-    expect(publicadas[0].temas.sort()).toEqual(['el-saber', 'el-tiempo']);
+    const publicadas = sinRelleno(await leerCitas(rutas.citas));
+    expect(publicadas[0].temas.sort()).toEqual([TEMA_PUBLICADO, 'el-saber', 'el-tiempo'].sort());
   });
 });
 
@@ -165,7 +171,7 @@ describe('Historia 11.2 — la Fuente sobrevive al paso de _revision/ a citas/',
     const rutas = await corpusCon([CANDIDATA_COMPLETA]);
     await aprobar(rutas, [CANDIDATA_COMPLETA.slug]);
 
-    const publicadas = await leerCitas(rutas.citas);
+    const publicadas = sinRelleno(await leerCitas(rutas.citas));
     expect(publicadas).toHaveLength(1);
     expect(publicadas[0].fuente).toEqual(CANDIDATA_COMPLETA.fuente);
   });
@@ -178,7 +184,7 @@ describe('Historia 11.2 — la Fuente sobrevive al paso de _revision/ a citas/',
     const resultado = await aprobar(rutas, [CANDIDATA_COMPLETA.slug]);
 
     expect(resultado.renombradas).toHaveLength(1);
-    const citas = await leerCitas(rutas.citas);
+    const citas = sinRelleno(await leerCitas(rutas.citas));
     for (const cita of citas) expect(cita.fuente).toEqual(CANDIDATA_COMPLETA.fuente);
   });
 
@@ -196,7 +202,7 @@ describe('Historia 11.2 — la Fuente sobrevive al paso de _revision/ a citas/',
 
     expect(resultado.publicadas).toEqual([]);
     expect(resultado.rechazadasPorAdmision[0].motivos.join(' ')).toMatch(/recuperar\.ts/);
-    expect(await readdir(rutas.citas)).toHaveLength(0);
+    expect(await ficherosPublicados(rutas)).toHaveLength(0);
     expect(await readdir(rutas.revision)).toHaveLength(1);
   });
 
@@ -247,7 +253,7 @@ describe('Retro épica 9 — aprobar nunca sobrescribe una Cita publicada', () =
     await aprobar(rutas, [CANDIDATA_QUE_COLISIONA.slug]);
 
     const { readFile } = await import('node:fs/promises');
-    const publicadas = await readdir(rutas.citas);
+    const publicadas = await ficherosPublicados(rutas);
     const textos = await Promise.all(
       publicadas.map((f) => readFile(join(rutas.citas, f), 'utf8')),
     );
@@ -259,7 +265,7 @@ describe('Retro épica 9 — aprobar nunca sobrescribe una Cita publicada', () =
     const resultado = await aprobar(rutas, [CANDIDATA_QUE_COLISIONA.slug]);
 
     // Las dos quedan publicadas: ninguna se pierde y ninguna se rechaza.
-    expect(await readdir(rutas.citas)).toHaveLength(2);
+    expect(await ficherosPublicados(rutas)).toHaveLength(2);
     expect(resultado.publicadas).toHaveLength(1);
     expect(resultado.renombradas).toEqual([
       { de: 'seneca-no-es-que-tengamos-poco-tiempo', a: 'seneca-no-es-que-tengamos-poco-tiempo-2' },
@@ -271,7 +277,7 @@ describe('Retro épica 9 — aprobar nunca sobrescribe una Cita publicada', () =
     await aprobar(rutas, [CANDIDATA_QUE_COLISIONA.slug]);
 
     const { readFile } = await import('node:fs/promises');
-    for (const fichero of await readdir(rutas.citas)) {
+    for (const fichero of await ficherosPublicados(rutas)) {
       const contenido = await readFile(join(rutas.citas, fichero), 'utf8');
       const slug = contenido.match(/slug: "([^"]+)"/)![1];
       // `{slug-autor}--{fragmento}.md` frente a `{slug-autor}-{fragmento}`.
@@ -377,7 +383,7 @@ describe('Historia 9.2 — una candidata rechazada no queda en ninguna parte', (
 
     expect(existsSync(ruta)).toBe(false);
     expect(await readdir(rutas.revision)).toHaveLength(0);
-    expect(await readdir(rutas.citas)).toHaveLength(0);
+    expect(await ficherosPublicados(rutas)).toHaveLength(0);
   });
 
   it('rechazar una no toca a las demás', async () => {
@@ -436,5 +442,178 @@ describe('leer el corpus no se traga un fichero mal escrito', () => {
 
     await expect(leerCitas(rutas.citas)).rejects.toThrow(/seneca--rota\.md/);
     await expect(leerCitas(rutas.citas)).rejects.toThrow(/frontmatter YAML válido/);
+  });
+});
+
+describe('Historia 26.8 — aprobar no publica una Cita sin Tema publicado', () => {
+  /** `n` Citas ya publicadas de «El tiempo», y el fichero del Tema. Sin relleno. */
+  async function corpusDelTiempo(candidatas: Record<string, unknown>[], n: number): Promise<Rutas> {
+    const publicadas = Array.from({ length: n }, (_, i) => ({
+      ...CANDIDATA_COMPLETA,
+      temas: ['el-tiempo'],
+      slug: `seneca-publicada-${i + 1}`,
+      texto: `Publicada número ${i + 1}: el tiempo es lo único que de verdad nos pertenece.`,
+    }));
+    const rutas = await corpusCon(candidatas, publicadas, false);
+    await writeFile(join(rutas.temas, 'el-tiempo.yml'), 'nombre: "El tiempo"\n', 'utf8');
+    return rutas;
+  }
+  const candidata = (n: number, temas: string[]) => ({
+    ...CANDIDATA_COMPLETA,
+    temas,
+    slug: `seneca-candidata-${n}`,
+    texto: `Candidata número ${n}: quien deja para mañana pierde el día de hoy.`,
+  });
+
+  it('la 15.ª de un Tema se publica', async () => {
+    const una = candidata(1, ['el-tiempo']);
+    const rutas = await corpusDelTiempo([una], MIN_CITAS_POR_TEMA - 1);
+    const resultado = await aprobar(rutas, [una.slug]);
+    expect(resultado.publicadas).toEqual([una.slug]);
+    expect(resultado.rechazadasPorTema).toEqual([]);
+  });
+
+  it('varias que juntas llegan al umbral se publican todas, y también con los Temas de la orden', async () => {
+    const dos = [candidata(1, ['el-tiempo']), candidata(2, [])];
+    const rutas = await corpusDelTiempo(dos, MIN_CITAS_POR_TEMA - 2);
+    // La segunda no trae Tema: lo pone la orden, para las dos.
+    const resultado = await aprobar(rutas, dos.map((c) => c.slug), ['el-tiempo']);
+    expect(resultado.publicadas.sort()).toEqual(dos.map((c) => c.slug).sort());
+    expect(resultado.rechazadasPorTema).toEqual([]);
+  });
+
+  it('una sin Tema sigue en revisión, intacta, con el motivo; las demás de la pasada se publican', async () => {
+    const sinTema = candidata(1, []);
+    const conTema = candidata(2, ['el-tiempo']);
+    const rutas = await corpusDelTiempo([sinTema, conTema], MIN_CITAS_POR_TEMA - 1);
+    const ruta = join(rutas.revision, `${sinTema.slug}.md`);
+    const antes = await readFile(ruta, 'utf8');
+
+    const resultado = await aprobar(rutas, [sinTema.slug, conTema.slug]);
+
+    expect(resultado.publicadas).toEqual([conTema.slug]);
+    expect(resultado.rechazadasPorTema).toHaveLength(1);
+    expect(resultado.rechazadasPorTema[0].slug).toBe(sinTema.slug);
+    expect(resultado.rechazadasPorTema[0].temas).toEqual([]);
+    expect(resultado.rechazadasPorTema[0].motivos.join(' ')).toMatch(/no declara ningún Tema/);
+    expect(await readFile(ruta, 'utf8')).toBe(antes);
+    expect(await ficherosPublicados(rutas)).toHaveLength(MIN_CITAS_POR_TEMA);
+  });
+
+  it('una cuyo Tema no llega ni con la pasada no se publica, y el parte da el recuento', async () => {
+    const dos = [candidata(1, ['el-tiempo']), candidata(2, ['el-tiempo'])];
+    const rutas = await corpusDelTiempo(dos, MIN_CITAS_POR_TEMA - 3);
+    const resultado = await aprobar(rutas, dos.map((c) => c.slug));
+
+    expect(resultado.publicadas).toEqual([]);
+    expect(resultado.rechazadasPorTema.map((r) => r.slug)).toEqual(dos.map((c) => c.slug));
+    expect(resultado.rechazadasPorTema[0].temas).toEqual([
+      { slug: 'el-tiempo', nombre: 'El tiempo', citas: MIN_CITAS_POR_TEMA - 1 },
+    ]);
+    expect(resultado.rechazadasPorTema[0].motivos[0]).toMatch(
+      new RegExp(`«El tiempo» \\(el-tiempo\\) tendría ${MIN_CITAS_POR_TEMA - 1} Citas`),
+    );
+    expect(await readdir(rutas.revision)).toHaveLength(2);
+  });
+
+  it('un slug repetido en la orden cuenta una vez para el Tema', async () => {
+    const una = candidata(1, ['el-tiempo']);
+    // 13 publicadas: contada dos veces llegaría a 15; contada una, se queda en 14.
+    const rutas = await corpusDelTiempo([una], MIN_CITAS_POR_TEMA - 2);
+    const resultado = await aprobar(rutas, [una.slug, una.slug]);
+
+    expect(resultado.publicadas).toEqual([]);
+    expect(resultado.rechazadasPorTema.map((r) => r.slug)).toEqual([una.slug]);
+    expect(resultado.rechazadasPorTema[0].temas).toEqual([
+      { slug: 'el-tiempo', nombre: 'El tiempo', citas: MIN_CITAS_POR_TEMA - 1 },
+    ]);
+    expect(await readdir(rutas.revision)).toEqual([`${una.slug}.md`]);
+  });
+
+  it('una cuya Ficha de Obra choca no cuenta para el Tema de las demás, y nada se escribe', async () => {
+    // A choca con una ficha del disco; B solo llega al umbral contando a A.
+    const a = { ...candidata(1, ['el-tiempo']), procedencia: { obra: 'X', año: 49 } };
+    const b = candidata(2, ['el-tiempo']);
+    const rutas = await corpusDelTiempo([a, b], MIN_CITAS_POR_TEMA - 2);
+    await mkdir(rutas.obras, { recursive: true });
+    await writeFile(join(rutas.obras, 'seneca--x.yml'), 'autor: "seneca"\ntitulo: "X"\nformas:\n  - "otra"\n', 'utf8');
+
+    // B va primero: sin planificar la ficha antes, se habría escrito apoyada en A.
+    const resultado = await aprobar(rutas, [b.slug, a.slug]);
+
+    expect(resultado.publicadas).toEqual([]);
+    expect(resultado.rechazadasPorFicha.map((r) => r.slug)).toEqual([a.slug]);
+    expect(resultado.rechazadasPorTema.map((r) => r.slug)).toEqual([b.slug]);
+    expect(resultado.publicadasSinTema).toEqual([]);
+    expect((await readdir(rutas.revision)).sort()).toEqual([`${a.slug}.md`, `${b.slug}.md`].sort());
+    expect(await ficherosPublicados(rutas)).toHaveLength(MIN_CITAS_POR_TEMA - 2);
+  });
+
+  describe('dos Fichas de Obra nuevas de la misma pasada que chocan al escribir', () => {
+    /*
+     * «Col·loquis» y «Col loquis» son formas distintas (`formaDeObra`) que se nombrarían igual,
+     * `seneca--col-loquis`: planificadas contra el disco de antes, las dos se pueden asegurar;
+     * escrita la de A, la de B choca. A tiene su Tema por el relleno; C solo llega al umbral de
+     * «El tiempo» contando a B.
+     */
+    const a = { ...candidata(1, [TEMA_PUBLICADO]), procedencia: { obra: 'Col·loquis', año: 49 } };
+    const b = { ...candidata(2, ['el-tiempo']), procedencia: { obra: 'Col loquis', año: 49 } };
+    const c = candidata(3, ['el-tiempo']);
+    async function corpusDeLaColision(): Promise<Rutas> {
+      const rutas = await corpusDelTiempo([a, b, c], MIN_CITAS_POR_TEMA - 2);
+      await sembrarTemaPublicado(rutas);
+      return rutas;
+    }
+
+    it('la que dependía de la que choca, si va detrás, sigue en revisión intacta', async () => {
+      const rutas = await corpusDeLaColision();
+      const ruta = join(rutas.revision, `${c.slug}.md`);
+      const antes = await readFile(ruta, 'utf8');
+
+      const resultado = await aprobar(rutas, [a.slug, b.slug, c.slug]);
+
+      expect(resultado.publicadas).toEqual([a.slug]);
+      expect(resultado.rechazadasPorFicha.map((r) => r.slug)).toEqual([b.slug]);
+      expect(resultado.rechazadasPorTema.map((r) => r.slug)).toEqual([c.slug]);
+      expect(resultado.rechazadasPorTema[0].temas).toEqual([
+        { slug: 'el-tiempo', nombre: 'El tiempo', citas: MIN_CITAS_POR_TEMA - 1 },
+      ]);
+      expect(resultado.publicadasSinTema).toEqual([]);
+      expect(await readFile(ruta, 'utf8')).toBe(antes);
+    });
+
+    it('si ya se escribió, se dice en publicadasSinTema y la orden sale con 1', async () => {
+      const rutas = await corpusDeLaColision();
+
+      const resultado = await aprobar(rutas, [a.slug, c.slug, b.slug]);
+
+      expect(resultado.publicadas).toEqual([a.slug, c.slug]);
+      expect(resultado.rechazadasPorFicha.map((r) => r.slug)).toEqual([b.slug]);
+      expect(resultado.publicadasSinTema.map((s) => s.slug)).toEqual([c.slug]);
+      expect(resultado.publicadasSinTema[0].temas).toEqual([
+        { slug: 'el-tiempo', nombre: 'El tiempo', citas: MIN_CITAS_POR_TEMA - 1 },
+      ]);
+
+      // La orden lo dice con «!» y sale con 1, sobre otro Corpus igual.
+      const otro = await corpusDeLaColision();
+      const { execFile } = await import('node:child_process');
+      const { promisify } = await import('node:util');
+      const { resolve } = await import('node:path');
+      const raiz = resolve(import.meta.dirname, '../..');
+      let codigo = 0;
+      let salida = '';
+      try {
+        ({ stdout: salida } = await promisify(execFile)(
+          'npx',
+          ['tsx', join(raiz, 'tools/revisar.ts'), '--corpus', otro.raiz, '--aprobar', a.slug, c.slug, b.slug],
+          { cwd: raiz },
+        ));
+      } catch (fallo) {
+        codigo = (fallo as { code?: number }).code ?? 1;
+        salida = (fallo as { stdout?: string }).stdout ?? '';
+      }
+      expect(codigo, salida).toBe(1);
+      expect(salida).toContain(`! ${c.slug} — publicada, pero se quedó sin ningún Tema publicado`);
+    });
   });
 });

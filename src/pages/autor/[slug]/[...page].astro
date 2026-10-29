@@ -21,6 +21,7 @@ import Paginacion from '../../../components/Paginacion.astro';
 import TarjetaDeCita from '../../../components/TarjetaDeCita.astro';
 import AtribucionDeSemblanza from '../../../components/AtribucionDeSemblanza.astro';
 import ListaDeObras from '../../../components/ListaDeObras.astro';
+import Rotulo from '../../../components/Rotulo.astro';
 import {
   autoresPublicados,
   citasDeAutor,
@@ -78,6 +79,20 @@ const semblanza = primera ? semblanzaEn(autor, 'ficha-de-autor') : undefined;
 // Si el índice de Pagefind puede llevarla; si no, va dentro de `data-pagefind-ignore`.
 const enElIndice = primera && semblanzaEn(autor, 'indice-de-busqueda') !== undefined;
 const descripcion = descripcionDeAutor(autor, documentadas);
+
+/*
+ * Historia 17.3, UX-DR46 — al pie de la Lista de Obras, cuántas Citas no declaran obra; con
+ * ninguna, nada. Es de esta página y no del componente, que comparte con `/obras/` (26.4), donde
+ * esta línea no va. «Y …» solo cuando sigue a la lista: sin ninguna Obra, la línea va sola bajo
+ * el rótulo y no puede empezar por «Y».
+ */
+const conLista = suObra.obras.length > 0;
+const pieDeObras =
+  suObra.sinObra === 0
+    ? undefined
+    : suObra.sinObra === 1
+      ? `${conLista ? 'Y una' : 'Una'} cita sin obra documentada.`
+      : `${conLista ? 'Y ' : ''}${suObra.sinObra} citas sin obra documentada.`;
 ---
 
 <Armazon
@@ -123,7 +138,13 @@ const descripcion = descripcionDeAutor(autor, documentadas);
        * Historia 17.3, UX-DR46 — la Lista de Obras, bajo la semblanza y su atribución y antes
        * del catálogo. Es parte de la ficha, así que solo la lleva la página 1 (17.4).
        */
-      primera && <ListaDeObras obras={suObra.obras} sinObra={suObra.sinObra} zona="lista-de-obras" />
+      primera && (conLista || pieDeObras !== undefined) && (
+        <section class="obras-del-autor" aria-labelledby="su-obra" data-pagefind-ignore>
+          <Rotulo id="su-obra">Su obra en este Corpus</Rotulo>
+          <ListaDeObras obras={suObra.obras} zona="lista-de-obras" />
+          {pieDeObras !== undefined && <p class="sin-obra">{pieDeObras}</p>}
+        </section>
+      )
     }
 
     {
@@ -136,9 +157,12 @@ const descripcion = descripcionDeAutor(autor, documentadas);
     }
     <h2 class="rotulo">Citas documentadas</h2>
 
-    {/* UX-DR25 — los listados son listas reales. */}
+    {/*
+      * UX-DR25 — los listados son listas reales. Cada tarjeta lleva el título de su Obra y no el
+      * Autor, que es el mismo en todas y ya dice el `h1` (`atribucion="obra"`, Historia 24.3).
+      */}
     <ul class="listado">
-      {pagina.data.map((cita) => <TarjetaDeCita cita={cita} zona="listado" />)}
+      {pagina.data.map((cita) => <TarjetaDeCita cita={cita} atribucion="obra" zona="listado" />)}
     </ul>
 
     <Paginacion pagina={pagina} zona="paginacion" />
@@ -173,6 +197,23 @@ const descripcion = descripcionDeAutor(autor, documentadas);
     margin: calc(var(--unidad) * 2) 0 0;
     font-size: var(--cuerpo-lg);
     max-width: var(--medida-prosa);
+  }
+
+  .obras-del-autor {
+    margin-top: calc(var(--unidad) * 5);
+    max-width: var(--medida-prosa);
+  }
+
+  /* La lista, a 2 × `--unidad` del rótulo: el espacio de encima es de quien la usa (26.4). */
+  .obras-del-autor > :global(.lista-de-obras) {
+    margin-top: calc(var(--unidad) * 2);
+  }
+
+  .sin-obra {
+    margin: calc(var(--unidad) * 2) 0 0;
+    font-family: var(--sans);
+    font-size: var(--pie);
+    color: var(--tinta-apagada);
   }
 
   .rotulo {

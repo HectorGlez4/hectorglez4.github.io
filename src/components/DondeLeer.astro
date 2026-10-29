@@ -22,9 +22,15 @@
  *
  * Va fuera del índice de Pagefind (`data-pagefind-ignore`): «Licencia CC BY-SA» no puede ser un
  * resultado de búsqueda en cada Obra.
+ *
+ * Historia 24.7 — su rótulo es el destino del salto «Dónde leer esta obra ↓» de la Cabecera:
+ * lleva `destino` (`tabindex="-1"`, UX-DR100), su `id` es `ANCLA_DE_DONDE_LEER`, el mismo valor
+ * que el `href` del salto, y su texto es `ROTULO_DE_DONDE_LEER`, el mismo que dice el salto. La
+ * sección no se mueve: sigue al pie.
  */
 import Rotulo from './Rotulo.astro';
 import EdicionesEnVenta from './EdicionesEnVenta.astro';
+import { ANCLA_DE_DONDE_LEER, ROTULO_DE_DONDE_LEER } from '../lib/obras.ts';
 import type { LineaDondeLeer, ResumenDondeLeer } from '../lib/obras.ts';
 import type { EdicionEnVenta } from '../lib/ediciones.ts';
 
@@ -58,8 +64,8 @@ const sinDocumento =
     : `${citasSinDocumento} de sus ${total} citas no tienen documento cotejado.`;
 ---
 
-<section class="donde-leer" aria-labelledby="donde-leer-esta-obra" data-pagefind-ignore>
-  <Rotulo id="donde-leer-esta-obra">Dónde leer esta obra</Rotulo>
+<section class="donde-leer" aria-labelledby={ANCLA_DE_DONDE_LEER} data-pagefind-ignore>
+  <Rotulo id={ANCLA_DE_DONDE_LEER} destino>{ROTULO_DE_DONDE_LEER}</Rotulo>
   {
     lineas.length === 0 ? (
       <p class="linea tras-el-rotulo">Ninguna de sus citas tiene todavía documento cotejado.</p>

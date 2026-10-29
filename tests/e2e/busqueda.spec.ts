@@ -1,8 +1,9 @@
 import { expect, test, type Page } from '@playwright/test';
-import { ETIQUETAS_DE_RESULTADO } from '../../src/lib/tipoDeResultado.ts';
+import { ETIQUETAS_DE_RESULTADO, OPCIONES_DE_PAGEFIND } from '../../src/lib/tipoDeResultado.ts';
+import { MARCA } from '../../src/lib/marca.ts';
 import { ASENTAMIENTO_DE_BUSQUEDA, EVENTOS } from '../../src/lib/medicion.ts';
 import { tramoDe } from '../../src/lib/vocabulario.ts';
-import { temaBajoUmbral } from './ayuda/corpus.ts';
+import { citaConLosDosBloques, temaBajoUmbral, textoDe } from './ayuda/corpus.ts';
 import { emitidos as emitidosEn, espiarMedicion } from './ayuda/espia.ts';
 
 /** Historias 3.1 y 3.2 — búsqueda y resultado vacío. */
@@ -30,6 +31,58 @@ async function resultados(page: import('@playwright/test').Page) {
     })),
   );
 }
+
+/*
+ * Historia 24.6, NFR-13 — el pie de la Página de Cita va bajo `data-pagefind-ignore="all"`: el
+ * texto de una Cita del pie encuentra su propia página, nunca las que la ofrecen al pie.
+ */
+test.describe('Historia 24.6 — el pie no entra en la búsqueda', () => {
+  /** Minúsculas y sin acentos, como compara el buscador. */
+  const plano = (texto: string) =>
+    texto
+      .normalize('NFD')
+      .replace(/\p{M}/gu, '')
+      .toLowerCase();
+  const palabras = (texto: string) =>
+    plano(texto)
+      .replace(/[«»"“”.,;:¡!¿?()]/g, ' ')
+      .split(/\s+/)
+      .filter(Boolean);
+  /** Si el texto de una Cita trae todas las palabras de la consulta (también como parte de otra). */
+  const traeTodas = (texto: string, consulta: string) => palabras(consulta).every((p) => plano(texto).includes(p));
+
+  test('el fragmento de una tarjeta del pie no devuelve ninguna página que la ofrezca al pie', async ({ page, request }) => {
+    const slug = citaConLosDosBloques();
+    expect(slug, 'El Corpus no tiene ninguna Cita con los dos bloques del pie.').toBeDefined();
+    const ruta = `/cita/${slug}/`;
+    await page.goto(ruta);
+    const hrefs = await page
+      .locator('nav.salidas .de-la-misma-obra li.tarjeta a, nav.salidas .mas-del-autor li.tarjeta a')
+      .evaluateAll((as) => as.map((a) => a.getAttribute('href')!));
+    // Una tarjeta cuyas primeras palabras no estén también en la Cita que se lee: si lo están, la
+    // página que la ofrece saldría por su propio texto, que es lo correcto, y la prueba no diría nada.
+    const elegida = hrefs
+      .map((href) => {
+        const otra = href.split('/')[2];
+        return { href, consulta: palabras(textoDe(otra)).slice(0, 6).join(' ') };
+      })
+      .find(({ consulta }) => !traeTodas(textoDe(slug!), consulta));
+    expect(elegida, `${ruta}: ninguna tarjeta del pie se distingue por sus primeras palabras`).toBeDefined();
+    const { href, consulta } = elegida!;
+    await buscar(page, consulta);
+    const citas = (await resultados(page)).filter((r) => r.tipo === 'cita').map((r) => r.href.replace(/\/?$/, '/'));
+    expect(citas, consulta).toContain(href);
+    expect(citas, consulta).not.toContain(ruta);
+    // Y ninguna otra: toda página de los resultados que ofrece la tarjeta al pie tiene que haber
+    // salido por su propio texto.
+    for (const resultado of citas.filter((c) => c !== href)) {
+      const html = await (await request.get(resultado)).text();
+      const pie = /<nav class="salidas"[\s\S]*?<\/nav>/.exec(html)?.[0] ?? '';
+      if (!pie.includes(`href="${href}"`)) continue;
+      expect(traeTodas(textoDe(resultado.split('/')[2]), consulta), `${resultado} sale por el pie con «${consulta}»`).toBe(true);
+    }
+  });
+});
 
 test.describe('Historia 3.1 — encontrar', () => {
   test('un fragmento de tres o más palabras localiza la Cita', async ({ page }) => {
@@ -93,8 +146,9 @@ test.describe('Historia 3.1 — encontrar', () => {
   });
 
   /*
-   * Historia 22.7 — el resultado de Obra: rótulo «Obra», título en la sans (`.de-obra`), el Autor
-   * debajo y el nombre accesible «Obra: {título}, de {Autor}». Los demás, como estaban.
+   * Historia 22.7 — el resultado de Obra: rótulo «Obra», título en la sans (`.en-sans` desde la
+   * 26.2; antes `.de-obra`), el Autor debajo y el nombre accesible «Obra: {título}, de {Autor}».
+   * Los demás, como estaban.
    */
   test('un resultado de Obra lleva el título en la sans y el Autor debajo', async ({ page }) => {
     await buscar(page, 'proverbios y cantares');
@@ -107,7 +161,7 @@ test.describe('Historia 3.1 — encontrar', () => {
             const titulo = n.querySelector('.titulo')!;
             return {
               etiqueta: n.querySelector('.clase')!.textContent!.trim(),
-              deObra: titulo.classList.contains('de-obra'),
+              deObra: titulo.classList.contains('en-sans'),
               familia: getComputedStyle(titulo).fontFamily,
               titulo: titulo.textContent!.trim(),
               autor: n.querySelector('.r-autor')?.textContent?.trim(),
@@ -127,7 +181,7 @@ test.describe('Historia 3.1 — encontrar', () => {
     // Los de otro tipo, como hoy: sin la clase, sin línea de Autor, sin nombre accesible propio.
     const otros = page.locator('[data-resultados] .resultado:not(:has([data-tipo="obra"]))');
     expect(await otros.count()).toBeGreaterThan(0);
-    expect(await otros.locator('.de-obra, .r-autor').count()).toBe(0);
+    expect(await otros.locator('.en-sans, .r-autor').count()).toBe(0);
     expect(await otros.locator('a[aria-label]').count()).toBe(0);
   });
 
@@ -340,7 +394,7 @@ test.describe('Historia 22.10 — el recuento y la búsqueda sin resultados se a
     await page.route('**/pagefind/pagefind.js', (ruta) =>
       ruta.fulfill({
         contentType: 'text/javascript',
-        body: 'export async function init() {}\nexport async function search() { return { results: [] }; }',
+        body: 'export async function options() {}\nexport async function init() {}\nexport async function search() { return { results: [] }; }',
       }),
     );
     await buscar(page, 'consulta que no está');
@@ -360,6 +414,7 @@ test.describe('Historia 22.10 — el recuento y la búsqueda sin resultados se a
       ruta.fulfill({
         contentType: 'text/javascript',
         body: [
+          'export async function options() {}',
           'export async function init() {}',
           'export async function search(q) {',
           "  if (q === 'nada') return { results: [] };",
@@ -377,5 +432,300 @@ test.describe('Historia 22.10 — el recuento y la búsqueda sin resultados se a
     await expect(estado).toBeVisible();
     await expect(estado).not.toHaveClass(/solo-para-lectores/);
     expect(await estado.evaluate((n) => n.getBoundingClientRect().width)).toBeGreaterThan(1);
+  });
+});
+
+/*
+ * Historia 26.2 (AD-17, AD-19) — el tipo de un resultado no casa como texto, y la portada tiene el
+ * suyo. Hasta la 26.2 el tipo viajaba en `data-pagefind-meta="tipo:…"`, y desde Pagefind 1.5 la
+ * metadata se busca: «cita» daba 4.559 resultados y 215 de los 400 primeros de «obra» no tenían la
+ * palabra. Ahora viaja como filtro, y la portada solo indexa su `h1`.
+ */
+test.describe('Historia 26.2 — el tipo no casa como texto y la portada tiene el suyo', () => {
+  /*
+   * (a) Con el Pagefind real, importado en la página y con las opciones de la búsqueda propia, en
+   * el orden en que las aplica la isla (`init()` al cargar, `options()` antes de cada búsqueda). Un
+   * resultado que casa solo por metadato trae `locations` vacío: ninguno puede salir así.
+   * «coleccion», sin tilde, es el valor literal que llevaba el metadato de antes.
+   */
+  const TERMINOS = ['obra', 'cita', 'autor', 'tema', 'colección', 'coleccion', 'directorio', 'portada', MARCA];
+
+  test('buscar el nombre de un tipo, o el del sitio, no devuelve ninguna página solo por su tipo', async ({ page }) => {
+    test.setTimeout(600_000);
+    await page.goto('/buscar/');
+    const porTermino = await page.evaluate(
+      async ({ terminos, opciones }) => {
+        const pf = await import('/pagefind/pagefind.js' as string);
+        await pf.init();
+        const salida: Record<string, { total: number; sinCoincidencia: string[] }> = {};
+        for (const termino of terminos) {
+          await pf.options(opciones);
+          const { results } = await pf.search(termino);
+          const sinCoincidencia: string[] = [];
+          // Todos sus datos, por tandas: «cita» llegó a dar miles.
+          for (let i = 0; i < results.length; i += 200) {
+            const datos = await Promise.all(results.slice(i, i + 200).map((r: { data: () => Promise<unknown> }) => r.data()));
+            for (const dato of datos as { url: string; locations: number[] }[]) {
+              if (dato.locations.length === 0) sinCoincidencia.push(dato.url);
+            }
+          }
+          salida[termino] = { total: results.length, sinCoincidencia };
+        }
+        return salida;
+      },
+      { terminos: TERMINOS, opciones: OPCIONES_DE_PAGEFIND },
+    );
+    // Todos los términos a la vez: el parte nombra cada uno que falla, no solo el primero.
+    const fallos = TERMINOS.flatMap((termino) => {
+      const { total, sinCoincidencia } = porTermino[termino];
+      return sinCoincidencia.length === 0
+        ? []
+        : [`«${termino}»: ${sinCoincidencia.length} de ${total} sin el término (${sinCoincidencia.slice(0, 3).join(', ')}…)`];
+    });
+    expect(fallos).toEqual([]);
+    // Y no en vacío: un índice roto, o uno que no devuelve nada, pasaría lo de arriba sin mirar.
+    // Estas palabras salen en el contenido de muchas páginas, y la marca en el `h1` de la portada.
+    // «directorio» y «portada» pueden no salir en ningún contenido todavía (los Directorios son de
+    // la 26.3), y por eso no se les exige resultado: su prueba es que ninguno salga por su tipo.
+    const vacios = ['obra', 'cita', 'autor', 'tema', 'colección', MARCA].filter((termino) => porTermino[termino].total === 0);
+    expect(vacios, 'términos sin ningún resultado').toEqual([]);
+  });
+
+  /** Lo que pinta un resultado del tipo dado, con su presentación calculada. */
+  async function pintadosDe(page: Page) {
+    return page.locator('[data-resultados] .resultado').evaluateAll((ns) =>
+      ns.map((n) => {
+        const titulo = n.querySelector('.titulo')!;
+        const estilo = getComputedStyle(titulo);
+        return {
+          tipo: n.querySelector('.clase')!.getAttribute('data-tipo')!,
+          rotulo: n.querySelector('.clase')!.textContent!.trim(),
+          titulo: titulo.textContent!.trim(),
+          enSans: titulo.classList.contains('en-sans'),
+          familia: estilo.fontFamily,
+          peso: estilo.fontWeight,
+          cuerpo: estilo.fontSize,
+          autor: n.querySelector('.r-autor')?.textContent?.trim(),
+          href: n.querySelector('a')!.getAttribute('href')!,
+          nombre: n.querySelector('a')!.getAttribute('aria-label'),
+        };
+      }),
+    );
+  }
+
+  // (b) Con el índice de verdad: la portada responde por su nombre, rotulada «Portada».
+  test('buscar el nombre del sitio da la portada, rotulada «Portada» y con el título en Inter', async ({ page }) => {
+    await buscar(page, MARCA);
+    const portada = (await pintadosDe(page)).find((r) => r.href === '/');
+    expect(portada, `«${MARCA}» no devuelve la portada`).toBeDefined();
+    expect(portada!.tipo).toBe('portada');
+    expect(portada!.rotulo).toBe(ETIQUETAS_DE_RESULTADO.portada);
+    expect(portada!.titulo).toBe(MARCA);
+    expect(portada!.enSans).toBe(true);
+    expect(portada!.familia).toMatch(/Inter/);
+    expect(portada!.familia).not.toMatch(/Georgia|Source Serif/);
+    expect(portada!.peso).toBe('400');
+    expect(portada!.nombre).toBe(`Portada: ${MARCA}`);
+    expect(portada!.autor).toBeUndefined();
+  });
+
+  /**
+   * Todas las direcciones que da el índice real para un término, con las opciones de la búsqueda
+   * propia: no solo las 30 que pinta `/buscar/`, porque una portada en el puesto 31 seguiría
+   * respondiendo por lo que no es suyo, y una página destino por debajo de la 30 no es un fallo.
+   */
+  async function todasLasDirecciones(page: Page, termino: string): Promise<string[]> {
+    return page.evaluate(
+      async ({ termino, opciones }) => {
+        const pf = await import('/pagefind/pagefind.js' as string);
+        await pf.init();
+        await pf.options(opciones);
+        const { results } = await pf.search(termino);
+        const urls: string[] = [];
+        for (let i = 0; i < results.length; i += 200) {
+          const datos = await Promise.all(results.slice(i, i + 200).map((r: { data: () => Promise<unknown> }) => r.data()));
+          for (const dato of datos as { url: string }[]) urls.push(dato.url.replace(/\/?$/, '/'));
+        }
+        return urls;
+      },
+      { termino, opciones: OPCIONES_DE_PAGEFIND },
+    );
+  }
+
+  // (c) Lo que la portada enseña ya tiene su página en el índice: la portada no sale por ello.
+  test('el texto de la Cita del Día y el nombre de un Autor de la portada dan su página, no la portada', async ({ page }) => {
+    test.setTimeout(300_000);
+    await page.goto('/');
+    // El Corpus publicado trae Citas aptas para portada, así que la Cita del Día está: si faltara,
+    // la mitad de esta prueba no miraría nada, y eso se dice en vez de saltarlo.
+    const delDia = page.locator('section.del-dia');
+    await expect(delDia, 'la portada no pinta la Cita del Día').toHaveCount(1);
+    const texto = (await delDia.locator('.texto').first().textContent())!.replace(/[«»]/g, '').trim();
+    // Cinco palabras, o el texto entero si es más corto: se mira la lista entera del índice, así
+    // que un arranque común («No hay nada que…») no deja el destino fuera por su puesto.
+    const fragmento = texto.split(/\s+/).slice(0, 5).join(' ');
+    const destino = (await delDia.getByRole('link', { name: 'Ver esta cita' }).getAttribute('href'))!;
+
+    const autor = page.locator('ul.autores a').first();
+    const nombre = (await autor.textContent())!.trim();
+    const pagina = (await autor.getAttribute('href'))!;
+
+    const deLaCita = await todasLasDirecciones(page, fragmento);
+    expect(deLaCita, fragmento).toContain(destino.replace(/\/?$/, '/'));
+    expect(deLaCita, fragmento).not.toContain('/');
+    const delAutor = await todasLasDirecciones(page, nombre);
+    expect(delAutor, nombre).toContain(pagina.replace(/\/?$/, '/'));
+    expect(delAutor, nombre).not.toContain('/');
+  });
+
+  // (d) Con un Pagefind de mentira: cómo se pintan los tipos nuevos frente a una Cita.
+  test('un resultado de Directorio o de Portada lleva su rótulo, el título en Inter 400 con el cuerpo de una Cita y su nombre accesible', async ({ page }) => {
+    await page.route('**/pagefind/pagefind.js', (ruta) =>
+      ruta.fulfill({
+        contentType: 'text/javascript',
+        body: [
+          'export async function options() {}',
+          'export async function init() {}',
+          'const D = [',
+          "  { url: '/cita/una/', meta: { title: 'Una cita' }, filters: { tipo: ['cita'] } },",
+          "  { url: '/autores/', meta: { title: 'Autores' }, filters: { tipo: ['directorio'] } },",
+          `  { url: '/', meta: { title: ${JSON.stringify(MARCA)} }, filters: { tipo: ['portada'] } },`,
+          "  { url: '/rara/', meta: { title: 'Rara' }, filters: { tipo: ['desconocido'] } },",
+          '];',
+          'export async function search() { return { results: D.map((d) => ({ data: async () => d })) }; }',
+        ].join('\n'),
+      }),
+    );
+    await buscar(page, 'algo');
+    const [cita, directorio, portada, rara] = await pintadosDe(page);
+
+    expect(directorio.rotulo).toBe(ETIQUETAS_DE_RESULTADO.directorio);
+    expect(directorio.nombre).toBe('Directorio: Autores');
+    expect(portada.rotulo).toBe(ETIQUETAS_DE_RESULTADO.portada);
+    expect(portada.nombre).toBe(`Portada: ${MARCA}`);
+    for (const r of [directorio, portada]) {
+      expect(r.enSans, r.href).toBe(true);
+      expect(r.familia, r.href).toMatch(/Inter/);
+      expect(r.peso, r.href).toBe('400');
+      expect(r.cuerpo, r.href).toBe(cita.cuerpo);
+      expect(r.autor, r.href).toBeUndefined();
+    }
+
+    expect(cita.rotulo).toBe(ETIQUETAS_DE_RESULTADO.cita);
+    expect(cita.enSans).toBe(false);
+    expect(cita.familia).not.toMatch(/^Inter/);
+    expect(cita.nombre).toBeNull();
+    expect(rara.tipo).toBe('desconocido');
+    expect(rara.rotulo).toBe(ETIQUETAS_DE_RESULTADO.cita);
+    expect(rara.enSans).toBe(false);
+    expect(rara.nombre).toBeNull();
+  });
+});
+
+/*
+ * Historia 26.3, NFR-13 — el Directorio de Autores responde por su título, y el listado entero va
+ * fuera del índice: el nombre de un Autor da su página, nunca el Directorio.
+ */
+test.describe('Historia 26.3 — el Directorio de Autores en la búsqueda', () => {
+  /** Todas las direcciones del índice real para un término, con las opciones de la búsqueda propia. */
+  async function direcciones(page: Page, termino: string): Promise<string[]> {
+    return page.evaluate(
+      async ({ termino, opciones }) => {
+        const pf = await import('/pagefind/pagefind.js' as string);
+        await pf.init();
+        await pf.options(opciones);
+        const { results } = await pf.search(termino);
+        const urls: string[] = [];
+        for (let i = 0; i < results.length; i += 200) {
+          const datos = await Promise.all(results.slice(i, i + 200).map((r: { data: () => Promise<unknown> }) => r.data()));
+          for (const dato of datos as { url: string }[]) urls.push(dato.url.replace(/\/?$/, '/'));
+        }
+        return urls;
+      },
+      { termino, opciones: OPCIONES_DE_PAGEFIND },
+    );
+  }
+
+  test('buscar «autores» devuelve `/autores/`, rotulado «Directorio»', async ({ page }) => {
+    await buscar(page, 'autores');
+    const directorio = (await resultados(page)).find((r) => r.href.replace(/\/?$/, '/') === '/autores/');
+    expect(directorio, '«autores» no devuelve el Directorio entre los resultados pintados').toBeDefined();
+    expect(directorio!.tipo).toBe('directorio');
+    expect(directorio!.etiqueta).toBe(ETIQUETAS_DE_RESULTADO.directorio);
+    expect(directorio!.titulo).toBe('Autores');
+  });
+
+  test('el nombre de un Autor leído de `/autores/` da su Página de Autor, y no el Directorio', async ({ page }) => {
+    test.setTimeout(120_000);
+    await page.goto('/autores/');
+    const fila = page.locator('main li.fila-de-bloque[data-zona="directorio"] a').first();
+    const nombre = (await fila.locator('.nombre').textContent())!.trim();
+    const pagina = (await fila.getAttribute('href'))!;
+    expect(nombre).not.toBe('');
+
+    await page.goto('/buscar/');
+    const urls = await direcciones(page, nombre);
+    expect(urls, nombre).toContain(pagina.replace(/\/?$/, '/'));
+    expect(urls, nombre).not.toContain('/autores/');
+  });
+});
+
+
+/*
+ * Historia 26.4, NFR-13 — el Directorio de Obras responde por su título, como el de Autores, y su
+ * listado va fuera del índice: el título de una Obra da su Página de Obra, nunca `/obras/`.
+ */
+test.describe('Historia 26.4 — el Directorio de Obras en la búsqueda', () => {
+  /** Todas las direcciones del índice real para un término, con las opciones de la búsqueda propia. */
+  async function direcciones(page: Page, termino: string): Promise<string[]> {
+    return page.evaluate(
+      async ({ termino, opciones }) => {
+        const pf = await import('/pagefind/pagefind.js' as string);
+        await pf.init();
+        await pf.options(opciones);
+        const { results } = await pf.search(termino);
+        const urls: string[] = [];
+        for (let i = 0; i < results.length; i += 200) {
+          const datos = await Promise.all(results.slice(i, i + 200).map((r: { data: () => Promise<unknown> }) => r.data()));
+          for (const dato of datos as { url: string }[]) urls.push(dato.url.replace(/\/?$/, '/'));
+        }
+        return urls;
+      },
+      { termino, opciones: OPCIONES_DE_PAGEFIND },
+    );
+  }
+
+  test('buscar «obras» devuelve `/obras/`, rotulado «Directorio»', async ({ page }) => {
+    await buscar(page, 'obras');
+    const directorio = (await resultados(page)).find((r) => r.href.replace(/\/?$/, '/') === '/obras/');
+    expect(directorio, '«obras» no devuelve el Directorio entre los resultados pintados').toBeDefined();
+    expect(directorio!.tipo).toBe('directorio');
+    expect(directorio!.etiqueta).toBe(ETIQUETAS_DE_RESULTADO.directorio);
+    expect(directorio!.titulo).toBe('Obras');
+  });
+
+  test('el título de una Obra indexable leído de `/obras/` da su Página de Obra, y no el Directorio', async ({ page, request }) => {
+    test.setTimeout(120_000);
+    await page.goto('/obras/');
+    const filas = page.locator('main ul.lista-de-obras[data-zona="directorio"] a');
+    const total = await filas.count();
+    expect(total).toBeGreaterThan(0);
+
+    // La primera fila cuya Página de Obra se indexa, leída de lo servido: ninguna lista fija.
+    let elegida: { titulo: string; href: string } | undefined;
+    for (let i = 0; i < total && elegida === undefined; i += 1) {
+      const fila = filas.nth(i);
+      const href = (await fila.getAttribute('href'))!;
+      const html = await (await request.get(href)).text();
+      if (/<meta name="robots" content="noindex/.test(html)) continue;
+      elegida = { titulo: (await fila.locator('.titulo').evaluate((e) => e.firstChild?.textContent ?? '')).trim(), href };
+    }
+    expect(elegida, 'ninguna Obra de `/obras/` se indexa').toBeDefined();
+    expect(elegida!.titulo).not.toBe('');
+
+    await page.goto('/buscar/');
+    const urls = await direcciones(page, elegida!.titulo);
+    expect(urls, elegida!.titulo).toContain(elegida!.href.replace(/\/?$/, '/'));
+    expect(urls, elegida!.titulo).not.toContain('/obras/');
   });
 });

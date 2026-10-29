@@ -4,6 +4,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { darDeAltaLote, type EntradaDeLote } from '../../tools/alta.ts';
 import { rutasDelCorpus, type Rutas } from '../../tools/lib/corpus.ts';
+import { NOMBRE_DEL_TEMA_PUBLICADO, ficherosPublicados, sembrarTemaPublicado } from './ayuda/relleno.ts';
 
 const temporales: string[] = [];
 afterEach(async () => {
@@ -19,15 +20,18 @@ async function corpusDePrueba(): Promise<Rutas> {
   }
   await writeFile(
     join(rutas.autores, 'seneca.yml'),
-    'nombre: "Séneca"\nañoFallecimiento: 65\nsemblanza: "Filósofo estoico."\n',
+    'nombre: "Séneca"\nañoFallecimiento: 65\nsemblanza: "Filósofo estoico."\nordenAlfabetico: "Séneca"\n',
     'utf8',
   );
+  // Historia 26.8 — un Tema con página: sin él, el alta no publica nada (NFR-5).
+  await sembrarTemaPublicado(rutas);
   return rutas;
 }
 
 const ORIGINAL: EntradaDeLote = {
   texto: 'La vida, si sabes usarla, es larga.',
   autor: 'Séneca',
+  temas: [NOMBRE_DEL_TEMA_PUBLICADO],
   procedencia: { obra: 'Sobre la brevedad de la vida', año: 49 },
   // Historia 11.2 — sin Fuente el alta manda la Cita a revisión, y estas pruebas miden
   // la detección de duplicados sobre Citas que sí llegan a publicarse.
@@ -48,7 +52,7 @@ describe('Historia 1.6 — detección de duplicados', () => {
     const rutas = await corpusDePrueba();
     await darDeAltaLote([ORIGINAL], rutas);
 
-    const antes = await readdir(rutas.citas);
+    const antes = await ficherosPublicados(rutas);
     const informe = await darDeAltaLote([VARIANTE], rutas);
 
     expect(informe.posiblesDuplicados).toHaveLength(1);
@@ -56,7 +60,7 @@ describe('Historia 1.6 — detección de duplicados', () => {
     expect(informe.posiblesDuplicados[0].donde).toBe('publicadas');
     expect(informe.publicadas).toHaveLength(0);
     // «antes de escribirla»: el corpus no ha cambiado, ni en citas/ ni en _revision/.
-    expect(await readdir(rutas.citas)).toEqual(antes);
+    expect(await ficherosPublicados(rutas)).toEqual(antes);
     expect(await readdir(rutas.revision)).toHaveLength(0);
   });
 
@@ -95,7 +99,7 @@ describe('Historia 1.6 — detección de duplicados', () => {
 
     expect(informe.posiblesDuplicados).toHaveLength(0);
     expect(informe.publicadas).toHaveLength(1);
-    expect(await readdir(rutas.citas)).toHaveLength(2);
+    expect(await ficherosPublicados(rutas)).toHaveLength(2);
   });
 
   it('el sistema no descarta nada por su cuenta', async () => {
@@ -107,7 +111,7 @@ describe('Historia 1.6 — detección de duplicados', () => {
     // perdido, solo no se ha escrito. La decisión es del editor.
     expect(informe.posiblesDuplicados[0].texto).toBe(VARIANTE.texto);
     // Y la que ya estaba no se ha tocado.
-    expect(await readdir(rutas.citas)).toHaveLength(1);
+    expect(await ficherosPublicados(rutas)).toHaveLength(1);
   });
 
   it('también detecta una repetición dentro del propio lote', async () => {
@@ -190,7 +194,7 @@ describe('Historia 15.2 — una Cita contenida en otra también se señala', () 
     await darDeAltaLote([LARGA], rutas);
     await darDeAltaLote([CORTA], rutas);
 
-    const ficheros = await readdir(rutas.citas);
+    const ficheros = await ficherosPublicados(rutas);
     expect(ficheros.filter((f) => /-\d+\.md$/.test(f))).toHaveLength(0);
   });
 

@@ -2,6 +2,7 @@ import { expect, test } from '@playwright/test';
 import { readdirSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import { rutaNormalizada, superficiesDelBarrido } from '../../src/lib/superficies.ts';
+import { comprobarNombresDeTarjetas } from './ayuda/tarjetas.ts';
 
 /**
  * Historia 12.3 — la Página de Colección, mirada en el navegador.
@@ -247,5 +248,27 @@ test.describe('Historia 12.3 — la Página de Colección', () => {
     const primeraCita = await page.locator('.listado li a').first().getAttribute('href');
     await page.goto(primeraCita!);
     await expect(page.locator('a[href^="/coleccion/"]')).toHaveCount(0);
+  });
+});
+
+/**
+ * Historia 24.3 — la Tarjeta de Cita de la Colección lleva el Autor y el título de la Obra, como
+ * el Tema, y su nombre es su texto visible, en su orden (`ayuda/tarjetas.ts`).
+ */
+test.describe('Historia 24.3 — la Tarjeta de Cita de la Colección', () => {
+  test('cada Tarjeta se nombra con su fragmento, su Autor y, si la tiene, su Obra, y nada más', async ({ page }) => {
+    test.skip(PRIMERA === undefined, SIN_COLECCIONES);
+    // Todas las Colecciones publicadas, primera página: en la que se mire, alguna Tarjeta con Obra.
+    let conObra = 0;
+    for (const ruta of COLECCIONES) {
+      await page.goto(ruta);
+      const vistas = await comprobarNombresDeTarjetas(page, [
+        ['fragmento', 'autor'],
+        ['fragmento', 'autor', 'obra'],
+      ]);
+      expect(vistas.total, ruta).toBeGreaterThan(0);
+      conObra += vistas.conObra;
+    }
+    expect(conObra, 'ninguna Tarjeta de ninguna Colección lleva línea de Obra').toBeGreaterThan(0);
   });
 });

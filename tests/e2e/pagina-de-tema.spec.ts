@@ -1,5 +1,6 @@
 import { expect, test } from '@playwright/test';
-import { temaBajoUmbral } from './ayuda/corpus.ts';
+import { paginasDeTema, temaBajoUmbral } from './ayuda/corpus.ts';
+import { comprobarNombresDeTarjetas } from './ayuda/tarjetas.ts';
 
 /**
  * Historia 2.5 — Página de Tema con umbral de publicación.
@@ -60,6 +61,70 @@ test.describe('Historia 2.5 — un Tema por encima del umbral', () => {
     for (const href of hrefs) {
       expect((await request.get(href, { maxRedirects: 0 })).status(), href).toBe(200);
     }
+  });
+});
+
+/**
+ * Historia 24.3 — la Tarjeta de Cita del Tema: fragmento, Autor y Obra.
+ *
+ * El nombre de cada Tarjeta, en todas las páginas del Tema (`ayuda/tarjetas.ts` dice qué se fija
+ * y por qué el navegador pone un espacio delante de cada coma), y, a 320 px, lo que la prueba
+ * unitaria no puede ver: el hueco de `--unidad` bajo el fragmento y bajo el Autor, y que la
+ * combinación más larga —Autor en versalitas más Obra— no desborda.
+ */
+test.describe('Historia 24.3 — la Tarjeta de Cita del Tema', () => {
+  test('cada Tarjeta, en cada página, se nombra con su fragmento, su Autor y su Obra, en ese orden y nada más', async ({
+    page,
+  }) => {
+    const paginas = paginasDeTema('la-vida');
+    let conObra = 0;
+    for (let n = 1; n <= paginas; n += 1) {
+      const ruta = n === 1 ? `${PUBLICADO}/` : `${PUBLICADO}/${n}/`;
+      const respuesta = await page.goto(ruta);
+      expect(respuesta?.status(), ruta).toBe(200);
+      const vistas = await comprobarNombresDeTarjetas(page, [
+        ['fragmento', 'autor'],
+        ['fragmento', 'autor', 'obra'],
+      ]);
+      expect(vistas.total, ruta).toBeGreaterThan(0);
+      conObra += vistas.conObra;
+    }
+    expect(conObra, 'ninguna Tarjeta del Tema lleva línea de Obra').toBeGreaterThan(0);
+  });
+
+  test('a 320 px, `--unidad` bajo el fragmento y bajo el Autor, y nada desborda', async ({ page }) => {
+    await page.setViewportSize({ width: 320, height: 640 });
+    await page.goto(PUBLICADO);
+    await page.evaluate(async () => {
+      await document.fonts.ready;
+    });
+    await page.mouse.move(0, 0);
+    const medida = await page.evaluate(() => {
+      const raiz = document.documentElement;
+      const unidad = parseFloat(getComputedStyle(raiz).getPropertyValue('--unidad'));
+      const huecos = [...document.querySelectorAll('.listado li a')].flatMap((a) => {
+        const fragmento = a.querySelector(':scope > .fragmento');
+        const autor = a.querySelector(':scope > .autor');
+        const obra = a.querySelector(':scope > .obra');
+        if (fragmento === null || autor === null || obra === null) return [];
+        const caja = (e: Element) => e.getBoundingClientRect();
+        return [
+          {
+            bajoElFragmento: caja(autor).top - caja(fragmento).bottom,
+            bajoElAutor: caja(obra).top - caja(autor).bottom,
+            derecha: Math.max(caja(autor).right, caja(obra).right),
+          },
+        ];
+      });
+      return { unidad, huecos, ancho: raiz.clientWidth, desborde: raiz.scrollWidth - raiz.clientWidth };
+    });
+    expect(medida.huecos.length, 'ninguna Tarjeta con Autor y Obra en el Tema').toBeGreaterThan(0);
+    for (const [i, hueco] of medida.huecos.entries()) {
+      expect(hueco.bajoElFragmento, `tarjeta ${i}`).toBeCloseTo(medida.unidad, 0);
+      expect(hueco.bajoElAutor, `tarjeta ${i}`).toBeCloseTo(medida.unidad, 0);
+      expect(hueco.derecha, `tarjeta ${i}`).toBeLessThanOrEqual(medida.ancho);
+    }
+    expect(medida.desborde).toBe(0);
   });
 });
 

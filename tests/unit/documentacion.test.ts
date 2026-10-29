@@ -15,6 +15,13 @@ import { censoSinLaCita } from '../../tools/lib/cotejo.ts';
 import { leerCensoDeCotejo, rutasDelCorpus, separarFrontmatter } from '../../tools/lib/corpus.ts';
 import { componerDocumento } from '../../tools/lib/documento.ts';
 import { TEMA_VALIDO, citaValida } from './ayuda/construir.js';
+import {
+  DE_EPICTETO,
+  EN_LA_COLECCION,
+  EN_LA_IRA,
+  instantaneaDe,
+  sembrarCorpusAlLimite,
+} from './ayuda/al-limite.ts';
 
 /**
  * Historia 11.6 — documentar y retirar una Cita ya publicada, sin construir.
@@ -146,6 +153,7 @@ const FICHA_DE_TERESA = [
   `nombre: ${AUTOR_DECLARADO}`,
   'añoFallecimiento: 1582',
   'semblanza: Monja y escritora castellana, fundadora de las Descalzas.',
+  'ordenAlfabetico: Jesús',
   '',
 ].join('\n');
 
@@ -793,6 +801,7 @@ citas:
         'nombre: Juan Montalvo',
         'añoFallecimiento: 1889',
         'semblanza: Ensayista ecuatoriano, desterrado por escribir contra los tiranos.',
+        'ordenAlfabetico: Montalvo',
         '',
       ].join('\n'),
       'temas/el-tiempo.yml': TEMA_VALIDO,
@@ -860,7 +869,7 @@ describe('Historia 19.1 — restituir la traducción', () => {
   const ODAS_SLUG = 'horacio-feliz-quien-lejos-de-negocios-vive';
   const ODAS_FICHERO = 'citas/horacio--feliz-quien-lejos-de-negocios-vive.md';
   const ODAS_DOCUMENTO = 'fuentes/wikisource-es--odas--odas-horacio-salinas-tr-i.txt';
-  const FICHA_DE_HORACIO = 'nombre: Horacio\nañoFallecimiento: -8\nsemblanza: Poeta lírico latino.\ntradicion: otra\n';
+  const FICHA_DE_HORACIO = 'nombre: Horacio\nañoFallecimiento: -8\nsemblanza: Poeta lírico latino.\ntradicion: otra\nordenAlfabetico: Horacio\n';
 
   function documentoDeOdas(declaracion: string[]): string {
     return componerDocumento(
@@ -1145,5 +1154,43 @@ describe('Historia 22.2 — el título de la ficha se pone al día en el mismo g
 
     expect((await retirarCita(rutas, SLUG, 'No aparece en la edición.')).ok).toBe(true);
     expect(await readFile(join(rutas.raiz, 'obras/teresa-de-jesus--poesias.yml'), 'utf8')).toBe(ficha);
+  });
+});
+
+/** Historia 26.8 — un Corpus al límite en un directorio temporal propio (`ayuda/al-limite.ts`). */
+const alLimite: string[] = [];
+afterEach(async () => {
+  await Promise.all(alLimite.splice(0).map((d) => rm(d, { recursive: true, force: true })));
+});
+async function corpusAlLimite() {
+  const raiz = await mkdtemp(join(tmpdir(), 'sabiduria-al-limite-'));
+  alLimite.push(raiz);
+  const rutas = rutasDelCorpus(join(raiz, 'corpus'));
+  await sembrarCorpusAlLimite(rutas);
+  return rutas;
+}
+
+describe('Historia 26.8 — retirar una Cita no deja a otra fuera de alcance', () => {
+  it('se niega, sin mover nada, si otra Cita queda a más de tres saltos, y nombra cada una con su Tema', async () => {
+    const rutas = await corpusAlLimite();
+    const antes = await instantaneaDe(rutas.raiz);
+
+    const resultado = await retirarCita(rutas, DE_EPICTETO[1]!, 'No aparece en la edición.');
+
+    expect(resultado.ok).toBe(false);
+    if (resultado.ok) return;
+    const parte = resultado.motivos.join('\n');
+    expect(parte).toMatch(/La orden dejaría 2 Citas a más de 3 saltos de la portada \(NFR-5\)/);
+    expect(parte).toContain(`/cita/${EN_LA_IRA}/ — su Tema «La ira» (la-ira) tiene 14 Citas`);
+    expect(parte).toContain(`/cita/${EN_LA_COLECCION}/ — no declara ningún Tema`);
+    expect(parte).toMatch(/No se ha escrito ni movido nada/);
+    expect(await instantaneaDe(rutas.raiz)).toEqual(antes);
+  });
+
+  it('retirar una Cita cuya salida no deja a nadie fuera funciona como siempre', async () => {
+    const rutas = await corpusAlLimite();
+    const resultado = await retirarCita(rutas, 'seneca-a-001', 'No aparece en la edición.');
+    expect(resultado.ok, resultado.ok ? '' : resultado.motivos.join('\n')).toBe(true);
+    expect(existsSync(join(rutas.revision, 'seneca--a-001.md'))).toBe(true);
   });
 });

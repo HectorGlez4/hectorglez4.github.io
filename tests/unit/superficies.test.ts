@@ -6,7 +6,9 @@ import {
   CRITERIOS_QUE_AÑADE_WCAG_22,
   ETIQUETAS_DEL_BARRIDO,
   ETIQUETAS_QUE_AXE_NO_CORRE,
+  FAMILIAS,
   LINEA_BASE_DE_LOS_DIRECTORIOS,
+  PAGINAS_DE_DIRECTORIO,
   SUPERFICIES,
   axeLaCorre,
   anunciableEnElSitemap,
@@ -15,9 +17,15 @@ import {
   consecuenciasDelCaracter,
   declararRutasIndexables,
   elBarridoLaCorre,
+  esRutaDeDirectorio,
+  esRutaDeObra,
   esServicioPorForma,
   etiquetaDeAxe,
   olvidarRutasIndexables,
+  rutaDeLaBusqueda,
+  rutaDeLaPortada,
+  rutaDelDirectorioDeAutores,
+  rutaDelDirectorioDeObras,
   rutaNormalizada,
   superficieDeLineaBase,
   superficieDeclaradaDe,
@@ -1125,15 +1133,112 @@ describe('Historia 23.10 — la superficie de línea base', () => {
   });
 
   it('una línea base declarada junta al menos dos superficies, y no se llama como otra superficie ni como la de las búsquedas', () => {
-    // Hoy no la declara ninguna; los Directorios la declaran con la 26 (26.3 y 26.4).
+    // La declaran `/autores/` (26.3) y `/obras/` (26.4): ya sin exención.
     const nombres = new Set(SUPERFICIES.map((s) => s.nombre));
     for (const superficie of SUPERFICIES) {
       // La unidad de las búsquedas no es una superficie: unas lecturas que se llamaran así se medirían
       // con las búsquedas asentadas.
       expect(superficieDeLineaBase(superficie), superficie.nombre).not.toBe(UNIDAD_DE_LAS_BUSQUEDAS);
       if (superficie.lineaBase === undefined) continue;
-      expect(SUPERFICIES.filter((s) => s.lineaBase === superficie.lineaBase).length, superficie.nombre).toBeGreaterThan(1);
       expect(nombres.has(superficie.lineaBase), superficie.nombre).toBe(false);
+      expect(SUPERFICIES.filter((s) => s.lineaBase === superficie.lineaBase).length, superficie.nombre).toBeGreaterThan(1);
     }
+  });
+
+  it('los dos Directorios declaran «los Directorios» (26.3, 26.4), y nadie más', () => {
+    expect(superficieDeclaradaDe('/autores/')?.lineaBase).toBe(LINEA_BASE_DE_LOS_DIRECTORIOS);
+    expect(superficieDeclaradaDe('/obras/')?.lineaBase).toBe(LINEA_BASE_DE_LOS_DIRECTORIOS);
+    expect(
+      SUPERFICIES.filter((s) => s.lineaBase === LINEA_BASE_DE_LOS_DIRECTORIOS).map((s) => s.pagina),
+    ).toEqual(['autores.astro', 'obras.astro']);
+  });
+});
+
+describe('Historia 26.3 — el Directorio de Autores', () => {
+  it('es producto, emite la vista de superficie y no tiene páginas 2+', () => {
+    expect(caracterDe(rutaDelDirectorioDeAutores())).toBe('producto');
+    expect(consecuenciasDe(rutaDelDirectorioDeAutores()).vistas).toEqual([EVENTOS.vistaDeSuperficie]);
+    expect(superficieDeclaradaDe('/autores/2/')).toBeUndefined();
+  });
+
+  it('`esRutaDeDirectorio` lo dice por la declaración, nunca por el prefijo', () => {
+    expect(esRutaDeDirectorio('/autores/')).toBe(true);
+    expect(esRutaDeDirectorio('/autores')).toBe(true);
+    expect(esRutaDeDirectorio('https://ejemplo.org/autores/')).toBe(true);
+    expect(esRutaDeDirectorio('/autor/seneca/')).toBe(false);
+    expect(esRutaDeDirectorio('/obras/')).toBe(true);
+    expect(esRutaDeDirectorio('/obra/seneca/de-la-ira/')).toBe(false);
+    expect(esRutaDeDirectorio('/autores/2/')).toBe(false);
+    expect(esRutaDeDirectorio('/obras/2/')).toBe(false);
+    expect(PAGINAS_DE_DIRECTORIO).toEqual(['autores.astro', 'obras.astro']);
+  });
+});
+
+describe('Historia 26.7 — las familias tienen un solo dueño', () => {
+  const RAIZ = join(import.meta.dirname, '..', '..');
+
+  it('son seis, en este orden, con una sola para los dos Directorios', () => {
+    expect(FAMILIAS).toEqual(['cita', 'autor', 'tema', 'coleccion', 'obra', 'directorio']);
+  });
+
+  it('ningún otro fichero de src/, tools/, integraciones/ ni medicion/ declara la lista ni la unión', () => {
+    /*
+     * Una lista literal de familias o una unión escrita a mano fuera de aquí es la segunda
+     * declaración que la 26.7 vino a quitar: `tools/lib/indexacion.ts` declaraba cuatro (más
+     * `obra`) y `tools/lib/avisar.ts` seis. Los subconjuntos se derivan de `FAMILIAS`.
+     */
+    const declaraciones = [
+      /'cita',\s*'autor',\s*'tema'/,
+      /'cita'\s*\|\s*'autor'\s*\|\s*'tema'/,
+      /\btype\s+Familia\s*=/,
+    ];
+    const ficheros: string[] = [];
+    const recorrer = (dir: string) => {
+      for (const entrada of readdirSync(dir)) {
+        if (entrada === 'node_modules' || entrada.startsWith('.')) continue;
+        const completa = join(dir, entrada);
+        if (statSync(completa).isDirectory()) recorrer(completa);
+        else if (/\.(?:[cm]?[jt]s|astro)$/.test(entrada)) ficheros.push(relative(RAIZ, completa));
+      }
+    };
+    for (const dir of ['src', 'tools', 'integraciones', 'medicion']) recorrer(join(RAIZ, dir));
+    const declaran = ficheros.filter((fichero) => {
+      const texto = readFileSync(join(RAIZ, fichero), 'utf8');
+      return declaraciones.some((patron) => patron.test(texto));
+    });
+    expect(declaran).toEqual([join('src', 'lib', 'superficies.ts')]);
+  });
+});
+
+describe('Historia 26.4 — el Directorio de Obras', () => {
+  it('es producto, emite la vista de superficie y no tiene páginas 2+', () => {
+    expect(rutaDelDirectorioDeObras()).toBe('/obras/');
+    expect(superficieDeclaradaDe(rutaDelDirectorioDeObras())?.pagina).toBe('obras.astro');
+    expect(caracterDe(rutaDelDirectorioDeObras())).toBe('producto');
+    expect(consecuenciasDe(rutaDelDirectorioDeObras()).vistas).toEqual([EVENTOS.vistaDeSuperficie]);
+    expect(superficieDeclaradaDe('/obras/2/')).toBeUndefined();
+  });
+
+  it('tiene las mismas consecuencias que el Directorio de Autores', () => {
+    expect(consecuenciasDe(rutaDelDirectorioDeObras())).toEqual(consecuenciasDe(rutaDelDirectorioDeAutores()));
+  });
+
+  it('no es una Página de Obra: ninguna regla de Obra la alcanza', () => {
+    expect(esRutaDeObra('/obras/')).toBe(false);
+    expect(esRutaDeObra('/obras')).toBe(false);
+    expect(superficieDeclaradaDe('/obras/')?.indexablePorContenido).toBeUndefined();
+    expect(superficieDeclaradaDe('/obras/')?.noPublicableEn).toBeUndefined();
+  });
+});
+
+describe('Historia 26.5 — las rutas de la cabecera salen de sus constructores', () => {
+  it('la portada es «/» y la declara index.astro', () => {
+    expect(rutaDeLaPortada()).toBe('/');
+    expect(superficieDeclaradaDe(rutaDeLaPortada())?.pagina).toBe('index.astro');
+  });
+
+  it('la búsqueda es «/buscar/» y la declara buscar.astro', () => {
+    expect(rutaDeLaBusqueda()).toBe('/buscar/');
+    expect(superficieDeclaradaDe(rutaDeLaBusqueda())?.pagina).toBe('buscar.astro');
   });
 });

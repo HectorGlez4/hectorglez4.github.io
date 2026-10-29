@@ -49,20 +49,40 @@ const INVISIBLES = /[\u00ad\u200b\u200c\u200d\u2060\ufeff]/gu;
  * `\s` cubre también el espacio duro y los espacios finos, que es lo que produce una
  * página web y lo que `aTextoPlano` ya traduce a espacio normal al versionar.
  */
-export function colapsarEspacios(texto: string): string {
-  return texto.replace(INVISIBLES, '').replace(/\s+/gu, ' ').trim();
+export function colapsarEspacios(texto: string): Colapsado {
+  return texto.replace(INVISIBLES, '').replace(/\s+/gu, ' ').trim() as Colapsado;
 }
 
 /**
- * Si el texto de una Cita aparece **literalmente** en el cuerpo de su documento.
- *
- * Un texto que se queda en nada al colapsar espacios no aparece en ninguna parte: sin
- * este guardián, `''.includes('')` daría por cotejada una Cita vacía.
+ * Una cadena que ya pasó por `colapsarEspacios`, y que solo esa función produce — Historia
+ * 24.1. Es una cadena a todos los efectos; la marca solo existe para el compilador, que así
+ * impide pasarle a `localizar` un texto o un cuerpo sin colapsar: las posiciones dejarían de
+ * casar con el cotejo sin que nada fallara.
  */
+export type Colapsado = string & { readonly __forma: 'colapsada' };
+
+/**
+ * Dónde aparece un texto en un cuerpo: el **único** localizador del proyecto — AD-23,
+ * Historia 24.1.
+ *
+ * Recibe las dos formas **ya colapsadas** —el tipo `Colapsado` lo exige: solo las produce
+ * `colapsarEspacios`— y devuelve la posición de la primera aparición en el cuerpo colapsado, o
+ * `-1`. Es la comparación del cotejo y la que sitúa cada Cita en su documento para el orden del
+ * libro (`tools/lib/posiciones.ts`): si fueran dos, una Cita podría estar cotejada y no tener
+ * sitio en su libro, o al revés. Recibe formas colapsadas para que quien recorre muchas Citas
+ * del mismo documento colapse su cuerpo una sola vez.
+ *
+ * Un texto que se queda en nada al colapsar espacios no aparece en ninguna parte: sin este
+ * guardián, `''.indexOf('')` daría por cotejada una Cita vacía, en la posición 0.
+ */
+export function localizar(buscado: Colapsado, cuerpo: Colapsado): number {
+  if (buscado === '') return -1;
+  return cuerpo.indexOf(buscado);
+}
+
+/** Si el texto de una Cita aparece **literalmente** en el cuerpo de su documento. */
 export function apareceEnDocumento(texto: string, cuerpo: string): boolean {
-  const buscado = colapsarEspacios(texto);
-  if (buscado === '') return false;
-  return colapsarEspacios(cuerpo).includes(buscado);
+  return localizar(colapsarEspacios(texto), colapsarEspacios(cuerpo)) !== -1;
 }
 
 /**

@@ -2,8 +2,9 @@ import { expect, test, type Page } from '@playwright/test';
 import { superficiesInalcanzables } from '../../src/lib/publicado.ts';
 import { MAX_SALTOS_DESDE_LA_PORTADA } from '../../src/lib/umbrales.ts';
 import { procedenciaDe, temaBajoUmbral } from './ayuda/corpus.ts';
-import { rutaDeTema } from '../../src/lib/superficies.ts';
+import { rutaDeTema, rutaDelDirectorioDeAutores, rutaDelDirectorioDeObras } from '../../src/lib/superficies.ts';
 import { apuntarGuiones, fueraDeLaListaAlCargar } from './ayuda/guiones.ts';
+import { pedir, porTandas } from './ayuda/tandas.ts';
 
 /** Historia 2.7 — fundamentos de SEO. */
 
@@ -22,10 +23,14 @@ test.describe('Historia 2.7 — sitemap', () => {
     expect(rutas).toContain('/tema/la-vida/');
   });
 
-  test('todo lo que anuncia existe de verdad', async ({ request }) => {
-    for (const ruta of await rutasDelSitemap(request)) {
-      expect((await request.get(ruta, { maxRedirects: 0 })).status(), ruta).toBe(200);
-    }
+  test('todo lo que anuncia existe de verdad', async ({ request, baseURL }) => {
+    const sinServir: string[] = [];
+    await porTandas(await rutasDelSitemap(request), async (ruta) => {
+      const respuesta = await pedir(baseURL, ruta, { seguir: false });
+      await respuesta.arrayBuffer();
+      if (respuesta.status !== 200) sinServir.push(`${ruta}: ${respuesta.status}`);
+    });
+    expect(sinServir, 'anunciadas y no servidas con 200').toEqual([]);
   });
 
   test('no contiene nada no publicado', async ({ request }) => {
@@ -45,34 +50,40 @@ test.describe('Historia 2.7 — sitemap', () => {
     expect(rutas.filter((r) => /\/(autor|tema|coleccion)\/[^/]+\/\d+\/$/.test(r))).toEqual([]);
   });
 
-  test('nada de lo que anuncia se declara no indexable', async ({ request }) => {
+  test('nada de lo que anuncia se declara no indexable', async ({ request, baseURL }) => {
     // La contradicción que hay que evitar: pedir que se indexe una página marcada
     // `noindex`. Basta con una para que el sitemap deje de ser fiable.
-    for (const ruta of await rutasDelSitemap(request)) {
-      const html = await (await request.get(ruta)).text();
-      expect(html, ruta).not.toMatch(/name="robots"[^>]*noindex/);
-    }
+    const noIndexables: string[] = [];
+    await porTandas(await rutasDelSitemap(request), async (ruta) => {
+      const html = await (await pedir(baseURL, ruta)).text();
+      if (/name="robots"[^>]*noindex/.test(html)) noIndexables.push(ruta);
+    });
+    expect(noIndexables, 'anunciadas y declaradas `noindex`').toEqual([]);
   });
 });
 
 test.describe('Historia 2.7 — cabecera de cada página', () => {
-  test('cada página declara su propia canónica', async ({ request }) => {
-    for (const ruta of await rutasDelSitemap(request)) {
-      const html = await (await request.get(ruta)).text();
+  test('cada página declara su propia canónica', async ({ request, baseURL }) => {
+    const ajenas: string[] = [];
+    await porTandas(await rutasDelSitemap(request), async (ruta) => {
+      const html = await (await pedir(baseURL, ruta)).text();
       const canonica = /<link rel="canonical" href="([^"]+)"/.exec(html);
-      expect(canonica, `${ruta} no declara canónica`).not.toBeNull();
-      expect(new URL(canonica![1]).pathname, ruta).toBe(ruta);
-    }
+      if (canonica === null) ajenas.push(`${ruta} no declara canónica`);
+      else if (new URL(canonica[1]).pathname !== ruta) ajenas.push(`${ruta} declara ${canonica[1]}`);
+    });
+    expect(ajenas, 'canónicas que faltan o no son la propia').toEqual([]);
   });
 
-  test('el idioma es `es`, sin variante regional', async ({ request }) => {
-    for (const ruta of await rutasDelSitemap(request)) {
-      const html = await (await request.get(ruta)).text();
+  test('el idioma es `es`, sin variante regional', async ({ request, baseURL }) => {
+    const sinEs: string[] = [];
+    await porTandas(await rutasDelSitemap(request), async (ruta) => {
+      const html = await (await pedir(baseURL, ruta)).text();
       // Astro añade su atributo de ámbito al `<html>`, así que no se ancla al `>`.
-      expect(html, ruta).toMatch(/<html lang="es"[\s>]/);
+      if (!/<html lang="es"[\s>]/.test(html)) sinEs.push(`${ruta} no declara lang="es"`);
       // Y sin variante regional: ni `es-ES` ni `es-MX`. El sitio es panhispánico.
-      expect(html, ruta).not.toMatch(/<html lang="es-/);
-    }
+      if (/<html lang="es-/.test(html)) sinEs.push(`${ruta} declara una variante regional`);
+    });
+    expect(sinEs, 'idioma que no es `es` a secas').toEqual([]);
   });
 });
 
@@ -155,7 +166,14 @@ test.describe('Historia 2.7 — nada huérfano', () => {
      */
     test.slow();
 
+    /*
+     * Historia 26.5 — el recorrido juzga el sitemap entero: la cabecera enlaza los dos
+     * Directorios desde toda página, y la exención por ruta de la 26.3 y la 26.4 ya no existe.
+     */
     const publicadas = await rutasDelSitemap(request);
+    for (const directorio of [rutaDelDirectorioDeAutores(), rutaDelDirectorioDeObras()]) {
+      expect(publicadas).toContain(directorio);
+    }
     const enlaces = new Map<string, string[]>();
 
     /*
@@ -208,8 +226,20 @@ test.describe('Historia 2.7 — nada huérfano', () => {
      * La aserción, el tope y lo que se cuenta como enlace son los de antes; lo que cambia es que
      * no se abre lo que no puede cambiar el veredicto.
      */
+    /*
+     * Y se deja de abrir en cuanto lo abierto ya alcanza todo lo publicado — puerta de la fusión
+     * de las Épicas 24 y 26.
+     *
+     * Por lo mismo: `superficiesInalcanzables` es monótona en los enlaces que se le dan —una
+     * página más abierta añade aristas, y una arista solo acorta caminos—, así que si con lo
+     * abierto ya no queda ninguna inalcanzable, abrir el resto no puede volver a dejar ninguna.
+     * Con 4.875 rutas en el sitemap el recorrido abría 3.730 páginas y en la tanda completa
+     * llegaba a los 90 s de `test.slow()` sin evaluar la aserción; todo queda alcanzado tras
+     * 1.758 de las 3.549 del último salto que se abre. Si alguna no se alcanza, la pregunta no se
+     * contesta antes y el recorrido sigue entero, como siempre: el rojo es el mismo.
+     */
     let frontera = ['/'];
-    for (let salto = 0; salto < MAX_SALTOS_DESDE_LA_PORTADA && frontera.length > 0; salto += 1) {
+    recorrido: for (let salto = 0; salto < MAX_SALTOS_DESDE_LA_PORTADA && frontera.length > 0; salto += 1) {
       const pendientes = frontera.filter((ruta) => !enlaces.has(ruta));
       const siguiente: string[] = [];
 
@@ -221,6 +251,7 @@ test.describe('Historia 2.7 — nada huérfano', () => {
 
         tanda.forEach((ruta, i) => enlaces.set(ruta, salientesDeLaTanda[i]));
         siguiente.push(...salientesDeLaTanda.flat());
+        if (superficiesInalcanzables(publicadas, enlaces).length === 0) break recorrido;
       }
 
       frontera = [...new Set(siguiente)].filter((enlace) => !enlaces.has(enlace));

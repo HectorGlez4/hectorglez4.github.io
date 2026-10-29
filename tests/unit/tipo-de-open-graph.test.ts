@@ -11,7 +11,8 @@ import { tipoDeOpenGraph } from '../../src/lib/tipoDeResultado.ts';
  *
  * La regla es de una línea y por eso vive aquí y no repartida por las páginas: **una Cita es un
  * artículo, todo lo demás es un sitio**. Un Tema, una Colección y una Página de Autor son
- * listados; la portada, el buscador y el 404 no llevan tipo y caen del mismo lado.
+ * listados; el buscador y el 404 no llevan tipo, y la portada y los Directorios llevan el suyo
+ * (Historia 26.2): todos caen del mismo lado.
  */
 describe('FR-19 — el tipo de Open Graph sale de la clase de superficie', () => {
   it('una Cita es un artículo: tiene autor, obra y año', () => {
@@ -24,8 +25,14 @@ describe('FR-19 — el tipo de Open Graph sale de la clase de superficie', () =>
     expect(tipoDeOpenGraph('autor')).toBe('website');
   });
 
-  it('y una superficie sin tipo —la portada, el buscador, el 404— también', () => {
-    // Es el caso que destapó el fallo: la portada se declaraba artículo.
+  it('y una superficie sin tipo —el buscador, el 404— también', () => {
     expect(tipoDeOpenGraph(undefined)).toBe('website');
+  });
+
+  it('Historia 26.2 — un Directorio y la portada, con su tipo, siguen siendo sitios', () => {
+    // La portada era el caso que destapó el fallo: se declaraba artículo. Con tipo propio
+    // desde la 26.2, la regla no cambia.
+    expect(tipoDeOpenGraph('directorio')).toBe('website');
+    expect(tipoDeOpenGraph('portada')).toBe('website');
   });
 });

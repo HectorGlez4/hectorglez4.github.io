@@ -265,6 +265,18 @@ describe('Historia 14.1 — el sitio con los cuatro Modelos apagados', () => {
     }
   });
 
+  it('Historias 26.3 y 26.4 — los dos Directorios y sus Tarjetas entran en la huella: dos construcciones, los mismos bytes', () => {
+    for (const fichero of [
+      'autores/index.html',
+      'tarjeta/directorio/autores.png',
+      'obras/index.html',
+      'tarjeta/directorio/obras.png',
+    ]) {
+      expect(primera, fichero).toHaveProperty([fichero]);
+      expect(segunda[fichero], fichero).toBe(primera[fichero]);
+    }
+  });
+
   it('lo marcado en cada página está encendido y admitido ahí — UX-DR35', () => {
     /*
      * La regla en su forma duradera, y no «no hay marcadores».
@@ -751,6 +763,11 @@ describe('Historia 17.5 — el tope de guion, con todo encendido donde se admite
     m.admitidoEn.length > 0 ? { ...m, encendido: true } : m,
   );
 
+  /** El Directorio de Autores de la copia con todo apagado (Historia 26.3), para compararlo. */
+  let directorioApagado = '';
+  /** Y el de Obras (Historia 26.4), de la misma copia apagada. */
+  let directorioDeObrasApagado = '';
+
   /*
    * Historia 22.9 — la afiliación ya se admite en la Página de Obra, así que se mide encendida
    * en una Obra **con ediciones**: la ficha de las dos Citas del corpus declara una, de la tienda
@@ -776,15 +793,39 @@ describe('Historia 17.5 — el tope de guion, con todo encendido donde se admite
     for (const modelo of ADMITIDOS) {
       if (!modelo.encendido) fuente = fuenteConModeloEncendido(fuente, modelo.id);
     }
+    const entorno = { MEDICION_ENDPOINT: 'https://medicion.ejemplo.workers.dev/e' };
     const build = await construirConCorpus(CORPUS_CON_EDICIONES, {
       jornada: JORNADA,
-      entorno: { MEDICION_ENDPOINT: 'https://medicion.ejemplo.workers.dev/e' },
+      entorno,
       ficheros: { 'src/lib/ingreso.ts': fuente },
     });
     aLimpiar.push(build.proyecto);
     expect(build.codigo, build.salida).toBe(0);
     paginas = await paginasDe(join(build.proyecto, 'dist'));
-  }, 240_000);
+
+    /*
+     * Historia 26.3 (FR-55, UX-DR110) — otra copia del mismo corpus, con la misma tienda y el mismo
+     * `MEDICION_ENDPOINT`, y con **todos** los Modelos apagados en la copia: lo que el árbol tenga
+     * encendido se apaga ahí, así que encender un Modelo en el repositorio no tumba esta prueba.
+     * Lo único que cambia entre las dos construcciones es el encendido, así que una diferencia en
+     * `/autores/` solo puede venir de un Modelo. Va en su propia copia, y no sobre el `dist/` de la
+     * encendida, para que ninguna prueba de este bloque pueda leer una construcción por la otra.
+     */
+    const apagada = fuenteConTiendaDePrueba(await readFile(resolve(RAIZ, 'src/lib/ingreso.ts'), 'utf8'))
+      .replaceAll('encendido: true,', 'encendido: false,');
+    expect((apagada.match(/encendido: false,/g) ?? []).length, 'un `encendido: false,` por Modelo').toBe(
+      MODELOS.length,
+    );
+    const otra = await construirConCorpus(CORPUS_CON_EDICIONES, {
+      jornada: JORNADA,
+      entorno,
+      ficheros: { 'src/lib/ingreso.ts': apagada },
+    });
+    aLimpiar.push(otra.proyecto);
+    expect(otra.codigo, otra.salida).toBe(0);
+    directorioApagado = await readFile(join(otra.proyecto, 'dist', 'autores', 'index.html'), 'utf8');
+    directorioDeObrasApagado = await readFile(join(otra.proyecto, 'dist', 'obras', 'index.html'), 'utf8');
+  }, 480_000);
 
   afterAll(async () => {
     await Promise.all(aLimpiar.splice(0).map(limpiar));
@@ -792,6 +833,27 @@ describe('Historia 17.5 — el tope de guion, con todo encendido donde se admite
 
   it('hay algo que medir: alguna superficie admite hoy algún Modelo', () => {
     expect(ADMITIDOS.length).toBeGreaterThan(0);
+  });
+
+  it('Historia 26.3 — `/autores/` sale idéntico byte a byte con todo encendido y con todo apagado', () => {
+    const encendido = paginas['autores/index.html'];
+    expect(encendido, 'la copia encendida no construyó /autores/').toBeDefined();
+    expect(directorioApagado).not.toBe('');
+    expect(modelosMarcadosEn(encendido)).toEqual([]);
+    expect(encendido).toBe(directorioApagado);
+  });
+
+  it('Historia 26.4 — `/obras/` sale idéntico byte a byte con todo encendido y con todo apagado, sin enlace de edición', () => {
+    const encendido = paginas['obras/index.html'];
+    expect(encendido, 'la copia encendida no construyó /obras/').toBeDefined();
+    expect(directorioDeObrasApagado).not.toBe('');
+    expect(modelosMarcadosEn(encendido)).toEqual([]);
+    expect(encendido).toBe(directorioDeObrasApagado);
+    // La Obra de la copia declara una edición en venta y la afiliación está encendida: su Página
+    // de Obra la enlaza, y `/obras/` —que no es una Página de Obra— no.
+    expect(encendido).toContain('/obra/seneca/sobre-la-brevedad-de-la-vida/');
+    expect(encendido).not.toContain(TIENDA_DE_PRUEBA.dominio);
+    expect(paginas['obra/seneca/sobre-la-brevedad-de-la-vida/index.html']).toContain(TIENDA_DE_PRUEBA.dominio);
   });
 
   it('lo marcado en cada ruta es exactamente lo encendido y admitido en esa ruta', () => {

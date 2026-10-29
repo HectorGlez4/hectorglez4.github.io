@@ -13,7 +13,10 @@
  */
 import { readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
+import { parse } from 'yaml';
+import { colgarObras, type FichaDeObra } from '../../../src/lib/obras.ts';
 import { CITAS_POR_PAGINA, MIN_CITAS_POR_TEMA } from '../../../src/lib/umbrales.ts';
+import { admiteImagen } from '../../../src/lib/tramos.ts';
 
 const raiz = join(new URL('../../..', import.meta.url).pathname, 'corpus');
 
@@ -124,14 +127,231 @@ export function citaConObraMasLarga(): { slug: string; obra: string } | undefine
   return mejor;
 }
 
-/** El texto literal de una Cita del Corpus, por su slug. */
-export function textoDe(slug: string): string {
+/**
+ * Un campo de primer nivel de la Cita del Corpus de ese slug. Lanza, nombrándolo, si no hay
+ * Cita con ese slug o si no declara el campo: un `undefined` que pasara por cadena acabaría en
+ * una ruta como `/autor/undefined/` y en un fallo que no dice nada.
+ */
+function campoDeCita(slug: string, nombre: string): string {
   for (const fichero of readdirSync(join(raiz, 'citas')).filter((f) => f.endsWith('.md'))) {
     const contenido = readFileSync(join(raiz, 'citas', fichero), 'utf8');
     if (campo(contenido, 'slug') !== slug) continue;
-    return campo(contenido, 'texto')!;
+    const valor = campo(contenido, nombre);
+    if (valor === undefined) throw new Error(`La Cita «${slug}» (citas/${fichero}) no declara \`${nombre}\`.`);
+    return valor;
   }
   throw new Error(`No hay ninguna Cita con el slug «${slug}» en el Corpus.`);
+}
+
+/** El texto literal de una Cita del Corpus, por su slug. */
+export function textoDe(slug: string): string {
+  return campoDeCita(slug, 'texto');
+}
+
+/** El slug del Autor que declara una Cita del Corpus, por el slug de la Cita. */
+export function autorDe(slug: string): string {
+  return campoDeCita(slug, 'autor');
+}
+
+/** Una Cita del Corpus con su Obra resuelta, como la cuelga el build. */
+interface CitaResuelta {
+  slug: string;
+  autor: string;
+  texto: string;
+  /** El título que pinta la Tarjeta de Cita, o `undefined` si no lleva línea de Obra. */
+  obra?: string;
+  /** Historia 24.6 — el nombre de la ficha de su Obra: la identidad, no el título. */
+  ficha?: string;
+  /** Si la Cita tiene Fuente: su Línea de la Fuente se pinta. */
+  conFuente: boolean;
+  /** Historia 24.4 — cuántas Citas tiene su Obra, como la cuenta el build. */
+  recuento?: number;
+  /** Historia 24.4 — si alguna Cita de su Obra está cotejada: la Tarjeta promete «dónde leerla». */
+  edicionCotejada?: boolean;
+}
+
+/**
+ * Las Citas del Corpus con el título de su Obra **resuelto por la misma función que el build**
+ * (`colgarObras`, Historia 22.3): el de la Ficha de Obra que reclama su forma, o la grafía por
+ * omisión si el título de la ficha ya no lo declara ninguna Cita. Nunca la grafía de la
+ * Procedencia, que es lo que una prueba leería si mirara la Cita sola.
+ */
+function citasResueltas(): CitaResuelta[] {
+  const citas = readdirSync(join(raiz, 'citas'))
+    .filter((f) => f.endsWith('.md'))
+    .map((fichero) => {
+      const contenido = readFileSync(join(raiz, 'citas', fichero), 'utf8');
+      const frontmatter = /^---\n([\s\S]*?)\n---/.exec(contenido)?.[1];
+      if (frontmatter === undefined) throw new Error(`citas/${fichero}: sin frontmatter`);
+      const datos = parse(frontmatter) as {
+        slug: string;
+        autor: string;
+        texto: string;
+        procedencia?: { obra?: string } | null;
+        fuente?: { id: string } | null;
+      };
+      // La Fuente también: de ella sale si la Obra tiene edición cotejada (Historia 24.4).
+      return {
+        slug: datos.slug,
+        autor: datos.autor,
+        texto: datos.texto,
+        procedencia: datos.procedencia,
+        ...(datos.fuente != null ? { fuente: datos.fuente } : {}),
+      };
+    });
+  const fichas: FichaDeObra[] = readdirSync(join(raiz, 'obras'))
+    .filter((f) => /\.ya?ml$/.test(f))
+    .map((fichero) => {
+      const ficha = parse(readFileSync(join(raiz, 'obras', fichero), 'utf8')) as Omit<FichaDeObra, 'nombre' | 'ruta'>;
+      return { ...ficha, nombre: fichero.replace(/\.ya?ml$/, ''), ruta: `corpus/obras/${fichero}` };
+    });
+  return colgarObras(citas, fichas).map((c) => ({
+    slug: c.slug,
+    autor: c.autor,
+    texto: c.texto,
+    conFuente: typeof c.fuente?.id === 'string' && c.fuente.id !== '',
+    ...(c.obra !== undefined
+      ? { obra: c.obra.titulo, ficha: c.obra.nombre, recuento: c.obra.recuento, edicionCotejada: c.obra.edicionCotejada }
+      : {}),
+  }));
+}
+
+const porSlug = (a: { slug: string }, b: { slug: string }) => (a.slug < b.slug ? -1 : a.slug > b.slug ? 1 : 0);
+
+/**
+ * Historia 24.4 — una Cita con la Tarjeta de Obra entera: su Obra tiene al menos dos Citas y
+ * edición cotejada, y ella misma tiene Fuente y texto que cabe en la Imagen de Cita (así su
+ * página lleva Línea de la Fuente, tarjeta, Copiar e Imagen). La primera por slug, o
+ * `undefined` si el Corpus de hoy no la tiene: la cara es obligatoria, y la hace fallar cada
+ * prueba que la pide —nunca una excepción al cargar el fichero, que tumbaría el barrido entero—.
+ */
+export function citaConTarjetaCompleta(): { slug: string; autor: string; titulo: string } | undefined {
+  const cita = citasResueltas()
+    .filter(
+      (c) =>
+        c.obra !== undefined &&
+        (c.recuento ?? 0) >= 2 &&
+        c.edicionCotejada === true &&
+        c.conFuente &&
+        admiteImagen(c.texto),
+    )
+    .sort(porSlug)[0];
+  return cita === undefined ? undefined : { slug: cita.slug, autor: cita.autor, titulo: cita.obra! };
+}
+
+/**
+ * Historia 24.5 — las Citas de una Obra de una sola Cita, por slug: las únicas cuya tarjeta
+ * puede llevar «Siguiente cita sobre {tema}». Si la lleva o no lo decide el build (el primer
+ * Tema publicado y otro Autor en su listado), así que la prueba lo lee del `dist/`.
+ */
+export function citasDeObraDeUnaCita(): string[] {
+  return citasResueltas()
+    .filter((c) => c.obra !== undefined && c.recuento === 1)
+    .sort(porSlug)
+    .map((c) => c.slug);
+}
+
+/**
+ * Historia 24.6 — las caras del pie de la Página de Cita, del Corpus y nunca fijadas a mano. Cada
+ * una es la primera por slug, o `undefined` si el Corpus de hoy no la tiene: quien la pide dice
+ * qué hace entonces.
+ *
+ * Una Obra de cuatro Citas o más deja al menos dos para «De la misma obra» después de quitar la
+ * propia y la siguiente, y una de dos no deja ninguna. «Más de {Autor}» existe si el Autor tiene
+ * alguna Cita fuera de esa Obra (de otra o sin Obra).
+ */
+function citasPorAutorResueltas(): Map<string, CitaResuelta[]> {
+  const porAutor = new Map<string, CitaResuelta[]>();
+  for (const cita of citasResueltas()) porAutor.set(cita.autor, [...(porAutor.get(cita.autor) ?? []), cita]);
+  return porAutor;
+}
+
+function primeraQue(condicion: (cita: CitaResuelta, delAutor: readonly CitaResuelta[]) => boolean): string | undefined {
+  const porAutor = citasPorAutorResueltas();
+  return citasResueltas()
+    .filter((c) => condicion(c, porAutor.get(c.autor) ?? []))
+    .sort(porSlug)[0]?.slug;
+}
+
+const fueraDeSuObra = (cita: CitaResuelta, delAutor: readonly CitaResuelta[]) =>
+  delAutor.some((otra) => otra.ficha !== cita.ficha);
+
+/**
+ * La ficha de la Obra de cada Cita del Corpus, por slug (`undefined` si no tiene Obra): la
+ * identidad de la Obra, que no cambia con el título. Historia 24.6.
+ */
+export function fichasDeObraPorCita(): Map<string, string | undefined> {
+  return new Map(citasResueltas().map((c) => [c.slug, c.ficha]));
+}
+
+/** Una Cita con «De la misma obra» y «Más de {Autor}»: Obra de 4 o más y Autor con Citas fuera de ella. */
+export function citaConLosDosBloques(): string | undefined {
+  return primeraQue((c, delAutor) => c.ficha !== undefined && (c.recuento ?? 0) >= 4 && fueraDeSuObra(c, delAutor));
+}
+
+/** Una Cita sin «De la misma obra» y con «Más de {Autor}»: Obra de 2 y Autor con Citas fuera de ella. */
+export function citaSinMismaObra(): string | undefined {
+  return primeraQue((c, delAutor) => c.ficha !== undefined && c.recuento === 2 && fueraDeSuObra(c, delAutor));
+}
+
+/** Una Cita con «De la misma obra» y sin «Más de {Autor}»: todas las de su Autor en una Obra de 4 o más. */
+export function citaSinMasDelAutor(): string | undefined {
+  return primeraQue((c, delAutor) => c.ficha !== undefined && (c.recuento ?? 0) >= 4 && !fueraDeSuObra(c, delAutor));
+}
+
+/** Por qué falla una prueba de la 24.4 cuando el Corpus no tiene la cara que pide. */
+export const SIN_TARJETA_COMPLETA =
+  'El Corpus no tiene ninguna Cita con Fuente de una Obra de dos o más Citas: no hay tarjeta completa que probar.';
+
+/**
+ * Historia 24.4 — una Cita cuya Obra no tiene ninguna Cita cotejada (su tarjeta dice «Ver la
+ * obra ›»), si hoy hay alguna. La primera por slug.
+ */
+export function citaDeObraSinCotejar(): { slug: string; autor: string; titulo: string } | undefined {
+  const cita = citasResueltas()
+    .filter((c) => c.obra !== undefined && c.edicionCotejada === false)
+    .sort(porSlug)[0];
+  return cita === undefined ? undefined : { slug: cita.slug, autor: cita.autor, titulo: cita.obra! };
+}
+
+/**
+ * La Cita cuya Tarjeta lleva el título de Obra más largo del Corpus, con su Autor y ese título
+ * —el de la ficha, resuelto como en el build—. Historia 24.3. Empate, por slug.
+ */
+export function citaConTituloDeObraMasLargo(): { slug: string; autor: string; titulo: string } | undefined {
+  let mejor: { slug: string; autor: string; titulo: string } | undefined;
+  for (const cita of citasResueltas()) {
+    if (cita.obra === undefined) continue;
+    if (
+      mejor === undefined ||
+      cita.obra.length > mejor.titulo.length ||
+      (cita.obra.length === mejor.titulo.length && cita.slug < mejor.slug)
+    ) {
+      mejor = { slug: cita.slug, autor: cita.autor, titulo: cita.obra };
+    }
+  }
+  return mejor;
+}
+
+/**
+ * Una Cita del Corpus que no lleva línea de Obra —no declara obra o ninguna ficha la reclama—,
+ * con su Autor y su texto, si hoy hay alguna. Historia 24.3. La primera por slug.
+ */
+export function citaSinObra(): { slug: string; autor: string; texto: string } | undefined {
+  const cita = citasResueltas()
+    .filter((c) => c.obra === undefined)
+    .sort((a, b) => (a.slug < b.slug ? -1 : a.slug > b.slug ? 1 : 0))[0];
+  return cita === undefined ? undefined : { slug: cita.slug, autor: cita.autor, texto: cita.texto };
+}
+
+/** Cuántas páginas tiene el listado de un Autor del Corpus. */
+export function paginasDeAutor(autor: string): number {
+  return Math.max(1, Math.ceil((citasPorAutor().get(autor) ?? 0) / CITAS_POR_PAGINA));
+}
+
+/** Cuántas páginas tiene el listado de un Tema del Corpus. */
+export function paginasDeTema(tema: string): number {
+  return Math.max(1, Math.ceil((citasPorTema().get(tema) ?? 0) / CITAS_POR_PAGINA));
 }
 
 /**

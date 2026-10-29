@@ -2,9 +2,14 @@
 /**
  * Armazón común de todas las superficies públicas.
  *
- * UX-DR29 — la cabecera lleva solo la marca y el acceso a la búsqueda. Sin migas de pan,
- * porque no hay jerarquía que reflejar: el visitante entra por una hoja y se mueve
- * lateralmente entre hojas a través de Autor y Tema.
+ * La cabecera — Historia 26.5 (UX-DR54, UX-DR55, UX-DR101, UX-DR102, UX-DR105, UX-DR106 y
+ * UX-DR112, que enmienda la UX-DR29 de la 2.1): «Sabiduría de Bolsillo · Autores · Obras ·
+ * Buscar». La marca lleva a la portada y una navegación «Principal» lleva a los dos Directorios
+ * y a la búsqueda, con las rutas de `src/lib/superficies.ts`; así toda Página de Autor y toda
+ * página 1 de Obra quedan a dos saltos de la portada (FR-55; las 2+ cuelgan de su página 1).
+ * Sigue sin migas de pan: no hay jerarquía que reflejar,
+ * el visitante entra por una hoja y se mueve lateralmente entre hojas. La marca no es un `h1`
+ * (eso es de la 28.1).
  *
  * NFR-2 — el contenido llega en el HTML inicial. AD-6 — en línea van las islas y el arranque
  * de la medición; lo que se descarga está en la lista cerrada de `src/lib/guiones.ts`.
@@ -13,10 +18,18 @@ import { Font } from 'astro:assets';
 import Medicion from './Medicion.astro';
 import DondeSeguirnos from './DondeSeguirnos.astro';
 import { LADO_DE_IOS, MARCA, TAMANOS_DEL_ICONO } from '../lib/marca.ts';
-import { consecuenciasDe, declararRutasIndexables } from '../lib/superficies.ts';
+import {
+  consecuenciasDe,
+  declararRutasIndexables,
+  rutaDeLaBusqueda,
+  rutaDeLaPortada,
+  rutaDelDirectorioDeAutores,
+  rutaDelDirectorioDeObras,
+  rutaNormalizada,
+} from '../lib/superficies.ts';
 import { ATRIBUTO_DE_INDEXABLE } from '../lib/medicion.ts';
 import { conjuntoPublicable, rutasIndexables } from '../lib/publicado.ts';
-import { tipoDeOpenGraph, type TipoDeResultado } from '../lib/tipoDeResultado.ts';
+import { FILTRO_DE_TIPO, tipoDeOpenGraph, type TipoDeResultado } from '../lib/tipoDeResultado.ts';
 import '../styles/tokens.css';
 import { PALETA } from '../lib/lienzo.ts';
 
@@ -28,6 +41,10 @@ interface Props {
    * El valor y su rótulo salen los dos de `src/lib/tipoDeResultado.ts`: la unión se deriva
    * de la tabla de rótulos, así que un tipo sin rótulo no compila. Sin valor, un resultado
    * cae al tipo por omisión, y una Página de Colección se leería como si fuera una Cita.
+   *
+   * Viaja como **filtro** de Pagefind (`FILTRO_DE_TIPO`), nunca como metadato: la metadata se
+   * busca, y buscar «obra» devolvía toda Obra aunque no lo dijera (Historia 26.2). Este armazón
+   * es su único emisor, y solo en una página que entra en la búsqueda propia.
    *
    * Esto **no** decide si la página se indexa: eso sale entero de `src/lib/superficies.ts`.
    */
@@ -87,6 +104,18 @@ const marcaDeLaObra = marcaDeObra === undefined ? {} : { [ATRIBUTO_DE_INDEXABLE]
 // Absoluta y no relativa: una previsualización se resuelve en el servidor de la red, que
 // no tiene la página delante para completar la ruta.
 const imagenSocial = tarjeta === undefined ? undefined : new URL(tarjeta, Astro.site).href;
+
+/*
+ * Historia 26.5 — `aria-current="page"` en el enlace de la cabecera cuya página es esta, y en
+ * ningún otro: se comparan rutas normalizadas, así que la marca lo lleva solo en la portada y
+ * «Buscar» en `/buscar/` (lo buscado va en la cadena de consulta, que no es parte de la ruta).
+ */
+const rutaDeEstaPagina = rutaNormalizada(ruta);
+const actualSi = (destino: string) => (rutaNormalizada(destino) === rutaDeEstaPagina ? 'page' : undefined);
+const portada = rutaDeLaPortada();
+const directorioDeAutores = rutaDelDirectorioDeAutores();
+const directorioDeObras = rutaDelDirectorioDeObras();
+const busqueda = rutaDeLaBusqueda();
 ---
 
 <!doctype html>
@@ -174,12 +203,30 @@ const imagenSocial = tarjeta === undefined ? undefined : new URL(tarjeta, Astro.
     <a class="saltar" href="#contenido">Saltar al contenido.</a>
 
     {/*
-      * Historia 23.7 — la Zona de salida interna de la marca y de «Buscar». El enlace de salto de
-      * arriba no la lleva: es un ancla de la propia página, y eso no es salida.
+      * Historia 23.7 — la Zona de salida interna de la marca y de los tres enlaces de la
+      * navegación «Principal» (Historia 26.5, UX-DR111): la lleva el contenedor y nada de dentro
+      * la tapa. El enlace de salto de arriba no la lleva: es un ancla de la propia página, y eso
+      * no es salida.
+      *
+      * Historia 26.5 — cada punto medio va **dentro** del `<li>` del enlace anterior, oculto al
+      * lector de pantalla: la lista sigue teniendo tres elementos y, si los enlaces se parten en
+      * otra fila, ninguna empieza por «·». Es un glifo tipográfico, no un icono.
       */}
     <header class="cabecera contenedor" data-zona="cabecera">
-      <a class="marca" href="/">{MARCA}</a>
-      <a class="buscar" href="/buscar/">Buscar</a>
+      <a class="marca" href={portada} aria-current={actualSi(portada)}>{MARCA}</a>
+      <nav aria-label="Principal">
+        <ul class="principal" role="list">
+          <li>
+            <a class="enlace-en-tinta" href={directorioDeAutores} aria-current={actualSi(directorioDeAutores)}>Autores</a><span class="punto" aria-hidden="true">·</span>
+          </li>
+          <li>
+            <a class="enlace-en-tinta" href={directorioDeObras} aria-current={actualSi(directorioDeObras)}>Obras</a><span class="punto" aria-hidden="true">·</span>
+          </li>
+          <li>
+            <a class="buscar" href={busqueda} aria-current={actualSi(busqueda)}>Buscar</a>
+          </li>
+        </ul>
+      </nav>
     </header>
 
     {/*
@@ -189,12 +236,16 @@ const imagenSocial = tarjeta === undefined ? undefined : new URL(tarjeta, Astro.
       *
       * Y quién lo lleva no se decide aquí: sale de la misma declaración que el `noindex`
       * de arriba, así que el buscador de dentro y el de fuera no pueden discrepar.
+      *
+      * Historia 26.2 — el tipo del resultado va como filtro (`data-pagefind-filter`), que no
+      * casa como texto, y no como `data-pagefind-meta`, que desde Pagefind 1.5 se busca. Solo
+      * lo lleva una página con `data-pagefind-body`: sin cuerpo no hay resultado que rotular.
       */}
     <main
       id="contenido"
       data-pagefind-body={enLaBusquedaPropia ? true : undefined}
       data-pagefind-ignore={enLaBusquedaPropia ? undefined : true}
-      data-pagefind-meta={tipo ? `tipo:${tipo}` : undefined}
+      data-pagefind-filter={enLaBusquedaPropia && tipo ? `${FILTRO_DE_TIPO}:${tipo}` : undefined}
     >
       <slot />
     </main>
@@ -228,18 +279,30 @@ const imagenSocial = tarjeta === undefined ? undefined : new URL(tarjeta, Astro.
     left: var(--margen);
   }
 
-  /* El ancho y el margen lateral vienen de `.contenedor`, compartido con el resto. */
+  /*
+   * El ancho y el margen lateral vienen de `.contenedor`, compartido con el resto.
+   *
+   * Historia 26.5 (UX-DR55, UX-DR102) — por debajo de 600px, dos filas: la marca en la suya y
+   * los tres enlaces debajo, con `--unidad` de aire arriba, entre las filas y abajo, así que la
+   * zona de la marca queda a 8px de las de los enlaces: 8 + 44 + 8 + 44 + 8 + 1 = 113px. Desde
+   * 600px, una fila, con 2 × `--unidad` de aire. Nada lleva `white-space: nowrap`: con el texto
+   * al 200 % a 320px la marca y los enlaces se parten y nunca desbordan (NFR-8).
+   */
   .cabecera {
     display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: var(--canal);
-    padding-block: calc(var(--unidad) * 2);
+    flex-direction: column;
+    gap: var(--unidad);
+    padding-block: var(--unidad);
     /* UX-DR13 — el filete de 1px es el único separador del sistema. */
     border-bottom: var(--grosor-filete) solid var(--filete);
   }
 
+  /*
+   * La marca, enlace de bloque **a su ancho**: su zona de toque es su texto con 44px de alto,
+   * no la fila entera, para que un toque a su derecha no lleve a la portada.
+   */
   .marca {
+    align-self: flex-start;
     font-family: var(--sans);
     font-size: var(--autor);
     font-weight: 600;
@@ -253,24 +316,84 @@ const imagenSocial = tarjeta === undefined ? undefined : new URL(tarjeta, Astro.
     min-height: var(--zona-de-toque);
   }
 
+  .marca:hover {
+    text-decoration: underline;
+  }
+
   /*
-   * Historia 22.10 — «Buscar» va subrayado siempre (UX-DR52): no es la marca ni ningún otro
-   * enlace de la lista cerrada de bloques, y en móvil no hay cursor que pase por encima. El
-   * subrayado permanente **sustituye** al que antes salía solo con `:hover`, por eso ya no
-   * está en la regla de abajo; la marca, enlace de bloque, conserva el suyo.
+   * Los tres enlaces se parten en otra fila si no caben, con `--unidad` entre filas. El primero
+   * se retranquea su relleno para que su texto quede alineado con el de la marca.
+   *
+   * El retranqueo sigue desde 600px: en la fila única no se ve —la navegación va al borde derecho
+   * por `space-between`, y el margen negativo del lado de entrada no la mueve—, y si el texto
+   * ampliado la parte bajo la marca, su «Autores» vuelve a alinearse con el texto de la marca en
+   * vez de quedar 8px a la derecha.
    */
-  .buscar {
-    font-size: var(--cuerpo-md);
-    color: var(--siena);
-    text-decoration-line: underline;
+  .principal {
+    display: flex;
+    flex-wrap: wrap;
+    row-gap: var(--unidad);
+    margin: 0;
+    margin-inline-start: calc(-1 * var(--unidad));
+    padding: 0;
+    list-style: none;
+  }
+
+  .principal li {
     display: flex;
     align-items: center;
+  }
+
+  /*
+   * UX-DR102, UX-DR105 — cuerpo `body-md`, zona de toque de 44 × 44 como mínimo y `--unidad` de
+   * relleno lateral. Subrayados siempre, porque comparten línea con los puntos medios, que no
+   * enlazan: «Autores» y «Obras» en tinta (`.enlace-en-tinta`, son navegación que informa) y
+   * «Buscar» en siena, porque actúa.
+   */
+  .principal a {
+    font-size: var(--cuerpo-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
     min-height: var(--zona-de-toque);
+    min-width: var(--zona-de-toque);
     padding-inline: var(--unidad);
   }
 
-  .marca:hover {
-    text-decoration: underline;
+  /*
+   * Historia 22.10 — «Buscar» va subrayado siempre (UX-DR52): en móvil no hay cursor que pase por
+   * encima. La marca, enlace de bloque, conserva el subrayado solo al pasar el cursor.
+   */
+  .buscar {
+    color: var(--siena);
+    text-decoration-line: underline;
+  }
+
+  /*
+   * El punto medio es el `--unidad` entre zonas: de ese ancho, centrado, en tinta apagada y al
+   * cuerpo de los enlaces que separa (el del `body` es `--cuerpo-lg`).
+   */
+  .punto {
+    flex: none;
+    width: var(--unidad);
+    text-align: center;
+    font-size: var(--cuerpo-md);
+    color: var(--tinta-apagada);
+  }
+
+  @media (min-width: 600px) {
+    .cabecera {
+      flex-direction: row;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--unidad) var(--canal);
+      padding-block: calc(var(--unidad) * 2);
+    }
+
+    .marca {
+      align-self: center;
+    }
   }
 
   .pie {

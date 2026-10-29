@@ -37,6 +37,7 @@ import {
   MAX_BYTES_GUION_DE_MEDICION,
   MAX_CARACTERES_IMAGEN,
   MIN_MS_VISIBLES_PARA_LA_LECTURA,
+  PAUSA_DE_TECLEO_MS,
 } from '../../src/lib/umbrales.ts';
 import {
   DESTINOS_DE_DESCARGA,
@@ -66,12 +67,21 @@ import {
   consecuenciasDe,
   declararRutasIndexables,
   olvidarRutasIndexables,
+  rutaDelDirectorioDeAutores,
+  rutaDelDirectorioDeObras,
   superficieDeclaradaDe,
   superficiesDelBarrido,
 } from '../../src/lib/superficies.ts';
 import { marcasDePagina } from '../../tools/lib/indexables.ts';
 import { ORIGEN_DEL_SANDBOX, medicionEnUnSandbox } from './ayuda/medicion.js';
 import { islaDeBusquedaEnUnSandbox, type OpcionesDeLaIsla, type Respuesta } from './ayuda/busqueda.js';
+import {
+  ETIQUETAS_DE_RESULTADO,
+  FILTRO_DE_TIPO,
+  OPCIONES_DE_PAGEFIND,
+  TIPOS_CON_TITULO_EN_SANS,
+} from '../../src/lib/tipoDeResultado.ts';
+import { MARCA as MARCA_DEL_SITIO } from '../../src/lib/marca.ts';
 import { enlacesDe, recorrerElementos, type Declaracion, type Elemento } from './ayuda/enlaces.js';
 import {
   AUTOR_VALIDO,
@@ -85,6 +95,13 @@ import {
 
 const RAIZ = resolve(import.meta.dirname, '../..');
 const aLimpiar: string[] = [];
+
+/**
+ * Historia 26.6 — el fichero que Astro emite para el `<script>` de `FiltroDelDirectorio.astro`,
+ * sin su resumen, y las dos páginas que lo piden.
+ */
+const FICHERO_DEL_FILTRO = 'FiltroDelDirectorio.astro_astro_type_script_index_0_lang';
+const RUTAS_DEL_FILTRO = [rutaDelDirectorioDeAutores(), rutaDelDirectorioDeObras()];
 
 /** Espacios colapsados: Vitest y el build transforman `anunciar` con el mismo esbuild. */
 const colapsado = (texto: string) => texto.replace(/\s+/g, ' ').trim();
@@ -1748,7 +1765,7 @@ describe('Historia 23.1 — la versión del fichero sale de su contenido', () =>
 
 describe('Historia 23.1 — la lista cerrada de guiones externos', () => {
   it('cada entrada tiene un tope entero positivo y un nombre propio', () => {
-    expect(GUIONES_EXTERNOS.map((g) => g.id).sort()).toEqual(['imagen', 'medicion', 'pagefind']);
+    expect(GUIONES_EXTERNOS.map((g) => g.id).sort()).toEqual(['filtro', 'imagen', 'medicion', 'pagefind']);
     for (const guion of GUIONES_EXTERNOS) {
       expect(Number.isInteger(guion.tope) && guion.tope > 0, `${guion.id}: ${guion.tope}`).toBe(true);
       expect(guion.reconoce.global, guion.id).toBe(false);
@@ -1760,7 +1777,14 @@ describe('Historia 23.1 — la lista cerrada de guiones externos', () => {
     expect(guionExternoDe('/islas/imagen.js')?.id).toBe('imagen');
     expect(guionExternoDe('/islas/imagen.js?2')?.id).toBe('imagen');
     expect(guionExternoDe('/pagefind/pagefind.js')?.id).toBe('pagefind');
+    // Historia 26.6 — el filtro de los Directorios, con el resumen que Astro le ponga.
+    expect(guionExternoDe(`/_astro/${FICHERO_DEL_FILTRO}.C2e0gZJx.js`)?.id).toBe('filtro');
+    expect(guionExternoDe(`/_astro/${FICHERO_DEL_FILTRO}.Ab-_9.js?v=1`)?.id).toBe('filtro');
     for (const ajeno of [
+      '/_astro/OtroComponente.astro_astro_type_script_index_0_lang.C2e0gZJx.js',
+      `/_astro/${FICHERO_DEL_FILTRO}.js`,
+      `/_astro/${FICHERO_DEL_FILTRO}.a/b.js`,
+      `https://sabiduriadebolsillo.net/_astro/${FICHERO_DEL_FILTRO}.C2e0gZJx.js`,
       'https://sabiduriadebolsillo.net/islas/imagen.js',
       '//cdn.ejemplo.org/islas/imagen.js',
       'islas/imagen.js',
@@ -2198,7 +2222,11 @@ describe('Historia 2.9 y 23.1 — sin punto final, el sitio no pide ni envía na
       expect(guionesExternosDe(html).filter((e) => guionExternoDe(e)?.id === 'medicion'), ruta).toEqual([]);
       // Ninguna etiqueta de guion, de la medición ni de nada: es la mitad «sin él, ninguno» de
       // los criterios de JavaScript de las Historias 2.1 y 4.1, que se juzgaba en el navegador.
-      expect(etiquetasDeGuionExterno(html), ruta).toEqual([]);
+      // Salvo el filtro de los Directorios (26.6), que no es medición y va con o sin punto final,
+      // y solo en sus dos páginas.
+      const ajenasAlFiltro = etiquetasDeGuionExterno(html).filter((e) => guionExternoDe(e.src)?.id !== 'filtro');
+      expect(ajenasAlFiltro, ruta).toEqual([]);
+      if (!RUTAS_DEL_FILTRO.includes(ruta)) expect(etiquetasDeGuionExterno(html), ruta).toEqual([]);
       expect(html, ruta).not.toContain('sendBeacon');
       expect(guionesEnLinea(html), ruta).toContain(ARRANQUE_DE_MEDICION);
     }
@@ -2226,7 +2254,8 @@ describe('Historia 23.1 — lo que se descarga está en la lista y cabe en su to
       }
     }
 
-    // Las tres entradas se piden en este sitio: si una no se viera, su tope no se mediría.
+    // Las cuatro entradas se piden en este sitio —el filtro, en `/autores/` y `/obras/` (26.6)—:
+    // si una no se viera, su tope no se mediría.
     expect([...vistos.keys()].sort()).toEqual(GUIONES_EXTERNOS.map((g) => g.id).sort());
 
     for (const guion of GUIONES_EXTERNOS) {
@@ -2254,6 +2283,77 @@ describe('Historia 23.1 — lo que se descarga está en la lista y cabe en su to
   }, 240_000);
 });
 
+/*
+ * Historia 26.6 — el primer guion empaquetado de la v8 (AD-6).
+ *
+ * El filtro de los Directorios es un `<script>` procesado por Astro, y Astro lo metería en línea
+ * —un `<script type="module">` con cuerpo— si cupiera en `assetsInlineLimit`. `astro.config.mjs`
+ * lo impide para todo `.js`, y esto es lo que lo vigila sobre lo construido: si una versión nueva
+ * de Astro dejara de consultar esa opción, el guion volvería en línea y esto saldría en rojo.
+ */
+describe('Historia 26.6 — el filtro de los Directorios es un fichero, y solo en sus dos páginas', () => {
+  it('ningún `<script type="module">` de las dos construcciones lleva cuerpo', async () => {
+    let paginas = 0;
+    for (const proyecto of [await sitioMedido(), await sitioSinMedir()]) {
+      for (const [ruta, html] of paginasDe(proyecto)) {
+        paginas++;
+        const enLinea = guionesEnLineaConTipo(html).filter((g) => g.modulo);
+        expect(enLinea.map((g) => g.cuerpo.slice(0, 80)), ruta).toEqual([]);
+      }
+    }
+    expect(paginas).toBeGreaterThan(SLUGS.length);
+  }, 240_000);
+
+  it('`/autores/` y `/obras/`, y ninguna otra página, piden el filtro una vez con `<script type="module" src>`', async () => {
+    for (const proyecto of [await sitioMedido(), await sitioSinMedir()]) {
+      const paginas = paginasDe(proyecto);
+      for (const ruta of RUTAS_DEL_FILTRO) expect(paginas.has(ruta), ruta).toBe(true);
+      for (const [ruta, html] of paginas) {
+        const delFiltro = etiquetasDeGuionExterno(html).filter((e) => guionExternoDe(e.src)?.id === 'filtro');
+        if (!RUTAS_DEL_FILTRO.includes(ruta)) {
+          expect(delFiltro, ruta).toEqual([]);
+          continue;
+        }
+        expect(delFiltro, ruta).toHaveLength(1);
+        expect(delFiltro[0].etiqueta, ruta).toMatch(/\btype="module"/);
+        expect(delFiltro[0].src, ruta).toMatch(new RegExp(`^/_astro/${FICHERO_DEL_FILTRO}\\.`));
+        expect(existsSync(join(proyecto, 'dist', delFiltro[0].src)), delFiltro[0].src).toBe(true);
+      }
+    }
+  }, 240_000);
+
+  it('el fichero del filtro no lleva contenido, ni toca la dirección, el historial o la ventana', async () => {
+    const ficheros = (await ficherosDescargados()).get('filtro');
+    expect(ficheros, 'nadie pide el filtro').toBeDefined();
+    const fuente = [...ficheros!.values()].join('\n');
+    // El Corpus de la prueba entero —slugs, textos, el Autor, las Obras, el Tema, la Colección—:
+    // el modelo lo lee de la página, nunca lo lleva dentro.
+    for (const dato of [
+      ...SLUGS_DE_CITA,
+      ...TEXTOS_DE_CITA,
+      'Séneca',
+      'Sobre la brevedad de la vida',
+      'Cartas a Lucilio',
+      'El tiempo',
+      'Frases cortas para reflexionar',
+    ]) {
+      expect(fuente, `el filtro lleva «${dato}»`).not.toContain(dato);
+    }
+    expect(fuente).not.toMatch(/\blocation\b/);
+    expect(fuente).not.toMatch(/\bhistory\b/);
+    expect(fuente).not.toContain('requestAnimationFrame');
+    // Ni la ventana por ningún nombre, ni ninguna escucha de `click`: escucha `input` en su campo.
+    expect(fuente).not.toMatch(/\b(?:window|self|globalThis)\b/);
+    expect(fuente).not.toMatch(/(["'`])click\1/);
+    expect(fuente).not.toMatch(/innerHTML|outerHTML|insertAdjacentHTML|document\.write/);
+    // Y la pausa de tecleo, el valor de `PAUSA_DE_TECLEO_MS` que el empaquetado copia en el
+    // fichero. Esto no distingue la constante de un `700` escrito a mano —después de empaquetar
+    // son lo mismo—: que el guion la importe lo dice su fuente, y el valor lo fija la prueba de
+    // `filtro-del-directorio.test.ts`; esto solo vigila que el número que viaja sea ese.
+    expect(fuente).toMatch(new RegExp(`\\b${PAUSA_DE_TECLEO_MS}\\b`));
+  }, 240_000);
+});
+
 describe('Historia 23.1 — la Página de Cita no pierde su listón', () => {
   /*
    * Retro de la épica 7: el tope de la Historia 2.1 se medía solo en construcciones sin punto
@@ -2266,8 +2366,11 @@ describe('Historia 23.1 — la Página de Cita no pierde su listón', () => {
     const proyecto = await sitioMedido();
     const paginas = paginasDe(proyecto);
     const barrido = superficiesDelBarrido([...paginas.keys()]);
-    // Portada, Cita, Autor, Tema, Colección, Obra, búsqueda y 404: una por familia pública.
-    expect(barrido).toHaveLength(8);
+    // Portada, Cita, Autor, Tema, Colección, Obra, los dos Directorios (26.3, 26.4), búsqueda y
+    // 404: una por familia pública.
+    expect(barrido).toHaveLength(10);
+    expect(barrido).toContain('/autores');
+    expect(barrido).toContain('/obras');
     const muestra = [...barrido, CITA_SIN_IMAGEN];
 
     const huecos: string[] = [];
@@ -2877,7 +2980,10 @@ describe('Historia 23.7 — toda salida interna de `dist/` dice su zona', () => 
     ['/404', '/autor/seneca/', [{ zona: 'atribucion' }]],
     ['/404', '/obra/seneca/sobre-la-brevedad-de-la-vida/', [{ zona: 'atribucion' }]],
     ['/404', '/tema/el-tiempo/', [{ sinZona: 'chips-del-404' }]],
-    [CITA, '/autor/seneca/', [{ zona: 'atribucion' }]],
+    // Historia 24.6 — el Autor sale además por el cierre de «Más de Séneca», con la zona de las Rutas de salida.
+    // «De la misma obra» enlaza aquí también a la Obra y a otras Citas, con `misma-obra`, que es de otra
+    // épica y `esDeOtraEpica` aparta de estas filas: la mira (c) de `tests/unit/rutas-de-salida.test.ts`.
+    [CITA, '/autor/seneca/', [{ zona: 'atribucion' }, { zona: 'rutas-de-salida' }]],
     [CITA, '/obra/seneca/sobre-la-brevedad-de-la-vida/', [{ zona: 'atribucion' }]],
     [CITA, /^\/cita\//, [{ zona: 'rutas-de-salida' }]],
     [CITA, '/tema/el-tiempo/', [{ zona: 'chip-de-tema' }]],
@@ -2923,58 +3029,38 @@ describe('Historia 23.7 — toda salida interna de `dist/` dice su zona', () => 
   );
 
   /*
-   * Las dos ramas de respaldo de las Rutas de salida, que el corpus medido no alcanza —toda Cita
-   * suya tiene hermanas—, en un sitio aparte: una Cita sola de su Autor y sin Temas, en un sitio sin
-   * ningún Tema publicado, pinta el último recurso, «Sobre {Autor}», con la zona que la página da a
-   * sus Rutas de salida; y una sonda pinta el componente con Temas en el sitio —«Explorar por
-   * tema»—, cuyos chips llevan `chip-de-tema`, como los de una Cita. Una zona válida en la rama
-   * equivocada pasa `astro check` y todas las demás pruebas.
+   * Historia 24.6 — las Rutas de salida ya no tienen respaldo: «Explorar por tema» y «Sobre {Autor}»
+   * se retiraron. Una Cita sola de su Autor, de una Obra de una Cita y sin Temas, en un sitio sin
+   * ningún Tema publicado, no pinta Rutas de salida: ni `nav`, ni rótulo. Y sus demás enlaces —la
+   * cabecera, la Atribución…— se juzgan como en el sitio medido.
    */
   const CITA_SOLA = 'seneca-sola';
-  const SONDA_DE_RESPALDO = `---
-import RutasDeSalida from '../components/RutasDeSalida.astro';
-const autor = { slug: 'seneca', nombre: 'Séneca' };
-const temasDelSitio = [{ slug: 'el-tiempo', nombre: 'El tiempo' }];
----
-<!doctype html>
-<html lang="es"><head><meta charset="utf-8" /><title>Sonda</title></head>
-<body><main><RutasDeSalida autor={autor} relacionadas={[]} chips={[]} temasDelSitio={temasDelSitio} zona="rutas-de-salida" /></main></body></html>
-`;
   let respaldo: Promise<string> | undefined;
   const sitioDeRespaldo = () =>
     (respaldo ??= construirConCorpus(
       { 'autores/seneca.yml': AUTOR_VALIDO, [`citas/${CITA_SOLA}.md`]: citaValida({ slug: CITA_SOLA, temas: [] }) },
-      { entorno: { MEDICION_ENDPOINT: ENDPOINT }, paginas: { 'sonda-de-respaldo.astro': SONDA_DE_RESPALDO } },
+      { entorno: { MEDICION_ENDPOINT: ENDPOINT } },
     ).then((resultado) => {
       aLimpiar.push(resultado.proyecto);
       expect(resultado.codigo, resultado.salida).toBe(0);
       return resultado.proyecto;
     }));
 
-  it('las ramas de respaldo de las Rutas de salida: «Sobre {Autor}» sale por su zona, y «Explorar por tema», por `chip-de-tema`', async () => {
+  it('una Cita sola de su Autor, de una Obra de una Cita y sin Temas no pinta Rutas de salida', async () => {
     const paginas = paginasDe(await sitioDeRespaldo());
-    // El resto de enlaces de este sitio —la cabecera, la Atribución…— se juzga como en el medido.
     const juicio = juzgarEnlacesDeMain(paginas);
     expect(juicio.sinDeclarar).toEqual([]);
     expect(juicio.sinMedirEnLaMismaPestaña).toEqual([]);
     expect([...paginas.keys()].filter((ruta) => cargaElFichero(paginas.get(ruta)!))).toContain(`/cita/${CITA_SOLA}/`);
     const cita = paginas.get(`/cita/${CITA_SOLA}/`);
     expect(cita, 'la Cita sola no está en dist/').toBeDefined();
-    expect(cita).toContain('Sobre Séneca');
+    expect(cita).not.toContain('class="salidas"');
+    expect(cita).not.toContain('Sobre Séneca');
+    expect(cita).not.toContain('Explorar por tema');
     const deLaCita = enlacesDe(cita!).filter((e) => e.enMain);
-    // El Autor sale dos veces: por la Atribución y por el último recurso, cada uno con la suya.
-    expect(deLaCita.filter((e) => e.href === '/autor/seneca/').map((e) => e.declaracion)).toEqual([
-      { zona: 'atribucion' },
-      { zona: 'rutas-de-salida' },
-    ]);
+    // El Autor sale solo por la Atribución.
+    expect(deLaCita.filter((e) => e.href === '/autor/seneca/').map((e) => e.declaracion)).toEqual([{ zona: 'atribucion' }]);
     expect(deLaCita.filter((e) => e.href?.startsWith('/tema/'))).toEqual([]);
-
-    const sonda = paginas.get('/sonda-de-respaldo/');
-    expect(sonda, 'la sonda no está en dist/').toBeDefined();
-    expect(sonda).toContain('Explorar por tema');
-    expect(enlacesDe(sonda!).filter((e) => e.enMain).map((e) => [e.href, e.declaracion])).toEqual([
-      ['/tema/el-tiempo/', { zona: 'chip-de-tema' }],
-    ]);
   }, 240_000);
 
   it('en todo `dist/` las zonas son del vocabulario, están las once de hoy y van en un contenedor, nunca en el enlace', async () => {
@@ -3060,11 +3146,27 @@ describe('Historia 23.1 — toda isla que anuncia lleva `anunciar`', () => {
      * `anunciar`, no el que solo lleva su texto, que `guionQueAnuncia` mete siempre.
      */
     let regionesVistas = 0;
+    /*
+     * Historia 26.6 — el filtro de los Directorios anuncia su recuento con el segundo ritmo
+     * (`ritmoDeTecleo`), desde un fichero y no en línea: la página que lo pide cuenta su guion
+     * como anunciante de la región que lleva en el HTML inicial, **si el fichero anuncia**: busca
+     * la región `role="status"`, programa la frase y escribe su `textContent`. Lo que hace con
+     * ella lo juzga ejecutándolo `tests/unit/ayuda/filtroEjecutado.ts`; aquí basta con que una
+     * etiqueta sola no cuente como anunciante.
+     */
+    const fuenteDelFiltro = [...((await ficherosDescargados()).get('filtro')?.values() ?? [])].join('\n');
+    const filtroAnuncia =
+      fuenteDelFiltro.includes('[role="status"]') && /\bsetTimeout\(/.test(fuenteDelFiltro) && /\.textContent\s*=(?!=)/.test(fuenteDelFiltro);
+    expect(filtroAnuncia, 'el fichero del filtro no anuncia por su región').toBe(true);
     for (const [ruta, html] of paginasDe(await sitioMedido())) {
       const regiones = (html.match(/\brole\s*=\s*["']?status\b/gi) ?? []).length;
-      const anunciantes = guionesEnLinea(html).filter(
-        (g) => colapsado(g).includes(ANUNCIAR) && /\banunciar\(/.test(sinAnunciar(g)),
-      ).length;
+      const delFiltro = filtroAnuncia
+        ? etiquetasDeGuionExterno(html).filter((e) => guionExternoDe(e.src)?.id === 'filtro').length
+        : 0;
+      const anunciantes =
+        delFiltro +
+        guionesEnLinea(html).filter((g) => colapsado(g).includes(ANUNCIAR) && /\banunciar\(/.test(sinAnunciar(g)))
+          .length;
       regionesVistas += regiones;
       expect(anunciantes, `${ruta}: ${regiones} regiones de estado y ${anunciantes} guiones con anunciar`).toBeGreaterThanOrEqual(
         regiones,
@@ -3860,5 +3962,132 @@ describe('Historia 23.8 — una búsqueda cuenta una vez, cuando se asienta', ()
       otra.ocultar();
       expect(otra.emitidos()).toEqual([[BUSQUEDA, '0', NINGUNO], [SIN_RESULTADOS, 'zzz']]);
     }, 240_000);
+
+    describe('Historia 26.2 — el tipo llega por el filtro y Pagefind se configura antes de cada búsqueda', () => {
+      /** Una sola fila, con los datos que se digan, para la consulta «uno». */
+      const conUnDato = (dato: { url: string; meta?: Record<string, unknown>; filters?: Record<string, unknown> }) =>
+        isla({ respuestas: () => ({ total: 1, datos: () => dato }) });
+      const SERIF = { clases: ['titulo'], autor: undefined, nombre: null };
+
+      it.each([
+        [
+          'Directorio',
+          { url: '/autores/', meta: { title: 'Autores' }, filters: { tipo: ['directorio'] } },
+          { tipo: 'directorio', rotulo: 'Directorio', titulo: 'Autores', clases: ['titulo', 'en-sans'], autor: undefined, nombre: 'Directorio: Autores' },
+        ],
+        [
+          'Portada',
+          { url: '/', meta: { title: MARCA_DEL_SITIO }, filters: { tipo: ['portada'] } },
+          { tipo: 'portada', rotulo: 'Portada', titulo: MARCA_DEL_SITIO, clases: ['titulo', 'en-sans'], autor: undefined, nombre: `Portada: ${MARCA_DEL_SITIO}` },
+        ],
+        [
+          'Obra con Autor',
+          { url: '/obra/seneca/cartas/', meta: { title: 'Cartas', autor: ' Séneca ' }, filters: { tipo: ['obra'] } },
+          { tipo: 'obra', rotulo: 'Obra', titulo: 'Cartas', clases: ['titulo', 'en-sans'], autor: 'Séneca', nombre: 'Obra: Cartas, de Séneca' },
+        ],
+        [
+          'Obra sin Autor',
+          { url: '/obra/seneca/cartas/', meta: { title: 'Cartas' }, filters: { tipo: ['obra'] } },
+          { tipo: 'obra', rotulo: 'Obra', titulo: 'Cartas', clases: ['titulo', 'en-sans'], autor: undefined, nombre: 'Obra: Cartas' },
+        ],
+        [
+          'Cita',
+          { url: '/cita/una/', meta: { title: 'Una', autor: 'Nadie' }, filters: { tipo: ['cita'] } },
+          { tipo: 'cita', rotulo: 'Cita', titulo: 'Una', ...SERIF },
+        ],
+        [
+          'Autor',
+          { url: '/autor/seneca/', meta: { title: 'Séneca' }, filters: { tipo: ['autor'] } },
+          { tipo: 'autor', rotulo: 'Autor', titulo: 'Séneca', ...SERIF },
+        ],
+        [
+          'Tema',
+          { url: '/tema/la-vida/', meta: { title: 'La vida' }, filters: { tipo: ['tema'] } },
+          { tipo: 'tema', rotulo: 'Tema', titulo: 'La vida', ...SERIF },
+        ],
+        [
+          'Colección',
+          { url: '/coleccion/x/', meta: { title: 'X' }, filters: { tipo: ['coleccion'] } },
+          { tipo: 'coleccion', rotulo: 'Colección', titulo: 'X', ...SERIF },
+        ],
+        [
+          'tipo desconocido',
+          { url: '/x/', meta: { title: 'X' }, filters: { tipo: ['foo'] } },
+          { tipo: 'foo', rotulo: 'Cita', titulo: 'X', ...SERIF },
+        ],
+        [
+          'sin filtros',
+          { url: '/x/', meta: { title: 'X' } },
+          { tipo: 'cita', rotulo: 'Cita', titulo: 'X', ...SERIF },
+        ],
+        [
+          'filtro de tipo vacío',
+          { url: '/x/', meta: { title: 'X' }, filters: { tipo: [] } },
+          { tipo: 'cita', rotulo: 'Cita', titulo: 'X', ...SERIF },
+        ],
+        [
+          'el tipo en la metadata —el medio viejo— no cuenta',
+          { url: '/obra/a/b/', meta: { title: 'B', tipo: 'obra' } },
+          { tipo: 'cita', rotulo: 'Cita', titulo: 'B', ...SERIF },
+        ],
+        [
+          'Directorio sin título',
+          { url: '/autores/', filters: { tipo: ['directorio'] } },
+          { tipo: 'directorio', rotulo: 'Directorio', titulo: '/autores/', clases: ['titulo', 'en-sans'], autor: undefined, nombre: null },
+        ],
+        [
+          'Portada sin título',
+          { url: '/', meta: {}, filters: { tipo: ['portada'] } },
+          { tipo: 'portada', rotulo: 'Portada', titulo: '/', clases: ['titulo', 'en-sans'], autor: undefined, nombre: null },
+        ],
+      ])('se pinta: %s', async (_, dato, esperado) => {
+        const entorno = await conUnDato(dato);
+        await entorno.teclear('uno');
+        expect(entorno.resultados()).toEqual([esperado]);
+      }, 240_000);
+
+      it('los rótulos, el filtro, los tipos en sans y las opciones del guion salen de `tipoDeResultado.ts`', async () => {
+        const guion = await islaConstruida();
+        expect(guion).toContain(`const ETIQUETA = ${JSON.stringify(ETIQUETAS_DE_RESULTADO)};`);
+        expect(guion).toContain(`const PAGEFIND = ${JSON.stringify(OPCIONES_DE_PAGEFIND)};`);
+        expect(guion).toContain(`const FILTRO = ${JSON.stringify(FILTRO_DE_TIPO)};`);
+        expect(guion).toContain(`const EN_SANS = ${JSON.stringify(TIPOS_CON_TITULO_EN_SANS)};`);
+      }, 240_000);
+
+      it('toda búsqueda va precedida de `options` con las opciones de Pagefind', async () => {
+        const entorno = await isla();
+        await entorno.teclear('viento');
+        await entorno.teclear('lluvia');
+        await entorno.teclear('zzz');
+        const llamadas = entorno.llamadas();
+        const busquedas = llamadas.flatMap((l, i) => (l[0] === 'search' ? [i] : []));
+        expect(busquedas).toHaveLength(3);
+        for (const i of busquedas) expect(llamadas[i - 1]).toEqual(['options', OPCIONES_DE_PAGEFIND]);
+        expect(llamadas.filter((l) => l[0] === 'init')).toHaveLength(1);
+      }, 240_000);
+
+      it.each(['search', 'data'] as const)(
+        'tras un fallo en %s y su `destroy()`, la búsqueda siguiente vuelve a aplicar las opciones antes de buscar',
+        async (falla) => {
+          const entorno = await isla();
+          entorno.fallar(falla);
+          await entorno.teclear('viento');
+          expect(entorno.destrucciones()).toBe(1);
+          entorno.fallar();
+          await entorno.teclear('lluvia');
+          expect(entorno.pintados()).toHaveLength(3);
+          const llamadas = entorno.llamadas();
+          const destruida = llamadas.findIndex((l) => l[0] === 'destroy');
+          expect(destruida).toBeGreaterThan(0);
+          const despues = llamadas.slice(destruida + 1);
+          expect(despues).toEqual([
+            ['options', OPCIONES_DE_PAGEFIND],
+            ['search', 'lluvia'],
+          ]);
+          expect(entorno.importaciones()).toEqual(['/pagefind/pagefind.js']);
+        },
+        240_000,
+      );
+    });
   });
 });

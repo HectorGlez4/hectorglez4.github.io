@@ -25,13 +25,14 @@ import type { Cita } from '../../src/lib/publicado.ts';
  * Séneca** y la prueba de «solo del mismo Autor» pasaba sin comprobar nada. Se vio en cuanto
  * el reparto empezó a llegar al final de la lista.
  */
-const cita = (slug: string, temas: string[] = ['el-saber']): Cita =>
+const cita = (slug: string, temas: string[] = ['el-saber'], obra?: string): Cita =>
   ({
     slug,
     autor: slug.startsWith('marti-') ? 'jose-marti' : 'seneca',
     texto: slug,
     temas,
     procedencia: {},
+    ...(obra !== undefined ? { obra: { nombre: obra, titulo: obra } } : {}),
   }) as unknown as Cita;
 
 /** Un Autor con muchas Citas, en orden de slug como las entrega el conjunto publicable. */
@@ -40,7 +41,7 @@ const MUCHAS = Array.from({ length: 40 }, (_, i) => cita(`seneca-${String(i).pad
 describe('UX-DR17 — cuáles son las Citas relacionadas', () => {
   it('son del mismo Autor y nunca la propia', () => {
     const otras = [...MUCHAS, cita('marti-una'), cita('marti-otra')];
-    const salida = citasRelacionadas(otras, MUCHAS[0], 4);
+    const salida = citasRelacionadas(otras, MUCHAS[0], 4, undefined);
 
     expect(salida).toHaveLength(4);
     expect(salida.every((c) => c.slug.startsWith('seneca-'))).toBe(true);
@@ -52,11 +53,11 @@ describe('UX-DR17 — cuáles son las Citas relacionadas', () => {
     const base = cita('seneca-00-base', ['la-virtud']);
     const otras = [base, ...MUCHAS.slice(1), conTema];
 
-    expect(citasRelacionadas(otras, base, 4).map((c) => c.slug)).toContain('seneca-zz-comparte');
+    expect(citasRelacionadas(otras, base, 4, undefined).map((c) => c.slug)).toContain('seneca-zz-comparte');
   });
 
   it('no son las cuatro primeras del alfabeto: se reparten por la obra del Autor', () => {
-    const salida = citasRelacionadas(MUCHAS, MUCHAS[0], 4).map((c) => c.slug);
+    const salida = citasRelacionadas(MUCHAS, MUCHAS[0], 4, undefined).map((c) => c.slug);
     const primeras = MUCHAS.slice(1, 5).map((c) => c.slug);
 
     expect(salida).not.toEqual(primeras);
@@ -65,22 +66,43 @@ describe('UX-DR17 — cuáles son las Citas relacionadas', () => {
   });
 
   it('el reparto es determinista: dos construcciones del mismo commit dan el mismo sitio', () => {
-    const una = citasRelacionadas(MUCHAS, MUCHAS[3], 4).map((c) => c.slug);
-    const otra = citasRelacionadas(MUCHAS, MUCHAS[3], 4).map((c) => c.slug);
+    const una = citasRelacionadas(MUCHAS, MUCHAS[3], 4, undefined).map((c) => c.slug);
+    const otra = citasRelacionadas(MUCHAS, MUCHAS[3], 4, undefined).map((c) => c.slug);
 
     expect(una).toEqual(otra);
   });
 
   it('con pocas candidatas las devuelve todas y sin repetir', () => {
     const pocas = MUCHAS.slice(0, 3);
-    const salida = citasRelacionadas(pocas, pocas[0], 4);
+    const salida = citasRelacionadas(pocas, pocas[0], 4, undefined);
 
     expect(salida).toHaveLength(2);
     expect(new Set(salida.map((c) => c.slug)).size).toBe(2);
   });
 
   it('nunca devuelve la misma Cita dos veces', () => {
-    const salida = citasRelacionadas(MUCHAS, MUCHAS[10], 4);
+    const salida = citasRelacionadas(MUCHAS, MUCHAS[10], 4, undefined);
     expect(new Set(salida.map((c) => c.slug)).size).toBe(salida.length);
+  });
+
+  /*
+   * Historia 24.6 — «Más de {Autor}» deja fuera las de su Obra, que tienen «De la misma obra», y
+   * la que ofrece «Siguiente»: ninguna tarjeta del pie repite lo que la página ya enlaza.
+   */
+  it('24.6 — excluye las Citas de la misma Obra', () => {
+    const base = cita('seneca-00-base', ['el-saber'], 'seneca--cartas');
+    const deLaObra = Array.from({ length: 6 }, (_, i) => cita(`seneca-cartas-${i}`, ['el-saber'], 'seneca--cartas'));
+    const deOtra = Array.from({ length: 3 }, (_, i) => cita(`seneca-ira-${i}`, ['el-saber'], 'seneca--ira'));
+    const sinObra = cita('seneca-suelta');
+    const salida = citasRelacionadas([base, ...deLaObra, ...deOtra, sinObra], base, 4, undefined).map((c) => c.slug);
+
+    expect(salida.sort()).toEqual(['seneca-ira-0', 'seneca-ira-1', 'seneca-ira-2', 'seneca-suelta']);
+  });
+
+  it('24.6 — excluye la Cita que ofrece «Siguiente»', () => {
+    const pocas = MUCHAS.slice(0, 4);
+    const salida = citasRelacionadas(pocas, pocas[0], 4, pocas[2]).map((c) => c.slug);
+
+    expect(salida).toEqual([pocas[1].slug, pocas[3].slug]);
   });
 });

@@ -10,8 +10,19 @@
  * las carga ninguna colección (AD-2)— y el informe dice, por cada una que no se publica,
  * qué regla incumplió. Sin eso, incorporar un lote de cincuenta obliga a revisarlas todas.
  *
+ * **La excepción es la Cita sin Tema publicado** (Historia 26.8, NFR-5): completa, pero ninguno
+ * de sus Temas llegaría a `MIN_CITAS_POR_TEMA` ni contando el lote entero. Esa **no se escribe en
+ * ningún sitio** —ni `corpus/citas/` ni `corpus/_revision/`—: no le falta nada que completar en
+ * revisión, le falta un Tema en el lote, y el informe la nombra con sus Temas y sus recuentos. Un
+ * Tema **desconocido**, en cambio, es una regla incumplida de la Cita y la manda a revisión, como
+ * siempre.
+ *
  * Uso:
- *   npx tsx tools/alta.ts <lote.yaml> [--corpus corpus] [--seco]
+ *   npx tsx tools/alta.ts <lote.yaml> [--corpus corpus] [--seco] [--con-duplicados]
+ *
+ * Sale con 1 si alguna entrada se quedó sin escribir por no tener Tema publicado —también en
+ * seco— o si alguna publicada se quedó sin él; con 2 si falta el lote o no es una lista; y con 0
+ * en lo demás, también con Citas en revisión.
  */
 
 import { readFile } from 'node:fs/promises';
@@ -31,6 +42,8 @@ import {
   type Rutas,
 } from './lib/corpus.ts';
 import { aplicarFichaDeObra, resolverFichaDeObra, type PlanDeFicha } from './lib/obras.ts';
+import { motivoSinTemaPublicado, temaPublicadoConLaPasada } from './lib/alcance.ts';
+import type { TemaBajoUmbral } from '../src/lib/publicado.ts';
 
 /** Una entrada del lote, tal como la escribe el editor. Sin slug: lo genera el alta. */
 export interface EntradaDeLote {
@@ -89,6 +102,21 @@ export interface InformeDeAlta {
    * editor decida, y se incorporan tal cual si vuelve a ejecutar con `--con-duplicados`.
    */
   posiblesDuplicados: PosibleDuplicado[];
+  /**
+   * Entradas que se publicarían pero no tendrían **ningún Tema publicado** —contando las
+   * publicadas y las que este mismo lote publica— — Historia 26.8, NFR-5. **No se escriben en
+   * ningún sitio**, ni en `corpus/citas/` ni en `corpus/_revision/`: el lote se corrige y se
+   * vuelve a pasar. Con alguna, la orden sale con 1, también en seco. Se nombran por su texto y
+   * no por un slug: no se escriben, así que no tienen ninguno, y el que tuvieron en el ensayo lo
+   * puede llevar ya otra entrada del lote que sí se publicó.
+   */
+  rechazadasPorTema: { texto: string; temas: TemaBajoUmbral[]; motivos: string[] }[];
+  /**
+   * Publicadas que se quedaron sin ningún Tema publicado porque la pasada que escribe discrepó del
+   * ensayo —una colisión entre dos Fichas de Obra nuevas del mismo lote mandó a revisión a otra
+   * de la que dependía su Tema—. Ya están en `corpus/citas/`. Vacío casi siempre — Historia 26.8.
+   */
+  publicadasSinTema?: { slug: string; temas: TemaBajoUmbral[]; motivos: string[] }[];
 }
 
 /**
@@ -109,186 +137,257 @@ export async function darDeAltaLote(
 
   const slugsDeAutor = new Set(autores.map((a) => a.slug));
   const slugsDeTema = new Set(temas.map((t) => t.slug));
-  const slugsOcupados = new Set(yaPublicadas.map((c) => c.slug));
-  // El conjunto publicado tal como va quedando, para la grafía por omisión de una ficha nueva.
-  const publicadasParaObra: { autor: string; procedencia?: { obra?: string } }[] = [
-    ...yaPublicadas,
-  ];
 
-  // FR-14 — el índice de comparación usa la forma canónica de AD-3, la misma que la
-  // búsqueda. Ese es justo el punto: si duplicados y búsqueda usaran criterios distintos,
-  // el corpus podría acabar con dos Citas que la búsqueda presenta como una sola.
-  const yaEnCorpus = new Map<string, { slug: string; donde: PosibleDuplicado['donde'] }>();
-  for (const c of enRevisionYa) {
-    yaEnCorpus.set(normalizar(c.texto), { slug: c.slug, donde: 'en revisión' });
-  }
-  // Las publicadas se indexan después para que ganen: si el mismo texto está en los dos
-  // sitios, lo que el editor necesita saber es que ya está publicado.
-  for (const c of yaPublicadas) {
-    yaEnCorpus.set(normalizar(c.texto), { slug: c.slug, donde: 'publicadas' });
-  }
-
-  const informe: InformeDeAlta = {
-    publicadas: [],
-    enRevision: [],
-    autoresDesconocidos: [],
-    posiblesDuplicados: [],
-  };
-
-  for (const entrada of lote) {
-    const texto = entrada.texto ?? '';
-    const motivos: string[] = [];
-
-    // ── Duplicados: se comprueba antes de escribir nada (FR-14) ──
-    const canonico = normalizar(texto);
-    const yaEsta = canonico === '' ? undefined : (yaEnCorpus.get(canonico) ?? contenidaEn(canonico, yaEnCorpus));
-    if (yaEsta && !opciones.conDuplicados) {
-      // No se escribe y no se descarta: se señala y el editor decide. El sistema no
-      // tiene criterio para saber si dos textos equivalentes son la misma Cita o dos
-      // ediciones legítimas de la misma frase.
-      informe.posiblesDuplicados.push({ texto, coincideCon: yaEsta.slug, donde: yaEsta.donde });
-      continue;
-    }
-
-    // ── El Autor se resuelve antes que nada: sin él no hay slug que generar ──
-    const referenciaAutor = entrada.autor ?? '';
-    const slugAutor = slugsDeAutor.has(referenciaAutor)
-      ? referenciaAutor
-      : slugDeAutor(referenciaAutor);
-
-    if (referenciaAutor === '') {
-      motivos.push('Regla incumplida: falta el Autor de la Cita.');
-    } else if (!slugsDeAutor.has(slugAutor)) {
-      // FR-15 — se señala, no se crea. Un Autor creado aquí saldría sin año de
-      // fallecimiento, y ese hueco bloquearía después la publicación de todas sus
-      // Citas sin que nadie recuerde de dónde salió.
-      motivos.push(
-        `El Autor «${referenciaAutor}» no existe en el corpus. Créelo antes con ` +
-          `«npx tsx tools/autor.ts crear», con su año de fallecimiento. El alta no lo ` +
-          'crea por su cuenta para no dejar un Autor incompleto.',
-      );
-      if (!informe.autoresDesconocidos.includes(referenciaAutor)) {
-        informe.autoresDesconocidos.push(referenciaAutor);
-      }
-    }
-
-    // ── Temas: se avisa de los desconocidos, pero no impiden publicar ──
-    const temasResueltos = (entrada.temas ?? []).map((t) =>
-      slugsDeTema.has(t) ? t : slugDeTema(t),
+  /*
+   * Historia 26.8 — antes de escribir nada se **ensaya** el lote entero (`recorrer` sin
+   * escribir) y se mira qué entradas publicadas tendrían algún Tema publicado, contando lo ya
+   * publicado y lo que el mismo lote publicaría (`temaPublicadoConLaPasada`). Las que no, se
+   * apartan y se vuelve a ensayar sin ellas —apartar una cambia el resto del recorrido: libera
+   * su slug, o deja de ser el primero de un duplicado dentro del lote—, hasta que nada cambia.
+   * Solo entonces se recorre de verdad, escribiendo, sin las apartadas: no se escriben en ningún
+   * sitio. En seco el ensayo es el informe.
+   *
+   * El ensayo resuelve las Fichas de Obra contra el disco de antes del lote; la pasada real, tras
+   * cada Cita escrita. Solo una colisión de nombre entre dos fichas nuevas del mismo lote los haría
+   * discrepar: esa entrada va a revisión con el motivo, como siempre, y lo que la pasada real dejó
+   * publicado se vuelve a juzgar al final (`publicadasSinTema`).
+   */
+  /** Las apartadas, con el recuento de sus Temas en la vuelta del ensayo que las apartó. */
+  const apartadas = new Map<number, { texto: string; temas: TemaBajoUmbral[] }>();
+  let ensayo = await recorrer(false);
+  for (;;) {
+    const { rechazadas } = temaPublicadoConLaPasada(
+      yaPublicadas,
+      ensayo.aPublicar.map((p) => ({ clave: p.indice, temas: p.temas })),
+      temas,
     );
-    const temasDesconocidos = temasResueltos.filter((t) => !slugsDeTema.has(t));
-    if (temasDesconocidos.length > 0) {
-      motivos.push(
-        `Tema desconocido: ${temasDesconocidos.map((t) => `«${t}»`).join(', ')}. ` +
-          'Créelo antes o retírelo de la Cita.',
-      );
+    if (rechazadas.length === 0) break;
+    for (const rechazada of rechazadas) {
+      const apartada = ensayo.aPublicar.find((p) => p.indice === rechazada.clave)!;
+      apartadas.set(rechazada.clave, { texto: apartada.texto, temas: rechazada.temas });
+    }
+    ensayo = await recorrer(false);
+  }
+  const { informe, aPublicar } = opciones.seco ? ensayo : await recorrer(true);
+  if (!opciones.seco) {
+    const sueltas = temaPublicadoConLaPasada(
+      yaPublicadas,
+      aPublicar.map((p) => ({ clave: p.slug, temas: p.temas })),
+      temas,
+    ).rechazadas;
+    if (sueltas.length > 0) {
+      informe.publicadasSinTema = sueltas.map((s) => ({
+        slug: s.clave,
+        temas: s.temas,
+        motivos: [motivoSinTemaPublicado(s.temas)],
+      }));
+    }
+  }
+  /*
+   * El recuento del parte es el de la vuelta del ensayo que apartó a cada una —lo publicado más
+   * lo que esa vuelta publicaba, la propia incluida—, como en `aprobar`: «tendría 14» quiere decir
+   * que ni con todo lo que se pidió llega. No se recalcula al final sumando las apartadas de
+   * vueltas distintas: la de una vuelta puede ser el duplicado de la de otra, y sumarlas daría un
+   * recuento que ninguna pasada alcanza.
+   */
+  informe.rechazadasPorTema = [...apartadas.entries()]
+    .sort(([a], [b]) => a - b)
+    .map(([, { texto, temas: suyos }]) => ({ texto, temas: suyos, motivos: [motivoSinTemaPublicado(suyos)] }));
+  return informe;
+
+  /**
+   * Una pasada por el lote sin las entradas apartadas. Con `escribir`, escribe como siempre; sin
+   * él, decide lo mismo sin tocar el disco. Devuelve el informe y lo que se publica, con sus Temas.
+   */
+  async function recorrer(escribir: boolean): Promise<{
+    informe: InformeDeAlta;
+    aPublicar: { indice: number; texto: string; slug: string; temas: string[] }[];
+  }> {
+    const aPublicar: { indice: number; texto: string; slug: string; temas: string[] }[] = [];
+    const slugsOcupados = new Set(yaPublicadas.map((c) => c.slug));
+    // El conjunto publicado tal como va quedando, para la grafía por omisión de una ficha nueva.
+    const publicadasParaObra: { autor: string; procedencia?: { obra?: string } }[] = [
+      ...yaPublicadas,
+    ];
+
+    // FR-14 — el índice de comparación usa la forma canónica de AD-3, la misma que la
+    // búsqueda. Ese es justo el punto: si duplicados y búsqueda usaran criterios distintos,
+    // el corpus podría acabar con dos Citas que la búsqueda presenta como una sola.
+    const yaEnCorpus = new Map<string, { slug: string; donde: PosibleDuplicado['donde'] }>();
+    for (const c of enRevisionYa) {
+      yaEnCorpus.set(normalizar(c.texto), { slug: c.slug, donde: 'en revisión' });
+    }
+    // Las publicadas se indexan después para que ganen: si el mismo texto está en los dos
+    // sitios, lo que el editor necesita saber es que ya está publicado.
+    for (const c of yaPublicadas) {
+      yaEnCorpus.set(normalizar(c.texto), { slug: c.slug, donde: 'publicadas' });
     }
 
-    // ── Las reglas de admisión, las mismas que aplica el build ──
-    const slugBase = slugDeCita(slugAutor, texto);
-    const candidata = {
-      texto,
-      autor: slugAutor,
-      temas: temasResueltos,
-      slug: slugLibre(slugBase, slugsOcupados),
-      procedencia: entrada.procedencia,
-      estadoDerechos: 'dominio-público' as const,
-      // Se pasa tal cual y la valida la misma puerta que el resto: un `fuente:` a medias
-      // manda la Cita a revisión con la regla incumplida escrita, no al corpus.
-      ...(entrada.fuente !== undefined ? { fuente: entrada.fuente } : {}),
-      // Solo se registra el sí. El esquema ya da `false` por defecto, así que escribir
-      // `aptaParaPortada: false` en cada Cita del corpus sería ruido que además invita
-      // a leerlo como una decisión tomada, cuando es la ausencia de decisión.
-      ...(entrada.aptaParaPortada === true ? { aptaParaPortada: true } : {}),
+    const informe: InformeDeAlta = {
+      publicadas: [],
+      enRevision: [],
+      autoresDesconocidos: [],
+      posiblesDuplicados: [],
+      rechazadasPorTema: [],
     };
 
-    const validada = citaAdmisible.safeParse(candidata);
-    if (!validada.success) {
-      for (const issue of validada.error.issues) {
-        const campo = issue.path.join('.');
-        motivos.push(campo ? `${campo}: ${issue.message}` : issue.message);
+    for (const [indice, entrada] of lote.entries()) {
+      if (apartadas.has(indice)) continue;
+      const texto = entrada.texto ?? '';
+      const motivos: string[] = [];
+
+      // ── Duplicados: se comprueba antes de escribir nada (FR-14) ──
+      const canonico = normalizar(texto);
+      const yaEsta = canonico === '' ? undefined : (yaEnCorpus.get(canonico) ?? contenidaEn(canonico, yaEnCorpus));
+      if (yaEsta && !opciones.conDuplicados) {
+        // No se escribe y no se descarta: se señala y el editor decide. El sistema no
+        // tiene criterio para saber si dos textos equivalentes son la misma Cita o dos
+        // ediciones legítimas de la misma frase.
+        informe.posiblesDuplicados.push({ texto, coincideCon: yaEsta.slug, donde: yaEsta.donde });
+        continue;
       }
-    }
 
-    /*
-     * Historia 11.2 — el alta no fabrica builds rotos.
-     *
-     * Publicar una Cita sin Fuente en `corpus/citas/` mataba la construcción siguiente:
-     * la herramienta escribía el fichero, informaba de éxito, y el fallo aparecía después
-     * en un sitio distinto y en boca de otra puerta. Aquí se aplica **la misma** regla que
-     * aplicará el build —importada, no copiada—, así que la Cita se queda en revisión con
-     * lo que le falta escrito al lado.
-     */
-    const sinDocumento = motivoParaNoPublicar(candidata);
-    if (sinDocumento !== undefined) motivos.push(sinDocumento);
+      // ── El Autor se resuelve antes que nada: sin él no hay slug que generar ──
+      const referenciaAutor = entrada.autor ?? '';
+      const slugAutor = slugsDeAutor.has(referenciaAutor)
+        ? referenciaAutor
+        : slugDeAutor(referenciaAutor);
 
-    const nombreFichero = nombreDeFicheroDeCita(slugAutor, candidata.slug);
-
-    /*
-     * Historia 22.1 — la Ficha de Obra, en el mismo gesto en que se publica (AD-25).
-     *
-     * Solo para lo que se va a publicar: una candidata que va a revisión no crea ficha. Se
-     * **resuelve** en solo lectura antes de escribir la Cita —también en seco, para que el
-     * seco y el real no discrepen ante una colisión—, y se escribe justo **después** de que
-     * la Cita esté escrita. Si no se puede asegurar sin decidir, la Cita va a revisión con
-     * el motivo, porque publicada sin ficha rompería la construcción siguiente.
-     */
-    const obraDeclarada = validada.success ? validada.data.procedencia?.obra : undefined;
-    let plan: PlanDeFicha | undefined;
-    if (motivos.length === 0 && validada.success && typeof obraDeclarada === 'string') {
-      plan = await resolverFichaDeObra(rutas, {
-        autor: slugAutor,
-        obra: obraDeclarada,
-        citasPublicadas: [
-          ...publicadasParaObra,
-          { autor: slugAutor, procedencia: { obra: obraDeclarada } },
-        ],
-      });
-      if (!plan.ok) motivos.push(...plan.motivos);
-    }
-
-    if (motivos.length > 0 || !validada.success) {
-      // A revisión con lo que se sepa. El fichero conserva el trabajo hecho para que
-      // completarlo sea rellenar un campo, no volver a teclear la Cita.
-      const ruta = opciones.seco
-        ? null
-        : await escribirCita(rutas.revision, nombreFichero, candidata);
-      informe.enRevision.push({ texto, ruta, motivos });
-      if (canonico !== '') {
-        yaEnCorpus.set(canonico, { slug: candidata.slug, donde: 'el propio lote' });
-      }
-      continue;
-    }
-
-    const ruta = opciones.seco
-      ? ''
-      : await escribirCita(rutas.citas, nombreFichero, aRegistroDeCita(validada.data));
-    slugsOcupados.add(candidata.slug);
-    if (!opciones.seco) {
-      // Solo lo que de verdad se publicó cuenta para la grafía por omisión.
-      publicadasParaObra.push({ autor: slugAutor, procedencia: validada.data.procedencia });
-      if (plan !== undefined) {
-        const ficha = await aplicarFichaDeObra(rutas, plan);
-        if (!ficha.ok) {
-          informe.fichasSinAsegurar = [
-            ...(informe.fichasSinAsegurar ?? []),
-            { slug: candidata.slug, motivos: ficha.motivos },
-          ];
+      if (referenciaAutor === '') {
+        motivos.push('Regla incumplida: falta el Autor de la Cita.');
+      } else if (!slugsDeAutor.has(slugAutor)) {
+        // FR-15 — se señala, no se crea. Un Autor creado aquí saldría sin año de
+        // fallecimiento, y ese hueco bloquearía después la publicación de todas sus
+        // Citas sin que nadie recuerde de dónde salió.
+        motivos.push(
+          `El Autor «${referenciaAutor}» no existe en el corpus. Créelo antes con ` +
+            `«npx tsx tools/autor.ts crear», con su año de fallecimiento. El alta no lo ` +
+            'crea por su cuenta para no dejar un Autor incompleto.',
+        );
+        if (!informe.autoresDesconocidos.includes(referenciaAutor)) {
+          informe.autoresDesconocidos.push(referenciaAutor);
         }
       }
-    }
-    // Lo aceptado entra en el índice: así un lote que repite la misma Cita dos veces se
-    // detecta igual que si la segunda llegara mañana en otro lote.
-    yaEnCorpus.set(canonico, { slug: candidata.slug, donde: 'el propio lote' });
-    informe.publicadas.push({
-      slug: candidata.slug,
-      ruta,
-      texto,
-      grado: gradoDeProcedencia(validada.data.procedencia) === 'completa' ? 'completa' : 'parcial',
-    });
-  }
 
-  return informe;
+      // ── Temas: se avisa de los desconocidos, pero no impiden publicar ──
+      const temasResueltos = (entrada.temas ?? []).map((t) =>
+        slugsDeTema.has(t) ? t : slugDeTema(t),
+      );
+      const temasDesconocidos = temasResueltos.filter((t) => !slugsDeTema.has(t));
+      if (temasDesconocidos.length > 0) {
+        motivos.push(
+          `Tema desconocido: ${temasDesconocidos.map((t) => `«${t}»`).join(', ')}. ` +
+            'Créelo antes o retírelo de la Cita.',
+        );
+      }
+
+      // ── Las reglas de admisión, las mismas que aplica el build ──
+      const slugBase = slugDeCita(slugAutor, texto);
+      const candidata = {
+        texto,
+        autor: slugAutor,
+        temas: temasResueltos,
+        slug: slugLibre(slugBase, slugsOcupados),
+        procedencia: entrada.procedencia,
+        estadoDerechos: 'dominio-público' as const,
+        // Se pasa tal cual y la valida la misma puerta que el resto: un `fuente:` a medias
+        // manda la Cita a revisión con la regla incumplida escrita, no al corpus.
+        ...(entrada.fuente !== undefined ? { fuente: entrada.fuente } : {}),
+        // Solo se registra el sí. El esquema ya da `false` por defecto, así que escribir
+        // `aptaParaPortada: false` en cada Cita del corpus sería ruido que además invita
+        // a leerlo como una decisión tomada, cuando es la ausencia de decisión.
+        ...(entrada.aptaParaPortada === true ? { aptaParaPortada: true } : {}),
+      };
+
+      const validada = citaAdmisible.safeParse(candidata);
+      if (!validada.success) {
+        for (const issue of validada.error.issues) {
+          const campo = issue.path.join('.');
+          motivos.push(campo ? `${campo}: ${issue.message}` : issue.message);
+        }
+      }
+
+      /*
+       * Historia 11.2 — el alta no fabrica builds rotos.
+       *
+       * Publicar una Cita sin Fuente en `corpus/citas/` mataba la construcción siguiente:
+       * la herramienta escribía el fichero, informaba de éxito, y el fallo aparecía después
+       * en un sitio distinto y en boca de otra puerta. Aquí se aplica **la misma** regla que
+       * aplicará el build —importada, no copiada—, así que la Cita se queda en revisión con
+       * lo que le falta escrito al lado.
+       */
+      const sinDocumento = motivoParaNoPublicar(candidata);
+      if (sinDocumento !== undefined) motivos.push(sinDocumento);
+
+      const nombreFichero = nombreDeFicheroDeCita(slugAutor, candidata.slug);
+
+      /*
+       * Historia 22.1 — la Ficha de Obra, en el mismo gesto en que se publica (AD-25).
+       *
+       * Solo para lo que se va a publicar: una candidata que va a revisión no crea ficha. Se
+       * **resuelve** en solo lectura antes de escribir la Cita —también en seco, para que el
+       * seco y el real no discrepen ante una colisión—, y se escribe justo **después** de que
+       * la Cita esté escrita. Si no se puede asegurar sin decidir, la Cita va a revisión con
+       * el motivo, porque publicada sin ficha rompería la construcción siguiente.
+       */
+      const obraDeclarada = validada.success ? validada.data.procedencia?.obra : undefined;
+      let plan: PlanDeFicha | undefined;
+      if (motivos.length === 0 && validada.success && typeof obraDeclarada === 'string') {
+        plan = await resolverFichaDeObra(rutas, {
+          autor: slugAutor,
+          obra: obraDeclarada,
+          citasPublicadas: [
+            ...publicadasParaObra,
+            { autor: slugAutor, procedencia: { obra: obraDeclarada } },
+          ],
+        });
+        if (!plan.ok) motivos.push(...plan.motivos);
+      }
+
+      if (motivos.length > 0 || !validada.success) {
+        // A revisión con lo que se sepa. El fichero conserva el trabajo hecho para que
+        // completarlo sea rellenar un campo, no volver a teclear la Cita.
+        const ruta = !escribir
+          ? null
+          : await escribirCita(rutas.revision, nombreFichero, candidata);
+        informe.enRevision.push({ texto, ruta, motivos });
+        if (canonico !== '') {
+          yaEnCorpus.set(canonico, { slug: candidata.slug, donde: 'el propio lote' });
+        }
+        continue;
+      }
+
+      const ruta = !escribir
+        ? ''
+        : await escribirCita(rutas.citas, nombreFichero, aRegistroDeCita(validada.data));
+      slugsOcupados.add(candidata.slug);
+      aPublicar.push({ indice, texto, slug: candidata.slug, temas: validada.data.temas });
+      if (!opciones.seco) {
+        // Solo lo que de verdad se publica cuenta para la grafía por omisión.
+        publicadasParaObra.push({ autor: slugAutor, procedencia: validada.data.procedencia });
+        if (plan !== undefined && escribir) {
+          const ficha = await aplicarFichaDeObra(rutas, plan);
+          if (!ficha.ok) {
+            informe.fichasSinAsegurar = [
+              ...(informe.fichasSinAsegurar ?? []),
+              { slug: candidata.slug, motivos: ficha.motivos },
+            ];
+          }
+        }
+      }
+      // Lo aceptado entra en el índice: así un lote que repite la misma Cita dos veces se
+      // detecta igual que si la segunda llegara mañana en otro lote.
+      yaEnCorpus.set(canonico, { slug: candidata.slug, donde: 'el propio lote' });
+      informe.publicadas.push({
+        slug: candidata.slug,
+        ruta,
+        texto,
+        grado: gradoDeProcedencia(validada.data.procedencia) === 'completa' ? 'completa' : 'parcial',
+      });
+    }
+
+    return { informe, aPublicar };
+  }
 }
 
 /**
@@ -312,6 +411,14 @@ function aRegistroDeCita(datos: CitaAdmisible): Record<string, unknown> {
   };
 }
 
+/**
+ * Si el alta dejó alguna Cita sin Tema publicado —sin escribir, o escrita y suelta—: con eso, la
+ * orden y la siembra salen con 1 (Historia 26.8).
+ */
+export function sinTemaPublicado(informe: InformeDeAlta): boolean {
+  return informe.rechazadasPorTema.length > 0 || (informe.publicadasSinTema ?? []).length > 0;
+}
+
 /** Informe legible en terminal. Sin colores: se lee igual en un registro de CI. */
 export function formatearInforme(informe: InformeDeAlta): string {
   const lineas: string[] = [];
@@ -325,6 +432,24 @@ export function formatearInforme(informe: InformeDeAlta): string {
   for (const c of informe.enRevision) {
     lineas.push(`  · «${recortar(c.texto)}»`);
     for (const motivo of c.motivos) lineas.push(`      ${motivo}`);
+  }
+
+  if (informe.rechazadasPorTema.length > 0) {
+    lineas.push('', `Sin Tema publicado, no escritas: ${informe.rechazadasPorTema.length}`);
+    for (const c of informe.rechazadasPorTema) {
+      lineas.push(`  ✕ «${recortar(c.texto)}»`);
+      for (const motivo of c.motivos) lineas.push(`      ${motivo}`);
+    }
+    lineas.push('  No se han escrito ni en corpus/citas/ ni en corpus/_revision/: corrija sus Temas en el lote.');
+  }
+
+  for (const suelta of informe.publicadasSinTema ?? []) {
+    lineas.push(
+      '',
+      `${suelta.slug}: publicada, pero se quedó sin ningún Tema publicado. Dele un Tema con ` +
+        'página o retírela antes de construir.',
+      ...suelta.motivos.map((m) => `  ${m}`),
+    );
   }
 
   for (const pendiente of informe.fichasSinAsegurar ?? []) {
@@ -419,4 +544,6 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   const informe = await darDeAltaLote(lote, rutasDelCorpus(raizCorpus), { seco, conDuplicados });
   process.stdout.write(`${formatearInforme(informe)}\n`);
   if (seco) process.stdout.write('\n(Ejecución en seco: no se ha escrito nada.)\n');
+  // Historia 26.8 — una entrada sin Tema publicado no se escribe, y la orden lo dice con 1.
+  if (sinTemaPublicado(informe)) process.exit(1);
 }

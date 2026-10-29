@@ -11,6 +11,12 @@
  * — que es el primer criterio de la Historia 11.4 — y la única salida era editar el
  * frontmatter a mano.
  *
+ * **Aprobar exige un Tema con página** (Historia 26.8, NFR-5): una candidata se publica solo si
+ * alguno de sus Temas —los suyos o los de `--temas`— llega a `MIN_CITAS_POR_TEMA` contando lo
+ * publicado y lo que la misma pasada aprueba. La que no, sigue en `corpus/_revision/`, intacta,
+ * con sus Temas y sus recuentos en el parte, y la orden sale con 1. Las candidatas que salen de
+ * `extraer` no traen Temas: casi siempre hace falta `--temas`.
+ *
  * La cola sale ordenada de más a menos prometedora (Historia 19.6), y `--primeras` corta
  * por arriba **diciendo cuántas quedan debajo**: con veintiún mil candidatas pendientes,
  * leerlas todas no es un plan, y esconderlas tampoco.
@@ -24,6 +30,7 @@
 import { rutasDelCorpus } from './lib/corpus.ts';
 import { aprobar, formatearLote, loteEnRevision, rechazar } from './lib/revision.ts';
 import { raizDeCorpusDe } from './lib/cli.ts';
+import { MIN_CITAS_POR_TEMA } from '../src/lib/umbrales.ts';
 
 const argumentos = process.argv.slice(2);
 const rutas = rutasDelCorpus(raizDeCorpusDe(argumentos));
@@ -129,6 +136,22 @@ if (aAprobar.length > 0) {
     lineas.push(`  ✕ ${rechazada.slug} — sigue en revisión: su Ficha de Obra no se puede asegurar.`);
     for (const motivo of rechazada.motivos) lineas.push(`      ${motivo}`);
   }
+  for (const rechazada of resultado.rechazadasPorTema) {
+    // Historia 26.8: cumple la admisión, pero publicada no tendría ningún Tema publicado (NFR-5).
+    fallo = true;
+    lineas.push(`  ✕ ${rechazada.slug} — sigue en revisión: no tendría ningún Tema publicado.`);
+    for (const motivo of rechazada.motivos) lineas.push(`      ${motivo}`);
+  }
+  if (resultado.rechazadasPorTema.length > 0) {
+    /*
+     * Cómo se sale de ahí: un Tema que ya tiene página, o aprobar en la misma pasada las que hacen
+     * falta para que el suyo llegue. Un Tema nuevo crece así, de una pasada que lo completa.
+     */
+    lineas.push(
+      `    Para publicarlas: añada con «--temas» un Tema que ya se publique, o apruebe en la misma ` +
+        `pasada las candidatas de su Tema hasta que llegue a ${MIN_CITAS_POR_TEMA}.`,
+    );
+  }
   for (const pendiente of resultado.fichasSinAsegurar) {
     fallo = true;
     lineas.push(
@@ -136,6 +159,15 @@ if (aAprobar.length > 0) {
         '«npm run obra -- sembrar» antes de construir:',
     );
     for (const motivo of pendiente.motivos) lineas.push(`      ${motivo}`);
+  }
+  for (const suelta of resultado.publicadasSinTema) {
+    // Historia 26.8: publicada, pero la que le daba el Tema no llegó a publicarse.
+    fallo = true;
+    lineas.push(
+      `  ! ${suelta.slug} — publicada, pero se quedó sin ningún Tema publicado: dele un Tema con ` +
+        'página o retírela antes de construir.',
+    );
+    for (const motivo of suelta.motivos) lineas.push(`      ${motivo}`);
   }
   for (const slug of resultado.noEncontradas) {
     fallo = true;

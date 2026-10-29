@@ -15,6 +15,8 @@ import {
 } from './ayuda/construir.js';
 import { componerBiografia, componerDocumento } from '../../tools/lib/documento.ts';
 import { CENSO_DE_PARTIDA, FICHERO_DEL_CENSO } from '../../tools/lib/cotejo.ts';
+import { rutasDelCorpus } from '../../tools/lib/corpus.ts';
+import { DE_EPICTETO, EN_LA_IRA, instantaneaDe, sembrarCorpusAlLimite } from './ayuda/al-limite.ts';
 
 const ejecutar = promisify(execFile);
 
@@ -458,5 +460,37 @@ describe('Historia 17.1 — una Cita no se documenta con una biografía, aunque 
     expect(resultado.error).toMatch(/documento de biografía \(clase: biografia\)/);
     expect(await leerCorpus(corpus)).toEqual(antes);
     expect(await readdir(join(corpus, '_revision'))).toEqual([]);
+  });
+});
+
+/** Historia 26.8 — un Corpus al límite en un directorio temporal propio (`ayuda/al-limite.ts`). */
+const alLimite: string[] = [];
+afterEach(async () => {
+  await Promise.all(alLimite.splice(0).map((d) => rm(d, { recursive: true, force: true })));
+});
+async function corpusAlLimite() {
+  const raiz = await mkdtemp(join(tmpdir(), 'sabiduria-al-limite-'));
+  alLimite.push(raiz);
+  const rutas = rutasDelCorpus(join(raiz, 'corpus'));
+  await sembrarCorpusAlLimite(rutas);
+  return rutas;
+}
+
+describe('Historia 26.8 — documentar --retirar no deja una Cita fuera de alcance', () => {
+  it('sale con 1, nombra la Cita y su Tema con el recuento, y no mueve nada', async () => {
+    const rutas = await corpusAlLimite();
+    const antes = await instantaneaDe(rutas.raiz);
+
+    const resultado = await correr(rutas.raiz, ['--retirar', DE_EPICTETO[1]!, 'No aparece en la edición.']);
+
+    expect(resultado.codigo).toBe(1);
+    expect(resultado.error).toContain(`/cita/${EN_LA_IRA}/ — su Tema «La ira» (la-ira) tiene 14 Citas`);
+    expect(await instantaneaDe(rutas.raiz)).toEqual(antes);
+  });
+
+  it('sin efecto sobre el alcance, retira como siempre', async () => {
+    const rutas = await corpusAlLimite();
+    const resultado = await correr(rutas.raiz, ['--retirar', 'seneca-a-001', 'No aparece en la edición.']);
+    expect(resultado.codigo, resultado.error).toBe(0);
   });
 });

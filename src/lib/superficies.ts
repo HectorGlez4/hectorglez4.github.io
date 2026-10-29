@@ -123,8 +123,8 @@ export interface Superficie {
    * superficie es su propia unidad (`superficieDeLineaBase`). La lectura de la línea base lo lee de
    * forma genérica y no nombra ninguna ruta, y cada superficie se informa también por separado.
    *
-   * Hoy no lo declara ninguna: lo declaran `/autores/` y `/obras/` cuando existan, las dos con
-   * `LINEA_BASE_DE_LOS_DIRECTORIOS` (Historias 26.3 y 26.4).
+   * Lo declaran los dos Directorios, `/autores/` (26.3) y `/obras/` (26.4), con
+   * `LINEA_BASE_DE_LOS_DIRECTORIOS`: las dos juntan sus lecturas.
    */
   lineaBase?: string;
 }
@@ -148,6 +148,19 @@ export function superficieDeLineaBase(superficie: Pick<Superficie, 'nombre' | 'l
  */
 /** El fichero de la Página de Obra: su identidad en la declaración (Historia 22.4). */
 const PAGINA_DE_OBRA = 'obra/[autor]/[slug]/[...page].astro';
+
+/**
+ * Los ficheros de los Directorios — Historias 26.3 y 26.4: su identidad en la declaración, como
+ * la de la Página de Obra. Dos, `/autores/` y `/obras/`. De aquí sale el único predicado que dice
+ * si una ruta es de un Directorio (`esRutaDeDirectorio`), y `src/lib/ingreso.ts` los deja sin
+ * ningún Modelo (`SUPERFICIES_SIN_INGRESO`).
+ */
+const PAGINA_DEL_DIRECTORIO_DE_AUTORES = 'autores.astro';
+const PAGINA_DEL_DIRECTORIO_DE_OBRAS = 'obras.astro';
+export const PAGINAS_DE_DIRECTORIO: readonly string[] = [
+  PAGINA_DEL_DIRECTORIO_DE_AUTORES,
+  PAGINA_DEL_DIRECTORIO_DE_OBRAS,
+];
 
 export const SUPERFICIES: readonly Superficie[] = [
   {
@@ -219,6 +232,30 @@ export const SUPERFICIES: readonly Superficie[] = [
     noPublicableEn: /^\/obra\/[^/]+\/[^/]+\/\d+$/,
   },
   {
+    nombre: 'el Directorio de Autores',
+    pagina: PAGINA_DEL_DIRECTORIO_DE_AUTORES,
+    // Historia 26.3 — una ruta literal y sin páginas 2+: lista entera, sin paginar. Por eso no
+    // declara `noPublicableEn`, y `/autores/2` no la reconoce nadie.
+    reconoce: /^\/autores$/,
+    caracter: 'producto',
+    vista: EVENTOS.vistaDeSuperficie,
+    // FR-56 — «los Directorios» son una sola unidad de línea base, con `/obras/` (26.4).
+    lineaBase: LINEA_BASE_DE_LOS_DIRECTORIOS,
+  },
+  {
+    nombre: 'el Directorio de Obras',
+    pagina: PAGINA_DEL_DIRECTORIO_DE_OBRAS,
+    // Historia 26.4 — literal y sin páginas 2+, como `/autores/`: lista entera, sin paginar
+    // (paginarla está aplazado; lo reabre el aviso de tamaño de `integraciones/directorios.ts`).
+    // `/obras` no es una Página de Obra: `esRutaDeObra` no la reconoce y ninguna regla de Obra
+    // —FR-52, congelación, ediciones— la alcanza.
+    reconoce: /^\/obras$/,
+    caracter: 'producto',
+    vista: EVENTOS.vistaDeSuperficie,
+    // FR-56 — la misma unidad de línea base que `/autores/`: «los Directorios».
+    lineaBase: LINEA_BASE_DE_LOS_DIRECTORIOS,
+  },
+  {
     nombre: 'la búsqueda',
     pagina: 'buscar.astro',
     reconoce: /^\/buscar$/,
@@ -255,6 +292,30 @@ export const SUPERFICIES: readonly Superficie[] = [
     caracter: 'ajena',
   },
 ];
+
+/**
+ * Las familias del sitio — Historia 26.7, AD-17. Seis, y este es el único sitio que las declara.
+ *
+ * Una familia es el grupo de URL publicadas que una serie compara entre jornadas: Cita, Autor,
+ * Tema, Colección, Obra y Directorio. **Directorio es una para los dos**, `/autores/` y
+ * `/obras/`: dos URL de índice que, contadas en Autor o en Obra, falsearían el reparto de lo que
+ * listan mientras se juzga SM-11. La portada no es de ninguna, y es deliberado: es una URL suelta
+ * y meterla en una familia la falsearía sin que nadie lo notara.
+ *
+ * Aquí solo están la lista y la unión. **Qué URL es de qué familia lo dice el censo**
+ * (`censoPorFamilia`, en `tools/`), compuesto con los constructores de ruta de
+ * abajo, nunca un prefijo. Y **qué familias cuenta cada serie** lo declara cada una con su
+ * subconjunto con nombre, derivado de esta lista (`FAMILIAS_DE_LA_SERIE`, `FAMILIAS_DEL_TRAFICO`,
+ * `FAMILIAS_DE_RUTA`…): si una serie deja de excluir una familia, cambia solo la suya. Ningún
+ * módulo de `src/` lee ni recibe una serie (AD-24): esto es una constante y un tipo, nada más.
+ *
+ * El orden es el del PRD, con las dos que llegaron después al final: es en el que se nombran
+ * y se reparten.
+ */
+export const FAMILIAS = ['cita', 'autor', 'tema', 'coleccion', 'obra', 'directorio'] as const;
+
+/** Una familia del sitio. La unión sale de `FAMILIAS` y no se escribe en ningún otro sitio. */
+export type Familia = (typeof FAMILIAS)[number];
 
 /*
  * Los constructores de ruta — uno por familia, todos aquí.
@@ -335,6 +396,49 @@ export function rutaDeColeccion(slug: string, pagina = 1): string {
  */
 export function rutaDeObra(autor: string, slugObra: string, pagina = 1): string {
   return rutaDePagina(`/obra/${autor}/${slugObra}/`, pagina);
+}
+
+/**
+ * La ruta del Directorio de Autores — Historia 26.3. Literal y con barra final, sin paginación:
+ * el Directorio es una sola página.
+ */
+export function rutaDelDirectorioDeAutores(): string {
+  return '/autores/';
+}
+
+/**
+ * La Tarjeta Social del Directorio de Autores — Historia 26.3, UX-DR79. Fuera del espacio
+ * `/tarjeta/{slug}.png` de las Citas: un slug de Cita llamado `directorio` no puede pisarla.
+ */
+export const TARJETA_DEL_DIRECTORIO_DE_AUTORES = '/tarjeta/directorio/autores.png';
+
+/**
+ * La ruta del Directorio de Obras — Historia 26.4. Literal y con barra final, sin paginación,
+ * como la de Autores.
+ */
+export function rutaDelDirectorioDeObras(): string {
+  return '/obras/';
+}
+
+/** La Tarjeta Social del Directorio de Obras — Historia 26.4, UX-DR79, junto a la de Autores. */
+export const TARJETA_DEL_DIRECTORIO_DE_OBRAS = '/tarjeta/directorio/obras.png';
+
+/**
+ * La ruta de la portada — Historia 26.5. La cabecera compone con ella el enlace de la marca y
+ * decide su `aria-current`: escrita a mano en el armazón, sería la única ruta de la cabecera
+ * que no sale de este fichero.
+ */
+export function rutaDeLaPortada(): string {
+  return '/';
+}
+
+/**
+ * La ruta de la búsqueda propia — Historia 26.5, la de «Buscar» en la cabecera. Literal y con
+ * barra final; lo que se busca viaja en la cadena de consulta, que no cambia la página (y por
+ * eso «Buscar» lleva `aria-current` con cualquier parámetro).
+ */
+export function rutaDeLaBusqueda(): string {
+  return '/buscar/';
 }
 
 /** Las consecuencias de declarar una superficie que salen solo de su carácter. */
@@ -463,6 +567,17 @@ export function superficieDeclaradaDe(
  */
 export function esRutaDeObra(rutaOUrl: string): boolean {
   return superficieDeclaradaDe(rutaOUrl)?.pagina === PAGINA_DE_OBRA;
+}
+
+/**
+ * Si una ruta es de un Directorio —`/autores/` o `/obras/`—, por la declaración y
+ * nunca por el prefijo — Historia 26.3. `/autor/x/` no lo es aunque empiece igual. Lo usan las
+ * pruebas; la familia `directorio` de las series no sale de aquí sino del censo
+ * (`censoPorFamilia`, Historia 26.7), compuesto con los dos constructores de ruta.
+ */
+export function esRutaDeDirectorio(rutaOUrl: string): boolean {
+  const pagina = superficieDeclaradaDe(rutaOUrl)?.pagina;
+  return pagina !== undefined && PAGINAS_DE_DIRECTORIO.includes(pagina);
 }
 
 /**

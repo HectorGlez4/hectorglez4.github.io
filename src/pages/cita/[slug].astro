@@ -13,18 +13,20 @@
 import Armazon from '../../components/Armazon.astro';
 import BloqueDeCita from '../../components/BloqueDeCita.astro';
 import Fuente from '../../components/Fuente.astro';
+import TarjetaDeObra from '../../components/TarjetaDeObra.astro';
 import CopiarCita from '../../islands/CopiarCita.astro';
 import ImagenDeCita from '../../islands/ImagenDeCita.astro';
 import CompartirEnlace from '../../islands/CompartirEnlace.astro';
 import RutasDeSalida from '../../components/RutasDeSalida.astro';
 import DatosEstructurados from '../../components/DatosEstructurados.astro';
 import {
-  citasRelacionadas,
+  citasDeLasObras,
+  citasDeTema,
   conjuntoPublicable,
-  temasDeLaCita,
+  rutasDeSalidaDeCita,
+  siguienteCita,
   temasPublicados,
 } from '../../lib/publicado.ts';
-import { MAX_CITAS_RELACIONADAS } from '../../lib/umbrales.ts';
 import { tituloDe } from '../../lib/marca.ts';
 import type { GetStaticPaths } from 'astro';
 import { rutaDeCita } from '../../lib/superficies.ts';
@@ -33,20 +35,35 @@ export const getStaticPaths = (async () => {
   const conjunto = await conjuntoPublicable();
   const autores = new Map(conjunto.autores.map((a) => [a.slug, a]));
   const publicados = temasPublicados(conjunto.temas, conjunto.citas);
+  /*
+   * Historia 24.5 — «Siguiente…» de la Tarjeta de Obra. Lo decide `siguienteCita`, con los
+   * mismos dueños que pintan los dos listados que sigue: el orden del libro de
+   * `citasDeLasObras` (la Página de Obra) y `citasDeTema` (la Página de Tema), calculados una
+   * vez para todas las Citas y no por página.
+   */
+  const porObra = await citasDeLasObras(conjunto);
+  const listados = new Map(publicados.map((tema) => [tema.slug, citasDeTema(conjunto.citas, tema.slug)]));
 
-  return conjunto.citas.map((cita) => ({
-    params: { slug: cita.slug },
-    props: {
-      cita,
-      autor: autores.get(cita.autor)!,
-      relacionadas: citasRelacionadas(conjunto.citas, cita, MAX_CITAS_RELACIONADAS),
-      chips: temasDeLaCita(cita, publicados),
-      temasDelSitio: publicados,
-    },
-  }));
+  return conjunto.citas.map((cita) => {
+    const siguiente = siguienteCita(cita, porObra, publicados, listados);
+    return {
+      params: { slug: cita.slug },
+      props: {
+        cita,
+        autor: autores.get(cita.autor)!,
+        siguiente,
+        /*
+         * Historia 24.6 — las Rutas de salida del pie: «De la misma obra», «Más de {Autor}» y
+         * los Temas. Las decide `rutasDeSalidaDeCita` con el mismo `porObra` y el mismo
+         * `siguiente` que la tarjeta, para que ninguna repita la Cita que «Siguiente» ya ofrece.
+         */
+        rutas: rutasDeSalidaDeCita(cita, conjunto.citas, porObra, publicados, siguiente),
+      },
+    };
+  });
 }) satisfies GetStaticPaths;
 
-const { cita, autor, relacionadas, chips, temasDelSitio } = Astro.props;
+const { cita, autor, siguiente, rutas } = Astro.props;
 
 /**
  * El título de pestaña y la meta descripción llevan la Cita entera si cabe. Quien llega
@@ -76,16 +93,22 @@ const canonica = new URL(rutaDeCita(cita.slug), Astro.site).href;
       * verificar una atribución.
       */}
     <Fuente cita={cita} />
+    {/*
+      * Historia 24.4 — la Obra de la que sale la Cita, entre lo que la Cita es (atribución y
+      * Fuente) y lo que se hace con ella (las acciones). Aquí y no en `BloqueDeCita` por lo
+      * mismo que la Fuente: la portada y el 404 no cambian con esta historia. Sin Obra no pinta
+      * nada, y Copiar sigue a la Fuente o a la Atribución. Desde la 24.5 lleva además
+      * «Siguiente…» cuando hay a dónde ir (`siguiente`, decidido arriba).
+      */}
+    <TarjetaDeObra cita={cita} autor={autor} nivel={2} siguiente={siguiente} />
     <CopiarCita cita={cita} autor={autor} />
     <ImagenDeCita cita={cita} autor={autor} />
     <CompartirEnlace cita={cita} autor={autor} canonica={canonica} />
-    <RutasDeSalida
-      autor={autor}
-      relacionadas={relacionadas}
-      chips={chips}
-      temasDelSitio={temasDelSitio}
-      zona="rutas-de-salida"
-    />
+    {/*
+      * Historia 24.6 — tras las acciones, los tres grupos del pie. Un grupo sin Citas no pinta
+      * nada, y sin ninguno no hay `nav`: la Atribución sigue enlazando al Autor y a la Obra.
+      */}
+    <RutasDeSalida autor={autor} rutas={rutas} zona="rutas-de-salida" />
   </article>
 </Armazon>
 

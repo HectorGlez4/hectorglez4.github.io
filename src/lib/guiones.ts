@@ -29,6 +29,7 @@ import {
   MAX_BYTES_GUION_DE_IMAGEN,
   MAX_BYTES_GUION_DE_MEDICION,
   MAX_BYTES_GUION_DE_PAGEFIND,
+  MAX_BYTES_GUION_DEL_FILTRO,
 } from './umbrales.ts';
 
 /** Cómo pide un guion, al ejecutarse, otro fichero de guion. */
@@ -43,7 +44,7 @@ export interface Arranque {
 
 export interface GuionExterno {
   /** Cómo se la nombra en los mensajes de las comprobaciones. */
-  id: 'medicion' | 'imagen' | 'pagefind';
+  id: 'medicion' | 'imagen' | 'pagefind' | 'filtro';
   /** Cuándo lo pide la página: es lo que justifica que esté en la lista. */
   cuando: string;
   /** La ruta —del mismo origen y sin consulta— de lo que se pide. Sin `g`: guarda estado. */
@@ -87,6 +88,17 @@ export const GUIONES_EXTERNOS: readonly GuionExterno[] = [
     // que no se puede leer del fichero: se declara aquí y la prueba cuenta los `new Worker`.
     arranca: [{ como: 'new Worker', ruta: '/pagefind/pagefind-worker.js' }],
     tope: MAX_BYTES_GUION_DE_PAGEFIND,
+  },
+  {
+    id: 'filtro',
+    cuando:
+      'al cargar `/autores/` y `/obras/`, con `<script type="module" src>`: es el `<script>` ' +
+      'procesado de `FiltroDelDirectorio.astro` (Historia 26.6), el primer guion empaquetado de ' +
+      'la v8, que inserta el campo de filtro y filtra la lista al teclear',
+    // Astro lo emite en `/_astro/` con el nombre del componente y un resumen del contenido, que
+    // cambia con cada versión del guion: se reconoce el nombre y se deja libre el resumen.
+    reconoce: /^\/_astro\/FiltroDelDirectorio\.astro_astro_type_script_index_0_lang\.[A-Za-z0-9_-]+\.js$/,
+    tope: MAX_BYTES_GUION_DEL_FILTRO,
   },
 ];
 

@@ -31,7 +31,7 @@ async function corpusConCita(): Promise<string> {
   }
   await writeFile(
     join(corpus, 'autores', 'seneca.yml'),
-    'nombre: Séneca\nañoFallecimiento: 65\nsemblanza: Filósofo.\n',
+    'nombre: Séneca\nañoFallecimiento: 65\nsemblanza: Filósofo.\nordenAlfabetico: Séneca\n',
     'utf8',
   );
   await escribirCita(join(corpus, 'citas'), 'seneca--a', {

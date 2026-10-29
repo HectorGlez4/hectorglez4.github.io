@@ -1,6 +1,6 @@
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test, type Page } from '@playwright/test';
-import { readFileSync, readdirSync, statSync } from 'node:fs';
+import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import {
   CRITERIOS_QUE_AÑADE_WCAG_22,
@@ -11,6 +11,18 @@ import {
   type CriterioDeWcag,
 } from '../../src/lib/superficies.ts';
 import { desviacionDelBarrido, reglasDeLaPagina, sinDecidir, versionesDeAxe } from './ayuda/barrido.ts';
+import {
+  SIN_TARJETA_COMPLETA,
+  citaConLosDosBloques,
+  citaConTarjetaCompleta,
+  citaSinMasDelAutor,
+  citaSinMismaObra,
+  citaConTituloDeObraMasLargo,
+  citaDeObraSinCotejar,
+  citaSinObra,
+  citasDeObraDeUnaCita,
+} from './ayuda/corpus.ts';
+import { leerTarjetaDeObra, tarjetaDeObraDe } from '../unit/ayuda/tarjeta-de-obra.js';
 
 /**
  * Historia 2.8 — accesibilidad y comportamiento responsive.
@@ -106,7 +118,142 @@ function obrasDelBarrido(): { indexable: string; noIndexable: string; segunda: s
 const OBRAS = obrasDelBarrido();
 const OBRAS_DEL_BARRIDO = [OBRAS.indexable, OBRAS.noIndexable, OBRAS.segunda, OBRAS.tituloLargo];
 
-const SUPERFICIES = [...new Set([...DERIVADAS, ...OBRAS_DEL_BARRIDO])];
+/**
+ * Historia 24.4 — cuatro Páginas de Cita además de la muestra derivada, sacadas del Corpus con
+ * los mismos ayudantes que las demás pruebas y nunca fijadas a mano: la de la tarjeta completa
+ * (Línea de la Fuente, tarjeta con «Ver la obra y dónde leerla ›», Copiar e Imagen), la de una
+ * Cita sin Obra (sin tarjeta), la de una Obra sin cotejar («Ver la obra ›») y la del título de
+ * Obra más largo, que es la que puede desbordar la columna. Las dos primeras son obligatorias
+ * —si el Corpus de hoy no las tiene, fallan las pruebas que las piden, nombrando la que falta, y
+ * no el fichero entero al cargarse—; las otras dos entran si el Corpus las tiene, y la prueba de
+ * abajo nombra la que falte.
+ */
+const CITAS_24_4 = {
+  completa: ((c) => (c === undefined ? undefined : `/cita/${c.slug}/`))(citaConTarjetaCompleta()),
+  sinObra: ((c) => (c === undefined ? undefined : `/cita/${c.slug}/`))(citaSinObra()),
+  sinCotejar: ((c) => (c === undefined ? undefined : `/cita/${c.slug}/`))(citaDeObraSinCotejar()),
+  tituloLargo: ((c) => (c === undefined ? undefined : { ruta: `/cita/${c.slug}/`, titulo: c.titulo }))(
+    citaConTituloDeObraMasLargo(),
+  ),
+};
+const SIN_CITA_SIN_OBRA = 'El Corpus no tiene ninguna Cita sin Obra: no hay cara sin tarjeta que barrer.';
+/**
+ * Historia 24.6 — las tres caras del pie: con «De la misma obra» y «Más de {Autor}», solo con «Más
+ * de» (una Obra de dos) y solo con «De la misma obra» (un Autor que es todo una Obra). Las dos
+ * primeras son obligatorias; la tercera entra si el Corpus la tiene, y la prueba la nombra si no.
+ */
+const CITAS_24_6 = {
+  dosBloques: ((s) => (s === undefined ? undefined : `/cita/${s}/`))(citaConLosDosBloques()),
+  sinMismaObra: ((s) => (s === undefined ? undefined : `/cita/${s}/`))(citaSinMismaObra()),
+  sinMasDelAutor: ((s) => (s === undefined ? undefined : `/cita/${s}/`))(citaSinMasDelAutor()),
+};
+const SIN_DOS_BLOQUES =
+  'El Corpus no tiene ninguna Cita de una Obra de 4 o más cuyo Autor tenga Citas fuera de ella: no hay pie con los dos bloques.';
+const SIN_MISMA_OBRA = 'El Corpus no tiene ninguna Cita de una Obra de dos cuyo Autor tenga Citas fuera de ella.';
+/** La ruta de una cara obligatoria, o el fallo de la prueba que la pide, con su motivo. */
+function obligatoria(ruta: string | undefined, motivo: string): string {
+  expect(ruta, motivo).toBeDefined();
+  return ruta!;
+}
+const CITAS_DEL_BARRIDO = [
+  CITAS_24_4.completa,
+  CITAS_24_4.sinObra,
+  CITAS_24_4.sinCotejar,
+  CITAS_24_4.tituloLargo?.ruta,
+  CITAS_24_6.dosBloques,
+  CITAS_24_6.sinMismaObra,
+  CITAS_24_6.sinMasDelAutor,
+].filter((ruta): ruta is string => ruta !== undefined);
+
+/** Una ruta sin su barra final: la muestra derivada las da sin ella, y las de arriba con ella. */
+const sinBarra = (ruta: string) => (ruta.length > 1 ? ruta.replace(/\/$/, '') : ruta);
+/** Sin repetir una página por escribirse con barra final y sin ella: axe la barrería dos veces. */
+const SUPERFICIES = [...DERIVADAS, ...OBRAS_DEL_BARRIDO, ...CITAS_DEL_BARRIDO].filter(
+  (ruta, i, todas) => todas.findIndex((otra) => sinBarra(otra) === sinBarra(ruta)) === i,
+);
+
+/** El HTML construido de una ruta con barra final. */
+const construida = (ruta: string) => readFileSync(join(dist, ...ruta.split('/').filter(Boolean), 'index.html'), 'utf8');
+
+test('24.4 — las Páginas de Cita del barrido salen del Corpus, cada una con su cara', () => {
+  const rutaCompleta = obligatoria(CITAS_24_4.completa, SIN_TARJETA_COMPLETA);
+  const rutaSinObra = obligatoria(CITAS_24_4.sinObra, SIN_CITA_SIN_OBRA);
+  const completa = construida(rutaCompleta);
+  expect(completa, rutaCompleta).toContain('<p class="fuente"');
+  expect(tarjetaDeObraDe(completa), rutaCompleta).toMatch(/>Ver la obra y dónde leerla<span aria-hidden="true"[^>]*>&nbsp;›<\/span>/);
+  const sinObra = construida(rutaSinObra);
+  // Por el lector de la tarjeta y no por el nombre de su clase en el HTML crudo, que una hoja
+  // puesta en línea traería aunque no haya tarjeta.
+  expect(tarjetaDeObraDe(sinObra), rutaSinObra).toBeUndefined();
+  expect(sinObra, rutaSinObra).not.toContain('>De la obra<');
+  if (CITAS_24_4.sinCotejar === undefined) {
+    test.info().annotations.push({ type: 'cara sin barrer', description: 'el Corpus no tiene ninguna Obra sin cotejar' });
+  } else {
+    const tarjeta = tarjetaDeObraDe(construida(CITAS_24_4.sinCotejar));
+    expect(tarjeta, CITAS_24_4.sinCotejar).toMatch(/>Ver la obra<span aria-hidden="true"[^>]*>&nbsp;›<\/span>/);
+    expect(tarjeta, CITAS_24_4.sinCotejar).not.toContain('dónde leerla');
+  }
+  if (CITAS_24_4.tituloLargo === undefined) {
+    test.info().annotations.push({ type: 'cara sin barrer', description: 'el Corpus no tiene ninguna Cita con Obra' });
+  } else {
+    const { ruta, titulo } = CITAS_24_4.tituloLargo;
+    const tarjeta = tarjetaDeObraDe(construida(ruta));
+    expect(tarjeta, ruta).toBeDefined();
+    expect(leerTarjetaDeObra(tarjeta!).titulo?.texto, ruta).toBe(titulo);
+  }
+  for (const ruta of CITAS_DEL_BARRIDO) expect(SUPERFICIES.map(sinBarra), ruta).toContain(sinBarra(ruta));
+});
+
+test('24.6 — las caras del pie del barrido salen del Corpus, cada una con sus grupos', () => {
+  const dos = construida(obligatoria(CITAS_24_6.dosBloques, SIN_DOS_BLOQUES));
+  expect(dos).toContain('<section class="de-la-misma-obra"');
+  expect(dos).toContain('<section class="mas-del-autor"');
+  const sinMisma = construida(obligatoria(CITAS_24_6.sinMismaObra, SIN_MISMA_OBRA));
+  expect(sinMisma).not.toContain('<section class="de-la-misma-obra"');
+  expect(sinMisma).toContain('<section class="mas-del-autor"');
+  if (CITAS_24_6.sinMasDelAutor === undefined) {
+    test.info().annotations.push({
+      type: 'cara sin barrer',
+      description: 'el Corpus no tiene ningún Autor con todas sus Citas en una Obra de 4 o más',
+    });
+  } else {
+    const sinMas = construida(CITAS_24_6.sinMasDelAutor);
+    expect(sinMas, CITAS_24_6.sinMasDelAutor).toContain('<section class="de-la-misma-obra"');
+    expect(sinMas, CITAS_24_6.sinMasDelAutor).not.toContain('<section class="mas-del-autor"');
+  }
+  for (const ruta of [CITAS_24_6.dosBloques, CITAS_24_6.sinMismaObra, CITAS_24_6.sinMasDelAutor]) {
+    if (ruta !== undefined) expect(SUPERFICIES.map(sinBarra), ruta).toContain(sinBarra(ruta));
+  }
+});
+
+test('24.4 — a 320 px el título de Obra más largo de la tarjeta parte en varias líneas, sin desplazamiento', async ({
+  page,
+}) => {
+  test.skip(CITAS_24_4.tituloLargo === undefined, 'el Corpus no tiene ninguna Cita con Obra');
+  const { ruta } = CITAS_24_4.tituloLargo!;
+  await page.setViewportSize({ width: 320, height: 640 });
+  await page.goto(ruta);
+  await page.evaluate(async () => {
+    await document.fonts.ready;
+  });
+  const medida = await page.evaluate(() => {
+    const titulo = document.querySelector('.tarjeta-de-obra .titulo') as HTMLElement;
+    // Todas las filas: desde la 24.5 puede ir «Siguiente…» encima de «Ver la obra».
+    const filas = [...document.querySelectorAll('.tarjeta-de-obra .fila-de-bloque a')] as HTMLElement[];
+    return {
+      alto: titulo.getBoundingClientRect().height,
+      linea: parseFloat(getComputedStyle(titulo).lineHeight),
+      filaDentro:
+        filas.length > 0 &&
+        filas.every((fila) => fila.getBoundingClientRect().right <= document.documentElement.clientWidth + 0.5),
+      desborda: document.documentElement.scrollWidth > document.documentElement.clientWidth,
+    };
+  });
+  test.info().annotations.push({ type: 'alto del título a 320 px', description: `${medida.alto} px (${medida.linea} px por línea)` });
+  expect(medida.alto, ruta).toBeGreaterThanOrEqual(medida.linea * 2 - 1);
+  expect(medida.filaDentro, ruta).toBe(true);
+  expect(medida.desborda, ruta).toBe(false);
+});
 
 test('las cuatro Páginas de Obra del barrido salen del dist/, cada una con su cara', () => {
   const noindex = (ruta: string) =>
@@ -376,6 +523,17 @@ test.describe('Historia 2.8 — foco', () => {
    * cuando el foco llega por teclado— y se mira el estilo del elemento que tiene el foco.
    */
   test('el indicador de foco no está suprimido en ningún elemento', async ({ page }) => {
+    /*
+     * Historia 26.4 — es una prueba de barrido, como la de alcance de `seo.spec.ts`: tabula cada
+     * enfocable de cada superficie, y `/obras/` trae unos 700 (cada Obra publicada, cada Autor con
+     * Obras, las letras y sus «Volver»). Medido el 2026-10-28: unos 10 s antes de `/obras/`, 29,4 s
+     * en escritorio y más de 30 en móvil con ella. `test.slow()` triplica el presupuesto de ésta y
+     * solo de ésta; no toca ningún umbral del producto ni lo que se comprueba. Se revierte borrando
+     * la línea. `/obras/` crece con cada Obra: si esta prueba vuelve a agotar el tiempo, es el
+     * mismo crecimiento que vigila `MAX_BYTES_DEL_DIRECTORIO_DE_OBRAS` (`src/lib/umbrales.ts`), y
+     * paginar `/obras/` lo decide Héctor —no se sube el presupuesto otra vez sin decirlo—.
+     */
+    test.slow();
     for (const ruta of SUPERFICIES) {
       await page.goto(ruta);
       /*
@@ -461,30 +619,113 @@ test.describe('Historia 2.8 — foco', () => {
     });
   }
 
-  test('en la Página de Cita el orden es contenido, acciones y después salidas', async ({
-    page,
-  }) => {
-    /*
-     * EXPERIENCE.md pide «contenido primero, acciones después, navegación al final».
-     * Se comprueba dentro del contenido principal, que es donde la secuencia significa
-     * algo. La cabecera queda fuera a propósito: moverla detrás del `main` en el marcado
-     * para que se tabule al final desalinearía el orden visual del de foco, y eso es un
-     * incumplimiento de WCAG 2.4.3 — arreglaría la letra del criterio rompiendo el
-     * criterio de al lado. Para eso está el enlace de salto, que es lo primero que
-     * recibe foco en toda la página.
-     */
-    await page.goto('/cita/miguel-de-cervantes-la-libertad-sancho-es-uno-de-los/');
+  /*
+   * EXPERIENCE.md pide «contenido primero, acciones después, navegación al final», y la v8 mete
+   * la Tarjeta de Obra entre el contenido y las acciones (Historia 24.4, enmienda de la 2.8). Se
+   * comprueba dentro del contenido principal, que es donde la secuencia significa algo. La
+   * cabecera queda fuera a propósito: moverla detrás del `main` en el marcado para que se
+   * tabule al final desalinearía el orden visual del de foco, y eso es un incumplimiento de
+   * WCAG 2.4.3 — arreglaría la letra del criterio rompiendo el criterio de al lado. Para eso
+   * está el enlace de salto, que es lo primero que recibe foco en toda la página.
+   *
+   * Con Tab de verdad, desde el enlace del Autor hasta el primer enlace de las salidas: cada
+   * parada se clasifica por dónde está —`figcaption` o `.fuente` es contenido, `.tarjeta-de-obra`
+   * es tarjeta, `.isla` es acción y `nav` es salida— y cualquier otra es un fallo.
+   */
+  async function paradasDesdeElAutor(page: Page, ruta: string) {
+    await page.goto(ruta);
+    expect(
+      await page.evaluate(() =>
+        [...document.querySelectorAll('main [tabindex]')].filter((n) => Number(n.getAttribute('tabindex')) > 0).length,
+      ),
+      `${ruta}: un elemento de main con tabindex positivo`,
+    ).toBe(0);
+    await page.locator('main figcaption a[href^="/autor/"]').first().focus();
+    const paradas: { grupo: string; texto: string; href: string | null }[] = [];
+    for (let i = 0; i < 80; i += 1) {
+      const parada = await page.evaluate(() => {
+        const n = document.activeElement as HTMLElement | null;
+        const grupo =
+          n === null || !n.closest('main')
+            ? 'fuera'
+            : n.closest('nav')
+              ? 'salida'
+              : n.closest('.tarjeta-de-obra')
+                ? 'tarjeta'
+                : n.closest('.isla')
+                  ? 'accion'
+                  : n.closest('figcaption, .fuente')
+                    ? 'contenido'
+                    : 'otro';
+        return { grupo, texto: (n?.textContent ?? '').replace(/\s+/g, ' ').trim(), href: n?.getAttribute('href') ?? null };
+      });
+      paradas.push(parada);
+      if (parada.grupo === 'salida') break;
+      await page.keyboard.press('Tab');
+    }
+    expect(paradas.filter((p) => p.grupo === 'otro' || p.grupo === 'fuera'), `${ruta}\n${JSON.stringify(paradas)}`).toEqual([]);
+    const grupos = paradas.map((p) => p.grupo).filter((g, k, todos) => k === 0 || todos[k - 1] !== g);
+    return { paradas, grupos };
+  }
 
-    const orden = await page.evaluate(() => {
-      const enfocables = [...document.querySelectorAll('main a, main button')];
-      return enfocables.map((n) =>
-        n.closest('nav') ? 'salida' : n.tagName === 'BUTTON' ? 'accion' : 'contenido',
-      );
-    });
+  test('en la Página de Cita el orden es contenido, tarjeta, acciones y después salidas', async ({ page }) => {
+    const ruta = obligatoria(CITAS_24_4.completa, SIN_TARJETA_COMPLETA);
+    const { paradas, grupos } = await paradasDesdeElAutor(page, ruta);
+    expect(grupos, `${ruta}\n${JSON.stringify(paradas)}`).toEqual(['contenido', 'tarjeta', 'accion', 'salida']);
+    const contenido = paradas.filter((p) => p.grupo === 'contenido');
+    // El Autor, el título de la Obra y la Fuente, delante de la tarjeta.
+    expect(contenido[0].href, ruta).toMatch(/^\/autor\//);
+    expect(contenido.some((p) => p.href?.startsWith('/obra/')), ruta).toBe(true);
+    expect(contenido.some((p) => /^https?:/.test(p.href ?? '')), `${ruta}: sin parada en la Fuente`).toBe(true);
+    // Dos paradas en la tarjeta (Historia 24.5, UX-DR63): «Siguiente cita de esta obra» —la
+    // cara completa es de una Obra de dos Citas o más— y después «Ver la obra y dónde leerla».
+    const tarjeta = paradas.filter((p) => p.grupo === 'tarjeta');
+    expect(tarjeta, ruta).toHaveLength(2);
+    expect(tarjeta[0].texto, ruta).toMatch(/^Siguiente cita de esta obra/);
+    expect(tarjeta[0].href, ruta).toMatch(/^\/cita\//);
+    expect(tarjeta[0].href, ruta).not.toBe(ruta);
+    expect(tarjeta[1].texto, ruta).toMatch(/^Ver la obra y dónde leerla/);
+    expect(tarjeta[1].href, ruta).toMatch(/^\/obra\//);
+  });
 
-    expect(orden.indexOf('accion')).toBeLessThan(orden.indexOf('salida'));
-    // Y el enlace de atribución —contenido— va antes que la acción.
-    expect(orden.indexOf('contenido')).toBeLessThan(orden.indexOf('accion'));
+  /*
+   * Historia 24.6 — dentro del pie, el orden de tabulación es el del marcado: las tarjetas de la
+   * misma obra, su cierre, las tarjetas del Autor, su cierre y los chips.
+   */
+  test('24.6 — en el pie, misma obra, su cierre, Autor, su cierre y chips', async ({ page }) => {
+    const ruta = obligatoria(CITAS_24_6.dosBloques, SIN_DOS_BLOQUES);
+    await page.goto(ruta);
+    await page.locator('nav.salidas a').first().focus();
+    const paradas: string[] = [];
+    for (let i = 0; i < 40; i += 1) {
+      const parada = await page.evaluate(() => {
+        const n = document.activeElement as HTMLElement | null;
+        if (n === null || !n.closest('nav.salidas')) return 'fuera';
+        const grupo = n.closest('section')?.classList[0] ?? 'sin-grupo';
+        const pieza = n.closest('li.tarjeta') ? 'tarjeta' : n.closest('li.fila-de-bloque') ? 'cierre' : n.closest('.chips') ? 'chip' : 'otro';
+        return `${grupo}:${pieza}`;
+      });
+      if (parada === 'fuera') break;
+      paradas.push(parada);
+      await page.keyboard.press('Tab');
+    }
+    const secuencia = paradas.filter((p, k, todas) => k === 0 || todas[k - 1] !== p);
+    // Si hay chips lo dice el marcado, no las paradas: un chip que no recibiera foco encogería la
+    // secuencia esperada y la prueba pasaría igual.
+    const hayChips = (await page.locator('nav.salidas section.temas-de-la-cita a').count()) > 0;
+    expect(secuencia, `${ruta}\n${JSON.stringify(paradas)}`).toEqual([
+      'de-la-misma-obra:tarjeta',
+      'de-la-misma-obra:cierre',
+      'mas-del-autor:tarjeta',
+      'mas-del-autor:cierre',
+      ...(hayChips ? ['temas-de-la-cita:chip'] : []),
+    ]);
+  });
+
+  test('sin Obra, el orden es contenido, acciones y después salidas', async ({ page }) => {
+    const ruta = obligatoria(CITAS_24_4.sinObra, SIN_CITA_SIN_OBRA);
+    const { paradas, grupos } = await paradasDesdeElAutor(page, ruta);
+    expect(grupos, `${ruta}\n${JSON.stringify(paradas)}`).toEqual(['contenido', 'accion', 'salida']);
   });
 
   test('el enlace de salto es lo primero que recibe foco', async ({ page }) => {
@@ -536,6 +777,154 @@ test.describe('Historia 2.8 — semántica', () => {
   });
 });
 
+/** Historia 26.9 — las tres condiciones del reflujo a 320 px (ver «Historia 26.9 — reflujo a 320 px»). */
+const CONDICIONES = ['texto por omisión', 'texto al 200 %', 'espaciado de 1.4.12'] as const;
+type Condicion = (typeof CONDICIONES)[number];
+const ESPACIADO_1412 =
+  '* { line-height: 1.5 !important; letter-spacing: 0.12em !important; word-spacing: 0.16em !important } p { margin-bottom: 2em !important }';
+
+/**
+ * Carga la ruta a 320 × 640 y aplica la condición, con su premisa comprobada. Devuelve si la
+ * premisa se cumple: la premisa falla con `expect.soft` —para que las demás condiciones se sigan
+ * midiendo— y quien llama no mide una condición cuya simulación no se aplicó, porque mediría el
+ * texto por omisión y saldría en verde. `preparar` lleva la página al estado que se mide —una
+ * búsqueda escrita, por ejemplo— antes de aplicar la condición.
+ */
+async function cargarEn320(
+  page: Page,
+  ruta: string,
+  condicion: Condicion,
+  preparar?: (page: Page) => Promise<void>,
+): Promise<boolean> {
+  await page.setViewportSize({ width: 320, height: 640 });
+  await page.goto(ruta);
+  // Se mide con la Inter del sitio y no con la de reserva, que es más estrecha.
+  await page.evaluate(async () => {
+    await document.fonts.ready;
+  });
+  if (preparar !== undefined) await preparar(page);
+  if (condicion === 'texto al 200 %') {
+    /*
+     * La ventana es el `clientWidth` de `<html>` y no `innerWidth`: en el proyecto `movil` (Pixel
+     * 7, `isMobile`) la ventana de diseño se ensancha con lo que desborda, y una página que
+     * desbordase con el zoom fallaría aquí por «la simulación no se aplicó» en vez de por desbordar.
+     */
+    const premisa = await page.evaluate(() => {
+      document.documentElement.style.zoom = '2';
+      return {
+        ventana: document.documentElement.clientWidth,
+        cuerpo: document.body.clientWidth,
+        zoom: getComputedStyle(document.documentElement).zoom,
+      };
+    });
+    const aplicada = premisa.zoom === '2' && Math.abs(premisa.cuerpo * 2 - premisa.ventana) <= 1;
+    expect
+      .soft(
+        aplicada,
+        `${ruta}: la simulación no se aplicó (texto al 200 %): zoom ${premisa.zoom}, ancho CSS de body ${premisa.cuerpo} con la ventana a ${premisa.ventana}`,
+      )
+      .toBe(true);
+    return aplicada;
+  }
+  if (condicion === 'espaciado de 1.4.12') {
+    await page.addStyleTag({ content: ESPACIADO_1412 });
+    // Se comprueban las cuatro propiedades, sobre un párrafo de prueba: una hoja aplicada a medias no pasa.
+    const premisa = await page.evaluate(() => {
+      const p = document.createElement('p');
+      p.textContent = 'sonda';
+      document.body.append(p);
+      const c = getComputedStyle(p);
+      const letra = parseFloat(c.fontSize);
+      const aplicadas = {
+        letras: Math.abs(parseFloat(c.letterSpacing) - 0.12 * letra) <= 0.1,
+        palabras: Math.abs(parseFloat(c.wordSpacing) - 0.16 * letra) <= 0.1,
+        renglon: Math.abs(parseFloat(c.lineHeight) - 1.5 * letra) <= 0.1,
+        parrafo: Math.abs(parseFloat(c.marginBottom) - 2 * letra) <= 0.1,
+      };
+      p.remove();
+      return aplicadas;
+    });
+    const faltan = Object.entries(premisa)
+      .filter(([, aplicada]) => !aplicada)
+      .map(([cual]) => cual);
+    expect.soft(faltan, `${ruta}: la simulación no se aplicó (espaciado de 1.4.12)`).toEqual([]);
+    return faltan.length === 0;
+  }
+  return true;
+}
+
+const anchoDeLaPagina = (page: Page) =>
+  page.evaluate(() => ({
+    scroll: document.documentElement.scrollWidth,
+    ventana: document.documentElement.clientWidth,
+  }));
+
+/**
+ * Los contenedores que se desplazan por su cuenta o recortan en horizontal lo que se les sale: el
+ * `scrollWidth` de `<html>` no los ve, y lo recortado es contenido que no se alcanza. Entran
+ * también `<html>` y `<body>`: un `overflow-x` que recortara la página entera escondería el
+ * desborde del criterio de la 2.8 y la prueba pasaría. Se dejan fuera los campos de formulario y
+ * lo que no se pinta (`.solo-para-lectores`, `.oculto`, cajas de 1 × 1 px).
+ */
+const contenedoresQueRecortan = (page: Page) =>
+  page.evaluate(() =>
+    [document.documentElement, document.body, ...document.body.querySelectorAll('*')]
+      .filter((e) => {
+        if (/^(INPUT|TEXTAREA|SELECT|OPTION)$/.test(e.tagName)) return false;
+        if (e.closest('.solo-para-lectores, .oculto')) return false;
+        const x = getComputedStyle(e).overflowX;
+        if (x === 'visible') return false;
+        const r = e.getBoundingClientRect();
+        if (r.width <= 1 || r.height <= 1) return false;
+        return e.scrollWidth > e.clientWidth + 1;
+      })
+      .map((e) => {
+        const clases = (e.getAttribute('class') ?? '').trim().split(/\s+/).filter(Boolean);
+        return `${e.tagName.toLowerCase()}${clases.map((c) => `.${c}`).join('')} ${e.scrollWidth}/${e.clientWidth}`;
+      }),
+  );
+
+/** Historia 26.9 — una palabra más ancha que la columna del texto al 200 %, y sin donde partirla. */
+const PALABRA_INDIVISIBLE = 'Anticonstitucionalmente';
+
+/**
+ * Los textos del Corpus que se pintan: el de la Cita, sus fragmentos, y los nombres de Autor,
+ * Tema, Colección y Obra donde los pinta cada superficie. Son los únicos que cambian sin que nadie
+ * toque una plantilla, y se toca el último texto visible de cada uno. Los encabezados entran
+ * todos, aunque alguno sea un rótulo fijo: muchos llevan un nombre del Corpus («Citas de {Tema}»)
+ * y sobre uno fijo la palabra es más exigencia, no menos. Los rótulos de controles («Siguiente»,
+ * «Volver al índice», «N citas») no se tocan: se miden tal cual en la prueba de arriba.
+ */
+const TEXTOS_DEL_CORPUS =
+  'main :is(h1, h2, h3, .texto, .fragmento, p.autor, p.procedencia, .titulo, .nombre, .chip, .autores a, p.de, .enlace-en-tinta)';
+
+/**
+ * Pone `PALABRA_INDIVISIBLE` al final del último texto visible de cada `TEXTOS_DEL_CORPUS`.
+ * Devuelve cuántos tocó.
+ */
+const ponerPalabraIndivisible = (page: Page) =>
+  page.evaluate(
+    ({ palabra, selector }) => {
+      const nodos = new Set<Text>();
+      for (const e of document.querySelectorAll(selector)) {
+        if (e.closest('.solo-para-lectores, .oculto, .paginacion')) continue;
+        const r = e.getBoundingClientRect();
+        if (r.width <= 1 || r.height <= 1) continue;
+        const recorrido = document.createTreeWalker(e, NodeFilter.SHOW_TEXT);
+        let ultimo: Text | null = null;
+        for (let n = recorrido.nextNode(); n !== null; n = recorrido.nextNode()) {
+          if ((n.textContent ?? '').trim() === '') continue;
+          if (n.parentElement?.closest('.solo-para-lectores, .oculto, [aria-hidden="true"]')) continue;
+          ultimo = n as Text;
+        }
+        if (ultimo !== null) nodos.add(ultimo);
+      }
+      for (const n of nodos) n.textContent = `${n.textContent} ${palabra}`;
+      return nodos.size;
+    },
+    { palabra: PALABRA_INDIVISIBLE, selector: TEXTOS_DEL_CORPUS },
+  );
+
 test.describe('Historia 2.8 — responsive', () => {
   test('en 360px no hay desplazamiento horizontal', async ({ page }) => {
     await page.setViewportSize({ width: 360, height: 640 });
@@ -548,9 +937,362 @@ test.describe('Historia 2.8 — responsive', () => {
     }
   });
 
-  test('las zonas de toque miden 44px con 8px de separación', async ({ page }) => {
+  /*
+   * Historia 26.9 — reflujo a 320 px (NFR-8, UX-DR103, DESIGN.md § Layout & Spacing «Reflujo sin
+   * desbordar»). La comprobación de 360 px de arriba (2.8) se queda tal cual; esta la extiende a
+   * 320 px en tres condiciones, con el mismo criterio de desbordar (`scrollWidth > clientWidth` de
+   * `<html>`) y sobre la misma muestra `SUPERFICIES`, sin exenciones por ruta.
+   *
+   * El texto al 200 % se **simula** con `zoom: 2` sobre `<html>` tras cargar (decisión de Héctor
+   * del 2026-10-19, la de la 26.5): los cuerpos de `src/styles/tokens.css` están en px y subir la
+   * letra raíz no los movería. La ventana sigue en 320 —las media queries ven 320— y el ancho CSS
+   * queda en 160. El espaciado de 1.4.12 se inyecta como hoja. Las dos simulaciones comprueban que
+   * se aplicaron: una que no se aplicara mediría el texto por omisión y saldría en verde.
+   */
+  test.describe('Historia 26.9 — reflujo a 320 px', () => {
+    for (const ruta of SUPERFICIES) {
+      test(`${ruta} no pide desplazamiento horizontal a 320 px en ninguna de las tres condiciones`, async ({ page }) => {
+        // Se miden las tres antes de fallar: una pasada dice todo lo que desborda.
+        for (const condicion of CONDICIONES) {
+          if (!(await cargarEn320(page, ruta, condicion))) continue;
+          const m = await anchoDeLaPagina(page);
+          expect.soft(m.scroll, `${ruta} desborda con el ${condicion}: ${m.scroll} frente a ${m.ventana}`).toBeLessThanOrEqual(
+            m.ventana,
+          );
+          expect
+            .soft(await contenedoresQueRecortan(page), `${ruta} (${condicion}): contenedores que se desplazan o recortan en horizontal`)
+            .toEqual([]);
+        }
+      });
+    }
+
+    /*
+     * Lo de arriba mide el Corpus de hoy, y los nombres de Tema, Autor, Colección y Obra y el texto
+     * de las Citas son del Corpus: mañana uno trae una palabra más ancha que la columna de 120 px CSS
+     * del texto al 200 %. `break-word` no baja el mínimo de un ítem flexible o de rejilla, así que
+     * un chip, una fila o un título que sea ítem flexible desbordaría con una palabra que hoy no
+     * existe. Se mide poniendo a propósito una palabra indivisible en cada texto del Corpus de la
+     * página, con el texto al 200 % y con el espaciado de 1.4.12.
+     */
+    for (const ruta of SUPERFICIES) {
+      test(`${ruta} no desborda a 320 px con una palabra indivisible en cada texto del Corpus`, async ({ page }) => {
+        for (const condicion of ['texto al 200 %', 'espaciado de 1.4.12'] as const) {
+          if (!(await cargarEn320(page, ruta, condicion))) continue;
+          const puestas = await ponerPalabraIndivisible(page);
+          // Blanda, como las demás: una condición sin texto donde ponerla no corta la otra.
+          expect.soft(puestas, `${ruta} (${condicion}): no hay ningún texto del Corpus donde poner la palabra`).toBeGreaterThan(0);
+          if (puestas === 0) continue;
+          const m = await anchoDeLaPagina(page);
+          expect
+            .soft(m.scroll, `${ruta} desborda con el ${condicion} y una palabra indivisible: ${m.scroll} frente a ${m.ventana}`)
+            .toBeLessThanOrEqual(m.ventana);
+          expect
+            .soft(
+              await contenedoresQueRecortan(page),
+              `${ruta} (${condicion}, palabra indivisible): contenedores que se desplazan o recortan en horizontal`,
+            )
+            .toEqual([]);
+        }
+      });
+    }
+
+    /*
+     * `/buscar/` se mide arriba vacía, y vacía no pinta nada del Corpus: los resultados (extractos,
+     * Autores, Obras) y los chips de Tema, Colección y Autor del estado sin resultados solo aparecen
+     * tras escribir. Se miden los dos estados en las tres condiciones, y con la palabra indivisible
+     * en cada texto del Corpus y en los chips con el texto al 200 % y el espaciado de 1.4.12.
+     *
+     * El estado sin resultados no se le puede pedir al índice real —Pagefind contesta a casi
+     * cualquier consulta con lo que más se le parece—, así que, como en la 3.2 (`busqueda.spec.ts`),
+     * se sirve un Pagefind que no encuentra nada: lo que se pinta es el guion de la página y los
+     * chips son los del Corpus, construidos con ella.
+     */
+    const ESTADOS_DE_BUSQUEDA = [
+      {
+        cual: 'con resultados',
+        consulta: () => citaConTituloDeObraMasLargo()?.titulo ?? 'vida',
+        quiere: 'resultados' as const,
+        palabraEn: '[data-resultados] :is(.titulo, .r-autor)',
+        pagefindVacio: false,
+      },
+      {
+        cual: 'sin resultados',
+        consulta: () => 'consulta que no está',
+        quiere: 'salida' as const,
+        palabraEn: '[data-salida] :is(.chip, h2, p)',
+        pagefindVacio: true,
+      },
+    ];
+    for (const { cual, consulta, quiere, palabraEn, pagefindVacio } of ESTADOS_DE_BUSQUEDA) {
+      test(`/buscar/ ${cual} no desborda a 320 px en las tres condiciones, ni con una palabra indivisible`, async ({ page }) => {
+        if (pagefindVacio) {
+          await page.route('**/pagefind/pagefind.js', (r) =>
+            r.fulfill({
+              contentType: 'text/javascript',
+              body: 'export async function options() {}\nexport async function init() {}\nexport async function search() { return { results: [] }; }',
+            }),
+          );
+        }
+        /** Escribe la consulta y espera a que la búsqueda pinte el estado que se mide. */
+        const preparar = async (p: Page) => {
+          await p.locator('[data-consulta]').fill(consulta());
+          await p.waitForFunction(
+            () =>
+              document.querySelector('[data-resultados]')!.children.length > 0 ||
+              !document.querySelector('[data-salida]')!.hasAttribute('hidden'),
+            undefined,
+            { timeout: 10_000 },
+          );
+          const pinto = (await p.locator('[data-salida]').isVisible()) ? 'salida' : 'resultados';
+          expect(pinto, `/buscar/ «${consulta()}» no da ${cual}`).toBe(quiere);
+        };
+        for (const condicion of CONDICIONES) {
+          for (const conPalabra of condicion === 'texto por omisión' ? [false] : [false, true]) {
+            if (!(await cargarEn320(page, '/buscar/', condicion, preparar))) continue;
+            const donde = `/buscar/ ${cual} (${condicion}${conPalabra ? ', palabra indivisible' : ''})`;
+            if (conPalabra) {
+              const puestas = await page.evaluate(
+                ({ palabra, selector }) => {
+                  let n = 0;
+                  for (const e of document.querySelectorAll(selector)) {
+                    const r = e.getBoundingClientRect();
+                    if (r.width <= 1 || r.height <= 1 || e.closest('.solo-para-lectores, .oculto')) continue;
+                    const recorrido = document.createTreeWalker(e, NodeFilter.SHOW_TEXT);
+                    let ultimo: Text | null = null;
+                    for (let t = recorrido.nextNode(); t !== null; t = recorrido.nextNode()) {
+                      if ((t.textContent ?? '').trim() !== '') ultimo = t as Text;
+                    }
+                    if (ultimo !== null) {
+                      ultimo.textContent = `${ultimo.textContent} ${palabra}`;
+                      n += 1;
+                    }
+                  }
+                  return n;
+                },
+                { palabra: PALABRA_INDIVISIBLE, selector: palabraEn },
+              );
+              expect.soft(puestas, `${donde}: no hay ningún texto del Corpus donde poner la palabra`).toBeGreaterThan(0);
+            }
+            const m = await anchoDeLaPagina(page);
+            expect.soft(m.scroll, `${donde} desborda: ${m.scroll} frente a ${m.ventana}`).toBeLessThanOrEqual(m.ventana);
+            expect.soft(await contenedoresQueRecortan(page), `${donde}: contenedores que se desplazan o recortan en horizontal`).toEqual([]);
+          }
+        }
+      });
+    }
+
+    /*
+     * Ningún control ni encabezado visible calcula `nowrap` (DESIGN.md: «ningún control ni título
+     * lleva `white-space: nowrap`»). «Visible» es una caja de más de 1 × 1 px fuera de
+     * `.solo-para-lectores` y `.oculto`, que son hoy los únicos `nowrap` del sitio y son legítimos:
+     * su texto no se pinta. Se mira también `text-wrap-mode`, que es lo que `white-space` abrevia
+     * (y que `pre` también deja en `nowrap`). Entran los controles por rol (`[role=button]`,
+     * `[role=link]`) y todo lo que va dentro de un control: un `span` con `nowrap` dentro de un
+     * enlace no parte aunque el enlace sí.
+     * Una prueba por ruta, como las de arriba: la muestra crece y una sola prueba no cabría en su tiempo.
+     */
+    for (const ruta of SUPERFICIES) {
+      test(`${ruta}: ningún enlace, botón, campo, selector ni encabezado visible calcula nowrap`, async ({ page }) => {
+        await cargarEn320(page, ruta, 'texto por omisión');
+        const conNowrap = await page.evaluate(() =>
+          [
+            ...document.querySelectorAll(
+              'a, button, input, select, textarea, summary, label, h1, h2, h3, h4, h5, h6, [role="button"], [role="link"], :is(a, button, summary, label, [role="button"], [role="link"]) *',
+            ),
+          ]
+            .filter((e) => {
+              const r = e.getBoundingClientRect();
+              if (r.width <= 1 || r.height <= 1) return false;
+              if (e.closest('.solo-para-lectores, .oculto')) return false;
+              const c = getComputedStyle(e) as CSSStyleDeclaration & { textWrapMode?: string };
+              return c.whiteSpace.includes('nowrap') || c.textWrapMode === 'nowrap';
+            })
+            .map((e) => {
+              const clases = (e.getAttribute('class') ?? '').trim().split(/\s+/).filter(Boolean);
+              return `${e.tagName.toLowerCase()}${clases.map((c) => `.${c}`).join('')} «${(e.textContent ?? '').trim().slice(0, 40)}»`;
+            }),
+        );
+        expect(conNowrap, `${ruta}: controles o encabezados visibles con nowrap`).toEqual([]);
+      });
+    }
+
+    /*
+     * La cabecera en las tres condiciones: no desborda su caja y sus enlaces quedan dentro de ella.
+     * Que se partan en filas con 8 px entre ellas lo mide la 26.5 (`cabecera.spec.ts`) con el
+     * texto al 200 %; aquí se mide también con el espaciado de 1.4.12 y por omisión.
+     */
+    test('la cabecera no desborda a 320 px y sus enlaces quedan dentro, en las tres condiciones', async ({ page }) => {
+      const ruta = SUPERFICIES.find((r) => r.startsWith('/cita/')) ?? '/';
+      for (const condicion of CONDICIONES) {
+        if (!(await cargarEn320(page, ruta, condicion))) continue;
+        const m = await page.evaluate(() => {
+          const cabecera = document.querySelector('header.cabecera');
+          if (cabecera === null) return undefined;
+          const c = cabecera.getBoundingClientRect();
+          return {
+            scroll: cabecera.scrollWidth,
+            client: cabecera.clientWidth,
+            fuera: [...cabecera.querySelectorAll('a')]
+              .filter((a) => {
+                const r = a.getBoundingClientRect();
+                return r.width > 1 && (r.left < c.left - 0.5 || r.right > c.right + 0.5);
+              })
+              .map((a) => (a.textContent ?? '').trim()),
+          };
+        });
+        expect(m, `${ruta}: no hay cabecera`).toBeDefined();
+        expect.soft(m!.scroll, `${ruta} (${condicion}): la cabecera desborda`).toBeLessThanOrEqual(m!.client);
+        expect.soft(m!.fuera, `${ruta} (${condicion}): enlaces de la cabecera fuera de ella`).toEqual([]);
+      }
+    });
+
+    /*
+     * Los títulos de Obra que comparten fila: el de la Tarjeta de Obra de la Cita con el título
+     * más largo, y las filas de `/obras/` y de la Lista de Obras del Autor de ese título. En cada
+     * página se miden la fila de título más largo y la de la palabra más larga —es la palabra, no
+     * el título, la que no cabe—, y otra vez con una palabra indivisible añadida al título. En las
+     * tres condiciones, el título parte palabras dentro de su fila —no se sale por la derecha ni
+     * desborda su propia caja— y la fila lo contiene en alto. Solo cuentan las filas visibles: una
+     * escondida por el filtro mide cero y pasaría sin decir nada. En `/obras/` y en la Lista de
+     * Obras se exige además que la fila del título más largo del Corpus (`citaConTituloDeObraMasLargo`)
+     * esté entre las medidas, si la página la lista: medir otra más corta pasaría sin decirlo.
+     */
+    const TITULOS_QUE_COMPARTEN_FILA = [
+      {
+        cual: 'la Tarjeta de Obra',
+        ruta: () => CITAS_24_4.tituloLargo?.ruta,
+        sinRuta: 'el Corpus no tiene ninguna Cita con Tarjeta de Obra de título largo (CITAS_24_4.tituloLargo)',
+        filas: '.tarjeta-de-obra',
+        titulo: '.titulo',
+        esperado: () => undefined,
+      },
+      {
+        cual: 'el Directorio de Obras',
+        ruta: () => '/obras/',
+        sinRuta: 'no hay Directorio de Obras',
+        filas: '.lista-de-obras li',
+        titulo: '.titulo',
+        esperado: () => citaConTituloDeObraMasLargo()?.titulo,
+      },
+      {
+        cual: 'la Lista de Obras del Autor',
+        ruta: () => ((c) => (c === undefined ? undefined : `/autor/${c.autor}/`))(citaConTituloDeObraMasLargo()),
+        sinRuta: 'el Corpus no tiene ninguna Cita con Obra: no hay Lista de Obras que medir',
+        filas: '.lista-de-obras li',
+        titulo: '.titulo',
+        esperado: () => citaConTituloDeObraMasLargo()?.titulo,
+      },
+    ];
+    for (const { cual, ruta: rutaDe, sinRuta, filas, titulo, esperado: esperadoDe } of TITULOS_QUE_COMPARTEN_FILA) {
+      test(`el título de Obra más largo de ${cual} parte palabras dentro de su fila a 320 px`, async ({ page }) => {
+        const ruta = rutaDe();
+        expect(ruta, sinRuta).toBeDefined();
+        const esperado = esperadoDe();
+        for (const condicion of CONDICIONES) {
+          if (!(await cargarEn320(page, ruta!, condicion))) continue;
+          for (const conPalabra of [false, true]) {
+            const { listado, medidas } = await page.evaluate(
+              ({ filas, titulo, conPalabra, palabra, esperado }) => {
+                const colapsar = (t: string) => t.replace(/\s+/g, ' ').trim();
+                const todas = [...document.querySelectorAll(filas)]
+                  .map((fila) => ({ fila, titulo: fila.querySelector(titulo) as HTMLElement | null }))
+                  .filter((c): c is { fila: Element; titulo: HTMLElement } => c.titulo !== null);
+                const visibles = todas.filter((c) => {
+                  const f = c.fila.getBoundingClientRect();
+                  const t = c.titulo.getBoundingClientRect();
+                  return f.width > 1 && f.height > 1 && t.width > 1 && t.height > 1;
+                });
+                const texto = (c: { titulo: HTMLElement }) => colapsar(c.titulo.textContent ?? '');
+                const palabraMasLarga = (c: { titulo: HTMLElement }) => Math.max(...texto(c).split(/\s+/).map((p) => p.length));
+                const delCorpus = esperado === undefined ? undefined : todas.find((c) => texto(c).includes(colapsar(esperado)));
+                const elegidas = [
+                  [...visibles].sort((a, b) => texto(b).length - texto(a).length)[0],
+                  [...visibles].sort((a, b) => palabraMasLarga(b) - palabraMasLarga(a))[0],
+                  delCorpus,
+                ].filter((c, i, lista) => c !== undefined && lista.indexOf(c) === i) as { fila: Element; titulo: HTMLElement }[];
+                const listado = delCorpus === undefined ? 'no' : visibles.includes(delCorpus) ? 'visible' : 'oculto';
+                return { listado, medidas: elegidas.map((elegida) => {
+                  if (conPalabra) {
+                    const nodos = document.createTreeWalker(elegida.titulo, NodeFilter.SHOW_TEXT);
+                    let ultimo: Text | null = null;
+                    for (let n = nodos.nextNode(); n !== null; n = nodos.nextNode()) {
+                      if ((n.textContent ?? '').trim() !== '') ultimo = n as Text;
+                    }
+                    if (ultimo !== null) ultimo.textContent = `${ultimo.textContent} ${palabra}`;
+                  }
+                  const f = elegida.fila.getBoundingClientRect();
+                  const t = elegida.titulo.getBoundingClientRect();
+                  return {
+                    texto: texto(elegida),
+                    fila: { arriba: f.top, abajo: f.bottom, der: f.right },
+                    titulo: { arriba: t.top, abajo: t.bottom, der: t.right },
+                    scroll: elegida.titulo.scrollWidth,
+                    client: elegida.titulo.clientWidth,
+                  };
+                }) };
+              },
+              { filas, titulo, conPalabra, palabra: PALABRA_INDIVISIBLE, esperado },
+            );
+            expect(medidas.length, `${ruta}: no hay ningún ${titulo} visible en ${filas}`).toBeGreaterThan(0);
+            expect
+              .soft(listado, `${ruta} (${cual}, ${condicion}): la fila del título más largo del Corpus, «${esperado}», está oculta`)
+              .not.toBe('oculto');
+            for (const m of medidas) {
+              const donde = `${ruta} (${cual}, ${condicion}${conPalabra ? ', palabra indivisible' : ''}): «${m.texto.slice(0, 60)}»`;
+              expect.soft(m.titulo.der, `${donde} se sale de su fila`).toBeLessThanOrEqual(m.fila.der + 0.5);
+              expect.soft(m.scroll, `${donde} desborda su caja`).toBeLessThanOrEqual(m.client + 0.5);
+              expect.soft(m.titulo.arriba, `${donde}: la fila no lo contiene en alto`).toBeGreaterThanOrEqual(m.fila.arriba - 0.5);
+              expect.soft(m.titulo.abajo, `${donde}: la fila no lo contiene en alto`).toBeLessThanOrEqual(m.fila.abajo + 0.5);
+            }
+          }
+        }
+      });
+    }
+
+    /*
+     * Las letras de salto de los Directorios: una rejilla `auto-fill` de 44 px que con el texto al
+     * 200 % se queda en dos columnas. Ninguna letra se sale de la ventana y ningún contenedor de la
+     * rejilla se desplaza por su cuenta (un desplazamiento propio no lo ve el `scrollWidth` de la
+     * página).
+     */
+    for (const ruta of ['/autores/', '/obras/']) {
+      test(`las letras de salto de ${ruta} se reajustan a 320 px sin desplazamiento propio`, async ({ page }) => {
+        for (const condicion of CONDICIONES) {
+          if (!(await cargarEn320(page, ruta, condicion))) continue;
+          const m = await page.evaluate(() => {
+            const letras = document.querySelector('nav.letras');
+            if (letras === null) return undefined;
+            const ventana = document.documentElement.clientWidth;
+            return {
+              letras: letras.querySelectorAll('a').length,
+              fuera: [...letras.querySelectorAll('a')]
+                .filter((a) => {
+                  const r = a.getBoundingClientRect();
+                  return r.left < -0.5 || r.right > ventana + 0.5;
+                })
+                .map((a) => (a.textContent ?? '').trim()),
+              conDesplazamiento: [letras, ...letras.querySelectorAll('*')]
+                .filter((e) => e.scrollWidth > e.clientWidth && getComputedStyle(e).display !== 'inline')
+                .filter((e) => !e.closest('.solo-para-lectores'))
+                .map((e) => `${e.tagName.toLowerCase()} ${e.scrollWidth}/${e.clientWidth}`),
+            };
+          });
+          expect(m, `${ruta}: no hay letras de salto`).toBeDefined();
+          expect(m!.letras, `${ruta}: la rejilla no tiene letras`).toBeGreaterThan(0);
+          expect.soft(m!.fuera, `${ruta} (${condicion}): letras fuera de la ventana`).toEqual([]);
+          expect.soft(m!.conDesplazamiento, `${ruta} (${condicion}): contenedores con desplazamiento propio`).toEqual([]);
+        }
+      });
+    }
+  });
+
+  /**
+   * Las zonas de toque de `main` en una página, a 360 px: 44 px de alto y 8 px entre vecinas,
+   * salvo las filas apiladas de un enlace de bloque, que basta con que no se solapen.
+   */
+  async function medirZonasDeToque(page: Page, ruta: string) {
     await page.setViewportSize({ width: 360, height: 640 });
-    await page.goto('/cita/antonio-machado-hoy-es-siempre-todavia/');
+    await page.goto(ruta);
 
     const cajas = await page.evaluate(() =>
       [...document.querySelectorAll('main a, main button')]
@@ -573,8 +1315,16 @@ test.describe('Historia 2.8 — responsive', () => {
             (padre.textContent ?? '').trim().length > (n.textContent ?? '').trim().length;
           return !(enLinea && acompanado);
         })
-        // Solo los listados de bloque con filete entre filas: las Citas hermanas.
-        .map((n) => ({ r: n.getBoundingClientRect(), lista: n.closest('.hermanas') }))
+        /*
+         * Solo los listados de bloque con filete entre filas: el `ul` que reúne Tarjetas de Cita
+         * o Filas de bloque (los componentes `.tarjeta` y `.fila-de-bloque`), como las dos filas
+         * de la Tarjeta de Obra (24.5) o las tarjetas y el cierre de cada grupo del pie (24.6).
+         * Por el componente, no por la ruta.
+         */
+        .map((n) => ({
+          r: n.getBoundingClientRect(),
+          lista: n.closest('li.tarjeta, li.fila-de-bloque')?.parentElement ?? null,
+        }))
         .filter(({ r }) => r.width > 0 && r.height > 0)
         .map(({ r, lista }) => ({
           arriba: r.top,
@@ -583,63 +1333,184 @@ test.describe('Historia 2.8 — responsive', () => {
           der: r.right,
           alto: r.height,
           // El listado al que pertenece, para reconocer las filas apiladas de un enlace de bloque.
-          lista: lista === null ? -1 : [...document.querySelectorAll('.hermanas')].indexOf(lista),
+          lista:
+            lista === null
+              ? -1
+              : [...document.querySelectorAll('ul:has(> li.tarjeta), ul:has(> li.fila-de-bloque)')].indexOf(lista),
+          // Si la lista reúne Tarjetas de Cita: solo ahí hay margen negativo que absorber.
+          conTarjetas: lista !== null && lista.querySelector(':scope > li.tarjeta') !== null,
         })),
     );
+    // El margen negativo de la tarjeta (`margin-inline: -1 × --unidad`) la saca un `--unidad` por
+    // cada lado de la fila que la cierra: dentro de una lista con tarjetas, eso no es otra columna.
+    // Una lista solo de Filas de bloque (la Tarjeta de Obra) sigue con el píxel de siempre.
+    const unidad = await page.evaluate(() => {
+      const sonda = document.createElement('div');
+      sonda.style.width = 'var(--unidad)';
+      document.body.append(sonda);
+      const ancho = sonda.getBoundingClientRect().width;
+      sonda.remove();
+      return ancho;
+    });
 
-    for (const caja of cajas) expect(caja.alto).toBeGreaterThanOrEqual(44);
+    for (const caja of cajas) expect(caja.alto, `${ruta}: ${JSON.stringify(caja)}`).toBeGreaterThanOrEqual(44);
 
     /*
      * Y entre dos zonas vecinas quedan 8px. Antes solo se pedía que no se solapasen, y el
      * comentario prometía los 8px sin medirlos (Historia 22.10). El hueco es por eje: dos
      * cajas quedan separadas por el eje en el que no se cruzan.
      *
-     * Las filas de las Citas hermanas —`.hermanas`, con el ancho entero de la columna y el
-     * filete entre una y otra, el único separador del sistema— no se miden entre sí: son
-     * enlaces de bloque de `EXPERIENCE.md` y su separación es el filete, no un hueco. Basta
-     * con que no se solapen. La exención se nombra por selector, no por «cualquier lista»,
-     * para que una botonera en `ul` no se cuele por ella.
+     * Las filas de un mismo `ul` de Tarjetas de Cita o de Filas de bloque —con el ancho entero
+     * de la columna y el filete entre una y otra, el único separador del sistema— no se miden
+     * entre sí: son enlaces de bloque de `EXPERIENCE.md` y su separación es el filete, no un
+     * hueco. Basta con que no se solapen (Historia 24.5: «Siguiente…» sobre «Ver la obra»; 24.6:
+     * las tarjetas y el cierre de cada grupo del pie, que sustituyen a las Citas hermanas). La
+     * exención se nombra por componente, no por «cualquier lista», para que una botonera en `ul`
+     * no se cuele por ella.
      */
     for (let i = 0; i < cajas.length; i += 1) {
       for (let j = i + 1; j < cajas.length; j += 1) {
         const a = cajas[i];
         const b = cajas[j];
+        const holgura = a.conTarjetas ? unidad + 1 : 1;
         const filasDeUnListado =
           a.lista !== -1 &&
           a.lista === b.lista &&
-          Math.abs(a.izq - b.izq) <= 1 &&
-          Math.abs(a.der - b.der) <= 1;
+          Math.abs(a.izq - b.izq) <= holgura &&
+          Math.abs(a.der - b.der) <= holgura;
         if (filasDeUnListado) {
-          expect(a.abajo <= b.arriba || b.abajo <= a.arriba, JSON.stringify([a, b])).toBe(true);
+          expect(a.abajo <= b.arriba || b.abajo <= a.arriba, `${ruta}: ${JSON.stringify([a, b])}`).toBe(true);
           continue;
         }
         const vertical = Math.max(a.arriba - b.abajo, b.arriba - a.abajo);
         const horizontal = Math.max(a.izq - b.der, b.izq - a.der);
         // Medio píxel de holgura por el redondeo subpíxel del navegador.
-        expect(Math.max(vertical, horizontal), JSON.stringify([a, b])).toBeGreaterThanOrEqual(7.5);
+        expect(Math.max(vertical, horizontal), `${ruta}: ${JSON.stringify([a, b])}`).toBeGreaterThanOrEqual(7.5);
       }
     }
+  }
+
+  test('las zonas de toque miden 44px con 8px de separación', async ({ page }) => {
+    await medirZonasDeToque(page, '/cita/antonio-machado-hoy-es-siempre-todavia/');
+  });
+
+  test('24.6 — las zonas de toque del pie con los dos bloques', async ({ page }) => {
+    await medirZonasDeToque(page, obligatoria(CITAS_24_6.dosBloques, SIN_DOS_BLOQUES));
+  });
+
+  /*
+   * Historia 24.5 — la otra variante de la fila, «Siguiente cita sobre {tema}», que cambia de
+   * largo con el nombre del Tema: la de la etiqueta más larga del `dist/` de hoy, entre las
+   * Citas de una Obra de una sola Cita. Zonas de toque y, a 320 px, que las dos filas caben.
+   */
+  test('24.5 — la fila «Siguiente cita sobre {tema}» más larga mide 44px y cabe a 320 px', async ({ page }) => {
+    const candidatas = citasDeObraDeUnaCita()
+      .map((slug) => {
+        const ruta = `/cita/${slug}/`;
+        const tarjeta = tarjetaDeObraDe(construida(ruta));
+        const etiqueta = tarjeta === undefined ? undefined : />(Siguiente cita sobre [^<]+)<span aria-hidden/.exec(tarjeta)?.[1];
+        return { ruta, etiqueta };
+      })
+      .filter((c): c is { ruta: string; etiqueta: string } => c.etiqueta !== undefined)
+      .sort((a, b) => b.etiqueta.length - a.etiqueta.length || a.ruta.localeCompare(b.ruta));
+    test.skip(candidatas.length === 0, 'el Corpus de hoy no tiene ninguna fila «Siguiente cita sobre {tema}»');
+    const { ruta, etiqueta } = candidatas[0];
+    test.info().annotations.push({ type: '24.5 fila por Tema', description: `${ruta}: «${etiqueta}»` });
+    // El Tema va en minúscula tras «sobre» (`temaEnFrase`).
+    expect(etiqueta, ruta).toMatch(/^Siguiente cita sobre \p{Ll}/u);
+
+    await medirZonasDeToque(page, ruta);
+    const zonas = await page.locator('.tarjeta-de-obra li.fila-de-bloque').evaluateAll((lis) =>
+      lis.map((li) => li.getAttribute('data-zona')),
+    );
+    expect(zonas, ruta).toEqual(['siguiente', 'tarjeta-de-obra']);
+
+    await page.setViewportSize({ width: 320, height: 640 });
+    await page.goto(ruta);
+    await page.evaluate(async () => {
+      await document.fonts.ready;
+    });
+    const medida = await page.evaluate(() => {
+      const filas = [...document.querySelectorAll('.tarjeta-de-obra .fila-de-bloque a')] as HTMLElement[];
+      return {
+        filas: filas.length,
+        dentro: filas.every((fila) => fila.getBoundingClientRect().right <= document.documentElement.clientWidth + 0.5),
+        desborda: document.documentElement.scrollWidth > document.documentElement.clientWidth,
+      };
+    });
+    expect(medida.filas, ruta).toBe(2);
+    expect(medida.dentro, ruta).toBe(true);
+    expect(medida.desborda, ruta).toBe(false);
+  });
+
+  test('24.5 — con la tarjeta de dos filas, las zonas de toque miden 44px y las filas se apilan sin solaparse', async ({
+    page,
+  }) => {
+    const ruta = obligatoria(CITAS_24_4.completa, SIN_TARJETA_COMPLETA);
+    await medirZonasDeToque(page, ruta);
+    // La cara completa trae las dos Filas de bloque, «Siguiente…» encima de «Ver la obra».
+    const filas = await page.locator('.tarjeta-de-obra li.fila-de-bloque').evaluateAll((lis) =>
+      lis.map((li) => {
+        const r = li.getBoundingClientRect();
+        return { zona: li.getAttribute('data-zona'), arriba: r.top, abajo: r.bottom };
+      }),
+    );
+    expect(filas.map((f) => f.zona), ruta).toEqual(['siguiente', 'tarjeta-de-obra']);
+    expect(filas[1].arriba, ruta).toBeGreaterThanOrEqual(filas[0].abajo - 0.5);
   });
 
   /*
    * Historia 22.10 — la prueba de arriba solo pedía que las cajas no se solapasen; los 8px de
    * `{spacing.unit}` entre zonas vecinas no los medía nadie, y los números de la Paginación
-   * iban a 4px. Se mide en el listado de Autor con más páginas del `dist/`, a 360 px, con el
-   * hueco por eje: dos cajas vecinas quedan separadas al menos 8px en el eje que las separa.
+   * iban a 4px. Se mide a 360 px, con el hueco por eje: dos cajas vecinas quedan separadas al
+   * menos 8px en el eje que las separa.
+   *
+   * Historia 26.9 — el listado ya no es «el Autor con más páginas», sino el que más páginas tiene
+   * entre las cuatro familias paginadas del `dist/` (Autor, Tema, Colección y Obra), por su número
+   * de páginas —los subdirectorios numéricos más la primera— y con la ruta como desempate. A 360
+   * px por omisión la fila sigue siendo una («Siguiente» en la de «Página N de M»), y a 320 px no
+   * desborda en ninguna de las tres condiciones del reflujo, ni en su página 1 ni en la 2.
    */
+  function listadosPaginados(): { ruta: string; paginas: number }[] {
+    const listados: { ruta: string; paginas: number }[] = [];
+    const paginasDe = (dir: string) => readdirSync(dir).filter((e) => /^\d+$/.test(e)).length + 1;
+    // Una familia sin listados no tiene directorio en el `dist/` —`corpus/colecciones/` puede estar
+    // vacío—: se salta, y si ninguna tiene uno de 2+ páginas la prueba falla nombrándolo.
+    for (const familia of ['autor', 'tema', 'coleccion']) {
+      const raiz = join(dist, familia);
+      if (!existsSync(raiz)) continue;
+      for (const slug of readdirSync(raiz)) {
+        if (!statSync(join(raiz, slug)).isDirectory()) continue;
+        listados.push({ ruta: `/${familia}/${slug}/`, paginas: paginasDe(join(raiz, slug)) });
+      }
+    }
+    const obras = join(dist, 'obra');
+    for (const autor of existsSync(obras) ? readdirSync(obras) : []) {
+      if (!statSync(join(obras, autor)).isDirectory()) continue;
+      for (const obra of readdirSync(join(obras, autor))) {
+        if (!statSync(join(obras, autor, obra)).isDirectory()) continue;
+        listados.push({ ruta: `/obra/${autor}/${obra}/`, paginas: paginasDe(join(obras, autor, obra)) });
+      }
+    }
+    return listados.sort((a, b) => b.paginas - a.paginas || a.ruta.localeCompare(b.ruta, 'es'));
+  }
+  const listadoConMasPaginas = () => listadosPaginados()[0];
+  /** El listado con menos páginas de entre los que tienen dos o más, con la ruta como desempate. */
+  const listadoConMenosPaginas = () =>
+    listadosPaginados()
+      .filter((l) => l.paginas >= 2)
+      .sort((a, b) => a.paginas - b.paginas || a.ruta.localeCompare(b.ruta, 'es'))[0];
+
   test('los números de la Paginación quedan a 8px entre zonas de toque, en la fila y entre filas', async ({
     page,
   }) => {
-    const autores = readdirSync(join(dist, 'autor'))
-      .map((slug) => ({
-        slug,
-        paginas: readdirSync(join(dist, 'autor', slug)).filter((e) => /^\d+$/.test(e)).length,
-      }))
-      .sort((a, b) => b.paginas - a.paginas || a.slug.localeCompare(b.slug, 'es'));
-    expect(autores[0]?.paginas ?? 0, 'ningún Autor del dist/ tiene más de una página').toBeGreaterThan(0);
+    const listado = listadoConMasPaginas();
+    expect(listado?.paginas ?? 0, 'ningún listado de Autor, Tema, Colección ni Obra del dist/ tiene más de una página').toBeGreaterThan(1);
+    const { ruta, paginas } = listado!;
+    test.info().annotations.push({ type: 'listado con más páginas', description: `${ruta}: ${paginas} páginas` });
 
     await page.setViewportSize({ width: 360, height: 640 });
-    await page.goto(`/autor/${autores[0].slug}/`);
+    await page.goto(ruta);
 
     const cajas = await page.evaluate(() =>
       [...document.querySelectorAll('.numeros > li > *')].map((n) => {
@@ -675,6 +1546,136 @@ test.describe('Historia 2.8 — responsive', () => {
     });
     expect(oculto).not.toBeNull();
     expect(oculto!).toBeLessThanOrEqual(1);
+
+    /*
+     * A 360 px por omisión, la fila sigue siendo una: «Anterior», «Página N de M» y «Siguiente» en
+     * la misma, en ese orden. Se mide en la página 1, en la 2 y en la última: las páginas 2+ traen
+     * «Anterior» y son las que menos holgura tienen, y la última no trae «Siguiente».
+     */
+    const filaDeLaPaginacion = () =>
+      page.evaluate(() => {
+        const caja = (e: Element | null) => {
+          if (e === null) return null;
+          const r = e.getBoundingClientRect();
+          return { arriba: r.top, abajo: r.bottom, izq: r.left, der: r.right, centro: (r.top + r.bottom) / 2 };
+        };
+        return {
+          anterior: caja(document.querySelector('.paginacion a[rel="prev"]')),
+          cuenta: caja(document.querySelector('.paginacion .cuenta')),
+          siguiente: caja(document.querySelector('.paginacion a[rel="next"]')),
+        };
+      });
+    for (const [pagina, numero] of [
+      [ruta, 1],
+      [`${ruta}2/`, 2],
+      [`${ruta}${paginas}/`, paginas],
+    ] as const) {
+      await page.setViewportSize({ width: 360, height: 640 });
+      await page.goto(pagina);
+      const fila = await filaDeLaPaginacion();
+      expect(fila.cuenta, `${pagina}: sin «Página N de M»`).not.toBeNull();
+      expect(fila.anterior === null, `${pagina}: «Anterior» ${numero === 1 ? 'en la página 1' : 'falta'}`).toBe(numero === 1);
+      expect(fila.siguiente === null, `${pagina}: «Siguiente» ${numero === paginas ? 'en la última página' : 'falta'}`).toBe(
+        numero === paginas,
+      );
+      if (fila.anterior !== null) {
+        expect
+          .soft(Math.abs(fila.anterior.centro - fila.cuenta!.centro), `${pagina}: «Anterior» cambió de fila a 360 px`)
+          .toBeLessThanOrEqual(1);
+        expect.soft(fila.anterior.der, `${pagina}: «Anterior» no va antes de «Página N de M»`).toBeLessThan(fila.cuenta!.izq);
+      }
+      if (fila.siguiente !== null) {
+        expect
+          .soft(Math.abs(fila.siguiente.centro - fila.cuenta!.centro), `${pagina}: «Siguiente» cambió de fila a 360 px`)
+          .toBeLessThanOrEqual(1);
+        expect.soft(fila.siguiente.izq, `${pagina}: «Siguiente» no va tras «Página N de M»`).toBeGreaterThan(fila.cuenta!.der);
+      }
+    }
+
+    /*
+     * Y a 320 px, en las tres condiciones del reflujo, ni la página 1, ni la 2, ni la última
+     * desbordan. Cuando la fila se parte —en las páginas 2+ a 320 px, o con el texto al 200 %—,
+     * «Anterior», «Página N de M», «Siguiente» y cada número quedan a `{spacing.unit}` al menos
+     * entre sí, también en vertical: al partirse, un número puede quedar al lado de «Siguiente».
+     */
+    for (const pagina of [ruta, `${ruta}2/`, `${ruta}${paginas}/`]) {
+      for (const condicion of CONDICIONES) {
+        if (!(await cargarEn320(page, pagina, condicion))) continue;
+        const m = await anchoDeLaPagina(page);
+        expect.soft(m.scroll, `${pagina} desborda con el ${condicion}: ${m.scroll} frente a ${m.ventana}`).toBeLessThanOrEqual(
+          m.ventana,
+        );
+        const fila = await filaDeLaPaginacion();
+        const numeros = await page.evaluate(() =>
+          [...document.querySelectorAll('.numeros > li > *')].map((n) => {
+            const r = n.getBoundingClientRect();
+            return { arriba: r.top, abajo: r.bottom, izq: r.left, der: r.right };
+          }),
+        );
+        const zonas = [fila.anterior, fila.cuenta, fila.siguiente, ...numeros].filter((c) => c !== null);
+        for (let i = 0; i < zonas.length; i += 1) {
+          for (let j = i + 1; j < zonas.length; j += 1) {
+            const a = zonas[i]!;
+            const b = zonas[j]!;
+            const separacion = Math.max(a.arriba - b.abajo, b.arriba - a.abajo, a.izq - b.der, b.izq - a.der);
+            expect.soft(separacion, `${pagina} (${condicion}): zonas ${i + 1} y ${j + 1} de la Paginación a menos de 8 px`).toBeGreaterThanOrEqual(7.5);
+          }
+        }
+      }
+    }
+  });
+
+  /*
+   * Historia 26.9 — la fila que se parte por el mínimo no cambia la forma de un listado corto. La
+   * prueba de arriba mide el listado más largo, cuya lista de números llena la fila con o sin el
+   * tope `max-content`; en uno corto es ese tope el que deja la lista a su ancho y reparte el aire
+   * entre los extremos (`space-between`), como antes de la 26.9. A 360 px por omisión, en su
+   * página 1 y en su última: una sola fila, la lista de números y «Página N de M» a su ancho, y
+   * los huecos entre ítems iguales.
+   */
+  test('la Paginación de un listado corto conserva su forma a 360 px por omisión', async ({ page }) => {
+    const listado = listadoConMenosPaginas();
+    expect(listado, 'ningún listado de Autor, Tema, Colección ni Obra del dist/ tiene más de una página').toBeDefined();
+    const { ruta, paginas } = listado!;
+    test.info().annotations.push({ type: 'listado con menos páginas', description: `${ruta}: ${paginas} páginas` });
+    await page.setViewportSize({ width: 360, height: 640 });
+    for (const pagina of [ruta, `${ruta}${paginas}/`]) {
+      await page.goto(pagina);
+      await page.evaluate(async () => {
+        await document.fonts.ready;
+      });
+      const m = await page.evaluate(() => {
+        const caja = (e: Element) => {
+          const r = e.getBoundingClientRect();
+          return { izq: r.left, der: r.right, centro: (r.top + r.bottom) / 2 };
+        };
+        const items = [...document.querySelectorAll('.paginacion > *')].filter((e) => e.getBoundingClientRect().width > 1);
+        const numeros = document.querySelector('.paginacion .numeros');
+        const cuenta = document.querySelector('.paginacion .cuenta');
+        const hijos = numeros === null ? [] : [...numeros.querySelectorAll(':scope > li')].map((li) => li.getBoundingClientRect());
+        const texto = document.createRange();
+        if (cuenta !== null) texto.selectNodeContents(cuenta);
+        return {
+          items: items.map((e) => ({ clase: e.getAttribute('class') ?? e.tagName.toLowerCase(), ...caja(e) })),
+          numeros: numeros === null ? null : { ancho: numeros.getBoundingClientRect().width, contenido: hijos.length === 0 ? 0 : hijos[hijos.length - 1].right - hijos[0].left },
+          cuenta: cuenta === null ? null : { ancho: cuenta.getBoundingClientRect().width, contenido: texto.getBoundingClientRect().width },
+        };
+      });
+      expect(m.items.length, `${pagina}: la Paginación no tiene ítems`).toBeGreaterThan(1);
+      const centro = m.items[0].centro;
+      for (const item of m.items) {
+        expect.soft(Math.abs(item.centro - centro), `${pagina}: ${item.clase} cambió de fila a 360 px`).toBeLessThanOrEqual(1);
+      }
+      expect(m.numeros, `${pagina}: sin lista de números`).not.toBeNull();
+      expect.soft(m.numeros!.ancho, `${pagina}: la lista de números se estira más allá de su contenido`).toBeLessThanOrEqual(m.numeros!.contenido + 1);
+      expect(m.cuenta, `${pagina}: sin «Página N de M»`).not.toBeNull();
+      expect.soft(m.cuenta!.ancho, `${pagina}: «Página N de M» se estira más allá de su texto`).toBeLessThanOrEqual(m.cuenta!.contenido + 1);
+      const huecos = m.items.slice(1).map((item, i) => item.izq - m.items[i].der);
+      for (const hueco of huecos) {
+        expect.soft(hueco, `${pagina}: los huecos de la Paginación no se reparten por igual (${huecos.map((h) => h.toFixed(1)).join(', ')})`).toBeGreaterThan(0);
+        expect.soft(Math.abs(hueco - huecos[0]), `${pagina}: los huecos de la Paginación no se reparten por igual (${huecos.map((h) => h.toFixed(1)).join(', ')})`).toBeLessThanOrEqual(1);
+      }
+    }
   });
 
   test('el ancho extra de escritorio es margen y no contenido nuevo', async ({ page }) => {
@@ -785,5 +1786,411 @@ test.describe('Historia 22.10 — subrayado y pestaña nueva', () => {
     // Solo las cuentas: si un día el pie aloja un enlace que entrega algo a un tercero
     // —donar, comprar—, ese sí abriría pestaña nueva.
     expect(await cuentas.evaluateAll((ns) => ns.filter((n) => n.hasAttribute('target')).length)).toBe(0);
+  });
+});
+
+/**
+ * Historia 24.7 — las Páginas de Obra con las que se mide el pie y la Cabecera, sacadas del
+ * `dist/` como `OBRAS` y no escritas a mano: una página 1 con Paginación y Temas, otra sin
+ * Paginación, con Temas y alguna línea de edición cotejada, y, si alguna Obra del `dist/` trae
+ * nota, la primera. Y dos listas de páginas 1: todas (`primeras`), para la primera pantalla, que
+ * depende del alto de la Cabecera y se mide en cada una —la más alta no es siempre la del título
+ * más largo: parte en más líneas la que tiene palabras más largas—, y las Cabeceras de texto más
+ * largo (`cabecerasLargas`: las cinco de título más largo y las cinco de «de {Autor} · {año}» más
+ * largo), para las zonas del salto, que no dependen del alto: «de {Autor}» parta o no, su zona
+ * acaba 10 px bajo `p.de` y la del salto empieza en el borde de `p.salto`.
+ */
+function obrasDelPie(): {
+  conPaginacion: string;
+  sinPaginacion: string;
+  conNota: string | undefined;
+  primeras: string[];
+  cabecerasLargas: string[];
+} {
+  const obras = rutasConstruidas()
+    .filter((ruta) => ruta.startsWith('/obra/'))
+    .sort((a, b) => a.localeCompare(b, 'es'));
+  const paginadas = new Set(
+    obras.filter((ruta) => /^\/obra\/[^/]+\/[^/]+\/\d+\/$/.test(ruta)).map((ruta) => ruta.replace(/\d+\/$/, '')),
+  );
+  const texto = (marcado: string) =>
+    marcado
+      .replace(/<span class="oculto"[^>]*>[^<]*<\/span>/g, '')
+      .replace(/<[^>]+>/g, '')
+      .replace(/\s+/g, ' ')
+      .trim();
+  const primeras = obras
+    .filter((ruta) => /^\/obra\/[^/]+\/[^/]+\/$/.test(ruta))
+    .map((ruta) => {
+      const html = readFileSync(join(dist, ...ruta.split('/').filter(Boolean), 'index.html'), 'utf8');
+      return {
+        ruta,
+        html,
+        titulo: texto(/<h1[^>]*>([\s\S]*?)<\/h1>/.exec(html)?.[1] ?? '').length,
+        de: texto(/<p class="de"[^>]*>([\s\S]*?)<\/p>/.exec(html)?.[1] ?? '').length,
+      };
+    });
+  const conTemas = (html: string) => html.includes('<section class="temas"');
+  const exigir = (ruta: string | undefined, cara: string) => {
+    if (ruta === undefined) throw new Error(`El dist/ no trae ninguna página 1 de Obra ${cara}.`);
+    return ruta;
+  };
+  const las5MasLargas = (campo: 'titulo' | 'de') =>
+    [...primeras]
+      .sort((a, b) => b[campo] - a[campo] || a.ruta.localeCompare(b.ruta, 'es'))
+      .slice(0, 5)
+      .map((o) => o.ruta);
+  return {
+    conPaginacion: exigir(
+      primeras.find((o) => paginadas.has(o.ruta) && conTemas(o.html))?.ruta,
+      'con Paginación y Temas',
+    ),
+    sinPaginacion: exigir(
+      primeras.find((o) => !paginadas.has(o.ruta) && conTemas(o.html) && o.html.includes('id="edicion-cotejada"'))
+        ?.ruta,
+      'sin Paginación, con Temas y edición cotejada',
+    ),
+    conNota: primeras.find((o) => o.html.includes('class="nota-de-la-ficha"'))?.ruta,
+    primeras: primeras.map((o) => o.ruta),
+    cabecerasLargas: [...new Set([...las5MasLargas('titulo'), ...las5MasLargas('de')])],
+  };
+}
+
+/*
+ * Se deriva al pedirla, no al cargar el fichero: si el Corpus del día deja de traer alguna de
+ * estas caras, fallan las pruebas de la 24.7 que la piden, nombrándola, y no deja de cargar el
+ * barrido entero.
+ */
+let pie: ReturnType<typeof obrasDelPie> | undefined;
+const PIE = () => (pie ??= obrasDelPie());
+
+/**
+ * Historia 24.7 — el salto «Dónde leer esta obra ↓» de la Cabecera de Obra (UX-DR96, UX-DR100).
+ *
+ * Se tabula hasta él y se activa con Intro, sin guion de por medio: el foco tiene que acabar en
+ * el `h2` de destino (`tabindex="-1"`) con el anillo global, porque el salto nativo del navegador
+ * enfoca un destino enfocable y el último gesto fue de teclado; y el Tab siguiente sale de ahí
+ * hacia delante, no vuelve a la Cabecera. Con el puntero el foco llega igual y el anillo es el que
+ * decida la regla global, sin ninguna de la página que lo pinte o lo quite; y, se llegue con
+ * Intro, con el puntero o abriendo la dirección con el fragmento, el `h2` queda a 2 × `--unidad`
+ * del borde. Las medidas son las de `DESIGN.md`
+ * § Página de Obra: el salto a 3 × de «de {Autor}», su zona de 44 px a 8 px como poco de la de
+ * «de {Autor}» —sin tocar ninguna de las dos—, la primera Cita aún en la primera pantalla y el
+ * ritmo del pie, que el salto no mueve. Medio píxel de holgura por el redondeo subpíxel, como en
+ * las demás.
+ */
+test.describe('Historia 24.7 — el salto «Dónde leer esta obra ↓»', () => {
+  const ANCLA = 'donde-leer-esta-obra';
+
+  for (const cara of ['indexable', 'noIndexable'] as const) {
+    test(`${cara}: Intro sobre el salto deja el foco en el h2 de destino, con el anillo global`, async ({
+      page,
+    }) => {
+      const ruta = OBRAS[cara];
+      await page.goto(ruta);
+      const salto = page.getByRole('link', { name: 'Dónde leer esta obra', exact: true });
+      await expect(salto, ruta).toHaveCount(1);
+      expect(await salto.getAttribute('href'), ruta).toBe(`#${ANCLA}`);
+      expect(await salto.getAttribute('target'), ruta).toBeNull();
+
+      let alcanzado = false;
+      for (let i = 0; i < 60 && !alcanzado; i += 1) {
+        await page.keyboard.press('Tab');
+        alcanzado = await salto.evaluate((n) => n === document.activeElement);
+      }
+      expect(alcanzado, `${ruta}: el salto no recibe el foco por teclado`).toBe(true);
+
+      await page.keyboard.press('Enter');
+      await expect.poll(() => page.evaluate(() => location.hash), { message: ruta }).toBe(`#${ANCLA}`);
+      await expect
+        .poll(() => page.evaluate(() => document.activeElement?.id), { message: `${ruta}: el foco no llega al h2` })
+        .toBe(ANCLA);
+
+      const foco = await page.evaluate(() => {
+        const n = document.activeElement as HTMLElement;
+        const s = getComputedStyle(n);
+        return {
+          etiqueta: n.tagName,
+          tabindex: n.getAttribute('tabindex'),
+          visible: n.matches(':focus-visible'),
+          estilo: s.outlineStyle,
+          ancho: s.outlineWidth,
+          separacion: s.outlineOffset,
+          color: s.outlineColor,
+          margen: s.scrollMarginTop,
+          siena: getComputedStyle(document.documentElement).getPropertyValue('--siena').trim(),
+        };
+      });
+      expect(foco.etiqueta, ruta).toBe('H2');
+      expect(foco.tabindex, ruta).toBe('-1');
+      expect(foco.visible, `${ruta}: el h2 enfocado no casa :focus-visible`).toBe(true);
+      expect(foco.estilo, ruta).toBe('solid');
+      expect(foco.ancho, ruta).toBe('2px');
+      expect(foco.separacion, ruta).toBe('2px');
+      expect(foco.margen, ruta).toBe('16px');
+      // El color, el del token: se compara resolviéndolo en el propio navegador.
+      const sienaResuelto = await page.evaluate((valor) => {
+        const prueba = document.createElement('span');
+        prueba.style.color = valor;
+        document.body.append(prueba);
+        const color = getComputedStyle(prueba).color;
+        prueba.remove();
+        return color;
+      }, foco.siena);
+      expect(foco.color, ruta).toBe(sienaResuelto);
+
+      // UX-DR100 — el destino mueve también el punto de partida de la tabulación: el Tab
+      // siguiente sigue desde «Dónde leer esta obra» hacia delante y no vuelve a la Cabecera.
+      await page.keyboard.press('Tab');
+      const siguiente = await page.evaluate((ancla) => {
+        const destino = document.getElementById(ancla)!;
+        const activo = document.activeElement;
+        if (activo === null || activo === document.body) return { despues: false, enCabecera: false };
+        return {
+          despues: Boolean(destino.compareDocumentPosition(activo) & Node.DOCUMENT_POSITION_FOLLOWING),
+          enCabecera: activo.closest('.cabecera-de-obra') !== null,
+        };
+      }, ANCLA);
+      expect(siguiente, `${ruta}: el Tab tras el salto`).toStrictEqual({ despues: true, enCabecera: false });
+    });
+  }
+
+  /*
+   * Con el puntero, que el anillo salga o no lo decide `:focus-visible` —la regla global, que
+   * nunca se suprime (UX-DR100)—, no la página: se exige que el contorno sea exactamente el de esa
+   * regla según case o no, y no qué decide el navegador. Lo que esto atrapa es una regla de foco
+   * propia (`.rotulo:focus`, un `outline` local), que la 24.7 no puede añadir.
+   */
+  test('con el puntero, el salto lleva el foco al h2 con el anillo de la regla global, y un clic en el h2 también', async ({
+    page,
+    isMobile,
+  }) => {
+    for (const ruta of [OBRAS.indexable, OBRAS.noIndexable]) {
+      await page.goto(ruta);
+      const salto = page.getByRole('link', { name: 'Dónde leer esta obra', exact: true });
+      // En el proyecto móvil, un toque; en el de escritorio, un clic.
+      if (isMobile) await salto.tap();
+      else await salto.click();
+      await expect.poll(() => page.evaluate(() => location.hash), { message: ruta }).toBe(`#${ANCLA}`);
+      await expect
+        .poll(() => page.evaluate(() => document.activeElement?.id), { message: `${ruta}: el foco no llega al h2` })
+        .toBe(ANCLA);
+      // El contorno, el que da la regla global: 2 px `solid` si casa `:focus-visible`, ninguno si no.
+      const anillo = () =>
+        page.evaluate(() => {
+          const n = document.activeElement as HTMLElement;
+          const s = getComputedStyle(n);
+          const visible = n.matches(':focus-visible');
+          return {
+            id: n.id,
+            deLaRegla: visible ? s.outlineStyle === 'solid' && s.outlineWidth === '2px' : s.outlineStyle === 'none',
+          };
+        });
+      expect(await anillo(), `${ruta}, tras el salto`).toStrictEqual({ id: ANCLA, deLaRegla: true });
+
+      // `tabindex="-1"` hace enfocable el h2 también al pulsarlo, con el mismo anillo.
+      await page.goto(ruta);
+      await page.locator(`#${ANCLA}`).click();
+      expect(await anillo(), `${ruta}, clic en el h2`).toStrictEqual({ id: ANCLA, deLaRegla: true });
+    }
+  });
+
+  test('al llegar, el h2 queda a 2 × --unidad del borde: con Intro, con el puntero y al abrir la dirección', async ({
+    page,
+    isMobile,
+  }) => {
+    /*
+     * Una ventana baja, para que lo que sigue al h2 dé para subirlo hasta arriba: con la alta, la
+     * página se acaba antes y el navegador se queda en el fondo, más abajo de los 16 px. El
+     * desplazamiento es de píxeles enteros, así que la holgura es de uno.
+     */
+    await page.setViewportSize({ width: page.viewportSize()!.width, height: 320 });
+    const llegada = (ruta: string, como: string) =>
+      expect
+        .poll(
+          () =>
+            page.evaluate(
+              (ancla) => Math.abs(document.getElementById(ancla)!.getBoundingClientRect().top - 16) <= 1,
+              ANCLA,
+            ),
+          { message: `${ruta}, ${como}: el h2 no queda a 16 px del borde` },
+        )
+        .toBe(true);
+    for (const ruta of [OBRAS.indexable, PIE().sinPaginacion]) {
+      const salto = page.getByRole('link', { name: 'Dónde leer esta obra', exact: true });
+      await page.goto(ruta);
+      // Antes de medir, que la página dé de sí: si lo que sigue al h2 no llena la ventana, el
+      // navegador se queda en el fondo y la llegada no dice nada del `scroll-margin-top`.
+      const daDeSi = await page.evaluate((ancla) => {
+        const arriba = document.getElementById(ancla)!.getBoundingClientRect().top + window.scrollY;
+        return document.scrollingElement!.scrollHeight - (arriba - 16) >= window.innerHeight;
+      }, ANCLA);
+      expect(daDeSi, `${ruta}: lo que sigue al h2 no llena la ventana; aquí no se puede medir la llegada`).toBe(true);
+      await salto.focus();
+      await page.keyboard.press('Enter');
+      await llegada(ruta, 'con Intro');
+
+      await page.goto(ruta);
+      if (isMobile) await salto.tap();
+      else await salto.click();
+      await llegada(ruta, 'con el puntero');
+
+      // Un enlace compartido con el fragmento, o volver atrás: la misma llegada.
+      await page.goto('about:blank');
+      await page.goto(`${ruta}#${ANCLA}`);
+      await llegada(ruta, 'al abrir la dirección con el fragmento');
+    }
+  });
+
+  test('el salto va en siena y subrayado siempre, también bajo el puntero', async ({ page }) => {
+    await page.goto(OBRAS.indexable);
+    const salto = page.locator('.cabecera-de-obra .salto a');
+    const pintado = () =>
+      salto.evaluate((n) => {
+        const s = getComputedStyle(n);
+        const prueba = document.createElement('span');
+        prueba.style.color = getComputedStyle(document.documentElement).getPropertyValue('--siena').trim();
+        document.body.append(prueba);
+        const siena = getComputedStyle(prueba).color;
+        prueba.remove();
+        return { color: s.color, siena, subrayado: s.textDecorationLine };
+      });
+    const quieto = await pintado();
+    expect(quieto.color, 'el color del salto').toBe(quieto.siena);
+    expect(quieto.subrayado, 'el subrayado del salto').toBe('underline');
+    await salto.hover();
+    expect(await pintado(), 'bajo el puntero').toStrictEqual(quieto);
+  });
+
+  for (const ancho of [360, 320]) {
+    test(`a ${ancho} px, el salto a 3 × de «de {Autor}», su zona de 44 px y a 8 px de la de «de {Autor}»`, async ({
+      page,
+    }) => {
+      await page.setViewportSize({ width: ancho, height: 640 });
+      for (const ruta of new Set([OBRAS.indexable, OBRAS.noIndexable, OBRAS.tituloLargo, ...PIE().cabecerasLargas])) {
+        await page.goto(ruta);
+        await page.evaluate(async () => {
+          await document.fonts.ready;
+        });
+        const medida = await page.evaluate(() => {
+          const parrafoDe = document.querySelector('.cabecera-de-obra .de')!.getBoundingClientRect();
+          const parrafo = document.querySelector('.cabecera-de-obra .salto')!.getBoundingClientRect();
+          const salto = document.querySelector('.cabecera-de-obra .salto a')!.getBoundingClientRect();
+          const de = document.querySelector('.cabecera-de-obra .de a')!.getBoundingClientRect();
+          return { linea: parrafo.top - parrafoDe.bottom, alto: salto.height, hueco: salto.top - de.bottom };
+        });
+        expect(Math.abs(medida.linea - 24), `${ruta}: de «de» al salto, ${medida.linea}`).toBeLessThanOrEqual(0.5);
+        expect(Math.abs(medida.alto - 44), `${ruta}: la zona del salto mide ${medida.alto}`).toBeLessThanOrEqual(0.5);
+        expect(medida.hueco, `${ruta}: entre las dos zonas`).toBeGreaterThanOrEqual(7.5);
+      }
+    });
+  }
+
+  test('a 360 × 640, la primera Cita sigue empezando en la primera pantalla de toda página 1', async ({ page }) => {
+    /*
+     * En todas, no en una muestra: el alto de la Cabecera depende de cómo parten el título y
+     * «de {Autor} · {año}» a 360 px, y ninguna longitud dice de antemano cuál es la más alta. Una
+     * navegación por Obra; el plazo crece con el Corpus.
+     */
+    const { primeras } = PIE();
+    expect(primeras.length, 'páginas 1 de Obra en el dist/').toBeGreaterThan(0);
+    test.setTimeout(60_000 + primeras.length * 500);
+    await page.setViewportSize({ width: 360, height: 640 });
+    const fuera: string[] = [];
+    let peor = { ruta: '', fin: 0 };
+    for (const ruta of primeras) {
+      await page.goto(ruta);
+      const medida = await page.evaluate(async () => {
+        await document.fonts.ready;
+        const fragmento = document.querySelector<HTMLElement>('.listado .fragmento');
+        if (fragmento === null) return null;
+        return {
+          desplazada: window.scrollY,
+          fin: fragmento.getBoundingClientRect().top + parseFloat(getComputedStyle(fragmento).lineHeight),
+        };
+      });
+      if (medida === null || medida.desplazada !== 0 || medida.fin > 640) {
+        fuera.push(`${ruta}: ${JSON.stringify(medida)}`);
+      } else if (medida.fin > peor.fin) {
+        peor = { ruta, fin: medida.fin };
+      }
+    }
+    expect(fuera, `fuera de la primera pantalla (la peor de las que caben: ${peor.ruta}, ${peor.fin} px)`).toEqual([]);
+  });
+
+  /** El hueco vertical entre el borde inferior de `a` y el superior de `b`. */
+  const hueco = (page: Page, a: string, b: string) =>
+    page.evaluate(
+      ([selectorA, selectorB]) => {
+        const sobre = document.querySelector(selectorA);
+        const bajo = document.querySelector(selectorB);
+        if (sobre === null || bajo === null) return null;
+        return bajo.getBoundingClientRect().top - sobre.getBoundingClientRect().bottom;
+      },
+      [a, b] as const,
+    );
+  const cerca = (medido: number | null, esperado: number, que: string) => {
+    expect(medido, `${que}: no está en la página`).not.toBeNull();
+    expect(Math.abs(medido! - esperado), `${que}: ${medido} px en vez de ${esperado}`).toBeLessThanOrEqual(0.5);
+  };
+
+  test('la Cabecera: el listado a 32 px del salto en la página 1, y de «de {Autor}» en la 2', async ({ page }) => {
+    for (const ruta of [OBRAS.indexable, OBRAS.noIndexable, PIE().conPaginacion]) {
+      await page.goto(ruta);
+      cerca(await hueco(page, '.cabecera-de-obra .salto', 'ul.listado'), 32, `${ruta}, salto → listado`);
+    }
+    await page.goto(OBRAS.segunda);
+    expect(await page.locator('.salto').count(), OBRAS.segunda).toBe(0);
+    expect(await page.locator(`[href="#${ANCLA}"], #${ANCLA}`).count(), OBRAS.segunda).toBe(0);
+    cerca(await hueco(page, '.cabecera-de-obra .de', 'ul.listado'), 32, `${OBRAS.segunda}, «de» → listado`);
+  });
+
+  test('el pie no se mueve: 5 × hasta los Temas, 4 × hasta «Dónde leer», 2 × y 1 ×', async ({ page }) => {
+    const { conPaginacion, sinPaginacion } = PIE();
+    await page.goto(conPaginacion);
+    cerca(await hueco(page, 'nav.paginacion', '.temas'), 40, `${conPaginacion}, Paginación → Temas`);
+    cerca(await hueco(page, '.temas', '.donde-leer'), 32, `${conPaginacion}, Temas → «Dónde leer»`);
+    cerca(await hueco(page, `#${ANCLA}`, `#${ANCLA} + *`), 16, `${conPaginacion}, h2 → lo que sigue`);
+
+    await page.goto(sinPaginacion);
+    expect(await page.locator('nav.paginacion').count(), sinPaginacion).toBe(0);
+    cerca(await hueco(page, 'ul.listado', '.temas'), 40, `${sinPaginacion}, listado → Temas`);
+    cerca(await hueco(page, '.temas', '.donde-leer'), 32, `${sinPaginacion}, Temas → «Dónde leer»`);
+    cerca(await hueco(page, `#${ANCLA}`, `#${ANCLA} + *`), 16, `${sinPaginacion}, h2 → lo que sigue`);
+    cerca(await hueco(page, '#edicion-cotejada', '#edicion-cotejada + .linea'), 8, `${sinPaginacion}, h3 → línea`);
+  });
+
+  test('la Nota: 4 × sobre su filete y 3 × bajo él', async ({ page }) => {
+    const { conNota, sinPaginacion } = PIE();
+    const ruta = conNota ?? sinPaginacion;
+    await page.goto(ruta);
+    if (conNota === undefined) {
+      /*
+       * Ninguna Obra del Corpus trae nota todavía —la escribe Héctor, y ningún agente siembra
+       * una—, así que se pone en la página servida con el marcado que emite la plantilla: un
+       * `p.nota-de-la-ficha` con `data-pagefind-ignore`, tras la sección y con el ámbito de la
+       * página, que es el de la Cabecera. Lo que se mide es la hoja que el sitio sirve; sin el
+       * ámbito no se le aplicaría y el filete saldría de 0 px.
+       */
+      await page.evaluate(() => {
+        const cabecera = document.querySelector('.cabecera-de-obra')!;
+        const nota = document.createElement('p');
+        nota.className = 'nota-de-la-ficha';
+        nota.setAttribute('data-pagefind-ignore', '');
+        for (const { name, value } of [...cabecera.attributes]) {
+          if (name.startsWith('data-astro-cid-')) nota.setAttribute(name, value);
+        }
+        nota.textContent = 'Una nota de una línea, como las que escribe Héctor.';
+        document.querySelector('.donde-leer')!.after(nota);
+      });
+    }
+    cerca(await hueco(page, '.donde-leer', '.nota-de-la-ficha'), 32, `${ruta}, «Dónde leer» → nota`);
+    const nota = await page.locator('.nota-de-la-ficha').evaluate((n) => {
+      const s = getComputedStyle(n);
+      return { filete: s.borderTopWidth, estilo: s.borderTopStyle, relleno: parseFloat(s.paddingTop) };
+    });
+    expect(nota.filete, `${ruta}, el filete de la nota`).toBe('1px');
+    expect(nota.estilo, `${ruta}, el filete de la nota`).toBe('solid');
+    cerca(nota.relleno, 24, `${ruta}, filete → texto de la nota`);
   });
 });

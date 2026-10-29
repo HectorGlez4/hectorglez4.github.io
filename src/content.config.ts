@@ -2,7 +2,10 @@ import { readdir, readFile } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import { extname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { defineCollection, reference, z } from 'astro:content';
+import { defineCollection, reference } from 'astro:content';
+// La v8 toma `z` de `astro/zod`, como `src/lib/admision.ts`: es el mismo Zod que reexportaba
+// `astro:content`, así que las colecciones admiten y rechazan exactamente lo mismo.
+import { z } from 'astro/zod';
 import { glob, type Loader } from 'astro/loaders';
 import {
   año,
@@ -13,6 +16,8 @@ import {
   fuenteDeCita,
   obraAdmisible,
   nombre,
+  ordenAlfabetico,
+  ordenRevisado,
   procedencia,
   semblanza,
   slug,
@@ -20,6 +25,7 @@ import {
   tradicion,
 } from './lib/admision.js';
 import { leerBiografia } from './lib/biografia.js';
+import { guardarPosiciones, leerPosicionesDelCorpus, releerAlCambiar } from '../tools/lib/posiciones.ts';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // AD-1 — La puerta de admisión vive aquí, no en `tools/`.
@@ -90,6 +96,10 @@ const autores = defineCollection({
     tradicion: tradicion.optional(),
     // Historia 17.1 — la revisión que sostiene la semblanza. Ver la nota en `admision.ts`.
     biografia: biografia.optional(),
+    // Historia 26.1 — la clave de orden y su revisión. Ver la nota en `admision.ts`: la
+    // forma es puerta aquí; la presencia, en `integraciones/claves.ts`.
+    ordenAlfabetico: ordenAlfabetico.optional(),
+    ordenRevisado: ordenRevisado.optional(),
   }),
 });
 
@@ -267,4 +277,64 @@ const biografias = defineCollection({
   }),
 });
 
-export const collections = { citas, autores, temas, colecciones, obras, biografias };
+/** En desarrollo, cuánto se espera tras el último cambio antes de volver a situar las Citas. */
+const ESPERA_TRAS_CAMBIO_MS = 250;
+
+/*
+ * Las posiciones — Historia 24.1, AD-23, AD-25.
+ *
+ * Dónde cae el texto de cada Cita publicada en los documentos de su obra, para que la Página de
+ * Obra liste sus Citas en el orden del libro. Este cargador **solo cablea**: la composición vive
+ * en `tools/lib/posiciones.ts`, que lee las Citas y los documentos de `corpus/fuentes/` con los
+ * mismos lectores que el cotejo, los casa como el cotejo y localiza con el mismo localizador.
+ * Quien ordena es `src/lib/obras.ts` (`ordenDelLibro`), con lo que esta colección entrega.
+ *
+ * Guarda, por el `slug` del frontmatter de cada Cita publicada, una aparición por documento en
+ * que aparece su texto —nombre del documento y posición—, **y nada del texto**: el cuerpo de un
+ * documento de Fuente no entra en el almacén de contenido (AD-2). También las Citas sin ninguna
+ * aparición —las del censo, sin Fuente— llevan su entrada, con la lista vacía: la colección no
+ * queda vacía mientras haya Citas, y nadie consulta una colección vacía. No escribe nada en
+ * `corpus/` ni pide nada por la red.
+ */
+const cargadorDePosiciones: Loader = {
+  name: 'posiciones',
+  load: async ({ store, parseData, config, watcher, logger }) => {
+    const raiz = join(fileURLToPath(config.root), 'corpus');
+    const vigiladas = [join(raiz, 'citas'), join(raiz, 'fuentes')];
+
+    const cargar = () =>
+      guardarPosiciones({ leer: () => leerPosicionesDelCorpus(raiz), analizar: parseData, almacen: store });
+
+    await cargar();
+
+    /*
+     * En desarrollo, una Cita o un documento que cambian se vuelven a situar sin reiniciar: una
+     * ráfaga en una sola relectura, nunca dos a la vez, y la que falla —un frontmatter a medio
+     * escribir— se dice y conserva lo anterior. Cómo, lo decide `releerAlCambiar`, que tiene sus
+     * pruebas; aquí solo se cablea.
+     */
+    if (watcher !== undefined) {
+      releerAlCambiar({
+        vigilante: watcher,
+        carpetas: vigiladas,
+        releer: cargar,
+        esperaMs: ESPERA_TRAS_CAMBIO_MS,
+        avisar: (mensaje) => logger.error(mensaje),
+      });
+    }
+  },
+};
+
+const posiciones = defineCollection({
+  loader: cargadorDePosiciones,
+  schema: z.object({
+    apariciones: z.array(
+      z.object({
+        documento: z.string().min(1),
+        posicion: z.number().int().nonnegative(),
+      }),
+    ),
+  }),
+});
+
+export const collections = { citas, autores, temas, colecciones, obras, biografias, posiciones };

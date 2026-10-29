@@ -1,6 +1,6 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { execFile } from 'node:child_process';
-import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
+import { appendFile, mkdtemp, readFile, readdir, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { promisify } from 'node:util';
@@ -20,9 +20,12 @@ import {
   rutaDeAutor,
   rutaDeCita,
   rutaDeColeccion,
+  rutaDelDirectorioDeAutores,
+  rutaDelDirectorioDeObras,
   rutaDeTema,
   rutaNormalizada,
 } from '../../src/lib/superficies.ts';
+import { obrasDelSitemap, rutasTocadas } from '../../tools/avisar.ts';
 
 const ejecutar = promisify(execFile);
 
@@ -46,7 +49,10 @@ const ejecutar = promisify(execFile);
  *     demuestra dando a dos superficies del mismo sitio dos fechas distintas y ninguna de
  *     hoy;
  *   · **dos construcciones del mismo commit dan las mismas fechas**, que es el criterio que
- *     separa una fecha de contenido de una fecha de reloj.
+ *     separa una fecha de contenido de una fecha de reloj;
+ *   · **la fecha es la de los campos que la página pinta** (Historia 24.8): un commit que solo
+ *     marca una Cita apta para portada no fecha nada, y uno que solo cambia la semblanza solo
+ *     fecha la Página de Autor.
  *
  * Las construcciones son del **mismo** proyecto a propósito —salvo la superficial, que por
  * definición tiene que ser un clon—: comparar dos proyectos distintos compararía dos
@@ -82,6 +88,9 @@ const ANUNCIABLES = [
   '/',
   ...SLUGS.map((slug) => rutaDeCita(slug)),
   rutaDeAutor('seneca'),
+  // Historias 26.3 y 26.4 — los Directorios, de producto por su declaración.
+  rutaDelDirectorioDeAutores(),
+  rutaDelDirectorioDeObras(),
   rutaDeTema('el-tiempo'),
   rutaDeColeccion('frases-cortas'),
 ]
@@ -97,6 +106,16 @@ const PRIMER_INSTANTE = '2024-01-02T09:00:00.000Z';
 /** El día en que se toca **solo** el fichero del Tema. */
 const SEGUNDO_COMMIT = '2024-03-04';
 const SEGUNDO_INSTANTE = '2024-03-04T09:00:00.000Z';
+/** Historia 24.8 — el día en que una Cita solo se marca apta para portada: no fecha nada. */
+const TERCER_COMMIT = '2024-05-06';
+const TERCER_INSTANTE = '2024-05-06T09:00:00.000Z';
+/** Historia 24.8 — el día en que solo cambia la semblanza del Autor: solo fecha su página. */
+const CUARTO_COMMIT = '2024-07-08';
+const CUARTO_INSTANTE = '2024-07-08T09:00:00.000Z';
+/** Historia 24.8 — el día en que se siembra una Cita nueva de la misma Obra, Autor y Tema. */
+const QUINTO_COMMIT = '2024-09-10';
+const QUINTO_INSTANTE = '2024-09-10T09:00:00.000Z';
+const SLUG_NUEVO = 'seneca-fragmento-nuevo';
 
 /**
  * El entorno de git de estas pruebas, sin heredar la configuración de quien las corre.
@@ -150,6 +169,10 @@ describe('Historia 18.4 — el sitemap declara cuándo cambió cada superficie',
   let superficial: Map<string, string | undefined>;
   let primera: Map<string, string | undefined>;
   let segunda: Map<string, string | undefined>;
+  /** Historia 24.8 — el sitemap tras sembrar una Cita, el HTML de sus hermanas y el aviso del commit. */
+  let tercera: Map<string, string | undefined>;
+  let hermanasQueEnlazanLaNueva: string[];
+  let avisoDeLaSiembra: { rutas: string[]; avisos: string[] };
 
   beforeAll(async () => {
     // 1) Construcción sin repositorio: el proyecto temporal no tiene `.git`.
@@ -181,6 +204,27 @@ describe('Historia 18.4 — el sitemap declara cuándo cambió cada superficie',
     await git(['add', 'corpus']);
     await git(['commit', '-m', 'el Tema'], `${SEGUNDO_COMMIT}T09:00:00+0000`);
 
+    // Historia 24.8 — dos commits que solo tocan campos que la Página de Cita no pinta.
+    await writeFile(
+      join(proyecto, 'corpus', 'citas', 'seneca--fragmento-1.md'),
+      citaValida({
+        slug: SLUGS[0],
+        texto: 'Fragmento 1 sobre la brevedad de la vida, que es larga si sabes usarla.',
+        aptaParaPortada: true,
+      }),
+      'utf8',
+    );
+    await git(['add', 'corpus']);
+    await git(['commit', '-m', 'apta para portada'], `${TERCER_COMMIT}T09:00:00+0000`);
+
+    await writeFile(
+      join(proyecto, 'corpus', 'autores', 'seneca.yml'),
+      AUTOR_VALIDO.replace(/^semblanza: .*$/mu, 'semblanza: Filósofo estoico nacido en Córdoba, consejero de Nerón.'),
+      'utf8',
+    );
+    await git(['add', 'corpus']);
+    await git(['commit', '-m', 'la semblanza'], `${CUARTO_COMMIT}T09:00:00+0000`);
+
     // 3) Dos construcciones más, del mismo commit y sin tocar nada entre medias.
     const conGit = await construirProyecto(proyecto);
     expect(conGit.codigo, conGit.salida).toBe(0);
@@ -207,6 +251,46 @@ describe('Historia 18.4 — el sitemap declara cuándo cambió cada superficie',
     expect(enSuperficial.codigo, enSuperficial.salida).toBe(0);
     salidaSuperficial = enSuperficial.salida;
     superficial = await entradasDelSitemap(clonSuperficial);
+
+    /*
+     * 5) Historia 24.8 — una siembra: una Cita nueva de la misma Obra, el mismo Autor y el mismo
+     *    Tema que todas las demás, con su texto añadido al documento de la Fuente para que cruce
+     *    el cotejo. Su «Siguiente», «De la misma obra» y los recuentos cambian el HTML de las
+     *    hermanas; su fecha no debe moverse. Y el aviso del mismo commit, leído con git de verdad,
+     *    tiene que nombrar exactamente las rutas que el sitemap refecha.
+     */
+    const desde = (await git(['rev-parse', 'HEAD'])).stdout.trim();
+    const textoNuevo = 'Una Cita sembrada después, sobre la brevedad de la vida y lo poco que la usamos.';
+    const fuentes = join(proyecto, 'corpus', 'fuentes');
+    const documentos = (await readdir(fuentes)).filter((nombre) => nombre.endsWith('.txt'));
+    expect(documentos).toHaveLength(1);
+    await appendFile(join(fuentes, documentos[0] as string), `\n${textoNuevo}\n`, 'utf8');
+    await writeFile(
+      join(proyecto, 'corpus', 'citas', 'seneca--fragmento-nuevo.md'),
+      citaValida({ slug: SLUG_NUEVO, texto: textoNuevo }),
+      'utf8',
+    );
+    await git(['add', 'corpus']);
+    await git(['commit', '-m', 'una Cita nueva'], `${QUINTO_COMMIT}T09:00:00+0000`);
+    const hasta = (await git(['rev-parse', 'HEAD'])).stdout.trim();
+
+    const conLaNueva = await construirProyecto(proyecto);
+    expect(conLaNueva.codigo, conLaNueva.salida).toBe(0);
+    tercera = await entradasDelSitemap(proyecto);
+    hermanasQueEnlazanLaNueva = [];
+    for (const slug of SLUGS) {
+      const html = await readFile(join(proyecto, 'dist', 'cita', slug, 'index.html'), 'utf8');
+      if (html.includes(`href="${rutaDeCita(SLUG_NUEVO)}"`)) hermanasQueEnlazanLaNueva.push(slug);
+    }
+    const avisos: string[] = [];
+    avisoDeLaSiembra = await rutasTocadas(
+      proyecto,
+      desde,
+      hasta,
+      await obrasDelSitemap(join(proyecto, 'dist', 'sitemap-0.xml')),
+      (linea) => avisos.push(linea),
+    );
+    avisoDeLaSiembra.avisos.push(...avisos);
   });
 
   afterAll(async () => {
@@ -274,8 +358,45 @@ describe('Historia 18.4 — el sitemap declara cuándo cambió cada superficie',
     // Es la prueba de que la fecha es del contenido y no del build: dos superficies del
     // mismo sitio, construidas a la vez, con fechas distintas.
     expect(primera.get('/tema/el-tiempo')).toBe(SEGUNDO_INSTANTE);
-    expect(primera.get('/autor/seneca')).toBe(PRIMER_INSTANTE);
     expect(primera.get('/coleccion/frases-cortas')).toBe(PRIMER_INSTANTE);
+  });
+
+  it('Historia 24.8 — un commit que solo toca `aptaParaPortada` no fecha ninguna entrada', () => {
+    expect([...primera].filter(([, fecha]) => fecha === TERCER_INSTANTE)).toEqual([]);
+    expect(primera.get(`/cita/${SLUGS[0]}`)).toBe(SEGUNDO_INSTANTE);
+  });
+
+  it('Historia 24.8 — la semblanza solo fecha la Página de Autor, que es la única que la pinta', () => {
+    expect([...primera].filter(([, fecha]) => fecha === CUARTO_INSTANTE).map(([ruta]) => ruta)).toEqual([
+      '/autor/seneca',
+    ]);
+  });
+
+  it('Historia 24.8 — una Cita nueva no mueve la fecha de ninguna otra Página de Cita, aunque su HTML cambie', () => {
+    // La premisa: la siembra cambió de verdad la navegación de alguna hermana.
+    expect(hermanasQueEnlazanLaNueva.length).toBeGreaterThan(0);
+    for (const slug of SLUGS) {
+      const ruta = rutaNormalizada(rutaDeCita(slug));
+      expect(tercera.get(ruta), ruta).toBe(primera.get(ruta));
+    }
+    expect(tercera.get(rutaNormalizada(rutaDeCita(SLUG_NUEVO)))).toBe(QUINTO_INSTANTE);
+    expect(tercera.get('/autor/seneca')).toBe(QUINTO_INSTANTE);
+    expect(tercera.get('/tema/el-tiempo')).toBe(QUINTO_INSTANTE);
+    // Historias 26.3 y 26.4 — los Directorios cuentan las Citas de cada Autor y de cada Obra: el
+    // alta los fecha.
+    expect(tercera.get('/autores')).toBe(QUINTO_INSTANTE);
+    expect(tercera.get('/obras')).toBe(QUINTO_INSTANTE);
+    // No es miembro de la Colección: su página no cambia.
+    expect(tercera.get('/coleccion/frases-cortas')).toBe(primera.get('/coleccion/frases-cortas'));
+  });
+
+  it('Historia 24.8 — el aviso del mismo commit nombra exactamente lo que el sitemap refecha, más la portada', () => {
+    expect(avisoDeLaSiembra.avisos).toEqual([]);
+    expect(avisoDeLaSiembra.rutas).toContain('/');
+    const avisadas = avisoDeLaSiembra.rutas.filter((ruta) => ruta !== '/').map(rutaNormalizada).sort();
+    const refechadas = [...tercera].filter(([, fecha]) => fecha === QUINTO_INSTANTE).map(([ruta]) => ruta).sort();
+    expect(refechadas.length).toBeGreaterThan(2);
+    expect(avisadas).toEqual(refechadas);
   });
 
   it('ninguna fecha es la de hoy: no se ha colado el reloj por ninguna rendija', () => {

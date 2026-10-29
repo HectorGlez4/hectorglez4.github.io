@@ -16,7 +16,14 @@ import { existsSync } from 'node:fs';
 import { join } from 'node:path';
 import { analizarDocumento, CLASE_BIOGRAFIA, nombreDeBiografia } from './documento.ts';
 import { fuenteDe } from './fuentes.ts';
-import { autorAdmisible, nombre as nombreDeEntidad, tradicion } from '../../src/lib/admision.ts';
+import {
+  REGLA_DE_CLAVE_DE_ORDEN,
+  autorAdmisible,
+  nombre as nombreDeEntidad,
+  ordenAlfabetico,
+  tradicion,
+} from '../../src/lib/admision.ts';
+import { ORDEN_PROPONER_CLAVES, ordenFijarClave, proponerClave, type PropuestaDeClave } from './claves.ts';
 import { slugDeAutor, slugDeTema } from '../../src/lib/slug.ts';
 import {
   FICHERO_DE_CANDIDATOS,
@@ -25,6 +32,7 @@ import {
   escribirCita,
   escribirTema,
   fechaLocal,
+  fijarCamposDeAutor,
   leerAutores,
   leerCandidatosPorEpoca,
   leerCitas,
@@ -45,6 +53,7 @@ import { leerColeccionesRetiradas } from './curacion.ts';
 import { descartesPorCandidato, slugsSembrados } from './epocas.ts';
 import { readFile } from 'node:fs/promises';
 import { basename } from 'node:path';
+import { negativaPorAlcance } from './alcance.ts';
 
 export type Resultado =
   | { ok: true; ruta: string; mensaje: string }
@@ -106,6 +115,13 @@ export async function crearAutor(rutas: Rutas, datos: DatosDeAutor): Promise<Res
     return { ok: false, motivos: [`El Autor «${slug}» ya existe. Use «editar» para cambiarlo.`] };
   }
 
+  /*
+   * Historia 26.1 — la clave de orden se propone aquí y no se teclea: no hay bandera para
+   * darla. Sale de la regla fija de `tools/lib/claves.ts`, la misma que usa `proponer-claves`,
+   * y nunca con `ordenRevisado`, que solo escribe la orden `clave` cuando una persona la mira.
+   */
+  const propuesta = proponerClave(validado.data.nombre);
+
   const ruta = await escribirAutor(rutas, slug, {
     nombre: validado.data.nombre,
     // El orden importa para quien lee el fichero: nacimiento antes que fallecimiento.
@@ -114,8 +130,36 @@ export async function crearAutor(rutas: Rutas, datos: DatosDeAutor): Promise<Res
     semblanza: validado.data.semblanza,
     // `aYaml` omite lo que no tiene valor, así que un Autor sin declarar sale sin la clave.
     tradicion: validado.data.tradicion,
+    // Y sin clave de orden cuando la regla no da ninguna con forma.
+    ordenAlfabetico: propuesta.clave,
   });
-  return { ok: true, ruta, mensaje: `Autor «${slug}» creado.` };
+  return { ok: true, ruta, mensaje: `Autor «${slug}» creado.\n${parteDeClaveNueva(slug, validado.data.nombre, propuesta)}` };
+}
+
+/**
+ * Lo que el alta dice de la clave que acaba de proponer — Historia 26.1. Recibe la propuesta
+ * que se escribió, no la recalcula: el parte no puede nombrar otra clave que la del fichero.
+ */
+function parteDeClaveNueva(slug: string, nombre: string, propuesta: PropuestaDeClave): string {
+  if (propuesta.clave === undefined) {
+    return (
+      `La regla de la última palabra no da clave de orden para «${nombre}»: el Autor queda sin ` +
+      `ella, y la fija Héctor con ${ordenFijarClave(slug)}.`
+    );
+  }
+  const marca = propuesta.marcada
+    ? ` El nombre tiene tres palabras o más: la clave merece mirarse antes, y la confirma o ` +
+      `corrige Héctor con ${ordenFijarClave(slug)} (o npx tsx tools/autor.ts clave ${slug}).`
+    : '';
+  return `Clave de orden: «${propuesta.clave}», sin revisar.${marca}`;
+}
+
+/** Cómo está la clave de orden de un Autor, en una frase — Historia 26.1. */
+function estadoDeClave(autor: { ordenAlfabetico?: string; ordenRevisado?: string }): string {
+  if (autor.ordenAlfabetico === undefined) return 'sin clave';
+  return `«${autor.ordenAlfabetico}», ${
+    autor.ordenRevisado === undefined ? 'sin revisar' : `revisada el ${autor.ordenRevisado}`
+  }`;
 }
 
 /**
@@ -162,7 +206,182 @@ export async function editarAutor(
   // El slug del fichero no se recalcula aunque cambie el nombre: es la URL pública del
   // Autor y cambiarla rompería los enlaces entrantes, igual que con las Citas (AD-4).
   const ruta = await escribirAutor(rutas, slug, fusion);
-  return { ok: true, ruta, mensaje: `Autor «${slug}» actualizado.` };
+  /*
+   * Historia 26.1 — `editar` no toca la clave de orden, ni aunque cambie el nombre: la clave
+   * no se teclea y tampoco se recalcula a escondidas. Lo que hace es recordarla, para que un
+   * cambio de nombre que la deje mal se vea en el mismo gesto.
+   */
+  const clave = validado.data.ordenAlfabetico;
+  const recuerdo =
+    clave === undefined
+      ? `Sin clave de orden: propóngala con ${ORDEN_PROPONER_CLAVES}.`
+      : `Clave de orden: ${estadoDeClave(validado.data)}.` +
+        (cambios.nombre !== undefined && cambios.nombre !== actual.nombre
+          ? ` No se recalcula con el nombre: si ya no vale, corríjala con ${ordenFijarClave(slug)}.`
+          : '');
+  return { ok: true, ruta, mensaje: `Autor «${slug}» actualizado.\n${recuerdo}` };
+}
+
+/**
+ * Propone la clave de orden de todo Autor que no la tiene — Historia 26.1.
+ *
+ * Idempotente: solo escribe en los ficheros **sin** `ordenAlfabetico`, una línea al final de
+ * cada uno, y no toca nada más (`fijarCamposDeAutor` conserva el resto byte a byte,
+ * comentarios incluidos). Una segunda pasada no escribe nada. Nunca escribe `ordenRevisado`.
+ *
+ * El parte da cada Autor con su nombre y su clave, cuántos quedan sin revisar, y aparte los
+ * de nombre de tres palabras o más sin revisar —donde la regla falla más— y los que la regla
+ * no sabe proponer, con la orden con que una persona los fija.
+ */
+export async function proponerClaves(rutas: Rutas): Promise<Resultado> {
+  let leidos: Awaited<ReturnType<typeof leerAutores>>;
+  try {
+    leidos = await leerAutores(rutas);
+  } catch (error) {
+    // Un Corpus ilegible se dice con 1 y sin escribir nada, no con una traza.
+    return { ok: false, motivos: [error instanceof Error ? error.message : String(error)] };
+  }
+  const autores = leidos.sort((a, b) => (a.slug < b.slug ? -1 : a.slug > b.slug ? 1 : 0));
+  const escritas: string[] = [];
+  const sinRegla: string[] = [];
+  const sinForma: string[] = [];
+  const fallidas: string[] = [];
+  const marcadas: string[] = [];
+  const lineas: string[] = [];
+  let sinRevisar = 0;
+
+  for (const autor of autores) {
+    const propuesta = proponerClave(typeof autor.nombre === 'string' ? autor.nombre : '');
+    let clave = autor.ordenAlfabetico;
+    let nueva = false;
+    /*
+     * Una revisión sin clave —`ordenRevisado` sin `ordenAlfabetico`, que solo sale de teclear el
+     * fichero— no se completa: la clave que el lote escribiera quedaría junto a una revisión
+     * anterior a ella, y el fichero la daría por revisada sin que nadie la mirase. Se nombra, no
+     * se toca, y la orden sale con 1; la arregla una persona con `clave`, como dice el build.
+     */
+    if (clave === undefined && autor.ordenRevisado !== undefined) {
+      fallidas.push(
+        `  ${autor.slug}\tordenRevisado sin ordenAlfabetico: no se le propone clave. ` +
+          `Quite ordenRevisado y fije la clave con ${ordenFijarClave(autor.slug)}`,
+      );
+      lineas.push(`  ${autor.slug}\t${autor.nombre}\tsin clave (revisión sin clave)`);
+      continue;
+    }
+    if (clave === undefined && propuesta.clave !== undefined) {
+      /*
+       * Un fichero que no se deja escribir —no es un mapa YAML, o la escritura cambiaría otra
+       * cosa— no detiene el lote a medias sin parte: se nombra, los demás se escriben y la orden
+       * sale con 1. Lo escrito queda escrito, y volver a correrla solo toca lo que falta.
+       */
+      try {
+        await fijarCamposDeAutor(autor.ruta, { ordenAlfabetico: propuesta.clave });
+      } catch (error) {
+        fallidas.push(`  ${autor.slug}\t${error instanceof Error ? error.message : String(error)}`);
+        lineas.push(`  ${autor.slug}\t${autor.nombre}\tsin clave (no se pudo escribir)`);
+        continue;
+      }
+      clave = propuesta.clave;
+      nueva = true;
+      escritas.push(autor.slug);
+    }
+    if (clave === undefined) {
+      sinRegla.push(`  ${autor.slug}\t${autor.nombre}\t${ordenFijarClave(autor.slug)}`);
+      lineas.push(`  ${autor.slug}\t${autor.nombre}\tsin clave`);
+      continue;
+    }
+    if (!ordenAlfabetico.safeParse(clave).success) sinForma.push(`  ${autor.slug}\t«${clave}»`);
+    // Una clave que este lote acaba de escribir no la ha revisado nadie.
+    const revisada = !nueva && autor.ordenRevisado !== undefined;
+    if (!revisada) sinRevisar += 1;
+    if (!revisada && propuesta.marcada) marcadas.push(`  ${autor.slug}\t${autor.nombre}\t→ «${clave}»`);
+    lineas.push(
+      `  ${autor.slug}\t${autor.nombre}\t«${clave}»\t` +
+        `${revisada ? `revisada el ${autor.ordenRevisado}` : 'sin revisar'}${nueva ? '\t(nueva)' : ''}`,
+    );
+  }
+
+  const parte = [
+    escritas.length === 0
+      ? 'Ninguna clave nueva: no falta ninguna que la regla sepa proponer.'
+      : `${escritas.length} ${escritas.length === 1 ? 'clave escrita' : 'claves escritas'}, sin revisar.`,
+    ...lineas,
+    `Sin revisar: ${sinRevisar} de ${autores.length}. Se confirman o corrigen con npx tsx tools/autor.ts clave <slug> ["<clave>"].`,
+  ];
+  if (marcadas.length > 0) {
+    parte.push(`Nombres de tres palabras o más, sin revisar (mírelos primero): ${marcadas.length}.`, ...marcadas);
+  }
+  if (sinRegla.length > 0) {
+    parte.push(`La regla no da clave para ${sinRegla.length} (la fija una persona):`, ...sinRegla);
+  }
+  if (sinForma.length > 0) {
+    parte.push(`Claves sin forma (el build las rechaza; ${REGLA_DE_CLAVE_DE_ORDEN}):`, ...sinForma);
+  }
+  if (fallidas.length > 0) {
+    return {
+      ok: false,
+      motivos: [
+        ...parte,
+        `No se pudo escribir la clave de ${fallidas.length} ${fallidas.length === 1 ? 'Autor' : 'Autores'}:`,
+        ...fallidas,
+      ],
+    };
+  }
+  return { ok: true, ruta: rutas.autores, mensaje: parte.join('\n') };
+}
+
+/**
+ * Confirma o corrige la clave de orden de un Autor — Historia 26.1, la orden de una persona.
+ *
+ * Con clave, la valida con el mismo validador que el esquema y la escribe; sin ella, confirma
+ * la que ya hay. En los dos casos escribe `ordenRevisado` con la jornada de `hoy`: es la
+ * **única** orden que lo escribe. Toca solo esos dos campos del fichero.
+ */
+export async function fijarClave(
+  rutas: Rutas,
+  slug: string,
+  clave: string | undefined,
+  hoy: string,
+): Promise<Resultado> {
+  let autores: Awaited<ReturnType<typeof leerAutores>>;
+  try {
+    autores = await leerAutores(rutas);
+  } catch (error) {
+    return { ok: false, motivos: [error instanceof Error ? error.message : String(error)] };
+  }
+  const autor = autores.find((a) => a.slug === slug);
+  if (!autor) return { ok: false, motivos: [`El Autor «${slug}» no existe en el corpus.`] };
+
+  const definitiva = clave ?? autor.ordenAlfabetico;
+  if (definitiva === undefined) {
+    return {
+      ok: false,
+      motivos: [
+        `«${slug}» no tiene clave de orden que confirmar. Dé la clave: ${ordenFijarClave(slug)}, ` +
+          `o propóngala con ${ORDEN_PROPONER_CLAVES}.`,
+      ],
+    };
+  }
+  if (!ordenAlfabetico.safeParse(definitiva).success) {
+    return { ok: false, motivos: [`«${definitiva}»: ${REGLA_DE_CLAVE_DE_ORDEN}`] };
+  }
+
+  try {
+    await fijarCamposDeAutor(autor.ruta, {
+      ...(clave !== undefined ? { ordenAlfabetico: clave } : {}),
+      ordenRevisado: hoy,
+    });
+  } catch (error) {
+    return { ok: false, motivos: [error instanceof Error ? error.message : String(error)] };
+  }
+  const antes = autor.ordenAlfabetico;
+  const que =
+    clave === undefined || clave === antes
+      ? `confirmada «${definitiva}»`
+      : antes === undefined
+        ? `fijada en «${definitiva}»`
+        : `corregida de «${antes}» a «${definitiva}»`;
+  return { ok: true, ruta: autor.ruta, mensaje: `Clave de orden de «${slug}» ${que}, revisada el ${hoy}.` };
 }
 
 /**
@@ -478,6 +697,19 @@ export async function quitarTema(
     };
   }
 
+  /*
+   * Historia 26.8 — NFR-5, antes de escribir: desmarcar puede dejar el Tema bajo su umbral, y
+   * con él sin camino a sus Citas, o dejar sin Tema publicado a la propia Cita.
+   */
+  const aDesmarcar = new Set(slugsDeCitas);
+  const negativa = await negativaPorAlcance(rutas, (datos) => ({
+    ...datos,
+    citas: datos.citas.map((c) =>
+      aDesmarcar.has(c.slug) ? { ...c, temas: c.temas.filter((t) => t !== slugTema) } : c,
+    ),
+  }));
+  if (negativa !== undefined) return negativa;
+
   let desmarcadas = 0;
   let noLoTenian = 0;
   for (const slug of new Set(slugsDeCitas)) {
@@ -688,6 +920,11 @@ async function pendienteEnEpocas(rutas: Rutas, autor: AutorEnCorpus): Promise<st
  *
  * **Mueve y no borra**, con `mover`, que nunca sobrescribe; y **sin motivo no retira**, como
  * `retirarCita`: el motivo va en el mensaje y de ahí al del commit (AD-10).
+ *
+ * **No consulta NFR-5 (Historia 26.8), y no hace falta.** Las órdenes que retiran comparan el
+ * modelo antes y después (`negativaPorAlcance`, `tools/lib/alcance.ts`) porque pueden dejar sin
+ * camino a una Cita que sigue publicada. Esta no puede: se niega mientras el Autor tenga una sola
+ * Cita publicada, así que no retira ninguna ni le quita a ninguna su Tema, su Colección o su página.
  */
 export async function retirarAutor(
   rutas: Rutas,

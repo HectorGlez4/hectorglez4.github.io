@@ -2,7 +2,7 @@
  * Qué inspeccionar y cómo se agrega el estado de indexación — Historia 16.1, Épica 16.
  *
  * Aquí vive **la única lógica interesante** de la historia: repartir un presupuesto de
- * peticiones entre las cuatro familias y decidir qué URL se miran. La red no entra
+ * peticiones entre las familias y decidir qué URL se miran. La red no entra
  * (AD-22): esto recibe el conjunto publicable y un número, y devuelve un plan. Por eso se
  * puede probar entera sin salir a ninguna parte, que es justo lo que hace falta cuando el
  * techo de cuota se cruce —y se va a cruzar pronto—.
@@ -36,10 +36,14 @@ import {
   type ConjuntoPublicable,
 } from '../../src/lib/publicado.ts';
 import {
+  FAMILIAS,
+  rutaDelDirectorioDeAutores,
+  rutaDelDirectorioDeObras,
   rutaDeAutor,
   rutaDeCita,
   rutaDeColeccion,
   rutaDeTema,
+  type Familia,
 } from '../../src/lib/superficies.ts';
 import {
   DESPLIEGUE_DE_LA_PORTADA_DE_RETORNO,
@@ -50,39 +54,57 @@ import {
   SM11_VIGENTE,
 } from '../../src/lib/umbrales.ts';
 
-/**
- * Las cuatro familias del sitio, y no hay una quinta.
- *
- * La portada no es de ninguna, y quedarse fuera es deliberado: es **una** URL, y meterla
- * en cualquiera de las cuatro falsearía el reparto de esa familia sin que nadie lo notara.
- * Lo que esta serie compara entre jornadas es el reparto por familia; una URL suelta que
- * no pertenece a ninguna no tiene con qué compararse.
+/*
+ * Las familias las declara `src/lib/superficies.ts` (`FAMILIAS`, `Familia`) — Historia 26.7,
+ * AD-17. Aquí solo se declara qué subconjunto mide cada cosa, derivado de esa lista y nunca
+ * reescrito a mano: si una serie deja de excluir una familia, cambia solo la suya.
  */
-export type Familia = 'cita' | 'autor' | 'tema' | 'coleccion';
-
-/** El orden en el que se nombran y se reparten. Es el del PRD: Cita, Autor, Tema, Colección. */
-export const FAMILIAS: readonly Familia[] = ['cita', 'autor', 'tema', 'coleccion'];
 
 /**
- * Las familias que mide **esta serie**: las cuatro y la Obra — Historia 22.8, FR-40.
+ * Las familias que mide **esta serie**: las seis — Historias 22.8 y 26.7, FR-40.
  *
  * La Obra se mide aquí y en ningún otro informe todavía —el tráfico, la demanda, el rastreo y
- * el canal siguen con las cuatro de `FAMILIAS`—, y se mide distinto: su censo no es lo
- * publicado sino **las rutas `/obra/…` del sitemap publicado**, porque una Obra con `noindex`
- * existe y no se cuenta (FR-52). Sin sitemap legible la familia va a `sinLeer` con su motivo,
- * jamás a cero.
+ * el canal cuentan cada uno su subconjunto sin ella (`FAMILIAS_DEL_TRAFICO`,
+ * `FAMILIAS_DE_LA_DEMANDA`, `FAMILIAS_DEL_RASTREO`, `FAMILIAS_DEL_CANAL`), del tipo
+ * `FamiliaDelCenso`—, y se mide distinto: su censo no es lo publicado sino
+ * **las rutas `/obra/…` del sitemap publicado**, porque una Obra con `noindex` existe y no se
+ * cuenta (FR-52). Sin sitemap legible la familia va a `sinLeer` con su motivo, jamás a cero.
+ * El Directorio (26.7) se mide con su censo de lo publicado: son dos URL y se leen enteras.
  */
-export type FamiliaDeLaSerie = Familia | 'obra';
+export type FamiliaDeLaSerie = Familia;
 
-export const FAMILIAS_DE_LA_SERIE: readonly FamiliaDeLaSerie[] = [...FAMILIAS, 'obra'];
+export const FAMILIAS_DE_LA_SERIE: readonly FamiliaDeLaSerie[] = FAMILIAS;
+
+/**
+ * Las familias que salen de lo publicado (`censoPorFamilia`): todas menos la Obra, cuyo censo
+ * es el sitemap (22.8). Son las claves de `CensoPorFamilia`, y las series que no cuentan la Obra
+ * —tráfico, demanda, rastreo, canal— derivan de aquí el tipo de su subconjunto.
+ */
+export type FamiliaDelCenso = Exclude<Familia, 'obra'>;
+
+export const FAMILIAS_DEL_CENSO: readonly FamiliaDelCenso[] = FAMILIAS.filter(
+  (f): f is FamiliaDelCenso => f !== 'obra',
+);
+
+/**
+ * Las familias que suma el `publicadas` de una entrada de indexación: las cuatro de siempre.
+ *
+ * El total es la cifra que se compara entre jornadas, y sumarle una familia nueva partiría la
+ * serie el día de su llegada. Por eso la Obra (22.8) y el Directorio (26.7) van cada una en su
+ * familia y no aquí. Se nombra el conjunto en vez de encadenar exclusiones en `componerLectura`.
+ */
+const FUERA_DEL_TOTAL: readonly Familia[] = ['obra', 'directorio'];
+
+export const FAMILIAS_DEL_TOTAL: readonly Familia[] = FAMILIAS.filter((f) => !FUERA_DEL_TOTAL.includes(f));
 
 /** El nombre con el que el producto llama a cada familia — PRD §3, y no se traduce. */
-export const NOMBRE_DE_FAMILIA: Readonly<Record<FamiliaDeLaSerie, string>> = {
+export const NOMBRE_DE_FAMILIA: Readonly<Record<Familia, string>> = {
   cita: 'Cita',
   autor: 'Autor',
   tema: 'Tema',
   coleccion: 'Colección',
   obra: 'Obra',
+  directorio: 'Directorio',
 };
 
 /**
@@ -98,6 +120,7 @@ export const CENSO_DE_FAMILIA: Readonly<Record<FamiliaDeLaSerie, CensoMedido>> =
   tema: 'publicadas',
   coleccion: 'publicadas',
   obra: 'sitemap',
+  directorio: 'publicadas',
 };
 
 /**
@@ -231,8 +254,8 @@ export function propiedadDeDominio(dominio: string): string {
   return `sc-domain:${dominio}`;
 }
 
-/** Las URL publicadas de cada familia, sin la portada. */
-export type CensoPorFamilia = Readonly<Record<Familia, readonly string[]>>;
+/** Las URL publicadas de cada familia, sin la portada ni la Obra (cuyo censo es el sitemap). */
+export type CensoPorFamilia = Readonly<Record<FamiliaDelCenso, readonly string[]>>;
 
 /**
  * Las URL publicadas, repartidas por familia — derivadas, nunca escritas.
@@ -243,9 +266,13 @@ export type CensoPorFamilia = Readonly<Record<Familia, readonly string[]>>;
  * impedir, y componer la ruta a mano la dejaría sin barra final —la forma que redirige— en
  * cuanto alguien se despistara.
  *
- * `tests/unit/indexacion.test.ts` compara la unión de las cuatro familias con
+ * `tests/unit/indexacion.test.ts` compara la unión de las familias del censo con
  * `rutasPublicadas`, así que una familia nueva no puede desaparecer de esta serie en
  * silencio.
+ *
+ * **Los Directorios son `directorio`** (Historia 26.7), compuestos con los mismos
+ * constructores que `rutasPublicadas`: `/obras/` no es una Obra ni `/autores/` un Autor, y
+ * contarlos en lo que listan falsearía el reparto de Autor y de Obra mientras se juzga SM-11.
  *
  * **La Obra no entra aquí, y es a propósito** (Historia 22.4). `rutasPublicadas` enumera las
  * Páginas de Obra —también las `noindex`—, y la serie de indexación la mide aparte, con las
@@ -254,16 +281,16 @@ export type CensoPorFamilia = Readonly<Record<Familia, readonly string[]>>;
  * las rutas de Obra por su nombre: la exclusión está escrita, no es un olvido.
  */
 export function censoPorFamilia(conjunto: ConjuntoPublicable): CensoPorFamilia {
-  return censoDeLasCuatro(conjunto);
+  return censoDeLoPublicado(conjunto);
 }
 
-/** El censo de la serie de indexación: las cuatro familias y la Obra del sitemap. */
+/** El censo de la serie de indexación: las familias de lo publicado y la Obra del sitemap. */
 export type CensoDeLaSerie = Readonly<Record<FamiliaDeLaSerie, readonly string[]>>;
 
 /**
  * El censo que mide la serie de indexación — Historia 22.8.
  *
- * Las cuatro familias salen de lo publicado, como siempre; la Obra, de las rutas de Obra del
+ * Las familias del censo salen de lo publicado, como siempre; la Obra, de las rutas de Obra del
  * **sitemap publicado** que se le pasen —nunca de `rutasPublicadas`, que enumera también las
  * Obras con `noindex`—. Sin sitemap, `obras` es la lista vacía y quien lee la serie tiene que
  * declarar la familia en `sinLeer` con su motivo: aquí no se inventa ningún cero.
@@ -272,15 +299,17 @@ export function censoDeLaSerie(
   conjunto: ConjuntoPublicable,
   obras: readonly string[] = [],
 ): CensoDeLaSerie {
-  return { ...censoDeLasCuatro(conjunto), obra: [...obras] };
+  return { ...censoDeLoPublicado(conjunto), obra: [...obras] };
 }
 
-function censoDeLasCuatro(conjunto: ConjuntoPublicable): CensoPorFamilia {
+function censoDeLoPublicado(conjunto: ConjuntoPublicable): CensoPorFamilia {
   return {
     cita: conjunto.citas.map((c) => rutaDeCita(c.slug)),
     autor: autoresPublicados(conjunto.autores, conjunto.citas).map((a) => rutaDeAutor(a.slug)),
     tema: temasPublicados(conjunto.temas, conjunto.citas).map((t) => rutaDeTema(t.slug)),
     coleccion: conjunto.colecciones.map((c) => rutaDeColeccion(c.slug)),
+    // Historia 26.7 — los dos Directorios, una familia; siempre se publican los dos.
+    directorio: [rutaDelDirectorioDeAutores(), rutaDelDirectorioDeObras()],
   };
 }
 
@@ -297,7 +326,7 @@ export interface PlanDeFamilia {
 
 export interface PlanDeInspeccion {
   presupuesto: number;
-  /** El total publicable de las cuatro familias. */
+  /** La suma de lo que publica cada familia del censo recibido (Obra incluida, si llega). */
   publicadas: number;
   /** Cuántas peticiones gasta el plan. Nunca pasa del presupuesto. */
   inspecciones: number;
@@ -314,6 +343,23 @@ export interface PlanDeInspeccion {
   /** Las familias que se pidieron enteras (SM-11), aunque el resto se muestree. */
   enteras?: readonly FamiliaDeLaSerie[];
 }
+
+/**
+ * Las familias cuyo suelo **no** se reserva por delante de las enteras — Historia 26.7.
+ *
+ * Mientras rija SM-11, Autor y Obra se leen enteras «y el Directorio no les quita suelo»: sus
+ * dos URL no pueden dejar a la Obra muestreada cuando el presupuesto aprieta. Su suelo sale de
+ * lo que quede tras las enteras, en el reparto de las demás, que sirve el suelo de la más
+ * pequeña a la más grande: con dos URL se lee entera mientras quede algo que repartir.
+ *
+ * El precio, dicho: con un presupuesto que cubre el suelo de las demás y las enteras **sin
+ * una petición de sobra**, las dos URL del Directorio salen del suelo de la familia más grande
+ * de las demás —Cita—, que se queda dos por debajo de `MUESTRA_MINIMA_POR_FAMILIA`; nunca de
+ * Autor ni de Obra. Sin otra familia cuyo suelo lo pague, si tras las enteras queda una sola
+ * petición el Directorio se lee una de dos y sale `muestreada`; si no queda ninguna, va a
+ * `sinPresupuesto` y de ahí a `sinLeer` con su motivo. Jamás se escribe como cero. Con el techo real de 2.000 nada de esto ocurre.
+ */
+const SIN_SUELO_POR_DELANTE: readonly FamiliaDeLaSerie[] = ['directorio'];
 
 /**
  * Qué inspeccionar con el presupuesto que hay.
@@ -362,8 +408,9 @@ export function planDeInspeccion(
   const publicadas = [...tamaños.values()].reduce((a, b) => a + b, 0);
 
   /*
-   * Primero se **reserva el suelo** de las demás familias —que ninguna se quede sin serie—;
-   * con lo que quede, las enteras en el orden dado; y lo que sobre aún se reparte entre las
+   * Primero se **reserva el suelo** de las demás familias —que ninguna se quede sin serie—,
+   * salvo el del Directorio (`SIN_SUELO_POR_DELANTE`); con lo que quede, las enteras en el
+   * orden dado; y lo que sobre aún se reparte entre las
    * demás con el suelo y la proporción de siempre. Si las enteras no caben, se muestrean y lo
    * dice su `muestreada`.
    */
@@ -372,7 +419,9 @@ export function planDeInspeccion(
   const demas = new Map([...tamaños].filter(([familia]) => !enterasConCenso.includes(familia)));
   const suelo = Math.min(
     disponible,
-    [...demas.values()].reduce((suma, total) => suma + Math.min(total, MUESTRA_MINIMA_POR_FAMILIA), 0),
+    [...demas]
+      .filter(([familia]) => !SIN_SUELO_POR_DELANTE.includes(familia))
+      .reduce((suma, [, total]) => suma + Math.min(total, MUESTRA_MINIMA_POR_FAMILIA), 0),
   );
   let paraEnteras = disponible - suelo;
   for (const familia of enterasConCenso) {
@@ -644,7 +693,7 @@ export function motivoDeFallo(error: unknown): string {
 }
 
 /** Una familia que no se leyó, con el motivo que lo impidió. */
-export interface FamiliaSinLeer<F extends FamiliaDeLaSerie = Familia> {
+export interface FamiliaSinLeer<F extends FamiliaDeLaSerie = FamiliaDelCenso> {
   familia: F;
   motivo: string;
 }
@@ -662,8 +711,10 @@ export interface LecturaDeIndexacion {
   /** La propiedad consultada, para que la entrada diga de dónde salió. */
   propiedad: string;
   /**
-   * El total publicable de las cuatro familias en el momento de la lectura. **Sin la Obra**
-   * (22.8): su censo es otro —el sitemap— y va en su familia.
+   * El total publicable de las cuatro familias de siempre (`FAMILIAS_DEL_TOTAL`) en el momento
+   * de la lectura. **Sin la Obra** (22.8), cuyo censo es otro —el sitemap—, **ni el
+   * Directorio** (26.7): cada una va en su familia, y el total sigue comparable con las
+   * entradas anteriores.
    */
   publicadas: number;
   /** Cuántas peticiones se gastaron de verdad, Obra incluida. */
@@ -721,9 +772,9 @@ export function componerLectura(entrada: {
   for (const familia of FAMILIAS_DE_LA_SERIE) {
     const cuantas = censo[familia]?.length ?? 0;
     if (cuantas === 0) continue;
-    // Historia 22.8 — el total de la entrada suma solo las cuatro de siempre, para que siga
-    // siendo comparable con las entradas anteriores; la Obra va aparte, en su familia.
-    if (familia !== 'obra') publicadas += cuantas;
+    // Historias 22.8 y 26.7 — el total de la entrada suma solo las cuatro de siempre, para que
+    // siga siendo comparable con las entradas anteriores; la Obra y el Directorio van aparte.
+    if (FAMILIAS_DEL_TOTAL.includes(familia)) publicadas += cuantas;
 
     const leida = lecturas[familia];
     if (leida !== undefined) {

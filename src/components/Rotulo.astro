@@ -1,20 +1,48 @@
 ---
 /**
- * El rótulo de sección de la Página de Obra — «Temas» y «Dónde leer esta obra» (UX-DR41, UX-DR42).
+ * El rótulo de sección — «Temas» y «Dónde leer esta obra» de la Página de Obra (UX-DR41, UX-DR42),
+ * «De la obra» de la Tarjeta de Obra y, desde la Historia 24.6, «De la misma obra», «Más de
+ * {Autor}» y «Temas» de las Rutas de salida de la Página de Cita.
  *
- * Un `h2` en `author` y tinta apagada, en versalitas por espaciado. Una sola regla para los dos
- * rótulos de la página: dos copias acabarían divergiendo. Sin márgenes: el aire lo pone quien lo
- * rodea. El peso, el espaciado y el interlineado son los mismos literales que el rótulo de las
- * Rutas de salida y el nombre del Autor, porque `tokens.css` no declara tokens para ellos.
+ * Un `h2` en `author` y tinta apagada, en versalitas por espaciado. Una sola regla para todos
+ * los rótulos: dos copias acabarían divergiendo. Sin márgenes: el aire lo pone quien lo rodea.
+ * El peso, el espaciado y el interlineado son los mismos literales que el nombre del Autor,
+ * porque `tokens.css` no declara tokens para ellos.
+ *
+ * Historia 24.7, UX-DR100 — `destino` lo pone el rótulo al que salta un ancla de la propia página
+ * («Dónde leer esta obra»): `tabindex="-1"` lo hace enfocable sin meterlo en la tabulación, y así
+ * el salto nativo del navegador le lleva el foco sin guion, con el anillo global de `tokens.css`
+ * (aquí no se declara ninguna regla de foco). `scroll-margin-top` le deja 2 × `--unidad` de aire
+ * sobre el borde de la ventana al llegar. Sin `destino`, el `h2` sale byte a byte como antes.
+ *
+ * Historia 24.4, UX-DR104 — lo usa también la Tarjeta de Obra («De la obra»), que no vive solo
+ * en la Página de Cita: la portada la pintará bajo un `h2` propio (28.2). Por eso el nivel lo
+ * recibe quien lo usa, con `nivel`; sin él, `h2`, y los usos de antes salen byte a byte iguales.
+ * La regla es la misma en los dos niveles: el aspecto no depende del encabezado.
  */
 interface Props {
   id: string;
+  /** El rótulo es destino de un ancla de la página: recibe el foco al saltar (UX-DR100). */
+  destino?: boolean;
+  /** El nivel del encabezado: 2 por omisión; 3 donde la sección cuelga de otro `h2` (UX-DR104). */
+  nivel?: 2 | 3;
 }
 
-const { id } = Astro.props;
+const { id, destino, nivel = 2 } = Astro.props;
 ---
 
-<h2 class="rotulo" id={id}><slot /></h2>
+{/*
+  * Dos ramas con el mismo marcado, y no una etiqueta dinámica (`const Encabezado = 'h3'`): Astro
+  * pinta el atributo de ámbito de una etiqueta dinámica como `data-astro-cid-…="true"`, y los
+  * rótulos de hoy dejarían de salir byte a byte iguales. Un atributo nuevo va en las dos ramas.
+  */}
+{
+  nivel === 3 ? (
+    <h3 class="rotulo" id={id} tabindex={destino ? -1 : undefined}><slot /></h3>
+  ) : (
+    <h2 class="rotulo" id={id} tabindex={destino ? -1 : undefined}><slot /></h2>
+  )
+}
 
 <style>
   .rotulo {
@@ -26,5 +54,9 @@ const { id } = Astro.props;
     line-height: 1.4;
     text-transform: uppercase;
     color: var(--tinta-apagada);
+  }
+
+  .rotulo[tabindex='-1'] {
+    scroll-margin-top: calc(var(--unidad) * 2);
   }
 </style>

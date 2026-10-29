@@ -1,5 +1,5 @@
 ---
-stepsCompleted: [1, 2, 3, 4]  # pasadas v1, v2, v3, v3.1 y v5 completadas; v7 (ciclo 1) en curso: paso 4; 2026-10-05: documentación retroactiva de la Épica 15 (v4) y de las historias 11.5, 11.6, 19.12 y 19.13, ya construidas; v7.1 (Página de Obra), 2026-10-09: pasos 1 a 4; v8 (la Cita como centro), 2026-10-19: pasos 1 a 4; v8.2, 2026-10-23 y 24: pasos 1 a 4
+stepsCompleted: [1, 2, 3, 4]  # pasadas v1, v2, v3, v3.1 y v5 completadas; v7 (ciclo 1) en curso: paso 4; 2026-10-05: documentación retroactiva de la Épica 15 (v4) y de las historias 11.5, 11.6, 19.12 y 19.13, ya construidas; v7.1 (Página de Obra), 2026-10-09: pasos 1 a 4; v8 (la Cita como centro), 2026-10-19: pasos 1 a 4; v8.2, 2026-10-23 y 24: pasos 1 a 4; v8.3, 2026-10-27: el glifo de avance «›» de la UX v8.3 propagado a UX-DR y criterios, sin otro cambio
 inputDocuments:
   - _bmad-output/planning-artifacts/prds/prd-brainlySabiduria-2026-08-10/prd.md
   - _bmad-output/planning-artifacts/prds/prd-brainlySabiduria-2026-08-10/addendum.md
@@ -4247,10 +4247,10 @@ UX-DR59: **Cita del Día en la portada** *(v8)*.
 UX-DR60: **Obras de la portada**: seis Filas de bloque bajo el `h2` «Obras».
 - **Cuáles.** Seis Obras **indexables**, de seis Autores distintos mientras los haya; con menos Autores, una de cada uno. Son las mismas para todos los visitantes de una jornada y rotan con ella (AD-12). Rotan aparte de la Cita del Día: la Obra de la Cita del Día puede salir también entre las seis, y no se excluye, así que algún día la misma Obra aparece dos veces en la primera mitad de la portada. Una fijación del Lote no cambia las Obras *(v8.2)*. Si rige la congelación de SM-11, salen del conjunto congelado.
 - **Cada fila.** El título va en Inter al cuerpo de `{typography.body-lg}`, con peso 600 y en `{colors.on-surface}`, y parte palabras antes que desbordar. Debajo, «{Autor} · {año} · {n} citas» en `{typography.caption}` y `{colors.on-surface-variant}`: el año solo si consta sin discrepancia, sin traductor, con los puntos medios ocultos y una pausa entre las dos líneas para el lector de pantalla.
-- **Cierre.** A 2 × `{spacing.unit}`, «Las {n} obras →» lleva al Directorio de Obras, en `{typography.body-md}` y `{colors.on-surface}`, subrayado y con zona de toque de 44 px.
+- **Cierre.** A 2 × `{spacing.unit}`, «Las {n} obras ›» lleva al Directorio de Obras, en `{typography.body-md}` y `{colors.on-surface}`, subrayado y con zona de toque de 44 px.
 - **Zona y ausencia.** Zona `obras-de-portada`. Sin Obras indexables, el bloque no existe, ni rótulo ni hueco. No aloja ningún enlace comercial.
 UX-DR61: **Temas y Colecciones de la portada**: todos los publicados, cada grupo bajo su `h2`. Los chips de Tema y de Colección no cambian: Source Serif al cuerpo de `{typography.body-md}`, fondo `{colors.surface-container}`, radio `{rounded.lg}`, 44 px de alto, 2 × `{spacing.unit}` de relleno lateral y `{spacing.unit}` entre chips. **Cada Colección va en su fila** *(variante 3A)*: el chip y, a `{spacing.unit}` debajo, su criterio, en `{typography.caption}` y `{colors.on-surface-variant}`. El criterio es una frase en los renglones que pida, nunca recortada, se asocia al chip con `aria-describedby` y no enlaza. Entre Colecciones, 2 × `{spacing.unit}`. El chip de Colección sigue sin aparecer en la Página de Cita (FR-28). Zonas: `chip-de-tema` y `colecciones`.
-UX-DR62: **Autores destacados**: ocho Filas de bloque bajo el `h2` «Autores». Son los mismos ocho que los de la búsqueda sin resultados y salen de una sola función; cada nombre enlaza con el componente de su sitio: Fila de bloque en la portada y Chip en la búsqueda sin resultados, como los Temas y las Colecciones de esa salida *(v8.2)*. Son los de más Citas publicadas, con el suelo latinoamericano de FR-8. **Se presentan en el orden del Directorio de Autores**, por su clave de orden, nunca por recuento. El nombre va en Source Serif al cuerpo de `{typography.headline-sm}` (21 px), con peso 400, en `{colors.on-surface}` y sin subrayado. Cierra, a 2 × `{spacing.unit}`, «Los {m} autores, de la A a la Z →», hacia el Directorio de Autores, con el trato de «Las {n} obras →». Zona: `autores-de-portada`. La lista entera de Autores sale de la portada.
+UX-DR62: **Autores destacados**: ocho Filas de bloque bajo el `h2` «Autores». Son los mismos ocho que los de la búsqueda sin resultados y salen de una sola función; cada nombre enlaza con el componente de su sitio: Fila de bloque en la portada y Chip en la búsqueda sin resultados, como los Temas y las Colecciones de esa salida *(v8.2)*. Son los de más Citas publicadas, con el suelo latinoamericano de FR-8. **Se presentan en el orden del Directorio de Autores**, por su clave de orden, nunca por recuento. El nombre va en Source Serif al cuerpo de `{typography.headline-sm}` (21 px), con peso 400, en `{colors.on-surface}` y sin subrayado. Cierra, a 2 × `{spacing.unit}`, «Los {m} autores, de la A a la Z ›», hacia el Directorio de Autores, con el trato de «Las {n} obras ›». Zona: `autores-de-portada`. La lista entera de Autores sale de la portada.
 UX-DR63: **Orden de la Página de Cita** *(v8)*.
 - **Orden de los bloques:** el Bloque de Cita con su Atribución y la Línea de la Fuente pegada a la Procedencia; la Tarjeta de Obra; Copiar e Imagen; el bloque «Compartir en»; «De la misma obra»; «Más de {Autor}»; los Temas.
 - **La Cita, primero.** Nada nuevo va antes que ella, que sigue siendo lo primero visible a 360 × 640 con la cabecera en dos filas (FR-1).
@@ -4263,12 +4263,12 @@ UX-DR64: **Tarjeta de Obra** *(variante 1A)*, un componente único (`TarjetaDeOb
 - **Rótulo.** «De la obra», el Rótulo de sección: `h2`, y `h3` en la portada.
 - **Título.** A `{spacing.unit}`, el de su Ficha de Obra, en Inter al cuerpo de `{typography.body-lg}`, con peso 600 y en `{colors.on-surface}`. **No enlaza.** Reparte sus líneas equilibradas y parte palabras antes que desbordar.
 - **Hechos.** A `{spacing.unit}`, «{Autor} · {año} · {n} citas» («1 cita» en singular), en `{typography.caption}` y `{colors.on-surface-variant}`, sin enlaces. Los puntos medios van ocultos y suenan como una coma. El año va solo si las Citas que lo declaran coinciden, y nunca es el de una traducción.
-- **Dos Filas de bloque**, a 2 × `{spacing.unit}`, en `{typography.body-md}`, con filete encima de la primera y debajo de cada una: «Siguiente…» (zona `siguiente`) y la que lleva a la Obra (zona `tarjeta-de-obra`). Esa segunda dice **«Ver la obra y dónde leerla →» si alguna Cita de la Obra está cotejada, y «Ver la obra →» si ninguna lo está**.
+- **Dos Filas de bloque**, a 2 × `{spacing.unit}`, en `{typography.body-md}`, con filete encima de la primera y debajo de cada una: «Siguiente…» (zona `siguiente`) y la que lleva a la Obra (zona `tarjeta-de-obra`). Esa segunda dice **«Ver la obra y dónde leerla ›» si alguna Cita de la Obra está cotejada, y «Ver la obra ›» si ninguna lo está**.
 - **Medida.** Unos 240 px a 360.
 - **Lo que no cambia.** Sin Obra, la tarjeta no existe y no deja hueco. No aloja ningún Modelo y sale idéntica con la afiliación encendida o apagada. La congelación no la quita. Va fuera del cuerpo de Pagefind.
 UX-DR65: **«Siguiente»**, la primera fila de la Tarjeta de Obra. Va en tinta, no en siena, y se compone en el build: es determinista y no lleva guion.
-- **«Siguiente cita de esta obra →»** lleva a la Cita que sigue a esta en el orden del libro, que es el del Listado de Obra. Tras la última, lleva a la primera.
-- **Si la Obra tiene una sola Cita**, el enlace es **«Siguiente cita sobre {tema} →»**, con el Tema en minúscula tras «sobre» («Siguiente cita sobre la vida →»). Toma el primer Tema publicado de la Cita, en el orden en que la Cita los declara, y lleva a la primera Cita que la sigue en su listado y es de otro Autor, nunca a otra del mismo Autor. Si detrás no queda ninguna de otro Autor, lleva a la primera del listado que lo sea.
+- **«Siguiente cita de esta obra ›»** lleva a la Cita que sigue a esta en el orden del libro, que es el del Listado de Obra. Tras la última, lleva a la primera.
+- **Si la Obra tiene una sola Cita**, el enlace es **«Siguiente cita sobre {tema} ›»**, con el Tema en minúscula tras «sobre» («Siguiente cita sobre la vida ›»). Toma el primer Tema publicado de la Cita, en el orden en que la Cita los declara, y lleva a la primera Cita que la sigue en su listado y es de otro Autor, nunca a otra del mismo Autor. Si detrás no queda ninguna de otro Autor, lleva a la primera del listado que lo sea.
 - **Sin «Siguiente».** Sin Tema publicado, o si ese Tema no tiene Citas de otro Autor, no hay «Siguiente» y queda solo «Ver la obra».
 - **Retener sin recordar.** Se retiene con lo que el sitio compone para todos, nunca con lo que guarda del visitante: ni «seguir donde lo dejaste» ni la última búsqueda recordada en el navegador.
 UX-DR66: **Acciones de la Página de Cita** *(v8: la posición)*.
@@ -4283,8 +4283,8 @@ UX-DR67: **Rutas de salida** *(variante 3A)*, al pie de la Página de Cita y den
 - **Listas.** Cada lista lleva su filete superior, va en Tarjetas de Cita de los listados y cierra con una última Fila de bloque en `{typography.body-md}` y `{colors.on-surface}`. Los Temas van en Chip de Tema, separados por `{spacing.unit}`.
 - **Reglas.** Un grupo sin contenido no se dibuja, y la página nunca queda sin enlaces internos. Todo va fuera del cuerpo de Pagefind: ninguna búsqueda devuelve una Página de Cita por el texto de las Tarjetas que enlaza.
 - **Medida.** A 360, la página crece de unos 1.500 a unos 2.780 px, y todo lo que crece cae después de las acciones.
-UX-DR68: **De la misma obra**: hasta tres Tarjetas de Cita de la Obra, sin repetir la que se lee ni la siguiente. Se reparten a pasos iguales a lo largo del orden del libro, en vez de ir contiguas, y van **sin Autor ni título de Obra**. Cierra con «Las {n} citas de {título} →», hacia la Página de Obra. Zona: `misma-obra`. Si no queda ninguna que ofrecer, como en las 87 Obras de dos Citas, o si la Cita no tiene Obra, el bloque no existe.
-UX-DR69: **Más de {Autor}**: hasta `MAX_CITAS_RELACIONADAS` (4) Tarjetas de Cita del Autor que no sean de la misma Obra, ni la que se lee, ni la siguiente. Van **sin el Autor y con el título de su Obra**. Cierra con «Las {n} citas de {Autor} →», hacia la Página de Autor. Zona: `rutas-de-salida`. Con una Cita sin Obra, elige entre todas las demás Citas del Autor. Si no queda ninguna que ofrecer, el bloque no existe.
+UX-DR68: **De la misma obra**: hasta tres Tarjetas de Cita de la Obra, sin repetir la que se lee ni la siguiente. Se reparten a pasos iguales a lo largo del orden del libro, en vez de ir contiguas, y van **sin Autor ni título de Obra**. Cierra con «Las {n} citas de {título} ›», hacia la Página de Obra. Zona: `misma-obra`. Si no queda ninguna que ofrecer, como en las 87 Obras de dos Citas, o si la Cita no tiene Obra, el bloque no existe.
+UX-DR69: **Más de {Autor}**: hasta `MAX_CITAS_RELACIONADAS` (4) Tarjetas de Cita del Autor que no sean de la misma Obra, ni la que se lee, ni la siguiente. Van **sin el Autor y con el título de su Obra**. Cierra con «Las {n} citas de {Autor} ›», hacia la Página de Autor. Zona: `rutas-de-salida`. Con una Cita sin Obra, elige entre todas las demás Citas del Autor. Si no queda ninguna que ofrecer, el bloque no existe.
 UX-DR70: **Tarjeta de Cita con Obra** *(enmienda UX-DR11)*.
 - **Qué lleva.** El fragmento en `{typography.headline-sm}` y, donde el listado no lo da por sabido, el Autor en `{typography.author}`. Debajo, a `{spacing.unit}`, el título de su Ficha de Obra en Inter, `{typography.caption}` y `{colors.on-surface-variant}`, sin versalitas, **como texto y nunca como un segundo enlace**.
 - **Qué lleva cada sitio.** En Tema y en Colección, Autor y Obra. En Autor y en «Más de {Autor}», solo la Obra. En Obra y en «De la misma obra», ninguno de los dos. Una Cita sin Obra no lleva línea de Obra.
@@ -4468,21 +4468,22 @@ UX-DR104: **Tipografía** *(v8)*.
 - **Ningún token nuevo.** Cada combinación toma el cuerpo de la escala (`--cuerpo-lg`, `--titular-sm`, `--titular-md`, `--cuerpo-md`) y escribe su familia y su peso.
 UX-DR105: **Siena y subrayado** *(v8, enmienda UX-DR52)*. Lo decide la función del elemento, nunca cuánto siena haya en la pantalla.
 - **En siena, lo que actúa:** los botones (también «Mostrar 30 más», «Quitar los filtros» y «Buscar»), «Buscar» de la cabecera, la paginación, las letras de salto, el salto «Dónde leer esta obra ↓», «Volver a las letras», «Buscar «x» en las citas» y los enlaces de salida.
-- **En tinta, toda la navegación nueva:** «Autores» y «Obras» de la cabecera, las filas de la Tarjeta de Obra, «Siguiente», «Ver la obra», los cierres «… →», las filas y las cabeceras de grupo de los Directorios, y «Ver esta cita» de la portada; el del 404 sigue en siena, como está construido, y es la única navegación que informa que va en siena en una superficie pública *(v8.2)*.
-- **Subrayados siempre:** los tres enlaces de la cabecera, el salto, «Buscar «x» en las citas», «Volver a las letras», «Ver esta cita», «Las {n} obras →», «Los {m} autores, de la A a la Z →» y el Autor de la cabecera de grupo de `/obras/`.
+- **En tinta, toda la navegación nueva:** «Autores» y «Obras» de la cabecera, las filas de la Tarjeta de Obra, «Siguiente», «Ver la obra», los cierres «… ›», las filas y las cabeceras de grupo de los Directorios, y «Ver esta cita» de la portada; el del 404 sigue en siena, como está construido, y es la única navegación que informa que va en siena en una superficie pública *(v8.2)*.
+- **Subrayados siempre:** los tres enlaces de la cabecera, el salto, «Buscar «x» en las citas», «Volver a las letras», «Ver esta cita», «Las {n} obras ›», «Los {m} autores, de la A a la Z ›» y el Autor de la cabecera de grupo de `/obras/`.
 - **Sin subrayado, los enlaces de bloque:** la marca, las filas de la Tarjeta de Obra, los cierres que son la última fila de su lista, las filas de los Directorios, las letras, las Obras y los Autores de la portada, y los botones de «Compartir en».
 - La regla no rige en el Kit ni en el Lote.
 UX-DR106: **Pestaña nueva** *(v8)*, solo para donar, compartir y comprar. WhatsApp, Facebook, Threads, Telegram y X la abren, y lo avisan con `AVISO_DE_PESTAÑA_NUEVA` (`src/lib/accesibilidad.ts`), oculto dentro de su nombre accesible. **Correo** comparte desde la misma pestaña, con `mailto:` y sin el aviso. «Historia de Instagram» y «Más opciones…» con hoja no abren pestaña: entregan a la Hoja del Sistema. La cabecera, los Directorios, la Tarjeta de Obra y su «Siguiente», «Buscar en…», el salto y «Volver a las letras» van en la misma pestaña.
 UX-DR107: **Voz y microcopia** *(v8)*.
-- **Entidades en minúscula** en el texto que lee el visitante, y el Tema dentro de una frase, tras «sobre»: «Buscar en este tema», «Ver la obra →», «Siguiente cita sobre la vida →».
+- **Entidades en minúscula** en el texto que lee el visitante, y el Tema dentro de una frase, tras «sobre»: «Buscar en este tema», «Ver la obra ›», «Siguiente cita sobre la vida ›».
 - **Una cifra del Corpus no es un contador**, y no hay ningún contador de visitas, lecturas ni comparticiones.
 - **Ninguna frase excusa una acción que no existe.**
 - **«Citas» y «frases».** Los Directorios no dicen «frases» en ningún texto. «Citas» va en el cuerpo y en la meta description, y el título de pestaña es la plantilla literal de UX-DR80 (decisión de Héctor del 2026-10-19) *(v8.2)*. «Frases» sigue solo en el título de pestaña y la meta description de la Página de Obra.
-- **Microcopia nueva, literal:** «La cita de hoy», «Ver esta cita», «Obras», «Autores», «Las {n} obras →», «Los {m} autores, de la A a la Z →», «De la obra», «Siguiente cita de esta obra →», «Ver la obra y dónde leerla →», «Ver la obra →», «De la misma obra», «Las {n} citas de {título} →», «Las {n} citas de {Autor} →», «Compartir en», «Historia de Instagram», «Más opciones…», «Compartir en la historia», «Dónde leer esta obra ↓», «Filtrar las citas», «Quitar los filtros», «Mostrar 30 más», «Volver a las letras», «Buscar», «Descargar la imagen cuadrada» y «Descargar la imagen vertical». Se suman las frases de estado de UX-DR75, UX-DR81, UX-DR86, UX-DR89, UX-DR90, UX-DR92 y UX-DR93.
+- **Microcopia nueva, literal:** «La cita de hoy», «Ver esta cita», «Obras», «Autores», «Las {n} obras ›», «Los {m} autores, de la A a la Z ›», «De la obra», «Siguiente cita de esta obra ›», «Ver la obra y dónde leerla ›», «Ver la obra ›», «De la misma obra», «Las {n} citas de {título} ›», «Las {n} citas de {Autor} ›», «Compartir en», «Historia de Instagram», «Más opciones…», «Compartir en la historia», «Dónde leer esta obra ↓», «Filtrar las citas», «Quitar los filtros», «Mostrar 30 más», «Volver a las letras», «Buscar», «Descargar la imagen cuadrada» y «Descargar la imagen vertical». Se suman las frases de estado de UX-DR75, UX-DR81, UX-DR86, UX-DR89, UX-DR90, UX-DR92 y UX-DR93.
+- **El glifo de avance es «›»** (U+203A) *(v8.3, decisión de Héctor del 2026-10-27)*: el de las Filas de bloque y los cierres «… ›» —«Siguiente cita de esta obra ›», «Ver la obra ›», «Las {n} obras ›»—, no la flecha U+2192, que no está en el subconjunto `latin` de Google Fonts de Inter ni de Source Serif 4 y pararía la puerta de cobertura tipográfica en todas las Páginas de Cita; «›» cae en U+2000–206F, dentro de ese subconjunto. Es un glifo tipográfico de la familia del rótulo, con `aria-hidden`, y no un icono. «↓» no cambia.
 UX-DR108: **Estados nuevos de la Página de Cita y de la portada.**
 - **Cita sin Obra:** sin Tarjeta de Obra, sin «Siguiente» y sin «De la misma obra». Las acciones suben a la primera pantalla, y «Más de {Autor}» elige entre todas las demás Citas del Autor. Eran 4 Citas el 2026-10-18.
-- **Obra de una sola Cita:** la tarjeta dice «1 cita», no hay «De la misma obra», y el «Siguiente» es «Siguiente cita sobre {tema} →» o no existe.
-- **Obra sin ninguna Cita cotejada:** «Ver la obra →». Eran 7 Obras.
+- **Obra de una sola Cita:** la tarjeta dice «1 cita», no hay «De la misma obra», y el «Siguiente» es «Siguiente cita sobre {tema} ›» o no existe.
+- **Obra sin ninguna Cita cotejada:** «Ver la obra ›». Eran 7 Obras.
 - **«De la misma obra» o «Más de {Autor}» sin Citas que ofrecer:** el bloque no existe.
 - **Cita sin Tema publicado:** no hay bloque de Temas.
 - **Año discrepante o ausente:** se omite, sin hueco y sin «Sin año documentado».
@@ -4602,7 +4603,7 @@ Dos son de referencia, sin variantes: [`v8-pagina-de-tema.html`](ux-designs/ux-b
 - «Buscar en este Tema», con mayúscula;
 - lo tecleado en serif, y la flecha propia del selector;
 - el filtro del Directorio por principio de palabra, que da 13 Autores en vez de 14;
-- «Siguiente cita sobre la vida →» hacia la Cita contigua;
+- «Siguiente cita sobre la vida ›» hacia la Cita contigua;
 - el destino Facebook sin aviso de pestaña nueva;
 - la línea de arriba de la Historia sin asociar al diálogo;
 - el texto de ejemplo en el filtro de los Directorios, «Por ejemplo: gonzalez» y «Por ejemplo: quijote», donde la espina no pone ninguno *(v8.2)*.
@@ -5940,8 +5941,8 @@ So that una frase suelta me lleve al libro del que viene y a dónde leerlo.
 **Given** la fila que lleva a la Obra
 **When** se pinta
 **Then** es una Fila de bloque a 2 × `{spacing.unit}`, en `{typography.body-md}` y `{colors.on-surface}`, sin subrayado, con un alto mínimo de `{components.tap-target-min}` y filete encima y debajo (UX-DR105)
-**And** dice «Ver la obra y dónde leerla →» si alguna Cita de la Obra está cotejada, y «Ver la obra →» si ninguna lo está (7 Obras el 2026-10-18) (UX-DR108)
-**And** lleva a la página 1 de su Obra, en la misma pestaña, también cuando la Obra no se indexa. Su zona es `tarjeta-de-obra`, y la flecha es un glifo con `aria-hidden` (UX-DR106, UX-DR111)
+**And** dice «Ver la obra y dónde leerla ›» si alguna Cita de la Obra está cotejada, y «Ver la obra ›» si ninguna lo está (7 Obras el 2026-10-18) (UX-DR108)
+**And** lleva a la página 1 de su Obra, en la misma pestaña, también cuando la Obra no se indexa. Su zona es `tarjeta-de-obra`, y el glifo «›» lleva `aria-hidden` (UX-DR106, UX-DR107, UX-DR111)
 **And** la Fila de bloque se escribe una sola vez, con el trato que ya tiene la Lista de Obras, y la reutilizan las filas que vienen después
 
 **Given** una Cita sin Obra
@@ -5994,12 +5995,12 @@ So that pueda leer una obra Cita a Cita sin volver al listado.
 
 **Given** una Cita cuya Obra tiene dos Citas o más
 **When** se sirve su página
-**Then** la primera fila de la Tarjeta de Obra es «Siguiente cita de esta obra →». Lleva a la Cita que sigue a esta en el orden del libro de `obras.ts`, el mismo del Listado de Obra, y desde la última, a la primera (FR-12, AD-25, UX-DR65)
+**Then** la primera fila de la Tarjeta de Obra es «Siguiente cita de esta obra ›». Lleva a la Cita que sigue a esta en el orden del libro de `obras.ts`, el mismo del Listado de Obra, y desde la última, a la primera (FR-12, AD-25, UX-DR65)
 **And** en una Obra de dos Citas, cada una lleva a la otra
 
 **Given** una Cita cuya Obra tiene una sola Cita
 **When** se sirve su página
-**Then** si hay a dónde ir, la fila dice «Siguiente cita sobre {tema} →», con el nombre del Tema en minúscula tras «sobre» («Siguiente cita sobre la vida →»). Lo compone `src/lib/`, no la plantilla (UX-DR107)
+**Then** si hay a dónde ir, la fila dice «Siguiente cita sobre {tema} ›», con el nombre del Tema en minúscula tras «sobre» («Siguiente cita sobre la vida ›»). Lo compone `src/lib/`, no la plantilla (UX-DR107)
 **And** el Tema es el primero publicado de la Cita, en el orden en que la Cita los declara (`temasDeLaCita`). Un Tema por debajo de `MIN_CITAS_POR_TEMA` no cuenta (UX-DR109)
 **And** lleva a la primera Cita de otro Autor que le sigue en el listado de ese Tema. El listado se lee de `citasDeTema` de `publicado.ts`, el mismo dueño que pinta la Página de Tema (AD-11)
 **And** si detrás no queda ninguna de otro Autor, lleva a la primera del listado que lo sea. Nunca lleva a otra Cita del mismo Autor
@@ -6059,7 +6060,7 @@ So that tenga a dónde seguir sin que se me repita lo que acabo de leer.
 **And** no ofrece la Cita que se lee ni la siguiente
 **And** las reparte a pasos iguales sobre el orden del libro, con el mismo reparto que ya usa `citasRelacionadas`, sin escribir una segunda función de reparto, y las muestra en el orden del libro (UX-DR68)
 **And** las Tarjetas van sin Autor ni título de Obra
-**And** cierra con «Las {n} citas de {título} →» hacia la página 1 de la Obra, con la zona `misma-obra`
+**And** cierra con «Las {n} citas de {título} ›» hacia la página 1 de la Obra, con la zona `misma-obra`
 
 **Given** una Cita sin Obra, de una Obra de dos Citas (87 Obras el 2026-10-18), o a la que, quitadas la actual y la siguiente, no le queda ninguna
 **When** se sirve
@@ -6070,7 +6071,7 @@ So that tenga a dónde seguir sin que se me repita lo que acabo de leer.
 **Then** ofrece hasta `MAX_CITAS_RELACIONADAS` (4) Tarjetas de Cita del Autor, sin las de la misma Obra, sin la que se lee y sin la siguiente (UX-DR69)
 **And** van sin el Autor y con el título de su Obra, como texto; la que no tiene Obra va sin esa línea
 **And** las elige `citasRelacionadas` de `publicado.ts`, determinista por commit y nunca por la jornada (AD-11)
-**And** cierra con «Las {n} citas de {Autor} →» hacia la página 1 del Autor, con la zona `rutas-de-salida`
+**And** cierra con «Las {n} citas de {Autor} ›» hacia la página 1 del Autor, con la zona `rutas-de-salida`
 **And** si la Cita no tiene Obra, elige entre todas las demás Citas del Autor; si no queda ninguna que ofrecer, el bloque no existe
 
 **Given** los Temas
@@ -7661,7 +7662,7 @@ So that encuentre entre sus citas sin pasar sus páginas una a una.
 **When** hay resultados
 **Then** va encima de la lista, a 3 × `{spacing.unit}`, en `{typography.caption}` y `{colors.on-surface-variant}`, dentro de la región `role="status"` que está en el marcado desde la carga (UX-DR89, UX-DR99)
 **And** dice cuántos hay, no cuántos se ven: sin filtros, «28 resultados.» o «Un resultado.»; con filtros, nombra lo filtrado, con el Tema en minúscula tras «sobre» y el texto tras «con»: «222 citas de José Martí.», «8 citas de José Martí sobre la prudencia.», «6 citas sobre el saber con «escuela».», y en singular «Una cita…»
-**And** la minúscula del Tema es la misma regla que la de «Siguiente cita sobre {tema} →» (24.5, UX-DR107), sin una segunda
+**And** la minúscula del Tema es la misma regla que la de «Siguiente cita sobre {tema} ›» (24.5, UX-DR107), sin una segunda
 **And** se anuncia con el segundo ritmo: al teclear, tras unos 700 ms sin teclear y solo si la frase cambió; tras un selector, tras la pausa de los selectores
 
 **Given** algún filtro puesto
@@ -8349,7 +8350,7 @@ So that volver me abra libros que no conocía y el Directorio de Obras me quede 
 
 **Given** el cierre del bloque
 **When** se pinta
-**Then** a 2 × `{spacing.unit}` va «Las {n} obras →», con n las Obras que lista el Directorio de Obras —también las que no se indexan—, hacia `/obras/`: un enlace de texto en `{typography.body-md}` y `{colors.on-surface}`, subrayado siempre, con zona de toque de 44 px y la flecha con `aria-hidden` (FR-55, UX-DR60, UX-DR102, UX-DR105)
+**Then** a 2 × `{spacing.unit}` va «Las {n} obras ›», con n las Obras que lista el Directorio de Obras —también las que no se indexan—, hacia `/obras/`: un enlace de texto en `{typography.body-md}` y `{colors.on-surface}`, subrayado siempre, con zona de toque de 44 px y la flecha con `aria-hidden` (FR-55, UX-DR60, UX-DR102, UX-DR105)
 **And** las filas y el cierre llevan la zona `obras-de-portada` (UX-DR111), y la prueba de Vitest de la 23.7 sobre `dist/` no encuentra en el bloque ningún enlace sin zona
 
 **Given** el bloque
@@ -8408,7 +8409,7 @@ So that no confunda una Colección con un Tema y llegue a cualquier Autor por su
 
 **Given** el cierre del bloque de Autores
 **When** se pinta
-**Then** a 2 × `{spacing.unit}` va «Los {m} autores, de la A a la Z →», con la m de la línea de cifras, hacia `/autores/`: el trato de «Las {n} obras →» y la zona `autores-de-portada` (FR-55, UX-DR62, UX-DR102, UX-DR105)
+**Then** a 2 × `{spacing.unit}` va «Los {m} autores, de la A a la Z ›», con la m de la línea de cifras, hacia `/autores/`: el trato de «Las {n} obras ›» y la zona `autores-de-portada` (FR-55, UX-DR62, UX-DR102, UX-DR105)
 
 **Given** la lista entera de Autores que la portada pinta hoy —unos 5.900 px—
 **When** se cierra la historia

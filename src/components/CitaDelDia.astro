@@ -1,0 +1,56 @@
+---
+/**
+ * La Cita del Día — Historia 26.8, AD-12.
+ *
+ * El bloque que la portada y el 404 pintan con la Cita que toca hoy: su rótulo, el Bloque de
+ * Cita y «Ver esta cita». La **selección** sigue en cada página —la jornada la leen ellas, y
+ * así lo vigila la guarda de `tests/unit/peso.test.ts`—; aquí solo se pinta lo seleccionado.
+ *
+ * **Es el único emisor de `data-jornada`** (atributo sin valor). Lo que cuelga de ese elemento
+ * cambia de un día a otro sin ningún commit, así que no puede sostener ninguna garantía del
+ * sitio: el grafo de enlaces con el que el build comprueba NFR-5 (`integraciones/alcance.ts`)
+ * y el de los veredictos se saltan su subárbol entero, y la prueba de dos jornadas
+ * (`tests/unit/dos-jornadas.test.ts`) exige que la portada y el 404 solo difieran ahí. Un
+ * segundo emisor de la marca dejaría que algo fuera de este bloque rotara a escondidas, y por
+ * eso `tests/unit/alcance-construido.test.ts` exige que ningún otro fichero de `src/` la nombre.
+ *
+ * `data-pagefind-ignore="all"`: la Cita del Día ya tiene su página en el índice propio. El
+ * margen sobre el bloque lo pone cada página, que es quien sabe qué tiene encima.
+ */
+import BloqueDeCita from './BloqueDeCita.astro';
+import type { Autor, Cita } from '../lib/publicado.ts';
+import { rutaDeCita } from '../lib/superficies.ts';
+
+interface Props {
+  cita: Cita;
+  autor: Autor;
+}
+
+const { cita, autor } = Astro.props;
+---
+
+<section class="del-dia" data-jornada data-pagefind-ignore="all">
+  <h2>La cita de hoy</h2>
+  <BloqueDeCita cita={cita} autor={autor} />
+  {/* Historia 23.7 — la Zona de salida interna va en el contenedor del enlace. */}
+  <p class="ir" data-zona="cita-del-dia">
+    <a href={rutaDeCita(cita.slug)}>Ver esta cita</a>
+  </p>
+</section>
+
+<style>
+  h2 {
+    margin: 0 0 calc(var(--unidad) * 3);
+    font-family: var(--sans);
+    font-size: var(--autor);
+    font-weight: 600;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--tinta-apagada);
+  }
+
+  .ir {
+    margin: calc(var(--unidad) * 3) 0 0;
+    font-size: var(--cuerpo-md);
+  }
+</style>

@@ -57,3 +57,74 @@ export function palabras(texto: string): string[] {
 export function equivalentes(a: string, b: string): boolean {
   return normalizar(a) === normalizar(b);
 }
+
+/*
+ * ─── La función hermana: inicial y orden de una clave de Autor — Historia 26.1 ─────────
+ *
+ * `normalizar` pliega la eñe a la ene, y para buscar es lo correcto. Para **ordenar** no lo
+ * es: el Directorio de Autores pone a Núñez entre Nuño y Nuza y a Ñandú después de toda la
+ * N, porque en español la eñe es una letra con su sitio en el alfabeto. Por eso hay una
+ * hermana y no una variante con bandera: las dos comparten el resto de la forma canónica
+ * —minúsculas, sin tildes, sin signos— y difieren solo en esa letra.
+ *
+ * AD-3 — es la única dueña de las iniciales y del orden de los Autores. El Directorio, sus
+ * letras de salto y los destacados de la 27 la consumen; ningún otro módulo calcula una
+ * inicial ni ordena Autores por su cuenta.
+ */
+
+/** Las iniciales que puede tener una clave: las 26 de la A a la Z y la Ñ. */
+const INICIAL_LATINA = /^[A-Za-z]$/u;
+
+/**
+ * Lo que sustituye a la eñe antes de normalizar: una ene seguida de un carácter de uso
+ * privado. Ese carácter no es una marca combinante ni un signo —`normalizar` no lo toca— y
+ * su código es mayor que el de cualquier letra latina, así que «n» + él ordena tras toda
+ * «n» seguida de letra y antes de la «o», también dentro de la palabra.
+ */
+const TRAS_LA_ENE = '\uE000';
+
+/**
+ * La inicial de una clave de orden: una letra de la A a la Z sin tilde, o la Ñ.
+ *
+ * Devuelve `undefined` cuando la clave no tiene inicial que repartir: en blanco, con un
+ * espacio delante, o empezando por cifra o signo. **No se recorta**: una clave con un
+ * espacio delante está mal escrita, y aceptarla recortando escondería la errata (NFR-12).
+ */
+export function inicialDeClave(clave: string): string | undefined {
+  const primera = clave.normalize('NFC').codePointAt(0);
+  if (primera === undefined) return undefined;
+  const letra = String.fromCodePoint(primera);
+  if (letra === 'ñ' || letra === 'Ñ') return 'Ñ';
+  /*
+   * Se mira la letra **antes** de pasarla a mayúscula: «ı» (i sin punto) y «ſ» (s larga) dan
+   * I y S con `toUpperCase`, pero `claveDeComparacion` no las pliega y ordenarían tras la Z.
+   * Una inicial que el orden no respeta no es inicial.
+   */
+  const base = letra.normalize('NFD').replace(DIACRITICOS, '');
+  return INICIAL_LATINA.test(base) ? base.toUpperCase() : undefined;
+}
+
+/**
+ * La forma con la que se comparan dos claves: la canónica de `normalizar`, salvo la eñe, que
+ * conserva su sitio entre la ene y la o. Se compara por unidades de código y nunca con
+ * `localeCompare`, cuyo resultado depende de los datos de idioma de quien construye.
+ */
+export function claveDeComparacion(clave: string): string {
+  return normalizar(clave.normalize('NFC').replace(/[ñÑ]/gu, `n${TRAS_LA_ENE}`));
+}
+
+/** Lo que hace falta para ordenar un Autor: su clave y, para desempatar, su slug. */
+export interface OrdenablePor {
+  clave: string;
+  slug: string;
+}
+
+const porUnidades = (a: string, b: string): number => (a < b ? -1 : a > b ? 1 : 0);
+
+/**
+ * El orden de los Autores: por la clave de comparación y, si empatan —«Séneca» y «Séneca»—,
+ * por el slug, que es único. El resultado no depende del orden de entrada.
+ */
+export function compararPorClave(a: OrdenablePor, b: OrdenablePor): number {
+  return porUnidades(claveDeComparacion(a.clave), claveDeComparacion(b.clave)) || porUnidades(a.slug, b.slug);
+}
