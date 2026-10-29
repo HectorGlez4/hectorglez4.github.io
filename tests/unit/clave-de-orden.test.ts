@@ -140,7 +140,7 @@ describe('Historia 27.1 — la clave de orden de la búsqueda', () => {
       expect(() => clavesDeOrden(AUTORES, CITAS, POR_OBRA, limites)).toThrow(/«Autor» tiene 2 posiciones y el tope es 2/u);
       // Uno solo cabe.
       const soloAbad = CITAS.filter((c) => c.autor === 'abad');
-      expect(clavesDeOrden(AUTORES, soloAbad, POR_OBRA, limites).get('abad-unica')).toBe('00000000');
+      expect(clavesDeOrden(AUTORES, soloAbad, new Map(), limites).get('abad-unica')).toBe('00000000');
     });
 
     it('el de la posición dentro de un Autor, con un tope pequeño', () => {
@@ -174,6 +174,34 @@ describe('Historia 27.1 — la clave de orden de la búsqueda', () => {
     it('un tope que sacaría la clave mayor de lo exacto en f32 se rechaza', () => {
       expect(() => clavesDeOrden(AUTORES, CITAS, POR_OBRA, { tope: 4097, aviso: undefined })).toThrow(/f32/u);
     });
+
+    it('caben tope − 1 posiciones por rango, y la mayor clave que sale queda bajo tope² − 1', () => {
+      const tope = 4;
+      // Tres Autores (tope − 1) con tres Citas cada uno: los dos rangos llenos sin alcanzar el tope.
+      const autores = ['a', 'b', 'c'].map((slug) => ({ slug, ordenAlfabetico: slug }));
+      const citas = autores.flatMap((a) => [1, 2, 3].map((n) => ({ slug: `${a.slug}-${n}`, autor: a.slug })));
+      const claves = clavesDeOrden(autores, citas, new Map(), { tope, aviso: undefined });
+      const mayor = Math.max(...[...claves.values()].map(Number));
+      expect(mayor).toBe((tope - 2) * tope + (tope - 2));
+      expect(mayor).toBeLessThan(tope * tope - 1);
+    });
+  });
+
+  describe('una entrada incoherente rompe en vez de dar posiciones de más o de menos', () => {
+    it('un slug de Cita repetido', () => {
+      const citas = [...CITAS, { slug: 'abad-unica', autor: 'abad' }];
+      expect(() => clavesDeOrden(AUTORES, citas, POR_OBRA)).toThrow(/La Cita «abad-unica» viene dos veces/u);
+    });
+
+    it('una lista de una Obra que ninguna Cita de la entrada resuelve', () => {
+      const porObra = new Map([...POR_OBRA, ['abad--fantasma', [{ slug: 'abad-otra' }]]]);
+      expect(() => clavesDeOrden(AUTORES, CITAS, porObra)).toThrow(/La lista de la Obra «abad--fantasma» trae 1 Citas/u);
+    });
+
+    it('una lista vacía de una Obra sin Citas no estorba', () => {
+      const porObra = new Map([...POR_OBRA, ['abad--vacia', []]]);
+      expect(clavesDeOrden(AUTORES, CITAS, porObra).size).toBe(CITAS.length);
+    });
   });
 
   describe('una lista de Obra que no casa con sus Citas rompe nombrando la Obra y el slug', () => {
@@ -206,6 +234,15 @@ describe('Historia 27.1 — la clave de orden de la búsqueda', () => {
       clavesDeOrden(AUTORES, CITAS, POR_OBRA, { tope: MAX_POR_RANGO_DE_LA_CLAVE_DE_ORDEN, aviso: undefined });
       expect(aviso).not.toHaveBeenCalled();
     });
+
+    it.each([0, -1, 1.5, Number.NaN, MAX_POR_RANGO_DE_LA_CLAVE_DE_ORDEN, MAX_POR_RANGO_DE_LA_CLAVE_DE_ORDEN + 1])(
+      'un aviso que no es un entero entre 1 y tope − 1 (%s) se rechaza',
+      (valor) => {
+        expect(() =>
+          clavesDeOrden(AUTORES, CITAS, POR_OBRA, { tope: MAX_POR_RANGO_DE_LA_CLAVE_DE_ORDEN, aviso: valor }),
+        ).toThrow(/AVISO_DE_RANGO_DE_LA_CLAVE_DE_ORDEN\) tiene que ser un entero entre 1 y 4095/u);
+      },
+    );
 
     it('con valor avisa del rango que lo alcanza, con su recuento, y no rompe', () => {
       const aviso = vi.spyOn(console, 'warn').mockImplementation(() => {});

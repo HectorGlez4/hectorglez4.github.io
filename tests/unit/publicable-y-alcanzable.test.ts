@@ -12,7 +12,7 @@ import {
   limpiar,
   paginaConstruida,
 } from './ayuda/construir.js';
-import { rutasPublicadas, superficiesInalcanzables } from '../../src/lib/publicado.ts';
+import { filtrosDeLaBusqueda, rutasPublicadas, superficiesInalcanzables } from '../../src/lib/publicado.ts';
 import { conjuntoDelCorpus, grafoDeDist } from '../../tools/lib/alcance.ts';
 import { rutasDelCorpus } from '../../tools/lib/corpus.ts';
 import { rutaDeFicheroHtml } from '../../tools/lib/indexables.ts';
@@ -844,6 +844,9 @@ describe('Historia 12.1 — sobre un sitio construido de verdad', () => {
         // Solo la clave del tipo: los filtros de la Cita (27.1) los mira su propia prueba.
         const delTipo = filtros.filter((f) => f.valor.split(':')[0] === FILTRO_DE_TIPO);
         expect(delTipo, ruta).toEqual([{ etiqueta: 'main', valor: `${FILTRO_DE_TIPO}:${tipo}` }]);
+        // Y ningún filtro de otra clave: fuera del tipo, solo los de la Cita, y solo en ella.
+        const permitidas = new Set<string>([FILTRO_DE_TIPO, ...(tipo === 'cita' ? Object.values(FILTROS_DE_CITA) : [])]);
+        expect(filtros.filter((f) => !permitidas.has(f.valor.split(':')[0])), ruta).toEqual([]);
         vistas.add(tipo!);
       }
       // Sin esto pasaría sobre un sitio sin nada indexado. El corpus trae las seis familias.
@@ -881,6 +884,36 @@ describe('Historia 12.1 — sobre un sitio construido de verdad', () => {
         expect(deLaPagina[0], ruta).toMatch(new RegExp(`^${ORDEN_DE_CITA}:\\d{8}$`, 'u'));
       }
       expect(new Set([...claves.values()].map((c) => c[0])).size).toBe(claves.size);
+    });
+
+    /*
+     * Historia 27.1, AD-11 — sobre el `dist/` de todas las familias, y no solo el del fixture de
+     * `filtros-de-cita.test.ts`: cada Página de Cita lleva exactamente su `autor`, como mucho su
+     * `obra` y en `tema` exactamente sus Temas publicados —los de `filtrosDeLaBusqueda` sobre el
+     * Corpus de la copia—, y el metadato `autor` una vez, con el nombre.
+     */
+    it('cada Página de Cita lleva exactamente los filtros de `filtrosDeLaBusqueda` y el metadato `autor`', async () => {
+      const conjunto = await conjuntoDelCorpus(rutasDelCorpus(join(proyecto, 'corpus')));
+      const { porCita } = filtrosDeLaBusqueda(conjunto);
+      const nombres = new Map(conjunto.autores.map((autor) => [autor.slug, autor.nombre]));
+      const vistas = new Set<string>();
+      for (const [ruta, html] of await paginas()) {
+        const slug = /^\/cita\/([^/]+)$/.exec(ruta)?.[1];
+        if (slug === undefined) continue;
+        const esperado = porCita.get(slug);
+        expect(esperado, `${ruta}: una Página de Cita sin filtros en filtrosDeLaBusqueda`).toBeDefined();
+        vistas.add(slug);
+        const valores = filtrosDe(html).map((f) => f.valor);
+        const de = (clave: string) => valores.filter((v) => v.startsWith(`${clave}:`)).map((v) => v.slice(clave.length + 1));
+        expect(de(FILTROS_DE_CITA.autor), ruta).toEqual([esperado!.autor]);
+        expect(de(FILTROS_DE_CITA.obra), ruta).toEqual(esperado!.obra === undefined ? [] : [esperado!.obra]);
+        expect(de(FILTROS_DE_CITA.tema), ruta).toEqual([...esperado!.temas]);
+        const metas = [...html.matchAll(/<span data-pagefind-meta="autor">([^<]*)<\/span>/gu)].map((m) => m[1]);
+        expect(metas, ruta).toEqual([nombres.get(esperado!.autor)]);
+      }
+      // Todas las Citas publicadas, y no en vacío.
+      expect([...vistas].sort()).toEqual([...porCita.keys()].sort());
+      expect(vistas.size).toBeGreaterThan(CITAS_POR_PAGINA);
     });
 
     it('todo `data-pagefind-meta` construido que no sea `title` declara su peso en `OPCIONES_DE_PAGEFIND`', async () => {

@@ -11,7 +11,7 @@ import { ASENTAMIENTO_DE_BUSQUEDA, EVENTOS } from '../../src/lib/medicion.ts';
 import { tramoDe } from '../../src/lib/vocabulario.ts';
 import { citaConLosDosBloques, temaBajoUmbral, textoDe } from './ayuda/corpus.ts';
 import { citasPorObra, filtrosDeLaBusqueda, type ConjuntoPublicable } from '../../src/lib/publicado.ts';
-import { rutaDeLaObra } from '../../src/lib/obras.ts';
+import { clavesDeOrden, ordenDeLaListaDeObras, rutaDeLaObra } from '../../src/lib/obras.ts';
 import { CITAS_POR_PAGINA } from '../../src/lib/umbrales.ts';
 import { conjuntoDeLosDatos, leerDatosDelCorpus } from '../../tools/lib/alcance.ts';
 import { leerDocumentosDeFuente, rutasDelCorpus } from '../../tools/lib/corpus.ts';
@@ -812,7 +812,8 @@ test.describe('Historia 27.1 — la Cita declara sus filtros y su resultado llev
     const delHtml: string[] = [];
     for (let pagina = 1; pagina <= paginas; pagina++) {
       const html = await (await request.get(rutaDeLaObra({ nombre }, pagina))).text();
-      const listado = /<ul class="listado"[^>]*>([\s\S]*?)<\/ul>/u.exec(html)?.[1] ?? '';
+      const listado = /<ul class="(?:[^"]*\s)?listado(?:\s[^"]*)?"[^>]*>([\s\S]*?)<\/ul>/u.exec(html)?.[1] ?? '';
+      expect(listado, `${rutaDeLaObra({ nombre }, pagina)}: sin listado`).not.toBe('');
       delHtml.push(...[...listado.matchAll(/href="(\/cita\/[^"]+)"/gu)].map((m) => m[1].replace(/\/?$/, '/')));
     }
     expect(delHtml).toEqual(citas.map((c) => `/cita/${c.slug}/`));
@@ -834,6 +835,61 @@ test.describe('Historia 27.1 — la Cita declara sus filtros y su resultado llev
     expect(delHtml).not.toEqual([...delHtml].sort(porSlug));
   });
 
+  // (e) Filtrar por Autores y ordenar por la clave cruza los rangos: Directorio, lista de obras, «sin Obra».
+  test('filtrar por dos Autores y ordenar por la clave da cada Autor entero, sus Obras en el orden de su lista y «sin Obra» al final', async ({ page }) => {
+    test.setTimeout(180_000);
+    const { conjunto, porObra } = await corpus();
+    const claves = clavesDeOrden(conjunto.autores, conjunto.citas, porObra);
+    const delAutor = (slug: string) => conjunto.citas.filter((c) => c.autor === slug);
+    const obrasDe = (slug: string) => new Set(delAutor(slug).flatMap((c) => (c.obra ? [c.obra.nombre] : [])));
+
+    // Un Autor con Citas sin Obra y con Obras —con más de una si lo hay—, el de menos Citas.
+    const conHueco = [...new Set(conjunto.citas.filter((c) => c.obra === undefined).map((c) => c.autor))]
+      .filter((slug) => obrasDe(slug).size > 0)
+      .sort(
+        (a, b) =>
+          Number(obrasDe(b).size > 1) - Number(obrasDe(a).size > 1) ||
+          delAutor(a).length - delAutor(b).length ||
+          (a < b ? -1 : 1),
+      )[0];
+    expect(conHueco, 'El Corpus no tiene ningún Autor con Obras y con Citas sin Obra.').toBeDefined();
+    // Y el último del Directorio —el de las claves más altas—, o el primero si el último es el mismo.
+    const porClave = [...claves].sort((a, b) => Number(a[1]) - Number(b[1]));
+    const autorDe = new Map(conjunto.citas.map((c) => [c.slug, c.autor]));
+    const ultimo = autorDe.get(porClave[porClave.length - 1][0])!;
+    const otro = ultimo !== conHueco ? ultimo : autorDe.get(porClave[0][0])!;
+    expect(otro).not.toBe(conHueco);
+
+    await page.goto('/buscar/');
+    const devueltas = ((await page.evaluate(
+      async ({ autores, clave, orden }) => {
+        const pf = await import('/pagefind/pagefind.js' as string);
+        await pf.init();
+        const { results } = await pf.search(null, { filters: { [clave]: { any: autores } }, sort: { [orden]: 'asc' } });
+        const datos = await Promise.all(results.map((r: { data: () => Promise<{ url: string }> }) => r.data()));
+        return datos.map((d) => d.url);
+      },
+      { autores: [conHueco!, otro], clave: FILTROS_DE_CITA.autor, orden: ORDEN_DE_CITA },
+    )) as string[]).map((u) => /^\/cita\/([^/]+)\/?$/u.exec(new URL(u, 'http://x').pathname)?.[1] ?? u);
+
+    // Las de los dos, cada una una vez.
+    expect([...devueltas].sort()).toEqual([...delAutor(conHueco!), ...delAutor(otro)].map((c) => c.slug).sort());
+    // Cada Autor en un bloque, en el orden de sus claves de Directorio.
+    const bloques = devueltas.map((slug) => autorDe.get(slug)!).filter((a, i, todos) => i === 0 || todos[i - 1] !== a);
+    expect(bloques).toHaveLength(2);
+    expect(bloques[1]).toBe(Number(claves.get(delAutor(otro)[0].slug)) > Number(claves.get(delAutor(conHueco!)[0].slug)) ? otro : conHueco);
+    // Dentro del Autor con hueco: sus Obras en el orden de su lista, cada una en el del libro, y «sin Obra» detrás, por slug.
+    const suyas = devueltas.filter((slug) => autorDe.get(slug) === conHueco);
+    const obraDe = new Map(delAutor(conHueco!).map((c) => [c.slug, c.obra]));
+    const obras = [...new Map(delAutor(conHueco!).flatMap((c) => (c.obra ? [[c.obra.nombre, c.obra] as const] : []))).values()];
+    const esperadas = [
+      ...ordenDeLaListaDeObras(obras).flatMap((o) => porObra.get(o.nombre)!.map((c) => c.slug)),
+      ...delAutor(conHueco!).filter((c) => c.obra === undefined).map((c) => c.slug).sort(),
+    ];
+    expect(suyas).toEqual(esperadas);
+    expect(obraDe.get(suyas[suyas.length - 1])).toBeUndefined();
+  });
+
   /** Lo que pinta un resultado, con la familia del título y su nombre accesible. */
   async function pintados(page: Page) {
     return page.locator('[data-resultados] .resultado').evaluateAll((ns) =>
@@ -842,10 +898,36 @@ test.describe('Historia 27.1 — la Cita declara sus filtros y su resultado llev
         titulo: n.querySelector('.titulo')!.textContent!.trim(),
         familia: getComputedStyle(n.querySelector('.titulo')!).fontFamily,
         autor: n.querySelector('.r-autor')?.textContent?.trim(),
+        estiloDelAutor: (() => {
+          const linea = n.querySelector('.r-autor');
+          if (linea === null) return undefined;
+          const e = getComputedStyle(linea);
+          return { familia: e.fontFamily, tamano: e.fontSize, peso: e.fontWeight, caja: e.textTransform, color: e.color };
+        })(),
         href: n.querySelector('a')!.getAttribute('href')!,
         nombre: n.querySelector('a')!.getAttribute('aria-label'),
       })),
     );
+  }
+
+  /** Lo que los tokens dan computado en la página: la serif, y la línea de Autor `{typography.author}`/`{colors.on-surface-variant}`. */
+  async function tokens(page: Page) {
+    return page.evaluate(() => {
+      const sonda = document.createElement('span');
+      sonda.style.cssText =
+        'font-family: var(--sans); font-size: var(--autor); font-weight: 600; text-transform: uppercase; color: var(--tinta-apagada)';
+      const serif = document.createElement('span');
+      serif.style.fontFamily = 'var(--serif)';
+      document.body.append(sonda, serif);
+      const e = getComputedStyle(sonda);
+      const resultado = {
+        serif: getComputedStyle(serif).fontFamily,
+        autor: { familia: e.fontFamily, tamano: e.fontSize, peso: e.fontWeight, caja: e.textTransform, color: e.color },
+      };
+      sonda.remove();
+      serif.remove();
+      return resultado;
+    });
   }
 
   // (c) Con el índice de verdad: un resultado de Cita lleva el nombre de su Autor debajo.
@@ -853,20 +935,62 @@ test.describe('Historia 27.1 — la Cita declara sus filtros y su resultado llev
     const { conjunto } = await corpus();
     const nombres = new Map(conjunto.autores.map((a) => [a.slug, a.nombre]));
     const autorDeCita = new Map(conjunto.citas.map((c) => [c.slug, c.autor]));
-    await buscar(page, 'no hay camino');
+    const FRASE = 'no hay camino';
+    const conLaFrase = new Set(conjunto.citas.filter((c) => c.texto.toLowerCase().includes(FRASE)).map((c) => c.slug));
+    expect(conLaFrase.size, `El Corpus no tiene ninguna Cita con «${FRASE}».`).toBeGreaterThan(0);
+    await buscar(page, FRASE);
+    const esperado = await tokens(page);
+    const slugDe = (href: string) => new URL(href, 'http://x').pathname.split('/')[2];
     const citas = (await pintados(page)).filter((r) => r.tipo === 'cita');
     expect(citas.length).toBeGreaterThan(0);
     for (const cita of citas) {
-      const autor = nombres.get(autorDeCita.get(cita.href.split('/')[2])!);
+      const autor = nombres.get(autorDeCita.get(slugDe(cita.href))!);
       expect(autor, cita.href).toBeDefined();
       expect(cita.autor, cita.href).toBe(autor);
-      expect(cita.familia, cita.href).toMatch(/Georgia|Source Serif/);
+      // La línea de Autor con los tokens del de Obra, y el título en la serif: de los tokens, no de un nombre de fuente.
+      expect(cita.estiloDelAutor, cita.href).toEqual(esperado.autor);
+      expect(cita.familia, cita.href).toBe(esperado.serif);
       expect(cita.titulo, cita.href).toMatch(/^«.*»$/su);
       expect(cita.nombre, cita.href).toBe(`Cita: ${cita.titulo}, ${autor}`);
     }
-    expect(citas.some((c) => c.titulo.includes('Caminante, no hay camino'))).toBe(true);
-    // La 27.1 no trae selectores: son de la 27.2 y la 27.3.
-    expect(await page.locator('select').count()).toBe(0);
+    expect(citas.some((c) => conLaFrase.has(slugDe(c.href)))).toBe(true);
+    // La 27.1 no trae selectores ni controles de filtro: son de la 27.2 y la 27.3.
+    expect(await page.locator('select, input[type="checkbox"], input[type="radio"], fieldset').count()).toBe(0);
+  });
+
+  /*
+   * El metadato `autor` va dentro de un `data-pagefind-ignore` (forma A): Pagefind lo recoge como
+   * metadato y su texto no entra en el contenido de la página, así que el nombre no puntúa dos
+   * veces. Lo que se compara es el contenido indexado contra el cuerpo de la página sin lo ignorado.
+   */
+  test('el nombre del metadato `autor` no entra en el contenido indexado de la Cita', async ({ page }) => {
+    const { conjunto } = await corpus();
+    const nombres = new Map(conjunto.autores.map((a) => [a.slug, a.nombre]));
+    const cita = conjunto.citas.find((c) => c.obra !== undefined && (nombres.get(c.autor) ?? '').length > 3)!;
+    const nombre = nombres.get(cita.autor)!;
+    await page.goto('/buscar/');
+    const indexado = (await page.evaluate(
+      async ({ clave, autor, url }) => {
+        const pf = await import('/pagefind/pagefind.js' as string);
+        await pf.init();
+        const { results } = await pf.search(null, { filters: { [clave]: autor } });
+        const datos = await Promise.all(results.map((r: { data: () => Promise<{ url: string; content: string; meta: Record<string, string> }> }) => r.data()));
+        return datos.find((d) => d.url.replace(/\/?$/, '/') === url);
+      },
+      { clave: FILTROS_DE_CITA.autor, autor: cita.autor, url: `/cita/${cita.slug}/` },
+    )) as { content: string; meta: Record<string, string> } | undefined;
+    expect(indexado, cita.slug).toBeDefined();
+    expect(indexado!.meta.autor).toBe(nombre);
+
+    await page.goto(`/cita/${cita.slug}/`);
+    const enElCuerpo = await page.evaluate(() => {
+      const cuerpo = document.querySelector('main[data-pagefind-body]')!.cloneNode(true) as HTMLElement;
+      for (const fuera of cuerpo.querySelectorAll('[data-pagefind-ignore], script, style')) fuera.remove();
+      return cuerpo.textContent ?? '';
+    });
+    const veces = (texto: string) => texto.split(nombre).length - 1;
+    // Si el texto del metadato se indexara, el contenido traería el nombre una vez más que el cuerpo sin lo ignorado.
+    expect(veces(indexado!.content), cita.slug).toBeLessThanOrEqual(veces(enElCuerpo));
   });
 
   // (d) Con un Pagefind de mentira: una Cita sin metadato de Autor —un índice viejo— no lo inventa.

@@ -32,6 +32,8 @@ import { FILTRO_DE_TIPO, FILTROS_DE_CITA, ORDEN_DE_CITA } from '../../src/lib/ti
  *   · Séneca tiene una Cita sin obra (solo año) y otra con obra «…», que no resuelve Obra: las dos
  *     al final de su Autor, por slug.
  *   · «El tiempo» se publica (16 Citas de la «Brevedad» y más); «La ira», con una, no.
+ *   · La ficha de «Cartas a Lucilio» se llama «seneca--epistolas», que no es el slug de su
+ *     título: el filtro `obra` lleva el nombre de la ficha, así que retitularla no lo mueve.
  *
  * Las Citas sin documento tienen que estar en el censo de cotejo, que es cerrado (11.2): son tres
  * de las de Séneca que de verdad están en él, con su texto. Con el censo en el fixture el andamio
@@ -72,8 +74,12 @@ const ZENON_DOS = { slug: 'zenon-de-citio-dos', texto: 'Dos: tenemos dos orejas 
 
 const ZENON_YML = 'nombre: Zenón de Citio\nañoNacimiento: -334\nañoFallecimiento: -262\nsemblanza: Fundador del estoicismo.\nordenAlfabetico: Citio\n';
 
+/** La ficha de «Cartas a Lucilio», con un nombre que no sale de su título. */
+const FICHA_CARTAS = 'seneca--epistolas';
+
 const CORPUS: Record<string, string> = {
   'autores/seneca.yml': AUTOR_VALIDO,
+  [`obras/${FICHA_CARTAS}.yml`]: 'autor: "seneca"\ntitulo: "Cartas a Lucilio"\nformas:\n  - "cartas a lucilio"\n',
   'autores/zenon-de-citio.yml': ZENON_YML,
   'temas/el-tiempo.yml': TEMA_VALIDO,
   'temas/la-ira.yml': 'nombre: La ira\n',
@@ -121,9 +127,9 @@ const ESPERADO: { slug: string; autor: string; nombre: string; obra?: string; te
     obra: 'seneca--sobre-la-brevedad-de-la-vida',
     temas: ['el-tiempo'],
   })),
-  { slug: CARTA_B.slug, autor: 'seneca', nombre: 'Séneca', obra: 'seneca--cartas-a-lucilio', temas: ['el-tiempo'] },
-  { slug: CARTA_A.slug, autor: 'seneca', nombre: 'Séneca', obra: 'seneca--cartas-a-lucilio', temas: ['el-tiempo'] },
-  { slug: CARTA_SIN_DOCUMENTO.slug, autor: 'seneca', nombre: 'Séneca', obra: 'seneca--cartas-a-lucilio', temas: ['el-tiempo'] },
+  { slug: CARTA_B.slug, autor: 'seneca', nombre: 'Séneca', obra: FICHA_CARTAS, temas: ['el-tiempo'] },
+  { slug: CARTA_A.slug, autor: 'seneca', nombre: 'Séneca', obra: FICHA_CARTAS, temas: ['el-tiempo'] },
+  { slug: CARTA_SIN_DOCUMENTO.slug, autor: 'seneca', nombre: 'Séneca', obra: FICHA_CARTAS, temas: ['el-tiempo'] },
   { slug: SIN_OBRA.slug, autor: 'seneca', nombre: 'Séneca', temas: ['el-tiempo'] },
   { slug: OBRA_PUNTOS.slug, autor: 'seneca', nombre: 'Séneca', temas: ['el-tiempo'] },
 ];
@@ -227,17 +233,25 @@ describe('Historia 27.1 — la Página de Cita declara sus filtros y su clave de
 });
 
 describe('Historia 27.1 — una clave de orden que no cabe rompe el build', () => {
-  it('con un tope de 2, los dos Autores llenan su rango y el build se para nombrándolo', async () => {
+  /*
+   * Cada rango, con un tope que solo él alcanza: con 2, los dos Autores llenan el suyo; con 3, los
+   * dos Autores caben y lo que rompe son las 21 Citas de Séneca (Zenón, con 2, va antes y cabe).
+   */
+  it.each([
+    { tope: 2, mensaje: /el rango «Autor» tiene 2 posiciones y el tope es 2/u },
+    { tope: 3, mensaje: /el rango «posición dentro de seneca» tiene 21 posiciones y el tope es 3/u },
+  ])('con un tope de $tope, el build se para nombrando el rango que no cabe', async ({ tope, mensaje }) => {
     const umbrales = await readFile(join(RAIZ, 'src/lib/umbrales.ts'), 'utf8');
-    const parcheado = umbrales.replace(
-      'export const MAX_POR_RANGO_DE_LA_CLAVE_DE_ORDEN = 4096;',
-      'export const MAX_POR_RANGO_DE_LA_CLAVE_DE_ORDEN = 2;',
-    );
+    const declaracion = 'export const MAX_POR_RANGO_DE_LA_CLAVE_DE_ORDEN = 4096;';
+    // Que el parche aplica: si la línea cambiara de forma, el build no rompería por esto.
+    expect(umbrales).toContain(declaracion);
+    const parcheado = umbrales.replace(declaracion, `export const MAX_POR_RANGO_DE_LA_CLAVE_DE_ORDEN = ${tope};`);
+    expect(parcheado).not.toBe(umbrales);
     const resultado = await construirConCorpus(CORPUS, {
       conservar: false,
       ficheros: { 'src/lib/umbrales.ts': parcheado },
     });
     expect(resultado.codigo).not.toBe(0);
-    expect(resultado.salida).toMatch(/el rango «Autor» tiene 2 posiciones y el tope es 2/u);
+    expect(resultado.salida).toMatch(mensaje);
   }, 300_000);
 });

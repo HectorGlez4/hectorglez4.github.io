@@ -57,6 +57,14 @@ export const getStaticPaths = (async () => {
 
   return conjunto.citas.map((cita) => {
     const siguiente = siguienteCita(cita, porObra, publicados, listados);
+    const filtros = porCita.get(cita.slug);
+    const clave = claves.get(cita.slug);
+    if (filtros === undefined || clave === undefined) {
+      throw new Error(
+        `La Cita «${cita.slug}» no tiene ${filtros === undefined ? 'filtros de búsqueda' : 'clave de orden'}: ` +
+          'filtrosDeLaBusqueda y clavesDeOrden tienen que cubrir todas las Citas publicadas (Historia 27.1).',
+      );
+    }
     return {
       params: { slug: cita.slug },
       props: {
@@ -69,8 +77,8 @@ export const getStaticPaths = (async () => {
          * `siguiente` que la tarjeta, para que ninguna repita la Cita que «Siguiente» ya ofrece.
          */
         rutas: rutasDeSalidaDeCita(cita, conjunto.citas, porObra, publicados, siguiente),
-        filtros: porCita.get(cita.slug)!,
-        clave: claves.get(cita.slug)!,
+        filtros,
+        clave,
       },
     };
   });

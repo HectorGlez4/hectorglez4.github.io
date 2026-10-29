@@ -5,7 +5,7 @@ created: '2026-10-29'
 status: 'done'
 baseline_revision: '20203e766d762d2b88f2479757ef860110e632e6'
 review_loop_iteration: 0
-followup_review_recommended: false
+followup_review_recommended: true
 context:
   - '{project-root}/_bmad-output/implementation-artifacts/epic-27-context.md'
   - '{project-root}/_bmad-output/planning-artifacts/architecture/architecture-brainlySabiduria-2026-08-10/ARCHITECTURE-SPINE.md'
@@ -127,6 +127,28 @@ deferred:
 
 Las cinco capas de revisión son externas en el bucle v8-ralph y no traían hallazgos en esta pasada; la revisión independiente viene después.
 
+### 2026-10-29 — Review pass 1 (capas externas: blind-hunter, edge-case-hunter, verification-gap, intent-alignment, ac-auditor)
+- intent_gap: 0
+- bad_spec: 0
+- patch: 12 (1 medium, 11 low)
+- defer: 0
+- reject: 14
+- addressed_findings:
+  - "[medium] Sobre el `dist/` de todas las familias no se miraba qué filtros lleva cada Página de Cita, y la prueba del tipo dejaba pasar filtros de cualquier otra clave (blind-hunter, edge-case-hunter, intent-alignment, ac-auditor): `publicable-y-alcanzable.test.ts` coteja cada Página de Cita con `filtrosDeLaBusqueda` del Corpus de la copia (autor, obra, tema y metadato) y rechaza toda clave de filtro que no sea el tipo o, en la Cita, las suyas."
+  - "[low] El comentario de `clavesDeOrden` prometía una clave mayor `B² − 1` que el «≥» de la matriz no deja salir (blind-hunter, intent-alignment): se conserva el «≥» del contrato y se documenta que caben `B − 1` posiciones por rango, con una prueba pura de la mayor clave."
+  - "[low] Entradas incoherentes que pasaban en silencio (blind-hunter, edge-case-hunter): un slug de Cita repetido y una lista no vacía de una Obra que ninguna Cita resuelve lanzan; las `!` de `cita/[slug].astro` pasan a un error con nombre."
+  - "[low] Un `AVISO_DE_RANGO_DE_LA_CLAVE_DE_ORDEN` fuera de 1…tope − 1 no avisaría nunca o siempre (edge-case-hunter): se rechaza nombrándolo."
+  - "[low] La rotura del build solo se probaba para el rango «Autor» y sin comprobar que el parche de `umbrales.ts` aplicaba (blind-hunter, ac-auditor): `filtros-de-cita.test.ts` lo comprueba y construye también con tope 3, que rompe en «posición dentro de seneca»."
+  - "[low] Que retitular no mueve el filtro `obra` solo se probaba en la función (ac-auditor): el fixture da a «Cartas a Lucilio» la ficha `seneca--epistolas`, que no es el slug de su título, y el `dist/` lleva ese nombre."
+  - "[low] El orden por Autor —bloques del Directorio, lista de obras, «sin Obra» detrás— no se probaba contra Pagefind (blind-hunter, intent-alignment): prueba (e) de Playwright con dos Autores filtrados por `any` y ordenados por la clave. La exactitud cerca de 2^24 sigue siendo de construcción y de la prueba pura: el Corpus no llega ahí."
+  - "[low] Que el texto del metadato no puntúa como contenido no tenía prueba (blind-hunter): prueba de Playwright que compara las apariciones del nombre en el `content` indexado con las del cuerpo sin lo ignorado."
+  - "[low] El estilo de la línea de Autor bajo una Cita no se medía (intent-alignment, ac-auditor): la prueba (c) compara su estilo computado y el de la serif del título con sondas de los tokens, no con nombres de fuente."
+  - "[low] «Todavía no hay selectores» solo miraba `select` (ac-auditor): ahora tampoco casillas, radios ni `fieldset`."
+  - "[low] Fragilidad de las e2e (blind-hunter): la (c) deriva la Cita esperada del Corpus en vez de un texto fijo y lee el slug con `URL`; la (b) acepta más clases en `ul.listado` y falla si una página no trae listado."
+  - "[low] La suite entera no se volvió a correr tras corregir `medicion.test.ts` (blind-hunter): se corre entera tras los parches."
+
+Rechazados: el tablero lo lleva el orquestador del bucle; el registro de revisión vacío es esta pasada; la incoherencia de objetos de Obra (salen todos de `resolverObras`); el `lastmod` y el aviso (el contrato prohíbe tocar `tools/lib/cambios.ts`); el `'obra'` del `aria-label` y la holgura de 34 bytes (los retira la 27.2, que empaqueta el guion); campos de opción y filtros en la Página de Obra (el orden visible y los selectores son de la 27.2–27.3, y los filtros son solo de la Cita por contrato); «tres rangos» (ya aplazado); el hueco «sin documento» como constante (es la cola de `ordenDelLibro`, como fija el contrato); `medicion.test.ts` fuera del Code Map y la ficha en el mismo commit (no es planificación); la prueba de Tema bajo umbral omitida (depende del Corpus del día).
+
 ## Auto Run Result
 
 Status: done
@@ -159,3 +181,26 @@ Blocking condition: —
 - `npm test` entero — 148 ficheros verdes y 1 rojo (`medicion.test.ts`, la expectativa vieja de la Cita sin línea de Autor); corregida y vuelto a correr el fichero: 548 verdes.
 
 **Riesgos.** `/buscar/` queda a 34 bytes del tope: la 27.2 tiene que sacar el guion a un fichero antes de añadir nada. La clave cambia en todas las Citas de un Autor cuando entra una Cita suya, y en las de los Autores posteriores cuando entra un Autor: no es afirmación (AD-27) y `tools/lib/cambios.ts` no se toca, pero el `lastmod` del sitemap no lo refleja.
+
+### Pasada de revisión 1 (capas externas)
+
+**Qué cambió.** Doce parches, ningún aplazado nuevo, catorce rechazados (detalle en el registro de triaje).
+- `src/lib/obras.ts` — `clavesDeOrden` documenta que caben `B − 1` posiciones por rango (la mayor clave que sale es `(B − 2)·B + (B − 2)`, bajo `B² − 1`; el «≥» de la matriz se conserva) y lanza ante un slug de Cita repetido, una lista no vacía de una Obra que ninguna Cita de la entrada resuelve y un aviso fuera de 1…tope − 1.
+- `src/pages/cita/[slug].astro` — sin `!`: una Cita sin filtros o sin clave rompe nombrándola.
+- `tests/unit/clave-de-orden.test.ts` — la mayor clave con los rangos llenos, las dos entradas incoherentes, la lista vacía que no estorba y el aviso inválido.
+- `tests/unit/filtros-de-cita.test.ts` — la ficha `seneca--epistolas` (nombre que no sale del título) y la rotura del build por los dos rangos, comprobando que el parche aplica.
+- `tests/unit/publicable-y-alcanzable.test.ts` — cada Página de Cita del `dist/` de todas las familias contra `filtrosDeLaBusqueda`, y ningún filtro de otra clave.
+- `tests/e2e/busqueda.spec.ts` — (e) dos Autores filtrados y ordenados por la clave; el metadato fuera del contenido indexado; estilo de la línea de Autor y serif del título por los tokens; sin controles de filtro; (b) y (c) menos atadas al Corpus y al marcado.
+
+**Seguimiento.** `followup_review_recommended: true`: 0 high, 1 medium y 11 low parcheados; puntuación 3·1 + 11 = 14 ≥ 5.
+
+**Verificación de esta pasada.**
+- `npx vitest run tests/unit/clave-de-orden.test.ts` — 28 verdes.
+- `npx vitest run tests/unit/filtros-de-cita.test.ts` — 6 verdes (tres construcciones).
+- `npx vitest run tests/unit/publicable-y-alcanzable.test.ts` — 39 verdes.
+- `npm run check` — 0 errores, 0 avisos, 8 pistas.
+- `npx playwright test tests/e2e/busqueda.spec.ts --project=escritorio -g "27.1|26.2|22.7|3.1"` — 19 verdes, 1 omitida (Tema bajo umbral: el Corpus de hoy no tiene ninguno).
+- `npm test` entero — 149 ficheros, 6.752 pruebas, verdes.
+
+**Riesgos que quedan.** Los de la pasada anterior: `/buscar/` a 34 bytes de `MAX_BYTES_DE_GUION` hasta que la 27.2 empaquete el guion, y la clave que se mueve en las Citas de un Autor sin que el `lastmod` lo refleje. La exactitud en f32 cerca de 2^24 se sostiene por construcción y por la prueba pura; ninguna prueba contra Pagefind llega ahí, porque el Corpus de hoy tiene claves de ~550.000.
+

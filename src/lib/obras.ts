@@ -1377,8 +1377,9 @@ export interface CitaParaLaClave {
  *   las Citas sin Obra resuelta (también las de obra «…»), por slug.
  *
  * Se escribe en decimal con ceros hasta ocho cifras (`'00012345'`): Pagefind lee el entero, y
- * con un valor que no fuera numérico ordenaría como texto. La mayor posible es `B² − 1`, que con
- * `B ≤ 4096` es exacta en `f32` (ver `MAX_POR_RANGO_DE_LA_CLAVE_DE_ORDEN`).
+ * con un valor que no fuera numérico ordenaría como texto. Como un rango que alcanza `B` rompe,
+ * caben `B − 1` posiciones por rango y la mayor clave que sale es `(B − 2)·B + (B − 2)`, por
+ * debajo de `B² − 1`; con `B ≤ 4096` es exacta en `f32` (ver `MAX_POR_RANGO_DE_LA_CLAVE_DE_ORDEN`).
  *
  * Pura y determinista ante el orden de la entrada. **Lanza**:
  *
@@ -1386,9 +1387,13 @@ export interface CitaParaLaClave {
  *   («Autor» o «posición dentro de {slug}»), el recuento y el tope: el build se para;
  * - si la lista de una Obra no casa con sus Citas —una Cita con Obra que falta en la lista de su
  *   Obra, o una lista que trae una Cita ajena—, nombrando la Obra y el slug;
+ * - si `porObra` trae una lista no vacía de una Obra que ninguna Cita de la entrada resuelve
+ *   —una lista huérfana o ajena—, nombrando la Obra;
+ * - si un mismo slug de Cita viene dos veces en `citas`, nombrándolo: tendría dos posiciones;
  * - si un Autor con Citas no tiene clave de orden, o una Cita nombra un Autor que no está, como
  *   `agruparPorClave` del Directorio;
- * - si el tope no deja la clave mayor dentro de lo exacto en `f32`.
+ * - si el tope no deja la clave mayor dentro de lo exacto en `f32`, o el aviso definido no es un
+ *   entero entre 1 y `tope − 1` —por encima no avisaría nunca antes de romper—.
  *
  * Con `limites.aviso` definido, cada rango cuyo recuento lo alcanza avisa por `console.warn`
  * nombrando el rango y el recuento, y el build sigue.
@@ -1410,6 +1415,13 @@ export function clavesDeOrden(
         `encima de ${MAYOR_EXACTO_EN_F32} Pagefind, que ordena como f32, empataría claves vecinas.`,
     );
   }
+  if (aviso !== undefined && (!Number.isInteger(aviso) || aviso < 1 || aviso >= tope)) {
+    throw new Error(
+      `El aviso de la clave de orden (${aviso}, AVISO_DE_RANGO_DE_LA_CLAVE_DE_ORDEN) tiene que ser ` +
+        `un entero entre 1 y ${tope - 1}: el tope (${tope}) rompe en ese recuento, y un aviso en él ` +
+        'o por encima no avisaría nunca antes de romper.',
+    );
+  }
 
   /** Comprueba un rango: rompe si su recuento alcanza el tope, avisa si alcanza el aviso. */
   const medir = (rango: string, recuento: number): void => {
@@ -1429,10 +1441,28 @@ export function clavesDeOrden(
   };
 
   const delAutor = new Map<string, CitaParaLaClave[]>();
+  const vistasDeCita = new Set<string>();
+  const obrasDeLaEntrada = new Set<string>();
   for (const cita of citas) {
+    if (vistasDeCita.has(cita.slug)) {
+      throw new Error(
+        `La Cita «${cita.slug}» viene dos veces en la entrada: la clave de orden de la búsqueda ` +
+          'le daría dos posiciones.',
+      );
+    }
+    vistasDeCita.add(cita.slug);
+    if (cita.obra !== undefined) obrasDeLaEntrada.add(cita.obra.nombre);
     const suyas = delAutor.get(cita.autor);
     if (suyas === undefined) delAutor.set(cita.autor, [cita]);
     else suyas.push(cita);
+  }
+  for (const [nombre, lista] of porObra) {
+    if (lista.length > 0 && !obrasDeLaEntrada.has(nombre)) {
+      throw new Error(
+        `La lista de la Obra «${nombre}» trae ${lista.length} Citas y ninguna Cita de la entrada ` +
+          'resuelve esa Obra: la clave de orden de la búsqueda no sabe a quién pertenece.',
+      );
+    }
   }
 
   const porSlugDeAutor = new Map(autores.map((autor) => [autor.slug, autor]));
