@@ -9,6 +9,7 @@ import {
 import { MARCA } from '../../src/lib/marca.ts';
 import { ASENTAMIENTO_DE_BUSQUEDA, EVENTOS } from '../../src/lib/medicion.ts';
 import { tramoDe } from '../../src/lib/vocabulario.ts';
+import { temaEnFrase } from '../../src/lib/recuentos.ts';
 import { citaConLosDosBloques, temaBajoUmbral, textoDe } from './ayuda/corpus.ts';
 import { citasPorObra, filtrosDeLaBusqueda, type ConjuntoPublicable } from '../../src/lib/publicado.ts';
 import { clavesDeOrden, ordenDeLaListaDeObras, porSlug as porSlugDeCita, rutaDeLaObra } from '../../src/lib/obras.ts';
@@ -159,8 +160,8 @@ test.describe('Historia 3.1 — encontrar', () => {
 
   /*
    * Historia 22.7 — el resultado de Obra: rótulo «Obra», título en la sans (`.en-sans` desde la
-   * 26.2; antes `.de-obra`), el Autor debajo y el nombre accesible «Obra: {título}, de {Autor}».
-   * Los demás, como estaban.
+   * 26.2; antes `.de-obra`), el Autor debajo y el nombre accesible «Obra: {título}, {Autor}» —sin
+   * «de» desde la 27.2, como el de la Cita—. Los demás, como estaban.
    */
   test('un resultado de Obra lleva el título en la sans y el Autor debajo', async ({ page }) => {
     await buscar(page, 'proverbios y cantares');
@@ -187,7 +188,7 @@ test.describe('Historia 3.1 — encontrar', () => {
       expect(obra.deObra).toBe(true);
       expect(obra.familia).not.toMatch(/Georgia|Source Serif/);
       expect(obra.autor).toBe('Antonio Machado');
-      expect(obra.nombre).toBe(`Obra: ${obra.titulo}, de Antonio Machado`);
+      expect(obra.nombre).toBe(`Obra: ${obra.titulo}, Antonio Machado`);
     }
 
     // Los de otro tipo, como hoy: sin la clase. Desde la 27.1 la Cita lleva también su Autor
@@ -323,11 +324,12 @@ test.describe('Historia 3.2 — resultado vacío con salida', () => {
     /*
      * Igual que en `pagina-404.spec.ts`, y aquí el argumento es aún más claro: la prueba de
      * arriba **exige** que la salida ofrezca enlaces a Temas. Uno de ellos se llama desde la
-     * 156.ª «El error». Se mira la prosa del mensaje, no el índice que la acompaña.
+     * 156.ª «El error». Se mira la prosa del mensaje, no el índice que la acompaña: tampoco las
+     * opciones de los selectores de la 27.2, que son los mismos Temas.
      */
     const texto = await page.locator('main').evaluate((main) => {
       const copia = main.cloneNode(true) as HTMLElement;
-      copia.querySelectorAll('.chips').forEach((chips) => chips.remove());
+      copia.querySelectorAll('.chips, select').forEach((indice) => indice.remove());
       return copia.textContent ?? '';
     });
     expect(texto).not.toMatch(/error|excepci|failed|undefined|null|0 resultados/i);
@@ -396,10 +398,15 @@ test.describe('Historia 22.10 — el recuento y la búsqueda sin resultados se a
 
   test('con resultados anuncia el recuento', async ({ page }) => {
     await buscar(page, 'no hay camino');
-    const cuantos = await page.locator('[data-resultados] .resultado').count();
-    await expect(page.locator('[role="status"]')).toHaveText(
-      cuantos === 1 ? 'Un resultado.' : `${cuantos} resultados.`,
-    );
+    // Historia 27.2 — el recuento dice el total de Pagefind, no los pintados (que son 30 como mucho).
+    const total = (await page.evaluate(async (opciones) => {
+      const pf = await import('/pagefind/pagefind.js' as string);
+      await pf.init();
+      await pf.options(opciones);
+      return (await pf.search('no hay camino')).results.length;
+    }, OPCIONES_DE_PAGEFIND)) as number;
+    expect(total).toBeGreaterThan(0);
+    await expect(page.locator('[role="status"]')).toHaveText(total === 1 ? 'Un resultado.' : `${total} resultados.`);
   });
 
   test('sin resultados anuncia la frase de la salida, sin pintarla dos veces', async ({ page }) => {
@@ -963,8 +970,9 @@ test.describe('Historia 27.1 — la Cita declara sus filtros y su resultado llev
     expect(citas.map((c) => slugDe(c.href)), FRASE).toContain(elegida!.slug);
     // La línea de Autor no ensancha la página: tampoco en el móvil, donde también corre.
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
-    // La 27.1 no trae selectores ni controles de filtro: son de la 27.2 y la 27.3.
-    expect(await page.locator('select, input[type="checkbox"], input[type="radio"], fieldset').count()).toBe(0);
+    // Desde la 27.2, los dos selectores de Autor y de Tema, y ningún otro control de filtro (Obra es la 27.3).
+    expect(await page.locator('fieldset select').count()).toBe(2);
+    expect(await page.locator('input[type="checkbox"], input[type="radio"]').count()).toBe(0);
   });
 
   /*
@@ -1011,7 +1019,7 @@ test.describe('Historia 27.1 — la Cita declara sus filtros y su resultado llev
   });
 
   // (d) Con un Pagefind de mentira: una Cita sin metadato de Autor —un índice viejo— no lo inventa.
-  test('una Cita sin metadato de Autor no lleva línea ni nombre accesible; la Obra sigue con «, de»', async ({ page }) => {
+  test('una Cita sin metadato de Autor no lleva línea ni nombre accesible; la Obra, sin «de» desde la 27.2', async ({ page }) => {
     await page.route('**/pagefind/pagefind.js', (ruta) =>
       ruta.fulfill({
         contentType: 'text/javascript',
@@ -1038,9 +1046,214 @@ test.describe('Historia 27.1 — la Cita declara sus filtros y su resultado llev
     expect(nueva.autor).toBe('José Martí');
     expect(nueva.nombre).toBe('Cita: «Una cita nueva», José Martí');
     expect(obra.autor).toBe('José Martí');
-    expect(obra.nombre).toBe('Obra: Ismaelillo, de José Martí');
+    expect(obra.nombre).toBe('Obra: Ismaelillo, José Martí');
     // Un tipo que no está en la tabla se rotula como Cita, pero no es una: sin línea de Autor.
     expect(rara.autor).toBeUndefined();
     expect(rara.nombre).toBeNull();
+  });
+});
+
+/*
+ * Historia 27.2 — la búsqueda se acota por Autor y por Tema, en el navegador y con el índice de
+ * verdad. Lo que se elige sale del Corpus en disco por las mismas funciones del build
+ * (`filtrosDeLaBusqueda`); ninguna cifra ni ningún nombre escritos aquí.
+ */
+test.describe('Historia 27.2 — la búsqueda se acota por Autor y por Tema', () => {
+  const RAIZ_DEL_CORPUS = join(new URL('../..', import.meta.url).pathname, 'corpus');
+  let leido: Promise<ConjuntoPublicable> | undefined;
+  const conjunto = () =>
+    (leido ??= (async () => conjuntoDeLosDatos(await leerDatosDelCorpus(rutasDelCorpus(RAIZ_DEL_CORPUS))))());
+
+  const AUTOR = '#filtro-de-autor';
+  const TEMA = '#filtro-de-tema';
+  const QUITAR = '[data-quitar]';
+  const slugDe = (href: string) => new URL(href, 'http://x').pathname.split('/')[2];
+
+  /** El Autor con más Citas (desempate por slug): pasa de la tanda de 30. */
+  async function elAutorMayor() {
+    const { autores } = filtrosDeLaBusqueda(await conjunto());
+    return [...autores].sort((a, b) => b.recuento - a.recuento || (a.valor < b.valor ? -1 : 1))[0];
+  }
+
+  test('el selector de Autor, sin texto, da sus Citas —solo Citas— y el recuento «N citas de {Autor}.»', async ({ page }) => {
+    test.setTimeout(60_000);
+    const autor = await elAutorMayor();
+    expect(autor.recuento).toBeGreaterThan(30);
+    const autorDe = new Map((await conjunto()).citas.map((c) => [c.slug, c.autor]));
+    await page.goto('/buscar/');
+    await page.locator(AUTOR).selectOption(autor.valor);
+    await expect(page.locator('[data-estado]')).toHaveText(`${autor.recuento} citas de ${autor.rotulo}.`, { timeout: 10_000 });
+    const pintados = await resultados(page);
+    expect(pintados).toHaveLength(30);
+    for (const r of pintados) {
+      expect(r.tipo, r.href).toBe('cita');
+      expect(autorDe.get(slugDe(r.href)), r.href).toBe(autor.valor);
+    }
+    await expect(page.locator(QUITAR)).toBeVisible();
+  });
+
+  test('Autor y Tema: su cruce, con «N citas de {Autor} sobre {tema}.»', async ({ page }) => {
+    test.setTimeout(60_000);
+    const filtros = filtrosDeLaBusqueda(await conjunto());
+    // El par con más Citas que quepan en una tanda, para comparar el conjunto entero.
+    const cruces = new Map<string, string[]>();
+    for (const [slug, deCita] of filtros.porCita) {
+      for (const tema of deCita.temas) {
+        const clave = `${deCita.autor}|${tema}`;
+        cruces.set(clave, [...(cruces.get(clave) ?? []), slug]);
+      }
+    }
+    const [clave, slugs] = [...cruces.entries()]
+      .filter(([, s]) => s.length >= 2 && s.length <= 30)
+      .sort((a, b) => b[1].length - a[1].length || (a[0] < b[0] ? -1 : 1))[0];
+    const [autor, tema] = clave.split('|');
+    const rotulo = (opciones: readonly { valor: string; rotulo: string }[], valor: string) => opciones.find((o) => o.valor === valor)!.rotulo;
+    await page.goto('/buscar/');
+    await page.locator(AUTOR).selectOption(autor);
+    await page.locator(TEMA).selectOption(tema);
+    await expect(page.locator('[data-estado]')).toHaveText(
+      `${slugs.length} citas de ${rotulo(filtros.autores, autor)} sobre ${temaEnFrase(rotulo(filtros.temas, tema))}.`,
+      { timeout: 10_000 },
+    );
+    expect((await resultados(page)).map((r) => slugDe(r.href)).sort()).toEqual([...slugs].sort());
+  });
+
+  test('Tema y texto: el recuento nombra el Tema y el texto, y solo salen Citas de ese Tema', async ({ page }) => {
+    test.setTimeout(60_000);
+    const filtros = filtrosDeLaBusqueda(await conjunto());
+    const tema = [...filtros.temas].sort((a, b) => b.recuento - a.recuento || (a.valor < b.valor ? -1 : 1))[0];
+    await buscar(page, 'vida');
+    await page.locator(TEMA).selectOption(tema.valor);
+    await expect(page.locator('[data-estado]')).toHaveText(
+      new RegExp(`^(?:\\d+ citas|Una cita) sobre ${temaEnFrase(tema.rotulo)} con «vida»\\.$`, 'u'),
+      { timeout: 10_000 },
+    );
+    const pintados = await resultados(page);
+    expect(pintados.length).toBeGreaterThan(0);
+    for (const r of pintados) {
+      expect(r.tipo, r.href).toBe('cita');
+      expect(filtros.porCita.get(slugDe(r.href))?.temas, r.href).toContain(tema.valor);
+    }
+  });
+
+  test('«Quitar los filtros»: los selectores a «Todos…», el botón fuera, el foco al campo y el texto conservado', async ({ page }) => {
+    const autor = await elAutorMayor();
+    await buscar(page, 'vida');
+    await expect(page.locator(QUITAR)).toBeHidden();
+    await page.locator(AUTOR).selectOption(autor.valor);
+    await expect(page.locator('[data-estado]')).toHaveText(/ de /u, { timeout: 10_000 });
+    await page.locator(QUITAR).click();
+    await expect(page.locator(QUITAR)).toBeHidden();
+    await expect(page.locator('[data-consulta]')).toBeFocused();
+    await expect(page.locator('[data-consulta]')).toHaveValue('vida');
+    await expect(page.locator(AUTOR)).toHaveValue('');
+    await expect(page.locator(TEMA)).toHaveValue('');
+    await expect(page.locator('[data-estado]')).toHaveText(/^(?:Un resultado|\d+ resultados)\.$/u, { timeout: 10_000 });
+  });
+
+  test('una ráfaga de cambios del selector de Autor —las flechas sobre el selector cerrado— lanza una sola búsqueda', async ({ page }) => {
+    // Un Pagefind de prueba que cuenta sus búsquedas: lo que se ejecuta es el guion de la página.
+    await page.route('**/pagefind/pagefind.js', (ruta) =>
+      ruta.fulfill({
+        contentType: 'text/javascript',
+        body: [
+          'export async function options() {}',
+          'export async function init() {}',
+          'export async function search(q, o) {',
+          '  (globalThis.__busquedas ??= []).push(o?.filters?.autor ?? null);',
+          "  return { results: [{ data: async () => ({ url: '/cita/una/', meta: { title: 'Una', autor: 'Nadie' }, filters: { tipo: ['cita'] } }) }] };",
+          '}',
+        ].join('\n'),
+      }),
+    );
+    await page.goto('/buscar/');
+    /*
+     * Cinco cambios en menos de la pausa, como los que da recorrer con las flechas un selector
+     * cerrado (`input` y `change` por opción). Se despachan en la página y no con el teclado: cómo
+     * responde a las flechas un selector nativo depende del sistema —en unos cambia el valor, en
+     * otros abre la lista—, y lo que se mide es la pausa de la isla, no eso.
+     */
+    const elegido = await page.locator(AUTOR).evaluate(async (selector: HTMLSelectElement) => {
+      for (let i = 1; i <= 5; i++) {
+        selector.selectedIndex = i;
+        selector.dispatchEvent(new Event('input', { bubbles: true }));
+        selector.dispatchEvent(new Event('change', { bubbles: true }));
+        await new Promise((r) => setTimeout(r, 50));
+      }
+      return selector.value;
+    });
+    expect(elegido).not.toBe('');
+    await expect(page.locator('[data-estado]')).toHaveText(/^Una cita de /u, { timeout: 10_000 });
+    await page.waitForTimeout(800);
+    expect(await page.evaluate(() => (globalThis as { __busquedas?: unknown[] }).__busquedas)).toEqual([elegido]);
+  });
+
+  test('la tabulación sigue el orden del documento: campo, Autor, Tema, «Quitar los filtros» y los resultados', async ({ page, browserName }) => {
+    test.skip(browserName !== 'chromium', 'El orden de tabulación se mira en Chromium.');
+    const autor = await elAutorMayor();
+    await page.goto('/buscar/');
+    await page.locator(AUTOR).selectOption(autor.valor);
+    await expect(page.locator('[data-estado]')).toHaveText(/ de /u, { timeout: 10_000 });
+    await page.locator('[data-consulta]').focus();
+    for (const siguiente of [AUTOR, TEMA, QUITAR, '[data-resultados] .resultado a >> nth=0']) {
+      await page.keyboard.press('Tab');
+      await expect(page.locator(siguiente)).toBeFocused();
+    }
+  });
+
+  test('Pagefind no se descarga al cargar, y sí al elegir un filtro sin tocar el campo', async ({ page }) => {
+    const descargados: string[] = [];
+    page.on('response', (r) => {
+      if (r.request().resourceType() === 'script') descargados.push(r.url());
+    });
+    await page.goto('/buscar/', { waitUntil: 'networkidle' });
+    expect(descargados.filter((u) => u.includes('pagefind'))).toHaveLength(0);
+    const temas = filtrosDeLaBusqueda(await conjunto()).temas;
+    const respuesta = page.waitForResponse((r) => r.url().includes('/pagefind/pagefind.js'), { timeout: 10_000 });
+    await page.locator(TEMA).selectOption(temas[0].valor);
+    await respuesta;
+    await expect(page.locator('[data-consulta]')).not.toBeFocused();
+  });
+
+  test('el ejemplo del campo es «no hay camino», y da resultados', async ({ page }) => {
+    await page.goto('/buscar/');
+    await expect(page.locator('[data-consulta]')).toHaveAttribute('placeholder', 'Por ejemplo: no hay camino');
+    await expect(page.locator('label[for="consulta"]')).toHaveText('Escribe un fragmento, un autor o un tema.');
+    await buscar(page, 'no hay camino');
+    expect((await resultados(page)).length).toBeGreaterThan(0);
+  });
+
+  test('a 360 px los selectores caben a todo el ancho y a la zona de toque, sin desplazamiento lateral', async ({ page }) => {
+    test.skip(page.viewportSize()?.width !== 360, 'Se mide en el proyecto móvil, a 360 px.');
+    const autor = await elAutorMayor();
+    await page.goto('/buscar/');
+    await page.locator(AUTOR).selectOption(autor.valor);
+    await expect(page.locator(QUITAR)).toBeVisible({ timeout: 10_000 });
+    const medidas = await page.evaluate(() => {
+      const fieldset = document.querySelector('fieldset')!;
+      const selects = [...fieldset.querySelectorAll('select')];
+      const campo = document.querySelector('[data-consulta]')!;
+      return {
+        fieldset: fieldset.getBoundingClientRect().height,
+        anchoDelCampo: campo.getBoundingClientRect().width,
+        selects: selects.map((s) => ({
+          ancho: s.getBoundingClientRect().width,
+          alto: s.getBoundingClientRect().height,
+          cuerpo: getComputedStyle(s).fontSize,
+        })),
+        quitar: document.querySelector('[data-quitar]')!.getBoundingClientRect().height,
+        desborda: document.documentElement.scrollWidth > window.innerWidth,
+      };
+    });
+    // Historia 27.2 — lo que ocupan los dos selectores a 360 px, con el valor a 17 px.
+    test.info().annotations.push({ type: 'alto del fieldset a 360 px', description: `${medidas.fieldset} px` });
+    console.log(`Historia 27.2 — fieldset a 360 px: ${medidas.fieldset} px de alto (${JSON.stringify(medidas)})`);
+    expect(medidas.desborda).toBe(false);
+    for (const select of medidas.selects) {
+      expect(select.cuerpo).toBe('17px');
+      expect(select.alto).toBeGreaterThanOrEqual(44);
+      expect(Math.abs(select.ancho - medidas.anchoDelCampo)).toBeLessThanOrEqual(1);
+    }
+    expect(medidas.quitar).toBeGreaterThanOrEqual(44);
   });
 });

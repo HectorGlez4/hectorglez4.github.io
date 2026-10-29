@@ -25,7 +25,11 @@ export const REDES = [
 
 export type Red = (typeof REDES)[number]['id'];
 
-export const REDES_VALIDAS: readonly Red[] = REDES.map((r) => r.id);
+/*
+ * Marcada `@__PURE__` (Historia 27.2): el guion empaquetado de la búsqueda importa el vocabulario,
+ * que importa este módulo, y sin la marca el empaquetado conservaría la llamada sin usar.
+ */
+export const REDES_VALIDAS: readonly Red[] = /* @__PURE__ */ REDES.map((r) => r.id);
 
 export function esRedValida(valor: string): valor is Red {
   return (REDES_VALIDAS as readonly string[]).includes(valor);
@@ -63,7 +67,8 @@ export const PERFILES: Partial<Record<Red, string>> = {
  * añadir una cuenta a PERFILES basta para que salga en el pie.
  */
 export const CUENTAS_PUBLICAS: readonly { id: Red; nombre: string; perfil: string }[] =
-  REDES.filter((r) => PERFILES[r.id]).map((r) => ({
+  // `@__PURE__` como `REDES_VALIDAS`, arriba (Historia 27.2).
+  /* @__PURE__ */ REDES.filter((r) => PERFILES[r.id]).map((r) => ({
     id: r.id,
     nombre: r.nombre,
     perfil: PERFILES[r.id]!,

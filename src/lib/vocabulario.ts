@@ -89,7 +89,8 @@ export const EVENTOS = {
 
 export type Evento = (typeof EVENTOS)[keyof typeof EVENTOS];
 
-export const EVENTOS_VALIDOS: readonly Evento[] = Object.values(EVENTOS);
+// `@__PURE__` desde la Historia 27.2: el guion empaquetado de la búsqueda importa este módulo y no la usa.
+export const EVENTOS_VALIDOS: readonly Evento[] = /* @__PURE__ */ Object.values(EVENTOS);
 
 export function esEventoValido(nombre: string): nombre is Evento {
   return (EVENTOS_VALIDOS as readonly string[]).includes(nombre);

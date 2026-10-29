@@ -1,0 +1,541 @@
+---
+/**
+ * La búsqueda de `/buscar/` — Historia 27.2, FR-7, FR-8, AD-6, UX-DR87, UX-DR88, UX-DR89, UX-DR91,
+ * UX-DR99, UX-DR100, UX-DR101; `DESIGN.md § Búsqueda` y `EXPERIENCE.md § Búsqueda`.
+ *
+ * El índice lo produce Pagefind sobre `dist/` después del build, así que solo contiene lo que las
+ * páginas publican: si una Cita no tiene página, no hay nada que indexar. El conjunto publicable de
+ * AD-11 gobierna la búsqueda sin que la búsqueda sepa que existe.
+ *
+ * Lo usa solo `/buscar/`, entre el `h1` y la región del recuento, y pinta dos cosas:
+ *
+ *   · un `<template>` con el formulario —el Campo de búsqueda de la 26.6 con su `name`, su
+ *     ejemplo y la marca `data-consulta`, y un `fieldset` con los selectores de Autor y de Tema y
+ *     «Quitar los filtros»— y la sombra del recuento, inertes: el guion los inserta al cargar. Ir en
+ *     plantilla deja el marcado, las opciones del build y sus estilos de ámbito en el HTML, y el
+ *     guion sin una palabra de contenido. Sin guion la página queda en el `h1` (hasta la 27.7);
+ *   · el `<script>`, que Astro empaqueta en un fichero de `/_astro/` (AD-6) y que nunca va en línea
+ *     (`assetsInlineLimit` en `astro.config.mjs`). Está en la lista cerrada de
+ *     `src/lib/guiones.ts` con su tope, `MAX_BYTES_GUION_DE_LA_BUSQUEDA`, y es el único guion de la
+ *     búsqueda: desde la 27.2 `/buscar/` no lleva guion propio en línea.
+ *
+ * Las opciones de los selectores salen del build y solo del build —de `filtrosDeLaBusqueda`, por
+ * `buscar.astro`—, ya ordenadas por `ordenDeAutoresPorNombre` y `ordenDeTemasPorNombre` de
+ * `src/lib/normalizar.ts`: el selector no ordena, y el guion no lleva ningún dato del Corpus; lee
+ * el nombre de la opción elegida. El rótulo de cada opción es el nombre, sin recuento.
+ *
+ * Lo que hay que saber al leer el guion:
+ *
+ *   · AD-6 — Pagefind no se descarga hasta que hace falta: `cargar` lo pide con `import()` del
+ *     literal `/pagefind/pagefind.js` (con `@vite-ignore`, para que el empaquetado no lo resuelva)
+ *     al enfocar el campo, al elegir un filtro, al buscar o al llegar con la consulta en la
+ *     dirección. Es otra entrada de la lista cerrada, `pagefind`, que esta declara en `pide`.
+ *   · Las tablas llegan de `src/lib/tipoDeResultado.ts` por importación: los rótulos, el filtro del
+ *     tipo, los tipos en la sans y con línea de Autor, los filtros y la clave de orden de la Cita y
+ *     las opciones de Pagefind. Escribirlas aquí era la segunda copia. La reserva cubre un índice
+ *     viejo que traiga un tipo que ya no existe, no un tipo nuevo sin rótulo: eso no compila.
+ *   · Historia 27.2 — basta un filtro para buscar. Con Autor o Tema elegido se busca con `filters`
+ *     (los valores que escribe la 27.1 en cada Página de Cita, `filtrosDePagefind`); sin texto
+ *     —vacío o solo espacios—, `search(null, …)` ordenado por la clave `orden`; con texto,
+ *     `search(texto, { filters })`, por relevancia. Solo salen Citas, porque solo la Página de Cita
+ *     declara esos filtros. Sin texto ni filtros no hay búsqueda, ni recuento, ni salida.
+ *   · Historia 27.2 — el recuento dice cuántos hay y, con filtros, qué se filtró
+ *     (`fraseDelRecuento`, de `src/lib/busqueda.ts`), y se escribe con el **segundo ritmo**
+ *     (`ritmoDeTecleo`): la de lo tecleado, tras `PAUSA_DE_TECLEO_MS` y solo si cambió; la de un
+ *     selector, al llegar la búsqueda que lanzó su pausa, sin otra espera (`ahora`). La sombra
+ *     lleva la frase al momento, invisible, y reserva el alto: la lista no se mueve cuando la frase
+ *     llega. Sin resultados, la sugerencia de la salida con el **primer ritmo** (`anunciar`), que
+ *     vacía y escribe en el fotograma siguiente, como en la 22.10; la región se aparta de la vista.
+ *   · Historia 27.2 — cada cambio de un selector reinicia `PAUSA_DE_LOS_SELECTORES_MS`, y la
+ *     búsqueda se rehace una vez al cumplirse: las flechas sobre un selector cerrado no lanzan una
+ *     búsqueda por opción. Enviar (Enter) cancela las dos pausas y busca el estado de ese momento.
+ *     «Quitar los filtros» vuelve los dos a «Todos…», rehace la búsqueda al momento (o la vacía, sin
+ *     texto) y lleva el foco al campo.
+ *   · Historia 23.8 (FR-56, FR-8, AD-13) — una búsqueda **cuenta una vez, cuando se asienta**, y
+ *     no por tecla ni por repintado. Lo que se asienta es el **estado que se ve**: el texto y los
+ *     filtros de la última búsqueda que se pintó, con el total de la respuesta de Pagefind
+ *     (`results.length`, no los pintados); vaciar el campo sin filtros lo limpia. Lo asientan tres
+ *     gestos: enviar el formulario —espera a que se pinte la búsqueda de lo enviado, y asienta solo
+ *     si sigue siendo la que se ve—, pulsar un enlace de la lista de resultados —`click`, también
+ *     con modificador o con el teclado, y el `auxclick` del botón central (`button` 1), que lo abre
+ *     en otra pestaña sin dar `click`; el del secundario abre el menú contextual, que no es pulsar,
+ *     y no asienta. Escuchados en la lista, que corre antes que la escucha de salida de la ventana,
+ *     sin quedarse con el clic ni parar su propagación— y ocultarse la página (`visibilitychange` a
+ *     `hidden`, con `pagehide` de respaldo). Una página que no se ha visto nunca no asienta nada.
+ *     Qué se emite ante ese estado lo decide `asentamientoDeBusqueda`, de `src/lib/medicion.ts`,
+ *     con sus constantes compuestas desde el vocabulario (`ASENTAMIENTO_DE_BUSQUEDA`): la
+ *     `busqueda` con el tramo del total y la combinación de filtros (`combinacionDeFiltros`), y,
+ *     con texto y sin resultados, la `busqueda-sin-resultados` con la consulta. La clave de un
+ *     estado lleva además los **valores** de los filtros (`valoresDeFiltros`): otro Autor es otra
+ *     búsqueda. Este componente no escribe ni un rótulo de tramo ni una combinación de filtros. Se
+ *     mide con `__medir(…)` a secas; la cola la abre el arranque del armazón, y el fichero de
+ *     medición va antes en el documento.
+ *   · Una vez por estado distinto en la carga: la isla guarda en memoria, en su propio cierre, las
+ *     claves ya emitidas —sin almacenamiento ni cookie—, y la memoria sobrevive a la caché de atrás
+ *     y adelante. Al emitir, marca su entrada del historial con un booleano en el objeto de estado
+ *     (`history.replaceState`, sin dirección: ni la cambia ni abre entrada). Al llegar con la
+ *     consulta en la dirección, la da por ya registrada si su entrada lleva la marca o, sin objeto
+ *     de estado, si la carga es una vuelta atrás o una recarga (Navigation Timing, leído una vez).
+ *     Nada de eso ocurre al evaluarse el guion: solo desde sus escuchas.
+ *   · La búsqueda que no corre —el índice no carga, o `init`, `search` o los datos de un
+ *     resultado fallan— no pinta, no cambia el estado que se ve y no deja ninguna promesa rechazada
+ *     sin manejar; no se asienta. La siguiente vuelve a pedir el índice, también con el mismo estado
+ *     (Enter otra vez), y lo pide de verdad: tras una importación fallida, con `?{n}` en la
+ *     dirección, porque el navegador recuerda el fallo de un módulo por su URL; tras un fallo de
+ *     Pagefind, con `destroy()`, porque Pagefind guarda el error de su índice en su instancia —
+ *     destruida, la siguiente crea otra—. Solo esas llamadas al índice van en el `try`: un fallo al
+ *     pintar es un error del guion y tiene que verse. La respuesta de una búsqueda ya superada por
+ *     otra no se pinta ni pasa a ser la que se ve.
+ *   · Historia 26.2 — antes de **cada** `search()` se aplican `OPCIONES_DE_PAGEFIND` con
+ *     `options()`, dentro del `try`: el `destroy()` del reintento deja a cero las opciones del
+ *     módulo, y la instancia que se crea después buscaría sin pesos.
+ *   · Historia 26.2 — el tipo de un resultado llega en `data().filters` (`FILTRO_DE_TIPO`), y no
+ *     en la metadata. Sin filtro, o con un tipo que no está en la tabla, el rótulo es el del tipo
+ *     por omisión. Los tipos de `TIPOS_CON_TITULO_EN_SANS` llevan el título en la sans
+ *     (`.en-sans`) y se leen «{rótulo}: {título}»; sin título en el índice, el visible es la URL y
+ *     no se lee en voz alta.
+ *   · Historias 27.1 y 27.2 — los tipos de `TIPOS_CON_LINEA_DE_AUTOR` (Obra y Cita) llevan el
+ *     Autor debajo, del metadato `autor`, y se leen «{rótulo}: {título}, {Autor}», sin «de». Sin
+ *     metadato de Autor, ni línea ni Autor en el nombre; la Cita, además, sin nombre accesible
+ *     propio.
+ *   · La consulta de la dirección se lee del campo después de escribirla en él: un campo de
+ *     búsqueda quita los saltos de línea, y la clave de la llegada tiene que ser la del texto que
+ *     Enter buscará. Con la consulta en la URL, la búsqueda se ejecuta al cargar. Los filtros no
+ *     se leen de la dirección ni se escriben en ella (27.4).
+ *   · Lo tecleado vuelve a la página solo por `textContent` y `value`, nunca como HTML.
+ */
+import CampoDeBusqueda from './CampoDeBusqueda.astro';
+import {
+  ETIQUETA_DE_LA_BUSQUEDA,
+  TEXTO_DE_EJEMPLO_DE_LA_BUSQUEDA,
+} from '../lib/busqueda.ts';
+import type { OpcionPorNombre } from '../lib/normalizar.ts';
+import { rutaDeLaBusqueda } from '../lib/superficies.ts';
+
+interface Props {
+  /** Las opciones del selector de Autor, ya en su orden (`ordenDeAutoresPorNombre`). */
+  autores: readonly OpcionPorNombre[];
+  /** Las opciones del selector de Tema, ya en su orden (`ordenDeTemasPorNombre`). */
+  temas: readonly OpcionPorNombre[];
+}
+
+const { autores, temas } = Astro.props;
+---
+
+<div data-busqueda>
+  <template>
+    <form class="formulario" role="search" action={rutaDeLaBusqueda()} method="get">
+      <CampoDeBusqueda
+        id="consulta"
+        etiqueta={ETIQUETA_DE_LA_BUSQUEDA}
+        nombre="q"
+        ejemplo={TEXTO_DE_EJEMPLO_DE_LA_BUSQUEDA}
+        consulta
+      />
+      <fieldset class="filtros">
+        <legend class="solo-para-lectores">Filtrar las citas</legend>
+        <div class="selector">
+          <label for="filtro-de-autor">Autor</label>
+          <select id="filtro-de-autor" data-selector-de-autor>
+            <option value="">Todos los autores</option>
+            {autores.map((opcion) => <option value={opcion.valor}>{opcion.rotulo}</option>)}
+          </select>
+        </div>
+        <div class="selector">
+          <label for="filtro-de-tema">Tema</label>
+          <select id="filtro-de-tema" data-selector-de-tema>
+            <option value="">Todos los temas</option>
+            {temas.map((opcion) => <option value={opcion.valor}>{opcion.rotulo}</option>)}
+          </select>
+        </div>
+        <button type="button" class="quitar" data-quitar hidden>Quitar los filtros</button>
+      </fieldset>
+    </form>
+    <p class="sombra" aria-hidden="true"></p>
+  </template>
+</div>
+
+<style>
+  .formulario {
+    margin-top: calc(var(--unidad) * 3);
+  }
+
+  /* Sin borde ni relleno: el grupo lo dice la leyenda, que solo oyen los lectores. */
+  .filtros {
+    margin: calc(var(--unidad) * 3) 0 0;
+    padding: 0;
+    border: 0;
+    min-width: 0;
+  }
+
+  .selector + .selector {
+    margin-top: calc(var(--unidad) * 2);
+  }
+
+  .selector label {
+    display: block;
+    margin-bottom: var(--unidad);
+    font-family: var(--sans);
+    font-size: var(--pie);
+    color: var(--tinta-apagada);
+  }
+
+  /* El selector nativo, con su flecha: a todo el ancho de la medida, a la zona de toque. */
+  select {
+    display: block;
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 100%;
+    min-height: var(--zona-de-toque);
+    margin: 0;
+    padding: var(--unidad) calc(var(--unidad) * 1.5);
+    font-family: var(--sans);
+    font-size: var(--cuerpo-lg);
+    color: var(--tinta);
+    background-color: var(--papel);
+    border: var(--grosor-filete) solid var(--contorno);
+    border-radius: var(--radio);
+    /*
+     * NFR-8, Historia 26.9 — ningún control lleva `nowrap`, y el selector nativo lo trae del
+     * navegador (`white-space: pre`): un nombre largo del Corpus, con el texto al 200 %, tiene que
+     * poder partirse en vez de salirse de la columna.
+     */
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+
+  /* UX-DR9 — secundario: texto en siena con filete, a su ancho, a la zona de toque. */
+  .quitar {
+    display: block;
+    margin-top: calc(var(--unidad) * 2);
+    max-width: 100%;
+    font-family: var(--sans);
+    font-size: var(--cuerpo-md);
+    color: var(--siena);
+    background: transparent;
+    border: var(--grosor-filete) solid var(--siena);
+    border-radius: var(--radio);
+    min-height: var(--zona-de-toque);
+    padding-inline: calc(var(--unidad) * 3);
+    cursor: pointer;
+    /* UX-DR22 — solo opacidad y color, y como máximo 150 ms. */
+    transition: background-color 150ms, color 150ms;
+  }
+
+  .quitar:hover {
+    background: var(--siena);
+    color: var(--sobre-siena);
+  }
+
+  /* `hidden` gana siempre a `display: block`. */
+  .quitar[hidden] {
+    display: none;
+  }
+
+  /*
+   * La sombra del recuento (26.6): el guion la pone junto a la región `role="status"` de
+   * `/buscar/`, en la misma celda, con la frase que la región escribirá tras la pausa, invisible y
+   * fuera del árbol de accesibilidad. La fila toma su alto al momento y, cuando la frase llega a la
+   * región —que va encima, sin dar alto—, la lista no se mueve.
+   */
+  .sombra {
+    grid-row: 1;
+    grid-column: 1;
+    margin: calc(var(--unidad) * 3) 0 0;
+    font-family: var(--sans);
+    font-size: var(--pie);
+    visibility: hidden;
+    overflow-wrap: anywhere;
+  }
+
+  .sombra:empty {
+    margin: 0;
+  }
+</style>
+
+<script>
+  import { anunciar, ritmoDeTecleo } from '../lib/anuncio.ts';
+  import {
+    combinacionDeFiltros,
+    filtrosDePagefind,
+    fraseDelRecuento,
+    hayFiltros,
+    valoresDeFiltros,
+    type FiltrosElegidos,
+  } from '../lib/busqueda.ts';
+  import { ASENTAMIENTO_DE_BUSQUEDA, asentamientoDeBusqueda, type EstadoDeBusqueda } from '../lib/medicion.ts';
+  import {
+    ETIQUETAS_DE_RESULTADO,
+    FILTRO_DE_TIPO,
+    OPCIONES_DE_PAGEFIND,
+    ORDEN_DE_CITA,
+    TIPO_POR_OMISION,
+    TIPOS_CON_LINEA_DE_AUTOR,
+    TIPOS_CON_TITULO_EN_SANS,
+    type TipoDeResultado,
+  } from '../lib/tipoDeResultado.ts';
+  import { PAUSA_DE_LOS_SELECTORES_MS, PAUSA_DE_TECLEO_MS } from '../lib/umbrales.ts';
+
+  /** La cola de medición que abre el arranque del armazón (AD-13). */
+  declare function __medir(...argumentos: unknown[]): void;
+
+  /** Lo que da `data()` de un resultado de Pagefind. */
+  interface DatoDeResultado {
+    url: string;
+    meta?: Record<string, unknown>;
+    filters?: Record<string, string[] | undefined>;
+  }
+
+  /** Lo que este guion usa del módulo de Pagefind. */
+  interface Pagefind {
+    init(): Promise<void>;
+    options(opciones: unknown): Promise<void>;
+    search(
+      texto: string | null,
+      opciones?: { filters: Record<string, string>; sort?: Record<string, 'asc'> },
+    ): Promise<{ results: { data(): Promise<DatoDeResultado> }[] }>;
+    destroy?(): Promise<void>;
+  }
+
+  /** Por dónde llega una búsqueda: decide con qué ritmo se escribe su recuento. */
+  type Origen = 'tecleo' | 'gesto';
+
+  function iniciar(raiz: HTMLElement) {
+    const plantilla = raiz.querySelector('template');
+    const lista = document.querySelector<HTMLElement>('[data-resultados]');
+    const estado = document.querySelector<HTMLElement>('[data-estado]');
+    const salida = document.querySelector<HTMLElement>('[data-salida]');
+    if (!plantilla || !lista || !estado || !salida) return;
+
+    const contenido = plantilla.content.cloneNode(true) as DocumentFragment;
+    const formulario = contenido.querySelector('form');
+    const campo = contenido.querySelector<HTMLInputElement>('[data-consulta]');
+    const autor = contenido.querySelector<HTMLSelectElement>('[data-selector-de-autor]');
+    const tema = contenido.querySelector<HTMLSelectElement>('[data-selector-de-tema]');
+    const quitar = contenido.querySelector<HTMLButtonElement>('[data-quitar]');
+    const sombra = contenido.querySelector<HTMLElement>('.sombra');
+    if (!formulario || !campo || !autor || !tema || !quitar || !sombra) return;
+    raiz.append(formulario);
+    estado.before(sombra);
+
+    const A = asentamientoDeBusqueda(ASENTAMIENTO_DE_BUSQUEDA);
+    const ritmo = ritmoDeTecleo(estado, PAUSA_DE_TECLEO_MS);
+    const hechos: string[] = [];
+    let indice: Promise<Pagefind | null> | null = null;
+    let fallos = 0;
+    let ultima: string | null = '';
+    let pendiente: Promise<void> = Promise.resolve();
+    let turno = 0;
+    let visto: EstadoDeBusqueda | null = null;
+    let vista = !document.hidden;
+    let aCero = false;
+    let tecleo: ReturnType<typeof setTimeout> | undefined;
+    let eleccion: ReturnType<typeof setTimeout> | undefined;
+
+    const elegidos = (): FiltrosElegidos => ({ autor: autor.value, tema: tema.value });
+    /** El nombre de la opción elegida, tal como se lee. */
+    const nombreDe = (selector: HTMLSelectElement) => selector.options[selector.selectedIndex]?.textContent?.trim() ?? '';
+
+    function cargar(): Promise<Pagefind | null> {
+      if (!indice) {
+        indice = import(/* @vite-ignore */ '/pagefind/pagefind.js' + (fallos ? '?' + fallos : ''))
+          .then(async (pf: Pagefind) => {
+            await pf.init();
+            return pf;
+          })
+          .catch(() => {
+            fallos++;
+            indice = null;
+            return null;
+          });
+      }
+      return indice;
+    }
+
+    function pintar(resultados: DatoDeResultado[], frase: string, origen: Origen) {
+      lista!.replaceChildren();
+
+      const vacio = resultados.length === 0;
+      estado!.classList.toggle('solo-para-lectores', vacio);
+      if (vacio) {
+        aCero = true;
+        sombra!.textContent = '';
+        ritmo.vaciar();
+        anunciar(estado!, salida!.querySelector('.sugerencia')?.textContent?.trim() || 'Ningún resultado.');
+        salida!.hidden = false;
+        return;
+      }
+
+      salida!.hidden = true;
+      // Al salir de cero, la región dice todavía la sugerencia: se vacía antes de la pausa.
+      if (aCero) ritmo.vaciar();
+      aCero = false;
+      sombra!.textContent = frase;
+      if (origen === 'tecleo') ritmo.anunciar(frase);
+      else ritmo.ahora(frase);
+
+      for (const dato of resultados) {
+        const tipo = (dato.filters?.[FILTRO_DE_TIPO]?.[0] || TIPO_POR_OMISION) as TipoDeResultado;
+        const rotulo = ETIQUETAS_DE_RESULTADO[tipo] || ETIQUETAS_DE_RESULTADO[TIPO_POR_OMISION];
+
+        const li = document.createElement('li');
+        li.className = 'resultado';
+
+        const a = document.createElement('a');
+        a.href = dato.url.replace(/[.]html$/, '');
+
+        const clase = document.createElement('span');
+        clase.className = 'clase';
+        clase.dataset.tipo = tipo;
+        clase.textContent = rotulo;
+
+        const t = typeof dato.meta?.title === 'string' ? dato.meta.title : '';
+        const titulo = document.createElement('span');
+        titulo.className = 'titulo';
+        titulo.textContent = t || dato.url;
+        a.append(clase, titulo);
+
+        const sans = TIPOS_CON_TITULO_EN_SANS.includes(tipo);
+        if (sans) titulo.classList.add('en-sans');
+        const deAutor = TIPOS_CON_LINEA_DE_AUTOR.includes(tipo) && typeof dato.meta?.autor === 'string' ? dato.meta.autor.trim() : '';
+        if (deAutor) {
+          const linea = document.createElement('span');
+          linea.className = 'r-autor';
+          linea.textContent = deAutor;
+          a.append(linea);
+        }
+        if (t && (sans || deAutor)) a.setAttribute('aria-label', rotulo + ': ' + t + (deAutor ? ', ' + deAutor : ''));
+
+        li.append(a);
+        lista!.append(li);
+      }
+    }
+
+    function buscar(origen: Origen): Promise<void> {
+      const texto = campo!.value;
+      const filtros = elegidos();
+      const clave = JSON.stringify([texto, filtros.autor, filtros.tema]);
+      if (clave === ultima) return pendiente;
+      ultima = clave;
+      const mio = ++turno;
+      const conFiltros = hayFiltros(filtros);
+      const sinTexto = texto.trim() === '';
+
+      if (sinTexto && !conFiltros) {
+        lista!.replaceChildren();
+        ritmo.vaciar();
+        sombra!.textContent = '';
+        salida!.hidden = true;
+        visto = null;
+        return (pendiente = Promise.resolve());
+      }
+
+      // Los nombres, de lo elegido al lanzar la búsqueda: el recuento dice lo que se buscó.
+      const nombres = {
+        ...(filtros.autor ? { autor: nombreDe(autor!) } : {}),
+        ...(filtros.tema ? { tema: nombreDe(tema!) } : {}),
+      };
+      const filters = filtrosDePagefind(filtros);
+
+      return (pendiente = (async () => {
+        let pf: Pagefind | null | undefined;
+        let respuesta: Awaited<ReturnType<Pagefind['search']>>;
+        let resultados: DatoDeResultado[];
+        try {
+          pf = await cargar();
+          await pf!.options(OPCIONES_DE_PAGEFIND);
+          respuesta = await (conFiltros
+            ? sinTexto
+              ? pf!.search(null, { filters, sort: { [ORDEN_DE_CITA]: 'asc' } })
+              : pf!.search(texto, { filters })
+            : pf!.search(texto));
+          resultados = await Promise.all(respuesta.results.slice(0, 30).map((r) => r.data()));
+        } catch {
+          if (mio === turno) ultima = null;
+          pf?.destroy?.().catch(() => {});
+          return;
+        }
+        if (mio !== turno) return;
+        const total = respuesta.results.length;
+        const valores = valoresDeFiltros(filtros);
+        visto = { texto, filtros: combinacionDeFiltros(filtros), total, ...(valores ? { valores } : {}) };
+        pintar(resultados, fraseDelRecuento({ total, texto, ...nombres }), origen);
+      })());
+    }
+
+    function asentar() {
+      if (!vista) return;
+      const r = A.emisiones(visto, hechos);
+      if (!r) return;
+      hechos.push(r.clave);
+      r.eventos.forEach((x) => __medir(...x));
+      try {
+        history.replaceState(A.marcada(history.state), '');
+      } catch {}
+    }
+
+    campo.addEventListener('focus', cargar, { once: true });
+    campo.addEventListener('input', () => {
+      clearTimeout(tecleo);
+      tecleo = setTimeout(() => buscar('tecleo'), 150);
+    });
+
+    const alElegir = () => {
+      quitar.hidden = !hayFiltros(elegidos());
+      cargar();
+      clearTimeout(eleccion);
+      eleccion = setTimeout(() => buscar('gesto'), PAUSA_DE_LOS_SELECTORES_MS);
+    };
+    for (const selector of [autor, tema]) {
+      selector.addEventListener('change', alElegir);
+      selector.addEventListener('input', alElegir);
+    }
+
+    quitar.addEventListener('click', () => {
+      autor.value = '';
+      tema.value = '';
+      quitar.hidden = true;
+      clearTimeout(tecleo);
+      clearTimeout(eleccion);
+      buscar('gesto');
+      campo.focus();
+    });
+
+    formulario.addEventListener('submit', (e) => {
+      e.preventDefault();
+      clearTimeout(tecleo);
+      clearTimeout(eleccion);
+      const texto = campo.value;
+      const valores = valoresDeFiltros(elegidos());
+      buscar('gesto').then(() => {
+        if (visto && visto.texto === texto && visto.valores === valores) asentar();
+      });
+    });
+
+    for (const tipo of ['click', 'auxclick'] as const) {
+      lista.addEventListener(tipo, (e) => {
+        if ((tipo === 'click' || e.button === 1) && (e.target as Element).closest('a')) asentar();
+      });
+    }
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) asentar();
+      else vista = true;
+    });
+    addEventListener('pagehide', asentar);
+
+    const inicial = new URLSearchParams(location.search).get('q');
+    if (inicial) {
+      let tipo = 'navigate';
+      try {
+        tipo = (performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming).type || tipo;
+      } catch {}
+      campo.value = inicial;
+      const q = campo.value;
+      if (A.yaRegistrada(history.state, tipo)) hechos.push(A.clave(q, ASENTAMIENTO_DE_BUSQUEDA.sinFiltros));
+      buscar('gesto');
+    }
+  }
+
+  const raiz = document.querySelector<HTMLElement>('[data-busqueda]');
+  if (raiz) iniciar(raiz);
+</script>

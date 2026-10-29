@@ -2,109 +2,28 @@
 /**
  * Búsqueda — FR-7, FR-8.
  *
- * El índice lo produce Pagefind sobre `dist/` después del build, así que solo contiene
- * lo que las páginas publican: si una Cita no tiene página, no hay nada que indexar. El
- * conjunto publicable de AD-11 gobierna la búsqueda sin que la búsqueda sepa que existe.
+ * La página es el marco: el `h1`, la búsqueda (`src/components/Busqueda.astro`, que pinta el
+ * campo, los selectores de Autor y de Tema y lleva el guion empaquetado), la región del recuento,
+ * la lista de resultados y la salida sin resultados. Las reglas del guion están escritas en el
+ * componente, junto a él (Historia 27.2): desde entonces `/buscar/` no lleva guion propio en línea.
  *
- * AD-6 — la isla se hidrata **bajo demanda**: el código de Pagefind son decenas de
- * kilobytes y no se descarga hasta que el visitante enfoca el campo. Aquí sí compensa
- * diferir, al revés que en el botón de copiar.
- *
- * La página funciona sin JavaScript: el campo es un formulario real que recarga con la
- * consulta en la URL, y los Temas y Autores destacados están en el HTML inicial.
- *
- * Lo que hay que saber al leer el guion, escrito aquí porque los comentarios de un guion en
- * línea viajan al visitante (Historia 23.1):
- *
- *   · AD-6 — el código de búsqueda no se descarga hasta que hace falta: `cargar` pide
- *     `/pagefind/pagefind.js` al enfocar el campo, al buscar o al llegar con la consulta en la
- *     dirección. Es una entrada de la lista cerrada de `src/lib/guiones.ts`.
- *   · La tabla de rótulos llega de `src/lib/tipoDeResultado.ts` como constante. Escribirla en
- *     el guion era la segunda copia, y la que se quedaba atrás al añadir una superficie. La
- *     reserva cubre un índice viejo que traiga un tipo que ya no existe, no un tipo nuevo sin
- *     rótulo: eso no compila.
- *   · Historia 22.10 — el recuento y la búsqueda sin resultados se anuncian con `anunciar`, de
- *     `src/lib/anuncio.ts`, el único dueño: vaciar y escribir en el fotograma siguiente, porque
- *     el mismo recuento dos veces, o dos búsquedas vacías seguidas, no cambian el texto y no se
- *     anunciarían. Su texto va dentro del guion: por eso el guion se compone aquí con
- *     `guionQueAnuncia`, que lo envuelve en `(function(){…})()` con las constantes, y se
- *     inserta con `set:html`.
- *   · Historia 23.8 (FR-56, FR-8, AD-13) — una búsqueda **cuenta una vez, cuando se asienta**, y
- *     no por tecla ni por repintado. Lo que se asienta es el **estado que se ve**: el texto y los
- *     filtros de la última búsqueda que se pintó, con el total de la respuesta de Pagefind
- *     (`results.length`, no los pintados); vaciar el campo lo limpia. Lo asientan tres gestos:
- *     enviar el formulario —espera a que se pinte la búsqueda del texto enviado, y asienta solo si
- *     sigue siendo la que se ve—, pulsar un enlace de la lista de resultados —`click`, también con
- *     modificador o con el teclado, y el `auxclick` del botón central (`button` 1), que lo abre en
- *     otra pestaña sin dar `click`; el del secundario abre el menú contextual, que no es pulsar, y
- *     no asienta. Escuchados en la lista, que corre antes que la escucha de salida de la ventana,
- *     sin quedarse con el clic ni parar su propagación— y ocultarse la página (`visibilitychange` a
- *     `hidden`, con `pagehide` de respaldo). Una página que no se ha visto nunca —abierta en una
- *     pestaña de fondo y cerrada sin mirarla, o prerenderizada y descartada— no asienta nada: lo que
- *     se asienta es lo que se ve. Qué se emite ante ese estado lo decide `asentamientoDeBusqueda`, de
- *     `src/lib/medicion.ts`, que viaja aquí por su texto con sus constantes compuestas desde el
- *     vocabulario (`ASENTAMIENTO_DE_BUSQUEDA`): la `busqueda` con el tramo del total y los
- *     filtros, y, con texto y sin resultados, la `busqueda-sin-resultados` con la consulta. Esta
- *     página no escribe ni un rótulo de tramo ni una combinación de filtros. Se mide con
- *     `__medir(…)` a secas; la cola la abre el arranque del armazón.
- *   · Una vez por estado distinto en la carga: la isla guarda en memoria, en su propio cierre, las
- *     claves ya emitidas —sin almacenamiento ni cookie—, y la memoria sobrevive a la caché de atrás
- *     y adelante. Al emitir, marca su entrada del historial con un booleano en el objeto de estado
- *     (`history.replaceState`, sin dirección: ni la cambia ni abre entrada). Al llegar con la
- *     consulta en la dirección, la da por ya registrada si su entrada lleva la marca o, sin objeto
- *     de estado, si la carga es una vuelta atrás o una recarga (Navigation Timing, leído una vez).
- *     Nada de eso ocurre al analizarse el guion: solo desde sus escuchas.
- *   · La búsqueda que no corre —el índice no carga, o `init`, `search` o los datos de un
- *     resultado fallan— no pinta, no cambia el estado que se ve y no deja ninguna promesa rechazada
- *     sin manejar; no se asienta. La siguiente vuelve a pedir el índice, también con el mismo texto
- *     (Enter otra vez), y lo pide de verdad: tras una importación fallida, con `?{n}` en la
- *     dirección, porque el navegador recuerda el fallo de un módulo por su URL y devolvería el mismo
- *     rechazo sin volver a pedirlo (el precedente es el reintento de la Imagen de Cita); tras un
- *     fallo de Pagefind, con `destroy()`, porque Pagefind guarda el error de su índice en su
- *     instancia y la siguiente búsqueda lo repetiría hasta recargar —destruida, la siguiente crea
- *     otra—. Solo esas llamadas al índice van en el `try`: un fallo al pintar es un error del guion
- *     y tiene que verse. La respuesta de una búsqueda ya superada por otra no se pinta ni pasa a ser
- *     la que se ve.
- *   · La consulta de la dirección se lee del campo después de escribirla en él: un campo de
- *     búsqueda quita los saltos de línea, y la clave de la llegada tiene que ser la del texto que
- *     Enter buscará.
- *   · Historia 26.2 — el tipo de un resultado llega en `data().filters` (el filtro
- *     `FILTRO_DE_TIPO`, que escribe solo `Armazon.astro`), y no en la metadata: la metadata se
- *     busca, y buscar «obra» devolvía toda Obra. Sin filtro, o con un tipo que no está en la
- *     tabla, el rótulo es el del tipo por omisión.
- *   · Historia 26.2 — antes de **cada** `search()` se aplican `OPCIONES_DE_PAGEFIND` con
- *     `options()`, dentro del `try`: el `destroy()` del reintento deja a cero las opciones del
- *     módulo, y la instancia que se crea después buscaría sin pesos. Llamarlo ahí cubre la
- *     primera carga y el reintento sin volver a importar.
- *   · Historias 22.7 y 26.2 — los tipos de `TIPOS_CON_TITULO_EN_SANS` (Obra, Directorio y
- *     Portada) llevan el título en la sans (`.en-sans`) y se leen «{rótulo}: {título}»; sin
- *     título en el índice, el visible es la URL y no se lee en voz alta.
- *   · Historia 27.1 — los tipos de `TIPOS_CON_LINEA_DE_AUTOR` (Obra y Cita) llevan el Autor
- *     debajo, del metadato `autor`, con el mismo código: la Cita se lee «Cita: {título}, {Autor}»
- *     y la Obra, hasta la 27.2, «Obra: {título}, de {Autor}». Sin metadato de Autor, ni línea ni
- *     Autor en el nombre; la Cita, además, sin nombre accesible propio.
- *   · Con la consulta en la URL, la búsqueda se ejecuta al cargar: es lo que ocurre cuando
- *     alguien llega desde el formulario sin JavaScript o comparte un enlace.
+ * Las opciones de los selectores salen de aquí y solo de aquí: del conjunto publicable, por
+ * `filtrosDeLaBusqueda` —la misma función que escribe los filtros de cada Página de Cita (27.1)—,
+ * ordenadas por `ordenDeAutoresPorNombre` y `ordenDeTemasPorNombre` de `src/lib/normalizar.ts`.
+ * Así no hay opción sin Citas que la filtren, ni Tema bajo su umbral.
  */
 import Armazon from '../components/Armazon.astro';
+import Busqueda from '../components/Busqueda.astro';
 import Sostener from '../components/Sostener.astro';
-import { guionQueAnuncia } from '../lib/anuncio.ts';
 import { modelosEnRuta } from '../lib/ingreso.ts';
-import { ASENTAMIENTO_DE_BUSQUEDA, asentamientoDeBusqueda } from '../lib/medicion.ts';
 import { tituloDe } from '../lib/marca.ts';
+import { ordenDeAutoresPorNombre, ordenDeTemasPorNombre } from '../lib/normalizar.ts';
 import {
   autoresPublicados,
   conjuntoPublicable,
+  filtrosDeLaBusqueda,
   temasPublicados,
 } from '../lib/publicado.ts';
-import {
-  ETIQUETAS_DE_RESULTADO,
-  FILTRO_DE_TIPO,
-  OPCIONES_DE_PAGEFIND,
-  TIPO_POR_OMISION,
-  TIPOS_CON_LINEA_DE_AUTOR,
-  TIPOS_CON_TITULO_EN_SANS,
-} from '../lib/tipoDeResultado.ts';
 import { rutaDeAutor, rutaDeColeccion, rutaDeTema } from '../lib/superficies.ts';
 
 const conjunto = await conjuntoPublicable();
@@ -121,179 +40,14 @@ const autores = autoresPublicados(conjunto.autores, conjunto.citas).slice(0, 8);
  */
 const colecciones = conjunto.colecciones;
 
-const guion = guionQueAnuncia(
-  {
-    ASENTAMIENTO: ASENTAMIENTO_DE_BUSQUEDA,
-    ETIQUETA: ETIQUETAS_DE_RESULTADO,
-    TIPO_POR_OMISION,
-    FILTRO: FILTRO_DE_TIPO,
-    EN_SANS: TIPOS_CON_TITULO_EN_SANS,
-    CON_AUTOR: TIPOS_CON_LINEA_DE_AUTOR,
-    PAGEFIND: OPCIONES_DE_PAGEFIND,
-  },
-  `const campo = document.querySelector('[data-consulta]');
-const lista = document.querySelector('[data-resultados]');
-const estado = document.querySelector('[data-estado]');
-const salida = document.querySelector('[data-salida]');
-if (!campo) return;
-
-const A = (${String(asentamientoDeBusqueda)})(ASENTAMIENTO);
-const hechos = [];
-let indice = null;
-let fallos = 0;
-let ultima = '';
-let pendiente = Promise.resolve();
-let turno = 0;
-let visto = null;
-let vista = !document.hidden;
-let temporizador;
-
-function cargar() {
-  if (!indice) {
-    indice = import('/pagefind/pagefind.js' + (fallos ? '?' + fallos : ''))
-      .then(async (pf) => {
-        await pf.init();
-        return pf;
-      })
-      .catch(() => {
-        fallos++;
-        return (indice = null);
-      });
-  }
-  return indice;
-}
-
-function pintar(resultados) {
-  lista.replaceChildren();
-
-  const vacio = resultados.length === 0;
-  estado.classList.toggle('solo-para-lectores', vacio);
-  if (vacio) {
-    anunciar(estado, salida.querySelector('.sugerencia')?.textContent.trim() || 'Ningún resultado.');
-    salida.hidden = false;
-    return;
-  }
-
-  salida.hidden = true;
-  anunciar(estado, resultados.length === 1 ? 'Un resultado.' : resultados.length + ' resultados.');
-
-  for (const dato of resultados) {
-    const tipo = dato.filters?.[FILTRO]?.[0] || TIPO_POR_OMISION;
-
-    const li = document.createElement('li');
-    li.className = 'resultado';
-
-    const a = document.createElement('a');
-    a.href = dato.url.replace(/[.]html$/, '');
-
-    const clase = document.createElement('span');
-    clase.className = 'clase';
-    clase.dataset.tipo = tipo;
-    clase.textContent = ETIQUETA[tipo] || ETIQUETA[TIPO_POR_OMISION];
-
-    const t = dato.meta?.title;
-    const titulo = document.createElement('span');
-    titulo.className = 'titulo';
-    titulo.textContent = t || dato.url;
-    a.append(clase, titulo);
-
-    const sans = EN_SANS.includes(tipo);
-    if (sans) titulo.classList.add('en-sans');
-    const autor = CON_AUTOR.includes(tipo) && typeof dato.meta?.autor === 'string' ? dato.meta.autor.trim() : '';
-    if (autor) {
-      const linea = document.createElement('span');
-      linea.className = 'r-autor';
-      linea.textContent = autor;
-      a.append(linea);
-    }
-    if (t && (sans || autor)) a.setAttribute('aria-label', ETIQUETA[tipo] + ': ' + t + (autor ? (tipo == 'obra' ? ', de ' : ', ') + autor : ''));
-
-    li.append(a);
-    lista.append(li);
-  }
-}
-
-function buscar(consulta) {
-  if (consulta === ultima) return pendiente;
-  ultima = consulta;
-  const mio = ++turno;
-
-  if (consulta.trim() === '') {
-    lista.replaceChildren();
-    estado.textContent = '';
-    salida.hidden = true;
-    visto = null;
-    return (pendiente = Promise.resolve());
-  }
-
-  return (pendiente = (async () => {
-    let pf, respuesta, resultados;
-    try {
-      pf = await cargar();
-      await pf.options(PAGEFIND);
-      respuesta = await pf.search(consulta);
-      resultados = await Promise.all(respuesta.results.slice(0, 30).map((r) => r.data()));
-    } catch (e) {
-      if (mio === turno) ultima = null;
-      pf?.destroy?.().catch(() => {});
-      return;
-    }
-    if (mio !== turno) return;
-    visto = { texto: consulta, filtros: ASENTAMIENTO.sinFiltros, total: respuesta.results.length };
-    pintar(resultados);
-  })());
-}
-
-function asentar() {
-  if (!vista) return;
-  const r = A.emisiones(visto, hechos);
-  if (!r) return;
-  hechos.push(r.clave);
-  r.eventos.forEach((x) => __medir(...x));
-  try {
-    history.replaceState(A.marcada(history.state), '');
-  } catch (e) {}
-}
-
-campo.addEventListener('focus', cargar, { once: true });
-campo.addEventListener('input', () => {
-  clearTimeout(temporizador);
-  temporizador = setTimeout(() => buscar(campo.value), 150);
-});
-
-document.querySelector('.formulario').addEventListener('submit', (e) => {
-  e.preventDefault();
-  clearTimeout(temporizador);
-  const texto = campo.value;
-  buscar(texto).then(() => {
-    if (visto && visto.texto === texto) asentar();
-  });
-});
-
-for (const tipo of ['click', 'auxclick']) {
-  lista.addEventListener(tipo, (e) => {
-    if ((tipo === 'click' || e.button === 1) && e.target.closest('a')) asentar();
-  });
-}
-document.addEventListener('visibilitychange', () => {
-  if (document.hidden) asentar();
-  else vista = true;
-});
-addEventListener('pagehide', asentar);
-
-const inicial = new URLSearchParams(location.search).get('q');
-if (inicial) {
-  let tipo = 'navigate';
-  try {
-    tipo = performance.getEntriesByType('navigation')[0].type || tipo;
-  } catch (e) {}
-  campo.value = inicial;
-  const q = campo.value;
-  if (A.yaRegistrada(history.state, tipo)) hechos.push(A.clave(q, ASENTAMIENTO.sinFiltros));
-  buscar(q);
-}
-`,
-);
+/*
+ * Historia 27.2 — las opciones de los selectores: solo el valor y el nombre, en el orden que se
+ * lee. El recuento de cada opción no se pinta (el rótulo es el nombre).
+ */
+const filtros = filtrosDeLaBusqueda(conjunto);
+const opciones = ({ valor, rotulo }: { valor: string; rotulo: string }) => ({ valor, rotulo });
+const autoresDelFiltro = ordenDeAutoresPorNombre(filtros.autores.map(opciones));
+const temasDelFiltro = ordenDeTemasPorNombre(filtros.temas.map(opciones));
 ---
 
 <Armazon
@@ -304,31 +58,26 @@ if (inicial) {
   <div class="pagina contenedor">
     <h1>Buscar</h1>
 
-    <form class="formulario" role="search" action="/buscar/" method="get">
-      <label for="consulta">Escribe un fragmento, un autor o un tema.</label>
-      <input
-        id="consulta"
-        name="q"
-        type="search"
-        autocomplete="off"
-        data-consulta
-        placeholder="Por ejemplo: no hay camino"
-      />
-    </form>
+    <Busqueda autores={autoresDelFiltro} temas={temasDelFiltro} />
 
     {/*
       * Historia 22.10 — WCAG 4.1.3: el recuento y la búsqueda sin resultados se anuncian por
       * esta región, que está desde la carga, vacía y sin `hidden`: lo que se anuncia es un
       * cambio de contenido, no de visibilidad. Sin resultados dice la frase de la salida y se
-      * aparta de la vista, para no pintarla dos veces.
+      * aparta de la vista, para no pintarla dos veces. Historia 27.2 — la región va encima de su
+      * sombra (que pone el guion, en la misma celda) y no da alto: el recuento que llega tras la
+      * pausa no mueve la lista.
       */}
-    <p class="estado" role="status" data-estado></p>
+    <div class="recuento">
+      <p class="estado" role="status" data-estado></p>
+    </div>
 
     {/*
       * Historia 23.7 — la Zona de salida interna de los resultados va en la lista, que pinta el
-      * build vacía: los `li.resultado` que mete la isla la heredan sin saber de zonas.
+      * build vacía: los `li.resultado` que mete la isla la heredan sin saber de zonas. Historia
+      * 27.2 — `role="list"`: sin viñetas, algún lector deja de anunciarla como lista.
       */}
-    <ul class="resultados" data-resultados data-zona="resultado"></ul>
+    <ul class="resultados" role="list" data-resultados data-zona="resultado"></ul>
 
     {/* FR-8 — la salida siempre está, en el HTML inicial. Se muestra al no haber nada. */}
     {/*
@@ -412,8 +161,6 @@ if (inicial) {
   </div>
 </Armazon>
 
-<script is:inline set:html={guion} />
-
 <style>
   .pagina {
     padding-block: var(--respiracion);
@@ -427,48 +174,32 @@ if (inicial) {
     margin: 0;
   }
 
-  .formulario {
-    margin-top: calc(var(--unidad) * 3);
+  /*
+   * La región y la sombra del recuento comparten celda: la sombra da el alto, la región se pinta
+   * encima. Sin guion solo está la región, vacía y fuera del flujo: la rejilla no mide nada.
+   */
+  .recuento {
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
   }
 
-  label {
-    display: block;
+  .estado {
+    position: absolute;
+    inset-inline: 0;
+    top: 0;
+    grid-row: 1;
+    grid-column: 1;
+    margin: calc(var(--unidad) * 3) 0 0;
+    font-family: var(--sans);
     font-size: var(--pie);
     color: var(--tinta-apagada);
-    margin-bottom: var(--unidad);
-  }
-
-  /* UX-DR10 — filete inferior que pasa a 2px siena al recibir foco. Sin caja, sin
-     sombra, sin icono decorativo. */
-  input {
-    width: 100%;
-    min-height: var(--zona-de-toque);
-    font-family: var(--serif);
-    font-size: var(--titular-sm);
-    color: var(--tinta);
-    background: transparent;
-    border: 0;
-    border-bottom: var(--grosor-filete) solid var(--contorno);
-    border-radius: 0;
-    padding: var(--unidad) 0;
-    transition: border-color 150ms;
-  }
-
-  /* Historia 22.10 — el filete pasa a 2px siena **además** del anillo global de UX-DR23,
-     nunca en su lugar: el anillo no se suprime en ningún elemento, tampoco en el campo. */
-  input:focus {
-    border-bottom: 2px solid var(--siena);
+    overflow-wrap: anywhere;
   }
 
   /* Vacía no ocupa sitio, pero sigue en el árbol de accesibilidad: no lleva `hidden`. */
   .estado:empty {
     margin: 0;
-  }
-
-  .estado {
-    margin: calc(var(--unidad) * 3) 0 0;
-    font-size: var(--pie);
-    color: var(--tinta-apagada);
   }
 
   .resultados {

@@ -90,20 +90,22 @@ describe('Historia 26.2 — la tabla de tipos de resultado', () => {
 });
 
 describe('Historia 26.2 — un solo emisor y un solo lector del tipo', () => {
-  it('en `src/`, `FILTRO_DE_TIPO` solo lo usan `Armazon.astro` (escribe) y `buscar.astro` (lee)', async () => {
+  it('en `src/`, `FILTRO_DE_TIPO` solo lo usan `Armazon.astro` (escribe) y `Busqueda.astro` (lee)', async () => {
+    // Historia 27.2 — el lector es el guion empaquetado de `Busqueda.astro`, que desde entonces es
+    // la búsqueda entera de `/buscar/`.
     const usan: string[] = [];
     for (const fichero of await ficheros('src')) {
       if (fichero === 'src/lib/tipoDeResultado.ts') continue;
       const codigo = sinComentarios(await readFile(join(RAIZ, fichero), 'utf8'));
       if (/\bFILTRO_DE_TIPO\b/u.test(codigo)) usan.push(fichero);
     }
-    expect(usan.sort()).toEqual(['src/components/Armazon.astro', 'src/pages/buscar.astro']);
+    expect(usan.sort()).toEqual(['src/components/Armazon.astro', 'src/components/Busqueda.astro']);
 
     const armazon = sinComentarios(await readFile(join(RAIZ, 'src/components/Armazon.astro'), 'utf8'));
     expect(armazon).toMatch(/data-pagefind-filter=\{[^}]*\$\{FILTRO_DE_TIPO\}:\$\{tipo\}/u);
-    const buscar = sinComentarios(await readFile(join(RAIZ, 'src/pages/buscar.astro'), 'utf8'));
-    expect(buscar).toContain('FILTRO: FILTRO_DE_TIPO');
-    expect(buscar).toContain('dato.filters?.[FILTRO]?.[0]');
+    const busqueda = sinComentarios(await readFile(join(RAIZ, 'src/components/Busqueda.astro'), 'utf8'));
+    expect(busqueda).toMatch(/import \{[^}]*\bFILTRO_DE_TIPO\b[^}]*\} from '\.\.\/lib\/tipoDeResultado\.ts';/u);
+    expect(busqueda).toContain('dato.filters?.[FILTRO_DE_TIPO]?.[0]');
   });
 
   it('ningún fichero de `src/` ni de `public/` escribe el tipo en un `data-pagefind-meta`', async () => {
@@ -115,7 +117,7 @@ describe('Historia 26.2 — un solo emisor y un solo lector del tipo', () => {
     expect(conTipo).toEqual([]);
   });
 
-  it('`data-pagefind-filter` solo lo escriben `Armazon.astro` y `FiltrosDeLaCita.astro`, y solo `buscar.astro` configura Pagefind', async () => {
+  it('`data-pagefind-filter` solo lo escriben `Armazon.astro` y `FiltrosDeLaCita.astro`, y solo `Busqueda.astro` configura Pagefind', async () => {
     // Un filtro escrito a mano en otra página, o en una isla, sería un segundo emisor del tipo
     // —o de los filtros de la Cita (27.1)— que las pruebas de `dist/` no atribuyen a nadie; y
     // unas opciones de Pagefind fuera de `OPCIONES_DE_PAGEFIND` serían un segundo sitio donde la
@@ -134,11 +136,12 @@ describe('Historia 26.2 — un solo emisor y un solo lector del tipo', () => {
     expect(filtran).toEqual(['src/components/Armazon.astro', 'src/components/FiltrosDeLaCita.astro']);
     expect(ordenan).toEqual(['src/components/FiltrosDeLaCita.astro']);
     expect(pesan).toEqual(['src/lib/tipoDeResultado.ts']);
-    expect(configuran).toEqual(['src/pages/buscar.astro']);
-    const buscar = sinComentarios(await readFile(join(RAIZ, 'src/pages/buscar.astro'), 'utf8'));
-    expect(buscar.match(/\.options\(/gu)).toEqual(['.options(']);
-    expect(buscar).toContain('pf.options(PAGEFIND)');
-    expect(buscar).toContain('PAGEFIND: OPCIONES_DE_PAGEFIND');
+    // Historia 27.2 — solo el guion de la búsqueda, una vez y con las opciones de su dueño.
+    expect(configuran).toEqual(['src/components/Busqueda.astro']);
+    const busqueda = sinComentarios(await readFile(join(RAIZ, 'src/components/Busqueda.astro'), 'utf8'));
+    expect(busqueda.match(/\.options\(/gu)).toEqual(['.options(']);
+    expect(busqueda).toContain('pf!.options(OPCIONES_DE_PAGEFIND)');
+    expect(busqueda).toMatch(/import \{[^}]*\bOPCIONES_DE_PAGEFIND\b[^}]*\} from '\.\.\/lib\/tipoDeResultado\.ts';/u);
   });
 
   it('el detector ve lo que tiene que ver', () => {
@@ -173,7 +176,7 @@ describe('Historia 27.1 — `FiltrosDeLaCita` solo lo usa la Página de Cita', (
     const componente = sinComentarios(await readFile(join(RAIZ, 'src/components/FiltrosDeLaCita.astro'), 'utf8'));
     expect(componente).toContain('FILTROS_DE_CITA.autor');
     expect(componente).toContain('ORDEN_DE_CITA');
-    const buscar = sinComentarios(await readFile(join(RAIZ, 'src/pages/buscar.astro'), 'utf8'));
-    expect(buscar).toContain('CON_AUTOR: TIPOS_CON_LINEA_DE_AUTOR');
+    const busqueda = sinComentarios(await readFile(join(RAIZ, 'src/components/Busqueda.astro'), 'utf8'));
+    expect(busqueda).toContain('TIPOS_CON_LINEA_DE_AUTOR.includes(tipo)');
   });
 });

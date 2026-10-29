@@ -10,25 +10,47 @@
  *
  * La etiqueta, visible y encima, en el pie y la tinta apagada, a `--unidad` del campo. Lo tecleado
  * va en Inter, al cuerpo grande y en tinta —nunca la serif, que es solo para texto de Cita y
- * nombres—, sin caja, sin sombra, sin radio, sin icono y sin `placeholder`: un filete inferior en
+ * nombres—, sin caja, sin sombra, sin radio y sin icono (sin `placeholder`, salvo el ejemplo de
+ * `/buscar/`, más abajo): un filete inferior en
  * el contorno, que al recibir el foco pasa a siena y al doble de grueso **además** del anillo
  * global de `tokens.css`, nunca en su lugar. Sin la cruz nativa de `type="search"`, que sería un
  * botón. El alto mínimo es la zona de toque. Ni mayúscula automática ni autocorrección: lo que se
  * teclea es parte de un nombre, y el teclado del móvil no tiene que cambiarlo por otra palabra.
+ *
+ * Historia 27.2 — `/buscar/` lo usa con tres cosas que el filtro no lleva, todas opcionales y sin
+ * ellas el campo sale como antes: el `name` que envía su formulario (`nombre`, «q»), un texto de
+ * ejemplo (`ejemplo`, el `placeholder`, en la tinta apagada) y la marca `data-consulta` por la que
+ * lo encuentran su guion y las pruebas (`consulta`).
  */
 interface Props {
   /** El `id` del campo, al que apunta su etiqueta. */
   id: string;
   /** La etiqueta visible: «Escribe parte del nombre.». */
   etiqueta: string;
+  /** El `name` del campo, si va en un formulario que lo envía. */
+  nombre?: string;
+  /** El texto de ejemplo («Por ejemplo: no hay camino»), como `placeholder`. */
+  ejemplo?: string;
+  /** Si el campo lleva la marca `data-consulta`. */
+  consulta?: boolean;
 }
 
-const { id, etiqueta } = Astro.props;
+const { id, etiqueta, nombre, ejemplo, consulta = false } = Astro.props;
 ---
 
 <div class="campo-de-busqueda">
   <label for={id}>{etiqueta}</label>
-  <input id={id} type="search" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false" />
+  <input
+    id={id}
+    name={nombre}
+    type="search"
+    autocomplete="off"
+    autocapitalize="none"
+    autocorrect="off"
+    spellcheck="false"
+    placeholder={ejemplo}
+    data-consulta={consulta ? '' : undefined}
+  />
 </div>
 
 <style>
@@ -56,6 +78,12 @@ const { id, etiqueta } = Astro.props;
     border-radius: 0;
     box-shadow: none;
     appearance: none;
+  }
+
+  /* El texto de ejemplo, cuando lo hay, en la tinta apagada: no es lo tecleado. */
+  input::placeholder {
+    color: var(--tinta-apagada);
+    opacity: 1;
   }
 
   /* Sin la cruz ni la lupa nativas de `type="search"`: ni botón ni icono. */

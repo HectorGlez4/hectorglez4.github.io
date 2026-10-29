@@ -28,3 +28,19 @@ export function recuentoDeAutores(m: number): string {
 export function recuentoDeObras(k: number): string {
   return k === 1 ? '1 obra' : `${k} obras`;
 }
+
+/**
+ * El nombre de un Tema dentro de una frase, tras «sobre»: «Siguiente cita sobre la vida», no
+ * «sobre La vida» — Historias 24.5 y 27.2.
+ *
+ * Solo la primera letra pasa a minúscula, con las reglas del español: los Temas empiezan por
+ * artículo («La vida», «El deber»), y el resto se respeta para no rebajar un nombre propio
+ * interior el día que lo haya. Es la **única** regla de esa minúscula: la usan la Fila
+ * «Siguiente…» de la Tarjeta de Obra (por `src/lib/atribucion.ts`, que la reexporta) y el recuento
+ * de `/buscar/` con un Tema elegido («8 citas de José Martí sobre la prudencia.»), que la lleva al
+ * navegador. Por eso vive en este módulo sin importaciones (Historia 27.2).
+ */
+export function temaEnFrase(nombre: string): string {
+  const [primera = '', ...resto] = nombre;
+  return primera.toLocaleLowerCase('es') + resto.join('');
+}

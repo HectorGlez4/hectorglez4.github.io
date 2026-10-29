@@ -13,7 +13,7 @@
 import type { Cita, Autor, SiguienteCita } from './publicado.ts';
 import type { ObraResuelta } from './obras.ts';
 import { MARCA } from './marca.ts';
-import { recuentoDeAutores, recuentoDeObras } from './recuentos.ts';
+import { recuentoDeAutores, recuentoDeObras, temaEnFrase } from './recuentos.ts';
 import {
   TARJETA_DEL_DIRECTORIO_DE_AUTORES,
   TARJETA_DEL_DIRECTORIO_DE_OBRAS,
@@ -25,8 +25,10 @@ import {
  * Los recuentos de Autores y de Obras viven en `src/lib/recuentos.ts` desde la Historia 26.6, sin
  * importaciones, porque el guion del filtro del Directorio los lleva al navegador; aquí se
  * reexportan para la meta, la Tarjeta Social y las pruebas, que los siguen pidiendo a este módulo.
+ * `temaEnFrase` se mudó con ellos en la Historia 27.2: el recuento de `/buscar/` la lleva al
+ * navegador, y la «Siguiente cita sobre…» de la 24.5 la sigue usando desde aquí. Una sola regla.
  */
-export { recuentoDeAutores, recuentoDeObras };
+export { recuentoDeAutores, recuentoDeObras, temaEnFrase };
 
 /**
  * La procedencia compuesta —título de la Obra y año de la Cita, en ese orden— o `undefined`
@@ -375,20 +377,6 @@ export function contenidoDeTarjetaDeObra(
  * El texto de «Siguiente…» cuando sigue el orden de la Obra (UX-DR65, Historia 24.5).
  */
 export const FILA_SIGUIENTE_DE_ESTA_OBRA = 'Siguiente cita de esta obra';
-
-/**
- * El nombre de un Tema dentro de una frase, tras «sobre»: «Siguiente cita sobre la vida», no
- * «sobre La vida» — Historia 24.5.
- *
- * Solo la primera letra pasa a minúscula, con las reglas del español: los Temas empiezan por
- * artículo («La vida», «El deber»), y el resto se respeta para no rebajar un nombre propio
- * interior el día que lo haya. Es la **única** regla de esa minúscula; la reutilizará el
- * recuento de la 27.x.
- */
-export function temaEnFrase(nombre: string): string {
-  const [primera = '', ...resto] = nombre;
-  return primera.toLocaleLowerCase('es') + resto.join('');
-}
 
 /**
  * El texto de la Fila de bloque «Siguiente…» de la Tarjeta de Obra — FR-12, UX-DR65, UX-DR107,

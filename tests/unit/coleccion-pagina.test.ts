@@ -448,17 +448,28 @@ describe('Historia 12.3 — la Página de Colección, construida', () => {
      * prueba que existía miraba el lado productor.
      */
     it('la página de búsqueda embarca la tabla de rótulos, con el de Colección', async () => {
+      /*
+       * Historia 27.2 — la tabla viaja en el guion empaquetado de la búsqueda, el fichero de
+       * `/_astro/` que pide `/buscar/`, como un objeto del empaquetado (`coleccion:`Colección``) y
+       * no como el JSON del guion en línea de antes.
+       */
       const buscar = await leer('/buscar/');
-      expect(buscar).toContain(`"coleccion":"${ETIQUETAS_DE_RESULTADO.coleccion}"`);
+      const src = /<script type="module" src="(\/_astro\/Busqueda\.astro_astro_type_script_index_0_lang\.[^"]+\.js)"/u.exec(buscar)?.[1];
+      expect(src, '/buscar/ no pide el guion de la búsqueda').toBeDefined();
+      const guion = await leerCrudo(src!.slice(1));
+      const entrada = (tipo: string, etiqueta: string) =>
+        new RegExp(`(?:^|[{,])["']?${tipo}["']?:\\s*[\`"']${etiqueta}[\`"']`, 'u');
+      expect(guion).toMatch(entrada('coleccion', ETIQUETAS_DE_RESULTADO.coleccion));
       for (const [tipo, etiqueta] of Object.entries(ETIQUETAS_DE_RESULTADO)) {
-        expect(buscar, tipo).toContain(`"${tipo}":"${etiqueta}"`);
+        expect(guion, tipo).toMatch(entrada(tipo, etiqueta));
       }
     });
 
     it('la tabla no está escrita a mano en el guion: llega del módulo que la posee', async () => {
-      const fuente = await readFile(join(RAIZ, 'src/pages/buscar.astro'), 'utf8');
-      expect(fuente).toContain("from '../lib/tipoDeResultado.ts'");
-      expect(fuente).not.toMatch(/const ETIQUETA\s*=\s*\{/);
+      // Historia 27.2 — el guion es el `<script>` de `Busqueda.astro`.
+      const fuente = await readFile(join(RAIZ, 'src/components/Busqueda.astro'), 'utf8');
+      expect(fuente).toMatch(/import \{[^}]*\bETIQUETAS_DE_RESULTADO\b[^}]*\} from '\.\.\/lib\/tipoDeResultado\.ts';/u);
+      expect(fuente).not.toMatch(/const ETIQUETA\S*\s*=\s*\{/);
     });
 
     it('la salida sin resultados también ofrece las Colecciones publicadas', async () => {

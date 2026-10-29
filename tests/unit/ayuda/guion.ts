@@ -1,5 +1,5 @@
 import { parseSync } from 'vite';
-import type { Arranque, FormaDeArrancar } from '../../../src/lib/guiones.ts';
+import { guionExternoDe, type Arranque, type FormaDeArrancar, type IdDeGuion } from '../../../src/lib/guiones.ts';
 
 /**
  * Los bytes de guion **ejecutable** en línea de una página — el contador del tope de
@@ -248,17 +248,28 @@ export function importacionesEstaticasDe(fuente: string): string[] {
  * misma forma —y con su ruta, si el argumento es un literal—: lo que no casa sale en
  * `sinDeclarar`, y el arranque declarado que no aparece, en `sinVer`. `ruta` es la ruta pública,
  * del mismo origen (`/islas/imagen.js`).
+ *
+ * Historia 27.2 — un `import()` cuyo literal reconoce **otra entrada** de la lista que esta declara
+ * en `pide` (la búsqueda pide Pagefind) no es un arranque: no se sigue ni cuenta en estos bytes, y
+ * sale en `pedidas`, con su ruta, para que quien mide la siga hasta su entrada y la mida con su
+ * tope. Una entrada declarada en `pide` que ningún fichero pide sale en `pideSinVer`. Con
+ * `trozos`, cada importación estática tiene que ser un trozo compartido de los que la entrada
+ * declara; si no, sale en `sinDeclarar`.
  */
 export function descargaDeLaEntrada(
   dist: string,
   ruta: string,
   arranca: readonly Arranque[],
   leer: (fichero: string) => Buffer,
-): { bytes: number; ficheros: string[]; sinDeclarar: string[]; sinVer: Arranque[] } {
+  pide: readonly IdDeGuion[] = [],
+  trozos?: RegExp,
+): { bytes: number; ficheros: string[]; sinDeclarar: string[]; sinVer: Arranque[]; pedidas: string[]; pideSinVer: IdDeGuion[] } {
   const ORIGEN = 'http://sitio.invalid';
   const vistos = new Set<string>();
   const sinVer = [...arranca];
   const sinDeclarar: string[] = [];
+  const pedidas: string[] = [];
+  const pideSinVer = [...pide];
   let bytes = 0;
   const pendientes = [ruta.replace(/[?#].*$/, ''), ...arranca.map((a) => a.ruta)];
   while (pendientes.length > 0) {
@@ -275,10 +286,20 @@ export function descargaDeLaEntrada(
         if (destino!.origin !== ORIGEN) {
           throw new Error(`${actual} importa «${peticion.literal}», que no es del mismo origen.`);
         }
+        // Historia 27.2 — la entrada que declara sus trozos solo importa trozos.
+        if (trozos !== undefined && !trozos.test(destino!.pathname)) {
+          sinDeclarar.push(`${actual}: import(${peticion.argumento.slice(0, 60)}), que no es un trozo de la entrada`);
+        }
         pendientes.push(destino!.pathname);
         continue;
       }
       const resuelta = destino === undefined ? undefined : destino.origin === ORIGEN ? destino.pathname : destino.href;
+      const otraEntrada = resuelta === undefined ? undefined : guionExternoDe(resuelta)?.id;
+      if (peticion.como === 'import()' && otraEntrada !== undefined && pide.includes(otraEntrada)) {
+        pedidas.push(resuelta!);
+        if (pideSinVer.includes(otraEntrada)) pideSinVer.splice(pideSinVer.indexOf(otraEntrada), 1);
+        continue;
+      }
       const declarado = sinVer.findIndex(
         (a) => a.como === peticion.como && (resuelta === undefined || a.ruta === resuelta),
       );
@@ -286,5 +307,5 @@ export function descargaDeLaEntrada(
       else sinVer.splice(declarado, 1);
     }
   }
-  return { bytes, ficheros: [...vistos], sinDeclarar, sinVer };
+  return { bytes, ficheros: [...vistos], sinDeclarar, sinVer, pedidas: [...new Set(pedidas)], pideSinVer };
 }

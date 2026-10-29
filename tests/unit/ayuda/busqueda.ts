@@ -1,20 +1,24 @@
 import { createContext, runInContext } from 'node:vm';
 
 /**
- * La isla de `/buscar/`, ejecutada — Historia 23.8.
+ * La isla de `/buscar/`, ejecutada — Historias 23.8 y 27.2.
  *
- * Es el «ejecutándola» que pedía la prueba de la 23.6: la isla es un guion clásico en línea, corre
- * antes que el fichero de medición diferido, y desde la 23.8 escribe en el historial. Lo que hay
- * que probar es lo que **hace** —qué pide a `__medir`, cuándo y qué escribe en `history`—, y eso
- * solo se ve ejecutando el guion de verdad, el que sale en `dist/`, no leyendo su texto.
+ * Es el «ejecutándola» que pedía la prueba de la 23.6. Desde la 27.2 la isla es el `<script>`
+ * empaquetado de `src/components/Busqueda.astro`, un fichero de `/_astro/` que se aplana a guion
+ * clásico (`tests/unit/ayuda/aplanar.ts`) para ejecutarlo; escribe en el historial desde la 23.8.
+ * Lo que hay que probar es lo que **hace** —qué pide a `__medir` y a Pagefind, cuándo, qué pinta y
+ * qué escribe en `history`—, y eso solo se ve ejecutando el guion de verdad, el que sale en `dist/`.
  *
  * El entorno es un global de verdad (`node:vm`), como el de `tests/unit/ayuda/medicion.ts`: la isla
  * llama `__medir`, `history` y `location` a secas. Lleva lo que la isla pide y nada más:
  *
- *   · los cinco elementos que busca —campo, lista, estado, salida (con su `.sugerencia`) y
- *     formulario—; cualquier otro selector **lanza**, para que una isla que empiece a pedir otra
- *     cosa no pase en verde contra un entorno que no la sabe. El campo es de búsqueda, y como en
- *     el navegador quita los saltos de línea de lo que se le escribe;
+ *   · la raíz `[data-busqueda]` con su `<template>`, cuyo contenido clonado da el formulario, el
+ *     campo, los dos selectores (con sus opciones), «Quitar los filtros» y la sombra del recuento;
+ *     y la lista, el estado (dentro de su contenedor, para que la sombra se ponga delante) y la
+ *     salida (con su `.sugerencia`). Cualquier otro selector **lanza**, para que una isla que
+ *     empiece a pedir otra cosa no pase en verde contra un entorno que no la sabe. El campo es de
+ *     búsqueda, y como en el navegador quita los saltos de línea de lo que se le escribe; un
+ *     selector cambia de opción al escribirle el valor, como uno nativo, y el foco se apunta;
  *   · `document.createElement` con lo que usa para pintar un resultado;
  *   · un reloj fingido —`setTimeout`, `clearTimeout`, `requestAnimationFrame`— que solo avanza con
  *     `avanzar(ms)`;
@@ -25,15 +29,18 @@ import { createContext, runInContext } from 'node:vm';
  *   · Navigation Timing configurable: el tipo de la entrada, ninguna entrada o sin la API;
  *   · la visibilidad del documento —visible al cargar, u oculta, como una pestaña de fondo—,
  *     `pagehide` y `pageshow`;
- *   · `__medir` espía;
+ *   · `__medir` espía, y `Event` con un `dispatchEvent` de la ventana que no hace nada: el envoltorio
+ *     con que el empaquetado rodea el `import()` avisa por ahí de una importación fallida;
  *   · un Pagefind de mentira en lugar del único `import(` del guion —la sustitución se comprueba:
- *     si el guion no lleva exactamente uno, o no empieza pidiendo `/pagefind/pagefind.js`, el
- *     entorno lanza; lo que pide de verdad, con el `?{n}` de su reintento, se apunta—, con el total
- *     y lo que da `slice` configurables por consulta, respuestas que esperan a
+ *     si el guion no lleva exactamente uno, o no empieza pidiendo `/pagefind/pagefind.js` (con
+ *     comillas simples, dobles o la plantilla del empaquetado), el entorno lanza; lo que pide de
+ *     verdad, con el `?{n}` de su reintento, se apunta—, con el total y lo que da `slice`
+ *     configurables por consulta (y por sus `filters`), respuestas que esperan a
  *     `responder(consulta)` si se pide, rechazo en la importación, en `init`, en `search` o en los
  *     datos de un resultado, y un `destroy` que se cuenta. Desde la Historia 26.2 el módulo lleva
  *     también `options`, y `llamadas()` da en orden cada llamada al módulo (`options` con su
- *     argumento, `init`, `search` con su consulta y `destroy`).
+ *     argumento, `init`, `search` con su consulta —y, si las lleva, sus opciones: los `filters` y
+ *     el `sort` de la 27.2— y `destroy`).
  *
  * `analizado()` es lo que la isla hizo **al evaluarse**, antes de ninguna escucha ni de ninguna
  * promesa: ahí no puede haber ni medición ni escritura en el historial. `rechazos()` son las
@@ -72,13 +79,43 @@ export interface OpcionesDeLaIsla {
   historialQueLanza?: boolean;
   /** Dónde falla el índice: la importación, `init`, `search` (que lanza) o los datos del primer resultado. */
   falla?: 'importacion' | 'init' | 'search' | 'data';
-  /** Lo que responde el índice a cada consulta. Por omisión, nada: total 0. */
-  respuestas?: (consulta: string) => Respuesta;
+  /**
+   * Lo que responde el índice a cada consulta —`null` en la búsqueda sin texto de la 27.2—, con
+   * las opciones de `search` si las lleva. Por omisión, nada: total 0.
+   */
+  respuestas?: (consulta: string | null, opciones?: OpcionesDeSearch) => Respuesta;
   /** Si las respuestas de `search` esperan a `responder(consulta)`. */
   manual?: boolean;
   /** Si la página carga oculta —una pestaña de fondo—, sin haberse visto. */
   oculta?: boolean;
+  /** Las opciones de los selectores (sin la primera, «Todos…»). Por omisión, `AUTORES` y `TEMAS`. */
+  autores?: OpcionDeSelector[];
+  temas?: OpcionDeSelector[];
 }
+
+/** Lo que `search` recibe como segundo argumento, si lo recibe. */
+export interface OpcionesDeSearch {
+  filters?: Record<string, string>;
+  sort?: Record<string, string>;
+}
+
+/** Una opción de un selector: su valor y el nombre que se lee. */
+export interface OpcionDeSelector {
+  valor: string;
+  rotulo: string;
+}
+
+/** Las opciones de Autor del entorno, en el orden del build. */
+export const AUTORES: OpcionDeSelector[] = [
+  { valor: 'jose-marti', rotulo: 'José Martí' },
+  { valor: 'seneca', rotulo: 'Séneca' },
+];
+
+/** Las opciones de Tema del entorno, en el orden del build. */
+export const TEMAS: OpcionDeSelector[] = [
+  { valor: 'el-saber', rotulo: 'El saber' },
+  { valor: 'la-prudencia', rotulo: 'La prudencia' },
+];
 
 /** Lo que la isla pide a `__medir`, cada llamada con sus argumentos. */
 export type Emitido = unknown[];
@@ -94,6 +131,8 @@ class Elemento {
   value = '';
   href = '';
   dataset: Record<string, string> = {};
+  /** Solo el campo sabe recibir el foco; en cualquier otro elemento, llamarlo lanza. */
+  focus?: () => void;
   readonly atributos = new Map<string, string>();
   hijos: Elemento[] = [];
   padre: Elemento | null = null;
@@ -125,6 +164,13 @@ class Elemento {
       nodo.padre = this;
       this.hijos.push(nodo);
     }
+  }
+
+  /** Pone `nodo` justo delante de este elemento, en su padre. */
+  before(nodo: Elemento) {
+    if (this.padre === null) throw new Error(`el entorno no sabe poner nada delante de <${this.tagName}> sin padre`);
+    nodo.padre = this.padre;
+    this.padre.hijos.splice(this.padre.hijos.indexOf(this), 0, nodo);
   }
 
   replaceChildren(...nodos: Elemento[]) {
@@ -167,8 +213,41 @@ function despachar(oyentes: Oyente[], tipo: string, evento: Record<string, unkno
   }
 }
 
-/** Cómo empieza el único `import(` del guion: el índice, con el `?{n}` del reintento concatenado detrás. */
-const IMPORTACION = "import('/pagefind/pagefind.js'";
+/**
+ * Cómo empieza el único `import(` del guion: el índice, con el `?{n}` del reintento concatenado
+ * detrás. Con comillas simples, dobles o la plantilla sin sustituciones con que lo escribe el
+ * empaquetado.
+ */
+const IMPORTACION = /import\(\s*(['"`])\/pagefind\/pagefind\.js\1/u;
+
+/** Un `<select>` de mentira: su valor es el de la opción elegida, y escribirlo elige otra. */
+function selector(id: string, primera: string, opciones: OpcionDeSelector[]) {
+  const elemento = new Elemento('select');
+  elemento.dataset.selector = id;
+  const todas = [{ valor: '', rotulo: primera }, ...opciones].map(({ valor, rotulo }) => {
+    const opcion = new Elemento('option');
+    opcion.value = valor;
+    opcion.textContent = rotulo;
+    return opcion;
+  });
+  elemento.append(...todas);
+  let elegida = 0;
+  Object.defineProperty(elemento, 'options', { get: () => todas });
+  Object.defineProperty(elemento, 'selectedIndex', {
+    get: () => elegida,
+    set: (i: number) => {
+      elegida = i;
+    },
+  });
+  Object.defineProperty(elemento, 'value', {
+    get: () => todas[elegida]?.value ?? '',
+    set: (valor: unknown) => {
+      // Como en un `<select>` nativo: un valor que no es de ninguna opción no elige ninguna.
+      elegida = todas.findIndex((o) => o.value === String(valor));
+    },
+  });
+  return elemento;
+}
 
 export function islaDeBusquedaEnUnSandbox(guion: string, opciones: OpcionesDeLaIsla = {}) {
   /*
@@ -176,10 +255,10 @@ export function islaDeBusquedaEnUnSandbox(guion: string, opciones: OpcionesDeLaI
    * importación, dejaría pasar en verde una isla que pide otra cosa.
    */
   const importaciones = guion.split('import(').length - 1;
-  if (importaciones !== 1 || !guion.includes(IMPORTACION)) {
+  if (importaciones !== 1 || !IMPORTACION.test(guion)) {
     throw new Error(`la isla lleva ${importaciones} «import(», y el entorno sabe sustituir exactamente uno: ${IMPORTACION}`);
   }
-  const sustituido = guion.replace(IMPORTACION, "__importar('/pagefind/pagefind.js'");
+  const sustituido = guion.replace(IMPORTACION, (_, comilla: string) => `__importar(${comilla}/pagefind/pagefind.js${comilla}`);
 
   const emitidos: Emitido[] = [];
   const llamadasAlHistorial: unknown[][] = [];
@@ -225,19 +304,57 @@ export function islaDeBusquedaEnUnSandbox(guion: string, opciones: OpcionesDeLaI
   });
   const lista = new Elemento('ul');
   const estado = new Elemento('p');
+  const recuento = new Elemento('div');
+  recuento.append(estado);
   const salida = new Elemento('div');
   salida.hidden = true;
   const sugerencia = new Elemento('p');
   sugerencia.textContent = '\n        No encontramos esa frase. Prueba con menos palabras.\n      ';
   salida.dentro.set('.sugerencia', sugerencia);
   const formulario = new Elemento('form');
-  const porSelector = new Map<string, Elemento>([
+  const autor = selector('autor', 'Todos los autores', opciones.autores ?? AUTORES);
+  const tema = selector('tema', 'Todos los temas', opciones.temas ?? TEMAS);
+  const quitar = new Elemento('button');
+  quitar.hidden = true;
+  const sombra = new Elemento('p');
+  formulario.append(campo, autor, tema, quitar);
+  // El contenido de la plantilla: lo que la isla saca de su clon, y nada más.
+  const clon = new Elemento('#fragmento');
+  clon.append(formulario, sombra);
+  for (const [selectorDeCss, elemento] of [
+    ['form', formulario],
     ['[data-consulta]', campo],
+    ['[data-selector-de-autor]', autor],
+    ['[data-selector-de-tema]', tema],
+    ['[data-quitar]', quitar],
+    ['.sombra', sombra],
+  ] as const) {
+    clon.dentro.set(selectorDeCss, elemento);
+  }
+  let clonada = false;
+  const plantilla = new Elemento('template');
+  Object.defineProperty(plantilla, 'content', {
+    get: () => ({
+      cloneNode: () => {
+        if (clonada) throw new Error('la isla clona la plantilla dos veces');
+        clonada = true;
+        return clon;
+      },
+    }),
+  });
+  const raiz = new Elemento('div');
+  raiz.append(plantilla);
+  raiz.dentro.set('template', plantilla);
+  const porSelector = new Map<string, Elemento>([
+    ['[data-busqueda]', raiz],
     ['[data-resultados]', lista],
     ['[data-estado]', estado],
     ['[data-salida]', salida],
-    ['.formulario', formulario],
   ]);
+  let enfocado: Elemento | null = null;
+  campo.focus = () => {
+    enfocado = campo;
+  };
 
   const delDocumento: Oyente[] = [];
   const deLaVentana: Oyente[] = [];
@@ -304,16 +421,16 @@ export function islaDeBusquedaEnUnSandbox(guion: string, opciones: OpcionesDeLaI
   let destrucciones = 0;
   /** Cada llamada al módulo, en orden: `['options', o]`, `['init']`, `['search', consulta]`, `['destroy']`. */
   const llamadasAlIndice: unknown[][] = [];
-  const esperando: { consulta: string; resolver: () => void }[] = [];
-  const responderA = (consulta: string) => {
-    const { total, pintados = total, datos }: Respuesta = (opciones.respuestas ?? (() => ({ total: 0 })))(consulta);
+  const esperando: { consulta: string | null; resolver: () => void }[] = [];
+  const responderA = (consulta: string | null, ajustes?: OpcionesDeSearch) => {
+    const { total, pintados = total, datos }: Respuesta = (opciones.respuestas ?? (() => ({ total: 0 })))(consulta, ajustes);
     const todos = Array.from({ length: total }, (_, i) => ({
       data: async () => {
         // Un fragmento que no llega: el índice y la búsqueda corrieron, los datos de un resultado no.
         if (falla === 'data' && i === 0) throw new Error('los datos de un resultado no llegan');
         if (datos) return datos(i);
         return {
-          url: `/cita/${encodeURIComponent(consulta)}-${i}.html`,
+          url: `/cita/${encodeURIComponent(String(consulta))}-${i}.html`,
           meta: { title: `${consulta} ${i}` },
           filters: { tipo: ['cita'] },
         };
@@ -333,11 +450,11 @@ export function islaDeBusquedaEnUnSandbox(guion: string, opciones: OpcionesDeLaI
       llamadasAlIndice.push(['init']);
       if (falla === 'init') throw new Error('el índice no se deja iniciar');
     },
-    search: (consulta: string) => {
-      llamadasAlIndice.push(['search', consulta]);
+    search: (consulta: string | null, ajustes?: OpcionesDeSearch) => {
+      llamadasAlIndice.push(ajustes === undefined ? ['search', consulta] : ['search', consulta, ajustes]);
       if (falla === 'search') throw new Error('la búsqueda falla');
-      if (!opciones.manual) return Promise.resolve(responderA(consulta));
-      return new Promise((resolver) => esperando.push({ consulta, resolver: () => resolver(responderA(consulta)) }));
+      if (!opciones.manual) return Promise.resolve(responderA(consulta, ajustes));
+      return new Promise((resolver) => esperando.push({ consulta, resolver: () => resolver(responderA(consulta, ajustes)) }));
     },
     destroy: async () => {
       llamadasAlIndice.push(['destroy']);
@@ -365,6 +482,8 @@ export function islaDeBusquedaEnUnSandbox(guion: string, opciones: OpcionesDeLaI
       deLaVentana.push({ tipo, oyente, unaVez: typeof ajustes === 'object' && ajustes.once === true }),
     __medir: (...argumentos: unknown[]) => void emitidos.push(argumentos),
     __importar: importar,
+    Event,
+    dispatchEvent: () => true,
   };
   ventana.window = ventana;
   createContext(ventana);
@@ -450,6 +569,38 @@ export function islaDeBusquedaEnUnSandbox(guion: string, opciones: OpcionesDeLaI
     pintados: () => lista.hijos.map((li) => li.hijos[0].hijos.map((span) => span.textContent).join(' · ')),
     /** El valor del campo. */
     valor: () => campo.value,
+    /** Lo que dice la región del recuento ahora, y si está apartada de la vista. */
+    region: () => ({ texto: estado.textContent, apartada: estado.clases.has('solo-para-lectores') }),
+    /** La sombra del recuento: la frase que la región escribirá tras la pausa. */
+    sombra: () => sombra.textContent,
+    /** Si la salida sin resultados está a la vista. */
+    salidaVisible: () => !salida.hidden,
+    /** Si «Quitar los filtros» está a la vista. */
+    quitarVisible: () => !quitar.hidden,
+    /** Qué tiene el foco, de lo que la isla puede enfocar: `campo` o nada. */
+    foco: () => (enfocado === campo ? 'campo' : null),
+    /** El valor elegido en cada selector. */
+    elegidos: () => ({ autor: autor.value, tema: tema.value }),
+    /** Lo que la isla insertó: los hijos de la raíz y del contenedor del recuento, por etiqueta. */
+    insertado: () => ({
+      raiz: raiz.hijos.map((h) => h.tagName.toLowerCase()),
+      recuento: recuento.hijos.map((h) => (h === sombra ? 'sombra' : h === estado ? 'estado' : h.tagName.toLowerCase())),
+    }),
+    /**
+     * Elige en un selector —como el visitante, que da `input` y `change`— sin dejar pasar el tiempo.
+     * `''` es «Todos…».
+     */
+    elegir: (cual: 'autor' | 'tema', valor: string) => {
+      const elemento = cual === 'autor' ? autor : tema;
+      elemento.value = valor;
+      if ((elemento as unknown as { selectedIndex: number }).selectedIndex < 0) {
+        throw new Error(`el selector de ${cual} no tiene la opción «${valor}»`);
+      }
+      despachar(elemento.oyentes, 'input', evento('input'));
+      despachar(elemento.oyentes, 'change', evento('change'));
+    },
+    /** Pulsa «Quitar los filtros». */
+    quitarFiltros: () => despachar(quitar.oyentes, 'click', evento('click', { target: quitar })),
     /** Avanza el reloj `ms` milisegundos. */
     avanzar,
     /** Deja correr las promesas pendientes. */
@@ -467,7 +618,10 @@ export function islaDeBusquedaEnUnSandbox(guion: string, opciones: OpcionesDeLaI
       await vaciar();
     },
     /** El campo recibe el foco. */
-    enfocar: () => despachar(campo.oyentes, 'focus', evento('focus')),
+    enfocar: () => {
+      enfocado = campo;
+      despachar(campo.oyentes, 'focus', evento('focus'));
+    },
     /** Envía el formulario (Enter en el campo) y deja correr las promesas. Devuelve el evento. */
     enviar: async () => {
       const envio = evento('submit');
@@ -511,7 +665,7 @@ export function islaDeBusquedaEnUnSandbox(guion: string, opciones: OpcionesDeLaI
       cambiarVisibilidad('visible');
     },
     /** Deja correr las promesas, resuelve la primera búsqueda pendiente de esa consulta (con `manual`) y las deja correr otra vez. */
-    responder: async (consulta: string) => {
+    responder: async (consulta: string | null) => {
       // La búsqueda llega al índice después de cargarlo e iniciarlo: unas cuantas promesas más allá.
       await vaciar();
       const indice = esperando.findIndex((e) => e.consulta === consulta);
@@ -520,13 +674,16 @@ export function islaDeBusquedaEnUnSandbox(guion: string, opciones: OpcionesDeLaI
       pendiente.resolver();
       await vaciar();
     },
-    /** Las escuchas puestas, por dónde: la ventana, el documento, el campo, la lista y el formulario. */
+    /** Las escuchas puestas, por dónde: la ventana, el documento, el campo, la lista, el formulario, los selectores y el botón. */
     escuchas: () => ({
       ventana: deLaVentana.map((o) => o.tipo),
       documento: delDocumento.map((o) => o.tipo),
       campo: campo.oyentes.map((o) => o.tipo),
       lista: lista.oyentes.map((o) => o.tipo),
       formulario: formulario.oyentes.map((o) => o.tipo),
+      autor: autor.oyentes.map((o) => o.tipo),
+      tema: tema.oyentes.map((o) => o.tipo),
+      quitar: quitar.oyentes.map((o) => o.tipo),
     }),
     /** Desde ahora el índice falla ahí (o deja de fallar, sin argumento). */
     fallar: (donde?: OpcionesDeLaIsla['falla']) => {

@@ -145,7 +145,8 @@ const PRIMERA_SI = 'si' satisfies Primera;
 const PRIMERA_NO = 'no' satisfies Primera;
 
 /** Los campos que el fichero sabe producir: desde la 23.9, todos los del vocabulario. */
-export const CAMPOS_DEL_GUION = Object.keys(FUENTE_EN_EL_GUION) as readonly Campo[];
+// `@__PURE__` desde la Historia 27.2: el guion empaquetado de la búsqueda importa este módulo y no la usa.
+export const CAMPOS_DEL_GUION = /* @__PURE__ */ Object.keys(FUENTE_EN_EL_GUION) as readonly Campo[];
 
 /**
  * Los campos que el fichero envía con un evento: los que el vocabulario le declara y él sabe
@@ -310,6 +311,12 @@ export const MARCA_DE_BUSQUEDA_ASENTADA = 'asentada';
 export interface EstadoDeBusqueda {
   readonly texto: string;
   readonly filtros: string;
+  /**
+   * Los **valores** de los filtros elegidos —qué Autor, qué Tema—, compuestos por la isla en una
+   * cadena (Historia 27.2). Entran en la clave, para que otro Autor sea otro estado aunque la
+   * combinación sea la misma; no viajan en ningún evento. Sin filtros, se omite.
+   */
+  readonly valores?: string;
   /** `respuesta.results.length`: el total, nunca los resultados pintados. */
   readonly total: number;
 }
@@ -330,9 +337,9 @@ if (SIN_FILTROS === null) throw new Error('medicion.ts: el vocabulario no declar
 /**
  * Las constantes del asentamiento — Historia 23.8: los dos eventos, los tramos del vocabulario (con
  * sus cortes y sus rótulos), la combinación sin filtros y la clave de la marca. Se componen aquí,
- * desde sus módulos, y viajan a la isla de `/buscar/` como constante —`guionQueAnuncia` las escribe
- * en JSON—: ni la isla ni `buscar.astro` escriben un rótulo de tramo, un corte ni un nombre de
- * evento. Cambiar un corte en el vocabulario cambia lo que la isla emite sin tocarla.
+ * desde sus módulos, y el guion de la búsqueda (`src/components/Busqueda.astro`) las importa desde
+ * la Historia 27.2: ni el guion ni `buscar.astro` escriben un rótulo de tramo, un corte ni un
+ * nombre de evento. Cambiar un corte en el vocabulario cambia lo que la isla emite sin tocarla.
  */
 export const ASENTAMIENTO_DE_BUSQUEDA: ConstantesDelAsentamiento = {
   busqueda: EVENTOS.busqueda,
@@ -352,9 +359,11 @@ export const ASENTAMIENTO_DE_BUSQUEDA: ConstantesDelAsentamiento = {
  * registrada y cómo se marca la entrada lo decide **esta función**, y nada más. Recibe las
  * constantes (`ASENTAMIENTO_DE_BUSQUEDA`) y devuelve cuatro funciones puras:
  *
- *   · `clave(texto, filtros)` — la identidad de un estado: el texto recortado en los extremos (sin
- *     tocar mayúsculas: «Viento» y «viento» son dos búsquedas) y los filtros. «viento » y «viento»
- *     son el mismo estado;
+ *   · `clave(texto, filtros, valores?)` — la identidad de un estado: el texto recortado en los
+ *     extremos (sin tocar mayúsculas: «Viento» y «viento» son dos búsquedas), la combinación de
+ *     filtros y, si los hay, sus valores (Historia 27.2: «autor» con José Martí y «autor» con
+ *     Séneca son dos estados). «viento » y «viento» son el mismo estado; sin valores, la clave es
+ *     la de la 23.8;
  *   · `emisiones(estado, registradas)` — `null` si no hay estado, si su total no es un entero ≥ 0
  *     (la búsqueda no corrió: el índice no cargó o falló), si no tiene texto ni filtros —no es una
  *     búsqueda— o si su clave ya está entre las registradas de la carga. Si no, la clave y los
@@ -369,20 +378,19 @@ export const ASENTAMIENTO_DE_BUSQUEDA: ConstantesDelAsentamiento = {
  *   · `marcada(estadoDeLaEntrada)` — el objeto que la isla escribe en su entrada: una copia del que
  *     hubiera, con sus demás claves y la marca a `true`, sin mutarlo; o uno nuevo con solo la marca.
  *
- * **Viaja por su texto**, como `anunciar`: `buscar.astro` la mete en el guion en línea con
- * `String(asentamientoDeBusqueda)`, y la isla la llama con las constantes. Por eso es
- * autocontenida —no lee nada de este módulo ni importa nada, y su texto, evaluado en un contexto
- * vacío, funciona igual— y no lleva comentarios dentro, que viajarían a la página. Tampoco declara
- * funciones con nombre dentro, solo métodos: un empaquetado con `keepNames` (el de `tsx`, no el de
- * Astro ni el de Vitest) las envolvería en una ayuda suya, `__name`, que en la página no existe. Ni
- * constantes locales de un solo uso: el build las sustituye en su sitio y su texto dejaría de ser el
- * que ve Vitest. Lo vigila `tests/unit/medicion.test.ts`, que la llama directa y por su texto y
- * comprueba que la isla de `dist/` lleva ese mismo texto.
+ * **Se importa**, desde la Historia 27.2: el guion de la búsqueda es el `<script>` empaquetado de
+ * `src/components/Busqueda.astro`, que la importa con sus constantes (AD-6). Hasta entonces viajaba
+ * por su texto dentro de un guion en línea, y de ahí le quedan tres hábitos que se conservan porque
+ * no cuestan nada y la prueba que la evalúa por su texto sigue en pie: es autocontenida —no lee
+ * nada de este módulo ni importa nada, y su texto, evaluado en un contexto vacío, funciona igual—,
+ * no lleva comentarios dentro ni funciones con nombre (un empaquetado con `keepNames` las
+ * envolvería en `__name`), solo métodos. Lo vigila `tests/unit/medicion.test.ts`, que la llama
+ * directa y por su texto, y ejecuta el fichero de `dist/` que la lleva.
  */
 export function asentamientoDeBusqueda(c: ConstantesDelAsentamiento) {
   const a = {
-    clave(texto: string, filtros: string): string {
-      return JSON.stringify([texto.trim(), filtros]);
+    clave(texto: string, filtros: string, valores?: string): string {
+      return JSON.stringify(valores ? [texto.trim(), filtros, valores] : [texto.trim(), filtros]);
     },
     emisiones(
       estado: EstadoDeBusqueda | null | undefined,
@@ -390,7 +398,7 @@ export function asentamientoDeBusqueda(c: ConstantesDelAsentamiento) {
     ): { clave: string; eventos: string[][] } | null {
       if (!estado || !Number.isInteger(estado.total) || estado.total < 0) return null;
       const texto = estado.texto.trim();
-      const k = a.clave(estado.texto, estado.filtros);
+      const k = a.clave(estado.texto, estado.filtros, estado.valores);
       if ((texto === '' && estado.filtros === c.sinFiltros) || registradas.indexOf(k) >= 0) return null;
       let tramo = '';
       for (const t of c.tramos) if (estado.total >= t.desde) tramo = t.rotulo;

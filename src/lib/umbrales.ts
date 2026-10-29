@@ -395,6 +395,12 @@ export const META_AUTORES_DE_OTRA_TRADICION: number | undefined = undefined;
  * medición puesta (34 libres), porque pinta la línea del Autor también bajo el resultado de Cita
  * (`TIPOS_CON_LINEA_DE_AUTOR`), con el mismo código que la de Obra. Es lo último que cabe en
  * línea: la 27.2 saca el guion de `/buscar/` a un fichero empaquetado con su propio tope (AD-6).
+ *
+ * Historia 27.2, sin moverlo: `/buscar/` ya no lleva guion propio en línea —solo el arranque de la
+ * medición, como toda página—, porque su isla es ahora el `<script>` empaquetado de
+ * `src/components/Busqueda.astro`, que se descarga aparte y se mide con su propio tope,
+ * `MAX_BYTES_GUION_DE_LA_BUSQUEDA`. La superficie más justa vuelve a ser la Página de Cita con
+ * Imagen.
  */
 export const MAX_BYTES_DE_GUION = 6656;
 
@@ -523,8 +529,40 @@ export const MAX_BYTES_GUION_DE_PAGEFIND = 87200;
  * recuento, la lectura del modelo por los selectores de cada fila y la espera a la letra compuesta
  * (`compositionend`)— mide **3.167 bytes** (2026-10-28), y el tope se rederiva con la misma regla:
  * 3.167 más unos 400.
+ *
+ * Historia 27.2 — rederivado con la misma regla. La búsqueda importa también los ritmos de
+ * `src/lib/anuncio.ts` y los recuentos, y el empaquetado saca lo que los dos guiones comparten a un
+ * trozo que importan los dos: el filtro deja de ser un solo fichero y arrastra, con el trozo,
+ * `anunciar`, el `ahora` del segundo ritmo y `temaEnFrase`, que no usa. Mide **3.460 bytes**
+ * (2026-10-29): 2.963 de su fichero y 497 del trozo. Tope: 3.460 más unos 400.
  */
-export const MAX_BYTES_GUION_DEL_FILTRO = 3570;
+export const MAX_BYTES_GUION_DEL_FILTRO = 3860;
+
+/**
+ * La búsqueda de `/buscar/`, el `<script>` de `src/components/Busqueda.astro` que Astro emite como
+ * fichero en `/_astro/` — AD-6, Historia 27.2.
+ *
+ * Es el segundo guion empaquetado de la v8, y sustituye a la isla en línea de `/buscar/` (que se
+ * comía `MAX_BYTES_DE_GUION` con 34 bytes libres). Lo pide solo `/buscar/`, con `<script
+ * type="module" src>` detrás del de medición, y lleva dentro, por importación, los rótulos y las
+ * opciones de `src/lib/tipoDeResultado.ts`, la parte pura del asentamiento y su vocabulario
+ * (`src/lib/medicion.ts`, `src/lib/vocabulario.ts`), los dos ritmos de `src/lib/anuncio.ts`, las
+ * frases de `src/lib/busqueda.ts` y las dos pausas de este módulo. Pide Pagefind por `import()`,
+ * que **no** cuenta aquí: es otra entrada de la lista, con su tope (`MAX_BYTES_GUION_DE_PAGEFIND`).
+ * El tope cuenta el fichero con lo que importe de forma estática —un trozo compartido con el filtro
+ * de los Directorios, si el empaquetado lo sacara, también—, y lo vigila
+ * `tests/unit/medicion.test.ts` sobre `dist/`.
+ *
+ * Medido el 2026-10-29: **8.712 bytes** —8.215 del fichero de entrada y 497 del trozo que comparte
+ * con el filtro (`anunciar`, `ritmoDeTecleo`, los recuentos y `temaEnFrase`)—, el mismo con o sin
+ * punto final de medición, porque no lleva contenido. Unos 1.100 de esos bytes no son de la
+ * búsqueda: son el envoltorio con que el empaquetado de Vite rodea todo `import()` dinámico
+ * (`__vitePreload`, que precargaría las dependencias del módulo pedido; Pagefind no tiene ninguna
+ * que Vite conozca, y la lista va vacía). Vite lo pone siempre que construye para el cliente y no
+ * tiene opción que lo quite; se mide aquí para que se vea. Más unos 400 de margen, como los demás
+ * topes de la lista.
+ */
+export const MAX_BYTES_GUION_DE_LA_BUSQUEDA = 9112;
 
 /**
  * La pausa de tecleo, en milisegundos — AD-9, UX-DR58, UX-DR86, Historia 26.6.
@@ -536,6 +574,18 @@ export const MAX_BYTES_GUION_DEL_FILTRO = 3570;
  * La reutiliza `/buscar/` en la Épica 27. `DESIGN.md` dice «unos 700 ms».
  */
 export const PAUSA_DE_TECLEO_MS = 700;
+
+/**
+ * La pausa de los selectores de `/buscar/`, en milisegundos — Historia 27.2, UX-DR88.
+ *
+ * Cada `change` o `input` de un selector de filtro (Autor, Tema) la reinicia, y la búsqueda se
+ * rehace **una vez** al cumplirse: recorrer el selector con las flechas del teclado, que en un
+ * `select` nativo cerrado cambia el valor con cada pulsación, no lanza una búsqueda por opción.
+ * El recuento de esa búsqueda se escribe al llegar, sin otra espera. Enviar el formulario (Enter)
+ * cancela esta pausa y la del tecleo y busca el estado de ese momento. Vive junto a la del tecleo
+ * porque son las dos esperas de los mensajes de estado de la búsqueda.
+ */
+export const PAUSA_DE_LOS_SELECTORES_MS = 400;
 
 /**
  * El techo de lo que el alojamiento admite por sitio — Historia 24.2, Entorno operativo.
