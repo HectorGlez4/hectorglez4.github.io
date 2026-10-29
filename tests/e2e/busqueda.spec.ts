@@ -10,11 +10,13 @@ import { MARCA } from '../../src/lib/marca.ts';
 import { ASENTAMIENTO_DE_BUSQUEDA, EVENTOS } from '../../src/lib/medicion.ts';
 import { tramoDe } from '../../src/lib/vocabulario.ts';
 import { recuentoDeCitas, temaEnFrase } from '../../src/lib/recuentos.ts';
-import { RUTA_DEL_MAPA_DE_OBRAS } from '../../src/lib/busqueda.ts';
+import { RUTA_DEL_MAPA_DE_OBRAS, avisoDeLaDireccion, fraseDelRecuento } from '../../src/lib/busqueda.ts';
+import { ETIQUETA_DEL_FILTRO } from '../../src/lib/filtroDelDirectorio.ts';
+import { rutaDeLaBusqueda, rutaDelDirectorioDeAutores } from '../../src/lib/superficies.ts';
 import { citaConLosDosBloques, temaBajoUmbral, textoDe } from './ayuda/corpus.ts';
 import { citasPorObra, filtrosDeLaBusqueda, obrasDelAutor, type ConjuntoPublicable } from '../../src/lib/publicado.ts';
 import { clavesDeOrden, ordenDeLaListaDeObras, porSlug as porSlugDeCita, rutaDeLaObra } from '../../src/lib/obras.ts';
-import { CITAS_POR_PAGINA } from '../../src/lib/umbrales.ts';
+import { CITAS_POR_PAGINA, PAUSA_DE_TECLEO_MS } from '../../src/lib/umbrales.ts';
 import { conjuntoDeLosDatos, leerDatosDelCorpus } from '../../tools/lib/alcance.ts';
 import { leerDocumentosDeFuente, rutasDelCorpus } from '../../tools/lib/corpus.ts';
 import { posicionesDeCitas } from '../../tools/lib/posiciones.ts';
@@ -1385,7 +1387,10 @@ test.describe('Historia 27.3 — la búsqueda se acota también por una Obra del
   test('sin Autor no hay selector de Obra ni se pide el mapa: al cargar, al enfocar, al teclear ni con un Tema', async ({ page }) => {
     const pedidos: string[] = [];
     page.on('request', (r) => pedidos.push(new URL(r.url()).pathname));
-    await page.goto('/buscar/?q=vida', { waitUntil: 'networkidle' });
+    // Historia 27.4 — se llega a `/buscar/` a secas y se teclea: con estado en la dirección, la
+    // carga sí pide el mapa y `filters()` (lo prueba el `describe` de la 27.4).
+    await page.goto('/buscar/', { waitUntil: 'networkidle' });
+    await page.locator('[data-consulta]').fill('vida');
     await expect(page.locator('[data-estado]')).not.toBeEmpty({ timeout: 10_000 });
     await page.locator('[data-consulta]').focus();
     await page.locator('[data-consulta]').fill('camino');
@@ -1570,5 +1575,305 @@ test.describe('Historia 27.3 — la búsqueda se acota también por una Obra del
       expect(Math.abs(select.ancho - medidas.anchoDelCampo)).toBeLessThanOrEqual(1);
     }
     expect(medidas.quitar).toBeGreaterThanOrEqual(44);
+  });
+});
+
+/*
+ * Historia 27.4 (FR-7, NFR-4, UX-DR87, UX-DR93, AD-13) — la búsqueda vive en la dirección, y
+ * «atrás» la devuelve, en el navegador y con el índice de verdad. Lo elegido sale del Corpus en
+ * disco por los dueños del build (`filtrosDeLaBusqueda`); las frases, de `avisoDeLaDireccion`.
+ * Cada fila de la matriz la recorre además el entorno simulado de `tests/unit/medicion.test.ts`.
+ */
+test.describe('Historia 27.4 — la búsqueda vive en la dirección, y «atrás» la devuelve', () => {
+  const RAIZ_DEL_CORPUS = join(new URL('../..', import.meta.url).pathname, 'corpus');
+  let leido: Promise<ConjuntoPublicable> | undefined;
+  const conjunto = () =>
+    (leido ??= (async () => conjuntoDeLosDatos(await leerDatosDelCorpus(rutasDelCorpus(RAIZ_DEL_CORPUS))))());
+
+  const CAMPO = '[data-consulta]';
+  const AUTOR = '#filtro-de-autor';
+  const OBRA = '#filtro-de-obra';
+  const TEMA = '#filtro-de-tema';
+  const QUITAR = '[data-quitar]';
+  const ESTADO = '[data-estado]';
+  const RESULTADOS = '[data-resultados] .resultado';
+  const RUTA = rutaDeLaBusqueda();
+  const porValor = (a: { valor: string }, b: { valor: string }) => (a.valor < b.valor ? -1 : a.valor > b.valor ? 1 : 0);
+  const escapar = (texto: string) => texto.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+  /**
+   * El Autor con más Obras (desempate por slug), su Obra con más Citas que quepan en una tanda, y
+   * otro Autor con Obras, para la Obra de otro.
+   */
+  async function datos() {
+    const filtros = filtrosDeLaBusqueda(await conjunto());
+    const recuento = new Map(filtros.obras.map((o) => [o.valor, o.recuento]));
+    const conObras = Object.entries(filtros.mapaDeObras).sort((a, b) => b[1].length - a[1].length || (a[0] < b[0] ? -1 : 1));
+    const autor = (slug: string) => {
+      const opcion = filtros.autores.find((a) => a.valor === slug)!;
+      return { slug, nombre: opcion.rotulo, recuento: opcion.recuento };
+    };
+    const [slugA, obrasA] = conObras[0];
+    const [valor, titulo] = [...obrasA]
+      .filter(([v]) => recuento.get(v)! <= 30)
+      .sort((a, b) => recuento.get(b[0])! - recuento.get(a[0])! || (a[0] < b[0] ? -1 : 1))[0];
+    const otro = autor(conObras[1][0]);
+    return { filtros, a: autor(slugA), obra: { valor, titulo, recuento: recuento.get(valor)! }, otro };
+  }
+
+  /** Espera a que la dirección diga esa consulta (con su `?`, o vacía). */
+  const direccion = (page: Page, consulta: string) =>
+    expect.poll(() => new URL(page.url()).search, { timeout: 10_000 }).toBe(consulta);
+  const entradas = (page: Page) => page.evaluate(() => history.length);
+  /** Lo que se pide a la red, por ruta, desde ahora. */
+  const pedidosDe = (page: Page) => {
+    const pedidos: string[] = [];
+    page.on('request', (r) => pedidos.push(new URL(r.url()).pathname));
+    return pedidos;
+  };
+
+  test('la dirección lleva slugs y el nombre de la ficha, nunca rótulos, y crece una entrada por pausa, no por tecla', async ({ page }) => {
+    test.setTimeout(60_000);
+    const { a, obra } = await datos();
+    await page.goto(RUTA);
+    const antes = await entradas(page);
+    await page.locator(AUTOR).selectOption(a.slug);
+    await direccion(page, `?autor=${a.slug}`);
+    expect(await entradas(page)).toBe(antes + 1);
+    await expect(page.locator(OBRA)).toBeVisible({ timeout: 10_000 });
+    await page.locator(OBRA).selectOption(obra.valor);
+    await direccion(page, `?autor=${a.slug}&obra=${obra.valor}`);
+    expect(await entradas(page)).toBe(antes + 2);
+    await page.locator(CAMPO).pressSequentially('vida', { delay: 80 });
+    await direccion(page, `?q=vida&autor=${a.slug}&obra=${obra.valor}`);
+    await page.waitForTimeout(PAUSA_DE_TECLEO_MS + 300);
+    expect(await entradas(page)).toBe(antes + 3);
+    expect(decodeURIComponent(page.url())).not.toContain(a.nombre);
+    expect(decodeURIComponent(page.url())).not.toContain(obra.titulo);
+  });
+
+  test('llegar con `?q=&autor=&tema=` pide el índice, `filters()` y el mapa, elige los selectores y dice lo filtrado, sin escribir', async ({ page }) => {
+    test.setTimeout(60_000);
+    const { filtros } = await datos();
+    const { citas } = await conjunto();
+    // El cruce de Autor y Tema con más Citas, y una palabra de la primera de ellas.
+    const cruces = new Map<string, string[]>();
+    for (const [slug, deCita] of filtros.porCita) {
+      for (const tema of deCita.temas) cruces.set(`${deCita.autor}|${tema}`, [...(cruces.get(`${deCita.autor}|${tema}`) ?? []), slug]);
+    }
+    const [clave, slugs] = [...cruces.entries()].sort((x, y) => y[1].length - x[1].length || (x[0] < y[0] ? -1 : 1))[0];
+    const [autor, tema] = clave.split('|');
+    const texto = citas.find((c) => c.slug === slugs[0])!.texto;
+    const palabra = [...texto.matchAll(/\p{L}{5,}/gu)].map((m) => m[0]).sort((x, y) => y.length - x.length || (x < y ? -1 : 1))[0];
+    const rotulo = (opciones: readonly { valor: string; rotulo: string }[], valor: string) => opciones.find((o) => o.valor === valor)!.rotulo;
+
+    const pedidos = pedidosDe(page);
+    await page.goto('/');
+    const antes = await entradas(page);
+    const consulta = `?${new URLSearchParams({ q: palabra, autor, tema })}`;
+    await page.goto(`${RUTA}${consulta}`);
+    await expect(page.locator(ESTADO)).toHaveText(
+      new RegExp(
+        `^(?:Una cita|\\d+ citas) de ${escapar(rotulo(filtros.autores, autor))} sobre ${escapar(temaEnFrase(rotulo(filtros.temas, tema)))} con «${escapar(palabra)}»\\.$`,
+        'u',
+      ),
+      { timeout: 10_000 },
+    );
+    await expect(page.locator(CAMPO)).toHaveValue(palabra);
+    await expect(page.locator(AUTOR)).toHaveValue(autor);
+    await expect(page.locator(TEMA)).toHaveValue(tema);
+    await expect(page.locator(QUITAR)).toBeVisible();
+    await expect.poll(() => pedidos.includes('/pagefind/pagefind.js')).toBe(true);
+    await expect.poll(() => pedidos.includes(RUTA_DEL_MAPA_DE_OBRAS)).toBe(true);
+    await expect.poll(() => pedidos.some((p) => p.startsWith('/pagefind/filter/'))).toBe(true);
+    expect(new URL(page.url()).search).toBe(consulta);
+    expect(await entradas(page)).toBe(antes + 1);
+  });
+
+  test('llegar con `?autor=&obra=` elige la Obra y dice «N citas de {Autor} en {título}.»', async ({ page }) => {
+    test.setTimeout(60_000);
+    const { a, obra } = await datos();
+    await page.goto(`${RUTA}?autor=${a.slug}&obra=${obra.valor}`);
+    await expect(page.locator(ESTADO)).toHaveText(fraseDelRecuento({ total: obra.recuento, texto: '', autor: a.nombre, obra: obra.titulo }), { timeout: 10_000 });
+    await expect(page.locator(AUTOR)).toHaveValue(a.slug);
+    await expect(page.locator(OBRA)).toHaveValue(obra.valor);
+    await expect(page.locator(QUITAR)).toBeVisible();
+    await expect(page.locator(RESULTADOS)).toHaveCount(obra.recuento);
+    expect(new URL(page.url()).search).toBe(`?autor=${a.slug}&obra=${obra.valor}`);
+  });
+
+  test('`obra` sin `autor`: Autor y Obra elegidos, y la dirección reemplazada con los dos, sin entrada nueva', async ({ page }) => {
+    test.setTimeout(60_000);
+    const { a, obra } = await datos();
+    await page.goto('/');
+    const antes = await entradas(page);
+    await page.goto(`${RUTA}?obra=${obra.valor}`);
+    await direccion(page, `?autor=${a.slug}&obra=${obra.valor}`);
+    await expect(page.locator(AUTOR)).toHaveValue(a.slug);
+    await expect(page.locator(OBRA)).toHaveValue(obra.valor);
+    await expect(page.locator(ESTADO)).toHaveText(fraseDelRecuento({ total: obra.recuento, texto: '', autor: a.nombre, obra: obra.titulo }), { timeout: 10_000 });
+    expect(await entradas(page)).toBe(antes + 1);
+  });
+
+  test('«atrás» y «adelante» entre dos estados, sin recargar: campo, selectores, recuento y resultados', async ({ page }) => {
+    test.setTimeout(60_000);
+    const { a, filtros } = await datos();
+    const tema = [...filtros.temas].sort((x, y) => y.recuento - x.recuento || porValor(x, y))[0];
+    await page.goto(RUTA);
+    await page.evaluate(() => ((window as unknown as { __marcador: number }).__marcador = 27));
+    await page.locator(AUTOR).selectOption(a.slug);
+    await direccion(page, `?autor=${a.slug}`);
+    await expect(page.locator(ESTADO)).toHaveText(fraseDelRecuento({ total: a.recuento, texto: '', autor: a.nombre }), { timeout: 10_000 });
+    await page.locator(TEMA).selectOption(tema.valor);
+    await direccion(page, `?autor=${a.slug}&tema=${tema.valor}`);
+    await expect(page.locator(ESTADO)).toHaveText(/ sobre /u, { timeout: 10_000 });
+    const conTema = await page.locator(ESTADO).textContent();
+
+    await page.goBack();
+    await direccion(page, `?autor=${a.slug}`);
+    await expect(page.locator(ESTADO)).toHaveText(fraseDelRecuento({ total: a.recuento, texto: '', autor: a.nombre }), { timeout: 10_000 });
+    await expect(page.locator(AUTOR)).toHaveValue(a.slug);
+    await expect(page.locator(TEMA)).toHaveValue('');
+    await expect(page.locator(RESULTADOS)).toHaveCount(Math.min(30, a.recuento));
+    expect(await page.evaluate(() => (window as unknown as { __marcador?: number }).__marcador)).toBe(27);
+
+    await page.goForward();
+    await direccion(page, `?autor=${a.slug}&tema=${tema.valor}`);
+    await expect(page.locator(ESTADO)).toHaveText(conTema!, { timeout: 10_000 });
+    await expect(page.locator(TEMA)).toHaveValue(tema.valor);
+
+    // A la llegada, `/buscar/` a secas: todo vacío.
+    await page.goBack();
+    await page.goBack();
+    await direccion(page, '');
+    await expect(page.locator(AUTOR)).toHaveValue('');
+    await expect(page.locator(CAMPO)).toHaveValue('');
+    await expect(page.locator(RESULTADOS)).toHaveCount(0);
+    await expect(page.locator(ESTADO)).toHaveText('');
+    expect(await page.evaluate(() => (window as unknown as { __marcador?: number }).__marcador)).toBe(27);
+  });
+
+  test('teclear, Intro, seguir tecleando y «atrás» vuelve a lo enviado', async ({ page }) => {
+    test.setTimeout(60_000);
+    await page.goto(RUTA);
+    const antes = await entradas(page);
+    await page.locator(CAMPO).fill('vie');
+    await direccion(page, '?q=vie');
+    await page.locator(CAMPO).fill('viento');
+    await page.locator(CAMPO).press('Enter');
+    await direccion(page, '?q=viento');
+    expect(await entradas(page)).toBe(antes + 1);
+    await page.locator(CAMPO).fill('viento favorable');
+    await direccion(page, '?q=viento+favorable');
+    expect(await entradas(page)).toBe(antes + 2);
+    await page.goBack();
+    await direccion(page, '?q=viento');
+    await expect(page.locator(CAMPO)).toHaveValue('viento');
+    await expect(page.locator(RESULTADOS).first()).toBeVisible({ timeout: 10_000 });
+  });
+
+  test('los filtros que no se pueden usar: «Uno…», «Dos…», «Tres…» delante del recuento, con la dirección reemplazada sin entrada nueva', async ({ page }) => {
+    test.setTimeout(90_000);
+    const { a, obra, otro } = await datos();
+    const bajo = temaBajoUmbral() ?? 'tema-inventado';
+    for (const [consulta, aviso, recuento, queda] of [
+      [`?autor=${otro.slug}&obra=${obra.valor}`, avisoDeLaDireccion(1, true), new RegExp(`^${escapar(fraseDelRecuento({ total: otro.recuento, texto: '', autor: otro.nombre }))}$`, 'u'), `?autor=${otro.slug}`],
+      [`?autor=autor-inventado&obra=${obra.valor}`, avisoDeLaDireccion(1, true), new RegExp(`^${escapar(fraseDelRecuento({ total: obra.recuento, texto: '', autor: a.nombre, obra: obra.titulo }))}$`, 'u'), `?autor=${a.slug}&obra=${obra.valor}`],
+      [`?q=vida&autor=autor-inventado&tema=${bajo}`, avisoDeLaDireccion(2, true), /^(?:Un resultado|\d+ resultados)\.$/u, '?q=vida'],
+      [`?q=vida&autor=autor-inventado&obra=autor-inventado--obra&tema=${bajo}`, avisoDeLaDireccion(3, true), /^(?:Un resultado|\d+ resultados)\.$/u, '?q=vida'],
+    ] as const) {
+      await page.goto('/');
+      const antes = await entradas(page);
+      await page.goto(`${RUTA}${consulta}`);
+      await direccion(page, queda);
+      await expect(page.locator(ESTADO), consulta).toHaveText(new RegExp(`^${escapar(aviso)} `, 'u'), { timeout: 10_000 });
+      const dicho = (await page.locator(ESTADO).textContent())!;
+      expect(dicho.slice(aviso.length + 1), consulta).toMatch(recuento);
+      expect(await entradas(page), consulta).toBe(antes + 1);
+    }
+  });
+
+  test('sin nada con que buscar: «El filtro… ya no existe.» o «Los filtros… ya no existen.», sin recuento ni salida', async ({ page }) => {
+    test.setTimeout(60_000);
+    const bajo = temaBajoUmbral() ?? 'tema-inventado';
+    for (const [consulta, aviso] of [
+      ['?autor=autor-inventado', avisoDeLaDireccion(1, false)],
+      [`?autor=autor-inventado&tema=${bajo}`, avisoDeLaDireccion(2, false)],
+      ['?obra=autor-inventado--obra-inventada', avisoDeLaDireccion(1, false)],
+    ] as const) {
+      await page.goto('/');
+      const antes = await entradas(page);
+      await page.goto(`${RUTA}${consulta}`);
+      await expect(page.locator(ESTADO), consulta).toHaveText(aviso, { timeout: 10_000 });
+      await direccion(page, '');
+      await expect(page.locator(RESULTADOS)).toHaveCount(0);
+      await expect(page.locator('[data-salida]')).toBeHidden();
+      await expect(page.locator(ESTADO)).toBeVisible();
+      expect(await entradas(page), consulta).toBe(antes + 1);
+    }
+  });
+
+  test('`pushState` y `replaceState` que lanzan una vez: la búsqueda sigue, la dirección se queda, y la escritura siguiente lo reintenta', async ({ page }) => {
+    test.setTimeout(60_000);
+    const errores: string[] = [];
+    page.on('pageerror', (e) => errores.push(e.message));
+    await page.addInitScript(() => {
+      for (const metodo of ['pushState', 'replaceState'] as const) {
+        const real = history[metodo].bind(history);
+        let lanzo = false;
+        history[metodo] = (...argumentos: Parameters<History['pushState']>) => {
+          // Solo una escritura de dirección: la marca (sin dirección) pasa.
+          if (!lanzo && argumentos[2] !== undefined) {
+            lanzo = true;
+            throw new DOMException('el historial no se deja escribir', 'SecurityError');
+          }
+          return real(...argumentos);
+        };
+      }
+    });
+    // El `replaceState` de la resolución lanza: la frase y la búsqueda siguen, la dirección no cambia.
+    await page.goto(`${RUTA}?q=vida&autor=autor-inventado`);
+    await expect(page.locator(ESTADO)).toHaveText(new RegExp(`^${escapar(avisoDeLaDireccion(1, true))} `, 'u'), { timeout: 10_000 });
+    expect(new URL(page.url()).search).toBe('?q=vida&autor=autor-inventado');
+    // El `pushState` de lo tecleado lanza; Enter lo vuelve a intentar.
+    await page.locator(CAMPO).fill('viento');
+    await expect(page.locator(RESULTADOS).first()).toBeVisible({ timeout: 10_000 });
+    await page.waitForTimeout(PAUSA_DE_TECLEO_MS + 300);
+    expect(new URL(page.url()).search).toBe('?q=vida&autor=autor-inventado');
+    await page.locator(CAMPO).press('Enter');
+    await direccion(page, '?q=viento');
+    expect(errores).toEqual([]);
+  });
+
+  test('lo hostil de la dirección vuelve como texto, en el campo y en la región, también con un filtro que no existe', async ({ page }) => {
+    test.setTimeout(60_000);
+    const { a } = await datos();
+    const hostil = '<img src=x onerror="window.__hostil=1">';
+    // Con el índice de verdad lo hostil no encuentra nada: la región dice la sugerencia, como texto.
+    // El recuento con lo hostil dentro («… con «<img…>».») lo prueba el entorno simulado.
+    await page.goto(`${RUTA}?q=${encodeURIComponent(hostil)}&autor=${a.slug}`);
+    await expect(page.locator(CAMPO)).toHaveValue(hostil);
+    await expect(page.locator('[data-salida]')).toBeVisible({ timeout: 10_000 });
+    await page.goto(`${RUTA}?q=${encodeURIComponent(hostil)}&autor=autor-inventado`);
+    await expect(page.locator(CAMPO)).toHaveValue(hostil);
+    await expect(page.locator(ESTADO)).toHaveText(new RegExp(`^${escapar(avisoDeLaDireccion(1, true))} `, 'u'), { timeout: 10_000 });
+    expect(await page.locator(`${ESTADO} *`).count()).toBe(0);
+    await page.waitForTimeout(300);
+    expect(await page.evaluate(() => (window as unknown as { __hostil?: number }).__hostil)).toBeUndefined();
+    expect(await page.locator('main img[src="x"]').count()).toBe(0);
+  });
+
+  test('llegar desde «Buscar «x» en las citas» de un Directorio busca lo tecleado, sin escribir en el historial', async ({ page }) => {
+    test.setTimeout(60_000);
+    await page.goto(rutaDelDirectorioDeAutores());
+    await page.getByLabel(ETIQUETA_DEL_FILTRO.autores).fill('viento');
+    await page.getByRole('link', { name: 'Buscar «viento» en las citas' }).click();
+    await page.waitForURL((url) => url.pathname === RUTA);
+    const antes = await entradas(page);
+    await expect(page.locator(CAMPO)).toHaveValue('viento');
+    await expect(page.locator(RESULTADOS).first()).toBeVisible({ timeout: 10_000 });
+    await page.waitForTimeout(500);
+    expect(new URL(page.url()).search).toBe('?q=viento');
+    expect(await entradas(page)).toBe(antes);
   });
 });

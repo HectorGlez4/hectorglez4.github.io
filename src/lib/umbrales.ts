@@ -583,8 +583,17 @@ export const MAX_BYTES_GUION_DEL_FILTRO = 3915;
  * que se sumó a una petición ajena que falló y la frase que no dobla el punto tras un título que ya
  * cierra— mide **11.034 bytes** (2026-10-29): 10.482 del fichero de entrada y 552 del trozo, que no
  * cambia. Tope, con la misma regla: 11.034 más unos 400.
+ *
+ * Historia 27.4 — rederivado con la misma regla. La búsqueda vive en la dirección: la lectura, la
+ * composición, la comparación y la resolución del estado (`estadoDeLaDireccion`,
+ * `direccionDeLaBusqueda`, `mismoEstado`, `estadoDeLaEntrada`, `entradaConEstado`,
+ * `autorDeLaObra`, `resolverEstado`), las frases de lo que no se puede usar
+ * (`avisoDeLaDireccion`), la decisión de cada escritura (`escrituraDelHistorial`), la llegada
+ * común a la carga y a `popstate` y la escritura que se adelanta al asentar: **15.087 bytes**
+ * (2026-10-29) —14.535 del fichero de entrada y 552 del trozo, que no cambia (el del filtro
+ * tampoco)—. Tope: 15.087 más unos 400.
  */
-export const MAX_BYTES_GUION_DE_LA_BUSQUEDA = 11434;
+export const MAX_BYTES_GUION_DE_LA_BUSQUEDA = 15487;
 
 /**
  * La pausa de tecleo, en milisegundos — AD-9, UX-DR58, UX-DR86, Historia 26.6.

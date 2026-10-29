@@ -7,6 +7,10 @@
  * la lista de resultados y la salida sin resultados. Las reglas del guion están escritas en el
  * componente, junto a él (Historia 27.2): desde entonces `/buscar/` no lleva guion propio en línea.
  *
+ * Historia 27.4 — la búsqueda vive en la dirección (`?q=&autor=&obra=&tema=`), y ninguna
+ * combinación de parámetros crea ruta ni página: es siempre este único HTML, `noindex`, con
+ * canónica `/buscar/` y fuera del sitemap y de Pagefind (`src/lib/superficies.ts`).
+ *
  * Las opciones de los selectores salen de aquí y solo de aquí: del conjunto publicable, por
  * `filtrosDeLaBusqueda` —la misma función que escribe los filtros de cada Página de Cita (27.1)—,
  * ordenadas por `ordenDeAutoresPorNombre` y `ordenDeTemasPorNombre` de `src/lib/normalizar.ts`.

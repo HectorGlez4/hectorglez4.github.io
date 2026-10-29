@@ -22,10 +22,16 @@ import { createContext, runInContext } from 'node:vm';
  *   · `document.createElement` con lo que usa para pintar un resultado;
  *   · un reloj fingido —`setTimeout`, `clearTimeout`, `requestAnimationFrame`, `performance.now`—
  *     que solo avanza con `avanzar(ms)`;
- *   · `location` de solo lectura —escribir en ella o llamar a `assign`/`replace` se apunta como
- *     violación—, `history` con su `state` inicial, un `replaceState` que apunta cada llamada con
- *     sus argumentos tal como llegaron (y puede lanzar) —con argumento de dirección, además, es una
- *     violación: la marca no toca la dirección— y un `pushState` que es una violación;
+ *   · Historia 27.4 — un historial con entradas: `location` refleja la entrada actual y es de
+ *     solo lectura —escribir en ella o llamar a `assign`/`replace` se apunta como violación—;
+ *     `history` lleva su `state` y su `length`, y `pushState`/`replaceState` con dirección se
+ *     admiten y se apuntan (con todos sus argumentos tal como llegaron) siempre que la dirección
+ *     sea del mismo origen y de la ruta `/buscar/` —otra es una violación—; `replaceState` sin
+ *     dirección es la marca de la 23.8 y `pushState` sin dirección, una violación. Pueden lanzar
+ *     siempre o las N primeras veces (`historialQueLanza`), y una llamada que lanza no cambia nada.
+ *     `atras()` y `adelante()` cambian de entrada y despachan `popstate` en la ventana con el objeto
+ *     de la entrada; `historial()` da todas las llamadas, `marcas()` las de dos argumentos y
+ *     `direcciones()` las que escriben dirección;
  *   · Navigation Timing configurable: el tipo de la entrada, ninguna entrada o sin la API;
  *   · la visibilidad del documento —visible al cargar, u oculta, como una pestaña de fondo—,
  *     `pagehide` y `pageshow`;
@@ -83,8 +89,11 @@ export interface OpcionesDeLaIsla {
   navegacion?: string | null;
   /** Sin `performance.getEntriesByType`. */
   sinNavigationTiming?: boolean;
-  /** Si `history.replaceState` lanza, como un historial que no se deja escribir. */
-  historialQueLanza?: boolean;
+  /**
+   * Si el historial lanza, como uno que no se deja escribir: `true`, siempre, `pushState` y
+   * `replaceState`; con un objeto, las N primeras llamadas de cada uno (o siempre, con `true`).
+   */
+  historialQueLanza?: boolean | { pushState?: number | boolean; replaceState?: number | boolean };
   /** Dónde falla el índice: la importación, `init`, `search` (que lanza) o los datos del primer resultado. */
   falla?: 'importacion' | 'init' | 'search' | 'data';
   /**
@@ -385,6 +394,8 @@ export function islaDeBusquedaEnUnSandbox(guion: string, opciones: OpcionesDeLaI
   sugerencia.textContent = '\n        No encontramos esa frase. Prueba con menos palabras.\n      ';
   salida.dentro.set('.sugerencia', sugerencia);
   const formulario = new Elemento('form');
+  // Historia 27.4 — el `action` del formulario es la ruta de la dirección (`rutaDeLaBusqueda()`).
+  formulario.setAttribute('action', '/buscar/');
   const autor = selector('autor', 'Todos los autores', opciones.autores ?? AUTORES);
   const obra = selectorDinamico('obra', 'Todas sus obras');
   const tema = selector('tema', 'Todos los temas', opciones.temas ?? TEMAS);
@@ -459,18 +470,20 @@ export function islaDeBusquedaEnUnSandbox(guion: string, opciones: OpcionesDeLaI
       delDocumento.push({ tipo, oyente, unaVez: typeof ajustes === 'object' && ajustes.once === true }),
   };
 
-  // La dirección, de solo lectura: escribir en ella es una violación.
-  const busqueda = opciones.busqueda ?? '';
+  // Historia 27.4 — el historial, con sus entradas; la dirección es la de la entrada actual.
+  const ORIGEN = 'https://ejemplo.invalid';
+  const entradas: { estado: unknown; direccion: URL }[] = [
+    {
+      estado: opciones.estado === undefined ? null : opciones.estado,
+      direccion: new URL(`/buscar/${opciones.busqueda ?? ''}`, ORIGEN),
+    },
+  ];
+  let actual = 0;
+  const entrada = () => entradas[actual];
   const ubicacion: Record<string, unknown> = {};
-  for (const [parte, valor] of Object.entries({
-    origin: 'https://ejemplo.invalid',
-    pathname: '/buscar/',
-    search: busqueda,
-    hash: '',
-    href: `https://ejemplo.invalid/buscar/${busqueda}`,
-  })) {
+  for (const parte of ['origin', 'pathname', 'search', 'hash', 'href'] as const) {
     Object.defineProperty(ubicacion, parte, {
-      get: () => valor,
+      get: () => entrada().direccion[parte],
       set: () => void violaciones.push(`escribe location.${parte}`),
       enumerable: true,
     });
@@ -478,28 +491,63 @@ export function islaDeBusquedaEnUnSandbox(guion: string, opciones: OpcionesDeLaI
   ubicacion.assign = () => void violaciones.push('location.assign');
   ubicacion.replace = () => void violaciones.push('location.replace');
 
-  let estadoDelHistorial: unknown = opciones.estado === undefined ? null : opciones.estado;
+  const lanza = opciones.historialQueLanza;
+  const quedanPorLanzar = {
+    pushState: lanza === true ? Infinity : typeof lanza === 'object' ? Number(lanza.pushState === true ? Infinity : (lanza.pushState ?? 0)) : 0,
+    replaceState: lanza === true ? Infinity : typeof lanza === 'object' ? Number(lanza.replaceState === true ? Infinity : (lanza.replaceState ?? 0)) : 0,
+  };
+  /** La dirección que escribe una llamada, resuelta contra la actual; otra ruta u otro origen, violación. */
+  const resolver = (metodo: string, argumentos: unknown[]): URL | null => {
+    if (argumentos.length < 3 || argumentos[2] === undefined || argumentos[2] === null) return null;
+    const nueva = new URL(String(argumentos[2]), entrada().direccion);
+    if (nueva.origin !== ORIGEN || nueva.pathname !== '/buscar/') violaciones.push(`${metodo} a otra ruta: ${nueva.href}`);
+    return nueva;
+  };
   const historia = {
     get state() {
-      return estadoDelHistorial;
+      return entrada().estado;
+    },
+    get length() {
+      return entradas.length;
     },
     replaceState(...argumentos: unknown[]) {
-      llamadasAlHistorial.push(argumentos);
-      if (argumentos.length > 2) violaciones.push(`replaceState con dirección: ${String(argumentos[2])}`);
-      if (opciones.historialQueLanza) throw new Error('el historial no se deja escribir');
-      estadoDelHistorial = argumentos[0];
+      llamadasAlHistorial.push(['replaceState', ...argumentos]);
+      const nueva = resolver('replaceState', argumentos);
+      if (quedanPorLanzar.replaceState > 0) {
+        quedanPorLanzar.replaceState--;
+        throw new Error('el historial no se deja escribir');
+      }
+      entradas[actual] = { estado: argumentos[0], direccion: nueva ?? entrada().direccion };
     },
     pushState(...argumentos: unknown[]) {
-      violaciones.push(`pushState(${argumentos.length} argumentos)`);
-      throw new Error('la isla no abre entradas en el historial');
+      llamadasAlHistorial.push(['pushState', ...argumentos]);
+      const nueva = resolver('pushState', argumentos);
+      if (nueva === null) violaciones.push(`pushState sin dirección (${argumentos.length} argumentos)`);
+      if (quedanPorLanzar.pushState > 0) {
+        quedanPorLanzar.pushState--;
+        throw new Error('el historial no se deja escribir');
+      }
+      entradas.splice(actual + 1);
+      entradas.push({ estado: argumentos[0], direccion: nueva ?? entrada().direccion });
+      actual = entradas.length - 1;
     },
+  };
+  /** Cambia de entrada, como «atrás» o «adelante» sin la caché, y despacha `popstate` con su objeto. */
+  const irA = (paso: number) => {
+    const destino = actual + paso;
+    if (destino < 0 || destino >= entradas.length) throw new Error(`no hay entrada ${destino} en el historial`);
+    actual = destino;
+    despachar(deLaVentana, 'popstate', { type: 'popstate', state: entrada().estado });
   };
 
   // `now()` da el reloj fingido: la pausa del recuento de lo tecleado cuenta desde la última tecla.
   const rendimiento: Record<string, unknown> = { now: () => ahora };
+  let consultasDeNavegacion = 0;
   if (!opciones.sinNavigationTiming) {
-    rendimiento.getEntriesByType = (tipo: string) =>
-      tipo !== 'navigation' || opciones.navegacion === null ? [] : [{ type: opciones.navegacion ?? 'navigate' }];
+    rendimiento.getEntriesByType = (tipo: string) => {
+      consultasDeNavegacion++;
+      return tipo !== 'navigation' || opciones.navegacion === null ? [] : [{ type: opciones.navegacion ?? 'navigate' }];
+    };
   }
 
   // El índice de mentira. Dónde falla se puede cambiar a mitad de prueba, con `fallar`.
@@ -664,10 +712,41 @@ export function islaDeBusquedaEnUnSandbox(guion: string, opciones: OpcionesDeLaI
     analizado: () => alAnalizarse,
     /** Las llamadas a `__medir`, en su orden, con sus argumentos. */
     emitidos: () => emitidos.map((e) => [...e]),
-    /** Las llamadas a `history.replaceState`, en su orden, con sus argumentos tal como llegaron. */
+    /**
+     * Las llamadas al historial, en su orden: `['pushState' | 'replaceState', ...argumentos]`, con
+     * los argumentos tal como llegaron (también las que lanzaron).
+     */
     historial: () => llamadasAlHistorial.map((l) => [...l]),
+    /** Las marcas de la 23.8: las llamadas a `replaceState` sin dirección, con sus dos argumentos. */
+    marcas: () => llamadasAlHistorial.filter((l) => l[0] === 'replaceState' && l.length === 3).map((l) => l.slice(1)),
+    /**
+     * Historia 27.4 — las escrituras de dirección, en orden: el método, la dirección tal como llegó
+     * y el objeto de estado (también las que lanzaron).
+     */
+    direcciones: () =>
+      llamadasAlHistorial
+        .filter((l) => l.length > 3)
+        .map((l) => ({ metodo: l[0] as string, direccion: l[3] as string, estado: l[1] })),
     /** `history.state` ahora. */
-    estadoDelHistorial: () => estadoDelHistorial,
+    estadoDelHistorial: () => entrada().estado,
+    /** La dirección de la entrada actual: ruta, consulta y fragmento. */
+    direccion: () => entrada().direccion.pathname + entrada().direccion.search + entrada().direccion.hash,
+    /** Cuántas veces la isla leyó Navigation Timing (`performance.getEntriesByType`). */
+    consultasDeNavegacion: () => consultasDeNavegacion,
+    /** `history.length`. */
+    longitud: () => entradas.length,
+    /** Qué entrada es la actual (desde 0). */
+    posicion: () => actual,
+    /** «Atrás»: la entrada anterior, con `popstate`, y deja correr las promesas. */
+    atras: async () => {
+      irA(-1);
+      await vaciar();
+    },
+    /** «Adelante»: la entrada siguiente, con `popstate`, y deja correr las promesas. */
+    adelante: async () => {
+      irA(1);
+      await vaciar();
+    },
     /** Lo que la isla no debe hacer nunca: abrir entradas, escribir la dirección, parar la propagación. */
     violaciones: () => [...violaciones],
     /** Las promesas rechazadas sin manejar desde que se abrió el entorno. */

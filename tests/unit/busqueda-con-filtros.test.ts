@@ -16,11 +16,26 @@ import { recorrerElementos } from '../../tools/lib/html.ts';
 import { conjuntoDelCorpus } from '../../tools/lib/alcance.ts';
 import { rutasDelCorpus } from '../../tools/lib/corpus.ts';
 import {
+  CLAVE_DEL_ESTADO_EN_LA_ENTRADA,
   EJEMPLO_DE_LA_BUSQUEDA,
+  ESTADO_VACIO,
   ETIQUETA_DE_LA_BUSQUEDA,
+  PARAMETROS_DE_LA_BUSQUEDA,
   RUTA_DEL_MAPA_DE_OBRAS,
   TEXTO_DE_EJEMPLO_DE_LA_BUSQUEDA,
+  autorDeLaObra,
+  avisoDeLaDireccion,
   combinacionDeFiltros,
+  direccionDeLaBusqueda,
+  entradaConEstado,
+  escrituraDelHistorial,
+  estadoDeLaDireccion,
+  estadoDeLaEntrada,
+  estadoSinNada,
+  mismoEstado,
+  resolverEstado,
+  type ControlDeLaBusqueda,
+  type EstadoDeLaBusqueda,
   filtrosDePagefind,
   fraseDelRecuento,
   hayFiltros,
@@ -31,6 +46,8 @@ import {
 } from '../../src/lib/busqueda.ts';
 import { filtrosDeLaBusqueda } from '../../src/lib/publicado.ts';
 import { MAPA_DE_OBRAS_EN_DIST } from '../../tools/lib/peso.ts';
+import { MARCA_DE_BUSQUEDA_ASENTADA } from '../../src/lib/medicion.ts';
+import { rutaDeLaBusqueda } from '../../src/lib/superficies.ts';
 import { guionExternoDe } from '../../src/lib/guiones.ts';
 import { ARRANQUE_DE_MEDICION, rutaDelGuionDeMedicion } from '../../src/lib/medicion.ts';
 import {
@@ -278,6 +295,200 @@ describe('Historia 27.3 — lo puro: la Obra', () => {
     expect(rotuloDeObra({ titulo: 'Cartas', recuento: 1 })).toBe('Cartas (1 cita)');
     expect(recuentoDeCitasDeAtribucion).toBe(recuentoDeCitas);
     expect(RUTA_DEL_MAPA_DE_OBRAS).toBe(`/${MAPA_DE_OBRAS_EN_DIST}`);
+  });
+});
+
+describe('Historia 27.4 — lo puro: la búsqueda en la dirección', () => {
+  const RUTA = rutaDeLaBusqueda();
+  const estado = (parcial: Partial<EstadoDeLaBusqueda>): EstadoDeLaBusqueda => ({ ...ESTADO_VACIO, ...parcial });
+  const MAPA: MapaDeObras = {
+    'jose-marti': [
+      ['jose-marti--maestros-ambulantes', 'Maestros ambulantes'],
+      ['jose-marti--cartas', 'Cartas'],
+    ],
+    seneca: [['seneca--cartas', 'Cartas']],
+  };
+  const RECUENTOS = { 'jose-marti--maestros-ambulantes': 23, 'jose-marti--cartas': 1, 'seneca--cartas': 9 };
+  const SITIO = {
+    autores: ['jose-marti', 'seneca'],
+    temas: ['el-saber', 'la-prudencia'],
+    autorDeLaObra: (nombre: string) => autorDeLaObra(MAPA, RECUENTOS, nombre),
+  };
+
+  it('compone `?q=&autor=&obra=&tema=` en ese orden, solo los no vacíos, con el texto recortado', () => {
+    expect(RUTA).toBe('/buscar/');
+    expect(Object.values(PARAMETROS_DE_LA_BUSQUEDA)).toEqual(['q', 'autor', 'obra', 'tema']);
+    expect(direccionDeLaBusqueda(estado({ texto: '  escuela ', autor: 'jose-marti', tema: 'la-prudencia' }), RUTA)).toBe(
+      '/buscar/?q=escuela&autor=jose-marti&tema=la-prudencia',
+    );
+    expect(
+      direccionDeLaBusqueda(estado({ tema: 't', obra: 'a--o', autor: 'a', texto: 'x' }), RUTA),
+    ).toBe('/buscar/?q=x&autor=a&obra=a--o&tema=t');
+    expect(direccionDeLaBusqueda(ESTADO_VACIO, RUTA)).toBe('/buscar/');
+    expect(direccionDeLaBusqueda(estado({ texto: '   ' }), RUTA)).toBe('/buscar/');
+    expect(direccionDeLaBusqueda(estado({ texto: 'no hay camino' }), RUTA)).toBe('/buscar/?q=no+hay+camino');
+  });
+
+  it('la Obra solo va con su Autor: sin `autor`, la `obra` no se compone', () => {
+    expect(direccionDeLaBusqueda(estado({ obra: 'jose-marti--cartas' }), RUTA)).toBe('/buscar/');
+    expect(direccionDeLaBusqueda(estado({ obra: 'jose-marti--cartas', tema: 't' }), RUTA)).toBe('/buscar/?tema=t');
+    // Componen igual, pero no son el mismo estado: la dirección que trae la `obra` se reemplaza.
+    expect(mismoEstado(estado({ obra: 'x' }), ESTADO_VACIO)).toBe(false);
+  });
+
+  it('lee la primera aparición de cada uno, vacío es ausente, y lo demás —`de`, `via`, otros— no se lee', () => {
+    expect(estadoDeLaDireccion('?q=a&q=b&autor=&tema=t&tema=u&de=instagram&via=x&otra=1')).toEqual(
+      estado({ texto: 'a', tema: 't' }),
+    );
+    expect(estadoDeLaDireccion('')).toEqual(ESTADO_VACIO);
+    expect(estadoDeLaDireccion('autor=seneca')).toEqual(estado({ autor: 'seneca' }));
+    expect(estadoDeLaDireccion('?q=no+hay%20camino')).toEqual(estado({ texto: 'no hay camino' }));
+    // Una composición nunca lleva las marcas de llegada, traiga lo que traiga lo leído.
+    const leido = estadoDeLaDireccion('?q=x&de=tiktok&via=whatsapp&autor=a');
+    expect(direccionDeLaBusqueda(leido, RUTA)).toBe('/buscar/?q=x&autor=a');
+  });
+
+  it('ida y vuelta: leer lo compuesto da el mismo estado, también con caracteres que se codifican', () => {
+    for (const e of [
+      estado({ texto: 'vida', autor: 'jose-marti', obra: 'jose-marti--maestros-ambulantes', tema: 'la-prudencia' }),
+      estado({ texto: '¿Qué & = ? # «sí»+más' }),
+      estado({ texto: '<img src=x onerror=alert(1)>', autor: 'a' }),
+      estado({ tema: 'el-saber' }),
+      ESTADO_VACIO,
+    ]) {
+      const direccion = direccionDeLaBusqueda(e, RUTA);
+      const leido = estadoDeLaDireccion(direccion.slice(RUTA.length));
+      expect(mismoEstado(leido, e), direccion).toBe(true);
+      expect(leido, direccion).toEqual(e);
+    }
+  });
+
+  it('`mismoEstado`: el texto se compara recortado; los filtros, exactos', () => {
+    expect(mismoEstado(estado({ texto: ' vida ' }), estado({ texto: 'vida' }))).toBe(true);
+    expect(mismoEstado(estado({ texto: 'Vida' }), estado({ texto: 'vida' }))).toBe(false);
+    expect(mismoEstado(estado({ autor: 'a' }), estado({ autor: 'b' }))).toBe(false);
+    expect(mismoEstado(estado({ autor: 'a', obra: 'x' }), estado({ autor: 'a' }))).toBe(false);
+    expect(estadoSinNada(estado({ texto: '  ' }))).toBe(true);
+    expect(estadoSinNada(estado({ obra: 'x' }))).toBe(false);
+  });
+
+  it('el objeto de la entrada: con los nombres de los parámetros, sin mutar el que había y conservando la marca', () => {
+    const conMarca = Object.freeze({ [MARCA_DE_BUSQUEDA_ASENTADA]: true, otra: 1 });
+    const escrito = entradaConEstado(conMarca, estado({ texto: ' vida ', autor: 'a', obra: 'a--o' }));
+    expect(escrito).toEqual({
+      [MARCA_DE_BUSQUEDA_ASENTADA]: true,
+      otra: 1,
+      [CLAVE_DEL_ESTADO_EN_LA_ENTRADA]: { q: 'vida', autor: 'a', obra: 'a--o' },
+    });
+    expect(conMarca).toEqual({ [MARCA_DE_BUSQUEDA_ASENTADA]: true, otra: 1 });
+    expect(entradaConEstado(null, ESTADO_VACIO)).toEqual({ [CLAVE_DEL_ESTADO_EN_LA_ENTRADA]: {} });
+    expect(entradaConEstado('x', estado({ tema: 't' }))).toEqual({ [CLAVE_DEL_ESTADO_EN_LA_ENTRADA]: { tema: 't' } });
+    // Y se lee de vuelta.
+    expect(estadoDeLaEntrada(escrito)).toEqual(estado({ texto: 'vida', autor: 'a', obra: 'a--o' }));
+    expect(estadoDeLaEntrada({ [CLAVE_DEL_ESTADO_EN_LA_ENTRADA]: {} })).toEqual(ESTADO_VACIO);
+  });
+
+  it('`estadoDeLaEntrada`: lo que no tiene la forma no se lee', () => {
+    for (const malo of [
+      null,
+      undefined,
+      'x',
+      1,
+      {},
+      { [MARCA_DE_BUSQUEDA_ASENTADA]: true },
+      { [CLAVE_DEL_ESTADO_EN_LA_ENTRADA]: null },
+      { [CLAVE_DEL_ESTADO_EN_LA_ENTRADA]: 'q=vida' },
+      { [CLAVE_DEL_ESTADO_EN_LA_ENTRADA]: ['vida'] },
+      { [CLAVE_DEL_ESTADO_EN_LA_ENTRADA]: { q: 1 } },
+      { [CLAVE_DEL_ESTADO_EN_LA_ENTRADA]: { texto: 'vida' } },
+      { [CLAVE_DEL_ESTADO_EN_LA_ENTRADA]: { q: 'vida', de: 'tiktok' } },
+    ]) {
+      expect(estadoDeLaEntrada(malo), JSON.stringify(malo)).toBeNull();
+    }
+  });
+
+  it('`autorDeLaObra`: el Autor en cuya lista está y que la ofrece; nunca partiendo el nombre', () => {
+    expect(autorDeLaObra(MAPA, RECUENTOS, 'jose-marti--cartas')).toBe('jose-marti');
+    expect(autorDeLaObra(MAPA, RECUENTOS, 'seneca--cartas')).toBe('seneca');
+    // Con forma de ser de un Autor, pero en ninguna lista: no tiene Autor.
+    expect(autorDeLaObra(MAPA, RECUENTOS, 'jose-marti--ismaelillo')).toBeNull();
+    // En una lista que no es la de su prefijo: es de quien la lista.
+    expect(autorDeLaObra({ seneca: [['jose-marti--rara', 'Rara']] }, { 'jose-marti--rara': 2 }, 'jose-marti--rara')).toBe('seneca');
+    // Sin Citas en el índice, no es ofrecible.
+    expect(autorDeLaObra(MAPA, { ...RECUENTOS, 'jose-marti--cartas': 0 }, 'jose-marti--cartas')).toBeNull();
+    expect(autorDeLaObra(MAPA, undefined, 'jose-marti--cartas')).toBeNull();
+    expect(autorDeLaObra(MAPA, RECUENTOS, '')).toBeNull();
+  });
+
+  it('resolución en orden fijo: descartar lo que no existe, la Obra sin Autor toma el suyo, y si no casan se va la Obra', () => {
+    expect(resolverEstado(estado({ texto: 'v', autor: 'jose-marti', tema: 'el-saber' }), SITIO)).toEqual({
+      estado: estado({ texto: 'v', autor: 'jose-marti', tema: 'el-saber' }),
+      noSeUsan: 0,
+    });
+    // `obra` sin `autor`.
+    expect(resolverEstado(estado({ obra: 'jose-marti--cartas' }), SITIO)).toEqual({
+      estado: estado({ autor: 'jose-marti', obra: 'jose-marti--cartas' }),
+      noSeUsan: 0,
+    });
+    // `obra` de otro: nunca se cambia el Autor por el de la Obra.
+    expect(resolverEstado(estado({ autor: 'seneca', obra: 'jose-marti--cartas' }), SITIO)).toEqual({
+      estado: estado({ autor: 'seneca' }),
+      noSeUsan: 1,
+    });
+    // Autor muerto y Obra viva: la Obra con su Autor.
+    expect(resolverEstado(estado({ autor: 'nadie', obra: 'jose-marti--cartas' }), SITIO)).toEqual({
+      estado: estado({ autor: 'jose-marti', obra: 'jose-marti--cartas' }),
+      noSeUsan: 1,
+    });
+    // Dos y tres descartes, con texto.
+    expect(resolverEstado(estado({ texto: 'vida', autor: 'x', tema: 'y' }), SITIO)).toEqual({
+      estado: estado({ texto: 'vida' }),
+      noSeUsan: 2,
+    });
+    expect(resolverEstado(estado({ texto: 'vida', autor: 'x', obra: 'x--o', tema: 'y' }), SITIO)).toEqual({
+      estado: estado({ texto: 'vida' }),
+      noSeUsan: 3,
+    });
+    // Una Obra absorbida al reunir —fuera del mapa— no se traduce a la que la absorbió.
+    expect(resolverEstado(estado({ autor: 'jose-marti', obra: 'jose-marti--maestros' }), SITIO)).toEqual({
+      estado: estado({ autor: 'jose-marti' }),
+      noSeUsan: 1,
+    });
+    // El texto no se toca, y sin Obra no se pregunta por su Autor.
+    let preguntas = 0;
+    resolverEstado(estado({ texto: '  x ', autor: 'seneca' }), {
+      ...SITIO,
+      autorDeLaObra: () => {
+        preguntas++;
+        return null;
+      },
+    });
+    expect(preguntas).toBe(0);
+    expect(resolverEstado(estado({ texto: '  x ' }), SITIO).estado.texto).toBe('  x ');
+  });
+
+  it('las frases fijas, en singular y en plural, y las dos de «ya no existe»', () => {
+    expect(avisoDeLaDireccion(0, true)).toBe('');
+    expect(avisoDeLaDireccion(0, false)).toBe('');
+    expect(avisoDeLaDireccion(1, true)).toBe('Uno de los filtros de esta dirección no se puede usar, y la búsqueda va sin él.');
+    expect(avisoDeLaDireccion(2, true)).toBe('Dos de los filtros de esta dirección no se pueden usar, y la búsqueda va sin ellos.');
+    expect(avisoDeLaDireccion(3, true)).toBe('Tres de los filtros de esta dirección no se pueden usar, y la búsqueda va sin ellos.');
+    expect(avisoDeLaDireccion(1, false)).toBe('El filtro de esta dirección ya no existe.');
+    expect(avisoDeLaDireccion(2, false)).toBe('Los filtros de esta dirección ya no existen.');
+    expect(avisoDeLaDireccion(3, false)).toBe('Los filtros de esta dirección ya no existen.');
+  });
+
+  it('`pushState`, `replaceState` o nada: reemplaza solo la entrada que abrió el mismo control', () => {
+    const CONTROLES: ControlDeLaBusqueda[] = ['campo', 'selector-de-autor', 'selector-de-obra', 'selector-de-tema', 'quitar'];
+    for (const control of CONTROLES) {
+      expect(escrituraDelHistorial({ igual: true, control, controlDeLaEntrada: control })).toBe('ninguna');
+      expect(escrituraDelHistorial({ igual: true, control, controlDeLaEntrada: null })).toBe('ninguna');
+      expect(escrituraDelHistorial({ igual: false, control, controlDeLaEntrada: control })).toBe('replaceState');
+      expect(escrituraDelHistorial({ igual: false, control, controlDeLaEntrada: null })).toBe('pushState');
+      for (const otro of CONTROLES.filter((c) => c !== control)) {
+        expect(escrituraDelHistorial({ igual: false, control, controlDeLaEntrada: otro }), `${control} tras ${otro}`).toBe('pushState');
+      }
+    }
   });
 });
 
@@ -603,6 +814,22 @@ describe('Historia 27.2 — lo construido', () => {
     }
     expect(html).not.toContain(RUTA_DEL_MAPA_DE_OBRAS);
   }, 120_000);
+
+  it('Historia 27.4 — ninguna combinación de parámetros crea ruta ni página indexable: un solo HTML de `/buscar/`, fuera del sitemap, `noindex` y con canónica `/buscar/`', () => {
+    const dist = join(proyecto, 'dist');
+    const deBuscar = readdirSync(join(dist, 'buscar'), { recursive: true }).map(String).sort();
+    expect(deBuscar).toEqual(['index.html', 'obras.json']);
+    expect(MAPA_DE_OBRAS_EN_DIST).toBe('buscar/obras.json');
+    const sitemaps = readdirSync(dist).filter((f) => /^sitemap.*\.xml$/u.test(f));
+    expect(sitemaps.length).toBeGreaterThan(0);
+    for (const sitemap of sitemaps) expect(readFileSync(join(dist, sitemap), 'utf8'), sitemap).not.toMatch(/\/buscar\b/u);
+    expect(html).toMatch(/<meta name="robots" content="noindex[^"]*"/u);
+    const canonica = /<link rel="canonical" href="([^"]+)"/u.exec(html)?.[1];
+    expect(canonica && new URL(canonica).pathname).toBe('/buscar/');
+    expect(canonica).not.toContain('?');
+    // El formulario sin guion envía a la misma ruta: su `action` es la que la isla compone.
+    expect(html).toMatch(new RegExp(`<form\\b[^>]*\\baction="${rutaDeLaBusqueda()}"`, 'u'));
+  });
 
   it('Historia 27.3 — en la plantilla, el `.selector` de Obra va entre el de Autor y el de Tema', () => {
     const plantilla = /<template\b[^>]*>([\s\S]*?)<\/template>/u.exec(html)![1];

@@ -1,10 +1,13 @@
 /**
- * La búsqueda con filtros de `/buscar/` — Historia 27.2, FR-7, UX-DR87, UX-DR88, UX-DR89.
+ * La búsqueda con filtros de `/buscar/` — Historias 27.2, 27.3 y 27.4, FR-7, NFR-4, UX-DR87,
+ * UX-DR88, UX-DR89, UX-DR93.
  *
  * La decisión pura de la búsqueda, sin DOM, como `src/lib/filtroDelDirectorio.ts` lo es del filtro
  * de los Directorios: qué frase dice el recuento, qué `filters` se le pasan a Pagefind, qué
- * combinación de filtros (`filtrosUsados`) viaja en la `busqueda` asentada y, desde la Historia
- * 27.3, qué Obras ofrece el selector de Obra del Autor elegido. La pinta el guion
+ * combinación de filtros (`filtrosUsados`) viaja en la `busqueda` asentada, desde la Historia
+ * 27.3, qué Obras ofrece el selector de Obra del Autor elegido y, desde la 27.4, cómo vive el
+ * estado en la dirección y en el historial: leerlo, componerlo, compararlo, resolverlo contra lo
+ * que se puede elegir, decir lo que no se puede usar y decidir cada escritura. La pinta el guion
  * empaquetado de `src/components/Busqueda.astro`, que la importa, y `buscar.astro` toma de aquí los
  * textos fijos del campo. Apta para el cliente: solo importa módulos que también lo son, y el grafo
  * entero de lo que arrastra el guion lo fija `tests/unit/busqueda-con-filtros.test.ts`.
@@ -205,4 +208,265 @@ export function opcionesDeObra(
  */
 export function rotuloDeObra(opcion: Pick<OpcionDelSelectorDeObra, 'titulo' | 'recuento'>): string {
   return `${opcion.titulo} (${recuentoDeCitas(opcion.recuento)})`;
+}
+
+// ─── La búsqueda en la dirección (Historia 27.4) ─────────────────────────────
+
+/**
+ * El estado de la búsqueda tal como vive en la dirección y en el objeto de estado de cada entrada
+ * del historial — Historia 27.4, FR-7, NFR-4, UX-DR93, AD-13. Lleva **identificadores**, nunca
+ * rótulos: `autor` es el slug del Autor, `obra` el nombre de la ficha de la Obra (el que escribe
+ * la 27.1, que retitular no cambia) y `tema` el slug del Tema. Vacío es ausente: `''` en
+ * cualquiera de los cuatro quiere decir que ese parámetro no está.
+ */
+export interface EstadoDeLaBusqueda {
+  /** Lo tecleado, tal como llegó; al componer la dirección se recorta (solo espacios = sin `q`). */
+  texto: string;
+  autor: string;
+  /** El nombre de la ficha de la Obra; **solo cuenta con `autor`** al componer la dirección. */
+  obra: string;
+  tema: string;
+}
+
+/**
+ * Los cuatro parámetros de la dirección de `/buscar/`, **en el orden en que se componen**:
+ * `?q=&autor=&obra=&tema=`. La clave es el campo de `EstadoDeLaBusqueda`; el valor, el nombre del
+ * parámetro. `q` es el `name` del campo desde la v1: el formulario sin guion envía lo mismo.
+ */
+export const PARAMETROS_DE_LA_BUSQUEDA = {
+  texto: 'q',
+  autor: 'autor',
+  obra: 'obra',
+  tema: 'tema',
+} as const satisfies Record<keyof EstadoDeLaBusqueda, string>;
+
+const CAMPOS_DEL_ESTADO = Object.keys(PARAMETROS_DE_LA_BUSQUEDA) as (keyof EstadoDeLaBusqueda)[];
+
+/** El estado sin nada: la búsqueda de `/buscar/` a secas. */
+export const ESTADO_VACIO: Readonly<EstadoDeLaBusqueda> = Object.freeze({ texto: '', autor: '', obra: '', tema: '' });
+
+/**
+ * El estado que dice una dirección — su `location.search`, con o sin `?`. De cada parámetro, la
+ * **primera aparición** (como `URLSearchParams.get`); uno vacío o ausente, `''`. Lo que la
+ * dirección traiga de más —otro parámetro, las marcas de llegada `de` y `via`— no se lee: la
+ * búsqueda no las conoce, y las quita el fichero de medición.
+ */
+export function estadoDeLaDireccion(search: string): EstadoDeLaBusqueda {
+  const parametros = new URLSearchParams(search);
+  const estado = { ...ESTADO_VACIO };
+  for (const campo of CAMPOS_DEL_ESTADO) estado[campo] = parametros.get(PARAMETROS_DE_LA_BUSQUEDA[campo]) ?? '';
+  return estado;
+}
+
+/**
+ * Los parámetros que un estado pone en la dirección, en su orden y solo los no vacíos: el texto
+ * recortado (solo espacios = sin `q`) y la Obra **solo con Autor** (FR-7: la Obra nunca va sin su
+ * Autor). Es lo que lleva también el objeto de estado de la entrada.
+ */
+function parametrosDe(estado: EstadoDeLaBusqueda): [string, string][] {
+  const valores: Record<keyof EstadoDeLaBusqueda, string> = {
+    texto: estado.texto.trim(),
+    autor: estado.autor,
+    obra: estado.autor !== '' ? estado.obra : '',
+    tema: estado.tema,
+  };
+  return CAMPOS_DEL_ESTADO.filter((campo) => valores[campo] !== '').map((campo) => [
+    PARAMETROS_DE_LA_BUSQUEDA[campo],
+    valores[campo],
+  ]);
+}
+
+/**
+ * Si un estado no busca nada: sin texto (vacío o solo espacios) y sin ningún filtro. Una `obra`
+ * sin `autor` **sí** cuenta aquí —la dirección la puede traer, y la resolución le busca su Autor—.
+ */
+export function estadoSinNada(estado: EstadoDeLaBusqueda): boolean {
+  return estado.texto.trim() === '' && estado.autor === '' && estado.obra === '' && estado.tema === '';
+}
+
+/**
+ * La dirección de un estado: `ruta` (la de `rutaDeLaBusqueda()`, que la isla recibe del `action`
+ * de su formulario, para no arrastrar `superficies.ts` al cliente) y, si queda algún parámetro,
+ * `?q=&autor=&obra=&tema=` en ese orden, codificados por `URLSearchParams`. Sin estado, la ruta a
+ * secas. Se compone **siempre desde el estado**, nunca editando `location.search`: lo que la
+ * dirección traía de más no vuelve.
+ */
+export function direccionDeLaBusqueda(estado: EstadoDeLaBusqueda, ruta: string): string {
+  const consulta = new URLSearchParams(parametrosDe(estado)).toString();
+  return consulta === '' ? ruta : `${ruta}?${consulta}`;
+}
+
+/**
+ * Si dos estados son el mismo: el mismo texto recortado y los mismos tres filtros, **tal cual**.
+ * Dos estados iguales dan la misma dirección; la inversa no vale para una `obra` sin `autor`, que
+ * no se compone pero sí es distinta: una dirección que la trae no dice lo mismo que una que no, y
+ * la isla la reemplaza.
+ */
+export function mismoEstado(a: EstadoDeLaBusqueda, b: EstadoDeLaBusqueda): boolean {
+  return a.texto.trim() === b.texto.trim() && a.autor === b.autor && a.obra === b.obra && a.tema === b.tema;
+}
+
+/**
+ * La clave del objeto de estado de una entrada del historial bajo la que la isla guarda el estado
+ * de la búsqueda de esa entrada, con los **nombres de los parámetros** (`{ q, autor, obra, tema }`,
+ * solo los no vacíos). Convive con la marca de búsqueda asentada de la 23.8
+ * (`MARCA_DE_BUSQUEDA_ASENTADA`), que es otra clave del mismo objeto.
+ */
+export const CLAVE_DEL_ESTADO_EN_LA_ENTRADA = 'busqueda';
+
+/**
+ * El estado que guarda el objeto de una entrada, o `null` si no guarda ninguno: sin objeto, sin la
+ * clave, o con algo bajo ella que no tiene la forma —un objeto cuyos valores, si están, son cadenas
+ * con nombre de parámetro—. El historial lo puede haber escrito otra versión del sitio: lo que no
+ * se entiende no se lee, y la isla cae a la dirección.
+ */
+export function estadoDeLaEntrada(estadoDelHistorial: unknown): EstadoDeLaBusqueda | null {
+  if (typeof estadoDelHistorial !== 'object' || estadoDelHistorial === null) return null;
+  if (!Object.prototype.hasOwnProperty.call(estadoDelHistorial, CLAVE_DEL_ESTADO_EN_LA_ENTRADA)) return null;
+  const guardado: unknown = (estadoDelHistorial as Record<string, unknown>)[CLAVE_DEL_ESTADO_EN_LA_ENTRADA];
+  if (typeof guardado !== 'object' || guardado === null || Array.isArray(guardado)) return null;
+  const nombres: readonly string[] = Object.values(PARAMETROS_DE_LA_BUSQUEDA);
+  const estado = { ...ESTADO_VACIO };
+  for (const [nombre, valor] of Object.entries(guardado)) {
+    if (!nombres.includes(nombre) || typeof valor !== 'string') return null;
+  }
+  for (const campo of CAMPOS_DEL_ESTADO) {
+    const valor = (guardado as Record<string, string | undefined>)[PARAMETROS_DE_LA_BUSQUEDA[campo]];
+    if (valor !== undefined) estado[campo] = valor;
+  }
+  return estado;
+}
+
+/**
+ * El objeto de estado que la isla escribe en una entrada: una **copia** del que se le pasa —con sus
+ * demás claves, también la marca de la 23.8— y, bajo `CLAVE_DEL_ESTADO_EN_LA_ENTRADA`, los
+ * parámetros del estado. No muta el que recibe. Sin objeto (o con algo que no lo es), uno nuevo.
+ */
+export function entradaConEstado(estadoDelHistorial: unknown, estado: EstadoDeLaBusqueda): Record<string, unknown> {
+  return Object.assign(
+    {},
+    typeof estadoDelHistorial === 'object' && estadoDelHistorial !== null ? estadoDelHistorial : {},
+    { [CLAVE_DEL_ESTADO_EN_LA_ENTRADA]: Object.fromEntries(parametrosDe(estado)) },
+  );
+}
+
+/**
+ * El Autor de una Obra, por su nombre de ficha: el Autor **en cuya lista del mapa** está y cuyo
+ * selector de Obra la ofrecería (`opcionesDeObra`, con los recuentos de `filters()`), o `null`.
+ * **Nunca partiendo el nombre**: el prefijo del nombre de la ficha no se lee en el cliente (AD-25),
+ * y una Obra que ya no tiene Citas —o que se absorbió al reunir— no tiene Autor aquí.
+ */
+export function autorDeLaObra(
+  mapa: MapaDeObras,
+  recuentos: Readonly<Record<string, number>> | undefined,
+  nombre: string,
+): string | null {
+  if (nombre === '') return null;
+  for (const autor of Object.keys(mapa)) {
+    if (opcionesDeObra(mapa, recuentos, autor).some((o) => o.valor === nombre)) return autor;
+  }
+  return null;
+}
+
+/** Lo que la resolución necesita saber del sitio: qué se puede elegir y de quién es cada Obra. */
+export interface LoQueSePuedeElegir {
+  /** Los valores de las opciones del selector de Autor (sin «Todos los autores»). */
+  autores: readonly string[];
+  /** Los valores de las opciones del selector de Tema (sin «Todos los temas»). */
+  temas: readonly string[];
+  /** El Autor de una Obra ofrecible, o `null` (`autorDeLaObra`). Solo se pregunta con `obra`. */
+  autorDeLaObra: (nombre: string) => string | null;
+}
+
+/**
+ * La resolución de un estado leído de la dirección o de una entrada — Historia 27.4, en un **orden
+ * fijo**:
+ *
+ *   1. se descarta, contando uno por cada uno, el `autor` que no es opción del selector de Autor,
+ *      el `tema` que no es opción del de Tema y la `obra` que no es ofrecible (sin Autor en
+ *      `autorDeLaObra`);
+ *   2. una `obra` sin `autor` toma el Autor de la Obra;
+ *   3. un `autor` y una `obra` que no casan: se descarta la `obra` (uno más).
+ *
+ * Nunca se cambia el Autor por el de la Obra, ni se traduce una Obra absorbida a la que la
+ * absorbió: lo que no existe se dice (`avisoDeLaDireccion`) y la búsqueda va sin ello. El texto
+ * no se toca.
+ */
+export function resolverEstado(
+  leido: EstadoDeLaBusqueda,
+  sitio: LoQueSePuedeElegir,
+): { estado: EstadoDeLaBusqueda; noSeUsan: number } {
+  const estado = { ...leido };
+  let noSeUsan = 0;
+  if (estado.autor !== '' && !sitio.autores.includes(estado.autor)) {
+    estado.autor = '';
+    noSeUsan++;
+  }
+  if (estado.tema !== '' && !sitio.temas.includes(estado.tema)) {
+    estado.tema = '';
+    noSeUsan++;
+  }
+  const deLaObra = estado.obra !== '' ? sitio.autorDeLaObra(estado.obra) : null;
+  if (estado.obra !== '' && deLaObra === null) {
+    estado.obra = '';
+    noSeUsan++;
+  }
+  if (estado.obra !== '' && estado.autor === '') estado.autor = deLaObra!;
+  if (estado.obra !== '' && estado.autor !== deLaObra) {
+    estado.obra = '';
+    noSeUsan++;
+  }
+  return { estado, noSeUsan };
+}
+
+const CUANTOS = ['Uno', 'Dos', 'Tres'] as const;
+
+/**
+ * La frase fija que dice que la dirección traía filtros que no se pueden usar — Historia 27.4,
+ * UX-DR93. Va en la región del recuento, delante del recuento (o de la sugerencia a cero), con un
+ * espacio. Con algo con que buscar (`quedaAlgo`: texto o algún filtro que sí se usa): «Uno de los
+ * filtros de esta dirección no se puede usar, y la búsqueda va sin él.», «Dos…»/«Tres… no se
+ * pueden usar, y la búsqueda va sin ellos.». Sin nada: «El filtro de esta dirección ya no
+ * existe.» o «Los filtros de esta dirección ya no existen.», y no hay búsqueda. Sin descartes, `''`.
+ */
+export function avisoDeLaDireccion(noSeUsan: number, quedaAlgo: boolean): string {
+  if (!(noSeUsan >= 1)) return '';
+  if (!quedaAlgo) {
+    return noSeUsan === 1 ? 'El filtro de esta dirección ya no existe.' : 'Los filtros de esta dirección ya no existen.';
+  }
+  const cuantos = CUANTOS[Math.min(noSeUsan, CUANTOS.length) - 1];
+  return noSeUsan === 1
+    ? `${cuantos} de los filtros de esta dirección no se puede usar, y la búsqueda va sin él.`
+    : `${cuantos} de los filtros de esta dirección no se pueden usar, y la búsqueda va sin ellos.`;
+}
+
+/**
+ * El control que escribe un estado en la dirección: el campo (teclear y Enter), cada selector, y
+ * «Quitar los filtros», que es control propio. Los selectores se nombran `selector-de-…`, no por el
+ * filtro: `autor` o `tema` a secas son combinaciones del vocabulario de la medición, y el guion de
+ * la búsqueda no escribe ninguna.
+ */
+export type ControlDeLaBusqueda = 'campo' | 'selector-de-autor' | 'selector-de-obra' | 'selector-de-tema' | 'quitar';
+
+/**
+ * Cómo se escribe un estado en el historial — Historia 27.4, AD-13:
+ *
+ *   · `'ninguna'` si es el mismo estado que dice la dirección actual (`igual`);
+ *   · `'replaceState'` si la entrada actual la abrió **el mismo control** y no está asentada
+ *     —una entrada asentada, la de una llegada o la de un `popstate` no tienen control
+ *     (`controlDeLaEntrada` `null`)—: seguir tecleando, o las flechas sobre el mismo selector, no
+ *     apilan una entrada por estado;
+ *   · `'pushState'` en cualquier otro caso: otro control, o una entrada sin control.
+ */
+export function escrituraDelHistorial({
+  igual,
+  control,
+  controlDeLaEntrada,
+}: {
+  igual: boolean;
+  control: ControlDeLaBusqueda;
+  controlDeLaEntrada: ControlDeLaBusqueda | null;
+}): 'ninguna' | 'pushState' | 'replaceState' {
+  if (igual) return 'ninguna';
+  return controlDeLaEntrada === control ? 'replaceState' : 'pushState';
 }

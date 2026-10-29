@@ -472,12 +472,15 @@ export function asentamientoDeBusqueda(c: ConstantesDelAsentamiento) {
  * dirección de la barra o volver a ella no cuentan otra vez la misma llegada. Se quitan también
  * en una página sin vista —páginas 2+, `/buscar/`, 404—, donde ningún evento las lleva. Las lee
  * y las quita **solo el fichero**: ninguna isla las lee, la única que lee la dirección es la de la
- * búsqueda —su consulta, antes que el fichero, que va con `defer`— y la única que escribe además
- * en el historial es ella (Historia 23.8): solo `history.replaceState` con la marca de su búsqueda
- * asentada (`MARCA_DE_BUSQUEDA_ASENTADA`) en el objeto de estado, sin dirección, y solo desde sus
- * escuchas —nunca al analizarse, que corre antes que este fichero—. Conserva así la dirección que
- * haya, ya sin marcas, y este fichero conserva al quitarlas el `history.state` que ella escribió. El
- * fichero no lee ese estado: no descarta ninguna `busqueda`. Sin punto final no hay fichero, y la
+ * búsqueda —su estado, `?q=&autor=&obra=&tema=`, que lee tras una microtarea, cuando este fichero,
+ * que va antes en el documento, ya las quitó— y la única que escribe además en el historial es
+ * ella: `history.replaceState` con la marca de su búsqueda asentada
+ * (`MARCA_DE_BUSQUEDA_ASENTADA`) en el objeto de estado, sin dirección (Historia 23.8), y, desde la
+ * Historia 27.4, `history.pushState` y `history.replaceState` con la dirección **compuesta desde su
+ * estado** —nunca copiando `location.search`, así que las marcas no vuelven— y el estado en el
+ * objeto de la entrada. Todo, solo desde sus escuchas o tras esa microtarea —nunca al analizarse—.
+ * Este fichero conserva al quitar las marcas el `history.state` que hubiera. El fichero no lee ese
+ * estado: no descarta ninguna `busqueda`. Sin punto final no hay fichero, y la
  * dirección se queda como llegó.
  *
  * **`primera`** (SM-5, SM-7): cada acción —un evento de `METRICA_DE_ACCION`— lleva `si` si es la
