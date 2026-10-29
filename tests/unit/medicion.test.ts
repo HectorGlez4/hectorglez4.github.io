@@ -4625,6 +4625,66 @@ describe('Historia 23.8 — una búsqueda cuenta una vez, cuando se asienta', ()
         expect(busquedas(entorno)).toEqual([['search', 'viento']]);
         expect(entorno.elegidos()).toEqual({ autor: '', tema: '' });
       }, 240_000);
+
+      it('llegar con `?q=` ya registrada y elegir un filtro: la llegada no vuelve a contar, el estado con filtro sí', async () => {
+        const entorno = await isla({ busqueda: '?q=viento', estado: { [MARCA]: true } });
+        await entorno.enviar();
+        expect(entorno.emitidos()).toEqual([]);
+        await elegirYEsperar(entorno, 'autor', 'seneca');
+        expect(ultimaBusqueda(entorno)).toEqual(['search', 'viento', { filters: { [AUTOR]: 'seneca' } }]);
+        await entorno.enviar();
+        // Quitarlo vuelve al estado de la llegada, que ya contaba.
+        entorno.quitarFiltros();
+        await entorno.enviar();
+        expect(entorno.emitidos()).toEqual([[BUSQUEDA, '1-9', 'autor']]);
+      }, 240_000);
+
+      it('Enter tras teclear: el recuento que esperaba la pausa del tecleo se escribe ya, también si la búsqueda iba en vuelo', async () => {
+        const pintada = await isla();
+        await pintada.teclear('vida');
+        expect(pintada.sombra()).toBe('3 resultados.');
+        expect(pintada.region().texto).toBe('');
+        await pintada.enviar();
+        expect(pintada.region().texto).toBe('3 resultados.');
+        expect(busquedas(pintada)).toHaveLength(1);
+        expect(pintada.emitidos()).toEqual([[BUSQUEDA, '1-9', NINGUNO]]);
+        // Enter mientras la búsqueda tecleada del mismo estado no ha llegado: al llegar, sin pausa.
+        const enVuelo = await isla({ manual: true });
+        enVuelo.escribir('vida');
+        enVuelo.avanzar(150);
+        await enVuelo.enviar();
+        expect(enVuelo.region().texto).toBe('');
+        await enVuelo.responder('vida');
+        expect(enVuelo.region().texto).toBe('3 resultados.');
+        expect(busquedas(enVuelo)).toHaveLength(1);
+      }, 240_000);
+
+      it('enviar unos filtros que no llegan a verse no asienta los que se ven', async () => {
+        const entorno = await isla();
+        await elegirYEsperar(entorno, 'autor', 'seneca');
+        expect(entorno.pintados()).toHaveLength(4);
+        // Otro Autor, cuya búsqueda falla: lo que se ve sigue siendo Séneca, con el mismo texto.
+        entorno.fallar('search');
+        entorno.elegir('autor', 'jose-marti');
+        await entorno.enviar();
+        expect(entorno.emitidos()).toEqual([]);
+        // Séneca no gastó su asentamiento: cuenta cuando se envía de verdad.
+        entorno.fallar();
+        entorno.elegir('autor', 'seneca');
+        await entorno.enviar();
+        expect(entorno.emitidos()).toEqual([[BUSQUEDA, '1-9', 'autor']]);
+      }, 240_000);
+
+      it('el recuento nombra lo elegido al lanzar la búsqueda, no lo que dice el selector cuando llega', async () => {
+        const entorno = await isla({ manual: true });
+        entorno.elegir('autor', 'jose-marti');
+        entorno.avanzar(PAUSA_DE_LOS_SELECTORES_MS);
+        // Otro Autor dentro de su pausa: la búsqueda de José Martí sigue siendo la última lanzada.
+        entorno.elegir('autor', 'seneca');
+        await entorno.responder(null);
+        expect(entorno.region().texto).toBe('222 citas de José Martí.');
+        expect(entorno.sombra()).toBe('222 citas de José Martí.');
+      }, 240_000);
     });
   });
 });

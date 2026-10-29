@@ -5,7 +5,8 @@
  * de los Directorios: qué frase dice el recuento, qué `filters` se le pasan a Pagefind y qué
  * combinación de filtros (`filtrosUsados`) viaja en la `busqueda` asentada. La pinta el guion
  * empaquetado de `src/components/Busqueda.astro`, que la importa, y `buscar.astro` toma de aquí los
- * textos fijos del campo. Apta para el cliente: solo importa módulos que también lo son.
+ * textos fijos del campo. Apta para el cliente: solo importa módulos que también lo son, y el grafo
+ * entero de lo que arrastra el guion lo fija `tests/unit/busqueda-con-filtros.test.ts`.
  *
  * AD-5 — Derivación pura.
  */

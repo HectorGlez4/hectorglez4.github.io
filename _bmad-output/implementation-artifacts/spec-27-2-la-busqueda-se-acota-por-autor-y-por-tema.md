@@ -149,6 +149,26 @@ Las capas de revisión son externas en este bucle y la revisión independiente v
 
 Rechazados (18), con su motivo: la frase visible anterior durante la pausa y su solape con la sombra (el diseño de la 26.6 que el spec adopta: la sombra reserva el alto de la frase nueva); sin JavaScript la página queda en el `h1` (la historia pone el campo en el guion; `<noscript>` y el aviso son de la 27.7); el filtro paga el trozo compartido y su tope se rederivó (la historia cuenta los trozos compartidos en el tope); la guarda textual de la región de `/buscar/` (el entorno simulado ejecuta el fichero y prueba qué se escribe y cuándo); `TROZO_COMPARTIDO` y su atribución (un trozo de una palabra solo sale de partir entradas declaradas, uno con otro nombre falla en rojo, y la atribución en las pruebas de red es de rótulo); los literales 150 y 30 (ya estaban; la tanda es de la 27.5); la e2e de Tema y texto (el entorno simulado lo comprueba sobre el fichero construido); `ficherosDescargados` sin `trozos` (lo juzga la prueba de los topes); la llegada con filtros y la caché de atrás y adelante (la clave con valores ya distingue el estado; la caché conserva el DOM); el `select` cerrado que no parte (control nativo, que la historia exige); `aria-controls` y la etiqueta del campo (la etiqueta la fija la historia); el registro de la pasada anterior (esta es la revisión); `vite:preloadError` (nada lo escucha en `dist/`); 30 pintadas de 222 (la tanda sigue en 30 hasta la 27.5, y el recuento dice el total); «Quitar los filtros» con `hidden` (fuera del árbol y sin pintarse); NFR-2 sobre un fixture de una página (lo garantiza el listado del Autor, que prueba `publicable-y-alcanzable`); los estilos por tokens sin prueba de estilo calculado (están en el componente, por tokens, y los barre axe); los comportamientos de plataforma (no hay lector de pantalla ni iOS en el CI).
 
+### 2026-10-29 — Review pass
+- intent_gap: 0
+- bad_spec: 0
+- patch: 10 (high 0, medium 0, low 10)
+- defer: 0
+- reject: 19 (high 0, medium 3, low 16)
+- addressed_findings:
+  - `[low]` `[patch]` Enter con la búsqueda tecleada del mismo estado en vuelo —o ya pintada y esperando la pausa— dejaba el recuento a la pausa del tecleo: enviar es un gesto, y si lo enviado es lo que se ve el recuento se escribe ya (`ritmo.ahora`); prueba nueva en el entorno simulado, comprobada en rojo quitando la línea (edge-case-hunter).
+  - `[low]` `[patch]` La región, absoluta sobre la sombra, podía decir durante la pausa del tecleo una frase de antes más larga que la nueva y pintarse sobre el primer resultado: `.estado` va con `inset: 0` y `overflow: hidden`, recortada a la fila de la sombra (los lectores leen la región entera); la e2e nueva de estilos lo comprueba con una frase larga (blind-hunter).
+  - `[low]` `[patch]` Las cifras de `umbrales.ts` eran las de antes de la primera revisión: medido otra vez sobre `dist/`, la búsqueda es 8.411 + 501 = 8.912 y el tope se rederiva con la misma regla, como el del filtro tras su revisión (9.312); el filtro, 2.963 + 501 = 3.464, sigue a ~400 de su tope sin moverlo (blind-hunter).
+  - `[low]` `[patch]` Prueba nueva: enviar con un Autor cuya búsqueda falla no asienta el estado de otro Autor que se ve, ni le gasta su asentamiento (verification-gap).
+  - `[low]` `[patch]` Prueba nueva: el recuento nombra lo elegido al lanzar la búsqueda aunque el selector haya cambiado dentro de la pausa antes de llegar la respuesta (verification-gap).
+  - `[low]` `[patch]` Prueba nueva: llegar con `?q=` ya registrada y elegir un filtro asienta el estado con filtro, y al quitarlo el de la llegada no vuelve a contar (blind-hunter).
+  - `[low]` `[patch]` Barrido de axe nuevo en `accesibilidad.spec.ts` con un Autor elegido (selectores, «Quitar los filtros», resultados con línea de Autor) y con un filtro a cero (blind-hunter).
+  - `[low]` `[patch]` E2e nueva de estilos calculados en `/buscar/`, con los tokens resueltos en el propio navegador: campo, `fieldset` sin borde ni relleno a 3 × `--unidad`, 2 × entre selectores, `select` con filete, radio y fondo, «Quitar los filtros» en siena a su ancho y a 2 × `--unidad`, recuento en `--pie` y `--tinta-apagada` encima de la lista (ac-auditor).
+  - `[low]` `[patch]` `busqueda.ts` se decía apta para el cliente sin que nada lo vigilara: una prueba fija el grafo entero de importaciones con valor del guion de la búsqueda (blind-hunter).
+  - `[low]` `[patch]` El Auto Run Result decía «0 parches» y «seguimiento: no» de la pasada de cierre sin decir que lo superaban las revisiones: anotado (blind-hunter).
+
+Rechazados (19), con su motivo: sin JavaScript `/buscar/` queda en el `h1` (la historia dice que el guion inserta el Campo; `<noscript>` y el aviso son de la 27.7); la `busqueda-sin-resultados` con texto cuando los filtros vacían (la historia lo pide literal: «la consulta sin resultados con texto se sigue registrando… solo con el texto»); la sugerencia a cero sin texto (a cero sigue la salida construida hasta la 27.6); el recuento de 222 con 30 pintadas (la historia: «dice cuántos hay, no cuántos se ven», la tanda es de la 27.5); la atribución del trozo compartido en `entradaDeLoDescargado` (sus consumidores solo preguntan si está declarado o si es de medición); la forma de `TROZO_COMPARTIDO` (un trozo nuevo cuenta en el tope de quien lo importa); el filtro que paga el trozo y las marcas `@__PURE__` (la historia cuenta los trozos compartidos en el tope, y están medidos); el alto del `fieldset` sin límite (la historia pide anotarlo); el `:hover` de «Quitar los filtros» (el de `.copiar`, que la historia manda copiar; el movimiento reducido y el anillo de foco son globales en `tokens.css`); el entorno simulado sobre el fichero aplanado (aproximación conocida, y las e2e corren los bytes reales); la clave de búsqueda sin recortar (una consulta de más sin efecto visible, como antes de la historia); la etiqueta del campo (la fija la historia); el texto de solo signos con filtro (la historia define «sin texto» como vacío o espacios); el informe de intent-alignment (descriptivo, sin divergencia nueva); y del ac-auditor, la invitación tras interactuar (la isla solo inserta en `[data-busqueda]` y delante de la región), NFR-2 sobre el Corpus real (lo garantiza `publicable-y-alcanzable`), el ritmo en navegador (lo prueba el entorno simulado) y la tabulación solo en Chromium.
+
 ## Design Notes
 
 **Por qué un `<template>`.** Como en el filtro de los Directorios: el marcado, las opciones del build y sus estilos de ámbito salen en el HTML, inertes, y el guion no lleva contenido (`medicion.test.ts` «ningún guion lleva contenido»). Sin guion la página queda en el `h1` hasta la 27.7, que la rama no fusiona antes.
@@ -188,7 +208,7 @@ Status: done
 - `src/lib/medicion.ts` — `EstadoDeBusqueda.valores` y `clave(texto, filtros, valores?)`; docblocks al día; `CAMPOS_DEL_GUION` marcada `@__PURE__`.
 - `src/lib/anuncio.ts` — `ritmoDeTecleo().ahora(texto)`; docblocks al día.
 - `src/lib/guiones.ts` — entrada `busqueda`, `IdDeGuion`, `pide`, `trozos` (el trozo compartido con el filtro) y `entradaDeLoDescargado` que lo reconoce.
-- `src/lib/umbrales.ts` — `PAUSA_DE_LOS_SELECTORES_MS`, `MAX_BYTES_GUION_DE_LA_BUSQUEDA` (9.112 = 8.712 medidos + ~400), `MAX_BYTES_GUION_DEL_FILTRO` rederivado (3.860 = 3.460 + ~400) y la nota en `MAX_BYTES_DE_GUION` (sin moverlo).
+- `src/lib/umbrales.ts` — `PAUSA_DE_LOS_SELECTORES_MS`, `MAX_BYTES_GUION_DE_LA_BUSQUEDA` (9.112 = 8.712 medidos + ~400; rederivado en la pasada 2 a 9.312 = 8.912 + ~400), `MAX_BYTES_GUION_DEL_FILTRO` rederivado (3.860 = 3.460 + ~400) y la nota en `MAX_BYTES_DE_GUION` (sin moverlo).
 - `src/lib/redes.ts`, `src/lib/vocabulario.ts` — llamadas de nivel superior marcadas `@__PURE__` para que el guion no las arrastre.
 - `tests/unit/ayuda/aplanar.ts` (nuevo) — aplana un fichero de `/_astro/` y sus trozos a guion clásico con `esbuild`, dejando el `import()` de Pagefind.
 - `tests/unit/ayuda/busqueda.ts` — entorno simulado de la isla empaquetada: plantilla, selectores, botón, foco, sombra, `Event`/`dispatchEvent`, `search` con opciones.
@@ -201,9 +221,9 @@ Status: done
 
 **Lo que ocupan los dos selectores a 360 px (2026-10-29, `--project=movil`).** El `fieldset` mide **222,875 px** de alto con «Quitar los filtros» a la vista y el valor a 17 px: cada selector 320 × 44 px, el botón 44 px de alto, sin desplazamiento lateral.
 
-**Hallazgos de revisión.** Ninguno en esta pasada (capas externas): 0 parches, 0 diferidos, 0 rechazados.
+**Hallazgos de revisión.** Ninguno en la pasada de cierre de la implementación, que corrió sin las capas externas: 0 parches, 0 diferidos, 0 rechazados. *Superado por las pasadas de revisión 1 y 2, abajo.*
 
-**Revisión de seguimiento recomendada:** no — 0 parches (0 altos, 0 medios, 0 bajos), puntuación 0.
+**Revisión de seguimiento recomendada:** ~~no — 0 parches, puntuación 0~~ — superado: la de cada pasada está en su sección.
 
 **Verificación.**
 - `npx vitest run tests/unit/busqueda-con-filtros.test.ts` — 20/20.
@@ -243,3 +263,29 @@ Status: done
 - Bytes tras los parches: búsqueda 8.366 + trozo 501 = 8.867 (tope 9.112); filtro 2.963 + 501 = 3.464 (tope 3.860).
 
 **Riesgos que quedan.** Los de arriba, salvo el del ritmo del recuento. La frase visible anterior sigue a la vista durante la pausa, sobre la sombra de la nueva (el diseño de la 26.6).
+
+### Pasada de revisión 2 (2026-10-29)
+
+**Qué cambió.** Diez parches, ninguno sobre el contrato:
+- `src/components/Busqueda.astro` — enviar escribe ya el recuento de lo que se ve (`ritmo.ahora`), también el de una búsqueda tecleada del mismo estado que iba en vuelo o esperaba su pausa; docblock al día.
+- `src/pages/buscar.astro` — `.estado` con `inset: 0` y `overflow: hidden`: la frase de antes, más larga, no se pinta sobre el primer resultado durante la pausa del tecleo.
+- `src/lib/umbrales.ts` — cifras medidas de nuevo: la búsqueda 8.411 + 501 = 8.912 y `MAX_BYTES_GUION_DE_LA_BUSQUEDA` rederivado a 9.312 con la misma regla; el filtro 2.963 + 501 = 3.464, tope sin mover. Ni `MAX_BYTES_DE_GUION` ni `MAX_BYTES_GUION_DE_PAGEFIND` cambian.
+- `src/lib/busqueda.ts` — la cabecera nombra la prueba que fija su grafo de importaciones.
+- `tests/unit/medicion.test.ts` — cuatro pruebas nuevas en «Historia 27.2»: Enter escribe ya el recuento (pintado y en vuelo), enviar unos filtros que no llegan a verse no asienta los que se ven, el recuento nombra lo elegido al lanzar, y la llegada con `?q=` registrada más un filtro.
+- `tests/unit/busqueda-con-filtros.test.ts` — el grafo de importaciones con valor del guion de la búsqueda, cerrado.
+- `tests/e2e/busqueda.spec.ts` — estilos calculados por tokens en `/buscar/` y el recorte de la región.
+- `tests/e2e/accesibilidad.spec.ts` — axe con un Autor elegido y con un filtro a cero.
+
+**Hallazgos.** 10 parches (0 altos, 0 medios, 10 bajos), 0 diferidos, 19 rechazados; el detalle, en el Review Triage Log.
+
+**Revisión de seguimiento recomendada:** sí — parches 0 altos, 0 medios, 10 bajos; puntuación 3 × 0 + 10 = 10 (≥ 5).
+
+**Verificación.**
+- `npx vitest run tests/unit/busqueda-con-filtros.test.ts` — 22/22.
+- `npx vitest run tests/unit/medicion.test.ts` — 578/578; la prueba de Enter sale en rojo quitando la escritura inmediata.
+- Uno por llamada: `tipo-de-resultado` 11/11, `filtros-de-cita` 9/9, `filtro-del-directorio` 22/22, `ingreso-construido` 41/41, `espinas-de-ux` 14/14, `siguiente` 20/20, `publicable-y-alcanzable` 39/39.
+- `npm run check` — 0 errores, 0 avisos.
+- `npx playwright test tests/e2e/busqueda.spec.ts --project=escritorio` — 43 pasan, 2 saltadas (360 px); `--project=movil -g "27.2"` — 11 pasan (el `fieldset`, otra vez 222,875 px); `tests/e2e/receptor.spec.ts -g "busca"` — 8 pasan; `tests/e2e/accesibilidad.spec.ts -g "buscar"` — 18 pasan.
+- `npm test` entero con `correr.sh` — 150 ficheros, 6.817 pruebas, verde.
+
+**Riesgos que quedan.** Los de arriba. El recorte de la región es visual: durante la pausa del tecleo la frase de antes puede verse cortada a la fila de la nueva, hasta que la región la reescribe.

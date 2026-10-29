@@ -53,7 +53,9 @@
  *   · Historia 27.2 — cada cambio de un selector reinicia `PAUSA_DE_LOS_SELECTORES_MS`, y la
  *     búsqueda se rehace una vez al cumplirse: las flechas sobre un selector cerrado no lanzan una
  *     búsqueda por opción. Una pausa cancela la otra: la búsqueda la lanza el último gesto, con su
- *     ritmo. Enviar (Enter) cancela las dos pausas y busca el estado de ese momento.
+ *     ritmo. Enviar (Enter) cancela las dos pausas y busca el estado de ese momento; enviar es un
+ *     gesto, así que si lo enviado es lo que se ve, su recuento se escribe ya (`ahora`), también
+ *     el de una búsqueda tecleada que aún esperaba su pausa.
  *     «Quitar los filtros» vuelve los dos a «Todos…», rehace la búsqueda al momento (o la vacía, sin
  *     texto) y lleva el foco al campo.
  *   · Historia 23.8 (FR-56, FR-8, AD-13) — una búsqueda **cuenta una vez, cuando se asienta**, y
@@ -529,7 +531,10 @@ const { autores, temas } = Astro.props;
       const texto = campo.value;
       const valores = valoresDeFiltros(elegidos());
       buscar('gesto').then(() => {
-        if (visto && visto.texto === texto && visto.valores === valores) asentar();
+        if (!visto || visto.texto !== texto || visto.valores !== valores) return;
+        // Enviar es un gesto: el recuento de lo tecleado que esperaba su pausa se escribe ya.
+        if (!aCero && sombra.textContent) ritmo.ahora(sombra.textContent);
+        asentar();
       });
     });
 

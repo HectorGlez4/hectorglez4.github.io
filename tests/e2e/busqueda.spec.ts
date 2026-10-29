@@ -1223,6 +1223,89 @@ test.describe('Historia 27.2 — la búsqueda se acota por Autor y por Tema', ()
     expect((await resultados(page)).length).toBeGreaterThan(0);
   });
 
+  test('lo pintado sale de los tokens: campo, fieldset, selectores, «Quitar los filtros» y recuento', async ({ page }) => {
+    test.setTimeout(60_000);
+    const autor = await elAutorMayor();
+    await page.goto('/buscar/');
+    await page.locator(AUTOR).selectOption(autor.valor);
+    await expect(page.locator('[data-estado]')).toHaveText(`${autor.recuento} citas de ${autor.rotulo}.`, { timeout: 10_000 });
+    const { medido, esperado } = await page.evaluate(() => {
+      /** Lo que da el navegador a una caja de prueba con esos estilos: los tokens, resueltos. */
+      const resolver = (estilos: Record<string, string>) => {
+        const prueba = document.createElement('div');
+        for (const [propiedad, valor] of Object.entries(estilos)) prueba.style.setProperty(propiedad, valor);
+        document.body.append(prueba);
+        const calculado = getComputedStyle(prueba);
+        const fuera = Object.fromEntries(Object.keys(estilos).map((p) => [p, calculado.getPropertyValue(p)]));
+        prueba.remove();
+        return fuera;
+      };
+      const de = (selector: string, propiedades: string[]) => {
+        const calculado = getComputedStyle(document.querySelector(selector)!);
+        return Object.fromEntries(propiedades.map((p) => [p, calculado.getPropertyValue(p)]));
+      };
+      const t = resolver({
+        'font-family': 'var(--sans)',
+        'font-size': 'var(--cuerpo-lg)',
+        'margin-top': 'calc(var(--unidad) * 3)',
+        'margin-bottom': 'calc(var(--unidad) * 2)',
+        'border-top-style': 'solid',
+        'border-top-width': 'var(--grosor-filete)',
+        'border-top-color': 'var(--contorno)',
+        'border-top-left-radius': 'var(--radio)',
+        'background-color': 'var(--papel)',
+        color: 'var(--siena)',
+        'outline-color': 'var(--tinta-apagada)',
+        'line-height': 'var(--pie)',
+      });
+      const fieldset = document.querySelector('fieldset')!.getBoundingClientRect();
+      const quitar = document.querySelector('[data-quitar]')!.getBoundingClientRect();
+      const estado = document.querySelector('[data-estado]')!.getBoundingClientRect();
+      const lista = document.querySelector('[data-resultados]')!.getBoundingClientRect();
+      return {
+        medido: {
+          campo: de('[data-consulta]', ['font-family', 'font-size']),
+          fieldset: de('fieldset', ['border-top-width', 'padding-top', 'padding-left', 'margin-top']),
+          entreSelectores: de('.selector + .selector', ['margin-top'])['margin-top'],
+          select: de('#filtro-de-autor', ['border-top-width', 'border-top-color', 'border-top-left-radius', 'background-color', 'font-family']),
+          quitar: { ...de('[data-quitar]', ['color', 'border-top-color', 'margin-top']), aSuAncho: quitar.width < fieldset.width },
+          estado: { ...de('[data-estado]', ['font-size', 'color', 'margin-top']), encimaDeLaLista: estado.bottom <= lista.top },
+        },
+        esperado: {
+          campo: { 'font-family': t['font-family'], 'font-size': t['font-size'] },
+          fieldset: { 'border-top-width': '0px', 'padding-top': '0px', 'padding-left': '0px', 'margin-top': t['margin-top'] },
+          entreSelectores: t['margin-bottom'],
+          select: {
+            'border-top-width': t['border-top-width'],
+            'border-top-color': t['border-top-color'],
+            'border-top-left-radius': t['border-top-left-radius'],
+            'background-color': t['background-color'],
+            'font-family': t['font-family'],
+          },
+          quitar: { color: t.color, 'border-top-color': t.color, 'margin-top': t['margin-bottom'], aSuAncho: true },
+          estado: { 'font-size': t['line-height'], color: t['outline-color'], 'margin-top': t['margin-top'], encimaDeLaLista: true },
+        },
+      };
+    });
+    // `line-height` y `outline-color` solo sirven de vehículo para resolver `--pie` y `--tinta-apagada`.
+    expect(medido).toEqual(esperado);
+
+    // La región se recorta a la fila de la sombra: una frase de antes más larga que la nueva —la que
+    // dice durante la pausa del tecleo— no se pinta sobre el primer resultado.
+    const recorte = await page.evaluate(() => {
+      const estado = document.querySelector<HTMLElement>('[data-estado]')!;
+      document.querySelector('.sombra')!.textContent = 'Corta.';
+      estado.textContent = 'Una frase de antes mucho más larga que la nueva. '.repeat(12);
+      return {
+        abajo: estado.getBoundingClientRect().bottom,
+        fila: estado.parentElement!.getBoundingClientRect().bottom,
+        primero: document.querySelector('[data-resultados] li')!.getBoundingClientRect().top,
+      };
+    });
+    expect(recorte.abajo).toBeLessThanOrEqual(recorte.fila + 0.5);
+    expect(recorte.abajo).toBeLessThanOrEqual(recorte.primero);
+  });
+
   test('a 360 px los selectores caben a todo el ancho y a la zona de toque, sin desplazamiento lateral', async ({ page }) => {
     test.skip(page.viewportSize()?.width !== 360, 'Se mide en el proyecto móvil, a 360 px.');
     const autor = await elAutorMayor();

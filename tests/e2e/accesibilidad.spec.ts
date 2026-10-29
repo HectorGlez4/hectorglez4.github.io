@@ -2194,3 +2194,35 @@ test.describe('Historia 24.7 — el salto «Dónde leer esta obra ↓»', () => 
     cerca(nota.relleno, 24, `${ruta}, filete → texto de la nota`);
   });
 });
+
+/**
+ * Historia 27.2 — el barrido de `/buscar/` de arriba mira la página vacía: los selectores, «Quitar
+ * los filtros», los resultados de un filtrado (todos Citas, con su línea de Autor) y la salida a cero
+ * con un filtro puesto solo existen después de elegir. Se barren aquí, en esos estados.
+ */
+test.describe('Historia 27.2 — /buscar/ con filtros pasa la auditoría automática', () => {
+  async function barrer(page: Page, estado: string) {
+    const resultado = await new AxeBuilder({ page }).withTags([...ETIQUETAS_DEL_BARRIDO]).analyze();
+    const resumen = resultado.violations.map((v) => `${v.id}: ${v.help} (${v.nodes.length})`);
+    expect(resumen, `/buscar/ ${estado}\n${resumen.join('\n')}`).toEqual([]);
+    const dudas = sinDecidir(resultado);
+    expect(dudas, `/buscar/ ${estado}: axe no supo decidir\n${dudas.join('\n')}`).toEqual([]);
+  }
+
+  test('/buscar/ con un Autor elegido, con resultados y con un filtro a cero', async ({ page }) => {
+    test.setTimeout(60_000);
+    await page.goto('/buscar/');
+    await page.locator('#filtro-de-autor').selectOption({ index: 1 });
+    await expect(page.locator('[data-quitar]')).toBeVisible();
+    await page.waitForFunction(() => document.querySelector('[data-resultados]')!.children.length > 0, null, {
+      timeout: 10_000,
+    });
+    await expect(page.locator('[data-estado]')).not.toBeEmpty();
+    await barrer(page, 'con un Autor elegido');
+
+    await page.locator('[data-consulta]').fill('zzzqxw');
+    await expect(page.locator('[data-salida]')).toBeVisible({ timeout: 10_000 });
+    await expect(page.locator('[data-quitar]')).toBeVisible();
+    await barrer(page, 'con un filtro a cero');
+  });
+});

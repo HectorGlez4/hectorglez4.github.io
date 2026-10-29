@@ -177,6 +177,9 @@ const temasDelFiltro = ordenDeTemasPorNombre(filtros.temas.map(opciones));
   /*
    * La región y la sombra del recuento comparten celda: la sombra da el alto, la región se pinta
    * encima. Sin guion solo está la región, vacía y fuera del flujo: la rejilla no mide nada.
+   * La región se recorta a la fila que da la sombra: mientras corre la pausa del tecleo dice todavía
+   * la frase de antes, que puede ocupar más líneas que la nueva, y sin recorte se pintaría encima
+   * del primer resultado. El recorte es solo visual: los lectores leen la región entera.
    */
   .recuento {
     position: relative;
@@ -186,8 +189,8 @@ const temasDelFiltro = ordenDeTemasPorNombre(filtros.temas.map(opciones));
 
   .estado {
     position: absolute;
-    inset-inline: 0;
-    top: 0;
+    inset: 0;
+    overflow: hidden;
     grid-row: 1;
     grid-column: 1;
     margin: calc(var(--unidad) * 3) 0 0;

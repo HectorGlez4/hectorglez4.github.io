@@ -534,7 +534,9 @@ export const MAX_BYTES_GUION_DE_PAGEFIND = 87200;
  * `src/lib/anuncio.ts` y los recuentos, y el empaquetado saca lo que los dos guiones comparten a un
  * trozo que importan los dos: el filtro deja de ser un solo fichero y arrastra, con el trozo,
  * `anunciar`, el `ahora` del segundo ritmo y `temaEnFrase`, que no usa. Mide **3.460 bytes**
- * (2026-10-29): 2.963 de su fichero y 497 del trozo. Tope: 3.460 más unos 400.
+ * (2026-10-29): 2.963 de su fichero y 497 del trozo. Tope: 3.460 más unos 400. Tras las dos
+ * revisiones de la 27.2 el trozo mide 501 y el filtro **3.464** (2026-10-29): sigue a ~400 del tope,
+ * que no se mueve.
  */
 export const MAX_BYTES_GUION_DEL_FILTRO = 3860;
 
@@ -561,8 +563,13 @@ export const MAX_BYTES_GUION_DEL_FILTRO = 3860;
  * que Vite conozca, y la lista va vacía). Vite lo pone siempre que construye para el cliente y no
  * tiene opción que lo quite; se mide aquí para que se vea. Más unos 400 de margen, como los demás
  * topes de la lista.
+ *
+ * Rederivado tras las dos revisiones de la historia, con la misma regla y como el del filtro: la
+ * cuenta de la pausa desde la última tecla, que una pausa cancele la otra, la sugerencia a cero que
+ * no pisa un recuento y el recuento que Enter escribe ya lo llevan a **8.912 bytes** (2026-10-29)
+ * —8.411 del fichero de entrada y 501 del trozo—. Tope: 8.912 más unos 400.
  */
-export const MAX_BYTES_GUION_DE_LA_BUSQUEDA = 9112;
+export const MAX_BYTES_GUION_DE_LA_BUSQUEDA = 9312;
 
 /**
  * La pausa de tecleo, en milisegundos — AD-9, UX-DR58, UX-DR86, Historia 26.6.

@@ -85,6 +85,35 @@ describe('Historia 27.2 — lo puro: la frase del recuento', () => {
     expect(fuente).not.toMatch(/^import\b/mu);
   });
 
+  it('el guion de la búsqueda solo arrastra módulos aptos para el cliente: su grafo de importaciones es esta lista', () => {
+    // Lo que el `<script>` de `Busqueda.astro` importa con valor, y lo que eso importa, hasta el final.
+    // `import type` no viaja. Un módulo nuevo en la lista —`superficies.ts`, `publicado.ts`…— se
+    // decide aquí, a la vista, y no se descubre como bytes de más en el tope.
+    const IMPORTA = /^\s*(?:import|export)\s+(?!type\b)[^;]*?from\s+'(\.[^']+)'/gmu;
+    const componente = readFileSync(join(RAIZ, 'src/components/Busqueda.astro'), 'utf8');
+    const guion = componente.slice(componente.indexOf('\n<script>'));
+    expect(guion.length).toBeLessThan(componente.length);
+    const vistos = new Set<string>();
+    const cola = [...guion.matchAll(IMPORTA)].map((m) => join(RAIZ, 'src/components', m[1]));
+    while (cola.length > 0) {
+      const fichero = cola.shift()!;
+      if (vistos.has(fichero)) continue;
+      vistos.add(fichero);
+      for (const m of readFileSync(fichero, 'utf8').matchAll(IMPORTA)) cola.push(join(fichero, '..', m[1]));
+    }
+    expect([...vistos].map((f) => f.slice(RAIZ.length + 1)).sort()).toEqual([
+      'src/lib/anuncio.ts',
+      'src/lib/busqueda.ts',
+      'src/lib/destinos.ts',
+      'src/lib/medicion.ts',
+      'src/lib/recuentos.ts',
+      'src/lib/redes.ts',
+      'src/lib/tipoDeResultado.ts',
+      'src/lib/umbrales.ts',
+      'src/lib/vocabulario.ts',
+    ]);
+  });
+
   it('lo tecleado va tal cual: la frase no escapa nada porque se pinta por `textContent`', () => {
     expect(fraseDelRecuento({ total: 2, texto: '<b>vida</b>', autor: 'Séneca' })).toBe('2 citas de Séneca con «<b>vida</b>».');
   });
