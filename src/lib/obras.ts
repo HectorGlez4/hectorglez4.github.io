@@ -1052,8 +1052,12 @@ function primeraAparicion(apariciones: readonly AparicionDeCita[]): AparicionDeC
   return primera;
 }
 
-/** Por slug, en español y, si la colación los iguala, por unidades de código. */
-function porSlug(a: { slug: string }, b: { slug: string }): number {
+/**
+ * Por slug, en español y, si la colación los iguala, por unidades de código. Es el orden de la
+ * cola «sin documento» de `ordenDelLibro` y del hueco «sin Obra» de `clavesDeOrden`; las pruebas
+ * que lo esperan lo toman de aquí, no de otra definición.
+ */
+export function porSlug(a: { slug: string }, b: { slug: string }): number {
   return a.slug.localeCompare(b.slug, 'es') || porUnidades(a.slug, b.slug);
 }
 
@@ -1378,8 +1382,15 @@ export interface CitaParaLaClave {
  *
  * Se escribe en decimal con ceros hasta ocho cifras (`'00012345'`): Pagefind lee el entero, y
  * con un valor que no fuera numérico ordenaría como texto. Como un rango que alcanza `B` rompe,
- * caben `B − 1` posiciones por rango y la mayor clave que sale es `(B − 2)·B + (B − 2)`, por
- * debajo de `B² − 1`; con `B ≤ 4096` es exacta en `f32` (ver `MAX_POR_RANGO_DE_LA_CLAVE_DE_ORDEN`).
+ * caben `B − 1` posiciones por rango y la mayor clave que sale es `(B − 2)·B + (B − 2)`; toda
+ * clave queda por debajo de `B²`, así que con `B ≤ 4096` es exacta en `f32` (ver
+ * `MAX_POR_RANGO_DE_LA_CLAVE_DE_ORDEN`).
+ *
+ * **Retitular una ficha no mueve su filtro `obra`, pero puede mover claves.** La lista de obras
+ * desempata por título las Obras de un mismo Autor con el mismo recuento (`ordenDeLaListaDeObras`,
+ * lo manda la espina), y la clave sigue esa lista: retitular una Obra empatada la cambia de sitio
+ * en la lista de su Autor, y con ella las claves de las Citas de las Obras empatadas. Sin empate,
+ * retitular no mueve ninguna clave. Fuera del Autor nada se mueve: `a` no depende de títulos.
  *
  * Pura y determinista ante el orden de la entrada. **Lanza**:
  *
@@ -1411,8 +1422,8 @@ export function clavesDeOrden(
   if (!Number.isInteger(tope) || tope < 1 || tope * tope > MAYOR_EXACTO_EN_F32) {
     throw new Error(
       `El tope de la clave de orden (${tope}) tiene que ser un entero entre 1 y ` +
-        `${Math.sqrt(MAYOR_EXACTO_EN_F32)}: con dos rangos, la clave mayor es tope² − 1, y por ` +
-        `encima de ${MAYOR_EXACTO_EN_F32} Pagefind, que ordena como f32, empataría claves vecinas.`,
+        `${Math.sqrt(MAYOR_EXACTO_EN_F32)}: con dos rangos, toda clave queda por debajo de tope², y ` +
+        `por encima de ${MAYOR_EXACTO_EN_F32} Pagefind, que ordena como f32, empataría claves vecinas.`,
     );
   }
   if (aviso !== undefined && (!Number.isInteger(aviso) || aviso < 1 || aviso >= tope)) {

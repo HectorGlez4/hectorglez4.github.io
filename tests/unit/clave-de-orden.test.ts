@@ -94,10 +94,10 @@ describe('Historia 27.1 — la clave de orden de la búsqueda', () => {
     expect(new Set(claves.values()).size).toBe(claves.size);
   });
 
-  it('la clave mayor posible, B² − 1, es exacta en f32 y distinta de su vecina', () => {
+  it('toda clave queda bajo B², y B² − 1 —la cota, por encima de la mayor que sale— es exacta en f32 y distinta de su vecina', () => {
     const B = MAX_POR_RANGO_DE_LA_CLAVE_DE_ORDEN;
+    expect(B * B).toBeLessThanOrEqual(F32);
     const mayor = B * B - 1;
-    expect(mayor).toBeLessThan(F32);
     expect(Math.fround(mayor)).toBe(mayor);
     expect(Math.fround(mayor - 1)).not.toBe(Math.fround(mayor));
     // El caso que la descarta: un 3+2+3 decimal pasa de 2^24 y empata con su vecina.
@@ -110,7 +110,7 @@ describe('Historia 27.1 — la clave de orden de la búsqueda', () => {
     expect(Object.fromEntries(permutada)).toEqual(Object.fromEntries(base));
   });
 
-  it('retitular una ficha no mueve ninguna clave', () => {
+  it('retitular una ficha sin empate en su lista de obras no mueve ninguna clave', () => {
     const cartas = obra('zorrilla--cartas', 'Epístolas', 1);
     const retituladas = CITAS.map((c) => (c.obra?.nombre === 'zorrilla--cartas' ? { ...c, obra: cartas } : c));
     expect(Object.fromEntries(clavesDeOrden(AUTORES, retituladas, POR_OBRA))).toEqual(
@@ -131,6 +131,50 @@ describe('Historia 27.1 — la clave de orden de la búsqueda', () => {
       ['ana--alfa', [{ slug: 'ana-2' }]],
     ]);
     expect(enOrden(clavesDeOrden(autores, citas, porObra))).toEqual(['ana-2', 'ana-1']);
+  });
+
+  /*
+   * El límite de «retitular no mueve la clave»: con un empate de recuento, la lista de obras
+   * desempata por título (lo manda la espina) y la clave la sigue. Retitular una Obra empatada la
+   * cambia de sitio en su Autor —igual que en la Página de Autor—, y nada fuera de él se mueve.
+   */
+  it('con un empate de recuento, retitular mueve las claves de las Obras empatadas como la lista de obras, y solo dentro del Autor', () => {
+    const autores = [
+      { slug: 'ana', ordenAlfabetico: 'Ana' },
+      { slug: 'luis', ordenAlfabetico: 'Luis' },
+    ];
+    const beta = obra('ana--beta', 'Beta', 1);
+    const alfa = obra('ana--alfa', 'Alfa', 1);
+    const citas: CitaParaLaClave[] = [
+      { slug: 'ana-1', autor: 'ana', obra: beta },
+      { slug: 'ana-2', autor: 'ana', obra: alfa },
+      { slug: 'luis-1', autor: 'luis' },
+    ];
+    const porObra = new Map([
+      ['ana--beta', [{ slug: 'ana-1' }]],
+      ['ana--alfa', [{ slug: 'ana-2' }]],
+    ]);
+    const antes = clavesDeOrden(autores, citas, porObra);
+    // «Beta» pasa a llamarse «Abecedario»: ahora va antes que «Alfa».
+    const retituladas = citas.map((c) => (c.obra?.nombre === 'ana--beta' ? { ...c, obra: obra('ana--beta', 'Abecedario', 1) } : c));
+    const despues = clavesDeOrden(autores, retituladas, porObra);
+    expect(enOrden(antes)).toEqual(['ana-2', 'ana-1', 'luis-1']);
+    expect(enOrden(despues)).toEqual(['ana-1', 'ana-2', 'luis-1']);
+    expect(despues.get('luis-1')).toBe(antes.get('luis-1'));
+  });
+
+  it('dos Autores con la misma clave de orden desempatan por slug, sea cual sea el orden de la entrada', () => {
+    const autores = [
+      { slug: 'seneca-el-viejo', ordenAlfabetico: 'Séneca' },
+      { slug: 'seneca', ordenAlfabetico: 'Séneca' },
+    ];
+    const citas: CitaParaLaClave[] = [
+      { slug: 'seneca-el-viejo-uno', autor: 'seneca-el-viejo' },
+      { slug: 'seneca-uno', autor: 'seneca' },
+    ];
+    const esperado = ['seneca-uno', 'seneca-el-viejo-uno'];
+    expect(enOrden(clavesDeOrden(autores, citas, new Map()))).toEqual(esperado);
+    expect(enOrden(clavesDeOrden([...autores].reverse(), [...citas].reverse(), new Map()))).toEqual(esperado);
   });
 
   describe('un rango que no cabe rompe nombrándolo', () => {
@@ -175,7 +219,7 @@ describe('Historia 27.1 — la clave de orden de la búsqueda', () => {
       expect(() => clavesDeOrden(AUTORES, CITAS, POR_OBRA, { tope: 4097, aviso: undefined })).toThrow(/f32/u);
     });
 
-    it('caben tope − 1 posiciones por rango, y la mayor clave que sale queda bajo tope² − 1', () => {
+    it('caben tope − 1 posiciones por rango, y la mayor clave que sale es (tope − 2)·tope + (tope − 2), bajo tope²', () => {
       const tope = 4;
       // Tres Autores (tope − 1) con tres Citas cada uno: los dos rangos llenos sin alcanzar el tope.
       const autores = ['a', 'b', 'c'].map((slug) => ({ slug, ordenAlfabetico: slug }));

@@ -12,9 +12,12 @@ import {
   limpiar,
   paginaConstruida,
 } from './ayuda/construir.js';
-import { filtrosDeLaBusqueda, rutasPublicadas, superficiesInalcanzables } from '../../src/lib/publicado.ts';
-import { conjuntoDelCorpus, grafoDeDist } from '../../tools/lib/alcance.ts';
-import { rutasDelCorpus } from '../../tools/lib/corpus.ts';
+import { citasPorObra, filtrosDeLaBusqueda, rutasPublicadas, superficiesInalcanzables } from '../../src/lib/publicado.ts';
+import { clavesDeOrden } from '../../src/lib/obras.ts';
+import { conjuntoDeLosDatos, conjuntoDelCorpus, grafoDeDist, leerDatosDelCorpus } from '../../tools/lib/alcance.ts';
+import { leerDocumentosDeFuente, rutasDelCorpus } from '../../tools/lib/corpus.ts';
+import { posicionesDeCitas } from '../../tools/lib/posiciones.ts';
+import { metadatosDe } from './ayuda/pagefind.ts';
 import { rutaDeFicheroHtml } from '../../tools/lib/indexables.ts';
 import {
   SUPERFICIES,
@@ -884,6 +887,19 @@ describe('Historia 12.1 — sobre un sitio construido de verdad', () => {
         expect(deLaPagina[0], ruta).toMatch(new RegExp(`^${ORDEN_DE_CITA}:\\d{8}$`, 'u'));
       }
       expect(new Set([...claves.values()].map((c) => c[0])).size).toBe(claves.size);
+      // Y cada una es la que `clavesDeOrden` da sobre el Corpus de la copia y su orden del libro.
+      const rutas = rutasDelCorpus(join(proyecto, 'corpus'));
+      const datos = await leerDatosDelCorpus(rutas);
+      const conjunto = conjuntoDeLosDatos(datos);
+      const porObra = citasPorObra(conjunto.citas, posicionesDeCitas(datos.citas, await leerDocumentosDeFuente(rutas)));
+      const esperadas = clavesDeOrden(conjunto.autores, conjunto.citas, porObra);
+      const malas: string[] = [];
+      for (const [ruta, deLaPagina] of claves) {
+        const esperada = `${ORDEN_DE_CITA}:${esperadas.get(ruta.slice('/cita/'.length))}`;
+        if (deLaPagina[0] !== esperada) malas.push(`${ruta}: ${deLaPagina[0]} en vez de ${esperada}`);
+      }
+      expect(malas).toEqual([]);
+      expect(esperadas.size).toBe(claves.size);
     });
 
     /*
@@ -908,8 +924,9 @@ describe('Historia 12.1 — sobre un sitio construido de verdad', () => {
         expect(de(FILTROS_DE_CITA.autor), ruta).toEqual([esperado!.autor]);
         expect(de(FILTROS_DE_CITA.obra), ruta).toEqual(esperado!.obra === undefined ? [] : [esperado!.obra]);
         expect(de(FILTROS_DE_CITA.tema), ruta).toEqual([...esperado!.temas]);
-        const metas = [...html.matchAll(/<span data-pagefind-meta="autor">([^<]*)<\/span>/gu)].map((m) => m[1]);
-        expect(metas, ruta).toEqual([nombres.get(esperado!.autor)]);
+        const metas = metadatosDe(html, 'autor');
+        expect(metas.elementos, ruta).toBe(1);
+        expect(metas.valores, ruta).toEqual([nombres.get(esperado!.autor)]);
       }
       // Todas las Citas publicadas, y no en vacío.
       expect([...vistas].sort()).toEqual([...porCita.keys()].sort());

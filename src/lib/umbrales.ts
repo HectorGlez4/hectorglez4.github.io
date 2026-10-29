@@ -624,13 +624,14 @@ export const MAX_BYTES_DEL_DIRECTORIO_DE_OBRAS = 290 * 1024;
  * `f32`, que representa exactos los enteros solo hasta 2^24 = 16.777.216: por encima, dos claves
  * vecinas empatan y el orden se pierde sin que nada falle. Un 3+2+3 decimal (Autor, Obra, posición
  * en el libro) llega a ~17,1 millones y ya empata; tres campos binarios no caben con holgura (hoy
- * 135 Autores, 57 Obras y 231 Citas por Obra como máximos). Con dos de 2^12 la clave mayor es
- * `B² − 1` = 16.777.215, exacta por construcción. Holgura el 2026-10-29: 30× en Autores (135) y
- * 13× en Citas de un Autor (308).
+ * 135 Autores, 57 Obras y 231 Citas por Obra como máximos). Con dos de 2^12 toda clave queda
+ * por debajo de `B²` = 2^24, exacta por construcción. Holgura el 2026-10-29: 30× en Autores (135)
+ * y 13× en Citas de un Autor (308).
  *
  * Un rango cuyo recuento llega a este número —4096 Autores, o 4096 Citas de un Autor— **rompe
  * el build** nombrando el rango («Autor» o «posición dentro de {slug}»), el recuento y el tope;
- * es el mismo «≥» con que avisa `AVISO_DE_RANGO_DE_LA_CLAVE_DE_ORDEN`. Subirlo no es una opción:
+ * es el mismo «≥» con que avisa `AVISO_DE_RANGO_DE_LA_CLAVE_DE_ORDEN`. Así caben `B − 1`
+ * posiciones por rango, y la clave mayor que llega a salir es `(B − 2)·B + (B − 2)` = 16.773.118. Subirlo no es una opción:
  * 4096² ya es el techo de `f32`. Lo que lo reabre es trocear la clave, o cambiar de rangos.
  */
 export const MAX_POR_RANGO_DE_LA_CLAVE_DE_ORDEN = 4096;

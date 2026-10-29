@@ -11,7 +11,7 @@ import { ASENTAMIENTO_DE_BUSQUEDA, EVENTOS } from '../../src/lib/medicion.ts';
 import { tramoDe } from '../../src/lib/vocabulario.ts';
 import { citaConLosDosBloques, temaBajoUmbral, textoDe } from './ayuda/corpus.ts';
 import { citasPorObra, filtrosDeLaBusqueda, type ConjuntoPublicable } from '../../src/lib/publicado.ts';
-import { clavesDeOrden, ordenDeLaListaDeObras, rutaDeLaObra } from '../../src/lib/obras.ts';
+import { clavesDeOrden, ordenDeLaListaDeObras, porSlug as porSlugDeCita, rutaDeLaObra } from '../../src/lib/obras.ts';
 import { CITAS_POR_PAGINA } from '../../src/lib/umbrales.ts';
 import { conjuntoDeLosDatos, leerDatosDelCorpus } from '../../tools/lib/alcance.ts';
 import { leerDocumentosDeFuente, rutasDelCorpus } from '../../tools/lib/corpus.ts';
@@ -770,6 +770,9 @@ test.describe('Historia 27.1 — la Cita declara sus filtros y su resultado llev
   const recuentos = (opciones: readonly { valor: string; recuento: number }[]) =>
     Object.fromEntries(opciones.map((o) => [o.valor, o.recuento]));
 
+  /** Por slug, con el mismo dueño que la cola «sin documento» y el hueco «sin Obra» (`porSlug` de `obras.ts`). */
+  const porSlug = (a: string, b: string) => porSlugDeCita({ slug: a }, { slug: b });
+
   // (a) Los recuentos de `filters()` del índice de verdad son los de `filtrosDeLaBusqueda`.
   test('los recuentos de `filters()` son los de `filtrosDeLaBusqueda`, valor a valor, también de las Obras con `noindex`', async ({ page }) => {
     test.setTimeout(120_000);
@@ -794,7 +797,6 @@ test.describe('Historia 27.1 — la Cita declara sus filtros y su resultado llev
   test('filtrar por una Obra y ordenar por la clave da sus Citas en el orden de su Página de Obra, que no es el de slug', async ({ page, request }) => {
     test.setTimeout(180_000);
     const { conjunto, porObra } = await corpus();
-    const porSlug = (a: string, b: string) => a.localeCompare(b, 'es') || (a < b ? -1 : a > b ? 1 : 0);
     const documentadas = new Set(conjunto.citas.filter((c) => c.fuente !== undefined).map((c) => c.slug));
     const candidata = [...porObra]
       .filter(
@@ -884,7 +886,7 @@ test.describe('Historia 27.1 — la Cita declara sus filtros y su resultado llev
     const obras = [...new Map(delAutor(conHueco!).flatMap((c) => (c.obra ? [[c.obra.nombre, c.obra] as const] : []))).values()];
     const esperadas = [
       ...ordenDeLaListaDeObras(obras).flatMap((o) => porObra.get(o.nombre)!.map((c) => c.slug)),
-      ...delAutor(conHueco!).filter((c) => c.obra === undefined).map((c) => c.slug).sort(),
+      ...delAutor(conHueco!).filter((c) => c.obra === undefined).map((c) => c.slug).sort(porSlug),
     ];
     expect(suyas).toEqual(esperadas);
     expect(obraDe.get(suyas[suyas.length - 1])).toBeUndefined();
@@ -935,9 +937,14 @@ test.describe('Historia 27.1 — la Cita declara sus filtros y su resultado llev
     const { conjunto } = await corpus();
     const nombres = new Map(conjunto.autores.map((a) => [a.slug, a.nombre]));
     const autorDeCita = new Map(conjunto.citas.map((c) => [c.slug, c.autor]));
-    const FRASE = 'no hay camino';
-    const conLaFrase = new Set(conjunto.citas.filter((c) => c.texto.toLowerCase().includes(FRASE)).map((c) => c.slug));
-    expect(conLaFrase.size, `El Corpus no tiene ninguna Cita con «${FRASE}».`).toBeGreaterThan(0);
+    // La consulta sale del Corpus: las cinco primeras palabras largas de una Cita con Obra, que
+    // Pagefind devuelve casando todas; ninguna frase escrita aquí.
+    const palabras = (texto: string) => texto.toLowerCase().match(/\p{L}{5,}/gu) ?? [];
+    const elegida = [...conjunto.citas]
+      .sort((a, b) => porSlug(a.slug, b.slug))
+      .find((c) => c.obra !== undefined && palabras(c.texto).length >= 5);
+    expect(elegida, 'El Corpus no tiene ninguna Cita con Obra y cinco palabras largas.').toBeDefined();
+    const FRASE = palabras(elegida!.texto).slice(0, 5).join(' ');
     await buscar(page, FRASE);
     const esperado = await tokens(page);
     const slugDe = (href: string) => new URL(href, 'http://x').pathname.split('/')[2];
@@ -953,7 +960,9 @@ test.describe('Historia 27.1 — la Cita declara sus filtros y su resultado llev
       expect(cita.titulo, cita.href).toMatch(/^«.*»$/su);
       expect(cita.nombre, cita.href).toBe(`Cita: ${cita.titulo}, ${autor}`);
     }
-    expect(citas.some((c) => conLaFrase.has(slugDe(c.href)))).toBe(true);
+    expect(citas.map((c) => slugDe(c.href)), FRASE).toContain(elegida!.slug);
+    // La línea de Autor no ensancha la página: tampoco en el móvil, donde también corre.
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
     // La 27.1 no trae selectores ni controles de filtro: son de la 27.2 y la 27.3.
     expect(await page.locator('select, input[type="checkbox"], input[type="radio"], fieldset').count()).toBe(0);
   });
@@ -966,7 +975,12 @@ test.describe('Historia 27.1 — la Cita declara sus filtros y su resultado llev
   test('el nombre del metadato `autor` no entra en el contenido indexado de la Cita', async ({ page }) => {
     const { conjunto } = await corpus();
     const nombres = new Map(conjunto.autores.map((a) => [a.slug, a.nombre]));
-    const cita = conjunto.citas.find((c) => c.obra !== undefined && (nombres.get(c.autor) ?? '').length > 3)!;
+    const deAutor = (slug: string) => conjunto.citas.filter((c) => c.autor === slug).length;
+    // La del Autor con menos Citas: filtrar por él y pedir sus datos carga pocas páginas.
+    const cita = conjunto.citas
+      .filter((c) => c.obra !== undefined && (nombres.get(c.autor) ?? '').length > 3)
+      .sort((a, b) => deAutor(a.autor) - deAutor(b.autor) || porSlug(a.slug, b.slug))[0];
+    expect(cita, 'El Corpus no tiene ninguna Cita con Obra de un Autor con nombre').toBeDefined();
     const nombre = nombres.get(cita.autor)!;
     await page.goto('/buscar/');
     const indexado = (await page.evaluate(
@@ -989,6 +1003,9 @@ test.describe('Historia 27.1 — la Cita declara sus filtros y su resultado llev
       return cuerpo.textContent ?? '';
     });
     const veces = (texto: string) => texto.split(nombre).length - 1;
+    // No en vacío: el nombre está en el cuerpo —en la Atribución—, y por tanto en el contenido.
+    expect(veces(enElCuerpo), cita.slug).toBeGreaterThan(0);
+    expect(veces(indexado!.content), cita.slug).toBeGreaterThan(0);
     // Si el texto del metadato se indexara, el contenido traería el nombre una vez más que el cuerpo sin lo ignorado.
     expect(veces(indexado!.content), cita.slug).toBeLessThanOrEqual(veces(enElCuerpo));
   });

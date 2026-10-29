@@ -13,6 +13,7 @@ import {
 import { componerDocumento } from '../../tools/lib/documento.ts';
 import { recorrerElementos, type Elemento } from '../../tools/lib/html.ts';
 import { FILTRO_DE_TIPO, FILTROS_DE_CITA, ORDEN_DE_CITA } from '../../src/lib/tipoDeResultado.ts';
+import { indiceDe, metadatosDe, type IndiceDePagefind } from './ayuda/pagefind.ts';
 
 /**
  * Historia 27.1, AD-11, AD-25 — lo que cada Página de Cita declara a Pagefind, sobre `dist/`.
@@ -166,23 +167,25 @@ function declaracionesDe(html: string) {
       fueraDeSitio.push(filtro ?? sort ?? meta!);
     }
   });
-  const metas = [...html.matchAll(/<span data-pagefind-meta="autor">([^<]*)<\/span>/gu)].map((m) => m[1]);
   const de = (clave: string) => filtros.filter((f) => f.clave === clave).map((f) => f.valor);
-  return { de, orden, metas, fueraDeSitio };
+  return { de, orden, metas: metadatosDe(html, 'autor'), fueraDeSitio };
 }
 
 describe('Historia 27.1 — la Página de Cita declara sus filtros y su clave de orden', () => {
   let proyecto = '';
   const html = new Map<string, string>();
+  let indice: (IndiceDePagefind & { soltar(): void }) | undefined;
 
   beforeAll(async () => {
-    const resultado = await construirConCorpus(CORPUS);
+    const resultado = await construirConCorpus(CORPUS, { conBusqueda: true });
     proyecto = resultado.proyecto;
     expect(resultado.codigo, resultado.salida).toBe(0);
     for (const { slug } of ESPERADO) html.set(slug, await readFile(paginaConstruida(proyecto, `/cita/${slug}/`), 'utf8'));
+    indice = await indiceDe(proyecto);
   }, 300_000);
 
   afterAll(async () => {
+    indice?.soltar();
     if (proyecto) await limpiar(proyecto);
   });
 
@@ -200,8 +203,52 @@ describe('Historia 27.1 — la Página de Cita declara sus filtros y su clave de
 
   it('el metadato `autor` lleva el nombre del Autor, una vez', () => {
     for (const esperado of ESPERADO) {
-      expect(declaracionesDe(html.get(esperado.slug)!).metas, esperado.slug).toEqual([esperado.nombre]);
+      const { metas } = declaracionesDe(html.get(esperado.slug)!);
+      expect(metas.elementos, esperado.slug).toBe(1);
+      expect(metas.valores, esperado.slug).toEqual([esperado.nombre]);
     }
+  });
+
+  /*
+   * Lo mismo, leído del índice que Pagefind generó y no del HTML: que recoge filtros, metadato y
+   * clave dentro del contenedor `hidden` con `data-pagefind-ignore`, y que ordena la clave como
+   * número. Es la parte del contrato con Pagefind que corre en el CI; la de la búsqueda servida
+   * en el navegador, con el Corpus entero, está en `tests/e2e/busqueda.spec.ts`.
+   */
+  describe('en el índice generado por Pagefind', () => {
+    it('`filters()` cuenta por valor lo que declaran las Citas', async () => {
+      const filtros = await indice!.filters();
+      const cuenta = (valores: (string | undefined)[]) => {
+        const recuento: Record<string, number> = {};
+        for (const valor of valores) if (valor !== undefined) recuento[valor] = (recuento[valor] ?? 0) + 1;
+        return recuento;
+      };
+      expect(filtros[FILTROS_DE_CITA.autor]).toEqual(cuenta(ESPERADO.map((e) => e.autor)));
+      expect(filtros[FILTROS_DE_CITA.obra]).toEqual(cuenta(ESPERADO.map((e) => e.obra)));
+      expect(filtros[FILTROS_DE_CITA.tema]).toEqual(cuenta(ESPERADO.flatMap((e) => e.temas)));
+    });
+
+    it('ordenar por la clave da el orden del Directorio, la lista de obras y el libro', async () => {
+      const { results } = await indice!.search(null, {
+        filters: { [FILTRO_DE_TIPO]: 'cita' },
+        sort: { [ORDEN_DE_CITA]: 'asc' },
+      });
+      const datos = await Promise.all(results.map((r) => r.data()));
+      expect(datos.map((d) => /^\/cita\/([^/]+)\/?$/u.exec(d.url)?.[1] ?? d.url)).toEqual(ESPERADO.map((e) => e.slug));
+    });
+
+    it('cada Cita lleva su metadato `autor`, y el nombre no entra en su contenido más veces que en la página', async () => {
+      const { results } = await indice!.search(null, { filters: { [FILTRO_DE_TIPO]: 'cita' } });
+      const datos = new Map((await Promise.all(results.map((r) => r.data()))).map((d) => [d.url.replace(/\/?$/u, '/'), d]));
+      for (const esperado of ESPERADO) {
+        const dato = datos.get(`/cita/${esperado.slug}/`);
+        expect(dato, esperado.slug).toBeDefined();
+        expect(dato!.meta.autor, esperado.slug).toBe(esperado.nombre);
+        expect(dato!.filters[FILTROS_DE_CITA.autor], esperado.slug).toEqual([esperado.autor]);
+        // El nombre está en la Atribución una vez; si el texto del metadato contara, saldría dos.
+        expect(dato!.content.split(esperado.nombre).length - 1, esperado.slug).toBe(1);
+      }
+    });
   });
 
   it('nada va fuera del cuerpo indexado, bajo `data-pagefind-ignore="all"` ni en un bloque que se repite', () => {

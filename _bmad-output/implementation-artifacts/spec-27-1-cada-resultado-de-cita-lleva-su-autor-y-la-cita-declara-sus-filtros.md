@@ -101,7 +101,7 @@ deferred:
 
 ## Design Notes
 
-**Clave f32-exacta.** Pagefind 1.5.2 ordena las claves numéricas como f32, exacto hasta 2^24 = 16.777.216; un 3+2+3 decimal (≈17,1 M) ya empata. Dos campos de `B = 4096`: `clave = a·B + p`, con `a` = posición del Autor en el orden del Directorio y `p` = posición de la Cita dentro de su Autor (sus Obras en el orden de la lista, cada una en el orden del libro —«sin documento» al final, que es la cola que ya da `ordenDelLibro`—, y el hueco «sin Obra» tras la última Obra, por slug). Máximo `B²−1 = 16.777.215`: exacto por construcción. Se escribe en decimal con ceros a 8 cifras (`'00012345'`; Pagefind lee el entero). Holgura: 30× en Autores, 13× en Citas por Autor. Frente al ordinal global denso, una Cita nueva solo mueve las claves de su Autor (un Autor nuevo, las de los posteriores), no las ~4.400 páginas. Desbordar `a` o `p` lanza con el nombre del rango.
+**Clave f32-exacta.** Pagefind 1.5.2 ordena las claves numéricas como f32, exacto hasta 2^24 = 16.777.216; un 3+2+3 decimal (≈17,1 M) ya empata. Dos campos de `B = 4096`: `clave = a·B + p`, con `a` = posición del Autor en el orden del Directorio y `p` = posición de la Cita dentro de su Autor (sus Obras en el orden de la lista, cada una en el orden del libro —«sin documento» al final, que es la cola que ya da `ordenDelLibro`—, y el hueco «sin Obra» tras la última Obra, por slug). Toda clave queda por debajo de `B²` = 2^24 —con el «≥» del tope, la mayor que sale es `(B−2)·B + (B−2)` = 16.773.118—: exacta por construcción. Se escribe en decimal con ceros a 8 cifras (`'00012345'`; Pagefind lee el entero). Holgura: 30× en Autores, 13× en Citas por Autor. Frente al ordinal global denso, una Cita nueva solo mueve las claves de su Autor, no las ~4.400 páginas; un Autor que entra o sale mueve las de todos los posteriores en el Directorio, que si está cerca del principio son casi todas. Desbordar `a` o `p` lanza con el nombre del rango.
 
 **Marcado.** Forma A (la elegida): contenedor `<div hidden data-pagefind-ignore>` con elementos vacíos para filtros y clave, y el metadato por contenido (`<span data-pagefind-meta="autor">José Martí</span>`), porque la forma en atributo (`autor:José Martí`) se partiría en una coma. Forma B si Playwright muestra que `hidden` o el `ignore` impiden capturarlo: `aria-hidden="true"` y la clase `.solo-para-lectores` de `tokens.css` en lugar de `hidden`. Comprobarlo pronto: construir y correr (a) antes de escribir el resto de pruebas.
 
@@ -149,10 +149,35 @@ Las cinco capas de revisión son externas en el bucle v8-ralph y no traían hall
 
 Rechazados: el tablero lo lleva el orquestador del bucle; el registro de revisión vacío es esta pasada; la incoherencia de objetos de Obra (salen todos de `resolverObras`); el `lastmod` y el aviso (el contrato prohíbe tocar `tools/lib/cambios.ts`); el `'obra'` del `aria-label` y la holgura de 34 bytes (los retira la 27.2, que empaqueta el guion); campos de opción y filtros en la Página de Obra (el orden visible y los selectores son de la 27.2–27.3, y los filtros son solo de la Cita por contrato); «tres rangos» (ya aplazado); el hueco «sin documento» como constante (es la cola de `ordenDelLibro`, como fija el contrato); `medicion.test.ts` fuera del Code Map y la ficha en el mismo commit (no es planificación); la prueba de Tema bajo umbral omitida (depende del Corpus del día).
 
+### 2026-10-29 — Review pass 2 (capas externas: blind-hunter, edge-case-hunter, verification-gap, intent-alignment, ac-auditor)
+- intent_gap: 0
+- bad_spec: 0
+- patch: 11 (medium 1, low 10)
+- defer: 0
+- reject: 20
+- addressed_findings:
+  - "`[medium]` `[patch]` El contrato con el índice de Pagefind —filtros, metadato y clave recogidos dentro del contenedor `hidden` con `data-pagefind-ignore`, y la clave ordenada como número— solo lo miraba Playwright, que el CI no corre (verification-gap): `tests/unit/ayuda/pagefind.ts` carga en Node el `pagefind.js` generado de la copia, y `filtros-de-cita.test.ts` (construida ahora con `conBusqueda`) comprueba `filters()` contra el fixture, el orden de `search(null, { sort: { orden } })` contra `ESPERADO` y el `meta.autor` y el contenido de cada Cita."
+  - "`[low]` `[patch]` «Retitular no mueve la clave» no se sostiene con un empate de recuento, porque la lista de obras desempata por título (blind-hunter): el comentario de `clavesDeOrden` lo dice, la prueba pura de retitular se nombra «sin empate» y otra fija que con empate las claves siguen a la lista de obras y nada fuera del Autor se mueve."
+  - "`[low]` `[patch]` Tres redacciones de la clave mayor (blind-hunter): `umbrales.ts`, el mensaje del tope y los nombres de las pruebas dicen lo mismo —toda clave bajo `B²`, la mayor que sale `(B − 2)·B + (B − 2)` = 16.773.118—."
+  - "`[low]` `[patch]` Dos definiciones de «por slug» en las e2e (blind-hunter, ac-auditor): `porSlug` de `obras.ts` se exporta y las pruebas (b) y (e) lo usan para la cola «sin Obra»."
+  - "`[low]` `[patch]` El metadato `autor` se contaba con una expresión regular sobre el HTML crudo (blind-hunter, edge-case-hunter): `metadatosDe` cuenta los elementos con el tokenizador y decodifica el texto, en `filtros-de-cita` y `publicable-y-alcanzable`."
+  - "`[low]` `[patch]` La e2e del metadato fuera del contenido podía pasar en vacío, cargaba cientos de fragmentos y daba un TypeError sin Cita (blind-hunter, edge-case-hunter): exige el nombre en cuerpo y contenido, elige el Autor con menos Citas y falla con mensaje."
+  - "`[low]` `[patch]` La prueba (c) buscaba una frase fija de Machado (blind-hunter): la consulta sale de una Cita del Corpus y se exige esa Cita entre los resultados."
+  - "`[low]` `[patch]` El Auto Run Result mezclaba el estado de la ejecución inicial con el de las pasadas (blind-hunter): queda marcado como histórico, con el estado vigente delante."
+  - "`[low]` `[patch]` Dos Autores con la misma `ordenAlfabetico` no tenían prueba (blind-hunter): prueba pura de desempate por slug con la entrada en los dos órdenes."
+  - "`[low]` `[patch]` Sobre el `dist/` de todas las familias la clave solo se miraba por forma y unicidad (blind-hunter): se coteja con `clavesDeOrden` sobre el Corpus de la copia y su orden del libro."
+  - "`[low]` `[patch]` La línea de Autor no se miraba en el móvil (blind-hunter): la prueba (c) exige que la página no se ensanche y corre también con `--project=movil`."
+
+Rechazados: el alcance del cambio de claves al entrar un Autor y el `lastmod` (ya en riesgos; el contrato prohíbe tocar `tools/lib/cambios.ts`); el Corpus en disco frente al construido (la configuración de Playwright construye antes de correr); el nombre del metadato con otro dueño y la coherencia de los objetos de Obra (salen del mismo conjunto y de `resolverObras`); las opciones aún sin consumidor, los filtros solo en la Cita, el `'obra'` del guion y los 34 bytes (son de la 27.2, y la prueba de `ingreso-construido` ya rompe); el tablero (lo lleva el orquestador); AGENTS.md (la función rompe con mensaje propio); el tipo por omisión en un resultado sin tipo (toda página indexada declara el suyo, y lo prueba la 26.2); el oráculo de (a) (la función se prueba aparte, pura y contra el fixture); la Obra `noindex` (recuento 1 < `MIN_CITAS_OBRA_INDEXABLE`); «sin documento» como constante, homónimas y retitular en `dist/`, la sonda de tokens, el Tema bajo umbral y la exactitud cerca de 2^24 (ya juzgados en la pasada 1 o cubiertos por construcción); «tres rangos» (ya aplazado).
+
 ## Auto Run Result
 
 Status: done
 Blocking condition: —
+
+**Estado vigente:** el de la última pasada de revisión, al final de esta sección. Lo que sigue hasta ella es el registro de la ejecución inicial, tal como quedó: su «sin hallazgos», su `followup_review_recommended: false` y su `npm test` con un rojo son de entonces.
+
+### Ejecución inicial (histórico)
 
 **Qué se hizo.** Cada Página de Cita declara a Pagefind, desde un solo componente y solo en ella, sus filtros `autor` (slug), `obra` (nombre de ficha, omitido sin Obra) y `tema` (uno por Tema publicado), el metadato `autor` con el nombre (por contenido, peso 0 ya declarado) y la clave `data-pagefind-sort="orden:NNNNNNNN"`. La clave es `a·B + p` con `B = MAX_POR_RANGO_DE_LA_CLAVE_DE_ORDEN = 4096`: `a` es la posición del Autor en el orden del Directorio (`compararPorClave`), `p` la de la Cita dentro de su Autor (lista de obras → orden del libro con «sin documento» detrás → «sin Obra» por slug). La mayor posible es 4096² − 1 = 16.777.215 < 2^24, exacta en f32. El resultado de Cita en `/buscar/` lleva la línea `.r-autor` y el nombre «Cita: {título}, {Autor}» con el mismo código que el de Obra, que conserva «, de».
 
@@ -204,3 +229,24 @@ Blocking condition: —
 
 **Riesgos que quedan.** Los de la pasada anterior: `/buscar/` a 34 bytes de `MAX_BYTES_DE_GUION` hasta que la 27.2 empaquete el guion, y la clave que se mueve en las Citas de un Autor sin que el `lastmod` lo refleje. La exactitud en f32 cerca de 2^24 se sostiene por construcción y por la prueba pura; ninguna prueba contra Pagefind llega ahí, porque el Corpus de hoy tiene claves de ~550.000.
 
+
+### Pasada de revisión 2 (capas externas) — estado vigente
+
+**Qué cambió.** Once parches (1 medium, 10 low), ningún aplazado nuevo, veinte rechazados (detalle en el registro de triaje). El código de producción solo cambia en redacción: `porSlug` de `src/lib/obras.ts` pasa a exportarse y el comentario de `clavesDeOrden` y el de `MAX_POR_RANGO_DE_LA_CLAVE_DE_ORDEN` dicen lo mismo de la clave mayor y del empate de la lista de obras.
+- `tests/unit/ayuda/pagefind.ts` (nuevo) — `metadatosDe` (metadatos contados con el tokenizador y decodificados) e `indiceDe`, que carga en Node el `pagefind.js` generado de una copia y sirve sus trozos del disco.
+- `tests/unit/filtros-de-cita.test.ts` — construye con `conBusqueda` y comprueba sobre el índice de verdad `filters()`, el orden por la clave y el `meta.autor` y el contenido de cada Cita: el contrato con Pagefind entra en el CI.
+- `tests/unit/publicable-y-alcanzable.test.ts` — cada clave del `dist/` de todas las familias contra `clavesDeOrden` del Corpus de la copia; el metadato con `metadatosDe`.
+- `tests/unit/clave-de-orden.test.ts` — empate de recuento al retitular, Autores con la misma clave del Directorio y nombres de prueba al día.
+- `tests/e2e/busqueda.spec.ts` — `porSlug` de `obras.ts` en (b) y (e); (c) con la consulta sacada del Corpus y sin desbordar en el móvil; la prueba del metadato fuera del contenido, no vacía, más barata y con mensaje.
+- `src/lib/obras.ts`, `src/lib/umbrales.ts` — redacción y la exportación de `porSlug`.
+
+**Seguimiento.** `followup_review_recommended: true`: 0 high, 1 medium y 10 low parcheados; puntuación 3·1 + 10 = 13 ≥ 5.
+
+**Verificación de esta pasada.**
+- `npx vitest run tests/unit/clave-de-orden.test.ts tests/unit/filtros-de-busqueda.test.ts` — 38 verdes.
+- `npx vitest run` por fichero: `filtros-de-cita` (9, tres construcciones, una con Pagefind), `publicable-y-alcanzable` (39), `tipo-de-resultado` (11), `ingreso-construido` (41), `obra-pagina` (66), `orden-del-libro` (47), `obras` (117), `medicion` (548) — verdes.
+- `npm run check` — 0 errores, 0 avisos, 8 pistas.
+- `npx playwright test tests/e2e/busqueda.spec.ts --project=escritorio -g "27.1|26.2|22.7|3.1"` — 19 verdes, 1 omitida (Tema bajo umbral: el Corpus de hoy no tiene ninguno); la prueba (c) con `--project=movil` — verde.
+- `npm test` entero — 149 ficheros, 6.758 pruebas, verdes.
+
+**Riesgos que quedan.** `/buscar/` a 34 bytes de `MAX_BYTES_DE_GUION` hasta que la 27.2 empaquete el guion. La clave se mueve en todas las Citas de un Autor cuando entra una suya, y en las de todos los Autores posteriores del Directorio cuando entra o sale un Autor —casi todo el sitio si está cerca del principio—, sin que el `lastmod` ni el aviso lo reflejen (AD-27: no es afirmación, y `tools/lib/cambios.ts` no se toca). La exactitud en f32 cerca de 2^24 se sostiene por construcción y por la prueba pura. `indiceDe` depende de que `pagefind.js` pida sus trozos con `fetch` relativo a sí mismo: si una versión de Pagefind cambia eso, la prueba falla en rojo, no en verde.
