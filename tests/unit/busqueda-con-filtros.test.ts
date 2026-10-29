@@ -20,6 +20,7 @@ import {
   EJEMPLO_DE_LA_BUSQUEDA,
   ESTADO_VACIO,
   ETIQUETA_DE_LA_BUSQUEDA,
+  FALLO_DE_LA_TANDA,
   PARAMETROS_DE_LA_BUSQUEDA,
   RUTA_DEL_MAPA_DE_OBRAS,
   TEXTO_DE_EJEMPLO_DE_LA_BUSQUEDA,
@@ -40,6 +41,7 @@ import {
   fraseDelRecuento,
   hayFiltros,
   opcionesDeObra,
+  rotuloDeMostrarMas,
   rotuloDeObra,
   valoresDeFiltros,
   type MapaDeObras,
@@ -62,7 +64,7 @@ import {
   temaEnFrase as temaEnFraseDeAtribucion,
 } from '../../src/lib/atribucion.ts';
 import { FILTROS_DE_CITA, FILTRO_DE_TIPO, ORDEN_DE_CITA } from '../../src/lib/tipoDeResultado.ts';
-import { MIN_CITAS_POR_TEMA } from '../../src/lib/umbrales.ts';
+import { MIN_CITAS_POR_TEMA, TANDA_DE_RESULTADOS } from '../../src/lib/umbrales.ts';
 import { decodificar } from './ayuda/listado.ts';
 
 /**
@@ -497,6 +499,30 @@ describe('Historia 27.4 — lo puro: la búsqueda en la dirección', () => {
   });
 });
 
+describe('Historia 27.5 — lo puro: el rótulo de la tanda siguiente y la frase de su fallo', () => {
+  it('la tanda es 30, y su único dueño es `umbrales.ts`', () => {
+    expect(TANDA_DE_RESULTADOS).toBe(30);
+  });
+
+  it('una tanda entera o más, «Mostrar 30 más»; menos, la última nombrada; ninguna, sin botón', () => {
+    expect(rotuloDeMostrarMas(0)).toBeNull();
+    expect(rotuloDeMostrarMas(-3)).toBeNull();
+    expect(rotuloDeMostrarMas(Number.NaN)).toBeNull();
+    expect(rotuloDeMostrarMas(1)).toBe('Mostrar la que falta');
+    expect(rotuloDeMostrarMas(2)).toBe('Mostrar las 2 que faltan');
+    expect(rotuloDeMostrarMas(12)).toBe('Mostrar las 12 que faltan');
+    expect(rotuloDeMostrarMas(29)).toBe('Mostrar las 29 que faltan');
+    expect(rotuloDeMostrarMas(30)).toBe('Mostrar 30 más');
+    expect(rotuloDeMostrarMas(31)).toBe('Mostrar 30 más');
+    expect(rotuloDeMostrarMas(222)).toBe(`Mostrar ${TANDA_DE_RESULTADOS} más`);
+    expect(rotuloDeMostrarMas(TANDA_DE_RESULTADOS - 1)).toBe(`Mostrar las ${TANDA_DE_RESULTADOS - 1} que faltan`);
+  });
+
+  it('la frase del fallo', () => {
+    expect(FALLO_DE_LA_TANDA).toBe('No se han podido cargar más resultados.');
+  });
+});
+
 describe('Historia 27.2 — los órdenes de los selectores', () => {
   const op = (valor: string, rotulo: string) => ({ valor, rotulo });
 
@@ -730,9 +756,12 @@ describe('Historia 27.2 — lo construido', () => {
     expect(campos[0].get('name')).toBe('q');
     expect(campos[0].get('placeholder')).toBe(TEXTO_DE_EJEMPLO_DE_LA_BUSQUEDA);
     expect(campos[0].has('data-consulta')).toBe(true);
-    expect(botones).toHaveLength(1);
+    // «Quitar los filtros», oculto, y (Historia 27.5) el de «Mostrar 30 más», vacío.
+    expect(botones).toHaveLength(2);
     expect(botones[0].get('type')).toBe('button');
     expect(botones[0].has('hidden')).toBe(true);
+    expect(botones[1].get('type')).toBe('button');
+    expect(botones[1].has('data-mostrar-mas')).toBe(true);
     expect(plantilla).toMatch(/<button\b[^>]*>Quitar los filtros<\/button>/u);
     // La lista de resultados es una lista, con su zona; la región está desde la carga, vacía.
     expect(html).toMatch(/<ul class="resultados" role="list" data-resultados data-zona="resultado"/u);
@@ -761,6 +790,9 @@ describe('Historia 27.2 — lo construido', () => {
       '[data-selector-de-tema]',
       '[data-quitar]',
       '.sombra',
+      '[data-mas]',
+      '[data-mostrar-mas]',
+      '[data-fallo-de-la-tanda]',
     ];
     const EN_LA_PAGINA = ['[data-busqueda]', 'template', '[data-resultados]', '[data-estado]', '[data-salida]', '.sugerencia'];
     expect([...buscados].sort()).toEqual([...EN_LA_PLANTILLA, ...EN_LA_PAGINA].sort());
@@ -844,6 +876,40 @@ describe('Historia 27.2 — lo construido', () => {
       expect(select, id).toBeDefined();
       expect(select, id).toMatch(/\bautocomplete="off"/u);
     }
+  });
+
+  it('Historia 27.5 — en la plantilla, fuera del formulario, el bloque de «Mostrar 30 más»: el botón vacío y su región vacía, sin `hidden` ni enlaces', () => {
+    const plantilla = /<template\b[^>]*>([\s\S]*?)<\/template>/u.exec(html)![1];
+    const formulario = /<form\b[\s\S]*?<\/form>/u.exec(plantilla)![0];
+    expect(formulario).not.toContain('data-mas');
+    expect(formulario).not.toContain('data-mostrar-mas');
+    expect(formulario).not.toContain('data-fallo-de-la-tanda');
+    const bloque = /<div\b[^>]*\bclass="mas"[^>]*\bdata-mas\b[^>]*>([\s\S]*?)<\/div>/u.exec(plantilla);
+    expect(bloque, 'no hay bloque').not.toBeNull();
+    expect(plantilla.indexOf(bloque![0])).toBeGreaterThan(plantilla.indexOf('</form>'));
+    const dentro = bloque![1];
+    expect(dentro).toMatch(/^<button\b[^>]*\btype="button"[^>]*\bdata-mostrar-mas\b[^>]*><\/button><p\b[^>]*><\/p>$/u);
+    const region = /<p\b([^>]*)><\/p>/u.exec(dentro)![1];
+    expect(region).toMatch(/\bclass="fallo-de-la-tanda"/u);
+    expect(region).toMatch(/\brole="status"/u);
+    expect(region).toMatch(/\bdata-fallo-de-la-tanda\b/u);
+    expect(region).not.toMatch(/\bhidden\b|aria-hidden/u);
+    expect(dentro).not.toMatch(/<a\b/u);
+    // Fuera de la plantilla, ni el bloque ni su región: el guion los pone detrás de la lista.
+    const fuera = html.replace(/<template\b[^>]*>[\s\S]*?<\/template>/gu, '');
+    expect(fuera).not.toContain('data-mas');
+    expect(fuera).not.toContain('data-fallo-de-la-tanda');
+  });
+
+  it('Historia 27.5 — el guion de `Busqueda.astro`, sin comentarios, no lleva un `30` literal: la tanda es `TANDA_DE_RESULTADOS`', () => {
+    const componente = readFileSync(join(RAIZ, 'src/components/Busqueda.astro'), 'utf8');
+    const guion = componente
+      .slice(componente.indexOf('\n<script>'))
+      .replace(/\/\*[\s\S]*?\*\//gu, '')
+      .replace(/^\s*\/\/.*$/gmu, '');
+    expect(guion).toContain('TANDA_DE_RESULTADOS');
+    expect(guion).not.toMatch(/(?<![\w.])30(?![\w.])/u);
+    expect(guion).toMatch(/\.slice\(0, TANDA_DE_RESULTADOS\)/u);
   });
 
   it('Historia 27.3 — en la plantilla, el `.selector` de Obra va entre el de Autor y el de Tema', () => {

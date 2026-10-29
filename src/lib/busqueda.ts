@@ -1,13 +1,14 @@
 /**
- * La búsqueda con filtros de `/buscar/` — Historias 27.2, 27.3 y 27.4, FR-7, NFR-4, UX-DR87,
- * UX-DR88, UX-DR89, UX-DR93.
+ * La búsqueda con filtros de `/buscar/` — Historias 27.2, 27.3, 27.4 y 27.5, FR-7, NFR-4,
+ * UX-DR87, UX-DR88, UX-DR89, UX-DR90, UX-DR93.
  *
  * La decisión pura de la búsqueda, sin DOM, como `src/lib/filtroDelDirectorio.ts` lo es del filtro
  * de los Directorios: qué frase dice el recuento, qué `filters` se le pasan a Pagefind, qué
  * combinación de filtros (`filtrosUsados`) viaja en la `busqueda` asentada, desde la Historia
  * 27.3, qué Obras ofrece el selector de Obra del Autor elegido y, desde la 27.4, cómo vive el
  * estado en la dirección y en el historial: leerlo, componerlo, compararlo, resolverlo contra lo
- * que se puede elegir, decir lo que no se puede usar y decidir cada escritura. La pinta el guion
+ * que se puede elegir, decir lo que no se puede usar y decidir cada escritura; desde la 27.5, el
+ * rótulo del botón que trae la tanda siguiente y la frase de su fallo. La pinta el guion
  * empaquetado de `src/components/Busqueda.astro`, que la importa, y `buscar.astro` toma de aquí los
  * textos fijos del campo. Apta para el cliente: solo importa módulos que también lo son, y el grafo
  * entero de lo que arrastra el guion lo fija `tests/unit/busqueda-con-filtros.test.ts`.
@@ -17,6 +18,7 @@
 
 import { recuentoDeCitas, temaEnFrase } from './recuentos.ts';
 import { FILTROS_DE_CITA } from './tipoDeResultado.ts';
+import { TANDA_DE_RESULTADOS } from './umbrales.ts';
 import { filtrosUsados, type Filtros } from './vocabulario.ts';
 
 /**
@@ -472,3 +474,25 @@ export function escrituraDelHistorial({
   if (igual) return 'ninguna';
   return controlDeLaEntrada === control ? 'replaceState' : 'pushState';
 }
+
+/**
+ * El rótulo del botón que trae la tanda siguiente de `/buscar/` — Historia 27.5, FR-7, UX-DR90,
+ * UX-DR112.
+ *
+ * `quedan` son los resultados del mismo `results` que aún no se pintaron. Con una tanda entera o
+ * más por delante —también con exactamente `TANDA_DE_RESULTADOS`—, «Mostrar 30 más»; con menos, la
+ * última se nombra: «Mostrar las 12 que faltan» y, con una, «Mostrar la que falta». Sin ninguna,
+ * `null`: no hay botón. La isla no escribe ninguna de las frases; pone en el botón lo que da esto.
+ */
+export function rotuloDeMostrarMas(quedan: number): string | null {
+  if (!(quedan > 0)) return null;
+  if (quedan >= TANDA_DE_RESULTADOS) return `Mostrar ${TANDA_DE_RESULTADOS} más`;
+  return quedan === 1 ? 'Mostrar la que falta' : `Mostrar las ${quedan} que faltan`;
+}
+
+/**
+ * Lo que dice la región de estado del botón cuando la tanda no llega — Historia 27.5, UX-DR99,
+ * UX-DR101. Se escribe con el primer ritmo (`anunciar`), en la región propia del botón y no en la
+ * del recuento, que no cambia: lo pintado sigue siendo cierto.
+ */
+export const FALLO_DE_LA_TANDA = 'No se han podido cargar más resultados.';

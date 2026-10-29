@@ -39,6 +39,7 @@ import {
   MIN_MS_VISIBLES_PARA_LA_LECTURA,
   PAUSA_DE_LOS_SELECTORES_MS,
   PAUSA_DE_TECLEO_MS,
+  TANDA_DE_RESULTADOS,
 } from '../../src/lib/umbrales.ts';
 import {
   DESTINOS_DE_DESCARGA,
@@ -82,7 +83,7 @@ import {
   type Respuesta,
 } from './ayuda/busqueda.js';
 import { aplanar } from './ayuda/aplanar.js';
-import { CLAVE_DEL_ESTADO_EN_LA_ENTRADA } from '../../src/lib/busqueda.ts';
+import { CLAVE_DEL_ESTADO_EN_LA_ENTRADA, FALLO_DE_LA_TANDA, rotuloDeMostrarMas } from '../../src/lib/busqueda.ts';
 import {
   ETIQUETAS_DE_RESULTADO,
   FILTRO_DE_TIPO,
@@ -3275,13 +3276,20 @@ describe('Historia 23.1 — toda isla que anuncia lleva `anunciar`', () => {
       /\.textContent\s*=(?!=)/.test(fuenteDeLaBusqueda) &&
       fuenteDeLaBusqueda.includes('requestAnimationFrame');
     expect(busquedaAnuncia, 'el fichero de la búsqueda no anuncia por su región').toBe(true);
+    /*
+     * Historia 27.5 — y por una segunda: la de «Mostrar 30 más», que va en su plantilla con el
+     * botón. La encuentra por `[data-fallo-de-la-tanda]` y le escribe el fallo de la tanda con
+     * `anunciar`; el fichero cuenta como anunciante de las dos.
+     */
+    const anunciaLaTanda = busquedaAnuncia && fuenteDeLaBusqueda.includes('[data-fallo-de-la-tanda]');
+    expect(anunciaLaTanda, 'el fichero de la búsqueda no anuncia por la región de la tanda').toBe(true);
     for (const [ruta, html] of paginasDe(await sitioMedido())) {
       const regiones = (html.match(/\brole\s*=\s*["']?status\b/gi) ?? []).length;
       const delFiltro = filtroAnuncia
         ? etiquetasDeGuionExterno(html).filter((e) => guionExternoDe(e.src)?.id === 'filtro').length
         : 0;
       const deLaBusqueda = busquedaAnuncia
-        ? etiquetasDeGuionExterno(html).filter((e) => guionExternoDe(e.src)?.id === 'busqueda').length
+        ? etiquetasDeGuionExterno(html).filter((e) => guionExternoDe(e.src)?.id === 'busqueda').length * (anunciaLaTanda ? 2 : 1)
         : 0;
       const anunciantes =
         delFiltro +
@@ -3529,7 +3537,7 @@ describe('Historia 23.8 — una búsqueda cuenta una vez, cuando se asienta', ()
       return { total: 3 };
     };
     /**
-     * Historia 27.2 — con filtros: José Martí da 222 (y pinta 30), José Martí sobre la prudencia
+     * Historia 27.2 — con filtros: José Martí da 222 (la primera tanda pinta 30), José Martí sobre la prudencia
      * 8, sobre el saber con «escuela» 6, Séneca sobre la prudencia ninguna, ninguna con «zzz…» y
      * una sola con «única».
      * Todas Citas, con su Autor.
@@ -3553,7 +3561,7 @@ describe('Historia 23.8 — una búsqueda cuenta una vez, cuando se asienta', ()
       if (autor === 'seneca' && tema === 'la-prudencia') return { total: 0 };
       if (tema === 'el-saber' && texto === 'escuela') return { total: 6, datos };
       if (autor === 'jose-marti' && tema === 'la-prudencia') return { total: 8, datos };
-      if (autor === 'jose-marti') return { total: 222, pintados: 30, datos };
+      if (autor === 'jose-marti') return { total: 222, datos };
       return { total: 4, datos };
     };
     const abiertas: ReturnType<typeof islaDeBusquedaEnUnSandbox>[] = [];
@@ -5735,6 +5743,268 @@ describe('Historia 23.8 — una búsqueda cuenta una vez, cuando se asienta', ()
         expect(escritas(entorno).at(-1)).toEqual(['replaceState', `/buscar/?autor=jose-marti&obra=${MAESTROS}`]);
         expect(entorno.longitud()).toBe(3);
         expect(plano(entorno.estadoDelHistorial())).toEqual({ [CLAVE_DEL_ESTADO_EN_LA_ENTRADA]: { autor: 'jose-marti', obra: MAESTROS } });
+      }, 240_000);
+    });
+    describe('Historia 27.5 — los resultados llegan de 30 en 30', () => {
+      const AUTOR = FILTROS_DE_CITA.autor;
+      const ORDEN = { [ORDEN_DE_CITA]: 'asc' };
+      type Entorno = Awaited<ReturnType<typeof isla>>;
+      const busquedas = (entorno: Entorno) => entorno.llamadas().filter((l) => l[0] === 'search');
+      const titulos = (entorno: Entorno) => entorno.resultados().map((r) => r.titulo);
+      /** Los títulos `Cita {i}` de `desde` a `hasta` (sin incluir): el orden del `results`. */
+      const deCitas = (desde: number, hasta: number) => Array.from({ length: hasta - desde }, (_, i) => `Cita ${desde + i}`);
+      /** Lo que responde el índice a toda consulta: `total` Citas numeradas en el orden de `results`. */
+      const conTotal = (total: number) => (): Respuesta => ({
+        total,
+        datos: (i) => ({ url: `/cita/c-${i}/`, meta: { title: `Cita ${i}`, autor: 'José Martí' }, filters: { tipo: ['cita'] } }),
+      });
+      const elegirYEsperar = async (entorno: Entorno, cual: 'autor' | 'tema', valor: string) => {
+        entorno.elegir(cual, valor);
+        entorno.avanzar(PAUSA_DE_LOS_SELECTORES_MS);
+        await entorno.vaciar();
+      };
+      /** Pulsa «Mostrar 30 más» y deja correr las promesas. */
+      const pulsarYEsperar = async (entorno: Entorno) => {
+        entorno.pulsarMas();
+        await entorno.vaciar();
+      };
+
+      it('una tanda —30, 3 o ninguno—: el bloque no está en el documento, nunca', async () => {
+        for (const total of [TANDA_DE_RESULTADOS, 3, 0]) {
+          const entorno = await isla({ respuestas: conTotal(total) });
+          expect(entorno.mas().enElDom, `${total}`).toBe(false);
+          await entorno.teclear('vida');
+          expect(entorno.pintados(), `${total}`).toHaveLength(total);
+          expect(entorno.mas(), `${total}`).toEqual({ enElDom: false, detrasDeLaLista: false, rotulo: '', fallo: '' });
+          expect(() => entorno.pulsarMas()).toThrow();
+        }
+      }, 240_000);
+
+      it('muchas: un Autor con 222 pinta 30, y detrás de la lista, fuera de ella, «Mostrar 30 más» con su región vacía', async () => {
+        const entorno = await isla();
+        await elegirYEsperar(entorno, 'autor', 'jose-marti');
+        expect(entorno.pintados()).toHaveLength(TANDA_DE_RESULTADOS);
+        expect(entorno.region().texto).toBe('222 citas de José Martí.');
+        expect(entorno.mas()).toEqual({ enElDom: true, detrasDeLaLista: true, rotulo: rotuloDeMostrarMas(222 - 30), fallo: '' });
+        expect(entorno.mas().rotulo).toBe(`Mostrar ${TANDA_DE_RESULTADOS} más`);
+        expect(entorno.escuchas().mas).toEqual(['click']);
+        // El bloque va en la columna, no en la lista ni en el formulario.
+        expect(entorno.insertado()).toEqual({ raiz: ['template', 'form'], recuento: ['sombra', 'estado'] });
+      }, 240_000);
+
+      it('segunda tanda: los 30 siguientes del mismo `results`, en su orden, sin otro `search`, con el foco en el primero nuevo y sin tocar el recuento', async () => {
+        const entorno = await isla();
+        await elegirYEsperar(entorno, 'autor', 'jose-marti');
+        entorno.avanzar(PAUSA_DE_TECLEO_MS);
+        const antes = { llamadas: entorno.llamadas(), escrituras: entorno.escrituras(), region: entorno.region(), sombra: entorno.sombra() };
+        await pulsarYEsperar(entorno);
+        entorno.avanzar(PAUSA_DE_TECLEO_MS);
+        expect(titulos(entorno)).toEqual(deCitas(0, 60));
+        expect(entorno.foco()).toBe('resultado:30');
+        // Ni otra búsqueda, ni opciones, ni destrucción: los `data()` del mismo `results`.
+        expect(entorno.llamadas()).toEqual(antes.llamadas);
+        expect(entorno.escrituras()).toEqual(antes.escrituras);
+        expect(entorno.region()).toEqual(antes.region);
+        expect(entorno.sombra()).toBe(antes.sombra);
+        expect(entorno.mas()).toEqual({ enElDom: true, detrasDeLaLista: true, rotulo: `Mostrar ${TANDA_DE_RESULTADOS} más`, fallo: '' });
+        expect(busquedas(entorno)).toEqual([['search', null, { filters: { [AUTOR]: 'jose-marti' }, sort: ORDEN }]]);
+      }, 240_000);
+
+      it('la última nombrada: 42 dice «Mostrar las 12 que faltan» y, al pulsar, 42 filas y el bloque fuera; 31, «Mostrar la que falta»; 90, otra tanda entera', async () => {
+        const de42 = await isla({ respuestas: conTotal(42) });
+        await de42.teclear('vida');
+        expect(de42.mas().rotulo).toBe('Mostrar las 12 que faltan');
+        await pulsarYEsperar(de42);
+        expect(titulos(de42)).toEqual(deCitas(0, 42));
+        expect(de42.foco()).toBe('resultado:30');
+        expect(de42.mas()).toEqual({ enElDom: false, detrasDeLaLista: false, rotulo: 'Mostrar las 12 que faltan', fallo: '' });
+
+        const de31 = await isla({ respuestas: conTotal(31) });
+        await de31.teclear('vida');
+        expect(de31.mas().rotulo).toBe('Mostrar la que falta');
+        await pulsarYEsperar(de31);
+        expect(titulos(de31)).toEqual(deCitas(0, 31));
+        expect(de31.foco()).toBe('resultado:30');
+        expect(de31.mas().enElDom).toBe(false);
+
+        const de90 = await isla({ respuestas: conTotal(90) });
+        await de90.teclear('vida');
+        expect(de90.mas().rotulo).toBe(`Mostrar ${TANDA_DE_RESULTADOS} más`);
+        await pulsarYEsperar(de90);
+        expect(de90.mas().rotulo).toBe(`Mostrar ${TANDA_DE_RESULTADOS} más`);
+        await pulsarYEsperar(de90);
+        expect(titulos(de90)).toEqual(deCitas(0, 90));
+        expect(de90.foco()).toBe('resultado:60');
+        expect(de90.mas().enElDom).toBe(false);
+      }, 240_000);
+
+      it('doble pulsación con la tanda en vuelo: un solo lote de `data()`, y 60 filas, no 90', async () => {
+        const entorno = await isla({ tandaManual: true });
+        await elegirYEsperar(entorno, 'autor', 'jose-marti');
+        entorno.pulsarMas();
+        entorno.pulsarMas();
+        await entorno.vaciar();
+        expect(entorno.pintados()).toHaveLength(30);
+        expect(await entorno.responderALaTanda()).toBe(TANDA_DE_RESULTADOS);
+        expect(titulos(entorno)).toEqual(deCitas(0, 60));
+        expect(entorno.foco()).toBe('resultado:30');
+        // El botón no se deshabilitó: con la tanda llegada, pulsar trae la siguiente.
+        entorno.pulsarMas();
+        expect(await entorno.responderALaTanda()).toBe(TANDA_DE_RESULTADOS);
+        expect(entorno.pintados()).toHaveLength(90);
+      }, 240_000);
+
+      it('fallo: nada nuevo, la frase en la región del botón al fotograma siguiente, el foco en el botón, el recuento intacto y el índice destruido', async () => {
+        const entorno = await isla({ falla: 'tanda' });
+        await elegirYEsperar(entorno, 'autor', 'jose-marti');
+        entorno.avanzar(PAUSA_DE_TECLEO_MS);
+        const antes = { escrituras: entorno.escrituras(), region: entorno.region(), busquedas: busquedas(entorno) };
+        await pulsarYEsperar(entorno);
+        expect(titulos(entorno)).toEqual(deCitas(0, 30));
+        expect(entorno.mas().fallo).toBe('');
+        entorno.avanzar(16);
+        expect(entorno.mas()).toEqual({ enElDom: true, detrasDeLaLista: true, rotulo: `Mostrar ${TANDA_DE_RESULTADOS} más`, fallo: FALLO_DE_LA_TANDA });
+        expect(FALLO_DE_LA_TANDA).toBe('No se han podido cargar más resultados.');
+        expect(entorno.foco()).toBe('mas');
+        expect(entorno.escrituras()).toEqual(antes.escrituras);
+        expect(entorno.region()).toEqual(antes.region);
+        expect(entorno.destrucciones()).toBe(1);
+        expect(busquedas(entorno)).toEqual(antes.busquedas);
+      }, 240_000);
+
+      it('reintento: la pulsación siguiente aplica las opciones, repite el `search` con los mismos argumentos y trae la tanda; la región se vacía', async () => {
+        const entorno = await isla({ falla: 'tanda' });
+        await elegirYEsperar(entorno, 'autor', 'jose-marti');
+        entorno.avanzar(PAUSA_DE_TECLEO_MS);
+        await pulsarYEsperar(entorno);
+        entorno.avanzar(16);
+        expect(entorno.mas().fallo).toBe(FALLO_DE_LA_TANDA);
+        // Pulsar con la red aún caída vuelve a decirlo, y a destruir.
+        const llamadasAntes = entorno.llamadas().length;
+        await pulsarYEsperar(entorno);
+        entorno.avanzar(16);
+        expect(entorno.mas().fallo).toBe(FALLO_DE_LA_TANDA);
+        expect(entorno.destrucciones()).toBe(2);
+        expect(entorno.llamadas().slice(llamadasAntes).map((l) => l[0])).toEqual(['options', 'search', 'destroy']);
+        // Con la red de vuelta.
+        entorno.fallar();
+        const escrituras = entorno.escrituras();
+        const desde = entorno.llamadas().length;
+        await pulsarYEsperar(entorno);
+        expect(entorno.llamadas().slice(desde)).toEqual([
+          ['options', OPCIONES_DE_PAGEFIND],
+          ['search', null, { filters: { [AUTOR]: 'jose-marti' }, sort: ORDEN }],
+        ]);
+        expect(titulos(entorno)).toEqual(deCitas(0, 60));
+        expect(entorno.mas().fallo).toBe('');
+        expect(entorno.foco()).toBe('resultado:30');
+        expect(entorno.escrituras()).toEqual(escrituras);
+        // Y la tanda siguiente ya no repite el `search`: sale del `results` del reintento.
+        const tras = entorno.llamadas().length;
+        await pulsarYEsperar(entorno);
+        expect(entorno.llamadas().slice(tras)).toEqual([]);
+        expect(titulos(entorno)).toEqual(deCitas(0, 90));
+      }, 240_000);
+
+      it('tanda obsoleta: teclear, elegir un filtro, «Quitar los filtros» o «atrás» con la tanda en vuelo, y al llegar no se pinta', async () => {
+        // El gesto, cuántas filas pinta lo que lanza y si eso trae su propio bloque.
+        const gestos: [string, (entorno: Entorno) => Promise<void>, number, boolean][] = [
+          ['teclear', (e) => e.teclear('vida'), 30, true],
+          ['elegir un Tema', (e) => elegirYEsperar(e, 'tema', 'la-prudencia'), 8, false],
+          [
+            'quitar los filtros',
+            async (e) => {
+              e.quitarFiltros();
+              await e.vaciar();
+            },
+            0,
+            false,
+          ],
+          ['atrás', (e) => e.atras(), 0, false],
+        ];
+        for (const [nombre, gesto, quedan, conBloque] of gestos) {
+          const entorno = await isla({ tandaManual: true });
+          await elegirYEsperar(entorno, 'autor', 'jose-marti');
+          entorno.pulsarMas();
+          await entorno.vaciar();
+          await gesto(entorno);
+          const visto = entorno.pintados();
+          expect(visto, nombre).toHaveLength(quedan);
+          await entorno.responderALaTanda();
+          expect(entorno.pintados(), nombre).toEqual(visto);
+          expect(String(entorno.foco()), nombre).not.toMatch(/^resultado/u);
+          expect(entorno.mas().enElDom, nombre).toBe(conBloque);
+          expect(entorno.mas().fallo, nombre).toBe('');
+        }
+        // Y un gesto que no cambia la búsqueda también la deja sin efecto: se vuelve a pulsar.
+        const mismo = await isla({ tandaManual: true });
+        await elegirYEsperar(mismo, 'autor', 'jose-marti');
+        mismo.pulsarMas();
+        await mismo.vaciar();
+        await elegirYEsperar(mismo, 'autor', 'jose-marti');
+        await mismo.responderALaTanda();
+        expect(mismo.pintados()).toHaveLength(30);
+        expect(mismo.mas().enElDom).toBe(true);
+        mismo.pulsarMas();
+        await mismo.responderALaTanda();
+        expect(mismo.pintados()).toHaveLength(60);
+      }, 240_000);
+
+      it('una búsqueda pintada con la tanda en vuelo se lleva el bloque de la anterior y el suyo es nuevo', async () => {
+        const entorno = await isla({ tandaManual: true });
+        await elegirYEsperar(entorno, 'autor', 'jose-marti');
+        entorno.pulsarMas();
+        await entorno.vaciar();
+        await elegirYEsperar(entorno, 'autor', 'seneca');
+        expect(entorno.pintados()).toHaveLength(4);
+        await entorno.responderALaTanda();
+        expect(entorno.pintados()).toHaveLength(4);
+        expect(entorno.mas().enElDom).toBe(false);
+        // De vuelta a un Autor con 222, su bloque, con su región vacía.
+        await elegirYEsperar(entorno, 'autor', 'jose-marti');
+        expect(entorno.mas()).toEqual({ enElDom: true, detrasDeLaLista: true, rotulo: `Mostrar ${TANDA_DE_RESULTADOS} más`, fallo: '' });
+      }, 240_000);
+
+      it('el fallo de una tanda ya obsoleta no escribe en el bloque de la búsqueda nueva, ni destruye su índice', async () => {
+        const entorno = await isla({ tandaManual: true, falla: 'tanda' });
+        await elegirYEsperar(entorno, 'autor', 'jose-marti');
+        entorno.pulsarMas();
+        await entorno.vaciar();
+        await entorno.teclear('vida');
+        await elegirYEsperar(entorno, 'tema', 'el-saber');
+        await entorno.responderALaTanda();
+        entorno.avanzar(16);
+        expect(entorno.destrucciones()).toBe(0);
+        expect(entorno.mas().fallo).toBe('');
+      }, 240_000);
+
+      it('con texto, por relevancia: las tandas siguen el orden del mismo `results`, sin repetir ni saltar', async () => {
+        const entorno = await isla({ respuestas: conTotal(75) });
+        await entorno.teclear('vida');
+        await pulsarYEsperar(entorno);
+        expect(entorno.mas().rotulo).toBe('Mostrar las 15 que faltan');
+        await pulsarYEsperar(entorno);
+        expect(titulos(entorno)).toEqual(deCitas(0, 75));
+        expect(new Set(titulos(entorno)).size).toBe(75);
+        expect(busquedas(entorno)).toEqual([['search', 'vida']]);
+      }, 240_000);
+
+      it('medición: pulsar no mide, no marca la entrada y no escribe en el historial', async () => {
+        const entorno = await isla();
+        await elegirYEsperar(entorno, 'autor', 'jose-marti');
+        const antes = { emitidos: entorno.emitidos(), historial: entorno.historial(), longitud: entorno.longitud(), direccion: entorno.direccion() };
+        await pulsarYEsperar(entorno);
+        await pulsarYEsperar(entorno);
+        entorno.avanzar(PAUSA_DE_TECLEO_MS * 2);
+        await entorno.vaciar();
+        expect(entorno.pintados()).toHaveLength(90);
+        expect(entorno.emitidos()).toEqual(antes.emitidos);
+        expect(entorno.historial()).toEqual(antes.historial);
+        expect(entorno.longitud()).toBe(antes.longitud);
+        expect(entorno.direccion()).toBe(antes.direccion);
+        // Pulsar un resultado de la segunda tanda sí asienta, como cualquier otro.
+        entorno.pulsarResultado(45);
+        expect(entorno.emitidos().length).toBeGreaterThan(antes.emitidos.length);
       }, 240_000);
     });
   });

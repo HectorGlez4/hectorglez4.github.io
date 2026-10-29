@@ -599,9 +599,18 @@ export const MAX_BYTES_GUION_DEL_FILTRO = 3915;
  * reconocido por el fragmento y la búsqueda como estado, la entrada del ancla que se marca, la
  * llegada que deja sin efecto la búsqueda en vuelo y la que pinta campo y selectores mientras
  * espera los datos de su Obra— mide **15.651 bytes** (2026-10-29): 15.099 del fichero de entrada y
- * 552 del trozo, que no cambia. **Tope vigente**, con la misma regla: 15.651 más unos 400.
+ * 552 del trozo, que no cambia (el tope de entonces, 16.051, ya no rige).
+ *
+ * Historia 27.5 — rederivado con la misma regla. Los resultados llegan de 30 en 30: el bloque de
+ * «Mostrar 30 más» que se pone y se quita tras la lista, la fila de resultado sacada a una función
+ * que comparten las dos tandas, la escucha del botón con su guarda de vuelo, el foco al primer
+ * resultado nuevo, el fallo anunciado en su región con la destrucción del índice y el reintento que
+ * repite la búsqueda —con las opciones de Pagefind aplicadas en un solo sitio para las dos
+ * búsquedas—, y el rótulo y la frase de `src/lib/busqueda.ts` con `TANDA_DE_RESULTADOS`:
+ * **16.740 bytes** (2026-10-29) —16.188 del fichero de entrada y 552 del trozo, que no cambia (el
+ * del filtro tampoco)—. **Tope vigente**, con la misma regla: 16.740 más unos 400.
  */
-export const MAX_BYTES_GUION_DE_LA_BUSQUEDA = 16051;
+export const MAX_BYTES_GUION_DE_LA_BUSQUEDA = 17140;
 
 /**
  * La pausa de tecleo, en milisegundos — AD-9, UX-DR58, UX-DR86, Historia 26.6.
@@ -625,6 +634,20 @@ export const PAUSA_DE_TECLEO_MS = 700;
  * porque son las dos esperas de los mensajes de estado de la búsqueda.
  */
 export const PAUSA_DE_LOS_SELECTORES_MS = 400;
+
+/**
+ * Cuántos resultados pinta `/buscar/` de cada vez — AD-9, FR-7, UX-DR90, UX-DR112, Historia 27.5.
+ *
+ * La primera tanda son los `TANDA_DE_RESULTADOS` primeros del `results` de Pagefind; el resto se
+ * pide con «Mostrar 30 más» (o «Mostrar las {n} que faltan», «Mostrar la que falta»: el rótulo lo
+ * compone `rotuloDeMostrarMas` de `src/lib/busqueda.ts` con esta cifra), un botón bajo la lista
+ * que pide los `data()` de la tanda siguiente del **mismo** `results` y los añade sin repintar. Ni
+ * desplazamiento infinito ni páginas: la tanda la pide un gesto. Hasta la 27.5 la isla cortaba en
+ * un `30` literal y quien buscaba a un Autor con 222 Citas no llegaba a la 31. Vive junto a las dos
+ * pausas porque es el tercer número de comportamiento de la búsqueda, y un solo dueño: ni la isla
+ * ni las pruebas lo escriben.
+ */
+export const TANDA_DE_RESULTADOS = 30;
 
 /**
  * El techo de lo que el alojamiento admite por sitio — Historia 24.2, Entorno operativo.

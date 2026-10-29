@@ -26,6 +26,8 @@ import { leerTarjetaDeObra, tarjetaDeObraDe } from '../unit/ayuda/tarjeta-de-obr
 import { filtrosDeLaBusqueda } from '../../src/lib/publicado.ts';
 import { conjuntoDeLosDatos, leerDatosDelCorpus } from '../../tools/lib/alcance.ts';
 import { rutasDelCorpus } from '../../tools/lib/corpus.ts';
+import { FALLO_DE_LA_TANDA } from '../../src/lib/busqueda.ts';
+import { TANDA_DE_RESULTADOS } from '../../src/lib/umbrales.ts';
 
 /**
  * Historia 2.8 — accesibilidad y comportamiento responsive.
@@ -2309,5 +2311,112 @@ test.describe('Historia 27.3 — /buscar/ con una Obra elegida', () => {
     expect(resumen, `/buscar/ con una Obra elegida\n${resumen.join('\n')}`).toEqual([]);
     const dudas = sinDecidir(resultado);
     expect(dudas, `/buscar/ con una Obra elegida: axe no supo decidir\n${dudas.join('\n')}`).toEqual([]);
+  });
+});
+
+/**
+ * Historia 27.5 — `/buscar/` con «Mostrar 30 más» puesto, en sus tres estados: «Mostrar 30 más», la
+ * última tanda nombrada («Mostrar las {n} que faltan») y la frase del fallo a la vista bajo el
+ * botón (los fragmentos de Pagefind cortados). A 320 px en las tres condiciones de la 26.9, sin
+ * desbordar, sin contenedores que recorten y sin `nowrap` en el bloque, y el barrido 2.2 AA en
+ * cada estado; aparte, el barrido a la anchura del proyecto con el botón puesto. El Autor sale del
+ * Corpus por `filtrosDeLaBusqueda`: el de menos Citas por encima de dos tandas con una última de
+ * dos o más (desempate por slug), como en `busqueda.spec.ts`.
+ */
+test.describe('Historia 27.5 — /buscar/ con «Mostrar 30 más»', () => {
+  const T = TANDA_DE_RESULTADOS;
+  const FRAGMENTOS = '**/pagefind/fragment/**';
+  let elegido: Promise<{ valor: string; recuento: number }> | undefined;
+  const elAutor = () =>
+    (elegido ??= (async () => {
+      const raiz = join(new URL('../..', import.meta.url).pathname, 'corpus');
+      const { autores } = filtrosDeLaBusqueda(conjuntoDeLosDatos(await leerDatosDelCorpus(rutasDelCorpus(raiz))));
+      const autor = [...autores]
+        .filter((a) => a.recuento > 2 * T && a.recuento % T >= 2)
+        .sort((a, b) => a.recuento - b.recuento || (a.valor < b.valor ? -1 : 1))[0];
+      if (!autor) throw new Error(`El Corpus no tiene ningún Autor con más de ${2 * T} Citas y una última tanda de dos o más.`);
+      return autor;
+    })());
+
+  /** Elige el Autor y espera a su primera tanda, con «Mostrar 30 más» puesto. */
+  const conElBoton = async (page: Page) => {
+    const { valor } = await elAutor();
+    await page.locator('#filtro-de-autor').selectOption(valor);
+    await expect(page.locator('[data-resultados] .resultado')).toHaveCount(T, { timeout: 10_000 });
+    await expect(page.locator('[data-mostrar-mas]')).toHaveText(`Mostrar ${T} más`);
+  };
+  /** Pulsa hasta que el botón nombra la última tanda. */
+  const conLaUltima = async (page: Page) => {
+    await conElBoton(page);
+    for (let i = 0; i < 20 && !/^Mostrar (?:las \d+ que faltan|la que falta)$/u.test((await page.locator('[data-mostrar-mas]').textContent()) ?? ''); i++) {
+      const antes = await page.locator('[data-resultados] .resultado').count();
+      await page.locator('[data-mostrar-mas]').click();
+      await expect(page.locator('[data-resultados] .resultado')).toHaveCount(antes + T, { timeout: 10_000 });
+    }
+    await expect(page.locator('[data-mostrar-mas]')).toHaveText(/^Mostrar (?:las \d+ que faltan|la que falta)$/u);
+  };
+  /** Pulsa con los fragmentos cortados: la frase del fallo queda a la vista bajo el botón. */
+  const conElFallo = async (page: Page) => {
+    await conElBoton(page);
+    await page.route(FRAGMENTOS, (ruta) => ruta.abort());
+    await page.locator('[data-mostrar-mas]').click();
+    await expect(page.locator('[data-fallo-de-la-tanda]')).toHaveText(FALLO_DE_LA_TANDA, { timeout: 10_000 });
+  };
+  const ESTADOS: [string, (page: Page) => Promise<void>][] = [
+    ['«Mostrar 30 más»', conElBoton],
+    ['la última tanda nombrada', conLaUltima],
+    ['la frase del fallo', conElFallo],
+  ];
+
+  test('a 320 px, en las tres condiciones y en sus tres estados, no desborda, no recorta ni lleva nowrap en el bloque, y pasa axe', async ({ page }) => {
+    test.setTimeout(420_000);
+    for (const [estado, preparar] of ESTADOS) {
+      for (const condicion of CONDICIONES) {
+        const aplicada = await cargarEn320(page, '/buscar/', condicion, preparar);
+        await page.unroute(FRAGMENTOS);
+        if (!aplicada) continue;
+        /*
+         * El puntero que pulsó se queda donde estaba, y la condición mueve lo que hay debajo: el
+         * botón puede entrar o salir de su `:hover` justo antes del barrido, y axe mediría a medio
+         * camino de su transición de color (150 ms), que no es ningún estado del botón. Se aparta el
+         * puntero y se deja acabar la transición.
+         */
+        await page.mouse.move(0, 0);
+        await page.waitForTimeout(300);
+        const donde = `/buscar/ con ${estado} (${condicion})`;
+        const m = await anchoDeLaPagina(page);
+        expect.soft(m.scroll, `${donde} desborda: ${m.scroll} frente a ${m.ventana}`).toBeLessThanOrEqual(m.ventana);
+        expect.soft(await contenedoresQueRecortan(page), `${donde}: contenedores que se desplazan o recortan en horizontal`).toEqual([]);
+        const bloque = await page.evaluate(() => {
+          const caja = document.querySelector('[data-mas]')!;
+          const conNowrap = [caja, ...caja.querySelectorAll('*')]
+            .filter((e) => {
+              const c = getComputedStyle(e) as CSSStyleDeclaration & { textWrapMode?: string };
+              return c.whiteSpace.includes('nowrap') || c.textWrapMode === 'nowrap';
+            })
+            .map((e) => e.tagName.toLowerCase());
+          const boton = caja.querySelector('button')!.getBoundingClientRect();
+          return { conNowrap, derecha: boton.right, ventana: document.documentElement.clientWidth };
+        });
+        expect.soft(bloque.conNowrap, `${donde}: el bloque lleva nowrap`).toEqual([]);
+        expect.soft(bloque.derecha, `${donde}: el botón se sale`).toBeLessThanOrEqual(bloque.ventana);
+        const resultado = await new AxeBuilder({ page }).withTags([...ETIQUETAS_DEL_BARRIDO]).analyze();
+        const resumen = resultado.violations.map((v) => `${v.id}: ${v.help} (${v.nodes.map((n) => n.target.join(' ')).join(', ')})`);
+        expect.soft(resumen, `${donde}\n${resumen.join('\n')}`).toEqual([]);
+        const dudas = sinDecidir(resultado);
+        expect.soft(dudas, `${donde}: axe no supo decidir\n${dudas.join('\n')}`).toEqual([]);
+      }
+    }
+  });
+
+  test('pasa la auditoría automática a la anchura del proyecto con «Mostrar 30 más» puesto', async ({ page }) => {
+    test.setTimeout(60_000);
+    await page.goto('/buscar/');
+    await conElBoton(page);
+    const resultado = await new AxeBuilder({ page }).withTags([...ETIQUETAS_DEL_BARRIDO]).analyze();
+    const resumen = resultado.violations.map((v) => `${v.id}: ${v.help} (${v.nodes.length})`);
+    expect(resumen, `/buscar/ con «Mostrar 30 más»\n${resumen.join('\n')}`).toEqual([]);
+    const dudas = sinDecidir(resultado);
+    expect(dudas, `/buscar/ con «Mostrar 30 más»: axe no supo decidir\n${dudas.join('\n')}`).toEqual([]);
   });
 });

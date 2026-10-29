@@ -7,6 +7,7 @@ import { EVENTOS, MARCA_DE_BUSQUEDA_ASENTADA } from '../../src/lib/medicion.ts';
 import { combinacionDeFiltros, fraseDelRecuento } from '../../src/lib/busqueda.ts';
 import { filtrosDeLaBusqueda } from '../../src/lib/publicado.ts';
 import { rutaDeLaBusqueda } from '../../src/lib/superficies.ts';
+import { TANDA_DE_RESULTADOS } from '../../src/lib/umbrales.ts';
 import { conjuntoDeLosDatos, leerDatosDelCorpus } from '../../tools/lib/alcance.ts';
 import { rutasDelCorpus } from '../../tools/lib/corpus.ts';
 import { conLaCacheDeVerdad } from './ayuda/cache.ts';
@@ -133,8 +134,8 @@ const balizas = (page: Page) =>
 const busquedas = async (page: Page) => (await medidos(page)).filter((m) => m[0] === EVENTOS.busqueda).map((m) => m[2]);
 const salidas = async (page: Page) => (await balizas(page)).filter((b) => b.evento === EVENTOS.salidaInterna);
 
-/** Cuántos resultados pinta una búsqueda: una tanda (la isla corta en 30 hasta «Mostrar 30 más», 27.5). */
-const TANDA = 30;
+/** Cuántos resultados pinta una búsqueda: una tanda; el resto llega con «Mostrar 30 más» (27.5). */
+const TANDA = TANDA_DE_RESULTADOS;
 
 /**
  * Deja correr una vuelta del bucle de la página: lo que una tecla dispara —el envío, su búsqueda ya

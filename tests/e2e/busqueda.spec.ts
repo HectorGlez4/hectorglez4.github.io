@@ -10,13 +10,19 @@ import { MARCA } from '../../src/lib/marca.ts';
 import { ASENTAMIENTO_DE_BUSQUEDA, EVENTOS } from '../../src/lib/medicion.ts';
 import { tramoDe } from '../../src/lib/vocabulario.ts';
 import { recuentoDeCitas, temaEnFrase } from '../../src/lib/recuentos.ts';
-import { RUTA_DEL_MAPA_DE_OBRAS, avisoDeLaDireccion, fraseDelRecuento } from '../../src/lib/busqueda.ts';
+import {
+  FALLO_DE_LA_TANDA,
+  RUTA_DEL_MAPA_DE_OBRAS,
+  avisoDeLaDireccion,
+  fraseDelRecuento,
+  rotuloDeMostrarMas,
+} from '../../src/lib/busqueda.ts';
 import { ETIQUETA_DEL_FILTRO } from '../../src/lib/filtroDelDirectorio.ts';
 import { rutaDeLaBusqueda, rutaDelDirectorioDeAutores } from '../../src/lib/superficies.ts';
 import { citaConLosDosBloques, temaBajoUmbral, textoDe } from './ayuda/corpus.ts';
 import { citasPorObra, filtrosDeLaBusqueda, obrasDelAutor, type ConjuntoPublicable } from '../../src/lib/publicado.ts';
 import { clavesDeOrden, ordenDeLaListaDeObras, porSlug as porSlugDeCita, rutaDeLaObra } from '../../src/lib/obras.ts';
-import { CITAS_POR_PAGINA, PAUSA_DE_TECLEO_MS } from '../../src/lib/umbrales.ts';
+import { CITAS_POR_PAGINA, PAUSA_DE_LOS_SELECTORES_MS, PAUSA_DE_TECLEO_MS, TANDA_DE_RESULTADOS } from '../../src/lib/umbrales.ts';
 import { conjuntoDeLosDatos, leerDatosDelCorpus } from '../../tools/lib/alcance.ts';
 import { leerDocumentosDeFuente, rutasDelCorpus } from '../../tools/lib/corpus.ts';
 import { posicionesDeCitas } from '../../tools/lib/posiciones.ts';
@@ -409,7 +415,8 @@ test.describe('Historia 22.10 — el recuento y la búsqueda sin resultados se a
       return (await pf.search('no hay camino')).results.length;
     }, OPCIONES_DE_PAGEFIND)) as number;
     expect(total).toBeGreaterThan(0);
-    await expect(page.locator('[role="status"]')).toHaveText(total === 1 ? 'Un resultado.' : `${total} resultados.`);
+    // Historia 27.5 — con más de una tanda, «Mostrar 30 más» trae su propia región: la del recuento es `[data-estado]`.
+    await expect(page.locator('[data-estado]')).toHaveText(total === 1 ? 'Un resultado.' : `${total} resultados.`);
   });
 
   test('sin resultados anuncia la frase de la salida, sin pintarla dos veces', async ({ page }) => {
@@ -1942,3 +1949,284 @@ test.describe('Historia 27.4 — la búsqueda vive en la dirección, y «atrás�
     expect(await entradas(page)).toBe(antes);
   });
 });
+
+/*
+ * Historia 27.5 — los resultados llegan de 30 en 30, en el navegador y con el índice de verdad. El
+ * Autor sale del Corpus en disco por `filtrosDeLaBusqueda`: el de menos Citas por encima de dos
+ * tandas cuya última tanda sea de dos o más (desempate por slug), para ver «Mostrar 30 más» y
+ * «Mostrar las {n} que faltan» sin pulsar cien veces. Los fragmentos de Pagefind se retrasan o se
+ * cortan con `page.route`: son lo que piden los `data()` de una tanda.
+ */
+test.describe('Historia 27.5 — los resultados llegan de 30 en 30', () => {
+  const RAIZ_DEL_CORPUS = join(new URL('../..', import.meta.url).pathname, 'corpus');
+  let leido: Promise<ConjuntoPublicable> | undefined;
+  const conjunto = () =>
+    (leido ??= (async () => conjuntoDeLosDatos(await leerDatosDelCorpus(rutasDelCorpus(RAIZ_DEL_CORPUS))))());
+
+  const AUTOR = '#filtro-de-autor';
+  const TEMA = '#filtro-de-tema';
+  const ESTADO = '[data-estado]';
+  const RESULTADOS = '[data-resultados] .resultado';
+  const BLOQUE = '[data-mas]';
+  const BOTON = '[data-mostrar-mas]';
+  const FALLO = '[data-fallo-de-la-tanda]';
+  const FRAGMENTOS = '**/pagefind/fragment/**';
+  const T = TANDA_DE_RESULTADOS;
+
+  /** El Autor de la historia: más de dos tandas y una última de dos o más. */
+  async function elAutor() {
+    const { autores } = filtrosDeLaBusqueda(await conjunto());
+    const elegido = [...autores]
+      .filter((a) => a.recuento > 2 * T && a.recuento % T >= 2)
+      .sort((a, b) => a.recuento - b.recuento || (a.valor < b.valor ? -1 : 1))[0];
+    expect(elegido, `El Corpus no tiene ningún Autor con más de ${2 * T} Citas y una última tanda de dos o más.`).toBeDefined();
+    return elegido;
+  }
+
+  /** Elige el Autor y espera a que se pinte su primera tanda. */
+  async function conElAutor(page: Page) {
+    const autor = await elAutor();
+    await page.goto('/buscar/');
+    await page.locator(AUTOR).selectOption(autor.valor);
+    await expect(page.locator(ESTADO)).toHaveText(`${autor.recuento} citas de ${autor.rotulo}.`, { timeout: 10_000 });
+    await expect(page.locator(RESULTADOS)).toHaveCount(T);
+    return autor;
+  }
+
+  const hrefs = (page: Page) => page.locator(`${RESULTADOS} a`).evaluateAll((as) => as.map((a) => a.getAttribute('href')!));
+
+  /** Las URL que da `search` del índice de verdad con esos argumentos, en su orden, como las pinta la isla. */
+  const delIndice = (page: Page, texto: string | null, filtros?: Record<string, string>) =>
+    page.evaluate(
+      async ({ texto, filtros, opciones, orden }) => {
+        const pf = await import('/pagefind/pagefind.js' as string);
+        await pf.options(opciones);
+        const respuesta = filtros
+          ? texto === null
+            ? await pf.search(null, { filters: filtros, sort: { [orden]: 'asc' } })
+            : await pf.search(texto, { filters: filtros })
+          : await pf.search(texto);
+        const datos = await Promise.all(respuesta.results.map((r: { data(): Promise<{ url: string }> }) => r.data()));
+        return datos.map((d) => d.url.replace(/[.]html$/u, ''));
+      },
+      { texto, filtros, opciones: OPCIONES_DE_PAGEFIND, orden: ORDEN_DE_CITA },
+    ) as Promise<string[]>;
+
+  /** Cuenta las mutaciones de la región del recuento desde ahora. */
+  const vigilarElRecuento = (page: Page) =>
+    page.evaluate(() => {
+      const w = window as unknown as { __mutaciones: number };
+      w.__mutaciones = 0;
+      new MutationObserver((registros) => {
+        w.__mutaciones += registros.length;
+      }).observe(document.querySelector('[data-estado]')!, { childList: true, characterData: true, subtree: true, attributes: true });
+    });
+  const mutaciones = (page: Page) => page.evaluate(() => (window as unknown as { __mutaciones: number }).__mutaciones);
+
+  test('con más de 30, detrás de la lista y fuera de ella, «Mostrar 30 más» a su ancho en siena y su región vacía; con 30 o menos, no existe', async ({ page }) => {
+    test.setTimeout(60_000);
+    await conElAutor(page);
+    await expect(page.locator(BOTON)).toHaveText(`Mostrar ${T} más`);
+    await expect(page.locator(BOTON)).toHaveAttribute('type', 'button');
+    await expect(page.locator(FALLO)).toHaveText('');
+    await expect(page.locator(FALLO)).toHaveAttribute('role', 'status');
+    const forma = await page.evaluate(() => {
+      const lista = document.querySelector('[data-resultados]')!;
+      const bloque = document.querySelector('[data-mas]')!;
+      const boton = bloque.querySelector('button')!;
+      const prueba = document.createElement('div');
+      prueba.style.color = 'var(--siena)';
+      prueba.style.marginTop = 'calc(var(--unidad) * 3)';
+      document.body.append(prueba);
+      const siena = getComputedStyle(prueba).color;
+      const tres = getComputedStyle(prueba).marginTop;
+      prueba.remove();
+      const estiloDelBoton = getComputedStyle(boton);
+      return {
+        detras: lista.nextElementSibling === bloque,
+        dentroDeLaLista: lista.contains(bloque),
+        enLaSalida: bloque.closest('.salida, [data-zona]') !== null,
+        botonEnElBloque: boton.hasAttribute('data-mostrar-mas'),
+        regionTrasElBoton: boton.nextElementSibling === bloque.querySelector('[data-fallo-de-la-tanda]'),
+        aSuAncho: boton.getBoundingClientRect().width < lista.getBoundingClientRect().width,
+        color: estiloDelBoton.color === siena && estiloDelBoton.borderTopColor === siena,
+        separado: getComputedStyle(bloque).marginTop === tres,
+        sinEnlaces: bloque.querySelectorAll('a').length,
+        sinDeshabilitar: !boton.disabled && !boton.hasAttribute('aria-disabled'),
+      };
+    });
+    expect(forma).toEqual({
+      detras: true,
+      dentroDeLaLista: false,
+      enLaSalida: false,
+      botonEnElBloque: true,
+      regionTrasElBoton: true,
+      aSuAncho: true,
+      color: true,
+      separado: true,
+      sinEnlaces: 0,
+      sinDeshabilitar: true,
+    });
+
+    // Un Autor con 30 Citas o menos: ni bloque, ni botón, ni región.
+    const { autores } = filtrosDeLaBusqueda(await conjunto());
+    const pequeno = [...autores].filter((a) => a.recuento <= T).sort((a, b) => b.recuento - a.recuento || (a.valor < b.valor ? -1 : 1))[0];
+    await page.locator(AUTOR).selectOption(pequeno.valor);
+    await expect(page.locator(ESTADO)).toHaveText(new RegExp(`${escaparRegex(pequeno.rotulo)}\\.$`, 'u'), { timeout: 10_000 });
+    await expect(page.locator(BLOQUE)).toHaveCount(0);
+    await expect(page.locator(BOTON)).toHaveCount(0);
+    await expect(page.locator(FALLO)).toHaveCount(0);
+  });
+
+  test('desplazarse al fondo no pide nada; pulsar trae los 30 siguientes, con el foco en el primero nuevo, sin tocar el recuento, la dirección ni el historial', async ({ page }) => {
+    test.setTimeout(60_000);
+    const autor = await conElAutor(page);
+    const pedidos: string[] = [];
+    page.on('request', (r) => {
+      if (r.url().includes('/pagefind/')) pedidos.push(r.url());
+    });
+    await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
+    await page.waitForTimeout(800);
+    expect(pedidos).toEqual([]);
+    await expect(page.locator(RESULTADOS)).toHaveCount(T);
+
+    const direccion = page.url();
+    const largo = await page.evaluate(() => history.length);
+    const recuento = await page.locator(ESTADO).textContent();
+    await vigilarElRecuento(page);
+    await page.locator(BOTON).click();
+    await expect(page.locator(RESULTADOS)).toHaveCount(2 * T, { timeout: 10_000 });
+    await expect(page.locator(`${RESULTADOS} a`).nth(T)).toBeFocused();
+    await page.waitForTimeout(PAUSA_DE_TECLEO_MS + 200);
+    expect(await mutaciones(page)).toBe(0);
+    await expect(page.locator(ESTADO)).toHaveText(recuento!);
+    expect(page.url()).toBe(direccion);
+    expect(await page.evaluate(() => history.length)).toBe(largo);
+    await expect(page.locator(BOTON)).toHaveText(rotuloDeMostrarMas(autor.recuento - 2 * T)!);
+  });
+
+  test('hasta el final: la última tanda nombrada, el bloque que desaparece, sin repetidos y en el orden y el conjunto de `search` con los mismos argumentos', async ({ page }) => {
+    test.setTimeout(120_000);
+    const autor = await conElAutor(page);
+    for (let pintados = T; pintados < autor.recuento; pintados += T) {
+      const quedan = autor.recuento - pintados;
+      await expect(page.locator(BOTON)).toHaveText(rotuloDeMostrarMas(quedan)!);
+      if (quedan < T) expect(await page.locator(BOTON).textContent()).toBe(`Mostrar las ${quedan} que faltan`);
+      await page.locator(BOTON).click();
+      await expect(page.locator(RESULTADOS)).toHaveCount(Math.min(autor.recuento, pintados + T), { timeout: 10_000 });
+      await expect(page.locator(`${RESULTADOS} a`).nth(pintados)).toBeFocused();
+    }
+    await expect(page.locator(BLOQUE)).toHaveCount(0);
+    await expect(page.locator(FALLO)).toHaveCount(0);
+    const pintadas = await hrefs(page);
+    expect(new Set(pintadas).size).toBe(autor.recuento);
+    expect(pintadas).toEqual(await delIndice(page, null, { [FILTROS_DE_CITA.autor]: autor.valor }));
+  });
+
+  test('con texto, por relevancia: las dos primeras tandas son las 60 primeras de `search(texto)`, sin repetir ni saltar', async ({ page }) => {
+    test.setTimeout(60_000);
+    await page.goto('/buscar/');
+    // Un texto con más de dos tandas, del Corpus: «vida» lo da.
+    const esperadas = await delIndice(page, 'vida');
+    expect(esperadas.length).toBeGreaterThan(2 * T);
+    await page.locator('[data-consulta]').fill('vida');
+    await expect(page.locator(RESULTADOS)).toHaveCount(T, { timeout: 10_000 });
+    await page.locator(BOTON).click();
+    await expect(page.locator(RESULTADOS)).toHaveCount(2 * T, { timeout: 10_000 });
+    expect(await hrefs(page)).toEqual(esperadas.slice(0, 2 * T));
+  });
+
+  test('Tab desde el último resultado llega al botón', async ({ page }) => {
+    test.setTimeout(60_000);
+    await conElAutor(page);
+    await page.locator(`${RESULTADOS} a`).nth(T - 1).focus();
+    await page.keyboard.press('Tab');
+    await expect(page.locator(BOTON)).toBeFocused();
+  });
+
+  test('doble pulsación con los fragmentos retrasados: un solo lote, 60 resultados y no 90', async ({ page }) => {
+    test.setTimeout(60_000);
+    await conElAutor(page);
+    const retrasados: string[] = [];
+    await page.route(FRAGMENTOS, async (ruta) => {
+      retrasados.push(ruta.request().url());
+      await new Promise((r) => setTimeout(r, 1_200));
+      await ruta.continue().catch(() => {});
+    });
+    await page.locator(BOTON).click();
+    await page.locator(BOTON).click();
+    await expect(page.locator(RESULTADOS)).toHaveCount(2 * T, { timeout: 15_000 });
+    await page.waitForTimeout(2_000);
+    await expect(page.locator(RESULTADOS)).toHaveCount(2 * T);
+    expect(retrasados.length).toBeGreaterThan(0);
+    expect(new Set(retrasados).size).toBe(retrasados.length);
+    expect(retrasados.length).toBeLessThanOrEqual(T);
+    await expect(page.locator(`${RESULTADOS} a`).nth(T)).toBeFocused();
+  });
+
+  test('con los fragmentos cortados: la frase bajo el botón en su región, el foco en el botón y el recuento igual; con la red de vuelta, la tanda llega', async ({ page }) => {
+    test.setTimeout(60_000);
+    const autor = await conElAutor(page);
+    const recuento = await page.locator(ESTADO).textContent();
+    const cortados: string[] = [];
+    await page.route(FRAGMENTOS, (ruta) => {
+      cortados.push(ruta.request().url());
+      return ruta.abort();
+    });
+    await vigilarElRecuento(page);
+    await page.locator(BOTON).click();
+    await expect(page.locator(FALLO)).toHaveText(FALLO_DE_LA_TANDA, { timeout: 10_000 });
+    expect(cortados.length).toBeGreaterThan(0);
+    await expect(page.locator(BOTON)).toBeFocused();
+    await expect(page.locator(RESULTADOS)).toHaveCount(T);
+    // La frase va debajo del botón, en su región, y es visible.
+    const debajo = await page.evaluate(() => {
+      const boton = document.querySelector('[data-mostrar-mas]')!.getBoundingClientRect();
+      const fallo = document.querySelector('[data-fallo-de-la-tanda]')!.getBoundingClientRect();
+      return fallo.top >= boton.bottom && fallo.height > 0;
+    });
+    expect(debajo).toBe(true);
+
+    await page.unroute(FRAGMENTOS);
+    await page.locator(BOTON).click();
+    await expect(page.locator(RESULTADOS)).toHaveCount(2 * T, { timeout: 10_000 });
+    await expect(page.locator(FALLO)).toHaveText('');
+    await expect(page.locator(`${RESULTADOS} a`).nth(T)).toBeFocused();
+    expect(await mutaciones(page)).toBe(0);
+    await expect(page.locator(ESTADO)).toHaveText(recuento!);
+    // Lo que llegó es la segunda tanda del mismo orden.
+    expect(await hrefs(page)).toEqual((await delIndice(page, null, { [FILTROS_DE_CITA.autor]: autor.valor })).slice(0, 2 * T));
+  });
+
+  test('cambiar el filtro con una tanda retrasada en vuelo: la tanda no se pinta', async ({ page }) => {
+    test.setTimeout(60_000);
+    const autor = await conElAutor(page);
+    const filtros = filtrosDeLaBusqueda(await conjunto());
+    // Un Tema con Citas del Autor, para que la búsqueda nueva pinte algo.
+    const temas = new Map<string, number>();
+    for (const [, deCita] of filtros.porCita) {
+      if (deCita.autor !== autor.valor) continue;
+      for (const tema of deCita.temas) temas.set(tema, (temas.get(tema) ?? 0) + 1);
+    }
+    const [tema, cuantas] = [...temas.entries()].sort((a, b) => b[1] - a[1] || (a[0] < b[0] ? -1 : 1))[0];
+    await page.route(FRAGMENTOS, async (ruta) => {
+      await new Promise((r) => setTimeout(r, 2_500));
+      await ruta.continue().catch(() => {});
+    });
+    await page.locator(BOTON).click();
+    await page.locator(TEMA).selectOption(tema);
+    await page.waitForTimeout(PAUSA_DE_LOS_SELECTORES_MS);
+    await expect(page.locator(ESTADO)).toHaveText(new RegExp(`^(?:${cuantas} citas|Una cita) de `, 'u'), { timeout: 15_000 });
+    await page.waitForTimeout(3_000);
+    await expect(page.locator(RESULTADOS)).toHaveCount(Math.min(cuantas, T));
+    await page.unroute(FRAGMENTOS);
+    const delCruce = await delIndice(page, null, { [FILTROS_DE_CITA.autor]: autor.valor, [FILTROS_DE_CITA.tema]: tema });
+    expect(await hrefs(page)).toEqual(delCruce.slice(0, T));
+    await expect(page.locator(BLOQUE)).toHaveCount(cuantas > T ? 1 : 0);
+  });
+});
+
+/** Escapa un texto para usarlo dentro de una expresión regular. */
+function escaparRegex(texto: string) {
+  return texto.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}

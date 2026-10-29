@@ -1,7 +1,8 @@
 import { createContext, runInContext } from 'node:vm';
+import { TANDA_DE_RESULTADOS } from '../../../src/lib/umbrales.ts';
 
 /**
- * La isla de `/buscar/`, ejecutada — Historias 23.8, 27.2 y 27.3.
+ * La isla de `/buscar/`, ejecutada — Historias 23.8, 27.2, 27.3, 27.4 y 27.5.
  *
  * Es el «ejecutándola» que pedía la prueba de la 23.6. Desde la 27.2 la isla es el `<script>`
  * empaquetado de `src/components/Busqueda.astro`, un fichero de `/_astro/` que se aplana a guion
@@ -19,6 +20,16 @@ import { createContext, runInContext } from 'node:vm';
  *     empiece a pedir otra cosa no pase en verde contra un entorno que no la sabe. El campo es de
  *     búsqueda, y como en el navegador quita los saltos de línea de lo que se le escribe; un
  *     selector cambia de opción al escribirle el valor, como uno nativo, y el foco se apunta;
+ *   · Historia 27.5 — la raíz, el contenedor del recuento, la lista y la salida van, en ese orden,
+ *     en la columna de la página (`isConnected` dice si un elemento cuelga de ella), así que se
+ *     puede poner algo detrás de la lista. El clon lleva además el bloque `[data-mas]` con su
+ *     botón (`[data-mostrar-mas]`) y su región (`[data-fallo-de-la-tanda]`). Reciben el foco el
+ *     campo, el botón y los enlaces que la isla crea; uno que sale del DOM lo pierde, como en el
+ *     navegador. `pulsarMas()` enfoca el botón y despacha `click`; `mas()` dice si el bloque está,
+ *     si va justo detrás de la lista, su rótulo y lo que dice su región; `escrituras()` cuenta lo
+ *     que se escribió en la región del recuento y en su sombra. `falla: 'tanda'` rechaza `data()`
+ *     de los resultados desde `TANDA_DE_RESULTADOS`, y con `tandaManual` esos `data()` esperan a
+ *     `responderALaTanda()`;
  *   · `document.createElement` con lo que usa para pintar un resultado;
  *   · un reloj fingido —`setTimeout`, `clearTimeout`, `requestAnimationFrame`, `performance.now`—
  *     que solo avanza con `avanzar(ms)`;
@@ -94,8 +105,13 @@ export interface OpcionesDeLaIsla {
    * `replaceState`; con un objeto, las N primeras llamadas de cada uno (o siempre, con `true`).
    */
   historialQueLanza?: boolean | { pushState?: number | boolean; replaceState?: number | boolean };
-  /** Dónde falla el índice: la importación, `init`, `search` (que lanza) o los datos del primer resultado. */
-  falla?: 'importacion' | 'init' | 'search' | 'data';
+  /**
+   * Dónde falla el índice: la importación, `init`, `search` (que lanza), los datos del primer
+   * resultado o (Historia 27.5) los de los resultados de la segunda tanda en adelante.
+   */
+  falla?: 'importacion' | 'init' | 'search' | 'data' | 'tanda';
+  /** Historia 27.5 — si los `data()` desde `TANDA_DE_RESULTADOS` esperan a `responderALaTanda()`. */
+  tandaManual?: boolean;
   /**
    * Lo que responde el índice a cada consulta —`null` en la búsqueda sin texto de la 27.2—, con
    * las opciones de `search` si las lleva. Por omisión, nada: total 0.
@@ -160,8 +176,13 @@ class Elemento {
   value = '';
   href = '';
   dataset: Record<string, string> = {};
-  /** Solo el campo sabe recibir el foco; en cualquier otro elemento, llamarlo lanza. */
+  /**
+   * Solo el campo, el botón de «Mostrar 30 más» y los enlaces que crea la isla saben recibir el
+   * foco; en cualquier otro elemento, llamarlo lanza.
+   */
   focus?: () => void;
+  /** Historia 27.5 — la columna de la página: lo que cuelga de ella está en el documento. */
+  esDocumento = false;
   readonly atributos = new Map<string, string>();
   hijos: Elemento[] = [];
   padre: Elemento | null = null;
@@ -190,6 +211,12 @@ class Elemento {
 
   get parentElement() {
     return this.padre;
+  }
+
+  /** Si cuelga de la columna de la página, como `isConnected` en el navegador. */
+  get isConnected() {
+    for (let nodo: Elemento | null = this; nodo; nodo = nodo.padre) if (nodo.esDocumento) return true;
+    return false;
   }
 
   /** Se quita de su padre; sin padre, no hace nada, como en el navegador. */
@@ -386,6 +413,22 @@ export function islaDeBusquedaEnUnSandbox(guion: string, opciones: OpcionesDeLaI
   });
   const lista = new Elemento('ul');
   const estado = new Elemento('p');
+  const sombra = new Elemento('p');
+  // Historia 27.5 — lo que se escribe en la región del recuento y en su sombra, contado.
+  const escrituras = { estado: 0, sombra: 0 };
+  for (const [elemento, cual] of [
+    [estado, 'estado'],
+    [sombra, 'sombra'],
+  ] as const) {
+    let texto = '';
+    Object.defineProperty(elemento, 'textContent', {
+      get: () => texto,
+      set: (valor: unknown) => {
+        escrituras[cual]++;
+        texto = valor === null || valor === undefined ? '' : String(valor);
+      },
+    });
+  }
   const recuento = new Elemento('div');
   recuento.append(estado);
   const salida = new Elemento('div');
@@ -401,7 +444,6 @@ export function islaDeBusquedaEnUnSandbox(guion: string, opciones: OpcionesDeLaI
   const tema = selector('tema', 'Todos los temas', opciones.temas ?? TEMAS);
   const quitar = new Elemento('button');
   quitar.hidden = true;
-  const sombra = new Elemento('p');
   // Historia 27.3 — cada selector en su caja, como el `.selector` de la plantilla.
   const caja = (dentro: Elemento) => {
     const div = new Elemento('div');
@@ -413,9 +455,15 @@ export function islaDeBusquedaEnUnSandbox(guion: string, opciones: OpcionesDeLaI
   const cajaDeObra = caja(obra);
   const cajaDeTema = caja(tema);
   formulario.append(campo, cajaDeAutor, cajaDeObra, cajaDeTema, quitar);
+  // Historia 27.5 — el bloque de «Mostrar 30 más»: el botón, vacío, y su región, vacía.
+  const mas = new Elemento('div');
+  mas.className = 'mas';
+  const boton = new Elemento('button');
+  const fallo = new Elemento('p');
+  mas.append(boton, fallo);
   // El contenido de la plantilla: lo que la isla saca de su clon, y nada más.
   const clon = new Elemento('#fragmento');
-  clon.append(formulario, sombra);
+  clon.append(formulario, sombra, mas);
   for (const [selectorDeCss, elemento] of [
     ['form', formulario],
     ['[data-consulta]', campo],
@@ -424,6 +472,9 @@ export function islaDeBusquedaEnUnSandbox(guion: string, opciones: OpcionesDeLaI
     ['[data-selector-de-tema]', tema],
     ['[data-quitar]', quitar],
     ['.sombra', sombra],
+    ['[data-mas]', mas],
+    ['[data-mostrar-mas]', boton],
+    ['[data-fallo-de-la-tanda]', fallo],
   ] as const) {
     clon.dentro.set(selectorDeCss, elemento);
   }
@@ -441,6 +492,10 @@ export function islaDeBusquedaEnUnSandbox(guion: string, opciones: OpcionesDeLaI
   const raiz = new Elemento('div');
   raiz.append(plantilla);
   raiz.dentro.set('template', plantilla);
+  // Historia 27.5 — la columna de la página, en el orden de `buscar.astro`.
+  const columna = new Elemento('div');
+  columna.esDocumento = true;
+  columna.append(raiz, recuento, lista, salida);
   const porSelector = new Map<string, Elemento>([
     ['[data-busqueda]', raiz],
     ['[data-resultados]', lista],
@@ -450,6 +505,9 @@ export function islaDeBusquedaEnUnSandbox(guion: string, opciones: OpcionesDeLaI
   let enfocado: Elemento | null = null;
   campo.focus = () => {
     enfocado = campo;
+  };
+  boton.focus = () => {
+    enfocado = boton;
   };
 
   const delDocumento: Oyente[] = [];
@@ -465,7 +523,16 @@ export function islaDeBusquedaEnUnSandbox(guion: string, opciones: OpcionesDeLaI
       if (elemento === undefined) throw new Error(`el entorno no sabe buscar «${selector}» en el documento`);
       return elemento;
     },
-    createElement: (etiqueta: string) => new Elemento(etiqueta),
+    createElement: (etiqueta: string) => {
+      const elemento = new Elemento(etiqueta);
+      // Historia 27.5 — el enlace de un resultado recibe el foco de una tanda nueva.
+      if (elemento.tagName === 'A') {
+        elemento.focus = () => {
+          enfocado = elemento;
+        };
+      }
+      return elemento;
+    },
     addEventListener: (tipo: string, oyente: Oyente['oyente'], ajustes?: boolean | { once?: boolean }) =>
       delDocumento.push({ tipo, oyente, unaVez: typeof ajustes === 'object' && ajustes.once === true }),
   };
@@ -557,6 +624,8 @@ export function islaDeBusquedaEnUnSandbox(guion: string, opciones: OpcionesDeLaI
 
   // El índice de mentira. Dónde falla se puede cambiar a mitad de prueba, con `fallar`.
   let falla = opciones.falla;
+  // Historia 27.5 — los `data()` de la segunda tanda en adelante que esperan a `responderALaTanda()`.
+  const tandaEsperando: (() => void)[] = [];
   // Historia 27.3 — `filters()` y el mapa de rótulos, configurables a mitad de prueba.
   let fallanLosFiltros: boolean | 'sin-obra' = opciones.fallanLosFiltros ?? false;
   let recuentosDeObra: Record<string, number> = opciones.recuentosDeObra ?? {};
@@ -589,8 +658,11 @@ export function islaDeBusquedaEnUnSandbox(guion: string, opciones: OpcionesDeLaI
     const { total, pintados = total, datos }: Respuesta = (opciones.respuestas ?? (() => ({ total: 0 })))(consulta, ajustes);
     const todos = Array.from({ length: total }, (_, i) => ({
       data: async () => {
+        // Historia 27.5 — los de la tanda siguiente esperan, si se pide, y luego pueden fallar.
+        if (opciones.tandaManual && i >= TANDA_DE_RESULTADOS) await new Promise<void>((r) => tandaEsperando.push(r));
         // Un fragmento que no llega: el índice y la búsqueda corrieron, los datos de un resultado no.
         if (falla === 'data' && i === 0) throw new Error('los datos de un resultado no llegan');
+        if (falla === 'tanda' && i >= TANDA_DE_RESULTADOS) throw new Error('los datos de la tanda no llegan');
         if (datos) return datos(i);
         return {
           url: `/cita/${encodeURIComponent(String(consulta))}-${i}.html`,
@@ -811,8 +883,53 @@ export function islaDeBusquedaEnUnSandbox(guion: string, opciones: OpcionesDeLaI
     salidaVisible: () => !salida.hidden,
     /** Si «Quitar los filtros» está a la vista. */
     quitarVisible: () => !quitar.hidden,
-    /** Qué tiene el foco, de lo que la isla puede enfocar: `campo` o nada. */
-    foco: () => (enfocado === campo ? 'campo' : null),
+    /**
+     * Qué tiene el foco, de lo que la isla puede enfocar: `campo`, `mas` (el botón), `resultado:{i}`
+     * (el enlace de la fila `i`, desde 0) o nada. Lo que salió del documento ya no lo tiene.
+     */
+    foco: () => {
+      if (enfocado === null || !enfocado.isConnected) return null;
+      if (enfocado === campo) return 'campo';
+      if (enfocado === boton) return 'mas';
+      const fila = lista.hijos.findIndex((li) => li.hijos[0] === enfocado);
+      return fila >= 0 ? `resultado:${fila}` : null;
+    },
+    /**
+     * Historia 27.5 — el bloque de «Mostrar 30 más»: si está en el documento, si va justo detrás de
+     * la lista (su hermano siguiente), el rótulo del botón y lo que dice su región.
+     */
+    mas: () => ({
+      enElDom: mas.isConnected,
+      detrasDeLaLista: mas.padre !== null && mas.padre === lista.padre && mas.padre.hijos.indexOf(mas) === mas.padre.hijos.indexOf(lista) + 1,
+      rotulo: boton.textContent,
+      fallo: fallo.textContent,
+    }),
+    /** Historia 27.5 — cuántas veces se escribió la región del recuento y su sombra desde que se abrió el entorno. */
+    escrituras: () => ({ ...escrituras }),
+    /**
+     * Historia 27.5 — pulsa «Mostrar 30 más»: el botón recibe el foco y da `click`, sin dejar correr
+     * las promesas. Lanza si el bloque no está en el documento.
+     */
+    pulsarMas: () => {
+      if (!mas.isConnected) throw new Error('«Mostrar 30 más» no está en el documento');
+      enfocado = boton;
+      const clic = evento('click', { target: boton, button: 0 });
+      for (let nodo: Elemento | null = boton; nodo; nodo = nodo.padre) despachar(nodo.oyentes, 'click', clic);
+      despachar(delDocumento, 'click', clic);
+      despachar(deLaVentana, 'click', clic);
+    },
+    /**
+     * Historia 27.5 — suelta los `data()` de la tanda que esperan (con `tandaManual`), deja correr
+     * las promesas y devuelve cuántos soltó: un lote de una tanda son `TANDA_DE_RESULTADOS` o menos.
+     */
+    responderALaTanda: async () => {
+      await vaciar();
+      if (tandaEsperando.length === 0) throw new Error('no hay ninguna tanda esperando');
+      const soltados = tandaEsperando.splice(0);
+      soltados.forEach((r) => r());
+      await vaciar();
+      return soltados.length;
+    },
     /** El valor elegido en cada selector. */
     elegidos: () => ({ autor: autor.value, tema: tema.value }),
     /**
@@ -964,6 +1081,7 @@ export function islaDeBusquedaEnUnSandbox(guion: string, opciones: OpcionesDeLaI
       obra: obra.oyentes.map((o) => o.tipo),
       tema: tema.oyentes.map((o) => o.tipo),
       quitar: quitar.oyentes.map((o) => o.tipo),
+      mas: boton.oyentes.map((o) => o.tipo),
     }),
     /** Desde ahora el índice falla ahí (o deja de fallar, sin argumento). */
     fallar: (donde?: OpcionesDeLaIsla['falla']) => {

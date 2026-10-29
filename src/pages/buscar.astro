@@ -11,6 +11,10 @@
  * combinación de parámetros crea ruta ni página: es siempre este único HTML, `noindex`, con
  * canónica `/buscar/` y fuera del sitemap y de Pagefind (`src/lib/superficies.ts`).
  *
+ * Historia 27.5 — los resultados llegan de 30 en 30 (`TANDA_DE_RESULTADOS`): la isla pone detrás de
+ * la lista, fuera de ella y de su Zona, «Mostrar 30 más» con su propia región de estado, que salen
+ * de la plantilla del componente. El marcado de esta página no cambia.
+ *
  * Las opciones de los selectores salen de aquí y solo de aquí: del conjunto publicable, por
  * `filtrosDeLaBusqueda` —la misma función que escribe los filtros de cada Página de Cita (27.1)—,
  * ordenadas por `ordenDeAutoresPorNombre` y `ordenDeTemasPorNombre` de `src/lib/normalizar.ts`.

@@ -1,8 +1,8 @@
 ---
 /**
- * La búsqueda de `/buscar/` — Historias 27.2, 27.3 y 27.4, FR-7, FR-8, NFR-4, AD-6, AD-11, AD-13,
- * UX-DR87, UX-DR88, UX-DR89, UX-DR91, UX-DR93, UX-DR99, UX-DR100, UX-DR101; `DESIGN.md § Búsqueda`
- * y `EXPERIENCE.md § Búsqueda`.
+ * La búsqueda de `/buscar/` — Historias 27.2, 27.3, 27.4 y 27.5, FR-7, FR-8, NFR-4, AD-6, AD-11,
+ * AD-13, UX-DR87, UX-DR88, UX-DR89, UX-DR90, UX-DR91, UX-DR93, UX-DR99, UX-DR100, UX-DR101,
+ * UX-DR112; `DESIGN.md § Búsqueda` y `EXPERIENCE.md § Búsqueda`.
  *
  * El índice lo produce Pagefind sobre `dist/` después del build, así que solo contiene lo que las
  * páginas publican: si una Cita no tiene página, no hay nada que indexar. El conjunto publicable de
@@ -12,8 +12,9 @@
  *
  *   · un `<template>` con el formulario —el Campo de búsqueda de la 26.6 con su `name`, su
  *     ejemplo y la marca `data-consulta`, y un `fieldset` con los selectores de Autor, de Obra
- *     (27.3) y de Tema y «Quitar los filtros»— y la sombra del recuento, inertes: el guion los
- *     inserta al cargar, salvo el `.selector` de Obra, que separa del clon (abajo). Ir en
+ *     (27.3) y de Tema y «Quitar los filtros»—, la sombra del recuento y, desde la 27.5, el bloque
+ *     de «Mostrar 30 más» con su región de estado, inertes: el guion los inserta al cargar, salvo
+ *     el `.selector` de Obra y el bloque, que separa del clon (abajo). Ir en
  *     plantilla deja el marcado, las opciones del build y sus estilos de ámbito en el HTML, y el
  *     guion sin una palabra de contenido. Sin guion la página queda en el `h1` (hasta la 27.7);
  *   · el `<script>`, que Astro empaqueta en un fichero de `/_astro/` (AD-6) y que nunca va en línea
@@ -159,6 +160,30 @@
  *         búsqueda y el mismo fragmento —el mismo control puede reemplazar la suya por la de antes—
  *         sí son una llegada: cancelan lo pendiente y no se escribe sobre la otra. Mientras una
  *         llegada busca, lo que se veía es de la entrada que se dejó y no se asienta en la nueva.
+ *   · Historia 27.5 (FR-7, UX-DR90, UX-DR112) — los resultados llegan de `TANDA_DE_RESULTADOS` en
+ *     `TANDA_DE_RESULTADOS` (30, en `src/lib/umbrales.ts`; el guion no escribe la cifra):
+ *       - la primera tanda son los primeros del `results` de Pagefind; si quedan más, el bloque
+ *         `[data-mas]` de la plantilla —un `button` y su región `role="status"`, vacía— va
+ *         **detrás de la lista** (`lista.after`), fuera de su Zona `resultado` —no es una salida
+ *         interna ni asienta— y después de los resultados al tabular. Su rótulo lo da
+ *         `rotuloDeMostrarMas` con lo que queda: «Mostrar 30 más», «Mostrar las 12 que faltan»,
+ *         «Mostrar la que falta». Sin nada que traer, el bloque no está;
+ *       - pulsar pide los `data()` de la tanda siguiente del **mismo** `results`, todo o nada
+ *         (`Promise.all`), sin otro `search`; con una tanda en vuelo no hace nada (sin
+ *         `disabled`). Al llegar, si nada la dejó sin efecto —un gesto, una búsqueda lanzada o
+ *         pintada—, añade sus filas con la misma función que la primera tanda (`fila`), lleva el
+ *         foco al enlace de la primera nueva y pone al día el rótulo, o quita el bloque si ya no
+ *         queda nada. Ni el recuento, ni su sombra, ni la dirección, ni el historial, ni la
+ *         medición cambian: la tanda no es otra búsqueda;
+ *       - si la tanda falla, nada suyo se pinta, el foco se queda en el botón y la frase del fallo
+ *         (`FALLO_DE_LA_TANDA`) va a la región del botón con el primer ritmo, solo si el bloque
+ *         sigue siendo el de esa búsqueda. Si la búsqueda sigue siendo la que se ve, se destruye
+ *         el índice, como en el fallo de abajo: Pagefind guarda en su instancia la promesa
+ *         rechazada de cada fragmento, así que la pulsación siguiente espera la destrucción,
+ *         aplica las opciones, repite el `search` con los mismos argumentos de la búsqueda que se
+ *         ve y toma la tanda de ese `results` nuevo, que pasa a ser el de las siguientes;
+ *       - pintar otra búsqueda, o vaciar la lista, quita el bloque, vacía su región y olvida la
+ *         tanda en vuelo y su avería.
  *   · La búsqueda que no corre —el índice no carga, o `init`, `search` o los datos de un
  *     resultado fallan— no pinta, no cambia el estado que se ve y no deja ninguna promesa rechazada
  *     sin manejar; no se asienta. La siguiente vuelve a pedir el índice, también con el mismo estado
@@ -251,6 +276,16 @@ const { autores, temas } = Astro.props;
       </fieldset>
     </form>
     <p class="sombra" aria-hidden="true"></p>
+    {/*
+      * Historia 27.5 — «Mostrar 30 más» y su región de estado, fuera del formulario. El guion separa
+      * el bloque del clon y lo pone detrás de la lista —fuera de su Zona `resultado`, después de los
+      * resultados al tabular— solo cuando quedan resultados por traer; la región entra con él,
+      * vacía y sin `hidden`. El rótulo del botón lo pone el guion (`rotuloDeMostrarMas`).
+      */}
+    <div class="mas" data-mas>
+      <button type="button" data-mostrar-mas></button>
+      <p class="fallo-de-la-tanda" role="status" data-fallo-de-la-tanda></p>
+    </div>
   </template>
 </div>
 
@@ -303,10 +338,13 @@ const { autores, temas } = Astro.props;
     overflow-wrap: anywhere;
   }
 
-  /* UX-DR9 — secundario: texto en siena con filete, a su ancho, a la zona de toque. */
-  .quitar {
+  /*
+   * UX-DR9 — secundario: texto en siena con filete, a su ancho, a la zona de toque. «Quitar los
+   * filtros» y, desde la 27.5, «Mostrar 30 más», con el mismo tratamiento.
+   */
+  .quitar,
+  .mas button {
     display: block;
-    margin-top: calc(var(--unidad) * 2);
     max-width: 100%;
     font-family: var(--sans);
     font-size: var(--cuerpo-md);
@@ -321,7 +359,12 @@ const { autores, temas } = Astro.props;
     transition: background-color 150ms, color 150ms;
   }
 
-  .quitar:hover {
+  .quitar {
+    margin-top: calc(var(--unidad) * 2);
+  }
+
+  .quitar:hover,
+  .mas button:hover {
     background: var(--siena);
     color: var(--sobre-siena);
   }
@@ -350,11 +393,34 @@ const { autores, temas } = Astro.props;
   .sombra:empty {
     margin: 0;
   }
+
+  /* Historia 27.5 — el bloque, 3× unidad bajo el último resultado. */
+  .mas {
+    margin-top: calc(var(--unidad) * 3);
+  }
+
+  .mas button {
+    margin: 0;
+  }
+
+  /* La región del botón: vacía no ocupa sitio, y cuando dice el fallo va 2× unidad bajo él. */
+  .fallo-de-la-tanda {
+    margin: calc(var(--unidad) * 2) 0 0;
+    font-family: var(--sans);
+    font-size: var(--pie);
+    color: var(--tinta);
+    overflow-wrap: anywhere;
+  }
+
+  .fallo-de-la-tanda:empty {
+    margin: 0;
+  }
 </style>
 
 <script>
   import { anunciar, ritmoDeTecleo } from '../lib/anuncio.ts';
   import {
+    FALLO_DE_LA_TANDA,
     RUTA_DEL_MAPA_DE_OBRAS,
     autorDeLaObra,
     avisoDeLaDireccion,
@@ -371,6 +437,7 @@ const { autores, temas } = Astro.props;
     mismoEstado,
     opcionesDeObra,
     resolverEstado,
+    rotuloDeMostrarMas,
     rotuloDeObra,
     valoresDeFiltros,
     type ControlDeLaBusqueda,
@@ -390,7 +457,7 @@ const { autores, temas } = Astro.props;
     TIPOS_CON_TITULO_EN_SANS,
     type TipoDeResultado,
   } from '../lib/tipoDeResultado.ts';
-  import { PAUSA_DE_LOS_SELECTORES_MS, PAUSA_DE_TECLEO_MS } from '../lib/umbrales.ts';
+  import { PAUSA_DE_LOS_SELECTORES_MS, PAUSA_DE_TECLEO_MS, TANDA_DE_RESULTADOS } from '../lib/umbrales.ts';
 
   /** La cola de medición que abre el arranque del armazón (AD-13). */
   declare function __medir(...argumentos: unknown[]): void;
@@ -402,6 +469,9 @@ const { autores, temas } = Astro.props;
     filters?: Record<string, string[] | undefined>;
   }
 
+  /** Los resultados de una búsqueda de Pagefind: el total es su largo, y cada uno da sus datos. */
+  type Resultados = { data(): Promise<DatoDeResultado> }[];
+
   /** Lo que este guion usa del módulo de Pagefind. */
   interface Pagefind {
     init(): Promise<void>;
@@ -409,7 +479,7 @@ const { autores, temas } = Astro.props;
     search(
       texto: string | null,
       opciones?: { filters: Record<string, string>; sort?: Record<string, 'asc'> },
-    ): Promise<{ results: { data(): Promise<DatoDeResultado> }[] }>;
+    ): Promise<{ results: Resultados }>;
     destroy?(): Promise<void>;
     /** Historia 27.3 — los recuentos de cada valor de cada filtro, sobre el índice entero. */
     filters(): Promise<Record<string, Record<string, number> | undefined>>;
@@ -439,7 +509,11 @@ const { autores, temas } = Astro.props;
     const tema = contenido.querySelector<HTMLSelectElement>('[data-selector-de-tema]');
     const quitar = contenido.querySelector<HTMLButtonElement>('[data-quitar]');
     const sombra = contenido.querySelector<HTMLElement>('.sombra');
-    if (!formulario || !campo || !autor || !obra || !tema || !quitar || !sombra) return;
+    // Historia 27.5 — el bloque de «Mostrar 30 más», con su botón y su región.
+    const mas = contenido.querySelector<HTMLElement>('[data-mas]');
+    const boton = contenido.querySelector<HTMLButtonElement>('[data-mostrar-mas]');
+    const fallo = contenido.querySelector<HTMLElement>('[data-fallo-de-la-tanda]');
+    if (!formulario || !campo || !autor || !obra || !tema || !quitar || !sombra || !mas || !boton || !fallo) return;
     // Historia 27.3 — el `.selector` de Obra sale del clon: sin Autor con Obras, no existe.
     const cajaDeAutor = autor.parentElement;
     const cajaDeObra = obra.parentElement;
@@ -448,6 +522,8 @@ const { autores, temas } = Astro.props;
     const ruta = formulario.getAttribute('action');
     if (!cajaDeAutor || !cajaDeObra || !todasSusObras || !ruta) return;
     cajaDeObra.remove();
+    // Historia 27.5 — el bloque sale del clon: solo está, detrás de la lista, si quedan resultados.
+    mas.remove();
     raiz.append(formulario);
     estado.before(sombra);
 
@@ -498,6 +574,22 @@ const { autores, temas } = Astro.props;
      * Historia 27.4 — la búsqueda (como estado, no como cadena) y el fragmento de la dirección de la
      * entrada actual: un salto de ancla cambia el fragmento y no la búsqueda.
      */
+    /**
+     * Historia 27.5 — los `results` de la búsqueda que se ve y cuántos de ellos están pintados: la
+     * tanda siguiente sale del mismo `results`, desde ahí.
+     */
+    let todos: Resultados = [];
+    let enLaLista = 0;
+    /** La búsqueda que se ve, repetible con sus mismos argumentos: el reintento de una tanda fallida. */
+    let repetir: ((pf: Pagefind) => Promise<{ results: Resultados }>) | null = null;
+    /**
+     * Si la última tanda falló, la destrucción del índice que siguió (`null`, ninguna): la tanda
+     * siguiente la espera y rehace la búsqueda en vez de fiarse de su `results`.
+     */
+    let averiada: Promise<unknown> | null = null;
+    /** La tanda en vuelo (0, ninguna): un gesto, una búsqueda lanzada o pintada la olvidan. */
+    let tanda = 0;
+    let tandas = 0;
     let busquedaDeLaEntrada = estadoDeLaDireccion(location.search);
     let anclaDeLaEntrada = location.hash;
     const recordarLaEntrada = () => {
@@ -535,6 +627,16 @@ const { autores, temas } = Astro.props;
           });
       }
       return indice;
+    }
+
+    /**
+     * Historia 26.2 — el índice con `OPCIONES_DE_PAGEFIND` aplicadas, antes de **cada** `search()`:
+     * el de una búsqueda y, desde la 27.5, el del reintento de una tanda. Un solo sitio las aplica.
+     * Sin índice, lanza: quien llama lo hace dentro de su `try`.
+     */
+    async function conOpciones(pf: Pagefind | null): Promise<Pagefind> {
+      await pf!.options(OPCIONES_DE_PAGEFIND);
+      return pf!;
     }
 
     /**
@@ -605,6 +707,28 @@ const { autores, temas } = Astro.props;
     }
 
     /**
+     * Historia 27.5 — quita el bloque de «Mostrar 30 más», vacía su región y olvida la tanda en
+     * vuelo y su avería: lo hace todo lo que repinta o vacía la lista.
+     */
+    function quitarMas() {
+      tanda = 0;
+      averiada = null;
+      fallo!.textContent = '';
+      mas!.remove();
+    }
+
+    /**
+     * Historia 27.5 — pone el bloque detrás de la lista con el rótulo de lo que queda del mismo
+     * `results` (`rotuloDeMostrarMas`), o lo quita si no queda nada. Ya puesto, solo cambia el rótulo.
+     */
+    function ponerMas() {
+      const rotulo = rotuloDeMostrarMas(todos.length - enLaLista);
+      if (rotulo === null) return quitarMas();
+      boton!.textContent = rotulo;
+      if (!mas!.isConnected) lista!.after(mas!);
+    }
+
+    /**
      * Pinta una búsqueda. `aviso` es la frase de la 27.4 de los filtros de la dirección que no se
      * pueden usar: va delante del recuento (o de la sugerencia a cero), con un espacio, en la
      * región y en la sombra. A cero con aviso la región no se aparta de la vista: el aviso no lo
@@ -612,6 +736,7 @@ const { autores, temas } = Astro.props;
      */
     function pintar(resultados: DatoDeResultado[], recuento: string, origen: Origen, aviso = '') {
       lista!.replaceChildren();
+      quitarMas();
       const vez = ++pintadas;
       const conAviso = (texto: string) => (aviso ? aviso + ' ' + texto : texto);
 
@@ -643,41 +768,50 @@ const { autores, temas } = Astro.props;
       if (origen === 'tecleo') ritmo.anunciar(frase, Math.max(0, tecla + PAUSA_DE_TECLEO_MS - performance.now()));
       else ritmo.ahora(frase);
 
-      for (const dato of resultados) {
-        const tipo = (dato.filters?.[FILTRO_DE_TIPO]?.[0] || TIPO_POR_OMISION) as TipoDeResultado;
-        const rotulo = ETIQUETAS_DE_RESULTADO[tipo] || ETIQUETAS_DE_RESULTADO[TIPO_POR_OMISION];
+      for (const dato of resultados) fila(dato);
+      enLaLista = resultados.length;
+      ponerMas();
+    }
 
-        const li = document.createElement('li');
-        li.className = 'resultado';
+    /**
+     * Historia 27.5 — una fila de resultado, añadida al final de la lista: la misma para la primera
+     * tanda y para las siguientes. Devuelve su enlace, al que va el foco de una tanda nueva.
+     */
+    function fila(dato: DatoDeResultado): HTMLAnchorElement {
+      const tipo = (dato.filters?.[FILTRO_DE_TIPO]?.[0] || TIPO_POR_OMISION) as TipoDeResultado;
+      const rotulo = ETIQUETAS_DE_RESULTADO[tipo] || ETIQUETAS_DE_RESULTADO[TIPO_POR_OMISION];
 
-        const a = document.createElement('a');
-        a.href = dato.url.replace(/[.]html$/, '');
+      const li = document.createElement('li');
+      li.className = 'resultado';
 
-        const clase = document.createElement('span');
-        clase.className = 'clase';
-        clase.dataset.tipo = tipo;
-        clase.textContent = rotulo;
+      const a = document.createElement('a');
+      a.href = dato.url.replace(/[.]html$/, '');
 
-        const t = typeof dato.meta?.title === 'string' ? dato.meta.title : '';
-        const titulo = document.createElement('span');
-        titulo.className = 'titulo';
-        titulo.textContent = t || dato.url;
-        a.append(clase, titulo);
+      const clase = document.createElement('span');
+      clase.className = 'clase';
+      clase.dataset.tipo = tipo;
+      clase.textContent = rotulo;
 
-        const sans = TIPOS_CON_TITULO_EN_SANS.includes(tipo);
-        if (sans) titulo.classList.add('en-sans');
-        const deAutor = TIPOS_CON_LINEA_DE_AUTOR.includes(tipo) && typeof dato.meta?.autor === 'string' ? dato.meta.autor.trim() : '';
-        if (deAutor) {
-          const linea = document.createElement('span');
-          linea.className = 'r-autor';
-          linea.textContent = deAutor;
-          a.append(linea);
-        }
-        if (t && (sans || deAutor)) a.setAttribute('aria-label', rotulo + ': ' + t + (deAutor ? ', ' + deAutor : ''));
+      const t = typeof dato.meta?.title === 'string' ? dato.meta.title : '';
+      const titulo = document.createElement('span');
+      titulo.className = 'titulo';
+      titulo.textContent = t || dato.url;
+      a.append(clase, titulo);
 
-        li.append(a);
-        lista!.append(li);
+      const sans = TIPOS_CON_TITULO_EN_SANS.includes(tipo);
+      if (sans) titulo.classList.add('en-sans');
+      const deAutor = TIPOS_CON_LINEA_DE_AUTOR.includes(tipo) && typeof dato.meta?.autor === 'string' ? dato.meta.autor.trim() : '';
+      if (deAutor) {
+        const linea = document.createElement('span');
+        linea.className = 'r-autor';
+        linea.textContent = deAutor;
+        a.append(linea);
       }
+      if (t && (sans || deAutor)) a.setAttribute('aria-label', rotulo + ': ' + t + (deAutor ? ', ' + deAutor : ''));
+
+      li.append(a);
+      lista!.append(li);
+      return a;
     }
 
     function buscar(origen: Origen, control: ControlDeLaBusqueda | null, aviso = ''): Promise<void> {
@@ -690,12 +824,15 @@ const { autores, temas } = Astro.props;
       if (clave === ultima) return pendiente;
       ultima = clave;
       const mio = ++turno;
+      // Historia 27.5 — una búsqueda lanzada deja sin efecto la tanda en vuelo de la que se ve.
+      tanda = 0;
       const conFiltros = hayFiltros(filtros);
       const sinTexto = texto.trim() === '';
 
       if (sinTexto && !conFiltros) {
         pintadas++;
         lista!.replaceChildren();
+        quitarMas();
         ritmo.vaciar();
         sombra!.textContent = '';
         salida!.hidden = true;
@@ -714,6 +851,13 @@ const { autores, temas } = Astro.props;
         ...(filtros.tema ? { tema: nombreDe(tema!) } : {}),
       };
       const filters = filtrosDePagefind(filtros);
+      // Historia 27.5 — la búsqueda, repetible con sus mismos argumentos: el reintento de una tanda.
+      const pedir = (pf: Pagefind) =>
+        conFiltros
+          ? sinTexto
+            ? pf.search(null, { filters, sort: { [ORDEN_DE_CITA]: 'asc' } })
+            : pf.search(texto, { filters })
+          : pf.search(texto);
 
       return (pendiente = (async () => {
         let pf: Pagefind | null | undefined;
@@ -721,13 +865,8 @@ const { autores, temas } = Astro.props;
         let resultados: DatoDeResultado[];
         try {
           pf = await cargar();
-          await pf!.options(OPCIONES_DE_PAGEFIND);
-          respuesta = await (conFiltros
-            ? sinTexto
-              ? pf!.search(null, { filters, sort: { [ORDEN_DE_CITA]: 'asc' } })
-              : pf!.search(texto, { filters })
-            : pf!.search(texto));
-          resultados = await Promise.all(respuesta.results.slice(0, 30).map((r) => r.data()));
+          respuesta = await pedir(await conOpciones(pf));
+          resultados = await Promise.all(respuesta.results.slice(0, TANDA_DE_RESULTADOS).map((r) => r.data()));
         } catch {
           if (mio === turno) ultima = null;
           pf?.destroy?.().catch(() => {});
@@ -739,6 +878,8 @@ const { autores, temas } = Astro.props;
         visto = { texto, filtros: combinacionDeFiltros(filtros), total, ...(valores ? { valores } : {}) };
         estadoVisto = deEsta;
         controlDelVisto = control;
+        todos = respuesta.results;
+        repetir = pedir;
         pintar(resultados, fraseDelRecuento({ total, texto, ...nombres }), origen, aviso);
       })());
     }
@@ -821,6 +962,7 @@ const { autores, temas } = Astro.props;
     /** Historia 27.4 — un gesto deja sin efecto la llegada que aún espera sus datos, y cancela las pausas. */
     const gesto = () => {
       llegada++;
+      tanda = 0;
       clearTimeout(tecleo);
       clearTimeout(eleccion);
       clearTimeout(escritura);
@@ -897,6 +1039,52 @@ const { autores, temas } = Astro.props;
       buscar('gesto', 'quitar');
       escribir('quitar');
       campo.focus();
+    });
+
+    /*
+     * Historia 27.5 — «Mostrar 30 más»: la tanda siguiente del mismo `results`, todo o nada. Con una
+     * tanda en vuelo, pulsar no hace nada. Llega solo si sigue siendo la de la búsqueda que se ve y
+     * nada la dejó sin efecto: añade sus filas, lleva el foco al primer resultado nuevo y pone al día
+     * el rótulo; ni el recuento, ni la dirección, ni la medición cambian. Si falla, nada se pinta,
+     * el foco se queda en el botón, su región lo dice y, si la búsqueda sigue siendo la que se ve, se
+     * destruye el índice: la siguiente pulsación rehace la búsqueda con los mismos argumentos.
+     */
+    boton.addEventListener('click', async () => {
+      if (tanda) return;
+      const mia = (tanda = ++tandas);
+      const vez = pintadas;
+      const mio = turno;
+      const desde = enLaLista;
+      let nuevos = todos;
+      let datos: DatoDeResultado[];
+      try {
+        if (averiada) {
+          await averiada;
+          nuevos = (await repetir!(await conOpciones(await cargar()))).results;
+        }
+        datos = await Promise.all(nuevos.slice(desde, desde + TANDA_DE_RESULTADOS).map((r) => r.data()));
+      } catch {
+        if (tanda === mia) tanda = 0;
+        if (vez !== pintadas) return;
+        if (mio === turno) averiada = cargar().then((pf) => pf?.destroy?.()).catch(() => {});
+        anunciar(
+          {
+            set textContent(texto: string | null) {
+              if (vez === pintadas) fallo.textContent = texto;
+            },
+          },
+          FALLO_DE_LA_TANDA,
+        );
+        return;
+      }
+      if (tanda !== mia) return;
+      tanda = 0;
+      todos = nuevos;
+      averiada = null;
+      fallo.textContent = '';
+      datos.map(fila)[0]?.focus();
+      enLaLista += datos.length;
+      ponerMas();
     });
 
     formulario.addEventListener('submit', (e) => {
@@ -996,6 +1184,7 @@ const { autores, temas } = Astro.props;
       ultima = null;
       pintadas++;
       lista!.replaceChildren();
+      quitarMas();
       ritmo.vaciar();
       sombra!.textContent = '';
       salida!.hidden = true;

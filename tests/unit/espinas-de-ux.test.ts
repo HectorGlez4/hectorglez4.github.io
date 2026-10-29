@@ -305,12 +305,27 @@ describe('Historia 22.10 — el marcado construido', () => {
     }
   });
 
-  it('`/buscar/` anuncia por una región que está desde la carga, vacía y sin `hidden`', () => {
-    const [region, ...otras] = regiones(paginas['/buscar/']);
+  it('`/buscar/` anuncia por una región que está desde la carga, vacía y sin `hidden`, y la de «Mostrar 30 más» va en la plantilla', () => {
+    /*
+     * Historia 27.5 — dos regiones, y ninguna más: la del recuento, fuera de la plantilla, y la del
+     * botón de la tanda siguiente, dentro de ella, que el guion pone con el botón detrás de la
+     * lista. Las dos vacías y sin `hidden`: lo que se anuncia es un cambio de contenido.
+     */
+    const html = paginas['/buscar/'];
+    const plantilla = /<template\b[^>]*>([\s\S]*?)<\/template>/.exec(html)?.[1] ?? '';
+    const fuera = html.replace(/<template\b[^>]*>[\s\S]*?<\/template>/g, '');
+    expect(regiones(html)).toHaveLength(2);
+    const [region, ...otras] = regiones(fuera);
     expect(region).toBeDefined();
     expect(otras).toEqual([]);
-    expect(region).not.toMatch(/\bhidden\b|aria-hidden/);
-    expect(paginas['/buscar/']).toMatch(/role="status"[^>]*><\/p>/);
+    expect(region).toMatch(/\bdata-estado\b/);
+    const [deLaTanda, ...masDentro] = regiones(plantilla);
+    expect(deLaTanda).toBeDefined();
+    expect(masDentro).toEqual([]);
+    expect(deLaTanda).toMatch(/\bdata-fallo-de-la-tanda\b/);
+    for (const r of [region, deLaTanda]) expect(r).not.toMatch(/\bhidden\b|aria-hidden/);
+    expect(fuera).toMatch(/role="status"[^>]*><\/p>/);
+    expect(plantilla).toMatch(/role="status"[^>]*><\/p>/);
   });
 
   it('el 404 no lleva ninguna isla —solo el arranque de la medición— ni necesita región de estado', () => {
