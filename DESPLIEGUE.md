@@ -1566,3 +1566,49 @@ familia y pone al lado lo indexado de la última lectura de la serie, pero las d
 las indexadas de una muestra no se puede decir si alguna es de las pedidas. El informe lo
 dice en pantalla en vez de insinuar lo contrario. Cerrarlo del todo exige que la lectura de
 §5 anote las rutas que muestreó, y eso está anotado como trabajo diferido.
+
+## 7. La matriz de dispositivos de la Épica 25 — Historias 25.3 y 25.7
+
+Lo compartido se juzga en teléfonos de verdad y con el Instagram del día, porque ningún
+navegador de escritorio ni emulador dice qué destinos ofrece la hoja del sistema ni qué hace
+Instagram con lo que recibe. Cada pasada se anota aquí con su fecha, el dispositivo y las
+versiones del sistema, del navegador y de Instagram. Las dos escriben a propósito en el D1 de
+producción: su jornada UTC y sus rutas van en `PASADAS_QUE_ESCRIBEN_EN_PRODUCCION`
+(`src/lib/umbrales.ts`), que la lectura de §3 descuenta y que este apartado cita y no copia.
+
+### Primera pasada, Historia 25.3 — sitio en vivo, sin nada de la rama
+
+**Android — 2026-10-29, hacia las 17:28–17:30 UTC.** Samsung Galaxy S24 FE (SM-S721B),
+Android 16, Chrome 150.0.7871.124, Instagram 449.0.0.52.84. Página de Cita
+`/cita/jose-marti-cultivo-una-rosa-blanca-en-junio-como/`, que admite Imagen. La pasada la
+condujo un agente por `adb` y las herramientas de depuración remota de Chrome, con Héctor al
+lado; el rótulo, la hoja y el menú de Instagram se leyeron de capturas de pantalla, y lo que
+la página entrega a la hoja y lo que recibe de vuelta, envolviendo `navigator.share` en la
+página antes de pulsar.
+
+- **Rótulo:** «Compartir como imagen». `canShare({ files })` es cierto (UX-DR73).
+- **Lo que llega a la hoja:** solo el fichero —`jose-marti-cultivo-una-rosa-blanca-en-junio-como.png`,
+  `image/png`, 71.739 bytes—, sin texto ni enlace.
+- **Instagram en la hoja:** al elegirlo despliega Mensajes, Feed, **Stories** y Reels.
+  **Android ofrece la Historia** al recibir solo un fichero desde la web. No se publicó nada.
+- **Cerrar la hoja** —atrás, con el menú de Instagram abierto y otra vez con la hoja—: la
+  promesa se rechaza con `AbortError` («Share canceled»), el diálogo sigue abierto, no hay
+  descarga, y la isla no registra la cancelación (`ImagenDeCita.astro`). Es lo que AD-7 da por hecho.
+- **Elegir un destino y no completar la entrega:** la promesa **se resuelve** en cuanto la hoja
+  entrega el fichero a la aplicación elegida, haga esta lo que haga después. Al elegir un
+  destino con la hoja abierta, Chrome abrió el manejador de historias de Instagram
+  (`StoryShareHandlerActivity`), que dejó Instagram en el inicio sin compositor y sin publicar,
+  y la página recibió éxito. En Android, por tanto, **un fallo o un abandono después de elegir
+  destino no llega a la página**: ni como `AbortError` ni como otro error, sino como entrega
+  hecha. No hubo caída en la descarga. Qué hacen ahí la Historia y la Imagen cuadrada lo decide
+  Héctor con la matriz completa delante, y entra como criterio de la 25.5 por
+  `bmad-correct-course` antes de construirla.
+- **En el D1 de producción**, jornada 2026-10-29 y esa ruta: `vista-de-cita` 1, `lectura` 1 y
+  `comparticion-de-imagen` (destino `opaco`) 3 en la lectura de las 17:3x UTC. La tabla no
+  guarda hora, así que no se separa lo de la pasada de lo de visitantes de verdad: la Cita era
+  la Cita del Día, y el descuento se lleva también lo de ellos esa jornada, como dice §3. Una
+  ruta de Cita que dio 404 por una errata al teclearla no dejó ningún registro y no se anota.
+
+**iOS — pendiente.** Falta la misma pasada en un iPhone con Safari y el Instagram del día:
+el rótulo, si Instagram ofrece «Historia», qué devuelve la entrega fallida y si la cuadrada
+cae en la descarga. Hasta entonces la 25.3 sigue en revisión y la 25.4 no empieza.
