@@ -147,13 +147,18 @@
  *         va), pinta campo, selectores, «Quitar los filtros», recuento y resultados con el ritmo
  *         `ahora`, sin recargar, y si lo resuelto no es lo leído reemplaza la entrada. Lo que no se
  *         puede usar lo dice `avisoDeLaDireccion` delante del recuento; sin nada con que buscar, la
- *         frase sola. Con Obra en lo leído, la resolución espera al mapa y a `filters()`; si no
- *         llegan, no se busca, no se dice nada y no se escribe (27.7);
+ *         frase sola. Con Obra en lo leído, la resolución espera al mapa y a `filters()` —mientras,
+ *         el campo y los selectores de Autor y de Tema que se pueden juzgar ya se ven, y un gesto
+ *         parte de ellos—; si no llegan, no se busca, no se dice nada y no se escribe (27.7). Una
+ *         llegada deja sin efecto la búsqueda de la entrada que se dejó que aún estuviera en vuelo;
  *       - `popstate` juzga lo ya registrado solo por la marca de su entrada: Navigation Timing
- *         describe la carga del documento, no la entrada a la que se vuelve. Un `popstate` que no
- *         cambia la búsqueda de la dirección —un salto de ancla, como «Saltar al contenido»— no es
- *         una llegada: no se repinta ni se anuncia nada. Mientras una llegada busca, lo que se veía
- *         es de la entrada que se dejó y no se asienta en la nueva.
+ *         describe la carga del documento, no la entrada a la que se vuelve. Un `popstate` que cambia
+ *         el fragmento y no la búsqueda (comparada como estado, no como cadena) —un salto de ancla,
+ *         como «Saltar al contenido»— no es una llegada: no se repinta ni se anuncia nada, y su
+ *         entrada se marca si dice lo que se ve y ya se emitió. Dos entradas seguidas con la misma
+ *         búsqueda y el mismo fragmento —el mismo control puede reemplazar la suya por la de antes—
+ *         sí son una llegada: cancelan lo pendiente y no se escribe sobre la otra. Mientras una
+ *         llegada busca, lo que se veía es de la entrada que se dejó y no se asienta en la nueva.
  *   · La búsqueda que no corre —el índice no carga, o `init`, `search` o los datos de un
  *     resultado fallan— no pinta, no cambia el estado que se ve y no deja ninguna promesa rechazada
  *     sin manejar; no se asienta. La siguiente vuelve a pedir el índice, también con el mismo estado
@@ -489,8 +494,16 @@ const { autores, temas } = Astro.props;
     let estadoVisto: EstadoDeLaBusqueda | null = null;
     /** La llegada en curso: un gesto o una llegada posterior la dejan sin efecto si espera datos. */
     let llegada = 0;
-    /** Historia 27.4 — la búsqueda de la dirección de la entrada actual, para reconocer un salto de ancla. */
-    let busquedaDeLaEntrada = location.search;
+    /**
+     * Historia 27.4 — la búsqueda (como estado, no como cadena) y el fragmento de la dirección de la
+     * entrada actual: un salto de ancla cambia el fragmento y no la búsqueda.
+     */
+    let busquedaDeLaEntrada = estadoDeLaDireccion(location.search);
+    let anclaDeLaEntrada = location.hash;
+    const recordarLaEntrada = () => {
+      busquedaDeLaEntrada = estadoDeLaDireccion(location.search);
+      anclaDeLaEntrada = location.hash;
+    };
 
     const obraEnElDom = () => compuestoPara !== null;
     const elegidos = (): FiltrosElegidos => ({
@@ -751,7 +764,7 @@ const { autores, temas } = Astro.props;
       } catch {
         return false;
       }
-      busquedaDeLaEntrada = location.search;
+      recordarLaEntrada();
       controlDeLaEntrada = control;
       return true;
     }
@@ -763,7 +776,7 @@ const { autores, temas } = Astro.props;
       } catch {
         return false;
       }
-      busquedaDeLaEntrada = location.search;
+      recordarLaEntrada();
       return true;
     }
 
@@ -1000,10 +1013,13 @@ const { autores, temas } = Astro.props;
       gesto();
       const mia = llegada;
       controlDeLaEntrada = null;
-      // Lo que se veía es de la entrada que se dejó: hasta que la llegada pinte, no hay nada asentable.
+      // Lo que se veía es de la entrada que se dejó: hasta que la llegada pinte, no hay nada asentable,
+      // y una búsqueda suya aún en vuelo ya no pinta.
       visto = null;
       estadoVisto = null;
       controlDelVisto = null;
+      turno++;
+      ultima = null;
       if (estadoSinNada(leido)) {
         resolverYBuscar(leido, null, tipo);
         return;
@@ -1015,9 +1031,12 @@ const { autores, temas } = Astro.props;
         datos.then(componerObra).catch(() => {});
         return;
       }
+      // Mientras llegan los datos, el campo y los selectores de Autor y de Tema que se pueden juzgar
+      // ya se ven: un gesto en la espera parte de ellos, no de un campo vacío.
+      ponerEstado({ ...leido, obra: '' });
       datos
         .then((d) => {
-          if (mia !== llegada) return;
+          if (mia !== llegada) return void componerObra();
           if (d) resolverYBuscar(leido, d, tipo);
           else sinDatos(leido);
         })
@@ -1025,14 +1044,22 @@ const { autores, temas } = Astro.props;
     }
 
     // `popstate` lee el objeto de la entrada y, sin él, la dirección. Nunca Navigation Timing. Un
-    // `popstate` que no cambia la búsqueda de la dirección es un salto de ancla: no es una llegada.
+    // `popstate` que cambia el fragmento y no la búsqueda es un salto de ancla: no es una llegada, y
+    // su entrada se marca si dice lo que se ve y ya se emitió. Dos entradas seguidas con la misma
+    // búsqueda y el mismo fragmento sí son una llegada.
     addEventListener('popstate', () => {
-      if (location.search === busquedaDeLaEntrada) {
+      const leida = estadoDeLaDireccion(location.search);
+      if (location.hash !== anclaDeLaEntrada && mismoEstado(leida, busquedaDeLaEntrada)) {
+        anclaDeLaEntrada = location.hash;
         controlDeLaEntrada = null;
+        if (visto && estadoVisto && mismoEstado(estadoVisto, leida) && hechos.includes(A.clave(visto.texto, visto.filtros, visto.valores))) asentar();
         return;
       }
-      busquedaDeLaEntrada = location.search;
-      llegar(estadoDeLaEntrada(history.state) ?? estadoDeLaDireccion(location.search));
+      recordarLaEntrada();
+      llegar(estadoDeLaEntrada(history.state) ?? leida);
+    });
+    addEventListener('hashchange', () => {
+      anclaDeLaEntrada = location.hash;
     });
 
     // La carga: tras una microtarea, para que al evaluarse el guion no se escriba ni se mida nada.

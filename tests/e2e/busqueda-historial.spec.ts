@@ -133,6 +133,16 @@ const balizas = (page: Page) =>
 const busquedas = async (page: Page) => (await medidos(page)).filter((m) => m[0] === EVENTOS.busqueda).map((m) => m[2]);
 const salidas = async (page: Page) => (await balizas(page)).filter((b) => b.evento === EVENTOS.salidaInterna);
 
+/** Cuántos resultados pinta una búsqueda: una tanda (la isla corta en 30 hasta «Mostrar 30 más», 27.5). */
+const TANDA = 30;
+
+/**
+ * Deja correr una vuelta del bucle de la página: lo que una tecla dispara —el envío, su búsqueda ya
+ * pintada y el asentamiento en sus microtareas— ya ha corrido. Sustituye a esperar un rato fijo
+ * antes de afirmar que **no** se emitió nada: la búsqueda que se ve ya está pintada (`seVe`).
+ */
+const unaVuelta = (page: Page) => page.evaluate(() => new Promise((listo) => setTimeout(() => setTimeout(listo, 0), 0)));
+
 /** El Autor y el Tema de su cruce con más Citas que quepan en una tanda, con sus nombres y recuentos. */
 async function elCruce() {
   const conjunto = conjuntoDeLosDatos(await leerDatosDelCorpus(rutasDelCorpus(join(RAIZ, 'corpus'))));
@@ -141,12 +151,16 @@ async function elCruce() {
   for (const [, deCita] of filtros.porCita) {
     for (const tema of deCita.temas) cruces.set(`${deCita.autor}|${tema}`, (cruces.get(`${deCita.autor}|${tema}`) ?? 0) + 1);
   }
-  const [clave, cuantas] = [...cruces.entries()]
-    .filter(([, n]) => n <= 30)
+  // Solo los cruces cuyo Tema se ofrece en el selector (publicado): uno sin opción no se elige.
+  const elegido = [...cruces.entries()]
+    .filter(([clave, n]) => n <= TANDA && filtros.temas.some((t) => t.valor === clave.split('|')[1]))
     .sort((a, b) => b[1] - a[1] || (a[0] < b[0] ? -1 : 1))[0];
+  if (!elegido) throw new Error(`El Corpus no tiene ningún cruce de Autor y Tema ofrecido con ${TANDA} Citas o menos.`);
+  const [clave, cuantas] = elegido;
   const [autor, tema] = clave.split('|');
-  const deAutor = filtros.autores.find((a) => a.valor === autor)!;
-  const deTema = filtros.temas.find((t) => t.valor === tema)!;
+  const deAutor = filtros.autores.find((a) => a.valor === autor);
+  const deTema = filtros.temas.find((t) => t.valor === tema);
+  if (!deAutor || !deTema) throw new Error(`El cruce ${clave} no está entre las opciones de la búsqueda.`);
   return {
     autor,
     tema,
@@ -199,7 +213,7 @@ async function recorrer(page: Page, volver: () => Promise<void>) {
   await direccion(page, ambos);
   await seVe(page, cruce.autor, cruce.tema, cruce.conTema);
   await page.locator('[data-consulta]').press('Enter');
-  await page.waitForTimeout(400);
+  await unaVuelta(page);
   expect(await busquedas(page)).toEqual([COMBINACION.autorTema]);
 
   // Atrás otra vez, en el mismo documento: el estado de solo el Autor, repintado sin recargar.
@@ -227,7 +241,7 @@ async function recorrer(page: Page, volver: () => Promise<void>) {
   await direccion(page, ambos);
   await seVe(page, cruce.autor, cruce.tema, cruce.conTema);
   await page.locator('[data-consulta]').press('Enter');
-  await page.waitForTimeout(400);
+  await unaVuelta(page);
   expect(await busquedas(page)).toEqual([COMBINACION.autorTema, COMBINACION.autor]);
 
   // Otro resultado tras volver: otra salida, contada aparte, y ninguna `busqueda` más.
@@ -273,7 +287,7 @@ test.describe('Historia 27.4 — «atrás» devuelve la búsqueda, con la caché
     await page.reload();
     await seVe(page, cruce.autor, '', cruce.soloAutor);
     await page.locator('[data-consulta]').press('Enter');
-    await page.waitForTimeout(400);
+    await unaVuelta(page);
     expect(await busquedas(page)).toEqual([COMBINACION.autor]);
   });
 

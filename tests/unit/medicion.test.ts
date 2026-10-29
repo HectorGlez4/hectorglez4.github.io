@@ -5428,6 +5428,13 @@ describe('Historia 23.8 — una búsqueda cuenta una vez, cuando se asienta', ()
         resuelta.ocultar();
         expect(resuelta.emitidos()).toEqual([]);
         if ('estado' in opciones) expect(plano(resuelta.estadoDelHistorial())).toEqual({ [MARCA]: true, [CLAVE_DEL_ESTADO_EN_LA_ENTRADA]: { q: 'viento' } });
+        // Con Obra, la llegada espera a los datos y resuelve por otro camino: tampoco asienta otra.
+        const conObra = await isla({ ...CON_OBRAS, ...opciones, busqueda: `?q=viento&autor=jose-marti&obra=${MAESTROS}` });
+        expect(conObra.obra().valor).toBe(MAESTROS);
+        await conObra.enviar();
+        conObra.pulsarResultado(0);
+        conObra.ocultar();
+        expect(conObra.emitidos()).toEqual([]);
       }, 240_000);
 
       it('caché de atrás y adelante con filtros: restaurar no reemite, otro resultado tampoco', async () => {
@@ -5542,16 +5549,32 @@ describe('Historia 23.8 — una búsqueda cuenta una vez, cuando se asienta', ()
         expect(entorno.emitidos()).toEqual([VIENTO]);
       }, 240_000);
 
-      it('un gesto mientras la llegada con Obra espera sus datos gana: la llegada tardía no pinta ni pisa lo tecleado', async () => {
+      it('mientras la llegada con Obra espera sus datos, el campo y los selectores que se pueden juzgar ya se ven', async () => {
+        const entorno = await isla({ ...CON_OBRAS, mapaManual: true, busqueda: `?q=vida&autor=jose-marti&obra=${MAESTROS}&tema=la-prudencia` });
+        expect(busquedas(entorno)).toEqual([]);
+        expect(entorno.valor()).toBe('vida');
+        expect(entorno.elegidos()).toEqual({ autor: 'jose-marti', tema: 'la-prudencia' });
+        expect(entorno.quitarVisible()).toBe(true);
+        expect(entorno.obra().enElDom).toBe(false);
+        expect(entorno.historial()).toEqual([]);
+        await entorno.responderAlMapa();
+        expect(entorno.obra().valor).toBe(MAESTROS);
+        expect(entorno.elegidos()).toEqual({ autor: 'jose-marti', tema: 'la-prudencia' });
+        expect(entorno.historial()).toEqual([]);
+      }, 240_000);
+
+      it('un gesto mientras la llegada con Obra espera sus datos gana: parte de lo pintado, y la llegada tardía no pinta ni lo pisa', async () => {
         const entorno = await isla({ ...CON_OBRAS, mapaManual: true, busqueda: `?q=vida&autor=jose-marti&obra=${MAESTROS}` });
         expect(busquedas(entorno)).toEqual([]);
         await teclearYEsperar(entorno, 'viento');
         await entorno.responderAlMapa();
         expect(entorno.valor()).toBe('viento');
-        expect(entorno.elegidos()).toEqual({ autor: '', tema: '' });
+        expect(entorno.elegidos()).toEqual({ autor: 'jose-marti', tema: '' });
+        // La Obra no se elige —el gesto ganó—, pero su selector aparece para el Autor vigente.
+        expect(entorno.obra().enElDom).toBe(true);
         expect(entorno.obra().valor).toBe('');
-        expect(entorno.region().texto).toBe('3 resultados.');
-        expect(escritas(entorno)).toEqual([['pushState', '/buscar/?q=viento']]);
+        expect(entorno.region().texto).toBe('222 citas de José Martí con «viento».');
+        expect(escritas(entorno)).toEqual([['pushState', '/buscar/?q=viento&autor=jose-marti']]);
       }, 240_000);
 
       it('«atrás» a una entrada con Obra aún sin datos y «adelante» antes de que lleguen: gana la llegada de después', async () => {
@@ -5561,11 +5584,12 @@ describe('Historia 23.8 — una búsqueda cuenta una vez, cuando se asienta', ()
         expect(busquedas(entorno)).toHaveLength(1);
         await entorno.adelante();
         await entorno.responderAlMapa();
-        expect(entorno.direccion()).toBe('/buscar/?q=viento');
+        expect(entorno.direccion()).toBe('/buscar/?q=viento&autor=jose-marti');
         expect(entorno.valor()).toBe('viento');
-        expect(entorno.elegidos()).toEqual({ autor: '', tema: '' });
-        expect(entorno.region().texto).toBe('3 resultados.');
-        expect(escritas(entorno)).toEqual([['pushState', '/buscar/?q=viento']]);
+        expect(entorno.elegidos()).toEqual({ autor: 'jose-marti', tema: '' });
+        expect(entorno.obra().valor).toBe('');
+        expect(entorno.region().texto).toBe('222 citas de José Martí con «viento».');
+        expect(escritas(entorno)).toEqual([['pushState', '/buscar/?q=viento&autor=jose-marti']]);
         expect(entorno.longitud()).toBe(2);
       }, 240_000);
 
@@ -5592,6 +5616,125 @@ describe('Historia 23.8 — una búsqueda cuenta una vez, cuando se asienta', ()
         expect(entorno.historial()).toHaveLength(escrituras);
         expect(entorno.longitud()).toBe(3);
         expect(entorno.direccion()).toBe('/buscar/?q=lluvia');
+      }, 240_000);
+
+      it('dos entradas seguidas con la misma búsqueda son una llegada: «atrás» con lo tecleado pendiente lo cancela y no escribe sobre la otra', async () => {
+        const entorno = await isla();
+        await teclearYEsperar(entorno, 'vida');
+        await entorno.enviar();
+        await teclearYEsperar(entorno, 'vida y');
+        // El mismo control reemplaza su entrada por la búsqueda de la anterior: dos iguales seguidas.
+        await teclearYEsperar(entorno, 'vida');
+        expect(escritas(entorno).slice(-2)).toEqual([
+          ['pushState', '/buscar/?q=vida+y'],
+          ['replaceState', '/buscar/?q=vida'],
+        ]);
+        expect(entorno.longitud()).toBe(3);
+        entorno.escribir('vida muerte');
+        entorno.avanzar(150);
+        await entorno.vaciar();
+        const escrituras = entorno.historial().length;
+        await entorno.atras();
+        expect(entorno.valor()).toBe('vida');
+        entorno.avanzar(PAUSA_DE_TECLEO_MS * 2);
+        await entorno.vaciar();
+        expect(entorno.historial()).toHaveLength(escrituras);
+        expect(entorno.posicion()).toBe(1);
+        expect(entorno.longitud()).toBe(3);
+        await entorno.adelante();
+        expect(entorno.direccion()).toBe('/buscar/?q=vida');
+        expect(entorno.posicion()).toBe(2);
+      }, 240_000);
+
+      it('el salto de ancla se reconoce por el fragmento y por la búsqueda como estado —`de` no cuenta—, también sin `popstate` al saltar', async () => {
+        // Con `de` en la dirección de la llegada (el fichero de medición la quita después), la búsqueda es la misma.
+        const entorno = await isla({ busqueda: '?q=vida+feliz&de=instagram' });
+        const buscadas = busquedas(entorno).length;
+        await entorno.saltarAlAncla('contenido', { soloHashchange: true });
+        await entorno.atras();
+        await entorno.adelante();
+        expect(busquedas(entorno)).toHaveLength(buscadas);
+        expect(entorno.historial()).toEqual([]);
+      }, 240_000);
+
+      it('volver de un ancla a la entrada de al lado marca esa entrada si dice lo que se ve y ya se emitió: recargarla no lo reemite', async () => {
+        const entorno = await isla();
+        await teclearYEsperar(entorno, 'viento');
+        await entorno.saltarAlAncla('contenido');
+        // Se asienta en la entrada del ancla, sin objeto: se marca ella al emitir.
+        entorno.pulsarResultado(0);
+        expect(entorno.emitidos()).toEqual([VIENTO]);
+        expect(plano(entorno.entrada(1).estado)).toEqual({ [CLAVE_DEL_ESTADO_EN_LA_ENTRADA]: { q: 'viento' } });
+        const buscadas = busquedas(entorno).length;
+        await entorno.atras();
+        expect(busquedas(entorno)).toHaveLength(buscadas);
+        const estado = plano(entorno.estadoDelHistorial());
+        expect(estado).toEqual({ [CLAVE_DEL_ESTADO_EN_LA_ENTRADA]: { q: 'viento' }, [MARCA]: true });
+        const recargada = await isla({ busqueda: '?q=viento', estado, navegacion: 'reload' });
+        await recargada.enviar();
+        recargada.ocultar();
+        expect(recargada.emitidos()).toEqual([]);
+      }, 240_000);
+
+      it('«atrás» a una entrada con Obra deja sin efecto la búsqueda que seguía en vuelo: ni pinta ni se asienta en la entrada a la que se vuelve', async () => {
+        const entorno = await isla({ ...CON_OBRAS, manual: true, mapaManual: true, busqueda: `?q=vida&autor=jose-marti&obra=${MAESTROS}` });
+        entorno.escribir('viento');
+        entorno.avanzar(PAUSA_DE_TECLEO_MS);
+        await entorno.vaciar();
+        expect(escritas(entorno)).toEqual([['pushState', '/buscar/?q=viento&autor=jose-marti']]);
+        const escrituras = entorno.historial().length;
+        await entorno.atras();
+        await entorno.responder('viento');
+        expect(entorno.pintados()).toEqual([]);
+        entorno.ocultar();
+        expect(entorno.historial()).toHaveLength(escrituras);
+        expect(entorno.longitud()).toBe(2);
+        expect(entorno.posicion()).toBe(0);
+        expect(entorno.emitidos()).toEqual([]);
+        entorno.mostrar();
+        await entorno.responderAlMapa();
+        await entorno.responder('vida');
+        expect(entorno.obra().valor).toBe(MAESTROS);
+        expect(entorno.valor()).toBe('vida');
+        expect(entorno.direccion()).toBe(`/buscar/?q=vida&autor=jose-marti&obra=${MAESTROS}`);
+      }, 240_000);
+
+      it('«Quitar los filtros» abre su entrada al momento; «atrás» devuelve los filtros, y teclear después abre otra', async () => {
+        const entorno = await isla({ ...CON_OBRAS });
+        await elegirYEsperar(entorno, 'autor', 'jose-marti');
+        await elegirYEsperar(entorno, 'tema', 'la-prudencia');
+        const largo = entorno.longitud();
+        entorno.quitarFiltros();
+        expect(escritas(entorno).at(-1)).toEqual(['pushState', '/buscar/']);
+        expect(entorno.longitud()).toBe(largo + 1);
+        await entorno.vaciar();
+        await teclearYEsperar(entorno, 'vida');
+        expect(escritas(entorno).at(-1)).toEqual(['pushState', '/buscar/?q=vida']);
+        expect(entorno.longitud()).toBe(largo + 2);
+        await entorno.atras();
+        await entorno.atras();
+        expect(entorno.elegidos()).toEqual({ autor: 'jose-marti', tema: 'la-prudencia' });
+        expect(entorno.quitarVisible()).toBe(true);
+        expect(entorno.region().texto).toBe('8 citas de José Martí sobre la prudencia.');
+      }, 240_000);
+
+      it('el selector de Obra escribe como los demás: abre entrada al cumplirse su pausa, y las flechas sobre él la reemplazan', async () => {
+        const entorno = await isla({ ...CON_OBRAS });
+        await elegirYEsperar(entorno, 'autor', 'jose-marti');
+        expect(entorno.obra().enElDom).toBe(true);
+        entorno.elegir('obra', MAESTROS);
+        entorno.avanzar(100);
+        entorno.elegir('obra', 'jose-marti--cartas');
+        entorno.avanzar(PAUSA_DE_LOS_SELECTORES_MS);
+        await entorno.vaciar();
+        expect(escritas(entorno)).toEqual([
+          ['pushState', '/buscar/?autor=jose-marti'],
+          ['pushState', '/buscar/?autor=jose-marti&obra=jose-marti--cartas'],
+        ]);
+        await elegirYEsperar(entorno, 'obra', MAESTROS);
+        expect(escritas(entorno).at(-1)).toEqual(['replaceState', `/buscar/?autor=jose-marti&obra=${MAESTROS}`]);
+        expect(entorno.longitud()).toBe(3);
+        expect(plano(entorno.estadoDelHistorial())).toEqual({ [CLAVE_DEL_ESTADO_EN_LA_ENTRADA]: { autor: 'jose-marti', obra: MAESTROS } });
       }, 240_000);
     });
   });

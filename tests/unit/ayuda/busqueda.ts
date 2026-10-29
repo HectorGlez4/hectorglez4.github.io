@@ -532,12 +532,17 @@ export function islaDeBusquedaEnUnSandbox(guion: string, opciones: OpcionesDeLaI
       actual = entradas.length - 1;
     },
   };
-  /** Cambia de entrada, como «atrás» o «adelante» sin la caché, y despacha `popstate` con su objeto. */
+  /**
+   * Cambia de entrada, como «atrás» o «adelante» sin la caché, y despacha `popstate` con su objeto
+   * y, si cambia el fragmento, `hashchange` después, como el navegador.
+   */
   const irA = (paso: number) => {
     const destino = actual + paso;
     if (destino < 0 || destino >= entradas.length) throw new Error(`no hay entrada ${destino} en el historial`);
+    const ancla = entrada().direccion.hash;
     actual = destino;
     despachar(deLaVentana, 'popstate', { type: 'popstate', state: entrada().estado });
+    if (entrada().direccion.hash !== ancla) despachar(deLaVentana, 'hashchange', { type: 'hashchange' });
   };
 
   // `now()` da el reloj fingido: la pausa del recuento de lo tecleado cuenta desde la última tecla.
@@ -749,17 +754,24 @@ export function islaDeBusquedaEnUnSandbox(guion: string, opciones: OpcionesDeLaI
     },
     /**
      * Un salto de ancla —el enlace «Saltar al contenido»—, como lo hace el navegador: una entrada
-     * nueva con la misma dirección y otro fragmento, sin objeto, y `popstate`.
+     * nueva con la misma dirección y otro fragmento, sin objeto, y `popstate` y `hashchange`. Con
+     * `soloHashchange`, sin `popstate`, como el navegador que no lo despacha al saltar.
      */
-    saltarAlAncla: async (ancla: string) => {
+    saltarAlAncla: async (ancla: string, { soloHashchange = false } = {}) => {
       const direccion = new URL(entrada().direccion);
       direccion.hash = ancla;
       entradas.splice(actual + 1);
       entradas.push({ estado: null, direccion });
       actual = entradas.length - 1;
-      despachar(deLaVentana, 'popstate', { type: 'popstate', state: null });
+      if (!soloHashchange) despachar(deLaVentana, 'popstate', { type: 'popstate', state: null });
+      despachar(deLaVentana, 'hashchange', { type: 'hashchange' });
       await vaciar();
     },
+    /** La entrada actual: su objeto y su dirección, por posición (desde 0). */
+    entrada: (posicion = actual) => ({
+      estado: entradas[posicion]?.estado,
+      direccion: entradas[posicion] ? entradas[posicion].direccion.pathname + entradas[posicion].direccion.search + entradas[posicion].direccion.hash : undefined,
+    }),
     /** Lo que la isla no debe hacer nunca: abrir entradas, escribir la dirección, parar la propagación. */
     violaciones: () => [...violaciones],
     /** Las promesas rechazadas sin manejar desde que se abrió el entorno. */

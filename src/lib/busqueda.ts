@@ -383,8 +383,9 @@ export interface LoQueSePuedeElegir {
  * fijo**:
  *
  *   1. se descarta, contando uno por cada uno, el `autor` que no es opción del selector de Autor,
- *      el `tema` que no es opción del de Tema y la `obra` que no es ofrecible (sin Autor en
- *      `autorDeLaObra`);
+ *      el `tema` que no es opción del de Tema y la `obra` que no es ofrecible: sin Autor en
+ *      `autorDeLaObra`, o con un Autor del mapa que no es opción del selector de Autor (un mapa y
+ *      un selector de construcciones distintas);
  *   2. una `obra` sin `autor` toma el Autor de la Obra;
  *   3. un `autor` y una `obra` que no casan: se descarta la `obra` (uno más).
  *

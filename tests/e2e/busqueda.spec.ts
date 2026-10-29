@@ -1863,6 +1863,71 @@ test.describe('Historia 27.4 — la búsqueda vive en la dirección, y «atrás�
     expect(await page.locator('main img[src="x"]').count()).toBe(0);
   });
 
+  test('lo hostil de la dirección vuelve como texto dentro del recuento: «… con «<img…>».»', async ({ page }) => {
+    test.setTimeout(60_000);
+    const { a } = await datos();
+    const hostil = '<img src=x onerror="window.__hostil=1">';
+    // El índice de verdad no encuentra lo hostil: este, servido en su lugar, da una Cita a todo.
+    await page.route('**/pagefind/pagefind.js', (ruta) =>
+      ruta.fulfill({
+        contentType: 'text/javascript',
+        body: [
+          'export async function init() {}',
+          'export async function options() {}',
+          'export async function destroy() {}',
+          'export async function filters() { return { obra: {} }; }',
+          "export async function search() { return { results: [{ data: async () => ({ url: '/cita/una/', meta: { title: 'Una cita' }, filters: { tipo: ['cita'] } }) }] }; }",
+        ].join('\n'),
+      }),
+    );
+    await page.goto(`${RUTA}?q=${encodeURIComponent(hostil)}&autor=${a.slug}`);
+    await expect(page.locator(CAMPO)).toHaveValue(hostil);
+    await expect(page.locator(ESTADO)).toHaveText(fraseDelRecuento({ total: 1, texto: hostil, autor: a.nombre }), { timeout: 10_000 });
+    expect(await page.locator(ESTADO).textContent()).toContain(`«${hostil}»`);
+    expect(await page.locator(`${ESTADO} *`).count()).toBe(0);
+    await page.waitForTimeout(300);
+    expect(await page.evaluate(() => (window as unknown as { __hostil?: number }).__hostil)).toBeUndefined();
+    expect(await page.locator('main img[src="x"]').count()).toBe(0);
+  });
+
+  test('las flechas sobre un selector tras su pausa reemplazan su entrada: una sola más', async ({ page }) => {
+    test.setTimeout(60_000);
+    const { a, otro } = await datos();
+    await page.goto(RUTA);
+    const antes = await entradas(page);
+    await page.locator(AUTOR).selectOption(a.slug);
+    await direccion(page, `?autor=${a.slug}`);
+    await page.locator(AUTOR).selectOption(otro.slug);
+    await direccion(page, `?autor=${otro.slug}`);
+    expect(await entradas(page)).toBe(antes + 1);
+  });
+
+  test('dos entradas seguidas con la misma búsqueda: «atrás» con lo tecleado aún en su pausa vuelve a la de antes y no la pisa', async ({ page }) => {
+    test.setTimeout(60_000);
+    await page.goto(RUTA);
+    const antes = await entradas(page);
+    await page.locator(CAMPO).fill('vida');
+    await direccion(page, '?q=vida');
+    await page.locator(CAMPO).press('Enter');
+    await page.locator(CAMPO).fill('vida y');
+    await direccion(page, '?q=vida+y');
+    // El mismo control reemplaza su entrada por la búsqueda de la anterior: dos iguales seguidas.
+    await page.locator(CAMPO).fill('vida');
+    await direccion(page, '?q=vida');
+    expect(await entradas(page)).toBe(antes + 2);
+    await page.locator(CAMPO).fill('vida muerte');
+    await page.goBack({ waitUntil: 'commit' });
+    await expect(page.locator(CAMPO)).toHaveValue('vida');
+    await page.waitForTimeout(PAUSA_DE_TECLEO_MS + 300);
+    expect(new URL(page.url()).search).toBe('?q=vida');
+    expect(await entradas(page)).toBe(antes + 2);
+    await expect(page.locator(CAMPO)).toHaveValue('vida');
+    // La de después sigue ahí.
+    await page.goForward({ waitUntil: 'commit' });
+    await direccion(page, '?q=vida');
+    expect(await entradas(page)).toBe(antes + 2);
+  });
+
   test('llegar desde «Buscar «x» en las citas» de un Directorio busca lo tecleado, sin escribir en el historial', async ({ page }) => {
     test.setTimeout(60_000);
     await page.goto(rutaDelDirectorioDeAutores());

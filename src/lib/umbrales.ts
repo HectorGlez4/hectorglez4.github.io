@@ -591,13 +591,17 @@ export const MAX_BYTES_GUION_DEL_FILTRO = 3915;
  * (`avisoDeLaDireccion`), la decisión de cada escritura (`escrituraDelHistorial`), la llegada
  * común a la carga y a `popstate` y la escritura que se adelanta al asentar: **15.087 bytes**
  * (2026-10-29) —14.535 del fichero de entrada y 552 del trozo, que no cambia (el del filtro
- * tampoco)—. Tope: 15.087 más unos 400. Tras la revisión de la 27.4 —la marca en toda entrada
- * con objeto que dice lo que se ve, el reemplazo de la entrada de una llegada al asentar, el salto
- * de ancla que no es llegada y la llegada que deja sin asentar lo de la entrada que se dejó— mide
- * **15.425 bytes** (2026-10-29): 14.873 del fichero de entrada y 552 del trozo, que no cambia.
- * Tope, con la misma regla: 15.425 más unos 400.
+ * tampoco)— (el tope de entonces, 15.087 más unos 400, ya no rige). Tras la primera revisión de la
+ * 27.4 —la marca en toda entrada con objeto que dice lo que se ve, el reemplazo de la entrada de
+ * una llegada al asentar, el salto de ancla que no es llegada y la llegada que deja sin asentar lo
+ * de la entrada que se dejó— mide **15.425 bytes** (2026-10-29): 14.873 del fichero de entrada y
+ * 552 del trozo (el tope de entonces, 15.825, tampoco rige). Tras la segunda —el salto de ancla
+ * reconocido por el fragmento y la búsqueda como estado, la entrada del ancla que se marca, la
+ * llegada que deja sin efecto la búsqueda en vuelo y la que pinta campo y selectores mientras
+ * espera los datos de su Obra— mide **15.651 bytes** (2026-10-29): 15.099 del fichero de entrada y
+ * 552 del trozo, que no cambia. **Tope vigente**, con la misma regla: 15.651 más unos 400.
  */
-export const MAX_BYTES_GUION_DE_LA_BUSQUEDA = 15825;
+export const MAX_BYTES_GUION_DE_LA_BUSQUEDA = 16051;
 
 /**
  * La pausa de tecleo, en milisegundos — AD-9, UX-DR58, UX-DR86, Historia 26.6.
