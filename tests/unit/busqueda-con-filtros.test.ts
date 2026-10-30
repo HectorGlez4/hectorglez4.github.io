@@ -764,6 +764,13 @@ describe('Historia 27.2 — lo construido', () => {
     expect(html).not.toMatch(/<script\b[^>]*type="module"[^>]*>[^<]/u);
   });
 
+  it('NFR-7 — `/buscar/` no pide ninguna hoja de estilo: la suya va en línea, como la del Armazón', () => {
+    // Fuera, la hoja de la búsqueda bloqueaba la primera pintura (+360 ms de FCP en la puerta de la 27.9).
+    expect(html).not.toMatch(/<link\b[^>]*\brel="stylesheet"/u);
+    const enLinea = [...html.matchAll(/<style\b[^>]*>([\s\S]*?)<\/style>/gu)].map(([, cuerpo]) => cuerpo).join('\n');
+    expect(enLinea).toMatch(/\.quitar\b/u);
+  });
+
   it('pide el fichero de la búsqueda con `<script type="module" src>`, detrás del de medición, y el fichero existe', () => {
     const guiones = guionesEjecutables(html);
     const deMedicion = guiones.findIndex((g) => g.atributos.includes(rutaDelGuionDeMedicion(ENDPOINT)));
