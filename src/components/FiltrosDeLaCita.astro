@@ -1,0 +1,44 @@
+---
+/**
+ * Los filtros, el metadato `autor` y la clave de orden de una Página de Cita — Historia 27.1,
+ * FR-7, AD-11, AD-25.
+ *
+ * Es el **único** que los escribe, y solo lo usa `src/pages/cita/[slug].astro`: fuera de
+ * `BloqueDeCita` (y de su Atribución), de la Tarjeta de Obra y de toda Tarjeta de Cita, porque
+ * esos bloques se repiten en otras páginas y Pagefind recoge filtros y metadatos también dentro
+ * de un `data-pagefind-ignore` sin valor. Va dentro del `<main data-pagefind-body>` del armazón y
+ * nunca bajo un `data-pagefind-ignore="all"`, que sí los descartaría.
+ *
+ * - Los valores salen de `filtrosDeLaBusqueda` de `src/lib/publicado.ts`, la misma función que
+ *   compone las opciones de `/buscar/`: un elemento vacío por filtro (`autor`, `obra` si la Cita
+ *   tiene Obra, uno por Tema publicado).
+ * - La clave (`data-pagefind-sort`) la compone `clavesDeOrden` de `src/lib/obras.ts` y va en
+ *   toda Página de Cita: Pagefind saca de los resultados ordenados a la página que no la lleva.
+ * - El metadato `autor` va **por contenido** y no en el atributo (`autor:José Martí`), porque en
+ *   el atributo una coma del nombre lo partiría. Pesa 0 (`OPCIONES_DE_PAGEFIND`).
+ *
+ * El contenedor lleva `data-pagefind-ignore` sin valor, para que el nombre no puntúe como texto
+ * de la página —ya está en su Atribución—, y `hidden`, para que no se vea ni se lea: no es nada
+ * que el visitante tenga que encontrar aquí.
+ */
+import type { FiltrosDeCita } from '../lib/publicado.ts';
+import { FILTROS_DE_CITA, ORDEN_DE_CITA } from '../lib/tipoDeResultado.ts';
+
+interface Props {
+  filtros: FiltrosDeCita;
+  /** La clave de orden de la Cita, ya compuesta: ocho cifras. */
+  clave: string;
+  /** El nombre del Autor, tal como se lee. */
+  nombreDelAutor: string;
+}
+
+const { filtros, clave, nombreDelAutor } = Astro.props;
+---
+
+<div hidden data-pagefind-ignore>
+  <span data-pagefind-filter={`${FILTROS_DE_CITA.autor}:${filtros.autor}`}></span>
+  {filtros.obra !== undefined && <span data-pagefind-filter={`${FILTROS_DE_CITA.obra}:${filtros.obra}`}></span>}
+  {filtros.temas.map((tema) => <span data-pagefind-filter={`${FILTROS_DE_CITA.tema}:${tema}`}></span>)}
+  <span data-pagefind-sort={`${ORDEN_DE_CITA}:${clave}`}></span>
+  <span data-pagefind-meta="autor">{nombreDelAutor}</span>
+</div>

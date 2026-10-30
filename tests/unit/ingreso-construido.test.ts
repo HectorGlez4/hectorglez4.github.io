@@ -911,6 +911,9 @@ describe('Historia 17.5 — el tope de guion, con todo encendido donde se admite
     }
     // Con la medición puesta, toda página que se visita pide al menos el fichero de medición.
     expect(pedidos).toBeGreaterThan(0);
+    // Historia 27.2 — y `/buscar/`, con los Modelos encendidos, sigue pidiendo su búsqueda por la
+    // entrada `busqueda` de la lista, no en línea.
+    expect(guionesExternosDe(paginas['buscar/index.html']).map((e) => guionExternoDe(e)?.id)).toContain('busqueda');
   });
 
   it('y el contador de guion cuenta bytes de guion, no el ld+json ni lo que se descarga', () => {

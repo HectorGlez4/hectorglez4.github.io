@@ -9,9 +9,11 @@
  * segundo ritmo, el del tecleo, vive aquí también: `ritmoDeTecleo`, más abajo (Historia 26.6).
  *
  * Hasta la 23.1 esto estaba escrito tres veces —en `CopiarCita`, en `ImagenDeCita` y en
- * `/buscar/`—, a mano y cada una a su manera. Ahora hay un solo dueño, y las tres islas lo
- * llevan dentro de su guion en línea como texto: componen el guion en el frontmatter con
- * `guionQueAnuncia`, que mete `String(anunciar)`, y lo insertan con `set:html`. Por eso la
+ * `/buscar/`—, a mano y cada una a su manera. Ahora hay un solo dueño. Las islas en línea lo
+ * llevan dentro de su guion como texto: componen el guion en el frontmatter con
+ * `guionQueAnuncia`, que mete `String(anunciar)`, y lo insertan con `set:html`. La de `/buscar/`
+ * dejó de ir en línea en la Historia 27.2: su guion es el `<script>` empaquetado de
+ * `Busqueda.astro`, que la importa (AD-6), como importa el segundo ritmo. Por eso la
  * función se escribe para que **su texto sea JavaScript válido y corto** una vez quitados los
  * tipos: sin importar nada, sin cierres sobre este módulo y sin comentarios dentro, que
  * viajarían a cada página y contarían en `MAX_BYTES_DE_GUION`. Que ningún guion en línea use `requestAnimationFrame`
@@ -79,23 +81,34 @@ export function guionQueAnuncia(constantes: Record<string, unknown>, cuerpo: str
  * hace para que lo repetido se oiga.
  *
  * `anunciar(texto)` reprograma la escritura con cada tecla; `vaciar()` la cancela y deja la
- * región vacía al momento, como al cargar: es lo que pasa al vaciar el campo.
+ * región vacía al momento, como al cargar: es lo que pasa al vaciar el campo. `anunciar(texto,
+ * espera)` escribe tras `espera` en vez de tras `pausa`: es el recuento de `/buscar/`, cuya
+ * búsqueda llega un rato después de la última tecla y espera solo lo que le falta a la pausa
+ * contada desde ella (Historia 27.2, revisión). `ahora(texto)`
+ * cancela lo programado y escribe al momento, también **solo si cambió** (Historia 27.2): es el
+ * recuento de `/buscar/` cuando lo provoca un selector, que ya esperó su propia pausa
+ * (`PAUSA_DE_LOS_SELECTORES_MS`) y no tiene que esperar otra.
  *
- * No viaja como texto, como `anunciar`: el guion del filtro es un `<script>` empaquetado y la
- * importa (AD-6), nunca por `define:vars`. Tampoco usa `requestAnimationFrame`, que la prueba de
- * `dist/` reserva a `anunciar`.
+ * No viaja como texto, como `anunciar`: los guiones del filtro y de la búsqueda son `<script>`
+ * empaquetados y la importan (AD-6), nunca por `define:vars`. Tampoco usa
+ * `requestAnimationFrame`, que la prueba de `dist/` reserva a `anunciar`.
  */
 export function ritmoDeTecleo(
   region: { textContent: string | null },
   pausa: number,
-): { anunciar(texto: string): void; vaciar(): void } {
+): { anunciar(texto: string, espera?: number): void; ahora(texto: string): void; vaciar(): void } {
   let espera: ReturnType<typeof setTimeout> | undefined;
+  const escribir = (texto: string) => {
+    if (region.textContent !== texto) region.textContent = texto;
+  };
   return {
-    anunciar(texto: string) {
+    anunciar(texto: string, tras = pausa) {
       clearTimeout(espera);
-      espera = setTimeout(() => {
-        if (region.textContent !== texto) region.textContent = texto;
-      }, pausa);
+      espera = setTimeout(() => escribir(texto), tras);
+    },
+    ahora(texto: string) {
+      clearTimeout(espera);
+      escribir(texto);
     },
     vaciar() {
       clearTimeout(espera);

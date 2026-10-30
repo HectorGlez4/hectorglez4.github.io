@@ -97,9 +97,15 @@ export default defineConfig({
        * regla por omisión. Lo vigila `tests/unit/obra-pagina.test.ts` («existe
        * `.enlace-en-tinta`»), que lee la regla en los `<style>` de la página: si el trozo
        * cambiara de nombre, volvería a salir a fichero y esa prueba se pondría en rojo.
+       *
+       * NFR-7, Épica 27 — la hoja de `/buscar/` va también en línea. Los selectores, el
+       * Recuento, «Quitar los filtros» y «Mostrar 30 más» la llevaron a 4.956 bytes, salió a
+       * `/_astro/buscar.*.css` y la primera pintura de la búsqueda pasó de 918 a 1.278 ms de
+       * media (puerta de la 27.9, 2026-10-30): la hoja bloquea el pintado y main no pedía
+       * ninguna. Es la hoja de una sola página, así que en línea no se repite en ninguna otra.
        */
       assetsInlineLimit: (fichero) =>
-        fichero.endsWith('.js') ? false : /(^|\/)Armazon\.[\w-]+\.css$/.test(fichero) ? true : undefined,
+        fichero.endsWith('.js') ? false : /(^|\/)(Armazon|buscar)\.[\w-]+\.css$/.test(fichero) ? true : undefined,
     },
   },
   integrations: [

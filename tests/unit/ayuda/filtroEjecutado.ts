@@ -1,7 +1,7 @@
-import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { createContext, runInContext } from 'node:vm';
 import { expect } from 'vitest';
+import { aplanar } from './aplanar.ts';
 import { normalizar } from '../../../src/lib/normalizar.ts';
 import {
   fraseDelFiltro,
@@ -358,11 +358,16 @@ function construir(html: string, directorio: DirectorioFiltrable): { documento: 
   return { documento, leido };
 }
 
-/** El fichero del guion del filtro que pide la página, leído del `dist/` de `proyecto`. */
+/**
+ * El guion del filtro que pide la página, del `dist/` de `proyecto`: su fichero con los trozos que
+ * importa, aplanado a guion clásico (`tests/unit/ayuda/aplanar.ts`). Desde la Historia 27.2 el
+ * filtro comparte con la búsqueda un trozo —los ritmos de `anuncio.ts` y los recuentos— que el
+ * empaquetado saca aparte.
+ */
 export function guionDelFiltro(proyecto: string, html: string): string {
   const src = /<script type="module" src="(\/_astro\/FiltroDelDirectorio[^"]+\.js)"/u.exec(html);
   expect(src, 'la página no pide el filtro').not.toBeNull();
-  return readFileSync(join(proyecto, 'dist', src![1]), 'utf8');
+  return aplanar(join(proyecto, 'dist'), src![1]);
 }
 
 /**
@@ -372,7 +377,7 @@ export function guionDelFiltro(proyecto: string, html: string): string {
  * reescribe igual.
  */
 export function comprobarFiltroEjecutado(html: string, guion: string, directorio: DirectorioFiltrable): void {
-  // Un solo fichero, sin importaciones: se ejecuta como guion clásico.
+  // Aplanado, sin importaciones: se ejecuta como guion clásico.
   expect(guion, 'el guion del filtro importa o exporta: el entorno no lo sabe ejecutar').not.toMatch(/^\s*(?:import|export)\b|\bimport\s*\(/mu);
   const { documento, leido } = construir(html, directorio);
 

@@ -8,16 +8,18 @@
  * la declaración de `src/lib/superficies.ts`. Una Obra que no se indexa es esta misma página,
  * sin marca ni aviso, con `noindex, follow` y fuera del sitemap y de Pagefind.
  *
- * Página 1: Cabecera con el salto «Dónde leer esta obra ↓» (Historia 24.7), Listado, Temas,
- * «Dónde leer esta obra» y, si la ficha la trae, su nota (Historia 22.6). Páginas 2+: solo
- * Cabecera, sin salto, y Listado, y `noindex` por forma. Nada de prosa compuesta (FR-51): ni
- * sinopsis, ni contexto, ni adjetivos; todo lo que se dice sale de hechos del Corpus, salvo la
- * nota, que escribe Héctor a mano.
+ * Página 1: Cabecera con el salto «Dónde leer esta obra ↓» (Historia 24.7), Listado, Paginación,
+ * «Buscar en esta obra» (Historia 27.8; debajo del listado desde la UX v8.4, decisión de Héctor del
+ * 2026-10-30), Temas, «Dónde leer esta obra» y, si la ficha la trae, su nota (Historia 22.6).
+ * Páginas 2+: solo Cabecera, sin salto, y Listado, y `noindex` por forma. Nada de prosa
+ * compuesta (FR-51): ni sinopsis, ni contexto, ni adjetivos; todo lo que se dice sale de hechos
+ * del Corpus, salvo la nota, que escribe Héctor a mano.
  *
  * El parámetro se llama `page` porque `paginate()` lo exige por nombre, como en la Página de
  * Autor; los dos segmentos públicos salen del nombre de la ficha (`segmentosDeObra`).
  */
 import Armazon from '../../../../components/Armazon.astro';
+import BuscarEn from '../../../../components/BuscarEn.astro';
 import Chips from '../../../../components/Chips.astro';
 import DondeLeer from '../../../../components/DondeLeer.astro';
 import Rotulo from '../../../../components/Rotulo.astro';
@@ -41,6 +43,7 @@ import {
 } from '../../../../lib/obras.ts';
 import { edicionesEnVenta, modelosEnRuta } from '../../../../lib/ingreso.ts';
 import { descripcionDeObra } from '../../../../lib/atribucion.ts';
+import { ROTULO_BUSCAR_EN_ESTA_OBRA } from '../../../../lib/busqueda.ts';
 import { CITAS_POR_PAGINA } from '../../../../lib/umbrales.ts';
 import { tituloDeObra } from '../../../../lib/marca.ts';
 import { rutaDeAutor, rutaDeTema } from '../../../../lib/superficies.ts';
@@ -177,6 +180,21 @@ const enVenta =
     <Paginacion pagina={pagina} zona="paginacion" />
 
     {
+      /*
+       * Historia 27.8, UX-DR94, UX-DR95 — «Buscar en esta obra», solo en la página 1 —se indexe la
+       * Obra o no, y con la familia congelada o sin congelar—, **debajo** del listado que filtra y
+       * de su paginación (UX v8.4, decisión de Héctor del 2026-10-30): encima echaba de la primera
+       * pantalla de 360 × 640 la primera Cita de las Obras de título largo. Va a 5 × `--unidad` de
+       * la paginación —o de la última tarjeta, sin ella— y Temas conserva su 5 ×, ahora medido
+       * desde el formulario. Lleva los dos filtros, el Autor y la Obra por el nombre de su ficha,
+       * que es su interfaz pública (nunca el título). Las 2+ no lo llevan.
+       */
+      primera && (
+        <BuscarEn id="buscar-en-esta-obra" rotulo={ROTULO_BUSCAR_EN_ESTA_OBRA} filtros={{ autor: autor.slug, obra: obra.nombre }} />
+      )
+    }
+
+    {
       primera && temas.length > 0 && (
         <section class="temas" aria-labelledby="temas-de-la-obra">
           <Rotulo id="temas-de-la-obra">Temas</Rotulo>
@@ -281,6 +299,17 @@ const enVenta =
     white-space: nowrap;
   }
 
+  /*
+   * Historia 27.8, UX-DR95 — «Buscar en esta obra», a 5 × `--unidad` de la paginación o, sin ella,
+   * de la última tarjeta: el margen es del formulario, así vale en los dos casos sin tocar
+   * `Paginacion.astro`, que comparten Autor, Tema y Colección. Va aquí, y no junto a `.temas`, que
+   * declara lo mismo: dos reglas iguales seguidas las funde el minificador en una sola lista de
+   * selectores, y la regla de `.temas` dejaría de existir por sí sola en la hoja emitida.
+   */
+  .pagina > :global(.buscar-en) {
+    margin-top: calc(var(--unidad) * 5);
+  }
+
   .listado {
     list-style: none;
     margin: calc(var(--unidad) * 4) 0 0;
@@ -288,7 +317,7 @@ const enVenta =
     border-top: var(--grosor-filete) solid var(--filete);
   }
 
-  /* UX-DR42 — 5 × `--unidad` de la paginación a «Temas». */
+  /* UX-DR42, UX-DR95 — 5 × `--unidad` a «Temas» desde lo que lo preceda: «Buscar en esta obra». */
   .temas {
     margin-top: calc(var(--unidad) * 5);
   }

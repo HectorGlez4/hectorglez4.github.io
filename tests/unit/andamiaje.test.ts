@@ -216,6 +216,10 @@ describe('AD-22 — la red vive solo en la cáscara exterior de tools/', () => {
       'tools/medicion.ts',
       'la cáscara que despliega y comprueba el receptor de la medición (Historia 23.2): envía con fetch las balizas de prueba al receptor y corre wrangler; lo que decide vive en tools/lib/medicion.ts, que no pide nada — el build no la invoca y ningún paso de CI la ejecuta (AD-14)',
     ],
+    [
+      'src/components/Busqueda.astro',
+      'el guion de /buscar/, que corre en el navegador del visitante y no en el build: al elegir un Autor pide al propio sitio, con fetch, el mapa de rótulos de las Obras que el build ya escribió en /buscar/obras.json (AD-11, Historia 27.3) — no recupera nada del Corpus ni sale del dominio',
+    ],
   ]);
 
   /*
@@ -325,11 +329,22 @@ describe('AD-22 — la red vive solo en la cáscara exterior de tools/', () => {
     expect(tieneLlamadaDeRed(readFileSync(resolve(raiz, ruta), 'utf8'))).toBe(true);
   });
 
-  it('no hay más excepciones que esas ocho', () => {
-    // Añadir una novena tiene que ser un cambio deliberado de esta prueba. La octava,
-    // `tools/medicion.ts`, la añadió la Historia 23.2.
+  it('la excepción del guion de /buscar/ es una sola petición, la del mapa de rótulos (Historia 27.3)', () => {
+    // La excepción se declara por fichero; esto la estrecha a la llamada: otra petición en ese
+    // componente —a otro sitio, o a otra ruta— tiene que ser otro cambio deliberado de esta prueba.
+    const codigo = sinComentarios(readFileSync(resolve(raiz, 'src/components/Busqueda.astro'), 'utf8'));
+    const delMapa = /\bfetch\s*\(\s*RUTA_DEL_MAPA_DE_OBRAS\s*\)/gu;
+    expect(codigo.match(delMapa)).toHaveLength(1);
+    expect(tieneLlamadaDeRed(codigo.replace(delMapa, ''))).toBe(false);
+  });
+
+  it('no hay más excepciones que esas nueve', () => {
+    // Añadir una décima tiene que ser un cambio deliberado de esta prueba. La octava,
+    // `tools/medicion.ts`, la añadió la Historia 23.2; la novena, el guion de `/buscar/`, la
+    // Historia 27.3, y es la única que corre en el navegador y no en una herramienta.
     expect([...EXCEPCIONES.keys()].sort()).toEqual([
       'astro.config.mjs',
+      'src/components/Busqueda.astro',
       'tools/avisar.ts',
       'tools/epocas.ts',
       'tools/indexacion.ts',
@@ -430,12 +445,18 @@ describe('AD-22 — la red vive solo en la cáscara exterior de tools/', () => {
      * - `tools/medicion.ts` despliega el receptor de la medición y lo comprueba con balizas de
      *   prueba que envía con `fetch` (Historia 23.2). **El build no lo llama** y ningún paso de
      *   CI lo ejecuta: lo corre Héctor, desde la rama que cambia el vocabulario (AD-14).
+     * - `src/components/Busqueda.astro` lleva el guion de `/buscar/`, que **corre en el
+     *   navegador** y no en el build: al elegir un Autor pide al propio sitio el mapa de rótulos
+     *   que el build ya escribió (`/buscar/obras.json`, Historia 27.3). Es lo mismo que el
+     *   `sendBeacon` de la medición —código para el navegador del visitante—, salvo que este se
+     *   escribe con `fetch` y el guardián lo ve.
      */
     const conRed = barridos.filter((ruta) =>
       tieneLlamadaDeRed(readFileSync(resolve(raiz, ruta), 'utf8')),
     );
     expect(conRed.sort()).toEqual([
       'astro.config.mjs',
+      'src/components/Busqueda.astro',
       'tools/avisar.ts',
       'tools/epocas.ts',
       'tools/indexacion.ts',

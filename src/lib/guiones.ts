@@ -27,6 +27,7 @@
 
 import {
   MAX_BYTES_GUION_DE_IMAGEN,
+  MAX_BYTES_GUION_DE_LA_BUSQUEDA,
   MAX_BYTES_GUION_DE_MEDICION,
   MAX_BYTES_GUION_DE_PAGEFIND,
   MAX_BYTES_GUION_DEL_FILTRO,
@@ -42,9 +43,12 @@ export interface Arranque {
   ruta: string;
 }
 
+/** El nombre de una entrada de la lista. */
+export type IdDeGuion = 'medicion' | 'imagen' | 'pagefind' | 'filtro' | 'busqueda';
+
 export interface GuionExterno {
   /** Cómo se la nombra en los mensajes de las comprobaciones. */
-  id: 'medicion' | 'imagen' | 'pagefind' | 'filtro';
+  id: IdDeGuion;
   /** Cuándo lo pide la página: es lo que justifica que esté en la lista. */
   cuando: string;
   /** La ruta —del mismo origen y sin consulta— de lo que se pide. Sin `g`: guarda estado. */
@@ -56,9 +60,33 @@ export interface GuionExterno {
    * más ni uno menos: una declaración que ya no se ve también falla.
    */
   arranca?: readonly Arranque[];
+  /**
+   * Las **otras entradas** de la lista que el fichero pide por `import()` al ejecutarse —la
+   * búsqueda pide Pagefind (Historia 27.2)—. No cuentan en el tope de esta entrada: son una
+   * entrada aparte, con el suyo, y la prueba de `dist/` las sigue hasta allí para medirlas. Como
+   * con `arranca`, cada `import()` de los ficheros de la entrada tiene que casar con un arranque
+   * o con una entrada pedida, y una entrada pedida que los ficheros ya no piden también falla.
+   */
+  pide?: readonly IdDeGuion[];
+  /**
+   * Los **trozos** que el fichero de la entrada importa de forma estática: lo que dos guiones
+   * empaquetados comparten —desde la Historia 27.2, la búsqueda y el filtro de los Directorios
+   * comparten los ritmos de `anuncio.ts` y los recuentos— el empaquetado lo saca a un fichero de
+   * `/_astro/` que importan los dos, nombrado por su primer módulo y su resumen. Cuenta en el tope
+   * de cada entrada que lo importa, como toda importación estática; ninguna página lo pide, y la
+   * prueba de `dist/` exige que cada importación estática de la entrada case con esto.
+   */
+  trozos?: RegExp;
   /** Bytes UTF-8 sin comprimir del fichero, de sus importaciones estáticas y de lo que arranca. */
   tope: number;
 }
+
+/**
+ * Un trozo compartido de los guiones empaquetados: `/_astro/{módulo}.{resumen}.js`, con un nombre de
+ * módulo de una sola palabra —los ficheros de entrada llevan el del componente con su sufijo de
+ * Astro, `….astro_astro_type_script_index_0_lang`, y no casan—. Sin `g`: guarda estado.
+ */
+const TROZO_COMPARTIDO = /^\/_astro\/[A-Za-z][A-Za-z0-9]*\.[A-Za-z0-9_-]+\.js$/;
 
 export const GUIONES_EXTERNOS: readonly GuionExterno[] = [
   {
@@ -81,8 +109,9 @@ export const GUIONES_EXTERNOS: readonly GuionExterno[] = [
   {
     id: 'pagefind',
     cuando:
-      'con `import()` al enfocar el campo de `/buscar/`, al buscar, o al llegar con la ' +
-      'consulta en la dirección; al iniciarse arranca su worker',
+      'con `import()` desde el guion de la búsqueda (la entrada `busqueda`) al enfocar el campo ' +
+      'de `/buscar/`, al elegir un filtro, al buscar o al llegar con la consulta en la ' +
+      'dirección; al iniciarse arranca su worker',
     reconoce: /^\/pagefind\/pagefind\.js$/,
     // La dirección del worker la compone Pagefind en tiempo de ejecución con su `basePath`, así
     // que no se puede leer del fichero: se declara aquí y la prueba cuenta los `new Worker`.
@@ -98,7 +127,21 @@ export const GUIONES_EXTERNOS: readonly GuionExterno[] = [
     // Astro lo emite en `/_astro/` con el nombre del componente y un resumen del contenido, que
     // cambia con cada versión del guion: se reconoce el nombre y se deja libre el resumen.
     reconoce: /^\/_astro\/FiltroDelDirectorio\.astro_astro_type_script_index_0_lang\.[A-Za-z0-9_-]+\.js$/,
+    trozos: TROZO_COMPARTIDO,
     tope: MAX_BYTES_GUION_DEL_FILTRO,
+  },
+  {
+    id: 'busqueda',
+    cuando:
+      'al cargar `/buscar/`, con `<script type="module" src>` detrás del de medición: es el ' +
+      '`<script>` procesado de `Busqueda.astro` (Historia 27.2), que inserta el campo y los ' +
+      'selectores de Autor y de Tema, busca al teclear o al elegir y asienta la búsqueda; pide ' +
+      'Pagefind (`pagefind`) con `import()` solo cuando hace falta',
+    // Como el filtro: el nombre del componente fijo y el resumen del contenido libre.
+    reconoce: /^\/_astro\/Busqueda\.astro_astro_type_script_index_0_lang\.[A-Za-z0-9_-]+\.js$/,
+    pide: ['pagefind'],
+    trozos: TROZO_COMPARTIDO,
+    tope: MAX_BYTES_GUION_DE_LA_BUSQUEDA,
   },
 ];
 
@@ -120,14 +163,17 @@ export function guionExternoDe(especificador: string): GuionExterno | undefined 
 }
 
 /**
- * La entrada a la que pertenece un guion **descargado**, lo pida la página o lo arranque el
- * fichero de una entrada —el worker de Pagefind—. Es la pregunta de las pruebas que miran la
- * red; la de lo que una página pide es `guionExternoDe`.
+ * La entrada a la que pertenece un guion **descargado**, lo pida la página, lo arranque el
+ * fichero de una entrada —el worker de Pagefind— o lo importe —un trozo compartido de los guiones
+ * empaquetados (Historia 27.2)—. Es la pregunta de las pruebas que miran la red; la de lo que una
+ * página pide es `guionExternoDe`, que no reconoce ningún trozo: una página no los pide.
  */
 export function entradaDeLoDescargado(especificador: string): GuionExterno | undefined {
   const directa = guionExternoDe(especificador);
   if (directa !== undefined) return directa;
   const ruta = rutaDelMismoOrigen(especificador);
   if (ruta === undefined) return undefined;
-  return GUIONES_EXTERNOS.find((guion) => guion.arranca?.some((arranque) => arranque.ruta === ruta));
+  return GUIONES_EXTERNOS.find(
+    (guion) => guion.arranca?.some((arranque) => arranque.ruta === ruta) || guion.trozos?.test(ruta),
+  );
 }

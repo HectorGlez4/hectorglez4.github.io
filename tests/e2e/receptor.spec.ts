@@ -15,8 +15,10 @@ import {
 } from '../../src/lib/medicion.ts';
 import { CAMPOS, MARCAS_DE_OBRA, claveEnLaBaliza, tramoDe } from '../../src/lib/vocabulario.ts';
 import { MIN_MS_VISIBLES_PARA_LA_LECTURA } from '../../src/lib/umbrales.ts';
-import { entradaDeLoDescargado } from '../../src/lib/guiones.ts';
+import { GUIONES_EXTERNOS, entradaDeLoDescargado } from '../../src/lib/guiones.ts';
 import { apuntarGuiones } from './ayuda/guiones.ts';
+import { conLaCacheDeVerdad as conLaCache } from './ayuda/cache.ts';
+import { CLAVE_DEL_ESTADO_EN_LA_ENTRADA } from '../../src/lib/busqueda.ts';
 import { interpretar, type Registro } from '../../medicion/receptor.ts';
 import { rutaDeAutor, rutaDeCita, rutaDeObra } from '../../src/lib/superficies.ts';
 import { AUTOR_VALIDO, TEMA_VALIDO, citaValida, construirConCorpus, limpiar } from '../unit/ayuda/construir.js';
@@ -421,29 +423,59 @@ test.describe('Historia 7.3 — el receptor caído no rompe el sitio', () => {
  * punto final del receptor local, así que allí también se pide el fichero; aquí se juzgan
  * **además** contra un sitio construido por esta prueba, con su receptor en memoria, y con la
  * exigencia entera: exactamente el fichero de medición, una vez.
+ *
+ * Desde la Historia 27.2, `/buscar/` carga además, al cargar, el guion empaquetado de la búsqueda
+ * —la entrada `busqueda` de la lista, que inserta el campo y los selectores— con los trozos
+ * compartidos que importa (AD-6; la 3.1 enmendada: «y en `/buscar/`, desde la Épica 27, el
+ * empaquetado de la búsqueda»). Su fila lo declara por el `id` de la entrada, y la exigencia sigue
+ * entera: el fichero de medición una vez, cada entrada declarada una vez, sus trozos y nada más
+ * —Pagefind, que se pide al usarla, no está en la fila—.
  */
 const OBRA_NO_INDEXABLE = rutaDeObra('seneca', 'sobre-la-brevedad-de-la-vida');
 /** Historia 23.9 — la Obra que se indexa: dos de las tres Citas del sitio. */
 const OBRA_INDEXABLE = rutaDeObra('seneca', 'cartas-a-lucilio');
 
 test.describe('Historia 23.1 — cada superficie descarga exactamente el guion de medición', () => {
-  const SUPERFICIES: [string, string][] = [
-    ['la Página de Cita', RUTA_CITA],
-    ['la portada', '/'],
-    ['la Página de Autor', rutaDeAutor('seneca')],
-    ['la Obra que se indexa', OBRA_INDEXABLE],
-    ['la Obra que no se indexa', OBRA_NO_INDEXABLE],
-    ['la búsqueda', RUTA_BUSCAR],
-    ['una ruta que no existe (404)', '/no-existe-esta-ruta/'],
+  /** Nombre, ruta y los `id` de los guiones empaquetados que la superficie carga además al cargar. */
+  const SUPERFICIES: [string, string, readonly string[]][] = [
+    ['la Página de Cita', RUTA_CITA, []],
+    ['la portada', '/', []],
+    ['la Página de Autor', rutaDeAutor('seneca'), []],
+    ['la Obra que se indexa', OBRA_INDEXABLE, []],
+    ['la Obra que no se indexa', OBRA_NO_INDEXABLE, []],
+    ['la búsqueda', RUTA_BUSCAR, ['busqueda']],
+    ['una ruta que no existe (404)', '/no-existe-esta-ruta/', []],
   ];
 
-  for (const [nombre, ruta] of SUPERFICIES) {
-    test(`${nombre} descarga el guion de medición, una vez, y nada más`, async ({ page }) => {
+  for (const [nombre, ruta, empaquetados] of SUPERFICIES) {
+    const ademas = empaquetados.length === 0 ? 'y nada más' : `y además solo ${empaquetados.join(', ')}`;
+    test(`${nombre} descarga el guion de medición, una vez, ${ademas}`, async ({ page }) => {
       const pedidos = apuntarGuiones(page, SITIO);
       await page.goto(`${SITIO}${ruta}`, { waitUntil: 'networkidle' });
-      // Sin otro guion: ni el `ld+json` de los datos estructurados, que no es ejecutable, ni
-      // el generador de la Imagen ni Pagefind, que solo se piden al usarlos.
-      expect(pedidos, `${ruta} pidió ${pedidos.join(', ')}`).toEqual([RUTA_DEL_FICHERO]);
+      const lista = `${ruta} pidió ${pedidos.join(', ')}`;
+      if (empaquetados.length === 0) {
+        // Sin otro guion: ni el `ld+json` de los datos estructurados, que no es ejecutable, ni
+        // el generador de la Imagen ni Pagefind, que solo se piden al usarlos.
+        expect(pedidos, lista).toEqual([RUTA_DEL_FICHERO]);
+        return;
+      }
+      // El fichero de medición, una vez.
+      expect(pedidos.filter((pedido) => pedido === RUTA_DEL_FICHERO), lista).toHaveLength(1);
+      const declarados = GUIONES_EXTERNOS.filter((guion) => empaquetados.includes(guion.id));
+      expect(declarados.map((guion) => guion.id), 'cada empaquetado de la fila es una entrada de la lista').toEqual([
+        ...empaquetados,
+      ]);
+      // Cada entrada declarada, una vez.
+      for (const guion of declarados) {
+        expect(pedidos.filter((pedido) => guion.reconoce.test(pedido)), `${guion.id}: ${lista}`).toHaveLength(1);
+      }
+      // Y nada más que esas entradas y sus trozos compartidos: ni Pagefind, ni la Imagen.
+      const ajenos = pedidos.filter(
+        (pedido) =>
+          pedido !== RUTA_DEL_FICHERO &&
+          !declarados.some((guion) => guion.reconoce.test(pedido) || guion.trozos?.test(pedido)),
+      );
+      expect(ajenos, lista).toEqual([]);
     });
   }
 
@@ -1085,59 +1117,24 @@ async function quedarseEn(contexto: BrowserContext, ruta: string) {
 }
 
 /**
- * Con la caché de atrás y adelante de verdad, como la prueba de la 23.5: un Chromium completo,
- * lanzado sin `--disable-back-forward-cache`, y el sitio servido `max-age=600`. Si no restaura,
- * se salta diciendo por qué.
+ * Con la caché de atrás y adelante de verdad, como la prueba de la 23.5: el Chromium completo de
+ * `tests/e2e/ayuda/cache.ts` (Historia 27.4), con las balizas apuntadas y, al restaurar, la página
+ * quieta en su ruta para que lo que salió por `sendBeacon` se pueda leer. Este sitio ya se sirve
+ * `max-age=600`. Si no restaura, se salta diciendo por qué.
  */
-async function conLaCacheDeVerdad(
+function conLaCacheDeVerdad(
   playwright: PlaywrightWorkerArgs['playwright'],
   recorrido: (pagina: Page, restaurada: () => Promise<void>) => Promise<void>,
 ) {
-  let navegador: Awaited<ReturnType<typeof playwright.chromium.launch>>;
-  try {
-    navegador = await playwright.chromium.launch({
-      channel: 'chromium',
-      ignoreDefaultArgs: ['--disable-back-forward-cache'],
-    });
-  } catch (error) {
-    test.skip(true, `no se pudo lanzar el Chromium completo sin cabeza: ${String(error).split('\n')[0]}`);
-    return;
-  }
-  try {
-    const contexto = await navegador.newContext();
-    const pagina = await contexto.newPage();
-    const cdp = await contexto.newCDPSession(pagina);
-    await cdp.send('Page.enable');
-    const sinCache: string[] = [];
-    cdp.on('Page.backForwardCacheNotUsed', (evento) => {
-      for (const explicacion of evento.notRestoredExplanations) sinCache.push(explicacion.reason);
-    });
-    await apuntarBalizas(pagina);
-    await pagina.addInitScript(() => {
-      const ventana = window as unknown as { __restaurada: boolean };
-      ventana.__restaurada = false;
-      addEventListener('pageshow', (evento) => {
-        if ((evento as PageTransitionEvent).persisted) ventana.__restaurada = true;
-      });
-    });
-    /** Vuelve atrás y espera a la restauración; si no la hubo, salta la prueba. */
-    const restaurada = async () => {
-      await pagina.goBack({ waitUntil: 'commit' });
-      const lo = async () =>
-        pagina.evaluate(() => (window as unknown as { __restaurada?: boolean }).__restaurada === true).catch(() => false);
-      const hasta = Date.now() + 3_000;
-      while (!(await lo()) && Date.now() < hasta) await esperar(100);
-      test.skip(
-        !(await lo()),
-        `Chromium no restauró la página de la caché de atrás y adelante: ${sinCache.join(', ') || 'sin motivo'}`,
-      );
+  return conLaCache(
+    playwright,
+    {
+      preparar: (pagina) => apuntarBalizas(pagina),
       // Desde aquí, salir ya no navega: la página restaurada se queda y sus balizas se leen.
-      await quedarseEn(contexto, new URL(pagina.url()).pathname);
-    };
-    await recorrido(pagina, restaurada);
-  } finally {
-    await navegador.close();
-  }
+      alRestaurar: (pagina, contexto) => quedarseEn(contexto, new URL(pagina.url()).pathname),
+    },
+    recorrido,
+  );
 }
 
 /*
@@ -1487,10 +1484,11 @@ test.describe('Historia 23.8 — una búsqueda cuenta una vez, cuando se asienta
     await campo(page).fill('');
     await esperar(500);
     expect(await balizasDe(page)).toEqual([]);
-    expect(await page.evaluate(() => history.state)).toBeNull();
+    // Historia 27.4 — lo tecleado entra en la dirección tras su pausa, pero sin la marca: nada se asentó.
+    expect(await page.evaluate((marca) => (history.state as Record<string, unknown> | null)?.[marca], MARCA)).toBeUndefined();
   });
 
-  test('Enter da una `busqueda` con sus claves exactas, marca la entrada sin tocar la dirección, y repetir —también A, B, A— no la repite', async ({
+  test('Enter da una `busqueda` con sus claves exactas, marca la entrada de lo enviado, y repetir —también A, B, A— no la repite', async ({
     page,
   }) => {
     await apuntarBalizas(page);
@@ -1507,10 +1505,11 @@ test.describe('Historia 23.8 — una búsqueda cuenta una vez, cuando se asienta
     const registro = await esperarEvento(EVENTOS.busqueda);
     expect(registro, 'no llegó la búsqueda').toBeTruthy();
     expect(registro).toMatchObject({ ruta: RUTA_BUSCAR, tramo, filtros: NINGUNO, consulta: null });
-    // La entrada lleva la marca, y nada más; la dirección y el historial no cambian.
-    expect(await page.evaluate(() => history.state)).toEqual({ [MARCA]: true });
-    expect(page.url()).toBe(`${SITIO}${RUTA_BUSCAR}`);
-    expect(await page.evaluate(() => history.length)).toBe(entradas);
+    // Historia 27.4 — Enter escribe lo enviado en la dirección (una entrada, con su estado), y la
+    // marca va en esa entrada: la marca sigue sin escribir dirección ni abrir otra.
+    expect(await page.evaluate(() => history.state)).toEqual({ [CLAVE_DEL_ESTADO_EN_LA_ENTRADA]: { q: CON_RESULTADOS }, [MARCA]: true });
+    expect(page.url()).toBe(`${SITIO}${RUTA_BUSCAR}?q=${CON_RESULTADOS}`);
+    expect(await page.evaluate(() => history.length)).toBe(entradas + 1);
 
     // Enter otra vez; B; A otra vez; A con un espacio de más.
     await campo(page).press('Enter');
@@ -1528,7 +1527,7 @@ test.describe('Historia 23.8 — una búsqueda cuenta una vez, cuando se asienta
       [EVENTOS.busquedaSinResultados, SIN_RESULTADOS],
     ]);
     expect(busquedas()).toHaveLength(2);
-    expect(page.url()).toBe(`${SITIO}${RUTA_BUSCAR}`);
+    expect(page.url()).toBe(`${SITIO}${RUTA_BUSCAR}?q=${CON_RESULTADOS}`);
   });
 
   test('sin resultados: la `busqueda` en el tramo 0 y después la `busqueda-sin-resultados` con el texto, una vez', async ({
@@ -1721,12 +1720,20 @@ test.describe('Historia 23.8 — una búsqueda cuenta una vez, cuando se asienta
     expect(new URL(page.url()).pathname).toBe(RUTA_BUSCAR);
     await esperarAlFichero(page);
     // Sin la caché, la vuelta es una carga nueva: lo dice Navigation Timing, y la entrada trae la marca.
-    // Lo que esta vuelta prueba es eso: que la marca se escribió y el tipo de la carga. La entrada no
-    // lleva `?q=` —la isla no lo escribe hasta la Épica 27— y el campo vuelve vacío
-    // (`autocomplete="off"`), así que no se llega a ningún estado y nada lee la marca: que una
-    // llegada marcada no asiente otra vez lo prueban las dos de abajo, con `?q=` (atrás y recarga).
+    // Historia 27.4 — pulsar el resultado dentro de la pausa escribió antes lo que se veía: la entrada
+    // lleva `?q=` y su estado, la vuelta repinta la búsqueda y la marca dice que ya contó.
     expect(await tipoDeNavegacion(page)).toBe('back_forward');
-    expect(await page.evaluate(() => history.state)).toEqual({ [MARCA]: true });
+    expect(page.url()).toBe(`${SITIO}${RUTA_BUSCAR}?q=${CON_RESULTADOS}`);
+    expect(await page.evaluate(() => history.state)).toEqual({ [CLAVE_DEL_ESTADO_EN_LA_ENTRADA]: { q: CON_RESULTADOS }, [MARCA]: true });
+    await expect(campo(page)).toHaveValue(CON_RESULTADOS);
+    await expect(page.locator(RESULTADOS).first()).toBeVisible();
+    await campo(page).press('Enter');
+    await esperar(300);
+    expect(busquedas()).toHaveLength(1);
+
+    // Y atrás otra vez: la entrada de la llegada, `/buscar/` a secas, en la misma carga.
+    await page.goBack();
+    expect(page.url()).toBe(`${SITIO}${RUTA_BUSCAR}`);
     await expect(campo(page)).toHaveValue('');
 
     await page.goBack();
@@ -1757,6 +1764,12 @@ test.describe('Historia 23.8 — una búsqueda cuenta una vez, cuando se asienta
       await campo(pagina).press('Enter');
       await esperar(300);
 
+      // Historia 27.4 — la página restaurada es la entrada de lo que se veía (`?q=`), que el clic
+      // escribió antes de marcarla; atrás, la de la llegada, en el mismo documento, sin asentar nada.
+      expect(new URL(pagina.url()).search).toBe(`?q=${CON_RESULTADOS}`);
+      await pagina.goBack({ waitUntil: 'commit' });
+      await expect.poll(() => new URL(pagina.url()).search).toBe('');
+      await expect(campo(pagina)).toHaveValue('');
       // Y atrás otra vez: la página se oculta sin asentar nada más.
       await pagina.context().unrouteAll({ behavior: 'ignoreErrors' });
       await pagina.goBack({ waitUntil: 'commit' });
@@ -1782,6 +1795,7 @@ test.describe('Historia 23.8 — una búsqueda cuenta una vez, cuando se asienta
     await esperarAlFichero(page);
     expect(page.url()).toBe(`${SITIO}${RUTA_BUSCAR}?q=${CON_RESULTADOS}`);
     expect(await tipoDeNavegacion(page)).toBe('back_forward');
+    // La llegada con `?q=` no escribió nada (la dirección ya lo decía): la entrada lleva solo la marca.
     expect(await page.evaluate(() => history.state)).toEqual({ [MARCA]: true });
     await expect(page.locator(RESULTADOS).first()).toBeVisible();
     await campo(page).press('Enter');

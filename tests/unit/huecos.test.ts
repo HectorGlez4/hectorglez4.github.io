@@ -4,6 +4,7 @@ import { readFileSync, readdirSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { promisify } from 'node:util';
 import {
+  cuentaParaElSuelo,
   lineasDeClasicos,
   verHuecos,
   type AutorParaHuecos,
@@ -113,6 +114,19 @@ describe('Historia 9.3 — el equilibrio de tradición frente al suelo', () => {
     expect(tradicion.otra).toBe(1);
     // Y desde la v6 no diluye: el único hispánico es latinoamericano, así que el 100 %.
     expect(tradicion.porcentaje).toBe(100);
+  });
+
+  it('Historia 27.6 — `cuentaParaElSuelo`: todos menos `otra`, también el sin declarar; y `hispanicos` es su cuenta', () => {
+    expect(cuentaParaElSuelo({ tradicion: 'latinoamericana' })).toBe(true);
+    expect(cuentaParaElSuelo({ tradicion: 'peninsular' })).toBe(true);
+    expect(cuentaParaElSuelo({ tradicion: 'otra' })).toBe(false);
+    expect(cuentaParaElSuelo({})).toBe(true);
+    const mezcla = autores(['latinoamericana', 'peninsular', 'otra', undefined, 'otra', 'peninsular']);
+    const { tradicion } = verHuecos([], [], mezcla);
+    // El mismo valor que antes de extraer el predicado: latinoamericana + peninsular + sin declarar.
+    expect(tradicion.hispanicos).toBe(tradicion.latinoamericana + tradicion.peninsular + tradicion.sinDeclarar);
+    expect(tradicion.hispanicos).toBe(mezcla.filter(cuentaParaElSuelo).length);
+    expect(tradicion.hispanicos).toBe(4);
   });
 
   it('un Corpus sin Autores no divide por cero', () => {

@@ -1,0 +1,1386 @@
+---
+/**
+ * La búsqueda de `/buscar/` — Historias 27.2, 27.3, 27.4, 27.5, 27.6 y 27.7, FR-7, FR-8, NFR-4, AD-6, AD-11,
+ * AD-13, UX-DR87, UX-DR88, UX-DR89, UX-DR90, UX-DR91, UX-DR92, UX-DR93, UX-DR99, UX-DR100, UX-DR101,
+ * UX-DR112; `DESIGN.md § Búsqueda` y `EXPERIENCE.md § Búsqueda`.
+ *
+ * El índice lo produce Pagefind sobre `dist/` después del build, así que solo contiene lo que las
+ * páginas publican: si una Cita no tiene página, no hay nada que indexar. El conjunto publicable de
+ * AD-11 gobierna la búsqueda sin que la búsqueda sepa que existe.
+ *
+ * Lo usa solo `/buscar/`, entre el `h1` y la región del recuento, y pinta tres cosas:
+ *
+ *   · Historia 27.7 (FR-7, NFR-2, UX-DR92) — los avisos de cuando la búsqueda no puede correr, los
+ *     tres del mismo componente (`AvisoDeLaBusqueda.astro`), con los dos Directorios debajo: en
+ *     `<noscript>`, el de sin guion; en el HTML inicial, el **aviso previo** (`data-aviso-previo`),
+ *     que su CSS oculta sin guion y la isla quita del DOM al arrancar —si el paquete no llega a
+ *     ejecutar, se queda—; y, fuera de `[data-busqueda]`, en `<template data-plantilla-del-fallo>`,
+ *     el del índice que no carga, que la isla inserta (abajo). Ninguno cuelga de la Zona
+ *     `resultado`: van exentos por escrito (`directorios-del-aviso`);
+ *   · un `<template>` con el formulario —el Campo de búsqueda de la 26.6 con su `name`, su
+ *     ejemplo y la marca `data-consulta`, y un `fieldset` con los selectores de Autor, de Obra
+ *     (27.3) y de Tema y «Quitar los filtros»—, la sombra del recuento y, desde la 27.5, el bloque
+ *     de «Mostrar 30 más» con su región de estado, inertes: el guion los inserta al cargar, salvo
+ *     el `.selector` de Obra y el bloque, que separa del clon (abajo). Ir en
+ *     plantilla deja el marcado, las opciones del build y sus estilos de ámbito en el HTML, y el
+ *     guion sin una palabra de contenido. Sin guion, lo que se ve es el aviso de `<noscript>`;
+ *   · el `<script>`, que Astro empaqueta en un fichero de `/_astro/` (AD-6) y que nunca va en línea
+ *     (`assetsInlineLimit` en `astro.config.mjs`). Está en la lista cerrada de
+ *     `src/lib/guiones.ts` con su tope, `MAX_BYTES_GUION_DE_LA_BUSQUEDA`, y es el único guion de la
+ *     búsqueda: desde la 27.2 `/buscar/` no lleva guion propio en línea.
+ *
+ * Las opciones de los selectores salen del build y solo del build —de `filtrosDeLaBusqueda`, por
+ * `buscar.astro`—, ya ordenadas por `ordenDeAutoresPorNombre` y `ordenDeTemasPorNombre` de
+ * `src/lib/normalizar.ts`: el selector no ordena, y el guion no lleva ningún dato del Corpus; lee
+ * el nombre de la opción elegida. El rótulo de cada opción es el nombre, sin recuento.
+ *
+ * El selector de Obra (Historia 27.3) es la excepción: sus opciones dependen del Autor elegido, y
+ * no van en el HTML. Las compone el guion con dos datos que pide **al elegir un Autor**, juntos: el
+ * mapa de rótulos del build (`RUTA_DEL_MAPA_DE_OBRAS`, que escribe `src/pages/buscar/obras.json.ts`
+ * desde `filtrosDeLaBusqueda`, AD-11) y los recuentos de `filters()` de Pagefind.
+ *
+ * Lo que hay que saber al leer el guion:
+ *
+ *   · AD-6 — Pagefind no se descarga hasta que hace falta: `cargar` lo pide con `import()` del
+ *     literal `/pagefind/pagefind.js` (con `@vite-ignore`, para que el empaquetado no lo resuelva)
+ *     al enfocar el campo, al elegir un filtro, al buscar o al llegar con la consulta en la
+ *     dirección. Es otra entrada de la lista cerrada, `pagefind`, que esta declara en `pide`.
+ *   · Las tablas llegan de `src/lib/tipoDeResultado.ts` por importación: los rótulos, el filtro del
+ *     tipo, los tipos en la sans y con línea de Autor, los filtros y la clave de orden de la Cita y
+ *     las opciones de Pagefind. Escribirlas aquí era la segunda copia. La reserva cubre un índice
+ *     viejo que traiga un tipo que ya no existe, no un tipo nuevo sin rótulo: eso no compila.
+ *   · Historia 27.2 — basta un filtro para buscar. Con Autor o Tema elegido se busca con `filters`
+ *     (los valores que escribe la 27.1 en cada Página de Cita, `filtrosDePagefind`); sin texto
+ *     —vacío o solo espacios—, `search(null, …)` ordenado por la clave `orden`; con texto,
+ *     `search(texto, { filters })`, por relevancia. Solo salen Citas, porque solo la Página de Cita
+ *     declara esos filtros. Sin texto ni filtros no hay búsqueda, ni recuento, ni salida.
+ *   · Historia 27.2 — el recuento dice cuántos hay y, con filtros, qué se filtró
+ *     (`fraseDelRecuento`, de `src/lib/busqueda.ts`), y se escribe con el **segundo ritmo**
+ *     (`ritmoDeTecleo`): la de lo tecleado, cuando se cumple `PAUSA_DE_TECLEO_MS` contada desde la
+ *     última tecla —la búsqueda llega 150 ms y su latencia después, y espera solo lo que falta; si
+ *     llega más tarde, se escribe al llegar— y solo si cambió; la de un selector, al llegar la
+ *     búsqueda que lanzó su pausa, sin otra espera (`ahora`). La sombra
+ *     lleva la frase al momento, invisible, y reserva el alto: la lista no se mueve cuando la frase
+ *     llega. Sin resultados, la sugerencia de la salida con el **primer ritmo** (`anunciar`), que
+ *     vacía y escribe en el fotograma siguiente, como en la 22.10; la región se aparta de la vista.
+ *     Desde la 27.6 esa frase la compone la isla (`sugerenciaSinResultados`): sin filtros, «No
+ *     encontramos esa frase. Prueba con menos palabras.»; con filtros nombra lo filtrado («No
+ *     encontramos «escuela» entre las citas de José Martí.», «No hay citas de José Martí sobre la
+ *     prudencia.»). Se escribe por `textContent` en la `.sugerencia`, con el aviso de la 27.4
+ *     delante si lo hay, y la región se aparta también con aviso: se ve una vez y se lee una.
+ *     Esa escritura del fotograma siguiente solo cae si nada se pintó entretanto: un recuento
+ *     escrito antes no lo pisa la sugerencia de la búsqueda anterior.
+ *   · Historia 27.2 — cada cambio de un selector reinicia `PAUSA_DE_LOS_SELECTORES_MS`, y la
+ *     búsqueda se rehace una vez al cumplirse: las flechas sobre un selector cerrado no lanzan una
+ *     búsqueda por opción. Una pausa cancela la otra: la búsqueda la lanza el último gesto, con su
+ *     ritmo. Enviar (Enter) cancela las dos pausas y busca el estado de ese momento; enviar es un
+ *     gesto, así que si lo enviado es lo que se ve, su recuento se escribe ya (`ahora`), también
+ *     el de una búsqueda tecleada que aún esperaba su pausa.
+ *     «Quitar los filtros» vuelve los selectores a «Todos…» (y quita el de Obra, 27.3), rehace la
+ *     búsqueda al momento (o la vacía, sin texto) y lleva el foco al campo.
+ *   · Historia 27.3 — la búsqueda se acota también por una Obra del Autor elegido:
+ *       - el `.selector` de Obra va en la plantilla entre los de Autor y Tema, y el guion lo
+ *         **separa** del clon antes de insertar: sin Autor, con un Autor sin Obras que ofrecer o
+ *         sin datos, no existe en el DOM vivo. Cuando hace falta lo reinserta en su hueco, tras el
+ *         `.selector` de Autor, sin mover el foco;
+ *       - el mapa y `filters()` se piden al elegir un Autor y, desde la 27.4, al llegar con estado
+ *         en la dirección (no al cargar `/buscar/` a secas, ni al enfocar), con `Promise.all`; un
+ *         éxito se guarda para la carga. Un fallo de
+ *         cualquiera de los dos —también un `filters()` sin el filtro `obra`— no deja promesa
+ *         rechazada, no pinta el selector, no toca la búsqueda en curso y se reintenta al
+ *         siguiente Autor elegido;
+ *       - se compone cuando están a la vez el **Autor vigente** —el de la última búsqueda
+ *         lanzada— y los datos: las Obras del Autor en el orden del mapa (el de su Lista de
+ *         Obras, hecho en el build), solo las que `filters().obra` cuenta con al menos una Cita
+ *         (`opcionesDeObra`); la primera, «Todas sus obras»; cada una «{título} ({n citas})» por
+ *         `new Option`, con el total del índice. Sin ninguna, no aparece;
+ *       - cambiar el Autor vacía la Obra y quita el selector al momento; se rehace para el Autor
+ *         nuevo al cumplirse la pausa de los selectores, si los datos están, o al llegar, si el
+ *         Autor sigue siendo el mismo. Elegir Obra o Tema no lo recompone. «Quitar los filtros»
+ *         quita los tres y el selector de Obra;
+ *       - con Obra se busca con `filters.obra` (y, sin texto, en el orden de `orden`: el de su
+ *         Página de Obra); el recuento nombra la Obra por su **título**, nunca por el rótulo con
+ *         su recuento («23 citas de José Martí en Maestros ambulantes.»), y la combinación que
+ *         viaja es `autor-obra` o `autor-obra-tema`. El selector de Obra comparte la pausa de los
+ *         selectores y el segundo ritmo (`ahora`).
+ *   · Historia 23.8 (FR-56, FR-8, AD-13) — una búsqueda **cuenta una vez, cuando se asienta**, y
+ *     no por tecla ni por repintado. Lo que se asienta es el **estado que se ve**: el texto y los
+ *     filtros de la última búsqueda que se pintó, con el total de la respuesta de Pagefind
+ *     (`results.length`, no los pintados); vaciar el campo sin filtros lo limpia. Lo asientan tres
+ *     gestos: enviar el formulario —espera a que se pinte la búsqueda de lo enviado, y asienta solo
+ *     si sigue siendo la que se ve—, pulsar un enlace de la lista de resultados —`click`, también
+ *     con modificador o con el teclado, y el `auxclick` del botón central (`button` 1), que lo abre
+ *     en otra pestaña sin dar `click`; el del secundario abre el menú contextual, que no es pulsar,
+ *     y no asienta. Escuchados en la lista, que corre antes que la escucha de salida de la ventana,
+ *     sin quedarse con el clic ni parar su propagación— y ocultarse la página (`visibilitychange` a
+ *     `hidden`, con `pagehide` de respaldo). Una página que no se ha visto nunca no asienta nada.
+ *     Qué se emite ante ese estado lo decide `asentamientoDeBusqueda`, de `src/lib/medicion.ts`,
+ *     con sus constantes compuestas desde el vocabulario (`ASENTAMIENTO_DE_BUSQUEDA`): la
+ *     `busqueda` con el tramo del total y la combinación de filtros (`combinacionDeFiltros`), y,
+ *     con texto y sin resultados, la `busqueda-sin-resultados` con la consulta. La clave de un
+ *     estado lleva además los **valores** de los filtros (`valoresDeFiltros`): otro Autor es otra
+ *     búsqueda. Este componente no escribe ni un rótulo de tramo ni una combinación de filtros. Se
+ *     mide con `__medir(…)` a secas; la cola la abre el arranque del armazón, y el fichero de
+ *     medición va antes en el documento.
+ *   · Una vez por estado distinto en la carga: la isla guarda en memoria, en su propio cierre, las
+ *     claves ya emitidas —sin almacenamiento ni cookie—, y la memoria sobrevive a la caché de atrás
+ *     y adelante. Al emitir, marca su entrada del historial con un booleano en el objeto de estado
+ *     (`history.replaceState`, sin dirección: ni la cambia ni abre entrada). Al cargar con estado en
+ *     la dirección, lo da por ya registrado si su entrada lleva la marca o, sin objeto de estado, si
+ *     la carga es una vuelta atrás o una recarga (Navigation Timing, leído una vez, solo al cargar).
+ *     Nada de eso ocurre al evaluarse el guion: solo desde sus escuchas y tras una microtarea.
+ *   · Historia 27.4 (FR-7, NFR-4, UX-DR93, AD-13) — la búsqueda vive en la dirección:
+ *       - la dirección es el estado de la isla con identificadores, `?q=&autor=&obra=&tema=` en ese
+ *         orden y solo los no vacíos, compuesta **siempre desde el estado**
+ *         (`direccionDeLaBusqueda`, sobre la ruta del `action` del formulario), nunca editando
+ *         `location.search`: lo que la dirección traía de más —`de`, `via`, otro parámetro— no
+ *         vuelve. La isla no lee ni escribe `de`/`via`; las quita el fichero de medición;
+ *       - se escribe lo tecleado al cumplirse `PAUSA_DE_TECLEO_MS` desde la última tecla (un
+ *         temporizador propio), un selector cuando lanza su búsqueda, y enviar y «Quitar los
+ *         filtros» al momento. Una pausa cancela la escritura pendiente de la otra, y un estado igual
+ *         al de la dirección no se escribe. `pushState` o `replaceState` lo decide
+ *         `escrituraDelHistorial`: se reemplaza solo la entrada que abrió el mismo control y no está
+ *         asentada; una llegada, un `popstate` o un asentamiento dejan la entrada sin control. Cada
+ *         entrada lleva su estado en su objeto (`CLAVE_DEL_ESTADO_EN_LA_ENTRADA`); una nueva empieza
+ *         sin las claves de la anterior —la marca no pasa a ella—. Todo, en `try`: si el historial
+ *         lanza, la búsqueda, el asentamiento y la emisión siguen, y la escritura siguiente reintenta;
+ *       - asentar no abre entrada: si lo que se ve no es lo que dice la dirección (su escritura
+ *         esperaba la pausa), primero se escribe con su regla —el gesto termina la pausa, como
+ *         Enter; lo que pintó una llegada o un `popstate` reemplaza su propia entrada— y después la
+ *         marca. La marca se escribe en toda entrada que diga lo que se ve y no la lleve, también si
+ *         ese estado ya se emitió en la carga: toda entrada que escribe la isla lleva objeto, así que
+ *         el respaldo de Navigation Timing («sin objeto de estado») ya solo cubre la entrada de
+ *         llegada, y sin la marca una recarga o una vuelta sin caché la daría por no registrada. Si
+ *         la dirección no pudo decir lo que se ve (el historial lanzó), no se marca una entrada que
+ *         dice otra búsqueda. Un estado asentado no se reescribe nunca;
+ *       - la carga (tras una microtarea) y `popstate` llegan por la misma función, `llegar`: la carga
+ *         lee la dirección; `popstate`, el objeto de la entrada y, sin él, la dirección. Cancela las
+ *         pausas, resuelve en el orden fijo de `resolverEstado` (Autor y Tema que no son opción,
+ *         Obra que no se ofrece, Obra sin Autor que toma el suyo del mapa, Obra de otro Autor que se
+ *         va), pinta campo, selectores, «Quitar los filtros», recuento y resultados con el ritmo
+ *         `ahora`, sin recargar, y si lo resuelto no es lo leído reemplaza la entrada. Lo que no se
+ *         puede usar lo dice `avisoDeLaDireccion` delante del recuento; sin nada con que buscar, la
+ *         frase sola. Con Obra en lo leído, la resolución espera al mapa y a `filters()` —mientras,
+ *         el campo y los selectores de Autor y de Tema que se pueden juzgar ya se ven, y un gesto
+ *         parte de ellos—; si no llegan, no se busca, no se dice nada y no se escribe (27.7). Una
+ *         llegada deja sin efecto la búsqueda de la entrada que se dejó que aún estuviera en vuelo;
+ *       - `popstate` juzga lo ya registrado solo por la marca de su entrada: Navigation Timing
+ *         describe la carga del documento, no la entrada a la que se vuelve. Un `popstate` que cambia
+ *         el fragmento y no la búsqueda (comparada como estado, no como cadena) —un salto de ancla,
+ *         como «Saltar al contenido»— no es una llegada: no se repinta ni se anuncia nada, y su
+ *         entrada se marca si dice lo que se ve y ya se emitió. Dos entradas seguidas con la misma
+ *         búsqueda y el mismo fragmento —el mismo control puede reemplazar la suya por la de antes—
+ *         sí son una llegada: cancelan lo pendiente y no se escribe sobre la otra. Mientras una
+ *         llegada busca, lo que se veía es de la entrada que se dejó y no se asienta en la nueva.
+ *   · Historia 27.5 (FR-7, UX-DR90, UX-DR112) — los resultados llegan de `TANDA_DE_RESULTADOS` en
+ *     `TANDA_DE_RESULTADOS` (30, en `src/lib/umbrales.ts`; el guion no escribe la cifra):
+ *       - la primera tanda son los primeros del `results` de Pagefind; si quedan más, el bloque
+ *         `[data-mas]` de la plantilla —un `button` y su región `role="status"`, vacía— va
+ *         **detrás de la lista** (`lista.after`), fuera de su Zona `resultado` —no es una salida
+ *         interna ni asienta— y después de los resultados al tabular. Su rótulo lo da
+ *         `rotuloDeMostrarMas` con lo que queda: «Mostrar 30 más», «Mostrar las 12 que faltan»,
+ *         «Mostrar la que falta». Sin nada que traer, el bloque no está;
+ *       - pulsar pide los `data()` de la tanda siguiente del **mismo** `results`, todo o nada
+ *         (`Promise.all`), sin otro `search`; con una tanda en vuelo no hace nada (sin
+ *         `disabled`). Al llegar, si nada la dejó sin efecto —un gesto, una búsqueda lanzada o
+ *         pintada—, añade sus filas con la misma función que la primera tanda
+ *         (`filaDeResultado`), lleva el foco al enlace de la primera nueva y pone al día el
+ *         rótulo, o quita el bloque si ya no
+ *         queda nada. Ni el recuento, ni su sombra, ni la dirección, ni el historial, ni la
+ *         medición cambian: la tanda no es otra búsqueda;
+ *       - si la tanda falla, nada suyo se pinta, el foco se queda en el botón y la frase del fallo
+ *         (`FALLO_DE_LA_TANDA`) va a la región del botón con el primer ritmo, solo si el bloque
+ *         sigue siendo el de esa búsqueda y la tanda sigue siendo la vigente (una que un gesto u
+ *         otra tanda dejaron atrás calla). Si la búsqueda sigue siendo la que se ve y no hay otra
+ *         tanda ni otra búsqueda en vuelo, se destruye el índice, como en el fallo de abajo: Pagefind guarda en su
+ *         instancia la promesa rechazada de cada fragmento, así que la pulsación siguiente espera
+ *         la destrucción, aplica las opciones, repite el `search` con los mismos argumentos de la
+ *         búsqueda que se ve y toma la tanda de ese `results` nuevo, que pasa a ser el de las
+ *         siguientes. Lo mismo tras una búsqueda nueva que falla con la lista de antes y su
+ *         bloque a la vista: su índice ya está destruido. Ni la búsqueda que se ve ni su recuento
+ *         se rehacen: si el índice cambió con un despliegue, las tandas siguen del `results` nuevo
+ *         bajo el recuento que se anunció (y, si ya no trae nada más, el bloque sale y el foco va
+ *         al último resultado). Una búsqueda nueva espera la destrucción en curso antes de buscar;
+ *       - pintar otra búsqueda, o vaciar la lista, quita el bloque, vacía su región y olvida la
+ *         tanda en vuelo y su avería.
+ *   · La búsqueda que no corre —el índice no carga, o `init`, `search` o los datos de un
+ *     resultado fallan— no deja ninguna promesa rechazada sin manejar y no se asienta. Desde la
+ *     Historia 27.7, si es la última lanzada, pinta el **aviso del fallo** en lugar de los
+ *     resultados (`mostrarFallo`): el clon único de la plantilla justo antes de la lista, la lista
+ *     vacía, sin «Mostrar 30 más», sin salida ni sombra, y la región apartada que lo anuncia una vez
+ *     con el primer ritmo; lo que se veía deja de ser asentable —con el aviso a la vista no hay
+ *     búsqueda que asentar, y un fallo no es un tramo 0—. Lo mismo cuando una `obra` de la dirección
+ *     no tiene mapa ni `filters()` (`sinDatos`). El aviso sale al pintar cualquier búsqueda y al
+ *     vaciarla, y la región se vacía antes del recuento, como al salir de cero. La siguiente vuelve a pedir el índice, también con el mismo estado
+ *     (Enter otra vez), y lo pide de verdad: tras una importación fallida, con `?{n}` en la
+ *     dirección, porque el navegador recuerda el fallo de un módulo por su URL; tras un fallo de
+ *     Pagefind, con `destroy()`, porque Pagefind guarda el error de su índice en su instancia —
+ *     destruida, la siguiente crea otra—. Solo esas llamadas al índice van en el `try`: un fallo al
+ *     pintar es un error del guion y tiene que verse. La respuesta de una búsqueda ya superada por
+ *     otra no se pinta ni pasa a ser la que se ve.
+ *   · Historia 26.2 — antes de **cada** `search()` se aplican `OPCIONES_DE_PAGEFIND` con
+ *     `options()`, dentro del `try`: el `destroy()` del reintento deja a cero las opciones del
+ *     módulo, y la instancia que se crea después buscaría sin pesos.
+ *   · Historia 26.2 — el tipo de un resultado llega en `data().filters` (`FILTRO_DE_TIPO`), y no
+ *     en la metadata. Sin filtro, o con un tipo que no está en la tabla, el rótulo es el del tipo
+ *     por omisión. Los tipos de `TIPOS_CON_TITULO_EN_SANS` llevan el título en la sans
+ *     (`.en-sans`) y se leen «{rótulo}: {título}»; sin título en el índice, el visible es la URL y
+ *     no se lee en voz alta.
+ *   · Historias 27.1 y 27.2 — los tipos de `TIPOS_CON_LINEA_DE_AUTOR` (Obra y Cita) llevan el
+ *     Autor debajo, del metadato `autor`, y se leen «{rótulo}: {título}, {Autor}», sin «de». Sin
+ *     metadato de Autor, ni línea ni Autor en el nombre; la Cita, además, sin nombre accesible
+ *     propio.
+ *   · La consulta de la dirección se lee del campo después de escribirla en él: un campo de
+ *     búsqueda quita los saltos de línea, y la clave de la llegada tiene que ser la del texto que
+ *     Enter buscará. Con estado en la dirección, la búsqueda se ejecuta al cargar.
+ *   · Lo tecleado vuelve a la página solo por `textContent` y `value`, nunca como HTML.
+ */
+import AvisoDeLaBusqueda from './AvisoDeLaBusqueda.astro';
+import CampoDeBusqueda from './CampoDeBusqueda.astro';
+import {
+  ETIQUETA_DE_LA_BUSQUEDA,
+  TEXTO_DE_EJEMPLO_DE_LA_BUSQUEDA,
+} from '../lib/busqueda.ts';
+import type { OpcionPorNombre } from '../lib/normalizar.ts';
+import { rutaDeLaBusqueda } from '../lib/superficies.ts';
+
+interface Props {
+  /** Las opciones del selector de Autor, ya en su orden (`ordenDeAutoresPorNombre`). */
+  autores: readonly OpcionPorNombre[];
+  /** Las opciones del selector de Tema, ya en su orden (`ordenDeTemasPorNombre`). */
+  temas: readonly OpcionPorNombre[];
+}
+
+const { autores, temas } = Astro.props;
+---
+
+<div data-busqueda>
+  {/*
+    * Historia 27.7 — sin guion, el aviso de `<noscript>`; con guion, hasta que la isla arranca, el
+    * aviso previo, que su propio CSS oculta sin guion y la isla quita del DOM al arrancar. Los dos,
+    * antes de la plantilla del formulario: el `<noscript>`, con guion, es texto y no lleva
+    * `<template>`, así que `raiz.querySelector('template')` sigue siendo la del formulario.
+    */}
+  <noscript><AvisoDeLaBusqueda caso="sin-guion" /></noscript>
+  <AvisoDeLaBusqueda caso="antes-de-arrancar" />
+  <template>
+    <form class="formulario" role="search" action={rutaDeLaBusqueda()} method="get">
+      <CampoDeBusqueda
+        id="consulta"
+        etiqueta={ETIQUETA_DE_LA_BUSQUEDA}
+        nombre="q"
+        ejemplo={TEXTO_DE_EJEMPLO_DE_LA_BUSQUEDA}
+        consulta
+      />
+      <fieldset class="filtros">
+        <legend class="solo-para-lectores">Filtrar las citas</legend>
+        {/*
+          * Historia 27.4 — `autocomplete="off"` en los tres selectores, como en el campo: sin él, al
+          * volver atrás sin la caché el navegador restaura su estado de formulario por posición
+          * —los selectores no tienen `name`— después de que la isla pinte la llegada, y el valor
+          * del selector de Obra que ya no está acaba en el de Tema.
+          */}
+        <div class="selector">
+          <label for="filtro-de-autor">Autor</label>
+          <select id="filtro-de-autor" data-selector-de-autor autocomplete="off">
+            <option value="">Todos los autores</option>
+            {autores.map((opcion) => <option value={opcion.valor}>{opcion.rotulo}</option>)}
+          </select>
+        </div>
+        {/*
+          * Historia 27.3 — el selector de Obra va en la plantilla, entre Autor y Tema, con solo su
+          * primera opción: el guion lo separa del clon antes de insertar el formulario y lo
+          * reinserta en este hueco cuando hay un Autor elegido con Obras que ofrecer. Sus opciones
+          * llegan del mapa de rótulos (`/buscar/obras.json`) y de `filters()`, nunca del HTML.
+          */}
+        <div class="selector">
+          <label for="filtro-de-obra">Obra</label>
+          <select id="filtro-de-obra" data-selector-de-obra autocomplete="off">
+            <option value="">Todas sus obras</option>
+          </select>
+        </div>
+        <div class="selector">
+          <label for="filtro-de-tema">Tema</label>
+          <select id="filtro-de-tema" data-selector-de-tema autocomplete="off">
+            <option value="">Todos los temas</option>
+            {temas.map((opcion) => <option value={opcion.valor}>{opcion.rotulo}</option>)}
+          </select>
+        </div>
+        <button type="button" class="quitar" data-quitar hidden>Quitar los filtros</button>
+      </fieldset>
+    </form>
+    <p class="sombra" aria-hidden="true"></p>
+    {/*
+      * Historia 27.5 — «Mostrar 30 más» y su región de estado, fuera del formulario. El guion separa
+      * el bloque del clon y lo pone detrás de la lista —fuera de su Zona `resultado`, después de los
+      * resultados al tabular— solo cuando quedan resultados por traer; la región entra con él,
+      * vacía y sin `hidden`. El rótulo del botón lo pone el guion (`rotuloDeMostrarMas`).
+      */}
+    <div class="mas" data-mas>
+      <button type="button" data-mostrar-mas></button>
+      <p class="fallo-de-la-tanda" role="status" data-fallo-de-la-tanda></p>
+    </div>
+  </template>
+</div>
+{/*
+  * Historia 27.7 — el aviso del índice que no carga, fuera de `[data-busqueda]`: la isla lo clona
+  * una vez y lo pone justo antes de la lista —bajo el formulario y el recuento, fuera de la Zona
+  * `resultado`— cuando la búsqueda no puede correr.
+  */}
+<template data-plantilla-del-fallo><AvisoDeLaBusqueda caso="fallo" /></template>
+
+<style>
+  .formulario {
+    margin-top: calc(var(--unidad) * 3);
+  }
+
+  /* Sin borde ni relleno: el grupo lo dice la leyenda, que solo oyen los lectores. */
+  .filtros {
+    margin: calc(var(--unidad) * 3) 0 0;
+    padding: 0;
+    border: 0;
+    min-width: 0;
+  }
+
+  .selector + .selector {
+    margin-top: calc(var(--unidad) * 2);
+  }
+
+  .selector label {
+    display: block;
+    margin-bottom: var(--unidad);
+    font-family: var(--sans);
+    font-size: var(--pie);
+    color: var(--tinta-apagada);
+  }
+
+  /* El selector nativo, con su flecha: a todo el ancho de la medida, a la zona de toque. */
+  select {
+    display: block;
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 100%;
+    min-height: var(--zona-de-toque);
+    margin: 0;
+    padding: var(--unidad) calc(var(--unidad) * 1.5);
+    font-family: var(--sans);
+    font-size: var(--cuerpo-lg);
+    color: var(--tinta);
+    background-color: var(--papel);
+    border: var(--grosor-filete) solid var(--contorno);
+    border-radius: var(--radio);
+    /*
+     * NFR-8, Historia 26.9 — ningún control lleva `nowrap`, y el selector nativo lo trae del
+     * navegador (`white-space: pre`): un nombre largo del Corpus, con el texto al 200 %, tiene que
+     * poder partirse en vez de salirse de la columna.
+     */
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+
+  /*
+   * UX-DR9 — secundario: texto en siena con filete, a su ancho, a la zona de toque. «Quitar los
+   * filtros» y, desde la 27.5, «Mostrar 30 más», con el mismo tratamiento.
+   */
+  .quitar,
+  .mas button {
+    display: block;
+    max-width: 100%;
+    font-family: var(--sans);
+    font-size: var(--cuerpo-md);
+    color: var(--siena);
+    background: transparent;
+    border: var(--grosor-filete) solid var(--siena);
+    border-radius: var(--radio);
+    min-height: var(--zona-de-toque);
+    padding-inline: calc(var(--unidad) * 3);
+    cursor: pointer;
+    /* UX-DR22 — solo opacidad y color, y como máximo 150 ms. */
+    transition: background-color 150ms, color 150ms;
+  }
+
+  .quitar {
+    margin-top: calc(var(--unidad) * 2);
+  }
+
+  .quitar:hover,
+  .mas button:hover {
+    background: var(--siena);
+    color: var(--sobre-siena);
+  }
+
+  /* `hidden` gana siempre a `display: block`. */
+  .quitar[hidden] {
+    display: none;
+  }
+
+  /*
+   * La sombra del recuento (26.6): el guion la pone junto a la región `role="status"` de
+   * `/buscar/`, en la misma celda, con la frase que la región escribirá tras la pausa, invisible y
+   * fuera del árbol de accesibilidad. La fila toma su alto al momento y, cuando la frase llega a la
+   * región —que va encima, sin dar alto—, la lista no se mueve.
+   */
+  .sombra {
+    grid-row: 1;
+    grid-column: 1;
+    margin: calc(var(--unidad) * 3) 0 0;
+    font-family: var(--sans);
+    font-size: var(--pie);
+    visibility: hidden;
+    overflow-wrap: anywhere;
+  }
+
+  .sombra:empty {
+    margin: 0;
+  }
+
+  /* Historia 27.5 — el bloque, 3× unidad bajo el último resultado. */
+  .mas {
+    margin-top: calc(var(--unidad) * 3);
+  }
+
+  .mas button {
+    margin: 0;
+  }
+
+  /* La región del botón: vacía no ocupa sitio, y cuando dice el fallo va 2× unidad bajo él. */
+  .fallo-de-la-tanda {
+    margin: calc(var(--unidad) * 2) 0 0;
+    font-family: var(--sans);
+    font-size: var(--pie);
+    line-height: 1.5;
+    color: var(--tinta);
+    overflow-wrap: anywhere;
+  }
+
+  .fallo-de-la-tanda:empty {
+    margin: 0;
+  }
+</style>
+
+<script>
+  import { anunciar, ritmoDeTecleo } from '../lib/anuncio.ts';
+  import {
+    ANUNCIO_DEL_FALLO_DE_LA_BUSQUEDA,
+    FALLO_DE_LA_TANDA,
+    RUTA_DEL_MAPA_DE_OBRAS,
+    autorDeLaObra,
+    avisoDeLaDireccion,
+    combinacionDeFiltros,
+    direccionDeLaBusqueda,
+    entradaConEstado,
+    escrituraDelHistorial,
+    estadoDeLaDireccion,
+    estadoDeLaEntrada,
+    estadoSinNada,
+    filtrosDePagefind,
+    fraseDelRecuento,
+    hayFiltros,
+    mismoEstado,
+    opcionesDeObra,
+    resolverEstado,
+    rotuloDeMostrarMas,
+    rotuloDeObra,
+    sugerenciaSinResultados,
+    valoresDeFiltros,
+    type ControlDeLaBusqueda,
+    type DatosDelRecuento,
+    type EstadoDeLaBusqueda,
+    type FiltrosElegidos,
+    type MapaDeObras,
+  } from '../lib/busqueda.ts';
+  import { ASENTAMIENTO_DE_BUSQUEDA, asentamientoDeBusqueda, type EstadoDeBusqueda } from '../lib/medicion.ts';
+  import {
+    ETIQUETAS_DE_RESULTADO,
+    FILTRO_DE_TIPO,
+    FILTROS_DE_CITA,
+    OPCIONES_DE_PAGEFIND,
+    ORDEN_DE_CITA,
+    TIPO_POR_OMISION,
+    TIPOS_CON_LINEA_DE_AUTOR,
+    TIPOS_CON_TITULO_EN_SANS,
+    type TipoDeResultado,
+  } from '../lib/tipoDeResultado.ts';
+  import { PAUSA_DE_LOS_SELECTORES_MS, PAUSA_DE_TECLEO_MS, TANDA_DE_RESULTADOS } from '../lib/umbrales.ts';
+
+  /** La cola de medición que abre el arranque del armazón (AD-13). */
+  declare function __medir(...argumentos: unknown[]): void;
+
+  /** Lo que da `data()` de un resultado de Pagefind. */
+  interface DatoDeResultado {
+    url: string;
+    meta?: Record<string, unknown>;
+    filters?: Record<string, string[] | undefined>;
+  }
+
+  /** Los resultados de una búsqueda de Pagefind: el total es su largo, y cada uno da sus datos. */
+  type Resultados = { id?: string; data(): Promise<DatoDeResultado> }[];
+
+  /** Lo que este guion usa del módulo de Pagefind. */
+  interface Pagefind {
+    init(): Promise<void>;
+    options(opciones: unknown): Promise<void>;
+    search(
+      texto: string | null,
+      opciones?: { filters: Record<string, string>; sort?: Record<string, 'asc'> },
+    ): Promise<{ results: Resultados }>;
+    destroy?(): Promise<void>;
+    /** Historia 27.3 — los recuentos de cada valor de cada filtro, sobre el índice entero. */
+    filters(): Promise<Record<string, Record<string, number> | undefined>>;
+  }
+
+  /** Lo que el selector de Obra necesita de la red: el mapa de rótulos y los recuentos de `obra`. */
+  interface DatosDeObra {
+    mapa: MapaDeObras;
+    recuentos: Record<string, number>;
+  }
+
+  /** Por dónde llega una búsqueda: decide con qué ritmo se escribe su recuento. */
+  type Origen = 'tecleo' | 'gesto';
+
+  function iniciar(raiz: HTMLElement) {
+    const plantilla = raiz.querySelector('template');
+    const lista = document.querySelector<HTMLElement>('[data-resultados]');
+    const estado = document.querySelector<HTMLElement>('[data-estado]');
+    const salida = document.querySelector<HTMLElement>('[data-salida]');
+    // Historia 27.7 — el aviso del índice que no carga, clonado una vez y reutilizado.
+    const delFallo = document.querySelector<HTMLTemplateElement>('[data-plantilla-del-fallo]');
+    const avisoDelFallo = delFallo?.content.firstElementChild?.cloneNode(true) as HTMLElement | undefined;
+    if (!plantilla || !lista || !estado || !salida || !avisoDelFallo) return;
+
+    const contenido = plantilla.content.cloneNode(true) as DocumentFragment;
+    const formulario = contenido.querySelector('form');
+    const campo = contenido.querySelector<HTMLInputElement>('[data-consulta]');
+    const autor = contenido.querySelector<HTMLSelectElement>('[data-selector-de-autor]');
+    const obra = contenido.querySelector<HTMLSelectElement>('[data-selector-de-obra]');
+    const tema = contenido.querySelector<HTMLSelectElement>('[data-selector-de-tema]');
+    const quitar = contenido.querySelector<HTMLButtonElement>('[data-quitar]');
+    const sombra = contenido.querySelector<HTMLElement>('.sombra');
+    // Historia 27.5 — el bloque de «Mostrar 30 más», con su botón y su región.
+    const mas = contenido.querySelector<HTMLElement>('[data-mas]');
+    const boton = contenido.querySelector<HTMLButtonElement>('[data-mostrar-mas]');
+    const fallo = contenido.querySelector<HTMLElement>('[data-fallo-de-la-tanda]');
+    if (!formulario || !campo || !autor || !obra || !tema || !quitar || !sombra || !mas || !boton || !fallo) return;
+    // Historia 27.3 — el `.selector` de Obra sale del clon: sin Autor con Obras, no existe.
+    const cajaDeAutor = autor.parentElement;
+    const cajaDeObra = obra.parentElement;
+    const todasSusObras = obra.options[0];
+    // Historia 27.4 — la ruta de la dirección, la del `action` del formulario (`rutaDeLaBusqueda()`).
+    const ruta = formulario.getAttribute('action');
+    if (!cajaDeAutor || !cajaDeObra || !todasSusObras || !ruta) return;
+    cajaDeObra.remove();
+    // Historia 27.5 — el bloque sale del clon: solo está, detrás de la lista, si quedan resultados.
+    mas.remove();
+    // Historia 27.7 — con todo lo necesario a mano, el aviso previo sale antes que entre el formulario.
+    raiz.querySelector('[data-aviso-previo]')?.remove();
+    raiz.append(formulario);
+    estado.before(sombra);
+
+    const A = asentamientoDeBusqueda(ASENTAMIENTO_DE_BUSQUEDA);
+    const ritmo = ritmoDeTecleo(estado, PAUSA_DE_TECLEO_MS);
+    const hechos: string[] = [];
+    let indice: Promise<Pagefind | null> | null = null;
+    let fallos = 0;
+    let ultima: string | null = '';
+    let pendiente: Promise<void> = Promise.resolve();
+    let turno = 0;
+    let visto: EstadoDeBusqueda | null = null;
+    let vista = !document.hidden;
+    let aCero = false;
+    let tecleo: ReturnType<typeof setTimeout> | undefined;
+    let eleccion: ReturnType<typeof setTimeout> | undefined;
+    /** Cuándo fue la última tecla: la pausa del recuento de lo tecleado cuenta desde ella. */
+    let tecla = 0;
+    /** Cuántas veces se pintó o se vació la lista: la sugerencia a cero solo cae si no cambió. */
+    let pintadas = 0;
+    /** Historia 27.3 — el mapa de rótulos, guardado para la carga tras el primer éxito. */
+    let mapa: MapaDeObras | null = null;
+    /** Los recuentos de `obra` de `filters()`, guardados para la carga tras el primer éxito. */
+    let recuentos: Record<string, number> | null = null;
+    /** La petición de los dos en curso, si la hay: dos Autores seguidos no la piden dos veces. */
+    let pidiendo: Promise<DatosDeObra | null> | null = null;
+    /** El Autor que empezó la petición en curso. */
+    let pedidaPara = '';
+    /** El Autor vigente: el de la última búsqueda lanzada; un cambio de Autor lo vacía al momento. */
+    let vigente = '';
+    /** El Autor para el que está compuesto el selector de Obra que se ve; `null`, ninguno. */
+    let compuestoPara: string | null = null;
+    /** Los títulos de las Obras ofrecidas, por nombre de ficha: el recuento dice el título. */
+    let titulos = new Map<string, string>();
+    /** Historia 27.4 — la escritura de lo tecleado en la dirección, al cumplirse su pausa. */
+    let escritura: ReturnType<typeof setTimeout> | undefined;
+    /** El control cuya escritura espera su pausa (la del campo o la de un selector), o `null`. */
+    let pendienteDe: ControlDeLaBusqueda | null = null;
+    /** El control que lanzó la búsqueda que se ve (`null`, una llegada): con él se escribe al asentar. */
+    let controlDelVisto: ControlDeLaBusqueda | null = null;
+    /** El control que abrió la entrada actual; `null` tras una llegada, un `popstate` o un asentamiento. */
+    let controlDeLaEntrada: ControlDeLaBusqueda | null = null;
+    /** El estado de la búsqueda que se ve, con sus identificadores: lo que se escribe al asentar. */
+    let estadoVisto: EstadoDeLaBusqueda | null = null;
+    /** La llegada en curso: un gesto o una llegada posterior la dejan sin efecto si espera datos. */
+    let llegada = 0;
+    /**
+     * Historia 27.5 — los `results` de la búsqueda que se ve y cuántos de ellos están pintados: la
+     * tanda siguiente sale del mismo `results`, desde ahí.
+     */
+    let todos: Resultados = [];
+    let enLaLista = 0;
+    /** La búsqueda que se ve, repetible con sus mismos argumentos: el reintento de una tanda fallida. */
+    let repetir: ((pf: Pagefind) => Promise<{ results: Resultados }>) | null = null;
+    /**
+     * Si la última tanda falló, la destrucción del índice que siguió (`null`, ninguna): la tanda
+     * siguiente la espera y rehace la búsqueda en vez de fiarse de su `results`.
+     */
+    let averiada: Promise<unknown> | null = null;
+    /**
+     * La tanda en vuelo, por su número (0, ninguna): un gesto, una búsqueda lanzada o pintada la
+     * olvidan poniéndolo a 0. `tandas` las numera desde 1, así que ninguna se confunde con «ninguna»
+     * y una tanda que llega sabe si sigue siendo la vigente (`tanda === mia`).
+     */
+    let tanda = 0;
+    let tandas = 0;
+    /** La tanda cuyo fallo se está diciendo (0, ninguna): una que llega después lo deja sin escribir. */
+    let fallida = 0;
+    /** El `turno` de la búsqueda que se ve: si otro posterior está en vuelo, el índice no se destruye bajo él. */
+    let turnoVisto = 0;
+    /**
+     * Historia 27.4 — la búsqueda (como estado, no como cadena) y el fragmento de la dirección de la
+     * entrada actual: un salto de ancla cambia el fragmento y no la búsqueda.
+     */
+    let busquedaDeLaEntrada = estadoDeLaDireccion(location.search);
+    let anclaDeLaEntrada = location.hash;
+    const recordarLaEntrada = () => {
+      busquedaDeLaEntrada = estadoDeLaDireccion(location.search);
+      anclaDeLaEntrada = location.hash;
+    };
+
+    const obraEnElDom = () => compuestoPara !== null;
+    const elegidos = (): FiltrosElegidos => ({
+      autor: autor.value,
+      ...(obraEnElDom() && obra.value !== '' ? { obra: obra.value } : {}),
+      tema: tema.value,
+    });
+    /** Historia 27.4 — el estado de la isla, con identificadores: lo que dice el campo y lo elegido. */
+    const estadoDeLaIsla = (): EstadoDeLaBusqueda => {
+      const f = elegidos();
+      return { texto: campo.value, autor: f.autor, obra: f.obra ?? '', tema: f.tema };
+    };
+    /** Los valores de las opciones de un selector, sin la primera («Todos…»). */
+    const valoresDe = (selector: HTMLSelectElement) => [...selector.options].map((o) => o.value).filter((v) => v !== '');
+    /** El nombre de la opción elegida, tal como se lee. */
+    const nombreDe = (selector: HTMLSelectElement) => selector.options[selector.selectedIndex]?.textContent?.trim() ?? '';
+
+    function cargar(): Promise<Pagefind | null> {
+      if (!indice) {
+        indice = import(/* @vite-ignore */ '/pagefind/pagefind.js' + (fallos ? '?' + fallos : ''))
+          .then(async (pf: Pagefind) => {
+            await pf.init();
+            return pf;
+          })
+          .catch(() => {
+            fallos++;
+            indice = null;
+            return null;
+          });
+      }
+      return indice;
+    }
+
+    /**
+     * Historia 26.2 — el índice con `OPCIONES_DE_PAGEFIND` aplicadas, antes de **cada** `search()`:
+     * el de una búsqueda y, desde la 27.5, el del reintento de una tanda. Un solo sitio las aplica.
+     * Sin índice, lanza: quien llama lo hace dentro de su `try`.
+     */
+    async function conOpciones(pf: Pagefind | null): Promise<Pagefind> {
+      await pf!.options(OPCIONES_DE_PAGEFIND);
+      return pf!;
+    }
+
+    /**
+     * Historia 27.3 — el mapa de rótulos y `filters()`, juntos y solo con intención: al elegir un
+     * Autor. Un éxito se guarda para la carga; un fallo de cualquiera de los dos da `null`, sin
+     * promesa rechazada, y el siguiente Autor elegido lo vuelve a pedir —el mapa, con otro `fetch`;
+     * Pagefind, con el reintento de `cargar`—.
+     */
+    function pedirDatosDeObra(para: string): Promise<DatosDeObra | null> {
+      if (mapa && recuentos) return Promise.resolve({ mapa, recuentos });
+      if (pidiendo) return pidiendo;
+      pedidaPara = para;
+      const delMapa: Promise<MapaDeObras> = mapa
+        ? Promise.resolve(mapa)
+        : fetch(RUTA_DEL_MAPA_DE_OBRAS)
+            .then((r) => {
+              if (!r.ok) throw new Error(String(r.status));
+              return r.json();
+            })
+            .then((leido: unknown) => {
+              if (typeof leido !== 'object' || leido === null || Array.isArray(leido)) throw new Error('mapa');
+              return (mapa = leido as MapaDeObras);
+            });
+      const deFiltros: Promise<Record<string, number>> = recuentos
+        ? Promise.resolve(recuentos)
+        : cargar()
+            .then((pf) => {
+              if (!pf) throw new Error('índice');
+              return pf.filters();
+            })
+            .then((todos) => {
+              // Un índice sin el filtro `obra` no es «ninguna Obra»: es que no llegó, y se reintenta.
+              const deObra = todos?.[FILTROS_DE_CITA.obra];
+              if (typeof deObra !== 'object' || deObra === null) throw new Error('obra');
+              return (recuentos = deObra);
+            });
+      return (pidiendo = Promise.all([delMapa, deFiltros])
+        .then(([m, r]) => ({ mapa: m, recuentos: r }))
+        .catch(() => null)
+        .finally(() => {
+          pidiendo = null;
+        }));
+    }
+
+    /** Quita el selector de Obra y vacía su elección. No mueve el foco. */
+    function quitarObra() {
+      obra!.value = '';
+      compuestoPara = null;
+      titulos = new Map();
+      cajaDeObra!.remove();
+    }
+
+    /**
+     * Compone el selector de Obra si están a la vez el Autor vigente y los datos, y no está ya
+     * compuesto para él: elegir Obra o Tema no lo recompone. Las opciones, en el orden del mapa y
+     * con los recuentos de `filters()` (`opcionesDeObra`); sin ninguna, no aparece. Insertarlo en
+     * su hueco, tras el `.selector` de Autor, no mueve el foco.
+     */
+    function componerObra() {
+      if (vigente === '' || vigente !== autor!.value || compuestoPara === vigente || !mapa || !recuentos) return;
+      const opciones = opcionesDeObra(mapa, recuentos, vigente);
+      if (opciones.length === 0) return;
+      obra!.replaceChildren(todasSusObras!, ...opciones.map((o) => new Option(rotuloDeObra(o), o.valor)));
+      obra!.value = '';
+      titulos = new Map(opciones.map((o) => [o.valor, o.titulo]));
+      compuestoPara = vigente;
+      cajaDeAutor!.after(cajaDeObra!);
+    }
+
+    /**
+     * Historia 27.5 — quita el bloque de «Mostrar 30 más», vacía su región y olvida la tanda en
+     * vuelo y su avería: lo hace todo lo que repinta o vacía la lista.
+     */
+    function quitarMas() {
+      tanda = 0;
+      averiada = null;
+      fallo!.textContent = '';
+      mas!.remove();
+    }
+
+    /**
+     * Historia 27.5 — pone el bloque detrás de la lista con el rótulo de lo que queda del mismo
+     * `results` (`rotuloDeMostrarMas`), o lo quita si no queda nada. Ya puesto, solo cambia el rótulo.
+     */
+    function ponerMas() {
+      const rotulo = rotuloDeMostrarMas(todos.length - enLaLista);
+      if (rotulo === null) return quitarMas();
+      boton!.textContent = rotulo;
+      if (!mas!.isConnected) lista!.after(mas!);
+    }
+
+    /**
+     * Historia 27.7 — la búsqueda que no puede correr: el aviso del fallo justo antes de la lista
+     * —bajo el formulario y el recuento, fuera de la Zona `resultado`—, en lugar de los resultados.
+     * Lista vacía, sin «Mostrar 30 más», sin salida y sin sombra; la región se aparta de la vista y
+     * lo anuncia una vez con el primer ritmo, como a cero. Nada asentable: con el aviso a la vista
+     * no hay búsqueda que asentar, y un fallo no es un tramo 0.
+     */
+    function mostrarFallo() {
+      const vez = ++pintadas;
+      lista!.replaceChildren();
+      quitarMas();
+      salida!.hidden = true;
+      sombra!.textContent = '';
+      aCero = false;
+      visto = null;
+      estadoVisto = null;
+      controlDelVisto = null;
+      if (!avisoDelFallo!.isConnected) lista!.before(avisoDelFallo!);
+      estado!.classList.add('solo-para-lectores');
+      ritmo.vaciar();
+      anunciar(
+        {
+          set textContent(texto: string | null) {
+            if (vez === pintadas) estado!.textContent = texto;
+          },
+        },
+        ANUNCIO_DEL_FALLO_DE_LA_BUSQUEDA,
+      );
+    }
+
+    /** Historia 27.7 — quita el aviso del fallo, si está. Devuelve si estaba. */
+    function quitarFallo(): boolean {
+      if (!avisoDelFallo!.isConnected) return false;
+      avisoDelFallo!.remove();
+      return true;
+    }
+
+    /**
+     * Pinta una búsqueda con los datos de su recuento —el total, el texto y los nombres de lo
+     * filtrado—. `aviso` es la frase de la 27.4 de los filtros de la dirección que no se pueden
+     * usar: va delante del recuento, con un espacio, en la región y en la sombra.
+     *
+     * Historia 27.6 — a cero, la frase la compone `sugerenciaSinResultados` (nombra lo filtrado) y
+     * se escribe, con el aviso delante, en la `.sugerencia` de la salida por `textContent`: es el
+     * único sitio donde se ve. La región la anuncia una vez con el primer ritmo y queda **siempre**
+     * apartada de la vista, con aviso o sin él, y la sombra vacía: la frase no se pinta dos veces.
+     */
+    function pintar(resultados: DatoDeResultado[], datos: DatosDelRecuento, origen: Origen, aviso = '') {
+      lista!.replaceChildren();
+      quitarMas();
+      // Historia 27.7 — al salir del aviso del fallo, la región dice todavía su frase: se vacía antes.
+      const desdeElFallo = quitarFallo();
+      const vez = ++pintadas;
+      const conAviso = (texto: string) => (aviso ? aviso + ' ' + texto : texto);
+
+      const vacio = resultados.length === 0;
+      estado!.classList.toggle('solo-para-lectores', vacio);
+      if (vacio) {
+        aCero = true;
+        const sugerencia = conAviso(sugerenciaSinResultados(datos));
+        const enLaSalida = salida!.querySelector('.sugerencia');
+        if (enLaSalida) enLaSalida.textContent = sugerencia;
+        sombra!.textContent = '';
+        ritmo.vaciar();
+        anunciar(
+          {
+            set textContent(texto: string | null) {
+              if (vez === pintadas) estado!.textContent = texto;
+            },
+          },
+          sugerencia,
+        );
+        salida!.hidden = false;
+        return;
+      }
+
+      salida!.hidden = true;
+      // Al salir de cero o del fallo, la región dice todavía su frase: se vacía antes de la pausa.
+      if (aCero || desdeElFallo) ritmo.vaciar();
+      aCero = false;
+      const frase = conAviso(fraseDelRecuento(datos));
+      sombra!.textContent = frase;
+      if (origen === 'tecleo') ritmo.anunciar(frase, Math.max(0, tecla + PAUSA_DE_TECLEO_MS - performance.now()));
+      else ritmo.ahora(frase);
+
+      for (const dato of resultados) filaDeResultado(dato);
+      enLaLista = resultados.length;
+      ponerMas();
+    }
+
+    /**
+     * Historia 27.5 — una fila de resultado, añadida al final de la lista: la misma para la primera
+     * tanda y para las siguientes. Devuelve su enlace, al que va el foco de una tanda nueva.
+     */
+    function filaDeResultado(dato: DatoDeResultado): HTMLAnchorElement {
+      const tipo = (dato.filters?.[FILTRO_DE_TIPO]?.[0] || TIPO_POR_OMISION) as TipoDeResultado;
+      const rotulo = ETIQUETAS_DE_RESULTADO[tipo] || ETIQUETAS_DE_RESULTADO[TIPO_POR_OMISION];
+
+      const li = document.createElement('li');
+      li.className = 'resultado';
+
+      const a = document.createElement('a');
+      a.href = dato.url.replace(/[.]html$/, '');
+
+      const clase = document.createElement('span');
+      clase.className = 'clase';
+      clase.dataset.tipo = tipo;
+      clase.textContent = rotulo;
+
+      const t = typeof dato.meta?.title === 'string' ? dato.meta.title : '';
+      const titulo = document.createElement('span');
+      titulo.className = 'titulo';
+      titulo.textContent = t || dato.url;
+      a.append(clase, titulo);
+
+      const sans = TIPOS_CON_TITULO_EN_SANS.includes(tipo);
+      if (sans) titulo.classList.add('en-sans');
+      const deAutor = TIPOS_CON_LINEA_DE_AUTOR.includes(tipo) && typeof dato.meta?.autor === 'string' ? dato.meta.autor.trim() : '';
+      if (deAutor) {
+        const linea = document.createElement('span');
+        linea.className = 'r-autor';
+        linea.textContent = deAutor;
+        a.append(linea);
+      }
+      if (t && (sans || deAutor)) a.setAttribute('aria-label', rotulo + ': ' + t + (deAutor ? ', ' + deAutor : ''));
+
+      li.append(a);
+      lista!.append(li);
+      return a;
+    }
+
+    function buscar(origen: Origen, control: ControlDeLaBusqueda | null, aviso = ''): Promise<void> {
+      // El Autor de esta búsqueda pasa a ser el vigente: con los datos ya aquí, su Obra aparece.
+      vigente = autor!.value;
+      componerObra();
+      const texto = campo!.value;
+      const filtros = elegidos();
+      const clave = JSON.stringify([texto, filtros.autor, filtros.obra ?? '', filtros.tema]);
+      if (clave === ultima) return pendiente;
+      ultima = clave;
+      const mio = ++turno;
+      // Historia 27.5 — una búsqueda lanzada deja sin efecto la tanda en vuelo de la que se ve.
+      tanda = 0;
+      const conFiltros = hayFiltros(filtros);
+      const sinTexto = texto.trim() === '';
+
+      if (sinTexto && !conFiltros) {
+        pintadas++;
+        lista!.replaceChildren();
+        quitarMas();
+        quitarFallo();
+        ritmo.vaciar();
+        sombra!.textContent = '';
+        salida!.hidden = true;
+        visto = null;
+        estadoVisto = null;
+        return (pendiente = Promise.resolve());
+      }
+      const deEsta: EstadoDeLaBusqueda = { texto, autor: filtros.autor, obra: filtros.obra ?? '', tema: filtros.tema };
+
+      // Los nombres, de lo elegido al lanzar la búsqueda: el recuento dice lo que se buscó.
+      // El título del mapa, nunca el rótulo de la opción con su recuento; sin título, no se nombra.
+      const tituloDeObra = filtros.obra ? titulos.get(filtros.obra) : undefined;
+      const nombres = {
+        ...(filtros.autor ? { autor: nombreDe(autor!) } : {}),
+        ...(tituloDeObra ? { obra: tituloDeObra } : {}),
+        ...(filtros.tema ? { tema: nombreDe(tema!) } : {}),
+      };
+      const filters = filtrosDePagefind(filtros);
+      // Historia 27.5 — la búsqueda, repetible con sus mismos argumentos: el reintento de una tanda.
+      const pedir = (pf: Pagefind) =>
+        conFiltros
+          ? sinTexto
+            ? pf.search(null, { filters, sort: { [ORDEN_DE_CITA]: 'asc' } })
+            : pf.search(texto, { filters })
+          : pf.search(texto);
+
+      return (pendiente = (async () => {
+        let pf: Pagefind | null | undefined;
+        let respuesta: Awaited<ReturnType<Pagefind['search']>>;
+        let resultados: DatoDeResultado[];
+        try {
+          // Historia 27.5 — si una tanda fallida destruye el índice, se espera: no se busca a medio destruir.
+          if (averiada) await averiada;
+          pf = await cargar();
+          respuesta = await pedir(await conOpciones(pf));
+          resultados = await Promise.all(respuesta.results.slice(0, TANDA_DE_RESULTADOS).map((r) => r.data()));
+        } catch {
+          const destruccion = pf?.destroy?.().catch(() => {});
+          const conMas = mas!.isConnected;
+          // Historia 27.7 — la última búsqueda lanzada no pudo correr: el aviso del fallo en lugar de
+          // los resultados. Una ya superada por otra no pinta nada.
+          if (mio === turno) {
+            ultima = null;
+            mostrarFallo();
+          }
+          // Historia 27.5 — si seguía a la vista una lista con su bloque, sus `results` eran del índice
+          // que se acaba de destruir: lo siguiente espera la destrucción, como tras un fallo de tanda.
+          // Historia 27.7 — y tras el aviso del fallo, el reintento también la espera: no busca en un
+          // índice a medio destruir (Pagefind lo suelta solo al acabar `destroy()`).
+          if (conMas || mio === turno) averiada = destruccion || Promise.resolve();
+          return;
+        }
+        if (mio !== turno) return;
+        turnoVisto = mio;
+        const total = respuesta.results.length;
+        const valores = valoresDeFiltros(filtros);
+        visto = { texto, filtros: combinacionDeFiltros(filtros), total, ...(valores ? { valores } : {}) };
+        estadoVisto = deEsta;
+        controlDelVisto = control;
+        todos = respuesta.results;
+        repetir = pedir;
+        pintar(resultados, { total, texto, ...nombres }, origen, aviso);
+      })());
+    }
+
+    /**
+     * Historia 27.4 — escribe `actual` en la dirección, si no es lo que ya dice, con `pushState` o
+     * `replaceState` según `escrituraDelHistorial`. Siempre en `try`: si el historial lanza, la
+     * dirección y el control de la entrada se quedan como estaban, y la escritura siguiente lo
+     * vuelve a intentar. Devuelve si escribió.
+     */
+    function escribir(control: ControlDeLaBusqueda, actual: EstadoDeLaBusqueda = estadoDeLaIsla()): boolean {
+      const como = escrituraDelHistorial({
+        igual: mismoEstado(actual, estadoDeLaDireccion(location.search)),
+        control,
+        controlDeLaEntrada,
+      });
+      if (como === 'ninguna') return false;
+      const direccion = direccionDeLaBusqueda(actual, ruta!);
+      try {
+        // Una entrada nueva empieza con su objeto: la marca de la anterior no pasa a ella.
+        if (como === 'pushState') history.pushState(entradaConEstado(null, actual), '', direccion);
+        else history.replaceState(entradaConEstado(history.state, actual), '', direccion);
+      } catch {
+        return false;
+      }
+      recordarLaEntrada();
+      controlDeLaEntrada = control;
+      return true;
+    }
+
+    /** Historia 27.4 — reemplaza la entrada actual por `nuevo`, sin abrir otra. En `try`; devuelve si escribió. */
+    function reemplazar(nuevo: EstadoDeLaBusqueda): boolean {
+      try {
+        history.replaceState(entradaConEstado(history.state, nuevo), '', direccionDeLaBusqueda(nuevo, ruta!));
+      } catch {
+        return false;
+      }
+      recordarLaEntrada();
+      return true;
+    }
+
+    function asentar() {
+      if (!vista || !visto) return;
+      const r = A.emisiones(visto, hechos);
+      // Lo que no se emite ahora solo cuenta si ya se emitió en la carga: si no, no es asentable.
+      if (!r && !hechos.includes(A.clave(visto.texto, visto.filtros, visto.valores))) return;
+      /*
+       * Historia 27.4 — asentar no abre entrada: marca la suya. Si lo que se ve no es lo que dice
+       * la dirección —su escritura aún esperaba la pausa—, el gesto termina la pausa, como Enter:
+       * primero se escribe con su regla, y después la marca.
+       */
+      let enLaDireccion = true;
+      if (estadoVisto && !mismoEstado(estadoVisto, estadoDeLaDireccion(location.search))) {
+        if (pendienteDe !== null && mismoEstado(estadoVisto, estadoDeLaIsla())) {
+          clearTimeout(escritura);
+          clearTimeout(eleccion);
+          pendienteDe = null;
+        }
+        // Lo que pintó una llegada o un `popstate` (sin control) es de su entrada: la reemplaza.
+        enLaDireccion = controlDelVisto === null ? reemplazar(estadoVisto) : escribir(controlDelVisto, estadoVisto);
+      }
+      controlDeLaEntrada = null;
+      if (r) {
+        hechos.push(r.clave);
+        r.eventos.forEach((x) => __medir(...x));
+      }
+      // La marca va en toda entrada con objeto que diga lo que se ve y no la lleve, aunque ese
+      // estado ya se emitiera en la carga: sin la marca, una recarga lo reemitiría. Una entrada sin
+      // objeto solo se marca al emitir: si no, ya la cubre Navigation Timing. Y si la dirección no
+      // pudo decir lo que se ve, no se marca una entrada que dice otra búsqueda.
+      const conObjeto = typeof history.state === 'object' && history.state !== null;
+      if (!enLaDireccion && !estadoSinNada(estadoDeLaDireccion(location.search))) return;
+      if (A.yaRegistrada(history.state) || (!r && !conObjeto)) return;
+      try {
+        history.replaceState(A.marcada(history.state), '');
+      } catch {}
+    }
+
+    campo.addEventListener('focus', cargar, { once: true });
+    /** Historia 27.4 — un gesto deja sin efecto la llegada que aún espera sus datos, y cancela las pausas. */
+    const gesto = () => {
+      llegada++;
+      tanda = 0;
+      clearTimeout(tecleo);
+      clearTimeout(eleccion);
+      clearTimeout(escritura);
+      pendienteDe = null;
+    };
+
+    campo.addEventListener('input', () => {
+      gesto();
+      tecla = performance.now();
+      tecleo = setTimeout(() => buscar('tecleo', 'campo'), 150);
+      // Historia 27.4 — lo tecleado entra en la dirección al cumplirse su pausa, contada desde la
+      // última tecla: un temporizador propio, nunca por tecla.
+      pendienteDe = 'campo';
+      escritura = setTimeout(() => {
+        pendienteDe = null;
+        escribir('campo');
+      }, PAUSA_DE_TECLEO_MS);
+    });
+
+    const alElegir = (control: ControlDeLaBusqueda) => {
+      gesto();
+      quitar.hidden = !hayFiltros(elegidos());
+      cargar();
+      // Historia 27.4 — el selector escribe cuando lanza su búsqueda, al cumplirse su pausa.
+      pendienteDe = control;
+      eleccion = setTimeout(() => {
+        pendienteDe = null;
+        buscar('gesto', control);
+        escribir(control);
+      }, PAUSA_DE_LOS_SELECTORES_MS);
+    };
+    /*
+     * Historia 27.3 — cambiar el Autor quita la Obra al momento (elegida y selector) y pide, si hay
+     * Autor, el mapa y `filters()`; el selector se rehace para el Autor nuevo cuando su pausa se
+     * cumple y los datos están. Una respuesta tardía solo pinta si el Autor sigue siendo el mismo.
+     * Un Autor elegido con la petición de otro ya en vuelo se suma a ella; si esa falla y él sigue
+     * elegido, es «el siguiente Autor» del reintento y la pide otra vez, una sola. (Elegir da
+     * `input` y `change`: el segundo se suma a la petición del mismo Autor, y no cuenta.)
+     */
+    const alCambiarElAutor = () => {
+      vigente = '';
+      if (obraEnElDom()) quitarObra();
+      if (autor.value === '') return;
+      const elegido = autor.value;
+      const deOtro = pidiendo !== null && pedidaPara !== elegido;
+      pedirDatosDeObra(elegido)
+        .then((datos) => (datos === null && deOtro && autor!.value === elegido ? pedirDatosDeObra(elegido) : datos))
+        .then(componerObra)
+        .catch(() => {});
+    };
+    for (const [selector, control] of [
+      [autor, 'selector-de-autor'],
+      [obra, 'selector-de-obra'],
+      [tema, 'selector-de-tema'],
+    ] as const) {
+      const alCambiar =
+        selector === autor
+          ? () => {
+              alCambiarElAutor();
+              alElegir(control);
+            }
+          : () => alElegir(control);
+      selector.addEventListener('change', alCambiar);
+      selector.addEventListener('input', alCambiar);
+    }
+
+    quitar.addEventListener('click', () => {
+      autor.value = '';
+      tema.value = '';
+      vigente = '';
+      if (obraEnElDom()) quitarObra();
+      quitar.hidden = true;
+      gesto();
+      buscar('gesto', 'quitar');
+      escribir('quitar');
+      campo.focus();
+    });
+
+    /*
+     * Historia 27.5 — «Mostrar 30 más»: la tanda siguiente del mismo `results`, todo o nada. Con una
+     * tanda en vuelo, pulsar no hace nada. Llega solo si sigue siendo la de la búsqueda que se ve y
+     * nada la dejó sin efecto: añade sus filas, lleva el foco al primer resultado nuevo y pone al día
+     * el rótulo; ni el recuento, ni la dirección, ni la medición cambian. Si falla, nada se pinta,
+     * el foco se queda en el botón, su región lo dice y, si la búsqueda sigue siendo la que se ve, se
+     * destruye el índice: la siguiente pulsación rehace la búsqueda con los mismos argumentos.
+     */
+    boton.addEventListener('click', async () => {
+      if (tanda) return;
+      const mia = (tanda = ++tandas);
+      const vez = pintadas;
+      const mio = turno;
+      const desde = enLaLista;
+      let nuevos = todos;
+      let datos: DatoDeResultado[];
+      try {
+        if (averiada) {
+          await averiada;
+          nuevos = (await repetir!(await conOpciones(await cargar()))).results;
+        }
+        datos = await Promise.all(nuevos.slice(desde, desde + TANDA_DE_RESULTADOS).map((r) => r.data()));
+      } catch {
+        // Solo la tanda vigente lo dice; una que un gesto o otra tanda dejaron atrás calla. Y el
+        // índice no se destruye bajo otra tanda ni bajo otra búsqueda en vuelo: si fallan, lo harán ellas.
+        const vigente = tanda === mia;
+        if (vigente) tanda = 0;
+        if (vez !== pintadas) return;
+        if (mio === turno && turno === turnoVisto && !tanda) averiada = cargar().then((pf) => pf?.destroy?.()).catch(() => {});
+        if (!vigente) return;
+        fallida = mia;
+        anunciar(
+          {
+            set textContent(texto: string | null) {
+              if (vez === pintadas && fallida === mia) fallo.textContent = texto;
+            },
+          },
+          FALLO_DE_LA_TANDA,
+        );
+        return;
+      }
+      if (tanda !== mia || vez !== pintadas) return;
+      tanda = fallida = 0;
+      averiada = null;
+      // El `results` del reintento pasa a ser el de las tandas siguientes.
+      todos = nuevos;
+      fallo.textContent = '';
+      // Sin filas nuevas —el `results` del reintento es más corto—, el bloque sale con el foco: va al último resultado.
+      (datos.map(filaDeResultado)[0] ?? (lista!.children[enLaLista - 1]?.children[0] as HTMLElement | undefined))?.focus();
+      enLaLista += datos.length;
+      ponerMas();
+    });
+
+    formulario.addEventListener('submit', (e) => {
+      e.preventDefault();
+      gesto();
+      const texto = campo.value;
+      const valores = valoresDeFiltros(elegidos());
+      // Historia 27.4 — enviar termina la pausa: lo enviado entra en la dirección al momento.
+      escribir('campo');
+      buscar('gesto', 'campo').then(() => {
+        if (!visto || visto.texto !== texto || visto.valores !== valores) return;
+        // Enviar es un gesto: el recuento de lo tecleado que esperaba su pausa se escribe ya.
+        if (!aCero && sombra.textContent) ritmo.ahora(sombra.textContent);
+        asentar();
+      });
+    });
+
+    for (const tipo of ['click', 'auxclick'] as const) {
+      lista.addEventListener(tipo, (e) => {
+        if ((tipo === 'click' || e.button === 1) && (e.target as Element).closest('a')) asentar();
+      });
+    }
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) asentar();
+      else vista = true;
+    });
+    addEventListener('pagehide', asentar);
+
+    /**
+     * Historia 27.4 — pone un estado en los controles: el campo (su `value` se relee: un campo de
+     * búsqueda quita los saltos de línea), los selectores de Autor y de Tema, el de Obra —quitado si
+     * era de otro Autor, compuesto para el Autor si los datos están, y elegido— y «Quitar los
+     * filtros». Un valor que no es de ninguna opción deja el selector en «Todos…».
+     */
+    function ponerEstado(nuevo: EstadoDeLaBusqueda) {
+      campo!.value = nuevo.texto;
+      if (obraEnElDom() && compuestoPara !== nuevo.autor) quitarObra();
+      for (const [selector, valor] of [
+        [autor!, nuevo.autor],
+        [tema!, nuevo.tema],
+      ] as const) {
+        selector.value = valor;
+        if (selector.value !== valor) selector.value = '';
+      }
+      vigente = autor!.value;
+      componerObra();
+      if (obraEnElDom()) {
+        obra!.value = nuevo.obra;
+        if (obra!.value !== nuevo.obra) obra!.value = '';
+      }
+      quitar!.hidden = !hayFiltros(elegidos());
+    }
+
+    /**
+     * Historia 27.4 — resuelve lo leído (`resolverEstado`, con lo que ofrecen los selectores y, con
+     * Obra, el mapa y `filters()`), lo pone en los controles y busca con el ritmo `ahora`, con la
+     * frase de lo que no se puede usar delante del recuento. Si lo resuelto no es lo leído, la
+     * entrada se reemplaza —sin abrir otra— por lo resuelto. Lo ya registrado se mira **antes** de
+     * reemplazar: con `tipo` (la carga), por la marca de la entrada o, sin objeto, por Navigation
+     * Timing; sin `tipo` (un `popstate`), solo por la marca.
+     */
+    function resolverYBuscar(leido: EstadoDeLaBusqueda, datos: DatosDeObra | null, tipo?: string) {
+      const { estado: resuelto, noSeUsan } = resolverEstado(leido, {
+        autores: valoresDe(autor!),
+        temas: valoresDe(tema!),
+        autorDeLaObra: (nombre) => (datos ? autorDeLaObra(datos.mapa, datos.recuentos, nombre) : null),
+      });
+      const registrada = A.yaRegistrada(history.state, tipo);
+      ponerEstado(resuelto);
+      const puesto = estadoDeLaIsla();
+      if (!mismoEstado(puesto, leido)) reemplazar(puesto);
+      const quedaAlgo = !estadoSinNada(puesto);
+      const aviso = avisoDeLaDireccion(noSeUsan, quedaAlgo);
+      const f = elegidos();
+      const clave = A.clave(puesto.texto, combinacionDeFiltros(f), valoresDeFiltros(f));
+      if (registrada && quedaAlgo && !hechos.includes(clave)) hechos.push(clave);
+      // Una llegada siempre busca, aunque sea lo último que se buscó: pinta su estado y su aviso.
+      ultima = null;
+      buscar('gesto', null, aviso);
+      if (!quedaAlgo && aviso) {
+        // Sin nada con que buscar: la frase sola, sin recuento ni salida ni búsqueda.
+        estado!.classList.toggle('solo-para-lectores', false);
+        sombra!.textContent = aviso;
+        ritmo.ahora(aviso);
+      }
+    }
+
+    /**
+     * Historia 27.4 — con Obra en lo leído y sin el mapa o `filters()`, no se sabe si la Obra existe:
+     * ni búsqueda, ni frase de `avisoDeLaDireccion`, ni escritura de la dirección, ni nada
+     * asentable. Quedan el campo y los selectores de Autor y de Tema que se pueden juzgar y, desde
+     * la 27.7, el aviso del fallo en lugar de los resultados: es el estado del índice que no carga.
+     * El gesto siguiente busca con lo que se vea.
+     */
+    function sinDatos(leido: EstadoDeLaBusqueda) {
+      ponerEstado({ ...leido, obra: '' });
+      turno++;
+      ultima = null;
+      mostrarFallo();
+    }
+
+    /**
+     * Historia 27.4 — la llegada, y la misma función para la carga y para `popstate`: cancela las
+     * pausas, deja la entrada sin control, y resuelve y pinta sin recargar. Con estado, pide el
+     * índice, el mapa y `filters()`; con Obra, la resolución los espera; sin Obra, la búsqueda no,
+     * y el selector de Obra aparece cuando lleguen (Autor vigente, 27.3).
+     */
+    function llegar(leido: EstadoDeLaBusqueda, tipo?: string) {
+      gesto();
+      const mia = llegada;
+      controlDeLaEntrada = null;
+      // Lo que se veía es de la entrada que se dejó: hasta que la llegada pinte, no hay nada asentable,
+      // y una búsqueda suya aún en vuelo ya no pinta.
+      visto = null;
+      estadoVisto = null;
+      controlDelVisto = null;
+      turno++;
+      ultima = null;
+      if (estadoSinNada(leido)) {
+        resolverYBuscar(leido, null, tipo);
+        return;
+      }
+      cargar();
+      const datos = pedirDatosDeObra(leido.autor);
+      if (leido.obra === '') {
+        resolverYBuscar(leido, null, tipo);
+        datos.then(componerObra).catch(() => {});
+        return;
+      }
+      // Mientras llegan los datos, el campo y los selectores de Autor y de Tema que se pueden juzgar
+      // ya se ven: un gesto en la espera parte de ellos, no de un campo vacío.
+      ponerEstado({ ...leido, obra: '' });
+      datos
+        .then((d) => {
+          if (mia !== llegada) return void componerObra();
+          if (d) resolverYBuscar(leido, d, tipo);
+          else sinDatos(leido);
+        })
+        .catch(() => {});
+    }
+
+    // `popstate` lee el objeto de la entrada y, sin él, la dirección. Nunca Navigation Timing. Un
+    // `popstate` que cambia el fragmento y no la búsqueda es un salto de ancla: no es una llegada, y
+    // su entrada se marca si dice lo que se ve y ya se emitió. Dos entradas seguidas con la misma
+    // búsqueda y el mismo fragmento sí son una llegada.
+    addEventListener('popstate', () => {
+      const leida = estadoDeLaDireccion(location.search);
+      if (location.hash !== anclaDeLaEntrada && mismoEstado(leida, busquedaDeLaEntrada)) {
+        anclaDeLaEntrada = location.hash;
+        controlDeLaEntrada = null;
+        if (visto && estadoVisto && mismoEstado(estadoVisto, leida) && hechos.includes(A.clave(visto.texto, visto.filtros, visto.valores))) asentar();
+        return;
+      }
+      recordarLaEntrada();
+      llegar(estadoDeLaEntrada(history.state) ?? leida);
+    });
+    addEventListener('hashchange', () => {
+      anclaDeLaEntrada = location.hash;
+    });
+
+    // La carga: tras una microtarea, para que al evaluarse el guion no se escriba ni se mida nada.
+    Promise.resolve().then(() => {
+      const inicial = estadoDeLaDireccion(location.search);
+      if (estadoSinNada(inicial)) return;
+      let tipo = 'navigate';
+      try {
+        tipo = (performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming).type || tipo;
+      } catch {}
+      llegar(inicial, tipo);
+    });
+  }
+
+  const raiz = document.querySelector<HTMLElement>('[data-busqueda]');
+  if (raiz) iniciar(raiz);
+</script>

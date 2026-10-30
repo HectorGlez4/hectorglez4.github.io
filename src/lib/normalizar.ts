@@ -128,3 +128,40 @@ const porUnidades = (a: string, b: string): number => (a < b ? -1 : a > b ? 1 : 
 export function compararPorClave(a: OrdenablePor, b: OrdenablePor): number {
   return porUnidades(claveDeComparacion(a.clave), claveDeComparacion(b.clave)) || porUnidades(a.slug, b.slug);
 }
+
+/** Una opción de un selector de `/buscar/`: el valor que se filtra y el nombre que se lee. */
+export interface OpcionPorNombre {
+  valor: string;
+  rotulo: string;
+}
+
+/** Copia ordenada por la clave de comparación del rótulo y, si empatan, por el valor, que es único. */
+function ordenarPorRotulo<T extends OpcionPorNombre>(opciones: readonly T[]): T[] {
+  return [...opciones].sort((a, b) => compararPorClave({ clave: a.rotulo, slug: a.valor }, { clave: b.rotulo, slug: b.valor }));
+}
+
+/**
+ * El orden del selector de Autor de `/buscar/` — Historia 27.2, AD-3, UX-DR87.
+ *
+ * Por el nombre **tal como se lee** («José Martí», con la J), y no por la clave del Directorio
+ * de Autores (`ordenAlfabetico`, «Martí»): en un selector nativo se salta tecleando la primera
+ * letra de lo que se ve, y una lista ordenada por otra cosa no se dejaría recorrer así. Con la
+ * comparación canónica de `claveDeComparacion` —sin tildes, la eñe en su sitio, por unidades de
+ * código y nunca con `localeCompare`—, y desempate por el valor (el slug). Pura, devuelve una
+ * copia y no depende del orden de entrada. El selector no ordena por su cuenta.
+ */
+export function ordenDeAutoresPorNombre<T extends OpcionPorNombre>(opciones: readonly T[]): T[] {
+  return ordenarPorRotulo(opciones);
+}
+
+/**
+ * El orden del selector de Tema de `/buscar/` — Historia 27.2, AD-3, UX-DR87.
+ *
+ * Por el nombre **con su artículo**, como se lee («El tiempo» con la E, «La vida» con la L), con
+ * la misma comparación canónica y el mismo desempate por el valor que el de Autores. Es otra
+ * función, y no la misma con otro nombre, porque dice otra regla: el día que los Temas se ordenen
+ * sin el artículo, cambia esta y no la de los Autores.
+ */
+export function ordenDeTemasPorNombre<T extends OpcionPorNombre>(opciones: readonly T[]): T[] {
+  return ordenarPorRotulo(opciones);
+}

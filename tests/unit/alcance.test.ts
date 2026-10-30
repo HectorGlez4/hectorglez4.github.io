@@ -220,6 +220,27 @@ describe('Historia 26.8 — los enlaces de una página construida', () => {
     expect(enlacesInternos(html)).toEqual(['/cita/visible']);
   });
 
+  it('Historia 27.7 — de las tres formas del aviso de `/buscar/`, solo los Directorios del previo entran en el grafo', () => {
+    const aviso = (atributos: string) =>
+      `<div class="aviso-de-la-busqueda" data-sin-zona="directorios-del-aviso"${atributos}><p>Uno.</p><p>Dos.</p>` +
+      '<ul class="filas-de-resultado" role="list">' +
+      '<li class="resultado"><a href="/autores/" aria-label="Directorio: Autores"><span class="clase" data-tipo="directorio">Directorio</span><span class="titulo en-sans">Autores</span></a></li>' +
+      '<li class="resultado"><a href="/obras/" aria-label="Directorio: Obras"><span class="clase" data-tipo="directorio">Directorio</span><span class="titulo en-sans">Obras</span></a></li>' +
+      '</ul></div>';
+    const html = [
+      '<main><div data-busqueda>',
+      `<noscript>${aviso('')}</noscript>`,
+      aviso(' data-aviso-previo'),
+      '<template><form action="/buscar/"></form></template>',
+      '</div>',
+      `<template data-plantilla-del-fallo>${aviso(' data-aviso-del-fallo')}</template>`,
+      '</main>',
+    ].join('');
+    expect(enlacesInternos(html)).toEqual(['/autores', '/obras']);
+    // Y quitado el previo, ninguno: los del `<noscript>` y la plantilla no cuentan.
+    expect(enlacesInternos(html.replace(aviso(' data-aviso-previo'), ''))).toEqual([]);
+  });
+
   it('el grafo de dist/ va por ruta normalizada', () => {
     const grafo = grafoDeDist([{ ruta: '/autor/seneca/', html: '<a href="/cita/una/">x</a>' }]);
     expect([...grafo]).toEqual([['/autor/seneca', ['/cita/una']]]);

@@ -1,5 +1,8 @@
 /**
- * El paso final de `npm run build`: cuánto pesa lo que se despliega — Historia 24.2, AD-9, AD-16.
+ * El paso final de `npm run build`: cuánto pesa lo que se despliega — Historia 24.2, AD-9, AD-16;
+ * y, desde la 27.3, cuántos bytes en disco ocupa lo que `/buscar/` pide al elegir un Autor (los
+ * filtros de Pagefind con el mapa de rótulos de las Obras; una cota por arriba de lo que se
+ * transfiere), frente a `AVISO_DE_BYTES_DE_FILTROS_Y_MAPA`: avisa, no rompe.
  *
  * Vive en `integraciones/` sin ser una integración de Astro. No puede serlo: corre **después
  * de Pagefind**, que es cuando `dist/` es exactamente lo que sube el despliegue —su índice
@@ -23,6 +26,7 @@ import {
   type FicheroDeDist,
 } from '../tools/lib/peso.ts';
 import {
+  AVISO_DE_BYTES_DE_FILTROS_Y_MAPA,
   AVISO_DE_PESO_DE_DIST,
   TOPE_DE_PESO_DE_DIST,
   TOPE_DE_PNG_DE_DIST,
@@ -101,7 +105,12 @@ try {
 if (listado !== undefined) {
   const parte = parteDePeso(
     medirDist(listado),
-    { aviso: AVISO_DE_PESO_DE_DIST, tope: TOPE_DE_PESO_DE_DIST, topeDePng: TOPE_DE_PNG_DE_DIST },
+    {
+      aviso: AVISO_DE_PESO_DE_DIST,
+      tope: TOPE_DE_PESO_DE_DIST,
+      topeDePng: TOPE_DE_PNG_DE_DIST,
+      avisoDeFiltrosYMapa: AVISO_DE_BYTES_DE_FILTROS_Y_MAPA,
+    },
     { anotar },
   );
   if (parte.cifras.length > 0) process.stdout.write(`${parte.cifras.join('\n')}\n`);

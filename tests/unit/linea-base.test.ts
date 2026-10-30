@@ -10,6 +10,7 @@ import {
   CORTES_DE_SERIE,
   CORTES_DE_SERIE_DECLARADOS,
   CORTES_DE_SM8,
+  DESPLIEGUE_DE_LA_BUSQUEDA_CON_FILTROS,
   SM12_CON_FACEBOOK,
   cortesQueLlegaron,
   type CorteLlegado,
@@ -948,6 +949,63 @@ describe('Historia 23.10 — las ventanas', () => {
     });
     expect(sm13.referencias).toEqual([{ tasa: 'SM-13', valor: calculada(30, 150) }]);
     expect(sm13.ventanas[0].tasas).toEqual([{ tasa: 'SM-13', valor: calculada(75, 150), direccion: 'sube' }]);
+  });
+
+  describe('Historia 27.9 — SM-6 y SM-13, contadas desde la llegada de la búsqueda con filtros', () => {
+    const SM_6 = JUICIOS_POR_VENTANAS.find((j) => j.nombre === 'SM-6')!;
+    const SM_13 = JUICIOS_POR_VENTANAS.find((j) => j.nombre === 'SM-13')!;
+    /** 50 asentadas al día; el tramo 0 y las salidas desde un resultado suben tras los tres primeros días. */
+    const partes = (): Partes => ({
+      busquedas: DIAS.flatMap((dia, i) => [busqueda(dia, '0', i < 3 ? 10 : 20), busqueda(dia, '1-9', i < 3 ? 40 : 30)]),
+      salidas: DIAS.map((dia, i) => salida(dia, '/buscar/', 'resultado', i < 3 ? 10 : 25)),
+    });
+
+    it('la tabla lee la constante de despliegue de la 27, sin copiar su valor', () => {
+      for (const juicio of [SM_6, SM_13]) {
+        expect(juicio.unidad).toBe(UNIDAD_DE_LAS_BUSQUEDAS);
+        expect(juicio.llegada).toBe(DESPLIEGUE_DE_LA_BUSQUEDA_CON_FILTROS);
+        expect(juicio.deDondeLlega).toBe('DESPLIEGUE_DE_LA_BUSQUEDA_CON_FILTROS');
+      }
+      const fuente = readFileSync(resolve(RAIZ, 'tools/lib/lineaBase.ts'), 'utf8');
+      expect(fuente.match(/llegada: DESPLIEGUE_DE_LA_BUSQUEDA_CON_FILTROS,/g)).toHaveLength(2);
+    });
+
+    it('con valor: la primera ventana empieza la jornada siguiente a la llegada, que no entra en ninguna y se informa como «cambió»', () => {
+      const llegada = D2; // 2026-11-03, antes del cierre de la línea base de las búsquedas.
+      const l = leer(partes(), { minimo: 150, juicios: [{ ...SM_6, llegada }, { ...SM_13, llegada }] });
+      const base = l.lineasBase.find((b) => b.unidad === UNIDAD_DE_LAS_BUSQUEDAS)!;
+      expect(base.saltadas).toEqual([llegada]);
+      expect(base.jornadas).not.toContain(llegada);
+      const [sm6, sm13] = l.juicios;
+      for (const juicio of [sm6, sm13]) {
+        expect(juicio.referencia).toBe('serie-de-antes');
+        expect(juicio.ventanas.map((v) => [v.desde, v.hasta, v.acumulado])).toEqual([
+          ['2026-11-04', '2026-11-06', 150],
+          ['2026-11-07', '2026-11-09', 150],
+        ]);
+        expect(juicio.ventanas.some((v) => v.desde <= llegada && llegada <= v.hasta)).toBe(false);
+      }
+      // La serie de antes es la jornada anterior a la llegada.
+      expect(sm6.referencias).toEqual([{ tasa: 'SM-6', valor: calculada(10, 50) }]);
+      expect(sm6.ventanas[0].tasas).toEqual([{ tasa: 'SM-6', valor: calculada(50, 150), direccion: 'sube' }]);
+      expect(sm13.referencias).toEqual([{ tasa: 'SM-13', valor: calculada(10, 50) }]);
+      expect(sm13.ventanas[0].tasas).toEqual([{ tasa: 'SM-13', valor: calculada(60, 150), direccion: 'sube' }]);
+      const informe = texto(l);
+      expect(informe).toContain(`No cuentan, porque cambiaron: ${llegada}.`);
+      expect(informe).toContain('frente a la serie propia de antes');
+    });
+
+    it('sin valor no cuenta nada desde ella: ninguna jornada se salta y las ventanas cuentan desde el cierre de la línea base', () => {
+      const l = leer(partes(), { minimo: 150, juicios: [{ ...SM_6, llegada: undefined }, { ...SM_13, llegada: undefined }] });
+      const base = l.lineasBase.find((b) => b.unidad === UNIDAD_DE_LAS_BUSQUEDAS)!;
+      expect(base).toMatchObject({ estado: 'cerrada', cerradaEl: D3, saltadas: [] });
+      for (const juicio of l.juicios) {
+        expect(juicio.referencia).toBe('linea-base');
+        expect(juicio.ventanas[0]).toMatchObject({ desde: '2026-11-05', hasta: '2026-11-07' });
+        expect(juicio.ventanas.every((v) => v.antesDeLaLlegada === undefined)).toBe(true);
+      }
+      expect(texto(l)).not.toContain('No cuentan, porque cambiaron');
+    });
   });
 
   it('los Directorios: la línea base empieza tras la llegada que los hace medibles, y las ventanas se juzgan frente a ella', () => {

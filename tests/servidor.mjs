@@ -22,6 +22,7 @@
 import { createServer } from 'node:http';
 import { readFile, stat } from 'node:fs/promises';
 import { extname, join, normalize } from 'node:path';
+import { gzipSync } from 'node:zlib';
 
 // `DIST` permite servir otro `dist/` que el del repositorio: una prueba que construye un
 // sitio aparte —con la medición configurada, por ejemplo— necesita servir el suyo.
@@ -37,6 +38,16 @@ const puerto = Number(process.env.PUERTO ?? 4321);
  * quien prueba no cambie a escondidas la caché de toda la suite.
  */
 const CACHE_CONTROL = process.env.SERVIDOR_CACHE_CONTROL || 'no-store';
+
+/*
+ * `SERVIDOR_GZIP=1` comprime como el alojamiento —NFR-7, puerta de la Épica 27—. GitHub Pages
+ * sirve el texto con `content-encoding: gzip` a quien lo acepta, y sin comprimir aquí cada byte
+ * de HTML pesaba en Lighthouse unas cinco veces lo que pesa en el sitio en vivo: `/buscar/` con
+ * los selectores pasaba de 27 a 42 KB, una ida y vuelta más en el 4G simulado, cuando en vivo
+ * son 7 KB frente a 9. Por omisión no comprime, y las pruebas funcionales no cambian.
+ */
+const GZIP = process.env.SERVIDOR_GZIP === '1';
+const COMPRIMIBLES = new Set(['.html', '.css', '.js', '.json', '.xml', '.svg', '.txt']);
 
 const TIPOS = {
   '.html': 'text/html; charset=utf-8',
@@ -102,11 +113,14 @@ createServer(async (peticion, respuesta) => {
     return;
   }
 
+  const cuerpo = await readFile(fichero);
+  const comprimir = GZIP && COMPRIMIBLES.has(extname(fichero)) && /\bgzip\b/u.test(peticion.headers['accept-encoding'] ?? '');
   respuesta.writeHead(200, {
     'content-type': TIPOS[extname(fichero)] ?? 'application/octet-stream',
     'cache-control': CACHE_CONTROL,
+    ...(comprimir ? { 'content-encoding': 'gzip', vary: 'Accept-Encoding' } : {}),
   });
-  respuesta.end(await readFile(fichero));
+  respuesta.end(comprimir ? gzipSync(cuerpo) : cuerpo);
 }).listen(puerto, () => {
   process.stdout.write(`Sirviendo dist/ en http://localhost:${puerto}\n`);
 });

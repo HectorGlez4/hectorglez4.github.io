@@ -17,16 +17,21 @@
  */
 
 import type { CollectionEntry } from 'astro:content';
+import type { z } from 'astro/zod';
 import {
+  AUTORES_DESTACADOS,
   CITAS_POR_PAGINA,
   MAX_CITAS_DE_LA_MISMA_OBRA,
   MAX_CITAS_RELACIONADAS,
   MAX_SALTOS_DESDE_LA_PORTADA,
   MIN_CITAS_POR_COLECCION,
   MIN_CITAS_POR_TEMA,
+  SUELO_TRADICION_LATINOAMERICANA,
   type CongelacionDeObras,
 } from './umbrales.ts';
-import type { FuenteDeCita, Procedencia } from './admision.ts';
+import type { FuenteDeCita, Procedencia, tradicion } from './admision.ts';
+import { cuentaParaElSuelo } from './huecos.ts';
+import { compararPorClave } from './normalizar.ts';
 import {
   colgarObras,
   congelacionVigente,
@@ -108,6 +113,12 @@ export interface Autor {
    * Citas puede no tenerla. Sin valor se omite.
    */
   ordenAlfabetico?: string;
+  /**
+   * La tradición del Autor — Historia 27.6, §6.1 del PRD: con el tipo del esquema (`tradicion` de
+   * `src/lib/admision.ts`), opcional como allí y omitida sin valor. La lee `autoresDestacados`
+   * para el suelo latinoamericano de FR-8; ninguna superficie la pinta.
+   */
+  tradicion?: z.infer<typeof tradicion>;
 }
 
 export interface Tema {
@@ -161,6 +172,78 @@ export function autoresPublicados(autores: Autor[], citas: Cita[]): Autor[] {
   return autores
     .filter((a) => conCitas.has(a.slug))
     .sort((a, b) => a.nombre.localeCompare(b.nombre, 'es'));
+}
+
+/**
+ * Los ocho Autores destacados — FR-8, AD-11, AD-3, UX-DR62, Historia 27.6.
+ *
+ * Es la **única** regla de los Autores que ofrece la búsqueda sin resultados de `/buscar/`, y la
+ * reutiliza la portada en la 28.4: dos superficies, una función, y ninguna corta una lista por su
+ * cuenta. Hasta la 27.6 la salida tomaba los ocho primeros del alfabeto, sin regla ni suelo.
+ *
+ *   1. Se publican los Autores con al menos una Cita en `citas`; se cuentan las de cada uno.
+ *   2. **Una sola clasificación**: más Citas primero y, a igualdad, el orden del Directorio
+ *      (`compararPorClave` de `src/lib/normalizar.ts`: la clave de orden y, si empatan, el slug).
+ *      Es total, así que el resultado no depende del orden de entrada.
+ *   3. Se eligen los `AUTORES_DESTACADOS` primeros.
+ *   4. **El suelo** de `SUELO_TRADICION_LATINOAMERICANA`, por razón exacta y en enteros —nunca un
+ *      porcentaje redondeado—, sobre los elegidos que **cuentan para el suelo**
+ *      (`cuentaParaElSuelo` de `src/lib/huecos.ts`, su único dueño: todos menos los de tradición
+ *      `otra`, también el que no la declara). Mientras no se alcance, cede el **último** elegido
+ *      en la clasificación que cuenta y no es latinoamericano —un peninsular o uno sin declarar,
+ *      nunca uno de `otra`, que no escora el reparto— y entra el **primero** de fuera que es
+ *      latinoamericano. Si falta uno de los dos, se para: el suelo no se fuerza con lo que no hay.
+ *   5. Se devuelven en el **orden del Directorio**, nunca por recuento: la lista se lee como una
+ *      lista de nombres, no como un ranking.
+ *
+ * Con menos de ocho publicados, todos. Pura: no muta la entrada. **Lanza** si un Autor publicado no
+ * tiene clave de orden, como `agruparPorClave` de `src/lib/directorios.ts`: el build ya lo para
+ * antes, en `integraciones/claves.ts`, y adivinarle un sitio escondería el fallo.
+ */
+export function autoresDestacados(autores: readonly Autor[], citas: readonly Pick<Cita, 'autor'>[]): Autor[] {
+  const recuento = new Map<string, number>();
+  for (const cita of citas) recuento.set(cita.autor, (recuento.get(cita.autor) ?? 0) + 1);
+
+  const publicados = autores
+    .filter((autor) => (recuento.get(autor.slug) ?? 0) > 0)
+    .map((autor) => {
+      if (autor.ordenAlfabetico === undefined) {
+        throw new Error(
+          [
+            `El Autor «${autor.slug}» tiene Citas publicadas y no tiene clave de orden (ordenAlfabetico),`,
+            'así que los Autores destacados no saben dónde ponerlo.',
+            'Lo para antes `integraciones/claves.ts`; si se llega aquí, esa puerta no corrió.',
+            'La clave la propone `npx tsx tools/autor.ts proponer-claves`.',
+          ].join(' '),
+        );
+      }
+      return { autor, clave: autor.ordenAlfabetico, citas: recuento.get(autor.slug) ?? 0 };
+    });
+
+  type Clasificado = (typeof publicados)[number];
+  const porDirectorio = (a: Clasificado, b: Clasificado) =>
+    compararPorClave({ clave: a.clave, slug: a.autor.slug }, { clave: b.clave, slug: b.autor.slug });
+  const clasificacion = [...publicados].sort((a, b) => b.citas - a.citas || porDirectorio(a, b));
+
+  const elegidos = clasificacion.slice(0, AUTORES_DESTACADOS);
+  const fuera = clasificacion.slice(AUTORES_DESTACADOS);
+  const esLatinoamericano = (x: Clasificado) => x.autor.tradicion === 'latinoamericana';
+  const puedeCeder = (x: Clasificado) => cuentaParaElSuelo(x.autor) && !esLatinoamericano(x);
+
+  for (;;) {
+    const cuentan = elegidos.filter((x) => cuentaParaElSuelo(x.autor)).length;
+    const latinoamericanos = elegidos.filter(esLatinoamericano).length;
+    if (100 * latinoamericanos >= SUELO_TRADICION_LATINOAMERICANA * cuentan) break;
+    const cede = elegidos.findLastIndex(puedeCeder);
+    const entra = fuera.findIndex(esLatinoamericano);
+    if (cede === -1 || entra === -1) break;
+    elegidos.splice(cede, 1);
+    // Entra detrás de los elegidos: tiene menos Citas que todos los que no han cedido, y más (o va
+    // antes en el Directorio) que los que quedan fuera. La clasificación sigue en orden.
+    elegidos.push(...fuera.splice(entra, 1));
+  }
+
+  return elegidos.sort(porDirectorio).map((x) => x.autor);
 }
 
 /** Un Tema se publica al alcanzar `MIN_CITAS_POR_TEMA` Citas publicadas — FR-6. */
@@ -791,6 +874,145 @@ export function obrasPublicadas(conjunto: Pick<ConjuntoPublicable, 'citas' | 'au
   return obrasDelConjunto(conjunto.citas, conjunto.autores).publicadas;
 }
 
+// ─── Los filtros de la búsqueda (Historia 27.1, FR-7) ────────────────────────
+
+/** Los valores de filtro de una Cita: su Autor, su Obra si la tiene y sus Temas publicados. */
+export interface FiltrosDeCita {
+  /** El slug del Autor. */
+  autor: string;
+  /** El nombre de la ficha de su Obra —nunca el título—; sin Obra resuelta, se omite. */
+  obra?: string;
+  /** Sus Temas publicados, sin repetir, en el orden en que la Cita los declara. */
+  temas: readonly string[];
+}
+
+/** Una opción de un filtro de `/buscar/`: el valor que viaja, lo que se lee y cuántas Citas lo llevan. */
+export interface OpcionDeFiltro {
+  valor: string;
+  rotulo: string;
+  recuento: number;
+}
+
+/** Una opción del filtro de Obra, con el slug de su Autor: la Obra se elige dentro de un Autor. */
+export interface OpcionDeObra extends OpcionDeFiltro {
+  autor: string;
+}
+
+/**
+ * El mapa de rótulos de las Obras de la búsqueda — Historia 27.3, AD-11: por slug de Autor, sus
+ * Obras como pares `[nombre de ficha, título]`, en el orden de su Lista de Obras. Es lo que
+ * `src/pages/buscar/obras.json.ts` escribe en `/buscar/obras.json`; el tipo del cliente,
+ * `MapaDeObras`, vive en `src/lib/busqueda.ts`.
+ */
+export type MapaDeObrasPorAutor = Record<string, [nombre: string, titulo: string][]>;
+
+/** Los filtros de cada Cita y las opciones de los filtros de `/buscar/`, de una sola vez. */
+export interface FiltrosDeLaBusqueda {
+  porCita: ReadonlyMap<string, FiltrosDeCita>;
+  autores: readonly OpcionDeFiltro[];
+  obras: readonly OpcionDeObra[];
+  temas: readonly OpcionDeFiltro[];
+  /**
+   * Historia 27.3 — por Autor con Obras, en orden de slug, sus Obras en el orden de
+   * `obrasDelAutor` (`ordenDeLaListaDeObras`): **toda** Obra con Citas publicadas, también las
+   * `noindex` y las de la familia congelada. Un Autor sin Obras no tiene clave.
+   */
+  mapaDeObras: MapaDeObrasPorAutor;
+}
+
+const porValor = (a: OpcionDeFiltro, b: OpcionDeFiltro): number =>
+  a.valor < b.valor ? -1 : a.valor > b.valor ? 1 : 0;
+
+/**
+ * Los filtros de la búsqueda — Historia 27.1, FR-7, AD-11, AD-25.
+ *
+ * Una sola función compone a la vez el `data-pagefind-filter` de cada Cita (`porCita`, que
+ * escribe `src/components/FiltrosDeLaCita.astro`) y las opciones de los filtros de `/buscar/`,
+ * así que un valor y su recuento no pueden salir de dos cálculos que discrepen:
+ *
+ * - `autor` es el slug del Autor; las opciones, los Autores con Citas publicadas, rotulados con
+ *   su nombre;
+ * - `obra` es el nombre de la ficha de su Obra (`cita.obra.nombre`, interfaz pública): retitular
+ *   no lo cambia, y dos Obras homónimas de Autores distintos no se confunden. Las opciones son
+ *   **toda** Obra con Citas publicadas —también las `noindex` y las congeladas—, rotuladas con
+ *   su título y con el slug de su Autor;
+ * - `tema`, uno por Tema **publicado** de la Cita (`temasPublicados`), sin repetir y en el orden
+ *   de `cita.temas`; un Tema bajo su umbral no tiene página ni filtro.
+ *
+ * Cada opción lleva cuántas Citas tienen ese valor, que es lo que `filters()` de Pagefind cuenta
+ * por página. Van por `valor`, en unidades de código: el orden que se enseña es de quien las pinta.
+ *
+ * Historia 27.3 — compone además el **mapa de rótulos** de las Obras (`mapaDeObras`), que el build
+ * escribe como JSON aparte y la isla de `/buscar/` pide al elegir un Autor, nunca en el HTML. Cada
+ * lista sale de `obrasDelAutor`, la misma llamada que ordena la Página de Autor y `/obras/`
+ * (AD-25): el selector de Obra no ordena por su cuenta.
+ */
+export function filtrosDeLaBusqueda(
+  conjunto: Pick<ConjuntoPublicable, 'citas' | 'autores' | 'temas'>,
+): FiltrosDeLaBusqueda {
+  const autores = new Map(conjunto.autores.map((autor) => [autor.slug, autor]));
+  const temas = new Map(temasPublicados(conjunto.temas, conjunto.citas).map((tema) => [tema.slug, tema]));
+
+  const porCita = new Map<string, FiltrosDeCita>();
+  const deAutor = new Map<string, OpcionDeFiltro>();
+  const deObra = new Map<string, OpcionDeObra>();
+  const deTema = new Map<string, OpcionDeFiltro>();
+
+  for (const cita of conjunto.citas) {
+    const autor = autores.get(cita.autor);
+    if (autor === undefined) {
+      throw new Error(`La Cita «${cita.slug}» nombra al Autor «${cita.autor}», que no está en el Corpus.`);
+    }
+    const suyos = [...new Set(cita.temas)].filter((slug) => temas.has(slug));
+    porCita.set(cita.slug, {
+      autor: autor.slug,
+      ...(cita.obra !== undefined ? { obra: cita.obra.nombre } : {}),
+      temas: suyos,
+    });
+
+    const opcionDeAutor = deAutor.get(autor.slug) ?? { valor: autor.slug, rotulo: autor.nombre, recuento: 0 };
+    opcionDeAutor.recuento++;
+    deAutor.set(autor.slug, opcionDeAutor);
+
+    if (cita.obra !== undefined) {
+      const opcionDeObra = deObra.get(cita.obra.nombre) ?? {
+        valor: cita.obra.nombre,
+        rotulo: cita.obra.titulo,
+        recuento: 0,
+        autor: cita.obra.autor,
+      };
+      opcionDeObra.recuento++;
+      deObra.set(cita.obra.nombre, opcionDeObra);
+    }
+
+    for (const slug of suyos) {
+      const opcionDeTema = deTema.get(slug) ?? { valor: slug, rotulo: temas.get(slug)!.nombre, recuento: 0 };
+      opcionDeTema.recuento++;
+      deTema.set(slug, opcionDeTema);
+    }
+  }
+
+  const citasPorAutor = new Map<string, (typeof conjunto.citas)[number][]>();
+  for (const cita of conjunto.citas) {
+    const suyas = citasPorAutor.get(cita.autor);
+    if (suyas === undefined) citasPorAutor.set(cita.autor, [cita]);
+    else suyas.push(cita);
+  }
+  const mapaDeObras: MapaDeObrasPorAutor = {};
+  for (const slug of [...citasPorAutor.keys()].sort()) {
+    const { obras } = obrasDelAutor(citasPorAutor.get(slug)!, slug);
+    if (obras.length > 0) mapaDeObras[slug] = obras.map((o) => [o.nombre, o.titulo]);
+  }
+
+  return {
+    porCita,
+    autores: [...deAutor.values()].sort(porValor),
+    obras: [...deObra.values()].sort(porValor),
+    temas: [...deTema.values()].sort(porValor),
+    mapaDeObras,
+  };
+}
+
 /** Las Obras con página y las que se indexan, sobre Citas que ya llevan su Obra colgada. */
 export interface ObrasDelSitio {
   publicadas: ObraResuelta[];
@@ -1124,7 +1346,7 @@ export function aplanarCita(entrada: EntradaCita): Cita {
  * `resolverAtribuciones`.
  */
 export function aplanarAutor(entrada: EntradaAutor): Autor {
-  const { nombre, semblanza, añoNacimiento, añoFallecimiento, ordenAlfabetico } = entrada.data;
+  const { nombre, semblanza, añoNacimiento, añoFallecimiento, ordenAlfabetico, tradicion } = entrada.data;
   return {
     slug: entrada.id,
     nombre,
@@ -1133,6 +1355,8 @@ export function aplanarAutor(entrada: EntradaAutor): Autor {
     añoFallecimiento,
     // Historia 26.3 — la clave viaja para el Directorio; `ordenRevisado` no, que no lo pinta nadie.
     ...(ordenAlfabetico !== undefined ? { ordenAlfabetico } : {}),
+    // Historia 27.6 — la tradición viaja para el suelo de los destacados; sin declarar, se omite.
+    ...(tradicion !== undefined ? { tradicion } : {}),
   };
 }
 

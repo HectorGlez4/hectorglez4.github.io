@@ -23,6 +23,19 @@ import {
   citasDeObraDeUnaCita,
 } from './ayuda/corpus.ts';
 import { leerTarjetaDeObra, tarjetaDeObraDe } from '../unit/ayuda/tarjeta-de-obra.js';
+import { filtrosDeLaBusqueda } from '../../src/lib/publicado.ts';
+import { conjuntoDeLosDatos, leerDatosDelCorpus } from '../../tools/lib/alcance.ts';
+import { rutasDelCorpus } from '../../tools/lib/corpus.ts';
+import {
+  ANUNCIO_DEL_FALLO_DE_LA_BUSQUEDA,
+  BOTON_DE_BUSCAR,
+  FALLO_DE_LA_TANDA,
+  ROTULO_BUSCAR_EN_ESTA_OBRA,
+  ROTULO_BUSCAR_EN_ESTE_TEMA,
+  rotuloBuscarEnAutor,
+} from '../../src/lib/busqueda.ts';
+import { guionExternoDe } from '../../src/lib/guiones.ts';
+import { TANDA_DE_RESULTADOS } from '../../src/lib/umbrales.ts';
 
 /**
  * Historia 2.8 — accesibilidad y comportamiento responsive.
@@ -308,6 +321,32 @@ test('el barrido cubre las superficies del sitio y no el Kit', () => {
   expect(SUPERFICIES.some((r) => r.startsWith('/autor/'))).toBe(true);
   expect(SUPERFICIES.some((r) => r.startsWith('/tema/'))).toBe(true);
   expect(SUPERFICIES).not.toContain('/kit');
+});
+
+/** El HTML construido de una ruta del barrido: con barra final o sin ella, y el 404 en la raíz. */
+const delBarrido = (ruta: string) =>
+  readFileSync(
+    sinBarra(ruta) === '/404' ? join(dist, '404.html') : join(dist, ...ruta.split('/').filter(Boolean), 'index.html'),
+    'utf8',
+  );
+
+/** Si una ruta es una página 2+ de un listado. */
+const esPaginaSegunda = (ruta: string) => /\/\d+\/?$/.test(ruta);
+
+/** La primera página 1 del barrido de una familia, o `undefined`. */
+const primeraDelBarrido = (prefijo: string) => SUPERFICIES.find((r) => r.startsWith(prefijo) && !esPaginaSegunda(r));
+
+test('27.8 — el barrido incluye la página 1 de una Obra, un Autor y un Tema con «Buscar en…», y el 404 con su botón', () => {
+  // Si la derivación diera solo páginas 2+, el barrido axe y el reflujo de la 26.9 no verían el
+  // formulario: aquí se exige que lo vean.
+  for (const prefijo of ['/obra/', '/autor/', '/tema/']) {
+    const ruta = primeraDelBarrido(prefijo);
+    expect(ruta, `ninguna página 1 de ${prefijo} en el barrido`).toBeDefined();
+    expect(delBarrido(ruta!), ruta).toMatch(/<form class="buscar-en"[^>]*\brole="search"/);
+  }
+  expect(delBarrido(OBRAS.noIndexable), OBRAS.noIndexable).toMatch(/<form class="buscar-en"/);
+  expect(delBarrido(OBRAS.segunda), OBRAS.segunda).not.toMatch(/<form class="buscar-en"/);
+  expect(delBarrido('/404')).toMatch(new RegExp(`<button\\b[^>]*\\btype="submit"[^>]*>${BOTON_DE_BUSCAR}</button>`));
 });
 
 test.describe('Historia 2.8, elevada por la 23.4 — WCAG 2.2 AA', () => {
@@ -2109,12 +2148,20 @@ test.describe('Historia 24.7 — el salto «Dónde leer esta obra ↓»', () => 
           fin: fragmento.getBoundingClientRect().top + parseFloat(getComputedStyle(fragmento).lineHeight),
         };
       });
-      if (medida === null || medida.desplazada !== 0 || medida.fin > 640) {
+      // Un `line-height: normal` daría `NaN`, que ni pasa de 640 ni gana a la peor: se cuenta fuera.
+      if (medida === null || medida.desplazada !== 0 || !Number.isFinite(medida.fin) || medida.fin > 640) {
         fuera.push(`${ruta}: ${JSON.stringify(medida)}`);
       } else if (medida.fin > peor.fin) {
         peor = { ruta, fin: medida.fin };
       }
     }
+    // Historia 27.8 — con «Buscar en esta obra» en la página (bajo el listado desde la UX v8.4), la
+    // peor medida queda anotada.
+    test.info().annotations.push({
+      type: 'peor fin de la primera línea de la primera Cita a 360 × 640, página 1 de Obra',
+      description: `${peor.fin} px en ${peor.ruta}`,
+    });
+    console.log(`Historia 27.8 — página 1 de Obra a 360 × 640: la peor, ${peor.ruta}, ${peor.fin} px`);
     expect(fuera, `fuera de la primera pantalla (la peor de las que caben: ${peor.ruta}, ${peor.fin} px)`).toEqual([]);
   });
 
@@ -2134,27 +2181,48 @@ test.describe('Historia 24.7 — el salto «Dónde leer esta obra ↓»', () => 
     expect(Math.abs(medido! - esperado), `${que}: ${medido} px en vez de ${esperado}`).toBeLessThanOrEqual(0.5);
   };
 
-  test('la Cabecera: el listado a 32 px del salto en la página 1, y de «de {Autor}» en la 2', async ({ page }) => {
+  /*
+   * Historia 27.8, UX v8.4 — «Buscar en esta obra» va bajo el listado (decisión de Héctor del
+   * 2026-10-30): entre el salto y el listado no hay nada, y el listado sigue a 4 × `--unidad`.
+   */
+  test('la Cabecera: el listado a 32 px del salto en la página 1, sin «Buscar en esta obra» en medio, y de «de {Autor}» en la 2', async ({
+    page,
+  }) => {
     for (const ruta of [OBRAS.indexable, OBRAS.noIndexable, PIE().conPaginacion]) {
       await page.goto(ruta);
       cerca(await hueco(page, '.cabecera-de-obra .salto', 'ul.listado'), 32, `${ruta}, salto → listado`);
+      // El formulario está en la página 1, y por debajo del listado entero (sus distancias, en el pie).
+      const bajoElListado = await hueco(page, 'ul.listado', 'form.buscar-en');
+      expect(bajoElListado, `${ruta}: sin «Buscar en esta obra»`).not.toBeNull();
+      expect(bajoElListado!, `${ruta}: «Buscar en esta obra» entre el salto y el listado`).toBeGreaterThan(0);
     }
     await page.goto(OBRAS.segunda);
     expect(await page.locator('.salto').count(), OBRAS.segunda).toBe(0);
     expect(await page.locator(`[href="#${ANCLA}"], #${ANCLA}`).count(), OBRAS.segunda).toBe(0);
+    expect(await page.locator('form.buscar-en').count(), OBRAS.segunda).toBe(0);
     cerca(await hueco(page, '.cabecera-de-obra .de', 'ul.listado'), 32, `${OBRAS.segunda}, «de» → listado`);
   });
 
-  test('el pie no se mueve: 5 × hasta los Temas, 4 × hasta «Dónde leer», 2 × y 1 ×', async ({ page }) => {
+  /*
+   * Historia 27.8, UX-DR95 (UX v8.4) — «Buscar en esta obra» entra en el pie: 5 × `--unidad` de la
+   * paginación —o de la última tarjeta— al formulario, y 5 × del formulario a los Temas.
+   *
+   * Al fusionar la Épica 25, «Compartir en» (25.6) va entre el formulario y los Temas, a 5 × de cada
+   * uno: «formulario → Temas 40» pasa a medirse como formulario → «Compartir en» 40 y «Compartir
+   * en» → Temas 40, nunca a otra distancia (diferido en el spec de la 27.8).
+   */
+  test('el pie: 5 × hasta «Buscar en esta obra», 5 × hasta los Temas, 4 × hasta «Dónde leer», 2 × y 1 ×', async ({ page }) => {
     const { conPaginacion, sinPaginacion } = PIE();
     await page.goto(conPaginacion);
-    cerca(await hueco(page, 'nav.paginacion', '.temas'), 40, `${conPaginacion}, Paginación → Temas`);
+    cerca(await hueco(page, 'nav.paginacion', 'form.buscar-en'), 40, `${conPaginacion}, Paginación → «Buscar en esta obra»`);
+    cerca(await hueco(page, 'form.buscar-en', '.temas'), 40, `${conPaginacion}, «Buscar en esta obra» → Temas`);
     cerca(await hueco(page, '.temas', '.donde-leer'), 32, `${conPaginacion}, Temas → «Dónde leer»`);
     cerca(await hueco(page, `#${ANCLA}`, `#${ANCLA} + *`), 16, `${conPaginacion}, h2 → lo que sigue`);
 
     await page.goto(sinPaginacion);
     expect(await page.locator('nav.paginacion').count(), sinPaginacion).toBe(0);
-    cerca(await hueco(page, 'ul.listado', '.temas'), 40, `${sinPaginacion}, listado → Temas`);
+    cerca(await hueco(page, 'ul.listado', 'form.buscar-en'), 40, `${sinPaginacion}, listado → «Buscar en esta obra»`);
+    cerca(await hueco(page, 'form.buscar-en', '.temas'), 40, `${sinPaginacion}, «Buscar en esta obra» → Temas`);
     cerca(await hueco(page, '.temas', '.donde-leer'), 32, `${sinPaginacion}, Temas → «Dónde leer»`);
     cerca(await hueco(page, `#${ANCLA}`, `#${ANCLA} + *`), 16, `${sinPaginacion}, h2 → lo que sigue`);
     cerca(await hueco(page, '#edicion-cotejada', '#edicion-cotejada + .linea'), 8, `${sinPaginacion}, h3 → línea`);
@@ -2193,4 +2261,492 @@ test.describe('Historia 24.7 — el salto «Dónde leer esta obra ↓»', () => 
     expect(nota.estilo, `${ruta}, el filete de la nota`).toBe('solid');
     cerca(nota.relleno, 24, `${ruta}, filete → texto de la nota`);
   });
+});
+
+/**
+ * Historia 27.8 — «Buscar en esta obra / en {Autor} / en este tema» y el campo del 404 (UX-DR94,
+ * UX-DR108, NFR-8, NFR-9, `DESIGN.md § Búsqueda`). Las páginas salen del barrido (`SUPERFICIES`,
+ * páginas 1 de cada familia) y del `dist/`, nunca escritas a mano. Medio píxel de holgura, como en
+ * la 24.7. El barrido axe y el reflujo de la 26.9 de arriba ya pasan por estas mismas páginas (lo
+ * exige la guarda de la 27.8); aquí, las distancias, los estilos y la primera pantalla del Tema.
+ */
+test.describe('Historia 27.8 — «Buscar en…» y el botón del 404', () => {
+  const RUTA_404 = '/una-ruta-que-no-existe/';
+
+  /** Las páginas con el formulario: la Obra, el Autor y el Tema del barrido, en su página 1. */
+  const conFormulario = () => ({
+    obra: OBRAS.indexable,
+    autor: obligatoria(primeraDelBarrido('/autor/'), 'ninguna página 1 de Autor en el barrido'),
+    tema: obligatoria(primeraDelBarrido('/tema/'), 'ninguna página 1 de Tema en el barrido'),
+  });
+
+  /** El hueco entre el borde inferior de lo que va justo antes del formulario y el formulario. */
+  const huecoSobreElFormulario = (page: Page) =>
+    page.evaluate(() => {
+      const formulario = document.querySelector('form.buscar-en')!;
+      const antes = formulario.previousElementSibling!;
+      return {
+        antes: `${antes.tagName.toLowerCase()}.${antes.className}`,
+        hueco: formulario.getBoundingClientRect().top - antes.getBoundingClientRect().bottom,
+      };
+    });
+
+  const huecoBajoElFormulario = (page: Page) =>
+    page.evaluate(() => {
+      const formulario = document.querySelector('form.buscar-en')!;
+      const listado = document.querySelector('ul.listado')!;
+      return listado.getBoundingClientRect().top - formulario.getBoundingClientRect().bottom;
+    });
+
+  const casi = (medido: number, esperado: number, que: string) =>
+    expect(Math.abs(medido - esperado), `${que}: ${medido} px en vez de ${esperado}`).toBeLessThanOrEqual(0.5);
+
+  /*
+   * La Obra no está en la tabla de encima y debajo: desde la UX v8.4 su formulario va bajo el listado,
+   * y sus distancias las mide la 24.7 («la Cabecera» y «el pie»).
+   */
+  test('las distancias: Autor 16 bajo el rótulo y 24, Tema 32 bajo el h1 y 32; campo → botón 16', async ({ page }) => {
+    const { obra, autor, tema } = conFormulario();
+    for (const [ruta, antes, sobre, bajo] of [
+      [autor, /^h2\.rotulo/, 16, 24],
+      [tema, /^h1/, 32, 32],
+    ] as const) {
+      await page.goto(ruta);
+      const encima = await huecoSobreElFormulario(page);
+      expect(encima.antes, ruta).toMatch(antes);
+      casi(encima.hueco, sobre, `${ruta}, ${encima.antes} → formulario`);
+      casi(await huecoBajoElFormulario(page), bajo, `${ruta}, formulario → listado`);
+    }
+    for (const ruta of [obra, autor, tema, RUTA_404]) {
+      await page.goto(ruta);
+      const hueco = await page.evaluate(() => {
+        const formulario = document.querySelector('form[role="search"]')!;
+        const campo = formulario.querySelector('input[name="q"]')!.getBoundingClientRect();
+        const boton = formulario.querySelector('button[type="submit"]')!.getBoundingClientRect();
+        return boton.top - campo.bottom;
+      });
+      casi(hueco, 16, `${ruta}, campo → botón`);
+    }
+  });
+
+  test('las páginas 2+ conservan sus distancias: Autor 16 bajo el rótulo, Tema 32 bajo el h1', async ({ page }) => {
+    const segunda = (prefijo: string) => rutasConstruidas().filter((r) => r.startsWith(prefijo) && esPaginaSegunda(r)).sort()[0];
+    for (const [ruta, sobre, esperado] of [
+      [segunda('/autor/'), 'h2.rotulo', 16],
+      [segunda('/tema/'), 'h1', 32],
+    ] as const) {
+      expect(ruta, 'una página 2 en el dist/').toBeDefined();
+      await page.goto(ruta!);
+      expect(await page.locator('form.buscar-en').count(), ruta).toBe(0);
+      const medido = await page.evaluate(
+        (selector) =>
+          document.querySelector('ul.listado')!.getBoundingClientRect().top -
+          document.querySelector(selector)!.getBoundingClientRect().bottom,
+        sobre,
+      );
+      casi(medido, esperado, `${ruta}, ${sobre} → listado`);
+    }
+  });
+
+  test('lo tecleado va en Inter al cuerpo grande, y el botón es el secundario siena con filete y 44 px', async ({ page }) => {
+    const { obra, autor, tema } = conFormulario();
+    for (const ruta of [obra, autor, tema, RUTA_404]) {
+      await page.goto(ruta);
+      const estilo = await page.evaluate(() => {
+        const formulario = document.querySelector('form[role="search"]')!;
+        const campo = getComputedStyle(formulario.querySelector('input[name="q"]')!);
+        const nodo = formulario.querySelector('button[type="submit"]') as HTMLElement;
+        const boton = getComputedStyle(nodo);
+        const raiz = getComputedStyle(document.documentElement);
+        const resolver = (propiedad: 'color' | 'fontSize' | 'borderTopWidth', valor: string) => {
+          const prueba = document.createElement('span');
+          prueba.style.borderTopStyle = 'solid';
+          prueba.style[propiedad] = valor;
+          document.body.append(prueba);
+          const resuelto = getComputedStyle(prueba)[propiedad];
+          prueba.remove();
+          return resuelto;
+        };
+        return {
+          familia: campo.fontFamily,
+          cuerpo: campo.fontSize,
+          cuerpoLg: resolver('fontSize', raiz.getPropertyValue('--cuerpo-lg').trim()),
+          siena: resolver('color', raiz.getPropertyValue('--siena').trim()),
+          filete: resolver('borderTopWidth', raiz.getPropertyValue('--grosor-filete').trim()),
+          boton: {
+            texto: nodo.textContent!.trim(),
+            color: boton.color,
+            borde: [boton.borderTopStyle, boton.borderTopWidth, boton.borderTopColor],
+            alto: nodo.getBoundingClientRect().height,
+            ancho: nodo.getBoundingClientRect().width,
+            familia: boton.fontFamily,
+            espacio: boton.whiteSpace,
+          },
+          anchoDelFormulario: formulario.getBoundingClientRect().width,
+        };
+      });
+      expect(estilo.familia, ruta).toMatch(/^["']?Inter\b/u);
+      expect(estilo.cuerpo, ruta).toBe(estilo.cuerpoLg);
+      expect(estilo.boton.texto, ruta).toBe(BOTON_DE_BUSCAR);
+      expect(estilo.boton.color, ruta).toBe(estilo.siena);
+      expect(estilo.boton.borde, ruta).toEqual(['solid', estilo.filete, estilo.siena]);
+      expect(estilo.boton.alto, ruta).toBeGreaterThanOrEqual(44);
+      expect(estilo.boton.familia, ruta).toMatch(/^["']?Inter\b/u);
+      expect(estilo.boton.espacio, ruta).not.toMatch(/nowrap/);
+      // A su ancho: no ocupa la medida entera.
+      expect(estilo.boton.ancho, ruta).toBeLessThan(estilo.anchoDelFormulario);
+    }
+  });
+
+  test('los rótulos son las etiquetas visibles, y con el enlace de la cabecera hay dos «Buscar»', async ({ page }) => {
+    const { obra, autor, tema } = conFormulario();
+    for (const [ruta, rotulo] of [
+      [obra, ROTULO_BUSCAR_EN_ESTA_OBRA],
+      [autor, undefined],
+      [tema, ROTULO_BUSCAR_EN_ESTE_TEMA],
+    ] as const) {
+      await page.goto(ruta);
+      const etiqueta = page.locator('form.buscar-en label');
+      // El del Autor lleva su nombre, el del `h1` de su página.
+      const esperado = rotulo ?? rotuloBuscarEnAutor((await page.locator('h1').innerText()).trim());
+      await expect(etiqueta, ruta).toHaveText(esperado);
+      await expect(page.getByLabel(await etiqueta.innerText(), { exact: true }), ruta).toBeVisible();
+      await expect(page.getByRole('link', { name: BOTON_DE_BUSCAR, exact: true }), ruta).toHaveCount(1);
+      await expect(page.getByRole('button', { name: BOTON_DE_BUSCAR, exact: true }), ruta).toHaveCount(1);
+    }
+    // El 404 también: el enlace de la cabecera y el botón de su campo, uno de cada.
+    await page.goto(RUTA_404);
+    await expect(page.getByRole('link', { name: BOTON_DE_BUSCAR, exact: true }), RUTA_404).toHaveCount(1);
+    await expect(page.getByRole('button', { name: BOTON_DE_BUSCAR, exact: true }), RUTA_404).toHaveCount(1);
+  });
+
+  test('a 360 × 640, la primera Cita sigue empezando en la primera pantalla de toda página 1 de Tema', async ({ page }) => {
+    const primeras = rutasConstruidas()
+      .filter((ruta) => /^\/tema\/[^/]+\/$/.test(ruta))
+      .sort((a, b) => a.localeCompare(b, 'es'));
+    expect(primeras.length, 'páginas 1 de Tema en el dist/').toBeGreaterThan(0);
+    test.setTimeout(60_000 + primeras.length * 500);
+    await page.setViewportSize({ width: 360, height: 640 });
+    const fuera: string[] = [];
+    let peor = { ruta: '', fin: 0 };
+    for (const ruta of primeras) {
+      await page.goto(ruta);
+      const medida = await page.evaluate(async () => {
+        await document.fonts.ready;
+        const fragmento = document.querySelector<HTMLElement>('.listado .fragmento');
+        if (fragmento === null || document.querySelector('form.buscar-en') === null) return null;
+        return {
+          desplazada: window.scrollY,
+          fin: fragmento.getBoundingClientRect().top + parseFloat(getComputedStyle(fragmento).lineHeight),
+        };
+      });
+      // Un `line-height: normal` daría `NaN`, que ni pasa de 640 ni gana a la peor: se cuenta fuera.
+      if (medida === null || medida.desplazada !== 0 || !Number.isFinite(medida.fin) || medida.fin > 640) {
+        fuera.push(`${ruta}: ${JSON.stringify(medida)}`);
+      } else if (medida.fin > peor.fin) {
+        peor = { ruta, fin: medida.fin };
+      }
+    }
+    test.info().annotations.push({
+      type: 'peor fin de la primera línea de la primera Cita a 360 × 640, página 1 de Tema',
+      description: `${peor.fin} px en ${peor.ruta}`,
+    });
+    console.log(`Historia 27.8 — página 1 de Tema a 360 × 640: la peor, ${peor.ruta}, ${peor.fin} px`);
+    expect(fuera, `fuera de la primera pantalla (la peor de las que caben: ${peor.ruta}, ${peor.fin} px)`).toEqual([]);
+  });
+});
+
+/**
+ * Historia 27.2 — el barrido de `/buscar/` de arriba mira la página vacía: los selectores, «Quitar
+ * los filtros», los resultados de un filtrado (todos Citas, con su línea de Autor) y la salida a cero
+ * con un filtro puesto solo existen después de elegir. Se barren aquí, en esos estados.
+ */
+test.describe('Historia 27.2 — /buscar/ con filtros pasa la auditoría automática', () => {
+  async function barrer(page: Page, estado: string) {
+    const resultado = await new AxeBuilder({ page }).withTags([...ETIQUETAS_DEL_BARRIDO]).analyze();
+    const resumen = resultado.violations.map((v) => `${v.id}: ${v.help} (${v.nodes.length})`);
+    expect(resumen, `/buscar/ ${estado}\n${resumen.join('\n')}`).toEqual([]);
+    const dudas = sinDecidir(resultado);
+    expect(dudas, `/buscar/ ${estado}: axe no supo decidir\n${dudas.join('\n')}`).toEqual([]);
+  }
+
+  test('/buscar/ con un Autor elegido, con resultados y con un filtro a cero', async ({ page }) => {
+    test.setTimeout(60_000);
+    await page.goto('/buscar/');
+    await page.locator('#filtro-de-autor').selectOption({ index: 1 });
+    await expect(page.locator('[data-quitar]')).toBeVisible();
+    await page.waitForFunction(() => document.querySelector('[data-resultados]')!.children.length > 0, null, {
+      timeout: 10_000,
+    });
+    await expect(page.locator('[data-estado]')).not.toBeEmpty();
+    await barrer(page, 'con un Autor elegido');
+
+    await page.locator('[data-consulta]').fill('zzzqxw');
+    await expect(page.locator('[data-salida]')).toBeVisible({ timeout: 10_000 });
+    await expect(page.locator('[data-quitar]')).toBeVisible();
+    await barrer(page, 'con un filtro a cero');
+  });
+});
+
+/**
+ * Historia 27.3 — `/buscar/` con los tres selectores: un Autor elegido, **la Obra del título más
+ * largo del Corpus** elegida (de `filtrosDeLaBusqueda`, el mismo dueño que el mapa de rótulos),
+ * «Quitar los filtros» y los resultados. A 320 px en las tres condiciones de la 26.9, sin
+ * desbordar ni `nowrap` en lo visible del formulario, y el barrido 2.2 AA en ese estado: a 320 px
+ * en cada condición y, aparte, a la anchura del proyecto.
+ */
+test.describe('Historia 27.3 — /buscar/ con una Obra elegida', () => {
+  let elegida: Promise<{ autor: string; obra: string; titulo: string }> | undefined;
+  /** La Obra con el título más largo (desempate por nombre de ficha) y su Autor. */
+  const laObraMasLarga = () =>
+    (elegida ??= (async () => {
+      const raiz = join(new URL('../..', import.meta.url).pathname, 'corpus');
+      const { mapaDeObras } = filtrosDeLaBusqueda(conjuntoDeLosDatos(await leerDatosDelCorpus(rutasDelCorpus(raiz))));
+      const [obra, titulo, autor] = Object.entries(mapaDeObras)
+        .flatMap(([autor, obras]) => obras.map(([obra, titulo]) => [obra, titulo, autor] as const))
+        .sort((a, b) => b[1].length - a[1].length || (a[0] < b[0] ? -1 : 1))[0];
+      return { autor, obra, titulo };
+    })());
+
+  /** Elige el Autor y la Obra, y espera a que la búsqueda pinte. */
+  const elegirLaObra = async (page: Page) => {
+    const { autor, obra, titulo } = await laObraMasLarga();
+    await page.locator('#filtro-de-autor').selectOption(autor);
+    await expect(page.locator('#filtro-de-obra')).toBeVisible({ timeout: 10_000 });
+    await page.locator('#filtro-de-obra').selectOption(obra);
+    await expect(page.locator('[data-estado]')).toContainText(` en ${titulo}`, { timeout: 10_000 });
+    await expect(page.locator('[data-quitar]')).toBeVisible();
+    await page.waitForFunction(() => document.querySelector('[data-resultados]')!.children.length > 0, null, { timeout: 10_000 });
+  };
+
+  test('a 320 px, en las tres condiciones, no desborda ni lleva nowrap en el formulario ni en los resultados, y pasa axe', async ({ page }) => {
+    test.setTimeout(180_000);
+    const { titulo } = await laObraMasLarga();
+    expect(titulo.length).toBeGreaterThan(40);
+    for (const condicion of CONDICIONES) {
+      if (!(await cargarEn320(page, '/buscar/', condicion, elegirLaObra))) continue;
+      const donde = `/buscar/ con «${titulo}» elegida (${condicion})`;
+      const m = await anchoDeLaPagina(page);
+      expect.soft(m.scroll, `${donde} desborda: ${m.scroll} frente a ${m.ventana}`).toBeLessThanOrEqual(m.ventana);
+      expect.soft(await contenedoresQueRecortan(page), `${donde}: contenedores que se desplazan o recortan en horizontal`).toEqual([]);
+      const conNowrap = await page.evaluate(() =>
+        [...document.querySelectorAll('form *, [data-resultados] *')]
+          .filter((e) => {
+            const r = e.getBoundingClientRect();
+            if (r.width <= 1 || r.height <= 1 || e.closest('.solo-para-lectores, .oculto')) return false;
+            const c = getComputedStyle(e) as CSSStyleDeclaration & { textWrapMode?: string };
+            return c.whiteSpace.includes('nowrap') || c.textWrapMode === 'nowrap';
+          })
+          .map((e) => e.tagName.toLowerCase() + (e.id ? `#${e.id}` : '')),
+      );
+      expect.soft(conNowrap, `${donde}: controles o resultados visibles con nowrap`).toEqual([]);
+      // El selector de Obra, con el título más largo elegido, cabe en la columna y no se desplaza
+      // por dentro. El valor puede recortarse en el control cerrado: la lista lo muestra entero
+      // (EXPERIENCE.md § Búsqueda, Selectores de filtro).
+      const obra = await page.evaluate(() => {
+        const s = document.querySelector<HTMLSelectElement>('#filtro-de-obra')!;
+        return { derecha: s.getBoundingClientRect().right, ventana: document.documentElement.clientWidth, scroll: s.scrollWidth, ancho: s.clientWidth };
+      });
+      expect.soft(obra.derecha, `${donde}: el selector de Obra se sale`).toBeLessThanOrEqual(obra.ventana);
+      expect.soft(obra.scroll, `${donde}: el selector de Obra desborda por dentro`).toBeLessThanOrEqual(obra.ancho);
+      // El barrido 2.2 AA en ese mismo estado: a 320 px y con la condición puesta.
+      const resultado = await new AxeBuilder({ page }).withTags([...ETIQUETAS_DEL_BARRIDO]).analyze();
+      const resumen = resultado.violations.map((v) => `${v.id}: ${v.help} (${v.nodes.length})`);
+      expect.soft(resumen, `${donde}\n${resumen.join('\n')}`).toEqual([]);
+      const dudas = sinDecidir(resultado);
+      expect.soft(dudas, `${donde}: axe no supo decidir\n${dudas.join('\n')}`).toEqual([]);
+    }
+  });
+
+  test('pasa la auditoría automática con Autor, Obra, «Quitar los filtros» y resultados', async ({ page }) => {
+    test.setTimeout(60_000);
+    await page.goto('/buscar/');
+    await elegirLaObra(page);
+    const resultado = await new AxeBuilder({ page }).withTags([...ETIQUETAS_DEL_BARRIDO]).analyze();
+    const resumen = resultado.violations.map((v) => `${v.id}: ${v.help} (${v.nodes.length})`);
+    expect(resumen, `/buscar/ con una Obra elegida\n${resumen.join('\n')}`).toEqual([]);
+    const dudas = sinDecidir(resultado);
+    expect(dudas, `/buscar/ con una Obra elegida: axe no supo decidir\n${dudas.join('\n')}`).toEqual([]);
+  });
+});
+
+/**
+ * Historia 27.5 — `/buscar/` con «Mostrar 30 más» puesto, en sus tres estados: «Mostrar 30 más», la
+ * última tanda nombrada («Mostrar las {n} que faltan») y la frase del fallo a la vista bajo el
+ * botón (los fragmentos de Pagefind cortados). A 320 px en las tres condiciones de la 26.9, sin
+ * desbordar, sin contenedores que recorten y sin `nowrap` en el bloque, y el barrido 2.2 AA en
+ * cada estado; aparte, el barrido a la anchura del proyecto con el botón puesto. El Autor sale del
+ * Corpus por `filtrosDeLaBusqueda`: el de menos Citas por encima de dos tandas con una última de
+ * dos o más (desempate por slug), como en `busqueda.spec.ts`.
+ */
+test.describe('Historia 27.5 — /buscar/ con «Mostrar 30 más»', () => {
+  const T = TANDA_DE_RESULTADOS;
+  const FRAGMENTOS = '**/pagefind/fragment/**';
+  let elegido: Promise<{ valor: string; recuento: number }> | undefined;
+  const elAutor = () =>
+    (elegido ??= (async () => {
+      const raiz = join(new URL('../..', import.meta.url).pathname, 'corpus');
+      const { autores } = filtrosDeLaBusqueda(conjuntoDeLosDatos(await leerDatosDelCorpus(rutasDelCorpus(raiz))));
+      const autor = [...autores]
+        .filter((a) => a.recuento > 2 * T && a.recuento % T >= 2)
+        .sort((a, b) => a.recuento - b.recuento || (a.valor < b.valor ? -1 : 1))[0];
+      if (!autor) throw new Error(`El Corpus no tiene ningún Autor con más de ${2 * T} Citas y una última tanda de dos o más.`);
+      return autor;
+    })());
+
+  /** Elige el Autor y espera a su primera tanda, con «Mostrar 30 más» puesto. */
+  const conElBoton = async (page: Page) => {
+    const { valor } = await elAutor();
+    await page.locator('#filtro-de-autor').selectOption(valor);
+    await expect(page.locator('[data-resultados] .resultado')).toHaveCount(T, { timeout: 10_000 });
+    await expect(page.locator('[data-mostrar-mas]')).toHaveText(`Mostrar ${T} más`);
+  };
+  /** Pulsa hasta que el botón nombra la última tanda. */
+  const conLaUltima = async (page: Page) => {
+    await conElBoton(page);
+    for (let i = 0; i < 20 && !/^Mostrar (?:las \d+ que faltan|la que falta)$/u.test((await page.locator('[data-mostrar-mas]').textContent()) ?? ''); i++) {
+      const antes = await page.locator('[data-resultados] .resultado').count();
+      await page.locator('[data-mostrar-mas]').click();
+      await expect(page.locator('[data-resultados] .resultado')).toHaveCount(antes + T, { timeout: 10_000 });
+    }
+    await expect(page.locator('[data-mostrar-mas]')).toHaveText(/^Mostrar (?:las \d+ que faltan|la que falta)$/u);
+  };
+  /** Pulsa con los fragmentos cortados: la frase del fallo queda a la vista bajo el botón. */
+  const conElFallo = async (page: Page) => {
+    await conElBoton(page);
+    await page.route(FRAGMENTOS, (ruta) => ruta.abort());
+    await page.locator('[data-mostrar-mas]').click();
+    await expect(page.locator('[data-fallo-de-la-tanda]')).toHaveText(FALLO_DE_LA_TANDA, { timeout: 10_000 });
+  };
+  const ESTADOS: [string, (page: Page) => Promise<void>][] = [
+    ['«Mostrar 30 más»', conElBoton],
+    ['la última tanda nombrada', conLaUltima],
+    ['la frase del fallo', conElFallo],
+  ];
+
+  test('a 320 px, en las tres condiciones y en sus tres estados, no desborda, no recorta ni lleva nowrap en el bloque, y pasa axe', async ({ page }) => {
+    test.setTimeout(420_000);
+    for (const [estado, preparar] of ESTADOS) {
+      for (const condicion of CONDICIONES) {
+        const aplicada = await cargarEn320(page, '/buscar/', condicion, preparar);
+        await page.unroute(FRAGMENTOS);
+        if (!aplicada) continue;
+        /*
+         * El puntero que pulsó se queda donde estaba, y la condición mueve lo que hay debajo: el
+         * botón puede entrar o salir de su `:hover` justo antes del barrido, y axe mediría a medio
+         * camino de su transición de color (150 ms), que no es ningún estado del botón. Se aparta el
+         * puntero y se deja acabar la transición.
+         */
+        await page.mouse.move(0, 0);
+        await page.waitForTimeout(300);
+        const donde = `/buscar/ con ${estado} (${condicion})`;
+        const m = await anchoDeLaPagina(page);
+        expect.soft(m.scroll, `${donde} desborda: ${m.scroll} frente a ${m.ventana}`).toBeLessThanOrEqual(m.ventana);
+        expect.soft(await contenedoresQueRecortan(page), `${donde}: contenedores que se desplazan o recortan en horizontal`).toEqual([]);
+        const bloque = await page.evaluate(() => {
+          const caja = document.querySelector('[data-mas]')!;
+          const conNowrap = [caja, ...caja.querySelectorAll('*')]
+            .filter((e) => {
+              const c = getComputedStyle(e) as CSSStyleDeclaration & { textWrapMode?: string };
+              return c.whiteSpace.includes('nowrap') || c.textWrapMode === 'nowrap';
+            })
+            .map((e) => e.tagName.toLowerCase());
+          const boton = caja.querySelector('button')!.getBoundingClientRect();
+          return { conNowrap, derecha: boton.right, ventana: document.documentElement.clientWidth };
+        });
+        expect.soft(bloque.conNowrap, `${donde}: el bloque lleva nowrap`).toEqual([]);
+        expect.soft(bloque.derecha, `${donde}: el botón se sale`).toBeLessThanOrEqual(bloque.ventana);
+        const resultado = await new AxeBuilder({ page }).withTags([...ETIQUETAS_DEL_BARRIDO]).analyze();
+        const resumen = resultado.violations.map((v) => `${v.id}: ${v.help} (${v.nodes.map((n) => n.target.join(' ')).join(', ')})`);
+        expect.soft(resumen, `${donde}\n${resumen.join('\n')}`).toEqual([]);
+        const dudas = sinDecidir(resultado);
+        expect.soft(dudas, `${donde}: axe no supo decidir\n${dudas.join('\n')}`).toEqual([]);
+      }
+    }
+  });
+
+  test('pasa la auditoría automática a la anchura del proyecto con «Mostrar 30 más» puesto', async ({ page }) => {
+    test.setTimeout(60_000);
+    await page.goto('/buscar/');
+    await conElBoton(page);
+    const resultado = await new AxeBuilder({ page }).withTags([...ETIQUETAS_DEL_BARRIDO]).analyze();
+    const resumen = resultado.violations.map((v) => `${v.id}: ${v.help} (${v.nodes.length})`);
+    expect(resumen, `/buscar/ con «Mostrar 30 más»\n${resumen.join('\n')}`).toEqual([]);
+    const dudas = sinDecidir(resultado);
+    expect(dudas, `/buscar/ con «Mostrar 30 más»: axe no supo decidir\n${dudas.join('\n')}`).toEqual([]);
+  });
+});
+
+/*
+ * Historia 27.7 — los avisos de `/buscar/` cuando la búsqueda no puede correr pasan el barrido WCAG
+ * 2.2 AA del fichero y el reflujo a 320 px en las tres condiciones: sin guion (el de `<noscript>`),
+ * con el paquete de la búsqueda cortado (el aviso previo) y con el índice que no carga (el del
+ * fallo, que la isla inserta). NFR-8, NFR-9.
+ */
+test.describe('Historia 27.7 — los avisos de /buscar/ pasan la auditoría y no desbordan a 320 px', () => {
+  const ESTADOS = [
+    /*
+     * axe corre en la página y espera promesas, que no se resuelven en un contexto sin JavaScript.
+     * Así que el DOM sin guion se reconstruye en uno con guion y sin ningún fichero de guion: el
+     * contenido de cada `<noscript>` se analiza como marcado —lo que hace el navegador sin guion— y
+     * el aviso previo sale, como lo oculta su CSS sin guion. Que sin guion se ve eso y solo eso, y
+     * nada más, lo prueba `busqueda.spec.ts` en un contexto sin JavaScript de verdad.
+     */
+    {
+      cual: 'sin guion',
+      aviso: '.sin-guion .aviso-de-la-busqueda',
+      preparar: async (page: Page) => {
+        await page.evaluate(() => {
+          for (const n of document.querySelectorAll('noscript')) {
+            const caja = document.createElement('div');
+            caja.className = 'sin-guion';
+            caja.innerHTML = n.textContent ?? '';
+            n.replaceWith(caja);
+          }
+          document.querySelector('[data-aviso-previo]')?.remove();
+        });
+        await expect(page.locator('[data-consulta]')).toHaveCount(0);
+      },
+      cortar: (page: Page) => page.route('**/*.js', (r) => r.abort()),
+    },
+    {
+      cual: 'con el paquete de la búsqueda cortado',
+      aviso: '[data-aviso-previo]',
+      preparar: async (_: Page) => {},
+      cortar: (page: Page) => page.route((url) => guionExternoDe(url.pathname)?.id === 'busqueda', (r) => r.abort()),
+    },
+    {
+      cual: 'con el índice que no carga',
+      aviso: '[data-aviso-del-fallo]',
+      preparar: async (page: Page) => {
+        await page.locator('[data-consulta]').fill('viento');
+        await expect(page.locator('[data-aviso-del-fallo]')).toBeVisible({ timeout: 10_000 });
+        await expect(page.locator('[data-estado]')).toHaveText(ANUNCIO_DEL_FALLO_DE_LA_BUSQUEDA);
+      },
+      cortar: (page: Page) => page.route('**/pagefind/pagefind.js*', (r) => r.abort()),
+    },
+  ];
+
+  for (const { cual, aviso, preparar, cortar } of ESTADOS) {
+    test(`/buscar/ ${cual}: el aviso pasa el barrido y no desborda a 320 px en las tres condiciones`, async ({ page }) => {
+      test.setTimeout(90_000);
+      await cortar(page);
+      await page.goto('/buscar/');
+      await preparar(page);
+      await expect(page.locator(aviso)).toBeVisible();
+      const resultado = await new AxeBuilder({ page }).withTags([...ETIQUETAS_DEL_BARRIDO]).analyze();
+      const resumen = resultado.violations.map((v) => `${v.id}: ${v.help} (${v.nodes.map((n) => n.target.join(' ')).join(', ')})`);
+      expect.soft(resumen, `/buscar/ ${cual}\n${resumen.join('\n')}`).toEqual([]);
+      const dudas = sinDecidir(resultado);
+      expect.soft(dudas, `/buscar/ ${cual}: axe no supo decidir\n${dudas.join('\n')}`).toEqual([]);
+      for (const condicion of CONDICIONES) {
+        if (!(await cargarEn320(page, '/buscar/', condicion, preparar))) continue;
+        await expect(page.locator(aviso)).toBeVisible();
+        const donde = `/buscar/ ${cual} (${condicion})`;
+        const m = await anchoDeLaPagina(page);
+        expect.soft(m.scroll, `${donde} desborda: ${m.scroll} frente a ${m.ventana}`).toBeLessThanOrEqual(m.ventana);
+        expect.soft(await contenedoresQueRecortan(page), `${donde}: contenedores que se desplazan o recortan en horizontal`).toEqual([]);
+      }
+    });
+  }
 });

@@ -140,6 +140,23 @@ export const DESPLIEGUE_DE_LA_PORTADA_DE_RETORNO: string | undefined = undefined
  */
 export const DESPLIEGUE_DE_LA_LECTURA: string | undefined = '2026-10-25';
 
+/**
+ * La llegada en vivo de la búsqueda con filtros — la Épica 27, AD-9, Historia 27.9.
+ *
+ * Es la jornada UTC en que termina el trabajo «Desplegar» de Actions que lleva la 27 al sitio en
+ * vivo —nunca la del merge—, con la misma forma que las de arriba: `undefined` mientras no haya
+ * llegado. **Le da valor Héctor, en un commit aparte del día en que llega, y ningún agente la
+ * elige.**
+ *
+ * La lee la orden de la línea base (23.10) para contar desde ella las ventanas de SM-6 y SM-13,
+ * en su tabla de juicios por ventanas: la primera empieza la primera jornada UTC
+ * completa tras la llegada, y la de llegada no entra en ninguna y se informa aparte, como
+ * «cambió». No es un corte de serie —la combinación de filtros de `busqueda` ya era del
+ * vocabulario de la 23, y `/buscar/` no emite vista—, así que no entra en
+ * `CORTES_DE_SERIE_DECLARADOS` ni en `CORTES_DE_SM8`; tampoco cambia lo que SM-11 compara.
+ */
+export const DESPLIEGUE_DE_LA_BUSQUEDA_CON_FILTROS: string | undefined = undefined;
+
 /*
  * Los cortes de serie de la medición — AD-9, AD-13, Historia 23.10.
  *
@@ -392,6 +409,17 @@ export const META_AUTORES_DE_OTRA_TRADICION: number | undefined = undefined;
  * opciones de `OPCIONES_DE_PAGEFIND` antes de cada búsqueda y pinta Directorio y Portada con el
  * bloque de Obra, que pasó a ser compartido (`TIPOS_CON_TITULO_EN_SANS`). La Página de Cita con
  * Imagen sigue en 5.630.
+ *
+ * Medido otra vez en la Historia 27.1, sin moverlo: `/buscar/` lleva **6.622 bytes** con la
+ * medición puesta (34 libres), porque pinta la línea del Autor también bajo el resultado de Cita
+ * (`TIPOS_CON_LINEA_DE_AUTOR`), con el mismo código que la de Obra. Es lo último que cabe en
+ * línea: la 27.2 saca el guion de `/buscar/` a un fichero empaquetado con su propio tope (AD-6).
+ *
+ * Historia 27.2, sin moverlo: `/buscar/` ya no lleva guion propio en línea —solo el arranque de la
+ * medición, como toda página—, porque su isla es ahora el `<script>` empaquetado de
+ * `src/components/Busqueda.astro`, que se descarga aparte y se mide con su propio tope,
+ * `MAX_BYTES_GUION_DE_LA_BUSQUEDA`. La superficie más justa vuelve a ser la Página de Cita con
+ * Imagen.
  */
 export const MAX_BYTES_DE_GUION = 6656;
 
@@ -520,8 +548,101 @@ export const MAX_BYTES_GUION_DE_PAGEFIND = 87200;
  * recuento, la lectura del modelo por los selectores de cada fila y la espera a la letra compuesta
  * (`compositionend`)— mide **3.167 bytes** (2026-10-28), y el tope se rederiva con la misma regla:
  * 3.167 más unos 400.
+ *
+ * Historia 27.2 — rederivado con la misma regla. La búsqueda importa también los ritmos de
+ * `src/lib/anuncio.ts` y los recuentos, y el empaquetado saca lo que los dos guiones comparten a un
+ * trozo que importan los dos: el filtro deja de ser un solo fichero y arrastra, con el trozo,
+ * `anunciar`, el `ahora` del segundo ritmo y `temaEnFrase`, que no usa. Mide **3.460 bytes**
+ * (2026-10-29): 2.963 de su fichero y 497 del trozo. Tope: 3.460 más unos 400. Tras las dos
+ * revisiones de la 27.2 el trozo mide 501 y el filtro **3.464** (2026-10-29): sigue a ~400 del tope,
+ * que no se mueve.
+ *
+ * Historia 27.3 — el trozo compartido cambia: `recuentoDeCitas` se muda a `src/lib/recuentos.ts`
+ * para el rótulo de cada Obra del selector de `/buscar/`, y el trozo pasa a medir 552. El filtro
+ * mide **3.515 bytes** (2026-10-29): 2.963 de su fichero y 552 del trozo. Tope, con la misma
+ * regla: 3.515 más unos 400.
  */
-export const MAX_BYTES_GUION_DEL_FILTRO = 3570;
+export const MAX_BYTES_GUION_DEL_FILTRO = 3915;
+
+/**
+ * La búsqueda de `/buscar/`, el `<script>` de `src/components/Busqueda.astro` que Astro emite como
+ * fichero en `/_astro/` — AD-6, Historia 27.2.
+ *
+ * Es el segundo guion empaquetado de la v8, y sustituye a la isla en línea de `/buscar/` (que se
+ * comía `MAX_BYTES_DE_GUION` con 34 bytes libres). Lo pide solo `/buscar/`, con `<script
+ * type="module" src>` detrás del de medición, y lleva dentro, por importación, los rótulos y las
+ * opciones de `src/lib/tipoDeResultado.ts`, la parte pura del asentamiento y su vocabulario
+ * (`src/lib/medicion.ts`, `src/lib/vocabulario.ts`), los dos ritmos de `src/lib/anuncio.ts`, las
+ * frases de `src/lib/busqueda.ts` y las dos pausas de este módulo. Pide Pagefind por `import()`,
+ * que **no** cuenta aquí: es otra entrada de la lista, con su tope (`MAX_BYTES_GUION_DE_PAGEFIND`).
+ * El tope cuenta el fichero con lo que importe de forma estática —un trozo compartido con el filtro
+ * de los Directorios, si el empaquetado lo sacara, también—, y lo vigila
+ * `tests/unit/medicion.test.ts` sobre `dist/`.
+ *
+ * Medido el 2026-10-29: **8.712 bytes** —8.215 del fichero de entrada y 497 del trozo que comparte
+ * con el filtro (`anunciar`, `ritmoDeTecleo`, los recuentos y `temaEnFrase`)—, el mismo con o sin
+ * punto final de medición, porque no lleva contenido. Unos 1.100 de esos bytes no son de la
+ * búsqueda: son el envoltorio con que el empaquetado de Vite rodea todo `import()` dinámico
+ * (`__vitePreload`, que precargaría las dependencias del módulo pedido; Pagefind no tiene ninguna
+ * que Vite conozca, y la lista va vacía). Vite lo pone siempre que construye para el cliente y no
+ * tiene opción que lo quite; se mide aquí para que se vea. Más unos 400 de margen, como los demás
+ * topes de la lista.
+ *
+ * Rederivado tras las dos revisiones de la historia, con la misma regla y como el del filtro: la
+ * cuenta de la pausa desde la última tecla, que una pausa cancele la otra, la sugerencia a cero que
+ * no pisa un recuento y el recuento que Enter escribe ya lo llevan a **8.912 bytes** (2026-10-29)
+ * —8.411 del fichero de entrada y 501 del trozo—. Tope: 8.912 más unos 400.
+ *
+ * Historia 27.3 — rederivado con la misma regla. El selector de Obra trae a la búsqueda la petición
+ * del mapa de rótulos y de `filters()`, la composición de sus opciones (`opcionesDeObra`,
+ * `rotuloDeObra` y `recuentoDeCitas`, que se muda al trozo compartido) y la Obra en los filtros,
+ * el recuento y el asentamiento: **10.810 bytes** (2026-10-29) —10.258 del fichero de entrada y 552
+ * del trozo—. Tope: 10.810 más unos 400. Tras las dos revisiones de la 27.3 —un `filters()` sin el
+ * filtro `obra` que cuenta como fallo, la Obra sin título que no se nombra, el reintento del Autor
+ * que se sumó a una petición ajena que falló y la frase que no dobla el punto tras un título que ya
+ * cierra— mide **11.034 bytes** (2026-10-29): 10.482 del fichero de entrada y 552 del trozo, que no
+ * cambia. Tope, con la misma regla: 11.034 más unos 400.
+ *
+ * Historia 27.4 — rederivado con la misma regla. La búsqueda vive en la dirección: la lectura, la
+ * composición, la comparación y la resolución del estado (`estadoDeLaDireccion`,
+ * `direccionDeLaBusqueda`, `mismoEstado`, `estadoDeLaEntrada`, `entradaConEstado`,
+ * `autorDeLaObra`, `resolverEstado`), las frases de lo que no se puede usar
+ * (`avisoDeLaDireccion`), la decisión de cada escritura (`escrituraDelHistorial`), la llegada
+ * común a la carga y a `popstate` y la escritura que se adelanta al asentar: **15.087 bytes**
+ * (2026-10-29) —14.535 del fichero de entrada y 552 del trozo, que no cambia (el del filtro
+ * tampoco)— (el tope de entonces, 15.087 más unos 400, ya no rige). Tras la primera revisión de la
+ * 27.4 —la marca en toda entrada con objeto que dice lo que se ve, el reemplazo de la entrada de
+ * una llegada al asentar, el salto de ancla que no es llegada y la llegada que deja sin asentar lo
+ * de la entrada que se dejó— mide **15.425 bytes** (2026-10-29): 14.873 del fichero de entrada y
+ * 552 del trozo (el tope de entonces, 15.825, tampoco rige). Tras la segunda —el salto de ancla
+ * reconocido por el fragmento y la búsqueda como estado, la entrada del ancla que se marca, la
+ * llegada que deja sin efecto la búsqueda en vuelo y la que pinta campo y selectores mientras
+ * espera los datos de su Obra— mide **15.651 bytes** (2026-10-29): 15.099 del fichero de entrada y
+ * 552 del trozo, que no cambia (el tope de entonces, 16.051, ya no rige).
+ *
+ * Historia 27.5 — rederivado con la misma regla. Los resultados llegan de 30 en 30: el bloque de
+ * «Mostrar 30 más» que se pone y se quita tras la lista, la fila de resultado sacada a una función
+ * que comparten las dos tandas, la escucha del botón con su guarda de vuelo, el foco al primer
+ * resultado nuevo, el fallo anunciado en su región con la destrucción del índice y el reintento que
+ * repite la búsqueda —con las opciones de Pagefind aplicadas en un solo sitio para las dos
+ * búsquedas—, y el rótulo y la frase de `src/lib/busqueda.ts` con `TANDA_DE_RESULTADOS`:
+ * **16.740 bytes** (2026-10-29) —16.188 del fichero de entrada y 552 del trozo, que no cambia (el
+ * del filtro tampoco)— (el tope de entonces, 17.140, ya no rige). Tras las dos revisiones de la
+ * 27.5 —el reintento que sigue del `results` nuevo sin rehacer la búsqueda, el foco al último
+ * resultado si ya no trae nada, la destrucción que no cae bajo otra búsqueda en vuelo, la búsqueda
+ * que espera la destrucción en curso y el fallo diferido que un reintento logrado ya no escribe—
+ * mide **16.893 bytes** (2026-10-29): 16.341 del fichero de entrada y 552 del trozo, que no cambia
+ * (el tope de entonces, 17.293, ya no rige).
+ *
+ * Historia 27.7 — rederivado con la misma regla. La búsqueda que no puede correr pinta el aviso del
+ * fallo: retirar el aviso previo al arrancar, clonar una vez la plantilla del fallo, ponerlo y
+ * quitarlo (`mostrarFallo`, `quitarFallo`) desde el fallo de `buscar`, `sinDatos`, `pintar` y la
+ * búsqueda vacía, con la frase que anuncia la región (`ANUNCIO_DEL_FALLO_DE_LA_BUSQUEDA`, de
+ * `src/lib/busqueda.ts`): **17.896 bytes** (2026-10-29), el fichero de entrada con el trozo de
+ * `recuentos`, medidos por `tests/unit/medicion.test.ts`. **Tope vigente**, con la misma regla:
+ * 17.896 más unos 400.
+ */
+export const MAX_BYTES_GUION_DE_LA_BUSQUEDA = 18296;
 
 /**
  * La pausa de tecleo, en milisegundos — AD-9, UX-DR58, UX-DR86, Historia 26.6.
@@ -533,6 +654,43 @@ export const MAX_BYTES_GUION_DEL_FILTRO = 3570;
  * La reutiliza `/buscar/` en la Épica 27. `DESIGN.md` dice «unos 700 ms».
  */
 export const PAUSA_DE_TECLEO_MS = 700;
+
+/**
+ * La pausa de los selectores de `/buscar/`, en milisegundos — Historia 27.2, UX-DR88.
+ *
+ * Cada `change` o `input` de un selector de filtro (Autor, Tema) la reinicia, y la búsqueda se
+ * rehace **una vez** al cumplirse: recorrer el selector con las flechas del teclado, que en un
+ * `select` nativo cerrado cambia el valor con cada pulsación, no lanza una búsqueda por opción.
+ * El recuento de esa búsqueda se escribe al llegar, sin otra espera. Enviar el formulario (Enter)
+ * cancela esta pausa y la del tecleo y busca el estado de ese momento. Vive junto a la del tecleo
+ * porque son las dos esperas de los mensajes de estado de la búsqueda.
+ */
+export const PAUSA_DE_LOS_SELECTORES_MS = 400;
+
+/**
+ * Cuántos resultados pinta `/buscar/` de cada vez — AD-9, FR-7, UX-DR90, UX-DR112, Historia 27.5.
+ *
+ * La primera tanda son los `TANDA_DE_RESULTADOS` primeros del `results` de Pagefind; el resto se
+ * pide con «Mostrar 30 más» (o «Mostrar las {n} que faltan», «Mostrar la que falta»: el rótulo lo
+ * compone `rotuloDeMostrarMas` de `src/lib/busqueda.ts` con esta cifra), un botón bajo la lista
+ * que pide los `data()` de la tanda siguiente del **mismo** `results` y los añade sin repintar. Ni
+ * desplazamiento infinito ni páginas: la tanda la pide un gesto. Hasta la 27.5 la isla cortaba en
+ * un `30` literal y quien buscaba a un Autor con 222 Citas no llegaba a la 31. Vive junto a las dos
+ * pausas porque es el tercer número de comportamiento de la búsqueda, y un solo dueño: ni la isla
+ * ni las pruebas lo escriben.
+ */
+export const TANDA_DE_RESULTADOS = 30;
+
+/**
+ * Cuántos Autores destacados ofrece la búsqueda sin resultados — AD-9, FR-8, UX-DR62, Historia 27.6.
+ *
+ * Los elige `autoresDestacados` de `src/lib/publicado.ts`: los que más Citas publicadas tienen, con
+ * el suelo de `SUELO_TRADICION_LATINOAMERICANA` aplicado sobre los que cuentan para él, y se
+ * presentan en el orden del Directorio de Autores. Hasta la 27.6 la salida de `/buscar/` cortaba la
+ * lista alfabética en un `8` literal, sin regla. La misma cifra la reutiliza la portada en la 28.4:
+ * un solo dueño para las dos superficies, y ninguna lo escribe.
+ */
+export const AUTORES_DESTACADOS = 8;
 
 /**
  * El techo de lo que el alojamiento admite por sitio — Historia 24.2, Entorno operativo.
@@ -608,6 +766,65 @@ export const TOPE_DE_PNG_DE_DIST: number | undefined = undefined;
  * en el mensaje del commit que lo fija.
  */
 export const MAX_BYTES_DEL_DIRECTORIO_DE_OBRAS = 290 * 1024;
+
+/**
+ * Bytes de los filtros de Pagefind más el mapa de rótulos de las Obras por encima de los cuales el
+ * build avisa — Historia 27.3, AD-9, AD-11.
+ *
+ * Es **una sola cifra** porque la isla de `/buscar/` los pide juntos al elegir un Autor
+ * (`filters()` y `/buscar/obras.json`), y trocearlos —por Autor— es la misma decisión aplazada para
+ * los dos. Lo mide el paso final de `npm run build`, después de Pagefind (`integraciones/peso.ts`,
+ * con la decisión en `tools/lib/peso.ts`): la suma de `dist/pagefind/filter/**` y
+ * `dist/buscar/obras.json`. Pasarlo **avisa y nunca rompe**; el parte da las dos partes para que se
+ * vea cuál crece, y si falta una no suma ni escribe cero.
+ *
+ * Son **bytes en disco**, no bytes transferidos: los `.pf_filter` de Pagefind ya se escriben
+ * comprimidos, y el mapa se escribe en claro y lo comprime el anfitrión al servirlo. La suma es
+ * por eso una cota por arriba de lo que descarga la isla, y sirve para ver crecer lo desplegado
+ * entre construcciones, no para estimar la transferencia.
+ *
+ * El 2026-10-17 los filtros medían unos 41 KB. El valor es lo medido sobre `npm run build` el
+ * 2026-10-29 —97.018 bytes: 52.625 de los filtros, en 4 ficheros, y 44.393 del mapa, con 517 Obras
+ * de 135 Autores; los filtros varían unos cien bytes de una construcción a otra con el mismo
+ * Corpus— más un 25 % (121.273), redondeado arriba a 10 KiB, con la regla de
+ * `MAX_BYTES_DEL_DIRECTORIO_DE_OBRAS`: 120 KiB.
+ */
+export const AVISO_DE_BYTES_DE_FILTROS_Y_MAPA = 120 * 1024;
+
+/**
+ * El ancho de cada rango de la clave de orden de la búsqueda — Historia 27.1, AD-25, AD-9.
+ *
+ * Toda Página de Cita lleva `data-pagefind-sort="orden:NNNNNNNN"`, que compone `clavesDeOrden`
+ * de `src/lib/obras.ts` como `a·B + p`: `a` es la posición del Autor en el orden del Directorio
+ * y `p` la de la Cita dentro de su Autor (sus Obras en el orden de su lista de obras, cada una en
+ * el del libro, y al final las que no tienen Obra). `B` es este número.
+ *
+ * **Por qué 4096 y dos rangos, y no tres.** Pagefind 1.5.2 ordena las claves numéricas como
+ * `f32`, que representa exactos los enteros solo hasta 2^24 = 16.777.216: por encima, dos claves
+ * vecinas empatan y el orden se pierde sin que nada falle. Un 3+2+3 decimal (Autor, Obra, posición
+ * en el libro) llega a ~17,1 millones y ya empata; tres campos binarios no caben con holgura (hoy
+ * 135 Autores, 57 Obras y 231 Citas por Obra como máximos). Con dos de 2^12 toda clave queda
+ * por debajo de `B²` = 2^24, exacta por construcción. Holgura el 2026-10-29: 30× en Autores (135)
+ * y 13× en Citas de un Autor (308).
+ *
+ * Un rango cuyo recuento llega a este número —4096 Autores, o 4096 Citas de un Autor— **rompe
+ * el build** nombrando el rango («Autor» o «posición dentro de {slug}»), el recuento y el tope;
+ * es el mismo «≥» con que avisa `AVISO_DE_RANGO_DE_LA_CLAVE_DE_ORDEN`. Así caben `B − 1`
+ * posiciones por rango, y la clave mayor que llega a salir es `(B − 2)·B + (B − 2)` = 16.773.118. Subirlo no es una opción:
+ * 4096² ya es el techo de `f32`. Lo que lo reabre es trocear la clave, o cambiar de rangos.
+ */
+export const MAX_POR_RANGO_DE_LA_CLAVE_DE_ORDEN = 4096;
+
+/**
+ * El recuento de un rango de la clave de orden a partir del cual el build avisa — Historia 27.1.
+ *
+ * Es el aviso previo a `MAX_POR_RANGO_DE_LA_CLAVE_DE_ORDEN`, al modo del de la 24.2 con el peso de
+ * `dist/`: avisa por `console.warn` nombrando el rango y su recuento, y nunca rompe.
+ *
+ * **Sin poner, y a propósito**: es un listón, y el listón lo pone Héctor en un diff visible.
+ * `undefined` significa eso: no avisa, y el tope sigue rompiendo.
+ */
+export const AVISO_DE_RANGO_DE_LA_CLAVE_DE_ORDEN: number | undefined = undefined;
 
 /**
  * Filas que D1 deja escribir al día en el plan gratuito — AD-9, AD-13, Historia 23.2.

@@ -10,25 +10,62 @@
  *
  * La etiqueta, visible y encima, en el pie y la tinta apagada, a `--unidad` del campo. Lo tecleado
  * va en Inter, al cuerpo grande y en tinta —nunca la serif, que es solo para texto de Cita y
- * nombres—, sin caja, sin sombra, sin radio, sin icono y sin `placeholder`: un filete inferior en
+ * nombres—, sin caja, sin sombra, sin radio y sin icono (sin `placeholder`, salvo el ejemplo de
+ * `/buscar/`, más abajo): un filete inferior en
  * el contorno, que al recibir el foco pasa a siena y al doble de grueso **además** del anillo
  * global de `tokens.css`, nunca en su lugar. Sin la cruz nativa de `type="search"`, que sería un
  * botón. El alto mínimo es la zona de toque. Ni mayúscula automática ni autocorrección: lo que se
  * teclea es parte de un nombre, y el teclado del móvil no tiene que cambiarlo por otra palabra.
+ *
+ * Historia 27.2 — `/buscar/` lo usa con tres cosas que el filtro no lleva, todas opcionales y sin
+ * ellas el campo sale como antes: el `name` que envía su formulario (`nombre`, «q»), un texto de
+ * ejemplo (`ejemplo`, el `placeholder`, en la tinta apagada) y la marca `data-consulta` por la que
+ * lo encuentran su guion y las pruebas (`consulta`).
+ *
+ * Historia 27.8, UX-DR94, UX-DR108 — el botón «Buscar» (`boton`), decisión de Héctor del 18/10: lo
+ * llevan los campos que **envían** a `/buscar/` —«Buscar en…», el 404 y, en la Épica 28, la
+ * portada—, para que quien usa control por voz o conmutadores tenga qué pulsar. Va debajo del
+ * campo, a 2 × `--unidad` y a su ancho, con el tratamiento del secundario siena de UX-DR9 —el de
+ * «Quitar los filtros» de `Busqueda.astro`—, y el campo pide al teclado del móvil la tecla de
+ * buscar (`enterkeyhint="search"`), que lo envía igual que Intro. Es un `submit` sin `name`: no
+ * añade nada a la dirección. El formulario lo pone quien lo usa; ni `/buscar/` ni el filtro de los
+ * Directorios, que responden al teclear, llevan botón.
  */
+import { BOTON_DE_BUSCAR } from '../lib/busqueda.ts';
+
 interface Props {
   /** El `id` del campo, al que apunta su etiqueta. */
   id: string;
   /** La etiqueta visible: «Escribe parte del nombre.». */
   etiqueta: string;
+  /** El `name` del campo, si va en un formulario que lo envía. */
+  nombre?: string;
+  /** El texto de ejemplo («Por ejemplo: no hay camino»), como `placeholder`. */
+  ejemplo?: string;
+  /** Si el campo lleva la marca `data-consulta`. */
+  consulta?: boolean;
+  /** Si el campo lleva debajo el botón «Buscar» que envía su formulario (Historia 27.8). */
+  boton?: boolean;
 }
 
-const { id, etiqueta } = Astro.props;
+const { id, etiqueta, nombre, ejemplo, consulta = false, boton = false } = Astro.props;
 ---
 
 <div class="campo-de-busqueda">
   <label for={id}>{etiqueta}</label>
-  <input id={id} type="search" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false" />
+  <input
+    id={id}
+    name={nombre}
+    type="search"
+    autocomplete="off"
+    autocapitalize="none"
+    autocorrect="off"
+    spellcheck="false"
+    placeholder={ejemplo}
+    data-consulta={consulta ? '' : undefined}
+    enterkeyhint={boton ? 'search' : undefined}
+  />
+  {boton && <button type="submit" class="buscar">{BOTON_DE_BUSCAR}</button>}
 </div>
 
 <style>
@@ -58,6 +95,12 @@ const { id, etiqueta } = Astro.props;
     appearance: none;
   }
 
+  /* El texto de ejemplo, cuando lo hay, en la tinta apagada: no es lo tecleado. */
+  input::placeholder {
+    color: var(--tinta-apagada);
+    opacity: 1;
+  }
+
   /* Sin la cruz ni la lupa nativas de `type="search"`: ni botón ni icono. */
   input::-webkit-search-cancel-button,
   input::-webkit-search-decoration {
@@ -71,5 +114,32 @@ const { id, etiqueta } = Astro.props;
    */
   input:focus {
     border-bottom: calc(var(--grosor-filete) * 2) solid var(--siena);
+  }
+
+  /*
+   * Historia 27.8, UX-DR9 — el botón secundario: texto en siena con filete, a su ancho, a la zona de
+   * toque y a 2 × `--unidad` bajo el campo; el mismo tratamiento que «Quitar los filtros» de
+   * `Busqueda.astro`. Sin `nowrap` (NFR-8, Historia 26.9).
+   */
+  .buscar {
+    display: block;
+    max-width: 100%;
+    margin-top: calc(var(--unidad) * 2);
+    font-family: var(--sans);
+    font-size: var(--cuerpo-md);
+    color: var(--siena);
+    background: transparent;
+    border: var(--grosor-filete) solid var(--siena);
+    border-radius: var(--radio);
+    min-height: var(--zona-de-toque);
+    padding-inline: calc(var(--unidad) * 3);
+    cursor: pointer;
+    /* UX-DR22 — solo opacidad y color, y como máximo 150 ms. */
+    transition: background-color 150ms, color 150ms;
+  }
+
+  .buscar:hover {
+    background: var(--siena);
+    color: var(--sobre-siena);
   }
 </style>

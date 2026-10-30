@@ -3,18 +3,24 @@ import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import { dirname, relative, resolve } from 'node:path';
 import { parse as parsearYaml } from 'yaml';
 import {
+  DIRECTORIO_DE_LOS_FILTROS,
   FICHEROS_QUE_ROTAN_CON_LA_JORNADA,
+  MAPA_DE_OBRAS_EN_DIST,
   enMiB,
   errorDeLectura,
   medirDist,
   parteDePeso,
   veredictoDePeso,
   veredictoDePng,
+  veredictoDeFiltrosYMapa,
   type FicheroDeDist,
   type UmbralesDePeso,
 } from '../../tools/lib/peso.ts';
+import { RUTA_DEL_MAPA_DE_OBRAS } from '../../src/lib/busqueda.ts';
 import {
+  AVISO_DE_BYTES_DE_FILTROS_Y_MAPA,
   AVISO_DE_PESO_DE_DIST,
+  MAX_BYTES_DEL_DIRECTORIO_DE_OBRAS,
   TECHO_DE_PESO_DEL_ALOJAMIENTO,
   TOPE_DE_PESO_DE_DIST,
   TOPE_DE_PNG_DE_DIST,
@@ -68,8 +74,11 @@ function resolverRelativo(desde: string, especificador: string, existe: (ruta: s
 
 const esFichero = (ruta: string): boolean => existsSync(ruta) && statSync(ruta).isFile();
 
-/** Umbrales pequeños y legibles para los casos: aviso en 1.000 bytes, tope en 2.000. */
-const UMBRALES: UmbralesDePeso = { aviso: 1_000, tope: 2_000, topeDePng: undefined };
+/**
+ * Umbrales pequeños y legibles para los casos: aviso en 1.000 bytes, tope en 2.000; y el de los
+ * filtros con el mapa (27.3), en 100.
+ */
+const UMBRALES: UmbralesDePeso = { aviso: 1_000, tope: 2_000, topeDePng: undefined, avisoDeFiltrosYMapa: 100 };
 
 /** Un `dist/` cuyo único fichero juzgado pesa `bytes`, con lo que rota al lado. */
 function distQueJuzga(bytes: number, rota = 10): FicheroDeDist[] {
@@ -243,7 +252,7 @@ describe('Historia 24.2 — el parte', () => {
     const parte = parteDePeso(medirDist(distQueJuzga(500)), UMBRALES);
     expect(parte.avisos).toEqual([]);
     expect(parte.error).toBeUndefined();
-    expect(parte.veredictos).toEqual({ peso: 'por-debajo', png: 'sin-tope' });
+    expect(parte.veredictos).toEqual({ peso: 'por-debajo', png: 'sin-tope', filtrosYMapa: 'sin-medir' });
   });
 
   it('las cifras dicen cuánto queda hasta el umbral siguiente, o cuánto se pasa del tope', () => {
@@ -280,8 +289,9 @@ describe('Historia 24.2 — el parte', () => {
     // Con un solo fichero juzgado ya hay medida: cifras, veredicto y ningún error.
     const conUno = parteDePeso(medirDist(distQueJuzga(1)), UMBRALES);
     expect(conUno.error).toBeUndefined();
-    expect(conUno.cifras).toHaveLength(5);
-    expect(conUno.veredictos).toEqual({ peso: 'por-debajo', png: 'sin-tope' });
+    // Historia 27.3 — la sexta, la de los filtros con el mapa.
+    expect(conUno.cifras).toHaveLength(6);
+    expect(conUno.veredictos).toEqual({ peso: 'por-debajo', png: 'sin-tope', filtrosYMapa: 'sin-medir' });
   });
 
   it('la primera línea dice si pagefind/ está, y no lo da por incluido cuando falta', () => {
@@ -358,7 +368,12 @@ describe('Historia 24.2 — el parte', () => {
   });
 
   it('con los valores de Héctor, el error los escribe en MiB', () => {
-    const umbrales = { aviso: AVISO_DE_PESO_DE_DIST, tope: TOPE_DE_PESO_DE_DIST, topeDePng: undefined };
+    const umbrales = {
+      aviso: AVISO_DE_PESO_DE_DIST,
+      tope: TOPE_DE_PESO_DE_DIST,
+      topeDePng: undefined,
+      avisoDeFiltrosYMapa: AVISO_DE_BYTES_DE_FILTROS_Y_MAPA,
+    };
     const parte = parteDePeso(medirDist(distQueJuzga(TOPE_DE_PESO_DE_DIST + 1)), umbrales);
     // A esta distancia el redondeo a MiB iguala las dos cifras: el exceso lo dice en bytes.
     expect(parte.error).toContain('943.718.401 bytes (900 MiB)');
@@ -402,6 +417,98 @@ describe('Historia 24.2 — el parte', () => {
     const anotado = errorDeLectura('/x/dist', `${motivo}\nsegunda línea`, { anotar: true });
     expect(anotado).toMatch(/^::error::No se pudo medir el peso de dist\/ /u);
     expect(anotado).not.toMatch(/[\r\n]/u);
+  });
+});
+
+describe('Historia 27.3 — los filtros de Pagefind con el mapa de rótulos, en el paso final', () => {
+  /** Un `dist/` con los filtros (dos trozos) y el mapa de los tamaños que se digan. */
+  const conFiltrosYMapa = (filtros: number, mapa: number | undefined): FicheroDeDist[] => [
+    ...distQueJuzga(300),
+    { ruta: 'pagefind/pagefind.js', bytes: 7 },
+    { ruta: `${DIRECTORIO_DE_LOS_FILTROS}es_1.pf_filter`, bytes: filtros - Math.floor(filtros / 2) },
+    { ruta: `${DIRECTORIO_DE_LOS_FILTROS}es_2.pf_filter`, bytes: Math.floor(filtros / 2) },
+    ...(mapa === undefined ? [] : [{ ruta: MAPA_DE_OBRAS_EN_DIST, bytes: mapa }]),
+  ];
+
+  it('el aviso tiene nombre en `umbrales.ts`, es entero y múltiplo de 10 KiB, como el de `/obras/`', () => {
+    expect(Number.isInteger(AVISO_DE_BYTES_DE_FILTROS_Y_MAPA)).toBe(true);
+    expect(AVISO_DE_BYTES_DE_FILTROS_Y_MAPA % (10 * 1024)).toBe(0);
+    expect(MAX_BYTES_DEL_DIRECTORIO_DE_OBRAS % (10 * 1024)).toBe(0);
+    expect(AVISO_DE_BYTES_DE_FILTROS_Y_MAPA).toBeGreaterThan(0);
+    // El mapa del paso es la dirección que pide la isla, sin la barra.
+    expect(`/${MAPA_DE_OBRAS_EN_DIST}`).toBe(RUTA_DEL_MAPA_DE_OBRAS);
+  });
+
+  it('`medirDist` cuenta los filtros —dentro de pagefind/— y el mapa, aparte', () => {
+    const medida = medirDist(conFiltrosYMapa(60, 30));
+    expect(medida.filtros).toEqual({ bytes: 60, ficheros: 2 });
+    expect(medida.mapa).toEqual({ bytes: 30, ficheros: 1 });
+    expect(medida.pagefind).toEqual({ bytes: 67, ficheros: 3 });
+    expect(medirDist(distQueJuzga(300)).filtros).toEqual({ bytes: 0, ficheros: 0 });
+  });
+
+  it('una cifra con las dos partes, su suma y el aviso; por debajo o igualándolo, sin aviso', () => {
+    const parte = parteDePeso(medirDist(conFiltrosYMapa(60, 40)), UMBRALES);
+    const linea = parte.cifras.at(-1)!;
+    expect(linea).toBe(
+      'Filtros de Pagefind y mapa de Obras de /buscar/: filtros (pagefind/filter/) 60 bytes (0,1 KiB) en 2 ficheros; ' +
+        'mapa (buscar/obras.json) 40 bytes (<0,1 KiB); suman 100 bytes (0,1 KiB); aviso en 100 bytes (0,1 KiB) ' +
+        '(AVISO_DE_BYTES_DE_FILTROS_Y_MAPA).',
+    );
+    expect(parte.avisos).toEqual([]);
+    expect(parte.veredictos?.filtrosYMapa).toBe('por-debajo');
+  });
+
+  it('por encima del aviso: avisa con las dos partes, la suma, la constante y quién decide, y no rompe', () => {
+    for (const anotar of [false, true]) {
+      const parte = parteDePeso(medirDist(conFiltrosYMapa(60, 41)), UMBRALES, { anotar });
+      expect(parte.error).toBeUndefined();
+      expect(parte.veredictos).toEqual({ peso: 'por-debajo', png: 'sin-tope', filtrosYMapa: 'aviso' });
+      expect(parte.avisos).toHaveLength(1);
+      const [aviso] = parte.avisos;
+      expect(aviso).toMatch(anotar ? /^::warning::Aviso de filtros y mapa: /u : /^Aviso de filtros y mapa: /u);
+      expect(aviso).not.toMatch(/[\r\n]/u);
+      expect(aviso).toContain('(60 bytes');
+      expect(aviso).toContain('(41 bytes');
+      expect(aviso).toContain('suman 101 bytes');
+      expect(aviso).toContain('AVISO_DE_BYTES_DE_FILTROS_Y_MAPA en src/lib/umbrales.ts');
+      expect(aviso).toContain('No detiene la construcción');
+      expect(aviso).toContain('lo decide Héctor');
+      // La cifra no es un aviso.
+      expect(parte.cifras.at(-1)).not.toMatch(/^(::|Aviso)/u);
+    }
+  });
+
+  it('con los valores medidos del 2026-10-29 no avisa, y con un aviso por debajo de lo medido, sí', () => {
+    const medido = medirDist(conFiltrosYMapa(52_625, 44_393));
+    const umbrales = { ...UMBRALES, avisoDeFiltrosYMapa: AVISO_DE_BYTES_DE_FILTROS_Y_MAPA };
+    expect(parteDePeso(medido, umbrales).avisos).toEqual([]);
+    expect(parteDePeso(medido, { ...umbrales, avisoDeFiltrosYMapa: 97_017 }).avisos).toHaveLength(1);
+    expect(veredictoDeFiltrosYMapa(medido, 97_018)).toBe('por-debajo');
+    expect(veredictoDeFiltrosYMapa(medido, 97_017)).toBe('aviso');
+  });
+
+  it('si falta una de las dos partes, la cifra lo dice, no suma ni escribe cero, y no avisa', () => {
+    const sinMapa = parteDePeso(medirDist(conFiltrosYMapa(500, undefined)), UMBRALES);
+    expect(sinMapa.cifras.at(-1)).toContain('sin buscar/obras.json: no hay mapa de Obras que medir');
+    expect(sinMapa.cifras.at(-1)).toContain('sin suma ni veredicto');
+    expect(sinMapa.cifras.at(-1)).not.toMatch(/suman|(?<![\d.])0 bytes/u);
+    expect(sinMapa.avisos).toEqual([]);
+    expect(sinMapa.veredictos?.filtrosYMapa).toBe('sin-medir');
+    const sinFiltros = parteDePeso(medirDist([...distQueJuzga(300), { ruta: MAPA_DE_OBRAS_EN_DIST, bytes: 500 }]), UMBRALES);
+    expect(sinFiltros.cifras.at(-1)).toContain('sin pagefind/filter/: no hay filtros de Pagefind que medir');
+    expect(sinFiltros.cifras.at(-1)).toContain('mapa (buscar/obras.json) 500 bytes');
+    expect(sinFiltros.avisos).toEqual([]);
+  });
+
+  it('el aviso de los filtros no toca el veredicto del peso: sobre el tope sigue siendo error, y los dos se dicen', () => {
+    const parte = parteDePeso(
+      medirDist([...conFiltrosYMapa(600, 600), { ruta: 'cita/otra/index.html', bytes: 2_000 }]),
+      UMBRALES,
+    );
+    expect(parte.veredictos).toEqual({ peso: 'sobre-el-tope', png: 'sin-tope', filtrosYMapa: 'aviso' });
+    expect(parte.error).toBeDefined();
+    expect(parte.avisos.some((a) => a.startsWith('Aviso de filtros y mapa'))).toBe(true);
   });
 });
 

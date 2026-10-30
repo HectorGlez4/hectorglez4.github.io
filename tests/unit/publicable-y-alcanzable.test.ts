@@ -12,9 +12,12 @@ import {
   limpiar,
   paginaConstruida,
 } from './ayuda/construir.js';
-import { rutasPublicadas, superficiesInalcanzables } from '../../src/lib/publicado.ts';
-import { conjuntoDelCorpus, grafoDeDist } from '../../tools/lib/alcance.ts';
-import { rutasDelCorpus } from '../../tools/lib/corpus.ts';
+import { citasPorObra, filtrosDeLaBusqueda, rutasPublicadas, superficiesInalcanzables } from '../../src/lib/publicado.ts';
+import { clavesDeOrden } from '../../src/lib/obras.ts';
+import { conjuntoDeLosDatos, conjuntoDelCorpus, grafoDeDist, leerDatosDelCorpus } from '../../tools/lib/alcance.ts';
+import { leerDocumentosDeFuente, rutasDelCorpus } from '../../tools/lib/corpus.ts';
+import { posicionesDeCitas } from '../../tools/lib/posiciones.ts';
+import { metadatosDe } from './ayuda/pagefind.ts';
 import { rutaDeFicheroHtml } from '../../tools/lib/indexables.ts';
 import {
   SUPERFICIES,
@@ -31,7 +34,12 @@ import {
 } from '../../src/lib/superficies.ts';
 import { CITAS_POR_PAGINA, MAX_SALTOS_DESDE_LA_PORTADA } from '../../src/lib/umbrales.ts';
 import { MARCA } from '../../src/lib/marca.ts';
-import { FILTRO_DE_TIPO, OPCIONES_DE_PAGEFIND } from '../../src/lib/tipoDeResultado.ts';
+import {
+  FILTRO_DE_TIPO,
+  FILTROS_DE_CITA,
+  OPCIONES_DE_PAGEFIND,
+  ORDEN_DE_CITA,
+} from '../../src/lib/tipoDeResultado.ts';
 import { declaracionDe, recorrerElementos, type Declaracion, type Elemento } from './ayuda/enlaces.js';
 import { conClase, exposicionDeLaPortada } from './ayuda/portada.js';
 
@@ -836,12 +844,93 @@ describe('Historia 12.1 — sobre un sitio construido de verdad', () => {
         conCuerpo++;
         const tipo = tipoDeLaRuta(ruta);
         expect(tipo, `${ruta}: una página con cuerpo de Pagefind fuera de toda familia`).toBeDefined();
-        expect(filtros, ruta).toEqual([{ etiqueta: 'main', valor: `${FILTRO_DE_TIPO}:${tipo}` }]);
+        // Solo la clave del tipo: los filtros de la Cita (27.1) los mira su propia prueba.
+        const delTipo = filtros.filter((f) => f.valor.split(':')[0] === FILTRO_DE_TIPO);
+        expect(delTipo, ruta).toEqual([{ etiqueta: 'main', valor: `${FILTRO_DE_TIPO}:${tipo}` }]);
+        // Y ningún filtro de otra clave: fuera del tipo, solo los de la Cita, y solo en ella.
+        const permitidas = new Set<string>([FILTRO_DE_TIPO, ...(tipo === 'cita' ? Object.values(FILTROS_DE_CITA) : [])]);
+        expect(filtros.filter((f) => !permitidas.has(f.valor.split(':')[0])), ruta).toEqual([]);
         vistas.add(tipo!);
       }
       // Sin esto pasaría sobre un sitio sin nada indexado. El corpus trae las seis familias.
       expect(conCuerpo).toBeGreaterThan(6);
       expect([...vistas].sort()).toEqual(['autor', 'cita', 'coleccion', 'directorio', 'obra', 'portada', 'tema']);
+    });
+
+    /*
+     * Historia 27.1, AD-11, AD-25 — los filtros `autor`, `obra` y `tema` y la clave de orden los
+     * lleva solo la Página de Cita, y toda Página de Cita lleva su clave: Pagefind saca de los
+     * resultados ordenados a la página que no la trae. El tipo de la 26.2 queda exento por nombre.
+     */
+    it('fuera de `/cita/…` ningún HTML lleva filtro `autor`, `obra` ni `tema` ni clave de orden, y toda Página de Cita lleva la suya', async () => {
+      const deCita = new Set<string>(Object.values(FILTROS_DE_CITA));
+      const fuera: string[] = [];
+      const claves = new Map<string, string[]>();
+      for (const [ruta, html] of await paginas()) {
+        const esCita = /^\/cita\/[^/]+$/.test(ruta);
+        const deLaPagina: string[] = [];
+        recorrerElementos(html, (elemento) => {
+          const filtro = elemento.atributos.get('data-pagefind-filter');
+          const sort = elemento.atributos.get('data-pagefind-sort');
+          if (sort !== undefined) deLaPagina.push(sort);
+          if (esCita) return;
+          if (sort !== undefined) fuera.push(`${ruta}: data-pagefind-sort="${sort}"`);
+          if (filtro !== undefined && deCita.has(filtro.split(':')[0])) fuera.push(`${ruta}: data-pagefind-filter="${filtro}"`);
+        });
+        if (esCita) claves.set(ruta, deLaPagina);
+      }
+      expect(fuera).toEqual([]);
+      // No en vacío: el corpus trae Citas, y cada una con una sola clave numérica de ocho cifras.
+      expect(claves.size).toBeGreaterThan(CITAS_POR_PAGINA);
+      for (const [ruta, deLaPagina] of claves) {
+        expect(deLaPagina, ruta).toHaveLength(1);
+        expect(deLaPagina[0], ruta).toMatch(new RegExp(`^${ORDEN_DE_CITA}:\\d{8}$`, 'u'));
+      }
+      expect(new Set([...claves.values()].map((c) => c[0])).size).toBe(claves.size);
+      // Y cada una es la que `clavesDeOrden` da sobre el Corpus de la copia y su orden del libro.
+      const rutas = rutasDelCorpus(join(proyecto, 'corpus'));
+      const datos = await leerDatosDelCorpus(rutas);
+      const conjunto = conjuntoDeLosDatos(datos);
+      const porObra = citasPorObra(conjunto.citas, posicionesDeCitas(datos.citas, await leerDocumentosDeFuente(rutas)));
+      const esperadas = clavesDeOrden(conjunto.autores, conjunto.citas, porObra);
+      const malas: string[] = [];
+      for (const [ruta, deLaPagina] of claves) {
+        const esperada = `${ORDEN_DE_CITA}:${esperadas.get(ruta.slice('/cita/'.length))}`;
+        if (deLaPagina[0] !== esperada) malas.push(`${ruta}: ${deLaPagina[0]} en vez de ${esperada}`);
+      }
+      expect(malas).toEqual([]);
+      expect(esperadas.size).toBe(claves.size);
+    });
+
+    /*
+     * Historia 27.1, AD-11 — sobre el `dist/` de todas las familias, y no solo el del fixture de
+     * `filtros-de-cita.test.ts`: cada Página de Cita lleva exactamente su `autor`, como mucho su
+     * `obra` y en `tema` exactamente sus Temas publicados —los de `filtrosDeLaBusqueda` sobre el
+     * Corpus de la copia—, y el metadato `autor` una vez, con el nombre.
+     */
+    it('cada Página de Cita lleva exactamente los filtros de `filtrosDeLaBusqueda` y el metadato `autor`', async () => {
+      const conjunto = await conjuntoDelCorpus(rutasDelCorpus(join(proyecto, 'corpus')));
+      const { porCita } = filtrosDeLaBusqueda(conjunto);
+      const nombres = new Map(conjunto.autores.map((autor) => [autor.slug, autor.nombre]));
+      const vistas = new Set<string>();
+      for (const [ruta, html] of await paginas()) {
+        const slug = /^\/cita\/([^/]+)$/.exec(ruta)?.[1];
+        if (slug === undefined) continue;
+        const esperado = porCita.get(slug);
+        expect(esperado, `${ruta}: una Página de Cita sin filtros en filtrosDeLaBusqueda`).toBeDefined();
+        vistas.add(slug);
+        const valores = filtrosDe(html).map((f) => f.valor);
+        const de = (clave: string) => valores.filter((v) => v.startsWith(`${clave}:`)).map((v) => v.slice(clave.length + 1));
+        expect(de(FILTROS_DE_CITA.autor), ruta).toEqual([esperado!.autor]);
+        expect(de(FILTROS_DE_CITA.obra), ruta).toEqual(esperado!.obra === undefined ? [] : [esperado!.obra]);
+        expect(de(FILTROS_DE_CITA.tema), ruta).toEqual([...esperado!.temas]);
+        const metas = metadatosDe(html, 'autor');
+        expect(metas.elementos, ruta).toBe(1);
+        expect(metas.valores, ruta).toEqual([nombres.get(esperado!.autor)]);
+      }
+      // Todas las Citas publicadas, y no en vacío.
+      expect([...vistas].sort()).toEqual([...porCita.keys()].sort());
+      expect(vistas.size).toBeGreaterThan(CITAS_POR_PAGINA);
     });
 
     it('todo `data-pagefind-meta` construido que no sea `title` declara su peso en `OPCIONES_DE_PAGEFIND`', async () => {
