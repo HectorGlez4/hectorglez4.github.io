@@ -432,9 +432,15 @@ export function cierreDeMasDelAutor(autor: Pick<Autor, 'nombre'>, recuento: numb
  * Lleva a `/obras/`, así que `n` son las Obras que lista el Directorio de Obras —también las que no
  * se indexan—, no las que la portada enseña hoy. Con punto de millar («Las 1.234 obras»), como la
  * línea de cifras de la 28.1, y concordado con una («La 1 obra»), que solo se da en las pruebas.
- * Sin el glifo de avance «›»: lo pone la portada, en un `span` `aria-hidden`.
+ * Sin el glifo de avance «›»: lo pone la portada, en un `span` `aria-hidden`. Lanza con un recuento
+ * que no sea un entero de 1 en adelante.
  */
 export function cierreDeLasObras(n: number): string {
+  // Como los cierres de la 24.6 (`recuentoDeCierre`), un recuento imposible no se redacta: con
+  // ninguna Obra la portada no tiene bloque, así que «Las 0 obras» solo saldría de un uso roto.
+  if (!Number.isInteger(n) || n < 1) {
+    throw new Error(`cierreDeLasObras: «${n}» no es un recuento de Obras (un entero de 1 en adelante).`);
+  }
   return n === 1 ? 'La 1 obra' : `Las ${milesEnEspañol(n)} obras`;
 }
 

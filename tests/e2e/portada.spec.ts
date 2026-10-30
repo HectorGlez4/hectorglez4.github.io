@@ -335,7 +335,7 @@ test.describe('Historia 28.3 — seis Obras que cambian con la jornada', () => {
     }
   });
 
-  test('el título en Inter `body-lg` 600 y tinta; los hechos en `caption` y tinta apagada', async ({ page }) => {
+  test('el título en Inter `body-lg` 600 y tinta; los hechos en `caption` y tinta apagada; filas sin subrayado y cierre en `body-md` y tinta', async ({ page }) => {
     await page.goto('/');
     await page.evaluate(() => document.fonts.ready);
     const m = await page.evaluate(() => {
@@ -353,6 +353,7 @@ test.describe('Historia 28.3 — seis Obras que cambian con la jornada', () => {
         esperado: {
           sans: resuelto('font-family', '--sans'),
           cuerpoLg: resuelto('font-size', '--cuerpo-lg'),
+          cuerpoMd: resuelto('font-size', '--cuerpo-md'),
           pie: resuelto('font-size', '--pie'),
           tinta: resuelto('color', '--tinta'),
           apagada: resuelto('color', '--tinta-apagada'),
@@ -363,8 +364,13 @@ test.describe('Historia 28.3 — seis Obras que cambian con la jornada', () => {
           return {
             titulo: { familia: titulo.fontFamily, cuerpo: titulo.fontSize, peso: titulo.fontWeight, color: titulo.color },
             hechos: { familia: hechos.fontFamily, cuerpo: hechos.fontSize, color: hechos.color },
+            subrayado: getComputedStyle(li.querySelector('a')!).textDecorationLine,
           };
         }),
+        cierre: (() => {
+          const a = getComputedStyle(document.querySelector('main p[data-zona="obras-de-portada"] a')!);
+          return { familia: a.fontFamily, cuerpo: a.fontSize, color: a.color };
+        })(),
       };
     });
     expect(m.filas.length).toBeGreaterThan(0);
@@ -372,7 +378,10 @@ test.describe('Historia 28.3 — seis Obras que cambian con la jornada', () => {
     for (const fila of m.filas) {
       expect(fila.titulo).toEqual({ familia: m.esperado.sans, cuerpo: m.esperado.cuerpoLg, peso: '600', color: m.esperado.tinta });
       expect(fila.hechos).toEqual({ familia: m.esperado.sans, cuerpo: m.esperado.pie, color: m.esperado.apagada });
+      // La fila es un bloque que se toca entero, no un enlace de texto: sin subrayado.
+      expect(fila.subrayado).toBe('none');
     }
+    expect(m.cierre).toEqual({ familia: m.esperado.sans, cuerpo: m.esperado.cuerpoMd, color: m.esperado.tinta });
   });
 
   test('las filas se tocan, la lista va a 2 × de su rótulo y el cierre a 2 × de la lista, subrayado y con 44 px', async ({ page }) => {

@@ -186,6 +186,7 @@ function modulo(n: number, divisor: number): number {
  * Devuelve las Obras en el orden de la ventana; con A = 0, ninguna. **Lanza** si una Obra es de un
  * Autor que no está en `autores` o si ese Autor no tiene clave de orden, como `autoresDestacados`:
  * el build lo para antes, en `integraciones/claves.ts`, y adivinarle un sitio escondería el fallo.
+ * Lanza también si la jornada no es una jornada (`esJornada`), en vez de devolver una ventana rota.
  */
 export function obrasDelDia<O extends Pick<ObraResuelta, 'nombre' | 'autor' | 'titulo' | 'recuento'>>(
   obras: readonly O[],
@@ -225,6 +226,11 @@ export function obrasDelDia<O extends Pick<ObraResuelta, 'nombre' | 'autor' | 't
 
   const total = lista.length;
   if (total === 0) return [];
+  // Una jornada sin forma, o que no está en el calendario, daría un día `NaN` y una ventana vacía:
+  // se nombra aquí y no cuatro marcos más abajo (como `esJornada` explica).
+  if (!esJornada(jornada)) {
+    throw new Error(`obrasDelDia: «${jornada}» no es una jornada AAAA-MM-DD del calendario.`);
+  }
   const cuantas = Math.min(OBRAS_DE_LA_PORTADA, total);
   const dia = diasDesdeLaEpoca(jornada);
 

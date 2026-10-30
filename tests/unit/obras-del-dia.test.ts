@@ -138,7 +138,39 @@ describe('Historia 28.3 — obrasDelDia, con menos Autores que Obras en la porta
   });
 });
 
+describe('Historia 28.3 — obrasDelDia, el orden que decide qué sale cada jornada', () => {
+  it(`con exactamente ${K} Autores la ventana da la vuelta entera: cada jornada todos, con la siguiente Obra`, () => {
+    const justos = MUCHOS.slice(0, K);
+    const obras = justos.flatMap((a) => [obra(a.slug, 'segunda', 3), obra(a.slug, 'primera', 7)]);
+    const lista = justos.map((a) => a.slug);
+    expect(nombres(obrasDelDia(obras, justos, jornada(0)))).toEqual(lista.map(primera));
+    expect(nombres(obrasDelDia(obras, justos, jornada(1)))).toEqual(lista.map(segunda));
+    expect(nombres(obrasDelDia(obras, justos, jornada(2)))).toEqual(lista.map(primera));
+  });
+
+  it('dos Autores con la misma clave van por su slug, como en el Directorio', () => {
+    const zeta = autor('zeta', 'Igual');
+    const alfa = autor('alfa', 'Igual');
+    const elegidas = obrasDelDia([obra('zeta', 'libro', 2), obra('alfa', 'libro', 2)], [zeta, alfa], jornada(0));
+    expect(elegidas.map((o) => o.autor)).toEqual(['alfa', 'zeta']);
+  });
+
+  it('dos Obras del mismo Autor con el mismo recuento y el mismo título van por su nombre de ficha', () => {
+    const solo = autor('solo', 'Solo');
+    const gemela = (slug: string): ObraResuelta => ({ ...obra('solo', slug, 2), titulo: 'Poesías' });
+    const obras = [gemela('poesias-2'), gemela('poesias-1')];
+    expect(nombres(obrasDelDia(obras, [solo], jornada(0)))).toEqual(['solo--poesias-1']);
+    expect(nombres(obrasDelDia(obras, [solo], jornada(1)))).toEqual(['solo--poesias-2']);
+  });
+});
+
 describe('Historia 28.3 — obrasDelDia, los bordes', () => {
+  it('lanza, nombrándola, ante una jornada que no es del calendario', () => {
+    for (const mala of ['2026-13-01', '2026-02-31', '30/10/2026', '']) {
+      expect(() => obrasDelDia(OBRAS_DE_MUCHOS, MUCHOS, mala), mala).toThrow(/no es una jornada/);
+    }
+  });
+
   it('sin Obras, ninguna', () => {
     expect(obrasDelDia([], MUCHOS, jornada(0))).toEqual([]);
     expect(obrasDelDia([], [], jornada(0))).toEqual([]);
@@ -180,5 +212,11 @@ describe('Historia 28.3 — el cierre de las Obras de la portada', () => {
     expect(cierreDeLasObras(1)).toBe('La 1 obra');
     expect(cierreDeLasObras(2)).toBe('Las 2 obras');
     expect(cierreDeLasObras(1234)).toBe('Las 1.234 obras');
+  });
+
+  it('lanza con un recuento que no es un entero de 1 en adelante', () => {
+    for (const n of [0, -3, 1.5, Number.NaN]) {
+      expect(() => cierreDeLasObras(n), String(n)).toThrow(/cierreDeLasObras/);
+    }
   });
 });

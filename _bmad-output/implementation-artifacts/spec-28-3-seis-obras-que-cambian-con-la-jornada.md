@@ -5,12 +5,19 @@ created: '2026-10-30'
 status: 'done'
 baseline_revision: '9a53e82d34e3a4e8aeb73542a32a950c398466e5'
 review_loop_iteration: 0
-followup_review_recommended: false
+followup_review_recommended: true
 context:
   - '{project-root}/_bmad-output/implementation-artifacts/epic-28-context.md'
   - '{project-root}/AGENTS.md'
 warnings: [oversized]
-deferred: []
+deferred:
+  - summary: >-
+      El criterio de la 28.3 en epics.md dice que las filas van en un subárbol data-jornada «con la marca del componente único de la 26.8» (CitaDelDia.astro), y el emisor único pasó a LoQueRota.astro; pendiente de Héctor (bmad-create-epics-and-stories).
+    evidence: |-
+      La espina (AD-12) pide una sola marca puesta por un solo componente, y eso se cumple: solo src/components/LoQueRota.astro nombra data-jornada (tests/unit/alcance-construido.test.ts) y AGENTS.md lo dice. Pero CitaDelDia.astro no puede pintar las Obras —el 404 lleva la Cita sin Obras—, así que la letra del criterio («el componente único de la 26.8») ya no casa con el código. Lo señalan intent-alignment (D2) y ac-auditor (punto 9). Los artefactos de planificación no se editan a mano.
+    location: >-
+      _bmad-output/planning-artifacts/epics.md (Historia 28.3); src/components/LoQueRota.astro
+    severity: low
 ---
 
 <intent-contract>
@@ -142,6 +149,30 @@ deferred: []
 
 Las cinco capas de revisión son externas (bucle v8-ralph) y no traían hallazgos en esta pasada; la revisión independiente viene después.
 
+### 2026-10-30 — Review pass
+- intent_gap: 0
+- bad_spec: 0
+- patch: 14: (high 0, medium 4, low 10)
+- defer: 1: (high 0, medium 0, low 1)
+- reject: 15: (high 0, medium 1, low 14)
+- addressed_findings:
+  - `[medium]` `[patch]` (verification-gap) Ninguna prueba leía el Autor que nombra cada fila: `obras-de-la-portada.test.ts` comprueba ahora, fila a fila, que el título es el de la Obra de su `href` y que los hechos son `[nombre del Autor, año, recuentoDeCitas]`.
+  - `[medium]` `[patch]` (intent-alignment D4, ac-auditor 1) La prueba de la fijación era vacía: fijaba la Cita que la rotación ya daba. Martí aporta dos Citas aptas, la rotación de la jornada da una de Séneca, la fijación lleva a la de Martí, y la prueba exige que la Cita del Día cambie y las Obras no.
+  - `[medium]` `[patch]` (intent-alignment D6, ac-auditor 3) La congelación no tenía prueba en la portada: una construcción con `CONGELACION_DE_OBRAS` en la copia de `umbrales.ts` exige que las filas sean solo las dos congeladas (una por Autor), que el rótulo y el cierre sigan y que el cierre cuente todo el Directorio.
+  - `[medium]` `[patch]` (ac-auditor 2) La copia con la afiliación encendida nunca enseñaba una Obra con ediciones: las ediciones van ahora en la primera Obra de Martí, que sale en la jornada, y la prueba lo exige.
+  - `[low]` `[patch]` (blind-hunter) El marcado del cierre se desviaba del contrato (`class="cierre"` y un `span` que agrupaba texto y glifo): vuelve a ser `<p data-zona="obras-de-portada"><a …>{cierre}<span aria-hidden="true">&nbsp;›</span></a></p>`, con el alto de toque por `inline-block`, `box-sizing: border-box` y relleno, en vez de `inline-flex`.
+  - `[low]` `[patch]` (blind-hunter) La clase genérica `.cierre` chocaría con el cierre de Autores de la 28.4: el estilo se nombra por `p[data-zona='obras-de-portada']`.
+  - `[low]` `[patch]` (blind-hunter, edge-case-hunter) `cierreDeLasObras` aceptaba 0, negativos y no enteros: lanza, como `recuentoDeCierre`, y lo prueba `obras-del-dia.test.ts`.
+  - `[low]` `[patch]` (blind-hunter, edge-case-hunter) `obrasDelDia` no validaba la jornada y fallaba con un `TypeError` opaco: lanza nombrándola si no pasa `esJornada`; con prueba.
+  - `[low]` `[patch]` (blind-hunter) Faltaban bordes del orden: exactamente `OBRAS_DE_LA_PORTADA` Autores, dos Autores con la misma clave (desempata el slug) y dos Obras gemelas de un Autor (desempata el nombre de ficha).
+  - `[low]` `[patch]` (blind-hunter) El comentario de la portada sobre lo que queda fuera de Pagefind no nombraba las Obras: ya las nombra, con su rótulo y su cierre.
+  - `[low]` `[patch]` (blind-hunter) AGENTS.md no documentaba las reglas del bloque: nueva subsección «Las Obras de la portada (Historia 28.3)» (la constante, solo indexables, sin indexables no hay bloque ni cierre, el cierre cuenta todo el Directorio, AD-17).
+  - `[low]` `[patch]` (intent-alignment D5, ac-auditor 4) Que la Obra de la Cita del Día siga entre las Obras solo se probaba en puro: la construcción fijada lo exige ahora sobre la portada construida.
+  - `[low]` `[patch]` (ac-auditor 5) Estilos sin medir: `portada.spec.ts` mide ya que las filas no se subrayan y que el cierre va en `--sans`, `--cuerpo-md` y `--tinta`.
+  - `[low]` `[patch]` (ac-auditor 6) Nada exigía que la sección entera quedara fuera de Pagefind: una prueba exige un `data-pagefind-ignore="all"` en la sección o en un antepasado.
+
+Diferido: el emisor de la marca —el criterio de epics.md nombra el componente de la 26.8— queda pendiente de Héctor (bmad-create-epics-and-stories). Rechazados, con su motivo: el `sprint-status.yaml` lo lleva el orquestador del bucle, no esta pasada; «done antes de revisar» es el estado de la pasada anterior y esta es la revisión; la comprobación de AD-17 sobre otra instancia, el recuento por `directorioDeObras` y el conjunto por `obrasDelConjunto(…).indexables` son lo que el contrato fija, y las dos instancias derivan de `obrasIndexables` y las ata ya la coincidencia sitemap/`noindex`/Pagefind (la redundancia parcial de AD-17 la pide la historia, y además cubre una ruta sin página); el parche de `obra-pagina.test.ts` comprueba que su literal existe y falla en voz alta; el grafo de NFR-5 salta por el atributo, que pinta `LoQueRota.astro`, y lo cubren la prueba de dos jornadas y el build con el Corpus real; sin indexables no hay cierre por la matriz del contrato y el criterio de la historia; seis filas en `portada.spec.ts` es el criterio de aceptación con el Corpus real; `sinLoQueRota` cuenta los subárboles con `recorrerElementos` antes y después y falla si no casan; los Autores del fixture escritos a mano son los mismos que el corpus siembra; `rutasQueRotan` vacío sin `astro:build:start` no ocurre en un build de Astro; la ventana de seis Autores en dos jornadas construidas y el título más largo del Corpus real a 320 px los fija el contrato en el nivel puro y en un fixture más exigente.
+
 ## Auto Run Result
 
 Status: done
@@ -172,4 +203,29 @@ Blocking condition: ninguna. Implementada en línea sobre la base `9a53e82d34e3a
 - `npx playwright test tests/e2e/obras-de-la-portada.spec.ts tests/e2e/portada.spec.ts` (móvil y escritorio) — 44 verdes, 2 saltadas por perfil; `tests/e2e/accesibilidad.spec.ts -g "320|axe"` — 148 verdes. Puertos 4321, 4404 y 8787 libres antes y después.
 - Matriz: cada fila cubierta por `obras-del-dia.test.ts` (≥ 6 Autores, jornada siguiente, < 6 Autores, vacío, Autor sin clave, Obra de la Cita del Día, cierre) y `obras-de-la-portada.test.ts` (fijación, vacío construido).
 
-**Riesgos residuales.** El cierre no usa exactamente el marcado de la Intent (lleva un `span` que agrupa texto y glifo dentro del enlace, como `FilaDeBloque`, para que el glifo no quede en su propia columna flexible). La 28.4 quitará la lista de Autores de la portada; las Obras no cambian el grafo de NFR-5 porque van en el subárbol que rota.
+**Riesgos residuales.** La 28.4 quitará la lista de Autores de la portada; las Obras no cambian el grafo de NFR-5 porque van en el subárbol que rota.
+
+### Pasada de revisión 1 (2026-10-30)
+
+**Resumen.** Catorce parches, sin cambiar la regla ni el contrato: el cierre vuelve al marcado exacto de la Intent (sin clase ni `span` envolvente; alto de toque por `inline-block` con relleno y `border-box`, nombrado por su zona); `cierreDeLasObras` y `obrasDelDia` lanzan ante un recuento o una jornada imposibles; y las pruebas dicen ya lo que prometían (el Autor de cada fila, una fijación que cambia de verdad la Cita del Día y deja las Obras, la Obra de la Cita del Día entre las seis en la portada construida, la congelación, una Obra con ediciones entre las de la jornada, Pagefind sobre la sección entera, los estilos sin medir y los bordes del orden). AGENTS.md documenta el bloque.
+
+**Ficheros de esta pasada.**
+- `src/pages/index.astro` — el cierre sin clase ni `span` envolvente y su estilo por `p[data-zona='obras-de-portada']`; el comentario de Pagefind nombra las Obras.
+- `src/lib/atribucion.ts` — `cierreDeLasObras` lanza con un recuento que no es un entero ≥ 1.
+- `src/lib/citaDelDia.ts` — `obrasDelDia` lanza ante una jornada que no pasa `esJornada`.
+- `tests/unit/obras-del-dia.test.ts` — exactamente k Autores, empates de clave y de Obra, jornada mala, cierre imposible.
+- `tests/unit/obras-de-la-portada.test.ts` — Autor por fila, fijación efectiva, Obra de la Cita del Día, afiliación sobre una Obra que sale, Pagefind de la sección y una construcción congelada.
+- `tests/e2e/portada.spec.ts` — filas sin subrayado; cierre en `--sans`, `--cuerpo-md`, `--tinta`.
+- `AGENTS.md` — «Las Obras de la portada (Historia 28.3)».
+
+**Hallazgos.** 14 parches (0 high, 4 medium, 10 low), 1 diferido, 15 rechazados. Recomendación de revisión de seguimiento: `true` (3 × 4 + 1 × 10 = 22 ≥ 5).
+
+**Verificación de esta pasada.**
+- `npx vitest run tests/unit/obras-del-dia.test.ts tests/unit/cita-del-dia.test.ts` — 62 verdes.
+- `npx vitest run tests/unit/obras-de-la-portada.test.ts` — 11 verdes (la primera corrida falló porque la rotación ya daba la Cita fijada; se añadió una segunda Cita apta de Martí).
+- `npx vitest run` de `obras-del-dia`, `cita-del-dia`, `dos-jornadas`, `alcance-construido`, `publicable-y-alcanzable`, `obra-indexable`, `obra-pagina`, `tarjeta-de-obra`, `medicion` y `peso` — 10 ficheros, 1.009 verdes.
+- `npx astro check` — 0 errores, 0 avisos.
+- `npx playwright test tests/e2e/obras-de-la-portada.spec.ts tests/e2e/portada.spec.ts` — 44 verdes, 2 saltadas; su `webServer` corre `npm run build` con el Corpus real, que termina con NFR-5 y AD-17 en verde.
+- `npx playwright test tests/e2e/accesibilidad.spec.ts -g "320|axe"` — 148 verdes. Puertos 4321, 4404 y 8787 libres antes y después.
+
+**Riesgos residuales.** El emisor de la marca no casa con la letra del criterio de epics.md (diferido a Héctor). Las Obras de la portada y la lista del build siguen calculándose en dos instancias del módulo; las ata la coincidencia sitemap/`noindex`/Pagefind y la prueba construida que compara las filas con `obrasDelDia` sobre el conjunto en disco.

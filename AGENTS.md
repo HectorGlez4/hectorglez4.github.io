@@ -1006,6 +1006,25 @@ Paginar o subir el tope **lo decide Héctor**: ningún agente sube el tope para 
 prueba de foco de `tests/e2e/accesibilidad.spec.ts` tabula cada enlace de la página y lleva
 `test.slow()` por ella; si vuelve a agotar el tiempo, es el mismo crecimiento.
 
+### Las Obras de la portada (Historia 28.3)
+
+Entre «La cita de hoy» y «Temas», la portada enseña hasta `OBRAS_DE_LA_PORTADA` (6, en
+`src/lib/umbrales.ts`) Obras de Autores distintos, que elige **solo** `obrasDelDia` de
+`src/lib/citaDelDia.ts` con la jornada del build: rondas sobre la lista circular de Autores en el
+orden del Directorio, una ventana que avanza tantos puestos como Obras salen y, en cada aparición de
+un Autor, su siguiente Obra en el orden de su Lista de Obras. No recibe la Cita del Día ni las
+fijaciones de `corpus/portada.json`: fijar una jornada no mueve las Obras.
+
+- **Rotan solo entre las indexables** (`obrasDelConjunto(…).indexables`, la lista de
+  `rutasIndexables`), con la congelación ya aplicada por `obrasIndexables`: la portada no la lee.
+  Sin ninguna indexable —también si la congelación no deja ninguna— **no hay bloque**: ni rótulo, ni
+  filas, ni el cierre a `/obras/`, que entonces solo se alcanza por la cabecera.
+- El cierre «Las {n} obras ›» cuenta **todo** el Directorio de Obras (`directorioDeObras`), también
+  las que no se indexan, y no las seis de hoy.
+- Las filas van dentro de `LoQueRota.astro`; el rótulo y el cierre, fuera. `integraciones/indexables.ts`
+  rompe el build si alguna Obra del conjunto del que rotan —no solo las de hoy— no tiene página en
+  `dist/` o la tiene con `noindex` (AD-17).
+
 ## Curar una Colección
 
 Una Colección se cura con su orden, nunca escribiendo el YAML a mano:

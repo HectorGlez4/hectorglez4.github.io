@@ -118,9 +118,10 @@ const DESCRIPCION = DESCRIPCION_DEL_SITIO;
   {/*
     * Historia 28.1 (AD-17, AD-19) — en la búsqueda propia la portada responde solo por su título,
     * que declara `Armazon.astro`. Todo lo de aquí —la línea, el campo, la Cita del Día, la entrada,
-    * los chips y la lista de Autores— va bajo `data-pagefind-ignore="all"`, porque o no es contenido
-    * o ya tiene su propia página en el índice: buscar el texto del día o cualquier Autor no devuelve
-    * la portada. La invitación a sostener lleva además su propio `data-pagefind-ignore`.
+    * las Obras con su rótulo y su cierre (28.3), los chips y la lista de Autores— va bajo
+    * `data-pagefind-ignore="all"`, porque o no es contenido o ya tiene su propia página en el
+    * índice: buscar el texto del día, una Obra o cualquier Autor no devuelve la portada. La
+    * invitación a sostener lleva además su propio `data-pagefind-ignore`.
     */}
   <div class="pagina contenedor" data-pagefind-ignore="all">
     {cifras !== undefined && <p class="cifras">{cifras}</p>}
@@ -168,7 +169,7 @@ const DESCRIPCION = DESCRIPCION_DEL_SITIO;
           <LoQueRota como="div">
             <ul class="obras">{obrasDeHoy.map(({ obra, hechos }) => (<FilaDeBloque href={rutaDeLaObra(obra)} zona="obras-de-portada"><span class="titulo-de-obra">{obra.titulo}</span><span class="solo-para-lectores">, </span><span class="hechos-de-obra">{hechos.map((parte, i) => (<>{i > 0 && (<><span aria-hidden="true"> · </span><span class="solo-para-lectores">, </span></>)}{parte}</>))}</span></FilaDeBloque>))}</ul>
           </LoQueRota>
-          <p class="cierre" data-zona="obras-de-portada"><a href={rutaDelDirectorioDeObras()}><span>{cierreDeLasObras(obrasDelDirectorio)}<span aria-hidden="true">&nbsp;›</span></span></a></p>
+          <p data-zona="obras-de-portada"><a href={rutaDelDirectorioDeObras()}>{cierreDeLasObras(obrasDelDirectorio)}<span aria-hidden="true">&nbsp;›</span></a></p>
         </section>
       )
     }
@@ -348,15 +349,23 @@ const DESCRIPCION = DESCRIPCION_DEL_SITIO;
     color: var(--tinta-apagada);
   }
 
-  /* El cierre, a 2 × de la lista: en tinta, subrayado siempre y con su zona de toque entera. */
-  .cierre {
+  /*
+   * El cierre, a 2 × de la lista: en tinta, subrayado siempre y con su zona de toque entera. Se
+   * nombra por su zona, que solo él lleva en un `p` (las filas la llevan en el `li`), y no por una
+   * clase que la 28.4 pudiera repetir en el cierre de Autores. `inline-block` con el relleno que
+   * completa la línea hasta `--zona-de-toque`, y no `inline-flex`: así el texto y el «›» son la
+   * misma línea de texto, y el glifo, pegado por su `&nbsp;`, nunca se queda en su propia columna.
+   */
+  p[data-zona='obras-de-portada'] {
     margin: calc(var(--unidad) * 2) 0 0;
   }
 
-  .cierre a {
-    display: inline-flex;
-    align-items: center;
+  p[data-zona='obras-de-portada'] a {
+    display: inline-block;
+    box-sizing: border-box;
     min-height: var(--zona-de-toque);
+    padding-block: calc((var(--zona-de-toque) - 1.5em) / 2);
+    line-height: 1.5;
     font-family: var(--sans);
     font-size: var(--cuerpo-md);
     color: var(--tinta);
