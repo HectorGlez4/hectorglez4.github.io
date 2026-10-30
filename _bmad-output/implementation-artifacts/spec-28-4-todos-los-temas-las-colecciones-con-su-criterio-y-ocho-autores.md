@@ -5,12 +5,19 @@ created: '2026-10-30'
 status: 'done'
 baseline_revision: '27d2505ee8073b388bf4a98142b09122c25b3c4a'
 review_loop_iteration: 0
-followup_review_recommended: false
+followup_review_recommended: true
 context:
   - '{project-root}/_bmad-output/implementation-artifacts/epic-28-context.md'
   - '{project-root}/AGENTS.md'
 warnings: [oversized]
-deferred: []
+deferred:
+  - summary: >-
+      Los ocho Autores destacados cambian con los recuentos, así que una orden que retira, o un alta o una aprobación que reordena los recuentos, puede sacar de los ocho al Autor que hoy acerca una Cita «ya fuera del modelo» y romper el build siguiente sin que ninguna orden la nombre antes.
+    evidence: |-
+      Edge-case-hunter, revisión de la 28.4. Por decisión del contrato (AD-11) el modelo no lleva los destacados y las órdenes que retiran no bloquean por lo que ya estaba fuera; antes de la 28.4 la lista entera de Autores era estable y esas Citas seguían a 3 saltos en dist/, y ahora dependen de qué ocho salgan. Hoy es latente: con el Corpus del árbol y el de la principal el aviso «NFR-5 en el modelo» no da ninguna Cita. Si algún día da alguna, decide Héctor si las órdenes (retirar, revisar --aprobar, alta) deben comparar también los destacados de antes y de después.
+    location: >-
+      tools/lib/alcance.ts (citasFueraDelModelo, avisoDeFueraDelModelo); src/pages/index.astro (destacados)
+    severity: medium
 ---
 
 <intent-contract>
@@ -137,6 +144,21 @@ El `li` es un contenedor de bloque; el chip, `inline-flex` (o el `li` en columna
 
 (Las capas de revisión son externas en el bucle v8-ralph y en esta pasada no traían hallazgos: la revisión independiente viene después.)
 
+### 2026-10-30 — Review pass
+- intent_gap: 0
+- bad_spec: 0
+- patch: 5: (high 0, medium 1, low 4)
+- defer: 1: (high 0, medium 1, low 0)
+- reject: 27: (high 0, medium 0, low 27)
+- addressed_findings:
+  - `[medium]` `[patch]` Las medidas de «Colecciones» (UX-DR62, variante 3A) solo las decía el CSS (verification-gap, ac-auditor 1, intent-alignment c): nueva prueba en `tests/e2e/temas-colecciones-autores-de-la-portada.spec.ts` que mide con el estilo calculado el chip igual al de Tema y más estrecho que su fila, el criterio en `--sans`/`--pie`/`--tinta-apagada` a `--unidad` del chip, 2 × entre Colecciones y la lista a 2 × del rótulo.
+  - `[low]` `[patch]` El otro enlace a `/autor/` de `main` se comprobaba con `<= 1` aunque siempre hay Cita del Día (blind-hunter): `toBe(1)` en la unitaria y en `tests/e2e/portada.spec.ts`.
+  - `[low]` `[patch]` El caso de dos Autores reescribía la regla de orden del Directorio a mano (blind-hunter): ahora compara con `autoresDestacados` sobre los mismos dos Autores y sus tres Citas.
+  - `[low]` `[patch]` En `tests/unit/ingreso-construido.test.ts` un `indexOf('<aside')` de −1 daba un fallo sin causa, y el filete de la invitación no se comprobaba (edge-case-hunter, ac-auditor 2, intent-alignment f): guarda explícita y aserción del `border-top` del `aside`.
+  - `[low]` `[patch]` El aviso «NFR-5 en el modelo» reescrito era ambiguo y no decía qué hacer (blind-hunter): conserva el prefijo y la frase de los destacados, aclara que las órdenes no bloquean por esas Citas y dice que cada una necesita un Tema publicado.
+
+Rechazados (27, todos `low`): el tablero y el commit del spec con el código (los lleva el bucle), el spec en `done` antes de la revisión (diseño del flujo), la zona compartida del cierre (la fija el contrato y una zona nueva es de Héctor), la guarda en `destacados` (`autoresDestacados` devuelve al menos uno si hay algún Autor publicado), el ancho (`section` ya lleva `max-width: var(--medida-prosa)`), el marcado en una línea (patrón de la 28.3, comentado), el reflujo que «pasa sin medir» (la premisa fallida es un `expect.soft` que suspende la prueba), los tipos de `comoAutor`, el `&nbsp;`, la regex con sangrías (tiene guarda), los bordes de 8 y 9 Autores (`autores-destacados.test.ts`), los `id` (slugs únicos con prefijo), la doble lectura del criterio, la redacción de «El 1 autor» y «1.234» (las fija el contrato), el sitio y la extensión de la sección de `AGENTS.md` (los fija el Code Map), el recuento de `/autores/`, la comprobación sobre el Corpus real de Colecciones, la identidad de los ocho y NFR-5 sobre el Corpus real (la puerta del build y la página pasa la salida de la función tal cual), las garantías previas de las Colecciones (ya probadas), las condiciones previas 26.8/27.6 en `review` (el bucle las fusiona por épica) y la lista de Temas escrita a mano en la unitaria.
+
 ## Auto Run Result
 
 Status: done
@@ -178,3 +200,23 @@ Planificación (pasada anterior): `avisoDeFueraDelModelo` no dejaba ninguna Cita
 **Auditoría de la matriz.** ≥ 9 Autores y suelo latinoamericano: `portada-temas-colecciones-autores` (diez Autores, el décimo latinoamericano entre los ocho, orden de `autoresDestacados`, m = 10). ≤ 8 Autores: misma prueba, segunda construcción (2 filas, «Los 2 autores…»). Dos Colecciones con palabra de 30+ letras: criterio entero en la unitaria y partido en renglones a 320 px en la e2e. Colección bajo umbral: la unitaria (14 miembros, ni chip ni criterio). Criterio vacío: `colecciones-build` (ya existente, en verde). Cierre m = 1 / 1234 / 0 / −1 / 1,5: `cierre-de-los-autores`.
 
 **Riesgos residuales.** Ninguno conocido. La regla de selección de los ocho es de `autoresDestacados` (27.6) y cambia con los recuentos del Corpus; el aviso de NFR-5 en el modelo lo dirá si algún día una Cita solo queda cerca por ellos.
+
+### Pasada de revisión 1 (2026-10-30)
+
+**Resumen.** La revisión independiente (cinco capas externas) no cambió el comportamiento de la portada: cinco parches de pruebas y de redacción, un diferido y 27 rechazos (detalle en el Review Triage Log).
+
+**Ficheros.**
+- `tests/e2e/temas-colecciones-autores-de-la-portada.spec.ts` — prueba nueva: las medidas de «Colecciones» con el estilo calculado (chip igual al de Tema y sin estirarse, criterio en `--sans`/`--pie`/`--tinta-apagada` a `--unidad`, 2 × entre Colecciones y del rótulo).
+- `tests/unit/portada-temas-colecciones-autores.test.ts` — la Atribución de la Cita del Día, exactamente un enlace a `/autor/`; el caso de dos Autores compara con `autoresDestacados`.
+- `tests/e2e/portada.spec.ts` — ídem, exactamente un enlace de Atribución.
+- `tests/unit/ingreso-construido.test.ts` — guarda del `<aside>` y su filete encima.
+- `tools/lib/alcance.ts` — el aviso «NFR-5 en el modelo», más claro y con el siguiente paso (un Tema publicado); prefijo y frase de los destacados intactos.
+
+**Revisión.** Parches: 5 (high 0, medium 1, low 4). Diferidos: 1. Rechazados: 27. Recomendación de revisión de seguimiento: `true` (puntuación 3 × 1 + 4 = 7 ≥ 5; ningún parche high).
+
+**Verificación.**
+- `npx vitest run` uno por uno: `portada-temas-colecciones-autores` 8/8, `ingreso-construido` 42/42, `alcance-construido` 6/6, `alcance` 26/26, `cierre-de-los-autores` 3/3.
+- `npx astro check` — 0 errores, 0 avisos, 8 pistas.
+- `npx playwright test tests/e2e/temas-colecciones-autores-de-la-portada.spec.ts tests/e2e/portada.spec.ts` — 53 en verde, 5 saltadas (la copia solo en `escritorio`). Puertos 4321, 4405 y 8787 libres antes y después.
+
+**Riesgos residuales.** El diferido: los destacados cambian con los recuentos y una orden que retira o un alta pueden sacar de los ocho al Autor que acerca una Cita ya fuera del modelo; hoy no hay ninguna (el aviso no sale con el Corpus del árbol).

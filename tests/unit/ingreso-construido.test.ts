@@ -668,7 +668,12 @@ describe('Historia 14.2 — el sitio con las donaciones encendidas', () => {
     const finDeLaSeccion = columna.indexOf('</section>', cierre);
     expect(finDeLaSeccion).toBe(columna.lastIndexOf('</section>'));
     expect(columna.indexOf(MARCA_DE_INGRESO)).toBeGreaterThan(finDeLaSeccion);
-    expect(columna.slice(finDeLaSeccion + '</section>'.length, columna.indexOf('<aside', finDeLaSeccion)).trim()).toBe('');
+    const invitacion = columna.indexOf('<aside', finDeLaSeccion);
+    expect(invitacion, 'no hay invitación detrás de la sección «Autores»').toBeGreaterThan(-1);
+    expect(columna.slice(finDeLaSeccion + '</section>'.length, invitacion).trim()).toBe('');
+    // Con su filete encima, que la separa del cierre de los Autores (`Sostener.astro`).
+    const etiqueta = columna.slice(invitacion, columna.indexOf('>', invitacion) + 1);
+    expect(etiqueta).toContain('border-top: var(--grosor-filete) solid var(--filete)');
   });
 
   it('y en /buscar queda fuera del bloque de salida, no dentro', () => {

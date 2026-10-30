@@ -450,7 +450,8 @@ test.describe('Historia 28.4 — todos los Temas, las Colecciones con su criteri
           .map((a) => a.closest('[data-zona]')?.getAttribute('data-zona') ?? 'sin zona'),
       );
     expect(otros.every((zona) => zona === 'atribucion'), otros.join(', ')).toBe(true);
-    expect(otros.length).toBeLessThanOrEqual(1);
+    // El sitio de la suite siempre tiene Cita del Día: su Atribución es exactamente un enlace.
+    expect(otros.length).toBe(1);
     await expect(page.locator('main ul.autores')).toHaveCount(0);
   });
 

@@ -293,7 +293,8 @@ describe('Historia 28.4 — Temas, Colecciones y ocho Autores en la portada, con
     const fuera = aAutores.filter(
       ({ antepasados }) => !antepasados.some((a) => a.atributos.get('data-zona') === 'autores-de-portada'),
     );
-    expect(fuera.length).toBeLessThanOrEqual(1);
+    // El fixture siempre tiene Cita del Día (la primera de Machado es apta): su Atribución, exactamente una.
+    expect(fuera.length).toBe(1);
     for (const { antepasados } of fuera) {
       const zona = [...antepasados].reverse().find((a) => a.atributos.has('data-zona'));
       expect(zona?.atributos.get('data-zona')).toBe('atribucion');
@@ -342,12 +343,15 @@ describe('Historia 28.4 — Temas, Colecciones y ocho Autores en la portada, con
     expect(rotulos).not.toContain('Temas');
     expect(rotulos).not.toContain('Colecciones');
     expect(rotulos.at(-1)).toBe('Autores');
-    expect(filasDeAutores(htmlDeDos)).toEqual(
-      [DIEZ[0], DIEZ[9]]
-        .map(comoAutor)
-        .sort((a, b) => a.ordenAlfabetico!.localeCompare(b.ordenAlfabetico!, 'es'))
-        .map((a) => rutaDeAutor(a.slug)),
-    );
+    // Lo que da `autoresDestacados` sobre los mismos dos Autores y sus tres Citas: la prueba no
+    // reescribe la regla de orden del Directorio.
+    const dosAutores = [DIEZ[0], DIEZ[9]];
+    const esperados = autoresDestacados(
+      dosAutores.map(comoAutor),
+      dosAutores.flatMap((a) => Array.from({ length: 3 }, () => ({ autor: a.slug }))),
+    ).map((a) => rutaDeAutor(a.slug));
+    expect(esperados).toHaveLength(2);
+    expect(filasDeAutores(htmlDeDos)).toEqual(esperados);
     const cierre = cierreDe(htmlDeDos)!;
     expect(cierre.texto).toBe(`${cierreDeLosAutores(2)}&nbsp;›`);
     expect(mDeLaLinea(htmlDeDos)).toBe('2');

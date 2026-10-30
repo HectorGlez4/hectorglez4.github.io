@@ -372,8 +372,9 @@ export function avisoDeFueraDelModelo(modelo: ModeloDelCorpus): string | undefin
   return [
     `NFR-5 en el modelo: ${enNumero(fuera.length, 'Cita queda', 'Citas quedan')} a más de ` +
       `${MAX_SALTOS_DESDE_LA_PORTADA} saltos de la portada sin los Autores destacados de la ` +
-      'portada. Hoy esos Autores las alcanzan y el build pasa, pero cambian con los recuentos y ' +
-      'una orden que retira no se apoya en ellos; tampoco las bloquea, porque ya estaban fuera:',
+      'portada. Hoy esos Autores las alcanzan y el build pasa, pero cambian con los recuentos: ' +
+      'las órdenes que retiran no cuentan con ellos y no bloquean por estas Citas, que ya estaban ' +
+      'fuera. Para que dejen de depender de ellos, cada una necesita un Tema publicado:',
     ...fuera.map(lineaDeFuera),
   ].join('\n');
 }

@@ -170,6 +170,85 @@ test('el chip de una Colección se nombra por la Colección y se describe por su
   await expect(fila).toHaveAccessibleName(NOMBRE_LARGO);
 });
 
+test('cada Colección: el chip como el de Tema y sin estirarse, el criterio en el pie, sans y tinta apagada a `--unidad`; 2 × entre ellas y del rótulo', async ({ page }) => {
+  // UX-DR62, variante 3A: lo que solo dice el CSS de `index.astro`, medido con el estilo calculado.
+  await page.goto(`${SITIO}/`);
+  await page.evaluate(() => document.fonts.ready);
+  const m = await page.evaluate(() => {
+    const raiz = getComputedStyle(document.documentElement);
+    const resuelto = (propiedad: string, variable: string) => {
+      const sonda = document.createElement('span');
+      sonda.style.setProperty(propiedad, raiz.getPropertyValue(variable).trim());
+      document.body.append(sonda);
+      const r = getComputedStyle(sonda).getPropertyValue(propiedad);
+      sonda.remove();
+      return r;
+    };
+    const unidad = (() => {
+      const sonda = document.createElement('div');
+      sonda.style.cssText = 'height: var(--unidad)';
+      document.body.append(sonda);
+      const alto = sonda.getBoundingClientRect().height;
+      sonda.remove();
+      return alto;
+    })();
+    const aspecto = (a: Element) => {
+      const e = getComputedStyle(a);
+      return {
+        familia: e.fontFamily,
+        cuerpo: e.fontSize,
+        color: e.color,
+        fondo: e.backgroundColor,
+        radio: e.borderRadius,
+        altoMinimo: e.minHeight,
+        relleno: e.paddingInline,
+        subrayado: e.textDecorationLine,
+      };
+    };
+    const caja = (e: Element) => e.getBoundingClientRect();
+    const seccion = document.querySelector('main section[aria-labelledby="colecciones"]')!;
+    const lista = seccion.querySelector('ul.colecciones')!;
+    const filas = [...lista.querySelectorAll(':scope > li')];
+    return {
+      unidad,
+      esperado: {
+        sans: resuelto('font-family', '--sans'),
+        pie: resuelto('font-size', '--pie'),
+        apagada: resuelto('color', '--tinta-apagada'),
+      },
+      deTema: aspecto(document.querySelector('main ul[data-zona="chip-de-tema"] a.chip')!),
+      bajoElRotulo: caja(lista).top - caja(seccion.querySelector('h2')!).bottom,
+      entreColecciones: filas.slice(1).map((li, i) => caja(li).top - caja(filas[i]).bottom),
+      filas: filas.map((li) => {
+        const chip = li.querySelector('a.chip')!;
+        const criterio = li.querySelector('p.criterio')!;
+        const e = getComputedStyle(criterio);
+        return {
+          chip: aspecto(chip),
+          chipMasEstrecho: caja(chip).width < caja(li).width - 1,
+          chipALaIzquierda: Math.abs(caja(chip).left - caja(li).left) <= 0.5,
+          chipACriterio: caja(criterio).top - caja(chip).bottom,
+          criterio: { familia: e.fontFamily, cuerpo: e.fontSize, color: e.color },
+        };
+      }),
+    };
+  });
+  expect(m.filas).toHaveLength(2);
+  expect(m.esperado.sans).toMatch(/Inter/);
+  for (const [i, fila] of m.filas.entries()) {
+    expect(fila.chip, `Colección ${i + 1}: el chip no es el de Tema`).toEqual(m.deTema);
+    expect(fila.chipMasEstrecho, `Colección ${i + 1}: el chip se estira a toda la fila`).toBe(true);
+    expect(fila.chipALaIzquierda).toBe(true);
+    expect(Math.abs(fila.chipACriterio - m.unidad), `chip → criterio: ${fila.chipACriterio}`).toBeLessThanOrEqual(0.5);
+    expect(fila.criterio).toEqual({ familia: m.esperado.sans, cuerpo: m.esperado.pie, color: m.esperado.apagada });
+  }
+  expect(m.entreColecciones).toHaveLength(1);
+  for (const hueco of m.entreColecciones) {
+    expect(Math.abs(hueco - 2 * m.unidad), `Colección → Colección: ${hueco}`).toBeLessThanOrEqual(0.5);
+  }
+  expect(Math.abs(m.bajoElRotulo - 2 * m.unidad), `rótulo → lista: ${m.bajoElRotulo}`).toBeLessThanOrEqual(0.5);
+});
+
 test('a 320 px, en las tres condiciones, el criterio largo parte en varios renglones y la página no se desplaza', async ({ page }) => {
   for (const condicion of CONDICIONES) {
     if (!(await cargarEn320(page, `${SITIO}/`, condicion))) continue;
