@@ -23,6 +23,7 @@ import {
   ROTULO_BUSCAR_EN_ESTE_TEMA,
   RUTA_DEL_MAPA_DE_OBRAS,
   SUGERENCIA_SIN_FILTROS,
+  TEXTO_DE_EJEMPLO_DE_LA_BUSQUEDA,
   avisoDeLaDireccion,
   fraseDelRecuento,
   rotuloBuscarEnAutor,
@@ -3001,6 +3002,46 @@ test.describe('Historia 27.8 — buscar en esta obra, en un Autor o en un tema',
     }
   });
 
+  /*
+   * El caso que motiva la historia: desde la página 1 de un listado que pagina, «Buscar» sin texto
+   * da en `/buscar/` el total de la entidad, no las `CITAS_POR_PAGINA` Tarjetas que enseña su página.
+   * Los mayores de cada familia, del Corpus en disco.
+   */
+  test('desde la página 1 de un listado que pagina, el recuento de `/buscar/` es el de la entidad entera', async ({ page }) => {
+    test.setTimeout(120_000);
+    const datos = await conjunto();
+    const filtros = filtrosDeLaBusqueda(datos);
+    const mayor = <T extends { valor: string; recuento: number }>(opciones: readonly T[]) =>
+      [...opciones].sort((a, b) => b.recuento - a.recuento || porValor(a, b))[0];
+    const autor = mayor(filtros.autores);
+    const tema = mayor(filtros.temas);
+    const obra = mayor(filtros.obras);
+    const nombreDe = (slug: string) => filtros.autores.find((a) => a.valor === slug)!.rotulo;
+    const tituloDe = (valor: string) =>
+      Object.values(filtros.mapaDeObras)
+        .flat()
+        .find(([v]) => v === valor)![1];
+    for (const [nombre, ruta, recuento, frase] of [
+      ['Autor', rutaDeAutor(autor.valor), autor.recuento, fraseDelRecuento({ total: autor.recuento, texto: '', autor: autor.rotulo })],
+      ['Tema', rutaDeTema(tema.valor), tema.recuento, fraseDelRecuento({ total: tema.recuento, texto: '', tema: tema.rotulo })],
+      [
+        'Obra',
+        rutaDeLaObra({ nombre: obra.valor }),
+        obra.recuento,
+        fraseDelRecuento({ total: obra.recuento, texto: '', autor: nombreDe(obra.autor), obra: tituloDe(obra.valor) }),
+      ],
+    ] as const) {
+      // Sin paginación no hay nada que demostrar: el Corpus de hoy pagina las tres familias.
+      expect(recuento, nombre).toBeGreaterThan(CITAS_POR_PAGINA);
+      await page.goto(ruta);
+      await expect(page.locator('ul.listado > li'), nombre).toHaveCount(CITAS_POR_PAGINA);
+      await llegarConEnvio(page, () =>
+        page.locator('form.buscar-en').getByRole('button', { name: BOTON_DE_BUSCAR, exact: true }).click(),
+      );
+      await expect(page.locator('[data-estado]'), nombre).toHaveText(frase, { timeout: 15_000 });
+    }
+  });
+
   test('las páginas 2+ no lo llevan', async ({ page }) => {
     const datos = await conjunto();
     const filtros = filtrosDeLaBusqueda(datos);
@@ -3026,7 +3067,7 @@ test.describe('Historia 27.8 — buscar en esta obra, en un Autor o en un tema',
   test('el 404 envía con su botón «Buscar» a `/buscar/?q=…`', async ({ page }) => {
     await page.goto('/esta-ruta-no-existe-en-el-sitio/');
     const campo = page.locator('form[role="search"] input[name="q"]');
-    await expect(campo).toHaveAttribute('placeholder', 'Por ejemplo: no hay camino');
+    await expect(campo).toHaveAttribute('placeholder', TEXTO_DE_EJEMPLO_DE_LA_BUSQUEDA);
     await campo.fill('no hay camino');
     const url = await llegarConEnvio(page, () =>
       page.locator('form[role="search"]').getByRole('button', { name: BOTON_DE_BUSCAR, exact: true }).click(),

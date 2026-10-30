@@ -5,12 +5,26 @@ created: '2026-10-29'
 status: 'done'
 baseline_revision: '3008994d7b1f6337260d7fc62d7295d8edb8046e'
 review_loop_iteration: 0
-followup_review_recommended: false
+followup_review_recommended: true
 context:
   - '{project-root}/_bmad-output/implementation-artifacts/epic-27-context.md'
   - '{project-root}/_bmad-output/planning-artifacts/ux-designs/ux-brainlySabiduria-2026-08-10/DESIGN.md'
 warnings: ['oversized']
-deferred: []
+deferred:
+  - summary: >-
+      Al fusionar la Épica 25 con la 27, «Compartir en» (25.6) se coloca tras «Buscar en esta obra» con su propio 5 × `--unidad`, y el pie de la 24.7 pasa a medir formulario → «Compartir en» → Temas.
+    evidence: |-
+      UX-DR95 (UX v8.4) pone «Compartir en» 5 × bajo el formulario y Temas 5 × más abajo; la 25.6 vive en `v8/epica-25` y no en esta rama, así que ninguna prueba de aquí lo mide. Hoy la obligación solo constaba en «Riesgos» del Auto Run Result.
+    location: >-
+      src/pages/obra/[autor]/[slug]/[...page].astro (pie de la página 1); tests/e2e/accesibilidad.spec.ts (24.7 «el pie»)
+    severity: low
+  - summary: >-
+      `busqueda.spec.ts:840` (Historia 27.1, proyecto `movil`) cae con «socket hang up» del servidor local en las pasadas largas y pasa aislada; pondría en rojo el `test:e2e` entero que pide la 27.9.
+    evidence: |-
+      Falló igual en la pasada de implementación de la 27.8 y en la del auditor de criterios (log `audit-27-8.log`), siempre en `movil` y siempre por el servidor de `tests/servidor.mjs`, no por una aserción; no es una prueba de la 27.8.
+    location: >-
+      tests/e2e/busqueda.spec.ts:840; tests/servidor.mjs
+    severity: medium
 ---
 
 <intent-contract>
@@ -65,7 +79,7 @@ deferred: []
 
 ## Code Map
 
-- `_bmad-output/implementation-artifacts/27-8-buscar-en-wip.patch` -- el trabajo de la primera pasada (2026-10-29), con el formulario **encima** del listado en la Obra. Se aplica limpio sobre `3008994d7b` (`git apply --check` verificado el 2026-10-30). Todo vale salvo la colocación de la Obra: sus hunks de `src/pages/obra/[autor]/[slug]/[...page].astro`, de `tests/unit/obra-pagina.test.ts`, el test «el formulario va justo encima del listado que filtra» de `tests/unit/buscar-en.test.ts` y los de distancias de Obra de `tests/e2e/accesibilidad.spec.ts`.
+- `_bmad-output/implementation-artifacts/27-8-buscar-en-wip.patch` -- **aplicado en `1fbd9e1640` y retirado del árbol en la revisión del 2026-10-30** (queda en la historia de git; las «l. N del parche» de abajo se refieren a él). Era el trabajo de la primera pasada (2026-10-29), con el formulario **encima** del listado en la Obra. Se aplica limpio sobre `3008994d7b` (`git apply --check` verificado el 2026-10-30). Todo vale salvo la colocación de la Obra: sus hunks de `src/pages/obra/[autor]/[slug]/[...page].astro`, de `tests/unit/obra-pagina.test.ts`, el test «el formulario va justo encima del listado que filtra» de `tests/unit/buscar-en.test.ts` y los de distancias de Obra de `tests/e2e/accesibilidad.spec.ts`.
 - `src/components/CampoDeBusqueda.astro` -- el Campo de la 26.6 (`Props { id, etiqueta, nombre?, ejemplo?, consulta? }`); el parche añade `boton?: boolean` (botón submit debajo + `enterkeyhint="search"`).
 - `src/components/BuscarEn.astro` (nuevo, en el parche) -- `form.buscar-en`; su `margin-top` lo pone cada página (`.pagina > :global(.buscar-en)`).
 - `src/components/Busqueda.astro:380–410` -- `.quitar, .mas button`: el secundario siena a replicar. No se toca.
@@ -124,6 +138,25 @@ deferred: []
 - addressed_findings:
   - none
 
+### 2026-10-30 — Review pass
+- intent_gap: 0
+- bad_spec: 0
+- patch: 11: (high 0, medium 1, low 10)
+- defer: 2: (high 0, medium 1, low 1)
+- reject: 18: (high 0, medium 3, low 15)
+- addressed_findings:
+  - `[medium]` `[patch]` El caso que motiva la historia (un listado que pagina) no se probaba de punta a punta: nueva prueba en `tests/e2e/busqueda.spec.ts` que, desde la página 1 del Autor, el Tema y la Obra mayores (más de `CITAS_POR_PAGINA`), envía «Buscar» vacío y exige en `/buscar/` el recuento de la entidad entera.
+  - `[low]` `[patch]` La prueba «…no entra en Pagefind» solo leía el sitemap: ahora exige que las páginas con `data-pagefind-body` de `dist/` sean exactamente las del sitemap, sin `/buscar/`, y que cada «Buscar en…» lleve `data-pagefind-ignore`.
+  - `[low]` `[patch]` `BuscarEn.astro` repetía a mano el orden de los ocultos: ahora lo lee de `PARAMETROS_DE_LA_BUSQUEDA`.
+  - `[low]` `[patch]` El tipo de `filtros` admitía `{}`, Obra sin Autor y Autor con Tema, y dejaba pasar un valor vacío: unión de las tres formas válidas y un valor vacío detiene la construcción.
+  - `[low]` `[patch]` El rótulo del Autor se miraba con `/^Buscar en \S/`: ahora se compara con `rotuloBuscarEnAutor` del nombre del `h1`.
+  - `[low]` `[patch]` La prueba del 404 tenía escrito el ejemplo: usa `TEXTO_DE_EJEMPLO_DE_LA_BUSQUEDA`.
+  - `[low]` `[patch]` «Sin botón» solo miraba `/buscar/`: ahora también `/autores/` y `/obras/`.
+  - `[low]` `[patch]` La prueba de la congelación solo afirmaba `noindex` en «Cartas»: ahora en las tres Obras.
+  - `[low]` `[patch]` El formulario del 404 no tenía prueba de zona: comparte con «Buscar en…» la comprobación de antepasados sin `data-zona` ni `data-sin-zona`.
+  - `[low]` `[patch]` `27-8-buscar-en-wip.patch`, ya aplicado, seguía en el árbol: retirado (queda en git) y el Code Map lo dice.
+  - `[low]` `[patch]` La medida y el resultado del 2026-10-29 se leían como vigentes: marcados como superados por la pasada del 2026-10-30.
+
 ## Design Notes
 
 - **Por qué el botón vive en el Campo:** el docblock de la 26.6 ya lo reserva («la 27 y la 28 le añaden… el botón “Buscar” y el `name`»): el 404, «Buscar en…» y la portada de la 28 comparten un solo marcado de campo + botón; el formulario lo pone quien lo usa.
@@ -141,7 +174,8 @@ deferred: []
 
 ## Medidas
 
-**2026-10-29**, sobre lo construido en la rama `v8/epica-27` (Corpus del día, 517 páginas 1 de Obra), con el
+**2026-10-29 — superada:** medida con el formulario **encima** del listado de la Obra, antes de la UX v8.4; la vigente
+es la del 2026-10-30, más abajo. Sobre lo construido en la rama `v8/epica-27` (Corpus del día, 517 páginas 1 de Obra), con el
 formulario puesto y a 360 × 640 (proyectos `escritorio` y `movil`, mismas cifras): fin de la primera línea
 de la primera Cita del listado.
 
@@ -171,6 +205,8 @@ mismas cifras): fin de la primera línea de la primera Cita del listado.
 - El Block If no salta.
 
 ## Auto Run Result
+
+### 2026-10-29 — primera pasada (superada por la replanificación y la implementación del 2026-10-30, más abajo)
 
 Status: blocked
 Blocking condition: Block If de la intención — a 360 × 640, con «Buscar en esta obra», la primera Cita de 6 de las 517 páginas 1 de Obra deja de empezar en la primera pantalla (peor: 722,24 px; medidas en `## Medidas`). Compactar es decisión de UX (Héctor, `bmad-ux`).
@@ -227,3 +263,41 @@ de Obra, a 5 × `--unidad`, con Temas 5 × más abajo; el listado vuelve a 4 × 
 
 **Riesgos.** «Compartir en» (25.6) no está en esta rama: al fusionar las dos épicas se colocará tras el formulario con
 su propio 5 ×, y el pie de la 24.7 tendrá que medir formulario → «Compartir en» → Temas.
+
+### 2026-10-30 — revisión
+
+Status: done
+Blocking condition: ninguna.
+
+**Resumen.** Pasada de revisión sobre `1fbd9e1640` con los hallazgos de las cinco capas externas: sin intent_gap ni
+bad_spec; 11 parches, 2 diferidos y 18 rechazados. Los parches endurecen `BuscarEn` (los tres juegos de filtros
+válidos como unión, el orden leído de `PARAMETROS_DE_LA_BUSQUEDA`, un filtro vacío detiene la construcción) y cierran
+huecos de prueba; no cambia nada de lo que se ve.
+
+**Ficheros.**
+- `src/components/BuscarEn.astro` — `Filtros` como unión (Obra con Autor, Autor, Tema); ocultos en el orden de
+  `PARAMETROS_DE_LA_BUSQUEDA`; un valor vacío lanza.
+- `tests/unit/buscar-en.test.ts` — Pagefind (páginas con `data-pagefind-body` = sitemap, sin `/buscar/`), Directorios
+  sin botón, las tres Obras `noindex` con la congelación, zona del formulario del 404.
+- `tests/e2e/busqueda.spec.ts` — el recuento de `/buscar/` desde la página 1 de un Autor, un Tema y una Obra que
+  paginan es el de la entidad entera; el ejemplo del 404 por su constante.
+- `tests/e2e/accesibilidad.spec.ts` — el rótulo del Autor comparado con `rotuloBuscarEnAutor` del `h1`.
+- `_bmad-output/implementation-artifacts/27-8-buscar-en-wip.patch` — retirado (aplicado; queda en git).
+- Este spec — triage, diferidos, y las entradas del 2026-10-29 marcadas como superadas.
+
+**Hallazgos.** 11 parches (1 medium, 10 low), 2 diferidos (la colocación de «Compartir en» al fusionar la 25; el
+«socket hang up» de `busqueda.spec.ts:840` en `movil`), 18 rechazados (entre ellos: `sprint-status.yaml`, que el bucle
+pone al día en su propio commit `chore(sprint)`; la medida del Autor, que la intención no pide; el envío sin JS en el
+navegador, que la intención delega en Vitest sobre `dist/`).
+`followup_review_recommended: true` — parches medium 1 y low 10: 3 × 1 + 10 = 13 ≥ 5.
+
+**Verificación.**
+- `npx astro check` — 0 errores, 0 avisos.
+- `npx vitest run` de `buscar-en`, `espinas-de-ux`, `obra-pagina`, `busqueda-con-filtros` y `superficies` — 261 pasan.
+- Playwright `busqueda`, `accesibilidad`, `pagina-404`, `pagina-de-autor`, `pagina-de-tema` en `escritorio` y `movil`
+  — 536 pasan, 12 se saltan, 0 fallan (esta vez también `busqueda.spec.ts:840`).
+- `npx playwright test tests/e2e/receptor.spec.ts -g "404" --project=escritorio` — 4 pasan.
+
+**Riesgos.** Los de la pasada anterior («Compartir en», ahora diferido) y el «socket hang up» intermitente, diferido
+para que no pille por sorpresa el `test:e2e` entero de la 27.9.
+

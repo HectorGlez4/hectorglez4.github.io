@@ -32,6 +32,7 @@ import {
   FALLO_DE_LA_TANDA,
   ROTULO_BUSCAR_EN_ESTA_OBRA,
   ROTULO_BUSCAR_EN_ESTE_TEMA,
+  rotuloBuscarEnAutor,
 } from '../../src/lib/busqueda.ts';
 import { guionExternoDe } from '../../src/lib/guiones.ts';
 import { TANDA_DE_RESULTADOS } from '../../src/lib/umbrales.ts';
@@ -2401,8 +2402,9 @@ test.describe('Historia 27.8 — «Buscar en…» y el botón del 404', () => {
     ] as const) {
       await page.goto(ruta);
       const etiqueta = page.locator('form.buscar-en label');
-      if (rotulo !== undefined) await expect(etiqueta, ruta).toHaveText(rotulo);
-      else await expect(etiqueta, ruta).toHaveText(/^Buscar en \S/u);
+      // El del Autor lleva su nombre, el del `h1` de su página.
+      const esperado = rotulo ?? rotuloBuscarEnAutor((await page.locator('h1').innerText()).trim());
+      await expect(etiqueta, ruta).toHaveText(esperado);
       await expect(page.getByLabel(await etiqueta.innerText(), { exact: true }), ruta).toBeVisible();
       await expect(page.getByRole('link', { name: BOTON_DE_BUSCAR, exact: true }), ruta).toHaveCount(1);
       await expect(page.getByRole('button', { name: BOTON_DE_BUSCAR, exact: true }), ruta).toHaveCount(1);

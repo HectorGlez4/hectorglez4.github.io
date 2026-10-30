@@ -1,6 +1,6 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { readFile } from 'node:fs/promises';
-import { join } from 'node:path';
+import { readFile, readdir } from 'node:fs/promises';
+import { join, sep } from 'node:path';
 import {
   AUTOR_VALIDO,
   RAIZ,
@@ -152,12 +152,27 @@ function comprobarBuscarEn(html: string, esperado: (typeof ESPERADO)[number]): v
   ).toEqual(ocultos);
   expect(campos.indexOf(campo!), ruta).toBe(0);
 
-  // Sin zona: ningún antepasado la declara ni la exime.
+  comprobarSinZona(html, ruta);
+}
+
+/** Sin zona: ni el formulario de búsqueda ni ningún antepasado suyo la declara ni la exime. */
+function comprobarSinZona(html: string, ruta: string): void {
   for (const antepasado of antepasadosDelFormulario(html)) {
     expect(antepasado.atributos.has('data-zona'), `${ruta}: <${antepasado.etiqueta}>`).toBe(false);
     expect(antepasado.atributos.has(ATRIBUTO_SIN_ZONA), `${ruta}: <${antepasado.etiqueta}>`).toBe(false);
   }
-  expect(apertura).not.toMatch(/\bdata-zona=|\bdata-sin-zona=/);
+  const apertura = /<form\b[^>]*\brole="search"[^>]*>/.exec(html)![0];
+  expect(apertura, ruta).not.toMatch(/\bdata-zona=|\bdata-sin-zona=/);
+}
+
+/** Las rutas de cada HTML de `dist/`: `x/index.html` → `/x/`, `404.html` → `/404`. */
+async function paginasDe(dist: string): Promise<{ ruta: string; fichero: string }[]> {
+  const ficheros = (await readdir(dist, { recursive: true })).filter((f) => f.endsWith('.html'));
+  return ficheros.map((f) => {
+    const relativo = f.split(sep).join('/');
+    const ruta = relativo.endsWith('index.html') ? `/${relativo.slice(0, -'index.html'.length)}` : `/${relativo.slice(0, -'.html'.length)}`;
+    return { ruta, fichero: join(dist, f) };
+  });
 }
 
 describe('Historia 27.8 — «Buscar en…», construido', () => {
@@ -223,10 +238,25 @@ describe('Historia 27.8 — «Buscar en…», construido', () => {
     }
   });
 
-  it('ninguna ruta nueva: el sitemap no anuncia `/buscar/` y la búsqueda no entra en Pagefind', async () => {
-    const xml = await readFile(join(proyecto, 'dist', 'sitemap-0.xml'), 'utf8');
+  it('ninguna ruta nueva: el sitemap no anuncia `/buscar/`, y lo que entra en Pagefind es lo del sitemap y nada más', async () => {
+    const dist = join(proyecto, 'dist');
+    const xml = await readFile(join(dist, 'sitemap-0.xml'), 'utf8');
     expect(xml).not.toContain('/buscar');
     expect(xml).not.toMatch(/\?q=/);
+    // Pagefind indexa solo lo que lleva `data-pagefind-body`: es el mismo conjunto que el sitemap,
+    // sin `/buscar/`, y el texto de «Buscar en…» queda fuera por su `data-pagefind-ignore`.
+    const delSitemap = [...xml.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => new URL(m[1]).pathname).sort();
+    const indexadas: string[] = [];
+    for (const { ruta, fichero } of await paginasDe(dist)) {
+      if (/<main\b[^>]*\bdata-pagefind-body/.test(await readFile(fichero, 'utf8'))) indexadas.push(ruta);
+    }
+    expect(indexadas.sort()).toEqual(delSitemap);
+    expect(indexadas).not.toContain('/buscar/');
+    for (const { ruta } of ESPERADO) {
+      for (const formulario of formulariosDeBusqueda(await html(ruta))) {
+        expect(/^<form\b[^>]*>/.exec(formulario)![0], ruta).toMatch(/\bdata-pagefind-ignore\b/);
+      }
+    }
   });
 
   it('el 404 lleva el Campo con su ejemplo y el botón, y sigue sin guion propio', async () => {
@@ -249,12 +279,16 @@ describe('Historia 27.8 — «Buscar en…», construido', () => {
     expect(texto(boton![2])).toBe(BOTON_DE_BUSCAR);
     expect(guionesEnLinea(pagina)).toEqual([ARRANQUE_DE_MEDICION]);
     expect(guionesExternosDe(pagina)).toEqual([]);
+    comprobarSinZona(pagina, '/404');
   });
 
-  it('el Campo sin botón sale como antes: `/buscar/` no lleva «Buscar» ni tecla de buscar', async () => {
-    const pagina = await html('/buscar/');
-    expect(pagina).not.toMatch(/<button\b[^>]*\btype="submit"/);
-    expect(pagina).not.toMatch(/\benterkeyhint=/);
+  it('el Campo sin botón sale como antes: ni `/buscar/` ni los Directorios llevan «Buscar» ni tecla de buscar', async () => {
+    for (const ruta of ['/buscar/', '/autores/', '/obras/']) {
+      const pagina = await html(ruta);
+      expect(pagina, ruta).toContain('class="campo-de-busqueda');
+      expect(pagina, ruta).not.toMatch(/<button\b[^>]*\btype="submit"/);
+      expect(pagina, ruta).not.toMatch(/\benterkeyhint=/);
+    }
   });
 });
 
@@ -278,7 +312,8 @@ describe('Historia 27.8 — «Buscar en…» con la familia Obra congelada', () 
 
   it('toda página 1 de Obra lleva el formulario, también la que dejó de indexarse por la congelación', async () => {
     // «Cartas» cumple FR-52 y no está en la lista congelada: `noindex`, y con su «Buscar en esta obra».
-    expect(await html(CARTAS)).toMatch(NOINDEX);
+    // «Brevedad» está en la lista pero no cumple FR-52, e «Ira» tampoco: ninguna Obra se indexa.
+    for (const ruta of [CARTAS, BREVEDAD, IRA]) expect(await html(ruta), ruta).toMatch(NOINDEX);
     for (const esperado of ESPERADO) comprobarBuscarEn(await html(esperado.ruta), esperado);
     expect(formulariosDeBusqueda(await html(`${BREVEDAD}2/`))).toEqual([]);
   });

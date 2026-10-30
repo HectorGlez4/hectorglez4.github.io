@@ -29,21 +29,39 @@ import CampoDeBusqueda from './CampoDeBusqueda.astro';
 import { PARAMETROS_DE_LA_BUSQUEDA } from '../lib/busqueda.ts';
 import { rutaDeLaBusqueda } from '../lib/superficies.ts';
 
+/**
+ * Los filtros que viajan ocultos: el slug del Autor, el nombre de la ficha de la Obra, el slug del
+ * Tema. Solo las tres formas que existen —la Obra con su Autor (FR-7: nunca sin él), el Autor solo y
+ * el Tema solo—: un «Buscar en…» sin filtro, una Obra sin Autor o un Autor con Tema no compilan.
+ */
+type Filtros =
+  | { autor: string; obra?: string; tema?: never }
+  | { tema: string; autor?: never; obra?: never };
+
 interface Props {
   /** El `id` del campo, único en la página: al que apunta su etiqueta. */
   id: string;
   /** El rótulo, que es la etiqueta visible del campo (`src/lib/busqueda.ts`). */
   rotulo: string;
-  /** Los filtros que viajan ocultos: el slug del Autor, el nombre de la ficha de la Obra, el slug del Tema. */
-  filtros: { autor?: string; obra?: string; tema?: string };
+  filtros: Filtros;
 }
 
 const { id, rotulo, filtros } = Astro.props;
 
-// En el orden de `PARAMETROS_DE_LA_BUSQUEDA`, y solo los que lleva esta página.
-const ocultos = (['autor', 'obra', 'tema'] as const)
-  .filter((campo) => filtros[campo] !== undefined)
-  .map((campo) => ({ nombre: PARAMETROS_DE_LA_BUSQUEDA[campo], valor: filtros[campo]! }));
+/*
+ * En el orden de `PARAMETROS_DE_LA_BUSQUEDA` —el mismo que recorre `direccionDeLaBusqueda`—, leído
+ * de él y no repetido aquí, y solo los que lleva esta página. Un valor vacío detiene la
+ * construcción: un oculto vacío lo lee `/buscar/` como «sin filtro», y la búsqueda saldría sin
+ * acotar bajo un rótulo que dice lo contrario (y un campo sin valor se omite, nunca va vacío).
+ */
+const valores: Partial<Record<keyof typeof PARAMETROS_DE_LA_BUSQUEDA, string>> = filtros;
+const ocultos = (Object.keys(PARAMETROS_DE_LA_BUSQUEDA) as (keyof typeof PARAMETROS_DE_LA_BUSQUEDA)[])
+  .filter((campo) => campo !== 'texto' && valores[campo] !== undefined)
+  .map((campo) => {
+    const valor = valores[campo]!;
+    if (valor.trim() === '') throw new Error(`«${rotulo}»: el filtro «${campo}» va vacío.`);
+    return { nombre: PARAMETROS_DE_LA_BUSQUEDA[campo], valor };
+  });
 ---
 
 <form class="buscar-en" role="search" method="get" action={rutaDeLaBusqueda()} data-pagefind-ignore>
