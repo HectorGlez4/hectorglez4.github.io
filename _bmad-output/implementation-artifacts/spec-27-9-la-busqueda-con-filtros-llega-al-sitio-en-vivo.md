@@ -181,3 +181,57 @@ Todas las medidas usan las dos construcciones del día: main en `bbcc43b7d0` y l
 - **(b)** `git fetch origin` y `git merge origin/main`: «Already up to date». `origin/main` sigue en
   bbcc43b7d0, antepasado de la rama (45 commits encima): no hay commit de merge que hacer.
 - No se comprobó nada en el sitio en vivo.
+
+## Verificación previa a la fusión — 2026-10-30 (intento 3)
+
+Bucle v8-ralph, etapa s-27, puerta previa a la fusión sobre `43815923e7` (la rama con el arreglo de
+la hoja de `/buscar/` y `SERVIDOR_GZIP`). `df -g /`: 106 GB libres. Puertos 4321, 4399, 4400, 4402
+y 8787 libres al empezar y al terminar.
+
+- **Sincronía.** `git fetch origin`: `origin/main` (bbcc43b7d0) ya es antepasado de la rama; no hubo
+  merge.
+- **`npm ci`**: no hizo falta; `package-lock.json` no cambia desde el 2026-10-24 y `node_modules`
+  se instaló con él.
+- **`npm run build`**: **pasa**. 5290 páginas, 4875 rutas indexables, NFR-5 con 5115 superficies a
+  3 saltos o menos y las 37398 aristas del modelo en `dist/`, Directorio de Obras de 235.017 bytes,
+  `dist/` juzgado en 480 MiB (aviso en 750 MiB), filtros y mapa de `/buscar/` en 94,6 KiB (aviso en
+  120 KiB).
+- **`npx astro check`**: **pasa**, 402 ficheros, 0 errores, 0 avisos, 8 sugerencias.
+- **`npm test`**: **pasa**, 152 ficheros y 7028 pruebas, en 884 s.
+- **`npm run test:e2e`** (los dos proyectos, receptor local con `wrangler dev` y D1 local):
+  1059 pasan, 102 se saltan y 1 falla: `[escritorio] tests/e2e/busqueda.spec.ts:841` «Historia
+  27.1 — … › filtrar por una Obra y ordenar por la clave da sus Citas en el orden de su Página de
+  Obra, que no es el de slug», con `apiRequestContext.get: socket hang up` al pedir
+  `/obra/jose-ingenieros/el-hombre-mediocre-ensayo-de-psicologia-y-moral/`: la misma intermitencia
+  de conexión del intento 2, esta vez en escritorio. Repetido el fichero entero
+  (`npx playwright test tests/e2e/busqueda.spec.ts`, los dos proyectos): **pasa**, 176 pasan y 6 se
+  saltan. **La puerta de punta a punta pasa.**
+- **NFR-7 (Lighthouse 13.5.0, `npx --yes lighthouse@13.5.0`, perfil móvil por omisión, 4G
+  simulado, Google Chrome por `CHROME_PATH`).** Las dos construcciones de hoy con
+  `MEDICION_ENDPOINT=http://localhost:8787/` y un receptor de pega que contesta 204 en :8787;
+  `origin/main` (bbcc43b7d0) en :4399 y la rama en :4400, las dos con el `tests/servidor.mjs` de la
+  rama, `SERVIDOR_CACHE_CONTROL=max-age=600` y `SERVIDOR_GZIP=1`. 10 corridas por página y
+  construcción, alternando principal y rama corrida a corrida. En todos los informes cada woff2
+  (2 distintos) se pide una sola vez y el documento llega comprimido (`/buscar/`: 7.190 bytes
+  transferidos de 26.748 en la principal y 8.977 de 41.559 en la rama; Página de Cita: 8.453 de
+  35.037 y 8.533 de 35.397).
+
+  | Página | Construcción | LCP media | LCP mediana | FCP media | FCP mediana |
+  |---|---|---|---|---|---|
+  | `/cita/seneca-a-cuantos-son-molestas-sus-mismas-riquezas/` | principal | 1609 | 1653 | 903 | 918 |
+  | ídem | rama | 1567 | 1517 | 856 | 917 |
+  | `/buscar/` | principal | 1459 | 1504 | 771 | 770 |
+  | `/buscar/` | rama | 1595 | 1653 | 831 | 829 |
+
+  LCP de cada corrida (ms): Cita principal 1653, 1654, 1653, 1655, 1652, 1513, 1655, 1503, 1652,
+  1503; Cita rama 1504, 1520, 1657, 1504, 1507, 1513, 1655, 1653, 1656, 1503; `/buscar/` principal
+  1505, 1505, 1506, 1503, 1504, 1506, 1352, 1353, 1502, 1352; `/buscar/` rama 1653, 1515, 1656,
+  1507, 1503, 1654, 1653, 1653, 1503, 1652.
+
+  La Página de Cita queda por debajo de 2.500 ms y de la principal (LCP −42 ms de media, FCP
+  −47 ms). En `/buscar/` la FCP media sube 60 ms (771 → 831), dentro de max(100 ms, 5 %). Ninguna
+  página falla la comparación relativa en la simulada, así que no hizo falta el desempate con
+  estrangulamiento real.
+
+**Veredicto: pasa.** Build, `astro check`, `npm test` y `npm run test:e2e` en verde (con la
+intermitencia de conexión repetida en verde) y NFR-7 dentro del margen.
