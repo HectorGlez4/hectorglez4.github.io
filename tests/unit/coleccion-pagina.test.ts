@@ -557,6 +557,16 @@ describe('Historia 12.3 — sin ninguna Colección publicada', () => {
     const entrada = conClase(enMain, 'p', 'entrada');
     expect(entrada).toHaveLength(1);
     expect(fueraDelIndice(entrada[0])).toBe(true);
+    // Historia 28.1 (UX-DR56) — la entrada ocupa el sitio de la Cita del Día: tras la línea de
+    // cifras y el campo, como tercer hijo de `.pagina`.
+    const pagina = entrada[0].antepasados.at(-1)!;
+    expect((pagina.atributos.get('class') ?? '').split(/\s+/)).toContain('pagina');
+    const hijos = enMain.filter(({ antepasados }) => antepasados.at(-1) === pagina).map(({ elemento }) => elemento);
+    expect(hijos.slice(0, 3).map((e) => `${e.etiqueta}.${(e.atributos.get('class') ?? '').split(/\s+/)[0]}`)).toEqual([
+      'p.cifras',
+      'form.formulario',
+      'p.entrada',
+    ]);
     expect(exposicion.titulosEnMain).toBe(0);
     expect(exposicion.titulosEnLaCabecera).toBe(1);
     expect(exposicion.textoDelTituloDeLaCabecera).toBe(MARCA);

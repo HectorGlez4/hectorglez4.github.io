@@ -620,7 +620,8 @@ test.describe('Historia 2.8 — foco', () => {
     }
   });
 
-  for (const ruta of ['/buscar/', '/una-ruta-que-no-existe/']) {
+  // Historia 28.1 — también el campo de la portada, el mismo Campo con botón que el del 404.
+  for (const ruta of ['/', '/buscar/', '/una-ruta-que-no-existe/']) {
     test(`el campo de búsqueda de ${ruta} lleva el anillo de foco al llegar con el teclado`, async ({
       page,
     }) => {

@@ -27,6 +27,7 @@ import {
   declararRutasIndexables,
   esRutaDeDirectorio,
   olvidarRutasIndexables,
+  rutaDeLaBusqueda,
   rutaDelDirectorioDeAutores,
   rutaDelDirectorioDeObras,
   rutaNormalizada,
@@ -34,6 +35,12 @@ import {
 } from '../../src/lib/superficies.ts';
 import { CITAS_POR_PAGINA, MAX_SALTOS_DESDE_LA_PORTADA } from '../../src/lib/umbrales.ts';
 import { MARCA } from '../../src/lib/marca.ts';
+import {
+  BOTON_DE_BUSCAR,
+  ETIQUETA_DE_LA_BUSQUEDA,
+  PARAMETROS_DE_LA_BUSQUEDA,
+  TEXTO_DE_EJEMPLO_DE_LA_BUSQUEDA,
+} from '../../src/lib/busqueda.ts';
 import {
   FILTRO_DE_TIPO,
   FILTROS_DE_CITA,
@@ -994,6 +1001,28 @@ describe('Historia 12.1 — sobre un sitio construido de verdad', () => {
       expect(portada).toContain('<meta property="og:type" content="website">');
     });
 
+    it('la marca sale con los mismos atributos en la portada que en el resto: solo cambia `aria-current`', async () => {
+      const marcaDe = (html: string) => {
+        let marca: Elemento | undefined;
+        recorrerElementos(html, (elemento, antepasados) => {
+          const enLaCabecera = antepasados.some((a) => a.etiqueta === 'header');
+          if (marca === undefined && enLaCabecera && elemento.etiqueta === 'a' && (elemento.atributos.get('class') ?? '').split(/\s+/).includes('marca')) marca = elemento;
+        });
+        return marca && new Map([...marca.atributos].filter(([nombre]) => nombre !== 'aria-current'));
+      };
+      const todas = await paginas();
+      const enLaPortada = marcaDe(todas.get('/')!);
+      expect(enLaPortada, 'la portada sin a.marca en la cabecera').toBeDefined();
+      let comparadas = 0;
+      for (const [ruta, html] of todas) {
+        const marca = marcaDe(html);
+        if (ruta === '/' || marca === undefined) continue;
+        expect(marca, ruta).toEqual(enLaPortada);
+        comparadas += 1;
+      }
+      expect(comparadas).toBeGreaterThan(0);
+    });
+
     it('ninguna otra página declara el título de la portada ni lleva `h1` en la cabecera', async () => {
       for (const [ruta, html] of await paginas()) {
         if (ruta === '/') continue;
@@ -1045,15 +1074,32 @@ describe('Historia 12.1 — sobre un sitio construido de verdad', () => {
     });
 
     it('el formulario es un GET a `/buscar/` con `q`, con su botón y sin ningún guion', async () => {
-      const { enMain, hijos } = await estructura();
+      const { html, enMain, hijos } = await estructura();
       const formulario = hijos[1];
       expect(formulario.atributos.get('role')).toBe('search');
-      expect(formulario.atributos.get('action')).toBe('/buscar/');
+      expect(formulario.atributos.get('action')).toBe(rutaDeLaBusqueda());
       expect(formulario.atributos.get('method')).toBe('get');
       const dentro = enMain.filter(({ antepasados }) => antepasados.includes(formulario)).map((e) => e.elemento);
       const campos = dentro.filter((e) => e.etiqueta === 'input');
-      expect(campos.map((e) => e.atributos.get('name'))).toEqual(['q']);
-      expect(dentro.filter((e) => e.etiqueta === 'button')).toHaveLength(1);
+      expect(campos.map((e) => e.atributos.get('name'))).toEqual([PARAMETROS_DE_LA_BUSQUEDA.texto]);
+      // El Campo del 404 (27.8): su etiqueta, su ejemplo y la tecla de buscar del móvil.
+      expect(campos[0].atributos.get('placeholder')).toBe(TEXTO_DE_EJEMPLO_DE_LA_BUSQUEDA);
+      expect(campos[0].atributos.get('enterkeyhint')).toBe('search');
+      const id = campos[0].atributos.get('id')!;
+      const etiqueta = new RegExp(`<label\\b[^>]*\\bfor="${id}"[^>]*>([\\s\\S]*?)<\\/label>`).exec(html)?.[1];
+      expect(etiqueta?.replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim()).toBe(ETIQUETA_DE_LA_BUSQUEDA);
+      const botones = dentro.filter((e) => e.etiqueta === 'button');
+      expect(botones).toHaveLength(1);
+      // Un envío sin `name`, que añadiría algo a la dirección, y tras el campo.
+      expect(botones[0].atributos.get('type')).toBe('submit');
+      expect(botones[0].atributos.has('name')).toBe(false);
+      expect(dentro.indexOf(botones[0])).toBeGreaterThan(dentro.indexOf(campos[0]));
+      const marcadoDelFormulario = /<form\b[^>]*role="search"[^>]*>[\s\S]*?<\/form>/.exec(
+        /<main[\s\S]*?<\/main>/.exec(html)![0],
+      )![0];
+      expect(/<button\b[^>]*>([\s\S]*?)<\/button>/.exec(marcadoDelFormulario)![1].replace(/<[^>]*>/g, '').trim()).toBe(
+        BOTON_DE_BUSCAR,
+      );
       expect(dentro.filter((e) => e.etiqueta === 'script')).toEqual([]);
       // Sin enlaces, así que ni zona ni exención.
       expect(dentro.filter((e) => e.etiqueta === 'a')).toEqual([]);
@@ -1062,15 +1108,26 @@ describe('Historia 12.1 — sobre un sitio construido de verdad', () => {
     });
 
     it('los rótulos de `main` van en el orden de la portada, cada sección con su `h2`', async () => {
-      const { html } = await estructura();
+      const { html, enMain, hijos } = await estructura();
       const cuerpo = /<main[\s\S]*?<\/main>/.exec(html)?.[0] ?? '';
       const rotulos = [...cuerpo.matchAll(/<h([1-6])\b[^>]*>([\s\S]*?)<\/h\1>/g)].map(
         (m) => `h${m[1]}:${m[2].replace(/<[^>]*>/g, '').trim()}`,
       );
       expect(rotulos).toEqual(['h2:La cita de hoy', 'h2:Temas', 'h2:Colecciones', 'h2:Autores']);
+      // Cada sección de la portada se nombra por su rótulo, y el `id` no se repite en la página.
+      const secciones = hijos.filter((e) => e.etiqueta === 'section' && !(e.atributos.get('class') ?? '').includes('del-dia'));
+      expect(secciones).toHaveLength(3);
+      const ids = [...html.matchAll(/\sid="([^"]+)"/g)].map((m) => m[1]);
+      for (const seccion of secciones) {
+        const nombre = seccion.atributos.get('aria-labelledby');
+        expect(nombre, 'una sección sin `aria-labelledby`').toBeDefined();
+        const rotulo = enMain.find(({ elemento, antepasados }) => antepasados.at(-1) === seccion && elemento.etiqueta === 'h2');
+        expect(rotulo?.elemento.atributos.get('id'), nombre).toBe(nombre);
+        expect(ids.filter((id) => id === nombre), nombre).toHaveLength(1);
+      }
     });
 
-    it('la portada no carga ningún guion más que los que ya cargaba (el campo no trae Pagefind)', async () => {
+    it('el campo no trae Pagefind a la portada: ni guion ni precarga', async () => {
       const html = await portada();
       const externos = [...html.matchAll(/<script\b[^>]*\bsrc="([^"]+)"/g)].map((m) => m[1]);
       expect(externos.filter((src) => /pagefind/.test(src))).toEqual([]);

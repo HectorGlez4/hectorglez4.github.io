@@ -148,18 +148,69 @@ test.describe('Historia 28.1 — la portada abre con las cifras del Corpus y un 
     await page.locator('main input[name="q"]').fill('tiempo libre');
     await page.locator('main form[role="search"]').getByRole('button', { name: 'Buscar' }).click();
     await page.waitForURL(/\/buscar\/\?q=tiempo\+libre$/);
+    // La búsqueda arranca con lo escrito: el campo de `/buscar/` lo trae y pinta resultados o la salida.
+    await expect(page.locator('[data-consulta]')).toHaveValue('tiempo libre');
+    await page.waitForFunction(
+      () =>
+        document.querySelector('[data-resultados]')!.children.length > 0 ||
+        !document.querySelector('[data-salida]')!.hasAttribute('hidden'),
+      undefined,
+      { timeout: 10_000 },
+    );
     // Lo que se pidió al enviar y al llegar está todo en la lista cerrada.
     expect(pedidos.filter((pedido) => entradaDeLoDescargado(pedido) === undefined)).toEqual([]);
   });
 
-  test('el campo funciona también sin JavaScript', async ({ browser, baseURL }) => {
-    const contexto = await browser.newContext({ javaScriptEnabled: false, baseURL });
-    const page = await contexto.newPage();
+  test('el campo se envía también con Intro', async ({ page }) => {
     await page.goto('/');
     await page.locator('main input[name="q"]').fill('amistad');
-    await page.locator('main form[role="search"]').getByRole('button', { name: 'Buscar' }).click();
+    await page.locator('main input[name="q"]').press('Enter');
     await page.waitForURL(/\/buscar\/\?q=amistad$/);
-    await contexto.close();
+    await expect(page.locator('[data-consulta]')).toHaveValue('amistad');
+  });
+
+  test('la línea de cifras va en `body-md` y tinta apagada, sin cifra destacada', async ({ page }) => {
+    await page.goto('/');
+    const estilo = await page.evaluate(() => {
+      const linea = document.querySelector('main .cifras')!;
+      const raiz = getComputedStyle(document.documentElement);
+      const resuelto = (propiedad: string, valor: string) => {
+        const sonda = document.createElement('span');
+        sonda.style.setProperty(propiedad, valor);
+        document.body.append(sonda);
+        const r = getComputedStyle(sonda).getPropertyValue(propiedad);
+        sonda.remove();
+        return r;
+      };
+      const s = getComputedStyle(linea);
+      return {
+        cuerpo: s.fontSize,
+        cuerpoEsperado: resuelto('font-size', raiz.getPropertyValue('--cuerpo-md').trim()),
+        color: s.color,
+        colorEsperado: resuelto('color', raiz.getPropertyValue('--tinta-apagada').trim()),
+        peso: s.fontWeight,
+        interlineado: parseFloat(s.lineHeight) / parseFloat(s.fontSize),
+        destacados: linea.querySelectorAll('*').length,
+      };
+    });
+    expect(estilo.cuerpo).toBe(estilo.cuerpoEsperado);
+    expect(estilo.color).toBe(estilo.colorEsperado);
+    expect(estilo.peso).toBe('400');
+    expect(estilo.interlineado).toBeCloseTo(1.6, 2);
+    expect(estilo.destacados).toBe(0);
+  });
+
+  test('el campo funciona también sin JavaScript', async ({ browser, baseURL }) => {
+    const contexto = await browser.newContext({ javaScriptEnabled: false, baseURL });
+    try {
+      const page = await contexto.newPage();
+      await page.goto('/');
+      await page.locator('main input[name="q"]').fill('amistad');
+      await page.locator('main form[role="search"]').getByRole('button', { name: 'Buscar' }).click();
+      await page.waitForURL(/\/buscar\/\?q=amistad$/);
+    } finally {
+      await contexto.close();
+    }
   });
 
   test('las distancias: campo a 3 ×, Cita del Día a 6 ×, cada sección a 6 × y su contenido a 2 ×', async ({ page }) => {
@@ -197,9 +248,18 @@ test.describe('Historia 28.1 — la portada abre con las cifras del Corpus y un 
     await page.setViewportSize({ width: 360, height: 640 });
     await page.goto('/');
     await page.evaluate(() => document.fonts.ready);
-    const arriba = await page.evaluate(() => document.querySelector('main .del-dia .texto')!.getBoundingClientRect().top);
+    const { arriba, linea } = await page.evaluate(() => {
+      const texto = document.querySelector('main .del-dia .texto')!;
+      const s = getComputedStyle(texto);
+      const interlineado = parseFloat(s.lineHeight);
+      return {
+        arriba: texto.getBoundingClientRect().top,
+        linea: Number.isNaN(interlineado) ? parseFloat(s.fontSize) * 1.2 : interlineado,
+      };
+    });
     test.info().annotations.push({ type: 'medida', description: `la Cita del Día empieza a ${arriba.toFixed(2)} px` });
-    expect(arriba).toBeLessThan(640);
+    // Al menos su primera línea entera dentro de la primera pantalla, no solo su borde.
+    expect(arriba + linea).toBeLessThanOrEqual(640);
   });
 
   for (const ancho of [360, 1280]) {

@@ -18,6 +18,7 @@ import {
   AVISO_PREVIO,
   AVISO_SIN_GUION,
   BOTON_DE_BUSCAR,
+  ETIQUETA_DE_LA_BUSQUEDA,
   FALLO_DE_LA_TANDA,
   ROTULO_BUSCAR_EN_ESTA_OBRA,
   ROTULO_BUSCAR_EN_ESTE_TEMA,
@@ -638,6 +639,14 @@ test.describe('Historia 26.2 — el tipo no casa como texto y la portada tiene e
     const delAutor = await todasLasDirecciones(page, nombre);
     expect(delAutor, nombre).toContain(pagina.replace(/\/?$/, '/'));
     expect(delAutor, nombre).not.toContain('/');
+
+    // Historia 28.1 — la línea de cifras y la etiqueta del campo no son contenido: buscarlas no da
+    // la portada, que responde solo por su título.
+    const linea = (await page.locator('main .cifras').textContent())!.trim();
+    expect(linea, 'la portada sin línea de cifras').not.toBe('');
+    for (const termino of [linea.replace(/[\d.;,]/g, ' ').replace(/\s+/g, ' ').trim(), 'cotejadas', ETIQUETA_DE_LA_BUSQUEDA]) {
+      expect(await todasLasDirecciones(page, termino), termino).not.toContain('/');
+    }
   });
 
   // (d) Con un Pagefind de mentira: cómo se pintan los tipos nuevos frente a una Cita.

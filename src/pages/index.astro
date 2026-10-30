@@ -118,7 +118,7 @@ const DESCRIPCION = DESCRIPCION_DEL_SITIO;
 
     {
       temas.length > 0 && (
-        <section>
+        <section aria-labelledby="temas">
           <Rotulo id="temas">Temas</Rotulo>
           <ul class="chips" data-zona="chip-de-tema">
             {temas.map((tema) => (
@@ -157,7 +157,7 @@ const DESCRIPCION = DESCRIPCION_DEL_SITIO;
     }
     {
       colecciones.length > 0 && (
-        <section>
+        <section aria-labelledby="colecciones">
           <Rotulo id="colecciones">Colecciones</Rotulo>
           {/* Chip idéntico al de Tema: la Colección es navegación lateral, no jerarquía. */}
           <ul class="chips" data-zona="colecciones">
@@ -173,7 +173,7 @@ const DESCRIPCION = DESCRIPCION_DEL_SITIO;
       )
     }
 
-    <section>
+    <section aria-labelledby="autores">
       <Rotulo id="autores">Autores</Rotulo>
       <ul class="autores" data-zona="autores-de-portada">
         {
@@ -226,12 +226,19 @@ const DESCRIPCION = DESCRIPCION_DEL_SITIO;
     margin: 0;
     max-width: var(--medida-prosa);
     font-size: var(--cuerpo-md);
+    /* El interlineado de `body-md` (DESIGN.md); `tokens.css` no lo declara como token. */
+    line-height: 1.6;
     color: var(--tinta-apagada);
   }
 
   .formulario {
     margin-top: calc(var(--unidad) * 3);
     max-width: var(--medida-prosa);
+  }
+
+  /* Sin ninguna Cita publicada no hay línea: el campo abre la columna sin aire encima. */
+  .formulario:first-child {
+    margin-top: 0;
   }
 
   /* Historia 27.8 — la etiqueta, el campo y el botón los estiliza `CampoDeBusqueda.astro`. */
@@ -246,8 +253,10 @@ const DESCRIPCION = DESCRIPCION_DEL_SITIO;
     max-width: var(--medida-prosa);
   }
 
+  /* Cada bloque, dentro de la medida de prosa (DESIGN.md § Portada). */
   section {
     margin-top: calc(var(--unidad) * 6);
+    max-width: var(--medida-prosa);
   }
 
   .chips {

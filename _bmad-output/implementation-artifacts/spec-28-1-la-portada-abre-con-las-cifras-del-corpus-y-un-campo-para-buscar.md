@@ -5,7 +5,7 @@ created: '2026-10-30'
 status: 'done'
 baseline_revision: 'ec1a27d1566088f073ef3572b2c51c9c415ca765'
 review_loop_iteration: 0
-followup_review_recommended: false
+followup_review_recommended: true
 context:
   - '{project-root}/_bmad-output/implementation-artifacts/epic-28-context.md'
   - '{project-root}/AGENTS.md'
@@ -126,6 +126,31 @@ deferred:
 
 Las capas de revisión son externas en el bucle v8-ralph y no traían hallazgos en esta pasada; sigue una revisión independiente.
 
+### 2026-10-30 — Review pass
+- intent_gap: 0
+- bad_spec: 0
+- patch: 15: (high 0, medium 1, low 14)
+- defer: 0
+- reject: 27: (high 0, medium 0, low 27)
+- addressed_findings:
+  - `[medium]` `[patch]` Ninguna prueba buscaba en el índice real el texto que la portada deja fuera: la (c) de `tests/e2e/busqueda.spec.ts` busca ahora la línea de cifras sin números, «cotejadas» y la etiqueta del campo, y exige que no den `/`.
+  - `[low]` `[patch]` Las dos ramas del enlace de la marca podían divergir: `publicable-y-alcanzable.test.ts` exige que `a.marca` lleve en la portada los mismos atributos que en el resto, salvo `aria-current`.
+  - `[low]` `[patch]` Las secciones de la portada no se nombraban por su rótulo: llevan `aria-labelledby` con el `id` de su `Rotulo`, como en las demás páginas, y la prueba exige el `id` único. Se ajusta la expresión del parche de `alcance-construido.test.ts`.
+  - `[low]` `[patch]` Con el criterio «dentro de la medida de prosa», las secciones (los chips) llevan `max-width: var(--medida-prosa)`.
+  - `[low]` `[patch]` La línea de cifras heredaba el interlineado de `body-lg`: lleva el 1,6 de `body-md`, y una prueba de `portada.spec.ts` mide su cuerpo, color, peso e interlineado y que no tiene marcado dentro.
+  - `[low]` `[patch]` Sin ninguna Cita publicada el formulario abría la columna con 3 × de aire: `.formulario:first-child` va sin margen.
+  - `[low]` `[patch]` La rama sin Cita apta no comprobaba el orden: `coleccion-pagina.test.ts` exige `p.cifras`, `form.formulario`, `p.entrada` como primeros hijos de `.pagina`.
+  - `[low]` `[patch]` La primera pantalla a 360 × 640 se daba por buena con el borde superior del texto: ahora exige la primera línea entera dentro de los 640 px.
+  - `[low]` `[patch]` El nombre «no carga ningún guion más» prometía más de lo que miraba: se llama «el campo no trae Pagefind a la portada» (la lista cerrada la vigila `medicion.test.ts`).
+  - `[low]` `[patch]` La prueba del formulario fijaba `/buscar/` y `q` a mano: usa `rutaDeLaBusqueda()` y `PARAMETROS_DE_LA_BUSQUEDA.texto`.
+  - `[low]` `[patch]` El Campo de la portada no tenía comprobados etiqueta, ejemplo, `enterkeyhint`, ni el botón `submit` sin `name` tras el campo con su texto: lo exige ahora `publicable-y-alcanzable.test.ts`, con las constantes de `src/lib/busqueda.ts`.
+  - `[low]` `[patch]` La prueba sin JavaScript no cerraba su contexto si fallaba: `try/finally`.
+  - `[low]` `[patch]` El anillo de foco del campo no se medía en la portada: `/` entra en la prueba del anillo de `accesibilidad.spec.ts`.
+  - `[low]` `[patch]` «La búsqueda arranca con ello» no se comprobaba: tras enviar, el campo de `/buscar/` trae lo escrito y pinta resultados o la salida.
+  - `[low]` `[patch]` El envío con Intro no se probaba: prueba nueva en `portada.spec.ts`.
+
+Rechazados, con su motivo: `sprint-status.yaml` lo mueve el orquestador del bucle; el registro vacío era de la pasada anterior; la suite tras el último cambio (solo un comentario) la cubrieron las pruebas por fichero de esta pasada; el desfase AD-11/AD-17 ya está diferido; enviar el formulario no es salida interna por el propio criterio; `tokens.css` no tiene regla de `h1`; el recuento de `title:` en otras páginas es a propósito; el `lastmod` lo fija ya `fecha-de-cambio-build.test.ts`; el corte de `data-jornada` y el slug de Cita de las e2e son de prueba y estables; la dependencia de Pagefind con el texto oculto está en los riesgos; las cifras de la matriz son ilustrativas; la concordancia con censo está en el contrato; la eficiencia de `autoresPublicados` es despreciable; una Cita sin Autor y una `MARCA` con coma no pueden darse (el esquema y la constante); «Autores» vacío sin Citas es previo e inalcanzable; «Obras» sin bloque es de la 28.3, que exige que sin Obras no haya rótulo; el censo por k < n lo garantiza la puerta de la 11.2; las tres formas de censo vacío las fija la función pura y dos construcciones; la línea con censo sobre `dist/` está en `cotejo-build.test.ts`; el salto lleva a `main`, cuyo primer hijo es la línea; el 3 × de «La cita de hoy» y su `h2` son de `CitaDelDia.astro`, que rehace la 28.2; la cabecera en dos filas en `/` se sigue de la caja idéntica de la marca; el resto del aspecto del Campo es del componente compartido y se mide en `/buscar/` y el 404.
+
 ## Auto Run Result
 
 Status: done
@@ -162,3 +187,28 @@ Status: done
 - Auditoría de la matriz: las seis filas, en `publicado.test.ts`; la de censo, además, construida en `cotejo-build.test.ts` y con el Corpus real en `portada.spec.ts`.
 
 **Riesgos residuales.** El título de Pagefind depende de que un `span` con `hidden` siga indexándose (verificado con Pagefind 1.5.2 por la prueba (b) de `busqueda.spec.ts`); un cambio de versión de Pagefind que dejara de indexar texto oculto sacaría la portada del índice. La concordancia en singular con censo produce «1 cita de 1 autor; 0 cotejadas…» en un Corpus de una sola Cita censada, que solo se da en pruebas.
+
+### Pasada de revisión 1 (2026-10-30)
+
+**Cambio de esta pasada.** Quince parches de los hallazgos de las cinco capas externas, sin tocar el contrato: en `src/pages/index.astro`, las tres secciones con `aria-labelledby` hacia su `Rotulo`, dentro de la medida de prosa, la línea de cifras con el interlineado 1,6 de `body-md` y el formulario sin aire encima cuando no hay línea; el resto, pruebas.
+
+**Ficheros.**
+- `src/pages/index.astro` — `aria-labelledby` en Temas, Colecciones y Autores; `max-width: var(--medida-prosa)` en las secciones; `line-height: 1.6` en `.cifras`; `.formulario:first-child` sin margen.
+- `tests/unit/publicable-y-alcanzable.test.ts` — el Campo de la portada (etiqueta, ejemplo, `enterkeyhint`, botón `submit` sin `name` tras el campo, con su texto), con `rutaDeLaBusqueda()` y `PARAMETROS_DE_LA_BUSQUEDA`; cada sección nombrada por su rótulo con `id` único; `a.marca` con los mismos atributos en toda página salvo `aria-current`; la prueba de guiones, renombrada a lo que mira.
+- `tests/unit/coleccion-pagina.test.ts` — en la rama sin Cita apta, `p.cifras`, `form.formulario`, `p.entrada` en ese orden.
+- `tests/unit/alcance-construido.test.ts` — la expresión del parche sigue el `aria-labelledby` nuevo.
+- `tests/e2e/portada.spec.ts` — `/buscar/` arranca con lo escrito; envío con Intro; estilo de la línea (cuerpo, color, peso, interlineado, sin marcado); primera línea entera de la Cita del Día a 360 × 640; `try/finally` en la prueba sin JavaScript.
+- `tests/e2e/busqueda.spec.ts` — la línea de cifras, «cotejadas» y la etiqueta del campo no dan la portada en el índice real.
+- `tests/e2e/accesibilidad.spec.ts` — el anillo de foco del campo, también en `/`.
+
+**Hallazgos.** Parches: 15 (medium 1, low 14). Diferidos: 0 (se conserva el de AD-11/AD-17). Rechazados: 27, con su motivo en el registro de triaje.
+
+**Revisión de seguimiento.** `followup_review_recommended: true` — parches de esta pasada: high 0, medium 1, low 14; puntuación 3 × 1 + 14 = 17 (≥ 5).
+
+**Verificación.**
+- `npx astro check` — 0 errores, 0 avisos.
+- `npx vitest run` uno por uno: `publicable-y-alcanzable` (46), `coleccion-pagina` (35), `alcance-construido` (6), `dos-jornadas` (6), `cotejo-build` (21), `publicado` (78), `cotejo` (58), `medicion` (683) — todos verdes.
+- `npx playwright test tests/e2e/portada.spec.ts tests/e2e/cabecera.spec.ts tests/e2e/busqueda.spec.ts` (móvil y escritorio, con `npm run build` del `webServer` —puerta de NFR-5 incluida— y el receptor local) — 234 pasan, 6 omitidas condicionales previas.
+- `npx playwright test tests/e2e/accesibilidad.spec.ts -g "320|axe|h1|anillo"` — 168 pasan.
+
+**Riesgos residuales.** Los de la pasada anterior. La prueba de que la línea no devuelve la portada busca la frase sin cifras y «cotejadas»: si el índice no diera ningún resultado para ellas, pasaría sin mirar nada, aunque lo que fija es la ausencia de `/`.
