@@ -168,6 +168,8 @@ describe('Historia 28.3 — obrasDelDia, los bordes', () => {
   it('lanza, nombrándola, ante una jornada que no es del calendario', () => {
     for (const mala of ['2026-13-01', '2026-02-31', '30/10/2026', '']) {
       expect(() => obrasDelDia(OBRAS_DE_MUCHOS, MUCHOS, mala), mala).toThrow(/no es una jornada/);
+      // También sin ninguna Obra: la jornada mala no se calla porque hoy no haya nada que elegir.
+      expect(() => obrasDelDia([], MUCHOS, mala), mala).toThrow(/no es una jornada/);
     }
   });
 

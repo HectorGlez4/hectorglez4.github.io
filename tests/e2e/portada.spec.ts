@@ -384,7 +384,7 @@ test.describe('Historia 28.3 — seis Obras que cambian con la jornada', () => {
     expect(m.cierre).toEqual({ familia: m.esperado.sans, cuerpo: m.esperado.cuerpoMd, color: m.esperado.tinta });
   });
 
-  test('las filas se tocan, la lista va a 2 × de su rótulo y el cierre a 2 × de la lista, subrayado y con 44 px', async ({ page }) => {
+  test('las filas se tocan con 44 px cada una, la lista va a 2 × de su rótulo y el cierre a 2 × de la lista, subrayado y con 44 px', async ({ page }) => {
     await page.goto('/');
     await page.evaluate(() => document.fonts.ready);
     const u = await unidad(page);
@@ -393,11 +393,13 @@ test.describe('Historia 28.3 — seis Obras que cambian con la jornada', () => {
       const caja = (e: Element) => e.getBoundingClientRect();
       const lista = seccion.querySelector('ul')!;
       const filas = [...lista.querySelectorAll(':scope > li')].map(caja);
+      const altosDeToque = [...lista.querySelectorAll(':scope > li > a')].map((a) => caja(a).height);
       const cierre = seccion.querySelector('p[data-zona="obras-de-portada"]')!;
       const enlace = cierre.querySelector('a')!;
       return {
         bajoElRotulo: caja(lista).top - caja(seccion.querySelector('h2')!).bottom,
         juntas: filas.slice(1).map((f, i) => f.top - filas[i].bottom),
+        altosDeToque,
         cierre: caja(cierre).top - caja(lista).bottom,
         alto: caja(enlace).height,
         subrayado: getComputedStyle(enlace).textDecorationLine,
@@ -409,6 +411,9 @@ test.describe('Historia 28.3 — seis Obras que cambian con la jornada', () => {
     for (const hueco of m.juntas) expect(Math.abs(hueco)).toBeLessThanOrEqual(0.5);
     expect(Math.abs(m.cierre - 2 * u), `lista → cierre: ${m.cierre}`).toBeLessThanOrEqual(0.5);
     expect(m.alto).toBeGreaterThanOrEqual(44);
+    // Cada fila es entera su zona de toque (UX-DR22): 44 px como mínimo.
+    expect(m.altosDeToque.length).toBeGreaterThan(0);
+    for (const alto of m.altosDeToque) expect(alto).toBeGreaterThanOrEqual(44);
     expect(m.subrayado).toContain('underline');
     expect(m.href).toBe(rutaDelDirectorioDeObras());
     expect(m.texto).toMatch(/^Las [\d.]+ obras ›$/);

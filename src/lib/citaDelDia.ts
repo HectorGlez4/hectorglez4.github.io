@@ -224,13 +224,14 @@ export function obrasDelDia<O extends Pick<ObraResuelta, 'nombre' | 'autor' | 't
     })
     .sort(compararPorClave);
 
-  const total = lista.length;
-  if (total === 0) return [];
   // Una jornada sin forma, o que no está en el calendario, daría un día `NaN` y una ventana vacía:
-  // se nombra aquí y no cuatro marcos más abajo (como `esJornada` explica).
+  // se nombra aquí y no cuatro marcos más abajo (como `esJornada` explica). Antes de mirar si hay
+  // Obras: una jornada mala es un fallo del que llama también el día que el conjunto está vacío.
   if (!esJornada(jornada)) {
     throw new Error(`obrasDelDia: «${jornada}» no es una jornada AAAA-MM-DD del calendario.`);
   }
+  const total = lista.length;
+  if (total === 0) return [];
   const cuantas = Math.min(OBRAS_DE_LA_PORTADA, total);
   const dia = diasDesdeLaEpoca(jornada);
 

@@ -26,8 +26,11 @@
  *     Obra del conjunto del que rotan las de la portada —las indexables que calculó en
  *     `astro:build:start`, no solo las de hoy— tiene página en `dist/` y sin `noindex`
  *     (`desajustesDeLasObrasDeLaPortada`): una que no, la portada la enlazaría el día que le tocara.
+ *     Y, porque ese conjunto lo calcula esta instancia y las filas las pinta la de las páginas, que
+ *     cada fila de Obras de la `index.html` construida lleva a una ruta del conjunto.
  */
 
+import { existsSync } from 'node:fs';
 import { readdir, readFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { join, relative, sep } from 'node:path';
@@ -36,6 +39,7 @@ import { leerAutores, leerCitas, leerFichasDeObra, rutasDelCorpus } from '../too
 import {
   desajustesDeIndexables,
   desajustesDeLasObrasDeLaPortada,
+  obrasEnlazadasDesdeLaPortada,
   informeDeCoincidencia,
   informeDeObras,
   marcasDePagina,
@@ -84,8 +88,11 @@ export async function obrasDelCorpusEnDisco(
 
 export default function rutasIndexablesDelCorpus(): AstroIntegration {
   let raiz = process.cwd();
-  /** Historia 28.3 — las rutas de las Obras indexables: el conjunto del que rotan las de la portada. */
-  let rutasQueRotan: string[] = [];
+  /**
+   * Historia 28.3 — las rutas de las Obras indexables: el conjunto del que rotan las de la portada.
+   * Sin calcular hasta `astro:build:start`: un conjunto que no se calculó no se confunde con uno vacío.
+   */
+  let rutasQueRotan: string[] | undefined;
 
   return {
     name: 'rutas-indexables',
@@ -130,17 +137,26 @@ export default function rutasIndexablesDelCorpus(): AstroIntegration {
           rutasDelSitemap,
         );
 
-        const desajustes = [
-          ...desajustesDeIndexables(sitemap, paginas),
-          ...desajustesDeLasObrasDeLaPortada(rutasQueRotan, paginas),
-        ];
+        if (rutasQueRotan === undefined) {
+          throw new Error(
+            'rutas-indexables: `astro:build:done` sin el conjunto del que rotan las Obras de la portada; ' +
+              '`astro:build:start` no llegó a calcularlo, y sin él la comprobación de AD-17 pasaría en vacío.',
+          );
+        }
+        // Las filas que pintó la instancia de las páginas, cotejadas con el conjunto de esta (28.3).
+        const portada = join(dist, 'index.html');
+        const enlazadas = existsSync(portada) ? obrasEnlazadasDesdeLaPortada(await readFile(portada, 'utf8')) : [];
+
+        const deIndexables = desajustesDeIndexables(sitemap, paginas);
+        const deLaPortada = desajustesDeLasObrasDeLaPortada(rutasQueRotan, paginas, enlazadas);
+        const desajustes = [...deIndexables, ...deLaPortada];
         if (desajustes.length === 0) {
           logger.info(informeDeCoincidencia(sitemap.length));
           return;
         }
         // El detalle por el registro y el corte por la excepción, como en la cobertura.
         logger.error(`\n${desajustes.join('\n')}`);
-        throw new Error(titularDeDesajustes(desajustes.length));
+        throw new Error(titularDeDesajustes(deIndexables.length, deLaPortada.length));
       },
     },
   };

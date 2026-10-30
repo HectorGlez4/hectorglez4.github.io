@@ -173,6 +173,28 @@ Las cinco capas de revisión son externas (bucle v8-ralph) y no traían hallazgo
 
 Diferido: el emisor de la marca —el criterio de epics.md nombra el componente de la 26.8— queda pendiente de Héctor (bmad-create-epics-and-stories). Rechazados, con su motivo: el `sprint-status.yaml` lo lleva el orquestador del bucle, no esta pasada; «done antes de revisar» es el estado de la pasada anterior y esta es la revisión; la comprobación de AD-17 sobre otra instancia, el recuento por `directorioDeObras` y el conjunto por `obrasDelConjunto(…).indexables` son lo que el contrato fija, y las dos instancias derivan de `obrasIndexables` y las ata ya la coincidencia sitemap/`noindex`/Pagefind (la redundancia parcial de AD-17 la pide la historia, y además cubre una ruta sin página); el parche de `obra-pagina.test.ts` comprueba que su literal existe y falla en voz alta; el grafo de NFR-5 salta por el atributo, que pinta `LoQueRota.astro`, y lo cubren la prueba de dos jornadas y el build con el Corpus real; sin indexables no hay cierre por la matriz del contrato y el criterio de la historia; seis filas en `portada.spec.ts` es el criterio de aceptación con el Corpus real; `sinLoQueRota` cuenta los subárboles con `recorrerElementos` antes y después y falla si no casan; los Autores del fixture escritos a mano son los mismos que el corpus siembra; `rutasQueRotan` vacío sin `astro:build:start` no ocurre en un build de Astro; la ventana de seis Autores en dos jornadas construidas y el título más largo del Corpus real a 320 px los fija el contrato en el nivel puro y en un fixture más exigente.
 
+### 2026-10-30 — Review pass
+- intent_gap: 0
+- bad_spec: 0
+- patch: 12: (high 0, medium 1, low 11)
+- defer: 0
+- reject: 21: (high 0, medium 0, low 21)
+- addressed_findings:
+  - `[medium]` `[patch]` (blind-hunter, edge-case-hunter, intent-alignment c) La comprobación de AD-17 miraba el conjunto que recalcula la instancia de la configuración y no las filas que pinta la de las páginas: `obrasEnlazadasDesdeLaPortada` (`tools/lib/indexables.ts`) lee las filas de Obras de la `index.html` construida y `desajustesDeLasObrasDeLaPortada` nombra la que lleve fuera del conjunto; `integraciones/indexables.ts` la usa en `astro:build:done`. Pruebas pura (`obra-indexable.test.ts`) y construida (`obra-pagina.test.ts`, con el conjunto vaciado en la copia).
+  - `[low]` `[patch]` (blind-hunter) `rutasQueRotan` empezaba como `[]` y un `astro:build:start` que no corriera dejaba pasar la comprobación en vacío: empieza `undefined` y `astro:build:done` lanza si sigue así.
+  - `[low]` `[patch]` (blind-hunter) El titular del corte decía el diagnóstico de las dos instancias aunque el único desajuste fuera de la portada: `titularDeDesajustes(lineas, deLaPortada)` dice solo el de las clases que se dieron; con prueba pura y en el build.
+  - `[low]` `[patch]` (blind-hunter, edge-case-hunter) `obrasDelDia` validaba la jornada después de devolver `[]` con el conjunto vacío: la valida antes; la prueba de la jornada mala cubre también el conjunto vacío.
+  - `[low]` `[patch]` (blind-hunter) El relleno del cierre suponía `line-height: 1.5` por su cuenta: los dos salen de una sola propiedad local, `--interlineado-del-cierre`.
+  - `[low]` `[patch]` (blind-hunter) `conjunto.autores.find(...)!` por fila en `index.astro`: un `Map` por slug y un error que nombra la Obra y el Autor en vez del `!`.
+  - `[low]` `[patch]` (blind-hunter) Nada probaba que el grafo de NFR-5 salte los dos subárboles de la portada y cuente el cierre a `/obras/`, que va fuera: prueba pura en `alcance.test.ts` con la forma exacta de la portada.
+  - `[low]` `[patch]` (blind-hunter) El fixture e2e escribía `aptaParaPortada: undefined`: se omite la clave.
+  - `[low]` `[patch]` (ac-auditor 1) El año de la fila solo se probaba con años que concuerdan: la segunda Obra de Arenal y la de Bécquer declaran años distintos en `obras-de-la-portada.test.ts`, salen en la jornada, y su fila va sin año (la prueba exige filas de las dos clases y ningún «1881»).
+  - `[low]` `[patch]` (ac-auditor 3) La prueba de zonas de la 23.7 podía pasar con el bloque vacío: `medicion.test.ts` exige ya que la portada medida lleve las filas y el cierre de `obras-de-portada` (sin tocar `COLOCACION`).
+  - `[low]` `[patch]` (ac-auditor 4) El alto de toque de las filas de la portada no se medía: `portada.spec.ts` exige 44 px en cada una.
+  - `[low]` `[patch]` (blind-hunter) El spec tenía la sección de hallazgos de la implementación sin decir que la sustituyen las pasadas siguientes: se etiqueta como de su pasada.
+
+Rechazados, con su motivo: `sprint-status.yaml` y la letra del criterio de epics.md los lleva el orquestador y el diferido ya registrado; los valores tipográficos literales (`font-weight`, `line-height`) son la convención del proyecto —`tokens.css` no tiene tokens de peso ni de interlineado y los componentes los escriben así—; extraer los hechos a un `HechosDeObra.astro` cambiaría el ámbito de estilo de `TarjetaDeObra.astro` sin pedirlo el contrato («unidos como en TarjetaDeObra»); `overflow-wrap: anywhere` es la decisión de `FilaDeBloque.astro` para un hijo de `flex`, donde `break-word` no parte; las seis filas de `portada.spec.ts` son el criterio con el Corpus real; el reflujo solo en `escritorio` es la convención de los barridos de la 26.9; `tarjeta-de-obra.test.ts` prueba que la Tarjeta de la 24.4 no se cuela en la portada, y las filas las fija `obras-de-la-portada.test.ts`; `sinLoQueRota` y el recuento de `/obras/` operan sobre marcado del propio build y fallan en voz alta; que el reparto cambie si el conjunto cambia el mismo día es la regla de AD-12 (función del conjunto y de la jornada); AGENTS.md ya dice que sin Obras no hay bloque, y `OBRAS_DE_LA_PORTADA` es un literal; una Obra repetida en la entrada no puede salir dos veces en una ventana (k ≤ A posiciones consecutivas son Autores distintos); la afiliación «apagada con ediciones» no puede construirse (con `TIENDAS` vacío el esquema rechaza toda edición); los escaneos de fuente por «6» y `SM11_VIGENTE`, el CI sin e2e, el título más largo del Corpus real a 320 px, la ventana de seis Autores en dos jornadas construidas, la congelación que no deja ninguna y las elecciones menores del contrato (h) son lo que el contrato fija o no aportan.
+
 ## Auto Run Result
 
 Status: done
@@ -192,7 +214,7 @@ Blocking condition: ninguna. Implementada en línea sobre la base `9a53e82d34e3a
 - `tests/unit/obras-del-dia.test.ts` (nuevo), `tests/unit/obras-de-la-portada.test.ts` (nuevo, cuatro construcciones), `tests/unit/obra-indexable.test.ts` y `tests/unit/obra-pagina.test.ts` (AD-17 puro y en build), `tests/unit/alcance-construido.test.ts`, `tests/unit/dos-jornadas.test.ts` (quita todos los subárboles; Epicteto con dos Obras que alternan), `tests/unit/publicable-y-alcanzable.test.ts` y `tests/unit/tarjeta-de-obra.test.ts` (la portada lleva ahora «Obras» y sus Filas de bloque).
 - `tests/e2e/ayuda/reflujo.ts` (nuevo, `CONDICIONES`/`cargarEn320`/`anchoDeLaPagina` sacados de `accesibilidad.spec.ts`), `tests/e2e/obras-de-la-portada.spec.ts` (nuevo, puerto 4404), `tests/e2e/portada.spec.ts`.
 
-**Hallazgos.** Ninguno en esta pasada (capas externas sin hallazgos): 0 parches, 0 diferidos, 0 rechazados. `followup_review_recommended: false` (parches: 0 high, 0 medium, 0 low; puntuación 0).
+**Hallazgos (pasada de implementación; las siguientes la sustituyen).** Ninguno en esa pasada (capas externas sin hallazgos): 0 parches, 0 diferidos, 0 rechazados. `followup_review_recommended: false` en esa pasada (parches: 0 high, 0 medium, 0 low; puntuación 0); el valor vigente es el del frontmatter.
 
 **Verificación.**
 - `npx vitest run tests/unit/obras-del-dia.test.ts tests/unit/cita-del-dia.test.ts` — verde.
@@ -229,3 +251,32 @@ Blocking condition: ninguna. Implementada en línea sobre la base `9a53e82d34e3a
 - `npx playwright test tests/e2e/accesibilidad.spec.ts -g "320|axe"` — 148 verdes. Puertos 4321, 4404 y 8787 libres antes y después.
 
 **Riesgos residuales.** El emisor de la marca no casa con la letra del criterio de epics.md (diferido a Héctor). Las Obras de la portada y la lista del build siguen calculándose en dos instancias del módulo; las ata la coincidencia sitemap/`noindex`/Pagefind y la prueba construida que compara las filas con `obrasDelDia` sobre el conjunto en disco.
+
+### Pasada de revisión 2 (2026-10-30)
+
+**Resumen.** Doce parches, sin cambiar la regla ni el contrato. La comprobación de AD-17 ata ya las dos instancias: además de mirar todo el conjunto del que rotan, coteja las filas que la portada construida enlaza con ese conjunto y nombra la que lleve fuera; el conjunto sin calcular ya no pasa por vacío, y el titular del corte dice solo el diagnóstico de los desajustes que hubo. `obrasDelDia` valida la jornada antes de mirar si hay Obras. En la portada, el Autor de cada fila sale de un `Map` con un error explícito y el relleno del cierre se calcula con el mismo interlineado que declara. Las pruebas cubren lo que faltaba: filas sin año cuando las Citas discrepan, el bloque presente en la prueba de zonas, 44 px por fila, y el grafo de NFR-5 sobre la forma exacta de la portada.
+
+**Ficheros de esta pasada.**
+- `tools/lib/indexables.ts` — `obrasEnlazadasDesdeLaPortada`; `desajustesDeLasObrasDeLaPortada` recibe las filas enlazadas y nombra las que caen fuera del conjunto; `titularDeDesajustes(lineas, deLaPortada)`.
+- `integraciones/indexables.ts` — `rutasQueRotan` empieza `undefined` y `astro:build:done` lanza si sigue así; lee las filas de `index.html` y pasa los dos recuentos al titular.
+- `src/lib/citaDelDia.ts` — la jornada se valida antes de devolver `[]`.
+- `src/pages/index.astro` — `autoresPorSlug` y error explícito; `--interlineado-del-cierre` para el relleno y el `line-height` del cierre.
+- `tests/unit/obra-indexable.test.ts` — filas fuera del conjunto, lectura de las filas por su zona, titular por clase.
+- `tests/unit/obra-pagina.test.ts` — el titular de la portada en el corte, y una construcción con el conjunto vaciado en la copia que rompe nombrando la Obra enlazada.
+- `tests/unit/obras-del-dia.test.ts` — jornada mala con el conjunto vacío.
+- `tests/unit/alcance.test.ts` — los dos subárboles de la portada se saltan y el cierre a `/obras/` cuenta.
+- `tests/unit/obras-de-la-portada.test.ts` — dos Obras con años que discrepan, que salen en la jornada sin año.
+- `tests/unit/medicion.test.ts` — la portada medida lleva las filas y el cierre de `obras-de-portada`.
+- `tests/e2e/portada.spec.ts` — 44 px por fila.
+- `tests/e2e/obras-de-la-portada.spec.ts` — `aptaParaPortada` se omite en vez de escribirse `undefined`.
+
+**Hallazgos.** 12 parches (0 high, 1 medium, 11 low), 0 diferidos, 21 rechazados. Recomendación de revisión de seguimiento: `true` (3 × 1 + 1 × 11 = 14 ≥ 5).
+
+**Verificación de esta pasada.**
+- `npx vitest run tests/unit/obras-del-dia.test.ts tests/unit/cita-del-dia.test.ts tests/unit/obra-indexable.test.ts tests/unit/alcance.test.ts` — 134 verdes.
+- `npx astro check` — 0 errores, 0 avisos.
+- `npx vitest run` de `obras-de-la-portada`, `obra-pagina`, `dos-jornadas`, `alcance-construido`, `publicable-y-alcanzable`, `tarjeta-de-obra`, `peso` y `medicion` — 8 ficheros, 916 verdes.
+- `npx playwright test tests/e2e/obras-de-la-portada.spec.ts tests/e2e/portada.spec.ts` — 44 verdes, 2 saltadas por perfil; su `webServer` corre `npm run build` con el Corpus real, que termina con NFR-5 y AD-17 (también el cotejo nuevo de las filas) en verde.
+- `npx playwright test tests/e2e/accesibilidad.spec.ts -g "320|axe"` — 148 verdes. Puertos 4321, 4399, 4400, 4402, 4404 y 8787 libres antes y después.
+
+**Riesgos residuales.** El emisor de la marca no casa con la letra del criterio de epics.md (diferido a Héctor). El cotejo de las filas mira la portada de la jornada del build; el resto del conjunto lo cubre la comprobación de todas las rutas.

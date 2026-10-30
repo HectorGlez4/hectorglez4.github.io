@@ -29,7 +29,8 @@ import { recorrerElementos, type Elemento } from '../../tools/lib/html.ts';
  *
  * Siete Autores con dos Obras indexables cada uno (y uno de ellos con una tercera que no se indexa)
  * y Séneca, de una sola Obra que no se indexa, con las Citas aptas para portada; Martí aporta dos
- * más, de su primera Obra. Tres construcciones a la misma jornada —la de siempre, una con la
+ * más, de su primera Obra; la segunda Obra de Arenal y la de Bécquer declaran años que discrepan, y
+ * su fila sale sin año. Tres construcciones a la misma jornada —la de siempre, una con la
  * jornada fijada en `corpus/portada.json` a la Cita de Martí, que cambia la Cita del Día, y otra con
  * la afiliación encendida, una tienda de prueba y ediciones en una ficha de las que salen ese día—
  * tienen que dar la misma sección «Obras»: no depende de la Cita del Día, de las fijaciones ni de
@@ -57,7 +58,13 @@ const AUTORES = [
 
 const WS = 'https://es.wikisource.org/wiki/';
 
-/** `n` Citas de una Obra, con su Fuente, para el corpus; las de `aptas` (por slug), aptas para portada. */
+/** Cuántos de los primeros Autores tienen su segunda Obra con años que discrepan. */
+const AUTORES_CON_AÑOS_QUE_DISCREPAN = 2;
+
+/**
+ * `n` Citas de una Obra, con su Fuente, para el corpus; las de `aptas` (por slug), aptas para
+ * portada. Con `discrepante`, la última declara otro año: la Obra se queda sin año (24.4).
+ */
 function sembrar(
   corpus: Record<string, string>,
   autor: string,
@@ -65,6 +72,7 @@ function sembrar(
   titulo: string,
   n: number,
   aptas: readonly string[] = [],
+  discrepante = false,
 ) {
   for (let i = 1; i <= n; i += 1) {
     const slug = `${autor}-${clave}-${i}`;
@@ -72,7 +80,7 @@ function sembrar(
       slug,
       autor,
       texto: `${titulo}, sentencia ${i}: lo que se aprende despacio se olvida tarde, ${autor}.`,
-      procedencia: { obra: titulo, año: 1880 },
+      procedencia: { obra: titulo, año: discrepante && i === n ? 1881 : 1880 },
       fuente: { id: 'wikisource-es', url: `${WS}${encodeURIComponent(titulo.replaceAll(' ', '_'))}` },
       ...(aptas.includes(slug) ? { aptaParaPortada: true } : {}),
     });
@@ -95,7 +103,7 @@ function conSeneca(corpus: Record<string, string>): Record<string, string> {
 
 function corpusConObras(): Record<string, string> {
   const corpus = conSeneca({});
-  for (const [slug, nombre, clave] of AUTORES) {
+  for (const [i, [slug, nombre, clave]] of AUTORES.entries()) {
     corpus[`autores/${slug}.yml`] = [
       `nombre: ${nombre}`,
       'añoNacimiento: 1820',
@@ -107,7 +115,9 @@ function corpusConObras(): Record<string, string> {
     // Dos Citas de Martí aptas: con ellas y las tres de Séneca, la rotación de `JORNADA` da una de
     // Séneca, y la fijación a la de Martí cambia de verdad la Cita del Día.
     sembrar(corpus, slug, 'primero', `Primer libro de ${clave}`, 3, [CITA_DE_MARTI, 'jose-marti-primero-2']);
-    sembrar(corpus, slug, 'segundo', `Segundo libro de ${clave}`, 2);
+    // La segunda Obra de los dos primeros Autores, con años que discrepan: salen en `JORNADA` y su
+    // fila no lleva año (lo comprueba la prueba).
+    sembrar(corpus, slug, 'segundo', `Segundo libro de ${clave}`, 2, [], i < AUTORES_CON_AÑOS_QUE_DISCREPAN);
   }
   // Una tercera Obra de Martí, de una sola Cita: se publica (cuenta en el cierre) y no se indexa.
   sembrar(corpus, 'jose-marti', 'tercero', 'Tercer libro de Martí', 1);
@@ -250,8 +260,15 @@ describe('Historia 28.3 — las Obras de la portada, construidas', () => {
         .replace(/<span aria-hidden="true"[^>]*> · <\/span><span class="solo-para-lectores"[^>]*>, <\/span>/g, '|')
         .replace(/<[^>]*>/g, '')
         .split('|');
-      expect(partes, href).toEqual([nombreDe.get(obra.autor), '1880', recuentoDeCitas(obra.recuento)]);
+      // El año solo si las Citas de la Obra lo declaran igual; si discrepan, la fila no lleva ninguno.
+      const año = obra.año === undefined ? [] : [String(obra.año)];
+      expect(partes, href).toEqual([nombreDe.get(obra.autor), ...año, recuentoDeCitas(obra.recuento)]);
     }
+    // Y la jornada enseña de las dos clases: no se pasa por no tener ninguna sin año.
+    const años = filas.map(([, href]) => porRuta.get(href)!.año);
+    expect(años).toContain(undefined);
+    expect(años).toContain(1880);
+    expect(seccionDeObras(html)).not.toContain('1881');
   });
 
   it('cada fila dice el título y, detrás, los hechos con el punto medio oculto al lector', () => {
@@ -263,7 +280,6 @@ describe('Historia 28.3 — las Obras de la portada, construidas', () => {
     for (const fila of filas) {
       expect(fila).toMatch(/<span class="titulo-de-obra"[^>]*>[^<]+<\/span><span class="solo-para-lectores"[^>]*>, <\/span><span class="hechos-de-obra"/);
       expect(fila).toMatch(/<span aria-hidden="true"[^>]*> · <\/span><span class="solo-para-lectores"[^>]*>, <\/span>/);
-      expect(fila).toMatch(/1880/);
       expect(fila).toMatch(/[23] citas/);
       // Sin glifo de avance en las filas: lo lleva el cierre.
       expect(fila).not.toContain('›');

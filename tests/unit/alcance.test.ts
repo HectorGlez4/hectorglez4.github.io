@@ -220,6 +220,23 @@ describe('Historia 26.8 — los enlaces de una página construida', () => {
     expect(enlacesInternos(html)).toEqual(['/cita/visible']);
   });
 
+  it('Historia 28.3 — en la portada salta los dos subárboles que rotan, y el cierre de las Obras, fuera, cuenta', () => {
+    const html = [
+      '<main>',
+      '<section class="del-dia" data-jornada data-pagefind-ignore="all"><p class="ir" data-zona="cita-del-dia"><a href="/cita/del-dia/">Ver esta cita</a></p></section>',
+      '<section aria-labelledby="obras"><h2 id="obras">Obras</h2>',
+      '<div data-jornada data-pagefind-ignore="all"><ul class="obras">',
+      '<li class="fila-de-bloque" data-zona="obras-de-portada"><a href="/obra/a/b/"><span>B</span></a></li>',
+      '<li class="fila-de-bloque" data-zona="obras-de-portada"><a href="/obra/z/y/"><span>Y</span></a></li>',
+      '</ul></div>',
+      '<p data-zona="obras-de-portada"><a href="/obras/">Las 2 obras<span aria-hidden="true">&nbsp;›</span></a></p>',
+      '</section>',
+      '<section aria-labelledby="temas"><ul class="chips"><li><a href="/tema/el-tiempo/">El tiempo</a></li></ul></section>',
+      '</main>',
+    ].join('');
+    expect(enlacesInternos(html).sort()).toEqual(['/obras', '/tema/el-tiempo']);
+  });
+
   it('Historia 27.7 — de las tres formas del aviso de `/buscar/`, solo los Directorios del previo entran en el grafo', () => {
     const aviso = (atributos: string) =>
       `<div class="aviso-de-la-busqueda" data-sin-zona="directorios-del-aviso"${atributos}><p>Uno.</p><p>Dos.</p>` +

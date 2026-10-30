@@ -92,12 +92,15 @@ const autorDelDia = seleccion
  * El cierre cuenta las Obras del Directorio de Obras, adonde lleva: todas las publicadas, también
  * las que no se indexan.
  */
+const autoresPorSlug = new Map(conjunto.autores.map((a) => [a.slug, a]));
 const obrasDeHoy = obrasDelDia(
   obrasDelConjunto(conjunto.citas, conjunto.autores).indexables,
   conjunto.autores,
   jornada,
 ).map((obra) => {
-  const autor = conjunto.autores.find((a) => a.slug === obra.autor)!;
+  // `obrasDelDia` ya lanzó si alguna Obra es de un Autor que no está en `conjunto.autores`.
+  const autor = autoresPorSlug.get(obra.autor);
+  if (autor === undefined) throw new Error(`Portada: la Obra «${obra.nombre}» es de un Autor sin ficha, «${obra.autor}».`);
   return { obra, hechos: contenidoDeTarjetaDeObra(autor, obra).hechos };
 });
 const obrasDelDirectorio = obrasDeHoy.length > 0 ? directorioDeObras(conjunto.autores, conjunto.citas).obras : 0;
@@ -361,11 +364,13 @@ const DESCRIPCION = DESCRIPCION_DEL_SITIO;
   }
 
   p[data-zona='obras-de-portada'] a {
+    /* El relleno completa una línea hasta la zona de toque: se calcula con el mismo interlineado. */
+    --interlineado-del-cierre: 1.5;
     display: inline-block;
     box-sizing: border-box;
     min-height: var(--zona-de-toque);
-    padding-block: calc((var(--zona-de-toque) - 1.5em) / 2);
-    line-height: 1.5;
+    padding-block: calc((var(--zona-de-toque) - var(--interlineado-del-cierre) * 1em) / 2);
+    line-height: var(--interlineado-del-cierre);
     font-family: var(--sans);
     font-size: var(--cuerpo-md);
     color: var(--tinta);

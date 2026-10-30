@@ -54,7 +54,7 @@ function corpus(): Record<string, string> {
         texto: `Sentencia ${n}: lo que se aprende despacio se olvida tarde, y lo que se lee se queda.`,
         procedencia: { obra: titulo, año: 1850 },
         fuente: { id: 'wikisource-es', url: `${WS}${encodeURIComponent(titulo.replaceAll(' ', '_'))}` },
-        aptaParaPortada: n === 1 ? true : undefined,
+        ...(n === 1 ? { aptaParaPortada: true } : {}),
       });
     }
   };

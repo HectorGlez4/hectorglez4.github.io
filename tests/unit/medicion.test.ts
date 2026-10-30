@@ -3078,6 +3078,11 @@ describe('Historia 23.7 — toda salida interna de `dist/` dice su zona', () => 
      */
     for (const ruta of [...PAGINAS_2, OBRAS[2], '/buscar/', '/404']) expect([...sinLectura], ruta).toContain(ruta);
     for (const ruta of [OBRAS[0], OBRAS[1]]) expect([...sinLectura], ruta).not.toContain(ruta);
+    // Historia 28.3 — y la portada lleva las Obras con su cierre (la Obra indexable del corpus): sus
+    // enlaces están entre los juzgados, no fuera por un bloque vacío.
+    const portada = await leerMedida('/');
+    expect(portada).toMatch(/<li class="fila-de-bloque" data-zona="obras-de-portada"[^>]*><a href="\/obra\//);
+    expect(portada).toMatch(/<p data-zona="obras-de-portada"[^>]*><a href="\/obras\/"/);
   }, 240_000);
 
   /**
