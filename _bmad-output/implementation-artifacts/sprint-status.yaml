@@ -446,7 +446,7 @@ development_status:
   27-6-sin-resultados-los-ocho-autores-con-más-citas: review  # v8-ralph 2026-10-29 18:15 UTC: entró la lista de los ocho Autores con más Citas en la búsqueda sin resultados; sin diferidos para Héctor
   27-7-sin-javascript-la-búsqueda-lleva-a-los-directorios: review  # v8-ralph 2026-10-29 19:22 UTC: sin guion o sin índice, /buscar/ lleva a los Directorios (exención directorios-del-aviso) y el reintento espera al índice; diferido para Héctor: alinear EXPERIENCE.md § Zonas (bmad-ux)
   27-8-buscar-en-esta-obra-en-un-autor-o-en-un-tema: review  # v8-ralph 2026-10-30: «Buscar en esta obra», en un Autor o en un Tema desde su página 1, con filtro completo de Pagefind bajo el listado; sin diferidos para Héctor
-  27-9-la-búsqueda-con-filtros-llega-al-sitio-en-vivo-operativa-v8: backlog  # operativa: acto de Héctor (test:e2e entero y NFR-7 en local, merge y su jornada de llegada; nada en el vivo)
+  27-9-la-búsqueda-con-filtros-llega-al-sitio-en-vivo-operativa-v8: review  # operativa: fusionada y desplegada por el bucle v8-ralph con autorización de Héctor del 2026-10-24; llegada 2026-10-30
   epic-27-retrospective: optional
 
   # Épica 28 — la portada de retorno. Al final; conviene la 21.2 antes (con 16 aptas la Cita del Día se repite cada 16 días).
