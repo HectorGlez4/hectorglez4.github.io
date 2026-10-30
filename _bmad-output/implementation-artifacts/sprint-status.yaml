@@ -445,7 +445,7 @@ development_status:
   27-5-los-resultados-llegan-de-30-en-30: review # v8-ralph 2026-10-29: /buscar/ pinta de 30 en 30 con «mostrar 30 más», reintento real de la tanda fallida y anuncio por región; sin diferidos
   27-6-sin-resultados-los-ocho-autores-con-más-citas: review  # v8-ralph 2026-10-29 18:15 UTC: entró la lista de los ocho Autores con más Citas en la búsqueda sin resultados; sin diferidos para Héctor
   27-7-sin-javascript-la-búsqueda-lleva-a-los-directorios: review  # v8-ralph 2026-10-29 19:22 UTC: sin guion o sin índice, /buscar/ lleva a los Directorios (exención directorios-del-aviso) y el reintento espera al índice; diferido para Héctor: alinear EXPERIENCE.md § Zonas (bmad-ux)
-  27-8-buscar-en-esta-obra-en-un-autor-o-en-un-tema: backlog  # bloqueada: con «Buscar en esta obra» sobre el listado, a 360 × 640 la primera Cita de 6 de las 517 páginas 1 de Obra sale de la primera pantalla (peor 722,24 px; medidas en la spec); hace falta que Héctor decida en bmad-ux cómo compactar (quitar el botón, acercar las distancias o mover el formulario); trabajo guardado en 27-8-buscar-en-wip.patch (v8-ralph 2026-10-29 UTC)
+  27-8-buscar-en-esta-obra-en-un-autor-o-en-un-tema: backlog
   27-9-la-búsqueda-con-filtros-llega-al-sitio-en-vivo-operativa-v8: backlog  # operativa: acto de Héctor (test:e2e entero y NFR-7 en local, merge y su jornada de llegada; nada en el vivo)
   epic-27-retrospective: optional
 

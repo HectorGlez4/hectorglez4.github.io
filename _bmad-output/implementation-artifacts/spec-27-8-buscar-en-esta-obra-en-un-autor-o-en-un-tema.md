@@ -2,7 +2,7 @@
 title: 'Historia 27.8 — Buscar en esta obra, en un Autor o en un tema'
 type: 'feature'
 created: '2026-10-29'
-status: 'blocked'
+status: 'draft'
 baseline_revision: 'ca87245df10c2143b5b33957841d454196f456e9'
 review_loop_iteration: 0
 followup_review_recommended: false
@@ -89,6 +89,16 @@ deferred: []
 - Given la página con «Buscar en…», when se lee su nombre accesible, then hay dos «Buscar» (enlace de la cabecera y botón) y se acepta.
 
 ## Spec Change Log
+
+- **2026-10-30 — la Obra lleva el formulario bajo el listado (decisión de Héctor).** El Block If de la primera
+  pantalla saltó en 6 de 517 páginas 1 de Obra (`## Medidas`). Héctor decidió moverlo: en la Obra, «Buscar en esta
+  obra» va tras el listado y su paginación y antes de «Compartir en», a 5 × `--unidad` de la paginación —o de la
+  última tarjeta— [ASSUMPTION de la UX], y el listado vuelve a 4 × bajo `p.salto`, como sin formulario. El Autor y
+  el Tema no cambian. Fuentes: UX v8.4 (`e12e6417fd`) y `sprint-change-proposal-2026-10-30.md` (`bbcc43b7d0`), que
+  enmiendan UX-DR94, UX-DR95 y los criterios de la 27.8 en `epics.md`. Hay que volver a planificar la colocación de la
+  Obra en Always, en el Code Map y en las pruebas de distancias de la 24.7 (salto → listado 32 px; listado →
+  formulario 40 px), y conservar la medida de la primera pantalla en Obra y en Tema. El trabajo hecho sigue en
+  `27-8-buscar-en-wip.patch`.
 
 ## Review Triage Log
 
