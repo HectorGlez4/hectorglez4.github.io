@@ -4407,14 +4407,14 @@ UX-DR93: **Estados de la búsqueda** *(v8)*.
 - **Un filtro de la dirección que no se puede usar** *(v8.2)* —uno que ya no existe, o una `obra` de otro Autor que el de `autor`— se ignora y se dice, en la región del Recuento y delante del recuento: «Uno de los filtros de esta dirección no se puede usar, y la búsqueda va sin él.»; con dos o tres, «Dos de los filtros de esta dirección no se pueden usar, y la búsqueda va sin ellos.» o «Tres de los filtros…». Si no queda nada con que buscar, «El filtro de esta dirección ya no existe.» o «Los filtros de esta dirección ya no existen.», sin recuento ni salida de la búsqueda sin resultados. Nunca se cambia el Autor. La dirección se reemplaza sin esos filtros.
 - **Llegada desde «Buscar en…».** Los selectores se ven elegidos (desde la Obra, Autor y Obra), «Quitar los filtros» está a la vista, lo escrito está en el campo y el recuento nombra lo filtrado entero. Una dirección con `obra` y sin `autor` toma el Autor de la Obra.
 - **Carga del índice.** Se pide al enfocar el campo y, con texto o filtros en la dirección, al cargar la página. Los filtros de Pagefind (unos 41 KB) se piden solo al elegir un Autor, filtrar o buscar, o si la dirección trae estado.
-UX-DR94: **«Buscar en esta obra / en {Autor} / en este tema»**, solo en la página 1. Es un formulario GET a `/buscar/` con el Campo de búsqueda y el botón secundario «Buscar». La etiqueta visible es el nombre del componente, en minúscula: «Buscar en esta obra», «Buscar en {Autor}» o «Buscar en este tema». El filtro va en campos ocultos: **dos en la Obra, `autor` y `obra`**, y uno en el Autor y en el Tema. No añade guion ni crea ninguna página indexable. Enviarlo vacío da todas las Citas de esa página, y «atrás» devuelve a ella. No lleva texto de ejemplo: un ejemplo de todo el Corpus dentro de «Buscar en José Martí» daría cero resultados *(v8.2)*. Va justo encima del listado que filtra:
-- **en la Obra**, a 4 × `{spacing.unit}` (32 px) del salto, con el listado 4 × más abajo;
+UX-DR94: **«Buscar en esta obra / en {Autor} / en este tema»**, solo en la página 1. Es un formulario GET a `/buscar/` con el Campo de búsqueda y el botón secundario «Buscar». La etiqueta visible es el nombre del componente, en minúscula: «Buscar en esta obra», «Buscar en {Autor}» o «Buscar en este tema». El filtro va en campos ocultos: **dos en la Obra, `autor` y `obra`**, y uno en el Autor y en el Tema. No añade guion ni crea ninguna página indexable. Enviarlo vacío da todas las Citas de esa página, y «atrás» devuelve a ella. No lleva texto de ejemplo: un ejemplo de todo el Corpus dentro de «Buscar en José Martí» daría cero resultados *(v8.2)*. En el Autor y en el Tema va justo encima del listado que filtra; en la Obra, justo debajo *(v8.4)*:
+- **en la Obra**, tras el listado y su paginación y antes de «Compartir en», a 5 × `{spacing.unit}` (40 px) de la paginación —o de la última tarjeta— y con «Compartir en» 5 × más abajo. Encima echaba de la primera pantalla la primera Cita de las Obras de título más largo, 6 de 517 el 2026-10-29 (decisión de Héctor del 2026-10-30) *(v8.4)*;
 - **en el Autor**, bajo el rótulo «Citas documentadas», a 2 × `{spacing.unit}` y con el listado 3 × más abajo, sin tocar la Ficha de Autor;
 - **en el Tema**, a 4 × `{spacing.unit}` bajo el `h1` y con el listado 4 × más abajo. Es la excepción declarada a que la Página de Tema empiece por su contenido. La primera Cita sigue en la primera pantalla de 360 × 640, y hay que volver a medirlo con el botón.
-UX-DR95: **Página de Obra, página 1** *(v8, variantes 2B y 3A)*.
-- **Orden:** la Cabecera de Obra con su salto, «Buscar en esta obra», el Listado de Obra con su Paginación, «Compartir en», los Temas, «Dónde leer esta obra» y la Nota. Las páginas 2+ no cambian: Cabecera de Obra, sin salto, y el listado.
+UX-DR95: **Página de Obra, página 1** *(v8, variantes 2B y 3A; v8.4)*.
+- **Orden:** la Cabecera de Obra con su salto, el Listado de Obra con su Paginación —4 × `{spacing.unit}` bajo el salto—, «Buscar en esta obra» *(v8.4)*, «Compartir en», los Temas, «Dónde leer esta obra» y la Nota. Las páginas 2+ no cambian: Cabecera de Obra, sin salto, y el listado.
 - **El orden del libro.** El listado va por la posición de cada Cita en su documento cotejado, documento a documento, y las Citas sin documento van detrás, por slug. Vale también en las páginas 2+. Ninguna línea ni subrótulo lo dice, y las Tarjetas van sin Autor ni título de Obra.
-- **Ritmo del pie:** 5 × `{spacing.unit}` (40 px) desde la paginación, o desde la última tarjeta, hasta «Compartir en»; 5 × de ahí a «Temas»; 4 × hasta «Dónde leer esta obra»; 2 × del `h2` al primer rótulo, y 1 × del rótulo a sus líneas. La Nota, 4 × por encima de su filete y 3 × por debajo.
+- **Ritmo del pie:** 5 × `{spacing.unit}` (40 px) desde la paginación, o desde la última tarjeta, hasta «Buscar en esta obra», y 5 × de ahí a «Compartir en» *(v8.4)*; 5 × de ahí a «Temas»; 4 × hasta «Dónde leer esta obra»; 2 × del `h2` al primer rótulo, y 1 × del rótulo a sus líneas. La Nota, 4 × por encima de su filete y 3 × por debajo.
 - La primera Cita sigue en la primera pantalla.
 UX-DR96: **Salto «Dónde leer esta obra ↓»** *(variante 1A)*, solo en la página 1. Es un enlace de texto en su propia línea, a 3 × `{spacing.unit}` (24 px) de «de {Autor} · {año}», para que su zona de toque de 44 px quede a 8 px de la del nombre. Va en `{typography.body-md}` y `{colors.primary}`, subrayado siempre, hacia `#donde-leer-esta-obra`, en la misma pestaña, y su flecha lleva `aria-hidden`. Su destino, el `h2` de «Dónde leer esta obra», lleva `tabindex="-1"` y `scroll-margin-top` de 2 × `{spacing.unit}`, y recibe el foco con el anillo global. El bloque no se mueve de su sitio, y el salto y su destino, el `h2` de «Dónde leer esta obra», se construyen idénticos con la afiliación encendida o apagada (FR-35); la página no, porque encendida lleva «Ediciones en venta» *(v8.2)*.
 UX-DR97: **Compartir en la Página de Obra** *(variante 2B)*: el bloque «Compartir en» sin la fila de la Historia, solo con el 2 × 2 de WhatsApp, Facebook, Threads y «Más opciones…». Va tras el listado y su paginación y antes de «Temas», solo en la página 1, se indexe la Obra o no y también con la familia congelada. El texto propuesto es «{título}, de {Autor}», con el título de su Ficha de Obra y sin traductor; en Facebook se publica su Tarjeta Social de Obra. **Correo** lleva el asunto «Una obra» —«Una cita» desde la Página de Cita y desde la Cita del Día, como está construido— y el cuerpo «{título}, de {Autor}», una línea en blanco y el enlace con `?via=correo`; el título va en el cuerpo y no en el asunto *(v8.2)*. Es la primera isla de la Página de Obra, y su guion cuenta en el tope que se mide donde se admite la afiliación.
@@ -6698,7 +6698,7 @@ So that lleguen al libro, no a una frase suelta, con lo que dice su tarjeta.
 **Given** la página 1 de toda Obra, se indexe o no y también con la familia congelada
 **When** se sirve
 **Then** lleva el bloque sin la fila de «Historia de Instagram», con el 2 × 2 de WhatsApp, Facebook, Threads y «Más opciones…», tras el listado y su paginación y antes de «Temas» (FR-18, FR-51, UX-DR97, UX-DR109)
-**And** sigue el ritmo del pie de UX-DR95: 5 × `{spacing.unit}` desde la paginación, o desde la última tarjeta, hasta «Compartir en», y otros 5 × de ahí a «Temas»
+**And** sigue el ritmo del pie de UX-DR95: 5 × `{spacing.unit}` desde lo que lo precede —«Buscar en esta obra», si la 27.8 ya está en la principal, o si no la paginación o la última tarjeta— hasta «Compartir en», y otros 5 × de ahí a «Temas» *(v8.4)*
 **And** la congelación no lo quita, porque no alcanza a la navegación (SM-11)
 
 **Given** las páginas 2+ de una Obra
@@ -8020,8 +8020,8 @@ So that no tenga que pasar sus páginas para encontrar la que recuerdo.
 
 **Given** dónde va
 **When** se sirve
-**Then** siempre justo encima del listado que filtra (UX-DR94, UX-DR95)
-**And** en la Obra, a 4 × `{spacing.unit}` del salto «Dónde leer esta obra ↓», con el listado 4 × más abajo
+**Then** justo encima del listado que filtra en el Autor y en el Tema, y justo debajo en la Obra (UX-DR94, UX-DR95) *(v8.4)*
+**And** en la Obra, tras el listado y su paginación, a 5 × `{spacing.unit}` de la paginación —o de la última tarjeta—, y con «Compartir en» 5 × más abajo cuando la 25.6 ya esté; el listado empieza 4 × bajo el salto «Dónde leer esta obra ↓», como sin el formulario *(v8.4)*
 **And** en el Autor, bajo el rótulo «Citas documentadas», a 2 × y con el listado 3 × más abajo, sin tocar la Ficha de Autor
 **And** en el Tema, a 4 × bajo el `h1` y con el listado 4 × más abajo: es la excepción declarada a que la Página de Tema empiece por su contenido
 
@@ -8056,6 +8056,7 @@ So that no tenga que pasar sus páginas para encontrar la que recuerdo.
 **Given** la primera Cita de la página 1 del Tema y de la Obra
 **When** se mide a 360 × 640 sobre lo construido, con el formulario y su botón
 **Then** sigue empezando en la primera pantalla, y la medida se anota, con fecha, en el spec de la historia (UX-DR94) *(v8.2)*
+**And** en la Obra el formulario no la mueve, porque va bajo el listado; la medida se anota igual, y es la de la 24.7 *(v8.4)*
 
 **Given** Playwright local
 **When** corre sobre la rama
