@@ -1211,9 +1211,8 @@ export function superficiesInalcanzables(
  *
  * **Ni la portada → los Autores destacados** —los ocho de la portada (Historia 28.4) cambian con
  * los recuentos, y una orden que retira no puede apoyarse en que un Autor siga entre ellos— **ni
- * Cita → Cita**: las Rutas de salida
- * de una Cita dependen de sus vecinas y no las promete ninguna enumeración. Lo que el sitio
- * enlace de más no estorba: el modelo es lo que **tiene** que estar.
+ * Cita → Cita**: las Rutas de salida de una Cita dependen de sus vecinas y no las promete ninguna
+ * enumeración. Lo que el sitio enlace de más no estorba: el modelo es lo que **tiene** que estar.
  *
  * Pura (AD-5): las Citas de cada Obra llegan ya ordenadas (`citasPorObra`), por nombre de ficha.
  */

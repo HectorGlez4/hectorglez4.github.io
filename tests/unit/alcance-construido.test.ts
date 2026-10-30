@@ -20,9 +20,8 @@ import { MARCA_DE_JORNADA } from '../../tools/lib/alcance.ts';
  * Autores destacados de la portada (Historia 28.4) alcanzan—; una con la portada parcheada sin sus
  * Autores destacados —que el modelo no lleva porque cambian con los recuentos—, que deja una Cita
  * de la página 2 de su Autor a cuatro saltos y rompe nombrándola con su Tema bajo umbral; y una
- * con la Paginación
- * sin los números y la Fila de Autor sin enlace, que rompe nombrando las aristas del modelo que
- * faltan.
+ * con la Paginación sin los números y la Fila de Autor sin enlace, que rompe nombrando las aristas
+ * del modelo que faltan.
  */
 
 const pad = (n: number) => String(n).padStart(3, '0');

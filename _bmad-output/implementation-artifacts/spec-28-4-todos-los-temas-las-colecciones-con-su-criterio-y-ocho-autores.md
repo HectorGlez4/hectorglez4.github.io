@@ -142,7 +142,7 @@ El `li` es un contenedor de bloque; el chip, `inline-flex` (o el `li` en columna
 - addressed_findings:
   - none
 
-(Las capas de revisión son externas en el bucle v8-ralph y en esta pasada no traían hallazgos: la revisión independiente viene después.)
+(Pasada de implementación: las capas de revisión son externas en el bucle v8-ralph y en esta pasada no traían hallazgos; la revisión independiente es la pasada 1, abajo. Este recuento a cero no es el veredicto vigente.)
 
 ### 2026-10-30 — Review pass
 - intent_gap: 0
@@ -159,10 +159,39 @@ El `li` es un contenedor de bloque; el chip, `inline-flex` (o el `li` en columna
 
 Rechazados (27, todos `low`): el tablero y el commit del spec con el código (los lleva el bucle), el spec en `done` antes de la revisión (diseño del flujo), la zona compartida del cierre (la fija el contrato y una zona nueva es de Héctor), la guarda en `destacados` (`autoresDestacados` devuelve al menos uno si hay algún Autor publicado), el ancho (`section` ya lleva `max-width: var(--medida-prosa)`), el marcado en una línea (patrón de la 28.3, comentado), el reflujo que «pasa sin medir» (la premisa fallida es un `expect.soft` que suspende la prueba), los tipos de `comoAutor`, el `&nbsp;`, la regex con sangrías (tiene guarda), los bordes de 8 y 9 Autores (`autores-destacados.test.ts`), los `id` (slugs únicos con prefijo), la doble lectura del criterio, la redacción de «El 1 autor» y «1.234» (las fija el contrato), el sitio y la extensión de la sección de `AGENTS.md` (los fija el Code Map), el recuento de `/autores/`, la comprobación sobre el Corpus real de Colecciones, la identidad de los ocho y NFR-5 sobre el Corpus real (la puerta del build y la página pasa la salida de la función tal cual), las garantías previas de las Colecciones (ya probadas), las condiciones previas 26.8/27.6 en `review` (el bucle las fusiona por épica) y la lista de Temas escrita a mano en la unitaria.
 
+### 2026-10-30 — Review pass
+- intent_gap: 0
+- bad_spec: 0
+- patch: 15: (high 0, medium 1, low 14)
+- defer: 0
+- reject: 13: (high 0, medium 0, low 13)
+- addressed_findings:
+  - `[medium]` `[patch]` La identidad de los ocho, los Temas y las Colecciones solo se comprobaba sobre fixtures (intent-alignment a): nueva prueba en `tests/e2e/portada.spec.ts` sobre el sitio construido con el Corpus del árbol que exige los enlaces de «Autores» iguales a `autoresDestacados` del Corpus leído con `conjuntoDeLosDatos`, en su orden y con su nombre, los de «Temas» iguales a `temasPublicados` y las Colecciones a `conjunto.colecciones` con su criterio.
+  - `[low]` `[patch]` El aviso «NFR-5 en el modelo» decía «el build pasa» aunque se escribe antes de juzgar `dist/` y la puerta puede romper (blind-hunter): reescrito para que valga en los dos casos —«En dist/ pueden acercarlas ellos… si el Autor de una deja de estar entre los destacados, el build puede romper por ella»—, con su prefijo y la frase de los destacados intactos; el comentario de `avisoDeFueraDelModelo` lo explica.
+  - `[low]` `[patch]` El consejo del aviso omitía la Colección y el umbral del Tema (blind-hunter): «un Tema publicado (desde `MIN_CITAS_POR_TEMA` Citas) o una Colección publicada».
+  - `[low]` `[patch]` El riesgo diferido no tenía seguimiento fuera del spec (blind-hunter, intent-alignment e, ac-auditor 6): entrada nueva en `_bmad-output/implementation-artifacts/deferred-work.md` y, en `AGENTS.md`, la consecuencia —el build siguiente puede romper sin aviso de ninguna orden— y cómo se cierra.
+  - `[low]` `[patch]` La subsección de la 28.4 en `AGENTS.md` colgaba de «Las fichas de Obra» (blind-hunter): pasa a sección propia (`##`) en el mismo sitio.
+  - `[low]` `[patch]` `AGENTS.md` no decía que la invitación a sostener va tras el cierre de «Autores» ni la fila de `COLOCACION` (blind-hunter): añadido. (El registro de puertos no existe en `AGENTS.md`; no se inventa aquí.)
+  - `[low]` `[patch]` El `li` de las Colecciones en una línea sin explicar (blind-hunter): comentario en `index.astro` —ningún blanco del formateo entra en el nombre ni en la descripción accesibles—.
+  - `[low]` `[patch]` `comoAutor` copiaba a mano los datos de la ficha (blind-hunter, ac-auditor 3): la unitaria lee ahora los Autores, las Citas y los Temas de los mismos ficheros que escribe (`yaml` sobre la ficha y el frontmatter), y los pasa por `aplanarAutor`.
+  - `[low]` `[patch]` «Temas» comparado con una lista escrita a mano (blind-hunter, ac-auditor 4): se compara, en orden, con `temasPublicados` sobre el Corpus de la prueba.
+  - `[low]` `[patch]` El cierre se comparaba con el literal `&nbsp;` en un caso y con la entidad en otro (blind-hunter): la unitaria normaliza `&nbsp;` a U+00A0 en los dos.
+  - `[low]` `[patch]` «El mismo trato que el cierre de Obras» solo se probaba en parte (ac-auditor 5): la e2e compara familia, cuerpo, peso, color y subrayado computados de los dos cierres.
+  - `[low]` `[patch]` La importación de `todasLasDirecciones` iba entre dos de `src/lib` (blind-hunter): junto a las ayudas locales. (`OPCIONES_DE_PAGEFIND` **sí** se usa todavía en `busqueda.spec.ts`, cuatro veces: esa parte del hallazgo no se sostiene.)
+  - `[low]` `[patch]` Dos comentarios partidos a media frase (`grafoDelModelo` en `src/lib/publicado.ts` y la cabecera de `tests/unit/alcance-construido.test.ts`) (blind-hunter): reenvueltos.
+  - `[low]` `[patch]` El spec mezclaba veredictos de pasadas distintas (blind-hunter): el `Auto Run Result` dice que el vigente es el último bloque, la pasada de implementación lleva su rótulo y sus riesgos «ninguno» quedan marcados como superados.
+  - `[low]` `[patch]` Verificación parcial tras la pasada 1 (blind-hunter): esta pasada corre la Verificación entera del spec, `tests/e2e/accesibilidad.spec.ts` completo (foco y orden de tabulación incluidos) y los trece ficheros unitarios.
+
+Rechazados (13, todos `low`): la m del cierre y la de la línea «coinciden por casualidad» (las dos salen de `autoresPublicados` con los mismos `conjunto.citas` y `conjunto.autores`: `lineaDeCifras` la calcula así); la zona compartida del cierre (la fija el contrato; una zona nueva es de Héctor, UX-DR111); el tablero `sprint-status.yaml` y las condiciones previas 26.8/27.6 en `review` (los lleva el bucle por épica, y esta pasada no tiene orden de tocar esas líneas); la regex con sangrías de `alcance-construido` (tiene guarda que falla diciendo por qué); las aserciones e2e sobre la Cita del Día y `/autores/` (hechos del sitio de la suite, que siempre tiene Cita del Día y cuyo Directorio lista un enlace por Autor); la doble lectura del criterio (UX-DR62 y el contrato piden el criterio visible **y** como descripción del chip: quien navega por enlaces lo oye con el chip, y quien lee en orden lo encuentra en su sitio); la portada vacía sin prueba construida (decisión del spec: guarda más prueba pura); el ancho de `.destacados` (`section` ya lleva `max-width: var(--medida-prosa)`); NFR-5 sobre el Corpus real (la puerta corre en cada build, también en CI, y esta pasada la vio pasar); el barrido a 320 px y la búsqueda del criterio sobre el Corpus real (no hay ninguna Colección publicada: curarlas es de Héctor, y el fixture lo cubre); y las garantías de FR-28, el criterio en blanco y las donaciones apagadas (probadas por las pruebas existentes, en verde).
+
 ## Auto Run Result
 
 Status: done
 Blocking condition: ninguna.
+
+Los bloques van en orden y el vigente es el último: «Pasada de implementación», «Pasada de revisión 1» y «Pasada de revisión 2». Las cifras de revisión y los riesgos de un bloque anterior quedan superados por los del siguiente.
+
+### Pasada de implementación (2026-10-30)
 
 Planificación (pasada anterior): `avisoDeFueraDelModelo` no dejaba ninguna Cita fuera del modelo con el Corpus de la rama ni con el de la principal (4.420 Citas). Confirmado al construir: la puerta de NFR-5 pasa sin la lista entera de Autores y el build no emite «NFR-5 en el modelo».
 
@@ -199,7 +228,7 @@ Planificación (pasada anterior): `avisoDeFueraDelModelo` no dejaba ninguna Cita
 
 **Auditoría de la matriz.** ≥ 9 Autores y suelo latinoamericano: `portada-temas-colecciones-autores` (diez Autores, el décimo latinoamericano entre los ocho, orden de `autoresDestacados`, m = 10). ≤ 8 Autores: misma prueba, segunda construcción (2 filas, «Los 2 autores…»). Dos Colecciones con palabra de 30+ letras: criterio entero en la unitaria y partido en renglones a 320 px en la e2e. Colección bajo umbral: la unitaria (14 miembros, ni chip ni criterio). Criterio vacío: `colecciones-build` (ya existente, en verde). Cierre m = 1 / 1234 / 0 / −1 / 1,5: `cierre-de-los-autores`.
 
-**Riesgos residuales.** Ninguno conocido. La regla de selección de los ocho es de `autoresDestacados` (27.6) y cambia con los recuentos del Corpus; el aviso de NFR-5 en el modelo lo dirá si algún día una Cita solo queda cerca por ellos.
+**Riesgos residuales (superado por la pasada 1, que difiere un riesgo medio).** Ninguno conocido. La regla de selección de los ocho es de `autoresDestacados` (27.6) y cambia con los recuentos del Corpus; el aviso de NFR-5 en el modelo lo dirá si algún día una Cita solo queda cerca por ellos.
 
 ### Pasada de revisión 1 (2026-10-30)
 
@@ -220,3 +249,28 @@ Planificación (pasada anterior): `avisoDeFueraDelModelo` no dejaba ninguna Cita
 - `npx playwright test tests/e2e/temas-colecciones-autores-de-la-portada.spec.ts tests/e2e/portada.spec.ts` — 53 en verde, 5 saltadas (la copia solo en `escritorio`). Puertos 4321, 4405 y 8787 libres antes y después.
 
 **Riesgos residuales.** El diferido: los destacados cambian con los recuentos y una orden que retira o un alta pueden sacar de los ocho al Autor que acerca una Cita ya fuera del modelo; hoy no hay ninguna (el aviso no sale con el Corpus del árbol).
+
+### Pasada de revisión 2 (2026-10-30)
+
+**Resumen.** Segunda revisión independiente (cinco capas externas): ningún cambio de comportamiento de la portada. Una prueba nueva sobre el sitio construido con el Corpus del árbol (los ocho, los Temas y las Colecciones son los de sus funciones, en su orden), el aviso «NFR-5 en el modelo» reescrito para que sea cierto pase o rompa la puerta, el riesgo diferido llevado a `deferred-work.md` y a `AGENTS.md`, y ajustes de pruebas, comentarios y documentación.
+
+**Ficheros.**
+- `tests/e2e/portada.spec.ts` — prueba nueva sobre el Corpus del árbol (`autoresDestacados`, `temasPublicados`, `conjunto.colecciones`); el cierre de «Autores» con el trato computado del de «Obras».
+- `tests/unit/portada-temas-colecciones-autores.test.ts` — Autores, Citas y Temas leídos de los ficheros que escribe; «Temas» frente a `temasPublicados`; `&nbsp;` normalizado.
+- `tools/lib/alcance.ts` — texto del aviso «NFR-5 en el modelo» y su comentario.
+- `AGENTS.md` — la sección de la 28.4 pasa a `##`; la consecuencia del riesgo diferido, la invitación tras el cierre y la fila de `COLOCACION`.
+- `_bmad-output/implementation-artifacts/deferred-work.md` — el riesgo de los destacados, con su evidencia.
+- `src/pages/index.astro` — comentario del `li` de las Colecciones (sin cambio de marcado).
+- `src/lib/publicado.ts`, `tests/unit/alcance-construido.test.ts` — comentarios reenvueltos.
+- `tests/e2e/busqueda.spec.ts` — la importación de la ayuda, con las ayudas locales.
+
+**Revisión.** Parches: 15 (high 0, medium 1, low 14). Diferidos: 0 nuevos (el de la pasada 1 sigue en el frontmatter y ahora también en `deferred-work.md`). Rechazados: 13. Recomendación de revisión de seguimiento: `true` (puntuación 3 × 1 + 14 = 17 ≥ 5; ningún parche high).
+
+**Verificación.**
+- `npx vitest run` uno por uno: `cierre-de-los-autores` 3, `portada-temas-colecciones-autores` 8, `alcance-construido` 6, `alcance` 26, `medicion` 686, `espinas-de-ux` 14, `ingreso-construido` 42, `publicable-y-alcanzable` 46, `colecciones-build` 18, `obras-de-la-portada` 11, `dos-jornadas` 7, `peso` 63, `cita-del-dia` 45 — 975 en verde.
+- `npx astro check` — 0 errores, 0 avisos, 8 pistas.
+- `npm run build` con el Corpus del árbol — termina con 0; «NFR-5: 5115 superficies publicadas, todas a 3 saltos o menos de la portada; las 37398 aristas del modelo están en dist/», sin aviso «NFR-5 en el modelo»; la portada lleva 8 filas `autores-de-portada` y «Los 135 autores, de la A a la Z».
+- `npx playwright test tests/e2e/temas-colecciones-autores-de-la-portada.spec.ts tests/e2e/portada.spec.ts tests/e2e/seo.spec.ts` — 75 en verde, 5 saltadas (la copia solo en `escritorio`); `tests/e2e/busqueda.spec.ts -g portada` — 8 en verde; `tests/e2e/accesibilidad.spec.ts` completo — 294 en verde.
+- Puertos 4321, 4405 y 8787 libres antes y después.
+
+**Riesgos residuales.** El diferido de la pasada 1, sin cambios: los destacados cambian con los recuentos y una orden puede sacar de los ocho al Autor que acerca una Cita ya fuera del modelo; hoy no hay ninguna. No se corrió `npm test` entero (los trece ficheros de la Verificación sí).

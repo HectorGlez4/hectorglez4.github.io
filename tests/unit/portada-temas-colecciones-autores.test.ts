@@ -1,5 +1,6 @@
 import { readFileSync } from 'node:fs';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import { parse as parsearYaml } from 'yaml';
 import {
   TEMA_VALIDO,
   citaValida,
@@ -10,8 +11,8 @@ import {
   type ResultadoBuild,
 } from './ayuda/construir.js';
 import { cierreDeLosAutores } from '../../src/lib/atribucion.ts';
-import { aplanarAutor, autoresDestacados, type Autor } from '../../src/lib/publicado.ts';
-import { rutaDeAutor, rutaDeColeccion, rutaDelDirectorioDeAutores } from '../../src/lib/superficies.ts';
+import { aplanarAutor, autoresDestacados, temasPublicados, type Autor, type Cita } from '../../src/lib/publicado.ts';
+import { rutaDeAutor, rutaDeColeccion, rutaDelDirectorioDeAutores, rutaDeTema } from '../../src/lib/superficies.ts';
 import { AUTORES_DESTACADOS, MIN_CITAS_POR_COLECCION, MIN_CITAS_POR_TEMA } from '../../src/lib/umbrales.ts';
 import { recorrerElementos, type Elemento } from '../../tools/lib/html.ts';
 
@@ -27,8 +28,10 @@ import { recorrerElementos, type Elemento } from '../../tools/lib/html.ts';
  * miembro de él. Una segunda construcción, con dos Autores, sin Colecciones y sin ningún Tema
  * publicado.
  *
- * Lo que la portada enseña se compara con lo que da `autoresDestacados` sobre los mismos Autores,
- * pasados por `aplanarAutor` como los recibe el build: la página no elige ni ordena.
+ * Lo que la portada enseña se compara con lo que dan `autoresDestacados` y `temasPublicados` sobre
+ * el mismo Corpus que se construye, leído de los ficheros que la prueba escribe —los Autores por
+ * `aplanarAutor`, como los recibe el build—: la página no elige ni ordena, y la prueba no copia a
+ * mano lo que ya dicen los ficheros.
  */
 
 const JORNADA = '2026-10-30';
@@ -74,17 +77,32 @@ function fichaDeAutor(a: AutorDelFixture): string {
   ].join('\n');
 }
 
-/** El Autor del fixture tal como lo lee el build: por `aplanarAutor`. */
-function comoAutor(a: AutorDelFixture): Autor {
-  const data = {
-    nombre: a.nombre,
-    semblanza: `Escritor de prueba, ${a.clave}.`,
-    añoNacimiento: 1820,
-    añoFallecimiento: 1900,
-    ordenAlfabetico: a.clave,
-    tradicion: a.tradicion,
-  };
-  return aplanarAutor({ id: a.slug, collection: 'autores', data } as unknown as Parameters<typeof aplanarAutor>[0]);
+/** Los ficheros de un directorio del Corpus de la prueba, por slug y con su texto. */
+function ficherosDe(corpus: Record<string, string>, dir: string): [string, string][] {
+  return Object.entries(corpus)
+    .filter(([ruta]) => ruta.startsWith(`${dir}/`))
+    .map(([ruta, texto]) => [ruta.slice(dir.length + 1).replace(/\.(yml|md)$/, ''), texto]);
+}
+
+/** Los Autores del Corpus de la prueba, leídos de sus fichas como los lee el build: por `aplanarAutor`. */
+function autoresDe(corpus: Record<string, string>): Autor[] {
+  return ficherosDe(corpus, 'autores').map(([id, yaml]) =>
+    aplanarAutor({ id, collection: 'autores', data: parsearYaml(yaml) } as unknown as Parameters<typeof aplanarAutor>[0]),
+  );
+}
+
+/** Las Citas del Corpus de la prueba —su Autor y sus Temas—, leídas de su frontmatter. */
+function citasDe(corpus: Record<string, string>): Cita[] {
+  return ficherosDe(corpus, 'citas').map(([, md]) => {
+    const { autor, temas } = parsearYaml(/^---\n([\s\S]*?)\n---/.exec(md)![1]) as Pick<Cita, 'autor' | 'temas'>;
+    return { autor, temas } as Cita;
+  });
+}
+
+/** Los Temas publicados del Corpus de la prueba, por `temasPublicados`. */
+function temasPublicadosDe(corpus: Record<string, string>) {
+  const temas = ficherosDe(corpus, 'temas').map(([slug, yaml]) => ({ slug, nombre: (parsearYaml(yaml) as { nombre: string }).nombre }));
+  return temasPublicados(temas, citasDe(corpus));
 }
 
 /** Las Citas de un Autor del fixture, por slug, con sus Temas. */
@@ -180,8 +198,8 @@ function seccion(html: string, id: string): string | undefined {
   return new RegExp(`<section aria-labelledby="${id}"[\\s\\S]*?</section>`).exec(html)?.[0];
 }
 
-/** El texto de un fragmento de HTML, sin etiquetas. */
-const texto = (html: string) => html.replace(/<[^>]*>/g, '');
+/** El texto de un fragmento de HTML, sin etiquetas y con `&nbsp;` como el carácter que es. */
+const texto = (html: string) => html.replace(/<[^>]*>/g, '').replaceAll('&nbsp;', '\u00a0');
 
 /** Las rutas de las filas de los Autores destacados, en su orden. */
 function filasDeAutores(html: string): string[] {
@@ -212,13 +230,15 @@ describe('Historia 28.4 — Temas, Colecciones y ocho Autores en la portada, con
   let dos: ResultadoBuild;
   let html = '';
   let htmlDeDos = '';
+  const corpusDiez = corpusDeDiez().corpus;
+  const corpusDos = corpusDeDos();
 
   beforeAll(async () => {
-    diez = await construirConCorpus(corpusDeDiez().corpus, { jornada: JORNADA });
+    diez = await construirConCorpus(corpusDiez, { jornada: JORNADA });
     expect(diez.codigo, diez.salida).toBe(0);
     html = readFileSync(paginaConstruida(diez.proyecto, '/'), 'utf8');
 
-    dos = await construirConCorpus(corpusDeDos(), { jornada: JORNADA });
+    dos = await construirConCorpus(corpusDos, { jornada: JORNADA });
     expect(dos.codigo, dos.salida).toBe(0);
     htmlDeDos = readFileSync(paginaConstruida(dos.proyecto, '/'), 'utf8');
   }, 600_000);
@@ -232,13 +252,16 @@ describe('Historia 28.4 — Temas, Colecciones y ocho Autores en la portada, con
     expect(rotulos.slice(-3)).toEqual(['Temas', 'Colecciones', 'Autores']);
   });
 
-  it('«Temas» enseña todos los publicados, y ninguno más', () => {
+  it('«Temas» enseña todos los publicados, en su orden, y ninguno más', () => {
     const temas = seccion(html, 'temas')!;
     expect(temas).toMatch(/<ul class="chips" data-zona="chip-de-tema"/);
     const rutas = [...temas.matchAll(/<a class="chip"[^>]* href="([^"]+)"|<a [^>]*href="([^"]+)"[^>]* class="chip"/g)].map(
       (m) => m[1] ?? m[2],
     );
-    expect(rutas.sort()).toEqual(['/tema/el-tiempo/', '/tema/la-calma/']);
+    const esperados = temasPublicadosDe(corpusDiez).map((t) => rutaDeTema(t.slug));
+    // El fixture publica dos de sus tres Temas: «La ira» se queda bajo su umbral.
+    expect(esperados).toHaveLength(2);
+    expect(rutas).toEqual(esperados);
     expect(temas).not.toContain('la-ira');
   });
 
@@ -275,9 +298,7 @@ describe('Historia 28.4 — Temas, Colecciones y ocho Autores en la portada, con
   });
 
   it(`«Autores» lleva los ${AUTORES_DESTACADOS} de autoresDestacados, en su orden, y ningún otro enlace a un Autor`, () => {
-    const autores = DIEZ.map(comoAutor);
-    const citas = DIEZ.flatMap((a) => Array.from({ length: a.citas }, () => ({ autor: a.slug })));
-    const esperados = autoresDestacados(autores, citas).map((a) => rutaDeAutor(a.slug));
+    const esperados = autoresDestacados(autoresDe(corpusDiez), citasDe(corpusDiez)).map((a) => rutaDeAutor(a.slug));
     expect(esperados).toHaveLength(AUTORES_DESTACADOS);
     // El latinoamericano, último por Citas, entra por el suelo; la página no lo decide.
     expect(esperados).toContain(rutaDeAutor(LATINOAMERICANO));
@@ -319,7 +340,7 @@ describe('Historia 28.4 — Temas, Colecciones y ocho Autores en la portada, con
     const cierre = cierreDe(html)!;
     expect(cierre).toBeDefined();
     expect(cierre.href).toBe(rutaDelDirectorioDeAutores());
-    expect(cierre.marcado).toBe(`${cierreDeLosAutores(DIEZ.length)}<span aria-hidden="true">&nbsp;›</span>`);
+    expect(cierre.marcado.replaceAll('&nbsp;', '\u00a0')).toBe(`${cierreDeLosAutores(DIEZ.length)}<span aria-hidden="true">\u00a0›</span>`);
     expect(mDeLaLinea(html)).toBe(String(DIEZ.length));
     expect(cierre.texto).toContain(`Los ${mDeLaLinea(html)} autores`);
     // Va dentro de la sección, detrás de la lista.
@@ -343,17 +364,13 @@ describe('Historia 28.4 — Temas, Colecciones y ocho Autores en la portada, con
     expect(rotulos).not.toContain('Temas');
     expect(rotulos).not.toContain('Colecciones');
     expect(rotulos.at(-1)).toBe('Autores');
-    // Lo que da `autoresDestacados` sobre los mismos dos Autores y sus tres Citas: la prueba no
-    // reescribe la regla de orden del Directorio.
-    const dosAutores = [DIEZ[0], DIEZ[9]];
-    const esperados = autoresDestacados(
-      dosAutores.map(comoAutor),
-      dosAutores.flatMap((a) => Array.from({ length: 3 }, () => ({ autor: a.slug }))),
-    ).map((a) => rutaDeAutor(a.slug));
+    // Lo que da `autoresDestacados` sobre el mismo Corpus de dos Autores: la prueba no reescribe la
+    // regla de orden del Directorio.
+    const esperados = autoresDestacados(autoresDe(corpusDos), citasDe(corpusDos)).map((a) => rutaDeAutor(a.slug));
     expect(esperados).toHaveLength(2);
     expect(filasDeAutores(htmlDeDos)).toEqual(esperados);
     const cierre = cierreDe(htmlDeDos)!;
-    expect(cierre.texto).toBe(`${cierreDeLosAutores(2)}&nbsp;›`);
+    expect(cierre.texto).toBe(`${cierreDeLosAutores(2)}\u00a0›`);
     expect(mDeLaLinea(htmlDeDos)).toBe('2');
   });
 });

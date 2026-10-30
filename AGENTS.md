@@ -1025,7 +1025,7 @@ fijaciones de `corpus/portada.json`: fijar una jornada no mueve las Obras.
   rompe el build si alguna Obra del conjunto del que rotan —no solo las de hoy— no tiene página en
   `dist/` o la tiene con `noindex` (AD-17).
 
-### Temas, Colecciones y Autores de la portada (Historia 28.4)
+## Temas, Colecciones y Autores de la portada (Historia 28.4)
 
 Tras «Obras», la portada enseña **todos** los Temas de `temasPublicados` (chips, zona
 `chip-de-tema`), **todas** las Colecciones de `conjunto.colecciones` —ya resueltas y sobre su
@@ -1043,7 +1043,15 @@ umbral: la página no filtra— y **ocho Autores**, no la lista entera:
   cabecera). `grafoDelModelo` **no** cuenta los destacados entre sus aristas (AD-11): cambian con los
   recuentos. Por eso el aviso «NFR-5 en el modelo» sigue: nombra las Citas que hoy solo acercan los
   destacados —una de la página 2+ de un Autor destacado y sin Tema publicado— y que una orden que
-  retira no puede dar por alcanzadas.
+  retira no puede dar por alcanzadas. **Ojo**: como los ocho cambian con los recuentos, un alta,
+  una aprobación o una retirada que saque de ellos al Autor de una de esas Citas puede **romper el
+  build siguiente** sin que ninguna orden la haya nombrado antes (diferido en
+  `deferred-work.md`; si las órdenes deben comparar los destacados, lo decide Héctor). Se cierra
+  dándole a la Cita un Tema publicado o una Colección.
+- Tras el cierre de «Autores» no va nada más de la columna salvo la invitación a sostener
+  (`Sostener`, si las donaciones se encienden): `tests/unit/ingreso-construido.test.ts` lo exige.
+  El cierre lleva su fila en `COLOCACION` de `tests/unit/medicion.test.ts` (`/` → `/autores/`,
+  `autores-de-portada`).
 
 ## Curar una Colección
 

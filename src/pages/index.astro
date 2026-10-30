@@ -238,7 +238,9 @@ const DESCRIPCION = DESCRIPCION_DEL_SITIO;
           {/*
             * Historia 28.4 (UX-DR62) — cada Colección en su fila: el chip, con el aspecto del de Tema,
             * y a `--unidad` debajo su criterio entero, que el chip lleva como descripción para quien
-            * llega a él con lector de pantalla. El criterio no enlaza: el enlace es el chip.
+            * llega a él con lector de pantalla. El criterio no enlaza: el enlace es el chip. El `li` en
+            * una línea, como las filas de «Autores»: ningún blanco del formateo entra en el nombre del
+            * chip ni en el criterio, que son su nombre y su descripción accesibles.
             */}
           <ul class="colecciones" data-zona="colecciones">
             {colecciones.map((coleccion) => (

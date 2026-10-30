@@ -1,7 +1,18 @@
 import { expect, test, type Page } from '@playwright/test';
 import { MARCA } from '../../src/lib/marca.ts';
 import { entradaDeLoDescargado } from '../../src/lib/guiones.ts';
-import { rutaDeCita, rutaDelDirectorioDeAutores, rutaDelDirectorioDeObras } from '../../src/lib/superficies.ts';
+import { join } from 'node:path';
+import {
+  rutaDeAutor,
+  rutaDeCita,
+  rutaDeColeccion,
+  rutaDelDirectorioDeAutores,
+  rutaDelDirectorioDeObras,
+  rutaDeTema,
+} from '../../src/lib/superficies.ts';
+import { autoresDestacados, temasPublicados, type ConjuntoPublicable } from '../../src/lib/publicado.ts';
+import { conjuntoDeLosDatos, leerDatosDelCorpus } from '../../tools/lib/alcance.ts';
+import { rutasDelCorpus } from '../../tools/lib/corpus.ts';
 import { AUTORES_DESTACADOS, OBRAS_DE_LA_PORTADA } from '../../src/lib/umbrales.ts';
 import { apuntarGuiones, fueraDeLaListaAlCargar } from './ayuda/guiones.ts';
 import { censoDeCotejo } from './ayuda/corpus.ts';
@@ -432,6 +443,35 @@ test.describe('Historia 28.3 — seis Obras que cambian con la jornada', () => {
 });
 
 test.describe('Historia 28.4 — todos los Temas, las Colecciones con su criterio y ocho Autores', () => {
+  const RAIZ_DEL_CORPUS = join(new URL('../..', import.meta.url).pathname, 'corpus');
+  let leido: Promise<ConjuntoPublicable> | undefined;
+  const conjunto = () =>
+    (leido ??= (async () => conjuntoDeLosDatos(await leerDatosDelCorpus(rutasDelCorpus(RAIZ_DEL_CORPUS))))());
+
+  // Sobre el sitio construido con el Corpus del árbol, no sobre un fixture: los ocho que enseña son
+  // los que `autoresDestacados` da para ese Corpus, en su orden, y los Temas y las Colecciones, todos
+  // los publicados.
+  test('con el Corpus del árbol: los Temas publicados, las Colecciones publicadas con su criterio y los Autores de autoresDestacados, en su orden', async ({ page }) => {
+    const { autores, citas, temas, colecciones } = await conjunto();
+    const esperados = autoresDestacados(autores, citas);
+    expect(esperados).toHaveLength(AUTORES_DESTACADOS);
+    await page.goto('/');
+    const enlaces = (selector: string) =>
+      page.locator(selector).evaluateAll((ns) => ns.map((n) => ({ href: n.getAttribute('href'), texto: n.textContent?.trim() })));
+    expect(await enlaces('main section[aria-labelledby="autores"] ul.destacados > li > a')).toEqual(
+      esperados.map((a) => ({ href: rutaDeAutor(a.slug), texto: a.nombre })),
+    );
+    expect(await enlaces('main section[aria-labelledby="temas"] a.chip')).toEqual(
+      temasPublicados(temas, citas).map((t) => ({ href: rutaDeTema(t.slug), texto: t.nombre })),
+    );
+    const enLaPortada = await page
+      .locator('main ul.colecciones > li')
+      .evaluateAll((ns) =>
+        ns.map((li) => ({ href: li.querySelector('a.chip')!.getAttribute('href'), criterio: li.querySelector('p.criterio')!.textContent })),
+      );
+    expect(enLaPortada).toEqual(colecciones.map((c) => ({ href: rutaDeColeccion(c.slug), criterio: c.criterio })));
+  });
+
   test(`«Autores» lleva ${AUTORES_DESTACADOS} Filas de bloque y su cierre, y ninguna lista entera de Autores`, async ({ page }) => {
     await page.goto('/');
     const rotulos = (await page.locator('main h2').allTextContents()).map((r) => r.trim());
@@ -522,8 +562,16 @@ test.describe('Historia 28.4 — todos los Temas, las Colecciones con su criteri
         texto: enlace.textContent!.replace(/\u00a0/g, ' ').trim(),
         href: enlace.getAttribute('href'),
         linea: document.querySelector('main .cifras')!.textContent!,
+        // El mismo trato que el cierre de «Obras» (28.3): la misma regla, comparada computada.
+        trato: [enlace, document.querySelector('main p[data-zona="obras-de-portada"] a')].map((a) => {
+          if (a === null) return undefined;
+          const e = getComputedStyle(a);
+          return { familia: e.fontFamily, cuerpo: e.fontSize, peso: e.fontWeight, color: e.color, subrayado: e.textDecorationLine };
+        }),
       };
     });
+    expect(m.trato[1], 'el Corpus del árbol tiene Obras indexables y su cierre').toBeDefined();
+    expect(m.trato[0]).toEqual(m.trato[1]);
     expect(Math.abs(m.cierre - 2 * u), `lista → cierre: ${m.cierre}`).toBeLessThanOrEqual(0.5);
     expect(m.alto).toBeGreaterThanOrEqual(44);
     expect(m.subrayado).toContain('underline');

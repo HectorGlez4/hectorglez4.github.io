@@ -649,3 +649,18 @@ Hallazgos reales que no son de la historia que los sacó a la luz. Append-only.
     nombre no coincide con el que su declaración implica. Mientras siga así, `extraer` y
     `documentar` lo rechazan, y volver a recuperar su URL escribiría un segundo fichero en
     vez de reutilizarlo. Renombrarlo es decisión de Héctor.
+
+- source_spec: `_bmad-output/implementation-artifacts/spec-28-4-todos-los-temas-las-colecciones-con-su-criterio-y-ocho-autores.md`
+  summary: Los ocho Autores destacados de la portada cambian con los recuentos, y ninguna orden mira si un alta, una aprobación o una retirada saca de ellos al Autor que acerca una Cita que ya estaba fuera del modelo, así que el build siguiente puede romper sin aviso previo.
+  evidence: |-
+    Revisión de la 28.4 (edge-case-hunter en la pasada 1; blind-hunter, intent-alignment y
+    ac-auditor en la 2). Antes de la 28.4 la portada enlazaba a todos los Autores, así que una
+    Cita de la página 2+ de cualquier Autor quedaba a tres saltos en `dist/`; ahora solo la de
+    uno de los ocho de `autoresDestacados`. El modelo (`grafoDelModelo`, AD-11) no lleva los
+    destacados y las órdenes que retiran no bloquean por lo que ya estaba fuera, de modo que una
+    orden que reordena los recuentos puede dejar esa Cita a cuatro saltos y la puerta de NFR-5
+    del build siguiente rompe nombrándola, sin que la orden la haya dicho. Hoy es latente: con el
+    Corpus del árbol el build no emite «NFR-5 en el modelo». Cuando lo emita, lo que lo cierra es
+    darle a la Cita un Tema publicado o una Colección. Si las órdenes (`revisar --aprobar`,
+    `tools/alta.ts`, `documentar --retirar`, `tema quitar`, `coleccion quitar`/`despublicar`)
+    deben comparar además los destacados de antes y de después, lo decide Héctor.

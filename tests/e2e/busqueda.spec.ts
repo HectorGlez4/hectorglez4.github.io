@@ -9,7 +9,6 @@ import {
   type TipoDeResultado,
 } from '../../src/lib/tipoDeResultado.ts';
 import { MARCA } from '../../src/lib/marca.ts';
-import { todasLasDirecciones } from './ayuda/pagefind.ts';
 import { ASENTAMIENTO_DE_BUSQUEDA, EVENTOS } from '../../src/lib/medicion.ts';
 import { tramoDe } from '../../src/lib/vocabulario.ts';
 import { recuentoDeCitas, temaEnFrase } from '../../src/lib/recuentos.ts';
@@ -42,6 +41,7 @@ import {
 } from '../../src/lib/superficies.ts';
 import { guionExternoDe } from '../../src/lib/guiones.ts';
 import { citaConLosDosBloques, temaBajoUmbral, textoDe } from './ayuda/corpus.ts';
+import { todasLasDirecciones } from './ayuda/pagefind.ts';
 import {
   autoresDestacados,
   citasPorObra,

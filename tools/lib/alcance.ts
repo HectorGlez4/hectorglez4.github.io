@@ -361,7 +361,8 @@ export function titularDeAlcance(veredicto: VeredictoDeAlcance): string {
  * desde la Historia 28.4 solo pueden acercarlas los Autores destacados de la portada, que el modelo
  * no lleva porque cambian con los recuentos (`grafoDelModelo`, AD-11): una Cita en la página 2+ de
  * un Autor destacado y sin Tema publicado está a tres saltos en `dist/` y a cuatro en el modelo. No
- * rompe —`dist/` cumple NFR-5—, pero sin decirlo serían invisibles: las órdenes que retiran las
+ * rompe por sí mismo, y el build lo escribe antes de juzgar `dist/`, así que su texto vale tanto si
+ * la puerta pasa como si no: sin decirlo serían invisibles, porque las órdenes que retiran las
  * cuentan como «ya fuera» y no las bloquean. `undefined` si no hay ninguna. No depende de la
  * jornada.
  */
@@ -372,9 +373,11 @@ export function avisoDeFueraDelModelo(modelo: ModeloDelCorpus): string | undefin
   return [
     `NFR-5 en el modelo: ${enNumero(fuera.length, 'Cita queda', 'Citas quedan')} a más de ` +
       `${MAX_SALTOS_DESDE_LA_PORTADA} saltos de la portada sin los Autores destacados de la ` +
-      'portada. Hoy esos Autores las alcanzan y el build pasa, pero cambian con los recuentos: ' +
-      'las órdenes que retiran no cuentan con ellos y no bloquean por estas Citas, que ya estaban ' +
-      'fuera. Para que dejen de depender de ellos, cada una necesita un Tema publicado:',
+      'portada. En dist/ pueden acercarlas ellos, pero cambian con los recuentos: si el Autor de ' +
+      'una deja de estar entre los destacados, el build puede romper por ella, y las órdenes que ' +
+      'retiran no bloquean por estas Citas, que ya estaban fuera. Para no depender de los ' +
+      `destacados, cada una necesita un Tema publicado (desde ${MIN_CITAS_POR_TEMA} Citas) o una ` +
+      'Colección publicada:',
     ...fuera.map(lineaDeFuera),
   ].join('\n');
 }
