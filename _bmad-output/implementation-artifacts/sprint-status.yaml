@@ -29,7 +29,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 # - Retrospective appends its action items to action_items; the status view surfaces open ones
 generated: 08-11-2026 09:00
-last_updated: 10-30-2026 19:44
+last_updated: 10-30-2026 21:04
 project: brainlySabiduria
 project_key: NOKEY
 tracking_system: file-system
@@ -454,7 +454,7 @@ development_status:
   28-1-la-portada-abre-con-las-cifras-del-corpus-y-un-campo-para-bu: review  # v8-ralph 2026-10-30: la portada abre con las cifras del Corpus y el campo de búsqueda; diferido para Héctor: desfase AD-11/AD-17 con la UX v8.2 (bmad-architecture)
   28-2-la-cita-de-hoy-lleva-su-obra-y-las-acciones-de-su-página: backlog
   28-3-seis-obras-que-cambian-con-la-jornada: review  # v8-ralph 2026-10-30: seis Obras de la portada que rotan con la jornada; sin diferidos para Héctor
-  28-4-todos-los-temas-las-colecciones-con-su-criterio-y-ocho-autor: backlog
+  28-4-todos-los-temas-las-colecciones-con-su-criterio-y-ocho-autor: review # v8-ralph 2026-10-30: la portada lista todos los Temas, las Colecciones con su criterio y ocho Autores destacados; diferido para Héctor: si las órdenes que retiran deben comparar también los destacados de antes y de después (NFR-5)
   28-5-la-portada-nueva-llega-en-vivo-tras-el-juicio-de-sm-11: backlog  # operativa: acto de Héctor (merge desde el 2026-12-05 o con la fecha que declare Héctor)
   epic-28-retrospective: optional
 
