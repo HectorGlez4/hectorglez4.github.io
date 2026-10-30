@@ -172,3 +172,12 @@ Todas las medidas usan las dos construcciones del día: main en `bbcc43b7d0` y l
   - El grafo pesimista de Lantern cuenta como bloqueante todo guion de prioridad alta, y la estimación de FCP promedia ese grafo con el optimista.
   - Con estrangulamiento real los dos pintan igual.
 - **Contra el umbral:** con la regla de la puerta, `max(100 ms, 5 %)`, los 857 ms de la rama quedan justo en el límite de 757 + 100: no lo pasan, pero tampoco tienen margen.
+
+### 2026-10-30 14:10 — preparación previa al merge, repasada (bucle v8-ralph)
+
+- **(a)** `DESPLIEGUE_DE_LA_BUSQUEDA_CON_FILTROS` sigue declarada sin valor en `src/lib/umbrales.ts`
+  (commit propio `669ed3d656`), y `juiciosPorVentanas` de `tools/lib/lineaBase.ts` la lee en SM-6 y
+  SM-13. `npx vitest run tests/unit/linea-base.test.ts`: 79 de 79. Nada que añadir.
+- **(b)** `git fetch origin` y `git merge origin/main`: «Already up to date». `origin/main` sigue en
+  bbcc43b7d0, antepasado de la rama (45 commits encima): no hay commit de merge que hacer.
+- No se comprobó nada en el sitio en vivo.
