@@ -1125,6 +1125,11 @@ describe('Historia 12.1 — sobre un sitio construido de verdad', () => {
         expect(rotulo?.elemento.atributos.get('id'), nombre).toBe(nombre);
         expect(ids.filter((id) => id === nombre), nombre).toHaveLength(1);
       }
+      // Y ningún `id` de la portada se repite —el del campo (`consulta`) tampoco—: son cortos, y los
+      // bloques que llegan después (la invitación, las Obras, los Autores destacados) pueden traer
+      // otro igual.
+      expect(ids).toContain('consulta');
+      expect(ids.filter((id, i) => ids.indexOf(id) !== i), 'ids repetidos en la portada').toEqual([]);
     });
 
     it('el campo no trae Pagefind a la portada: ni guion ni precarga', async () => {

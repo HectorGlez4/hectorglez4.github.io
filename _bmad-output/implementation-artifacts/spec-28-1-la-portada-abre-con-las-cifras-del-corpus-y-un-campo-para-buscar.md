@@ -151,6 +151,33 @@ Las capas de revisión son externas en el bucle v8-ralph y no traían hallazgos 
 
 Rechazados, con su motivo: `sprint-status.yaml` lo mueve el orquestador del bucle; el registro vacío era de la pasada anterior; la suite tras el último cambio (solo un comentario) la cubrieron las pruebas por fichero de esta pasada; el desfase AD-11/AD-17 ya está diferido; enviar el formulario no es salida interna por el propio criterio; `tokens.css` no tiene regla de `h1`; el recuento de `title:` en otras páginas es a propósito; el `lastmod` lo fija ya `fecha-de-cambio-build.test.ts`; el corte de `data-jornada` y el slug de Cita de las e2e son de prueba y estables; la dependencia de Pagefind con el texto oculto está en los riesgos; las cifras de la matriz son ilustrativas; la concordancia con censo está en el contrato; la eficiencia de `autoresPublicados` es despreciable; una Cita sin Autor y una `MARCA` con coma no pueden darse (el esquema y la constante); «Autores» vacío sin Citas es previo e inalcanzable; «Obras» sin bloque es de la 28.3, que exige que sin Obras no haya rótulo; el censo por k < n lo garantiza la puerta de la 11.2; las tres formas de censo vacío las fija la función pura y dos construcciones; la línea con censo sobre `dist/` está en `cotejo-build.test.ts`; el salto lleva a `main`, cuyo primer hijo es la línea; el 3 × de «La cita de hoy» y su `h2` son de `CitaDelDia.astro`, que rehace la 28.2; la cabecera en dos filas en `/` se sigue de la caja idéntica de la marca; el resto del aspecto del Campo es del componente compartido y se mide en `/buscar/` y el 404.
 
+### 2026-10-30 — Review pass
+- intent_gap: 0
+- bad_spec: 0
+- patch: 17: (high 0, medium 1, low 16)
+- defer: 0
+- reject: 15: (high 0, medium 0, low 15)
+- addressed_findings:
+  - `[medium]` `[patch]` El título de la portada en Pagefind solo se comprobaba en e2e (que el CI no corre): `busqueda-con-filtros.test.ts` busca ahora en el índice generado el nombre del sitio, exige `/` con `meta.title` igual a la marca, filtro `tipo: ['portada']` y contenido igual a la marca, y que la línea sin cifras, «cotejada», «autores», la etiqueta y el ejemplo del campo no den `/`.
+  - `[low]` `[patch]` La (c) de `busqueda.spec.ts` podía pasar sin buscar nada: control positivo (la marca da `/` en el índice real) antes de las ausencias.
+  - `[low]` `[patch]` La (c) leía `.cifras` sin exigir que existiera: `toHaveCount(1)` antes de leerla.
+  - `[low]` `[patch]` La (c) fijaba «cotejadas», que con el censo vacío no sale: la palabra se toma de la línea (`cotejadas?`).
+  - `[low]` `[patch]` `portada.spec.ts` fijaba la forma con censo del Corpus de hoy: decide la forma por el censo leído (`censoDeCotejo`, nuevo en `tests/e2e/ayuda/corpus.ts`), y con censo sigue exigiendo que no diga «cada una».
+  - `[low]` `[patch]` El parche de `alcance-construido.test.ts` podía no casar en silencio: exige que el fuente parcheado difiera del original.
+  - `[low]` `[patch]` El corte de `dos-jornadas.test.ts` por `<section` era frágil: recorre el árbol de elementos y exige una sola línea sin antepasado `data-jornada`, y que la marca exista.
+  - `[low]` `[patch]` Solo se comprobaban únicos los `id` de las secciones: ningún `id` de la portada se repite, `consulta` incluido.
+  - `[low]` `[patch]` La pasada anterior no corrió la suite entera tras su último cambio: esta la corre (`npm test`).
+  - `[low]` `[patch]` El código seguía la UX v8.2 contra AD-11 y AD-17 sin decirlo: los comentarios de `lineaDeCifras` y del título en `Armazon.astro` nombran el desfase y su diferido.
+  - `[low]` `[patch]` El comentario de `lineaDeCifras` no nombraba la puerta del censo: nombra `cotejoDeCitas()` de `astro.config.mjs`, que la prueba de `cotejo.test.ts` admite.
+  - `[low]` `[patch]` La trampa del título de Pagefind de la portada no estaba en `AGENTS.md`: añadida al punto de Pagefind, con el dueño del `span`, la prueba que la vigila y el de la línea.
+  - `[low]` `[patch]` El nombre de una prueba de `tipo-de-resultado.test.ts` decía que el título sale del `h1`: dice el que declara el armazón.
+  - `[low]` `[patch]` El aspecto del campo no se medía en `/`: la portada entra en las pruebas de `accesibilidad.spec.ts` de campo → botón a 2 × y de Inter `body-lg`, botón secundario siena a su ancho.
+  - `[low]` `[patch]` El 3 × de «La cita de hoy» a su contenido no se medía en `/`: lo mide la prueba de distancias de `portada.spec.ts`.
+  - `[low]` `[patch]` La forma de censo vacío con varios Autores no se construía: `busqueda-con-filtros.test.ts` la lee de `dist/` («20 citas de 3 autores, cada una…», con un Autor sin Citas que no cuenta).
+  - `[low]` `[patch]` Las dos filas de la cabecera en `/` se inferían de la caja de la marca: la prueba de la caja exige además los tres enlaces bajo la marca a 360 px y en su fila a 1280 px.
+
+Rechazados, con su motivo: el interlineado 1,6 literal sigue la práctica del proyecto (`tokens.css` no tiene interlineados y una treintena de componentes los escriben así; el valor es el de `body-md` en `DESIGN.md`); la rama sin Citas no se construye porque un Corpus vacío no pasa las puertas del build, y la función la fija en memoria; el registro del spec es histórico por pasadas y `followup_review_recommended` lo calcula el flujo; `sprint-status.yaml` lo mueve el orquestador del bucle; el texto oculto es el nombre del sitio, que ya está visible en la cabecera; el formato de los números es el de `milesEnEspañol`, el único del sitio, y la UX lo escribe así; el slug de Cita de las e2e es el mismo de `cabecera.spec.ts` y es estable; las cifras de la matriz están dentro del contrato y son ilustrativas; una Cita sin Autor no construye (referencia del esquema); «Autores» vacío sin Citas es previo e inalcanzable; `MARCA` es una constante sin coma; el bloque y el rótulo de «Obras» son de la 28.3 y el rótulo de la Cita del Día y la entrada son de la 28.2 (contrato, «Never»); el salto lleva a `main`, cuyo primer hijo es la línea; enviar el formulario no es salida interna y ya lo fija `medicion.test.ts` (23.7, «al enviar un formulario»). Duplicados fundidos: el hueco de verificación del índice (con el del título solo local) y el control positivo del auditor (con el de la (c)). La forma de una sola Cita sigue solo en memoria: construir un Corpus de una Cita no pasa NFR-5.
+
 ## Auto Run Result
 
 Status: done
@@ -212,3 +239,33 @@ Status: done
 - `npx playwright test tests/e2e/accesibilidad.spec.ts -g "320|axe|h1|anillo"` — 168 pasan.
 
 **Riesgos residuales.** Los de la pasada anterior. La prueba de que la línea no devuelve la portada busca la frase sin cifras y «cotejadas»: si el índice no diera ningún resultado para ellas, pasaría sin mirar nada, aunque lo que fija es la ausencia de `/`.
+
+### Pasada de revisión 2 (2026-10-30)
+
+**Cambio de esta pasada.** Diecisiete parches de los hallazgos de las cinco capas externas, sin tocar el contrato ni el comportamiento del sitio: el título de la portada en Pagefind se comprueba ya en el índice generado, en el CI; las pruebas de la línea, del campo y de la cabecera miran `/` y dejan de depender de una foto del Corpus o de un corte del texto; los comentarios de `lineaDeCifras` y `Armazon.astro` nombran la puerta del censo y el desfase con AD-11/AD-17; `AGENTS.md` recoge la trampa del título oculto.
+
+**Ficheros.**
+- `src/lib/publicado.ts` — comentario de `lineaDeCifras`: nombra `cotejoDeCitas()` y el desfase con AD-11.
+- `src/components/Armazon.astro` — comentario del título oculto: la prueba que lo vigila y el desfase con AD-17.
+- `AGENTS.md` — la portada responde solo por su título: quién pone el `span`, qué lo rompe, qué prueba lo vigila y quién redacta la línea.
+- `tests/unit/busqueda-con-filtros.test.ts` — en el índice generado, la marca da `/` con su título, su tipo y su contenido, y la línea, «cotejada», «autores», la etiqueta y el ejemplo del campo no; en `dist/`, la línea con censo vacío y varios Autores.
+- `tests/unit/dos-jornadas.test.ts` — la línea fuera del subárbol `data-jornada`, por el árbol de elementos.
+- `tests/unit/alcance-construido.test.ts` — el parche del fuente tiene que casar.
+- `tests/unit/publicable-y-alcanzable.test.ts` — ningún `id` repetido en la portada, `consulta` incluido.
+- `tests/unit/tipo-de-resultado.test.ts` — nombre de la prueba al título declarado.
+- `tests/e2e/ayuda/corpus.ts` — `censoDeCotejo()`.
+- `tests/e2e/portada.spec.ts` — la forma de la línea según el censo leído; el 3 × de «La cita de hoy»; los enlaces de la cabecera bajo la marca a 360 px y en su fila a 1280 px.
+- `tests/e2e/busqueda.spec.ts` — la (c) con control positivo, la línea exigida y la palabra de cotejo tomada de ella.
+- `tests/e2e/accesibilidad.spec.ts` — `/` en las pruebas del campo de la 27.8 (campo → botón, Inter `body-lg`, botón a su ancho).
+
+**Hallazgos.** Parches: 17 (medium 1, low 16). Diferidos: 0 (se conserva el de AD-11/AD-17). Rechazados: 15, con su motivo en el registro de triaje.
+
+**Revisión de seguimiento.** `followup_review_recommended: true` — parches de esta pasada: high 0, medium 1, low 16; puntuación 3 × 1 + 16 = 19 (≥ 5). Todos son pruebas, comentarios y documentación: el sitio construido no cambia.
+
+**Verificación.**
+- `npx vitest run tests/unit/busqueda-con-filtros.test.ts` — 67 pasan, las dos nuevas de la 28.1 incluidas.
+- `npx astro check` — 0 errores, 0 avisos.
+- `npm test` completo, tras el último cambio de código — 152 ficheros, 7046 pruebas, todas verdes (896 s).
+- `npx playwright test tests/e2e/portada.spec.ts tests/e2e/cabecera.spec.ts tests/e2e/busqueda.spec.ts tests/e2e/accesibilidad.spec.ts -g "Historia 4.1|Historia 28.1|Historia 26.2|Historia 26.5|Historia 27.8|cabecera|320|axe|h1|anillo"` (móvil y escritorio, con el `npm run build` del `webServer` —puerta de NFR-5 con el Corpus real— y el receptor local) — 254 pasan; puertos libres al terminar.
+
+**Riesgos residuales.** La forma de una sola Cita y la rama sin Citas siguen fijadas solo en memoria (un Corpus así no pasa las puertas del build). La etiqueta y la raya del campo en `/` las sigue midiendo el componente compartido en las otras páginas. El riesgo del texto oculto con Pagefind queda vigilado en el CI por el índice generado.

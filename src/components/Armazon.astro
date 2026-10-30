@@ -266,7 +266,11 @@ const busqueda = rutaDeLaBusqueda();
         * Historia 28.1 (AD-17, AD-19) — la portada responde en la búsqueda propia solo por su
         * título, y todo lo que pinta en `main` va bajo `data-pagefind-ignore="all"`. Un cuerpo sin
         * ninguna palabra indexable lo descarta Pagefind entero, así que el nombre va aquí como texto
-        * y como `title:`; `hidden` lo saca de la vista y del árbol de accesibilidad.
+        * y como `title:`; `hidden` lo saca de la vista y del árbol de accesibilidad. Que Pagefind
+        * siga indexando ese texto oculto lo mira, sobre el índice generado y en el CI,
+        * `tests/unit/busqueda-con-filtros.test.ts`. AD-17 dice todavía que la portada va «rotulada
+        * con el nombre del sitio»; manda la UX v8.2 (rótulo «Portada», título el nombre), y el
+        * desfase está anotado como pendiente de Héctor (bmad-architecture) en el spec de la 28.1.
         */}
       {esLaPortada && enLaBusquedaPropia && (
         <span hidden data-pagefind-meta={`title:${MARCA}`}>{MARCA}</span>

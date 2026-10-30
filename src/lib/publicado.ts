@@ -277,11 +277,15 @@ export function esCitaDocumentada(cita: Cita): boolean {
  * regla que las páginas de Autor) y k las Citas documentadas (`esCitaDocumentada`).
  *
  * **Si queda censo se decide sin leer el fichero del censo de pendientes.** La puerta de la
- * Historia 11.2, una integración de `integraciones/` (este módulo no la nombra: se lo prohíbe una
- * prueba), rompe el build si una Cita publicada sin `fuente` no está censada, si una censada declara
- * `fuente` o si un slug censado no es una Cita publicada: en todo build que llega aquí, «queda censo» es
+ * Historia 11.2 —`cotejoDeCitas()`, la integración enganchada en `astro.config.mjs`— rompe el
+ * build si una Cita publicada sin `fuente` no está censada, si una censada declara `fuente` o si
+ * un slug censado no es una Cita publicada: en todo build que llega aquí, «queda censo» es
  * exactamente «k < n». Mientras quede, la línea da k y **nunca** dice «cada una»; con el censo
  * vacío, todas están cotejadas y lo dice así.
+ *
+ * La redacción es la de la UX v8.2 (UX-DR56), que manda: «cada una cotejada con el texto de su
+ * fuente», y con censo la forma con «;». AD-11 de la espina dice todavía «cada una con su fuente»;
+ * el desfase está anotado como pendiente de Héctor (bmad-architecture) en el spec de la 28.1.
  *
  * Concuerda en número: «1 cita», «de 1 autor», «1 cotejada» (solo se ve en Corpus de prueba). Los
  * números, con punto de millar (`milesEnEspañol`). Sin ninguna Cita publicada no hay línea.

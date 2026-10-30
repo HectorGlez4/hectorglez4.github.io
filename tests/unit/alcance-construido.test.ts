@@ -165,6 +165,9 @@ describe('Historia 26.8 — la portada sin su lista de Autores', () => {
       /\n {4}<section aria-labelledby="autores">\n {6}<Rotulo id="autores">Autores<\/Rotulo>[\s\S]*?<\/section>\n/u,
       '\n',
     );
+    // Si el marcado de la portada cambia y la expresión deja de casar, el parche no quitaría nada y
+    // el fallo de abajo no diría por qué: se dice aquí.
+    expect(sinAutores, 'la expresión ya no encuentra la sección «Autores» de la portada').not.toBe(portada);
     const resultado = await construirConCorpus(corpusDeSeneca(51), {
       jornada: '2026-10-28',
       ficheros: { 'src/pages/index.astro': sinAutores },

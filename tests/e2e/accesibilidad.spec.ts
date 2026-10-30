@@ -7,6 +7,7 @@ import {
   ETIQUETAS_DEL_BARRIDO,
   axeLaCorre,
   etiquetaDeAxe,
+  rutaDeLaPortada,
   superficiesDelBarrido,
   type CriterioDeWcag,
 } from '../../src/lib/superficies.ts';
@@ -2318,7 +2319,7 @@ test.describe('Historia 27.8 — «Buscar en…» y el botón del 404', () => {
       casi(encima.hueco, sobre, `${ruta}, ${encima.antes} → formulario`);
       casi(await huecoBajoElFormulario(page), bajo, `${ruta}, formulario → listado`);
     }
-    for (const ruta of [obra, autor, tema, RUTA_404]) {
+    for (const ruta of [obra, autor, tema, RUTA_404, rutaDeLaPortada()]) {
       await page.goto(ruta);
       const hueco = await page.evaluate(() => {
         const formulario = document.querySelector('form[role="search"]')!;
@@ -2351,7 +2352,7 @@ test.describe('Historia 27.8 — «Buscar en…» y el botón del 404', () => {
 
   test('lo tecleado va en Inter al cuerpo grande, y el botón es el secundario siena con filete y 44 px', async ({ page }) => {
     const { obra, autor, tema } = conFormulario();
-    for (const ruta of [obra, autor, tema, RUTA_404]) {
+    for (const ruta of [obra, autor, tema, RUTA_404, rutaDeLaPortada()]) {
       await page.goto(ruta);
       const estilo = await page.evaluate(() => {
         const formulario = document.querySelector('form[role="search"]')!;

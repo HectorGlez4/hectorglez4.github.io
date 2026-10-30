@@ -12,6 +12,7 @@ import {
 import { MIN_CITAS_POR_TEMA } from '../../src/lib/umbrales.ts';
 import { grafoDeDist } from '../../tools/lib/alcance.ts';
 import { rutaDeFicheroHtml } from '../../tools/lib/indexables.ts';
+import { recorrerElementos } from '../../tools/lib/html.ts';
 
 /**
  * Historia 26.8, AD-12 — dos construcciones del mismo commit en dos jornadas que cambian la Cita
@@ -151,11 +152,18 @@ describe('Historia 26.8 — dos jornadas, un mismo sitio', () => {
       lineas.push(linea!);
       // Sigue ahí cuando se quita lo que rota: no está dentro de él.
       expect(sinLoQueRota(html)).toContain(`>${linea}</p>`);
-      const marca = html.indexOf('data-jornada');
-      expect(marca).toBeGreaterThan(-1);
-      const desde = html.lastIndexOf('<section', marca);
-      const hasta = html.indexOf('</section>', marca);
-      expect(html.slice(desde, hasta)).not.toContain('class="cifras');
+      // Y ningún antepasado suyo lleva la marca, leído con el árbol de elementos y no por un corte
+      // del texto: la marca puede cambiar de elemento (la 28.2 rehace ese bloque).
+      let conMarca = 0;
+      const lineasEnElArbol: boolean[] = [];
+      recorrerElementos(html, (elemento, antepasados) => {
+        if (elemento.atributos.has('data-jornada')) conMarca++;
+        if (elemento.etiqueta === 'p' && (elemento.atributos.get('class') ?? '').split(/\s+/u).includes('cifras')) {
+          lineasEnElArbol.push(antepasados.some((a) => a.atributos.has('data-jornada')));
+        }
+      });
+      expect(conMarca, 'la portada sin subárbol data-jornada: la prueba no miraría nada').toBeGreaterThan(0);
+      expect(lineasEnElArbol).toEqual([false]);
     }
     expect(lineas[1]).toBe(lineas[0]);
     expect(lineas[0]).toBe('51 citas de 1 autor, cada una cotejada con el texto de su fuente.');

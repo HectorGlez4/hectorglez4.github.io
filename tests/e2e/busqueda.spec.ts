@@ -642,9 +642,16 @@ test.describe('Historia 26.2 — el tipo no casa como texto y la portada tiene e
 
     // Historia 28.1 — la línea de cifras y la etiqueta del campo no son contenido: buscarlas no da
     // la portada, que responde solo por su título.
+    await expect(page.locator('main .cifras'), 'la portada sin línea de cifras').toHaveCount(1);
     const linea = (await page.locator('main .cifras').textContent())!.trim();
-    expect(linea, 'la portada sin línea de cifras').not.toBe('');
-    for (const termino of [linea.replace(/[\d.;,]/g, ' ').replace(/\s+/g, ' ').trim(), 'cotejadas', ETIQUETA_DE_LA_BUSQUEDA]) {
+    expect(linea, 'la portada con la línea de cifras vacía').not.toBe('');
+    // El control positivo: el índice responde y la portada está en él. Sin esto, un índice roto
+    // o vacío daría la ausencia de `/` de abajo sin haber buscado nada.
+    expect(await todasLasDirecciones(page, MARCA), MARCA).toContain('/');
+    // La palabra de la línea sale de la línea («cotejadas» con censo, «cotejada» sin él), no se fija.
+    const cotejo = /cotejadas?/.exec(linea)?.[0];
+    expect(cotejo, linea).toBeDefined();
+    for (const termino of [linea.replace(/[\d.;,]/g, ' ').replace(/\s+/g, ' ').trim(), cotejo!, ETIQUETA_DE_LA_BUSQUEDA]) {
       expect(await todasLasDirecciones(page, termino), termino).not.toContain('/');
     }
   });

@@ -3,6 +3,7 @@ import { MARCA } from '../../src/lib/marca.ts';
 import { entradaDeLoDescargado } from '../../src/lib/guiones.ts';
 import { rutaDeCita } from '../../src/lib/superficies.ts';
 import { apuntarGuiones, fueraDeLaListaAlCargar } from './ayuda/guiones.ts';
+import { censoDeCotejo } from './ayuda/corpus.ts';
 
 /** Historia 4.1 — portada con Cita del Día. */
 
@@ -122,13 +123,20 @@ const unidad = (page: Page) =>
   });
 
 test.describe('Historia 28.1 — la portada abre con las cifras del Corpus y un campo para buscar', () => {
-  test('`main` abre con la línea de cifras del Corpus real, que tiene censo: nunca «cada una»', async ({ page }) => {
+  test('`main` abre con la línea de cifras del Corpus real: con censo, nunca «cada una»', async ({ page }) => {
     await page.goto('/');
     const primero = page.locator('main > .pagina > :first-child');
     await expect(primero).toHaveClass(/(^|\s)cifras(\s|$)/);
     const linea = (await primero.innerText()).trim();
-    expect(linea).toMatch(/^\d{1,3}(\.\d{3})* citas de \d{1,3}(\.\d{3})* autores; \d{1,3}(\.\d{3})* cotejadas con el texto de su fuente\.$/);
-    expect(linea).not.toContain('cada una');
+    const numero = String.raw`\d{1,3}(?:\.\d{3})*`;
+    // La forma la decide el censo de hoy, no una foto del Corpus: el día que la 11.4 lo vacíe, la
+    // línea correcta pasa a la de «cada una» y la prueba la sigue juzgando.
+    if (censoDeCotejo().length > 0) {
+      expect(linea).toMatch(new RegExp(`^${numero} citas de ${numero} autores; ${numero} cotejadas con el texto de su fuente\\.$`));
+      expect(linea).not.toContain('cada una');
+    } else {
+      expect(linea).toMatch(new RegExp(`^${numero} citas de ${numero} autores, cada una cotejada con el texto de su fuente\\.$`));
+    }
   });
 
   test('tras «Saltar al contenido.», el siguiente Tab va al campo de búsqueda', async ({ page }) => {
@@ -222,6 +230,7 @@ test.describe('Historia 28.1 — la portada abre con las cifras del Corpus y un 
       const cifras = document.querySelector('main .cifras')!;
       const formulario = document.querySelector('main form[role="search"]')!;
       const delDia = document.querySelector('main .del-dia')!;
+      const rotuloDelDia = delDia.querySelector('h2')!;
       const secciones = [...document.querySelectorAll('main .pagina > section:not(.del-dia)')].map((s) => ({
         rotulo: s.querySelector('h2')!.textContent!.trim(),
         arriba: caja(s).top,
@@ -232,11 +241,16 @@ test.describe('Historia 28.1 — la portada abre con las cifras del Corpus y un 
       return {
         campo: caja(formulario).top - caja(cifras).bottom,
         delDia: caja(delDia).top - caja(formulario).bottom,
+        // «La cita de hoy» a 3 × de su contenido (el `h2` y su margen son de `CitaDelDia.astro`).
+        rotuloDelDia: rotuloDelDia.textContent!.trim(),
+        bajoElRotuloDelDia: caja(rotuloDelDia.nextElementSibling!).top - caja(rotuloDelDia).bottom,
         secciones,
       };
     });
     expect(Math.abs(m.campo - 3 * u), `campo: ${m.campo}`).toBeLessThanOrEqual(0.5);
     expect(Math.abs(m.delDia - 6 * u), `Cita del Día: ${m.delDia}`).toBeLessThanOrEqual(0.5);
+    expect(m.rotuloDelDia).toBe('La cita de hoy');
+    expect(Math.abs(m.bajoElRotuloDelDia - 3 * u), `«La cita de hoy» → la Cita: ${m.bajoElRotuloDelDia}`).toBeLessThanOrEqual(0.5);
     expect(m.secciones.map((s) => s.rotulo)).toEqual(expect.arrayContaining(['Temas', 'Autores']));
     for (const s of m.secciones) {
       expect(Math.abs(s.arriba - s.anterior - 6 * u), `${s.rotulo}: ${s.arriba - s.anterior}`).toBeLessThanOrEqual(0.5);
@@ -273,10 +287,24 @@ test.describe('Historia 28.1 — la portada abre con las cifras del Corpus y un 
           return { x: r.x, y: r.y, ancho: r.width, alto: r.height };
         });
       };
-      const enLaPortada = await caja('/');
       const enLaCita = await caja(CITA);
+      const enLaPortada = await caja('/');
       for (const clave of ['x', 'y', 'ancho', 'alto'] as const) {
         expect(Math.abs(enLaPortada[clave] - enLaCita[clave]), `${clave}: ${enLaPortada[clave]} frente a ${enLaCita[clave]}`).toBeLessThanOrEqual(0.5);
+      }
+      // Y la cabecera de la portada va, como la de toda página, en dos filas bajo 600 px y en una
+      // desde ahí: la caja igual de la marca no lo dice por sí sola.
+      const enlaces = await page.evaluate(() =>
+        [...document.querySelectorAll('header.cabecera nav[aria-label="Principal"] a')].map((a) => {
+          const r = a.getBoundingClientRect();
+          return { arriba: r.top, abajo: r.bottom };
+        }),
+      );
+      expect(enlaces).toHaveLength(3);
+      const bajoLaMarca = enLaPortada.y + enLaPortada.alto;
+      for (const enlace of enlaces) {
+        if (ancho < 600) expect(enlace.arriba, 'un enlace en la fila de la marca').toBeGreaterThanOrEqual(bajoLaMarca);
+        else expect(enlace.arriba, 'un enlace bajo la fila de la marca').toBeLessThan(bajoLaMarca);
       }
     });
   }
