@@ -29,7 +29,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 # - Retrospective appends its action items to action_items; the status view surfaces open ones
 generated: 08-11-2026 09:00
-last_updated: 10-30-2026 05:30
+last_updated: 10-30-2026 18:10
 project: brainlySabiduria
 project_key: NOKEY
 tracking_system: file-system
@@ -385,13 +385,13 @@ development_status:
 
   # Épica 23 — medir la lectura. Va primera: sin ella ninguna otra se juzga.
   epic-23: in-progress
-  23-1-la-medición-sale-a-un-fichero-y-la-página-de-cita-no-pierde: review  # el presupuesto de AD-6 (medición a fichero) es la puerta de la 25 y la 28; v8-ralph 2026-10-24: con punto final, la Página de Cita lleva 5630 B en línea con Imagen (1026 libres de 6656) y 1954 sin Imagen (4702 libres); topes de la lista cerrada: medición 1320 B (920 medidos con el punto final de producción), Imagen 7550 B (7153), Pagefind 87200 B (86810: cliente 45555 + worker 41255, Pagefind 1.5.2); v8-ralph 2026-10-24 17:33 UTC: entró la medición a fichero del presupuesto de AD-6 con sus topes y la prueba de la Página de Cita; sin diferidos para Héctor
+  23-1-la-medición-sale-a-un-fichero-y-la-página-de-cita-no-pierde: review  # el presupuesto de AD-6 (medición a fichero) es la puerta de la 25 y la 28; v8-ralph 2026-10-24: con punto final, la Página de Cita lleva 5630 B en línea con Imagen (1026 libres de 6656) y 1954 sin Imagen (4702 libres); topes de la lista cerrada: medición 1320 B (920 medidos con el punto final de producción), Imagen 7550 B (7153), Pagefind 87200 B (86810: cliente 45555 + worker 41255, Pagefind 1.5.2); v8-ralph 2026-10-24 17:33 UTC: entró la medición a fichero del presupuesto de AD-6 con sus topes y la prueba de la Página de Cita; diferido para Héctor: desfase AD-11/AD-17 con la UX v8.2 (bmad-architecture)
   23-2-el-receptor-sabe-guardar-lo-que-la-v8-va-a-medir-antes-de-qu: review  # desde aquí la prueba de huella queda en rojo en la rama hasta la 23.3 (aceptado) · v8-ralph 2026-10-24 22:53: el receptor guarda Marca y lecturas v8 con su migración, y desplegar mira la cuota; diferido: barrer la suite e2e entera con el webServer nuevo; desplegar y comprobar remotos quedan para la 23.3
   23-3-la-migración-y-el-receptor-llegan-antes-que-el-sitio: review  # operativa: desplegar corrido por el orquestador del bucle v8-ralph el 2026-10-24 23:13 UTC con autorización de Héctor del 2026-10-24; huella 6aece9a77f
   23-4-el-sitio-se-audita-contra-wcag-2-2-aa: review  # v8-ralph 2026-10-24: barrido axe contra WCAG 2.2 AA desde un solo sitio, con guardia y dos revisiones; diferidos en el frontmatter (Modelos a 360 px, Obra contada dos veces, incomplete de axe y estados interactivos de la 2.8)
-  23-5-una-carga-que-se-lee-deja-una-lectura: review # v8-ralph 2026-10-25 01:58 UTC: una carga que se lee deja una lectura, con revisión de código aplicada; sin diferidos para Héctor
+  23-5-una-carga-que-se-lee-deja-una-lectura: review # v8-ralph 2026-10-25 01:58 UTC: una carga que se lee deja una lectura, con revisión de código aplicada; diferido para Héctor: desfase AD-11/AD-17 con la UX v8.2 (bmad-architecture)
   23-6-las-marcas-de-llegada-cuentan-una-vez-y-salen-de-la-direcció: review # v8-ralph 2026-10-25 04:34 UTC: entran las marcas ?de=/?via= que cuentan una vez y salen de la dirección, compartido en canal; diferidos para Héctor: criterio de epics.md sobre ?via= repetido (bmad-create-epics-and-stories)
-  23-7-cada-salida-interna-dice-desde-qué-zona: review  # v8-ralph 2026-10-25: cada salida interna marca la zona de origen en la baliza (continuación), con 404 y páginas 2+ apartadas; sin diferidos para Héctor
+  23-7-cada-salida-interna-dice-desde-qué-zona: review  # v8-ralph 2026-10-25: cada salida interna marca la zona de origen en la baliza (continuación), con 404 y páginas 2+ apartadas; diferido para Héctor: desfase AD-11/AD-17 con la UX v8.2 (bmad-architecture)
   23-8-una-búsqueda-cuenta-una-vez-cuando-se-asienta: review # v8-ralph 2026-10-25: la búsqueda se cuenta una vez al asentarse (Enter, clic o botón central) y el índice que falla se reintenta; diferido para Héctor: marcar en epics.md la 3.2 como sustituida por la 23.8 (bmad-create-epics-and-stories)
   23-9-toda-obra-cuenta-sus-vistas-se-indexe-o-no: review  # v8-ralph 2026-10-25: toda Obra (indexable o no) emite vista-de-obra con su marca y la puerta lo exige; diferido para Héctor: marcar en epics.md el criterio de la 22.4 como sustituido por la 23.9 (bmad-create-epics-and-stories)
   23-10-la-línea-base-se-lee-desde-tools-con-la-cuota-de-d1-a-la-vis: review # v8-ralph 2026-10-25: npm run medicion -- leer da la línea base por superficie y la cuota de D1 (escrituras y tamaño) desde tools/; diferidos para Héctor: cuota de lectura (bmad-architecture), letra del criterio de la cuota en epics.md (bmad-create-epics-and-stories), y lo pendiente de bmad-prd
@@ -408,19 +408,19 @@ development_status:
   24-5-de-una-cita-a-la-siguiente-del-libro: review  # v8-ralph 2026-10-27: la Tarjeta de Obra lleva a la siguiente Cita del libro, o del primer Tema publicado si la Obra tiene una sola; sin diferidos
   24-6-al-pie-más-de-la-misma-obra-y-más-del-autor: review  # v8-ralph 2026-10-27: al pie de la Página de Cita, «De la misma obra» (3), «Más de {Autor}» (4, sin su Obra) y Temas, con cierres «Las {n} citas de… ›»; PARA HÉCTOR: la proyección de peso (≈7.426/9.026/9.598 Citas hasta aviso/tope/1 GB, frente a ~7.790/9.440/10.030 de la 24.2), NFR-7 (LCP 1.953→2.252 ms) y el alto a 360 (1.805→3.078 px) están en el Auto Run Result de spec-24-6, para revisar los valores de la 24.2; el docblock de Chips se corrigió en la revisión
   24-7-la-obra-salta-a-dónde-leerla: review  # v8-ralph 2026-10-25: la página 1 de una Obra salta a «Dónde leer esta obra», medido en navegador; diferido para Héctor: verificar el salto en WebKit
-  24-8-una-cita-nueva-no-refecha-las-demás-páginas-de-cita: review  # v8-ralph 2026-10-28 00:29 UTC: la relación de AD-27 va por campos y una Cita nueva no refecha las demás páginas de Cita; sin diferidos para Héctor
+  24-8-una-cita-nueva-no-refecha-las-demás-páginas-de-cita: review  # v8-ralph 2026-10-28 00:29 UTC: la relación de AD-27 va por campos y una Cita nueva no refecha las demás páginas de Cita; diferido para Héctor: desfase AD-11/AD-17 con la UX v8.2 (bmad-architecture)
   epic-24-retrospective: optional
 
   epic-26: in-progress
-  26-1-todo-autor-publicado-tiene-su-clave-de-orden: review  # tras la 24.8: sin la relación por campos, el lote de claves refecharía todo el sitio · v8-ralph 2026-10-28: el build rompe ante un autor publicado sin clave de orden; órdenes y lote de claves la escriben; sin diferidos para Héctor
-  26-2-el-tipo-de-un-resultado-no-casa-como-texto-y-la-portada-tien: review  # v8-ralph 2026-10-28: el tipo de un resultado viaja como filtro de pagefind y la portada responde solo por su título; sin diferidos para Héctor
+  26-1-todo-autor-publicado-tiene-su-clave-de-orden: review  # tras la 24.8: sin la relación por campos, el lote de claves refecharía todo el sitio · v8-ralph 2026-10-28: el build rompe ante un autor publicado sin clave de orden; órdenes y lote de claves la escriben; diferido para Héctor: desfase AD-11/AD-17 con la UX v8.2 (bmad-architecture)
+  26-2-el-tipo-de-un-resultado-no-casa-como-texto-y-la-portada-tien: review  # v8-ralph 2026-10-28: el tipo de un resultado viaja como filtro de pagefind y la portada responde solo por su título; diferido para Héctor: desfase AD-11/AD-17 con la UX v8.2 (bmad-architecture)
   26-3-todos-los-autores-de-la-a-a-la-z: review  # v8-ralph 2026-10-28: directorio /autores/ de la a a la z con letras de salto, Tarjeta y Pagefind; diferido para Héctor: tokens de peso e interlineado en tokens.css y DESIGN.md (bmad-ux)
-  26-4-todas-las-obras-bajo-su-autor: review # v8-ralph 2026-10-28: /obras/ recorre todas las obras bajo su autor, fechada solo por lo que pinta; sin diferidos para Héctor
+  26-4-todas-las-obras-bajo-su-autor: review # v8-ralph 2026-10-28: /obras/ recorre todas las obras bajo su autor, fechada solo por lo que pinta; diferido para Héctor: desfase AD-11/AD-17 con la UX v8.2 (bmad-architecture)
   26-5-la-cabecera-lleva-a-autores-obras-y-buscar: review  # v8-ralph 2026-10-28: la cabecera lleva a autores, obras y buscar, con navegación partida desde 600 px; diferido a la 26.9 el desplazamiento horizontal de la Página de Cita a 320 px con el texto al 200 %
   26-6-el-directorio-filtra-al-teclear-sin-pensar-en-tildes: review # v8-ralph 2026-10-28 12:12 UTC: filtro del directorio al teclear, insensible a tildes, con recuento anunciado; diferido: anclaje en Safari
-  26-7-los-directorios-se-miden-como-familia-propia: review # v8-ralph 2026-10-28: los directorios se miden como familia propia en indexación, tráfico, demanda y rastreo, con suelo propio y reatribución dicha en los informes; sin diferidos para Héctor
+  26-7-los-directorios-se-miden-como-familia-propia: review # v8-ralph 2026-10-28: los directorios se miden como familia propia en indexación, tráfico, demanda y rastreo, con suelo propio y reatribución dicha en los informes; diferido para Héctor: desfase AD-11/AD-17 con la UX v8.2 (bmad-architecture)
   26-8-ninguna-cita-queda-a-más-de-tres-saltos-y-el-build-lo-compru: review  # v8-ralph 2026-10-28: entra el modelo de alcance en el build (aviso de Citas a más de tres saltos) y las órdenes que retiran y publican lo comprueban; diferidos para Héctor: órdenes que añaden o reordenan listados sin comprobar el tramo, y tema --corpus tomado como slug
-  26-9-ninguna-página-obliga-a-desplazarse-en-horizontal-a-320-px: review  # v8-ralph 2026-10-28 17:57 UTC: ninguna superficie pide desplazamiento horizontal a 320 px (texto al 200 % y espaciado 1.4.12), nombres largos se parten y el barrido e2e de 320 px cubre /buscar/; sin diferidos para Héctor
+  26-9-ninguna-página-obliga-a-desplazarse-en-horizontal-a-320-px: review  # v8-ralph 2026-10-28 17:57 UTC: ninguna superficie pide desplazamiento horizontal a 320 px (texto al 200 % y espaciado 1.4.12), nombres largos se parten y el barrido e2e de 320 px cubre /buscar/; diferido para Héctor: desfase AD-11/AD-17 con la UX v8.2 (bmad-architecture)
   26-10-una-persona-revisa-las-claves-de-orden-operativa-no-bloquea: backlog  # operativa: acto de Héctor (revisar las claves del lote inicial; se cierra con él, y las de los Autores nuevos pasan a la sesión de sembrado)
   26-11-la-obra-y-los-directorios-llegan-juntos-al-sitio-en-vivo-y-s: review  # operativa: fusionada y desplegada por el bucle v8-ralph con autorización de Héctor del 2026-10-24; llegada 2026-10-29
   epic-26-retrospective: optional
@@ -443,15 +443,15 @@ development_status:
   27-3-la-búsqueda-se-acota-también-por-una-obra-del-autor-elegido: review  # v8-ralph 2026-10-29: selector de Obra del Autor elegido en /buscar/ (filtro obra de Pagefind, mapa de Obras del build); diferido: la excepción de red de Busqueda.astro en AD-22, pendiente de Héctor (bmad-architecture)
   27-4-la-búsqueda-vive-en-la-dirección-y-atrás-la-devuelve: review  # v8-ralph 2026-10-29: la consulta y los filtros viven en la dirección, atrás repinta y la llegada con filtros muertos avisa; diferido (a la 27.6): la sugerencia doble a cero resultados con aviso
   27-5-los-resultados-llegan-de-30-en-30: review # v8-ralph 2026-10-29: /buscar/ pinta de 30 en 30 con «mostrar 30 más», reintento real de la tanda fallida y anuncio por región; sin diferidos
-  27-6-sin-resultados-los-ocho-autores-con-más-citas: review  # v8-ralph 2026-10-29 18:15 UTC: entró la lista de los ocho Autores con más Citas en la búsqueda sin resultados; sin diferidos para Héctor
+  27-6-sin-resultados-los-ocho-autores-con-más-citas: review  # v8-ralph 2026-10-29 18:15 UTC: entró la lista de los ocho Autores con más Citas en la búsqueda sin resultados; diferido para Héctor: desfase AD-11/AD-17 con la UX v8.2 (bmad-architecture)
   27-7-sin-javascript-la-búsqueda-lleva-a-los-directorios: review  # v8-ralph 2026-10-29 19:22 UTC: sin guion o sin índice, /buscar/ lleva a los Directorios (exención directorios-del-aviso) y el reintento espera al índice; diferido para Héctor: alinear EXPERIENCE.md § Zonas (bmad-ux)
-  27-8-buscar-en-esta-obra-en-un-autor-o-en-un-tema: review  # v8-ralph 2026-10-30: «Buscar en esta obra», en un Autor o en un Tema desde su página 1, con filtro completo de Pagefind bajo el listado; sin diferidos para Héctor
+  27-8-buscar-en-esta-obra-en-un-autor-o-en-un-tema: review  # v8-ralph 2026-10-30: «Buscar en esta obra», en un Autor o en un Tema desde su página 1, con filtro completo de Pagefind bajo el listado; diferido para Héctor: desfase AD-11/AD-17 con la UX v8.2 (bmad-architecture)
   27-9-la-búsqueda-con-filtros-llega-al-sitio-en-vivo-operativa-v8: review  # operativa: fusionada y desplegada por el bucle v8-ralph con autorización de Héctor del 2026-10-24; llegada 2026-10-30
   epic-27-retrospective: optional
 
   # Épica 28 — la portada de retorno. Al final; conviene la 21.2 antes (con 16 aptas la Cita del Día se repite cada 16 días).
-  epic-28: backlog
-  28-1-la-portada-abre-con-las-cifras-del-corpus-y-un-campo-para-bu: backlog
+  epic-28: in-progress
+  28-1-la-portada-abre-con-las-cifras-del-corpus-y-un-campo-para-bu: review  # v8-ralph 2026-10-30: la portada abre con las cifras del Corpus y el campo de búsqueda; diferido para Héctor: desfase AD-11/AD-17 con la UX v8.2 (bmad-architecture)
   28-2-la-cita-de-hoy-lleva-su-obra-y-las-acciones-de-su-página: backlog
   28-3-seis-obras-que-cambian-con-la-jornada: backlog
   28-4-todos-los-temas-las-colecciones-con-su-criterio-y-ocho-autor: backlog
