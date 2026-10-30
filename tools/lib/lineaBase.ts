@@ -39,6 +39,7 @@ import {
   CORTES_DE_SERIE,
   CUOTA_DE_BYTES_POR_BASE_EN_D1,
   CUOTA_DE_FILAS_ESCRITAS_POR_DIA_EN_D1,
+  DESPLIEGUE_DE_LA_BUSQUEDA_CON_FILTROS,
   DESPLIEGUE_DE_LA_PORTADA_DE_RETORNO,
   DESPLIEGUE_DE_OBRA_Y_DIRECTORIOS,
   MIN_LECTURAS_DE_LINEA_BASE,
@@ -426,15 +427,15 @@ export const juiciosPorVentanas = (superficies: readonly Superficie[] = SUPERFIC
   {
     nombre: 'SM-6',
     unidad: UNIDAD_DE_LAS_BUSQUEDAS,
-    llegada: undefined,
-    deDondeLlega: 'sin constante todavía: la da la 27.9',
+    llegada: DESPLIEGUE_DE_LA_BUSQUEDA_CON_FILTROS,
+    deDondeLlega: 'DESPLIEGUE_DE_LA_BUSQUEDA_CON_FILTROS',
     tasas: ['sm6'],
   },
   {
     nombre: 'SM-13',
     unidad: UNIDAD_DE_LAS_BUSQUEDAS,
-    llegada: undefined,
-    deDondeLlega: 'sin constante todavía: la da la 27.9',
+    llegada: DESPLIEGUE_DE_LA_BUSQUEDA_CON_FILTROS,
+    deDondeLlega: 'DESPLIEGUE_DE_LA_BUSQUEDA_CON_FILTROS',
     tasas: ['sm13'],
   },
 ];

@@ -906,7 +906,11 @@ base se cerró antes de la llegada de lo que se juzga, las ventanas de antes de 
 —se cuentan desde el cierre— pero dicen que no juzgan lo que llega. Cuando la referencia es
 la serie de antes y no reúne el mínimo, se dice. Una señal de SM-C3 o SM-C5 a la que le falta una
 dirección dice que no se puede juzgar, nunca «no se da», y no deja pasar la cadena de «salta»: dos
-ventanas con la señal separadas por una sin juzgar no son «dos seguidas». La orden dice
+ventanas con la señal separadas por una sin juzgar no son «dos seguidas». SM-6 y SM-13 cuentan
+sus ventanas desde `DESPLIEGUE_DE_LA_BUSQUEDA_CON_FILTROS`, la llegada de la Épica 27 (27.9): si
+llega antes del cierre de la línea base de las búsquedas, se juzgan frente a su serie de antes, la
+primera ventana empieza la jornada siguiente y la de llegada se informa como «cambió»; sin valor,
+no se cuenta nada desde ella, y le da valor Héctor el día que llega. La orden dice
 «cerrada»; que Héctor la miró, con la comparación por firma delante, y la da por buena lo anota él
 aquí debajo, con la fecha, la métrica y la superficie. Ningún agente lo anota.
 
