@@ -140,6 +140,23 @@ export const DESPLIEGUE_DE_LA_PORTADA_DE_RETORNO: string | undefined = undefined
  */
 export const DESPLIEGUE_DE_LA_LECTURA: string | undefined = '2026-10-25';
 
+/**
+ * La llegada en vivo de la búsqueda con filtros — la Épica 27, AD-9, Historia 27.9.
+ *
+ * Es la jornada UTC en que termina el trabajo «Desplegar» de Actions que lleva la 27 al sitio en
+ * vivo —nunca la del merge—, con la misma forma que las de arriba: `undefined` mientras no haya
+ * llegado. **Le da valor Héctor, en un commit aparte del día en que llega, y ningún agente la
+ * elige.**
+ *
+ * La lee la orden de la línea base (23.10) para contar desde ella las ventanas de SM-6 y SM-13,
+ * en su tabla de juicios por ventanas: la primera empieza la primera jornada UTC
+ * completa tras la llegada, y la de llegada no entra en ninguna y se informa aparte, como
+ * «cambió». No es un corte de serie —la combinación de filtros de `busqueda` ya era del
+ * vocabulario de la 23, y `/buscar/` no emite vista—, así que no entra en
+ * `CORTES_DE_SERIE_DECLARADOS` ni en `CORTES_DE_SM8`; tampoco cambia lo que SM-11 compara.
+ */
+export const DESPLIEGUE_DE_LA_BUSQUEDA_CON_FILTROS: string | undefined = undefined;
+
 /*
  * Los cortes de serie de la medición — AD-9, AD-13, Historia 23.10.
  *
