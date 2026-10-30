@@ -1,5 +1,7 @@
-import { expect, test } from '@playwright/test';
+import { expect, test, type Page } from '@playwright/test';
 import { MARCA } from '../../src/lib/marca.ts';
+import { entradaDeLoDescargado } from '../../src/lib/guiones.ts';
+import { rutaDeCita } from '../../src/lib/superficies.ts';
 import { apuntarGuiones, fueraDeLaListaAlCargar } from './ayuda/guiones.ts';
 
 /** Historia 4.1 — portada con Cita del Día. */
@@ -92,10 +94,130 @@ test.describe('Historia 4.1 — la portada', () => {
     expect(html).toContain(texto.slice(1, 30));
   });
 
-  test('un único h1 y la Cita del Día no compite con él', async ({ page }) => {
+  test('un único h1, la marca de la cabecera, y la Cita del Día no compite con él', async ({ page }) => {
     await page.goto('/');
     await expect(page.locator('h1')).toHaveCount(1);
-    // En la portada el h1 es la marca; la Cita del Día no es el título de la página.
-    await expect(page.locator('h1')).toHaveText(MARCA);
+    // Historia 28.1 — en la portada el h1 es la marca, en la cabecera y con `aria-current`;
+    // `main` no lleva ninguno, y la Cita del Día no es el título de la página.
+    const titulo = page.locator('header.cabecera h1');
+    await expect(titulo).toHaveCount(1);
+    await expect(titulo).toHaveText(MARCA);
+    await expect(titulo.locator('a.marca')).toHaveAttribute('aria-current', 'page');
+    await expect(page.locator('main h1')).toHaveCount(0);
   });
+});
+
+/** Una Página de Cita del Corpus servido, la misma que miden las pruebas de la cabecera. */
+const CITA = rutaDeCita('miguel-de-cervantes-la-libertad-sancho-es-uno-de-los');
+
+/** `--unidad` resuelto en la página, en px CSS. */
+const unidad = (page: Page) =>
+  page.evaluate(() => {
+    const sonda = document.createElement('div');
+    sonda.style.cssText = 'height: var(--unidad)';
+    document.body.append(sonda);
+    const alto = sonda.getBoundingClientRect().height;
+    sonda.remove();
+    return alto;
+  });
+
+test.describe('Historia 28.1 — la portada abre con las cifras del Corpus y un campo para buscar', () => {
+  test('`main` abre con la línea de cifras del Corpus real, que tiene censo: nunca «cada una»', async ({ page }) => {
+    await page.goto('/');
+    const primero = page.locator('main > .pagina > :first-child');
+    await expect(primero).toHaveClass(/(^|\s)cifras(\s|$)/);
+    const linea = (await primero.innerText()).trim();
+    expect(linea).toMatch(/^\d{1,3}(\.\d{3})* citas de \d{1,3}(\.\d{3})* autores; \d{1,3}(\.\d{3})* cotejadas con el texto de su fuente\.$/);
+    expect(linea).not.toContain('cada una');
+  });
+
+  test('tras «Saltar al contenido.», el siguiente Tab va al campo de búsqueda', async ({ page }) => {
+    await page.goto('/');
+    await page.keyboard.press('Tab');
+    await expect(page.locator('a.saltar')).toBeFocused();
+    await page.keyboard.press('Enter');
+    await page.keyboard.press('Tab');
+    await expect(page.locator('main input[name="q"]')).toBeFocused();
+  });
+
+  test('escribir y pulsar «Buscar» lleva a /buscar/?q=…, sin pedir ningún guion fuera de la lista', async ({ page, baseURL }) => {
+    const pedidos = apuntarGuiones(page, baseURL!);
+    await page.goto('/', { waitUntil: 'networkidle' });
+    // Al cargar, la portada no pide Pagefind ni nada que no sea la medición.
+    expect(fueraDeLaListaAlCargar(pedidos), `la portada pidió ${pedidos.join(', ')}`).toEqual([]);
+    await page.locator('main input[name="q"]').fill('tiempo libre');
+    await page.locator('main form[role="search"]').getByRole('button', { name: 'Buscar' }).click();
+    await page.waitForURL(/\/buscar\/\?q=tiempo\+libre$/);
+    // Lo que se pidió al enviar y al llegar está todo en la lista cerrada.
+    expect(pedidos.filter((pedido) => entradaDeLoDescargado(pedido) === undefined)).toEqual([]);
+  });
+
+  test('el campo funciona también sin JavaScript', async ({ browser, baseURL }) => {
+    const contexto = await browser.newContext({ javaScriptEnabled: false, baseURL });
+    const page = await contexto.newPage();
+    await page.goto('/');
+    await page.locator('main input[name="q"]').fill('amistad');
+    await page.locator('main form[role="search"]').getByRole('button', { name: 'Buscar' }).click();
+    await page.waitForURL(/\/buscar\/\?q=amistad$/);
+    await contexto.close();
+  });
+
+  test('las distancias: campo a 3 ×, Cita del Día a 6 ×, cada sección a 6 × y su contenido a 2 ×', async ({ page }) => {
+    await page.goto('/');
+    await page.evaluate(() => document.fonts.ready);
+    const u = await unidad(page);
+    const m = await page.evaluate(() => {
+      const caja = (e: Element) => e.getBoundingClientRect();
+      const cifras = document.querySelector('main .cifras')!;
+      const formulario = document.querySelector('main form[role="search"]')!;
+      const delDia = document.querySelector('main .del-dia')!;
+      const secciones = [...document.querySelectorAll('main .pagina > section:not(.del-dia)')].map((s) => ({
+        rotulo: s.querySelector('h2')!.textContent!.trim(),
+        arriba: caja(s).top,
+        anterior: caja(s.previousElementSibling!).bottom,
+        rotuloAbajo: caja(s.querySelector('h2')!).bottom,
+        contenido: caja(s.querySelector('h2')!.nextElementSibling!).top,
+      }));
+      return {
+        campo: caja(formulario).top - caja(cifras).bottom,
+        delDia: caja(delDia).top - caja(formulario).bottom,
+        secciones,
+      };
+    });
+    expect(Math.abs(m.campo - 3 * u), `campo: ${m.campo}`).toBeLessThanOrEqual(0.5);
+    expect(Math.abs(m.delDia - 6 * u), `Cita del Día: ${m.delDia}`).toBeLessThanOrEqual(0.5);
+    expect(m.secciones.map((s) => s.rotulo)).toEqual(expect.arrayContaining(['Temas', 'Autores']));
+    for (const s of m.secciones) {
+      expect(Math.abs(s.arriba - s.anterior - 6 * u), `${s.rotulo}: ${s.arriba - s.anterior}`).toBeLessThanOrEqual(0.5);
+      expect(Math.abs(s.contenido - s.rotuloAbajo - 2 * u), `${s.rotulo}: ${s.contenido - s.rotuloAbajo}`).toBeLessThanOrEqual(0.5);
+    }
+  });
+
+  test('a 360 × 640, el texto de la Cita del Día empieza en la primera pantalla', async ({ page }) => {
+    await page.setViewportSize({ width: 360, height: 640 });
+    await page.goto('/');
+    await page.evaluate(() => document.fonts.ready);
+    const arriba = await page.evaluate(() => document.querySelector('main .del-dia .texto')!.getBoundingClientRect().top);
+    test.info().annotations.push({ type: 'medida', description: `la Cita del Día empieza a ${arriba.toFixed(2)} px` });
+    expect(arriba).toBeLessThan(640);
+  });
+
+  for (const ancho of [360, 1280]) {
+    test(`a ${ancho} px la marca ocupa la misma caja en la portada que en una Página de Cita`, async ({ page }) => {
+      await page.setViewportSize({ width: ancho, height: 800 });
+      const caja = async (ruta: string) => {
+        await page.goto(ruta);
+        await page.evaluate(() => document.fonts.ready);
+        return page.evaluate(() => {
+          const r = document.querySelector('header.cabecera a.marca')!.getBoundingClientRect();
+          return { x: r.x, y: r.y, ancho: r.width, alto: r.height };
+        });
+      };
+      const enLaPortada = await caja('/');
+      const enLaCita = await caja(CITA);
+      for (const clave of ['x', 'y', 'ancho', 'alto'] as const) {
+        expect(Math.abs(enLaPortada[clave] - enLaCita[clave]), `${clave}: ${enLaPortada[clave]} frente a ${enLaCita[clave]}`).toBeLessThanOrEqual(0.5);
+      }
+    });
+  }
 });

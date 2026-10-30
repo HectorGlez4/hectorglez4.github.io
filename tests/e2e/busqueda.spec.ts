@@ -500,7 +500,8 @@ test.describe('Historia 22.10 — el recuento y la búsqueda sin resultados se a
  * Historia 26.2 (AD-17, AD-19) — el tipo de un resultado no casa como texto, y la portada tiene el
  * suyo. Hasta la 26.2 el tipo viajaba en `data-pagefind-meta="tipo:…"`, y desde Pagefind 1.5 la
  * metadata se busca: «cita» daba 4.559 resultados y 215 de los 400 primeros de «obra» no tenían la
- * palabra. Ahora viaja como filtro, y la portada solo indexa su `h1`.
+ * palabra. Ahora viaja como filtro, y la portada solo indexa su título (desde la 28.1, el que
+ * declara el armazón con `data-pagefind-meta="title:…"`).
  */
 test.describe('Historia 26.2 — el tipo no casa como texto y la portada tiene el suyo', () => {
   /*
@@ -545,7 +546,7 @@ test.describe('Historia 26.2 — el tipo no casa como texto y la portada tiene e
     });
     expect(fallos).toEqual([]);
     // Y no en vacío: un índice roto, o uno que no devuelve nada, pasaría lo de arriba sin mirar.
-    // Estas palabras salen en el contenido de muchas páginas, y la marca en el `h1` de la portada.
+    // Estas palabras salen en el contenido de muchas páginas, y la marca en el título que declara la portada.
     // «directorio» y «portada» pueden no salir en ningún contenido todavía (los Directorios son de
     // la 26.3), y por eso no se les exige resultado: su prueba es que ninguno salga por su tipo.
     const vacios = ['obra', 'cita', 'autor', 'tema', 'colección', MARCA].filter((termino) => porTermino[termino].total === 0);

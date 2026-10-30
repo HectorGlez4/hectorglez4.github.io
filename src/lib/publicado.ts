@@ -31,6 +31,7 @@ import {
 } from './umbrales.ts';
 import type { FuenteDeCita, Procedencia, tradicion } from './admision.ts';
 import { cuentaParaElSuelo } from './huecos.ts';
+import { milesEnEspañol } from './formato.ts';
 import { compararPorClave } from './normalizar.ts';
 import {
   colgarObras,
@@ -167,7 +168,7 @@ export interface ConjuntoPublicable {
  * no tiene página accesible ni indexable, y esta función es la que lo decide para todas
  * las superficies a la vez.
  */
-export function autoresPublicados(autores: Autor[], citas: Cita[]): Autor[] {
+export function autoresPublicados(autores: readonly Autor[], citas: readonly Cita[]): Autor[] {
   const conCitas = new Set(citas.map((c) => c.autor));
   return autores
     .filter((a) => conCitas.has(a.slug))
@@ -266,6 +267,38 @@ export function temasPublicados(temas: Tema[], citas: Cita[]): Tema[] {
  */
 export function esCitaDocumentada(cita: Cita): boolean {
   return cita.fuente !== undefined;
+}
+
+/**
+ * La línea de cifras con la que abre la portada — Historia 28.1, AD-11, UX-DR56.
+ *
+ * Es la **única** redactora de la línea: ni la página la compone ni `tools/lib/cifras.ts` cuenta
+ * por ella. n son las Citas publicadas, m los Autores publicados (`autoresPublicados`, la misma
+ * regla que las páginas de Autor) y k las Citas documentadas (`esCitaDocumentada`).
+ *
+ * **Si queda censo se decide sin leer el fichero del censo de pendientes.** La puerta de la
+ * Historia 11.2, una integración de `integraciones/` (este módulo no la nombra: se lo prohíbe una
+ * prueba), rompe el build si una Cita publicada sin `fuente` no está censada, si una censada declara
+ * `fuente` o si un slug censado no es una Cita publicada: en todo build que llega aquí, «queda censo» es
+ * exactamente «k < n». Mientras quede, la línea da k y **nunca** dice «cada una»; con el censo
+ * vacío, todas están cotejadas y lo dice así.
+ *
+ * Concuerda en número: «1 cita», «de 1 autor», «1 cotejada» (solo se ve en Corpus de prueba). Los
+ * números, con punto de millar (`milesEnEspañol`). Sin ninguna Cita publicada no hay línea.
+ * Depende solo del Corpus del commit, nunca de la jornada: no rota y no da `lastmod` a la portada.
+ */
+export function lineaDeCifras(citas: readonly Cita[], autores: readonly Autor[]): string | undefined {
+  const n = citas.length;
+  if (n === 0) return undefined;
+  const m = autoresPublicados(autores, citas).length;
+  const k = citas.filter(esCitaDocumentada).length;
+  const deCitas = `${milesEnEspañol(n)} ${n === 1 ? 'cita' : 'citas'}`;
+  const deAutores = `de ${milesEnEspañol(m)} ${m === 1 ? 'autor' : 'autores'}`;
+  if (k < n) {
+    return `${deCitas} ${deAutores}; ${milesEnEspañol(k)} ${k === 1 ? 'cotejada' : 'cotejadas'} con el texto de su fuente.`;
+  }
+  if (n === 1) return `${deCitas} ${deAutores}, cotejada con el texto de su fuente.`;
+  return `${deCitas} ${deAutores}, cada una cotejada con el texto de su fuente.`;
 }
 
 /** Cuántas Citas publicadas de un Autor están documentadas — ver `esCitaDocumentada`. */

@@ -162,7 +162,7 @@ describe('Historia 26.8 — la portada sin su lista de Autores', () => {
   it('rompe nombrando la Cita de la página 2 y su Tema con su recuento', async () => {
     const portada = readFileSync(join(RAIZ, 'src/pages/index.astro'), 'utf8');
     const sinAutores = portada.replace(
-      /\n {4}<section data-pagefind-ignore="all">\n {6}<h2>Autores<\/h2>[\s\S]*?<\/section>\n/u,
+      /\n {4}<section>\n {6}<Rotulo id="autores">Autores<\/Rotulo>[\s\S]*?<\/section>\n/u,
       '\n',
     );
     const resultado = await construirConCorpus(corpusDeSeneca(51), {

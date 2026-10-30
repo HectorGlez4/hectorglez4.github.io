@@ -1,4 +1,6 @@
 import { afterAll, describe, expect, it } from 'vitest';
+import { readFile } from 'node:fs/promises';
+import { join } from 'node:path';
 import {
   AUTOR_VALIDO,
   TEMA_VALIDO,
@@ -189,6 +191,29 @@ describe('Historia 11.2 — el cotejo corre en el build y rompe la construcción
     });
     expect(codigo).toBe(0);
     expect(salida).toMatch(/1 pendiente de cotejo/);
+  });
+
+  /*
+   * Historia 28.1 — este es el único fixture que construye con censo no vacío, así que es el que
+   * mira la línea de cifras de la portada con su forma de censo: da las cotejadas y nunca dice
+   * «cada una». La documentada es otro texto del mismo documento.
+   */
+  it('con una Cita censada, la línea de cifras de la portada da las cotejadas y no dice «cada una»', async () => {
+    const { codigo, salida, proyecto } = await construir({
+      ...CORPUS_BASE,
+      [FICHERO_DEL_CENSO]: `citas:\n  - ${SLUG}\n`,
+      [FICHERO_DE_LA_CITA]: citaSembrada({ fuente: undefined }),
+      'citas/seneca--la-vida-es-larga-si-sabes-usarla.md': citaSembrada({
+        texto: 'La vida es larga si sabes usarla.',
+        slug: 'seneca-la-vida-es-larga-si-sabes-usarla',
+      }),
+      [NOMBRE_DEL_DOCUMENTO]: documento(CUERPO_CON_LA_CITA),
+    });
+    expect(codigo, salida).toBe(0);
+    const portada = await readFile(join(proyecto, 'dist', 'index.html'), 'utf8');
+    const linea = /<p class="cifras[^"]*"[^>]*>([\s\S]*?)<\/p>/.exec(portada)?.[1].replace(/\s+/g, ' ').trim();
+    expect(linea).toBe('2 citas de 1 autor; 1 cotejada con el texto de su fuente.');
+    expect(linea).not.toContain('cada una');
   });
 
   it('un slug del censo que ya no existe entre las Citas rompe el build', async () => {

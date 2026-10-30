@@ -545,18 +545,23 @@ describe('Historia 12.3 — sin ninguna Colección publicada', () => {
   /*
    * Historia 26.2 (AD-17, AD-19) — esta construcción es la que pinta la otra rama de la portada:
    * ninguna de sus Citas es apta, así que en lugar de la Cita del Día va la entrada. La portada
-   * responde solo por su `h1` también aquí, con la misma regla que juzga la rama de la Cita del
+   * responde solo por su título también aquí —desde la 28.1, el que declara el armazón, con la
+   * marca como único `h1`, en la cabecera—, con la misma regla que juzga la rama de la Cita del
    * Día en `publicable-y-alcanzable.test.ts`.
    */
-  it('sin Cita del Día, la portada solo expone su `h1`: la entrada queda fuera del índice', async () => {
+  it('sin Cita del Día, la portada solo expone su título: la entrada queda fuera del índice', async () => {
     const portada = await readFile(join(dist, 'index.html'), 'utf8');
-    const { enMain, titulos, textoDelTitulo, expuestos, fueraDelIndice } = exposicionDeLaPortada(portada);
+    const exposicion = exposicionDeLaPortada(portada);
+    const { enMain, expuestos, fueraDelIndice } = exposicion;
     expect(conClase(enMain, 'section', 'del-dia')).toEqual([]);
     const entrada = conClase(enMain, 'p', 'entrada');
     expect(entrada).toHaveLength(1);
     expect(fueraDelIndice(entrada[0])).toBe(true);
-    expect(titulos).toBe(1);
-    expect(textoDelTitulo).toBe(MARCA);
+    expect(exposicion.titulosEnMain).toBe(0);
+    expect(exposicion.titulosEnLaCabecera).toBe(1);
+    expect(exposicion.textoDelTituloDeLaCabecera).toBe(MARCA);
+    expect(exposicion.valorDelTitulo).toBe(MARCA);
+    expect(exposicion.textoDelTitulo).toBe(MARCA);
     expect(expuestos).toEqual([]);
   });
 

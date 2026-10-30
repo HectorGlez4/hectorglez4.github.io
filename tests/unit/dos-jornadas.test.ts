@@ -138,6 +138,29 @@ describe('Historia 26.8 — dos jornadas, un mismo sitio', () => {
     }
   });
 
+  /*
+   * Historia 28.1 — la línea de cifras de la portada depende solo del Corpus del commit: es la
+   * misma en las dos jornadas y no cuelga del subárbol que rota.
+   */
+  it('la línea de cifras de la portada es la misma en las dos jornadas, fuera del subárbol data-jornada', async () => {
+    const lineas: string[] = [];
+    for (const resultado of [hoy, manana]) {
+      const html = await leer(resultado, 'index.html');
+      const linea = /<p class="cifras[^"]*"[^>]*>([\s\S]*?)<\/p>/u.exec(html)?.[1];
+      expect(linea).toBeDefined();
+      lineas.push(linea!);
+      // Sigue ahí cuando se quita lo que rota: no está dentro de él.
+      expect(sinLoQueRota(html)).toContain(`>${linea}</p>`);
+      const marca = html.indexOf('data-jornada');
+      expect(marca).toBeGreaterThan(-1);
+      const desde = html.lastIndexOf('<section', marca);
+      const hasta = html.indexOf('</section>', marca);
+      expect(html.slice(desde, hasta)).not.toContain('class="cifras');
+    }
+    expect(lineas[1]).toBe(lineas[0]);
+    expect(lineas[0]).toBe('51 citas de 1 autor, cada una cotejada con el texto de su fuente.');
+  });
+
   it('el mismo sitemap', async () => {
     expect(await leer(manana, 'sitemap-0.xml')).toBe(await leer(hoy, 'sitemap-0.xml'));
   });

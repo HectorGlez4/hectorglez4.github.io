@@ -8,8 +8,12 @@
  * y a la búsqueda, con las rutas de `src/lib/superficies.ts`; así toda Página de Autor y toda
  * página 1 de Obra quedan a dos saltos de la portada (FR-55; las 2+ cuelgan de su página 1).
  * Sigue sin migas de pan: no hay jerarquía que reflejar,
- * el visitante entra por una hoja y se mueve lateralmente entre hojas. La marca no es un `h1`
- * (eso es de la 28.1).
+ * el visitante entra por una hoja y se mueve lateralmente entre hojas.
+ *
+ * Historia 28.1 (UX-DR56) — en la portada, y solo en ella, la marca es el único `h1` de la página:
+ * el enlace va dentro de un `h1` que no cambia su aspecto, y `main` no lleva ninguno. En el resto
+ * de páginas la cabecera no lleva encabezado. Y como `main` de la portada queda entero fuera de
+ * Pagefind, su título en el índice lo declara este armazón (`data-pagefind-meta="title:…"`).
  *
  * NFR-2 — el contenido llega en el HTML inicial. AD-6 — en línea van las islas y el arranque
  * de la medición; lo que se descarga está en la lista cerrada de `src/lib/guiones.ts`.
@@ -113,6 +117,8 @@ const imagenSocial = tarjeta === undefined ? undefined : new URL(tarjeta, Astro.
 const rutaDeEstaPagina = rutaNormalizada(ruta);
 const actualSi = (destino: string) => (rutaNormalizada(destino) === rutaDeEstaPagina ? 'page' : undefined);
 const portada = rutaDeLaPortada();
+/* Historia 28.1 — la portada por su ruta normalizada, la misma comparación que `aria-current`. */
+const esLaPortada = rutaNormalizada(portada) === rutaDeEstaPagina;
 const directorioDeAutores = rutaDelDirectorioDeAutores();
 const directorioDeObras = rutaDelDirectorioDeObras();
 const busqueda = rutaDeLaBusqueda();
@@ -213,7 +219,15 @@ const busqueda = rutaDeLaBusqueda();
       * otra fila, ninguna empieza por «·». Es un glifo tipográfico, no un icono.
       */}
     <header class="cabecera contenedor" data-zona="cabecera">
-      <a class="marca" href={portada} aria-current={actualSi(portada)}>{MARCA}</a>
+      {/*
+        * Historia 28.1 — en la portada la marca es su `h1`; en las demás, el enlace a secas. Dos
+        * ramas con el mismo enlace, para que fuera de la portada salga byte a byte como antes.
+        */}
+      {esLaPortada ? (
+        <h1 class="titulo-de-la-marca"><a class="marca" href={portada} aria-current={actualSi(portada)}>{MARCA}</a></h1>
+      ) : (
+        <a class="marca" href={portada} aria-current={actualSi(portada)}>{MARCA}</a>
+      )}
       <nav aria-label="Principal">
         <ul class="principal" role="list">
           <li>
@@ -248,6 +262,15 @@ const busqueda = rutaDeLaBusqueda();
       data-pagefind-filter={enLaBusquedaPropia && tipo ? `${FILTRO_DE_TIPO}:${tipo}` : undefined}
     >
       <slot />
+      {/*
+        * Historia 28.1 (AD-17, AD-19) — la portada responde en la búsqueda propia solo por su
+        * título, y todo lo que pinta en `main` va bajo `data-pagefind-ignore="all"`. Un cuerpo sin
+        * ninguna palabra indexable lo descarta Pagefind entero, así que el nombre va aquí como texto
+        * y como `title:`; `hidden` lo saca de la vista y del árbol de accesibilidad.
+        */}
+      {esLaPortada && enLaBusquedaPropia && (
+        <span hidden data-pagefind-meta={`title:${MARCA}`}>{MARCA}</span>
+      )}
     </main>
 
     <footer class="pie contenedor">
@@ -301,8 +324,22 @@ const busqueda = rutaDeLaBusqueda();
    * La marca, enlace de bloque **a su ancho**: su zona de toque es su texto con 44px de alto,
    * no la fila entera, para que un toque a su derecha no lleve a la portada.
    */
-  .marca {
+  /*
+   * Historia 28.1 — el `h1` de la portada envuelve la marca sin cambiar su aspecto: sin margen, con
+   * la letra de la cabecera, y es él quien se alinea en la cabecera (el enlace, dentro, ya no es
+   * elemento de la caja flexible).
+   */
+  .titulo-de-la-marca {
+    margin: 0;
+    font: inherit;
+  }
+
+  .marca,
+  .titulo-de-la-marca {
     align-self: flex-start;
+  }
+
+  .marca {
     font-family: var(--sans);
     font-size: var(--autor);
     font-weight: 600;
@@ -391,7 +428,8 @@ const busqueda = rutaDeLaBusqueda();
       padding-block: calc(var(--unidad) * 2);
     }
 
-    .marca {
+    .marca,
+    .titulo-de-la-marca {
       align-self: center;
     }
   }

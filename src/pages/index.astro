@@ -2,33 +2,48 @@
 /**
  * Portada.
  *
- * De momento es la puerta de entrada al descubrimiento: desde aquí se alcanzan todos los
- * Temas publicados, todas las Colecciones publicadas y todos los Autores, y desde ellos
- * toda Página de Cita. Eso es lo que sostiene NFR-5 —ninguna página huérfana— y lo que la
- * Historia 2.7 comprueba recorriendo enlaces de verdad.
+ * Historia 28.1 (UX-DR56) — la portada sirve a quien vuelve: `main` abre con la línea de cifras del
+ * Corpus (`lineaDeCifras` de `src/lib/publicado.ts`, su única redactora) y el Campo de búsqueda con
+ * su botón, un GET a `/buscar/` sin guion, como el del 404. Siguen, en el orden fijo de la portada,
+ * la Cita del Día, el hueco de «Obras» (28.3), «Temas», «Colecciones» y «Autores», cada sección con
+ * su Rótulo, y al final la invitación a sostener si está encendida. La marca es el `h1` de la
+ * cabecera (`Armazon.astro`), y aquí no hay ninguno.
  *
- * La Cita del Día llega en la Historia 4.1 y ocupará la parte de arriba. El descubrimiento
- * de abajo se queda: sin él, la portada tendría una sola salida y el sitio dejaría de ser
- * recorrible desde ella.
+ * Desde aquí se alcanzan todos los Temas publicados, todas las Colecciones publicadas y todos los
+ * Autores, y desde ellos toda Página de Cita: es lo que sostiene NFR-5 —ninguna página huérfana—,
+ * y la puerta de `integraciones/alcance.ts` lo comprueba sobre `dist/`.
+ *
+ * Todo lo que esta página pinta va bajo `data-pagefind-ignore="all"` (AD-17, AD-19): la portada
+ * responde en la búsqueda propia solo por su título, que declara el armazón.
  */
 import Armazon from '../components/Armazon.astro';
+import CampoDeBusqueda from '../components/CampoDeBusqueda.astro';
 import CitaDelDia from '../components/CitaDelDia.astro';
 import DatosDelSitio from '../components/DatosDelSitio.astro';
+import Rotulo from '../components/Rotulo.astro';
 import Sostener from '../components/Sostener.astro';
 import portada from '../../corpus/portada.json';
+import {
+  ETIQUETA_DE_LA_BUSQUEDA,
+  PARAMETROS_DE_LA_BUSQUEDA,
+  TEXTO_DE_EJEMPLO_DE_LA_BUSQUEDA,
+} from '../lib/busqueda.ts';
 import { aptasParaPortada, citaDelDia, jornadaDelBuild } from '../lib/citaDelDia.ts';
 import { modelosEnRuta } from '../lib/ingreso.ts';
 import { DESCRIPCION_DEL_SITIO, MARCA } from '../lib/marca.ts';
-import { rutaDeAutor, rutaDeColeccion, rutaDeTema } from '../lib/superficies.ts';
+import { rutaDeAutor, rutaDeColeccion, rutaDeLaBusqueda, rutaDeTema } from '../lib/superficies.ts';
 import {
   autoresPublicados,
   conjuntoPublicable,
+  lineaDeCifras,
   temasPublicados,
 } from '../lib/publicado.ts';
 
 const conjunto = await conjuntoPublicable();
 const temas = temasPublicados(conjunto.temas, conjunto.citas);
 const autores = autoresPublicados(conjunto.autores, conjunto.citas);
+/* Historia 28.1 — la línea la redacta `publicado.ts`; sin ninguna Cita publicada no hay línea. */
+const cifras = lineaDeCifras(conjunto.citas, conjunto.autores);
 
 /*
  * Las Colecciones publicadas — Historia 12.3, descubrimiento de FR-28 y NFR-5.
@@ -62,36 +77,49 @@ const DESCRIPCION = DESCRIPCION_DEL_SITIO;
 >
   <DatosDelSitio slot="cabeza" descripcion={DESCRIPCION} />
 
-  <div class="pagina contenedor">
-    {
-      /*
-       * Historia 26.2 (AD-17, AD-19) — en la búsqueda propia la portada responde solo por su
-       * título: este `h1`, que es la marca y del que Pagefind saca el título del resultado. Todo lo
-       * demás —la Cita del Día, la entrada, los chips y la lista de Autores— va bajo
-       * `data-pagefind-ignore="all"`, porque ya tiene su propia página en el índice: sin esto, buscar
-       * el texto del día o cualquier Autor devolvía también la portada. La invitación a sostener
-       * lleva su propio `data-pagefind-ignore` en `Sostener.astro`. Cuando la 28.1 saque el `h1`
-       * de `main`, la portada declarará su título con `data-pagefind-meta="title:…"`.
-       */
-    }
-    <h1 class="marca-portada">{MARCA}</h1>
+  {/*
+    * Historia 28.1 (AD-17, AD-19) — en la búsqueda propia la portada responde solo por su título,
+    * que declara `Armazon.astro`. Todo lo de aquí —la línea, el campo, la Cita del Día, la entrada,
+    * los chips y la lista de Autores— va bajo `data-pagefind-ignore="all"`, porque o no es contenido
+    * o ya tiene su propia página en el índice: buscar el texto del día o cualquier Autor no devuelve
+    * la portada. La invitación a sostener lleva además su propio `data-pagefind-ignore`.
+    */}
+  <div class="pagina contenedor" data-pagefind-ignore="all">
+    {cifras !== undefined && <p class="cifras">{cifras}</p>}
+
+    {/*
+      * El Campo de búsqueda con su botón, el mismo del 404 (Historia 27.8): un GET a `/buscar/` sin
+      * guion, así que la portada no carga Pagefind. No lleva zona: no tiene enlaces, y enviarlo no
+      * es una salida interna.
+      */}
+    <form class="formulario" role="search" action={rutaDeLaBusqueda()} method="get">
+      <CampoDeBusqueda
+        id="consulta"
+        etiqueta={ETIQUETA_DE_LA_BUSQUEDA}
+        nombre={PARAMETROS_DE_LA_BUSQUEDA.texto}
+        ejemplo={TEXTO_DE_EJEMPLO_DE_LA_BUSQUEDA}
+        boton
+      />
+    </form>
 
     {
       seleccion && autorDelDia ? (
         /* Historia 26.8 — el bloque, y su marca de lo que rota, los pinta un solo componente. */
         <CitaDelDia cita={seleccion.cita} autor={autorDelDia} />
       ) : (
-        <p class="entrada" data-pagefind-ignore="all">
+        <p class="entrada">
           Citas en español, cada una en su página, con el autor y la obra de la que
           procede. Solo se publica lo que se puede documentar.
         </p>
       )
     }
 
+    {/* Historia 28.3 — aquí entrará «Obras», entre la Cita del Día y los Temas. */}
+
     {
       temas.length > 0 && (
-        <section data-pagefind-ignore="all">
-          <h2>Temas</h2>
+        <section>
+          <Rotulo id="temas">Temas</Rotulo>
           <ul class="chips" data-zona="chip-de-tema">
             {temas.map((tema) => (
               <li>
@@ -129,8 +157,8 @@ const DESCRIPCION = DESCRIPCION_DEL_SITIO;
     }
     {
       colecciones.length > 0 && (
-        <section data-pagefind-ignore="all">
-          <h2>Colecciones</h2>
+        <section>
+          <Rotulo id="colecciones">Colecciones</Rotulo>
           {/* Chip idéntico al de Tema: la Colección es navegación lateral, no jerarquía. */}
           <ul class="chips" data-zona="colecciones">
             {colecciones.map((coleccion) => (
@@ -145,8 +173,8 @@ const DESCRIPCION = DESCRIPCION_DEL_SITIO;
       )
     }
 
-    <section data-pagefind-ignore="all">
-      <h2>Autores</h2>
+    <section>
+      <Rotulo id="autores">Autores</Rotulo>
       <ul class="autores" data-zona="autores-de-portada">
         {
           autores.map((autor) => (
@@ -188,24 +216,33 @@ const DESCRIPCION = DESCRIPCION_DEL_SITIO;
     padding-block: var(--respiracion);
   }
 
-  .marca-portada {
-    font-family: var(--sans);
-    font-size: var(--autor);
-    font-weight: 600;
-    letter-spacing: 0.09em;
-    text-transform: uppercase;
-    color: var(--tinta-apagada);
-    line-height: 1.4;
+  /*
+   * Historia 28.1 (UX-DR56) — la línea de cifras en `body-md` y tinta apagada, sin cifra destacada;
+   * el campo a 3 × `--unidad` de ella; la Cita del Día, o la entrada, a 6 ×; cada sección a 6 × de
+   * lo anterior y su contenido a 2 × de su rótulo (el de la Cita del Día, 3 ×, lo pone
+   * `CitaDelDia.astro`). Nada lleva `nowrap`: la línea y los nombres se parten.
+   */
+  .cifras {
     margin: 0;
+    max-width: var(--medida-prosa);
+    font-size: var(--cuerpo-md);
+    color: var(--tinta-apagada);
   }
+
+  .formulario {
+    margin-top: calc(var(--unidad) * 3);
+    max-width: var(--medida-prosa);
+  }
+
+  /* Historia 27.8 — la etiqueta, el campo y el botón los estiliza `CampoDeBusqueda.astro`. */
 
   /* La Cita del Día (su rótulo y «Ver esta cita» los estiliza `CitaDelDia.astro`). */
   .pagina > :global(.del-dia) {
-    margin-top: calc(var(--unidad) * 4);
+    margin-top: calc(var(--unidad) * 6);
   }
 
   .entrada {
-    margin: calc(var(--unidad) * 2) 0 0;
+    margin: calc(var(--unidad) * 6) 0 0;
     max-width: var(--medida-prosa);
   }
 
@@ -213,22 +250,12 @@ const DESCRIPCION = DESCRIPCION_DEL_SITIO;
     margin-top: calc(var(--unidad) * 6);
   }
 
-  h2 {
-    margin: 0 0 calc(var(--unidad) * 2);
-    font-family: var(--sans);
-    font-size: var(--autor);
-    font-weight: 600;
-    letter-spacing: 0.09em;
-    text-transform: uppercase;
-    color: var(--tinta-apagada);
-  }
-
   .chips {
     list-style: none;
     display: flex;
     flex-wrap: wrap;
     gap: var(--unidad);
-    margin: 0;
+    margin: calc(var(--unidad) * 2) 0 0;
     padding: 0;
   }
 
@@ -251,7 +278,7 @@ const DESCRIPCION = DESCRIPCION_DEL_SITIO;
 
   .autores {
     list-style: none;
-    margin: 0;
+    margin: calc(var(--unidad) * 2) 0 0;
     padding: 0;
     border-top: var(--grosor-filete) solid var(--filete);
     max-width: var(--medida-prosa);
