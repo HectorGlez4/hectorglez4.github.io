@@ -1209,8 +1209,9 @@ export function superficiesInalcanzables(
  *   · la página 1 de un Autor → sus Obras (la Lista de Obras va solo en la página 1);
  *   · `/autores/` → todo Autor publicado; `/obras/` → toda Obra publicada.
  *
- * **Ni la portada → los Autores** —la lista de la portada se va en la Épica 28, y esta historia
- * existe para que quitarla no deje nada fuera sin verse— **ni Cita → Cita**: las Rutas de salida
+ * **Ni la portada → los Autores destacados** —los ocho de la portada (Historia 28.4) cambian con
+ * los recuentos, y una orden que retira no puede apoyarse en que un Autor siga entre ellos— **ni
+ * Cita → Cita**: las Rutas de salida
  * de una Cita dependen de sus vecinas y no las promete ninguna enumeración. Lo que el sitio
  * enlace de más no estorba: el modelo es lo que **tiene** que estar.
  *

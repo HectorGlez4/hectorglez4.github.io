@@ -196,7 +196,9 @@ describe('Historia 26.9 — las reglas del reflujo, en la fuente', () => {
       expect.arrayContaining(['src/components/Chips.astro', 'src/pages/index.astro', 'src/pages/404.astro', 'src/pages/buscar.astro']),
     );
     for (const [fichero, selector] of [
-      ['src/pages/index.astro', '.autores a'],
+      // Historia 28.4 — el nombre de un Autor destacado y el criterio de una Colección.
+      ['src/pages/index.astro', '.nombre'],
+      ['src/pages/index.astro', '.criterio'],
       ['src/components/Atribucion.astro', '.autor a'],
       ['src/pages/obra/[autor]/[slug]/[...page].astro', '.de a'],
     ]) {

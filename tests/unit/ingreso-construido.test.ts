@@ -658,6 +658,19 @@ describe('Historia 14.2 — el sitio con las donaciones encendidas', () => {
     }
   });
 
+  it('en la portada va detrás del cierre de los Autores destacados — Historia 28.4', () => {
+    // La sección «Autores» es la última de la portada desde la 28.4, y su cierre a `/autores/` lo
+    // último de esa sección: la invitación va detrás, fuera de ella, y es lo último de la columna.
+    const html = paginas['index.html'];
+    const columna = divDesde(html, html.indexOf('<div class="pagina'));
+    const cierre = columna.search(/<p data-zona="autores-de-portada"[^>]*><a href="\/autores\/"/);
+    expect(cierre, 'la portada no lleva el cierre de los Autores').toBeGreaterThan(-1);
+    const finDeLaSeccion = columna.indexOf('</section>', cierre);
+    expect(finDeLaSeccion).toBe(columna.lastIndexOf('</section>'));
+    expect(columna.indexOf(MARCA_DE_INGRESO)).toBeGreaterThan(finDeLaSeccion);
+    expect(columna.slice(finDeLaSeccion + '</section>'.length, columna.indexOf('<aside', finDeLaSeccion)).trim()).toBe('');
+  });
+
   it('y en /buscar queda fuera del bloque de salida, no dentro', () => {
     /*
      * El caso que obliga a mirar contención y no orden. `.salida` nace con `hidden` y solo se

@@ -358,10 +358,12 @@ export function titularDeAlcance(veredicto: VeredictoDeAlcance): string {
 
 /**
  * El aviso del build cuando el **modelo** deja Citas a más del tope aunque `dist/` las alcance:
- * hoy las acerca la lista de Autores de la portada, que el modelo no lleva porque la Épica 28 la
- * quita (`grafoDelModelo`). No rompe —`dist/` cumple NFR-5—, pero sin decirlo serían invisibles:
- * las órdenes que retiran las cuentan como «ya fuera» y no las bloquean. `undefined` si no hay
- * ninguna. No depende de la jornada.
+ * desde la Historia 28.4 solo pueden acercarlas los Autores destacados de la portada, que el modelo
+ * no lleva porque cambian con los recuentos (`grafoDelModelo`, AD-11): una Cita en la página 2+ de
+ * un Autor destacado y sin Tema publicado está a tres saltos en `dist/` y a cuatro en el modelo. No
+ * rompe —`dist/` cumple NFR-5—, pero sin decirlo serían invisibles: las órdenes que retiran las
+ * cuentan como «ya fuera» y no las bloquean. `undefined` si no hay ninguna. No depende de la
+ * jornada.
  */
 export function avisoDeFueraDelModelo(modelo: ModeloDelCorpus): string | undefined {
   const citas = citasPorRuta(modelo.conjunto);
@@ -369,9 +371,9 @@ export function avisoDeFueraDelModelo(modelo: ModeloDelCorpus): string | undefin
   if (fuera.length === 0) return undefined;
   return [
     `NFR-5 en el modelo: ${enNumero(fuera.length, 'Cita queda', 'Citas quedan')} a más de ` +
-      `${MAX_SALTOS_DESDE_LA_PORTADA} saltos de la portada sin la lista de Autores que quitará la ` +
-      'Épica 28. Hoy esa lista las alcanza y el build pasa; las órdenes que retiran no las ' +
-      'bloquean porque ya estaban fuera:',
+      `${MAX_SALTOS_DESDE_LA_PORTADA} saltos de la portada sin los Autores destacados de la ` +
+      'portada. Hoy esos Autores las alcanzan y el build pasa, pero cambian con los recuentos y ' +
+      'una orden que retira no se apoya en ellos; tampoco las bloquea, porque ya estaban fuera:',
     ...fuera.map(lineaDeFuera),
   ].join('\n');
 }
@@ -400,8 +402,8 @@ function citasFueraDelModelo(modelo: ModeloDelCorpus): string[] {
  *
  * Solo cuenta lo **nuevo**: una Cita que ya estaba fuera del modelo antes no es efecto de la
  * orden y no la bloquea. Y solo las Citas que siguen publicadas después: la que la orden retira
- * no queda fuera de alcance, sale. El modelo no lleva la lista de Autores de la portada
- * (`grafoDelModelo`), así que esto calcula con el sitio que quedará cuando la Épica 28 la quite.
+ * no queda fuera de alcance, sale. El modelo no lleva los Autores destacados de la portada
+ * (`grafoDelModelo`): cambian con los recuentos, así que esto calcula sin apoyarse en ellos.
  *
  * Un Corpus que no se deja leer devuelve `ok: false` con el motivo: de lo que no se puede leer no
  * se puede afirmar que no deje a nadie fuera.

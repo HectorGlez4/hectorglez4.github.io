@@ -1,8 +1,8 @@
 import { expect, test, type Page } from '@playwright/test';
 import { MARCA } from '../../src/lib/marca.ts';
 import { entradaDeLoDescargado } from '../../src/lib/guiones.ts';
-import { rutaDeCita, rutaDelDirectorioDeObras } from '../../src/lib/superficies.ts';
-import { OBRAS_DE_LA_PORTADA } from '../../src/lib/umbrales.ts';
+import { rutaDeCita, rutaDelDirectorioDeAutores, rutaDelDirectorioDeObras } from '../../src/lib/superficies.ts';
+import { AUTORES_DESTACADOS, OBRAS_DE_LA_PORTADA } from '../../src/lib/umbrales.ts';
 import { apuntarGuiones, fueraDeLaListaAlCargar } from './ayuda/guiones.ts';
 import { censoDeCotejo } from './ayuda/corpus.ts';
 
@@ -428,5 +428,113 @@ test.describe('Historia 28.3 — seis Obras que cambian con la jornada', () => {
       .locator('main a[href^="/obra/"]')
       .evaluateAll((enlaces) => new Set(enlaces.map((a) => a.getAttribute('href'))).size);
     expect(n).toBe(obras);
+  });
+});
+
+test.describe('Historia 28.4 — todos los Temas, las Colecciones con su criterio y ocho Autores', () => {
+  test(`«Autores» lleva ${AUTORES_DESTACADOS} Filas de bloque y su cierre, y ninguna lista entera de Autores`, async ({ page }) => {
+    await page.goto('/');
+    const rotulos = (await page.locator('main h2').allTextContents()).map((r) => r.trim());
+    expect(rotulos.at(-1)).toBe('Autores');
+    const filas = page.locator('main section[aria-labelledby="autores"] ul.destacados > li[data-zona="autores-de-portada"] > a');
+    await expect(filas).toHaveCount(AUTORES_DESTACADOS);
+    for (const href of await filas.evaluateAll((enlaces) => enlaces.map((a) => a.getAttribute('href')!))) {
+      expect(href).toMatch(/^\/autor\/[^/]+\/$/);
+    }
+    // Ningún enlace a un Autor fuera de los destacados, salvo la Atribución de la Cita del Día.
+    const otros = await page
+      .locator('main a[href^="/autor/"]')
+      .evaluateAll((enlaces) =>
+        enlaces
+          .filter((a) => !a.closest('[data-zona="autores-de-portada"]'))
+          .map((a) => a.closest('[data-zona]')?.getAttribute('data-zona') ?? 'sin zona'),
+      );
+    expect(otros.every((zona) => zona === 'atribucion'), otros.join(', ')).toBe(true);
+    expect(otros.length).toBeLessThanOrEqual(1);
+    await expect(page.locator('main ul.autores')).toHaveCount(0);
+  });
+
+  test('el nombre en la serif `headline-sm` 400 y tinta, sin subrayado ni al pasar; filas de 44 px que se tocan, a 2 × del rótulo', async ({ page }) => {
+    await page.goto('/');
+    await page.evaluate(() => document.fonts.ready);
+    const u = await unidad(page);
+    const primera = page.locator('main section[aria-labelledby="autores"] li > a').first();
+    await primera.hover();
+    const m = await page.evaluate(() => {
+      const raiz = getComputedStyle(document.documentElement);
+      const resuelto = (propiedad: string, variable: string) => {
+        const sonda = document.createElement('span');
+        sonda.style.setProperty(propiedad, raiz.getPropertyValue(variable).trim());
+        document.body.append(sonda);
+        const r = getComputedStyle(sonda).getPropertyValue(propiedad);
+        sonda.remove();
+        return r;
+      };
+      const seccion = document.querySelector('main section[aria-labelledby="autores"]')!;
+      const caja = (e: Element) => e.getBoundingClientRect();
+      const lista = seccion.querySelector('ul.destacados')!;
+      const filas = [...lista.querySelectorAll(':scope > li')].map(caja);
+      return {
+        esperado: {
+          serif: resuelto('font-family', '--serif'),
+          titularSm: resuelto('font-size', '--titular-sm'),
+          tinta: resuelto('color', '--tinta'),
+        },
+        nombres: [...lista.querySelectorAll('.nombre')].map((n) => {
+          const e = getComputedStyle(n);
+          return { familia: e.fontFamily, cuerpo: e.fontSize, peso: e.fontWeight, color: e.color };
+        }),
+        subrayados: [...lista.querySelectorAll('a, .nombre')].map((a) => getComputedStyle(a).textDecorationLine),
+        altosDeToque: [...lista.querySelectorAll(':scope > li > a')].map((a) => caja(a).height),
+        juntas: filas.slice(1).map((f, i) => f.top - filas[i].bottom),
+        bajoElRotulo: caja(lista).top - caja(seccion.querySelector('h2')!).bottom,
+        fileteArriba: getComputedStyle(lista).borderTopStyle,
+      };
+    });
+    expect(m.esperado.serif).toMatch(/Source Serif/);
+    expect(m.nombres.length).toBeGreaterThan(0);
+    for (const nombre of m.nombres) {
+      expect(nombre).toEqual({ familia: m.esperado.serif, cuerpo: m.esperado.titularSm, peso: '400', color: m.esperado.tinta });
+    }
+    // La primera fila está bajo el puntero: tampoco se subraya al pasar.
+    for (const subrayado of m.subrayados) expect(subrayado).toBe('none');
+    for (const alto of m.altosDeToque) expect(alto).toBeGreaterThanOrEqual(44);
+    for (const hueco of m.juntas) expect(Math.abs(hueco)).toBeLessThanOrEqual(0.5);
+    expect(Math.abs(m.bajoElRotulo - 2 * u), `rótulo → lista: ${m.bajoElRotulo}`).toBeLessThanOrEqual(0.5);
+    expect(m.fileteArriba).toBe('solid');
+  });
+
+  test('el cierre a 2 × de la lista, subrayado, de 44 px, y su número es la m de la línea y los Autores de /autores/', async ({ page }) => {
+    await page.goto('/');
+    await page.evaluate(() => document.fonts.ready);
+    const u = await unidad(page);
+    const m = await page.evaluate(() => {
+      const seccion = document.querySelector('main section[aria-labelledby="autores"]')!;
+      const caja = (e: Element) => e.getBoundingClientRect();
+      const lista = seccion.querySelector('ul.destacados')!;
+      const cierre = seccion.querySelector('p[data-zona="autores-de-portada"]')!;
+      const enlace = cierre.querySelector('a')!;
+      return {
+        cierre: caja(cierre).top - caja(lista).bottom,
+        alto: caja(enlace).height,
+        subrayado: getComputedStyle(enlace).textDecorationLine,
+        texto: enlace.textContent!.replace(/\u00a0/g, ' ').trim(),
+        href: enlace.getAttribute('href'),
+        linea: document.querySelector('main .cifras')!.textContent!,
+      };
+    });
+    expect(Math.abs(m.cierre - 2 * u), `lista → cierre: ${m.cierre}`).toBeLessThanOrEqual(0.5);
+    expect(m.alto).toBeGreaterThanOrEqual(44);
+    expect(m.subrayado).toContain('underline');
+    expect(m.href).toBe(rutaDelDirectorioDeAutores());
+    expect(m.texto).toMatch(/^Los [\d.]+ autores, de la A a la Z ›$/);
+    const enElCierre = /Los ([\d.]+) autores/.exec(m.texto)![1];
+    expect(/de ([\d.]+) autores/.exec(m.linea)![1]).toBe(enElCierre);
+
+    await page.goto(rutaDelDirectorioDeAutores());
+    const autores = await page
+      .locator('main a[href^="/autor/"]')
+      .evaluateAll((enlaces) => new Set(enlaces.map((a) => a.getAttribute('href'))).size);
+    expect(Number(enElCierre.replaceAll('.', ''))).toBe(autores);
   });
 });

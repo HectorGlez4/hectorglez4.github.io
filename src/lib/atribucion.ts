@@ -445,6 +445,23 @@ export function cierreDeLasObras(n: number): string {
 }
 
 /**
+ * El cierre de los Autores de la portada — «Los {m} autores, de la A a la Z», FR-55, UX-DR62,
+ * Historia 28.4.
+ *
+ * Lleva a `/autores/`, así que `m` son los Autores que lista el Directorio —todos los publicados,
+ * la misma m que la línea de cifras—, no los ocho destacados que la portada enseña. Con punto de
+ * millar («Los 1.234 autores») y concordado con uno («El 1 autor»), que solo se da en las pruebas.
+ * Sin el glifo de avance «›»: lo pone la portada, en un `span` `aria-hidden`. Lanza con un recuento
+ * que no sea un entero de 1 en adelante: sin ningún Autor la portada no tiene sección.
+ */
+export function cierreDeLosAutores(m: number): string {
+  if (!Number.isInteger(m) || m < 1) {
+    throw new Error(`cierreDeLosAutores: «${m}» no es un recuento de Autores (un entero de 1 en adelante).`);
+  }
+  return m === 1 ? 'El 1 autor, de la A a la Z' : `Los ${milesEnEspañol(m)} autores, de la A a la Z`;
+}
+
+/**
  * La línea de procedencia de la Atribución, en piezas — UX-DR8, FR-2, Historia 22.4.
  *
  * `titulo` es el título de la Obra resuelta, si consta, y `resto` todo lo que va detrás en la

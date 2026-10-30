@@ -9,6 +9,7 @@ import {
   type TipoDeResultado,
 } from '../../src/lib/tipoDeResultado.ts';
 import { MARCA } from '../../src/lib/marca.ts';
+import { todasLasDirecciones } from './ayuda/pagefind.ts';
 import { ASENTAMIENTO_DE_BUSQUEDA, EVENTOS } from '../../src/lib/medicion.ts';
 import { tramoDe } from '../../src/lib/vocabulario.ts';
 import { recuentoDeCitas, temaEnFrase } from '../../src/lib/recuentos.ts';
@@ -592,29 +593,6 @@ test.describe('Historia 26.2 — el tipo no casa como texto y la portada tiene e
     expect(portada!.autor).toBeUndefined();
   });
 
-  /**
-   * Todas las direcciones que da el índice real para un término, con las opciones de la búsqueda
-   * propia: no solo las 30 que pinta `/buscar/`, porque una portada en el puesto 31 seguiría
-   * respondiendo por lo que no es suyo, y una página destino por debajo de la 30 no es un fallo.
-   */
-  async function todasLasDirecciones(page: Page, termino: string): Promise<string[]> {
-    return page.evaluate(
-      async ({ termino, opciones }) => {
-        const pf = await import('/pagefind/pagefind.js' as string);
-        await pf.init();
-        await pf.options(opciones);
-        const { results } = await pf.search(termino);
-        const urls: string[] = [];
-        for (let i = 0; i < results.length; i += 200) {
-          const datos = await Promise.all(results.slice(i, i + 200).map((r: { data: () => Promise<unknown> }) => r.data()));
-          for (const dato of datos as { url: string }[]) urls.push(dato.url.replace(/\/?$/, '/'));
-        }
-        return urls;
-      },
-      { termino, opciones: OPCIONES_DE_PAGEFIND },
-    );
-  }
-
   // (c) Lo que la portada enseña ya tiene su página en el índice: la portada no sale por ello.
   test('el texto de la Cita del Día y el nombre de un Autor de la portada dan su página, no la portada', async ({ page }) => {
     test.setTimeout(300_000);
@@ -629,7 +607,8 @@ test.describe('Historia 26.2 — el tipo no casa como texto y la portada tiene e
     const fragmento = texto.split(/\s+/).slice(0, 5).join(' ');
     const destino = (await delDia.getByRole('link', { name: 'Ver esta cita' }).getAttribute('href'))!;
 
-    const autor = page.locator('ul.autores a').first();
+    // Historia 28.4 — los Autores de la portada son los destacados, Filas de bloque bajo «Autores».
+    const autor = page.locator('ul.destacados a').first();
     const nombre = (await autor.textContent())!.trim();
     const pagina = (await autor.getAttribute('href'))!;
 

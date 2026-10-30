@@ -856,7 +856,7 @@ const PALABRA_INDIVISIBLE = 'Anticonstitucionalmente';
  * «Volver al índice», «N citas») no se tocan: se miden tal cual en la prueba de arriba.
  */
 const TEXTOS_DEL_CORPUS =
-  'main :is(h1, h2, h3, .texto, .fragmento, p.autor, p.procedencia, .titulo, .nombre, .chip, .autores a, p.de, .enlace-en-tinta)';
+  'main :is(h1, h2, h3, .texto, .fragmento, p.autor, p.procedencia, .titulo, .nombre, .chip, .criterio, p.de, .enlace-en-tinta)';
 
 /**
  * Pone `PALABRA_INDIVISIBLE` al final del último texto visible de cada `TEXTOS_DEL_CORPUS`.

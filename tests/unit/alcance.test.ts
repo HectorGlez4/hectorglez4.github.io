@@ -285,7 +285,7 @@ describe('Historia 26.8 — contención y veredicto', () => {
   it('una Cita fuera rompe nombrando su Tema bajo umbral y su recuento', () => {
     const { conjunto, porObra } = conjuntoDePrueba();
     const modelo = grafoDelModelo(conjunto, porObra);
-    // El sitio construido es exactamente el modelo: sin la lista de Autores de la portada.
+    // El sitio construido es exactamente el modelo: sin los Autores destacados de la portada.
     const veredicto = veredictoDeAlcance(conjunto, modelo, modelo);
     expect(rompeElBuild(veredicto)).toBe(true);
     expect(veredicto.aristasQueFaltan).toEqual([]);
@@ -301,7 +301,7 @@ describe('Historia 26.8 — contención y veredicto', () => {
     ).toBe(`  · /cita/x — su Tema «La ira» (la-ira) tiene 14 Citas, por debajo de MIN_CITAS_POR_TEMA (${MIN_CITAS_POR_TEMA})`);
   });
 
-  it('con la lista de Autores de la portada no rompe, y la línea no dice ninguna fecha', () => {
+  it('con los Autores destacados de la portada no rompe, y la línea no dice ninguna fecha', () => {
     const { conjunto, porObra } = conjuntoDePrueba();
     const modelo = grafoDelModelo(conjunto, porObra);
     const construido = new Map([...modelo].map(([o, d]) => [o, [...d]]));

@@ -16,10 +16,11 @@ import { MARCA_DE_JORNADA } from '../../tools/lib/alcance.ts';
 /**
  * Historia 26.8 — la puerta de NFR-5 del build, sobre sitios construidos de verdad.
  *
- * Tres construcciones: la sana, que informa con una línea fija —y avisa de la Cita que solo la
- * lista de Autores de la portada alcanza—; una con la portada parcheada
- * sin su lista de Autores —lo que la Épica 28 hará—, que deja una Cita de la página 2 de su
- * Autor a cuatro saltos y rompe nombrándola con su Tema bajo umbral; y una con la Paginación
+ * Tres construcciones: la sana, que informa con una línea fija —y avisa de la Cita que solo los
+ * Autores destacados de la portada (Historia 28.4) alcanzan—; una con la portada parcheada sin sus
+ * Autores destacados —que el modelo no lleva porque cambian con los recuentos—, que deja una Cita
+ * de la página 2 de su Autor a cuatro saltos y rompe nombrándola con su Tema bajo umbral; y una
+ * con la Paginación
  * sin los números y la Fila de Autor sin enlace, que rompe nombrando las aristas del modelo que
  * faltan.
  */
@@ -34,7 +35,8 @@ const pad = (n: number) => String(n).padStart(3, '0');
  *
  * El Tema publicado, «El tiempo», es de `MIN_CITAS_POR_TEMA` Citas de **Epicteto**, de otra
  * Obra: así las Citas a dos saltos de la portada no llevan, por sus Rutas de salida, a ninguna
- * de Séneca, y lo único que acerca la página 2 de Séneca es la lista de Autores de la portada.
+ * de Séneca, y lo único que acerca la página 2 de Séneca son los Autores destacados de la portada:
+ * con dos Autores publicados, los dos lo son (`autoresDestacados`).
  */
 function corpusDeSeneca(n: number): Record<string, string> {
   const corpus: Record<string, string> = {
@@ -108,9 +110,10 @@ describe('Historia 26.8 — el build sano', () => {
     );
   });
 
-  it('avisa, sin romper, de la Cita que solo alcanza la lista de Autores de la portada', () => {
-    // La 051 está en la página 2 de Séneca y de su Obra, y «La ira» no llega: en el modelo
-    // —sin esa lista, como la dejará la Épica 28— queda a cuatro saltos.
+  it('avisa, sin romper, de la Cita que solo alcanzan los Autores destacados de la portada', () => {
+    // La 051 está en la página 2 de Séneca y de su Obra, y «La ira» no llega: en el modelo —que
+    // no lleva los destacados, porque cambian con los recuentos— queda a cuatro saltos.
+    expect(salida).toContain('sin los Autores destacados de la portada');
     expect(salida).toMatch(/NFR-5 en el modelo: 1 Cita queda a más de 3 saltos de la portada/);
     expect(salida).toContain(
       `/cita/seneca-fragmento-051 — su Tema «La ira» (la-ira) tiene 3 Citas, por debajo de ` +
@@ -165,7 +168,7 @@ describe('Historia 26.8 — el build sano', () => {
   });
 });
 
-describe('Historia 26.8 — la portada sin su lista de Autores', () => {
+describe('Historia 26.8 — la portada sin sus Autores destacados', () => {
   let proyecto: string | undefined;
 
   afterAll(async () => {
@@ -174,9 +177,11 @@ describe('Historia 26.8 — la portada sin su lista de Autores', () => {
 
   it('rompe nombrando la Cita de la página 2 y su Tema con su recuento', async () => {
     const portada = readFileSync(join(RAIZ, 'src/pages/index.astro'), 'utf8');
+    // Historia 28.4 — la sección va dentro de `destacados.length > 0 && (…)`: se cambia la
+    // expresión entera por `null`, así que no queda ningún enlace de la portada a un Autor.
     const sinAutores = portada.replace(
-      /\n {4}<section aria-labelledby="autores">\n {6}<Rotulo id="autores">Autores<\/Rotulo>[\s\S]*?<\/section>\n/u,
-      '\n',
+      /destacados\.length > 0 && \(\n {8}<section aria-labelledby="autores">\n {10}<Rotulo id="autores">Autores<\/Rotulo>[\s\S]*?<\/section>\n {6}\)/u,
+      'null',
     );
     // Si el marcado de la portada cambia y la expresión deja de casar, el parche no quitaría nada y
     // el fallo de abajo no diría por qué: se dice aquí.
