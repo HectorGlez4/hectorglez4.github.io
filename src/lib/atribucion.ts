@@ -13,6 +13,7 @@
 import type { Cita, Autor, SiguienteCita } from './publicado.ts';
 import type { ObraResuelta } from './obras.ts';
 import { MARCA } from './marca.ts';
+import { milesEnEspañol } from './formato.ts';
 import { recuentoDeAutores, recuentoDeCitas, recuentoDeObras, temaEnFrase } from './recuentos.ts';
 import {
   TARJETA_DEL_DIRECTORIO_DE_AUTORES,
@@ -423,6 +424,18 @@ export function cierreDeLaMismaObra(obra: Pick<ObraResuelta, 'recuento' | 'titul
  */
 export function cierreDeMasDelAutor(autor: Pick<Autor, 'nombre'>, recuento: number): string {
   return `Las ${recuentoDeCierre('cierreDeMasDelAutor', recuento)} citas de ${autor.nombre}`;
+}
+
+/**
+ * El cierre de las Obras de la portada — «Las {n} obras», FR-55, UX-DR56, Historia 28.3.
+ *
+ * Lleva a `/obras/`, así que `n` son las Obras que lista el Directorio de Obras —también las que no
+ * se indexan—, no las que la portada enseña hoy. Con punto de millar («Las 1.234 obras»), como la
+ * línea de cifras de la 28.1, y concordado con una («La 1 obra»), que solo se da en las pruebas.
+ * Sin el glifo de avance «›»: lo pone la portada, en un `span` `aria-hidden`.
+ */
+export function cierreDeLasObras(n: number): string {
+  return n === 1 ? 'La 1 obra' : `Las ${milesEnEspañol(n)} obras`;
 }
 
 /**

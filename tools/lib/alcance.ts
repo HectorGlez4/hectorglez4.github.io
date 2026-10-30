@@ -56,7 +56,10 @@ import {
 import { recorrerElementos } from './html.ts';
 import { posicionesDeCitas } from './posiciones.ts';
 
-/** El atributo que marca lo que rota con la jornada. Lo emite solo `CitaDelDia.astro`. */
+/**
+ * El atributo que marca lo que rota con la jornada. Lo emite solo `LoQueRota.astro` (Historia
+ * 28.3), que envuelve la Cita del Día de la portada y del 404 y las Obras de la portada.
+ */
 export const MARCA_DE_JORNADA = 'data-jornada';
 
 /** Las etiquetas cuyo contenido no es enlace visible: su subárbol no entra en el grafo. */

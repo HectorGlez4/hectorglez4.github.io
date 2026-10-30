@@ -118,25 +118,33 @@ describe('Historia 26.8 — el build sano', () => {
     );
   });
 
-  it('data-jornada va solo en la portada y el 404, una vez, con «Ver esta cita» dentro', async () => {
+  it('data-jornada va solo en la portada y el 404; la Cita del Día, una vez, con «Ver esta cita» dentro', async () => {
     const paginas = await htmlDe(join(proyecto, 'dist'));
     const conMarca = [...paginas].filter(([, html]) => html.includes('data-jornada'));
     expect(conMarca.map(([ruta]) => ruta).sort()).toEqual(['404.html', 'index.html']);
     for (const [ruta, html] of conMarca) {
-      expect(html.split('data-jornada').length - 1, ruta).toBe(1);
-      const marca = html.indexOf('data-jornada');
-      const seccion = html.slice(html.lastIndexOf('<section', marca), html.indexOf('</section>', marca));
-      expect(seccion, ruta).toMatch(/^<section class="del-dia" data-jornada /);
+      // La Cita del Día sale de `LoQueRota.astro` como salía de `CitaDelDia.astro` (28.3).
+      const delDia = html.split('<section class="del-dia" data-jornada data-pagefind-ignore="all">');
+      expect(delDia.length - 1, ruta).toBe(1);
+      const seccion = delDia[1].slice(0, delDia[1].indexOf('</section>'));
       expect(seccion, ruta).toContain('data-zona="cita-del-dia"');
       expect(seccion, ruta).toContain('Ver esta cita');
     }
+    // El 404 no lleva más que la Cita del Día. La portada puede llevar además el subárbol de sus
+    // Obras (28.3), y ningún otro: aquí ninguna Obra se indexa, así que tampoco ese.
+    expect(paginas.get('404.html')!.split('data-jornada').length - 1).toBe(1);
+    const portada = paginas.get('index.html')!;
+    const deObras = portada.split('<div data-jornada data-pagefind-ignore="all"><ul class="obras"').length - 1;
+    expect(portada.split('data-jornada').length - 1).toBe(1 + deObras);
+    expect(deObras).toBe(0);
     // El lote marca sus jornadas con otro atributo: la marca queda libre para lo que rota.
     expect(paginas.get('lote/index.html')).not.toContain('data-jornada');
   });
 
-  it('entre las fuentes de src/ y public/, solo CitaDelDia.astro nombra la marca que el grafo salta', async () => {
+  it('entre las fuentes de src/ y public/, solo LoQueRota.astro nombra la marca que el grafo salta', async () => {
     // La marca es la de `MARCA_DE_JORNADA`: si el componente y el grafo la llamaran distinto, el
-    // grafo dejaría de saltar la Cita del Día y esto lo diría.
+    // grafo dejaría de saltar lo que rota y esto lo diría. Desde la 28.3 la pone un componente sin
+    // otro trabajo, que usan la Cita del Día y las Obras de la portada.
     const entradas = [
       ...(await readdir(join(RAIZ, 'src'), { recursive: true, withFileTypes: true })),
       ...(await readdir(join(RAIZ, 'public'), { recursive: true, withFileTypes: true })),
@@ -145,10 +153,15 @@ describe('Historia 26.8 — el build sano', () => {
       .filter((e) => e.isFile() && !/\.(?:png|jpe?g|webp|gif|ico|woff2?|ttf|otf|pdf)$/iu.test(e.name))
       .map((e) => join(e.parentPath, e.name))
       .filter((ruta) => readFileSync(ruta, 'utf8').includes(MARCA_DE_JORNADA));
-    expect(fuentes.map((ruta) => relative(RAIZ, ruta))).toEqual(['src/components/CitaDelDia.astro']);
-    expect(readFileSync(join(RAIZ, 'src/components/CitaDelDia.astro'), 'utf8')).toMatch(
-      new RegExp(`<section class="del-dia" ${MARCA_DE_JORNADA} `),
+    expect(fuentes.map((ruta) => relative(RAIZ, ruta))).toEqual(['src/components/LoQueRota.astro']);
+    const componente = readFileSync(join(RAIZ, 'src/components/LoQueRota.astro'), 'utf8');
+    expect(componente).toMatch(new RegExp(`<section class=\\{clase\\} ${MARCA_DE_JORNADA} data-pagefind-ignore="all">`));
+    expect(componente).toMatch(new RegExp(`<div class=\\{clase\\} ${MARCA_DE_JORNADA} data-pagefind-ignore="all">`));
+    // La Cita del Día y las Obras de la portada lo usan; ninguno de los dos nombra la marca.
+    expect(readFileSync(join(RAIZ, 'src/components/CitaDelDia.astro'), 'utf8')).toContain(
+      '<LoQueRota como="section" class="del-dia">',
     );
+    expect(readFileSync(join(RAIZ, 'src/pages/index.astro'), 'utf8')).toContain('<LoQueRota como="div">');
   });
 });
 

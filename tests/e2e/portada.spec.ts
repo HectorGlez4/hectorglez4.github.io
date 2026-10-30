@@ -1,7 +1,8 @@
 import { expect, test, type Page } from '@playwright/test';
 import { MARCA } from '../../src/lib/marca.ts';
 import { entradaDeLoDescargado } from '../../src/lib/guiones.ts';
-import { rutaDeCita } from '../../src/lib/superficies.ts';
+import { rutaDeCita, rutaDelDirectorioDeObras } from '../../src/lib/superficies.ts';
+import { OBRAS_DE_LA_PORTADA } from '../../src/lib/umbrales.ts';
 import { apuntarGuiones, fueraDeLaListaAlCargar } from './ayuda/guiones.ts';
 import { censoDeCotejo } from './ayuda/corpus.ts';
 
@@ -308,4 +309,110 @@ test.describe('Historia 28.1 — la portada abre con las cifras del Corpus y un 
       }
     });
   }
+});
+
+/*
+ * Historia 28.3 — las Obras de la portada, con el sitio de siempre (el Corpus real): el bloque, sus
+ * filas de Autores distintos, la tipografía y los colores medidos, las filas que se tocan y el
+ * cierre a `/obras/` con el número del Directorio de Obras.
+ */
+test.describe('Historia 28.3 — seis Obras que cambian con la jornada', () => {
+  test('«Obras» va tras «La cita de hoy» y antes de «Temas», con filas de Autores distintos', async ({ page }) => {
+    await page.goto('/');
+    const rotulos = await page.locator('main h2').allTextContents();
+    const i = rotulos.map((r) => r.trim()).indexOf('Obras');
+    expect(rotulos.map((r) => r.trim()).slice(i - 1, i + 2)).toEqual(['La cita de hoy', 'Obras', 'Temas']);
+
+    const filas = page.locator('main section[aria-labelledby="obras"] li[data-zona="obras-de-portada"] a');
+    await expect(filas).toHaveCount(OBRAS_DE_LA_PORTADA);
+    const hrefs = await filas.evaluateAll((enlaces) => enlaces.map((a) => a.getAttribute('href')!));
+    for (const href of hrefs) expect(href).toMatch(/^\/obra\/[^/]+\/[^/]+\/$/);
+    const autores = new Set(hrefs.map((h) => h.split('/')[2]));
+    expect(autores.size).toBe(OBRAS_DE_LA_PORTADA);
+    // En la misma pestaña.
+    for (const target of await filas.evaluateAll((enlaces) => enlaces.map((a) => a.getAttribute('target')))) {
+      expect(target).toBeNull();
+    }
+  });
+
+  test('el título en Inter `body-lg` 600 y tinta; los hechos en `caption` y tinta apagada', async ({ page }) => {
+    await page.goto('/');
+    await page.evaluate(() => document.fonts.ready);
+    const m = await page.evaluate(() => {
+      const raiz = getComputedStyle(document.documentElement);
+      const resuelto = (propiedad: string, variable: string) => {
+        const sonda = document.createElement('span');
+        sonda.style.setProperty(propiedad, raiz.getPropertyValue(variable).trim());
+        document.body.append(sonda);
+        const r = getComputedStyle(sonda).getPropertyValue(propiedad);
+        sonda.remove();
+        return r;
+      };
+      const filas = [...document.querySelectorAll('main section[aria-labelledby="obras"] li')];
+      return {
+        esperado: {
+          sans: resuelto('font-family', '--sans'),
+          cuerpoLg: resuelto('font-size', '--cuerpo-lg'),
+          pie: resuelto('font-size', '--pie'),
+          tinta: resuelto('color', '--tinta'),
+          apagada: resuelto('color', '--tinta-apagada'),
+        },
+        filas: filas.map((li) => {
+          const titulo = getComputedStyle(li.querySelector('.titulo-de-obra')!);
+          const hechos = getComputedStyle(li.querySelector('.hechos-de-obra')!);
+          return {
+            titulo: { familia: titulo.fontFamily, cuerpo: titulo.fontSize, peso: titulo.fontWeight, color: titulo.color },
+            hechos: { familia: hechos.fontFamily, cuerpo: hechos.fontSize, color: hechos.color },
+          };
+        }),
+      };
+    });
+    expect(m.filas.length).toBeGreaterThan(0);
+    expect(m.esperado.sans).toMatch(/Inter/);
+    for (const fila of m.filas) {
+      expect(fila.titulo).toEqual({ familia: m.esperado.sans, cuerpo: m.esperado.cuerpoLg, peso: '600', color: m.esperado.tinta });
+      expect(fila.hechos).toEqual({ familia: m.esperado.sans, cuerpo: m.esperado.pie, color: m.esperado.apagada });
+    }
+  });
+
+  test('las filas se tocan, la lista va a 2 × de su rótulo y el cierre a 2 × de la lista, subrayado y con 44 px', async ({ page }) => {
+    await page.goto('/');
+    await page.evaluate(() => document.fonts.ready);
+    const u = await unidad(page);
+    const m = await page.evaluate(() => {
+      const seccion = document.querySelector('main section[aria-labelledby="obras"]')!;
+      const caja = (e: Element) => e.getBoundingClientRect();
+      const lista = seccion.querySelector('ul')!;
+      const filas = [...lista.querySelectorAll(':scope > li')].map(caja);
+      const cierre = seccion.querySelector('p[data-zona="obras-de-portada"]')!;
+      const enlace = cierre.querySelector('a')!;
+      return {
+        bajoElRotulo: caja(lista).top - caja(seccion.querySelector('h2')!).bottom,
+        juntas: filas.slice(1).map((f, i) => f.top - filas[i].bottom),
+        cierre: caja(cierre).top - caja(lista).bottom,
+        alto: caja(enlace).height,
+        subrayado: getComputedStyle(enlace).textDecorationLine,
+        texto: enlace.textContent!.replace(/\u00a0/g, ' ').trim(),
+        href: enlace.getAttribute('href'),
+      };
+    });
+    expect(Math.abs(m.bajoElRotulo - 2 * u), `rótulo → lista: ${m.bajoElRotulo}`).toBeLessThanOrEqual(0.5);
+    for (const hueco of m.juntas) expect(Math.abs(hueco)).toBeLessThanOrEqual(0.5);
+    expect(Math.abs(m.cierre - 2 * u), `lista → cierre: ${m.cierre}`).toBeLessThanOrEqual(0.5);
+    expect(m.alto).toBeGreaterThanOrEqual(44);
+    expect(m.subrayado).toContain('underline');
+    expect(m.href).toBe(rutaDelDirectorioDeObras());
+    expect(m.texto).toMatch(/^Las [\d.]+ obras ›$/);
+  });
+
+  test('el número del cierre es el de Obras de /obras/', async ({ page }) => {
+    await page.goto('/');
+    const texto = (await page.locator('main p[data-zona="obras-de-portada"] a').textContent())!;
+    const n = Number(/Las ([\d.]+) obras/.exec(texto)![1].replaceAll('.', ''));
+    await page.goto(rutaDelDirectorioDeObras());
+    const obras = await page
+      .locator('main a[href^="/obra/"]')
+      .evaluateAll((enlaces) => new Set(enlaces.map((a) => a.getAttribute('href'))).size);
+    expect(n).toBe(obras);
+  });
 });

@@ -1113,10 +1113,11 @@ describe('Historia 12.1 — sobre un sitio construido de verdad', () => {
       const rotulos = [...cuerpo.matchAll(/<h([1-6])\b[^>]*>([\s\S]*?)<\/h\1>/g)].map(
         (m) => `h${m[1]}:${m[2].replace(/<[^>]*>/g, '').trim()}`,
       );
-      expect(rotulos).toEqual(['h2:La cita de hoy', 'h2:Temas', 'h2:Colecciones', 'h2:Autores']);
+      // Historia 28.3 — este Corpus tiene Obras indexables: «Obras» va entre la Cita del Día y los Temas.
+      expect(rotulos).toEqual(['h2:La cita de hoy', 'h2:Obras', 'h2:Temas', 'h2:Colecciones', 'h2:Autores']);
       // Cada sección de la portada se nombra por su rótulo, y el `id` no se repite en la página.
       const secciones = hijos.filter((e) => e.etiqueta === 'section' && !(e.atributos.get('class') ?? '').includes('del-dia'));
-      expect(secciones).toHaveLength(3);
+      expect(secciones).toHaveLength(4);
       const ids = [...html.matchAll(/\sid="([^"]+)"/g)].map((m) => m[1]);
       for (const seccion of secciones) {
         const nombre = seccion.atributos.get('aria-labelledby');

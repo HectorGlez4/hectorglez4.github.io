@@ -21,6 +21,11 @@
  *     falta en cada lado. Va **después** de la integración del sitemap
  *     en `astro.config.mjs`, porque es esa la que lo escribe en este mismo gancho. Pagefind
  *     corre después de Astro (`package.json`), así que lo que se compara es la marca.
+ *
+ *     Desde la Historia 28.3 (AD-17) comprueba también, en la misma lista de desajustes, que toda
+ *     Obra del conjunto del que rotan las de la portada —las indexables que calculó en
+ *     `astro:build:start`, no solo las de hoy— tiene página en `dist/` y sin `noindex`
+ *     (`desajustesDeLasObrasDeLaPortada`): una que no, la portada la enlazaría el día que le tocara.
  */
 
 import { readdir, readFile } from 'node:fs/promises';
@@ -30,6 +35,7 @@ import type { AstroIntegration } from 'astro';
 import { leerAutores, leerCitas, leerFichasDeObra, rutasDelCorpus } from '../tools/lib/corpus.ts';
 import {
   desajustesDeIndexables,
+  desajustesDeLasObrasDeLaPortada,
   informeDeCoincidencia,
   informeDeObras,
   marcasDePagina,
@@ -78,6 +84,8 @@ export async function obrasDelCorpusEnDisco(
 
 export default function rutasIndexablesDelCorpus(): AstroIntegration {
   let raiz = process.cwd();
+  /** Historia 28.3 — las rutas de las Obras indexables: el conjunto del que rotan las de la portada. */
+  let rutasQueRotan: string[] = [];
 
   return {
     name: 'rutas-indexables',
@@ -89,6 +97,8 @@ export default function rutasIndexablesDelCorpus(): AstroIntegration {
       'astro:build:start': async ({ logger }) => {
         const { publicadas, indexables } = await obrasDelCorpusEnDisco(raiz);
         declararRutasIndexables(indexables.map((obra) => rutaDeLaObra(obra)));
+        // Historia 28.3 — el conjunto del que rotan las Obras de la portada, para `astro:build:done`.
+        rutasQueRotan = indexables.map((obra) => rutaDeLaObra(obra));
         logger.info(informeDeObras(publicadas.length, indexables.length));
         // Historia 22.8 — un nombre congelado que ya no es ninguna ficha activa avisa, no rompe.
         const congelacion = congelacionVigente();
@@ -120,7 +130,10 @@ export default function rutasIndexablesDelCorpus(): AstroIntegration {
           rutasDelSitemap,
         );
 
-        const desajustes = desajustesDeIndexables(sitemap, paginas);
+        const desajustes = [
+          ...desajustesDeIndexables(sitemap, paginas),
+          ...desajustesDeLasObrasDeLaPortada(rutasQueRotan, paginas),
+        ];
         if (desajustes.length === 0) {
           logger.info(informeDeCoincidencia(sitemap.length));
           return;

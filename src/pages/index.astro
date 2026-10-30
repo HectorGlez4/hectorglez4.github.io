@@ -5,9 +5,15 @@
  * Historia 28.1 (UX-DR56) — la portada sirve a quien vuelve: `main` abre con la línea de cifras del
  * Corpus (`lineaDeCifras` de `src/lib/publicado.ts`, su única redactora) y el Campo de búsqueda con
  * su botón, un GET a `/buscar/` sin guion, como el del 404. Siguen, en el orden fijo de la portada,
- * la Cita del Día, el hueco de «Obras» (28.3), «Temas», «Colecciones» y «Autores», cada sección con
- * su Rótulo, y al final la invitación a sostener si está encendida. La marca es el `h1` de la
- * cabecera (`Armazon.astro`), y aquí no hay ninguno.
+ * la Cita del Día, «Obras» (28.3), «Temas», «Colecciones» y «Autores», cada sección con su Rótulo,
+ * y al final la invitación a sostener si está encendida. La marca es el `h1` de la cabecera
+ * (`Armazon.astro`), y aquí no hay ninguno.
+ *
+ * Historia 28.3 (AD-12, UX-DR56) — «Obras» enseña hasta `OBRAS_DE_LA_PORTADA` Obras indexables de
+ * Autores distintos, que cambian con la jornada: las elige `obrasDelDia` de `src/lib/citaDelDia.ts`,
+ * junto a la Cita del Día y con la misma jornada, y van dentro de `LoQueRota.astro`, el único emisor
+ * de la marca de lo que rota. El rótulo y el cierre «Las {n} obras ›» a `/obras/` quedan fuera de
+ * ese subárbol: no cambian de un día a otro.
  *
  * Desde aquí se alcanzan todos los Temas publicados, todas las Colecciones publicadas y todos los
  * Autores, y desde ellos toda Página de Cita: es lo que sostiene NFR-5 —ninguna página huérfana—,
@@ -20,6 +26,8 @@ import Armazon from '../components/Armazon.astro';
 import CampoDeBusqueda from '../components/CampoDeBusqueda.astro';
 import CitaDelDia from '../components/CitaDelDia.astro';
 import DatosDelSitio from '../components/DatosDelSitio.astro';
+import FilaDeBloque from '../components/FilaDeBloque.astro';
+import LoQueRota from '../components/LoQueRota.astro';
 import Rotulo from '../components/Rotulo.astro';
 import Sostener from '../components/Sostener.astro';
 import portada from '../../corpus/portada.json';
@@ -28,14 +36,24 @@ import {
   PARAMETROS_DE_LA_BUSQUEDA,
   TEXTO_DE_EJEMPLO_DE_LA_BUSQUEDA,
 } from '../lib/busqueda.ts';
-import { aptasParaPortada, citaDelDia, jornadaDelBuild } from '../lib/citaDelDia.ts';
+import { aptasParaPortada, citaDelDia, jornadaDelBuild, obrasDelDia } from '../lib/citaDelDia.ts';
+import { cierreDeLasObras, contenidoDeTarjetaDeObra } from '../lib/atribucion.ts';
+import { directorioDeObras } from '../lib/directorios.ts';
+import { rutaDeLaObra } from '../lib/obras.ts';
 import { modelosEnRuta } from '../lib/ingreso.ts';
 import { DESCRIPCION_DEL_SITIO, MARCA } from '../lib/marca.ts';
-import { rutaDeAutor, rutaDeColeccion, rutaDeLaBusqueda, rutaDeTema } from '../lib/superficies.ts';
+import {
+  rutaDeAutor,
+  rutaDeColeccion,
+  rutaDeLaBusqueda,
+  rutaDelDirectorioDeObras,
+  rutaDeTema,
+} from '../lib/superficies.ts';
 import {
   autoresPublicados,
   conjuntoPublicable,
   lineaDeCifras,
+  obrasDelConjunto,
   temasPublicados,
 } from '../lib/publicado.ts';
 
@@ -63,6 +81,26 @@ const seleccion = citaDelDia(aptasParaPortada(conjunto.citas), jornada, portada.
 const autorDelDia = seleccion
   ? conjunto.autores.find((a) => a.slug === seleccion.cita.autor)
   : undefined;
+
+/*
+ * Historia 28.3 — las Obras de hoy, del conjunto indexable: la misma lista que da
+ * `rutasIndexables` —con `CONGELACION_DE_OBRAS` ya la estrecha `obrasIndexables`—, así que ninguna
+ * fila lleva a una página `noindex`, y `integraciones/indexables.ts` lo comprueba sobre `dist/` para
+ * todo el conjunto, no solo para las de hoy (AD-17). La portada no consulta la congelación ni ninguna
+ * otra regla de Obra. Sin ninguna, no hay bloque.
+ *
+ * El cierre cuenta las Obras del Directorio de Obras, adonde lleva: todas las publicadas, también
+ * las que no se indexan.
+ */
+const obrasDeHoy = obrasDelDia(
+  obrasDelConjunto(conjunto.citas, conjunto.autores).indexables,
+  conjunto.autores,
+  jornada,
+).map((obra) => {
+  const autor = conjunto.autores.find((a) => a.slug === obra.autor)!;
+  return { obra, hechos: contenidoDeTarjetaDeObra(autor, obra).hechos };
+});
+const obrasDelDirectorio = obrasDeHoy.length > 0 ? directorioDeObras(conjunto.autores, conjunto.citas).obras : 0;
 
 /* La descripción vive en `marca.ts`: la usan también los datos estructurados y la Tarjeta. */
 const DESCRIPCION = DESCRIPCION_DEL_SITIO;
@@ -114,7 +152,26 @@ const DESCRIPCION = DESCRIPCION_DEL_SITIO;
       )
     }
 
-    {/* Historia 28.3 — aquí entrará «Obras», entre la Cita del Día y los Temas. */}
+    {
+      /*
+       * Historia 28.3 — «Obras», entre la Cita del Día y los Temas. Las filas, dentro de lo que rota;
+       * el rótulo y el cierre, fuera. Cada fila dice el título y, en una segunda línea, «{Autor} ·
+       * {año} · {n} citas» como la Tarjeta de Obra (`contenidoDeTarjetaDeObra`): el punto medio es
+       * decoración y el lector oye una coma. Las partes van pegadas, sin espacio entre etiquetas,
+       * por lo mismo que en `TarjetaDeObra.astro`. Sin glifo de avance en las filas: lo lleva el
+       * cierre, que va a otra superficie. Ningún enlace comercial, ni con la afiliación encendida:
+       * las ediciones en venta son de la Página de Obra.
+       */
+      obrasDeHoy.length > 0 && (
+        <section aria-labelledby="obras">
+          <Rotulo id="obras">Obras</Rotulo>
+          <LoQueRota como="div">
+            <ul class="obras">{obrasDeHoy.map(({ obra, hechos }) => (<FilaDeBloque href={rutaDeLaObra(obra)} zona="obras-de-portada"><span class="titulo-de-obra">{obra.titulo}</span><span class="solo-para-lectores">, </span><span class="hechos-de-obra">{hechos.map((parte, i) => (<>{i > 0 && (<><span aria-hidden="true"> · </span><span class="solo-para-lectores">, </span></>)}{parte}</>))}</span></FilaDeBloque>))}</ul>
+          </LoQueRota>
+          <p class="cierre" data-zona="obras-de-portada"><a href={rutaDelDirectorioDeObras()}><span>{cierreDeLasObras(obrasDelDirectorio)}<span aria-hidden="true">&nbsp;›</span></span></a></p>
+        </section>
+      )
+    }
 
     {
       temas.length > 0 && (
@@ -257,6 +314,54 @@ const DESCRIPCION = DESCRIPCION_DEL_SITIO;
   section {
     margin-top: calc(var(--unidad) * 6);
     max-width: var(--medida-prosa);
+  }
+
+  /*
+   * Historia 28.3 (UX-DR56) — las Obras: la lista a 2 × de su rótulo, con el filete encima de la
+   * primera (el de debajo de cada una lo pone `FilaDeBloque`), y filas que se tocan. El título en
+   * Inter `body-lg` 600 y tinta, que parte palabras antes que desbordar; los hechos en `caption` y
+   * tinta apagada. Nada se recorta (NFR-12).
+   */
+  .obras {
+    list-style: none;
+    margin: calc(var(--unidad) * 2) 0 0;
+    padding: 0;
+    border-top: var(--grosor-filete) solid var(--filete);
+  }
+
+  .titulo-de-obra {
+    display: block;
+    font-family: var(--sans);
+    font-size: var(--cuerpo-lg);
+    font-weight: 600;
+    line-height: 1.4;
+    color: var(--tinta);
+    overflow-wrap: anywhere;
+  }
+
+  .hechos-de-obra {
+    display: block;
+    font-family: var(--sans);
+    font-size: var(--pie);
+    font-weight: 400;
+    line-height: 1.5;
+    color: var(--tinta-apagada);
+  }
+
+  /* El cierre, a 2 × de la lista: en tinta, subrayado siempre y con su zona de toque entera. */
+  .cierre {
+    margin: calc(var(--unidad) * 2) 0 0;
+  }
+
+  .cierre a {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--zona-de-toque);
+    font-family: var(--sans);
+    font-size: var(--cuerpo-md);
+    color: var(--tinta);
+    text-decoration: underline;
+    overflow-wrap: anywhere;
   }
 
   .chips {

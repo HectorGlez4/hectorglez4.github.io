@@ -817,7 +817,13 @@ describe('Historia 24.4 — la tarjeta en cada Página de Cita, construida', () 
       expect(existsSync(fichero), ruta).toBe(true);
       const marcado = sinHojas(await readFile(fichero, 'utf8'));
       expect(marcado, ruta).not.toContain('tarjeta-de-obra');
-      expect(marcado, ruta).not.toContain('fila-de-bloque');
+      /*
+       * Historia 28.3 — la portada pinta sus Obras con Filas de bloque (zona `obras-de-portada`): las
+       * únicas que puede llevar. Ninguna de la tarjeta ni de «Siguiente…»; el 404, ninguna.
+       */
+      const filas = [...marcado.matchAll(/<li class="fila-de-bloque" data-zona="([^"]+)"/g)].map((m) => m[1]);
+      expect(filas.length, ruta).toBe(marcado.split('fila-de-bloque').length - 1);
+      expect(new Set(filas), ruta).toEqual(new Set(ruta === 'index.html' && filas.length > 0 ? ['obras-de-portada'] : []));
     }
   });
 

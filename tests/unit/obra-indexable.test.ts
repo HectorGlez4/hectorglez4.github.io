@@ -38,6 +38,7 @@ import { ATRIBUTO_DE_INDEXABLE, EVENTOS } from '../../src/lib/medicion.ts';
 import { MARCAS_DE_OBRA } from '../../src/lib/vocabulario.ts';
 import {
   desajustesDeIndexables,
+  desajustesDeLasObrasDeLaPortada,
   informeDeCoincidencia,
   informeDeObras,
   nombresCongeladosSinFicha,
@@ -334,6 +335,25 @@ describe('la comprobación del build, pura', () => {
     expect(
       desajustesDeIndexables(['/cita/x'], [{ ...pagina('/cita/x', false), vistas: [EVENTOS.vistaDeObra] }]),
     ).toEqual([`${porSeparado}: /cita/x (la vista sin la marca)`]);
+  });
+
+  it('28.3 — una Obra del conjunto del que rotan las de la portada sin página o con `noindex` se nombra', () => {
+    const paginas = [pagina('/obra/a/b', false), pagina('/obra/a/c', true), pagina('/cita/x', false)];
+    expect(desajustesDeLasObrasDeLaPortada(['/obra/a/b/', '/obra/a/c/', '/obra/z/y/', '/obra/a/d/'], paginas)).toEqual([
+      '  · Obra de la portada sin página construida: /obra/a/d, /obra/z/y',
+      '  · Obra de la portada con `noindex`: /obra/a/c',
+    ]);
+    // Solo la ausente, o solo la `noindex`: una línea cada vez.
+    expect(desajustesDeLasObrasDeLaPortada(['/obra/q/r/'], paginas)).toEqual([
+      '  · Obra de la portada sin página construida: /obra/q/r',
+    ]);
+    expect(desajustesDeLasObrasDeLaPortada(['/obra/a/c/'], paginas)).toEqual(['  · Obra de la portada con `noindex`: /obra/a/c']);
+  });
+
+  it('28.3 — todas con su página sin `noindex`, o ninguna en el conjunto: nada que decir', () => {
+    const paginas = [pagina('/obra/a/b', false), pagina('/obra/a/c', true)];
+    expect(desajustesDeLasObrasDeLaPortada(['/obra/a/b/', '/obra/a/b'], paginas)).toEqual([]);
+    expect(desajustesDeLasObrasDeLaPortada([], paginas)).toEqual([]);
   });
 
   it('23.9 — una página no declarada no se juzga, lleve o no la marca', () => {

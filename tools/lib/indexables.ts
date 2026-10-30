@@ -189,6 +189,31 @@ export function desajustesDeIndexables(
   return lineas;
 }
 
+/**
+ * Las Obras de la portada que no se sostienen en lo construido — AD-17, Historia 28.3.
+ *
+ * La portada enseña cada jornada unas Obras del conjunto indexable (`obrasDelDia`), y la jornada
+ * no la decide ningún commit: si una Obra del conjunto del que rotan no tuviera página, o la
+ * tuviera con `noindex`, la portada la enlazaría el día que le tocara y ningún build del día de
+ * hoy lo habría visto. Por eso se mira **todo** el conjunto, no las de hoy: cada ruta tiene que
+ * tener su página en `dist/` y sin `noindex`. Devuelve las líneas del informe, con las rutas
+ * nombradas, o vacío.
+ */
+export function desajustesDeLasObrasDeLaPortada(
+  rutasQueRotan: readonly string[],
+  paginas: readonly Pick<PaginaIndexable, 'ruta' | 'noindex'>[],
+): string[] {
+  const porRuta = new Map(paginas.map((p) => [rutaNormalizada(p.ruta), p]));
+  const rutas = [...new Set(rutasQueRotan.map(rutaNormalizada))].sort((x, y) => x.localeCompare(y, 'es'));
+  const lineas: string[] = [];
+  const nombrar = (titulo: string, lista: readonly string[]) => {
+    if (lista.length > 0) lineas.push(`  · ${titulo}: ${lista.join(', ')}`);
+  };
+  nombrar('Obra de la portada sin página construida', rutas.filter((r) => !porRuta.has(r)));
+  nombrar('Obra de la portada con `noindex`', rutas.filter((r) => porRuta.get(r)?.noindex === true));
+  return lineas;
+}
+
 /** El titular del corte, cuando la comprobación falla. */
 export function titularDeDesajustes(lineas: number): string {
   return (
@@ -196,6 +221,7 @@ export function titularDeDesajustes(lineas: number): string {
     `${lineas === 1 ? 'desajuste' : 'desajustes'}). Salen de la misma declaración de ` +
     'src/lib/superficies.ts y de la misma lista de rutas indexables: si discrepan, alguna ' +
     'instancia se construyó con otra lista, o la marca de Obra no salió de `consecuenciasDe`. ' +
+    'Una Obra de la portada sin página o con `noindex` sale en la misma lista (Historia 28.3). ' +
     'Ver el detalle arriba.'
   );
 }
