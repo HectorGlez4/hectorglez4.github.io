@@ -58,3 +58,37 @@ la base antes de este registro.
 `npm run test:e2e` entero sobre la rama construida con la medición contra un receptor local; NFR-7
 con Lighthouse en perfil móvil 4G en `/buscar/` con un Autor y una Obra en la dirección y en una
 Página de Cita, frente a la principal del mismo día construida y servida igual.
+
+## Verificación previa a la fusión — 2026-10-30
+
+Bucle v8-ralph, etapa s-27, intento 1, sobre `af61d21b6e`. `df -g /`: 105 GB libres. Puertos 4321,
+4399, 4400, 4402 y 8787 libres al empezar y al terminar.
+
+- **Sincronía.** `git fetch origin`: `origin/main` (bbcc43b7d0) ya es antepasado de la rama; no hubo
+  merge.
+- **`npm ci`**: no hizo falta; `package-lock.json` y `node_modules/.package-lock.json` coinciden.
+- **`npm run build`** (con `MEDICION_ENDPOINT=http://localhost:8787/`): **pasa**. 5290 páginas,
+  4875 rutas indexables, NFR-5 con 5115 superficies a 3 saltos o menos, Directorio de Obras de
+  235.068 bytes, `dist/` juzgado en 480,3 MiB (aviso en 750 MiB), filtros y mapa de `/buscar/` en
+  94,7 KiB (aviso en 120 KiB).
+- **`npx astro check`**: **pasa**, 402 ficheros, 0 errores, 0 avisos, 8 sugerencias.
+- **`npm test`**: **pasa**, 152 ficheros y 7027 pruebas, en 891 s.
+- **`npm run test:e2e`** (los dos proyectos, receptor local con `wrangler dev` y D1 local):
+  **falla**. 1011 pasan, 101 se saltan, 1 falla y 49 no corren (el resto de
+  `tests/e2e/receptor.spec.ts` en escritorio, que va en serie tras el fallo).
+  - Falla `[escritorio] tests/e2e/receptor.spec.ts:443` «Historia 23.1 — cada superficie descarga
+    exactamente el guion de medición › la búsqueda descarga el guion de medición, una vez, y nada
+    más»: `/buscar/ pidió /medicion/9e2382e9.js,
+    /_astro/Busqueda.astro_astro_type_script_index_0_lang.DEmCydXO.js, /_astro/recuentos.B_30A4jF.js`,
+    frente al esperado `["/medicion/9e2382e9.js"]`. La prueba exige para `/buscar/` exactamente el
+    fichero de medición, y desde la 27.2 la página carga además el `<script>` procesado de
+    `Busqueda.astro` (ya en `GUIONES_EXTERNOS`) y su trozo `recuentos`.
+  - Repetida sola (`npx playwright test tests/e2e/receptor.spec.ts --project=escritorio`): **falla
+    igual** —no es intermitente—, 15 pasan y 49 no corren.
+  - El resto del fichero, sin ella (`--grep-invert "la búsqueda descarga el guion de medición"`):
+    63 pasan y 1 se salta. No hay ningún otro fallo.
+- **NFR-7 (Lighthouse)**: **no se midió**, porque la puerta de las pruebas de punta a punta no pasó.
+
+**Veredicto: no se fusiona.** Queda para el arreglo la prueba de `receptor.spec.ts` (o la carga de
+`/buscar/`): decidir si la búsqueda declara sus guiones propios en esa lista de la 23.1 o si la
+página no debe pedirlos al cargar.
