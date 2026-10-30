@@ -92,3 +92,60 @@ Bucle v8-ralph, etapa s-27, intento 1, sobre `af61d21b6e`. `df -g /`: 105 GB lib
 **Veredicto: no se fusiona.** Queda para el arreglo la prueba de `receptor.spec.ts` (o la carga de
 `/buscar/`): decidir si la búsqueda declara sus guiones propios en esa lista de la 23.1 o si la
 página no debe pedirlos al cargar.
+
+## Verificación previa a la fusión — 2026-10-30 (intento 2)
+
+Bucle v8-ralph, etapa s-27, intento 2, sobre `e687cf3a8e` (el arreglo de la fila de `/buscar/` en
+`receptor.spec.ts`). `df -g /`: 105 GB libres. Puertos 4321, 4399, 4400, 4402 y 8787 libres al
+empezar y al terminar.
+
+- **Sincronía.** `git fetch origin`: `origin/main` (bbcc43b7d0) ya es antepasado de la rama; no hubo
+  merge.
+- **`npm ci`**: no hizo falta; `package-lock.json` no cambia desde el 2026-10-24 y `node_modules`
+  se instaló con él.
+- **`npm run build`** (con `MEDICION_ENDPOINT=http://localhost:8787/`): **pasa**. 5290 páginas,
+  4875 rutas indexables, NFR-5 con 5115 superficies a 3 saltos o menos y las 37398 aristas del
+  modelo en `dist/`, Directorio de Obras de 235.068 bytes, `dist/` juzgado en 480,3 MiB (aviso en
+  750 MiB), filtros y mapa de `/buscar/` en 94,7 KiB (aviso en 120 KiB).
+- **`npx astro check`**: **pasa**, 402 ficheros, 0 errores, 0 avisos, 8 sugerencias.
+- **`npm test`**: **pasa**, 152 ficheros y 7027 pruebas, en 881 s.
+- **`npm run test:e2e`** (los dos proyectos, receptor local con `wrangler dev` y D1 local):
+  1059 pasan, 102 se saltan y 1 falla: `[movil] tests/e2e/busqueda.spec.ts:841` «Historia 27.1 —
+  … › filtrar por una Obra y ordenar por la clave da sus Citas en el orden de su Página de Obra, que
+  no es el de slug», con `apiRequestContext.get: socket hang up` al pedir
+  `/obra/jose-ingenieros/el-hombre-mediocre-ensayo-de-psicologia-y-moral/` al servidor local.
+  Repetido el fichero entero (`npx playwright test tests/e2e/busqueda.spec.ts`, los dos
+  proyectos): **pasa**, 176 pasan y 6 se saltan. Es intermitente (la conexión, no la aserción):
+  **la puerta de punta a punta pasa**.
+- **NFR-7 (Lighthouse 13.5.0, `npx --yes lighthouse@13.5.0`, perfil móvil por omisión, 4G
+  simulado, Google Chrome por `CHROME_PATH`)**. Las dos construcciones de hoy con
+  `MEDICION_ENDPOINT=http://localhost:8787/` y un receptor de pega que contesta 204 en :8787;
+  `origin/main` (bbcc43b7d0) en :4399 y la rama en :4400, las dos con `node tests/servidor.mjs` y
+  `SERVIDOR_CACHE_CONTROL=max-age=600`. 10 corridas por página y construcción, alternando principal
+  y rama corrida a corrida. Cada woff2 (2 distintos) se pide una sola vez en todos los informes.
+
+  | Página | Construcción | LCP media | LCP mediana | FCP media | FCP mediana |
+  |---|---|---|---|---|---|
+  | `/cita/seneca-a-cuantos-son-molestas-sus-mismas-riquezas/` | principal | 1758 | 1802 | 1034 | 1066 |
+  | ídem | rama | 1772 | 1802 | 1033 | 1064 |
+  | `/buscar/` | principal | 1622 | 1652 | 918 | 918 |
+  | `/buscar/` | rama | 1877 | 1877 | 1278 | 1278 |
+
+  LCP de cada corrida (ms): Cita principal 1804, 1653, 1802, 1804, 1802, 1802, 1802, 1653, 1653,
+  1802; Cita rama 1804, 1802, 1802, 1801, 1802, 1802, 1652, 1803, 1651, 1801; `/buscar/` principal
+  1654, 1652, 1502, 1651, 1653, 1652, 1651, 1652, 1652, 1502; `/buscar/` rama 1803, 1802, 1953,
+  1802, 1802, 1952, 1802, 1953, 1952, 1951.
+
+  La Página de Cita no se mueve (LCP +14 ms de media, FCP −1 ms). **`/buscar/` empeora**: FCP
+  +360 ms de media (918 → 1278, +39 %) y LCP +255 ms (1622 → 1877), todo bajo 2,5 s. La causa que
+  da el informe: la rama sirve `/_astro/buscar.BY9-jnIV.css` (4956 bytes) como `<link
+  rel="stylesheet">` que bloquea el pintado (`render-blocking-insight`: 152 ms simulados), cuando la
+  principal no carga ninguna hoja externa en `/buscar/`; además el HTML pasa de 26.960 a 36.873
+  bytes transferidos y la página pide `Busqueda.astro_astro_type_script_index_0_lang.DEmCydXO.js`
+  (17.571 bytes) y `recuentos.B_30A4jF.js` (769 bytes).
+
+**Veredicto: no se fusiona.** Las pruebas pasan (build, `astro check`, `npm test` y
+`npm run test:e2e` con una intermitencia que se repite en verde), pero la FCP media de `/buscar/` en
+la rama supera la de la principal en más de max(100 ms, 5 %). Queda para el arreglo la hoja
+`buscar.*.css` que bloquea el pintado (pasa por poco del límite con que Astro incrusta las hojas en
+la página) y, si hace falta, el peso del HTML de `/buscar/`.
