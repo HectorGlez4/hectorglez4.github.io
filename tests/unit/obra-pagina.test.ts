@@ -734,7 +734,9 @@ describe('Historia 22.4 — la Página de Obra, construida', () => {
       const posicion = (marca: string) => pagina.indexOf(marca);
       expect(posicion('class="listado"')).toBeGreaterThan(-1);
       expect(posicion('class="paginacion"')).toBeGreaterThan(posicion('class="listado"'));
-      expect(posicion('class="temas"')).toBeGreaterThan(posicion('class="paginacion"'));
+      // Historia 27.8, UX-DR95 (UX v8.4) — «Buscar en esta obra», tras la paginación y antes de Temas.
+      expect(posicion('class="buscar-en"')).toBeGreaterThan(posicion('class="paginacion"'));
+      expect(posicion('class="temas"')).toBeGreaterThan(posicion('class="buscar-en"'));
       expect(posicion('class="donde-leer"')).toBeGreaterThan(posicion('class="temas"'));
     });
 

@@ -2,8 +2,8 @@
 title: 'Historia 27.8 — Buscar en esta obra, en un Autor o en un tema'
 type: 'feature'
 created: '2026-10-29'
-status: 'draft'
-baseline_revision: 'ca87245df10c2143b5b33957841d454196f456e9'
+status: 'done'
+baseline_revision: '3008994d7b1f6337260d7fc62d7295d8edb8046e'
 review_loop_iteration: 0
 followup_review_recommended: false
 context:
@@ -17,9 +17,9 @@ deferred: []
 
 ## Intent
 
-**Problem:** Quien lee la página 1 de una Obra, de un Autor o de un Tema solo puede encontrar una Cita concreta pasando sus páginas (el Tema mayor tiene 12); y el campo del 404 se envía solo con Intro, sin control visible, con lo tecleado en la serif (FR-4, FR-6, FR-7, FR-51, UX-DR58, UX-DR94, UX-DR104–UX-DR109).
+**Problem:** Quien lee la página 1 de una Obra, de un Autor o de un Tema solo puede encontrar una Cita concreta pasando sus páginas (el Tema mayor tiene 12); y el campo del 404 se envía solo con Intro, sin control visible, con lo tecleado en la serif (FR-4, FR-6, FR-7, FR-51, UX-DR58, UX-DR94, UX-DR95, UX-DR104–UX-DR109).
 
-**Approach:** Un componente nuevo, «Buscar en…»: formulario GET sin guion a `/buscar/` con el Campo de búsqueda de la 26.6 (etiqueta = rótulo, sin ejemplo), el botón secundario «Buscar» y el filtro en campos ocultos, solo en la página 1 de Obra, Autor y Tema, justo encima del listado. El Campo gana el botón como opción, y el 404 pasa a usar ese Campo con botón.
+**Approach:** Un componente nuevo, «Buscar en…»: formulario GET sin guion a `/buscar/` con el Campo de búsqueda de la 26.6 (etiqueta = rótulo, sin ejemplo), el botón secundario «Buscar» y el filtro en campos ocultos, solo en la página 1 de Obra, Autor y Tema: en el Autor y en el Tema justo encima del listado, y en la Obra justo debajo de su listado y su paginación (UX v8.4, decisión de Héctor del 2026-10-30). El Campo gana el botón como opción, y el 404 pasa a usar ese Campo con botón.
 
 ## Boundaries & Constraints
 
@@ -27,9 +27,14 @@ deferred: []
 - Rótulos literales, constantes en `src/lib/busqueda.ts` (sin importaciones nuevas): «Buscar en esta obra», «Buscar en {nombre del Autor}» (función), «Buscar en este tema» (en minúscula, EXPERIENCE.md § Voice and Tone); botón «Buscar».
 - Formulario: `<form role="search" method="get" action={rutaDeLaBusqueda()}>` con `data-pagefind-ignore`, sin `target`; dentro, el Campo con `nombre="q"`, **sin** `ejemplo` ni `consulta`, `enterkeyhint="search"`, y debajo `<button type="submit">Buscar</button>`; después del campo, los ocultos en el orden y con los nombres de `PARAMETROS_DE_LA_BUSQUEDA`: Obra → `autor` = `autor.slug` y `obra` = `obra.nombre` (nombre de la ficha, nunca el título); Autor → `autor` = `autor.slug`; Tema → `tema` = `tema.slug`. Un `id` de campo único en la página.
 - Presentación (DESIGN.md § Campo de búsqueda y § Buscar en…): dentro de `--medida-prosa`; etiqueta y campo los del Campo (lo tecleado en `--sans` a `--cuerpo-lg`); botón secundario siena a su ancho a 2 × `--unidad` bajo el campo, como `.quitar` de `Busqueda.astro` (UX-DR9: texto `--siena`, filete `--grosor-filete` siena, `--radio`, alto `--zona-de-toque`, `padding-inline` 3 × `--unidad`, `--sans` `--cuerpo-md`, hover a `--siena`/`--sobre-siena`, sin `nowrap`). Solo tokens.
-- Colocación, solo en la página 1 (`currentPage === 1`), también en Obras `noindex` o con la familia congelada: Obra, 4 × `--unidad` bajo `p.salto` y `ul.listado` 4 × más abajo; Autor, 2 × bajo `h2.rotulo` «Citas documentadas» y `ul.listado` 3 × más abajo, sin tocar la Ficha; Tema, 4 × bajo el `h1` y `ul.listado` 4 × más abajo. Las páginas 2+ conservan sus distancias de hoy (Obra 4 × bajo `p.de`, Autor 2 × bajo el rótulo, Tema 4 × bajo el `h1`).
+- Colocación, solo en la página 1 (`currentPage === 1`), también en Obras `noindex` o con la familia congelada:
+  - **Obra** *(v8.4)*: tras el `ul.listado` y la `Paginacion` (que solo se pinta con más de una página), antes de `section.temas`, de «Dónde leer esta obra» y de la nota, a 5 × `--unidad` (40 px) de la paginación —o de la última tarjeta, sin paginación—. El listado vuelve a 4 × bajo `p.salto`, como sin formulario, y `section.temas` conserva su 5 ×, que pasa a medirse desde el formulario (UX-DR95: 5 × del formulario a «Compartir en» y 5 × de ahí a Temas; «Compartir en» es de la 25.6 y no está en esta rama).
+  - **Autor**: 2 × bajo `h2.rotulo` «Citas documentadas» y `ul.listado` 3 × más abajo, sin tocar la Ficha.
+  - **Tema**: 4 × bajo el `h1` y `ul.listado` 4 × más abajo.
+  - Las páginas 2+ conservan sus distancias de hoy (Obra 4 × bajo `p.de`, Autor 2 × bajo el rótulo, Tema 4 × bajo el `h1`).
 - Sin zona: ni el formulario ni sus antepasados llevan `data-zona` ni `data-sin-zona`; `EXENCIONES_DE_ZONA` no cambia (su docblock ya nombra «Buscar en…»).
 - El 404: `<form class="formulario" role="search" action={rutaDeLaBusqueda()} method="get">` con `CampoDeBusqueda` (`id="consulta"`, `ETIQUETA_DE_LA_BUSQUEDA`, `nombre="q"`, `ejemplo={TEXTO_DE_EJEMPLO_DE_LA_BUSQUEDA}`, con botón); se quitan sus reglas propias de `label`/`input` (serif, `--titular-sm`); la Cita del Día, los Temas y la invitación no cambian.
+- La medida de la primera pantalla (360 × 640, fin de la primera línea de la primera Cita) se toma en toda página 1 de Obra y de Tema y se anota, con fecha, en `## Medidas`.
 
 **Block If:**
 - A 360 × 640 sobre lo construido, con el formulario, la primera Cita de alguna página 1 de Obra o de Tema deja de empezar en la primera pantalla (fin de su primera línea > 640 px): compactar es decisión de UX. HALT con las medidas.
@@ -40,6 +45,7 @@ deferred: []
 - Ni ruta, ni página, ni superficie nueva; nada en `src/lib/superficies.ts`, `src/lib/ingreso.ts`, `src/lib/guiones.ts` ni `src/lib/medicion.ts`.
 - No tocar la isla de `/buscar/` (`Busqueda.astro`): la llegada con filtros es de la 27.4.
 - Sin texto de ejemplo en «Buscar en…»; sin botón en `/buscar/` ni en el filtro de los Directorios.
+- No traer «Compartir en» (25.6, rama `v8/epica-25`) ni reservarle hueco.
 
 ## I/O & Edge-Case Matrix
 
@@ -50,42 +56,44 @@ deferred: []
 | Con texto e Intro | «tiempo» + Intro (o tecla de buscar) | Misma pestaña, `q=tiempo`; el campo de `/buscar/` dice «tiempo» | — |
 | Atrás | tras llegar a `/buscar/` | `page.goBack()` vuelve a la página de origen | — |
 | Página 2+ | `/autor/x/2/`, `/tema/x/2/`, `/obra/a/b/2/` | Sin el formulario, distancias de hoy | — |
-| Obra `noindex` o congelada | p. 1 | Lleva el formulario igual | — |
+| Obra `noindex` o congelada | p. 1 | Lleva el formulario igual, bajo el listado | — |
+| Obra de más de 50 Citas | p. 1 con Paginación | Formulario tras `nav.paginacion`, 40 px; Temas 40 px más abajo | — |
+| Obra sin paginación | p. 1 de ≤ 50 Citas | Formulario 40 px bajo la última tarjeta | — |
 | 404 | ruta inexistente | Campo con «Por ejemplo: no hay camino», lo tecleado en Inter, botón «Buscar»; enviar → `/buscar/?q=…` | — |
 
 </intent-contract>
 
 ## Code Map
 
-- `src/components/CampoDeBusqueda.astro` -- el Campo de la 26.6 (`Props { id, etiqueta, nombre?, ejemplo?, consulta? }`); su docblock ya anuncia el botón de la 27/28. Añadir `boton?: boolean` (botón submit debajo + `enterkeyhint="search"`).
-- `src/components/Busqueda.astro:380–410` -- `.quitar, .mas button`: el tratamiento del secundario siena a replicar (patrón del repo: cada componente declara su botón, p. ej. `src/islands/CopiarCita.astro:153`). No se toca.
-- `src/lib/busqueda.ts:29–35` -- `ETIQUETA_DE_LA_BUSQUEDA`, `TEXTO_DE_EJEMPLO_DE_LA_BUSQUEDA`; l. 287 `PARAMETROS_DE_LA_BUSQUEDA`. Sin importaciones nuevas (lo fija `tests/unit/busqueda-con-filtros.test.ts:116`).
-- `src/lib/superficies.ts:440` -- `rutaDeLaBusqueda()`.
-- `src/pages/obra/[autor]/[slug]/[...page].astro` -- `primera`, `p.salto` (siempre en la p. 1: `conDondeLeer`), `ul.listado` con `margin-top` 4 ×; `obra.nombre`, `autor.slug`.
-- `src/pages/autor/[slug]/[...page].astro` -- `primera`, `h2.rotulo` «Citas documentadas», `.listado` 2 ×.
-- `src/pages/tema/[slug]/[...page].astro` -- sin `primera` todavía (`pagina.currentPage`), `h1`, `.listado` 4 ×.
-- `src/pages/404.astro` -- formulario a mano (`#consulta`, serif `--titular-sm`) a sustituir; `.formulario` 4 × y `--medida-prosa` se conservan.
-- `tests/unit/ayuda/construir.ts` -- `construirConCorpus`, `paginaConstruida`, `citaValida`, `AUTOR_VALIDO`, `TEMA_VALIDO`, `limpiar`, `RAIZ`; `tests/unit/obra-pagina.test.ts:1–60, 1182–1205` -- corpus con Obra paginada/`noindex`/indexable y la copia con `CONGELACION_DE_OBRAS` parcheada en `umbrales.ts`; `tests/unit/ayuda/guion.ts:48,217` -- `guionesEnLinea`, `guionesExternosDe`; `tools/lib/html.ts:145` -- `recorrerElementos` (antepasados).
-- `tests/unit/espinas-de-ux.test.ts:331` -- el 404 sin isla ni región de estado (debe seguir en verde).
-- `tests/e2e/accesibilidad.spec.ts` -- `SUPERFICIES` (l. 177, barrido axe l. 320 y reflujo 26.9 ~l. 960) ya incluye muestras de `/autor/`, `/tema/`, `/obra/` y `/404`; 24.7: «el listado a 32 px del salto» (l. ~2143, cambia), «primera Cita en la primera pantalla de toda página 1» (l. 2095), `hueco`/`cerca`; foco del campo del 404 (l. 590).
-- `tests/e2e/busqueda.spec.ts` -- `conjunto()` y `filtrosDeLaBusqueda` para lo esperado (l. ~1380–1430), `fraseDelRecuento`, `[data-estado]`, `[data-quitar]`, `#filtro-de-autor/-obra/-tema`. `tests/e2e/receptor.spec.ts:1581` usa `form[role="search"] input[name="q"]` del 404 (debe seguir en verde). `tests/e2e/pagina-404.spec.ts:17` (`input[type="search"]` único).
+- `_bmad-output/implementation-artifacts/27-8-buscar-en-wip.patch` -- el trabajo de la primera pasada (2026-10-29), con el formulario **encima** del listado en la Obra. Se aplica limpio sobre `3008994d7b` (`git apply --check` verificado el 2026-10-30). Todo vale salvo la colocación de la Obra: sus hunks de `src/pages/obra/[autor]/[slug]/[...page].astro`, de `tests/unit/obra-pagina.test.ts`, el test «el formulario va justo encima del listado que filtra» de `tests/unit/buscar-en.test.ts` y los de distancias de Obra de `tests/e2e/accesibilidad.spec.ts`.
+- `src/components/CampoDeBusqueda.astro` -- el Campo de la 26.6 (`Props { id, etiqueta, nombre?, ejemplo?, consulta? }`); el parche añade `boton?: boolean` (botón submit debajo + `enterkeyhint="search"`).
+- `src/components/BuscarEn.astro` (nuevo, en el parche) -- `form.buscar-en`; su `margin-top` lo pone cada página (`.pagina > :global(.buscar-en)`).
+- `src/components/Busqueda.astro:380–410` -- `.quitar, .mas button`: el secundario siena a replicar. No se toca.
+- `src/lib/busqueda.ts:29–35, 287` -- `ETIQUETA_DE_LA_BUSQUEDA`, `TEXTO_DE_EJEMPLO_DE_LA_BUSQUEDA`, `PARAMETROS_DE_LA_BUSQUEDA`. Sin importaciones nuevas (`tests/unit/busqueda-con-filtros.test.ts:116`).
+- `src/pages/obra/[autor]/[slug]/[...page].astro` -- docblock l. 11–13 (orden de la página 1); `</header>` l. 167; `ul.listado` l. 173; `<Paginacion>` l. 177; `section.temas` l. 179–186 (`.temas { margin-top: 5 × }`, l. 292); `DondeLeer` l. 189; nota l. 196. `.listado` (l. 284) conserva `margin: 4 × 0 0`. `Paginacion.astro:50` solo pinta con `lastPage > 1` (`margin-top` 3 ×, l. 114).
+- `src/pages/autor/[slug]/[...page].astro`, `src/pages/tema/[slug]/[...page].astro`, `src/pages/404.astro` -- tal como los deja el parche.
+- `tests/unit/obra-pagina.test.ts` -- l. 455–465 y 511–523: la 24.1 exige `</header>\s*<ul class="listado"` en toda página (vuelve a valer en la 1); l. 732–739: orden listado < paginación < temas < donde-leer.
+- `tests/unit/ayuda/construir.ts`, `tests/unit/ayuda/guion.ts:48,217`, `tools/lib/html.ts:145` -- lo que usa `buscar-en.test.ts`.
+- `tests/e2e/accesibilidad.spec.ts` -- 24.7: primera pantalla de toda página 1 de Obra (l. 2096–2124), «la Cabecera: el listado a 32 px del salto» (l. 2143–2152), «el pie no se mueve» (l. 2154–2167: `nav.paginacion → .temas` 40, `ul.listado → .temas` 40); `PIE()` l. 1871 (`conPaginacion`, `sinPaginacion`, `primeras`); `SUPERFICIES` l. 177.
+- `tests/e2e/busqueda.spec.ts`, `tests/e2e/receptor.spec.ts:1581`, `tests/e2e/pagina-404.spec.ts:17`, `tests/unit/espinas-de-ux.test.ts:331` -- deben seguir en verde.
 
 ## Tasks & Acceptance
 
 **Execution:**
-- `src/lib/busqueda.ts` -- exportar `ROTULO_BUSCAR_EN_ESTA_OBRA`, `rotuloBuscarEnAutor(nombre)`, `ROTULO_BUSCAR_EN_ESTE_TEMA` y `BOTON_DE_BUSCAR`, con docblock (27.8, UX-DR94) -- un dueño de los textos.
-- `src/components/CampoDeBusqueda.astro` -- `boton?: boolean`: `enterkeyhint="search"` en el `input` y `<button type="submit" class="buscar">{BOTON_DE_BUSCAR}</button>` tras él, con su regla de secundario siena a 2 × `--unidad`; docblock -- el botón de la decisión de Héctor del 18/10.
-- `src/components/BuscarEn.astro` (nuevo) -- `Props { id: string; rotulo: string; filtros: { autor?: string; obra?: string; tema?: string } }`; `form.buscar-en` según Always (Campo con botón, ocultos tras él en orden de `PARAMETROS_DE_LA_BUSQUEDA`, `data-pagefind-ignore`, `max-width: var(--medida-prosa)`), sin `<script>` ni `<style>` que dependa de la página; docblock (sin zona, sin guion, GET) -- el componente único.
-- `src/pages/obra/[autor]/[slug]/[...page].astro`, `src/pages/autor/[slug]/[...page].astro`, `src/pages/tema/[slug]/[...page].astro` -- pintar `BuscarEn` solo en la página 1 donde dice Always, con las distancias de la página 1 y sin cambiar las de las 2+; docblocks -- colocación.
-- `src/pages/404.astro` -- el Campo con botón según Always; quitar las reglas de `label`/`input`; docblock -- UX-DR108.
-- `tests/unit/buscar-en.test.ts` (nuevo) -- una construcción con Séneca, 55 Citas (Obra de 51 que pagina y no se indexa, Obra de 3 indexable, Obra de 1) y todas con un Tema de `TEMA_VALIDO` (pagina), más una segunda con `CONGELACION_DE_OBRAS` parcheada como en `obra-pagina.test.ts:1182`: en `dist/`, la p. 1 de Autor, Tema y de cada Obra (también `noindex` y congelada) lleva exactamente un `form[role="search"][method="get"][action="/buscar/"]`, con `data-pagefind-ignore`, sin `target`, su etiqueta = rótulo y `for` = `id` del campo `name="q"` sin `placeholder` y con `enterkeyhint="search"`, botón `type="submit"` «Buscar», y los ocultos exactos (nombres, valores, orden) de cada familia; ningún antepasado del formulario con `data-zona`/`data-sin-zona`; las p. 2 no lo llevan; las p. 1 y 2 de cada familia llevan los mismos `guionesEnLinea` y `guionesExternosDe`; `/404` lleva el Campo con «Por ejemplo: no hay camino» y el botón, y sigue sin guion propio -- Vitest sobre `dist/`.
-- `tests/e2e/busqueda.spec.ts` -- describe «Historia 27.8» sobre el Corpus real (lo esperado de `conjunto()`/`filtrosDeLaBusqueda`, como la 27.3): desde la p. 1 de una Obra indexable, una `noindex`, un Autor y un Tema, «Buscar» vacío → dirección con los ocultos, selectores elegidos (Autor y Obra en la Obra), «Quitar los filtros» visible, recuento `fraseDelRecuento` con N = Citas del listado de origen; con texto e Intro → misma pestaña, `[data-consulta]` con el texto; `goBack` → la página de origen; el 404 con el botón → `/buscar/?q=…` -- superficie real.
-- `tests/e2e/accesibilidad.spec.ts` -- guarda: las muestras `/autor/`, `/tema/` y `/obra/` de `SUPERFICIES` son páginas 1 con el formulario y `/404` lleva el botón (si la derivación no da páginas 1, añadirlas); 24.7: salto → formulario 32 px y formulario → listado 32 px (p. 1), 2 sin cambios; Autor: rótulo → formulario 16, formulario → listado 24; Tema: `h1` → formulario 32, formulario → listado 32; campo → botón 16; estilo calculado del texto del campo (`--sans`, `--cuerpo-lg`) y del botón (siena, filete, 44 px) en los tres y en el 404; nueva «a 360 × 640, la primera Cita sigue empezando en la primera pantalla de toda página 1 de Tema» (como la de Obra, l. 2095), y las dos anotan la peor medida en `test.info().annotations` -- UX-DR94, NFR-8, NFR-9.
-- `_bmad-output/implementation-artifacts/spec-27-8-buscar-en-esta-obra-en-un-autor-o-en-un-tema.md` -- sección `## Medidas` con fecha: peor fin de la primera línea de la primera Cita a 360 × 640 en las páginas 1 de Obra y de Tema, con el formulario (y su ruta) -- AC «la medida se anota».
+- Árbol de trabajo -- `git apply _bmad-output/implementation-artifacts/27-8-buscar-en-wip.patch` -- punto de partida; lo que no toca la Obra queda como está (rótulos, Campo con botón, `BuscarEn`, Autor, Tema, 404, describe 27.8 de `busqueda.spec.ts`).
+- `src/pages/obra/[autor]/[slug]/[...page].astro` -- mover `primera && <BuscarEn …/>` tras `<Paginacion>` y antes de `section.temas`; `.pagina > :global(.buscar-en) { margin-top: calc(var(--unidad) * 5) }`; quitar el comentario del parche sobre `.listado`; docblock de la página y del bloque: orden «Cabecera con salto, Listado, Paginación, “Buscar en esta obra”, Temas, “Dónde leer”, nota», v8.4 y decisión de Héctor del 2026-10-30 -- UX-DR94, UX-DR95.
+- `src/components/BuscarEn.astro` (docblock, l. 12 del parche) y `src/lib/busqueda.ts` (docblock de los rótulos, l. 151 del parche) -- decir «encima del listado en el Autor y el Tema, debajo de su listado y su paginación en la Obra (v8.4)» -- que ningún docblock contradiga la colocación.
+- `tests/unit/obra-pagina.test.ts` -- deshacer los cambios del parche (la 24.1 vuelve a `</header>\s*<ul class="listado"` en toda página, sin `SIN_NADA_ANTES_DEL_LISTADO_EN_LA_PRIMERA`) y añadir a l. 732 `posicion('class="buscar-en"')` entre `paginacion` y `temas` en la página 1 -- el orden de UX-DR95.
+- `tests/unit/buscar-en.test.ts` -- partir «el formulario va justo encima del listado que filtra»: Autor y Tema, `</form>` seguido de `<ul class="listado"`; Obra, `</header>` seguido de `<ul class="listado"` y el formulario después del cierre del listado —y de `class="paginacion"` en «Brevedad», que pagina— y antes de `class="temas"` y `class="donde-leer"` -- la colocación sobre `dist/`.
+- `tests/e2e/accesibilidad.spec.ts` -- 24.7 «la Cabecera»: vuelve a `salto → ul.listado` 32 px en la página 1 (sin formulario en medio) y comprueba que el formulario no está entre ellos; «el pie»: `nav.paginacion → form.buscar-en` 40 y `form.buscar-en → .temas` 40 en `conPaginacion`, `ul.listado → form.buscar-en` 40 y `form.buscar-en → .temas` 40 en `sinPaginacion`; describe 27.8 «las distancias»: quitar la Obra de la tabla de encima/debajo (la cubre la 24.7) y conservar campo → botón 16 en los cuatro; conservar la guarda del barrido, los estilos, los rótulos, la primera pantalla del Tema y la anotación de la peor medida de Obra y de Tema (el comentario de la anotación de Obra, l. 504 del parche, ya no dice «encima del listado») -- UX-DR94, UX-DR95, NFR-8, NFR-9.
+- `_bmad-output/implementation-artifacts/spec-27-8-buscar-en-esta-obra-en-un-autor-o-en-un-tema.md` -- en `## Medidas`, una entrada **2026-10-30** con la peor medida de las páginas 1 de Obra y de Tema con el formulario en su sitio nuevo (ruta y px), sacada de las anotaciones o del `console.log` de Playwright -- AC «la medida se anota».
+- `_bmad-output/implementation-artifacts/sprint-status.yaml` -- al cerrar, la línea `27-8-…` sin comentario en línea; nada más.
 
 **Acceptance Criteria:**
 - Given el sitio construido, when se lee `dist/`, then solo la página 1 de cada Obra (indexable, `noindex` o congelada), Autor y Tema lleva «Buscar en…», ninguna ruta nueva aparece en el sitemap ni en Pagefind, y ninguna de esas páginas carga un guion más que su página 2.
+- Given la página 1 de una Obra, when se lee su marcado, then el orden es Cabecera, listado, paginación (si la hay), «Buscar en esta obra», Temas, «Dónde leer esta obra», nota; y a 360 × 640 hay 32 px del salto al listado, 40 px de la paginación —o de la última tarjeta— al formulario y 40 px del formulario a Temas.
 - Given Playwright local sobre la rama, when corre el barrido WCAG 2.2 AA y el reflujo a 320 px de la 26.9, then incluye la página 1 de una Obra, de un Autor y de un Tema con el formulario y el 404 con su botón, y pasan.
+- Given toda página 1 de Obra y de Tema a 360 × 640, when se mide la primera línea de la primera Cita, then acaba a 640 px o antes, y la peor de cada familia queda anotada con fecha en `## Medidas`.
 - Given la página con «Buscar en…», when se lee su nombre accesible, then hay dos «Buscar» (enlace de la cabecera y botón) y se acepta.
 
 ## Spec Change Log
@@ -99,20 +107,35 @@ deferred: []
   Obra en Always, en el Code Map y en las pruebas de distancias de la 24.7 (salto → listado 32 px; listado →
   formulario 40 px), y conservar la medida de la primera pantalla en Obra y en Tema. El trabajo hecho sigue en
   `27-8-buscar-en-wip.patch`.
+- **2026-10-30 — replanificado sobre el borrador.** Approach, Always «Colocación» (Obra v8.4) y la matriz recogen la
+  decisión; el Code Map parte del parche y nombra los hunks que cambian; las tareas mueven el formulario en la Obra,
+  devuelven la 24.1 y la 24.7 «Cabecera» a su forma sin formulario y pasan las distancias del formulario de la Obra
+  al test del pie. `baseline_revision` pasa a `3008994d7b` (el parche no está commiteado). KEEP: rótulos, Campo con
+  botón, `BuscarEn`, Autor, Tema y 404 tal como los deja el parche; la medida de la primera pantalla en Obra y Tema.
 
 ## Review Triage Log
+
+### 2026-10-30 — Review pass
+- intent_gap: 0
+- bad_spec: 0
+- patch: 0
+- defer: 0
+- reject: 0
+- addressed_findings:
+  - none
 
 ## Design Notes
 
 - **Por qué el botón vive en el Campo:** el docblock de la 26.6 ya lo reserva («la 27 y la 28 le añaden… el botón “Buscar” y el `name`»): el 404, «Buscar en…» y la portada de la 28 comparten un solo marcado de campo + botón; el formulario lo pone quien lo usa.
 - **Por qué los ocultos van tras el campo:** el GET compone la dirección en orden de documento, y así sale `?q=&autor=&obra=` en el orden de `direccionDeLaBusqueda`. La isla lee por nombre y no reescribe una llegada ya resuelta (`q=` vacío = sin texto).
 - **Por qué `data-pagefind-ignore`:** «Buscar en José Martí Buscar» no es texto buscable de la página 1 indexable; mismo criterio que el salto de la 24.7.
+- **Por qué el margen del formulario en la Obra es suyo y no de la Paginación:** el formulario sigue a la `Paginacion` o, sin ella, al `ul.listado`; un `margin-top` de 5 × en el propio formulario da los 40 px en los dos casos sin tocar `Paginacion.astro`, que comparten Autor, Tema y Colección. `section.temas` conserva su 5 ×. Cuando llegue la 25.6, «Compartir en» se coloca tras el formulario con su propio 5 × (su criterio ya lo prevé).
 
 ## Verification
 
 **Commands:**
 - `npx astro check` -- expected: 0 errores.
-- `npx vitest run tests/unit/buscar-en.test.ts`, `tests/unit/espinas-de-ux.test.ts`, `tests/unit/obra-pagina.test.ts`, `tests/unit/busqueda-con-filtros.test.ts` -- expected: verdes.
+- `npx vitest run tests/unit/buscar-en.test.ts`, `tests/unit/espinas-de-ux.test.ts`, `tests/unit/obra-pagina.test.ts`, `tests/unit/busqueda-con-filtros.test.ts`, `tests/unit/superficies.test.ts` -- expected: verdes.
 - `npx playwright test tests/e2e/busqueda.spec.ts tests/e2e/accesibilidad.spec.ts tests/e2e/pagina-404.spec.ts tests/e2e/pagina-de-autor.spec.ts tests/e2e/pagina-de-tema.spec.ts --project=escritorio --project=movil` (largo: `correr.sh`/`esperar.pl`) -- expected: verde sobre el sitio construido por `tests/servidor.mjs`; si la primera pantalla falla, Block If.
 - `npx playwright test tests/e2e/receptor.spec.ts -g "404" --project=escritorio` -- expected: verde.
 
@@ -136,6 +159,17 @@ de la primera Cita del listado.
   que parte en cuatro o cinco líneas a 360 px. Compactar (quitar el botón, acercar las distancias, mover el
   formulario) es decisión de UX: no se ha tocado nada para que pasen.
 
+**2026-10-30**, sobre lo construido en la rama `v8/epica-27` (Corpus del día: 517 páginas 1 de Obra y 24 de
+Tema), con «Buscar en esta obra» ya **bajo** el listado (UX v8.4) y a 360 × 640 (proyectos `escritorio` y `movil`,
+mismas cifras): fin de la primera línea de la primera Cita del listado.
+
+- **Página 1 de Obra:** las 517 en la primera pantalla. La peor,
+  `/obra/jose-victorino-lastarria/discurso-de-incorporacion-de-don-jose-victorino-lastarria-a-una-sociedad-de-literatura-de-santiago-en-la-sesion-del-tres-de-mayo-de-1842/`,
+  **556,8 px** (era 722,24 con el formulario encima): vuelve a la medida de la 24.7, sin formulario entre la
+  Cabecera y el listado.
+- **Página 1 de Tema:** las 24 en la primera pantalla. La peor, `/tema/el-amor/`, **430,74 px** (sin cambio).
+- El Block If no salta.
+
 ## Auto Run Result
 
 Status: blocked
@@ -144,3 +178,52 @@ Blocking condition: Block If de la intención — a 360 × 640, con «Buscar en 
 Implementado y sin commitear en el árbol de trabajo: `src/lib/busqueda.ts` (rótulos y botón), `src/components/CampoDeBusqueda.astro` (`boton`), `src/components/BuscarEn.astro` (nuevo), las páginas de Obra, Autor y Tema (página 1), `src/pages/404.astro` (Campo con botón), `tests/unit/buscar-en.test.ts` (nuevo), `tests/unit/obra-pagina.test.ts` (la 24.1 admite el formulario entre la Cabecera y el listado de la página 1), `tests/e2e/busqueda.spec.ts` y `tests/e2e/accesibilidad.spec.ts` (describe 27.8, distancias de la 24.7, primera pantalla del Tema y anotación de la peor medida).
 
 Verificación: `npx astro check` 0 errores; `npx vitest run` de `buscar-en`, `espinas-de-ux`, `obra-pagina`, `busqueda-con-filtros` y `superficies` en verde (260 pruebas; `obra-pagina` se repitió, 66, tras ajustar su aserción de la 24.1); Playwright de `busqueda`, `accesibilidad`, `pagina-404`, `pagina-de-autor` y `pagina-de-tema` en `escritorio` y `movil`: 532 pasan, 12 se saltan, 2 fallan —la primera pantalla de la página 1 de Obra de la 24.7, en los dos proyectos, que es el Block If—; `receptor.spec.ts -g 404` en verde (4).
+
+### 2026-10-30 — replanificación
+
+Status: ready-for-dev
+Blocking condition: ninguna. Replanificado sobre el borrador con la decisión de Héctor del 2026-10-30 (UX v8.4): en la Obra, «Buscar en esta obra» va tras el listado y su paginación, a 5 × `--unidad`; Autor y Tema sin cambios. Parada tras planificar; la implementación parte de `27-8-buscar-en-wip.patch` (aplica limpio sobre `3008994d7b`).
+
+### 2026-10-30 — implementación
+
+Status: done
+Blocking condition: ninguna.
+
+**Resumen.** Se aplicó `27-8-buscar-en-wip.patch` (rótulos y botón en `src/lib/busqueda.ts`, `boton` en el Campo,
+`BuscarEn.astro`, Autor, Tema y 404) y se movió «Buscar en esta obra» bajo el listado y la paginación de la página 1
+de Obra, a 5 × `--unidad`, con Temas 5 × más abajo; el listado vuelve a 4 × bajo el salto.
+
+**Ficheros.**
+- `src/lib/busqueda.ts` — rótulos de «Buscar en…» y `BOTON_DE_BUSCAR`; el docblock nombra las dos colocaciones.
+- `src/components/CampoDeBusqueda.astro` — `boton`: submit «Buscar» secundario siena bajo el campo y `enterkeyhint`.
+- `src/components/BuscarEn.astro` (nuevo) — el formulario GET sin guion con los filtros ocultos.
+- `src/pages/obra/[autor]/[slug]/[...page].astro` — el formulario tras `<Paginacion>` y antes de Temas, 5 × (regla
+  separada de `.temas` para que el minificador no las funda); docblock con el orden de la página 1.
+- `src/pages/autor/[slug]/[...page].astro`, `src/pages/tema/[slug]/[...page].astro` — el formulario encima del listado.
+- `src/pages/404.astro` — el Campo con ejemplo y botón; fuera las reglas propias de serif.
+- `tests/unit/buscar-en.test.ts` (nuevo) — el formulario sobre `dist/`; la colocación partida en Autor/Tema (encima)
+  y Obra (debajo, tras `</nav>` o `</ul>`, antes de Temas y «Dónde leer»).
+- `tests/unit/obra-pagina.test.ts` — la 24.1 intacta (`</header>` seguido del listado); el orden del pie suma el
+  formulario entre paginación y Temas.
+- `tests/e2e/accesibilidad.spec.ts` — guarda del barrido, 24.7 «la Cabecera» (salto → listado 32, formulario bajo el
+  listado) y «el pie» (paginación/listado → formulario 40, formulario → Temas 40), describe 27.8 sin la Obra en la tabla
+  de encima/debajo, primera pantalla de Obra y Tema anotadas.
+- `tests/e2e/busqueda.spec.ts` — describe 27.8 (vacío, texto + Intro, atrás, páginas 2+, 404).
+
+**Revisión.** Capas externas sin hallazgos en esta pasada: 0 parches, 0 diferidos, 0 rechazados.
+`followup_review_recommended: false` (0 parches; puntuación 0).
+
+**Verificación.**
+- `npx astro check` — 0 errores, 0 avisos.
+- `npx vitest run` de `buscar-en`, `espinas-de-ux`, `obra-pagina`, `busqueda-con-filtros` y `superficies` — 261
+  pruebas; `obra-pagina` falló una vez («la hoja emitida del pie»: la regla del formulario, junto a `.temas` y con la
+  misma declaración, se fundía con ella) y, movida la regla, `obra-pagina` + `buscar-en` pasan (74).
+- Playwright `busqueda`, `accesibilidad`, `pagina-404`, `pagina-de-autor`, `pagina-de-tema` en `escritorio` y
+  `movil` — 533 pasan, 12 se saltan, 1 falla: `busqueda.spec.ts:840` (27.1) en `movil` por «socket hang up» del
+  servidor local; repetido aislado en los dos proyectos, pasa (2).
+- `npx playwright test tests/e2e/receptor.spec.ts -g "404" --project=escritorio` — 4 pasan.
+- Matriz: cada fila la cubre una prueba que corrió y pasó (describe 27.8 de `busqueda.spec.ts`, `buscar-en.test.ts`
+  con la congelación, y el pie de la 24.7 con y sin paginación).
+
+**Riesgos.** «Compartir en» (25.6) no está en esta rama: al fusionar las dos épicas se colocará tras el formulario con
+su propio 5 ×, y el pie de la 24.7 tendrá que medir formulario → «Compartir en» → Temas.

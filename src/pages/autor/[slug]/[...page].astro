@@ -16,6 +16,7 @@
  * que ve el visitante y en los identificadores del dominio.
  */
 import Armazon from '../../../components/Armazon.astro';
+import BuscarEn from '../../../components/BuscarEn.astro';
 import DatosDeAutor from '../../../components/DatosDeAutor.astro';
 import Paginacion from '../../../components/Paginacion.astro';
 import TarjetaDeCita from '../../../components/TarjetaDeCita.astro';
@@ -31,6 +32,7 @@ import {
   type Cita,
 } from '../../../lib/publicado.ts';
 import { añosDeAutor, descripcionDeAutor, semblanzaEn } from '../../../lib/atribucion.ts';
+import { rotuloBuscarEnAutor } from '../../../lib/busqueda.ts';
 import { CITAS_POR_PAGINA } from '../../../lib/umbrales.ts';
 import { tituloDeAutor } from '../../../lib/marca.ts';
 import type { GetStaticPaths } from 'astro';
@@ -157,6 +159,16 @@ const pieDeObras =
     }
     <h2 class="rotulo">Citas documentadas</h2>
 
+    {
+      /*
+       * Historia 27.8, UX-DR94 — «Buscar en {Autor}», solo en la página 1: al empezar el catálogo,
+       * bajo el rótulo y fuera de la Ficha, que queda entera; justo encima del listado que filtra.
+       * A 2 × `--unidad` del rótulo, y el listado 3 × más abajo. Las 2+ no lo llevan, y su listado
+       * sigue a 2 × del rótulo.
+       */
+      primera && <BuscarEn id="buscar-en-el-autor" rotulo={rotuloBuscarEnAutor(autor.nombre)} filtros={{ autor: autor.slug }} />
+    }
+
     {/*
       * UX-DR25 — los listados son listas reales. Cada tarjeta lleva el título de su Obra y no el
       * Autor, que es el mismo en todas y ya dice el `h1` (`atribucion="obra"`, Historia 24.3).
@@ -226,10 +238,20 @@ const pieDeObras =
     color: var(--tinta-apagada);
   }
 
+  /* Historia 27.8 — «Buscar en {Autor}», a 2 × `--unidad` del rótulo. */
+  .pagina > :global(.buscar-en) {
+    margin-top: calc(var(--unidad) * 2);
+  }
+
   .listado {
     list-style: none;
     margin: calc(var(--unidad) * 2) 0 0;
     padding: 0;
     border-top: var(--grosor-filete) solid var(--filete);
+  }
+
+  /* En la página 1, el listado empieza 3 × `--unidad` bajo «Buscar en {Autor}». */
+  :global(.buscar-en) + .listado {
+    margin-top: calc(var(--unidad) * 3);
   }
 </style>

@@ -17,16 +17,26 @@ import {
   AVISO_DEL_FALLO,
   AVISO_PREVIO,
   AVISO_SIN_GUION,
+  BOTON_DE_BUSCAR,
   FALLO_DE_LA_TANDA,
+  ROTULO_BUSCAR_EN_ESTA_OBRA,
+  ROTULO_BUSCAR_EN_ESTE_TEMA,
   RUTA_DEL_MAPA_DE_OBRAS,
   SUGERENCIA_SIN_FILTROS,
   avisoDeLaDireccion,
   fraseDelRecuento,
+  rotuloBuscarEnAutor,
   rotuloDeMostrarMas,
   sugerenciaSinResultados,
 } from '../../src/lib/busqueda.ts';
 import { ETIQUETA_DEL_FILTRO } from '../../src/lib/filtroDelDirectorio.ts';
-import { rutaDeAutor, rutaDeLaBusqueda, rutaDelDirectorioDeAutores, rutaDelDirectorioDeObras } from '../../src/lib/superficies.ts';
+import {
+  rutaDeAutor,
+  rutaDeLaBusqueda,
+  rutaDeTema,
+  rutaDelDirectorioDeAutores,
+  rutaDelDirectorioDeObras,
+} from '../../src/lib/superficies.ts';
 import { guionExternoDe } from '../../src/lib/guiones.ts';
 import { citaConLosDosBloques, temaBajoUmbral, textoDe } from './ayuda/corpus.ts';
 import {
@@ -34,6 +44,7 @@ import {
   citasPorObra,
   filtrosDeLaBusqueda,
   obrasDelAutor,
+  rutasIndexables,
   type ConjuntoPublicable,
 } from '../../src/lib/publicado.ts';
 import { clavesDeOrden, ordenDeLaListaDeObras, porSlug as porSlugDeCita, rutaDeLaObra } from '../../src/lib/obras.ts';
@@ -2849,6 +2860,180 @@ test.describe('Historia 27.7 — sin JavaScript, la búsqueda lleva a los Direct
     }
     expect(new URL(page.url()).search).toBe(consulta);
     await expect(page.locator('[data-resultados] .resultado')).toHaveCount(0);
+  });
+});
+
+/*
+ * Historia 27.8 (FR-4, FR-6, FR-7, FR-51, UX-DR94, UX-DR108) — «Buscar en esta obra», «Buscar en
+ * {Autor}» y «Buscar en este tema» llegan a `/buscar/` con el filtro puesto, en el navegador y con
+ * el índice de verdad; y el 404 envía con su botón. Lo esperado sale del Corpus en disco por los
+ * dueños del build (`filtrosDeLaBusqueda`, `rutasIndexables`), como en la 27.3: ningún nombre ni
+ * ninguna cifra escritos aquí. Cada origen se elige con todas sus Citas en la página 1 (como mucho
+ * `CITAS_POR_PAGINA`), así que el recuento de `/buscar/` es el número de Tarjetas de su listado.
+ */
+test.describe('Historia 27.8 — buscar en esta obra, en un Autor o en un tema', () => {
+  const RAIZ_DEL_CORPUS = join(new URL('../..', import.meta.url).pathname, 'corpus');
+  let leido: Promise<ConjuntoPublicable> | undefined;
+  const conjunto = () =>
+    (leido ??= (async () => conjuntoDeLosDatos(await leerDatosDelCorpus(rutasDelCorpus(RAIZ_DEL_CORPUS))))());
+  const porValor = (a: { valor: string }, b: { valor: string }) => (a.valor < b.valor ? -1 : a.valor > b.valor ? 1 : 0);
+  /** De más a menos Citas que quepan en la página 1, con desempate por valor. */
+  const enUnaPagina = <T extends { valor: string; recuento: number }>(opciones: readonly T[], minimo = 2) =>
+    [...opciones]
+      .filter((o) => o.recuento >= minimo && o.recuento <= CITAS_POR_PAGINA)
+      .sort((a, b) => b.recuento - a.recuento || porValor(a, b));
+
+  interface Origen {
+    nombre: string;
+    ruta: string;
+    rotulo: string;
+    /** Los ocultos esperados, en su orden. */
+    ocultos: [string, string][];
+    recuento: number;
+    /** El recuento de `/buscar/` sin texto. */
+    frase: string;
+    /** Los selectores elegidos al llegar. */
+    elegidos: Record<string, string>;
+  }
+
+  async function origenes(): Promise<Origen[]> {
+    const datos = await conjunto();
+    const filtros = filtrosDeLaBusqueda(datos);
+    const indexables = new Set(rutasIndexables(datos));
+    const nombreDe = (slug: string) => filtros.autores.find((a) => a.valor === slug)!.rotulo;
+    const tituloDe = (obra: string) =>
+      Object.values(filtros.mapaDeObras)
+        .flat()
+        .find(([valor]) => valor === obra)![1];
+    const deObra = (obra: (typeof filtros.obras)[number], nombre: string): Origen => ({
+      nombre,
+      ruta: rutaDeLaObra({ nombre: obra.valor }),
+      rotulo: ROTULO_BUSCAR_EN_ESTA_OBRA,
+      ocultos: [
+        ['autor', obra.autor],
+        ['obra', obra.valor],
+      ],
+      recuento: obra.recuento,
+      frase: fraseDelRecuento({ total: obra.recuento, texto: '', autor: nombreDe(obra.autor), obra: tituloDe(obra.valor) }),
+      elegidos: { 'filtro-de-autor': obra.autor, 'filtro-de-obra': obra.valor },
+    });
+    const obras = enUnaPagina(filtros.obras, 1);
+    const indexable = obras.find((o) => indexables.has(rutaDeLaObra({ nombre: o.valor })));
+    const sinIndexar = obras.find((o) => !indexables.has(rutaDeLaObra({ nombre: o.valor })));
+    expect(indexable, 'una Obra indexable de una sola página').toBeDefined();
+    expect(sinIndexar, 'una Obra `noindex` de una sola página').toBeDefined();
+    const autor = enUnaPagina(filtros.autores)[0];
+    const tema = enUnaPagina(filtros.temas)[0];
+    expect(autor, 'un Autor de una sola página').toBeDefined();
+    expect(tema, 'un Tema de una sola página').toBeDefined();
+    return [
+      deObra(indexable!, 'Obra indexable'),
+      deObra(sinIndexar!, 'Obra `noindex`'),
+      {
+        nombre: 'Autor',
+        ruta: rutaDeAutor(autor!.valor),
+        rotulo: rotuloBuscarEnAutor(autor!.rotulo),
+        ocultos: [['autor', autor!.valor]],
+        recuento: autor!.recuento,
+        frase: fraseDelRecuento({ total: autor!.recuento, texto: '', autor: autor!.rotulo }),
+        elegidos: { 'filtro-de-autor': autor!.valor },
+      },
+      {
+        nombre: 'Tema',
+        ruta: rutaDeTema(tema!.valor),
+        rotulo: ROTULO_BUSCAR_EN_ESTE_TEMA,
+        ocultos: [['tema', tema!.valor]],
+        recuento: tema!.recuento,
+        frase: fraseDelRecuento({ total: tema!.recuento, texto: '', tema: tema!.rotulo }),
+        elegidos: { 'filtro-de-tema': tema!.valor },
+      },
+    ];
+  }
+
+  /** La navegación a `/buscar/` que dispara `accion`, con la dirección que pidió el navegador. */
+  async function llegarConEnvio(page: Page, accion: () => Promise<void>): Promise<URL> {
+    const peticion = page.waitForRequest((r) => r.isNavigationRequest() && new URL(r.url()).pathname === rutaDeLaBusqueda());
+    await accion();
+    const url = new URL((await peticion).url());
+    await page.waitForURL((u) => u.pathname === rutaDeLaBusqueda());
+    return url;
+  }
+
+  test('«Buscar» sin texto desde la página 1 llega con los ocultos, los selectores elegidos, «Quitar los filtros» y el recuento del listado', async ({
+    page,
+  }) => {
+    test.setTimeout(120_000);
+    for (const origen of await origenes()) {
+      await page.goto(origen.ruta);
+      const formulario = page.locator('form[role="search"]');
+      await expect(formulario, origen.nombre).toHaveCount(1);
+      await expect(formulario.getByLabel(origen.rotulo, { exact: true }), origen.nombre).toHaveAttribute('name', 'q');
+      // N es el de su listado: todas sus Citas caben en la página 1.
+      await expect(page.locator('ul.listado > li'), origen.nombre).toHaveCount(origen.recuento);
+      const boton = formulario.getByRole('button', { name: BOTON_DE_BUSCAR, exact: true });
+      await expect(boton, origen.nombre).toBeVisible();
+      const url = await llegarConEnvio(page, () => boton.click());
+      expect(url.search, origen.nombre).toBe(`?q=${origen.ocultos.map(([n, v]) => `&${n}=${encodeURIComponent(v)}`).join('')}`);
+      await expect(page.locator('[data-estado]'), origen.nombre).toHaveText(origen.frase, { timeout: 15_000 });
+      for (const [id, valor] of Object.entries(origen.elegidos)) {
+        await expect(page.locator(`#${id}`), `${origen.nombre}: ${id}`).toHaveValue(valor, { timeout: 10_000 });
+      }
+      await expect(page.locator('[data-quitar]'), origen.nombre).toBeVisible();
+      await expect(page.locator('[data-consulta]'), origen.nombre).toHaveValue('');
+    }
+  });
+
+  test('con texto e Intro llega en la misma pestaña con el texto en el campo, y «atrás» vuelve al origen', async ({ page, context }) => {
+    test.setTimeout(120_000);
+    for (const origen of await origenes()) {
+      await page.goto(origen.ruta);
+      const campo = page.getByLabel(origen.rotulo, { exact: true });
+      await campo.fill('tiempo');
+      const url = await llegarConEnvio(page, () => campo.press('Enter'));
+      expect(url.searchParams.get('q'), origen.nombre).toBe('tiempo');
+      for (const [nombre, valor] of origen.ocultos) expect(url.searchParams.get(nombre), origen.nombre).toBe(valor);
+      expect(context.pages(), origen.nombre).toHaveLength(1);
+      await expect(page.locator('[data-consulta]'), origen.nombre).toHaveValue('tiempo', { timeout: 10_000 });
+      await expect(page.locator('[data-estado]'), origen.nombre).not.toBeEmpty({ timeout: 15_000 });
+      await page.goBack();
+      await page.waitForURL((u) => u.pathname === origen.ruta);
+      await expect(page.getByLabel(origen.rotulo, { exact: true }), origen.nombre).toBeVisible();
+    }
+  });
+
+  test('las páginas 2+ no lo llevan', async ({ page }) => {
+    const datos = await conjunto();
+    const filtros = filtrosDeLaBusqueda(datos);
+    const mayor = <T extends { valor: string; recuento: number }>(opciones: readonly T[]) =>
+      [...opciones].sort((a, b) => b.recuento - a.recuento || porValor(a, b))[0];
+    const autor = mayor(filtros.autores);
+    const tema = mayor(filtros.temas);
+    const obra = mayor(filtros.obras);
+    for (const [ruta, recuento] of [
+      [rutaDeAutor(autor.valor, 2), autor.recuento],
+      [rutaDeTema(tema.valor, 2), tema.recuento],
+      [rutaDeLaObra({ nombre: obra.valor }, 2), obra.recuento],
+    ] as const) {
+      // Sin página 2 no hay nada que mirar: el Corpus de hoy pagina las tres familias.
+      expect(recuento, ruta).toBeGreaterThan(CITAS_POR_PAGINA);
+      await page.goto(ruta);
+      await expect(page.locator('ul.listado > li').first(), ruta).toBeVisible();
+      await expect(page.locator('form.buscar-en'), ruta).toHaveCount(0);
+      await expect(page.getByRole('button', { name: BOTON_DE_BUSCAR, exact: true }), ruta).toHaveCount(0);
+    }
+  });
+
+  test('el 404 envía con su botón «Buscar» a `/buscar/?q=…`', async ({ page }) => {
+    await page.goto('/esta-ruta-no-existe-en-el-sitio/');
+    const campo = page.locator('form[role="search"] input[name="q"]');
+    await expect(campo).toHaveAttribute('placeholder', 'Por ejemplo: no hay camino');
+    await campo.fill('no hay camino');
+    const url = await llegarConEnvio(page, () =>
+      page.locator('form[role="search"]').getByRole('button', { name: BOTON_DE_BUSCAR, exact: true }).click(),
+    );
+    expect(url.search).toBe('?q=no+hay+camino');
+    await expect(page.locator('[data-consulta]')).toHaveValue('no hay camino', { timeout: 10_000 });
+    await expect(page.locator('[data-resultados] .resultado').first()).toBeVisible({ timeout: 15_000 });
   });
 });
 

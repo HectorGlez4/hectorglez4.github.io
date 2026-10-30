@@ -10,8 +10,13 @@
  * A diferencia de la Página de Autor, aquí cada tarjeta lleva el nombre del Autor y el título
  * de su Obra (`atribucion="autor-y-obra"`, Historia 24.3): el Tema agrupa a varios y sin el
  * nombre el listado no dice de quién es cada frase, ni sin el título de dónde sale.
+ *
+ * Historia 27.8, UX-DR94 — la página 1 lleva «Buscar en este tema» bajo el `h1` y encima del
+ * listado: la excepción declarada a que la Página de Tema empiece por su contenido (`DESIGN.md §
+ * Do's and Don'ts`, decisión de Héctor del 18/10), y la primera Cita sigue en la primera pantalla.
  */
 import Armazon from '../../../components/Armazon.astro';
+import BuscarEn from '../../../components/BuscarEn.astro';
 import DatosDeTema from '../../../components/DatosDeTema.astro';
 import Paginacion from '../../../components/Paginacion.astro';
 import TarjetaDeCita from '../../../components/TarjetaDeCita.astro';
@@ -22,6 +27,7 @@ import {
   type Autor,
   type Cita,
 } from '../../../lib/publicado.ts';
+import { ROTULO_BUSCAR_EN_ESTE_TEMA } from '../../../lib/busqueda.ts';
 import { CITAS_POR_PAGINA } from '../../../lib/umbrales.ts';
 import { tituloDeTema } from '../../../lib/marca.ts';
 import type { GetStaticPaths } from 'astro';
@@ -45,6 +51,7 @@ const pagina = Astro.props.page as import('astro').Page<Cita>;
 
 const ruta = rutaDeTema(tema.slug, pagina.currentPage);
 const canonica = new URL(ruta, Astro.site).href;
+const primera = pagina.currentPage === 1;
 ---
 
 <Armazon
@@ -63,6 +70,14 @@ const canonica = new URL(ruta, Astro.site).href;
   />
   <div class="pagina contenedor">
     <h1>{tema.nombre}</h1>
+
+    {
+      /*
+       * Historia 27.8 — «Buscar en este tema», solo en la página 1: a 4 × `--unidad` del `h1`, y el
+       * listado 4 × más abajo. En las 2+ el listado sigue a 4 × del `h1`.
+       */
+      primera && <BuscarEn id="buscar-en-este-tema" rotulo={ROTULO_BUSCAR_EN_ESTE_TEMA} filtros={{ tema: tema.slug }} />
+    }
 
     <ul class="listado">
       {pagina.data.map((cita) => <TarjetaDeCita cita={cita} atribucion="autor-y-obra" autor={autores.get(cita.autor)} zona="listado" />)}
@@ -84,6 +99,11 @@ const canonica = new URL(ruta, Astro.site).href;
     font-weight: 600;
     line-height: 1.2;
     margin: 0;
+  }
+
+  /* Historia 27.8 — «Buscar en este tema», a 4 × `--unidad` del `h1`. */
+  .pagina > :global(.buscar-en) {
+    margin-top: calc(var(--unidad) * 4);
   }
 
   .listado {

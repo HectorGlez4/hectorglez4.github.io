@@ -26,7 +26,13 @@ import { leerTarjetaDeObra, tarjetaDeObraDe } from '../unit/ayuda/tarjeta-de-obr
 import { filtrosDeLaBusqueda } from '../../src/lib/publicado.ts';
 import { conjuntoDeLosDatos, leerDatosDelCorpus } from '../../tools/lib/alcance.ts';
 import { rutasDelCorpus } from '../../tools/lib/corpus.ts';
-import { ANUNCIO_DEL_FALLO_DE_LA_BUSQUEDA, FALLO_DE_LA_TANDA } from '../../src/lib/busqueda.ts';
+import {
+  ANUNCIO_DEL_FALLO_DE_LA_BUSQUEDA,
+  BOTON_DE_BUSCAR,
+  FALLO_DE_LA_TANDA,
+  ROTULO_BUSCAR_EN_ESTA_OBRA,
+  ROTULO_BUSCAR_EN_ESTE_TEMA,
+} from '../../src/lib/busqueda.ts';
 import { guionExternoDe } from '../../src/lib/guiones.ts';
 import { TANDA_DE_RESULTADOS } from '../../src/lib/umbrales.ts';
 
@@ -314,6 +320,32 @@ test('el barrido cubre las superficies del sitio y no el Kit', () => {
   expect(SUPERFICIES.some((r) => r.startsWith('/autor/'))).toBe(true);
   expect(SUPERFICIES.some((r) => r.startsWith('/tema/'))).toBe(true);
   expect(SUPERFICIES).not.toContain('/kit');
+});
+
+/** El HTML construido de una ruta del barrido: con barra final o sin ella, y el 404 en la raíz. */
+const delBarrido = (ruta: string) =>
+  readFileSync(
+    sinBarra(ruta) === '/404' ? join(dist, '404.html') : join(dist, ...ruta.split('/').filter(Boolean), 'index.html'),
+    'utf8',
+  );
+
+/** Si una ruta es una página 2+ de un listado. */
+const esPaginaSegunda = (ruta: string) => /\/\d+\/?$/.test(ruta);
+
+/** La primera página 1 del barrido de una familia, o `undefined`. */
+const primeraDelBarrido = (prefijo: string) => SUPERFICIES.find((r) => r.startsWith(prefijo) && !esPaginaSegunda(r));
+
+test('27.8 — el barrido incluye la página 1 de una Obra, un Autor y un Tema con «Buscar en…», y el 404 con su botón', () => {
+  // Si la derivación diera solo páginas 2+, el barrido axe y el reflujo de la 26.9 no verían el
+  // formulario: aquí se exige que lo vean.
+  for (const prefijo of ['/obra/', '/autor/', '/tema/']) {
+    const ruta = primeraDelBarrido(prefijo);
+    expect(ruta, `ninguna página 1 de ${prefijo} en el barrido`).toBeDefined();
+    expect(delBarrido(ruta!), ruta).toMatch(/<form class="buscar-en"[^>]*\brole="search"/);
+  }
+  expect(delBarrido(OBRAS.noIndexable), OBRAS.noIndexable).toMatch(/<form class="buscar-en"/);
+  expect(delBarrido(OBRAS.segunda), OBRAS.segunda).not.toMatch(/<form class="buscar-en"/);
+  expect(delBarrido('/404')).toMatch(new RegExp(`<button\\b[^>]*\\btype="submit"[^>]*>${BOTON_DE_BUSCAR}</button>`));
 });
 
 test.describe('Historia 2.8, elevada por la 23.4 — WCAG 2.2 AA', () => {
@@ -2121,6 +2153,13 @@ test.describe('Historia 24.7 — el salto «Dónde leer esta obra ↓»', () => 
         peor = { ruta, fin: medida.fin };
       }
     }
+    // Historia 27.8 — con «Buscar en esta obra» en la página (bajo el listado desde la UX v8.4), la
+    // peor medida queda anotada.
+    test.info().annotations.push({
+      type: 'peor fin de la primera línea de la primera Cita a 360 × 640, página 1 de Obra',
+      description: `${peor.fin} px en ${peor.ruta}`,
+    });
+    console.log(`Historia 27.8 — página 1 de Obra a 360 × 640: la peor, ${peor.ruta}, ${peor.fin} px`);
     expect(fuera, `fuera de la primera pantalla (la peor de las que caben: ${peor.ruta}, ${peor.fin} px)`).toEqual([]);
   });
 
@@ -2140,27 +2179,44 @@ test.describe('Historia 24.7 — el salto «Dónde leer esta obra ↓»', () => 
     expect(Math.abs(medido! - esperado), `${que}: ${medido} px en vez de ${esperado}`).toBeLessThanOrEqual(0.5);
   };
 
-  test('la Cabecera: el listado a 32 px del salto en la página 1, y de «de {Autor}» en la 2', async ({ page }) => {
+  /*
+   * Historia 27.8, UX v8.4 — «Buscar en esta obra» va bajo el listado (decisión de Héctor del
+   * 2026-10-30): entre el salto y el listado no hay nada, y el listado sigue a 4 × `--unidad`.
+   */
+  test('la Cabecera: el listado a 32 px del salto en la página 1, sin «Buscar en esta obra» en medio, y de «de {Autor}» en la 2', async ({
+    page,
+  }) => {
     for (const ruta of [OBRAS.indexable, OBRAS.noIndexable, PIE().conPaginacion]) {
       await page.goto(ruta);
       cerca(await hueco(page, '.cabecera-de-obra .salto', 'ul.listado'), 32, `${ruta}, salto → listado`);
+      // El formulario está en la página 1, y por debajo del listado entero (sus distancias, en el pie).
+      const bajoElListado = await hueco(page, 'ul.listado', 'form.buscar-en');
+      expect(bajoElListado, `${ruta}: sin «Buscar en esta obra»`).not.toBeNull();
+      expect(bajoElListado!, `${ruta}: «Buscar en esta obra» entre el salto y el listado`).toBeGreaterThan(0);
     }
     await page.goto(OBRAS.segunda);
     expect(await page.locator('.salto').count(), OBRAS.segunda).toBe(0);
     expect(await page.locator(`[href="#${ANCLA}"], #${ANCLA}`).count(), OBRAS.segunda).toBe(0);
+    expect(await page.locator('form.buscar-en').count(), OBRAS.segunda).toBe(0);
     cerca(await hueco(page, '.cabecera-de-obra .de', 'ul.listado'), 32, `${OBRAS.segunda}, «de» → listado`);
   });
 
-  test('el pie no se mueve: 5 × hasta los Temas, 4 × hasta «Dónde leer», 2 × y 1 ×', async ({ page }) => {
+  /*
+   * Historia 27.8, UX-DR95 (UX v8.4) — «Buscar en esta obra» entra en el pie: 5 × `--unidad` de la
+   * paginación —o de la última tarjeta— al formulario, y 5 × del formulario a los Temas.
+   */
+  test('el pie: 5 × hasta «Buscar en esta obra», 5 × hasta los Temas, 4 × hasta «Dónde leer», 2 × y 1 ×', async ({ page }) => {
     const { conPaginacion, sinPaginacion } = PIE();
     await page.goto(conPaginacion);
-    cerca(await hueco(page, 'nav.paginacion', '.temas'), 40, `${conPaginacion}, Paginación → Temas`);
+    cerca(await hueco(page, 'nav.paginacion', 'form.buscar-en'), 40, `${conPaginacion}, Paginación → «Buscar en esta obra»`);
+    cerca(await hueco(page, 'form.buscar-en', '.temas'), 40, `${conPaginacion}, «Buscar en esta obra» → Temas`);
     cerca(await hueco(page, '.temas', '.donde-leer'), 32, `${conPaginacion}, Temas → «Dónde leer»`);
     cerca(await hueco(page, `#${ANCLA}`, `#${ANCLA} + *`), 16, `${conPaginacion}, h2 → lo que sigue`);
 
     await page.goto(sinPaginacion);
     expect(await page.locator('nav.paginacion').count(), sinPaginacion).toBe(0);
-    cerca(await hueco(page, 'ul.listado', '.temas'), 40, `${sinPaginacion}, listado → Temas`);
+    cerca(await hueco(page, 'ul.listado', 'form.buscar-en'), 40, `${sinPaginacion}, listado → «Buscar en esta obra»`);
+    cerca(await hueco(page, 'form.buscar-en', '.temas'), 40, `${sinPaginacion}, «Buscar en esta obra» → Temas`);
     cerca(await hueco(page, '.temas', '.donde-leer'), 32, `${sinPaginacion}, Temas → «Dónde leer»`);
     cerca(await hueco(page, `#${ANCLA}`, `#${ANCLA} + *`), 16, `${sinPaginacion}, h2 → lo que sigue`);
     cerca(await hueco(page, '#edicion-cotejada', '#edicion-cotejada + .linea'), 8, `${sinPaginacion}, h3 → línea`);
@@ -2198,6 +2254,193 @@ test.describe('Historia 24.7 — el salto «Dónde leer esta obra ↓»', () => 
     expect(nota.filete, `${ruta}, el filete de la nota`).toBe('1px');
     expect(nota.estilo, `${ruta}, el filete de la nota`).toBe('solid');
     cerca(nota.relleno, 24, `${ruta}, filete → texto de la nota`);
+  });
+});
+
+/**
+ * Historia 27.8 — «Buscar en esta obra / en {Autor} / en este tema» y el campo del 404 (UX-DR94,
+ * UX-DR108, NFR-8, NFR-9, `DESIGN.md § Búsqueda`). Las páginas salen del barrido (`SUPERFICIES`,
+ * páginas 1 de cada familia) y del `dist/`, nunca escritas a mano. Medio píxel de holgura, como en
+ * la 24.7. El barrido axe y el reflujo de la 26.9 de arriba ya pasan por estas mismas páginas (lo
+ * exige la guarda de la 27.8); aquí, las distancias, los estilos y la primera pantalla del Tema.
+ */
+test.describe('Historia 27.8 — «Buscar en…» y el botón del 404', () => {
+  const RUTA_404 = '/una-ruta-que-no-existe/';
+
+  /** Las páginas con el formulario: la Obra, el Autor y el Tema del barrido, en su página 1. */
+  const conFormulario = () => ({
+    obra: OBRAS.indexable,
+    autor: obligatoria(primeraDelBarrido('/autor/'), 'ninguna página 1 de Autor en el barrido'),
+    tema: obligatoria(primeraDelBarrido('/tema/'), 'ninguna página 1 de Tema en el barrido'),
+  });
+
+  /** El hueco entre el borde inferior de lo que va justo antes del formulario y el formulario. */
+  const huecoSobreElFormulario = (page: Page) =>
+    page.evaluate(() => {
+      const formulario = document.querySelector('form.buscar-en')!;
+      const antes = formulario.previousElementSibling!;
+      return {
+        antes: `${antes.tagName.toLowerCase()}.${antes.className}`,
+        hueco: formulario.getBoundingClientRect().top - antes.getBoundingClientRect().bottom,
+      };
+    });
+
+  const huecoBajoElFormulario = (page: Page) =>
+    page.evaluate(() => {
+      const formulario = document.querySelector('form.buscar-en')!;
+      const listado = document.querySelector('ul.listado')!;
+      return listado.getBoundingClientRect().top - formulario.getBoundingClientRect().bottom;
+    });
+
+  const casi = (medido: number, esperado: number, que: string) =>
+    expect(Math.abs(medido - esperado), `${que}: ${medido} px en vez de ${esperado}`).toBeLessThanOrEqual(0.5);
+
+  /*
+   * La Obra no está en la tabla de encima y debajo: desde la UX v8.4 su formulario va bajo el listado,
+   * y sus distancias las mide la 24.7 («la Cabecera» y «el pie»).
+   */
+  test('las distancias: Autor 16 bajo el rótulo y 24, Tema 32 bajo el h1 y 32; campo → botón 16', async ({ page }) => {
+    const { obra, autor, tema } = conFormulario();
+    for (const [ruta, antes, sobre, bajo] of [
+      [autor, /^h2\.rotulo/, 16, 24],
+      [tema, /^h1/, 32, 32],
+    ] as const) {
+      await page.goto(ruta);
+      const encima = await huecoSobreElFormulario(page);
+      expect(encima.antes, ruta).toMatch(antes);
+      casi(encima.hueco, sobre, `${ruta}, ${encima.antes} → formulario`);
+      casi(await huecoBajoElFormulario(page), bajo, `${ruta}, formulario → listado`);
+    }
+    for (const ruta of [obra, autor, tema, RUTA_404]) {
+      await page.goto(ruta);
+      const hueco = await page.evaluate(() => {
+        const formulario = document.querySelector('form[role="search"]')!;
+        const campo = formulario.querySelector('input[name="q"]')!.getBoundingClientRect();
+        const boton = formulario.querySelector('button[type="submit"]')!.getBoundingClientRect();
+        return boton.top - campo.bottom;
+      });
+      casi(hueco, 16, `${ruta}, campo → botón`);
+    }
+  });
+
+  test('las páginas 2+ conservan sus distancias: Autor 16 bajo el rótulo, Tema 32 bajo el h1', async ({ page }) => {
+    const segunda = (prefijo: string) => rutasConstruidas().filter((r) => r.startsWith(prefijo) && esPaginaSegunda(r)).sort()[0];
+    for (const [ruta, sobre, esperado] of [
+      [segunda('/autor/'), 'h2.rotulo', 16],
+      [segunda('/tema/'), 'h1', 32],
+    ] as const) {
+      expect(ruta, 'una página 2 en el dist/').toBeDefined();
+      await page.goto(ruta!);
+      expect(await page.locator('form.buscar-en').count(), ruta).toBe(0);
+      const medido = await page.evaluate(
+        (selector) =>
+          document.querySelector('ul.listado')!.getBoundingClientRect().top -
+          document.querySelector(selector)!.getBoundingClientRect().bottom,
+        sobre,
+      );
+      casi(medido, esperado, `${ruta}, ${sobre} → listado`);
+    }
+  });
+
+  test('lo tecleado va en Inter al cuerpo grande, y el botón es el secundario siena con filete y 44 px', async ({ page }) => {
+    const { obra, autor, tema } = conFormulario();
+    for (const ruta of [obra, autor, tema, RUTA_404]) {
+      await page.goto(ruta);
+      const estilo = await page.evaluate(() => {
+        const formulario = document.querySelector('form[role="search"]')!;
+        const campo = getComputedStyle(formulario.querySelector('input[name="q"]')!);
+        const nodo = formulario.querySelector('button[type="submit"]') as HTMLElement;
+        const boton = getComputedStyle(nodo);
+        const raiz = getComputedStyle(document.documentElement);
+        const resolver = (propiedad: 'color' | 'fontSize' | 'borderTopWidth', valor: string) => {
+          const prueba = document.createElement('span');
+          prueba.style.borderTopStyle = 'solid';
+          prueba.style[propiedad] = valor;
+          document.body.append(prueba);
+          const resuelto = getComputedStyle(prueba)[propiedad];
+          prueba.remove();
+          return resuelto;
+        };
+        return {
+          familia: campo.fontFamily,
+          cuerpo: campo.fontSize,
+          cuerpoLg: resolver('fontSize', raiz.getPropertyValue('--cuerpo-lg').trim()),
+          siena: resolver('color', raiz.getPropertyValue('--siena').trim()),
+          filete: resolver('borderTopWidth', raiz.getPropertyValue('--grosor-filete').trim()),
+          boton: {
+            texto: nodo.textContent!.trim(),
+            color: boton.color,
+            borde: [boton.borderTopStyle, boton.borderTopWidth, boton.borderTopColor],
+            alto: nodo.getBoundingClientRect().height,
+            ancho: nodo.getBoundingClientRect().width,
+            familia: boton.fontFamily,
+            espacio: boton.whiteSpace,
+          },
+          anchoDelFormulario: formulario.getBoundingClientRect().width,
+        };
+      });
+      expect(estilo.familia, ruta).toMatch(/^["']?Inter\b/u);
+      expect(estilo.cuerpo, ruta).toBe(estilo.cuerpoLg);
+      expect(estilo.boton.texto, ruta).toBe(BOTON_DE_BUSCAR);
+      expect(estilo.boton.color, ruta).toBe(estilo.siena);
+      expect(estilo.boton.borde, ruta).toEqual(['solid', estilo.filete, estilo.siena]);
+      expect(estilo.boton.alto, ruta).toBeGreaterThanOrEqual(44);
+      expect(estilo.boton.familia, ruta).toMatch(/^["']?Inter\b/u);
+      expect(estilo.boton.espacio, ruta).not.toMatch(/nowrap/);
+      // A su ancho: no ocupa la medida entera.
+      expect(estilo.boton.ancho, ruta).toBeLessThan(estilo.anchoDelFormulario);
+    }
+  });
+
+  test('los rótulos son las etiquetas visibles, y con el enlace de la cabecera hay dos «Buscar»', async ({ page }) => {
+    const { obra, autor, tema } = conFormulario();
+    for (const [ruta, rotulo] of [
+      [obra, ROTULO_BUSCAR_EN_ESTA_OBRA],
+      [autor, undefined],
+      [tema, ROTULO_BUSCAR_EN_ESTE_TEMA],
+    ] as const) {
+      await page.goto(ruta);
+      const etiqueta = page.locator('form.buscar-en label');
+      if (rotulo !== undefined) await expect(etiqueta, ruta).toHaveText(rotulo);
+      else await expect(etiqueta, ruta).toHaveText(/^Buscar en \S/u);
+      await expect(page.getByLabel(await etiqueta.innerText(), { exact: true }), ruta).toBeVisible();
+      await expect(page.getByRole('link', { name: BOTON_DE_BUSCAR, exact: true }), ruta).toHaveCount(1);
+      await expect(page.getByRole('button', { name: BOTON_DE_BUSCAR, exact: true }), ruta).toHaveCount(1);
+    }
+  });
+
+  test('a 360 × 640, la primera Cita sigue empezando en la primera pantalla de toda página 1 de Tema', async ({ page }) => {
+    const primeras = rutasConstruidas()
+      .filter((ruta) => /^\/tema\/[^/]+\/$/.test(ruta))
+      .sort((a, b) => a.localeCompare(b, 'es'));
+    expect(primeras.length, 'páginas 1 de Tema en el dist/').toBeGreaterThan(0);
+    test.setTimeout(60_000 + primeras.length * 500);
+    await page.setViewportSize({ width: 360, height: 640 });
+    const fuera: string[] = [];
+    let peor = { ruta: '', fin: 0 };
+    for (const ruta of primeras) {
+      await page.goto(ruta);
+      const medida = await page.evaluate(async () => {
+        await document.fonts.ready;
+        const fragmento = document.querySelector<HTMLElement>('.listado .fragmento');
+        if (fragmento === null || document.querySelector('form.buscar-en') === null) return null;
+        return {
+          desplazada: window.scrollY,
+          fin: fragmento.getBoundingClientRect().top + parseFloat(getComputedStyle(fragmento).lineHeight),
+        };
+      });
+      if (medida === null || medida.desplazada !== 0 || medida.fin > 640) {
+        fuera.push(`${ruta}: ${JSON.stringify(medida)}`);
+      } else if (medida.fin > peor.fin) {
+        peor = { ruta, fin: medida.fin };
+      }
+    }
+    test.info().annotations.push({
+      type: 'peor fin de la primera línea de la primera Cita a 360 × 640, página 1 de Tema',
+      description: `${peor.fin} px en ${peor.ruta}`,
+    });
+    console.log(`Historia 27.8 — página 1 de Tema a 360 × 640: la peor, ${peor.ruta}, ${peor.fin} px`);
+    expect(fuera, `fuera de la primera pantalla (la peor de las que caben: ${peor.ruta}, ${peor.fin} px)`).toEqual([]);
   });
 });
 

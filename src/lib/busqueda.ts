@@ -34,6 +34,34 @@ export const TEXTO_DE_EJEMPLO_DE_LA_BUSQUEDA = `Por ejemplo: ${EJEMPLO_DE_LA_BUS
 /** La etiqueta visible del campo de `/buscar/`. */
 export const ETIQUETA_DE_LA_BUSQUEDA = 'Escribe un fragmento, un autor o un tema.';
 
+/*
+ * Historia 27.8, UX-DR94 — los rótulos de «Buscar en…», el formulario que la página 1 de un Autor
+ * y de un Tema pone encima de su listado y la de una Obra debajo de su listado y su paginación (UX
+ * v8.4), y el del botón que lo envía. Un solo dueño de
+ * los textos: los pinta `src/components/BuscarEn.astro` y los leen las pruebas. Las entidades van
+ * en minúscula, como nombres comunes (`EXPERIENCE.md § Voice and Tone`): «esta obra», «este tema».
+ * El rótulo es la etiqueta visible del campo; no lleva texto de ejemplo, que en «Buscar en José
+ * Martí» daría cero resultados y enseñaría a fallar.
+ */
+
+/** El rótulo de «Buscar en…» en la página 1 de una Obra. */
+export const ROTULO_BUSCAR_EN_ESTA_OBRA = 'Buscar en esta obra';
+
+/** El rótulo de «Buscar en…» en la página 1 de un Autor: «Buscar en José Martí». */
+export function rotuloBuscarEnAutor(nombre: string): string {
+  return `Buscar en ${nombre}`;
+}
+
+/** El rótulo de «Buscar en…» en la página 1 de un Tema. */
+export const ROTULO_BUSCAR_EN_ESTE_TEMA = 'Buscar en este tema';
+
+/**
+ * El botón secundario que envía a `/buscar/` el Campo de búsqueda que lo lleva —«Buscar en…», el
+ * 404 y, en la Épica 28, la portada—: decisión de Héctor del 18/10, para que quien usa control por
+ * voz o conmutadores tenga qué pulsar.
+ */
+export const BOTON_DE_BUSCAR = 'Buscar';
+
 /**
  * Lo que está elegido en los selectores: el **valor** de cada filtro (el slug del Autor, el nombre
  * de la ficha de la Obra, el slug del Tema), vacío si está en «Todos…». `obra` se omite —o va

@@ -1,0 +1,58 @@
+---
+/**
+ * «Buscar en esta obra», «Buscar en {Autor}» y «Buscar en este tema» — Historia 27.8, FR-4, FR-6,
+ * FR-7, FR-51, UX-DR94, `DESIGN.md § Búsqueda → Buscar en esta obra / en {Autor} / en este Tema`.
+ *
+ * El componente único que la página 1 de un Autor y de un Tema pone justo encima del listado que
+ * filtra, y la de una Obra justo debajo de su listado y su paginación (UX v8.4, decisión de Héctor
+ * del 2026-10-30: encima echaba de la primera pantalla la primera Cita de las Obras de título
+ * largo). Con 12 páginas en el Tema mayor, es la forma de encontrar una Cita concreta sin pasarlas.
+ * Su `margin-top` lo pone cada página (`.pagina > :global(.buscar-en)`). Es un **formulario GET sin guion** a `/buscar/` (`rutaDeLaBusqueda`): el navegador
+ * compone la dirección y la isla de `/buscar/` la lee al llegar (Historia 27.4); ninguna
+ * combinación crea una ruta ni una página indexable, porque `/buscar/` es un solo HTML `noindex`.
+ * Va en la misma pestaña, sin `target`.
+ *
+ * Dentro, el Campo de búsqueda de la 26.6 con su botón «Buscar» (`CampoDeBusqueda`, `boton`): su
+ * etiqueta visible es el rótulo, sin texto de ejemplo —un ejemplo de Machado dentro de «Buscar en
+ * José Martí» daría cero resultados—, y lo tecleado viaja como `q`. **Después del campo** van los
+ * filtros en campos ocultos, con los nombres y en el orden de `PARAMETROS_DE_LA_BUSQUEDA`: el GET
+ * compone la dirección en orden de documento, así que sale `?q=&autor=&obra=` o `?q=&tema=`, el
+ * orden de `direccionDeLaBusqueda`. En la Obra van dos, `autor` y `obra` —el nombre de la ficha,
+ * nunca el título—: se llega con los dos selectores elegidos (decisión de Héctor del 18/10).
+ *
+ * `data-pagefind-ignore`: «Buscar en José Martí Buscar» no es texto buscable de la página 1
+ * indexable, por el mismo criterio que el salto de la 24.7. **Sin zona**: ni el formulario ni sus
+ * antepasados llevan `data-zona` ni `data-sin-zona` —la escucha de la medición solo mira enlaces y
+ * enviar un formulario no es salida (`EXENCIONES_DE_ZONA`, `src/lib/medicion.ts`)—. Sin `<script>`.
+ */
+import CampoDeBusqueda from './CampoDeBusqueda.astro';
+import { PARAMETROS_DE_LA_BUSQUEDA } from '../lib/busqueda.ts';
+import { rutaDeLaBusqueda } from '../lib/superficies.ts';
+
+interface Props {
+  /** El `id` del campo, único en la página: al que apunta su etiqueta. */
+  id: string;
+  /** El rótulo, que es la etiqueta visible del campo (`src/lib/busqueda.ts`). */
+  rotulo: string;
+  /** Los filtros que viajan ocultos: el slug del Autor, el nombre de la ficha de la Obra, el slug del Tema. */
+  filtros: { autor?: string; obra?: string; tema?: string };
+}
+
+const { id, rotulo, filtros } = Astro.props;
+
+// En el orden de `PARAMETROS_DE_LA_BUSQUEDA`, y solo los que lleva esta página.
+const ocultos = (['autor', 'obra', 'tema'] as const)
+  .filter((campo) => filtros[campo] !== undefined)
+  .map((campo) => ({ nombre: PARAMETROS_DE_LA_BUSQUEDA[campo], valor: filtros[campo]! }));
+---
+
+<form class="buscar-en" role="search" method="get" action={rutaDeLaBusqueda()} data-pagefind-ignore>
+  <CampoDeBusqueda id={id} etiqueta={rotulo} nombre={PARAMETROS_DE_LA_BUSQUEDA.texto} boton />
+  {ocultos.map((oculto) => <input type="hidden" name={oculto.nombre} value={oculto.valor} />)}
+</form>
+
+<style>
+  .buscar-en {
+    max-width: var(--medida-prosa);
+  }
+</style>
