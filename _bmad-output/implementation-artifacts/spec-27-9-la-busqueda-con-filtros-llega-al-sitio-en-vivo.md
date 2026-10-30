@@ -149,3 +149,26 @@ empezar y al terminar.
 la rama supera la de la principal en más de max(100 ms, 5 %). Queda para el arreglo la hoja
 `buscar.*.css` que bloquea el pintado (pasa por poco del límite con que Astro incrusta las hojas en
 la página) y, si hace falta, el peso del HTML de `/buscar/`.
+
+## NFR-7 en `/buscar/`, el arreglo y la vuelta a medir — 2026-10-30
+
+La puerta dio «worse» por `/buscar/`: primera pintura de 918 ms en main frente a 1.278 ms en la rama. Se hicieron dos cambios:
+
+- **`86b6dec80a`:** la hoja de `/buscar/` va en línea, con la misma regla de `assetsInlineLimit` que la del Armazón. Era un `<link rel="stylesheet">` de 4.956 bytes que bloqueaba el pintado.
+- **`89b2c3c14d`:** `tests/servidor.mjs` acepta `SERVIDOR_GZIP=1`, porque el alojamiento sirve con gzip. Comprobado en vivo: `/buscar/` llega con `content-encoding: gzip`, en 6.947 bytes.
+
+Todas las medidas usan las dos construcciones del día: main en `bbcc43b7d0` y la rama con el arreglo. Las sirve `tests/servidor.mjs` con `SERVIDOR_CACHE_CONTROL=max-age=600`, con Lighthouse 13.5.0 en móvil y alternando main y rama en cada corrida. Las cifras son medias.
+
+| Medida | Página | FCP main → rama | LCP main → rama |
+|---|---|---|---|
+| Simulada, sin gzip, 10 corridas | `/buscar/` | 922 → 1.021 | 1.624 → 1.791 |
+| Simulada, con gzip, 10 corridas | `/buscar/` | 757 → 857 | 1.474 → 1.609 |
+| Simulada, con gzip, 10 corridas | Página de Cita | 902 → 902 | 1.594 → 1.624 |
+| Estrangulamiento real (`devtools`), con gzip, 6 corridas | `/buscar/` | 737 → 734 | 737 → 734 |
+
+- **Sin hoja externa:** con el arreglo, `/buscar/` no pide ninguna hoja. Los dos documentos comprimidos caben en la primera ida y vuelta: 7.190 bytes en main y 8.977 en la rama.
+- **Lo que queda en la simulada:** la diferencia restante, de unos 100 ms de FCP, es del modelo de la simulación (Lantern) y no del navegador.
+  - La rama pide el guion de la isla, `Busqueda.astro_…js`, como `<script type="module">`, que Chrome pide con prioridad alta.
+  - El grafo pesimista de Lantern cuenta como bloqueante todo guion de prioridad alta, y la estimación de FCP promedia ese grafo con el optimista.
+  - Con estrangulamiento real los dos pintan igual.
+- **Contra el umbral:** con la regla de la puerta, `max(100 ms, 5 %)`, los 857 ms de la rama quedan justo en el límite de 757 + 100: no lo pasan, pero tampoco tienen margen.
