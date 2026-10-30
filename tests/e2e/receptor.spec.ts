@@ -15,7 +15,7 @@ import {
 } from '../../src/lib/medicion.ts';
 import { CAMPOS, MARCAS_DE_OBRA, claveEnLaBaliza, tramoDe } from '../../src/lib/vocabulario.ts';
 import { MIN_MS_VISIBLES_PARA_LA_LECTURA } from '../../src/lib/umbrales.ts';
-import { entradaDeLoDescargado } from '../../src/lib/guiones.ts';
+import { GUIONES_EXTERNOS, entradaDeLoDescargado } from '../../src/lib/guiones.ts';
 import { apuntarGuiones } from './ayuda/guiones.ts';
 import { conLaCacheDeVerdad as conLaCache } from './ayuda/cache.ts';
 import { CLAVE_DEL_ESTADO_EN_LA_ENTRADA } from '../../src/lib/busqueda.ts';
@@ -423,29 +423,59 @@ test.describe('Historia 7.3 — el receptor caído no rompe el sitio', () => {
  * punto final del receptor local, así que allí también se pide el fichero; aquí se juzgan
  * **además** contra un sitio construido por esta prueba, con su receptor en memoria, y con la
  * exigencia entera: exactamente el fichero de medición, una vez.
+ *
+ * Desde la Historia 27.2, `/buscar/` carga además, al cargar, el guion empaquetado de la búsqueda
+ * —la entrada `busqueda` de la lista, que inserta el campo y los selectores— con los trozos
+ * compartidos que importa (AD-6; la 3.1 enmendada: «y en `/buscar/`, desde la Épica 27, el
+ * empaquetado de la búsqueda»). Su fila lo declara por el `id` de la entrada, y la exigencia sigue
+ * entera: el fichero de medición una vez, cada entrada declarada una vez, sus trozos y nada más
+ * —Pagefind, que se pide al usarla, no está en la fila—.
  */
 const OBRA_NO_INDEXABLE = rutaDeObra('seneca', 'sobre-la-brevedad-de-la-vida');
 /** Historia 23.9 — la Obra que se indexa: dos de las tres Citas del sitio. */
 const OBRA_INDEXABLE = rutaDeObra('seneca', 'cartas-a-lucilio');
 
 test.describe('Historia 23.1 — cada superficie descarga exactamente el guion de medición', () => {
-  const SUPERFICIES: [string, string][] = [
-    ['la Página de Cita', RUTA_CITA],
-    ['la portada', '/'],
-    ['la Página de Autor', rutaDeAutor('seneca')],
-    ['la Obra que se indexa', OBRA_INDEXABLE],
-    ['la Obra que no se indexa', OBRA_NO_INDEXABLE],
-    ['la búsqueda', RUTA_BUSCAR],
-    ['una ruta que no existe (404)', '/no-existe-esta-ruta/'],
+  /** Nombre, ruta y los `id` de los guiones empaquetados que la superficie carga además al cargar. */
+  const SUPERFICIES: [string, string, readonly string[]][] = [
+    ['la Página de Cita', RUTA_CITA, []],
+    ['la portada', '/', []],
+    ['la Página de Autor', rutaDeAutor('seneca'), []],
+    ['la Obra que se indexa', OBRA_INDEXABLE, []],
+    ['la Obra que no se indexa', OBRA_NO_INDEXABLE, []],
+    ['la búsqueda', RUTA_BUSCAR, ['busqueda']],
+    ['una ruta que no existe (404)', '/no-existe-esta-ruta/', []],
   ];
 
-  for (const [nombre, ruta] of SUPERFICIES) {
-    test(`${nombre} descarga el guion de medición, una vez, y nada más`, async ({ page }) => {
+  for (const [nombre, ruta, empaquetados] of SUPERFICIES) {
+    const ademas = empaquetados.length === 0 ? 'y nada más' : `y además solo ${empaquetados.join(', ')}`;
+    test(`${nombre} descarga el guion de medición, una vez, ${ademas}`, async ({ page }) => {
       const pedidos = apuntarGuiones(page, SITIO);
       await page.goto(`${SITIO}${ruta}`, { waitUntil: 'networkidle' });
-      // Sin otro guion: ni el `ld+json` de los datos estructurados, que no es ejecutable, ni
-      // el generador de la Imagen ni Pagefind, que solo se piden al usarlos.
-      expect(pedidos, `${ruta} pidió ${pedidos.join(', ')}`).toEqual([RUTA_DEL_FICHERO]);
+      const lista = `${ruta} pidió ${pedidos.join(', ')}`;
+      if (empaquetados.length === 0) {
+        // Sin otro guion: ni el `ld+json` de los datos estructurados, que no es ejecutable, ni
+        // el generador de la Imagen ni Pagefind, que solo se piden al usarlos.
+        expect(pedidos, lista).toEqual([RUTA_DEL_FICHERO]);
+        return;
+      }
+      // El fichero de medición, una vez.
+      expect(pedidos.filter((pedido) => pedido === RUTA_DEL_FICHERO), lista).toHaveLength(1);
+      const declarados = GUIONES_EXTERNOS.filter((guion) => empaquetados.includes(guion.id));
+      expect(declarados.map((guion) => guion.id), 'cada empaquetado de la fila es una entrada de la lista').toEqual([
+        ...empaquetados,
+      ]);
+      // Cada entrada declarada, una vez.
+      for (const guion of declarados) {
+        expect(pedidos.filter((pedido) => guion.reconoce.test(pedido)), `${guion.id}: ${lista}`).toHaveLength(1);
+      }
+      // Y nada más que esas entradas y sus trozos compartidos: ni Pagefind, ni la Imagen.
+      const ajenos = pedidos.filter(
+        (pedido) =>
+          pedido !== RUTA_DEL_FICHERO &&
+          !declarados.some((guion) => guion.reconoce.test(pedido) || guion.trozos?.test(pedido)),
+      );
+      expect(ajenos, lista).toEqual([]);
     });
   }
 
