@@ -155,7 +155,12 @@ export const DESPLIEGUE_DE_LA_LECTURA: string | undefined = '2026-10-25';
  * vocabulario de la 23, y `/buscar/` no emite vista—, así que no entra en
  * `CORTES_DE_SERIE_DECLARADOS` ni en `CORTES_DE_SM8`; tampoco cambia lo que SM-11 compara.
  */
-export const DESPLIEGUE_DE_LA_BUSQUEDA_CON_FILTROS: string | undefined = undefined;
+/*
+ * Llegó el 2026-10-30: el merge `c76c565210` desplegó con Publicar (ejecución 41066751732), cuyo
+ * trabajo «Desplegar» terminó a las 14:19:28 UTC. Lo anota el bucle v8-ralph con la autorización
+ * de Héctor del 2026-10-24.
+ */
+export const DESPLIEGUE_DE_LA_BUSQUEDA_CON_FILTROS: string | undefined = '2026-10-30';
 
 /*
  * Los cortes de serie de la medición — AD-9, AD-13, Historia 23.10.
