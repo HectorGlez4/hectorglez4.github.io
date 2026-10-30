@@ -276,6 +276,9 @@ describe('Historia 27.8 — «Buscar en…», construido', () => {
     const boton = /<button\b([^>]*)>([\s\S]*?)<\/button>/.exec(formulario);
     expect(boton).not.toBeNull();
     expect(boton![1]).toMatch(/\btype="submit"/);
+    // Sin `name`, que añadiría algo a la dirección, y tras el campo, como en «Buscar en…».
+    expect(boton![1]).not.toMatch(/\bname=/);
+    expect(formulario.indexOf('<button')).toBeGreaterThan(formulario.indexOf(campo));
     expect(texto(boton![2])).toBe(BOTON_DE_BUSCAR);
     expect(guionesEnLinea(pagina)).toEqual([ARRANQUE_DE_MEDICION]);
     expect(guionesExternosDe(pagina)).toEqual([]);
@@ -317,4 +320,24 @@ describe('Historia 27.8 — «Buscar en…» con la familia Obra congelada', () 
     for (const esperado of ESPERADO) comprobarBuscarEn(await html(esperado.ruta), esperado);
     expect(formulariosDeBusqueda(await html(`${BREVEDAD}2/`))).toEqual([]);
   });
+});
+
+/*
+ * Un filtro vacío detiene la construcción, nombrando el rótulo y el campo: un oculto `tema=""` lo
+ * leería `/buscar/` como «sin filtro», y la búsqueda saldría sin acotar bajo «Buscar en este tema».
+ * La página de Tema se parchea en la copia (nunca la del árbol, AD-21) para pasar un valor en blanco.
+ */
+describe('Historia 27.8 — «Buscar en…» con un filtro vacío', () => {
+  it('no construye, y dice qué rótulo y qué filtro iban vacíos', async () => {
+    const pagina = 'src/pages/tema/[slug]/[...page].astro';
+    const original = await readFile(join(RAIZ, pagina), 'utf8');
+    const llamada = 'filtros={{ tema: tema.slug }}';
+    expect(original).toContain(llamada);
+    const resultado = await construirConCorpus(corpus(), {
+      ficheros: { [pagina]: original.replace(llamada, "filtros={{ tema: ' ' }}") },
+    });
+    aLimpiar.push(resultado.proyecto);
+    expect(resultado.codigo, resultado.salida).not.toBe(0);
+    expect(resultado.salida).toContain(`«${ROTULO_BUSCAR_EN_ESTE_TEMA}»: el filtro «tema» va vacío.`);
+  }, 300_000);
 });

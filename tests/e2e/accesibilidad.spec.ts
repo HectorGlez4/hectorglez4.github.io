@@ -2148,7 +2148,8 @@ test.describe('Historia 24.7 — el salto «Dónde leer esta obra ↓»', () => 
           fin: fragmento.getBoundingClientRect().top + parseFloat(getComputedStyle(fragmento).lineHeight),
         };
       });
-      if (medida === null || medida.desplazada !== 0 || medida.fin > 640) {
+      // Un `line-height: normal` daría `NaN`, que ni pasa de 640 ni gana a la peor: se cuenta fuera.
+      if (medida === null || medida.desplazada !== 0 || !Number.isFinite(medida.fin) || medida.fin > 640) {
         fuera.push(`${ruta}: ${JSON.stringify(medida)}`);
       } else if (medida.fin > peor.fin) {
         peor = { ruta, fin: medida.fin };
@@ -2205,6 +2206,10 @@ test.describe('Historia 24.7 — el salto «Dónde leer esta obra ↓»', () => 
   /*
    * Historia 27.8, UX-DR95 (UX v8.4) — «Buscar en esta obra» entra en el pie: 5 × `--unidad` de la
    * paginación —o de la última tarjeta— al formulario, y 5 × del formulario a los Temas.
+   *
+   * Al fusionar la Épica 25, «Compartir en» (25.6) va entre el formulario y los Temas, a 5 × de cada
+   * uno: «formulario → Temas 40» pasa a medirse como formulario → «Compartir en» 40 y «Compartir
+   * en» → Temas 40, nunca a otra distancia (diferido en el spec de la 27.8).
    */
   test('el pie: 5 × hasta «Buscar en esta obra», 5 × hasta los Temas, 4 × hasta «Dónde leer», 2 × y 1 ×', async ({ page }) => {
     const { conPaginacion, sinPaginacion } = PIE();
@@ -2409,6 +2414,10 @@ test.describe('Historia 27.8 — «Buscar en…» y el botón del 404', () => {
       await expect(page.getByRole('link', { name: BOTON_DE_BUSCAR, exact: true }), ruta).toHaveCount(1);
       await expect(page.getByRole('button', { name: BOTON_DE_BUSCAR, exact: true }), ruta).toHaveCount(1);
     }
+    // El 404 también: el enlace de la cabecera y el botón de su campo, uno de cada.
+    await page.goto(RUTA_404);
+    await expect(page.getByRole('link', { name: BOTON_DE_BUSCAR, exact: true }), RUTA_404).toHaveCount(1);
+    await expect(page.getByRole('button', { name: BOTON_DE_BUSCAR, exact: true }), RUTA_404).toHaveCount(1);
   });
 
   test('a 360 × 640, la primera Cita sigue empezando en la primera pantalla de toda página 1 de Tema', async ({ page }) => {
@@ -2431,7 +2440,8 @@ test.describe('Historia 27.8 — «Buscar en…» y el botón del 404', () => {
           fin: fragmento.getBoundingClientRect().top + parseFloat(getComputedStyle(fragmento).lineHeight),
         };
       });
-      if (medida === null || medida.desplazada !== 0 || medida.fin > 640) {
+      // Un `line-height: normal` daría `NaN`, que ni pasa de 640 ni gana a la peor: se cuenta fuera.
+      if (medida === null || medida.desplazada !== 0 || !Number.isFinite(medida.fin) || medida.fin > 640) {
         fuera.push(`${ruta}: ${JSON.stringify(medida)}`);
       } else if (medida.fin > peor.fin) {
         peor = { ruta, fin: medida.fin };

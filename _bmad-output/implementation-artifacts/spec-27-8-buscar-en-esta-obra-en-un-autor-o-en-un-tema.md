@@ -25,6 +25,13 @@ deferred:
     location: >-
       tests/e2e/busqueda.spec.ts:840; tests/servidor.mjs
     severity: medium
+  - summary: >-
+      Corrige el diferido anterior del «socket hang up»: la prueba es `busqueda.spec.ts:841` («filtrar por una Obra y ordenar por la clave…», Historia 27.1), cae en `escritorio` y en `movil`, y hay que estabilizarla antes del `npm run test:e2e` entero de la 27.9, que es quien la sufre.
+    evidence: |-
+      En la pasada del auditor de criterios del 2026-10-30 (log `audit-27-8.log`) falló por «socket hang up» de `tests/servidor.mjs` en los dos proyectos, no solo en `movil`, y repetida aislada pasó en los dos (2/2). La línea 840 es el comentario que la precede. No es una prueba de la 27.8 ni la toca su diff.
+    location: >-
+      tests/e2e/busqueda.spec.ts:841; tests/servidor.mjs
+    severity: medium
 ---
 
 <intent-contract>
@@ -94,6 +101,11 @@ deferred:
 ## Tasks & Acceptance
 
 **Execution:**
+
+> Hechas en `1fbd9e1640`. El parche ya no está en el árbol: quien quiera repetir la primera tarea lo saca de la
+> base con `git show 3008994d7b1f6337260d7fc62d7295d8edb8046e:_bmad-output/implementation-artifacts/27-8-buscar-en-wip.patch`,
+> y las «l. N del parche» de abajo se leen en esa copia.
+
 - Árbol de trabajo -- `git apply _bmad-output/implementation-artifacts/27-8-buscar-en-wip.patch` -- punto de partida; lo que no toca la Obra queda como está (rótulos, Campo con botón, `BuscarEn`, Autor, Tema, 404, describe 27.8 de `busqueda.spec.ts`).
 - `src/pages/obra/[autor]/[slug]/[...page].astro` -- mover `primera && <BuscarEn …/>` tras `<Paginacion>` y antes de `section.temas`; `.pagina > :global(.buscar-en) { margin-top: calc(var(--unidad) * 5) }`; quitar el comentario del parche sobre `.listado`; docblock de la página y del bloque: orden «Cabecera con salto, Listado, Paginación, “Buscar en esta obra”, Temas, “Dónde leer”, nota», v8.4 y decisión de Héctor del 2026-10-30 -- UX-DR94, UX-DR95.
 - `src/components/BuscarEn.astro` (docblock, l. 12 del parche) y `src/lib/busqueda.ts` (docblock de los rótulos, l. 151 del parche) -- decir «encima del listado en el Autor y el Tema, debajo de su listado y su paginación en la Obra (v8.4)» -- que ningún docblock contradiga la colocación.
@@ -156,6 +168,22 @@ deferred:
   - `[low]` `[patch]` El formulario del 404 no tenía prueba de zona: comparte con «Buscar en…» la comprobación de antepasados sin `data-zona` ni `data-sin-zona`.
   - `[low]` `[patch]` `27-8-buscar-en-wip.patch`, ya aplicado, seguía en el árbol: retirado (queda en git) y el Code Map lo dice.
   - `[low]` `[patch]` La medida y el resultado del 2026-10-29 se leían como vigentes: marcados como superados por la pasada del 2026-10-30.
+
+### 2026-10-30 — Review pass
+- intent_gap: 0
+- bad_spec: 0
+- patch: 8: (high 0, medium 0, low 8)
+- defer: 1: (high 0, medium 1, low 0)
+- reject: 19: (high 0, medium 3, low 16)
+- addressed_findings:
+  - `[low]` `[patch]` La primera pantalla del Tema (y la de Obra de la 24.7, que lleva la anotación de la 27.8) pasaba sin medir nada si `line-height` daba `NaN`: un `fin` no finito cuenta ahora como fuera de la primera pantalla.
+  - `[low]` `[patch]` Los dos «Buscar» (enlace de la cabecera y botón) no se comprobaban en el 404: la prueba de los rótulos de `accesibilidad.spec.ts` lo exige también allí.
+  - `[low]` `[patch]` El 404 escribía `nombre="q"` a mano: lo lee de `PARAMETROS_DE_LA_BUSQUEDA.texto`, el dueño del nombre.
+  - `[low]` `[patch]` La prueba unitaria del 404 no miraba que el botón va sin `name` y tras el campo: lo mira, como en «Buscar en…».
+  - `[low]` `[patch]` El rechazo de un filtro vacío en `BuscarEn` no lo ejercía ninguna prueba: nueva construcción en `buscar-en.test.ts` con la página de Tema parcheada en la copia (`tema: ' '`), que exige salida distinta de 0 y el mensaje con el rótulo y el campo.
+  - `[low]` `[patch]` «Atrás» solo se probaba tras una búsqueda con texto: el envío vacío también vuelve al origen.
+  - `[low]` `[patch]` La obligación de «Compartir en» al fusionar la 25 no constaba junto a la aserción que cambiará: comentario en «el pie» de la 24.7 que la describe y apunta al diferido.
+  - `[low]` `[patch]` Las tareas seguían mandando `git apply` de un parche retirado del árbol: una nota dice que están hechas en `1fbd9e1640` y cómo sacar el parche de la base.
 
 ## Design Notes
 
@@ -301,3 +329,45 @@ navegador, que la intención delega en Vitest sobre `dist/`).
 **Riesgos.** Los de la pasada anterior («Compartir en», ahora diferido) y el «socket hang up» intermitente, diferido
 para que no pille por sorpresa el `test:e2e` entero de la 27.9.
 
+
+### 2026-10-30 — segunda revisión
+
+Status: done
+Blocking condition: ninguna.
+
+**Resumen.** Segunda pasada de revisión sobre `286632b54c`, con los hallazgos de las cinco capas externas: sin
+intent_gap ni bad_spec; 8 parches, 1 diferido y 19 rechazados. Los parches cierran huecos de prueba (una medida de
+la primera pantalla que podía pasar sin medir, los dos «Buscar» del 404, el botón del 404 sin `name`, el rechazo
+del filtro vacío, «atrás» tras el envío vacío) y quitan del 404 el último nombre de parámetro escrito a mano. No
+cambia nada de lo que se ve.
+
+**Ficheros.**
+- `src/pages/404.astro` — `nombre={PARAMETROS_DE_LA_BUSQUEDA.texto}` en vez de `"q"`.
+- `tests/unit/buscar-en.test.ts` — el botón del 404 sin `name` y tras el campo; nueva construcción con un filtro
+  vacío que tiene que fallar nombrando rótulo y campo.
+- `tests/e2e/accesibilidad.spec.ts` — `fin` no finito cuenta fuera de la primera pantalla (Obra y Tema); dos «Buscar»
+  en el 404; comentario de «Compartir en» en el pie de la 24.7.
+- `tests/e2e/busqueda.spec.ts` — «atrás» tras el envío vacío vuelve al origen.
+- Este spec — nota en las tareas sobre el parche retirado, diferido corregido del «socket hang up», triage.
+
+**Hallazgos.** 8 parches (low 8); 1 diferido (corrige el del «socket hang up»: `busqueda.spec.ts:841`, en los dos
+proyectos, a estabilizar antes de la 27.9); 19 rechazados, entre ellos: el `sprint-status.yaml` (lo pone al día el
+bucle en su `chore(sprint)`), un salto o enlace al formulario de la Obra y la medida del Autor (la colocación es la
+decisión v8.4 de Héctor y la intención no pide más), `aria-labelledby` en el único `search` de cada página, la
+prop discriminada, `data-pagefind-ignore="all"` (la intención fija el atributo a secas y el formulario no lleva
+metadatos ni filtros), el hover sin `@media (hover: hover)` (igual que `.quitar`, al que la intención manda imitar),
+medir el uso de «Buscar en…» (la intención lo deja sin zona y sin medición), la regla del minificador (ya la vigila
+`obra-pagina.test.ts`), el «a su ancho» (`ancho < formulario` distingue ya del ancho entero) y el «antes» de los
+guiones comparado con la página 2 (es lo que dice el criterio).
+`followup_review_recommended: true` — parches medium 0 y low 8: 3 × 0 + 8 = 8 ≥ 5.
+
+**Verificación.**
+- `npx astro check` — 0 errores, 0 avisos.
+- `npx vitest run` de `buscar-en`, `espinas-de-ux`, `obra-pagina`, `busqueda-con-filtros` y `superficies` — 262 pasan.
+- Playwright `busqueda`, `accesibilidad`, `pagina-404`, `pagina-de-autor`, `pagina-de-tema` en `escritorio` y `movil`
+  — 536 pasan, 12 se saltan, 0 fallan. Primera pantalla: Obra peor 556,8 px (Lastarria), Tema peor 430,74 px
+  (`/tema/el-amor/`), sin cambio respecto a `## Medidas`.
+- `npx playwright test tests/e2e/receptor.spec.ts -g "404" --project=escritorio` — 4 pasan.
+
+**Riesgos.** «Compartir en» al fusionar la 25 (diferido, ahora también anotado en la aserción) y el «socket hang up»
+intermitente de `busqueda.spec.ts:841` (diferido, corregido).

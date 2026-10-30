@@ -2981,6 +2981,10 @@ test.describe('Historia 27.8 — buscar en esta obra, en un Autor o en un tema',
       }
       await expect(page.locator('[data-quitar]'), origen.nombre).toBeVisible();
       await expect(page.locator('[data-consulta]'), origen.nombre).toHaveValue('');
+      // «Atrás» vuelve al origen también tras el envío vacío.
+      await page.goBack();
+      await page.waitForURL((u) => u.pathname === origen.ruta);
+      await expect(page.locator('form[role="search"]'), origen.nombre).toHaveCount(1);
     }
   });
 
