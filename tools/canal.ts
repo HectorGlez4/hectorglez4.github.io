@@ -30,8 +30,7 @@
  * `--fecha` sin forma de jornada o una `--nota` vacía; 1 por una red ajena, un formato que no
  * existe, una ruta que el sitio no publica, un enlace marcado para otra red, un enlace con
  * `?via=` —la marca de un visitante que comparte, nunca la de una cuenta propia (Historia
- * 23.6)—, una fecha futura o anterior a la primera anotable, o un Corpus o un registro que no
- * se dejan leer.
+ * 23.6)—, una fecha futura, o un Corpus o un registro que no se dejan leer.
  *
  * `senal`:
  * Código 1 si lo dicho se rechaza: un origen que no es una URL http(s) absoluta, que es del
