@@ -2311,3 +2311,14 @@ sesiones:
       citasPublicadas: 4420
       procedenciaCompleta: 17.6
       tradicionLatinoamericanaSobreHispanicos: 53.9
+  - fecha: "2026-10-31"
+    hora: "18:06"
+    clase: "epoca"
+    propuesto: "Agotar la época Autores ecuatorianos: le quedan 16 candidatos por sembrar o por descartar con motivo escrito. Admitir sigue siendo del editor."
+    hueco: "La Fuente clasifica 45 candidatos en la época Autores ecuatorianos: 1 ya sembrados y 28 descartados con motivo. La lista está en corpus/candidatos-por-epoca.yml y se regenera con: npm run epocas:registrar"
+    elegido: "Agotar la época Autores colombianos"
+    motivo: "Cierre de la época colombianos: 12 descartes con motivo; Vargas Vila aparcado por nombres de Obra con sufijo ':NNN' que declara la propia Fuente"
+    resultado:
+      citasPublicadas: 4420
+      procedenciaCompleta: 17.6
+      tradicionLatinoamericanaSobreHispanicos: 54.3
