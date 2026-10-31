@@ -4044,3 +4044,27 @@ descartes:
     idDePagina: 398654
     nombre: "Temistocles Avella"
     motivo: "La Fuente no enlaza ninguna obra"
+  - fecha: "2026-10-31"
+    epoca: "cubanos"
+    candidato: "domitila-garcia-de-coronado"
+    idDePagina: 237847
+    nombre: "Domitila García de Coronado"
+    motivo: "Su única obra en la Fuente es una antología de poemas de otras escritoras (Album poético-fotográfico de las escritoras cubanas, 1868): no son sentencias propias."
+  - fecha: "2026-10-31"
+    epoca: "cubanos"
+    candidato: "emilio-roig-de-leuchsenring"
+    idDePagina: 137759
+    nombre: "Emilio Roig de Leuchsenring"
+    motivo: "Murió en 1964 (aún no es dominio público en España) y su obra en la Fuente es un tratado político de 1919, sin sentencias citables."
+  - fecha: "2026-10-31"
+    epoca: "cubanos"
+    candidato: "fidel-castro"
+    idDePagina: 9448
+    nombre: "Fidel Castro"
+    motivo: "Autor del siglo XX vivo hasta 2016: sin dominio público, y la Fuente solo trae discursos políticos."
+  - fecha: "2026-10-31"
+    epoca: "cubanos"
+    candidato: "raul-de-cardenas-y-echarte"
+    idDePagina: 134414
+    nombre: "Raúl de Cárdenas y Echarte"
+    motivo: "Murió en 1979 (no es dominio público) y su obra en la Fuente es un ensayo político de 1921, sin sentencias citables."
