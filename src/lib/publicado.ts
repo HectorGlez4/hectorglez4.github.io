@@ -43,6 +43,7 @@ import {
   type CitaParaObra,
   type FichaDeObra,
   type ObraResuelta,
+  type IndicesDeObras,
   type PosicionesDeCitas,
 } from './obras.ts';
 import { atribucionDeBiografia, type AtribucionDeSemblanza } from './biografia.ts';
@@ -851,13 +852,14 @@ export function obrasDelAutor(citas: readonly CitaConSuObra[], slugAutor: string
  * Las Citas de cada Obra, por nombre de ficha y **en el orden del libro** — Historia 24.1.
  *
  * Agrupa por la Obra resuelta de cada Cita (`cita.obra.nombre`) y ordena cada grupo con
- * `ordenDelLibro`, el único que ordena las Citas de una Obra (AD-25). Pura: las posiciones
- * llegan por parámetro. Lo que la Página de Obra pagina —y después «Siguiente» y «De la misma
+ * `ordenDelLibro`, el único que ordena las Citas de una Obra (AD-25). Pura: las posiciones y
+ * los índices de subpáginas de la Fuente (Historia 24.9) llegan por parámetro. Lo que la Página de Obra pagina —y después «Siguiente» y «De la misma
  * obra»— sale de aquí, nunca de un agrupado propio (AD-11).
  */
 export function citasPorObra<C extends Pick<Cita, 'slug' | 'fuente' | 'obra'>>(
   citas: readonly C[],
   posiciones: PosicionesDeCitas,
+  indices: IndicesDeObras,
 ): Map<string, C[]> {
   const porObra = new Map<string, C[]>();
   for (const cita of citas) {
@@ -866,7 +868,7 @@ export function citasPorObra<C extends Pick<Cita, 'slug' | 'fuente' | 'obra'>>(
     if (suyas === undefined) porObra.set(cita.obra.nombre, [cita]);
     else suyas.push(cita);
   }
-  return new Map([...porObra].map(([nombre, suyas]) => [nombre, ordenDelLibro(suyas, posiciones)]));
+  return new Map([...porObra].map(([nombre, suyas]) => [nombre, ordenDelLibro(suyas, posiciones, indices)]));
 }
 
 /** Las Obras con página: las que resuelve alguna Cita publicada de un Autor publicado. */
@@ -1505,9 +1507,10 @@ const citasDeLasObrasPorConjunto = new WeakMap<ConjuntoPublicable, Promise<Reado
 /**
  * Las Citas de cada Obra del conjunto, en el orden del libro — Historia 24.1.
  *
- * Es la fachada de `citasPorObra`: lee las posiciones de la colección `posiciones` (el cargador
- * de `src/content.config.ts`) y se memoriza por conjunto, como `rutasIndexables`, porque cada
- * página que la pida comparte el mismo. Sin ninguna Cita con Obra no consulta la colección.
+ * Es la fachada de `citasPorObra`: lee las posiciones de la colección `posiciones` y el orden de
+ * los índices de subpáginas de la colección `indices` (Historia 24.9; los dos cargadores de
+ * `src/content.config.ts`) y se memoriza por conjunto, como `rutasIndexables`, porque cada
+ * página que la pida comparte el mismo. Sin ninguna Cita con Obra no consulta las colecciones.
  */
 export function citasDeLasObras(conjunto: ConjuntoPublicable): Promise<ReadonlyMap<string, Cita[]>> {
   const memorizada = citasDeLasObrasPorConjunto.get(conjunto);
@@ -1518,7 +1521,11 @@ export function citasDeLasObras(conjunto: ConjuntoPublicable): Promise<ReadonlyM
     const posiciones = new Map<string, readonly AparicionDeCita[]>(
       (await getCollection('posiciones')).map((entrada) => [entrada.id, entrada.data.apariciones]),
     );
-    return citasPorObra(conjunto.citas, posiciones);
+    // Una sola entrada, siempre presente aunque no haya ningún índice: ver el cargador.
+    const indices: IndicesDeObras = new Map(
+      (await getCollection('indices')).flatMap((entrada) => Object.entries(entrada.data.porObra)),
+    );
+    return citasPorObra(conjunto.citas, posiciones, indices);
   })();
   citasDeLasObrasPorConjunto.set(conjunto, calculo);
   // Un fallo no se memoriza: la siguiente página que la pida vuelve a intentarlo, como

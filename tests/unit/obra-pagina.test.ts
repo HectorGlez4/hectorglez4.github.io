@@ -1,3 +1,4 @@
+import { componerIndice } from '../../tools/lib/indice.ts';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { readFile, readdir } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
@@ -1046,6 +1047,14 @@ describe('Historia 22.6 — «Dónde leer esta obra» y la nota, construidas', (
         `${URL_EPISTOLAS}/2`,
         [E2],
       ),
+      // Historia 24.9 — y el índice que declara la Fuente enlaza la carta 1 antes que la 2: manda
+      // sobre el orden natural, que pondría la ii antes que la x.
+      'fuentes/wikisource-es--epistolas-morales.indice.yml': componerIndice({
+        fuente: 'wikisource-es',
+        url: URL_EPISTOLAS,
+        recuperado: '2026-10-31',
+        paginas: ['Autor:Séneca', 'Epistolas morales/1', 'Epistolas morales/2'],
+      }),
       // Dos páginas de primer nivel: ninguna es la entrada de la otra.
       'citas/seneca--dialogos-1.md': cotejada('seneca-dialogos-1', D1, 'Diálogos', URL_PROVIDENCIA),
       'citas/seneca--dialogos-2.md': cotejada('seneca-dialogos-2', D2, 'Diálogos', URL_CONSTANCIA),
@@ -1103,7 +1112,7 @@ describe('Historia 22.6 — «Dónde leer esta obra» y la nota, construidas', (
     expect(donde).not.toContain('<a ');
   });
 
-  it('24.1 — el orden del libro: las cotejadas por documento y posición, las del censo al final', async () => {
+  it('24.1 y 24.9 — el orden del libro: las cotejadas por documento y posición, las del censo al final, y el índice manda', async () => {
     const listado = async (ruta: string) => {
       const pagina = await html(proyecto, ruta);
       const ul = /<ul class="listado"[^>]*>([\s\S]*?)<\/ul>/.exec(pagina)?.[1] ?? '';
@@ -1114,7 +1123,9 @@ describe('Historia 22.6 — «Dónde leer esta obra» y la nota, construidas', (
       'seneca-brevedad-1',
       BREVEDAD_SIN,
     ]);
-    expect(await listado('/obra/seneca/epistolas-morales/')).toEqual(['seneca-epistolas-2', 'seneca-epistolas-1']);
+    // Historia 24.9 — con su índice capturado, Epístolas morales sigue el de la Fuente (1, 2) y no
+    // el orden natural de sus documentos (carta-ii antes que carta-x), que daría el contrario.
+    expect(await listado('/obra/seneca/epistolas-morales/')).toEqual(['seneca-epistolas-1', 'seneca-epistolas-2']);
     expect(await listado('/obra/seneca/cartas-a-lucilio/')).toEqual([CARTAS_COTEJADA, CARTAS_SIN_1, CARTAS_SIN_2]);
   });
 

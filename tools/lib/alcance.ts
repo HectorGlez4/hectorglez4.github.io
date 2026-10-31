@@ -24,7 +24,7 @@
  */
 
 import { DOMINIO, SITIO } from '../../src/lib/dominio.ts';
-import { colgarObras, type FichaDeObra, type PosicionesDeCitas } from '../../src/lib/obras.ts';
+import { colgarObras, type FichaDeObra, type IndicesDeObras, type PosicionesDeCitas } from '../../src/lib/obras.ts';
 import {
   citasPorObra,
   coleccionesPublicadas,
@@ -47,6 +47,7 @@ import {
   leerColecciones,
   leerDocumentosDeFuente,
   leerFichasDeObra,
+  leerOrdenDeLosIndices,
   leerTemas,
   type AutorEnCorpus,
   type CitaEnCorpus,
@@ -123,10 +124,18 @@ export interface ModeloDelCorpus {
   grafo: Map<string, string[]>;
 }
 
-/** El modelo de unos datos, con las posiciones de sus Citas en sus documentos (el orden del libro). */
-export function modeloDeLosDatos(datos: DatosDelCorpus, posiciones: PosicionesDeCitas): ModeloDelCorpus {
+/**
+ * El modelo de unos datos, con las posiciones de sus Citas en sus documentos y los índices de
+ * subpáginas de la Fuente (el orden del libro, Historias 24.1 y 24.9): qué Cita cae en cada página
+ * de una Obra depende de los dos.
+ */
+export function modeloDeLosDatos(
+  datos: DatosDelCorpus,
+  posiciones: PosicionesDeCitas,
+  indices: IndicesDeObras,
+): ModeloDelCorpus {
   const conjunto = conjuntoDeLosDatos(datos);
-  return { conjunto, grafo: grafoDelModelo(conjunto, citasPorObra(conjunto.citas, posiciones)) };
+  return { conjunto, grafo: grafoDelModelo(conjunto, citasPorObra(conjunto.citas, posiciones, indices)) };
 }
 
 /**
@@ -137,7 +146,7 @@ export function modeloDeLosDatos(datos: DatosDelCorpus, posiciones: PosicionesDe
 export async function modeloDelCorpus(rutas: Rutas): Promise<ModeloDelCorpus> {
   const datos = await leerDatosDelCorpus(rutas);
   const posiciones = posicionesDeCitas(datos.citas, await leerDocumentosDeFuente(rutas));
-  return modeloDeLosDatos(datos, posiciones);
+  return modeloDeLosDatos(datos, posiciones, await leerOrdenDeLosIndices(rutas));
 }
 
 // ─── El grafo del sitio construido ───────────────────────────────────────────
@@ -417,8 +426,9 @@ export async function fueraDeAlcanceTras(
   try {
     const datos = await leerDatosDelCorpus(rutas);
     const posiciones = posicionesDeCitas(datos.citas, await leerDocumentosDeFuente(rutas));
-    antes = new Set(citasFueraDelModelo(modeloDeLosDatos(datos, posiciones)));
-    despues = modeloDeLosDatos(cambio(datos), posiciones);
+    const indices = await leerOrdenDeLosIndices(rutas);
+    antes = new Set(citasFueraDelModelo(modeloDeLosDatos(datos, posiciones, indices)));
+    despues = modeloDeLosDatos(cambio(datos), posiciones, indices);
   } catch (fallo) {
     return {
       ok: false,

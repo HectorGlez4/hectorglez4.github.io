@@ -955,6 +955,24 @@ export interface AparicionDeCita {
 /** Las apariciones de cada Cita, por el `slug` de su frontmatter; sin ordenar ni elegir. */
 export type PosicionesDeCitas = ReadonlyMap<string, readonly AparicionDeCita[]>;
 
+/**
+ * El orden que declaran los índices de subpáginas de la Fuente — Historia 24.9, AD-23: por Obra
+ * en el nombre de los ficheros (`{fuente}--{obra}`, `obraDelDocumento`), sus documentos en el
+ * orden de su índice. Lo compone `tools/lib/indice.ts` desde `corpus/fuentes/*.indice.yml` y lo
+ * entrega la colección `indices` de `src/content.config.ts`; una Obra sin índice capturado no
+ * está, y sus documentos siguen el orden natural de `compararDocumentos`.
+ */
+export type IndicesDeObras = ReadonlyMap<string, readonly string[]>;
+
+/**
+ * La Obra de un documento de Fuente en el nombre de los ficheros: `{fuente}--{obra}`, sin la
+ * página — Historia 24.9. Es el prefijo con que `documentosDeCita` casa una Cita con los
+ * documentos de su obra, y el nombre del índice que los ordena.
+ */
+export function obraDelDocumento(nombre: string): string {
+  return nombre.split('--').slice(0, 2).join('--');
+}
+
 /** Un trozo de nombre de documento que se lee como número: arábigo, o romano canónico. */
 const ARABIGO = /^\d+$/u;
 const ROMANO = /^m{0,3}(cm|cd|d?c{0,3})(xc|xl|l?x{0,3})(ix|iv|v?i{0,3})$/u;
@@ -1006,8 +1024,9 @@ function porValor(a: string, b: string): number {
  * reunida con varias formas (`npm run obra -- reunir`) ordena sus documentos de una Fuente
  * forma a forma, por el slug de cada una.
  *
- * Límites aceptados hasta que se capture el índice de subpáginas de la Fuente, que es lo que
- * los corregirá (no hay detector de desorden):
+ * Rige en las Obras sin índice de subpáginas capturado (Historia 24.9: `compararEnElLibro`), y
+ * con estos límites aceptados, que el índice corrige donde se captura (no hay detector de
+ * desorden):
  *   · una palabra que es romano canónico («mi», «di») se lee como número;
  *   · la palabra va antes que el número también al final del libro: «epilogo», «notas» o
  *     «apendice» van antes que «i»;
@@ -1038,13 +1057,42 @@ export function compararDocumentos(a: string, b: string): number {
   return trozosA.length - trozosB.length;
 }
 
-/** De las apariciones de una Cita, la del primer documento en orden natural. */
-function primeraAparicion(apariciones: readonly AparicionDeCita[]): AparicionDeCita | undefined {
+/**
+ * El orden de dos documentos de Fuente **en el libro** — Historia 24.9, AD-23.
+ *
+ * En una Obra con índice de subpáginas capturado, sus documentos van en el orden que declara la
+ * Fuente; los que el índice no enlaza, detrás y en orden natural. Sin índice, el orden natural
+ * de `compararDocumentos` (24.1), intacto. Es un orden total: cada documento tiene la clave
+ * `[obra, 1, rango]` si su índice lo enlaza, `[obra, 2, nombre]` si su Obra tiene índice y no lo
+ * enlaza, y `[nombre]` si no lo tiene, y la primera componente se compara con
+ * `compararDocumentos` —que solo da cero entre nombres iguales—.
+ */
+export function compararEnElLibro(a: string, b: string, indices: IndicesDeObras): number {
+  if (a === b) return 0;
+  const obraA = obraDelDocumento(a);
+  const obraB = obraDelDocumento(b);
+  const indiceA = indices.get(obraA);
+  const indiceB = indices.get(obraB);
+  const porBase = compararDocumentos(indiceA === undefined ? a : obraA, indiceB === undefined ? b : obraB);
+  if (porBase !== 0 || indiceA === undefined) return porBase;
+  const rangoA = indiceA.findIndex((documento) => documento === a);
+  const rangoB = indiceA.findIndex((documento) => documento === b);
+  if (rangoA !== -1 && rangoB !== -1) return rangoA - rangoB;
+  if (rangoA !== -1) return -1;
+  if (rangoB !== -1) return 1;
+  return compararDocumentos(a, b);
+}
+
+/** De las apariciones de una Cita, la del primer documento en el orden del libro. */
+function primeraAparicion(
+  apariciones: readonly AparicionDeCita[],
+  indices: IndicesDeObras,
+): AparicionDeCita | undefined {
   let primera: AparicionDeCita | undefined;
   for (const aparicion of apariciones) {
     if (
       primera === undefined ||
-      (compararDocumentos(aparicion.documento, primera.documento) || aparicion.posicion - primera.posicion) < 0
+      (compararEnElLibro(aparicion.documento, primera.documento, indices) || aparicion.posicion - primera.posicion) < 0
     ) {
       primera = aparicion;
     }
@@ -1065,9 +1113,10 @@ export function porSlug(a: { slug: string }, b: { slug: string }): number {
  * Las Citas de una Obra en el orden del libro — Historia 24.1, AD-25.
  *
  * Es el **único** sitio que ordena las Citas de una Obra, y recibe las posiciones por parámetro
- * (AD-5): no lee disco ni colecciones. Primero la Fuente que más Citas situadas aporta —a
- * igualdad, el identificador menor—; dentro, el documento en orden natural
- * (`compararDocumentos`), tomando cada Cita su aparición del primero; luego la posición en ese
+ * (AD-5), y desde la 24.9 también los índices de subpáginas: no lee disco ni colecciones.
+ * Primero la Fuente que más Citas situadas aporta —a igualdad, el identificador menor—; dentro,
+ * el documento en el orden del libro (`compararEnElLibro`: el del índice que declara la Fuente o,
+ * sin él, el natural), tomando cada Cita su aparición del primero; luego la posición en ese
  * documento y, a igual documento y posición, el slug. Al final, por slug, las Citas sin Fuente
  * o sin ninguna aparición: las del censo, que no tienen documento del que tomar un sitio.
  *
@@ -1077,12 +1126,13 @@ export function porSlug(a: { slug: string }, b: { slug: string }): number {
 export function ordenDelLibro<C extends { slug: string; fuente?: { id: string } | null }>(
   citas: readonly C[],
   posiciones: PosicionesDeCitas,
+  indices: IndicesDeObras,
 ): C[] {
   const situadas: { cita: C; fuente: string; aparicion: AparicionDeCita }[] = [];
   const sueltas: C[] = [];
   for (const cita of citas) {
     const fuente = cita.fuente?.id;
-    const aparicion = primeraAparicion(posiciones.get(cita.slug) ?? []);
+    const aparicion = primeraAparicion(posiciones.get(cita.slug) ?? [], indices);
     if (typeof fuente !== 'string' || fuente === '' || aparicion === undefined) sueltas.push(cita);
     else situadas.push({ cita, fuente, aparicion });
   }
@@ -1098,7 +1148,7 @@ export function ordenDelLibro<C extends { slug: string; fuente?: { id: string } 
   situadas.sort(
     (a, b) =>
       (rango.get(a.fuente) ?? 0) - (rango.get(b.fuente) ?? 0) ||
-      compararDocumentos(a.aparicion.documento, b.aparicion.documento) ||
+      compararEnElLibro(a.aparicion.documento, b.aparicion.documento, indices) ||
       a.aparicion.posicion - b.aparicion.posicion ||
       porSlug(a.cita, b.cita),
   );

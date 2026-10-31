@@ -25,7 +25,13 @@ import {
   tradicion,
 } from './lib/admision.js';
 import { leerBiografia } from './lib/biografia.js';
-import { guardarPosiciones, leerPosicionesDelCorpus, releerAlCambiar } from '../tools/lib/posiciones.ts';
+import {
+  guardarOrdenDeLosIndices,
+  guardarPosiciones,
+  leerOrdenDeLosIndicesDelCorpus,
+  leerPosicionesDelCorpus,
+  releerAlCambiar,
+} from '../tools/lib/posiciones.ts';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // AD-1 — La puerta de admisión vive aquí, no en `tools/`.
@@ -337,4 +343,45 @@ const posiciones = defineCollection({
   }),
 });
 
-export const collections = { citas, autores, temas, colecciones, obras, biografias, posiciones };
+/*
+ * Los índices de subpáginas — Historia 24.9, AD-23, AD-25.
+ *
+ * El orden entre los documentos de una Obra paginada lo declara la Fuente, y `tools/recuperar.ts
+ * --indice` lo versiona aparte de ellos, en `corpus/fuentes/{fuente}--{obra}.indice.yml`. Este
+ * cargador, hermano del de posiciones y con su patrón, **solo cablea** `tools/lib/posiciones.ts`,
+ * que lee esos índices y los casa con los documentos por la dirección de su cabecera. Quien
+ * ordena es `ordenDelLibro` de `src/lib/obras.ts`, que lo recibe por parámetro.
+ *
+ * Guarda una sola entrada, `orden`, con `{ porObra: { obra: [documentos en su orden] } }`, siempre
+ * presente aunque no haya ningún índice: nadie consulta una colección vacía. Sin red y sin
+ * escribir nada en `corpus/`.
+ */
+const cargadorDeIndices: Loader = {
+  name: 'indices',
+  load: async ({ store, parseData, config, watcher, logger }) => {
+    const raiz = join(fileURLToPath(config.root), 'corpus');
+    const cargar = () =>
+      guardarOrdenDeLosIndices({ leer: () => leerOrdenDeLosIndicesDelCorpus(raiz), analizar: parseData, almacen: store });
+
+    await cargar();
+
+    if (watcher !== undefined) {
+      releerAlCambiar({
+        vigilante: watcher,
+        carpetas: [join(raiz, 'fuentes')],
+        releer: cargar,
+        esperaMs: ESPERA_TRAS_CAMBIO_MS,
+        avisar: (mensaje) => logger.error(mensaje),
+      });
+    }
+  },
+};
+
+const indices = defineCollection({
+  loader: cargadorDeIndices,
+  schema: z.object({
+    porObra: z.record(z.string().min(1), z.array(z.string().min(1))),
+  }),
+});
+
+export const collections = { citas, autores, temas, colecciones, obras, biografias, posiciones, indices };

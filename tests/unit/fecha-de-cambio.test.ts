@@ -802,6 +802,23 @@ describe('Historia 24.8 — la matriz: qué cambia de fecha', () => {
     expect(fechasPorSuperficie(corpus, h).has('/cita/x-b')).toBe(false);
   });
 
+  it('24.9 — capturar o cambiar el índice de una Obra: solo esa Obra, como un documento suyo', () => {
+    const indice = 'corpus/fuentes/fuente--obra-o.indice.yml';
+    const nuevo = { [indice]: { antes: null, despues: VERSION_OPACA as Version } };
+    expect(refechadas(corpusDeEjemplo([], [DOCUMENTO, indice]), historial(nuevo))).toEqual(['/obra/x/o']);
+    expect(avisadas(nuevo, corpusDeEjemplo([], [DOCUMENTO, indice]), corpusDeEjemplo())).toEqual(['/obra/x/o']);
+    const cambiado = { [indice]: { antes: VERSION_OPACA as Version, despues: VERSION_OPACA as Version } };
+    expect(avisadas(cambiado, corpusDeEjemplo([], [DOCUMENTO, indice]))).toEqual(['/obra/x/o']);
+    // El índice que sale fecha la Obra que ordenaba.
+    const h = historial({ [indice]: { antes: VERSION_OPACA, despues: null } });
+    const corpus = conBajas(corpusDeEjemplo([], [DOCUMENTO]), h);
+    expect(corpus.bajas?.documentos).toEqual([indice]);
+    expect(refechadas(corpus, h)).toEqual(['/obra/x/o']);
+    // Y el índice de otra Obra no compone esta, ni el índice compone ninguna Página de Cita.
+    const ajeno = 'corpus/fuentes/fuente--otra-cosa.indice.yml';
+    expect(refechadas(corpusDeEjemplo([], [DOCUMENTO, ajeno]), historial({ [ajeno]: { antes: null, despues: VERSION_OPACA } }))).toEqual([]);
+  });
+
   it('el documento que sale fecha la Obra cuyas Citas lo casaban', () => {
     const h = historial({ [DOCUMENTO]: { antes: VERSION_OPACA, despues: null } });
     const corpus = conBajas(corpusDeEjemplo([], []), h);

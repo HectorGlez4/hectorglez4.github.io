@@ -659,3 +659,13 @@ Hallazgos reales que no son de la historia que los sacó a la luz. Append-only.
 - source_spec: `_bmad-output/implementation-artifacts/spec-26-12-el-peso-y-el-interlineado-salen-de-sus-tokens.md`
   summary: El criterio de la 26.12 en epics.md dice que la medida juzgada de dos jornadas es «idéntica byte a byte»; Héctor decidió (2026-10-31) comparar el índice de pagefind/ descodificado y normalizado, porque Pagefind 1.5.2 no es determinista ni en el mismo día — pendiente de Héctor (bmad-create-epics-and-stories).
   evidence: Spec Change Log de la 26.12; dos construcciones del mismo día y commit difieren en pf_meta y en el filtro tipo (±1 byte).
+- source_spec: `_bmad-output/implementation-artifacts/spec-24-9-el-orden-del-libro-lo-declara-la-fuente.md`
+  summary: En Novelas ejemplares, el documento de «La señora Cornelia» es de la edición de 1878 y el índice capturado es el de 1825, así que no casa y va detrás de «El coloquio de los perros», donde el libro la pone antes.
+  evidence: corpus/fuentes/wikisource-es--novelas-ejemplares--la-senora-cornelia.txt declara url La_señora_Cornelia; el índice enlaza «La señora Cornelia (1825)». Hoy no tiene ninguna Cita, así que no mueve ningún listado; recuperar la página de 1825 o decidir otra cosa es de Héctor.
+
+- source_spec: `_bmad-output/implementation-artifacts/spec-24-9-el-orden-del-libro-lo-declara-la-fuente.md`
+  summary: Retirar un índice con tools/retirar.ts lo trata como documento (retirarFuente casa Citas y candidatas por fuente.url = la página del índice): si un documento versionado comparte esa URL se niega por sus Citas, y si no borra las candidatas de _revision/ de ese documento; falta una rama que solo mueva el .indice.yml, con su prueba.
+  evidence: Revisión independiente de la 24.9 (2026-10-31), tools/lib/gestion.ts:762; AGENTS.md y el rechazo con 1 de recuperar --indice piden «retirar antes el que hay».
+- source_spec: `_bmad-output/implementation-artifacts/spec-24-9-el-orden-del-libro-lo-declara-la-fuente.md`
+  summary: tools/recuperar.ts:625 hace readdir de corpus/fuentes/ sin comprobar que existe, y sin ese directorio lanza un ENOENT sin controlar tras la petición de red en vez del rechazo con 1 «ninguna es un documento versionado».
+  evidence: Revisión independiente de la 24.9 (2026-10-31); indiceConTitulo (l. 718) sí lo comprueba.

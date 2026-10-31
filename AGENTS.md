@@ -796,20 +796,47 @@ casado (`documentosDeCita`) y **el mismo localizador** (`localizar` de `tools/li
 formas ya colapsadas, que `apareceEnDocumento` también usa). Da, por el `slug` del frontmatter,
 `{documento, posicion}` de cada documento en que aparece el texto, sin texto y sin elegir; nada
 se escribe en `corpus/`. **Solo `ordenDelLibro` de `src/lib/obras.ts` ordena**, con las
-posiciones por parámetro: primero la Fuente que más Citas sitúa, luego el documento en orden
-natural (`compararDocumentos`: trozos por `-`, arábigos y romanos canónicos por su valor, la
+posiciones por parámetro: primero la Fuente que más Citas sitúa, luego el documento —en el orden
+del índice de la Fuente si está capturado (24.9, abajo); si no, en orden natural (`compararDocumentos`: trozos por `-`, arábigos y romanos canónicos por su valor, la
 palabra antes que el número —«proemio» antes que «i»— y el nombre corto antes que sus páginas),
 la posición y el slug; al final, por slug, las Citas sin Fuente o sin aparición (las del censo).
-La página lo toma de `citasDeLasObras` de `src/lib/publicado.ts`. El índice de subpáginas de la
-Fuente queda aplazado, y no hay detector de desorden: las páginas cuyo slug no ordena bien se
-corregirán con ese índice. Son las que se nombran por capítulo y no por número (*Novelas
-ejemplares*: «la-gitanilla», «el-coloquio-de-los-perros», por orden alfabético), las de
-ordinal escrito («jornada-primera») o de cifra y letra («10a»), que se leen como palabras, una
-palabra que es romano canónico («mi» se lee 1001) y el final del libro —«epilogo», «notas»—,
-que como palabra va antes que «i». Ningún fichero de `src/` importa de `tools/lib/`, salvo
-ese cargador. **La Página de Obra depende así también de `corpus/fuentes/`**, y desde la 24.8 la
-relación lo sabe: recuperar o retirar un documento —que puede reordenar una Obra y pasar Citas de
-su página 1 a la `/2/`— mueve el `lastmod` de esa Obra y la avisa, y a ninguna otra superficie.
+La página lo toma de `citasDeLasObras` de `src/lib/publicado.ts`. Ningún fichero de `src/`
+importa de `tools/lib/`, salvo los cargadores de `content.config.ts`. **La Página de Obra depende
+así también de `corpus/fuentes/`**, y desde la 24.8 la relación lo sabe: recuperar o retirar un
+documento —que puede reordenar una Obra y pasar Citas de su página 1 a la `/2/`— mueve el
+`lastmod` de esa Obra y la avisa, y a ninguna otra superficie.
+
+**El orden entre los documentos lo declara la Fuente (Historia 24.9).** Una Obra paginada cuyas
+páginas se nombran por título (*Novelas ejemplares*: «la-gitanilla», «el-coloquio-de-los-perros»)
+no se ordena bien por el nombre: se le captura el **índice de subpáginas** de la Fuente, con la
+misma orden que recupera documentos y nunca a mano:
+
+```
+npx tsx tools/recuperar.ts --indice "<url de la página de la obra>" --ensayo   # qué ordenaría; no escribe
+npx tsx tools/recuperar.ts --indice "<url de la página de la obra>"
+```
+
+Pide **una vez** la página de la obra ya pintada (`action=render`, que trae también el índice
+transcluido del escaneo, como en *Recuerdos de provincia*), con las guardas de un documento, y
+versiona en orden los títulos que enlaza en `corpus/fuentes/{fuente}--{obra}.indice.yml`, junto a
+los documentos y aparte de ellos: no reescribe ninguno, no es `.txt` y ningún lector de documentos
+—cotejo, `extraer`, posiciones— lo toma por uno. Lo único que se teclea es la dirección: la Obra es
+la de los documentos versionados que el índice enlaza, casados por la `url` (o el `pedido`) de su
+cabecera, y si son de varias Obras, la que se llama como la página; si no, se niega con 1. Ya
+versionado sale con 0 sin pedir nada; otro índice para la misma Obra se niega con 1 (cambiarlo es
+retirar antes el que hay). Solo Wikisource publica índices. Lo lleva a `src/` la colección
+hermana `indices` (una sola entrada, `orden`, siempre presente), que también solo cablea
+`tools/lib/posiciones.ts`, y `ordenDelLibro` lo recibe **por parámetro**, como las posiciones:
+`compararEnElLibro` pone primero el documento de la propia página del índice, luego los que enlaza
+en su orden y detrás, en orden natural, los que no enlaza (*Novelas ejemplares*: «la-senora-cornelia»
+es de otra edición que la del índice de 1825 y va al final). **Sin índice rige el orden natural** de
+`compararDocumentos`, con sus límites: los ordinales escritos («jornada-primera») y la cifra con
+letra («10a») se leen como palabras, una palabra que es romano canónico («mi») como número, y el
+final del libro —«epilogo», «notas»— va antes que «i»; no hay detector de desorden, y se corrigen
+capturando el índice de esa Obra. El índice compone la Página de Obra como un documento suyo
+(`relacionDeSuperficies`): capturarlo o cambiarlo la fecha y la avisa, y a ninguna Página de Cita.
+Hoy lo tienen *Novelas ejemplares* (de «Novelas ejemplares (1825)»), *Vidas paralelas*,
+*Recuerdos de provincia* y *Novelas y cuadros de la vida sur-americana*.
 
 ### El aviso, la serie y la congelación (Historia 22.8)
 

@@ -1,0 +1,71 @@
+# Índice de subpáginas de una Obra paginada (Historia 24.9, AD-23): el orden de sus
+# documentos lo declara la Fuente. Lo escribe «npx tsx tools/recuperar.ts --indice <url>»
+# y no se edita a mano; no es un documento y ningún cotejo lo lee.
+fuente: wikisource-es
+url: https://es.wikisource.org/wiki/Vidas_paralelas
+recuperado: 2026-10-31
+paginas:
+  - Vidas paralelas/Teseo
+  - Vidas paralelas/Rómulo
+  - Vidas paralelas/Comparación de Teseo y Rómulo
+  - Vidas paralelas/Licurgo
+  - Vidas paralelas/Numa Pompilio
+  - Vidas paralelas/Comparación de Licurgo y Numa Pompilio
+  - Vidas paralelas/Solón
+  - Vidas paralelas/Publícola
+  - Vidas paralelas/Comparación de Solón y Publícola
+  - Vidas paralelas/Temístocles
+  - Vidas paralelas/Camilo
+  - Vidas paralelas/Pericles
+  - Vidas paralelas/Fabio Máximo
+  - Vidas paralelas/Comparación de Pericles y Fabio Máximo
+  - Vidas paralelas/Alcibiades
+  - Vidas paralelas/Coriolano
+  - Vidas paralelas/Comparación de Alcibiades y Coriolano
+  - Vidas paralelas/Timoleón
+  - Vidas paralelas/Emilio Paulo
+  - Vidas paralelas/Comparación de Timoleón y Emilio Paulo
+  - Vidas paralelas/Pelópidas
+  - Vidas paralelas/Marcelo
+  - Vidas paralelas/Comparación de Pelópidas y Marcelo
+  - Vidas paralelas/Arístides
+  - Vidas paralelas/Catón
+  - Vidas paralelas/Comparación de Arístides y Catón
+  - Vidas paralelas/Filopemen
+  - Vidas paralelas/Tito
+  - Vidas paralelas/Comparación de Filopemen y Tito
+  - Vidas paralelas/Pirro
+  - Vidas paralelas/Gayo Mario
+  - Vidas paralelas/Lisandro
+  - Vidas paralelas/Sila
+  - Vidas paralelas/Comparación de Lisandro y Sila
+  - Vidas paralelas/Cimón
+  - Vidas paralelas/Lúculo
+  - Vidas paralelas/Comparación de Cimón y Lúculo
+  - Vidas paralelas/Nicias
+  - Vidas paralelas/Craso
+  - Vidas paralelas/Comparación de Nicias y Craso
+  - Vidas paralelas/Eumenes
+  - Vidas paralelas/Sertorio
+  - Vidas paralelas/Comparación de Eumenes y Sertorio
+  - Vidas paralelas/Agesilao
+  - Vidas paralelas/Pompeyo
+  - Vidas paralelas/Comparación de Agesilao y Pompeyo
+  - Vidas paralelas/Alejandro
+  - Vidas paralelas/Julio César
+  - Vidas paralelas/Foción
+  - Vidas paralelas/Catón el Menor
+  - Vidas paralelas/Agis y Cleomenes
+  - Vidas paralelas/Tiberio y Gaio Graco
+  - Vidas paralelas/Comparación de Agis y Cleomenes y Tiberio y Gayo Graco
+  - Vidas paralelas/Demóstenes
+  - Vidas paralelas/Cicerón
+  - Vidas paralelas/Comparación de Demóstenes y Cicerón
+  - Vidas paralelas/Demetrio
+  - Vidas paralelas/Antonio
+  - Vidas paralelas/Comparación de Demetrio y Antonio
+  - Vidas paralelas/Dión
+  - Vidas paralelas/Bruto
+  - Vidas paralelas/Comparación de Dión y Bruto
+  - Vidas paralelas/Artojerjes y Arato
+  - Vidas paralelas/Galba y Otón

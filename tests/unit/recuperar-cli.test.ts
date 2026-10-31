@@ -1793,3 +1793,164 @@ describe('Historia 17.1 — reutilizar una obra compara también la obra de su c
     expect(segunda.salida).toMatch(/Ya versionado/);
   });
 });
+
+/**
+ * Historia 24.9 — el índice de subpáginas de una Obra paginada: lo pide la misma cáscara, una
+ * vez y de la propia Fuente, pintado (`action=render`), y lo versiona aparte de los documentos.
+ */
+describe('Historia 24.9 — recuperar --indice', () => {
+  const INDICE = 'https://es.wikisource.org/wiki/Libro';
+  const PINTADO = `${INDICE}?action=render`;
+  const urlDe = (pagina: string) => `https://es.wikisource.org/wiki/Libro/${pagina}`;
+
+  async function conDocumentos(t: { corpus: string }, documentos: Record<string, string>) {
+    for (const [nombre, url] of Object.entries(documentos)) {
+      await writeFile(
+        join(t.corpus, 'fuentes', `${nombre}.txt`),
+        ['fuente: wikisource-es', 'obra: Libro', `url: ${url}`, 'recuperado: 2026-10-31', '---', 'Libro', '---', 'Cuerpo.'].join('\n'),
+        'utf8',
+      );
+    }
+  }
+
+  async function indice(
+    url: string,
+    t: { raiz: string; corpus: string; registro: string },
+    guion: Record<string, RespuestaFingida>,
+    extra: string[] = [],
+  ) {
+    const fichero = join(t.raiz, 'guion.json');
+    await writeFile(fichero, JSON.stringify(guion), 'utf8');
+    const argumentos = ['--import', 'tsx', '--import', DOBLE, join(RAIZ, 'tools/recuperar.ts'), '--indice', url, ...extra, '--corpus', t.corpus];
+    try {
+      const { stdout } = await ejecutar('node', argumentos, {
+        cwd: RAIZ,
+        env: { ...process.env, DOBLE_GUION: fichero, DOBLE_REGISTRO: t.registro },
+      });
+      return { codigo: 0, salida: stdout, error: '' };
+    } catch (e) {
+      const fallo = e as { code?: number; stdout?: string; stderr?: string };
+      return { codigo: fallo.code ?? 1, salida: fallo.stdout ?? '', error: fallo.stderr ?? '' };
+    }
+  }
+
+  const PAGINA_DEL_INDICE = `<div class="mw-parser-output">
+    <a href="/wiki/Autor:Alguien">Alguien</a>
+    <a href="/wiki/Libro/Segunda">Segunda</a>
+    <a href="/wiki/Libro/Primera">Primera</a>
+    <a href="/wiki/Libro/Sin_recuperar">Sin recuperar</a>
+  </div>`;
+
+  it('versiona los títulos en su orden, aparte de los documentos, sin reescribir ninguno', async () => {
+    const t = await taller();
+    await conDocumentos(t, {
+      'wikisource-es--libro--primera': urlDe('Primera'),
+      'wikisource-es--libro--segunda': urlDe('Segunda'),
+      'wikisource-es--libro--suelta': urlDe('Suelta'),
+    });
+    const antes = await readFile(join(t.corpus, 'fuentes', 'wikisource-es--libro--primera.txt'), 'utf8');
+    const r = await indice(INDICE, t, { [PINTADO]: OK(PAGINA_DEL_INDICE) });
+    expect(r.codigo, r.error).toBe(0);
+    expect(await pedidas(t)).toEqual([PINTADO]);
+    const escrito = await readFile(join(t.corpus, 'fuentes', 'wikisource-es--libro.indice.yml'), 'utf8');
+    expect(escrito).toMatch(/paginas:\n {2}- Libro\/Segunda\n {2}- Libro\/Primera\n {2}- Libro\/Sin recuperar\n/u);
+    expect(escrito).toContain(`url: ${INDICE}`);
+    expect(r.salida).toMatch(/1\. wikisource-es--libro--segunda\n {2}2\. wikisource-es--libro--primera/u);
+    expect(r.salida).toMatch(/no enlaza \(1\)[^\n]*\n {2}· wikisource-es--libro--suelta/u);
+    expect(await readFile(join(t.corpus, 'fuentes', 'wikisource-es--libro--primera.txt'), 'utf8')).toBe(antes);
+  });
+
+  it('ya versionado, no se vuelve a pedir', async () => {
+    const t = await taller();
+    await conDocumentos(t, { 'wikisource-es--libro--primera': urlDe('Primera') });
+    expect((await indice(INDICE, t, { [PINTADO]: OK(PAGINA_DEL_INDICE) })).codigo).toBe(0);
+    const segunda = await indice(INDICE, t, {});
+    expect(segunda.codigo, segunda.error).toBe(0);
+    expect(segunda.salida).toMatch(/Ya versionado/u);
+    expect(await pedidas(t)).toEqual([PINTADO]);
+  });
+
+  it('en seco dice lo que haría y no escribe nada', async () => {
+    const t = await taller();
+    await conDocumentos(t, { 'wikisource-es--libro--primera': urlDe('Primera') });
+    const r = await indice(INDICE, t, { [PINTADO]: OK(PAGINA_DEL_INDICE) }, ['--ensayo']);
+    expect(r.codigo, r.error).toBe(0);
+    expect(r.salida).toMatch(/En seco/u);
+    expect(await readdir(join(t.corpus, 'fuentes'))).toEqual(['wikisource-es--libro--primera.txt']);
+  });
+
+  it('sin ningún documento enlazado, o sin enlaces, no versiona nada', async () => {
+    const t = await taller();
+    await conDocumentos(t, { 'wikisource-es--otro--x': 'https://es.wikisource.org/wiki/Otro/X' });
+    const r = await indice(INDICE, t, { [PINTADO]: OK(PAGINA_DEL_INDICE) });
+    expect(r.codigo).toBe(1);
+    expect(r.error).toMatch(/ninguna es un documento versionado/u);
+    const vacio = await indice(INDICE, t, { [PINTADO]: OK('<p>nada</p>') });
+    expect(vacio.codigo).toBe(1);
+    expect(vacio.error).toMatch(/no enlaza ninguna página/u);
+    expect(await readdir(join(t.corpus, 'fuentes'))).toEqual(['wikisource-es--otro--x.txt']);
+  });
+
+  it('documentos de varias Obras: la que se llama como la página, o ninguna', async () => {
+    const t = await taller();
+    await conDocumentos(t, {
+      'wikisource-es--libro--primera': urlDe('Primera'),
+      'wikisource-es--segunda': urlDe('Segunda'),
+    });
+    const r = await indice(INDICE, t, { [PINTADO]: OK(PAGINA_DEL_INDICE) }, ['--ensayo']);
+    expect(r.codigo, r.error).toBe(0);
+    expect(r.salida).toMatch(/Obra: wikisource-es--libro\n/u);
+
+    const otro = await taller();
+    await conDocumentos(otro, {
+      'wikisource-es--a--primera': urlDe('Primera'),
+      'wikisource-es--b--segunda': urlDe('Segunda'),
+    });
+    const ninguna = await indice(INDICE, otro, { [PINTADO]: OK(PAGINA_DEL_INDICE) });
+    expect(ninguna.codigo).toBe(1);
+    expect(ninguna.error).toMatch(/2 Obras/u);
+  });
+
+  it('otro índice para la misma Obra se niega', async () => {
+    const t = await taller();
+    await conDocumentos(t, { 'wikisource-es--libro--primera': urlDe('Primera') });
+    expect((await indice(INDICE, t, { [PINTADO]: OK(PAGINA_DEL_INDICE) })).codigo).toBe(0);
+    const otra = 'https://es.wikisource.org/wiki/Libro_(1825)';
+    const r = await indice(otra, t, { [`${otra}?action=render`]: OK(PAGINA_DEL_INDICE) });
+    expect(r.codigo).toBe(1);
+    expect(r.error).toMatch(/ya tiene índice/u);
+  });
+
+  it('una redirección, una Fuente sin índice o una dirección de fuera no versionan nada', async () => {
+    const t = await taller();
+    await conDocumentos(t, { 'wikisource-es--libro--primera': urlDe('Primera') });
+    const redirigida = await indice(INDICE, t, {
+      [PINTADO]: OK('<div class="redirectMsg"><p>Redirigir a:</p><a href="/wiki/Otro">Otro</a></div>'),
+    });
+    expect(redirigida.codigo).toBe(1);
+    expect(redirigida.error).toMatch(/redirección/u);
+    const gutenberg = await indice('https://www.gutenberg.org/ebooks/7500', t, {});
+    expect(gutenberg.codigo).toBe(1);
+    expect(gutenberg.error).toMatch(/no publica un índice/u);
+    const fuera = await indice('https://example.com/wiki/Libro', t, {});
+    expect(fuera.codigo).toBe(1);
+    expect(await pedidas(t)).toEqual([PINTADO]);
+    expect(await readdir(join(t.corpus, 'fuentes'))).toEqual(['wikisource-es--libro--primera.txt']);
+  });
+
+  it('--ensayo sin --indice es una invocación que no vale', async () => {
+    const t = await taller();
+    const fichero = join(t.raiz, 'guion.json');
+    await writeFile(fichero, '{}', 'utf8');
+    const codigo = await ejecutar(
+      'node',
+      ['--import', 'tsx', '--import', DOBLE, join(RAIZ, 'tools/recuperar.ts'), URL_WIKISOURCE, '--ensayo', '--corpus', t.corpus],
+      { cwd: RAIZ, env: { ...process.env, DOBLE_GUION: fichero, DOBLE_REGISTRO: t.registro } },
+    ).then(
+      () => 0,
+      (e: { code?: number }) => e.code ?? 1,
+    );
+    expect(codigo).toBe(2);
+    expect(await pedidas(t)).toEqual([]);
+  });
+});

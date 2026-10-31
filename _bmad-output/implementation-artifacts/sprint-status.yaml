@@ -29,7 +29,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 # - Retrospective appends its action items to action_items; the status view surfaces open ones
 generated: 08-11-2026 09:00
-last_updated: 10-31-2026 18:51
+last_updated: 10-31-2026 20:09
 project: brainlySabiduria
 project_key: NOKEY
 tracking_system: file-system
@@ -410,7 +410,7 @@ development_status:
   24-6-al-pie-más-de-la-misma-obra-y-más-del-autor: review  # v8-ralph 2026-10-27: al pie de la Página de Cita, «De la misma obra» (3), «Más de {Autor}» (4, sin su Obra) y Temas, con cierres «Las {n} citas de… ›»; PARA HÉCTOR: la proyección de peso (≈7.426/9.026/9.598 Citas hasta aviso/tope/1 GB, frente a ~7.790/9.440/10.030 de la 24.2), NFR-7 (LCP 1.953→2.252 ms) y el alto a 360 (1.805→3.078 px) están en el Auto Run Result de spec-24-6, para revisar los valores de la 24.2; el docblock de Chips se corrigió en la revisión
   24-7-la-obra-salta-a-dónde-leerla: review  # v8-ralph 2026-10-25: la página 1 de una Obra salta a «Dónde leer esta obra», medido en navegador; diferido para Héctor: verificar el salto en WebKit
   24-8-una-cita-nueva-no-refecha-las-demás-páginas-de-cita: review  # v8-ralph 2026-10-28 00:29 UTC: la relación de AD-27 va por campos y una Cita nueva no refecha las demás páginas de Cita; sin diferidos para Héctor
-  24-9-el-orden-del-libro-lo-declara-la-fuente: backlog  # v8.5 (Héctor, 2026-10-31): el índice de subpáginas que la 24.1 aplazó; ya hay cuatro Obras desordenadas
+  24-9-el-orden-del-libro-lo-declara-la-fuente: review  # v8.5 (Héctor, 2026-10-31): el índice de subpáginas que la 24.1 aplazó; ya hay cuatro Obras desordenadas · 2026-10-31: índices de subpáginas capturados con «recuperar --indice» para las cuatro Obras; ordenDelLibro los recibe por parámetro; diferido para Héctor: «La señora Cornelia» (1878) no casa con el índice de 1825
   epic-24-retrospective: done
 
   epic-26: in-progress
