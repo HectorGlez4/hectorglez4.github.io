@@ -397,6 +397,7 @@ development_status:
   23-10-la-línea-base-se-lee-desde-tools-con-la-cuota-de-d1-a-la-vis: review # v8-ralph 2026-10-25: npm run medicion -- leer da la línea base por superficie y la cuota de D1 (escrituras y tamaño) desde tools/; diferidos para Héctor: cuota de lectura (bmad-architecture), letra del criterio de la cuota en epics.md (bmad-create-epics-and-stories), y lo pendiente de bmad-prd
   23-11-la-lectura-se-mide-en-vivo-y-su-línea-base-empieza-a-contar: review  # operativa: fusionada y desplegada por el bucle v8-ralph con autorización de Héctor del 2026-10-24; llegada 2026-10-25
   23-12-el-orden-de-llegada-no-reconstruye-a-nadie: review  # v8.2: se fusiona SOLA en la principal antes de la 23.3 (rowid aleatorio del Worker); excepción declarada a la fusión por épica; # v8-ralph 2026-10-24: el receptor inserta con rowid aleatorio, prueba de orden de llegada en tools/ y DESPLIEGUE.md §3; diferido para Héctor: la rama trae debajo el commit de epic-23-context.md (aceptarlo o quitarlo al fusionar)
+  23-13-la-cuota-de-lectura-de-d1-se-juzga-antes-de-leer-orden-por-o: backlog  # v8.5 (Héctor, 2026-10-31): espina AD-14; llega con la épica ya en vivo, cómo entra en la principal lo decide Héctor
   epic-23-retrospective: optional
 
   # Épicas 24 y 26 — una sola rama y un solo merge, por SM-11. La 24.8 se construye antes que la 26.1.
@@ -409,6 +410,7 @@ development_status:
   24-6-al-pie-más-de-la-misma-obra-y-más-del-autor: review  # v8-ralph 2026-10-27: al pie de la Página de Cita, «De la misma obra» (3), «Más de {Autor}» (4, sin su Obra) y Temas, con cierres «Las {n} citas de… ›»; PARA HÉCTOR: la proyección de peso (≈7.426/9.026/9.598 Citas hasta aviso/tope/1 GB, frente a ~7.790/9.440/10.030 de la 24.2), NFR-7 (LCP 1.953→2.252 ms) y el alto a 360 (1.805→3.078 px) están en el Auto Run Result de spec-24-6, para revisar los valores de la 24.2; el docblock de Chips se corrigió en la revisión
   24-7-la-obra-salta-a-dónde-leerla: review  # v8-ralph 2026-10-25: la página 1 de una Obra salta a «Dónde leer esta obra», medido en navegador; diferido para Héctor: verificar el salto en WebKit
   24-8-una-cita-nueva-no-refecha-las-demás-páginas-de-cita: review  # v8-ralph 2026-10-28 00:29 UTC: la relación de AD-27 va por campos y una Cita nueva no refecha las demás páginas de Cita; sin diferidos para Héctor
+  24-9-el-orden-del-libro-lo-declara-la-fuente: backlog  # v8.5 (Héctor, 2026-10-31): el índice de subpáginas que la 24.1 aplazó; ya hay cuatro Obras desordenadas
   epic-24-retrospective: optional
 
   epic-26: in-progress
@@ -423,6 +425,7 @@ development_status:
   26-9-ninguna-página-obliga-a-desplazarse-en-horizontal-a-320-px: review  # v8-ralph 2026-10-28 17:57 UTC: ninguna superficie pide desplazamiento horizontal a 320 px (texto al 200 % y espaciado 1.4.12), nombres largos se parten y el barrido e2e de 320 px cubre /buscar/; sin diferidos para Héctor
   26-10-una-persona-revisa-las-claves-de-orden-operativa-no-bloquea: backlog  # operativa: acto de Héctor (revisar las claves del lote inicial; se cierra con él, y las de los Autores nuevos pasan a la sesión de sembrado)
   26-11-la-obra-y-los-directorios-llegan-juntos-al-sitio-en-vivo-y-s: review  # operativa: fusionada y desplegada por el bucle v8-ralph con autorización de Héctor del 2026-10-24; llegada 2026-10-29
+  26-12-el-peso-y-el-interlineado-salen-de-sus-tokens: backlog  # v8.5 (Héctor, 2026-10-31): tokens de DESIGN.md § Typography y la prueba de dos jornadas del peso de dist/ (diferido de la 24.2)
   epic-26-retrospective: optional
 
   # Épica 25 — compartir donde se publica. La matriz de dispositivos corre dos veces, y cada una es puerta.
