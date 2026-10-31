@@ -105,7 +105,12 @@ const { obras, zona } = Astro.props;
     max-width: 100%;
     font-family: var(--sans);
     font-size: var(--cuerpo-md);
-    line-height: 1.4;
+    /*
+     * Historia 26.12 — excepción de DESIGN.md § Typography: el título de la Obra en la Lista de
+     * Obras toma el interlineado de `author` (1,4) y no el de su cuerpo. No es un descuido: la
+     * nombra, por fichero y selector, `tests/unit/tipografia-en-tokens.test.ts`.
+     */
+    line-height: var(--interlineado-autor);
     overflow-wrap: break-word;
   }
 

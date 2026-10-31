@@ -29,7 +29,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 # - Retrospective appends its action items to action_items; the status view surfaces open ones
 generated: 08-11-2026 09:00
-last_updated: 10-30-2026 05:30
+last_updated: 10-31-2026 16:08
 project: brainlySabiduria
 project_key: NOKEY
 tracking_system: file-system
@@ -425,7 +425,7 @@ development_status:
   26-9-ninguna-página-obliga-a-desplazarse-en-horizontal-a-320-px: review  # v8-ralph 2026-10-28 17:57 UTC: ninguna superficie pide desplazamiento horizontal a 320 px (texto al 200 % y espaciado 1.4.12), nombres largos se parten y el barrido e2e de 320 px cubre /buscar/; sin diferidos para Héctor
   26-10-una-persona-revisa-las-claves-de-orden-operativa-no-bloquea: backlog  # operativa: acto de Héctor (revisar las claves del lote inicial; se cierra con él, y las de los Autores nuevos pasan a la sesión de sembrado)
   26-11-la-obra-y-los-directorios-llegan-juntos-al-sitio-en-vivo-y-s: review  # operativa: fusionada y desplegada por el bucle v8-ralph con autorización de Héctor del 2026-10-24; llegada 2026-10-29
-  26-12-el-peso-y-el-interlineado-salen-de-sus-tokens: backlog  # v8.5 (Héctor, 2026-10-31): tokens de DESIGN.md § Typography y la prueba de dos jornadas del peso de dist/ (diferido de la 24.2)
+  26-12-el-peso-y-el-interlineado-salen-de-sus-tokens: review  # v8.5 (Héctor, 2026-10-31): tokens de DESIGN.md § Typography y la prueba de dos jornadas del peso de dist/ (diferido de la 24.2)
   epic-26-retrospective: optional
 
   # Épica 25 — compartir donde se publica. La matriz de dispositivos corre dos veces, y cada una es puerta.

@@ -52,6 +52,30 @@
   --autor: 13px;
   --pie: 13px;
 
+  /*
+   * Historia 26.12 — el peso y el interlineado de cada token (DESIGN.md § Typography, «En CSS»).
+   * Un token de tipografía da tres propiedades: su cuerpo (`--cita-xl`), el interlineado que va
+   * con él (`--interlineado-cita-xl`, el `lineHeight` del frontmatter) y uno de los dos pesos.
+   * Ningún componente escribe un peso ni un interlineado literal: la única excepción es el
+   * interlineado 1 de las letras de salto (`LetrasDeSalto.astro`), y la vigila
+   * `tests/unit/tipografia-en-tokens.test.ts`. El interlineado de un uso es el del token cuyo
+   * cuerpo toma, salvo donde DESIGN.md diga otro.
+   */
+  --peso-regular: 400;
+  --peso-fuerte: 600;
+
+  --interlineado-cita-xl: 1.25;
+  --interlineado-cita-lg: 1.3;
+  --interlineado-cita-md: 1.35;
+  --interlineado-cita-sm: 1.4;
+  --interlineado-titular-md: 1.2;
+  --interlineado-titular-sm: 1.3;
+  --interlineado-titular-obra: 1.25;
+  --interlineado-cuerpo-lg: 1.65;
+  --interlineado-cuerpo-md: 1.6;
+  --interlineado-autor: 1.4;
+  --interlineado-pie: 1.5;
+
   /* ── Espacio ──────────────────────────────────────────────────────────── */
   --unidad: 8px;
   --canal: 24px;
@@ -111,7 +135,7 @@ body {
   color: var(--tinta);
   font-family: var(--sans);
   font-size: var(--cuerpo-lg);
-  line-height: 1.65;
+  line-height: var(--interlineado-cuerpo-lg);
   /* NFR-8: el contenido se enmarca, nunca sangra al borde de la pantalla. */
   -webkit-text-size-adjust: 100%;
   /*

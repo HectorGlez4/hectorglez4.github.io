@@ -1,0 +1,122 @@
+{
+  "a.saltar": {
+    "400 | 1.650": 1
+  },
+  "footer.contenedor.pie > nav.seguir > ul > li > a": {
+    "400 | 1.650": 5
+  },
+  "footer.contenedor.pie > p": {
+    "400 | 1.650": 1
+  },
+  "header.cabecera.contenedor > a.marca": {
+    "600 | 1.650": 1
+  },
+  "header.cabecera.contenedor > nav > ul.principal > li > a.buscar": {
+    "400 | 1.650": 1
+  },
+  "header.cabecera.contenedor > nav > ul.principal > li > a.enlace-en-tinta": {
+    "400 | 1.650": 2
+  },
+  "header.cabecera.contenedor > nav > ul.principal > li > span.punto": {
+    "400 | 1.650": 2
+  },
+  "main > article.contenedor.pagina > div > span": {
+    "400 | 1.650": 1
+  },
+  "main > article.contenedor.pagina > div.isla > button.abrir": {
+    "400 | normal": 1
+  },
+  "main > article.contenedor.pagina > div.isla > button.copiar > span": {
+    "400 | normal": 1
+  },
+  "main > article.contenedor.pagina > div.isla > button.hoja": {
+    "400 | normal": 1
+  },
+  "main > article.contenedor.pagina > div.isla > dialog.dialogo > button.descargar": {
+    "400 | normal": 1
+  },
+  "main > article.contenedor.pagina > div.isla > dialog.dialogo > div.cabecera > button.cerrar": {
+    "400 | normal": 1
+  },
+  "main > article.contenedor.pagina > div.isla > dialog.dialogo > div.cabecera > p.titulo": {
+    "400 | 1.650": 1
+  },
+  "main > article.contenedor.pagina > div.isla > dialog.dialogo > div.fallo > button.abrir": {
+    "400 | normal": 1
+  },
+  "main > article.contenedor.pagina > div.isla > dialog.dialogo > div.fallo > p": {
+    "400 | 1.650": 1
+  },
+  "main > article.contenedor.pagina > div.isla > dialog.dialogo > div.fallo > textarea": {
+    "400 | normal": 1
+  },
+  "main > article.contenedor.pagina > div.isla > p.respaldo > label": {
+    "400 | 1.650": 1
+  },
+  "main > article.contenedor.pagina > div.isla > p.respaldo > textarea": {
+    "400 | normal": 1
+  },
+  "main > article.contenedor.pagina > div.isla > ul.destinos > li > a": {
+    "400 | 1.650": 4
+  },
+  "main > article.contenedor.pagina > div.isla > ul.destinos > li > a > span.solo-para-lectores": {
+    "400 | 1.650": 4
+  },
+  "main > article.contenedor.pagina > figure.bloque > blockquote.cita[data-tramo=lg] > h1.texto": {
+    "400 | 1.300": 1
+  },
+  "main > article.contenedor.pagina > figure.bloque > figcaption > p.autor > a.enlace-en-tinta": {
+    "600 | 1.400": 1
+  },
+  "main > article.contenedor.pagina > figure.bloque > figcaption > p.procedencia": {
+    "400 | 1.500": 1
+  },
+  "main > article.contenedor.pagina > figure.bloque > figcaption > p.procedencia > a.enlace-en-tinta": {
+    "400 | 1.500": 1
+  },
+  "main > article.contenedor.pagina > nav.salidas > section.de-la-misma-obra > h2.rotulo": {
+    "600 | 1.400": 1
+  },
+  "main > article.contenedor.pagina > nav.salidas > section.de-la-misma-obra > ul.tarjetas > li.fila-de-bloque > a > span": {
+    "400 | 1.400": 1
+  },
+  "main > article.contenedor.pagina > nav.salidas > section.de-la-misma-obra > ul.tarjetas > li.fila-de-bloque > a > span > span": {
+    "400 | 1.400": 1
+  },
+  "main > article.contenedor.pagina > nav.salidas > section.de-la-misma-obra > ul.tarjetas > li.tarjeta > a > span.fragmento": {
+    "600 | 1.300": 3
+  },
+  "main > article.contenedor.pagina > nav.salidas > section.temas-de-la-cita > h2.rotulo": {
+    "600 | 1.400": 1
+  },
+  "main > article.contenedor.pagina > nav.salidas > section.temas-de-la-cita > ul.chips > li > a.chip": {
+    "400 | 1.650": 1
+  },
+  "main > article.contenedor.pagina > p.fuente": {
+    "400 | 1.500": 1
+  },
+  "main > article.contenedor.pagina > p.fuente > a": {
+    "400 | 1.500": 1
+  },
+  "main > article.contenedor.pagina > section.tarjeta-de-obra > h2.rotulo": {
+    "600 | 1.400": 1
+  },
+  "main > article.contenedor.pagina > section.tarjeta-de-obra > p.hechos": {
+    "400 | 1.500": 1
+  },
+  "main > article.contenedor.pagina > section.tarjeta-de-obra > p.hechos > span": {
+    "400 | 1.500": 1
+  },
+  "main > article.contenedor.pagina > section.tarjeta-de-obra > p.hechos > span.solo-para-lectores": {
+    "400 | 1.500": 1
+  },
+  "main > article.contenedor.pagina > section.tarjeta-de-obra > p.titulo": {
+    "600 | 1.400": 1
+  },
+  "main > article.contenedor.pagina > section.tarjeta-de-obra > ul.filas > li.fila-de-bloque > a > span": {
+    "400 | 1.400": 2
+  },
+  "main > article.contenedor.pagina > section.tarjeta-de-obra > ul.filas > li.fila-de-bloque > a > span > span": {
+    "400 | 1.400": 2
+  }
+}

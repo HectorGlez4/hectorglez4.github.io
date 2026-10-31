@@ -354,8 +354,9 @@ describe('Historia 24.4 — el contrato de los componentes, sin construir', () =
     expect(titulo.get('margin')).toBe('var(--unidad) 0 0');
     expect(titulo.get('font-family')).toBe('var(--sans)');
     expect(titulo.get('font-size')).toBe('var(--cuerpo-lg)');
-    expect(titulo.get('font-weight')).toBe('600');
-    expect(titulo.get('line-height')).toBe('1.4');
+    expect(titulo.get('font-weight')).toBe('var(--peso-fuerte)');
+    // DESIGN.md § Typography: el título toma el interlineado de `author`, no el de su cuerpo.
+    expect(titulo.get('line-height')).toBe('var(--interlineado-autor)');
     expect(titulo.get('color')).toBe('var(--tinta)');
     expect(titulo.get('text-wrap')).toBe('balance');
     expect(titulo.get('overflow-wrap')).toBe('break-word');
@@ -365,8 +366,8 @@ describe('Historia 24.4 — el contrato de los componentes, sin construir', () =
     expect(hechos.get('margin')).toBe('var(--unidad) 0 0');
     expect(hechos.get('font-family')).toBe('var(--sans)');
     expect(hechos.get('font-size')).toBe('var(--pie)');
-    expect(hechos.get('font-weight')).toBe('400');
-    expect(hechos.get('line-height')).toBe('1.5');
+    expect(hechos.get('font-weight')).toBe('var(--peso-regular)');
+    expect(hechos.get('line-height')).toBe('var(--interlineado-pie)');
     expect(hechos.get('color')).toBe('var(--tinta-apagada)');
 
     const filas = de('.filas');
@@ -411,7 +412,7 @@ describe('Historia 24.4 — el contrato de los componentes, sin construir', () =
     expect(a!.get('padding-block')).toBe('calc(var(--unidad) * 1.25)');
     expect(a!.get('font-family')).toBe('var(--sans)');
     expect(a!.get('font-size')).toBe('var(--cuerpo-md)');
-    expect(a!.get('line-height')).toBe('1.4');
+    expect(a!.get('line-height')).toBe('var(--interlineado-autor)');
     expect(a!.get('color')).toBe('var(--tinta)');
     expect(a!.get('text-decoration')).toBe('none');
     expect(['anywhere', 'break-word']).toContain(a!.get('overflow-wrap'));

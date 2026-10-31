@@ -15,6 +15,7 @@ import {
   limpiar,
 } from './ayuda/construir.js';
 import { FICHEROS_QUE_ROTAN_CON_LA_JORNADA } from '../../tools/lib/peso.ts';
+import { descodificarCbor, diferenciasDeIndice, esFicheroDeIndice, indiceDe } from './ayuda/indice-de-pagefind.ts';
 import { milesEnEspañol } from '../../src/lib/formato.ts';
 import { TOPE_DE_PESO_DE_DIST } from '../../src/lib/umbrales.ts';
 
@@ -370,5 +371,165 @@ describe('Historia 24.2 — el peso de dist/, construido', () => {
     const ilegible = await correrElPaso(paso, conFichero);
     expect(ilegible.codigo).toBe(1);
     expect(ilegible.stderr).toContain('No se pudo medir el peso de dist/');
+  });
+});
+
+/**
+ * Historia 26.12, AD-12 — la jornada no cambia el contenido de nada juzgado, sobre una
+ * construcción real.
+ *
+ * Dos `npm run build` del mismo commit en dos jornadas cuya Cita del Día difiere: fuera de
+ * `FICHEROS_QUE_ROTAN_CON_LA_JORNADA`, todo `dist/` es idéntico byte a byte salvo los ficheros de
+ * índice de `pagefind/`, que se comparan descodificados y con su orden normalizado
+ * (`tests/unit/ayuda/indice-de-pagefind.ts`). Pagefind 1.5.2 no es determinista ni en dos
+ * construcciones del mismo día —baraja el orden de los filtros y de sus valores, y con él los
+ * hashes de los nombres y unos bytes de lo comprimido—, así que la línea de lo juzgado del paso
+ * puede variar esos bytes y no se compara (decisión de Héctor, Spec Change Log de la 26.12). La 24.2
+ * aplazó esta prueba porque entonces la Cita del Día entraba en el índice, hasta que la 26.2 la
+ * sacó. La prueba pura vive en `tests/unit/peso.test.ts`; la del HTML y los veredictos, en
+ * `tests/unit/dos-jornadas.test.ts`.
+ */
+describe('Historia 26.12 — dos jornadas, la misma medida', () => {
+  const JORNADAS = ['2026-10-24', '2026-10-25'] as const;
+  interface Construida {
+    codigo: number;
+    salida: string;
+    dist: string;
+    huella: Map<string, string>;
+  }
+  const construcciones: Construida[] = [];
+  /** Testigo: la primera jornada con otra Cita en el Corpus. Su índice tiene que salir distinto. */
+  let testigo: Construida | undefined;
+
+  beforeAll(async () => {
+    const construir = async (corpus: Record<string, string>, jornada: string): Promise<Construida> => {
+      const resultado = await construirConCorpus(corpus, { conNpmRunBuild: true, jornada, entorno: SIN_ACTIONS });
+      aLimpiar.push(resultado.proyecto);
+      const dist = join(resultado.proyecto, 'dist');
+      return { ...resultado, dist, huella: existsSync(dist) ? await huellaDe(dist) : new Map() };
+    };
+    for (const jornada of JORNADAS) construcciones.push(await construir(CORPUS, jornada));
+    testigo = await construir(
+      {
+        ...CORPUS,
+        'citas/seneca--mientras-se-espera-vivir.md': citaValida({
+          texto: 'Mientras se espera vivir, la vida pasa.',
+          slug: 'seneca-mientras-se-espera-vivir',
+        }),
+      },
+      JORNADAS[0],
+    );
+  }, 900_000);
+
+  /**
+   * Las dos construcciones de las jornadas, exigidas antes de mirarlas: si falta una o no salió
+   * bien, la prueba lo dice con la salida del build, no con un `TypeError`.
+   */
+  function lasDos(): [Construida, Construida] {
+    expect(construcciones, 'beforeAll no dejó las dos construcciones de las jornadas').toHaveLength(JORNADAS.length);
+    for (const [i, { codigo, salida }] of construcciones.entries()) expect(codigo, `${JORNADAS[i]}:\n${salida}`).toBe(0);
+    return [construcciones[0], construcciones[1]];
+  }
+
+  function elTestigo(): Construida {
+    expect(testigo, 'beforeAll no dejó la construcción testigo').toBeDefined();
+    expect(testigo!.codigo, testigo!.salida).toBe(0);
+    return testigo!;
+  }
+
+  /**
+   * El veredicto del paso, sin las cifras: el código de salida, la clase que dice la línea de lo
+   * juzgado (por debajo del aviso, en el aviso o sobre el tope) y si avisó o se detuvo por stderr.
+   * Las cifras pueden variar los pocos bytes de recomprimir el índice; el veredicto, no.
+   */
+  function veredicto({ codigo, salida }: Construida): string {
+    const linea = salida.match(/^Juzgado sin lo que rota: .*$/mu)?.[0];
+    expect(linea, salida).toBeDefined();
+    const clase = /hasta el aviso\.$/u.test(linea!)
+      ? 'por debajo del aviso'
+      : /hasta el tope\.$/u.test(linea!)
+        ? 'aviso'
+        : /pasa del tope en .*\.$/u.test(linea!)
+          ? 'sobre el tope'
+          : undefined;
+    expect(clase, linea).toBeDefined();
+    const aviso = /^(?:::warning::)?Aviso de peso: /mu.test(salida);
+    const tope = /^(?:::error::)?dist\/ pesa .* pasa el tope /mu.test(salida);
+    return `código ${codigo}; ${clase}; ${aviso ? 'con' : 'sin'} aviso; ${tope ? 'con' : 'sin'} tope`;
+  }
+
+  it('las dos construyen, y la Cita del Día cambia de verdad', () => {
+    const [una, otra] = lasDos();
+    expect(una.huella.get('index.html')).toBeDefined();
+    expect(otra.huella.get('index.html'), 'index.html no cambia: las dos jornadas dan la misma Cita del Día').not.toBe(
+      una.huella.get('index.html'),
+    );
+  });
+
+  it('fuera de lo que rota y del índice de pagefind/, dist/ es idéntico byte a byte', () => {
+    const [una, otra] = lasDos();
+    const rutas = new Set([...una.huella.keys(), ...otra.huella.keys()]);
+    const cambian = [...rutas]
+      .filter((ruta) => !FICHEROS_QUE_ROTAN_CON_LA_JORNADA.includes(ruta) && !esFicheroDeIndice(ruta))
+      .filter((ruta) => una.huella.get(ruta) !== otra.huella.get(ruta))
+      .sort();
+    expect(cambian, `Cambian entre ${JORNADAS.join(' y ')}: ${cambian.join(', ')}`).toEqual([]);
+    // Lo de pagefind/ que no es índice —el guion, la interfaz, el wasm— sí entra byte a byte.
+    expect([...una.huella.keys()].some((ruta) => ruta.startsWith('pagefind/') && !esFicheroDeIndice(ruta))).toBe(true);
+  });
+
+  it('el índice de pagefind/, descodificado y normalizado, es el mismo en las dos jornadas', async () => {
+    const [una, otra] = lasDos();
+    const indice = await indiceDe(una.dist);
+    for (const clase of ['pagefind-entry.json', 'pf_meta', 'filter', 'index', 'fragment']) {
+      expect(indice.get(clase)?.length ?? 0, clase).toBeGreaterThan(0);
+    }
+    const diferencias = diferenciasDeIndice(indice, await indiceDe(otra.dist));
+    expect(diferencias, `El índice cambia entre ${JORNADAS.join(' y ')}:\n${diferencias.join('\n')}`).toEqual([]);
+  });
+
+  it('el veredicto del paso es el mismo en las dos jornadas', () => {
+    const [una, otra] = lasDos();
+    expect(veredicto(una)).toBe('código 0; por debajo del aviso; sin aviso; sin tope');
+    expect(veredicto(otra)).toBe(veredicto(una));
+  });
+
+  it('la comparación ve un cambio real: con otra Cita en el Corpus, el índice sale distinto', async () => {
+    const [una] = lasDos();
+    const diferencias = diferenciasDeIndice(await indiceDe(una.dist), await indiceDe(elTestigo().dist));
+    expect(diferencias.length).toBeGreaterThan(0);
+    expect(diferencias.some((d) => d.startsWith('fragment: solo en la segunda'))).toBe(true);
+  });
+
+  it('el descodificador de CBOR lee lo que el índice usa, y rechaza lo mal formado', () => {
+    const de = (...bytes: number[]) => descodificarCbor(Uint8Array.from(bytes));
+    // {"a": [1, -2, "x"], 3: h'ff'} en longitud definida, y [1, 2] y "ab" en indefinida.
+    expect(de(0xa2, 0x61, 0x61, 0x83, 0x01, 0x21, 0x61, 0x78, 0x03, 0x41, 0xff)).toEqual({
+      mapa: [
+        ['a', [1, -2, 'x']],
+        [3, 'ff'],
+      ],
+    });
+    expect(de(0x9f, 0x01, 0x02, 0xff)).toEqual([1, 2]);
+    expect(de(0xbf, 0x61, 0x61, 0x01, 0xff)).toEqual({ mapa: [['a', 1]] });
+    expect(de(0x7f, 0x61, 0x61, 0x61, 0x62, 0xff)).toBe('ab');
+    expect(de(0x19, 0x01, 0xea)).toBe(490);
+    expect(de(0xf9, 0x3c, 0x00)).toBe(1);
+    expect(de(0xc1, 0x01)).toEqual({ etiqueta: 1, valor: 1 });
+    // Los simples sin nombre no se confunden con un texto.
+    expect(de(0xf0)).toEqual({ simple: 16 });
+    expect(de(0xf8, 0x20)).toEqual({ simple: 32 });
+    expect(de(0xf0)).not.toEqual(de(0x6a, ...Buffer.from('simple(16)')));
+    // Lo mal formado lanza.
+    expect(() => de(0x01, 0x02)).toThrow(/sobran/);
+    expect(() => de(0x1f)).toThrow(/indefinida en el tipo mayor 0/);
+    expect(() => de(0x3f)).toThrow(/indefinida en el tipo mayor 1/);
+    expect(() => de(0xdf, 0x01)).toThrow(/indefinida en el tipo mayor 6/);
+    expect(() => de(0x82, 0x01, 0xff)).toThrow(/«break» fuera/);
+    expect(() => de(0xa1, 0x61, 0x61, 0xff)).toThrow(/«break» fuera/);
+    expect(() => de(0xbf, 0x61, 0x61, 0xff)).toThrow(/«break» fuera/);
+    expect(() => de(0xff)).toThrow(/«break» fuera/);
+    expect(() => de(0x7f, 0x41, 0x61, 0xff)).toThrow(/trozo mal formado/);
+    expect(() => de(0x83, 0x01)).toThrow(/truncado/);
   });
 });

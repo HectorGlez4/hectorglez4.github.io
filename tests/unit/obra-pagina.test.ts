@@ -832,7 +832,7 @@ describe('Historia 22.4 — la Página de Obra, construida', () => {
       expect(salto.get('margin')).toBe('calc(var(--unidad) * 3) 0 0');
       expect(salto.get('font-family')).toBe('var(--sans)');
       expect(salto.get('font-size')).toBe('var(--cuerpo-md)');
-      expect(salto.get('line-height')).toBe('1.6');
+      expect(salto.get('line-height')).toBe('var(--interlineado-cuerpo-md)');
       const enlace = de('.salto a');
       expect(enlace.get('display')).toBe('inline-flex');
       expect(enlace.get('align-items')).toBe('center');

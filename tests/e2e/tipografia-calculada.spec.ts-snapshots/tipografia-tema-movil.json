@@ -1,0 +1,59 @@
+{
+  "a.saltar": {
+    "400 | 1.650": 1
+  },
+  "footer.contenedor.pie > nav.seguir > ul > li > a": {
+    "400 | 1.650": 5
+  },
+  "footer.contenedor.pie > p": {
+    "400 | 1.650": 1
+  },
+  "header.cabecera.contenedor > a.marca": {
+    "600 | 1.650": 1
+  },
+  "header.cabecera.contenedor > nav > ul.principal > li > a.buscar": {
+    "400 | 1.650": 1
+  },
+  "header.cabecera.contenedor > nav > ul.principal > li > a.enlace-en-tinta": {
+    "400 | 1.650": 2
+  },
+  "header.cabecera.contenedor > nav > ul.principal > li > span.punto": {
+    "400 | 1.650": 2
+  },
+  "main > div.contenedor.pagina > form.buscar-en > div.campo-de-busqueda > button.buscar": {
+    "400 | normal": 1
+  },
+  "main > div.contenedor.pagina > form.buscar-en > div.campo-de-busqueda > label": {
+    "400 | 1.650": 1
+  },
+  "main > div.contenedor.pagina > h1": {
+    "600 | 1.200": 1
+  },
+  "main > div.contenedor.pagina > nav.paginacion > a": {
+    "400 | 1.650": 1
+  },
+  "main > div.contenedor.pagina > nav.paginacion > ol.numeros > li > a": {
+    "400 | 1.650": 2
+  },
+  "main > div.contenedor.pagina > nav.paginacion > ol.numeros > li > a > span.oculto": {
+    "400 | 1.650": 2
+  },
+  "main > div.contenedor.pagina > nav.paginacion > ol.numeros > li > span": {
+    "600 | 1.650": 1
+  },
+  "main > div.contenedor.pagina > nav.paginacion > p.cuenta": {
+    "400 | 1.650": 1
+  },
+  "main > div.contenedor.pagina > ul.listado > li.tarjeta > a > span.autor": {
+    "600 | 1.650": 50
+  },
+  "main > div.contenedor.pagina > ul.listado > li.tarjeta > a > span.fragmento": {
+    "600 | 1.300": 50
+  },
+  "main > div.contenedor.pagina > ul.listado > li.tarjeta > a > span.obra": {
+    "400 | 1.500": 50
+  },
+  "main > div.contenedor.pagina > ul.listado > li.tarjeta > a > span.solo-para-lectores": {
+    "400 | 1.650": 100
+  }
+}
