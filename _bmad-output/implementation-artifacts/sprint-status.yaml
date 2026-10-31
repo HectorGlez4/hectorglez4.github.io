@@ -29,7 +29,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 # - Retrospective appends its action items to action_items; the status view surfaces open ones
 generated: 08-11-2026 09:00
-last_updated: 10-30-2026 05:30
+last_updated: 10-31-2026 18:51
 project: brainlySabiduria
 project_key: NOKEY
 tracking_system: file-system
@@ -394,11 +394,11 @@ development_status:
   23-7-cada-salida-interna-dice-desde-qué-zona: review  # v8-ralph 2026-10-25: cada salida interna marca la zona de origen en la baliza (continuación), con 404 y páginas 2+ apartadas; sin diferidos para Héctor
   23-8-una-búsqueda-cuenta-una-vez-cuando-se-asienta: review # v8-ralph 2026-10-25: la búsqueda se cuenta una vez al asentarse (Enter, clic o botón central) y el índice que falla se reintenta; diferido para Héctor: marcar en epics.md la 3.2 como sustituida por la 23.8 (bmad-create-epics-and-stories)
   23-9-toda-obra-cuenta-sus-vistas-se-indexe-o-no: review  # v8-ralph 2026-10-25: toda Obra (indexable o no) emite vista-de-obra con su marca y la puerta lo exige; diferido para Héctor: marcar en epics.md el criterio de la 22.4 como sustituido por la 23.9 (bmad-create-epics-and-stories)
-  23-10-la-línea-base-se-lee-desde-tools-con-la-cuota-de-d1-a-la-vis: review # v8-ralph 2026-10-25: npm run medicion -- leer da la línea base por superficie y la cuota de D1 (escrituras y tamaño) desde tools/; diferidos para Héctor: cuota de lectura (bmad-architecture), letra del criterio de la cuota en epics.md (bmad-create-epics-and-stories), y lo pendiente de bmad-prd
+  23-10-la-línea-base-se-lee-desde-tools-con-la-cuota-de-d1-a-la-vis: review # v8-ralph 2026-10-25: npm run medicion (sin subcomando) da la línea base por superficie y la cuota de D1 (escrituras y tamaño) desde tools/; diferidos para Héctor: cuota de lectura (bmad-architecture), letra del criterio de la cuota en epics.md (bmad-create-epics-and-stories), y lo pendiente de bmad-prd
   23-11-la-lectura-se-mide-en-vivo-y-su-línea-base-empieza-a-contar: review  # operativa: fusionada y desplegada por el bucle v8-ralph con autorización de Héctor del 2026-10-24; llegada 2026-10-25
   23-12-el-orden-de-llegada-no-reconstruye-a-nadie: review  # v8.2: se fusiona SOLA en la principal antes de la 23.3 (rowid aleatorio del Worker); excepción declarada a la fusión por épica; # v8-ralph 2026-10-24: el receptor inserta con rowid aleatorio, prueba de orden de llegada en tools/ y DESPLIEGUE.md §3; diferido para Héctor: la rama trae debajo el commit de epic-23-context.md (aceptarlo o quitarlo al fusionar)
   23-13-la-cuota-de-lectura-de-d1-se-juzga-antes-de-leer-orden-por-o: backlog  # v8.5 (Héctor, 2026-10-31): espina AD-14; llega con la épica ya en vivo, cómo entra en la principal lo decide Héctor
-  epic-23-retrospective: optional
+  epic-23-retrospective: done
 
   # Épicas 24 y 26 — una sola rama y un solo merge, por SM-11. La 24.8 se construye antes que la 26.1.
   epic-24: in-progress
@@ -411,7 +411,7 @@ development_status:
   24-7-la-obra-salta-a-dónde-leerla: review  # v8-ralph 2026-10-25: la página 1 de una Obra salta a «Dónde leer esta obra», medido en navegador; diferido para Héctor: verificar el salto en WebKit
   24-8-una-cita-nueva-no-refecha-las-demás-páginas-de-cita: review  # v8-ralph 2026-10-28 00:29 UTC: la relación de AD-27 va por campos y una Cita nueva no refecha las demás páginas de Cita; sin diferidos para Héctor
   24-9-el-orden-del-libro-lo-declara-la-fuente: backlog  # v8.5 (Héctor, 2026-10-31): el índice de subpáginas que la 24.1 aplazó; ya hay cuatro Obras desordenadas
-  epic-24-retrospective: optional
+  epic-24-retrospective: done
 
   epic-26: in-progress
   26-1-todo-autor-publicado-tiene-su-clave-de-orden: review  # tras la 24.8: sin la relación por campos, el lote de claves refecharía todo el sitio · v8-ralph 2026-10-28: el build rompe ante un autor publicado sin clave de orden; órdenes y lote de claves la escriben; sin diferidos para Héctor
@@ -426,7 +426,7 @@ development_status:
   26-10-una-persona-revisa-las-claves-de-orden-operativa-no-bloquea: backlog  # operativa: acto de Héctor (revisar las claves del lote inicial; se cierra con él, y las de los Autores nuevos pasan a la sesión de sembrado)
   26-11-la-obra-y-los-directorios-llegan-juntos-al-sitio-en-vivo-y-s: review  # operativa: fusionada y desplegada por el bucle v8-ralph con autorización de Héctor del 2026-10-24; llegada 2026-10-29
   26-12-el-peso-y-el-interlineado-salen-de-sus-tokens: backlog  # v8.5 (Héctor, 2026-10-31): tokens de DESIGN.md § Typography y la prueba de dos jornadas del peso de dist/ (diferido de la 24.2)
-  epic-26-retrospective: optional
+  epic-26-retrospective: done
 
   # Épica 25 — compartir donde se publica. La matriz de dispositivos corre dos veces, y cada una es puerta.
   epic-25: backlog
@@ -446,11 +446,11 @@ development_status:
   27-3-la-búsqueda-se-acota-también-por-una-obra-del-autor-elegido: review  # v8-ralph 2026-10-29: selector de Obra del Autor elegido en /buscar/ (filtro obra de Pagefind, mapa de Obras del build); diferido: la excepción de red de Busqueda.astro en AD-22, pendiente de Héctor (bmad-architecture)
   27-4-la-búsqueda-vive-en-la-dirección-y-atrás-la-devuelve: review  # v8-ralph 2026-10-29: la consulta y los filtros viven en la dirección, atrás repinta y la llegada con filtros muertos avisa; diferido (a la 27.6): la sugerencia doble a cero resultados con aviso
   27-5-los-resultados-llegan-de-30-en-30: review # v8-ralph 2026-10-29: /buscar/ pinta de 30 en 30 con «mostrar 30 más», reintento real de la tanda fallida y anuncio por región; sin diferidos
-  27-6-sin-resultados-los-ocho-autores-con-más-citas: review  # v8-ralph 2026-10-29 18:15 UTC: entró la lista de los ocho Autores con más Citas en la búsqueda sin resultados; sin diferidos para Héctor
+  27-6-sin-resultados-los-ocho-autores-con-más-citas: review  # v8-ralph 2026-10-29 18:15 UTC: entró la lista de los ocho Autores con más Citas en la búsqueda sin resultados; diferido para Héctor: confirmar la clave «Prada» de González Prada (retro 27, 2026-10-31)
   27-7-sin-javascript-la-búsqueda-lleva-a-los-directorios: review  # v8-ralph 2026-10-29 19:22 UTC: sin guion o sin índice, /buscar/ lleva a los Directorios (exención directorios-del-aviso) y el reintento espera al índice; diferido para Héctor: alinear EXPERIENCE.md § Zonas (bmad-ux)
   27-8-buscar-en-esta-obra-en-un-autor-o-en-un-tema: review  # v8-ralph 2026-10-30: «Buscar en esta obra», en un Autor o en un Tema desde su página 1, con filtro completo de Pagefind bajo el listado; sin diferidos para Héctor
   27-9-la-búsqueda-con-filtros-llega-al-sitio-en-vivo-operativa-v8: review  # operativa: fusionada y desplegada por el bucle v8-ralph con autorización de Héctor del 2026-10-24; llegada 2026-10-30
-  epic-27-retrospective: optional
+  epic-27-retrospective: done
 
   # Épica 28 — la portada de retorno. Al final; conviene la 21.2 antes (con 16 aptas la Cita del Día se repite cada 16 días).
   epic-28: backlog
@@ -552,7 +552,7 @@ action_items:
     action: "Vigilar el coste de build de las Tarjetas cuando el Corpus crezca: hoy
       38 PNG, y escala con el Corpus"
     owner: "Héctor"
-    status: open
+    status: in-progress
     ref: "_bmad-output/implementation-artifacts/epic-10-retro-08-12-2026.md"
   - id: "epic-13-item-1-acotar-la-longitud-del-nombre-de-coleccion"
     epic: 13
@@ -564,17 +564,233 @@ action_items:
     ref: "_bmad-output/implementation-artifacts/spec-13-3-una-coleccion-anuncia-su-pieza.md"
   - id: "epic-13-item-2-ux-el-nombre-de-coleccion-en-la-pieza"
     epic: 13
-    action: "Pasada acotada de bmad-ux: DESIGN.md dice que el Nombre de Colección es
-      «una sola línea» y la Pieza lo reparte. Hoy la contradicción se resuelve en un
-      comentario del código, que no es quien manda sobre la maqueta"
+    action: "Pasada acotada de bmad-ux: DESIGN.md dice que el Nombre de Colección
+      es «una sola línea» y la Pieza lo reparte. Hoy la contradicción se resuelve
+      en un comentario del código, que no es quien manda sobre la maqueta"
     owner: "Héctor"
     status: open
     ref: "_bmad-output/implementation-artifacts/spec-13-3-una-coleccion-anuncia-su-pieza.md"
   - id: "epic-13-item-3-subir-el-convenio-de-codigos-de-salida"
     epic: 13
-    action: "Subir a AGENTS.md o a la espina el convenio de códigos de salida de
-      `tools/`: 2 es la forma de la invocación, 1 es lo que la invocación dice. Hoy
-      vive en la cabecera de tools/pieza.ts y gobierna todas las órdenes"
+    action: "Subir a AGENTS.md o a la espina el convenio de códigos de salida de `tools/`:
+      2 es la forma de la invocación, 1 es lo que la invocación dice. Hoy vive en
+      la cabecera de tools/pieza.ts y gobierna todas las órdenes"
     owner: "Héctor"
     status: open
     ref: "_bmad-output/implementation-artifacts/spec-13-3-una-coleccion-anuncia-su-pieza.md"
+  - id: "epic-23-retro-item-17-correr-npm-run-medicion-sobre-la-jornada"
+    epic: 23
+    action: "Correr npm run medicion sobre la jornada 2026-10-26 y anotar filas, tamaño
+      y eventos nuevos en DESPLIEGUE.md §3 (criterio pendiente de la 23.11)"
+    owner: "Héctor"
+    status: open
+    ref: "_bmad-output/implementation-artifacts/epic-23-retro-10-31-2026.md"
+  - id: "epic-23-retro-item-18-confirmar-en-el-panel-el-plan-de-cloudfl"
+    epic: 23
+    action: "Confirmar en el panel el plan de Cloudflare y anotar sus cuotas y la
+      ventana de Time Travel"
+    owner: "Héctor"
+    status: open
+    ref: "_bmad-output/implementation-artifacts/epic-23-retro-10-31-2026.md"
+  - id: "epic-23-retro-item-19-validar-medicion_endpoint-como-http-s-ta"
+    epic: 23
+    action: "Validar MEDICION_ENDPOINT como http(s) también en el build, con la regla
+      de tools/"
+    owner: "bucle (bmad-build)"
+    status: open
+    ref: "_bmad-output/implementation-artifacts/epic-23-retro-10-31-2026.md"
+  - id: "epic-23-retro-item-20-dejar-una-sola-redacción-de-los-códigos"
+    epic: 23
+    action: "Dejar una sola redacción de los códigos de anotar (tools/canal.ts y tools/lib/corpus.ts)"
+    owner: "bucle (bmad-build)"
+    status: open
+    ref: "_bmad-output/implementation-artifacts/epic-23-retro-10-31-2026.md"
+  - id: "epic-23-retro-item-21-trocear-en-planificación-las-historias-o"
+    epic: 23
+    action: "Trocear en planificación las historias oversized o multiple-goals"
+    owner: "Héctor (bmad-create-epics-and-stories)"
+    status: open
+    ref: "_bmad-output/implementation-artifacts/epic-23-retro-10-31-2026.md"
+  - id: "epic-24-retro-item-22-revisar-el-aviso-y-el-tope-del-peso-de-d"
+    epic: 24
+    action: "Revisar el aviso y el tope del peso de dist/ con la proyección de la
+      24.6 y poner al día el comentario de umbrales.ts"
+    owner: "Héctor"
+    status: open
+    ref: "_bmad-output/implementation-artifacts/epic-24-retro-10-31-2026.md"
+  - id: "epic-24-retro-item-23-alinear-agents-md-con-la-v8-5-los-chips"
+    epic: 24
+    action: "Alinear AGENTS.md con la v8.5: los chips de Tema son navegación"
+    owner: "agente (bmad-project-context), visto bueno de Héctor"
+    status: open
+    ref: "_bmad-output/implementation-artifacts/epic-24-retro-10-31-2026.md"
+  - id: "epic-24-retro-item-24-probar-en-webkit-o-safari-de-ios-el-salt"
+    epic: 24
+    action: "Probar en WebKit o Safari de iOS el salto de la 24.7"
+    owner: "Héctor"
+    status: open
+    ref: "_bmad-output/implementation-artifacts/epic-24-retro-10-31-2026.md"
+  - id: "epic-24-retro-item-25-decidir-qué-significa-followup_review_re"
+    epic: 24
+    action: "Decidir qué significa followup_review_recommended en los specs"
+    owner: "Héctor"
+    status: open
+    ref: "_bmad-output/implementation-artifacts/epic-24-retro-10-31-2026.md"
+  - id: "epic-24-retro-item-26-comprobar-los-glifos-contra-los-subconju"
+    epic: 24
+    action: "Comprobar los glifos contra los subconjuntos de fuente servidos al planificar
+      UX"
+    owner: "Héctor (bmad-ux)"
+    status: open
+    ref: "_bmad-output/implementation-artifacts/epic-24-retro-10-31-2026.md"
+  - id: "epic-24-retro-item-27-reconciliar-fr-51-con-el-lastmod-de-la-o"
+    epic: 24
+    action: "Reconciliar FR-51 con el lastmod de la Obra que fija AD-27"
+    owner: "Héctor (bmad-prd)"
+    status: open
+    ref: "_bmad-output/implementation-artifacts/epic-24-retro-10-31-2026.md"
+  - id: "epic-24-retro-item-28-borrar-el-parche-wip-de-la-24-4-su-rama"
+    epic: 24
+    action: "Borrar el parche WIP de la 24.4, su rama y el worktree v8-24-2"
+    owner: "Héctor"
+    status: open
+    ref: "_bmad-output/implementation-artifacts/epic-24-retro-10-31-2026.md"
+  - id: "epic-26-retro-item-29-cerrar-la-26-10-revisar-las-171-claves-d"
+    epic: 26
+    action: "Cerrar la 26.10: revisar las 171 claves de orden sin revisar"
+    owner: "Héctor"
+    status: open
+    ref: "_bmad-output/implementation-artifacts/epic-26-retro-10-31-2026.md"
+  - id: "epic-26-retro-item-30-escribir-la-regla-de-nfr-7-media-de-10-c"
+    epic: 26
+    action: "Escribir la regla de NFR-7 (media de 10 corridas alternas con max-age=600)
+      en DESPLIEGUE.md y en epics.md"
+    owner: "Héctor decide; agente redacta"
+    status: open
+    ref: "_bmad-output/implementation-artifacts/epic-26-retro-10-31-2026.md"
+  - id: "epic-26-retro-item-31-hacer-y-anotar-la-comprobación-en-vivo-d"
+    epic: 26
+    action: "Hacer y anotar la comprobación en vivo de la 26.11 (curl a Cita con Obra,
+      /obra/ y sitemap; qué avisó IndexNow) y cerrar su spec"
+    owner: "Héctor; el bucle prepara las órdenes"
+    status: open
+    ref: "_bmad-output/implementation-artifacts/epic-26-retro-10-31-2026.md"
+  - id: "epic-26-retro-item-32-tope-con-nombre-en-umbrales-ts-para-la-h"
+    epic: 26
+    action: "Tope con nombre en umbrales.ts para la hoja del Armazón en línea, con
+      su prueba de dist/"
+    owner: "bucle (valor de Héctor)"
+    status: open
+    ref: "_bmad-output/implementation-artifacts/epic-26-retro-10-31-2026.md"
+  - id: "epic-26-retro-item-33-cambiar-localecompare-por-clavedecompara"
+    epic: 26
+    action: "Cambiar localeCompare por claveDeComparacion en la Lista de Obras y en
+      grafiaPorOmision"
+    owner: "bucle (bmad-build)"
+    status: open
+    ref: "_bmad-output/implementation-artifacts/epic-26-retro-10-31-2026.md"
+  - id: "epic-26-retro-item-34-regla-del-bucle-ninguna-historia-pasa-a"
+    epic: 26
+    action: "Regla del bucle: ninguna historia pasa a review con npm test en rojo,
+      aunque sea previo"
+    owner: "Héctor"
+    status: open
+    ref: "_bmad-output/implementation-artifacts/epic-26-retro-10-31-2026.md"
+  - id: "epic-26-retro-item-35-que-las-órdenes-que-reordenan-listados-c"
+    epic: 26
+    action: "Que las órdenes que reordenan listados corran fueraDeAlcanceTras antes
+      de escribir"
+    owner: "bucle (bmad-build)"
+    status: open
+    ref: "_bmad-output/implementation-artifacts/epic-26-retro-10-31-2026.md"
+  - id: "epic-26-retro-item-36-arreglar-los-posicionales-de-tools-tema"
+    epic: 26
+    action: "Arreglar los posicionales de tools/tema.ts (--corpus tomado como slug)"
+    owner: "bucle (bmad-build)"
+    status: open
+    ref: "_bmad-output/implementation-artifacts/epic-26-retro-10-31-2026.md"
+  - id: "epic-26-retro-item-37-decidir-el-salto-del-filtro-en-webkit-y"
+    epic: 26
+    action: "Decidir el salto del filtro en WebKit y los 3 px de Compartir en"
+    owner: "Héctor (bmad-ux)"
+    status: open
+    ref: "_bmad-output/implementation-artifacts/epic-26-retro-10-31-2026.md"
+  - id: "epic-26-retro-item-38-auditar-agents-md-y-partir-accesibilidad"
+    epic: 26
+    action: "Auditar AGENTS.md y partir accesibilidad.spec.ts por historia"
+    owner: "Héctor"
+    status: open
+    ref: "_bmad-output/implementation-artifacts/epic-26-retro-10-31-2026.md"
+  - id: "epic-27-retro-item-39-la-puerta-de-nfr-7-juzga-también-el-lcp"
+    epic: 27
+    action: "La puerta de NFR-7 juzga también el LCP de /buscar/, con desempate por
+      estrangulamiento real (Héctor ratificó la fusión el 2026-10-31)"
+    owner: "bucle (bmad-build)"
+    status: open
+    ref: "_bmad-output/implementation-artifacts/epic-27-retro-10-31-2026.md"
+  - id: "epic-27-retro-item-40-estabilizar-busqueda-spec-ts-841-y-tests"
+    epic: 27
+    action: "Estabilizar busqueda.spec.ts:841 y tests/servidor.mjs antes de la próxima
+      verificación de punta a punta"
+    owner: "bucle (bmad-build)"
+    status: open
+    ref: "_bmad-output/implementation-artifacts/epic-27-retro-10-31-2026.md"
+  - id: "epic-27-retro-item-41-añadir-a-known-pitfalls-de-agents-md-la"
+    epic: 27
+    action: "Añadir a Known pitfalls de AGENTS.md la trampa de -g con subcadenas sin
+      acento"
+    owner: "Héctor (bmad-project-context)"
+    status: open
+    ref: "_bmad-output/implementation-artifacts/epic-27-retro-10-31-2026.md"
+  - id: "epic-27-retro-item-42-decidir-si-el-tope-del-guion-de-la-búsqu"
+    epic: 27
+    action: "Decidir si el tope del guion de la búsqueda es presupuesto fijo o registro"
+    owner: "Héctor (bmad-architecture)"
+    status: open
+    ref: "_bmad-output/implementation-artifacts/epic-27-retro-10-31-2026.md"
+  - id: "epic-27-retro-item-43-recoger-en-ad-22-el-fetch-de-buscar-obra"
+    epic: 27
+    action: "Recoger en AD-22 el fetch de /buscar/obras.json y corregir el comentario
+      Ocho excepciones de andamiaje.test.ts"
+    owner: "Héctor (bmad-architecture); desarrollo"
+    status: open
+    ref: "_bmad-output/implementation-artifacts/epic-27-retro-10-31-2026.md"
+  - id: "epic-27-retro-item-44-alinear-experience-md-zonas-con-la-exenc"
+    epic: 27
+    action: "Alinear EXPERIENCE.md § Zonas con la exención directorios-del-aviso y
+      decidir la frase de la llegada que falla"
+    owner: "Héctor (bmad-ux)"
+    status: open
+    ref: "_bmad-output/implementation-artifacts/epic-27-retro-10-31-2026.md"
+  - id: "epic-27-retro-item-45-confirmar-la-clave-prada-y-dar-valor-a-a"
+    epic: 27
+    action: "Confirmar la clave Prada y dar valor a AVISO_DE_RANGO_DE_LA_CLAVE_DE_ORDEN"
+    owner: "Héctor"
+    status: open
+    ref: "_bmad-output/implementation-artifacts/epic-27-retro-10-31-2026.md"
+  - id: "epic-27-retro-item-46-unificar-la-fila-de-resultado-de-la-isla"
+    epic: 27
+    action: "Unificar la fila de resultado de la isla y la de los avisos, barrida
+      con axe"
+    owner: "bucle (bmad-build)"
+    status: open
+    ref: "_bmad-output/implementation-artifacts/epic-27-retro-10-31-2026.md"
+  - id: "epic-27-retro-item-47-al-poner-la-épica-25-al-día-con-la-princ"
+    epic: 27
+    action: "Al poner la Épica 25 al día con la principal, colocar Compartir en tras
+      Buscar en esta obra"
+    owner: "quien fusione la 25"
+    status: open
+    ref: "_bmad-output/implementation-artifacts/epic-27-retro-10-31-2026.md"
+  - id: "epic-27-retro-item-48-cerrar-el-registro-operativo-de-spec-27"
+    epic: 27
+    action: "Cerrar el registro operativo de spec-27-9 y regenerar epic-27-context.md"
+    owner: "bucle"
+    status: open
+    ref: "_bmad-output/implementation-artifacts/epic-27-retro-10-31-2026.md"
+  - id: "epic-27-retro-item-49-leer-sm-6-y-sm-13-desde-la-ventana-del-2"
+    epic: 27
+    action: "Leer SM-6 y SM-13 desde la ventana del 2026-10-31"
+    owner: "Héctor"
+    status: open
+    ref: "_bmad-output/implementation-artifacts/epic-27-retro-10-31-2026.md"
