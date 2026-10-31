@@ -7,7 +7,7 @@ sources:
   - "{planning_artifacts}/architecture/architecture-brainlySabiduria-2026-08-10/ARCHITECTURE-SPINE.md"
   - "docs/superpowers/specs/2026-10-05-pagina-de-obra-design.md"
   - "docs/superpowers/specs/2026-10-17-v8-cita-como-centro-design.md"
-updated: 2026-10-30
+updated: 2026-10-31
 colors:
   surface: '#faf7f0'
   surface-dim: '#efe9dd'
@@ -183,14 +183,15 @@ La tipografía es el producto. Dos familias, sin excepciones.
 
 **Comillas:** angulares españolas « » alrededor del texto de la Cita, no comillas rectas ni inglesas. Es una decisión de identidad y de corrección ortográfica a la vez.
 
-**En CSS**, un token de tipografía da solo su cuerpo: la familia sale de `--serif` o `--sans`, y el peso, el interlineado y el espaciado los escribe cada componente. La correspondencia de todos los tokens con su propiedad CSS está al cierre de `§ Components`.
+**En CSS** *(v8.5, decisión de Héctor del 2026-10-31)*, un token de tipografía da su cuerpo, su peso y su interlineado: el cuerpo, de su propiedad de tamaño (`--cita-xl`); el interlineado, de la propiedad que va junto a ella (`--interlineado-cita-xl`, con el `lineHeight` del frontmatter); y el peso, de una de las dos propiedades de peso, `--peso-regular` (400) y `--peso-fuerte` (600). La familia sale de `--serif` o `--sans`, y el espaciado entre letras lo escribe cada componente. **Ningún componente escribe un peso ni un interlineado literal**, igual que no escribe un color ni un tamaño. La única excepción es la de las letras de salto, más abajo. La correspondencia de todos los tokens con su propiedad CSS está al cierre de `§ Components`.
 
-**En el frontmatter** *(v8)*, la familia y el peso de cada token son los de su uso principal, no una regla para todo uso. Cuando un componente toma solo el cuerpo de un token, su fila dice la familia y el peso, y quien lea el YAML no debe tomarlos de él. Son dos parejas que se repiten y siete usos sueltos:
-- Inter al cuerpo de `{typography.body-lg}` con peso 600: el título de la Tarjeta de Obra y el de las Obras de la portada;
+**En el frontmatter** *(v8)*, la familia y el peso de cada token son los de su uso principal, no una regla para todo uso. Cuando un componente toma solo el cuerpo de un token, su fila dice la familia y el peso, y quien lea el YAML no debe tomarlos de él. *(v8.5)* El interlineado es el del token, salvo donde la fila diga otro. Son dos parejas que se repiten y ocho usos sueltos:
+- Inter al cuerpo de `{typography.body-lg}` con peso 600 y el interlineado de `{typography.author}` (1.4) *(v8.5)*: el título de la Tarjeta de Obra y el de las Obras de la portada;
 - Source Serif al cuerpo de `{typography.headline-sm}` con peso 400: la Fila de Autor, los Autores destacados de la portada y el título del Resultado de búsqueda;
 - y los usos sueltos:
   - Inter al cuerpo de `{typography.headline-md}` con peso 600: el Encabezado del Directorio;
-  - `{typography.body-md}` con peso 600: las letras de salto;
+  - `{typography.body-md}` con peso 600: las letras de salto. *(v8.5, decisión de Héctor del 2026-10-31)* Su interlineado es 1, y es la **única excepción nombrada** a la regla de los tokens: cada letra es un glifo suelto centrado en su zona de toque, sin renglones que espaciar, y no tiene rol tipográfico propio;
+  - Inter al cuerpo de `{typography.body-md}` con el interlineado de `{typography.author}` (1.4) *(v8.5)*: el rótulo de la Fila de bloque —«Siguiente…», «Ver la obra…» y los cierres «Las {n} citas de… ›»— y el título de la Obra en la Lista de Obras;
   - Inter al cuerpo de `{typography.headline-sm}` con peso 400: el título de los resultados de tipo Obra, Directorio y Portada;
   - Source Serif al cuerpo de `{typography.body-md}`: el Chip de Tema y, *(v8.2)*, los Autores destacados de la búsqueda sin resultados, que van en él;
   - `{typography.caption}` con el peso de `{typography.author}`: el rótulo de cada parte de «Dónde leer esta obra»;
@@ -433,6 +434,8 @@ Los tokens conservan los nombres del formato de DESIGN.md; el código los declar
 | `{typography.title-lg}` | `--titular-obra` —declarado desde la épica de la Obra—, no `--titular-lg`, que se confundiría con los dos titulares serif |
 | `{typography.body-lg}` · `{typography.body-md}` | `--cuerpo-lg` · `--cuerpo-md` |
 | `{typography.author}` · `{typography.caption}` | `--autor` · `--pie` |
+| `lineHeight` de cada token de tipografía *(v8.5)* | `--interlineado-` seguido del nombre de la propiedad de su tamaño: `--interlineado-cita-xl` · `--interlineado-cita-lg` · `--interlineado-cita-md` · `--interlineado-cita-sm` · `--interlineado-titular-md` · `--interlineado-titular-sm` · `--interlineado-titular-obra` · `--interlineado-cuerpo-lg` · `--interlineado-cuerpo-md` · `--interlineado-autor` · `--interlineado-pie` |
+| `fontWeight` de los tokens de tipografía *(v8.5)* | `--peso-regular` (400) · `--peso-fuerte` (600) |
 | `{rounded.DEFAULT}` · `{rounded.lg}` | `--radio` · `--radio-tarjeta` |
 | `{spacing.unit}` · `{spacing.gutter}` | `--unidad` · `--canal` |
 | `{spacing.margin-mobile}` · `{spacing.margin-desktop}` | `--margen`, que toma `margin-mobile`, `gutter` o `margin-desktop` según el punto de ruptura (`EXPERIENCE.md § Responsive & Platform`) |

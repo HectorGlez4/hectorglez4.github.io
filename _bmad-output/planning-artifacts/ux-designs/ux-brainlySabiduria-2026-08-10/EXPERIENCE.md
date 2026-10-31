@@ -8,7 +8,7 @@ sources:
   - "docs/superpowers/specs/2026-10-05-pagina-de-obra-design.md"
   - "docs/superpowers/specs/2026-10-17-v8-cita-como-centro-design.md"
   - "DESIGN.md"
-updated: 2026-10-30
+updated: 2026-10-31
 ---
 
 # Sabiduría de Bolsillo — Experience Spine
@@ -437,7 +437,7 @@ Qué muestra cada maqueta, qué papel tiene y en qué difiere ya de estas espina
 | Directorio sin JavaScript *(v8)* | Directorio de Autores, Directorio de Obras | No hay campo de filtro. La lista está entera y las letras de salto funcionan, porque son anclas (FR-55, NFR-2). |
 | Portada sin Obras indexables *(v8)* | Portada | El bloque de Obras no existe, sin rótulo ni hueco. Con la familia Obra congelada, las seis salen del conjunto indexable congelado; la congelación no quita el bloque, porque no alcanza a la navegación (FR-9, SM-11). |
 | Cita del Día sin Obra, o de más de 300 caracteres *(v8)* | Portada | Sin Obra, no lleva Tarjeta de Obra. Por encima de 300 caracteres, ni Imagen ni «Historia de Instagram», sin explicación; Copiar y los destinos de enlace siguen (FR-10). |
-| Portada sin ninguna Cita apta *(v8.2)* | Portada | *(v8.2, decisión de Héctor del 2026-10-20)* En lugar de «La cita de hoy», tras el campo, una sola frase: «Citas en español, cada una en su página, con su autor y, cuando consta, la obra de la que procede.», igual que `DESCRIPCION_DEL_SITIO`. Nombra la obra solo cuando consta, porque hay Citas sin Obra, y no dice que cada una tenga su fuente, que FR-9 veda mientras quede censo: la línea de cifras, justo encima, ya dice cuántas están cotejadas. Cambia lo construido. |
+| Portada sin ninguna Cita apta *(v8.2)* | Portada | *(v8.2, decisión de Héctor del 2026-10-20)* En lugar de «La cita de hoy», tras el campo, una sola frase: «Citas en español, cada una en su página, con su autor y, cuando consta, la obra de la que procede.». *(v8.5, decisión de Héctor del 2026-10-31)* Es la misma frase que `DESCRIPCION_DEL_SITIO` y tiene un solo dueño: la frase de la portada sin apta, la meta description de la portada, el `description` del `WebSite`, la bajada de la Tarjeta Social de la portada y la descripción del canal de `rss.xml` dicen lo mismo. La constante adopta esta frase y cambia lo construido en las cuatro superficies que ya la usaban. Nombra la obra solo cuando consta, porque hay Citas sin Obra, y no dice que cada una tenga su fuente, que FR-9 veda mientras quede censo: la línea de cifras, justo encima, ya dice cuántas están cotejadas. Cambia lo construido. |
 | Sin Cita apta para portada *(recoge lo construido)* | Kit Diario; cada jornada del Lote | «Hoy no hay ninguna Cita apta para portada.» en el Kit, y «No hay ninguna Cita apta para portada.» en la jornada del Lote. [ASSUMPTION] |
 | Cita del Día sin Imagen *(recoge lo construido)* | Kit Diario y Lote | «Esta Cita pasa del límite de longitud, así que no admite Imagen. Abajo tienes una alternativa apta con su material completo.», y debajo la «Alternativa con Imagen», con el mismo material que la Cita del Día. [ASSUMPTION] |
 | Jornadas por delante *(recoge lo construido)* | Kit Diario | Al pie, «Hay {n} jornadas preparadas por delante.» —«No hay ninguna jornada preparada por delante.» si no hay— y el enlace «Ver el lote». [ASSUMPTION] |
