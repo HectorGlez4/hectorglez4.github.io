@@ -165,10 +165,44 @@ export function camposQueEmite(evento: string): Campo[] {
  *
  * Qué producto se contrata se decide al desplegar; lo que no se decide al desplegar son
  * las propiedades, que son estas y están cerradas aquí.
+ *
+ * Con valor, tiene que ser `http(s)://` —la misma regla que `npm run medicion` aplica con
+ * `puntoFinalDeComprobacion`, por `problemaDelPuntoFinal`—, y si no lo es **la construcción se
+ * para**: un secreto mal escrito construía en verde y `sendBeacon` mandaba cada evento a una
+ * ruta relativa del propio sitio, donde se perdía sin que nada protestara. La máquina propia sí
+ * vale aquí, a diferencia de en la orden: las pruebas de punta a punta construyen contra el
+ * receptor local.
  */
 export function puntoFinal(entorno: Record<string, string | undefined>): string | null {
   const url = entorno.MEDICION_ENDPOINT?.trim();
-  return url ? url : null;
+  if (!url) return null;
+  const problema = problemaDelPuntoFinal(url);
+  if (problema !== undefined) {
+    throw new Error(
+      `${problema} Sin una dirección absoluta, cada evento iría a una ruta del propio sitio y se ` +
+        'perdería: corrija el secreto (DESPLIEGUE.md §3) o quítelo para construir sin medición.',
+    );
+  }
+  return url;
+}
+
+/**
+ * Por qué una dirección no vale como punto final de la medición, o `undefined` si vale: tiene
+ * que ser una URL absoluta `http:` o `https:`. Es la regla única de `MEDICION_ENDPOINT`, que
+ * comparten el build (`puntoFinal`) y `npm run medicion` (`puntoFinalDeComprobacion`), y el
+ * motivo **no repite el valor**: es un secreto del repositorio.
+ */
+export function problemaDelPuntoFinal(url: string): string | undefined {
+  let direccion: URL;
+  try {
+    direccion = new URL(url);
+  } catch {
+    return 'MEDICION_ENDPOINT no es una dirección http(s).';
+  }
+  if (direccion.protocol !== 'http:' && direccion.protocol !== 'https:') {
+    return 'MEDICION_ENDPOINT no es una dirección http(s).';
+  }
+  return undefined;
 }
 
 

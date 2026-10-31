@@ -24,6 +24,7 @@ import {
   asentamientoDeBusqueda,
   esEventoValido,
   guionDeMedicion,
+  problemaDelPuntoFinal,
   puntoFinal,
   rutaDelGuionDeMedicion,
   versionDelGuion,
@@ -75,6 +76,7 @@ import {
   superficiesDelBarrido,
 } from '../../src/lib/superficies.ts';
 import { marcasDePagina } from '../../tools/lib/indexables.ts';
+import { puntoFinalDeComprobacion } from '../../tools/lib/medicion.ts';
 import { ORIGEN_DEL_SANDBOX, medicionEnUnSandbox } from './ayuda/medicion.js';
 import {
   islaDeBusquedaEnUnSandbox,
@@ -2271,6 +2273,35 @@ describe('Historia 2.9 y 23.1 — sin punto final, el sitio no pide ni envía na
     expect(puntoFinal({ MEDICION_ENDPOINT: '   ' })).toBeNull();
     expect(puntoFinal({ MEDICION_ENDPOINT: 'https://x.invalid/e' })).toBe('https://x.invalid/e');
   });
+
+  /*
+   * A4 de la retrospectiva de la Épica 23: el build aceptaba cualquier cadena, `npm run medicion`
+   * exigía `http(s)://`, y un secreto mal escrito construía en verde y perdía cada evento.
+   */
+  it('un punto final que no es http(s) para la construcción, con la misma regla que `npm run medicion`', () => {
+    for (const valor of ['medicion.ejemplo.workers.dev/e', '/e', 'ftp://receptor.example/m', 'file:///etc/hosts']) {
+      expect(() => puntoFinal({ MEDICION_ENDPOINT: valor }), valor).toThrow(/MEDICION_ENDPOINT no es una dirección http\(s\)/);
+      // El motivo no repite el valor: es un secreto del repositorio.
+      expect(() => puntoFinal({ MEDICION_ENDPOINT: valor }), valor).not.toThrow(valor);
+      expect(problemaDelPuntoFinal(valor), valor).toBeDefined();
+      const deLaOrden = puntoFinalDeComprobacion({ MEDICION_ENDPOINT: valor });
+      expect(deLaOrden.ok ? undefined : deLaOrden.motivo, valor).toBe(problemaDelPuntoFinal(valor));
+    }
+    // La máquina propia sí vale para construir: las pruebas de punta a punta usan el receptor local.
+    expect(puntoFinal({ MEDICION_ENDPOINT: ' http://localhost:8787/ ' })).toBe('http://localhost:8787/');
+    expect(problemaDelPuntoFinal(ENDPOINT)).toBeUndefined();
+  });
+
+  it('con un punto final mal escrito, `astro build` sale con error y no publica un sitio que pierde los eventos', async () => {
+    const malEscrito = 'medicion.ejemplo.workers.dev/e';
+    const { codigo, salida } = await construirConCorpus(CORPUS_MEDIDO, {
+      entorno: { MEDICION_ENDPOINT: malEscrito },
+      conservar: false,
+    });
+    expect(codigo, salida).not.toBe(0);
+    expect(salida).toContain('MEDICION_ENDPOINT no es una dirección http(s).');
+    expect(salida).not.toContain(malEscrito);
+  }, 240_000);
 
   it('ni fichero ni etiqueta; quedan el arranque, el `data-vistas` y la marca de Obra', async () => {
     const proyecto = await sitioSinMedir();

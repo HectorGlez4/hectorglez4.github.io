@@ -1070,7 +1070,7 @@ describe('Historia 26.8 — quitar un Tema no deja una Cita fuera de alcance', (
   it('la orden `tema quitar` sale con 1, nombra la Cita y el Tema, y no escribe', async () => {
     const rutas = await corpusAlLimite();
     const antes = await instantaneaDe(rutas.raiz);
-    // Desde el directorio del Corpus de prueba, sin `--corpus` (que `quitar` tomaría por slug).
+    // Desde el directorio del Corpus de prueba, sin `--corpus`; con él, la prueba siguiente.
     const fallo = await promisify(execFile)(
       join(RAIZ, 'node_modules', '.bin', 'tsx'),
       [join(RAIZ, 'tools', 'tema.ts'), 'quitar', 'la-ira', DE_EPICTETO[3]!],
@@ -1081,6 +1081,29 @@ describe('Historia 26.8 — quitar un Tema no deja una Cita fuera de alcance', (
     );
     expect(fallo.codigo).toBe(1);
     expect(fallo.error).toContain(`/cita/${EN_LA_IRA}/ — su Tema «La ira» (la-ira) tiene 14 Citas`);
+    expect(await instantaneaDe(rutas.raiz)).toEqual(antes);
+  });
+
+  it.each([
+    ['delante del Tema', (corpus: string) => ['quitar', '--corpus', corpus, 'la-ira', DE_EPICTETO[3]!]],
+    ['delante de la orden', (corpus: string) => ['--corpus', corpus, 'quitar', 'la-ira', DE_EPICTETO[3]!]],
+    ['al final', (corpus: string) => ['quitar', 'la-ira', DE_EPICTETO[3]!, '--corpus', corpus]],
+  ])('`tema quitar` con `--corpus` %s no toma la ruta por un slug (A7 de la retrospectiva de la 26)', async (_, argumentos) => {
+    const rutas = await corpusAlLimite();
+    const antes = await instantaneaDe(rutas.raiz);
+    // Desde otro directorio: el Corpus solo se encuentra por `--corpus`.
+    const fallo = await promisify(execFile)(
+      join(RAIZ, 'node_modules', '.bin', 'tsx'),
+      [join(RAIZ, 'tools', 'tema.ts'), ...argumentos(rutas.raiz)],
+      { cwd: tmpdir() },
+    ).then(
+      () => ({ codigo: 0, error: '' }),
+      (e: { code?: number; stderr?: string }) => ({ codigo: e.code ?? 1, error: e.stderr ?? '' }),
+    );
+    // Antes, el Tema era la ruta del Corpus y la Cita, `la-ira`: el motivo no era este.
+    expect(fallo.codigo).toBe(1);
+    expect(fallo.error).toContain(`/cita/${EN_LA_IRA}/ — su Tema «La ira» (la-ira) tiene 14 Citas`);
+    expect(fallo.error).not.toContain(rutas.raiz);
     expect(await instantaneaDe(rutas.raiz)).toEqual(antes);
   });
 

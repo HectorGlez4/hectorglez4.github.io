@@ -137,7 +137,7 @@ describe('Historia 11.2 — el censo de pendientes de cotejo', () => {
 /**
  * AD-22 — La red vive **solo** en la cáscara exterior de `tools/`.
  *
- * Ocho excepciones, las ocho escritas y con nombre. Una excepción escrita se revisa; un
+ * Nueve excepciones, las nueve escritas y con nombre. Una excepción escrita se revisa; un
  * punto ciego, no:
  *
  *   · `tools/recuperar.ts` es la cáscara exterior de las herramientas de editor: la única
@@ -169,6 +169,14 @@ describe('Historia 11.2 — el censo de pendientes de cotejo', () => {
  *     prueba. Lo que decide qué se envía y cómo se lee lo que contesta D1 vive en
  *     `tools/lib/medicion.ts`, que no pide nada. El build no la invoca y ningún paso de CI la
  *     ejecuta: la corre Héctor (AD-14).
+ *   · `tools/avisar.ts` es la cáscara del aviso a IndexNow: avisa a los buscadores de lo ya
+ *     publicado y corre en el flujo de trabajo detrás del despliegue (`needs: desplegar`). El
+ *     build no la invoca, así que sigue construyendo sin internet.
+ *   · `src/components/Busqueda.astro` es el guion de `/buscar/` —Historia 27.3— y la única
+ *     excepción que corre en el navegador del visitante y no en una herramienta: al elegir un
+ *     Autor pide al propio sitio el mapa de rótulos de las Obras que el build ya escribió en
+ *     `/buscar/obras.json`. No recupera nada del Corpus ni sale del dominio, y una prueba de
+ *     abajo la estrecha a esa sola llamada.
  *   · `astro.config.mjs` declara las dos familias de UX-DR3 por la Fonts API de Astro, y
  *     `fontProviders.google()` **sí descarga** en el build: los `.woff2` acaban en
  *     `.astro/fonts/` y `unifont` está en el árbol de dependencias por eso.
@@ -365,7 +373,7 @@ describe('AD-22 — la red vive solo en la cáscara exterior de tools/', () => {
     /*
      * Historia 20.3 — la serie de demanda hace sus peticiones desde su cáscara,
      * `tools/demanda.ts`, pero no construye otro cliente de Search Analytics: reutiliza el de
-     * `tools/trafico.ts`, que ya es excepción. Por eso no es una octava excepción —el
+     * `tools/trafico.ts`, que ya es excepción. Por eso no es una excepción más —el
      * guardián no ve en ella ninguna llamada de red y la daría por innecesaria—, y lo que se
      * fija aquí es lo que sí tiene que seguir siendo cierto: que la red le llega por ese
      * cliente y por ningún otro sitio, y que su hermana pura no lo importa.

@@ -13,17 +13,22 @@
 
 import { asignarTema, crearTema, eliminarTema, quitarTema } from './lib/gestion.ts';
 import { leerCitas, leerTemas, rutasDelCorpus } from './lib/corpus.ts';
-import { raizDeCorpusDe, terminar } from './lib/cli.ts';
+import { posicionales, raizDeCorpusDe, terminar } from './lib/cli.ts';
 import { MIN_CITAS_POR_TEMA } from '../src/lib/umbrales.ts';
 
 const argumentos = process.argv.slice(2);
-const orden = argumentos[0];
+/*
+ * Los posicionales, sin las opciones ni su valor: con `filter((a) => !a.startsWith('--'))`
+ * el valor de `--corpus` pasaba por un slug —`quitar --corpus <dir> el-tiempo <cita>` tomaba
+ * la ruta por el Tema— (A7 de la retrospectiva de la Épica 26).
+ */
+const [orden, ...resto] = posicionales(argumentos, ['--corpus']);
 const rutas = rutasDelCorpus(raizDeCorpusDe(argumentos));
 
 switch (orden) {
   case 'crear': {
-    const nombre = argumentos[1];
-    if (!nombre || nombre.startsWith('--')) {
+    const nombre = resto[0];
+    if (!nombre) {
       process.stderr.write('Indique el nombre del Tema.\n');
       process.exit(2);
     }
@@ -36,9 +41,8 @@ switch (orden) {
      * que ya están publicadas hablan de lo mismo. Sin esta orden eso se hacía editando
      * frontmatter a mano, y la primera vez salió un fallo.
      */
-    const slugTema = argumentos[1];
-    const slugsDeCitas = argumentos.slice(2).filter((a) => !a.startsWith('--'));
-    if (!slugTema || slugTema.startsWith('--')) {
+    const [slugTema, ...slugsDeCitas] = resto;
+    if (!slugTema) {
       process.stderr.write('Indique el slug del Tema y las Citas a las que asignarlo.\n');
       process.exit(2);
     }
@@ -50,9 +54,8 @@ switch (orden) {
      * La simétrica de `asignar`, y hacía falta por lo mismo: sin ella, un Tema mal puesto solo
      * se deshacía editando el frontmatter a mano. `eliminar` no vale — borra el Tema entero.
      */
-    const slugTema = argumentos[1];
-    const slugsDeCitas = argumentos.slice(2).filter((a) => !a.startsWith('--'));
-    if (!slugTema || slugTema.startsWith('--')) {
+    const [slugTema, ...slugsDeCitas] = resto;
+    if (!slugTema) {
       process.stderr.write('Indique el slug del Tema y las Citas a las que quitárselo.\n');
       process.exit(2);
     }
@@ -60,8 +63,8 @@ switch (orden) {
   }
 
   case 'eliminar': {
-    const slug = argumentos[1];
-    if (!slug || slug.startsWith('--')) {
+    const slug = resto[0];
+    if (!slug) {
       process.stderr.write('Indique el slug del Tema a eliminar.\n');
       process.exit(2);
     }
