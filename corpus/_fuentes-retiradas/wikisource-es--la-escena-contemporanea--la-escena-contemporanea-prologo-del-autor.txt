@@ -1,0 +1,31 @@
+fuente: wikisource-es
+obra: La escena contemporánea
+url: https://es.wikisource.org/wiki/La_escena_contempor%C3%A1nea/Pr%C3%B3logo_del_autor
+recuperado: 2026-10-31
+---
+La escena contemporánea/Prólogo del autor
+|título=[[La escena contemporánea]]
+|autor=José Carlos Mariátegui
+obra> |título=La escena contemporánea
+obra> |autor=José Carlos Mariátegui
+obra> |título={{Anclaje+|Índice}}
+---
+Prólogo
+
+La benévola instancia de algunos amigos me decide a recoger en un libro una parte de mis artículos de los dos últimos años sobre "figuras y aspectos de la vida mundial".
+
+Agrupadas y coordinadas en un volumen, bajo el título de "La Escena Contemporánea", no pretenden estas impresiones, demasiado rápidas o demasiado fragmentarias, componer una explicación de nuestra época. Pero contienen los elementos primarios de un bosquejo o un ensayo de interpretación de esta época y sus tormentosos problemas que acaso me atreva a intentar en un libro más orgánico.
+
+Pienso que no es posible aprehender en una teoría el entero panorama del mundo contemporáneo. Que no es posible, sobre todo, fijar en una teoría su movimiento. Tenemos que explorarlo y conocerlo, episodio por episodio, faceta por faceta. Nuestro juicio y nuestra imaginación se sentirán siempre en retardo respecto de la totalidad del fenómeno.
+
+Por consiguiente, el mejor método para explicar y traducir nuestro tiempo es, tal vez, un método un poco periodístico y un poco cinematográfico.
+
+He ahí otra de las razones que me animan a dar a la imprenta estos artículos. Casi todos se han publicado en "Variedades". Sólo cinco de esta serie han aparecido en "Mundial".
+
+Al revisarlos y corregirlos no he tocado su sustancia. Me he limitado a algunas enmiendas formales, como la supresión de los puntos de referencia inmediatos del instante en que fueron escritos. Para facilitar y ordenar su lectura los he asociado y ensamblado según el tema.
+
+Sé muy bien que mi visión de la época no es bastante objetiva ni bastante anastigmática. No soy un espectador indiferente del drama humano. Soy, por el contrario, un hombre con una filiación y una fe. Este libro no tiene más valor que el de ser un documento leal del espíritu y la sensibilidad de mi generación. Lo dedico, por esto, a los hombres nuevos, a los hombres jóvenes de la América indo-íbera.
+
+José Carlos Mariátegui.
+
+Lima, MCMXXV.
