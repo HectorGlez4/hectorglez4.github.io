@@ -2333,3 +2333,14 @@ sesiones:
       citasPublicadas: 4420
       procedenciaCompleta: 17.6
       tradicionLatinoamericanaSobreHispanicos: 53.9
+  - fecha: "2026-10-31"
+    hora: "18:41"
+    clase: "epoca"
+    propuesto: "Agotar la época Autores venezolanos: le quedan 20 candidatos por sembrar o por descartar con motivo escrito. Admitir sigue siendo del editor."
+    hueco: "La Fuente clasifica 42 candidatos en la época Autores venezolanos: 2 ya sembrados y 20 descartados con motivo. La lista está en corpus/candidatos-por-epoca.yml y se regenera con: npm run epocas:registrar"
+    elegido: "Obras de sentencias de Ricardo Mella"
+    motivo: "Cambio de estrategia a obras de sentencias de Autores ya existentes: barrido de enlaces de Wikisource (casi todo ya recuperado); Mella, Vota pero escucha"
+    resultado:
+      citasPublicadas: 4424
+      procedenciaCompleta: 17.6
+      tradicionLatinoamericanaSobreHispanicos: 53.9
