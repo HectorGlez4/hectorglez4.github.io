@@ -25,6 +25,7 @@
 import * as vocabularioDeLaRama from '../../src/lib/vocabulario.ts';
 import type { DeclaracionDeCampo } from '../../src/lib/vocabulario.ts';
 import { CUOTA_DE_FILAS_ESCRITAS_POR_DIA_EN_D1 } from '../../src/lib/umbrales.ts';
+import { problemaDelPuntoFinal } from '../../src/lib/medicion.ts';
 import { EVENTOS_DE_LA_V71, type Registro } from '../../medicion/receptor.ts';
 import { motivosDeArgumentosNoReconocidos } from './cli.ts';
 
@@ -295,15 +296,11 @@ export function puntoFinalDeComprobacion(entorno: Record<string, string | undefi
         'repositorio (DESPLIEGUE.md §3). Sin ella no se puede enviar la baliza de prueba.',
     };
   }
-  let direccion: URL;
-  try {
-    direccion = new URL(url);
-  } catch {
-    return { ok: false, motivo: 'MEDICION_ENDPOINT no es una dirección http(s).' };
-  }
-  if (direccion.protocol !== 'http:' && direccion.protocol !== 'https:') {
-    return { ok: false, motivo: 'MEDICION_ENDPOINT no es una dirección http(s).' };
-  }
+  // La forma la juzga la regla única que comparte con el build (`puntoFinal`, A4 de la
+  // retrospectiva de la Épica 23); lo de la máquina propia es solo de esta orden.
+  const problema = problemaDelPuntoFinal(url);
+  if (problema !== undefined) return { ok: false, motivo: problema };
+  const direccion = new URL(url);
   // `desplegar` y `comprobar` leen el D1 remoto: con las balizas enviadas a un receptor local,
   // migraría y desplegaría en remoto para pararse después sin haber visto ninguna.
   if (esHostLocal(direccion.hostname)) {
