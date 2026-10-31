@@ -2344,3 +2344,14 @@ sesiones:
       citasPublicadas: 4424
       procedenciaCompleta: 17.6
       tradicionLatinoamericanaSobreHispanicos: 53.9
+  - fecha: "2026-10-31"
+    hora: "19:25"
+    clase: "epoca"
+    propuesto: "Agotar la época Autores venezolanos: le quedan 20 candidatos por sembrar o por descartar con motivo escrito. Admitir sigue siendo del editor."
+    hueco: "La Fuente clasifica 42 candidatos en la época Autores venezolanos: 2 ya sembrados y 20 descartados con motivo. La lista está en corpus/candidatos-por-epoca.yml y se regenera con: npm run epocas:registrar"
+    elegido: "Obras de sentencias de Juan Valera"
+    motivo: "Gutenberg: libros de máximas; el catálogo en español ya estaba casi todo recuperado (267 libros, Los Sueños retirados); Valera, A vuela pluma"
+    resultado:
+      citasPublicadas: 4429
+      procedenciaCompleta: 17.6
+      tradicionLatinoamericanaSobreHispanicos: 53.9
