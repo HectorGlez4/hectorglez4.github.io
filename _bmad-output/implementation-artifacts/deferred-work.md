@@ -649,3 +649,13 @@ Hallazgos reales que no son de la historia que los sacó a la luz. Append-only.
     nombre no coincide con el que su declaración implica. Mientras siga así, `extraer` y
     `documentar` lo rechazan, y volver a recuperar su URL escribiría un segundo fichero en
     vez de reutilizarlo. Renombrarlo es decisión de Héctor.
+
+- source_spec: `_bmad-output/implementation-artifacts/spec-26-12-el-peso-y-el-interlineado-salen-de-sus-tokens.md`
+  summary: Muchas reglas fijan un cuerpo de token sin interlineado y heredan el 1,65 del body, contra DESIGN.md v8.5 («el interlineado es el del token cuyo cuerpo toma»): el h1 de /autores/, /obras/ y /buscar/ (titular-md, 1,2), FilaDeAutor (titular-sm), los rótulos en --autor de Armazon, CitaDelDia, 404, portada y Página de Autor, y Paginacion — pendiente de Héctor (bmad-ux): darles su token cambia lo que se ve.
+  evidence: La 26.12 migra literales sin cambiar valores calculados (frozen «Always»); la instantánea tipografia-autores-escritorio-darwin.json registra el h1 del Directorio como «600 | 1.650». Anterior a la 26.12; la revisión (Blind Hunter) lo encontró.
+- source_spec: `_bmad-output/implementation-artifacts/spec-26-12-el-peso-y-el-interlineado-salen-de-sus-tokens.md`
+  summary: Los h1/h2/h3 de MaterialParaPublicar.astro, /kit y /lote no declaran peso y salen en la negrita del navegador (700), como el <strong> de lote.astro, fuera de los dos pesos de DESIGN.md (400/600) — pendiente de Héctor (bmad-ux), son superficies internas.
+  evidence: La guardia de la 26.12 solo ve pesos escritos, no ausentes; DESIGN.md describe el rótulo del Material «en negrita». Anterior a la 26.12.
+- source_spec: `_bmad-output/implementation-artifacts/spec-26-12-el-peso-y-el-interlineado-salen-de-sus-tokens.md`
+  summary: El criterio de la 26.12 en epics.md dice que la medida juzgada de dos jornadas es «idéntica byte a byte»; Héctor decidió (2026-10-31) comparar el índice de pagefind/ descodificado y normalizado, porque Pagefind 1.5.2 no es determinista ni en el mismo día — pendiente de Héctor (bmad-create-epics-and-stories).
+  evidence: Spec Change Log de la 26.12; dos construcciones del mismo día y commit difieren en pf_meta y en el filtro tipo (±1 byte).

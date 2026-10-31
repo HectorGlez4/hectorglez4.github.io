@@ -54,21 +54,9 @@ import { conjuntoDeLosDatos, leerDatosDelCorpus } from '../../tools/lib/alcance.
 import { leerDocumentosDeFuente, rutasDelCorpus } from '../../tools/lib/corpus.ts';
 import { posicionesDeCitas } from '../../tools/lib/posiciones.ts';
 import { emitidos as emitidosEn, espiarMedicion } from './ayuda/espia.ts';
+import { buscar } from './ayuda/buscar.ts';
 
 /** Historias 3.1 y 3.2 — búsqueda y resultado vacío. */
-
-/** Escribe la consulta y espera a que la lista se estabilice. */
-async function buscar(page: import('@playwright/test').Page, consulta: string) {
-  await page.goto('/buscar/');
-  await page.locator('[data-consulta]').fill(consulta);
-  await page.waitForFunction(
-    () =>
-      document.querySelector('[data-resultados]')!.children.length > 0 ||
-      !document.querySelector('[data-salida]')!.hasAttribute('hidden'),
-    undefined,
-    { timeout: 10_000 },
-  );
-}
 
 async function resultados(page: import('@playwright/test').Page) {
   return page.locator('[data-resultados] .resultado').evaluateAll((ns) =>
@@ -961,7 +949,7 @@ test.describe('Historia 27.1 — la Cita declara sus filtros y su resultado llev
     return page.evaluate(() => {
       const sonda = document.createElement('span');
       sonda.style.cssText =
-        'font-family: var(--sans); font-size: var(--autor); font-weight: 600; text-transform: uppercase; color: var(--tinta-apagada)';
+        'font-family: var(--sans); font-size: var(--autor); font-weight: var(--peso-fuerte); text-transform: uppercase; color: var(--tinta-apagada)';
       const serif = document.createElement('span');
       serif.style.fontFamily = 'var(--serif)';
       document.body.append(sonda, serif);

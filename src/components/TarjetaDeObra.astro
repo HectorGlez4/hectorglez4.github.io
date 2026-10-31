@@ -140,8 +140,13 @@ if (siguiente !== undefined) {
     margin: var(--unidad) 0 0;
     font-family: var(--sans);
     font-size: var(--cuerpo-lg);
-    font-weight: 600;
-    line-height: 1.4;
+    font-weight: var(--peso-fuerte);
+    /*
+     * Historia 26.12 — excepción de DESIGN.md § Typography: el título de la Tarjeta de Obra toma el
+     * interlineado de `author` (1,4) y no el de su cuerpo. No es un descuido: la nombra, por fichero
+     * y selector, `tests/unit/tipografia-en-tokens.test.ts`.
+     */
+    line-height: var(--interlineado-autor);
     color: var(--tinta);
     text-wrap: balance;
     overflow-wrap: break-word;
@@ -152,8 +157,8 @@ if (siguiente !== undefined) {
     margin: var(--unidad) 0 0;
     font-family: var(--sans);
     font-size: var(--pie);
-    font-weight: 400;
-    line-height: 1.5;
+    font-weight: var(--peso-regular);
+    line-height: var(--interlineado-pie);
     color: var(--tinta-apagada);
   }
 

@@ -195,7 +195,7 @@ const temasDelFiltro = ordenDeTemasPorNombre(filtros.temas.map(opciones));
   h1 {
     font-family: var(--sans);
     font-size: var(--titular-md);
-    font-weight: 600;
+    font-weight: var(--peso-fuerte);
     margin: 0;
   }
 
@@ -284,9 +284,9 @@ const temasDelFiltro = ordenDeTemasPorNombre(filtros.temas.map(opciones));
   :global(.filas-de-resultado .r-autor) {
     font-family: var(--sans);
     font-size: var(--autor);
-    font-weight: 600;
+    font-weight: var(--peso-fuerte);
     letter-spacing: 0.09em;
-    line-height: 1.4;
+    line-height: var(--interlineado-autor);
     text-transform: uppercase;
     color: var(--tinta-apagada);
   }
@@ -308,7 +308,7 @@ const temasDelFiltro = ordenDeTemasPorNombre(filtros.temas.map(opciones));
     margin: 0 0 calc(var(--unidad) * 2);
     font-family: var(--sans);
     font-size: var(--autor);
-    font-weight: 600;
+    font-weight: var(--peso-fuerte);
     letter-spacing: 0.09em;
     text-transform: uppercase;
     color: var(--tinta-apagada);

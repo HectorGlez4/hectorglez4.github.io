@@ -15,8 +15,8 @@ import { readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { parse } from 'yaml';
 import { colgarObras, type FichaDeObra } from '../../../src/lib/obras.ts';
-import { CITAS_POR_PAGINA, MIN_CITAS_POR_TEMA } from '../../../src/lib/umbrales.ts';
-import { admiteImagen } from '../../../src/lib/tramos.ts';
+import { CITAS_POR_PAGINA, MIN_CITAS_POR_COLECCION, MIN_CITAS_POR_TEMA } from '../../../src/lib/umbrales.ts';
+import { admiteImagen, tramoDe } from '../../../src/lib/tramos.ts';
 
 const raiz = join(new URL('../../..', import.meta.url).pathname, 'corpus');
 
@@ -428,4 +428,33 @@ export function citaDeAutorConUnaSola(): string | undefined {
 
   const sola = [...porAutor.values()].find((slugs) => slugs.length === 1);
   return sola === undefined ? undefined : `/cita/${sola[0]}`;
+}
+
+/**
+ * Historia 26.12 — la primera Cita por slug cuyo texto cae en el tramo `nombre` de
+ * `src/lib/tramos.ts` (`xl`, `lg`, `md` o `sm`), o `undefined` si hoy no hay ninguna. El tramo
+ * elige el cuerpo y el interlineado del Bloque de Cita, así que la prueba de la tipografía
+ * calculada mide uno de cada.
+ */
+export function citaDeTramo(nombre: string): string | undefined {
+  return citasResueltas()
+    .filter((c) => tramoDe(c.texto).nombre === nombre)
+    .sort(porSlug)[0]?.slug;
+}
+
+/**
+ * Historia 26.12 — la primera Colección por slug con al menos `MIN_CITAS_POR_COLECCION` miembros
+ * que son Citas publicadas: la que tiene página. `undefined` si hoy no hay ninguna.
+ */
+export function coleccionPublicada(): string | undefined {
+  const publicadas = new Set(citasResueltas().map((c) => c.slug));
+  const dir = join(raiz, 'colecciones');
+  return readdirSync(dir)
+    .filter((f) => /\.ya?ml$/.test(f))
+    .sort()
+    .find((f) => {
+      const { miembros } = parse(readFileSync(join(dir, f), 'utf8')) as { miembros?: string[] };
+      return (miembros ?? []).filter((m) => publicadas.has(m)).length >= MIN_CITAS_POR_COLECCION;
+    })
+    ?.replace(/\.ya?ml$/, '');
 }

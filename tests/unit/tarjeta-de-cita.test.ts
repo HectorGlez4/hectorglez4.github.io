@@ -282,8 +282,8 @@ describe('Historia 24.3 — el contrato del componente, sin construir', () => {
     expect(deObra.map((r) => r.selector)).toContain('.obra');
     expect(declaraciones.get('font-family')).toBe('var(--sans)');
     expect(declaraciones.get('font-size')).toBe('var(--pie)');
-    expect(declaraciones.get('font-weight')).toBe('400');
-    expect(declaraciones.get('line-height')).toBe('1.5');
+    expect(declaraciones.get('font-weight')).toBe('var(--peso-regular)');
+    expect(declaraciones.get('line-height')).toBe('var(--interlineado-pie)');
     expect(declaraciones.get('color')).toBe('var(--tinta-apagada)');
     for (const prohibida of [
       'text-transform',
