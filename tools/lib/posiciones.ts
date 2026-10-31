@@ -24,7 +24,7 @@ import {
   localizar,
   type DocumentosDeFuente,
 } from './cotejo.ts';
-import { leerCitas, leerDocumentosDeFuente, rutasDelCorpus } from './corpus.ts';
+import { leerCitas, leerDocumentosDeFuente, leerOrdenDeLosIndices, rutasDelCorpus } from './corpus.ts';
 
 /**
  * Lo que de una Cita hace falta para situarla, tal y como sale del frontmatter. Los campos se
@@ -112,6 +112,39 @@ export async function leerPosicionesDelCorpus(
   const rutas = rutasDelCorpus(raizDelCorpus);
   const [citas, documentos] = await Promise.all([leerCitas(rutas.citas), leerDocumentosDeFuente(rutas)]);
   return posicionesDeCitas(citas, documentos);
+}
+
+/**
+ * El orden de los índices de subpáginas de un Corpus en disco — Historia 24.9: por Obra
+ * (`{fuente}--{obra}`), sus documentos en el orden que declara la Fuente. Lo lee
+ * `leerOrdenDeLosIndices`, que no toma ningún índice por documento ni lee ningún cuerpo.
+ */
+export async function leerOrdenDeLosIndicesDelCorpus(raizDelCorpus: string): Promise<Map<string, string[]>> {
+  return leerOrdenDeLosIndices(rutasDelCorpus(raizDelCorpus));
+}
+
+/** El identificador de la única entrada de la colección `indices`. */
+export const ENTRADA_DEL_ORDEN_DE_LOS_INDICES = 'orden';
+
+/**
+ * Lleva el orden de los índices al almacén de la colección `indices` — Historia 24.9. Es el
+ * cuerpo de su cargador en `src/content.config.ts`, con el patrón de `guardarPosiciones`: lee y
+ * analiza todo antes de tocar el almacén.
+ *
+ * Es **una sola entrada**, `{ porObra }`, y está siempre, también sin ningún índice: así la
+ * colección nunca está vacía y nadie consulta una colección vacía (Astro avisa de eso en cada
+ * construcción de un Corpus sin índices).
+ */
+export async function guardarOrdenDeLosIndices(opciones: {
+  leer: () => Promise<Map<string, string[]>>;
+  analizar: (entrada: EntradaDePosiciones) => Promise<Record<string, unknown>>;
+  almacen: AlmacenDePosiciones;
+}): Promise<void> {
+  const { leer, analizar, almacen } = opciones;
+  const id = ENTRADA_DEL_ORDEN_DE_LOS_INDICES;
+  const data = await analizar({ id, data: { porObra: Object.fromEntries(await leer()) } });
+  almacen.clear();
+  almacen.set({ id, data });
 }
 
 /** Una entrada del almacén de la colección `posiciones`. */

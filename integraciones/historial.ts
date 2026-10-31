@@ -95,6 +95,7 @@ import {
   type Version,
 } from '../tools/lib/cambios.ts';
 import { FAMILIAS_DE_FICHERO, type FamiliaDeFichero } from '../tools/lib/avisar.ts';
+import { obraDeIndice } from '../tools/lib/indice.ts';
 
 const ejecutar = promisify(execFile);
 
@@ -405,12 +406,15 @@ export function soloDeModo(entrada: EntradaCruda): boolean {
   return entrada.antes !== null && entrada.antes === entrada.despues;
 }
 
-/** Los documentos de `corpus/fuentes/` en disco, por su ruta absoluta: `.txt`, con subdirectorios. */
+/**
+ * Los documentos de `corpus/fuentes/` en disco, por su ruta absoluta: `.txt`, con subdirectorios,
+ * y los índices de subpáginas (`.indice.yml`, Historia 24.9), que la relación compone en su Obra.
+ */
 async function documentosEnDisco(directorio: string): Promise<string[]> {
   if (!existsSync(directorio)) return [];
   const entradas = await readdir(directorio, { recursive: true });
   return entradas
-    .filter((entrada) => extname(entrada) === '.txt')
+    .filter((entrada) => extname(entrada) === '.txt' || obraDeIndice(entrada) !== undefined)
     .map((entrada) => resolve(directorio, entrada))
     .sort();
 }

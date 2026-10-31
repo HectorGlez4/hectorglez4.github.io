@@ -79,6 +79,17 @@ import {
   nombreDeDocumento,
   paginaDeLaObraDeclarada,
 } from './lib/documento.ts';
+import {
+  analizarIndice,
+  componerIndice,
+  documentosEnElOrdenDelIndice,
+  nombreDeIndice,
+  obraDeIndice,
+  obraDelDocumento,
+  paginasDelIndice,
+  tituloDeDireccion,
+} from './lib/indice.ts';
+import { compararDocumentos } from '../src/lib/obras.ts';
 
 /** La única llamada de red del proyecto no puede colgarse ni tragarse una biblioteca. */
 const TIEMPO_MAXIMO_MS = 30_000;
@@ -127,7 +138,14 @@ const [url, ...sobrantes] = posicionales(argumentos, ['--corpus']);
 const rutas = rutasDelCorpus(raizDeCorpusDe(argumentos));
 
 if (url === undefined || sobrantes.length > 0) {
-  process.stderr.write('Uso: npx tsx tools/recuperar.ts <url> [--corpus corpus]\n');
+  process.stderr.write(
+    'Uso: npx tsx tools/recuperar.ts <url> [--corpus corpus]\n' +
+      '     npx tsx tools/recuperar.ts --indice <url de la página de la obra> [--ensayo] [--corpus corpus]\n',
+  );
+  process.exit(2);
+}
+if (argumentos.includes('--ensayo') && !argumentos.includes('--indice')) {
+  process.stderr.write('--ensayo solo acompaña a --indice: un documento no se recupera en seco.\n');
   process.exit(2);
 }
 
@@ -153,6 +171,12 @@ if (!fuente.permiteReutilizacion) {
       `(licencia declarada: ${fuente.licencia}). No se ha descargado nada.`,
     ],
   });
+}
+
+// ── El índice de subpáginas de una Obra paginada, aparte de sus documentos ───
+
+if (argumentos.includes('--indice')) {
+  await recuperarIndice(url, fuente, argumentos.includes('--ensayo'));
 }
 
 // ── Una Fuente mutable entra por revisión, y a su propio espacio ─────────────
@@ -507,6 +531,199 @@ terminar({
 });
 
 // ── Piezas ───────────────────────────────────────────────────────────────────
+
+/**
+ * La rama del índice de subpáginas — Historia 24.9, AD-23. Termina el proceso siempre.
+ *
+ * El orden entre los documentos de una Obra paginada **lo declara la Fuente**: la página de la
+ * obra enlaza sus subpáginas en el orden del libro. Se pide **una vez**, su texto de origen
+ * (`?action=raw`), con las mismas guardas que un documento —conjunto cerrado antes de pedir,
+ * redirecciones revalidadas, tiempo máximo y techo—, y se versiona en
+ * `corpus/fuentes/{fuente}--{obra}.indice.yml`, junto a los documentos de la Obra y aparte de
+ * ellos: no reescribe ninguno, no es `.txt` y ningún cotejo lo lee (`tools/lib/indice.ts`).
+ *
+ * No acepta ningún orden tecleado: lo único que se teclea es la dirección de la página, y de
+ * ella se guardan, tal cual y en su orden, los títulos que enlaza. La Obra no se teclea
+ * tampoco: es la de los documentos versionados que el índice enlaza, casados por la dirección
+ * que declara su cabecera, y se niega si no enlaza ninguno o si enlaza documentos de dos Obras.
+ * Un índice ya versionado no se vuelve a pedir; otro índice para la misma Obra se niega.
+ *
+ * Con `--ensayo` dice lo que versionaría y no escribe nada.
+ */
+async function recuperarIndice(direccion: string, fuente: Fuente, ensayo: boolean): Promise<never> {
+  if (!ENCABEZADO_EN_EL_ORIGEN.has(fuente.id) || fuente.mutable === true) {
+    terminar({
+      ok: false,
+      motivos: [
+        `${fuente.nombre} no publica un índice de subpáginas que se sepa leer; solo Wikisource lo hace.`,
+        'No se ha pedido nada: sin índice, sus documentos siguen el orden natural de su nombre.',
+      ],
+    });
+  }
+
+  let pagina: URL;
+  try {
+    pagina = new URL(direccion);
+  } catch {
+    terminar({ ok: false, motivos: [`«${direccion}» no es una dirección.`] });
+  }
+  pagina.hash = '';
+  pagina.search = '';
+  const titulo = tituloDeDireccion(pagina.toString());
+  if (titulo === undefined) {
+    terminar({
+      ok: false,
+      motivos: [`«${direccion}» no es la dirección de una página (…/wiki/<título>). No se ha pedido nada.`],
+    });
+  }
+  const urlDelIndice = pagina.toString();
+
+  // Lo ya versionado no se vuelve a pedir: un índice se recupera una vez.
+  const yaVersionado = await indiceConTitulo(titulo, rutas.fuentes);
+  if (yaVersionado !== undefined) {
+    terminar({
+      ok: true,
+      ruta: yaVersionado,
+      mensaje: `Ya versionado: ${yaVersionado}\nNo se ha vuelto a pedir: el índice de una Obra se recupera una vez.`,
+    });
+  }
+
+  /*
+   * La página **pintada** (`action=render`: el contenido, sin el marco del sitio), no su
+   * wikitexto: el índice de muchas obras se transcluye del escaneo, y lo que la Fuente declara
+   * es lo que pinta. Una redirección no se pinta como índice: se pide la página a la que va.
+   */
+  const pintada = new URL(urlDelIndice);
+  pintada.searchParams.set('action', 'render');
+  const descarga = await conReintentos(
+    () => descargar(pintada.toString(), fuente),
+    (r) => r.ok || !esPasajero(r),
+  );
+  if (!descarga.ok) terminar({ ok: false, motivos: descarga.motivos });
+
+  if (/class\s*=\s*["'][^"']*\bredirectMsg\b/u.test(descarga.contenido)) {
+    terminar({
+      ok: false,
+      motivos: [
+        `«${titulo}» es una redirección. No se ha versionado nada: pida el índice por la dirección`,
+        'de la página a la que redirige.',
+      ],
+    });
+  }
+
+  const paginas = paginasDelIndice(descarga.contenido, urlDelIndice);
+  if (paginas.length === 0) {
+    terminar({
+      ok: false,
+      motivos: [`«${titulo}» no enlaza ninguna página: no es un índice de subpáginas. No se ha versionado nada.`],
+    });
+  }
+
+  // La Obra es la de los documentos versionados que el índice enlaza, por su cabecera.
+  const enlazados = new Set([titulo, ...paginas]);
+  const documentos: { nombre: string; url: string; pedido?: string }[] = [];
+  for (const entrada of await readdir(rutas.fuentes, { recursive: true })) {
+    if (extname(entrada) !== '.txt') continue;
+    const cabecera = analizarDocumento(await readFile(join(rutas.fuentes, entrada), 'utf8'))?.cabecera;
+    if (cabecera === undefined || cabecera.clase === CLASE_BIOGRAFIA || cabecera.fuente !== fuente.id) continue;
+    documentos.push({
+      nombre: basename(entrada, '.txt'),
+      url: cabecera.url,
+      ...(cabecera.pedido === undefined ? {} : { pedido: cabecera.pedido }),
+    });
+  }
+  const casados = documentos.filter((d) =>
+    [d.url, d.pedido].some((u) => u !== undefined && enlazados.has(tituloDeDireccion(u) ?? '')),
+  );
+  const enlazadas = [...new Set(casados.map((d) => obraDelDocumento(d.nombre)))].sort();
+  /*
+   * Si enlaza documentos de varias Obras —la página de una colección enlaza también las novelas
+   * que el Corpus versionó como obras propias—, el índice es de la que se llama como la propia
+   * página, con el mismo nombre que le daría la recuperación de un documento suyo. Si ninguna se
+   * llama así, no se elige.
+   */
+  const delTitulo = nombreDeDocumento(fuente.id, titulo);
+  const obras = enlazadas.length > 1 && delTitulo !== undefined && enlazadas.includes(delTitulo) ? [delTitulo] : enlazadas;
+  if (obras.length === 0) {
+    terminar({
+      ok: false,
+      motivos: [
+        `«${titulo}» enlaza ${paginas.length} páginas y ninguna es un documento versionado en ` +
+          `${basename(rutas.fuentes)}/. No se ha versionado nada: un índice ordena documentos, y ` +
+          'primero se recuperan con «npx tsx tools/recuperar.ts <url>».',
+      ],
+    });
+  }
+  if (obras.length > 1) {
+    terminar({
+      ok: false,
+      motivos: [
+        `«${titulo}» enlaza documentos de ${obras.length} Obras (${obras.join(', ')}) y ninguna se ` +
+          'llama como la página. No se ha versionado nada: un índice es de una Obra, y no se elige por cuál.',
+      ],
+    });
+  }
+  const obra = obras[0] as string;
+  const destino = join(rutas.fuentes, nombreDeIndice(obra));
+  if (existsSync(destino)) {
+    terminar({
+      ok: false,
+      motivos: [
+        `${obra} ya tiene índice: ${destino}, de otra página. No se ha versionado nada:`,
+        'una Obra tiene un índice, y cambiarlo es retirar antes el que hay.',
+      ],
+    });
+  }
+
+  const indice = {
+    fuente: fuente.id,
+    url: urlDelIndice,
+    recuperado: new Date().toISOString().slice(0, 10),
+    paginas,
+  };
+  const deLaObra = documentos.filter((d) => obraDelDocumento(d.nombre) === obra);
+  const ordenados = documentosEnElOrdenDelIndice(obra, indice, deLaObra);
+  const fuera = deLaObra
+    .map((d) => d.nombre)
+    .filter((nombre) => !ordenados.includes(nombre))
+    .sort(compararDocumentos);
+
+  const parte = [
+    `Obra: ${obra}`,
+    `Índice: ${urlDelIndice} (${paginas.length} páginas enlazadas)`,
+    `Documentos en el orden del índice (${ordenados.length}):`,
+    ...ordenados.map((nombre, i) => `  ${i + 1}. ${nombre}`),
+    ...(fuera.length === 0
+      ? []
+      : [
+          `Documentos de la Obra que el índice no enlaza (${fuera.length}); irán detrás, en el orden natural de su nombre:`,
+          ...fuera.map((nombre) => `  · ${nombre}`),
+        ]),
+  ];
+
+  if (ensayo) {
+    terminar({ ok: true, ruta: destino, mensaje: [`En seco: no se ha escrito ${destino}.`, ...parte].join('\n') });
+  }
+
+  await writeFile(destino, componerIndice(indice), 'utf8');
+  terminar({
+    ok: true,
+    ruta: destino,
+    mensaje: [`Índice versionado: ${destino}`, ...parte, `Licencia: ${fuente.licencia} (${fuente.nombre})`].join('\n'),
+  });
+}
+
+/** El índice versionado que salió de la página de ese título, si lo hay. */
+async function indiceConTitulo(titulo: string, carpeta: string): Promise<string | undefined> {
+  if (!existsSync(carpeta)) return undefined;
+  for (const entrada of await readdir(carpeta, { recursive: true })) {
+    if (obraDeIndice(entrada) === undefined) continue;
+    const ruta = join(carpeta, entrada);
+    const indice = analizarIndice(await readFile(ruta, 'utf8'));
+    if (indice !== undefined && tituloDeDireccion(indice.url) === titulo) return ruta;
+  }
+  return undefined;
+}
 
 /**
  * La rama de una Fuente mutable — Historia 17.1. Termina el proceso siempre.

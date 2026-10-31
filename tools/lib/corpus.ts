@@ -27,6 +27,14 @@ import type {
 } from '../../src/lib/objetivo.ts';
 import { BIOGRAFIA_MAL_COLOCADA, FICHERO_DEL_CENSO, type DocumentosDeFuente } from './cotejo.ts';
 import { analizarDocumento, CLASE_BIOGRAFIA, type CabeceraAnalizada } from './documento.ts';
+import {
+  analizarIndice,
+  documentosEnElOrdenDelIndice,
+  obraDeIndice,
+  obraDelDocumento,
+  type DocumentoParaIndice,
+  type IndiceDeObra,
+} from './indice.ts';
 /*
  * Solo los tipos, y a propósito: quien decide qué se inspecciona y cómo se agrega es
  * `indexacion.ts`, que es puro y no toca disco. Esta capa escribe lo que le den. Al ser
@@ -1072,6 +1080,56 @@ export async function leerDocumentosDeFuente(rutas: Rutas): Promise<DocumentosDe
     );
   }
   return documentos;
+}
+
+/**
+ * El orden que declaran los índices de subpáginas versionados — Historia 24.9, AD-23: por Obra
+ * (`{fuente}--{obra}`), sus documentos en el orden de su índice (`documentosEnElOrdenDelIndice`).
+ *
+ * Lee los ficheros `.indice.yml` de `corpus/fuentes/` y, de los documentos de una Obra con
+ * índice, **usa solo la cabecera**: la dirección con que cada uno casa con los títulos del índice.
+ * No coteja ningún cuerpo ni toma un índice por documento, y los documentos de las Obras sin
+ * índice no los abre. Lanza, nombrando el fichero, ante un
+ * índice que no se deja analizar o que no es de la Fuente de su nombre: un orden ilegible no se
+ * puede afirmar, y caer al orden natural en silencio lo escondería.
+ */
+export async function leerOrdenDeLosIndices(rutas: Rutas): Promise<Map<string, string[]>> {
+  const ficheros = (await ficherosDe(rutas.fuentes, ['.yml'])).filter((ruta) => obraDeIndice(ruta) !== undefined);
+  const orden = new Map<string, string[]>();
+  if (ficheros.length === 0) return orden;
+
+  const indices = new Map<string, IndiceDeObra>();
+  for (const ruta of ficheros) {
+    const obra = obraDeIndice(ruta) as string;
+    const indice = analizarIndice(await readFile(ruta, 'utf8'));
+    if (indice === undefined || obra.split('--')[0] !== indice.fuente) {
+      throw new Error(
+        `${relative(process.cwd(), ruta)}: no es un índice de subpáginas legible de la Fuente de su ` +
+          'nombre. Lo escribe «npx tsx tools/recuperar.ts --indice <url>» y no se edita a mano.',
+      );
+    }
+    if (indices.has(obra)) {
+      throw new Error(`${relative(process.cwd(), ruta)}: hay otro índice de la misma Obra (${obra}).`);
+    }
+    indices.set(obra, indice);
+  }
+
+  const documentos = new Map<string, DocumentoParaIndice[]>();
+  for (const ruta of await ficherosDe(rutas.fuentes, ['.txt'])) {
+    const nombre = slugDeFichero(ruta);
+    const obra = obraDelDocumento(nombre);
+    if (!indices.has(obra)) continue;
+    const cabecera = analizarDocumento(await readFile(ruta, 'utf8'))?.cabecera;
+    if (cabecera === undefined || cabecera.clase === CLASE_BIOGRAFIA) continue;
+    const suyos = documentos.get(obra) ?? [];
+    suyos.push({ nombre, url: cabecera.url, ...(cabecera.pedido === undefined ? {} : { pedido: cabecera.pedido }) });
+    documentos.set(obra, suyos);
+  }
+
+  for (const [obra, indice] of indices) {
+    orden.set(obra, documentosEnElOrdenDelIndice(obra, indice, documentos.get(obra) ?? []));
+  }
+  return orden;
 }
 
 /**

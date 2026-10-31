@@ -649,3 +649,6 @@ Hallazgos reales que no son de la historia que los sacó a la luz. Append-only.
     nombre no coincide con el que su declaración implica. Mientras siga así, `extraer` y
     `documentar` lo rechazan, y volver a recuperar su URL escribiría un segundo fichero en
     vez de reutilizarlo. Renombrarlo es decisión de Héctor.
+- source_spec: `_bmad-output/implementation-artifacts/spec-24-9-el-orden-del-libro-lo-declara-la-fuente.md`
+  summary: En Novelas ejemplares, el documento de «La señora Cornelia» es de la edición de 1878 y el índice capturado es el de 1825, así que no casa y va detrás de «El coloquio de los perros», donde el libro la pone antes.
+  evidence: corpus/fuentes/wikisource-es--novelas-ejemplares--la-senora-cornelia.txt declara url La_señora_Cornelia; el índice enlaza «La señora Cornelia (1825)». Hoy no tiene ninguna Cita, así que no mueve ningún listado; recuperar la página de 1825 o decidir otra cosa es de Héctor.

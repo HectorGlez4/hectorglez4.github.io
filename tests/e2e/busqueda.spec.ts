@@ -51,7 +51,7 @@ import {
 import { clavesDeOrden, ordenDeLaListaDeObras, porSlug as porSlugDeCita, rutaDeLaObra } from '../../src/lib/obras.ts';
 import { CITAS_POR_PAGINA, PAUSA_DE_TECLEO_MS, TANDA_DE_RESULTADOS } from '../../src/lib/umbrales.ts';
 import { conjuntoDeLosDatos, leerDatosDelCorpus } from '../../tools/lib/alcance.ts';
-import { leerDocumentosDeFuente, rutasDelCorpus } from '../../tools/lib/corpus.ts';
+import { leerDocumentosDeFuente, leerOrdenDeLosIndices, rutasDelCorpus } from '../../tools/lib/corpus.ts';
 import { posicionesDeCitas } from '../../tools/lib/posiciones.ts';
 import { emitidos as emitidosEn, espiarMedicion } from './ayuda/espia.ts';
 
@@ -808,7 +808,7 @@ test.describe('Historia 27.1 — la Cita declara sus filtros y su resultado llev
       const datos = await leerDatosDelCorpus(rutas);
       const conjunto = conjuntoDeLosDatos(datos);
       const posiciones = posicionesDeCitas(datos.citas, await leerDocumentosDeFuente(rutas));
-      return { conjunto, porObra: citasPorObra(conjunto.citas, posiciones) };
+      return { conjunto, porObra: citasPorObra(conjunto.citas, posiciones, await leerOrdenDeLosIndices(rutas)) };
     })());
 
   const recuentos = (opciones: readonly { valor: string; recuento: number }[]) =>

@@ -43,7 +43,8 @@
  *     línea de Obra de cada tarjeta, 24.3, y de la Lista de Obras del Autor). Son listados: si
  *     entra una Cita nueva en un Tema, la página cambió aunque el fichero del Tema no se toque.
  *   · **Página de Obra** — su ficha, sus Citas, su Autor y **sus documentos**: la unión de
- *     `documentosDeCita` de sus Citas sobre los nombres de `corpus/fuentes/`. Un documento no se
+ *     `documentosDeCita` de sus Citas sobre los nombres de `corpus/fuentes/`, y el índice de
+ *     subpáginas que los ordena (`{fuente}--{obra}.indice.yml`, Historia 24.9). Un documento no se
  *     analiza: cualquier cambio suyo puede reordenar la Obra, y solo fecha esa página.
  *   · **Directorio de Autores** (Historia 26.3) — lo que pinta: de cada Autor con alguna Cita, el
  *     nombre, los años y la clave de orden (`ordenAlfabetico`), que lo ordena y lo agrupa; de cada
@@ -108,7 +109,8 @@ import {
   rutaNormalizada,
 } from '../../src/lib/superficies.ts';
 import { formaDeObra, rutaDeLaObra } from '../../src/lib/obras.ts';
-import { documentosDeCita } from './cotejo.ts';
+import { documentoDeCita, documentosDeCita } from './cotejo.ts';
+import { obraDeIndice } from './indice.ts';
 import type { FamiliaDeFichero, FamiliaDeRuta } from './avisar.ts';
 
 /**
@@ -438,10 +440,17 @@ export function relacionDeSuperficies(corpus: CorpusParaFechar): Map<string, Sup
     if (vivos.has(ficha.ruta)) continue;
     for (const forma of ficha.formas ?? []) apilar(fichasDeBaja, clave(ficha.autor, forma), ficha.ruta);
   }
-  /** Los documentos, de hoy y de baja, por su nombre sin extensión. */
+  /**
+   * Los documentos, de hoy y de baja, por su nombre sin extensión; y aparte, los índices de
+   * subpáginas (Historia 24.9), por la Obra de los documentos que ordenan (`{fuente}--{obra}`):
+   * un índice no es un documento y no casa con ninguna Cita por prefijo.
+   */
   const documentos = new Map<string, string[]>();
+  const indices = new Map<string, string[]>();
   for (const ruta of [...(corpus.documentos ?? []), ...(bajas.documentos ?? [])]) {
-    apilar(documentos, nombreDeDocumento(ruta), ruta);
+    const deIndice = obraDeIndice(ruta);
+    if (deIndice === undefined) apilar(documentos, nombreDeDocumento(ruta), ruta);
+    else apilar(indices, deIndice, ruta);
   }
 
   /** Las fichas de Obra cuyo título pinta una Cita viva: la suya y las de baja que la reclamaban. */
@@ -584,6 +593,9 @@ export function relacionDeSuperficies(corpus: CorpusParaFechar): Map<string, Sup
       for (const nombre of documentosDeCita({ id: cita.fuente }, cita.obraDeclarada, documentos)) {
         for (const documento of documentos.get(nombre) ?? []) componer(ruta, documento, 'documento');
       }
+      // Historia 24.9 — el índice que ordena los documentos de su obra la compone como uno de ellos.
+      const corto = documentoDeCita({ id: cita.fuente }, cita.obraDeclarada);
+      for (const indice of corto === undefined ? [] : (indices.get(corto) ?? [])) componer(ruta, indice, 'documento');
     }
   }
 

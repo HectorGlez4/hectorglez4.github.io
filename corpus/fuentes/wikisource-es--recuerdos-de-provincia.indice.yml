@@ -1,0 +1,31 @@
+# Índice de subpáginas de una Obra paginada (Historia 24.9, AD-23): el orden de sus
+# documentos lo declara la Fuente. Lo escribe «npx tsx tools/recuperar.ts --indice <url>»
+# y no se edita a mano; no es un documento y ningún cotejo lo lee.
+fuente: wikisource-es
+url: https://es.wikisource.org/wiki/Recuerdos_de_provincia
+recuperado: 2026-10-31
+paginas:
+  - Recuerdos de provincia/A mis compatriotas solamente
+  - Recuerdos de provincia/Las Palmas
+  - Recuerdos de provincia/Juan Eugenio de Mallea
+  - Recuerdos de provincia/Los huarpes
+  - Recuerdos de provincia/Los hijos de Jofré
+  - Recuerdos de provincia/Los hijos de Mallea
+  - Recuerdos de provincia/Los Sayavedras
+  - Recuerdos de provincia/Los Albarracines
+  - Recuerdos de provincia/Los Oro
+  - Recuerdos de provincia/Fray Justo Santa María de Oro
+  - Recuerdos de provincia/Domingo de Oro
+  - Recuerdos de provincia/El historiador Funes
+  - Recuerdos de provincia/El Obispo de Cuyo
+  - Recuerdos de provincia/La historia de mi madre
+  - Recuerdos de provincia/Mi hogar paterno
+  - Recuerdos de provincia/Mi educación
+  - Recuerdos de provincia/La vida pública
+  - Recuerdos de provincia/Chile
+  - Recuerdos de provincia/Diarios y publicaciones periódicas
+  - Recuerdos de provincia/Folletos
+  - Recuerdos de provincia/Biografías
+  - Recuerdos de provincia/Libros
+  - Recuerdos de provincia/Traducciones
+  - Recuerdos de provincia/Casas de educación

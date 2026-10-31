@@ -15,7 +15,7 @@ import {
 import { citasPorObra, filtrosDeLaBusqueda, rutasPublicadas, superficiesInalcanzables } from '../../src/lib/publicado.ts';
 import { clavesDeOrden } from '../../src/lib/obras.ts';
 import { conjuntoDeLosDatos, conjuntoDelCorpus, grafoDeDist, leerDatosDelCorpus } from '../../tools/lib/alcance.ts';
-import { leerDocumentosDeFuente, rutasDelCorpus } from '../../tools/lib/corpus.ts';
+import { leerDocumentosDeFuente, leerOrdenDeLosIndices, rutasDelCorpus } from '../../tools/lib/corpus.ts';
 import { posicionesDeCitas } from '../../tools/lib/posiciones.ts';
 import { metadatosDe } from './ayuda/pagefind.ts';
 import { rutaDeFicheroHtml } from '../../tools/lib/indexables.ts';
@@ -891,7 +891,11 @@ describe('Historia 12.1 — sobre un sitio construido de verdad', () => {
       const rutas = rutasDelCorpus(join(proyecto, 'corpus'));
       const datos = await leerDatosDelCorpus(rutas);
       const conjunto = conjuntoDeLosDatos(datos);
-      const porObra = citasPorObra(conjunto.citas, posicionesDeCitas(datos.citas, await leerDocumentosDeFuente(rutas)));
+      const porObra = citasPorObra(
+        conjunto.citas,
+        posicionesDeCitas(datos.citas, await leerDocumentosDeFuente(rutas)),
+        await leerOrdenDeLosIndices(rutas),
+      );
       const esperadas = clavesDeOrden(conjunto.autores, conjunto.citas, porObra);
       const malas: string[] = [];
       for (const [ruta, deLaPagina] of claves) {
