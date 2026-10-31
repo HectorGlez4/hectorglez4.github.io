@@ -844,6 +844,23 @@ export const AVISO_DE_RANGO_DE_LA_CLAVE_DE_ORDEN: number | undefined = undefined
 export const CUOTA_DE_FILAS_ESCRITAS_POR_DIA_EN_D1 = 100_000;
 
 /**
+ * Filas que D1 deja leer al día en el plan gratuito, **por cuenta** — AD-9, AD-14, Historia 23.13.
+ *
+ * La tercera cuota de «Cuotas del receptor» de la espina, y tampoco la decide el proyecto: 5
+ * millones. **Es de la cuenta, no de una base**: D1 suma las filas leídas de todas las bases de la
+ * cuenta de Cloudflare, y `d1 info` da solo las de la medición. Por eso la cuenta aloja una sola
+ * base D1, la de la medición (Héctor, 2026-10-31), y crear otra reabre la regla. Cada índice que
+ * una consulta recorre cuenta también. Pasada, las consultas fallan hasta las 00:00 UTC.
+ *
+ * La juzgan, antes de leer más que el `COUNT(*)` que da las filas de la tabla, las tres órdenes de
+ * `tools/` que recorren `eventos` —`npm run medicion` (la lectura), `desplegar` y `comprobar`—,
+ * con el juez de `tools/lib/medicion.ts`: si no cabe su coste más otro tanto de lo leído en 24 h,
+ * salen con 1 y se repiten otro día. Si el proyecto pasa al plan de pago, cambia aquí, en un diff
+ * visible, y en ningún otro sitio.
+ */
+export const CUOTA_DE_FILAS_LEIDAS_POR_DIA_EN_D1 = 5_000_000;
+
+/**
  * Bytes que D1 admite por base en el plan gratuito — AD-9, Historia 23.10.
  *
  * La otra cuota de «Cuotas del receptor» de la espina, y tampoco la decide el proyecto: 500 MB.

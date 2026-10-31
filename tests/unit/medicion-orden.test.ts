@@ -6,7 +6,7 @@ import { join, resolve } from 'node:path';
 import * as vocabulario from '../../src/lib/vocabulario.ts';
 import { EVENTOS } from '../../src/lib/vocabulario.ts';
 import { EVENTOS_DE_LA_V71, interpretar } from '../../medicion/receptor.ts';
-import { CORTES_DE_SERIE, CUOTA_DE_FILAS_ESCRITAS_POR_DIA_EN_D1 } from '../../src/lib/umbrales.ts';
+import { CORTES_DE_SERIE, CUOTA_DE_FILAS_ESCRITAS_POR_DIA_EN_D1, CUOTA_DE_FILAS_LEIDAS_POR_DIA_EN_D1 } from '../../src/lib/umbrales.ts';
 import { partirSerie } from '../../tools/lib/lineaBase.ts';
 import { rutasIndexables, rutasPublicadas } from '../../src/lib/publicado.ts';
 import { conjuntoDelCorpus } from '../../tools/indexacion.ts';
@@ -36,6 +36,15 @@ import {
   avisoDeInterrupcion,
   consultasDeLaLectura,
   leerInformacionDeLaCuota,
+  leerFilasLeidas24h,
+  cuotaDeLectura,
+  cuotaDelBarajado,
+  juzgarCuota,
+  recorridosDeComprobar,
+  recorridosDeDesplegar,
+  recorridosDeLaLectura,
+  textoDeCuota,
+  vecesQueRecorre,
   escriturasDeLasBalizas,
   esHostLocal,
   ordenDeBorradoDeLasBalizas,
@@ -289,6 +298,12 @@ describe('Historia 23.2 — lo que contesta wrangler', () => {
   it('una consulta: sus filas, o lo que dijo D1', () => {
     const bien = JSON.stringify([{ results: [{ n: 3 }], success: true, meta: { duration: 0 } }]);
     expect(leerConsulta(bien)).toEqual({ ok: true, filas: [{ n: 3 }] });
+    expect('leidas' in (leerConsulta(bien) as object)).toBe(false);
+    // Con meta.rows_read, las filas que leyó D1 para darlas (Historia 23.13).
+    const medida = JSON.stringify([{ results: [{ n: 3 }], success: true, meta: { duration: 0, rows_read: 1234 } }]);
+    expect(leerConsulta(medida)).toEqual({ ok: true, filas: [{ n: 3 }], leidas: 1234 });
+    const rara = JSON.stringify([{ results: [], success: true, meta: { rows_read: -1 } }]);
+    expect(leerConsulta(rara)).toEqual({ ok: true, filas: [] });
     expect(leerConsulta(JSON.stringify({ error: { text: 'no such column: nada' } }))).toEqual({
       ok: false,
       motivo: 'no such column: nada',
@@ -721,6 +736,21 @@ describe('Historia 23.2 — el orden de las filas de prueba', () => {
 });
 
 describe('Historia 23.2 — la cuota y los recuentos', () => {
+  it('rows_read_24h de d1 info: la cifra, o por qué falta —con lo que dijo wrangler—', () => {
+    expect(leerFilasLeidas24h(JSON.stringify({ rows_read_24h: 4321, rows_written_24h: 1 }))).toEqual({ ok: true, valor: 4321 });
+    expect(leerFilasLeidas24h(JSON.stringify({ rows_written_24h: 1 }))).toEqual({ ok: false, motivo: 'd1 info no trae rows_read_24h.' });
+    expect(leerFilasLeidas24h(JSON.stringify({ rows_read_24h: -3 })).ok).toBe(false);
+    expect(leerFilasLeidas24h('[1]').ok).toBe(false);
+    expect(leerFilasLeidas24h('✘ [ERROR]', ' (wrangler salió con 1)')).toEqual({
+      ok: false,
+      motivo: 'wrangler no contestó JSON (wrangler salió con 1).',
+    });
+    expect(leerFilasLeidas24h('{}', ' (wrangler salió con 1)')).toEqual({
+      ok: false,
+      motivo: 'd1 info no trae rows_read_24h (wrangler salió con 1).',
+    });
+  });
+
   it('el barajado cabe justo con la reserva del resto del día, y no cabe por una fila', () => {
     const filas = 10_000;
     const coste = filas * FILAS_ESCRITAS_POR_FILA_BARAJADA;
@@ -755,6 +785,99 @@ describe('Historia 23.2 — la cuota y los recuentos', () => {
   it('sin reserva, un barajado que agota la cuota pasaría: con ella, no', () => {
     // Justo lo que quedaba: el sitio se quedaría sin escribir hasta la medianoche UTC.
     expect(cabeElBarajado({ filas: 10_000, escritas24h: 70_000, cuota: 100_000 }).cabe).toBe(false);
+  });
+});
+
+describe('Historia 23.13 — el juez de las cuotas, con cifras fijas', () => {
+  const ok = (valor: number) => ({ ok: true as const, valor });
+
+  it('cabe: lo usado, otro tanto de reserva y el coste, dentro de la cuota', () => {
+    const juicio = juzgarCuota('lectura', { usado: ok(1_000_000), coste: 3_000_000, cuota: 5_000_000 });
+    expect(juicio).toMatchObject({ clase: 'lectura', cabe: true, usado: 1_000_000, coste: 3_000_000, reserva: 1_000_000, disponible: 3_000_000 });
+    expect(textoDeCuota(juicio, 'npm run medicion')).toMatch(/^La lectura de la tabla cabe: /);
+  });
+
+  it('no cabe por la reserva: sin ella cabría', () => {
+    // 1,5 M usadas + 2,5 M de coste caben en 5 M; con la reserva de otras 1,5 M, no.
+    const juicio = juzgarCuota('lectura', { usado: ok(1_500_000), coste: 2_500_000, cuota: 5_000_000 });
+    expect(juicio.cabe).toBe(false);
+    expect(juicio.reserva).toBe(1_500_000);
+    expect(juicio.disponible).toBe(2_000_000);
+    const texto = textoDeCuota(juicio, 'npm run medicion');
+    expect(texto).toMatch(/^La lectura de la tabla no cabe hoy: /);
+    expect(texto).toContain('de la cuota de 5000000 filas leídas al día van 1500000 en las últimas 24 h');
+    expect(texto).toContain('y otras 1500000 se dejan para el resto del día, hasta las 00:00 UTC');
+    expect(texto).toContain('la cuota es de la cuenta: lo que lea hoy otra base D1 suya no está contado');
+    expect(texto).toContain('así que quedan 2000000. No se lee más ni se trocea: repite `npm run medicion` otro día.');
+    // Justo en el límite cabe; una fila más, no.
+    expect(juzgarCuota('lectura', { usado: ok(1_500_000), coste: 2_000_000, cuota: 5_000_000 }).cabe).toBe(true);
+    expect(juzgarCuota('lectura', { usado: ok(1_500_000), coste: 2_000_001, cuota: 5_000_000 }).cabe).toBe(false);
+  });
+
+  it('falta lo usado: no se juzga, y no cabe', () => {
+    const juicio = juzgarCuota('lectura', { usado: { ok: false, motivo: 'd1 info no trae rows_read_24h.' }, coste: 1, cuota: 5_000_000 });
+    expect(juicio).toMatchObject({ cabe: false, falta: 'd1 info no trae rows_read_24h.' });
+    expect(textoDeCuota(juicio, 'npm run medicion')).toBe(
+      'No se juzga la cuota de lectura: d1 info no trae rows_read_24h. Sin esa cifra no se sabe si cabe, así que no se ' +
+        'lee ninguna fila de la tabla.',
+    );
+    // También sin coste, antes del COUNT(*).
+    expect(juzgarCuota('lectura', { usado: { ok: false, motivo: 'no' }, cuota: 5_000_000 }).cabe).toBe(false);
+  });
+
+  it('sin coste, antes del COUNT(*): cabe solo lo que está por debajo de la cuota', () => {
+    expect(juzgarCuota('lectura', { usado: ok(4_999_999), cuota: 5_000_000 }).cabe).toBe(true);
+    const agotada = juzgarCuota('lectura', { usado: ok(5_000_000), cuota: 5_000_000 });
+    expect(agotada.cabe).toBe(false);
+    expect(textoDeCuota(agotada, 'npm run medicion -- comprobar')).toBe(
+      'La cuota de lectura está agotada hoy: de la cuota de 5000000 filas leídas al día van 5000000 en las últimas ' +
+        '24 h (la cuota es de la cuenta: lo que lea hoy otra base D1 suya no está contado). No se lee ninguna fila de ' +
+        'la tabla: repite `npm run medicion -- comprobar` otro día.',
+    );
+  });
+
+  it('la cuota de escritura y la de lectura, cada una por su lado', () => {
+    // Las mismas cifras, juzgadas cada una contra su cuota: la de escritura no cabe y la de lectura sí.
+    const escritura = juzgarCuota('escritura', { usado: ok(40_000), coste: 30_000, cuota: CUOTA_DE_FILAS_ESCRITAS_POR_DIA_EN_D1 });
+    const lectura = juzgarCuota('lectura', { usado: ok(40_000), coste: 30_000, cuota: CUOTA_DE_FILAS_LEIDAS_POR_DIA_EN_D1 });
+    expect(escritura.cabe).toBe(false);
+    expect(lectura.cabe).toBe(true);
+    expect(escritura.cifras).toContain('filas escritas al día');
+    expect(escritura.cifras).toContain('lo que el sitio escriba hasta las 00:00 UTC');
+    expect(lectura.cifras).toContain('filas leídas al día');
+    // El barajado pasa por el mismo juez: su juicio es el de la cuota de escritura.
+    const datos = { filas: 10_000, escritas24h: 35_000, cuota: 100_000 };
+    expect(cabeElBarajado(datos).cabe).toBe(juzgarCuota('escritura', cuotaDelBarajado(datos)).cabe);
+    expect(cabeElBarajado(datos).mensaje).toBe(textoDeCuota(juzgarCuota('escritura', cuotaDelBarajado(datos)), 'npm run medicion -- desplegar'));
+    expect(CUOTA_DE_FILAS_LEIDAS_POR_DIA_EN_D1).toBe(5_000_000);
+  });
+
+  it('el coste de lectura es N × la lista declarada de cada orden, nunca un literal', () => {
+    const vocabulario = huellaDelVocabulario();
+    const lectura = recorridosDeLaLectura('2026-11-10');
+    const desplegar = recorridosDeDesplegar(vocabulario);
+    const comprobar = recorridosDeComprobar(vocabulario);
+    // Cada una empieza por el COUNT(*) que da N.
+    for (const lista of [lectura, desplegar, comprobar]) expect(lista[0].sql).toBe(SQL_DE_FILAS);
+    // La lectura: el recuento y sus cinco consultas.
+    expect(lectura.slice(1).map((r) => r.sql)).toEqual(CONSULTAS_DE_LA_LECTURA.map((c) => consultasDeLaLectura('2026-11-10')[c]));
+    // Las balizas: dos recorridos por intento y el borrado final; sin índice por ruta, cada uno entero.
+    expect(vecesQueRecorre(comprobar)).toBe(1 + 2 * INTENTOS_DE_COMPROBACION + 1);
+    // desplegar: recuento, recuentos de antes y de después, balizas y barajado.
+    expect(vecesQueRecorre(desplegar)).toBe(1 + 2 + 2 * INTENTOS_DE_COMPROBACION + 1 + 1);
+    expect(desplegar.map((r) => r.sql)).toEqual([
+      SQL_DE_FILAS,
+      SQL_DE_RECUENTOS,
+      SQL_DE_BORRADO,
+      sqlDeLasBalizas([...new Set(Object.values(vocabulario.eventos).flatMap((c) => Object.keys(c)))].sort()),
+      SQL_DE_BARAJADO,
+      SQL_DE_RECUENTOS,
+    ]);
+    const cuota = cuotaDeLectura({ recorridos: lectura, filas: 7_000, usado: ok(0) });
+    expect(cuota.coste).toBe(7_000 * vecesQueRecorre(lectura));
+    expect(cuota.cuota).toBe(CUOTA_DE_FILAS_LEIDAS_POR_DIA_EN_D1);
+    expect(cuota.detalle).toContain('estimación y cota inferior: 7000 filas × 6 recorridos');
+    expect(cuota.detalle).toContain('rows_read cuenta también los índices');
   });
 
   const antes = recuentos([
@@ -975,6 +1098,11 @@ describe('Historia 23.10 — el SQL de la lectura', () => {
 });
 
 describe('Historia 23.2 — la cáscara sale con 2 antes de tocar la red', () => {
+  /** Lo que contesta `d1 info` en las lecturas de mentira: con lo leído en 24 h (Historia 23.13). */
+  const INFORMACION_DE_MENTIRA = '{"rows_written_24h":1200,"rows_read_24h":3000,"database_size":9000000}';
+  /** Lo que contesta el `COUNT(*)` que da N: diez filas, que leyó enteras. */
+  const FILAS_DE_MENTIRA = '[{"results":[{"n":10}],"success":true,"meta":{"rows_read":10}}]';
+
   /** Un `PATH` con un `npx` de mentira delante, que contesta lo que se le dé y sale con su código. */
   function npxDeMentira(salida: string, codigo: number): string {
     const dir = mkdtempSync(join(tmpdir(), 'sabiduria-npx-'));
@@ -1059,8 +1187,9 @@ describe('Historia 23.2 — la cáscara sale con 2 antes de tocar la red', () =>
         `printf '%s\\n' "$*" >> '${apuntes}'`,
         'case "$*" in',
         `  *whoami*) printf '%s' '{"loggedIn":true}' ;;`,
-        `  *"d1 info"*) printf '%s' '{"rows_written_24h":1200,"database_size":9000000}' ;;`,
-        `  *"d1 execute"*) printf '%s' '[{"results":[],"success":true}]' ;;`,
+        `  *"d1 info"*) printf '%s' '${INFORMACION_DE_MENTIRA}' ;;`,
+        `  *"${SQL_DE_FILAS}") printf '%s' '${FILAS_DE_MENTIRA}' ;;`,
+        `  *"d1 execute"*) printf '%s' '[{"results":[],"success":true,"meta":{"rows_read":10}}]' ;;`,
         '  *) exit 99 ;;',
         'esac',
         '',
@@ -1070,11 +1199,18 @@ describe('Historia 23.2 — la cáscara sale con 2 antes de tocar la red', () =>
     const { codigo, salida } = await correr([], { MEDICION_ENDPOINT: undefined, PATH: `${dir}:${process.env.PATH}` });
     expect(codigo, salida).toBe(0);
     expect(salida).toContain('Cuota de D1 (plan gratuito)');
+    // La cuota de lectura (23.13): lo leído en 24 h, la estimación y la medida, cada una por su lado.
+    expect(salida).toContain('Filas leídas en 24 h, según d1 info, antes de leer: 3000 de 5.000.000');
+    expect(salida).toContain('Esta lectura, estimación: 60 filas, 10 filas de la tabla × 6 recorridos');
+    expect(salida).toContain('Esta lectura, medida: 60 filas, la suma de los rows_read de sus 6 sentencias');
     expect(salida.trim().split('\n').at(-1)).toBe('Consulta: no se ha escrito nada.');
+    // Sesión, d1 info, el COUNT(*) y las cinco consultas, en ese orden; nada más.
     const pedido = readFileSync(apuntes, 'utf8').trim().split('\n');
     expect(pedido[0]).toBe(`--yes ${WRANGLER} whoami --json`);
-    expect(pedido.slice(1, 6).every((linea) => linea.startsWith(`--yes ${WRANGLER} d1 execute medicion --remote --json --command SELECT `))).toBe(true);
-    expect(pedido.slice(6)).toEqual([`--yes ${WRANGLER} d1 info medicion --json`]);
+    expect(pedido[1]).toBe(`--yes ${WRANGLER} d1 info medicion --json`);
+    expect(pedido[2]).toBe(`--yes ${WRANGLER} d1 execute medicion --remote --json --command ${SQL_DE_FILAS}`);
+    expect(pedido.slice(3).every((linea) => linea.startsWith(`--yes ${WRANGLER} d1 execute medicion --remote --json --command SELECT `))).toBe(true);
+    expect(pedido).toHaveLength(3 + CONSULTAS_DE_LA_LECTURA.length);
   }, 60_000);
 
   it('la lectura (23.10): resuelve las filas contra el censo del Corpus de verdad —una Cita y una Obra que no se indexa—', async () => {
@@ -1112,7 +1248,8 @@ describe('Historia 23.2 — la cáscara sale con 2 antes de tocar la red', () =>
         '#!/bin/sh',
         'case "$*" in',
         `  *whoami*) printf '%s' '{"loggedIn":true}' ;;`,
-        `  *"d1 info"*) printf '%s' '{"rows_written_24h":1200,"database_size":9000000}' ;;`,
+        `  *"d1 info"*) printf '%s' '${INFORMACION_DE_MENTIRA}' ;;`,
+        `  *"${SQL_DE_FILAS}") printf '%s' '${FILAS_DE_MENTIRA}' ;;`,
         `  *vista-de-obra*) printf '%s' '${filas}' ;;`,
         `  *"d1 execute"*) printf '%s' '[{"results":[],"success":true}]' ;;`,
         '  *) exit 99 ;;',
@@ -1128,21 +1265,19 @@ describe('Historia 23.2 — la cáscara sale con 2 antes de tocar la red', () =>
     expect(salida).toMatch(/Fuera del censo —se cuenta aparte y se nombra, nunca se descarta—\n {2}nada\./);
   }, 120_000);
 
-  it('la lectura (23.10): con un npx que no contesta consultas sale con 1, nombrando lo que no leyó', async () => {
-    // Contesta lo mismo a todo: con sesión, y ninguna consulta ni `d1 info` se deja leer.
+  it('la lectura (23.13): con un d1 info sin rows_read_24h sale con 1 antes de leer ninguna fila de la tabla', async () => {
+    // Contesta lo mismo a todo: con sesión, y `d1 info` sin la cifra de lo leído en 24 h.
     const { codigo, salida } = await correr([], {
       MEDICION_ENDPOINT: undefined,
       PATH: `${npxDeMentira('{"loggedIn":true}', 0)}:${process.env.PATH}`,
     });
     expect(codigo, salida).toBe(1);
-    expect(salida).toContain('No se leyó nada de D1');
-    for (const que of ['las vistas y las lecturas', 'las salidas internas', 'las acciones', 'las búsquedas asentadas', 'las búsquedas sin resultados', 'las filas escritas en 24 h', 'el tamaño de la base']) {
-      expect(salida).toContain(que);
-    }
+    expect(salida).toContain('No se lee: No se juzga la cuota de lectura: d1 info no trae rows_read_24h');
+    expect(salida).toContain('no se lee ninguna fila de la tabla');
     expect(salida).toContain('Consulta: no se ha escrito nada.');
   }, 60_000);
 
-  it('la lectura (23.10): si wrangler contesta pero ninguna consulta trae recuentos con forma ni d1 info cifras, sale con 1', async () => {
+  it('la lectura (23.13): si ninguna consulta trae recuentos con forma sale con 1, aunque d1 info dé lo leído', async () => {
     const dir = mkdtempSync(join(tmpdir(), 'sabiduria-npx-'));
     aBorrar.push(dir);
     writeFileSync(
@@ -1151,7 +1286,8 @@ describe('Historia 23.2 — la cáscara sale con 2 antes de tocar la red', () =>
         '#!/bin/sh',
         'case "$*" in',
         `  *whoami*) printf '%s' '{"loggedIn":true}' ;;`,
-        `  *"d1 info"*) printf '%s' '{}' ;;`,
+        `  *"d1 info"*) printf '%s' '{"rows_read_24h":3000}' ;;`,
+        `  *"${SQL_DE_FILAS}") printf '%s' '${FILAS_DE_MENTIRA}' ;;`,
         `  *"d1 execute"*) printf '%s' '[{"results":[{"jornada":"ayer","ruta":"/","n":"muchas"}],"success":true}]' ;;`,
         '  *) exit 99 ;;',
         'esac',
@@ -1161,7 +1297,7 @@ describe('Historia 23.2 — la cáscara sale con 2 antes de tocar la red', () =>
     chmodSync(join(dir, 'npx'), 0o755);
     const { codigo, salida } = await correr([], { MEDICION_ENDPOINT: undefined, PATH: `${dir}:${process.env.PATH}` });
     expect(codigo, salida).toBe(1);
-    expect(salida).toContain('No se leyó nada de D1:');
+    expect(salida).toContain('Ninguna consulta con forma —ninguna trajo recuentos que se puedan leer—:');
     expect(salida).toContain('las vistas y las lecturas: una fila sin forma de recuento');
     expect(salida).toContain('el tamaño de la base (d1 info): d1 info no trae database_size.');
     expect(salida).not.toContain('Cuota de D1 (plan gratuito)');

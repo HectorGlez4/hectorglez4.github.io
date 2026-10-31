@@ -397,7 +397,7 @@ development_status:
   23-10-la-línea-base-se-lee-desde-tools-con-la-cuota-de-d1-a-la-vis: review # v8-ralph 2026-10-25: npm run medicion (sin subcomando) da la línea base por superficie y la cuota de D1 (escrituras y tamaño) desde tools/; diferidos para Héctor: cuota de lectura (bmad-architecture), letra del criterio de la cuota en epics.md (bmad-create-epics-and-stories), y lo pendiente de bmad-prd
   23-11-la-lectura-se-mide-en-vivo-y-su-línea-base-empieza-a-contar: review  # operativa: fusionada y desplegada por el bucle v8-ralph con autorización de Héctor del 2026-10-24; llegada 2026-10-25
   23-12-el-orden-de-llegada-no-reconstruye-a-nadie: review  # v8.2: se fusiona SOLA en la principal antes de la 23.3 (rowid aleatorio del Worker); excepción declarada a la fusión por épica; # v8-ralph 2026-10-24: el receptor inserta con rowid aleatorio, prueba de orden de llegada en tools/ y DESPLIEGUE.md §3; diferido para Héctor: la rama trae debajo el commit de epic-23-context.md (aceptarlo o quitarlo al fusionar)
-  23-13-la-cuota-de-lectura-de-d1-se-juzga-antes-de-leer-orden-por-o: backlog  # v8.5 (Héctor, 2026-10-31): espina AD-14; llega con la épica ya en vivo, cómo entra en la principal lo decide Héctor
+  23-13-la-cuota-de-lectura-de-d1-se-juzga-antes-de-leer-orden-por-o: review  # v8-23-13 2026-10-31: las tres órdenes juzgan la cuota de lectura antes de leer, con un solo juez (tools/lib/medicion.ts); pendiente de Héctor: cotejar rows_read_24h con la medida (--remote); # v8.5 (Héctor, 2026-10-31): espina AD-14; llega con la épica ya en vivo, cómo entra en la principal lo decide Héctor
   epic-23-retrospective: done
 
   # Épicas 24 y 26 — una sola rama y un solo merge, por SM-11. La 24.8 se construye antes que la 26.1.

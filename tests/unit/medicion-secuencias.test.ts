@@ -19,7 +19,13 @@ import {
   SQL_DE_RECUENTOS,
   SQL_DE_TABLA_DE_MIGRACIONES,
   CONSULTAS_DE_LA_LECTURA,
+  NINGUNA_CONSULTA_CON_FORMA,
+  RECORRIDOS_DEL_BARAJADO,
   argumentosDeMigracion,
+  recorridosDeComprobar,
+  recorridosDeDesplegar,
+  recorridosDeLaLectura,
+  vecesQueRecorre,
   columnasDeLaMigracion,
   consultasDeLaLectura,
   leer,
@@ -33,8 +39,10 @@ import {
   type Columna,
   type Efectos,
   type Migracion,
+  type Recorrido,
   type VocabularioDeHuella,
 } from '../../tools/lib/medicion.ts';
+import { CUOTA_DE_FILAS_LEIDAS_POR_DIA_EN_D1 } from '../../src/lib/umbrales.ts';
 
 /**
  * Historia 23.2 — las secuencias de `npm run medicion`, con efectos de mentira (AD-22).
@@ -114,6 +122,12 @@ interface Opciones {
   escritas24h?: number;
   /** Lo escrito en 24 h que contesta `d1 info` desde que se envían las balizas. */
   escritas24hTrasLasBalizas?: number;
+  /** Lo leído en 24 h que contesta `d1 info` (Historia 23.13). */
+  leidas24h?: number;
+  /** Lo leído en 24 h que contesta `d1 info` desde que se envían las balizas. */
+  leidas24hTrasLasBalizas?: number;
+  /** `d1 info` contesta sin `rows_read_24h`, como cuando su consulta de GraphQL falla. */
+  sinLeidas24h?: boolean;
   /** `d1 info` sale con error y sin JSON. */
   informacionRota?: boolean;
   /** `SELECT COUNT(*)` contesta una fila sin número. */
@@ -158,10 +172,18 @@ function mundo(opciones: Opciones = {}) {
   }
 
   const nombres = () => estado.columnas.map((c) => c.nombre);
-  const responder = (filas: unknown[]) => ({ codigo: 0, stdout: JSON.stringify([{ results: filas, success: true }]), stderr: '' });
+  // Como D1: cada respuesta dice las filas que leyó. Una sentencia sobre `eventos` la recorre entera
+  // —no hay índice por `ruta`—; las del esquema leen una.
+  let leidasPorLaSentencia = 0;
+  const responder = (filas: unknown[]) => ({
+    codigo: 0,
+    stdout: JSON.stringify([{ results: filas, success: true, meta: { rows_read: leidasPorLaSentencia } }]),
+    stderr: '',
+  });
   const fallar = (texto: string) => ({ codigo: 1, stdout: JSON.stringify({ error: { text: texto } }), stderr: `✘ [ERROR] ${texto}` });
 
   function ejecutar(sql: string) {
+    leidasPorLaSentencia = recorreLaTabla(sql) ? estado.filas.length : 1;
     for (const [i, fallo] of (opciones.fallos ?? []).entries()) {
       if (!fallo.sql(sql)) continue;
       const vez = (vecesDe.get(i) ?? 0) + 1;
@@ -212,11 +234,19 @@ function mundo(opciones: Opciones = {}) {
       if (argumentos.join(' ') === ARGUMENTOS_DE_INFORMACION.join(' ')) {
         llamadas.push('informacion');
         if (opciones.informacionRota) return { codigo: 1, stdout: '', stderr: '✘ [ERROR] Authentication error [code: 10000]' };
+        const enviadas = llamadas.includes('enviar');
         const escritas =
-          llamadas.includes('enviar') && opciones.escritas24hTrasLasBalizas !== undefined
+          enviadas && opciones.escritas24hTrasLasBalizas !== undefined
             ? opciones.escritas24hTrasLasBalizas
             : (opciones.escritas24h ?? 1_000);
-        return { codigo: 0, stdout: JSON.stringify({ rows_written_24h: escritas }), stderr: '' };
+        const leidas =
+          enviadas && opciones.leidas24hTrasLasBalizas !== undefined
+            ? opciones.leidas24hTrasLasBalizas
+            : (opciones.leidas24h ?? 10_000);
+        const informacion = opciones.sinLeidas24h
+          ? { rows_written_24h: escritas }
+          : { rows_written_24h: escritas, rows_read_24h: leidas };
+        return { codigo: 0, stdout: JSON.stringify(informacion), stderr: '' };
       }
       if (argumentos[0] === 'd1' && argumentos[1] === 'execute') {
         const sql = argumentos[argumentos.length - 1];
@@ -311,12 +341,40 @@ async function paradaDe(promesa: Promise<void>): Promise<Parada | undefined> {
   }
 }
 
+/** Si una sentencia recorre la tabla `eventos`: la lee, la reescribe o borra en ella. El esquema no. */
+function recorreLaTabla(sql: string): boolean {
+  return /\b(FROM|UPDATE)\s+eventos\b/i.test(sql) && !/^\s*PRAGMA\b/i.test(sql);
+}
+
+/** Las sentencias que recorren la tabla, en el orden en que se enviaron. */
+const recorridosEnviados = (llamadas: readonly string[]) =>
+  llamadas
+    .filter((l) => l.startsWith('consulta '))
+    .map((l) => l.replace(/^consulta --(remote|local) /, ''))
+    .filter(recorreLaTabla);
+
+/**
+ * Lo enviado que la lista de la orden no declara, o que envía más veces de las declaradas. Vacío si
+ * la lista lo cubre: una sentencia nueva que recorra la tabla sin entrar en su lista falla aquí.
+ */
+function sinDeclarar(enviadas: readonly string[], recorridos: readonly Recorrido[]): string[] {
+  const declaradas = new Map<string, number>();
+  for (const { sql, veces } of recorridos) declaradas.set(sql, (declaradas.get(sql) ?? 0) + veces);
+  const veces = new Map<string, number>();
+  for (const sql of enviadas) veces.set(sql, (veces.get(sql) ?? 0) + 1);
+  return [...veces].flatMap(([sql, n]) => {
+    const declarada = declaradas.get(sql);
+    if (declarada === undefined) return [`sin declarar: ${sql}`];
+    return n > declarada ? [`${n} veces y declarada ${declarada}: ${sql}`] : [];
+  });
+}
+
 const huellaDeLaRama = () => componerHuella({ escritaEl: '2026-10-24', commit: 'a'.repeat(40), vocabulario: huellaDelVocabulario() });
 const balizasQueQuedan = (filas: readonly Fila[]) => filas.filter((f) => f.ruta === RUTA_DE_COMPROBACION);
 const remotas = (llamadas: readonly string[]) => llamadas.filter((l) => l.startsWith('consulta '));
 
 describe('Historia 23.2 — desplegar, en su orden', () => {
-  it('sesión, árbol, cobertura, recuentos, cuota prevista, migrar, desplegar, balizas, cuota, barajar, recuentos y, al final, la huella', async () => {
+  it('sesión, árbol, cobertura, tabla, cuotas con el COUNT(*), recuentos, migrar, desplegar, balizas, cuotas, barajar, recuentos y, al final, la huella', async () => {
     const { efectos, estado, llamadas, dichos } = mundo();
     expect(await paradaDe(desplegar(efectos, URL_EN_VIVO))).toBeUndefined();
 
@@ -326,9 +384,10 @@ describe('Historia 23.2 — desplegar, en su orden', () => {
       'git status',
       'git rev-parse',
       'origin/main',
-      `consulta --remote ${SQL_DE_RECUENTOS}`,
       `consulta --remote ${SQL_DE_COLUMNAS}`,
       'informacion',
+      `consulta --remote ${SQL_DE_FILAS}`,
+      `consulta --remote ${SQL_DE_RECUENTOS}`,
       'migrar',
       'desplegar',
       'enviar',
@@ -337,8 +396,11 @@ describe('Historia 23.2 — desplegar, en su orden', () => {
     ].map(primera);
     expect(orden.every((i) => i >= 0), JSON.stringify(orden)).toBe(true);
     expect(orden).toEqual([...orden].sort((a, b) => a - b));
-    // La cuota se mira dos veces: antes de tocar nada y, tras las balizas, antes de barajar.
+    // La cuota se mira dos veces: antes de tocar nada y, tras las balizas, antes de barajar. Las
+    // filas de la tabla se cuentan una vez, la primera sentencia que la recorre (Historia 23.13).
     expect(llamadas.filter((l) => l === 'informacion')).toHaveLength(2);
+    expect(llamadas.filter((l) => l === `consulta --remote ${SQL_DE_FILAS}`)).toHaveLength(1);
+    expect(recorridosEnviados(llamadas)[0]).toBe(SQL_DE_FILAS);
     expect(llamadas.lastIndexOf('informacion')).toBeGreaterThan(llamadas.lastIndexOf('enviar'));
     expect(llamadas.lastIndexOf('informacion')).toBeLessThan(primera(`consulta --remote ${SQL_DE_BARAJADO}`));
     // La huella, lo último; y el segundo recuento, entre el barajado y ella.
@@ -366,6 +428,9 @@ describe('Historia 23.2 — desplegar, en su orden', () => {
     // Los dos instantes de Time Travel se dicen al pasar, por si la orden se corta a mitad.
     expect(dichos.join('\n')).toContain('Instante anterior a la migración');
     expect(dichos.join('\n')).toContain('Instante anterior al barajado');
+    // Las dos cuotas, dichas; y, al final, lo leído medido frente a lo estimado.
+    expect(dichos.join('\n')).toContain('La lectura de la tabla cabe: leer la tabla cuesta unas 55 filas');
+    expect(dichos.join('\n')).toMatch(/Filas leídas por esta orden: \d+ medidas \(suma de los rows_read de \d+ sentencias\)/);
   });
 
   it('sin sesión de wrangler: 2, sin nada más', async () => {
@@ -505,7 +570,98 @@ describe('Historia 23.2 — desplegar, en su orden', () => {
     for (const prohibida of ['migrar', 'desplegar', 'enviar', `consulta --remote ${SQL_DE_BARAJADO}`]) {
       expect(llamadas).not.toContain(prohibida);
     }
+    // De la tabla, solo el COUNT(*) que da N.
+    expect(recorridosEnviados(llamadas)).toEqual([SQL_DE_FILAS]);
     expect(estado.huellaEscrita).toBeUndefined();
+  });
+
+  describe('Historia 23.13 — la cuota de lectura, juzgada dos veces', () => {
+    const LECTURA = CUOTA_DE_FILAS_LEIDAS_POR_DIA_EN_D1;
+    /** Lo prohibido sin cupo: nada aplicado, ninguna baliza, ningún barajado ni huella. */
+    const sinTocarNada = (llamadas: readonly string[], estado: { huellaEscrita?: string }) => {
+      for (const prohibida of ['migrar', 'desplegar', 'enviar', 'escribir la huella']) expect(llamadas).not.toContain(prohibida);
+      expect(estado.huellaEscrita).toBeUndefined();
+    };
+
+    it('la lectura no cabe por la reserva: 1 tras el COUNT(*), sin otra fila, sin migrar ni desplegar', async () => {
+      // 5 filas × 11 recorridos = 55; con 2 · (cuota/2 − 20) = cuota − 40 ya no caben.
+      const { efectos, estado, llamadas } = mundo({ leidas24h: LECTURA / 2 - 20 });
+      const parada = await paradaDe(desplegar(efectos, URL_EN_VIVO));
+      expect(parada?.codigo).toBe(1);
+      expect(parada?.message).toMatch(/^No se migra ni se despliega: La lectura de la tabla no cabe hoy: leer la tabla cuesta unas 55 filas/);
+      expect(parada?.message).toContain(`de la cuota de ${LECTURA} filas leídas al día van ${LECTURA / 2 - 20} en las últimas 24 h`);
+      expect(parada?.message).toContain(`y otras ${LECTURA / 2 - 20} se dejan para el resto del día`);
+      expect(parada?.message).toContain('estimación y cota inferior: 5 filas × 11 recorridos');
+      expect(parada?.message).toContain('repite `npm run medicion -- desplegar` otro día');
+      expect(parada?.message).toContain('No se aplicó nada en remoto.');
+      expect(recorridosEnviados(llamadas)).toEqual([SQL_DE_FILAS]);
+      sinTocarNada(llamadas, estado);
+    });
+
+    it('lo leído en 24 h ya en la cuota: 1 sin el COUNT(*) siquiera', async () => {
+      const { efectos, estado, llamadas } = mundo({ leidas24h: LECTURA });
+      const parada = await paradaDe(desplegar(efectos, URL_EN_VIVO));
+      expect(parada?.codigo).toBe(1);
+      expect(parada?.message).toContain('La cuota de lectura está agotada hoy');
+      expect(recorridosEnviados(llamadas)).toEqual([]);
+      sinTocarNada(llamadas, estado);
+    });
+
+    it('d1 info sin rows_read_24h: 1 antes de leer ninguna fila de la tabla', async () => {
+      const { efectos, estado, llamadas } = mundo({ sinLeidas24h: true });
+      const parada = await paradaDe(desplegar(efectos, URL_EN_VIVO));
+      expect(parada?.codigo).toBe(1);
+      expect(parada?.message).toContain('No se juzga la cuota de lectura: d1 info no trae rows_read_24h');
+      expect(parada?.message).toContain('no se lee ninguna fila de la tabla');
+      expect(recorridosEnviados(llamadas)).toEqual([]);
+      sinTocarNada(llamadas, estado);
+    });
+
+    it('la escritura y la lectura se juzgan juntas, y se dicen las dos', async () => {
+      const { efectos } = mundo({ escritas24h: 50_000, leidas24h: LECTURA / 2 - 20 });
+      const parada = await paradaDe(desplegar(efectos, URL_EN_VIVO));
+      expect(parada?.message).toContain('El barajado no cabe hoy');
+      expect(parada?.message).toContain('La lectura de la tabla no cabe hoy');
+    });
+
+    it('el segundo juicio cuenta lo que la orden ya leyó aunque d1 info no lo vea: sin barajar ni huella', async () => {
+      // Antes de migrar caben (2 · (cuota/2 − 30) + 55 ≤ cuota); tras las balizas d1 info dice lo
+      // mismo, pero la orden ya leyó varios cientos de filas, y el barajado y los recuentos ya no caben.
+      const { efectos, estado, llamadas } = mundo({ leidas24h: LECTURA / 2 - 30, leidas24hTrasLasBalizas: LECTURA / 2 - 30 });
+      const parada = await paradaDe(desplegar(efectos, URL_EN_VIVO));
+      expect(parada?.codigo).toBe(1);
+      expect(parada?.message).toMatch(/^La lectura de la tabla no cabe hoy: leer la tabla cuesta unas 10 filas/);
+      expect(parada?.message).toMatch(/contadas unas \d+ que esta orden ya leyó, que d1 info puede no ver todavía/);
+      expect(parada?.message).toContain('No se baraja ni se escribe la huella.');
+      expect(parada?.message).toContain('Quedó aplicado, en este orden: las migraciones en remoto; el receptor desplegado');
+      expect(llamadas).toContain('desplegar');
+      expect(llamadas).not.toContain(`consulta --remote ${SQL_DE_BARAJADO}`);
+      expect(estado.huellaEscrita).toBeUndefined();
+    });
+
+    it('el segundo juicio toma lo que diga d1 info si es más: sin barajar ni huella', async () => {
+      const { efectos, estado, llamadas } = mundo({ leidas24h: 1_000, leidas24hTrasLasBalizas: LECTURA / 2 });
+      const parada = await paradaDe(desplegar(efectos, URL_EN_VIVO));
+      expect(parada?.message).toContain(`van ${LECTURA / 2} en las últimas 24 h`);
+      // d1 info ya lo ve: no se dice que se cuente lo leído por la orden.
+      expect(parada?.message).not.toContain('que esta orden ya leyó');
+      expect(llamadas).not.toContain(`consulta --remote ${SQL_DE_BARAJADO}`);
+      expect(estado.huellaEscrita).toBeUndefined();
+    });
+
+    it('sin rows_read_24h en el segundo d1 info: 1, sin barajar', async () => {
+      const { efectos, llamadas } = mundo();
+      const original = efectos.wrangler;
+      let veces = 0;
+      efectos.wrangler = async (argumentos) => {
+        const salida = await original(argumentos);
+        if (argumentos.join(' ') !== ARGUMENTOS_DE_INFORMACION.join(' ') || ++veces < 2) return salida;
+        return { ...salida, stdout: JSON.stringify({ rows_written_24h: 1_000 }) };
+      };
+      const parada = await paradaDe(desplegar(efectos, URL_EN_VIVO));
+      expect(parada?.message).toContain('No se juzga la cuota de lectura: d1 info no trae rows_read_24h');
+      expect(llamadas).not.toContain(`consulta --remote ${SQL_DE_BARAJADO}`);
+    });
   });
 
   it('con cuota antes de migrar y sin ella tras las balizas: 1 después de comprobar, sin barajar ni huella', async () => {
@@ -631,16 +787,44 @@ describe('Historia 23.2 — comprobar', () => {
     const { efectos } = desplegado({ sesion: false });
     expect((await paradaDe(comprobar(efectos, URL_EN_VIVO)))?.codigo).toBe(2);
   });
+
+  it('la cuota de lectura, antes de la primera baliza: d1 info, el COUNT(*) y después las balizas', async () => {
+    const { efectos, llamadas, dichos } = desplegado();
+    expect(await paradaDe(comprobar(efectos, URL_EN_VIVO))).toBeUndefined();
+    const primera = (paso: string) => llamadas.findIndex((l) => l === paso || l.startsWith(paso));
+    expect(primera('informacion')).toBeLessThan(primera(`consulta --remote ${SQL_DE_FILAS}`));
+    expect(primera(`consulta --remote ${SQL_DE_FILAS}`)).toBeLessThan(primera('enviar'));
+    expect(recorridosEnviados(llamadas)[0]).toBe(SQL_DE_FILAS);
+    expect(dichos.join('\n')).toContain('La lectura de la tabla cabe: leer la tabla cuesta unas 40 filas');
+    expect(dichos.join('\n')).toMatch(/Filas leídas por esta orden: \d+ medidas/);
+  });
+
+  it.each([
+    ['no cabe por la reserva', { leidas24h: CUOTA_DE_FILAS_LEIDAS_POR_DIA_EN_D1 / 2 - 10 }, 'La lectura de la tabla no cabe hoy', [SQL_DE_FILAS]],
+    ['ya en la cuota', { leidas24h: CUOTA_DE_FILAS_LEIDAS_POR_DIA_EN_D1 + 1 }, 'La cuota de lectura está agotada hoy', []],
+    ['sin rows_read_24h', { sinLeidas24h: true }, 'd1 info no trae rows_read_24h', []],
+  ] as const)('sin cupo —%s—: 1 sin enviar ninguna baliza', async (_caso, opciones, motivo, recorridas) => {
+    const { efectos, estado, llamadas } = desplegado(opciones);
+    const parada = await paradaDe(comprobar(efectos, URL_EN_VIVO));
+    expect(parada?.codigo).toBe(1);
+    expect(parada?.message).toMatch(/^No se envía ninguna baliza: /);
+    expect(parada?.message).toContain(motivo);
+    expect(llamadas).not.toContain('enviar');
+    expect(recorridosEnviados(llamadas)).toEqual(recorridas);
+    expect(balizasQueQuedan(estado.filas)).toEqual([]);
+  });
 });
 
-describe('Historia 23.10 — leer, la secuencia de la lectura', () => {
+describe('Historias 23.10 y 23.13 — leer, la secuencia de la lectura', () => {
   const AHORA = new Date('2026-11-10T08:00:00.000Z');
   const SENTENCIAS = consultasDeLaLectura('2026-11-10');
+  const FILAS = 1_000;
 
   /**
    * Un mundo para la lectura: solo contesta `whoami`, `d1 execute` y `d1 info`. Todo otro efecto
    * —desplegar, migrar, git, balizas, la huella, el disco— lo apunta y lanza: la lectura no lo
-   * toca, y una llamada así rompería la prueba.
+   * toca, y una llamada así rompería la prueba. Cada consulta dice que leyó la tabla entera
+   * (`meta.rows_read`), y el `COUNT(*)` da `FILAS`.
    */
   function mundoDeLectura(
     opciones: {
@@ -650,6 +834,8 @@ describe('Historia 23.10 — leer, la secuencia de la lectura', () => {
       lanzan?: (sql: string) => boolean;
       informacion?: string;
       informacionLanza?: boolean;
+      leidas24h?: number;
+      sinMeta?: boolean;
       corpusRoto?: boolean;
     } = {},
   ) {
@@ -658,6 +844,7 @@ describe('Historia 23.10 — leer, la secuencia de la lectura', () => {
       llamadas.push(que);
       throw new Error(`la lectura no ${que}`);
     };
+    const meta = opciones.sinMeta ? {} : { meta: { rows_read: FILAS } };
     const efectos: Efectos = {
       async wrangler(argumentos) {
         if (argumentos.join(' ') === ARGUMENTOS_DE_SESION.join(' ')) {
@@ -669,7 +856,11 @@ describe('Historia 23.10 — leer, la secuencia de la lectura', () => {
           llamadas.push('informacion');
           if (opciones.informacionLanza) throw new Parada(1, 'npx no contestó en 300 s y se cortó.');
           return opciones.informacion === undefined
-            ? { codigo: 0, stdout: JSON.stringify({ rows_written_24h: 900, database_size: 4_000_000 }), stderr: '' }
+            ? {
+                codigo: 0,
+                stdout: JSON.stringify({ rows_written_24h: 900, rows_read_24h: opciones.leidas24h ?? 20_000, database_size: 4_000_000 }),
+                stderr: '',
+              }
             : { codigo: 1, stdout: opciones.informacion, stderr: '✘ [ERROR] Authentication error [code: 10000]' };
         }
         if (argumentos[0] === 'd1' && argumentos[1] === 'execute') {
@@ -679,7 +870,8 @@ describe('Historia 23.10 — leer, la secuencia de la lectura', () => {
           if (opciones.fallan?.(sql)) {
             return { codigo: 1, stdout: JSON.stringify({ error: { text: 'D1_ERROR: fallo de mentira' } }), stderr: '✘ [ERROR] D1_ERROR' };
           }
-          return { codigo: 0, stdout: JSON.stringify([{ results: [], success: true }]), stderr: '' };
+          const filas = sql === SQL_DE_FILAS ? [{ n: FILAS }] : [];
+          return { codigo: 0, stdout: JSON.stringify([{ results: filas, success: true, ...meta }]), stderr: '' };
         }
         llamadas.push(`wrangler ${argumentos.join(' ')}`);
         throw new Error(`la lectura no corre wrangler ${argumentos.join(' ')}`);
@@ -705,19 +897,41 @@ describe('Historia 23.10 — leer, la secuencia de la lectura', () => {
     return { efectos, llamadas, corpus };
   }
 
-  it('sesión, Corpus, las cinco consultas con --remote y d1 info; nada más', async () => {
+  it('sesión, Corpus, d1 info, el COUNT(*), el juicio y las cinco consultas con --remote; nada más', async () => {
     const { efectos, llamadas, corpus } = mundoDeLectura();
     const lectura = await leer(efectos, corpus);
+    // Todo lo local antes de nada remoto que lea filas; el COUNT(*), la primera que recorre la tabla.
     expect(llamadas).toEqual([
       'sesion',
       'corpus',
-      ...CONSULTAS_DE_LA_LECTURA.map((c) => `consulta --remote ${SENTENCIAS[c]}`),
       'informacion',
+      `consulta --remote ${SQL_DE_FILAS}`,
+      ...CONSULTAS_DE_LA_LECTURA.map((c) => `consulta --remote ${SENTENCIAS[c]}`),
     ]);
     expect(lectura.hoy).toBe('2026-11-10');
     expect(lectura.corpus).toEqual({ citas: [] });
-    for (const c of CONSULTAS_DE_LA_LECTURA) expect(lectura.consultas[c]).toEqual({ ok: true, filas: [] });
+    for (const c of CONSULTAS_DE_LA_LECTURA) expect(lectura.consultas[c]).toEqual({ ok: true, filas: [], leidas: FILAS });
     expect(lectura.cuota).toEqual({ escritas: { ok: true, valor: 900 }, tamaño: { ok: true, valor: 4_000_000 } });
+    // La estimación sale de la lista declarada, nunca de un literal; la medida, de los rows_read.
+    const recorridos = recorridosDeLaLectura('2026-11-10');
+    expect(lectura.gasto).toEqual({
+      leidas24h: 20_000,
+      filas: FILAS,
+      recorridos,
+      estimacion: FILAS * vecesQueRecorre(recorridos),
+      reserva: 20_000,
+      cuota: CUOTA_DE_FILAS_LEIDAS_POR_DIA_EN_D1,
+      medida: FILAS * (1 + CONSULTAS_DE_LA_LECTURA.length),
+      enviadas: 1 + CONSULTAS_DE_LA_LECTURA.length,
+      sinMedir: 0,
+    });
+  });
+
+  it('sin rows_read en las respuestas: la medida dice cuántas no lo trajeron', async () => {
+    const { efectos, corpus } = mundoDeLectura({ sinMeta: true });
+    const lectura = await leer(efectos, corpus);
+    expect(lectura.gasto.medida).toBe(0);
+    expect(lectura.gasto.sinMedir).toBe(1 + CONSULTAS_DE_LA_LECTURA.length);
   });
 
   it('sin sesión: 2, antes de leer el Corpus o consultar', async () => {
@@ -734,12 +948,46 @@ describe('Historia 23.10 — leer, la secuencia de la lectura', () => {
     expect(llamadas).toEqual(['sesion']);
   });
 
-  it('sin Corpus: 1, sin consultar', async () => {
+  it('sin Corpus: 1, sin nada remoto que lea filas', async () => {
     const { efectos, llamadas, corpus } = mundoDeLectura({ corpusRoto: true });
     const parada = await paradaDe(leer(efectos, corpus).then(() => undefined));
     expect(parada?.codigo).toBe(1);
     expect(parada?.message).toMatch(/No se pudo leer el Corpus: ENOENT/);
     expect(llamadas).toEqual(['sesion', 'corpus']);
+  });
+
+  it.each([
+    ['d1 info sin rows_read_24h', { informacion: '{}' }, 'No se juzga la cuota de lectura: d1 info no trae rows_read_24h (wrangler salió con 1'],
+    ['d1 info que no contesta JSON', { informacion: '' }, 'No se juzga la cuota de lectura: wrangler no contestó JSON (wrangler salió con 1'],
+    ['un wrangler que se corta en d1 info', { informacionLanza: true }, 'No se juzga la cuota de lectura: npx no contestó en 300 s y se cortó'],
+    ['lo leído en 24 h ya en la cuota', { leidas24h: CUOTA_DE_FILAS_LEIDAS_POR_DIA_EN_D1 }, 'La cuota de lectura está agotada hoy'],
+  ] as const)('%s: 1 antes de leer ninguna fila de la tabla, ni el COUNT(*)', async (_caso, opciones, motivo) => {
+    const { efectos, llamadas, corpus } = mundoDeLectura(opciones);
+    const parada = await paradaDe(leer(efectos, corpus).then(() => undefined));
+    expect(parada?.codigo).toBe(1);
+    expect(parada?.message).toMatch(/^No se lee: /);
+    expect(parada?.message).toContain(motivo);
+    expect(parada?.message).toContain('Consulta: no se ha escrito nada.');
+    expect(llamadas).toEqual(['sesion', 'corpus', 'informacion']);
+  });
+
+  it('la lectura no cabe por la reserva: 1 tras el COUNT(*), sin ninguna consulta', async () => {
+    // 1.000 filas × 6 recorridos = 6.000; con 2 · (cuota/2 − 2.000) = cuota − 4.000 ya no caben.
+    const { efectos, llamadas, corpus } = mundoDeLectura({ leidas24h: CUOTA_DE_FILAS_LEIDAS_POR_DIA_EN_D1 / 2 - 2_000 });
+    const parada = await paradaDe(leer(efectos, corpus).then(() => undefined));
+    expect(parada?.codigo).toBe(1);
+    expect(parada?.message).toContain('No se lee: La lectura de la tabla no cabe hoy: leer la tabla cuesta unas 6000 filas');
+    expect(parada?.message).toContain('repite `npm run medicion` otro día');
+    expect(llamadas).toEqual(['sesion', 'corpus', 'informacion', `consulta --remote ${SQL_DE_FILAS}`]);
+  });
+
+  it('un COUNT(*) que falla: 1, sin ninguna consulta', async () => {
+    const { efectos, llamadas, corpus } = mundoDeLectura({ fallan: (sql) => sql === SQL_DE_FILAS });
+    const parada = await paradaDe(leer(efectos, corpus).then(() => undefined));
+    expect(parada?.codigo).toBe(1);
+    expect(parada?.message).toContain('No se lee: No se pudo contar las filas: D1_ERROR: fallo de mentira');
+    expect(parada?.message).toContain('Consulta: no se ha escrito nada.');
+    expect(llamadas.at(-1)).toBe(`consulta --remote ${SQL_DE_FILAS}`);
   });
 
   it('una consulta que falla no para: va con su motivo y las demás se leen', async () => {
@@ -748,45 +996,99 @@ describe('Historia 23.10 — leer, la secuencia de la lectura', () => {
     expect(lectura.consultas.salidas.ok).toBe(false);
     if (!lectura.consultas.salidas.ok) expect(lectura.consultas.salidas.motivo).toMatch(/D1_ERROR: fallo de mentira/);
     expect(lectura.consultas.vistasYLecturas.ok).toBe(true);
+    // La que falló no trajo rows_read: cuenta como enviada y sin medir.
+    expect(lectura.gasto.sinMedir).toBe(1);
   });
 
   it('un wrangler que se corta en una consulta no se lleva lo leído: esa va a «Sin leer» y las demás se leen', async () => {
-    const { efectos, llamadas, corpus } = mundoDeLectura({ lanzan: (sql) => sql === SENTENCIAS.salidas, informacionLanza: true });
+    const { efectos, llamadas, corpus } = mundoDeLectura({ lanzan: (sql) => sql === SENTENCIAS.salidas });
     const lectura = await leer(efectos, corpus);
     expect(lectura.consultas.salidas).toEqual({ ok: false, motivo: 'npx no contestó en 300 s y se cortó.' });
     for (const c of CONSULTAS_DE_LA_LECTURA.filter((c) => c !== 'salidas')) expect(lectura.consultas[c].ok, c).toBe(true);
-    expect(lectura.cuota).toEqual({
-      escritas: { ok: false, motivo: 'npx no contestó en 300 s y se cortó.' },
-      tamaño: { ok: false, motivo: 'npx no contestó en 300 s y se cortó.' },
-    });
     // Siguió con las consultas de después de la que se cortó.
-    expect(llamadas.filter((l) => l.startsWith('consulta '))).toHaveLength(CONSULTAS_DE_LA_LECTURA.length);
+    expect(llamadas.filter((l) => l.startsWith('consulta ') && !l.endsWith(SQL_DE_FILAS))).toHaveLength(CONSULTAS_DE_LA_LECTURA.length);
   });
 
-  it('si wrangler se corta en todo, no leyó nada: 1', async () => {
-    const { efectos, corpus } = mundoDeLectura({ lanzan: () => true, informacionLanza: true });
+  it('si wrangler se corta en todas las consultas: ninguna con forma, 1', async () => {
+    const { efectos, corpus } = mundoDeLectura({ lanzan: (sql) => sql !== SQL_DE_FILAS });
     const parada = await paradaDe(leer(efectos, corpus).then(() => undefined));
     expect(parada?.codigo).toBe(1);
+    expect(parada?.message).toContain(NINGUNA_CONSULTA_CON_FORMA);
     expect(parada?.message).toContain('las acciones: npx no contestó en 300 s y se cortó.');
   });
 
-  it('con solo d1 info legible, lee: sale con 0', async () => {
-    const { efectos, corpus } = mundoDeLectura({ fallan: () => true });
-    const lectura = await leer(efectos, corpus);
-    expect(CONSULTAS_DE_LA_LECTURA.every((c) => !lectura.consultas[c].ok)).toBe(true);
-    expect(lectura.cuota.escritas.ok).toBe(true);
-  });
-
-  it('si no se lee nada —ni una consulta ni d1 info—: 1, nombrando cada cosa', async () => {
-    const { efectos, corpus } = mundoDeLectura({ fallan: () => true, informacion: '' });
+  it('si ninguna consulta se lee, sale con 1 aunque d1 info dé sus cifras', async () => {
+    const { efectos, corpus } = mundoDeLectura({ fallan: (sql) => sql !== SQL_DE_FILAS });
     const parada = await paradaDe(leer(efectos, corpus).then(() => undefined));
     expect(parada?.codigo).toBe(1);
-    expect(parada?.message).toContain('No se leyó nada de D1');
+    expect(parada?.message.split('\n')[0]).toBe(NINGUNA_CONSULTA_CON_FORMA);
     expect(parada?.message).toContain('las salidas internas: D1_ERROR: fallo de mentira');
-    expect(parada?.message).toMatch(/las filas escritas en 24 h: wrangler no contestó JSON \(wrangler salió con 1/);
     expect(parada?.message).toContain('Consulta: no se ha escrito nada.');
   });
 });
+
+describe('Historia 23.13 — toda sentencia que recorre la tabla está en la lista de su orden', () => {
+  /** Lo que exige de una pasada: que la lista cubra lo enviado y que el COUNT(*) vaya primero. */
+  const cubre = (llamadas: readonly string[], recorridos: readonly Recorrido[]) => {
+    const enviadas = recorridosEnviados(llamadas);
+    expect(enviadas.length).toBeGreaterThan(0);
+    expect(enviadas[0]).toBe(SQL_DE_FILAS);
+    expect(sinDeclarar(enviadas, recorridos)).toEqual([]);
+  };
+  const vocabulario = huellaDelVocabulario();
+  const desplegado = (opciones: Opciones = {}) =>
+    mundo({ columnas: MIGRADAS, anotadas: MIGRACIONES.map((m) => m.nombre), enVivo: 'rama', huella: huellaDeLaRama(), ...opciones });
+
+  it('desplegar, de punta a punta y con los tres intentos de baliza', async () => {
+    const entero = mundo();
+    expect(await paradaDe(desplegar(entero.efectos, URL_EN_VIVO))).toBeUndefined();
+    cubre(entero.llamadas, recorridosDeDesplegar(vocabulario));
+    // El barajado y los recuentos de después, desde el segundo juicio: lo que este juzga.
+    const tras = entero.llamadas.slice(entero.llamadas.lastIndexOf('informacion'));
+    expect(recorridosEnviados(tras)).toEqual(RECORRIDOS_DEL_BARAJADO.map((r) => r.sql));
+
+    const tresIntentos = mundo({ migracionSinEfecto: true });
+    await paradaDe(desplegar(tresIntentos.efectos, URL_EN_VIVO));
+    cubre(tresIntentos.llamadas, recorridosDeDesplegar(vocabulario));
+    expect(recorridosEnviados(tresIntentos.llamadas)).toHaveLength(
+      vecesQueRecorre(recorridosDeDesplegar(vocabulario)) - vecesQueRecorre(RECORRIDOS_DEL_BARAJADO),
+    );
+  });
+
+  it('comprobar, de punta a punta y con los tres intentos de baliza', async () => {
+    const bien = desplegado();
+    expect(await paradaDe(comprobar(bien.efectos, URL_EN_VIVO))).toBeUndefined();
+    cubre(bien.llamadas, recorridosDeComprobar(vocabulario));
+
+    const tresIntentos = desplegado({ enVivo: 'v71' });
+    await paradaDe(comprobar(tresIntentos.efectos, URL_EN_VIVO));
+    cubre(tresIntentos.llamadas, recorridosDeComprobar(vocabulario));
+    expect(recorridosEnviados(tresIntentos.llamadas)).toHaveLength(vecesQueRecorre(recorridosDeComprobar(vocabulario)));
+  });
+
+  it('la lectura', async () => {
+    // El mismo D1 en memoria, con su `d1 info`: la lectura es solo de lectura.
+    // Su D1 no sabe contestar las cinco consultas: fallan, y la lectura sale con 1 tras enviarlas.
+    const { efectos, llamadas } = desplegado();
+    await paradaDe(leer(efectos, async () => ({})).then(() => undefined));
+    cubre(llamadas, recorridosDeLaLectura(jornadaDe(efectos)));
+    expect(recorridosEnviados(llamadas)).toHaveLength(vecesQueRecorre(recorridosDeLaLectura(jornadaDe(efectos))));
+  });
+
+  it('una sentencia que recorre la tabla sin estar en la lista hace fallar la prueba', async () => {
+    const { efectos, llamadas } = mundo();
+    await paradaDe(desplegar(efectos, URL_EN_VIVO));
+    const sinElBarajado = recorridosDeDesplegar(vocabulario).filter((r) => r.sql !== SQL_DE_BARAJADO);
+    expect(sinDeclarar(recorridosEnviados(llamadas), sinElBarajado)).toEqual([`sin declarar: ${SQL_DE_BARAJADO}`]);
+    const unBorradoMenos = recorridosDeDesplegar(vocabulario).map((r) => (r.sql === SQL_DE_BORRADO ? { ...r, veces: 1 } : r));
+    expect(sinDeclarar(recorridosEnviados(llamadas), unBorradoMenos)).toEqual([`2 veces y declarada 1: ${SQL_DE_BORRADO}`]);
+  });
+});
+
+/** La jornada UTC del reloj de un mundo, sin moverlo de más: la de la lectura que acaba de correr. */
+function jornadaDe(efectos: Efectos): string {
+  return efectos.ahora().toISOString().slice(0, 10);
+}
 
 describe('Historia 23.2 — ensayo, contra el receptor local', () => {
   /** El D1 local tal como lo deja `npm run medicion -- local`: migrado, con el receptor de la rama. */
