@@ -16,6 +16,11 @@
  * Lo que se hace con lo leído —descuentos, censo, tramos, tasas, líneas base y el informe— es de
  * `tools/lib/lineaBase.ts`, puro.
  *
+ * Desde la Historia 23.13, el juez de las dos cuotas de D1 que muerden a estas órdenes —la de
+ * escritura del barajado y la de lectura de las tres que recorren `eventos`— (`juzgarCuota`), y la
+ * lista declarada de lo que cada una recorre (`recorridosDeLaLectura`, `recorridosDeDesplegar`,
+ * `recorridosDeComprobar`), de la que sale su coste: ninguna orden escribe su propio juicio.
+ *
  * Ningún SQL de aquí ordena: el `rowid` es aleatorio (Historia 23.12) y solo lo nombran dos
  * sentencias, la lectura de las balizas de prueba, como texto, y el barajado. Ninguna otra lo
  * nombra, tampoco las de la lectura, y `tests/unit/orden-de-llegada.test.ts` lo vigila en todo
@@ -24,7 +29,7 @@
 
 import * as vocabularioDeLaRama from '../../src/lib/vocabulario.ts';
 import type { DeclaracionDeCampo } from '../../src/lib/vocabulario.ts';
-import { CUOTA_DE_FILAS_ESCRITAS_POR_DIA_EN_D1 } from '../../src/lib/umbrales.ts';
+import { CUOTA_DE_FILAS_ESCRITAS_POR_DIA_EN_D1, CUOTA_DE_FILAS_LEIDAS_POR_DIA_EN_D1 } from '../../src/lib/umbrales.ts';
 import { EVENTOS_DE_LA_V71, type Registro } from '../../medicion/receptor.ts';
 import { motivosDeArgumentosNoReconocidos } from './cli.ts';
 
@@ -217,7 +222,8 @@ export const FORMA_DE_JORNADA = /^\d{4}-\d{2}-\d{2}$/;
  * Las cinco sentencias de la lectura, todas de solo lectura y con la misma forma: los recuentos
  * agrupados de las jornadas **cerradas** —anteriores a `hoy`, en UTC— sin las balizas de prueba,
  * sin `ORDER BY` —se ordena en JavaScript— y sin nombrar el `rowid`. Cada una recorre la tabla una
- * vez, así que una lectura son cinco recorridos, que D1 cuenta contra su cuota de lectura.
+ * vez, y D1 cuenta lo leído contra su cuota de lectura: con el `COUNT(*)` que da N, son los
+ * recorridos que declara `recorridosDeLaLectura` (Historia 23.13).
  *
  * `hoy` se juzga antes de entrar en el SQL: otra cosa que una jornada lanza.
  */
@@ -353,11 +359,26 @@ export function leerSesion(salida: string): Sesion {
   }
 }
 
-export type Filas = { ok: true; filas: Record<string, unknown>[] } | { ok: false; motivo: string };
+/**
+ * Las filas de una consulta y, si D1 lo dice, las que leyó para darlas (`meta.rows_read`, Historia
+ * 23.13): la medida de lo gastado, que la estimación de la cuota de lectura no sustituye.
+ */
+export type Filas = { ok: true; filas: Record<string, unknown>[]; leidas?: number } | { ok: false; motivo: string };
+
+/** Las filas leídas que dice `meta.rows_read`, sumadas; `undefined` si alguna respuesta no lo trae. */
+function filasLeidasDe(respuestas: readonly unknown[]): number | undefined {
+  let suma = 0;
+  for (const respuesta of respuestas) {
+    const leidas = (respuesta as { meta?: { rows_read?: unknown } } | null)?.meta?.rows_read;
+    if (typeof leidas !== 'number' || !Number.isFinite(leidas) || leidas < 0) return undefined;
+    suma += leidas;
+  }
+  return respuestas.length === 0 ? undefined : suma;
+}
 
 /**
- * `d1 execute --json` de una sola sentencia: `[{ results: [...], success: true }]`; si falla,
- * `{ error: { text } }`.
+ * `d1 execute --json` de una sola sentencia: `[{ results: [...], success: true, meta }]`; si falla,
+ * `{ error: { text } }`. De `meta.rows_read` salen las filas leídas, cuando D1 lo trae.
  */
 export function leerConsulta(salida: string): Filas {
   let dato: unknown;
@@ -374,7 +395,9 @@ export function leerConsulta(salida: string): Filas {
   if (ultimo === undefined || ultimo.success !== true || !Array.isArray(ultimo.results)) {
     return { ok: false, motivo: 'la consulta no salió bien.' };
   }
-  return { ok: true, filas: ultimo.results as Record<string, unknown>[] };
+  const filas = ultimo.results as Record<string, unknown>[];
+  const leidas = filasLeidasDe(dato);
+  return leidas === undefined ? { ok: true, filas } : { ok: true, filas, leidas };
 }
 
 export type Informacion = { ok: true; escritas24h: number; tamaño?: number } | { ok: false; motivo: string };
@@ -413,6 +436,23 @@ const cifraDe = (valor: unknown, nombre: string): Leido<number> =>
   typeof valor === 'number' && Number.isFinite(valor) && valor >= 0
     ? { ok: true, valor }
     : { ok: false, motivo: `d1 info no trae ${nombre}.` };
+
+/**
+ * `rows_read_24h` de `d1 info --json`: las filas leídas en las últimas 24 horas, por horas y solo
+ * de esta base (Historia 23.13). Es la precondición del juicio de la cuota de lectura: sin ella,
+ * ninguna orden lee una fila de la tabla. `causa` es lo que dijo `wrangler`, para el motivo.
+ */
+export function leerFilasLeidas24h(salida: string, causa = ''): Leido<number> {
+  let dato: unknown;
+  try {
+    dato = JSON.parse(salida);
+  } catch {
+    return { ok: false, motivo: `wrangler no contestó JSON${causa}.` };
+  }
+  const objeto = (typeof dato === 'object' && dato !== null && !Array.isArray(dato) ? dato : {}) as Record<string, unknown>;
+  const leido = cifraDe(objeto.rows_read_24h, 'rows_read_24h');
+  return leido.ok ? leido : { ok: false, motivo: `${leido.motivo.replace(/\.$/, '')}${causa}.` };
+}
 
 /**
  * `d1 info --json` para la lectura: las filas escritas en 24 h y el tamaño, **por separado** —la
@@ -1091,7 +1131,132 @@ export function rowidAleatorio(filas: readonly string[]): Orden {
   return 'aleatorio';
 }
 
-// ── La cuota y los recuentos ──────────────────────────────────────────────────────────────
+// ── Las cuotas de D1: un solo juez (Historia 23.13) ───────────────────────────────────────
+
+/** Las dos cuotas diarias de D1 que gastan las órdenes de aquí: la de filas escritas y la de leídas. */
+export type ClaseDeCuota = 'escritura' | 'lectura';
+
+/** Lo que se juzga de una cuota: lo usado en 24 h, lo que la orden va a gastar y la cuota. */
+export interface CuotaAJuzgar {
+  /**
+   * Lo gastado en las últimas 24 h, de `d1 info` —o lo que se sabe que va, si es más—, o por qué no
+   * se sabe. Sin ello no se juzga, y no cabe.
+   */
+  usado: Leido<number>;
+  /**
+   * Lo que la orden va a gastar. Sin él, el juicio previo al `COUNT(*)` que da las filas de la
+   * tabla: solo se mira que lo usado esté **bajo** la cuota.
+   */
+  coste?: number;
+  cuota: number;
+  /** De dónde sale el coste, delante de las cifras: `barajar N filas escribe unas C…`. */
+  detalle?: string;
+  /** Lo que lleva sumado lo usado, tras su cifra: `(contadas unas N de las balizas…)`. */
+  nota?: string;
+}
+
+/** Lo que dice el juez de una cuota. */
+export interface JuicioDeCuota {
+  clase: ClaseDeCuota;
+  cabe: boolean;
+  cuota: number;
+  usado?: number;
+  coste?: number;
+  /** Lo que se deja para el resto del día: otro tanto de lo usado. */
+  reserva?: number;
+  /** Lo que queda tras lo usado y la reserva. */
+  disponible?: number;
+  /** Las cifras del juicio, o por qué no se pudo juzgar. */
+  cifras: string;
+  /** Por qué no se juzgó: lo usado no se sabe. */
+  falta?: string;
+}
+
+const NOMBRE_DE_LA_CUOTA: {
+  readonly [C in ClaseDeCuota]: { filas: string; resto: string; verbo: string };
+} = {
+  escritura: { filas: 'escritas', resto: 'lo que el sitio escriba hasta las 00:00 UTC', verbo: 'escriba' },
+  lectura: { filas: 'leídas', resto: 'el resto del día, hasta las 00:00 UTC', verbo: 'lea' },
+};
+
+/**
+ * **El juez de las cuotas de D1** — AD-13, AD-14, AD-22, Historia 23.13. El único: la escritura del
+ * barajado y la lectura de las tres órdenes que recorren `eventos` pasan por aquí, y ninguna orden
+ * escribe su propio juicio. Puro: no lee nada, recibe las cifras.
+ *
+ * Cabe si lo usado en 24 h, **otro tanto de reserva** para el resto del día y el coste caben en la
+ * cuota. La reserva existe porque pasada la cuota D1 rechaza lo que venga hasta las 00:00 UTC: la
+ * de escritura, cada `INSERT` del receptor, que el Worker calla; la de lectura, las consultas, y
+ * quizá también los `INSERT` (sin confirmar). Las dos son **de la cuenta**: lo que gaste hoy otra
+ * base D1 de la cuenta no se ve en `d1 info`, y las cifras lo dicen.
+ *
+ * Sin `coste`, es el juicio previo al `COUNT(*)` que da las filas de la tabla: cabe si lo usado está
+ * por debajo de la cuota. Sin lo usado no cabe: no se sabe.
+ */
+export function juzgarCuota(clase: ClaseDeCuota, datos: CuotaAJuzgar): JuicioDeCuota {
+  const { cuota } = datos;
+  const nombre = NOMBRE_DE_LA_CUOTA[clase];
+  const deLaCuenta = `la cuota es de la cuenta: lo que ${nombre.verbo} hoy otra base D1 suya no está contado`;
+  if (!datos.usado.ok) {
+    return { clase, cabe: false, cuota, falta: datos.usado.motivo, cifras: datos.usado.motivo };
+  }
+  const usado = datos.usado.valor;
+  const nota = datos.nota ?? '';
+  if (datos.coste === undefined) {
+    return {
+      clase,
+      cabe: usado < cuota,
+      cuota,
+      usado,
+      cifras: `de la cuota de ${cuota} filas ${nombre.filas} al día van ${usado} en las últimas 24 h${nota} (${deLaCuenta})`,
+    };
+  }
+  const { coste } = datos;
+  const reserva = usado;
+  const disponible = Math.max(0, cuota - usado - reserva);
+  const detalle = datos.detalle === undefined ? `cuesta unas ${coste}` : datos.detalle;
+  return {
+    clase,
+    cabe: usado + reserva + coste <= cuota,
+    cuota,
+    usado,
+    coste,
+    reserva,
+    disponible,
+    cifras:
+      `${detalle}; de la cuota de ${cuota} filas ${nombre.filas} al día van ${usado} en las últimas 24 h${nota}, ` +
+      `y otras ${reserva} se dejan para ${nombre.resto} (${deLaCuenta})`,
+  };
+}
+
+/**
+ * Lo que una orden dice de un juicio: si cabe, o por qué no y que se repite otro día, sin trocear.
+ * `repetir` es la orden que se repite.
+ */
+export function textoDeCuota(juicio: JuicioDeCuota, repetir: string): string {
+  const otroDia = `repite \`${repetir}\` otro día.`;
+  if (juicio.falta !== undefined) {
+    return juicio.clase === 'lectura'
+      ? `No se juzga la cuota de lectura: ${juicio.falta.replace(/\.$/, '')}. Sin esa cifra no se sabe si cabe, así ` +
+          'que no se lee ninguna fila de la tabla.'
+      : `No se juzga la cuota de escritura: ${juicio.falta.replace(/\.$/, '')}. Sin esa cifra no se sabe si cabe.`;
+  }
+  if (juicio.coste === undefined) {
+    return juicio.cabe
+      ? `Las filas ${NOMBRE_DE_LA_CUOTA[juicio.clase].filas} en 24 h están bajo la cuota: ${juicio.cifras}.`
+      : `La cuota de ${juicio.clase} está agotada hoy: ${juicio.cifras}. ` +
+          `${juicio.clase === 'lectura' ? 'No se lee ninguna fila de la tabla' : 'No se escribe nada'}: ${otroDia}`;
+  }
+  if (juicio.clase === 'escritura') {
+    return juicio.cabe
+      ? `El barajado cabe: ${juicio.cifras}.`
+      : `El barajado no cabe hoy: ${juicio.cifras}, así que quedan ${juicio.disponible}. No se baraja ni se trocea: ${otroDia}`;
+  }
+  return juicio.cabe
+    ? `La lectura de la tabla cabe: ${juicio.cifras}.`
+    : `La lectura de la tabla no cabe hoy: ${juicio.cifras}, así que quedan ${juicio.disponible}. No se lee más ni se ` +
+        `trocea: ${otroDia}`;
+}
 
 export interface Barajado {
   cabe: boolean;
@@ -1103,50 +1268,128 @@ export interface Barajado {
 }
 
 /**
- * Si barajar cabe en lo que queda de la cuota de escritura del día (AD-13): unas tres filas
- * escritas por fila. Si no cabe, no se baraja ni se trocea: se repite otro día.
- *
- * **Con reserva para el resto de la jornada.** Pasada la cuota, D1 rechaza toda escritura hasta
- * las 00:00 UTC y el Worker calla el rechazo: cada evento de lo que quede del día se perdería
- * en silencio, y se leería después como un cero. Por eso no basta con que el barajado quepa
- * justo: se reserva para el sitio otro tanto de lo escrito en las últimas 24 h —un día entero
- * de tráfico, más de lo que puede quedar del de hoy—. La cuota es **de la cuenta**: lo que
- * escriba hoy otra base D1 de la misma cuenta no se ve aquí, y el mensaje lo dice.
- *
- * `escritas24h` ya trae contadas las escrituras de las balizas de esta orden —`balizas`, que
- * solo dice cuántas son en el mensaje—: `d1 info` puede no verlas todavía, y `desplegar` las suma
- * antes de llamar (`escriturasDeLasBalizas`).
+ * Lo que se juzga de la cuota de escritura antes de barajar (AD-13): unas tres filas escritas por
+ * fila. `escritas24h` ya trae contadas las escrituras de las balizas de esta orden —`balizas`, que
+ * solo dice cuántas son—: `d1 info` puede no verlas todavía, y `desplegar` las suma antes de llamar
+ * (`escriturasDeLasBalizas`).
  */
-export function cabeElBarajado(datos: {
-  filas: number;
-  escritas24h: number;
-  cuota: number;
-  balizas?: number;
-}): Barajado {
+export function cuotaDelBarajado(datos: { filas: number; escritas24h: number; cuota: number; balizas?: number }): CuotaAJuzgar {
   const coste = datos.filas * FILAS_ESCRITAS_POR_FILA_BARAJADA;
-  const reserva = datos.escritas24h;
-  const disponible = Math.max(0, datos.cuota - datos.escritas24h - reserva);
-  const cabe = datos.escritas24h + reserva + coste <= datos.cuota;
-  const conBalizas =
-    datos.balizas !== undefined && datos.balizas > 0
-      ? ` (contadas unas ${datos.balizas} de las balizas de esta orden)`
-      : '';
-  const cifras =
-    `barajar ${datos.filas} filas escribe unas ${coste} (${FILAS_ESCRITAS_POR_FILA_BARAJADA} por fila); ` +
-    `de la cuota de ${datos.cuota} filas escritas al día van ${datos.escritas24h} en las últimas 24 h${conBalizas}, ` +
-    `y otras ${reserva} se dejan para lo que el sitio escriba hasta las 00:00 UTC ` +
-    '(la cuota es de la cuenta: lo que escriba hoy otra base D1 suya no está contado)';
   return {
-    cabe,
+    usado: { ok: true, valor: datos.escritas24h },
     coste,
-    reserva,
-    disponible,
-    mensaje: cabe
-      ? `El barajado cabe: ${cifras}.`
-      : `El barajado no cabe hoy: ${cifras}, así que quedan ${disponible}. No se baraja ni se trocea: ` +
-        'repite `npm run medicion -- desplegar` otro día.',
+    cuota: datos.cuota,
+    detalle: `barajar ${datos.filas} filas escribe unas ${coste} (${FILAS_ESCRITAS_POR_FILA_BARAJADA} por fila)`,
+    nota:
+      datos.balizas !== undefined && datos.balizas > 0 ? ` (contadas unas ${datos.balizas} de las balizas de esta orden)` : '',
   };
 }
+
+/**
+ * Si barajar cabe en lo que queda de la cuota de escritura del día, con la reserva del resto de la
+ * jornada (AD-13), por el juez (`juzgarCuota`). Si no cabe, no se baraja ni se trocea: se repite
+ * otro día.
+ */
+export function cabeElBarajado(datos: { filas: number; escritas24h: number; cuota: number; balizas?: number }): Barajado {
+  const juicio = juzgarCuota('escritura', cuotaDelBarajado(datos));
+  return {
+    cabe: juicio.cabe,
+    coste: juicio.coste ?? 0,
+    reserva: juicio.reserva ?? 0,
+    disponible: juicio.disponible ?? 0,
+    mensaje: textoDeCuota(juicio, 'npm run medicion -- desplegar'),
+  };
+}
+
+// ── Lo que cada orden recorre (Historia 23.13) ────────────────────────────────────────────
+
+/**
+ * Una sentencia que recorre la tabla `eventos` entera, y cuántas veces la envía la orden como
+ * mucho. `eventos` no tiene índice por `ruta`, así que también la recorren las de las balizas.
+ */
+export interface Recorrido {
+  que: string;
+  sql: string;
+  veces: number;
+}
+
+/** El `COUNT(*)` que da N, las filas de la tabla: el primero, y el único antes del juicio. */
+export const RECORRIDO_DEL_RECUENTO_DE_FILAS: Recorrido = { que: 'el recuento de filas', sql: SQL_DE_FILAS, veces: 1 };
+
+/** Lo que recorre una comprobación con balizas: el borrado de cada intento y el del final, y su lectura. */
+export function recorridosDeLasBalizas(vocabulario: VocabularioDeHuella): Recorrido[] {
+  return [
+    { que: 'el borrado de las balizas', sql: SQL_DE_BORRADO, veces: INTENTOS_DE_COMPROBACION + 1 },
+    { que: 'la lectura de las balizas', sql: sqlDeLasBalizas(camposDe(vocabulario)), veces: INTENTOS_DE_COMPROBACION },
+  ];
+}
+
+/** Lo que `desplegar` recorre desde el segundo juicio: el barajado y los recuentos de después. */
+export const RECORRIDOS_DEL_BARAJADO: readonly Recorrido[] = [
+  { que: 'el barajado', sql: SQL_DE_BARAJADO, veces: 1 },
+  { que: 'los recuentos de después', sql: SQL_DE_RECUENTOS, veces: 1 },
+];
+
+/** Lo que recorre la lectura de la línea base: el recuento de filas y sus cinco consultas. */
+export function recorridosDeLaLectura(hoy: string): Recorrido[] {
+  const sentencias = consultasDeLaLectura(hoy);
+  return [
+    RECORRIDO_DEL_RECUENTO_DE_FILAS,
+    ...CONSULTAS_DE_LA_LECTURA.map((nombre) => ({ que: QUE_LEE[nombre], sql: sentencias[nombre], veces: 1 })),
+  ];
+}
+
+/** Lo que recorre `desplegar`, en su orden: recuento, recuentos de antes, balizas, barajado y recuentos de después. */
+export function recorridosDeDesplegar(vocabulario: VocabularioDeHuella): Recorrido[] {
+  return [
+    RECORRIDO_DEL_RECUENTO_DE_FILAS,
+    { que: 'los recuentos de antes', sql: SQL_DE_RECUENTOS, veces: 1 },
+    ...recorridosDeLasBalizas(vocabulario),
+    ...RECORRIDOS_DEL_BARAJADO,
+  ];
+}
+
+/** Lo que recorre `comprobar`: el recuento de filas y las balizas. */
+export function recorridosDeComprobar(vocabulario: VocabularioDeHuella): Recorrido[] {
+  return [RECORRIDO_DEL_RECUENTO_DE_FILAS, ...recorridosDeLasBalizas(vocabulario)];
+}
+
+/** Cuántas veces recorre la tabla una lista. */
+export function vecesQueRecorre(recorridos: readonly Recorrido[]): number {
+  return recorridos.reduce((suma, recorrido) => suma + recorrido.veces, 0);
+}
+
+/** Cómo se nombra una lista de recorridos en un mensaje. */
+export function textoDeRecorridos(recorridos: readonly Recorrido[]): string {
+  return recorridos.map((r) => (r.veces > 1 ? `${r.que} ×${r.veces}` : r.que)).join(', ');
+}
+
+/**
+ * Lo que se juzga de la cuota de lectura: **N × la lista declarada**, nunca un literal (AD-14). Es
+ * una estimación y una **cota inferior**: `rows_read` cuenta también las filas de índice que una
+ * consulta recorre, y mientras las balizas están en la tabla cada recorrido suyo lee también las
+ * suyas.
+ */
+export function cuotaDeLectura(datos: {
+  recorridos: readonly Recorrido[];
+  filas: number;
+  usado: Leido<number>;
+  nota?: string;
+}): CuotaAJuzgar {
+  const veces = vecesQueRecorre(datos.recorridos);
+  const coste = datos.filas * veces;
+  return {
+    usado: datos.usado,
+    coste,
+    cuota: CUOTA_DE_FILAS_LEIDAS_POR_DIA_EN_D1,
+    detalle:
+      `leer la tabla cuesta unas ${coste} filas (estimación y cota inferior: ${datos.filas} filas × ${veces} ` +
+      `recorridos —${textoDeRecorridos(datos.recorridos)}—; rows_read cuenta también los índices)`,
+    ...(datos.nota === undefined ? {} : { nota: datos.nota }),
+  };
+}
+
+// ── La cuota y los recuentos ──────────────────────────────────────────────────────────────
 
 /**
  * Lo que escriben como mucho las balizas de prueba de una comprobación: cada una se inserta y se
@@ -1363,10 +1606,47 @@ function causaDe(salida: Salida): string {
   return ` (wrangler salió con ${salida.codigo}${recorte === '' ? '' : `: ${recorte}`})`;
 }
 
-/** Una sentencia contra la base: sus filas, o una parada con lo que dijo D1 y `wrangler`. */
-async function consultar(efectos: Efectos, sql: string, base: Base, que: string): Promise<Record<string, unknown>[]> {
+/**
+ * Lo que una orden lleva leído de la tabla (Historia 23.13): sus recorridos declarados, las filas
+ * del `COUNT(*)` y, por cada sentencia de la lista que envía, la estimación —N— y la medida
+ * —`meta.rows_read`, si D1 lo trae—.
+ */
+interface Gasto {
+  recorridos: readonly Recorrido[];
+  filas: number;
+  enviadas: number;
+  estimado: number;
+  medido: number;
+  /** Las enviadas que no trajeron `rows_read`: la medida se queda corta por ellas. */
+  sinMedir: number;
+}
+
+/** Apunta una sentencia enviada, si recorre la tabla según la lista de la orden. */
+function apuntar(gasto: Gasto | undefined, sql: string, leidas: number | undefined): void {
+  if (gasto === undefined || !gasto.recorridos.some((recorrido) => recorrido.sql === sql)) return;
+  gasto.enviadas += 1;
+  gasto.estimado += gasto.filas;
+  if (leidas === undefined) gasto.sinMedir += 1;
+  else gasto.medido += leidas;
+}
+
+/** Lo que la orden ya gastó: el mayor de lo medido y lo estimado de lo enviado. */
+const gastado = (gasto: Gasto) => Math.max(gasto.medido, gasto.estimado);
+
+/**
+ * Una sentencia contra la base: sus filas, o una parada con lo que dijo D1 y `wrangler`. Con
+ * `gasto`, la apunta, también si falla: lo que leyó antes de fallar ya está gastado.
+ */
+async function consultar(
+  efectos: Efectos,
+  sql: string,
+  base: Base,
+  que: string,
+  gasto?: Gasto,
+): Promise<Record<string, unknown>[]> {
   const salida = await efectos.wrangler(argumentosDeConsulta(sql, base));
   const leido = leerConsulta(salida.stdout);
+  apuntar(gasto, sql, leido.ok ? leido.leidas : undefined);
   if (!leido.ok) throw new Parada(1, `No se pudo ${que}: ${leido.motivo}${causaDe(salida)}`);
   return leido.filas;
 }
@@ -1419,6 +1699,7 @@ export async function comprobarConBalizas(
   base: Base,
   vocabulario: VocabularioDeHuella,
   espera: number,
+  gasto?: Gasto,
 ): Promise<string[]> {
   const { balizas, esperadas, campos } = balizasDePrueba(vocabulario);
 
@@ -1427,7 +1708,7 @@ export async function comprobarConBalizas(
     let ningunaFila = false;
     for (let intento = 1; intento <= INTENTOS_DE_COMPROBACION; intento++) {
       if (intento > 1) await efectos.esperar(espera);
-      await consultar(efectos, SQL_DE_BORRADO, base, 'borrar las balizas de un intento anterior');
+      await consultar(efectos, SQL_DE_BORRADO, base, 'borrar las balizas de un intento anterior', gasto);
       // Lo que contestó el receptor a las que no recibieron un 204: un 301 o un 302 dice que la
       // dirección redirige —la baliza no la sigue, porque un POST redirigido llega como GET, que
       // el receptor contesta con 204 sin escribir nada—; `sin respuesta`, que no contestó a tiempo.
@@ -1439,7 +1720,7 @@ export async function comprobarConBalizas(
         rechazos.set(clave, (rechazos.get(clave) ?? 0) + 1);
       }
       const rechazadas = [...rechazos.values()].reduce((suma, n) => suma + n, 0);
-      const leidas = await consultar(efectos, sqlDeLasBalizas(campos), base, 'leer las balizas de prueba');
+      const leidas = await consultar(efectos, sqlDeLasBalizas(campos), base, 'leer las balizas de prueba', gasto);
       ningunaFila = leidas.length === 0;
       const cuales = [...rechazos].map(([clave, n]) => `${clave} ×${n}`).join(', ');
       diferencias = [
@@ -1477,7 +1758,7 @@ export async function comprobarConBalizas(
 
   let sinBorrar: string | undefined;
   try {
-    await consultar(efectos, SQL_DE_BORRADO, base, 'borrar las balizas de prueba');
+    await consultar(efectos, SQL_DE_BORRADO, base, 'borrar las balizas de prueba', gasto);
   } catch (error) {
     sinBorrar = (error as Error).message;
   }
@@ -1572,22 +1853,103 @@ async function estadoDeLaBase(efectos: Efectos, base: Base): Promise<EstadoDeLaT
   return estadoDeLaTabla(columnas, anotadas, await efectos.migraciones());
 }
 
-/** Las filas de la tabla, para el coste del barajado: un entero, o una parada que dice qué llegó. */
-async function contarFilas(efectos: Efectos, base: Base): Promise<number> {
-  const [fila] = await consultar(efectos, SQL_DE_FILAS, base, 'contar las filas');
+/**
+ * Las filas de la tabla —N, el coste del barajado y de cada recorrido— y las que leyó D1 para
+ * darlas: un entero, o una parada que dice qué llegó.
+ */
+async function contarFilasConMedida(efectos: Efectos, base: Base): Promise<{ filas: number; leidas?: number }> {
+  const salida = await efectos.wrangler(argumentosDeConsulta(SQL_DE_FILAS, base));
+  const leido = leerConsulta(salida.stdout);
+  if (!leido.ok) throw new Parada(1, `No se pudo contar las filas: ${leido.motivo}${causaDe(salida)}`);
+  const [fila] = leido.filas;
   const filas = Number(fila?.n);
   if (fila === undefined || fila.n === null || !Number.isSafeInteger(filas) || filas < 0) {
-    throw new Parada(1, `No se baraja: el recuento de filas no es un número (${JSON.stringify(fila ?? null)}).`);
+    throw new Parada(
+      1,
+      `No se juzga ninguna cuota: el recuento de filas no es un número (${JSON.stringify(fila ?? null)}).`,
+    );
   }
-  return filas;
+  return leido.leidas === undefined ? { filas } : { filas, leidas: leido.leidas };
 }
 
-/** Lo escrito en 24 h, de `d1 info --json`, y las filas de la tabla: lo que pide la cuota. */
-async function leerCuota(efectos: Efectos): Promise<{ escritas24h: number; filas: number }> {
+async function contarFilas(efectos: Efectos, base: Base): Promise<number> {
+  return (await contarFilasConMedida(efectos, base)).filas;
+}
+
+/** `d1 info --json`: lo que contesta `wrangler`, y la causa si salió distinto de 0. */
+async function pedirInformacion(efectos: Efectos): Promise<{ salida: Salida; causa: string }> {
   const salida = await efectos.wrangler(ARGUMENTOS_DE_INFORMACION);
+  return { salida, causa: salida.codigo === 0 ? '' : causaDe(salida) };
+}
+
+/**
+ * Lo escrito y lo leído en 24 h, de `d1 info --json`, para los juicios de `desplegar`. Sin lo
+ * escrito se para (no se sabe si el barajado cabe); lo leído va como venga, y lo juzga el juez.
+ */
+async function leerCuotasDeDesplegar(efectos: Efectos): Promise<{ escritas24h: number; leidas24h: Leido<number> }> {
+  const { salida, causa } = await pedirInformacion(efectos);
   const informacion = leerInformacion(salida.stdout);
   if (!informacion.ok) throw new Parada(1, `No se baraja: ${informacion.motivo}${causaDe(salida)}`);
-  return { escritas24h: informacion.escritas24h, filas: await contarFilas(efectos, 'remota') };
+  return { escritas24h: informacion.escritas24h, leidas24h: leerFilasLeidas24h(salida.stdout, causa) };
+}
+
+/**
+ * **El juicio de la cuota de lectura antes de leer** (AD-14, Historia 23.13), el mismo para las
+ * tres órdenes que recorren la tabla: con lo leído en 24 h —precondición: sin ello, ninguna fila—,
+ * el `COUNT(*)` que da N solo si está **bajo** la cuota, y el coste entero de la orden, N × su
+ * lista, con la reserva de otro tanto. Con `escritura`, juzga también la cuota de escritura, junta.
+ * Si algo no cabe, una parada con `prefijo` y cada juicio que no cabe: no se trocea, y se repite.
+ * El coste del `COUNT(*)` entra en la cuenta, porque es el primero de la lista.
+ */
+async function contarYJuzgar(
+  efectos: Efectos,
+  datos: {
+    leidas24h: Leido<number>;
+    recorridos: readonly Recorrido[];
+    repetir: string;
+    prefijo: string;
+    sufijo?: string;
+    escritura?: (filas: number) => CuotaAJuzgar;
+  },
+): Promise<{ filas: number; gasto: Gasto; juicios: JuicioDeCuota[] }> {
+  const parar = (juicios: readonly JuicioDeCuota[]) =>
+    new Parada(1, `${datos.prefijo}${juicios.map((j) => textoDeCuota(j, datos.repetir)).join('\n')}${datos.sufijo ?? ''}`);
+  const previo = juzgarCuota('lectura', { usado: datos.leidas24h, cuota: CUOTA_DE_FILAS_LEIDAS_POR_DIA_EN_D1 });
+  if (!previo.cabe) throw parar([previo]);
+
+  let contadas: { filas: number; leidas?: number };
+  try {
+    contadas = await contarFilasConMedida(efectos, 'remota');
+  } catch (error) {
+    if (error instanceof Parada) throw new Parada(error.codigo, `${datos.prefijo}${error.message}${datos.sufijo ?? ''}`);
+    throw error;
+  }
+  const { filas, leidas } = contadas;
+  const gasto: Gasto = {
+    recorridos: datos.recorridos,
+    filas,
+    enviadas: 1,
+    estimado: filas,
+    medido: leidas ?? 0,
+    sinMedir: leidas === undefined ? 1 : 0,
+  };
+  const juicios = [
+    ...(datos.escritura === undefined ? [] : [juzgarCuota('escritura', datos.escritura(filas))]),
+    juzgarCuota('lectura', cuotaDeLectura({ recorridos: datos.recorridos, filas, usado: datos.leidas24h })),
+  ];
+  const noCaben = juicios.filter((juicio) => !juicio.cabe);
+  if (noCaben.length > 0) throw parar(noCaben);
+  return { filas, gasto, juicios };
+}
+
+/** Lo que una orden dice, al terminar, de lo que leyó: la medida, aparte de la estimación. */
+function textoDelGasto(gasto: Gasto): string {
+  const sinMedir =
+    gasto.sinMedir > 0 ? `; ${gasto.sinMedir} no trajeron rows_read, y la medida se queda corta por ellas` : '';
+  return (
+    `Filas leídas por esta orden: ${gasto.medido} medidas (suma de los rows_read de ${gasto.enviadas} sentencias` +
+    `${sinMedir}), frente a una estimación de ${gasto.estimado} (${gasto.filas} filas por recorrido).`
+  );
 }
 
 /**
@@ -1617,14 +1979,22 @@ async function aplicar(
 
 /**
  * `npm run medicion -- desplegar`, en su orden, parando en el primer fallo con 1 y el parte de
- * lo aplicado (AD-14): sesión, árbol limpio, cobertura, recuentos, estado de la tabla y la cuota
- * prevista, migrar, desplegar, comprobar con balizas, `rowid`, cuota otra vez, barajar, recuentos
- * otra vez y, solo si todo eso salió, la huella. No reintenta migraciones ni despliegues, y no
- * hace commit.
+ * lo aplicado (AD-14): sesión, árbol limpio, cobertura, estado de la tabla, `d1 info`, el
+ * `COUNT(*)` que da N y **el primer juicio** —escritura del barajado y lectura de toda la orden,
+ * juntas—, recuentos, migrar, desplegar, comprobar con balizas, `rowid`, **el segundo juicio**,
+ * barajar, recuentos otra vez y, solo si todo eso salió, la huella. No reintenta migraciones ni
+ * despliegues, y no hace commit.
+ *
+ * El primer juicio va antes de migrar y de la primera sentencia que recorre la tabla salvo el
+ * `COUNT(*)`: si hoy no cabe, migrar y desplegar para pararse después no sirve de nada, y se repite
+ * otro día igual (AD-13, AD-14). El segundo, antes de barajar, juzga lo que falta con el mayor de
+ * dos valores —lo que diga `d1 info` y lo del primer juicio más lo que la orden ya gastó—, porque
+ * `d1 info` llega con retraso. El N es el del primero: no se vuelve a contar.
  */
 export async function desplegar(efectos: Efectos, url: string): Promise<void> {
   const aplicado: string[] = [];
   const instantes: Instantes = {};
+  const repetir = 'npm run medicion -- desplegar';
   try {
     await exigirSesion(efectos);
     await exigirArbolLimpio(efectos);
@@ -1632,7 +2002,7 @@ export async function desplegar(efectos: Efectos, url: string): Promise<void> {
     await exigirCobertura(efectos);
 
     const hoy = jornadaUtc(efectos.ahora());
-    const antes = recuentos(await consultar(efectos, SQL_DE_RECUENTOS, 'remota', 'contar las filas de antes'));
+    // El estado de la tabla no la recorre: lee su esquema y `d1_migrations`.
     const estado = await estadoDeLaBase(efectos, 'remota');
     if (estado.estado === 'otra') throw new Parada(1, `No se migra: ${estado.motivo}`);
     efectos.decir(
@@ -1640,18 +2010,23 @@ export async function desplegar(efectos: Efectos, url: string): Promise<void> {
         (estado.pendientes.length > 0 ? `; faltan ${estado.pendientes.join(', ')}.` : '; no falta ninguna migración.'),
     );
 
-    // La cuota, antes de tocar nada: si hoy el barajado no cabe, migrar y desplegar para pararse
-    // después no sirve de nada, y se repite otro día igual. Cuenta ya las balizas que se van a
-    // escribir. Se vuelve a mirar antes de barajar, con lo que haya escrito el sitio entretanto.
-    const balizas = escriturasDeLasBalizas(huellaDelVocabulario());
-    const previa = await leerCuota(efectos);
-    const previsto = cabeElBarajado({
-      filas: previa.filas,
-      escritas24h: previa.escritas24h + balizas,
-      cuota: CUOTA_DE_FILAS_ESCRITAS_POR_DIA_EN_D1,
-      balizas,
+    // Las cuotas, antes de tocar nada. La de escritura cuenta ya las balizas que se van a escribir.
+    const vocabulario = huellaDelVocabulario();
+    const balizas = escriturasDeLasBalizas(vocabulario);
+    const previa = await leerCuotasDeDesplegar(efectos);
+    const { filas, gasto, juicios } = await contarYJuzgar(efectos, {
+      leidas24h: previa.leidas24h,
+      recorridos: recorridosDeDesplegar(vocabulario),
+      repetir,
+      prefijo: 'No se migra ni se despliega: ',
+      escritura: (n) =>
+        cuotaDelBarajado({ filas: n, escritas24h: previa.escritas24h + balizas, cuota: CUOTA_DE_FILAS_ESCRITAS_POR_DIA_EN_D1, balizas }),
     });
-    if (!previsto.cabe) throw new Parada(1, `No se migra ni se despliega: ${previsto.mensaje}`);
+    for (const juicio of juicios) efectos.decir(textoDeCuota(juicio, repetir));
+    // Tras el juicio, lo leído en 24 h es un número: si no lo fuera, no habría cabido.
+    const leidasAntes = previa.leidas24h.ok ? previa.leidas24h.valor : 0;
+
+    const antes = recuentos(await consultar(efectos, SQL_DE_RECUENTOS, 'remota', 'contar las filas de antes', gasto));
 
     instantes.antesDeMigrar = efectos.ahora();
     efectos.decir(`Instante anterior a la migración: ${instantes.antesDeMigrar.toISOString()}.`);
@@ -1669,38 +2044,59 @@ export async function desplegar(efectos: Efectos, url: string): Promise<void> {
         `npx --yes ${WRANGLER} deployments list, en ${DIRECTORIO_DEL_RECEPTOR}/.`,
     });
 
-    const filasDePrueba = await comprobarConBalizas(
-      efectos,
-      url,
-      'remota',
-      huellaDelVocabulario(),
-      ESPERA_ENTRE_INTENTOS_EN_VIVO_MS,
-    );
+    const filasDePrueba = await comprobarConBalizas(efectos, url, 'remota', vocabulario, ESPERA_ENTRE_INTENTOS_EN_VIVO_MS, gasto);
     aplicado.push('la comprobación con balizas, ya borradas');
     exigirRowidAleatorio(filasDePrueba, 'Lo cierra el siguiente despliegue que pase la comprobación.');
 
-    // Lo escrito en 24 h, al menos lo de antes más las balizas: `d1 info` puede no verlas aún.
-    const actual = await leerCuota(efectos);
-    const barajado = cabeElBarajado({
-      filas: actual.filas,
-      escritas24h: Math.max(actual.escritas24h, previa.escritas24h + balizas),
-      cuota: CUOTA_DE_FILAS_ESCRITAS_POR_DIA_EN_D1,
-      balizas,
-    });
-    if (!barajado.cabe) throw new Parada(1, barajado.mensaje);
-    efectos.decir(barajado.mensaje);
+    // El segundo juicio. Lo escrito en 24 h, al menos lo de antes más las balizas, y lo leído, al
+    // menos lo de antes más lo que esta orden ya leyó: `d1 info` puede no verlo aún.
+    const actual = await leerCuotasDeDesplegar(efectos);
+    const yaLeido = gastado(gasto);
+    const conLoLeido = leidasAntes + yaLeido;
+    const segundos = [
+      juzgarCuota(
+        'escritura',
+        cuotaDelBarajado({
+          filas,
+          escritas24h: Math.max(actual.escritas24h, previa.escritas24h + balizas),
+          cuota: CUOTA_DE_FILAS_ESCRITAS_POR_DIA_EN_D1,
+          balizas,
+        }),
+      ),
+      juzgarCuota(
+        'lectura',
+        cuotaDeLectura({
+          recorridos: RECORRIDOS_DEL_BARAJADO,
+          filas,
+          usado: actual.leidas24h.ok ? { ok: true, valor: Math.max(actual.leidas24h.valor, conLoLeido) } : actual.leidas24h,
+          // La nota, solo cuando lo leído por la orden es lo que manda: si d1 info dice más, ya lo ve.
+          nota:
+            actual.leidas24h.ok && actual.leidas24h.valor >= conLoLeido
+              ? ''
+              : ` (contadas unas ${yaLeido} que esta orden ya leyó, que d1 info puede no ver todavía)`,
+        }),
+      ),
+    ];
+    const noCaben = segundos.filter((juicio) => !juicio.cabe);
+    if (noCaben.length > 0) {
+      throw new Parada(
+        1,
+        [...noCaben.map((juicio) => textoDeCuota(juicio, repetir)), 'No se baraja ni se escribe la huella.'].join('\n'),
+      );
+    }
+    for (const juicio of segundos) efectos.decir(textoDeCuota(juicio, repetir));
 
     instantes.antesDeBarajar = efectos.ahora();
     efectos.decir(`Instante anterior al barajado: ${instantes.antesDeBarajar.toISOString()}.`);
     try {
-      await consultar(efectos, SQL_DE_BARAJADO, 'remota', 'barajar el rowid');
+      await consultar(efectos, SQL_DE_BARAJADO, 'remota', 'barajar el rowid', gasto);
     } catch (error) {
       aplicado.push('quizá el barajado: wrangler no dijo que saliera bien, ni que no');
       throw error;
     }
     aplicado.push('el rowid barajado');
 
-    const despues = recuentos(await consultar(efectos, SQL_DE_RECUENTOS, 'remota', 'contar las filas de después'));
+    const despues = recuentos(await consultar(efectos, SQL_DE_RECUENTOS, 'remota', 'contar las filas de después', gasto));
     efectos.decir(informeDeRecuentos(antes, despues));
     const diferencias = compararRecuentos(antes, despues, hoy);
     if (diferencias.length > 0) {
@@ -1712,7 +2108,7 @@ export async function desplegar(efectos: Efectos, url: string): Promise<void> {
     );
     aplicado.push(`la huella escrita en ${RUTA_DE_LA_HUELLA}`);
     efectos.decir(
-      `${parteDeLoAplicado(aplicado)}\n` +
+      `${textoDelGasto(gasto)}\n${parteDeLoAplicado(aplicado)}\n` +
         `Commitea ${RUTA_DE_LA_HUELLA}: es lo que devuelve npm test a verde. El sitio se despliega después.`,
     );
   } catch (error) {
@@ -1727,6 +2123,10 @@ export async function desplegar(efectos: Efectos, url: string): Promise<void> {
  * `npm run medicion -- comprobar`: que el receptor en vivo guarda lo que dice la huella
  * versionada, descarta lo ajeno y numera al azar. No migra, no despliega, no baraja ni escribe
  * la huella; sí escribe y borra sus balizas en el D1 de producción.
+ *
+ * Antes de la primera baliza juzga su cuota de lectura (Historia 23.13): con `d1 info` y el
+ * `COUNT(*)` que da N, el coste de sus recorridos —cada intento de baliza recorre la tabla dos
+ * veces, y el borrado final una más—. Si no cabe, sale con 1 sin enviar ninguna.
  */
 export async function comprobar(efectos: Efectos, url: string): Promise<void> {
   await exigirSesion(efectos);
@@ -1737,9 +2137,25 @@ export async function comprobar(efectos: Efectos, url: string): Promise<void> {
       `No hay huella en ${RUTA_DE_LA_HUELLA}: la escribe npm run medicion -- desplegar (Historia 23.3).`,
     );
   }
+  const repetir = 'npm run medicion -- comprobar';
+  const { salida, causa } = await pedirInformacion(efectos);
+  const { gasto, juicios } = await contarYJuzgar(efectos, {
+    leidas24h: leerFilasLeidas24h(salida.stdout, causa),
+    recorridos: recorridosDeComprobar(huella.vocabulario),
+    repetir,
+    prefijo: 'No se envía ninguna baliza: ',
+  });
+  for (const juicio of juicios) efectos.decir(textoDeCuota(juicio, repetir));
   const cierre = 'La cierra repetir la 23.3: npm run medicion -- desplegar.';
   try {
-    const filas = await comprobarConBalizas(efectos, url, 'remota', huella.vocabulario, ESPERA_ENTRE_INTENTOS_EN_VIVO_MS);
+    const filas = await comprobarConBalizas(
+      efectos,
+      url,
+      'remota',
+      huella.vocabulario,
+      ESPERA_ENTRE_INTENTOS_EN_VIVO_MS,
+      gasto,
+    );
     exigirRowidAleatorio(filas, cierre);
   } catch (error) {
     if (error instanceof Parada && !error.message.includes(cierre)) {
@@ -1749,8 +2165,32 @@ export async function comprobar(efectos: Efectos, url: string): Promise<void> {
   }
   efectos.decir(
     `El receptor en vivo guarda cada evento y cada valor de la huella (${huella.commit}), descarta lo ajeno, ` +
-      'numera al azar y las balizas se borraron.',
+      `numera al azar y las balizas se borraron.\n${textoDelGasto(gasto)}`,
   );
+}
+
+/**
+ * Lo que la lectura gastó de la cuota de lectura, para el informe (Historia 23.13): lo leído en 24 h
+ * antes de leer, la estimación —N × los recorridos declarados— y la medida —la suma de los
+ * `rows_read` de lo enviado—, cada una por su lado.
+ */
+export interface GastoDeLaLectura {
+  /** `rows_read_24h` de `d1 info`, antes de leer. */
+  leidas24h: number;
+  /** N, las filas de la tabla, del `COUNT(*)`. */
+  filas: number;
+  recorridos: readonly Recorrido[];
+  /** N × los recorridos: una cota inferior. */
+  estimacion: number;
+  /** Lo que se dejó para el resto del día: otro tanto de lo leído en 24 h. */
+  reserva: number;
+  cuota: number;
+  /** La suma de los `rows_read` de las sentencias enviadas que lo trajeron. */
+  medida: number;
+  /** Cuántas sentencias de la lista se enviaron. */
+  enviadas: number;
+  /** Cuántas de ellas no trajeron `rows_read`. */
+  sinMedir: number;
 }
 
 /** Lo que trae la lectura de D1, sin tocar todavía: el informe lo compone `tools/lib/lineaBase.ts`. */
@@ -1762,16 +2202,23 @@ export interface LecturaCruda<C> {
   /** Cada consulta, con sus filas o con por qué no se leyó. */
   consultas: { readonly [Q in ConsultaDeLaLectura]: Filas };
   cuota: CuotaLeida;
+  gasto: GastoDeLaLectura;
 }
 
+/** El encabezado de la parada y del informe cuando ninguna consulta trae recuentos con forma. */
+export const NINGUNA_CONSULTA_CON_FORMA = 'Ninguna consulta con forma —ninguna trajo recuentos que se puedan leer—:';
+
 /**
- * `npm run medicion` sin subcomando: la lectura de la línea base (Historia 23.10, AD-14, AD-22).
+ * `npm run medicion` sin subcomando: la lectura de la línea base (Historias 23.10 y 23.13, AD-14,
+ * AD-22).
  *
  * Sesión de `wrangler` —sin ella, 2; ilegible, 1—, el Corpus —sin él no se sabe qué publica el
- * sitio, y sale con 1—, las cinco consultas con `--remote` y `d1 info`. **Solo lee**: no despliega,
- * no migra, no envía balizas ni toca git, la huella o el disco. Una consulta que falla no para: va
- * con su motivo, y el informe omite y nombra lo que dependía de ella. Si no se leyó nada —ni una
- * consulta ni ninguna cifra de `d1 info`—, sale con 1 nombrando cada cosa.
+ * sitio, y sale con 1—, **todo lo local antes de lo remoto que lee filas** (los umbrales los juzga
+ * la cáscara antes de llamar); después `d1 info`, cuyo `rows_read_24h` es precondición, el `COUNT(*)`
+ * que da N y el juicio de la cuota de lectura —N × sus recorridos declarados, con la reserva—, y solo si
+ * cabe las cinco consultas con `--remote`. **Solo lee**: no despliega, no migra, no envía balizas ni
+ * toca git, la huella o el disco. Una consulta que falla no para: va con su motivo, y el informe
+ * omite y nombra lo que dependía de ella. Si ninguna trae filas, sale con 1 nombrando cada una.
  */
 export async function leer<C>(efectos: Efectos, leerCorpus: () => Promise<C>): Promise<LecturaCruda<C>> {
   await exigirSesion(efectos);
@@ -1787,45 +2234,74 @@ export async function leer<C>(efectos: Efectos, leerCorpus: () => Promise<C>): P
   }
   const hoy = jornadaUtc(efectos.ahora());
   const sentencias = consultasDeLaLectura(hoy);
-  const consultas = {} as Record<ConsultaDeLaLectura, Filas>;
+  const recorridos = recorridosDeLaLectura(hoy);
   // Un `wrangler` que se corta —su tope de tiempo, más salida de la que cabe, un `npx` que no
   // arranca— es una consulta que falla, y no se lleva lo ya leído: va a «Sin leer» con su motivo.
   const mensajeDe = (error: unknown) => (error instanceof Error ? error.message : String(error));
+
+  let cuota: CuotaLeida;
+  let leidas24h: Leido<number>;
+  try {
+    const { salida, causa } = await pedirInformacion(efectos);
+    cuota = leerInformacionDeLaCuota(salida.stdout, causa);
+    leidas24h = leerFilasLeidas24h(salida.stdout, causa);
+  } catch (error) {
+    const motivo = mensajeDe(error);
+    cuota = { escritas: { ok: false, motivo }, tamaño: { ok: false, motivo } };
+    leidas24h = { ok: false, motivo };
+  }
+  const { filas, gasto } = await contarYJuzgar(efectos, {
+    leidas24h,
+    recorridos,
+    repetir: 'npm run medicion',
+    prefijo: 'No se lee: ',
+    sufijo: '\nConsulta: no se ha escrito nada.',
+  });
+
+  const consultas = {} as Record<ConsultaDeLaLectura, Filas>;
   for (const nombre of CONSULTAS_DE_LA_LECTURA) {
     let salida: Salida;
     try {
       salida = await efectos.wrangler(argumentosDeConsulta(sentencias[nombre], 'remota'));
     } catch (error) {
+      apuntar(gasto, sentencias[nombre], undefined);
       consultas[nombre] = { ok: false, motivo: mensajeDe(error) };
       continue;
     }
     const leido = leerConsulta(salida.stdout);
+    apuntar(gasto, sentencias[nombre], leido.ok ? leido.leidas : undefined);
     consultas[nombre] = leido.ok ? leido : { ok: false, motivo: `${leido.motivo}${causaDe(salida)}` };
   }
-  let cuota: CuotaLeida;
-  try {
-    const informacion = await efectos.wrangler(ARGUMENTOS_DE_INFORMACION);
-    cuota = leerInformacionDeLaCuota(informacion.stdout, informacion.codigo === 0 ? '' : causaDe(informacion));
-  } catch (error) {
-    const motivo = mensajeDe(error);
-    cuota = { escritas: { ok: false, motivo }, tamaño: { ok: false, motivo } };
-  }
 
-  const leidas = CONSULTAS_DE_LA_LECTURA.filter((nombre) => consultas[nombre].ok);
-  if (leidas.length === 0 && !cuota.escritas.ok && !cuota.tamaño.ok) {
-    const motivo = (leido: Filas | Leido<number>) => (leido.ok ? '' : leido.motivo);
+  if (CONSULTAS_DE_LA_LECTURA.every((nombre) => !consultas[nombre].ok)) {
+    const motivo = (leido: Filas) => (leido.ok ? '' : leido.motivo);
     throw new Parada(
       1,
       [
-        'No se leyó nada de D1:',
+        NINGUNA_CONSULTA_CON_FORMA,
         ...CONSULTAS_DE_LA_LECTURA.map((nombre) => `  ${QUE_LEE[nombre]}: ${motivo(consultas[nombre])}`),
-        `  las filas escritas en 24 h: ${motivo(cuota.escritas)}`,
-        `  el tamaño de la base: ${motivo(cuota.tamaño)}`,
         'Consulta: no se ha escrito nada.',
       ].join('\n'),
     );
   }
-  return { hoy, corpus, consultas, cuota };
+  const usadas = leidas24h.ok ? leidas24h.valor : 0;
+  return {
+    hoy,
+    corpus,
+    consultas,
+    cuota,
+    gasto: {
+      leidas24h: usadas,
+      filas,
+      recorridos,
+      estimacion: filas * vecesQueRecorre(recorridos),
+      reserva: usadas,
+      cuota: CUOTA_DE_FILAS_LEIDAS_POR_DIA_EN_D1,
+      medida: gasto.medido,
+      enviadas: gasto.enviadas,
+      sinMedir: gasto.sinMedir,
+    },
+  };
 }
 
 /**

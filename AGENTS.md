@@ -338,8 +338,9 @@ nada remoto. Códigos: **2** si la invocación no vale, si falta `MEDICION_ENDPO
 `http(s)://`, o apunta a la máquina propia) o si `wrangler` no tiene sesión, siempre antes de tocar nada; **1** para todo lo
 demás, con el parte de lo que quedó aplicado y los instantes para Time Travel. `desplegar` coteja
 el receptor de la rama siempre contra el vocabulario de `origin/main` —el sitio en vivo; haz
-`git fetch` antes— y contra la huella si la hay, mira la cuota **antes de migrar** (si hoy el
-barajado no cabría, sale con 1 sin tocar nada), se para en el primer fallo, no reintenta
+`git fetch` antes— y contra la huella si la hay, juzga las cuotas **antes de migrar** (si hoy el
+barajado o la lectura de la orden no cabrían, sale con 1 sin tocar nada; abajo, «La cuota de
+lectura»), se para en el primer fallo, no reintenta
 migraciones ni despliegues, borra sus balizas pase lo que pase, no baraja si el `rowid` de las
 balizas es contiguo ni si el barajado (unas tres filas escritas por fila, más otro tanto de lo
 escrito en 24 h de reserva para el resto del día) no cabe en
@@ -350,6 +351,29 @@ subcomando y sus paradas viven en `tools/lib/medicion.ts`, con sus efectos inyec
 `tests/unit/medicion-secuencias.test.ts` los recorre con un D1 en memoria; el paso a paso, la
 reversión y Time Travel, en `DESPLIEGUE.md` §3.
 
+### La cuota de lectura (Historia 23.13)
+
+D1 cuenta las filas leídas **por cuenta** y al día: `CUOTA_DE_FILAS_LEIDAS_POR_DIA_EN_D1` (5 millones,
+plan gratuito, en `src/lib/umbrales.ts` junto a la de escritura). Las tres órdenes que recorren la tabla
+—la lectura, `desplegar` y `comprobar`— juzgan **su coste entero antes de leer ninguna fila salvo el
+`COUNT(*)` que da N**: primero `d1 info`, cuyo `rows_read_24h` es precondición (sin él, 1 sin leer
+ninguna fila de la tabla); si lo leído en 24 h ya está en la cuota, 1 sin el `COUNT(*)`; si no, el
+`COUNT(*)` y el juicio: N × la **lista declarada** de las sentencias de esa orden que recorren la tabla
+(`recorridosDeLaLectura`, `recorridosDeDesplegar`, `recorridosDeComprobar`; sin índice por `ruta`,
+cada intento de baliza cuenta), más **otro tanto de lo leído en 24 h de reserva**, dentro de la
+cuota. Es una estimación y una cota inferior. Si no cabe, sale con 1 sin trocear y se repite otro
+día. **Un solo juez**, `juzgarCuota` de `tools/lib/medicion.ts`, juzga la escritura del barajado y la
+lectura de las tres: ninguna orden escribe el suyo. `desplegar` juzga dos veces —la primera,
+escritura y lectura juntas antes de migrar; la segunda, antes de barajar, con el mayor de `d1 info` y
+lo del primer juicio más lo ya leído; si no cabe, no baraja ni escribe la huella—; `comprobar` juzga
+antes de la primera baliza; la lectura, tras lo local, antes de su primera consulta, y su informe da
+aparte la **medida**, la suma de los `rows_read` de su pasada. Una sentencia nueva que recorra la
+tabla **entra en la lista de su orden**: la prueba de `tests/unit/medicion-secuencias.test.ts` falla
+si una orden envía una que su lista no declara. **La cuenta de Cloudflare aloja una sola base D1, la
+de la medición** (`d1 info` cuenta solo esta base): crear otra reabre la regla. Sin confirmar: que pasar
+la cuota de lectura pare también los `INSERT` del receptor. Cotejar `rows_read_24h` con la medida es
+de Héctor (`DESPLIEGUE.md` §3, «La cuota de lectura de D1, orden por orden»).
+
 ### Leer la línea base (Historia 23.10)
 
 ```
@@ -357,18 +381,20 @@ npm run medicion                # sin subcomando: lee D1 en remoto, informa y no
 ```
 
 **Es solo lectura**, con `--remote` explícito: sesión de `wrangler`, el Corpus de este equipo —del
-que sale el censo—, cinco recuentos agrupados con `d1 execute` de las jornadas UTC cerradas y
-`d1 info`. No pide `MEDICION_ENDPOINT`, no escribe en D1 ni en el repositorio, no ordena ni nombra
+que sale el censo—, `d1 info`, el `COUNT(*)` y el juicio de la cuota de lectura (arriba), y cinco
+recuentos agrupados con `d1 execute` de las jornadas UTC cerradas. No pide `MEDICION_ENDPOINT`, no escribe en D1 ni en el repositorio, no ordena ni nombra
 el `rowid` —una prueba estrecha de `tests/unit/orden-de-llegada.test.ts` exige que en `tools/` solo
 lo nombren el barajado y la lectura de las balizas— y no hay punto final de lectura. Códigos: **2**
 sin sesión o con cualquier bandera o argumento (la lectura no lleva opciones); **1** si un valor de
 `src/lib/umbrales.ts` que lee no se sostiene (una jornada que no existe, un mínimo que no es un entero
 positivo, una ruta de pasada que el sitio no declara) —se juzga antes de tocar nada—, si la sesión no
-se deja leer, si el Corpus no se deja leer o si no se leyó nada de D1 (tampoco cuando las consultas
-solo traen filas sin forma); 0 si leyó algo. El detalle, en `DESPLIEGUE.md` §3, «Leer la línea base». Una consulta que falla va a «Sin leer» y lo
+se deja leer, si el Corpus no se deja leer, si `d1 info` no trae `rows_read_24h` o la cuota de lectura
+no cabe, o si ninguna consulta trae recuentos con forma («ninguna consulta con forma», aunque `d1 info`
+diera sus cifras); 0 si alguna los trajo. Las filas escritas y el tamaño van a «Sin leer» cada una por
+su lado. El detalle, en `DESPLIEGUE.md` §3, «Leer la línea base». Una consulta que falla va a «Sin leer» y lo
 que depende de ella se omite, nunca como cero. Va con `--remote`, así que, como todo lo de arriba con
-`--remote`, la corre Héctor y no un agente; cada lectura son cinco recorridos de la tabla, que D1
-cuenta contra su cuota de lectura.
+`--remote`, la corre Héctor y no un agente; cada lectura son seis recorridos de la tabla —el
+`COUNT(*)` y sus cinco consultas—, que D1 cuenta contra su cuota de lectura.
 
 La secuencia (`leer`, con `Efectos`) vive en `tools/lib/medicion.ts`; todo lo demás —descuentos,
 censo, tramos, tasas, líneas base, firmas, ventanas y el informe— en `tools/lib/lineaBase.ts`, puro

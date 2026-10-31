@@ -16,7 +16,14 @@ import {
   type CorteLlegado,
 } from '../../src/lib/umbrales.ts';
 import { EVENTOS } from '../../src/lib/vocabulario.ts';
-import { CONSULTAS_DE_LA_LECTURA, type ConsultaDeLaLectura, type CuotaLeida, type Filas } from '../../tools/lib/medicion.ts';
+import {
+  CONSULTAS_DE_LA_LECTURA,
+  recorridosDeLaLectura,
+  type ConsultaDeLaLectura,
+  type CuotaLeida,
+  type Filas,
+  type GastoDeLaLectura,
+} from '../../tools/lib/medicion.ts';
 import {
   JUICIOS_POR_VENTANAS,
   PAGINAS_2_O_MAS,
@@ -29,7 +36,8 @@ import {
   esJornadaReal,
   legible,
   lineasDeLecturaDeMedicion,
-  nadaSeLeyo,
+  lineasDelGasto,
+  ningunaConsultaConForma,
   partirSerie,
   problemasDeLaLectura,
   valoresDeLaLectura,
@@ -101,9 +109,22 @@ function consultas(partes: Partes): Record<ConsultaDeLaLectura, Filas> {
 
 const CUOTA: CuotaLeida = { escritas: { ok: true, valor: 2500 }, tamaño: { ok: true, valor: 12_000_000 } };
 
+/** Lo que una lectura gastó de la cuota de lectura: 2.000 filas, seis recorridos, todo medido. */
+const GASTO: GastoDeLaLectura = {
+  leidas24h: 40_000,
+  filas: 2_000,
+  recorridos: recorridosDeLaLectura(HOY),
+  estimacion: 12_000,
+  reserva: 40_000,
+  cuota: 5_000_000,
+  medida: 12_600,
+  enviadas: 6,
+  sinMedir: 0,
+};
+
 function leer(partes: Partes, opciones: OpcionesDeLaLectura = {}, censo: string[] = CENSO, cuota: CuotaLeida = CUOTA): LecturaDeMedicion {
   return componerLecturaDeMedicion(
-    { hoy: HOY, censo, consultas: consultas(partes), cuota },
+    { hoy: HOY, censo, consultas: consultas(partes), cuota, gasto: GASTO },
     { cortes: [CORTE_23], minimo: undefined, pasadas: [], conFacebook: false, juicios: [], ...opciones },
   );
 }
@@ -235,7 +256,37 @@ describe('Historia 23.10 — la cuota de D1', () => {
         'filas escritas, hasta las 00:00 UTC, cuando se renueva; pasada la de tamaño, hasta que se borren filas o cambie ' +
         'el plan, porque esa no se renueva sola.',
     );
-    expect(informe).toContain('Cada lectura recorre la tabla cinco veces, una por consulta.');
+  });
+});
+
+describe('Historia 23.13 — la cuota de lectura en el informe', () => {
+  it('lo leído en 24 h frente a la cuota, la estimación y, aparte, la medida', () => {
+    const informe = texto(leer({}));
+    expect(informe).toContain(
+      'Filas leídas en 24 h, según d1 info, antes de leer: 40.000 de 5.000.000 al día ' +
+        '(CUOTA_DE_FILAS_LEIDAS_POR_DIA_EN_D1, por cuenta), 0,8 %. Se dejaron otras 40.000 de reserva para el resto del día.',
+    );
+    // Los recorridos salen de la lista declarada, nunca de una cifra escrita.
+    expect(informe).toContain(
+      'Esta lectura, estimación: 12.000 filas, 2000 filas de la tabla × 6 recorridos (el recuento de filas, ' +
+        'las vistas y las lecturas, las salidas internas, las acciones, las búsquedas asentadas, las búsquedas sin ' +
+        'resultados). Es una cota inferior: rows_read cuenta también los índices.',
+    );
+    expect(informe).toContain('Esta lectura, medida: 12.600 filas, la suma de los rows_read de sus 6 sentencias; 0,3 % de la cuota de lectura.');
+    expect(informe).toContain('quizá —sin confirmar— también las escrituras del receptor');
+    // Va dentro del bloque de la cuota, antes de los descuentos.
+    const lineas = lineasDeLecturaDeMedicion(leer({}));
+    const cuota = lineas.indexOf('Cuota de D1 (plan gratuito)');
+    const medida = lineas.findIndex((l) => l.includes('Esta lectura, medida'));
+    expect(cuota).toBeGreaterThanOrEqual(0);
+    expect(medida).toBeGreaterThan(cuota);
+    expect(medida).toBeLessThan(lineas.indexOf('Descuentos'));
+  });
+
+  it('las sentencias sin rows_read se dicen: la medida se queda corta', () => {
+    expect(lineasDelGasto({ ...GASTO, sinMedir: 2 }).join('\n')).toContain(
+      'la suma de los rows_read de sus 6 sentencias; 2 de ellas no trajeron rows_read, así que la medida se queda corta;',
+    );
   });
 });
 
@@ -1189,6 +1240,7 @@ describe('Historia 23.10 — revisión: lo que la primera pasada dejaba sin deci
           acciones: [accion(D1, '/cita/una/', EVENTOS.comparticionDeEnlace, 1, { destino: 'facebook' })],
         }),
         cuota: CUOTA,
+        gasto: GASTO,
       });
       expect(l.series.lectura.vigente.desde).toBe(D1);
       expect(l.descuentos.pasadas).toEqual([{ pasada: '25.3', jornada: D2, rutas: ['/cita/una/'], registros: 5 }]);
@@ -1206,7 +1258,7 @@ describe('Historia 23.10 — revisión: lo que la primera pasada dejaba sin deci
   });
 
   it('sin opciones, la tabla de juicios es JUICIOS_POR_VENTANAS, y Facebook queda fuera o dentro según la constante', () => {
-    const l = componerLecturaDeMedicion({ hoy: HOY, censo: CENSO, consultas: consultas({}), cuota: CUOTA });
+    const l = componerLecturaDeMedicion({ hoy: HOY, censo: CENSO, consultas: consultas({}), cuota: CUOTA, gasto: GASTO });
     expect(l.juicios.map((j) => j.juicio.nombre)).toEqual(JUICIOS_POR_VENTANAS.map((j) => j.nombre));
     expect(texto(l)).toMatch(/^ {2}SM-C3 \(la Página de Cita; llegada: /m);
     // La constante es de Héctor (la enciende en la 25.7): la prueba sigue su valor, no lo fija.
@@ -1384,20 +1436,21 @@ describe('Historia 23.10 — segunda revisión: lo que una consulta sin leer dej
 
   it('una jornada de hoy que no existe se rechaza antes de componer', () => {
     for (const hoy of ['2026-11-31', '2026-1-12', 'hoy']) {
-      expect(() => componerLecturaDeMedicion({ hoy, censo: CENSO, consultas: consultas({}), cuota: CUOTA }), hoy).toThrow(
+      expect(() => componerLecturaDeMedicion({ hoy, censo: CENSO, consultas: consultas({}), cuota: CUOTA, gasto: GASTO }), hoy).toThrow(
         'no es una jornada AAAA-MM-DD',
       );
     }
   });
 
-  it('no se leyó nada si ninguna consulta trajo recuentos —tampoco con filas sin forma— y d1 info no dio nada', () => {
+  it('ninguna consulta con forma si ninguna trajo recuentos —tampoco con filas sin forma—, dé lo que dé d1 info', () => {
     const sinForma = [{ jornada: 'ayer', ruta: '/', n: 1 }];
     const partes = Object.fromEntries(CONSULTAS_DE_LA_LECTURA.map((c) => [c, sinForma])) as Partes;
     const sinCuota: CuotaLeida = { escritas: { ok: false, motivo: 'no' }, tamaño: { ok: false, motivo: 'no' } };
-    expect(nadaSeLeyo(leer(partes, {}, CENSO, sinCuota))).toBe(true);
-    // Basta una cifra de d1 info, o una consulta con recuentos, para que algo se leyera.
-    expect(nadaSeLeyo(leer(partes, {}, CENSO, { ...sinCuota, tamaño: { ok: true, valor: 1 } }))).toBe(false);
-    expect(nadaSeLeyo(leer({ ...partes, salidas: [] }, {}, CENSO, sinCuota))).toBe(false);
+    expect(ningunaConsultaConForma(leer(partes, {}, CENSO, sinCuota))).toBe(true);
+    // Las cifras de d1 info ya no bastan (Historia 23.13): es la precondición de toda lectura.
+    expect(ningunaConsultaConForma(leer(partes, {}, CENSO, CUOTA))).toBe(true);
+    // Basta una consulta con recuentos.
+    expect(ningunaConsultaConForma(leer({ ...partes, salidas: [] }, {}, CENSO, sinCuota))).toBe(false);
   });
 
   it('el texto de un visitante tampoco trae separadores de línea, marcas de dirección árabes ni caracteres de anchura cero', () => {

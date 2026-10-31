@@ -58,9 +58,12 @@ import {
   RUTA_DE_COMPROBACION,
   jornadaAnterior,
   jornadaUtc,
+  textoDeRecorridos,
+  vecesQueRecorre,
   type ConsultaDeLaLectura,
   type CuotaLeida,
   type Filas,
+  type GastoDeLaLectura,
   type Leido,
 } from './medicion.ts';
 
@@ -451,6 +454,8 @@ export interface EntradaDeLaLectura {
   censo: Iterable<string>;
   consultas: { readonly [C in ConsultaDeLaLectura]: Filas };
   cuota: CuotaLeida;
+  /** Lo que la lectura gastó de la cuota de lectura: estimación y medida (Historia 23.13). */
+  gasto: GastoDeLaLectura;
 }
 
 /** Los valores de `src/lib/umbrales.ts` y la declaración de superficies, que las pruebas cambian. */
@@ -616,6 +621,7 @@ export interface LecturaDeMedicion {
   /** Lo que no se leyó, con su motivo: consultas y cifras de `d1 info`. */
   sinLeer: { que: string; motivo: string }[];
   cuota: CuotaLeida;
+  gasto: GastoDeLaLectura;
   descuentos: { comprobacion: number; pasadas: DescuentoDePasada[]; incompletos: ConsultaDeLaLectura[] };
   series: { readonly [S in SerieDeMedicion]: SeriePartida };
   sm8: { tramos: TramoDeSm8[] } | { faltan: ConsultaDeLaLectura[] };
@@ -1386,6 +1392,7 @@ export function componerLecturaDeMedicion(
     hoy,
     sinLeer,
     cuota: entrada.cuota,
+    gasto: entrada.gasto,
     descuentos: {
       comprobacion,
       pasadas: pasadas.map((pasada, i) => ({ ...pasada, registros: porPasada[i] })),
@@ -1410,15 +1417,12 @@ export function componerLecturaDeMedicion(
 }
 
 /**
- * Si no se leyó nada: ninguna consulta dio recuentos —falló, o trajo filas sin forma— y `d1 info`
- * no dio ninguna de sus dos cifras. Entonces la orden sale con 1, como cuando `wrangler` no contesta.
+ * Si ninguna consulta tiene forma: ninguna dio recuentos —falló, o trajo filas sin forma—. Entonces la
+ * orden sale con 1, como cuando `wrangler` no contesta (Historia 23.13): las cifras de `d1 info` ya no
+ * bastan para que «se leyera algo», porque `d1 info` es la precondición de toda lectura.
  */
-export function nadaSeLeyo(lectura: LecturaDeMedicion): boolean {
-  return (
-    lectura.descuentos.incompletos.length === CONSULTAS_DE_LA_LECTURA.length &&
-    !lectura.cuota.escritas.ok &&
-    !lectura.cuota.tamaño.ok
-  );
+export function ningunaConsultaConForma(lectura: LecturaDeMedicion): boolean {
+  return lectura.descuentos.incompletos.length === CONSULTAS_DE_LA_LECTURA.length;
 }
 
 // ── El informe ────────────────────────────────────────────────────────────────────────────
@@ -1482,6 +1486,30 @@ const NOMBRE_DE_SERIE: { readonly [S in SerieDeMedicion]: string } = {
   busqueda: 'la búsqueda',
 };
 
+/**
+ * La cuota de lectura en el informe (Historia 23.13): lo leído en 24 h antes de leer frente a la
+ * cuota, la estimación de esta lectura —N × sus recorridos declarados, una cota inferior— y, aparte,
+ * la medida —la suma de los `rows_read` que D1 dio de cada sentencia—, frente a la cuota.
+ */
+export function lineasDelGasto(gasto: GastoDeLaLectura): string[] {
+  const veces = vecesQueRecorre(gasto.recorridos);
+  const sinMedir =
+    gasto.sinMedir === 0
+      ? ''
+      : `; ${entero(gasto.sinMedir)} de ellas no trajeron rows_read, así que la medida se queda corta`;
+  return [
+    `  Filas leídas en 24 h, según d1 info, antes de leer: ${entero(gasto.leidas24h)} de ${entero(gasto.cuota)} al día ` +
+      `(CUOTA_DE_FILAS_LEIDAS_POR_DIA_EN_D1, por cuenta), ${porcentaje(gasto.leidas24h, gasto.cuota)}. Se dejaron otras ` +
+      `${entero(gasto.reserva)} de reserva para el resto del día.`,
+    `  Esta lectura, estimación: ${entero(gasto.estimacion)} filas, ${entero(gasto.filas)} filas de la tabla × ${veces} ` +
+      `recorridos (${textoDeRecorridos(gasto.recorridos)}). Es una cota inferior: rows_read cuenta también los índices.`,
+    `  Esta lectura, medida: ${entero(gasto.medida)} filas, la suma de los rows_read de sus ${entero(gasto.enviadas)} ` +
+      `sentencias${sinMedir}; ${porcentaje(gasto.medida, gasto.cuota)} de la cuota de lectura.`,
+    `  Al pasar la de lectura, las consultas fallan hasta las 00:00 UTC, y quizá —sin confirmar— también las ` +
+      'escrituras del receptor.',
+  ];
+}
+
 /** El informe, en líneas. Termina diciendo que no se escribió nada. */
 export function lineasDeLecturaDeMedicion(lectura: LecturaDeMedicion): string[] {
   const lineas: string[] = [];
@@ -1515,8 +1543,8 @@ export function lineasDeLecturaDeMedicion(lectura: LecturaDeMedicion): string[] 
     '  Al pasar cualquiera de las dos, las escrituras fallan en silencio —el Worker se traga el error—: pasada la de ' +
       'filas escritas, hasta las 00:00 UTC, cuando se renueva; pasada la de tamaño, hasta que se borren filas o cambie ' +
       'el plan, porque esa no se renueva sola.',
-    '  Cada lectura recorre la tabla cinco veces, una por consulta.',
   );
+  lineas.push(...lineasDelGasto(lectura.gasto));
 
   // Los descuentos.
   const sinContar =
