@@ -1,0 +1,17 @@
+fuente: wikisource-es
+obra: Cartas marruecas
+url: https://es.wikisource.org/wiki/Cartas_marruecas/Carta_XXXVI
+recuperado: 2026-11-01
+---
+Cartas marruecas/Carta XXXVI
+|título=[[Cartas marruecas]]
+|autor=José Cadalso
+obra> |título=Cartas marruecas
+obra> |autor=José Cadalso
+obra> |título={{Anclaje+|Índice}}
+---
+Carta XXXVI
+
+De Gazel a Ben-Beley
+
+Prescindiendo de la corrupción de la lengua, consiguiente a la de las costumbres, el vicio de estilo más universal en nuestros días es el frecuente uso de una especie de antítesis, como el del equívoco lo fue en el siglo pasado. Entonces un orador no se detenía en decir un desatino de cualquiera clase que fuese, por no desperdiciar un equivoquillo pueril y ridículo; ahora se expone a lo mismo por aprovechar una contraposición, falsa muchas veces. Por ejemplo, en el año de 1670 diría un panegirista en la oración fúnebre de uno que por casualidad se llamase Fulano Vivo: «Vengo a predicar con viveza la muerte del Vivo que murió para el mundo, y con moribundos acentos la vida del muerto que vive en las lenguas de la fama». Pero en 1770, un gacetista que escribiese una expedición hecha por los españoles en América no se detendría un minuto en decir: «Estos españoles hicieron en estas conquistas las mismas hazañas que los soldados de Cortés, sin cometer las crueldades que aquéllos ejecutaron».

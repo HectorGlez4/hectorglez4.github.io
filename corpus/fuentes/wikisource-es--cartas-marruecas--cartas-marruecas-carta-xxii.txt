@@ -1,0 +1,17 @@
+fuente: wikisource-es
+obra: Cartas marruecas
+url: https://es.wikisource.org/wiki/Cartas_marruecas/Carta_XXII
+recuperado: 2026-11-01
+---
+Cartas marruecas/Carta XXII
+|título=[[Cartas marruecas]]
+|autor=José Cadalso
+obra> |título=Cartas marruecas
+obra> |autor=José Cadalso
+obra> |título={{Anclaje+|Índice}}
+---
+Carta XXII
+
+Gazel a Ben-Beley
+
+Siempre que las bodas no se forman entre personas de iguales en haberes, genios y nacimiento, me parece que las cartas en que se anuncian estas ceremonias a los parientes y amigos de las casas, si hubiera menos hipocresía en el mundo, se pudieran reducir a estas palabras: «Con motivo de ser nuestra casa pobre y noble, enviamos nuestra hija a la de Craso, que es rica y plebeya». «Con motivo de ser nuestro hijo tonto, mal criado y rico, pedimos para él la mano de N., que es discreta, bien criada y pobre»; o bien éstas: «Con motivo de que es inaguantable la carga de tres hijas en una casa, las enviamos a que sean amantes y amadas de tres hombres que ni las conocen ni son conocidos de ellas»; o a otras frases semejantes, salvo empero el acabar con el acostumbrado cumplido de «para que mereciendo la aprobación de vuestra merced, no falte circunstancia de gusto a este tratado», porque es cláusula muy esencial.

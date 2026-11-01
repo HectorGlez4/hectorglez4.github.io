@@ -1,0 +1,17 @@
+fuente: wikisource-es
+obra: Cartas marruecas
+url: https://es.wikisource.org/wiki/Cartas_marruecas/Carta_LXVI
+recuperado: 2026-11-01
+---
+Cartas marruecas/Carta LXVI
+|título=[[Cartas marruecas]]
+|autor=José Cadalso
+obra> |título=Cartas marruecas
+obra> |autor=José Cadalso
+obra> |título={{Anclaje+|Índice}}
+---
+Carta LXVI
+
+De Gazel a Ben-Beley
+
+En Europa hay varias clases de escritores. Unos escriben cuanto les viene a la pluma; otros, lo que les mandan escribir; otros, todo lo contrario de lo que sienten; otros, lo que agrada al público, con lisonja; otros, lo que les choca, con reprehensiones. Los de la primera clase están expuestos a más gloria y más desastres, porque pueden producir mayores aciertos y desaciertos. Los de la segunda se lisonjean de hallar el premio seguro de su trabajo; pero si, acabado de publicarlo, se muere o se aparta el que se lo mandó y entra a sucederle uno de sistema opuesto, suele encontrar castigo en vez de recompensa. Los de la tercera son mentirosos, como los llama Nuño, y merecen por escrito el odio de todo el público. Los de la cuarta tienen alguna disculpa, como la lisonja no sea muy baja. Los de la última merecen aprecio por el valor, pues no es poco el que se necesita para reprehender a quien se halla bien con sus vicios, o bien cree que el libre ejercicio de ellos es una preeminencia muy apreciable. Cada nación ha tenido alguno o algunos censores más o menos rígidos; pero creo que para ejercer este oficio con algún respeto de parte del vulgo, necesita el que lo emprende hallarse limpio de los defectos que va a censurar. ¿Quién tendría paciencia en la antigua Roma para ver a Séneca escribir contra el lujo y la magnificencia con la mano misma que se ocupaba con notable codicia en atesorar millones? ¿Qué efecto podría producir todo el elogio que hacía de la medianía quien no aspiraba sino a superar a los poderosos en esplendor? El hacer una cosa y escribir otra es el modo más tiránico de burlar la sencillez de la plebe, y es también el medio más poderoso para exasperarla, si llega a comprender este artificio.

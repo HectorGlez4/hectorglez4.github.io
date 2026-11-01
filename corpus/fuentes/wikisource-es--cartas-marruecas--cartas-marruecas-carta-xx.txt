@@ -1,0 +1,17 @@
+fuente: wikisource-es
+obra: Cartas marruecas
+url: https://es.wikisource.org/wiki/Cartas_marruecas/Carta_XX
+recuperado: 2026-11-01
+---
+Cartas marruecas/Carta XX
+|título=[[Cartas marruecas]]
+|autor=José Cadalso
+obra> |título=Cartas marruecas
+obra> |autor=José Cadalso
+obra> |título={{Anclaje+|Índice}}
+---
+Carta XX
+
+Ben-Beley a Nuño
+
+Veo con sumo gusto el aprovechamiento con que Gazel va viajando por tu país y los progresos que hace su talento natural con el auxilio de tus consejos. Su entendimiento solo estaría tan lejos de serle útil sin tu dirección, que más serviría a alucinarle. A no haberte puesto la fortuna en el camino de este joven, hubiera malogrado Gazel su tiempo. ¿Qué se pudiera esperar de sus viajes? Mi Gazel hubiera aprendido, y mal, una infinidad de cosas; se llenaría la cabeza de especies sueltas, y hubiera vuelto a su patria ignorante y presumido. Pero aun así, dime, Nuño, ¿son verdaderas muchas de las noticias que me envía sobre las costumbres y usos de tus paisanos? Suspendo el juicio hasta ver tu respuesta. Algunas cosas me escribe incompatibles entre sí. Me temo que su juventud le engañe en algunas ocasiones y me represente las cosas no como son, sino cuales se le representaron. Haz que te enseñe cuantas cartas me remita, para que veas si me escribe con puntualidad lo que sucede o lo que se le figura. ¿Sabes de dónde nace esta mi confusión y esta mi eficacia en pedirte que me saques de ella, o por lo menos que impidas su aumento? Nace, cristiano amigo, nace de que sus cartas, que copio con exactitud y suelo leer con frecuencia, me representan tu nación diferente de todas en no tener carácter propio, que es el peor carácter que puede tener.

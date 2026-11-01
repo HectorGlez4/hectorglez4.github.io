@@ -1,0 +1,17 @@
+fuente: wikisource-es
+obra: Cartas marruecas
+url: https://es.wikisource.org/wiki/Cartas_marruecas/Carta_XLIII
+recuperado: 2026-11-01
+---
+Cartas marruecas/Carta XLIII
+|título=[[Cartas marruecas]]
+|autor=José Cadalso
+obra> |título=Cartas marruecas
+obra> |autor=José Cadalso
+obra> |título={{Anclaje+|Índice}}
+---
+Carta XLIII
+
+De Gazel a Nuño
+
+La ciudad en que ahora me hallo es la única de cuantas he visto que se parece a las de la antigua España, cuya descripción me has hecho muchas veces. El color de los vestidos, triste; las concurrencias, pocas; la división de los dos sexos, fielmente observada; las mujeres, recogidas; los hombres, celosos; los viejos, sumamente graves; los mozos, pendencieros, y todo lo restante del aparato me hace mirar mil veces al calendario por ver si estamos efectivamente en el año que vosotros llamáis de 1768, o si es el de 1500, ó 1600 al sumo. Sus conversaciones son correspondientes a sus costumbres. Aquí no se habla de los sucesos que hoy vemos ni de las gentes que hoy viven, sino de los eventos que ya pasaron y hombres que ya fueron. He llegado a dudar si por arte mágica me representa algún encantador las generaciones anteriores. Si esto es así, ¡ojalá alcanzara su ciencia a traerme a los ojos las edades futuras! Pero sin molestarme más en este correo, y reservando el asunto para cuando nos veamos, te aseguro que admiro como singular mérito en estos habitantes la reverencia que hacen continuamente a las cenizas de sus padres. Es una especie de perpetuo agradecimiento a la vida que de ellos han recibido. Pero, pues en esto puede haber exceso, como en todas las prendas de los hombres, cuya naturaleza suele viciar hasta las virtudes mismas, responde lo que te se ofrezca sobre este particular.

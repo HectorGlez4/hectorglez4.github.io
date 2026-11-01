@@ -1,0 +1,17 @@
+fuente: wikisource-es
+obra: Cartas marruecas
+url: https://es.wikisource.org/wiki/Cartas_marruecas/Carta_XXX
+recuperado: 2026-11-01
+---
+Cartas marruecas/Carta XXX
+|título=[[Cartas marruecas]]
+|autor=José Cadalso
+obra> |título=Cartas marruecas
+obra> |autor=José Cadalso
+obra> |título={{Anclaje+|Índice}}
+---
+Carta XXX
+
+De Gazel a Ben-Beley
+
+Reparo que algunos tienen singular complacencia en hablar delante de aquéllos a quienes creen ignorantes, como los oráculos hablaban al vulgo necio y engañado. Aunque mi humor fuese de hablar mucho, creo sería de mayor gusto para mí el aparentar necedad y oír el discurso del que se cree sabio, o proferir de cuando en cuando algún desatino, con lo que daría mayor pábulo a su vanidad y a mi diversión.

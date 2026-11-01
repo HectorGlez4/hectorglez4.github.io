@@ -1,0 +1,19 @@
+fuente: wikisource-es
+obra: Cartas marruecas
+url: https://es.wikisource.org/wiki/Cartas_marruecas/Carta_XXXVIII
+recuperado: 2026-11-01
+---
+Cartas marruecas/Carta XXXVIII
+|título=[[Cartas marruecas]]
+|autor=José Cadalso
+obra> |título=Cartas marruecas
+obra> |autor=José Cadalso
+obra> |título={{Anclaje+|Índice}}
+---
+Carta XXXVIII
+
+De Gazel a Ben-Beley
+
+Uno de los defectos de la nación española, según el sentir de los demás europeos, es el orgullo. Si esto es así, es muy extraña la proporción en que este vicio se nota entre los españoles, pues crece según disminuye el carácter del sujeto, parecido en algo a lo que los físicos dicen haber hallado en el descenso de los graves hacia el centro: tendencia que crece mientras más baja el cuerpo que la contiene. El rey lava los pies a doce pobres en ciertos días del año, acompañado de sus hijos, con tanta humildad, que yo, sin entender el sentido religioso de esta ceremonia, cuando asistí a ella me llené de ternura y prorrumpí en lágrimas. Los magnates o nobles de primera jerarquía, aunque de cuando en cuando hablan de sus abuelos, se familiarizan hasta con sus ínfimos criados. Los nobles menos elevados hablan con más frecuencia de sus conexiones, entronques y enlaces. Los caballeros de las ciudades ya son algo pesados en punto de nobleza. Antes de visitar a un forastero o admitirle en sus casas, indagan quién fue su quinto abuelo, teniendo buen cuidado de no bajar un punto de esta etiqueta, aunque sea en favor de un magistrado del más alto mérito y ciencia, ni de un militar lleno de heridas y servicios. Lo más es que, aunque uno y otro forastero tengan un origen de los más ilustres, siempre se mira como tacha inexcusable el no haber nacido en la ciudad donde se halla de paso, pues se da por regla general que nobleza como ella no la hay en todo el reino.
+
+Todo lo dicho es poco en comparación de la vanidad de un hidalgo de aldea. Éste se pasea majestuosamente en la triste plaza de su pobre lugar, embozado en su mala capa, contemplando el escudo de armas que cubre la puerta de su casa medio caída, y dando gracias a la providencia divina de haberle hecho don Fulano de Tal. No se quitará el sombrero, aunque lo pudiera hacer sin embarazarse; no saludará al forastero que llega al mesón, aunque sea el general de la provincia o el presidente del primer tribunal de ella. Lo más que se digna hacer es preguntar si el forastero es de casa solar conocida al fuero de Castilla, qué escudo es el de sus armas, y si tiene parientes conocidos en aquellas cercanías. Pero lo que te ha de pasmar es el grado en que se halla este vicio en los pobres mendigos. Piden limosna; si se les niega con alguna aspereza, insultan al mismo a quien poco ha suplicaban. Hay un proverbio por acá que dice: «El alemán pide limosna cantando, el francés llorando y el español regañando».

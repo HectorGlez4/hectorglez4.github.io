@@ -1,0 +1,17 @@
+fuente: wikisource-es
+obra: Cartas marruecas
+url: https://es.wikisource.org/wiki/Cartas_marruecas/Carta_LXVIII
+recuperado: 2026-11-01
+---
+Cartas marruecas/Carta LXVIII
+|título=[[Cartas marruecas]]
+|autor=José Cadalso
+obra> |título=Cartas marruecas
+obra> |autor=José Cadalso
+obra> |título={{Anclaje+|Índice}}
+---
+Carta LXVIII
+
+De Gazel a Ben-Beley
+
+Examina la historia de todos los pueblos, y sacarás que toda nación se ha establecido por la austeridad de costumbres. En este estado de fuerza se ha aumentado, de este aumento ha venido la abundancia, de esta abundancia se ha producido el lujo, de este lujo se ha seguido afeminación, de esta afeminación ha nacido la flaqueza, de la flaqueza ha dimanado su ruina. Otros lo han dicho antes que yo; pero no por eso deja de ser verdad y verdad útil, y las verdades útiles están tan lejos de ser repetidas con sobrada frecuencia, que pocas veces llegan a repetirse con la suficiente.

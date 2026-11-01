@@ -1,0 +1,17 @@
+fuente: wikisource-es
+obra: Cartas marruecas
+url: https://es.wikisource.org/wiki/Cartas_marruecas/Carta_XXXII
+recuperado: 2026-11-01
+---
+Cartas marruecas/Carta XXXII
+|título=[[Cartas marruecas]]
+|autor=José Cadalso
+obra> |título=Cartas marruecas
+obra> |autor=José Cadalso
+obra> |título={{Anclaje+|Índice}}
+---
+Carta XXXII
+
+De Ben-Beley a Gazel
+
+Acabo de leer el último libro de los que me has enviado en los varios viajes que has hecho por Europa, con el cual llegan a algunos centenares las obras europeas de distintas naciones y tiempos, los que he leído. Gazel, Gazel, sin duda tendrás por grande absurdo lo que voy a decirte, y si publicas este mi dictamen, no habrá europeo que no me llame bárbaro africano; pero la amistad que te profeso es muy grande para dejar de corresponder con mis observaciones a las tuyas, y mi sinceridad es tanta, que en nada puede mi lengua hacer traición a mi pecho. En este supuesto, digo que de los libros que he referido he hecho la siguiente separación: he escogido cuatro de matemáticas, en los que admiro la extensión y acierto que tiene el entendimiento humano cuando va bien dirigido; otros tantos de filosofía escolástica, en que me asombra la variedad de ocurrencias extraordinarias que tiene el hombre cuando no procede sobre principios ciertos y evidentes; uno de medicina, al que falta un tratado completo de los simples, cuyo conocimiento es mil veces mayor en África; otro de anatomía, cuya lectura fue sin duda la que dio motivo al cuento del loco que se figuraba ser tan quebradizo como el vidrio; dos de los que reforman las costumbres, en las que advierto lo mucho que aún tienen que reformar; cuatro del conocimiento de la naturaleza, ciencia que llaman filosofía, en los que noto lo mucho que ignoraron nuestros abuelos y lo mucho más que tendrán que aprender nuestros nietos; algunos de poesía, delicioso delirio del alma, que prueba ferocidad en el hombre si la aborrece, puerilidad si la profesa toda la vida, y suavidad si la cultiva algún tiempo. Todas las demás obras de las ciencias humanas las he arrojado o distribuido, por parecerme inútiles extractos, compendios defectuosos y copias imperfectas de lo ya dicho y repetido una y mil veces.

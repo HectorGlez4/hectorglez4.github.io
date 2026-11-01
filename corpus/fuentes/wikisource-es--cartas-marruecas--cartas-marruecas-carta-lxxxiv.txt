@@ -1,0 +1,17 @@
+fuente: wikisource-es
+obra: Cartas marruecas
+url: https://es.wikisource.org/wiki/Cartas_marruecas/Carta_LXXXIV
+recuperado: 2026-11-01
+---
+Cartas marruecas/Carta LXXXIV
+|título=[[Cartas marruecas]]
+|autor=José Cadalso
+obra> |título=Cartas marruecas
+obra> |autor=José Cadalso
+obra> |título={{Anclaje+|Índice}}
+---
+Carta LXXXIV
+
+De Ben-Beley a Gazel
+
+No enseñes a tus amigos la carta que te escribí contra esa cosa que llaman fama póstuma. Aunque ésta sea una de las mayores locuras del hombre, es preciso dejarla reinar como otras muchas. Pretender reducir el género humano a sólo lo que es moralmente bueno, es pretender que todos los hombres sean filósofos, y esto es imposible. Después de escribirte meses ha sobre este asunto, he considerado que el tal deseo es una de las pocas cosas que pueden consolar a un hombre de mérito desgraciado. Puede serle muy fuerte alivio el pensar que las generaciones futuras le harán la justicia que le niegan sus coetáneos, y soy de parecer que se han de dar cuantos gustos y consuelos pueda apetecer, aunque sean pueriles, como sean inocentes, al infeliz y cuitado animal llamado hombre.

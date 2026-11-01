@@ -1,0 +1,17 @@
+fuente: wikisource-es
+obra: Cartas marruecas
+url: https://es.wikisource.org/wiki/Cartas_marruecas/Carta_LXXXVI
+recuperado: 2026-11-01
+---
+Cartas marruecas/Carta LXXXVI
+|título=[[Cartas marruecas]]
+|autor=José Cadalso
+obra> |título=Cartas marruecas
+obra> |autor=José Cadalso
+obra> |título={{Anclaje+|Índice}}
+---
+Carta LXXXVI
+
+De Ben-Beley a Gazel
+
+Pregunta a tu amigo Nuño su dictamen sobre un héroe famoso en su país por el auxilio que los españoles han creído deberle en la larga serie de batallas que tuvieron sus abuelos con los nuestros por la posesión de esa península. En sus historias veo que, estando el rey don Ramiro con un puñado de vasallos suyos rodeado de un ejército innumerable de moros, y siendo su pérdida inevitable, se le apareció el tal héroe, llamado Santiago, y le dijo que al amanecer del día siguiente, sin cuidar del número de sus soldados ni el de sus enemigos, se arrojase sobre ellos, confiado en la protección que él le traía del cielo. Añaden los historiadores que así lo hizo Don Ramiro, y ganó una batalla tan gloriosa como hubiera sido temeraria si se hubiese graduado la esperanza por las fuerzas. Los que han escrito los anales de España refieren esto mismo. Dime qué hay en ello.

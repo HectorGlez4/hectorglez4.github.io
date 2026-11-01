@@ -1,0 +1,19 @@
+fuente: wikisource-es
+obra: Cartas marruecas
+url: https://es.wikisource.org/wiki/Cartas_marruecas/Carta_LXXXV
+recuperado: 2026-11-01
+---
+Cartas marruecas/Carta LXXXV
+|título=[[Cartas marruecas]]
+|autor=José Cadalso
+obra> |título=Cartas marruecas
+obra> |autor=José Cadalso
+obra> |título={{Anclaje+|Índice}}
+---
+Carta LXXXV
+
+De Gazel a Ben-Beley, respuesta de la anterior
+
+Bien me guardaré de enseñar tu carta a algunas gentes. Me hace mucha fuerza la reflexión de que la esperanza de la fama póstuma es la única que puede mantener en pie a muchos que padecen la persecución de su siglo y apelan a los venideros; y que, por consiguiente, debe darse este consuelo y cualquiera otro decente, aunque sea pueril, al hombre que vive en medio de tanto infortunio. Pero mi amigo Nuño dice que ya es demasiado el número de gentes que en España siguen el sistema de la indiferencia sobre esta especie de fama. O sea carácter del siglo o espíritu verdadero de filosofía; o sea consecuencia de la religión, que mira como vanas, transitorias y frívolas las glorias del mundo, lo cierto es que en la realidad es excesivo el número de los que miran el último día de su vida como el último de su existencia en este mundo.
+
+Para confirmarme en ello, me contó la vida que hacen muchos, incapaces de adquirir tal fama póstuma. No sólo habló de la vida deliciosa de la corte y grandes ciudades, que son un lugar común de la crítica, sino de las villas y aldeas. El primer ejemplo que saca es el del huésped que tuve y tanto estimé en mi primer viaje por la península. A éste siguen otros varios muy parecidos a él, y suele concluir diciendo: -Son muchos millares de hombres los que se levantan muy tarde, toman chocolate muy caliente, agua muy fría, se visten, salen a la plaza, ajustan un par de pollos, oyen misa, vuelven a la plaza, dan cuatro paseos, se informan en qué estado se hallan los chismes y hablillas del lugar, vuelven a casa, comen muy despacio, duermen la siesta, se levantan, dan un paseo al campo, vuelven a casa, se refrescan, van a la tertulia, juegan a la malilla, vuelta a casa, rezan el rosario, cenan y se meten en la cama.

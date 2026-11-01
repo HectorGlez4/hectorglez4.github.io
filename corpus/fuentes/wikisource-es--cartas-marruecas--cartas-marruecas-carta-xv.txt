@@ -1,0 +1,17 @@
+fuente: wikisource-es
+obra: Cartas marruecas
+url: https://es.wikisource.org/wiki/Cartas_marruecas/Carta_XV
+recuperado: 2026-11-01
+---
+Cartas marruecas/Carta XV
+|título=[[Cartas marruecas]]
+|autor=José Cadalso
+obra> |título=Cartas marruecas
+obra> |autor=José Cadalso
+obra> |título={{Anclaje+|Índice}}
+---
+Carta XV
+
+De Gazel a Ben-Beley
+
+En España, como en todos los países del mundo, las gentes de cada carrera desprecian a la de las otras. Búrlase el soldado del escolástico, oyendo disputar utrum blictiri sit terminus logicus. Búrlase éste del químico, empeñado en el hallazgo de la piedra filosofal. Éste se ríe del soldado que trabaja mucho sobre que la vuelta de la casaca tenga tres pulgadas de ancho, y no tres y media. ¿Qué hemos de inferir de todo esto, sino que en todas las facultades humanas hay cosas ridículas?

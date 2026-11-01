@@ -1,0 +1,17 @@
+fuente: wikisource-es
+obra: Cartas marruecas
+url: https://es.wikisource.org/wiki/Cartas_marruecas/Carta_LXXXI
+recuperado: 2026-11-01
+---
+Cartas marruecas/Carta LXXXI
+|título=[[Cartas marruecas]]
+|autor=José Cadalso
+obra> |título=Cartas marruecas
+obra> |autor=José Cadalso
+obra> |título={{Anclaje+|Índice}}
+---
+Carta LXXXI
+
+De Gazel a Ben-Beley
+
+No es fácil saber cómo ha de portarse un hombre para hacerse un mediano lugar en el mundo. Si uno aparenta talento o instrucción, se adquiere el odio de las gentes, porque le tienen por soberbio, osado y capaz de cosas grandes. Si, al contrario, uno es humilde y comedido, le desprecian por inútil y necio. Si ven que uno es algo cauto, prudente y detenido, le tienen por vengativo y traidor. Si es uno sincero, humano y fácil de reconciliarse con el que le ha agraviado, le llaman cobarde y pusilánime; si procura elevarse, ambicioso; si se contenta con la medianía, desidioso; si sigue la corriente del mundo, adquiere nota de adulador; si se opone a los delirios de los hombres, sienta plaza de extravagante. Estas consideraciones, pesadas con madurez y confirmadas con tantos ejemplos como abundan, le dan al hombre gana de retirarse a lo más desierto de nuestra África, huir de sus semejantes y escoger la morada de los desiertos o montes entre fieras y brutos.

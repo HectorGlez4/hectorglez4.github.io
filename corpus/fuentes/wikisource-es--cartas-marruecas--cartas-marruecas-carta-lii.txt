@@ -1,0 +1,17 @@
+fuente: wikisource-es
+obra: Cartas marruecas
+url: https://es.wikisource.org/wiki/Cartas_marruecas/Carta_LII
+recuperado: 2026-11-01
+---
+Cartas marruecas/Carta LII
+|título=[[Cartas marruecas]]
+|autor=José Cadalso
+obra> |título=Cartas marruecas
+obra> |autor=José Cadalso
+obra> |título={{Anclaje+|Índice}}
+---
+Carta LII
+
+De Nuño a Gazel
+
+Entre ser hombres de bien y no ser hombres de bien, no hay medio. Si lo hubiera, no sería tanto el número de pícaros. La alternativa de no hacer mal a alguno, o de atrasarse uno mismo si no hace mal a otro, es de una tiranía tan despótica que sólo puede resistirse a ella por la invencible fuerza de la virtud. Pero la virtud está muy desairada en la corrupción del mundo para tener atractivo alguno. Su mayor trofeo es el respeto de la menor parte de los hombres.

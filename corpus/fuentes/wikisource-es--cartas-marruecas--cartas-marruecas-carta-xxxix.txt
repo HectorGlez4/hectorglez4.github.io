@@ -1,0 +1,19 @@
+fuente: wikisource-es
+obra: Cartas marruecas
+url: https://es.wikisource.org/wiki/Cartas_marruecas/Carta_XXXIX
+recuperado: 2026-11-01
+---
+Cartas marruecas/Carta XXXIX
+|título=[[Cartas marruecas]]
+|autor=José Cadalso
+obra> |título=Cartas marruecas
+obra> |autor=José Cadalso
+obra> |título={{Anclaje+|Índice}}
+---
+Carta XXXIX
+
+De Gazel a Ben-Beley
+
+Pocos días ha, me entré una mañana en el cuarto de mi amigo Nuño antes que él se levantase. Hallé su mesa cubierta de papeles, y, arrimándome a ellos con la libertad que nuestra amistad nos permite, abrí un cuadernillo que tenía por título Observaciones y reflexiones sueltas. Cuando pensé hallar una cosa por lo menos mediana, hallé que era un laberinto de materias sin conexión. Junto a una reflexión muy seria sobre la inmortalidad del alma, hallé otra acerca de la danza francesa, y, entre dos relativas a la patria potestad, una sobre la pesca del atún. No pude menos de extrañar este desarreglo, y aun se lo dije a Nuño, quien sin alterarse ni hacer más movimiento que suspender la acción de ponerse una media, en cuyo movimiento le cogió mi reparo, me respondió: «Mira, Gazel; cuando intenté escribir mis observaciones sobre las cosas del mundo y las reflexiones que de ellas nacen, creí también sería justo disponerlas en varias órdenes, como religión, política, moral, filosofía, crítica, etc.; pero cuando vi el ningún método que el mundo guarda en sus cosas, no me pareció digno de que estudiase mucho el de escribirlas. Así como vemos al mundo mezclar lo sagrado con lo profano, pasar de lo importante a lo frívolo, confundir lo malo con lo bueno, dejar un asunto para emprender otro, retroceder y adelantar a un tiempo, afanarse y descuidarse, mudar y afectar constancia, ser firme y aparentar ligereza, así también yo quiero escribir con igual desarreglo». Al decir esto prosiguió vistiéndose, mientras fui ojeando el manuscrito.
+
+Extrañé también que un hombre tan amante de su patria tuviese tan poco escrito sobre el gobierno de ella; a lo que me dijo: «Se ha escrito tanto, con tanta variedad, en tan diversos tiempos, y con tan distintos fines sobre el gobierno de las monarquías, que ya poco se puede decir de nuevo que sea útil a los estados, o seguro para los autores».

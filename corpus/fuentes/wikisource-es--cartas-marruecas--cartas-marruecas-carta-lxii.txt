@@ -1,0 +1,17 @@
+fuente: wikisource-es
+obra: Cartas marruecas
+url: https://es.wikisource.org/wiki/Cartas_marruecas/Carta_LXII
+recuperado: 2026-11-01
+---
+Cartas marruecas/Carta LXII
+|título=[[Cartas marruecas]]
+|autor=José Cadalso
+obra> |título=Cartas marruecas
+obra> |autor=José Cadalso
+obra> |título={{Anclaje+|Índice}}
+---
+Carta LXII
+
+De Ben-Beley a Nuño, respuesta de la XLII
+
+El estilo de tu carta, que acabo de recibir, me prueba ser verdad lo que Gazel me ha escrito de ti tan repetidas veces. No dudaba yo que pudiese haber hombres de bien entre vosotros. Jamás creí que la honradez y rectitud fuese peculiar a éste o a otro clima; pero aun así creo que ha sido singular fortuna de Gazel el encontrar contigo. Le encargo que te frecuente, y a ti que me envíes una relación de tu vida, prometiéndote que te enviaré una muy exacta de la mía, pues a lo que veo somos tales los dos, que merecemos mutuamente tener un perfecto conocimiento el uno del otro. Alá te guarde.

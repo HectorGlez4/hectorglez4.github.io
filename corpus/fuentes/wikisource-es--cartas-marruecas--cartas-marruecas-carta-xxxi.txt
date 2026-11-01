@@ -1,0 +1,17 @@
+fuente: wikisource-es
+obra: Cartas marruecas
+url: https://es.wikisource.org/wiki/Cartas_marruecas/Carta_XXXI
+recuperado: 2026-11-01
+---
+Cartas marruecas/Carta XXXI
+|título=[[Cartas marruecas]]
+|autor=José Cadalso
+obra> |título=Cartas marruecas
+obra> |autor=José Cadalso
+obra> |título={{Anclaje+|Índice}}
+---
+Carta XXXI
+
+Ben-Beley a Gazel
+
+De las cartas que recibo de tu parte desde que estás en España, y las que me escribiste en otros viajes, infiero una gran contradicción en los españoles, común a todos los europeos. Cada día alaban la libertad que les nace del trato civil y sociable, la ponderan y se envanecen de ella; pero al mismo tiempo se labran a sí mismos la más penosa esclavitud. La naturaleza les impone leyes como a todos los hombres; la religión les añade otras; la patria, otras; las carreras, otras; y como si no bastasen todas estas cadenas para esclavizarlos, se imponen a sí mismos otros muchos preceptos espontáneamente en el trato civil y diario, en el modo de vestirse, en la hora de comer, en la especie de diversión, en la calidad del pasatiempo, en el amor y en la amistad. Pero ¡qué exactitud en observarlos! ¡Cuánto mayor que en la observancia de los otros!

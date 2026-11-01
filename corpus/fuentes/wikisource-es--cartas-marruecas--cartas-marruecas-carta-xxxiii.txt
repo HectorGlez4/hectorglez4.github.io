@@ -1,0 +1,23 @@
+fuente: wikisource-es
+obra: Cartas marruecas
+url: https://es.wikisource.org/wiki/Cartas_marruecas/Carta_XXXIII
+recuperado: 2026-11-01
+---
+Cartas marruecas/Carta XXXIII
+|título=[[Cartas marruecas]]
+|autor=José Cadalso
+obra> |título=Cartas marruecas
+obra> |autor=José Cadalso
+obra> |título={{Anclaje+|Índice}}
+---
+Carta XXXIII
+
+Gazel a Ben-Beley
+
+En mis viajes por la península me hallo de cuando en cuando con algunas cartas de mi amigo Nuño, que se mantiene en Madrid. Te enviaré copia de algunas y empiezo por la siguiente, en que habla de ti sin conocerte.
+
+Copia. «Amado Gazel: Estimaré que continúes tu viaje por la península con felicidad. No extraño tu detención en Granada: es ciudad llena de antigüedades del tiempo de tus abuelos. Su suelo es delicioso y sus habitantes son amables. Yo continúo haciendo la vida que sabes y visitando la tertulia que conoces. Otras pudiera frecuentar, pero ¿a qué fin? He vivido con hombres de todas clases, edades y genios; mis años, mi humor y mi carrera me precisaron a tratar y congeniar sucesivamente con varios sujetos; milicia, pleitos, pretensiones y amores me han hecho entrar y salir con frecuencia en el mundo. Los lances de tanta escena como he presenciado, ya como individuo de la farsa, o ya como del auditorio, me han hecho hallar tedio en lo ruidoso de las gentes, peligro en lo bajo de la república y delicia en la medianía.
+
+»¿Habrá cosa más fastidiosa que la conversación de aquellos que pesan el mérito del hombre por el de la plata y oro que posee? Éstos son los ricos. ¿Habrá cosa más cansada que la compañía de los que no estiman a un hombre por lo que es, sino por lo que fueron sus abuelos? Éstos son los nobles. ¿Cosa más vana que la concurrencia de aquellos que apenas llaman racional al que no sabe el cálculo algebraico o el idioma caldeo? Éstos son los sabios. ¿Cosa más insufrible que la concurrencia de los que vinculan todas las ventajas del entendimiento humano en juntar una colección de medallas o en saber qué edad tenía Catulo cuando compuso el Pervigilium Veneris, si es suyo, o de quien sea en caso de no serlo del dicho? Éstos son los eruditos. En ningún concurso de éstos ha depositado naturaleza el bien social de los hombres. Envidia, rencor y vanidad ocupan demasiado tales pechos para que en ellos quepan la verdadera alegría, la conversación festiva, la chanza inocente, la mutua benevolencia, el agasajo sincero y la amistad, en fin, madre de todos los bienes sociables. Ésta sólo se halla entre los hombres que se miran sin competencia.
+
+»La semana pasada envié a Cádiz las cartas que me dejaste para el sujeto de aquella ciudad a quien has encargado las dirija a Ben-Beley. También escribo yo a este anciano como me lo encargas. Espero con la mayor ansia su respuesta para confirmarme en el concepto que me has hecho formar de sus virtudes, menos por la relación que me hiciste de ellas que por las que veo en tu persona. Prendas cuyo origen puede atribuirse en gran parte a sus consejos y crianza».

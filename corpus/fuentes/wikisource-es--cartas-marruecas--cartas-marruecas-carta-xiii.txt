@@ -1,0 +1,17 @@
+fuente: wikisource-es
+obra: Cartas marruecas
+url: https://es.wikisource.org/wiki/Cartas_marruecas/Carta_XIII
+recuperado: 2026-11-01
+---
+Cartas marruecas/Carta XIII
+|título=[[Cartas marruecas]]
+|autor=José Cadalso
+obra> |título=Cartas marruecas
+obra> |autor=José Cadalso
+obra> |título={{Anclaje+|Índice}}
+---
+Carta XIII
+
+De Gazel a Ben-Beley
+
+Instando a mi amigo cristiano a que me explicase qué es nobleza hereditaria, después de decirme mil cosas que yo no entendí, mostrarme estampas que me parecieron de mágica, y figuras que tuve por capricho de algún pintor demente, y después de reírse conmigo de muchas cosas que decía ser muy respetables en el mundo, concluyó con estas voces, interrumpidas con otras tantas carcajadas de risa: «Nobleza hereditaria es la vanidad que yo fundo en que, ochocientos años antes de mi nacimiento, muriese uno que se llamó como yo me llamo, y fue hombre de provecho, aunque yo sea inútil para todo».

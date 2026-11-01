@@ -1,0 +1,17 @@
+fuente: wikisource-es
+obra: Cartas marruecas
+url: https://es.wikisource.org/wiki/Cartas_marruecas/Carta_XIX
+recuperado: 2026-11-01
+---
+Cartas marruecas/Carta XIX
+|título=[[Cartas marruecas]]
+|autor=José Cadalso
+obra> |título=Cartas marruecas
+obra> |autor=José Cadalso
+obra> |título={{Anclaje+|Índice}}
+---
+Carta XIX
+
+Ben-Beley a Gazel, respuesta de la anterior
+
+Como suben al cielo las aromas de las flores, y como llegan a mezclarse con los celestes coros los trinos de las aves, así he recibido la expresión de rendimiento que me ha traído la carta en que abominas del desacato de algunos jóvenes europeos hacia sus padres. Mantente contra tan horrendas máximas, como la peña se mantiene contra el esfuerzo de las olas, y créeme que Alá mirará con bondad, desde la alteza de su trono, a los hijos que tratan con reverencia a sus padres, pues los otros se oponen abiertamente al establecimiento de la sabia economía que resplandece en la creación.

@@ -1,0 +1,27 @@
+fuente: wikisource-es
+obra: Cartas marruecas
+url: https://es.wikisource.org/wiki/Cartas_marruecas/Carta_LVII
+recuperado: 2026-11-01
+---
+Cartas marruecas/Carta LVII
+|título=[[Cartas marruecas]]
+|autor=José Cadalso
+obra> |título=Cartas marruecas
+obra> |autor=José Cadalso
+obra> |título={{Anclaje+|Índice}}
+---
+Carta LVII
+
+De Gazel a Ben-Beley
+
+Si los vicios comunes en el método europeo de escribir la historia son tan capitales como te tengo avisado, te espantará otro mucho mayor y más común en la historia que llaman universal. Apenas hay nación en Europa que no haya producido un escritor, o bien compendioso, o bien extenso, de la historia universal; pero ¿qué trazas de ser universal? A más de las preocupaciones que guían las plumas, y los respetos que atan las manos a estos historiadores generales, comunes con los iguales obstáculos de los historiadores particulares, tienen uno muy singular y peculiar de ellos, y es que cada uno, escribiendo con individualidad los fastos de su nación, los anales gloriosos de sus reyes y generales, los progresos hechos por sus sabios en las ciencias, contando cada cosa de éstas con unas menudencias en realidad despreciables, cree firmemente que cumple para con las demás naciones en referir cuatro o cinco épocas notables, y nombrar cuatro o cinco hombres grandes, aunque sea desfigurando sus nombres. El historiador universal inglés gastará muchas hojas en la noticia de quién fue cualquiera de sus corsarios, y apenas dice que hubo un Turena en el mundo. El francés nos dirá de buena gana con igual exactitud quién fue el primer actor que mudó el sombrero por el morrión en los papeles de su teatro, y por poco se olvida quién fue el duque de Malboroug.
+
+-¡Qué chasco el que acabo de llevar! -díjome Nuño pocos días ha-, ¡qué chasco, cuando, engañado por el título de una obra en que el autor nos prometía la vida de todos los grandes hombres del mundo, voy a buscar unos cuantos amigos de mi mayor estimación, y no me hallé ni siquiera con el nombre de ellos! Voy por el abecedario a encontrar los Ordoños, Sanchos, Fernandos de Castilla, los Jaimes de Aragón, y nada, nada dice de ellos.
+
+Entre tantos hombres grandes como desperdiciaron su sangre durante ocho siglos en ayudar a su patria a sacudir el yugo de tus abuelos, apenas dos o tres han merecido la atención de este historiador. Botánicos insignes, humanistas, estadistas, poetas, oradores anteriores con más de un siglo, y algunos dos, a las academias francesas, quedan sepultados en el olvido si no se leen más historias que éstas. Pilotos vizcaínos, andaluces, portugueses, que navegaron con tanta osadía como pericia, y por consiguiente tan beneméritos de la sociedad, quedan cubiertos con igual velo. Los soldados catalanes y aragoneses, tan ilustres en ambas Sicilias y sus mares por los años 1280, no han parecido dignos de fama póstuma a los tales compositores. Doctores cordobeses de tu religión y descendientes de tu país, que conservaron las ciencias en España mientras ardía la península en guerras sangrientas, tampoco ocupan una llana en la tal obra.
+
+Creo que se quejarán de igual descuido las demás naciones, menos la del autor. ¿Qué mérito, pues, para llamarse universal? Si un sabio de Siam-China se aplicase a entender algún idioma europeo y tuviese encargo de su soberano de leer una historia de éstos, e informarle de su contenido, juzgo que ceñiría su dictamen a estas pocas líneas: «He leído la historia universal cuyo examen se me ha cometido, y de su lectura infiero que en aquella pequeña parte del mundo que llaman Europa no hay más que una nación cultivada, es a saber la patria del autor; y los demás son unos países incultos, o poco menos, pues apenas tiene media docena de hombres ilustres cada una de ellas, por más que nos hayan quedado tradiciones de padres a hijos, por las cuales sabemos que centenares de años ha, arribaron a nuestras costas algunos navíos con hombres europeos, los cuales dieron noticia de que sus países en diferentes eras han producido varones dignos de la admiración de la posteridad. Digo que los tales viajeros deben ser despreciados por sospechosos en punto de verdad en lo que contaron de sus patrias y patriotas, pues apenas se habla de ellas ni de sus hijos en esta historia universal, escrita por un europeo, a quien debemos suponer completamente instruido en las letras de toda Europa, pues habla de toda ella».
+
+En efecto, amigo Ben-Beley, no creo que se pueda ver jamás una historia universal completa, mientras se siga el método de escribirla uno solo o muchos de un mismo país.
+
+¿No se juntaron los astrónomos de todos los países para observar el paso de Venus por el disco del sol? ¿No se comunican todas las academias de Europa sus observaciones astronómicas, sus experimentos físicos y sus adelantamientos en todas las ciencias? Pues señale cada nación cuatro o cinco de sus hombres los más ilustrados, menos preocupados, más activos y más laboriosos, trabajen éstos a los anales en lo respectivo a su patria, júntense después las obras que resultan del trabajo de los de cada nación, y de aquí se forma una verdadera historia universal, digna de todo aquel tal cual crédito que merecen las obras de los hombres.

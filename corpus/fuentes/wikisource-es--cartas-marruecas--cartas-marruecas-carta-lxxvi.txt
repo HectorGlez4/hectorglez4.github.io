@@ -1,0 +1,19 @@
+fuente: wikisource-es
+obra: Cartas marruecas
+url: https://es.wikisource.org/wiki/Cartas_marruecas/Carta_LXXVI
+recuperado: 2026-11-01
+---
+Cartas marruecas/Carta LXXVI
+|título=[[Cartas marruecas]]
+|autor=José Cadalso
+obra> |título=Cartas marruecas
+obra> |autor=José Cadalso
+obra> |título={{Anclaje+|Índice}}
+---
+Carta LXXVI
+
+De Gazel a Ben-Beley
+
+Son infinitos los caprichos de la moda. Uno de los actuales es escribirme cartas algunas mujeres que no me conocen sino de nombre, o por oírme, o por hablarme, o por ambos casos. Se han puesto muchas en este pie desde que se divulgó la esquela que me escribió la primera y yo te remití. Lo mismo ejecutaré con las que me parezcan dignas de pasar el mar para divertir a un sabio africano con extravagancias europeas; y sin perder correo, allá va esa copia. Depón por un rato, oh mi venerable Ben-Beley, el serio aspecto de tu edad y carácter. Te he oído mil veces que algún rato empleado en pasatiempo suele dejar el espíritu más descansado para dedicarse a sublimes especulaciones. Me acuerdo haberte visto cuidar de un pájaro en la jaula y de una flor en el jardín: nunca me pareciste más sabio. El hombre grande nunca es mayor que cuando se baja al nivel de los demás hombres, sin que esto le quite el remontarse después a donde le encumbre el rayo de la esencia suprema que nos anima. Dice, pues, así la carta:
+
+«Señor moro: Las francesas tienen cierto pasatiempo que llaman coquetería, y es engaño que hace la mujer a cuantos hombres se presentan. La coqueta lo pasa muy bien, porque tiene a su disposición todos los jóvenes de algún mérito, y se lisonjea mucho del amor propio con tanto incienso. Pero como los franceses toman y dejan con bastante ligereza algunas cosas, y entre ellas las de amor, las consecuencias de mil coquetinas en perjuicio de un mozo se reducen a que el tal lo reflexiona un minuto, y se va con su incensario a otro altar. Los españoles son más formales en esto de enamorarse; y como ya todo aquel antiguo aparato de galanteo, obstáculos que vencer, dificultades que prevenir, criados que cohechar, como todo esto se ha desvanecido, empiezan a padecer desde el instante que se enamoraron de una coqueta española, y suele parar la cosa en que el amante que conoce la burla que le han hecho se muere, se vuelve loco, o a mejor librar, piensa en ausentarse desesperado. Yo soy una de las más famosas en esta secta, y no puedo menos de acordarme con satisfacción propia de las víctimas que se han sacrificado en mi templo y por mi culto. Si en Marruecos nos dan algún día semejante despotismo, que será en el mismo instante que se anulen las austeras leyes de los serrallos, y si las señoras marruecas quisiesen admitir unas cuantas españolas para catedráticas de esta nueva ciencia hasta ahora desconocida en África, prometo en breve tiempo sacar, entre mis lecciones y la de otra media docena de amigas, suficiente número de discípulas para que paguen los musulmanes a pocas semanas todas las tiranías que han ejercido sobre nosotras desde el mismo Mahoma hasta el día de la fecha; pues aumentando el dominio de mi sexo sobre el masculino en proporción del calor del clima como se ha experimentado en la corta distancia del paso de los Pirineos, deben esperar las coquetas marruecas un despotismo que apenas cabe en la imaginación humana, sobre todo en las provincias meridionales de ese imperio».

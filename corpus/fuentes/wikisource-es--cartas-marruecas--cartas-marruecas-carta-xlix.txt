@@ -1,0 +1,29 @@
+fuente: wikisource-es
+obra: Cartas marruecas
+url: https://es.wikisource.org/wiki/Cartas_marruecas/Carta_XLIX
+recuperado: 2026-11-01
+---
+Cartas marruecas/Carta XLIX
+|título=[[Cartas marruecas]]
+|autor=José Cadalso
+obra> |título=Cartas marruecas
+obra> |autor=José Cadalso
+obra> |título={{Anclaje+|Índice}}
+---
+Carta XLIX
+
+Gazel a Ben-Beley
+
+¿Quién creyera que la lengua tenida universalmente por la más hermosa de todas las vivas dos siglos ha, sea hoy una de las menos apreciables? Tal es la priesa que se han dado a echarla a perder los españoles. El abuso de su flexibilidad, digámoslo así, la poca economía en figuras y frases de muchos autores del siglo pasado, y la esclavitud de los traductores de presente a sus originales, han despojado este idioma de sus naturales hermosuras, cuales eran laconismo, abundancia y energía. Los franceses han hermoseado el suyo al paso que los españoles lo han desfigurado. Un párrafo de Montesquieu y otros coetáneos tiene tal abundancia de las tres hermosuras referidas, que no parecían caber en el idioma francés; y siendo anteriores con un siglo y algo más los autores que han escrito en buen castellano, los españoles del día parecen haber hecho asunto formal de humillar el lenguaje de sus padres. Los traductores e imitadores de los extranjeros son los que más han lucido en esta empresa. Como no saben su propia lengua, porque no se sirven tomar el trabajo de estudiarla, cuando se hallan con alguna hermosura en algún original francés, italiano o inglés, amontonan galicismos, italianismos y anglicismos, con lo cual consiguen todo lo siguiente:
+
+Defraudan el original de su verdadero mérito, pues no dan la verdadera idea de él en la traducción.
+
+Añaden al castellano mil frases impertinentes.
+
+Lisonjean al extranjero, haciéndole creer que la lengua española es subalterna a las otras.
+
+Alucinan a muchos jóvenes españoles, disuadiéndoles del indispensable estudio de su lengua natal.
+
+Sobre estos particulares suele decirme Nuño: «Algunas veces me puse a traducir, cuando muchacho, varios trozos de literatura extranjera; porque así como algunas naciones no tuvieron a menos el traducir nuestras obras en los siglos en que éstas lo merecían, así debemos nosotros portarnos con ellas en lo actual. El método que seguí fue éste: leía un párrafo del original con todo cuidado; procuraba tomarle el sentido preciso; lo meditaba mucho en mi mente, y luego me preguntaba yo a mí mismo: si yo hubiese de poner en castellano la idea que me ha producido esta especie que he leído, ¿cómo lo haría? Después recapacitaba si algún autor antiguo español había dicho cosa que se le pareciese; si se me figuraba que sí, iba a leerlo, y tomaba todo lo que me parecía ser análogo a lo que deseaba. Esta familiaridad con los españoles del XVI siglo y algunos del XVII me sacó de muchos apuros, y sin esta ayuda es formalmente imposible el salir de ellos, a no cometer los vicios de estilo que son tan comunes. Más te diré. Creyendo la transmigración de las artes tan firmemente como cree la de las almas cualquiera buen pitagorista, he creído ver en el castellano y latín de Luis Vives, Alonso Matamoros, Pedro Ciruelo, Francisco Sánchez llamado el Brocense, Hurtado de Mendoza, Ercilla, fray Luis de Granada, fray Luis de León, Garcilaso, Argensola, Herrera, Álava, Cervantes y otros, las semillas que tan felizmente han cultivado los franceses de la mitad última del siglo pasado, de que tanto fruto han sacado los del actual. En medio del justo respeto que siempre han observado las plumas españolas en materias de religión y gobierno, he visto en los referidos autores excelentes trozos, así de pensamiento como de locución, hasta en las materias frívolas de pasatiempo gracioso; y en aquellas en que la crítica con sobrada libertad suele mezclar lo frívolo con lo serio, y que es precisamente el género que más atractivo tiene en lo moderno extranjero, hallo mucho en lo antiguo nacional, así impreso como inédito. Y en fin, concluyo que, bien entendido y practicado nuestro idioma, según lo han manejado los maestros arriba citados, no necesita más echarlo a perder en la traducción de lo que se escribe, bueno o malo, en lo restante de Europa; y a la verdad, prescindiendo de lo que han adelantado en física y matemática, por lo demás no hacen absoluta falta las traducciones».
+
+Esto suele decir Nuño cuando habla seriamente en este punto.

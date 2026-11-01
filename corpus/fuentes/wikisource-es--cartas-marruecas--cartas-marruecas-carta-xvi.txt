@@ -1,0 +1,27 @@
+fuente: wikisource-es
+obra: Cartas marruecas
+url: https://es.wikisource.org/wiki/Cartas_marruecas/Carta_XVI
+recuperado: 2026-11-01
+---
+Cartas marruecas/Carta XVI
+|título=[[Cartas marruecas]]
+|autor=José Cadalso
+obra> |título=Cartas marruecas
+obra> |autor=José Cadalso
+obra> |título={{Anclaje+|Índice}}
+---
+Carta XVI
+
+De Gazel a Ben-Beley
+
+Entre los manuscritos de mi amigo Nuño he hallado uno, cuyo título es: Historia heroica de España. Preguntándole qué significaba, me dijo que prosiguiese leyendo, y el prólogo me gustó tanto, que lo copio y te lo remito.
+
+Prólogo. «No extraño que las naciones antiguas llamasen semidioses a los hombres grandes que hacían proezas superiores a las comunes fuerzas humanas. En cada país han florecido en tales o tales tiempos unos varones cuyo mérito ha pasmado a los otros. La patria, deudora a ellos de singulares beneficios, les dio aplausos, aclamaciones y obsequios. Por poco que el patriotismo inflamase aquellos ánimos, las ceremonias se volvían culto, el sepulcro altar, la casa templo; y venía el hombre grande a ser adorado por la generación inmediata a sus contemporáneos, siendo alguna vez tan rápido este progreso, que sus mismos conciudadanos, conocidos y amigos tomaban el incensario y cantaban los himnos. La sequedad de aquellos pueblos sobre la idea de la deidad pudo multiplicar este nombre. Nosotros, más instruidos, no podemos admitir tal absurdo; pero hay una gran diferencia entre este exceso y la ingratitud con que tratamos la memoria de nuestros héroes. Las naciones modernas no tienen bastantes monumentos levantados a los nombres de sus varones ilustres. Si lo motiva la envidia de los que hoy ocupan los puestos de aquéllos, temiendo éstos que su lustre se eclipse por el de sus antecesores, anhelen a superarlos; la eficacia del deseo por sí sola bastará a igualar su mérito con el de los otros.
+
+»De los pueblos que hoy florecen, el inglés es el solo que parece adoptar esta máxima, y levanta monumentos a sus héroes en la misma iglesia que sirve de panteón a sus reyes; llegando a tanto su sistema, que hacen algunas voces igual obsequio a las cenizas de los héroes enemigos, para realzar la gloria de sus naturales. Las demás naciones son ingratas a la memoria de los que las han adornado y defendido. Esta es una de las fuentes de la desidia universal, o de la falta de entusiasmo de los generales modernos. Ya no hay patriotismo, porque ya no hay patria.
+
+»La francesa y la española abundan en héroes insignes, mayores que muchos de los que veo en los altares de la Roma pagana. Los reinados de Francisco I, Enrique IV y Luis XIV han llenado de gloria los anales de Francia; pero no tienen los franceses una historia de sus héroes tan metódica como yo quisiera y ellos merecen, pues sólo tengo noticia de la obra de Mr. Perrault, y ésta no trata sino de los hombres ilustres del último de los tres reinados gloriosos que he dicho. En lugar de llenar toda Europa de tanta obra frívola como han derramado a millares en estos últimos años, ¡cuánto más beneméritos de sí mismos serían si nos hubieran dado una obra de esta especie, escrita por algún hombre grande de los que tienen todavía en medio del gran número de autores que no merecen tal nombre!».
+
+-Este era uno de los asuntos que yo había emprendido -prosiguió Nuño- cuando tenía algunas ideas muy opuestas a las de quietud y descanso que ahora me ocupan. Intenté escribir una historia heroica de España: ésta era una relación de todos los hombres grandes que ha producido la nación desde don Pelayo. Para poner el cimiento de esta obra tuve que leer con sumo cuidado nuestras historias, así generales como particulares; y te juro que cada libro era una mina cuya abundancia me envanece. El mucho número formaba la gran dificultad de la empresa, porque todos hubieran llegado a un tomo exorbitante, y pocos hubieran sido de dificultosa elección. Entre tantos insignes, si cabe alguna preferencia que no agravie a los que incluye, señalaba como asuntos sobresalientes después de don Pelayo, libertador de su patria, don Ramiro, padre de sus vasallos; Peláez de Correa, azote de los moros; Alonso Pérez de Guzmán, ejemplo de fidelidad; Cid Ruy Díaz, restaurador de Valencia; Fernando III, el conquistador de Sevilla; Gonzalo Fernández de Córdoba, vasallo envidiable; Hernán Cortés, héroe mayor que los de la fábula; Leiva, Pescara y Basto, vencedores de Pavía, y Álvaro de Bazán, favorito de la fortuna.
+
+¡Cuán glorioso proyecto sería el de levantar estatuas, monumentos y columnas en los parajes más públicos de la villa capital con un corto elogio de cada una citando la historia de sus hazañas! ¡Qué estímulo para nuestra juventud, que se criaría desde su niñez a vista de unas cenizas tan venerables! A semejantes ardides debió Roma en mucha parte el dominio del orbe.

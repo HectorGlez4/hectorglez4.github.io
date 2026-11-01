@@ -1,0 +1,19 @@
+fuente: wikisource-es
+obra: Cartas marruecas
+url: https://es.wikisource.org/wiki/Cartas_marruecas/Carta_LXI
+recuperado: 2026-11-01
+---
+Cartas marruecas/Carta LXI
+|título=[[Cartas marruecas]]
+|autor=José Cadalso
+obra> |título=Cartas marruecas
+obra> |autor=José Cadalso
+obra> |título={{Anclaje+|Índice}}
+---
+Carta LXI
+
+De Gazel a Ben-Beley
+
+En esta nación hay un libro muy aplaudido por todas las demás. Lo he leído, y me ha gustado sin duda; pero no deja de mortificarme la sospecha de que el sentido literal es uno, y el verdadero es otro muy diferente. Ninguna obra necesita más que ésta el diccionario de Nuño. Lo que se lee es una serie de extravagancias de un loco, que cree que hay gigantes, encantadores, etcétera; algunas sentencias en boca de un necio, y muchas escenas de la vida bien criticada; pero lo que hay debajo de esta apariencia es, en mi concepto, un conjunto de materias profundas e importantes.
+
+Creo que el carácter de algunos escritores europeos (hablo de los clásicos de cada nación) es el siguiente: los españoles escriben la mitad de lo que imaginan; los franceses más de lo que piensan, por la calidad de su estilo; los alemanes lo dicen todo, pero de manera que la mitad no se les entiende; los ingleses escriben para sí solos.

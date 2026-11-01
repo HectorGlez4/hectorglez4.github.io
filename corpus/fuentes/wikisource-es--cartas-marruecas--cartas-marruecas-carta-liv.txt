@@ -1,0 +1,19 @@
+fuente: wikisource-es
+obra: Cartas marruecas
+url: https://es.wikisource.org/wiki/Cartas_marruecas/Carta_LIV
+recuperado: 2026-11-01
+---
+Cartas marruecas/Carta LIV
+|título=[[Cartas marruecas]]
+|autor=José Cadalso
+obra> |título=Cartas marruecas
+obra> |autor=José Cadalso
+obra> |título={{Anclaje+|Índice}}
+---
+Carta LIV
+
+Gazel a Ben-Beley
+
+La voz fortuna y la frase hacer fortuna me han gustado en el diccionario de Nuño. Después de explicarlas, añade lo siguiente:
+
+«El que aspire a hacer fortuna por medios honrosos no tiene más que uno en que fundar su esperanza, a saber, el mérito. El que sea menos escrupuloso tiene mayor número en que escoger, a saber, todos los vicios y las apariencias de todas las virtudes. Escoja según las circunstancias lo que más le convenga, o por junto o por menor, ocultamente o a las claras, con moderación o sin ella».

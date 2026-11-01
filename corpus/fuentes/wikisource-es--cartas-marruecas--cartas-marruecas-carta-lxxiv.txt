@@ -1,0 +1,31 @@
+fuente: wikisource-es
+obra: Cartas marruecas
+url: https://es.wikisource.org/wiki/Cartas_marruecas/Carta_LXXIV
+recuperado: 2026-11-01
+---
+Cartas marruecas/Carta LXXIV
+|título=[[Cartas marruecas]]
+|autor=José Cadalso
+obra> |título=Cartas marruecas
+obra> |autor=José Cadalso
+obra> |título={{Anclaje+|Índice}}
+---
+Carta LXXIV
+
+De Gazel a Ben-Beley
+
+Ayer me hallé en una concurrencia en que se hablaba de España, de su estado, de su religión, de su gobierno, de lo que es, de lo que ha sido, de lo que pudiera ser, etc. Admirome la elocuencia, la eficacia y el amor con que se hablaba, tanto más cuanto noté que excepto Nuño, que era el que menos se explicaba, ninguno de los concurrentes era español. Unos daban al público los hermosos efectos de sus especulaciones para que esta monarquía tuviese cien navíos de línea en poco más de seis meses; otros, para que la población de estas provincias se duplicase en menos de quince años; otros, para que todo el oro y plata de ambas Américas queden en la península; otros, para que las fábricas de España desbancasen todas las de Europa; y así de lo demás.
+
+Muchos apoyaban sus discursos con pariedades sacadas de lo que sucede en otro país. Algunos pretendían que no les movía más objeto que el hacer bien a esta nación, contemplándola con dolor atrasada en más de siglo y medio respecto de las otras, y no faltaban algunos que ostentaban su profunda ciencia en estas materias para demostrar con más evidencia la inutilidad de los genios o ingenios españoles, y otros, en fin, por otros varios motivos.
+
+-Harto se hizo en tiempo de Felipe V, no obstante sus largas y sangrientas guerras -dijo uno.
+
+-Tal quedó ello en la muerte de Carlos II -dijo otro.
+
+-Fue muy desidioso -añadió un tercero-, Felipe IV, y muy desgraciado su ministro el conde-duque de Olivares.
+
+-¡Ay, caballeros! -dijo Nuño-; aunque todos ustedes tengan la mejor intención cuando hablan de remediar los atrasos de España, aunque todos tengan el mayor interés en trabajar a restablecerla, por más que la miren con el amor de patria, digámoslo así, adoptiva, es imposible que acierten. Para curar a un enfermo, no bastan las noticias generales de la facultad ni el buen deseo del profesor; es preciso que éste tenga un conocimiento particular del temperamento del paciente, del origen de la enfermedad, de sus incrementos y de sus complicaciones si las hay. Quieren curar toda especie de enfermos y de enfermedades con un mismo medicamento: no es medicina, sino lo que llaman charlatanería, no sólo ridícula en quien la profesa, sino dañosa para quien la usa. En lugar de todas estas especulaciones y proyectos, me parece mucho más sencillo otro sistema nacido del conocimiento que ustedes no tienen, y se reduce a esto poco: la monarquía española nunca fue tan feliz por dentro, ni tan respetada por fuera, como en la época de morir Fernando el Católico; véase, pues, qué máximas entre las que formaron juntas aquella excelente política han decaído de su antiguo vigor; vuélvase a dar el vigor antiguo, y tendremos la monarquía en el mismo pie en que la halló la casa de Austria. Cortas variaciones respecto el sistema actual de Europa bastan, en vez de todas esas que ustedes han amontonado.
+
+-¿Quién fue ese Fernando el Católico? -preguntó uno de los que habían perorado. -¿Quién fue ése? -preguntó otro. -¿Quién, quién? -preguntaron todos los demás estadistas.
+
+-¡Ay, necio de mí! -exclamó Nuño, perdiendo algo de su natural quietud-; ¡necio de mí! que he gastado tiempo en hablar de España con gentes que no saben quién fue Fernando el Católico. Vámonos, Gazel.

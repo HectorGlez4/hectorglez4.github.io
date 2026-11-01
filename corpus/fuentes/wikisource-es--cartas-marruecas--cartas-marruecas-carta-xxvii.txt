@@ -1,0 +1,17 @@
+fuente: wikisource-es
+obra: Cartas marruecas
+url: https://es.wikisource.org/wiki/Cartas_marruecas/Carta_XXVII
+recuperado: 2026-11-01
+---
+Cartas marruecas/Carta XXVII
+|título=[[Cartas marruecas]]
+|autor=José Cadalso
+obra> |título=Cartas marruecas
+obra> |autor=José Cadalso
+obra> |título={{Anclaje+|Índice}}
+---
+Carta XXVII
+
+De Gazel a Ben-Beley
+
+Toda la noche pasada estuvo hablando mi amigo Nuño de una cosa que llaman fama póstuma. Éste es un fantasma que ha alborotado muchas provincias y quitado el sueño a muchos, hasta secarles el cerebro y hacerles perder el juicio. Alguna dificultad me costó entender lo que era, pero lo que aun ahora no puedo comprender es que haya hombres que apetezcan la tal fama. ¡Cosa que yo no he de gozar, no sé por qué he de apetecerla! Si después de morir en opinión de hombre insigne, hubiese yo de volver a segunda vida, en que sacase el fruto de la fama que merecieron las acciones de la primera, y que esto fuese indefectible, sería cosa muy cuerda trabajar en la actual para la segunda: era una especie de economía, aun mayor y más plausible que la del joven que guarda para la vejez. Pero, Ben-Beley, ¿de qué me servirá? ¿Qué puede ser este deseo que vemos en algunos tan eficaz de adquirir tan inútil ventaja? En nuestra religión y en la cristiana, el hombre que muere no tiene ya conexión temporal con los que quedan vivos. Los palacios que fabricó no le han de hospedar, ni ha de comer el fruto del árbol que dejó plantado, ni ha de abrazar los hijos que dejó; ¿de qué, pues, le sirven los hijos, los huertos, los palacios? ¿Será, acaso, la quinta esencia de nuestro amor propio este deseo de dejar nombre a la posteridad? Sospecho que sí. Un hombre que logró atraerse la consideración de su país o siglo, conoce que va a perder el humo de tanto incensario desde el instante que expire; conoce que va a ser igual con el último de sus esclavos. Su orgullo padece en este instante un abatimiento tan grande como lo fue la suma de todas las lisonjas recibidas mientras adquirió la fama. ¿Por qué no he de vivir eternamente, dícese a sí mismo, recibiendo los aplausos que voy a perder? Voces tan agradables, ¿no han de volver a lisonjear mis oídos? El gustoso espectáculo de tanta rodilla hincada ante mí, ¿no ha de volver a deleitar mi vista? La turba de los que me necesitan, ¿han de volverme la espalda? ¿Han de tener ya por objeto de asco y horror el que fue para ellos un dios tutelar, a quien temblaban airado y aclamaban piadoso? Semejantes reflexiones le atormentan en la muerte; pero hace su último esfuerzo su amor propio, y le engaña diciendo: tus hazañas llevarán tu nombre de siglo en siglo a la más remota posteridad; la fama no se oscurece con el humo de la hoguera, ni se corrompe con el polvo del sepulcro. Como hombre, te comprende la muerte; como héroe, la vences. Ella misma se hace la primera esclava de tu triunfo, y su guadaña el primero de tus trofeos. La tumba es una cuna nueva para semidioses como tú; en su bóveda han de resonar las alabanzas que te canten futuras generaciones. Tu sombra ha de ser tan venerada por los hijos de los que viven como lo fue tu presencia entre sus padres. Hércules, Alejandro y otros ¿no viven? ¿Acaso han de olvidarse sus nombres? Con estos y otros iguales delirios se aniquila el hombre; muchos de este carácter inficionan toda la especie; y anhelan a inmortalizarse algunos que ni aun en su vida son conocidos.

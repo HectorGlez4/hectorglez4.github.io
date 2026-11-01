@@ -1,0 +1,19 @@
+fuente: wikisource-es
+obra: Cartas marruecas
+url: https://es.wikisource.org/wiki/Cartas_marruecas/Carta_XIV
+recuperado: 2026-11-01
+---
+Cartas marruecas/Carta XIV
+|título=[[Cartas marruecas]]
+|autor=José Cadalso
+obra> |título=Cartas marruecas
+obra> |autor=José Cadalso
+obra> |título={{Anclaje+|Índice}}
+---
+Carta XIV
+
+De Gazel a Ben-Beley
+
+Entre las voces que mi amigo hace ánimo de poner en su diccionario, la voz victoria es una de las que necesitan más explicación, según se confunde en las gacetas modernas. Toda la guerra pasada -dice Nuño- estuve leyendo gacetas y mercurios, y nunca pude entender quién ganaba o perdía. Las mismas funciones en que me he hallado me han parecido sueños, según las relaciones impresas, por su lectura, y no supe jamás cuándo habíamos de cantar el Te Deum o el Miserere. Lo que sucede por lo regular es lo siguiente:
+
+Dase una batalla sangrienta entre dos ejércitos numerosos, y uno o ambos quedan destruidos; pero ambos generales la envían pomposamente referida a sus cortes respectivas. El que más ventaja sacó, por pequeña que sea, incluye en su relación un estado de los enemigos muertos, heridos y prisioneros, cañones, morteros, banderas, estandartes, timbales y carros tomados. Se anuncia la victoria en su corte con el Te Deum, campanas, iluminaciones, etc. El otro asegura que no fue batalla, sino un pequeño choque de poca o ninguna importancia; que, no obstante la grande superioridad del enemigo, no rehusó la acción; que las tropas del rey hicieron maravillas; que se acabó la función con el día y que, no fiando su ejército a la oscuridad de la noche, se retiró metódicamente. También canta el Te Deum y se tiran cohetes en su corte. Y todo queda problemático, menos la muerte de veinte mil hombres, que ocasiona la de otros tantos hijos huérfanos, padres desconsolados, madres viudas, etc.

@@ -1,0 +1,23 @@
+fuente: wikisource-es
+obra: Cartas marruecas
+url: https://es.wikisource.org/wiki/Cartas_marruecas/Carta_LXXXIX
+recuperado: 2026-11-01
+---
+Cartas marruecas/Carta LXXXIX
+|título=[[Cartas marruecas]]
+|autor=José Cadalso
+obra> |título=Cartas marruecas
+obra> |autor=José Cadalso
+obra> |título={{Anclaje+|Índice}}
+---
+Carta LXXXIX
+
+Nuño a Gazel
+
+Las cartas familiares que no tratan sino de la salud y negocios domésticos de amigos y conocidos son las composiciones más frías e insulsas del mundo. Debieran venderse impresas y tener los blancos necesarios para la firma y la fecha, con distinción de cartas de padres a hijos, de hijos a padres, de amos a criados, de criados a amos, de los que viven en la corte a los que viven en la aldea, de los que viven en la aldea a los que viven en la corte. Con este surtido, que pudiera venderse en cualquiera librería a precio hecho, se quitaría uno el trabajo de escribir una resma de papel llena de insulseces todos los años y de leer otras tantas de la misma calidad, dedicando el tiempo a cosas más útiles.
+
+Si son de esta especie las contenidas en el paquete que te remito y que me han enviado desde Cádiz para ti, no puedo menos de compadecerte. Pero creo que entre ellas habrá muchas del viejo Ben-Beley, en las cuales no puede menos de hallarse cosas más dignas de tu lectura.
+
+Te remitiré en breve un extracto de cierta obra de un amigo mío que está haciendo un paralelo entre el sistema de las ciencias en varios siglos y países. Es increíble que, habiéndose adelantado tan poco en lo esencial, haya sido tanta la variedad de los dictámenes en diferentes épocas.
+
+Hay nación en Europa (y no es la española) que pocos siglos ha prohibió la imprenta, después todos los teatros, luego toda la filosofía opuesta al peripateticismo, y sucesivamente el uso de la quina; y luego ha dado en el extremo opuesto. Quiso la misma hacer salir de la cáscara, en su propio país frío y húmedo, los pájaros traídos dentro de sus huevos desde su clima natural que es caliente y seco. Otros de sus sabios se empeñaron en sostener que los animales pueden procrearse sin ser producidos del semen. Otros apuraron el sistema de la atracción neutoniana, hasta atribuir a dicha atracción la formación de los fetos dentro de las madres. Otros dijeron que los montes se habían formado de la mar. Esta libertad ha trascendido de la física a la moral. Han defendido algunos que lo de tuyo y mío eran delitos formales; que en la igualdad natural de los hombres es vicioso el establecimiento de las jerarquías entre ellos; que el estado natural del hombre es la soledad, como la de la fiera en el monte. Los que no ahondamos tanto en las especulaciones, no podemos determinarnos a dejar las ciudades de Europa y pasar a vivir con los hotentotes, patagones, araucos, iroqueses, apalaches y otros tales pueblos, que parece más conforme a la naturaleza, según el sistema de estos filósofos, o lo que sean.

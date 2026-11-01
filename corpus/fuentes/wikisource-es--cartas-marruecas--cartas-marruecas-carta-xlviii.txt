@@ -1,0 +1,17 @@
+fuente: wikisource-es
+obra: Cartas marruecas
+url: https://es.wikisource.org/wiki/Cartas_marruecas/Carta_XLVIII
+recuperado: 2026-11-01
+---
+Cartas marruecas/Carta XLVIII
+|título=[[Cartas marruecas]]
+|autor=José Cadalso
+obra> |título=Cartas marruecas
+obra> |autor=José Cadalso
+obra> |título={{Anclaje+|Índice}}
+---
+Carta XLVIII
+
+De Nuño a Ben-Beley
+
+He visto en una de las cartas que Gazel te escribe un retrato horroroso del siglo actual, y la ridícula defensa de él, hecha por un hombre muy superficial e ignorante. Partamos la diferencia tú y yo entre los dos pareceres; y sin dejar de conocer que no es la era tan buena ni tan mala como se dice, confesemos que lo peor que tiene este siglo es que lo defiendan como cosa propia semejantes abogados. El que se ve en esta carta oponerse a la demasiado rigurosa crítica de Gazel es capaz de perder la más segura causa. Emprende la defensa, como otros muchos, por el lado que muestra más flaqueza y ridiculez. Si en lugar de querer sostener estas locuras se hiciera cargo de lo que merece verdaderos aplausos, hubiera dado sin duda al africano mejor opinión de la era en que vino a Europa. Otro efecto le hubiera causado una relación de la suavidad de costumbres, humanidad en la guerra, noble uso de las victorias, blandura en los gobiernos; los adelantamientos en las matemáticas y física; el mutuo comercio de talentos por medio de las traducciones que se hacen en todas las lenguas de cualquiera obra que sobresale en alguna de ellas. Cuando todas estas ventajas no sean tan efectivas como lo parecen, pueden a lo menos hacer equilibrio con la enumeración de desdichas que hace Gazel; y siempre que los bienes y los males, los delitos y las virtudes estén en igual balanza, no puede llamarse tan infeliz el siglo en que se note esta igualdad, respecto del número que nos muestra la historia llenos de miserias y horrores, y sin una época siquiera que consuele al género humano.

@@ -1,0 +1,19 @@
+fuente: wikisource-es
+obra: Cartas marruecas
+url: https://es.wikisource.org/wiki/Cartas_marruecas/Carta_V
+recuperado: 2026-11-01
+---
+Cartas marruecas/Carta V
+|título=[[Cartas marruecas]]
+|autor=José Cadalso
+obra> |título=Cartas marruecas
+obra> |autor=José Cadalso
+obra> |título={{Anclaje+|Índice}}
+---
+Carta V
+
+De Gazel a Ben-Beley
+
+He leído la toma de Méjico por los españoles y un extracto de los historiadores que han escrito las conquistas de esta nación en aquella remota parte del mundo que se llama América, y te aseguro que todo parece haberse ejecutado por arte mágica: descubrimiento, conquista, posesión, dominio son otras tantas maravillas.
+
+Como los autores por los cuales he leído esta serie de prodigios son todos españoles, la imparcialidad que profeso pide también que lea lo escrito por los extranjeros. Luego sacaré una razón media entre lo que digan éstos y aquéllos, y creo que en ella podré fundar el dictamen más sano. Supuesto que la conquista y dominio de aquel medio mundo tuvieron y aún tienen tanto influjo sobre las costumbres de los españoles, que son ahora el objeto de mi especulación, la lectura de esta historia particular es un suplemento necesario al de la historia general de España, y clave precisa para la inteligencia de varias alteraciones sucedidas en el estado político y moral de esta nación. No entraré en la cuestión tan vulgar de saber si estas nuevas adquisiciones han sido útiles, inútiles o perjudiciales a España. No hay evento alguno en las cosas humanas que no pueda convertirse en daño o en provecho, según lo maneje la prudencia.

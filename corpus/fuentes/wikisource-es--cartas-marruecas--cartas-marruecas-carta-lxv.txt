@@ -1,0 +1,21 @@
+fuente: wikisource-es
+obra: Cartas marruecas
+url: https://es.wikisource.org/wiki/Cartas_marruecas/Carta_LXV
+recuperado: 2026-11-01
+---
+Cartas marruecas/Carta LXV
+|título=[[Cartas marruecas]]
+|autor=José Cadalso
+obra> |título=Cartas marruecas
+obra> |autor=José Cadalso
+obra> |título={{Anclaje+|Índice}}
+---
+Carta LXV
+
+De Gazel a Ben-Beley
+
+-Yo me vi una vez, -decíame Nuño no ha mucho-, en la precisión de que me despreciasen por tonto, o me aborreciesen como capaz de vengarme. No tardé en escoger, a pesar de mi amor propio, el concepto que más me abatía. Humilláronme en tanto grado, que nada me podía consolar sino esta reflexión que hice con mucha frecuencia: con abrir yo la boca, me temblarían en lugar de mofarme; pero yo me estimaría menos. La autoridad de ellos puede desvanecerse, pero mi interior testimonio ha de acompañarme más allá de la sepultura. Hagan, pues, ellos lo que quieran; yo haré lo que debo.
+
+Esta doctrina sin duda es excelente, y mi amigo Nuño hace muy bien en observarla, pero es cosa fuerte que los malos abusen de la paciencia y virtud de los buenos. No me parece ésta menor villanía que la del ladrón que roba y asesina al pasajero que halla dormido e indefenso en un bosque. Aun me parece mayor, porque el infeliz asesinado no conoce el mal que se le hace; pero el hombre virtuoso de este caso está viendo continuamente la mano que le hiere mortalmente. Esto, no obstante, dicen que es común en el mundo.
+
+-No tanto -respondió Nuño-; las gentes se cansan de esta superabundancia de honradez y suelen vengarse cuando pueden. Lo que más me lisonjeaba en aquella situación era el conocimiento de ser yo original en mi conducta. Aun les daba yo gracias de haberme precisado a hacer un examen tan riguroso de mi hombría de bien. De su suma crueldad me resultaba el mayor consuelo, y lo que para otros hubiera sido un tormento riguroso, era para mí una nueva especie de delicia. Me tenía yo a mí mismo por un Belisario de segunda clase, y solamente me hubiera yo trocado por aquel general, para serlo en la primera, contemplando que hubiera sido mayor mi satisfacción, cuanto más alta mi elevación y más baja mi caída.

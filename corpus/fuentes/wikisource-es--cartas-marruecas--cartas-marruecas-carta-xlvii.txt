@@ -1,0 +1,17 @@
+fuente: wikisource-es
+obra: Cartas marruecas
+url: https://es.wikisource.org/wiki/Cartas_marruecas/Carta_XLVII
+recuperado: 2026-11-01
+---
+Cartas marruecas/Carta XLVII
+|título=[[Cartas marruecas]]
+|autor=José Cadalso
+obra> |título=Cartas marruecas
+obra> |autor=José Cadalso
+obra> |título={{Anclaje+|Índice}}
+---
+Carta XLVII
+
+Respuesta de la anterior
+
+Veo que nos conformamos mucho en las ideas de virtud, amistad y vicio, como también en la justicia que hacemos al corazón del hombre en medio de la universal sátira que padece la humanidad en nuestros días. Bien me lo prueba tu carta, pero si se publicase pocos la entenderían. La mayor parte de los lectores la tendría por un trozo de moral abstracto y casi de ningún servicio en el trato humano. Reiríanse de ello los mismos que lloran algunas veces de resulta de no observarse semejante doctrina. Ésta es otra de nuestras flaquezas, y de las más antiguas, pues no fue el siglo de Augusto el primero que dio motivo a decir: conozco lo mejor y sigo lo peor; y desde aquél al nuestro han pasado muchos, todos muy parecidos los unos a los otros.

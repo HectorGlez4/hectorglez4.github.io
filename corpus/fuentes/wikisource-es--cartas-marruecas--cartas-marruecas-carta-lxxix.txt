@@ -1,0 +1,17 @@
+fuente: wikisource-es
+obra: Cartas marruecas
+url: https://es.wikisource.org/wiki/Cartas_marruecas/Carta_LXXIX
+recuperado: 2026-11-01
+---
+Cartas marruecas/Carta LXXIX
+|título=[[Cartas marruecas]]
+|autor=José Cadalso
+obra> |título=Cartas marruecas
+obra> |autor=José Cadalso
+obra> |título={{Anclaje+|Índice}}
+---
+Carta LXXIX
+
+De Gazel a Ben-Beley
+
+Dicen los jóvenes: esta pesadez de los viejos es insufrible. Dicen los viejos: este desenfreno de los jóvenes es inaguantable. Unos y otros tienen razón, dice Nuño; la demasiada prudencia de los ancianos hace imposibles las cosas más fáciles, y el sobrado ardor de los mozos finge fáciles las cosas imposibles. En este caso no debe interesarse el prudente, añade Nuño, ni por uno ni por otro bando; sino dejar a los unos con su cólera y a los otros con su flema; tomar el medio justo y burlarse de ambos extremos.

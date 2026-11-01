@@ -1,0 +1,27 @@
+fuente: wikisource-es
+obra: Cartas marruecas
+url: https://es.wikisource.org/wiki/Cartas_marruecas/Carta_LIX
+recuperado: 2026-11-01
+---
+Cartas marruecas/Carta LIX
+|título=[[Cartas marruecas]]
+|autor=José Cadalso
+obra> |título=Cartas marruecas
+obra> |autor=José Cadalso
+obra> |título={{Anclaje+|Índice}}
+---
+Carta LIX
+
+De Gazel a Ben-Beley
+
+Dicen en Europa que la historia es el libro de los reyes. Si esto es así, y la historia se prosigue escribiendo como hasta ahora, creo firmemente que los reyes están destinados a leer muchas mentiras a más de las que oyen. No dudo que una relación exacta de los hechos principales de los hombres, y una noticia de la formación, auge, decadencia y ruina de los estados, darían en breves hojas a un príncipe lecciones de lo que ha de hacer, sacadas de lo que otros han hecho. Pero ¿dónde se halla esta relación y esta noticia? No la hay, Ben-Beley, no la hay ni la puede haber. Esto último te espantará, pero se te hará muy fácil de creer si lo reflexionas. Un hecho no se puede escribir sino en el tiempo en que sucede, o después de sucedido. En el tiempo del evento, ¿qué pluma se encargará de ello, sin que la detenga la razón de estado, o alguna preocupación? Después del cabo, ¿sobre qué documento ha de trabajar el historiador que lo transmita a la posteridad, sino sobre lo que dejaron escrito las plumas que he referido?
+
+-Yo mandara quemar de buena gana, -decía yo a Nuño en la tertulia, pocos noches ha-, todas las historias menos la del siglo presente. Daría el encargo de escribir ésta a algún hombre lleno de crítica, imparcialidad y juicio. Los meros hechos, sin aquellas reflexiones que comúnmente hacen más importante el mérito del historiador que el peso de la historia en la mente de los lectores, formarían todos la obra.
+
+-¿Y dónde se imprimiría? -dijo Nuño-. ¿Y quién la leería? ¿Y qué efectos produciría? ¿Y qué pago tendría el escritor? Era menester -añadió con gracia-, era menester imprimirla junto al cabo de Hornos o al de Buena Esperanza, y leerla a los hotentotes o a los patagones, y aun así me temo que algunos sabios de los que habrá sin duda a su modo entre aquéllos que nosotros nos servimos llamar salvajes, diría al oír tantos y tales sucesos al que los estuviera leyendo: «Calla, calla, no leas esas fábulas llenas de ridiculeces y barbaridades»; y los mozos proseguirían su danza, caza o pesca, sin creer que hubiese en el mundo conocido parte alguna donde pudiesen suceder tales cosas.
+
+Prosígase, pues, escribiendo la historia como se hace en el día. Déjense a la posteridad noticias de nuestro siglo, de nuestros héroes y de nuestros abuelos, con poco más o menos la misma autoridad que las que nos envió la antigüedad acerca de los trabajos de Hércules y de la conquista del vellocino. Equivóquese la fábula con la historia, sin más diferencia que escribirse ésta en prosa y la otra en verso; sea la armonía diferente, pero la verdad la misma, y queden nuestros hijos tan ignorantes de lo que sucede en nuestro siglo como nosotros lo estamos de lo que sucedió en el de Eneas.
+
+Uno de los tertulianos quiso partir la diferencia entre el proyecto irónico de Nuño y lo anteriormente expuesto, opinando que se escribiesen tres géneros de historias en cada siglo: uno para el pueblo, en la que hubiese efectivamente caballos llenos de hombres y armas, dioses amigos y contrarios, y sucesos maravillosos; otro más auténtico, pero no tan sincero, que descubriese del todo los resortes que mueven las grandes máquinas; éste sería del uso de la gente mediana; y otro cargado de reflexiones políticas y morales, en impresiones poco numerosas, meramente reservadas ad usum Principum.
+
+No me parece mal esta treta en lo político, y creo que algunos historiadores españoles lo han ejecutado, a saber: Garibay con la primera mira, Mariana con la segunda, y Solís con la tercera. Pero yo no soy político ni aspiro a serlo; deseo sólo ser filósofo, y en este ánimo digo que la verdad sola es digna de llenar el tiempo y ocupar la atención de todos los hombres, aunque singularmente a los que mandan a otros.
