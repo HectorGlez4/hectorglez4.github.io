@@ -1,0 +1,33 @@
+fuente: wikisource-es
+obra: Reflexiones o sentencias y máximas morales
+traductor: Narciso Álvaro y Cereza
+url: https://es.wikisource.org/wiki/Reflexiones_o_sentencias:_53
+recuperado: 2026-11-01
+---
+Reflexiones o sentencias: 53
+|título=[[Reflexiones o sentencias y máximas morales]]
+|autor=François de La Rochefoucauld
+obra> |título=Reflexiones o sentencias y máximas morales
+obra> |traductor=Narciso Álvaro y Cereza
+obra> |autor=François de La Rochefoucauld
+obra> |título={{Anclaje+|Índice}}
+---
+§ 521. Siempre ganaria en el trato quien renunciase el bien que de él pudiera decirse, con la condicion de que nunca se dijese mal.
+
+§ 522. Por dispuesto que el mundo esté á juzgar mal; siempre por lo regular hace mas gracia al mérito aparente, que injusticia al verdadero.
+
+§ 523. Suele encontrarse un ignorante con ingenio; pero jamas con juicio.
+
+§ 524. Mas ganariamos en dejarnos ver tales como somos, que en procurar parecer lo que no somos.
+
+§ 525. Nuestros enemigos se acercan mas á la verdad en los juicios que forman de nosotros, que nosotros mismos.
+
+§ 526. Muchos remedios hay para curar el amor; pero ninguno infalible.
+
+§ 527. Conveniente seria que conociesemos todo lo que nuestras pasiones nos hacen ejecutar.
+
+§ 528. La vejez es un tirano que prohibe bajo pena de muerte los placeres de la juventud.
+
+§ 529. El mismo orgullo, que nos hace vituperar los defectos de que nos creemos libres, nos inclina á mirar con desprecio las buenas calidades que no tenemos.
+
+§ 530. Mas orgullo hay por lo regular que bondad en condolernos de las desgracias de nuestros enemigos. Les damos muestras de compasion para hacerles entender que somos superiores á ellos.

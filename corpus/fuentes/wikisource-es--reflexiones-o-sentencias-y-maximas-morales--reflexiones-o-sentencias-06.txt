@@ -1,0 +1,34 @@
+fuente: wikisource-es
+obra: Reflexiones o sentencias y máximas morales
+traductor: Narciso Álvaro y Cereza
+url: https://es.wikisource.org/wiki/Reflexiones_o_sentencias:_06
+recuperado: 2026-11-01
+---
+Reflexiones o sentencias: 06
+|título=[[Reflexiones o sentencias y máximas morales]]
+|autor=François de La Rochefoucauld
+obra> |título=Reflexiones o sentencias y máximas morales
+obra> |traductor=Narciso Álvaro y Cereza
+obra> |autor=François de La Rochefoucauld
+obra> |título={{Anclaje+|Índice}}
+---
+§ 51. Aun más extravagante es el capricho de nuestro humor que el de la fortuna.
+
+§ 52. La complexión que produce un talento propio para bagatelas, es contraria a la que le produce propio para cosas grandes.
+
+§ 53. El apego o la indiferencia de los filósofos a la vida no es mas que una complacencia de su amor propio; de que debemos disputar tanto como del gusto del paladar, o de la elección de
+los colores.
+
+§ 54. Es una especie de felicidad el conocer hasta que punto debemos ser felices.
+
+§ 55. Nuestro humor es el que pone precio a todo lo que nos da la fortuna.
+
+§ 56. La felicidad está en el gusto, y no en las cosas. Entonces es uno feliz cuando posee lo que ama, y no cuando tiene lo que es amable para los otros.
+
+§ 57. En vano nos fatigamos en buscar fuera de nosotros el reposo que no hallamos dentro de nosotros mismos.
+
+§ 58. Nunca somos tan felices ó infelices como imaginamos.
+
+§ 59. Los que se creen beneméritos tienen a honor ser desgraciados; para persuadirse a sí y a los otros que son dignos de ser el blanco de la fortuna.
+
+§ 60. Nada debe disminuir más la satisfacción que tenemos de nosotros mismos, que el ver que en un tiempo desaprobamos lo que aprobamos en otro.

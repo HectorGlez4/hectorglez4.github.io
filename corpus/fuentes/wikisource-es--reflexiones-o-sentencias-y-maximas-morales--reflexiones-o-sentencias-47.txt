@@ -1,0 +1,33 @@
+fuente: wikisource-es
+obra: Reflexiones o sentencias y máximas morales
+traductor: Narciso Álvaro y Cereza
+url: https://es.wikisource.org/wiki/Reflexiones_o_sentencias:_47
+recuperado: 2026-11-01
+---
+Reflexiones o sentencias: 47
+|título=[[Reflexiones o sentencias y máximas morales]]
+|autor=François de La Rochefoucauld
+obra> |título=Reflexiones o sentencias y máximas morales
+obra> |traductor=Narciso Álvaro y Cereza
+obra> |autor=François de La Rochefoucauld
+obra> |título={{Anclaje+|Índice}}
+---
+§ 461. Bien puede uno ser mas sagaz que otro; pero no mas que todos.
+
+§ 462. Menos desgraciados somos á veces en ser engañados de lo que amamos, que en ser desengañados.
+
+§ 463. Consérvase largo tiempo el primer amante, cuando no se toma otro segundo.
+
+§ 464. No tenemos ánimo para decir en general que carecemos de defectos, y que nuestros enemigos no tienen buenas prendas; pero en particular no estamos muy distantes de creerlo.
+
+§ 465. De todos nuestros defectos, el que con menos pena confesamos es la pereza; persuadidos á que participa de todas las virtudes apacibles, y á que sin destruir enteramente las demas solo suspende sus funciones.
+
+§ 466. Hay una elevacion que no depende de la fortuna: es un cierto aire que nos distingue, y parece nos destina á grandes cosas: es un precio que imperceptiblemente nos damos á nosotros mismos. Por esta calidad nos usurpamos la deferencia de los demas hombres; y es lo que mas de ordinario nos hace sus superiores, que el nacimiento, las dignidades, y aun el mérito mismo.
+
+§ 467. Hay mérito sin elevacion; pero no hay elevacion sin algun mérito.
+
+§ 468. Es la elevacion respecto del mérito, lo que el adorno respecto de la hermosura.
+
+§ 469. Lo que menos hay en los galanteos es amor.
+
+§ 470. Se sirve á veces la fortuna de nuestros defectos para elevarnos: y hay personas incómodas, cuyo mérito estaria mal recompensado, si no nos causara su ausencia algun disgusto.

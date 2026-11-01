@@ -1,0 +1,34 @@
+fuente: wikisource-es
+obra: Reflexiones o sentencias y máximas morales
+traductor: Narciso Álvaro y Cereza
+url: https://es.wikisource.org/wiki/Reflexiones_o_sentencias:_02
+recuperado: 2026-11-01
+---
+Reflexiones o sentencias: 02
+|título=[[Reflexiones o sentencias y máximas morales]]
+|autor=François de La Rochefoucauld
+obra> |título=Reflexiones o sentencias y máximas morales
+obra> |traductor=Narciso Álvaro y Cereza
+obra> |autor=François de La Rochefoucauld
+obra> |título={{Anclaje+|Índice}}
+---
+§ 11. Engendran frecuentemente las pasiones a sus contrarias. La avaricia produce a veces la prodigalidad, y la prodigalidad a la avaricia; y somos de ordinario fuertes por debilidad y
+atrevidos por timidez.
+
+§ 12. Por mas que trabajemos en ocultar nuestras pasiones con las apariencias de piedad y de honor, nunca dejan de descubrirse al traves de estos velos.
+
+§ 13. Con mas impaciencia lleva nuestro amor propio la condenación de nuestros gustos, que la de nuestras opiniones.
+
+§ 14. No son otra cosa todas las pasiones que los diversos grados de calor y frialdad de la sangre.
+
+§ 15. No sólo están los hombres sujetos á perder la memoria de los beneficios y de las injurias; sino que aborrecen tambien á los que los tienen obligados, y dejan de aborrecer a los que los han ofendido: la aplicación a recompensar el bien y a vengarse del mal, les parece una servidumbre a que les cuesta mucho trabajo someterse.
+
+§ 16. No es por lo comun la clemencia de los príncipes otra cosa que una política para ganar el amor de los pueblos.
+
+§ 17. Esta clemencia, de que tanto alarde se hace, se practica ya por vanidad, ya por pereza, muchas veces por miedo, y casi siempre por todas estas cosas juntas.
+
+§ 18. La moderación en la buena fortuna no es otra cosa que el temor de la vergüenza de que nos cubriría nuestro entonamiento, o el de perder lo que poseemos.
+
+§ 19. La moderación de las personas felices proviene de la calma en que mantiene sus humores la buena fortuna.
+
+§ 20. Es la moderación un temor de caer en la ridiculez y desprecio que merecen los que se desvanecen con su felicidad: es una vana ostentación de la fuerza de nuestro espíritu. En fin la moderación de los hombres en su mayor elevación, es un deseo de parecer más grandes que su fortuna.

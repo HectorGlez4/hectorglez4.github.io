@@ -1,0 +1,34 @@
+fuente: wikisource-es
+obra: Reflexiones o sentencias y máximas morales
+traductor: Narciso Álvaro y Cereza
+url: https://es.wikisource.org/wiki/Reflexiones_o_sentencias:_21
+recuperado: 2026-11-01
+---
+Reflexiones o sentencias: 21
+|título=[[Reflexiones o sentencias y máximas morales]]
+|autor=François de La Rochefoucauld
+obra> |título=Reflexiones o sentencias y máximas morales
+obra> |traductor=Narciso Álvaro y Cereza
+obra> |autor=François de La Rochefoucauld
+obra> |título={{Anclaje+|Índice}}
+---
+§ 201. Mas opuesta es á la economía la avaricia que la liberalidad.
+
+§ 202. Menos crueles hace la ferocidad natural que el amor propio.
+
+§ 203. Por engañosa que sea la esperanza, sirve á lo menos de conducirnos al fin de la vida por un camino delicioso.
+
+§ 204. Siendo asi que por pereza y timidez nos contenemos en los límites de nuestra obligacion, se lleva la virtud ordinariamente todo el honor.
+
+§ 205. Difícil es juzgar si un proceder claro, sincero y honesto es efecto de probidad ó de simulacion.
+
+§ 206. Lo que el mundo llama virtud, es por lo comun un fantasma formado por nuestras pasiones, á que se da un nombre honesto, para hacer impunemente cuanto se quiera.
+
+§ 207.De tal modo estamos preocupados en nuestro favor, que lo que regularmente tenemos por virtudes, no es en realidad sino un número de vicios que se les parecen, y que el orgullo y el amor
+propio nos han disfrazado.
+
+§ 208. Se pierden las virtudes en el interes, como los rios en el mar.
+
+§ 209. Si examinamos bien los varios efectos del enojo, hallaremos que nos hace faltar á mas obligaciones que el interes.
+
+§ 210. Varias clases hay de curiosidad: una de interes, que nos incita á desear saber lo que puede sernos útil; y otra de orgullo, que nace del deseo de saber lo que los otros ignoran.

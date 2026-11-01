@@ -1,0 +1,33 @@
+fuente: wikisource-es
+obra: Reflexiones o sentencias y máximas morales
+traductor: Narciso Álvaro y Cereza
+url: https://es.wikisource.org/wiki/Reflexiones_o_sentencias:_51
+recuperado: 2026-11-01
+---
+Reflexiones o sentencias: 51
+|título=[[Reflexiones o sentencias y máximas morales]]
+|autor=François de La Rochefoucauld
+obra> |título=Reflexiones o sentencias y máximas morales
+obra> |traductor=Narciso Álvaro y Cereza
+obra> |autor=François de La Rochefoucauld
+obra> |título={{Anclaje+|Índice}}
+---
+§ 501. Luego que una vez nos han engañado nuestros amigos, no se les debe mas que indiferencia á las señales de su amistad; pero siempre se debe sensibilidad á sus desgracias.
+
+§ 502. La fortuna y el capricho gobiernan el mundo.
+
+§ 503. Mas fácil es conocer al hombre en general, que en particular á uno.
+
+§ 504. No se debe juzgar del mérito de un hombre por sus grandes calidades, sino por el uso que sabe hacer de ellas.
+
+§ 505. Hay un cierto reconocimiento vivo, que no solo nos descarga de los beneficios que hemos recibido, sino que hace al mismo tiempo que nuestros amigos nos sean deudores por pagarles lo que les debemos.
+
+§ 506. Casi nada deseariamos con ardor, si conociesemos perfectamente lo que deseamos.
+
+§ 507. La causa de que las mugeres sean poco sensibles á la amistad, es que esta es insulsa cuando se ha gustado el amor.
+
+§ 508. En la amistad, como en el amor, somos por lo regular mas dichosos por lo que ignoramos, que por lo que sabemos.
+
+§ 509. Probamos á honrarnos con los defectos de que no queremos corregirnos.
+
+§ 510. Las mas violentas pasiones nos dejan respirar algunas veces; pero siempre nos agita la vanidad.

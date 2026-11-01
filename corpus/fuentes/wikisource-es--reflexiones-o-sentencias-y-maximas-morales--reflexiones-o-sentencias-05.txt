@@ -1,0 +1,33 @@
+fuente: wikisource-es
+obra: Reflexiones o sentencias y máximas morales
+traductor: Narciso Álvaro y Cereza
+url: https://es.wikisource.org/wiki/Reflexiones_o_sentencias:_05
+recuperado: 2026-11-01
+---
+Reflexiones o sentencias: 05
+|título=[[Reflexiones o sentencias y máximas morales]]
+|autor=François de La Rochefoucauld
+obra> |título=Reflexiones o sentencias y máximas morales
+obra> |traductor=Narciso Álvaro y Cereza
+obra> |autor=François de La Rochefoucauld
+obra> |título={{Anclaje+|Índice}}
+---
+§ 41. Parece que la naturaleza, que tan sabiamente ha dispuesto los órganos de nuestro cuerpo para hacernos felices, nos ha dado también el orgullo para excusarnos el dolor de conocer nuestras imperfecciones.
+
+§ 42. Mas parte tiene en las advertencias que hacemos a los que yerran el orgullo que la bondad; y no tanto los reprehendemos para corregirlos, como para persuadirles que estamos exentos de aquellos defectos.
+
+§ 43. Prometemos según nuestras esperanzas, y cumplimos según nuestros temores.
+
+§ 44. El interés habla todos los idiomas y representa todos los papeles; hasta el del desinteresado.
+
+§ 45. El interés que ciega a unos, sirve de luz a otros.
+
+§ 46. Hácense ordinariamente incapaces de grandes cosas los que se aplican demasiado a menudencias.
+
+§ 47. No son suficientes nuestras fuerzas para poder ir en todo con nuestra razón.
+
+§ 48. Creen comunmente los hombres conducirse, cuando son conducidos; y mientras su espíritu los dirige hacia un objeto, los arrastra insensiblemente su corazón hacia otro.
+
+§ 49. Solo percibimos las alteraciones y movimientos extraordinarios de nuestros humores y temperamento, como la violencia de la cólera; pero casi nadie conoce que estos humores tienen un curso ordinario y reglado que mueve e inclina dulce e imperceptiblemente nuestra voluntad a diferentes acciones. Caminan juntos, por decirlo asi, y ejercen sucesivamente un secreto imperio en nosotros mismos: de modo que les somos deudores, sin que podamos advertirlo, de una parte considerable de todas nuestras acciones.
+
+§ 50. Mal denominadas están la fuerza y la debilidad del espíritu; pues no son en efecto otra cosa que la buena o mala disposición de los órganos del cuerpo.

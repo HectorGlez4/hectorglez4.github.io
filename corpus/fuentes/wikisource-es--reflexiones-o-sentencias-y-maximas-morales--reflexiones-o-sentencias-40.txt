@@ -1,0 +1,33 @@
+fuente: wikisource-es
+obra: Reflexiones o sentencias y máximas morales
+traductor: Narciso Álvaro y Cereza
+url: https://es.wikisource.org/wiki/Reflexiones_o_sentencias:_40
+recuperado: 2026-11-01
+---
+Reflexiones o sentencias: 40
+|título=[[Reflexiones o sentencias y máximas morales]]
+|autor=François de La Rochefoucauld
+obra> |título=Reflexiones o sentencias y máximas morales
+obra> |traductor=Narciso Álvaro y Cereza
+obra> |autor=François de La Rochefoucauld
+obra> |título={{Anclaje+|Índice}}
+---
+§ 391. Hay en los zelos mas amor propio que amor.
+
+§ 392. Regularmente nos consolamos por debilidad de los males de que no nos puede consolar la razon.
+
+§ 393. Mas deshonra la ridiculez que el deshonor.
+
+§ 394. No confesamos los defectos leves, sino para persuadir que no tenemos otros mayores.
+
+§ 395. Mas irreconciliable es la envidia que el odio.
+
+§ 396. A veces creemos aborrecer la lisonja, y no aborrecemos sino el modo de lisongear.
+
+§ 397. Perdonamos en cuanto amamos.
+
+§ 398. Mas difícil es el ser fiel á su amada un favorecido que un desdeñado.
+
+§ 399.No conocen las mugeres toda su coquetería.
+
+§ 400. No tienen las mugeres severidad completa, si no tienen aversion.

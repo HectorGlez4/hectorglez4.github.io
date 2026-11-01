@@ -1,0 +1,35 @@
+fuente: wikisource-es
+obra: Reflexiones o sentencias y máximas morales
+traductor: Narciso Álvaro y Cereza
+url: https://es.wikisource.org/wiki/Reflexiones_o_sentencias:_35
+recuperado: 2026-11-01
+---
+Reflexiones o sentencias: 35
+|título=[[Reflexiones o sentencias y máximas morales]]
+|autor=François de La Rochefoucauld
+obra> |título=Reflexiones o sentencias y máximas morales
+obra> |traductor=Narciso Álvaro y Cereza
+obra> |autor=François de La Rochefoucauld
+obra> |título={{Anclaje+|Índice}}
+---
+§ 341. La sinceridad que mutuamente se piden los amantes para saber uno y otro cuando dejarán de amarse, no tanto es por querer estar advertidos de cuando no se les amará, como por estar mejor
+asegurados de que se les ama cuando no se les dice lo contrario.
+
+§ 342. Creen frecuentemente las mugeres amar, aun cuando todavía no aman. La ocupacion de una intriga, la emocion de espíritu que causa el galanteo, la inclinacion natural al placer de ser amadas, el trabajo de la resistencia, las persuaden á que tienen pasion, cuando solo tienen coquetería.
+
+§ 343. La mas justa comparacion que podemos hacer del amor es la de la fiebre: no tenemos mas poder sobre el uno que sobre la otra, asi por su violencia como por su duracion.
+
+§ 344. Vivimos regularmente poco satisfechos de los que negocian, porque abandonan casi siempre el interes de sus amigos por el interes del feliz éxito de la negociacion; que le hacen suyo
+propio por el honor que les resulta de haber acertado á desempeñar su comision.
+
+§ 345. Cuando exageramos la ternura de nuestros amigos para con nosotros, no tanto es por reconocimiento, cuanto por el deseo de hacer comprender nuestro mérito.
+
+§ 346. La aprobacion que damos á los que de nuevo se establecen en el mundo, nace regularmente de la envidia secreta que tenemos á los que ya se hallan establecidos en él.
+
+§ 347. La mayor habilidad de los menos avisados, es saber someterse al buen gobierno de otro.
+
+§ 348. El orgullo, que nos inspira tanta envidia, nos sirve tambien muchas veces para moderarla.
+
+§ 349. Hay falsedades disfrazadas, que representan tan al vivo la verdad, que seria no saber discernir el no dejarse engañar.
+
+§ 350. No es á veces menor habilidad saber aprovecharse de un buen consejo, que aconsejarse bien á sí mismo.

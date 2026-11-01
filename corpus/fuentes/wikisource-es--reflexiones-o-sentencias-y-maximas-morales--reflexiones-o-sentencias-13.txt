@@ -1,0 +1,33 @@
+fuente: wikisource-es
+obra: Reflexiones o sentencias y máximas morales
+traductor: Narciso Álvaro y Cereza
+url: https://es.wikisource.org/wiki/Reflexiones_o_sentencias:_13
+recuperado: 2026-11-01
+---
+Reflexiones o sentencias: 13
+|título=[[Reflexiones o sentencias y máximas morales]]
+|autor=François de La Rochefoucauld
+obra> |título=Reflexiones o sentencias y máximas morales
+obra> |traductor=Narciso Álvaro y Cereza
+obra> |autor=François de La Rochefoucauld
+obra> |título={{Anclaje+|Índice}}
+---
+§ 121. Nos engañamos creyendo que el ingenio y el juicio son dos cosas diferentes. El juicio no es mas que la extension de las luces del ingenio; las cuales penetran hasta el fondo de las cosas, observan en ellas todo lo que merece notarse, y perciben aun lo que parece imperceptible. Asi pues conviene quedemos de acuerdo en que la extensión de las luces del ingenio es la que produce todos los efectos atribuidos al juicio.
+
+§ 122. Cada cual habla bien de su corazon, y nadie se atreve a hablar de su ingenio.
+
+§ 123. La cultura del ingenio consiste en pensar en cosas honestas y delicadas.
+
+§ 124. La agudeza del ingenio consiste en decir cosas placenteras de un modo agradable.
+
+§ 125. Sucede frecuentemente parecer perfectas las cosas a nuestro ingenio, porque no es capaz de hacerlas con mayor perfección.
+
+§ 126. Siempre es el ingenio burlado por el corazón.
+
+§ 127. No todos los que conocen su ingenio conocen su corazón.
+
+§ 128. Los hombres y los negocios tienen su punto de vista. Unos deben mirarse de cerca para juzgar bien de ellos, y de otros no se puede juzgar tan bien, si no se miran de lejos.
+
+§ 129. No es racional el que por acaso descubre la razon; sino el que la conoce, la discierne, y gusta de ella.
+
+§ 130. Para entender bien las cosas es necesario saber su pormenor; y como este es casi infinito, son siempre superficiales e imperfectos nuestros conocimientos.

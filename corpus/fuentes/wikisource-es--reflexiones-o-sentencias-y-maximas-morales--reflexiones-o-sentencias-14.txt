@@ -1,0 +1,33 @@
+fuente: wikisource-es
+obra: Reflexiones o sentencias y máximas morales
+traductor: Narciso Álvaro y Cereza
+url: https://es.wikisource.org/wiki/Reflexiones_o_sentencias:_14
+recuperado: 2026-11-01
+---
+Reflexiones o sentencias: 14
+|título=[[Reflexiones o sentencias y máximas morales]]
+|autor=François de La Rochefoucauld
+obra> |título=Reflexiones o sentencias y máximas morales
+obra> |traductor=Narciso Álvaro y Cereza
+obra> |autor=François de La Rochefoucauld
+obra> |título={{Anclaje+|Índice}}
+---
+§ 131. Disimular la coquetería es una coquetería refinada.
+
+§ 132. No puede el ingenio representar por mucho tiempo el papel del corazón.
+
+§ 133. La juventud es inconstante en sus gustos por el ardor de la sangre; y la vejez tenaz en los suyos por costumbre.
+
+§ 134. Nada damos con tanta liberalidad como los consejos.
+
+§ 135. Cuanto mas amamos a una mujer, estamos más próximos a aborrecerla.
+
+§ 136. Con la vejez se aumentan los defectos del ingenio asi como los del rostro.
+
+§ 137. Hay buenos matrimonios; pero no los hay deliciosos.
+
+§ 138. No podemos consolarnos de ser engañados por nuestros enemigos, y vendidos por nuestros amigos; pero quedamos regularmente satisfechos cuando lo somos por nosotros mismos.
+
+§ 139. Tan fácil es engañarse uno a sí mismo sin conocerlo, como difícil engañar a los otros sin que lo entiendan.
+
+§ 140. En nada hay menos sinceridad que en el modo de pedir y dar consejos. El que los pide afecta una respetuosa deferencia a los sentimientos de su amigo, aunque no piense sino en hacerle aprobar los suyos y garante de su conducta: y el que los da paga la confianza que se le manifiesta con un celo ardiente y desinteresado, aunque no busque ordinariamente en los consejos que da, sino su propio interes o gloria.

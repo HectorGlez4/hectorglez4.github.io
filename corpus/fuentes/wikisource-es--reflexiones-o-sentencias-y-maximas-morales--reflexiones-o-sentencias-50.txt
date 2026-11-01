@@ -1,0 +1,33 @@
+fuente: wikisource-es
+obra: Reflexiones o sentencias y máximas morales
+traductor: Narciso Álvaro y Cereza
+url: https://es.wikisource.org/wiki/Reflexiones_o_sentencias:_50
+recuperado: 2026-11-01
+---
+Reflexiones o sentencias: 50
+|título=[[Reflexiones o sentencias y máximas morales]]
+|autor=François de La Rochefoucauld
+obra> |título=Reflexiones o sentencias y máximas morales
+obra> |traductor=Narciso Álvaro y Cereza
+obra> |autor=François de La Rochefoucauld
+obra> |título={{Anclaje+|Índice}}
+---
+§ 491. Nos honramos con los defectos contrarios á los que tenemos: cuando somos débiles, blasonamos de ser obstinados.
+
+§ 492. Tiene la penetracion un aire de adivinar que lisongea mas nuestra vanidad, que las demas calidades del espíritu.
+
+§ 493. La gracia de la novedad y la larga costumbre, por opuestas que sean, nos impiden igualmente conocer los defectos de nuestros amigos.
+
+§ 494. La mayor parte de los amigos se disgustan de la amistad, y el mayor número de los devotos de la devocion.
+
+§ 495. Fácilmente perdonamos á nuestros amigos los defectos que no nos perjudican.
+
+§ 496. Con mas facilidad perdonan las mugeres que aman las grandes indiscreciones, que las pequeñas infidelidades.
+
+§ 497. En la vejez del amor, como en la de la edad, se vive para los males; pero no para los placeres.
+
+§ 498. Nada impide tanto ser natural, como el deseo de parecerlo.
+
+§ 499. Es en algun modo tomarse parte en las buenas acciones aplaudirlas de buena gana.
+
+§ 500. La señal mas cierta de haber nacido con grandes calidades, es haber nacido sin envidia.

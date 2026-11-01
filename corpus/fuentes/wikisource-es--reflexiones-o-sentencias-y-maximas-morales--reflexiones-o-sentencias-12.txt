@@ -1,0 +1,33 @@
+fuente: wikisource-es
+obra: Reflexiones o sentencias y máximas morales
+traductor: Narciso Álvaro y Cereza
+url: https://es.wikisource.org/wiki/Reflexiones_o_sentencias:_12
+recuperado: 2026-11-01
+---
+Reflexiones o sentencias: 12
+|título=[[Reflexiones o sentencias y máximas morales]]
+|autor=François de La Rochefoucauld
+obra> |título=Reflexiones o sentencias y máximas morales
+obra> |traductor=Narciso Álvaro y Cereza
+obra> |autor=François de La Rochefoucauld
+obra> |título={{Anclaje+|Índice}}
+---
+§ 111. No vivirían mucho tiempo los hombres en sociedad, si no fuesen los unos víctimas de la astucia de los otros.
+
+§ 112. Nuestro amor propio aumenta o disminuye las buenas prendas de nuestros amigos, a proporción de la satisfacción que tenemos de ellos; y juzgamos de su mérito, por el modo con que se portan con nosotros.
+
+§ 113. Todos se quejan de su memoria, y nadie de su juicio.
+
+§ 114. Más agradamos comunmente en el comercio de la vida por nuestros defectos, que por nuestras buenas prendas y calidades.
+
+§ 115. No tiene la menor apariencia de tal la mayor ambición, cuando se halla en una absoluta imposibilidad de llegar a lo que aspira.
+
+§ 116. Desengañar a un hombre preocupado de su mérito, es hacerle tan mala obra, como se hizo al loco de Atenas, que creía eran suyos todos los bajeles que llegaban al puerto.
+
+§ 117. Gustan los viejos de dar buenos consejos, para consolarse de no estar ya en estado de dar malos ejemplos.
+
+§ 118. Los nombres célebres envilecen, en lugar de engrandecer, a los que no saben sostenerlos.
+
+§ 119. La señal de un mérito extraordinario es ver a los que mas le envidian precisados a alabarle.
+
+§ 120. Algunos ingratos son menos culpables de su ingratitud, que los que les han hecho el beneficio.

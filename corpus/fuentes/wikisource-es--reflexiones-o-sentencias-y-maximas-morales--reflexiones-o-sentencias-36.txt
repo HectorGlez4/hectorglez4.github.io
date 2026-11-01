@@ -1,0 +1,33 @@
+fuente: wikisource-es
+obra: Reflexiones o sentencias y máximas morales
+traductor: Narciso Álvaro y Cereza
+url: https://es.wikisource.org/wiki/Reflexiones_o_sentencias:_36
+recuperado: 2026-11-01
+---
+Reflexiones o sentencias: 36
+|título=[[Reflexiones o sentencias y máximas morales]]
+|autor=François de La Rochefoucauld
+obra> |título=Reflexiones o sentencias y máximas morales
+obra> |traductor=Narciso Álvaro y Cereza
+obra> |autor=François de La Rochefoucauld
+obra> |título={{Anclaje+|Índice}}
+---
+§ 351. Hay malvados que serian menos peligrosos, si no tuvieran bondad alguna.
+
+§ 352. Bien definida está por su nombre la magnanimidad: sin embargo, podria decirse que es el buen sentido del orgullo, y el camino mas noble para recibir las alabanzas.
+
+§ 353. Es imposible amar segunda vez lo que una vez se dejó verdaderamente de amar.
+
+§ 354. No es tanto la fecundidad del talento la que nos hace hallar muchos expedientes en un mismo negocio, cuanto la falta de luces: esta pobreza hace que nos paremos en todo lo que se presenta á nuestra imaginacion, y nos impide discernir desde luego lo mejor.
+
+§ 355. Hay negocios y enfermedades en uue los medicamentos irritan á ciertos tiempos: la grande habilidad consiste en conocer cuando es peligroso su uso.
+
+§ 356. La sencillez afectada es una delicada impostura.
+
+§ 357. Mas defectos hay en el humor que en el espíritu.
+
+§ 358. El mérito de los hombres tiene su tiempo y su sazon como los frutos.
+
+§ 359. Se puede decir del humor de los hombres, lo que de la mayor parte de los edificios; que tienen muchas fachadas, unas agradables y desagradables otras.
+
+§ 360. La moderacion no puede tener el mérito de combatir y sojuzgar á la ambicion, pues nunca se hallan juntas. La moderacion es la languidez y pereza del alma, asi como la ambicion es su actividad y ardor.

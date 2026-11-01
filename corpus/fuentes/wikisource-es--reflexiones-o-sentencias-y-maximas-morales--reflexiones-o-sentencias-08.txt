@@ -1,0 +1,35 @@
+fuente: wikisource-es
+obra: Reflexiones o sentencias y máximas morales
+traductor: Narciso Álvaro y Cereza
+url: https://es.wikisource.org/wiki/Reflexiones_o_sentencias:_08
+recuperado: 2026-11-01
+---
+Reflexiones o sentencias: 08
+|título=[[Reflexiones o sentencias y máximas morales]]
+|autor=François de La Rochefoucauld
+obra> |título=Reflexiones o sentencias y máximas morales
+obra> |traductor=Narciso Álvaro y Cereza
+obra> |autor=François de La Rochefoucauld
+obra> |título={{Anclaje+|Índice}}
+---
+§ 71. Para poder responder de nuestras acciones futuras, sería preciso poder responder de nuestra fortuna.
+
+§ 72. La sinceridad es una efusión del corazón. Muy pocos la tienen; y la que ordinariamente vemos no es sino un refinado disimulo para ganar la confianza de los demás.
+
+§ 73. La aversión a la mentira es regularmente una imperceptible ambición de hacer dignos de consideración nuestros testimonios, y de merecer a nuestras palabras un respeto de religión.
+
+§ 74. No hace tanto bien en el mundo la verdad, como mal sus apariencias.
+
+§ 75. ¿Cómo podremos decir lo que querremos en adelante, si no sabemos precisamente lo que queremos al presente?
+
+§ 76. Aunque no puede la prudencia asegurarnos del menor acontecimiento, no hay sin embargo elogios que no la tributemos.
+
+§ 77. Un hombre sabio debe reglar sus intereses, y ponerlos cada uno en su orden. Nuestra avaricia le turba por lo regular; haciéndonos atender a un tiempo a tantas cosas, que, por desear
+demasiado las de menos importancia, olvidamos las más considerables.
+
+§ 78. Es el amor respecto del alma del amante, lo que el alma respecto del cuerpo que anima.
+
+§ 79. Es la gentileza respecto del cuerpo, lo que el entendimiento respecto del espíritu.
+
+§ 80. Difícil es definir al amor. Lo que de él se puede decir es, que en el alma es una pasión de reinar, en los espíritus un simpatía, y en el cuerpo un apetito oculto y delicado de poseer
+lo que se ama después de muchos misterios.

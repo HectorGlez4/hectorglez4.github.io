@@ -1,0 +1,33 @@
+fuente: wikisource-es
+obra: Reflexiones o sentencias y máximas morales
+traductor: Narciso Álvaro y Cereza
+url: https://es.wikisource.org/wiki/Reflexiones_o_sentencias:_54
+recuperado: 2026-11-01
+---
+Reflexiones o sentencias: 54
+|título=[[Reflexiones o sentencias y máximas morales]]
+|autor=François de La Rochefoucauld
+obra> |título=Reflexiones o sentencias y máximas morales
+obra> |traductor=Narciso Álvaro y Cereza
+obra> |autor=François de La Rochefoucauld
+obra> |título={{Anclaje+|Índice}}
+---
+§ 531. Hay un exceso de bienes y de males que excede nuestra sensibilidad.
+
+§ 532. Es indispensable que la inocencia no encuentre tanta proteccion como el crímen.
+
+§ 533. De todas las pasiones violentas la que menos mal dice á las mugeres es el amor.
+
+§ 534. La vanidad nos hace ejecutar mas cosas contra nuestro gusto que la razon.
+
+§ 535. Hay perversas calidades que producen grandes talentos.
+
+§ 536. Jamas deseamos con ardor lo que no deseamos sino por la razon.
+
+§ 537. Todas nuestras calidades son inciertas y dudosas, tanto en el bien como en el mal; y casi todas estan á merced de las ocasiones.
+
+§ 538. En las primeras pasiones aman las mugeres al amante, y en las otras al amor.
+
+§ 539. Tiene tambien el orgullo sus caprichos como las demas pasiones: nos avergonzamos de confesar que tenemos zelos, y nos gloriamos de haberlos tenido y de ser capaces de tenerlos.
+
+§ 540. Por raro que sea el verdadero amor, lo es mas todavía la verdadera amistad.

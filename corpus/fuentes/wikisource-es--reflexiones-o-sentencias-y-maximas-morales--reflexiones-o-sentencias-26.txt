@@ -1,0 +1,35 @@
+fuente: wikisource-es
+obra: Reflexiones o sentencias y máximas morales
+traductor: Narciso Álvaro y Cereza
+url: https://es.wikisource.org/wiki/Reflexiones_o_sentencias:_26
+recuperado: 2026-11-01
+---
+Reflexiones o sentencias: 26
+|título=[[Reflexiones o sentencias y máximas morales]]
+|autor=François de La Rochefoucauld
+obra> |título=Reflexiones o sentencias y máximas morales
+obra> |traductor=Narciso Álvaro y Cereza
+obra> |autor=François de La Rochefoucauld
+obra> |título={{Anclaje+|Índice}}
+---
+§ 251. Con la vejez llegamos á ser mas locos y mas cuerdos.
+
+§ 252. Hay personas que se parecen á las seguidillas, que se cantan solo una temporada.
+
+§ 253. La mayor parte de la gente juzga de los hombres por la aceptacion que tienen, ó por su fortuna.
+
+§ 254. Por incertidumbre y variedad que aparezca en el mundo; se nota no obstante un cierto enlace secreto y un órden siempre reglado por la providencia, que hace que cada cosa esté en su lugar
+y siga el curso de su destino.
+
+§ 255. El amor de la gloria, el temor de la vergüenza, el intento de hacer fortuna, el deseo de hacer cómoda y agradable nuestra vida, y el ansia de abatir á los otros, son por lo regular las causas de aquel valor tan célebre entre los hombres.
+
+§ 256. Es el valor en los simples soldados un oficio peligroso que han tomado para ganar la vida.
+
+§ 257. El perfecto valor y la completa cobardía son dos extremos á que rara vez se llega. Es vasto el espacio que hay entre los dos, y contiene todas las otras especies de valentía: no hay menos diferencia entre ellas, que entre los rostros y los genios. Hombres hay que se exponen gustosos al principio de una accion, y que aflojan y se entibian fácilmente por su duracion: otros quedan contentos luego que han satisfecho el honor del mundo, y no hacen mucho caso de lo demas. Hay quienes no siempre son igualmente señores de su miedo: unos se dejan llevar de terrores generales: otros cargan, por no atreverse á quedar en sus puestos. A muchos esfuerza el hábito de peligros menores, y los prepara para arrostrar otros mayores. Algunos son valientes á cuchilladas, y temen á la polvora: otros temen pelear con espada, y no á escopetazos. Todas estas diferentes especies de valor convienen en que (aumentando la noche el temor, y cubriendo con su manto las buenas y malas acciones) dejan á cada uno la libertad de tomar el partido que le parece menos expuesto; porque no hay hombre que en una accion haga
+todo lo que seria capaz de hacer, si estuviese asegurado de salir de ella con felicidad: de modo que es palpable, que el temor de la muerte disminuye el valor una parte considerable.
+
+§ 258. El perfecto valor consiste en hacer sin testigos lo que se hiciera delante de todo el mundo.
+
+§ 259. La intrepidez es una fuerza extraordinaria del alma que la hace superior á las turbaciones, desórdenes y emociones que puede excitar en ella la consideracion de los grandes peligros; y por esta fuerza se mantienen los héroes en un estado tranquilo, y conservan el uso de su razon en los accidentes mas espantosos y terribles.
+
+§ 260. La intrepidez es la que sostiene al corazon en las conjuraciones; y el valor solo le da toda la firmeza necesaria en los peligros de la guerra.

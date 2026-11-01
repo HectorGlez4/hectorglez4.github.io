@@ -1,0 +1,35 @@
+fuente: wikisource-es
+obra: Reflexiones o sentencias y máximas morales
+traductor: Narciso Álvaro y Cereza
+url: https://es.wikisource.org/wiki/Reflexiones_o_sentencias:_11
+recuperado: 2026-11-01
+---
+Reflexiones o sentencias: 11
+|título=[[Reflexiones o sentencias y máximas morales]]
+|autor=François de La Rochefoucauld
+obra> |título=Reflexiones o sentencias y máximas morales
+obra> |traductor=Narciso Álvaro y Cereza
+obra> |autor=François de La Rochefoucauld
+obra> |título={{Anclaje+|Índice}}
+---
+§ 101. Lo que los hombres llaman amistad no es mas que una compañía, un manejo recíproco de intereses, un cambio de buenos oficios; en fin un comercio en que el amor propio siempre se propone ganar algo.
+
+§ 102. Mas vergonzoso es desconfiar de sus amigos, que ser engañado de ellos.
+
+§ 103. Nos persuadimos de ordinario a que amamos a los más poderosos que nosotros; y solo es el interes el que produce nuestra amistad. No se la profesamos por el bien que les queremos hacer, sino por el que de ellos esperamos recibir.
+
+§ 104. Siempre hallamos algo que no nos desagrada en la adversidad de nuestros mayores amigos.
+
+§ 105. ¿Cómo queremos que guarde otro un secreto, cuando no hemos podido nosotros guardarle?
+
+§ 106. Tiene tambien el amor propio, como si no le bastara la de transformarse a sí mismo, la virtud de transformar los objetos; y lo hace de un modo bien extraño. No solo los disfraza tan bien que se engaña a sí propio, sino que muda también el estado y naturaleza de las cosas. Efectivamente; cuando nos es contraria una persona y convierte contra nosotros su odio y persecución, juzga sus acciones nuestro amor propio con toda la severidad de la justicia, da a sus defectos una extensión que los hace enormes, y nos propone sus buenas prendas de un modo tan poco ventajoso, que nos disgustan mas que sus propios defectos. Pero conviértase en nuestro favor esta misma persona, o reconciliela con nosotros algun interes; nuestra
+satisfaccion sola restituye bien pronto a su mérito todo el lustre que acababa de quitarle nuestra aversión; desaparecen sus malas calidades; comparecen las buenas mucho mas ventajosamente que antes, y empleamos toda nuestra indulgencia en justificar la guerra que
+nos había hecho. Aunque todas las pasiones demuestren esta verdad, el amor la hace ver mas claramente que las otras; pues vemos a un amante, agitado de la rabia que le ha causado el olvido o infidelidad de su amada, meditar para su venganza todo lo más violento que inspira esta pasión: pero al punto que su presencia calma el furor de sus movimientos; su regocijo hace inocente a la belleza, se acusa solo a sí mismo, condena sus condenaciones; y por esta milagrosa virtud del amor propio, quita toda la fealdad a las acciones de su amada, y se achaca a sí mismo el delito de que la acusaba.
+
+§ 107. La ceguedad de los hombres es el efecto mas peligroso del orgullo. Sirve para nutrirle y aumentarle, y nos quita el conocimiento de los remedios que pudieran aliviar nuestras miserias y curar nuestros desarreglos.
+
+§ 108.Cuando no esperamos hallar razon en los demas, tampoco la tenemos nosotros.
+
+§ 109. No desterraron los Filósofos, y en especial Séneca, los vicios con sus preceptos; ni hicieron mas que emplearlos en la fábrica del orgullo.
+
+§ 110. Nuestra desconfianza justifica el engaño de otro.

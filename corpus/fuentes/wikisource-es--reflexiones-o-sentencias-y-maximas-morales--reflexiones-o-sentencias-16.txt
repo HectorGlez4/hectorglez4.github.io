@@ -1,0 +1,33 @@
+fuente: wikisource-es
+obra: Reflexiones o sentencias y máximas morales
+traductor: Narciso Álvaro y Cereza
+url: https://es.wikisource.org/wiki/Reflexiones_o_sentencias:_16
+recuperado: 2026-11-01
+---
+Reflexiones o sentencias: 16
+|título=[[Reflexiones o sentencias y máximas morales]]
+|autor=François de La Rochefoucauld
+obra> |título=Reflexiones o sentencias y máximas morales
+obra> |traductor=Narciso Álvaro y Cereza
+obra> |autor=François de La Rochefoucauld
+obra> |título={{Anclaje+|Índice}}
+---
+§ 151. El verdadero medio de ser engañado, es creerse mas astuto que los demas.
+
+§ 152. La demasiada sagacidad es una falsa delicadeza, y la verdadera delicadeza es una sólida sagacidad.
+
+§ 153. A veces basta ser ignorante para no ser engañado por un hombre hábil.
+
+§ 154. La debilidad es el único defecto que no se puede corregir.
+
+§ 155. El menor defecto de las mugeres abandonadas al galanteo, es el galanteo.
+
+§ 156. Mas fácil es ser sabio para los otros, que serlo para nosotros mismos.
+
+§ 157. Los mas sabios lo son en las cosas indiferentes; pero casi nunca lo son en sus mas importantes negocios.
+
+§ 158. La mas sutil locura es hija de la mas sutil sabiduría.
+
+§ 159. La sobriedad es el amor á la salud, ó la imposibilidad de comer mucho.
+
+§ 160. Las únicas buenas copias son las que nos hacen ver lo ridículo de los malos originales.

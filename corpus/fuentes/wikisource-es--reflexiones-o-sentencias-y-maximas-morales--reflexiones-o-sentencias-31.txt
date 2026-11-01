@@ -1,0 +1,34 @@
+fuente: wikisource-es
+obra: Reflexiones o sentencias y máximas morales
+traductor: Narciso Álvaro y Cereza
+url: https://es.wikisource.org/wiki/Reflexiones_o_sentencias:_31
+recuperado: 2026-11-01
+---
+Reflexiones o sentencias: 31
+|título=[[Reflexiones o sentencias y máximas morales]]
+|autor=François de La Rochefoucauld
+obra> |título=Reflexiones o sentencias y máximas morales
+obra> |traductor=Narciso Álvaro y Cereza
+obra> |autor=François de La Rochefoucauld
+obra> |título={{Anclaje+|Índice}}
+---
+§ 301. Lo qué parece generosidad no es por lo comun otra cosa, que una ambicion disfrazada, que desprecia los pequeños intereses por conseguir otros mayores.
+
+§ 302. La fidelidad que se observa en la mayor parte de los hombres, es una invencion del amor propio para ganar su confianza. Es un medio de hacernos superiores á los otros, y depositarios de las cosas mas importantes.
+
+§ 303. Todo lo desprecia la magnanimidad, por lograrlo todo.
+
+§ 304. Es la magnanimidad un noble esfuerzo del orgullo, que hace al hombre señor de sí mismo, para hacerle señor de todas las cosas.
+
+§ 305. No hay menos elocuencia en el tono de la voz, en los ojos y en el aire de la persona, que en la eleccion de las palabras.
+
+§ 306. La verdadera elocuencia consiste en decir todo lo necesario, y en no decir mas que lo que lo es.
+
+§ 307. Hay personas á quienes dicen bien hasta sus mismos defectos, y otras que son desgraciadas con las mejores calidades.
+
+§ 308. Tan ordinario es ver mudar los gustos, como extraordinario ver mudar las inclinaciones.
+
+§ 309. El interes maneja toda clase de virtudes y de vicios.
+
+§ 310. No es por lo comun la humildad otra cosa que una fingida sumision de que nos valemos para someter á los otros: es un artificio del orgullo que se humilla para ensalzarse; y aunque se
+transforme de mil modos, jamas está mejor disfrazado y mas en estado de engañar, que cuando se oculta bajo la capa de la humildad.

@@ -1,0 +1,41 @@
+fuente: wikisource-es
+obra: Reflexiones o sentencias y máximas morales
+traductor: Narciso Álvaro y Cereza
+url: https://es.wikisource.org/wiki/Reflexiones_o_sentencias:_60
+recuperado: 2026-11-01
+---
+Reflexiones o sentencias: 60
+|título=[[Reflexiones o sentencias y máximas morales]]
+|autor=François de La Rochefoucauld
+obra> |título=Reflexiones o sentencias y máximas morales
+obra> |traductor=Narciso Álvaro y Cereza
+obra> |autor=François de La Rochefoucauld
+obra> |título={{Anclaje+|Índice}}
+---
+§ XXI. Cuando amamos demasiado, no es fácil conocer si dejan de amarnos.
+
+§ XXII. No decimos mal de nosotros, sino para ser aplaudidos.
+
+§ XXIII. Las almas débiles se conmueven por cosas minimas.
+
+§ XXIV. Hay ciertos defectos, que en cierto punto y circunstancias, agradan mas que la misma perfeccion.
+
+§ XXV. Siempre se nos hace largo el tiempo que estamos con los que nos incomodan.
+
+§ XXVI. Nunca es mas difícil hablar bien, que cuando nos avergonzamos de callar.
+
+§ XXVII. Siempre son perdonables los defectos cuando hay valor para confesarlos.
+
+§ XXVIII. Damos consejos; pero no la prudencia de aprovecharse de ellos.
+
+§ XXIX. Nada es mas natural ni mas engañoso, que creerse amados.
+
+§ XXX. Mas queremos ver á los á que hemos hecho bien , que á los que nos le han hecho.
+
+§ XXXI. Mas difícil es disimular los sentimientos que tenemos, que fingir los que no tenemos.
+
+§ XXXII. Las amistades renovadas exigen mas cuidado, que las que nunca se han perdido.
+
+§ XXXIII. Un hombre que de nadie gusta, es mas infeliz que el que á nadie agrada.
+
+FIN.

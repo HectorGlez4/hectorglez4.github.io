@@ -1,0 +1,34 @@
+fuente: wikisource-es
+obra: Reflexiones o sentencias y máximas morales
+traductor: Narciso Álvaro y Cereza
+url: https://es.wikisource.org/wiki/Reflexiones_o_sentencias:_30
+recuperado: 2026-11-01
+---
+Reflexiones o sentencias: 30
+|título=[[Reflexiones o sentencias y máximas morales]]
+|autor=François de La Rochefoucauld
+obra> |título=Reflexiones o sentencias y máximas morales
+obra> |traductor=Narciso Álvaro y Cereza
+obra> |autor=François de La Rochefoucauld
+obra> |título={{Anclaje+|Índice}}
+---
+§ 291. No vemos cómodamente lo que está mas allá de lo que vemos.
+
+§ 292. La confianza que tenemos en nosotros mismos produce en gran parte la que tenemos en los demas.
+
+§ 293. Hay una revolucion general que trastorna el gusto de los espíritus, como las fortunas del mundo.
+
+§ 294. La verdad es el fundamento y la razón de la perfeccion y de la belleza. No seria bella y perfecta una cosa, de cualquier naturaleza que sea, si no fuera verdaderamente todo lo que
+debe ser, y si no tuviera todo lo que debe tener.
+
+§ 295. Puede decirse del agrado separado de la belleza, que es una simetría cuyas reglas se ignoran; una secreta relacion de las facciones entre sí, y de estas facciones con los colores y con el aire de la persona.
+
+§ 296. La coquetería es el fondo del caudal de las mugeres: pero no todas la ponen en práctica, porque en algunas la retiene el temor ó la razon.
+
+§ 297. Incomodamos ordinariamente á los otros, cuando creemos no poderlos jamas incomodar.
+
+§ 298. Pocas cosas hay imposibles en sí mismas; y mas que los medios, nos falta la aplicacion para salir con ellas.
+
+§ 299. La habilidad suma consiste en conocer bien el precio de las cosas.
+
+§ 300. Grande habilidad es saber ocultar su propia habilidad.

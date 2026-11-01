@@ -1,0 +1,35 @@
+fuente: wikisource-es
+obra: Reflexiones o sentencias y máximas morales
+traductor: Narciso Álvaro y Cereza
+url: https://es.wikisource.org/wiki/Reflexiones_o_sentencias:_29
+recuperado: 2026-11-01
+---
+Reflexiones o sentencias: 29
+|título=[[Reflexiones o sentencias y máximas morales]]
+|autor=François de La Rochefoucauld
+obra> |título=Reflexiones o sentencias y máximas morales
+obra> |traductor=Narciso Álvaro y Cereza
+obra> |autor=François de La Rochefoucauld
+obra> |título={{Anclaje+|Índice}}
+---
+§ 281. Nos oponemos tan porfiadamente á las mas recibidas opiniones, mas de ordinario por orgullo que por falta de luces: hallamos tomados en el buen partido los mejores lugares, y no queremos los últimos.
+
+§ 282. No sentimos la pérdida de nuestros amigos segun su mérito; sino segun nuestras necesidades, y segun la opinion que creemos haberles hecho tener de lo que valemos.
+
+§ 283. Fácilmente nos consolamos de las desgracias de nuestros amigos, por cuanto nos dan ocasion de manifestarles nuestra ternura.
+
+§ 284. Parece que triunfa la bondad de el amor propio, y que éste se olvida de sí mismo, cuando trabajamos en utilidad de los otros. Sin embargo , esto es tomar el camino mas seguro para
+llegar á sus fines; es prestar á usura bajo pretexto de dar; es en fin ganarse á todos por un medio sagaz y delicado.
+
+§ 285. Ninguno merece ser alabado de bueno, si no tiene la fuerza necesaria para ser malo; pues cualquiera otra bondad no es por lo regular mas que una pereza, ó una impotencia de la
+voluntad.
+
+§ 286. Es muy difícil el distinguir la bondad general y comun á todos, de la gran sagacidad y astucia.
+
+§ 287. No es tan peligroso hacer mal á la mayor parte de los hombres, como hacerles demasiado bien.
+
+§ 288. Para poder ser siempre buenos, es necesario crean los demas que nunca pueden ser para con nosotros impunemente malos.
+
+§ 289. Nada lisongea mas nuestro orgullo, que la confianza de los grandes; pues la miramos como un efecto de nuestro mérito, sin considerar que solo proviene las mas veces de vanidad ó de impotencia para guardar el secreto.
+
+§ 290. La confianza de agradar es por lo comun un medio de desagradar infaliblemente.

@@ -1,0 +1,37 @@
+fuente: wikisource-es
+obra: Reflexiones o sentencias y máximas morales
+traductor: Narciso Álvaro y Cereza
+url: https://es.wikisource.org/wiki/Reflexiones_o_sentencias:_22
+recuperado: 2026-11-01
+---
+Reflexiones o sentencias: 22
+|título=[[Reflexiones o sentencias y máximas morales]]
+|autor=François de La Rochefoucauld
+obra> |título=Reflexiones o sentencias y máximas morales
+obra> |traductor=Narciso Álvaro y Cereza
+obra> |autor=François de La Rochefoucauld
+obra> |título={{Anclaje+|Índice}}
+---
+§ 211. Mas vale emplear nuestro talento en sobrellevar los infortunios que nos acaecen, que en prever los que nos pueden suceder.
+
+§ 212. La constancia en el amor es una perpetua inconstancia que hace á nuestro corazon adherirse sucesivamente á todas las calidades de la persona amada, dando la preferencia ya á una y ya á
+otra; de modo que esta constancia no es mas que una inconstancia circunscrita y encerrada en un mismo sugeto.
+
+§ 213. Dos clases de constancia hay en el amor; la una proviene de encontrar continuamente en el objeto amado nuevos motivos de amarle, y la otra de hacer punto de honor la misma constancia.
+
+§ 214. La perseverancia no es digna de alabanza ni de vituperio; pues no es mas que la duracion de los gustos y de los sentimientos, que ni se da ni se quita.
+
+§ 215. Lo que nos hace apetecibles las nuevas conexiones no es tanto el fastidio de las antiguas ó el placer de la novedad, como el disgusto de no ser bastante admirados de los que ya nos conocen
+bien, y la esperanza de serlo mas de los que no nos conocen tanto.
+
+§ 216. A veces nos quejamos ligeramente de nuestros amigos por justificar con anticipacion nuestra ligereza.
+
+§ 217. Nuestro arrepentimiento no tanto es un pesar del mal que hemos hecho, como un temor del que nos puede sobrevenir.
+
+§ 218. Hay una inconstancia que nace de la liviandad del espíritu, ó de su debilidad, que le hace admitir todas las opiniones de otro; y hay otra mas excusable que proviene del disgusto de las cosas.
+
+§ 219. Entran los vicios en la composicion de las virtudes, como los venenos en la confeccion de los medicamentos. La prudencia los mezcla y modifica, y se sirve de ellos con utilidad para los
+males de la vida.
+
+§ 220. Hay crímenes que llegan á ser inocentes y aun gloriosos por su brillo, su número y su exceso. De aquí es que damos el nombre de raterías á las pequeñas usurpaciones, y el de conquistas al
+apoderarse injustamente de provincias y reinos enteros.

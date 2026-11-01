@@ -1,0 +1,33 @@
+fuente: wikisource-es
+obra: Reflexiones o sentencias y máximas morales
+traductor: Narciso Álvaro y Cereza
+url: https://es.wikisource.org/wiki/Reflexiones_o_sentencias:_56
+recuperado: 2026-11-01
+---
+Reflexiones o sentencias: 56
+|título=[[Reflexiones o sentencias y máximas morales]]
+|autor=François de La Rochefoucauld
+obra> |título=Reflexiones o sentencias y máximas morales
+obra> |traductor=Narciso Álvaro y Cereza
+obra> |autor=François de La Rochefoucauld
+obra> |título={{Anclaje+|Índice}}
+---
+§ 551. Cuando está todavía el corazon agitado por las reliquias de una pasion; estamos mas próximos á otra nueva, que cuando está del todo sereno.
+
+§ 552. Los que han tenido grandes pasiones, se juzgan toda su vida felices ó infelices por haber sanado de ellas.
+
+§ 553. Mas personas hay sin interes, que sin envidia.
+
+§ 554. Mas pereza tenemos en el espíritu, que en el cuerpo.
+
+§ 555. La calma ó agitacion de nuestro humor, no tanto depende de las cosas mas considerables que nos acaecen en el discurso de la vida, cuanto de una disposicion cómoda ó desagradable de las cosas pequeñas que nos suceden cada dia.
+
+§ 556. Por malvados que sean los hombres, no se atreverán á declararse enemigos de la virtud; y cuando quieren perseguirla, fingen creerla falsa ó la imputan crímenes.
+
+§ 557. Frecuentemente pasamos del amor á la ambicion, pero rara vez de la ambicion al amor.
+
+§ 558. Casi siempre se engaña la extrema avaricia. No hay pasion que mas ordinariamente se aleje de su fin, ni sobre que tenga el presente mas imperio en perjuicio del futuro.
+
+§ 559. La avaricia produce frecuentemente efectos contrarios. Hay infinitos que sacrifican todo su bien á esperanzas dudosas y remotas; y otros que desprecian grandes ventajas futuras por pequeños intereses presentes.
+
+§ 560. Parece que los hombres no encuentran en sí bastantes defectos, pues aumentan todavía su número por ciertas singulares calidades con que afectan adornarse: y las cultivan con tal esmero, que al fin llegan á ser defectos naturales que no está en su mano corregirlos.

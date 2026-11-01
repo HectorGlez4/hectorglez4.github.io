@@ -1,0 +1,33 @@
+fuente: wikisource-es
+obra: Reflexiones o sentencias y máximas morales
+traductor: Narciso Álvaro y Cereza
+url: https://es.wikisource.org/wiki/Reflexiones_o_sentencias:_07
+recuperado: 2026-11-01
+---
+Reflexiones o sentencias: 07
+|título=[[Reflexiones o sentencias y máximas morales]]
+|autor=François de La Rochefoucauld
+obra> |título=Reflexiones o sentencias y máximas morales
+obra> |traductor=Narciso Álvaro y Cereza
+obra> |autor=François de La Rochefoucauld
+obra> |título={{Anclaje+|Índice}}
+---
+§ 61. Por diferentes que nos parezcan las fortunas, hay sin embargo una cierta compensacion de bienes y de males que las iguala.
+
+§ 62. Por grandes ventajas que dé la naturaleza; no es sin embargo ella sola, sino también la fortuna, la que hace los héroes.
+
+§ 63. El desprecio de las riquezas era en los filósofos un deseo oculto de vengar su mérito de la injusticia de la fortuna, por el desprecio de los mismos bienes de que los privaba; era un secreto para ponerse a cubierto del envilecimiento de la pobreza: era un camino tortuoso para llegar a la estimación que por las riquezas no podían adquirir.
+
+§ 64. El odio a los privados no es mas que el amor del favor. El despecho de no tenerle se consuela y mitiga con el desprecio que se manifiesta de los que le tienen; y les rehusamos nuestros homenajes, ya que no podemos quitarles lo que les atrae los de todo el mundo.
+
+§ 65. Para establecernos en el mundo hacemos lo posible por aparentar que lo estamos.
+
+§ 66. Por mas que los hombres se lisongeen de sus grandes aciertos; no son estos por lo común efectos de una perfecta combinación, sino de la casualidad.
+
+§ 67. Parece que nuestras acciones tienen estrellas felices o infelices, a que deben una gran parte de la alabanza o vituperio que se les da.
+
+§ 68. No hay accidentes, por fatales que sean, de que no saquen los sabios alguna ventaja; ni accidentes tan prósperos, que no puedan los imprudentes convertir en su daño.
+
+§ 69. Todo lo endereza la fortuna en beneficio de los que favorece.
+
+§ 70. La felicidad o infelicidad de los hombres depende no menos de su humor que de la fortuna.

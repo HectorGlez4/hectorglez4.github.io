@@ -1,0 +1,33 @@
+fuente: wikisource-es
+obra: Reflexiones o sentencias y máximas morales
+traductor: Narciso Álvaro y Cereza
+url: https://es.wikisource.org/wiki/Reflexiones_o_sentencias:_42
+recuperado: 2026-11-01
+---
+Reflexiones o sentencias: 42
+|título=[[Reflexiones o sentencias y máximas morales]]
+|autor=François de La Rochefoucauld
+obra> |título=Reflexiones o sentencias y máximas morales
+obra> |traductor=Narciso Álvaro y Cereza
+obra> |autor=François de La Rochefoucauld
+obra> |título={{Anclaje+|Índice}}
+---
+§ 411. La mayor parte de los hombres tiene, como las plantas, propiedades ocultas que descubre la casualidad.
+
+§ 412. Las ocasiones nos hacen conocer á los otros, y aun todavía mas á nosotros mismos.
+
+§ 413. No puede haber regla en el espíritu ni en el corazon de las mugeres, si no se conforma el temperamento.
+
+§ 414. Casi no tenemos por hombres de buen sentido, sino á los que son de nuestro parecer.
+
+§ 415. Cuando amamos, dudamos regularmente de lo que mas creemos.
+
+§ 416. El mayor milagro del amor es curar la coquetería.
+
+§ 417. Lo que nos indispone tanto con los que nos engañan, es que por el mismo hecho se presumen mas diestros que nosotros.
+
+§ 418. No cuesta mucho trabajo romper con uno, cuando ya no se le ama.
+
+§ 419. Casi siempre nos enfadamos con quienes no nos es permitido enojarnos.
+
+§ 420. Un hombre de bien puede amar como un loco, pero no como un necio.

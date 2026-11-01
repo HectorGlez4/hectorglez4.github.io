@@ -1,0 +1,33 @@
+fuente: wikisource-es
+obra: Reflexiones o sentencias y máximas morales
+traductor: Narciso Álvaro y Cereza
+url: https://es.wikisource.org/wiki/Reflexiones_o_sentencias:_17
+recuperado: 2026-11-01
+---
+Reflexiones o sentencias: 17
+|título=[[Reflexiones o sentencias y máximas morales]]
+|autor=François de La Rochefoucauld
+obra> |título=Reflexiones o sentencias y máximas morales
+obra> |traductor=Narciso Álvaro y Cereza
+obra> |autor=François de La Rochefoucauld
+obra> |título={{Anclaje+|Índice}}
+---
+§ 161. Nunca somos tan ridículos por las calidades que tenemos, como por las que afectamos tener.
+
+§ 162. Tan indiferentes somos á veces respecto de nosotros mismos, como respecto de los demas.
+
+§ 163. Hay algunos que jamas hubieran amado, si nunca hubieran oido hablar del amor.
+
+§ 164. Hablamos poco cuando la vanidad no nos hace hablar.
+
+§ 165. Mas queremos decir mal de nosotros mismos, que dejar de hablar de nosotros mismos.
+
+§ 166. Una de las causas por que hay tan pocos que parezcan razonables y agradables en la conversacion, es por no haber casi ninguno que no piense mas en lo que quiere decir, que en responder precisamente á lo que se le dice. Los mas hábiles y complacientes se contentan con mostrar un semblante atento, al mismo tiempo que se nota en sus ojos y en su espíritu una distraccion de lo que se les está diciendo, y una precipitacion por volver á lo que quieren decir: en vez de considerar que es un mal medio de agradar á los otros ó persuadirlos, el procurar tanto agradarse á sí mismos; y que asi el escuchar bien, como el contestar bien, son una de las mayores perfecciones que se pueden apetecer en una conversacion.
+
+§ 167. Un hombre de talento se veria frecuentemente embarazado sin la compañía de los necios.
+
+§ 168. Blasonamos comunmente de nuestra paciencia y tolerancia; y no podemos sufrir sin inquietud una compañía desagradable.
+
+§ 169. Nunca se olvidan mejor las cosas, que cuando nos llega á cansar el hablar de ellas.
+
+§ 170. Asi como es carácter de los grandes ingenios decir mucho en pocas palabras, lo es tambien de los pequeños el don de hablar mucho sin decir nada.

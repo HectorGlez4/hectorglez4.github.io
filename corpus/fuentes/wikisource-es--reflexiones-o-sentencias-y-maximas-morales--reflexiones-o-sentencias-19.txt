@@ -1,0 +1,34 @@
+fuente: wikisource-es
+obra: Reflexiones o sentencias y máximas morales
+traductor: Narciso Álvaro y Cereza
+url: https://es.wikisource.org/wiki/Reflexiones_o_sentencias:_19
+recuperado: 2026-11-01
+---
+Reflexiones o sentencias: 19
+|título=[[Reflexiones o sentencias y máximas morales]]
+|autor=François de La Rochefoucauld
+obra> |título=Reflexiones o sentencias y máximas morales
+obra> |traductor=Narciso Álvaro y Cereza
+obra> |autor=François de La Rochefoucauld
+obra> |título={{Anclaje+|Índice}}
+---
+§ 181. El deseo de merecer los elogios que se nos tributan, fortifica nuestra virtud; y los que se dan al ingenio, al valor y á la belleza, contribuyen á aumentarlos.
+
+§ 182. Mas difícil es el estorbar que nos gobiernen, que gobernar á otros.
+
+§ 183. No podria perjudicarnos la lisonja de los otros, si no nos lisongeásemos á nosotros mismos.
+
+§ 184. No distinguimos las especies de cólera; siendo asi que hay una leve y casi inocente que proviene del ardor de la complexion, y otra muy criminal que es, hablando con propiedad, el
+furor del orgullo.
+
+§ 185. La naturaleza da el mérito, y la fortuna le hace valer.
+
+§ 186. Las almas grandes no son aquellas que tienen menos pasiones y mas virtud que las comunes, sino las que tienen mas vastos designios.
+
+§ 187. Muchos defectos que no podria corrigir la razon, los corrige la fortuna.
+
+§ 188. Hay unos que desagradan á pesar de su mérito, y otros que agradan a pesar de sus defectos.
+
+§ 189. Hay personas cuyo mérito consiste en decir y hacer útilmente necedades, y que lo perderian todo si mudasen de conducta.
+
+§ 190. Hacen los reyes con los hombres lo que con las monedas: les dan el valor que quieren, y hay precision de recibirlas segun su curso y no segun su verdadero precio.

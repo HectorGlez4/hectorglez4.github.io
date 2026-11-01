@@ -1,0 +1,33 @@
+fuente: wikisource-es
+obra: Reflexiones o sentencias y máximas morales
+traductor: Narciso Álvaro y Cereza
+url: https://es.wikisource.org/wiki/Reflexiones_o_sentencias:_48
+recuperado: 2026-11-01
+---
+Reflexiones o sentencias: 48
+|título=[[Reflexiones o sentencias y máximas morales]]
+|autor=François de La Rochefoucauld
+obra> |título=Reflexiones o sentencias y máximas morales
+obra> |traductor=Narciso Álvaro y Cereza
+obra> |autor=François de La Rochefoucauld
+obra> |título={{Anclaje+|Índice}}
+---
+§ 471. Parece que ha escondido la naturaleza en el fondo de nuestro espíritu ciertos talentos y cierta habilidad que no conocemos nosotros: solas las pasiones tienen el derecho de descubrirlos, haciéndonos algunas veces llevar las cosas al punto de perfeccion que no pudiera el arte.
+
+§ 472. Llegamos del todo nuevos á las diversas edades de la vida; y nos falta de ordinario la experiencia á pesar del número de años.
+
+§ 473. Hacen las coquetas punto de honor de ser zelosas de sus amantes, por ocultar que tienen envidia de las demas mugeres.
+
+§ 474. Es indispensable que no nos parezcan tan ridículos los que caen en nuestros lazos, como nos parecemos á nosotros mismos cuando caemos en los de otros.
+
+§ 475. La mas peligrosa ridiculez de los viejos que han sido amados, es olvidarse de que ya no lo son.
+
+§ 476. Nos avergonzáramos regularmente de nuestras mejores acciones, si viese el mundo los motivos que las producen.
+
+§ 477. El mayor esfuerzo de la amistad, no es el manifestar nuestros defectos al amigo, sino el hacerle ver los suyos.
+
+§ 478. Casi no hay defectos mas perdonables, que los medios de que nos valemos para ocultarlos.
+
+§ 479. Por vergüenza que hayamos merecido, casi siempre está en nuestra mano restablecer nuestra reputacion.
+
+§ 480. No agradan largo tiempo los que no tienen talento mas que para una cosa.

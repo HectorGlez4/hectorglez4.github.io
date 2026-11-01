@@ -1,0 +1,33 @@
+fuente: wikisource-es
+obra: Reflexiones o sentencias y máximas morales
+traductor: Narciso Álvaro y Cereza
+url: https://es.wikisource.org/wiki/Reflexiones_o_sentencias:_20
+recuperado: 2026-11-01
+---
+Reflexiones o sentencias: 20
+|título=[[Reflexiones o sentencias y máximas morales]]
+|autor=François de La Rochefoucauld
+obra> |título=Reflexiones o sentencias y máximas morales
+obra> |traductor=Narciso Álvaro y Cereza
+obra> |autor=François de La Rochefoucauld
+obra> |título={{Anclaje+|Índice}}
+---
+§ 191. La gloria de los grandes hombres se debe siempre medir por los medios de que se han valido para adquirirla.
+
+§ 192. La adulacion es una moneda falsa, que solo tiene curso por nuestra vanidad.
+
+§ 193. No basta tener grandes calidades; es necesario usarlas con economía.
+
+§ 194. Por brillante que sea una accion, no se debe calificar de grande, sino cuando sea resultado de una grande combinacion.
+
+§ 195. Debe haber cierta proporcion entre las acciones y los designios, si queremos sacar de ellas todas las ventajas que pueden producir.
+
+§ 196. El arte de saber emplear bien las mediocres calidades, es el que grangea la estimacion, y da por lo comun mas reputacion que el verdadero mérito.
+
+§ 197. Hay infinitos modos de conducirse que parecen ridículos, y cuyas ocultas razones son muy sabias y muy sólidas.
+
+§ 198. Mas fácil es parecer digno del puesto que no se tiene, que del que se ocupa.
+
+§ 199. Nuestro mérito nos grangea la estimacion de los hombres de bien, y nuestra estrella la del público.
+
+§ 200. Mas recompensa por lo regular el mundo la apariencia del mérito, que el mérito mismo.

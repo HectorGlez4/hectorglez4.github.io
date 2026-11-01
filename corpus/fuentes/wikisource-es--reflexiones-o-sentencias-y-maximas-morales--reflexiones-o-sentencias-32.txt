@@ -1,0 +1,34 @@
+fuente: wikisource-es
+obra: Reflexiones o sentencias y máximas morales
+traductor: Narciso Álvaro y Cereza
+url: https://es.wikisource.org/wiki/Reflexiones_o_sentencias:_32
+recuperado: 2026-11-01
+---
+Reflexiones o sentencias: 32
+|título=[[Reflexiones o sentencias y máximas morales]]
+|autor=François de La Rochefoucauld
+obra> |título=Reflexiones o sentencias y máximas morales
+obra> |traductor=Narciso Álvaro y Cereza
+obra> |autor=François de La Rochefoucauld
+obra> |título={{Anclaje+|Índice}}
+---
+§ 311. Todos los sentimientos tienen cada uno su tono de voz propio, sus gestos y sus semblantes: y esta relacion buena ó mala, agradable ó desagradable, es la causa de que gusten ó disgusten las
+personas.
+
+§ 312. En todas las profesiones afecta cada uno un aire y un exterior para parecer lo que quiere que le crean. Y asi puede decirse que el mundo no se compone sino de gestos.
+
+§ 313. La gravedad es un misterio del cuerpo, inventado para ocultar los defectos del espíritu.
+
+§ 314. El buen gusto mas proviene del juicio que del ingenio.
+
+§ 315. El placer del amor es amar: y mas dichoso es uno por la pasion que tiene, que por la que se le profesa.
+
+§ 316. El lujo y la demasiada civilidad en los estados son el presagio seguro de su decadencia; porqué como todos los particulares se aplican á sus intereses propios, abandonan el bien público.
+
+§ 317. La cortesanía es un deseo de ser tratado del mismo modo, y de ser tenido por hombre culto.
+
+§ 318. La educacion que comunmente se da á los jóvenes, es un segundo amor propio que se les inspira.
+
+§ 319. No hay pasion en que reine tan poderosamente el amor de sí mismo como en la del amor: y mas dispuestos estamos siempre á sacrificar el reposo de lo que amamos, que á perder el nuestro.
+
+§ 320. Lo que se llama liberalidad no es de ordinario otra cosa que la vanidad de dar; la cual apetecemos mas que aquello que damos.

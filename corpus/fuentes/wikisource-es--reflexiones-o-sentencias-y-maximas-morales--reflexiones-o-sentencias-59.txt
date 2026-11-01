@@ -1,0 +1,33 @@
+fuente: wikisource-es
+obra: Reflexiones o sentencias y máximas morales
+traductor: Narciso Álvaro y Cereza
+url: https://es.wikisource.org/wiki/Reflexiones_o_sentencias:_59
+recuperado: 2026-11-01
+---
+Reflexiones o sentencias: 59
+|título=[[Reflexiones o sentencias y máximas morales]]
+|autor=François de La Rochefoucauld
+obra> |título=Reflexiones o sentencias y máximas morales
+obra> |traductor=Narciso Álvaro y Cereza
+obra> |autor=François de La Rochefoucauld
+obra> |título={{Anclaje+|Índice}}
+---
+§ XI. Un verdadero amigo es el mayor de todos los bienes, y el que menos se procura adquirir.
+
+§ XII. Los amantes no advierten los defectos de sus amadas, hasta despues de acabado su encanto.
+
+§ XIII. La prudencia y el amor no pueden hallarse juntos: á medida que el amor crece, la prudencia se disminuye.
+
+§ XIV. A veces es agradable a un marido tener una mujer celosa, pues logra asi oir hablar siempre de lo que ama.
+
+§ XV. ¡Cuan digna de compasion es una mujer virtuosa y enamorada!
+
+§ XVI. El hombre cuerdo cuida bien de no empeñarse, sino en lo que ha de conseguir.
+
+§ XVII. Mas necesario es estudiar los hombres, que los libros.
+
+§ XVIII. La dicha ó la desgracia siguen por lo comun á los que tienen mas de una ó de otra.
+
+§ XIX. El acento y el carácter del pais donde se ha nacido, permanecen en el espíritu y en el corazon, como en el lenguage.
+
+§ XX. Una mujer honesta es un tesoro escondido: el que le ha encontrado hace muy bien en no jactarse de ello.

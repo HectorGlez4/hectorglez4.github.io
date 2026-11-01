@@ -1,0 +1,33 @@
+fuente: wikisource-es
+obra: Reflexiones o sentencias y máximas morales
+traductor: Narciso Álvaro y Cereza
+url: https://es.wikisource.org/wiki/Reflexiones_o_sentencias:_10
+recuperado: 2026-11-01
+---
+Reflexiones o sentencias: 10
+|título=[[Reflexiones o sentencias y máximas morales]]
+|autor=François de La Rochefoucauld
+obra> |título=Reflexiones o sentencias y máximas morales
+obra> |traductor=Narciso Álvaro y Cereza
+obra> |autor=François de La Rochefoucauld
+obra> |título={{Anclaje+|Índice}}
+---
+§ 91. No es otra cosa el deseo de justicia, sino un vivo recelo de que nos desposean de lo nuestro. De aquí proviene aquella consideración y aquel respeto a los intereses del próximo, y aquella escrupulosa aplicación a no perjudicarle en nada. Este temor retiene al hombre en los límites de aquellos bienes que debe al nacimiento o a la fortuna; y sin él usurparla a los otros cuantos pudiese.
+
+§ 92. La justicia en los Jueces moderados no es mas que el deseo de su elevación.
+
+§ 93. Vituperamos la injusticia, no por la aversión que la tenemos, sino por el perjuicio que nos ocasiona.
+
+§ 94. El amor a la justicia en la mayor parte de los hombres no es otra cosa que el temor de sufrir la injusticia.
+
+§ 95. El silencio es el partido más seguro de quien desconfia de sí mismo.
+
+§ 96. Lo que nos hace tan inconstantes en nuestras amistades, es la dificultad de conocer las calidades del alma, y la facilidad de conocer las del ingenio.
+
+§ 97. Nada podemos amar sino con relación a nosotros mismos, ni hacemos más que seguir nuestro gusto y placer cuando preferimos nuestros amigos a nosotros mismos: pero no obstante, solo cuando haya esta preferencia será verdadera y perfecta la amistad.
+
+§ 98. La reconciliación con nuestros enemigos es un deseo de mejorar nuestra condición; un cansancio ya de la guerra, y un temor de algún mal suceso.
+
+§ 99. Cuando nos cansamos de amar, celebramos la infidelidad de la otra parte, por quedar quitos de nuestra fidelidad.
+
+§ 100. El primer movimiento de gozo que tenemos por la felicidad de nuestros amigos, ni proviene de nuestra bondad natural, ni de la amistad que les profesamos: es un efecto del amor propio que nos lisongea con la esperanza de lograr nuestro turno de felicidad, o de sacar algun partido de su buena fortuna.

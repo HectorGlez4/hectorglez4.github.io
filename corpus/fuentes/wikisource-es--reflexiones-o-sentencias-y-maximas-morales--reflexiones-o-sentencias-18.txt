@@ -1,0 +1,33 @@
+fuente: wikisource-es
+obra: Reflexiones o sentencias y máximas morales
+traductor: Narciso Álvaro y Cereza
+url: https://es.wikisource.org/wiki/Reflexiones_o_sentencias:_18
+recuperado: 2026-11-01
+---
+Reflexiones o sentencias: 18
+|título=[[Reflexiones o sentencias y máximas morales]]
+|autor=François de La Rochefoucauld
+obra> |título=Reflexiones o sentencias y máximas morales
+obra> |traductor=Narciso Álvaro y Cereza
+obra> |autor=François de La Rochefoucauld
+obra> |título={{Anclaje+|Índice}}
+---
+§ 171. Mas exageramos las buenas calidades de los otros por dar á entender nuestro discernimiento, que por recomendar su mérito; y queremos grangearnos los elogios, cuando parece que los tributamos.
+
+§ 172. Ni gustamos de alabar á otros, ni lo hacemos jamas sin interes. La alabanza es una fina lisonja, oculta y delicada, que satisface diferentemente al que la da y al que la recibe: éste la toma como recompensa de su mérito, y aquel la da por manifestar su discernimiento y equidad.
+
+§ 173. Usamos regularmente de unas alabanzas emponzoñadas, que de resulta descubren en aquellos á quienes alabamos los defectos que de otro modo no nos atrevemos á manifestar.
+
+§ 174. Regularmente alabamos solo por ser alabados.
+
+§ 175. Pocos hay tan diestros, que sepan preferir el útil vituperio á la peligrosa alabanza.
+
+§ 176. Ni alabamos la virtud, ni vituperamos el vicio, sino por interes.
+
+§ 177. Hay reprehensiones que elogian, y elogios que reprehenden.
+
+§ 178. La modestia que parece rehusar las alabanzas, no es efectivamente otra cosa que un deseo de conseguir otras mayores.
+
+§ 179. Rehusar las alabanzas, es un deseo de ser alabado dos veces.
+
+§ 180. Los elogios que se nos tributan sirven á lo menos para fijarnos en la práctica de las virtudes.

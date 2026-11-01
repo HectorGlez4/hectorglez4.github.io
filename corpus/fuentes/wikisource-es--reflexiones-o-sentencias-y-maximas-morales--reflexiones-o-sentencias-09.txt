@@ -1,0 +1,33 @@
+fuente: wikisource-es
+obra: Reflexiones o sentencias y máximas morales
+traductor: Narciso Álvaro y Cereza
+url: https://es.wikisource.org/wiki/Reflexiones_o_sentencias:_09
+recuperado: 2026-11-01
+---
+Reflexiones o sentencias: 09
+|título=[[Reflexiones o sentencias y máximas morales]]
+|autor=François de La Rochefoucauld
+obra> |título=Reflexiones o sentencias y máximas morales
+obra> |traductor=Narciso Álvaro y Cereza
+obra> |autor=François de La Rochefoucauld
+obra> |título={{Anclaje+|Índice}}
+---
+§ 81. Si hay algun amor puro y sin mezcla de las demás pasiones, es el que está oculto en el fondo del corazón e ignoramos nosotros mismos.
+
+§ 82. No hay disfraz que pueda ocultar por largo tiempo el amor donde le hay, o fingirle donde no le hay.
+
+§ 83. Como nunca somos libres en amar o dejar de amar; ni puede el amante quejarse con justicia de la inconstancia de su amada, ni ésta de la ligereza de su amante.
+
+§ 84. Pocos hay que, cuando ya no se aman, no se avergüenzen de haberse amado.
+
+§ 85. Si juzgamos del amor por la mayor parte de sus efectos, se asemeja más al odio que a la amistad.
+
+§ 86. Podrán hallarse mujeres que nunca hayan tenido cortejo; pero es difícil hallarlas que solo hayan tenido uno.
+
+§ 87. No hay mas que una especie de amor; pero hay mil diferentes copias de él.
+
+§ 88. El amor, igualmente que el fuego, no puede subsistir sin un movimiento continuo; y se acaba luego que falta la esperanza o el temor.
+
+§ 89. Sucede con el verdadero amor lo que con la aparición de los espíritus: todo el mundo habla de ellos, y pocos los han visto.
+
+§ 90. El amor presta su nombre a un número infinito de comercios que se le atribuyen, y en que tiene tanta parte como el Dux en lo que se hace en Venecia.

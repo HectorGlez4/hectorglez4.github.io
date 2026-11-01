@@ -1,0 +1,33 @@
+fuente: wikisource-es
+obra: Reflexiones o sentencias y máximas morales
+traductor: Narciso Álvaro y Cereza
+url: https://es.wikisource.org/wiki/Reflexiones_o_sentencias:_04
+recuperado: 2026-11-01
+---
+Reflexiones o sentencias: 04
+|título=[[Reflexiones o sentencias y máximas morales]]
+|autor=François de La Rochefoucauld
+obra> |título=Reflexiones o sentencias y máximas morales
+obra> |traductor=Narciso Álvaro y Cereza
+obra> |autor=François de La Rochefoucauld
+obra> |título={{Anclaje+|Índice}}
+---
+§ 31. Los celos son en algun modo justos y razonables, pues se dirigen a conservar un bien que nos pertenece, o creemos pertenecemos; pero la envidia es un furor que no puede sufrir el bien de los otros.
+
+§ 32. No nos acarrea tantas persecuciones y odios el mal que hacemos, como nuestras buenas calidades.
+
+§ 33. Todos culpan en otros lo que en ellos es culpable.
+
+§ 34. Tenemos mas fuerza que voluntad: y sucede que, para excusarnos con nosotros mismos, nos imaginamos imposibles las cosas.
+
+§ 35. Si no tuvieramos defectos, no nos complaceríamos tanto en notar los de los otros.
+
+§ 36. Los celos se alimentan en las dudas; y llegan a ser furor, o se extinguen luego que pasamos de la duda a la evidencia.
+
+§ 37. El orgullo siempre se recompensa, y no pierde nada aun cuando renuncia a la vanidad.
+
+§ 38. El orgullo, como cansado de sus artificios y de sus metamorfosis diferentes, después de haber representado todos los personajes de la comedia humana, se manifiesta con un rostro natural y se descubre por la fureza; de modo que, para hablar con propiedad, la fiereza es el resplandor y la declaración del orgullo.
+
+§ 39. Si no tuvieramos orgullo, no nos quejaríamos del de los otros.
+
+§ 40. El orgullo es igual en todos los hombres; solo se diferencia en el modo y en los medios de manifestarle.

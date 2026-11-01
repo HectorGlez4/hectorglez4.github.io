@@ -1,0 +1,33 @@
+fuente: wikisource-es
+obra: Reflexiones o sentencias y máximas morales
+traductor: Narciso Álvaro y Cereza
+url: https://es.wikisource.org/wiki/Reflexiones_o_sentencias:_25
+recuperado: 2026-11-01
+---
+Reflexiones o sentencias: 25
+|título=[[Reflexiones o sentencias y máximas morales]]
+|autor=François de La Rochefoucauld
+obra> |título=Reflexiones o sentencias y máximas morales
+obra> |traductor=Narciso Álvaro y Cereza
+obra> |autor=François de La Rochefoucauld
+obra> |título={{Anclaje+|Índice}}
+---
+§ 241. Engáñase mucho quien crea poder hallar en sí mismo con que pasar sin el sufragio de los otros; pero se engaña mucho mas quien crea no pueden pasar los otros sin el suyo.
+
+§ 242. La pompa de los entierros sirve mas á la vanidad de los vivos, que al honor de los muertos.
+
+§ 243. Los fingidos hombres de bien son los que disfrazan sus defectos á los otros y á sí mismos: los hombres de bien verdaderos son los que los conocen perfectamente y los confiesan.
+
+§ 244. El verdadero hombre de bien, es el que en nada aspira á la gloria mundana.
+
+§ 245. La gravedad de las mugeres es un arreo, que añaden á su belleza.
+
+§ 246. La honestidad de las mugeres es por lo regular el amor de su reputacion y quietud.
+
+§ 247. Es ser á todas luces hombre de bien, querer estar siempre expuesto á la vista de los que lo son.
+
+§ 248. En todos los periodos de la vida nos acompaña la locura. Si alguno parece cuerdo, solo es porque sus locuras son proporcionadas á su edad y á su fortuna.
+
+§ 249. Hay necios que se conocen y manejan con destreza sus necedades.
+
+§ 250. Quien vive sin locura, no es tan cuerdo como lo imagina.

@@ -1,0 +1,33 @@
+fuente: wikisource-es
+obra: Reflexiones o sentencias y máximas morales
+traductor: Narciso Álvaro y Cereza
+url: https://es.wikisource.org/wiki/Reflexiones_o_sentencias:_39
+recuperado: 2026-11-01
+---
+Reflexiones o sentencias: 39
+|título=[[Reflexiones o sentencias y máximas morales]]
+|autor=François de La Rochefoucauld
+obra> |título=Reflexiones o sentencias y máximas morales
+obra> |traductor=Narciso Álvaro y Cereza
+obra> |autor=François de La Rochefoucauld
+obra> |título={{Anclaje+|Índice}}
+---
+§ 381. El extremo placer que tenemos en hablar de nosotros mismos, nos debe hacer temer que no le daremos á los que nos escuchan.
+
+§ 382. Lo que de ordinario nos impide descubrir el fondo de nuestro corazon á nuestros amigos, no tanto es la desconfianza que tenemos de ellos, como la que tenemos de nosotros mismos.
+
+§ 383. Los débiles no pueden ser sinceros.
+
+§ 384. No es una grande desgracia obligar á los ingratos; pero lo es insoportable el estar obligado á un picaro.
+
+§ 385. Remedios hay para curar la locura, pero no los hay para curar un espíritu revoltoso.
+
+§ 386. No conservariamos por mucho tiempo los sentimientos que debemos tener de nuestros amigos y bienhechores, si nos tomasemos la libertad de hablar á menudo de sus defectos.
+
+§ 387. Loar á los príncipes de las virtudes que no tienen, es injuriarlos impunemente.
+
+§ 388. Mas cerca estamos de amar á los que nos aborrecen, que á los que nos aman mas de lo que quisieramos.
+
+§ 389. Solo los despreciables son los que temen ser despreciados.
+
+§ 390. No está menos á merced de la fortuna nuestra sabiduría, que nuestros bienes.

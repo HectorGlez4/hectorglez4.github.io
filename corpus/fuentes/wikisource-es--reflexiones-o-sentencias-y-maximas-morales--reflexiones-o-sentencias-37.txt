@@ -1,0 +1,33 @@
+fuente: wikisource-es
+obra: Reflexiones o sentencias y máximas morales
+traductor: Narciso Álvaro y Cereza
+url: https://es.wikisource.org/wiki/Reflexiones_o_sentencias:_37
+recuperado: 2026-11-01
+---
+Reflexiones o sentencias: 37
+|título=[[Reflexiones o sentencias y máximas morales]]
+|autor=François de La Rochefoucauld
+obra> |título=Reflexiones o sentencias y máximas morales
+obra> |traductor=Narciso Álvaro y Cereza
+obra> |autor=François de La Rochefoucauld
+obra> |título={{Anclaje+|Índice}}
+---
+§ 361. Siempre gustamos de los que nos admiran: pero no siempre gustamos de los que admiramos nosotros.
+
+§ 362. Es preciso que no podamos llegar á conocer todas nuestras voluntades.
+
+§ 363. Difícil es amar á los que no estimamos: pero no lo es menos amar á los que estimamos mucho mas que á nosotros.
+
+§ 364. Tienen los humores del cuerpo un curso ordinario y reglado que mueve é inclina imperceptiblemente nuestra voluntad: caminan juntos y ejercen sucesivamente un imperio secreto en nosotros; de suerte que tienen una parte considerable en todas nuestras acciones, sin que nosotros podamos conocerlo.
+
+§ 365. El reconocimiento de la mayor parte de los hombres, es un secreto deseo de recibir mayores beneficios.
+
+§ 366. Casi todos hallan placer en corresponder á las pequeñas obligaciones: muchos reconocen las medianas; pero casi nadie deja de ser ingrato á las obligaciones mayores.
+
+§ 367. Hay locuras que se pegan como las enfermedades contagiosas.
+
+§ 368. Muchos desprecian los bienes; pero pocos saben darlos.
+
+§ 369. No sucede de ordinario sino en los pequeños intereses, el que tomemos el partido de no creer en las apariencias.
+
+§ 370. Por muy bien que nos hablen de nosotros, nunca nos dicen nada de nuevo.

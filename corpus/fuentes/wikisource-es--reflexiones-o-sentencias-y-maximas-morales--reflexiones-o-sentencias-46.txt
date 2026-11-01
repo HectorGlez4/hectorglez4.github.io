@@ -1,0 +1,33 @@
+fuente: wikisource-es
+obra: Reflexiones o sentencias y máximas morales
+traductor: Narciso Álvaro y Cereza
+url: https://es.wikisource.org/wiki/Reflexiones_o_sentencias:_46
+recuperado: 2026-11-01
+---
+Reflexiones o sentencias: 46
+|título=[[Reflexiones o sentencias y máximas morales]]
+|autor=François de La Rochefoucauld
+obra> |título=Reflexiones o sentencias y máximas morales
+obra> |traductor=Narciso Álvaro y Cereza
+obra> |autor=François de La Rochefoucauld
+obra> |título={{Anclaje+|Índice}}
+---
+§ 451. No debiéramos maravillarnos, sino de poder todavía maravillarnos.
+
+§ 452. Tan difíciles somos de contentar cuando tenemos mucho amor, como cuando casi no tenemos ninguno.
+
+§ 453. Ninguno por lo comun vive mas mortificado, que el que no puede sufrir el serlo.
+
+§ 454. Un simple no tiene suficiente proporcion para ser bueno.
+
+§ 455. Si la vanidad no trastorna enteramente las virtudes, á lo menos las bambolea todas.
+
+§ 456. Lo que nos hace insoportable la vanidad de los otros, es que pica la nuestra.
+
+§ 457. Con mas facilidad renunciamos nuestros intereses que nuestros gustos.
+
+§ 458. A nadie parece tan ciega la fortuna, como á los que no favorece.
+
+§ 459. Es preciso portarnos con la fortuna como con la salud: disfrutarla cuando es buena, tener paciencia cuando es mala, y nunca hacer grandes remedios sin una extrema necesidad.
+
+§ 460. El aire de ciudad suele á veces perderse en el ejército; pero nunca en la corte.
