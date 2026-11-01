@@ -81,8 +81,9 @@ reporta en la cola con su causa y se pasa a la siguiente veta; si son tres atasc
 | Estado | Veta | Notas |
 |---|---|---|
 | hecha (33 Citas, it. 1) | La Rochefoucauld, `Categoría:Reflexiones o sentencias y máximas morales` (60 pp.) | quedan ~360 candidatas aforísticas en `_revision/`, tope 33 por sesión; puede darse otra pasada a otro filtro |
-| pendiente | Séneca, `Categoría:Cartas a Lucilio (Wikisource tr.)` (63 cartas) | URL `…/wiki/Cartas_a_Lucilio_(Wikisource_tr.)/Carta_N`; Autor `seneca` ya existe |
-| pendiente | Cadalso, `Categoría:Cartas marruecas` (91 pp.) | Autor nuevo; sátira, cribar con cuidado |
+| descartada (it. 2) | Séneca, `Cartas a Lucilio (Wikisource tr.)` | cada carta declara su propia Obra («Cartas a Lucilio - Carta N»): 63 Obras de 1-2 Citas; solo con una regla de Héctor (reunir) |
+| hecha (14 Citas, it. 2) | Cadalso, `Categoría:Cartas marruecas` (91 pp.) | 1.247 candidatas, prosa epistolar contextual: rinde ~1 %. No repetir |
+| lección | Antes de recuperar un lote, probar UNA página y mirar `Obra:`: si cada página declara una Obra distinta, no sembrar | |
 | pendiente | Categorías `Ensayos de <Autor>` de Wikisource (479 en `Categoría:Ensayos`) aún no versionadas | listar con allcategories prefix `Ensayos de`; cruzar con fuentes |
 | descartada | `Categorías Aforismos/Máximas/Sentencias/Proverbios` | no existen o vacías; la categoría real es `Pensamientos, máximas, aforismos y definiciones` (fragmentos de Shakespeare, teatro: no) |
 | pendiente | Wikisource `Categoría:Discursos` de Autores ya en el Corpus | oratoria: cribar con cuidado |

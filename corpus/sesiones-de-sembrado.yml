@@ -2454,3 +2454,14 @@ sesiones:
       citasPublicadas: 4579
       procedenciaCompleta: 17.1
       tradicionLatinoamericanaSobreHispanicos: 56.9
+  - fecha: "2026-11-02"
+    hora: "00:47"
+    clase: "epoca"
+    propuesto: "Agotar la época Autores venezolanos: le quedan 19 candidatos por sembrar o por descartar con motivo escrito. Admitir sigue siendo del editor."
+    hueco: "La Fuente clasifica 42 candidatos en la época Autores venezolanos: 3 ya sembrados y 20 descartados con motivo. La lista está en corpus/candidatos-por-epoca.yml y se regenera con: npm run epocas:registrar"
+    elegido: "Sentencias de Cadalso"
+    motivo: "Categoría Cartas marruecas de Wikisource: Cadalso, 1.247 candidatas de prosa epistolar contextual, 14 sentencias; Cartas a Lucilio descartada (cada carta se declara como Obra distinta)"
+    resultado:
+      citasPublicadas: 4593
+      procedenciaCompleta: 17.1
+      tradicionLatinoamericanaSobreHispanicos: 56.5
