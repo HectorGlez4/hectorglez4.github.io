@@ -2421,3 +2421,14 @@ sesiones:
       citasPublicadas: 4520
       procedenciaCompleta: 17.2
       tradicionLatinoamericanaSobreHispanicos: 55.8
+  - fecha: "2026-11-01"
+    hora: "21:31"
+    clase: "epoca"
+    propuesto: "Agotar la época Autores venezolanos: le quedan 19 candidatos por sembrar o por descartar con motivo escrito. Admitir sigue siendo del editor."
+    hueco: "La Fuente clasifica 42 candidatos en la época Autores venezolanos: 3 ya sembrados y 20 descartados con motivo. La lista está en corpus/candidatos-por-epoca.yml y se regenera con: npm run epocas:registrar"
+    elegido: "Ensayos de Moreno, Camaña y Lugones"
+    motivo: "Categorías por Autor de Wikisource: Escritos de Mariano Moreno, Ensayos de Raquel Camaña y de Leopoldo Lugones"
+    resultado:
+      citasPublicadas: 4537
+      procedenciaCompleta: 17.2
+      tradicionLatinoamericanaSobreHispanicos: 56.9
