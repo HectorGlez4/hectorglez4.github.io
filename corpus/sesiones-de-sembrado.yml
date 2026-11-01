@@ -2366,3 +2366,14 @@ sesiones:
       citasPublicadas: 4440
       procedenciaCompleta: 17.5
       tradicionLatinoamericanaSobreHispanicos: 54.3
+  - fecha: "2026-11-01"
+    hora: "06:47"
+    clase: "epoca"
+    propuesto: "Agotar la época Autores venezolanos: le quedan 19 candidatos por sembrar o por descartar con motivo escrito. Admitir sigue siendo del editor."
+    hueco: "La Fuente clasifica 42 candidatos en la época Autores venezolanos: 3 ya sembrados y 20 descartados con motivo. La lista está en corpus/candidatos-por-epoca.yml y se regenera con: npm run epocas:registrar"
+    elegido: "Prosa de ideas de Quiroga, López Arango y Díaz Rodríguez"
+    motivo: "Cribado afinado de las épocas pendientes; Quiroga (Decálogo), López Arango (Ideas y ética), Díaz Rodríguez (Paréntesis modernista)"
+    resultado:
+      citasPublicadas: 4462
+      procedenciaCompleta: 17.4
+      tradicionLatinoamericanaSobreHispanicos: 55.5
