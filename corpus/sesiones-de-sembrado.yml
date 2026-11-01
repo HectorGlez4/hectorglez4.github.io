@@ -2432,3 +2432,14 @@ sesiones:
       citasPublicadas: 4537
       procedenciaCompleta: 17.2
       tradicionLatinoamericanaSobreHispanicos: 56.9
+  - fecha: "2026-11-01"
+    hora: "22:01"
+    clase: "epoca"
+    propuesto: "Agotar la época Autores venezolanos: le quedan 19 candidatos por sembrar o por descartar con motivo escrito. Admitir sigue siendo del editor."
+    hueco: "La Fuente clasifica 42 candidatos en la época Autores venezolanos: 3 ya sembrados y 20 descartados con motivo. La lista está en corpus/candidatos-por-epoca.yml y se regenera con: npm run epocas:registrar"
+    elegido: "Ensayos de Valera y Donoso Cortés"
+    motivo: "Categorías por Autor de Wikisource (resto): Valera, De la naturaleza y carácter de la novela; Donoso Cortés, Discurso sobre la Biblia"
+    resultado:
+      citasPublicadas: 4546
+      procedenciaCompleta: 17.2
+      tradicionLatinoamericanaSobreHispanicos: 56.9
