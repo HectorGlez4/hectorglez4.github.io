@@ -80,7 +80,11 @@ reporta en la cola con su causa y se pasa a la siguiente veta; si son tres atasc
 
 | Estado | Veta | Notas |
 |---|---|---|
-| pendiente | Wikisource `Categoría:Aforismos` / `Pensamientos` / `Máximas` (todas las obras no versionadas) | descubrir lista |
+| hecha (33 Citas, it. 1) | La Rochefoucauld, `Categoría:Reflexiones o sentencias y máximas morales` (60 pp.) | quedan ~360 candidatas aforísticas en `_revision/`, tope 33 por sesión; puede darse otra pasada a otro filtro |
+| pendiente | Séneca, `Categoría:Cartas a Lucilio (Wikisource tr.)` (63 cartas) | URL `…/wiki/Cartas_a_Lucilio_(Wikisource_tr.)/Carta_N`; Autor `seneca` ya existe |
+| pendiente | Cadalso, `Categoría:Cartas marruecas` (91 pp.) | Autor nuevo; sátira, cribar con cuidado |
+| pendiente | Categorías `Ensayos de <Autor>` de Wikisource (479 en `Categoría:Ensayos`) aún no versionadas | listar con allcategories prefix `Ensayos de`; cruzar con fuentes |
+| descartada | `Categorías Aforismos/Máximas/Sentencias/Proverbios` | no existen o vacías; la categoría real es `Pensamientos, máximas, aforismos y definiciones` (fragmentos de Shakespeare, teatro: no) |
 | pendiente | Wikisource `Categoría:Discursos` de Autores ya en el Corpus | oratoria: cribar con cuidado |
 | pendiente | Wikisource `Categoría:Cartas` de Autores ya en el Corpus | |
 | pendiente | Wikisource categorías de Autor de Autores hispanos del XIX/XX no sembrados | solo con obra en dominio público |
