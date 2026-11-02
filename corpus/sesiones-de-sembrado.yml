@@ -2465,3 +2465,14 @@ sesiones:
       citasPublicadas: 4593
       procedenciaCompleta: 17.1
       tradicionLatinoamericanaSobreHispanicos: 56.5
+  - fecha: "2026-11-02"
+    hora: "01:04"
+    clase: "epoca"
+    propuesto: "Agotar la época Autores venezolanos: le quedan 19 candidatos por sembrar o por descartar con motivo escrito. Admitir sigue siendo del editor."
+    hueco: "La Fuente clasifica 42 candidatos en la época Autores venezolanos: 3 ya sembrados y 20 descartados con motivo. La lista está en corpus/candidatos-por-epoca.yml y se regenera con: npm run epocas:registrar"
+    elegido: "Ensayos de Wilde y Unamuno"
+    motivo: "Categorías Ensayos de <Autor> de Wikisource: Wilde (La verdad sobre las máscaras, Pluma, lápiz y veneno) y Unamuno (La fe, La ideocracia); crítica teatral y relato biográfico, 9 sentencias"
+    resultado:
+      citasPublicadas: 4602
+      procedenciaCompleta: 17
+      tradicionLatinoamericanaSobreHispanicos: 56.5

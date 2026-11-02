@@ -84,7 +84,8 @@ reporta en la cola con su causa y se pasa a la siguiente veta; si son tres atasc
 | descartada (it. 2) | Séneca, `Cartas a Lucilio (Wikisource tr.)` | cada carta declara su propia Obra («Cartas a Lucilio - Carta N»): 63 Obras de 1-2 Citas; solo con una regla de Héctor (reunir) |
 | hecha (14 Citas, it. 2) | Cadalso, `Categoría:Cartas marruecas` (91 pp.) | 1.247 candidatas, prosa epistolar contextual: rinde ~1 %. No repetir |
 | lección | Antes de recuperar un lote, probar UNA página y mirar `Obra:`: si cada página declara una Obra distinta, no sembrar | |
-| pendiente | Categorías `Ensayos de <Autor>` de Wikisource (479 en `Categoría:Ensayos`) aún no versionadas | listar con allcategories prefix `Ensayos de`; cruzar con fuentes |
+| hecha (9 Citas, it. 3) | Categorías `Ensayos de <Autor>` de Wikisource, Autores ya en el Corpus (Wilde, Unamuno; Ariel, Arenal, Balmes ya estaban) | La categoría lista solo la página índice: una obra "pendiente" suele estar ya versionada por subpáginas (`ls corpus/fuentes \| grep <obra>`) antes de recuperar. Crítica teatral/biográfica rinde ~2 % |
+| pendiente (poco) | Ensayos aún sin tocar: Medardo Ángel Silva (4), Eduardo Wilde (3), Zeballos (3), Ameghino (2), Stendhal «Del amor», Molinos «Guía espiritual», Swift, Camaña (viajes: no) | probar UNA página y comprobar Obra y tamaño; Ortega y Gasset (31 pp.) lo decide Héctor: murió en 1955, en España sigue protegido |
 | descartada | `Categorías Aforismos/Máximas/Sentencias/Proverbios` | no existen o vacías; la categoría real es `Pensamientos, máximas, aforismos y definiciones` (fragmentos de Shakespeare, teatro: no) |
 | pendiente | Wikisource `Categoría:Discursos` de Autores ya en el Corpus | oratoria: cribar con cuidado |
 | pendiente | Wikisource `Categoría:Cartas` de Autores ya en el Corpus | |
