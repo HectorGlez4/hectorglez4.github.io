@@ -2553,3 +2553,14 @@ sesiones:
       citasPublicadas: 4732
       procedenciaCompleta: 16.9
       tradicionLatinoamericanaSobreHispanicos: 56.5
+  - fecha: "2026-11-02"
+    hora: "05:14"
+    clase: "epoca"
+    propuesto: "Agotar la época Autores venezolanos: le quedan 19 candidatos por sembrar o por descartar con motivo escrito. Admitir sigue siendo del editor."
+    hueco: "La Fuente clasifica 42 candidatos en la época Autores venezolanos: 3 ya sembrados y 20 descartados con motivo. La lista está en corpus/candidatos-por-epoca.yml y se regenera con: npm run epocas:registrar"
+    elegido: "El principio federativo (Proudhon)"
+    motivo: "Pi y Margall: El principio federativo es de Proudhon (traducido por Pi y Margall, que intercala comentarios): Autor nuevo, 649 candidatas, solo 2 sin duda de autoría; La reacción y la revolución y Las nacionalidades declaran una Obra por página"
+    resultado:
+      citasPublicadas: 4734
+      procedenciaCompleta: 16.9
+      tradicionLatinoamericanaSobreHispanicos: 56.5
