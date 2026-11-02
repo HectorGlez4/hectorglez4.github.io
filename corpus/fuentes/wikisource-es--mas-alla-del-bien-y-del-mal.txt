@@ -1,0 +1,221 @@
+fuente: wikisource-es
+obra: Más allá del bien y del mal
+url: https://es.wikisource.org/wiki/M%C3%A1s_all%C3%A1_del_bien_y_del_mal
+recuperado: 2026-11-02
+---
+Más allá del bien y del mal
+[[Categoría:Obras de Friedrich Wilhelm Nietzsche]]
+|título=Más allá del bien y del mal
+|autor=[[Friedrich Wilhelm Nietzsche]]
+---
+I - II - III - IV - V - VI - VII - VIII - IX - X - XI - XII - XIII - XIV - XV - XVI - XVII - XVIII - XIX - XX - XXI - XXII - XXIII - XXIV - XXV - XXVI - XXVII - XXVIII - XXIX - XXX - XXXI - XXXII - XXXIII XXXIV - XXXV - XXXVI - XXXVII - XXXVIII - XXXIX - XL - XLI - XLII - XLIII - XLIV - XLV - XLVI - XLVII - XLVIII - XLIX - L - LI - LII - LIII - LIV - LV - LVI - LVII - LVIII - LIX - LX - LXI - LXII
+
+Prólogo
+
+Suponiendo que la verdad sea una mujer –, ¿cómo?, ¿no está justificada la sospecha de que todos los filósofos, en la medida en que han sido dogmáticos, han entendido poco de mujeres?, ¿de que la estremecedora
+seriedad, la torpe insistencia con que hasta ahora han solido acercarse a la verdad eran medios inhábiles e
+ineptos para conquistar los favores precisamente de una hembra? Lo cierto es que la verdad no se ha dejado
+conquistar – y hoy toda especie de dogmática está ahí en pie, con una actitud de aflicción y desánimo. ¡Si es que en absoluto permanece en pie! Pues burlones hay que afirman que ha caído, que toda dogmática
+yace por el suelo, incluso que toda dogmática se encuentra en las últimas. Hablando en serio, hay buenas
+razones que abonan la esperanza de que todo dogmatizar en filosofía, aunque se haya presentado como algo
+muy solemne, muy definitivo y válido, acaso no haya sido más que una noble puerilidad y cosa de principiantes; y tal vez esté muy cercano el tiempo en que se comprenderá cada vez más qué es lo que propiamente ha bastado para poner la primera piedra de esos sublimes e incondicionales edificios de filósofos que los dogmáticos han venido levantando hasta ahora, – una superstición popular cualquiera procedente de una época inmemorial (como la superstición del alma, la cual, en cuanto superstición del sujeto y superstición del yo, aún hoy no ha dejado de causar daño), acaso un juego cualquiera de palabras, una seducción de parte de la gramática o una temeraria generalización de hechos muy reducidos, muy personales, muy humanos, demasiado humanos. La filosofía de los dogmáticos ha sido, esperémoslo, tan sólo un hacer promesas durante milenios: como lo fue, en una época aún más antigua, la astrología, en cuyo servicio es posible que se hayan invertido más trabajo, dinero, perspicacia, paciencia que los invertidos hasta ahora en favor de cualquiera de las verdaderas ciencias – a la astrología y a sus pretensiones »sobreterrenales« se debe en Asia y en Egipto el estilo grandioso de la arquitectura. Parece que todas las cosas grandes, para inscribirse en el corazón de la humanidad con sus exigencias eternas, tienen que vagar antes sobre la tierra cual monstruosas y tremebundas figuras grotescas: una de esas figuras grotescas fue la filosofía dogmática, por ejemplo la doctrina del Vedanta en Asia y en Europa el platonismo. No seamos ingratos con ellas, aunque también tengamos que admitir que el peor, el más duradero y peligroso de todos los errores ha sido hasta ahora un error de dogmáticos, a saber, la invención por Platón del espíritu puro y del bien en sí. Sin embargo, ahora que ese error ha sido superado, ahora que Europa respira aliviada de su pesadilla y que al menos le es lícito disfrutar de un mejor - sueño, somos nosotros, cuya tarea es el estar despiertos, los herederos de toda la fuerza que la lucha contra ese error ha desarrollado y hecho crecer. En todo caso, hablar del espíritu y del bien como lo hizo Platón significaría poner la verdad cabeza abajo y negar el perspectivismo, el cual es condición fundamental de toda vida; incluso, en cuanto médicos, nos es lícito preguntar: »¿De dónde procede esa enfermedad que aparece en la más bella planta de la Antigüedad, en Platón?, ¿es que la corrompió el malvado Sócrates?, ¿habría sido Sócrates, por lo tanto, el corruptor de la juventud?, ¿y habría merecido su cicuta?« – Pero la lucha contra Platón o, para decirlo de una manera más inteligible para el »pueblo«, la lucha contra la opresión cristiano-eclesiástica durante siglos – pues el cristianismo es platonismo para el »pueblo« – ha creado en Europa una magnífica tensión del espíritu, cual no la había habido antes en la tierra: con un arco tan tenso nosotros podemos tomar ahora como blanco las metas más lejanas. Es cierto que el hombre europeo siente esa tensión como una tortura; y ya por dos veces se ha hecho, con gran estilo, el intento de aflojar el arco, la primera, por el jesuitismo, y la segunda, por la ilustración democrática – ¡a la cual le fue dado de hecho conseguir, con ayuda de la libertad de prensa y de la lectura de periódicos, que el espíritu no se sintiese ya tan fácilmente a sí mismo como «tortura»! (Los alemanes inventaron la pólvora – ¡todos mis respetos por ello!, pero volvieron a repararlo – inventaron la prensa.) Mas nosotros, que no somos ni jesuitas, ni demócratas, y ni siquiera suficientemente alemanes; nosotros los buenos europeos y espíritus libres, muy libres - ¡nosotros la tenemos todavía, tenemos la entera tortura del espíritu y la entera tensión de su arco! Y acaso también la flecha, la tarea y, ¿quién sabe?, incluso el blanco...
+
+Sils-Maria, Alta Engadina, en junio de 1885
+
+Primera Sección. De los prejuicios de los filósofos
+
+1-10
+
+1
+
+La voluntad de verdad, que todavía nos seducirá a correr más de un riesgo, esa famosa veracidad de la que todos los filósofos han hablado hasta ahora con veneración: ¡qué preguntas nos ha propuesto ya esa voluntad de verdad! ¡Qué extrañas, perversas, problemáticas preguntas! Es una historia ya larga – ¿y no parece, sin embargo, que apenas acaba de empezar? ¿Puede extrañar el que nosotros acabemos haciéndonos desconfiados, perdiendo la paciencia y dándonos la vuelta impacientes? ¿El que también nosotros, por nuestra parte, aprendamos de esa esfinge a preguntar? ¿Quién es propiamente el que aquí nos hace preguntas? ¿Qué cosa existente en nosotros es lo que quiere propiamente llegar »a la verdad«? – De hecho hemos estado detenidos durante largo tiempo ante la pregunta que interroga por la causa de ese querer, – hasta que hemos acabado deteniéndonos del todo ante una pregunta aún más radical. Hemos preguntado por el valor de esa voluntad. Suponiendo que nosotros queramos la verdad: ¿por qué no, más bien, la no-verdad? ¿Y la incertidumbre? ¿Y aun la ignorancia? – El problema del valor de la verdad se plantó delante de nosotros, – ¿o fuimos nosotros quienes nos plantamos delante del problema? ¿Quién de nosotros es aquí Edipo? ¿Quién Esfinge? Es éste, a lo que parece, un lugar donde se dan cita preguntas y signos de interrogación. – ¿Y se creería que a nosotros quiere parecernos, en última instancia, que el problema no ha sido planteado nunca hasta ahora, – que ha sido visto, afrontado, osado por vez primera por nosotros?. Pues en él hay un riesgo, y acaso no exista ninguno mayor.
+
+Cuarta sección. Sentencias e interludios
+
+71-80
+
+78
+
+Quien a sí mismo se desprecia continúa apreciándose, sin embargo, a sí mismo en cuanto despreciador.
+
+...
+
+IX
+
+¿"Según la naturaleza" queréis vivir? ¡Ay — estoicos nobles, qué mentira de palabras! Imaginados un ser, tal como es la naturaleza, abundoso sin medida, indiferente sin medida, sin intenciones y respetos, sin conmiseración y justicia, cruel y abandonado e incierto, imaginados la indiferencia misma como poder — cómo podríais vivir según esa indiferencia?, ¿Vivir — no es eso justamente un querer-ser-diferente de esa naturaleza?, ¿No significa vivir: estimar, preferir, ser injusto, ser limitado, querer ser diferente?
+
+...
+
+XVI
+
+Hay todavía candorosos observadores de si mismos, cuales creen, que haya „certezas directas“, por ejemplo „yo pienso“, o como según la superstición de Schopenhauer „yo quiero“: como si el distinguir/reconocimiento podría concebir su objeto de manera pura y desnuda, como „cosa en sí“, y no tuviera lugar un falseamiento ni del lado del sujeto, ni del lado del objeto. Pues, que „certezas directas“, igual que „cognición absoluta“ y „sujeto en si“, implica una „contradictio in adjecto“, repetiré cien veces: se debería soltarse por fin de la seducción de las palabras! Puede ser que el pueblo crea que el reconocimiento fuera una percepción final. El filósofo tiene que decirse: „si descompongo el proceso, que se expresa en la frase „yo pienso“, entonces recibo una serie de proposiciones osadas, que son difíciles de fundamentar, y quizás imposible, — por ejemplo, que lo sea yo, quien piensa, que sobretodo algo tuviera que existir, que piensa, que el pensar fuera una actuación y un efecto de un ser, el cual es pensado como la causa, que exista un "yo", en fin, que ya está claro, lo que se tiene que nombrar, -- que yo sé, qué es Pensar.
+
+...
+
+XVII
+
+Lo que afecta/atanya/concerne/reza/se refire a la superstición de los Lógicos: pues, no voy a cansarme de sublinar un pequeño hecho una y otra vez, que no admiten esos supersticiosos, — es decir, que un pensamiento entra, cuando quiera „ello“, y no cuando quiera „yo“; así que resulta como un f a l s i m i e n t o del hecho, decir: el sujeto „yo“ es la condición del predicado „pensar“. Ello piensa: pero que ese „ello“ fuera justamente aquello viejo famoso „Yo“, es, dicho con clemencia, solamente una presunción, una aserción, sobre todo ninguna „certeza inmediata“. Al final está hecho/dicho ya demasiado con este „ello piensa“: este „ello“ ya contiene una interpretación del procedimiento y no pertenece al procedimiento mismo.
+
+...
+
+XIX
+
+Los filósofos suelen de hablar del libre albedrío (la voluntad libre), como si fuera la cosa más conocida del mundo, incluso Schopenhauer dió para entender la voluntad sola la conocemos en el fondo, la conocemos totalmente, sin descuento y sin añadidura fuera conocida. Pero me parece una vez más que Schopenhauer ha hecho en este caso también, lo que suelen que hacer los filósofos: que él ha absorbido un prejuicio del pueblo y lo ha exagerado. La voluntad me parece sobre todo algo complicado, algo que sólo en forma de palabra constituye una unidad - y esa reducción hacia una palabra encasquilla el prejuicio del pueblo. Ese prejuicio se puso sobre la cautela de los filósofos. Seamos por una vez más cautelosos, seamos „no-filosóficos“ —, digamos: en cada voluntad hay primero una mayoría de sentimientos, es decir el sentimiento de la afección, desde el allí (weg), la sensación de la afección hacía aquí (hin), la sensación desde este „allí" (hin) y „aquí“ (weg) mismo, luego una sensación acompañante de músculos, la cual — sin que pongamos „brazos y piernas“ en marcha — empieza su juego a través de un tipo de costumbre, en cuanto „querramos“ nosotros.
+
+...
+
+Desde altas montañas
+
+Epodo
+
+¡Oh mediodía de la vida! ¡Tiempo solemne!
+
+¡Oh jardín estival!
+
+Inquieta felicidad de estar de pie y atisbar y aguardar: —
+
+A los amigos espero, preparado día y noche,
+
+¿Dónde permanecéis, amigos? ¡Venid! ¡Es tiempo ya! ¡Es tiempo ya!
+
+¿No fue por vosotros que el gris del glaciar se
+
+adornó hoy de rosas?
+
+El arroyo os busca, anhelantes se empujan y se lanzan
+
+Hoy el viento y la nube hacia el azul,
+
+Para atisbaros a vosotros desde lejanísima vista de pájaro.
+
+En lo más alto estaba preparada mi mesa para vosotros:
+
+¿Quién habita tan cerca
+
+De las estrellas, quién de las grisísimas lejanías del abismo?
+
+Mi reino — ¿qué reino se ha extendido más que él?
+
+Y mi miel — ¿quién la ha saboreado?.....
+
+— ¡Allí estáis, amigos! — Ay, ¿es que no es a mí
+
+A quien queríais llegar?
+
+Vaciláis, os sorprendéis — ay, ¡mejor si sintierais rencor!
+
+Yo - ¿ya no soy yo? ¿cambiados están mi mano, mi paso y mi rostro?
+
+Y lo que soy yo, para vosotros amigos — ¿no lo soy?
+
+¿Me he vuelto otro? ¿Y extraño a mí mismo?
+
+¿De mí mismo me he evadido?
+
+¿Un luchador que se ha domeñado a sí mismo demasiadas veces?
+
+¿Que demasiadas veces ha contendido contra la propia fuerza,
+
+Por la propia victoria herido y estorbado?
+
+¿Busqué donde más cortante sopla el viento?
+
+¿Aprendí a habitar
+
+Donde nadie habita, en desoladas zonas de osos polares,
+
+Olvidé hombre y Dios, maldición y plegaria?
+
+¿Me volví un fantasma que anda sobre glaciares?
+
+— ¡Vosotros, viejos amigos! ¡Mirad! Ahora os quedáis pálidos,
+
+¡Llenos de amor y de horror!
+
+¡No, idos! ¡No os enojéis! ¡Aquí — no podríais vosotros tener vuestra casa!
+
+Aquí, en el lejanísimo reino del hielo y de las rocas —
+
+Aquí se tiene que ser cazador e igual que las gamuzas.
+
+¡En un malo cazador me he vuelto! — ¡Ved cuán tirante
+
+Se tensa mi arco!
+
+El más fuerte de todos fue quien logró tal tirantez — —:
+
+Pero ¡ay ahora! Peligrosa es la flecha,
+
+Como ninguna otra, — ¡fuera de aquí! ¡por vuestro bien!...
+
+¿Os dais la vuelta? — Oh corazón, has soportado bastante,
+
+Fuerte permaneció tu esperanza:
+
+¡Para nuevos amigos mantén abiertas tus puertas!
+
+¡Deja a los viejos! ¡Deja el recuerdo!
+
+Una vez fuiste joven, ahora — ¡eres un joven mejor!
+
+Lo que alguna vez nos ligó, el lazo de una misma esperanza, —
+
+¿Quién continúa leyendo los signos
+
+Que el amor una vez grabó, los pálidos signos?
+
+Yo te comparo al pergamino, que la mano
+
+Rehuye agarrar, — al igual que él amarronado y quemado.
+
+¡Ya no amigos, son — ¿cómo llamarles? —
+
+Sólo fantasmas de amigos!
+
+Sin duda aún golpean ellos por la noche en el corazón y la ventana,
+
+Me miran y dicen: "¿es que no hemos sido amigos?" —
+
+— ¡Oh palabra marchita, que una vez a rosas olió!
+
+¡Oh anhelo de juventud, que a sí mismo se malentendió!
+
+Los que yo anhelaba,
+
+Los que yo imaginaba transformados-parientes míos,
+
+El que se volvieran viejos, los ha alejado de mí:
+
+Sólo quien se transforma, permanece emparentado conmigo.
+
+¡Oh mediodía de la vida! ¡Segunda juventud!
+
+¡Oh jardín estival!
+
+¡Inquieta felicidad de estar de pie y atisbar y aguardar!
+
+A los amigos espero, preparado día y noche,
+
+¡A los nuevos amigos! ¡Venid! ¡Es tiempo ya! ¡Es tiempo ya!
+
+*
+
+Esta canción ha terminado, — el grito dulce del anhelo
+
+Ha expirado en la boca:
+
+Un mago la hizo, el amigo a la hora justa,
+
+El amigo del mediodía — ¡no! no preguntéis quién es —
+
+En torno al mediodía fue en que uno se volvió dos .....
+
+Ahora nosotros, seguros de una victoria conjunta, celebramos
+
+la fiesta de las fiestas:
+
+¡El amigo Zaratustra ha venido, el huésped de los huéspedes!
+
+Ahora el mundo ríe, el telón gris se ha rasgado,
+
+El momento de la boda entre luz y tinieblas ha venido .....
