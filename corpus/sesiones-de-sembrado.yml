@@ -2608,3 +2608,14 @@ sesiones:
       citasPublicadas: 4790
       procedenciaCompleta: 17
       tradicionLatinoamericanaSobreHispanicos: 55.9
+  - fecha: "2026-11-02"
+    hora: "07:28"
+    clase: "epoca"
+    propuesto: "Agotar la época Autores venezolanos: le quedan 19 candidatos por sembrar o por descartar con motivo escrito. Admitir sigue siendo del editor."
+    hueco: "La Fuente clasifica 42 candidatos en la época Autores venezolanos: 3 ya sembrados y 20 descartados con motivo. La lista está en corpus/candidatos-por-epoca.yml y se regenera con: npm run epocas:registrar"
+    elegido: "Zola (¡Yo acuso!)"
+    motivo: "Último barrido de Autores nuevos (Engels, Poe, Dostoyevski, Chéjov, Zola, Macaulay): casi todo índices o Obra por página; solo ¡Yo acuso! de Zola, 165 candidatas, 3 sentencias"
+    resultado:
+      citasPublicadas: 4793
+      procedenciaCompleta: 17
+      tradicionLatinoamericanaSobreHispanicos: 55.9
