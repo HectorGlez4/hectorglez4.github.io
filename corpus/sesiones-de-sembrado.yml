@@ -2575,3 +2575,14 @@ sesiones:
       citasPublicadas: 4757
       procedenciaCompleta: 17
       tradicionLatinoamericanaSobreHispanicos: 56.5
+  - fecha: "2026-11-02"
+    hora: "06:23"
+    clase: "epoca"
+    propuesto: "Agotar la época Autores venezolanos: le quedan 19 candidatos por sembrar o por descartar con motivo escrito. Admitir sigue siendo del editor."
+    hueco: "La Fuente clasifica 42 candidatos en la época Autores venezolanos: 3 ya sembrados y 20 descartados con motivo. La lista está en corpus/candidatos-por-epoca.yml y se regenera con: npm run epocas:registrar"
+    elegido: "Kant, Azaña y Maeztu (Autores nuevos)"
+    motivo: "Autores nuevos de las categorías Obras de <Autor>: Kant (Fundamentación, trad. García Morente), Azaña (Apelación a la República, Paz piedad y perdón) y Maeztu (10 ensayos); 1.156 candidatas, 17 sentencias"
+    resultado:
+      citasPublicadas: 4774
+      procedenciaCompleta: 17.1
+      tradicionLatinoamericanaSobreHispanicos: 55.6
