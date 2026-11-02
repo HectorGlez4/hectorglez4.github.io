@@ -1,0 +1,54 @@
+fuente: wikisource-es
+obra: Ética
+url: https://es.wikisource.org/wiki/%C3%89tica_(Balmes)/07
+recuperado: 2026-11-02
+---
+Ética (Balmes)/07
+|título=[[Ética (Balmes)|Ética]]
+|autor=Jaime Balmes
+obra> |título=Ética
+obra> |autor=Jaime Balmes
+obra> |título={{Anclaje+|Índice}}
+---
+Razones contra el principio utilitario en todos los sentidos
+
+34. Los que confunden la moralidad con la utilidad, sea que hablen de la privada o de la pública, caen en el inconveniente de reducir la moral a una cuestión de cálculo, no dando a las acciones ningún valor intrínseco, y apreciándolas sólo por el resultado. Esto no es explicar el orden moral; es destruirle, es convertir las acciones en actos puramente físicos, haciendo del orden moral una palabra vacía. Hagámoslo sentir, poniendo en escena las varías doctrinas, y empezando por la del interés privado.
+
+Un hombre quiere matar a su enemigo: ¿qué le diréis para hacerle desistir de su intento criminal? Veámoslo,
+
+-Esto es un acto injusto.
+
+-¿Por qué? ¿Qué es la injusticia? Yo no reconozco, más justicia ni moralidad que lo que conviene a mis intereses; y ahora para mí no hay interés más vivo, más estimulante, que el de saciar mi venganza.
+
+-Pero de esto le puede resultar a usted un grave perjuicio, cayendo en seguida bajo el rigor de las leyes.
+
+-Procuraré evitarlo: además, estoy completamente seguro,
+
+-¿Está usted seguro de ello?
+
+-Sí, del todo; pero suponed que no lo estuviera; ¿esto qué importa?
+
+-Entonces se expone usted.
+
+-Ciertamente; pero el peligro es lejano, y la satisfacción es segura: opto por la segunda, y arrostro el primero.
+
+-Pero esto es reprensible...
+
+-No: porque, según usted, mi regla es mi interés: éste le debo conocer yo; lo más que puede suceder, es que yerre yo en mis cálculos; cometeré un error, no un delito.
+
+-Mas la acción no dejará de ser fea; pudierais calcular mejor.
+
+-Que tal vez pudiera calcular mejor, lo admito; pero niego que un error de cálculo sea una cosa fea. ¿Hay algo más que mi interés? ¿Sí o no? Si no hay más, y yo me lo juego, por decirlo así, ¿dónde está la fealdad?
+
+-En efecto, si se tratara sólo de usted; pero hay de por medio la vida de un hombre y la suerte de su familia.
+
+-Cierto; pero ni esa vida, ni la suerte de toda una familia son "mi interés"; y, supuesto que no hay otra regla que ésta, lo demás es inconducente. Con la venganza disfruto: con la muerte del enemigo, me quito de delante un objeto que me molesta; lo restante no significa nada.
+
+35. Fácil seria extender la aplicación de la doctrina del interés privado a todos los actos de la vida, manifestando que, en último análisis, es la muerte de toda moral, pues erige en única regla las pasiones y los caprichos.
+
+36. La doctrina del interés social o del bien común adolece de inconvenientes semejantes. Ya hemos visto cómo la podrían explotar todos los vicios y delirios de los hombres; bajo la engañosa apariencia del desprendimiento encierra la más deforme inmoralidad. En nombre del bien común se han cometido los más horrendos crímenes, contra los que protesta la conciencia del género humano; pero, si admitimos que la moralidad no tiene reglas intrínsecas, propias, independientes de sus resultados, esos crímenes se pueden justificar, reduciéndolos, cuando menos, a simples errores de cálculo. Un tirano, para guardarse de un enemigo terrible, sacrifica centenares de personas inocentes: la humanidad le execra, pero vuestra doctrina le justifica. "Así lo exige el bien común", dirá él; no hay bien común que justifique la maldad: el fin no justifica los medios; "esto último no es exacto, responderéis vosotros; la cuestión no está en si el acto es moral o inmoral en sí mismo, sino en si conduce o no al bien común; según conduzca o no, será moral o inmoral; pues su moralidad o inmoralidad depende de sus relaciones con el bien común. Tirano, calcula; y, si el resultado del cálculo es que la matanza de muchos inocentes es "útil" al bien común, sacrifícalos; y si no lo haces, serás inmoral.
+
+37. He aquí las horribles consecuencias a que conducen las doctrinas que aprecian la moralidad por los resultados. Todo se reduce a una cuestión de cálculo, que las pasiones cuidarán de resolver a su modo; y por desastres que resulten, por más que lo que se creía favorable al interés privado o al común, le sea muy dañoso, no hay inmoralidad intrínseca; hay un error de cálculo, no un delito. No hay, pues, nada digno de alabanza ni vituperio; no hay mérito ni demérito; no hay premio ni castigo. Cuando se aplique una pena, ésta no será más que un medio represivo semejante a los que se emplean contra los brutos: el hombre que arrostre la multa, la prisión, el destierro, la muerte, por cometer un acto que las leyes reprimen, será, si se quiere, un jugador, torpe o temerario; un hombre que habrá hecho un negocio desigual: nada más; y al verle morir en el patíbulo, no deberemos decir que satisface a la justicia, que paga su merecido, que expía sus crímenes, sino que liquida una cuenta de un negocio conducido erradamente, en cuyo término hay un cargo contra él, que es la pérdida de la vida.
+
+38. La razón y el sentido común ven en la moralidad algo muy superior a una cuestión de cálculo; y de aquí dimana el desprecio que se acarrea el egoísmo, la necesidad que tiene de ocultarse y de engalanarse con velos hipócritas: de aquí el aprecio que nos inspira el desinterés de quien cumple sus deberes sin atender a los resultados; y el que consideremos que no hay belleza moral en un acto, cuando su autor sólo se ha movido por una razón de utilidad.
+Dos hombres mueren por su patria; ambos ejecutan lo mismo; igual es el bien público que de su muerte dimana; igual el beneficio con que lo obtienen: el uno es ambicioso, y sólo se proponía conseguir un alto puesto; el otro es un sincero amante del bien público, y muere porque cree que morir es su deber: ¿de qué parte está la moralidad? La hallamos en el segundo, que prescinde de la utilidad propia; no en el primero, en quien sólo vemos un calculador, que juega su vida por la probabilidad de adquirir lo que ambiciona. Dos gobernantes que tienen en rehenes a individuos inocentes de las familias del enemigo, se abstienen de matarlos y atropellarlos, y les dan libertad. La conducta del uno es motivada por miras de interés público, porque cree que de este modo contribuye al triunfo de la causa, desarmando la cólera del enemigo, y adquiriendo su gobierno un buen nombre; la del otro es efecto de la idea del deber; les da libertad porque cree que así lo exigen la humanidad y la justicia: ¿en cuál de los dos vemos al hombre moral? En el segundo, no en el primero. La razón del bien común no nos basta para que hallemos moral la acción; ésta tiene en ambos el mismo resultado, pero la diferente intención de sus autores le da caracteres diversos: en el uno reconocemos moralidad; en el otro, habilidad.

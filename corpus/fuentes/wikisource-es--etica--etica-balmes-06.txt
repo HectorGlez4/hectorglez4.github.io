@@ -1,0 +1,21 @@
+fuente: wikisource-es
+obra: Ética
+url: https://es.wikisource.org/wiki/%C3%89tica_(Balmes)/06
+recuperado: 2026-11-02
+---
+Ética (Balmes)/06
+|título=[[Ética (Balmes)|Ética]]
+|autor=Jaime Balmes
+obra> |título=Ética
+obra> |autor=Jaime Balmes
+obra> |título={{Anclaje+|Índice}}
+---
+La moralidad no es la relación a la utilidad pública
+
+30. Al desaparecer el interés privado, se ofrece desde luego el común: ¿será posible cimentar la moralidad, en la utilidad de todos; por manera que lo que conduzca al bien común sea moral, y lo que a él se oponga sea inmoral?
+
+31. Desde luego ocurre una grave dificultad contra esta doctrina: ella rechaza al egoísmo como base de la moral; pero, en cambio, exime de la moralidad al individuo en aquellas acciones que no tengan relación con la sociedad; de suerte que, para un individuo solo, aislado, no habría orden moral. La razón es evidente: si moralidad es la relación al bien común, cuando esta relación falta, no hay ni puede haber moralidad: la consecuencia es profundamente inmoral, pero legítima, necesaria; no hay medio de eludirla. Según esta doctrina, un ser inteligente, considerado en sus relaciones con Dios, no estaría sujeto a la moral por manera que si no hubiese sociedad, si hubiese un hombre solo en el mundo, este hombre podría hacer lo que quisiese con respecto a sí y a Dios, sin infringir leyes morales. Además, muchas de nuestras acciones exteriores e interiores no tienen ninguna relación con la sociedad; son actos puramente individuales que no favorecen ni dañan al bien común. Admito que la moralidad nace únicamente de sus relaciones con este bien, gran parte de nuestras acciones queda fuera del orden moral; lo que, a más de ser contrario a la razón y al sentido común, es un manantial de inmoralidad. No; no es necesaria la sociedad para que tengan existencia y aplicación las ideas morales; una criatura inteligente, que estuviese sola en el universo, tendría sus deberes, para consigo y con el Criador: desde el momento que hay inteligencia y libertad, hay el orden moral, que es su regla.
+
+32. A más de estas dificultades, ocurre otra, que no es de menos gravedad. Si la norma de la moral fuese el bien común, sería preciso explicar en qué consiste este bien. ¿Será el desarrollo de la inteligencia, será el bienestar material, o ambas cosas a un tiempo? En todos los supuestos la moralidad quedará fluctuante. Porque, si la inteligencia es al fin, se podrá descuidar el bienestar material, y no será inmoral el dañarle ni el destruirle. Si se sobrepone el bienestar material, entonces la perfección de los pueblos consistirá en la mayor cantidad posible de goces; el epicureismo, condenado en el individuo, lo trasladaremos a la sociedad. Si son ambas cosas a un tipo, falta saber en qué proporción se han de combinar: si se ha de sacrificar el uno al otro en ciertos casos; y en favor de cuál se ha de resolver el conflicto. Nada habrá constante; la moralidad flotará a merced de las pasiones y caprichos de los hombres; lo que unos llamaran moral, lo que éstos alabarán como virtud, aquellos lo condenarán como vicio.
+
+33. Esta incertidumbre afectará mucho más a los actos individuales que no se refieran inmediatamente al bien común. El suicida dirá: "a la sociedad no le "conviene" un miembro que sufre tanto como yo; yo quiero hacerle un bien, apartando de su vista este cuadro aflictivo" y se matará. El ofendido por una palabra dirá: "a la sociedad no le "convienen" hombres sin honra; yo debo lavar la mía con la sangre de mi enemigo, o morir", y se batirá en duelo. El pródigo dirá: "a la sociedad le conviene" el progreso de la industria y del comercio; yo lo fomento con mi lujo y disipación; la suerte de mis hijos, cuyo porvenir destruyo, no vale tanto como el bien de la sociedad", y seguirá dilapidando. Y, como a estos insensatos no se les podría reconvenir con la ley moral, con ese conjunto de máximas fijas, eternas, que arreglan la conducta del individuo y de la sociedad, necesario sería calcularlo todo por el "resultado"; el cálculo fuera tan variable como las pasiones y caprichos, y, en vez de una moral social, no tendríamos ninguna.

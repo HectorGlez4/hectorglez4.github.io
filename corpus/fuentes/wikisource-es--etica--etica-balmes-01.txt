@@ -1,0 +1,21 @@
+fuente: wikisource-es
+obra: Ética
+url: https://es.wikisource.org/wiki/%C3%89tica_(Balmes)/01
+recuperado: 2026-11-02
+---
+Ética (Balmes)/01
+|título=[[Ética (Balmes)|Ética]]
+|autor=Jaime Balmes
+obra> |título=Ética
+obra> |autor=Jaime Balmes
+obra> |título={{Anclaje+|Índice}}
+---
+ÉTICA llamo a la ciencia que tiene por objeto la naturaleza y el origen de la moralidad. Cuál sea el verdadero sentido de la palabra moralidad, no se puede explicar aquí, pues que a ello se dedica una parte considerable de este volumen. Algunos han dado a la Ética el título de "arte de vivir bien": lo cual no parece exacto, pues que, si se reuniesen todas las reglas de buena conducta, sin acompañarlas de examen, formarían un arte" mas no una "ciencia".
+
+Fácil me hubiera sido escribir un grueso volumen de ÉTICA, o filosofía moral: es materia que en las riquezas abundan, y se las puede tomar de otros, sin que se conozca el plagio; pero he preferido reducir el tratado a pocas páginas, ya porque lo requiere el género de la obra, ya también porque las ideas para germinar, conviene que no estén desleídas. Lo que importa es asentar los principios, e indicar con claridad y precisión el modo de aplicarlos: ciertos pormenores corresponden a una obra de moral pero no a una de filosofía moral. La palabra filosofía expresa aquí examen y análisis de los fundamentos de la moral y de sus conclusiones capitales: sise quisiese descender hasta las últimas consecuencias, sería preciso contar con más tiempo del que suele emplearse en esta enseñanza.
+
+Se notará que no trato separadamente ni del sentido ni del sentimiento moral: sólo hablo de ellos, cuando la materia respectiva va ofreciendo la ocasión. Si por sentido moral se entiende la percepción instintiva de ciertas relaciones morales, queda incluido en el sentido común, del cual forma un ramo: si se le quiere tomar en otra acepción, no la comprendo. El sentimiento moral es lo que indica su nombre: el sentimiento, en sus relaciones morales. Como mero sentimiento, es una inclinación que nada significa en el orden moral, hasta que se subordina a la libertad, y se encamina a un objeto, con sujeción a las condiciones, en cuyo supuesto el criterio de su moralidad se halla en alguno de los capítulos que tratan de los deberes y derechos. Todo sentimiento se refiere al sujeto o al objeto: así están señaladas sus reglas, cuando se han fijado las de la moral en todas sus relaciones.
+
+En el orden de materias no he seguido el método común: no es necesario exponer aquí los motivos, ni lo consiente tampoco la brevedad que me he propuesto. No obstante, para juzgar de si he acertado o no, hay un medio sencillo: leer el tomo con la mira de buscar un cuerpo de ciencia, resultado de un examen riguroso. Si el libro llena este objeto, el método es bueno; si no, errado.
+
+He procurado presentar las cuestiones bajo el aspecto reclamado por las necesidades de la época: si en algo conviene atender a esta circunstancia, es indudablemente en la moral. Fuera de las Academias, pocos hablan de ideología y psicología; pero las cuestiones sobre la sociedad, el poder público, la propiedad, el suicidio, se agitan en todas partes. Es preciso tener sobre ellas ideas fijas, para preservarse del extravío, y es indispensable saber tratarlas con el método y estilo de la época, so pena de dañar a la verdad, desluciéndola.

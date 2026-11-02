@@ -1,0 +1,25 @@
+fuente: wikisource-es
+obra: Ética
+url: https://es.wikisource.org/wiki/%C3%89tica_(Balmes)/02
+recuperado: 2026-11-02
+---
+Ética (Balmes)/02
+|título=[[Ética (Balmes)|Ética]]
+|autor=Jaime Balmes
+obra> |título=Ética
+obra> |autor=Jaime Balmes
+obra> |título={{Anclaje+|Índice}}
+---
+Existencia de las ideas morales y su carácter práctico
+
+1. Hay en todos los hombres ideas morales. Bueno, malo, virtud, vicio, lícito, ilícito, derecho, deber, obligación, culpa, responsabilidad, demérito, son palabras que emplea el ignorante, como el sabio} en todos tiempos y países: éste es un lenguaje perfectamente entendido por todo el linaje humano, sean cuales fueren las diferencias en cuanto a la ampliación del significado a casos especiales.
+
+2. Las cuestiones de los filósofos sobre la naturaleza de las ideas morales confirman la existencia de las mismas; no se buscaría lo que son, si no se supiese que son. No cabe señalar un hecho más general que éste; no cabe designar un orden de ideas de que nos sea más imposible despojarnos: el hombre encuentra en sí propio tanta resistencia a prescindir de la existencia del orden moral, como de la del mundo que percibe con los sentidos.
+
+Imaginaos el ateo más corrompido; el que con mayor impudencia se mofe de lo más santo; que profese el principio de que la moral es una quimera y de que sólo hay que mirar la utilidad en todo, buscando el placer y huyendo del dolor; ese monstruo, tal como es, no llega todavía a ser tan perverso como él quisiera, pues no consigue el despojarse de las ideas morales. Hágase la prueba: dígasele que un amigo a quien ha dispensado muchos favores, acaba de hacerle traición: "¡qué ingratitud!" exclamará, "¡qué iniquidad!". Y no advierte que la ingratitud y la iniquidad son cosas de orden puramente moral que él se empeña en negar. Figurémonos que el amigo traidor se presenta y dice al ofendido: "es cierto, yo he hecho lo que usted llama una traición, usted me dispensaba favores; pero, como de la traición me resultaba una utilidad mayor que los beneficios de usted, he creído que era una puerilidad el reparar en la justicia y en el agradecimiento". ¿Podrá el filósofo dejar de irritarse a la vista de tamaña impudencia? ¿No es probable que le llamará infame, malvado, monstruo, y otros epítetos que le sugiera la cólera? Y, no obstante, éste es el mismo filósofo que sostenía no haber orden moral, y que ahora le proclama con una contradicción tan elocuente. Quitad el interés propio; hacedle simple espectador de acciones morales o inmorales: y la contradicción será la misma. Se le refiere que un amigo expuso su vida, para salvar la de otro amigo: "¡qué acción más "bella"! dirá el filósofo. Por algunas talegas de pesos fuertes, un militar entregó una fortaleza, lo que causó la ruina de su patria; ¡qué villanía, qué bajeza, qué infamia! dirá también el filósofo. Esto, ¿qué prueba? Prueba que las ideas morales están profundamente arraigadas, en el espíritu, que son inseparables de él, que son hechos primitivos, condiciones impuestas a nuestra naturaleza, contra las que nada pueden las cavilaciones de la filosofía.
+
+3. Las ideas morales no se nos han dado como objetos de pura contemplación, sino como reglas de conducta; no son especulativas, son eminentemente prácticas; por esto no necesitan del análisis científico para que puedan regir al individuo y a la sociedad. Antes de las escuelas filosóficas había moralidad en los individuos y en los pueblos, como antes, de los adelantos de las ciencias naturales la luz inundaba el mundo y los animales se aprovechaban de los fenómenos notados y explicados por la catóptrica y la dióptrica.
+
+4. Así, pues, al entrar en el examen de la moral, es preciso considerar que se trata de un hecho; las teorías no serán verdaderas, si no están acordes con él. La filosofía debe explicarle, no alterarle: pues no se ocupa en un objeto que ella haya inventado y que pueda modificar sino en un hecho que se le da para que lo examine. Por este motivo, los elementos constitutivos de las ideas morales es necesario buscarlos en la razón, en la conciencia, en el sentido común. Siendo reguladores de la conducta del hombre, no pueden estar en contradicción con los medios preceptivos del humano linaje; y, debiendo dominar en la conciencia, han de encontrarse en la conciencia misma.
+
+5. La razón, el sentido común, la conciencia, no son exclusivo patrimonio de los filósofos: pertenecen a todos los hombres; por lo que la filosofía moral debe comenzar interrogando al linaje humano para que de la respuesta pueda sacar qué es lo que se entiende por moral o inmoral, y cuáles son las condiciones constitutivas de estas propiedades.

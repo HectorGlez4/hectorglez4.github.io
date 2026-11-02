@@ -1,0 +1,25 @@
+fuente: wikisource-es
+obra: Ética
+url: https://es.wikisource.org/wiki/%C3%89tica_(Balmes)/03
+recuperado: 2026-11-02
+---
+Ética (Balmes)/03
+|título=[[Ética (Balmes)|Ética]]
+|autor=Jaime Balmes
+obra> |título=Ética
+obra> |autor=Jaime Balmes
+obra> |título={{Anclaje+|Índice}}
+---
+Condiciones indispensables para el orden moral
+
+6. No hay moralidad ni inmoralidad cuando no hay conocimiento: nadie ha culpado jamás a una piedra, aunque con su caída haya producido un desastre; ni ha juzgado meritoria la influencia del agua, que da a las plantas verdor y lozanía. Este conocimiento, necesario para la moral, debe ser superior a la percepción puramente sensitiva: por cuya razón están exentos de responsabilidad los brutos. La moral exige un conocimiento de relaciones, capaz de comparar los medios con los fines: una percepción inteligente; cuando esto falta, hay acciones físicas, provechosas o nocivas, pero no morales o inmorales.
+
+7. De esto inferiremos que la primera condición para que una acción pueda pertenecer al orden moral, es la "inteligencia" en el ser que la ejecuta. El orden moral corresponde, pues, únicamente al mundo intelectual, y de tal modo, que las criaturas racionales sólo están en él mientras usan de razón. En el sueño, u otra situación cualquiera en que el uso de la razón esté interrumpido, no hay orden moral: y, si se imputan algunas acciones, como al borracho el asesinato, es porque con su conocimiento anterior había podido prever la perturbación mental y sus consecuencias.
+
+8. El conocimiento de lo que se ejecuta no es suficiente, si el sujeto no obra con espontaneidad libre. Espontaneidad, porque si se procediese por violencia, como uno a quien se forzase la mano para escribir; no habría acción del sujeto, éste no sería más que un instrumento del agente principal. Libertad, porque, aun suponiendo que el acto se ejerce con espontaneidad y hasta con vivo placer, no hay orden moral, si el sujeto obra por un impulso irresistible, si no puede evitar la acción que ejecute. El niño que no ha llegado al de la razón, el demente, el delirante, hacen muchos de sus actos con espontaneidad, sin violencia de ninguna especie, tal vez con mucho gusto; y, sin embargo, sus acciones no son laudables ni vituperables; no pertenecen al mundo moral, porque el sujeto que obra no procede con libertad de albedrío.
+
+9. La inteligencia, o sea un conocimiento de relaciones, y la libertad, son necesarias para el orden moral pero es preciso notar que por relaciones se entiende algo más que la de los medios con los fines; y por la libertad, algo más también que la simple facultad de hacer o no hacer, o de hacer esto o aquello; se entiende cierto grado de conocimiento y de libertad, que no siempre se puede fijar con absoluta precisión, pero que determinan aproximadamente la razón y el sentido común. Un ejemplo hará comprender lo que quiero decir.
+
+Un demente intenta escapar de su encierro, y dispone los medios de la manera más adecuada; suple la llave con algún hierro que tiene a la mano, sale callandito, evita el encuentro de los vigilantes, arrima una escalera en la pared, se descuelga a la calle por una cuerda para evitar el daño de la caída, se dirige a la casa de su antiguo enemigo, y le asesina. No hay duda que muchos dementes son capaces de proceder así, y, por consiguiente, hay en ellos un conocimiento de relación de los medios con el fin. Si al salir de la puerta de su encierro, hubiese visto a un vigilante, habría retrocedido, e indudablemente lo hubiera hecho, si a la vista se siguiera la amenaza: por donde se conoce que, al ejecutar su acción, no obraba con un impulso del todo irresistible, y podía dejar de obrar, en entendiendo que le tenía más cuenta para evitar el castigo: conservaba, pues, alguna libertad: no obraba por un impulso irresistible. Sin embargo, nadie dirá que el demente fuera responsable del asesinato; si algún día volviese a la razón, el recuerdo del homicidio no le rebajaría a los ojos de los demás hombres; sería digno de lástima, mas no de vituperio.
+
+10. Para el orden moral, se necesita una capacidad de conocer la moralidad de las acciones, y de conocer libremente, conforme a este conocimiento; la criatura intelectual no está en el orden moral, sino cuando se halla completa, por decirlo así; cuando, aunque no reflexione actualmente, es al menos capaz de reflexionar sobre el orden moral. Esto es tan cierto, que no se culpa a quien comete con pleno conocimiento y libertad un acto, cuya malicia moral ignoraba invenciblemente. En el orden físico, los actos son lo que son, prescindiendo del conocimiento de quien los ejecuta; pero en el moral, todo depende del conocimiento y libertad del que obra; Y este conocimiento y libertad deben ser capaces de referirse al mismo orden moral; de lo contrario, no producen acciones que pertenezcan a él.

@@ -1,0 +1,67 @@
+fuente: wikisource-es
+obra: Ética
+url: https://es.wikisource.org/wiki/%C3%89tica_(Balmes)/13
+recuperado: 2026-11-02
+---
+Ética (Balmes)/13
+|título=[[Ética (Balmes)|Ética]]
+|autor=Jaime Balmes
+obra> |título=Ética
+obra> |autor=Jaime Balmes
+obra> |título={{Anclaje+|Índice}}
+---
+Explicación de las nociones fundamentales del orden moral
+
+66. Ahora podemos definir el orden moral y todas las ideas fundamentales.
+
+67. La moralidad absoluta y esencial es la santidad infinita, o sea el acto con que Dios ama su perfección infinita.
+
+68. La moralidad en los seres criados es el amor de Dios, explícito o implícito.
+
+69. El amor explícito es el acto mismo de amar a Dios; éste es el acto moral por excelencia.
+
+70. El amor implícito es el amor del orden que Dios ama en sus criaturas.
+
+71. El orden moral es el orden en las criaturas, en cuanto amado por Dios.
+
+72. Bien moral, relativo y finito, es lo que pertenece al orden amado por Dios en las criaturas, en cuanto es realizable por seres inteligentes y libres. Mal moral es lo que es contrario al orden amado por Dios, en cuanto la contrariedad es realizable por criaturas libres.
+
+73. Vínculo moral, tomado en su mayor generalidad, es un límite que deja intacta la libertad y voluntad del ser libre para que ejerza o no su acción en cierto sentido. La voluntad es físicamente libre para querer una cosa mala; pero no la quiere, porque es mala, o porque acarrea castigo: he aquí un límite; un vínculo moral produciendo su efecto sin destruir la libertad.
+
+74. Ley natural es la comunicación del orden moral hecha por Dios al hombre desde su creación, en cuanto produce en éste un vínculo moral.
+
+75. Mandamiento o precepto es el acto que produce este vínculo moral con respecto a la ejecución de una cosa. Prohibición es el acto que liga moralmente para no ejecutar una acción.
+
+76. Lícito es lo que no contraría el orden moral; ilícito, lo que le contraría.
+
+77. Deber es la sujeción de la criatura libre al orden moral.
+
+78. La obligación, tomada esta palabra en su mayor generalidad, se confunde con el deber. Se llama obligación, porque la sujeción al orden moral forma una especie de vínculo, que, respetando la libertad física, la "liga" en el orden moral, en cuanto la criatura no puede apartarse de este orden sin hacerse culpable y sin incurrir en una pena.
+
+79. La idea de derecho incluye dos: la de lícito con relación al sujeto que lo tiene, y la obligación de los demás en respetársele. Camilo puede pasearse; los otros no pueden impedírselo; Camilo tiene, pues, derecho al paseo. Si estuviese solo en el mundo, el paseo le sería lícito; pero no se diría que esta licitud (si puedo expresarme así) fuese un derecho. Salustio puede reclamar el dinero que ha prestado a su amigo; y éste tiene obligación de devolvérselo; en Salustio hay un derecho. Luego el derecho incluye siempre obligación o deber en otro, ya sea para hacer, ya para no impedir.
+
+80. Imputabilidad moral es el conjunto de las condiciones necesarias para que una acción pueda ser atribuida a una criatura en el orden moral: éstas son: conocimiento del acto imputado y libertad en su ejecución (capítulo II)
+
+81. Responsabilidad moral es la sujeción a la imputabilidad y a sus consecuencias.
+
+82. Culpa es la misma responsabilidad por una mala acción. "Es culpable, no es culpable"; esto es, ha obrado mal, o no; es responsable de un mal, o no.
+
+83. Pecado es una acción mala. Se suele aplicar este nombre a las acciones consideradas únicamente con relación a Dios. Cuando se las refiere a las leyes humanas, se apellidan faltas, delitos o crímenes, según su gravedad y naturaleza. Hay pecados de omisión.
+
+84. Premio es un bien otorgado a un ser a consecuencia de una acción buena que le pertenece como imputable.
+
+85. Pena es un mal causado al ser libre, por motivo de una acción mala de que es responsable. El castigo es la aplicación de la pena.
+
+86. Virtud es el hábito de obrar bien.
+
+87. Vicio es el hábito de obrar mal. Para ser virtuoso, no basta ejecutar una acción buena; es preciso tener el hábito de obrar bien, así como por un acto malo se hace el hombre culpable, más no vicioso.
+
+88. Laudable es el ser la acción digna de que la reconozcan y aprecien los demás, como conforme al orden moral.
+
+89. Vituperable es lo digno de que los demás lo reconozcan y censuren como contrario al orden moral.
+
+90. Conciencia es el dictamen de la razón que nos dice: eso es bueno, aquello es malo.
+
+91. Si hay verdad en el juicio de la moralidad de un acto, la conciencia se llama recta: si hay error, errónea; si hay certeza, cierta; si hay probabilidad, probable. La conciencia dudosa es la que está fluctuante entre el sí y el no.
+
+92. El error es invencible, cuando no lo hemos podido evitar; de lo contrario, es vencible. Lo mismo se aplica a la ignorancia de una obligación. Si por ignorancia invencible cometemos un acto malo, no somos culpables; pero la ignorancia vencible no exime de culpa.

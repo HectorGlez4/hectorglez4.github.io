@@ -1,0 +1,21 @@
+fuente: wikisource-es
+obra: Ética
+url: https://es.wikisource.org/wiki/%C3%89tica_(Balmes)/14
+recuperado: 2026-11-02
+---
+Ética (Balmes)/14
+|título=[[Ética (Balmes)|Ética]]
+|autor=Jaime Balmes
+obra> |título=Ética
+obra> |autor=Jaime Balmes
+obra> |título={{Anclaje+|Índice}}
+---
+Cómo se entiende el orden moral a lo que no le pertenece por intrínseca necesidad
+
+93. Hasta aquí hemos considerado el orden moral en sus relaciones necesarias: fáltanos ahora saber cómo se extiende a muchas cosas que no participan de esta necesidad. Lo que pertenece al orden moral necesario, está mandado porque es bueno, o prohibido porque es malo; lo que está fuera de dicha necesidad, es bueno porque esta mandado, o malo, porque está prohibido. El amor de Dios está mandado porque es bueno; el perjurio está prohibido porque es malo. La observancia de un rito, por ejemplo, la abstinencia de ciertos manjares, es buena porque está mandada; el comer de ellos es malo porque está prohibido. Los mandamientos relativos al orden necesarios se llaman naturales; los demás, positivos.
+
+94. La obligación positiva es una consecuencia de la natural; o, hablando con más propiedad, es la misma obligación natural aplicada a un caso. He aquí puesta en un silogismo la fórmula general de todas las obligaciones positivas que emanan de Dios: Es de ley natural el obedecer a Dios en iodo lo que mande; es así que ha mandado "esto"; luego es de ley natural el hacer "esto". La mayor parte de un principio de moral necesaria; la menor es la afirmación de una cosa particular; luego la consecuencia incluye también una obligación natural, o sea, la aplicación de la ley natural a un caso dado.
+
+95. Esta aplicación de los principios naturales a casos especiales se encuentra en todas las relaciones de la vida. Casio no está obligado a ceder una propiedad a Sempronio: esta cesión nada tiene que ver con la ley natural. Pero, si suponemos que Casio se ligue por un trato, la cesión resultará prescripta por la ley natural. Según ésta, se debe cumplir lo pactado; Casio ha pactado la cesión; luego debe hacerla; y, no haciéndola peca contra la ley natural.
+
+96. De la propia suerte se explican las obligaciones positivas que emanan de legítima autoridad humana. La ley natural prescribe que se guarde en la sociedad el orden debido, el cual no puede subsistir, rotos los vínculos de la obediencia a la autoridad legítima: ésta tiene, pues, la sanción de la ley natural; y en ejercicio de sus funciones produce obligación, a causa de esta misma ley.

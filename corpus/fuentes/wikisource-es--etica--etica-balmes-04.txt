@@ -1,0 +1,21 @@
+fuente: wikisource-es
+obra: Ética
+url: https://es.wikisource.org/wiki/%C3%89tica_(Balmes)/04
+recuperado: 2026-11-02
+---
+Ética (Balmes)/04
+|título=[[Ética (Balmes)|Ética]]
+|autor=Jaime Balmes
+obra> |título=Ética
+obra> |autor=Jaime Balmes
+obra> |título={{Anclaje+|Índice}}
+---
+Necesidad de una regla
+
+11. Capacidad de conocer lo que se ejecuta en el orden físico y en el moral, y libertad para obrar o no obrar: he aquí las condiciones que se necesitan para que un acto pueda ser digno de alabanza o vituperio; así lo enseña la razón, lo juzga el sentido común y lo confirma la legislación de todos los pueblos. Pero hasta aquí hemos encontrado las condiciones necesarias, mas no las constituyentes; sabemos que aquellas son indispensables para el orden moral, sin conocer, por eso, cuál es la esencia de la moralidad. Con conocimiento y libertad se hacen cosas buenas o malas, morales o inmorales; ¿en qué consiste esa bondad y malicia, esa moralidad e inmoralidad? ¿Cuál es la razón de que el mismo conocimiento y libertad produzcan acciones buenas o malas, según los objetos a que se aplican? Y, ante todo, ¿hay alguna regla fija que distinga lo bueno de lo malo?
+
+12. En el universo está todo en un orden, y no debían formar excepción de esta regla las criaturas racionales. Pero ese orden no podía ser en ellas el efecto de una ley necesaria, a no mutilar su naturaleza, despojándola del libre albedrío. Era preciso, pues, que en el ejercicio de sus facultades estuviesen sujetas a un orden que no las violentase y que les dejase lugar a la trasgresión. Por donde se ve que la ley moral no es para las criaturas racionales una influencia de fuerza, sino de atracción, de limitaciones en varios sentidos pero que siempre respeta su libertad de obrar. El que sabe la pena en que incurre si falta a sus deberes, tiene limitada su acción por la influencia del temor; el que espera una recompensa de su obra, está atraído por el deseo del premio; pero ambos motivos, así el repulsivo como el atractivo, aunque puedan ejercer más o menos influencia sobre la voluntad, la dejan siempre libre: el uno puede cometer el delito arrostrando la pena; y el otro puede omitir la buena acción renunciando al premio.
+
+13. Por lo mismo que la criatura libre no tiene un principio determinante necesario de sus acciones, es preciso buscar alguna regla a que pueda atenerse, o bien dejarla abandonada a todos los impulsos de su naturaleza. Esto último equivaldría a degradar la criatura racional, haciéndola de condición inferior a la de los brutos y aun de los seres inanimados; pues que éstos tienen una regla a la cual se conforman por necesidad. Todo ser criado ejerce sus funciones en el orden del universo; y del ejercicio de ellas no puede estar abandonado al acaso, si se quiere que el ser pueda, llenar el objeto de su destino. Así, pues, será necesario convenir en que las acciones libres han de tener alguna regla; y en la conformidad a la misma debe consistir la moralidad.
+
+14. Esta regla no depende del arbitrio de los hombres; las acciones no son morales o inmorales porque se haya establecido así por un convenio, sino por su íntima naturaleza, ¿podrían los hombres haber hecho que la piedad filial, fuese un vicio y el parricidio una acción virtuosa; que el agradecimiento fuese malo y la ingratitud buena; que fuera vituperable la lealtad y laudable la perfidia; que la templanza mereciese castigo y la embriaguez, fuera digna de premio? Es evidente que no; las ideas de bien y de mal convienen naturalmente a ciertas acciones; nada puede contra eso la voluntad del hombre. Quien afirme que la diferencia entre el bien y el mal es arbitraria, contradice a la razón, al grito de la conciencia, al sentido común, a los sentimientos más profundos del corazón, a la voz de la humanidad, manifiesta en la experiencia de cada día y en la historia de todos los tiempos y países.

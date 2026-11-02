@@ -1,0 +1,19 @@
+fuente: wikisource-es
+obra: Ética
+url: https://es.wikisource.org/wiki/%C3%89tica_(Balmes)/10
+recuperado: 2026-11-02
+---
+Ética (Balmes)/10
+|título=[[Ética (Balmes)|Ética]]
+|autor=Jaime Balmes
+obra> |título=Ética
+obra> |autor=Jaime Balmes
+obra> |título={{Anclaje+|Índice}}
+---
+Nada se explica con decir que la moral es un hecho absoluto de la naturaleza humana
+
+50. Las ideas morales están en nuestro espíritu; en la razón que las conoce; en la voluntad que las ama; en el corazón que las siente: ¿podríamos decir que la moralidad es un hecho primitivo del alma, y que su valor intrínseco depende de nuestra propia naturaleza racional?
+
+51. La naturaleza humana, en general, es un ser abstracto, en el que no puede fundarse una cosa tan real e inalterable como es la moralidad; tomada individualmente, no es otra cosa que el hombre mismo; y en éste tampoco se puede hallar el origen de la moral. El individuo humano es un ser contingente, el orden moral es necesario; antes que nosotros existiéramos, el orden moral existía; y éste continuaría, aunque nosotros fuéramos aniquilados; en ningún individuo humano se halla el origen de una cosa necesaria; luego tampoco puede hallarse en su conjunto. Nosotros concebimos las ideas morales independientes, no sólo de éste o aquel individuo, sino de toda la humanidad, aunque no existiese hombre alguno, habría orden moral, con tal que hubiera criaturas racionales. El hombre es uno de los seres que por su racionalidad es susceptible del orden moral; pero no el origen de este orden.
+
+52. Los que miran la moralidad como un hecho absoluto del espíritu humano, sin ligarla con la existencia de un ser superior, no explican nada; no hacen más que consignar el hecho de las ideas y sentimientos morales, para lo cual no necesitamos ciertamente de investigación filosófica; son cosas que todos llevamos en el entendimiento y en el corazón; para cerciorarnos de ellas, bástanos el testimonio de la conciencia.

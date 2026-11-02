@@ -1,0 +1,23 @@
+fuente: wikisource-es
+obra: Ética
+url: https://es.wikisource.org/wiki/%C3%89tica_(Balmes)/09
+recuperado: 2026-11-02
+---
+Ética (Balmes)/09
+|título=[[Ética (Balmes)|Ética]]
+|autor=Jaime Balmes
+obra> |título=Ética
+obra> |autor=Jaime Balmes
+obra> |título={{Anclaje+|Índice}}
+---
+No se explica bastante la moralidad con decir que lo moral es conforme a la razón
+
+45. La razón nos prescribe la moral: ¿consistirá la moralidad en la conformidad con la razón? Analicémoslo.
+
+46. ¿Qué se entiende aquí por conformidad a la razón? Y, ante todo, ¿qué significa la palabra razón? Suele tomarse en varias acepciones: a veces expresa la facultad de pensar, o el entendimiento, en cuyo sentido se dice que el bruto carece de razón, y que el demente ha perdido el uso de la razón; a veces significa d conjunto de las verdades fundamentales, que son las leyes de nuestro entendimiento, así decimos que tal o cual cosa es contraria a la razón, y que lo absurdo es contra la razón, porque se halla en contradicción con estas verdades. Por fin, la razón se toma frecuentemente por la equidad y justicia moral: "Pretende eso y tiene razón, es lo justo; se resiste a desposeerse de tal propiedad y no tiene razón, porque no le pertenece; exige en el contrato condiciones razonables"; en estos y otros casos, razón se toma por equidad y justicia. Ninguna de estas acepciones basta para que, diciendo: conforme a razón, resulte explicado el carácter constitutivo de la moralidad.
+
+47. Ser conforme a razón, significando por esta palabra la facultad de entender, es no decir nada. Una facultad incluye actividad, pero ésta puede ejercerse de mil maneras; ser conforme a una actividad, es ser proporcionado a ella, o ser una condición que la desenvuelva; pero en todo eso nada encontramos que nos de ideas morales.
+
+48. Decir que la moralidad es la conformidad a la razón, esto es, al conjunto de verdades que ella conoce, es, o no decir nada, o caer en un círculo vicioso. Porque en este conjunto de verdades entran las morales, o no; si entran, la proposición significa que la moralidad consiste en la conformidad a las verdades morales, lo que es explicar la cosa por sí misma, y, por tanto, no aclarar nada; si no entran, entonces observaremos que la conformidad a la razón será conformidad con lo conocido: y, como este conocimiento puede referirse a mil objetos, y aplicarse de infinitas maneras, nos quedamos sin ninguna regla moral, y el hombre podrá conocer las acciones que quiera en conformidad con sus conocimientos. Verdad hay en los cálculos del traidor; verdad en los insidiosos preparativos del asesino; verdad en las invenciones del sensual para prolongar, variar y avivar sus placeres; verdad en las especulaciones del codicioso; verdad en los planes del ambicioso turbulento; verdad en los designios del orgulloso que todo lo sacrifica en sus aras; en tales casos hay verdades de hecho, conocidas, calculadas; verdad en las relaciones del medio con el fin: ¿diremos, sin embargo, que hay moralidad? Claro es que no; luego el conocimiento por sí solo no es regla de moral; el conocimiento es una arma de que podemos hacer bueno y mal uso; necesitamos, pues, un principio que le dirija, y que le dé ese carácter que en sí propio no tiene.
+
+49. Si por la palabra razón se entiende justicia, equidad u otra idea moral, caemos en el mismo defecto arriba censurado; se explica la cosa por sí misma, y así no se adelanta nada.
