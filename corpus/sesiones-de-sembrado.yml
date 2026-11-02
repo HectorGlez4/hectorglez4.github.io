@@ -2652,3 +2652,14 @@ sesiones:
       citasPublicadas: 4803
       procedenciaCompleta: 17
       tradicionLatinoamericanaSobreHispanicos: 55.9
+  - fecha: "2026-11-02"
+    hora: "20:28"
+    clase: "epoca"
+    propuesto: "Agotar la época Autores venezolanos: le quedan 19 candidatos por sembrar o por descartar con motivo escrito. Admitir sigue siendo del editor."
+    hueco: "La Fuente clasifica 42 candidatos en la época Autores venezolanos: 3 ya sembrados y 20 descartados con motivo. La lista está en corpus/candidatos-por-epoca.yml y se regenera con: npm run epocas:registrar"
+    elegido: "Wikisource Filosofía"
+    motivo: "Categoría Filosofía de Wikisource: Epicuro, Carta a Meneceo (12 Citas, Autor nuevo); Rousseau Discurso con OCR roto; Compendio solo índice"
+    resultado:
+      citasPublicadas: 4815
+      procedenciaCompleta: 16.9
+      tradicionLatinoamericanaSobreHispanicos: 55.9
