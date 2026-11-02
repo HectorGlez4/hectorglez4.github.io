@@ -2762,3 +2762,14 @@ sesiones:
       citasPublicadas: 4904
       procedenciaCompleta: 16.6
       tradicionLatinoamericanaSobreHispanicos: 55
+  - fecha: "2026-11-02"
+    hora: "22:44"
+    clase: "epoca"
+    propuesto: "Agotar la época Autores venezolanos: le quedan 19 candidatos por sembrar o por descartar con motivo escrito. Admitir sigue siendo del editor."
+    hueco: "La Fuente clasifica 42 candidatos en la época Autores venezolanos: 3 ya sembrados y 20 descartados con motivo. La lista está en corpus/candidatos-por-epoca.yml y se regenera con: npm run epocas:registrar"
+    elegido: "Búsqueda de texto: ensayos sin autor"
+    motivo: "Sondeo de La casta histórica castellana y Memorial de Mascarones: la Fuente no declara autor, no se pueden atribuir"
+    resultado:
+      citasPublicadas: 4904
+      procedenciaCompleta: 16.6
+      tradicionLatinoamericanaSobreHispanicos: 55
