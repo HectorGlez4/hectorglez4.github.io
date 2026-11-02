@@ -1,0 +1,44 @@
+fuente: wikisource-es
+obra: El Discreto
+año: 1646
+url: https://es.wikisource.org/wiki/El_Discreto/Realce_XXIII
+recuperado: 2026-11-02
+---
+El Discreto/Realce XXIII
+|titulo = [[El Discreto]]
+|autor = Baltasar Gracián
+obra> |título=El Discreto
+obra> |autor=Baltasar Gracián
+obra> |año=1646
+obra> |título={{Anclaje+|Índice}}
+---
+Realce XXIII
+
+Arte
+para ser dichoso
+
+Fábula
+
+Tiene la mentida
+Fortuna muchos quejosos y ningún agradecido. Llega este descontento hasta las bestias, pero ¿a quién mejor? El más quejoso de todos es el más simple. Íbase éste quejando de corrillo en corrillo, y hallaba, no sólo compasión, pero aplauso, especialmente en el vulgo.
+
+Un día, pues, aconsejado de muchos y acompañado de ninguno, dicen que se presentó en la audiencia general del soberano Júpiter. Aquí, profundamente humilde (que le es de agradecer a un necio) y otorgada la inestimable licencia de ser escuchado, pronunció mal esta peor trazada arenga:
+
+«Integérrimo Júpiter, que justiciero y no vengador te deseo. Aquí tienes ante tu majestuosa presencia el más infeliz, sobre ignorante, de los brutos, solicitando, no tanto la venganza de mis agravios cuanto el remedio de mis desdichas. ¿Cómo pasa, ¡oh, Numen
+eterno!, tu entereza por la impiedad de la Fortuna, solo para mí ciega, tirana y aun madrastra, ya que la naturaleza me hizo el más simple de los animales, que es decir cuanto se puede? ¿Por qué esta cruel, a tanta carga, ha de añadir la sobrecarga de desdichado, violando el uso y atropellando la costumbre? Me hace ser necio y vivir descontento. Persigue la inocencia y favorece la malicia; el soberbio León triunfa; el Tigre cruel vive; la Vulpeja, que a todos engaña, de todos se ríe; el voraz Lobo pasa. Yo solo, que a ninguno hago mal, de todos le recibo. Como poco, trabajo mucho; nada del pan, todo del palo. Tráeme desaliñado y yo, que me soy feo, no puedo parecer entre gentes, y sirvo de acarrear villanos, que es lo que más siento».
+
+Conmovió grandemente esta lastimosa proclamación a todos los circunstantes. Sólo Júpiter, severo, que no se inmuta así vulgarmente, alargó la mano sobre que había estado (no tanto recodado, cuanto reservando para la otra parte aquel oído),
+hizo ademán que llamasen para dar su descargo a la Fortuna.
+
+Partieron en busca de ella muchos soldados, estudiantes y pretendientes; anduvieron por muchas partes y en ninguna la hallaban. Preguntaban a unos y a otros, y ninguno sabía dar razón. Entraron en la casa del poderoso Mando, y era tanta la confusión y la prisa con que todos, sin discurrir, se movían, que no hallaron quien les respondiese, ni aun les escuchase, aunque toparon con muchos. Discurrieron ellos que sin duda no debía de estar entre tanto desasosiego, y no se engañaron. Pasaron a la casa de la Riqueza, y aquí les dijo el Cuidado que había estado, pero muy de paso, no más de para encomendar algunos haces de espinas y unos talegones de leznas.
+Entraron en la quinta
+de la Hermosura, que está muy cerca del sexto, para pagarlo por las setenas;
+toparon con la Necedad, y, sin preguntar más, pasaron a la de la Sabiduría; respondioles la Pobreza que tampoco estaba allí, pero que de día en día la aguardaban.
+
+Sola les quedaba ya otra casa, que estaba sola a la derecha acera. Llamaron, por estar muy cerrada, y salió a responderles una tan hermosa doncella, que creyeron ser alguna de las Tres Gracias, y así, la preguntaron cuál era. Respondió con notable agrado que era la Virtud. En esto salía ya de allá dentro, y de lo más interior, la Fortuna, muy risueña. Intimáronla el mandato y obedeció ella, como suele, volando a ciegas.
+
+Llegó muy reverente al sacro trono, y todos los del cortejo la hicieron muchas cortesías, y aun zalemas, por recambiarlas. «¿Qué es esto, ¡oh Fortuna!», dijo Júpiter, «que cada día han de subir a mí las quejas de tu proceder? Bien veo cuán dificultoso es el asunto de contentar, cuanto más a muchos, y a todos imposible. También me consta que a los más les va mal porque les va bien, y en lugar de agradecer lo mucho que les sobra, se quejan de cualquier poco que les falte. Es abuso entre los hombres nunca poner los ojos en el saco de las desdichas de los otros, sino en el de las felicidades, y al contrario en sí mismos; miran el lucimiento del oro de una corona, pero no el peso o el pesar. Por el tanto, yo nunca hago caso de sus quejas, hasta ahora, que las de este, de todas maneras infeliz, traen alguna apariencia».
+
+Miróselo la Fortuna de reojo; iba a sonreír, pero advirtiendo dónde estaba, mesurose, y, muy caricompuesta, dijo: «Supremo Júpiter, una palabra sola quiero que sea mi descargo, y sea ésta: si él es un asno, ¿de quién se queja?» Fue muy reída de todos la respuesta, y del mismo Jove aplaudida, y en confirmación de ella y enseñanza del necio acusador (más que consuelo), le dijo:
+
+«Infeliz bruto, nunca vos fuéradeis tan desgraciado, si fuéradeis más avisado. Andad, y procurad ser de hoy en adelante despierto como el León, prudente como el Elefante, astuto como la Vulpeja y cauto como el Lobo. Disponed bien de los medios, y conseguiréis vuestros intentos; y desengáñense todos los mortales», dijo alzando la voz, «que no hay más dicha ni más desdicha que prudencia o imprudencia».

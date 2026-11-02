@@ -1,0 +1,110 @@
+fuente: wikisource-es
+obra: El Discreto
+año: 1646
+url: https://es.wikisource.org/wiki/El_Discreto/Realce_VIII
+recuperado: 2026-11-02
+---
+El Discreto/Realce VIII
+|titulo = [[El Discreto]]
+|autor = Baltasar Gracián
+obra> |título=El Discreto
+obra> |autor=Baltasar Gracián
+obra> |año=1646
+obra> |título={{Anclaje+|Índice}}
+---
+Realce VIII
+
+El buen entendedor
+
+Diálogo entre el doctor Juan Francisco Andrés
+y el autor
+
+DOCTOR.- Dicen que, al buen entendedor, pocas palabras.
+
+AUTOR.- Yo diría que, a pocas palabras, buen entendedor. Y no sólo a palabras, al semblante, que es la puerta del alma, sobrescrito del corazón; aun le ve apuntar al mismo callar, que tal vez exprime
+más para un entendido que una prolijidad para un necio.
+
+DOCTOR.- Las verdades que más nos importan vienen siempre a medio decir.
+
+AUTOR.- Así es, pero recíbanse del advertido a todo entender.
+
+DOCTOR.- Eso le valió a aquel nuestro Anfión aragonés, cuando, perseguido de los propios, halló amparo y aun aplauso en los coronados Delfines extraños.
+
+AUTOR.- Tan poderosa es una armonía, y más de tan suaves consonancias, como fueron las de aquel prodigioso ingenio.
+
+DOCTOR.- Califícase ya el decir verdades con nombre de necedades.
+
+AUTOR.- Y aun, por no parecer o niño o necio, ninguno la quiere decir, con que no se usa; solas quedan en el mundo algunas reliquias de ella, y aun ésas se descubren como misterio con ceremonia y recato.
+
+DOCTOR.- Con los príncipes siempre se les brujulea.
+
+AUTOR.- Pero discurran ellos, que va en ello el perderse o el ganarse.
+
+DOCTOR.- Es la verdad una doncella tan vergonzosa cuanto hermosa, y por eso anda siempre atapada.
+
+AUTOR.- Descúbranla los príncipes con galantería, que han de tener mucho de adivinos de verdades y de zahoríes de desengaños. Cuanto más entre dientes se les dicen, es dárselas mascadas para que mejor se digieran y entren en provecho. Es ya político el desengaño, anda de ordinario entre dos luces, o para retirarse a las tinieblas de la lisonja, si topa con la necedad, o salir a la luz de la verdad, si topa con la cordura.
+
+DOCTOR.- ¡Qué es de ver, en una entendida competencia la detención de un recatado y la atención de un advertido! Aquél apunta, éste discurre, y más en desengaños.
+
+AUTOR.- Sí, que se ha de ajustar la inteligencia a las materias; en las favorables, tirante siempre la credulidad; en las odiosas, dar la rienda y aun picarla. Lo que la lisonja se adelanta en el que dice, la sagacidad lo desande en el que oye, que siempre fue la mitad menos lo real de lo imaginado.
+
+DOCTOR.- En materias odiosas, yo discurriría al contrario, pues en un ligero amago, en un levísimo ceño, se le descubre al entendido mucho campo que correr.
+
+AUTOR.- Y que correrse
+tal vez; y entienda que es mucho más lo que se lo calla en lo poco que se le dice. Va el cuerdo en los puntos vidriosos con gran tiento y, cuanto la materia es más liviana, da pasos de plomo en el apuntar, con lengua de pluma
+en el pasar.
+
+DOCTOR.- Muy dificultoso es darse uno por entendido en puntos de censura y de desengaño, porque se cree mal aquello que no se desea. No es menester mucha elocuencia para persuadirnos lo que nos está bien, y toda la de Demóstenes
+no basta para lo que nos está mal.
+
+AUTOR.- Poco es ya el entender, menester es a veces adivinar, que hay hombres que sellan el corazón y se les podrecen
+las cosas en el pecho.
+
+DOCTOR.- Hacer entonces lo que el diestro físico,
+que toma el pulso en el mismo aliento; así, el atento metafísico, en el aire de la boca ha de penetrar el interior.
+
+AUTOR.- El saber nunca daña.
+
+DOCTOR.- Pero tal vez da pena, y así como previene la cordura el qué dirán, la sagacidad ha de observar el qué dijeron. Saltea insidiosa esfinge el camino de la vida, y el que no es entendido es perdido. Enigma es, y dificultoso, esto del conocerse un hombre; sólo un Edipo discurre, y, aun ése, con soplos auxiliares.
+
+AUTOR.- No hay cosa más fácil que el conocimiento ajeno.
+
+DOCTOR.- Ni más dificultosa que el propio.
+
+AUTOR.- No hay simple que no sea malicioso.
+
+DOCTOR.- Y que, siendo sencillo para sus faltas, no sea doblado para las ajenas.
+
+AUTOR.- Las motas percibe en los ojos del vecino.
+
+DOCTOR.- Y las vigas no divisa en los propios.
+
+AUTOR.- El primer paso del saber es saberse.
+
+DOCTOR.- Ni puede ser entendido el que no es entendedor. Pero ese aforismo de conocerse a sí mismo presto es dicho y tarde es hecho.
+
+AUTOR.- Por encargarlo fue uno contado entre los siete sabios.
+
+DOCTOR.- Por cumplirlo, ninguno hasta hoy. Cuanto más saben algunos de los otros, de sí saben menos; y el necio más sabe de la casa ajena que de la suya;
+que ya hasta los refranes andan al revés. Discurren mucho algunos en lo que nada les importa, y nada en lo que mucho les convendría.
+
+AUTOR.- ¿Que hay ocupación peor aún que el ocio?
+
+DOCTOR.- Sí, la inútil curiosidad.
+
+AUTOR.- ¡Oh, cuidados de los hombres! ¡Y cuánto hay en las cosas sin sustancia!
+
+DOCTOR.- Hase de distinguir también entre lo detenido de un recatado y lo desatentado de un fácil; exageran unos, disminuyen otros; discierna, pues, el atento entendedor, que a tantos han condenado las credulidades como las incredulidades.
+
+AUTOR.- Por eso dijeron sabiamente los bárbaros escitas al joven Peleo
+que son los hombres ríos: lo que aquéllos corren se van deteniendo éstos, y comúnmente tienen más de fondo los que mayor sosiego, y llevan más agua los que menos ruido.
+
+DOCTOR.- Materias hay también en que la sospecha tiene fuerza de prueba: que la mujer de César (dijo él mismo) ni aun la fama;
+y cuando en el interesado llega a ser duda, en los demás ya pasa y aun corre por evidencia.
+
+AUTOR.- Tienen más o menos fondo las palabras, según las materias.
+
+DOCTOR.- Por no calarlas se ahogaron muchos; sóndelas el entendido entendedor, y advierta que la gala del nadar es saber guardar la ropa.
+
+AUTOR.- Y más si es púrpura.
+Y con esto vamos a uno a su historia, digo, a la Zaragoza antigua, tan deseada de la curiosidad cuanto ilustrada de la erudición, y yo, a mi filosofía de El Varón Atento.
