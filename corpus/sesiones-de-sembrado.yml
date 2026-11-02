@@ -2597,3 +2597,14 @@ sesiones:
       citasPublicadas: 4790
       procedenciaCompleta: 17
       tradicionLatinoamericanaSobreHispanicos: 55.9
+  - fecha: "2026-11-02"
+    hora: "07:19"
+    clase: "epoca"
+    propuesto: "Agotar la época Autores venezolanos: le quedan 19 candidatos por sembrar o por descartar con motivo escrito. Admitir sigue siendo del editor."
+    hueco: "La Fuente clasifica 42 candidatos en la época Autores venezolanos: 3 ya sembrados y 20 descartados con motivo. La lista está en corpus/candidatos-por-epoca.yml y se regenera con: npm run epocas:registrar"
+    elegido: "Tradiciones peruanas, Kant y Voltaire (sondeo)"
+    motivo: "Sondeo de Palma (Tradiciones peruanas: solo epígrafes de capítulo y refranes, sin subpáginas en Wikisource), Kant (Crítica de la razón práctica: solo índice) y Voltaire (Diccionario Filosófico tomo IX: solo índice); 0 Citas"
+    resultado:
+      citasPublicadas: 4790
+      procedenciaCompleta: 17
+      tradicionLatinoamericanaSobreHispanicos: 55.9
