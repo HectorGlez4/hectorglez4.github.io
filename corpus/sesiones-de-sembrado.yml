@@ -2487,3 +2487,14 @@ sesiones:
       citasPublicadas: 4633
       procedenciaCompleta: 16.9
       tradicionLatinoamericanaSobreHispanicos: 56.5
+  - fecha: "2026-11-02"
+    hora: "02:40"
+    clase: "epoca"
+    propuesto: "Agotar la época Autores venezolanos: le quedan 19 candidatos por sembrar o por descartar con motivo escrito. Admitir sigue siendo del editor."
+    hueco: "La Fuente clasifica 42 candidatos en la época Autores venezolanos: 3 ya sembrados y 20 descartados con motivo. La lista está en corpus/candidatos-por-epoca.yml y se regenera con: npm run epocas:registrar"
+    elegido: "Política de Dios (Quevedo) y Ética (Balmes)"
+    motivo: "Descubrimiento de vetas: categorías Política de Dios (Quevedo, 47 pp.) y Ética (Balmes, 28 pp.) de Wikisource; 3.637 candidatas, 24 sentencias"
+    resultado:
+      citasPublicadas: 4657
+      procedenciaCompleta: 16.8
+      tradicionLatinoamericanaSobreHispanicos: 56.5
