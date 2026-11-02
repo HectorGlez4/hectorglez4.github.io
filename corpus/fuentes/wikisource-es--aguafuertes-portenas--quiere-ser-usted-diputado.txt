@@ -1,0 +1,16 @@
+fuente: wikisource-es
+obra: Aguafuertes porteñas
+url: https://es.wikisource.org/wiki/%C2%BFQuiere_ser_usted_diputado%3F
+recuperado: 2026-11-02
+---
+¿Quiere ser usted diputado?
+|título=[[Aguafuertes porteñas]]
+|autor=Roberto Arlt
+obra> |título=Aguafuertes porteñas
+obra> |autor=Roberto Arlt
+---
+¿Quiere ser usted diputado?
+
+Si usted quiere ser diputado, no hable en favor de las remolachas, del petróleo, del trigo, del impuesto a la renta; no hable de fidelidad a la Constitución, al país; no hable de defensa del obrero, del empleado y del niño. No; si usted quiere ser diputado, exclame por todas partes:
+
+—Soy un ladrón, he robado... he robado todo lo que he podido y siempre.

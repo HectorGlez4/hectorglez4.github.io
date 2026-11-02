@@ -1,0 +1,16 @@
+fuente: wikisource-es
+obra: Aguafuertes porteñas
+url: https://es.wikisource.org/wiki/Desorientadores
+recuperado: 2026-11-02
+---
+Desorientadores
+|título=[[Aguafuertes porteñas]]
+|autor=Roberto Arlt
+obra> |título=Aguafuertes porteñas
+obra> |autor=Roberto Arlt
+---
+Desorientadores
+
+La mayoría de los que escribimos, lo que hacemos es desorientar a la opinión pública. La gente busca la verdad y nosotros les damos verdades equivocadas. Lo blanco por lo negro. Es doloroso confesarlo, pero es así. Hay que escribir. En Europa los autores tienen su público; a ese público le dan un libro por un año. ¿Usted puede creer, de buena fe, que en un año se escribe un libro que contenga verdades? No, señor. No es posible. Para escribir un libro por año hay que macanear. Dorar la píldora. Llenar páginas de frases.
+
+Es el oficio, "el métier". La gente recibe la mercadería y cree que es materia prima, cuando apenas se trata de una falsificación burda de otras falsificaciones, que también se inspiraron en falsificaciones.
