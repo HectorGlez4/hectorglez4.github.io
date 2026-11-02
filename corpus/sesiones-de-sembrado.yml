@@ -2707,3 +2707,14 @@ sesiones:
       citasPublicadas: 4849
       procedenciaCompleta: 16.8
       tradicionLatinoamericanaSobreHispanicos: 55.8
+  - fecha: "2026-11-02"
+    hora: "21:43"
+    clase: "epoca"
+    propuesto: "Agotar la época Autores venezolanos: le quedan 19 candidatos por sembrar o por descartar con motivo escrito. Admitir sigue siendo del editor."
+    hueco: "La Fuente clasifica 42 candidatos en la época Autores venezolanos: 3 ya sembrados y 20 descartados con motivo. La lista está en corpus/candidatos-por-epoca.yml y se regenera con: npm run epocas:registrar"
+    elegido: "Búsqueda de texto en Wikisource"
+    motivo: "Búsqueda de texto completo en Wikisource: Feijoo (Teatro crítico universal) y Bakunin (Dios y el Estado), 21 Citas, 2 Autores nuevos; Facundo y Contrato social ya cubiertos o con Obra por página"
+    resultado:
+      citasPublicadas: 4870
+      procedenciaCompleta: 16.7
+      tradicionLatinoamericanaSobreHispanicos: 55.4
