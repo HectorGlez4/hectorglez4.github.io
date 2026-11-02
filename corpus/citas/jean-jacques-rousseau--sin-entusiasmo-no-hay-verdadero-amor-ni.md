@@ -1,0 +1,15 @@
+---
+texto: "Sin entusiasmo no hay verdadero amor, ni entusiasmo sin un objeto de perfección, real o fantástico, pero siempre existente en la imaginación."
+autor: "jean-jacques-rousseau"
+temas:
+  - "el-amor"
+slug: "jean-jacques-rousseau-sin-entusiasmo-no-hay-verdadero-amor-ni"
+procedencia:
+  obra: "Emilio o De la educación"
+estadoDerechos: "dominio-público"
+fuente:
+  id: "wikisource-es"
+  nombre: "Wikisource en español"
+  licencia: "CC BY-SA 4.0"
+  url: "https://es.wikisource.org/wiki/Emilio/Libro_V"
+---
