@@ -80,7 +80,7 @@ reporta en la cola con su causa y se pasa a la siguiente veta; si son tres atasc
 
 | Estado | Veta | Notas |
 |---|---|---|
-| hecha (33 Citas, it. 1) | La Rochefoucauld, `Categoría:Reflexiones o sentencias y máximas morales` (60 pp.) | quedan ~360 candidatas aforísticas en `_revision/`, tope 33 por sesión; puede darse otra pasada a otro filtro |
+| hecha (33 + 31 Citas, it. 1 y 4) | La Rochefoucauld, `Categoría:Reflexiones o sentencias y máximas morales` (60 pp.) | Autor en 64 Citas: CERRADA, no más pasadas (representación). Quedan ~540 candidatas en `_revision/` |
 | descartada (it. 2) | Séneca, `Cartas a Lucilio (Wikisource tr.)` | cada carta declara su propia Obra («Cartas a Lucilio - Carta N»): 63 Obras de 1-2 Citas; solo con una regla de Héctor (reunir) |
 | hecha (14 Citas, it. 2) | Cadalso, `Categoría:Cartas marruecas` (91 pp.) | 1.247 candidatas, prosa epistolar contextual: rinde ~1 %. No repetir |
 | lección | Antes de recuperar un lote, probar UNA página y mirar `Obra:`: si cada página declara una Obra distinta, no sembrar | |

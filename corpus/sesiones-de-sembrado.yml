@@ -2476,3 +2476,14 @@ sesiones:
       citasPublicadas: 4602
       procedenciaCompleta: 17
       tradicionLatinoamericanaSobreHispanicos: 56.5
+  - fecha: "2026-11-02"
+    hora: "01:20"
+    clase: "epoca"
+    propuesto: "Agotar la época Autores venezolanos: le quedan 19 candidatos por sembrar o por descartar con motivo escrito. Admitir sigue siendo del editor."
+    hueco: "La Fuente clasifica 42 candidatos en la época Autores venezolanos: 3 ya sembrados y 20 descartados con motivo. La lista está en corpus/candidatos-por-epoca.yml y se regenera con: npm run epocas:registrar"
+    elegido: "Remanentes de La Rochefoucauld (2)"
+    motivo: "Segunda pasada sobre las candidatas ya extraídas de La Rochefoucauld (Reflexiones o sentencias): filtro permisivo, 31 máximas; Autor ya con 64 Citas, no sobrepasar"
+    resultado:
+      citasPublicadas: 4633
+      procedenciaCompleta: 16.9
+      tradicionLatinoamericanaSobreHispanicos: 56.5
