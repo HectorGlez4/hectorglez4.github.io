@@ -2729,3 +2729,14 @@ sesiones:
       citasPublicadas: 4875
       procedenciaCompleta: 16.7
       tradicionLatinoamericanaSobreHispanicos: 55.4
+  - fecha: "2026-11-02"
+    hora: "22:02"
+    clase: "epoca"
+    propuesto: "Agotar la época Autores venezolanos: le quedan 19 candidatos por sembrar o por descartar con motivo escrito. Admitir sigue siendo del editor."
+    hueco: "La Fuente clasifica 42 candidatos en la época Autores venezolanos: 3 ya sembrados y 20 descartados con motivo. La lista está en corpus/candidatos-por-epoca.yml y se regenera con: npm run epocas:registrar"
+    elegido: "Búsqueda de texto: Marx"
+    motivo: "Búsqueda de texto: Marx (Salario, precio y ganancia; Sobre Proudhon; La nacionalización de la tierra), 11 Citas, Autor nuevo; descartada la Introducción de La guerra civil en Francia (es de Engels, la Fuente la declara de Marx)"
+    resultado:
+      citasPublicadas: 4886
+      procedenciaCompleta: 16.7
+      tradicionLatinoamericanaSobreHispanicos: 55.4
