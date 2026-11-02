@@ -2718,3 +2718,14 @@ sesiones:
       citasPublicadas: 4870
       procedenciaCompleta: 16.7
       tradicionLatinoamericanaSobreHispanicos: 55.4
+  - fecha: "2026-11-02"
+    hora: "21:51"
+    clase: "epoca"
+    propuesto: "Agotar la época Autores venezolanos: le quedan 19 candidatos por sembrar o por descartar con motivo escrito. Admitir sigue siendo del editor."
+    hueco: "La Fuente clasifica 42 candidatos en la época Autores venezolanos: 3 ya sembrados y 20 descartados con motivo. La lista está en corpus/candidatos-por-epoca.yml y se regenera con: npm run epocas:registrar"
+    elegido: "Búsqueda de texto: Bakunin El principio de autoridad"
+    motivo: "Bakunin, El principio de autoridad (5 Citas); sondeo de Fray Luis (Exposición del Libro de Job: exégesis verso a verso), Hartmann y Garnier sin Citas"
+    resultado:
+      citasPublicadas: 4875
+      procedenciaCompleta: 16.7
+      tradicionLatinoamericanaSobreHispanicos: 55.4
