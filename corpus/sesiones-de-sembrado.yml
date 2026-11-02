@@ -2498,3 +2498,14 @@ sesiones:
       citasPublicadas: 4657
       procedenciaCompleta: 16.8
       tradicionLatinoamericanaSobreHispanicos: 56.5
+  - fecha: "2026-11-02"
+    hora: "02:44"
+    clase: "epoca"
+    propuesto: "Agotar la época Autores venezolanos: le quedan 19 candidatos por sembrar o por descartar con motivo escrito. Admitir sigue siendo del editor."
+    hueco: "La Fuente clasifica 42 candidatos en la época Autores venezolanos: 3 ya sembrados y 20 descartados con motivo. La lista está en corpus/candidatos-por-epoca.yml y se regenera con: npm run epocas:registrar"
+    elegido: "Libros de máximas de Wikisource (búsqueda por título)"
+    motivo: "Búsqueda por título de libros de máximas en Wikisource: Epicteto es un poema de Bacarisse; Enquiridión mezcla Autores; Pachacutec es verso de Althaus; Refranes glosados es popular; Máximas del padre de Fernán Caballero de autoría dudosa. 0 Citas"
+    resultado:
+      citasPublicadas: 4657
+      procedenciaCompleta: 16.8
+      tradicionLatinoamericanaSobreHispanicos: 56.5
