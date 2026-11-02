@@ -2641,3 +2641,14 @@ sesiones:
       citasPublicadas: 4793
       procedenciaCompleta: 17
       tradicionLatinoamericanaSobreHispanicos: 55.9
+  - fecha: "2026-11-02"
+    hora: "20:19"
+    clase: "epoca"
+    propuesto: "Agotar la época Autores venezolanos: le quedan 19 candidatos por sembrar o por descartar con motivo escrito. Admitir sigue siendo del editor."
+    hueco: "La Fuente clasifica 42 candidatos en la época Autores venezolanos: 3 ya sembrados y 20 descartados con motivo. La lista está en corpus/candidatos-por-epoca.yml y se regenera con: npm run epocas:registrar"
+    elegido: "Cicerón De la invención retórica"
+    motivo: "Cicerón, De la invención retórica (tratado, 858 candidatas): 10 definiciones"
+    resultado:
+      citasPublicadas: 4803
+      procedenciaCompleta: 17
+      tradicionLatinoamericanaSobreHispanicos: 55.9
