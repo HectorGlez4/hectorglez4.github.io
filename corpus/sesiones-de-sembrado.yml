@@ -2531,3 +2531,14 @@ sesiones:
       citasPublicadas: 4706
       procedenciaCompleta: 17
       tradicionLatinoamericanaSobreHispanicos: 56.5
+  - fecha: "2026-11-02"
+    hora: "04:41"
+    clase: "epoca"
+    propuesto: "Agotar la época Autores venezolanos: le quedan 19 candidatos por sembrar o por descartar con motivo escrito. Admitir sigue siendo del editor."
+    hueco: "La Fuente clasifica 42 candidatos en la época Autores venezolanos: 3 ya sembrados y 20 descartados con motivo. La lista está en corpus/candidatos-por-epoca.yml y se regenera con: npm run epocas:registrar"
+    elegido: "Quevedo (La hora de todos) y Tolstói"
+    motivo: "Sondeo de obras de la cola: La hora de todos (Quevedo, 834 candidatas) y ¿Qué es el dinero? (Tolstói); Bastiat y Voltaire sin sentencias; 15 Citas"
+    resultado:
+      citasPublicadas: 4721
+      procedenciaCompleta: 16.9
+      tradicionLatinoamericanaSobreHispanicos: 56.5
