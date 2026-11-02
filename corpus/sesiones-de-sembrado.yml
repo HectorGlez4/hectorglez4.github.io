@@ -2784,3 +2784,14 @@ sesiones:
       citasPublicadas: 4908
       procedenciaCompleta: 16.6
       tradicionLatinoamericanaSobreHispanicos: 55.3
+  - fecha: "2026-11-02"
+    hora: "22:54"
+    clase: "epoca"
+    propuesto: "Agotar la época Autores venezolanos: le quedan 19 candidatos por sembrar o por descartar con motivo escrito. Admitir sigue siendo del editor."
+    hueco: "La Fuente clasifica 42 candidatos en la época Autores venezolanos: 3 ya sembrados y 20 descartados con motivo. La lista está en corpus/candidatos-por-epoca.yml y se regenera con: npm run epocas:registrar"
+    elegido: "Búsqueda de texto: Desigualdad personal"
+    motivo: "De la desigualdad personal en la sociedad civil: ya retirada antes por autoría dudosa; no se vuelve a sembrar"
+    resultado:
+      citasPublicadas: 4908
+      procedenciaCompleta: 16.6
+      tradicionLatinoamericanaSobreHispanicos: 55.3
