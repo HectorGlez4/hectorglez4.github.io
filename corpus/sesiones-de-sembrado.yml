@@ -2509,3 +2509,14 @@ sesiones:
       citasPublicadas: 4657
       procedenciaCompleta: 16.8
       tradicionLatinoamericanaSobreHispanicos: 56.5
+  - fecha: "2026-11-02"
+    hora: "03:47"
+    clase: "epoca"
+    propuesto: "Agotar la época Autores venezolanos: le quedan 19 candidatos por sembrar o por descartar con motivo escrito. Admitir sigue siendo del editor."
+    hueco: "La Fuente clasifica 42 candidatos en la época Autores venezolanos: 3 ya sembrados y 20 descartados con motivo. La lista está en corpus/candidatos-por-epoca.yml y se regenera con: npm run epocas:registrar"
+    elegido: "Gracián y Séneca (Obras de Autores del Corpus)"
+    motivo: "Cruce de categorías Obras de <Autor> con el Corpus: Gracián (El Discreto 1646, El héroe) y Séneca (De la ira, De la clemencia); 3.149 candidatas, 29 sentencias"
+    resultado:
+      citasPublicadas: 4686
+      procedenciaCompleta: 16.9
+      tradicionLatinoamericanaSobreHispanicos: 56.5
