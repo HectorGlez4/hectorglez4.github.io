@@ -16,21 +16,10 @@
  * fichero descargado, que es exactamente lo que AD-8 impide.
  */
 
-/** El ancho es fijo; lo que cambia con el formato es el alto. */
 const LADO = 1080;
 const MARGEN = 96;
 
-/**
- * Los formatos del lienzo. El cuadrado es el que aceptan todas las redes sin recortar y
- * es el de partida.
- *
- * El vertical (9:16) es para Stories y Reels: un cuadrado dentro de esas superficies se
- * amplía hasta llenar el alto y pierde el texto por los lados, en la portada del Reel y
- * en la cuadrícula del perfil. `franja` es la banda donde se compone todo —texto,
- * atribución y marca—: la central 3:4, que es lo que conserva la cuadrícula del perfil y
- * a la vez lo que no tapan la cabecera ni la barra de respuesta del visor de Stories.
- * Fuera de ella solo hay fondo.
- */
+/** `franja`: donde se compone todo. Ver por qué en `ImagenDeCita.astro`. */
 export const FORMATOS = [
   { id: 'cuadrado', nombre: 'Cuadrado', alto: LADO, franja: [0, LADO] },
   { id: 'vertical', nombre: 'Vertical', alto: 1920, franja: [240, 1680] },

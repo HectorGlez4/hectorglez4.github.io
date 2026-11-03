@@ -87,6 +87,14 @@
  * El formato (cuadrado o vertical, `FORMATOS` en `imagen.js`) es un grupo aparte de las
  * plantillas y los dos los pinta `pintarGrupo`: elegir uno no cambia el otro. El vertical
  * lleva `-vertical` en el nombre del fichero; el cuadrado conserva el de siempre.
+ *
+ * Por qué hay vertical (9:16): un cuadrado dentro de una Story o de un Reel se amplía hasta
+ * llenar el alto y pierde el texto por los lados, en la portada del Reel y en la cuadrícula
+ * del perfil. La `franja` de cada formato es la banda donde se compone todo —texto,
+ * atribución y marca—; en vertical es la central 3:4 (y 240–1680), que es lo que conserva la
+ * cuadrícula del perfil y lo que no tapan la cabecera ni la barra de respuesta del visor de
+ * Stories. Fuera de ella solo hay fondo. Esta nota vive aquí y no en `imagen.js` porque ese
+ * fichero se sirve tal cual y tiene tope de bytes (`MAX_BYTES_GUION_DE_IMAGEN`).
  */
 import { guionQueAnuncia } from '../lib/anuncio.ts';
 import { procedenciaCompuesta, textoParaCopiar } from '../lib/atribucion.ts';
