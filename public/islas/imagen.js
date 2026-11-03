@@ -16,9 +16,25 @@
  * fichero descargado, que es exactamente lo que AD-8 impide.
  */
 
-/** Lienzo cuadrado: la proporción que aceptan todas las redes sin recortar. */
+/** El ancho es fijo; lo que cambia con el formato es el alto. */
 const LADO = 1080;
 const MARGEN = 96;
+
+/**
+ * Los formatos del lienzo. El cuadrado es el que aceptan todas las redes sin recortar y
+ * es el de partida.
+ *
+ * El vertical (9:16) es para Stories y Reels: un cuadrado dentro de esas superficies se
+ * amplía hasta llenar el alto y pierde el texto por los lados, en la portada del Reel y
+ * en la cuadrícula del perfil. `franja` es la banda donde se compone todo —texto,
+ * atribución y marca—: la central 3:4, que es lo que conserva la cuadrícula del perfil y
+ * a la vez lo que no tapan la cabecera ni la barra de respuesta del visor de Stories.
+ * Fuera de ella solo hay fondo.
+ */
+export const FORMATOS = [
+  { id: 'cuadrado', nombre: 'Cuadrado', alto: LADO, franja: [0, LADO] },
+  { id: 'vertical', nombre: 'Vertical', alto: 1920, franja: [240, 1680] },
+];
 
 /**
  * Las tres plantillas de FR-11. Cambian el color y el adorno, **nunca el contenido**:
@@ -56,13 +72,15 @@ function repartirEnLineas(ctx, texto, anchoMaximo) {
  */
 export function dibujar(lienzo, datos) {
   const plantilla = PLANTILLAS.find((p) => p.id === datos.plantilla) ?? PLANTILLAS[0];
+  const formato = FORMATOS.find((f) => f.id === datos.formato) ?? FORMATOS[0];
+  const [arriba, abajo] = formato.franja;
   const ctx = lienzo.getContext('2d');
 
   lienzo.width = LADO;
-  lienzo.height = LADO;
+  lienzo.height = formato.alto;
 
   ctx.fillStyle = plantilla.fondo;
-  ctx.fillRect(0, 0, LADO, LADO);
+  ctx.fillRect(0, 0, LADO, formato.alto);
 
   const anchoUtil = LADO - MARGEN * 2;
 
@@ -78,7 +96,8 @@ export function dibujar(lienzo, datos) {
 
   // Bloque de atribución: filete corto, autor y procedencia.
   const altoAtribucion = 24 + 34 + (datos.procedencia ? 30 : 0);
-  const inicio = Math.max(MARGEN, (LADO - altoTexto - altoAtribucion - 48) / 2);
+  const inicio =
+    arriba + Math.max(MARGEN, (abajo - arriba - altoTexto - altoAtribucion - 48) / 2);
 
   lineas.forEach((linea, i) => {
     ctx.fillText(linea, MARGEN, inicio + i * alturaLinea);
@@ -107,7 +126,7 @@ export function dibujar(lienzo, datos) {
   // por las redes con un nombre que el sitio ya no usa.
   ctx.fillStyle = plantilla.apagada;
   ctx.font = '600 20px Inter, system-ui, sans-serif';
-  ctx.fillText(datos.marca.toLocaleUpperCase('es'), MARGEN, LADO - MARGEN + 8);
+  ctx.fillText(datos.marca.toLocaleUpperCase('es'), MARGEN, abajo - MARGEN + 8);
 
   return lienzo;
 }
