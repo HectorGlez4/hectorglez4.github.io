@@ -543,3 +543,26 @@ Dos revisiones del borrador de la v9 —una de calidad y una conciliación con e
 5. **Ninguna cuenta que cierre por falta de ventas** se solicita hasta el criterio de la pregunta 11; las que no tienen plazo pueden solicitarse antes (FR-35, §12.1, pregunta 11).
 
 El borrador había escrito «cada edición la elige Héctor» como hecho; era un supuesto sin confirmar, y vuelve a §15 como tal.
+
+## Addendum de la v9.1 — la Cita atribuida (2026-11-04)
+
+**Entrada:** la lluvia de ideas del 2026-11-03, «Citas de autores vivos y de personajes de ficción» (`_bmad-output/brainstorming/brainstorm-citas-recientes-y-ficcion-2026-11-03/`), modo facilitador con la técnica «Sí, y…».
+
+**La decisión de la lluvia que la v9.1 enmienda.** La sesión decidió que «el Autor es quien dice la Cita» y que, en la ficción, el Autor era el personaje. Héctor la corrigió el 2026-11-04: el Personaje es una entidad aparte, y una Cita puede tener a la vez Personaje y Autor. Así el concepto de Autor no se parte en persona y personaje, y no se toca su clave de orden. *(Corregido en el cierre de la v9.1: la frase decía que tampoco se tocaban su año de fallecimiento ni «la cuota latinoamericana de las Épocas». El año de fallecimiento deja de exigirse al Autor con derechos vigentes que vive (FR-15), y la cuota es la del suelo de §6.1, que se cuenta sobre la clase de siempre (FR-8).)*
+
+**Alternativas que se descartaron:**
+- **Relajar la Procedencia para todas las Citas.** Habría que reescribir SM-C1, FR-13, FR-23 y la puerta del cotejo, y habría desaparecido el diferencial que el sitio tiene frente a BrainyQuote.
+- **Que la otra clase la defina no estar cotejada.** Héctor eligió que la defina tener Personaje o un Autor con derechos vigentes, también en obras de dominio público.
+- **Dejarlo para una v10.** Entra en la v9 como paso 8.
+
+**Por qué la clase se juzga aparte.**
+- Si contara en SM-C1, la cifra bajaría con cada Personaje publicado sin que se hubiera relajado nada en la clase de siempre. Esa caída no se distinguiría de la que SM-C1 existe para delatar.
+- El precio de publicar sin cotejo se mide en reclamaciones (SM-C6), no en Procedencia.
+
+**El riesgo jurídico, que sigue abierto (pregunta 18).** Esto no es asesoramiento legal.
+- **España:** el art. 32 LPI admite la cita de fragmentos breves con atribución, para análisis, comentario o juicio crítico, y la ilustración con fines educativos.
+- **EE. UU.:** el *fair use* pondera la finalidad, la naturaleza de la obra, la cantidad tomada y el efecto en el mercado.
+- **En ningún sitio** «frase célebre» equivale a dominio público.
+- **Personajes:** muchos son además marcas registradas, y eso limita sobre todo su uso comercial en la imagen.
+- **BrainyQuote:** sus condiciones prohíben reutilizar el contenido. En la UE, la Directiva 96/9/CE protege la inversión en una base de datos aunque cada frase sea libre.
+- **Lo que la v9.1 pone como freno:** los topes por Obra y por longitud, el canal de retirada y la semilla acotada.
