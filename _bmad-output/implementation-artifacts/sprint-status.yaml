@@ -455,11 +455,88 @@ development_status:
   # Épica 28 — la portada de retorno. Al final; conviene la 21.2 antes (con 16 aptas la Cita del Día se repite cada 16 días).
   epic-28: backlog
   28-1-la-portada-abre-con-las-cifras-del-corpus-y-un-campo-para-bu: backlog
-  28-2-la-cita-de-hoy-lleva-su-obra-y-las-acciones-de-su-página: backlog
+  28-2-la-cita-de-hoy-lleva-su-obra-y-las-acciones-de-su-página: backlog  # v9, Héctor 2026-11-07: nace en el orden v9 (acciones, «Compartir en», «Ver esta cita», Tarjeta de Obra; UX-DR123), criterios enmendados en epics.md
   28-3-seis-obras-que-cambian-con-la-jornada: backlog
   28-4-todos-los-temas-las-colecciones-con-su-criterio-y-ocho-autor: backlog
   28-5-la-portada-nueva-llega-en-vivo-tras-el-juicio-de-sm-11: backlog  # operativa: acto de Héctor (merge desde el 2026-12-05 o con la fecha que declare Héctor)
   epic-28-retrospective: optional
+
+  # ── v9 y v9.1, de la cita al libro y la Cita atribuida ─────────────────────────────
+  # Añadidas a mano el 2026-11-07 (épicas fe1e7b4000 en planificacion/v9-prd), con las
+  # claves del --dry-run. Orden de §6.8; la unidad de fusión es la épica, salvo la 34.0.
+  # Ninguna espera ya a las Épicas 25 y 28 (Héctor, 2026-11-07).
+
+  # Épica 29 — el verso con sus saltos; primera. Antes de abrirla, Héctor decide la Tarjeta
+  # Social de las Citas en verso que no quepan en 630 px, con las cifras de la 29.1. Desde la
+  # 29.2 la rama está en rojo hasta su commit de restitución de saltos (acto de Héctor).
+  epic-29: backlog
+  29-1-el-salto-de-verso-sobrevive-en-el-corpus-el-cotejo-y-el-slug: backlog
+  29-2-una-orden-restituye-los-saltos-de-las-citas-publicadas-desde: backlog
+  29-3-el-verso-en-toda-superficie-y-todo-lo-que-sale: backlog
+  29-4-los-casi-duplicados-dentro-de-una-obra-y-entre-clases-se-señ: backlog
+  epic-29-retrospective: optional
+
+  # Épica 30 — citar y llevarse la Cita: corte de serie de SM-4 y SM-C5 (jornada, Héctor).
+  # La 30.5 mueve la huella: no se fusiona con huella.test.ts en rojo (despliega Héctor).
+  epic-30: backlog
+  30-1-copiar-antes-de-la-tarjeta-de-obra-en-la-página-de-cita: backlog
+  30-2-la-cita-a-su-medida-y-las-acciones-en-fila-desde-600-px: backlog
+  30-3-cómo-citar-en-la-página-de-cita: backlog
+  30-4-inserta-esta-cita: backlog
+  30-5-copiar-una-referencia-y-copiar-el-fragmento-entran-en-el-voc: backlog
+  epic-30-retrospective: optional
+
+  # Épica 31 — el pasaje; tras la 30.1 y la 30.3. MAX_CARACTERES_DEL_PASAJE nace sin valor
+  # (Héctor; 1.200 propuesto): el corte cae el día en que se le da valor, no el del merge.
+  epic-31: backlog
+  31-1-el-pasaje-se-localiza-con-el-localizador-del-orden-del-libro: backlog
+  31-2-lee-el-pasaje-plegado-en-la-página-de-cita: backlog
+  epic-31-retrospective: optional
+
+  # Épica 32 — la Obra como destino. Pregunta 12 («Granos de oro») antes de la 32.1;
+  # incipit declarado por Héctor y MAX_CARACTERES_DEL_INCIPIT sin valor (400 propuesto).
+  epic-32: backlog
+  32-1-revisiones-fijas-de-wikidata-versionadas-y-la-orden-que-ata: backlog
+  32-2-la-línea-de-ficha-técnica-bajo-la-cabecera-de-obra: backlog
+  32-3-el-incipit-lo-declara-una-persona-y-la-página-lo-enseña-pleg: backlog
+  32-4-la-página-1-de-la-obra-reordenada-dónde-leer-esta-obra-plega: backlog
+  32-5-cómo-citar-la-obra: backlog
+  epic-32-retrospective: optional
+
+  # Épica 33 — afiliación sin reloj. Las tiendas las declara Héctor; ninguna cuenta con
+  # plazo de ventas antes de la pregunta 11.
+  epic-33: backlog
+  33-1-una-tienda-se-declara-sin-marca-y-el-modelo-no-se-enciende-c: backlog
+  33-2-las-ediciones-en-venta-por-formato-y-por-tienda-dentro-de-dó: backlog
+  33-3-la-orden-de-qué-obras-curar-primero: backlog
+  epic-33-retrospective: optional
+
+  # Épica 34 — listados que se leen. La 34.0 (Desplegable) se funde sola, antes que la 30:
+  # excepción con nombre a la unidad de fusión, como la 23.12 (Héctor, 2026-11-07).
+  epic-34: backlog
+  34-0-la-primitiva-de-desplegable: backlog
+  34-1-un-solo-dueño-del-recorte-por-palabra: backlog
+  34-2-la-página-de-autor-enseña-tres-obras-y-despliega-el-resto: backlog
+  34-3-el-campo-de-búsqueda-se-ve-como-campo: backlog
+  epic-34-retrospective: optional
+
+  # Épica 35 — la Cita atribuida, construida entera con la puerta cerrada: sin los cinco
+  # topes ni BUZON_DE_PETICIONES (Héctor) no publica ninguna. La siembra a escala espera
+  # a la pregunta 18; la Página de Personaje, criterios de patrón hasta UJ-8 (pregunta 24).
+  epic-35: backlog
+  35-1-la-clase-se-fija-al-dar-de-alta-y-queda-registrada: backlog
+  35-1b-la-atribuida-tiene-su-puerta-cerrada-y-sus-topes: backlog
+  35-2-el-personaje-entra-en-el-corpus-y-la-obra-tiene-un-solo-dueñ: backlog
+  35-3-la-página-de-personaje: backlog
+  35-3b-la-tarjeta-social-del-personaje-y-cuándo-se-indexa-su-página: backlog
+  35-4-el-personaje-va-donde-va-el-autor: backlog
+  35-5-los-personajes-en-los-directorios-y-en-la-búsqueda: backlog
+  35-6-la-variante-de-españa-y-la-única-orden-que-cambia-una-atribu: backlog
+  35-7-lo-que-cuenta-solo-la-clase-de-siempre: backlog
+  35-8-pedir-que-se-corrija-o-se-retire-y-que-conste: backlog
+  35-9-la-obra-con-derechos-vigentes-se-vende-sola: backlog
+  35-10-la-siembra-acotada-desde-brainyquote: backlog
+  epic-35-retrospective: optional
 
 action_items:
   - id: "epic-6-retro-item-1-separar-los-artefactos-de-planificación"
