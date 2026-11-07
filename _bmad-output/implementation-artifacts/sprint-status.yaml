@@ -470,7 +470,7 @@ development_status:
   # Social de las Citas en verso que no quepan en 630 px, con las cifras de la 29.1. Desde la
   # 29.2 la rama está en rojo hasta su commit de restitución de saltos (acto de Héctor).
   epic-29: backlog
-  29-1-el-salto-de-verso-sobrevive-en-el-corpus-el-cotejo-y-el-slug: backlog
+  29-1-el-salto-de-verso-sobrevive-en-el-corpus-el-cotejo-y-el-slug: review
   29-2-una-orden-restituye-los-saltos-de-las-citas-publicadas-desde: backlog  # bloqueada: no empieza hasta que la decisión de Héctor sobre la Tarjeta Social de una Cita en verso que no cabe en 630 px (cambiar el reparto de tramos.ts o componerla sin texto) esté anotada en el spec de la 29.1, con las cifras que da la 29.1; si la 29.1 no nombra ninguna Cita que pase, queda sin objeto (v9-ralph 2026-11-07)
   29-3-el-verso-en-toda-superficie-y-todo-lo-que-sale: backlog  # bloqueada: aplica la decisión de Héctor sobre la Tarjeta Social de una Cita en verso que no cabe en 630 px, que falta y se toma con las cifras de la 29.1 en su spec; si la 29.1 no nombra ninguna, queda sin objeto (v9-ralph 2026-11-07)
   29-4-los-casi-duplicados-dentro-de-una-obra-y-entre-clases-se-señ: backlog  # bloqueada: la regla de Héctor del 2026-11-07 (pregunta abierta de la Épica 29) es que ninguna otra historia de la épica empieza hasta que su decisión sobre la Tarjeta Social del verso esté anotada en el spec de la 29.1; sin objeto si la 29.1 no nombra ninguna Cita que pase de 630 px (v9-ralph 2026-11-07)
