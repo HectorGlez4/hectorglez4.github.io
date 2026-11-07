@@ -1246,6 +1246,23 @@ describe('Historia 30.1 — el corte del orden nuevo de la Página de Cita', () 
     expect(informe).toMatch(/la continuación de la Página de Cita \(SM-4, SM-3 y SM-C5\): 2 tramos, que no se suman/);
   });
 
+  it('con jornada pasada: la línea base propia se salta la jornada de otra llegada de la unidad', () => {
+    // SM-C3 llega el 7, dentro del tramo tras el corte: esa jornada cambió y no entra en la referencia.
+    const SM_C3 = JUICIOS_POR_VENTANAS.find((j) => j.nombre === 'SM-C3')!;
+    const l = leer(partes(), {
+      minimo: 300,
+      cortes: [CORTE_23, corte30('2026-11-05')],
+      juicios: [SM_C5, { ...SM_C3, llegada: '2026-11-07' }],
+    });
+    const juicio = l.juicios.find((j) => j.juicio.nombre === 'SM-C5')!;
+    expect(juicio.corte).toMatchObject({ estado: 'llegado', desde: '2026-11-06', acumulado: 360, cerradaEl: '2026-11-09' });
+    // Del 6, el 8 y el 9 —sin el 7—: 36 + 36 + 60 salidas y 18 copiados sobre 360.
+    expect(juicio.referencias).toEqual([
+      { tasa: 'continuación', valor: calculada(132, 360) },
+      { tasa: 'SM-5', valor: calculada(18, 360) },
+    ]);
+  });
+
   it('el tramo que nombra el informe es el de su serie, no el de la lectura', () => {
     // Sin el corte de la 23, la lectura va por su tramo 1 y la continuación, por el 2.
     const l = leer(partes(), { minimo: 300, cortes: [corte30('2026-11-05')], juicios: [SM_C5] });

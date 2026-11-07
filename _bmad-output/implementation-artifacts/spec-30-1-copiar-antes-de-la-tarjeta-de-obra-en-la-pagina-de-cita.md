@@ -109,7 +109,7 @@ deferred:
 
 ## Review Triage Log
 
-### 2026-11-07 — Review pass
+### 2026-11-07 — Review pass (implementación, antes de las capas externas)
 - intent_gap: 0
 - bad_spec: 0
 - patch: 0
@@ -136,6 +136,20 @@ deferred:
   - `[low]` `[patch]` Sin Obra se exigía `salidas` tras compartir aunque una Cita sin Rutas acabe en los filtros (blind-hunter 12): se acepta `filtros` cuando no hay `nav`, como en la rama con Obra.
   - `[low]` `[patch]` La distancia 3 × de compartir solo la miraba el e2e local (verification-gap): una prueba de `tarjeta-de-obra.test.ts` en `npm test` lee el `margin-top` de la raíz de Copiar (4 ×), Imagen (2 ×) y compartir (3 ×).
   - Rechazadas (21): la palanca con cualquier ventana `salta` (es la letra del contrato: «cuando una ventana de SM-C5 sale `salta`», y `salta` ya son dos seguidas); la 30.1 desplegada sola (la Épica 30 se funde entera, tras la 29); un tope a la `y` de Copiar (la historia pide anotarla sin tope); dos dueños del orden de tabulación (miden granos distintos y los dos pasan); la distancia compartir → Tarjeta (no la fija ningún criterio; la Tarjeta conserva su 4 ×); `texto.length` del fixture de Unamuno (el texto es ASCII, sin comillas, y cada Cita del fixture se comprueba con o sin Imagen en `dist/`); el estado `done` previo a la revisión externa (es el orden del bucle); `sprint-status.yaml` (lo escribe el cierre del bucle); `cifra(undefined)` (da «sin leer», no un número); las comillas “ ” del `que` (las fija el contrato); el `!` de `desde` de la intersección (un corte llegado siempre abre tramo con principio); un segundo corte pendiente de la misma serie (no hay ninguno declarado); «Superficies con lectura» sin partir (decisión de Design Notes, dicha ahora en el informe); la medida sin Imagen en el navegador y en las seis rutas (el orden lo cubre `dist/`); las cifras de la auditoría y la orden remota (de Héctor); y la Cita en verso, ya diferida.
+
+### 2026-11-07 — Review pass (capas externas, pasada 2, la última)
+- intent_gap: 0
+- bad_spec: 0
+- patch: 5: (high 0, medium 1, low 4)
+- defer: 0
+- reject: 29
+- addressed_findings:
+  - `[medium]` `[patch]` La medida e2e a 360 × 640 dejaba pasar una ruta de `conTarjeta` sin `.tarjeta-de-obra`: con la tarjeta nula se saltaba la comparación (blind-hunter 4, edge-case 5). Ahora exige la tarjeta en esas rutas y nombra la ruta (`tests/e2e/pagina-de-cita.spec.ts`).
+  - `[low]` `[patch]` Con el corte llegado, la cabecera de SM-C5 que sale antes de contar tomaba el `desde` del tramo del corte y la línea base propia el de la intersección (blind-hunter 13, edge-case 2). Un solo cálculo, `desdeTrasElCorte`, sirve a las dos (`tools/lib/lineaBase.ts`).
+  - `[low]` `[patch]` Ese principio podía caer antes del de la línea base de la unidad (edge-case 1): `desdeTrasElCorte` toma el más tardío de los dos.
+  - `[low]` `[patch]` La línea base propia de SM-C5 tras el corte se salta las jornadas de otra llegada de la unidad, y nada lo comprobaba (verification-gap). Prueba nueva en `tests/unit/linea-base.test.ts` con SM-C3 llegando el 2026-11-07: referencia del 6, el 8 y el 9, cerrada el 9.
+  - `[low]` `[patch]` El spec se contradecía sobre su revisión (blind-hunter 1, ac-auditor): la primera entrada del triaje y el primer párrafo «Revisión» del resultado se rotulan como la pasada de la implementación, y el resultado dice cuál es la vigente.
+  - Rechazadas (29): `done` y `sprint-status.yaml` (la línea la escribe el cierre del bucle); un tope a la `y` de Copiar y las Citas largas fuera de la primera pantalla (la historia pide anotar sin tope y solo que Copiar vaya sobre la Tarjeta); el grupo `imagen` de la tabulación en la cara completa, la parada en `document.body`, `conImagen` fijado en el fixture, el recuento de caracteres y `previousElementSibling` nulo (la cara completa y el fixture son fijos: futuros especulativos); la rama de la portada sin ejercitar (es la regla escrita para la 28.2, por contrato); la identidad de la tarjeta con Modelos (la cubre `ediciones-en-venta.test.ts`), la igualdad de portada y 404 (comprobada a mano con la base limpia en la pasada 1), Fuente sin Obra (no es construible), la medida en seis rutas (el orden lo cubre `dist/`), las distancias sin Fuente (las mide «sin Obra, Copiar sigue donde estaba») y la Imagen a 2 × desde 600 px (es de la 30.2); un segundo corte de la misma serie, la palanca fuera de `salta`, la lista de series repetida, los textos de la 30.3/30.4 en el `que` y la palanca (los fija el contrato) y el denominador de cada línea (ya rotulado en la pasada 1); el tramo vacío de un corte de ayer (ya probado en la pasada 1); la clasificación de foco en la isla de Copiar; los números de línea del Code Map; y la Épica 29, ya diferida.
 
 ## Design Notes
 
@@ -193,7 +207,7 @@ Status: done
 - `tests/e2e/accesibilidad.spec.ts` — el orden de foco esperado pasa a contenido, acciones, tarjeta y salidas.
 - `AGENTS.md` — orden nuevo, el corte y su constante sin valor.
 
-**Revisión:** capas externas sin hallazgos en esta pasada: 0 parches, 0 diferidos, 0 rechazados. `followup_review_recommended: false` (parches: 0 high, 0 medium, 0 low; puntuación 0).
+**Revisión (pasada de la implementación, antes de las capas externas):** sin hallazgos: 0 parches, 0 diferidos, 0 rechazados. Las dos pasadas externas van abajo; el estado vigente es el de la última.
 
 **Verificación:** `npx vitest run tests/unit/tarjeta-de-obra.test.ts` (32 verdes); `tests/unit/linea-base.test.ts`, `medicion.test.ts`, `tipografia-en-tokens.test.ts`, `siguiente.test.ts` (800 verdes); `npx astro check` (0 errores); `FECHA_JORNADA=2026-11-07 npm run build` (EXIT 0, sin aviso de peso); `npx playwright test tests/e2e/pagina-de-cita.spec.ts tests/e2e/accesibilidad.spec.ts --project=movil --project=escritorio` (369 verdes, 9 omitidas por proyecto); `npm test` (155 ficheros, 7174 verdes); `dist/index.html` y `dist/404.html` idénticos byte a byte a la construcción de la base con la misma jornada.
 
@@ -212,3 +226,21 @@ Status: done
 **Revisión:** 10 parches (0 high, 3 medium, 7 low), 0 diferidos, 21 rechazados. `followup_review_recommended: true` (3 × 3 + 1 × 7 = 16 ≥ 5).
 
 **Verificación:** `npx vitest run tests/unit/linea-base.test.ts` (90 verdes) y `tests/unit/tarjeta-de-obra.test.ts` (33 verdes); `npx playwright test tests/e2e/pagina-de-cita.spec.ts --project=movil --project=escritorio` (77 verdes, 9 omitidas por proyecto); `dist/index.html` y `dist/404.html` idénticos byte a byte entre `src/` de `baseline_revision` y de la historia, `FECHA_JORNADA=2026-11-07 npx astro build` en las dos; `npx astro check` (0 errores, 0 avisos); `npm test` (155 ficheros, 7178 verdes).
+
+### Pasada de revisión externa 2, la última (2026-11-07)
+
+**Cambio:** la medida e2e a 360 × 640 exige la Tarjeta en las rutas de `conTarjeta`; el principio de la línea base propia de SM-C5 tras el corte sale de un solo cálculo (`desdeTrasElCorte`: la intersección con el tramo de la unidad, nunca antes de su línea base), para la cabecera que sale antes de contar y para la que cuenta; una prueba fija que esa línea base se salta la jornada de otra llegada de la unidad. El spec rotula su primera pasada como la de la implementación.
+
+**Ficheros:**
+- `tests/e2e/pagina-de-cita.spec.ts` — la tarjeta, obligatoria en las rutas de `conTarjeta`.
+- `tools/lib/lineaBase.ts` — `desdeTrasElCorte`, un solo principio tras el corte.
+- `tests/unit/linea-base.test.ts` — prueba nueva: SM-C3 llega dentro del tramo tras el corte y su jornada no entra en la referencia de SM-C5.
+- este spec — triaje y resultado al día.
+
+**Revisión:** 5 parches (0 high, 1 medium, 4 low), 0 diferidos, 29 rechazados. `followup_review_recommended: true` (3 × 1 + 1 × 4 = 7 ≥ 5); es la última pasada del bucle, así que la recomendación queda anotada para Héctor y no abre otra.
+
+**Verificación:** `npx vitest run tests/unit/linea-base.test.ts` (91 verdes); `npx playwright test tests/e2e/pagina-de-cita.spec.ts --project=movil --project=escritorio` (77 verdes, 9 omitidas); `npx astro check` (0 errores, 0 avisos); `npm test` (155 ficheros, 7179 verdes). Los cambios no tocan `src/`, así que `dist/` y la igualdad de portada y 404 de la pasada 1 siguen valiendo.
+
+**Estado en HEAD:** la historia está construida y revisada en `v9/epica-30`, sin fusionar: la Épica 30 se funde entera tras la 29, y la línea de `sprint-status.yaml` la escribe el cierre del bucle. Siguen diferidas la medida con la Cita en verso de la Épica 29 y su precondición.
+
+**Riesgos residuales:** los de arriba; y que las Citas de texto largo dejan Copiar fuera de la primera pantalla (667 y 611 px), que la historia acepta sin tope.

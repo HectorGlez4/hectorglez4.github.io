@@ -646,6 +646,8 @@ test.describe('Historia 24.4 — la Tarjeta de Obra en la Página de Cita', () =
       expect(copiar).not.toBeNull();
       expect(cita!.y, ruta).toBeGreaterThan(0);
       expect(cita!.y, ruta).toBeLessThan(640);
+      // Las de `conTarjeta` la traen siempre: que falte es una regresión, no una Cita sin Obra.
+      if (conTarjeta.includes(ruta)) expect(tarjeta, `${ruta}: sin .tarjeta-de-obra`).not.toBeNull();
       if (tarjeta !== null) expect(copiar!.y + copiar!.height, ruta).toBeLessThanOrEqual(tarjeta.y);
       // Sin tope para la larga: la cifra se anota, y la de la auditoría se compara en el spec.
       info.annotations.push({

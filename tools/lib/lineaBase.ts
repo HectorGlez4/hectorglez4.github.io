@@ -1354,6 +1354,13 @@ export function componerLecturaDeMedicion(
     // Historia 30.1 — el corte que parte lo que juzga, si lo declara: el último que llegó de su serie.
     const partidaDelCorte = juicio.corte === undefined ? undefined : series[juicio.corte.serie];
     const llegadoDelCorte = partidaDelCorte?.cortes.at(-1);
+    const lineaBase = lineasBase.find((l) => l.unidad === juicio.unidad);
+    // Un solo cálculo del principio tras el corte, para la cabecera y para la línea base propia: la
+    // primera jornada de la intersección con el tramo de la unidad, y nunca antes de su línea base.
+    const desdeTrasElCorte = (): string => {
+      const enInterseccion = interseccion(series[lineaBase?.serie ?? 'lectura'].vigente, partidaDelCorte!.vigente).desde!;
+      return lineaBase?.desde !== undefined && lineaBase.desde > enInterseccion ? lineaBase.desde : enInterseccion;
+    };
     let corte: CorteDelJuicio | undefined;
     if (juicio.corte !== undefined && llegadoDelCorte === undefined) {
       const pendiente = partidaDelCorte!.pendientes[0];
@@ -1369,13 +1376,12 @@ export function componerLecturaDeMedicion(
         estado: 'llegado',
         deDondeLlega: juicio.corte.deDondeLlega,
         jornada: llegadoDelCorte.jornada,
-        desde: partidaDelCorte!.vigente.desde!,
+        desde: desdeTrasElCorte(),
       };
     }
     const conCorte = (leido: JuicioLeido): JuicioLeido => (corte === undefined ? leido : { ...leido, corte });
     const sin = (sinVentanas: string): JuicioLeido =>
       conCorte({ juicio, sinVentanas, referencias: [], ventanas: [], cortadas: [] });
-    const lineaBase = lineasBase.find((l) => l.unidad === juicio.unidad);
     if (lineaBase === undefined || (lineaBase.serie === 'lectura' && lineaBase.superficies.length === 0)) {
       return sin(juicio.sinUnidad ?? `ninguna superficie declara la unidad «${juicio.unidad}»`);
     }
@@ -1407,7 +1413,7 @@ export function componerLecturaDeMedicion(
     if (llegadoDelCorte !== undefined) {
       // Una línea base propia tras la llegada del corte, que no compara con nada de antes: empieza
       // la primera jornada completa de la intersección y reúne el mínimo sin las jornadas saltadas.
-      const desde = interseccion(tramo, partidaDelCorte!.vigente).desde!;
+      const desde = desdeTrasElCorte();
       const jornadas: string[] = [];
       let reunidas = 0;
       let cerradaEl: string | undefined;
