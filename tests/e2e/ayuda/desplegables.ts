@@ -81,11 +81,14 @@ export async function recorrerElFoco(page: Page, ruta: string, estado: string) {
  */
 export const abrirLosDesplegables = (page: Page) =>
   page.evaluate(() => {
-    const desplegables = document.querySelectorAll('details');
+    const desplegables = [...document.querySelectorAll('details')];
     desplegables.forEach((d) => {
+      // Un acordeón exclusivo (`name`) cerraría a sus hermanos al abrir cada uno.
+      d.removeAttribute('name');
       d.open = true;
     });
-    return desplegables.length;
+    // Los que de verdad quedaron abiertos, no los que se intentó abrir.
+    return desplegables.filter((d) => d.open).length;
   });
 
 /** Un barrido axe de la página tal como está, con lo que exige la 23.4. */

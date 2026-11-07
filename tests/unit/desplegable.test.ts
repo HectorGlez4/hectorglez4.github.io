@@ -154,7 +154,7 @@ describe('Historia 34.0 — el contrato del componente, sin construir', () => {
     }
     expect(hoja).toMatch(/summary::-webkit-details-marker \{ display: none; \}/);
     expect(hoja).toMatch(/\.desplegable \+ \.desplegable \{ border-block-start: none; \}/);
-    expect(hoja).toMatch(/\.desplegable\[open\] \.giro \{ transform: rotate\(90deg\); \}/);
+    expect(hoja).toMatch(/\.desplegable\[open\] > summary \.giro \{ transform: rotate\(90deg\); \}/);
     // Sin fondo, radio, subrayado, siena, transición ni regla de foco propia.
     expect(hoja).not.toMatch(/background|border-radius|text-decoration|--siena|transition|:focus/);
   });
@@ -182,7 +182,10 @@ describe('Historia 34.0 — el contrato del componente, sin construir', () => {
   it('ninguna página ni componente del sitio lo importa todavía', async () => {
     for (const ruta of await ficherosDelSitio()) {
       if (ruta === join(RAIZ, COMPONENTE)) continue;
-      expect(sinComentarios(await readFile(ruta, 'utf8')), ruta).not.toContain('Desplegable.astro');
+      expect(
+        sinComentarios(await readFile(ruta, 'utf8')),
+        `${ruta}: prueba temporal de la 34.0; el primer consumidor del Desplegable (34.2 o la Épica 30) la quita, y solo esta`,
+      ).not.toContain('Desplegable.astro');
     }
   });
 
@@ -230,7 +233,9 @@ import Desplegable from '../components/Desplegable.astro';
 const SONDA_CON_CONTENIDO = sonda(
   '<Desplegable rotulo="Cómo citar"><p id="dentro">Séneca, «Sobre la brevedad de la vida».</p></Desplegable>' +
     '<section id="seguidos"><Desplegable rotulo="Lee el pasaje"><p>Uno.</p></Desplegable>' +
-    '<Desplegable rotulo="Ediciones"><p>Dos.</p></Desplegable></section>',
+    '<Desplegable rotulo="Ediciones"><p>Dos.</p></Desplegable></section>' +
+    // Sin texto, pero con un medio: también es contenido, y construye.
+    '<Desplegable rotulo="Retrato"><img id="solo-imagen" src="/retrato.png" alt="Retrato de Séneca" /></Desplegable>',
 );
 
 /** Los `<details>` de un HTML, con su `<summary>` y su contenido. */
@@ -263,7 +268,7 @@ describe('Historia 34.0 — el desplegable construido en una sonda', () => {
 
   it('pinta cada desplegable cerrado, con el rótulo como único texto del `<summary>` y el contenido dentro', () => {
     const desplegables = desplegablesDe(html);
-    expect(desplegables.map((d) => textoSinGlifo(d.summary))).toEqual(['Cómo citar', 'Lee el pasaje', 'Ediciones']);
+    expect(desplegables.map((d) => textoSinGlifo(d.summary))).toEqual(['Cómo citar', 'Lee el pasaje', 'Ediciones', 'Retrato']);
     for (const { apertura, summary, contenido } of desplegables) {
       expect(apertura).toMatch(/class="desplegable[ "]/);
       expect(apertura).not.toMatch(/\bopen\b/);
@@ -278,6 +283,7 @@ describe('Historia 34.0 — el desplegable construido en una sonda', () => {
       expect(contenido).toMatch(/^<div\b[^>]*class="contenido[ "]/);
     }
     expect(desplegables[0].contenido).toContain('<p id="dentro">Séneca, «Sobre la brevedad de la vida».</p>');
+    expect(desplegables[3].contenido).toMatch(/<img\b[^>]*id="solo-imagen"/);
     // Sin guion: la sonda no lleva ninguno, así que ninguno sale del componente.
     expect(html).not.toMatch(/<script\b/i);
   });
@@ -338,8 +344,11 @@ describe('Historia 34.0 — un desplegable sin contenido detiene la construcció
     expect(resultado.salida).toContain(`Desplegable «${rotulo}» sin contenido: quien lo usa no lo renderiza (UX-DR144)`);
   }, 300_000);
 
-  it('con el rótulo en blanco: código distinto de 0, porque el `<summary>` no tendría nombre', async () => {
-    const uso = '<Desplegable rotulo="  "><p>Algo.</p></Desplegable>';
+  it.each([
+    ['en blanco', '<Desplegable rotulo="  "><p>Algo.</p></Desplegable>'],
+    // `astro build` no comprueba los tipos: sin la guarda, saldría un `TypeError` sin nombre.
+    ['ausente', '<Desplegable><p>Algo.</p></Desplegable>'],
+  ])('con el rótulo %s: código distinto de 0, porque el `<summary>` no tendría nombre', async (_caso, uso) => {
     const resultado = await construirConCorpus(CORPUS, { paginas: { 'sonda-sin-rotulo.astro': sonda(uso) } });
     aLimpiar.push(resultado.proyecto);
     expect(resultado.codigo, resultado.salida).not.toBe(0);

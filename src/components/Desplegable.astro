@@ -57,7 +57,7 @@ interface Props {
 
 const { rotulo } = Astro.props;
 
-if (rotulo.trim() === '') {
+if (typeof rotulo !== 'string' || rotulo.trim() === '') {
   throw new Error('Desplegable sin rótulo: el <summary> se quedaría sin nombre accesible (NFR-9)');
 }
 
@@ -112,7 +112,8 @@ if (texto === '' && !CONTENIDO_SIN_TEXTO.test(sinComentarios)) {
     display: inline-block;
   }
 
-  .desplegable[open] .giro {
+  /* Solo el glifo de su propio `<summary>`: uno anidado y cerrado no gira con el de fuera. */
+  .desplegable[open] > summary .giro {
     transform: rotate(90deg);
   }
 

@@ -159,7 +159,10 @@ test.beforeEach(({}, info) => {
 test('la sonda pasa axe con los desplegables cerrados y abiertos', async ({ page }) => {
   await irA(page);
   await auditar(page, SONDA, 'con los desplegables cerrados');
+  // Aunque fueran un acordeón exclusivo, quedan todos abiertos y se cuentan los abiertos.
+  await page.evaluate(() => document.querySelectorAll('details').forEach((d) => d.setAttribute('name', 'grupo')));
   expect(await abrirLosDesplegables(page)).toBe(ROTULOS.length);
+  expect(await page.locator('details[open]').count()).toBe(ROTULOS.length);
   await auditar(page, SONDA, 'con los desplegables abiertos');
 });
 
@@ -220,6 +223,17 @@ test('Intro y Espacio abren y cierran sin mover el foco; el glifo gira sin salta
   await expect(dentro).toBeHidden();
   expect(await foco(page)).toBe(enElResumen);
   expect(await giroDelGlifo(page, 0)).toBe(0);
+
+  // Y al revés: Espacio abre sin desplazar la página e Intro cierra.
+  const desplazamiento = await page.evaluate(() => window.scrollY);
+  await page.keyboard.press('Space');
+  await expect(desplegable).toHaveAttribute('open');
+  await expect(dentro).toBeVisible();
+  expect(await foco(page)).toBe(enElResumen);
+  expect(await page.evaluate(() => window.scrollY)).toBe(desplazamiento);
+  await page.keyboard.press('Enter');
+  await expect(desplegable).not.toHaveAttribute('open');
+  expect(await foco(page)).toBe(enElResumen);
 });
 
 test('la fila del `<summary>` mide al menos `--zona-de-toque`, y dos seguidos comparten un filete', async ({ page }) => {
@@ -230,6 +244,11 @@ test('la fila del `<summary>` mide al menos `--zona-de-toque`, y dos seguidos co
     document.body.append(regla);
     const zona = regla.getBoundingClientRect().height;
     regla.remove();
+    const muestra = document.createElement('div');
+    muestra.style.color = 'var(--tinta-apagada)';
+    document.body.append(muestra);
+    const tinta = getComputedStyle(muestra).color;
+    muestra.remove();
     const desplegables = [...document.querySelectorAll('details.desplegable')];
     return {
       zona,
@@ -239,6 +258,17 @@ test('la fila del `<summary>` mide al menos `--zona-de-toque`, y dos seguidos co
         return [s.borderTopWidth, s.borderBottomWidth];
       }),
       marcador: getComputedStyle(desplegables[0].querySelector('summary')!).display,
+      // El trato del Rótulo de sección y toda la fila como zona de toque.
+      resumen: desplegables.map((d) => {
+        const s = d.querySelector('summary')!;
+        const e = getComputedStyle(s);
+        return {
+          ancho: Math.round(s.getBoundingClientRect().width) === Math.round(d.getBoundingClientRect().width),
+          mayusculas: e.textTransform,
+          subrayado: e.textDecorationLine,
+          tinta: e.color === tinta,
+        };
+      }),
     };
   });
   expect(medidas.zona).toBeGreaterThan(0);
@@ -249,4 +279,38 @@ test('la fila del `<summary>` mide al menos `--zona-de-toque`, y dos seguidos co
   expect(primero[0]).not.toBe('0px');
   for (const [encima] of resto) expect(encima).toBe('0px');
   for (const [, debajo] of medidas.filetes) expect(debajo).not.toBe('0px');
+  for (const r of medidas.resumen) {
+    expect(r).toEqual({ ancho: true, mayusculas: 'uppercase', subrayado: 'none', tinta: true });
+  }
+});
+
+test('abierto, el contenido lleva 2× y 3× `--unidad` y el desplegable no pasa de `--medida-prosa`', async ({ page }) => {
+  await irA(page);
+  await abrirLosDesplegables(page);
+  const medidas = await page.evaluate(() => {
+    const medir = (valor: string) => {
+      const regla = document.createElement('div');
+      regla.style.inlineSize = valor;
+      document.body.append(regla);
+      const ancho = regla.getBoundingClientRect().width;
+      regla.remove();
+      return ancho;
+    };
+    const unidad = medir('var(--unidad)');
+    const medida = medir('var(--medida-prosa)');
+    return {
+      unidad,
+      medida,
+      desplegables: [...document.querySelectorAll('details.desplegable')].map((d) => {
+        const c = getComputedStyle(d.querySelector('.contenido')!);
+        return { arriba: parseFloat(c.paddingTop), abajo: parseFloat(c.paddingBottom), ancho: d.getBoundingClientRect().width };
+      }),
+    };
+  });
+  expect(medidas.unidad).toBeGreaterThan(0);
+  for (const d of medidas.desplegables) {
+    expect(d.arriba).toBeCloseTo(medidas.unidad * 2, 1);
+    expect(d.abajo).toBeCloseTo(medidas.unidad * 3, 1);
+    expect(d.ancho).toBeLessThanOrEqual(medidas.medida + 0.5);
+  }
 });
