@@ -1,0 +1,105 @@
+---
+/**
+ * El Desplegable — la primitiva única de todo lo que se pliega en el sitio (Historia 34.0;
+ * UX-DR117, UX-DR143, UX-DR144, UX-DR145, UX-DR146).
+ *
+ * Un `<details>` nativo, **cerrado al cargar** (sin `open`), con el rótulo en su `<summary>` y
+ * el contenido en el `slot` por omisión. Funciona sin guion y está entero en el HTML inicial:
+ * Intro o Espacio sobre el `<summary>` lo abre y lo cierra sin mover el foco, y lo de dentro
+ * cuenta para el grafo de alcance de NFR-5 (no es `<template>` ni `<noscript>`).
+ *
+ * API, y nada más:
+ *
+ *   · `rotulo: string` — el texto del `<summary>`, tal cual. Sin `open`, `id`, `zona` ni `nivel`.
+ *   · el `slot` por omisión — lo que se pliega.
+ *
+ * Lo usarán la Lista de Obras plegada de la Página de Autor (34.2) y los desplegables de la
+ * Página de Cita, la de Obra y la de Personaje (30.3, 30.4, 31.2, 32.3–32.5, 33.2, 35.3).
+ * **Ningún componente escribe su propio `<details>`**: dos copias divergirían en el trato, el
+ * glifo o la accesibilidad a la primera corrección.
+ *
+ * El `<summary>` lleva **solo el texto del rótulo**, nunca un `h1`…`h6` (NFR-9): un encabezado
+ * dentro de un `<summary>` pierde su papel para el lector de pantalla. Por eso no reutiliza
+ * `Rotulo.astro`, que pinta un `h2`/`h3`, y copia sus cinco declaraciones tipográficas —tokens
+ * salvo `letter-spacing`—. Lo que se lee como Rótulo de sección, sin serlo de encabezado.
+ *
+ * Sin `data-zona` ni guion propio: el `<summary>` no es enlace —sin subrayado ni siena; abrir no
+ * es actuar— y lo de dentro declara su zona como si no estuviera plegado. Tampoco lleva
+ * `data-ingreso` ni `data-pagefind-*`: qué se indexa lo dice lo de dentro.
+ *
+ * El glifo de despliegue es «›» (U+203A), el mismo que el avance de `FilaDeBloque`, en un
+ * `span` `aria-hidden` —el nombre accesible del `<summary>` es solo el rótulo— y pegado a él
+ * con `&nbsp;` dentro del mismo `span` de texto, para que nunca quede solo en una línea. Al
+ * abrir gira 90°, sin transición. Está en el subconjunto `latin` de Inter (`U+2000-206F`); nunca
+ * «→» (U+2192), que no lo está, ni un `content` de CSS ni un SVG. **Es provisional**: el glifo
+ * concreto lo decide Héctor con `bmad-ux`.
+ *
+ * **Un desplegable sin contenido no se pinta** (UX-DR144): el que no existe para su página no
+ * deja `<summary>`, filete ni aire, y eso lo cumple quien lo usa, no renderizándolo. El
+ * componente solo garantiza que nunca sale vacío: sin `slot`, o con uno que solo renderiza
+ * espacio en blanco, detiene la construcción nombrando el rótulo.
+ *
+ * El `<style>` solo nombra el marcado de este componente, con el ámbito de Astro y sin
+ * `:global`: Astro emite la hoja por el grafo de importaciones aunque el componente no se
+ * renderice, así que una regla de fuera cambiaría páginas que no lo usan en cuanto el primer
+ * consumidor lo importe. Lo vigila `tests/unit/desplegable.test.ts`. Sin regla de foco propia:
+ * manda el anillo global de `tokens.css`.
+ */
+interface Props {
+  /** El texto del `<summary>`: solo el rótulo, sin encabezado. */
+  rotulo: string;
+}
+
+const { rotulo } = Astro.props;
+
+const contenido = Astro.slots.has('default') ? await Astro.slots.render('default') : '';
+if (contenido.trim() === '') {
+  throw new Error(`Desplegable «${rotulo}» sin contenido: quien lo usa no lo renderiza (UX-DR144)`);
+}
+---
+
+<details class="desplegable"><summary><span>{rotulo}<span class="glifo" aria-hidden="true">&nbsp;›</span></span></summary><div class="contenido"><Fragment set:html={contenido} /></div></details>
+
+<style>
+  /* Plano: filete encima de cada rótulo y debajo del último, sin fondo ni radio (UX-DR145). */
+  .desplegable {
+    max-inline-size: var(--medida-prosa);
+    border-block: var(--grosor-filete) solid var(--filete);
+  }
+
+  .desplegable + .desplegable {
+    border-block-start: none;
+  }
+
+  /* El trato del Rótulo de sección; toda la fila es zona de toque (UX-DR22). */
+  summary {
+    display: flex;
+    align-items: center;
+    min-block-size: var(--zona-de-toque);
+    list-style: none;
+    cursor: pointer;
+    font-family: var(--sans);
+    font-size: var(--autor);
+    font-weight: var(--peso-fuerte);
+    letter-spacing: 0.09em;
+    line-height: var(--interlineado-autor);
+    text-transform: uppercase;
+    color: var(--tinta-apagada);
+  }
+
+  summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .glifo {
+    display: inline-block;
+  }
+
+  .desplegable[open] .glifo {
+    transform: rotate(90deg);
+  }
+
+  .contenido {
+    padding-block: calc(var(--unidad) * 2) calc(var(--unidad) * 3);
+  }
+</style>
