@@ -410,10 +410,18 @@ que la orden lee sin nombrar ninguna ruta. Ningún módulo de `src/`, `integraci
 (2026-10-25, la jornada UTC en que la 23 llegó al sitio en vivo; se lo dio la 23.11, en un commit
 aparte),
 `PASADAS_QUE_ESCRIBEN_EN_PRODUCCION` (vacía; la anota él el día de la 25.3 y de la 25.7) y
-`SM12_CON_FACEBOOK` (apagada; la enciende él en la 25.7). Ningún agente les da valor. Los **cortes de
+`SM12_CON_FACEBOOK` (apagada; la enciende él en la 25.7) y `DESPLIEGUE_DE_CITAR_Y_LLEVARSE` (sin
+valor; la jornada UTC en que termina «Desplegar» de la Épica 30, que pone él en un commit aparte).
+Ningún agente les da valor. Los **cortes de
 serie** viven en `CORTES_DE_SERIE_DECLARADOS`, una lista de constantes de despliegue sin ninguna
 fecha escrita —`CORTES_DE_SERIE` filtra las que llegaron y `CORTES_DE_SM8` es su proyección—: un
-corte nuevo entra con su historia y su constante, nunca con un literal. Una tasa nueva que se juzgue
+corte nuevo entra con su historia y su constante, nunca con un literal. El de la Épica 30 (Historia
+30.1) parte solo la serie `continuacion-de-cita`: la continuación de la Página de Cita (SM-4), su
+SM-3 y SM-C5 se leen en la intersección de su tramo y del de `lectura`, y SM-5, SM-7, SM-C3 y las
+demás superficies siguen en el de `lectura`. Con el corte llegado, SM-C5 abre su línea base tras
+la llegada y ninguna ventana la cruza; sin él, juzga como antes y nombra la llegada pendiente. Si
+su señal salta, el informe nombra su palanca —quitar los tres desplegables o bajarlos tras las
+Rutas de salida—, que decide Héctor. Una tasa nueva que se juzgue
 por ventanas entra en la tabla de `juiciosPorVentanas` (`JUICIOS_POR_VENTANAS`) de
 `tools/lib/lineaBase.ts`. Ninguna prueba fija el valor de esas constantes: siguen el que tengan, para
 que darles valor (23.11, 25.7, 26.11) no ponga la principal en rojo. La orden dice «cerrada»,
@@ -967,13 +975,15 @@ Ninguna hace commit; las dos se niegan con 1 y sin escribir si no hay nada que h
 
 ### La Tarjeta de Obra (Historia 24.4)
 
-Bajo la Cita, entre la Línea de la Fuente —o la Atribución, sin Fuente— y Copiar, la Página de
+Tras las acciones —Copiar, Imagen y compartir— y antes de las Rutas de salida (Historia 30.1:
+nada se intercala entre la Atribución, con su Línea de la Fuente, y Copiar), la Página de
 Cita dice de qué Obra sale: `src/components/TarjetaDeObra.astro`, con el rótulo «De la obra»,
 el título de la ficha sin enlace, «{Autor} · {año} · {n} citas» y una o dos Filas de bloque:
 «Siguiente…» cuando hay a dónde ir (24.5) y, siempre, la de la página 1 de la Obra —se indexe o
 no, esté congelada o no—. **Solo en `src/pages/cita/[slug].astro`**:
 no va dentro de `BloqueDeCita.astro` porque ese bloque lo comparten la portada y el 404, que no
-la llevan (la portada la recibe en la 28.2). Sin Obra no pinta nada, ni rótulo ni hueco.
+la llevan (la portada la recibe en la 28.2, y la Cita del Día nace en el orden de la 30.1). Sin
+Obra no pinta nada, ni rótulo ni hueco, y las Rutas de salida siguen a compartir.
 
 - `nivel` (2 | 3) es obligatorio y sin valor por omisión: la Página de Cita pasa `2`; la portada
   pasará `3`. `Rotulo.astro` admite `nivel`, por omisión `2`.
@@ -1012,7 +1022,7 @@ la llevan (la portada la recibe en la 28.2). Sin Obra no pinta nada, ni rótulo 
 
 ### Al pie de la Página de Cita (Historia 24.6)
 
-Tras las acciones, `src/components/RutasDeSalida.astro` pinta hasta tres grupos, en este orden y
+Tras las acciones y la Tarjeta de Obra (30.1), `src/components/RutasDeSalida.astro` pinta hasta tres grupos, en este orden y
 cada uno con su `h2` (`Rotulo.astro`): **«De la misma obra»** —hasta `MAX_CITAS_DE_LA_MISMA_OBRA`
 (3) Citas de su Obra, en el orden del libro, con la Tarjeta de Cita `ninguna`, zona `misma-obra`,
 y el cierre «Las {n} citas de {título} ›» a la página 1 de la Obra—, **«Más de {Autor}»** —hasta

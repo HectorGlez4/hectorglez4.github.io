@@ -162,6 +162,21 @@ export const DESPLIEGUE_DE_LA_LECTURA: string | undefined = '2026-10-25';
  */
 export const DESPLIEGUE_DE_LA_BUSQUEDA_CON_FILTROS: string | undefined = '2026-10-30';
 
+/**
+ * La llegada en vivo de «Citar y llevarse la Cita» — la Épica 30, AD-9, AD-13, Historia 30.1.
+ *
+ * Es la jornada UTC en que termina el trabajo «Desplegar» de Actions que lleva la Épica 30 al
+ * sitio en vivo —nunca la del merge—, con la misma forma que las de arriba: `undefined` mientras
+ * no haya llegado. **Le da valor Héctor, en un commit aparte (como la 23.11), y ningún agente la
+ * elige.**
+ *
+ * Con ella llega el orden nuevo de la Página de Cita —las acciones antes de la Tarjeta de Obra, y
+ * «Cómo citar» e «Inserta esta cita» detrás—, que cambia lo que miden la continuación de la Página
+ * de Cita (SM-4, y su complemento SM-3) y SM-C5: su entrada en `CORTES_DE_SERIE_DECLARADOS` parte
+ * solo la serie `continuacion-de-cita`, y el juicio de SM-C5 no compara ventanas a través de ella.
+ */
+export const DESPLIEGUE_DE_CITAR_Y_LLEVARSE: string | undefined = undefined;
+
 /*
  * Los cortes de serie de la medición — AD-9, AD-13, Historia 23.10.
  *
@@ -179,8 +194,13 @@ export const DESPLIEGUE_DE_LA_BUSQUEDA_CON_FILTROS: string | undefined = '2026-1
  * distinto motivo, son un solo «cambió».
  */
 
-/** Las series de la medición que un corte puede partir. */
-export type SerieDeMedicion = 'sm8' | 'lectura' | 'busqueda';
+/**
+ * Las series de la medición que un corte puede partir. `continuacion-de-cita` (Historia 30.1) es
+ * la continuación de la Página de Cita (SM-4 y SM-3) y SM-C5, y nada más: partir `lectura`
+ * partiría las tasas de lectura de todas las superficies. Se lee en la intersección de su tramo y
+ * del de `lectura`.
+ */
+export type SerieDeMedicion = 'sm8' | 'lectura' | 'busqueda' | 'continuacion-de-cita';
 
 /** Un corte de serie tal como se declara: su jornada es la de una constante de despliegue. */
 export interface CorteDeSerie {
@@ -201,7 +221,8 @@ export interface CorteLlegado extends CorteDeSerie {
  * La lista declarada, en el orden en que se escribió: cada jornada es una constante de arriba.
  * La de la Épica 23 parte SM-8 —la marca se cuenta una vez por llegada y la vista sale del fichero
  * diferido—, la serie de la lectura y la de la búsqueda, que empiezan con ella; la de la 24 con la
- * 26 parte SM-8, porque los Directorios emiten vista.
+ * 26 parte SM-8, porque los Directorios emiten vista; la de la 30 parte solo la continuación de la
+ * Página de Cita y SM-C5 (Historia 30.1).
  */
 export const CORTES_DE_SERIE_DECLARADOS: readonly CorteDeSerie[] = [
   {
@@ -213,6 +234,11 @@ export const CORTES_DE_SERIE_DECLARADOS: readonly CorteDeSerie[] = [
     jornada: DESPLIEGUE_DE_OBRA_Y_DIRECTORIOS,
     que: 'la llegada de la Tarjeta de Obra con los Directorios (Épicas 24 y 26)',
     series: ['sm8'],
+  },
+  {
+    jornada: DESPLIEGUE_DE_CITAR_Y_LLEVARSE,
+    que: 'el orden nuevo de la Página de Cita: las acciones antes de la Tarjeta de Obra, con “Cómo citar” e “Inserta esta cita” detrás',
+    series: ['continuacion-de-cita'],
   },
 ];
 

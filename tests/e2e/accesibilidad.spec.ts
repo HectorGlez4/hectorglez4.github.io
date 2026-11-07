@@ -664,12 +664,13 @@ test.describe('Historia 2.8 — foco', () => {
     return { paradas, grupos };
   }
 
-  test('en la Página de Cita el orden es contenido, tarjeta, acciones y después salidas', async ({ page }) => {
+  // Historia 30.1 — las acciones (Copiar, Imagen y compartir) suben delante de la tarjeta.
+  test('en la Página de Cita el orden es contenido, acciones, tarjeta y después salidas', async ({ page }) => {
     const ruta = obligatoria(CITAS_24_4.completa, SIN_TARJETA_COMPLETA);
     const { paradas, grupos } = await paradasDesdeElAutor(page, ruta);
-    expect(grupos, `${ruta}\n${JSON.stringify(paradas)}`).toEqual(['contenido', 'tarjeta', 'accion', 'salida']);
+    expect(grupos, `${ruta}\n${JSON.stringify(paradas)}`).toEqual(['contenido', 'accion', 'tarjeta', 'salida']);
     const contenido = paradas.filter((p) => p.grupo === 'contenido');
-    // El Autor, el título de la Obra y la Fuente, delante de la tarjeta.
+    // El Autor, el título de la Obra y la Fuente, delante de las acciones.
     expect(contenido[0].href, ruta).toMatch(/^\/autor\//);
     expect(contenido.some((p) => p.href?.startsWith('/obra/')), ruta).toBe(true);
     expect(contenido.some((p) => /^https?:/.test(p.href ?? '')), `${ruta}: sin parada en la Fuente`).toBe(true);

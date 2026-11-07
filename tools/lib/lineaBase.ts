@@ -274,6 +274,15 @@ const enTramo = (tramo: Tramo) => (jornada: string) =>
   (tramo.desde === undefined || jornada >= tramo.desde) && jornada <= tramo.hasta;
 
 /**
+ * Las jornadas que dos tramos comparten (Historia 30.1): el principio más tardío y el final más
+ * temprano, con el número del primero. Lo que lee dos series a la vez no reabre lo que la otra partió.
+ */
+const interseccion = (a: Tramo, b: Tramo): Tramo => {
+  const desde = a.desde === undefined ? b.desde : b.desde === undefined ? a.desde : a.desde > b.desde ? a.desde : b.desde;
+  return { numero: a.numero, ...(desde === undefined ? {} : { desde }), hasta: a.hasta < b.hasta ? a.hasta : b.hasta };
+};
+
+/**
  * Parte una serie solo por los cortes que la nombran, sin suponer cuántos hay: cada tramo nuevo
  * empieza la primera jornada UTC completa tras la llegada, la jornada de llegada no entra en
  * ninguno —es un «cambió», con los motivos de todos los cortes de esa jornada— y el último tramo
@@ -385,6 +394,16 @@ export interface JuicioPorVentanas {
    * que no puede tener lecturas.
    */
   haceMedible?: true;
+  /**
+   * El corte de serie que parte lo que juzga (Historia 30.1): la serie que nombra y la constante de
+   * la que sale su jornada. Mientras no haya llegado, el juicio sigue como si no lo tuviera y lo
+   * dice; cuando llega, su línea base es propia —empieza la primera jornada UTC completa tras la
+   * llegada, en la intersección del tramo vigente de la lectura y del de su serie— y ninguna
+   * ventana cruza esa jornada.
+   */
+  corte?: { serie: SerieDeMedicion; deDondeLlega: string };
+  /** Lo que se puede hacer si la señal salta: lo nombra el informe, y lo decide Héctor. */
+  palanca?: string;
 }
 
 /**
@@ -410,6 +429,9 @@ export const juiciosPorVentanas = (superficies: readonly Superficie[] = SUPERFIC
     deDondeLlega: 'DESPLIEGUE_DE_OBRA_Y_DIRECTORIOS',
     tasas: ['continuacion', 'sm5'],
     senal: { sube: 'continuacion', baja: 'sm5' },
+    // Historia 30.1 — el orden nuevo de la Página de Cita parte lo que SM-C5 juzga.
+    corte: { serie: 'continuacion-de-cita', deDondeLlega: 'DESPLIEGUE_DE_CITAR_Y_LLEVARSE' },
+    palanca: 'quitar de la Página de Cita los tres desplegables o bajarlos tras las Rutas de salida; lo decide Héctor',
   },
   {
     nombre: 'la continuación de los Directorios',
@@ -508,6 +530,20 @@ export interface TasasDeAccion {
   sinContinuacion: Tasa;
 }
 
+/**
+ * Las de la Página de Cita (Historia 30.1): la continuación, SM-3 y SM-C5 se leen en la
+ * intersección del tramo vigente de la lectura y del de `continuacion-de-cita`; SM-5 y SM-7, en el
+ * de la lectura. Sin corte llegado, las dos lecturas coinciden.
+ */
+export interface TasasDeLaPaginaDeCita extends TasasDeAccion {
+  /** Las lecturas de la intersección: el denominador de la continuación y de SM-C5. */
+  lecturasDeLaContinuacion?: number;
+  /** SM-5 en la intersección, junto a la continuación en la línea de SM-C5. */
+  conAccionEnSmC5: Tasa;
+  /** El tramo de la intersección. */
+  tramoDeLaContinuacion: Tramo;
+}
+
 export type MarcaDeLaJornada = 'indexable' | 'no indexable' | 'nula' | 'cambió' | 'sin marca';
 export const MARCAS_DE_LA_JORNADA: readonly MarcaDeLaJornada[] = ['indexable', 'no indexable', 'cambió', 'nula', 'sin marca'];
 
@@ -602,8 +638,25 @@ export interface VentanaCortada {
   por: string;
 }
 
+/**
+ * El corte de un juicio, leído (Historia 30.1): pendiente —sin jornada, o de hoy o posterior— o
+ * llegado, con la línea base propia que abre tras él.
+ */
+export type CorteDelJuicio =
+  | { estado: 'pendiente'; deDondeLlega: string; jornada?: string }
+  | {
+      estado: 'llegado';
+      deDondeLlega: string;
+      jornada: string;
+      /** La primera jornada de su línea base: la primera completa tras la llegada. */
+      desde: string;
+      acumulado: number;
+      cerradaEl?: string;
+    };
+
 export interface JuicioLeido {
   juicio: JuicioPorVentanas;
+  corte?: CorteDelJuicio;
   /** Por qué no hay ventanas, si no las hay. */
   sinVentanas?: string;
   referencia?: 'linea-base' | 'serie-de-antes';
@@ -631,7 +684,7 @@ export interface LecturaDeMedicion {
   /** Las consultas que no se leyeron y faltan en lo de fuera del censo. */
   fueraDelCensoSinLeer: ConsultaDeLaLectura[];
   obra: CifrasDeObra[] | { faltan: ConsultaDeLaLectura[] };
-  cita?: TasasDeAccion;
+  cita?: TasasDeLaPaginaDeCita;
   portada?: TasasDeAccion;
   obraTasas?: TasasDeAccion;
   sm12: { destinos: DestinoDeSm12[]; imagenCuadrada?: number } | { faltan: ConsultaDeLaLectura[] };
@@ -869,8 +922,12 @@ export function componerLecturaDeMedicion(
     sm8: partirSerie('sm8', cortes, hoy),
     lectura: partirSerie('lectura', cortes, hoy),
     busqueda: partirSerie('busqueda', cortes, hoy),
+    'continuacion-de-cita': partirSerie('continuacion-de-cita', cortes, hoy),
   } as const;
   const enLectura = enTramo(series.lectura.vigente);
+  // Historia 30.1 — la continuación de la Página de Cita y SM-C5: la intersección de los dos tramos.
+  const tramoDeLaContinuacion = interseccion(series.lectura.vigente, series['continuacion-de-cita'].vigente);
+  const enLaContinuacionDeCita = enTramo(tramoDeLaContinuacion);
   const enBusqueda = enTramo(series.busqueda.vigente);
   const conJornada =
     (enPeriodo: (jornada: string) => boolean, filtro: (r: Recuento) => boolean = () => true) =>
@@ -1036,7 +1093,19 @@ export function componerLecturaDeMedicion(
     const s = superficieDe(r);
     return s !== undefined && s.vista === EVENTOS.vistaDeCita;
   };
-  const cita = unidadesConCita.length > 0 ? tasasDeAccion(deLasCitas, enLectura) : undefined;
+  let cita: TasasDeLaPaginaDeCita | undefined;
+  if (unidadesConCita.length > 0) {
+    const enLaLectura = tasasDeAccion(deLasCitas, enLectura);
+    const enLaContinuacion = tasasDeAccion(deLasCitas, enLaContinuacionDeCita);
+    cita = {
+      ...enLaLectura,
+      continuacion: enLaContinuacion.continuacion,
+      sinContinuacion: enLaContinuacion.sinContinuacion,
+      ...(enLaContinuacion.lecturas === undefined ? {} : { lecturasDeLaContinuacion: enLaContinuacion.lecturas }),
+      conAccionEnSmC5: enLaContinuacion.conAccion,
+      tramoDeLaContinuacion,
+    };
+  }
   const portada = portadaDeclarada ? tasasDeAccion(deSuperficie(portadaDeclarada.nombre), enLectura) : undefined;
   const obraTasas = superficies.some((s) => s.vistaConMarca !== undefined) ? tasasDeAccion(esDeObra, enLectura) : undefined;
 
@@ -1279,7 +1348,21 @@ export function componerLecturaDeMedicion(
       ? `continuación desde ${tasa.zona}`
       : { sm5: 'SM-5', sm7: 'SM-7', continuacion: 'continuación', 'continuacion-por-zona': 'continuación', sm6: 'SM-6', sm13: 'SM-13' }[tasa];
   const juiciosLeidos: JuicioLeido[] = juicios.map((juicio) => {
-    const sin = (sinVentanas: string): JuicioLeido => ({ juicio, sinVentanas, referencias: [], ventanas: [], cortadas: [] });
+    // Historia 30.1 — el corte que parte lo que juzga, si lo declara: el último que llegó de su serie.
+    const partidaDelCorte = juicio.corte === undefined ? undefined : series[juicio.corte.serie];
+    const llegadoDelCorte = partidaDelCorte?.cortes.at(-1);
+    let corte: CorteDelJuicio | undefined;
+    if (juicio.corte !== undefined && llegadoDelCorte === undefined) {
+      const pendiente = partidaDelCorte!.pendientes[0];
+      corte = {
+        estado: 'pendiente',
+        deDondeLlega: juicio.corte.deDondeLlega,
+        ...(pendiente === undefined ? {} : { jornada: pendiente.jornada }),
+      };
+    }
+    const conCorte = (leido: JuicioLeido): JuicioLeido => (corte === undefined ? leido : { ...leido, corte });
+    const sin = (sinVentanas: string): JuicioLeido =>
+      conCorte({ juicio, sinVentanas, referencias: [], ventanas: [], cortadas: [] });
     const lineaBase = lineasBase.find((l) => l.unidad === juicio.unidad);
     if (lineaBase === undefined || (lineaBase.serie === 'lectura' && lineaBase.superficies.length === 0)) {
       return sin(juicio.sinUnidad ?? `ninguna superficie declara la unidad «${juicio.unidad}»`);
@@ -1309,7 +1392,37 @@ export function componerLecturaDeMedicion(
     let inicio: string;
     let referenciaDe: ReadonlySet<string>;
     let referencia: JuicioLeido['referencia'];
-    if (antesDelCierre) {
+    if (llegadoDelCorte !== undefined) {
+      // Una línea base propia tras la llegada del corte, que no compara con nada de antes: empieza
+      // la primera jornada completa de la intersección y reúne el mínimo sin las jornadas saltadas.
+      const desde = interseccion(tramo, partidaDelCorte!.vigente).desde!;
+      const jornadas: string[] = [];
+      let reunidas = 0;
+      let cerradaEl: string | undefined;
+      for (const jornada of jornadasEntre(desde, tramo.hasta)) {
+        if (saltadas.has(jornada)) continue;
+        jornadas.push(jornada);
+        reunidas += porJornada.get(jornada) ?? 0;
+        if (reunidas >= minimo) {
+          cerradaEl = jornada;
+          break;
+        }
+      }
+      corte = {
+        estado: 'llegado',
+        deDondeLlega: juicio.corte!.deDondeLlega,
+        jornada: llegadoDelCorte.jornada,
+        desde,
+        acumulado: reunidas,
+        ...(cerradaEl === undefined ? {} : { cerradaEl }),
+      };
+      if (cerradaEl === undefined) {
+        return sin(`la línea base tras la llegada del ${llegadoDelCorte.jornada} no se ha cerrado todavía`);
+      }
+      inicio = desplazarJornada(cerradaEl, 1);
+      referenciaDe = new Set(jornadas);
+      referencia = 'linea-base';
+    } else if (antesDelCierre) {
       inicio = desplazarJornada(llegadaEnTramo!, 1);
       referenciaDe = new Set(jornadasEntre(lineaBase.desde, jornadaAnterior(llegadaEnTramo!)).filter((j) => !saltadas.has(j)));
       referencia = 'serie-de-antes';
@@ -1356,7 +1469,9 @@ export function componerLecturaDeMedicion(
       const ventana: Ventana = { desde: actual[0], hasta: actual[actual.length - 1], acumulado, tasas: valores };
       // Una línea base cerrada antes de la llegada da ventanas antes de ella: se juzgan, como pide
       // «contadas desde el cierre», pero se dice que no juzgan lo que llega.
-      if (juicio.llegada !== undefined && ventana.hasta < juicio.llegada) ventana.antesDeLaLlegada = juicio.llegada;
+      if (llegadoDelCorte === undefined && juicio.llegada !== undefined && ventana.hasta < juicio.llegada) {
+        ventana.antesDeLaLlegada = juicio.llegada;
+      }
       if (juicio.senal !== undefined) {
         const sube = valores[tasas.indexOf(juicio.senal.sube)]?.direccion;
         const baja = valores[tasas.indexOf(juicio.senal.baja)]?.direccion;
@@ -1377,7 +1492,7 @@ export function componerLecturaDeMedicion(
       actual = [];
       acumulado = 0;
     }
-    return {
+    return conCorte({
       juicio,
       referencia,
       referencias,
@@ -1385,7 +1500,7 @@ export function componerLecturaDeMedicion(
       ventanas,
       cortadas,
       ...(actual.length > 0 ? { enCurso: { desde: actual[0], acumulado } } : {}),
-    };
+    });
   });
 
   return {
@@ -1484,6 +1599,7 @@ const NOMBRE_DE_SERIE: { readonly [S in SerieDeMedicion]: string } = {
   sm8: 'SM-8 (CORTES_DE_SM8)',
   lectura: 'la lectura',
   busqueda: 'la búsqueda',
+  'continuacion-de-cita': 'la continuación de la Página de Cita (SM-4, SM-3 y SM-C5)',
 };
 
 /**
@@ -1571,7 +1687,7 @@ export function lineasDeLecturaDeMedicion(lectura: LecturaDeMedicion): string[] 
 
   // Los cortes.
   lineas.push('', 'Cortes de serie (CORTES_DE_SERIE de src/lib/umbrales.ts)');
-  for (const serie of ['sm8', 'lectura', 'busqueda'] as const) {
+  for (const serie of ['sm8', 'lectura', 'busqueda', 'continuacion-de-cita'] as const) {
     const partida = lectura.series[serie];
     const cabeza = `  ${NOMBRE_DE_SERIE[serie]}: `;
     if (partida.cortes.length === 0) {
@@ -1660,15 +1776,24 @@ export function lineasDeLecturaDeMedicion(lectura: LecturaDeMedicion): string[] 
 
   // La Página de Cita.
   if (lectura.cita !== undefined) {
-    const { conAccion, conComparticion, continuacion, sinContinuacion, lecturas } = lectura.cita;
+    const { conAccion, conComparticion, continuacion, sinContinuacion, lecturas, conAccionEnSmC5 } = lectura.cita;
     lineas.push('', `La Página de Cita — sobre sus lecturas (${cifra(lecturas)}), resueltas contra el censo`);
     lineas.push(
       `  SM-5, lecturas con su primera acción —copiado o descarga sin destino—: ${textoDeTasa(conAccion)}.`,
       `  SM-7, lecturas con su primera compartición: ${textoDeTasa(conComparticion)}; cota inferior en Chrome para Android.`,
+    );
+    // Historia 30.1 — con el corte de la continuación llegado, lo que parte se lee en su tramo.
+    if (lectura.series['continuacion-de-cita'].cortes.length > 0) {
+      lineas.push(
+        `  La continuación, SM-3 y SM-C5, desde el corte de su serie: ${textoDeTramo(lectura.cita.tramoDeLaContinuacion, lectura.hoy)}, ` +
+          `sobre ${cifra(lectura.cita.lecturasDeLaContinuacion)} lecturas.`,
+      );
+    }
+    lineas.push(
       `  Continuación: ${textoDeTasa(continuacion)}; cota inferior.`,
       `  SM-3, 1 − la continuación: ${textoDeTasa(sinContinuacion)}; cota superior, porque la continuación es inferior.`,
       `  SM-C3: SM-5 ${textoDeTasa(conAccion)} junto a SM-7 ${textoDeTasa(conComparticion)}.`,
-      `  SM-C5: la continuación ${textoDeTasa(continuacion)} junto a SM-5 ${textoDeTasa(conAccion)}.`,
+      `  SM-C5: la continuación ${textoDeTasa(continuacion)} junto a SM-5 ${textoDeTasa(conAccionEnSmC5)}.`,
     );
   }
   for (const [nombre, tasas] of [
@@ -1792,11 +1917,29 @@ export function lineasDeLecturaDeMedicion(lectura: LecturaDeMedicion): string[] 
   // Las ventanas.
   lineas.push('', 'Ventanas — cada tasa frente a su línea base o a su serie de antes');
   for (const j of lectura.juicios) {
-    const cabeza = `  ${j.juicio.nombre} (${j.juicio.unidad}; llegada: ${
-      j.juicio.llegada === undefined ? j.juicio.deDondeLlega : `${j.juicio.llegada}, ${j.juicio.deDondeLlega}`
-    })`;
+    const llegada =
+      j.corte?.estado === 'llegado'
+        ? `${j.corte.jornada}, ${j.corte.deDondeLlega}`
+        : j.juicio.llegada === undefined
+          ? j.juicio.deDondeLlega
+          : `${j.juicio.llegada}, ${j.juicio.deDondeLlega}`;
+    const cabeza = `  ${j.juicio.nombre} (${j.juicio.unidad}; llegada: ${llegada})`;
+    // Historia 30.1 — el corte que parte lo que juzga: pendiente, o la línea base propia que abrió.
+    const lineaDelCorte =
+      j.corte === undefined
+        ? undefined
+        : j.corte.estado === 'pendiente'
+          ? j.corte.jornada === undefined
+            ? `    La llegada de ${j.corte.deDondeLlega} no ha ocurrido: la tomará de esa constante de src/lib/umbrales.ts, y hasta entonces se juzga como hasta ahora.`
+            : `    La llegada del ${j.corte.jornada} (${j.corte.deDondeLlega}) es de hoy o posterior: no ha ocurrido todavía, y hasta entonces se juzga como hasta ahora.`
+          : `    Desde la llegada del ${j.corte.jornada} (${j.corte.deDondeLlega}), su línea base es propia: empieza el ${j.corte.desde}` +
+            (j.corte.cerradaEl === undefined
+              ? `, reúne ${entero(j.corte.acumulado)} de ${entero(lectura.minimo ?? 0)} y no se ha cerrado`
+              : ` y se cerró el ${j.corte.cerradaEl}`) +
+            '; ninguna ventana cruza esa jornada.';
     if (j.sinVentanas !== undefined) {
       lineas.push(`${cabeza}: ${j.sinVentanas}.`);
+      if (lineaDelCorte !== undefined) lineas.push(lineaDelCorte);
       continue;
     }
     lineas.push(
@@ -1806,6 +1949,7 @@ export function lineasDeLecturaDeMedicion(lectura: LecturaDeMedicion): string[] 
           : 'desde el cierre de la línea base, frente a ella'
       }.`,
     );
+    if (lineaDelCorte !== undefined) lineas.push(lineaDelCorte);
     lineas.push(
       `    Referencia: ${j.referencias.length === 0 ? 'ninguna tasa' : j.referencias.map(({ tasa, valor }) => `${legible(tasa)} ${valor.estado === 'calculada' ? textoDeTasa(valor) : `sin referencia (${textoDeTasa(valor)})`}`).join('; ')}.`,
     );
@@ -1840,6 +1984,9 @@ export function lineasDeLecturaDeMedicion(lectura: LecturaDeMedicion): string[] 
       );
     }
     if (j.ventanas.length === 0) lineas.push('    Ninguna ventana completa todavía.');
+    if (j.juicio.palanca !== undefined && j.ventanas.some((v) => v.senal === 'salta')) {
+      lineas.push(`    Palanca de ${j.juicio.nombre}: ${j.juicio.palanca}.`);
+    }
     if (j.enCurso !== undefined) {
       lineas.push(`    En curso desde el ${j.enCurso.desde}: ${entero(j.enCurso.acumulado)} de ${entero(lectura.minimo ?? 0)}.`);
     }

@@ -531,6 +531,7 @@ describe('Historia 23.10 — los cortes de serie y los tramos', () => {
     expect([...lista.matchAll(/jornada: ([A-Z_]+),/g)].map((m) => m[1])).toEqual([
       'DESPLIEGUE_DE_LA_LECTURA',
       'DESPLIEGUE_DE_OBRA_Y_DIRECTORIOS',
+      'DESPLIEGUE_DE_CITAR_Y_LLEVARSE',
     ]);
   });
 });
@@ -649,6 +650,10 @@ describe('Historia 23.10 — la Página de Cita, la portada y la Obra', () => {
       conComparticion: calculada(2, 10),
       continuacion: calculada(4, 10),
       sinContinuacion: calculada(6, 10),
+      // Historia 30.1 — sin corte de la continuación llegado, su tramo es el de la lectura.
+      lecturasDeLaContinuacion: 10,
+      conAccionEnSmC5: calculada(3, 10),
+      tramoDeLaContinuacion: l.series.lectura.vigente,
     });
     const informe = texto(l);
     expect(informe).toContain('SM-5, lecturas con su primera acción —copiado o descarga sin destino—: 30,0 % (3 de 10).');
@@ -1119,6 +1124,130 @@ describe('Historia 23.10 — las ventanas', () => {
     expect(direccionDe(calculada(1, 3), calculada(2, 6))).toBe('igual');
     expect(direccionDe(calculada(2, 5), calculada(1, 3))).toBe('sube');
     expect(direccionDe({ estado: 'sin-denominador', numerador: 1 }, calculada(1, 3))).toBeUndefined();
+  });
+});
+
+describe('Historia 30.1 — el corte del orden nuevo de la Página de Cita', () => {
+  const SM_C5 = JUICIOS_POR_VENTANAS.find((j) => j.nombre === 'SM-C5')!;
+  const PALANCA =
+    'Palanca de SM-C5: quitar de la Página de Cita los tres desplegables o bajarlos tras las Rutas de salida; lo decide Héctor.';
+  /** Llega el 2026-11-05 (el cuarto día): el tramo de la continuación empieza el 2026-11-06. */
+  const corte30 = (jornada: string): CorteLlegado => ({ jornada, que: 'el orden nuevo de la Página de Cita', series: ['continuacion-de-cita'] });
+  /** 120 lecturas al día; las salidas, 12, 36 y 60; los copiados, 12 y después 6. */
+  const partes = () => ({
+    vistasYLecturas: DIAS.map((dia) => lectura(dia, '/cita/una/', 120)),
+    salidas: DIAS.map((dia, i) => salida(dia, '/cita/una/', 'atribucion', i < 3 ? 12 : i < 7 ? 36 : 60)),
+    acciones: DIAS.map((dia, i) => accion(dia, '/cita/una/', EVENTOS.copiado, i < 3 ? 12 : 6)),
+  });
+
+  it('SM-C5 declara el corte de su serie, de DESPLIEGUE_DE_CITAR_Y_LLEVARSE, y su palanca', () => {
+    expect(SM_C5.corte).toEqual({ serie: 'continuacion-de-cita', deDondeLlega: 'DESPLIEGUE_DE_CITAR_Y_LLEVARSE' });
+    expect(SM_C5.palanca).toBe('quitar de la Página de Cita los tres desplegables o bajarlos tras las Rutas de salida; lo decide Héctor');
+    // La entrada declarada nombra solo la serie nueva; las dos de antes, sin tocar.
+    const entrada = CORTES_DE_SERIE_DECLARADOS.find((c) => c.series.includes('continuacion-de-cita'))!;
+    expect(entrada.series).toEqual(['continuacion-de-cita']);
+    expect(entrada.que).toBe(
+      'el orden nuevo de la Página de Cita: las acciones antes de la Tarjeta de Obra, con “Cómo citar” e “Inserta esta cita” detrás',
+    );
+    expect(CORTES_DE_SERIE_DECLARADOS.filter((c) => c !== entrada).map((c) => c.series)).toEqual([['sm8', 'lectura', 'busqueda'], ['sm8']]);
+  });
+
+  it('sin jornada: SM-C5 juzga como hasta ahora y nombra la llegada pendiente y, al saltar, la palanca', () => {
+    const l = leer(
+      {
+        vistasYLecturas: DIAS.map((dia) => lectura(dia, '/cita/una/', 120)),
+        salidas: DIAS.map((dia, i) => salida(dia, '/cita/una/', 'atribucion', i < 3 ? 12 : 36)),
+        acciones: DIAS.map((dia, i) => accion(dia, '/cita/una/', EVENTOS.copiado, i < 3 ? 12 : 6)),
+      },
+      { minimo: 300, juicios: [{ ...SM_C5, llegada: undefined }] },
+    );
+    const [juicio] = l.juicios;
+    expect(juicio.corte).toEqual({ estado: 'pendiente', deDondeLlega: 'DESPLIEGUE_DE_CITAR_Y_LLEVARSE' });
+    expect(juicio.referencia).toBe('linea-base');
+    expect(juicio.ventanas.map((v) => v.senal)).toEqual(['se da', 'salta']);
+    expect(l.series['continuacion-de-cita'].cortes).toEqual([]);
+    expect(l.cita?.tramoDeLaContinuacion).toEqual(l.series.lectura.vigente);
+    const informe = texto(l);
+    expect(informe).toContain(
+      'La llegada de DESPLIEGUE_DE_CITAR_Y_LLEVARSE no ha ocurrido: la tomará de esa constante de src/lib/umbrales.ts',
+    );
+    expect(informe).toContain(PALANCA);
+    expect(informe).toContain('la continuación de la Página de Cita (SM-4, SM-3 y SM-C5): ningún corte ha llegado todavía');
+    expect(informe).not.toContain('desde el corte de su serie');
+  });
+
+  it('sin salto, la palanca no se nombra', () => {
+    const l = leer(partes(), { minimo: 300, cortes: [CORTE_23, corte30('2026-11-05')], juicios: [SM_C5] });
+    expect(l.juicios[0].ventanas.every((v) => v.senal !== 'salta')).toBe(true);
+    expect(texto(l)).not.toContain('Palanca de SM-C5');
+  });
+
+  it('con jornada de hoy: no ha ocurrido todavía, y nada se parte', () => {
+    const l = leer(partes(), { minimo: 300, cortes: [CORTE_23, corte30(HOY)], juicios: [SM_C5] });
+    expect(l.juicios[0].corte).toEqual({ estado: 'pendiente', deDondeLlega: 'DESPLIEGUE_DE_CITAR_Y_LLEVARSE', jornada: HOY });
+    expect(l.cita?.tramoDeLaContinuacion).toEqual(l.series.lectura.vigente);
+    expect(texto(l)).toContain(`La llegada del ${HOY} (DESPLIEGUE_DE_CITAR_Y_LLEVARSE) es de hoy o posterior: no ha ocurrido todavía`);
+  });
+
+  it('con jornada pasada: SM-C5 abre su línea base tras la llegada y ninguna ventana la cruza; lo demás, intacto', () => {
+    const llegada = '2026-11-05';
+    const sinCorte = leer(partes(), { minimo: 300, juicios: [SM_C5] });
+    const l = leer(partes(), { minimo: 300, cortes: [CORTE_23, corte30(llegada)], juicios: [SM_C5] });
+    const [juicio] = l.juicios;
+    expect(juicio.corte).toEqual({
+      estado: 'llegado',
+      deDondeLlega: 'DESPLIEGUE_DE_CITAR_Y_LLEVARSE',
+      jornada: llegada,
+      desde: '2026-11-06',
+      acumulado: 360,
+      cerradaEl: '2026-11-08',
+    });
+    expect(juicio.referencia).toBe('linea-base');
+    // La línea base, del 6 al 8: 108 salidas y 18 copiados sobre 360.
+    expect(juicio.referencias).toEqual([
+      { tasa: 'continuación', valor: calculada(108, 360) },
+      { tasa: 'SM-5', valor: calculada(18, 360) },
+    ]);
+    expect(juicio.ventanas.map((v) => [v.desde, v.hasta, v.acumulado])).toEqual([['2026-11-09', '2026-11-11', 360]]);
+    expect(juicio.ventanas.every((v) => v.desde > llegada)).toBe(true);
+    expect(juicio.ventanas[0].tasas).toEqual([
+      { tasa: 'continuación', valor: calculada(180, 360), direccion: 'sube' },
+      { tasa: 'SM-5', valor: calculada(18, 360), direccion: 'igual' },
+    ]);
+    // La serie nueva se parte; la de la lectura, no.
+    expect(l.series['continuacion-de-cita'].vigente.desde).toBe('2026-11-06');
+    expect(l.series['continuacion-de-cita'].cambios).toEqual([{ jornada: llegada, motivos: ['el orden nuevo de la Página de Cita'] }]);
+    expect(l.series.lectura).toEqual(sinCorte.series.lectura);
+    // La continuación y SM-3 de la Página de Cita, del 6 al 11; SM-5 y SM-7, en el tramo de la lectura.
+    expect(l.cita?.continuacion).toEqual(calculada(288, 720));
+    expect(l.cita?.sinContinuacion).toEqual(calculada(432, 720));
+    expect(l.cita?.lecturasDeLaContinuacion).toBe(720);
+    expect(l.cita?.conAccionEnSmC5).toEqual(calculada(36, 720));
+    expect(l.cita?.conAccion).toEqual(sinCorte.cita?.conAccion);
+    expect(l.cita?.conAccion).toEqual(calculada(78, 1200));
+    expect(l.cita?.conComparticion).toEqual(sinCorte.cita?.conComparticion);
+    expect(l.cita?.lecturas).toBe(1200);
+    // Las superficies, la portada y la Obra siguen en el tramo de la lectura.
+    expect(l.superficies).toEqual(sinCorte.superficies);
+    expect(l.portada).toEqual(sinCorte.portada);
+    expect(l.obraTasas).toEqual(sinCorte.obraTasas);
+    const informe = texto(l);
+    expect(informe).toContain('SM-C5 (la Página de Cita; llegada: 2026-11-05, DESPLIEGUE_DE_CITAR_Y_LLEVARSE)');
+    expect(informe).toContain(
+      'Desde la llegada del 2026-11-05 (DESPLIEGUE_DE_CITAR_Y_LLEVARSE), su línea base es propia: empieza el 2026-11-06 y se cerró el 2026-11-08; ninguna ventana cruza esa jornada.',
+    );
+    expect(informe).toContain('SM-C5: la continuación 40,0 % (288 de 720) junto a SM-5 5,0 % (36 de 720).');
+    expect(informe).toContain('La continuación, SM-3 y SM-C5, desde el corte de su serie: tramo 2 (desde el 2026-11-06 hasta el 2026-11-11)');
+    expect(informe).toMatch(/la continuación de la Página de Cita \(SM-4, SM-3 y SM-C5\): 2 tramos, que no se suman/);
+  });
+
+  it('con jornada pasada y la línea base sin cerrar: no hay ventanas, y se dice cuánto reúne', () => {
+    const l = leer(partes(), { minimo: 300, cortes: [CORTE_23, corte30('2026-11-09')], juicios: [SM_C5] });
+    const [juicio] = l.juicios;
+    expect(juicio.ventanas).toEqual([]);
+    expect(juicio.sinVentanas).toBe('la línea base tras la llegada del 2026-11-09 no se ha cerrado todavía');
+    expect(juicio.corte).toMatchObject({ estado: 'llegado', desde: '2026-11-10', acumulado: 240 });
+    expect(texto(l)).toContain('empieza el 2026-11-10, reúne 240 de 300 y no se ha cerrado');
   });
 });
 

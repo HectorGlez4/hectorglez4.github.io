@@ -5,9 +5,11 @@ import {
   citaConObraMasLarga,
   citaConProcedenciaCompleta,
   citaConLosDosBloques,
+  citaConObraDeTextoMasLargo,
   citaConTarjetaCompleta,
   citaConTituloDeObraMasLargo,
   citaSinObra,
+  estaPublicada,
   procedenciaDe,
 } from './ayuda/corpus.ts';
 import { apuntarGuiones, fueraDeLaListaAlCargar } from './ayuda/guiones.ts';
@@ -583,12 +585,12 @@ test.describe('Historia 22.5 — los enlaces en tinta de la Atribución', () => 
 /**
  * Historia 24.4 — bajo la Cita, la obra de la que sale.
  *
- * La Tarjeta de Obra va entre la Línea de la Fuente y Copiar. Se mide en el navegador lo que la
- * prueba unitaria no ve: que el texto de la Cita sigue empezando en la primera pantalla de
- * 360 × 640 (que Copiar quede justo debajo es deuda aceptada que vigila SM-C5: su posición se
- * anota, y se exige que no pase de la segunda pantalla), los tokens calculados de la tarjeta y
- * de su fila, y la separación de las acciones de debajo. Las Citas salen del Corpus, nunca
- * fijadas a mano. Los valores esperados salen de los tokens de la propia página.
+ * Desde la Historia 30.1 la Tarjeta de Obra va tras Copiar, la Imagen y compartir, antes de las
+ * Rutas de salida. Se mide en el navegador lo que la prueba unitaria no ve: que el texto de la
+ * Cita sigue empezando en la primera pantalla de 360 × 640 y que Copiar va por encima de la
+ * tarjeta (su posición se anota), el orden de tabulación, los tokens calculados de la tarjeta y
+ * de su fila. Las Citas salen del Corpus, nunca fijadas a mano. Los valores esperados salen de los
+ * tokens de la propia página.
  */
 test.describe('Historia 24.4 — la Tarjeta de Obra en la Página de Cita', () => {
   // La cara es obligatoria: si el Corpus de hoy no la tiene, fallan las pruebas que la piden, y
@@ -605,32 +607,88 @@ test.describe('Historia 24.4 — la Tarjeta de Obra en la Página de Cita', () =
     });
   }
 
-  for (const ruta of conTarjeta) {
-    test(`${ruta}: la Cita empieza en la primera pantalla de 360 × 640 y Copiar va debajo de la tarjeta`, async ({
+  /*
+   * Historia 30.1 — las de la medida: la cara completa, la de título de Obra más largo, la de texto
+   * más largo con Obra (la Cita en verso más larga la sustituye cuando la Épica 29 llegue a la rama)
+   * y las tres de la auditoría del 2026-11-05, si están publicadas.
+   */
+  const deTextoLargo = citaConObraDeTextoMasLargo();
+  const AUDITORIA = [
+    'antonio-machado-caminante-no-hay-camino-se-hace-camino',
+    'jose-marti-yo-soy-un-hombre-sincero-de-donde',
+    'jose-marti-yo-vengo-de-todas-partes-y-hacia',
+  ];
+  const medidas = [
+    ...new Set([
+      ...conTarjeta,
+      ...(deTextoLargo === undefined ? [] : [`/cita/${deTextoLargo.slug}/`]),
+      ...AUDITORIA.filter(estaPublicada).map((slug) => `/cita/${slug}/`),
+    ]),
+  ];
+
+  for (const ruta of medidas) {
+    test(`${ruta}: la Cita empieza en la primera pantalla de 360 × 640 y Copiar va por encima de la tarjeta`, async ({
       page,
     }, info) => {
       test.skip(info.project.name !== 'movil', 'El criterio se enuncia sobre 360×640.');
       await abrir(page, ruta === '(sin tarjeta completa)' ? undefined : ruta);
       expect(await page.evaluate(() => window.scrollY)).toBe(0);
       const cita = await page.locator('blockquote .texto').boundingBox();
-      const tarjeta = await page.locator('.tarjeta-de-obra').boundingBox();
       const copiar = await page.locator('button.copiar').boundingBox();
+      const tarjeta = (await page.locator('.tarjeta-de-obra').count()) === 0 ? null : await page.locator('.tarjeta-de-obra').boundingBox();
       expect(cita).not.toBeNull();
-      expect(tarjeta).not.toBeNull();
       expect(copiar).not.toBeNull();
       expect(cita!.y, ruta).toBeGreaterThan(0);
       expect(cita!.y, ruta).toBeLessThan(640);
-      expect(copiar!.y, ruta).toBeGreaterThanOrEqual(tarjeta!.y + tarjeta!.height);
-      // «Justo debajo»: la deuda aceptada es que Copiar salga de la primera pantalla, no que se
-      // vaya más allá de la segunda (medido el 2026-10-27 con una fila: y = 756 y 867; desde la
-      // 24.5 la tarjeta suma la fila de «Siguiente…» y la cifra se anota con su nombre).
-      expect(copiar!.y, `${ruta}: Copiar pasa de la segunda pantalla`).toBeLessThan(640 * 2);
+      if (tarjeta !== null) expect(copiar!.y + copiar!.height, ruta).toBeLessThanOrEqual(tarjeta.y);
+      // Sin tope para la larga: la cifra se anota, y la de la auditoría se compara en el spec.
       info.annotations.push({
-        type: '24.5 a 360 × 640',
-        description: `${ruta}: tarjeta de ${Math.round(tarjeta!.height)} px desde y = ${Math.round(tarjeta!.y)}; Copiar en y = ${Math.round(copiar!.y)} (${copiar!.y + copiar!.height <= 640 ? 'dentro' : 'fuera'} de la primera pantalla)`,
+        type: '30.1 a 360 × 640',
+        description: `${ruta}: Copiar en y = ${Math.round(copiar!.y)} (${copiar!.y + copiar!.height <= 640 ? 'dentro' : 'fuera'} de la primera pantalla); ${tarjeta === null ? 'sin tarjeta' : `tarjeta desde y = ${Math.round(tarjeta.y)}`}`,
       });
     });
   }
+
+  test('30.1 — el orden de tabulación es el del marcado: Atribución y Fuente, acciones, compartir, tarjeta, salidas y pie', async ({
+    page,
+  }, info) => {
+    test.skip(info.project.name !== 'escritorio', 'El teclado se recorre una vez, en escritorio.');
+    await abrir(page, completa);
+    const GRUPOS = ['atribucion', 'acciones', 'compartir', 'tarjeta', 'salidas', 'pie'];
+    const recorrido: { grupo: string; indice: number }[] = [];
+    for (let i = 0; i < 400; i++) {
+      await page.keyboard.press('Tab');
+      const foco = await page.evaluate(() => {
+        const activo = document.activeElement;
+        if (activo === null || activo === document.body) return null;
+        const grupo = activo.closest('footer')
+          ? 'pie'
+          : activo.closest('article figure.bloque, article p.fuente')
+            ? 'atribucion'
+            : activo.closest('article .isla[data-compartir]')
+              ? 'compartir'
+              : activo.closest('article .isla')
+                ? 'acciones'
+                : activo.closest('article .tarjeta-de-obra')
+                  ? 'tarjeta'
+                  : activo.closest('article nav.salidas')
+                    ? 'salidas'
+                    : 'otro';
+        const indice = [...document.querySelectorAll('*')].indexOf(activo);
+        return { grupo, indice };
+      });
+      if (foco === null) break;
+      recorrido.push(foco);
+      if (foco.grupo === 'pie') break;
+    }
+    const dentro = recorrido.filter((f) => f.grupo !== 'otro');
+    // Cada foco sigue al anterior en el marcado.
+    const indices = dentro.map((f) => f.indice);
+    expect(indices).toEqual([...indices].sort((a, b) => a - b));
+    // Y los grupos van en su orden, todos presentes en la cara completa.
+    const grupos = dentro.map((f) => f.grupo).filter((g, i, todos) => i === 0 || todos[i - 1] !== g);
+    expect(grupos).toEqual(GRUPOS);
+  });
 
   test('24.5 — la tarjeta de la cara completa tiene dos filas, «Siguiente…» primero y del mismo trato', async ({
     page,
@@ -814,30 +872,39 @@ test.describe('Historia 24.4 — la Tarjeta de Obra en la Página de Cita', () =
     });
   });
 
-  test('las acciones de debajo: Copiar a 32 px de la tarjeta, Imagen a 16 px de Copiar, cada botón en su línea', async ({
+  // Historia 30.1 — las acciones bajo la Atribución, y la tarjeta tras compartir (UX-DR114).
+  test('las acciones bajo la Fuente: Copiar a 32 px, Imagen a 16 px de Copiar, compartir a 24 px, cada botón en su línea, y la tarjeta detrás', async ({
     page,
   }) => {
     await abrir(page, completa);
     const medida = await page.evaluate(() => {
       const caja = (n: Element | null) => (n as HTMLElement).getBoundingClientRect();
-      const tarjeta = caja(document.querySelector('.tarjeta-de-obra'));
       const islas = [...document.querySelectorAll('main .isla')];
       const copiar = islas.find((n) => n.querySelector('button.copiar') !== null)!;
       const imagen = islas.find((n) => n.hasAttribute('data-imagen'))!;
+      const compartir = islas.find((n) => n.hasAttribute('data-compartir'))!;
+      const anterior = copiar.previousElementSibling!;
+      const tarjeta = caja(document.querySelector('.tarjeta-de-obra'));
       const botonCopiar = caja(copiar.querySelector('button.copiar'));
       const botonImagen = caja(imagen.querySelector('button[data-abrir]'));
       const columna = caja(document.querySelector('main article'));
       return {
-        tarjetaACopiar: caja(copiar).top - tarjeta.bottom,
+        anterior: anterior.matches('p.fuente'),
+        fuenteACopiar: caja(copiar).top - caja(anterior).bottom,
         copiarAImagen: caja(imagen).top - caja(copiar).bottom,
+        imagenACompartir: caja(compartir).top - caja(imagen).bottom,
+        compartirATarjeta: tarjeta.top - caja(compartir).bottom,
         unidad: parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--unidad')),
         enSuLinea: botonImagen.top >= botonCopiar.bottom,
         anchos: [botonCopiar.width, botonImagen.width],
         columna: columna.width,
       };
     });
-    expect(Math.abs(medida.tarjetaACopiar - medida.unidad * 4), JSON.stringify(medida)).toBeLessThanOrEqual(1);
+    expect(medida.anterior, JSON.stringify(medida)).toBe(true);
+    expect(Math.abs(medida.fuenteACopiar - medida.unidad * 4), JSON.stringify(medida)).toBeLessThanOrEqual(1);
     expect(Math.abs(medida.copiarAImagen - medida.unidad * 2), JSON.stringify(medida)).toBeLessThanOrEqual(1);
+    expect(Math.abs(medida.imagenACompartir - medida.unidad * 3), JSON.stringify(medida)).toBeLessThanOrEqual(1);
+    expect(medida.compartirATarjeta, JSON.stringify(medida)).toBeGreaterThan(0);
     expect(medida.enSuLinea, JSON.stringify(medida)).toBe(true);
     for (const ancho of medida.anchos) expect(ancho, JSON.stringify(medida)).toBeLessThan(medida.columna);
   });

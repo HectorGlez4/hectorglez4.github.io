@@ -334,6 +334,28 @@ export function citaConTituloDeObraMasLargo(): { slug: string; autor: string; ti
 }
 
 /**
+ * Historia 30.1 — la Cita publicada con Obra y el texto más largo (el primer slug, si empatan):
+ * la que más empuja Copiar hacia abajo. Sustituye a la Cita en verso más larga hasta que la Épica
+ * 29 esté en la rama (deferred de la 30.1).
+ */
+export function citaConObraDeTextoMasLargo(): { slug: string; caracteres: number } | undefined {
+  let mejor: { slug: string; caracteres: number } | undefined;
+  for (const cita of citasResueltas()) {
+    if (cita.obra === undefined) continue;
+    const caracteres = [...cita.texto].length;
+    if (mejor === undefined || caracteres > mejor.caracteres || (caracteres === mejor.caracteres && cita.slug < mejor.slug)) {
+      mejor = { slug: cita.slug, caracteres };
+    }
+  }
+  return mejor;
+}
+
+/** Historia 30.1 — si una Cita está publicada hoy en el Corpus. */
+export function estaPublicada(slug: string): boolean {
+  return citasResueltas().some((c) => c.slug === slug);
+}
+
+/**
  * Una Cita del Corpus que no lleva línea de Obra —no declara obra o ninguna ficha la reclama—,
  * con su Autor y su texto, si hoy hay alguna. Historia 24.3. La primera por slug.
  */

@@ -115,16 +115,23 @@ const canonica = new URL(rutaDeCita(cita.slug), Astro.site).href;
       */}
     <Fuente cita={cita} />
     {/*
-      * Historia 24.4 — la Obra de la que sale la Cita, entre lo que la Cita es (atribución y
-      * Fuente) y lo que se hace con ella (las acciones). Aquí y no en `BloqueDeCita` por lo
-      * mismo que la Fuente: la portada y el 404 no cambian con esta historia. Sin Obra no pinta
-      * nada, y Copiar sigue a la Fuente o a la Atribución. Desde la 24.5 lleva además
-      * «Siguiente…» cuando hay a dónde ir (`siguiente`, decidido arriba).
+      * Historia 30.1 — nada se intercala entre la Atribución —con su Línea de la Fuente— y
+      * Copiar: a 360 × 640 la Tarjeta de Obra empujaba Copiar entre 661 y 756 px, fuera de la
+      * primera pantalla, y quien viene a llevarse la Cita tenía que pasar antes por la Obra
+      * (SM-C5). Primero lo que se hace con la Cita —Copiar, Imagen, compartir— y después la
+      * Tarjeta de Obra (UX-DR113, UX-DR122).
       */}
-    <TarjetaDeObra cita={cita} autor={autor} nivel={2} siguiente={siguiente} />
     <CopiarCita cita={cita} autor={autor} />
     <ImagenDeCita cita={cita} autor={autor} />
     <CompartirEnlace cita={cita} autor={autor} canonica={canonica} />
+    {/*
+      * Historia 24.4, movida tras compartir por la 30.1 — la Obra de la que sale la Cita. Aquí
+      * y no en `BloqueDeCita` por lo mismo que la Fuente: la portada y el 404 no cambian (la Cita
+      * del Día nace en este orden con la 28.2). Sin Obra no pinta nada, y las Rutas de salida
+      * siguen a compartir. Desde la 24.5 lleva además «Siguiente…» cuando hay a dónde ir
+      * (`siguiente`, decidido arriba).
+      */}
+    <TarjetaDeObra cita={cita} autor={autor} nivel={2} siguiente={siguiente} />
     {/*
       * Historia 24.6 — tras las acciones, los tres grupos del pie. Un grupo sin Citas no pinta
       * nada, y sin ninguno no hay `nav`: la Atribución sigue enlazando al Autor y a la Obra.
