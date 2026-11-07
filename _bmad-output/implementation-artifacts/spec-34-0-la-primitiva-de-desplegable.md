@@ -282,3 +282,16 @@ Blocking condition: ninguna
 - `npm test` — 155 ficheros, 7.166 pruebas, verde.
 
 **Riesgos residuales.** Los seis diferidos de UX siguen pendientes de Héctor (bmad-ux). El comentario de la fila de `sprint-status.yaml` lo escribe el cierre del bucle.
+
+## Verificación previa a la fusión — 2026-11-07 (UTC)
+
+Puerta del bucle v9-ralph sobre `v9/34-0-desplegable`, con origin/main en a6e9b17ebc (ancestro de la rama, sin fusión que hacer; `proponer-claves` no escribió nada).
+
+- `npm ci`: no hacía falta (package-lock.json igual que en main).
+- `npm run build`: verde (5.295 páginas, NFR-5 y peso dentro del tope).
+- `npx astro check`: 0 errores, 0 avisos.
+- `npm test`: 155 ficheros, 7.166 pruebas, verde (912 s).
+- `npm run test:e2e` (escritorio y móvil, receptor local en 8787): 1.100 pasadas, 108 omitidas, 4 fallidas, todas en `tipografia-calculada.spec.ts`. Las dos de `/obras/` eran la instantánea de la 26.12, que contaba 517 Obras donde la siembra ya ha dejado 518 (solo cambian recuentos, ningún peso ni interlineado); se regrabaron en 2f8b2a6c86. Las dos de `buscar-con-resultados` pasaron al repetirlas sin regrabar (inestables). El fichero entero, repetido: 28 pasadas.
+- `dist/`: idéntico byte a byte al de la base construida desde main el mismo día (10.433 ficheros; comprobado por la implementación y por el auditor de aceptación en las dos rondas). Nada de `src/` importa `Desplegable.astro`.
+- NFR-7: no aplica (el sitio construido no cambia).
+- Vocabulario y migraciones: sin cambios; no hay despliegue de D1.
