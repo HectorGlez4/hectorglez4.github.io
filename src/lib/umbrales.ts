@@ -334,6 +334,18 @@ export const MAX_CITAS_RELACIONADAS = 4;
 export const MAX_CITAS_DE_LA_MISMA_OBRA = 3;
 
 /**
+ * Obras que la Lista de Obras de la Página de Autor enseña antes de las Citas — UX-DR130, FR-4,
+ * AD-9, Historia 34.2. Valor de Héctor del 2026-11-05.
+ *
+ * Con más, la Lista pinta las primeras y pliega el resto en un Desplegable cerrado («Y {m} obras
+ * más», `rotuloDeObrasPlegadas`), para que la primera Cita no quede pantallas abajo (Rafael
+ * Barrett, con 59 Obras, la dejaba a unos 3.249 px a 360 × 640). `/obras/` no se pliega nunca.
+ * Moverlo lo decide Héctor, en un diff visible. Literal: el filtro de los Directorios importa este
+ * módulo y un cálculo aquí engordaría su guion.
+ */
+export const MAX_OBRAS_ANTES_DE_LAS_CITAS = 3;
+
+/**
  * Saltos de enlace interno desde la portada en los que toda superficie publicada debe
  * alcanzarse — NFR-5, AD-11 extendido.
  *

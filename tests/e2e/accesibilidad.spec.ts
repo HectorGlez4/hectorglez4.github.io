@@ -14,6 +14,7 @@ import { desviacionDelBarrido, reglasDeLaPagina, sinDecidir, versionesDeAxe } fr
 import { abrirLosDesplegables, auditar, recorrerElFoco } from './ayuda/desplegables.ts';
 import {
   SIN_TARJETA_COMPLETA,
+  autorConMasObras,
   citaConLosDosBloques,
   citaConTarjetaCompleta,
   citaSinMasDelAutor,
@@ -181,8 +182,16 @@ const CITAS_DEL_BARRIDO = [
 
 /** Una ruta sin su barra final: la muestra derivada las da sin ella, y las de arriba con ella. */
 const sinBarra = (ruta: string) => (ruta.length > 1 ? ruta.replace(/\/$/, '') : ruta);
+/**
+ * Historia 34.2 — la Página del Autor con más Obras, la de la Lista de Obras plegada más larga:
+ * axe y el foco la barren cerrada y abierta (el paso de la 34.0). Sale del Corpus, nunca fijada.
+ */
+const AUTORES_DEL_BARRIDO = [autorConMasObras()]
+  .filter((a): a is { slug: string; obras: number } => a !== undefined)
+  .map((a) => `/autor/${a.slug}/`);
+
 /** Sin repetir una página por escribirse con barra final y sin ella: axe la barrería dos veces. */
-const SUPERFICIES = [...DERIVADAS, ...OBRAS_DEL_BARRIDO, ...CITAS_DEL_BARRIDO].filter(
+const SUPERFICIES = [...DERIVADAS, ...OBRAS_DEL_BARRIDO, ...CITAS_DEL_BARRIDO, ...AUTORES_DEL_BARRIDO].filter(
   (ruta, i, todas) => todas.findIndex((otra) => sinBarra(otra) === sinBarra(ruta)) === i,
 );
 
@@ -1186,6 +1195,8 @@ test.describe('Historia 2.8 — responsive', () => {
         const esperado = esperadoDe();
         for (const condicion of CONDICIONES) {
           if (!(await cargarEn320(page, ruta!, condicion))) continue;
+          // Historia 34.2 — una fila plegada mide cero: se abren los Desplegables antes de medir.
+          await abrirLosDesplegables(page);
           for (const conPalabra of [false, true]) {
             const { listado, medidas } = await page.evaluate(
               ({ filas, titulo, conPalabra, palabra, esperado }) => {

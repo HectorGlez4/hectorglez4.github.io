@@ -426,6 +426,25 @@ export function cierreDeMasDelAutor(autor: Pick<Autor, 'nombre'>, recuento: numb
 }
 
 /**
+ * El rótulo del Desplegable de la Lista de Obras plegada — «Y {m} obras más», UX-DR130,
+ * Historia 34.2.
+ *
+ * `m` son las Obras que quedan dentro del Desplegable, tras las `MAX_OBRAS_ANTES_DE_LAS_CITAS`
+ * primeras: «Y una obra más» con una, «Y {m} obras más» con dos o más. Es la única que redacta el
+ * rótulo. Un `m` que no es un entero de 1 o más lanza: un Desplegable sin Obras no se pinta
+ * (UX-DR144), así que el uso está roto.
+ */
+export function rotuloDeObrasPlegadas(m: number): string {
+  if (!Number.isInteger(m) || m < 1) {
+    throw new Error(
+      `rotuloDeObrasPlegadas: el Desplegable de la Lista de Obras pliega una Obra o más, y este pliega ${m}. ` +
+        'Sin Obras plegadas no hay Desplegable: el uso está roto (Historia 34.2).',
+    );
+  }
+  return m === 1 ? 'Y una obra más' : `Y ${m} obras más`;
+}
+
+/**
  * La línea de procedencia de la Atribución, en piezas — UX-DR8, FR-2, Historia 22.4.
  *
  * `titulo` es el título de la Obra resuelta, si consta, y `resto` todo lo que va detrás en la

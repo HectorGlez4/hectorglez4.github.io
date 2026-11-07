@@ -24,6 +24,7 @@ import { rutaDeObra } from './superficies.ts';
 import {
   AVISO_DE_RANGO_DE_LA_CLAVE_DE_ORDEN,
   CONGELACION_DE_OBRAS,
+  MAX_OBRAS_ANTES_DE_LAS_CITAS,
   MAX_POR_RANGO_DE_LA_CLAVE_DE_ORDEN,
   MAX_PROPORCION_OBRA_DEL_AUTOR,
   MIN_CITAS_OBRA_INDEXABLE,
@@ -143,6 +144,20 @@ export function ordenDeLaListaDeObras<O extends Pick<ObraResuelta, 'nombre' | 't
       a.titulo.localeCompare(b.titulo, 'es') ||
       a.nombre.localeCompare(b.nombre, 'es'),
   );
+}
+
+/**
+ * La Lista de Obras plegada de la Página de Autor, partida — UX-DR130, Historia 34.2.
+ *
+ * Las `MAX_OBRAS_ANTES_DE_LAS_CITAS` primeras, a la vista, y el resto, que va dentro del
+ * Desplegable; las dos en el orden de entrada (el de `ordenDeLaListaDeObras`), sin reordenar ni
+ * repetir. Con esa cifra o menos, `resto` es vacío y no hay Desplegable. Es el único sitio que
+ * corta: `ListaDeObras.astro` la llama solo cuando se pliega (`/obras/` no).
+ */
+export function partirLaListaDeObras<O>(obras: readonly O[]): { primeras: readonly O[]; resto: readonly O[] } {
+  return obras.length > MAX_OBRAS_ANTES_DE_LAS_CITAS
+    ? { primeras: obras.slice(0, MAX_OBRAS_ANTES_DE_LAS_CITAS), resto: obras.slice(MAX_OBRAS_ANTES_DE_LAS_CITAS) }
+    : { primeras: obras, resto: [] };
 }
 
 /**

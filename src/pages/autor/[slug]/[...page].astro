@@ -22,6 +22,7 @@ import Paginacion from '../../../components/Paginacion.astro';
 import TarjetaDeCita from '../../../components/TarjetaDeCita.astro';
 import AtribucionDeSemblanza from '../../../components/AtribucionDeSemblanza.astro';
 import ListaDeObras from '../../../components/ListaDeObras.astro';
+import Desplegable from '../../../components/Desplegable.astro';
 import Rotulo from '../../../components/Rotulo.astro';
 import {
   autoresPublicados,
@@ -143,7 +144,7 @@ const pieDeObras =
       primera && (conLista || pieDeObras !== undefined) && (
         <section class="obras-del-autor" aria-labelledby="su-obra" data-pagefind-ignore>
           <Rotulo id="su-obra">Su obra en este Corpus</Rotulo>
-          <ListaDeObras obras={suObra.obras} zona="lista-de-obras" />
+          <ListaDeObras obras={suObra.obras} zona="lista-de-obras" pliegue={Desplegable} />
           {pieDeObras !== undefined && <p class="sin-obra">{pieDeObras}</p>}
         </section>
       )
