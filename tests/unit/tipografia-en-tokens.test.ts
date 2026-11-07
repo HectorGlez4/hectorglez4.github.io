@@ -59,6 +59,7 @@ const TOKEN_CSS: Record<string, string> = {
   'body-md': 'cuerpo-md',
   author: 'autor',
   caption: 'pie',
+  code: 'codigo',
 };
 
 /** Las propiedades personalizadas que declara una hoja, con su valor. */
