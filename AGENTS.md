@@ -612,7 +612,8 @@ slug **no** se recalcula aunque el texto cambie: es la URL (AD-4). Con `--texto`
 saltos de verso los toma la orden del documento de verso de la Cita, **no de lo tecleado**: un
 salto tecleado sin respaldo queda en espacio y el parte lo dice (Historia 29.1). Para elegir
 ese documento la orden lee las cabeceras de todo `corpus/fuentes/` (unos 2–3 s), y si alguno no se
-deja leer se niega con 1 sin escribir.
+puede abrir se niega con 1 sin escribir; un documento que se abre pero cuya cabecera no se entiende
+no cuenta como candidato, y de él no salen saltos (la Cita queda en una línea, como hoy).
 
 **De una obra traducida se conserva lo que la Fuente declara** (Historia 19.1). `recuperar`
 registra el traductor en la cabecera del documento (`traductor:` y, si consta,

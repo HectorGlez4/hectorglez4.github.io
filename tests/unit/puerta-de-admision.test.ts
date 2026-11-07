@@ -159,6 +159,12 @@ describe('Historia 29.1 — el salto de verso es un único U+000A (AD-29)', () =
     ['Yo vengo\u0085Y hacia', /otro separador de línea/],
     ['Yo vengo\vY hacia', /otro separador de línea/],
     ['Yo vengo\fY hacia', /otro separador de línea/],
+    // Un invisible entre dos saltos, o entre el salto y el borde, no los separa (revisión 2).
+    ['Yo vengo\n\ufeff\nY hacia', /dos saltos seguidos/],
+    ['Yo vengo\n\u200b\u00ad\nY hacia', /dos saltos seguidos/],
+    ['\ufeff\nYo vengo', /al principio ni al final/],
+    ['Yo vengo\n\u2060', /al principio ni al final/],
+    ['Yo vengo\ufeff \nY hacia', /espacio .*ni un tabulador/],
     ['Yo vengo<br>Y hacia', /«<br»/],
     ['Yo vengo / Y hacia', /« \/ »/],
   ];

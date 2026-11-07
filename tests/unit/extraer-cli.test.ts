@@ -1370,4 +1370,18 @@ describe('Historia 29.1 — la candidata conserva el verso de su documento (AD-2
     expect(escritos.length).toBeGreaterThan(0);
     for (const texto of escritos) expect(texto).not.toContain('\n');
   });
+
+  // Revisión 2: una «lineas:» fuera del conjunto se avisa en el parte y no da saltos.
+  it('una cabecera «lineas:» fuera del conjunto se avisa y el poema sale en una línea', async () => {
+    const { corpus } = await corpusConAutores();
+    const resultado = await extraer(
+      await documento(corpus, { ...CABECERA, lineas: 'poesia' }, { texto: VERSO }),
+      corpus,
+    );
+    expect(resultado.codigo, resultado.error).toBe(0);
+    expect(resultado.salida).toMatch(/«lineas: poesia», que no es ninguna forma del conjunto/);
+    const escritos = await textos(corpus);
+    expect(escritos.length).toBeGreaterThan(0);
+    for (const texto of escritos) expect(texto).not.toContain('\n');
+  });
 });

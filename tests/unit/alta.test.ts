@@ -472,4 +472,18 @@ describe('Historia 29.1 — el alta escribe el verso de su documento (AD-29; sem
     expect(informe.saltosDescartados).toEqual([{ texto: EN_VERSO, descartados: 1 }]);
     expect(formatearInforme(informe)).toMatch(/salto tecleado no sobrevive/);
   });
+
+  // Revisión 2: el parte de saltos habla solo de textos que se escriben, no de un duplicado.
+  it('un duplicado que no se escribe no deja parte de saltos', async () => {
+    const rutas = await corpusDePrueba();
+    await conDocumento(rutas, `De la brevedad\n\n${EN_VERSO}\n`, 'verso');
+    await darDeAltaLote([COMPLETA], rutas);
+    const informe = await darDeAltaLote(
+      [{ ...COMPLETA, texto: 'No es que tengamos\npoco tiempo, es que perdemos mucho.' }],
+      rutas,
+    );
+    expect(informe.posiblesDuplicados).toHaveLength(1);
+    expect(informe.saltosDescartados).toBeUndefined();
+    expect(formatearInforme(informe)).not.toMatch(/salto tecleado no sobrevive/);
+  });
 });

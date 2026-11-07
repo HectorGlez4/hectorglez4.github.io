@@ -546,4 +546,37 @@ describe('Historia 29.1 — documentar escribe el verso del documento, no el tec
     expect(await textoEscrito(corpus)).toBe(TEXTO);
     expect(`${hecho.salida}${hecho.error}`).toMatch(/salto tecleado no sobrevive/);
   });
+
+  // Revisión 2: el parte dice que la Cita publicada pierde un salto que su documento no respalda.
+  it('una Cita publicada con un salto, documentada contra prosa, lo pierde y el parte lo dice', async () => {
+    const conSalto = citaValida({
+      slug: SLUG,
+      texto: EN_VERSO,
+      procedencia: { obra: 'De brevitate vitae' },
+      fuente: undefined,
+    });
+    const corpus = await enDisco({ ...CORPUS, [FICHERO]: conSalto });
+    const hecho = await correr(corpus, [SLUG, rutaDelDocumento(corpus)]);
+    expect(hecho.codigo, hecho.error).toBe(0);
+    expect(await textoEscrito(corpus)).toBe(TEXTO);
+    expect(`${hecho.salida}${hecho.error}`).toMatch(/pierde 1 salto de verso que su documento no respalda/);
+  });
+
+  // Revisión 2: sin poder leer corpus/fuentes/ no se sabe de qué documento salen los saltos.
+  it('si corpus/fuentes/ no se deja leer, sale con 1 y no escribe ni la Cita ni el censo', async () => {
+    const corpus = await enDisco(CORPUS);
+    await mkdir(join(corpus, 'fuentes', 'wikisource-es--ilegible.txt'));
+    const antes = instantaneaDeDocumentar(corpus);
+    const hecho = await correr(corpus, [SLUG, rutaDelDocumento(corpus)]);
+    expect(hecho.codigo).toBe(1);
+    expect(`${hecho.salida}${hecho.error}`).toMatch(/corpus\/fuentes\/ no se deja leer/);
+    expect(await instantaneaDeDocumentar(corpus)).toEqual(await antes);
+  });
 });
+
+async function instantaneaDeDocumentar(corpus: string) {
+  return {
+    cita: await readFile(join(corpus, FICHERO), 'utf8'),
+    censo: await readFile(join(corpus, FICHERO_DEL_CENSO), 'utf8'),
+  };
+}

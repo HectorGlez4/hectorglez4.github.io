@@ -269,12 +269,6 @@ export async function darDeAltaLote(
       const escrito = textoDelAlta(entrada);
       const texto = escrito.texto;
       const motivos: string[] = [];
-      if (escrito.descartados > 0) {
-        informe.saltosDescartados = [
-          ...(informe.saltosDescartados ?? []),
-          { texto, descartados: escrito.descartados },
-        ];
-      }
 
       // ── Duplicados: se comprueba antes de escribir nada (FR-14) ──
       const canonico = normalizar(texto);
@@ -285,6 +279,14 @@ export async function darDeAltaLote(
         // ediciones legítimas de la misma frase.
         informe.posiblesDuplicados.push({ texto, coincideCon: yaEsta.slug, donde: yaEsta.donde });
         continue;
+      }
+      // El parte de saltos habla solo de lo que se escribe (a `citas/` o a revisión), no de un
+      // duplicado que se aparta sin escribir.
+      if (escrito.descartados > 0) {
+        informe.saltosDescartados = [
+          ...(informe.saltosDescartados ?? []),
+          { texto, descartados: escrito.descartados },
+        ];
       }
 
       // ── El Autor se resuelve antes que nada: sin él no hay slug que generar ──
