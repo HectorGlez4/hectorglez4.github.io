@@ -2,8 +2,8 @@
 title: 'Historia 29.1 — El salto de verso sobrevive en el Corpus, el cotejo y el slug'
 type: 'feature'
 created: '2026-11-07'
-status: 'ready-for-dev'
-baseline_revision: 'bcd8a3a3917aea5d9c4b2de534a25381ef2df6a5'
+status: 'done'
+baseline_revision: '6b58bb0429112a579348170e3ea741df9f854370'
 review_loop_iteration: 0
 followup_review_recommended: false
 context:
@@ -123,21 +123,165 @@ deferred: []
 
 ## Reparto de los documentos por forma
 
-_Lo rellena la implementación con la salida de `npx tsx tools/lineas.ts formas` y la comparación con la espina._
+Salida de `npx tsx tools/lineas.ts formas` sobre el Corpus real de la rama (HEAD `6b58bb0429`, 1.422 documentos `.txt` de `corpus/fuentes/`; los cuatro `.indice.yml` no son documentos). Sale con 0 y no toca `git status`. Ningún documento declara aún `lineas:` (todos son anteriores a la v9), así que todo es calculado:
+
+```
+gutenberg (267):
+  prosa-ajustada       267   (declarada 0, calculada 267)
+
+wikisource-es (1155):
+  verso                 57   (declarada 0, calculada 57)
+  verso-espaciado       96   (declarada 0, calculada 96)
+  prosa-por-lineas     513   (declarada 0, calculada 513)
+  prosa-ajustada        19   (declarada 0, calculada 19)
+  indeterminada        470   (declarada 0, calculada 470)
+```
+
+`npx tsx tools/lineas.ts formas --detalle` añade la lista nominal de los 153 documentos de verso.
+
+**Comparación con la espina.** Gutenberg: 267/267 `prosa-ajustada` (la espina decía ~263/267); ninguno sale `verso` ni `verso-espaciado`, tampoco `gutenberg--origenes-de-la-novela-tomo-ii.txt`/`-iii.txt`. Wikisource: 96 `verso-espaciado` frente a los ~143 de la espina, más 57 `verso` (153 documentos de verso en total). La diferencia con la espina no es una forma perdida: el prototipo de la planificación daba 115 `verso-espaciado` con falsos positivos conocidos, y al cerrarlos cayeron índices de una entrada por línea (`maria--maria-isaacs`, `en-torno-al-casticismo`, `campos-de-castilla`, `la-hermana-de-la-caridad`, `el-primer-loco`, el índice de *Las tres musas últimas castellanas*), páginas de unas pocas líneas cortas seguidas de prosa larga, que una tolerancia sin límite de las líneas largas del final daba por verso (`influencia-de-la-vida-del-campo-en-la-familia-rosario-de`, la portada y la lista de ediciones de `viaje-del-parnaso`; ahora se tolera una sola línea larga en cada extremo), y la carta corta (`carta-a-jose-marti-y-zayas-bazan`) nunca entró. Lo que queda en `indeterminada` con bloques de una línea y líneas cortas se revisó a mano (83 documentos): son prosa dialogada (Platón, Terencio en prosa, Cervantes en prosa), cartas y notas, no verso. Las piezas en verso con acotaciones (*La elección de los alcaldes de Daganzo*, *El rufián viudo*, *La vida es sueño*, *Los empeños de una casa*) entran porque se toleran unas pocas líneas largas (≤ 1 %) en documentos de 100 líneas o más. Juicio: el reparto no contradice la espina **por mucho** en el sentido del «Block If» —Gutenberg casa, y la cifra de Wikisource baja por los falsos positivos que la propia espina pedía corregir—, así que no se bloquea; la cifra queda aquí para Héctor.
+
+Trampas de la «Code Map», todas fuera del verso: `gutenberg--origenes-de-la-novela-tomo-ii.txt` y `-iii.txt` → `prosa-ajustada`; `maria--maria-isaacs`, `en-torno-al-casticismo` y `carta-a-jose-marti-y-zayas-bazan` → `indeterminada`; el pie de licencia de Wikisource se retira antes de juzgar. `a-una-nariz` (Góngora) sale `verso`, que es lo que es.
 
 ## Cifras para la decisión de la Tarjeta Social
 
-_Lo rellena la implementación con la salida de `npx tsx tools/lineas.ts tarjeta`: Citas que ganarían saltos por forma; cuántas admiten Imagen; tabla slug · caracteres · versos · alto sin saltos · alto con saltos; las que pasan de 630 px y cuántas son. La decisión es de Héctor y se anota aquí antes de abrir la 29.2 o la 29.3._
+Salida de `npx tsx tools/lineas.ts tarjeta` sobre el Corpus real (sale con 0; no escribe nada en `corpus/`; `git status` igual antes y después). Para cada Cita publicada con Fuente: los candidatos de `documentosDeCita`, el documento de los saltos de `documentoParaLosSaltos` y el texto de `textoConSaltos`; cuenta las que ganarían al menos un salto. El alto es el de `altoDeTarjeta` (`tools/lib/tarjetaDelVerso.ts`: 2·80 + líneas·round(cuerpo·1,3) + 40 + 24 + 34 + 30 con procedencia, el cuerpo de `tramoDe`, cada verso repartido por separado con `repartirEnLineas`), contrastado en `tests/unit/lineas.test.ts` con el `y` de `svgDeTarjeta` real para un texto sin saltos de cada tramo. Todas llevan procedencia.
+
+- **Citas que ganarían saltos: 75** — de documento `verso`: 65; de documento `verso-espaciado`: 10.
+- **Admiten Imagen (Tarjeta con texto): 75** de 75.
+- **Pasan de 630 px con saltos: 3**, las tres de Calderón, de 7 versos, con 631 px (484 px sin saltos):
+  - `pedro-calderon-de-la-barca-contra-vosotros-naciendo-aunque-si-naci-ya` · 631 px
+  - `pedro-calderon-de-la-barca-entre-las-flores-se-quiebra-cuando-musico` · 631 px
+  - `pedro-calderon-de-la-barca-ni-que-pueda-preguntarte-solo-dire-que` · 631 px
+
+La siguiente es de 582 px (las de 6 versos: Quevedo, Góngora, Sor Juana).
+
+| slug | caracteres | versos | líneas en la Tarjeta | alto sin saltos (px) | alto con saltos (px) |
+|---|---|---|---|---|---|
+| pedro-calderon-de-la-barca-contra-vosotros-naciendo-aunque-si-naci-ya | 178 | 7 | 7 | 484 | 631 |
+| pedro-calderon-de-la-barca-entre-las-flores-se-quiebra-cuando-musico | 177 | 7 | 7 | 484 | 631 |
+| pedro-calderon-de-la-barca-ni-que-pueda-preguntarte-solo-dire-que | 179 | 7 | 7 | 484 | 631 |
+| francisco-de-quevedo-alma-a-quien-todo-un-dios-prision | 221 | 6 | 6 | 533 | 582 |
+| francisco-de-quevedo-entre-en-mi-casa-vi-que-amancillada | 218 | 6 | 6 | 533 | 582 |
+| francisco-de-quevedo-llevada-de-enganoso-pensamiento-y-de-esperanza | 214 | 6 | 6 | 533 | 582 |
+| luis-de-gongora-goza-cuello-cabello-labio-y-frente-antes | 235 | 6 | 6 | 533 | 582 |
+| sor-juana-ines-de-la-cruz-es-un-vano-artificio-del-cuidado-es | 210 | 6 | 6 | 533 | 582 |
+| sor-juana-ines-de-la-cruz-si-a-este-pago-padece-mi-deseo | 220 | 6 | 6 | 533 | 582 |
+| sor-juana-ines-de-la-cruz-sigan-tu-sombra-en-busca-de-tu | 211 | 6 | 6 | 533 | 582 |
+| antonio-machado-quien-prefiere-lo-vivo-a-lo-pintado | 75 | 2 | 4 | 507 | 580 |
+| antonio-machado-al-andar-se-hace-camino-y-al | 101 | 4 | 4 | 468 | 528 |
+| antonio-machado-como-no-sabeis-la-hora-en-que | 99 | 4 | 4 | 468 | 528 |
+| antonio-machado-el-bueno-es-el-que-guarda-cual | 103 | 2 | 4 | 468 | 528 |
+| gonzalo-de-berceo-quanto-aqui-vivimos-en-ageno-moramos-la | 151 | 4 | 4 | 528 | 528 |
+| jose-marti-con-los-pobres-de-la-tierra-quiero-2 | 105 | 4 | 4 | 468 | 528 |
+| jose-marti-cultivo-una-rosa-blanca-en-julio-como | 92 | 4 | 4 | 468 | 528 |
+| jose-marti-denle-al-vano-el-oro-tierno-que | 114 | 4 | 4 | 468 | 528 |
+| jose-marti-oculto-en-mi-pecho-bravo-la-pena | 106 | 4 | 4 | 468 | 528 |
+| jose-marti-rapida-como-un-reflejo-dos-veces-vi | 106 | 4 | 4 | 468 | 528 |
+| jose-marti-si-dicen-que-del-joyero-tome-la | 94 | 4 | 4 | 468 | 528 |
+| jose-marti-todo-es-hermoso-y-constante-todo-es | 103 | 4 | 4 | 468 | 528 |
+| jose-marti-y-para-el-cruel-que-me-arranca | 104 | 4 | 4 | 468 | 528 |
+| jose-marti-yo-he-visto-al-aguila-herida-volar | 94 | 4 | 4 | 468 | 528 |
+| jose-marti-yo-he-visto-el-oro-hecho-tierra | 110 | 4 | 4 | 468 | 528 |
+| jose-marti-yo-se-que-el-necio-se-entierra | 121 | 4 | 4 | 468 | 528 |
+| jose-marti-yo-vengo-de-todas-partes-y-hacia | 103 | 4 | 4 | 468 | 528 |
+| luis-de-gongora-cosas-celalba-mia-he-visto-extranas-cascarse | 144 | 4 | 4 | 528 | 528 |
+| luis-de-gongora-duelete-de-esa-puente-manzanares-mira-que | 141 | 4 | 4 | 528 | 528 |
+| pedro-calderon-de-la-barca-negandose-a-la-piedad-del-nido-que | 96 | 4 | 4 | 468 | 528 |
+| sor-juana-ines-de-la-cruz-detente-sombra-de-mi-bien-esquivo-imagen | 145 | 4 | 4 | 528 | 528 |
+| sor-juana-ines-de-la-cruz-en-perseguirme-mundo-que-interesas-en-que | 151 | 4 | 4 | 528 | 528 |
+| sor-juana-ines-de-la-cruz-feliciano-me-adora-y-le-aborrezco-lizardo | 148 | 4 | 4 | 528 | 528 |
+| sor-juana-ines-de-la-cruz-hombres-necios-que-acusais-a-la-mujer | 102 | 4 | 4 | 468 | 528 |
+| sor-juana-ines-de-la-cruz-yo-no-estimo-tesoros-ni-riquezas-y | 142 | 4 | 4 | 528 | 528 |
+| antonio-machado-ah-cuando-yo-era-nino-sonaba-con | 59 | 2 | 3 | 434 | 507 |
+| antonio-machado-confiemos-en-que-no-sera-verdad-nada | 55 | 3 | 3 | 434 | 507 |
+| antonio-machado-despacito-y-buena-letra-el-hacer-las | 77 | 3 | 3 | 507 | 507 |
+| antonio-machado-en-mi-soledad-he-visto-cosas-muy | 59 | 3 | 3 | 434 | 507 |
+| antonio-machado-la-verdad-es-lo-que-es-y | 72 | 3 | 3 | 507 | 507 |
+| antonio-machado-no-te-importe-con-el-barro-de | 80 | 3 | 3 | 507 | 507 |
+| antonio-machado-solo-si-viene-un-corazon-al-mundo | 75 | 2 | 3 | 507 | 507 |
+| antonio-machado-vereis-como-el-poeta-admira-y-calla | 62 | 2 | 3 | 434 | 507 |
+| francisco-de-quevedo-que-sin-poder-saber-como-ni-adonde | 70 | 2 | 3 | 507 | 507 |
+| antonio-machado-virtud-es-fortaleza-ser-bueno-es-ser | 187 | 4 | 4 | 484 | 484 |
+| gonzalo-de-berceo-sennores-e-amigos-lo-que-dicho-avemos | 165 | 4 | 4 | 484 | 484 |
+| gonzalo-de-berceo-todos-quantos-vevimos-que-en-piedes-andamos | 171 | 4 | 4 | 484 | 484 |
+| andres-bello-cuanto-el-valor-y-el-patriotismo-pueden | 94 | 3 | 3 | 468 | 468 |
+| antonio-machado-responde-al-hachazo-ha-dicho-el-buda | 83 | 3 | 3 | 408 | 468 |
+| jose-manuel-de-navarrete-oh-mexico-sin-duda-yo-gozara-del | 103 | 3 | 3 | 468 | 468 |
+| jose-manuel-de-navarrete-todo-el-mundo-se-llena-de-alegria | 109 | 3 | 3 | 468 | 468 |
+| antonio-machado-buen-cazador-de-si-mismo-siempre-en | 44 | 2 | 2 | 434 | 434 |
+| antonio-machado-caminante-no-hay-camino-sino-estelas-en | 49 | 2 | 2 | 434 | 434 |
+| antonio-machado-con-el-puno-en-la-mejilla-todo | 49 | 2 | 2 | 434 | 434 |
+| antonio-machado-cuando-cielo-y-tierra-pasen-mi-palabra | 48 | 2 | 2 | 434 | 434 |
+| antonio-machado-en-suenos-lucha-con-dios-y-despierto | 50 | 2 | 2 | 434 | 434 |
+| antonio-machado-espanolito-que-vienes-al-mundo-te-guarde | 47 | 2 | 2 | 434 | 434 |
+| antonio-machado-haz-tu-copa-y-no-te-importe | 54 | 2 | 2 | 434 | 434 |
+| antonio-machado-mancebo-llena-tu-jarro-que-ya-te | 44 | 2 | 2 | 434 | 434 |
+| antonio-machado-ni-aunque-te-elogie-un-bruto-ha | 47 | 2 | 2 | 434 | 434 |
+| antonio-machado-nunca-extraneis-que-un-bruto-se-descuerne | 63 | 2 | 2 | 434 | 434 |
+| antonio-machado-todas-tus-palabras-fueron-una-palabra-velad | 45 | 2 | 2 | 434 | 434 |
+| antonio-machado-todo-el-que-camina-anda-como-jesus | 50 | 2 | 2 | 434 | 434 |
+| antonio-machado-todo-necio-confunde-valor-y-precio | 35 | 2 | 2 | 434 | 434 |
+| antonio-machado-un-hombre-a-tientas-camina-lleva-a | 56 | 2 | 2 | 434 | 434 |
+| antonio-machado-una-de-las-dos-espanas-ha-de | 48 | 2 | 2 | 434 | 434 |
+| antonio-machado-volvamos-a-la-verdad-vanidad-de-vanidades | 43 | 2 | 2 | 434 | 434 |
+| antonio-machado-yo-vivo-en-paz-con-los-hombres | 60 | 2 | 2 | 434 | 434 |
+| fernan-gonzalez-de-eslava-por-que-mi-dios-me-soltais-y | 54 | 2 | 2 | 434 | 434 |
+| jose-marti-cultivo-una-rosa-blanca-en-junio-como | 43 | 2 | 2 | 434 | 434 |
+| pedro-calderon-de-la-barca-soy-un-hombre-de-las-fieras-y | 56 | 2 | 2 | 434 | 434 |
+| pedro-calderon-de-la-barca-viendo-que-el-ver-me-da-muerte | 55 | 2 | 2 | 434 | 434 |
+| teresa-de-jesus-la-paciencia-todo-lo-alcanza | 29 | 2 | 2 | 361 | 434 |
+| teresa-de-jesus-quien-a-dios-tiene-nada-le-falta | 34 | 2 | 2 | 434 | 434 |
+| antonio-machado-el-mas-truhan-se-lleva-la-mano | 83 | 2 | 2 | 408 | 408 |
+
+**Decisión de Héctor** (cambiar el reparto de `src/lib/tramos.ts` o componer sin texto la Tarjeta de estas tres, u otra): _pendiente; se anota aquí antes de abrir la 29.2 o la 29.3._
 
 ## Tiempo de construcción y `dist/`
 
-_Lo rellena la implementación: tiempo de `npm run build` en `baseline_revision` y al cerrar, y el resultado de comparar los `.html`._
+`npm run build` con `FECHA_JORNADA=2026-11-07`, por `correr.sh`, sobre el Corpus real de la rama:
+
+- **Antes** (HEAD `6b58bb0429`, el `baseline_revision`, que solo difiere de `bcd8a3a391` en este spec): **142 s**, `EXIT:0`; «4403 Citas cotejadas contra su documento; 21 pendientes de cotejo de un tope de 38». La construcción arrancó con el árbol limpio; la primera edición de la historia (el esquema de `texto` en `src/lib/admision.ts`, que solo rechaza y no cambia ninguna salida) cayó durante esa construcción.
+- **Después** (con la 29.1): **108 s**, `EXIT:0`; el mismo «4403 Citas cotejadas… 21 pendientes». La diferencia de tiempo es ruido de la máquina (la primera pasada calentó cachés): el cotejo solo añade leer `lineas:` en la misma pasada y no calcula ninguna forma, porque ninguna Cita tiene hoy un salto.
+- **`dist/`**: `diff -rq` de los 5.295 `.html` de antes y de después: **sin ninguna diferencia**. El peso total se movió 30 bytes (508.852.717 → 508.852.687), todos en `pagefind/filter/` (52.636 → 52.607 bytes), que Pagefind no compone byte a byte igual entre dos construcciones; ninguna página cambia.
+- `git diff --stat corpus/`: vacío.
 
 ## Spec Change Log
 
 ## Review Triage Log
 
+### 2026-11-07 — Review pass
+- intent_gap: 0
+- bad_spec: 0
+- patch: 0
+- defer: 0
+- reject: 0
+- addressed_findings:
+  - none
+
+Las cinco capas (blind-hunter, edge-case-hunter, verification-gap, intent-alignment, ac-auditor) son externas en el bucle v9-ralph y no trajeron hallazgos a esta pasada.
+
 ## Auto Run Result
 
-Status: ready-for-dev
-Blocking condition: ninguna. Planificación terminada (Halt after planning); la implementación rellena las tres secciones de cifras, y la decisión de la Tarjeta Social es de Héctor.
+Status: done
+Blocking condition: ninguna. Queda una decisión de Héctor, que no bloquea esta historia y sí abre la 29.2 y la 29.3: la Tarjeta Social de las tres Citas de Calderón que pasan de 630 px (631 px; ver «Cifras para la decisión de la Tarjeta Social»).
+
+**Resumen.** El salto de verso es un único U+000A del `texto`, con una sola regla de qué es, quién lo escribe y qué lo respalda. `formaDeLasLineas` (conservadora, solo el cuerpo, la cabecera `lineas:` manda) y `textoConSaltos` (el escritor único: solo toca el espacio, un `\n` donde un documento `verso`/`verso-espaciado` parte línea, descarta y cuenta lo tecleado) viven en `tools/lib/lineas.ts`; `tramoEnCrudo` en `tools/lib/cotejo.ts`; el esquema de `texto` rechaza toda otra forma del salto; el cotejo del build rompe ante un salto sin respaldo (tres reglas) y ante una `lineas:` fuera del conjunto; `recuperar` declara `lineas:` en los documentos nuevos; `extraer`, el alta (y `sembrar`) y `documentar` (también `--texto`) escriben con el escritor único. Ninguna Cita publicada cambia (la restitución es la 29.2) y `dist/` sale idéntico.
+
+**Ficheros.**
+- `tools/lib/lineas.ts` (nuevo) — `FORMAS_DE_LINEAS`, `formaDeLasLineas`, `textoConSaltos`, `documentoParaLosSaltos` y el parte de saltos descartados.
+- `tools/lib/cotejo.ts` — `tramoEnCrudo` (con la correspondencia colapsado→crudo privada) y la puerta del salto en `cotejar` (reglas 1–3 y `lineas:` inválida); `EntradaDeCotejo.lineasDeclaradas`.
+- `tools/lib/documento.ts` — `lineas?` en la cabecera: la escribe `componerDocumento`, la lee `analizarDocumento`, en crudo.
+- `tools/lib/corpus.ts` — `leerDocumentosParaElCotejo` (cuerpos y `lineas:` en una pasada; `leerDocumentosDeFuente` la usa) y `lineas?` en `leerDocumentosDeclarados`.
+- `integraciones/cotejo.ts` — pasa las `lineas:` declaradas al cotejo.
+- `src/lib/admision.ts` — reglas de AD-29 en `texto`.
+- `tools/recuperar.ts`, `tools/extraer.ts`, `tools/alta.ts`, `tools/lib/documentacion.ts` — `lineas:` en el documento nuevo; el `texto` por `textoConSaltos` y el parte de lo descartado.
+- `tools/lib/tarjetaDelVerso.ts` (nuevo) y `tools/lineas.ts` (nuevo, solo lectura) — la geometría de la Tarjeta y la orden `formas|tarjeta`.
+- `tests/unit/lineas.test.ts` y `tests/unit/ayuda/lineas/` (nuevos); pruebas añadidas en `puerta-de-admision`, `cotejo`, `cotejo-build`, `normalizar-y-slug`, `recuperar-cli`, `extraer-cli`, `alta` y `documentar-cli`; `documentacion.test.ts` ajustada (su documento de prueba es un poema: la Cita gana sus saltos y colapsa a lo mismo).
+- `AGENTS.md` — el verso en «Una sesión de sembrado» y en «Documentar una Cita ya publicada».
+- `sprint-status.yaml` — solo la línea de la 29.1 (`review`); los comentarios de la 29.2, 29.3 y 29.4 siguen diciendo que esperan la decisión de Héctor.
+
+**Revisión.** Capas externas sin hallazgos en esta pasada: 0 parches, 0 diferidos, 0 rechazados. `followup_review_recommended: false` (parches: 0 high, 0 medium, 0 low; puntuación 0).
+
+**Verificación.** `npx vitest run tests/unit/lineas.test.ts` en verde (36); uno por uno en verde: `puerta-de-admision` (24), `cotejo` (64), `cotejo-build` (25), `normalizar-y-slug` (141), `recuperar-cli` (95), `extraer-cli` (56), `alta` (23), `documentar-cli` (22), `documento` (241), `documentacion` (48). `npx astro check`: 0 errores, 0 avisos. `npx tsx tools/lineas.ts formas` y `tarjeta`: salen con 0 y `git status` no cambia; invocación mala, 2. `npm run build` antes (142 s) y después (108 s), los dos `EXIT:0`; `diff -rq` de los 5.295 `.html`: iguales; `git diff --stat corpus/`: vacío. `npm test` entero (por `correr.sh`): 156 ficheros, 7.250 pruebas, en verde (1.099 s). Auditoría de la matriz: cada fila tiene su prueba y corrió en verde (verso, estrofa, prosa y sin documento y tecleado en `lineas.test.ts`, `alta`, `documentar-cli`; esquema en `puerta-de-admision`; las tres reglas de la puerta y `lineas:` inválida en `cotejo` y `cotejo-build`; crudo en `lineas.test.ts`).
+
+**Riesgos.** El clasificador es heurístico: 96 `verso-espaciado` frente a los ~143 de la espina (razonado arriba); un documento de verso que caiga en `indeterminada` solo deja a su Cita en una línea, que es lo de hoy. La regla de índices (≥ 3 entradas y ≥ 20 % de líneas que empiezan por número o romano con signo, «Capítulo …», o por las mismas tres palabras) podría dejar fuera algún poema muy anafórico; no se vio ninguno. `documentar` lee ahora todos los documentos de `corpus/fuentes/` (unos 2–3 s) para elegir el de los saltos. La decisión de la Tarjeta Social es de Héctor.
