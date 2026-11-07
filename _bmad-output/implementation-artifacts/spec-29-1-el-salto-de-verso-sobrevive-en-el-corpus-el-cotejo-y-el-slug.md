@@ -5,11 +5,25 @@ created: '2026-11-07'
 status: 'done'
 baseline_revision: '6b58bb0429112a579348170e3ea741df9f854370'
 review_loop_iteration: 0
-followup_review_recommended: false
+followup_review_recommended: true
 context:
   - '{project-root}/_bmad-output/implementation-artifacts/epic-29-context.md'
 warnings: [oversized]
-deferred: []
+deferred:
+  - summary: >-
+      Los saltos y la regla 2 de la puerta se juzgan sobre la primera aparición del texto en el documento de verso; un estribillo o una nota editorial que cite el verso en una línea antes del poema dejarían a la Cita sin saltos.
+    evidence: |-
+      textoConSaltos y reglaDelSalto usan localizar (indexOf) y por tanto la primera aparición. El resultado es conservador —la Cita queda en una línea, como hoy, y el escritor y la puerta coinciden—, pero la restitución de la 29.2 puede perder saltos válidos en un poema con estribillo. Ninguna prueba lo cubre.
+    location: >-
+      tools/lib/lineas.ts (textoConSaltos), tools/lib/cotejo.ts (reglaDelSalto)
+    severity: low
+  - summary: >-
+      revisar --aprobar (que conserva el texto de la candidata) y tools/sembrar.ts (que pasa por darDeAltaLote) no tienen prueba propia con un texto con saltos.
+    evidence: |-
+      Hoy se cumple por construcción: revisión copia el fichero de la candidata sin recomponer el texto y sembrar llama a darDeAltaLote, que sí está probado en alta.test.ts. Una prueba de cada orden con una candidata o una semilla con \n lo fijaría frente a cambios futuros.
+    location: >-
+      tools/lib/revision.ts, tools/sembrar.ts
+    severity: low
 ---
 
 <intent-contract>
@@ -234,16 +248,36 @@ La siguiente es de 582 px (las de 6 versos: Quevedo, Góngora, Sor Juana).
 | teresa-de-jesus-quien-a-dios-tiene-nada-le-falta | 34 | 2 | 2 | 434 | 434 |
 | antonio-machado-el-mas-truhan-se-lleva-la-mano | 83 | 2 | 2 | 408 | 408 |
 
+**Margen de error de estas cifras, dicho para la decisión** (revisión de la 29.1, primera pasada externa). El veredicto «tres pasan» depende de 1 px (631 frente a 630), así que conviene separar qué es exacto y qué es modelo:
+
+- **Lo vertical es aritmética entera, no estimación.** `altoDeTarjeta` repite la cuenta de `svgDeTarjeta` —renglón `round(cuerpo·1,3)`, 40 hasta el filete, 24 + 34 + 30 de la atribución, márgenes de 80— y `tests/unit/lineas.test.ts` la contrasta con el `y` real de `svgDeTarjeta` para un texto sin saltos de cada tramo. La única hipótesis añadida es la que la propia AC fija: **un salto abre un renglón nuevo del mismo alto**. Con 7 renglones de 49 px (cuerpo 38, tramo `md`) el bloque es 7·49 + 128 = 471 px y el hueco entre márgenes 470: de ahí el 631.
+- **El número de renglones tampoco es estimación en estas tres.** Cada verso se reparte con el mismo `repartirEnLineas` que usa la Tarjeta real, y aquí ninguno se acerca al ancho útil (1.040 px): renderizado, el verso más ancho de las tres llega a x = 578. Cada verso es un renglón con más de 450 px de holgura, así que un error de la estimación de anchos de `lienzo.ts` no cambia el 7.
+- **Se comprobó contra un renderizado real**, sin tocar `src/`: un guion de la revisión (fuera del repositorio) compuso el SVG del verso con la misma estructura que `svgDeTarjeta` —los renglones de `lineasDeTarjetaEnVerso` en lugar de los del texto corrido— y lo rasterizó con `sharp`, como `src/pages/tarjeta/[slug].png.ts`. Las tintas medidas casan con el modelo: primer verso desde y ≈ 89 (línea base 118), filete en 456–457, Autor hasta 496, procedencia («La vida es sueño», sin descendentes) hasta 532 y la marca del pie desde 535 (la tilde de «SABIDURÍA»; su línea base, fija, en 558).
+- **Qué significa pasar de 630 aquí.** El alto incluye los dos márgenes de 80: con 631 **nada sale del lienzo ni se corta**; el bloque se come 1 px del margen inferior, que es donde vive la marca. El efecto visible es que entre la procedencia y la marca quedan unos 2 px de aire (frente a unos 3 en una Tarjeta que llenara justo los 630, y unos 28 en las de 582 px). Una procedencia con descendentes («g», «p», «y») sí tocaría la marca; la de estas tres no los tiene. La Tarjeta de hoy, sin saltos, de esas tres Citas mide 484 px y no se acerca.
+- **Confianza.** Que con saltos esas tres miden 631 px según la geometría de `svgDeTarjeta` es seguro (aritmética contrastada y renderizado que la confirma); que la siguiente es 582 y no hay ninguna entre 583 y 630, también. Lo que **no** es seguro es cómo pintará la 29.3 el verso —si mantiene renglón y atribución tal cual—: estas cifras valen para «la geometría de hoy con un renglón por salto», que es lo que la AC pide medir.
+
 **Decisión de Héctor** (cambiar el reparto de `src/lib/tramos.ts` o componer sin texto la Tarjeta de estas tres, u otra): _pendiente; se anota aquí antes de abrir la 29.2 o la 29.3._
 
 ## Tiempo de construcción y `dist/`
 
 `npm run build` con `FECHA_JORNADA=2026-11-07`, por `correr.sh`, sobre el Corpus real de la rama:
 
-- **Antes** (HEAD `6b58bb0429`, el `baseline_revision`, que solo difiere de `bcd8a3a391` en este spec): **142 s**, `EXIT:0`; «4403 Citas cotejadas contra su documento; 21 pendientes de cotejo de un tope de 38». La construcción arrancó con el árbol limpio; la primera edición de la historia (el esquema de `texto` en `src/lib/admision.ts`, que solo rechaza y no cambia ninguna salida) cayó durante esa construcción.
-- **Después** (con la 29.1): **108 s**, `EXIT:0`; el mismo «4403 Citas cotejadas… 21 pendientes». La diferencia de tiempo es ruido de la máquina (la primera pasada calentó cachés): el cotejo solo añade leer `lineas:` en la misma pasada y no calcula ninguna forma, porque ninguna Cita tiene hoy un salto.
-- **`dist/`**: `diff -rq` de los 5.295 `.html` de antes y de después: **sin ninguna diferencia**. El peso total se movió 30 bytes (508.852.717 → 508.852.687), todos en `pagefind/filter/` (52.636 → 52.607 bytes), que Pagefind no compone byte a byte igual entre dos construcciones; ninguna página cambia.
+- **Antes** (HEAD `6b58bb0429`, el `baseline_revision`, que solo difiere de `bcd8a3a391` en este spec): **142 s**, `EXIT:0`; «4403 Citas cotejadas contra su documento; 21 pendientes de cotejo de un tope de 38». La construcción arrancó con el árbol limpio, pero la primera edición de la historia (el esquema de `texto` en `src/lib/admision.ts`, que solo rechaza y no cambia ninguna salida) cayó durante ella: esa línea base está contaminada y no vale como medida limpia.
+- **Después** (con la 29.1, antes del commit de la historia): **108 s**, `EXIT:0`; el mismo «4403 Citas cotejadas… 21 pendientes».
+- Una corrida de cada lado no sostiene ninguna afirmación sobre el coste: la diferencia es del orden del ruido de la máquina (la primera pasada calentó cachés). Lo que sí se puede decir del código es que el cotejo solo añade leer `lineas:` en la misma pasada y no calcula ninguna forma, porque ninguna Cita tiene hoy un salto. Las corridas repetidas de la revisión están abajo.
+- **`dist/`**: `diff -rq` de los 5.295 `.html` de antes y de después: **sin ninguna diferencia**. El peso total se movió 30 bytes (508.852.717 → 508.852.687), todos en `pagefind/filter/` (52.636 → 52.607 bytes), que Pagefind no compone byte a byte igual entre dos construcciones; ninguna página cambia. De esa primera comparación no quedó registro en `logs/`; la de la revisión, sí (abajo).
 - `git diff --stat corpus/`: vacío.
+
+**Repetido en la revisión** (HEAD `27215bee79`, con los parches de la primera pasada externa), cuatro construcciones seguidas con `FECHA_JORNADA=2026-11-07` y el árbol limpio, alternando el código de la historia y el de `6b58bb0429` (los nueve ficheros de código que la historia cambia, puestos con `git checkout` y restaurados al terminar), registradas en `.claude/v9-ralph/logs/s-29/triage-29.1-1-builds.log`:
+
+| construcción | código | segundos | cotejo |
+|---|---|---|---|
+| 1 | después (HEAD) | 112 | 4403 cotejadas; 21 pendientes de un tope de 38 |
+| 2 | antes (`6b58bb0429`) | 110 | ídem |
+| 3 | después | 109 | ídem |
+| 4 | antes | 108 | ídem |
+
+Media de 110,5 s después y 109 s antes: una diferencia de 1,5 s, dentro de lo que varía una misma versión entre dos corridas (3 s la de después, 2 s la de antes). No se ve coste. `diff -rq` de los 5.295 `.html` de la construcción 1 frente a la 2: **sin diferencias**.
 
 ## Spec Change Log
 
@@ -258,30 +292,57 @@ La siguiente es de 582 px (las de 6 versos: Quevedo, Góngora, Sor Juana).
 - addressed_findings:
   - none
 
-Las cinco capas (blind-hunter, edge-case-hunter, verification-gap, intent-alignment, ac-auditor) son externas en el bucle v9-ralph y no trajeron hallazgos a esta pasada.
+Esta entrada se escribió en la pasada de implementación, antes de que corrieran las cinco capas externas (blind-hunter, edge-case-hunter, verification-gap, intent-alignment, ac-auditor) del bucle v9-ralph: «sin hallazgos» quería decir que esa pasada no los tenía, no que las capas los hubieran descartado. Sus hallazgos se triaron en la entrada siguiente.
+
+### 2026-11-07 — Review pass
+- intent_gap: 0
+- bad_spec: 0
+- patch: 17 (high 0, medium 4, low 13)
+- defer: 2 (high 0, medium 0, low 2)
+- reject: 14 (high 0, medium 0, low 14)
+- addressed_findings:
+  - `[medium]` `[patch]` U+FEFF casa con `\s` pero `colapsarEspacios` lo retira: la correspondencia con el crudo contaba una racha de solo marcas como espacio y desplazaba todo lo de detrás, y `textoConSaltos` insertaba un espacio (NFR-12). Las rachas las recorre ahora una sola función de `tools/lib/cotejo.ts`, `rachasDeEspacio`, con `UN_INVISIBLE` derivado de `INVISIBLES`; la usan `tramoEnCrudo` y `textoConSaltos`. Pruebas con U+FEFF en la matriz «Crudo» y en el escritor.
+  - `[medium]` `[patch]` El esquema de `texto` rechaza también U+2028, U+2029, U+0085, `\v` y `\f`, y cualquier espacio (duro, fino) pegado a un salto, no solo el normal y el tabulador; U+FEFF junto al salto se admite porque el escritor lo conserva. Filas nuevas en `puerta-de-admision.test.ts`.
+  - `[medium]` `[patch]` `tools/lineas.ts` gana `tests/unit/lineas-cli.test.ts` (execFile sobre un Corpus temporal): códigos 2 y 1, el filtro de `tarjeta` (solo las que ganan un salto), el orden, el alto sin y con saltos y la lista de las que pasan de 630. `--detalle` se lee de `argumentos`, es solo de `formas`, y una bandera repetida sale con 2.
+  - `[medium]` `[patch]` El veredicto 631/630: el spec dice en «Cifras para la decisión de la Tarjeta Social» qué es aritmética exacta y qué es modelo, que el alto incluye los márgenes (nada se sale ni se corta: el bloque se come 1 px del margen inferior, donde vive la marca) y lo comprueba contra un renderizado real con `sharp` del SVG del verso, sin tocar `src/`.
+  - `[low]` `[patch]` El conjunto de invisibles ya no se escribe tres veces: lo que quedaba en `lineas.ts` se va, y la guarda de dueños fija `rachasDeEspacio` en `cotejo.ts`.
+  - `[low]` `[patch]` `conEspacio.includes(racha)` (cuadrático) y `Math.max(...)` sobre listas largas se cambian por la marca de la racha y por `reduce`.
+  - `[low]` `[patch]` El comentario huérfano de `ACABA_EN_SIGNO` vuelve a su constante.
+  - `[low]` `[patch]` La regla 1 de la puerta ya no dice «no lo son» de documentos que pueden ser de verso sin el texto dentro.
+  - `[low]` `[patch]` `formas` cuenta aparte la `lineas:` no válida («declaración no válida»), la lista, y dice cuántos `.txt` de `corpus/fuentes/` no entran en el reparto.
+  - `[low]` `[patch]` `tools/alta.ts`: un `texto` o una `procedencia.obra` que no son cadena llegan al esquema en vez de lanzar en el escritor.
+  - `[low]` `[patch]` `documentar` dice los saltos que la Cita gana o pierde frente a lo publicado, no todos los que acaba teniendo.
+  - `[low]` `[patch]` `documentar` se niega con un motivo, sin escribir, si `corpus/fuentes/` no se deja leer, en vez de salir por una excepción.
+  - `[low]` `[patch]` `extraer` avisa en el parte de una `lineas:` fuera del conjunto, que el build rechazará.
+  - `[low]` `[patch]` Una cabecera `lineas:` vacía ya no se da por ausente: `analizarDocumento` la entrega y el cotejo la rechaza nombrando el documento (prueba en `cotejo.test.ts`).
+  - `[low]` `[patch]` La guarda de dueños fija además quién importa `tramoEnCrudo` y `rachasDeEspacio` de `cotejo.ts` (hoy solo `tools/lib/lineas.ts`).
+  - `[low]` `[patch]` `AGENTS.md`: las candidatas de `corpus/_revision/` anteriores a la 29.1 se publican en una línea salvo que se regeneren con `extraer`; `documentar` lee las cabeceras de todo `corpus/fuentes/` (2–3 s) y se niega con 1 si alguna no se deja leer.
+  - `[low]` `[patch]` El spec ya no da por buenos sin matiz el estado `done` previo, el tiempo de una sola construcción con la línea base contaminada ni el `dist/` idéntico sin registro: lo dice, y la revisión repite las construcciones alternando antes y después, con su `diff -rq` en `logs/s-29/triage-29.1-1-builds.log`.
+
+Rechazado con motivo, porque la orquestación lo señaló: que `documentar` escriba los saltos de verso en una Cita del censo ya publicada **no contradice** el «Never» de la 29.2. La AC de la épica pide que `documentar` —«también con `--texto`»— componga el texto con `textoConSaltos` y que `AGENTS.md` diga que `--texto` toma los saltos del documento; documentar ya reescribe esa Cita (la saca del censo, compone su Procedencia y puede corregir su texto), y lo hace de una en una y por un acto de quien documenta. Lo que el «Never» reserva a la 29.2 es la restitución en bloque de lo publicado, acto de Héctor. Tampoco llega un `\n` a ninguna superficie en vivo antes de la 29.3: la unidad de fusión es la épica, que entra con la 29.3 pintando el verso, y la siembra de la principal no corre `documentar` en esta rama. Los demás rechazos: `localizar` no normaliza (es `indexOf` sobre colapsados); los 30 px fijos de la procedencia son los de `svgDeTarjeta`, que la compone en una línea; el informe del alta no se duplica (cada `recorrer` lleva el suyo); la caché de un mapa; `\r` suelto (ningún documento de `corpus/fuentes/` lo trae); que el estado del Corpus real solo conste en pasadas anotadas, los fixtures trampa con dos valores, la regla 2 por el escritor, el «basta uno» solo en la prueba pura y el esquema con ruta en un solo build (lo que la AC pide); `lineas:` permanente desde `recuperar` (la AC: «manda desde entonces»); el ciclo `cotejo`↔`lineas` (un uso en lo alto fallaría al importar en cualquier prueba); y « / » en prosa (lo manda AD-29).
 
 ## Auto Run Result
 
 Status: done
-Blocking condition: ninguna. Queda una decisión de Héctor, que no bloquea esta historia y sí abre la 29.2 y la 29.3: la Tarjeta Social de las tres Citas de Calderón que pasan de 630 px (631 px; ver «Cifras para la decisión de la Tarjeta Social»).
+Blocking condition: ninguna. Queda una decisión de Héctor, que no bloquea esta historia y sí abre la 29.2 y la 29.3: la Tarjeta Social de las tres Citas de Calderón que pasan de 630 px (631 px; ver «Cifras para la decisión de la Tarjeta Social», con su margen de error).
 
-**Resumen.** El salto de verso es un único U+000A del `texto`, con una sola regla de qué es, quién lo escribe y qué lo respalda. `formaDeLasLineas` (conservadora, solo el cuerpo, la cabecera `lineas:` manda) y `textoConSaltos` (el escritor único: solo toca el espacio, un `\n` donde un documento `verso`/`verso-espaciado` parte línea, descarta y cuenta lo tecleado) viven en `tools/lib/lineas.ts`; `tramoEnCrudo` en `tools/lib/cotejo.ts`; el esquema de `texto` rechaza toda otra forma del salto; el cotejo del build rompe ante un salto sin respaldo (tres reglas) y ante una `lineas:` fuera del conjunto; `recuperar` declara `lineas:` en los documentos nuevos; `extraer`, el alta (y `sembrar`) y `documentar` (también `--texto`) escriben con el escritor único. Ninguna Cita publicada cambia (la restitución es la 29.2) y `dist/` sale idéntico.
+**Resumen.** El salto de verso es un único U+000A del `texto`, con una sola regla de qué es, quién lo escribe y qué lo respalda. `formaDeLasLineas` (conservadora, solo el cuerpo, la cabecera `lineas:` manda) y `textoConSaltos` (el escritor único: solo toca el espacio, un `\n` donde un documento `verso`/`verso-espaciado` parte línea, descarta y cuenta lo tecleado) viven en `tools/lib/lineas.ts`; `tramoEnCrudo` y, desde la revisión, `rachasDeEspacio` —el único recorrido del espacio de un texto, con las reglas de `colapsarEspacios`— en `tools/lib/cotejo.ts`; el esquema de `texto` rechaza toda otra forma del salto; el cotejo del build rompe ante un salto sin respaldo (tres reglas) y ante una `lineas:` fuera del conjunto o vacía; `recuperar` declara `lineas:` en los documentos nuevos; `extraer`, el alta (y `sembrar`) y `documentar` (también `--texto`) escriben con el escritor único. Ninguna Cita publicada cambia (la restitución es la 29.2) y `dist/` sale idéntico.
 
-**Ficheros.**
+**Ficheros** (implementación, `f68312a2d9`).
 - `tools/lib/lineas.ts` (nuevo) — `FORMAS_DE_LINEAS`, `formaDeLasLineas`, `textoConSaltos`, `documentoParaLosSaltos` y el parte de saltos descartados.
-- `tools/lib/cotejo.ts` — `tramoEnCrudo` (con la correspondencia colapsado→crudo privada) y la puerta del salto en `cotejar` (reglas 1–3 y `lineas:` inválida); `EntradaDeCotejo.lineasDeclaradas`.
-- `tools/lib/documento.ts` — `lineas?` en la cabecera: la escribe `componerDocumento`, la lee `analizarDocumento`, en crudo.
-- `tools/lib/corpus.ts` — `leerDocumentosParaElCotejo` (cuerpos y `lineas:` en una pasada; `leerDocumentosDeFuente` la usa) y `lineas?` en `leerDocumentosDeclarados`.
+- `tools/lib/cotejo.ts` — `tramoEnCrudo`, `rachasDeEspacio` y la puerta del salto en `cotejar` (reglas 1–3 y `lineas:` inválida); `EntradaDeCotejo.lineasDeclaradas`.
+- `tools/lib/documento.ts` — `lineas?` en la cabecera, en crudo (también vacía).
+- `tools/lib/corpus.ts` — `leerDocumentosParaElCotejo` y `lineas?` en `leerDocumentosDeclarados`.
 - `integraciones/cotejo.ts` — pasa las `lineas:` declaradas al cotejo.
 - `src/lib/admision.ts` — reglas de AD-29 en `texto`.
 - `tools/recuperar.ts`, `tools/extraer.ts`, `tools/alta.ts`, `tools/lib/documentacion.ts` — `lineas:` en el documento nuevo; el `texto` por `textoConSaltos` y el parte de lo descartado.
 - `tools/lib/tarjetaDelVerso.ts` (nuevo) y `tools/lineas.ts` (nuevo, solo lectura) — la geometría de la Tarjeta y la orden `formas|tarjeta`.
-- `tests/unit/lineas.test.ts` y `tests/unit/ayuda/lineas/` (nuevos); pruebas añadidas en `puerta-de-admision`, `cotejo`, `cotejo-build`, `normalizar-y-slug`, `recuperar-cli`, `extraer-cli`, `alta` y `documentar-cli`; `documentacion.test.ts` ajustada (su documento de prueba es un poema: la Cita gana sus saltos y colapsa a lo mismo).
+- `tests/unit/lineas.test.ts`, `tests/unit/lineas-cli.test.ts` (de la revisión) y `tests/unit/ayuda/lineas/`; pruebas en `puerta-de-admision`, `cotejo`, `cotejo-build`, `normalizar-y-slug`, `recuperar-cli`, `extraer-cli`, `alta`, `documentar-cli` y `documentacion`.
 - `AGENTS.md` — el verso en «Una sesión de sembrado» y en «Documentar una Cita ya publicada».
-- `sprint-status.yaml` — solo la línea de la 29.1 (`review`); los comentarios de la 29.2, 29.3 y 29.4 siguen diciendo que esperan la decisión de Héctor.
+- `sprint-status.yaml` — solo la línea de la 29.1; los comentarios de la 29.2, 29.3 y 29.4 siguen diciendo que esperan la decisión de Héctor.
 
-**Revisión.** Capas externas sin hallazgos en esta pasada: 0 parches, 0 diferidos, 0 rechazados. `followup_review_recommended: false` (parches: 0 high, 0 medium, 0 low; puntuación 0).
+**Revisión (primera pasada externa, `27215bee79`).** 17 parches (4 medium, 13 low), 2 diferidos (low, en el frontmatter), 14 rechazados; detalle en el «Review Triage Log». Lo principal: U+FEFF ya no desplaza la cuenta en crudo ni hace al escritor insertar un espacio; el esquema rechaza los demás separadores de línea y los espacios Unicode pegados a un salto; `tools/lineas.ts` tiene prueba de punta a punta; y el margen de error de las cifras de la Tarjeta queda dicho y contrastado con un renderizado real. `followup_review_recommended: true` (parches: 0 high, 4 medium, 13 low; puntuación 3·4 + 13 = 25).
 
-**Verificación.** `npx vitest run tests/unit/lineas.test.ts` en verde (36); uno por uno en verde: `puerta-de-admision` (24), `cotejo` (64), `cotejo-build` (25), `normalizar-y-slug` (141), `recuperar-cli` (95), `extraer-cli` (56), `alta` (23), `documentar-cli` (22), `documento` (241), `documentacion` (48). `npx astro check`: 0 errores, 0 avisos. `npx tsx tools/lineas.ts formas` y `tarjeta`: salen con 0 y `git status` no cambia; invocación mala, 2. `npm run build` antes (142 s) y después (108 s), los dos `EXIT:0`; `diff -rq` de los 5.295 `.html`: iguales; `git diff --stat corpus/`: vacío. `npm test` entero (por `correr.sh`): 156 ficheros, 7.250 pruebas, en verde (1.099 s). Auditoría de la matriz: cada fila tiene su prueba y corrió en verde (verso, estrofa, prosa y sin documento y tecleado en `lineas.test.ts`, `alta`, `documentar-cli`; esquema en `puerta-de-admision`; las tres reglas de la puerta y `lineas:` inválida en `cotejo` y `cotejo-build`; crudo en `lineas.test.ts`).
+**Verificación (revisión).** `npx astro check`: 0 errores, 0 avisos. Uno a uno por `correr.sh` (`logs/s-29/triage-29.1-1-ficheros.log`): `lineas`, `lineas-cli`, `cotejo`, `puerta-de-admision`, `cotejo-build`, `normalizar-y-slug`, `recuperar-cli`, `extraer-cli`, `alta`, `documentar-cli`, `documento`, `documentacion`: 12 ficheros, 797 pruebas, en verde. `npx tsx tools/lineas.ts formas` y `tarjeta`: mismas cifras que antes de los parches (1.422 documentos; 75 Citas, 3 por encima de 630). Cuatro `npm run build` alternos antes/después (`logs/s-29/triage-29.1-1-builds.log`): todos `EXIT:0`, 112/109 s después y 110/108 s antes, `diff -rq` de los 5.295 `.html` sin diferencias. `git diff --stat 6b58bb0429 HEAD -- corpus/`: vacío. `npm test` entero (`logs/s-29/triage-29.1-1-npm-test.log`): 157 ficheros, 7.273 pruebas, en verde (985 s).
 
-**Riesgos.** El clasificador es heurístico: 96 `verso-espaciado` frente a los ~143 de la espina (razonado arriba); un documento de verso que caiga en `indeterminada` solo deja a su Cita en una línea, que es lo de hoy. La regla de índices (≥ 3 entradas y ≥ 20 % de líneas que empiezan por número o romano con signo, «Capítulo …», o por las mismas tres palabras) podría dejar fuera algún poema muy anafórico; no se vio ninguno. `documentar` lee ahora todos los documentos de `corpus/fuentes/` (unos 2–3 s) para elegir el de los saltos. La decisión de la Tarjeta Social es de Héctor.
+**Riesgos.** El clasificador es heurístico: 96 `verso-espaciado` frente a los ~143 de la espina (razonado arriba); un documento de verso que caiga en `indeterminada` solo deja a su Cita en una línea, que es lo de hoy. La regla de índices podría dejar fuera algún poema muy anafórico; no se vio ninguno. Los saltos se toman de la primera aparición del texto (diferido). `documentar` lee las cabeceras de todo `corpus/fuentes/` (2–3 s). Las cifras de la Tarjeta valen para la geometría de hoy con un renglón por salto; cómo pinte la 29.3 el verso puede moverlas. La decisión de la Tarjeta Social es de Héctor.
