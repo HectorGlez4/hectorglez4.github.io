@@ -144,6 +144,23 @@ boton.addEventListener('click', async () => {
     margin-top: calc(var(--unidad) * 4);
   }
 
+  /*
+   * Historia 30.2 — dentro de la Fila de acciones de la Página de Cita la isla no tiene caja:
+   * el botón y el respaldo son elementos de la fila, y el respaldo baja tras Imagen, a lo ancho,
+   * en vez de quedar entre los dos botones. El marcado y el guion no cambian —el guion sigue
+   * buscando el respaldo dentro de su isla—, y fuera de la fila (el Kit) todo sigue igual.
+   * La región de estado es `position: absolute` y no ocupa sitio en la fila.
+   */
+  :global(.fila-de-acciones) > .isla {
+    display: contents;
+  }
+
+  :global(.fila-de-acciones) > .isla > .respaldo {
+    order: 1;
+    flex-basis: 100%;
+    margin-top: 0;
+  }
+
   /* UX-DR9 — secundario: texto en siena con filete, altura mínima de 44px. */
   .copiar {
     font-family: var(--sans);

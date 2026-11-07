@@ -20,6 +20,7 @@ import {
   citaSinMismaObra,
   citaConTituloDeObraMasLargo,
   citaDeObraSinCotejar,
+  citaDeTramo,
   citaSinObra,
   citasDeObraDeUnaCita,
 } from './ayuda/corpus.ts';
@@ -2704,6 +2705,40 @@ test.describe('Historia 27.7 — los avisos de /buscar/ pasan la auditoría y no
         const m = await anchoDeLaPagina(page);
         expect.soft(m.scroll, `${donde} desborda: ${m.scroll} frente a ${m.ventana}`).toBeLessThanOrEqual(m.ventana);
         expect.soft(await contenedoresQueRecortan(page), `${donde}: contenedores que se desplazan o recortan en horizontal`).toEqual([]);
+      }
+    });
+  }
+});
+
+/*
+ * Historia 30.2 — la medida de la Cita sale del cuerpo de su tramo y Copiar e Imagen van en fila
+ * desde 600 px: ninguna de las dos cosas puede pedir desplazamiento horizontal, ni en la Página de
+ * Cita —la cara completa y una de cada tramo— ni en la portada, que comparte el Bloque de Cita.
+ */
+test.describe('Historia 30.2 — sin desplazamiento horizontal con la medida y la fila', () => {
+  const completa = citaConTarjetaCompleta()?.slug;
+  const rutas = [
+    ...new Set([
+      '/',
+      ...(completa === undefined ? [] : [`/cita/${completa}/`]),
+      ...(['xl', 'lg', 'md'] as const).flatMap((t) => ((s) => (s === undefined ? [] : [`/cita/${s}/`]))(citaDeTramo(t))),
+    ]),
+  ];
+  for (const ruta of rutas) {
+    test(`${ruta} no desborda a 320, 600, 768 ni 1280 px`, async ({ page }, info) => {
+      test.skip(info.project.name !== 'escritorio', 'Los anchos se fijan a mano; se miden una vez.');
+      if (ruta !== '/') expect(completa, SIN_TARJETA_COMPLETA).toBeDefined();
+      for (const ancho of [320, 600, 768, 1280]) {
+        await page.setViewportSize({ width: ancho, height: 800 });
+        await page.goto(ruta);
+        await page.evaluate(async () => {
+          await document.fonts.ready;
+        });
+        const m = await page.evaluate(() => ({
+          scroll: document.documentElement.scrollWidth,
+          ventana: document.documentElement.clientWidth,
+        }));
+        expect.soft(m.scroll, `${ruta} a ${ancho} px: ${m.scroll} frente a ${m.ventana}`).toBeLessThanOrEqual(m.ventana);
       }
     });
   }

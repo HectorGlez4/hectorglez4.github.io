@@ -16,6 +16,7 @@ import Fuente from '../../components/Fuente.astro';
 import TarjetaDeObra from '../../components/TarjetaDeObra.astro';
 import CopiarCita from '../../islands/CopiarCita.astro';
 import ImagenDeCita from '../../islands/ImagenDeCita.astro';
+import FilaDeAcciones from '../../components/FilaDeAcciones.astro';
 import CompartirEnlace from '../../islands/CompartirEnlace.astro';
 import RutasDeSalida from '../../components/RutasDeSalida.astro';
 import DatosEstructurados from '../../components/DatosEstructurados.astro';
@@ -119,10 +120,14 @@ const canonica = new URL(rutaDeCita(cita.slug), Astro.site).href;
       * Copiar: a 360 × 640 la Tarjeta de Obra empujaba Copiar entre 661 y 756 px, fuera de la
       * primera pantalla, y quien viene a llevarse la Cita tenía que pasar antes por la Obra
       * (SM-C5). Primero lo que se hace con la Cita —Copiar, Imagen, compartir— y después la
-      * Tarjeta de Obra (UX-DR113, UX-DR122).
+      * Tarjeta de Obra (UX-DR113, UX-DR122). Desde la 30.2 Copiar e Imagen van en la Fila de
+      * acciones —en fila desde 600 px, apilados por debajo (UX-DR114, UX-DR123)—, y «Compartir
+      * en» queda fuera, detrás, en su bloque propio.
       */}
-    <CopiarCita cita={cita} autor={autor} />
-    <ImagenDeCita cita={cita} autor={autor} />
+    <FilaDeAcciones>
+      <CopiarCita cita={cita} autor={autor} />
+      <ImagenDeCita cita={cita} autor={autor} />
+    </FilaDeAcciones>
     <CompartirEnlace cita={cita} autor={autor} canonica={canonica} />
     {/*
       * Historia 24.4, movida tras compartir por la 30.1 — la Obra de la que sale la Cita. Aquí

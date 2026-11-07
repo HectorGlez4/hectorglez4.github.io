@@ -985,6 +985,16 @@ no va dentro de `BloqueDeCita.astro` porque ese bloque lo comparten la portada y
 la llevan (la portada la recibe en la 28.2, y la Cita del Día nace en el orden de la 30.1). Sin
 Obra no pinta nada, ni rótulo ni hueco, y las Rutas de salida siguen a compartir.
 
+**La Fila de acciones (Historia 30.2).** Copiar e Imagen van dentro de
+`src/components/FilaDeAcciones.astro` —un `div.fila-de-acciones` con `<slot />`, sin `data-zona`
+ni `data-sin-zona` porque no tiene enlaces, y sin guion—: en fila desde 600 px, apilados por
+debajo; «Compartir en» queda fuera, detrás. La reutilizará la 28.2 en la Cita del Día. Dentro de
+la fila la `.isla` de Copiar es `display: contents` para que su respaldo baje tras Imagen sin
+tocar marcado ni guion, así que **una prueba que mida Copiar mide `button.copiar`, no su isla**,
+que no tiene caja. Y la medida de la Cita (`--medida-cita`, 34ch) está en `.texto` de
+`BloqueDeCita.astro`, no en `.bloque`: el `ch` se resuelve en el cuerpo del tramo; la Atribución
+(`figcaption`) y la Línea de la Fuente van en `--medida-prosa`.
+
 - `nivel` (2 | 3) es obligatorio y sin valor por omisión: la Página de Cita pasa `2`; la portada
   pasará `3`. `Rotulo.astro` admite `nivel`, por omisión `2`.
 - Lo que dice lo compone `contenidoDeTarjetaDeObra` de `src/lib/atribucion.ts`, con el año y el

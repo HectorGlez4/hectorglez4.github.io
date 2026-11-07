@@ -316,8 +316,10 @@ describe('Historia 24.4 — el contrato de los componentes, sin construir', () =
     const orden = [
       '<BloqueDeCita',
       '<Fuente cita={cita} />',
+      '<FilaDeAcciones>',
       '<CopiarCita',
       '<ImagenDeCita',
+      '</FilaDeAcciones>',
       '<CompartirEnlace',
       '<TarjetaDeObra',
       '<RutasDeSalida',
@@ -341,6 +343,58 @@ describe('Historia 24.4 — el contrato de los componentes, sin construir', () =
     expect(await margen('src/islands/CopiarCita.astro')).toBe('calc(var(--unidad) * 4)');
     expect(await margen('src/islands/ImagenDeCita.astro')).toBe('calc(var(--unidad) * 2)');
     expect(await margen('src/islands/CompartirEnlace.astro')).toBe('calc(var(--unidad) * 3)');
+  });
+
+  it('Historia 30.2 — la Fila de acciones: 4 × de lo de arriba, 2 × entre los dos, en fila desde 600 px', async () => {
+    // Dentro de la fila las distancias las pone ella: la isla de Copiar no tiene caja y la de
+    // Imagen pierde su margen; por debajo de 600 px Imagen ocupa su línea, desde 600 toma su ancho.
+    const fila = await reglasDe('src/components/FilaDeAcciones.astro');
+    const raiz = fila.find((r) => r.selector === '.fila-de-acciones')!.declaraciones;
+    expect(Object.fromEntries(raiz)).toEqual({
+      'margin-top': 'calc(var(--unidad) * 4)',
+      display: 'flex',
+      'flex-wrap': 'wrap',
+      'align-items': 'flex-start',
+      gap: 'calc(var(--unidad) * 2)',
+    });
+    const fuente = await readFile(join(RAIZ, 'src/components/FilaDeAcciones.astro'), 'utf8');
+    const marcado = sinComentarios(fuente.slice(fuente.indexOf('---', 3) + 3, fuente.indexOf('<style')));
+    expect(marcado.trim()).toBe('<div class="fila-de-acciones">\n  <slot />\n</div>');
+    expect(sinComentarios(fuente)).not.toMatch(/data-zona|data-sin-zona|<script/);
+
+    const copiar = await reglasDe('src/islands/CopiarCita.astro');
+    const enCopiar = (selector: string) => Object.fromEntries(copiar.find((r) => r.selector === selector)!.declaraciones);
+    expect(enCopiar(':global(.fila-de-acciones) > .isla')).toEqual({ display: 'contents' });
+    expect(enCopiar(':global(.fila-de-acciones) > .isla > .respaldo')).toEqual({
+      order: '1',
+      'flex-basis': '100%',
+      'margin-top': '0',
+    });
+    const imagen = await reglasDe('src/islands/ImagenDeCita.astro');
+    const enImagen = imagen.filter((r) => r.selector.endsWith(':global(.fila-de-acciones) > .isla'));
+    expect(enImagen.map((r) => [r.selector.replace(/\s+/g, ' '), Object.fromEntries(r.declaraciones)])).toEqual([
+      [':global(.fila-de-acciones) > .isla', { 'margin-top': '0', 'flex-basis': '100%' }],
+      [':global(.fila-de-acciones) > .isla', { 'flex-basis': 'auto' }],
+    ]);
+    // La segunda, la de `flex-basis: auto`, dentro del punto de ruptura de 600 px.
+    const fuenteDeImagen = await readFile(join(RAIZ, 'src/islands/ImagenDeCita.astro'), 'utf8');
+    expect(fuenteDeImagen).toMatch(
+      /@media \(min-width: 600px\) \{\s*:global\(\.fila-de-acciones\) > \.isla \{\s*flex-basis: auto;\s*\}\s*\}/,
+    );
+  });
+
+  it('Historia 30.2 — la medida de la Cita en su texto, la Atribución y la Fuente en la de prosa (UX-DR115)', async () => {
+    const bloque = await reglasDe('src/components/BloqueDeCita.astro');
+    const de = (selector: string) => bloque.find((r) => r.selector === selector)!.declaraciones;
+    expect(de('.bloque').has('max-width')).toBe(false);
+    expect(de('.texto').get('max-width')).toBe('var(--medida-cita)');
+    expect(de('figcaption').get('max-width')).toBe('var(--medida-prosa)');
+    const fuente = await reglasDe('src/components/Fuente.astro');
+    expect(fuente.find((r) => r.selector === '.fuente')!.declaraciones.get('max-width')).toBe('var(--medida-prosa)');
+    // Ningún otro `max-width` con la medida de la Cita en el Bloque: ni la columna entera.
+    expect(bloque.filter((r) => r.declaraciones.get('max-width') === 'var(--medida-cita)').map((r) => r.selector)).toEqual([
+      '.texto',
+    ]);
   });
 
   it('`Rotulo` admite `nivel?: 2 | 3`, por omisión 2', async () => {
@@ -688,17 +742,27 @@ const autor = conjunto.autores.find((a) => a.slug === cita.autor)!;
  * Historia 30.1 — los hijos de `<article>` de una página construida, en orden de marcado y sin
  * `script`, `style`, `template` ni `noscript`: lo que se lee y se tabula. Cada uno con lo que es.
  */
-function hijosDelArticle(pagina: string): { etiqueta: string; clase: string; copiar: boolean }[] {
-  const hijos: { elemento: Elemento; copiar: boolean; filtros: boolean }[] = [];
+function hijosDelArticle(pagina: string): {
+  etiqueta: string;
+  clase: string;
+  copiar: boolean;
+  elemento: Elemento;
+  /** Historia 30.2 — en la Fila de acciones, sus hijos directos en orden, `script` incluidos. */
+  dentro: Elemento[];
+}[] {
+  const hijos: { elemento: Elemento; copiar: boolean; filtros: boolean; dentro: Elemento[] }[] = [];
   recorrerElementos(pagina, (elemento, antepasados) => {
     const k = antepasados.findIndex((e) => e.etiqueta === 'article');
     if (k === -1) return;
     const hijo = k === antepasados.length - 1 ? elemento : antepasados[k + 1];
     if (hijo === elemento) {
       if (['script', 'style', 'template', 'noscript'].includes(elemento.etiqueta)) return;
-      hijos.push({ elemento, copiar: false, filtros: false });
+      hijos.push({ elemento, copiar: false, filtros: false, dentro: [] });
     }
     const entrada = hijos.find((h) => h.elemento === hijo);
+    if (entrada !== undefined && hijo !== elemento && antepasados.length - 1 === k + 1) {
+      entrada.dentro.push(elemento);
+    }
     if (entrada !== undefined && elemento.etiqueta === 'button' && elemento.atributos.has('data-copiar')) {
       entrada.copiar = true;
     }
@@ -707,10 +771,12 @@ function hijosDelArticle(pagina: string): { etiqueta: string; clase: string; cop
       entrada.filtros = true;
     }
   });
-  return hijos.map(({ elemento, copiar, filtros }) => {
+  return hijos.map(({ elemento, copiar, filtros, dentro }) => {
     const clase = elemento.atributos.get('class') ?? '';
     const a = elemento.atributos;
-    const que = copiar
+    const que = elemento.etiqueta === 'div' && clase.split(/\s+/).includes('fila-de-acciones')
+      ? 'acciones'
+      : copiar
       ? 'copiar'
       : a.has('data-imagen')
         ? 'imagen'
@@ -727,8 +793,21 @@ function hijosDelArticle(pagina: string): { etiqueta: string; clase: string; cop
                   : filtros
                     ? 'filtros'
                     : `${elemento.etiqueta}.${clase}`;
-    return { etiqueta: elemento.etiqueta, clase: que, copiar };
+    return { etiqueta: elemento.etiqueta, clase: que, copiar, elemento, dentro };
   });
+}
+
+/** Historia 30.2 — lo que hay dentro de la Fila de acciones: cada isla y su guion, en orden. */
+function dentroDeLaFila(dentro: Elemento[]): string[] {
+  return dentro.map((e) =>
+    e.etiqueta === 'script'
+      ? 'script'
+      : e.atributos.has('data-imagen')
+        ? 'imagen'
+        : e.atributos.get('class') === 'isla' && !e.atributos.has('data-imagen')
+          ? 'copiar'
+          : `${e.etiqueta}.${e.atributos.get('class') ?? ''}`,
+  );
 }
 
 /** El enlace de la fila «Ver la obra» de una tarjeta: el único con la zona `tarjeta-de-obra`. */
@@ -799,11 +878,48 @@ describe('Historia 24.4 — la tarjeta en cada Página de Cita, construida', () 
       expect(conFuente, slug).toBe(esperada?.fila === FILA_VER_LA_OBRA_Y_DONDE_LEERLA);
       const siguiente = hijos[bloque + (conFuente ? 2 : 1)];
       expect(siguiente?.copiar, slug).toBe(true);
-      // Tras Copiar, la Imagen si la Cita la admite, y compartir; sin Imagen, sin hueco.
+      // Historia 30.2 — tras la Fila de acciones, compartir, fuera de ella.
       const desdeCopiar = hijos.slice(bloque + (conFuente ? 2 : 1)).map((h) => h.clase);
+      expect(desdeCopiar.slice(0, 2), slug).toEqual(['acciones', 'compartir']);
+      // Dentro, Copiar y, si la Cita la admite, Imagen, cada una con su guion detrás; sin
+      // Imagen, sin hueco ni celda vacía.
       const conImagen = slug !== SIN_IMAGEN;
-      expect(desdeCopiar.slice(0, conImagen ? 3 : 2), slug).toEqual(
-        conImagen ? ['copiar', 'imagen', 'compartir'] : ['copiar', 'compartir'],
+      expect(dentroDeLaFila(siguiente!.dentro), slug).toEqual(
+        conImagen ? ['copiar', 'script', 'imagen', 'script'] : ['copiar', 'script'],
+      );
+    }
+  });
+
+  it('Historia 30.2 — la fila no lleva zona ni exención, y cada isla conserva sus atributos', async () => {
+    for (const [slug] of esperadas) {
+      const hijos = hijosDelArticle(await html(`/cita/${slug}/`));
+      const fila = hijos.find((h) => h.clase === 'acciones')!;
+      expect(fila, slug).toBeDefined();
+      expect([...fila.elemento.atributos.keys()].filter((n) => !n.startsWith('data-astro-cid')), slug).toEqual([
+        'class',
+      ]);
+      const [copiar, , imagen] = fila.dentro;
+      expect([...copiar.atributos.keys()].filter((n) => !n.startsWith('data-astro-cid')).sort(), slug).toEqual([
+        'class',
+        'data-pagefind-ignore',
+      ]);
+      if (slug === SIN_IMAGEN) {
+        expect(imagen, slug).toBeUndefined();
+        continue;
+      }
+      expect([...imagen.atributos.keys()].filter((n) => !n.startsWith('data-astro-cid')).sort(), slug).toEqual(
+        [
+          'class',
+          'data-autor',
+          'data-imagen',
+          'data-marca',
+          'data-nombre',
+          'data-pagefind-ignore',
+          'data-procedencia',
+          'data-tamano',
+          'data-texto',
+          'data-texto-plano',
+        ].sort(),
       );
     }
   });
@@ -834,7 +950,7 @@ describe('Historia 24.4 — la tarjeta en cada Página de Cita, construida', () 
       expect(clases[enTarjeta - 1], slug).toBe('compartir');
       // Las Rutas de salida, si hay alguna; sin ninguna, los filtros, sin hueco.
       expect(clases[enTarjeta + 1], slug).toBe(clases.includes('salidas') ? 'salidas' : 'filtros');
-      expect(clases.indexOf('copiar'), slug).toBeLessThan(enTarjeta);
+      expect(clases.indexOf('acciones'), slug).toBeLessThan(enTarjeta);
       expect(clases.at(-1), slug).toBe('filtros');
 
       // Un antepasado —o ella misma— fuera de Pagefind con `all`, y ningún Modelo dentro.
