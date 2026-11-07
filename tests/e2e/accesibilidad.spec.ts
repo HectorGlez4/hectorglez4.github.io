@@ -11,6 +11,7 @@ import {
   type CriterioDeWcag,
 } from '../../src/lib/superficies.ts';
 import { desviacionDelBarrido, reglasDeLaPagina, sinDecidir, versionesDeAxe } from './ayuda/barrido.ts';
+import { abrirLosDesplegables, auditar, recorrerElFoco } from './ayuda/desplegables.ts';
 import {
   SIN_TARJETA_COMPLETA,
   citaConLosDosBloques,
@@ -353,18 +354,9 @@ test.describe('Historia 2.8, elevada por la 23.4 — WCAG 2.2 AA', () => {
   for (const ruta of SUPERFICIES) {
     test(`${ruta} pasa la auditoría automática`, async ({ page }) => {
       await page.goto(ruta);
-      const resultado = await new AxeBuilder({ page }).withTags([...ETIQUETAS_DEL_BARRIDO]).analyze();
-
-      const resumen = resultado.violations.map((v) => `${v.id}: ${v.help} (${v.nodes.length})`);
-      expect(resumen, `${ruta}\n${resumen.join('\n')}`).toEqual([]);
-      // Historia 23.4 — y lo que no es violación tampoco se calla: el barrido corrió entero, y
-      // axe decidió en cada nodo la regla con la que responde de 2.5.8.
-      expect(await desviacionDelBarrido(page, resultado), `${ruta}: el barrido no corrió lo que pide`).toEqual({
-        faltan: [],
-        sobran: [],
-      });
-      const dudas = sinDecidir(resultado);
-      expect(dudas, `${ruta}: axe no supo decidir\n${dudas.join('\n')}`).toEqual([]);
+      await auditar(page, ruta, 'con los desplegables cerrados');
+      // Historia 34.0 — y otra vez con todo lo plegado abierto.
+      if ((await abrirLosDesplegables(page)) > 0) await auditar(page, ruta, 'con los desplegables abiertos');
     });
   }
 });
@@ -575,48 +567,13 @@ test.describe('Historia 2.8 — foco', () => {
     test.slow();
     for (const ruta of SUPERFICIES) {
       await page.goto(ruta);
+      await recorrerElFoco(page, ruta, 'con los desplegables cerrados');
       /*
-       * Cada enfocable lleva una marca única antes de tabular: así se reconoce sin ambigüedad
-       * cuándo el recorrido vuelve al primero, y el tope sale de cuántos hay, no de un número
-       * escrito a mano que una página larga superaría sin que nadie lo notara.
+       * Historia 34.0 — y otra vez con todo lo plegado abierto: lo de dentro de un `<details>`
+       * cerrado no se tabula, y abierto sí. Sin ninguno, la pasada sería la misma y no se repite;
+       * la sonda de `tests/e2e/desplegable.spec.ts` hace correr las dos mientras tanto.
        */
-      const enfocables = await page.evaluate(() => {
-        const candidatos = [
-          ...document.querySelectorAll<HTMLElement>(
-            'a[href], button, input, textarea, select, [tabindex]:not([tabindex="-1"])',
-          ),
-        ];
-        candidatos.forEach((n, i) => n.setAttribute('data-barrido-de-foco', String(i)));
-        return candidatos.length;
-      });
-      expect(enfocables, `${ruta}: no hay nada enfocable`).toBeGreaterThan(0);
-
-      const suprimidos: string[] = [];
-      let primero: string | null = null;
-      let vuelta = false;
-      // Cada enfocable una vez, más las paradas fuera del documento al dar la vuelta.
-      for (let i = 0; i < enfocables + 3 && !vuelta; i += 1) {
-        await page.keyboard.press('Tab');
-        const foco = await page.evaluate(() => {
-          const n = document.activeElement as HTMLElement | null;
-          if (n === null || n === document.body || n === document.documentElement) return null;
-          const s = getComputedStyle(n);
-          return {
-            marca: n.getAttribute('data-barrido-de-foco') ?? `sin marca: ${n.outerHTML.slice(0, 80)}`,
-            descripcion: n.outerHTML.slice(0, 100),
-            suprimido: s.outlineStyle === 'none' || s.outlineWidth === '0px',
-          };
-        });
-        if (foco === null) continue;
-        if (primero === null) primero = foco.marca;
-        else if (foco.marca === primero) {
-          vuelta = true;
-          break;
-        }
-        if (foco.suprimido) suprimidos.push(foco.descripcion);
-      }
-      expect(vuelta, `${ruta}: el recorrido con el tabulador no dio la vuelta en ${enfocables + 3} pasos`).toBe(true);
-      expect(suprimidos, ruta).toEqual([]);
+      if ((await abrirLosDesplegables(page)) > 0) await recorrerElFoco(page, ruta, 'con los desplegables abiertos');
     }
   });
 
