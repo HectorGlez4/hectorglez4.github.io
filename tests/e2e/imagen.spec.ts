@@ -426,6 +426,23 @@ test.describe('Formato vertical para Stories y Reels', () => {
     expect(fueraLimpio).toBe(true);
   });
 
+  test('en vertical, la columna de la derecha (x ≥ 900) solo tiene fondo', async ({ page }) => {
+    /* La columna de herramientas del editor de Stories ocupa x ≥ 917 y taparía el texto. */
+    await abrirDialogo(page);
+    await page.locator('[data-formatos] .formato').nth(1).click();
+    const libre = await page.locator('[data-lienzo]').evaluate((l) => {
+      const c = l as HTMLCanvasElement;
+      const ctx = c.getContext('2d')!;
+      const fondo = ctx.getImageData(0, 0, 1, 1).data.join();
+      const d = ctx.getImageData(900, 0, c.width - 900, c.height).data;
+      for (let i = 0; i < d.length; i += 4) {
+        if (`${d[i]},${d[i + 1]},${d[i + 2]},${d[i + 3]}` !== fondo) return false;
+      }
+      return true;
+    });
+    expect(libre).toBe(true);
+  });
+
   test('los botones de formato son zonas de toque de 44px', async ({ page }) => {
     await abrirDialogo(page);
     const altos = await page

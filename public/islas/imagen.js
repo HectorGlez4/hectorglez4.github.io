@@ -71,7 +71,7 @@ export function dibujar(lienzo, datos) {
   ctx.fillStyle = plantilla.fondo;
   ctx.fillRect(0, 0, LADO, formato.alto);
 
-  const anchoUtil = LADO - MARGEN * 2;
+  const anchoUtil = LADO - MARGEN * (formato.alto > LADO ? 3 : 2);
 
   // ── Texto de la Cita ──────────────────────────────────────────────────────
   const tamaño = datos.tamaño;
