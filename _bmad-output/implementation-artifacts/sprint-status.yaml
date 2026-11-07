@@ -515,7 +515,7 @@ development_status:
   # excepción con nombre a la unidad de fusión, como la 23.12 (Héctor, 2026-11-07).
   epic-34: in-progress
   34-0-la-primitiva-de-desplegable: review  # v9-ralph 2026-11-07: Desplegable.astro, la primitiva de lo plegado (details nativo, rótulo en summary, glifo › provisional); se funde sola en la principal, antes que la Épica 30. Diferidos para Héctor (bmad-ux): el glifo, filete con envoltorios, anidado, esquema de encabezados, hover, anclas e impresión, medida de prosa
-  34-1-un-solo-dueño-del-recorte-por-palabra: backlog
+  34-1-un-solo-dueño-del-recorte-por-palabra: backlog  # bloqueada: espera la Épica 29 fundida en la principal (saltos U+000A y enUnaLinea de src/lib/verso.ts, que no existe en origin/main); su primer criterio dice «Sin la 29, esta historia no empieza» (v9-ralph 2026-11-07)
   34-2-la-página-de-autor-enseña-tres-obras-y-despliega-el-resto: backlog
   34-3-el-campo-de-búsqueda-se-ve-como-campo: backlog
   epic-34-retrospective: optional
