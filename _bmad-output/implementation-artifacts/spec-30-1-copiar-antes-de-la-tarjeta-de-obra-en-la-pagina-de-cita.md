@@ -5,7 +5,7 @@ created: '2026-11-07'
 status: 'done'
 baseline_revision: '7a9de4a9254aedeb726328ecbd7e49bb9c195656'
 review_loop_iteration: 0
-followup_review_recommended: false
+followup_review_recommended: true
 context:
   - '{project-root}/_bmad-output/implementation-artifacts/epic-30-context.md'
 warnings: [oversized]
@@ -118,6 +118,25 @@ deferred:
 - addressed_findings:
   - none
 
+### 2026-11-07 — Review pass (capas externas, pasada 1)
+- intent_gap: 0
+- bad_spec: 0
+- patch: 10: (high 0, medium 3, low 7)
+- defer: 0
+- reject: 21
+- addressed_findings:
+  - `[medium]` `[patch]` El informe no decía que SM-5, SM-7, SM-C3 y la continuación de «Superficies con lectura» siguen en el tramo de la lectura, ni que partir SM-5 lo decide Héctor, y enseñaba dos cifras sin rotularlas (blind-hunter 5/6, intent-alignment). La línea del corte llegado lo dice ahora tal cual (`tools/lib/lineaBase.ts`), y la prueba fija la línea entera, con «sobre 720 lecturas» (verification-gap, otros).
+  - `[medium]` `[patch]` Con el corte llegado y el juicio sin contar (sin mínimo, sin leer, línea base sin empezar), SM-C5 nombraba la llegada vieja y callaba la del corte (edge-case 1). El corte llegado se fija antes de las salidas tempranas, sin `acumulado` —nada inventado—, y la cabecera y la línea del corte lo dicen; prueba nueva.
+  - `[medium]` `[patch]` La igualdad byte a byte de `dist/index.html` y `dist/404.html` descansaba en una base construida a media edición (blind-hunter 17, ac-auditor 1). Se rehízo con la base limpia: `src/` de `baseline_revision` y de la historia, `FECHA_JORNADA=2026-11-07 npx astro build` cada una; `cmp` sin diferencias en las dos.
+  - `[low]` `[patch]` `interseccion` daba el número de tramo de la lectura en la línea de la continuación (blind-hunter 1). Lleva el de `continuacion-de-cita`; prueba nueva sin el corte de la 23, donde los dos números difieren.
+  - `[low]` `[patch]` Un corte de ayer en la serie nueva no tenía prueba (blind-hunter 2, edge-case 4): el informe dice «aún no tiene ninguna jornada cerrada» y «reúne 0 de 300»; prueba nueva.
+  - `[low]` `[patch]` La prueba de tabulación tiraba las paradas que no casaban, juntaba Copiar e Imagen y no exigía llegar al pie (blind-hunter 9, edge-case 6, ac-auditor 3). Ahora una parada del `article` fuera de sus grupos falla nombrándose, Copiar e Imagen son grupos propios y el recorrido tiene que acabar en el pie.
+  - `[low]` `[patch]` Las Citas de la auditoría ausentes del Corpus se caían sin aviso (blind-hunter 8): cada una ausente es una prueba omitida con su motivo.
+  - `[low]` `[patch]` `hijosDelArticle` tomaba por `FiltrosDeLaCita` cualquier hijo `hidden` (blind-hunter 11): la marca es ahora el `span[data-pagefind-sort]` que solo él lleva.
+  - `[low]` `[patch]` Sin Obra se exigía `salidas` tras compartir aunque una Cita sin Rutas acabe en los filtros (blind-hunter 12): se acepta `filtros` cuando no hay `nav`, como en la rama con Obra.
+  - `[low]` `[patch]` La distancia 3 × de compartir solo la miraba el e2e local (verification-gap): una prueba de `tarjeta-de-obra.test.ts` en `npm test` lee el `margin-top` de la raíz de Copiar (4 ×), Imagen (2 ×) y compartir (3 ×).
+  - Rechazadas (21): la palanca con cualquier ventana `salta` (es la letra del contrato: «cuando una ventana de SM-C5 sale `salta`», y `salta` ya son dos seguidas); la 30.1 desplegada sola (la Épica 30 se funde entera, tras la 29); un tope a la `y` de Copiar (la historia pide anotarla sin tope); dos dueños del orden de tabulación (miden granos distintos y los dos pasan); la distancia compartir → Tarjeta (no la fija ningún criterio; la Tarjeta conserva su 4 ×); `texto.length` del fixture de Unamuno (el texto es ASCII, sin comillas, y cada Cita del fixture se comprueba con o sin Imagen en `dist/`); el estado `done` previo a la revisión externa (es el orden del bucle); `sprint-status.yaml` (lo escribe el cierre del bucle); `cifra(undefined)` (da «sin leer», no un número); las comillas “ ” del `que` (las fija el contrato); el `!` de `desde` de la intersección (un corte llegado siempre abre tramo con principio); un segundo corte pendiente de la misma serie (no hay ninguno declarado); «Superficies con lectura» sin partir (decisión de Design Notes, dicha ahora en el informe); la medida sin Imagen en el navegador y en las seis rutas (el orden lo cubre `dist/`); las cifras de la auditoría y la orden remota (de Héctor); y la Cita en verso, ya diferida.
+
 ## Design Notes
 
 **Medida:** la implementación anota aquí, desde las anotaciones de la prueba e2e, la `y` de `button.copiar` a 360 × 640 tras el cambio, frente a la de la auditoría: Machado «Caminante, no hay camino» (707 antes), Martí «Yo soy un hombre sincero» (661), Martí «Yo vengo de todas partes» (756), y la Cita con Obra de texto más largo, con su slug (sustituto del verso hasta la Épica 29).
@@ -178,4 +197,18 @@ Status: done
 
 **Verificación:** `npx vitest run tests/unit/tarjeta-de-obra.test.ts` (32 verdes); `tests/unit/linea-base.test.ts`, `medicion.test.ts`, `tipografia-en-tokens.test.ts`, `siguiente.test.ts` (800 verdes); `npx astro check` (0 errores); `FECHA_JORNADA=2026-11-07 npm run build` (EXIT 0, sin aviso de peso); `npx playwright test tests/e2e/pagina-de-cita.spec.ts tests/e2e/accesibilidad.spec.ts --project=movil --project=escritorio` (369 verdes, 9 omitidas por proyecto); `npm test` (155 ficheros, 7174 verdes); `dist/index.html` y `dist/404.html` idénticos byte a byte a la construcción de la base con la misma jornada.
 
-**Riesgos residuales:** la medida con la Cita en verso más larga espera a la Épica 29 (deferred). La construcción de la base corrió mientras se editaba `src/pages/cita/[slug].astro`, así que solo vale como base para la portada y el 404, que no dependen de los ficheros tocados. `DESPLIEGUE_DE_CITAR_Y_LLEVARSE` la pone Héctor; el bloque «Superficies con lectura» sigue en el tramo de `lectura` (Design Notes).
+**Riesgos residuales:** la medida con la Cita en verso más larga espera a la Épica 29 (deferred). `DESPLIEGUE_DE_CITAR_Y_LLEVARSE` la pone Héctor; el bloque «Superficies con lectura» sigue en el tramo de `lectura` (Design Notes), y el informe lo dice.
+
+### Pasada de revisión externa 1 (2026-11-07)
+
+**Cambio:** el informe de `npm run medicion`, con el corte llegado, dice que SM-5, SM-7, SM-C3 y la continuación de «Superficies con lectura» siguen en el tramo de la lectura y que partir también SM-5 lo decide Héctor; nombra el tramo de `continuacion-de-cita` y no el de la lectura; y SM-C5 nombra la llegada del corte también cuando no llega a contar. Las pruebas de orden, tabulación y distancias se endurecen.
+
+**Ficheros:**
+- `tools/lib/lineaBase.ts` — número de tramo de la continuación, corte llegado antes de las salidas tempranas (`acumulado` opcional), línea del informe que dice lo que no se parte.
+- `tests/unit/linea-base.test.ts` — línea entera del corte llegado; tres pruebas nuevas (número de tramo, corte de ayer, corte llegado sin mínimo).
+- `tests/unit/tarjeta-de-obra.test.ts` — `FiltrosDeLaCita` por su marca, Rutas o filtros tras compartir sin Obra, distancias 4 × / 2 × / 3 × en `npm test`.
+- `tests/e2e/pagina-de-cita.spec.ts` — tabulación con Copiar e Imagen separados, sin paradas sueltas en el `article` y hasta el pie; aviso de la Cita de la auditoría ausente.
+
+**Revisión:** 10 parches (0 high, 3 medium, 7 low), 0 diferidos, 21 rechazados. `followup_review_recommended: true` (3 × 3 + 1 × 7 = 16 ≥ 5).
+
+**Verificación:** `npx vitest run tests/unit/linea-base.test.ts` (90 verdes) y `tests/unit/tarjeta-de-obra.test.ts` (33 verdes); `npx playwright test tests/e2e/pagina-de-cita.spec.ts --project=movil --project=escritorio` (77 verdes, 9 omitidas por proyecto); `dist/index.html` y `dist/404.html` idénticos byte a byte entre `src/` de `baseline_revision` y de la historia, `FECHA_JORNADA=2026-11-07 npx astro build` en las dos; `npx astro check` (0 errores, 0 avisos); `npm test` (155 ficheros, 7178 verdes).

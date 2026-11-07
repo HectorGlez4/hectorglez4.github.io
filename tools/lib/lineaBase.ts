@@ -275,7 +275,8 @@ const enTramo = (tramo: Tramo) => (jornada: string) =>
 
 /**
  * Las jornadas que dos tramos comparten (Historia 30.1): el principio más tardío y el final más
- * temprano, con el número del primero. Lo que lee dos series a la vez no reabre lo que la otra partió.
+ * temprano, con el número del primero —el de la serie que da nombre a lo que se lee—. Lo que lee dos
+ * series a la vez no reabre lo que la otra partió.
  */
 const interseccion = (a: Tramo, b: Tramo): Tramo => {
   const desde = a.desde === undefined ? b.desde : b.desde === undefined ? a.desde : a.desde > b.desde ? a.desde : b.desde;
@@ -650,7 +651,8 @@ export type CorteDelJuicio =
       jornada: string;
       /** La primera jornada de su línea base: la primera completa tras la llegada. */
       desde: string;
-      acumulado: number;
+      /** Lo reunido hacia el mínimo; falta si el juicio no llegó a contar (sin mínimo, sin leer…). */
+      acumulado?: number;
       cerradaEl?: string;
     };
 
@@ -926,7 +928,8 @@ export function componerLecturaDeMedicion(
   } as const;
   const enLectura = enTramo(series.lectura.vigente);
   // Historia 30.1 — la continuación de la Página de Cita y SM-C5: la intersección de los dos tramos.
-  const tramoDeLaContinuacion = interseccion(series.lectura.vigente, series['continuacion-de-cita'].vigente);
+  // El número del tramo es el de `continuacion-de-cita`: es el que nombra el informe.
+  const tramoDeLaContinuacion = interseccion(series['continuacion-de-cita'].vigente, series.lectura.vigente);
   const enLaContinuacionDeCita = enTramo(tramoDeLaContinuacion);
   const enBusqueda = enTramo(series.busqueda.vigente);
   const conJornada =
@@ -1359,6 +1362,15 @@ export function componerLecturaDeMedicion(
         deDondeLlega: juicio.corte.deDondeLlega,
         ...(pendiente === undefined ? {} : { jornada: pendiente.jornada }),
       };
+    } else if (juicio.corte !== undefined && llegadoDelCorte !== undefined) {
+      // Llegado, aunque el juicio no llegue a contar: la cabecera nombra esta llegada y no la de antes.
+      // Si cuenta, lo de abajo lo completa con la intersección y lo reunido.
+      corte = {
+        estado: 'llegado',
+        deDondeLlega: juicio.corte.deDondeLlega,
+        jornada: llegadoDelCorte.jornada,
+        desde: partidaDelCorte!.vigente.desde!,
+      };
     }
     const conCorte = (leido: JuicioLeido): JuicioLeido => (corte === undefined ? leido : { ...leido, corte });
     const sin = (sinVentanas: string): JuicioLeido =>
@@ -1786,7 +1798,8 @@ export function lineasDeLecturaDeMedicion(lectura: LecturaDeMedicion): string[] 
     if (lectura.series['continuacion-de-cita'].cortes.length > 0) {
       lineas.push(
         `  La continuación, SM-3 y SM-C5, desde el corte de su serie: ${textoDeTramo(lectura.cita.tramoDeLaContinuacion, lectura.hoy)}, ` +
-          `sobre ${cifra(lectura.cita.lecturasDeLaContinuacion)} lecturas.`,
+          `sobre ${cifra(lectura.cita.lecturasDeLaContinuacion)} lecturas. SM-5 y SM-7 de este bloque, SM-C3 y la continuación de ` +
+          `«Superficies con lectura» siguen en el tramo de la lectura y sobre sus lecturas; que el corte parta también SM-5 lo decide Héctor.`,
       );
     }
     lineas.push(
@@ -1933,9 +1946,11 @@ export function lineasDeLecturaDeMedicion(lectura: LecturaDeMedicion): string[] 
             ? `    La llegada de ${j.corte.deDondeLlega} no ha ocurrido: la tomará de esa constante de src/lib/umbrales.ts, y hasta entonces se juzga como hasta ahora.`
             : `    La llegada del ${j.corte.jornada} (${j.corte.deDondeLlega}) es de hoy o posterior: no ha ocurrido todavía, y hasta entonces se juzga como hasta ahora.`
           : `    Desde la llegada del ${j.corte.jornada} (${j.corte.deDondeLlega}), su línea base es propia: empieza el ${j.corte.desde}` +
-            (j.corte.cerradaEl === undefined
-              ? `, reúne ${entero(j.corte.acumulado)} de ${entero(lectura.minimo ?? 0)} y no se ha cerrado`
-              : ` y se cerró el ${j.corte.cerradaEl}`) +
+            (j.corte.acumulado === undefined
+              ? ''
+              : j.corte.cerradaEl === undefined
+                ? `, reúne ${entero(j.corte.acumulado)} de ${entero(lectura.minimo ?? 0)} y no se ha cerrado`
+                : ` y se cerró el ${j.corte.cerradaEl}`) +
             '; ninguna ventana cruza esa jornada.';
     if (j.sinVentanas !== undefined) {
       lineas.push(`${cabeza}: ${j.sinVentanas}.`);

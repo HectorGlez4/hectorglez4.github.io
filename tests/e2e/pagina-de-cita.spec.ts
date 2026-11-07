@@ -618,6 +618,12 @@ test.describe('Historia 24.4 — la Tarjeta de Obra en la Página de Cita', () =
     'jose-marti-yo-soy-un-hombre-sincero-de-donde',
     'jose-marti-yo-vengo-de-todas-partes-y-hacia',
   ];
+  // Una de la auditoría que el Corpus de hoy no publica no se mide en silencio: se dice por qué.
+  for (const slug of AUDITORIA.filter((s) => !estaPublicada(s))) {
+    test(`/cita/${slug}/: la medida de la auditoría a 360 × 640`, () => {
+      test.skip(true, `La Cita de la auditoría ${slug} no está publicada hoy: su medida no se repite.`);
+    });
+  }
   const medidas = [
     ...new Set([
       ...conTarjeta,
@@ -654,7 +660,7 @@ test.describe('Historia 24.4 — la Tarjeta de Obra en la Página de Cita', () =
   }, info) => {
     test.skip(info.project.name !== 'escritorio', 'El teclado se recorre una vez, en escritorio.');
     await abrir(page, completa);
-    const GRUPOS = ['atribucion', 'acciones', 'compartir', 'tarjeta', 'salidas', 'pie'];
+    const GRUPOS = ['atribucion', 'copiar', 'imagen', 'compartir', 'tarjeta', 'salidas', 'pie'];
     const recorrido: { grupo: string; indice: number }[] = [];
     for (let i = 0; i < 400; i++) {
       await page.keyboard.press('Tab');
@@ -667,13 +673,17 @@ test.describe('Historia 24.4 — la Tarjeta de Obra en la Página de Cita', () =
             ? 'atribucion'
             : activo.closest('article .isla[data-compartir]')
               ? 'compartir'
-              : activo.closest('article .isla')
-                ? 'acciones'
-                : activo.closest('article .tarjeta-de-obra')
-                  ? 'tarjeta'
-                  : activo.closest('article nav.salidas')
-                    ? 'salidas'
-                    : 'otro';
+              : activo.closest('article .isla[data-imagen]')
+                ? 'imagen'
+                : activo.closest('article .isla')?.querySelector('button.copiar')
+                  ? 'copiar'
+                  : activo.closest('article .tarjeta-de-obra')
+                    ? 'tarjeta'
+                    : activo.closest('article nav.salidas')
+                      ? 'salidas'
+                      : activo.closest('article')
+                        ? `article: ${activo.outerHTML.slice(0, 120)}`
+                        : 'otro';
         const indice = [...document.querySelectorAll('*')].indexOf(activo);
         return { grupo, indice };
       });
@@ -681,6 +691,10 @@ test.describe('Historia 24.4 — la Tarjeta de Obra en la Página de Cita', () =
       recorrido.push(foco);
       if (foco.grupo === 'pie') break;
     }
+    // El recorrido llega al pie: si no, lo de abajo fallaría por un orden que no es el problema.
+    expect(recorrido.at(-1)?.grupo, JSON.stringify(recorrido.map((f) => f.grupo))).toBe('pie');
+    // Ninguna parada del `article` fuera de sus grupos: una de más o fuera de sitio se nombra.
+    expect(recorrido.filter((f) => f.grupo.startsWith('article: ')).map((f) => f.grupo)).toEqual([]);
     const dentro = recorrido.filter((f) => f.grupo !== 'otro');
     // Cada foco sigue al anterior en el marcado.
     const indices = dentro.map((f) => f.indice);

@@ -650,10 +650,11 @@ describe('Historia 23.10 — la Página de Cita, la portada y la Obra', () => {
       conComparticion: calculada(2, 10),
       continuacion: calculada(4, 10),
       sinContinuacion: calculada(6, 10),
-      // Historia 30.1 — sin corte de la continuación llegado, su tramo es el de la lectura.
+      // Historia 30.1 — sin corte de la continuación llegado, sus jornadas son las de la lectura,
+      // con el número de tramo de su serie.
       lecturasDeLaContinuacion: 10,
       conAccionEnSmC5: calculada(3, 10),
-      tramoDeLaContinuacion: l.series.lectura.vigente,
+      tramoDeLaContinuacion: { ...l.series.lectura.vigente, numero: 1 },
     });
     const informe = texto(l);
     expect(informe).toContain('SM-5, lecturas con su primera acción —copiado o descarga sin destino—: 30,0 % (3 de 10).');
@@ -1166,7 +1167,7 @@ describe('Historia 30.1 — el corte del orden nuevo de la Página de Cita', () 
     expect(juicio.referencia).toBe('linea-base');
     expect(juicio.ventanas.map((v) => v.senal)).toEqual(['se da', 'salta']);
     expect(l.series['continuacion-de-cita'].cortes).toEqual([]);
-    expect(l.cita?.tramoDeLaContinuacion).toEqual(l.series.lectura.vigente);
+    expect(l.cita?.tramoDeLaContinuacion).toEqual({ ...l.series.lectura.vigente, numero: 1 });
     const informe = texto(l);
     expect(informe).toContain(
       'La llegada de DESPLIEGUE_DE_CITAR_Y_LLEVARSE no ha ocurrido: la tomará de esa constante de src/lib/umbrales.ts',
@@ -1185,7 +1186,7 @@ describe('Historia 30.1 — el corte del orden nuevo de la Página de Cita', () 
   it('con jornada de hoy: no ha ocurrido todavía, y nada se parte', () => {
     const l = leer(partes(), { minimo: 300, cortes: [CORTE_23, corte30(HOY)], juicios: [SM_C5] });
     expect(l.juicios[0].corte).toEqual({ estado: 'pendiente', deDondeLlega: 'DESPLIEGUE_DE_CITAR_Y_LLEVARSE', jornada: HOY });
-    expect(l.cita?.tramoDeLaContinuacion).toEqual(l.series.lectura.vigente);
+    expect(l.cita?.tramoDeLaContinuacion).toEqual({ ...l.series.lectura.vigente, numero: 1 });
     expect(texto(l)).toContain(`La llegada del ${HOY} (DESPLIEGUE_DE_CITAR_Y_LLEVARSE) es de hoy o posterior: no ha ocurrido todavía`);
   });
 
@@ -1237,8 +1238,50 @@ describe('Historia 30.1 — el corte del orden nuevo de la Página de Cita', () 
       'Desde la llegada del 2026-11-05 (DESPLIEGUE_DE_CITAR_Y_LLEVARSE), su línea base es propia: empieza el 2026-11-06 y se cerró el 2026-11-08; ninguna ventana cruza esa jornada.',
     );
     expect(informe).toContain('SM-C5: la continuación 40,0 % (288 de 720) junto a SM-5 5,0 % (36 de 720).');
-    expect(informe).toContain('La continuación, SM-3 y SM-C5, desde el corte de su serie: tramo 2 (desde el 2026-11-06 hasta el 2026-11-11)');
+    expect(informe).toContain(
+      'La continuación, SM-3 y SM-C5, desde el corte de su serie: tramo 2 (desde el 2026-11-06 hasta el 2026-11-11), sobre 720 lecturas. ' +
+        'SM-5 y SM-7 de este bloque, SM-C3 y la continuación de «Superficies con lectura» siguen en el tramo de la lectura y sobre sus lecturas; ' +
+        'que el corte parta también SM-5 lo decide Héctor.',
+    );
     expect(informe).toMatch(/la continuación de la Página de Cita \(SM-4, SM-3 y SM-C5\): 2 tramos, que no se suman/);
+  });
+
+  it('el tramo que nombra el informe es el de su serie, no el de la lectura', () => {
+    // Sin el corte de la 23, la lectura va por su tramo 1 y la continuación, por el 2.
+    const l = leer(partes(), { minimo: 300, cortes: [corte30('2026-11-05')], juicios: [SM_C5] });
+    expect(l.series.lectura.vigente.numero).toBe(1);
+    expect(l.cita?.tramoDeLaContinuacion).toEqual({ numero: 2, desde: '2026-11-06', hasta: '2026-11-11' });
+    expect(texto(l)).toContain('La continuación, SM-3 y SM-C5, desde el corte de su serie: tramo 2 (desde el 2026-11-06 hasta el 2026-11-11)');
+  });
+
+  it('un corte de ayer: el tramo de la continuación aún no tiene jornadas, y se dice', () => {
+    const ayer = '2026-11-11';
+    const l = leer(partes(), { minimo: 300, cortes: [CORTE_23, corte30(ayer)], juicios: [SM_C5] });
+    expect(l.cita?.tramoDeLaContinuacion).toEqual({ numero: 2, desde: HOY, hasta: ayer });
+    expect(l.juicios[0].ventanas).toEqual([]);
+    expect(l.juicios[0].corte).toMatchObject({ estado: 'llegado', jornada: ayer, desde: HOY, acumulado: 0 });
+    const informe = texto(l);
+    expect(informe).toContain(
+      `La continuación, SM-3 y SM-C5, desde el corte de su serie: tramo 2 (empieza el ${HOY}: aún no tiene ninguna jornada cerrada)`,
+    );
+    expect(informe).toContain(`empieza el ${HOY}, reúne 0 de 300 y no se ha cerrado`);
+  });
+
+  it('llegado, aunque el juicio no cuente: la cabecera nombra la llegada del corte, sin cifras inventadas', () => {
+    const l = leer(partes(), { cortes: [CORTE_23, corte30('2026-11-05')], juicios: [SM_C5] });
+    const [juicio] = l.juicios;
+    expect(juicio.sinVentanas).toBe('sin mínimo declarado (MIN_LECTURAS_DE_LINEA_BASE): no hay ventanas');
+    expect(juicio.corte).toEqual({
+      estado: 'llegado',
+      deDondeLlega: 'DESPLIEGUE_DE_CITAR_Y_LLEVARSE',
+      jornada: '2026-11-05',
+      desde: '2026-11-06',
+    });
+    const informe = texto(l);
+    expect(informe).toContain('SM-C5 (la Página de Cita; llegada: 2026-11-05, DESPLIEGUE_DE_CITAR_Y_LLEVARSE)');
+    expect(informe).toContain(
+      'Desde la llegada del 2026-11-05 (DESPLIEGUE_DE_CITAR_Y_LLEVARSE), su línea base es propia: empieza el 2026-11-06; ninguna ventana cruza esa jornada.',
+    );
   });
 
   it('con jornada pasada y la línea base sin cerrar: no hay ventanas, y se dice cuánto reúne', () => {

@@ -330,6 +330,19 @@ describe('Historia 24.4 — el contrato de los componentes, sin construir', () =
     expect(orden).toEqual([...orden].sort((a, b) => a - b));
   });
 
+  it('Historia 30.1 — las distancias de las acciones salen de la unidad: Copiar 4 ×, Imagen 2 ×, compartir 3 × (UX-DR114)', async () => {
+    // La medida en el navegador es local (e2e); esto la sostiene en `npm test`: la regla de la raíz
+    // de cada isla, en su `<style>`.
+    const margen = async (ruta: string) => {
+      const fuente = await readFile(join(RAIZ, ruta), 'utf8');
+      const estilo = fuente.slice(fuente.lastIndexOf('<style'));
+      return /\.isla\s*\{[^}]*margin-top:\s*([^;]+);/.exec(estilo)?.[1].trim();
+    };
+    expect(await margen('src/islands/CopiarCita.astro')).toBe('calc(var(--unidad) * 4)');
+    expect(await margen('src/islands/ImagenDeCita.astro')).toBe('calc(var(--unidad) * 2)');
+    expect(await margen('src/islands/CompartirEnlace.astro')).toBe('calc(var(--unidad) * 3)');
+  });
+
   it('`Rotulo` admite `nivel?: 2 | 3`, por omisión 2', async () => {
     const props = await propsDe('src/components/Rotulo.astro');
     expect(props.get('nivel')).toMatchObject({ opcional: true });
@@ -676,21 +689,25 @@ const autor = conjunto.autores.find((a) => a.slug === cita.autor)!;
  * `script`, `style`, `template` ni `noscript`: lo que se lee y se tabula. Cada uno con lo que es.
  */
 function hijosDelArticle(pagina: string): { etiqueta: string; clase: string; copiar: boolean }[] {
-  const hijos: { elemento: Elemento; copiar: boolean }[] = [];
+  const hijos: { elemento: Elemento; copiar: boolean; filtros: boolean }[] = [];
   recorrerElementos(pagina, (elemento, antepasados) => {
     const k = antepasados.findIndex((e) => e.etiqueta === 'article');
     if (k === -1) return;
     const hijo = k === antepasados.length - 1 ? elemento : antepasados[k + 1];
     if (hijo === elemento) {
       if (['script', 'style', 'template', 'noscript'].includes(elemento.etiqueta)) return;
-      hijos.push({ elemento, copiar: false });
+      hijos.push({ elemento, copiar: false, filtros: false });
     }
     const entrada = hijos.find((h) => h.elemento === hijo);
     if (entrada !== undefined && elemento.etiqueta === 'button' && elemento.atributos.has('data-copiar')) {
       entrada.copiar = true;
     }
+    // `FiltrosDeLaCita`: el contenedor oculto que lleva el orden de Pagefind de la Cita.
+    if (entrada !== undefined && hijo.atributos.has('hidden') && elemento.atributos.has('data-pagefind-sort')) {
+      entrada.filtros = true;
+    }
   });
-  return hijos.map(({ elemento, copiar }) => {
+  return hijos.map(({ elemento, copiar, filtros }) => {
     const clase = elemento.atributos.get('class') ?? '';
     const a = elemento.atributos;
     const que = copiar
@@ -707,7 +724,7 @@ function hijosDelArticle(pagina: string): { etiqueta: string; clase: string; cop
                 ? 'tarjeta-de-obra'
                 : elemento.etiqueta === 'nav' && clase.split(/\s+/).includes('salidas')
                   ? 'salidas'
-                  : a.has('hidden')
+                  : filtros
                     ? 'filtros'
                     : `${elemento.etiqueta}.${clase}`;
     return { etiqueta: elemento.etiqueta, clase: que, copiar };
@@ -764,7 +781,8 @@ describe('Historia 24.4 — la tarjeta en cada Página de Cita, construida', () 
         const hijos = hijosDelArticle(pagina);
         const compartir = hijos.findIndex((h) => h.clase === 'compartir');
         expect(compartir, slug).toBeGreaterThan(-1);
-        expect(hijos[compartir + 1]?.clase, slug).toBe('salidas');
+        const clases = hijos.map((h) => h.clase);
+        expect(clases[compartir + 1], slug).toBe(clases.includes('salidas') ? 'salidas' : 'filtros');
       } else {
         expect(cuantasTarjetasDeObra(pagina), slug).toBe(1);
       }
