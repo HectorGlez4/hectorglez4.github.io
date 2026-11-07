@@ -295,3 +295,9 @@ Puerta del bucle v9-ralph sobre `v9/34-0-desplegable`, con origin/main en a6e9b1
 - `dist/`: idéntico byte a byte al de la base construida desde main el mismo día (10.433 ficheros; comprobado por la implementación y por el auditor de aceptación en las dos rondas). Nada de `src/` importa `Desplegable.astro`.
 - NFR-7: no aplica (el sitio construido no cambia).
 - Vocabulario y migraciones: sin cambios; no hay despliegue de D1.
+
+## Verificación en el sitio en vivo — 2026-11-07 (UTC)
+
+- Fusión 734fcb7377 en main. Su Publicar (42396016675, tres intentos) y uno nuevo por `workflow_dispatch` (42400206561) construyeron en verde y fallaron en «Desplegar»: GitHub Pages se quedó en `syncing_files` hasta el tope de 10 min, con el mismo peso que el despliegue verde de las 13:52 (485,9 MiB, 15.371 ficheros) y con Pages «operational» en githubstatus. Es del alojamiento, no de la rama.
+- Lo que la 34.0 publica no cambia nada que se vea: ninguna página usa `Desplegable.astro`. `https://sabiduriadebolsillo.net/` responde 200. La Página de Cita `/cita/manuel-gonzalez-prada-y-nada-mas-temible-que-una-sociedad/` en vivo, comparada con la construida en la rama, solo difiere en el nombre del fichero de medición, que lleva el receptor dentro (`bf89c1c9` en vivo, el de la construcción local contra 8787 en la rama). `/obras/` en vivo no tiene ningún `<details>`, como debe ser.
+- El comportamiento de la primitiva (teclado, foco, filete, glifo) no se puede comprobar en vivo hasta que la use su primer consumidor (34.2 o la Épica 30): está probado en la sonda de `tests/e2e/desplegable.spec.ts`. «Sin datos que enseñar» en vivo.
