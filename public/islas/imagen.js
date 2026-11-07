@@ -22,7 +22,7 @@ const MARGEN = 96;
 /** `franja`: donde se compone todo. Ver por qué en `ImagenDeCita.astro`. */
 export const FORMATOS = [
   { id: 'cuadrado', nombre: 'Cuadrado', alto: LADO, franja: [0, LADO] },
-  { id: 'vertical', nombre: 'Vertical', alto: 1920, franja: [240, 1680] },
+  { id: 'vertical', nombre: 'Vertical', alto: 1920, franja: [240, 1500] },
 ];
 
 /**
