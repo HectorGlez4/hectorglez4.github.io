@@ -29,7 +29,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 # - Retrospective appends its action items to action_items; the status view surfaces open ones
 generated: 08-11-2026 09:00
-last_updated: 11-07-2026 16:51
+last_updated: 11-07-2026 21:17
 project: brainlySabiduria
 project_key: NOKEY
 tracking_system: file-system
@@ -478,8 +478,8 @@ development_status:
 
   # Épica 30 — citar y llevarse la Cita: corte de serie de SM-4 y SM-C5 (jornada, Héctor).
   # La 30.5 mueve la huella: no se fusiona con huella.test.ts en rojo (despliega Héctor).
-  epic-30: backlog
-  30-1-copiar-antes-de-la-tarjeta-de-obra-en-la-página-de-cita: backlog
+  epic-30: in-progress
+  30-1-copiar-antes-de-la-tarjeta-de-obra-en-la-página-de-cita: review  # v9-ralph 2026-11-07: Copiar antes de la Tarjeta de Obra (orden nuevo del article, compartir a 3×, corte continuacion-de-cita con DESPLIEGUE_DE_CITAR_Y_LLEVARSE sin valor). Diferido: repetir la medida a 360×640 con la Cita en verso más larga al fundir la Épica 29; la jornada del corte la da Héctor
   30-2-la-cita-a-su-medida-y-las-acciones-en-fila-desde-600-px: backlog
   30-3-cómo-citar-en-la-página-de-cita: backlog
   30-4-inserta-esta-cita: backlog
