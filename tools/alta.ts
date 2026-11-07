@@ -155,10 +155,14 @@ export async function darDeAltaLote(
     : new Map<string, { cuerpo: string; lineas?: string }>();
   function textoDelAlta(entrada: EntradaDeLote): { texto: string; descartados: number } {
     const recibido = entrada.texto ?? '';
+    // Un `texto` que no es cadena (un número del YAML) sigue tal cual hasta el esquema, que lo
+    // rechaza con su regla: el escritor solo escribe cadenas.
+    if (typeof recibido !== 'string') return { texto: recibido, descartados: 0 };
     const id = entrada.fuente?.id;
+    const obra = entrada.procedencia?.obra;
     const candidatos = documentosDeCita(
       typeof id === 'string' ? { id } : undefined,
-      entrada.procedencia?.obra,
+      typeof obra === 'string' ? obra : undefined,
       documentos,
     ).map((nombre) => {
       const d = documentos.get(nombre)!;

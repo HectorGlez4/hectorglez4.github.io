@@ -16,6 +16,7 @@ import {
   type CitaParaCotejar,
 } from '../../tools/lib/cotejo.ts';
 import { fuenteDeCita } from '../../src/lib/admision.ts';
+import { analizarDocumento } from '../../tools/lib/documento.ts';
 import { normalizar } from '../../src/lib/normalizar.ts';
 import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { join, resolve } from 'node:path';
@@ -718,6 +719,24 @@ describe('Historia 29.1 — el salto de verso en el cotejo (AD-29)', () => {
     expect(r.ok).toBe(false);
     expect(r.fallos).toEqual([
       { ruta: `corpus/fuentes/${DOC}.txt`, regla: expect.stringMatching(/lineas: poesia/) },
+    ]);
+  });
+
+  it('una lineas: vacía no es ausente: analizarDocumento la entrega y el cotejo la rechaza', () => {
+    const analizado = analizarDocumento(
+      'fuente: wikisource-es\nobra: Versos sencillos\nlineas:\nurl: https://es.wikisource.org/wiki/X\n' +
+        'recuperado: 2026-11-07\n---\nVersos sencillos\n---\n' + CUERPO_MARTI,
+    );
+    const cabecera = analizado?.cabecera as { lineas?: string } | undefined;
+    expect(cabecera?.lineas).toBe('');
+    const r = cotejar({
+      citas: [],
+      documentos: new Map([[DOC, CUERPO_MARTI]]),
+      censo: [],
+      lineasDeclaradas: new Map([[DOC, cabecera?.lineas as string]]),
+    });
+    expect(r.fallos).toEqual([
+      { ruta: `corpus/fuentes/${DOC}.txt`, regla: expect.stringMatching(/«lineas: »/) },
     ]);
   });
 });

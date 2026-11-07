@@ -75,7 +75,7 @@ import {
 } from './lib/extraccion.ts';
 import { fuenteDeUrl } from './lib/fuentes.ts';
 import { opcion, posicionales, raizDeCorpusDe, terminar } from './lib/cli.ts';
-import { formaDeLasLineas, parteDeSaltosDescartados, textoConSaltos } from './lib/lineas.ts';
+import { esFormaDeLineas, formaDeLasLineas, parteDeSaltosDescartados, textoConSaltos } from './lib/lineas.ts';
 
 const USO =
   'Uso: npx tsx tools/extraer.ts <corpus/fuentes/documento.txt> --autor <slug> ' +
@@ -527,6 +527,12 @@ terminar({
     // es cantera nueva sino una antología de lo que el Corpus ya tiene.
     `\nYa eran Cita publicada: ${yaEstaban}` +
     `\nForma de las líneas del documento: ${deEsteDocumento.forma}` +
+    // Una `lineas:` fuera del conjunto no se calla: el texto sale en una línea y el build
+    // romperá por esa cabecera.
+    (cabecera.lineas !== undefined && !esFormaDeLineas(cabecera.lineas)
+      ? ` (la cabecera declara «lineas: ${cabecera.lineas}», que no es ninguna forma del ` +
+        'conjunto: el texto va en una línea y el build romperá nombrando el documento)'
+      : '') +
     (parteDeSaltosDescartados(saltosDescartados) === undefined
       ? ''
       : `\n${parteDeSaltosDescartados(saltosDescartados)}`),

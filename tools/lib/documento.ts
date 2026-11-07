@@ -2316,7 +2316,9 @@ export function analizarDocumento(
       ...(pedido !== undefined && pedido !== '' ? { pedido } : {}),
       ...(traductor !== undefined && traductor !== '' ? { traductor } : {}),
       ...(añoDeTraduccion !== undefined ? { añoDeTraduccion } : {}),
-      ...(formaDeLineas !== undefined && formaDeLineas !== '' ? { lineas: formaDeLineas } : {}),
+      // Historia 29.1 — también vacía: una `lineas:` sin valor no es ninguna forma, y el cotejo
+      // del build la rechaza nombrando el documento en vez de darla por ausente.
+      ...(formaDeLineas !== undefined ? { lineas: formaDeLineas } : {}),
     },
     declaracion,
     cuerpo,

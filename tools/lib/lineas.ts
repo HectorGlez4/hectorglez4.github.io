@@ -14,7 +14,7 @@
  * del otro, así que el orden de evaluación da igual.
  */
 
-import { colapsarEspacios, localizar, tramoEnCrudo } from './cotejo.ts';
+import { colapsarEspacios, localizar, rachasDeEspacio, tramoEnCrudo } from './cotejo.ts';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // La forma de las líneas
@@ -78,7 +78,6 @@ const CLASIFICADOR = {
  */
 const PIE_DE_LICENCIA = /^(?:Esta obra se encuentra en dominio público|Public domain)/u;
 
-/** Lo que se ve al final de un verso: signo de cierre. */
 /**
  * Una entrada de índice: «Capítulo IV», un número o un romano en mayúsculas seguidos de signo
  * («1. La tradición eterna», «I. Retrato»), o una línea que acaba en un guion suelto («XII -»).
@@ -88,6 +87,7 @@ const PIE_DE_LICENCIA = /^(?:Esta obra se encuentra en dominio público|Public d
  */
 const ENTRADA_DE_INDICE =
   /^(?:Cap[íi]tulo|Cap\.|Libro|Parte)\s+(?:\d+|[IVXLCDM]+)\b|^(?:\d+|[IVXLCDM]+)\s*[.)\-–—:]|\s[-–—]$/u;
+/** Lo que se ve al final de un verso: signo de cierre. */
 const ACABA_EN_SIGNO = /[.,;:!?¡¿»”"')\]—–-]$/u;
 const EMPIEZA_EN_MINUSCULA = /^\p{Ll}/u;
 
@@ -133,7 +133,7 @@ function formaCalculada(cuerpo: string): FormaDeLineas {
   let partidas = 0;
   for (const bloque of bloques) {
     if (bloque.length < 3) continue;
-    const maximo = Math.max(...bloque.map((l) => l.length));
+    const maximo = bloque.reduce((m, l) => Math.max(m, l.length), 0);
     for (let i = 0; i < bloque.length - 1; i += 1) {
       internas += 1;
       const linea = bloque[i];
@@ -183,7 +183,8 @@ function formaCalculada(cuerpo: string): FormaDeLineas {
     const prefijo = l.split(/\s+/u).slice(0, 3).join(' ');
     prefijos.set(prefijo, (prefijos.get(prefijo) ?? 0) + 1);
   }
-  const repetido = Math.max(0, ...prefijos.values());
+  let repetido = 0;
+  for (const n of prefijos.values()) repetido = Math.max(repetido, n);
 
   if (
     largos.length >= CLASIFICADOR.minLineas &&
@@ -229,11 +230,6 @@ function cuantil(ordenados: readonly number[], q: number): number {
 // El escritor del texto
 // ─────────────────────────────────────────────────────────────────────────────
 
-/** Lo que `colapsarEspacios` retira sin dejar espacio. */
-const INVISIBLE = /[­​‌‍⁠﻿]/u;
-/** Una racha de espacio con los invisibles que la rodeen. */
-const RACHA = /[\s­​‌‍⁠﻿]+/gu;
-
 export interface TextoConSaltos {
   /** El texto tal y como se escribe en el fichero de la Cita. */
   texto: string;
@@ -255,11 +251,9 @@ export function textoConSaltos(
   texto: string,
   documento?: { cuerpo: string; forma: FormaDeLineas },
 ): TextoConSaltos {
-  const rachas = [...texto.matchAll(RACHA)];
-  /** Las rachas que dejan un espacio en el colapsado: las interiores con algún espacio. */
-  const conEspacio = rachas.filter(
-    (r) => /\s/u.test(r[0]) && (r.index ?? 0) > 0 && (r.index ?? 0) + r[0].length < texto.length,
-  );
+  // Las rachas de espacio del texto, con las reglas de `colapsarEspacios` (las de `cotejo.ts`):
+  // la k-ésima que deja espacio es el k-ésimo espacio del colapsado.
+  const rachas = rachasDeEspacio(texto);
 
   let saltosDelDocumento: boolean[] | undefined;
   if (documento !== undefined && esFormaDeVerso(documento.forma)) {
@@ -280,20 +274,19 @@ export function textoConSaltos(
   let desde = 0;
   let k = 0;
   for (const racha of rachas) {
-    const inicio = racha.index ?? 0;
-    resultado += texto.slice(desde, inicio);
-    desde = inicio + racha[0].length;
-    const invisibles = [...racha[0]].filter((c) => INVISIBLE.test(c)).join('');
-    if (!conEspacio.includes(racha)) {
+    resultado += texto.slice(desde, racha.inicio);
+    desde = racha.fin;
+    const conSalto = texto.slice(racha.inicio, racha.fin).includes('\n');
+    if (!racha.dejaEspacio) {
       // En un extremo, o solo invisibles: el espacio se va, como en `colapsarEspacios`.
-      if (racha[0].includes('\n')) descartados += 1;
-      resultado += invisibles;
+      if (conSalto) descartados += 1;
+      resultado += racha.invisibles;
       continue;
     }
     const salto = saltosDelDocumento?.[k] === true;
     k += 1;
-    if (!salto && racha[0].includes('\n')) descartados += 1;
-    resultado += invisibles + (salto ? '\n' : ' ');
+    if (!salto && conSalto) descartados += 1;
+    resultado += racha.invisibles + (salto ? '\n' : ' ');
   }
   resultado += texto.slice(desde);
   return { texto: resultado, descartados };

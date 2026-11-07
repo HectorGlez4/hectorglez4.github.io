@@ -149,9 +149,16 @@ describe('Historia 29.1 — el salto de verso es un único U+000A (AD-29)', () =
     ['Yo vengo\n\nY hacia', /dos saltos seguidos/],
     ['\nYo vengo', /al principio ni al final/],
     ['Yo vengo\n', /al principio ni al final/],
-    ['Yo vengo \nY hacia', /espacio ni un tabulador/],
-    ['Yo vengo\t\nY hacia', /espacio ni un tabulador/],
-    ['Yo vengo\n Y hacia', /espacio ni un tabulador/],
+    ['Yo vengo \nY hacia', /espacio .*ni un tabulador/],
+    ['Yo vengo\t\nY hacia', /espacio .*ni un tabulador/],
+    ['Yo vengo\n Y hacia', /espacio .*ni un tabulador/],
+    ['Yo vengo\u00a0\nY hacia', /espacio .*ni un tabulador/],
+    ['Yo vengo\n\u2009Y hacia', /espacio .*ni un tabulador/],
+    ['Yo vengo\u2028Y hacia', /otro separador de línea/],
+    ['Yo vengo\u2029Y hacia', /otro separador de línea/],
+    ['Yo vengo\u0085Y hacia', /otro separador de línea/],
+    ['Yo vengo\vY hacia', /otro separador de línea/],
+    ['Yo vengo\fY hacia', /otro separador de línea/],
     ['Yo vengo<br>Y hacia', /«<br»/],
     ['Yo vengo / Y hacia', /« \/ »/],
   ];
@@ -166,6 +173,8 @@ describe('Historia 29.1 — el salto de verso es un único U+000A (AD-29)', () =
 
   it('un solo salto entre versos se admite', () => {
     expect(citaAdmisible.safeParse(datos(VERSOS)).success).toBe(true);
+    // U+FEFF casa con \s, pero es un invisible que el escritor conserva junto al salto.
+    expect(citaAdmisible.safeParse(datos('Yo vengo de todas partes,\ufeff\nY hacia')).success).toBe(true);
   });
 
   it('dos saltos seguidos rompen el build, nombrando el fichero', async () => {

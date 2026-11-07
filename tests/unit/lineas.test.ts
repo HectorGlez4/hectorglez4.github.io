@@ -151,6 +151,14 @@ describe('textoConSaltos', () => {
     }
   });
 
+  it('un invisible no es espacio: U+FEFF entre letras sigue sin espacio, y junto a uno se conserva (NFR-12)', () => {
+    expect(textoConSaltos('Yo\ufeffvengo de todas')).toEqual({ texto: 'Yo\ufeffvengo de todas', descartados: 0 });
+    const conMarca = 'Yo vengo de todas partes,\ufeff Y hacia todas partes voy:';
+    const escrito = textoConSaltos(conMarca, versos);
+    expect(escrito.texto).toBe('Yo vengo de todas partes,\ufeff\nY hacia todas partes voy:');
+    expect(colapsarEspacios(escrito.texto)).toBe(colapsarEspacios(conMarca));
+  });
+
   it('documentoParaLosSaltos toma el primero de verso en que el texto se localiza', () => {
     const candidatos = [
       { nombre: 'prosa', cuerpo: cuerpoDe(A_FLOR_DE_PIEL) },
@@ -168,7 +176,7 @@ describe('textoConSaltos', () => {
 });
 
 describe('tramoEnCrudo', () => {
-  const crudo = '  Uno\u00a0dos\u200b tres\n\ncuatro \u00ad\nci\u00adnco 𝄞 seis\u2060\n  ';
+  const crudo = '  Uno\u00a0dos\u200b tres\n\ncuatro \u00ad\nci\u00adnco 𝄞 se\ufeffis\u2060\n  ';
 
   it('cada tramo del colapsado sale del crudo que lo produjo (invisibles, U+00A0, \\n, \\n\\n, astral)', () => {
     const colapsado = colapsarEspacios(crudo);
@@ -205,6 +213,21 @@ describe('tramoEnCrudo', () => {
         expect(colapsarEspacios(cuerpo.slice(a, b))).toBe(colapsado.slice(inicio, fin));
       }
     }
+  });
+
+  it('U+FEFF casa con \\s pero no es espacio: no desplaza la cuenta (la marca de orden de bytes)', () => {
+    const conMarca = 'ab\ufeffcd ef\ngh';
+    const colapsado = colapsarEspacios(conMarca);
+    expect(colapsado).toBe('abcd ef gh');
+    const tramo = (a: number, b: number) => {
+      const { inicio, fin } = tramoEnCrudo(conMarca, a, b);
+      return conMarca.slice(inicio, fin);
+    };
+    expect(tramo(colapsado.indexOf('gh'), colapsado.length)).toBe('gh');
+    expect(tramo(colapsado.indexOf(' ef'), colapsado.indexOf(' ef') + 1)).toBe(' ');
+    expect(tramo(colapsado.indexOf(' gh'), colapsado.indexOf(' gh') + 1)).toBe('\n');
+    // Una racha de solo marcas entre dos letras no deja espacio.
+    expect(colapsarEspacios(tramo(0, 4))).toBe('abcd');
   });
 
   it('un tramo fuera del colapsado lanza', () => {
@@ -273,6 +296,7 @@ describe('dueños del salto (AD-29)', () => {
       [/function\s+documentoParaLosSaltos\b/u, 'tools/lib/lineas.ts'],
       [/\bFORMAS_DE_LINEAS\s*=/u, 'tools/lib/lineas.ts'],
       [/function\s+tramoEnCrudo\b/u, 'tools/lib/cotejo.ts'],
+      [/function\s+rachasDeEspacio\b/u, 'tools/lib/cotejo.ts'],
     ];
     for (const [patron, dueño] of definiciones) {
       expect(todos.filter((f) => patron.test(f.contenido)).map((f) => f.ruta)).toEqual([dueño]);
@@ -303,5 +327,20 @@ describe('dueños del salto (AD-29)', () => {
         'tools/recuperar.ts',
       ].sort(),
     );
+  });
+
+  it('quien importa tramoEnCrudo o rachasDeEspacio de tools/lib/cotejo.ts es exactamente la lista declarada', () => {
+    const importadores = todos
+      .filter((f) => f.ruta !== 'tools/lib/cotejo.ts')
+      .filter((f) =>
+        [...f.contenido.matchAll(/import\s*(?:type\s*)?\{([^}]*)\}\s*from\s*['"]([^'"]*cotejo\.ts)['"]/gu)].some(
+          (m) =>
+            resolve(RAIZ, dirname(f.ruta), m[2]) === join(RAIZ, 'tools/lib/cotejo.ts') &&
+            /\b(?:tramoEnCrudo|rachasDeEspacio)\b/u.test(m[1]),
+        ),
+      )
+      .map((f) => f.ruta)
+      .sort();
+    expect(importadores).toEqual(['tools/lib/lineas.ts']);
   });
 });

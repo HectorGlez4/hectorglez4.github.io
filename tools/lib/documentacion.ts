@@ -578,7 +578,18 @@ export async function documentarCita(
    * que el texto se localiza), nunca de lo tecleado. Un salto tecleado sin respaldo se pierde y
    * el parte lo dice.
    */
-  const declarados = await leerDocumentosDeclarados(rutas);
+  let declarados: Awaited<ReturnType<typeof leerDocumentosDeclarados>>;
+  try {
+    declarados = await leerDocumentosDeclarados(rutas);
+  } catch (fallo) {
+    return {
+      ok: false,
+      motivos: [
+        `corpus/fuentes/ no se deja leer (${(fallo as Error).message}): sin los documentos no se ` +
+          'sabe de cuál salen los saltos de verso. No se ha escrito nada.',
+      ],
+    };
+  }
   const nombres = documentosDeCita({ id: documento.idFuente }, documento.obra, declarados);
   if (!nombres.includes(documento.nombre)) nombres.unshift(documento.nombre);
   const candidatos = nombres.map((nombre) => {
@@ -622,10 +633,17 @@ export async function documentarCita(
   const saltosDescartados = parteDeSaltosDescartados(escrito.descartados);
   if (saltosDescartados !== undefined) cambios.push(saltosDescartados);
   if (textoEscrito !== cita.texto && colapsarEspacios(textoEscrito) === colapsarEspacios(cita.texto)) {
-    const saltos = (textoEscrito.match(/\n/gu) ?? []).length;
+    // Lo que dice el parte es la diferencia con lo publicado, no los saltos que acaba teniendo.
+    const antes = (cita.texto.match(/\n/gu) ?? []).length;
+    const despues = (textoEscrito.match(/\n/gu) ?? []).length;
+    const diferencia = Math.abs(despues - antes);
+    const cuantos = `${diferencia} ${diferencia === 1 ? 'salto' : 'saltos'} de verso`;
     cambios.push(
-      `El texto toma ${saltos} ${saltos === 1 ? 'salto' : 'saltos'} de verso de su documento; ` +
-        'no cambia ninguna letra ni ningún signo.',
+      despues > antes
+        ? `El texto toma ${cuantos} de su documento; no cambia ninguna letra ni ningún signo.`
+        : despues < antes
+          ? `El texto pierde ${cuantos} que su documento no respalda; no cambia ninguna letra ni ningún signo.`
+          : 'El texto mueve sus saltos de verso a donde los parte su documento; no cambia ninguna letra ni ningún signo.',
     );
   }
   if (colapsarEspacios(textoEscrito) !== colapsarEspacios(cita.texto)) {

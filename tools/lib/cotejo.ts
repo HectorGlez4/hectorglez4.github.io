@@ -86,16 +86,62 @@ export function tramoEnCrudo(
   return { inicio: mapa.inicios[inicio], fin: mapa.finales[fin - 1] };
 }
 
-/** Lo que `colapsarEspacios` retira sin dejar espacio, carácter a carácter. */
-const UN_INVISIBLE = /[­​‌‍⁠﻿]/u;
+/**
+ * Lo que `colapsarEspacios` retira sin dejar espacio, carácter a carácter: el mismo conjunto
+ * que `INVISIBLES`, del que sale, para que la correspondencia con el crudo y el escritor de
+ * `tools/lib/lineas.ts` no puedan dejar de coincidir con el colapso.
+ */
+const UN_INVISIBLE = new RegExp(INVISIBLES.source, 'u');
 const UN_ESPACIO = /\s/u;
 
 /**
+ * Una racha de espacio de un texto tal y como la ve `colapsarEspacios`: los caracteres de
+ * espacio e invisibles seguidos, `[inicio, fin)` en UTF-16, y si deja un espacio en el
+ * colapsado —es interior y trae algún espacio que **no** es invisible: U+FEFF casa con `\s`
+ * en JavaScript, pero `colapsarEspacios` lo retira antes de colapsar—. `invisibles` son los
+ * que trae, que el colapso retira y quien reescriba el espacio conserva.
+ */
+export interface RachaDeEspacio {
+  inicio: number;
+  fin: number;
+  dejaEspacio: boolean;
+  invisibles: string;
+}
+
+/**
+ * Las rachas de espacio de un texto, con las reglas de `colapsarEspacios` — AD-29. Es el único
+ * recorrido del espacio de un texto: lo usan la correspondencia con el crudo de `tramoEnCrudo`
+ * y el escritor `textoConSaltos`, y por eso no pueden discrepar del colapso.
+ */
+export function rachasDeEspacio(texto: string): RachaDeEspacio[] {
+  const rachas: RachaDeEspacio[] = [];
+  let i = 0;
+  while (i < texto.length) {
+    if (!UN_ESPACIO.test(texto[i]) && !UN_INVISIBLE.test(texto[i])) {
+      i += 1;
+      continue;
+    }
+    let j = i;
+    let conEspacio = false;
+    let invisibles = '';
+    while (j < texto.length && (UN_ESPACIO.test(texto[j]) || UN_INVISIBLE.test(texto[j]))) {
+      if (UN_INVISIBLE.test(texto[j])) invisibles += texto[j];
+      else conEspacio = true;
+      j += 1;
+    }
+    // Solo las rachas interiores con algún espacio dejan un espacio; las de los extremos las
+    // quita el `trim`, y las de solo invisibles no dejan nada.
+    rachas.push({ inicio: i, fin: j, dejaEspacio: conEspacio && i > 0 && j < texto.length, invisibles });
+    i = j;
+  }
+  return rachas;
+}
+
+/**
  * La correspondencia colapsado→crudo: para cada unidad del colapsado, dónde empieza y dónde
- * acaba lo que la produjo en el crudo. Recorre el crudo con las mismas reglas que
- * `colapsarEspacios` —invisibles fuera, cada racha con algún espacio a un espacio, los
- * extremos fuera— y se guarda la última, porque quien pregunta suele recorrer muchas rachas
- * del mismo documento.
+ * acaba lo que la produjo en el crudo. Recorre el crudo con `rachasDeEspacio`, las mismas
+ * reglas que `colapsarEspacios`, y se guarda la última, porque quien pregunta suele recorrer
+ * muchas rachas del mismo documento.
  */
 let ultimoMapa: { crudo: string; inicios: number[]; finales: number[] } | undefined;
 function mapaDelCrudo(crudo: string): { inicios: number[]; finales: number[] } {
@@ -103,27 +149,16 @@ function mapaDelCrudo(crudo: string): { inicios: number[]; finales: number[] } {
   const inicios: number[] = [];
   const finales: number[] = [];
   let i = 0;
-  while (i < crudo.length) {
-    const c = crudo[i];
-    if (UN_ESPACIO.test(c) || UN_INVISIBLE.test(c)) {
-      let j = i;
-      let conEspacio = false;
-      while (j < crudo.length && (UN_ESPACIO.test(crudo[j]) || UN_INVISIBLE.test(crudo[j]))) {
-        if (UN_ESPACIO.test(crudo[j])) conEspacio = true;
-        j += 1;
-      }
-      // Solo las rachas interiores con algún espacio dejan un espacio; las de los extremos
-      // las quita el `trim`, y las de solo invisibles no dejan nada.
-      if (conEspacio && inicios.length > 0 && j < crudo.length) {
-        inicios.push(i);
-        finales.push(j);
-      }
-      i = j;
-      continue;
+  for (const racha of [...rachasDeEspacio(crudo), { inicio: crudo.length, fin: crudo.length, dejaEspacio: false }]) {
+    for (; i < racha.inicio; i += 1) {
+      inicios.push(i);
+      finales.push(i + 1);
     }
-    inicios.push(i);
-    finales.push(i + 1);
-    i += 1;
+    if (racha.dejaEspacio) {
+      inicios.push(racha.inicio);
+      finales.push(racha.fin);
+    }
+    i = racha.fin;
   }
   ultimoMapa = { crudo, inicios, finales };
   return ultimoMapa;
@@ -379,8 +414,9 @@ function reglaDelSalto(
     const enumerados = legibles.map((n) => `corpus/fuentes/${n}.txt`).join(', ');
     return (
       'Regla incumplida (salto de verso, 1): la Cita lleva un salto de línea y su texto no se ' +
-      `localiza en ningún documento suyo de verso (${enumerados} no lo son). Un salto solo lo ` +
-      'respalda un documento de forma «verso» o «verso-espaciado»: escriba el texto en una línea.'
+      `localiza en ningún documento suyo de verso (entre ${enumerados}, ninguno es de verso con ` +
+      'el texto dentro). Un salto solo lo respalda un documento de forma «verso» o ' +
+      '«verso-espaciado» en que el texto aparece: escriba el texto en una línea.'
     );
   }
   const respaldado = deVerso.some((nombre) => {
