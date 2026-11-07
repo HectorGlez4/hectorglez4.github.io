@@ -1378,9 +1378,13 @@ bloque «Ediciones en venta» (`src/components/EdicionesEnVenta.astro`) dentro d
 esta obra», tras la edición cotejada. El repositorio versiona **`TIENDAS` vacío**, y mientras lo
 esté el esquema rechaza toda edición: ninguna ficha puede declarar una.
 
-1. **La primera tienda, con su marca, la declara Héctor** en `TIENDAS`
-   (`{ clave, nombre, dominio, parametro, marca }`). El repositorio es público y la marca queda a
-   la vista: **ningún agente escribe una tienda ni una marca**.
+1. **Las tiendas las declara Héctor** en `TIENDAS`, y **sin marca** (Historia 33.1):
+   `{ clave, nombre, dominio, parametro }`, con el campo `marca` omitido —nunca `''` ni
+   `undefined` escrito—. Así se curan sus ediciones sin haber solicitado la cuenta, que es lo
+   que arranca el plazo de ventas. La `marca` la añade Héctor el día que solicita la cuenta,
+   **nunca un agente**: el repositorio es público y la marca queda a la vista, así que **ningún
+   agente escribe una tienda ni una marca**. `npm run ingreso` dice qué tiendas no tienen marca
+   (y `--json`, `conMarca` por tienda, sin la marca ni el parámetro).
 2. **Las ediciones se declaran con su orden**, nunca escribiendo `ediciones` a mano:
 
    ```
@@ -1392,15 +1396,20 @@ esté el esquema rechaza toda edición: ninguna ficha puede declarar una.
    código 1 y sin escribir si la familia Obra está congelada (`CONGELACION_DE_OBRAS`, SM-11), si
    la tienda no es del conjunto o si el esquema la rechaza (otro dominio, un puerto, el
    parámetro de la marca en cualquier capitalización); con 2, la forma de la invocación. Si la
-   Obra no tiene ninguna Cita cotejada, declara igual y avisa de que no se pintará.
+   Obra no tiene ninguna Cita cotejada, declara igual y avisa de que no se pintará. Una tienda
+   sin marca admite ediciones con las mismas reglas, y el parte dice que la edición no se
+   pintará hasta que Héctor declare la marca y encienda el Modelo.
    `quitar-edicion <ficha> <n>` la quita (1 si no hay esa posición).
    Las órdenes que reescriben una ficha conservan sus ediciones; `reunir` no hereda las de la
    absorbida y lo dice.
 3. **Encender es el booleano**, y en lugar del `destino` que exigen los demás Modelos exige
-   **al menos una tienda declarada**: sin ella el build se para. Una edición solo se pinta en
-   una Obra con alguna Cita cotejada —la edición en venta nunca va sola (FR-54)—; si no la hay,
-   el build avisa «Ediciones sin edición cotejada» nombrando la ficha. Apagada, `dist/` es
-   idéntico con ediciones declaradas o sin ellas.
+   **al menos una tienda declarada** y que **toda** tienda declarada tenga marca: sin tiendas
+   el build se para, y con alguna sin marca también, nombrando cada una por clave y nombre
+   (`revisarDeclaracionDeIngreso`; `urlDeEdicion` solo acepta por su tipo una `TiendaConMarca`).
+   Una edición solo se pinta en una Obra con alguna Cita cotejada —la edición en venta nunca va
+   sola (FR-54)—; si no la hay, el build avisa «Ediciones sin edición cotejada» nombrando la
+   ficha. Apagada, `dist/` es idéntico byte a byte con tiendas con marca o sin ella y con
+   ediciones o sin ellas: lo construye en cuatro variantes `tests/unit/ediciones-en-venta.test.ts`.
 4. **Barrido de accesibilidad con el Modelo encendido**: el mismo
    `npx playwright test tests/e2e/ingreso-accesible.spec.ts --project=escritorio`, que ya barre
    la Página de Obra con dos ediciones de una tienda inventada en la copia.

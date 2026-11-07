@@ -58,7 +58,7 @@ import type { Resultado } from './gestion.ts';
 import { obrasDeLosDatos } from '../../src/lib/publicado.ts';
 import type { CongelacionDeObras } from '../../src/lib/umbrales.ts';
 import { esquemaDeObra } from '../../src/lib/admision.ts';
-import { TIENDAS, tiendaDe, type Tienda } from '../../src/lib/ingreso.ts';
+import { TIENDAS, tieneMarca, tiendaDe, type Tienda } from '../../src/lib/ingreso.ts';
 
 /** El esquema con que se leen y reescriben las fichas; por omisión, el del sitio (22.9). */
 type EsquemaDeFicha = Parameters<typeof leerFichasDeObra>[1];
@@ -867,7 +867,8 @@ export async function declararEdicion(
       motivos: [
         `«${edicion.tienda}» no es ninguna tienda declarada en TIENDAS de src/lib/ingreso.ts` +
           (tiendas.length === 0
-            ? ', y hoy no declara ninguna. La primera tienda, con su marca, la declara el dueño de la cuenta.'
+            ? ', y hoy no declara ninguna. La primera tienda la declara Héctor, sin marca o con ella: ' +
+              'la marca se le añade el día que se solicita la cuenta.'
             : `. Las declaradas: ${tiendas.map((t) => `«${t.clave}»`).join(', ')}.`),
         NADA_ESCRITO,
       ],
@@ -928,6 +929,12 @@ export async function declararEdicion(
       ...lineasDeEdiciones(admitida.data.ediciones ?? [], tiendas),
       'La marca de afiliado la pone el build desde TIENDAS. La edición solo se pinta con la ' +
         'afiliación encendida y alguna Cita de la Obra cotejada: nunca va sola (FR-54).',
+      ...(tieneMarca(tienda)
+        ? []
+        : [
+            `La tienda «${tienda.clave}» (${tienda.nombre}) no tiene marca: la edición queda curada, ` +
+              'pero no se pintará hasta que Héctor declare la marca y encienda el Modelo.',
+          ]),
       ...(await avisoSinCotejada(rutas, { ...ficha, ediciones: admitida.data.ediciones ?? [] })),
     ].join('\n'),
   };

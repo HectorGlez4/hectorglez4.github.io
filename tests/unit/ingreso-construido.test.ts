@@ -15,6 +15,7 @@ import {
   fuenteConTiendaDePrueba,
   limpiar,
   TIENDA_DE_PRUEBA,
+  TIENDA_SIN_MARCA_DE_PRUEBA,
 } from './ayuda/construir.js';
 import {
   bytesDeGuionEnLinea,
@@ -736,6 +737,49 @@ describe('Historia 14.2 — encender sin destino detiene la construcción', () =
     // el que redacta `revisarDeclaracionDeIngreso`, y llega hasta la terminal.
     expect(resultado.salida).toContain('no lleva a ninguna parte');
     expect(resultado.salida).toContain('src/lib/ingreso.ts');
+  });
+});
+
+/**
+ * Historia 33.1 — encender la afiliación con una tienda sin marca detiene la construcción.
+ *
+ * Como la de la 14.2, una construcción que **falla**, y barata: la puerta corta al cargar
+ * `src/lib/ingreso.ts`. La copia declara las dos tiendas inventadas —una con marca y otra sin—
+ * y enciende la afiliación; el fallo nombra la que no tiene marca, por clave y nombre, y no la
+ * otra.
+ */
+describe('Historia 33.1 — encender con una tienda sin marca detiene la construcción', () => {
+  const aLimpiar: string[] = [];
+  let resultado: { codigo: number; salida: string; proyecto: string };
+
+  beforeAll(async () => {
+    const fuente = fuenteConModeloEncendido(
+      fuenteConTiendaDePrueba(await readFile(resolve(RAIZ, 'src/lib/ingreso.ts'), 'utf8'), [
+        TIENDA_DE_PRUEBA,
+        TIENDA_SIN_MARCA_DE_PRUEBA,
+      ]),
+      'afiliacion-de-libros',
+    );
+    resultado = await construirConCorpus(CORPUS, {
+      jornada: JORNADA,
+      ficheros: { 'src/lib/ingreso.ts': fuente },
+    });
+    aLimpiar.push(resultado.proyecto);
+  }, 240_000);
+
+  afterAll(async () => {
+    await Promise.all(aLimpiar.splice(0).map(limpiar));
+  });
+
+  it('el build falla', () => {
+    expect(resultado.codigo, resultado.salida).not.toBe(0);
+  });
+
+  it('y nombra la tienda sin marca, por clave y nombre, y no la que la tiene', () => {
+    const t = TIENDA_SIN_MARCA_DE_PRUEBA;
+    expect(resultado.salida).toContain(`«${t.clave}» (${t.nombre})`);
+    expect(resultado.salida).toContain('no se enciende mientras alguna tienda declarada no tenga marca');
+    expect(resultado.salida).not.toContain(`«${TIENDA_DE_PRUEBA.clave}»`);
   });
 });
 

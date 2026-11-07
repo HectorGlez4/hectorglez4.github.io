@@ -113,7 +113,7 @@ const conDondeLeer = primera && resumenDondeLeer !== undefined;
 const afiliacion = modelosEnRuta(ruta).find((modelo) => modelo.id === 'afiliacion-de-libros');
 const enVenta =
   afiliacion !== undefined && obra.ediciones !== undefined
-    ? { id: afiliacion.id, ediciones: edicionesEnVenta(obra.ediciones) }
+    ? { id: afiliacion.id, ediciones: edicionesEnVenta(obra.ediciones, obra.nombre) }
     : undefined;
 ---
 
