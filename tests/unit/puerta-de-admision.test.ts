@@ -1,6 +1,8 @@
 import { afterAll, describe, expect, it } from 'vitest';
 import { readFileSync, readdirSync } from 'node:fs';
-import { resolve } from 'node:path';
+import { join, resolve } from 'node:path';
+import { citaAdmisible } from '../../src/lib/admision.ts';
+import { separarFrontmatter } from '../../tools/lib/corpus.ts';
 import {
   AUTOR_VALIDO,
   RAIZ,
@@ -112,6 +114,70 @@ describe('Historia 1.2 — el criterio de admisión rompe el build', () => {
     expect(codigo).not.toBe(0);
   });
 
+});
+
+describe('Historia 29.1 — el salto de verso es un único U+000A (AD-29)', () => {
+  const VERSOS = 'Yo vengo de todas partes,\nY hacia todas partes voy:';
+  const DOCUMENTO_DE_VERSO = readFileSync(
+    join(import.meta.dirname, 'ayuda/lineas/wikisource-es--versos-sencillos--versos-sencillos-i.txt'),
+    'utf8',
+  );
+  const deVerso = (texto: string) =>
+    citaValida({
+      texto,
+      slug: 'seneca-yo-vengo-de-todas-partes',
+      procedencia: { obra: 'Versos sencillos' },
+      fuente: { id: 'wikisource-es', url: 'https://es.wikisource.org/wiki/Versos_sencillos/I' },
+    });
+
+  it('dos versos se escriben «…partes,\\nY hacia…», construyen y se leen con el mismo U+000A', async () => {
+    const fichero = deVerso(VERSOS);
+    expect(fichero).toContain('texto: "Yo vengo de todas partes,\\nY hacia todas partes voy:"');
+    expect(separarFrontmatter(fichero)?.texto).toBe(VERSOS);
+    const { codigo, salida } = await construir({
+      ...CORPUS_BASE,
+      'fuentes/wikisource-es--versos-sencillos--versos-sencillos-i.txt': DOCUMENTO_DE_VERSO,
+      'citas/seneca--yo-vengo.md': fichero,
+    });
+    expect(salida).not.toMatch(/Regla incumplida/);
+    expect(codigo).toBe(0);
+  });
+
+  const datos = (texto: string) => ({ ...(separarFrontmatter(citaValida()) as Record<string, unknown>), texto });
+  const rechazos: [string, RegExp][] = [
+    ['Yo vengo\r\nY hacia', /retornos de carro/],
+    ['Yo vengo\n\nY hacia', /dos saltos seguidos/],
+    ['\nYo vengo', /al principio ni al final/],
+    ['Yo vengo\n', /al principio ni al final/],
+    ['Yo vengo \nY hacia', /espacio ni un tabulador/],
+    ['Yo vengo\t\nY hacia', /espacio ni un tabulador/],
+    ['Yo vengo\n Y hacia', /espacio ni un tabulador/],
+    ['Yo vengo<br>Y hacia', /«<br»/],
+    ['Yo vengo / Y hacia', /« \/ »/],
+  ];
+  for (const [texto, regla] of rechazos) {
+    it(`rechaza ${JSON.stringify(texto)} con su regla`, () => {
+      const resultado = citaAdmisible.safeParse(datos(texto));
+      expect(resultado.success).toBe(false);
+      const mensajes = resultado.success ? [] : resultado.error.issues.map((i) => i.message);
+      expect(mensajes.some((m) => /^Regla incumplida: /u.test(m) && regla.test(m))).toBe(true);
+    });
+  }
+
+  it('un solo salto entre versos se admite', () => {
+    expect(citaAdmisible.safeParse(datos(VERSOS)).success).toBe(true);
+  });
+
+  it('dos saltos seguidos rompen el build, nombrando el fichero', async () => {
+    const { codigo, salida } = await construir({
+      ...CORPUS_BASE,
+      'fuentes/wikisource-es--versos-sencillos--versos-sencillos-i.txt': DOCUMENTO_DE_VERSO,
+      'citas/seneca--yo-vengo.md': deVerso('Yo vengo de todas partes,\n\nY hacia todas partes voy:'),
+    });
+    expect(codigo).not.toBe(0);
+    expect(salida).toContain('seneca--yo-vengo');
+    expect(salida).toMatch(/dos saltos seguidos/);
+  });
 });
 
 describe('Historia 1.2 — la puerta no vive en tools/', () => {

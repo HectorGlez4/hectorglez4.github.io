@@ -38,7 +38,7 @@ import {
   leerCensoDeCotejo,
   leerCitas,
   leerDocumentosDeBiografia,
-  leerDocumentosDeFuente,
+  leerDocumentosParaElCotejo,
   rutasDelCorpus,
 } from '../tools/lib/corpus.ts';
 import {
@@ -75,7 +75,8 @@ export default function cotejoDeCitas(): AstroIntegration {
     const rutas = rutasDelCorpus(join(raiz, 'corpus'));
 
     const publicadas = await leerCitas(rutas.citas);
-    const documentos = await leerDocumentosDeFuente(rutas);
+    // Historia 29.1 — cuerpos y `lineas:` declaradas en la misma pasada por `corpus/fuentes/`.
+    const { documentos, lineasDeclaradas } = await leerDocumentosParaElCotejo(rutas);
     const censo = await leerCensoDeCotejo(rutas);
 
     const citas: CitaParaCotejar[] = publicadas.map((cita) => ({
@@ -89,6 +90,7 @@ export default function cotejoDeCitas(): AstroIntegration {
     const deCitas = cotejar({
       citas,
       documentos,
+      lineasDeclaradas,
       censo,
       rutaDelCenso: relativaALaRaiz(raiz, rutas.pendientesDeCotejo),
     });

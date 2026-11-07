@@ -15,7 +15,7 @@ import {
 } from './ayuda/construir.js';
 import { componerBiografia, componerDocumento } from '../../tools/lib/documento.ts';
 import { CENSO_DE_PARTIDA, FICHERO_DEL_CENSO } from '../../tools/lib/cotejo.ts';
-import { rutasDelCorpus } from '../../tools/lib/corpus.ts';
+import { rutasDelCorpus, separarFrontmatter } from '../../tools/lib/corpus.ts';
 import { DE_EPICTETO, EN_LA_IRA, instantaneaDe, sembrarCorpusAlLimite } from './ayuda/al-limite.ts';
 
 const ejecutar = promisify(execFile);
@@ -492,5 +492,58 @@ describe('Historia 26.8 — documentar --retirar no deja una Cita fuera de alcan
     const rutas = await corpusAlLimite();
     const resultado = await correr(rutas.raiz, ['--retirar', 'seneca-a-001', 'No aparece en la edición.']);
     expect(resultado.codigo, resultado.error).toBe(0);
+  });
+});
+
+describe('Historia 29.1 — documentar escribe el verso del documento, no el tecleado (AD-29)', () => {
+  const EN_VERSO = 'No es que tengamos poco tiempo,\nes que perdemos mucho.';
+  const documentoDeVerso = componerDocumento(
+    {
+      fuente: 'wikisource-es',
+      obra: OBRA,
+      año: AÑO,
+      lineas: 'verso',
+      url: 'https://es.wikisource.org/wiki/Sobre_la_brevedad_de_la_vida',
+      recuperado: '2026-08-21',
+    },
+    [OBRA, `Año de publicación: ${AÑO}`, `|autor=${AUTOR_DECLARADO}`].join('\n'),
+    CUERPO.replace(TEXTO, EN_VERSO),
+  );
+  const textoEscrito = async (corpus: string) =>
+    separarFrontmatter(await readFile(join(corpus, FICHERO), 'utf8'))?.texto;
+
+  it('de un documento de verso, la Cita toma sus saltos; el slug no cambia', async () => {
+    const corpus = await enDisco({ ...CORPUS, [DOCUMENTO]: documentoDeVerso });
+    const hecho = await correr(corpus, [SLUG, rutaDelDocumento(corpus)]);
+    expect(hecho.codigo, hecho.error).toBe(0);
+    expect(await textoEscrito(corpus)).toBe(EN_VERSO);
+    expect(`${hecho.salida}${hecho.error}`).toMatch(/toma 1 salto de verso/);
+    expect(separarFrontmatter(await readFile(join(corpus, FICHERO), 'utf8'))?.slug).toBe(SLUG);
+  });
+
+  it('con --texto, los saltos salen del documento y el tecleado sin respaldo se descarta', async () => {
+    const corpus = await enDisco({ ...CORPUS, [DOCUMENTO]: documentoDeVerso });
+    const hecho = await correr(corpus, [
+      SLUG,
+      rutaDelDocumento(corpus),
+      '--texto',
+      'No es que tengamos\npoco tiempo, es que perdemos mucho.',
+    ]);
+    expect(hecho.codigo, hecho.error).toBe(0);
+    expect(await textoEscrito(corpus)).toBe(EN_VERSO);
+    expect(`${hecho.salida}${hecho.error}`).toMatch(/salto tecleado no sobrevive/);
+  });
+
+  it('de un documento de prosa, en una línea, también con un \\n tecleado', async () => {
+    const corpus = await enDisco(CORPUS);
+    const hecho = await correr(corpus, [
+      SLUG,
+      rutaDelDocumento(corpus),
+      '--texto',
+      'No es que tengamos poco tiempo,\nes que perdemos mucho.',
+    ]);
+    expect(hecho.codigo, hecho.error).toBe(0);
+    expect(await textoEscrito(corpus)).toBe(TEXTO);
+    expect(`${hecho.salida}${hecho.error}`).toMatch(/salto tecleado no sobrevive/);
   });
 });

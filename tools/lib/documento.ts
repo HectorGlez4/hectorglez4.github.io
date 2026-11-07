@@ -2156,6 +2156,12 @@ export interface CabeceraDeDocumento {
   traductor?: string;
   /** El año declarado junto al traductor. Nunca se escribe como `año:`, que es el de la Obra. */
   añoDeTraduccion?: number;
+  /**
+   * La forma de las líneas del cuerpo — Historia 29.1, AD-29. La escribe `recuperar` desde la
+   * v9 y, cuando consta, manda sobre el cálculo. Va **en crudo**: la valida y la interpreta solo
+   * `tools/lib/lineas.ts` (importarlo aquí cerraría el ciclo documento→lineas→cotejo→documento).
+   */
+  lineas?: string;
   /** La dirección de la que llegó el documento, ya resueltas las redirecciones. */
   url: string;
   /**
@@ -2209,6 +2215,7 @@ export function componerDocumento(
   if (cabecera.traductor !== undefined && cabecera.añoDeTraduccion !== undefined) {
     lineas.push(`añoDeTraduccion: ${cabecera.añoDeTraduccion}`);
   }
+  if (cabecera.lineas !== undefined) lineas.push(`lineas: ${unaLinea(cabecera.lineas)}`);
   lineas.push(`url: ${unaLinea(cabecera.url)}`);
   if (cabecera.pedido !== undefined) lineas.push(`pedido: ${unaLinea(cabecera.pedido)}`);
   lineas.push(`recuperado: ${unaLinea(cabecera.recuperado)}`);
@@ -2287,6 +2294,7 @@ export function analizarDocumento(
   if (declarado !== undefined && declarado !== '' && año === undefined) return undefined;
 
   const pedido = campos.get('pedido');
+  const formaDeLineas = campos.get('lineas');
   const traductor = campos.get('traductor');
   const declaradoDeTraduccion = campos.get('añodetraduccion');
   const añoDeTraduccion = añoExacto(declaradoDeTraduccion);
@@ -2308,6 +2316,7 @@ export function analizarDocumento(
       ...(pedido !== undefined && pedido !== '' ? { pedido } : {}),
       ...(traductor !== undefined && traductor !== '' ? { traductor } : {}),
       ...(añoDeTraduccion !== undefined ? { añoDeTraduccion } : {}),
+      ...(formaDeLineas !== undefined && formaDeLineas !== '' ? { lineas: formaDeLineas } : {}),
     },
     declaracion,
     cuerpo,

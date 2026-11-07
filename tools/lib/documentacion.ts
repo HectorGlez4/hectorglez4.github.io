@@ -42,6 +42,7 @@ import { normalizar } from '../../src/lib/normalizar.ts';
 import {
   apareceEnDocumento,
   censoSinLaCita,
+  colapsarEspacios,
   documentosDeCita,
   FICHERO_DEL_CENSO,
   huellaDeTexto,
@@ -83,6 +84,7 @@ import { formaDeObra } from '../../src/lib/obras.ts';
 import { fuenteDeUrl } from './fuentes.ts';
 import type { Resultado } from './gestion.ts';
 import { negativaPorAlcance } from './alcance.ts';
+import { documentoParaLosSaltos, parteDeSaltosDescartados, textoConSaltos } from './lineas.ts';
 
 /**
  * Lo que se dice antes de escribir, cuando lo que se va a escribir cambia lo que lee el
@@ -223,6 +225,9 @@ interface DocumentoLeido {
   nombreDeLaFuente: string;
   licencia: string;
   cuerpo: string;
+  /** Historia 29.1 — el nombre del documento, sin extensión, y su `lineas:` en crudo. */
+  nombre: string;
+  lineas?: string;
 }
 
 type LecturaDeDocumento =
@@ -352,6 +357,8 @@ async function leerDocumento(
       nombreDeLaFuente: utilizable.fuente.nombre,
       licencia: utilizable.fuente.licencia,
       cuerpo,
+      nombre: basename(rutaDelDocumento, extname(rutaDelDocumento)),
+      ...(cabecera.lineas !== undefined ? { lineas: cabecera.lineas } : {}),
     },
   };
 }
@@ -563,6 +570,27 @@ export async function documentarCita(
     };
   }
 
+  /*
+   * ── El texto que se escribe: con los saltos del documento de verso — Historia 29.1 ──
+   *
+   * Lo escribe `textoConSaltos`, el escritor único, también con `--texto`: los saltos salen del
+   * documento de verso de la Cita (el primero de su obra, en el orden de `documentosDeCita`, en
+   * que el texto se localiza), nunca de lo tecleado. Un salto tecleado sin respaldo se pierde y
+   * el parte lo dice.
+   */
+  const declarados = await leerDocumentosDeclarados(rutas);
+  const nombres = documentosDeCita({ id: documento.idFuente }, documento.obra, declarados);
+  if (!nombres.includes(documento.nombre)) nombres.unshift(documento.nombre);
+  const candidatos = nombres.map((nombre) => {
+    if (nombre === documento.nombre) {
+      return { nombre, cuerpo: documento.cuerpo, ...(documento.lineas !== undefined ? { lineas: documento.lineas } : {}) };
+    }
+    const d = declarados.get(nombre)!;
+    return { nombre, cuerpo: d.cuerpo, ...(d.lineas !== undefined ? { lineas: d.lineas } : {}) };
+  });
+  const escrito = textoConSaltos(textoFinal, documentoParaLosSaltos(textoFinal, candidatos));
+  const textoEscrito = escrito.texto;
+
   // ── Lo que cambia, dicho antes de escribir ────────────────────────────────
 
   const cambios: string[] = [];
@@ -591,11 +619,20 @@ export async function documentarCita(
     );
   }
 
-  if (textoFinal !== cita.texto) {
+  const saltosDescartados = parteDeSaltosDescartados(escrito.descartados);
+  if (saltosDescartados !== undefined) cambios.push(saltosDescartados);
+  if (textoEscrito !== cita.texto && colapsarEspacios(textoEscrito) === colapsarEspacios(cita.texto)) {
+    const saltos = (textoEscrito.match(/\n/gu) ?? []).length;
+    cambios.push(
+      `El texto toma ${saltos} ${saltos === 1 ? 'salto' : 'saltos'} de verso de su documento; ` +
+        'no cambia ninguna letra ni ningún signo.',
+    );
+  }
+  if (colapsarEspacios(textoEscrito) !== colapsarEspacios(cita.texto)) {
     cambios.push(
       `El texto se corrige contra la edición (se parecen ${parecido.toFixed(2)}):`,
       `  antes:   «${cita.texto}»`,
-      `  después: «${textoFinal}»`,
+      `  después: «${textoEscrito}»`,
       // AD-4: el slug es la URL y no se recalcula. Que el texto ya no lo componga es
       // exactamente lo que ocurre con cualquier Cita cuyo texto se corrige, y el precio de
       // no romper los enlaces entrantes.
@@ -672,7 +709,7 @@ export async function documentarCita(
     return { ok: false, motivos: [`El fichero ${cita.ruta} no tiene frontmatter.`] };
   }
 
-  datos.texto = textoFinal;
+  datos.texto = textoEscrito;
 
   /*
    * La Procedencia se compone de lo derivado, no de lo que la Cita tuviera tecleado: es el

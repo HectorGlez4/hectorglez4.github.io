@@ -632,3 +632,92 @@ describe('Historia 11.4 — el cotejo busca todas las páginas de la obra', () =
     expect(cotejar({ citas: [cita()], documentos, censo: [] }).ok).toBe(true);
   });
 });
+
+describe('Historia 29.1 — el salto de verso en el cotejo (AD-29)', () => {
+  const MARTI = readFileSync(
+    join(import.meta.dirname, 'ayuda/lineas/wikisource-es--versos-sencillos--versos-sencillos-i.txt'),
+    'utf8',
+  );
+  const CUERPO_MARTI = MARTI.slice(MARTI.indexOf('\n---\n', MARTI.indexOf('\n---\n') + 1) + 5);
+  const VERSOS = 'Yo vengo de todas partes,\nY hacia todas partes voy:\nArte soy entre las artes,\nEn los montes, monte soy.';
+  const EN_UNA_LINEA = VERSOS.replace(/\n/gu, ' ');
+  const DOC = 'wikisource-es--versos-sencillos--versos-sencillos-i';
+  const deMarti = (texto: string): CitaParaCotejar => ({
+    slug: 'jose-marti-yo-vengo-de-todas-partes-y-hacia',
+    ruta: 'corpus/citas/jose-marti--yo-vengo.md',
+    texto,
+    obra: 'Versos sencillos',
+    fuente: { id: 'wikisource-es', url: 'https://es.wikisource.org/wiki/Versos_sencillos/I' },
+  });
+
+  it('con saltos y en una línea, el veredicto y la huella son los mismos', () => {
+    expect(apareceEnDocumento(VERSOS, CUERPO_MARTI)).toBe(true);
+    expect(apareceEnDocumento(EN_UNA_LINEA, CUERPO_MARTI)).toBe(true);
+    expect(huellaDeTexto(VERSOS)).toBe(huellaDeTexto(EN_UNA_LINEA));
+    for (const texto of [VERSOS, EN_UNA_LINEA]) {
+      const r = cotejar({ citas: [deMarti(texto)], documentos: new Map([[DOC, CUERPO_MARTI]]), censo: [] });
+      expect(r.fallos).toEqual([]);
+      expect(r.cotejadas).toBe(1);
+    }
+  });
+
+  it('regla 1: un salto sin documento de verso rompe', () => {
+    const documentos = new Map([[DOC, CUERPO_MARTI]]);
+    const r = cotejar({
+      citas: [deMarti(VERSOS)],
+      documentos,
+      censo: [],
+      lineasDeclaradas: new Map([[DOC, 'prosa-por-lineas']]),
+    });
+    expect(r.ok).toBe(false);
+    expect(r.fallos[0].ruta).toBe('corpus/citas/jose-marti--yo-vengo.md');
+    expect(r.fallos[0].regla).toMatch(/salto de verso, 1/);
+  });
+
+  it('regla 2: un \\n donde el documento no parte línea rompe', () => {
+    const r = cotejar({
+      citas: [deMarti('Yo vengo de todas\npartes, Y hacia todas partes voy:')],
+      documentos: new Map([[DOC, CUERPO_MARTI]]),
+      censo: [],
+    });
+    expect(r.fallos.map((f) => f.regla)).toEqual([expect.stringMatching(/salto de verso, 2/)]);
+  });
+
+  it('regla 2: basta un documento de verso del conjunto que lo respalde', () => {
+    const otro = `${DOC}--bis`;
+    const r = cotejar({
+      citas: [deMarti(VERSOS)],
+      documentos: new Map([
+        [DOC, CUERPO_MARTI.replace(/\n/gu, ' ').replace('soy.', 'soy.\n\nYo\nsoy\nverso\nsuelto')],
+        [otro, CUERPO_MARTI],
+      ]),
+      censo: [],
+      lineasDeclaradas: new Map([[DOC, 'verso']]),
+    });
+    expect(r.fallos).toEqual([]);
+  });
+
+  it('regla 3: una Cita del censo con salto rompe', () => {
+    const texto = 'caminante, no hay camino,\nse hace camino al andar.';
+    const r = cotejar({
+      citas: [cita({ texto, fuente: undefined })],
+      documentos: new Map(),
+      censo: [SLUG],
+      censoDePartida: { [SLUG]: huellaDeTexto(texto) },
+    });
+    expect(r.fallos.map((f) => f.regla)).toEqual([expect.stringMatching(/salto de verso, 3/)]);
+  });
+
+  it('una lineas: fuera del conjunto rompe nombrando el documento, aunque ninguna Cita lo use', () => {
+    const r = cotejar({
+      citas: [],
+      documentos: new Map([[DOC, CUERPO_MARTI]]),
+      censo: [],
+      lineasDeclaradas: new Map([[DOC, 'poesia']]),
+    });
+    expect(r.ok).toBe(false);
+    expect(r.fallos).toEqual([
+      { ruta: `corpus/fuentes/${DOC}.txt`, regla: expect.stringMatching(/lineas: poesia/) },
+    ]);
+  });
+});

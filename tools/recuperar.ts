@@ -90,6 +90,7 @@ import {
   tituloDeDireccion,
 } from './lib/indice.ts';
 import { compararDocumentos } from '../src/lib/obras.ts';
+import { formaDeLasLineas } from './lib/lineas.ts';
 
 /** La única llamada de red del proyecto no puede colgarse ni tragarse una biblioteca. */
 const TIEMPO_MAXIMO_MS = 30_000;
@@ -432,6 +433,8 @@ await writeFile(
       ...(derivado.traductor !== undefined && derivado.añoDeTraduccion !== undefined
         ? { añoDeTraduccion: derivado.añoDeTraduccion }
         : {}),
+      // Historia 29.1 — la forma de las líneas, juzgada sobre lo mismo que se escribe.
+      lineas: formaDeLasLineas({ cuerpo: derivado.cuerpo.trim() }),
       url: descarga.url,
       // Solo cuando hubo redirección: si no, sería la misma línea dos veces.
       ...(descarga.url !== url ? { pedido: url } : {}),

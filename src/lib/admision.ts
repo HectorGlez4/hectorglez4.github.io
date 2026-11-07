@@ -126,9 +126,31 @@ export const slug = z
     'Regla incumplida: el slug solo admite minúsculas, dígitos y guiones, sin diacríticos.',
   );
 
+/**
+ * AD-29 (Historia 29.1) — el salto de verso se guarda como un único U+000A dentro del `texto`,
+ * y solo así. Cada forma que no es esa se rechaza con su regla: un retorno de carro, dos saltos
+ * seguidos (la estrofa no se guarda), un salto al principio o al final, un espacio o tabulador
+ * pegado a un salto, y las dos maneras de fingir un verso en una línea —`<br` y « / »—. Quién
+ * escribe el salto, y de qué documento sale, lo decide `textoConSaltos` de `tools/lib/lineas.ts`;
+ * aquí solo vive la forma.
+ */
+const FORMAS_DEL_SALTO_RECHAZADAS: readonly { prueba: RegExp; regla: string }[] = [
+  { prueba: /\r/u, regla: 'el texto no admite retornos de carro (U+000D): el salto de verso es un único U+000A.' },
+  { prueba: /\n\n/u, regla: 'el texto no admite dos saltos seguidos: entre estrofas va un solo U+000A.' },
+  { prueba: /^\n|\n$/u, regla: 'el texto no admite un salto al principio ni al final.' },
+  { prueba: /[ \t]\n|\n[ \t]/u, regla: 'el texto no admite un espacio ni un tabulador pegados a un salto.' },
+  { prueba: /<br/iu, regla: 'el texto no admite «<br»: el salto de verso es un U+000A.' },
+  { prueba: / \/ /u, regla: 'el texto no admite « / » como salto de verso: el salto es un U+000A.' },
+];
+
 export const texto = z
   .string({ message: 'Regla incumplida: falta el texto de la Cita.' })
-  .min(1, 'Regla incumplida: el texto de la Cita no puede estar vacío.');
+  .min(1, 'Regla incumplida: el texto de la Cita no puede estar vacío.')
+  .superRefine((valor, ctx) => {
+    for (const { prueba, regla } of FORMAS_DEL_SALTO_RECHAZADAS) {
+      if (prueba.test(valor)) ctx.addIssue({ code: 'custom', message: `Regla incumplida: ${regla}` });
+    }
+  });
 
 /** AD-1 — el único estado de derechos admisible. Cualquier otro rompe el build. */
 export const estadoDerechos = z.literal('dominio-público', {

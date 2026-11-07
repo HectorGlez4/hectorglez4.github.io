@@ -75,6 +75,7 @@ import {
 } from './lib/extraccion.ts';
 import { fuenteDeUrl } from './lib/fuentes.ts';
 import { opcion, posicionales, raizDeCorpusDe, terminar } from './lib/cli.ts';
+import { formaDeLasLineas, parteDeSaltosDescartados, textoConSaltos } from './lib/lineas.ts';
 
 const USO =
   'Uso: npx tsx tools/extraer.ts <corpus/fuentes/documento.txt> --autor <slug> ' +
@@ -435,6 +436,17 @@ const yaPublicadas = new Set(publicadas.map((c) => clave(c.autor, c.texto)));
 let repetidas = 0;
 let yaEstaban = 0;
 
+/*
+ * Historia 29.1 — el `texto` lo escribe `textoConSaltos`, el escritor único: de un documento de
+ * verso, con sus saltos; de cualquier otro, en una línea. La forma la decide la cabecera
+ * `lineas:` si la trae, y si no el cuerpo.
+ */
+const deEsteDocumento = {
+  cuerpo,
+  forma: formaDeLasLineas({ cuerpo, ...(cabecera.lineas !== undefined ? { lineas: cabecera.lineas } : {}) }),
+};
+let saltosDescartados = 0;
+
 for (const candidata of resultado.candidatas) {
   if (yaEnRevision.has(clave(autor, candidata.texto))) {
     repetidas += 1;
@@ -458,10 +470,12 @@ for (const candidata of resultado.candidatas) {
     escritas += 1;
     continue;
   }
+  const escrito = textoConSaltos(candidata.texto, deEsteDocumento);
+  saltosDescartados += escrito.descartados;
   await writeFile(
     fichero,
     `---\n${aYaml({
-      texto: candidata.texto,
+      texto: escrito.texto,
       autor: candidata.autor,
       temas: [],
       slug,
@@ -511,5 +525,9 @@ terminar({
     `\nYa estaban en revisión: ${repetidas}` +
     // Y este número, además, dice algo del documento: si es alto, lo que se ha recuperado no
     // es cantera nueva sino una antología de lo que el Corpus ya tiene.
-    `\nYa eran Cita publicada: ${yaEstaban}`,
+    `\nYa eran Cita publicada: ${yaEstaban}` +
+    `\nForma de las líneas del documento: ${deEsteDocumento.forma}` +
+    (parteDeSaltosDescartados(saltosDescartados) === undefined
+      ? ''
+      : `\n${parteDeSaltosDescartados(saltosDescartados)}`),
 });

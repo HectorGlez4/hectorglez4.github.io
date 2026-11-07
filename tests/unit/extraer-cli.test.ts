@@ -1312,3 +1312,62 @@ describe('Historia 17.1 — de una biografía no sale ninguna candidata, aunque 
     expect(await readdir(join(corpus, 'citas'))).toEqual([]);
   });
 });
+
+describe('Historia 29.1 — la candidata conserva el verso de su documento (AD-29)', () => {
+  const VERSO = [
+    'Yo soy un hombre sincero',
+    'De donde crece la palma.',
+    'Y antes de morirme quiero',
+    'Echar mis versos del alma.',
+    '',
+    'Yo vengo de todas partes,',
+    'Y hacia todas partes voy:',
+    'Arte soy entre las artes,',
+    'En los montes, monte soy.',
+    '',
+    'Yo sé los nombres extraños',
+    'De las yerbas y las flores,',
+    'Y de mortales engaños,',
+    'Y de sublimes dolores.',
+  ].join('\n');
+
+  async function textos(corpus: string): Promise<string[]> {
+    const salida: string[] = [];
+    for (const fichero of await readdir(join(corpus, '_revision'))) {
+      salida.push((await frontmatterDe(corpus, fichero)).texto as string);
+    }
+    return salida;
+  }
+
+  it('de un documento de verso, con sus saltos; y lo escrito pasa la admisión', async () => {
+    const { corpus } = await corpusConAutores();
+    const resultado = await extraer(await documento(corpus, CABECERA, { texto: VERSO }), corpus);
+    expect(resultado.codigo, resultado.error).toBe(0);
+    expect(resultado.salida).toMatch(/Forma de las líneas del documento: verso/);
+    const escritos = await textos(corpus);
+    expect(escritos).toContain('Yo vengo de todas partes,\nY hacia todas partes voy:\nArte soy entre las artes,\nEn los montes, monte soy.');
+    for (const fichero of await readdir(join(corpus, '_revision'))) {
+      const datos = await frontmatterDe(corpus, fichero);
+      expect(citaAdmisible.safeParse(datos).success, fichero).toBe(true);
+    }
+  });
+
+  it('de un documento de prosa, en una línea', async () => {
+    const { corpus } = await corpusConAutores();
+    const resultado = await extraer(await documento(corpus), corpus);
+    expect(resultado.codigo, resultado.error).toBe(0);
+    for (const texto of await textos(corpus)) expect(texto).not.toContain('\n');
+  });
+
+  it('la cabecera «lineas:» manda: un poema declarado de prosa sale en una línea', async () => {
+    const { corpus } = await corpusConAutores();
+    const resultado = await extraer(
+      await documento(corpus, { ...CABECERA, lineas: 'prosa-por-lineas' }, { texto: VERSO }),
+      corpus,
+    );
+    expect(resultado.codigo, resultado.error).toBe(0);
+    const escritos = await textos(corpus);
+    expect(escritos.length).toBeGreaterThan(0);
+    for (const texto of escritos) expect(texto).not.toContain('\n');
+  });
+});

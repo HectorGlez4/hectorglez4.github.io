@@ -28,7 +28,8 @@
 import { readFile } from 'node:fs/promises';
 import { parse as parsearYaml } from 'yaml';
 import { citaAdmisible, gradoDeProcedencia, type CitaAdmisible } from '../src/lib/admision.ts';
-import { motivoParaNoPublicar } from './lib/cotejo.ts';
+import { documentosDeCita, motivoParaNoPublicar } from './lib/cotejo.ts';
+import { documentoParaLosSaltos, parteDeSaltosDescartados, textoConSaltos } from './lib/lineas.ts';
 import { normalizar } from '../src/lib/normalizar.ts';
 import { MIN_CARACTERES_PARA_CONTENCION } from '../src/lib/umbrales.ts';
 import { slugDeAutor, slugDeCita, slugDeTema, slugLibre } from '../src/lib/slug.ts';
@@ -36,6 +37,7 @@ import {
   escribirCita,
   leerAutores,
   leerCitas,
+  leerDocumentosDeclarados,
   leerTemas,
   nombreDeFicheroDeCita,
   rutasDelCorpus,
@@ -117,6 +119,11 @@ export interface InformeDeAlta {
    * de la que dependía su Tema—. Ya están en `corpus/citas/`. Vacío casi siempre — Historia 26.8.
    */
   publicadasSinTema?: { slug: string; temas: TemaBajoUmbral[]; motivos: string[] }[];
+  /**
+   * Historia 29.1 — entradas cuyo texto traía saltos que ningún documento de verso suyo respalda:
+   * se escribieron con un espacio en su lugar (AD-29). No impiden nada; el parte lo dice.
+   */
+  saltosDescartados?: { texto: string; descartados: number }[];
 }
 
 /**
@@ -137,6 +144,28 @@ export async function darDeAltaLote(
 
   const slugsDeAutor = new Set(autores.map((a) => a.slug));
   const slugsDeTema = new Set(temas.map((t) => t.slug));
+
+  /*
+   * Historia 29.1 — el `texto` lo escribe `textoConSaltos`, con los saltos del documento de verso
+   * de la Cita si lo hay. Los documentos se leen solo si alguna entrada declara Fuente: sin ella
+   * no hay documento, y el texto va en una línea.
+   */
+  const documentos = lote.some((e) => typeof e.fuente?.id === 'string')
+    ? await leerDocumentosDeclarados(rutas)
+    : new Map<string, { cuerpo: string; lineas?: string }>();
+  function textoDelAlta(entrada: EntradaDeLote): { texto: string; descartados: number } {
+    const recibido = entrada.texto ?? '';
+    const id = entrada.fuente?.id;
+    const candidatos = documentosDeCita(
+      typeof id === 'string' ? { id } : undefined,
+      entrada.procedencia?.obra,
+      documentos,
+    ).map((nombre) => {
+      const d = documentos.get(nombre)!;
+      return { nombre, cuerpo: d.cuerpo, ...(d.lineas !== undefined ? { lineas: d.lineas } : {}) };
+    });
+    return textoConSaltos(recibido, documentoParaLosSaltos(recibido, candidatos));
+  }
 
   /*
    * Historia 26.8 — antes de escribir nada se **ensaya** el lote entero (`recorrer` sin
@@ -233,8 +262,15 @@ export async function darDeAltaLote(
 
     for (const [indice, entrada] of lote.entries()) {
       if (apartadas.has(indice)) continue;
-      const texto = entrada.texto ?? '';
+      const escrito = textoDelAlta(entrada);
+      const texto = escrito.texto;
       const motivos: string[] = [];
+      if (escrito.descartados > 0) {
+        informe.saltosDescartados = [
+          ...(informe.saltosDescartados ?? []),
+          { texto, descartados: escrito.descartados },
+        ];
+      }
 
       // ── Duplicados: se comprueba antes de escribir nada (FR-14) ──
       const canonico = normalizar(texto);
@@ -470,6 +506,10 @@ export function formatearInforme(informe: InformeDeAlta): string {
     lineas.push(
       '  Nada se ha descartado. Para incorporarlos igualmente, repita con --con-duplicados.',
     );
+  }
+
+  for (const salto of informe.saltosDescartados ?? []) {
+    lineas.push('', `«${recortar(salto.texto)}»: ${parteDeSaltosDescartados(salto.descartados)}`);
   }
 
   if (informe.autoresDesconocidos.length > 0) {

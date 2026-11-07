@@ -87,6 +87,18 @@ publicado y lo que la misma pasada aprueba; si no, sigue en `corpus/_revision/` 
 la nombra con sus Temas y sus recuentos, y la orden sale con 1. Lo que sale de `extraer` llega sin
 Temas, así que el paso 3 casi siempre lleva `--temas`.
 
+**`recuperar` y `extraer` conservan el verso** (Historia 29.1, AD-29). Un documento nuevo declara
+en su cabecera la forma de sus líneas, `lineas:` —una de `FORMAS_DE_LINEAS` de
+`tools/lib/lineas.ts`: `verso`, `verso-espaciado`, `prosa-por-lineas`, `prosa-ajustada` o
+`indeterminada`—, que manda sobre el cálculo; los versionados antes no la llevan, no se
+reescriben y la forma se calcula de su cuerpo, de forma conservadora (ante la duda,
+`indeterminada`). Una `lineas:` fuera del conjunto rompe el build. `extraer`, el alta, `sembrar` y
+`documentar` escriben el `texto` con un único escritor, `textoConSaltos`: un salto de verso (un
+U+000A, uno también entre estrofas) solo donde un documento `verso` o `verso-espaciado` de la Cita
+parte línea. **Un salto nunca se teclea**: el tecleado que el documento no respalda se pierde y el
+parte lo dice, y el build rompe ante un salto sin respaldo. El reparto del Corpus por forma y las
+cifras de la Tarjeta del verso, sin escribir nada: `npx tsx tools/lineas.ts formas|tarjeta`.
+
 **Un Autor dado de alta en la sesión trae una clave de orden sin revisar** (Historia 26.1).
 `crear` la propone —la última palabra del `nombre`, la regla fija de `tools/lib/claves.ts`— y
 no hay bandera para teclearla; el build rompe ante un Autor publicado sin clave, nombrando su
@@ -593,7 +605,9 @@ corrige con `--texto`, que restituye el texto literal de la edición: el texto n
 tiene que aparecer literal en el documento —si no, se estaría inventando— y tiene que
 parecerse al publicado por encima de `MIN_PARECIDO_PARA_CORREGIR` (0,85 sobre la forma
 canónica de AD-3), que es lo que impide cambiar una Cita por otra de la misma página. El
-slug **no** se recalcula aunque el texto cambie: es la URL (AD-4).
+slug **no** se recalcula aunque el texto cambie: es la URL (AD-4). Con `--texto` también, los
+saltos de verso los toma la orden del documento de verso de la Cita, **no de lo tecleado**: un
+salto tecleado sin respaldo queda en espacio y el parte lo dice (Historia 29.1).
 
 **De una obra traducida se conserva lo que la Fuente declara** (Historia 19.1). `recuperar`
 registra el traductor en la cabecera del documento (`traductor:` y, si consta,

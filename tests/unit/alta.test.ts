@@ -2,7 +2,9 @@ import { afterEach, describe, expect, it } from 'vitest';
 import { mkdtemp, mkdir, readFile, readdir, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { darDeAltaLote, type EntradaDeLote } from '../../tools/alta.ts';
+import { darDeAltaLote, formatearInforme, type EntradaDeLote } from '../../tools/alta.ts';
+import { componerDocumento } from '../../tools/lib/documento.ts';
+import { separarFrontmatter } from '../../tools/lib/corpus.ts';
 import { rutasDelCorpus, type Rutas } from '../../tools/lib/corpus.ts';
 import { CENSO_DE_PARTIDA } from '../../tools/lib/cotejo.ts';
 import { MIN_CITAS_POR_TEMA } from '../../src/lib/umbrales.ts';
@@ -414,5 +416,60 @@ describe('Historia 26.8 — el alta no publica una Cita sin Tema publicado', () 
     }
     expect(await readdir(rutas.citas)).toHaveLength(MIN_CITAS_POR_TEMA - 1);
     expect(await readdir(rutas.revision)).toEqual([]);
+  });
+});
+
+describe('Historia 29.1 — el alta escribe el verso de su documento (AD-29; sembrar pasa por la misma función)', () => {
+  const EN_VERSO = 'No es que tengamos poco tiempo,\nes que perdemos mucho.';
+  async function conDocumento(rutas: Rutas, cuerpo: string, lineas?: string) {
+    await mkdir(rutas.fuentes, { recursive: true });
+    await writeFile(
+      join(rutas.fuentes, 'wikisource-es--sobre-la-brevedad-de-la-vida.txt'),
+      componerDocumento(
+        {
+          fuente: 'wikisource-es',
+          obra: 'Sobre la brevedad de la vida',
+          año: 49,
+          ...(lineas !== undefined ? { lineas } : {}),
+          url: FUENTE.url,
+          recuperado: '2026-08-19',
+        },
+        'Sobre la brevedad de la vida',
+        cuerpo,
+      ),
+      'utf8',
+    );
+  }
+  async function textoPublicado(rutas: Rutas): Promise<string> {
+    const [fichero] = await ficherosPublicados(rutas);
+    return separarFrontmatter(await readFile(join(rutas.citas, fichero), 'utf8'))?.texto as string;
+  }
+
+  it('de un documento de verso, con sus saltos, aunque el lote la traiga en una línea', async () => {
+    const rutas = await corpusDePrueba();
+    await conDocumento(rutas, `De la brevedad\n\n${EN_VERSO}\n`, 'verso');
+    const informe = await darDeAltaLote([COMPLETA], rutas);
+    expect(informe.publicadas).toHaveLength(1);
+    expect(await textoPublicado(rutas)).toBe(EN_VERSO);
+    expect(informe.publicadas[0].slug).toBe('seneca-no-es-que-tengamos-poco-tiempo-es');
+  });
+
+  it('de un documento de prosa, en una línea', async () => {
+    const rutas = await corpusDePrueba();
+    await conDocumento(rutas, `De la brevedad\n\n${EN_VERSO}\n`, 'prosa-por-lineas');
+    await darDeAltaLote([COMPLETA], rutas);
+    expect(await textoPublicado(rutas)).toBe(COMPLETA.texto);
+  });
+
+  it('un salto tecleado sin respaldo se descarta y el parte lo dice', async () => {
+    const rutas = await corpusDePrueba();
+    await conDocumento(rutas, `De la brevedad\n\n${EN_VERSO}\n`, 'verso');
+    const informe = await darDeAltaLote(
+      [{ ...COMPLETA, texto: 'No es que tengamos\npoco tiempo, es que perdemos mucho.' }],
+      rutas,
+    );
+    expect(await textoPublicado(rutas)).toBe(EN_VERSO);
+    expect(informe.saltosDescartados).toEqual([{ texto: EN_VERSO, descartados: 1 }]);
+    expect(formatearInforme(informe)).toMatch(/salto tecleado no sobrevive/);
   });
 });
