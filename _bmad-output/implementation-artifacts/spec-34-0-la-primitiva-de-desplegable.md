@@ -5,7 +5,7 @@ created: '2026-11-07'
 status: 'done'
 baseline_revision: '9b33277f97ac5ea2042dcb0af2cebd0073a8e4ed'
 review_loop_iteration: 0
-followup_review_recommended: false
+followup_review_recommended: true
 context:
   - '{project-root}/_bmad-output/implementation-artifacts/epic-34-context.md'
 warnings: [oversized]
@@ -16,6 +16,48 @@ deferred:
   - summary: 'Cierre: la fila 34-0-la-primitiva-de-desplegable de sprint-status.yaml debe llevar en su comentario en línea que se funde sola en la principal, antes que la Épica 30 (excepción con nombre, como la 23.12).'
     evidence: 'epics.md Story 34.0, último Given; epic-34-context.md § Cross-Story Dependencies.'
     severity: low
+  - summary: >-
+      Un solo filete entre desplegables que el consumidor envuelve (un `<li>` por desplegable en una Lista de Obras plegada) no está decidido: `.desplegable + .desplegable` solo alcanza a hermanos directos. Pendiente de Héctor (bmad-ux).
+    evidence: |-
+      Revisión 34.0, blind-hunter. DESIGN.md/EXPERIENCE.md no dicen cómo se pliega una lista de bloques envueltos; la hoja no puede nombrar el envoltorio ajeno (selector vigilado).
+    location: >-
+      src/components/Desplegable.astro (.desplegable + .desplegable)
+    severity: medium
+  - summary: >-
+      Si un Desplegable puede contener otro (y con qué filetes y medida) no está decidido. Pendiente de Héctor (bmad-ux).
+    evidence: |-
+      Revisión 34.0, blind-hunter. Ninguna historia de la v9 lo pide hoy; anidar duplicaría filetes y heredaría `max-inline-size`.
+    location: >-
+      src/components/Desplegable.astro
+    severity: low
+  - summary: >-
+      El esquema de encabezados de una sección que se pliega: el `<summary>` no admite `h1`…`h6` (NFR-9), así que la sección deja de figurar en la navegación por encabezados, y no está dicho qué nivel llevan los de dentro. Pendiente de Héctor (bmad-ux).
+    evidence: |-
+      Revisión 34.0, blind-hunter. UX-DR143/UX-DR146 fijan el rótulo sin encabezado, pero no qué pasa con el esquema de la página.
+    location: >-
+      src/components/Desplegable.astro (summary)
+    severity: medium
+  - summary: >-
+      Sin estado de puntero ni de pulsación en el `<summary>` (solo `cursor: pointer` y el glifo), y su texto va en `--tinta-apagada`. Si basta como señal de control lo decide Héctor (bmad-ux); el contraste lo mide ya axe en `tests/e2e/desplegable.spec.ts`.
+    evidence: |-
+      Revisión 34.0, blind-hunter. La primitiva copia el Rótulo de sección, que no es control; DESIGN.md no da trato de puntero a lo plegado.
+    location: >-
+      src/components/Desplegable.astro (summary)
+    severity: low
+  - summary: >-
+      Qué hace un desplegable cerrado ante un `#ancla` a algo de dentro (Safari no lo abre), al imprimir y con `:target`: no está decidido. Pendiente de Héctor (bmad-ux).
+    evidence: |-
+      Revisión 34.0, blind-hunter. EXPERIENCE.md no trata ni la impresión ni los fragmentos de lo plegado; abrir por `hashchange` exigiría guion, que la primitiva no lleva.
+    location: >-
+      src/components/Desplegable.astro
+    severity: low
+  - summary: >-
+      `max-inline-size: var(--medida-prosa)` se impone a todo consumidor, también al contenido que no es prosa (Lista de Obras, ediciones), y la API no tiene salida. Pendiente de Héctor (bmad-ux) antes de la 34.2.
+    evidence: |-
+      Revisión 34.0, blind-hunter. Lo fija el contrato de la historia (Boundaries); la API es solo `rotulo` y la hoja no puede ser pisada desde fuera sin romper la guardia de selectores.
+    location: >-
+      src/components/Desplegable.astro (.desplegable)
+    severity: medium
 ---
 
 <intent-contract>
@@ -102,6 +144,24 @@ deferred:
 
 (Las capas de revisión son externas en el bucle v9-ralph y en esta pasada no traen hallazgos; sigue una revisión independiente.)
 
+### 2026-11-07 — Review pass
+- intent_gap: 0
+- bad_spec: 0
+- patch: 8 (high 0, medium 2, low 6)
+- defer: 6 (medium 3, low 3)
+- reject: 7 (medium 0, low 7)
+- addressed_findings:
+  - `[medium]` `[patch]` La pasada de foco con lo plegado cerrado no contaba el `<summary>` y sí lo de dentro de un `<details>` cerrado (tope mal medido, paradas sin marca). Ahora `ENFOCABLES` lleva `summary` en las dos pasadas y `recorrerElFoco` descarta lo inalcanzable, también anidado (`tests/e2e/ayuda/desplegables.ts`).
+  - `[medium]` `[patch]` La pasada abierta del e2e y el teclado no habían corrido nunca. Nuevo `tests/e2e/desplegable.spec.ts`: sonda construida en una copia (AD-21, puerto 4404) con siete desplegables; corre `auditar` y `recorrerElFoco` cerrados y abiertos (exige que abra siete), Tab para solo en los `<summary>`, Intro y Espacio abren y cierran sin mover el foco, el glifo gira 90° sin desplazar su centro, lo de encima no se mueve, el `<summary>` mide al menos `--zona-de-toque`, sin marcador y un solo filete entre hermanos. Las tres funciones salen de `accesibilidad.spec.ts` a esa ayuda.
+  - `[low]` `[patch]` La negativa ante lo vacío solo veía espacio en blanco: ahora también comentarios, `&nbsp;` y elementos sin texto, salvo medios y controles; sonda que rompe con ese caso.
+  - `[low]` `[patch]` Un rótulo en blanco dejaba el `<summary>` sin nombre accesible: detiene la construcción (NFR-9); sonda que rompe.
+  - `[low]` `[patch]` El glifo giraba con el `&nbsp;` dentro de su caja: gira solo `.giro`, el «›».
+  - `[low]` `[patch]` La guardia «ningún componente escribe su propio `<details>`» compartía prueba con la temporal «nadie lo importa»: va en la suya, permanente, y mira también `public/islas/`, `.js`/`.tsx`/`.mjs` y `createElement('details')`.
+  - `[low]` `[patch]` La prueba de cobertura exige que Inter esté entre las familias juzgadas.
+  - `[low]` `[patch]` La sonda construida afirma sin `<script>` en la página y sin `data-zona`, `data-ingreso` ni `data-pagefind` en cada desplegable; el espacio que pega el glifo se exige que no parta (`&nbsp;` o U+00A0, escrito como escape).
+
+Rechazados: el mensaje de error no nombra la página (la salida de `astro build` la nombra, y el texto lo fija el contrato); «la prueba admite un espacio que parte» (la alternativa era U+00A0, ahora escrita como `\u00a0`); la guardia de selectores ingenua ante selectores que la hoja no usa; compatibilidad con navegadores viejos sin evidencia; el comentario de `sprint-status.yaml` (lo escribe el paso de cierre del bucle, ya diferido); `<details>` insertados por islas (ninguna lo hace y ahora lo vigila la guardia); la identidad de `dist/` fuera de las pruebas (verificada fuera de banda, idéntica).
+
 ## Design Notes
 
 El `<summary>` no reutiliza `Rotulo.astro` porque ese pinta un encabezado y NFR-9 lo prohíbe dentro del `<summary>`; se copian sus cinco declaraciones tipográficas, que son tokens salvo `letter-spacing`, que la guardia de tipografía no vigila. Que un desplegable «que no existe» no deje hueco lo cumple quien lo usa, no renderizándolo; el componente solo garantiza que nunca sale vacío. El `<style>` se emite por el grafo de importaciones: por eso solo puede tocar su marcado —un selector de fuera cambiaría páginas que no lo usan cuando el primer consumidor lo importe—. Golden:
@@ -124,6 +184,7 @@ El `<summary>` no reutiliza `Rotulo.astro` porque ese pinta un encabezado y NFR-
 - `npx astro check` -- expected: 0 errores.
 - `FECHA_JORNADA=2026-11-07 npx astro build` + `shasum` de `dist/` -- expected: idéntico a `dist-antes.sha`.
 - `npx playwright test tests/e2e/accesibilidad.spec.ts --project=escritorio` (detached con `correr.sh`) -- expected: mismos resultados que antes.
+- `npx playwright test tests/e2e/desplegable.spec.ts --project=escritorio` (detached) -- expected: verde; la sonda corre los barridos de axe y de foco cerrados y abiertos, el teclado, la zona de toque, el glifo y el filete.
 - `npm test` (detached) -- expected: verde.
 
 **Manual checks (if no CLI):**
@@ -157,3 +218,26 @@ Blocking condition: ninguna
 **Matriz.** Con contenido, sin slot, slot en blanco y dos seguidos: pruebas de `desplegable.test.ts`. Teclado: comprobación manual de arriba (ninguna superficie pinta aún un `<details>` para que la cubra el e2e).
 
 **Riesgos residuales.** El glifo es provisional (diferido a Héctor). El paso de cierre de `sprint-status.yaml` (comentario «se funde sola en la principal…») queda para el cierre del bucle.
+
+### Revisión independiente (pasada 1, 2026-11-07)
+
+**Resumen.** Ocho parches de la revisión externa: la pasada de foco cuenta el `<summary>` y descarta lo de dentro de un `<details>` cerrado; una sonda e2e en una copia hace correr por fin los barridos de axe y de foco con lo plegado abierto y comprueba el teclado, el foco, la zona de toque, el glifo, lo de encima y el filete en un navegador; la negativa ante lo vacío alcanza comentarios y elementos sin texto, y la de un rótulo en blanco; el glifo gira solo; la guardia de `<details>` escritos a mano es permanente y mira también las islas.
+
+**Ficheros.**
+- `src/components/Desplegable.astro` — negativa ante rótulo en blanco y contenido sin texto (salvo medios y controles); el giro va en un `span.giro` con solo el «›».
+- `tests/unit/desplegable.test.ts` — glifo con `.giro`, espacio que no parte, sin guion ni marcas en la sonda construida, Inter entre las familias, dos sondas más que rompen, guardia de `<details>` en su propia prueba sobre `src/` y `public/islas/`.
+- `tests/e2e/ayuda/desplegables.ts` — nuevo: `ENFOCABLES` (con `summary`), `recorrerElFoco` (solo lo alcanzable), `abrirLosDesplegables` y `auditar`, compartidos.
+- `tests/e2e/accesibilidad.spec.ts` — usa la ayuda; mismas pasadas.
+- `tests/e2e/desplegable.spec.ts` — nuevo: la sonda en el navegador (puerto 4404).
+
+**Revisión.** Parches: 8 (alto 0, medio 2, bajo 6). Diferidos: 6, todos pendientes de Héctor (bmad-ux). Rechazados: 7. `followup_review_recommended: true` (puntuación 3 × 2 + 1 × 6 = 12).
+
+**Verificación.**
+- `npx vitest run tests/unit/desplegable.test.ts` — 14/14 verde.
+- `npx vitest run tests/unit/superficies.test.ts tests/unit/tipografia-en-tokens.test.ts tests/unit/desplegable.test.ts` — 129/129 verde (la guardia del barrido acepta la ayuda nueva).
+- `npx astro check` — 0 errores, 0 avisos.
+- `npx playwright test tests/e2e/desplegable.spec.ts tests/e2e/accesibilidad.spec.ts --project=escritorio` — 151 passed (146 de antes + 5 de la sonda).
+- `FECHA_JORNADA=2026-11-07 npx astro build` + `shasum` de `dist/` (10.433 ficheros) — idéntico a `logs/s-34-0/dist-antes.sha`.
+- `npm test` — 155 ficheros, 7.165 pruebas, verde.
+
+**Riesgos residuales.** Los seis diferidos de UX (filete entre envueltos, anidar, esquema de encabezados, señal de puntero, anclas e impresión, medida de prosa impuesta) llegan con la 34.2 y la Épica 30 si Héctor no los decide antes. La sonda e2e solo corre en local, como todo Playwright.

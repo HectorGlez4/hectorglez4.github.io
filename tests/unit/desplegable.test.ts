@@ -23,7 +23,12 @@ import { revisarCobertura, type PaginaConstruida } from '../../tools/lib/cobertu
  *     solo pueden nombrar el marcado del propio componente.
  *   · **Una construcción**: un desplegable con contenido y dos seguidos, leídos de `dist/`, y la
  *     cobertura tipográfica de esa página con el CSS que emite la copia.
- *   · **Dos construcciones que fallan**: sin `slot` y con un `slot` en blanco.
+ *   · **Construcciones que fallan**: sin `slot`, con un `slot` en blanco, con uno de solo
+ *     comentarios y elementos sin texto, y con un rótulo en blanco.
+ *
+ * Lo que solo se ve en un navegador —el teclado, el foco, la zona de toque, el glifo girado y
+ * los barridos de axe y de foco con los desplegables cerrados y abiertos— lo mira
+ * `tests/e2e/desplegable.spec.ts` sobre una sonda igual.
  */
 
 const COMPONENTE = 'src/components/Desplegable.astro';
@@ -59,7 +64,7 @@ async function partes(): Promise<{ frontmatter: string; plantilla: string; estil
 
 /** Lo que pinta el marcado del componente: lo único que su hoja puede nombrar. */
 const ELEMENTOS_PROPIOS = new Set(['details', 'summary', 'span', 'div']);
-const CLASES_PROPIAS = new Set(['desplegable', 'contenido', 'glifo']);
+const CLASES_PROPIAS = new Set(['desplegable', 'contenido', 'glifo', 'giro']);
 /** Pseudoclases, pseudoelementos y atributos que no salen del propio marcado. */
 const MODIFICADORES_PROPIOS = new Set(['::-webkit-details-marker', '[open]']);
 
@@ -111,7 +116,8 @@ describe('Historia 34.0 — el contrato del componente, sin construir', () => {
     const { plantilla, estilo } = await partes();
     expect(plantilla).toContain('<details class="desplegable">');
     expect(plantilla).not.toMatch(/<details[^>]*\bopen\b/);
-    expect(plantilla).toContain(`<span class="glifo" aria-hidden="true">&nbsp;${GLIFO}</span>`);
+    // Gira solo el glifo, no el espacio que lo pega al rótulo.
+    expect(plantilla).toContain(`<span class="glifo" aria-hidden="true">&nbsp;<span class="giro">${GLIFO}</span></span>`);
     expect(plantilla).toMatch(/<summary><span>\{rotulo\}<span class="glifo"/);
     expect(plantilla).toContain('<div class="contenido">');
     for (const ajeno of ['<script', 'data-zona', 'data-ingreso', 'data-pagefind', '<svg', FLECHA]) {
@@ -148,6 +154,7 @@ describe('Historia 34.0 — el contrato del componente, sin construir', () => {
     }
     expect(hoja).toMatch(/summary::-webkit-details-marker \{ display: none; \}/);
     expect(hoja).toMatch(/\.desplegable \+ \.desplegable \{ border-block-start: none; \}/);
+    expect(hoja).toMatch(/\.desplegable\[open\] \.giro \{ transform: rotate\(90deg\); \}/);
     // Sin fondo, radio, subrayado, siena, transición ni regla de foco propia.
     expect(hoja).not.toMatch(/background|border-radius|text-decoration|--siena|transition|:focus/);
   });
@@ -168,18 +175,41 @@ describe('Historia 34.0 — el contrato del componente, sin construir', () => {
     expect(selectoresAjenos('@media (min-width: 1px) { h2 { x: y; } }')).toEqual(['h2']);
   });
 
-  it('ninguna página ni componente del sitio lo importa todavía, ni escribe su propio `<details>`', async () => {
-    const entradas = await readdir(join(RAIZ, 'src'), { recursive: true, withFileTypes: true });
-    for (const entrada of entradas) {
-      if (!entrada.isFile() || !/\.(astro|mdx|ts)$/.test(entrada.name)) continue;
-      const ruta = join(entrada.parentPath, entrada.name);
+  /*
+   * Temporal: la primera historia que lo use (34.2 o la Épica 30) quita esta prueba, y solo esta.
+   * La de abajo es permanente.
+   */
+  it('ninguna página ni componente del sitio lo importa todavía', async () => {
+    for (const ruta of await ficherosDelSitio()) {
+      if (ruta === join(RAIZ, COMPONENTE)) continue;
+      expect(sinComentarios(await readFile(ruta, 'utf8')), ruta).not.toContain('Desplegable.astro');
+    }
+  });
+
+  it('ningún fichero del sitio, ni una isla, escribe su propio `<details>`', async () => {
+    const ficheros = await ficherosDelSitio();
+    expect(ficheros).toContain(join(RAIZ, 'public', 'islas', 'imagen.js'));
+    for (const ruta of ficheros) {
       if (ruta === join(RAIZ, COMPONENTE)) continue;
       const fuente = sinComentarios(await readFile(ruta, 'utf8'));
-      expect(fuente, ruta).not.toContain('Desplegable.astro');
-      expect(fuente, ruta).not.toMatch(/<details\b/);
+      expect(fuente, ruta).not.toMatch(/<details\b/i);
+      expect(fuente, ruta).not.toMatch(/createElement\(\s*['"`]details['"`]/i);
     }
   });
 });
+
+/** Todo fichero de código del sitio: `src/` y las islas de `public/islas/`. */
+async function ficherosDelSitio(): Promise<string[]> {
+  const ficheros: string[] = [];
+  for (const raiz of [join(RAIZ, 'src'), join(RAIZ, 'public', 'islas')]) {
+    for (const entrada of await readdir(raiz, { recursive: true, withFileTypes: true })) {
+      if (entrada.isFile() && /\.(astro|mdx|[cm]?[jt]s|[jt]sx)$/.test(entrada.name)) {
+        ficheros.push(join(entrada.parentPath, entrada.name));
+      }
+    }
+  }
+  return ficheros;
+}
 
 // ─── Una construcción ────────────────────────────────────────────────────────
 
@@ -238,10 +268,18 @@ describe('Historia 34.0 — el desplegable construido en una sonda', () => {
       expect(apertura).toMatch(/class="desplegable[ "]/);
       expect(apertura).not.toMatch(/\bopen\b/);
       expect(summary).not.toMatch(/<h[1-6]\b/);
-      expect(summary).toMatch(new RegExp(`<span\\b[^>]*aria-hidden="true"[^>]*>&nbsp;${GLIFO}</span>|<span\\b[^>]*aria-hidden="true"[^>]*> ${GLIFO}</span>`));
+      // Pegado con un espacio que no parte (`&nbsp;` o el carácter U+00A0), nunca con uno que parte.
+      expect(summary).toMatch(
+        new RegExp(`<span\\b[^>]*aria-hidden="true"[^>]*>(?:&nbsp;|\u00a0)<span\\b[^>]*class="giro[ "][^>]*>${GLIFO}</span></span>`),
+      );
+      for (const ajeno of ['data-zona', '<script', 'data-ingreso', 'data-pagefind']) {
+        expect(apertura + summary + contenido, ajeno).not.toContain(ajeno);
+      }
       expect(contenido).toMatch(/^<div\b[^>]*class="contenido[ "]/);
     }
     expect(desplegables[0].contenido).toContain('<p id="dentro">Séneca, «Sobre la brevedad de la vida».</p>');
+    // Sin guion: la sonda no lleva ninguno, así que ninguno sale del componente.
+    expect(html).not.toMatch(/<script\b/i);
   });
 
   it('dos seguidos son hermanos, y la hoja quita el filete de encima del segundo', async () => {
@@ -255,6 +293,8 @@ describe('Historia 34.0 — el desplegable construido en una sonda', () => {
     const pagina: PaginaConstruida = { ruta: 'sonda-desplegable/index.html', html };
     const resultado = revisarCobertura([pagina], css);
     expect(resultado.familias.length, 'la copia no emite familias').toBeGreaterThan(0);
+    // El glifo se juzga contra Inter, la familia del rótulo, y no solo contra la que haya.
+    expect(resultado.familias.some((f) => /inter/i.test(f)), resultado.familias.join(', ')).toBe(true);
     expect(resultado.ok, JSON.stringify(resultado.fallos)).toBe(true);
   });
 });
@@ -280,16 +320,29 @@ async function cssDeLaCopia(proyecto: string): Promise<string> {
   return [...bloques].join('\n');
 }
 
-// ─── Dos construcciones que fallan ───────────────────────────────────────────
+// ─── Construcciones que fallan ───────────────────────────────────────────
 
 describe('Historia 34.0 — un desplegable sin contenido detiene la construcción', () => {
   it.each([
     ['sin slot', '<Desplegable rotulo="Cómo citar" />', 'Cómo citar'],
     ['con slot en blanco', '<Desplegable rotulo="Lee el pasaje">   </Desplegable>', 'Lee el pasaje'],
+    [
+      'con solo un comentario y elementos sin texto',
+      '<Desplegable rotulo="Ediciones"><Fragment set:html="<!-- nada -->" /><p></p><ul> </ul>&nbsp;</Desplegable>',
+      'Ediciones',
+    ],
   ])('%s: código distinto de 0, nombrando el rótulo', async (_caso, uso, rotulo) => {
     const resultado = await construirConCorpus(CORPUS, { paginas: { 'sonda-vacia.astro': sonda(uso) } });
     aLimpiar.push(resultado.proyecto);
     expect(resultado.codigo, resultado.salida).not.toBe(0);
     expect(resultado.salida).toContain(`Desplegable «${rotulo}» sin contenido: quien lo usa no lo renderiza (UX-DR144)`);
+  }, 300_000);
+
+  it('con el rótulo en blanco: código distinto de 0, porque el `<summary>` no tendría nombre', async () => {
+    const uso = '<Desplegable rotulo="  "><p>Algo.</p></Desplegable>';
+    const resultado = await construirConCorpus(CORPUS, { paginas: { 'sonda-sin-rotulo.astro': sonda(uso) } });
+    aLimpiar.push(resultado.proyecto);
+    expect(resultado.codigo, resultado.salida).not.toBe(0);
+    expect(resultado.salida).toContain('Desplegable sin rótulo: el <summary> se quedaría sin nombre accesible (NFR-9)');
   }, 300_000);
 });

@@ -30,14 +30,19 @@
  * El glifo de despliegue es «›» (U+203A), el mismo que el avance de `FilaDeBloque`, en un
  * `span` `aria-hidden` —el nombre accesible del `<summary>` es solo el rótulo— y pegado a él
  * con `&nbsp;` dentro del mismo `span` de texto, para que nunca quede solo en una línea. Al
- * abrir gira 90°, sin transición. Está en el subconjunto `latin` de Inter (`U+2000-206F`); nunca
+ * abrir gira 90°, sin transición, y gira **solo el glifo** (`.giro`), no el espacio que lo pega:
+ * girando la caja entera, el centro del giro caería entre el espacio y el glifo, y el «›»
+ * abierto saltaría a un lado y fuera de la línea base. Está en el subconjunto `latin` de Inter (`U+2000-206F`); nunca
  * «→» (U+2192), que no lo está, ni un `content` de CSS ni un SVG. **Es provisional**: el glifo
  * concreto lo decide Héctor con `bmad-ux`.
  *
  * **Un desplegable sin contenido no se pinta** (UX-DR144): el que no existe para su página no
  * deja `<summary>`, filete ni aire, y eso lo cumple quien lo usa, no renderizándolo. El
  * componente solo garantiza que nunca sale vacío: sin `slot`, o con uno que solo renderiza
- * espacio en blanco, detiene la construcción nombrando el rótulo.
+ * espacio en blanco, comentarios o elementos sin texto (`<p></p>`, `<ul></ul>`), detiene la
+ * construcción nombrando el rótulo. Lo que sin texto sí es contenido —una imagen, un SVG, un
+ * control— cuenta como tal. Un rótulo en blanco también la detiene: el `<summary>` se quedaría
+ * sin nombre accesible, porque el glifo está oculto.
  *
  * El `<style>` solo nombra el marcado de este componente, con el ámbito de Astro y sin
  * `:global`: Astro emite la hoja por el grafo de importaciones aunque el componente no se
@@ -52,13 +57,25 @@ interface Props {
 
 const { rotulo } = Astro.props;
 
+if (rotulo.trim() === '') {
+  throw new Error('Desplegable sin rótulo: el <summary> se quedaría sin nombre accesible (NFR-9)');
+}
+
+/** Lo que sin texto también es contenido: medios y controles. */
+const CONTENIDO_SIN_TEXTO = /<(?:img|svg|picture|video|audio|iframe|canvas|object|embed|math|input|select|textarea|button)\b/i;
+
 const contenido = Astro.slots.has('default') ? await Astro.slots.render('default') : '';
-if (contenido.trim() === '') {
+const sinComentarios = contenido.replace(/<!--[\s\S]*?-->/g, '');
+const texto = sinComentarios
+  .replace(/<[^>]*>/g, '')
+  .replace(/&nbsp;|&#160;|&#xa0;/gi, ' ')
+  .trim();
+if (texto === '' && !CONTENIDO_SIN_TEXTO.test(sinComentarios)) {
   throw new Error(`Desplegable «${rotulo}» sin contenido: quien lo usa no lo renderiza (UX-DR144)`);
 }
 ---
 
-<details class="desplegable"><summary><span>{rotulo}<span class="glifo" aria-hidden="true">&nbsp;›</span></span></summary><div class="contenido"><Fragment set:html={contenido} /></div></details>
+<details class="desplegable"><summary><span>{rotulo}<span class="glifo" aria-hidden="true">&nbsp;<span class="giro">›</span></span></span></summary><div class="contenido"><Fragment set:html={contenido} /></div></details>
 
 <style>
   /* Plano: filete encima de cada rótulo y debajo del último, sin fondo ni radio (UX-DR145). */
@@ -91,11 +108,11 @@ if (contenido.trim() === '') {
     display: none;
   }
 
-  .glifo {
+  .giro {
     display: inline-block;
   }
 
-  .desplegable[open] .glifo {
+  .desplegable[open] .giro {
     transform: rotate(90deg);
   }
 
