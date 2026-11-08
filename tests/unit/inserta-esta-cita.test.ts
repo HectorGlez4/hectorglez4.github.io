@@ -1,0 +1,217 @@
+import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import { readFile, readdir } from 'node:fs/promises';
+import { join } from 'node:path';
+import {
+  AUTOR_VALIDO,
+  TEMA_VALIDO,
+  citaValida,
+  construirConCorpus,
+  limpiar,
+  paginaConstruida,
+} from './ayuda/construir.js';
+import { recorrerElementos, type Elemento } from './ayuda/enlaces.js';
+import { decodificar } from './ayuda/listado.js';
+import { indiceDe } from './ayuda/pagefind.js';
+import { componerDocumento, nombreDeDocumento } from '../../tools/lib/documento.ts';
+
+/**
+ * Historia 30.4 — «Inserta esta cita» en la Página de Cita, leído de `dist/` (FR-57, UX-DR120).
+ *
+ * El Fragmento literal lo fija `tests/unit/atribucion.test.ts`; aquí, lo que solo dice lo
+ * construido: que toda Página de Cita lo lleva, plegado y el último del bloque de desplegables;
+ * que el campo trae un Fragmento que, analizado, es un solo `blockquote` sin nada vedado y con la
+ * canónica como único enlace; que la página no gana ningún `<a>`, que el JSON-LD no lo lleva y que
+ * Pagefind no lo indexa. El comportamiento en el navegador lo mira `tests/e2e/inserta-esta-cita.spec.ts`.
+ */
+
+const WS = 'https://es.wikisource.org/wiki/';
+const BREVEDAD = 'Sobre la brevedad de la vida';
+const SIN_OBRA = 'seneca-mientras-esperamos-vivir-la-vida-pasa';
+const TEXTOS = [
+  'No es que tengamos poco tiempo, es que perdemos mucho.',
+  'La vida es larga si sabes emplearla.',
+  'Lo breve & lo bueno <dos veces> bueno, dice "el sabio".',
+];
+const COTEJADAS = TEXTOS.map((_, i) => `seneca-brevedad-${i}`);
+const TEXTO_SIN_OBRA = 'Mientras esperamos vivir, la vida pasa.';
+
+function corpus(): Record<string, string> {
+  const url = `${WS}Sobre_la_brevedad_de_la_vida`;
+  const c: Record<string, string> = {
+    'autores/seneca.yml': AUTOR_VALIDO,
+    'temas/el-tiempo.yml': TEMA_VALIDO,
+    'pendientes-de-cotejo.yml': `citas:\n  - ${SIN_OBRA}\n`,
+    'citas/seneca--sin-obra.md': citaValida({
+      slug: SIN_OBRA,
+      texto: TEXTO_SIN_OBRA,
+      procedencia: { referencia: 'Carta 1' },
+      fuente: undefined,
+    }),
+    [`fuentes/${nombreDeDocumento('wikisource-es', BREVEDAD)}.txt`]: componerDocumento(
+      { fuente: 'wikisource-es', obra: BREVEDAD, url, recuperado: '2026-10-27' },
+      BREVEDAD,
+      TEXTOS.join('\n\n'),
+    ),
+  };
+  TEXTOS.forEach((texto, i) => {
+    c[`citas/seneca--brevedad-${i}.md`] = citaValida({
+      slug: COTEJADAS[i],
+      texto,
+      procedencia: { obra: BREVEDAD, año: 49 },
+      fuente: { id: 'wikisource-es', url },
+    });
+  });
+  return c;
+}
+
+const TEXTO_DE: Record<string, string> = {
+  ...Object.fromEntries(COTEJADAS.map((slug, i) => [slug, TEXTOS[i]])),
+  [SIN_OBRA]: TEXTO_SIN_OBRA,
+};
+
+const VEDADOS = ['script', 'img', 'iframe', 'link', 'style', 'object', 'embed', 'svg'];
+
+const aLimpiar: string[] = [];
+afterAll(async () => {
+  await Promise.all(aLimpiar.map(limpiar));
+});
+
+/** El bloque de desplegables, de su apertura al cierre del `article`. */
+function regionDeDesplegables(html: string): string {
+  const inicio = html.indexOf('<div class="desplegables');
+  expect(inicio, 'sin bloque de desplegables').toBeGreaterThan(-1);
+  return html.slice(inicio, html.indexOf('</article>', inicio));
+}
+
+/** Los `<details>` del bloque, enteros, en orden. */
+function detallesDe(region: string): string[] {
+  return [...region.matchAll(/<details\b[\s\S]*?<\/details>/g)].map((m) => m[0]);
+}
+
+/** El valor del campo del Fragmento, decodificado. */
+function fragmentoDe(html: string): string {
+  const campos = [...html.matchAll(/<textarea\b([^>]*)>([\s\S]*?)<\/textarea>/g)].filter((m) => /\bdata-copiable\b/.test(m[1]));
+  expect(campos).toHaveLength(1);
+  return decodificar(campos[0][2]);
+}
+
+describe('Historia 30.4 — «Inserta esta cita» en la Página de Cita construida', () => {
+  let proyecto = '';
+  let rutas: string[] = [];
+  const html = (ruta: string) => readFile(paginaConstruida(proyecto, ruta), 'utf8');
+
+  beforeAll(async () => {
+    const resultado = await construirConCorpus(corpus(), { conBusqueda: true });
+    aLimpiar.push(resultado.proyecto);
+    expect(resultado.codigo, resultado.salida).toBe(0);
+    proyecto = resultado.proyecto;
+    rutas = (await readdir(join(proyecto, 'dist', 'cita'), { withFileTypes: true }))
+      .filter((d) => d.isDirectory())
+      .map((d) => `/cita/${d.name}/`);
+  }, 300_000);
+
+  it('toda Página de Cita lo lleva: el último `<details>` del bloque, cerrado, con su `label`, su región vacía y su botón `hidden`', async () => {
+    expect(rutas.sort()).toEqual([...COTEJADAS, SIN_OBRA].map((s) => `/cita/${s}/`).sort());
+    for (const ruta of rutas) {
+      const region = regionDeDesplegables(await html(ruta));
+      expect(region, ruta).toMatch(/^<div class="desplegables[^"]*"[^>]*data-pagefind-ignore="all"/);
+      const detalles = detallesDe(region);
+      expect(detalles.map((d) => /<summary\b[\s\S]*?(Cómo citar|Inserta esta cita)[\s\S]*?<\/summary>/.exec(d)?.[1]), ruta).toEqual([
+        'Cómo citar',
+        'Inserta esta cita',
+      ]);
+      const inserta = detalles.at(-1)!;
+      expect(inserta, ruta).not.toMatch(/<details\b[^>]*\bopen\b/);
+      expect(inserta, ruta).toMatch(/<div\b[^>]*\bdata-inserta-esta-cita\b[^>]*\bdata-copiables\b/);
+      expect(inserta.match(/<textarea\b[^>]*\bdata-copiable\b/g), ruta).toHaveLength(1);
+      expect(inserta, ruta).toMatch(/<textarea\b[^>]*id="fragmento-para-insertar"[^>]*\breadonly\b/);
+      expect(inserta, ruta).toMatch(
+        /<label\b[^>]*for="fragmento-para-insertar"[^>]*>Pega este fragmento en tu página: lleva la cita, su autor y el enlace a esta página\.<\/label>/,
+      );
+      expect(inserta, ruta).toMatch(/<button\b[^>]*\bdata-copiar-texto\b[^>]*aria-label="Copiar el fragmento"[^>]*\bhidden\b/);
+      const regiones = [...inserta.matchAll(/<p\b([^>]*)role="status"([^>]*)>([\s\S]*?)<\/p>/g)];
+      expect(regiones, ruta).toHaveLength(1);
+      expect(regiones[0][3], ruta).toBe('');
+      expect(regiones[0][1] + regiones[0][2], ruta).not.toMatch(/\bhidden\b/);
+      // Ningún enlace de la página sale del bloque: el del Fragmento es texto del campo.
+      expect(inserta, ruta).not.toMatch(/<a\b|data-zona|data-sin-zona/);
+    }
+  });
+
+  it('el Fragmento es un solo `blockquote` sin nada vedado, con la canónica como único enlace y el texto literal', async () => {
+    for (const ruta of rutas) {
+      const pagina = await html(ruta);
+      const canonica = decodificar(/<link rel="canonical" href="([^"]+)"/.exec(pagina)![1]);
+      expect(canonica, ruta).toMatch(/^https?:\/\/[^?#]+$/);
+      const fragmento = fragmentoDe(pagina);
+      const raices: Elemento[] = [];
+      const todos: Elemento[] = [];
+      recorrerElementos(fragmento, (elemento, antepasados) => {
+        todos.push(elemento);
+        if (antepasados.length === 0) raices.push(elemento);
+      });
+      expect(raices.map((e) => e.etiqueta), ruta).toEqual(['blockquote']);
+      expect(fragmento.trim().endsWith('</blockquote>'), ruta).toBe(true);
+      for (const e of todos) {
+        expect(VEDADOS, `${ruta}: <${e.etiqueta}>`).not.toContain(e.etiqueta);
+        expect(e.atributos.has('class') || e.atributos.has('style'), `${ruta}: <${e.etiqueta}> con clase o estilo`).toBe(false);
+        for (const nombre of e.atributos.keys()) expect(nombre, ruta).not.toMatch(/^on/);
+      }
+      const enlaces = todos.filter((e) => e.etiqueta === 'a');
+      expect(enlaces.map((e) => e.atributos.get('href')), ruta).toEqual([canonica]);
+      expect(fragmento, ruta).not.toMatch(/\bsrc=|[?&](de|via)=/);
+      const primero = /<p>([\s\S]*?)<\/p>/.exec(fragmento)![1];
+      const slug = ruta.split('/')[2];
+      expect(decodificar(primero), ruta).toBe(TEXTO_DE[slug]);
+    }
+  });
+
+  it('con Obra lleva su título en `<cite>`; sin Obra, ninguno', async () => {
+    expect(fragmentoDe(await html(`/cita/${COTEJADAS[0]}/`))).toContain(`<p>— Séneca, <cite>${BREVEDAD}</cite>. <a href=`);
+    const sinObra = fragmentoDe(await html(`/cita/${SIN_OBRA}/`));
+    expect(sinObra).not.toContain('<cite>');
+    expect(sinObra).toContain('<p>— Séneca. <a href=');
+  });
+
+  it('el texto con `&`, `<`, `>` y `"` va escapado en el Fragmento, y doblemente en el marcado del campo', async () => {
+    const pagina = await html(`/cita/${COTEJADAS[2]}/`);
+    expect(fragmentoDe(pagina)).toContain('<p>Lo breve &amp; lo bueno &lt;dos veces&gt; bueno, dice &quot;el sabio&quot;.</p>');
+    expect(pagina).toContain('&lt;p&gt;Lo breve &amp;amp; lo bueno &amp;lt;dos veces&amp;gt;');
+  });
+
+  it('el JSON-LD no lleva el Fragmento', async () => {
+    for (const ruta of rutas) {
+      const pagina = await html(ruta);
+      const ld = [...pagina.matchAll(/<script type="application\/ld\+json"[^>]*>([\s\S]*?)<\/script>/g)].map((m) => m[1]);
+      expect(ld.length, ruta).toBeGreaterThan(0);
+      for (const cuerpo of ld) expect(cuerpo, ruta).not.toMatch(/blockquote|Pega este fragmento|Inserta esta cita/);
+    }
+  });
+
+  it('Pagefind no lo indexa: lo que solo dice el bloque no da ninguna Página de Cita', async () => {
+    const indice = await indiceDe(proyecto);
+    try {
+      const rutasDe = async (termino: string) =>
+        (await Promise.all((await indice.search(termino)).results.map((r) => r.data()))).map((d) => d.url);
+      for (const termino of ['fragmento', 'blockquote', 'pega', 'cite', 'insertar']) {
+        expect((await rutasDe(termino)).filter((u) => u.startsWith('/cita/')), termino).toEqual([]);
+      }
+    } finally {
+      indice.soltar();
+    }
+  });
+});
+
+describe('Historia 30.4 — `--mono` y `--codigo` son solo del campo del Fragmento', () => {
+  it('en `src/` solo los nombran `tokens.css` e `InsertaEstaCita.astro`', async () => {
+    const raiz = join(import.meta.dirname, '..', '..', 'src');
+    const ficheros = (await readdir(raiz, { recursive: true, withFileTypes: true }))
+      .filter((d) => d.isFile() && /\.(astro|css|ts|js|mjs)$/.test(d.name))
+      .map((d) => join(d.parentPath, d.name));
+    const nombran: string[] = [];
+    for (const f of ficheros) {
+      if (/var\(--(mono|codigo)\)|--(mono|codigo)\s*:/.test(await readFile(f, 'utf8'))) nombran.push(f.slice(raiz.length + 1));
+    }
+    expect(nombran.sort()).toEqual(['components/InsertaEstaCita.astro', 'styles/tokens.css']);
+  });
+});

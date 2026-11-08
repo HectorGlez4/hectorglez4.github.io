@@ -32,6 +32,11 @@
   /* Las define la Fonts API de Astro; aquí solo se les da el nombre del proyecto. */
   --serif: var(--fuente-serif), Georgia, 'Times New Roman', serif;
   --sans: var(--fuente-sans), system-ui, -apple-system, 'Segoe UI', sans-serif;
+  /*
+   * Historia 30.4 — la pila monoespaciada del sistema, sin fichero de fuente: solo el campo del
+   * Fragmento de «Inserta esta cita» (`InsertaEstaCita.astro`), con `--codigo`.
+   */
+  --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace;
 
   /* Tramos de Cita — UX-DR19. Qué tramo toca lo decide src/lib/tramos.ts. */
   --cita-xl: 44px;
@@ -51,7 +56,7 @@
   --cuerpo-md: 15px;
   --autor: 13px;
   --pie: 13px;
-  /* code — el Fragmento para insertar y la Referencia (DESIGN.md v9, `{typography.code}`). */
+  /* code — solo el campo del Fragmento de «Inserta esta cita» (DESIGN.md v9, `{typography.code}`). */
   --codigo: 13px;
 
   /*

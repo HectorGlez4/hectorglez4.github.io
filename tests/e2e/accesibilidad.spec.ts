@@ -673,9 +673,13 @@ test.describe('Historia 2.8 — foco', () => {
   test('en la Página de Cita el orden es contenido, acciones, tarjeta y después salidas', async ({ page }) => {
     const ruta = obligatoria(CITAS_24_4.completa, SIN_TARJETA_COMPLETA);
     const { paradas, grupos } = await paradasDesdeElAutor(page, ruta);
-    // Historia 30.3 — tras la tarjeta, el rótulo de «Cómo citar», cerrado: una sola parada.
+    // Historia 30.3 — tras la tarjeta, los rótulos de los desplegables, cerrados: una parada cada
+    // uno, «Cómo citar» y —desde la 30.4— «Inserta esta cita».
     expect(grupos, `${ruta}\n${JSON.stringify(paradas)}`).toEqual(['contenido', 'accion', 'tarjeta', 'desplegable', 'salida']);
-    expect(paradas.filter((p) => p.grupo === 'desplegable').map((p) => p.texto), ruta).toEqual(['Cómo citar ›']);
+    expect(paradas.filter((p) => p.grupo === 'desplegable').map((p) => p.texto), ruta).toEqual([
+      'Cómo citar ›',
+      'Inserta esta cita ›',
+    ]);
     const contenido = paradas.filter((p) => p.grupo === 'contenido');
     // El Autor, el título de la Obra y la Fuente, delante de las acciones.
     expect(contenido[0].href, ruta).toMatch(/^\/autor\//);
@@ -1294,9 +1298,18 @@ test.describe('Historia 2.8 — responsive', () => {
    * Las zonas de toque de `main` en una página, a 360 px: 44 px de alto y 8 px entre vecinas,
    * salvo las filas apiladas de un enlace de bloque, que basta con que no se solapen.
    */
-  async function medirZonasDeToque(page: Page, ruta: string) {
+  async function medirZonasDeToque(page: Page, ruta: string, { abiertos = false } = {}) {
     await page.setViewportSize({ width: 360, height: 640 });
     await page.goto(ruta);
+    /*
+     * Historia 30.4 — con `abiertos`, se miden también los botones de dentro de los desplegables
+     * («Copiar APA»…, «Copiar el fragmento»), que la isla enseña al cargar: se abren todos antes.
+     */
+    if (abiertos) {
+      const resumenes = page.locator('main details:not([open]) > summary');
+      while ((await resumenes.count()) > 0) await resumenes.first().click();
+      await expect(page.getByRole('button', { name: 'Copiar el fragmento', exact: true })).toBeVisible();
+    }
 
     const cajas = await page.evaluate(() =>
       [...document.querySelectorAll('main a, main button')]
@@ -1402,6 +1415,10 @@ test.describe('Historia 2.8 — responsive', () => {
 
   test('las zonas de toque miden 44px con 8px de separación', async ({ page }) => {
     await medirZonasDeToque(page, '/cita/antonio-machado-hoy-es-siempre-todavia/');
+  });
+
+  test('30.4 — las zonas de toque con los desplegables abiertos', async ({ page }) => {
+    await medirZonasDeToque(page, obligatoria(CITAS_24_4.completa, SIN_TARJETA_COMPLETA), { abiertos: true });
   });
 
   test('24.6 — las zonas de toque del pie con los dos bloques', async ({ page }) => {
@@ -2803,3 +2820,41 @@ test.describe('Historia 30.3 — «Cómo citar» pasa el barrido cerrado y abier
     });
   }
 });
+test.describe('Historia 30.4 — «Inserta esta cita» pasa el barrido cerrado y abierto, y no desborda a 320 px', () => {
+  const caras: [string, string | undefined, string][] = [
+    ['la cara completa', citaConTarjetaCompleta()?.slug, SIN_TARJETA_COMPLETA],
+    ['una Cita sin Obra', citaSinObra()?.slug, 'el Corpus no tiene ninguna Cita sin Obra'],
+  ];
+  for (const [cara, slug, falta] of caras) {
+    test(`${cara}: axe con «Inserta esta cita» cerrado y abierto, y el reflujo a 320 px abierto`, async ({ page }) => {
+      expect(slug, falta).toBeDefined();
+      const ruta = `/cita/${slug}/`;
+      await page.goto(ruta);
+      const detalles = page.locator('details.desplegable', { has: page.locator('[data-inserta-esta-cita]') });
+      await expect(detalles).toHaveCount(1);
+      await auditar(page, ruta, 'con «Inserta esta cita» cerrado');
+      await detalles.locator('summary').click();
+      await expect(detalles).toHaveAttribute('open', '');
+      await auditar(page, ruta, 'con «Inserta esta cita» abierto');
+
+      await page.setViewportSize({ width: 320, height: 640 });
+      await page.evaluate(async () => {
+        await document.fonts.ready;
+      });
+      const m = await page.evaluate(() => {
+        const campo = document.querySelector('#fragmento-para-insertar')!;
+        return {
+          scroll: document.documentElement.scrollWidth,
+          ventana: document.documentElement.clientWidth,
+          campo: campo.getBoundingClientRect().right,
+          campoScroll: campo.scrollWidth,
+          campoAncho: campo.clientWidth,
+        };
+      });
+      expect(m.scroll, `${ruta} a 320 px: ${m.scroll} frente a ${m.ventana}`).toBeLessThanOrEqual(m.ventana);
+      expect(m.campo, `${ruta}: el campo acaba en ${m.campo}`).toBeLessThanOrEqual(m.ventana);
+      expect(m.campoScroll, `${ruta}: el campo desplaza en horizontal`).toBeLessThanOrEqual(m.campoAncho);
+    });
+  }
+});
+

@@ -101,7 +101,7 @@ function hijosDelArticle(html: string): { que: string; elemento: Elemento }[] {
   return hijos;
 }
 
-/** El marcado del bloque de desplegables, entero (una sola aparición). */
+/** El marcado del bloque de desplegables hasta su primer `</details>` —«Cómo citar»; desde la 30.4 le sigue «Inserta esta cita»—, con una sola aparición del bloque. */
 function bloqueDe(html: string): string {
   const inicio = html.indexOf('<div class="desplegables');
   expect(inicio, 'sin bloque de desplegables').toBeGreaterThan(-1);
@@ -168,7 +168,7 @@ describe('Historia 30.3 — «Cómo citar» en la Página de Cita construida', (
     ]) {
       expect(bloque).toMatch(new RegExp(`<span ${MARCADOR_DE_FECHA_DE_CONSULTA}="${estilo}"[^>]*></span>`));
       expect(bloque).toMatch(
-        new RegExp(`<button\\b[^>]*data-copiar-referencia[^>]*aria-label="Copiar ${rotulo}"[^>]*hidden[^>]*>`),
+        new RegExp(`<button\\b[^>]*data-copiar-texto[^>]*aria-label="Copiar ${rotulo}"[^>]*hidden[^>]*>`),
       );
       expect(bloque).toContain(`>${rotulo}</p>`);
     }
@@ -235,7 +235,7 @@ describe('Historia 30.3 — «Cómo citar» en la Página de Cita construida', (
     const primero = await deCopiar(COTEJADAS[0]);
     expect(primero).toHaveLength(1);
     for (const slug of [...COTEJADAS.slice(1), SIN_OBRA]) expect(await deCopiar(slug), slug).toEqual(primero);
-    expect(primero[0]).toContain('[data-como-citar]');
+    expect(primero[0]).toContain('[data-copiables]');
     for (const ajeno of [...COTEJADAS, SIN_OBRA, 'Séneca', 'brevedad']) expect(primero[0], ajeno).not.toContain(ajeno);
   });
 

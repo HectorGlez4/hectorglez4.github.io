@@ -23,6 +23,11 @@
  * «Copiado.» se anuncia por la región `role="status"` del bloque, que está aquí dentro —dentro
  * del `<details>`— desde la carga, vacía y sin `hidden`. Los botones fijan su nombre accesible
  * con `aria-label`, como Copiar. Sin enlaces —la canónica es texto—, así que sin `data-zona`.
+ *
+ * Historia 30.4 — la isla atiende «Cómo citar» e «Inserta esta cita» por atributos neutros: el
+ * bloque lleva `data-copiables`, cada botón `data-copiar-texto` y cada Referencia `data-copiable`
+ * (lo que copia su botón). `data-como-citar` y `data-referencia` se quedan como identidad del
+ * bloque y de la Referencia, para las pruebas y para la 30.5.
  */
 import { MARCADOR_DE_FECHA_DE_CONSULTA, type ReferenciaCompuesta } from '../lib/atribucion.ts';
 
@@ -47,14 +52,14 @@ if (MARCADOR_DE_FECHA_DE_CONSULTA !== 'data-fecha-de-consulta') {
 }
 ---
 
-<div class="como-citar" data-como-citar>
+<div class="como-citar" data-como-citar data-copiables>
   {
     referencias.map(({ estilo, rotulo, segmentos }) => (
       <div class="estilo">
         <p class="rotulo">{rotulo}</p>
-        <p class="referencia" data-referencia>{segmentos.map((s) => ('fecha' in s ? <span data-fecha-de-consulta={s.fecha} /> : s.cursiva ? <i>{s.texto}</i> : s.texto))}</p>
+        <p class="referencia" data-referencia data-copiable>{segmentos.map((s) => ('fecha' in s ? <span data-fecha-de-consulta={s.fecha} /> : s.cursiva ? <i>{s.texto}</i> : s.texto))}</p>
         <p class="sin-fecha" data-sin-fecha>Sin fecha de consulta: añade la de hoy.</p>
-        <button type="button" class="copiar-referencia" data-copiar-referencia aria-label={`Copiar ${rotulo}`} hidden><span data-etiqueta>Copiar {rotulo}</span></button>
+        <button type="button" class="copiar-referencia" data-copiar-texto aria-label={`Copiar ${rotulo}`} hidden><span data-etiqueta>Copiar {rotulo}</span></button>
       </div>
     ))
   }

@@ -1045,10 +1045,10 @@ la 28.2 las hereda solo con esas dos islas, y otra acción que entre en la fila 
 Tras la Tarjeta de Obra —o tras «Compartir en», sin Obra— y antes de las Rutas de salida, la
 Página de Cita lleva **un solo bloque** de desplegables, `<div class="desplegables"
 data-pagefind-ignore="all">` en `src/pages/cita/[slug].astro`, a 4 × unidad de lo de arriba: la
-palanca de SM-C5 es un diff de ese sitio. Hoy contiene el Desplegable «Cómo citar»
-(`Desplegable.astro`, la primitiva de la 34.0, que no se copia ni se cambia); «Inserta esta cita»
-(30.4) va detrás y el pasaje (Épica 31) delante, sin hueco. Sin ningún desplegable para la Cita no
-se pinta el bloque. Sin `data-zona` —no hay enlaces: la canónica es texto— y fuera del JSON-LD.
+palanca de SM-C5 es un diff de ese sitio. Contiene el Desplegable «Cómo citar»
+(`Desplegable.astro`, la primitiva de la 34.0, que no se copia ni se cambia) y, el último, «Inserta
+esta cita» (30.4); el pasaje (Épica 31) irá delante, sin hueco. Desde la 30.4 el bloque se pinta en
+toda Página de Cita. Sin `data-zona` —no hay enlaces: la canónica es texto— y fuera del JSON-LD.
 
 - **La composición es solo de `src/lib/atribucion.ts`** (AD-28): `referenciaDeCita` (segmentos,
   con la Obra en cursiva y un segmento vacío para la fecha), `referenciasDeCita`,
@@ -1076,6 +1076,32 @@ se pinta el bloque. Sin `data-zona` —no hay enlaces: la canónica es texto— 
 - Pendiente al fundir la Épica 29: el texto de la Referencia pasa por `enUnaLinea` de
   `src/lib/verso.ts` (« / » entre versos); hasta entonces va `cita.texto` tal cual (AD-29: nadie
   escribe su unión de versos).
+
+### Inserta esta cita (Historia 30.4)
+
+El último Desplegable del bloque, «Inserta esta cita», lleva el Fragmento de HTML estático que se
+pega en un blog (FR-57): `src/components/InsertaEstaCita.astro` pinta su `<label>`, un `<textarea
+readonly>` con el Fragmento, el botón «Copiar el fragmento» `hidden` y su región `role="status"`.
+
+- **El Fragmento lo compone solo `fragmentoParaInsertar` de `src/lib/atribucion.ts`** (AD-28): un
+  `blockquote` con el texto entero y literal, «— {Autor}, <cite>{Obra}</cite>.» (sin Obra, sin
+  `<cite>`) y el enlace a la canónica con la marca. Nada más —ni año, ni traductor, ni Fuente—, todo
+  escapado con `escapar` de `src/lib/lienzo.ts`, sin guion, imagen, estilo, clase ni recurso del
+  sitio. Una canónica que no sea `http(s)` absoluta o lleve `?…` o `#…` detiene la construcción:
+  el Fragmento nunca lleva `?de=` ni `?via=`. El marcado literal es un supuesto que revisa Héctor,
+  fijado por la tabla de `tests/unit/atribucion.test.ts`. El nombre sale de `nombreEnAtribucion`,
+  la misma función que pinta la Atribución (la 35.4 pondrá ahí el Personaje).
+- El enlace del Fragmento es **texto del campo**, no un `<a>` de la página: sin zona ni exención.
+- `--mono` y `--codigo` (con `--interlineado-codigo`) son **solo** del campo del Fragmento; fuera de
+  `tokens.css` e `InsertaEstaCita.astro` no los nombra nadie (`tests/unit/inserta-esta-cita.test.ts`).
+- **Sin guion propio.** La isla de Copiar (`CopiarCita.astro`) atiende «Cómo citar» e «Inserta esta
+  cita» por atributos neutros: cada bloque `data-copiables`, cada botón `data-copiar-texto`, y lo
+  que copia es el `textContent` del `data-copiable` de al lado (una Referencia, o el campo). Un
+  bloque copiable nuevo usa esos tres atributos, no un segundo recorrido. `data-como-citar`,
+  `data-referencia` y `data-inserta-esta-cita` quedan como identidad (la 30.5 distinguirá el evento
+  por ella). Sin evento de medición: copiar el Fragmento entra en el vocabulario con la 30.5.
+- Pendiente al fundir la Épica 29: los saltos de verso del Fragmento como `<br>` por `versosDe` de
+  `src/lib/verso.ts` (AD-29); hasta entonces el texto va en un solo `<p>`.
 
 ### Al pie de la Página de Cita (Historia 24.6)
 

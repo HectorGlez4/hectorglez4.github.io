@@ -664,7 +664,7 @@ test.describe('Historia 24.4 — la Tarjeta de Obra en la Página de Cita', () =
   }, info) => {
     test.skip(info.project.name !== 'escritorio', 'El teclado se recorre una vez, en escritorio.');
     await abrir(page, completa);
-    // Historia 30.3 — tras la tarjeta, el bloque de desplegables («Cómo citar», cerrado).
+    // Historia 30.3 — tras la tarjeta, el bloque de desplegables («Cómo citar» e «Inserta esta cita», cerrados).
     const GRUPOS = ['atribucion', 'copiar', 'imagen', 'compartir', 'tarjeta', 'desplegables', 'salidas', 'pie'];
     const recorrido: { grupo: string; indice: number }[] = [];
     for (let i = 0; i < 400; i++) {

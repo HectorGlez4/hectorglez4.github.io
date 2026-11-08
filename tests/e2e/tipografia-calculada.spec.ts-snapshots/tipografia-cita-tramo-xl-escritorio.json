@@ -38,11 +38,20 @@
   "main > article.contenedor.pagina > div.desplegables > details.desplegable > div.contenido > div.como-citar > div.estilo > p.rotulo": {
     "600 | 1.500": 3
   },
+  "main > article.contenedor.pagina > div.desplegables > details.desplegable > div.contenido > div.inserta > button.copiar-fragmento > span": {
+    "400 | 1.600": 1
+  },
+  "main > article.contenedor.pagina > div.desplegables > details.desplegable > div.contenido > div.inserta > label": {
+    "400 | 1.500": 1
+  },
+  "main > article.contenedor.pagina > div.desplegables > details.desplegable > div.contenido > div.inserta > textarea": {
+    "400 | 1.500": 1
+  },
   "main > article.contenedor.pagina > div.desplegables > details.desplegable > summary > span": {
-    "600 | 1.400": 1
+    "600 | 1.400": 2
   },
   "main > article.contenedor.pagina > div.desplegables > details.desplegable > summary > span > span.glifo > span.giro": {
-    "600 | 1.400": 1
+    "600 | 1.400": 2
   },
   "main > article.contenedor.pagina > div.fila-de-acciones > div.isla > button.abrir": {
     "400 | normal": 1

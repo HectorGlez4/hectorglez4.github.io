@@ -13,6 +13,7 @@
 import type { Cita, Autor, SiguienteCita } from './publicado.ts';
 import { rotuloDeFuente, type ObraResuelta } from './obras.ts';
 import { MARCA } from './marca.ts';
+import { escapar } from './lienzo.ts';
 import { recuentoDeAutores, recuentoDeCitas, recuentoDeObras, temaEnFrase } from './recuentos.ts';
 import {
   TARJETA_DEL_DIRECTORIO_DE_AUTORES,
@@ -677,4 +678,59 @@ export function referenciaEnTexto(segmentos: readonly SegmentoDeReferencia[], fe
   return segmentos
     .map((s) => ('fecha' in s ? (fecha === undefined ? '' : fechaDeConsulta(s.fecha, fecha)) : s.texto))
     .join('');
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// «Inserta esta cita» — Historia 30.4, FR-57, AD-28
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * El nombre del Autor tal como lo pinta la Atribución y lo lleva el Fragmento (UX-DR137). Hoy es
+ * el `nombre`; existe para que las dos superficies nombren por una sola función, donde la
+ * Historia 35.4 añadirá el Personaje sin tocar los componentes.
+ */
+export function nombreEnAtribucion(autor: Pick<Autor, 'nombre'>): string {
+  return autor.nombre;
+}
+
+/**
+ * El Fragmento para insertar de una Cita — FR-57, AD-28. HTML estático, en cuatro líneas unidas
+ * por `\n` (supuesto que revisa Héctor; lo fija la tabla de `tests/unit/atribucion.test.ts`):
+ *
+ *   <blockquote>
+ *   <p>{texto}</p>
+ *   <p>— {Autor}, <cite>{Obra}</cite>. <a href="{canónica}">Sabiduría de Bolsillo</a></p>
+ *   </blockquote>
+ *
+ * Sin Obra, sin `<cite>`: «— {Autor}. ». El texto va entero y literal, sin comillas —el
+ * `blockquote` ya dice que es cita— y a cualquier longitud. Tras el nombre o el título va «.»
+ * salvo que ya acaben en «.», «?», «!» o «…», la regla de la Referencia. Nada más: ni año, ni
+ * traductor, ni edición, ni Fuente, ni la grafía que declara la Cita. Todo texto y el `href` salen escapados
+ * con `escapar` de `src/lib/lienzo.ts`; sin guion, imagen, estilo, clase ni recurso del sitio, y su
+ * único enlace es la canónica. Una canónica que no sea `http(s)` absoluta o lleve `?…` o `#…`
+ * —una Marca de llegada pegada en blogs ajenos atribuiría sus visitas a otra cosa— detiene la
+ * construcción.
+ */
+export function fragmentoParaInsertar(cita: Pick<Cita, 'texto' | 'obra'>, autor: Pick<Autor, 'nombre'>, canonica: string): string {
+  let url: URL | undefined;
+  try {
+    url = new URL(canonica);
+  } catch {
+    url = undefined;
+  }
+  if (url === undefined || !/^https?:$/.test(url.protocol) || canonica.includes('?') || canonica.includes('#')) {
+    throw new Error(`fragmentoParaInsertar: la canónica «${canonica}» no es una URL http(s) absoluta sin «?» ni «#»`);
+  }
+  const conPunto = (frase: string) => `${frase}${/[.?!…]$/u.test(frase) ? '' : '.'}`;
+  const titulo = cita.obra?.titulo;
+  const firma =
+    titulo === undefined
+      ? escapar(conPunto(nombreEnAtribucion(autor)))
+      : `${escapar(nombreEnAtribucion(autor))}, <cite>${escapar(titulo)}</cite>${/[.?!…]$/u.test(titulo) ? '' : '.'}`;
+  return [
+    '<blockquote>',
+    `<p>${escapar(cita.texto)}</p>`,
+    `<p>— ${firma} <a href="${escapar(canonica)}">${escapar(MARCA)}</a></p>`,
+    '</blockquote>',
+  ].join('\n');
 }

@@ -5,7 +5,9 @@ import { parse as parsearYaml } from 'yaml';
 import {
   ESTILOS_DE_REFERENCIA,
   fechaDeConsulta,
+  fragmentoParaInsertar,
   citaTieneComoCitar,
+  nombreEnAtribucion,
   nombreEnReferencia,
   partesDelNombre,
   referenciaDeCita,
@@ -16,6 +18,7 @@ import {
 } from '../../src/lib/atribucion.ts';
 import { aplanarAutor, type Autor, type Cita } from '../../src/lib/publicado.ts';
 import type { ObraResuelta } from '../../src/lib/obras.ts';
+import { MAX_CARACTERES_IMAGEN } from '../../src/lib/umbrales.ts';
 
 /**
  * Historia 30.3 — «Cómo citar»: las formas literales de APA, MLA y Chicago (FR-58, AD-28).
@@ -325,5 +328,95 @@ describe('Historia 30.3 — el nombre de Autores reales del Corpus, por `aplanar
       datos.nombre,
       datos.nombre,
     ]);
+  });
+});
+
+/**
+ * Historia 30.4 — «Inserta esta cita»: el Fragmento literal (FR-57, AD-28). Como las Referencias,
+ * es un supuesto del spec que **revisa Héctor**: esta tabla lo fija, y cambiarlo es cambiar la
+ * tabla y `fragmentoParaInsertar`, nada más.
+ */
+describe('Historia 30.4 — el Fragmento para insertar', () => {
+  const pie = (firma: string) => `<p>— ${firma} <a href="${U}">Sabiduría de Bolsillo</a></p>`;
+  const fragmento = (texto: string, firma: string) => ['<blockquote>', `<p>${texto}</p>`, pie(firma), '</blockquote>'].join('\n');
+  const largo = `${'Palabra larga sin fin '.repeat(18)}fin.`;
+
+  const tabla: { caso: string; cita: Cita; autor: Autor; esperado: string }[] = [
+    {
+      caso: 'con Obra',
+      cita: citaDe(),
+      autor: MARTI,
+      esperado:
+        '<blockquote>\n<p>Yo soy un hombre sincero de donde crece la palma.</p>\n<p>— José Martí, <cite>Versos sencillos</cite>. <a href="https://ejemplo.org/cita/x/">Sabiduría de Bolsillo</a></p>\n</blockquote>',
+    },
+    {
+      caso: 'sin Obra',
+      cita: citaDe({ obra: undefined, procedencia: undefined, fuente: undefined }),
+      autor: MARTI,
+      esperado: fragmento(X, 'José Martí.'),
+    },
+    {
+      caso: 'título en «?»',
+      cita: citaDe({ obra: obra('¿Qué es la vida?') }),
+      autor: MARTI,
+      esperado: fragmento(X, 'José Martí, <cite>¿Qué es la vida?</cite>'),
+    },
+    {
+      caso: 'texto con & < > "',
+      cita: citaDe({ texto: 'A & B <c> "d"' }),
+      autor: MARTI,
+      esperado: fragmento('A &amp; B &lt;c&gt; &quot;d&quot;', 'José Martí, <cite>Versos sencillos</cite>.'),
+    },
+    {
+      caso: 'título con <',
+      cita: citaDe({ obra: obra('Uno < dos') }),
+      autor: MARTI,
+      esperado: fragmento(X, 'José Martí, <cite>Uno &lt; dos</cite>.'),
+    },
+    {
+      caso: 'Cita de 400 caracteres',
+      cita: citaDe({ texto: largo }),
+      autor: MARTI,
+      esperado: fragmento(largo, 'José Martí, <cite>Versos sencillos</cite>.'),
+    },
+    {
+      caso: 'nombre sin invertir aunque la clave esté revisada, y sin año, traductor ni edición',
+      cita: citaDe({ procedencia: { año: 1891, traduccion: { traductor: 'Nadie', año: 1900 } } as Cita['procedencia'] }),
+      autor: autorDe('María de Zayas y Sotomayor', 'Zayas'),
+      esperado: fragmento(X, 'María de Zayas y Sotomayor, <cite>Versos sencillos</cite>.'),
+    },
+  ];
+
+  it.each(tabla)('$caso', ({ cita, autor, esperado }) => {
+    expect(fragmentoParaInsertar(cita, autor, U)).toBe(esperado);
+  });
+
+  it('la Cita de prueba larga pasa de `MAX_CARACTERES_IMAGEN` y va entera', () => {
+    expect(largo.length).toBeGreaterThanOrEqual(400);
+    expect(largo.length).toBeGreaterThan(MAX_CARACTERES_IMAGEN);
+    expect(fragmentoParaInsertar(citaDe({ texto: largo }), MARTI, U)).toContain(`<p>${largo}</p>`);
+  });
+
+  it('el `href` también sale escapado', () => {
+    expect(fragmentoParaInsertar(citaDe(), MARTI, 'https://ejemplo.org/cita/a"b/')).toContain('href="https://ejemplo.org/cita/a&quot;b/"');
+  });
+
+  it.each([
+    `${U}?de=instagram`,
+    `${U}?via=whatsapp`,
+    `${U}#a`,
+    `${U}?`,
+    '/cita/x/',
+    'ftp://ejemplo.org/cita/x/',
+    'javascript:alert(1)',
+    '',
+  ])('una canónica «%s» detiene la construcción', (canonica) => {
+    expect(() => fragmentoParaInsertar(citaDe(), MARTI, canonica)).toThrow(/canónica/);
+  });
+
+  it('`nombreEnAtribucion` da el `nombre`, revisada la clave o no', () => {
+    expect(nombreEnAtribucion(MARTI)).toBe('José Martí');
+    expect(nombreEnAtribucion(MARTI_SIN_REVISAR)).toBe('José Martí');
+    expect(nombreEnAtribucion(autorDe('Horacio', 'Horacio'))).toBe('Horacio');
   });
 });

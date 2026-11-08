@@ -46,7 +46,7 @@
  *
  * Historia 30.3 — **la única isla de copiar de la página** atiende también «Cómo citar»
  * (`ComoCitar.astro`), que va después en el marcado. Por eso espera al documento analizado
- * (`DOMContentLoaded` si aún se está leyendo) y entonces recorre cada bloque `[data-como-citar]`
+ * (`DOMContentLoaded` si aún se está leyendo) y entonces recorre cada bloque `[data-copiables]` (hasta la 30.4, `[data-como-citar]`)
  * que no esté marcado (`data-listo`, para que las dos copias del Kit o la Cita del Día no lo
  * hagan dos veces): escribe en cada marcador la fecha de consulta de hoy —y la vuelve a escribir en
  * cada pulsación, para que una página abierta desde ayer no copie la fecha de ayer—, con
@@ -61,6 +61,13 @@
  * Cita, y copiar la Cita copia lo mismo que antes. Sin `__medir` nuevo: el evento de copiar una
  * Referencia es de la 30.5. Donde no hay «Cómo citar» (portada, 404, Kit), el recorrido no
  * encuentra nada.
+ *
+ * Historia 30.4 — el recorrido atiende «Cómo citar» **e** «Inserta esta cita» por atributos
+ * neutros, sin un segundo guion: cada bloque `[data-copiables]`, cada botón `[data-copiar-texto]`,
+ * y lo que copia es el `textContent` del `[data-copiable]` de al lado (una Referencia, o el campo
+ * del Fragmento, cuyo `textContent` es su valor). En «Inserta esta cita» no hay marcador de fecha
+ * ni línea «Sin fecha…», así que esa parte no encuentra nada. La 30.5 distinguirá su evento por la
+ * identidad del bloque (`data-como-citar` / `data-inserta-esta-cita`).
  */
 import { MARCADOR_DE_FECHA_DE_CONSULTA, fechaDeConsulta, textoParaCopiar } from '../lib/atribucion.ts';
 import { guionQueAnuncia } from '../lib/anuncio.ts';
@@ -137,13 +144,13 @@ boton.addEventListener('click', async () => {
 });
 
 const citar = () => {
-for (const k of document.querySelectorAll('[data-como-citar]:not([data-listo])')) {
+for (const k of document.querySelectorAll('[data-copiables]:not([data-listo])')) {
 k.setAttribute('data-listo', '');
 const r = k.querySelector('[data-anuncio]');
 const w = () => { const hoy = new Date(); for (const m of k.querySelectorAll('[' + MARCADOR + ']')) m.textContent = fechaDeConsulta(m.getAttribute(MARCADOR), hoy); };
 w();
 for (const l of k.querySelectorAll('[data-sin-fecha]')) l.remove();
-for (const b of k.querySelectorAll('[data-copiar-referencia]')) {
+for (const b of k.querySelectorAll('[data-copiar-texto]')) {
 const e = b.querySelector('[data-etiqueta]'), t = e.textContent;
 let s;
 const v = () => { clearTimeout(s); e.textContent = t; if (k.d === b) r.textContent = ''; b.removeAttribute('data-estado'); };
@@ -151,7 +158,7 @@ b.hidden = false;
 b.onclick = async () => {
 v();
 w();
-try { await navigator.clipboard.writeText(b.parentNode.querySelector('[data-referencia]').textContent); } catch { return; }
+try { await navigator.clipboard.writeText(b.parentNode.querySelector('[data-copiable]').textContent); } catch { return; }
 e.textContent = 'Copiado.';
 b.setAttribute('data-estado', 'copiado');
 k.d = b;

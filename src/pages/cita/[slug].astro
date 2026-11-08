@@ -23,7 +23,8 @@ import DatosEstructurados from '../../components/DatosEstructurados.astro';
 import FiltrosDeLaCita from '../../components/FiltrosDeLaCita.astro';
 import Desplegable from '../../components/Desplegable.astro';
 import ComoCitar from '../../components/ComoCitar.astro';
-import { citaTieneComoCitar, referenciasDeCita } from '../../lib/atribucion.ts';
+import InsertaEstaCita from '../../components/InsertaEstaCita.astro';
+import { citaTieneComoCitar, fragmentoParaInsertar, referenciasDeCita } from '../../lib/atribucion.ts';
 import {
   citasDeLasObras,
   citasDeTema,
@@ -143,17 +144,19 @@ const canonica = new URL(rutaDeCita(cita.slug), Astro.site).href;
     {/*
       * Historia 30.3 — el bloque de desplegables, tras la Tarjeta de Obra —o tras compartir, sin
       * Obra— y antes de las Rutas de salida (UX-DR119). Es **un solo sitio** a propósito: la
-      * palanca de SM-C5 es un diff de aquí. Hoy lleva «Cómo citar»; «Inserta esta cita» (30.4)
-      * va detrás y el pasaje de la Épica 31 delante, sin hueco reservado. Sin ningún desplegable
-      * para esta Cita, el bloque no se pinta. Fuera de Pagefind (`all`): las Referencias repiten
-      * el título y el Autor, y la página no se encuentra por ellas; fuera del JSON-LD. Sin
-      * `data-zona`: no hay enlaces, la canónica de las Referencias es texto.
+      * palanca de SM-C5 es un diff de aquí. Lleva «Cómo citar» —si la Cita lo tiene— y, el último,
+      * «Inserta esta cita» (30.4); el pasaje de la Épica 31 irá delante, sin hueco reservado. Desde
+      * la 30.4 el bloque se pinta siempre: el Fragmento existe para toda Cita. Fuera de Pagefind
+      * (`all`): las Referencias y el Fragmento repiten el texto, el título y el Autor, y la página
+      * no se encuentra por ellos; fuera del JSON-LD. Sin `data-zona`: no hay enlaces, la canónica
+      * es texto de las Referencias y del campo.
       */}
-    {citaTieneComoCitar(cita) && (
-      <div class="desplegables" data-pagefind-ignore="all">
+    <div class="desplegables" data-pagefind-ignore="all">
+      {citaTieneComoCitar(cita) && (
         <Desplegable rotulo="Cómo citar"><ComoCitar referencias={referenciasDeCita(cita, autor, canonica)} /></Desplegable>
-      </div>
-    )}
+      )}
+      <Desplegable rotulo="Inserta esta cita"><InsertaEstaCita fragmento={fragmentoParaInsertar(cita, autor, canonica)} /></Desplegable>
+    </div>
     {/*
       * Historia 24.6 — tras las acciones, los tres grupos del pie. Un grupo sin Citas no pinta
       * nada, y sin ninguno no hay `nav`: la Atribución sigue enlazando al Autor y a la Obra.
