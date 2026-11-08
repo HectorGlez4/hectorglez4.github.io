@@ -29,7 +29,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 # - Retrospective appends its action items to action_items; the status view surfaces open ones
 generated: 08-11-2026 09:00
-last_updated: 11-07-2026 16:51
+last_updated: 11-08-2026 12:00
 project: brainlySabiduria
 project_key: NOKEY
 tracking_system: file-system
@@ -523,8 +523,8 @@ development_status:
   # Épica 35 — la Cita atribuida, construida entera con la puerta cerrada: sin los cinco
   # topes ni BUZON_DE_PETICIONES (Héctor) no publica ninguna. La siembra a escala espera
   # a la pregunta 18; la Página de Personaje, criterios de patrón hasta UJ-8 (pregunta 24).
-  epic-35: backlog
-  35-1-la-clase-se-fija-al-dar-de-alta-y-queda-registrada: backlog
+  epic-35: in-progress
+  35-1-la-clase-se-fija-al-dar-de-alta-y-queda-registrada: review  # v9-ralph 2026-11-08: clase fijada al alta y registro; diferidos: lecturas crudas de añoFallecimiento en tools (35.1b), relectura tras el append
   35-1b-la-atribuida-tiene-su-puerta-cerrada-y-sus-topes: backlog  # bloqueada: su criterio exige comparar con parecidoEntre de tools/lib/parecido.ts (29.4), «la misma medida… sin otra», que no existe en la principal; la 29.4 está bloqueada hasta que Héctor decida la Tarjeta Social del verso (regla de la Épica 29) (v9-ralph 2026-11-07)
   35-2-el-personaje-entra-en-el-corpus-y-la-obra-tiene-un-solo-dueñ: backlog
   35-3-la-página-de-personaje: backlog
