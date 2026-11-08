@@ -155,6 +155,28 @@ boton.addEventListener('click', async () => {
     display: contents;
   }
 
+  /*
+   * En la fila, «Copiado.» —más corto que el rótulo— encogería el botón dos segundos y correría
+   * Imagen bajo el puntero. El botón reserva el ancho del rótulo: su `aria-label` (que es el
+   * rótulo) en una copia invisible, en la misma celda que la etiqueta. `visibility: hidden` la
+   * deja fuera del árbol de accesibilidad, y el nombre accesible sigue siendo el `aria-label`.
+   */
+  :global(.fila-de-acciones) > .isla > .copiar {
+    display: inline-grid;
+    justify-items: center;
+    align-items: center;
+  }
+
+  :global(.fila-de-acciones) > .isla > .copiar > [data-etiqueta],
+  :global(.fila-de-acciones) > .isla > .copiar::after {
+    grid-area: 1 / 1;
+  }
+
+  :global(.fila-de-acciones) > .isla > .copiar::after {
+    content: attr(aria-label);
+    visibility: hidden;
+  }
+
   :global(.fila-de-acciones) > .isla > .respaldo {
     order: 1;
     flex-basis: 100%;

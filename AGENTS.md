@@ -1032,7 +1032,12 @@ que no tiene caja. Y la medida de la Cita (`--medida-cita`, 34ch) está en `.tex
 `BloqueDeCita.astro`, no en `.bloque`: el `ch` se resuelve en el cuerpo del tramo; la Atribución
 (`figcaption`) y la Línea de la Fuente van en `--medida-prosa`. Con el campo de copia manual a
 la vista —el guion lo enfoca al fallar el portapapeles—, el Tabulador va de Copiar al campo y de
-ahí a Imagen: es el orden del marcado, aunque el campo se pinte bajo la fila.
+ahí a Imagen: es el orden del marcado, aunque el campo se pinte bajo la fila. Dentro de la fila
+`button.copiar` reserva el ancho de su rótulo (una copia invisible de su `aria-label` en
+`::after`, en la misma celda que la etiqueta), para que «Copiado.» no lo encoja y corra Imagen.
+La fila no es autosuficiente: estas reglas, y el `flex-basis` de Imagen, viven con contexto
+(`:global(.fila-de-acciones) > .isla …`) en `CopiarCita.astro` e `ImagenDeCita.astro`, así que
+la 28.2 las hereda solo con esas dos islas, y otra acción que entre en la fila trae las suyas.
 
 ### Al pie de la Página de Cita (Historia 24.6)
 

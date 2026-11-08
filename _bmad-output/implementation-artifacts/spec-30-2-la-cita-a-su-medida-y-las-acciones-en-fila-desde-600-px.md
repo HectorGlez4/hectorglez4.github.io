@@ -13,25 +13,19 @@ deferred:
   - summary: 'Al fundir la Épica 29 en la rama: repetir a 1280 × 800 la medida de 34ch con la Cita en verso más larga (sus saltos de `versosDe`) y comprobar que la fila de acciones no cambia con ella; anotarlo en este spec.'
     evidence: 'La Épica 29 (src/lib/verso.ts) no está en v9/epica-30; ninguna pieza de la 30.2 parte ni une versos (AD-29). Hoy se mide con `citaDeTramo` (xl, lg, md).'
     severity: low
-  - summary: 'Resuelto por Héctor (2026-11-08): la medida queda como está construida. Antes, pendiente de Héctor (bmad-create-epics-and-stories / bmad-ux): el AC dice «una Cita de tramo xl a 36 px, unos 610 px», pero desde 600 px el tramo xl se compone a `--cita-xl` (44 px) y 36 px es el tramo lg; en el ch de la Cita, xl resuelve unos 745 px, más que la columna de 720, que es la que lo limita. Lo construido sigue el contrato literal (34ch en el cuerpo de su tramo, sin valor nuevo, sin desbordar la columna); la cifra de cada tramo queda anotada.'
-    evidence: 'src/components/BloqueDeCita.astro (media ≥600: xl→--cita-xl); src/styles/tokens.css:37-38; DESIGN.md § Layout «Medida de la Cita» («a 36px son unos 610px»).'
-    severity: low
-  - summary: 'Aceptado por Héctor (2026-11-08): la regrabación de las instantáneas de móvil (solo claves, mismos valores). Antes, pendiente de Héctor (bmad-create-epics-and-stories): el AC pide que las instantáneas de móvil de tests/e2e/tipografia-calculada.spec.ts no cambien, pero su clave es la ruta de clases desde <body>, y el contenedor de la fila (pedido por el mismo AC) añade un segmento a la ruta de Copiar e Imagen en móvil y escritorio. Se regraban las de las páginas de Cita con los mismos valores (peso | interlineado) y solo esa reclave; las claves de la Cita no cambian.'
-    evidence: 'tests/e2e/tipografia-calculada.spec.ts:100-140 (ruta de clases); epics.md Story 30.2, tercer y cuarto Given.'
-    severity: low
   - summary: >-
-      Resuelto por decisión de Héctor (2026-11-08): la medida queda como está construida, 34ch en el cuerpo de su tramo, y la columna de 720 px limita xl; la cifra del AC («xl a 36 px, unos 610 px») mezcla tramos y no pide cambio. Era la pregunta de qué medida quería el AC, incoherente con tokens.css (xl se compone a 44 px desde 600 px; 36 px es lg).
+      Resuelto por Héctor (2026-11-08): la medida queda como está construida, 34ch en el cuerpo de su tramo, y la columna de 720 px limita xl. La cifra del AC («xl a 36 px, unos 610 px») mezcla tramos —desde 600 px xl se compone a 44 px y 36 px es lg— y no pide cambio; las cifras de la I/O Matrix («~610», «~745») son la misma estimación, y las medidas valen las de Design Notes.
     evidence: |-
-      Revisión 1 (blind-hunter, intent-alignment, ac-auditor). Medido a 1280 × 800 con la sonda «0» de Source Serif 4: xl 44 px → max-width 791,4 px (la caja la limita la columna, 720 px); lg 36 px → 647,5 px; md 28 px → 503,6 px. Ningún tramo da ~610 px: con el «0» real (~0,53 em) 610 px corresponden a ~34 px de cuerpo. Si se quiere ~610 px en algún tramo, cambia la medida o el cuerpo, y eso es de Héctor (DESIGN.md § Layout «Medida de la Cita»).
+      Revisiones 1 y 2. Medido a 1280 × 800 con la sonda «0» de Source Serif 4 (~0,53 em): xl 44 px → max-width 791,4 px (caja limitada a 720); lg 36 px → 647,5 px; md 28 px → 503,6 px. Cambiar la medida o el cuerpo sería de Héctor (DESIGN.md § Layout «Medida de la Cita»).
     location: >-
       src/components/BloqueDeCita.astro (.texto); src/styles/tokens.css (--cita-*, --medida-cita)
-    severity: medium
+    severity: low
   - summary: >-
-      Aceptado por Héctor (2026-11-08): las instantáneas de móvil de tipografia-calculada se regrabaron en esta historia aunque el AC dice que «no cambian»; cambian solo las claves (la ruta de clases gana « > div.fila-de-acciones» en Copiar e Imagen), y ningún valor, como consecuencia del contenedor que el mismo AC pide.
+      Aceptado por Héctor (2026-11-08): las instantáneas de tipografia-calculada de las páginas de Cita, de móvil y de escritorio, se regrabaron aunque el AC dice que las de móvil «no cambian»; cambian solo las claves (la ruta de clases gana « > div.fila-de-acciones» en Copiar e Imagen, y por eso `button.hoja` cambia de sitio en el JSON), ningún valor.
     evidence: |-
-      Revisión 1 (blind-hunter, intent-alignment, ac-auditor). Cotejado por programa: quitando ese segmento de las claves nuevas, cada tipografia-cita*-movil.json es idéntico al de 74341bdb78 (mismas claves, mismos pares peso | interlineado); la Cita, la portada y el 404 no cambian. Si Héctor prefiere que la clave no dependa del contenedor o que el AC lo diga, es bmad-create-epics-and-stories; la regrabación no se deshace sin quitar la fila.
+      Cotejado por programa: quitando ese segmento de las claves nuevas, cada tipografia-cita*.json es idéntico al de 74341bdb78670af7cd9ed61986e46418f9f65c0a (mismas claves, mismos pares peso | interlineado); la portada y el 404 no cambian.
     location: >-
-      tests/e2e/tipografia-calculada.spec.ts-snapshots/tipografia-cita*-movil.json
+      tests/e2e/tipografia-calculada.spec.ts-snapshots/tipografia-cita*.json
     severity: low
 ---
 
@@ -125,7 +119,8 @@ deferred:
 
 ## Review Triage Log
 
-### 2026-11-07 — Review pass
+### 2026-11-07 — Review pass (vacía)
+Primera pasada del mismo día sin hallazgos externos que triar: no clasificó nada. La revisión 1 es la siguiente.
 - intent_gap: 0
 - bad_spec: 0
 - patch: 0
@@ -154,6 +149,19 @@ deferred:
   - `[low]` `[patch]` `hijosDelArticle` decía «en la Fila de acciones» de lo que recoge para todos, y `siguiente?.copiar` no decía que es la fila (blind-hunter): comentario al día y la fila exigida por su clase.
   - `[low]` `[patch]` El párrafo de la fila partía el apartado de la Tarjeta de Obra en `AGENTS.md` (blind-hunter): va en su propio apartado, «La Fila de acciones y la medida de la Cita (Historia 30.2)», antes de «Al pie de la Página de Cita».
   - `[low]` `[patch]` Con el respaldo a la vista el foco va Copiar → campo → Imagen, aunque el campo se pinte bajo la fila (blind-hunter): es el orden del marcado, que la historia no puede cambiar, y el guion enfoca el campo al revelarlo; queda dicho en `AGENTS.md` y en Design Notes.
+
+### 2026-11-08 — Review pass
+- intent_gap: 0
+- bad_spec: 0
+- patch: 5: (high 0, medium 1, low 4)
+- defer: 0
+- reject: 14: (high 0, medium 0, low 14)
+- addressed_findings:
+  - `[medium]` `[patch]` Desde 600 px, «Copiar la cita» → «Copiado.» encogía Copiar 29 px y corría Imagen bajo el puntero dos segundos (edge-case-hunter): dentro de la fila `button.copiar` es `inline-grid` y reserva el ancho de su rótulo con una copia invisible de su `aria-label` en `::after`, en la misma celda que la etiqueta; el marcado y el guion no cambian, el nombre accesible tampoco, y el Kit queda igual. Prueba nueva en `pagina-de-cita.spec.ts` a 360, 600, 768 y 1280 px (roja sin el arreglo en los cuatro anchos: 142,9 → 113,7 px a 1280).
+  - `[low]` `[patch]` La prueba de la portada y el 404 construidos no comprobaba qué superficie medía (blind-hunter): `abrirEn` devuelve la respuesta y la prueba exige 200 en `/` y 404 en la ruta inexistente.
+  - `[low]` `[patch]` La Verificación nombra `copiar.spec.ts` e `imagen.spec.ts` y no constaban corridas, y las instantáneas se pasaron con una copia de la configuración (blind-hunter): corridas ahora con la configuración del repositorio, junto a `pagina-de-cita`, `accesibilidad` y `tipografia-calculada`, en móvil y escritorio.
+  - `[low]` `[patch]` La fila depende de reglas con contexto que viven en las dos islas, y eso no estaba dicho (blind-hunter): `AGENTS.md` lo dice en el apartado de la 30.2, con la reserva de ancho de Copiar, y que otra acción que entre en la fila trae las suyas.
+  - `[low]` `[patch]` El frontmatter repetía los dos diferidos resueltos como «pendiente» y «resuelto» y la primera pasada vacía no se explicaba (blind-hunter): `deferred` queda en tres entradas (la de la Épica 29 y las dos decisiones de Héctor, con las cifras de la I/O Matrix y el reordenamiento de `button.hoja` en los JSON dichos), y la pasada vacía lleva su nota.
 
 ## Design Notes
 
@@ -220,3 +228,7 @@ Blocking condition: ninguna.
 **Verificación:** sobre el mismo árbol de código: `npx vitest run tests/unit/tarjeta-de-obra.test.ts` (36 verdes, repetida el 2026-11-08); `npx astro check` (0 errores, repetida); `npx playwright test tests/e2e/pagina-de-cita.spec.ts tests/e2e/accesibilidad.spec.ts --project=movil --project=escritorio` (475 verdes; las 6 rojas eran las caras sm y sin Imagen, que el Corpus no trae, y pasaron a saltarse con su motivo; la repetición de las pruebas de la 30.2, 28 verdes y 36 omitidas); `npm test` (155 ficheros, 7187 verdes, EXIT 0). Tras eso solo cambió este spec.
 
 **Riesgos:** la medida de la Cita en verso más larga queda para cuando la Épica 29 llegue a la rama (diferido). El tramo sm y la Cita sin Imagen no se ejercen en el navegador hasta que el Corpus traiga una Cita de más de 240 caracteres; los cubre el fixture `SIN_IMAGEN`. La suite e2e completa no se corrió.
+
+**Revisión 2 (2026-11-08):** 5 parches (medium 1, low 4), 0 diferidos, 14 rechazados. Copiar guarda su ancho dentro de la fila (`src/islands/CopiarCita.astro`: `inline-grid` y `::after` con `attr(aria-label)`, invisible), así que «Copiado.» ya no corre Imagen; la prueba de la portada y el 404 comprueba su estado HTTP (`tests/e2e/pagina-de-cita.spec.ts`); `AGENTS.md` dice la reserva de ancho y que la fila depende de las reglas con contexto de las dos islas; el frontmatter queda sin duplicados. Rechazados: las cifras y las instantáneas (decisiones de Héctor del 2026-11-08), los saltos de línea en móvil frente a la principal, el tramo sm y la Cita sin Imagen en el navegador (el Corpus no los trae), el orden de foco con el respaldo (es el del marcado, dicho), y robusteces de prueba especulativas (clasificación de Copiar, marcado literal, tupla, axe antes de hidratar, foco fuera de la fila, distancia del respaldo, peso por página ya anotado sin aviso). La instantánea intermitente de `/buscar/` es ajena a la historia y no se tocó. Recomendación de revisión siguiente: `true` por la regla (3 × 1 + 1 × 4 = 7; ningún parche high).
+
+**Verificación de la revisión 2:** `FECHA_JORNADA=2026-11-08 npx playwright test tests/e2e/pagina-de-cita.spec.ts tests/e2e/accesibilidad.spec.ts tests/e2e/copiar.spec.ts tests/e2e/imagen.spec.ts tests/e2e/tipografia-calculada.spec.ts --project=movil --project=escritorio` con la configuración del repositorio: 507 verdes, 49 omitidas, 0 rojas, sin instantáneas cambiadas. `npx astro check`: 0 errores. `npm test`: 155 ficheros, 7186 verdes y 1 roja por plazo (`tests/unit/extraer-cli.test.ts`, «El sable», 120 s con la máquina a carga ~18; fichero ajeno al diff), que corrida sola sale verde (53 de 53). El párrafo de `AGENTS.md` se escribió con `npm test` ya en marcha; las pruebas que leen `AGENTS.md` buscan textos de otros apartados.

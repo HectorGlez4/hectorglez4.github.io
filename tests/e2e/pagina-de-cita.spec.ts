@@ -979,10 +979,11 @@ test.describe('Historia 30.2 — la Cita a su medida y la Fila de acciones', () 
 
   async function abrirEn(page: Page, ruta: string, ancho: number, alto: number) {
     await page.setViewportSize({ width: ancho, height: alto });
-    await page.goto(ruta);
+    const respuesta = await page.goto(ruta);
     await page.evaluate(async () => {
       await document.fonts.ready;
     });
+    return respuesta;
   }
 
   /** La medida resuelta del texto, 34 «0» en su fuente y su cuerpo, y las cajas de alrededor. */
@@ -1190,6 +1191,32 @@ test.describe('Historia 30.2 — la Cita a su medida y la Fila de acciones', () 
     });
   }
 
+  // Desde 600 px Imagen va a la derecha de Copiar: si «Copiar la cita» → «Copiado.» encogiera el
+  // botón, Imagen se correría bajo el puntero durante dos segundos. Copiar guarda su ancho.
+  for (const ancho of [360, 600, 768, 1280]) {
+    test(`a ${ancho} px, «Copiado.» no cambia el ancho de Copiar ni mueve Imagen`, async ({ page }, info) => {
+      test.skip(info.project.name !== 'escritorio', 'Los anchos se fijan a mano; se miden una vez.');
+      expect(completa, SIN_TARJETA_COMPLETA).toBeDefined();
+      await page.addInitScript(() => {
+        Object.defineProperty(navigator, 'clipboard', {
+          configurable: true,
+          value: { writeText: () => Promise.resolve() },
+        });
+      });
+      await abrirEn(page, completa!, ancho, 800);
+      const antes = await medirLaFila(page);
+      await page.locator('.fila-de-acciones button.copiar').click();
+      await expect(page.locator('.fila-de-acciones button.copiar [data-etiqueta]')).toHaveText('Copiado.');
+      const despues = await medirLaFila(page);
+      const dice = JSON.stringify({ antes, despues });
+      expect(Math.abs(despues.copiar.width - antes.copiar.width), dice).toBeLessThanOrEqual(0.5);
+      expect(Math.abs(despues.imagen.left - antes.imagen.left), dice).toBeLessThanOrEqual(0.5);
+      expect(Math.abs(despues.imagen.top - antes.imagen.top), dice).toBeLessThanOrEqual(0.5);
+      // Y el nombre accesible sigue siendo el del rótulo: la reserva de ancho no se lee.
+      await expect(page.locator('.fila-de-acciones button.copiar')).toHaveAccessibleName('Copiar la cita');
+    });
+  }
+
   // FR-10 — sin Acción Imagen la fila lleva solo Copiar, y «Compartir en» sigue a 3 × de ella.
   for (const ancho of [360, 1280]) {
     test(`a ${ancho} px, una Cita sin Imagen: la fila solo trae Copiar, sin hueco`, async ({ page }, info) => {
@@ -1226,7 +1253,9 @@ test.describe('Historia 30.2 — la Cita a su medida y la Fila de acciones', () 
       page,
     }, info) => {
       test.skip(info.project.name !== 'escritorio', 'La medida de escritorio se toma una vez.');
-      await abrirEn(page, ruta, 1280, 800);
+      const respuesta = await abrirEn(page, ruta, 1280, 800);
+      // Que se mide la superficie que se dice: la portada responde 200 y el 404, 404.
+      expect(respuesta?.status(), ruta).toBe(ruta === '/' ? 200 : 404);
       const m = await page.evaluate(() => {
         const cero = (de: HTMLElement) => {
           const sonda = document.createElement('span');
