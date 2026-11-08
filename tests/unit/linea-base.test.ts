@@ -1283,13 +1283,18 @@ describe('Historia 30.1 — el corte del orden nuevo de la Página de Cita', () 
   it('SM-C5 declara el corte de su serie, de DESPLIEGUE_DE_CITAR_Y_LLEVARSE, y su palanca', () => {
     expect(SM_C5.corte).toEqual({ serie: 'continuacion-de-cita', deDondeLlega: 'DESPLIEGUE_DE_CITAR_Y_LLEVARSE' });
     expect(SM_C5.palanca).toBe('quitar de la Página de Cita los tres desplegables o bajarlos tras las Rutas de salida; lo decide Héctor');
-    // La entrada declarada nombra solo la serie nueva; las dos de antes, sin tocar.
+    // La entrada declarada nombra solo la serie nueva; las dos de antes, sin tocar, y la del incipit
+    // (Historia 32.3), que parte solo la continuación de la Página de Obra.
     const entrada = CORTES_DE_SERIE_DECLARADOS.find((c) => c.series.includes('continuacion-de-cita'))!;
     expect(entrada.series).toEqual(['continuacion-de-cita']);
     expect(entrada.que).toBe(
       'el orden nuevo de la Página de Cita: las acciones antes de la Tarjeta de Obra, con “Cómo citar” e “Inserta esta cita” detrás',
     );
-    expect(CORTES_DE_SERIE_DECLARADOS.filter((c) => c !== entrada).map((c) => c.series)).toEqual([['sm8', 'lectura', 'busqueda'], ['sm8']]);
+    expect(CORTES_DE_SERIE_DECLARADOS.filter((c) => c !== entrada).map((c) => c.series)).toEqual([
+      ['sm8', 'lectura', 'busqueda'],
+      ['sm8'],
+      ['continuacion-de-obra'],
+    ]);
   });
 
   it('sin jornada: SM-C5 juzga como hasta ahora y nombra la llegada pendiente y, al saltar, la palanca', () => {
