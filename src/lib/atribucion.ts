@@ -249,6 +249,17 @@ function conInicialMayuscula(texto: string): string {
 /** El texto del enlace con que cierra la línea de Ficha técnica (UX-DR126). */
 export const TEXTO_DATOS_DE_WIKIDATA = 'Datos: Wikidata, CC0';
 
+/** Las etiquetas sin repetir, en el orden de la revisión; repetida es igual en `es` sin mayúsculas. */
+function sinEtiquetasRepetidas(etiquetas: readonly string[]): string[] {
+  const vistas = new Set<string>();
+  return etiquetas.filter((etiqueta) => {
+    const clave = etiqueta.toLocaleLowerCase('es');
+    if (vistas.has(clave)) return false;
+    vistas.add(clave);
+    return true;
+  });
+}
+
 /**
  * Las partes de texto de la línea de Ficha técnica — Historia 32.2, UX-DR126.
  *
@@ -265,10 +276,13 @@ export function partesDeFichaTecnica(
   ficha: { generos: readonly string[]; lenguas: readonly string[]; año?: number },
   traductor?: string,
 ): string[] | undefined {
+  // Dos entidades distintas pueden compartir etiqueta en español: la línea no dice «Novela, novela».
+  const generos = sinEtiquetasRepetidas(ficha.generos);
+  const lenguas = sinEtiquetasRepetidas(ficha.lenguas);
   const partes: string[] = [];
-  if (ficha.generos.length > 0) partes.push(conInicialMayuscula(ficha.generos.join(', ')));
+  if (generos.length > 0) partes.push(conInicialMayuscula(generos.join(', ')));
   if (ficha.año !== undefined) partes.push(añoLegible(ficha.año));
-  if (ficha.lenguas.length > 0) partes.push(`Escrita en ${enumeracion(ficha.lenguas)}`);
+  if (lenguas.length > 0) partes.push(`Escrita en ${enumeracion(lenguas)}`);
   if (partes.length === 0) return undefined;
   if (traductor !== undefined) partes.push(`Traducción de ${traductor}`);
   return partes;

@@ -3,6 +3,7 @@ import { readdir, readFile } from 'node:fs/promises';
 import { join, relative, sep } from 'node:path';
 import { AUTOR_VALIDO, TEMA_VALIDO, citaValida, construirConCorpus, limpiar } from './ayuda/construir.js';
 import { formaDeObra } from '../../src/lib/obras.ts';
+import { gunzipSync } from 'node:zlib';
 import { componerVigentes, nombreDeDocumentoDeWikidata } from '../../tools/lib/wikidata.ts';
 import { aEntidad, aTiempo, documento, entidad } from './ayuda/wikidata.ts';
 
@@ -76,7 +77,10 @@ async function ficherosQueContienen(proyecto: string, aguja: string): Promise<st
   for (const entrada of await readdir(dist, { recursive: true, withFileTypes: true })) {
     if (!entrada.isFile() || !/\.(html|xml|json|txt|js|css|webmanifest|pf_meta|pf_fragment|pf_index)$/u.test(entrada.name)) continue;
     const ruta = join(entrada.parentPath, entrada.name);
-    if ((await readFile(ruta, 'utf8')).includes(aguja)) encontrados.push(relative(dist, ruta).split(sep).join('/'));
+    // Pagefind escribe sus `pf_*` comprimidos con gzip: sin descomprimir, la aguja no se vería nunca.
+    const bruto = await readFile(ruta);
+    const texto = /\.pf_/u.test(entrada.name) ? gunzipSync(bruto).toString('utf8') : bruto.toString('utf8');
+    if (texto.includes(aguja)) encontrados.push(relative(dist, ruta).split(sep).join('/'));
   }
   return encontrados.sort();
 }
@@ -97,7 +101,8 @@ describe('Historia 32.1 — el build repite el cotejo de Wikidata', () => {
     expect(salida).not.toMatch(/Regla incumplida/);
     expect(codigo, salida).toBe(0);
     // Historia 32.2 — la línea de Ficha técnica pinta las etiquetas y el permanente de la revisión
-    // solo en la página 1 de esa Obra: ni en otra superficie, ni en Pagefind, ni en el JSON-LD.
+    // solo en la página 1 de esa Obra: ni en otra superficie ni en el JSON-LD. (Esta construcción no
+    // indexa con Pagefind; que el índice no recoja la línea lo fija `ficha-tecnica-build.test.ts`.)
     for (const presente of ['Q480', String(REVISION), GENERO, LENGUA, 'wikidata.org']) {
       expect(await ficherosQueContienen(proyecto, presente), presente).toEqual([PAGINA_1]);
     }

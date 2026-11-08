@@ -943,7 +943,10 @@ analizar cuenta como cambio de todo; un campo ausente es `undefined`; el orden d
   efectivo de una Obra cuyo `titulo` ya no declara ninguna Cita sale de las grafías de sus Citas
   (`grafiaPorOmision`), y esas hermanas no componen la Página de Cita; y el chip de un Tema
   aparece o desaparece en las demás Páginas de Cita cuando una Cita lo cruza por su umbral de
-  publicación, sin fecharlas. Las biografías de `corpus/biografias/` no son familia porque cada
+  publicación, sin fecharlas; y las claves de `corpus/wikidata/vigentes.yml` que pinta una Obra
+  atada (32.2) salen del documento de la revisión que su ficha declara **hoy**, así que los
+  cambios de `vigentes.yml` anteriores a un cambio de revisión se juzgan con las entidades de la
+  de hoy (el cambio de revisión, que reescribe `wikidata` de la ficha, sí fecha). Las biografías de `corpus/biografias/` no son familia porque cada
   documento es una revisión que no se reescribe: cambiar de biografía es cambiar el campo
   `biografia` del Autor.
 - **Bajas.** Un fichero cuya última transición es un borrado —mover una Cita a

@@ -38,6 +38,8 @@ import {
   fechasDeLasSuperficies,
   historialDeLosFicheros,
 } from '../../integraciones/historial.ts';
+import { componerVigentes, nombreDeDocumentoDeWikidata } from '../../tools/lib/wikidata.ts';
+import { aEntidad, documento, entidad, sembrarWikidata } from './ayuda/wikidata.ts';
 
 const ejecutar = promisify(execFile);
 
@@ -1407,6 +1409,97 @@ describe('Historia 18.4 — el cruce entre lo que git dice y lo que el Corpus ti
       expect(fechas.size).toBe(0);
       expect(avisos).toHaveLength(1);
       expect(avisos[0]).toMatch(/lastmod/);
+    } finally {
+      await rm(raiz, { recursive: true, force: true });
+    }
+  });
+});
+
+/**
+ * Historia 32.2, revisión — el cableado de la Ficha técnica, de punta a punta desde el disco y git.
+ *
+ * Las pruebas de arriba escriben `CorpusParaFechar` a mano, con `pinta` ya calculado. Aquí lo
+ * produce `corpusParaFechar` leyendo un Corpus de verdad —la ficha atada, sus documentos de
+ * `corpus/wikidata/` y `vigentes.yml`— y lo fecha `fechasDeLasSuperficies`, como el sitemap: si se
+ * perdiera el reparto de `wikidata` o de `vigentesDeWikidata` en `obras[]`, si `entidadesQuePinta`
+ * devolviera también el autor (P50) o si la ruta del documento no casara con la de git, esto se cae.
+ */
+describe('Historia 32.2 — la Ficha técnica fecha su Página de Obra desde el disco', () => {
+  const OBRA = entidad('Q480', 100, {
+    es: 'Sobre la brevedad de la vida',
+    claims: { P50: [aEntidad('Q2054')], P136: [aEntidad('Q8261')], P407: [aEntidad('Q1321')] },
+  });
+  const AUTOR = entidad('Q2054', 30, { es: 'Séneca' });
+  const GENERO = entidad('Q8261', 40, { es: 'ensayo' });
+  const LENGUA = entidad('Q1321', 41, { es: 'latín' });
+  const RUTA_DE_OBRA = '/obra/seneca/sobre-la-brevedad-de-la-vida';
+
+  async function escribirCorpus(base: string): Promise<void> {
+    const corpus = join(base, 'corpus');
+    for (const dir of ['citas', 'autores', 'temas', 'colecciones', 'obras']) await mkdir(join(corpus, dir), { recursive: true });
+    await writeFile(
+      join(corpus, 'citas', 'seneca--el-tiempo.md'),
+      '---\nslug: seneca-el-tiempo\nautor: seneca\ntemas:\n  - el-tiempo\nprocedencia:\n  obra: Sobre la brevedad de la vida\n---\n\nTexto.\n',
+      'utf8',
+    );
+    await writeFile(join(corpus, 'autores', 'seneca.yml'), 'nombre: Séneca\n', 'utf8');
+    await writeFile(join(corpus, 'temas', 'el-tiempo.yml'), 'nombre: El tiempo\n', 'utf8');
+    await writeFile(
+      join(corpus, 'obras', 'seneca--sobre-la-brevedad-de-la-vida.yml'),
+      `autor: seneca\ntitulo: Sobre la brevedad de la vida\nformas:\n  - "${formaDeObra('Sobre la brevedad de la vida')}"\n` +
+        'wikidata:\n  entidad: Q480\n  revision: 100\n',
+      'utf8',
+    );
+    await sembrarWikidata(corpus, [OBRA, AUTOR, GENERO, LENGUA], { Q480: 100, Q2054: 30, Q8261: 40, Q1321: 41 });
+  }
+
+  it('la vigente de un género que pinta refecha la Obra; la de su autor (P50), no; ninguna refecha la Cita', async () => {
+    const raiz = await temporal('sabiduria-ficha-tecnica-');
+    const git = gitEn(raiz);
+    const vigentes = (mapa: Record<string, number>) =>
+      writeFile(join(raiz, 'corpus', 'wikidata', 'vigentes.yml'), componerVigentes(new Map(Object.entries(mapa))), 'utf8');
+    try {
+      await git(['init', '--initial-branch=principal']);
+      await escribirCorpus(raiz);
+      await git(['add', 'corpus']);
+      await git(['commit', '-m', 'atada'], '2024-01-02T09:00:00+0000');
+
+      await vigentes({ Q480: 100, Q2054: 30, Q8261: 42, Q1321: 41 });
+      await git(['add', 'corpus']);
+      await git(['commit', '-m', 'el género'], '2024-03-04T09:00:00+0000');
+
+      await vigentes({ Q480: 100, Q2054: 31, Q8261: 42, Q1321: 41 });
+      await git(['add', 'corpus']);
+      await git(['commit', '-m', 'el autor'], '2024-05-06T09:00:00+0000');
+
+      const avisos: string[] = [];
+      const fechas = await fechasDeLasSuperficies(raiz, (mensaje) => avisos.push(mensaje));
+      expect(avisos).toEqual([]);
+      expect(fechas.get(RUTA_DE_OBRA)).toBe('2024-03-04T09:00:00.000Z');
+      expect(fechas.get('/cita/seneca-el-tiempo')).toBe('2024-01-02T09:00:00.000Z');
+      expect(fechas.get('/autor/seneca')).toBe('2024-01-02T09:00:00.000Z');
+    } finally {
+      await rm(raiz, { recursive: true, force: true });
+    }
+  });
+
+  it('un cambio del documento de su revisión refecha la Obra', async () => {
+    const raiz = await temporal('sabiduria-ficha-tecnica-doc-');
+    const git = gitEn(raiz);
+    try {
+      await git(['init', '--initial-branch=principal']);
+      await escribirCorpus(raiz);
+      await git(['add', 'corpus']);
+      await git(['commit', '-m', 'atada'], '2024-01-02T09:00:00+0000');
+
+      const documentoDeLaObra = join(raiz, 'corpus', 'wikidata', nombreDeDocumentoDeWikidata('Q480', 100));
+      await writeFile(documentoDeLaObra, documento(OBRA, '2024-06-01'), 'utf8');
+      await git(['add', 'corpus']);
+      await git(['commit', '-m', 'el documento'], '2024-03-04T09:00:00+0000');
+
+      const fechas = await fechasDeLasSuperficies(raiz, () => {});
+      expect(fechas.get(RUTA_DE_OBRA)).toBe('2024-03-04T09:00:00.000Z');
+      expect(fechas.get('/cita/seneca-el-tiempo')).toBe('2024-01-02T09:00:00.000Z');
     } finally {
       await rm(raiz, { recursive: true, force: true });
     }

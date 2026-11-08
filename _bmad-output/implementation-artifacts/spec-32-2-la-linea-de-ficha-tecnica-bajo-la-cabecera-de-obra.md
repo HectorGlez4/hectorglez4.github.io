@@ -5,7 +5,7 @@ created: '2026-11-08'
 status: 'done'
 baseline_revision: '6041a380c5d70617b8ef63f1200691d0c49a1460'
 review_loop_iteration: 0
-followup_review_recommended: false
+followup_review_recommended: true
 context:
   - '{project-root}/_bmad-output/implementation-artifacts/epic-32-context.md'
   - '{project-root}/_bmad-output/implementation-artifacts/spec-32-1-revisiones-fijas-de-wikidata-versionadas-y-la-orden-que-ata.md'
@@ -114,7 +114,22 @@ deferred: []
 - addressed_findings:
   - none
 
-(Las capas de revisión son externas, del orquestador v9-ralph, y no traen hallazgos en esta pasada.)
+(Entrada escrita al cerrar la implementación, antes de que las capas externas del orquestador v9-ralph devolvieran hallazgos: no registra ninguna revisión. La primera pasada de revisión real es la siguiente.)
+
+### 2026-11-08 — Review pass
+- intent_gap: 0
+- bad_spec: 0
+- patch: 7 (high 0, medium 1, low 6)
+- defer: 0
+- reject: 25
+- addressed_findings:
+  - `[medium]` `[patch]` (verification-gap, intent-alignment e) El cableado de `corpusParaFechar` con una ficha atada no lo ejercía ninguna prueba desde el disco y git: nuevo bloque «Historia 32.2 — la Ficha técnica fecha su Página de Obra desde el disco» en `tests/unit/fecha-de-cambio.test.ts`, con un repositorio real (ficha atada, documentos de `corpus/wikidata/`, `vigentes.yml`) y `fechasDeLasSuperficies`: la vigente de un género refecha la Obra, la del autor (P50) no, ninguna refecha la Cita ni el Autor, y un cambio del documento de la revisión refecha la Obra. Comprobado que quitar el reparto de `wikidata` en `obras[]` la tumba.
+  - `[low]` `[patch]` (blind-hunter, edge-case-hunter) Dos entidades con la misma etiqueta repetían texto («Novela, novela»): `partesDeFichaTecnica` quita las etiquetas repetidas (sin distinguir mayúsculas, en el orden de la revisión), con su caso en `tests/unit/ficha-tecnica.test.ts`.
+  - `[low]` `[patch]` (edge-case-hunter) El aviso «Ficha técnica con año discrepante» escribía «-49»: ahora usa `añoLegible`, como la línea («49 a. C.»), con su caso.
+  - `[low]` `[patch]` (blind-hunter, verification-gap) `ficherosQueContienen` de `tests/unit/wikidata-build.test.ts` leía los `pf_*` de Pagefind sin descomprimir: ahora los descomprime con `gunzipSync`, y el comentario ya no afirma que esa construcción (sin `conBusqueda`) mire Pagefind; lo fija `ficha-tecnica-build.test.ts`.
+  - `[low]` `[patch]` (blind-hunter) La fecha por las claves de `vigentes.yml` usa el documento de la revisión que la ficha declara hoy: anotado como límite conocido en AGENTS.md («Lo que la relación todavía no compone»).
+  - `[low]` `[patch]` (ac-auditor) «La Fuente que encabeza no es una traducción» no tenía caso propio en Vitest: añadido.
+  - `[low]` `[patch]` (blind-hunter) La entrada anterior de este registro daba por hecha una revisión que no había ocurrido: anotada como tal arriba.
 
 ## Design Notes
 
@@ -171,3 +186,21 @@ Blocking condition: ninguna.
 - `npm test` — 159 ficheros, 7.296 pruebas en verde.
 
 **Riesgos residuales.** La línea mide 599,5 px de primera pantalla en el peor caso construido; las 32.3–32.5 añaden desplegables y deben volver a medir. El texto (UX-DR126) sigue siendo `[ASSUMPTION]` revisable por Héctor con `bmad-ux`. Ninguna ficha real está atada: atar es acto de Héctor.
+
+### Primera pasada de revisión (2026-11-08)
+
+**Resumen.** Siete patches sobre los hallazgos de las cinco capas externas; ningún bad_spec ni intent_gap; nada diferido; 25 rechazados (lo que el contrato fija a propósito —orden de la línea con el traductor antes del crédito, los dos años sin rótulo, el traductor por Fuente frente al grupo de «Dónde leer», el aviso de año sin romper—, coste o estilo sin consecuencia —dos lecturas del Corpus, `opacos`, condición redundante, números de línea del Code Map— y huecos de prueba de presentación que el contrato no pide).
+
+**Ficheros.**
+- `src/lib/atribucion.ts` — `partesDeFichaTecnica` quita etiquetas repetidas (`sinEtiquetasRepetidas`).
+- `src/lib/obras.ts` — el aviso de año escribe los años con `añoLegible`.
+- `tests/unit/fecha-de-cambio.test.ts` — la Ficha técnica fecha su Página de Obra desde el disco y git (`corpusParaFechar` + `fechasDeLasSuperficies`).
+- `tests/unit/ficha-tecnica.test.ts` — etiquetas repetidas, aviso antes de Cristo, Fuente que no es traducción.
+- `tests/unit/wikidata-build.test.ts` — los `pf_*` se descomprimen; el comentario ya no afirma que esa construcción mire Pagefind.
+- `AGENTS.md` — límite conocido de la fecha por `vigentes.yml` con el documento de hoy.
+
+**Seguimiento.** `true`: patches 0 high, 1 medium, 6 low; puntuación 3 × 1 + 6 = 9 ≥ 5.
+
+**Verificación.** `npx vitest run tests/unit/ficha-tecnica.test.ts tests/unit/fecha-de-cambio.test.ts tests/unit/obras.test.ts tests/unit/wikidata.test.ts tests/unit/indexnow.test.ts` — 293 en verde; `npx vitest run tests/unit/ficha-tecnica-build.test.ts tests/unit/wikidata-build.test.ts tests/unit/medicion.test.ts tests/unit/tipografia-en-tokens.test.ts tests/unit/orden-del-libro.test.ts` — 762 en verde; `npx astro check` — 0 errores, 0 avisos; `npx playwright test tests/e2e/ficha-tecnica.spec.ts --project=escritorio` — 3 en verde, primera Tarjeta a 599,5 px de 640; `npm test` — 159 ficheros, 7.301 pruebas en verde. La comparación de `dist/` con la base no se repitió: ningún patch toca lo que se pinta sin ficha atada.
+
+**Riesgos residuales.** Los de arriba, más: el orden «Traducción de X · Datos: Wikidata, CC0» y los dos años sin rótulo cuando discrepan son del texto de UX-DR126, `[ASSUMPTION]` que revisa Héctor con `bmad-ux`.

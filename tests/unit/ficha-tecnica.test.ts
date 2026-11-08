@@ -69,6 +69,12 @@ describe('partesDeFichaTecnica — el texto de la línea (UX-DR126)', () => {
     ]);
   });
 
+  it('dos entidades con la misma etiqueta no la repiten: ni «Novela, novela» ni «español y español»', () => {
+    expect(
+      partesDeFichaTecnica(ficha({ generos: ['novela', 'Novela', 'sátira'], lenguas: ['español', 'español'] })),
+    ).toEqual(['Novela, sátira', 'Escrita en español']);
+  });
+
   it('el enlace no es una parte: lo pone el componente, con su texto fijo', () => {
     expect(TEXTO_DATOS_DE_WIKIDATA).toBe('Datos: Wikidata, CC0');
   });
@@ -96,6 +102,10 @@ describe('traductorDeLaEdicionQueEncabeza — FR-48', () => {
     const citas = [de('z', 'De Zeta', 'Biblioteca Zeta'), de('y', 'De Alfa', 'Ábaco')];
     expect(traductorDeLaEdicionQueEncabeza(citas)).toBe('De Alfa');
     expect(traductorDeLaEdicionQueEncabeza([...citas].reverse())).toBe('De Alfa');
+  });
+
+  it('la Fuente que encabeza no es una traducción: ninguno', () => {
+    expect(traductorDeLaEdicionQueEncabeza([de('a'), de('a'), de('b', 'Juan Pérez')])).toBeUndefined();
   });
 
   it('sin ninguna Cita cotejada: `undefined`', () => {
@@ -132,6 +142,13 @@ describe('avisosDeAñoDeFichaTecnica — FR-60', () => {
     expect(avisos[0]).toContain('corpus/obras/x--o.yml');
     expect(avisos[0]).toContain('1605');
     expect(avisos[0]).toContain('1604');
+  });
+
+  it('antes de Cristo: el aviso escribe el año como lo pinta la línea, «49 a. C.», nunca «-49»', () => {
+    const tecnicas = new Map([['x--o', ficha({ año: -49 })]]);
+    const [aviso] = avisosDeAñoDeFichaTecnica(resolverObras([cita(-50)], fichas, tecnicas), tecnicas, ruta);
+    expect(aviso).toContain('Wikidata dice 49 a. C.; sus Citas, 50 a. C.');
+    expect(aviso).not.toContain('-49');
   });
 
   it('coincide: no avisa', () => {

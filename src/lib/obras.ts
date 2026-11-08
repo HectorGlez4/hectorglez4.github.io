@@ -18,6 +18,7 @@
  */
 
 import type { FormatoDeEdicion } from './ediciones.ts';
+import { añoLegible } from './atribucion.ts';
 import { compararPorClave, normalizar } from './normalizar.ts';
 import { slugDeObra } from './slug.ts';
 import { rutaDeObra } from './superficies.ts';
@@ -959,8 +960,8 @@ export function avisosDeAñoDeFichaTecnica(
     const deLasCitas = obras.get(nombre)?.año;
     if (deWikidata === undefined || deLasCitas === undefined || deWikidata === deLasCitas) continue;
     avisos.push(
-      `  · Ficha técnica con año discrepante: ${rutaDeFicha(nombre)} → Wikidata dice ${deWikidata}; ` +
-        `sus Citas, ${deLasCitas}. La línea de Ficha técnica pinta el de Wikidata y la Cabecera el de ` +
+      `  · Ficha técnica con año discrepante: ${rutaDeFicha(nombre)} → Wikidata dice ${añoLegible(deWikidata)}; ` +
+        `sus Citas, ${añoLegible(deLasCitas)}. La línea de Ficha técnica pinta el de Wikidata y la Cabecera el de ` +
         'las Citas; ninguno se corrige solo.',
     );
   }
