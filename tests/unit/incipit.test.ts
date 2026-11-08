@@ -8,6 +8,7 @@ import type { FormaDeLineas } from '../../tools/lib/lineas.ts';
 import { incipitDe, ofreceIncipit } from '../../tools/lib/pasaje.ts';
 import { fuenteDelIncipit, incipitDelDocumento, leerIncipitsDelCorpus } from '../../tools/lib/posiciones.ts';
 import { lineaDeLaFuenteDelIncipit } from '../../src/lib/atribucion.ts';
+import { obraAdmisible } from '../../src/lib/admision.ts';
 
 /**
  * Historia 32.3 — el corte del incipit (`incipitDe`) y el único punto que decide si se ofrece
@@ -231,6 +232,42 @@ describe('32.3 — lineaDeLaFuenteDelIncipit', () => {
   });
 });
 
+describe('32.3 — el bloque `incipit` del esquema de la Ficha de Obra', () => {
+  const BASE = { autor: 'seneca', titulo: 'X', formas: ['x'] };
+  const mensajes = (incipit: unknown) => {
+    const r = obraAdmisible.safeParse({ ...BASE, incipit });
+    expect(r.success).toBe(false);
+    return r.error?.issues.map((i) => i.message).join(' ') ?? '';
+  };
+
+  it('admite {documento, desde} con forma de slug y una sola línea', () => {
+    expect(obraAdmisible.safeParse({ ...BASE, incipit: { documento: 'wikisource-es--x', desde: 'En un lugar' } }).success).toBe(true);
+  });
+
+  it.each([
+    ['con carpeta relativa', '../secreto'],
+    ['con subcarpeta', 'sub/x'],
+    ['con extensión', 'x.txt'],
+    ['con mayúsculas', 'Wikisource-es--x'],
+    ['vacío', ''],
+  ])('rechaza un documento %s, sin carpeta ni extensión', (_caso, documento) => {
+    expect(mensajes({ documento, desde: 'En un lugar' })).toContain('sin carpeta ni extensión');
+  });
+
+  it('rechaza un «desde» con salto de línea o tabulador, y uno en blanco', () => {
+    expect(mensajes({ documento: 'x', desde: 'En un\nlugar' })).toContain('una sola línea');
+    expect(mensajes({ documento: 'x', desde: 'En un\tlugar' })).toContain('una sola línea');
+    expect(mensajes({ documento: 'x', desde: '   ' })).toContain('no puede estar vacío');
+  });
+
+  it('rechaza una clave de más nombrando los campos, y un incipit que no es objeto', () => {
+    expect(mensajes({ documento: 'x', desde: 'En', hasta: 'y' })).toContain(
+      '«incipit» no reconoce «hasta». Sus campos son documento y desde.',
+    );
+    expect(mensajes('wikisource-es--x')).toContain('«incipit» es un objeto con documento y desde.');
+  });
+});
+
 describe('32.3 — el cargador del incipit, sobre un Corpus en disco', () => {
   const temporales: string[] = [];
   afterEach(async () => {
@@ -326,5 +363,17 @@ describe('32.3 — el cargador del incipit, sobre un Corpus en disco', () => {
       await expect(promesa).rejects.toThrow(/seneca--sobre-la-brevedad-de-la-vida\.yml/u);
       await expect(promesa).rejects.toThrow(motivo);
     }
+  });
+
+  it('rompe nombrando la ficha cuando dos subcarpetas traen un documento con su nombre', async () => {
+    const raiz = await corpus({
+      'obras/seneca--sobre-la-brevedad-de-la-vida.yml': FICHA(`incipit:\n  documento: "${NOMBRE}"\n  desde: "En un lugar"\n`),
+      [`fuentes/a/${NOMBRE}.txt`]: DOCUMENTO,
+      [`fuentes/b/${NOMBRE}.txt`]: DOCUMENTO,
+    });
+    const promesa = leerIncipitsDelCorpus(raiz, { tope: 400 });
+    await expect(promesa).rejects.toThrow(/^Regla incumplida: /u);
+    await expect(promesa).rejects.toThrow(/seneca--sobre-la-brevedad-de-la-vida\.yml/u);
+    await expect(promesa).rejects.toThrow(/más de un documento con ese nombre/u);
   });
 });

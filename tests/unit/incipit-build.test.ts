@@ -153,11 +153,11 @@ describe('Historia 32.3 — «Cómo empieza» en el dist/', () => {
     const pagina2 = paginaConstruida(proyecto, `${OBRA}2/`);
     expect(pagina2).toContain('cabecera-de-obra');
     expect(pagina2).not.toContain('Cómo empieza');
-    expect(pagina2).not.toContain('<details');
+    expect(bloqueDe(pagina2)).toBeUndefined();
     const ira = paginaConstruida(proyecto, '/obra/seneca/de-la-ira/');
     expect(ira).toContain('cabecera-de-obra');
     expect(ira).not.toContain('Cómo empieza');
-    expect(ira).not.toContain('<details');
+    expect(bloqueDe(ira)).toBeUndefined();
     const jsonLd = [...pagina1.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)].map((m) => m[1]).join('\n');
     expect(jsonLd.length).toBeGreaterThan(0);
     expect(jsonLd).not.toContain('Primer verso');
@@ -172,7 +172,8 @@ describe('Historia 32.3 — «Cómo empieza» en el dist/', () => {
     for (const ruta of htmlDe(join(sin.proyecto, 'dist'))) {
       const html = readFileSync(ruta, 'utf8');
       expect(html, ruta).not.toContain('Cómo empieza');
-      expect(html, ruta).not.toContain('<details');
+      // Solo el bloque del incipit: otros desplegables (32.4, 34.2) pueden ir en la misma página.
+      expect(bloqueDe(html), ruta).toBeUndefined();
     }
   }, 600_000);
 

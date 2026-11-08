@@ -1573,3 +1573,52 @@ describe('Historia 32.2 — la Ficha técnica fecha su Página de Obra desde el 
     }
   });
 });
+
+/**
+ * Historia 32.3, revisión — el documento del incipit fecha su Página de Obra desde el disco y git.
+ *
+ * Las pruebas del incipit de arriba escriben `CorpusParaFechar` a mano; aquí lo produce
+ * `corpusParaFechar` desde una ficha que declara `incipit` sobre un documento que no es de ninguna
+ * de sus Citas: si se perdiera el reparto de `incipit` en `obras[]`, un cambio de ese documento no
+ * movería el `lastmod` de la Obra, y esto se cae.
+ */
+describe('Historia 32.3 — el documento del incipit fecha su Página de Obra desde el disco', () => {
+  const RUTA_DE_OBRA = '/obra/seneca/sobre-la-brevedad-de-la-vida';
+  const DOC = 'wikisource-es--otra-cosa';
+
+  it('un cambio solo en el documento del incipit refecha la Obra, y no la Cita', async () => {
+    const raiz = await temporal('sabiduria-incipit-fecha-');
+    const git = gitEn(raiz);
+    const corpus = join(raiz, 'corpus');
+    try {
+      await git(['init', '--initial-branch=principal']);
+      for (const dir of ['citas', 'autores', 'temas', 'colecciones', 'obras', 'fuentes']) await mkdir(join(corpus, dir), { recursive: true });
+      await writeFile(
+        join(corpus, 'citas', 'seneca--el-tiempo.md'),
+        '---\nslug: seneca-el-tiempo\nautor: seneca\ntemas:\n  - el-tiempo\nprocedencia:\n  obra: Sobre la brevedad de la vida\n---\n\nTexto.\n',
+        'utf8',
+      );
+      await writeFile(join(corpus, 'autores', 'seneca.yml'), 'nombre: Séneca\n', 'utf8');
+      await writeFile(join(corpus, 'temas', 'el-tiempo.yml'), 'nombre: El tiempo\n', 'utf8');
+      await writeFile(
+        join(corpus, 'obras', 'seneca--sobre-la-brevedad-de-la-vida.yml'),
+        `autor: seneca\ntitulo: Sobre la brevedad de la vida\nformas:\n  - "${formaDeObra('Sobre la brevedad de la vida')}"\n` +
+          `incipit:\n  documento: "${DOC}"\n  desde: "La mayor parte"\n`,
+        'utf8',
+      );
+      await writeFile(join(corpus, 'fuentes', `${DOC}.txt`), 'La mayor parte de los mortales.\n', 'utf8');
+      await git(['add', 'corpus']);
+      await git(['commit', '-m', 'declarada'], '2024-01-02T09:00:00+0000');
+
+      await writeFile(join(corpus, 'fuentes', `${DOC}.txt`), 'La mayor parte de los mortales se queja.\n', 'utf8');
+      await git(['add', 'corpus']);
+      await git(['commit', '-m', 'el documento'], '2024-03-04T09:00:00+0000');
+
+      const fechas = await fechasDeLasSuperficies(raiz, () => {});
+      expect(fechas.get(RUTA_DE_OBRA)).toBe('2024-03-04T09:00:00.000Z');
+      expect(fechas.get('/cita/seneca-el-tiempo')).toBe('2024-01-02T09:00:00.000Z');
+    } finally {
+      await rm(raiz, { recursive: true, force: true });
+    }
+  });
+});

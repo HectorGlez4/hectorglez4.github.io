@@ -169,6 +169,19 @@ deferred:
   - `[low]` `[patch]` El barrido de accesibilidad del desplegable no lo corre el CI: AGENTS.md lo pone como paso del commit que dé valor al tope, junto con mirar el corte del parte.
   - `[low]` `[patch]` Sin pruebas de `lineaDeLaFuenteDelIncipit` ni de Fuentes que no sean Wikisource: pruebas de las dos ramas y de Gutenberg en `incipit.test.ts`.
 
+### 2026-11-08 — Review pass
+- intent_gap: 0
+- bad_spec: 0
+- patch: 5 (high 0, medium 2, low 3)
+- defer: 0
+- reject: 36 (high 0, medium 0, low 36)
+- addressed_findings:
+  - `[medium]` `[patch]` Las reglas del bloque `incipit` del esquema de la ficha (slug de `documento`, una línea y no en blanco en `desde`, objeto estricto) no tenían prueba, y son la única guarda de una ficha editada a mano (`../x`): nuevo bloque en `tests/unit/incipit.test.ts` que las rechaza una por una con su mensaje.
+  - `[medium]` `[patch]` El reparto de `incipit` en `obras[]` de `corpusParaFechar` (`integraciones/historial.ts`) no se ejercía desde el disco: nueva prueba en `tests/unit/fecha-de-cambio.test.ts` con una ficha con incipit y un commit que solo toca su documento, que refecha la Obra y no la Cita (cae si se mapea otro campo).
+  - `[low]` `[patch]` La rama `ambiguo` de `leerDocumentoDeFuente` (dos subcarpetas con el mismo nombre) no la ejercía nadie: un caso en el cargador (`incipit.test.ts`) y otro en la orden (`incipit-cli.test.ts`), que caen si se toma la primera hallada.
+  - `[low]` `[patch]` `incipit-build.test.ts` afirmaba que ningún HTML trae `<details`, lo que rompería con el siguiente uso de `Desplegable.astro` (32.4, 34.2): se afirma la ausencia del bloque del incipit (`bloqueDe`), con «Cómo empieza».
+  - `[low]` `[patch]` El fichero de la historia parecía contradecirse (el primer «Revisión» del Auto Run Result dice 0 parches): era la pasada inicial sin hallazgos; se rotula como tal y se añade esta pasada.
+
 ## Design Notes
 
 - **La única diferencia de `dist/` con el Corpus real es CSS, y es inevitable.** Astro emite la hoja de un componente por el grafo de importaciones aunque no se pinte (lo dice la cabecera de `Desplegable.astro` y la nota de `Sostener.astro` en AGENTS.md); el AC pide a la vez `Desplegable.astro` y «`dist/` no cambia». Se lee como: ningún contenido cambia; la hoja de la Página de Obra gana exactamente las reglas acotadas de la primitiva. Por eso `ComoEmpieza.astro` va sin `<style>` y la página no gana reglas: la diferencia queda reducida a eso, y la 32.4 la tendría igual al plegar «Dónde leer».
@@ -220,7 +233,7 @@ Blocking condition: ninguna.
 - `AGENTS.md` — párrafo del incipit.
 - Pruebas: `tests/unit/incipit.test.ts`, `incipit-cli.test.ts`, `incipit-build.test.ts`, `tests/e2e/incipit.spec.ts` (nuevas); `linea-base`, `fecha-de-cambio`, `orden-del-libro`, `obras`, `ediciones-en-venta`, `ingreso-construido`, `desplegable` (al día).
 
-**Revisión.** Las capas externas no traen hallazgos en esta pasada: 0 parches, 0 diferidos, 0 rechazados. Seguimiento recomendado: no (0 alto, 0 medio, 0 bajo; puntuación 0).
+**Revisión (pasada inicial, sin hallazgos externos).** Las capas externas no traen hallazgos en esta pasada: 0 parches, 0 diferidos, 0 rechazados. Seguimiento recomendado: no (0 alto, 0 medio, 0 bajo; puntuación 0).
 
 **Verificación.**
 - `npx vitest run tests/unit/incipit.test.ts` — 31 verdes.
@@ -263,3 +276,23 @@ Blocking condition: ninguna.
 - `npm test` — 171 ficheros, 7.685 pruebas, verde.
 
 **Riesgos residuales.** Los tres diferidos; el corte por signo se mira a mano el día del tope (AGENTS.md).
+
+### Pasada de revisión 2 (2026-11-08)
+
+**Resumen.** Última pasada, proporcionada: cinco parches, todos de verificación o de contabilidad, sin tocar código de producción ni el contrato. Las reglas del bloque `incipit` del esquema, el reparto de `incipit` desde el disco en `corpusParaFechar` y la rama `ambiguo` de `leerDocumentoDeFuente` (cargador y orden) quedan atados por pruebas que caen sin el código que protegen (comprobado mutándolo); `incipit-build.test.ts` deja de afirmar que ningún HTML trae `<details` y afirma la ausencia del bloque del incipit, para no romper con el siguiente uso de `Desplegable.astro`; el primer «Revisión» se rotula como pasada inicial.
+
+**Ficheros de esta pasada.**
+- `tests/unit/incipit.test.ts` — bloque del esquema; caso `ambiguo` del cargador.
+- `tests/unit/incipit-cli.test.ts` — caso `ambiguo` de la orden.
+- `tests/unit/fecha-de-cambio.test.ts` — el documento del incipit fecha la Obra desde el disco y git.
+- `tests/unit/incipit-build.test.ts` — la ausencia se afirma sobre el bloque, no sobre `<details`.
+
+**Revisión.** 5 parches (2 medios, 3 bajos), 0 diferidos, 36 rechazados: comportamientos ya decididos en el contrato o en los tres diferidos previos (comienzo del `desde`, también a media palabra o a media línea de verso; estrofas; licencia de `FUENTES`; serie sin métrica hasta la 32.4), endurecimientos especulativos sobre entradas que no llegan por el camino real (enlaces simbólicos, mayúsculas de esquema, CRLF, credenciales en la `url:`, `--` al empezar el `desde`, invisibles, rutas relativas fuera de la raíz —`npm run` corre en ella—), un tope inválido que es valor de Héctor, rendimiento y memoria de módulo como los preexistentes, aserciones de presentación y la medida de 669,5 px de la 32.4; y la aserción del tope del árbol en el parte, que la prueba no fija a propósito. Seguimiento recomendado: **sí** por la regla (0 altos; 3 × 2 + 3 = 9 ≥ 5), aunque ningún parche toca código de producción.
+
+**Verificación.**
+- `npx vitest run tests/unit/incipit.test.ts tests/unit/incipit-cli.test.ts tests/unit/fecha-de-cambio.test.ts tests/unit/obras.test.ts` — 292 verdes; cada prueba nueva cae al mutar el código que protege (`ambiguo` → primera hallada; `incipit` → otro campo en `historial.ts`).
+- `npx astro check` — 0 errores.
+- `npm test` (con `correr.sh`) — 171 ficheros, 7.696 pruebas, verde.
+- La e2e y la comparación de `dist/` no se repiten: esta pasada no cambia nada que se construya.
+
+**Riesgos residuales.** Los de la pasada 1 y los tres diferidos.

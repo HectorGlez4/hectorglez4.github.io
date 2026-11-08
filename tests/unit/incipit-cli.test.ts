@@ -208,6 +208,19 @@ describe('Historia 32.3 — npm run obra -- incipit', () => {
       /no es el documento que el nombre/u,
     ],
     [
+      'dos subcarpetas traen un documento con su nombre',
+      async (r: Rutas) => {
+        const doc = documento('Sobre la brevedad de la vida', CUERPO);
+        await rm(docDe(r));
+        for (const sub of ['a', 'b']) {
+          await mkdir(join(r.fuentes, sub), { recursive: true });
+          await writeFile(join(r.fuentes, sub, `${DOC}.txt`), doc, 'utf8');
+        }
+        return [FICHA, join(r.fuentes, 'a', `${DOC}.txt`), 'La mayor parte'];
+      },
+      /más de un documento/u,
+    ],
+    [
       'el url de la cabecera no es http(s)',
       async (r: Rutas) => {
         await writeFile(
