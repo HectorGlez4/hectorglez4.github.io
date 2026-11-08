@@ -5,12 +5,11 @@ import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import {
   documentarCita,
-  parecidoDeTextos,
   restitucionDeTraduccion,
   restituirTraducciones,
   retirarCita,
-  MIN_PARECIDO_PARA_CORREGIR,
 } from '../../tools/lib/documentacion.ts';
+import { MIN_PARECIDO_PARA_CORREGIR, parecidoDeTextos } from '../../tools/lib/parecido.ts';
 import { censoSinLaCita, colapsarEspacios } from '../../tools/lib/cotejo.ts';
 import { leerCensoDeCotejo, rutasDelCorpus, separarFrontmatter } from '../../tools/lib/corpus.ts';
 import { componerDocumento } from '../../tools/lib/documento.ts';

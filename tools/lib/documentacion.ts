@@ -38,7 +38,7 @@
 
 import { readFile, writeFile } from 'node:fs/promises';
 import { basename, dirname, extname, isAbsolute, relative, resolve, sep } from 'node:path';
-import { normalizar } from '../../src/lib/normalizar.ts';
+import { MIN_PARECIDO_PARA_CORREGIR, parecidoDeTextos } from './parecido.ts';
 import {
   apareceEnDocumento,
   candidatosDeLosSaltos,
@@ -115,75 +115,6 @@ import { corpusParaFechar } from '../../integraciones/historial.ts';
 export type Avisar = (linea: string) => void;
 
 const CALLAR: Avisar = () => {};
-
-// ─────────────────────────────────────────────────────────────────────────────
-// El parecido, que es lo que distingue corregir de sustituir
-// ─────────────────────────────────────────────────────────────────────────────
-
-/**
- * Cuánto tiene que parecerse el texto corregido al publicado para que sea **la misma Cita**.
- *
- * El caso real que obliga a que exista `--texto` está en el censo: el Corpus dice «Hombres
- * necios que acusáis a la mujer sin razón, sin ver que sois la ocasión de lo mismo que
- * culpáis.» y las *Redondillas* dicen lo mismo con una coma más y un punto y coma final. No
- * es una paráfrasis: es la misma Cita con la puntuación normalizada al teclearla en la v1, y
- * ese es el patrón general del censo. Sin esta salida, la única sería retirar Citas
- * verdaderas por una coma.
- *
- * El parecido se mide sobre la **forma canónica de AD-3**, que es la definición que el
- * proyecto ya tiene de «dos textos son la misma Cita» y la que usa la detección de
- * duplicados de FR-14. Eso hace que una corrección que solo toca signos o acentos —el caso
- * de las *Redondillas*— valga 1, sin margen de duda, y que lo que el umbral juzgue de verdad
- * sean las diferencias de **palabras**, que son las que pueden convertir una Cita en otra.
- *
- * 0,85 deja restituir una palabra elidida o una forma verbal en un texto de la longitud
- * habitual —una frase de 100 caracteres canónicos admite 15 de corrección— y se queda muy
- * por encima de lo que puntúan dos Citas distintas de la misma página: «El sabio hace luego
- * lo que el necio al fin» contra «Haga al principio el cuerdo lo que el necio al fin»
- * —justamente el par que descubrió el problema— se queda en 0,60. Entre las dos cosas hay
- * espacio de sobra, y el umbral vive en esa holgura y no pegado a ningún caso concreto.
- *
- * No es la puerta: la puerta es que el texto nuevo **aparezca literal en el documento**, que
- * es lo que impide inventárselo. Esto es lo que impide lo otro, cambiar una Cita por otra
- * distinta de la misma página, que sí aparecería literal.
- */
-export const MIN_PARECIDO_PARA_CORREGIR = 0.85;
-
-/**
- * Cuánto se parecen dos textos, entre 0 y 1, sobre su forma canónica.
- *
- * Distancia de edición normalizada por la longitud del más largo. Se cuenta por caracteres
- * y no por palabras porque una corrección típica del censo cambia media palabra —una `s`
- * final, una tilde que en forma canónica ni se ve— y un parecido por palabras la contaría
- * como palabra entera cambiada, castigando más una corrección menor en un texto corto que
- * una reescritura en uno largo.
- */
-export function parecidoDeTextos(a: string, b: string): number {
-  const uno = normalizar(a);
-  const otro = normalizar(b);
-  if (uno === otro) return 1;
-  if (uno === '' || otro === '') return 0;
-  return 1 - distanciaDeEdicion(uno, otro) / Math.max(uno.length, otro.length);
-}
-
-/** Distancia de Levenshtein, con una sola fila viva: los textos de una Cita son cortos. */
-function distanciaDeEdicion(uno: string, otro: string): number {
-  let fila = Array.from({ length: otro.length + 1 }, (_, i) => i);
-
-  for (let i = 1; i <= uno.length; i += 1) {
-    const siguiente = [i];
-    for (let j = 1; j <= otro.length; j += 1) {
-      siguiente[j] = Math.min(
-        fila[j] + 1,
-        siguiente[j - 1] + 1,
-        fila[j - 1] + (uno[i - 1] === otro[j - 1] ? 0 : 1),
-      );
-    }
-    fila = siguiente;
-  }
-
-  return fila[otro.length];
-}
 
 // ─────────────────────────────────────────────────────────────────────────────
 // La Cita sobre la que se opera

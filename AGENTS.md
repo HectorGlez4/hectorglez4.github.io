@@ -88,6 +88,14 @@ publicado y lo que la misma pasada aprueba; si no, sigue en `corpus/_revision/` 
 la nombra con sus Temas y sus recuentos, y la orden sale con 1. Lo que sale de `extraer` llega sin
 Temas, así que el paso 3 casi siempre lleva `--temas`.
 
+**`revisar` avisa de lo que casi coincide** (Historia 29.4, FR-14). Además de la repetida
+(«⚠ Duplica a …»), cada candidata lleva «⚠ Contenida en / Contiene a …» frente a lo publicado y a
+lo de revisión, y «⚠ Casi igual a …» frente a las publicadas de su misma Obra, y `--aprobar` repite
+esos avisos en el parte de lo que publicó. Nada de eso bloquea: aprobar publica igual. La medida es
+una sola, `parecidoEntre` de `tools/lib/parecido.ts` —repetidas, contenida (la corta con al menos
+`MIN_CARACTERES_PARA_CONTENCION`), casi iguales (`MIN_PARECIDO_PARA_CORREGIR`, 0,85)—, la misma del
+alta y de `documentar --texto`; ningún otro módulo calcula parecido ni contención.
+
 **`recuperar` y `extraer` conservan el verso** (Historia 29.1, AD-29). Un documento nuevo declara
 en su cabecera la forma de sus líneas, `lineas:` —una de `FORMAS_DE_LINEAS` de
 `tools/lib/lineas.ts`: `verso`, `verso-espaciado`, `prosa-por-lineas`, `prosa-ajustada` o
@@ -754,6 +762,20 @@ da la orden de retirarla.
 
 `sembrar` informa además de los grupos de grafías equivalentes y de los pares en que una
 forma es prefijo de otra del mismo Autor.
+
+**Los casi duplicados dentro de una Obra** (Historia 29.4) se miran con un parte:
+
+```
+npm run obra -- casi-duplicados [<ficha>...] [--json]   # NO escribe nada
+```
+
+Recorre cada par de Citas publicadas de cada Obra (o de las fichas nombradas) y señala las
+**repetidas**, las **contenidas** —se dice cuál está dentro de cuál— y las **casi iguales** —con la
+palabra que cambia, si es una—, con `parecidoEntre`; entre Obras distintas no mira. Cierra
+recordando las tres decisiones —retirar una (`npm run documentar -- --retirar`), conservar las dos,
+restituir el literal (`npm run documentar -- <slug> <documento> --texto`)— y **las toma una
+persona**: la orden no retira, corrige, conserva ni guarda excepciones. Una ficha nombrada que no
+existe o un Corpus ilegible salen con 1, sin parte; una bandera desconocida o repetida, con 2.
 
 **`ediciones`** (Historia 22.9) es el otro campo que decide Héctor, y **no se escribe a mano**:
 lo escriben sus dos órdenes, que lo validan con el esquema del build.

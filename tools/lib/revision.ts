@@ -26,11 +26,14 @@ import {
 } from './cotejo.ts';
 import { saltosDeLaCita } from './lineas.ts';
 import { normalizar } from '../../src/lib/normalizar.ts';
+import { fichaDeCita, indiceDeFichas } from '../../src/lib/obras.ts';
+import { formaParaComparar, indiceDeContencion, parecidoEntre, type FormaParaComparar } from './parecido.ts';
 import { slugLibre } from '../../src/lib/slug.ts';
 import {
   conLaLineaDeTexto,
   leerCitas,
   leerDocumentosParaElCotejo,
+  leerFichasDeObra,
   leerTemas,
   mover,
   nombreDeFicheroDeCita,
@@ -65,6 +68,13 @@ export interface CandidataEnRevision {
    * equivalentes son la misma Cita o dos ediciones legítimas de la misma frase.
    */
   duplicaA?: { slug: string; donde: 'publicadas' | 'en revisión' };
+  /**
+   * Historia 29.4 — las Citas con las que casi coincide sin ser la misma forma (`parecidoEntre`):
+   * la **contenida** frente a lo publicado y a lo de revisión, en los dos sentidos, y la **casi
+   * igual** frente a las publicadas de su misma Obra resuelta. Publicadas primero, luego por slug.
+   * Se omite si no hay ninguna. Como `duplicaA`, señala y no bloquea nada.
+   */
+  parecidas?: Parecida[];
   /** Si pasaría la puerta de admisión ahora mismo, y qué le falta si no. */
   admisible: boolean;
   motivos: string[];
@@ -78,6 +88,96 @@ export interface CandidataEnRevision {
   señalesDeOrden: SeñalDeOrden[];
 }
 
+/** Una coincidencia de la 29.4 que no es la misma forma. */
+export interface Parecida {
+  slug: string;
+  donde: 'publicadas' | 'en revisión';
+  clase: 'contenida' | 'casi-iguales';
+  parecido: number;
+  /** En la contenida: si la candidata está dentro de la otra o la otra dentro de ella. */
+  sentido?: 'contenida-en' | 'contiene-a';
+  /** En la casi igual: la palabra que cambia, la de la candidata y la de la otra. */
+  palabra?: { a: string; b: string };
+}
+
+/**
+ * Las parecidas de cada candidata (Historia 29.4), por slug de candidata.
+ *
+ * La contenida se mira frente a **todo** —publicadas y revisión, en los dos sentidos—, con el
+ * índice de `indiceDeContencion` para no comparar cada candidata con las 290.000 restantes; la casi
+ * igual, solo frente a las publicadas de la misma Obra resuelta por ficha. Una candidata sin ficha
+ * no tiene publicadas en su Obra: toda publicada tiene ficha. Un par entre dos publicadas no es de
+ * ninguna candidata y no se mira.
+ */
+function parecidasDeLasCandidatas(
+  pendientes: readonly { slug: string; autor: string; texto?: string; procedencia?: { obra?: string } | null }[],
+  publicadas: readonly { slug: string; autor: string; texto: string; procedencia?: { obra?: string } | null }[],
+  fichas: Parameters<typeof fichaDeCita>[1],
+): Map<string, Parecida[]> {
+  const todas: { slug: string; donde: 'publicadas' | 'en revisión'; forma: FormaParaComparar }[] = [
+    ...publicadas.map((c) => ({ slug: c.slug, donde: 'publicadas' as const, forma: formaParaComparar(c.texto) })),
+    ...pendientes.map((c) => ({ slug: c.slug, donde: 'en revisión' as const, forma: formaParaComparar(c.texto ?? '') })),
+  ];
+  const parecidas = new Map<string, Parecida[]>();
+  const anotar = (slug: string, p: Parecida) => {
+    const lista = parecidas.get(slug);
+    if (lista === undefined) parecidas.set(slug, [p]);
+    else lista.push(p);
+  };
+
+  const contenedoras = indiceDeContencion(todas.map((t) => t.forma));
+  for (const dentro of todas) {
+    for (const indice of contenedoras(dentro.forma)) {
+      const fuera = todas[indice];
+      if (dentro.donde === 'publicadas' && fuera.donde === 'publicadas') continue;
+      const coincidencia = parecidoEntre(dentro.forma, fuera.forma, 'contenida');
+      if (coincidencia?.clase !== 'contenida') continue;
+      const comun = { clase: 'contenida' as const, parecido: coincidencia.parecido };
+      if (dentro.donde === 'en revisión') {
+        anotar(dentro.slug, { slug: fuera.slug, donde: fuera.donde, ...comun, sentido: 'contenida-en' });
+      }
+      if (fuera.donde === 'en revisión') {
+        anotar(fuera.slug, { slug: dentro.slug, donde: dentro.donde, ...comun, sentido: 'contiene-a' });
+      }
+    }
+  }
+
+  const porObra = new Map<string, { slug: string; forma: FormaParaComparar }[]>();
+  publicadas.forEach((c, i) => {
+    const ficha = fichaDeCita(c, fichas);
+    if (ficha === undefined) return;
+    const lista = porObra.get(ficha.nombre) ?? [];
+    lista.push({ slug: c.slug, forma: todas[i].forma });
+    porObra.set(ficha.nombre, lista);
+  });
+  pendientes.forEach((c, i) => {
+    const ficha = fichaDeCita(c, fichas);
+    if (ficha === undefined) return;
+    const suya = todas[publicadas.length + i].forma;
+    for (const otra of porObra.get(ficha.nombre) ?? []) {
+      const coincidencia = parecidoEntre(suya, otra.forma);
+      if (coincidencia?.clase !== 'casi-iguales') continue;
+      anotar(c.slug, {
+        slug: otra.slug,
+        donde: 'publicadas',
+        clase: 'casi-iguales',
+        parecido: coincidencia.parecido,
+        ...(coincidencia.palabra !== undefined ? { palabra: coincidencia.palabra } : {}),
+      });
+    }
+  });
+
+  for (const lista of parecidas.values()) {
+    lista.sort(
+      (x, y) =>
+        Number(x.donde !== 'publicadas') - Number(y.donde !== 'publicadas') ||
+        x.slug.localeCompare(y.slug, 'es') ||
+        x.clase.localeCompare(y.clase),
+    );
+  }
+  return parecidas;
+}
+
 /**
  * Todo lo que está pendiente de decisión, en el orden en que se revisa.
  *
@@ -89,6 +189,8 @@ export interface CandidataEnRevision {
 export async function loteEnRevision(rutas: Rutas): Promise<CandidataEnRevision[]> {
   const pendientes = await leerCitas(rutas.revision);
   const publicadas = await leerCitas(rutas.citas);
+  const fichas = indiceDeFichas(await leerFichasDeObra(rutas));
+  const parecidas = parecidasDeLasCandidatas(pendientes, publicadas, fichas);
 
   // El índice de comparación usa la forma canónica de AD-3, la misma que la búsqueda:
   // si duplicados y búsqueda usaran criterios distintos, el corpus podría acabar con dos
@@ -165,6 +267,7 @@ export async function loteEnRevision(rutas: Rutas): Promise<CandidataEnRevision[
         : duplicadaEnRevision !== undefined
           ? { duplicaA: { slug: duplicadaEnRevision, donde: 'en revisión' as const } }
           : {}),
+      ...(parecidas.has(candidata.slug) ? { parecidas: parecidas.get(candidata.slug)! } : {}),
       ...cargaYSeñales(candidata.texto ?? ''),
       admisible:
         comprobacion.success &&
@@ -260,6 +363,11 @@ export interface ResultadoDeDecision {
    * rompería el build siguiente.
    */
   conSaltos: { slug: string; documento: string }[];
+  /**
+   * Historia 29.4 — lo que se señalaba de cada publicada al aprobarla: su repetida (`duplicaA`) y
+   * sus parecidas. Publicarla no lo cambia: es aviso para quien aprueba, que lo lee en el parte.
+   */
+  avisos: { slug: string; duplicaA?: CandidataEnRevision['duplicaA']; parecidas: Parecida[] }[];
   noEncontradas: string[];
 }
 
@@ -293,6 +401,7 @@ export async function aprobar(
     rechazadas: [],
     noEncontradas: [],
     conSaltos: [],
+    avisos: [],
   };
 
   /*
@@ -467,6 +576,13 @@ export async function aprobar(
     }
 
     resultado.publicadas.push(slug);
+    if (candidata.duplicaA !== undefined || (candidata.parecidas ?? []).length > 0) {
+      resultado.avisos.push({
+        slug,
+        ...(candidata.duplicaA !== undefined ? { duplicaA: candidata.duplicaA } : {}),
+        parecidas: candidata.parecidas ?? [],
+      });
+    }
     if (conSaltos !== undefined) resultado.conSaltos.push({ slug: definitivo, documento: conSaltos.documento });
   }
 
@@ -615,6 +731,7 @@ export async function rechazar(rutas: Rutas, slugs: string[]): Promise<Resultado
     rechazadas: [],
     noEncontradas: [],
     conSaltos: [],
+    avisos: [],
   };
 
   for (const slug of slugs) {
@@ -648,9 +765,10 @@ export function formatearLote(lote: CandidataEnRevision[], total: number = lote.
     lineas.push(`  «${candidata.texto}»`);
     if (candidata.duplicaA) {
       lineas.push(
-        `  ⚠ Duplica a ${candidata.duplicaA.slug} (${candidata.duplicaA.donde}). Decide tú.`,
+        `  ⚠ Duplica a ${candidata.duplicaA.slug} (${candidata.duplicaA.donde}; repetidas). Decide tú.`,
       );
     }
+    for (const parecida of candidata.parecidas ?? []) lineas.push(`  ${lineaDeParecida(parecida)}`);
     if (!candidata.admisible) {
       lineas.push('  ✕ No pasaría la admisión aunque se apruebe:');
       for (const motivo of candidata.motivos) lineas.push(`      ${motivo}`);
@@ -670,4 +788,18 @@ export function formatearLote(lote: CandidataEnRevision[], total: number = lote.
   lineas.push('Aprobar:  npx tsx tools/revisar.ts --aprobar <slug> [<slug>...]');
   lineas.push('Rechazar: npx tsx tools/revisar.ts --rechazar <slug> [<slug>...]');
   return `${lineas.join('\n')}\n`;
+}
+
+/**
+ * El aviso de una parecida (Historia 29.4), en una línea: con quién, dónde, la clase y el parecido.
+ * Lo usan el listado y el parte de `--aprobar`.
+ */
+export function lineaDeParecida(p: Parecida): string {
+  const cifra = p.parecido.toFixed(2).replace('.', ',');
+  if (p.clase === 'contenida') {
+    const verbo = p.sentido === 'contiene-a' ? 'Contiene a' : 'Contenida en';
+    return `⚠ ${verbo} ${p.slug} (${p.donde}; contenida, ${cifra}). Decide tú.`;
+  }
+  const palabra = p.palabra !== undefined ? `; ${p.palabra.a}/${p.palabra.b}` : '';
+  return `⚠ Casi igual a ${p.slug} (${p.donde}; casi iguales, ${cifra}${palabra}). Decide tú.`;
 }
