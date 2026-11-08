@@ -1,5 +1,5 @@
 ---
-texto: "LEONARDO Iulia, quiera Dios que os vea como mi pecho desea."
+texto: "LEONARDO\nIulia, quiera Dios que os vea\ncomo mi pecho desea."
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-leonardo-iulia-quiera-dios-que-os-vea"
 procedencia:

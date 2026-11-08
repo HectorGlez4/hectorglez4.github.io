@@ -1,5 +1,5 @@
 ---
-texto: "¿dónde el claro río que de Albión los héroes vio humillados, los azules pendones reverbera de Buenos Aires, y orgulloso arrastra de cien potentes aguas los tributos al atónito mar?"
+texto: "¿dónde el claro río\nque de Albión los héroes vio humillados,\nlos azules pendones reverbera\nde Buenos Aires, y orgulloso arrastra\nde cien potentes aguas los tributos\nal atónito mar?"
 autor: "andres-bello"
 slug: "andres-bello-donde-el-claro-rio-que-de-albion"
 procedencia:

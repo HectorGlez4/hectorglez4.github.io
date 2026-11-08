@@ -1,5 +1,5 @@
 ---
-texto: "Dos veces me han condenado Los señores a trinchar, Y la una el Maestresala Tuvo aprestado sitial."
+texto: "Dos veces me han condenado\nLos señores a trinchar,\nY la una el Maestresala\nTuvo aprestado sitial."
 autor: "francisco-de-quevedo"
 slug: "francisco-de-quevedo-dos-veces-me-han-condenado-los-senores"
 procedencia:

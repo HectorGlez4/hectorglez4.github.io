@@ -1,5 +1,5 @@
 ---
-texto: "LEONARDO A no entenderos, nueua especie de crueldad, con mascara de fauor, 725 quereis en mi executar."
+texto: "LEONARDO\nA no entenderos,\nnueua especie de crueldad,\ncon mascara de fauor, 725\nquereis en mi executar."
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-leonardo-a-no-entenderos-nueua-especie-de"
 procedencia:

@@ -1,5 +1,5 @@
 ---
-texto: "REBOLLEDO: Ha de ser cuando anochezca, y música más fundada."
+texto: "REBOLLEDO: Ha de ser cuando anochezca,\ny música más fundada."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-rebolledo-ha-de-ser-cuando-anochezca-y"
 procedencia:

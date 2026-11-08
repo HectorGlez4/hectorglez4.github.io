@@ -1,5 +1,5 @@
 ---
-texto: "Síguelo; mostraráte el rostro amado, y engañarán un rato tus pasiones dos bienes, que serán dormir y cuello."
+texto: "Síguelo; mostraráte el rostro amado,\ny engañarán un rato tus pasiones\ndos bienes, que serán dormir y cuello."
 autor: "luis-de-gongora"
 slug: "luis-de-gongora-siguelo-mostrarate-el-rostro-amado-y-enganaran"
 procedencia:

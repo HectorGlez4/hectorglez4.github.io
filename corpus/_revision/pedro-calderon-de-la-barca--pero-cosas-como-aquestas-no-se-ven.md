@@ -1,5 +1,5 @@
 ---
-texto: "Pero cosas como aquestas no se ven con tanta prisa.) En extremo agradecido estoy a quien solicita honrarme."
+texto: "Pero cosas como aquestas\nno se ven con tanta prisa.)\nEn extremo agradecido\nestoy a quien solicita\nhonrarme."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-pero-cosas-como-aquestas-no-se-ven"
 procedencia:

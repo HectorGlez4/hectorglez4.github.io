@@ -1,5 +1,5 @@
 ---
-texto: "Yo sé bien que cuando el mundo Cede, lívido, al descanso, Sobre el silencio profundo Murmura el arroyo manso."
+texto: "Yo sé bien que cuando el mundo\nCede, lívido, al descanso,\nSobre el silencio profundo\nMurmura el arroyo manso."
 autor: "jose-marti"
 slug: "jose-marti-yo-se-bien-que-cuando-el-mundo"
 procedencia:

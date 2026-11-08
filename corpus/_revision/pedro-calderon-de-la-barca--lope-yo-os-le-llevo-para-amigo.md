@@ -1,5 +1,5 @@
 ---
-texto: "LOPE: Yo os le llevo para amigo; que me ha inclinado en extremo su desenfado y su brío, y la afición a las armas."
+texto: "LOPE: Yo os le llevo para amigo;\nque me ha inclinado en extremo\nsu desenfado y su brío,\ny la afición a las armas."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-lope-yo-os-le-llevo-para-amigo"
 procedencia:

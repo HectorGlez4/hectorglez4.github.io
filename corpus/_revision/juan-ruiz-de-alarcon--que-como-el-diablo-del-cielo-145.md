@@ -1,5 +1,5 @@
 ---
-texto: "¿Que, como el diablo, del cielo 145 huyendo a la tierra baxa, el Inuierno tiritando, y el Verano abuchornada?"
+texto: "¿Que, como el diablo, del cielo 145\nhuyendo a la tierra baxa,\nel Inuierno tiritando,\ny el Verano abuchornada?"
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-que-como-el-diablo-del-cielo-145"
 procedencia:

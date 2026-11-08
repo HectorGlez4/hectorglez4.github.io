@@ -1,5 +1,5 @@
 ---
-texto: "Te halles al raso, a tu sabor tendido, rodeado de cardos y dejaras, cantándote una rana a cada oído."
+texto: "Te halles al raso, a tu sabor tendido,\nrodeado de cardos y dejaras,\ncantándote una rana a cada oído."
 autor: "andres-bello"
 slug: "andres-bello-te-halles-al-raso-a-tu-sabor"
 procedencia:

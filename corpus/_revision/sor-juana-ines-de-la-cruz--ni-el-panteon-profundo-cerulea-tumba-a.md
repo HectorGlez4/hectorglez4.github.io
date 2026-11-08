@@ -1,5 +1,5 @@
 ---
-texto: "Ni el panteón profundo, cerúlea tumba a su infeliz ceniza, ni el vengativo rayo fulminante mueve, por más que avisa, al ánimo arrogante que, el vivir despreciando, determina su nombre eternizar en su ruïna."
+texto: "Ni el panteón profundo,\ncerúlea tumba a su infeliz ceniza,\nni el vengativo rayo fulminante\nmueve, por más que avisa,\nal ánimo arrogante\nque, el vivir despreciando, determina\nsu nombre eternizar en su ruïna."
 autor: "sor-juana-ines-de-la-cruz"
 slug: "sor-juana-ines-de-la-cruz-ni-el-panteon-profundo-cerulea-tumba-a"
 procedencia:

@@ -1,5 +1,5 @@
 ---
-texto: "DON IUAN ¿Donde vais? 235 LEONARDO ¿Mandais que al Pirù me parta, y preguntais donde voy? a embarcarme parto."
+texto: "DON IUAN\n¿Donde vais?\n235\nLEONARDO\n¿Mandais que al Pirù me parta,\ny preguntais donde voy?\na embarcarme parto."
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-don-iuan-donde-vais-235-leonardo-mandais"
 procedencia:

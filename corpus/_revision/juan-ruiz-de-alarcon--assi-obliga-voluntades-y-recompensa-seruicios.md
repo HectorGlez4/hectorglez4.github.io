@@ -1,5 +1,5 @@
 ---
-texto: "Assi obliga voluntades, y recompensa seruicios?"
+texto: "Assi obliga voluntades,\ny recompensa seruicios?"
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-assi-obliga-voluntades-y-recompensa-seruicios"
 procedencia:

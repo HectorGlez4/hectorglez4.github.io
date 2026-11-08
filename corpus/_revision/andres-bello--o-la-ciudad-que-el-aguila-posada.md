@@ -1,5 +1,5 @@
 ---
-texto: "¿O la ciudad que el águila posada sobre el nopal mostró al azteca errante, y el suelo de inexhaustas venas rico, que casi hartaron la avarienta Europa?"
+texto: "¿O la ciudad que el águila posada\nsobre el nopal mostró al azteca errante,\ny el suelo de inexhaustas venas rico,\nque casi hartaron la avarienta Europa?"
 autor: "andres-bello"
 slug: "andres-bello-o-la-ciudad-que-el-aguila-posada"
 procedencia:

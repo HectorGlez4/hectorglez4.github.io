@@ -1,5 +1,5 @@
 ---
-texto: "Quiere defenderse; pero viendo que era una cuadrilla, corre veloz."
+texto: "Quiere defenderse; pero\nviendo que era una cuadrilla,\ncorre veloz."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-quiere-defenderse-pero-viendo-que-era-una"
 procedencia:

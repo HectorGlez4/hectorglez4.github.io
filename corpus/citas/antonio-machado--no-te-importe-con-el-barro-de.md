@@ -1,5 +1,5 @@
 ---
-texto: "No te importe; con el barro de la tierra, haz una copa para que beba tu hermano."
+texto: "No te importe; con el barro\nde la tierra, haz una copa\npara que beba tu hermano."
 autor: "antonio-machado"
 temas:
   - "la-virtud"

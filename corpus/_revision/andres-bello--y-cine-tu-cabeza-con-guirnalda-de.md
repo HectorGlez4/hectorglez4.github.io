@@ -1,5 +1,5 @@
 ---
-texto: "Y ciñe tu cabeza con guirnalda de siempre verde lauro que matiza purpúrea flor, y azul, y roja, y gualda."
+texto: "Y ciñe tu cabeza con guirnalda\nde siempre verde lauro que matiza\npurpúrea flor, y azul, y roja, y gualda."
 autor: "andres-bello"
 slug: "andres-bello-y-cine-tu-cabeza-con-guirnalda-de"
 procedencia:

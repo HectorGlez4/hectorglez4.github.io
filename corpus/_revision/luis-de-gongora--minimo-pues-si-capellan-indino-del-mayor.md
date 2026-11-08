@@ -1,5 +1,5 @@
 ---
-texto: "Mínimo, pues, si capellán indino del mayor rey, monarca al fin de cuanto pisa el sol, lamen ambos oceanos,"
+texto: "Mínimo, pues, si capellán indino\ndel mayor rey, monarca al fin de cuanto\npisa el sol, lamen ambos oceanos,"
 autor: "luis-de-gongora"
 slug: "luis-de-gongora-minimo-pues-si-capellan-indino-del-mayor"
 procedencia:

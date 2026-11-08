@@ -1,5 +1,5 @@
 ---
-texto: "Más enemigos que el agua, Más corchetes que un gabán, Más soplos que lo caliente, Más plumas que el tornear."
+texto: "Más enemigos que el agua,\nMás corchetes que un gabán,\nMás soplos que lo caliente,\nMás plumas que el tornear."
 autor: "francisco-de-quevedo"
 slug: "francisco-de-quevedo-mas-enemigos-que-el-agua-mas-corchetes"
 procedencia:

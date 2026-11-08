@@ -1,5 +1,5 @@
 ---
-texto: "¡Mal haya ese París tan divertido, y todas sus famosas fruslerías, que a soledad me tienen reducido!"
+texto: "¡Mal haya ese París tan divertido,\ny todas sus famosas fruslerías,\nque a soledad me tienen reducido!"
 autor: "andres-bello"
 slug: "andres-bello-mal-haya-ese-paris-tan-divertido-y"
 procedencia:

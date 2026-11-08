@@ -1,5 +1,5 @@
 ---
-texto: "SANCHO Si amor es tacha, 180 no ay quien valga por testigo."
+texto: "SANCHO\nSi amor es tacha,\n180\nno ay quien valga por testigo."
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-sancho-si-amor-es-tacha-180-no"
 procedencia:

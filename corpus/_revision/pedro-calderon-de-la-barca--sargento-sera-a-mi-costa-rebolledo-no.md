@@ -1,5 +1,5 @@
 ---
-texto: "SARGENTO: Será a mi costa REBOLLEDO: No es más de hasta ver quién es quien llega."
+texto: "SARGENTO: Será a mi costa\nREBOLLEDO: No es más de hasta ver quién es\nquien llega."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-sargento-sera-a-mi-costa-rebolledo-no"
 procedencia:

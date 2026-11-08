@@ -1,5 +1,5 @@
 ---
-texto: "Celia: (Aparte.) Bien la deshecha mi ama hace de querer tenerla)."
+texto: "Celia: (Aparte.) Bien la deshecha mi ama\nhace de querer tenerla)."
 autor: "sor-juana-ines-de-la-cruz"
 slug: "sor-juana-ines-de-la-cruz-celia-aparte-bien-la-deshecha-mi-ama"
 procedencia:

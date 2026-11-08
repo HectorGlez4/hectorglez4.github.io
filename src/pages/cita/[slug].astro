@@ -38,6 +38,7 @@ import { tituloDe } from '../../lib/marca.ts';
 import type { GetStaticPaths } from 'astro';
 import { rutaDeCita } from '../../lib/superficies.ts';
 import { clavesDeOrden } from '../../lib/obras.ts';
+import { enUnaLinea } from '../../lib/verso.ts';
 
 export const getStaticPaths = (async () => {
   const conjunto = await conjuntoPublicable();
@@ -96,14 +97,23 @@ const { cita, autor, siguiente, rutas, filtros, clave } = Astro.props;
  * desde un buscador decide si entrar leyendo esto, así que recortarlo con puntos
  * suspensivos donde no hace falta cuesta clics.
  */
-const recorte = cita.texto.length > 110 ? `${cita.texto.slice(0, 109)}…` : cita.texto;
+/*
+ * Ninguno de los dos admite saltos: el verso va en una línea, con « / » (`enUnaLinea`, Historia
+ * 29.3). El recorte se mide sobre el texto —cada salto, un carácter— y en el mismo índice de
+ * siempre; si cae en o junto a un salto, la racha final que lo contiene se quita para que ni el
+ * salto ni « / » queden colgando antes de «…». Una Cita sin saltos no cambia ni un byte.
+ */
+const recorte =
+  cita.texto.length > 110
+    ? `${enUnaLinea(cita.texto.slice(0, 109).replace(/\s*\n\s*$/, ''))}…`
+    : enUnaLinea(cita.texto);
 const titulo = tituloDe(`«${recorte}» — ${autor.nombre}`);
 const canonica = new URL(rutaDeCita(cita.slug), Astro.site).href;
 ---
 
 <Armazon
   titulo={titulo}
-  descripcion={`${cita.texto} — ${autor.nombre}.`}
+  descripcion={`${enUnaLinea(cita.texto)} — ${autor.nombre}.`}
   ruta={rutaDeCita(cita.slug)}
   tarjeta={`/tarjeta/${cita.slug}.png`}
   tipo="cita"

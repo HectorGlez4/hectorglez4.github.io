@@ -1,5 +1,5 @@
 ---
-texto: "las hojas infamó de un alhelí, y los Acroceraunios montes no."
+texto: "las hojas infamó de un alhelí,\ny los Acroceraunios montes no."
 autor: "luis-de-gongora"
 slug: "luis-de-gongora-las-hojas-infamo-de-un-alheli-y"
 procedencia:

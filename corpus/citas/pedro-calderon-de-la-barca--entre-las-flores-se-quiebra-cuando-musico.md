@@ -1,5 +1,5 @@
 ---
-texto: "Entre las flores se quiebra, Cuando, músico, celebra De las flores la piedad, Que le da la majestad Del campo abierto á su huida: ¿Y, teniendo yo mas vida, Tengo menos libertad?"
+texto: "Entre las flores se quiebra,\nCuando, músico, celebra\nDe las flores la piedad,\nQue le da la majestad\nDel campo abierto á su huida:\n¿Y, teniendo yo mas vida,\nTengo menos libertad?"
 autor: "pedro-calderon-de-la-barca"
 temas:
   - "la-libertad"

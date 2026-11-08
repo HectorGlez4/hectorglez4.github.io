@@ -1,5 +1,5 @@
 ---
-texto: "A mi hermano os encomiendo, ya que tan dichoso ha sido que merece ir por criado vuestro."
+texto: "A mi hermano os encomiendo,\nya que tan dichoso ha sido\nque merece ir por criado\nvuestro."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-a-mi-hermano-os-encomiendo-ya-que"
 procedencia:

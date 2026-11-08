@@ -1,5 +1,5 @@
 ---
-texto: "AURORA Mejor diras la sentencia, contra la vida de Aurora."
+texto: "AURORA\nMejor diras la sentencia,\ncontra la vida de Aurora."
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-aurora-mejor-diras-la-sentencia-contra-la"
 procedencia:

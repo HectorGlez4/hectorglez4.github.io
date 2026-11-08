@@ -1,5 +1,5 @@
 ---
-texto: "No la domó el valor; no al hambre cede, que sus guerreros ciento a ciento siega."
+texto: "No la domó el valor; no al hambre cede,\nque sus guerreros ciento a ciento siega."
 autor: "andres-bello"
 slug: "andres-bello-no-la-domo-el-valor-no-al"
 procedencia:

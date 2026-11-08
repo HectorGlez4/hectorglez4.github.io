@@ -1,5 +1,5 @@
 ---
-texto: "Caíste, sí; mas vencedor caíste; y de la patria el pabellón triunfante sombra te dio al morir, enarbolado sobre las conquistadas baterías, de los usurpadores sepultura."
+texto: "Caíste, sí; mas vencedor caíste;\ny de la patria el pabellón triunfante\nsombra te dio al morir, enarbolado\nsobre las conquistadas baterías,\nde los usurpadores sepultura."
 autor: "andres-bello"
 slug: "andres-bello-caiste-si-mas-vencedor-caiste-y-de"
 procedencia:

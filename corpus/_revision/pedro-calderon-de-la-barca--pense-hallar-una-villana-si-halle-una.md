@@ -1,5 +1,5 @@
 ---
-texto: "Pensé hallar una villana; si hallé una deidad, ¿no era preciso que peligrase en mi misma inadvertencia?"
+texto: "Pensé hallar una villana;\nsi hallé una deidad, ¿no era\npreciso que peligrase\nen mi misma inadvertencia?"
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-pense-hallar-una-villana-si-halle-una"
 procedencia:

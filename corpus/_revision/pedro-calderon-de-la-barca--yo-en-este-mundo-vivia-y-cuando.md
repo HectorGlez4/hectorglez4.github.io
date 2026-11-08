@@ -1,5 +1,5 @@
 ---
-texto: "Yo en este mundo vivia, Y, cuando entre mí decía: ¿Habrá otra persona alguna De suerte más importuna?"
+texto: "Yo en este mundo vivia,\nY, cuando entre mí decía:\n¿Habrá otra persona alguna\nDe suerte más importuna?"
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-yo-en-este-mundo-vivia-y-cuando"
 procedencia:

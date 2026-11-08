@@ -1,5 +1,5 @@
 ---
-texto: "Dime ¿los vates se mantienen de versos, majadero?"
+texto: "Dime ¿los vates\nse mantienen de versos, majadero?"
 autor: "mariano-jose-de-larra"
 slug: "mariano-jose-de-larra-dime-los-vates-se-mantienen-de-versos"
 procedencia:

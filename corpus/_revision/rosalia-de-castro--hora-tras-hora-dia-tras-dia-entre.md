@@ -1,5 +1,5 @@
 ---
-texto: "Hora tras hora, día tras día, entre el cielo y la tierra que quedan eternos vigías, como torrente que se despeña, pasa la vida."
+texto: "Hora tras hora, día tras día,\nentre el cielo y la tierra que quedan\neternos vigías,\ncomo torrente que se despeña,\npasa la vida."
 autor: "rosalia-de-castro"
 slug: "rosalia-de-castro-hora-tras-hora-dia-tras-dia-entre"
 procedencia:

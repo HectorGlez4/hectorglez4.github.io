@@ -1,5 +1,5 @@
 ---
-texto: "¿Qué ciudad, qué campiña no ha inundado la sangre de tus hijos y la ibera?"
+texto: "¿Qué ciudad, qué campiña no ha inundado\nla sangre de tus hijos y la ibera?"
 autor: "andres-bello"
 slug: "andres-bello-que-ciudad-que-campina-no-ha-inundado"
 procedencia:

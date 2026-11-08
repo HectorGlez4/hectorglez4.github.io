@@ -1,5 +1,5 @@
 ---
-texto: "ÁLVARO: Advertid, que el sitio en que habemos de juntarnos es ese monte vecino que está a la mano derecha, como salen del camino."
+texto: "ÁLVARO: Advertid, que el sitio\nen que habemos de juntarnos\nes ese monte vecino\nque está a la mano derecha,\ncomo salen del camino."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-alvaro-advertid-que-el-sitio-en-que"
 procedencia:

@@ -1,5 +1,5 @@
 ---
-texto: "Si vengar solicitáis por armas vuestra opinión, poco tengo que temer; si por justicia ha de ser, no tenéis jurisdicción."
+texto: "Si vengar solicitáis\npor armas vuestra opinión,\npoco tengo que temer;\nsi por justicia ha de ser,\nno tenéis jurisdicción."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-si-vengar-solicitais-por-armas-vuestra-opinion"
 procedencia:

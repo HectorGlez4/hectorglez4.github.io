@@ -1,5 +1,5 @@
 ---
-texto: "Si no os le dan al momento, poned fuego y la abrasad."
+texto: "Si no os le dan al momento,\nponed fuego y la abrasad."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-si-no-os-le-dan-al-momento"
 procedencia:

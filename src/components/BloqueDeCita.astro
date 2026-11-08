@@ -11,6 +11,7 @@
  */
 import { tramoDe } from '../lib/tramos.ts';
 import Atribucion from './Atribucion.astro';
+import TextoDeCita from './TextoDeCita.astro';
 import type { Cita, Autor } from '../lib/publicado.ts';
 import { rutaDeAutor } from '../lib/superficies.ts';
 
@@ -36,9 +37,9 @@ const tramo = tramoDe(cita.texto);
     }
     {
       comoTitulo ? (
-        <h1 class="texto">«{cita.texto}»</h1>
+        <h1 class="texto"><TextoDeCita texto={cita.texto} /></h1>
       ) : (
-        <p class="texto">«{cita.texto}»</p>
+        <p class="texto"><TextoDeCita texto={cita.texto} /></p>
       )
     }
   </blockquote>

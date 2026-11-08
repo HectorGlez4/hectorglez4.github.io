@@ -1,5 +1,5 @@
 ---
-texto: "NUÑO: Todo esto contó Ginesa, su criada."
+texto: "NUÑO: Todo esto contó Ginesa,\nsu criada."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-nuno-todo-esto-conto-ginesa-su-criada"
 procedencia:

@@ -1,5 +1,5 @@
 ---
-texto: "¡Oh espada sobre mí de un pelo asida, de la amorosa espuela duro freno!"
+texto: "¡Oh espada sobre mí de un pelo asida,\nde la amorosa espuela duro freno!"
 autor: "luis-de-gongora"
 slug: "luis-de-gongora-oh-espada-sobre-mi-de-un-pelo"
 procedencia:

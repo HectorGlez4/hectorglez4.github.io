@@ -1,5 +1,5 @@
 ---
-texto: "ISABEL: Por cariño, y no por paga, solamente la recibo."
+texto: "ISABEL: Por cariño, y no por paga,\nsolamente la recibo."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-isabel-por-carino-y-no-por-paga"
 procedencia:

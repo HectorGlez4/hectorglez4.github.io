@@ -1,5 +1,5 @@
 ---
-texto: "Vase [el SARGENTO] y salen REBOLLEDO y la CHISPA REBOLLEDO: ¡Señor, albricias me da!"
+texto: "Vase [el SARGENTO] y salen REBOLLEDO y la\nCHISPA\nREBOLLEDO: ¡Señor, albricias me da!"
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-vase-el-sargento-y-salen-rebolledo-y"
 procedencia:

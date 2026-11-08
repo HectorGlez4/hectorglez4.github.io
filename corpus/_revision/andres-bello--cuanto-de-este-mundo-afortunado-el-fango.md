@@ -1,5 +1,5 @@
 ---
-texto: "¡cuánto de este mundo afortunado el fango inmundo en que yacemos dista, para destierro a la virtud criado!"
+texto: "¡cuánto de este mundo afortunado\nel fango inmundo en que yacemos dista,\npara destierro a la virtud criado!"
 autor: "andres-bello"
 slug: "andres-bello-cuanto-de-este-mundo-afortunado-el-fango"
 procedencia:

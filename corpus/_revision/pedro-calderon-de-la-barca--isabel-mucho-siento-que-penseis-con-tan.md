@@ -1,5 +1,5 @@
 ---
-texto: "ISABEL: Mucho siento que penséis, con tan generoso indicio, que pagáis el hospedaje, pues, de honra que recibimos, somos los deudores."
+texto: "ISABEL: Mucho siento que penséis,\ncon tan generoso indicio,\nque pagáis el hospedaje,\npues, de honra que recibimos,\nsomos los deudores."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-isabel-mucho-siento-que-penseis-con-tan"
 procedencia:

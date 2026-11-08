@@ -1,5 +1,5 @@
 ---
-texto: "¡Ay de mí, que acosada y perseguida de tantas penas, de tantas ansias, de tantas impías fortunas, contra mi honor se han conjurado tus iras!"
+texto: "¡Ay de mí,\nque acosada y perseguida\nde tantas penas, de tantas\nansias, de tantas impías\nfortunas, contra mi honor\nse han conjurado tus iras!"
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-ay-de-mi-que-acosada-y-perseguida"
 procedencia:

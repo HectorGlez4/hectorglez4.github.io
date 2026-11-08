@@ -1,5 +1,5 @@
 ---
-texto: "LOPE: Que os entráis no es bien, se arguya, en otra jurisdicción."
+texto: "LOPE: Que os entráis no es bien, se arguya,\nen otra jurisdicción."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-lope-que-os-entrais-no-es-bien"
 procedencia:

@@ -1,5 +1,5 @@
 ---
-texto: "Y porque la sepais, es, que fingiendo mi primo y yo, que somos parecidos, 310 esta opinion con cartas estendiendo."
+texto: "Y porque la sepais, es, que fingiendo\nmi primo y yo, que somos parecidos, 310\nesta opinion con cartas estendiendo."
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-y-porque-la-sepais-es-que-fingiendo"
 procedencia:

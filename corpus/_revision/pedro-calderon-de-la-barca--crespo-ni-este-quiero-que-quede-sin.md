@@ -1,5 +1,5 @@
 ---
-texto: "CRESPO: Ni éste quiero que quede sin que mi acero la calle le haga dejar."
+texto: "CRESPO: Ni éste quiero\nque quede sin que mi acero\nla calle le haga dejar."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-crespo-ni-este-quiero-que-quede-sin"
 procedencia:

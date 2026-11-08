@@ -1,5 +1,5 @@
 ---
-texto: "Esta venera que, aunque está de diamantes ricos guarnecida, llega pobre a vuestras manos, suplico que la toméis y traigáis por patena en nombre mío."
+texto: "Esta venera que, aunque\nestá de diamantes ricos\nguarnecida, llega pobre\na vuestras manos, suplico\nque la toméis y traigáis\npor patena en nombre mío."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-esta-venera-que-aunque-esta-de-diamantes"
 procedencia:

@@ -1,5 +1,5 @@
 ---
-texto: "LOPE: Mal los trabajos de la guerra, sin aquesta libertad se llevarán; que es estrecha religión la de un soldado, y darle ensanchas es fuerza."
+texto: "LOPE: Mal\nlos trabajos de la guerra,\nsin aquesta libertad\nse llevarán; que es estrecha\nreligión la de un soldado,\ny darle ensanchas es fuerza."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-lope-mal-los-trabajos-de-la-guerra"
 procedencia:

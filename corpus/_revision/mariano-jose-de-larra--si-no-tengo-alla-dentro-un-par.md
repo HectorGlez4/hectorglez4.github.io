@@ -1,5 +1,5 @@
 ---
-texto: "Si no tengo allá dentro un par de amigas, si no adulo el cortejo que las paga, serán de mis comedias enemigas."
+texto: "Si no tengo allá dentro un par de amigas,\nsi no adulo el cortejo que las paga,\nserán de mis comedias enemigas."
 autor: "mariano-jose-de-larra"
 slug: "mariano-jose-de-larra-si-no-tengo-alla-dentro-un-par"
 procedencia:

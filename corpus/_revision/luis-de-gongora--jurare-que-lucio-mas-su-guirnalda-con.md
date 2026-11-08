@@ -1,5 +1,5 @@
 ---
-texto: "juraré que lució más su guirnalda, con ser de flores, la otra ser de estrellas, que la que ilustra el cielo en luces nueve."
+texto: "juraré que lució más su guirnalda,\ncon ser de flores, la otra ser de estrellas,\nque la que ilustra el cielo en luces nueve."
 autor: "luis-de-gongora"
 slug: "luis-de-gongora-jurare-que-lucio-mas-su-guirnalda-con"
 procedencia:

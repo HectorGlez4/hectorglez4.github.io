@@ -1,5 +1,5 @@
 ---
-texto: "Gritan todos a porfía; jamás la Parca triste, de ira llena, de tu preciosa vida el hilo corte."
+texto: "Gritan todos a porfía;\njamás la Parca triste, de ira llena,\nde tu preciosa vida el hilo corte."
 autor: "andres-bello"
 slug: "andres-bello-gritan-todos-a-porfia-jamas-la-parca"
 procedencia:

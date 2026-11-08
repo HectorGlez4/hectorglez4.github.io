@@ -1,5 +1,5 @@
 ---
-texto: "Huid, días de afán, días de luto, y acelerad los tiempos que adivino. ..........................."
+texto: "Huid, días de afán, días de luto,\ny acelerad los tiempos que adivino.\n..........................."
 autor: "andres-bello"
 slug: "andres-bello-huid-dias-de-afan-dias-de-luto"
 procedencia:

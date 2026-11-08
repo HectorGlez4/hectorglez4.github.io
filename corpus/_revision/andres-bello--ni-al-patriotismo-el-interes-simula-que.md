@@ -1,5 +1,5 @@
 ---
-texto: "ni al patriotismo el interés simula, que hoy a la libertad himnos entona, y mañana al poder, sumiso, adula;"
+texto: "ni al patriotismo el interés simula,\nque hoy a la libertad himnos entona,\ny mañana al poder, sumiso, adula;"
 autor: "andres-bello"
 slug: "andres-bello-ni-al-patriotismo-el-interes-simula-que"
 procedencia:

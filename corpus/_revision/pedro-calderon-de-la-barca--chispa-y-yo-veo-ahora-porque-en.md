@@ -1,5 +1,5 @@
 ---
-texto: "CHISPA: Y yo veo ahora porque en el mundo he cantado..."
+texto: "CHISPA: Y yo veo ahora\nporque en el mundo he cantado..."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-chispa-y-yo-veo-ahora-porque-en"
 procedencia:

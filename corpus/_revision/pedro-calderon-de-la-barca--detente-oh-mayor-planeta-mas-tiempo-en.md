@@ -1,5 +1,5 @@
 ---
-texto: "¡Detente, oh mayor planeta, mas tiempo en la espuma fría del mar!"
+texto: "¡Detente, oh mayor planeta,\nmas tiempo en la espuma fría\ndel mar!"
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-detente-oh-mayor-planeta-mas-tiempo-en"
 procedencia:

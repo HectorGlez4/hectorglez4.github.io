@@ -1,5 +1,5 @@
 ---
-texto: "donde no se conoce esteva o pico, y vive mansa gente en leda holgura, vistiendo aún el pastoral pellico;"
+texto: "donde no se conoce esteva o pico,\ny vive mansa gente en leda holgura,\nvistiendo aún el pastoral pellico;"
 autor: "andres-bello"
 slug: "andres-bello-donde-no-se-conoce-esteva-o-pico"
 procedencia:

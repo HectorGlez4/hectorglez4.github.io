@@ -1,5 +1,5 @@
 ---
-texto: "De aquí, si no es preso o muerto, no saldréis."
+texto: "De aquí, si no es preso o muerto,\nno saldréis."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-de-aqui-si-no-es-preso-o"
 procedencia:

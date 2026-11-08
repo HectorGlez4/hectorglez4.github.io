@@ -1,5 +1,5 @@
 ---
-texto: "MENDO: En mi guardarnés presumo que hay para tales empresas algo que ponerme."
+texto: "MENDO: En mi guardarnés presumo\nque hay para tales empresas\nalgo que ponerme."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-mendo-en-mi-guardarnes-presumo-que-hay"
 procedencia:

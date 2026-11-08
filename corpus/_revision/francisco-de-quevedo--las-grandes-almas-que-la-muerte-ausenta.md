@@ -1,5 +1,5 @@
 ---
-texto: "Las Grandes Almas que la Muerte ausenta, De injurias de los años vengadora, Libra, ¡oh gran Don Josef!, docta la Imprenta."
+texto: "Las Grandes Almas que la Muerte ausenta,\nDe injurias de los años vengadora,\nLibra, ¡oh gran Don Josef!, docta la Imprenta."
 autor: "francisco-de-quevedo"
 slug: "francisco-de-quevedo-las-grandes-almas-que-la-muerte-ausenta"
 procedencia:

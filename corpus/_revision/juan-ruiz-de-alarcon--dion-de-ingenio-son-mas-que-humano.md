@@ -1,5 +1,5 @@
 ---
-texto: "DION De ingenio son mas que humano preuenciones tan diuinas; pero que ocasion hallays 255 en este intento, que impida el casamiento de Aurora?"
+texto: "DION\nDe ingenio son mas que humano\npreuenciones tan diuinas;\npero que ocasion hallays 255\nen este intento, que impida\nel casamiento de Aurora?"
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-dion-de-ingenio-son-mas-que-humano"
 procedencia:

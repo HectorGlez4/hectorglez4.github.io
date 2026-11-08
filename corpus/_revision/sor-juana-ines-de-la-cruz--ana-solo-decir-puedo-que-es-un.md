@@ -1,5 +1,5 @@
 ---
-texto: "Ana: Sólo decir puedo que es un don Carlos de Olmedo el galán."
+texto: "Ana: Sólo decir puedo\nque es un don Carlos de Olmedo\nel galán."
 autor: "sor-juana-ines-de-la-cruz"
 slug: "sor-juana-ines-de-la-cruz-ana-solo-decir-puedo-que-es-un"
 procedencia:

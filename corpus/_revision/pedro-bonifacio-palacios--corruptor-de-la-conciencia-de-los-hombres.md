@@ -1,5 +1,5 @@
 ---
-texto: "Corruptor de la conciencia de los hombres; musa roja de filósofos y sabios, de políticos y estetas; Mefistófeles."
+texto: "Corruptor de la conciencia de los hombres;\nmusa roja de filósofos y sabios,\nde políticos y estetas;\nMefistófeles."
 autor: "pedro-bonifacio-palacios"
 slug: "pedro-bonifacio-palacios-corruptor-de-la-conciencia-de-los-hombres"
 procedencia:

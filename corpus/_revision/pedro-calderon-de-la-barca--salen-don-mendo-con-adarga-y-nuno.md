@@ -1,5 +1,5 @@
 ---
-texto: "Salen don MENDO con adarga, y NUÑO MENDO: ¿Ves bien lo que pasa?"
+texto: "Salen don MENDO con adarga, y NUÑO\nMENDO: ¿Ves bien lo que pasa?"
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-salen-don-mendo-con-adarga-y-nuno"
 procedencia:

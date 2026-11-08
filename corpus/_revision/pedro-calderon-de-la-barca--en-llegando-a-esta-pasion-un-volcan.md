@@ -1,5 +1,5 @@
 ---
-texto: "¡En llegando á esta pasión, Un volcan, un Etna hecho."
+texto: "¡En llegando á esta pasión,\nUn volcan, un Etna hecho."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-en-llegando-a-esta-pasion-un-volcan"
 procedencia:

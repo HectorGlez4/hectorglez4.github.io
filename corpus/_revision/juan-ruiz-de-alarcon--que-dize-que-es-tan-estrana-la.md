@@ -1,5 +1,5 @@
 ---
-texto: "Que dize, que es tan estraña la semejança que Dios quiso poner en los dos, 545 que a tus amigos engaña, y le hablan todos por ti."
+texto: "Que dize, que es tan estraña\nla semejança que Dios\nquiso poner en los dos, 545\nque a tus amigos engaña,\ny le hablan todos por ti."
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-que-dize-que-es-tan-estrana-la"
 procedencia:

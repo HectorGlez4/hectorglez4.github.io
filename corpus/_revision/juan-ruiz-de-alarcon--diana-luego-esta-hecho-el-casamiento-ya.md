@@ -1,5 +1,5 @@
 ---
-texto: "DIANA Luego està hecho el casamiento ya?"
+texto: "DIANA\nLuego està\nhecho el casamiento ya?"
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-diana-luego-esta-hecho-el-casamiento-ya"
 procedencia:

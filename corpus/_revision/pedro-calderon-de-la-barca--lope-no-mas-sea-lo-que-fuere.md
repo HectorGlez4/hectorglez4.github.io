@@ -1,5 +1,5 @@
 ---
-texto: "LOPE: No; mas sea lo que fuere justicia la parte espere de mí; que también sé yo degollar si es necesario."
+texto: "LOPE: No; mas sea lo que fuere\njusticia la parte espere\nde mí; que también sé yo\ndegollar si es necesario."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-lope-no-mas-sea-lo-que-fuere"
 procedencia:

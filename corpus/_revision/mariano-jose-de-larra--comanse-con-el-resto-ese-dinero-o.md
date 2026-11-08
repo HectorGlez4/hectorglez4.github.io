@@ -1,5 +1,5 @@
 ---
-texto: "Cómanse con el resto ese dinero, o al hospital lo den para una cura."
+texto: "Cómanse con el resto ese dinero,\no al hospital lo den para una cura."
 autor: "mariano-jose-de-larra"
 slug: "mariano-jose-de-larra-comanse-con-el-resto-ese-dinero-o"
 procedencia:

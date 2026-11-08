@@ -1,5 +1,5 @@
 ---
-texto: "Vos, Bernardo entre Franceses, Y entre Españoles Roldán, Cuya espada es un Galeno Y una botica la faz,"
+texto: "Vos, Bernardo entre Franceses,\nY entre Españoles Roldán,\nCuya espada es un Galeno\nY una botica la faz,"
 autor: "francisco-de-quevedo"
 slug: "francisco-de-quevedo-vos-bernardo-entre-franceses-y-entre-espanoles"
 procedencia:

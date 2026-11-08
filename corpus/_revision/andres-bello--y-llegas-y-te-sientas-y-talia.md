@@ -1,5 +1,5 @@
 ---
-texto: "Y llegas, y te sientas, y Talía, que al áureo cinto arregazó la falda, la copa te presenta de ambrosía."
+texto: "Y llegas, y te sientas, y Talía,\nque al áureo cinto arregazó la falda,\nla copa te presenta de ambrosía."
 autor: "andres-bello"
 slug: "andres-bello-y-llegas-y-te-sientas-y-talia"
 procedencia:

@@ -1,5 +1,5 @@
 ---
-texto: "CRESPO: Pues yo acá le tengo preso por lo que acá ha sucedido."
+texto: "CRESPO: Pues yo acá le tengo preso\npor lo que acá ha sucedido."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-crespo-pues-yo-aca-le-tengo-preso"
 procedencia:

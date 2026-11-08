@@ -1,5 +1,5 @@
 ---
-texto: "Sale Pedro CRESPO CRESPO: Cierto es que el que queda ahí sin duda es algún soldado."
+texto: "Sale Pedro CRESPO\nCRESPO: Cierto es que el que queda ahí\nsin duda es algún soldado."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-sale-pedro-crespo-crespo-cierto-es-que"
 procedencia:

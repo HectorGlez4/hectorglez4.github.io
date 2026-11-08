@@ -1,5 +1,5 @@
 ---
-texto: "¿Contaré las glorias que Anzoátegui lidiando gana en ella, o las que de Carúpano en los valles, o en las campañas del Apure, han dado tanto lustre a su nombre, o como experto caudillo, o como intrépido soldado?"
+texto: "¿Contaré las glorias\nque Anzoátegui lidiando gana en ella,\no las que de Carúpano en los valles,\no en las campañas del Apure, han dado\ntanto lustre a su nombre, o como experto\ncaudillo, o como intrépido soldado?"
 autor: "andres-bello"
 slug: "andres-bello-contare-las-glorias-que-anzoategui-lidiando-gana"
 procedencia:

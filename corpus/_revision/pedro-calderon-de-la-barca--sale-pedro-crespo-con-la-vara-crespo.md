@@ -1,5 +1,5 @@
 ---
-texto: "Sale Pedro CRESPO [con la vara] CRESPO: ¿Qué es esto?"
+texto: "Sale Pedro CRESPO [con la vara]\nCRESPO: ¿Qué es esto?"
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-sale-pedro-crespo-con-la-vara-crespo"
 procedencia:

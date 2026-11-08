@@ -1,5 +1,5 @@
 ---
-texto: "Colombia vence; libertad los vanos cálculos de los déspotas engaña; y fecundos tus triunfos inhumanos, mas que a ti de oro, son de oprobio a España."
+texto: "Colombia vence; libertad los vanos\ncálculos de los déspotas engaña;\ny fecundos tus triunfos inhumanos,\nmas que a ti de oro, son de oprobio a España."
 autor: "andres-bello"
 slug: "andres-bello-colombia-vence-libertad-los-vanos-calculos-de"
 procedencia:

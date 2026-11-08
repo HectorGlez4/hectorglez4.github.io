@@ -1,5 +1,5 @@
 ---
-texto: "CRESPO: Son mozos. (Si por don Lope, no fuera, Aparte yo les hiciera...) JUAN: (Si yo Aparte una rodelilla vieja que en el cuarto de don Lope está colgada, pudiera sacar...) [JUAN] hace que se va CRESPO: ¡Dónde vais, mancebo?"
+texto: "CRESPO: Son mozos.\n(Si por don Lope, no fuera, Aparte\nyo les hiciera...)\nJUAN: (Si yo Aparte\nuna rodelilla vieja\nque en el cuarto de don Lope\nestá colgada, pudiera\nsacar...)\n[JUAN] hace que se va\nCRESPO: ¡Dónde vais, mancebo?"
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-crespo-son-mozos-si-por-don-lope"
 procedencia:

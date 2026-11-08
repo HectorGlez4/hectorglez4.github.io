@@ -1,5 +1,5 @@
 ---
-texto: "Sabes, rubia, ¿qué gracia solicito cuando de ofrenda cubro los altares?"
+texto: "Sabes, rubia, ¿qué gracia solicito\ncuando de ofrenda cubro los altares?"
 autor: "andres-bello"
 slug: "andres-bello-sabes-rubia-que-gracia-solicito-cuando-de"
 procedencia:

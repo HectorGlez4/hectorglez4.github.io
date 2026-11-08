@@ -1,5 +1,5 @@
 ---
-texto: "NUÑO: Y más no habiendo en el estómago fuerzas con que resistirle."
+texto: "NUÑO: Y más no habiendo\nen el estómago fuerzas\ncon que resistirle."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-nuno-y-mas-no-habiendo-en-el"
 procedencia:

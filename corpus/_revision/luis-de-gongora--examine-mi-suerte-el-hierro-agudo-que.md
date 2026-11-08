@@ -1,5 +1,5 @@
 ---
-texto: "Examine mi suerte el hierro agudo, que a pesar de sus filos me prometo alta piedad de vuestra excelsa mano."
+texto: "Examine mi suerte el hierro agudo,\nque a pesar de sus filos me prometo\nalta piedad de vuestra excelsa mano."
 autor: "luis-de-gongora"
 slug: "luis-de-gongora-examine-mi-suerte-el-hierro-agudo-que"
 procedencia:

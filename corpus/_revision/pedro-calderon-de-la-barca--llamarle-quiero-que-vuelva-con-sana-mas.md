@@ -1,5 +1,5 @@
 ---
-texto: "Llamarle quiero, que vuelva con saña más vengativa, y me dé muerte."
+texto: "Llamarle quiero, que vuelva\ncon saña más vengativa,\ny me dé muerte."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-llamarle-quiero-que-vuelva-con-sana-mas"
 procedencia:

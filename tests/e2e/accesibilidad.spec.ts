@@ -24,6 +24,7 @@ import {
   citaSinImagen,
   citaSinObra,
   citasDeObraDeUnaCita,
+  citasEnVerso,
 } from './ayuda/corpus.ts';
 import { leerTarjetaDeObra, tarjetaDeObraDe } from '../unit/ayuda/tarjeta-de-obra.js';
 import { filtrosDeLaBusqueda } from '../../src/lib/publicado.ts';
@@ -181,10 +182,43 @@ const CITAS_DEL_BARRIDO = [
   CITAS_24_6.sinMasDelAutor,
 ].filter((ruta): ruta is string => ruta !== undefined);
 
+/**
+ * Historia 29.3 — una Cita en verso en su Página y en un listado que la lleva (su Obra o su Tema),
+ * sacados del Corpus y del `dist/` construido. La portada no entra aquí: su Cita del Día depende
+ * de la jornada y llevar una en verso exigiría fijar una, que es de Héctor; el componente en la
+ * portada (y en el 404 y el Kit) lo cubre `tests/unit/verso-construido.test.ts`.
+ */
+const CITAS_29_3 = (() => {
+  const enVerso =
+    citasEnVerso().find((c) => c.slug === 'jose-marti-yo-vengo-de-todas-partes-y-hacia') ?? citasEnVerso()[0];
+  if (enVerso === undefined) return { pagina: undefined, listado: undefined };
+  const enlace = `href="/cita/${enVerso.slug}/"`;
+  const listado = rutasConstruidas()
+    .filter((ruta) => /^\/(obra|tema)\//.test(ruta) && ruta.endsWith('/'))
+    .sort((a, b) => a.localeCompare(b, 'es'))
+    .find((ruta) => readFileSync(join(dist, ...ruta.split('/').filter(Boolean), 'index.html'), 'utf8').includes(enlace));
+  return { pagina: `/cita/${enVerso.slug}/`, listado };
+})();
+const SIN_CITA_EN_VERSO = 'El Corpus no tiene ninguna Cita en verso: falta el commit de restitución de la 29.2.';
+
+test('29.3 — el barrido lleva una Cita en verso en su Página y en un listado, verso a verso', () => {
+  const pagina = obligatoria(CITAS_29_3.pagina, SIN_CITA_EN_VERSO);
+  const listado = obligatoria(CITAS_29_3.listado, `Ningún listado de Obra o Tema enlaza ${pagina}.`);
+  for (const ruta of [pagina, listado]) {
+    expect(SUPERFICIES, ruta).toContain(ruta);
+    expect(construida(ruta), ruta).toContain('<span class="verso" style="display:block">');
+  }
+});
+
 /** Una ruta sin su barra final: la muestra derivada las da sin ella, y las de arriba con ella. */
 const sinBarra = (ruta: string) => (ruta.length > 1 ? ruta.replace(/\/$/, '') : ruta);
 /** Sin repetir una página por escribirse con barra final y sin ella: axe la barrería dos veces. */
-const SUPERFICIES = [...DERIVADAS, ...OBRAS_DEL_BARRIDO, ...CITAS_DEL_BARRIDO].filter(
+const SUPERFICIES = [
+  ...DERIVADAS,
+  ...OBRAS_DEL_BARRIDO,
+  ...CITAS_DEL_BARRIDO,
+  ...[CITAS_29_3.pagina, CITAS_29_3.listado].filter((ruta): ruta is string => ruta !== undefined),
+].filter(
   (ruta, i, todas) => todas.findIndex((otra) => sinBarra(otra) === sinBarra(ruta)) === i,
 );
 

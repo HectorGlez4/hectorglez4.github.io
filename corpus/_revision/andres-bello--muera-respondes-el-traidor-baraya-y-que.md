@@ -1,5 +1,5 @@
 ---
-texto: "«Muera (respondes) el traidor Baraya, y que a destierro su familia vaya»."
+texto: "«Muera (respondes) el traidor Baraya,\ny que a destierro su familia vaya»."
 autor: "andres-bello"
 slug: "andres-bello-muera-respondes-el-traidor-baraya-y-que"
 procedencia:

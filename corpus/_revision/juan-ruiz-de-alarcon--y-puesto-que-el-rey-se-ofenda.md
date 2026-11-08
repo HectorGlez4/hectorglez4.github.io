@@ -1,5 +1,5 @@
 ---
-texto: "Y puesto que el Rey se ofenda, que me ha de costar?"
+texto: "Y puesto que el Rey se ofenda,\nque me ha de costar?"
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-y-puesto-que-el-rey-se-ofenda"
 procedencia:

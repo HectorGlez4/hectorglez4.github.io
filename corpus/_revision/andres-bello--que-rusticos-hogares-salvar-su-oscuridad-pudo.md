@@ -1,5 +1,5 @@
 ---
-texto: "¿Qué rústicos hogares salvar su oscuridad pudo a las furias de la civil discordia embravecida?"
+texto: "¿Qué rústicos hogares\nsalvar su oscuridad pudo a las furias\nde la civil discordia embravecida?"
 autor: "andres-bello"
 slug: "andres-bello-que-rusticos-hogares-salvar-su-oscuridad-pudo"
 procedencia:

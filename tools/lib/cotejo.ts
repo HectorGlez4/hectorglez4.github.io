@@ -15,6 +15,15 @@ import { createHash } from 'node:crypto';
 import { CLASE_BIOGRAFIA, nombreDeBiografia, nombreDeDocumento } from './documento.ts';
 import { fuenteDe, fuenteDeUrl, revisionExacta } from './fuentes.ts';
 import { ENLACES_DE_LICENCIA } from '../../src/lib/biografia.ts';
+import {
+  esFormaDeLineas,
+  esFormaDeVerso,
+  formaDeLasLineas,
+  textoConSaltos,
+  type DocumentoConForma,
+  type FormaDeLineas,
+  saltosDeLaCita,
+} from './lineas.ts';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // La comparación
@@ -51,6 +60,110 @@ const INVISIBLES = /[\u00ad\u200b\u200c\u200d\u2060\ufeff]/gu;
  */
 export function colapsarEspacios(texto: string): Colapsado {
   return texto.replace(INVISIBLES, '').replace(/\s+/gu, ' ').trim() as Colapsado;
+}
+
+/**
+ * Dónde cae, en el **crudo**, un tramo del texto colapsado — AD-29, Historia 29.1.
+ *
+ * `inicio` y `fin` son desplazamientos UTF-16 sobre `colapsarEspacios(crudo)`, como los que
+ * da `localizar`; lo devuelto son desplazamientos UTF-16 sobre `crudo` tales que
+ * `colapsarEspacios(crudo.slice(a, b)) === colapsado.slice(inicio, fin)` siempre que el tramo
+ * no empiece ni acabe en un espacio. Un espacio del colapsado corresponde a la racha entera
+ * del crudo que lo produjo —espacios, saltos y los invisibles que haya en medio—, así que
+ * `tramoEnCrudo(crudo, k, k + 1)` sobre un espacio dice si en ese sitio el documento partía
+ * línea. Es el **único** dueño de esa cuenta: ningún otro módulo recorre el crudo por su
+ * cuenta (lo fija `tests/unit/lineas.test.ts`).
+ */
+export function tramoEnCrudo(
+  crudo: string,
+  inicio: number,
+  fin: number,
+): { inicio: number; fin: number } {
+  const mapa = mapaDelCrudo(crudo);
+  if (!(inicio >= 0 && fin > inicio && fin <= mapa.inicios.length)) {
+    throw new RangeError(
+      `tramoEnCrudo: el tramo [${inicio}, ${fin}) no cabe en un colapsado de ${mapa.inicios.length} unidades.`,
+    );
+  }
+  return { inicio: mapa.inicios[inicio], fin: mapa.finales[fin - 1] };
+}
+
+/**
+ * Lo que `colapsarEspacios` retira sin dejar espacio, carácter a carácter: el mismo conjunto
+ * que `INVISIBLES`, del que sale, para que la correspondencia con el crudo y el escritor de
+ * `tools/lib/lineas.ts` no puedan dejar de coincidir con el colapso.
+ */
+const UN_INVISIBLE = new RegExp(INVISIBLES.source, 'u');
+const UN_ESPACIO = /\s/u;
+
+/**
+ * Una racha de espacio de un texto tal y como la ve `colapsarEspacios`: los caracteres de
+ * espacio e invisibles seguidos, `[inicio, fin)` en UTF-16, y si deja un espacio en el
+ * colapsado —es interior y trae algún espacio que **no** es invisible: U+FEFF casa con `\s`
+ * en JavaScript, pero `colapsarEspacios` lo retira antes de colapsar—. `invisibles` son los
+ * que trae, que el colapso retira y quien reescriba el espacio conserva.
+ */
+export interface RachaDeEspacio {
+  inicio: number;
+  fin: number;
+  dejaEspacio: boolean;
+  invisibles: string;
+}
+
+/**
+ * Las rachas de espacio de un texto, con las reglas de `colapsarEspacios` — AD-29. Es el único
+ * recorrido del espacio de un texto: lo usan la correspondencia con el crudo de `tramoEnCrudo`
+ * y el escritor `textoConSaltos`, y por eso no pueden discrepar del colapso.
+ */
+export function rachasDeEspacio(texto: string): RachaDeEspacio[] {
+  const rachas: RachaDeEspacio[] = [];
+  let i = 0;
+  while (i < texto.length) {
+    if (!UN_ESPACIO.test(texto[i]) && !UN_INVISIBLE.test(texto[i])) {
+      i += 1;
+      continue;
+    }
+    let j = i;
+    let conEspacio = false;
+    let invisibles = '';
+    while (j < texto.length && (UN_ESPACIO.test(texto[j]) || UN_INVISIBLE.test(texto[j]))) {
+      if (UN_INVISIBLE.test(texto[j])) invisibles += texto[j];
+      else conEspacio = true;
+      j += 1;
+    }
+    // Solo las rachas interiores con algún espacio dejan un espacio; las de los extremos las
+    // quita el `trim`, y las de solo invisibles no dejan nada.
+    rachas.push({ inicio: i, fin: j, dejaEspacio: conEspacio && i > 0 && j < texto.length, invisibles });
+    i = j;
+  }
+  return rachas;
+}
+
+/**
+ * La correspondencia colapsado→crudo: para cada unidad del colapsado, dónde empieza y dónde
+ * acaba lo que la produjo en el crudo. Recorre el crudo con `rachasDeEspacio`, las mismas
+ * reglas que `colapsarEspacios`, y se guarda la última, porque quien pregunta suele recorrer
+ * muchas rachas del mismo documento.
+ */
+let ultimoMapa: { crudo: string; inicios: number[]; finales: number[] } | undefined;
+function mapaDelCrudo(crudo: string): { inicios: number[]; finales: number[] } {
+  if (ultimoMapa !== undefined && ultimoMapa.crudo === crudo) return ultimoMapa;
+  const inicios: number[] = [];
+  const finales: number[] = [];
+  let i = 0;
+  for (const racha of [...rachasDeEspacio(crudo), { inicio: crudo.length, fin: crudo.length, dejaEspacio: false }]) {
+    for (; i < racha.inicio; i += 1) {
+      inicios.push(i);
+      finales.push(i + 1);
+    }
+    if (racha.dejaEspacio) {
+      inicios.push(racha.inicio);
+      finales.push(racha.fin);
+    }
+    i = racha.fin;
+  }
+  ultimoMapa = { crudo, inicios, finales };
+  return ultimoMapa;
 }
 
 /**
@@ -261,6 +374,51 @@ export function documentosDeCita(
     .sort((a, b) => (a === corto ? -1 : b === corto ? 1 : a.localeCompare(b, 'es')));
 }
 
+/** De los documentos de una obra, los que tienen cuerpo: los mismos para la puerta y la restitución. */
+export function documentosLegibles(nombres: readonly string[], documentos: DocumentosDeFuente): string[] {
+  return nombres.filter((n) => typeof documentos.get(n) === 'string');
+}
+
+/**
+ * Lo que `saltosDeLaCita` recibe de cada documento —su forma y su cuerpo colapsado—, calculado una
+ * vez por nombre — Historia 29.2.
+ *
+ * Lo comparten la regla 4 del cotejo y `documentar --restituir-saltos`: si cada una armara sus
+ * candidatos por su lado, la misma decisión podría recibir entradas distintas y el build romper
+ * tras correr la orden, que es la divergencia que AD-29 impide. Una `lineas:` declarada válida
+ * manda sobre el cálculo de la forma, como en la 29.1.
+ */
+export function candidatosDeLosSaltos(
+  documentos: DocumentosDeFuente,
+  lineasDeclaradas: ReadonlyMap<string, string> = new Map(),
+): {
+  formaDe: (nombre: string, cuerpo: string) => FormaDeLineas;
+  candidatos: (nombres: readonly string[]) => DocumentoConForma[];
+} {
+  const formas = new Map<string, FormaDeLineas>();
+  const colapsados = new Map<string, Colapsado>();
+  const formaDe = (nombre: string, cuerpo: string): FormaDeLineas => {
+    let forma = formas.get(nombre);
+    if (forma === undefined) {
+      const lineas = lineasDeclaradas.get(nombre);
+      forma = formaDeLasLineas({ cuerpo, ...(lineas !== undefined ? { lineas } : {}) });
+      formas.set(nombre, forma);
+    }
+    return forma;
+  };
+  const candidatos = (nombres: readonly string[]): DocumentoConForma[] =>
+    nombres.map((nombre) => {
+      const cuerpo = documentos.get(nombre) as string;
+      let colapsado = colapsados.get(nombre);
+      if (colapsado === undefined) {
+        colapsado = colapsarEspacios(cuerpo);
+        colapsados.set(nombre, colapsado);
+      }
+      return { nombre, cuerpo, forma: formaDe(nombre, cuerpo), colapsado };
+    });
+  return { formaDe, candidatos };
+}
+
 const RECUPERAR =
   'Recupere su Fuente con: npx tsx tools/recuperar.ts <url> — y siembre desde el ' +
   'documento con tools/extraer.ts.';
@@ -273,6 +431,53 @@ const CENSO_CERRADO =
 const SIN_FUENTE =
   'Regla incumplida: la Cita no declara de qué Fuente salió, así que no hay documento ' +
   `contra el que cotejar su texto. ${RECUPERAR} ${CENSO_CERRADO}`;
+
+/** Historia 29.1, regla 3 de la puerta del salto. */
+const SALTO_SIN_DOCUMENTO =
+  'Regla incumplida (salto de verso, 3): la Cita lleva un salto de línea y no tiene documento ' +
+  'del que salga: un salto de verso solo lo respalda un documento de verso versionado. Escriba ' +
+  'el texto en una línea o dele documento.';
+
+/**
+ * La puerta del salto de verso — AD-29, Historia 29.1. `undefined` si los saltos se sostienen.
+ *
+ * 1) El texto tiene que localizarse en algún documento suyo de forma `verso` o `verso-espaciado`.
+ * 2) En al menos uno de ellos, cada `\n` tiene que caer —sobre la primera aparición— en una
+ *    racha del crudo que también parte línea. Es lo mismo que decir que el escritor único,
+ *    `textoConSaltos`, no descartaría ninguno. No se exigen todos los saltos del documento:
+ *    eso lo hace el escritor.
+ */
+function reglaDelSalto(
+  texto: string,
+  legibles: readonly string[],
+  documentos: DocumentosDeFuente,
+  formaDe: (nombre: string, cuerpo: string) => FormaDeLineas,
+): string | undefined {
+  const deVerso = legibles.filter((nombre) => {
+    const cuerpo = documentos.get(nombre) as string;
+    return esFormaDeVerso(formaDe(nombre, cuerpo)) && apareceEnDocumento(texto, cuerpo);
+  });
+  if (deVerso.length === 0) {
+    const enumerados = legibles.map((n) => `corpus/fuentes/${n}.txt`).join(', ');
+    return (
+      'Regla incumplida (salto de verso, 1): la Cita lleva un salto de línea y su texto no se ' +
+      `localiza en ningún documento suyo de verso (entre ${enumerados}, ninguno es de verso con ` +
+      'el texto dentro). Un salto solo lo respalda un documento de forma «verso» o ' +
+      '«verso-espaciado» en que el texto aparece: escriba el texto en una línea.'
+    );
+  }
+  const respaldado = deVerso.some((nombre) => {
+    const cuerpo = documentos.get(nombre) as string;
+    return textoConSaltos(texto, { cuerpo, forma: formaDe(nombre, cuerpo) }).descartados === 0;
+  });
+  if (respaldado) return undefined;
+  const enumerados = deVerso.map((n) => `corpus/fuentes/${n}.txt`).join(', ');
+  return (
+    'Regla incumplida (salto de verso, 2): algún salto de línea de la Cita cae donde ' +
+    `${enumerados} no parte línea. Los saltos no se teclean: salen del documento, por ` +
+    'textoConSaltos de tools/lib/lineas.ts.'
+  );
+}
 
 /**
  * Si una Cita puede vivir en `corpus/citas/` sin documento, y si no, por qué no.
@@ -354,6 +559,11 @@ export interface EntradaDeCotejo {
   censoDePartida?: Readonly<Record<string, string>>;
   /** Cuántas exenciones se admiten como mucho. */
   tope?: number;
+  /**
+   * Historia 29.1 — la `lineas:` que declara la cabecera de cada documento, en crudo y por
+   * nombre. Una fuera del conjunto rompe; una válida manda sobre el cálculo de la forma.
+   */
+  lineasDeclaradas?: ReadonlyMap<string, string>;
 }
 
 export interface FalloDeCotejo {
@@ -370,6 +580,11 @@ export interface ResultadoDeCotejo {
   pendientes: string[];
   /** Citas cuyo texto se ha localizado en su documento. */
   cotejadas: number;
+  /**
+   * Historia 29.2 — lo que se dice sin romper: una Cita cuyos documentos de verso le darían
+   * saltos distintos. Ni la puerta elige uno ni la restitución la toca.
+   */
+  avisos: string[];
 }
 
 /**
@@ -386,10 +601,34 @@ export function cotejar(entrada: EntradaDeCotejo): ResultadoDeCotejo {
 
   const fallos: FalloDeCotejo[] = [];
   const pendientes: string[] = [];
+  const avisos: string[] = [];
   let cotejadas = 0;
+  /** Historia 29.2, regla 4: las Citas de documento de verso a las que les faltan sus saltos. */
+  const sinSusSaltos: { slug: string; ruta: string; documento: string }[] = [];
 
   const publicadas = new Map(citas.map((c) => [c.slug, c]));
   const enCenso = new Set(censo);
+
+  /*
+   * Historia 29.1 — una `lineas:` fuera del conjunto rompe aunque ninguna Cita use el documento:
+   * es una cabecera que miente, y la forma calculada no la sustituye en silencio.
+   */
+  const lineasDeclaradas = entrada.lineasDeclaradas ?? new Map<string, string>();
+  for (const [nombre, lineas] of lineasDeclaradas) {
+    if (esFormaDeLineas(lineas)) continue;
+    fallos.push({
+      ruta: `corpus/fuentes/${nombre}.txt`,
+      regla:
+        `Regla incumplida: la cabecera declara «lineas: ${lineas}», que no es ninguna forma de ` +
+        'líneas del conjunto cerrado de tools/lib/lineas.ts. La escribe la recuperación y no se ' +
+        'edita a mano.',
+    });
+  }
+  /**
+   * La forma y el colapsado de cada documento, una vez por nombre: desde la 29.2 la regla 4 la
+   * pide para todo documento legible de toda Cita, con los mismos candidatos que la restitución.
+   */
+  const { formaDe, candidatos: candidatosDeSaltos } = candidatosDeLosSaltos(documentos, lineasDeclaradas);
 
   // El trinquete se aplica **aquí**, donde corre el cotejo, y no solo en una prueba: un
   // tope que solo vigila la suite no detiene ninguna construcción, y el build imprime el
@@ -447,6 +686,11 @@ export function cotejar(entrada: EntradaDeCotejo): ResultadoDeCotejo {
       const motivo = motivoParaNoPublicar(cita, censoDePartida);
       if (motivo !== undefined) {
         fallos.push({ ruta: cita.ruta, regla: motivo });
+        continue;
+      }
+
+      if (cita.texto.includes('\n')) {
+        fallos.push({ ruta: cita.ruta, regla: SALTO_SIN_DOCUMENTO });
         continue;
       }
 
@@ -517,7 +761,7 @@ export function cotejar(entrada: EntradaDeCotejo): ResultadoDeCotejo {
      * analiza, el fallo es ese y no «no aparece». Con varios, uno roto no puede tapar a los
      * sanos, así que solo se informa cuando ninguno sirvió.
      */
-    const legibles = candidatos.filter((n) => typeof documentos.get(n) === 'string');
+    const legibles = documentosLegibles(candidatos, documentos);
     if (legibles.length === 0) {
       fallos.push({
         ruta: `corpus/fuentes/${candidatos[0]}.txt`,
@@ -544,10 +788,61 @@ export function cotejar(entrada: EntradaDeCotejo): ResultadoDeCotejo {
       continue;
     }
 
+    if (cita.texto.includes('\n')) {
+      const regla = reglaDelSalto(cita.texto, legibles, documentos, formaDe);
+      if (regla !== undefined) {
+        fallos.push({ ruta: cita.ruta, regla });
+        continue;
+      }
+    }
+
+    /*
+     * Historia 29.2, regla 4 — una Cita de documento de verso sin los saltos que le compondría
+     * el escritor único. Decide `saltosDeLaCita`, la misma función que la restitución, así que
+     * tras correr la orden el build pasa. Solo se mira si algún documento suyo es de verso: sin
+     * ninguno, la decisión no puede ser `saltos` ni `conflicto`.
+     */
+    if (legibles.some((n) => esFormaDeVerso(formaDe(n, documentos.get(n) as string)))) {
+      const decision = saltosDeLaCita(cita.texto, candidatosDeSaltos(legibles));
+      if (decision.tipo === 'saltos' && decision.texto !== cita.texto) {
+        sinSusSaltos.push({ slug: cita.slug, ruta: cita.ruta, documento: decision.documento });
+        continue;
+      }
+      if (decision.tipo === 'conflicto') {
+        avisos.push(
+          `${cita.ruta}: sus documentos de verso le darían saltos distintos ` +
+            `(${decision.documentos.map((n) => `corpus/fuentes/${n}.txt`).join(', ')}); no se ` +
+            'elige ninguno y la Cita sigue como está. Lo decide una persona (Historia 29.2).',
+        );
+      }
+    }
+
     cotejadas += 1;
   }
 
-  return { ok: fallos.length === 0, fallos, pendientes, cotejadas };
+  const orden = (slugs: readonly string[]) => `npm run documentar -- --restituir-saltos ${slugs.join(' ')}`;
+  for (const { slug, ruta, documento } of sinSusSaltos) {
+    fallos.push({
+      ruta,
+      regla:
+        'Regla incumplida (salto de verso, 4): la Cita sale de un documento de verso ' +
+        `(corpus/fuentes/${documento}.txt) y no lleva los saltos que le corresponden. Los ` +
+        'saltos no se teclean: los restituye la orden, que solo toca el espacio. ' +
+        (sinSusSaltos.length === 1
+          ? `Restitúyalos con: ${orden([slug])}`
+          : 'La orden que restituye todas las de esta lista va al final.'),
+    });
+  }
+  if (sinSusSaltos.length > 1) {
+    fallos.push({
+      ruta: 'corpus/citas/',
+      regla:
+        `Regla incumplida (salto de verso, 4): ${sinSusSaltos.length} Citas de documento de verso ` +
+        `no llevan sus saltos. Restitúyalos todos con: ${orden(sinSusSaltos.map((c) => c.slug))}`,
+    });
+  }
+
+  return { ok: fallos.length === 0, fallos, pendientes, cotejadas, avisos };
 }
 
 /**

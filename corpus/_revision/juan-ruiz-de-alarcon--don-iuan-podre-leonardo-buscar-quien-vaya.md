@@ -1,5 +1,5 @@
 ---
-texto: "DON IUAN Podrè Leonardo, buscar quien vaya en vuestro lugar."
+texto: "DON IUAN\nPodrè Leonardo, buscar\nquien vaya en vuestro lugar."
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-don-iuan-podre-leonardo-buscar-quien-vaya"
 procedencia:

@@ -1,5 +1,5 @@
 ---
-texto: "Que ayer la cólera vuestra os debió de enajenar de vos."
+texto: "Que ayer la cólera vuestra\nos debió de enajenar\nde vos."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-que-ayer-la-colera-vuestra-os-debio"
 procedencia:

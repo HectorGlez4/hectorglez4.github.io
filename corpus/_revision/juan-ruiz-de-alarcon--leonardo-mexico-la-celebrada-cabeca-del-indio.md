@@ -1,5 +1,5 @@
 ---
-texto: "LEONARDO Mexico la celebrada cabeça del Indio mundo, 55 que se nombra Nueua España."
+texto: "LEONARDO\nMexico la celebrada\ncabeça del Indio mundo, 55\nque se nombra Nueua España."
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-leonardo-mexico-la-celebrada-cabeca-del-indio"
 procedencia:

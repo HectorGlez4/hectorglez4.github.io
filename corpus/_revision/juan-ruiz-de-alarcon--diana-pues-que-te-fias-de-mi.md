@@ -1,5 +1,5 @@
 ---
-texto: "DIANA Pues que te fias de mi, no me examines."
+texto: "DIANA\nPues que te fias de mi,\nno me examines."
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-diana-pues-que-te-fias-de-mi"
 procedencia:

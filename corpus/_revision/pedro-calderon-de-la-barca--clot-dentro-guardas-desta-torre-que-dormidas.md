@@ -1,5 +1,5 @@
 ---
-texto: "CLOT. (Dentro.) Guardas desta torre, que, dormidas ó cobardes, Disteis paso a dos personas que han quebrantado la cárcel..."
+texto: "CLOT. (Dentro.) Guardas desta torre, que, dormidas ó cobardes,\nDisteis paso a dos personas que han quebrantado la cárcel..."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-clot-dentro-guardas-desta-torre-que-dormidas"
 procedencia:

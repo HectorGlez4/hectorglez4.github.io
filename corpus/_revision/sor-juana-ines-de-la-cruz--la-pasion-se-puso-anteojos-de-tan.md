@@ -1,5 +1,5 @@
 ---
-texto: "La pasión se puso anteojos de tan engañosos grados, que a mis moderadas prendas agrandaban los tamaños."
+texto: "La pasión se puso anteojos\nde tan engañosos grados,\nque a mis moderadas prendas\nagrandaban los tamaños."
 autor: "sor-juana-ines-de-la-cruz"
 slug: "sor-juana-ines-de-la-cruz-la-pasion-se-puso-anteojos-de-tan"
 procedencia:

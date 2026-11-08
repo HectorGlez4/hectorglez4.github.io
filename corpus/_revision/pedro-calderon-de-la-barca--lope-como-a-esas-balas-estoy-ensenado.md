@@ -1,5 +1,5 @@
 ---
-texto: "LOPE: Como a esas balas estoy enseñado yo a esperar... (Mas no se ha de aventurar Aparte nada en el acción de hoy.) ¡Hola, soldado!"
+texto: "LOPE: Como a esas balas estoy\nenseñado yo a esperar...\n(Mas no se ha de aventurar Aparte\nnada en el acción de hoy.)\n¡Hola, soldado!"
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-lope-como-a-esas-balas-estoy-ensenado"
 procedencia:

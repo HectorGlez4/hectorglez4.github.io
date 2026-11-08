@@ -1,5 +1,5 @@
 ---
-texto: "Como quereis que no quede absorto, señora, en vos, si es dios la misma hermosura quando goza mi ventura 695 en la vuestra tanto dios?"
+texto: "Como quereis que no quede\nabsorto, señora, en vos,\nsi es dios la misma hermosura\nquando goza mi ventura 695\nen la vuestra tanto dios?"
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-como-quereis-que-no-quede-absorto-senora"
 procedencia:

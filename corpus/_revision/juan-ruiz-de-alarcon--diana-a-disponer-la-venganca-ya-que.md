@@ -1,5 +1,5 @@
 ---
-texto: "DIANA A disponer la vengança, ya que no el impedimento. 505 ELISA No prouoques el rigor de Ricardo."
+texto: "DIANA\nA disponer la vengança,\nya que no el impedimento. 505\nELISA\nNo prouoques el rigor\nde Ricardo."
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-diana-a-disponer-la-venganca-ya-que"
 procedencia:

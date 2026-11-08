@@ -1,5 +1,5 @@
 ---
-texto: "Era un reloj de sol mal encarado, érase un elefante boca arriba, érase una nariz sayón y escriba, un Ovidio Nasón mal narigado."
+texto: "Era un reloj de sol mal encarado,\nérase un elefante boca arriba,\nérase una nariz sayón y escriba,\nun Ovidio Nasón mal narigado."
 autor: "francisco-de-quevedo"
 slug: "francisco-de-quevedo-era-un-reloj-de-sol-mal-encarado"
 procedencia:

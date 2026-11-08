@@ -1,5 +1,5 @@
 ---
-texto: "Sabio legislador le vio el senado, el pueblo, incorruptible magistrado, honesto ciudadano, amante esposo, amigo fiel, y de las prendas todas que honran la humanidad cabal dechado."
+texto: "Sabio legislador le vio el senado,\nel pueblo, incorruptible magistrado,\nhonesto ciudadano, amante esposo,\namigo fiel, y de las prendas todas\nque honran la humanidad cabal dechado."
 autor: "andres-bello"
 slug: "andres-bello-sabio-legislador-le-vio-el-senado-el"
 procedencia:

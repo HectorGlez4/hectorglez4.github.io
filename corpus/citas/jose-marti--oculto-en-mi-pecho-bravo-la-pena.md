@@ -1,5 +1,5 @@
 ---
-texto: "Oculto en mi pecho bravo La pena que me lo hiere: El hijo de un pueblo esclavo Vive por él, calla y muere."
+texto: "Oculto en mi pecho bravo\nLa pena que me lo hiere:\nEl hijo de un pueblo esclavo\nVive por él, calla y muere."
 autor: "jose-marti"
 temas:
   - "la-libertad"

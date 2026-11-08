@@ -1,5 +1,5 @@
 ---
-texto: "Odio la máscara y vicio Del corredor de mi hotel: Me vuelvo al manso bullicio De mi monte de laurel."
+texto: "Odio la máscara y vicio\nDel corredor de mi hotel:\nMe vuelvo al manso bullicio\nDe mi monte de laurel."
 autor: "jose-marti"
 slug: "jose-marti-odio-la-mascara-y-vicio-del-corredor"
 procedencia:

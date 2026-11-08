@@ -1,5 +1,5 @@
 ---
-texto: "Tonante monseñor, ¿de cuándo acá fulminas jovenetos?"
+texto: "Tonante monseñor, ¿de cuándo acá\nfulminas jovenetos?"
 autor: "luis-de-gongora"
 slug: "luis-de-gongora-tonante-monsenor-de-cuando-aca-fulminas-jovenetos"
 procedencia:

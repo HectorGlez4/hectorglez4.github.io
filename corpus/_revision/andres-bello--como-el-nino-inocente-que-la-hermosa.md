@@ -1,5 +1,5 @@
 ---
-texto: "Como el niño inocente, que la hermosa fábrica ve del iris, que a la esfera sube, esmaltado de jacinto y rosa,"
+texto: "Como el niño inocente, que la hermosa\nfábrica ve del iris, que a la esfera\nsube, esmaltado de jacinto y rosa,"
 autor: "andres-bello"
 slug: "andres-bello-como-el-nino-inocente-que-la-hermosa"
 procedencia:

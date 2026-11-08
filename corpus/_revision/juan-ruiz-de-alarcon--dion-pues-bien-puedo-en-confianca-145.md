@@ -1,5 +1,5 @@
 ---
-texto: "DION Pues bien puedo en confiança 145 de tan crecido fauor pedir albricias, señor, de su cumplida esperança a Policiano, que a Aurora por esposa me ha pedido. 150 REY (A parte.)"
+texto: "DION\nPues bien puedo en confiança 145\nde tan crecido fauor\npedir albricias, señor,\nde su cumplida esperança\na Policiano, que a Aurora\npor esposa me ha pedido. 150\nREY\n(A parte.)"
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-dion-pues-bien-puedo-en-confianca-145"
 procedencia:

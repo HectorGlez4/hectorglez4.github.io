@@ -1,5 +1,5 @@
 ---
-texto: "En mataros tantos moros cuido que los ofendí, dexando huérfanos todos los que caboñan al Cid."
+texto: "En mataros tantos moros\ncuido que los ofendí,\ndexando huérfanos todos\nlos que caboñan al Cid."
 autor: "francisco-de-quevedo"
 slug: "francisco-de-quevedo-en-mataros-tantos-moros-cuido-que-los"
 procedencia:

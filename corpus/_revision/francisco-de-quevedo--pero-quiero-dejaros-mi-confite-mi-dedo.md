@@ -1,5 +1,5 @@
 ---
-texto: "Pero quiero dejaros, mi confite, mi dedo margarite, mi diamante, mi aljófar, mi rocío, pues será no meteros, desvarío; que es una pulga poco más pequeña, y, si es que pica, dígalo una dueña."
+texto: "Pero quiero dejaros, mi confite,\nmi dedo margarite,\nmi diamante, mi aljófar, mi rocío,\npues será no meteros, desvarío;\nque es una pulga poco más pequeña,\ny, si es que pica, dígalo una dueña."
 autor: "francisco-de-quevedo"
 slug: "francisco-de-quevedo-pero-quiero-dejaros-mi-confite-mi-dedo"
 procedencia:

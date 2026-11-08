@@ -1,5 +1,5 @@
 ---
-texto: "LOPE: ¿Vos sabéis que mi valor dueño de esta causa ha sido?"
+texto: "LOPE: ¿Vos sabéis que mi valor\ndueño de esta causa ha sido?"
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-lope-vos-sabeis-que-mi-valor-dueno"
 procedencia:

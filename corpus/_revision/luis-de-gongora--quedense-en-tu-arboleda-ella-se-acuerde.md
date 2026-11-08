@@ -1,5 +1,5 @@
 ---
-texto: "Quédense en tu arboleda, ella se acuerde de fin tan tierno, y su memoria triste, pues en troncos está, troncos la lean."
+texto: "Quédense en tu arboleda, ella se acuerde\nde fin tan tierno, y su memoria triste,\npues en troncos está, troncos la lean."
 autor: "luis-de-gongora"
 slug: "luis-de-gongora-quedense-en-tu-arboleda-ella-se-acuerde"
 procedencia:

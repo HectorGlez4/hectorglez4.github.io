@@ -1,5 +1,5 @@
 ---
-texto: "¿Pues qué he de hacer (¡Ay de mí!) en confusión semejante, Si quien la trae por favor, para su muerte la trae."
+texto: "¿Pues qué he de hacer (¡Ay de mí!) en confusión semejante,\nSi quien la trae por favor, para su muerte la trae."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-pues-que-he-de-hacer-ay-de"
 procedencia:

@@ -1,5 +1,5 @@
 ---
-texto: "Pero ¿al de Margarita qué otro nombre deslucirá?"
+texto: "Pero ¿al de Margarita qué otro nombre\ndeslucirá?"
 autor: "andres-bello"
 slug: "andres-bello-pero-al-de-margarita-que-otro-nombre"
 procedencia:

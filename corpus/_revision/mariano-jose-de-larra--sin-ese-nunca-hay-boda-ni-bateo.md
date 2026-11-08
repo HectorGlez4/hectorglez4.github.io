@@ -1,5 +1,5 @@
 ---
-texto: "Sin ese nunca, hay boda, ni bateo, ni hay ambigú, ni baile, ni banquete, ni hay partida de caza o de recreo."
+texto: "Sin ese nunca, hay boda, ni bateo,\nni hay ambigú, ni baile, ni banquete,\nni hay partida de caza o de recreo."
 autor: "mariano-jose-de-larra"
 slug: "mariano-jose-de-larra-sin-ese-nunca-hay-boda-ni-bateo"
 procedencia:

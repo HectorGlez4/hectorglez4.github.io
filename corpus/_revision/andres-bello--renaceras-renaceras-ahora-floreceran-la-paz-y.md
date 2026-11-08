@@ -1,5 +1,5 @@
 ---
-texto: "Renacerás, renacerás ahora; florecerán la paz y la abundancia en tus talados campos; las divinas Musas te harán favorecida estancia, y cubrirán de rosas tus rüinas. ..........................."
+texto: "Renacerás, renacerás ahora;\nflorecerán la paz y la abundancia\nen tus talados campos; las divinas\nMusas te harán favorecida estancia,\ny cubrirán de rosas tus rüinas.\n..........................."
 autor: "andres-bello"
 slug: "andres-bello-renaceras-renaceras-ahora-floreceran-la-paz-y"
 procedencia:

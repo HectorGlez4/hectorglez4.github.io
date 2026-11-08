@@ -1,5 +1,5 @@
 ---
-texto: "Viue el cielo, sino enfrena tan mal aduertido antojo, 805 que ha de sentir en mi enojo de su locura la pena: a Aurora, a Aurora se embia recado tan atreuido?"
+texto: "Viue el cielo, sino enfrena\ntan mal aduertido antojo, 805\nque ha de sentir en mi enojo\nde su locura la pena:\na Aurora, a Aurora se embia\nrecado tan atreuido?"
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-viue-el-cielo-sino-enfrena-tan-mal"
 procedencia:

@@ -1,5 +1,5 @@
 ---
-texto: "Assi desmienten verdades, los que prometen firmezas?"
+texto: "Assi desmienten verdades,\nlos que prometen firmezas?"
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-assi-desmienten-verdades-los-que-prometen-firmezas"
 procedencia:

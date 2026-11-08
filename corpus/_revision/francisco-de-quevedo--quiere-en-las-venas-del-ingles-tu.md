@@ -1,5 +1,5 @@
 ---
-texto: "Quiere en las venas del Inglés tu espada Matar la sed al Español sediento, Y en tus armas el Sol desde su asiento Mira su lumbre en rayos aumentada."
+texto: "Quiere en las venas del Inglés tu espada\nMatar la sed al Español sediento,\nY en tus armas el Sol desde su asiento\nMira su lumbre en rayos aumentada."
 autor: "francisco-de-quevedo"
 slug: "francisco-de-quevedo-quiere-en-las-venas-del-ingles-tu"
 procedencia:

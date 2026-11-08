@@ -1,5 +1,5 @@
 ---
-texto: "Y con su nombre irè donde me abraça 345 mi padre por don Diego, y mi querida, sin saber que soy yo, mi cuello enlaça."
+texto: "Y con su nombre irè donde me abraça 345\nmi padre por don Diego, y mi querida,\nsin saber que soy yo, mi cuello enlaça."
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-y-con-su-nombre-ire-donde-me"
 procedencia:

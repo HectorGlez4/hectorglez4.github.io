@@ -1,5 +1,5 @@
 ---
-texto: "Mas dio su inmortal desden muerte a mi amor y esperança."
+texto: "Mas dio su inmortal desden\nmuerte a mi amor y esperança."
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-mas-dio-su-inmortal-desden-muerte-a"
 procedencia:

@@ -1,5 +1,5 @@
 ---
-texto: "Como tú sobre la dura roca nativa, parásita también he visto en la vida sobre las rocas más áridas criaturas tristes y buenas embellecer..."
+texto: "Como tú sobre la dura\nroca nativa, parásita\ntambién he visto en la vida\nsobre las rocas más áridas\ncriaturas tristes y buenas\nembellecer..."
 autor: "jose-asuncion-silva"
 slug: "jose-asuncion-silva-como-tu-sobre-la-dura-roca-nativa"
 procedencia:

@@ -1,5 +1,5 @@
 ---
-texto: "¿Hacer escenas tan fácil es como decir dislates?"
+texto: "¿Hacer escenas\ntan fácil es como decir dislates?"
 autor: "mariano-jose-de-larra"
 slug: "mariano-jose-de-larra-hacer-escenas-tan-facil-es-como-decir"
 procedencia:

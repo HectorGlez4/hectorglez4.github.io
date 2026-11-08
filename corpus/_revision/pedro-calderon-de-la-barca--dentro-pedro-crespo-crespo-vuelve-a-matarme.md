@@ -1,5 +1,5 @@
 ---
-texto: "Dentro [Pedro CRESPO] CRESPO: Vuelve a matarme, serás piadoso homicida; que no es piedad, no, dejar a un desdichado con vida."
+texto: "Dentro [Pedro CRESPO]\nCRESPO: Vuelve a matarme,\nserás piadoso homicida;\nque no es piedad, no, dejar\na un desdichado con vida."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-dentro-pedro-crespo-crespo-vuelve-a-matarme"
 procedencia:

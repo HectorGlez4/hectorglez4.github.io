@@ -1,5 +1,5 @@
 ---
-texto: "Con una afable modestia igualando el agasajo, quitaba lo general lo sospechoso el agrado."
+texto: "Con una afable modestia\nigualando el agasajo,\nquitaba lo general\nlo sospechoso el agrado."
 autor: "sor-juana-ines-de-la-cruz"
 slug: "sor-juana-ines-de-la-cruz-con-una-afable-modestia-igualando-el-agasajo"
 procedencia:

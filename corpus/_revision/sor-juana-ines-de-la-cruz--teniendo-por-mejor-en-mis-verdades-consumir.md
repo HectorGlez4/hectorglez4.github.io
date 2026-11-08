@@ -1,5 +1,5 @@
 ---
-texto: "teniendo por mejor en mis verdades, consumir vanidades de la vida que consumir la vida en vanidades."
+texto: "teniendo por mejor en mis verdades,\nconsumir vanidades de la vida\nque consumir la vida en vanidades."
 autor: "sor-juana-ines-de-la-cruz"
 slug: "sor-juana-ines-de-la-cruz-teniendo-por-mejor-en-mis-verdades-consumir"
 procedencia:

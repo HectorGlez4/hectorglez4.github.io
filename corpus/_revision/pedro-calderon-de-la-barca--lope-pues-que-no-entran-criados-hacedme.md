@@ -1,5 +1,5 @@
 ---
-texto: "LOPE: Pues, que no entran criados, hacedme favor que venga vuestra hija aquí a cenar conmigo."
+texto: "LOPE: Pues, que no entran criados,\nhacedme favor que venga\nvuestra hija aquí a cenar\nconmigo."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-lope-pues-que-no-entran-criados-hacedme"
 procedencia:

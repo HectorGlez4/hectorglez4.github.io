@@ -1,5 +1,5 @@
 ---
-texto: "dame la mano; y sobre la ardua peña donde el sagrado alcázar se sublima, podrán dejar mis pies alguna seña;"
+texto: "dame la mano; y sobre la ardua peña\ndonde el sagrado alcázar se sublima,\npodrán dejar mis pies alguna seña;"
 autor: "andres-bello"
 slug: "andres-bello-dame-la-mano-y-sobre-la-ardua"
 procedencia:

@@ -1,5 +1,5 @@
 ---
-texto: "POLICIANO Si gloria tan alta pierdo, que me queda que perder? el Rey a vuestros desseos se ha de oponer, ni a los mios? 330 pues yo solo tengo brios para hazerle."
+texto: "POLICIANO\nSi gloria tan alta pierdo,\nque me queda que perder?\nel Rey a vuestros desseos\nse ha de oponer, ni a los mios? 330\npues yo solo tengo brios\npara hazerle."
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-policiano-si-gloria-tan-alta-pierdo-que"
 procedencia:
