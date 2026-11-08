@@ -1,5 +1,5 @@
 ---
-texto: "Los necios y las cortinas Se corren en nuestra España: El doblón y los traidores son los que tienen dos caras."
+texto: "Los necios y las cortinas\nSe corren en nuestra España:\nEl doblón y los traidores\nson los que tienen dos caras."
 autor: "francisco-de-quevedo"
 slug: "francisco-de-quevedo-los-necios-y-las-cortinas-se-corren"
 procedencia:

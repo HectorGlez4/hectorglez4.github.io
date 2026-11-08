@@ -1,5 +1,5 @@
 ---
-texto: "¿O la elevada Quito harás tu albergue, que entre canas cumbres sentada, oye bramar las tempestades bajo sus pies, y etéreas auras bebe a tu celeste inspiración propicias?"
+texto: "¿O la elevada Quito\nharás tu albergue, que entre canas cumbres\nsentada, oye bramar las tempestades\nbajo sus pies, y etéreas auras bebe\na tu celeste inspiración propicias?"
 autor: "andres-bello"
 slug: "andres-bello-o-la-elevada-quito-haras-tu-albergue"
 procedencia:

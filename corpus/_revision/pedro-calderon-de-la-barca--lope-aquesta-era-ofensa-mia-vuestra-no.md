@@ -1,5 +1,5 @@
 ---
-texto: "LOPE: Aquesta era ofensa mía, vuestra no."
+texto: "LOPE: Aquesta era ofensa mía,\nvuestra no."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-lope-aquesta-era-ofensa-mia-vuestra-no"
 procedencia:

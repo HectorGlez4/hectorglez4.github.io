@@ -1,5 +1,5 @@
 ---
-texto: "Quan tarde la fuerça passa 705 de amor, que fue verdadero, pues con el soplo primero se descubre tanta brasa."
+texto: "Quan tarde la fuerça passa 705\nde amor, que fue verdadero,\npues con el soplo primero\nse descubre tanta brasa."
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-quan-tarde-la-fuerca-passa-705-de"
 procedencia:

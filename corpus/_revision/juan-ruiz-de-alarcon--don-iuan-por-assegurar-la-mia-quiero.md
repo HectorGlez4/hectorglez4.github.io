@@ -1,5 +1,5 @@
 ---
-texto: "DON IUAN Por assegurar la mia, quiero agora que te vayas, 190 que hablar queremos a solas."
+texto: "DON IUAN\nPor assegurar la mia,\nquiero agora que te vayas, 190\nque hablar queremos a solas."
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-don-iuan-por-assegurar-la-mia-quiero"
 procedencia:

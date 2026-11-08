@@ -1,5 +1,5 @@
 ---
-texto: "¿Por qué en tu margen el rumor festivo calló?"
+texto: "¿Por qué en tu margen el rumor festivo\ncalló?"
 autor: "andres-bello"
 slug: "andres-bello-por-que-en-tu-margen-el-rumor"
 procedencia:

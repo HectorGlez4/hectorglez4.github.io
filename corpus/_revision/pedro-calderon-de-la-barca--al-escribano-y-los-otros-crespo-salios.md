@@ -1,5 +1,5 @@
 ---
-texto: "Al ESCRIBANO y los otros CRESPO: Salíos vosotros también."
+texto: "Al ESCRIBANO y los otros\nCRESPO: Salíos vosotros también."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-al-escribano-y-los-otros-crespo-salios"
 procedencia:

@@ -1,5 +1,5 @@
 ---
-texto: "Diosa de la memoria, himnos te pide el imperio también de Motezuma, que, rota la coyunda de Iturbide, entre los pueblos libres se numera."
+texto: "Diosa de la memoria, himnos te pide\nel imperio también de Motezuma,\nque, rota la coyunda de Iturbide,\nentre los pueblos libres se numera."
 autor: "andres-bello"
 slug: "andres-bello-diosa-de-la-memoria-himnos-te-pide"
 procedencia:

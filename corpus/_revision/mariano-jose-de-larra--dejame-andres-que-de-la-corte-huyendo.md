@@ -1,5 +1,5 @@
 ---
-texto: "Déjame, Andrés, que de la corte huyendo, de tantos vicios hórridos me aleje, como en mi patria mísera estoy viendo: ni te asombre que, al tiempo que los deje, ya que enmendarlos mi razón no pueda, en sátiras amargas los moteje."
+texto: "Déjame, Andrés, que de la corte huyendo,\nde tantos vicios hórridos me aleje,\ncomo en mi patria mísera estoy viendo:\nni te asombre que, al tiempo que los deje,\nya que enmendarlos mi razón no pueda,\nen sátiras amargas los moteje."
 autor: "mariano-jose-de-larra"
 slug: "mariano-jose-de-larra-dejame-andres-que-de-la-corte-huyendo"
 procedencia:

@@ -1,5 +1,5 @@
 ---
-texto: "A los dos quitad las armas, y atadles Los ojos, porque no vean cómo ni de dónde salen."
+texto: "A los dos quitad las armas, y atadles\nLos ojos, porque no vean cómo ni de dónde salen."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-a-los-dos-quitad-las-armas-y"
 procedencia:

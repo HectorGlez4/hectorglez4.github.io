@@ -1,5 +1,5 @@
 ---
-texto: "SANCHO Y tu en la tuya daras, pues que con tu prima estàs."
+texto: "SANCHO\nY tu en la tuya daras,\npues que con tu prima estàs."
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-sancho-y-tu-en-la-tuya-daras"
 procedencia:

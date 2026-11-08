@@ -1,5 +1,5 @@
 ---
-texto: "¡Y a la casa donde estoy venirse a dar cantaletas!..."
+texto: "¡Y a la casa donde estoy\nvenirse a dar cantaletas!..."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-y-a-la-casa-donde-estoy-venirse"
 procedencia:

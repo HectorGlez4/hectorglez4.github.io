@@ -1,5 +1,5 @@
 ---
-texto: "CHISPA: Ahí un pobrete que queda con un rasguño en el rostro."
+texto: "CHISPA: Ahí un pobrete que queda\ncon un rasguño en el rostro."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-chispa-ahi-un-pobrete-que-queda-con"
 procedencia:

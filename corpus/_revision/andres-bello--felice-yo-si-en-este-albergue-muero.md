@@ -1,5 +1,5 @@
 ---
-texto: "¡Felice yo si en este albergue muero, y al exhalar mi aliento fugitivo, sello en tus labios el adiós postrero!"
+texto: "¡Felice yo si en este albergue muero,\ny al exhalar mi aliento fugitivo,\nsello en tus labios el adiós postrero!"
 autor: "andres-bello"
 slug: "andres-bello-felice-yo-si-en-este-albergue-muero"
 procedencia:

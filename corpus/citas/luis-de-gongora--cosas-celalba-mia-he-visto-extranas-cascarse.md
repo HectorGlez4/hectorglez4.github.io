@@ -1,5 +1,5 @@
 ---
-texto: "Cosas, Celalba mía, he visto extrañas: cascarse nubes, desbocarse vientos, altas torres besar sus fundamentos, y vomitar la tierra sus entrañas;"
+texto: "Cosas, Celalba mía, he visto extrañas:\ncascarse nubes, desbocarse vientos,\naltas torres besar sus fundamentos,\ny vomitar la tierra sus entrañas;"
 autor: "luis-de-gongora"
 temas:
   - "la-vida"

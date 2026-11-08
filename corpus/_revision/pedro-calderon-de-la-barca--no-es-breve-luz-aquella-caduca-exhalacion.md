@@ -1,5 +1,5 @@
 ---
-texto: "¿No es breve luz aquella Caduca exhalación, pálida estrella, Que en trémulos desmayos, Pulsando ardores y latiendo rayos."
+texto: "¿No es breve luz aquella\nCaduca exhalación, pálida estrella,\nQue en trémulos desmayos,\nPulsando ardores y latiendo rayos."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-no-es-breve-luz-aquella-caduca-exhalacion"
 procedencia:

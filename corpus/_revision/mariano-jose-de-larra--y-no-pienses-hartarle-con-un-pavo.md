@@ -1,5 +1,5 @@
 ---
-texto: "Y no pienses hartarle con un pavo, porque es un sabañón, aunque un poema te recite al comer de cabo a rabo."
+texto: "Y no pienses hartarle con un pavo,\nporque es un sabañón, aunque un poema\nte recite al comer de cabo a rabo."
 autor: "mariano-jose-de-larra"
 slug: "mariano-jose-de-larra-y-no-pienses-hartarle-con-un-pavo"
 procedencia:

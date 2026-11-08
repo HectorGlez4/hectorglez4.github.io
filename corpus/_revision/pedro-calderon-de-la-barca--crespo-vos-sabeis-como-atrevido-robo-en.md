@@ -1,5 +1,5 @@
 ---
-texto: "CRESPO: ¿Vos sabéis cómo atrevido robó en un monte mi honor?"
+texto: "CRESPO: ¿Vos sabéis cómo atrevido\nrobó en un monte mi honor?"
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-crespo-vos-sabeis-como-atrevido-robo-en"
 procedencia:

@@ -1,5 +1,5 @@
 ---
-texto: "¡Adriana! de tan dulces horas guardarán el secreto tu estancia, el rayo de la luna, el vago ruido de tus besos, la noche silenciosa, y en mi alma el recuerdo!..."
+texto: "¡Adriana! de tan dulces horas\nguardarán el secreto\ntu estancia, el rayo de la luna, el vago\nruido de tus besos,\nla noche silenciosa,\ny en mi alma el recuerdo!..."
 autor: "jose-asuncion-silva"
 slug: "jose-asuncion-silva-adriana-de-tan-dulces-horas-guardaran-el"
 procedencia:

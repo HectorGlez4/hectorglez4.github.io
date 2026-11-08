@@ -1,5 +1,5 @@
 ---
-texto: "DOÑA ANA De tu primo el de la Corte es vna carta."
+texto: "DOÑA ANA\nDe tu primo el de la Corte\nes vna carta."
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-dona-ana-de-tu-primo-el-de"
 procedencia:

@@ -1,5 +1,5 @@
 ---
-texto: "Pues aquese es un hombre; un año exige su tocado al espejo; a ese bonito le ampara protector, si es que nos rige"
+texto: "Pues aquese es un hombre; un año exige\nsu tocado al espejo; a ese bonito\nle ampara protector, si es que nos rige"
 autor: "mariano-jose-de-larra"
 slug: "mariano-jose-de-larra-pues-aquese-es-un-hombre-un-ano"
 procedencia:

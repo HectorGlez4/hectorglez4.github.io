@@ -1,5 +1,5 @@
 ---
-texto: "CRESPO: (¡Cielos, Aparte cuando vengarte imaginas, me hace dueño de mi honor la vara de la justicia!"
+texto: "CRESPO: (¡Cielos, Aparte\ncuando vengarte imaginas,\nme hace dueño de mi honor\nla vara de la justicia!"
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-crespo-cielos-aparte-cuando-vengarte-imaginas-me"
 procedencia:

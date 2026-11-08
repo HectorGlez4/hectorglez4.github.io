@@ -1,5 +1,5 @@
 ---
-texto: "mas luego que ciñó sus sienes bellas de los varios despojos de su falda (término puesto al oro y a la nieve),"
+texto: "mas luego que ciñó sus sienes bellas\nde los varios despojos de su falda\n(término puesto al oro y a la nieve),"
 autor: "luis-de-gongora"
 slug: "luis-de-gongora-mas-luego-que-cino-sus-sienes-bellas"
 procedencia:

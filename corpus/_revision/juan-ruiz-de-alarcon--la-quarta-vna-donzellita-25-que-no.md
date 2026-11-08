@@ -1,5 +1,5 @@
 ---
-texto: "La quarta, vna donzellita, 25 que no casarse desea: la quinta vna muger fea, que los años no se quita."
+texto: "La quarta, vna donzellita, 25\nque no casarse desea:\nla quinta vna muger fea,\nque los años no se quita."
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-la-quarta-vna-donzellita-25-que-no"
 procedencia:

@@ -1,5 +1,5 @@
 ---
-texto: "¿O al que en funciones mil pavor y espanto puso, con su marcial legión llanera, al español; y a Marte lo pusiera?"
+texto: "¿O al que en funciones mil pavor y espanto\npuso, con su marcial legión llanera,\nal español; y a Marte lo pusiera?"
 autor: "andres-bello"
 slug: "andres-bello-o-al-que-en-funciones-mil-pavor"
 procedencia:

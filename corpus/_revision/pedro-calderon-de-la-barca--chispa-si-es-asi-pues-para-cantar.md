@@ -1,5 +1,5 @@
 ---
-texto: "CHISPA: Si es así, pues para cantar nací, he de cantar, ¡vive Dios!"
+texto: "CHISPA: Si es así,\npues para cantar nací,\nhe de cantar, ¡vive Dios!"
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-chispa-si-es-asi-pues-para-cantar"
 procedencia:

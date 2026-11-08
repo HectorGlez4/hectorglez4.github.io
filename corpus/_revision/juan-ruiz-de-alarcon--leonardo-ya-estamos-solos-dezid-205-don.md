@@ -1,5 +1,5 @@
 ---
-texto: "LEONARDO Ya estamos solos: dezid, 205 don Iuan amigo, la causa de auernos quedado assi."
+texto: "LEONARDO\nYa estamos solos: dezid, 205\ndon Iuan amigo, la causa\nde auernos quedado assi."
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-leonardo-ya-estamos-solos-dezid-205-don"
 procedencia:

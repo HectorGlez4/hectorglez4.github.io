@@ -1,5 +1,5 @@
 ---
-texto: "CLOT. (Dentro.) Acudid, y vigilantes, Sin que puedan defenderse, o prendedles ó matadles."
+texto: "CLOT. (Dentro.) Acudid, y vigilantes,\nSin que puedan defenderse, o prendedles ó matadles."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-clot-dentro-acudid-y-vigilantes-sin-que"
 procedencia:

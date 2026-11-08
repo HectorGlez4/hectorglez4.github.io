@@ -1,5 +1,5 @@
 ---
-texto: "Tocan guitarras [dentro] LOPE: ¿Qué es aquello?"
+texto: "Tocan guitarras [dentro]\nLOPE: ¿Qué es aquello?"
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-tocan-guitarras-dentro-lope-que-es-aquello"
 procedencia:

@@ -1,5 +1,5 @@
 ---
-texto: "LOPE: ¿Vos sabéis cuánto os prefiere el cargo que he gobernado?"
+texto: "LOPE: ¿Vos sabéis cuánto os prefiere\nel cargo que he gobernado?"
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-lope-vos-sabeis-cuanto-os-prefiere-el"
 procedencia:

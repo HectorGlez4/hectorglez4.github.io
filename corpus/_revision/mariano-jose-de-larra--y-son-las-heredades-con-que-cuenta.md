@@ -1,5 +1,5 @@
 ---
-texto: "Y son las heredades con que cuenta y aquí vive, el amarre y el pegote, y su casa y su honor, que pone en venta."
+texto: "Y son las heredades con que cuenta\ny aquí vive, el amarre y el pegote,\ny su casa y su honor, que pone en venta."
 autor: "mariano-jose-de-larra"
 slug: "mariano-jose-de-larra-y-son-las-heredades-con-que-cuenta"
 procedencia:

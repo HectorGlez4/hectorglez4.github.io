@@ -1,5 +1,5 @@
 ---
-texto: "Puerto Cabello vio acabar tus días, mas tu memoria no, que eterna dura."
+texto: "Puerto Cabello vio acabar tus días,\nmas tu memoria no, que eterna dura."
 autor: "andres-bello"
 slug: "andres-bello-puerto-cabello-vio-acabar-tus-dias-mas"
 procedencia:

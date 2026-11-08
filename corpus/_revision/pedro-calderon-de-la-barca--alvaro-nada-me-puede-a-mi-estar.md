@@ -1,5 +1,5 @@
 ---
-texto: "ÁLVARO: Nada me puede a mí estar mejor, llegando a saber que estoy aquí, y no temer a la gente del lugar; que la justicia es forzoso remitirme en esta tierra a mi consejo de guerra; con que, aunque el lance es penoso, tengo mi seguridad."
+texto: "ÁLVARO: Nada me puede a mí estar\nmejor, llegando a saber\nque estoy aquí, y no temer\na la gente del lugar;\nque la justicia es forzoso\nremitirme en esta tierra\na mi consejo de guerra;\ncon que, aunque el lance es penoso,\ntengo mi seguridad."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-alvaro-nada-me-puede-a-mi-estar"
 procedencia:

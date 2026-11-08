@@ -1,5 +1,5 @@
 ---
-texto: "¿Quién es aquella cara que enamora, con el gesto mirlado, rubio el pelo, ceñido el talle y dengues de señora?"
+texto: "¿Quién es aquella cara que enamora,\ncon el gesto mirlado, rubio el pelo,\nceñido el talle y dengues de señora?"
 autor: "mariano-jose-de-larra"
 slug: "mariano-jose-de-larra-quien-es-aquella-cara-que-enamora-con"
 procedencia:

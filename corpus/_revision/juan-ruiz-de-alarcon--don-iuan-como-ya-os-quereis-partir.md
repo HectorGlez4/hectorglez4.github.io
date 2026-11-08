@@ -1,5 +1,5 @@
 ---
-texto: "DON IUAN Como ya os quereis partir, aureis venido a pedir 875 a Iulia su bendicion."
+texto: "DON IUAN\nComo ya os quereis partir,\naureis venido a pedir 875\na Iulia su bendicion."
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-don-iuan-como-ya-os-quereis-partir"
 procedencia:

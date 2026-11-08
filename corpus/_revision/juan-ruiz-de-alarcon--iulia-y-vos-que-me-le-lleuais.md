@@ -1,5 +1,5 @@
 ---
-texto: "IULIA Y vos, que me le lleuais, por mi maldicion vendreis."
+texto: "IULIA\nY vos, que me le lleuais,\npor mi maldicion vendreis."
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-iulia-y-vos-que-me-le-lleuais"
 procedencia:

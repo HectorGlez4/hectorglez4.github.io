@@ -1,5 +1,5 @@
 ---
-texto: "Celia: Pues eso será velar, porque él juzga que es temprano la una o las dos; y a mi ver, aunque es grande ociosidad viene a decir la verdad, pues viene al amanecer."
+texto: "Celia: Pues eso será velar,\nporque él juzga que es temprano\nla una o las dos; y a mi ver,\naunque es grande ociosidad\nviene a decir la verdad,\npues viene al amanecer."
 autor: "sor-juana-ines-de-la-cruz"
 slug: "sor-juana-ines-de-la-cruz-celia-pues-eso-sera-velar-porque-el"
 procedencia:

@@ -1,5 +1,5 @@
 ---
-texto: "¿Que sino, que mayor gloria, que mas Indias puedo hallar tras tanto amor, que alcançar 795 de vuestro desden vitoria?"
+texto: "¿Que sino, que mayor gloria,\nque mas Indias puedo hallar\ntras tanto amor, que alcançar 795\nde vuestro desden vitoria?"
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-que-sino-que-mayor-gloria-que-mas"
 procedencia:

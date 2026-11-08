@@ -1,5 +1,5 @@
 ---
-texto: "¿Que su fiereza luego te dio en la cabeza?"
+texto: "¿Que su fiereza\nluego te dio en la cabeza?"
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-que-su-fiereza-luego-te-dio-en"
 procedencia:

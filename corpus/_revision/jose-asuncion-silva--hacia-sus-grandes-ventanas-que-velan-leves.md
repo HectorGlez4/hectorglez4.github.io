@@ -1,5 +1,5 @@
 ---
-texto: "Hacia sus grandes ventanas que velan leves cortinas tienden las oscuras ramas las madreselvas vecinas."
+texto: "Hacia sus grandes ventanas\nque velan leves cortinas\ntienden las oscuras ramas\nlas madreselvas vecinas."
 autor: "jose-asuncion-silva"
 slug: "jose-asuncion-silva-hacia-sus-grandes-ventanas-que-velan-leves"
 procedencia:

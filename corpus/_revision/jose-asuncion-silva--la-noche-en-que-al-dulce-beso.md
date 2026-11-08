@@ -1,5 +1,5 @@
 ---
-texto: "La noche en que al dulce beso del amor, se abrió su alma caminando lentamente iba, en mi brazo apoyada."
+texto: "La noche en que al dulce beso\ndel amor, se abrió su alma\ncaminando lentamente\niba, en mi brazo apoyada."
 autor: "jose-asuncion-silva"
 slug: "jose-asuncion-silva-la-noche-en-que-al-dulce-beso"
 procedencia:

@@ -1,5 +1,5 @@
 ---
-texto: "Al tramontar del sol la ninfa mía, de flores despojando el verde llano, cuantas troncaba la hermosa mano, tantas el blanco pie crecer hacía."
+texto: "Al tramontar del sol la ninfa mía,\nde flores despojando el verde llano,\ncuantas troncaba la hermosa mano,\ntantas el blanco pie crecer hacía."
 autor: "luis-de-gongora"
 slug: "luis-de-gongora-al-tramontar-del-sol-la-ninfa-mia"
 procedencia:

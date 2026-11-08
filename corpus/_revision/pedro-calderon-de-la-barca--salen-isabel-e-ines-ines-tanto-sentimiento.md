@@ -1,5 +1,5 @@
 ---
-texto: "Salen ISABEL e INÉS INÉS: Tanto sentimiento deja; que vivir tan afligida, no es vivir, matarte es."
+texto: "Salen ISABEL e INÉS\nINÉS: Tanto sentimiento deja;\nque vivir tan afligida,\nno es vivir, matarte es."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-salen-isabel-e-ines-ines-tanto-sentimiento"
 procedencia:

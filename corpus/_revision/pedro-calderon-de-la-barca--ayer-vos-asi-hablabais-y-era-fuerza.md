@@ -1,5 +1,5 @@
 ---
-texto: "Ayer vos así hablabais, y era fuerza que fuera de un mismo tono la pregunta y la respuesta."
+texto: "Ayer vos\nasí hablabais, y era fuerza\nque fuera de un mismo tono\nla pregunta y la respuesta."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-ayer-vos-asi-hablabais-y-era-fuerza"
 procedencia:

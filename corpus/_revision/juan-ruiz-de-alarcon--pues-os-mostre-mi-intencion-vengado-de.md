@@ -1,5 +1,5 @@
 ---
-texto: "Pues os mostrè mi intencion, vengado de vos me siento, que os ha ofendido el intento, 775 quando no la execucion."
+texto: "Pues os mostrè mi intencion,\nvengado de vos me siento,\nque os ha ofendido el intento, 775\nquando no la execucion."
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-pues-os-mostre-mi-intencion-vengado-de"
 procedencia:

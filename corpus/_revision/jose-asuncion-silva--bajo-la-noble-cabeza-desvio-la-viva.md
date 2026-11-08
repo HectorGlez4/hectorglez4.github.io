@@ -1,5 +1,5 @@
 ---
-texto: "Bajo la noble cabeza desvió la viva mirada y dijo paso –de nuevo me preguntabas \"te cansas\"."
+texto: "Bajo la noble cabeza\ndesvió la viva mirada\ny dijo paso –de nuevo\nme preguntabas \"te cansas\"."
 autor: "jose-asuncion-silva"
 slug: "jose-asuncion-silva-bajo-la-noble-cabeza-desvio-la-viva"
 procedencia:

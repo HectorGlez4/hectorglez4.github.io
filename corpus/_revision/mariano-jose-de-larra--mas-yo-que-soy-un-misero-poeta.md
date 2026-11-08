@@ -1,5 +1,5 @@
 ---
-texto: "Mas yo, que soy un mísero poeta, antes que por decir verdades claras en un encierro un alguacil me meta, y me cuesten mis sátiras más caras, o en el hospicio muera miserable, quiero del riesgo huir doscientas varas:"
+texto: "Mas yo, que soy un mísero poeta,\nantes que por decir verdades claras\nen un encierro un alguacil me meta,\ny me cuesten mis sátiras más caras,\no en el hospicio muera miserable,\nquiero del riesgo huir doscientas varas:"
 autor: "mariano-jose-de-larra"
 slug: "mariano-jose-de-larra-mas-yo-que-soy-un-misero-poeta"
 procedencia:

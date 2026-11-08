@@ -1,5 +1,5 @@
 ---
-texto: "Todo es hermoso y constante, Todo es música y razón, Y todo, como el diamante, Antes que luz es carbón."
+texto: "Todo es hermoso y constante,\nTodo es música y razón,\nY todo, como el diamante,\nAntes que luz es carbón."
 autor: "jose-marti"
 temas:
   - "la-vida"

@@ -1,5 +1,5 @@
 ---
-texto: "Llegue; que no es pequeña la ventaja del comer tarde al acostarse ayuno."
+texto: "Llegue; que no es pequeña la ventaja\ndel comer tarde al acostarse ayuno."
 autor: "luis-de-gongora"
 slug: "luis-de-gongora-llegue-que-no-es-pequena-la-ventaja"
 procedencia:

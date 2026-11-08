@@ -1,5 +1,5 @@
 ---
-texto: "LOPE: ¿Quién nos dijera aquel día primero que aquí nos vimos, que habíamos de quedar para siempre tan amigos?"
+texto: "LOPE: ¿Quién nos dijera aquel día\nprimero que aquí nos vimos,\nque habíamos de quedar\npara siempre tan amigos?"
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-lope-quien-nos-dijera-aquel-dia-primero"
 procedencia:

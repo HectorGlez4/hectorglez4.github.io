@@ -1,5 +1,5 @@
 ---
-texto: "Que mi enemigo padre (dura pena) a que en estos galeones parta a Lima 280 a cobrar cierta herencia me condena."
+texto: "Que mi enemigo padre (dura pena)\na que en estos galeones parta a Lima 280\na cobrar cierta herencia me condena."
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-que-mi-enemigo-padre-dura-pena-a"
 procedencia:

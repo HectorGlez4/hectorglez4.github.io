@@ -1,5 +1,5 @@
 ---
-texto: "¿Pero de Maipo la campiña sola cuán larga lista, oh Musa, no te ofrece, para que en tus cantares se repita, de campeones cuya frente adorna el verde honor que nunca se marchita?"
+texto: "¿Pero de Maipo la campiña sola\ncuán larga lista, oh Musa, no te ofrece,\npara que en tus cantares se repita,\nde campeones cuya frente adorna\nel verde honor que nunca se marchita?"
 autor: "andres-bello"
 slug: "andres-bello-pero-de-maipo-la-campina-sola-cuan"
 procedencia:

@@ -1,5 +1,5 @@
 ---
-texto: "¿Qué, si de Ribas a los altos hechos dio la fortuna injusto premio al cabo?"
+texto: "¿Qué, si de Ribas a los altos hechos\ndio la fortuna injusto premio al cabo?"
 autor: "andres-bello"
 slug: "andres-bello-que-si-de-ribas-a-los-altos"
 procedencia:

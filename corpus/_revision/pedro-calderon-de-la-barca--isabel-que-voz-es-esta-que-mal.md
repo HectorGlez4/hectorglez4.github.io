@@ -1,5 +1,5 @@
 ---
-texto: "ISABEL: ¿Qué voz es ésta, que mal pronunciada y poco oída, no se deja conocer?"
+texto: "ISABEL: ¿Qué voz es ésta, que mal\npronunciada y poco oída,\nno se deja conocer?"
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-isabel-que-voz-es-esta-que-mal"
 procedencia:

@@ -1,5 +1,5 @@
 ---
-texto: "O terribles agrauios, mas o mayor simpleça, atas la bolsa, y pidesme firmeça. (Vase.)"
+texto: "O terribles agrauios,\nmas o mayor simpleça,\natas la bolsa, y pidesme firmeça.\n(Vase.)"
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-o-terribles-agrauios-mas-o-mayor-simpleca"
 procedencia:

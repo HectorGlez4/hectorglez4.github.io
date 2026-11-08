@@ -1,5 +1,5 @@
 ---
-texto: "DON IUAN Vete, acaba, SANCHO Iranse, que no son bestias, puesto que con bestias tratan. (Vase.)"
+texto: "DON IUAN\nVete, acaba,\nSANCHO\nIranse, que no son bestias,\npuesto que con bestias tratan.\n(Vase.)"
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-don-iuan-vete-acaba-sancho-iranse-que"
 procedencia:

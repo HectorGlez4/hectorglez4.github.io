@@ -1,5 +1,5 @@
 ---
-texto: "Él no dice quién le hirió; pero si esto se averigua será una gran causa."
+texto: "Él no dice quién le hirió;\npero si esto se averigua\nserá una gran causa."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-el-no-dice-quien-le-hirio-pero"
 procedencia:

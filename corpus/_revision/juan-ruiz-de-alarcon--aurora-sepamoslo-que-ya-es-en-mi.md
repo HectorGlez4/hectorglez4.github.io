@@ -1,5 +1,5 @@
 ---
-texto: "AURORA Sepamoslo, que ya es en mi la curiosidad cuydado."
+texto: "AURORA\nSepamoslo, que ya es en mi\nla curiosidad cuydado."
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-aurora-sepamoslo-que-ya-es-en-mi"
 procedencia:

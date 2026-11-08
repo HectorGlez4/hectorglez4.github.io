@@ -1,5 +1,5 @@
 ---
-texto: "Con tan rudo artificio La arquitectura está de su edificio, Que parece, á las plantas De tantas rocas y de peñas tantas Que al sol tocan la lumbre, Peñasco que ha rodado de la cumbre."
+texto: "Con tan rudo artificio\nLa arquitectura está de su edificio,\nQue parece, á las plantas\nDe tantas rocas y de peñas tantas\nQue al sol tocan la lumbre,\nPeñasco que ha rodado de la cumbre."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-con-tan-rudo-artificio-la-arquitectura-esta"
 procedencia:

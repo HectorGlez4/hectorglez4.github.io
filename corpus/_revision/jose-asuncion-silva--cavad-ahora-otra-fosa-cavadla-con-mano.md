@@ -1,5 +1,5 @@
 ---
-texto: "Cavad ahora otra fosa, cavadla con mano trémula, de la sonrïente niña del triste sepulcro cerca, para que lejos del mundo su sueño postrero duerman mis recuerdos de cariño y mis memorias más tiernas."
+texto: "Cavad ahora otra fosa,\ncavadla con mano trémula,\nde la sonrïente niña\ndel triste sepulcro cerca,\npara que lejos del mundo\nsu sueño postrero duerman\nmis recuerdos de cariño\ny mis memorias más tiernas."
 autor: "jose-asuncion-silva"
 slug: "jose-asuncion-silva-cavad-ahora-otra-fosa-cavadla-con-mano"
 procedencia:

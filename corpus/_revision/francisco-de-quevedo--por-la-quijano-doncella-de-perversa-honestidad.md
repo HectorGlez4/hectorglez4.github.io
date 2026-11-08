@@ -1,5 +1,5 @@
 ---
-texto: "Por la Quijano, doncella De perversa honestidad, Nos mojamos yo y Vicioso, Sin metedores de paz."
+texto: "Por la Quijano, doncella\nDe perversa honestidad,\nNos mojamos yo y Vicioso,\nSin metedores de paz."
 autor: "francisco-de-quevedo"
 slug: "francisco-de-quevedo-por-la-quijano-doncella-de-perversa-honestidad"
 procedencia:

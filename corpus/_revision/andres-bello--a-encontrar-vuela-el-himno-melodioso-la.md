@@ -1,5 +1,5 @@
 ---
-texto: "A encontrar vuela el himno melodioso, la hueste de los vates inmortales, el cielo, el agua, el viento, el bosque umbroso;"
+texto: "A encontrar vuela el himno melodioso,\nla hueste de los vates inmortales,\nel cielo, el agua, el viento, el bosque umbroso;"
 autor: "andres-bello"
 slug: "andres-bello-a-encontrar-vuela-el-himno-melodioso-la"
 procedencia:

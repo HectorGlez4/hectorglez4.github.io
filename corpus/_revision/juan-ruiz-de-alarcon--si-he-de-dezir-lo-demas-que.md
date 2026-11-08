@@ -1,5 +1,5 @@
 ---
-texto: "Si he de dezir lo demas que causo este atreuimiento, aparte habeis de escucharme 665 porque el caso lo requiere."
+texto: "Si he de dezir lo demas\nque causo este atreuimiento,\naparte habeis de escucharme 665\nporque el caso lo requiere."
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-si-he-de-dezir-lo-demas-que"
 procedencia:

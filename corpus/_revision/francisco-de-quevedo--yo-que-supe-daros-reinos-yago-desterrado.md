@@ -1,5 +1,5 @@
 ---
-texto: "Yo, que supe daros reinos, yago desterrado aquí, y con mucha yanta al lado quien los sabe destroir."
+texto: "Yo, que supe daros reinos,\nyago desterrado aquí,\ny con mucha yanta al lado\nquien los sabe destroir."
 autor: "francisco-de-quevedo"
 slug: "francisco-de-quevedo-yo-que-supe-daros-reinos-yago-desterrado"
 procedencia:

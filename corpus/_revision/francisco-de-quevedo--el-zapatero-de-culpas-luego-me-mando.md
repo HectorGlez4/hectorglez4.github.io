@@ -1,5 +1,5 @@
 ---
-texto: "El zapatero de culpas Luego me mandó calzar Botinicos Vizcaínos, Martillado el cordobán."
+texto: "El zapatero de culpas\nLuego me mandó calzar\nBotinicos Vizcaínos,\nMartillado el cordobán."
 autor: "francisco-de-quevedo"
 slug: "francisco-de-quevedo-el-zapatero-de-culpas-luego-me-mando"
 procedencia:

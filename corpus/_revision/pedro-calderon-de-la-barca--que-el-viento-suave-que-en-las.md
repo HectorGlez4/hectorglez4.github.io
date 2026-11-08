@@ -1,5 +1,5 @@
 ---
-texto: "Que el viento süave, que en las blandas hojas suena de estas parras y estas copas, mil cláusulas lisonjeras hace al compás de esta fuente, cítara de plata y perlas, poreque son en trastes de oro las guijas tmepladas cuerdas."
+texto: "Que el viento süave,\nque en las blandas hojas suena\nde estas parras y estas copas,\nmil cláusulas lisonjeras\nhace al compás de esta fuente,\ncítara de plata y perlas,\nporeque son en trastes de oro\nlas guijas tmepladas cuerdas."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-que-el-viento-suave-que-en-las"
 procedencia:

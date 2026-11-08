@@ -1,5 +1,5 @@
 ---
-texto: "Entre las rotas cúpulas que oyeron sacros ritos ayer, torpes reptiles anidan, y en la sala que gozosos banquetes vio y amores, hoy sacude la grama del erial su infausta espiga."
+texto: "Entre las rotas cúpulas que oyeron\nsacros ritos ayer, torpes reptiles\nanidan, y en la sala que gozosos\nbanquetes vio y amores, hoy sacude\nla grama del erial su infausta espiga."
 autor: "andres-bello"
 slug: "andres-bello-entre-las-rotas-cupulas-que-oyeron-sacros"
 procedencia:

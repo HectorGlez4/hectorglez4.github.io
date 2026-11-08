@@ -1,5 +1,5 @@
 ---
-texto: "Yo he visto al águila herida Volar al azul sereno, Y morir en su guarida La víbora del veneno."
+texto: "Yo he visto al águila herida\nVolar al azul sereno,\nY morir en su guarida\nLa víbora del veneno."
 autor: "jose-marti"
 temas:
   - "la-virtud"

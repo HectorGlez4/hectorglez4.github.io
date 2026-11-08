@@ -1,5 +1,5 @@
 ---
-texto: "En toda mi vida vi más divina, más perfecta hermosura."
+texto: "En toda mi vida vi\nmás divina, más perfecta\nhermosura."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-en-toda-mi-vida-vi-mas-divina"
 procedencia:

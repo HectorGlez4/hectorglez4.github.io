@@ -1,5 +1,5 @@
 ---
-texto: "el sueño (autor de representaciones), en su teatro, sobre el viento armado, sombras suele vestir de bulto hermoso."
+texto: "el sueño (autor de representaciones),\nen su teatro, sobre el viento armado,\nsombras suele vestir de bulto hermoso."
 autor: "luis-de-gongora"
 slug: "luis-de-gongora-el-sueno-autor-de-representaciones-en-su"
 procedencia:

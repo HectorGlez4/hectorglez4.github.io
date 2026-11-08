@@ -1,5 +1,5 @@
 ---
-texto: "Por la gracia de Dios, Juan, eres de linaje limpio, más que el sol, pero villano."
+texto: "Por la gracia de Dios, Juan,\neres de linaje limpio,\nmás que el sol, pero villano."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-por-la-gracia-de-dios-juan-eres"
 procedencia:

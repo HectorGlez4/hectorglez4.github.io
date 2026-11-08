@@ -1,5 +1,5 @@
 ---
-texto: "Y assi intenta en el Reyno que violenta, acreditarse de humano?"
+texto: "Y assi intenta\nen el Reyno que violenta,\nacreditarse de humano?"
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-y-assi-intenta-en-el-reyno-que"
 procedencia:

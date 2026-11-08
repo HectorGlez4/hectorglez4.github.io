@@ -1,5 +1,5 @@
 ---
-texto: "Bajad a la pobre niña, bajadla con mano trémula, y con cuidadoso esmero entre la fosa ponedla y arrojad sobre su tumba frías puñadas de tierra!"
+texto: "Bajad a la pobre niña,\nbajadla con mano trémula,\ny con cuidadoso esmero\nentre la fosa ponedla\ny arrojad sobre su tumba\nfrías puñadas de tierra!"
 autor: "jose-asuncion-silva"
 slug: "jose-asuncion-silva-bajad-a-la-pobre-nina-bajadla-con"
 procedencia:

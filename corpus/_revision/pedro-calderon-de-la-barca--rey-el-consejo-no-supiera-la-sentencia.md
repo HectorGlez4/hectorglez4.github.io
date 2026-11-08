@@ -1,5 +1,5 @@
 ---
-texto: "REY: ¿El consejo no supiera la sentencia ejecutar?"
+texto: "REY: ¿El consejo no supiera\nla sentencia ejecutar?"
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-rey-el-consejo-no-supiera-la-sentencia"
 procedencia:

@@ -1,5 +1,5 @@
 ---
-texto: "En los desdenes sufrido, en los favores callado, en los peligros resuelto, y prudente en los acasos."
+texto: "En los desdenes sufrido,\nen los favores callado,\nen los peligros resuelto,\ny prudente en los acasos."
 autor: "sor-juana-ines-de-la-cruz"
 slug: "sor-juana-ines-de-la-cruz-en-los-desdenes-sufrido-en-los-favores"
 procedencia:

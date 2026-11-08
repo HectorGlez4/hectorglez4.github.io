@@ -1,5 +1,5 @@
 ---
-texto: "¿Qué ley, justicia ó razon Negar á los hombres sabe Prívilegio tan süave, Excepcíon tan principal, Que Dios le ha, dado á. un cristal, A un pez, á un bruto y á, un ave?"
+texto: "¿Qué ley, justicia ó razon\nNegar á los hombres sabe\nPrívilegio tan süave,\nExcepcíon tan principal,\nQue Dios le ha, dado á. un cristal,\nA un pez, á un bruto y á, un ave?"
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-que-ley-justicia-o-razon-negar-a"
 procedencia:

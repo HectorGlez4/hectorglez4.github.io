@@ -1,5 +1,5 @@
 ---
-texto: "Pues si viniere Dion, viue Dios de no auisaros. 580 (Vase.)"
+texto: "Pues si viniere Dion,\nviue Dios de no auisaros. 580\n(Vase.)"
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-pues-si-viniere-dion-viue-dios-de"
 procedencia:

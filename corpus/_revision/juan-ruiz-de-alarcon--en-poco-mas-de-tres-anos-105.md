@@ -1,5 +1,5 @@
 ---
-texto: "En poco mas de tres años 105 concluyeron la jornada de las tres leguas de mina, que la laguna desagua."
+texto: "En poco mas de tres años 105\nconcluyeron la jornada\nde las tres leguas de mina,\nque la laguna desagua."
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-en-poco-mas-de-tres-anos-105"
 procedencia:

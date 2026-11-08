@@ -1,5 +1,5 @@
 ---
-texto: "CHISPA: Esto es cosa asentada, y que no hay ley que tal mande."
+texto: "CHISPA: Esto es cosa asentada,\ny que no hay ley que tal mande."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-chispa-esto-es-cosa-asentada-y-que"
 procedencia:

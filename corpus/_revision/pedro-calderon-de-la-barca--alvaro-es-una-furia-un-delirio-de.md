@@ -1,5 +1,5 @@
 ---
-texto: "ÁLVARO: Es una furia, un delirio de amor."
+texto: "ÁLVARO: Es una furia, un delirio\nde amor."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-alvaro-es-una-furia-un-delirio-de"
 procedencia:

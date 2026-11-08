@@ -1,5 +1,5 @@
 ---
-texto: "LOPE: Pues, ¡cómo ayer, sin que os dijera que os sentarais, os sentasteis, aun en la silla primera?"
+texto: "LOPE: Pues,\n¡cómo ayer, sin que os dijera\nque os sentarais, os sentasteis,\naun en la silla primera?"
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-lope-pues-como-ayer-sin-que-os"
 procedencia:

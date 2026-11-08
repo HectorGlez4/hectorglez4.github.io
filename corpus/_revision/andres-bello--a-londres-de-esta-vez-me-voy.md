@@ -1,5 +1,5 @@
 ---
-texto: "A Londres de esta vez, me voy derecho, donde, aunque no me aguarda el beso amante de mi Virginia, ni el paterno techo,"
+texto: "A Londres de esta vez, me voy derecho,\ndonde, aunque no me aguarda el beso amante\nde mi Virginia, ni el paterno techo,"
 autor: "andres-bello"
 slug: "andres-bello-a-londres-de-esta-vez-me-voy"
 procedencia:

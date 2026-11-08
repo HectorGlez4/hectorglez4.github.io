@@ -1,5 +1,5 @@
 ---
-texto: "ÁLVARO: Llantos no se han de creer de viejo, niño y mujer."
+texto: "ÁLVARO: Llantos no se han de creer\nde viejo, niño y mujer."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-alvaro-llantos-no-se-han-de-creer"
 procedencia:

@@ -1,5 +1,5 @@
 ---
-texto: "Y ya de espeso polvo se cubre el aire, y cerca se oye el trueno del hueco bronce, entre dolientes ayes de inerme vulgo, que a los golpes cae del vencedor; mas no, no impunemente: Ricaurte aguarda de una antorcha armado."
+texto: "Y ya de espeso polvo\nse cubre el aire, y cerca se oye el trueno\ndel hueco bronce, entre dolientes ayes\nde inerme vulgo, que a los golpes cae\ndel vencedor; mas no, no impunemente:\nRicaurte aguarda de una antorcha armado."
 autor: "andres-bello"
 slug: "andres-bello-y-ya-de-espeso-polvo-se-cubre"
 procedencia:

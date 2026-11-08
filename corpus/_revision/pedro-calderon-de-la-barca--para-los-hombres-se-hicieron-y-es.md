@@ -1,5 +1,5 @@
 ---
-texto: "Para los hombres se hicieron, y es menester que se impriman con valor dentro del pecho."
+texto: "Para los hombres se hicieron,\ny es menester que se impriman\ncon valor dentro del pecho."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-para-los-hombres-se-hicieron-y-es"
 procedencia:

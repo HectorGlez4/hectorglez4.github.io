@@ -126,9 +126,54 @@ export const slug = z
     'Regla incumplida: el slug solo admite minúsculas, dígitos y guiones, sin diacríticos.',
   );
 
+/**
+ * AD-29 (Historia 29.1) — el salto de verso se guarda como un único U+000A dentro del `texto`,
+ * y solo así. Cada forma que no es esa se rechaza con su regla: un retorno de carro, dos saltos
+ * seguidos (la estrofa no se guarda), un salto al principio o al final, cualquier otro
+ * separador de línea (U+2028, U+2029, U+0085, `\v`, `\f`), un espacio de cualquier clase pegado a
+ * un salto, y las dos maneras de fingir un verso en una línea —`<br` y « / »—. Quién
+ * escribe el salto, y de qué documento sale, lo decide `textoConSaltos` de `tools/lib/lineas.ts`;
+ * aquí solo vive la forma.
+ */
+/**
+ * Los invisibles que `colapsarEspacios` retira al comparar con el documento. Las reglas que miran
+ * lo que rodea a un salto se juzgan sin ellos: un U+FEFF entre dos saltos no separa la estrofa
+ * («verso\n\ufeff\notro» son dos saltos seguidos), ni uno entre el salto y el borde lo aparta
+ * del borde. No es una segunda lectura del espacio, solo lo que este esquema no debe dejar pasar.
+ */
+const INVISIBLES_JUNTO_AL_SALTO = /[\u00ad\u200b\u200c\u200d\u2060\ufeff]/gu;
+
+const FORMAS_DEL_SALTO_RECHAZADAS: readonly { prueba: RegExp; regla: string; sinInvisibles?: true }[] = [
+  { prueba: /\r/u, regla: 'el texto no admite retornos de carro (U+000D): el salto de verso es un único U+000A.' },
+  {
+    prueba: /\n\n/u,
+    regla: 'el texto no admite dos saltos seguidos: entre estrofas va un solo U+000A.',
+    sinInvisibles: true,
+  },
+  { prueba: /^\n|\n$/u, regla: 'el texto no admite un salto al principio ni al final.', sinInvisibles: true },
+  {
+    prueba: /[\u2028\u2029\u0085\v\f]/u,
+    regla:
+      'el texto no admite otro separador de línea (U+2028, U+2029, U+0085, tabulador vertical ni salto de página): el salto de verso es un único U+000A.',
+  },
+  // U+FEFF casa con `\s`, pero es un invisible que el escritor conserva junto al salto.
+  {
+    prueba: /[^\S\n\ufeff]\n|\n[^\S\n\ufeff]/u,
+    regla: 'el texto no admite un espacio (tampoco duro ni fino) ni un tabulador pegados a un salto.',
+  },
+  { prueba: /<br/iu, regla: 'el texto no admite «<br»: el salto de verso es un U+000A.' },
+  { prueba: / \/ /u, regla: 'el texto no admite « / » como salto de verso: el salto es un U+000A.' },
+];
+
 export const texto = z
   .string({ message: 'Regla incumplida: falta el texto de la Cita.' })
-  .min(1, 'Regla incumplida: el texto de la Cita no puede estar vacío.');
+  .min(1, 'Regla incumplida: el texto de la Cita no puede estar vacío.')
+  .superRefine((valor, ctx) => {
+    const sinInvisibles = valor.replace(INVISIBLES_JUNTO_AL_SALTO, '');
+    for (const { prueba, regla, sinInvisibles: juzgarSinInvisibles } of FORMAS_DEL_SALTO_RECHAZADAS) {
+      if (prueba.test(juzgarSinInvisibles ? sinInvisibles : valor)) ctx.addIssue({ code: 'custom', message: `Regla incumplida: ${regla}` });
+    }
+  });
 
 /** AD-1 — el único estado de derechos admisible. Cualquier otro rompe el build. */
 export const estadoDerechos = z.literal('dominio-público', {

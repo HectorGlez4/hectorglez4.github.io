@@ -1,5 +1,5 @@
 ---
-texto: "Si otro villano le festejara y sirviera, hiciera más caso de él."
+texto: "Si otro villano\nle festejara y sirviera,\nhiciera más caso de él."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-si-otro-villano-le-festejara-y-sirviera"
 procedencia:

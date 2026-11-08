@@ -1,5 +1,5 @@
 ---
-texto: "y este triste velar por la sabrosa ilusión permutemos, que se sueña en los floridos antros de tu diosa."
+texto: "y este triste velar por la sabrosa\nilusión permutemos, que se sueña\nen los floridos antros de tu diosa."
 autor: "andres-bello"
 slug: "andres-bello-y-este-triste-velar-por-la-sabrosa"
 procedencia:

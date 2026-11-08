@@ -1,5 +1,5 @@
 ---
-texto: "ÁLVARO: Yo he de llegar y atrevido quitar a Isabel de allí."
+texto: "ÁLVARO: Yo he de llegar y atrevido\nquitar a Isabel de allí."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-alvaro-yo-he-de-llegar-y-atrevido"
 procedencia:

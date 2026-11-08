@@ -1,5 +1,5 @@
 ---
-texto: "Al ESCRIBANO Con respeto le llevad a las casas en efeto del concejo, y con respeto un par de grillos le echad y una cadena, y tened con respeto gran cuidado, que no hable a ningún soldado."
+texto: "Al ESCRIBANO\nCon respeto le llevad\na las casas en efeto\ndel concejo, y con respeto\nun par de grillos le echad\ny una cadena, y tened\ncon respeto gran cuidado,\nque no hable a ningún soldado."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-al-escribano-con-respeto-le-llevad-a"
 procedencia:

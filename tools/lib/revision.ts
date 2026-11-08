@@ -18,10 +18,34 @@ import { join } from 'node:path';
 import { citaAdmisible } from '../../src/lib/admision.ts';
 import { cargaDeCandidata, type SeñalDeOrden } from '../../src/lib/ordenDeRevision.ts';
 import { esAparatoDeLaFuente, esTrozoDeCitaAjena, tienePuntuacionRota } from './extraccion.ts';
-import { motivoParaNoPublicar } from './cotejo.ts';
+import {
+  candidatosDeLosSaltos,
+  documentosDeCita,
+  documentosLegibles,
+  motivoParaNoPublicar,
+} from './cotejo.ts';
+import { saltosDeLaCita } from './lineas.ts';
 import { normalizar } from '../../src/lib/normalizar.ts';
+import { fichaDeCita, indiceDeFichas } from '../../src/lib/obras.ts';
+import {
+  CLASES_DE_COINCIDENCIA,
+  cifraDeParecido,
+  formaParaComparar,
+  indiceDeContencion,
+  parecidoEntre,
+  type FormaParaComparar,
+} from './parecido.ts';
 import { slugLibre } from '../../src/lib/slug.ts';
-import { leerCitas, leerTemas, mover, nombreDeFicheroDeCita, type Rutas } from './corpus.ts';
+import {
+  conLaLineaDeTexto,
+  leerCitas,
+  leerDocumentosParaElCotejo,
+  leerFichasDeObra,
+  leerTemas,
+  mover,
+  nombreDeFicheroDeCita,
+  type Rutas,
+} from './corpus.ts';
 import { aplicarFichaDeObra, resolverFichaDeObra } from './obras.ts';
 import { motivoSinTemaPublicado, temaPublicadoConLaPasada } from './alcance.ts';
 import type { TemaBajoUmbral } from '../../src/lib/publicado.ts';
@@ -42,6 +66,8 @@ export interface CandidataEnRevision {
    * asegura la Ficha de Obra de (Autor, obra) en el mismo gesto en que publica.
    */
   obra?: string;
+  /** Su Fuente, si declara una: de ella salen los documentos de los que toma sus saltos (29.2). */
+  fuente?: { id: string };
   /**
    * La Cita ya presente con la que coincide, si coincide con alguna — FR-14.
    *
@@ -49,6 +75,13 @@ export interface CandidataEnRevision {
    * equivalentes son la misma Cita o dos ediciones legítimas de la misma frase.
    */
   duplicaA?: { slug: string; donde: 'publicadas' | 'en revisión' };
+  /**
+   * Historia 29.4 — las Citas con las que casi coincide sin ser la misma forma (`parecidoEntre`):
+   * la **contenida** frente a lo publicado y a lo de revisión, en los dos sentidos, y la **casi
+   * igual** frente a las publicadas de su misma Obra resuelta. Publicadas primero, luego por slug.
+   * Se omite si no hay ninguna. Como `duplicaA`, señala y no bloquea nada.
+   */
+  parecidas?: Parecida[];
   /** Si pasaría la puerta de admisión ahora mismo, y qué le falta si no. */
   admisible: boolean;
   motivos: string[];
@@ -62,6 +95,96 @@ export interface CandidataEnRevision {
   señalesDeOrden: SeñalDeOrden[];
 }
 
+/** Una coincidencia de la 29.4 que no es la misma forma. */
+export interface Parecida {
+  slug: string;
+  donde: 'publicadas' | 'en revisión';
+  clase: 'contenida' | 'casi-iguales';
+  parecido: number;
+  /** En la contenida: si la candidata está dentro de la otra o la otra dentro de ella. */
+  sentido?: 'contenida-en' | 'contiene-a';
+  /** En la casi igual: la palabra que cambia, la de la candidata y la de la otra. */
+  palabra?: { a: string; b: string };
+}
+
+/**
+ * Las parecidas de cada candidata (Historia 29.4), por slug de candidata.
+ *
+ * La contenida se mira frente a **todo** —publicadas y revisión, en los dos sentidos—, con el
+ * índice de `indiceDeContencion` para no comparar cada candidata con las 290.000 restantes; la casi
+ * igual, solo frente a las publicadas de la misma Obra resuelta por ficha. Una candidata sin ficha
+ * no tiene publicadas en su Obra: toda publicada tiene ficha. Un par entre dos publicadas no es de
+ * ninguna candidata y no se mira.
+ */
+function parecidasDeLasCandidatas(
+  pendientes: readonly { slug: string; autor: string; texto?: string; procedencia?: { obra?: string } | null }[],
+  publicadas: readonly { slug: string; autor: string; texto: string; procedencia?: { obra?: string } | null }[],
+  fichas: Parameters<typeof fichaDeCita>[1],
+): Map<string, Parecida[]> {
+  const todas: { slug: string; donde: 'publicadas' | 'en revisión'; forma: FormaParaComparar }[] = [
+    ...publicadas.map((c) => ({ slug: c.slug, donde: 'publicadas' as const, forma: formaParaComparar(c.texto) })),
+    ...pendientes.map((c) => ({ slug: c.slug, donde: 'en revisión' as const, forma: formaParaComparar(c.texto ?? '') })),
+  ];
+  const parecidas = new Map<string, Parecida[]>();
+  const anotar = (slug: string, p: Parecida) => {
+    const lista = parecidas.get(slug);
+    if (lista === undefined) parecidas.set(slug, [p]);
+    else lista.push(p);
+  };
+
+  const contenedoras = indiceDeContencion(todas.map((t) => t.forma));
+  for (const dentro of todas) {
+    for (const indice of contenedoras(dentro.forma)) {
+      const fuera = todas[indice];
+      if (dentro.donde === 'publicadas' && fuera.donde === 'publicadas') continue;
+      const coincidencia = parecidoEntre(dentro.forma, fuera.forma, 'contenida');
+      if (coincidencia?.clase !== 'contenida') continue;
+      const comun = { clase: 'contenida' as const, parecido: coincidencia.parecido };
+      if (dentro.donde === 'en revisión') {
+        anotar(dentro.slug, { slug: fuera.slug, donde: fuera.donde, ...comun, sentido: 'contenida-en' });
+      }
+      if (fuera.donde === 'en revisión') {
+        anotar(fuera.slug, { slug: dentro.slug, donde: dentro.donde, ...comun, sentido: 'contiene-a' });
+      }
+    }
+  }
+
+  const porObra = new Map<string, { slug: string; forma: FormaParaComparar }[]>();
+  publicadas.forEach((c, i) => {
+    const ficha = fichaDeCita(c, fichas);
+    if (ficha === undefined) return;
+    const lista = porObra.get(ficha.nombre) ?? [];
+    lista.push({ slug: c.slug, forma: todas[i].forma });
+    porObra.set(ficha.nombre, lista);
+  });
+  pendientes.forEach((c, i) => {
+    const ficha = fichaDeCita(c, fichas);
+    if (ficha === undefined) return;
+    const suya = todas[publicadas.length + i].forma;
+    for (const otra of porObra.get(ficha.nombre) ?? []) {
+      const coincidencia = parecidoEntre(suya, otra.forma);
+      if (coincidencia?.clase !== 'casi-iguales') continue;
+      anotar(c.slug, {
+        slug: otra.slug,
+        donde: 'publicadas',
+        clase: 'casi-iguales',
+        parecido: coincidencia.parecido,
+        ...(coincidencia.palabra !== undefined ? { palabra: coincidencia.palabra } : {}),
+      });
+    }
+  });
+
+  for (const lista of parecidas.values()) {
+    lista.sort(
+      (x, y) =>
+        Number(x.donde !== 'publicadas') - Number(y.donde !== 'publicadas') ||
+        x.slug.localeCompare(y.slug, 'es') ||
+        CLASES_DE_COINCIDENCIA.indexOf(x.clase) - CLASES_DE_COINCIDENCIA.indexOf(y.clase),
+    );
+  }
+  return parecidas;
+}
+
 /**
  * Todo lo que está pendiente de decisión, en el orden en que se revisa.
  *
@@ -73,6 +196,8 @@ export interface CandidataEnRevision {
 export async function loteEnRevision(rutas: Rutas): Promise<CandidataEnRevision[]> {
   const pendientes = await leerCitas(rutas.revision);
   const publicadas = await leerCitas(rutas.citas);
+  const fichas = indiceDeFichas(await leerFichasDeObra(rutas));
+  const parecidas = parecidasDeLasCandidatas(pendientes, publicadas, fichas);
 
   // El índice de comparación usa la forma canónica de AD-3, la misma que la búsqueda:
   // si duplicados y búsqueda usaran criterios distintos, el corpus podría acabar con dos
@@ -142,12 +267,14 @@ export async function loteEnRevision(rutas: Rutas): Promise<CandidataEnRevision[
       ...(Array.isArray(candidata.temas) && candidata.temas.length > 0 ? { temas: candidata.temas } : {}),
       ruta: candidata.ruta,
       ...(typeof candidata.procedencia?.obra === 'string' ? { obra: candidata.procedencia.obra } : {}),
+      ...(typeof candidata.fuente?.id === 'string' ? { fuente: { id: candidata.fuente.id } } : {}),
       // La publicada gana: lo que el editor necesita saber es que ya está publicada.
       ...(duplicadaPublicada !== undefined
         ? { duplicaA: { slug: duplicadaPublicada, donde: 'publicadas' as const } }
         : duplicadaEnRevision !== undefined
           ? { duplicaA: { slug: duplicadaEnRevision, donde: 'en revisión' as const } }
           : {}),
+      ...(parecidas.has(candidata.slug) ? { parecidas: parecidas.get(candidata.slug)! } : {}),
       ...cargaYSeñales(candidata.texto ?? ''),
       admisible:
         comprobacion.success &&
@@ -236,6 +363,18 @@ export interface ResultadoDeDecision {
    */
   publicadasSinTema: { slug: string; temas: TemaBajoUmbral[]; motivos: string[] }[];
   rechazadas: string[];
+  /**
+   * Publicadas que llegaban sin los saltos de verso de su documento —una candidata extraída antes de
+   * la 29.1, o de un documento en prosa de una obra que también tiene uno de verso— y se publicaron
+   * con ellos, con el documento del que salen — Historia 29.2. Sin esto, la regla 4 del cotejo
+   * rompería el build siguiente.
+   */
+  conSaltos: { slug: string; documento: string }[];
+  /**
+   * Historia 29.4 — lo que se señalaba de cada publicada al aprobarla: su repetida (`duplicaA`) y
+   * sus parecidas. Publicarla no lo cambia: es aviso para quien aprueba, que lo lee en el parte.
+   */
+  avisos: { slug: string; duplicaA?: CandidataEnRevision['duplicaA']; parecidas: Parecida[] }[];
   noEncontradas: string[];
 }
 
@@ -252,6 +391,12 @@ export async function aprobar(
   temas: string[] = [],
 ): Promise<ResultadoDeDecision> {
   const lote = await loteEnRevision(rutas);
+  let leidos:
+    | Promise<{
+        documentos: Awaited<ReturnType<typeof leerDocumentosParaElCotejo>>['documentos'];
+        candidatos: ReturnType<typeof candidatosDeLosSaltos>['candidatos'];
+      }>
+    | undefined;
   const resultado: ResultadoDeDecision = {
     publicadas: [],
     renombradas: [],
@@ -262,6 +407,8 @@ export async function aprobar(
     publicadasSinTema: [],
     rechazadas: [],
     noEncontradas: [],
+    conSaltos: [],
+    avisos: [],
   };
 
   /*
@@ -306,6 +453,8 @@ export async function aprobar(
     candidata: CandidataEnRevision;
     temas: string[];
     comoPublicada: { autor: string; procedencia?: { obra?: string } };
+    /** El `texto` con sus saltos de verso, si llega sin ellos (Historia 29.2). */
+    conSaltos?: { texto: string; documento: string };
   }[] = [];
   const planeadasParaObra = [...publicadasParaObra];
   for (const [indice, slug] of [...new Set(slugs)].entries()) {
@@ -318,6 +467,19 @@ export async function aprobar(
       resultado.rechazadasPorAdmision.push({ slug, motivos: candidata.motivos });
       continue;
     }
+    /*
+     * Historia 29.2 — los saltos de verso, con la misma decisión que la regla 4 del cotejo
+     * (`saltosDeLaCita` sobre `candidatosDeLosSaltos`). Una candidata extraída antes de la 29.1 —el
+     * `_revision/` de la principal no se versiona y no lo restituye nadie— llega en una línea, y
+     * publicarla así rompería el build siguiente. Se publica con sus saltos; un conflicto entre dos
+     * documentos de verso se publica como está, igual que la regla 4 solo avisa.
+     */
+    const saltos = await saltosQueLeFaltan(candidata);
+    if (saltos !== undefined && !saltos.ok) {
+      resultado.rechazadasPorAdmision.push({ slug, motivos: [saltos.motivo] });
+      continue;
+    }
+    const conSaltos = saltos?.ok ? { texto: saltos.texto, documento: saltos.documento } : undefined;
     const obra = candidata.obra;
     const comoPublicada = {
       autor: candidata.autor,
@@ -346,9 +508,12 @@ export async function aprobar(
       candidata,
       temas: [...new Set([...(candidata.temas ?? []), ...temas])],
       comoPublicada,
+      ...(conSaltos !== undefined ? { conSaltos } : {}),
     });
   }
 
+  // Historia 29.4 — con qué slug salió cada candidata publicada en esta pasada, para los avisos.
+  const publicadaComo = new Map<string, string>();
   // Lo que esta pasada ya publicó: cuenta para los Temas de las que quedan.
   const escritas: { slug: string; temas: string[] }[] = [];
   let pendientes = planeadas;
@@ -376,7 +541,7 @@ export async function aprobar(
   replanificar();
 
   while (pendientes.length > 0) {
-    const { slug, candidata, temas: suyos, comoPublicada } = pendientes.shift()!;
+    const { slug, candidata, temas: suyos, comoPublicada, conSaltos } = pendientes.shift()!;
 
     /*
      * Historia 22.1 — la Ficha de Obra, en el mismo gesto en que se publica (AD-25).
@@ -403,10 +568,10 @@ export async function aprobar(
     const definitivo = slugLibre(candidata.slug, ocupados);
     ocupados.add(definitivo);
 
-    if (definitivo === candidata.slug && temas.length === 0) {
+    if (definitivo === candidata.slug && temas.length === 0 && conSaltos === undefined) {
       await mover(candidata.ruta, rutas.citas);
     } else {
-      await reescribirConSlug(candidata, definitivo, rutas, temas);
+      await reescribirConSlug(candidata, definitivo, rutas, temas, conSaltos?.texto);
       if (definitivo !== candidata.slug) {
         resultado.renombradas.push({ de: candidata.slug, a: definitivo });
       }
@@ -420,7 +585,30 @@ export async function aprobar(
     }
 
     resultado.publicadas.push(slug);
+    publicadaComo.set(candidata.slug, definitivo);
+    if (candidata.duplicaA !== undefined || (candidata.parecidas ?? []).length > 0) {
+      resultado.avisos.push({
+        slug: definitivo,
+        ...(candidata.duplicaA !== undefined ? { duplicaA: candidata.duplicaA } : {}),
+        parecidas: candidata.parecidas ?? [],
+      });
+    }
+    if (conSaltos !== undefined) resultado.conSaltos.push({ slug: definitivo, documento: conSaltos.documento });
   }
+
+  /*
+   * Historia 29.4 — los avisos se calcularon al listar, antes de publicar: una otra Cita que esta
+   * misma pasada publicó ya no está «en revisión», y su slug es el definitivo.
+   */
+  const aDondeVa = <T extends { slug: string; donde: 'publicadas' | 'en revisión' }>(x: T): T => {
+    const definitivo = x.donde === 'en revisión' ? publicadaComo.get(x.slug) : undefined;
+    return definitivo === undefined ? x : { ...x, slug: definitivo, donde: 'publicadas' };
+  };
+  resultado.avisos = resultado.avisos.map((aviso) => ({
+    ...aviso,
+    ...(aviso.duplicaA !== undefined ? { duplicaA: aDondeVa(aviso.duplicaA) } : {}),
+    parecidas: aviso.parecidas.map(aDondeVa),
+  }));
 
   /*
    * Lo escrito no se deshace. Si una Ficha que falló al escribir era la que le daba el Tema a una
@@ -436,6 +624,36 @@ export async function aprobar(
   }
 
   return resultado;
+
+  /**
+   * Los saltos de verso que le faltan a una candidata: `undefined` si no le falta ninguno —sin
+   * documento, en prosa, sin saltos en su tramo, en conflicto o ya con ellos—; `ok: false` si le
+   * faltan y su fichero no tiene la línea `texto:` que se sabe reescribir. Los documentos se leen
+   * una vez por pasada, como los lee el build.
+   */
+  async function saltosQueLeFaltan(
+    candidata: CandidataEnRevision,
+  ): Promise<{ ok: true; texto: string; documento: string } | { ok: false; motivo: string } | undefined> {
+    if (candidata.fuente === undefined) return undefined;
+    leidos ??= leerDocumentosParaElCotejo(rutas).then(({ documentos, lineasDeclaradas }) => ({
+      documentos,
+      candidatos: candidatosDeLosSaltos(documentos, lineasDeclaradas).candidatos,
+    }));
+    const { documentos, candidatos } = await leidos;
+    const legibles = documentosLegibles(documentosDeCita(candidata.fuente, candidata.obra, documentos), documentos);
+    const decision = saltosDeLaCita(candidata.texto, candidatos(legibles));
+    if (decision.tipo !== 'saltos' || decision.texto === candidata.texto) return undefined;
+    if (conLaLineaDeTexto(await readFile(candidata.ruta, 'utf8'), candidata.texto, decision.texto) === undefined) {
+      return {
+        ok: false,
+        motivo:
+          `le faltan los saltos de verso de corpus/fuentes/${decision.documento}.txt y su línea «texto:» no ` +
+          'es la que se sabe reescribir: publicada así rompería el build (regla 4 del cotejo). Corra ' +
+          `«npm run documentar -- --restituir-saltos ${candidata.slug}» y apruébela después.`,
+      };
+    }
+    return { ok: true, texto: decision.texto, documento: decision.documento };
+  }
 }
 
 /**
@@ -450,8 +668,14 @@ async function reescribirConSlug(
   definitivo: string,
   rutas: Rutas,
   temas: string[] = [],
+  conSaltos?: string,
 ): Promise<void> {
-  const bruto = await readFile(candidata.ruta, 'utf8');
+  const leido = await readFile(candidata.ruta, 'utf8');
+  // Historia 29.2 — solo cambia la línea `texto:`, como en la restitución.
+  const bruto = conSaltos === undefined ? leido : conLaLineaDeTexto(leido, candidata.texto, conSaltos);
+  if (bruto === undefined) {
+    throw new Error(`${candidata.ruta} cambió mientras se aprobaba: su línea «texto:» ya no es la que se decidió.`);
+  }
   const conNuevoSlug = bruto.replace(
     /^slug:.*$/m,
     `slug: ${JSON.stringify(definitivo)}`,
@@ -530,6 +754,8 @@ export async function rechazar(rutas: Rutas, slugs: string[]): Promise<Resultado
     publicadasSinTema: [],
     rechazadas: [],
     noEncontradas: [],
+    conSaltos: [],
+    avisos: [],
   };
 
   for (const slug of slugs) {
@@ -561,11 +787,8 @@ export function formatearLote(lote: CandidataEnRevision[], total: number = lote.
   for (const candidata of lote) {
     lineas.push(`${candidata.slug}`);
     lineas.push(`  «${candidata.texto}»`);
-    if (candidata.duplicaA) {
-      lineas.push(
-        `  ⚠ Duplica a ${candidata.duplicaA.slug} (${candidata.duplicaA.donde}). Decide tú.`,
-      );
-    }
+    if (candidata.duplicaA) lineas.push(`  ⚠ ${textoDeRepetida(candidata.duplicaA)}. Decide tú.`);
+    for (const parecida of candidata.parecidas ?? []) lineas.push(`  ⚠ ${textoDeParecida(parecida)}. Decide tú.`);
     if (!candidata.admisible) {
       lineas.push('  ✕ No pasaría la admisión aunque se apruebe:');
       for (const motivo of candidata.motivos) lineas.push(`      ${motivo}`);
@@ -585,4 +808,26 @@ export function formatearLote(lote: CandidataEnRevision[], total: number = lote.
   lineas.push('Aprobar:  npx tsx tools/revisar.ts --aprobar <slug> [<slug>...]');
   lineas.push('Rechazar: npx tsx tools/revisar.ts --rechazar <slug> [<slug>...]');
   return `${lineas.join('\n')}\n`;
+}
+
+/**
+ * El aviso de una repetida (Historia 29.4), sin signo ni cierre: con quién, dónde y la clase. Lo
+ * usan el listado («… Decide tú.») y el parte de `--aprobar`, que ya publicó.
+ */
+export function textoDeRepetida(d: NonNullable<CandidataEnRevision['duplicaA']>): string {
+  return `Duplica a ${d.slug} (${d.donde}; repetidas)`;
+}
+
+/**
+ * El aviso de una parecida (Historia 29.4), sin signo ni cierre: con quién, dónde, la clase y el
+ * parecido. Lo usan el listado y el parte de `--aprobar`.
+ */
+export function textoDeParecida(p: Parecida): string {
+  const cifra = cifraDeParecido(p.parecido);
+  if (p.clase === 'contenida') {
+    const verbo = p.sentido === 'contiene-a' ? 'Contiene a' : 'Contenida en';
+    return `${verbo} ${p.slug} (${p.donde}; contenida, ${cifra})`;
+  }
+  const palabra = p.palabra !== undefined ? `; ${p.palabra.a}/${p.palabra.b}` : '';
+  return `Casi igual a ${p.slug} (${p.donde}; casi iguales, ${cifra}${palabra})`;
 }

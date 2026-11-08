@@ -1,5 +1,5 @@
 ---
-texto: "Sale JUAN JUAN: (¡Quiera el cielo, que le tope!) Aparte Señor, a tu lado estoy."
+texto: "Sale JUAN\nJUAN: (¡Quiera el cielo, que le tope!) Aparte\nSeñor, a tu lado estoy."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-sale-juan-juan-quiera-el-cielo-que"
 procedencia:

@@ -1,5 +1,5 @@
 ---
-texto: "LOPE: Pues a decirme vení quién es el alcalde."
+texto: "LOPE: Pues a decirme vení\nquién es el alcalde."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-lope-pues-a-decirme-veni-quien-es"
 procedencia:

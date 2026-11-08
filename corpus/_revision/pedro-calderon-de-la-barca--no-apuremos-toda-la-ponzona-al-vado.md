@@ -1,5 +1,5 @@
 ---
-texto: "No apuremos toda la ponzoña al vado; quédese algo al sufrimiento."
+texto: "No apuremos\ntoda la ponzoña al vado;\nquédese algo al sufrimiento."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-no-apuremos-toda-la-ponzona-al-vado"
 procedencia:

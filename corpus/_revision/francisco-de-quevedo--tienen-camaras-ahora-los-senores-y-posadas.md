@@ -1,5 +1,5 @@
 ---
-texto: "Tienen cámaras ahora los señores y posadas; y tienen nueces sin cuento los nogales y gargantas."
+texto: "Tienen cámaras ahora\nlos señores y posadas;\ny tienen nueces sin cuento\nlos nogales y gargantas."
 autor: "francisco-de-quevedo"
 slug: "francisco-de-quevedo-tienen-camaras-ahora-los-senores-y-posadas"
 procedencia:

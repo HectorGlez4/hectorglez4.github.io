@@ -1,5 +1,5 @@
 ---
-texto: "Culpa sin duda es ser desdichado; mayor, de condición ser encogida."
+texto: "Culpa sin duda es ser desdichado;\nmayor, de condición ser encogida."
 autor: "luis-de-gongora"
 slug: "luis-de-gongora-culpa-sin-duda-es-ser-desdichado-mayor"
 procedencia:

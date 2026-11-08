@@ -1,5 +1,5 @@
 ---
-texto: "CRESPO: Malo lo veo; ni que haya en el mundo creo quien tan mal os aconseje."
+texto: "CRESPO: Malo lo veo;\nni que haya en el mundo creo\nquien tan mal os aconseje."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-crespo-malo-lo-veo-ni-que-haya"
 procedencia:

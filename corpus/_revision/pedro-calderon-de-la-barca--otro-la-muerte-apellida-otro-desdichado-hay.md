@@ -1,5 +1,5 @@
 ---
-texto: "Otro la muerte apellida, otro desdichado hay que hoy a pesar suyo viva."
+texto: "Otro la muerte apellida,\notro desdichado hay\nque hoy a pesar suyo viva."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-otro-la-muerte-apellida-otro-desdichado-hay"
 procedencia:

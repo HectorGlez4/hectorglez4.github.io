@@ -1,5 +1,5 @@
 ---
-texto: "Vase [JUAN] CRESPO: El cielo vaya contigo."
+texto: "Vase [JUAN]\nCRESPO: El cielo vaya contigo."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-vase-juan-crespo-el-cielo-vaya-contigo"
 procedencia:

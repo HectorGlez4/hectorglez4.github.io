@@ -1,5 +1,5 @@
 ---
-texto: "Mas animame el seruiros: dadme los braços."
+texto: "Mas animame el seruiros:\ndadme los braços."
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-mas-animame-el-seruiros-dadme-los-bracos"
 procedencia:

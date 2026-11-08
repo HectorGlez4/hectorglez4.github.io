@@ -1,5 +1,5 @@
 ---
-texto: "La lealtad al Rey ¿No es ántse Que la vida y que el honor?"
+texto: "La lealtad al Rey ¿No es ántse\nQue la vida y que el honor?"
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-la-lealtad-al-rey-no-es-antse"
 procedencia:

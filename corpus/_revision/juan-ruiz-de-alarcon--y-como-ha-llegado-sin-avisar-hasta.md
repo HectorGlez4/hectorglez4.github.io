@@ -1,5 +1,5 @@
 ---
-texto: "Y como ha llegado sin avisar hasta aqui?"
+texto: "Y como ha llegado\nsin avisar hasta aqui?"
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-y-como-ha-llegado-sin-avisar-hasta"
 procedencia:

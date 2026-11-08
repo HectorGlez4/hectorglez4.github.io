@@ -1,5 +1,5 @@
 ---
-texto: "Los dos seréis los que conmigo vendréis."
+texto: "Los dos seréis\nlos que conmigo vendréis."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-los-dos-sereis-los-que-conmigo-vendreis"
 procedencia:

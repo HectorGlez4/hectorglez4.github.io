@@ -1,5 +1,5 @@
 ---
-texto: "ESCRIBANO: Vení a la casa del concejo y, recibida la posesión de la vara, haréis en la causa misma averiguaciones."
+texto: "ESCRIBANO: Vení a la casa\ndel concejo y, recibida\nla posesión de la vara,\nharéis en la causa misma\naveriguaciones."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-escribano-veni-a-la-casa-del-concejo"
 procedencia:

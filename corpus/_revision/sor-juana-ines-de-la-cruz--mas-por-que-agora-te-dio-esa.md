@@ -1,5 +1,5 @@
 ---
-texto: "Mas, ¿por qué agora te dio esa gana de esperar, si te entras siempre a acostar tú, y le espero sola yo?"
+texto: "Mas, ¿por qué agora te dio\nesa gana de esperar,\nsi te entras siempre a acostar\ntú, y le espero sola yo?"
 autor: "sor-juana-ines-de-la-cruz"
 slug: "sor-juana-ines-de-la-cruz-mas-por-que-agora-te-dio-esa"
 procedencia:

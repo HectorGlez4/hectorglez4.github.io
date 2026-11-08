@@ -1,5 +1,5 @@
 ---
-texto: "Rápida como un reflejo, Dos veces vi el alma, dos: Cuando murió el pobre viejo, Cuando ella me dijo adiós."
+texto: "Rápida como un reflejo,\nDos veces vi el alma, dos:\nCuando murió el pobre viejo,\nCuando ella me dijo adiós."
 autor: "jose-marti"
 temas:
   - "la-muerte"

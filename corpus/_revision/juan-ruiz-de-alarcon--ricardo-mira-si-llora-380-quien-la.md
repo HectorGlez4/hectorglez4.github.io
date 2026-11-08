@@ -1,5 +1,5 @@
 ---
-texto: "RICARDO Mira si llora, 380 quien la pierde enamorado, justamente."
+texto: "RICARDO\nMira si llora,\n380\nquien la pierde enamorado,\njustamente."
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-ricardo-mira-si-llora-380-quien-la"
 procedencia:

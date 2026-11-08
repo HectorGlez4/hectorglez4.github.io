@@ -1,5 +1,5 @@
 ---
-texto: "si enternecer bastara un duro canto, mirad qué habrá con un corazón hecho, que al llanto y al suspiro fue de cera."
+texto: "si enternecer bastara un duro canto,\nmirad qué habrá con un corazón hecho,\nque al llanto y al suspiro fue de cera."
 autor: "luis-de-gongora"
 slug: "luis-de-gongora-si-enternecer-bastara-un-duro-canto-mirad"
 procedencia:

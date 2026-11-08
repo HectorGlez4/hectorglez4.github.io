@@ -1,5 +1,5 @@
 ---
-texto: "FILIPO Del Rey alienta el deseo favorable la ventura, 630 pues dice ya esta hermosura que es Aurora la que veo."
+texto: "FILIPO\nDel Rey alienta el deseo\nfavorable la ventura, 630\npues dice ya esta hermosura\nque es Aurora la que veo."
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-filipo-del-rey-alienta-el-deseo-favorable"
 procedencia:

@@ -1,5 +1,5 @@
 ---
-texto: "Estando en cuita y en duelo, denostado de zofrir, el Cid al rey don Alfonso fabló de esta guisa; oíd: Si como atendeís los chismes de los que fablan de mí, atendiérades mis quejas mi sandez toviera fin."
+texto: "Estando en cuita y en duelo,\ndenostado de zofrir,\nel Cid al rey don Alfonso\nfabló de esta guisa; oíd:\nSi como atendeís los chismes\nde los que fablan de mí,\natendiérades mis quejas\nmi sandez toviera fin."
 autor: "francisco-de-quevedo"
 slug: "francisco-de-quevedo-estando-en-cuita-y-en-duelo-denostado"
 procedencia:

@@ -1,5 +1,5 @@
 ---
-texto: "Y el médico aquí viva, que se entiende con algún boticario, y nos receta drogas que a medias con aquel nos vende."
+texto: "Y el médico aquí viva, que se entiende\ncon algún boticario, y nos receta\ndrogas que a medias con aquel nos vende."
 autor: "mariano-jose-de-larra"
 slug: "mariano-jose-de-larra-y-el-medico-aqui-viva-que-se"
 procedencia:

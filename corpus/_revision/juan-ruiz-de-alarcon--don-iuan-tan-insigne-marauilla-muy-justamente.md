@@ -1,5 +1,5 @@
 ---
-texto: "DON IUAN Tan insigne marauilla muy justamente se alaua por la primera del mundo."
+texto: "DON IUAN\nTan insigne marauilla\nmuy justamente se alaua\npor la primera del mundo."
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-don-iuan-tan-insigne-marauilla-muy-justamente"
 procedencia:

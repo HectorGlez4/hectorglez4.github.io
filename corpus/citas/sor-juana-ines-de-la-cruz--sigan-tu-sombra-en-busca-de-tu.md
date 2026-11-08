@@ -1,5 +1,5 @@
 ---
-texto: "sigan tu sombra en busca de tu día los que, con verdes vidrios por anteojos, todo lo ven pintado a su deseo; que yo, más cuerda en la fortuna mía, tengo en entrambas manos ambos ojos y solamente lo que toco veo."
+texto: "sigan tu sombra en busca de tu día\nlos que, con verdes vidrios por anteojos,\ntodo lo ven pintado a su deseo;\nque yo, más cuerda en la fortuna mía,\ntengo en entrambas manos ambos ojos\ny solamente lo que toco veo."
 autor: "sor-juana-ines-de-la-cruz"
 temas:
   - "la-vida"

@@ -1,5 +1,5 @@
 ---
-texto: "Y cuanta fresca rosa la esmeralda matiza de sus campos florecidos, Guayaquil entreteja a tu guirnalda;"
+texto: "Y cuanta fresca rosa la esmeralda\nmatiza de sus campos florecidos,\nGuayaquil entreteja a tu guirnalda;"
 autor: "andres-bello"
 slug: "andres-bello-y-cuanta-fresca-rosa-la-esmeralda-matiza"
 procedencia:

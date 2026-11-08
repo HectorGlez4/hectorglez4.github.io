@@ -1,5 +1,5 @@
 ---
-texto: "Ciento por ciento llevaron Los Inocentes de Orgaz, Peonzas que a puro azote Hizo el bederre bailar."
+texto: "Ciento por ciento llevaron\nLos Inocentes de Orgaz,\nPeonzas que a puro azote\nHizo el bederre bailar."
 autor: "francisco-de-quevedo"
 slug: "francisco-de-quevedo-ciento-por-ciento-llevaron-los-inocentes-de"
 procedencia:

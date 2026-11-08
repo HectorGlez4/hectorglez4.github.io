@@ -1,5 +1,5 @@
 ---
-texto: "Ministro, no grifaño, duro sí, que en Líparis Estérope forjó (Piedra digo bezahar de otro Pirú)"
+texto: "Ministro, no grifaño, duro sí,\nque en Líparis Estérope forjó\n(Piedra digo bezahar de otro Pirú)"
 autor: "luis-de-gongora"
 slug: "luis-de-gongora-ministro-no-grifano-duro-si-que-en"
 procedencia:

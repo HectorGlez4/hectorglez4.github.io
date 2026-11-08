@@ -1,5 +1,5 @@
 ---
-texto: "Nace el arroyo, culebra Que entre flores se desata, Y, apenas, sierpe de plata."
+texto: "Nace el arroyo, culebra\nQue entre flores se desata,\nY, apenas, sierpe de plata."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-nace-el-arroyo-culebra-que-entre-flores"
 procedencia:

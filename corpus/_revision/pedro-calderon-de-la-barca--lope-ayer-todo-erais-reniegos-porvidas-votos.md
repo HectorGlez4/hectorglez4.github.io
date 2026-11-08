@@ -1,5 +1,5 @@
 ---
-texto: "LOPE: Ayer todo erais reniegos, porvidas, votos y pesias; y hoy estáis más apacible, con más gusto y más prudencia."
+texto: "LOPE: Ayer todo erais reniegos,\nporvidas, votos y pesias;\ny hoy estáis más apacible,\ncon más gusto y más prudencia."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-lope-ayer-todo-erais-reniegos-porvidas-votos"
 procedencia:

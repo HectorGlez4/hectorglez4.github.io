@@ -1,5 +1,5 @@
 ---
-texto: "No mal logres tu esperança, por castigar mi rigor, 850 que si muere el vengador, es locura la vengança."
+texto: "No mal logres tu esperança,\npor castigar mi rigor, 850\nque si muere el vengador,\nes locura la vengança."
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-no-mal-logres-tu-esperanca-por-castigar"
 procedencia:

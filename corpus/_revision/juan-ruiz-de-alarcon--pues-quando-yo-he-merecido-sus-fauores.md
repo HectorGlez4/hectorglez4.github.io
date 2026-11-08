@@ -1,5 +1,5 @@
 ---
-texto: "Pues quando yo he merecido sus fauores, y el Rey no, que le ofendo, en querer yo 870 ganar lo que el ha perdido?"
+texto: "Pues quando yo he merecido\nsus fauores, y el Rey no,\nque le ofendo, en querer yo 870\nganar lo que el ha perdido?"
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-pues-quando-yo-he-merecido-sus-fauores"
 procedencia:

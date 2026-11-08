@@ -1,5 +1,5 @@
 ---
-texto: "Mató a Francisco Jiménez Con una aguja un rapaz, Y murió muerte de sastre, Sin tijeras ni dedal."
+texto: "Mató a Francisco Jiménez\nCon una aguja un rapaz,\nY murió muerte de sastre,\nSin tijeras ni dedal."
 autor: "francisco-de-quevedo"
 slug: "francisco-de-quevedo-mato-a-francisco-jimenez-con-una-aguja"
 procedencia:

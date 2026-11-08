@@ -1,5 +1,5 @@
 ---
-texto: "Ana: (A lástima me ha movido su belleza y su desgracia."
+texto: "Ana: (A lástima me ha movido\nsu belleza y su desgracia."
 autor: "sor-juana-ines-de-la-cruz"
 slug: "sor-juana-ines-de-la-cruz-ana-a-lastima-me-ha-movido-su"
 procedencia:

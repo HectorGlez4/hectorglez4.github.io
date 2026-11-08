@@ -1,5 +1,5 @@
 ---
-texto: "IULIA Soltarâ don Iuan, si puedo, la palabra a ruego mio. 870 LEONARDO No intentes tal desvario, que pensarà, que es enredo, y que he mudado intencion."
+texto: "IULIA\nSoltarâ don Iuan, si puedo,\nla palabra a ruego mio. 870\nLEONARDO\nNo intentes tal desvario,\nque pensarà, que es enredo,\ny que he mudado intencion."
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-iulia-soltara-don-iuan-si-puedo-la"
 procedencia:

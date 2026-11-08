@@ -1,5 +1,5 @@
 ---
-texto: "¡Oh niebla del estado más sereno, furia infernal, serpiente mal nacida!"
+texto: "¡Oh niebla del estado más sereno,\nfuria infernal, serpiente mal nacida!"
 autor: "luis-de-gongora"
 slug: "luis-de-gongora-oh-niebla-del-estado-mas-sereno-furia"
 procedencia:

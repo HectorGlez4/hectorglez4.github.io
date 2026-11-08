@@ -1,5 +1,5 @@
 ---
-texto: "Y, ¡vive Dios!, que a no entrar en el lugar tan aprisa, señor, Vuestra Majestad, que había de hallar luminarias puestas por todo el lugar."
+texto: "Y, ¡vive Dios!, que a no entrar\nen el lugar tan aprisa,\nseñor, Vuestra Majestad,\nque había de hallar luminarias\npuestas por todo el lugar."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-y-vive-dios-que-a-no-entrar"
 procedencia:

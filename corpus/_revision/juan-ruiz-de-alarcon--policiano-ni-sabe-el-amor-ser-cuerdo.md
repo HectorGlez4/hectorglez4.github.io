@@ -1,5 +1,5 @@
 ---
-texto: "POLICIANO Ni sabe el amor ser cuerdo, ni el loco sabe temer; 370 Sicilia se ha de perder, viue Dios, si a Aurora pierdo."
+texto: "POLICIANO\nNi sabe el amor ser cuerdo,\nni el loco sabe temer; 370\nSicilia se ha de perder,\nviue Dios, si a Aurora pierdo."
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-policiano-ni-sabe-el-amor-ser-cuerdo"
 procedencia:

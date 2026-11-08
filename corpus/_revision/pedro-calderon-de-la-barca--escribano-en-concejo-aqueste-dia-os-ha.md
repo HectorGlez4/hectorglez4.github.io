@@ -1,5 +1,5 @@
 ---
-texto: "ESCRIBANO: En concejo aqueste día os ha hecho alcalde, y tenéis para estrena de justicia dos grandes acciones hoy."
+texto: "ESCRIBANO: En concejo aqueste día\nos ha hecho alcalde, y tenéis\npara estrena de justicia\ndos grandes acciones hoy."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-escribano-en-concejo-aqueste-dia-os-ha"
 procedencia:

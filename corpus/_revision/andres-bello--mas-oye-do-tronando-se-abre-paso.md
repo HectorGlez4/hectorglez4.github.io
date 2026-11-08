@@ -1,5 +1,5 @@
 ---
-texto: "Mas oye do tronando se abre paso entre murallas de peinada roca, y envuelto en blanca nube de vapores, de vacilantes iris matizada, los valles va a buscar del Magdalena con salto audaz el Bogotá espumoso."
+texto: "Mas oye do tronando se abre paso\nentre murallas de peinada roca,\ny envuelto en blanca nube de vapores,\nde vacilantes iris matizada,\nlos valles va a buscar del Magdalena\ncon salto audaz el Bogotá espumoso."
 autor: "andres-bello"
 slug: "andres-bello-mas-oye-do-tronando-se-abre-paso"
 procedencia:

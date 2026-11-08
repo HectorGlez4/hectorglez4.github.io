@@ -1,5 +1,5 @@
 ---
-texto: "Un soldado me alcanzó y me dijo en el camino..."
+texto: "Un soldado me alcanzó\ny me dijo en el camino..."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-un-soldado-me-alcanzo-y-me-dijo"
 procedencia:

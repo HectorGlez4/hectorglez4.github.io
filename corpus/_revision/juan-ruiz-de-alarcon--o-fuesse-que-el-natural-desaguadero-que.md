@@ -1,5 +1,5 @@
 ---
-texto: "O fuesse que el natural desaguadero, que traga 70 las corrientes, que recibe esta laguna, se harta: O fuesse que fueron tales las crecientes de las aguas, que para poder beuellas 75 no era capaz su garganta."
+texto: "O fuesse que el natural\ndesaguadero, que traga 70\nlas corrientes, que recibe\nesta laguna, se harta:\nO fuesse que fueron tales\nlas crecientes de las aguas,\nque para poder beuellas 75\nno era capaz su garganta."
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-o-fuesse-que-el-natural-desaguadero-que"
 procedencia:

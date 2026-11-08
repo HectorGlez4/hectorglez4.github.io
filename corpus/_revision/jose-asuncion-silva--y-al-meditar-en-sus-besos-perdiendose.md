@@ -1,5 +1,5 @@
 ---
-texto: "Y al meditar en sus besos perdiéndose en sus miradas se sueñan locos excesos de frescas carnes rosadas."
+texto: "Y al meditar en sus besos\nperdiéndose en sus miradas\nse sueñan locos excesos\nde frescas carnes rosadas."
 autor: "jose-asuncion-silva"
 slug: "jose-asuncion-silva-y-al-meditar-en-sus-besos-perdiendose"
 procedencia:

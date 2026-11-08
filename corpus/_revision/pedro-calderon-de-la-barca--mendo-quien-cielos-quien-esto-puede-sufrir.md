@@ -1,5 +1,5 @@
 ---
-texto: "MENDO: ¿Quién, cielos, quien esto puede sufrir?"
+texto: "MENDO: ¿Quién, cielos, quien\nesto puede sufrir?"
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-mendo-quien-cielos-quien-esto-puede-sufrir"
 procedencia:

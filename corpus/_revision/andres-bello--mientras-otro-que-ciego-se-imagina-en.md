@@ -1,5 +1,5 @@
 ---
-texto: "mientras otro que ciego se imagina en sólidos objetos ocupado, y también a su modo desatina,"
+texto: "mientras otro que ciego se imagina\nen sólidos objetos ocupado,\ny también a su modo desatina,"
 autor: "andres-bello"
 slug: "andres-bello-mientras-otro-que-ciego-se-imagina-en"
 procedencia:

@@ -1,5 +1,5 @@
 ---
-texto: "LEONARDO Iulia, aduierte, que me ofendo: don Iuan, mirad, que no entiendo, que me teneis por amigo."
+texto: "LEONARDO\nIulia, aduierte, que me ofendo:\ndon Iuan, mirad, que no entiendo,\nque me teneis por amigo."
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-leonardo-iulia-aduierte-que-me-ofendo-don"
 procedencia:

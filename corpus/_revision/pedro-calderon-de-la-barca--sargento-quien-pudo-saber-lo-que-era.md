@@ -1,5 +1,5 @@
 ---
-texto: "SARGENTO: ¿Quién pudo saber lo que era antes de curada?"
+texto: "SARGENTO: ¿Quién pudo saber\nlo que era antes de curada?"
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-sargento-quien-pudo-saber-lo-que-era"
 procedencia:

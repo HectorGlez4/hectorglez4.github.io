@@ -1,5 +1,5 @@
 ---
-texto: "¡Paciencia!) MÚSICOS: \"La flores del romero, niña Isabel, hoy son flores azules, y mañana serán miel.\" LOPE: (Música, vaya."
+texto: "¡Paciencia!)\nMÚSICOS: \"La flores del romero,\nniña Isabel,\nhoy son flores azules,\ny mañana serán miel.\"\nLOPE: (Música, vaya."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-paciencia-musicos-la-flores-del-romero-nina"
 procedencia:

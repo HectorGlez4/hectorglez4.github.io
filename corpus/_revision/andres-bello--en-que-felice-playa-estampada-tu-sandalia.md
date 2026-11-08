@@ -1,5 +1,5 @@
 ---
-texto: "¿en qué felice playa estampada tu sandalia de oro será primero?"
+texto: "¿en qué felice\nplaya estampada tu sandalia de oro\nserá primero?"
 autor: "andres-bello"
 slug: "andres-bello-en-que-felice-playa-estampada-tu-sandalia"
 procedencia:

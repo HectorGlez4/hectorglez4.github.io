@@ -1,5 +1,5 @@
 ---
-texto: "Dios tenga en su santa gloria A Bartolomé Román, Que aun con Dios, si no le tiene, Pienso que no querrá estar."
+texto: "Dios tenga en su santa gloria\nA Bartolomé Román,\nQue aun con Dios, si no le tiene,\nPienso que no querrá estar."
 autor: "francisco-de-quevedo"
 slug: "francisco-de-quevedo-dios-tenga-en-su-santa-gloria-a"
 procedencia:

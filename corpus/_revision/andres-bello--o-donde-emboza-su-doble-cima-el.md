@@ -1,5 +1,5 @@
 ---
-texto: "¿o dónde emboza su doble cima el Avila entre nubes, y la ciudad renace de Losada?"
+texto: "¿o dónde emboza\nsu doble cima el Avila entre nubes,\ny la ciudad renace de Losada?"
 autor: "andres-bello"
 slug: "andres-bello-o-donde-emboza-su-doble-cima-el"
 procedencia:

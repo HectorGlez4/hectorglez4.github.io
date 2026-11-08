@@ -1,5 +1,5 @@
 ---
-texto: "No te quiero dar parte En mis quejas, Clarín, por no quitarte, Llorando tu desvelo, El derecho que tienes tú al consuelo."
+texto: "No te quiero dar parte\nEn mis quejas, Clarín, por no quitarte,\nLlorando tu desvelo,\nEl derecho que tienes tú al consuelo."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-no-te-quiero-dar-parte-en-mis"
 procedencia:

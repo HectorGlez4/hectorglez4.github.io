@@ -1,5 +1,5 @@
 ---
-texto: "Pocos reserva a vil suplicio el hierro; su rabia insana en los demás desfoga un enemigo que hacer siempre supo, más que la lid, sangrienta la victoria."
+texto: "Pocos reserva a vil suplicio el hierro;\nsu rabia insana en los demás desfoga\nun enemigo que hacer siempre supo,\nmás que la lid, sangrienta la victoria."
 autor: "andres-bello"
 slug: "andres-bello-pocos-reserva-a-vil-suplicio-el-hierro"
 procedencia:

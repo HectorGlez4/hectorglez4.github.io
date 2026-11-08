@@ -1,5 +1,5 @@
 ---
-texto: "¡Ah, cielos, qué bien hacéis en quitarme La libertad!"
+texto: "¡Ah, cielos, qué bien hacéis en quitarme\nLa libertad!"
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-ah-cielos-que-bien-haceis-en-quitarme"
 procedencia:

@@ -1,5 +1,5 @@
 ---
-texto: "ÁLVARO: Yo os apercibo que soy un capitán vivo."
+texto: "ÁLVARO: Yo os apercibo\nque soy un capitán vivo."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-alvaro-yo-os-apercibo-que-soy-un"
 procedencia:

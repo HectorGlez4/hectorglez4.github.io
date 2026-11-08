@@ -1,5 +1,5 @@
 ---
-texto: "Un abanico de culpas Fue principio de mi mal; Un letrado de lo caro, Grullo de la puridad."
+texto: "Un abanico de culpas\nFue principio de mi mal;\nUn letrado de lo caro,\nGrullo de la puridad."
 autor: "francisco-de-quevedo"
 slug: "francisco-de-quevedo-un-abanico-de-culpas-fue-principio-de"
 procedencia:

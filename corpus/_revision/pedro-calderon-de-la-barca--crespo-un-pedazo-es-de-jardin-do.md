@@ -1,5 +1,5 @@
 ---
-texto: "CRESPO: Un pedazo es de jardín do mi hija se divierta."
+texto: "CRESPO: Un pedazo es de jardín\ndo mi hija se divierta."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-crespo-un-pedazo-es-de-jardin-do"
 procedencia:

@@ -1,5 +1,5 @@
 ---
-texto: "FILIPO El fuera en esso dichoso: mas tiene su casamiento 775 en Cartago ya tratado."
+texto: "FILIPO\nEl fuera en esso dichoso:\nmas tiene su casamiento 775\nen Cartago ya tratado."
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-filipo-el-fuera-en-esso-dichoso-mas"
 procedencia:

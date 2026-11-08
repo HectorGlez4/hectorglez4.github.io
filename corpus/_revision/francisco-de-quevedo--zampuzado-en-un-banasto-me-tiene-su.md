@@ -1,5 +1,5 @@
 ---
-texto: "Zampuzado en un banasto Me tiene su Majestad, En un callejón Noruega Aprendiendo a gavilán."
+texto: "Zampuzado en un banasto\nMe tiene su Majestad,\nEn un callejón Noruega\nAprendiendo a gavilán."
 autor: "francisco-de-quevedo"
 slug: "francisco-de-quevedo-zampuzado-en-un-banasto-me-tiene-su"
 procedencia:

@@ -1,5 +1,5 @@
 ---
-texto: "Todo necio confunde valor y precio."
+texto: "Todo necio\nconfunde valor y precio."
 autor: "antonio-machado"
 temas:
   - "el-saber"

@@ -1,5 +1,5 @@
 ---
-texto: "Yo vivo en paz con los hombres y en guerra con mis entrañas."
+texto: "Yo vivo en paz con los hombres\ny en guerra con mis entrañas."
 autor: "antonio-machado"
 temas:
   - "la-vida"

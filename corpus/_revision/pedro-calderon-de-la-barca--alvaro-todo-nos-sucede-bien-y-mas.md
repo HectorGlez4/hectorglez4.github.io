@@ -1,5 +1,5 @@
 ---
-texto: "ÁLVARO: Todo nos sucede bien, y más, si me ayuda quien esta esperanza me da de que esta noche podré hablarla."
+texto: "ÁLVARO: Todo nos sucede bien,\ny más, si me ayuda quien\nesta esperanza me da\nde que esta noche podré\nhablarla."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-alvaro-todo-nos-sucede-bien-y-mas"
 procedencia:

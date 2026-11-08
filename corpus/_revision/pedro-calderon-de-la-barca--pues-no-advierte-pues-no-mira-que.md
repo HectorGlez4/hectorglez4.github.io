@@ -1,5 +1,5 @@
 ---
-texto: "Pues no advierte, pues no mira, que las victorias de amor no hay trofeo en que consistan, sino en granjear el cariño de la hermosura que estiman; porque querer sin el alma una hermosura ofendida, es querer una belleza hermosa pero no viva!"
+texto: "Pues no advierte, pues no mira,\nque las victorias de amor\nno hay trofeo en que consistan,\nsino en granjear el cariño\nde la hermosura que estiman;\nporque querer sin el alma\nuna hermosura ofendida,\nes querer una belleza\nhermosa pero no viva!"
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-pues-no-advierte-pues-no-mira-que"
 procedencia:

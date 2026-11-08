@@ -1,5 +1,5 @@
 ---
-texto: "Hombres necios que acusáis a la mujer, sin razón, sin ver que sois la ocasión de lo mismo que culpáis;"
+texto: "Hombres necios que acusáis\na la mujer, sin razón,\nsin ver que sois la ocasión\nde lo mismo que culpáis;"
 autor: "sor-juana-ines-de-la-cruz"
 temas:
   - "la-palabra"

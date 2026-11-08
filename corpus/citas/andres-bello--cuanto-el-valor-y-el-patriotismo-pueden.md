@@ -1,5 +1,5 @@
 ---
-texto: "Cuanto el valor y el patriotismo pueden, el patriotismo y el valor agotan; mas ¡ay! sin fruto."
+texto: "Cuanto el valor y el patriotismo pueden,\nel patriotismo y el valor agotan;\nmas ¡ay! sin fruto."
 autor: "andres-bello"
 temas:
   - "la-patria"

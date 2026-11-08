@@ -1,5 +1,5 @@
 ---
-texto: "Sin temor en los concursos defendía mi recato con peligros del peligro y con el daño del daño."
+texto: "Sin temor en los concursos\ndefendía mi recato\ncon peligros del peligro\ny con el daño del daño."
 autor: "sor-juana-ines-de-la-cruz"
 slug: "sor-juana-ines-de-la-cruz-sin-temor-en-los-concursos-defendia-mi"
 procedencia:

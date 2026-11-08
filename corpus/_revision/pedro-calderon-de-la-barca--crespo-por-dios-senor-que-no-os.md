@@ -1,5 +1,5 @@
 ---
-texto: "CRESPO: Por Dios, señor, que no os alteréis; que sólo a una diligencia vengo, con vuestra licencia, aquí, y que solo os quedéis importa."
+texto: "CRESPO: Por Dios,\nseñor, que no os alteréis;\nque sólo a una diligencia\nvengo, con vuestra licencia,\naquí, y que solo os quedéis\nimporta."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-crespo-por-dios-senor-que-no-os"
 procedencia:

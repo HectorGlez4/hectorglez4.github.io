@@ -1,5 +1,5 @@
 ---
-texto: "LOPE: ¿Cómo a servirla no entran mis criados?"
+texto: "LOPE: ¿Cómo a servirla no entran\nmis criados?"
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-lope-como-a-servirla-no-entran-mis"
 procedencia:

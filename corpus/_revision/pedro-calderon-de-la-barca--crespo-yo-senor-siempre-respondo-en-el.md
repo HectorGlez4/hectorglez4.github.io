@@ -1,5 +1,5 @@
 ---
-texto: "CRESPO: Yo, señor, siempre respondo en el tono y en la letra, que me hablan."
+texto: "CRESPO: Yo, señor, siempre respondo\nen el tono y en la letra,\nque me hablan."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-crespo-yo-senor-siempre-respondo-en-el"
 procedencia:

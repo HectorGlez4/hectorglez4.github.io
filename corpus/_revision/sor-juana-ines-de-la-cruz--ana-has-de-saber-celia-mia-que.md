@@ -1,5 +1,5 @@
 ---
-texto: "Ana: Has de saber, Celia mía, que aquesta noche ha fïado de mí todo su cuidado; tanto de mi afecto fía."
+texto: "Ana: Has de saber, Celia mía,\nque aquesta noche ha fïado\nde mí todo su cuidado;\ntanto de mi afecto fía."
 autor: "sor-juana-ines-de-la-cruz"
 slug: "sor-juana-ines-de-la-cruz-ana-has-de-saber-celia-mia-que"
 procedencia:

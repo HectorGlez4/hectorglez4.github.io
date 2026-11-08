@@ -1,5 +1,5 @@
 ---
-texto: "SANCHO ¿Acabò el secreto ya? 450 DON IUAN ¿Quien os mete en esso a vos?"
+texto: "SANCHO\n¿Acabò el secreto ya? 450\nDON IUAN\n¿Quien os mete en esso a vos?"
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-sancho-acabo-el-secreto-ya-450-don"
 procedencia:

@@ -1,5 +1,5 @@
 ---
-texto: "Vámonos acercando; Que este es mucho mirar, señora, cuando Es mejor que la gente Que habita en ella generosamente Nos admita."
+texto: "Vámonos acercando;\nQue este es mucho mirar, señora, cuando\nEs mejor que la gente\nQue habita en ella generosamente\nNos admita."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-vamonos-acercando-que-este-es-mucho-mirar"
 procedencia:

@@ -1,5 +1,5 @@
 ---
-texto: "duras puentes romper, cual tiernas cañas; arroyos prodigiosos, ríos violentos, mal vadeados de los pensamientos y enfrenados peor de las montañas;"
+texto: "duras puentes romper, cual tiernas cañas;\narroyos prodigiosos, ríos violentos,\nmal vadeados de los pensamientos\ny enfrenados peor de las montañas;"
 autor: "luis-de-gongora"
 slug: "luis-de-gongora-duras-puentes-romper-cual-tiernas-canas-arroyos"
 procedencia:

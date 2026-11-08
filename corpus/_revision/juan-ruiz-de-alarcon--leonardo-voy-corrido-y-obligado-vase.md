@@ -1,5 +1,5 @@
 ---
-texto: "LEONARDO Voy corrido, y obligado. (Vase.)"
+texto: "LEONARDO\nVoy corrido, y obligado.\n(Vase.)"
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-leonardo-voy-corrido-y-obligado-vase"
 procedencia:

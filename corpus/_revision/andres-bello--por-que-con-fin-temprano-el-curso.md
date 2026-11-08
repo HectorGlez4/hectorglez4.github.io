@@ -1,5 +1,5 @@
 ---
-texto: "¿Por qué con fin temprano el curso alegre cortó de tus hazañas la fortuna?"
+texto: "¿Por qué con fin temprano el curso alegre\ncortó de tus hazañas la fortuna?"
 autor: "andres-bello"
 slug: "andres-bello-por-que-con-fin-temprano-el-curso"
 procedencia:

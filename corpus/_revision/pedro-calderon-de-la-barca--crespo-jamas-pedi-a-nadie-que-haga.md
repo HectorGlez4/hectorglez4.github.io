@@ -1,5 +1,5 @@
 ---
-texto: "CRESPO: Jamás pedí a nadie que haga lo que yo me pueda hacer."
+texto: "CRESPO: Jamás pedí a nadie que haga\nlo que yo me pueda hacer."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-crespo-jamas-pedi-a-nadie-que-haga"
 procedencia:

@@ -1,5 +1,5 @@
 ---
-texto: "goza cuello, cabello, labio, y frente, antes que lo que fue en tu edad dorada oro, lilio, clavel, cristal luciente, no solo en plata o víola troncada se vuelva, mas tú y ello juntamente en tierra, en humo, en polvo, en sombra, en nada."
+texto: "goza cuello, cabello, labio, y frente,\nantes que lo que fue en tu edad dorada\noro, lilio, clavel, cristal luciente,\nno solo en plata o víola troncada\nse vuelva, mas tú y ello juntamente\nen tierra, en humo, en polvo, en sombra, en nada."
 autor: "luis-de-gongora"
 temas:
   - "el-tiempo"

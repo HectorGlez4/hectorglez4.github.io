@@ -1,5 +1,5 @@
 ---
-texto: "¿Quién no escucha la célica armonía que con alegre estrépito resuena del abrasador sur al frío norte?"
+texto: "¿Quién no escucha la célica armonía\nque con alegre estrépito resuena\ndel abrasador sur al frío norte?"
 autor: "andres-bello"
 slug: "andres-bello-quien-no-escucha-la-celica-armonia-que"
 procedencia:

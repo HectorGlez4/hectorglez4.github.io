@@ -1,5 +1,5 @@
 ---
-texto: "SANCHO Yo lo soy: pues siempre delante voy, mas dime, ¿en que estado estan 635 las penas de que me ausento?"
+texto: "SANCHO\nYo lo soy:\npues siempre delante voy,\nmas dime, ¿en que estado estan 635\nlas penas de que me ausento?"
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-sancho-yo-lo-soy-pues-siempre-delante"
 procedencia:

@@ -1,5 +1,5 @@
 ---
-texto: "Pero disimularé por Pedro Crespo y por ella.) ¡Qué travesuras!"
+texto: "Pero disimularé\npor Pedro Crespo y por ella.)\n¡Qué travesuras!"
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-pero-disimulare-por-pedro-crespo-y-por"
 procedencia:

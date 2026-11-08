@@ -1,5 +1,5 @@
 ---
-texto: "Con asombro de mirarte, Con admiración de oirte."
+texto: "Con asombro de mirarte,\nCon admiración de oirte."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-con-asombro-de-mirarte-con-admiracion-de"
 procedencia:

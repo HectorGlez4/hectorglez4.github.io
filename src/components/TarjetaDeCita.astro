@@ -14,6 +14,7 @@
  */
 import type { Cita, Autor } from '../lib/publicado.ts';
 import { rutaDeCita } from '../lib/superficies.ts';
+import TextoDeCita from './TextoDeCita.astro';
 import type { Zona } from '../lib/vocabulario.ts';
 
 interface Props {
@@ -139,7 +140,7 @@ const fragmento =
   * comas y nada más.
   */}
 <li class="tarjeta" data-zona={zona}>
-  <a href={rutaDeCita(cita.slug)}><span class="fragmento">«{fragmento}»</span>{partes.map((parte) => (<><span class="solo-para-lectores">, </span><span class={parte.clase}>{parte.texto}</span></>))}</a>
+  <a href={rutaDeCita(cita.slug)}><span class="fragmento"><TextoDeCita texto={fragmento} /></span>{partes.map((parte) => (<><span class="solo-para-lectores">, </span><span class={parte.clase}>{parte.texto}</span></>))}</a>
 </li>
 
 <style>

@@ -1,5 +1,5 @@
 ---
-texto: "Que cada vez que te miro, siento más el que te vayas, y ha de ser, porque lo he dicho."
+texto: "Que cada vez que te miro,\nsiento más el que te vayas,\ny ha de ser, porque lo he dicho."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-que-cada-vez-que-te-miro-siento"
 procedencia:

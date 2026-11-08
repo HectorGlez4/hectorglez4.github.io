@@ -54,6 +54,15 @@
  * cambia la revisión vigente de una entidad referida en `corpus/wikidata/vigentes.yml`, sin
  * descargar nada, y dice cuántas Obras remiten a ella. Atar una entidad real es acto de Héctor.
  *
+ * Historia 29.4 — los casi duplicados:
+ *
+ *   npm run obra -- casi-duplicados [<ficha>...] [--json] [--corpus corpus]
+ *
+ * Recorre los pares de Citas publicadas de cada Obra —o de las fichas nombradas— y señala los
+ * repetidos, los contenidos y los casi iguales, con la única medida de `tools/lib/parecido.ts`. Es
+ * un parte: no escribe nada y no decide nada (retirar, conservar o restituir lo decide una
+ * persona). Código 1 si una ficha nombrada no existe o el Corpus no se deja leer, sin parte.
+ *
  * Códigos: 2 es la forma de la invocación (falta un argumento, sobra uno, una bandera que no
  * existe); 1 es lo que la invocación dice.
  *
@@ -61,6 +70,7 @@
  */
 
 import { fechaLocal, rutasDelCorpus } from './lib/corpus.ts';
+import { casiDuplicados, formatearCasiDuplicados } from './lib/casiDuplicados.ts';
 import {
   motivosDeArgumentosNoReconocidos,
   opcion,
@@ -96,6 +106,7 @@ const USO = [
   '  npm run obra -- quitar-edicion <ficha> <n> [--corpus corpus]',
   '  npm run obra -- wikidata <ficha> corpus/wikidata/<Q>--r<N>.json [--corpus corpus]',
   '  npm run obra -- wikidata-vigente <Q> <N> [--corpus corpus]',
+  '  npm run obra -- casi-duplicados [<ficha>...] [--json] [--corpus corpus]',
   '  npm run obra -- congelar [--corpus corpus]',
   '  npm run obra -- levantar',
   '',
@@ -270,6 +281,28 @@ async function principal(): Promise<never> {
       if (!/^Q[1-9]\d*$/u.test(entidad)) usoMal([`«${entidad}» no es una entidad de Wikidata («Q…»).`]);
       if (!/^[1-9]\d{0,15}$/u.test(revision) || !Number.isSafeInteger(Number(revision))) usoMal([`«${revision}» no es una revisión: un entero positivo.`]);
       return terminar(await cambiarVigenteDeWikidata(rutas, entidad, Number(revision)));
+    }
+
+    case 'casi-duplicados': {
+      const conValor = ['--corpus'];
+      const soloOpciones = resto.filter((a, i) => a.startsWith('--') || (i > 0 && resto[i - 1] === '--corpus'));
+      const mal = motivosDeArgumentosNoReconocidos(soloOpciones, { solas: ['--json'], conValor });
+      if (mal.length > 0) usoMal(mal);
+      for (const bandera of ['--corpus', '--json']) {
+        if (resto.filter((a) => a === bandera).length > 1) usoMal([`«${bandera}» se da dos veces.`]);
+      }
+      const fichas = [...posicionales(resto, conValor), ...trasElSeparador];
+      const resultado = await casiDuplicados(rutas, fichas);
+      if (!resultado.ok) {
+        process.stderr.write(`${resultado.motivos.join('\n')}\n`);
+        return process.exit(1);
+      }
+      process.stdout.write(
+        resto.includes('--json')
+          ? `${JSON.stringify(resultado.parte, null, 2)}\n`
+          : `${formatearCasiDuplicados(resultado.parte)}\n`,
+      );
+      return process.exit(0);
     }
 
     case 'congelar':

@@ -1,5 +1,5 @@
 ---
-texto: "Quando no la vi en mil dias, huyendo su resistencia, 690 y estan con la larga ausencia las cenizas de amor frias, ¿de llamarme se ha acordado? quando estoy tan de partida, ¿quiere por la despedida 695 resucitar mi cuidado?"
+texto: "Quando no la vi en mil dias,\nhuyendo su resistencia, 690\ny estan con la larga ausencia\nlas cenizas de amor frias,\n¿de llamarme se ha acordado?\nquando estoy tan de partida,\n¿quiere por la despedida 695\nresucitar mi cuidado?"
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-quando-no-la-vi-en-mil-dias"
 procedencia:

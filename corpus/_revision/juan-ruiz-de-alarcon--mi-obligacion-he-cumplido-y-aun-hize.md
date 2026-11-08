@@ -1,5 +1,5 @@
 ---
-texto: "Mi obligacion he cumplido, y aun hize mas que deui; 845 pues tercero contra mi de sus cuydados he sido: hasta aqui de mi lealtad pudo estenderse la ley, mas no a que el amor del Rey 850 la ponga a mi voluntad."
+texto: "Mi obligacion he cumplido,\ny aun hize mas que deui; 845\npues tercero contra mi\nde sus cuydados he sido:\nhasta aqui de mi lealtad\npudo estenderse la ley,\nmas no a que el amor del Rey 850\nla ponga a mi voluntad."
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-mi-obligacion-he-cumplido-y-aun-hize"
 procedencia:

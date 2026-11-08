@@ -1,5 +1,5 @@
 ---
-texto: "DOÑA ANA Por cierto que estas pesado, 505 don Iuan, o falto de sesso."
+texto: "DOÑA ANA\nPor cierto que estas pesado, 505\ndon Iuan, o falto de sesso."
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-dona-ana-por-cierto-que-estas-pesado"
 procedencia:

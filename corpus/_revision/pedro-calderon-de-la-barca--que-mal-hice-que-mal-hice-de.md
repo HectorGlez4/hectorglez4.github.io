@@ -1,5 +1,5 @@
 ---
-texto: "¡Qué mal hice, qué mal hice de escaparme fugitiva de mi hermano!"
+texto: "¡Qué mal hice, qué mal hice\nde escaparme fugitiva\nde mi hermano!"
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-que-mal-hice-que-mal-hice-de"
 procedencia:

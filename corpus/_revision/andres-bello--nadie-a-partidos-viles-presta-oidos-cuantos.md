@@ -1,5 +1,5 @@
 ---
-texto: "Nadie a partidos viles presta oídos; cuantos un resto de vigor conservan, lánzanse al mar, y la enemiga flota en mal seguros leños atraviesan."
+texto: "Nadie a partidos viles presta oídos;\ncuantos un resto de vigor conservan,\nlánzanse al mar, y la enemiga flota\nen mal seguros leños atraviesan."
 autor: "andres-bello"
 slug: "andres-bello-nadie-a-partidos-viles-presta-oidos-cuantos"
 procedencia:

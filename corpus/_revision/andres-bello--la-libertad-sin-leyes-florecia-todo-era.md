@@ -1,5 +1,5 @@
 ---
-texto: "La libertad sin leyes florecía, todo era paz, contento y alegría; cuando de dichas tantas envidiosa Huitaca bella, de las aguas diosa, hinchando el Bogotá, sumerge el valle."
+texto: "La libertad sin leyes florecía,\ntodo era paz, contento y alegría;\ncuando de dichas tantas envidiosa\nHuitaca bella, de las aguas diosa,\nhinchando el Bogotá, sumerge el valle."
 autor: "andres-bello"
 slug: "andres-bello-la-libertad-sin-leyes-florecia-todo-era"
 procedencia:

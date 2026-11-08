@@ -1,5 +1,5 @@
 ---
-texto: "Decirte que nací hermosa presumo que es excusado, pues lo atestiguan tus ojos y lo prueban mis trabajos."
+texto: "Decirte que nací hermosa\npresumo que es excusado,\npues lo atestiguan tus ojos\ny lo prueban mis trabajos."
 autor: "sor-juana-ines-de-la-cruz"
 slug: "sor-juana-ines-de-la-cruz-decirte-que-naci-hermosa-presumo-que-es"
 procedencia:

@@ -1,5 +1,5 @@
 ---
-texto: "Con un paso de garganta no ha de hacer otro en su vida."
+texto: "Con un paso de garganta\nno ha de hacer otro en su vida."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-con-un-paso-de-garganta-no-ha"
 procedencia:

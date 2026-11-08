@@ -1,5 +1,5 @@
 ---
-texto: "Vanse don ÁLVARO y el SARGENTO, y sale la CHISPA CHISPA: ¡Téngase!"
+texto: "Vanse don ÁLVARO y el SARGENTO, y sale la\nCHISPA\nCHISPA: ¡Téngase!"
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-vanse-don-alvaro-y-el-sargento-y"
 procedencia:

@@ -1,5 +1,5 @@
 ---
-texto: "Si es muy hermosa mi hija, díganlo vuestros extremos, aunque pudiera, al decirlos, con mayores sentimientos llorar."
+texto: "Si es muy hermosa mi hija,\ndíganlo vuestros extremos,\naunque pudiera, al decirlos,\ncon mayores sentimientos\nllorar."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-si-es-muy-hermosa-mi-hija-diganlo"
 procedencia:

@@ -1,5 +1,5 @@
 ---
-texto: "Todo el mundo se llena de alegría, menos yo, que en mis penas siempre graves, ausente estoy de la zagala mía."
+texto: "Todo el mundo se llena de alegría,\nmenos yo, que en mis penas siempre graves,\nausente estoy de la zagala mía."
 autor: "jose-manuel-de-navarrete"
 temas:
   - "el-amor"

@@ -137,3 +137,70 @@ describe('la paleta y las familias tienen un solo dueño', () => {
     expect(anchoAproximado('abcd', 10)).toBe(4 * 10 * ANCHO_POR_CARACTER);
   });
 });
+
+describe('Historia 29.3 — repartirEnLineas abre línea en cada salto de verso', () => {
+  const MARTI =
+    '«Yo vengo de todas partes,\nY hacia todas partes voy:\nArte soy entre las artes,\nEn los montes, monte soy.»';
+
+  it('con una línea holgada, cada verso es una línea: nunca se unen dos', () => {
+    expect(repartirEnLineas(MARTI, 46, 1040)).toEqual([
+      '«Yo vengo de todas partes,',
+      'Y hacia todas partes voy:',
+      'Arte soy entre las artes,',
+      'En los montes, monte soy.»',
+    ]);
+  });
+
+  it('ninguna línea contiene el final de un verso y el principio del siguiente, a ningún ancho', () => {
+    const versos = MARTI.split('\n');
+    for (const ancho of [200, 400, 600, 1040]) {
+      const lineas = repartirEnLineas(MARTI, 46, ancho);
+      // Las líneas, unidas por espacio y releídas por verso, reconstruyen cada verso sin mezclar.
+      let i = 0;
+      for (const verso of versos) {
+        let resto = verso;
+        while (resto !== '') {
+          const linea = lineas[i++];
+          expect(resto.startsWith(linea), `ancho ${ancho}: «${linea}» no es el principio de «${resto}»`).toBe(true);
+          resto = resto.slice(linea.length).trimStart();
+        }
+      }
+      expect(i).toBe(lineas.length);
+    }
+  });
+
+  it('un verso más ancho que la línea sigue en la siguiente, y no se une al verso siguiente', () => {
+    const texto = 'un verso bastante largo que no cabe entero\ncorto';
+    const lineas = repartirEnLineas(texto, 20, 300); // 300 / (20 · 0,55) → 27 caracteres
+    expect(lineas.length).toBeGreaterThan(2);
+    expect(lineas.at(-1)).toBe('corto');
+    expect(lineas.slice(0, -1).join(' ')).toBe('un verso bastante largo que no cabe entero');
+  });
+
+  it('sin saltos, el reparto es el de siempre', () => {
+    const texto = 'La libertad, Sancho, es uno de los más preciosos dones que a los hombres dieron los cielos.';
+    const deCorrido = (t: string, maximo: number) => {
+      const salida: string[] = [];
+      let actual = '';
+      for (const palabra of t.split(/\s+/)) {
+        const tentativa = actual === '' ? palabra : `${actual} ${palabra}`;
+        if ([...tentativa].length <= maximo || actual === '') actual = tentativa;
+        else {
+          salida.push(actual);
+          actual = palabra;
+        }
+      }
+      if (actual !== '') salida.push(actual);
+      return salida;
+    };
+    expect(repartirEnLineas(texto, 46, 1040)).toEqual(deCorrido(texto, Math.floor(1040 / (46 * ANCHO_POR_CARACTER))));
+  });
+
+  it('palabrasQueDesbordan lee igual un salto que un espacio', () => {
+    const largo = 'a'.repeat(60);
+    expect(palabrasQueDesbordan(`corto\n${largo}\nfin`, 46, 1040)).toEqual(
+      palabrasQueDesbordan(`corto ${largo} fin`, 46, 1040),
+    );
+    expect(palabrasQueDesbordan(`corto\n${largo}`, 46, 1040)).toEqual([largo]);
+  });
+});

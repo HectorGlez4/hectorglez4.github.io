@@ -1,5 +1,5 @@
 ---
-texto: "No prosigas; que desdichas, Isabel, para contarlas no es menester referirlas."
+texto: "No prosigas; que desdichas,\nIsabel, para contarlas\nno es menester referirlas."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-no-prosigas-que-desdichas-isabel-para-contarlas"
 procedencia:

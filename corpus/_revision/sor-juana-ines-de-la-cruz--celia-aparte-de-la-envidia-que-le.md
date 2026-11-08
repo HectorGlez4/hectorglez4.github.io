@@ -1,5 +1,5 @@
 ---
-texto: "Celia: (Aparte.) De la envidia que le tiene no le arriendo la ganancia)."
+texto: "Celia: (Aparte.) De la envidia que le tiene\nno le arriendo la ganancia)."
 autor: "sor-juana-ines-de-la-cruz"
 slug: "sor-juana-ines-de-la-cruz-celia-aparte-de-la-envidia-que-le"
 procedencia:

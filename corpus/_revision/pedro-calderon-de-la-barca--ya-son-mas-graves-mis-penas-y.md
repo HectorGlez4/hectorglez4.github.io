@@ -1,5 +1,5 @@
 ---
-texto: "Ya son más graves Mis penas y confusiones, mis ansias y mis pesares."
+texto: "Ya son más graves\nMis penas y confusiones, mis ansias y mis pesares."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-ya-son-mas-graves-mis-penas-y"
 procedencia:

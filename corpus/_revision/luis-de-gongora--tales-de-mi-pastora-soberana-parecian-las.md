@@ -1,5 +1,5 @@
 ---
-texto: "tales de mi pastora soberana parecían las lágrimas hermosas sobre las dos mejillas milagrosas, de quien mezcladas leche y sangre mana,"
+texto: "tales de mi pastora soberana\nparecían las lágrimas hermosas\nsobre las dos mejillas milagrosas,\nde quien mezcladas leche y sangre mana,"
 autor: "luis-de-gongora"
 slug: "luis-de-gongora-tales-de-mi-pastora-soberana-parecian-las"
 procedencia:

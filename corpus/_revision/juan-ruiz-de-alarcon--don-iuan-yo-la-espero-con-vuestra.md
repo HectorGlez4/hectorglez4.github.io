@@ -1,5 +1,5 @@
 ---
-texto: "DON IUAN Yo la espero con vuestra ayuda."
+texto: "DON IUAN\nYo la espero\ncon vuestra ayuda."
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-don-iuan-yo-la-espero-con-vuestra"
 procedencia:

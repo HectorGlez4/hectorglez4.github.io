@@ -1,5 +1,5 @@
 ---
-texto: "Pues ocultarle Al Rey no puedo, conforme a la ley del homenaje."
+texto: "Pues ocultarle\nAl Rey no puedo, conforme a la ley del homenaje."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-pues-ocultarle-al-rey-no-puedo-conforme"
 procedencia:

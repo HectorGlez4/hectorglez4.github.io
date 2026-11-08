@@ -1,5 +1,5 @@
 ---
-texto: "Con él esperaré que llegue el día de dar la vuelta a mi nativo suelo, y a los abrazos de la esposa mía;"
+texto: "Con él esperaré que llegue el día\nde dar la vuelta a mi nativo suelo,\ny a los abrazos de la esposa mía;"
 autor: "andres-bello"
 slug: "andres-bello-con-el-esperare-que-llegue-el-dia"
 procedencia:

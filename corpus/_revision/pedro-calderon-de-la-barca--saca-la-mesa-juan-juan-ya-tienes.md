@@ -1,5 +1,5 @@
 ---
-texto: "Saca la mesa JUAN JUAN: Ya tienes la mesa aquí."
+texto: "Saca la mesa JUAN\nJUAN: Ya tienes la mesa aquí."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-saca-la-mesa-juan-juan-ya-tienes"
 procedencia:

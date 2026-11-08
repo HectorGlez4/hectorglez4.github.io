@@ -1,5 +1,5 @@
 ---
-texto: "Al mismo que yo idolatro es el que quiere Leonor..."
+texto: "Al mismo que yo idolatro\nes el que quiere Leonor..."
 autor: "sor-juana-ines-de-la-cruz"
 slug: "sor-juana-ines-de-la-cruz-al-mismo-que-yo-idolatro-es-el"
 procedencia:

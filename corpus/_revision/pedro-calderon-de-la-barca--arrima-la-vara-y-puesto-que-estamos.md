@@ -1,5 +1,5 @@
 ---
-texto: "Arrima la vara Y puesto que estamos solos, señor don Álvaro, hablemos más claramente los dos sin que tantos sentimientos como tiene encerrados en las cárceles del pecho acierten a quebrantar las prisiones del silencio."
+texto: "Arrima la vara\nY puesto que estamos solos,\nseñor don Álvaro, hablemos\nmás claramente los dos\nsin que tantos sentimientos\ncomo tiene encerrados\nen las cárceles del pecho\nacierten a quebrantar\nlas prisiones del silencio."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-arrima-la-vara-y-puesto-que-estamos"
 procedencia:

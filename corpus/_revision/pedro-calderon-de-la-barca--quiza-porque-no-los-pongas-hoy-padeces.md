@@ -1,5 +1,5 @@
 ---
-texto: "Quizá, porque no los pongas, hoy padeces tantos males. (Llévanse algunos soldados á Segismundo, y enciérranle en su prisión.)"
+texto: "Quizá, porque no los pongas, hoy padeces tantos males.\n(Llévanse algunos soldados á Segismundo, y enciérranle en su prisión.)"
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-quiza-porque-no-los-pongas-hoy-padeces"
 procedencia:

@@ -1,5 +1,5 @@
 ---
-texto: "Y a todos también poned en la cárcel, que es razón, y aparte, porque después con respeto a todos tres les tomen la confesión."
+texto: "Y a todos también poned\nen la cárcel, que es razón,\ny aparte, porque después\ncon respeto a todos tres\nles tomen la confesión."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-y-a-todos-tambien-poned-en-la"
 procedencia:

@@ -1,5 +1,5 @@
 ---
-texto: "Falta la vida, asiste lo vivido, y no hay calamidad que no me ronde."
+texto: "Falta la vida, asiste lo vivido,\ny no hay calamidad que no me ronde."
 autor: "francisco-de-quevedo"
 slug: "francisco-de-quevedo-falta-la-vida-asiste-lo-vivido-y"
 procedencia:

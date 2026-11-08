@@ -1,5 +1,5 @@
 ---
-texto: "Sale INÉS con la espada INÉS: Ésta, señor, es tu espada."
+texto: "Sale INÉS con la espada\nINÉS: Ésta, señor, es tu espada."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-sale-ines-con-la-espada-ines-esta"
 procedencia:

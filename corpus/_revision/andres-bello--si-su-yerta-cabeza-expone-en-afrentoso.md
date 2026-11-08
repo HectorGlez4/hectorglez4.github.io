@@ -1,5 +1,5 @@
 ---
-texto: "¿si su yerta cabeza expone en afrentoso palo?"
+texto: "¿si su yerta\ncabeza expone en afrentoso palo?"
 autor: "andres-bello"
 slug: "andres-bello-si-su-yerta-cabeza-expone-en-afrentoso"
 procedencia:

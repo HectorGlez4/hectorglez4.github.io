@@ -1,5 +1,5 @@
 ---
-texto: "Sale el ESCRIBANO ESCRIBANO: ¡Oh, señor, Pedro Crespo!"
+texto: "Sale el ESCRIBANO\nESCRIBANO: ¡Oh, señor,\nPedro Crespo!"
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-sale-el-escribano-escribano-oh-senor-pedro"
 procedencia:

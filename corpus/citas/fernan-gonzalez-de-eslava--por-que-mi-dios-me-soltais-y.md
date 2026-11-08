@@ -1,5 +1,5 @@
 ---
-texto: "¿Por qué, mi Dios, me soltais, Y soltando me prendeis?"
+texto: "¿Por qué, mi Dios, me soltais,\nY soltando me prendeis?"
 autor: "fernan-gonzalez-de-eslava"
 temas:
   - "la-libertad"

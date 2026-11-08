@@ -1,5 +1,5 @@
 ---
-texto: "CRESPO: Yo también de esa otra; y aun bien que está cerca de aquí, y nos oirá a los dos."
+texto: "CRESPO: Yo también\nde esa otra; y aun bien que está\ncerca de aquí, y nos oirá\na los dos."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-crespo-yo-tambien-de-esa-otra-y"
 procedencia:

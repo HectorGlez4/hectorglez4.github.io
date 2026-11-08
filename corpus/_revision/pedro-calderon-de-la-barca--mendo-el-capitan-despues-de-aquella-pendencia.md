@@ -1,5 +1,5 @@
 ---
-texto: "MENDO: ¿El capitán, después de aquella pendencia, que en su casa tuvo, fuése?"
+texto: "MENDO: ¿El capitán,\ndespués de aquella pendencia,\nque en su casa tuvo, fuése?"
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-mendo-el-capitan-despues-de-aquella-pendencia"
 procedencia:

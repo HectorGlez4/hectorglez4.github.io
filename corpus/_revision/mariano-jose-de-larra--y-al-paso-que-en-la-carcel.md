@@ -1,5 +1,5 @@
 ---
-texto: "Y al paso que en la cárcel mil pobretes por un duro se mueren de ictericia, ese pasea libre de corchetes; porque es conde y señor, y aunque desquicia con su vivir el orden, insolente de las leyes se burla y la justicia."
+texto: "Y al paso que en la cárcel mil pobretes\npor un duro se mueren de ictericia,\nese pasea libre de corchetes;\nporque es conde y señor, y aunque desquicia\ncon su vivir el orden, insolente\nde las leyes se burla y la justicia."
 autor: "mariano-jose-de-larra"
 slug: "mariano-jose-de-larra-y-al-paso-que-en-la-carcel"
 procedencia:

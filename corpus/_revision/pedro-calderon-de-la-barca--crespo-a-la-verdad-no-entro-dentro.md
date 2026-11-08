@@ -1,5 +1,5 @@
 ---
-texto: "CRESPO: (A la verdad, no entro dentro Aparte porque desde aquí imagino como el camino blanquea veo a Juan en el camino.) Inés, sácame a esta puerta asiento."
+texto: "CRESPO: (A la verdad, no entro dentro Aparte\nporque desde aquí imagino\ncomo el camino blanquea\nveo a Juan en el camino.)\nInés, sácame a esta puerta\nasiento."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-crespo-a-la-verdad-no-entro-dentro"
 procedencia:

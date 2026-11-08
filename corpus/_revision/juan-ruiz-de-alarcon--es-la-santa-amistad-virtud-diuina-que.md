@@ -1,5 +1,5 @@
 ---
-texto: "Es la santa amistad virtud diuina, que no dilata el premio de tenella, 445 pues ella misma es de si misma el fruto."
+texto: "Es la santa amistad virtud diuina,\nque no dilata el premio de tenella, 445\npues ella misma es de si misma el fruto."
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-es-la-santa-amistad-virtud-diuina-que"
 procedencia:

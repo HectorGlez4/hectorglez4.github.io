@@ -1,5 +1,5 @@
 ---
-texto: "LOPE: Apacible estancia en extremo es ésta."
+texto: "LOPE: Apacible\nestancia en extremo es ésta."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-lope-apacible-estancia-en-extremo-es-esta"
 procedencia:

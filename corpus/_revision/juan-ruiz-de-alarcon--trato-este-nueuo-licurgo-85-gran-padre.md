@@ -1,5 +1,5 @@
 ---
-texto: "Tratò este nueuo Licurgo, 85 gran padre de aquella patria, de dar passo a estas crecientes que ruìna amenaçauan."
+texto: "Tratò este nueuo Licurgo, 85\ngran padre de aquella patria,\nde dar passo a estas crecientes\nque ruìna amenaçauan."
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-trato-este-nueuo-licurgo-85-gran-padre"
 procedencia:

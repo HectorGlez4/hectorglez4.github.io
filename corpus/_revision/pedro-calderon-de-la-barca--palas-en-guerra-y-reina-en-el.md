@@ -1,5 +1,5 @@
 ---
-texto: "Palas en guerra, Y Reina en el alma mia."
+texto: "Palas en guerra,\nY Reina en el alma mia."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-palas-en-guerra-y-reina-en-el"
 procedencia:

@@ -1,5 +1,5 @@
 ---
-texto: "Dios perdone al Padre Esquerra, Pues fue su Paternidad Mi suegro más de seis años En la cuexca de Alcalá,"
+texto: "Dios perdone al Padre Esquerra,\nPues fue su Paternidad\nMi suegro más de seis años\nEn la cuexca de Alcalá,"
 autor: "francisco-de-quevedo"
 slug: "francisco-de-quevedo-dios-perdone-al-padre-esquerra-pues-fue"
 procedencia:

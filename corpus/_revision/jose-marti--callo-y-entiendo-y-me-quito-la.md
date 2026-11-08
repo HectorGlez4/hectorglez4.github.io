@@ -1,5 +1,5 @@
 ---
-texto: "Callo, y entiendo, y me quito La pompa del rimador: Cuelgo de un árbol marchito Mi muceta de doctor."
+texto: "Callo, y entiendo, y me quito\nLa pompa del rimador:\nCuelgo de un árbol marchito\nMi muceta de doctor."
 autor: "jose-marti"
 slug: "jose-marti-callo-y-entiendo-y-me-quito-la"
 procedencia:

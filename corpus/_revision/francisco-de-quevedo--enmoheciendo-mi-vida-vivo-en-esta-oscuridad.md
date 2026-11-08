@@ -1,5 +1,5 @@
 ---
-texto: "Enmoheciendo mi vida Vivo en esta oscuridad, Monje de zaquizamíes, Ermitaño de un desván."
+texto: "Enmoheciendo mi vida\nVivo en esta oscuridad,\nMonje de zaquizamíes,\nErmitaño de un desván."
 autor: "francisco-de-quevedo"
 slug: "francisco-de-quevedo-enmoheciendo-mi-vida-vivo-en-esta-oscuridad"
 procedencia:

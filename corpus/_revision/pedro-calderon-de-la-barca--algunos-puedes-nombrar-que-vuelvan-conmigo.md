@@ -1,5 +1,5 @@
 ---
-texto: "Algunos puedes nombrar que vuelvan conmigo."
+texto: "Algunos puedes nombrar\nque vuelvan conmigo."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-algunos-puedes-nombrar-que-vuelvan-conmigo"
 procedencia:

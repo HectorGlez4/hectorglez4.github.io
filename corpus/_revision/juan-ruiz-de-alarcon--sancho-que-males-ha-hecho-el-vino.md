@@ -1,5 +1,5 @@
 ---
-texto: "SANCHO ¿Que males ha hecho el vino? 155 quien en Indias, ni en España ha recibido mal del, ¿que de essa suerte le tratan?"
+texto: "SANCHO\n¿Que males ha hecho el vino? 155\nquien en Indias, ni en España\nha recibido mal del,\n¿que de essa suerte le tratan?"
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-sancho-que-males-ha-hecho-el-vino"
 procedencia:

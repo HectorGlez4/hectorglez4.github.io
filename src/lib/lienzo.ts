@@ -17,6 +17,8 @@
  * AD-5 — Derivación pura: cadenas de entrada, cadenas de salida, nada de disco.
  */
 
+import { versosDe } from './verso.ts';
+
 /**
  * La paleta «papel» de DESIGN.md, que es la de la marca.
  *
@@ -86,7 +88,7 @@ export function escapar(texto: string): string {
 }
 
 /**
- * Reparte el texto en líneas que quepan en el ancho dado.
+ * Reparte el texto en líneas que quepan en el ancho dado, abriendo línea en cada salto de verso.
  *
  * Nunca recorta ni abrevia: devuelve siempre el texto entero repartido (NFR-12). Una palabra
  * más larga que la línea ocupa su propia línea **y se sale del lienzo**, que es preferible a
@@ -103,17 +105,21 @@ export function repartirEnLineas(
   const maximo = Math.max(1, Math.floor(anchoUtil / (cuerpo * factor)));
 
   const lineas: string[] = [];
-  let actual = '';
 
-  for (const palabra of texto.split(/\s+/)) {
-    const tentativa = actual === '' ? palabra : `${actual} ${palabra}`;
-    if ([...tentativa].length <= maximo || actual === '') actual = tentativa;
-    else {
-      lineas.push(actual);
-      actual = palabra;
+  // Cada verso abre línea y se reparte por palabras con la misma medida: dos versos no se
+  // unen nunca en una línea (Historia 29.3). Un texto sin saltos es un verso.
+  for (const verso of versosDe(texto)) {
+    let actual = '';
+    for (const palabra of verso.split(/\s+/)) {
+      const tentativa = actual === '' ? palabra : `${actual} ${palabra}`;
+      if ([...tentativa].length <= maximo || actual === '') actual = tentativa;
+      else {
+        lineas.push(actual);
+        actual = palabra;
+      }
     }
+    if (actual !== '') lineas.push(actual);
   }
-  if (actual !== '') lineas.push(actual);
   return lineas;
 }
 

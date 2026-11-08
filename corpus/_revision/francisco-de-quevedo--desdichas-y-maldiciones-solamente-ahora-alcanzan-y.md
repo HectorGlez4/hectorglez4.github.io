@@ -1,5 +1,5 @@
 ---
-texto: "Desdichas y maldiciones solamente ahora alcanzan: Y ya los que quieren sólo, y no los que deben, pagan."
+texto: "Desdichas y maldiciones\nsolamente ahora alcanzan:\nY ya los que quieren sólo,\ny no los que deben, pagan."
 autor: "francisco-de-quevedo"
 slug: "francisco-de-quevedo-desdichas-y-maldiciones-solamente-ahora-alcanzan-y"
 procedencia:

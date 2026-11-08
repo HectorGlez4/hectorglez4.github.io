@@ -1,5 +1,5 @@
 ---
-texto: "DON IUAN Parecidome has lacayo de comedia, pues estrañas que yo no te comunique 195 los secretos de importancia."
+texto: "DON IUAN\nParecidome has lacayo\nde comedia, pues estrañas\nque yo no te comunique 195\nlos secretos de importancia."
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-don-iuan-parecidome-has-lacayo-de-comedia"
 procedencia:

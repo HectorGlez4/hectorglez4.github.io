@@ -1,5 +1,5 @@
 ---
-texto: "Y cual una visión vana que evaporándose crece se salen por la ventana cuando la aurora amanece!"
+texto: "Y cual una visión vana\nque evaporándose crece\nse salen por la ventana\ncuando la aurora amanece!"
 autor: "jose-asuncion-silva"
 slug: "jose-asuncion-silva-y-cual-una-vision-vana-que-evaporandose"
 procedencia:

@@ -1,5 +1,5 @@
 ---
-texto: "Salen el ESCRIBANO y los villanos ESCRIBANO: ¿Señor?"
+texto: "Salen el ESCRIBANO y los villanos\nESCRIBANO: ¿Señor?"
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-salen-el-escribano-y-los-villanos-escribano"
 procedencia:

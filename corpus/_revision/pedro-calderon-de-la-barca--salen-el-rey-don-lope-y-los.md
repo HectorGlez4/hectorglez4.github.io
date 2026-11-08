@@ -1,5 +1,5 @@
 ---
-texto: "Salen el REY, don LOPE y los soldados, Pedro CRESPO, y los villanos."
+texto: "Salen el REY, don LOPE y los soldados, Pedro\nCRESPO, y los villanos."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-salen-el-rey-don-lope-y-los"
 procedencia:

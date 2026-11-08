@@ -1,5 +1,5 @@
 ---
-texto: "Con los de Codro y Curcio el de Ricaurte vivirá, mientras hagan el humano pecho latir la libertad, la gloria."
+texto: "Con los de Codro y Curcio el de Ricaurte\nvivirá, mientras hagan el humano\npecho latir la libertad, la gloria."
 autor: "andres-bello"
 slug: "andres-bello-con-los-de-codro-y-curcio-el"
 procedencia:

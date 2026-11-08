@@ -1,5 +1,5 @@
 ---
-texto: "Ana: Hasta que venga mi hermano, Celia, le hemos de esperar."
+texto: "Ana: Hasta que venga mi hermano,\nCelia, le hemos de esperar."
 autor: "sor-juana-ines-de-la-cruz"
 slug: "sor-juana-ines-de-la-cruz-ana-hasta-que-venga-mi-hermano-celia"
 procedencia:

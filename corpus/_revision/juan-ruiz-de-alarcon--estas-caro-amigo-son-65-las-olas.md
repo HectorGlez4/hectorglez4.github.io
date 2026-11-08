@@ -1,5 +1,5 @@
 ---
-texto: "Estas, caro amigo, son 65 las olas, en que me anego; las confusiones son estas, en que dudoso padezco, de tu ingenio y amor fio; solo tu amor y tu ingenio 70 de tan ciega tempestad me pueden sacar al puerto."
+texto: "Estas, caro amigo, son 65\nlas olas, en que me anego;\nlas confusiones son estas,\nen que dudoso padezco,\nde tu ingenio y amor fio;\nsolo tu amor y tu ingenio 70\nde tan ciega tempestad\nme pueden sacar al puerto."
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-estas-caro-amigo-son-65-las-olas"
 procedencia:

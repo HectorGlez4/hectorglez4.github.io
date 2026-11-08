@@ -1,5 +1,5 @@
 ---
-texto: "Pues si los demás nacieron, ¿Qué privilegios tuvieron, Que yo no gocé jamas?"
+texto: "Pues si los demás nacieron,\n¿Qué privilegios tuvieron,\nQue yo no gocé jamas?"
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-pues-si-los-demas-nacieron-que-privilegios"
 procedencia:

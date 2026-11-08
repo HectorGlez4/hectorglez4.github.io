@@ -1,5 +1,5 @@
 ---
-texto: "En brazos al capitán, volvieron hacia la villa, sin mirar en su delito; que en las penas sucedidas acudir determinaron primero a la más precisa."
+texto: "En brazos al capitán,\nvolvieron hacia la villa,\nsin mirar en su delito;\nque en las penas sucedidas\nacudir determinaron\nprimero a la más precisa."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-en-brazos-al-capitan-volvieron-hacia-la"
 procedencia:

@@ -1,5 +1,5 @@
 ---
-texto: "De Aragua a las orillas un distrito que me tribute fáciles manjares, do vecino a mis rústicos hogares entre peñascos corra un arroyito."
+texto: "De Aragua a las orillas un distrito\nque me tribute fáciles manjares,\ndo vecino a mis rústicos hogares\nentre peñascos corra un arroyito."
 autor: "andres-bello"
 slug: "andres-bello-de-aragua-a-las-orillas-un-distrito"
 procedencia:

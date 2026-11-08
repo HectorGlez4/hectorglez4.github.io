@@ -1,5 +1,5 @@
 ---
-texto: "Vosotros a un tiempo mismo impedid a cuchilladas el que me sigan."
+texto: "Vosotros a un tiempo mismo\nimpedid a cuchilladas\nel que me sigan."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-vosotros-a-un-tiempo-mismo-impedid-a"
 procedencia:

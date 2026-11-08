@@ -1,5 +1,5 @@
 ---
-texto: "En fuga irrevocable huye la hora; Pero aquella el mejor cálculo cuenta, Que en la lección y estudios nos mejora."
+texto: "En fuga irrevocable huye la hora;\nPero aquella el mejor cálculo cuenta,\nQue en la lección y estudios nos mejora."
 autor: "francisco-de-quevedo"
 slug: "francisco-de-quevedo-en-fuga-irrevocable-huye-la-hora-pero"
 procedencia:

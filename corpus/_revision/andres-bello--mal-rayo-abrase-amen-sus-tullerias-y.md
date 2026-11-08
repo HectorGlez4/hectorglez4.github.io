@@ -1,5 +1,5 @@
 ---
-texto: "¡Mal rayo abrase, amén, sus Tullerías, y mala peste en sus teatros haga sonar, en vez de amores, letanías!"
+texto: "¡Mal rayo abrase, amén, sus Tullerías,\ny mala peste en sus teatros haga\nsonar, en vez de amores, letanías!"
 autor: "andres-bello"
 slug: "andres-bello-mal-rayo-abrase-amen-sus-tullerias-y"
 procedencia:

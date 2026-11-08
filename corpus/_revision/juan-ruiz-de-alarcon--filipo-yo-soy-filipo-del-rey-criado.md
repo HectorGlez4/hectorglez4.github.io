@@ -1,5 +1,5 @@
 ---
-texto: "FILIPO Yo soy Filipo, del Rey criado, 650 si valido, no priuado, porque a vuestro padre doy solamente este lugar."
+texto: "FILIPO\nYo soy\nFilipo, del Rey criado, 650\nsi valido, no priuado,\nporque a vuestro padre doy\nsolamente este lugar."
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-filipo-yo-soy-filipo-del-rey-criado"
 procedencia:

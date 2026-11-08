@@ -1,5 +1,5 @@
 ---
-texto: "Ya sueltan, Juanilla, presos las cárceles y las nalgas: Ya están compuestos de puntos el canto llano y las calzas."
+texto: "Ya sueltan, Juanilla, presos\nlas cárceles y las nalgas:\nYa están compuestos de puntos\nel canto llano y las calzas."
 autor: "francisco-de-quevedo"
 slug: "francisco-de-quevedo-ya-sueltan-juanilla-presos-las-carceles-y"
 procedencia:

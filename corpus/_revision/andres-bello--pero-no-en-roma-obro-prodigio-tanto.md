@@ -1,5 +1,5 @@
 ---
-texto: "Pero no en Roma obró prodigio tanto el amor de la patria, no en la austera Esparta, no en Numancia generosa; ni de la historia da página alguna, Musa, más altos hechos a tu canto."
+texto: "Pero no en Roma obró prodigio tanto\nel amor de la patria, no en la austera\nEsparta, no en Numancia generosa;\nni de la historia da página alguna,\nMusa, más altos hechos a tu canto."
 autor: "andres-bello"
 slug: "andres-bello-pero-no-en-roma-obro-prodigio-tanto"
 procedencia:

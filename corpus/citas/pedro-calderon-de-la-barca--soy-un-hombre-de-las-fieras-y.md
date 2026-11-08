@@ -1,5 +1,5 @@
 ---
-texto: "Soy un hombre de las fieras, Y una fiera de los hombres;"
+texto: "Soy un hombre de las fieras,\nY una fiera de los hombres;"
 autor: "pedro-calderon-de-la-barca"
 temas:
   - "la-adversidad"

@@ -1,5 +1,5 @@
 ---
-texto: "Ya no mas comprar enojos a costa de merecer, no mas, la vid exponer a vuestros leues antojos. 740 Huistes quando os seguia, quando huyo me seguis, esto que aora sentis senti yo, Iulia, algun dia."
+texto: "Ya no mas comprar enojos\na costa de merecer,\nno mas, la vid exponer\na vuestros leues antojos. 740\nHuistes quando os seguia,\nquando huyo me seguis,\nesto que aora sentis\nsenti yo, Iulia, algun dia."
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-ya-no-mas-comprar-enojos-a-costa"
 procedencia:

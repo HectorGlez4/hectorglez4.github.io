@@ -1,5 +1,5 @@
 ---
-texto: "Y ya que ha de ser, que sea con llanto, mas no con risa."
+texto: "Y ya que ha de ser, que sea\ncon llanto, mas no con risa."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-y-ya-que-ha-de-ser-que"
 procedencia:

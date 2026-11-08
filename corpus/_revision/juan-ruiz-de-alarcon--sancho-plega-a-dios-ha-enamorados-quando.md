@@ -1,5 +1,5 @@
 ---
-texto: "SANCHO Plega a Dios, ha enamorados, quando empieçan a plegar 625 plegarias pueden prestar al dia de los finados."
+texto: "SANCHO\nPlega a Dios, ha enamorados,\nquando empieçan a plegar 625\nplegarias pueden prestar\nal dia de los finados."
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-sancho-plega-a-dios-ha-enamorados-quando"
 procedencia:

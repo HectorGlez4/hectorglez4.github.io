@@ -1,5 +1,5 @@
 ---
-texto: "ÁLVARO: Como está don Lope allí, no quisiera despertarle."
+texto: "ÁLVARO: Como está\ndon Lope allí, no quisiera\ndespertarle."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-alvaro-como-esta-don-lope-alli-no"
 procedencia:

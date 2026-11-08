@@ -1,5 +1,5 @@
 ---
-texto: "REY De tu agudo entendimiento 125 es la traça."
+texto: "REY\nDe tu agudo entendimiento 125\nes la traça."
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-rey-de-tu-agudo-entendimiento-125-es"
 procedencia:

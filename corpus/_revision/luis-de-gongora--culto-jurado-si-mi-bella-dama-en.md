@@ -1,5 +1,5 @@
 ---
-texto: "Culto jurado, si mi bella dama, en cuyo generoso mortal manto arde, como en cristal de templo santo, de un limpio amor la más ilustre llama,"
+texto: "Culto jurado, si mi bella dama,\nen cuyo generoso mortal manto\narde, como en cristal de templo santo,\nde un limpio amor la más ilustre llama,"
 autor: "luis-de-gongora"
 slug: "luis-de-gongora-culto-jurado-si-mi-bella-dama-en"
 procedencia:

@@ -1,5 +1,5 @@
 ---
-texto: "Con cada vez que te veo Nueva admiración me das, Y cuando te miro más."
+texto: "Con cada vez que te veo\nNueva admiración me das,\nY cuando te miro más."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-con-cada-vez-que-te-veo-nueva"
 procedencia:
