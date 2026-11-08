@@ -323,6 +323,8 @@ describe('dueños del salto (AD-29)', () => {
         'tools/extraer.ts',
         'tools/lib/cotejo.ts',
         'tools/lib/documentacion.ts',
+        'tools/lib/pasaje.ts',
+        'tools/lib/posiciones.ts',
         'tools/lineas.ts',
         'tools/recuperar.ts',
       ].sort(),
@@ -341,6 +343,6 @@ describe('dueños del salto (AD-29)', () => {
       )
       .map((f) => f.ruta)
       .sort();
-    expect(importadores).toEqual(['tools/lib/lineas.ts']);
+    expect(importadores).toEqual(['tools/lib/lineas.ts', 'tools/lib/pasaje.ts']);
   });
 });
