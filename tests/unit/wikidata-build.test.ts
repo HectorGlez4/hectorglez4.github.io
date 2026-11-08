@@ -148,6 +148,15 @@ describe('Historia 32.1 — el build repite el cotejo de Wikidata', () => {
     expect(salida.match(/seneca--[a-z-]+\.yml: Q480 ya la declara .*seneca--[a-z-]+\.yml; una entidad de Wikidata es una sola Obra/g)).toHaveLength(2);
   });
 
+  it('sin ninguna ficha atada, el build no consulta fichasTecnicas ni avisa de una colección vacía (32.2)', async () => {
+    const { codigo, salida } = await construir({
+      ...BASE,
+      'obras/seneca--sobre-la-brevedad-de-la-vida.yml': ficha('Sobre la brevedad de la vida'),
+    });
+    expect(codigo, salida).toBe(0);
+    expect(salida).not.toMatch(/fichasTecnicas/);
+  });
+
   it('un vigentes.yml ilegible rompe nombrándolo', async () => {
     const { codigo, salida } = await construir({
       ...BASE,

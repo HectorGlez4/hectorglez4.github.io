@@ -131,6 +131,20 @@ deferred: []
   - `[low]` `[patch]` (ac-auditor) «La Fuente que encabeza no es una traducción» no tenía caso propio en Vitest: añadido.
   - `[low]` `[patch]` (blind-hunter) La entrada anterior de este registro daba por hecha una revisión que no había ocurrido: anotada como tal arriba.
 
+### 2026-11-08 — Review pass
+- intent_gap: 0
+- bad_spec: 0
+- patch: 4 (high 0, medium 2, low 2)
+- defer: 0
+- reject: 40
+- addressed_findings:
+  - `[medium]` `[patch]` (verification-gap, ac-auditor) La guarda de `getCollection('fichasTecnicas')` no la fijaba ninguna prueba: nuevo caso en `tests/unit/wikidata-build.test.ts` que construye con una ficha sin `wikidata` y exige salida sin «fichasTecnicas»; comprobado que quitar la guarda lo tumba (Astro avisa de la colección vacía).
+  - `[medium]` `[patch]` (verification-gap, edge-case-hunter) El repliegue «documento ilegible ⇒ `vigentes.yml` con cualquier cambio» no se ejercía desde el disco: nuevo caso en `tests/unit/fecha-de-cambio.test.ts` con el documento roto y solo la vigente del autor (P50) cambiada, que refecha la Obra y no la Cita; comprobado que con `pinta = []` en el repliegue falla.
+  - `[low]` `[patch]` (verification-gap, ac-auditor) `FichaTecnica.astro` entra en la guarda «sin bloque `<style>`» de `tests/unit/ingreso-construido.test.ts`, junto a `Sostener.astro` y `EdicionesEnVenta.astro`: un `<style>` suyo cambiaría la hoja de toda Página de Obra con el Corpus real.
+  - `[low]` `[patch]` (blind-hunter) El «Revisión.» del primer cierre del Auto Run Result decía 0 patches y seguimiento `false`, en contradicción con las pasadas reales: reescrito como lo que es, el cierre de la implementación.
+
+Rechazados (resumen): lo que el contrato fija a propósito —el traductor por Fuente frente al grupo que encabeza «Dónde leer», línea con solo el año, los dos años sin rótulo (UX-DR126, `[ASSUMPTION]` de Héctor), la Cabecera por dentro, el e2e dedicado con fixture—; entradas exóticas que el esquema o el cargador no dejan llegar —etiquetas o traductor en blanco, NFC/NFD, `.yaml` sin ruta, `id` de colección distinto del nombre, `vigentesDeWikidata` ausente en un Corpus hecho a mano, documento referido reescrito (inmutable por revisión)—; robustez especulativa —el `catch` del aviso de año (el cargador rompe antes), el `catch` de `corpusParaFechar` (fechar de más es el contrato), el comparador del desempate escrito junto al rótulo compartido, el tipo `FichaTecnicaDeObra` en dos módulos (AD: `src/` no importa de `tools/lib/`; el esquema zod es el puente), el `url()` del enlace (lo escribe `enlacePermanenteDeWikidata`), CSP, mayúscula ante «¿»—; y coste o forma sin consecuencia —doble lectura, trabajo de una Obra sin ficha, lecturas en serie, ancho de línea de AGENTS.md, borde superior frente a «empieza dentro» (es lo que pide el AC), color siena por la regla global, `gunzipSync` de los `pf_*` (Pagefind los comprime siempre)—.
+
 ## Design Notes
 
 - **Por qué atributos `style`**: el brief y la regla de AGENTS.md sobre `Sostener.astro`: un `<style>` del componente entraría en la hoja de toda Página de Obra (y quizá en un `_astro/*.css` compartido, cambiando su hash en todo el sitio) con el Corpus real sin ninguna línea.
@@ -174,7 +188,7 @@ Blocking condition: ninguna.
 - `tests/unit/ficha-tecnica.test.ts`, `tests/unit/ficha-tecnica-build.test.ts`, `tests/e2e/ficha-tecnica.spec.ts` (nuevos); `tests/unit/fecha-de-cambio.test.ts`, `tests/unit/indexnow.test.ts`, `tests/unit/wikidata-build.test.ts` (al día).
 - `AGENTS.md` — la línea, el traductor, el aviso y la fecha, en el párrafo de `wikidata`.
 
-**Revisión.** 0 patches, 0 diferidos, 0 rechazados (capas externas sin hallazgos en esta pasada). Seguimiento: `false` (0 high, 0 medium, 0 low; puntuación 0).
+**Revisión.** Ninguna en este cierre: es el de la implementación, escrito antes de que las capas externas devolvieran hallazgos. Las dos pasadas de revisión reales siguen abajo, y el `followup_review_recommended` del frontmatter es el de la última.
 
 **Verificación.**
 - `npx vitest run tests/unit/ficha-tecnica.test.ts` — 18 en verde.
@@ -204,3 +218,19 @@ Blocking condition: ninguna.
 **Verificación.** `npx vitest run tests/unit/ficha-tecnica.test.ts tests/unit/fecha-de-cambio.test.ts tests/unit/obras.test.ts tests/unit/wikidata.test.ts tests/unit/indexnow.test.ts` — 293 en verde; `npx vitest run tests/unit/ficha-tecnica-build.test.ts tests/unit/wikidata-build.test.ts tests/unit/medicion.test.ts tests/unit/tipografia-en-tokens.test.ts tests/unit/orden-del-libro.test.ts` — 762 en verde; `npx astro check` — 0 errores, 0 avisos; `npx playwright test tests/e2e/ficha-tecnica.spec.ts --project=escritorio` — 3 en verde, primera Tarjeta a 599,5 px de 640; `npm test` — 159 ficheros, 7.301 pruebas en verde. La comparación de `dist/` con la base no se repitió: ningún patch toca lo que se pinta sin ficha atada.
 
 **Riesgos residuales.** Los de arriba, más: el orden «Traducción de X · Datos: Wikidata, CC0» y los dos años sin rótulo cuando discrepan son del texto de UX-DR126, `[ASSUMPTION]` que revisa Héctor con `bmad-ux`.
+
+### Segunda pasada de revisión (2026-11-08)
+
+**Resumen.** Cuatro patches, todos de verificación y de registro; ningún cambio de `src/`, `integraciones/` ni `tools/`; ningún bad_spec ni intent_gap; nada diferido; 40 rechazados (resumen en el Review Triage Log).
+
+**Ficheros.**
+- `tests/unit/wikidata-build.test.ts` — sin ninguna ficha atada, el build no consulta `fichasTecnicas` ni avisa de colección vacía.
+- `tests/unit/fecha-de-cambio.test.ts` — documento ilegible desde el disco: cualquier cambio de `vigentes.yml` refecha la Obra.
+- `tests/unit/ingreso-construido.test.ts` — `FichaTecnica.astro` en la guarda «sin `<style>`».
+- Este spec — el primer cierre ya no se contradice con las revisiones.
+
+**Seguimiento.** `true`: patches 0 high, 2 medium, 2 low; puntuación 3 × 2 + 2 = 8 ≥ 5. Los cuatro son pruebas y registro, sin cambio de comportamiento del sitio.
+
+**Verificación.** Los dos casos nuevos, verdes, y rojos con la regresión que vigilan (guarda quitada; `pinta = []` en el repliegue), restaurado después; `npx astro check` — 0 errores, 0 avisos; `npm test` — 159 ficheros, 7.303 pruebas en verde. El e2e y la comparación de `dist/` con la base no se repiten: ningún patch toca código del sitio.
+
+**Riesgos residuales.** Los de las pasadas anteriores.

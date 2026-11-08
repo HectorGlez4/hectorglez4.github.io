@@ -1483,6 +1483,33 @@ describe('Historia 32.2 — la Ficha técnica fecha su Página de Obra desde el 
     }
   });
 
+  it('con su documento ilegible, cualquier cambio de vigentes.yml refecha la Obra (también el de su autor)', async () => {
+    const raiz = await temporal('sabiduria-ficha-tecnica-ilegible-');
+    const git = gitEn(raiz);
+    try {
+      await git(['init', '--initial-branch=principal']);
+      await escribirCorpus(raiz);
+      await writeFile(join(raiz, 'corpus', 'wikidata', nombreDeDocumentoDeWikidata('Q480', 100)), '{ roto', 'utf8');
+      await git(['add', 'corpus']);
+      await git(['commit', '-m', 'atada, con el documento roto'], '2024-01-02T09:00:00+0000');
+
+      // Solo cambia la vigente del autor (P50), que la línea no pinta: fechar de más antes que de menos.
+      await writeFile(
+        join(raiz, 'corpus', 'wikidata', 'vigentes.yml'),
+        componerVigentes(new Map(Object.entries({ Q480: 100, Q2054: 31, Q8261: 40, Q1321: 41 }))),
+        'utf8',
+      );
+      await git(['add', 'corpus']);
+      await git(['commit', '-m', 'el autor'], '2024-05-06T09:00:00+0000');
+
+      const fechas = await fechasDeLasSuperficies(raiz, () => {});
+      expect(fechas.get(RUTA_DE_OBRA)).toBe('2024-05-06T09:00:00.000Z');
+      expect(fechas.get('/cita/seneca-el-tiempo')).toBe('2024-01-02T09:00:00.000Z');
+    } finally {
+      await rm(raiz, { recursive: true, force: true });
+    }
+  });
+
   it('un cambio del documento de su revisión refecha la Obra', async () => {
     const raiz = await temporal('sabiduria-ficha-tecnica-doc-');
     const git = gitEn(raiz);

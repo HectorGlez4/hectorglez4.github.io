@@ -369,7 +369,9 @@ describe('Historia 14.1 — el sitio con los cuatro Modelos apagados', () => {
     const sinComentarios = (texto: string) => texto.replace(/\/\*[\s\S]*?\*\//g, '');
     // Historia 22.9 — y el de las ediciones en venta, por lo mismo: la Página de Obra lo
     // importa con la afiliación apagada.
-    for (const componente of ['Sostener.astro', 'EdicionesEnVenta.astro']) {
+    // Historia 32.2 — y el de la línea de Ficha técnica: toda Página de Obra lo importa, y con el
+    // Corpus real (ninguna ficha atada) no pinta nada.
+    for (const componente of ['Sostener.astro', 'EdicionesEnVenta.astro', 'FichaTecnica.astro']) {
       const fuente = await readFile(resolve(RAIZ, 'src/components', componente), 'utf8');
       expect(
         sinComentarios(fuente).match(/<style[\s>]/g) ?? [],
