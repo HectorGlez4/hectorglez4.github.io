@@ -542,6 +542,11 @@ export const MAX_BYTES_DE_GUION = 7680;
  * coteja, el evento en la lista de vistas que salen de `data-vistas`, y la lectura de la marca del
  * atributo del `<html>` una vez al activarse, que solo viaja con la vista que declara la página. Con
  * ella el fichero emite ya todo el vocabulario.
+ *
+ * Medido de nuevo en la fase B de la Historia 30.5: **3.700 bytes** con el punto final de producción
+ * (3.701 con la barra final; 3.652 con `http://localhost:8787/`), 53 sobre los 3.647 de la 23.9 y
+ * 30 de margen, así que el tope no se mueve. Creció por las dos entradas sin campos de las acciones
+ * de citar, `copiado-de-referencia` y `copiado-de-fragmento`, en la tabla.
  */
 export const MAX_BYTES_GUION_DE_MEDICION = 3730;
 

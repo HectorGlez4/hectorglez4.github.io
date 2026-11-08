@@ -64,9 +64,9 @@ export const EVENTOS_DE_VISTA = [EVENTOS.vistaDeCita, EVENTOS.vistaDeSuperficie,
 export type EventoDeVista = (typeof EVENTOS_DE_VISTA)[number];
 
 /**
- * Los eventos que el fichero sabe emitir — Historias 23.2, 23.5, 23.7, 23.8 y 23.9.
+ * Los eventos que el fichero sabe emitir — Historias 23.2, 23.5, 23.7, 23.8, 23.9 y 30.5.
  *
- * Desde la Historia 23.9 son **todos** los del vocabulario: `vista-de-obra` fue el último, y entró
+ * Desde la Historia 23.9 son **todos** los del vocabulario: `vista-de-obra` fue el último de la v8, y entró
  * aquí en el mismo diff que lo sacó de los pendientes de `tests/unit/vocabulario.test.ts`. Sale de
  * `data-vistas` como las otras dos vistas —la página 1 de toda Obra la declara, se indexe o no—,
  * con la marca que el build escribe en el `<html>` (`ATRIBUTO_DE_INDEXABLE`); no es de
@@ -74,7 +74,9 @@ export type EventoDeVista = (typeof EVENTOS_DE_VISTA)[number];
  * `salida-interna` con la 23.7, y las dos las emite solo el fichero (`EVENTOS_SOLO_DEL_FICHERO`).
  * La `busqueda` entró con la 23.8, y al revés: la pide la isla de `/buscar/` al asentarse un
  * estado, y el fichero envía **cada una** que recibe —qué estado cuenta y cuándo lo decide la isla
- * con `asentamientoDeBusqueda`, nunca el fichero—.
+ * con `asentamientoDeBusqueda`, nunca el fichero—. Las dos de citar, `copiado-de-referencia` y
+ * `copiado-de-fragmento`, entraron con la fase B de la 30.5, tras desplegar el receptor que ya las
+ * guardaba: las pide la isla de Copiar de la Página de Cita, sin campos, y el fichero envía cada una.
  */
 export const EVENTOS_DEL_GUION: readonly Evento[] = [
   EVENTOS.vistaDeCita,
@@ -88,6 +90,8 @@ export const EVENTOS_DEL_GUION: readonly Evento[] = [
   EVENTOS.busquedaSinResultados,
   EVENTOS.comparticionDeImagen,
   EVENTOS.comparticionDeEnlace,
+  EVENTOS.copiadoDeReferencia,
+  EVENTOS.copiadoDeFragmento,
 ];
 
 /**

@@ -185,7 +185,7 @@ describe('Historia 2.9 — el vocabulario es cerrado', () => {
      * compartición los añadió la Historia 10.4, y `vista-de-superficie` la 20.1. La 23.2 trae
      * los cuatro de la v8 —`lectura`, `salida-interna`, `busqueda` y `vista-de-obra`— al
      * vocabulario, antes de que nadie los envíe. La 30.5, los dos de citar —`copiado-de-referencia`
-     * y `copiado-de-fragmento`—, retenidos hasta que se despliegue el receptor.
+     * y `copiado-de-fragmento`—, retenidos en su fase A y sueltos en la B, tras desplegar el receptor.
      */
     expect([...EVENTOS_VALIDOS].sort()).toEqual(
       [
