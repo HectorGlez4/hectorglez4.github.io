@@ -5,7 +5,7 @@ created: '2026-11-08'
 status: 'done'
 baseline_revision: '923a0f27b4caeb6d10986741d0a7261bfe78a20d'
 review_loop_iteration: 0
-followup_review_recommended: true
+followup_review_recommended: false
 context:
   - '{project-root}/_bmad-output/implementation-artifacts/epic-35-context.md'
   - '{project-root}/_bmad-output/implementation-artifacts/spec-35-2-el-personaje-entra-en-el-corpus-y-la-obra-tiene-un-solo-dueno.md'
@@ -152,6 +152,17 @@ Dueño de la página: `citasDePersonaje(citas, slug)` = Citas con `personaje ===
   - `[low]` `[patch]` El parche de `obra-pagina.test.ts` podía quedar vacuo si cambiaba el fragmento: la prueba exige que la copia parcheada difiera del original. Y la unidad de línea base de la Página de Personaje, `[ASSUMPTION]` del criterio, queda fijada en `superficies.test.ts` (la suya, sin `lineaBase`, distinta de la del Autor).
 - rejected (resumen): la Atribución que pone al Personaje en el lugar del Autor es el criterio, y el grafo del modelo no declara Cita → Autor; biografía y `semblanzaPropia` no conviven (esquema, `src/lib/admision.ts:567`); `.universo`, el `h2` «Citas», el JSON-LD sin `name` y la Lista de Obras vacía con pie calcan la Página de Autor por contrato; la cadena `style` de `AtribucionDeSemblanza` (cosmético, y reescribir su marcado arriesga el `dist/` de los Autores con biografía); la doble lectura de `corpus/citas/` al arrancar y la lectura asimétrica de `corpus/personajes/` (el cargador de Astro carga la colección igual); la prueba automática de «sin Personaje, marcado idéntico» es criterio de la 35.4; el suelo de Personaje bajo SM-11 sigue la regla escrita («el suelo de las demás»); guardas de casos que el esquema o el dueño ya impiden (semblanza sin atribución, Personaje sin Citas, «0 frases», Corpus ilegible); el `lastmod` por campos lo fija la relación (`fecha-de-cambio.test.ts`) y sale del mismo historial que las demás familias; tipografía por CSS, «ninguna Cita sin su Personaje» (la Tarjeta no cambia) y el barrido de axe (ya en `deferred`).
 
+### 2026-11-08 — Review pass
+- intent_gap: 0
+- bad_spec: 0
+- patch: 2: (high 0, medium 0, low 2)
+- defer: 0
+- reject: 40: (high 0, medium 0, low 40)
+- addressed_findings:
+  - `[low]` `[patch]` El Personaje era opcional (`personaje?: Personaje`) en `Atribucion.astro` y `BloqueDeCita.astro`, así que un uso nuevo que lo olvidara pasaba `astro check` y solo rompía en la guarda el día que le llegara una Cita con Personaje: ahora es obligatorio, `Personaje | undefined`, como en `CitaDelDia.astro` y como `zona`. Todos los usos ya lo pasaban; `astro check` en 0 errores lo fija.
+  - `[low]` `[patch]` En `src/lib/publicado.ts`, `porSlug` quedaba entre el JSDoc de `citasDeAutor` y la función, con dos comentarios apilados, y `citasDePersonaje` lo usaba antes de su declaración: `porSlug` se declara antes de `citasDePersonaje` y `citasDeAutor` recupera su comentario.
+- rejected (resumen): `.universo` sale en la sans, porque `.ficha` no fija familia y el `body` es sans (solo el `h1` lleva la serif); el `h2` «Citas», el JSON-LD sin `name`, la cadena `style` de `AtribucionDeSemblanza` y la doble lectura de `corpus/citas/` ya se rechazaron en la pasada anterior por las mismas razones; `personajes.get` sin ficha, el Personaje del día sin ficha y la arista Cita → Personaje sin página son inalcanzables tras `verificarIntegridad`; `semblanzaEn` con la superficie cruzada, `resolverAtribuciones` con su valor por omisión, `corpus.personajes ?? []` y una variante futura de `AtribucionDeSemblanza` con `responde` son usos que hoy no existen; la baja de la última Cita de un Personaje la avisa la relación de `--desde`, que sí declara su página, como a la Obra que se queda sin Citas; el suelo de Personaje bajo SM-11 sigue la regla escrita, como se decidió en la pasada anterior; las pruebas de series con una ruta `/personaje/`, del orden del listado, del `lastmod` en el sitemap, del render de `/buscar/` con un Personaje, de la fila del Desplegable en `COLOCACION` y de la guarda de la Atribución en su camino de fallo son huecos de verificación sin defecto (las familias salen de `FAMILIAS` y del censo, y lo demás está fijado en su capa); el comentario de «3 de 55» / «3 de 54» y el `replace` del ancla son de las pruebas, sin efecto en el sitio; FR-38 para el Personaje, el dueño Personaje sobre `dist/`, el barrido de axe y el `diff` de `dist/` contra la base ya están en `deferred` o son decisión aceptada del orquestador; `review_loop_iteration: 0` es el valor que pone el paso 1 a cada pasada nueva; la longitud de los párrafos de `AGENTS.md` es redacción.
+
 ## Auto Run Result
 
 Status: done
@@ -173,3 +184,14 @@ Status: done. Cinco capas externas (blind-hunter, edge-case-hunter, verification
 - **Revisión de seguimiento:** recomendada (`true`): parcheados 0 high, 6 medium y 5 low; puntuación 3 × 6 + 5 = 23 ≥ 5.
 - **Verificación:** `npx astro check` 0 errores; por fichero, en verde: `pagina-de-personaje`, `personajes-build`, `obra-pagina`, `alcance`, `indexacion`, `superficies`; `npm test` completo (detached, `logs/s-35/npm-test-triage-35.3-1.log`): 164 ficheros, 7.367 pruebas, EXIT 0. `npm run build` con el Corpus real y `FECHA_JORNADA=2026-11-08` (`logs/s-35/build-triage-35.3-1.log`) frente al `dist/` de la pasada anterior: `diff -rq` sin ninguna diferencia fuera de `pagefind/`; NFR-5 y la coincidencia de indexables en verde.
 - **Riesgos:** la `dist/` de referencia era la de la construcción anterior de este árbol (21:03), no una de la base; las diferencias aceptadas frente a la base no se volvieron a medir. Sigue el diferido de FR-38 y los de la pasada anterior.
+
+### Revisión externa 2 (2026-11-08)
+
+Status: done. Cinco capas externas (blind-hunter, edge-case-hunter, verification-gap, intent-alignment, ac-auditor); ningún intent_gap ni bad_spec. Última ronda, proporcionada.
+
+- **Cambio:** el Personaje pasa a ser prop obligatoria (`Personaje | undefined`) de `Atribucion.astro` y `BloqueDeCita.astro`, para que `astro check` señale el uso que la olvide antes de que la guarda rompa la construcción; `porSlug` se declara antes de su primer uso y `citasDeAutor` recupera su comentario.
+- **Ficheros:** `src/components/Atribucion.astro`, `src/components/BloqueDeCita.astro` (prop obligatoria), `src/lib/publicado.ts` (orden de `porSlug` y comentarios).
+- **Hallazgos:** 2 parches (0 high, 0 medium, 2 low), 0 diferidos, 40 rechazados.
+- **Revisión de seguimiento:** no recomendada (`false`): parcheados 0 high, 0 medium y 2 low; puntuación 3 × 0 + 2 = 2 < 5.
+- **Verificación:** `npx astro check` 0 errores (431 ficheros); `npm test` completo (detached, `logs/s-35/npm-test-triage-35.3-2.log`): 164 ficheros, 7.367 pruebas, EXIT 0.
+- **Riesgos:** los de la pasada anterior (FR-38 del Personaje a la 35.3b, dueño Personaje sobre `dist/` a la 35.4, barrido de axe de Héctor); los cambios de esta pasada son de tipos y de orden de declaraciones, sin efecto en `dist/`.

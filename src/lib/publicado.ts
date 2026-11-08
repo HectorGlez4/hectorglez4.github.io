@@ -210,6 +210,9 @@ export function personajesIndexables<P extends { slug: string; nombre: string }>
   return personajesPublicados(personajes, citas);
 }
 
+/** El orden de los listados de Autor y de Personaje: por slug, en español. */
+const porSlug = (a: Cita, b: Cita): number => a.slug.localeCompare(b.slug, 'es');
+
 /**
  * Las Citas de un Personaje, en el orden de `citasDeAutor` — Historia 35.3. Una Cita con Autor y
  * Personaje está en las dos páginas (AD-33).
@@ -349,9 +352,6 @@ export function citasDocumentadasDeAutor(citas: readonly Cita[], slugAutor: stri
 }
 
 /** Las Citas de un Autor, en orden estable para que el build sea reproducible. */
-/** El orden de los listados de Autor y de Personaje: por slug, en español. */
-const porSlug = (a: Cita, b: Cita): number => a.slug.localeCompare(b.slug, 'es');
-
 export function citasDeAutor(citas: readonly Cita[], slugAutor: string): Cita[] {
   return citas.filter((c) => c.autor === slugAutor).sort(porSlug);
 }
