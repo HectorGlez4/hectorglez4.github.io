@@ -78,6 +78,14 @@ export function parecidoDeTextos(a: string, b: string): number {
   return parecidoCanonico(normalizar(a), normalizar(b));
 }
 
+/**
+ * El parecido como se escribe en cualquier parte de la curación —el alta, `revisar` y el parte de
+ * casi duplicados—: dos decimales con coma («0,91»). Una sola forma para la misma medida.
+ */
+export function cifraDeParecido(parecido: number): string {
+  return parecido.toFixed(2).replace('.', ',');
+}
+
 function parecidoCanonico(uno: string, otro: string): number {
   if (uno === otro) return 1;
   if (uno === '' || otro === '') return 0;

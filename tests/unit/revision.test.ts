@@ -755,4 +755,52 @@ describe('Historia 29.4 — la contenida y la casi igual se señalan al revisar'
       sentido: 'contiene-a',
     });
   });
+  it('el listado pinta la casi igual con su cifra y su palabra, y la que contiene a otra en su sentido', async () => {
+    const { formatearLote } = await import('../../tools/lib/revision.ts');
+    const casi = { ...CANDIDATA_COMPLETA, texto: LARGA.texto.replace('perdemos', 'gastamos') };
+    const conCasi = await corpusCon([casi], [LARGA]);
+    await conFicha(conCasi);
+    expect(formatearLote(await loteEnRevision(conCasi))).toMatch(
+      new RegExp(`⚠ Casi igual a ${LARGA.slug} \\(publicadas; casi iguales, 0,\\d\\d; gastamos/perdemos\\)\\. Decide tú\\.`),
+    );
+
+    const larga = { ...LARGA, slug: 'seneca-zeta-larga' };
+    const lote = await loteEnRevision(await corpusCon([CANDIDATA_COMPLETA, larga]));
+    const texto = formatearLote(lote);
+    expect(texto).toContain(`⚠ Contiene a ${CANDIDATA_COMPLETA.slug} (en revisión; contenida, `);
+    expect(texto).toContain(`⚠ Contenida en ${larga.slug} (en revisión; contenida, `);
+  });
+
+  it('aprobar una repetida devuelve su duplicaA en el aviso', async () => {
+    const publicada = { ...CANDIDATA_COMPLETA, slug: 'seneca-ya-publicada' };
+    const rutas = await corpusCon([CANDIDATA_COMPLETA], [publicada]);
+    const resultado = await aprobar(rutas, [CANDIDATA_COMPLETA.slug]);
+    expect(resultado.publicadas).toEqual([CANDIDATA_COMPLETA.slug]);
+    expect(resultado.avisos).toEqual([
+      { slug: CANDIDATA_COMPLETA.slug, duplicaA: { slug: 'seneca-ya-publicada', donde: 'publicadas' }, parecidas: [] },
+    ]);
+  });
+
+  it('dos candidatas, una dentro de la otra, aprobadas juntas: el aviso dice que la otra ya está publicada', async () => {
+    const larga = { ...LARGA, slug: 'seneca-zeta-larga' };
+    const rutas = await corpusCon([CANDIDATA_COMPLETA, larga]);
+    const resultado = await aprobar(rutas, [CANDIDATA_COMPLETA.slug, larga.slug]);
+    expect(resultado.publicadas).toEqual([CANDIDATA_COMPLETA.slug, larga.slug]);
+    const porSlug = new Map(resultado.avisos.map((a) => [a.slug, a.parecidas]));
+    expect(porSlug.get(CANDIDATA_COMPLETA.slug)).toEqual([
+      expect.objectContaining({ slug: larga.slug, donde: 'publicadas', sentido: 'contenida-en' }),
+    ]);
+    expect(porSlug.get(larga.slug)).toEqual([
+      expect.objectContaining({ slug: CANDIDATA_COMPLETA.slug, donde: 'publicadas', sentido: 'contiene-a' }),
+    ]);
+  });
+
+  it('una candidata que se publica con otro slug lleva el aviso con el slug con que salió', async () => {
+    const ocupada = { ...LARGA, slug: CANDIDATA_COMPLETA.slug, texto: 'Otra Cita del mismo nombre, que no tiene nada que ver con esta.' };
+    const rutas = await corpusCon([CANDIDATA_COMPLETA], [ocupada, LARGA]);
+    const resultado = await aprobar(rutas, [CANDIDATA_COMPLETA.slug]);
+    const [renombrada] = resultado.renombradas;
+    expect(renombrada.de).toBe(CANDIDATA_COMPLETA.slug);
+    expect(resultado.avisos.map((a) => a.slug)).toEqual([renombrada.a]);
+  });
 });

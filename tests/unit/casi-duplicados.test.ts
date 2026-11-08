@@ -160,6 +160,34 @@ describe('Historia 29.4 — casiDuplicados', () => {
     expect(cli.salida).toContain('Ningún par');
   });
 
+  it('una ficha nombrada sin Citas publicadas se dice, no pasa por recorrida', async () => {
+    const corpus = await corpusConDosObras();
+    await writeFile(
+      join(corpus, 'obras', 'seneca--sin-citas.yml'),
+      'autor: "seneca"\ntitulo: "Sin citas"\nformas:\n  - "sin citas"\n',
+      'utf8',
+    );
+    const resultado = await casiDuplicados(rutasDelCorpus(corpus), ['seneca--sin-citas']);
+    expect(resultado.ok && resultado.parte.sinCitas).toEqual(['seneca--sin-citas']);
+    expect(resultado.ok && resultado.parte.resumen.recorridas).toBe(0);
+    expect(resultado.ok && formatearCasiDuplicados(resultado.parte)).toContain(
+      'seneca--sin-citas: sin Citas publicadas; no se recorre.',
+    );
+    const todas = await casiDuplicados(rutasDelCorpus(corpus));
+    expect(todas.ok && todas.parte.sinCitas).toBeUndefined();
+  });
+
+  it('un Corpus sin obras/ no tiene Obras que recorrer, y no es un fallo', async () => {
+    const corpus = await corpusConDosObras();
+    await rm(join(corpus, 'obras'), { recursive: true });
+    const resultado = await casiDuplicados(rutasDelCorpus(corpus));
+    expect(resultado.ok && resultado.parte.resumen).toEqual({
+      recorridas: 0,
+      conPares: 0,
+      pares: { repetidas: 0, contenida: 0, 'casi-iguales': 0 },
+    });
+  });
+
   it('un Corpus ilegible no da parte', async () => {
     const corpus = await corpusConDosObras();
     await writeFile(join(corpus, 'citas', 'seneca--rota.md'), '---\ntexto: "sin cerrar\n: :\n---\n', 'utf8');

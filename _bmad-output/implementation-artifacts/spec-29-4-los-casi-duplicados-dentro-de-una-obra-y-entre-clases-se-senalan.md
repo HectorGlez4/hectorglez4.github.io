@@ -5,12 +5,19 @@ created: '2026-11-08'
 status: 'done'
 baseline_revision: '40a78bcf835b95163e806af721e0e2199e1229a8'
 review_loop_iteration: 0
-followup_review_recommended: false
+followup_review_recommended: true
 context:
   - '{project-root}/AGENTS.md'
   - '{project-root}/_bmad-output/implementation-artifacts/epic-29-context.md'
 warnings: [oversized]
-deferred: []
+deferred:
+  - summary: >-
+      `aprobar` recalcula las parecidas de todo `_revision/` (contención frente a ~290.000 formas) aunque se apruebe un solo slug.
+    evidence: |-
+      `aprobar` llama a `loteEnRevision`, que desde la 29.4 corre `parecidasDeLasCandidatas` sobre todas las candidatas; los avisos solo hacen falta para las aprobadas. Es parte del +30 % de CPU medido, por debajo del Block If, y no cambia ningún veredicto: es coste, no defecto.
+    location: >-
+      tools/lib/revision.ts (aprobar → loteEnRevision → parecidasDeLasCandidatas)
+    severity: low
 ---
 
 <intent-contract>
@@ -159,6 +166,28 @@ Son los dos casos de la auditoría del 2026-11-03. Ninguna decisión tomada: ret
 
 (Las capas de revisión son externas y no traen hallazgos en esta pasada.)
 
+### 2026-11-08 — Review pass
+- intent_gap: 0
+- bad_spec: 0
+- patch: 12: (high 0, medium 2, low 10)
+- defer: 1: (high 0, medium 0, low 1)
+- reject: 11: (high 0, medium 0, low 11)
+- addressed_findings:
+  - `[medium]` `[patch]` El alta anotaba en `casiIguales` («escritas igual») entradas que luego apartaba por repetida/contenida, mandaba a revisión o rechazaba por Tema: ahora se reúnen por entrada y pasan al informe solo al publicarla.
+  - `[medium]` `[patch]` Faltaban pruebas de lo que se lee: el parte de `revisar --aprobar` (nueva prueba de CLI en `revisar-cli.test.ts`), las líneas «Casi igual a …»/«Contiene a …» de `formatearLote`, `duplicaA` en `avisos`, las etiquetas «(publicadas; contenida|repetidas)» y la cifra del parte del alta, la casi igual apartada y la forzada con `--con-duplicados`.
+  - `[low]` `[patch]` El alta no comparaba la casi igual dentro del mismo lote: lo que el lote publica entra en las de su Obra (`donde: 'el propio lote'`; por ficha, o por identidad Autor+forma si la Obra aún no tiene ficha), copiadas por pasada para que el ensayo no contamine la pasada real.
+  - `[low]` `[patch]` `repetidaOContenida` del alta nombraba la candidata en revisión antes que la publicada que también la contenía: ahora recorre primero las publicadas, como dice el comentario de la repetida.
+  - `[low]` `[patch]` La cifra del parecido salía «0.91» en el alta y «0,91» en `revisar` y en el parte: una sola forma, `cifraDeParecido` de `tools/lib/parecido.ts`, en los tres.
+  - `[low]` `[patch]` El orden de `parecidas` desempataba la clase por orden alfabético: ahora por `CLASES_DE_COINCIDENCIA`.
+  - `[low]` `[patch]` Los `avisos` de `aprobar` iban con el slug de la candidata y no con el que salió (`definitivo`), como `conSaltos`.
+  - `[low]` `[patch]` Los `avisos` de `aprobar` decían «en revisión» de una otra Cita que la misma pasada acababa de publicar: se reescriben a «publicadas» con su slug definitivo.
+  - `[low]` `[patch]` `revisar.ts` recortaba «⚠ » con `.slice(2)` y arrastraba «Decide tú.» a lo ya publicado, y la repetida tenía otra redacción: `textoDeRepetida`/`textoDeParecida` dan el texto sin signo ni cierre y el listado y el parte lo envuelven.
+  - `[low]` `[patch]` `casi-duplicados` exigía `obras/` (un Corpus sin fichas salía con 1) y una ficha nombrada sin Citas daba «Ningún par» sin decirlo: `obras/` ya no hace falta y el parte lleva `sinCitas` («sin Citas publicadas; no se recorre»).
+  - `[low]` `[patch]` AGENTS.md no decía los límites de la casi igual (solo frente a publicadas, solo con ficha) ni que `revisar` y el alta leen `corpus/obras/`, ni lo de la ficha sin Citas del parte.
+  - `[low]` `[patch]` La prueba «con o sin --con-duplicados» no ejercía `--con-duplicados`: renombrada y cubierto el caso en una prueba nueva.
+
+Diferido: el coste de `aprobar`, que recalcula las parecidas de todo `_revision/` (frontmatter). Rechazados: el barrido lineal del alta y su rama redundante (lotes pequeños; ya era así), el objeto `CitaConObra` del alta (es el contrato del tipo), la forma en tupla de `palabra` en el JSON (coherente con `slugs` y `textos`), la rama sin palabras interiores de `indiceDeContencion` (≥ 40 caracteres en ≤ 2 palabras, exacta), la contención no alineada a palabra y el parecido de la contenida como cociente de longitudes (los define el spec), la prueba de dueños por nombres (la forma que pide el spec), la repetida de `revisar` fuera de `parecidoEntre` («se conserva tal cual»), «entre clases» por construcción y el parte real comprobado a mano (lo que pide la historia), el registro de revisión anterior, 518 frente a 520 Obras (la cifra de planificación es de otro censo; el criterio no la fija) y la medida bajo carga (las dos cifras quedan bajo el +50 %).
+
 ## Auto Run Result
 
 Status: done
@@ -182,3 +211,22 @@ Blocking condition: ninguna (las dos condiciones de Block If no se dieron: `revi
 **Verificación.** `npx vitest run` de `parecido`, `casi-duplicados`, `duplicados`, `revision`, `documentacion`, `alta`, `obra-cli` y `lineas`: verdes. `npx astro check`: 0 errores, 0 avisos (10 sugerencias ya existentes). `npm run obra -- casi-duplicados` y `--json`: exit 0, `git status --short corpus` igual antes y después. `npm test` entero (desacoplado): 162 ficheros, 7.402 pruebas, verde. Medidas de `revisar` y parte del Corpus real, en sus secciones. Auditoría de la matriz: cada fila tiene una prueba que corrió y pasó (`parecido.test.ts` para las seis de la función; `casi-duplicados.test.ts` para orden, ficha inexistente, Corpus ilegible o inexistente, banderas y sin pares, también por la orden).
 
 **Riesgos residuales.** Leer `corpus/obras/` es nuevo en `revisar` y en el alta: una ficha ilegible, que ya rompía el build, ahora también las para. El tiempo de `revisar` se midió con otras etapas construyendo en paralelo; la CPU de usuario es la cifra más estable (+30 %). La casi igual de `revisar` y del alta solo mira publicadas de la misma Obra resuelta por ficha (una candidata cuya obra aún no tiene ficha no tiene publicadas con que compararse).
+
+### Pasada de revisión 1 (2026-11-08)
+
+**Resumen.** Doce parches sobre los hallazgos de las cinco capas externas, sin tocar el `<intent-contract>` ni el comportamiento de bloqueo: el alta anota la casi igual solo de lo que publica, la compara también dentro del mismo lote y prefiere la publicada en la contenida; `aprobar` da sus avisos con el slug definitivo y con «publicadas» para lo que la misma pasada publicó; el texto de cada aviso tiene un dueño (`textoDeRepetida`, `textoDeParecida`) y la cifra otro (`cifraDeParecido`); `casi-duplicados` no exige `obras/` y nombra la ficha pedida sin Citas.
+
+**Ficheros de esta pasada.**
+- `tools/lib/parecido.ts` — `cifraDeParecido`, la forma única de escribir el parecido.
+- `tools/alta.ts` — `casiIguales` por entrada publicada, comparación dentro del lote (`donde: 'el propio lote'`), mapa por pasada, contenida con la publicada primero, cifra con coma.
+- `tools/lib/revision.ts` — orden de clases por `CLASES_DE_COINCIDENCIA`, `avisos` con `definitivo` y reescritos tras la pasada, `textoDeRepetida`/`textoDeParecida` en lugar de `lineaDeParecida`.
+- `tools/revisar.ts` — el parte de `--aprobar` con esos textos, sin `.slice(2)` ni «Decide tú.».
+- `tools/lib/casiDuplicados.ts` — sin exigir `obras/`; `sinCitas` en el parte y en el JSON (omitido si vacío).
+- `AGENTS.md` — los límites de la casi igual, la lectura de `corpus/obras/` y la ficha sin Citas del parte.
+- `tests/unit/revision.test.ts`, `tests/unit/duplicados.test.ts`, `tests/unit/casi-duplicados.test.ts`, `tests/unit/revisar-cli.test.ts` — casos añadidos (ninguno existente cambiado salvo el título de una prueba de la 29.4 que prometía `--con-duplicados`).
+
+**Revisión.** 12 parches (0 high, 2 medium, 10 low), 1 diferido, 11 rechazados (detalle en el Triage Log). `followup_review_recommended: true`: puntuación 3 × 2 + 10 = 16.
+
+**Verificación.** `npx vitest run` de `parecido`, `casi-duplicados`, `duplicados`, `revision`, `documentacion`, `alta`, `obra-cli`, `lineas` y `revisar-cli`: 9 ficheros, 244 pruebas, verdes. `npx astro check`: 0 errores, 0 avisos. `npm run obra -- casi-duplicados` y `--json` sobre el Corpus real: exit 0, el mismo parte (518 recorridas, 1 con pares, 2 contenidas de *Versos sencillos*), `git status --short corpus` vacío antes y después. `npm test` entero, desacoplado: 162 ficheros, 7.413 pruebas, verde.
+
+**Riesgos residuales.** Los de la pasada anterior siguen: la casi igual solo mira publicadas con ficha, y una ficha ilegible para `revisar` y el alta (ahora dicho en AGENTS.md). `aprobar` sigue pagando el recorrido entero de `_revision/` (diferido). Las medidas de `revisar` no se repitieron: los parches no tocan el recorrido de la contención.

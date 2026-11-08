@@ -27,7 +27,14 @@ import {
 import { saltosDeLaCita } from './lineas.ts';
 import { normalizar } from '../../src/lib/normalizar.ts';
 import { fichaDeCita, indiceDeFichas } from '../../src/lib/obras.ts';
-import { formaParaComparar, indiceDeContencion, parecidoEntre, type FormaParaComparar } from './parecido.ts';
+import {
+  CLASES_DE_COINCIDENCIA,
+  cifraDeParecido,
+  formaParaComparar,
+  indiceDeContencion,
+  parecidoEntre,
+  type FormaParaComparar,
+} from './parecido.ts';
 import { slugLibre } from '../../src/lib/slug.ts';
 import {
   conLaLineaDeTexto,
@@ -172,7 +179,7 @@ function parecidasDeLasCandidatas(
       (x, y) =>
         Number(x.donde !== 'publicadas') - Number(y.donde !== 'publicadas') ||
         x.slug.localeCompare(y.slug, 'es') ||
-        x.clase.localeCompare(y.clase),
+        CLASES_DE_COINCIDENCIA.indexOf(x.clase) - CLASES_DE_COINCIDENCIA.indexOf(y.clase),
     );
   }
   return parecidas;
@@ -505,6 +512,8 @@ export async function aprobar(
     });
   }
 
+  // Historia 29.4 — con qué slug salió cada candidata publicada en esta pasada, para los avisos.
+  const publicadaComo = new Map<string, string>();
   // Lo que esta pasada ya publicó: cuenta para los Temas de las que quedan.
   const escritas: { slug: string; temas: string[] }[] = [];
   let pendientes = planeadas;
@@ -576,15 +585,30 @@ export async function aprobar(
     }
 
     resultado.publicadas.push(slug);
+    publicadaComo.set(candidata.slug, definitivo);
     if (candidata.duplicaA !== undefined || (candidata.parecidas ?? []).length > 0) {
       resultado.avisos.push({
-        slug,
+        slug: definitivo,
         ...(candidata.duplicaA !== undefined ? { duplicaA: candidata.duplicaA } : {}),
         parecidas: candidata.parecidas ?? [],
       });
     }
     if (conSaltos !== undefined) resultado.conSaltos.push({ slug: definitivo, documento: conSaltos.documento });
   }
+
+  /*
+   * Historia 29.4 — los avisos se calcularon al listar, antes de publicar: una otra Cita que esta
+   * misma pasada publicó ya no está «en revisión», y su slug es el definitivo.
+   */
+  const aDondeVa = <T extends { slug: string; donde: 'publicadas' | 'en revisión' }>(x: T): T => {
+    const definitivo = x.donde === 'en revisión' ? publicadaComo.get(x.slug) : undefined;
+    return definitivo === undefined ? x : { ...x, slug: definitivo, donde: 'publicadas' };
+  };
+  resultado.avisos = resultado.avisos.map((aviso) => ({
+    ...aviso,
+    ...(aviso.duplicaA !== undefined ? { duplicaA: aDondeVa(aviso.duplicaA) } : {}),
+    parecidas: aviso.parecidas.map(aDondeVa),
+  }));
 
   /*
    * Lo escrito no se deshace. Si una Ficha que falló al escribir era la que le daba el Tema a una
@@ -763,12 +787,8 @@ export function formatearLote(lote: CandidataEnRevision[], total: number = lote.
   for (const candidata of lote) {
     lineas.push(`${candidata.slug}`);
     lineas.push(`  «${candidata.texto}»`);
-    if (candidata.duplicaA) {
-      lineas.push(
-        `  ⚠ Duplica a ${candidata.duplicaA.slug} (${candidata.duplicaA.donde}; repetidas). Decide tú.`,
-      );
-    }
-    for (const parecida of candidata.parecidas ?? []) lineas.push(`  ${lineaDeParecida(parecida)}`);
+    if (candidata.duplicaA) lineas.push(`  ⚠ ${textoDeRepetida(candidata.duplicaA)}. Decide tú.`);
+    for (const parecida of candidata.parecidas ?? []) lineas.push(`  ⚠ ${textoDeParecida(parecida)}. Decide tú.`);
     if (!candidata.admisible) {
       lineas.push('  ✕ No pasaría la admisión aunque se apruebe:');
       for (const motivo of candidata.motivos) lineas.push(`      ${motivo}`);
@@ -791,15 +811,23 @@ export function formatearLote(lote: CandidataEnRevision[], total: number = lote.
 }
 
 /**
- * El aviso de una parecida (Historia 29.4), en una línea: con quién, dónde, la clase y el parecido.
- * Lo usan el listado y el parte de `--aprobar`.
+ * El aviso de una repetida (Historia 29.4), sin signo ni cierre: con quién, dónde y la clase. Lo
+ * usan el listado («… Decide tú.») y el parte de `--aprobar`, que ya publicó.
  */
-export function lineaDeParecida(p: Parecida): string {
-  const cifra = p.parecido.toFixed(2).replace('.', ',');
+export function textoDeRepetida(d: NonNullable<CandidataEnRevision['duplicaA']>): string {
+  return `Duplica a ${d.slug} (${d.donde}; repetidas)`;
+}
+
+/**
+ * El aviso de una parecida (Historia 29.4), sin signo ni cierre: con quién, dónde, la clase y el
+ * parecido. Lo usan el listado y el parte de `--aprobar`.
+ */
+export function textoDeParecida(p: Parecida): string {
+  const cifra = cifraDeParecido(p.parecido);
   if (p.clase === 'contenida') {
     const verbo = p.sentido === 'contiene-a' ? 'Contiene a' : 'Contenida en';
-    return `⚠ ${verbo} ${p.slug} (${p.donde}; contenida, ${cifra}). Decide tú.`;
+    return `${verbo} ${p.slug} (${p.donde}; contenida, ${cifra})`;
   }
   const palabra = p.palabra !== undefined ? `; ${p.palabra.a}/${p.palabra.b}` : '';
-  return `⚠ Casi igual a ${p.slug} (${p.donde}; casi iguales, ${cifra}${palabra}). Decide tú.`;
+  return `Casi igual a ${p.slug} (${p.donde}; casi iguales, ${cifra}${palabra})`;
 }

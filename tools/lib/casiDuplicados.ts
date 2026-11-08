@@ -19,6 +19,7 @@ import { enUnaLinea } from '../../src/lib/verso.ts';
 import { leerCitas, leerFichasDeObra, type Rutas } from './corpus.ts';
 import {
   CLASES_DE_COINCIDENCIA,
+  cifraDeParecido,
   formaParaComparar,
   parecidoEntre,
   type ClaseDeCoincidencia,
@@ -46,6 +47,8 @@ export interface ObraConCasiDuplicados {
 
 export interface ParteDeCasiDuplicados {
   obras: ObraConCasiDuplicados[];
+  /** Fichas nombradas que no tienen ninguna Cita publicada, y por eso no se recorrieron. */
+  sinCitas?: string[];
   resumen: {
     /** Obras recorridas, con al menos una Cita publicada. */
     recorridas: number;
@@ -65,8 +68,10 @@ export type ResultadoDeCasiDuplicados =
  * que no se puede leer no se informa a medias.
  */
 export async function casiDuplicados(rutas: Rutas, fichas: readonly string[] = []): Promise<ResultadoDeCasiDuplicados> {
-  if (!existsSync(rutas.citas) || !existsSync(rutas.obras)) {
-    return { ok: false, motivos: [`No hay Corpus que leer en ${rutas.raiz}: faltan citas/ u obras/.`] };
+  // Sin `obras/` no hay fichas, y sin fichas ninguna Obra que recorrer: es un parte vacío, no un
+  // Corpus ilegible. Sin `citas/` no hay Corpus.
+  if (!existsSync(rutas.citas)) {
+    return { ok: false, motivos: [`No hay Corpus que leer en ${rutas.raiz}: falta citas/.`] };
   }
   let citas: Awaited<ReturnType<typeof leerCitas>>;
   let activas: Awaited<ReturnType<typeof leerFichasDeObra>>;
@@ -140,8 +145,18 @@ export async function casiDuplicados(rutas: Rutas, fichas: readonly string[] = [
     obras.push({ obra, titulo: grupo.titulo, pares: suyos });
   }
   obras.sort((a, b) => b.pares.length - a.pares.length || a.obra.localeCompare(b.obra, 'es'));
+  // Una ficha nombrada sin Citas publicadas no se recorre: se dice, para que «ningún par» no pase
+  // por un recorrido que no hubo.
+  const sinCitas = [...pedidas].filter((f) => !porObra.has(f)).sort((a, b) => a.localeCompare(b, 'es'));
 
-  return { ok: true, parte: { obras, resumen: { recorridas: porObra.size, conPares: obras.length, pares } } };
+  return {
+    ok: true,
+    parte: {
+      obras,
+      ...(sinCitas.length > 0 ? { sinCitas } : {}),
+      resumen: { recorridas: porObra.size, conPares: obras.length, pares },
+    },
+  };
 }
 
 const NOMBRE_DE_CLASE: Record<ClaseDeCoincidencia, string> = {
@@ -150,16 +165,15 @@ const NOMBRE_DE_CLASE: Record<ClaseDeCoincidencia, string> = {
   'casi-iguales': 'casi iguales',
 };
 
-function cifra(n: number): string {
-  return n.toFixed(2).replace('.', ',');
-}
-
 /** El parte legible. Cierra con las tres decisiones, que son de una persona. */
 export function formatearCasiDuplicados(parte: ParteDeCasiDuplicados): string {
   const { resumen } = parte;
   const lineas: string[] = [
     `Casi duplicados dentro de cada Obra publicada: ${resumen.recorridas} Obras recorridas.`,
   ];
+  for (const ficha of parte.sinCitas ?? []) {
+    lineas.push(`${ficha}: sin Citas publicadas; no se recorre.`);
+  }
   if (parte.obras.length === 0) {
     lineas.push('', 'Ningún par: ninguna Obra tiene Citas repetidas, contenidas ni casi iguales.');
     return lineas.join('\n');
@@ -172,10 +186,10 @@ export function formatearCasiDuplicados(parte: ParteDeCasiDuplicados): string {
       let cabeza: string;
       if (par.clase === 'contenida') {
         const fuera = par.contenida === a ? b : a;
-        cabeza = `contenida (${cifra(par.parecido)}): ${par.contenida} dentro de ${fuera}`;
+        cabeza = `contenida (${cifraDeParecido(par.parecido)}): ${par.contenida} dentro de ${fuera}`;
       } else {
         const palabra = par.palabra !== undefined ? `; ${par.palabra[0]}/${par.palabra[1]}` : '';
-        cabeza = `${NOMBRE_DE_CLASE[par.clase]} (${cifra(par.parecido)}${palabra}): ${a} y ${b}`;
+        cabeza = `${NOMBRE_DE_CLASE[par.clase]} (${cifraDeParecido(par.parecido)}${palabra}): ${a} y ${b}`;
       }
       lineas.push(`  · ${cabeza}`);
       lineas.push(`      ${a}: «${enUnaLinea(par.textos[0])}»`);

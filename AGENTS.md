@@ -94,7 +94,10 @@ lo de revisión, y «⚠ Casi igual a …» frente a las publicadas de su misma 
 esos avisos en el parte de lo que publicó. Nada de eso bloquea: aprobar publica igual. La medida es
 una sola, `parecidoEntre` de `tools/lib/parecido.ts` —repetidas, contenida (la corta con al menos
 `MIN_CARACTERES_PARA_CONTENCION`), casi iguales (`MIN_PARECIDO_PARA_CORREGIR`, 0,85)—, la misma del
-alta y de `documentar --texto`; ningún otro módulo calcula parecido ni contención.
+alta y de `documentar --texto`; ningún otro módulo calcula parecido ni contención. La casi igual
+tiene dos límites: solo se mira frente a **publicadas** (nunca entre dos candidatas) y solo dentro
+de la Obra resuelta por ficha, así que una candidata cuya Obra aún no tiene ficha no recibe ninguna.
+Para eso `revisar` y el alta leen `corpus/obras/`: una ficha ilegible los para, nombrando el fichero.
 
 **`recuperar` y `extraer` conservan el verso** (Historia 29.1, AD-29). Un documento nuevo declara
 en su cabecera la forma de sus líneas, `lineas:` —una de `FORMAS_DE_LINEAS` de
@@ -775,7 +778,8 @@ palabra que cambia, si es una—, con `parecidoEntre`; entre Obras distintas no 
 recordando las tres decisiones —retirar una (`npm run documentar -- --retirar`), conservar las dos,
 restituir el literal (`npm run documentar -- <slug> <documento> --texto`)— y **las toma una
 persona**: la orden no retira, corrige, conserva ni guarda excepciones. Una ficha nombrada que no
-existe o un Corpus ilegible salen con 1, sin parte; una bandera desconocida o repetida, con 2.
+existe o un Corpus ilegible salen con 1, sin parte; una nombrada sin Citas publicadas sale en el
+parte como «sin Citas publicadas; no se recorre»; una bandera desconocida o repetida, con 2.
 
 **`ediciones`** (Historia 22.9) es el otro campo que decide Héctor, y **no se escribe a mano**:
 lo escriben sus dos órdenes, que lo validan con el esquema del build.

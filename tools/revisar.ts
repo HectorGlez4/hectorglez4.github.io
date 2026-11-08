@@ -29,7 +29,14 @@
  */
 
 import { rutasDelCorpus } from './lib/corpus.ts';
-import { aprobar, formatearLote, lineaDeParecida, loteEnRevision, rechazar } from './lib/revision.ts';
+import {
+  aprobar,
+  formatearLote,
+  loteEnRevision,
+  rechazar,
+  textoDeParecida,
+  textoDeRepetida,
+} from './lib/revision.ts';
 import { raizDeCorpusDe } from './lib/cli.ts';
 import { MIN_CITAS_POR_TEMA } from '../src/lib/umbrales.ts';
 
@@ -121,10 +128,8 @@ if (aAprobar.length > 0) {
 
   for (const aviso of resultado.avisos) {
     // Historia 29.4: se publicó igual; lo que se señalaba de ella, para quien aprueba.
-    if (aviso.duplicaA !== undefined) {
-      lineas.push(`  ⚠ ${aviso.slug}: duplica a ${aviso.duplicaA.slug} (${aviso.duplicaA.donde}; repetidas).`);
-    }
-    for (const parecida of aviso.parecidas) lineas.push(`  ⚠ ${aviso.slug}: ${lineaDeParecida(parecida).slice(2)}`);
+    if (aviso.duplicaA !== undefined) lineas.push(`  ⚠ ${aviso.slug}: ${textoDeRepetida(aviso.duplicaA)}.`);
+    for (const parecida of aviso.parecidas) lineas.push(`  ⚠ ${aviso.slug}: ${textoDeParecida(parecida)}.`);
   }
 
   for (const { slug, documento } of resultado.conSaltos) {
