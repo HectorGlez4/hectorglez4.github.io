@@ -106,7 +106,7 @@ describe('Historia 23.2 — el vocabulario es un módulo puro que solo importa d
 });
 
 describe('Historia 23.2 — los eventos y los conjuntos cerrados', () => {
-  it('son los siete de la v7.1 y los cuatro de la v8', () => {
+  it('son los siete de la v7.1, los cuatro de la v8 y los dos de citar de la v9 (30.5)', () => {
     expect([...EVENTOS_VALIDOS].sort()).toEqual(
       [
         'busqueda',
@@ -114,6 +114,8 @@ describe('Historia 23.2 — los eventos y los conjuntos cerrados', () => {
         'comparticion-de-enlace',
         'comparticion-de-imagen',
         'copiado',
+        'copiado-de-fragmento',
+        'copiado-de-referencia',
         'descarga-de-imagen',
         'lectura',
         'salida-interna',
@@ -239,9 +241,15 @@ describe('Historia 23.2 — los eventos y los conjuntos cerrados', () => {
  * interna, con su zona; la 23.8, la búsqueda, con su tramo y sus filtros; y la 23.9, la vista de
  * Obra, con su marca `indexable`. Las pruebas que la recorren con `it.each` se quedan sin casos y no
  * fallan por ello; un evento o un campo que el vocabulario gane después, y que el guion no sepa
- * producir todavía, vuelve a entrar aquí con su historia.
+ * producir todavía, vuelve a entrar aquí con su historia. La primera en volver es la 30.5, con
+ * `copiado-de-referencia` y `copiado-de-fragmento`: la isla de Copiar ya los pide, y el guion los
+ * descarta hasta la fase B.
  */
-const PENDIENTES: readonly { historia: string; eventos?: readonly Evento[]; campos?: readonly [Evento, Campo][] }[] = [];
+const PENDIENTES: readonly { historia: string; eventos?: readonly Evento[]; campos?: readonly [Evento, Campo][] }[] = [
+  // Historia 30.5 — fase A: en el vocabulario y en el receptor, retenidos hasta que Héctor despliegue
+  // el receptor desde la rama y commitee la huella; soltarlos es un commit aparte (fase B).
+  { historia: '30.5', eventos: [EVENTOS.copiadoDeReferencia, EVENTOS.copiadoDeFragmento] },
+];
 
 const eventoPendiente = (evento: Evento) => PENDIENTES.some((p) => p.eventos?.includes(evento));
 const campoPendiente = (evento: Evento, campo: Campo) =>

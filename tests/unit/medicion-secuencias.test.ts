@@ -536,7 +536,7 @@ describe('Historia 23.2 — desplegar, en su orden', () => {
   it('un receptor que redirige: 1, diciendo que MEDICION_ENDPOINT redirige', async () => {
     const { efectos } = mundo({ respuesta: 301 });
     const parada = await paradaDe(desplegar(efectos, URL_EN_VIVO));
-    expect(parada?.message).toContain('87 de 87 balizas no recibieron un 204 (301 ×87): MEDICION_ENDPOINT redirige');
+    expect(parada?.message).toContain('91 de 91 balizas no recibieron un 204 (301 ×91): MEDICION_ENDPOINT redirige');
   });
 
   it('las balizas que no llegan —la migración no hizo nada—: 1 tras tres intentos, con la pista, sin barajar ni huella', async () => {
@@ -565,7 +565,7 @@ describe('Historia 23.2 — desplegar, en su orden', () => {
     const parada = await paradaDe(desplegar(efectos, URL_EN_VIVO));
     expect(parada?.codigo).toBe(1);
     expect(parada?.message).toContain('No se migra ni se despliega: El barajado no cabe hoy');
-    expect(parada?.message).toContain('contadas unas 1566 de las balizas de esta orden');
+    expect(parada?.message).toContain('contadas unas 1638 de las balizas de esta orden');
     expect(parada?.message).toContain('No se aplicó nada en remoto.');
     for (const prohibida of ['migrar', 'desplegar', 'enviar', `consulta --remote ${SQL_DE_BARAJADO}`]) {
       expect(llamadas).not.toContain(prohibida);
@@ -679,7 +679,7 @@ describe('Historia 23.2 — desplegar, en su orden', () => {
     const { efectos, llamadas, dichos } = mundo({ escritas24h: 48_000, escritas24hTrasLasBalizas: 48_000 });
     await paradaDe(desplegar(efectos, URL_EN_VIVO));
     expect(llamadas).toContain(`consulta --remote ${SQL_DE_BARAJADO}`);
-    expect(dichos.join('\n')).toContain('van 49566 en las últimas 24 h');
+    expect(dichos.join('\n')).toContain('van 49638 en las últimas 24 h');
   });
 
   it('d1 info que falla: 1 antes de migrar, con lo que dijo wrangler', async () => {

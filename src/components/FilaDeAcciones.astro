@@ -1,0 +1,32 @@
+---
+/**
+ * Fila de acciones — Historia 30.2, UX-DR114, UX-DR123.
+ *
+ * Lo que se hace con la Cita —Copiar e Imagen— en un solo contenedor: por debajo de 600 px
+ * apilados, Imagen a 2 × bajo Copiar, como siempre; desde 600 px en fila, cada botón a su ancho
+ * y a 2 × el uno del otro. Con el texto al 200 % `flex-wrap` baja Imagen a su línea sin solapes.
+ * «Compartir en» queda fuera, detrás, en su bloque propio a 3 ×.
+ *
+ * El campo de copia manual de Copiar va siempre bajo la fila y nunca entre los dos botones: lo
+ * deciden las reglas con contexto de `CopiarCita.astro` (su `.isla` es `display: contents` dentro
+ * de la fila y el respaldo, `order: 1` a lo ancho), sin tocar su marcado ni su guion. Por eso una
+ * prueba que mida Copiar mide su botón, no su isla, que aquí no tiene caja.
+ *
+ * Sin `data-zona` ni `data-sin-zona`: no contiene enlaces, solo las dos islas, y una zona de
+ * salida aquí no mediría nada. Sin guion. La reutilizará la 28.2 en la Cita del Día.
+ */
+---
+
+<div class="fila-de-acciones">
+  <slot />
+</div>
+
+<style>
+  .fila-de-acciones {
+    margin-top: calc(var(--unidad) * 4);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: calc(var(--unidad) * 2);
+  }
+</style>

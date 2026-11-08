@@ -115,6 +115,12 @@ export interface Autor {
    */
   ordenAlfabetico?: string;
   /**
+   * La jornada en que una persona revisó la clave — Historia 26.1. Viaja desde la 30.3 porque
+   * decide el nombre invertido de «Cómo citar» (`partesDelNombre` de `src/lib/atribucion.ts`):
+   * sin revisar, la Referencia lleva el `nombre` tal cual. Sin valor se omite.
+   */
+  ordenRevisado?: string;
+  /**
    * La tradición del Autor — Historia 27.6, §6.1 del PRD: con el tipo del esquema (`tradicion` de
    * `src/lib/admision.ts`), opcional como allí y omitida sin valor. La lee `autoresDestacados`
    * para el suelo latinoamericano de FR-8; ninguna superficie la pinta.
@@ -1348,15 +1354,17 @@ export function aplanarCita(entrada: EntradaCita): Cita {
  * `resolverAtribuciones`.
  */
 export function aplanarAutor(entrada: EntradaAutor): Autor {
-  const { nombre, semblanza, añoNacimiento, añoFallecimiento, ordenAlfabetico, tradicion } = entrada.data;
+  const { nombre, semblanza, añoNacimiento, añoFallecimiento, ordenAlfabetico, ordenRevisado, tradicion } = entrada.data;
   return {
     slug: entrada.id,
     nombre,
     semblanza,
     ...(añoNacimiento !== undefined ? { añoNacimiento } : {}),
     añoFallecimiento,
-    // Historia 26.3 — la clave viaja para el Directorio; `ordenRevisado` no, que no lo pinta nadie.
+    // Historia 26.3 — la clave viaja para el Directorio; desde la 30.3 también su revisión, que
+    // decide si «Cómo citar» invierte el nombre (`partesDelNombre`).
     ...(ordenAlfabetico !== undefined ? { ordenAlfabetico } : {}),
+    ...(ordenRevisado !== undefined ? { ordenRevisado } : {}),
     // Historia 27.6 — la tradición viaja para el suelo de los destacados; sin declarar, se omite.
     ...(tradicion !== undefined ? { tradicion } : {}),
   };
