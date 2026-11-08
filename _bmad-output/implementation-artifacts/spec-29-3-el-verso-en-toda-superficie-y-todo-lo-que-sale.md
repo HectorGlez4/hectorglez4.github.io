@@ -5,7 +5,7 @@ created: '2026-11-08'
 status: 'done'
 baseline_revision: '3906b28d503978ab8efd55311110bd70c7644436'
 review_loop_iteration: 0
-followup_review_recommended: true
+followup_review_recommended: false
 context:
   - '{project-root}/_bmad-output/implementation-artifacts/epic-29-context.md'
   - '{project-root}/_bmad-output/implementation-artifacts/spec-29-1-el-salto-de-verso-sobrevive-en-el-corpus-el-cotejo-y-el-slug.md'
@@ -28,6 +28,12 @@ deferred:
     evidence: |-
       `wc -c public/islas/imagen.js` da 7.527; el tope está en `src/lib/umbrales.ts`. Antes de la 29.3 el margen era de 33 bytes, y la 29.3 ganó el sitio del reparto por versos recortando prosa de dos comentarios. La razón de AD-7 sigue escrita en la espina y en `ImagenDeCita.astro`.
     location: public/islas/imagen.js
+    severity: low
+  - summary: >-
+      La cabida de la Imagen de Cita en verso solo la juzga `tests/e2e/cabida-de-imagen.spec.ts`, que el CI no corre: una Cita sembrada en muchos versos cortos que se saliera del lienzo vertical pasaría `npm test`.
+    evidence: |-
+      `tests/unit/imagen-verso.test.ts` prueba el reparto con un `measureText` falso, sin alto ni márgenes; la Tarjeta Social sí tiene barrido unitario del Corpus real (`tests/unit/tarjeta.test.ts`). Un barrido unitario de `public/islas/imagen.js` con `ANCHO_POR_CARACTER` cerraría el hueco sin depender del e2e local (hallazgo verification-gap, pasada 2).
+    location: tests/unit/imagen-verso.test.ts
     severity: low
 ---
 
@@ -271,6 +277,16 @@ la principal + máx(100 ms, 5 %), y la Cita en verso no empeora frente a la de p
   - `[low]` `[patch]` La exención de `tests/unit/lineas.test.ts` valía para `class=` delante de cualquiera de las cinco formas (blind-hunter): solo exime `class="verso"` de `TextoDeCita.astro`.
   - `[low]` `[patch]` La prueba de 360 × 640 heredaba el tamaño del proyecto (blind-hunter): lo fija antes de navegar.
 
+
+### 2026-11-08 — Review pass
+- intent_gap: 0
+- bad_spec: 0
+- patch: 1: (high 0, medium 0, low 1)
+- defer: 1: (high 0, medium 0, low 1)
+- reject: 30: (high 0, medium 2, low 28)
+- addressed_findings:
+  - `[low]` `[patch]` AGENTS.md decía «nunca « / » en el HTML» y una exención `biografia.ts` entera, cuando el título y la meta del `<head>` llevan « / » por `enUnaLinea` y la guarda de `verso.test.ts` ya nombra sus tres exenciones una a una (blind-hunter): el párrafo dice ahora `<main>` y nombra las exenciones como la prueba.
+
 ## Auto Run Result
 
 Status: done
@@ -344,3 +360,27 @@ proyectos: 230 pasan, 6 se saltan (75 casos de cabida en verso por proyecto, los
 **Riesgos.** El margen del bloque al límite frente al ojo de la marca es de 2 px a 32 px: la prueba
 lo vigila, pero cualquier retoque de la marca o de la atribución lo agota. La portada sigue sin
 barrido de axe con verso.
+
+### Pasada de revisión 2 (2026-11-08)
+
+**Resumen.** Última pasada, proporcionada: un parche de documentación y ninguno de código. Se comprobó
+sobre el `dist/` de la restitución que ningún `<title>`, `content`, `alt`, `data-pagefind-meta` ni
+JSON-LD lleva un salto crudo: solo los `data-texto`/`data-texto-plano`/`data-carga` de las islas, que
+lo llevan a propósito (`textoParaCopiar`). El recorte del título en el mismo índice, el `text` del
+JSON-LD y la `description` del RSS con « / » son lo que la AC manda; la regla de la Tarjeta es la
+decisión delegada de Héctor (se rechazan los hallazgos de que la eligió el agente). Los hallazgos del
+camino de aprobación de la 29.2 (escritura a medias, documento ilegible, candidata con saltos sin
+respaldo, slug renombrado en «↵», que ya acompaña la lista de renombradas) son exóticos o no son
+defectos y se rechazan.
+
+**Ficheros.**
+- `AGENTS.md` — « / » prohibido en el cuerpo (`<main>`) y en los lienzos, no en `<head>`; las exenciones de la guarda, nombradas como en `tests/unit/verso.test.ts`.
+
+**Revisión.** 1 parche (bajo), 1 diferido (bajo: barrido unitario de la cabida de la Imagen), 30
+rechazados. `followup_review_recommended: false` (parches: 0 altos, 0 medios, 1 bajo; 3·0 + 1 = 1).
+
+**Verificación.** `npm test` entero por `correr.sh`, en verde (162 ficheros, 7.402 pruebas, 22,6 min);
+el parche es de `AGENTS.md` y ninguna prueba lee ese párrafo. Barrido de `dist/` (restituido): 0
+atributos de `<head>`, `alt` ni JSON-LD con salto crudo.
+
+**Riesgos.** Los de la pasada 1, más el diferido de la cabida de la Imagen fuera del CI.
