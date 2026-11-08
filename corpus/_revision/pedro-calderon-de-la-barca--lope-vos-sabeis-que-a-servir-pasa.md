@@ -1,5 +1,5 @@
 ---
-texto: "LOPE: ¿Vos sabéis que a servir pasa al Rey, y soy su juez yo?"
+texto: "LOPE: ¿Vos sabéis que a servir pasa\nal Rey, y soy su juez yo?"
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-lope-vos-sabeis-que-a-servir-pasa"
 procedencia:

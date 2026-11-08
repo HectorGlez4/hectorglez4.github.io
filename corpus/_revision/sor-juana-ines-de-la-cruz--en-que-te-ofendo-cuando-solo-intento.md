@@ -1,5 +1,5 @@
 ---
-texto: "¿En qué te ofendo, cuando sólo intento poner bellezas en mi entendimiento y no mi entendimiento en las bellezas?"
+texto: "¿En qué te ofendo, cuando sólo intento\nponer bellezas en mi entendimiento\ny no mi entendimiento en las bellezas?"
 autor: "sor-juana-ines-de-la-cruz"
 slug: "sor-juana-ines-de-la-cruz-en-que-te-ofendo-cuando-solo-intento"
 procedencia:

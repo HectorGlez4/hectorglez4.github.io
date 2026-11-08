@@ -1,5 +1,5 @@
 ---
-texto: "RICARDO Que permita es menester, lo que yo te he de rogar? 450 Diana, puedo negar, lo que deuo agradecer?"
+texto: "RICARDO\nQue permita es menester,\nlo que yo te he de rogar? 450\nDiana, puedo negar,\nlo que deuo agradecer?"
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-ricardo-que-permita-es-menester-lo-que"
 procedencia:

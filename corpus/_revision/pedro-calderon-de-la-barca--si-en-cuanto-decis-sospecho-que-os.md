@@ -1,5 +1,5 @@
 ---
-texto: "Si en cuanto decis, sospecho Que os desmiente ese retrato Que está pendiente del pecho."
+texto: "Si en cuanto decis, sospecho\nQue os desmiente ese retrato\nQue está pendiente del pecho."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-si-en-cuanto-decis-sospecho-que-os"
 procedencia:

@@ -1,5 +1,5 @@
 ---
-texto: "De la gente infeliz parte pequeña asilo halló en los montes; el abismo voraz sepulta el resto."
+texto: "De la gente infeliz parte pequeña\nasilo halló en los montes;\nel abismo voraz sepulta el resto."
 autor: "andres-bello"
 slug: "andres-bello-de-la-gente-infeliz-parte-pequena-asilo"
 procedencia:

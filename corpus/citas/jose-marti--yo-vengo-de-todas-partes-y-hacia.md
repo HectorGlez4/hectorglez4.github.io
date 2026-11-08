@@ -1,5 +1,5 @@
 ---
-texto: "Yo vengo de todas partes, Y hacia todas partes voy: Arte soy entre las artes, En los montes, monte soy."
+texto: "Yo vengo de todas partes,\nY hacia todas partes voy:\nArte soy entre las artes,\nEn los montes, monte soy."
 autor: "jose-marti"
 temas:
   - "la-vida"

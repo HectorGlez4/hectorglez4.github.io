@@ -1,5 +1,5 @@
 ---
-texto: "Isabel, vamos aprisa; demos la vuelta a mi casa; que este muchacho peligra, y hemos menester hacer diligencias exquisitas, por saber de él, y ponerle en salvo."
+texto: "Isabel, vamos aprisa;\ndemos la vuelta a mi casa;\nque este muchacho peligra,\ny hemos menester hacer\ndiligencias exquisitas,\npor saber de él, y ponerle\nen salvo."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-isabel-vamos-aprisa-demos-la-vuelta-a"
 procedencia:

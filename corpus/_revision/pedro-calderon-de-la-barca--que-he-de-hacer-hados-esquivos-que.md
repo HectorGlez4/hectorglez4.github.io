@@ -1,5 +1,5 @@
 ---
-texto: "¿Qué he de hacer hados esquivos que de cualquiera manera es uno solo el peligro?"
+texto: "¿Qué he de hacer hados esquivos\nque de cualquiera manera\nes uno solo el peligro?"
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-que-he-de-hacer-hados-esquivos-que"
 procedencia:

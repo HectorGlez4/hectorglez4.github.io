@@ -1,5 +1,5 @@
 ---
-texto: "En densa muchedumbre ceibas, acacias, mirtos se entretejen, bejucos, vides, gramas; las ramas a las ramas, pugnando por gozar de las felices auras y de la luz, perpetua guerra hacen, y a las raíces angosto viene el seno de la tierra."
+texto: "En densa muchedumbre\nceibas, acacias, mirtos se entretejen,\nbejucos, vides, gramas;\nlas ramas a las ramas,\npugnando por gozar de las felices\nauras y de la luz, perpetua guerra\nhacen, y a las raíces\nangosto viene el seno de la tierra."
 autor: "andres-bello"
 slug: "andres-bello-en-densa-muchedumbre-ceibas-acacias-mirtos-se"
 procedencia:

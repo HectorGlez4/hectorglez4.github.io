@@ -1,5 +1,5 @@
 ---
-texto: "De noche mis pensamientos allí van –ruido importuno en las alas de los vientos con los rayos de la luna."
+texto: "De noche mis pensamientos\nallí van –ruido importuno\nen las alas de los vientos\ncon los rayos de la luna."
 autor: "jose-asuncion-silva"
 slug: "jose-asuncion-silva-de-noche-mis-pensamientos-alli-van-ruido"
 procedencia:

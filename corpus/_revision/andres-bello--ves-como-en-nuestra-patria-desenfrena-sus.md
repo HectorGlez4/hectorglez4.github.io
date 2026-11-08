@@ -1,5 +1,5 @@
 ---
-texto: "¿Ves cómo en nuestra patria desenfrena sus furias la ambición, y al cuello exento forjando está otra vez servil cadena?"
+texto: "¿Ves cómo en nuestra patria desenfrena\nsus furias la ambición, y al cuello exento\nforjando está otra vez servil cadena?"
 autor: "andres-bello"
 slug: "andres-bello-ves-como-en-nuestra-patria-desenfrena-sus"
 procedencia:

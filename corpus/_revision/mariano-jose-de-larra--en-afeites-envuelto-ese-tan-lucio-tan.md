@@ -1,5 +1,5 @@
 ---
-texto: "en afeites envuelto, ¿ese tan lucio, tan vestido y compuesto, es algún dije que del país nos vino de Confucio?"
+texto: "en afeites envuelto, ¿ese tan lucio,\ntan vestido y compuesto, es algún dije\nque del país nos vino de Confucio?"
 autor: "mariano-jose-de-larra"
 slug: "mariano-jose-de-larra-en-afeites-envuelto-ese-tan-lucio-tan"
 procedencia:

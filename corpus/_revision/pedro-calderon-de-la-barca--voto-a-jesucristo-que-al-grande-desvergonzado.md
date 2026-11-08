@@ -1,5 +1,5 @@
 ---
-texto: "¡Voto a Jesucristo, que al grande desvergonzado a palos le he de matar!"
+texto: "¡Voto a Jesucristo, que\nal grande desvergonzado\na palos le he de matar!"
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-voto-a-jesucristo-que-al-grande-desvergonzado"
 procedencia:

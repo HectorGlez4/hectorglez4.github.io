@@ -1,5 +1,5 @@
 ---
-texto: "¿Que puedo esperar? en gran peligro estoy puesta, porque dudar la respuesta, 855 es especie de negar."
+texto: "¿Que puedo esperar?\nen gran peligro estoy puesta,\nporque dudar la respuesta, 855\nes especie de negar."
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-que-puedo-esperar-en-gran-peligro-estoy"
 procedencia:

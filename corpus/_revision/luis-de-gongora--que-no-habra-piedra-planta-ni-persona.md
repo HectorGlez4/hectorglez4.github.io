@@ -1,5 +1,5 @@
 ---
-texto: "que no habrá piedra, planta, ni persona, que suspensa no siga el tierno acento, siendo tuya la voz, y el canto della."
+texto: "que no habrá piedra, planta, ni persona,\nque suspensa no siga el tierno acento,\nsiendo tuya la voz, y el canto della."
 autor: "luis-de-gongora"
 slug: "luis-de-gongora-que-no-habra-piedra-planta-ni-persona"
 procedencia:

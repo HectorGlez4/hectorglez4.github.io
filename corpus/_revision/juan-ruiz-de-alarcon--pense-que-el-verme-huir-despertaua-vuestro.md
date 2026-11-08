@@ -1,5 +1,5 @@
 ---
-texto: "Pensè, que el verme huir despertaua vuestro amor, 790 y temi vuestro rigor en boluiendoos a seguir."
+texto: "Pensè, que el verme huir\ndespertaua vuestro amor, 790\ny temi vuestro rigor\nen boluiendoos a seguir."
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-pense-que-el-verme-huir-despertaua-vuestro"
 procedencia:

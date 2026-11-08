@@ -1,5 +1,5 @@
 ---
-texto: "La corteza do están desnuda, o viste su villano troncón de hierba verde, de suerte que mis ojos no las vean."
+texto: "La corteza do están desnuda, o viste\nsu villano troncón de hierba verde,\nde suerte que mis ojos no las vean."
 autor: "luis-de-gongora"
 slug: "luis-de-gongora-la-corteza-do-estan-desnuda-o-viste"
 procedencia:

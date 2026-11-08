@@ -1,5 +1,5 @@
 ---
-texto: "LEONARDO Y qual es. 15 SANCHO Vna muger que no pide."
+texto: "LEONARDO\nY qual es.\n15\nSANCHO\nVna muger que no pide."
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-leonardo-y-qual-es-15-sancho-vna"
 procedencia:

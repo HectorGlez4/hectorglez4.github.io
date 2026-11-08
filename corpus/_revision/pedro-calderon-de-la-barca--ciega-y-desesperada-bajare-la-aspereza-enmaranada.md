@@ -1,5 +1,5 @@
 ---
-texto: "Ciega y desesperada, Bajaré la aspereza enmarañada Deste monte eminente, Que arruga al sol el ceño de su frente."
+texto: "Ciega y desesperada,\nBajaré la aspereza enmarañada\nDeste monte eminente,\nQue arruga al sol el ceño de su frente."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-ciega-y-desesperada-bajare-la-aspereza-enmaranada"
 procedencia:

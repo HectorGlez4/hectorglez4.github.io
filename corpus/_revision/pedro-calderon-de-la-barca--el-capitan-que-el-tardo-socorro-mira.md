@@ -1,5 +1,5 @@
 ---
-texto: "El capitán, que el tardo socorro mira en mi favor, contra el suyo saca la blanca cuchilla."
+texto: "El capitán,\nque el tardo socorro mira\nen mi favor, contra el suyo\nsaca la blanca cuchilla."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-el-capitan-que-el-tardo-socorro-mira"
 procedencia:

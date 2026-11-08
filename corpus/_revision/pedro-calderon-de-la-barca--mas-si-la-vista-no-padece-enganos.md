@@ -1,5 +1,5 @@
 ---
-texto: "Mas, si la vista no padece engaños Que hace la fantasía, A la medrosa luz que aun tiene el día."
+texto: "Mas, si la vista no padece engaños\nQue hace la fantasía,\nA la medrosa luz que aun tiene el día."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-mas-si-la-vista-no-padece-enganos"
 procedencia:

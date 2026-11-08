@@ -1,5 +1,5 @@
 ---
-texto: "CRESPO: Aunque vuestra salud fuera, señor, la que yo os deseo, me dejara sin sospecha."
+texto: "CRESPO: Aunque vuestra salud fuera,\nseñor, la que yo os deseo,\nme dejara sin sospecha."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-crespo-aunque-vuestra-salud-fuera-senor-la"
 procedencia:

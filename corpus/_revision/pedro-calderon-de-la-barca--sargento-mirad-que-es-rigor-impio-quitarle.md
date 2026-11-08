@@ -1,5 +1,5 @@
 ---
-texto: "SARGENTO: Mirad, que es rigor impío quitarle la vida y honor; mejor es en lo escondido del monte dejarle atado, porque no lleve el aviso."
+texto: "SARGENTO: Mirad, que es rigor impío\nquitarle la vida y honor;\nmejor es en lo escondido\ndel monte dejarle atado,\nporque no lleve el aviso."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-sargento-mirad-que-es-rigor-impio-quitarle"
 procedencia:

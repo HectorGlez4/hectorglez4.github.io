@@ -1,5 +1,5 @@
 ---
-texto: "Un palacio tan breve, Que al sol apenas á mirar se atreve."
+texto: "Un palacio tan breve,\nQue al sol apenas á mirar se atreve."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-un-palacio-tan-breve-que-al-sol"
 procedencia:

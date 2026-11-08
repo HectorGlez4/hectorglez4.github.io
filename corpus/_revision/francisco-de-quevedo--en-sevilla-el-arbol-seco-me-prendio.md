@@ -1,5 +1,5 @@
 ---
-texto: "En Sevilla el Árbol seco Me prendió en el arenal, Porque le afufé la vida Al zaino de Santo Horcaz."
+texto: "En Sevilla el Árbol seco\nMe prendió en el arenal,\nPorque le afufé la vida\nAl zaino de Santo Horcaz."
 autor: "francisco-de-quevedo"
 slug: "francisco-de-quevedo-en-sevilla-el-arbol-seco-me-prendio"
 procedencia:

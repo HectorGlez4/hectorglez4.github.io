@@ -1,5 +1,5 @@
 ---
-texto: "Gozaba un entendimiento tan sutil, tan elevado, que la edad de lo entendido era un mentís de sus años."
+texto: "Gozaba un entendimiento\ntan sutil, tan elevado,\nque la edad de lo entendido\nera un mentís de sus años."
 autor: "sor-juana-ines-de-la-cruz"
 slug: "sor-juana-ines-de-la-cruz-gozaba-un-entendimiento-tan-sutil-tan-elevado"
 procedencia:

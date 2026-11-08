@@ -1,5 +1,5 @@
 ---
-texto: "SARGENTO: Calla, que está aquí un figura del lugar."
+texto: "SARGENTO: Calla, que está aquí un figura\ndel lugar."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-sargento-calla-que-esta-aqui-un-figura"
 procedencia:

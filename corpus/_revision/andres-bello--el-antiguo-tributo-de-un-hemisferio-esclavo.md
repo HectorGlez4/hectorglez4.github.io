@@ -1,5 +1,5 @@
 ---
-texto: "¿El antiguo tributo de un hemisferio esclavo a España llevas?"
+texto: "¿El antiguo tributo\nde un hemisferio esclavo a España llevas?"
 autor: "andres-bello"
 slug: "andres-bello-el-antiguo-tributo-de-un-hemisferio-esclavo"
 procedencia:

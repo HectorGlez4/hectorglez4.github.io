@@ -1,5 +1,5 @@
 ---
-texto: "¿Y no quieres, Andrés, que brame y cruja el látigo tendido en la cloaca que a Sodoma y Gomorra sobrepuja?"
+texto: "¿Y no quieres, Andrés, que brame y cruja\nel látigo tendido en la cloaca\nque a Sodoma y Gomorra sobrepuja?"
 autor: "mariano-jose-de-larra"
 slug: "mariano-jose-de-larra-y-no-quieres-andres-que-brame-y"
 procedencia:

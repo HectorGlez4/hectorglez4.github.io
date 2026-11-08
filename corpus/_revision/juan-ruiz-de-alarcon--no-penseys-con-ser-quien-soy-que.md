@@ -1,5 +1,5 @@
 ---
-texto: "No penseys, con ser quien soy, que tanto credito doy a mi confiança necia; 300 que intente mi calidad ygualar con la de Aurora, que nadie humano me ignora, nadie la ignora deydad."
+texto: "No penseys, con ser quien soy,\nque tanto credito doy\na mi confiança necia; 300\nque intente mi calidad\nygualar con la de Aurora,\nque nadie humano me ignora,\nnadie la ignora deydad."
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-no-penseys-con-ser-quien-soy-que"
 procedencia:

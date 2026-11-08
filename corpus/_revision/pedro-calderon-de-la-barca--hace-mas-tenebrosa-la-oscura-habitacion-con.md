@@ -1,5 +1,5 @@
 ---
-texto: "Hace más tenebrosa La oscura habitación con luz dudosa?"
+texto: "Hace más tenebrosa\nLa oscura habitación con luz dudosa?"
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-hace-mas-tenebrosa-la-oscura-habitacion-con"
 procedencia:

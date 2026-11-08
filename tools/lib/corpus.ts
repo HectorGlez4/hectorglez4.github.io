@@ -782,6 +782,25 @@ export async function leerCitasTolerante(
   return { citas, ilegibles };
 }
 
+/**
+ * La línea `texto:` del frontmatter tal y como la escribe `aYaml`, sustituida por la del texto
+ * nuevo; `undefined` si el fichero no la tiene exactamente una vez. Solo esa línea cambia: el
+ * resto del fichero queda byte a byte, aunque se haya escrito a mano con otra disposición. La usan
+ * la restitución de saltos (Historia 29.2) y la aprobación de una candidata que llega sin ellos.
+ */
+export function conLaLineaDeTexto(contenido: string, viejo: string, nuevo: string): string | undefined {
+  const fin = /\r?\n---\r?\n?/u.exec(contenido.slice(3));
+  if (!contenido.startsWith('---') || fin === null) return undefined;
+  const cabecera = contenido.slice(0, 3 + fin.index);
+  const linea = `texto: ${JSON.stringify(viejo)}`;
+  const lineas = cabecera.split('\n');
+  const donde = lineas.map((l, i) => (l.replace(/\r$/u, '') === linea ? i : -1)).filter((i) => i !== -1);
+  if (donde.length !== 1) return undefined;
+  const [i] = donde;
+  lineas[i] = `texto: ${JSON.stringify(nuevo)}${lineas[i].endsWith('\r') ? '\r' : ''}`;
+  return lineas.join('\n') + contenido.slice(cabecera.length);
+}
+
 const FRONTMATTER = /^---\r?\n([\s\S]*?)\r?\n---\r?\n?/;
 
 export function separarFrontmatter(contenido: string): Record<string, unknown> | null {
@@ -1064,12 +1083,26 @@ export function nombreDeFicheroDeCita(slugAutor: string, slugCita: string): stri
  * analizar; no es lo mismo que faltar, y merece otro mensaje.
  */
 export async function leerDocumentosDeFuente(rutas: Rutas): Promise<DocumentosDeFuente> {
+  return (await leerDocumentosParaElCotejo(rutas)).documentos;
+}
+
+/**
+ * Lo mismo que `leerDocumentosDeFuente` y, **en la misma pasada**, la `lineas:` que declara la
+ * cabecera de cada documento, en crudo — Historia 29.1. El cotejo la necesita para juzgar los
+ * saltos de verso, y una segunda lectura de los 1.400 documentos solo para esa línea sería el
+ * doble de disco por nada. Aquí no se interpreta: la valida `tools/lib/lineas.ts`.
+ */
+export async function leerDocumentosParaElCotejo(
+  rutas: Rutas,
+): Promise<{ documentos: DocumentosDeFuente; lineasDeclaradas: Map<string, string> }> {
   const ficheros = await ficherosDe(rutas.fuentes, ['.txt']);
   const documentos = new Map<string, string | null | typeof BIOGRAFIA_MAL_COLOCADA>();
+  const lineasDeclaradas = new Map<string, string>();
   for (const ruta of ficheros) {
     const analizado = analizarDocumento(await readFile(ruta, 'utf8'));
+    const nombre = slugDeFichero(ruta);
     documentos.set(
-      slugDeFichero(ruta),
+      nombre,
       analizado === undefined
         ? null
         : // Historia 17.1 — una biografía mal colocada en `fuentes/` no da cuerpo que cotejar:
@@ -1078,8 +1111,12 @@ export async function leerDocumentosDeFuente(rutas: Rutas): Promise<DocumentosDe
           ? BIOGRAFIA_MAL_COLOCADA
           : analizado.cuerpo,
     );
+    if (analizado !== undefined && analizado.cabecera.clase !== CLASE_BIOGRAFIA) {
+      const { lineas } = analizado.cabecera;
+      if (lineas !== undefined) lineasDeclaradas.set(nombre, lineas);
+    }
   }
-  return documentos;
+  return { documentos, lineasDeclaradas };
 }
 
 /**
@@ -1172,12 +1209,12 @@ export async function leerDocumentosDeBiografia(
 export async function leerDocumentosDeclarados(
   rutas: Rutas,
 ): Promise<
-  Map<string, { fuente: string; obra: string; declaracion: string; cuerpo: string }>
+  Map<string, { fuente: string; obra: string; declaracion: string; cuerpo: string; lineas?: string }>
 > {
   const ficheros = await ficherosDe(rutas.fuentes, ['.txt']);
   const documentos = new Map<
     string,
-    { fuente: string; obra: string; declaracion: string; cuerpo: string }
+    { fuente: string; obra: string; declaracion: string; cuerpo: string; lineas?: string }
   >();
   for (const ruta of ficheros) {
     const analizado = analizarDocumento(await readFile(ruta, 'utf8'));
@@ -1189,6 +1226,8 @@ export async function leerDocumentosDeclarados(
       obra: analizado.cabecera.obra,
       declaracion: analizado.declaracion,
       cuerpo: analizado.cuerpo,
+      // Historia 29.1 — la forma de las líneas que declara la cabecera, en crudo.
+      ...(analizado.cabecera.lineas !== undefined ? { lineas: analizado.cabecera.lineas } : {}),
     });
   }
   return documentos;

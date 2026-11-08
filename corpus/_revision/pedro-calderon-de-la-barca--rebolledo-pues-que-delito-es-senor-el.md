@@ -1,5 +1,5 @@
 ---
-texto: "REBOLLEDO: ¿Pues qué delito es, señor, el cantar?"
+texto: "REBOLLEDO: ¿Pues qué delito es, señor,\nel cantar?"
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-rebolledo-pues-que-delito-es-senor-el"
 procedencia:

@@ -1,5 +1,5 @@
 ---
-texto: "ESCRIBANO: Ya, aunque rompan la cárcel, no le darán libertad."
+texto: "ESCRIBANO: Ya, aunque rompan la cárcel,\nno le darán libertad."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-escribano-ya-aunque-rompan-la-carcel-no"
 procedencia:

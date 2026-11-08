@@ -1,5 +1,5 @@
 ---
-texto: "Huye el prestigio aéreo, y la burlada vista le busca por el aire puro, y su error reconoce avergonzada;"
+texto: "Huye el prestigio aéreo, y la burlada\nvista le busca por el aire puro,\ny su error reconoce avergonzada;"
 autor: "andres-bello"
 slug: "andres-bello-huye-el-prestigio-aereo-y-la-burlada"
 procedencia:

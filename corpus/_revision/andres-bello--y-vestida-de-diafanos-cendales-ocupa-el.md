@@ -1,5 +1,5 @@
 ---
-texto: "Y vestida de diáfanos cendales, ocupa el aire en torno al Inca santo bella visión de cándidos cristales que con etérea voz repite el canto."
+texto: "Y vestida de diáfanos cendales,\nocupa el aire en torno al Inca santo\nbella visión de cándidos cristales\nque con etérea voz repite el canto."
 autor: "andres-bello"
 slug: "andres-bello-y-vestida-de-diafanos-cendales-ocupa-el"
 procedencia:

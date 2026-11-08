@@ -1,5 +1,5 @@
 ---
-texto: "Ni menos estimada la de Roscio será en la más remota edad futura."
+texto: "Ni menos estimada la de Roscio\nserá en la más remota edad futura."
 autor: "andres-bello"
 slug: "andres-bello-ni-menos-estimada-la-de-roscio-sera"
 procedencia:

@@ -1,5 +1,5 @@
 ---
-texto: "Bien se puede hallar persona Más jarifa y más galán, Empero más bien prendida Yo dudo que se hallará."
+texto: "Bien se puede hallar persona\nMás jarifa y más galán,\nEmpero más bien prendida\nYo dudo que se hallará."
 autor: "francisco-de-quevedo"
 slug: "francisco-de-quevedo-bien-se-puede-hallar-persona-mas-jarifa"
 procedencia:

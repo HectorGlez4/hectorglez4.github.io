@@ -1,5 +1,5 @@
 ---
-texto: "CHISPA: Que es del reñir, imagino, la gala, el guardar la ropa, aunque del nadar se dijo."
+texto: "CHISPA: Que es del reñir, imagino,\nla gala, el guardar la ropa,\naunque del nadar se dijo."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-chispa-que-es-del-renir-imagino-la"
 procedencia:

@@ -1,5 +1,5 @@
 ---
-texto: "Sólo porque me has oido, Entre mis membrudos brazos Te tengo de hacer pedazos."
+texto: "Sólo porque me has oido,\nEntre mis membrudos brazos\nTe tengo de hacer pedazos."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-solo-porque-me-has-oido-entre-mis"
 procedencia:

@@ -1,5 +1,5 @@
 ---
-texto: "Mal entiende mi desseo, doyle otro tiento:) Quisiera que aduiertas que no lo hiziera 575 sino por ti."
+texto: "Mal entiende mi desseo,\ndoyle otro tiento:) Quisiera\nque aduiertas que no lo hiziera 575\nsino por ti."
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-mal-entiende-mi-desseo-doyle-otro-tiento"
 procedencia:

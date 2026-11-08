@@ -1,5 +1,5 @@
 ---
-texto: "Aquí, que me des te pido licencia para pintarlo, por disculpar mis errores, o divertir mis cuidados; o porque al ver de mi amor los extremos temerarios, no te admire que el que fue tanto, mereciera tanto."
+texto: "Aquí, que me des te pido\nlicencia para pintarlo,\npor disculpar mis errores,\no divertir mis cuidados;\no porque al ver de mi amor\nlos extremos temerarios,\nno te admire que el que fue\ntanto, mereciera tanto."
 autor: "sor-juana-ines-de-la-cruz"
 slug: "sor-juana-ines-de-la-cruz-aqui-que-me-des-te-pido-licencia"
 procedencia:

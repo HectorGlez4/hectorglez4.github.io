@@ -1,5 +1,5 @@
 ---
-texto: "TURPIN No es facil, si tiene tanta hermosura mi ama? 525 FILIPO Engañaste, que jamas la he visto."
+texto: "TURPIN\nNo es facil, si tiene\ntanta hermosura mi ama? 525\nFILIPO\nEngañaste, que jamas\nla he visto."
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-turpin-no-es-facil-si-tiene-tanta"
 procedencia:

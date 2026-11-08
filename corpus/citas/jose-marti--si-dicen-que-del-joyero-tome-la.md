@@ -1,5 +1,5 @@
 ---
-texto: "Si dicen que del joyero Tome la joya mejor, Tomo a un amigo sincero Y pongo a un lado el amor."
+texto: "Si dicen que del joyero\nTome la joya mejor,\nTomo a un amigo sincero\nY pongo a un lado el amor."
 autor: "jose-marti"
 temas:
   - "la-amistad"

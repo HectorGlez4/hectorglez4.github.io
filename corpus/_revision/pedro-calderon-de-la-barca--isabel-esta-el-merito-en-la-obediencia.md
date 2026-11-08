@@ -1,5 +1,5 @@
 ---
-texto: "ISABEL: Está el mérito en la obediencia."
+texto: "ISABEL: Está\nel mérito en la obediencia."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-isabel-esta-el-merito-en-la-obediencia"
 procedencia:

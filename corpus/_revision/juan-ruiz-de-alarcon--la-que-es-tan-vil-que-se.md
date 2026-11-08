@@ -1,5 +1,5 @@
 ---
-texto: "La que es tan vil, ¿que se vende por dos quartos vna carga? 150 en que pluguiera a los cielos, que el vino la remedara."
+texto: "La que es tan vil, ¿que se vende\npor dos quartos vna carga? 150\nen que pluguiera a los cielos,\nque el vino la remedara."
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-la-que-es-tan-vil-que-se"
 procedencia:

@@ -1,5 +1,5 @@
 ---
-texto: "Aparece dado garrote en una silla don ÁLVARO REY: Pues, ¿cómo así os atrevisteis?"
+texto: "Aparece dado garrote en una silla don\nÁLVARO\nREY: Pues, ¿cómo así os atrevisteis?"
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-aparece-dado-garrote-en-una-silla-don"
 procedencia:

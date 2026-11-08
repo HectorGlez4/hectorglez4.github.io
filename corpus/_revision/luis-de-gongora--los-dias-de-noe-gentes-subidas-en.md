@@ -1,5 +1,5 @@
 ---
-texto: "los días de Noé, gentes subidas en los más altos pinos levantados, en las robustas hayas más crecidas."
+texto: "los días de Noé, gentes subidas\nen los más altos pinos levantados,\nen las robustas hayas más crecidas."
 autor: "luis-de-gongora"
 slug: "luis-de-gongora-los-dias-de-noe-gentes-subidas-en"
 procedencia:

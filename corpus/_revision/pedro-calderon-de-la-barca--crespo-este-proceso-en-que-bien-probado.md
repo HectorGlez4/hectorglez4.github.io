@@ -1,5 +1,5 @@
 ---
-texto: "CRESPO: Este proceso, en que bien probado el delito está, digno de muerte por ser una doncella robar, forzarla en un despoblado y no quererse casar con ella, habiendo su padre rogádole con la paz."
+texto: "CRESPO: Este proceso, en que bien\nprobado el delito está,\ndigno de muerte por ser\nuna doncella robar,\nforzarla en un despoblado\ny no quererse casar\ncon ella, habiendo su padre\nrogádole con la paz."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-crespo-este-proceso-en-que-bien-probado"
 procedencia:

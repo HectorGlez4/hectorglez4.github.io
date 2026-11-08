@@ -1,5 +1,5 @@
 ---
-texto: "Pues no llueve flamígera y opaca rayos aquí una nube tronadora, ¿querrás que yo no aplique mi triaca?"
+texto: "Pues no llueve flamígera y opaca\nrayos aquí una nube tronadora,\n¿querrás que yo no aplique mi triaca?"
 autor: "mariano-jose-de-larra"
 slug: "mariano-jose-de-larra-pues-no-llueve-flamigera-y-opaca-rayos"
 procedencia:

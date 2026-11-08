@@ -1,5 +1,5 @@
 ---
-texto: "pequeña puerta de coral preciado, claras lumbreras de mirar seguro que a la esmeralda fina el verde puro habéis para viriles usurpado;"
+texto: "pequeña puerta de coral preciado,\nclaras lumbreras de mirar seguro\nque a la esmeralda fina el verde puro\nhabéis para viriles usurpado;"
 autor: "luis-de-gongora"
 slug: "luis-de-gongora-pequena-puerta-de-coral-preciado-claras-lumbreras"
 procedencia:

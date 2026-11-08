@@ -1,5 +1,5 @@
 ---
-texto: "¡Oh! quiera amor, sabio dios, Que el vulgo, astrólogo cierto."
+texto: "¡Oh! quiera amor, sabio dios,\nQue el vulgo, astrólogo cierto."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-oh-quiera-amor-sabio-dios-que-el"
 procedencia:

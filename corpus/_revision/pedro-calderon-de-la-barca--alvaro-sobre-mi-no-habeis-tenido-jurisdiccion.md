@@ -1,5 +1,5 @@
 ---
-texto: "ÁLVARO: Sobre mí no habéis tenido jurisdicción."
+texto: "ÁLVARO: Sobre mí no habéis tenido\njurisdicción."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-alvaro-sobre-mi-no-habeis-tenido-jurisdiccion"
 procedencia:

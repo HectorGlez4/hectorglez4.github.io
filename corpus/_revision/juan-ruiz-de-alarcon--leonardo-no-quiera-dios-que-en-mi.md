@@ -1,5 +1,5 @@
 ---
-texto: "LEONARDO No quiera Dios, que en mi vença el amor a la amistad."
+texto: "LEONARDO\nNo quiera Dios, que en mi vença\nel amor a la amistad."
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-leonardo-no-quiera-dios-que-en-mi"
 procedencia:

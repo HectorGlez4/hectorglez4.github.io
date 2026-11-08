@@ -1,5 +1,5 @@
 ---
-texto: "DION En ellos he de aguardar que vna licencia me des. 140 REY El pedilla vos la abona, desde agora os la concedo; que nada negalle puedo a quien deuo la corona."
+texto: "DION\nEn ellos he de aguardar\nque vna licencia me des. 140\nREY\nEl pedilla vos la abona,\ndesde agora os la concedo;\nque nada negalle puedo\na quien deuo la corona."
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-dion-en-ellos-he-de-aguardar-que"
 procedencia:

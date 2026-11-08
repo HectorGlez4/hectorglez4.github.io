@@ -1,5 +1,5 @@
 ---
-texto: "Nace el pez, que no respira, Aborto de ovas y lamas; Y, apénas bajel de escamas Sobre las ondas se mira, Cuando á todas partes gira, Midiendo la inmensidad De tanta capacidad Como le da el centro frio: ¿Y yo, con más albedrío."
+texto: "Nace el pez, que no respira,\nAborto de ovas y lamas;\nY, apénas bajel de escamas\nSobre las ondas se mira,\nCuando á todas partes gira,\nMidiendo la inmensidad\nDe tanta capacidad\nComo le da el centro frio:\n¿Y yo, con más albedrío."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-nace-el-pez-que-no-respira-aborto"
 procedencia:

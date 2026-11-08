@@ -1,5 +1,5 @@
 ---
-texto: "FILIPO Ya ha cesado su rigor y ya con ese fauor no temo mudanza alguna, 660 que esa beldad."
+texto: "FILIPO\nYa ha cesado su rigor\ny ya con ese fauor\nno temo mudanza alguna, 660\nque esa beldad."
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-filipo-ya-ha-cesado-su-rigor-y"
 procedencia:

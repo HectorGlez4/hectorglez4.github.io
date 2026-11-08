@@ -1,5 +1,5 @@
 ---
-texto: "SOLDADO 1: No fue menester llamar la gente; que habiendo oído aquesto que ha sucedido se ha entrado en el lugar."
+texto: "SOLDADO 1: No fue menester llamar\nla gente; que habiendo oído\naquesto que ha sucedido\nse ha entrado en el lugar."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-soldado-1-no-fue-menester-llamar-la"
 procedencia:

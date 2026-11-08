@@ -1,5 +1,5 @@
 ---
-texto: "Hipogrifo violento Que corriste parejas con el viento, ¿Dónde, rayo sin llama, Pájaro sin matiz, pez sin escama, Y bruto sin instinto Natural, al confuso laberinto Destas desnudas peñas Te desbocas, arrastras y despeñas?"
+texto: "Hipogrifo violento\nQue corriste parejas con el viento,\n¿Dónde, rayo sin llama,\nPájaro sin matiz, pez sin escama,\nY bruto sin instinto\nNatural, al confuso laberinto\nDestas desnudas peñas\nTe desbocas, arrastras y despeñas?"
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-hipogrifo-violento-que-corriste-parejas-con-el"
 procedencia:

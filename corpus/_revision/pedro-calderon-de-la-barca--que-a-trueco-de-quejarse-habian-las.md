@@ -1,5 +1,5 @@
 ---
-texto: "Que, á trueco de quejarse, Habían las desdichas de buscarse."
+texto: "Que, á trueco de quejarse,\nHabían las desdichas de buscarse."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-que-a-trueco-de-quejarse-habian-las"
 procedencia:

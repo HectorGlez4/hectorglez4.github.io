@@ -1,5 +1,5 @@
 ---
-texto: "Viole en sangrientas lides el Aragua dar a su patria lustre, a España miedo; el despotismo sus falanges dobla, y aun no sucumbe al número el denuedo."
+texto: "Viole en sangrientas lides el Aragua\ndar a su patria lustre, a España miedo;\nel despotismo sus falanges dobla,\ny aun no sucumbe al número el denuedo."
 autor: "andres-bello"
 slug: "andres-bello-viole-en-sangrientas-lides-el-aragua-dar"
 procedencia:

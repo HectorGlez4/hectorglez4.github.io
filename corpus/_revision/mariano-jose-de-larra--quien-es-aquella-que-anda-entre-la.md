@@ -1,5 +1,5 @@
 ---
-texto: "¿Quién es aquella que anda entre la gente, abrumada de encajes y diamantes, que parece sultana del Oriente?"
+texto: "¿Quién es aquella que anda entre la gente,\nabrumada de encajes y diamantes,\nque parece sultana del Oriente?"
 autor: "mariano-jose-de-larra"
 slug: "mariano-jose-de-larra-quien-es-aquella-que-anda-entre-la"
 procedencia:

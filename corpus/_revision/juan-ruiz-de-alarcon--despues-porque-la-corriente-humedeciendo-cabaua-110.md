@@ -1,5 +1,5 @@
 ---
-texto: "Despues, porque la corriente humedeciendo cabaua 110 el monte, que el aqueducto cegar al fin amenaça."
+texto: "Despues, porque la corriente\nhumedeciendo cabaua 110\nel monte, que el aqueducto\ncegar al fin amenaça."
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-despues-porque-la-corriente-humedeciendo-cabaua-110"
 procedencia:

@@ -1,5 +1,5 @@
 ---
-texto: "CRESPO: Porque nome lo dijisteis, y hoy, que lo decís, quisiera no hacerlo."
+texto: "CRESPO: Porque nome lo dijisteis,\ny hoy, que lo decís, quisiera\nno hacerlo."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-crespo-porque-nome-lo-dijisteis-y-hoy"
 procedencia:

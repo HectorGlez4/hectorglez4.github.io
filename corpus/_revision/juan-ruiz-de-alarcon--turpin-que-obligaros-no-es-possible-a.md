@@ -1,5 +1,5 @@
 ---
-texto: "TURPIN Que obligaros no es possible a mi intencion?"
+texto: "TURPIN\nQue obligaros\nno es possible a mi intencion?"
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-turpin-que-obligaros-no-es-possible-a"
 procedencia:

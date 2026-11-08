@@ -1,5 +1,5 @@
 ---
-texto: "CRESPO: Pues habéis venido en balde; porque pienso que el alcalde no se los dejará dar."
+texto: "CRESPO: Pues habéis venido en balde;\nporque pienso que el alcalde\nno se los dejará dar."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-crespo-pues-habeis-venido-en-balde-porque"
 procedencia:

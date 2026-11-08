@@ -1,5 +1,5 @@
 ---
-texto: "A cualquiera persona que es pequeña, ¡oh linda, medio dueña!, por el refrán le dicen castellano que desde el codo llega hasta la mano; mas en vuestra medida el refrán peca, que no llegáis del codo a la muñeca."
+texto: "A cualquiera persona que es pequeña,\n¡oh linda, medio dueña!,\npor el refrán le dicen castellano\nque desde el codo llega hasta la mano;\nmas en vuestra medida el refrán peca,\nque no llegáis del codo a la muñeca."
 autor: "francisco-de-quevedo"
 slug: "francisco-de-quevedo-a-cualquiera-persona-que-es-pequena-oh"
 procedencia:

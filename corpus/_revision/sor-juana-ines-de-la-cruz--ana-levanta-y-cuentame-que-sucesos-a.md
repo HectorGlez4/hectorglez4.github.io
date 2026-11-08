@@ -1,5 +1,5 @@
 ---
-texto: "Ana: Levanta, y cuéntame qué sucesos a tal desdicha te arrastran, aunque, si eres tan hermosa, no es mucho ser desdichada."
+texto: "Ana: Levanta,\ny cuéntame qué sucesos\na tal desdicha te arrastran,\naunque, si eres tan hermosa,\nno es mucho ser desdichada."
 autor: "sor-juana-ines-de-la-cruz"
 slug: "sor-juana-ines-de-la-cruz-ana-levanta-y-cuentame-que-sucesos-a"
 procedencia:

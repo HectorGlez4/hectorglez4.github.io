@@ -1,5 +1,5 @@
 ---
-texto: "REBOLLEDO: ¡Bueno es estar de mohina, cuando vengo yo de fiesta!"
+texto: "REBOLLEDO: ¡Bueno es estar de mohina,\ncuando vengo yo de fiesta!"
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-rebolledo-bueno-es-estar-de-mohina-cuando"
 procedencia:

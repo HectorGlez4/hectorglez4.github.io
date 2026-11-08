@@ -1,5 +1,5 @@
 ---
-texto: "Jeldre está en Torre Bermeja; Mal aposentado está, Que torre de tan mal pelo A Judas puede guardar."
+texto: "Jeldre está en Torre Bermeja;\nMal aposentado está,\nQue torre de tan mal pelo\nA Judas puede guardar."
 autor: "francisco-de-quevedo"
 slug: "francisco-de-quevedo-jeldre-esta-en-torre-bermeja-mal-aposentado"
 procedencia:

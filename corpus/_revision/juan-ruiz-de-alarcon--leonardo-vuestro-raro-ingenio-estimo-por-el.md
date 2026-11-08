@@ -1,5 +1,5 @@
 ---
-texto: "LEONARDO Vuestro raro ingenio estimo por el mejor que nacio."
+texto: "LEONARDO\nVuestro raro ingenio estimo\npor el mejor que nacio."
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-leonardo-vuestro-raro-ingenio-estimo-por-el"
 procedencia:

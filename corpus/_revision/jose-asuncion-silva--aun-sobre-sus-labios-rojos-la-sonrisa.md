@@ -1,5 +1,5 @@
 ---
-texto: "Aún sobre sus labios rojos la sonrisa postrimera, tan joven y tan hermosa y descansa helada, yerta, y está marchito el tesoro de su dulce adolescencia!"
+texto: "Aún sobre sus labios rojos\nla sonrisa postrimera,\ntan joven y tan hermosa\ny descansa helada, yerta,\ny está marchito el tesoro\nde su dulce adolescencia!"
 autor: "jose-asuncion-silva"
 slug: "jose-asuncion-silva-aun-sobre-sus-labios-rojos-la-sonrisa"
 procedencia:

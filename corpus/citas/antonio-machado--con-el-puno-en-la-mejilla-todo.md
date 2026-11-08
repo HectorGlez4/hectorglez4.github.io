@@ -1,5 +1,5 @@
 ---
-texto: "Con el puño en la mejilla, todo lo llegó a saber."
+texto: "Con el puño en la mejilla,\ntodo lo llegó a saber."
 autor: "antonio-machado"
 temas:
   - "el-saber"

@@ -1,5 +1,5 @@
 ---
-texto: "Mil banderas vos he dado, esclavos más de cien mil; y esos que de mi murmuran, sólo a vos dan que reir."
+texto: "Mil banderas vos he dado,\nesclavos más de cien mil;\ny esos que de mi murmuran,\nsólo a vos dan que reir."
 autor: "francisco-de-quevedo"
 slug: "francisco-de-quevedo-mil-banderas-vos-he-dado-esclavos-mas"
 procedencia:

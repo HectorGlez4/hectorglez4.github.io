@@ -1,5 +1,5 @@
 ---
-texto: "ISABEL: Mejor es, que a vuestra cena sirvamos las dos."
+texto: "ISABEL: Mejor es, que a vuestra cena\nsirvamos las dos."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-isabel-mejor-es-que-a-vuestra-cena"
 procedencia:

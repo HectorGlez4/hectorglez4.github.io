@@ -1,5 +1,5 @@
 ---
-texto: "aljófar blanco sobre frescas rosas, o cual por manos hecha artificiosas bordadura de perlas sobre grana,"
+texto: "aljófar blanco sobre frescas rosas,\no cual por manos hecha artificiosas\nbordadura de perlas sobre grana,"
 autor: "luis-de-gongora"
 slug: "luis-de-gongora-aljofar-blanco-sobre-frescas-rosas-o-cual"
 procedencia:

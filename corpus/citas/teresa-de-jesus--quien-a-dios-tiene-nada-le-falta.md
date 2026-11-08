@@ -1,5 +1,5 @@
 ---
-texto: "Quien a Dios tiene, nada le falta."
+texto: "Quien a Dios tiene,\nnada le falta."
 autor: "teresa-de-jesus"
 temas:
   - "la-vida"

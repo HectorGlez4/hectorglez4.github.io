@@ -1,5 +1,5 @@
 ---
-texto: "¿Habrá otro (entre sí decía) Más pobre y triste que yo?"
+texto: "¿Habrá otro (entre sí decía)\nMás pobre y triste que yo?"
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-habra-otro-entre-si-decia-mas-pobre"
 procedencia:

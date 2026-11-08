@@ -1,5 +1,5 @@
 ---
-texto: "Que aun esa gracia tiene; pues no hay flema que aguante los sonetos que te encaja entre uno y otro cangilón de crema."
+texto: "Que aun esa gracia tiene; pues no hay flema\nque aguante los sonetos que te encaja\nentre uno y otro cangilón de crema."
 autor: "mariano-jose-de-larra"
 slug: "mariano-jose-de-larra-que-aun-esa-gracia-tiene-pues-no"
 procedencia:

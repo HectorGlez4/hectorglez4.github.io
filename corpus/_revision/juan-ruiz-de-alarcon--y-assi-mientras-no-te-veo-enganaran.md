@@ -1,5 +1,5 @@
 ---
-texto: "Y assi mientras no te veo, engañaràn tus enojos con el retrato los ojos, 585 con la esperança el desseo."
+texto: "Y assi mientras no te veo,\nengañaràn tus enojos\ncon el retrato los ojos, 585\ncon la esperança el desseo."
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-y-assi-mientras-no-te-veo-enganaran"
 procedencia:

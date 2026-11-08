@@ -1,5 +1,5 @@
 ---
-texto: "Cultivo una rosa blanca En julio como enero"
+texto: "Cultivo una rosa blanca\nEn julio como enero"
 autor: "jose-marti"
 temas:
   - "la-amistad"

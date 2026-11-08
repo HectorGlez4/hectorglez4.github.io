@@ -1,5 +1,5 @@
 ---
-texto: "Allá hay justicia, y así remitid al preso."
+texto: "Allá hay justicia, y así\nremitid al preso."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-alla-hay-justicia-y-asi-remitid-al"
 procedencia:

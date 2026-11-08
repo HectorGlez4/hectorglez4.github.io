@@ -1,5 +1,5 @@
 ---
-texto: "DION Aqui està el Rey, Policiano, a Dios, 100 que a solas hablalle quiero."
+texto: "DION\nAqui està\nel Rey, Policiano, a Dios, 100\nque a solas hablalle quiero."
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-dion-aqui-esta-el-rey-policiano-a"
 procedencia:

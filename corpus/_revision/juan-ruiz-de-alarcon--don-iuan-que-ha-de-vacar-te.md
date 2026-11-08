@@ -1,5 +1,5 @@
 ---
-texto: "DON IUAN Que ha de vacar, te parece, mi plaça en tu amor partiendo, y papeles andas viendo para ver quien la merece. 510 DOÑA ANA ¿Y bastaràme obligar ver vna carta?"
+texto: "DON IUAN\nQue ha de vacar, te parece,\nmi plaça en tu amor partiendo,\ny papeles andas viendo\npara ver quien la merece. 510\nDOÑA ANA\n¿Y bastaràme obligar\nver vna carta?"
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-don-iuan-que-ha-de-vacar-te"
 procedencia:

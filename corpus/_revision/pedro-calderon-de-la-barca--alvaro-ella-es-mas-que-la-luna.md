@@ -1,5 +1,5 @@
 ---
-texto: "ÁLVARO: Ella es; mas que la luna, el corazón me lo ha dicho."
+texto: "ÁLVARO: Ella es; mas que la luna,\nel corazón me lo ha dicho."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-alvaro-ella-es-mas-que-la-luna"
 procedencia:

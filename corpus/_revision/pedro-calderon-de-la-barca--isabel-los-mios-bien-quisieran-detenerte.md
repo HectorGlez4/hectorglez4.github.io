@@ -1,5 +1,5 @@
 ---
-texto: "ISABEL: Los míos bien quisieran detenerte."
+texto: "ISABEL: Los míos\nbien quisieran detenerte."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-isabel-los-mios-bien-quisieran-detenerte"
 procedencia:

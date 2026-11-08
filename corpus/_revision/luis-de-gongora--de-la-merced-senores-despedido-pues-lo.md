@@ -1,5 +1,5 @@
 ---
-texto: "De la Merced, señores, despedido, —pues lo ha querido así la suerte mía— de mis deudos iré a la Compañía no poco de mis deudas oprimido."
+texto: "De la Merced, señores, despedido,\n—pues lo ha querido así la suerte mía—\nde mis deudos iré a la Compañía\nno poco de mis deudas oprimido."
 autor: "luis-de-gongora"
 slug: "luis-de-gongora-de-la-merced-senores-despedido-pues-lo"
 procedencia:

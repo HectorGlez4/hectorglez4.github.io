@@ -1,5 +1,5 @@
 ---
-texto: "Si por siempre enmudecieran, ¡Qué tristeza en el aire y el cielo!"
+texto: "Si por siempre enmudecieran,\n¡Qué tristeza en el aire y el cielo!"
 autor: "rosalia-de-castro"
 slug: "rosalia-de-castro-si-por-siempre-enmudecieran-que-tristeza-en"
 procedencia:

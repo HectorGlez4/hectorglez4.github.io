@@ -1,5 +1,5 @@
 ---
-texto: "Pues no consigues vengarla, consigue el callarla ahora."
+texto: "Pues no consigues vengarla,\nconsigue el callarla ahora."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-pues-no-consigues-vengarla-consigue-el-callarla"
 procedencia:

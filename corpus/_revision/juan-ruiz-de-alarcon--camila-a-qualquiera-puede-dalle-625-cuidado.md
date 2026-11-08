@@ -1,5 +1,5 @@
 ---
-texto: "CAMILA A qualquiera puede dalle 625 cuidado y curiosidad."
+texto: "CAMILA\nA qualquiera puede dalle 625\ncuidado y curiosidad."
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-camila-a-qualquiera-puede-dalle-625-cuidado"
 procedencia:

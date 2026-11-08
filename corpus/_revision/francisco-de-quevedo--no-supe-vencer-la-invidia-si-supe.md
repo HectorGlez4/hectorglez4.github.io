@@ -1,5 +1,5 @@
 ---
-texto: "No supe vencer la invidia, si supe vencer la lid, pues hoy desfacen mis fechos los dichos de algún malsín."
+texto: "No supe vencer la invidia,\nsi supe vencer la lid,\npues hoy desfacen mis fechos\nlos dichos de algún malsín."
 autor: "francisco-de-quevedo"
 slug: "francisco-de-quevedo-no-supe-vencer-la-invidia-si-supe"
 procedencia:

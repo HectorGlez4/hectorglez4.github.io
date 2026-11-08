@@ -1,5 +1,5 @@
 ---
-texto: "Menos la temo perdida, que perder tan alta prenda. 875 Todo, para conseguir tanto bien, lo he de emprender, que no queda que temer, al que se atreue a morir."
+texto: "Menos la temo perdida,\nque perder tan alta prenda. 875\nTodo, para conseguir\ntanto bien, lo he de emprender,\nque no queda que temer,\nal que se atreue a morir."
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-menos-la-temo-perdida-que-perder-tan"
 procedencia:

@@ -1,5 +1,5 @@
 ---
-texto: "Lo uno y otro te digo; aquello, porque no humilles tanto tu orgullo y tu brío, que dejes, desconfiado, de aspirar con cuerdo arbitrio a ser más; lo otro, porque no vengas desvanecido a ser menos."
+texto: "Lo uno y otro te digo;\naquello, porque no humilles\ntanto tu orgullo y tu brío,\nque dejes, desconfiado,\nde aspirar con cuerdo arbitrio\na ser más; lo otro, porque\nno vengas desvanecido\na ser menos."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-lo-uno-y-otro-te-digo-aquello"
 procedencia:

@@ -1,5 +1,5 @@
 ---
-texto: "AURORA Tente, pensamiento mio, que preuiene ya el temor 730 en halagos del aluedrio."
+texto: "AURORA\nTente, pensamiento mio,\nque preuiene ya el temor 730\nen halagos del aluedrio."
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-aurora-tente-pensamiento-mio-que-preuiene-ya"
 procedencia:

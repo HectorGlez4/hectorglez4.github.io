@@ -1,5 +1,5 @@
 ---
-texto: "Que no tan facil afloxa al arco la cuerda amor."
+texto: "Que no tan facil afloxa\nal arco la cuerda amor."
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-que-no-tan-facil-afloxa-al-arco"
 procedencia:

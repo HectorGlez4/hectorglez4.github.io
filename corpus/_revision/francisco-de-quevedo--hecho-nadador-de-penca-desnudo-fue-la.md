@@ -1,5 +1,5 @@
 ---
-texto: "Hecho nadador de penca, Desnudo fue la mitad, Tocándole pasacalles El músico de Quien tal..."
+texto: "Hecho nadador de penca,\nDesnudo fue la mitad,\nTocándole pasacalles\nEl músico de Quien tal..."
 autor: "francisco-de-quevedo"
 slug: "francisco-de-quevedo-hecho-nadador-de-penca-desnudo-fue-la"
 procedencia:

@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { procedenciaDe, textoDe } from './ayuda/corpus.ts';
+import { citasEnVerso, procedenciaDe, textoDe } from './ayuda/corpus.ts';
 
 /**
  * Historia 2.2 — Copiado con atribución.
@@ -189,5 +189,17 @@ test.describe('Historia 2.2 — copiar', () => {
     await page.goto(CON_PROCEDENCIA);
     const caja = await page.getByRole('button', { name: 'Copiar la cita' }).boundingBox();
     expect(caja!.height).toBeGreaterThanOrEqual(44);
+  });
+  test('Historia 29.3 — una Cita en verso se copia con un salto entre verso y verso y la atribución detrás del último', async ({ page }) => {
+    const verso = citasEnVerso().find((c) => c.slug === 'jose-marti-yo-vengo-de-todas-partes-y-hacia') ?? citasEnVerso()[0];
+    expect(verso, 'ninguna Cita publicada lleva saltos: falta el commit de restitución de la 29.2').toBeDefined();
+    await page.goto(`/cita/${verso!.slug}`);
+    await page.getByRole('button', { name: 'Copiar la cita' }).click();
+
+    const portapapeles = await page.evaluate(() => navigator.clipboard.readText());
+    expect(portapapeles.startsWith(`«${verso!.texto}» — `)).toBe(true);
+    expect(portapapeles.split('\n')).toHaveLength(verso!.versos.length);
+    expect(portapapeles).not.toContain(' / ');
+    if (verso!.obra !== undefined) expect(portapapeles.split('\n').at(-1)).toContain(verso!.obra);
   });
 });

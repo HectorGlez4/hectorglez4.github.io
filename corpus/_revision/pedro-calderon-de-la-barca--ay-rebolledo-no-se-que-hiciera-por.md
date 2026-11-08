@@ -1,5 +1,5 @@
 ---
-texto: "¡Ay, Rebolledo, no sé qué hiciera por verla!"
+texto: "¡Ay, Rebolledo,\nno sé qué hiciera por verla!"
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-ay-rebolledo-no-se-que-hiciera-por"
 procedencia:

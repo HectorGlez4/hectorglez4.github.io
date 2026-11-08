@@ -1,5 +1,5 @@
 ---
-texto: "Tú pintarás al vencedor furioso que ni al anciano trémulo perdona, ni a la inocente edad, y en el regazo de la insultada madre al hijo inmola."
+texto: "Tú pintarás al vencedor furioso\nque ni al anciano trémulo perdona,\nni a la inocente edad, y en el regazo\nde la insultada madre al hijo inmola."
 autor: "andres-bello"
 slug: "andres-bello-tu-pintaras-al-vencedor-furioso-que-ni"
 procedencia:

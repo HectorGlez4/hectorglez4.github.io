@@ -33,6 +33,7 @@ Sitio panhispánico de citas célebres en español, estático, construido con As
 - Un campo opcional sin valor se omite del fichero; nunca cadena vacía ni `null`. La distinción entre procedencia completa, parcial y ausente es de presencia de campos.
 - Ningún componente lleva valores literales de color o tipografía — usa los tokens de `DESIGN.md` como propiedades personalizadas de CSS, también para el peso (`--peso-regular`, `--peso-fuerte`) y el interlineado (`--interlineado-*`, el del token cuyo cuerpo toma la regla), tampoco en el atajo `font` ni en una cadena `style` (Historia 26.12). Las únicas excepciones son de `DESIGN.md` § Typography: el `line-height: 1` de las letras de salto (`LetrasDeSalto.astro`, `a`) y `--interlineado-autor` (1,4) en `.fila-de-bloque a`, en el `.titulo` de `ListaDeObras` y en el de `TarjetaDeObra`; las vigila `tests/unit/tipografia-en-tokens.test.ts`, y otra la decide Héctor con `bmad-ux`.
 - La familia serif se aplica solo a texto de Cita, nombre de Autor y nombre de Tema.
+- El verso tiene **dos dueños** en las salidas, en `src/lib/verso.ts` (Historia 29.3): `versosDe` para lo que admite saltos y `enUnaLinea` (« / » entre versos) para lo que no —título de pestaña, meta descripción, `text` del JSON-LD, `description` del RSS—. El texto de una Cita lo pinta en el HTML **solo** `src/components/TextoDeCita.astro`, dentro del elemento de quien lo usa (Bloque de Cita, Tarjeta de Cita y material del Kit/lote): sin saltos emite `«{texto}»` tal cual, byte a byte como antes; con saltos, un `<span class="verso" style="display:block">` por verso con un espacio entre ellos (el que leen Pagefind y el nombre accesible) y el estilo en atributo, no en `<style>`. Nunca `<br>` en el Corpus ni « / » en el cuerpo de la página (`<main>`) o en un lienzo —en `<head>` sí, porque el título y la meta van por `enUnaLinea`—; ningún otro fichero de `src/` ni de `public/islas/` lee el salto (`tests/unit/verso.test.ts` enumera cada uso y nombra sus exenciones: los dos de `src/lib/biografia.ts` y el recorte del título de `src/pages/cita/[slug].astro`). Los dos repartos de los lienzos —`repartirEnLineas` de `src/lib/lienzo.ts` y el privado de `public/islas/imagen.js`, que no importa de `src/`— abren línea en cada salto y nunca unen dos versos. La Tarjeta Social de una Cita **en verso** que no cabe en 630 px baja al tramo siguiente, hasta `sm` (`cuerpoEnTarjeta` de `src/lib/tramos.ts`, decisión de Héctor del 2026-11-08); la prosa conserva su tramo, y si nada cabe el build se para nombrando la Cita. La Página de Cita, la Imagen y la Pieza no cambian de tramo.
 - Todo lo que se pliega usa `src/components/Desplegable.astro` (Historia 34.0): un `<details>` nativo cerrado al cargar, con el rótulo como único texto del `<summary>` —sin `h1`…`h6` dentro—, sin guion ni `data-zona`; lo de dentro declara su zona como si no estuviera plegado. Ningún componente escribe su propio `<details>`. Un desplegable sin contenido no se pinta: quien lo usa no lo renderiza, y el componente, ante un `slot` ausente o sin contenido —en blanco, solo comentarios o elementos sin texto; un medio o un control sí cuentan—, detiene la construcción nombrando el rótulo, y también ante un rótulo ausente o en blanco. Su `<style>` solo nombra su propio marcado (se emite por el grafo de importaciones aunque no se renderice), y `tests/e2e/accesibilidad.spec.ts` barre cada superficie también con todos los `<details>` abiertos; hasta que una superficie pinte uno, esa pasada abierta solo corre en la sonda de `tests/e2e/desplegable.spec.ts` (puerto 4404 libre).
 - Un mensaje de estado («Copiado.», la búsqueda sin resultados de `/buscar/`, la imagen lista, el fallo del generador) se anuncia por una región `role="status"` que está en el marcado desde la carga, vacía y sin `hidden` (`.solo-para-lectores` de `tokens.css`; dentro del `<dialog>` si se anuncia con él abierto, porque lo de fuera es inerte). Para anunciar se vacía la región y se escribe el mensaje en el siguiente fotograma: el mismo texto escrito sobre sí mismo no se anuncia. Lo hace `anunciar` de `src/lib/anuncio.ts` —su único dueño—; una isla en línea lo lleva dentro por `guionQueAnuncia` y `set:html` (`define:vars` y `set:html` juntos pierden el cuerpo en Astro 7.2), y ningún guion en línea usa `requestAnimationFrame` fuera de él (Historia 23.1). Lo que cambia mientras se teclea —el recuento del filtro de los Directorios, y el de `/buscar/` desde la 27.2— va por el **segundo ritmo**, `ritmoDeTecleo` del mismo `src/lib/anuncio.ts`: se escribe tras `PAUSA_DE_TECLEO_MS` (`src/lib/umbrales.ts`) sin teclear y solo si la frase cambió, y vaciar el campo vacía la región al momento (Historia 26.6); el de `/buscar/` tras un selector se escribe al llegar la búsqueda, también solo si cambió (Historia 27.2). Pestaña nueva solo para donar, compartir y comprar, con `AVISO_DE_PESTAÑA_NUEVA` de `src/lib/accesibilidad.ts` —su único dueño— oculto dentro del nombre accesible; todo lo demás, en la misma pestaña (Historia 22.10).
 - La medición se llama `__medir(…)` a secas, nunca `window.__medir && …`: el arranque (`ARRANQUE_DE_MEDICION`) abre la cola en línea en toda página del armazón y es el único guion en línea que asigna `__medir`; el fichero `/medicion/{versión}.js` la vacía y la sustituye. Qué vista emite una página lo declara su superficie en `src/lib/superficies.ts` y sale al `data-vistas` del `<html>`; ninguna página la elige. La página 1 de toda Obra declara además, se indexe o no, la `vista-de-obra` (`vistaConMarca`, Historia 23.9), con su marca —`indexable` o `no-indexable`, de `MARCAS_DE_OBRA`— en el atributo `ATRIBUTO_DE_INDEXABLE` del `<html>`: la escribe `Armazon.astro` desde `consecuenciasDe`, de la misma lista de rutas indexables que su `noindex`, el fichero la lee una vez al activarse y la envía solo con la vista que declara la página —una `vista-de-obra` que pidiera una isla saldría con la marca nula—, y `astro:build:done` (`tools/lib/indexables.ts`) para la construcción si falta en una página 1 de Obra o trae un valor ajeno a `MARCAS_DE_OBRA`, contradice su `noindex`, aparece en otra página o no va junto a la `vista-de-obra` de `data-vistas`; ninguna isla la pide ni la lee, y no entra en SM-8. La `lectura` y el `primera` de cada acción los decide solo el fichero (Historia 23.5): ninguna isla los emite ni los calcula, ni conoce `METRICA_DE_ACCION`, y `__medir('lectura')` se descarta (`EVENTOS_SOLO_DEL_FICHERO`). Las Marcas de llegada (`?de=` y `?via=`, `MARCAS_DE_LLEGADA`) las lee y las quita de la dirección solo el fichero, una vez y con el `history.state` que había (Historia 23.6), y viajan solo con las vistas que declara la página y con la lectura —una vista que pida una isla sale sin ellas—: ninguna isla las lee, y la única que escribe además en el historial es la de la búsqueda: solo `history.replaceState` con la marca de su búsqueda asentada (`MARCA_DE_BUSQUEDA_ASENTADA`, un booleano) en el objeto de estado, sin dirección, desde sus escuchas y nunca al analizarse, que corre antes que el fichero diferido (lo vigilan `tests/unit/medicion.test.ts` sobre `dist/` y, ejecutándola, el entorno simulado de `tests/unit/ayuda/busqueda.ts`). La `busqueda` y la `busqueda-sin-resultados` las emite solo esa isla al asentar un estado —enviar, pulsar un resultado, ocultarse; nunca por tecla ni por repintado— y una vez por estado y carga: qué emite, con qué tramo y si una llegada ya estaba registrada lo decide `asentamientoDeBusqueda` de `src/lib/medicion.ts`, que viaja a la isla por su texto con sus constantes del vocabulario (`ASENTAMIENTO_DE_BUSQUEDA`), y el fichero no descarta ninguna `busqueda` ni lee el historial (Historia 23.8). La `salida-interna` (Historia 23.7) la emite también solo el fichero, desde una única escucha de `click` en la ventana y en burbuja: un enlace del mismo origen a otra ruta, con el botón principal, sin modificador, sin `defaultPrevented`, sin `download` y sin abrir en otra pestaña; como mucho una por carga, detrás de la lectura, con la ruta y la zona y nada más —ni el destino ni el texto pulsado—, y `__medir('salida-interna')` se descarta. La zona la pinta el build en el **contenedor**, nunca en el `<a>`: `data-zona` con un valor de `ZONAS` del vocabulario —prop `zona: Zona` obligatoria en `TarjetaDeCita`, `Chips`, `Paginacion`, `ListaDeObras`, `RutasDeSalida` y `Atribucion`; atributo en los contenedores propios de cada página—, y lo exento lleva `data-sin-zona` con un motivo de `EXENCIONES_DE_ZONA` (`src/lib/medicion.ts`); la escucha toma la declaración más cercana al enlace, y lo que inserta una isla la hereda. Ninguna isla emite la salida ni lee zonas. Ningún guion en línea lleva datos de contenido —slug, texto, Obra—: van en `data-*` (exención nombrada: `ImagenDelKit`, hasta la 25.4). Lo que una página descarga —`<script src>`, `<link rel="modulepreload">` o `import()`, y lo que un fichero de la lista arranca al ejecutarse, como el worker de Pagefind (`arranca`)— está en `GUIONES_EXTERNOS` de `src/lib/guiones.ts`, con su tope en `umbrales.ts` (Historia 23.1).
@@ -86,6 +87,35 @@ alguno de sus Temas —los suyos o los de `--temas`— llega a `MIN_CITAS_POR_TE
 publicado y lo que la misma pasada aprueba; si no, sigue en `corpus/_revision/` intacta, el parte
 la nombra con sus Temas y sus recuentos, y la orden sale con 1. Lo que sale de `extraer` llega sin
 Temas, así que el paso 3 casi siempre lleva `--temas`.
+
+**`revisar` avisa de lo que casi coincide** (Historia 29.4, FR-14). Además de la repetida
+(«⚠ Duplica a …»), cada candidata lleva «⚠ Contenida en / Contiene a …» frente a lo publicado y a
+lo de revisión, y «⚠ Casi igual a …» frente a las publicadas de su misma Obra, y `--aprobar` repite
+esos avisos en el parte de lo que publicó. Nada de eso bloquea: aprobar publica igual. La medida es
+una sola, `parecidoEntre` de `tools/lib/parecido.ts` —repetidas, contenida (la corta con al menos
+`MIN_CARACTERES_PARA_CONTENCION`), casi iguales (`MIN_PARECIDO_PARA_CORREGIR`, 0,85)—, la misma del
+alta y de `documentar --texto`; ningún otro módulo calcula parecido ni contención. La casi igual
+tiene dos límites: solo se mira frente a **publicadas** (nunca entre dos candidatas) y solo dentro
+de la Obra resuelta por ficha, así que una candidata cuya Obra aún no tiene ficha no recibe ninguna.
+Para eso `revisar` y el alta leen `corpus/obras/`: una ficha ilegible los para, nombrando el fichero.
+
+**`recuperar` y `extraer` conservan el verso** (Historia 29.1, AD-29). Un documento nuevo declara
+en su cabecera la forma de sus líneas, `lineas:` —una de `FORMAS_DE_LINEAS` de
+`tools/lib/lineas.ts`: `verso`, `verso-espaciado`, `prosa-por-lineas`, `prosa-ajustada` o
+`indeterminada`—, que manda sobre el cálculo; los versionados antes no la llevan, no se
+reescriben y la forma se calcula de su cuerpo, de forma conservadora (ante la duda,
+`indeterminada`). Una `lineas:` fuera del conjunto rompe el build. `extraer`, el alta, `sembrar` y
+`documentar` escriben el `texto` con un único escritor, `textoConSaltos`: un salto de verso (un
+U+000A, uno también entre estrofas) solo donde un documento `verso` o `verso-espaciado` de la Cita
+parte línea. **Un salto nunca se teclea**: el tecleado que el documento no respalda se pierde y el
+parte lo dice, y el build rompe ante un salto sin respaldo. El reparto del Corpus por forma y las
+cifras de la Tarjeta del verso, sin escribir nada: `npx tsx tools/lineas.ts formas|tarjeta`.
+Las candidatas que ya estaban en `corpus/_revision/` antes de la 29.1 se escribieron en una línea:
+`revisar --aprobar` las publica **con sus saltos**, decididos con `saltosDeLaCita` como en la regla 4
+del build y escritos solo en la línea `texto:`, y el parte lo dice («↵ … se publicó con los saltos de
+verso de …»). Si esa línea no es la que escribe `aYaml`, no la publica y da la orden
+`documentar --restituir-saltos <slug>` (abajo); un conflicto entre dos documentos de verso se publica
+como está, porque el build solo avisa.
 
 **Un Autor dado de alta en la sesión trae una clave de orden sin revisar** (Historia 26.1).
 `crear` la propone —la última palabra del `nombre`, la regla fija de `tools/lib/claves.ts`— y
@@ -593,7 +623,45 @@ corrige con `--texto`, que restituye el texto literal de la edición: el texto n
 tiene que aparecer literal en el documento —si no, se estaría inventando— y tiene que
 parecerse al publicado por encima de `MIN_PARECIDO_PARA_CORREGIR` (0,85 sobre la forma
 canónica de AD-3), que es lo que impide cambiar una Cita por otra de la misma página. El
-slug **no** se recalcula aunque el texto cambie: es la URL (AD-4).
+slug **no** se recalcula aunque el texto cambie: es la URL (AD-4). Con `--texto` también, los
+saltos de verso los toma la orden del documento de verso de la Cita, **no de lo tecleado**: un
+salto tecleado sin respaldo queda en espacio y el parte lo dice (Historia 29.1). Para elegir
+ese documento la orden lee las cabeceras de todo `corpus/fuentes/` (unos 2–3 s), y si alguno no se
+puede abrir se niega con 1 sin escribir; un documento que se abre pero cuya cabecera no se entiende
+no cuenta como candidato, y de él no salen saltos (la Cita queda en una línea, como hoy).
+
+**Los saltos de verso de lo ya publicado se restituyen con una orden** (Historia 29.2, AD-29):
+
+```
+npm run documentar -- --restituir-saltos --seco          # el parte entero, sin escribir nada
+npm run documentar -- --restituir-saltos [<slug>...]     # escribe; sin slugs, todas
+```
+
+Decide cada Cita —las publicadas y, aparte, las candidatas de `corpus/_revision/`— con
+`saltosDeLaCita` de `tools/lib/lineas.ts`, la misma función que la puerta del build, y reescribe
+**solo la línea `texto:`** del fichero, y solo si lo nuevo colapsa a lo publicado (NFR-12): slug,
+nombre de fichero, URL y los demás campos quedan byte a byte. Se queda en una línea la Cita sin
+documento (el censo, o sin Fuente u obra), la que no se localiza en su documento, la de documento
+en prosa (`prosa-por-lineas`, `prosa-ajustada` o `indeterminada`) y la de documento de verso sin
+saltos en su tramo; el parte las cuenta por motivo. Dos documentos de verso que le darían saltos
+distintos son un **conflicto**: no se toca, el parte lo lista con los dos documentos y el build
+solo avisa —lo decide una persona—. Primero decide todo y después escribe; si una escritura falla,
+devuelve lo ya escrito —y el propio fichero que falló— a su contenido original y sale con 1;
+un fichero que cambió en disco entre la decisión y la escritura cuenta como escritura fallida, y
+no se pisa. Las fechas se cuentan antes de escribir. Es idempotente. El parte dice además
+cuántas Páginas de Cita y listados cambian de fecha (la relación de AD-27) y recuerda
+`npx tsx tools/avisar.ts --ensayo --desde <A> --hasta <B>`. Códigos: 2 la forma (bandera
+desconocida o repetida, junto a `--restituir-traduccion`, `--retirar` o `--texto`); 1 un slug que
+no es de ninguna Cita o una nombrada sin documento, un Corpus ilegible o una escritura que falla;
+0 en lo demás, también con una nombrada en prosa, sin saltos en su tramo, que no se localiza o en
+conflicto: el parte dice por qué se queda como está.
+Lee todo `_revision/` y tarda minuto y medio sobre el Corpus real.
+
+**El build rompe ante una Cita de documento de verso sin sus saltos** (regla 4 de la puerta del
+salto), con la orden exacta: con una, en su fallo; con varias, una sola al final con todos los
+slugs. **La orden sin `--seco` la corre Héctor** —ningún agente— en un commit propio de
+`corpus/`, y se repite tras cada puesta al día de la rama con la principal: lo sembrado allí llega
+en una línea. Hasta ese commit, el build de la rama sobre el Corpus real está en rojo a propósito.
 
 **De una obra traducida se conserva lo que la Fuente declara** (Historia 19.1). `recuperar`
 registra el traductor en la cabecera del documento (`traductor:` y, si consta,
@@ -697,6 +765,21 @@ da la orden de retirarla.
 
 `sembrar` informa además de los grupos de grafías equivalentes y de los pares en que una
 forma es prefijo de otra del mismo Autor.
+
+**Los casi duplicados dentro de una Obra** (Historia 29.4) se miran con un parte:
+
+```
+npm run obra -- casi-duplicados [<ficha>...] [--json]   # NO escribe nada
+```
+
+Recorre cada par de Citas publicadas de cada Obra (o de las fichas nombradas) y señala las
+**repetidas**, las **contenidas** —se dice cuál está dentro de cuál— y las **casi iguales** —con la
+palabra que cambia, si es una—, con `parecidoEntre`; entre Obras distintas no mira. Cierra
+recordando las tres decisiones —retirar una (`npm run documentar -- --retirar`), conservar las dos,
+restituir el literal (`npm run documentar -- <slug> <documento> --texto`)— y **las toma una
+persona**: la orden no retira, corrige, conserva ni guarda excepciones. Una ficha nombrada que no
+existe o un Corpus ilegible salen con 1, sin parte; una nombrada sin Citas publicadas sale en el
+parte como «sin Citas publicadas; no se recorre»; una bandera desconocida o repetida, con 2.
 
 **`ediciones`** (Historia 22.9) es el otro campo que decide Héctor, y **no se escribe a mano**:
 lo escriben sus dos órdenes, que lo validan con el esquema del build.
@@ -1228,6 +1311,10 @@ Publicarla en dos cuentas son dos composiciones, una por marca.
   slug** —este último porque de él sale el nombre del fichero, y uno con `/` o `..` sacaría el
   PNG de `piezas/`, donde ya no está ignorado. Igual que `--salida`, que tiene que ser una
   ruta `.png` y no un directorio. Nada se escribe hasta que la selección entera vale.
+
+**El apilado cuenta los versos** (Historia 29.3): cada salto de una Cita en verso abre línea en
+`repartirEnLineas`, así que una selección que cabría de corrido puede no caber, y `cabenEnPieza`
+lo dice como siempre, con cuántas caben.
 
 **Los tamaños son una columna más de `src/lib/tramos.ts`** (`pixelesEnPieza`), no un número
 escrito en la plantilla. El lienzo de la Pieza apila varias Citas, así que el cuerpo que le

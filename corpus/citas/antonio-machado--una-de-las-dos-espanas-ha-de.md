@@ -1,5 +1,5 @@
 ---
-texto: "Una de las dos Españas ha de helarte el corazón."
+texto: "Una de las dos Españas\nha de helarte el corazón."
 autor: "antonio-machado"
 temas:
   - "la-adversidad"

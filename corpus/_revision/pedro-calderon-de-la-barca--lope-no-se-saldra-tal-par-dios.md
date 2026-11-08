@@ -1,5 +1,5 @@
 ---
-texto: "LOPE: No se saldrá tal, ¡par Dios!, y si por ventura vos, si sale o no, queréis vello, decidme dó vive o no."
+texto: "LOPE: No se saldrá tal, ¡par Dios!,\ny si por ventura vos,\nsi sale o no, queréis vello,\ndecidme dó vive o no."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-lope-no-se-saldra-tal-par-dios"
 procedencia:

@@ -1,5 +1,5 @@
 ---
-texto: "Murió en Nápoles Zamora Ahíto de pelear, Lloró a cántaros su muerte Eugenia la Escarramán."
+texto: "Murió en Nápoles Zamora\nAhíto de pelear,\nLloró a cántaros su muerte\nEugenia la Escarramán."
 autor: "francisco-de-quevedo"
 slug: "francisco-de-quevedo-murio-en-napoles-zamora-ahito-de-pelear"
 procedencia:

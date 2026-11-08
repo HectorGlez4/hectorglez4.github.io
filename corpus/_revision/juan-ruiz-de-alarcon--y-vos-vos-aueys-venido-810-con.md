@@ -1,5 +1,5 @@
 ---
-texto: "Y vos, vos aueys venido 810 con tal vil mensajeria?"
+texto: "Y vos, vos aueys venido 810\ncon tal vil mensajeria?"
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-y-vos-vos-aueys-venido-810-con"
 procedencia:

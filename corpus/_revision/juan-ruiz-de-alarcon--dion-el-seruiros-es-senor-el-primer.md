@@ -1,5 +1,5 @@
 ---
-texto: "DION El seruiros es, señor, el primer intento mio."
+texto: "DION\nEl seruiros es, señor,\nel primer intento mio."
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-dion-el-seruiros-es-senor-el-primer"
 procedencia:

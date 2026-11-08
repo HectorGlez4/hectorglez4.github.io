@@ -1,5 +1,5 @@
 ---
-texto: "CRESPO: Dile que venga tu hermana al instante, Juan."
+texto: "CRESPO: Dile que venga\ntu hermana al instante, Juan."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-crespo-dile-que-venga-tu-hermana-al"
 procedencia:
