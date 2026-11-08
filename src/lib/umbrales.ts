@@ -26,6 +26,28 @@ export const MIN_CITAS_POR_TEMA = 15;
 export const MAX_CARACTERES_IMAGEN = 300;
 
 /**
+ * Tope del fragmento de la Tarjeta de Cita en los listados — UX-DR132, Historia 34.1.
+ *
+ * Puntos de código sin contar los saltos de verso, «…» incluido; solo lo rebasa una primera
+ * palabra que ya no cabe (sale entera). Lo aplica solo
+ * `recortarPorPalabra` de `src/lib/recorte.ts`, que corta en la última palabra entera: el
+ * listado resume la Cita, nunca la publica recortada (NFR-12). Literal, sin cálculo: este módulo
+ * viaja en el guion del filtro de los Directorios.
+ */
+export const MAX_CARACTERES_DE_TARJETA_DE_CITA = 120;
+
+/**
+ * Tope de la Cita en el título de pestaña y la meta descripción de la Página de Cita —
+ * UX-DR131, Historia 34.1.
+ *
+ * Se cuenta igual que el de la Tarjeta y lo aplica la misma función; el verso pasa a una línea
+ * (`enUnaLinea`) después de recortar, así que un título o una meta en verso lo rebasa en los
+ * « / » que suma (tres caracteres por salto que quede dentro), a propósito. Quien llega desde un buscador decide si entrar leyendo
+ * esto, así que lo que cabe va entero.
+ */
+export const MAX_CARACTERES_DE_TITULO_Y_META = 110;
+
+/**
  * Entradas por página en los listados de Autor, de Tema, de Colección y de Obra — FR-5.
  *
  * La Página de Obra (Historia 22.4) pagina con este mismo número y la misma `Paginacion`: un
@@ -358,6 +380,18 @@ export const MAX_CITAS_RELACIONADAS = 4;
  * reparte `repartir`, que con menos lanza y para la construcción.
  */
 export const MAX_CITAS_DE_LA_MISMA_OBRA = 3;
+
+/**
+ * Obras que la Lista de Obras de la Página de Autor enseña antes de las Citas — UX-DR130, FR-4,
+ * AD-9, Historia 34.2. Valor de Héctor del 2026-11-05.
+ *
+ * Con más, la Lista pinta las primeras y pliega el resto en un Desplegable cerrado («Y {m} obras
+ * más», `rotuloDeObrasPlegadas`), para que la primera Cita no quede pantallas abajo (Rafael
+ * Barrett, con su Lista entera, la dejaba a unos 3.249 px a 360 × 640). `/obras/` no se pliega nunca.
+ * Moverlo lo decide Héctor, en un diff visible. Literal: el filtro de los Directorios importa este
+ * módulo y un cálculo aquí engordaría su guion.
+ */
+export const MAX_OBRAS_ANTES_DE_LAS_CITAS = 3;
 
 /**
  * Saltos de enlace interno desde la portada en los que toda superficie publicada debe

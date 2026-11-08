@@ -14,6 +14,7 @@ import { desviacionDelBarrido, reglasDeLaPagina, sinDecidir, versionesDeAxe } fr
 import { abrirLosDesplegables, auditar, recorrerElFoco } from './ayuda/desplegables.ts';
 import {
   SIN_TARJETA_COMPLETA,
+  autorConMasObras,
   citaConLosDosBloques,
   citaConTarjetaCompleta,
   citaSinMasDelAutor,
@@ -39,7 +40,7 @@ import {
   rotuloBuscarEnAutor,
 } from '../../src/lib/busqueda.ts';
 import { guionExternoDe } from '../../src/lib/guiones.ts';
-import { TANDA_DE_RESULTADOS } from '../../src/lib/umbrales.ts';
+import { MAX_OBRAS_ANTES_DE_LAS_CITAS, TANDA_DE_RESULTADOS } from '../../src/lib/umbrales.ts';
 
 /**
  * Historia 2.8 — accesibilidad y comportamiento responsive.
@@ -212,11 +213,22 @@ test('29.3 — el barrido lleva una Cita en verso en su Página y en un listado,
 
 /** Una ruta sin su barra final: la muestra derivada las da sin ella, y las de arriba con ella. */
 const sinBarra = (ruta: string) => (ruta.length > 1 ? ruta.replace(/\/$/, '') : ruta);
+/**
+ * Historia 34.2 — la Página del Autor con más Obras, la de la Lista de Obras plegada más larga:
+ * axe y el foco la barren cerrada y abierta (el paso de la 34.0). Sale del Corpus, nunca fijada,
+ * y solo entra si de verdad pliega: con `MAX_OBRAS_ANTES_DE_LAS_CITAS` Obras o menos no hay
+ * `<details>` y la pasada abierta pasaría en vacío.
+ */
+const AUTORES_DEL_BARRIDO = [autorConMasObras()]
+  .filter((a): a is { slug: string; obras: number } => a !== undefined && a.obras > MAX_OBRAS_ANTES_DE_LAS_CITAS)
+  .map((a) => `/autor/${a.slug}/`);
+
 /** Sin repetir una página por escribirse con barra final y sin ella: axe la barrería dos veces. */
 const SUPERFICIES = [
   ...DERIVADAS,
   ...OBRAS_DEL_BARRIDO,
   ...CITAS_DEL_BARRIDO,
+  ...AUTORES_DEL_BARRIDO,
   ...[CITAS_29_3.pagina, CITAS_29_3.listado].filter((ruta): ruta is string => ruta !== undefined),
 ].filter(
   (ruta, i, todas) => todas.findIndex((otra) => sinBarra(otra) === sinBarra(ruta)) === i,
@@ -1232,6 +1244,8 @@ test.describe('Historia 2.8 — responsive', () => {
         const esperado = esperadoDe();
         for (const condicion of CONDICIONES) {
           if (!(await cargarEn320(page, ruta!, condicion))) continue;
+          // Historia 34.2 — una fila plegada mide cero: se abren los Desplegables antes de medir.
+          await abrirLosDesplegables(page);
           for (const conPalabra of [false, true]) {
             const { listado, medidas } = await page.evaluate(
               ({ filas, titulo, conPalabra, palabra, esperado }) => {

@@ -29,7 +29,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 # - Retrospective appends its action items to action_items; the status view surfaces open ones
 generated: 08-11-2026 09:00
-last_updated: 11-08-2026 21:00
+last_updated: 11-09-2026 01:00
 project: brainlySabiduria
 project_key: NOKEY
 tracking_system: file-system
@@ -515,9 +515,9 @@ development_status:
   # excepción con nombre a la unidad de fusión, como la 23.12 (Héctor, 2026-11-07).
   epic-34: in-progress
   34-0-la-primitiva-de-desplegable: review  # v9-ralph 2026-11-07: Desplegable.astro, la primitiva de lo plegado (details nativo, rótulo en summary, glifo › provisional); se funde sola en la principal, antes que la Épica 30. Diferidos para Héctor (bmad-ux): el glifo, filete con envoltorios, anidado, esquema de encabezados, hover, anclas e impresión, medida de prosa
-  34-1-un-solo-dueño-del-recorte-por-palabra: backlog
-  34-2-la-página-de-autor-enseña-tres-obras-y-despliega-el-resto: backlog
-  34-3-el-campo-de-búsqueda-se-ve-como-campo: backlog
+  34-1-un-solo-dueño-del-recorte-por-palabra: review  # v9-ralph 2026-11-08: recortarPorPalabra en src/lib/recorte.ts, topes de Tarjeta (120) y título/meta (110) en umbrales.ts; dos pasadas de revisión; diferidos para Héctor: palabra única más larga que el tope sin «…», signos colgantes antes de «…»
+  34-2-la-página-de-autor-enseña-tres-obras-y-despliega-el-resto: review  # v9-ralph 2026-11-08: dos pasadas de revisión; diferida a Héctor la zona del pliegue
+  34-3-el-campo-de-búsqueda-se-ve-como-campo: review  # v9-ralph 2026-11-08: campo de búsqueda con contorno completo; diferido a Héctor: el AC «la del filtro sin tocarla» choca con el contorno (se reescribió el reposo de la e2e); la portada (28.1) se integra al fundir
   epic-34-retrospective: optional
 
   # Épica 35 — la Cita atribuida, construida entera con la puerta cerrada: sin los cinco
