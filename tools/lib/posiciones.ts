@@ -1,5 +1,6 @@
 /**
- * Dónde cae cada Cita en sus documentos de Fuente — Historia 24.1, AD-23.
+ * Dónde cae cada Cita en sus documentos de Fuente, y su pasaje — Historias 24.1 y 31.1, AD-23,
+ * AD-30.
  *
  * La Página de Obra lista sus Citas en el orden del libro, y ese orden necesita saber en qué
  * documento y en qué posición aparece el texto de cada una. Ese dato no se guarda en ninguna
@@ -9,14 +10,20 @@
  * otros, una Cita podría estar cotejada y no tener sitio en su libro.
  *
  * Aquí no se ordena ni se elige: se entrega, por el `slug` del frontmatter de cada Cita, una
- * aparición por documento de su obra en que aparece su texto, sin el texto. Quien ordena es
- * `src/lib/obras.ts` (`ordenDelLibro`), que recibe esto por parámetro. Quien lo cablea al build
- * es el cargador `posiciones` de `src/content.config.ts`, que no hace nada más.
+ * aparición por documento de su obra en que aparece su texto. Desde la 31.1 cada aparición
+ * trae además, si lo hay, su **pasaje** —el párrafo literal del documento y el tramo de la
+ * Cita en él—, que calcula `tools/lib/pasaje.ts` desde esa misma posición: es el único texto de
+ * `corpus/fuentes/` que entra en el almacén de contenido (AD-30), y solo cuando
+ * `MAX_CARACTERES_DEL_PASAJE` tiene valor. Quien ordena y elige la aparición que cuenta es
+ * `src/lib/obras.ts` (`ordenDelLibro`, `aparicionQueCuenta`), que recibe esto por parámetro.
+ * Quien lo cablea al build es el cargador `posiciones` de `src/content.config.ts`, que no hace
+ * nada más.
  *
  * Sin red (AD-22) y sin escribir nada en `corpus/`.
  */
 
 import type { AparicionDeCita } from '../../src/lib/obras.ts';
+import { MAX_CARACTERES_DEL_PASAJE } from '../../src/lib/umbrales.ts';
 import {
   colapsarEspacios,
   documentoDeCita,
@@ -24,7 +31,9 @@ import {
   localizar,
   type DocumentosDeFuente,
 } from './cotejo.ts';
-import { leerCitas, leerDocumentosDeFuente, leerOrdenDeLosIndices, rutasDelCorpus } from './corpus.ts';
+import { leerCitas, leerDocumentosParaElCotejo, leerOrdenDeLosIndices, rutasDelCorpus } from './corpus.ts';
+import { formaDeLasLineas } from './lineas.ts';
+import { pasajeDeAparicion } from './pasaje.ts';
 
 /**
  * Lo que de una Cita hace falta para situarla, tal y como sale del frontmatter. Los campos se
@@ -54,19 +63,34 @@ function obraDe(cita: CitaParaSituar): string | undefined {
     : undefined;
 }
 
+/** Lo que el pasaje necesita además de las Citas y los documentos. */
+export interface OpcionesDelPasaje {
+  /** `MAX_CARACTERES_DEL_PASAJE`; sin él —o en `undefined`— ninguna aparición trae pasaje. */
+  tope?: number | undefined;
+  /** La `lineas:` que declara la cabecera de cada documento, en crudo (`leerDocumentosParaElCotejo`). */
+  lineasDeclaradas?: ReadonlyMap<string, string>;
+}
+
 /**
  * Las apariciones de cada Cita en los documentos de su obra, por el `slug` de su frontmatter.
  *
  * Pura. Una Cita sin documento —la del censo, sin Fuente u obra—, con el texto vacío o que no
  * aparece queda con la lista vacía; un documento ilegible (`null`) o una biografía mal colocada
  * no entra, como en el cotejo. Las Citas se agrupan por el documento corto de su obra
- * (`documentoDeCita`), que es lo único de lo que depende `documentosDeCita`: así cada cuerpo se
- * colapsa una sola vez por grupo, y se suelta en cuanto el grupo termina.
+ * (`documentoDeCita`), que es lo único de lo que depende `documentosDeCita`, y dentro del grupo
+ * se recorre documento a documento: así cada cuerpo se colapsa una sola vez, su forma se juzga
+ * una vez y la correspondencia con el crudo de `tramoEnCrudo` se calcula una vez. Las
+ * apariciones de cada Cita salen en el orden de `documentosDeCita`.
+ *
+ * Con `opciones.tope`, la aparición cuyo pasaje ofrece `tools/lib/pasaje.ts` lo trae; la que no,
+ * no lleva la clave.
  */
 export function posicionesDeCitas(
   citas: readonly CitaParaSituar[],
   documentos: DocumentosDeFuente,
+  opciones: OpcionesDelPasaje = {},
 ): Map<string, AparicionDeCita[]> {
+  const { tope, lineasDeclaradas } = opciones;
   const posiciones = new Map<string, AparicionDeCita[]>();
   const porGrupo = new Map<string, { fuente: { id: string }; obra: string; citas: CitaParaSituar[] }>();
 
@@ -83,19 +107,26 @@ export function posicionesDeCitas(
   }
 
   for (const { fuente, obra, citas: delGrupo } of porGrupo.values()) {
-    const cuerpos = documentosDeCita(fuente, obra, documentos).flatMap((nombre) => {
-      const cuerpo = documentos.get(nombre);
-      return typeof cuerpo === 'string' ? [{ nombre, cuerpo: colapsarEspacios(cuerpo) }] : [];
+    const buscadas = delGrupo.map((cita) => {
+      const texto = typeof cita.texto === 'string' ? cita.texto : '';
+      return { slug: cita.slug as string, texto, buscado: colapsarEspacios(texto) };
     });
-    for (const cita of delGrupo) {
-      const buscado = colapsarEspacios(typeof cita.texto === 'string' ? cita.texto : '');
-      const apariciones: AparicionDeCita[] = [];
-      for (const { nombre, cuerpo } of cuerpos) {
+    const apariciones = buscadas.map((): AparicionDeCita[] => []);
+    for (const nombre of documentosDeCita(fuente, obra, documentos)) {
+      const crudo = documentos.get(nombre);
+      if (typeof crudo !== 'string') continue;
+      const cuerpo = colapsarEspacios(crudo);
+      const forma = formaDeLasLineas({ cuerpo: crudo, lineas: lineasDeclaradas?.get(nombre) });
+      buscadas.forEach(({ texto, buscado }, i) => {
         const posicion = localizar(buscado, cuerpo);
-        if (posicion !== -1) apariciones.push({ documento: nombre, posicion });
-      }
-      posiciones.set(cita.slug as string, apariciones);
+        if (posicion === -1) return;
+        const resultado = pasajeDeAparicion({ crudo, forma, posicion, buscado, textoDeCita: texto, tope });
+        apariciones[i].push(
+          'pasaje' in resultado ? { documento: nombre, posicion, pasaje: resultado.pasaje } : { documento: nombre, posicion },
+        );
+      });
     }
+    buscadas.forEach(({ slug }, i) => posiciones.set(slug, apariciones[i]));
   }
 
   return posiciones;
@@ -104,14 +135,20 @@ export function posicionesDeCitas(
 /**
  * Las posiciones de las Citas publicadas de un Corpus en disco: `corpus/citas/` y
  * `corpus/fuentes/`, con los lectores del cotejo. Lanza, nombrando el fichero, ante un
- * frontmatter que no se deja analizar, igual que el cotejo.
+ * frontmatter que no se deja analizar, igual que el cotejo. El tope del pasaje es, si no se
+ * dice otro, `MAX_CARACTERES_DEL_PASAJE`.
  */
 export async function leerPosicionesDelCorpus(
   raizDelCorpus: string,
+  opciones: { tope?: number | undefined } = {},
 ): Promise<Map<string, AparicionDeCita[]>> {
+  const tope = 'tope' in opciones ? opciones.tope : MAX_CARACTERES_DEL_PASAJE;
   const rutas = rutasDelCorpus(raizDelCorpus);
-  const [citas, documentos] = await Promise.all([leerCitas(rutas.citas), leerDocumentosDeFuente(rutas)]);
-  return posicionesDeCitas(citas, documentos);
+  const [citas, { documentos, lineasDeclaradas }] = await Promise.all([
+    leerCitas(rutas.citas),
+    leerDocumentosParaElCotejo(rutas),
+  ]);
+  return posicionesDeCitas(citas, documentos, { tope, lineasDeclaradas });
 }
 
 /**

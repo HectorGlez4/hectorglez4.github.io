@@ -26,6 +26,21 @@ export const MIN_CITAS_POR_TEMA = 15;
 export const MAX_CARACTERES_IMAGEN = 300;
 
 /**
+ * Longitud máxima del pasaje de una Cita, en puntos de código — Historia 31.1, AD-30.
+ *
+ * El pasaje es el párrafo —o la estrofa— del documento cotejado del que sale la Cita, literal
+ * y entero. Por encima de esto no se ofrece: un pasaje nunca se recorta ni se resume, así que
+ * el que no cabe no está (`ofrecePasaje` de `tools/lib/pasaje.ts`, el único que lo decide; el
+ * borde, igual al tope, sí se ofrece). Se cuenta como `MAX_CARACTERES_IMAGEN`, por puntos de
+ * código y no por unidades UTF-16.
+ *
+ * **Nace en `undefined`, y con él no se ofrece ningún pasaje**: la puerta nace cerrada. Su
+ * valor lo da Héctor, en un diff visible (la propuesta es 1.200); ningún agente se lo da, y
+ * ninguna prueba fija su valor: pasan el tope por parámetro o lo parchean en una copia.
+ */
+export const MAX_CARACTERES_DEL_PASAJE: number | undefined = undefined;
+
+/**
  * Entradas por página en los listados de Autor, de Tema, de Colección y de Obra — FR-5.
  *
  * La Página de Obra (Historia 22.4) pagina con este mismo número y la misma `Paginacion`: un
