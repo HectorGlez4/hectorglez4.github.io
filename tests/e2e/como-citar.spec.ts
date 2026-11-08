@@ -1,6 +1,7 @@
 import { expect, test, type Page } from '@playwright/test';
 import { citaConTarjetaCompleta, citaSinObra, textoDe } from './ayuda/corpus.ts';
-import { emitidos, espiarMedicion } from './ayuda/espia.ts';
+import { EVENTOS } from '../../src/lib/vocabulario.ts';
+import { denegarPortapapeles, emitidosDeCopiar, escriturasDenegadas, espiarMedicion } from './ayuda/espia.ts';
 
 /**
  * Historia 30.3 — «Cómo citar» en la Página de Cita, en el navegador (FR-58, UX-DR119).
@@ -177,12 +178,6 @@ test.describe('Historia 30.3 — «Cómo citar», con JavaScript', () => {
   });
 });
 
-/** Lo que el espía vio de las acciones de copiar, en orden. */
-const deCopiar = async (page: Page) =>
-  (await emitidos(page)).filter((e) => ['copiado', 'copiado-de-referencia', 'copiado-de-fragmento'].includes(e.evento))
-    // Sin datos ni destino: lo que la isla no pasa llega como `undefined`, y aquí se lee como nulo.
-    .map((e) => ({ evento: e.evento, datos: e.datos ?? null, destino: e.destino ?? null }));
-
 test.describe('Historia 30.5 — copiar una Referencia pide su evento', () => {
   test.beforeEach(async ({ context }) => {
     await context.grantPermissions(['clipboard-read', 'clipboard-write']);
@@ -196,24 +191,24 @@ test.describe('Historia 30.5 — copiar una Referencia pide su evento', () => {
       await page.getByRole('button', { name: `Copiar ${rotulo}`, exact: true }).click();
       await expect(region(page)).toHaveText('Copiado.');
     }
-    expect(await deCopiar(page)).toEqual(
-      Array.from({ length: 4 }, () => ({ evento: 'copiado-de-referencia', datos: null, destino: null })),
+    expect(await emitidosDeCopiar(page)).toEqual(
+      Array.from({ length: 4 }, () => ({ evento: EVENTOS.copiadoDeReferencia, datos: null, destino: null })),
     );
   });
 
   test('con el portapapeles denegado no pide nada', async ({ page }) => {
     await espiarMedicion(page);
-    await page.addInitScript(() => {
-      Object.defineProperty(navigator, 'clipboard', {
-        value: { writeText: () => Promise.reject(new Error('denegado')), readText: () => Promise.resolve('') },
-        configurable: true,
-      });
-    });
+    await denegarPortapapeles(page);
     await page.goto(`/cita/${COMPLETA!.slug}/`);
     await resumen(page).click();
-    await page.getByRole('button', { name: 'Copiar MLA', exact: true }).click();
+    const mla = page.getByRole('button', { name: 'Copiar MLA', exact: true });
+    await mla.click();
+    // La rama del rechazo corrió: se intentó escribir, y ni «Copiado.» ni el estado.
+    await expect.poll(() => escriturasDenegadas(page)).toBe(1);
     await page.waitForTimeout(300);
-    expect(await deCopiar(page)).toEqual([]);
+    await expect(mla).not.toHaveAttribute('data-estado', 'copiado');
+    await expect(region(page)).toHaveText('');
+    expect(await emitidosDeCopiar(page)).toEqual([]);
   });
 
   test('«Copiar la cita» sigue pidiendo «copiado», y ninguna de citar', async ({ page }) => {
@@ -221,7 +216,28 @@ test.describe('Historia 30.5 — copiar una Referencia pide su evento', () => {
     await page.goto(`/cita/${COMPLETA!.slug}/`);
     await page.getByRole('button', { name: 'Copiar la cita', exact: true }).click();
     await expect(page.locator('[data-copiar] [data-etiqueta]')).toHaveText('Copiado.');
-    expect((await deCopiar(page)).map((e) => e.evento)).toEqual(['copiado']);
+    expect((await emitidosDeCopiar(page)).map((e) => e.evento)).toEqual([EVENTOS.copiado]);
+  });
+
+  test('en una misma carga, cada pulsación pide solo su evento: la Cita, una Referencia y el Fragmento', async ({ page }) => {
+    await espiarMedicion(page);
+    await page.goto(`/cita/${COMPLETA!.slug}/`);
+    await page.getByRole('button', { name: 'Copiar la cita', exact: true }).click();
+    await expect(page.locator('[data-copiar] [data-etiqueta]')).toHaveText('Copiado.');
+    await resumen(page).click();
+    await page.getByRole('button', { name: 'Copiar APA', exact: true }).click();
+    await expect(region(page)).toHaveText('Copiado.');
+    await page.locator('details.desplegable', { has: page.locator('[data-inserta-esta-cita]') }).locator('summary').click();
+    await page.getByRole('button', { name: 'Copiar el fragmento', exact: true }).click();
+    await expect(page.locator('[data-inserta-esta-cita] > [role="status"]')).toHaveText('Copiado.');
+    await page.getByRole('button', { name: 'Copiar MLA', exact: true }).click();
+    await expect(region(page)).toHaveText('Copiado.');
+    expect((await emitidosDeCopiar(page)).map((e) => e.evento)).toEqual([
+      EVENTOS.copiado,
+      EVENTOS.copiadoDeReferencia,
+      EVENTOS.copiadoDeFragmento,
+      EVENTOS.copiadoDeReferencia,
+    ]);
   });
 });
 

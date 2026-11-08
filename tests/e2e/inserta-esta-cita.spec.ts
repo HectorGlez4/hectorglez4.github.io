@@ -1,6 +1,7 @@
 import { expect, test, type Page } from '@playwright/test';
 import { citaConTarjetaCompleta, textoDe } from './ayuda/corpus.ts';
-import { emitidos, espiarMedicion } from './ayuda/espia.ts';
+import { EVENTOS } from '../../src/lib/vocabulario.ts';
+import { denegarPortapapeles, emitidosDeCopiar, escriturasDenegadas, espiarMedicion } from './ayuda/espia.ts';
 
 /**
  * Historia 30.4 — «Inserta esta cita» en la Página de Cita, en el navegador (FR-57, UX-DR120).
@@ -124,11 +125,6 @@ test.describe('Historia 30.4 — «Inserta esta cita», con JavaScript', () => {
 });
 
 test.describe('Historia 30.5 — copiar el Fragmento pide su evento', () => {
-  const deCopiar = async (page: Page) =>
-    (await emitidos(page)).filter((e) => ['copiado', 'copiado-de-referencia', 'copiado-de-fragmento'].includes(e.evento))
-    // Sin datos ni destino: lo que la isla no pasa llega como `undefined`, y aquí se lee como nulo.
-    .map((e) => ({ evento: e.evento, datos: e.datos ?? null, destino: e.destino ?? null }));
-
   test.beforeEach(async ({ context }) => {
     await context.grantPermissions(['clipboard-read', 'clipboard-write']);
   });
@@ -141,25 +137,24 @@ test.describe('Historia 30.5 — copiar el Fragmento pide su evento', () => {
     await expect(region(page)).toHaveText('Copiado.');
     await boton(page).click();
     await expect(region(page)).toHaveText('Copiado.');
-    expect(await deCopiar(page)).toEqual([
-      { evento: 'copiado-de-fragmento', datos: null, destino: null },
-      { evento: 'copiado-de-fragmento', datos: null, destino: null },
+    expect(await emitidosDeCopiar(page)).toEqual([
+      { evento: EVENTOS.copiadoDeFragmento, datos: null, destino: null },
+      { evento: EVENTOS.copiadoDeFragmento, datos: null, destino: null },
     ]);
   });
 
   test('con el portapapeles denegado no pide nada', async ({ page }) => {
     await espiarMedicion(page);
-    await page.addInitScript(() => {
-      Object.defineProperty(navigator, 'clipboard', {
-        value: { writeText: () => Promise.reject(new Error('denegado')), readText: () => Promise.resolve('') },
-        configurable: true,
-      });
-    });
+    await denegarPortapapeles(page);
     await page.goto(`/cita/${COMPLETA!.slug}/`);
     await resumen(page).click();
     await boton(page).click();
+    // La rama del rechazo corrió: se intentó escribir, y ni «Copiado.» ni el estado.
+    await expect.poll(() => escriturasDenegadas(page)).toBe(1);
     await page.waitForTimeout(300);
-    expect(await deCopiar(page)).toEqual([]);
+    await expect(boton(page)).not.toHaveAttribute('data-estado', 'copiado');
+    await expect(region(page)).toHaveText('');
+    expect(await emitidosDeCopiar(page)).toEqual([]);
   });
 });
 

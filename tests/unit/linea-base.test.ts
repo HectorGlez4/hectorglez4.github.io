@@ -695,7 +695,8 @@ describe('Historia 23.10 — la Página de Cita, la portada y la Obra', () => {
 
 const LINEA_SIN_META =
   '  No tienen meta: no cuentan en SM-5, SM-7, SM-C3 ni en las acciones de las superficies. Contarlas en SM-5 o en SM-C3 ' +
-  'es la pregunta 15 del PRD, y se decide con su línea base declarando el corte. Lo de fuera del censo va en su bloque.';
+  'es la pregunta 15 del PRD, y se decide con su línea base declarando el corte. Las cifras son del censo de hoy: ' +
+  'lo de fuera del censo va en «Fuera del censo».';
 
 describe('Historia 30.5 — copiar una Referencia y copiar el Fragmento, aparte', () => {
   const base = {
@@ -710,8 +711,9 @@ describe('Historia 30.5 — copiar una Referencia y copiar el Fragmento, aparte'
       accion(D1, '/obra/a/b/', EVENTOS.copiado, 1),
     ],
   };
-  // Lo mismo, con las acciones de citar: en dos Citas, una retirada y una jornada fuera del tramo.
+  // Lo mismo, con las acciones de citar: en dos Citas, una Obra, una retirada y una jornada fuera del tramo.
   const deCitar = [
+    accion(D1, '/obra/a/b/', EVENTOS.copiadoDeReferencia, 3, { primera: null }), // el `acciones` de la Obra no las cuenta
     accion(D1, '/cita/una/', EVENTOS.copiadoDeReferencia, 4, { primera: null }),
     accion(D2, '/cita/dos/', EVENTOS.copiadoDeReferencia, 2, { primera: null }),
     accion(D1, '/cita/una/', EVENTOS.copiadoDeFragmento, 1, { primera: null }),
@@ -724,7 +726,14 @@ describe('Historia 30.5 — copiar una Referencia y copiar el Fragmento, aparte'
   it('cada evento, por superficie declarada del censo, en el tramo vigente de la lectura', () => {
     expect(con.citar).toEqual({
       porEvento: [
-        { evento: EVENTOS.copiadoDeReferencia, total: 6, porSuperficie: [{ superficie: 'la Página de Cita', n: 6 }] },
+        {
+          evento: EVENTOS.copiadoDeReferencia,
+          total: 9,
+          porSuperficie: [
+            { superficie: 'la Página de Cita', n: 6 },
+            { superficie: 'la Página de Obra', n: 3 },
+          ],
+        },
         { evento: EVENTOS.copiadoDeFragmento, total: 1, porSuperficie: [{ superficie: 'la Página de Cita', n: 1 }] },
       ],
       referenciasEnCita: 6,
@@ -758,7 +767,7 @@ describe('Historia 30.5 — copiar una Referencia y copiar el Fragmento, aparte'
   it('el informe: un renglón por evento, la tesis sin juzgarla y la pregunta 15', () => {
     const informe = texto(con);
     expect(informe).toContain('Citar — copiar una Referencia y copiar el Fragmento, ');
-    expect(informe).toContain(`  ${EVENTOS.copiadoDeReferencia}: 6 (la Página de Cita 6).`);
+    expect(informe).toContain(`  ${EVENTOS.copiadoDeReferencia}: 9 (la Página de Cita 6, la Página de Obra 3).`);
     expect(informe).toContain(`  ${EVENTOS.copiadoDeFragmento}: 1 (la Página de Cita 1).`);
     expect(informe).toContain(
       '  En la Página de Cita, copias de la Referencia 6 frente a copiados de la Cita 5 (todos los registros de copiado): ' +

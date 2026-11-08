@@ -69,12 +69,13 @@
  *
  * Historia 30.5 — tras una copia buena de un bloque, y fuera del `try` como la de copiar la Cita,
  * la isla pide su evento con `__medir(…)` a secas: `copiado-de-fragmento` si el bloque es «Inserta
- * esta cita» (`data-inserta-esta-cita`) y `copiado-de-referencia` si no (los tres estilos de «Cómo
- * citar» son el mismo evento). Los nombres llegan como constantes por `guionQueAnuncia`
+ * esta cita» (`data-inserta-esta-cita`) y `copiado-de-referencia` si es «Cómo citar»
+ * (`data-como-citar`; los tres estilos son el mismo evento). Un bloque `[data-copiables]` que no
+ * sea ninguno de los dos copia y no pide nada: su evento lo declara la historia que lo traiga,
+ * nunca se cuenta como Referencia por omisión. Los nombres llegan como constantes por `guionQueAnuncia`
  * (`EVENTO_REFERENCIA`, `EVENTO_FRAGMENTO`), nunca como literal. Si el portapapeles rechaza, no se
- * pide nada. Ninguno de los dos cuenta en SM-5 ni lleva campos (lo declara el vocabulario, y la
- * isla no lo sabe), y mientras estén retenidos el fichero de medición los descarta; soltarlos no
- * toca la isla.
+ * pide nada. Mientras estén retenidos el fichero de medición los descarta; soltarlos no toca la
+ * isla.
  */
 import { MARCADOR_DE_FECHA_DE_CONSULTA, fechaDeConsulta, textoParaCopiar } from '../lib/atribucion.ts';
 import { guionQueAnuncia } from '../lib/anuncio.ts';
@@ -159,6 +160,7 @@ const citar = () => {
 for (const k of document.querySelectorAll('[data-copiables]:not([data-listo])')) {
 k.setAttribute('data-listo', '');
 const r = k.querySelector('[data-anuncio]');
+const c = k.hasAttribute('data-inserta-esta-cita') ? EVENTO_FRAGMENTO : k.hasAttribute('data-como-citar') ? EVENTO_REFERENCIA : '';
 const w = () => { const hoy = new Date(); for (const m of k.querySelectorAll('[' + MARCADOR + ']')) m.textContent = fechaDeConsulta(m.getAttribute(MARCADOR), hoy); };
 w();
 for (const l of k.querySelectorAll('[data-sin-fecha]')) l.remove();
@@ -176,7 +178,7 @@ b.setAttribute('data-estado', 'copiado');
 k.d = b;
 anunciar(r, 'Copiado.');
 s = setTimeout(v, 2000);
-__medir(k.hasAttribute('data-inserta-esta-cita') ? EVENTO_FRAGMENTO : EVENTO_REFERENCIA);
+if (c) __medir(c);
 };
 }
 }

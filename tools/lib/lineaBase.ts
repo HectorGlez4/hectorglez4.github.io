@@ -50,7 +50,7 @@ import {
   type PasadaEnProduccion,
   type SerieDeMedicion,
 } from '../../src/lib/umbrales.ts';
-import { EVENTOS, MARCAS_DE_OBRA, PRIMERA, TRAMOS, type Zona } from '../../src/lib/vocabulario.ts';
+import { EVENTOS, MARCAS_DE_OBRA, PRIMERA, TRAMOS, type Evento, type Zona } from '../../src/lib/vocabulario.ts';
 import {
   CONSULTAS_DE_LA_LECTURA,
   FORMA_DE_JORNADA,
@@ -573,7 +573,7 @@ export interface CifrasDeObra {
 export type CifrasDeCitar =
   | {
       porEvento: {
-        evento: string;
+        evento: Evento;
         /** Lo de las superficies del censo: la suma de `porSuperficie`. */
         total: number;
         /** Por superficie declarada, solo las que tienen alguno. */
@@ -741,8 +741,8 @@ const COMPARTICIONES: readonly string[] = [EVENTOS.comparticionDeEnlace, EVENTOS
  * Historia 30.5 — las acciones de citar: se leen en la consulta `acciones` y se informan aparte, fuera
  * del `acciones` de superficie y de Obra y de toda tasa (pregunta 15 del PRD).
  */
-export const ACCIONES_DE_CITAR: readonly string[] = [EVENTOS.copiadoDeReferencia, EVENTOS.copiadoDeFragmento];
-const noEsDeCitar = (r: Recuento) => !ACCIONES_DE_CITAR.includes(r.evento);
+export const ACCIONES_DE_CITAR: readonly Evento[] = [EVENTOS.copiadoDeReferencia, EVENTOS.copiadoDeFragmento];
+const noEsDeCitar = (r: Recuento) => !(ACCIONES_DE_CITAR as readonly string[]).includes(r.evento);
 
 const sumar = (recuentos: readonly Recuento[] | undefined, filtro: (r: Recuento) => boolean): number | undefined =>
   recuentos === undefined ? undefined : recuentos.reduce((total, r) => (filtro(r) ? total + r.n : total), 0);
@@ -1906,7 +1906,8 @@ export function lineasDeLecturaDeMedicion(lectura: LecturaDeMedicion): string[] 
       `  En la Página de Cita, copias de la Referencia ${entero(lectura.citar.referenciasEnCita)} frente a copiados de la Cita ` +
         `${entero(lectura.citar.copiadosEnCita)} (todos los registros de copiado): la tesis de la v9, sin juzgarla.`,
       '  No tienen meta: no cuentan en SM-5, SM-7, SM-C3 ni en las acciones de las superficies. Contarlas en SM-5 o en SM-C3 ' +
-        'es la pregunta 15 del PRD, y se decide con su línea base declarando el corte. Lo de fuera del censo va en su bloque.',
+        'es la pregunta 15 del PRD, y se decide con su línea base declarando el corte. Las cifras son del censo de hoy: ' +
+          'lo de fuera del censo va en «Fuera del censo».',
     );
   }
 

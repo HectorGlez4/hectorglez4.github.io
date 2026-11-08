@@ -5,7 +5,7 @@ created: '2026-11-08'
 status: 'done'
 baseline_revision: 'f81a36ff7dd5ade29c7f78fdf83ee7dad062ccc8'
 review_loop_iteration: 0
-followup_review_recommended: false
+followup_review_recommended: true
 context:
   - '{project-root}/_bmad-output/implementation-artifacts/epic-30-context.md'
   - '{project-root}/_bmad-output/implementation-artifacts/spec-30-4-inserta-esta-cita.md'
@@ -125,6 +125,23 @@ deferred:
 
 Las capas de revisión son externas (orquestador v9-ralph) y no trajeron hallazgos en esta pasada.
 
+### 2026-11-08 — Review pass (2)
+- intent_gap: 0
+- bad_spec: 0
+- patch: 7 (high 0, medium 3, low 4)
+- defer: 0
+- reject: 16 (low 16)
+- addressed_findings:
+  - `[medium]` `[patch]` La isla daba por Referencia todo bloque `[data-copiables]` que no fuera «Inserta esta cita» (blind-hunter, edge-case-hunter). Ahora el evento sale de las dos identidades explícitas (`data-inserta-esta-cita` → `copiado-de-fragmento`, `data-como-citar` → `copiado-de-referencia`) al preparar el bloque, y un bloque que no es ninguno copia sin pedir nada (`if (c) __medir(c);`); la cabecera de `CopiarCita.astro` lo dice. La prueba de `dist/` de `tests/unit/medicion.test.ts` sigue el nuevo texto.
+  - `[medium]` `[patch]` El literal de atributo del guion no estaba atado al marcado, y nada comprobaba que la portada, el 404 o el Kit no tuvieran bloques copiables (blind-hunter, edge-case-hunter, verification-gap, intent-alignment, ac-auditor). Prueba nueva en `npm test` sobre todas las páginas de `dist/`: los bloques `[data-copiables]` solo están en Páginas de Cita, cada uno con exactamente una de las dos identidades que el guion conoce, y la Página de Cita trae las dos.
+  - `[medium]` `[patch]` La exclusión de las acciones de citar en el `acciones` de Obra (`tools/lib/lineaBase.ts:1097`) no se ejercitaba (verification-gap, ac-auditor). El fixture de `tests/unit/linea-base.test.ts` gana una `copiado-de-referencia` en `/obra/a/b/`; comprobado que revertir la exclusión pone la prueba en rojo, y el bloque de citar la cuenta en «la Página de Obra».
+  - `[low]` `[patch]` `ACCIONES_DE_CITAR` y `CifrasDeCitar.porEvento[].evento` tipados como `Evento`, no `string` (blind-hunter).
+  - `[low]` `[patch]` El renglón de la pregunta 15 decía «Lo de fuera del censo va en su bloque»; ahora dice que las cifras son del censo de hoy y nombra el bloque «Fuera del censo» (blind-hunter).
+  - `[low]` `[patch]` E2E: el filtro de las acciones de copiar y el portapapeles denegado viven una vez en `tests/e2e/ayuda/espia.ts` (`emitidosDeCopiar`, `denegarPortapapeles`, `escriturasDenegadas`), con los nombres de `EVENTOS`; las pruebas de denegado comprueban que se intentó escribir, que el botón no pasa a `copiado` y que la región sigue vacía antes de afirmar la ausencia; y una prueba nueva copia la Cita, una Referencia, el Fragmento y otra Referencia en la misma carga y espera cada evento en orden (blind-hunter, edge-case-hunter).
+  - `[low]` `[patch]` `tests/unit/medicion-orden.test.ts`: el comentario explica qué hace «descartable» a la baliza de un evento sin campos (sus campos ajenos, que el bucle exige en la baliza, no la fila) y que la única fila no guardada es la del evento ajeno: de ahí 91 enviadas y 90 leídas (blind-hunter, edge-case-hunter).
+
+Rechazados, con su motivo: el `status: done` frente a `review` de `sprint-status.yaml` es el reparto del bucle (el spec cierra la fase A; la línea del tablero la escribe el paso de cierre y la fase B está diferida); el `findLastIndex` es correcto por construcción (la descartable va siempre detrás) y la baliza la distingue; la prueba por texto del guion es el patrón de la casa para guiones en línea y el comportamiento lo cubren las e2e; `total` del censo queda dicho en el informe; `citar` obligatorio compila (`astro check` 0 errores; no hay otro constructor); `textoDeTramo(vigente, …)` es el mismo encabezado que «Superficies con lectura»; `referenciasEnCita` y `porEvento` clasifican con el mismo `superficieDe`; la tesis declara su denominador, que es la lectura (a) que el spec fija; el estilo de la Referencia ya está diferido a Héctor; el margen del guion es riesgo residual anotado; el párrafo transitorio de AGENTS.md lo reescribe la fase B diferida; la cabecera de la isla deja de describir el vocabulario; el receptor local para la fase A no aplica (los eventos están retenidos y la fase B está diferida); `ACCIONES_DE_CITAR` frente a la consulta ya lo fija la prueba del SQL de `medicion-orden`; sin Página de Cita declarada no hay sitio; lo anterior al tramo vigente no entra, como en toda cifra de la lectura.
+
 ## Design Notes
 
 Por qué la exclusión en `acciones` de superficie: es un recuento de registros que ya tiene historia; sumarle los copiados de citar movería la serie el día que se suelten, sin decirlo. Por qué la consulta `acciones` y no una sexta: cada consulta es un recorrido de la tabla contra la cuota de lectura de D1 (Historia 23.13).
@@ -184,3 +201,28 @@ Blocking condition: ninguna. `tests/unit/huella.test.ts` en rojo es **esperado**
 **Auditoría de la matriz.** Copiar APA/MLA/Chicago y el fragmento → e2e de la 30.5 (evento por pulsación, sin datos ni destino; que no sale baliza lo fija «está pendiente» de `vocabulario.test.ts`). Portapapeles denegado → e2e «no pide nada» en los dos bloques. Copiar la cita → e2e «sigue pidiendo copiado». `acciones` falla → `linea-base.test.ts` «Sin leer (las acciones)». Lectura con los dos → `linea-base.test.ts` recuentos por superficie, fuera del censo y tasas idénticas.
 
 **Riesgos residuales.** Margen del guion de 164 bytes para la Épica 31 y la fase B (que no toca la isla). La fase B, la medida NFR-7 de la épica y el despliegue del receptor siguen diferidos (frontmatter).
+
+### Pasada de revisión 2 (hallazgos externos de las cinco capas)
+
+**Resumen.** Siete parches, ningún `bad_spec` ni `intent_gap`, nada diferido; 16 rechazados con su motivo en el Review Triage Log. La isla ya no da por Referencia un bloque copiable sin identidad conocida: el evento sale de `data-inserta-esta-cita` o `data-como-citar`, y lo demás copia sin pedir nada. `npm test` gana la prueba de `dist/` que ata esas dos identidades al marcado y deja los bloques copiables solo en las Páginas de Cita; la línea base ejercita la exclusión del `acciones` de Obra; tipos `Evento` en `ACCIONES_DE_CITAR`; el renglón de la pregunta 15 nombra «Fuera del censo»; las e2e comparten ayudante con los nombres de `EVENTOS`, comprueban la rama del rechazo y la secuencia mezclada.
+
+**Ficheros.**
+- `src/islands/CopiarCita.astro` — evento por las dos identidades del bloque, `if (c) __medir(c);`; cabecera al día.
+- `tools/lib/lineaBase.ts` — `Evento` en `ACCIONES_DE_CITAR` y `CifrasDeCitar`; renglón de la pregunta 15.
+- `tests/unit/medicion.test.ts` — la prueba del guion sigue el nuevo texto; prueba nueva de los bloques copiables en todo `dist/`.
+- `tests/unit/linea-base.test.ts` — fila de citar en la Obra; renglones al día.
+- `tests/unit/medicion-orden.test.ts` — comentario de la descartable sin campos y de 91/90.
+- `tests/e2e/ayuda/espia.ts` — `emitidosDeCopiar`, `denegarPortapapeles`, `escriturasDenegadas`.
+- `tests/e2e/como-citar.spec.ts`, `tests/e2e/inserta-esta-cita.spec.ts` — ayudante compartido, rechazo comprobado, secuencia mezclada.
+
+**Revisión.** Parches 7 (alta 0, media 3, baja 4); diferidos 0; rechazados 16. Recomendación de revisión de seguimiento: `true` (3 × 3 + 1 × 4 = 13 ≥ 5).
+
+**Verificación.**
+- `npx vitest run` de vocabulario, migraciones, receptor, linea-base, medicion-orden y medicion-secuencias — 384 en verde. Revertir la exclusión de la Obra (`lineaBase.ts:1097`) pone en rojo «ninguna tasa ni el acciones de superficie o de Obra cambian por ellas»; restituida.
+- `npx vitest run tests/unit/medicion.test.ts tests/unit/como-citar.test.ts tests/unit/inserta-esta-cita.test.ts` — 713 en verde. Guion en línea de la Página de Cita con Imagen y medición puesta: **7.577 de 7.680 bytes** (+61 sobre la pasada 1); `MAX_BYTES_DE_GUION` no cambia.
+- `npx astro check` — 0 errores, 0 avisos.
+- `npm run medicion -- local` (desacoplado) y `npm run medicion -- ensayo` — **0**, «91 balizas enviadas, 90 filas leídas, y casan»; receptor parado.
+- `npx playwright test tests/e2e/como-citar.spec.ts tests/e2e/inserta-esta-cita.spec.ts tests/e2e/copiar.spec.ts --project=movil --project=escritorio` — 64 en verde.
+- `npm test` — 7.322 en verde, 1 en rojo: solo `tests/unit/huella.test.ts`, el rojo esperado hasta el despliegue del receptor.
+
+**Riesgos residuales.** El margen del guion baja a 103 bytes para la Épica 31 (la fase B no toca la isla). Un bloque copiable nuevo copia sin medir hasta que su historia declare su evento y su identidad (la prueba de `dist/` lo para si no trae una de las dos conocidas). Fase B, NFR-7 de la épica y el despliegue siguen diferidos.

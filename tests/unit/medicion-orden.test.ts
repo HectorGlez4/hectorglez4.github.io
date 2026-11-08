@@ -599,8 +599,13 @@ describe('Historia 23.2 — las balizas de prueba', () => {
       ...Object.fromEntries(campos.map((campo) => [campo, null])),
     });
     for (const [evento, declarados] of Object.entries(vocabularioDeLaV8.eventos)) {
-      // La descartable es la última fila vacía de su evento. Un evento sin campos (los de citar,
-      // Historia 30.5) deja además vacía su baliza válida: dos filas vacías, la buena y la descartada.
+      // La descartable es la última fila vacía de su evento: `balizasDePrueba` la empuja detrás de las
+      // válidas. «Descartable» es de sus campos, no de la fila: lleva un valor en cada campo ajeno a su
+      // evento, el receptor guarda la fila con esos campos a nulo, y el bucle de abajo exige que la
+      // baliza los lleve. Un evento sin campos (los de citar, Historia 30.5) deja además vacía su baliza
+      // válida —no tiene campo que llenar—: dos filas vacías, la buena y la descartada, que se
+      // distinguen por la baliza. La única fila que el receptor no guarda es la del evento ajeno
+      // (`EVENTO_AJENO`): de ahí las 91 balizas enviadas y 90 filas leídas del ensayo.
       const i = esperadas.findLastIndex((fila) => fila !== null && fila.evento === evento && campos.every((c) => fila[c] === null));
       expect(i, evento).toBeGreaterThanOrEqual(0);
       const sinCampos = Object.keys(declarados).length === 0;

@@ -2604,7 +2604,11 @@ describe('Historia 30.5 — Copiar pide las acciones de citar, con su nombre del
     // decidido por la identidad del bloque.
     const bloques = copiar.slice(copiar.indexOf('const citar ='));
     const rechazo = bloques.indexOf('catch { return; }');
-    const pide = bloques.indexOf("__medir(k.hasAttribute('data-inserta-esta-cita') ? EVENTO_FRAGMENTO : EVENTO_REFERENCIA);");
+    // El evento sale de la identidad del bloque, por sus dos atributos: lo que no es ninguno no pide nada.
+    expect(bloques).toContain(
+      "const c = k.hasAttribute('data-inserta-esta-cita') ? EVENTO_FRAGMENTO : k.hasAttribute('data-como-citar') ? EVENTO_REFERENCIA : '';",
+    );
+    const pide = bloques.indexOf('if (c) __medir(c);');
     expect(rechazo).toBeGreaterThan(0);
     expect(pide).toBeGreaterThan(rechazo);
     expect(bloques.slice(rechazo, pide)).toContain('anunciar(r,');
@@ -2612,6 +2616,26 @@ describe('Historia 30.5 — Copiar pide las acciones de citar, con su nombre del
     expect([...copiar.matchAll(/__medir\(/g)]).toHaveLength(2);
     expect(copiar).toContain('__medir(EVENTO_COPIADO);');
     console.log(`Historia 30.5 — guion en línea de la Página de Cita con Imagen: ${bytesDeGuionEnLinea(html)} de ${MAX_BYTES_DE_GUION} bytes`);
+  }, 240_000);
+
+  it('los bloques copiables solo están en la Página de Cita, y cada uno con una identidad que el guion conoce', async () => {
+    // El guion elige el evento por `data-inserta-esta-cita` y `data-como-citar`: si un componente
+    // renombra su atributo, o un bloque copiable aparece en otra superficie (la portada, el 404, el
+    // Kit), esto lo para en `npm test`, que no corre el navegador.
+    const identidades = ['data-inserta-esta-cita', 'data-como-citar'];
+    const bloquesDe = (html: string) => [...html.matchAll(/<[a-z][a-z0-9-]*\s[^<>]*\bdata-copiables\b[^<>]*>/g)].map((m) => m[0]);
+    for (const [ruta, html] of paginasDe(await sitioMedido())) {
+      const bloques = bloquesDe(html);
+      if (!ruta.startsWith('/cita/')) {
+        expect(bloques, ruta).toEqual([]);
+        continue;
+      }
+      for (const bloque of bloques) {
+        expect(identidades.filter((a) => new RegExp(`\\s${a}(?=[\\s=>])`).test(bloque)), `${ruta}: ${bloque}`).toHaveLength(1);
+      }
+    }
+    const enLaCita = bloquesDe(await leerMedida(CITA));
+    for (const a of identidades) expect(enLaCita.some((b) => b.includes(a)), a).toBe(true);
   }, 240_000);
 });
 
