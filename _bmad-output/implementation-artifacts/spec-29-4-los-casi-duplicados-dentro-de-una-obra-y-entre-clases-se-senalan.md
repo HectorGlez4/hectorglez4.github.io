@@ -273,3 +273,23 @@ Blocking condition: ninguna (las dos condiciones de Block If no se dieron: `revi
 **Verificación.** `npx vitest run` de `parecido`, `casi-duplicados`, `duplicados`, `revision`, `documentacion`, `alta`, `obra-cli`, `lineas` y `revisar-cli`: 9 ficheros, 252 pruebas, verdes; la prueba de `aDondeVa` falla con la mutación del slug. `npx astro check`: 0 errores, 0 avisos. `npx tsx tools/obra.ts casi-duplicados --json` sobre el Corpus real: exit 0, el mismo parte, `git status --short corpus` vacío. `npm test` entero, desacoplado: 162 ficheros, 7.421 pruebas, verde.
 
 **Riesgos residuales.** Los de las pasadas anteriores; además, la casi igual entre candidatas aprobadas juntas en `revisar` (diferida, para Héctor).
+
+## Verificación previa a la fusión — 2026-11-08
+
+Puerta de la etapa s-29 (Épica 29, historias 29.1–29.4), intento 1.
+
+- **Sincronía.** `git fetch origin`: `origin/main` (2566e227b4) ya es antepasado de la rama; no hubo fusión. `npx tsx tools/autor.ts proponer-claves`: «Ninguna clave nueva», nada escrito. `npx tsx tools/documentar.ts --restituir-saltos --seco`: Citas publicadas, 0 ganarían saltos y 75 ya restituidas; candidatas, 0 ganarían saltos; 0 conflictos; nada escrito. `tools/clases.ts` no existe en el árbol.
+- **Equivalente del CI** (`publicar.yml`; el lock no cambió, sin `npm ci`). `npm run build`: verde (5.295 páginas, NFR-5 a 3 saltos, peso 485,4 MiB juzgados bajo el aviso). `npx astro check`: 0 errores, 0 avisos, 10 sugerencias. `npm test`: 162 ficheros, 7.421 pruebas, verde; repetido tras el arreglo, igual.
+- **`npm run test:e2e` completo, primera pasada: 8 rojos**, los mismos en los dos proyectos. Causa: desde la 29.3 un verso se pinta como `span.verso` dentro de `span.fragmento`, y con los 75 saltos restituidos ya hay Citas en verso en los listados de Tema y Colección. `coleccion.spec.ts` («la serif no aparece en nada más que…») tomaba el `span.verso` por serif fuera de sitio, y las instantáneas de la 26.12 (`tipografia-calculada`, tema y coleccion) no tenían la ruta nueva. **Arreglo** (239d883c22): la prueba de la serif nombra el verso con el fragmento que lo contiene —es texto de Cita, UX-DR31— y las cuatro instantáneas se regrabaron: la única diferencia es la ruta `span.fragmento > span.verso`, con el mismo «600 | 1.300» que su fragmento; ningún otro valor se movió. El cuarto rojo, `buscar-con-resultados`, es el parpadeo conocido de `p.estado` y pasó solo.
+- **`npm run test:e2e` completo, segunda pasada:** 1.281 superadas, 110 omitidas, 1 roja (`tipografia-calculada` › `buscar-con-resultados`, escritorio: `p.estado` con texto, el mismo parpadeo); el fichero repetido solo: 28 de 28 en verde.
+- **NFR-7** (aplica: la 29.3 cambia lo que pintan la Página de Cita, los listados y la portada). Lighthouse 13.5.0, móvil, `--throttling-method=simulate`, 10 corridas por página y construcción, alternando `origin/main` (2566e227b4) y la rama, las dos construidas con `MEDICION_ENDPOINT=http://localhost:8787/` y servidas por el `tests/servidor.mjs` de la rama con `SERVIDOR_CACHE_CONTROL=max-age=600` y `SERVIDOR_GZIP=1`; receptor ficticio en 8787 que contesta 204. Medias (ms):
+
+  | Página | LCP main | LCP rama | Δ | FCP main | FCP rama | Δ |
+  |---|---|---|---|---|---|---|
+  | `/cita/antonio-machado-caminante-no-hay-camino-sino-estelas-en/` (en verso) | 1610 | 1579 | −31 | 928 | 924 | −4 |
+  | `/obra/antonio-machado/proverbios-y-cantares/` | 1654 | 1654 | −1 | 775 | 772 | −3 |
+  | `/` | 1504 | 1505 | +1 | 750 | 762 | +13 |
+  | `/buscar/` | 1593 | 1549 | −44 | 889 | 848 | −41 |
+
+  Todas dentro de main + máx(100 ms, 5 %), y el LCP de la Cita bajo 2.500 ms: veredicto **ok**, sin desempate con `devtools`.
+- **Vocabulario.** La etapa no toca `src/lib/vocabulario.ts` ni añade nada a `medicion/migrations/`.
