@@ -303,6 +303,8 @@ export const CAMPOS_QUE_PINTA = {
  *   · `estadoDerechos` es una puerta de admisión, no un texto publicado;
  *   · `tradicion` es del suelo del 40 % de tradición latinoamericana (§6.1);
  *   · `distintaDe` solo silencia un aviso del build (22.2).
+ *   · `wikidata` (32.1) ata la ficha a una revisión de Wikidata que ninguna página pinta todavía;
+ *     la 32.2, que pinta la Ficha técnica, lo pasa a la tabla.
  *   · `ordenRevisado` (26.1) solo dice que una persona revisó la clave: no lo pinta ninguna
  *     superficie, nunca. La clave, `ordenAlfabetico`, sí: la pintan los dos Directorios (26.3,
  *     26.4), y por eso está en la tabla y no aquí.
@@ -313,7 +315,8 @@ export const CAMPOS_QUE_PINTA = {
 export const CAMPOS_QUE_NO_FECHAN = {
   cita: ['aptaParaPortada', 'estadoDerechos'],
   autor: ['tradicion', 'ordenRevisado'],
-  obra: ['distintaDe'],
+  // `wikidata` (32.1) todavía no lo pinta ninguna página: no fecha hasta la 32.2, que la pinta.
+  obra: ['distintaDe', 'wikidata'],
 } as const satisfies Partial<Record<FamiliaDeFichero, readonly string[]>>;
 
 /**

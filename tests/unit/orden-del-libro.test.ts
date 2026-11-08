@@ -934,11 +934,15 @@ describe('24.1 — las dependencias que la historia prohíbe', () => {
     expect(infractores).toEqual([]);
   });
 
-  it('content.config.ts toma `z` de astro/zod y de tools/lib/ importa solo posiciones.ts', async () => {
+  it('content.config.ts toma `z` de astro/zod y de tools/lib/ importa solo posiciones.ts y wikidata.ts', async () => {
     const codigo = sinComentarios(await readFile(join(RAIZ_DEL_REPO, 'src', 'content.config.ts'), 'utf8'));
     expect(codigo).not.toMatch(/import\s*\{[^}]*\bz\b[^}]*\}\s*from\s*['"]astro:content['"]/);
     expect(codigo).toMatch(/import\s*\{\s*z\s*\}\s*from\s*['"]astro\/zod['"]/);
-    expect(importados(codigo).filter((r) => /(^|\/)tools\//.test(r))).toEqual(['../tools/lib/posiciones.ts']);
+    // La segunda excepción con nombre es el cargador de Wikidata (Historia 32.1, AD-31).
+    expect(importados(codigo).filter((r) => /(^|\/)tools\//.test(r))).toEqual([
+      '../tools/lib/posiciones.ts',
+      '../tools/lib/wikidata.ts',
+    ]);
   });
 
   it('el único localizador: el `indexOf` de cotejo.ts está en `localizar`, y `apareceEnDocumento` lo usa', async () => {

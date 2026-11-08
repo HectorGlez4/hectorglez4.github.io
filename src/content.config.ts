@@ -32,6 +32,7 @@ import {
   leerPosicionesDelCorpus,
   releerAlCambiar,
 } from '../tools/lib/posiciones.ts';
+import { guardarFichasTecnicas, leerFichasTecnicasDelCorpus } from '../tools/lib/wikidata.ts';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // AD-1 — La puerta de admisión vive aquí, no en `tools/`.
@@ -384,4 +385,60 @@ const indices = defineCollection({
   }),
 });
 
-export const collections = { citas, autores, temas, colecciones, obras, biografias, posiciones, indices };
+/*
+ * Las Fichas técnicas — Historia 32.1, AD-31.
+ *
+ * La **segunda excepción con nombre** a que `src/` no importe de `tools/lib/`, con el patrón del
+ * cargador de posiciones: **solo cablea** `tools/lib/wikidata.ts`, que lee las Fichas de Obra que
+ * declaran `wikidata`, sus documentos de `corpus/wikidata/` y las revisiones vigentes de
+ * `corpus/wikidata/vigentes.yml`, y repite lo que comprueba `npm run obra -- wikidata`: que el
+ * documento sea de esa entidad y esa revisión y que su autor concuerde con el Autor de la ficha.
+ * Si algo falla, el build se para nombrando la ficha (o `vigentes.yml`).
+ *
+ * Una entrada por ficha que declara `wikidata`, con el nombre de la ficha por id y
+ * `{entidad, revision, generos, lenguas, año?}`. En la 32.1 nadie la consulta: la 32.2 la pinta.
+ * Sin red y sin escribir nada en `corpus/`.
+ */
+const cargadorDeFichasTecnicas: Loader = {
+  name: 'fichas-tecnicas',
+  load: async ({ store, parseData, config, watcher, logger }) => {
+    const raiz = join(fileURLToPath(config.root), 'corpus');
+    const cargar = () =>
+      guardarFichasTecnicas({ leer: () => leerFichasTecnicasDelCorpus(raiz), analizar: parseData, almacen: store });
+
+    await cargar();
+
+    if (watcher !== undefined) {
+      releerAlCambiar({
+        vigilante: watcher,
+        carpetas: [join(raiz, 'obras'), join(raiz, 'autores'), join(raiz, 'wikidata')],
+        releer: cargar,
+        esperaMs: ESPERA_TRAS_CAMBIO_MS,
+        avisar: (mensaje) => logger.error(mensaje),
+      });
+    }
+  },
+};
+
+const fichasTecnicas = defineCollection({
+  loader: cargadorDeFichasTecnicas,
+  schema: z.object({
+    entidad: z.string().regex(/^Q[1-9]\d*$/),
+    revision: z.number().int().positive(),
+    generos: z.array(z.string().min(1)),
+    lenguas: z.array(z.string().min(1)),
+    año: z.number().int().optional(),
+  }),
+});
+
+export const collections = {
+  citas,
+  autores,
+  temas,
+  colecciones,
+  obras,
+  biografias,
+  posiciones,
+  indices,
+  fichasTecnicas,
+};

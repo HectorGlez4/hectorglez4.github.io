@@ -649,15 +649,46 @@ export function esquemaDeObra(tiendas: readonly Tienda[] = TIENDAS) {
           })
           .min(1, 'Regla incumplida: «ediciones» sin ninguna edición se omite; no se escribe vacía.')
           .optional(),
+        /*
+         * Historia 32.1 (AD-31): la entidad de Wikidata y la revisión fija de la que salen el
+         * género, la lengua y el año de la Ficha técnica. Solo la escribe `npm run obra --
+         * wikidata`, que coteja el Autor; el build lo repite desde el cargador de
+         * `src/content.config.ts`. Aquí solo se juzga la forma.
+         */
+        wikidata: z
+          .object(
+            {
+              entidad: z
+                .string({ message: 'Regla incumplida: la entidad de Wikidata es una cadena «Q…».' })
+                .regex(
+                  /^Q[1-9]\d*$/u,
+                  'Regla incumplida: la entidad de Wikidata de una Ficha de Obra es «Q» seguida ' +
+                    'de su número, sin ceros a la izquierda.',
+                ),
+              revision: z
+                .number({ message: 'Regla incumplida: la revisión de Wikidata es un número.' })
+                .int('Regla incumplida: la revisión de Wikidata es un entero.')
+                .positive('Regla incumplida: la revisión de Wikidata es un entero positivo.'),
+            },
+            {
+              error: (problema) =>
+                problema.code === 'unrecognized_keys'
+                  ? 'Regla incumplida: «wikidata» no reconoce ' +
+                    `«${problema.keys.join('», «')}». Sus campos son entidad y revision.`
+                  : 'Regla incumplida: «wikidata» es un objeto con entidad y revision.',
+            },
+          )
+          .strict()
+          .optional(),
       },
       {
         error: (problema) =>
           problema.code === 'unrecognized_keys'
             ? 'Regla incumplida: la Ficha de Obra no reconoce ' +
               `«${problema.keys.join('», «')}». Sus campos son autor, titulo, formas, ` +
-              'distintaDe, nota y ediciones.'
+              'distintaDe, nota, ediciones y wikidata.'
             : 'Regla incumplida: una Ficha de Obra es un objeto con autor, titulo y formas, y ' +
-              'opcionalmente distintaDe, nota y ediciones.',
+              'opcionalmente distintaDe, nota, ediciones y wikidata.',
       },
     )
     .strict()

@@ -255,6 +255,17 @@ export interface Rutas {
    */
   biografias: string;
   /**
+   * Las revisiones fijas de Wikidata — Historia 32.1, AD-31: un documento JSON por (entidad,
+   * revisión), `{Q}--r{N}.json`, CC0. Lo escribe solo `tools/recuperar.ts`. No es una Fuente
+   * de texto: el cotejo de Citas, las posiciones y `extraer` no lo leen nunca.
+   */
+  wikidata: string;
+  /**
+   * Qué revisión de cada entidad referida (autor, género, lengua) es la vigente — 32.1.
+   * Solo se amplía (`recuperar`); cambiar una vigente es `npm run obra -- wikidata-vigente`.
+   */
+  vigentesDeWikidata: string;
+  /**
    * El censo de Citas anteriores a la v3 que todavía no tienen documento — Historia 11.2.
    *
    * Va junto a `corpus/portada.json`, que ya es metadato del Corpus y no colección.
@@ -362,6 +373,8 @@ export function rutasDelCorpus(raizCorpus: string): Rutas {
     revision: join(raizCorpus, '_revision'),
     fuentes: join(raizCorpus, 'fuentes'),
     biografias: join(raizCorpus, 'biografias'),
+    wikidata: join(raizCorpus, 'wikidata'),
+    vigentesDeWikidata: join(raizCorpus, 'wikidata', 'vigentes.yml'),
     pendientesDeCotejo: join(raizCorpus, FICHERO_DEL_CENSO),
     sesionesDeSembrado: join(raizCorpus, FICHERO_DE_SESIONES),
     serieDeIndexacion: join(raizCorpus, FICHERO_DE_INDEXACION),
@@ -643,6 +656,10 @@ function yamlDeFicha(ficha: ObraAdmisible): string {
             ...(edicion.descripcion !== undefined ? { descripcion: edicion.descripcion } : {}),
           })),
         }
+      : {}),
+    // La entidad de Wikidata (32.1): la escribe solo `npm run obra -- wikidata`.
+    ...(ficha.wikidata !== undefined
+      ? { wikidata: { entidad: ficha.wikidata.entidad, revision: ficha.wikidata.revision } }
       : {}),
   });
 }

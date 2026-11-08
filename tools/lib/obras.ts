@@ -59,6 +59,18 @@ import { obrasDeLosDatos } from '../../src/lib/publicado.ts';
 import type { CongelacionDeObras } from '../../src/lib/umbrales.ts';
 import { esquemaDeObra } from '../../src/lib/admision.ts';
 import { TIENDAS, tiendaDe, type Tienda } from '../../src/lib/ingreso.ts';
+import {
+  cotejarAutorDeLaEntidad,
+  documentoDeLaCarpeta,
+  fichaTecnicaDe,
+  leerDocumentoDeWikidata,
+  leerVigentes,
+  leerWikidataDelCorpus,
+  obrasQueRemitenA,
+  ordenQueRecupera,
+  sustituirVigente,
+  type WikidataDelCorpus,
+} from './wikidata.ts';
 
 /** El esquema con que se leen y reescriben las fichas; por omisión, el del sitio (22.9). */
 type EsquemaDeFicha = Parameters<typeof leerFichasDeObra>[1];
@@ -500,6 +512,8 @@ function datosDeFicha(ficha: FichaDeObra) {
     ...(ficha.ediciones !== undefined && ficha.ediciones.length > 0
       ? { ediciones: ficha.ediciones.map((edicion) => ({ ...edicion })) }
       : {}),
+    // La entidad de Wikidata (32.1) la escribe solo su orden: reescribir no la toca.
+    ...(ficha.wikidata !== undefined ? { wikidata: { ...ficha.wikidata } } : {}),
   };
 }
 
@@ -579,6 +593,8 @@ export async function reunirFichas(
     ...(a.ediciones !== undefined && a.ediciones.length > 0
       ? { ediciones: a.ediciones.map((edicion) => ({ ...edicion })) }
       : {}),
+    // La entidad de Wikidata (32.1) es de la destino; la de la absorbida describe otra ficha.
+    ...(a.wikidata !== undefined ? { wikidata: { ...a.wikidata } } : {}),
   };
 
   // Terceras fichas que se declaraban distintas de una forma de la absorbida: ahora lo son de
@@ -644,6 +660,15 @@ export async function reunirFichas(
               : `Las ${b.ediciones.length} ediciones en venta de «${b.nombre}» no pasan a la ` +
                 `reunida: se quedan en ${movida}. `) +
               `Si deben publicarse, declárelas en «${a.nombre}» con «npm run obra -- edicion».`,
+          ]
+        : []),
+      ...(b.wikidata !== undefined
+        ? [
+            `La entidad de Wikidata de «${b.nombre}» (${b.wikidata.entidad}, revisión ` +
+              `${b.wikidata.revision}) no pasa a la reunida: se queda en ${movida}. ` +
+              (a.wikidata !== undefined
+                ? `«${a.nombre}» conserva la suya (${a.wikidata.entidad}, revisión ${a.wikidata.revision}).`
+                : `Si describe la reunida, átela con «npm run obra -- wikidata ${a.nombre} <documento>».`),
           ]
         : []),
       ...(terceras.length > 0
@@ -1493,4 +1518,175 @@ export async function levantarCongelacion(opciones: { umbrales?: string } = {}):
 
 function textoDe(fallo: unknown): string {
   return fallo instanceof Error ? fallo.message : String(fallo);
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Wikidata — Historia 32.1, AD-31
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * `npm run obra -- wikidata <ficha> <documento>`: ata a la ficha la entidad y la revisión de un
+ * documento de `corpus/wikidata/`, si su autor (P50) concuerda con el Autor de la ficha.
+ *
+ * Es el único escritor del campo `wikidata`. Se niega —nada escrito— si la ficha no existe, si el
+ * documento falta, no está en `corpus/wikidata/` o no es un documento de Wikidata coherente, si
+ * la ficha ya declara esa misma entidad y revisión, y si el cotejo del autor no concuerda o no se
+ * puede hacer (sin P50, sin revisión vigente de la persona, sin etiqueta en español). El build
+ * repite el cotejo con la misma función (`cotejarAutorDeLaEntidad`).
+ */
+export async function atarEntidadDeWikidata(
+  rutas: Rutas,
+  nombreDeFicha: string,
+  documento: string,
+  /** Para las pruebas: el esquema de un conjunto de tiendas dado (22.9). */
+  esquema?: EsquemaDeFicha,
+): Promise<Resultado> {
+  const activa = await fichaActiva(rutas, nombreDeFicha, esquema);
+  if (!activa.ok) return { ok: false, motivos: [...activa.motivos, NADA_ESCRITO] };
+  const ficha = activa.ficha;
+
+  const ruta = resolve(documento);
+  if (dirname(ruta) !== resolve(rutas.wikidata)) {
+    return {
+      ok: false,
+      motivos: [
+        `«${documento}» no está en ${rutas.wikidata}: una ficha solo declara un documento de ` +
+          'Wikidata versionado allí por `npx tsx tools/recuperar.ts`.',
+        NADA_ESCRITO,
+      ],
+    };
+  }
+  if (!existsSync(ruta)) {
+    return { ok: false, motivos: [`No existe el documento ${ruta}. Se versiona con recuperar.`, NADA_ESCRITO] };
+  }
+  let lectura: ReturnType<typeof leerDocumentoDeWikidata>;
+  try {
+    lectura = leerDocumentoDeWikidata(basename(ruta), await readFile(ruta, 'utf8'));
+  } catch (fallo) {
+    return { ok: false, motivos: [`No se pudo leer ${ruta}: ${texto(fallo)}`, NADA_ESCRITO] };
+  }
+  if (!lectura.ok) return { ok: false, motivos: [lectura.motivo, NADA_ESCRITO] };
+  const { entidad, revision, datos } = lectura.documento;
+
+  if (ficha.wikidata?.entidad === entidad && ficha.wikidata.revision === revision) {
+    return {
+      ok: false,
+      motivos: [`«${ficha.nombre}» ya declara ${entidad} en la revisión ${revision}: no hay nada que atar.`, NADA_ESCRITO],
+    };
+  }
+
+  let nombreDelAutor: string | undefined;
+  let wikidata: WikidataDelCorpus;
+  try {
+    nombreDelAutor = (await leerAutores(rutas)).find((a) => a.slug === ficha.autor)?.nombre;
+    wikidata = await leerWikidataDelCorpus(rutas);
+  } catch (fallo) {
+    return { ok: false, motivos: [texto(fallo), NADA_ESCRITO] };
+  }
+  if (nombreDelAutor === undefined) {
+    return { ok: false, motivos: [`El Autor «${ficha.autor}» de «${ficha.nombre}» no existe.`, NADA_ESCRITO] };
+  }
+  const cotejo = cotejarAutorDeLaEntidad(datos, nombreDelAutor, wikidata.vigente);
+  if (!cotejo.ok) return { ok: false, motivos: [cotejo.motivo, NADA_ESCRITO] };
+
+  try {
+    await reescribirFichaDeObra(ficha.ruta, { ...datosDeFicha(ficha), wikidata: { entidad, revision } }, esquema);
+  } catch (fallo) {
+    return { ok: false, motivos: [texto(fallo), NADA_ESCRITO] };
+  }
+
+  const tecnica = fichaTecnicaDe(datos, (q) => {
+    const v = wikidata.vigente(q);
+    return v.ok ? v.datos : undefined;
+  });
+  return {
+    ok: true,
+    ruta: ficha.ruta,
+    mensaje: [
+      `«${ficha.nombre}» declara ${entidad}, revisión ${revision}.`,
+      ...(ficha.wikidata !== undefined
+        ? [`  Sustituye a ${ficha.wikidata.entidad}, revisión ${ficha.wikidata.revision}.`]
+        : []),
+      `  Autor: «${cotejo.etiqueta}» (${cotejo.persona}) concuerda con «${nombreDelAutor}».`,
+      `  Géneros: ${tecnica.generos.length > 0 ? tecnica.generos.join(', ') : 'ninguno con etiqueta en español'}`,
+      `  Lenguas: ${tecnica.lenguas.length > 0 ? tecnica.lenguas.join(', ') : 'ninguna con etiqueta en español'}`,
+      `  Año: ${tecnica.año !== undefined ? tecnica.año : 'ninguno (sin una sola fecha de publicación con año)'}`,
+    ].join('\n'),
+  };
+}
+
+/**
+ * `npm run obra -- wikidata-vigente <Q> <N>`: cambia la revisión vigente de una entidad referida.
+ *
+ * No descarga (AD-22: la red solo en `tools/recuperar.ts`): el documento de la revisión nueva se
+ * versiona antes con `recuperar`, y si falta, la orden se niega dando la orden exacta. Dice
+ * cuántas Obras —fichas activas con `wikidata`— remiten a la entidad, y las nombra: son las que
+ * el cambio fecha cuando la 32.2 pinte la Ficha técnica.
+ */
+export async function cambiarVigenteDeWikidata(rutas: Rutas, entidad: string, revision: number): Promise<Resultado> {
+  let vigentes: Map<string, number>;
+  try {
+    vigentes = await leerVigentes(rutas.vigentesDeWikidata);
+  } catch (fallo) {
+    return { ok: false, motivos: [texto(fallo), NADA_ESCRITO] };
+  }
+  const anterior = vigentes.get(entidad);
+  if (anterior === undefined) {
+    return {
+      ok: false,
+      motivos: [
+        `${entidad} no es vigente en ${rutas.vigentesDeWikidata}: esta orden solo cambia una vigente. ` +
+          'Las referidas que faltan las añade `recuperar` al versionar la entidad de una Obra.',
+        NADA_ESCRITO,
+      ],
+    };
+  }
+  if (anterior === revision) {
+    return { ok: false, motivos: [`${entidad} ya es vigente en la revisión ${revision}.`, NADA_ESCRITO] };
+  }
+  const suyo = await documentoDeLaCarpeta(rutas.wikidata, entidad, revision);
+  if (!suyo.ok) {
+    return {
+      ok: false,
+      motivos: [
+        suyo.motivo,
+        ...(suyo.ausente === true ? [`Versiónela antes: ${ordenQueRecupera(entidad, revision)}`] : []),
+        NADA_ESCRITO,
+      ],
+    };
+  }
+
+  let remiten: string[];
+  try {
+    const fichas = await leerFichasDeObra(rutas);
+    const conDocumento: { nombre: string; datos: Record<string, unknown> }[] = [];
+    for (const ficha of fichas) {
+      if (ficha.wikidata === undefined) continue;
+      const lectura = await documentoDeLaCarpeta(rutas.wikidata, ficha.wikidata.entidad, ficha.wikidata.revision);
+      if (!lectura.ok) {
+        return { ok: false, motivos: [`${ficha.ruta}: ${lectura.motivo}`, NADA_ESCRITO] };
+      }
+      conDocumento.push({ nombre: ficha.nombre, datos: lectura.documento.datos });
+    }
+    remiten = obrasQueRemitenA(entidad, conDocumento);
+  } catch (fallo) {
+    return { ok: false, motivos: [texto(fallo), NADA_ESCRITO] };
+  }
+
+  try {
+    await sustituirVigente(rutas.vigentesDeWikidata, entidad, revision);
+  } catch (fallo) {
+    return { ok: false, motivos: [texto(fallo), NADA_ESCRITO] };
+  }
+  return {
+    ok: true,
+    ruta: rutas.vigentesDeWikidata,
+    mensaje: [
+      `${entidad}: la revisión vigente pasa de ${anterior} a ${revision} en ${rutas.vigentesDeWikidata}.`,
+      remiten.length === 0
+        ? 'Ninguna Obra remite a ella.'
+        : `${remiten.length === 1 ? 'Remite a ella 1 Obra' : `Remiten a ella ${remiten.length} Obras`}:`,
+      ...remiten.map((nombre) => `  · ${nombre}`),
+    ].join('\n'),
+  };
 }

@@ -197,6 +197,12 @@ export interface FichaDeObra {
    * `npm run obra -- edicion`; las órdenes que reescriben una ficha las conservan.
    */
   ediciones?: readonly EdicionDeObra[];
+  /**
+   * La entidad de Wikidata y su revisión fija (32.1, AD-31). La escribe solo
+   * `npm run obra -- wikidata`, que coteja el Autor; las órdenes que reescriben una ficha la
+   * conservan.
+   */
+  wikidata?: { entidad: string; revision: number };
 }
 
 /** Una edición en venta de una ficha, ya admitida por el esquema (22.9). */

@@ -712,6 +712,27 @@ ajuste del título de `documentar`/`restituir-grafia`, `retirar`) las conservan;
 conserva las de la destino, no hereda las de la absorbida y lo dice. Cómo se encienden y qué
 exige cada edición: «Encender la afiliación de libros».
 
+**`wikidata`** (Historia 32.1, AD-31) es el tercer campo que decide Héctor, y tampoco se escribe
+a mano: `wikidata: {entidad, revision}` lo escribe solo `npm run obra -- wikidata <ficha>
+corpus/wikidata/<Q>--r<N>.json`, que se niega con 1 —nada escrito— si el autor (P50) de esa
+revisión no concuerda con el `nombre` del Autor de la ficha por `esElMismoAutor` (o no hay P50,
+ni revisión vigente de la persona, ni etiqueta en español). La revisión se versiona antes, por
+`oldid`, con `npx tsx tools/recuperar.ts "https://www.wikidata.org/w/index.php?title=<Q>&oldid=<N>"`:
+la entidad y la fecha las declara Wikidata por su API, se guarda el JSON entero de esa revisión
+en `corpus/wikidata/{Q}--r{N}.json` (CC0, nunca sobrescrito) y se recuperan las entidades a las
+que remite —autor, género P136, lengua P407— que falten en `corpus/wikidata/vigentes.yml`, que
+**solo se amplía**; cambiar una vigente es `npm run obra -- wikidata-vigente <Q> <N>`, que no
+descarga (si falta el documento, da la orden `recuperar` exacta) y dice cuántas Obras remiten a
+ella. Wikidata no es una Fuente de `FUENTES`: el cotejo de Citas, las posiciones y `extraer` no
+leen `corpus/wikidata/`. El build repite las comprobaciones desde el cargador `fichasTecnicas` de
+`src/content.config.ts`, la **segunda excepción** a que `src/` no importe de `tools/lib/` (la
+primera es el de posiciones), y rompe nombrando la ficha o `vigentes.yml`. Ninguna página pinta
+nada todavía (la 32.2 pinta la Ficha técnica), y `wikidata` está en `CAMPOS_QUE_NO_FECHAN` hasta
+entonces. Las órdenes que reescriben una ficha lo conservan; `reunir` no hereda el de la
+absorbida y lo dice. **Ningún agente ata una entidad ni recupera de Wikidata sobre el Corpus
+real**, y la Pregunta 12 del PRD —si una antología de un compilador («Granos de oro») es Obra del
+Autor— sigue abierta: hasta que Héctor responda, nadie ata entidad a esas Obras.
+
 ### Una obra, un nombre (Historia 22.2)
 
 ```

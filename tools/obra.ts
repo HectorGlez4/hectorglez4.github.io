@@ -44,6 +44,16 @@
  * `quitar-edicion` quita la de la posición `n` (desde 1, como las numera el parte de `edicion`);
  * código 1 si no existe esa posición. Las ediciones las decide Héctor: ningún agente declara una.
  *
+ * Historia 32.1 — Wikidata (AD-31):
+ *
+ *   npm run obra -- wikidata <ficha> corpus/wikidata/<Q>--r<N>.json
+ *   npm run obra -- wikidata-vigente <Q> <N>
+ *
+ * `wikidata` ata a la ficha la entidad y la revisión de un documento versionado, si su autor
+ * (P50) concuerda con el Autor de la ficha; es el único escritor del campo. `wikidata-vigente`
+ * cambia la revisión vigente de una entidad referida en `corpus/wikidata/vigentes.yml`, sin
+ * descargar nada, y dice cuántas Obras remiten a ella. Atar una entidad real es acto de Héctor.
+ *
  * Códigos: 2 es la forma de la invocación (falta un argumento, sobra uno, una bandera que no
  * existe); 1 es lo que la invocación dice.
  *
@@ -59,6 +69,8 @@ import {
   terminar,
 } from './lib/cli.ts';
 import {
+  atarEntidadDeWikidata,
+  cambiarVigenteDeWikidata,
   congelarObras,
   declararEdicion,
   quitarEdicion,
@@ -82,6 +94,8 @@ const USO = [
   '  npm run obra -- titular <ficha> "<grafía>" [--corpus corpus]',
   '  npm run obra -- edicion <ficha> <tienda> <impresa|electronica> <url> [--descripcion "<texto>"] [--corpus corpus]',
   '  npm run obra -- quitar-edicion <ficha> <n> [--corpus corpus]',
+  '  npm run obra -- wikidata <ficha> corpus/wikidata/<Q>--r<N>.json [--corpus corpus]',
+  '  npm run obra -- wikidata-vigente <Q> <N> [--corpus corpus]',
   '  npm run obra -- congelar [--corpus corpus]',
   '  npm run obra -- levantar',
   '',
@@ -244,6 +258,18 @@ async function principal(): Promise<never> {
         usoMal([`«${n}» no es una posición: las ediciones se numeran desde 1, como las lista \`edicion\`.`]);
       }
       return terminar(await quitarEdicion(rutas, ficha, Number(n)));
+    }
+
+    case 'wikidata': {
+      const [ficha, documento] = exactamente(2, 'la ficha y el documento de Wikidata');
+      return terminar(await atarEntidadDeWikidata(rutas, ficha, documento));
+    }
+
+    case 'wikidata-vigente': {
+      const [entidad, revision] = exactamente(2, 'la entidad y la revisión');
+      if (!/^Q[1-9]\d*$/u.test(entidad)) usoMal([`«${entidad}» no es una entidad de Wikidata («Q…»).`]);
+      if (!/^[1-9]\d{0,15}$/u.test(revision)) usoMal([`«${revision}» no es una revisión: un entero positivo.`]);
+      return terminar(await cambiarVigenteDeWikidata(rutas, entidad, Number(revision)));
     }
 
     case 'congelar':

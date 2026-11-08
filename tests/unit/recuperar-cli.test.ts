@@ -6,6 +6,7 @@ import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { promisify } from 'node:util';
+import * as wd from './ayuda/wikidata.ts';
 
 const ejecutar = promisify(execFile);
 const RAIZ = resolve(import.meta.dirname, '../..');
@@ -1951,6 +1952,227 @@ describe('Historia 24.9 — recuperar --indice', () => {
       (e: { code?: number }) => e.code ?? 1,
     );
     expect(codigo).toBe(2);
+    expect(await pedidas(t)).toEqual([]);
+  });
+});
+
+describe('Historia 32.1 — Wikidata entra por revisión, a corpus/wikidata/', () => {
+  const W = 'https://www.wikidata.org';
+  const PROPS = '&rvprop=ids|timestamp&format=json&formatversion=2';
+  const declaracion = (n: number) => `${W}/w/api.php?action=query&prop=revisions&revids=${n}${PROPS}`;
+  const actual = (q: string) => `${W}/w/api.php?action=query&prop=revisions&titles=${q}${PROPS}`;
+  const datos = (q: string, n: number) => `${W}/wiki/Special:EntityData/${q}.json?revision=${n}`;
+  const permanente = (q: string, n: number) => `${W}/w/index.php?title=${q}&oldid=${n}`;
+  const JSON_OK = (cuerpo: string): RespuestaFingida => ({
+    estado: 200,
+    cabeceras: { 'content-type': 'application/json; charset=utf-8' },
+    cuerpo,
+  });
+
+  const Q480 = wd.entidad('Q480', 100, {
+    es: 'Don Quijote de la Mancha',
+    claims: { P50: [wd.aEntidad('Q5682')], P136: [wd.aEntidad('Q8261')] },
+  });
+  const Q5682 = wd.entidad('Q5682', 70, { es: 'Miguel de Cervantes' });
+  const Q8261 = wd.entidad('Q8261', 80, { es: 'novela' });
+
+  const GUION_COMPLETO: Record<string, RespuestaFingida> = {
+    [declaracion(100)]: JSON_OK(wd.respuestaDeRevision('Q480', 100)),
+    [datos('Q480', 100)]: JSON_OK(wd.respuestaDeDatos(Q480)),
+    [actual('Q5682')]: JSON_OK(wd.respuestaDeRevision('Q5682', 70, { timestamp: '2025-01-02T00:00:00Z' })),
+    [datos('Q5682', 70)]: JSON_OK(wd.respuestaDeDatos(Q5682)),
+    [actual('Q8261')]: JSON_OK(wd.respuestaDeRevision('Q8261', 80)),
+    [datos('Q8261', 80)]: JSON_OK(wd.respuestaDeDatos(Q8261)),
+  };
+
+  const carpeta = (t: { corpus: string }) => join(t.corpus, 'wikidata');
+  const ficheros = async (t: { corpus: string }) =>
+    existsSync(carpeta(t)) ? (await readdir(carpeta(t))).sort() : [];
+  const vigentesDe = async (t: { corpus: string }) =>
+    (await readFile(join(carpeta(t), 'vigentes.yml'), 'utf8')).split('\n').filter((l) => /^Q\d/.test(l));
+
+  it('recupera la Obra y sus referidas sin vigente, y las añade a vigentes.yml', async () => {
+    const t = await taller();
+    const resultado = await recuperar(permanente('Q480', 100), t, GUION_COMPLETO);
+
+    expect(resultado.codigo, resultado.error).toBe(0);
+    expect(await pedidas(t)).toEqual([
+      declaracion(100),
+      datos('Q480', 100),
+      actual('Q5682'),
+      datos('Q5682', 70),
+      actual('Q8261'),
+      datos('Q8261', 80),
+    ]);
+    expect(await ficheros(t)).toEqual(['Q480--r100.json', 'Q5682--r70.json', 'Q8261--r80.json', 'vigentes.yml']);
+    expect(await vigentesDe(t)).toEqual(['Q5682: 70', 'Q8261: 80']);
+
+    const documento = JSON.parse(await readFile(join(carpeta(t), 'Q480--r100.json'), 'utf8'));
+    expect(Object.keys(documento)).toEqual([
+      'fuente',
+      'entidad',
+      'revision',
+      'fechaDeRevision',
+      'licencia',
+      'url',
+      'recuperado',
+      'datos',
+    ]);
+    expect(documento).toMatchObject({
+      fuente: 'wikidata',
+      entidad: 'Q480',
+      revision: 100,
+      fechaDeRevision: '2024-05-01',
+      licencia: 'CC0 1.0',
+      url: permanente('Q480', 100),
+    });
+    expect(documento.datos).toEqual(Q480);
+    expect(JSON.parse(await readFile(join(carpeta(t), 'Q5682--r70.json'), 'utf8')).fechaDeRevision).toBe('2025-01-02');
+    expect(resultado.salida).toContain('El cotejo de Citas no lee corpus/wikidata/: de este documento no sale ninguna Cita.');
+    expect(resultado.salida).toMatch(/Licencia: CC0 1\.0/);
+    expect(resultado.salida).toContain('Q5682: 70, Q8261: 80');
+    // Nada en el espacio de las obras.
+    expect(await readdir(join(t.corpus, 'fuentes'))).toEqual([]);
+  });
+
+  it('una dirección pedida de otra forma se guarda en «pedido»', async () => {
+    const t = await taller();
+    const resultado = await recuperar(`${W}/wiki/Q480?oldid=100`, t, GUION_COMPLETO);
+    expect(resultado.codigo, resultado.error).toBe(0);
+    const documento = JSON.parse(await readFile(join(carpeta(t), 'Q480--r100.json'), 'utf8'));
+    expect(documento.pedido).toBe(`${W}/wiki/Q480?oldid=100`);
+    expect(Object.keys(documento).indexOf('pedido')).toBe(Object.keys(documento).indexOf('url') + 1);
+  });
+
+  it('sin oldid se niega con 1 y no pide nada', async () => {
+    const t = await taller();
+    const resultado = await recuperar(`${W}/wiki/Q480`, t, GUION_COMPLETO);
+    expect(resultado.codigo).toBe(1);
+    expect(resultado.error).toMatch(/no pide ninguna revisión/);
+    expect(await pedidas(t)).toEqual([]);
+    expect(await ficheros(t)).toEqual([]);
+  });
+
+  it('con --indice es la forma de la invocación: 2, sin pedir nada', async () => {
+    const t = await taller();
+    const fichero = join(t.raiz, 'guion.json');
+    await writeFile(fichero, JSON.stringify(GUION_COMPLETO), 'utf8');
+    const r = await ejecutar(
+      'node',
+      ['--import', 'tsx', '--import', DOBLE, join(RAIZ, 'tools/recuperar.ts'), '--indice', permanente('Q480', 100), '--corpus', t.corpus],
+      { cwd: RAIZ, env: { ...process.env, DOBLE_GUION: fichero, DOBLE_REGISTRO: t.registro } },
+    ).then(
+      () => 0,
+      (e: { code?: number }) => e.code,
+    );
+    expect(r).toBe(2);
+    expect(await pedidas(t)).toEqual([]);
+  });
+
+  it('si la dirección nombra otra entidad, se niega nombrando las dos y no escribe', async () => {
+    const t = await taller();
+    const resultado = await recuperar(permanente('Q481', 100), t, GUION_COMPLETO);
+    expect(resultado.codigo).toBe(1);
+    expect(resultado.error).toContain('«Q481»');
+    expect(resultado.error).toContain('«Q480»');
+    expect(await pedidas(t)).toEqual([declaracion(100)]);
+    expect(await ficheros(t)).toEqual([]);
+  });
+
+  it.each([
+    ['una propiedad', wd.respuestaDeRevision('Property:P31', 100, { ns: 120 })],
+    ['otro espacio', wd.respuestaDeRevision('Talk:Q480', 100, { ns: 1 })],
+  ])('la revisión de %s no es una entidad: 1, sin escribir', async (_caso, respuesta) => {
+    const t = await taller();
+    const resultado = await recuperar(`${W}/w/index.php?oldid=100`, t, { [declaracion(100)]: JSON_OK(respuesta) });
+    expect(resultado.codigo).toBe(1);
+    expect(resultado.error).toMatch(/no es una entidad de elemento/);
+    expect(await ficheros(t)).toEqual([]);
+  });
+
+  it.each([
+    ['otra entidad (fusionada)', wd.entidad('Q999', 100)],
+    ['otra revisión', wd.entidad('Q480', 101)],
+  ])('EntityData que sirve %s: 1, nombrando lo servido, sin escribir', async (_caso, servida) => {
+    const t = await taller();
+    const resultado = await recuperar(permanente('Q480', 100), t, {
+      ...GUION_COMPLETO,
+      [datos('Q480', 100)]: JSON_OK(wd.respuestaDeDatos(servida)),
+    });
+    expect(resultado.codigo).toBe(1);
+    expect(resultado.error).toContain(`sirvió ${String(servida.id)} en la revisión ${String(servida.lastrevid)}`);
+    expect(await ficheros(t)).toEqual([]);
+  });
+
+  it('ya versionada: no pide la entidad y sigue con las referidas que falten', async () => {
+    const t = await taller();
+    await wd.sembrarWikidata(t.corpus, [Q480, Q5682], { Q5682: 70 });
+    const resultado = await recuperar(permanente('Q480', 100), t, GUION_COMPLETO);
+    expect(resultado.codigo, resultado.error).toBe(0);
+    // Q5682 ya es vigente con su documento: ni se pide ni se toca su línea.
+    expect(await pedidas(t)).toEqual([actual('Q8261'), datos('Q8261', 80)]);
+    expect(resultado.salida).toMatch(/Ya versionado/);
+    expect(resultado.salida).toMatch(/Q5682: ya vigente, revisión 70/);
+    expect(await vigentesDe(t)).toEqual(['Q5682: 70', 'Q8261: 80']);
+  });
+
+  it('una referida ya vigente en otra revisión no se pide ni cambia', async () => {
+    const t = await taller();
+    const Q8261_viejo = wd.entidad('Q8261', 60, { es: 'novela' });
+    await wd.sembrarWikidata(t.corpus, [Q8261_viejo, Q5682], { Q5682: 70, Q8261: 60 });
+    const resultado = await recuperar(permanente('Q480', 100), t, GUION_COMPLETO);
+    expect(resultado.codigo, resultado.error).toBe(0);
+    expect(await pedidas(t)).toEqual([declaracion(100), datos('Q480', 100)]);
+    expect(await vigentesDe(t)).toEqual(['Q5682: 70', 'Q8261: 60']);
+  });
+
+  it('una referida vigente sin documento se recupera en su revisión vigente', async () => {
+    const t = await taller();
+    const Q8261_viejo = wd.entidad('Q8261', 60, { es: 'novela' });
+    await wd.sembrarWikidata(t.corpus, [Q480, Q5682], { Q5682: 70, Q8261: 60 });
+    const resultado = await recuperar(permanente('Q480', 100), t, {
+      [declaracion(60)]: JSON_OK(wd.respuestaDeRevision('Q8261', 60)),
+      [datos('Q8261', 60)]: JSON_OK(wd.respuestaDeDatos(Q8261_viejo)),
+    });
+    expect(resultado.codigo, resultado.error).toBe(0);
+    expect(await pedidas(t)).toEqual([declaracion(60), datos('Q8261', 60)]);
+    expect(await ficheros(t)).toContain('Q8261--r60.json');
+    expect(await vigentesDe(t)).toEqual(['Q5682: 70', 'Q8261: 60']);
+  });
+
+  it('una referida que falla: escribe lo logrado, añade solo las logradas, nombra la que falta, y repetir lo completa', async () => {
+    const t = await taller();
+    const conFallo = { ...GUION_COMPLETO, [actual('Q5682')]: { estado: 503, cuerpo: 'ocupado' } };
+    const primera = await recuperar(permanente('Q480', 100), t, conFallo);
+    expect(primera.codigo).toBe(1);
+    expect(primera.error).toMatch(/Q5682/);
+    expect(primera.error).toMatch(/repita la misma orden/);
+    expect(await ficheros(t)).toEqual(['Q480--r100.json', 'Q8261--r80.json', 'vigentes.yml']);
+    expect(await vigentesDe(t)).toEqual(['Q8261: 80']);
+
+    await rm(t.registro, { force: true });
+    const segunda = await recuperar(permanente('Q480', 100), t, GUION_COMPLETO);
+    expect(segunda.codigo, segunda.error).toBe(0);
+    expect(await pedidas(t)).toEqual([actual('Q5682'), datos('Q5682', 70)]);
+    expect(await vigentesDe(t)).toEqual(['Q5682: 70', 'Q8261: 80']);
+  }, 30_000);
+
+  it('una redirección fuera de Wikidata no se sigue', async () => {
+    const t = await taller();
+    const resultado = await recuperar(permanente('Q480', 100), t, {
+      [declaracion(100)]: { estado: 302, cabeceras: { location: 'https://wikidata.org.example.com/x' } },
+    });
+    expect(resultado.codigo).toBe(1);
+    expect(resultado.error).toMatch(/no es de Wikidata/);
+    expect(await pedidas(t)).toEqual([declaracion(100)]);
+  });
+
+  it('un vigentes.yml ilegible se niega sin pedir nada', async () => {
+    const t = await taller();
+    await mkdir(carpeta(t), { recursive: true });
+    await writeFile(join(carpeta(t), 'vigentes.yml'), 'Q1: cero\n', 'utf8');
+    const resultado = await recuperar(permanente('Q480', 100), t, GUION_COMPLETO);
+    expect(resultado.codigo).toBe(1);
     expect(await pedidas(t)).toEqual([]);
   });
 });
