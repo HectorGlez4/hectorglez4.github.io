@@ -11,17 +11,19 @@
  */
 import { tramoDe } from '../lib/tramos.ts';
 import Atribucion from './Atribucion.astro';
-import type { Cita, Autor } from '../lib/publicado.ts';
+import type { Cita, Autor, Personaje } from '../lib/publicado.ts';
 import { rutaDeAutor } from '../lib/superficies.ts';
 
 interface Props {
   cita: Cita;
   autor: Autor;
+  /** El Personaje que dice la Cita, si lo declara (Historia 35.3): lo nombra la Atribución. */
+  personaje?: Personaje;
   /** En la Página de Cita el texto es el `h1`; en un listado, no. */
   comoTitulo?: boolean;
 }
 
-const { cita, autor, comoTitulo = false } = Astro.props;
+const { cita, autor, personaje, comoTitulo = false } = Astro.props;
 const tramo = tramoDe(cita.texto);
 ---
 
@@ -44,7 +46,7 @@ const tramo = tramoDe(cita.texto);
   </blockquote>
 
   <figcaption>
-    <Atribucion cita={cita} autor={autor} zona="atribucion" />
+    <Atribucion cita={cita} autor={autor} personaje={personaje} zona="atribucion" />
   </figcaption>
 </figure>
 

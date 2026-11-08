@@ -363,6 +363,7 @@ export type Destino =
   | 'autor'
   | 'coleccion'
   | 'directorio'
+  | 'personaje'
   | 'portada'
   | 'otra'
   | 'yaNoSePublica'
@@ -373,6 +374,7 @@ export const DESTINOS: readonly Destino[] = [
   'autor',
   'coleccion',
   'directorio',
+  'personaje',
   'portada',
   'otra',
   'yaNoSePublica',
@@ -384,6 +386,8 @@ export const NOMBRE_DEL_DESTINO: Readonly<Record<Destino, string>> = {
   autor: 'Autor',
   coleccion: 'Colección',
   directorio: 'Directorio',
+  // Historia 35.3 — la Página de Personaje, familia propia.
+  personaje: 'Personaje',
   portada: 'portada',
   otra: 'otra',
   yaNoSePublica: 'ya no se publica',

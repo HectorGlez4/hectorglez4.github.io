@@ -10,9 +10,10 @@
  *     de las páginas carga otra instancia, y ahí la declara `Armazon.astro`. Escribe en el
  *     registro «N Obras publicadas, M indexables», la línea base de SM-11.
  *
- *     Declara solo las rutas de Obra: son las únicas que `superficies.ts` consulta en la lista
- *     (las demás superficies no dependen del contenido). El armazón declara la lista entera de
- *     `rutasIndexables`, que contiene exactamente estas mismas rutas de Obra.
+ *     Declara solo las rutas de Obra y, desde la Historia 35.3, las de Personaje: son las únicas
+ *     que `superficies.ts` consulta en la lista (las demás superficies no dependen del contenido).
+ *     El armazón declara la lista entera de `rutasIndexables`, que contiene exactamente estas
+ *     mismas rutas de Obra y de Personaje.
  *
  *   · **`astro:build:done`** — sobre el `dist/` real, comprueba que el sitemap, las páginas sin
  *     `noindex` y las que llevan `data-pagefind-body` son el mismo conjunto, y —desde la Historia
@@ -27,7 +28,7 @@ import { readdir, readFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { join, relative, sep } from 'node:path';
 import type { AstroIntegration } from 'astro';
-import { leerAutores, leerCitas, leerFichasDeObra, rutasDelCorpus } from '../tools/lib/corpus.ts';
+import { leerAutores, leerCitas, leerFichasDeObra, leerPersonajes, rutasDelCorpus } from '../tools/lib/corpus.ts';
 import {
   desajustesDeIndexables,
   informeDeCoincidencia,
@@ -41,8 +42,8 @@ import {
 } from '../tools/lib/indexables.ts';
 import { congelacionVigente, rutaDeLaObra } from '../src/lib/obras.ts';
 import type { CongelacionDeObras } from '../src/lib/umbrales.ts';
-import { obrasDeLosDatos, type ObrasDelSitio } from '../src/lib/publicado.ts';
-import { declararRutasIndexables } from '../src/lib/superficies.ts';
+import { obrasDeLosDatos, personajesIndexables, type ObrasDelSitio } from '../src/lib/publicado.ts';
+import { declararRutasIndexables, rutaDePersonaje } from '../src/lib/superficies.ts';
 
 async function ficherosBajo(raiz: string, filtro: (nombre: string) => boolean): Promise<string[]> {
   const entradas = await readdir(raiz, { withFileTypes: true, recursive: true });
@@ -76,6 +77,18 @@ export async function obrasDelCorpusEnDisco(
   );
 }
 
+/**
+ * Las rutas de los Personajes que se indexan, leídas del Corpus de `raiz` — Historia 35.3: con la
+ * misma `personajesIndexables` que usa el armazón (`rutasIndexables`), sobre las Citas publicadas.
+ */
+export async function personajesIndexablesEnDisco(raiz: string): Promise<string[]> {
+  const rutas = rutasDelCorpus(join(raiz, 'corpus'));
+  const citas = await leerCitas(rutas.citas);
+  // Sin ninguna Cita que declare Personaje, no se lee `corpus/personajes/`.
+  if (!citas.some((cita) => cita.personaje !== undefined)) return [];
+  return personajesIndexables(await leerPersonajes(rutas), citas).map((p) => rutaDePersonaje(p.slug));
+}
+
 export default function rutasIndexablesDelCorpus(): AstroIntegration {
   let raiz = process.cwd();
 
@@ -88,7 +101,11 @@ export default function rutasIndexablesDelCorpus(): AstroIntegration {
 
       'astro:build:start': async ({ logger }) => {
         const { publicadas, indexables } = await obrasDelCorpusEnDisco(raiz);
-        declararRutasIndexables(indexables.map((obra) => rutaDeLaObra(obra)));
+        // Historia 35.3 — y los Personajes que se indexan: las dos superficies por contenido.
+        declararRutasIndexables([
+          ...indexables.map((obra) => rutaDeLaObra(obra)),
+          ...(await personajesIndexablesEnDisco(raiz)),
+        ]);
         logger.info(informeDeObras(publicadas.length, indexables.length));
         // Historia 22.8 — un nombre congelado que ya no es ninguna ficha activa avisa, no rompe.
         const congelacion = congelacionVigente();

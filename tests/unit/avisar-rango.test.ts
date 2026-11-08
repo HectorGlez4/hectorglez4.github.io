@@ -327,6 +327,8 @@ describe('Historia 24.8 — el aviso de un rango, por campos', () => {
       obra: { cambianDeFecha: 1, seAvisarian: 1 },
       // Historia 26.3 — el rango cambia el texto de una Cita, que el Directorio no pinta.
       directorio: { cambianDeFecha: 0, seAvisarian: 0 },
+      // Historia 35.3 — el Corpus del rango no tiene Personajes.
+      personaje: { cambianDeFecha: 0, seAvisarian: 0 },
     });
     const informe = informeDelEnsayo('a', 'b', ensayo).join('\n');
     expect(informe).toMatch(/Reparto por familia, a\.\.b/);

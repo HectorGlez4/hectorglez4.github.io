@@ -56,6 +56,7 @@ import {
   rutaDelDirectorioDeObras,
   rutaDeLaBusqueda,
   rutaDeLaPortada,
+  rutaDePersonaje,
   rutaDeTema,
   rutaNormalizada,
 } from './superficies.ts';
@@ -170,16 +171,53 @@ export interface ConjuntoPublicable {
    * una invariante: aquí se cierra por construcción, quitando la entrada.
    */
   colecciones: ColeccionPublicada[];
+  /**
+   * Los Personajes del Corpus — Historia 35.3. Todos los declarados, como `autores`: cuáles se
+   * publican lo decide `personajesPublicados` sobre las Citas.
+   */
+  personajes: Personaje[];
 }
 
 // ─── Núcleo puro ─────────────────────────────────────────────────────────────
 
-/** Un Personaje tal como lo leerán las superficies — Historia 35.2 (las páginas, la 35.3). */
+/** Un Personaje tal como lo leen las superficies — Historias 35.2 y 35.3 (su página). */
 export interface Personaje {
   slug: string;
   nombre: string;
   universo: string;
   ordenAlfabetico?: string;
+  /**
+   * La semblanza — Historia 35.3: la de su biografía (AD-26, con `atribucion`) o el texto de su
+   * `semblanzaPropia` (con `responde`). Sin ninguna, se omite y la ficha no la pinta.
+   */
+  semblanza?: string;
+  /** La atribución de la semblanza tomada de una biografía; la pone `resolverAtribuciones`. */
+  atribucion?: AtribucionDeSemblanza;
+  /** Quién responde de la semblanza propia; presente solo con ella. */
+  responde?: string;
+}
+
+/**
+ * Los Personajes cuya página se indexa — Historia 35.3. Hoy, todo Personaje publicado: la 35.3b
+ * le pone su umbral aquí, y solo aquí. La usan `rutasIndexables` (las páginas) e
+ * `integraciones/indexables.ts` (la configuración), así que las dos instancias de
+ * `src/lib/superficies.ts` reciben la misma lista.
+ */
+export function personajesIndexables<P extends { slug: string; nombre: string }>(
+  personajes: readonly P[],
+  citas: readonly { personaje?: string }[],
+): P[] {
+  return personajesPublicados(personajes, citas);
+}
+
+/**
+ * Las Citas de un Personaje, en el orden de `citasDeAutor` — Historia 35.3. Una Cita con Autor y
+ * Personaje está en las dos páginas (AD-33).
+ */
+export function citasDePersonaje(citas: readonly Cita[], slugPersonaje: string): Cita[] {
+  return citas
+    .filter((c) => c.personaje === slugPersonaje)
+    .sort((a, b) => a.slug.localeCompare(b.slug, 'es'));
 }
 
 /**
@@ -830,6 +868,8 @@ export function rutasPublicadas(conjunto: ConjuntoPublicable): string[] {
     '/',
     ...conjunto.citas.map((c) => rutaDeCita(c.slug)),
     ...autoresPublicados(conjunto.autores, conjunto.citas).map((a) => rutaDeAutor(a.slug)),
+    // Historia 35.3 — la página 1 de todo Personaje publicado: existir no es indexarse.
+    ...personajesPublicados(conjunto.personajes, conjunto.citas).map((p) => rutaDePersonaje(p.slug)),
     rutaDelDirectorioDeAutores(),
     rutaDelDirectorioDeObras(),
     ...temasPublicados(conjunto.temas, conjunto.citas).map((t) => rutaDeTema(t.slug)),
@@ -880,6 +920,17 @@ export interface ObrasDelAutor {
  */
 export function obrasDelAutor(citas: readonly CitaConSuObra[], slugAutor: string): ObrasDelAutor {
   const suyas = citas.filter((cita) => cita.autor === slugAutor);
+  const obras = ordenDeLaListaDeObras(obrasDeLasCitas(suyas));
+  return { obras, sinObra: suyas.filter((cita) => cita.obra === undefined).length };
+}
+
+/**
+ * Las Obras de un Personaje para su página — Historia 35.3, como `obrasDelAutor` y con su orden:
+ * las Obras resueltas de las Citas que declaran el Personaje, sea él el dueño de la Obra o lo sea
+ * el Autor de la Cita, y cuántas de esas Citas no resuelven ninguna.
+ */
+export function obrasDelPersonaje(citas: readonly CitaConSuObra[], slugPersonaje: string): ObrasDelAutor {
+  const suyas = citas.filter((cita) => cita.personaje === slugPersonaje);
   const obras = ordenDeLaListaDeObras(obrasDeLasCitas(suyas));
   return { obras, sinObra: suyas.filter((cita) => cita.obra === undefined).length };
 }
@@ -1155,10 +1206,15 @@ export function rutasIndexables(conjunto: ConjuntoPublicable): readonly string[]
   if (memorizada !== undefined) return memorizada;
   const obras = obrasDelConjunto(conjunto.citas, conjunto.autores);
   const indexables = new Set(obras.indexables.map((o) => rutaDeLaObra(o)));
+  // Historia 35.3 — y los Personajes que `personajesIndexables` deja fuera (hoy ninguno).
+  for (const personaje of personajesIndexables(conjunto.personajes, conjunto.citas)) {
+    indexables.add(rutaDePersonaje(personaje.slug));
+  }
   const noIndexables = new Set(
-    obras.publicadas
-      .map((o) => rutaDeLaObra(o))
-      .filter((ruta) => !indexables.has(ruta)),
+    [
+      ...obras.publicadas.map((o) => rutaDeLaObra(o)),
+      ...personajesPublicados(conjunto.personajes, conjunto.citas).map((p) => rutaDePersonaje(p.slug)),
+    ].filter((ruta) => !indexables.has(ruta)),
   );
   const rutas = rutasPublicadas(conjunto).filter((ruta) => !noIndexables.has(ruta));
   rutasIndexablesPorConjunto.set(conjunto, rutas);
@@ -1223,7 +1279,9 @@ export function superficiesInalcanzables(
  *   · cada página k de un listado → cada página j ≠ k del mismo listado (la Paginación pinta
  *     todos los números) y → las Citas de su tramo;
  *   · la página 1 de un Autor → sus Obras (la Lista de Obras va solo en la página 1);
- *   · `/autores/` → todo Autor publicado; `/obras/` → toda Obra publicada.
+ *   · `/autores/` → todo Autor publicado; `/obras/` → toda Obra publicada;
+ *   · desde la Historia 35.3, el listado de cada Personaje publicado, su página 1 → sus Obras
+ *     (`obrasDelPersonaje`) y cada Cita que lo declara → su página (la Atribución lo enlaza).
  *
  * **Ni la portada → los Autores** —la lista de la portada se va en la Épica 28, y esta historia
  * existe para que quitarla no deje nada fuera sin verse— **ni Cita → Cita**: las Rutas de salida
@@ -1281,6 +1339,19 @@ export function grafoDelModelo(
     listado((n) => rutaDeAutor(autor.slug, n), citasDeAutor(conjunto.citas, autor.slug));
     for (const obra of obrasDelAutor(conjunto.citas, autor.slug).obras) {
       enlazar(rutaDeAutor(autor.slug), rutaDeLaObra(obra));
+    }
+  }
+  const personajes = personajesPublicados(conjunto.personajes, conjunto.citas);
+  for (const personaje of personajes) {
+    listado((n) => rutaDePersonaje(personaje.slug, n), citasDePersonaje(conjunto.citas, personaje.slug));
+    for (const obra of obrasDelPersonaje(conjunto.citas, personaje.slug).obras) {
+      enlazar(rutaDePersonaje(personaje.slug), rutaDeLaObra(obra));
+    }
+  }
+  const conPagina = new Set(personajes.map((p) => p.slug));
+  for (const cita of conjunto.citas) {
+    if (cita.personaje !== undefined && conPagina.has(cita.personaje)) {
+      enlazar(rutaDeCita(cita.slug), rutaDePersonaje(cita.personaje));
     }
   }
   for (const obra of obrasPublicadas(conjunto)) {
@@ -1348,12 +1419,16 @@ export function temasBajoUmbralDe(
  */
 export function verificarIntegridad(conjunto: ConjuntoPublicable): void {
   const autores = new Set(conjunto.autores.map((a) => a.slug));
+  const personajes = new Set(conjunto.personajes.map((p) => p.slug));
   const temas = new Set(conjunto.temas.map((t) => t.slug));
   const fallos: string[] = [];
 
   for (const cita of conjunto.citas) {
     if (!autores.has(cita.autor)) {
       fallos.push(`  · ${cita.slug} → el Autor «${cita.autor}» no existe en el corpus.`);
+    }
+    if (cita.personaje !== undefined && !personajes.has(cita.personaje)) {
+      fallos.push(`  · ${cita.slug} → el Personaje «${cita.personaje}» no existe en el corpus.`);
     }
     for (const tema of cita.temas) {
       if (!temas.has(tema)) {
@@ -1380,6 +1455,7 @@ type EntradaAutor = CollectionEntry<'autores'>;
 type EntradaTema = CollectionEntry<'temas'>;
 type EntradaColeccion = CollectionEntry<'colecciones'>;
 type EntradaObra = CollectionEntry<'obras'>;
+type EntradaPersonaje = CollectionEntry<'personajes'>;
 
 export function aplanarCita(entrada: EntradaCita): Cita {
   // El build ya lo rompe (`reglaDeAutorPublicado`); aquí se dice otra vez en vez de suponerlo.
@@ -1418,6 +1494,23 @@ export function aplanarAutor(entrada: EntradaAutor): Autor {
   };
 }
 
+/**
+ * El Personaje tal como lo leen las superficies — Historia 35.3. Como `aplanarAutor`, campo a
+ * campo: la `semblanzaPropia` viaja partida en `semblanza` y `responde`; la de la biografía viaja
+ * como `semblanza`, y su atribución la pone `resolverAtribuciones`.
+ */
+export function aplanarPersonaje(entrada: EntradaPersonaje): Personaje {
+  const { nombre, universo, ordenAlfabetico, semblanza, semblanzaPropia } = entrada.data;
+  return {
+    slug: entrada.id,
+    nombre,
+    universo,
+    ...(ordenAlfabetico !== undefined ? { ordenAlfabetico } : {}),
+    ...(semblanza !== undefined ? { semblanza } : {}),
+    ...(semblanzaPropia !== undefined ? { semblanza: semblanzaPropia.texto, responde: semblanzaPropia.responde } : {}),
+  };
+}
+
 /** Lo que el cargador de `corpus/biografias/` guarda de cada documento: su cabecera. */
 export interface BiografiaCargada {
   id: string;
@@ -1436,20 +1529,22 @@ export interface BiografiaCargada {
  * biografía con su revisión) ya lo habrá dicho con la ruta del Autor, y publicar la semblanza
  * ajena sin su atribución es justo lo que AD-28 prohíbe. Un Autor sin biografía sale tal cual.
  */
-export function resolverAtribuciones(
-  autores: readonly Autor[],
+export function resolverAtribuciones<E extends { slug: string; atribucion?: AtribucionDeSemblanza }>(
+  entidades: readonly E[],
   declaradas: ReadonlyMap<string, string>,
   biografias: readonly BiografiaCargada[],
-): Autor[] {
+  /** Cómo se nombra la entidad en el mensaje: «El Autor», o «El Personaje» (Historia 35.3). */
+  quien = 'El Autor',
+): E[] {
   const porId = new Map(biografias.map((b) => [b.id, b]));
-  return autores.map((autor) => {
+  return entidades.map((autor) => {
     const documento = declaradas.get(autor.slug);
     if (documento === undefined) return autor;
     const biografia = porId.get(documento);
     const atribucion = biografia === undefined ? undefined : atribucionDeBiografia(biografia);
     if (atribucion === undefined) {
       throw new Error(
-        `El Autor «${autor.slug}» declara la biografía ${documento} y no hay atribución que ` +
+        `${quien} «${autor.slug}» declara la biografía ${documento} y no hay atribución que ` +
           'publicar con ella: el documento no está en corpus/biografias/, o su Fuente no tiene ' +
           'nombre declarado, o su licencia no tiene escritura enlazable. Una semblanza ajena no ' +
           'se publica sin su atribución.',
@@ -1632,13 +1727,21 @@ export async function conjuntoPublicable(): Promise<ConjuntoPublicable> {
    * aviso de colección inexistente en cada construcción.
    */
   const entradasDeAutor = await getCollection('autores');
-  const biografiasDeclaradas = new Map(
-    entradasDeAutor.flatMap((e) =>
-      e.data.biografia !== undefined ? [[e.id, e.data.biografia.documento] as const] : [],
-    ),
-  );
+  /*
+   * Historia 35.3 — los Personajes, solo si alguna Cita publicada declara uno: sin ninguno, la
+   * colección no se consulta y la construcción no cambia.
+   */
+  const entradasDePersonaje = citas.some((cita) => cita.personaje !== undefined)
+    ? await getCollection('personajes')
+    : [];
+  const declaradasDe = (entradas: readonly { id: string; data: { biografia?: { documento: string } } }[]) =>
+    new Map(
+      entradas.flatMap((e) => (e.data.biografia !== undefined ? [[e.id, e.data.biografia.documento] as const] : [])),
+    );
+  const biografiasDeclaradas = declaradasDe(entradasDeAutor);
+  const biografiasDePersonaje = declaradasDe(entradasDePersonaje);
   const biografias =
-    biografiasDeclaradas.size === 0
+    biografiasDeclaradas.size === 0 && biografiasDePersonaje.size === 0
       ? []
       : (await getCollection('biografias')).map((e) => ({ id: e.id, ...e.data }));
   const autores = resolverAtribuciones(
@@ -1646,12 +1749,19 @@ export async function conjuntoPublicable(): Promise<ConjuntoPublicable> {
     biografiasDeclaradas,
     biografias,
   );
+  const personajes = resolverAtribuciones(
+    entradasDePersonaje.map(aplanarPersonaje),
+    biografiasDePersonaje,
+    biografias,
+    'El Personaje',
+  );
 
   const conjunto: ConjuntoPublicable = {
     citas,
     autores,
     temas: (await getCollection('temas')).map(aplanarTema),
     colecciones: coleccionesPublicadas(declaradas, citas),
+    personajes,
   };
 
   verificarIntegridad(conjunto);

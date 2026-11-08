@@ -64,7 +64,7 @@ describe('con la congelación declarada', () => {
     expect(obrasIndexables(citas).map((o) => o.nombre)).toEqual(['gracian--heroe', 'gracian--oraculo']);
     // Sin congelación, la regla sola la deja entrar.
     expect(obrasIndexables(citas, null).map((o) => o.nombre)).toContain('gracian--criticon');
-    const conjunto = { citas, autores: [{ slug: 'gracian', nombre: 'Baltasar Gracián', semblanza: 'S.' }], temas: [], colecciones: [] };
+    const conjunto = { citas, autores: [{ slug: 'gracian', nombre: 'Baltasar Gracián', semblanza: 'S.' }], temas: [], colecciones: [], personajes: [] };
     expect(rutasIndexables(conjunto as never)).not.toContain('/obra/gracian/criticon/');
   });
 

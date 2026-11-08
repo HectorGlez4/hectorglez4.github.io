@@ -68,12 +68,14 @@ describe('Historia 35.2 — el Personaje en el build', () => {
     // La Cita se publica en su ruta de siempre, en la ficha de su Autor.
     expect(existsSync(paginaConstruida(r.proyecto, '/cita/batman-la-noche-es-mas-oscura/'))).toBe(true);
     expect(existsSync(paginaConstruida(r.proyecto, '/obra/seneca/obras-de-seneca/'))).toBe(true);
-    // Ninguna página nombra todavía a un Personaje (35.3, 35.4), ni hay página de la ficha sin Citas.
+    // No hay página de la ficha sin Citas.
     expect(existsSync(paginaConstruida(r.proyecto, '/obra/batman/el-caballero/'))).toBe(false);
-    // Ni su nombre ni su slug —fuera del de la Cita, que es su URL— en ninguna grafía, ni su
-    // universo: en el texto, el JSON-LD, los meta o un `data-*`.
+    // Historia 35.3 — el Personaje con Citas tiene página, y la Atribución lo nombra y enlaza a
+    // ella; el que no tiene Citas, ni página ni mención. El universo solo lo dice su página.
+    expect(existsSync(paginaConstruida(r.proyecto, '/personaje/batman/'))).toBe(true);
+    expect(existsSync(paginaConstruida(r.proyecto, '/personaje/joker/'))).toBe(false);
     const pagina = readFileSync(paginaConstruida(r.proyecto, '/cita/batman-la-noche-es-mas-oscura/'), 'utf8');
-    expect(pagina).not.toMatch(/batman(?!-la-noche-es-mas-oscura)/iu);
+    expect(pagina).toMatch(/<a href="\/personaje\/batman\/" class="enlace-en-tinta"[^>]*>Batman<\/a>/u);
     expect(pagina).not.toMatch(/joker/iu);
     expect(pagina).not.toContain('DC Comics');
   });

@@ -224,9 +224,11 @@ const CITAS_DE_CARTAS = [
 ];
 const OBRA_INDEXABLE = '/obra/seneca/cartas-a-lucilio';
 const OBRA_NO_INDEXABLE = '/obra/seneca/sobre-la-brevedad-de-la-vida';
+/** Historia 35.3 — la Página de Personaje del corpus de abajo. */
+const PERSONAJE = '/personaje/batman';
 
 /** Las páginas 2+ de un listado, también las de Obra, que tienen dos segmentos. */
-const PAGINA_SEGUNDA = /^\/(?:(?:autor|tema|coleccion)\/[^/]+|obra\/[^/]+\/[^/]+)\/\d+$/;
+const PAGINA_SEGUNDA = /^\/(?:(?:autor|tema|coleccion|personaje)\/[^/]+|obra\/[^/]+\/[^/]+)\/\d+$/;
 
 const CORPUS_COMPLETO: Record<string, string> = {
   'autores/seneca.yml': AUTOR_VALIDO,
@@ -267,6 +269,21 @@ const CORPUS_COMPLETO: Record<string, string> = {
       }),
     ]),
   ),
+  /*
+   * Historia 35.3 — la familia de Personaje entra en los dos lazos: una atribuida de Séneca que
+   * dice Batman, de «Cartas a Lucilio» (3 de 54, sigue indexable) y del Tema, en su página 1 —su
+   * slug ordena delante—, a tres saltos de la portada.
+   */
+  'personajes/batman.yml': 'nombre: "Batman"\nuniverso: "DC Comics"\nordenAlfabetico: "Batman"\n',
+  'citas/seneca--a-batman.md': citaValida({
+    slug: 'seneca-a-batman',
+    texto: 'Carta de Batman: la noche es más oscura antes del alba, y hay que aprenderlo.',
+    personaje: 'batman',
+    clase: 'atribuida',
+    estadoDerechos: undefined,
+    procedencia: { obra: 'Cartas a Lucilio', año: 64 },
+    fuente: { id: 'wikisource-es', url: 'https://es.wikisource.org/wiki/Cartas_a_Lucilio' },
+  }),
 };
 
 describe('Historia 12.1 — sobre un sitio construido de verdad', () => {
@@ -287,7 +304,8 @@ describe('Historia 12.1 — sobre un sitio construido de verdad', () => {
   });
 
   beforeEach(() => {
-    declararRutasIndexables([OBRA_INDEXABLE]);
+    // Historia 35.3 — y el Personaje, que hoy se indexa siempre que tenga página.
+    declararRutasIndexables([OBRA_INDEXABLE, PERSONAJE]);
   });
 
   afterEach(() => {
@@ -741,8 +759,10 @@ describe('Historia 12.1 — sobre un sitio construido de verdad', () => {
       expect(rutas).toContain('/coleccion/frases-cortas');
       // Historia 22.4 — la Obra que no repite otra página.
       expect(rutas).toContain(OBRA_INDEXABLE);
+      // Historia 35.3 — y la Página de Personaje, con la Cita que lo declara.
+      expect(rutas).toContain(PERSONAJE);
       expect(rutas.filter((r) => r.startsWith('/cita/')).length).toBe(
-        CITAS_POR_PAGINA + 1 + CITAS_DE_CARTAS.length,
+        CITAS_POR_PAGINA + 1 + CITAS_DE_CARTAS.length + 1,
       );
     });
 
@@ -797,7 +817,7 @@ describe('Historia 12.1 — sobre un sitio construido de verdad', () => {
       if (ruta === '/') return 'portada';
       // Historia 26.3 — por su declaración, no por el prefijo: `/autores` empieza como `/autor/`.
       if (esRutaDeDirectorio(ruta)) return 'directorio';
-      return /^\/(cita|autor|tema|coleccion|obra)\//.exec(ruta)?.[1];
+      return /^\/(cita|autor|tema|coleccion|obra|personaje)\//.exec(ruta)?.[1];
     };
 
     /** Cada elemento con su `data-pagefind-filter`, con la etiqueta en que va. */
@@ -852,9 +872,9 @@ describe('Historia 12.1 — sobre un sitio construido de verdad', () => {
         expect(filtros.filter((f) => !permitidas.has(f.valor.split(':')[0])), ruta).toEqual([]);
         vistas.add(tipo!);
       }
-      // Sin esto pasaría sobre un sitio sin nada indexado. El corpus trae las seis familias.
-      expect(conCuerpo).toBeGreaterThan(6);
-      expect([...vistas].sort()).toEqual(['autor', 'cita', 'coleccion', 'directorio', 'obra', 'portada', 'tema']);
+      // Sin esto pasaría sobre un sitio sin nada indexado. El corpus trae las siete familias.
+      expect(conCuerpo).toBeGreaterThan(7);
+      expect([...vistas].sort()).toEqual(['autor', 'cita', 'coleccion', 'directorio', 'obra', 'personaje', 'portada', 'tema']);
     });
 
     /*

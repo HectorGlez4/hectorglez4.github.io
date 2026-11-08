@@ -93,6 +93,7 @@ function conjuntoDePrueba(): { conjunto: ConjuntoPublicable; porObra: Map<string
       { slug: 'la-ira', nombre: 'La ira' },
     ],
     colecciones: [coleccion],
+    personajes: [],
   };
   // El orden del libro: al revés que el de slug, para que el tramo no sea el de la Página de Autor.
   const porObra = new Map([['seneca--cartas', citas.filter((c) => c.obra !== undefined).reverse()]]);

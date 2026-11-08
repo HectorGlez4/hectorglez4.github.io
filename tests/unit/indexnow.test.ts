@@ -153,7 +153,7 @@ describe('las familias del Corpus', () => {
       ['corpus/colecciones', 'coleccion'],
       ['corpus/obras', 'obra'],
       ['corpus/fuentes', 'documento'],
-      // Historia 35.2 — los Personajes: familia de fichero antes que de ruta (su página, la 35.3).
+      // Historia 35.2 — los Personajes; desde la 35.3, también familia de ruta (su página).
       ['corpus/personajes', 'personaje'],
     ]);
     for (const [directorio, familia] of FAMILIAS_DE_FICHERO) {
@@ -166,19 +166,24 @@ describe('las familias del Corpus', () => {
     expect(familiaDeFichero('src/lib/umbrales.ts')).toBeUndefined();
   });
 
-  it('las familias de ruta son las seis superficies que la relación declara, y la pone la relación', () => {
+  it('las familias de ruta son las siete superficies que la relación declara, y la pone la relación', () => {
     // Historia 26.3 — `directorio`: `/autores/` no es un Autor, y la relación le da su familia.
-    expect(FAMILIAS_DE_RUTA).toEqual(['cita', 'autor', 'tema', 'coleccion', 'obra', 'directorio']);
+    // Historia 35.3 — `personaje`, la Página de Personaje.
+    expect(FAMILIAS_DE_RUTA).toEqual(['cita', 'autor', 'tema', 'coleccion', 'obra', 'directorio', 'personaje']);
     // Historia 26.7 — no las declara el aviso: son las de `src/lib/superficies.ts`, su único dueño.
     expect(FAMILIAS_DE_RUTA).toBe(FAMILIAS);
-    // Las de fichero son las cinco con directorio en el Corpus —el Directorio no tiene fichero—
-    // más `documento`, que no es familia de ruta, y `personaje` (Historia 35.2), que aún no lo es:
-    // su página llega con la 35.3.
+    // Las de fichero son las seis con directorio en el Corpus —el Directorio no tiene fichero—
+    // más `documento`, que no es familia de ruta.
     const deFichero = FAMILIAS_DE_FICHERO.map(([, familia]) => familia);
-    expect(deFichero.filter((f) => f !== 'documento' && f !== 'personaje')).toEqual(
-      FAMILIAS.filter((f) => f !== 'directorio'),
-    );
-    const familias = new Set([...relacionDeSuperficies(corpusDeEjemplo()).values()].map((s) => s.familia));
+    expect(deFichero.filter((f) => f !== 'documento')).toEqual(FAMILIAS.filter((f) => f !== 'directorio'));
+    // Con un Personaje que dice una Cita, para que la relación declare su página.
+    const ejemplo = corpusDeEjemplo();
+    const conPersonaje: CorpusParaFechar = {
+      ...ejemplo,
+      citas: [...ejemplo.citas, { slug: 'seneca-la-noche', autor: 'seneca', personaje: 'batman', temas: [], ruta: 'citas/noche.md' }],
+      personajes: [{ slug: 'batman', ruta: 'personajes/batman.yml' }],
+    };
+    const familias = new Set([...relacionDeSuperficies(conPersonaje).values()].map((s) => s.familia));
     expect([...familias].sort()).toEqual([...FAMILIAS_DE_RUTA].sort());
   });
 });
@@ -335,6 +340,23 @@ describe('AD-27 — el aviso es la lectura inversa de la relación que fecha el 
         'corpus/autores/unamuno.yml',
       ].sort(),
     );
+  });
+
+  it('Historia 35.3 — cambiar el universo de un Personaje avisa su página y nada más', () => {
+    const ejemplo = corpusDeEjemplo();
+    const relacion = relacionDeSuperficies({
+      ...ejemplo,
+      citas: [...ejemplo.citas, { slug: 'seneca-la-noche', autor: 'seneca', personaje: 'batman', temas: [], ruta: 'corpus/citas/noche.md' }],
+      personajes: [{ slug: 'batman', ruta: 'corpus/personajes/batman.yml' }],
+    });
+    const cambio: CambioDeFichero = {
+      fichero: 'corpus/personajes/batman.yml',
+      antes: { nombre: 'Batman', universo: 'DC' } as unknown as Version,
+      despues: { nombre: 'Batman', universo: 'DC Comics' } as unknown as Version,
+    };
+    expect([...rutasAvisadasPor([cambio], relacion)]).toEqual(['/personaje/batman/']);
+    // Y un cambio de la Cita que lo declara avisa también su página.
+    expect([...rutasAvisadasPor([editado('corpus/citas/noche.md')], relacion)]).toContain('/personaje/batman/');
   });
 
   it('la rutasAvisadasPor sola es la inversa, sin la portada ni la indexabilidad', () => {

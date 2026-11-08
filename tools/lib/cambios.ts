@@ -101,6 +101,7 @@
 
 import {
   rutaDeAutor,
+  rutaDePersonaje,
   rutaDeCita,
   rutaDeColeccion,
   rutaDelDirectorioDeAutores,
@@ -272,6 +273,8 @@ export const CAMPOS_QUE_PINTA = {
     tema: CAMPOS_DE_CITA,
     coleccion: CAMPOS_DE_CITA,
     obra: CAMPOS_DE_CITA,
+    // Historia 35.3 — el listado de la Página de Personaje.
+    personaje: CAMPOS_DE_CITA,
     directorioDeAutores: ['autor'],
     directorioDeObras: ['autor', 'procedencia.obra', 'procedencia.año'],
   },
@@ -297,15 +300,18 @@ export const CAMPOS_QUE_PINTA = {
     tema: ['titulo'],
     coleccion: ['titulo'],
     obra: ['autor', 'personaje', 'personajes', 'titulo', 'formas', 'nota', 'ediciones'],
+    // Historia 35.3 — el título de la línea de Obra del listado y de la Lista de Obras.
+    personaje: ['titulo'],
     directorioDeObras: ['titulo', 'formas', 'personaje', 'personajes'],
   },
   /*
-   * Historia 35.2 — el Personaje. Hoy ninguna superficie lo pinta (la Página de Personaje es de
-   * la 35.3, y la Atribución que lo nombra, de la 35.4), pero el nombre y la clave son los campos
-   * que lo nombrarán, y se clasifican en el mismo commit que entran en el esquema: con el Corpus
+   * Historia 35.2 — el Personaje: el nombre lo pintan la Atribución de su Cita (35.3) y las
+   * superficies que lo nombrarán (35.4), y la clave, los Directorios (35.5). Desde la 35.3 su
+   * página pinta además su universo y su semblanza —propia o de su biografía—. Con el Corpus
    * real, sin Personajes, la relación no compone ninguno y nada se fecha.
    */
   personaje: {
+    personaje: ['nombre', 'universo', 'semblanza', 'semblanzaPropia', 'biografia'],
     cita: ['nombre'],
     autor: ['nombre'],
     tema: ['nombre'],
@@ -341,11 +347,10 @@ export const CAMPOS_QUE_NO_FECHAN = {
   autor: ['tradicion', 'ordenRevisado'],
   obra: ['distintaDe'],
   /*
-   * Historia 35.2 — lo que solo pintará la Página de Personaje (35.3): su universo y su
-   * semblanza, que entonces pasarán a la tabla en su columna; `ordenRevisado`, como el del Autor,
-   * no lo pinta nadie nunca.
+   * Historia 35.2 — `ordenRevisado`, como el del Autor, no lo pinta nadie nunca. El universo y la
+   * semblanza pasaron a la tabla con la Página de Personaje (35.3).
    */
-  personaje: ['universo', 'semblanza', 'semblanzaPropia', 'biografia', 'ordenRevisado'],
+  personaje: ['ordenRevisado'],
 } as const satisfies Partial<Record<FamiliaDeFichero, readonly string[]>>;
 
 /**
@@ -573,10 +578,21 @@ export function relacionDeSuperficies(corpus: CorpusParaFechar): Map<string, Sup
   for (const autor of corpus.autores) declarar(rutaDeAutor(autor.slug), 'autor');
   for (const tema of corpus.temas) declarar(rutaDeTema(tema.slug), 'tema');
   for (const coleccion of corpus.colecciones) declarar(rutaDeColeccion(coleccion.slug), 'coleccion');
+  /*
+   * Historia 35.3 — la Página de Personaje: la de todo Personaje con alguna Cita viva, que la
+   * componen su fichero y sus Citas (cada una con su Autor y su ficha de Obra, como un listado).
+   */
+  const conCitas = new Set(corpus.citas.map((cita) => cita.personaje).filter(definido));
+  for (const personaje of corpus.personajes ?? []) {
+    if (!conCitas.has(personaje.slug)) continue;
+    declarar(rutaDePersonaje(personaje.slug), 'personaje');
+    componer(rutaDePersonaje(personaje.slug), personaje.ruta, 'personaje');
+  }
   for (const autor of corpus.autores) componer(rutaDeAutor(autor.slug), autor.ruta, 'autor');
   for (const tema of corpus.temas) componer(rutaDeTema(tema.slug), tema.ruta, 'tema');
   for (const cita of corpus.citas) {
     if (cita.autor !== undefined) conLaCita(rutaDeAutor(cita.autor), cita);
+    if (cita.personaje !== undefined) conLaCita(rutaDePersonaje(cita.personaje), cita);
     for (const tema of cita.temas ?? []) conLaCita(rutaDeTema(tema), cita);
   }
   const deCita = new Map(corpus.citas.map((cita) => [cita.slug, cita]));
@@ -674,6 +690,8 @@ export function relacionDeSuperficies(corpus: CorpusParaFechar): Map<string, Sup
   for (const baja of bajas.citas ?? []) {
     if (vivos.has(baja.ruta)) continue;
     if (baja.autor !== undefined) componer(rutaDeAutor(baja.autor), baja.ruta, 'cita');
+    // Historia 35.3 — y la página de su Personaje, si sigue viva: su listado la contaba.
+    if (baja.personaje !== undefined) componer(rutaDePersonaje(baja.personaje), baja.ruta, 'cita');
     // El Directorio la contaba en su Autor: la baja mueve el recuento (26.3).
     componer(directorio, baja.ruta, 'cita');
     // Y el de Obras la contaba en su Obra, si declaraba una: la baja mueve su recuento (26.4).

@@ -382,7 +382,7 @@ describe('el cierre de la 18.2', () => {
   it('cuatro semanas ISO consecutivas con foto los 7 días y todo marcado la cierran', () => {
     // De 2026-W38 (lunes 14/09) a 2026-W41 (domingo 11/10).
     const publicaciones = fotosDiarias('2026-09-14', 28);
-    const resumen = resumenPorSemana(publicaciones, { cita: [], autor: [], tema: [], coleccion: [], directorio: [] }, ['/']);
+    const resumen = resumenPorSemana(publicaciones, { cita: [], autor: [], tema: [], coleccion: [], directorio: [], personaje: [] }, ['/']);
     expect(resumen.every((f) => f.diasConFoto === 7 && f.cuentaPara18_2)).toBe(true);
 
     // El lunes de la W42 todavía no rompe la racha: la semana en curso no puede tener 7 días.
@@ -403,7 +403,7 @@ describe('el cierre de la 18.2', () => {
     ];
     // …salvo que en la W41 una publicación con enlace va sin marcar.
     publicaciones.push({ fecha: '2026-10-07', red: 'facebook', formato: 'reel', ruta: '/', marcado: false });
-    const resumen = resumenPorSemana(publicaciones, { cita: [], autor: [], tema: [], coleccion: [], directorio: [] }, ['/']);
+    const resumen = resumenPorSemana(publicaciones, { cita: [], autor: [], tema: [], coleccion: [], directorio: [], personaje: [] }, ['/']);
     expect(resumen.map((f) => f.cuentaPara18_2)).toEqual([true, true, false, false]);
     expect(rachasPorRed(resumen, '2026-10-12')).toEqual([{ red: 'facebook', actual: 0, maxima: 2 }]);
   });
@@ -413,7 +413,7 @@ describe('el cierre de la 18.2', () => {
       const { marcado: _, ...sinMarca } = p;
       return { ...sinMarca, ruta: '-' };
     });
-    const [fila] = resumenPorSemana(publicaciones, { cita: [], autor: [], tema: [], coleccion: [], directorio: [] }, ['/']);
+    const [fila] = resumenPorSemana(publicaciones, { cita: [], autor: [], tema: [], coleccion: [], directorio: [], personaje: [] }, ['/']);
     expect(fila).toMatchObject({ diasConFoto: 7, conEnlace: 0, todasMarcadas: true, cuentaPara18_2: false });
   });
 });
@@ -861,7 +861,7 @@ describe('componer una señal externa', () => {
 
 describe('el resumen de señales', () => {
   it('sin señales lo dice, y dice que todavía no hay ajena', () => {
-    const resumen = resumenDeSenales([], { cita: [], autor: [], tema: [], coleccion: [], directorio: [] }, ['/'], HOY);
+    const resumen = resumenDeSenales([], { cita: [], autor: [], tema: [], coleccion: [], directorio: [], personaje: [] }, ['/'], HOY);
     expect(resumen).toEqual({
       propias: [],
       ajenas: [],
@@ -899,7 +899,7 @@ describe('el resumen de señales', () => {
   });
 
   it('ordena por fecha y, a igual fecha, por orden del fichero; la primera ajena es la más temprana', () => {
-    const censo = { cita: [], autor: [], tema: [], coleccion: [], directorio: [] };
+    const censo = { cita: [], autor: [], tema: [], coleccion: [], directorio: [], personaje: [] };
     const senales: SenalExterna[] = [
       { fecha: '2026-10-09', tipo: 'ajena', origen: 'https://b.example/', destino: '/' },
       { fecha: '2026-10-08', tipo: 'ajena', origen: 'https://c.example/', destino: '/' },
@@ -911,7 +911,7 @@ describe('el resumen de señales', () => {
   });
 
   it('cuenta enlaces distintos, no entradas, y no cuenta lo retirado ni la corrección', () => {
-    const censo = { cita: [], autor: [], tema: [], coleccion: [], directorio: [] };
+    const censo = { cita: [], autor: [], tema: [], coleccion: [], directorio: [], personaje: [] };
     const a: SenalExterna = { fecha: '2026-10-05', tipo: 'propia', origen: 'https://www.tiktok.com/@x', destino: '/' };
     const ajena: SenalExterna = { fecha: '2026-10-06', tipo: 'ajena', origen: 'https://a.example/', destino: '/' };
     const resumen = resumenDeSenales(
@@ -932,7 +932,7 @@ describe('el resumen de señales', () => {
   });
 
   it('la comprobación de Search Console toca a los 14 días de la primera propia', () => {
-    const censo = { cita: [], autor: [], tema: [], coleccion: [], directorio: [] };
+    const censo = { cita: [], autor: [], tema: [], coleccion: [], directorio: [], personaje: [] };
     const propia: SenalExterna = { fecha: '2026-09-26', tipo: 'propia', origen: 'https://linktr.ee/x', destino: '/' };
     expect(resumenDeSenales([propia], censo, ['/'], '2026-10-09').comprobacionDeSearchConsole).toEqual({
       estado: 'aunNoToca',
@@ -1447,7 +1447,7 @@ describe('Historia 23.6 — la Marca de difusión en el canal', () => {
   });
 
   it('la consulta avisa «copia un enlace compartido» en la ajena con `compartido`, junto al del Kit si lleva las dos', () => {
-    const censo = { cita: [], autor: [], tema: [], coleccion: [], directorio: [] };
+    const censo = { cita: [], autor: [], tema: [], coleccion: [], directorio: [], personaje: [] };
     const senales: SenalExterna[] = [
       { fecha: '2026-10-08', tipo: 'ajena', origen: 'https://a.example/', destino: '/', compartido: true },
       { fecha: '2026-10-09', tipo: 'ajena', origen: 'https://b.example/', destino: '/', marcado: true, compartido: true },
@@ -1634,7 +1634,7 @@ describe('Historia 23.6 — la Marca de difusión en el canal', () => {
   });
 
   it('la consulta: un mismo enlace anotado sin marcas y luego con ellas lleva los avisos, en el orden que sea', () => {
-    const censo = { cita: [], autor: [], tema: [], coleccion: [], directorio: [] };
+    const censo = { cita: [], autor: [], tema: [], coleccion: [], directorio: [], personaje: [] };
     const base = { tipo: 'ajena' as const, origen: 'https://a.example/', destino: '/' };
     for (const senales of [
       [

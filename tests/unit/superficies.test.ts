@@ -10,9 +10,11 @@ import {
   LINEA_BASE_DE_LOS_DIRECTORIOS,
   PAGINAS_DE_DIRECTORIO,
   SUPERFICIES,
+  PAGINA_DE_PERSONAJE,
   axeLaCorre,
   anunciableEnElSitemap,
   caracterDe,
+  causaDelServicio,
   consecuenciasDe,
   consecuenciasDelCaracter,
   declararRutasIndexables,
@@ -26,6 +28,7 @@ import {
   rutaDeLaPortada,
   rutaDelDirectorioDeAutores,
   rutaDelDirectorioDeObras,
+  rutaDePersonaje,
   rutaNormalizada,
   superficieDeLineaBase,
   superficieDeclaradaDe,
@@ -67,6 +70,10 @@ const MUESTRAS = [
   '/obra/baltasar-gracian/oraculo-manual-y-arte-de-prudencia',
   '/obra/baltasar-gracian/el-criticon',
   '/obra/baltasar-gracian/oraculo-manual-y-arte-de-prudencia/2',
+  // Historia 35.3 — el Personaje, indexable (declarado abajo) y no, y su 2+.
+  '/personaje/batman',
+  '/personaje/joker',
+  '/personaje/batman/2',
 ];
 
 /*
@@ -76,7 +83,7 @@ const MUESTRAS = [
  * `obra-indexable.test.ts`.
  */
 beforeEach(() => {
-  declararRutasIndexables(['/obra/baltasar-gracian/oraculo-manual-y-arte-de-prudencia/']);
+  declararRutasIndexables(['/obra/baltasar-gracian/oraculo-manual-y-arte-de-prudencia/', '/personaje/batman/']);
 });
 afterEach(() => {
   olvidarRutasIndexables();
@@ -1124,6 +1131,41 @@ describe('Historia 23.1 — la medición es una consecuencia más de la declarac
   });
 });
 
+describe('Historia 35.3 — la Página de Personaje', () => {
+  afterEach(() => {
+    olvidarRutasIndexables();
+  });
+
+  it('la reconoce su declaración, con la ruta que compone `rutaDePersonaje`', () => {
+    expect(rutaDePersonaje('batman')).toBe('/personaje/batman/');
+    expect(rutaDePersonaje('batman', 2)).toBe('/personaje/batman/2/');
+    expect(superficieDeclaradaDe('/personaje/batman')?.pagina).toBe(PAGINA_DE_PERSONAJE);
+    expect(superficieDeclaradaDe('/personaje/batman/2')?.pagina).toBe(PAGINA_DE_PERSONAJE);
+    expect(superficieDeclaradaDe('/personaje/batman/robin')).toBeUndefined();
+    expect(FAMILIAS.at(-1)).toBe('personaje');
+  });
+
+  it('sin la lista de rutas indexables, rompe ante un Personaje como ante una Obra', () => {
+    olvidarRutasIndexables();
+    expect(() => caracterDe('/personaje/batman')).toThrow(/rutas indexables no se ha declarado/u);
+    // La 2+ se decide por forma, sin lista.
+    expect(caracterDe('/personaje/batman/2')).toBe('servicio');
+    expect(causaDelServicio('/personaje/batman/2')).toBe('forma');
+  });
+
+  it('la página 1 de la lista es producto con la vista de superficie; la de fuera y las 2+, servicio sin vista', () => {
+    declararRutasIndexables(['/personaje/batman/']);
+    expect(caracterDe('/personaje/batman')).toBe('producto');
+    expect(consecuenciasDe('/personaje/batman').vistas).toEqual([EVENTOS.vistaDeSuperficie]);
+    expect('marcaDeObra' in consecuenciasDe('/personaje/batman')).toBe(false);
+    expect(causaDelServicio('/personaje/joker')).toBe('contenido');
+    expect(consecuenciasDe('/personaje/joker').vistas).toEqual([]);
+    expect(consecuenciasDe('/personaje/batman/2')).toMatchObject({ noIndexar: true, vistas: [] });
+    // Un slug enteramente numérico es un Personaje, no la página 1984 de nada.
+    expect(causaDelServicio('/personaje/1984')).toBe('contenido');
+  });
+});
+
 describe('Historia 23.10 — la superficie de línea base', () => {
   it('es la que declara la superficie, o ella misma por su nombre', () => {
     const portada = superficieDeclaradaDe('/')!;
@@ -1177,8 +1219,8 @@ describe('Historia 26.3 — el Directorio de Autores', () => {
 describe('Historia 26.7 — las familias tienen un solo dueño', () => {
   const RAIZ = join(import.meta.dirname, '..', '..');
 
-  it('son seis, en este orden, con una sola para los dos Directorios', () => {
-    expect(FAMILIAS).toEqual(['cita', 'autor', 'tema', 'coleccion', 'obra', 'directorio']);
+  it('son siete, en este orden, con una sola para los dos Directorios y el Personaje al final (35.3)', () => {
+    expect(FAMILIAS).toEqual(['cita', 'autor', 'tema', 'coleccion', 'obra', 'directorio', 'personaje']);
   });
 
   it('ningún otro fichero de src/, tools/, integraciones/ ni medicion/ declara la lista ni la unión', () => {

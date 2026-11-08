@@ -32,6 +32,7 @@
 
 import {
   autoresPublicados,
+  personajesPublicados,
   temasPublicados,
   type ConjuntoPublicable,
 } from '../../src/lib/publicado.ts';
@@ -42,6 +43,7 @@ import {
   rutaDeAutor,
   rutaDeCita,
   rutaDeColeccion,
+  rutaDePersonaje,
   rutaDeTema,
   type Familia,
 } from '../../src/lib/superficies.ts';
@@ -90,10 +92,10 @@ export const FAMILIAS_DEL_CENSO: readonly FamiliaDelCenso[] = FAMILIAS.filter(
  * Las familias que suma el `publicadas` de una entrada de indexación: las cuatro de siempre.
  *
  * El total es la cifra que se compara entre jornadas, y sumarle una familia nueva partiría la
- * serie el día de su llegada. Por eso la Obra (22.8) y el Directorio (26.7) van cada una en su
- * familia y no aquí. Se nombra el conjunto en vez de encadenar exclusiones en `componerLectura`.
+ * serie el día de su llegada. Por eso la Obra (22.8), el Directorio (26.7) y el Personaje (35.3)
+ * van cada una en su familia y no aquí. Se nombra el conjunto en vez de encadenar exclusiones en `componerLectura`.
  */
-const FUERA_DEL_TOTAL: readonly Familia[] = ['obra', 'directorio'];
+const FUERA_DEL_TOTAL: readonly Familia[] = ['obra', 'directorio', 'personaje'];
 
 export const FAMILIAS_DEL_TOTAL: readonly Familia[] = FAMILIAS.filter((f) => !FUERA_DEL_TOTAL.includes(f));
 
@@ -105,6 +107,7 @@ export const NOMBRE_DE_FAMILIA: Readonly<Record<Familia, string>> = {
   coleccion: 'Colección',
   obra: 'Obra',
   directorio: 'Directorio',
+  personaje: 'Personaje',
 };
 
 /**
@@ -121,6 +124,8 @@ export const CENSO_DE_FAMILIA: Readonly<Record<FamiliaDeLaSerie, CensoMedido>> =
   coleccion: 'publicadas',
   obra: 'sitemap',
   directorio: 'publicadas',
+  // Historia 35.3 — el Personaje, con su censo de lo publicado, como el Autor.
+  personaje: 'publicadas',
 };
 
 /**
@@ -310,6 +315,8 @@ function censoDeLoPublicado(conjunto: ConjuntoPublicable): CensoPorFamilia {
     coleccion: conjunto.colecciones.map((c) => rutaDeColeccion(c.slug)),
     // Historia 26.7 — los dos Directorios, una familia; siempre se publican los dos.
     directorio: [rutaDelDirectorioDeAutores(), rutaDelDirectorioDeObras()],
+    // Historia 35.3 — los Personajes publicados; sin ninguno, la familia no publica URL.
+    personaje: personajesPublicados(conjunto.personajes, conjunto.citas).map((p) => rutaDePersonaje(p.slug)),
   };
 }
 

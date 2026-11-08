@@ -187,6 +187,7 @@ const CENSO: CensoPorFamilia = {
   coleccion: [],
   // Sin Directorios a propósito: los de la Historia 26.7 usan el censo real de un corpus.
   directorio: [],
+  personaje: [],
 };
 const OPCIONES = { slugsDeAutores: ['seneca', 'seneca-el-viejo'], censo: CENSO, dominio: DOMINIO };
 

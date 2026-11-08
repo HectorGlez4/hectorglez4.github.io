@@ -150,6 +150,12 @@ export function superficieDeLineaBase(superficie: Pick<Superficie, 'nombre' | 'l
 const PAGINA_DE_OBRA = 'obra/[autor]/[slug]/[...page].astro';
 
 /**
+ * El fichero de la Página de Personaje — Historia 35.3: su identidad en la declaración, como la de
+ * la Página de Obra. `src/lib/ingreso.ts` la deja sin ningún Modelo (`SUPERFICIES_SIN_INGRESO`).
+ */
+export const PAGINA_DE_PERSONAJE = 'personaje/[slug]/[...page].astro';
+
+/**
  * Los ficheros de los Directorios — Historias 26.3 y 26.4: su identidad en la declaración, como
  * la de la Página de Obra. Dos, `/autores/` y `/obras/`. De aquí sale el único predicado que dice
  * si una ruta es de un Directorio (`esRutaDeDirectorio`), y `src/lib/ingreso.ts` los deja sin
@@ -187,6 +193,20 @@ export const SUPERFICIES: readonly Superficie[] = [
     // `src/lib/admision.ts` admite un slug enteramente numérico, así que `/autor/1984` es
     // una Página de Autor y no la página 1984 de nada.
     noPublicableEn: /^\/autor\/[^/]+\/\d+$/,
+  },
+  {
+    nombre: 'la Página de Personaje',
+    pagina: PAGINA_DE_PERSONAJE,
+    reconoce: /^\/personaje\/[^/]+(?:\/\d+)?$/,
+    // Historia 35.3 — calca la de Autor: producto con la vista de superficie en su página 1.
+    caracter: 'producto',
+    vista: EVENTOS.vistaDeSuperficie,
+    // Que se indexe lo decide el Corpus (la lista de rutas indexables, `personajesIndexables` de
+    // `src/lib/publicado.ts`): hoy, todo Personaje publicado; la 35.3b le pone su umbral. Sin la
+    // lista declarada, `caracterDe` rompe ante un Personaje como ante una Obra.
+    indexablePorContenido: true,
+    // Anclada a la ruta entera, como Autor: `/personaje/1984` es un Personaje.
+    noPublicableEn: /^\/personaje\/[^/]+\/\d+$/,
   },
   {
     nombre: 'la Página de Tema',
@@ -294,10 +314,11 @@ export const SUPERFICIES: readonly Superficie[] = [
 ];
 
 /**
- * Las familias del sitio — Historia 26.7, AD-17. Seis, y este es el único sitio que las declara.
+ * Las familias del sitio — Historia 26.7, AD-17. Siete desde la 35.3 (`personaje`), y este es el
+ * único sitio que las declara.
  *
  * Una familia es el grupo de URL publicadas que una serie compara entre jornadas: Cita, Autor,
- * Tema, Colección, Obra y Directorio. **Directorio es una para los dos**, `/autores/` y
+ * Tema, Colección, Obra, Directorio y, desde la 35.3, Personaje. **Directorio es una para los dos**, `/autores/` y
  * `/obras/`: dos URL de índice que, contadas en Autor o en Obra, falsearían el reparto de lo que
  * listan mientras se juzga SM-11. La portada no es de ninguna, y es deliberado: es una URL suelta
  * y meterla en una familia la falsearía sin que nadie lo notara.
@@ -312,7 +333,7 @@ export const SUPERFICIES: readonly Superficie[] = [
  * El orden es el del PRD, con las dos que llegaron después al final: es en el que se nombran
  * y se reparten.
  */
-export const FAMILIAS = ['cita', 'autor', 'tema', 'coleccion', 'obra', 'directorio'] as const;
+export const FAMILIAS = ['cita', 'autor', 'tema', 'coleccion', 'obra', 'directorio', 'personaje'] as const;
 
 /** Una familia del sitio. La unión sale de `FAMILIAS` y no se escribe en ningún otro sitio. */
 export type Familia = (typeof FAMILIAS)[number];
@@ -377,6 +398,11 @@ function rutaDeListado(familia: string, slug: string, pagina: number): string {
 
 export function rutaDeAutor(slug: string, pagina = 1): string {
   return rutaDeListado('autor', slug, pagina);
+}
+
+/** La ruta de una Página de Personaje — Historia 35.3: un listado paginado, como la de Autor. */
+export function rutaDePersonaje(slug: string, pagina = 1): string {
+  return rutaDeListado('personaje', slug, pagina);
 }
 
 export function rutaDeTema(slug: string, pagina = 1): string {

@@ -1376,17 +1376,42 @@ describe('Historia 35.2 — la relación de AD-27 conoce al Personaje', () => {
     expect(camposDe('/obra/batman/el-alba/', PERSONAJE)).toEqual(['nombre']);
   });
 
-  it('su `ordenAlfabetico` fecha los Directorios, y `universo` no fecha nada', () => {
+  it('su `ordenAlfabetico` fecha los Directorios, y `universo` solo su página (Historia 35.3)', () => {
     expect(camposDe('/autores/', PERSONAJE)).toContain('ordenAlfabetico');
     expect(camposDe('/obras/', PERSONAJE)).toContain('ordenAlfabetico');
-    for (const lista of componentes.values()) {
+    for (const [ruta, lista] of componentes) {
       for (const { fichero, campos } of lista) {
-        if (fichero.startsWith('personajes/')) expect(campos).not.toContain('universo');
+        if (fichero.startsWith('personajes/') && !ruta.startsWith('/personaje/')) expect(campos).not.toContain('universo');
       }
     }
     // Sin Obra, el Personaje no compone `/obras/`, aunque sí `/autores/`.
     expect(camposDe('/obras/', 'personajes/joker.yml')).toBeUndefined();
     expect(camposDe('/autores/', 'personajes/joker.yml')).toBeDefined();
+  });
+
+  it('Historia 35.3 — la Página de Personaje: su fichero, sus Citas, sus Autores y los títulos de sus Obras', () => {
+    expect(camposDe('/personaje/batman/', PERSONAJE)).toEqual(['nombre', 'universo', 'semblanza', 'semblanzaPropia', 'biografia']);
+    expect(camposDe('/personaje/batman/', 'citas/c1.md')).toEqual(['texto', 'autor', 'temas', 'procedencia', 'fuente', 'slug', 'personaje']);
+    expect(camposDe('/personaje/batman/', 'citas/c2.md')).toBeDefined();
+    expect(camposDe('/personaje/batman/', 'obras/s.yml')).toEqual(['titulo']);
+    expect(camposDe('/personaje/batman/', 'obras/b.yml')).toEqual(['titulo']);
+    // El Autor de sus Citas no lo pinta la página (la Tarjeta de Cita lleva solo la Obra).
+    expect(camposDe('/personaje/batman/', 'autores/seneca.yml')).toBeUndefined();
+    // Una Cita de otro Personaje no la compone; uno sin Citas vivas no tiene página.
+    expect(camposDe('/personaje/batman/', 'citas/c4.md')).toBeUndefined();
+    expect(componentes.has('/personaje/joker')).toBe(true);
+  });
+
+  it('Historia 35.3 — la baja de una Cita que declaraba un Personaje fecha su página, si sigue viva', () => {
+    const conBaja = componentesPorSuperficie({
+      ...CON_PERSONAJES,
+      bajas: {
+        ...CON_PERSONAJES.bajas,
+        citas: [{ slug: 'seneca-se-fue', autor: 'seneca', personaje: 'batman', temas: [], ruta: 'citas/baja-de-batman.md' }],
+      },
+    });
+    expect(conBaja.get('/personaje/batman')?.find((c) => c.fichero === 'citas/baja-de-batman.md')).toBeDefined();
+    expect(conBaja.has('/personaje/seneca-se-fue')).toBe(false);
   });
 
   it('las bajas se resuelven con la regla de dos pasos, también por el `autor` informativo', () => {

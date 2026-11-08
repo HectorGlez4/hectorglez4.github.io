@@ -49,7 +49,7 @@ const sinComentarios = (fuente: string) =>
 const META_CON_TIPO = /data-pagefind-meta\s*=\s*(?:"[^"]*\btipo\b[^"]*"|'[^']*\btipo\b[^']*'|\{[^}]*\btipo\b[^}]*\})/u;
 
 describe('Historia 26.2 — la tabla de tipos de resultado', () => {
-  it('son las seis familias más la portada, con sus rótulos', () => {
+  it('son las siete familias más la portada, con sus rótulos', () => {
     expect(ETIQUETAS_DE_RESULTADO).toEqual({
       cita: 'Cita',
       autor: 'Autor',
@@ -57,6 +57,8 @@ describe('Historia 26.2 — la tabla de tipos de resultado', () => {
       coleccion: 'Colección',
       obra: 'Obra',
       directorio: 'Directorio',
+      // Historia 35.3 — la Página de Personaje: título en la serif y sin línea de Autor.
+      personaje: 'Personaje',
       portada: 'Portada',
     });
     expect(TIPO_POR_OMISION).toBe('cita');

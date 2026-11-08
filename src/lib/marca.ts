@@ -93,6 +93,15 @@ export function tituloDeObra(autor: string, titulo: string, pagina = 1): string 
   return tituloDe(`Frases de ${autor} en ${titulo}${tramo}`);
 }
 
+/**
+ * La Página de Personaje — Historia 35.3: «Frases de {nombre}», y en las 2+ con su número.
+ * «Frases» solo en la pestaña y en la descripción; el cuerpo dice «Citas».
+ */
+export function tituloDePersonaje(nombre: string, pagina = 1): string {
+  const tramo = pagina > 1 ? ` — página ${pagina}` : '';
+  return tituloDe(`Frases de ${nombre}${tramo}`);
+}
+
 /** Una Colección ya lleva su intención en el nombre; solo distingue páginas posteriores. */
 export function tituloDeColeccion(nombre: string, pagina = 1): string {
   const tramo = pagina > 1 ? ` — página ${pagina}` : '';

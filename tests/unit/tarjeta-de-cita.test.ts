@@ -172,6 +172,8 @@ describe('Historia 24.3 — el contrato del componente, sin construir', () => {
       'src/pages/tema/[slug]/[...page].astro': ['autor-y-obra'],
       'src/pages/coleccion/[slug]/[...page].astro': ['autor-y-obra'],
       'src/pages/autor/[slug]/[...page].astro': ['obra'],
+      // Historia 35.3 — la Página de Personaje, como la de Autor.
+      'src/pages/personaje/[slug]/[...page].astro': ['obra'],
       'src/pages/obra/[autor]/[slug]/[...page].astro': ['ninguna'],
       // Historia 24.6 — «De la misma obra» y «Más de {Autor}», en ese orden.
       'src/components/RutasDeSalida.astro': ['ninguna', 'obra'],

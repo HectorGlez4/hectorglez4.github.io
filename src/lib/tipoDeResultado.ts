@@ -38,6 +38,9 @@ export const ETIQUETAS_DE_RESULTADO = {
   // portada responde solo por su `h1`, que es `MARCA` (`src/lib/marca.ts`): el rótulo no la
   // repite, y su título en el índice sale de ese `h1`, no de esta tabla.
   directorio: 'Directorio',
+  // Historia 35.3 — la Página de Personaje: un tipo más, con el título en la serif (es nombre de
+  // Personaje) y sin línea de Autor debajo.
+  personaje: 'Personaje',
   portada: 'Portada',
 } as const satisfies Record<Familia | 'portada', string>;
 

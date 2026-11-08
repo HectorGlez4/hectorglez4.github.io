@@ -12,6 +12,7 @@
 
 import type { Cita, Autor, SiguienteCita } from './publicado.ts';
 import type { ObraResuelta } from './obras.ts';
+import type { AtribucionDeSemblanza } from './biografia.ts';
 import { MARCA } from './marca.ts';
 import { recuentoDeAutores, recuentoDeCitas, recuentoDeObras, temaEnFrase } from './recuentos.ts';
 import {
@@ -120,6 +121,8 @@ export function textoParaCopiar(cita: Cita, autor: Autor): string {
  */
 export const SUPERFICIES_DE_LA_SEMBLANZA = [
   'ficha-de-autor',
+  // Historia 35.3 — la Ficha de Personaje de la página 1, que la porta como la de Autor.
+  'ficha-de-personaje',
   'meta-description',
   'datos-estructurados',
   'indice-de-busqueda',
@@ -134,19 +137,23 @@ export type SuperficieDeLaSemblanza = (typeof SUPERFICIES_DE_LA_SEMBLANZA)[numbe
  */
 export const PORTAN_LA_ATRIBUCION: ReadonlySet<SuperficieDeLaSemblanza> = new Set([
   'ficha-de-autor',
+  'ficha-de-personaje',
 ]);
 
 /**
  * La semblanza que una superficie puede reproducir, o `undefined` si no puede: una semblanza
  * ajena —el Autor declara biografía— solo donde se porta su atribución; una propia, donde
  * estaba.
+ *
+ * Historia 35.3 — la semblanza propia de un Personaje lleva quién responde de ella (`responde`),
+ * y eso es también una atribución: solo sale donde se porta, como la de una biografía.
  */
 export function semblanzaEn(
-  autor: Pick<Autor, 'semblanza' | 'atribucion'>,
+  entidad: { semblanza?: string; atribucion?: AtribucionDeSemblanza; responde?: string },
   superficie: SuperficieDeLaSemblanza,
 ): string | undefined {
-  if (autor.atribucion === undefined) return autor.semblanza;
-  return PORTAN_LA_ATRIBUCION.has(superficie) ? autor.semblanza : undefined;
+  if (entidad.atribucion === undefined && entidad.responde === undefined) return entidad.semblanza;
+  return PORTAN_LA_ATRIBUCION.has(superficie) ? entidad.semblanza : undefined;
 }
 
 /**
@@ -312,6 +319,22 @@ export function descripcionDeAutor(
   const años = añosDeAutor(autor);
   if (años === undefined) return `${prefijo}${cotejadas}`;
   return `${prefijo} ${años}${años.endsWith('.') ? '' : '.'}${cotejadas}`;
+}
+
+/**
+ * El `<meta description>` de una Página de Personaje — Historia 35.3, UX-DR134:
+ * «{n} frases de {nombre}, personaje de {universo}.», con «1 frase» en singular; las 2+ añaden
+ * « Página N.», como la de Obra. {n} son las Citas publicadas del Personaje. Solo hechos del
+ * Corpus; «frases» solo aquí y en la pestaña, como en la Obra.
+ */
+export function descripcionDePersonaje(
+  personaje: { nombre: string; universo: string },
+  citas: number,
+  pagina = 1,
+): string {
+  const cuantas = `${citas} ${citas === 1 ? 'frase' : 'frases'}`;
+  const tramo = pagina > 1 ? ` Página ${pagina}.` : '';
+  return `${cuantas} de ${personaje.nombre}, personaje de ${personaje.universo}.${tramo}`;
 }
 
 /**

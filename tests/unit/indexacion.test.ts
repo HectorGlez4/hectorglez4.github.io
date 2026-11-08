@@ -119,6 +119,7 @@ function conjuntoDe(cuantasCitas: number): ConjuntoPublicable {
     })),
     temas: [{ slug: 'la-vida', nombre: 'La vida' }],
     colecciones: [],
+    personajes: [],
   };
 }
 
@@ -200,7 +201,7 @@ describe('el censo por familia', () => {
 
 /** Un censo hecho a mano, para poder mover los tamaños sin fabricar un corpus. */
 function censoDe(tamaños: Partial<Record<FamiliaDelCenso, number>>) {
-  const censo = { cita: [], autor: [], tema: [], coleccion: [], directorio: [] } as Record<
+  const censo = { cita: [], autor: [], tema: [], coleccion: [], directorio: [], personaje: [] } as Record<
     FamiliaDelCenso,
     string[]
   >;

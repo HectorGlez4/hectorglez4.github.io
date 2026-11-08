@@ -1976,6 +1976,10 @@ const TEXTO_LARGO =
   'nuestro, y esa sola posesión, fugaz y resbaladiza, nos la arrebata cualquiera que ' +
   'quiere, sin que nos demos cuenta de lo que hemos perdido hasta que ya no queda nada.';
 const SLUG_LARGO = 'seneca-frase-larga';
+/** Historia 35.3 — la Cita que dice un Personaje, y su página. */
+const SLUG_DE_PERSONAJE = 'seneca-a-batman-le-dice';
+const TEXTO_DE_PERSONAJE = 'La noche del catálogo de prueba es más oscura antes del alba.';
+const PERSONAJE = '/personaje/batman/';
 const CORPUS_MEDIDO: Record<string, string> = {
   'autores/seneca.yml': AUTOR_VALIDO,
   'temas/el-tiempo.yml': TEMA_VALIDO,
@@ -2014,12 +2018,28 @@ const CORPUS_MEDIDO: Record<string, string> = {
       }),
     ]),
   ),
+  /*
+   * Historia 35.3 — un Personaje con su página: una atribuida de Séneca que dice Batman, del Tema
+   * —su slug ordena delante, en la página 1 del listado, a tres saltos de la portada— y de
+   * «Cartas a Lucilio», que sigue indexable (3 de 55) y da a la página su Lista de Obras.
+   */
+  'personajes/batman.yml': 'nombre: "Batman"\nuniverso: "DC Comics"\nordenAlfabetico: "Batman"\n',
+  [`citas/${SLUG_DE_PERSONAJE}.md`]: citaValida({
+    texto: TEXTO_DE_PERSONAJE,
+    slug: SLUG_DE_PERSONAJE,
+    personaje: 'batman',
+    clase: 'atribuida',
+    estadoDerechos: undefined,
+    procedencia: { obra: 'Cartas a Lucilio', año: 64 },
+    fuente: { id: 'wikisource-es', url: 'https://es.wikisource.org/wiki/Cartas_a_Lucilio' },
+  }),
 };
-const SLUGS_DE_CITA = [...SLUGS, SLUG_LARGO, 'seneca-carta-0', 'seneca-carta-1'];
+const SLUGS_DE_CITA = [...SLUGS, SLUG_LARGO, 'seneca-carta-0', 'seneca-carta-1', SLUG_DE_PERSONAJE];
 const TEXTOS_DE_CITA = [
   ...SLUGS.map((_, i) => `Frase número ${i} del catálogo de prueba.`),
   TEXTO_LARGO,
   ...[0, 1].map((i) => `Carta número ${i} del catálogo de prueba.`),
+  TEXTO_DE_PERSONAJE,
 ];
 
 /** Construye una vez por entorno y apunta el proyecto para limpiarlo, falle o no. */
@@ -2074,7 +2094,7 @@ const cabezaDe = (html: string): string => html.slice(0, html.indexOf('</head>')
 const RUTA_DEL_FICHERO = rutaDelGuionDeMedicion(ENDPOINT);
 const CITA = `/cita/${SLUGS[0]}/`;
 const CITA_SIN_IMAGEN = `/cita/${SLUG_LARGO}/`;
-const PAGINAS_1 = ['/', '/autor/seneca/', '/tema/el-tiempo/', '/coleccion/frases-cortas/'];
+const PAGINAS_1 = ['/', '/autor/seneca/', '/tema/el-tiempo/', '/coleccion/frases-cortas/', PERSONAJE];
 const PAGINAS_2 = ['/autor/seneca/2/', '/tema/el-tiempo/2/', '/coleccion/frases-cortas/2/'];
 const SIN_VISTA = ['/buscar/', '/404', '/kit/', '/lote/'];
 const AJENAS = ['/kit/', '/lote/'];
@@ -2090,7 +2110,7 @@ describe('Historia 20.1 y 23.1 — las vistas salen de la declaración, al `data
   // La lista de rutas indexables que FR-52 da para este corpus; sin ella `consecuenciasDe` no
   // sabe qué es una Obra. Que el build decidió lo mismo lo dice la propia comparación.
   beforeEach(() => {
-    declararRutasIndexables([OBRA_INDEXABLE]);
+    declararRutasIndexables([OBRA_INDEXABLE, PERSONAJE]);
   });
   afterEach(() => {
     olvidarRutasIndexables();
@@ -2152,7 +2172,7 @@ const llevaNoindex = (html: string): boolean => marcasDePagina(html).noindex;
 
 describe('Historia 23.9 — la marca de Obra, en `dist/`', () => {
   beforeEach(() => {
-    declararRutasIndexables([OBRA_INDEXABLE]);
+    declararRutasIndexables([OBRA_INDEXABLE, PERSONAJE]);
   });
   afterEach(() => {
     olvidarRutasIndexables();
@@ -2229,7 +2249,7 @@ describe('Historia 23.9 — la marca de Obra, en `dist/`', () => {
 
 describe('Historia 23.1 — con punto final, la medición es un fichero', () => {
   beforeEach(() => {
-    declararRutasIndexables([OBRA_INDEXABLE]);
+    declararRutasIndexables([OBRA_INDEXABLE, PERSONAJE]);
   });
   afterEach(() => {
     olvidarRutasIndexables();
@@ -2485,11 +2505,12 @@ describe('Historia 23.1 — la Página de Cita no pierde su listón', () => {
     const proyecto = await sitioMedido();
     const paginas = paginasDe(proyecto);
     const barrido = superficiesDelBarrido([...paginas.keys()]);
-    // Portada, Cita, Autor, Tema, Colección, Obra, los dos Directorios (26.3, 26.4), búsqueda y
-    // 404: una por familia pública.
-    expect(barrido).toHaveLength(10);
+    // Portada, Cita, Autor, Tema, Colección, Obra, los dos Directorios (26.3, 26.4), el Personaje
+    // (35.3), búsqueda y 404: una por familia pública.
+    expect(barrido).toHaveLength(11);
     expect(barrido).toContain('/autores');
     expect(barrido).toContain('/obras');
+    expect(barrido).toContain('/personaje/batman');
     const muestra = [...barrido, CITA_SIN_IMAGEN];
 
     const huecos: string[] = [];
@@ -3156,6 +3177,11 @@ describe('Historia 23.7 — toda salida interna de `dist/` dice su zona', () => 
     ['/coleccion/frases-cortas/', /^\/coleccion\/frases-cortas\/2\/?$/, [{ zona: 'paginacion' }]],
     ['/coleccion/frases-cortas/2/', /^\/cita\//, [{ zona: 'listado' }]],
     ['/coleccion/frases-cortas/2/', /^\/coleccion\/frases-cortas\/?$/, [{ zona: 'paginacion' }]],
+    // Historia 35.3 — la Atribución de la Cita que dice un Personaje lo enlaza a él, y su página
+    // lista sus Obras y sus Citas.
+    [`/cita/${SLUG_DE_PERSONAJE}/`, PERSONAJE, [{ zona: 'atribucion' }]],
+    [PERSONAJE, /^\/obra\//, [{ zona: 'lista-de-obras' }]],
+    [PERSONAJE, /^\/cita\//, [{ zona: 'listado' }]],
     [OBRA_INDEXABLE, '/autor/seneca/', [{ zona: 'atribucion' }]],
     [OBRA_INDEXABLE, /^\/cita\//, [{ zona: 'listado' }]],
     [OBRAS[1], '/autor/seneca/', [{ zona: 'atribucion' }]],

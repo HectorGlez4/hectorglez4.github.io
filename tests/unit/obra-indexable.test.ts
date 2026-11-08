@@ -84,7 +84,7 @@ function citasDe(titulo: string, n: number, desde = 0): Cita[] {
 }
 
 function conjunto(citas: Cita[]): ConjuntoPublicable {
-  return { citas: colgarObras(citas, FICHAS), autores: [AUTOR], temas: [], colecciones: [] };
+  return { citas: colgarObras(citas, FICHAS), autores: [AUTOR], temas: [], colecciones: [], personajes: [] };
 }
 
 describe('FR-52 — la regla, pura', () => {

@@ -35,6 +35,7 @@ import {
   temasPublicados,
   type Cita,
   type Coleccion,
+  type Personaje,
   type ConjuntoPublicable,
   type Tema,
   type TemaBajoUmbral,
@@ -48,10 +49,12 @@ import {
   leerDocumentosDeFuente,
   leerFichasDeObra,
   leerOrdenDeLosIndices,
+  leerPersonajes,
   leerTemas,
   type AutorEnCorpus,
   type CitaEnCorpus,
   type ColeccionEnCorpus,
+  type PersonajeEnCorpus,
   type Rutas,
 } from './corpus.ts';
 import { recorrerElementos } from './html.ts';
@@ -75,6 +78,8 @@ export interface DatosDelCorpus {
   colecciones: ColeccionEnCorpus[];
   /** Las Fichas de Obra activas, admitidas por su esquema. */
   fichas: FichaDeObra[];
+  /** Los Personajes de `corpus/personajes/` — Historia 35.3. */
+  personajes: PersonajeEnCorpus[];
 }
 
 /** Lee del disco los datos de `conjuntoDeLosDatos`. Lanza, nombrando el fichero, ante uno ilegible. */
@@ -85,6 +90,7 @@ export async function leerDatosDelCorpus(rutas: Rutas): Promise<DatosDelCorpus> 
     autores: await leerAutores(rutas),
     temas: await leerTemas(rutas),
     colecciones: await leerColecciones(rutas),
+    personajes: await leerPersonajes(rutas),
   };
 }
 
@@ -107,6 +113,21 @@ export function conjuntoDeLosDatos(datos: DatosDelCorpus): ConjuntoPublicable {
     autores: datos.autores as unknown as ConjuntoPublicable['autores'],
     temas: datos.temas,
     colecciones: coleccionesPublicadas(datos.colecciones as unknown as Coleccion[], citas),
+    // Historia 35.3 — los campos que las superficies leen, como `aplanarPersonaje`.
+    personajes: datos.personajes.map(personajeDeLosDatos),
+  };
+}
+
+/** Un Personaje leído de disco en la forma plana del conjunto (la de `aplanarPersonaje`). */
+function personajeDeLosDatos(personaje: PersonajeEnCorpus): Personaje {
+  const { slug, nombre, universo, ordenAlfabetico, semblanza, semblanzaPropia } = personaje;
+  return {
+    slug,
+    nombre,
+    universo,
+    ...(ordenAlfabetico !== undefined ? { ordenAlfabetico } : {}),
+    ...(semblanza !== undefined ? { semblanza } : {}),
+    ...(semblanzaPropia !== undefined ? { semblanza: semblanzaPropia.texto, responde: semblanzaPropia.responde } : {}),
   };
 }
 

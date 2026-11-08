@@ -37,6 +37,8 @@ import { clavesDeOrden } from '../../lib/obras.ts';
 export const getStaticPaths = (async () => {
   const conjunto = await conjuntoPublicable();
   const autores = new Map(conjunto.autores.map((a) => [a.slug, a]));
+  // Historia 35.3 — el Personaje que dice la Cita, para su Atribución.
+  const personajes = new Map(conjunto.personajes.map((p) => [p.slug, p]));
   const publicados = temasPublicados(conjunto.temas, conjunto.citas);
   /*
    * Historia 24.5 — «Siguiente…» de la Tarjeta de Obra. Lo decide `siguienteCita`, con los
@@ -70,6 +72,7 @@ export const getStaticPaths = (async () => {
       props: {
         cita,
         autor: autores.get(cita.autor)!,
+        personaje: cita.personaje === undefined ? undefined : personajes.get(cita.personaje),
         siguiente,
         /*
          * Historia 24.6 — las Rutas de salida del pie: «De la misma obra», «Más de {Autor}» y
@@ -84,7 +87,7 @@ export const getStaticPaths = (async () => {
   });
 }) satisfies GetStaticPaths;
 
-const { cita, autor, siguiente, rutas, filtros, clave } = Astro.props;
+const { cita, autor, personaje, siguiente, rutas, filtros, clave } = Astro.props;
 
 /**
  * El título de pestaña y la meta descripción llevan la Cita entera si cabe. Quien llega
@@ -105,7 +108,7 @@ const canonica = new URL(rutaDeCita(cita.slug), Astro.site).href;
 >
   <DatosEstructurados slot="cabeza" cita={cita} autor={autor} canonica={canonica} />
   <article class="pagina contenedor">
-    <BloqueDeCita cita={cita} autor={autor} comoTitulo />
+    <BloqueDeCita cita={cita} autor={autor} personaje={personaje} comoTitulo />
     {/*
       * Va aquí y no dentro de `BloqueDeCita` a propósito: ese bloque lo comparten la
       * portada y esta página, y la Cita del Día no es una superficie de comprobación —el

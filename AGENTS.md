@@ -39,7 +39,7 @@ Sitio panhispánico de citas célebres en español, estático, construido con As
 
 ## Known pitfalls
 
-- Al añadir una página a `src/pages/`, declárala en `src/lib/superficies.ts`: es el único sitio donde se dice si una superficie es publicable, y de ahí salen el sitemap, el `noindex`, el índice de Pagefind, el barrido de accesibilidad y, desde la 23.1, la medición: si la página carga el fichero (`cargaLaMedicion`) y qué vista emite —una superficie `producto` declara su `vista`, y una prueba de `tests/unit/superficies.test.ts` falla si la omite—. Sin declaración el build se para. Antes eran tres sitios y había que acordarse de los tres; `/404` y `/buscar` acabaron `noindex` para el buscador de fuera y visibles para el de dentro (Historia 12.1). Desde la 22.4 la Página de Obra depende además de la **lista de rutas indexables**, que `superficies.ts` recibe por `declararRutasIndexables` y que se declara en **dos instancias** del módulo —`Armazon.astro` en las páginas e `integraciones/indexables.ts` en la configuración—; sin ella `caracterDe` lanza ante una Obra. Un guion o una prueba que pregunte por una ruta de Obra la declara antes (y la olvida después).
+- Al añadir una página a `src/pages/`, declárala en `src/lib/superficies.ts`: es el único sitio donde se dice si una superficie es publicable, y de ahí salen el sitemap, el `noindex`, el índice de Pagefind, el barrido de accesibilidad y, desde la 23.1, la medición: si la página carga el fichero (`cargaLaMedicion`) y qué vista emite —una superficie `producto` declara su `vista`, y una prueba de `tests/unit/superficies.test.ts` falla si la omite—. Sin declaración el build se para. Antes eran tres sitios y había que acordarse de los tres; `/404` y `/buscar` acabaron `noindex` para el buscador de fuera y visibles para el de dentro (Historia 12.1). Desde la 22.4 la Página de Obra depende además de la **lista de rutas indexables**, que `superficies.ts` recibe por `declararRutasIndexables` y que se declara en **dos instancias** del módulo —`Armazon.astro` en las páginas e `integraciones/indexables.ts` en la configuración—; sin ella `caracterDe` lanza ante una Obra. Desde la 35.3 la Página de Personaje es la segunda superficie `indexablePorContenido` y va en la misma lista (`personajesIndexables` de `src/lib/publicado.ts`, en las dos instancias); sin ella `caracterDe` lanza también ante un Personaje. Un guion o una prueba que pregunte por una ruta de Obra o de Personaje la declara antes (y la olvida después).
 - Una página nueva cuyo contenido dependa de la jornada —la Cita del Día, `FECHA_JORNADA`, `corpus/portada.json`— va también en `FICHEROS_QUE_ROTAN_CON_LA_JORNADA` de `tools/lib/peso.ts`, con su ruta exacta en `dist/`: si no, el paso del peso la juzga con el resto y su veredicto pasa a depender del día (AD-12). Una prueba de `tests/unit/peso.test.ts` sigue las importaciones de las páginas, las integraciones y la configuración y lo exige; no sabe seguir un alias de importación ni un `import.meta.glob`, y por eso los rechaza.
 - El tipo de un resultado de la búsqueda propia viaja como `data-pagefind-filter="tipo:…"`, y solo lo escribe `Armazon.astro` (en `<main>`, desde su prop `tipo`): ningún `data-pagefind-meta` lleva el tipo, porque desde Pagefind 1.5 la metadata se busca y «obra» devolvía toda Obra aunque no lo dijera (Historia 26.2). Todo `data-pagefind-meta` salvo `title` declara su peso en `OPCIONES_DE_PAGEFIND` de `src/lib/tipoDeResultado.ts`, el único sitio donde la búsqueda configura Pagefind, y una prueba de `dist/` de `tests/unit/publicable-y-alcanzable.test.ts` lo exige. Ojo: un peso 0 quita la puntuación, **no la coincidencia** —el metadato se sigue buscando—, así que un valor que no deba casar como texto va en un filtro o bajo `data-pagefind-ignore`, nunca en un metadato; `autor` pesa 0 y no estorba solo porque su texto ya está en el cuerpo indexado. `/buscar/` llama `options()` antes de cada `search()` y dentro del mismo `try`: un Pagefind de mentira que sustituya `pagefind.js` en una prueba exporta `options`, o toda búsqueda cae al reintento.
 - Todo `<script>` procesado de un componente sale como fichero de `/_astro/` y nunca en línea (`assetsInlineLimit` en `astro.config.mjs`, Historia 26.6): uno nuevo entra en `GUIONES_EXTERNOS` de `src/lib/guiones.ts` con su tope, o `medicion.test.ts` lo rechaza por no estar en la lista. Lo que importe del cliente viaja con él: `src/lib/umbrales.ts` lo importa el filtro de los Directorios, así que una constante calculada en lo alto de ese módulo lleva `/* @__PURE__ */` o engorda el guion (sin la marca en `CORTES_DE_SERIE` y `CORTES_DE_SM8`, el fichero arrastraba la lista de cortes entera: unos 540 bytes más).
@@ -271,11 +271,28 @@ existir —si no, la entrada no tiene dueño y no se escribe en ningún sitio—
 atribuida cerrada (35.1b) va a `corpus/_revision/{personaje}--…md`, sin `autor` y con `clase:
 atribuida`. **Dos guardas del build esperan a la 35.4**: una Cita publicada sin Autor rompe el esquema
 («una Cita publicada lleva Autor hasta la Historia 35.4»), y una Obra de Personaje con Citas publicadas
-rompe la puerta de las fichas. Ninguna página pinta todavía a un Personaje: su página es de la 35.3 y
-la Atribución que lo nombra, de la 35.4. Para AD-27, `corpus/personajes` es familia de fichero
-(`FAMILIAS_DE_FICHERO`) y no de ruta: su `nombre` compone la Página de Cita, los listados y la Obra
-de la que es dueño, y su clave los Directorios; el universo y la semblanza esperan a su página
-(`CAMPOS_QUE_NO_FECHAN`).
+rompe la puerta de las fichas.
+
+**La Página de Personaje** (Historia 35.3, UX-DR134) vive en `/personaje/{slug}/` (`rutaDePersonaje`,
+`PAGINA_DE_PERSONAJE` en `src/lib/superficies.ts`) y calca la de Autor: en la página 1, el `h1` con el
+nombre en la serif, «personaje de {universo}» donde el Autor lleva sus años, la semblanza —de su
+biografía con `AtribucionDeSemblanza`, o la propia con «Semblanza de {responde}.»— **siempre** bajo
+`data-pagefind-ignore` (`semblanzaEn` la deja solo en `ficha-de-personaje`), la Lista de Obras
+(«Obras en este Corpus», `obrasDelPersonaje`), el rótulo «Citas» y el listado (`citasDePersonaje`, el
+orden de `citasDeAutor`); las 2+, el `h1` y el listado, `noindex` por forma. Pestaña «Frases de
+{nombre}» (`tituloDePersonaje`) y meta «{n} frases de {nombre}, personaje de {universo}.»
+(`descripcionDePersonaje`); JSON-LD `CollectionPage` sin `Person`; sin Tarjeta Social ni «Buscar en…»
+(35.3b, 35.5) y sin ningún Modelo (`SUPERFICIES_SIN_INGRESO`). Se publica la de todo Personaje que una
+Cita publicada declara, y **existir no es indexarse**: la página 1 es `indexablePorContenido`, con la
+lista de `personajesIndexables` —hoy, todo Personaje publicado; el umbral lo pone la 35.3b—. La
+Atribución de una Cita con `personaje` nombra al Personaje y enlaza a su página (zona `atribucion`);
+sin él, el marcado es el de siempre. El grafo de NFR-5 (`grafoDelModelo`) gana su listado, su página 1
+→ sus Obras y cada Cita → su Personaje, y la búsqueda propia el tipo `personaje` («Personaje» en
+`ETIQUETAS_DE_RESULTADO`). Para AD-27 `personaje` es familia de fichero y de ruta: su página la
+componen su fichero (`nombre`, `universo`, la semblanza y la biografía), sus Citas y los títulos de
+sus Obras, y su `nombre` compone además la Página de Cita, los listados y la Obra de la que es dueño, y
+su clave los Directorios. La Tarjeta de Cita, las Rutas de salida, la Tarjeta de Obra, lo copiado y el
+JSON-LD de Cita siguen sin nombrarlo hasta la 35.4.
 
 ## Leer el estado de indexación
 
@@ -323,15 +340,16 @@ frente a Autor de la misma lectura y, desde `PRIMER_DESPLIEGUE_DE_OBRAS` más
 `SEMANAS_HASTA_JUZGAR_SM11`, «toca juzgar SM-11: lo decide Héctor».
 
 **Los Directorios** (`/autores/` y `/obras/`) son una familia propia, `directorio` (Historia
-26.7): nunca Autor ni Obra. Las seis familias las declara solo `src/lib/superficies.ts`
-(`FAMILIAS`), y cada serie deriva de ahí su subconjunto con nombre (`FAMILIAS_DE_LA_SERIE`, las
-seis, aquí). El Directorio se mide con su censo de lo publicado y se anota con
+26.7): nunca Autor ni Obra. Las siete familias —la séptima, `personaje`, desde la Historia 35.3—
+las declara solo `src/lib/superficies.ts` (`FAMILIAS`), y cada serie deriva de ahí su subconjunto con
+nombre (`FAMILIAS_DE_LA_SERIE`, las siete, aquí). El Directorio se mide con su censo de lo publicado y se anota con
 `censo: publicadas`; son dos URL, así que se lee entera. Mientras rija SM-11 no le quita
 presupuesto a Autor ni a Obra: su suelo no se reserva por delante de ellas, sino que sale de lo
 que queda tras leerlas enteras, y con un presupuesto tan justo que no sobre ni una petición lo
 paga el suelo de Cita (dos por debajo del mínimo); si no queda nada, va a `sinLeer` con su motivo. **El `publicadas` de la entrada sigue sumando
-solo las cuatro de siempre** —Cita, Autor, Tema y Colección—: la Obra y el Directorio van cada
-una en su familia, para que el total siga siendo comparable. Una lectura fallida va a `sinLeer`
+solo las cuatro de siempre** —Cita, Autor, Tema y Colección—: la Obra, el Directorio y el Personaje
+(«Personaje», con su censo de lo publicado; sin Personajes publicados no tiene URL) van cada uno en
+su familia, para que el total siga siendo comparable. Una lectura fallida va a `sinLeer`
 con su motivo, jamás a cero, y las entradas anteriores, sin `directorio`, se siguen leyendo.
 
 ## Leer el tráfico orgánico
@@ -613,8 +631,8 @@ comprobar que la última entrada es la nueva; un fichero ilegible —o una entra
 red, un formato o una fecha imposibles— se niega sin tocarlo. La consulta desglosa a dónde
 enlaza cada semana y red —Cita, Autor, Colección, Directorio, portada, «otra», «ya no se publica» y
 «sin enlace»— con la familia sacada del censo (`FAMILIAS_DEL_CANAL`; un enlace a los Directorios
-—`/autores/` y `/obras/`— sale como «Directorio» desde la 26.7, y uno a un Tema o a una Obra,
-como «otra»), cuenta los días con `foto` y los enlaces marcados, y
+—`/autores/` y `/obras/`— sale como «Directorio» desde la 26.7, uno a una Página de Personaje como
+«Personaje» desde la 35.3, y uno a un Tema o a una Obra, como «otra»), cuenta los días con `foto` y los enlaces marcados, y
 da por red la racha actual y la máxima de semanas ISO **consecutivas** con foto los 7 días y
 todo enlace marcado: «La 18.2 se cierra con 4: lleva N». Ningún módulo de `src/lib/` lo lee
 (AD-24), y el fichero se versiona con su cabecera y la lista vacía: ningún agente anota
@@ -903,8 +921,8 @@ de la Procedencia de **esa** Cita; la Tarjeta de Cita de los listados lleva el t
 El `isPartOf` del JSON-LD describe la Obra y lleva el año de la Obra, y sin él va sin fecha.
 
 Cada uso de `TarjetaDeCita.astro` declara su `atribucion`, un conjunto cerrado y sin valor por
-omisión (Historia 24.3): `autor-y-obra` en Tema y Colección, `obra` en Autor y en «Más de
-{Autor}», y `ninguna` en el Listado de Obra y en «De la misma obra» —los dos bloques del pie de
+omisión (Historia 24.3): `autor-y-obra` en Tema y Colección, `obra` en Autor, en Personaje (35.3) y
+en «Más de {Autor}», y `ninguna` en el Listado de Obra y en «De la misma obra» —los dos bloques del pie de
 la Página de Cita, que pinta `RutasDeSalida.astro` (24.6)—. Un uso nuevo se declara además en la
 prueba de `tests/unit/tarjeta-de-cita.test.ts`.
 Un valor fuera del conjunto —o ninguno—, o `autor-y-obra` sin el `autor` que declara la Cita,

@@ -69,22 +69,34 @@ const BIOGRAFIA = componerBiografia(
 );
 
 describe('qué superficie reproduce la semblanza', () => {
-  it('solo la ficha de la página 1 porta la atribución', () => {
-    expect([...PORTAN_LA_ATRIBUCION]).toEqual(['ficha-de-autor']);
+  it('solo la ficha de la página 1 —la de Autor y, desde la 35.3, la de Personaje— porta la atribución', () => {
+    expect([...PORTAN_LA_ATRIBUCION]).toEqual(['ficha-de-autor', 'ficha-de-personaje']);
   });
 
   it('una semblanza ajena solo aparece en la ficha de la página 1', () => {
     const conBiografia = { ...SENECA, atribucion: ATRIBUCION };
     for (const superficie of SUPERFICIES_DE_LA_SEMBLANZA) {
       expect(semblanzaEn(conBiografia, superficie), superficie).toBe(
-        superficie === 'ficha-de-autor' ? SENECA.semblanza : undefined,
+        PORTAN_LA_ATRIBUCION.has(superficie) ? SENECA.semblanza : undefined,
       );
     }
+  });
+
+  it('Historia 35.3 — la semblanza propia de un Personaje, con quien responde, se trata como ajena', () => {
+    const propia = { semblanza: 'Un justiciero de Gotham.', responde: 'Héctor' };
+    for (const superficie of SUPERFICIES_DE_LA_SEMBLANZA) {
+      expect(semblanzaEn(propia, superficie), superficie).toBe(
+        superficie === 'ficha-de-personaje' || superficie === 'ficha-de-autor' ? propia.semblanza : undefined,
+      );
+    }
+    // Sin semblanza, ninguna superficie la tiene.
+    expect(semblanzaEn({}, 'ficha-de-personaje')).toBeUndefined();
   });
 
   it('las páginas 2+ no son superficie de la semblanza, ni propia ni ajena (17.4)', () => {
     expect(SUPERFICIES_DE_LA_SEMBLANZA).toEqual([
       'ficha-de-autor',
+      'ficha-de-personaje',
       'meta-description',
       'datos-estructurados',
       'indice-de-busqueda',
