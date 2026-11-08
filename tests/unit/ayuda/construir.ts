@@ -679,10 +679,14 @@ export function fuenteConTiendaDePrueba(
         'en vez de una: o ya hay tiendas declaradas en el árbol, o la declaración cambió de forma.',
     );
   }
+  // Cada valor va como literal de JSON, que también lo es de TypeScript: una comilla o una
+  // barra no rompen la fuente. La `marca` se escribe si la tienda tiene el campo —también
+  // `undefined` escrito, la variante que `revisarTiendas` rechaza—, no si vale algo.
+  const literal = (valor: unknown) => JSON.stringify(valor) ?? 'undefined';
   const declaradas = tiendas.map(
     (t) =>
-      `  { clave: '${t.clave}', nombre: '${t.nombre}', dominio: '${t.dominio}', ` +
-      `parametro: '${t.parametro}'${t.marca === undefined ? '' : `, marca: '${t.marca}'`} },\n`,
+      `  { clave: ${literal(t.clave)}, nombre: ${literal(t.nombre)}, dominio: ${literal(t.dominio)}, ` +
+      `parametro: ${literal(t.parametro)}${Object.hasOwn(t, 'marca') ? `, marca: ${literal(t.marca)}` : ''} },\n`,
   );
   return partes.join(`export const TIENDAS: readonly Tienda[] = [\n${declaradas.join('')}];`);
 }

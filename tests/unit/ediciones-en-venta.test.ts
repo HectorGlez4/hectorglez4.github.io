@@ -26,7 +26,9 @@ import {
   modelosEnRuta,
   modelosMarcadosEn,
   revisarDeclaracionDeIngreso,
+  esMarcaValida,
   revisarTiendas,
+  tieneMarca,
   urlDeEdicion,
   type Modelo,
   type Tienda,
@@ -259,6 +261,26 @@ describe('Historia 33.1 — una tienda sin marca', () => {
     expect(revisarDeclaracionDeIngreso([afiliacion], undefined, [TIENDA, SIN_MARCA])).toEqual([]);
   });
 
+  it('una sola regla de marca: `esMarcaValida`, `tieneMarca`, la puerta y `urlDeEdicion` coinciden', () => {
+    for (const marca of ['marca-21', 'a_b.c']) {
+      expect(esMarcaValida(marca), marca).toBe(true);
+      expect(tieneMarca({ ...SIN_MARCA, marca }), marca).toBe(true);
+    }
+    for (const marca of [undefined, null, 21, '', ' ', 'con espacio', ' marca', 'marca\t', 'a\nb']) {
+      const tienda = { ...SIN_MARCA, marca } as unknown as Tienda;
+      expect(esMarcaValida(marca), JSON.stringify(marca)).toBe(false);
+      expect(tieneMarca(tienda), JSON.stringify(marca)).toBe(false);
+      // Lo que `tieneMarca` no da por marca tampoco lo da por buena `revisarTiendas`…
+      expect(revisarTiendas([tienda]), JSON.stringify(marca)).toHaveLength(1);
+      // …ni la acepta el enlace.
+      expect(() => urlDeEdicion({ url: `https://${DOMINIO_SIN_MARCA}/x` }, tienda as TiendaConMarca)).toThrow(
+        SIN_MARCA.clave,
+      );
+    }
+    expect(tieneMarca(SIN_MARCA)).toBe(false);
+    expect(tieneMarca(TIENDA)).toBe(true);
+  });
+
   it('una marca en blanco, con espacios o escrita como `undefined` se rechaza, encendida o apagada', () => {
     for (const marca of ['', ' ', 'con espacio']) {
       const fallos = revisarTiendas([{ ...SIN_MARCA, marca }]);
@@ -289,6 +311,18 @@ describe('Historia 33.1 — una tienda sin marca', () => {
     expect(fallos).toHaveLength(1);
     expect(fallos[0]).toContain(`«${SIN_MARCA.clave}»`);
     expect(fallos[0]).toContain(`«${otra.clave}»`);
+    expect(fallos[0]).toContain('2 tiendas de TIENDAS no tienen marca');
+  });
+
+  it('el ayudante de las copias escapa cada valor y escribe la `marca` solo si la tienda tiene el campo', async () => {
+    const fuente = await readFile(join(RAIZ, 'src/lib/ingreso.ts'), 'utf8');
+    const rara: Tienda = { ...SIN_MARCA, nombre: "L'Atelier \\ de Prueba" };
+    const parcheada = fuenteConTiendaDePrueba(fuente, [rara, { ...SIN_MARCA, clave: 'escrita', marca: undefined }, TIENDA]);
+    expect(parcheada).toContain(`nombre: ${JSON.stringify(rara.nombre)}`);
+    const lineas = parcheada.split('\n');
+    expect(lineas.find((l) => l.includes(`clave: "${SIN_MARCA.clave}"`))).not.toContain('marca:');
+    expect(lineas.find((l) => l.includes('clave: "escrita"'))).toContain('marca: undefined');
+    expect(lineas.find((l) => l.includes(`clave: "${TIENDA.clave}"`))).toContain(`marca: "${TIENDA.marca}"`);
   });
 
   it('encendida sin tiendas sigue el fallo de la 22.9, y con todas con marca no hay fallo', () => {
@@ -353,12 +387,16 @@ describe('Historia 33.1 — una tienda sin marca', () => {
     expect(json).not.toContain('"marca"');
 
     const texto = textoDeTiendas([TIENDA, SIN_MARCA]);
-    expect(texto).toContain(`${SIN_MARCA.nombre} (${DOMINIO_SIN_MARCA}) (sin marca)`);
-    expect(texto).not.toContain(`${TIENDA.nombre} (${DOMINIO}) (sin marca)`);
+    expect(texto).toContain(`${SIN_MARCA.nombre} (${DOMINIO_SIN_MARCA}, sin marca)`);
+    expect(texto).toContain(`${TIENDA.nombre} (${DOMINIO})`);
+    expect(texto).not.toContain(`${TIENDA.nombre} (${DOMINIO}, sin marca)`);
     expect(texto).toContain('la afiliación no se enciende');
     expect(textoDeTiendas([TIENDA])).not.toContain('sin marca');
     const informe = lineasDelInforme(estadosDe(medida), [TIENDA, SIN_MARCA]).join('\n');
-    expect(informe).toContain('(sin marca)');
+    expect(informe).toContain(', sin marca)');
+    // Sin ninguna tienda, el texto dice que la primera se declara sin marca o con ella.
+    expect(textoDeTiendas([])).toContain('ninguna tienda declarada');
+    expect(textoDeTiendas([])).toContain('sin marca o con ella');
     expect(informe).toContain('dispara la SOLICITUD');
   });
 });
@@ -574,6 +612,8 @@ describe('Historia 22.9 — la orden `edicion`', () => {
     const parte = hecho.ok ? hecho.mensaje : '';
     expect(parte).toContain(`La tienda «${SIN_MARCA.clave}» (${SIN_MARCA.nombre}) no tiene marca`);
     expect(parte).toContain('no se pintará hasta que Héctor declare la marca y encienda el Modelo');
+    // La frase general («la pone el build») no acompaña a la tienda sin marca: la contradiría.
+    expect(parte).not.toContain('La marca de afiliado la pone el build');
 
     // Con marca, el parte no lo dice.
     const otra = await corpusConFicha();
@@ -584,11 +624,31 @@ describe('Historia 22.9 — la orden `edicion`', () => {
       { tiendas: [TIENDA, SIN_MARCA], congelacion: null },
     );
     expect(conMarca.ok ? conMarca.mensaje : '').not.toContain('no tiene marca');
+    expect(conMarca.ok ? conMarca.mensaje : '').toContain('La marca de afiliado la pone el build');
+
+    // Sin ninguna tienda declarada, el rechazo dice que la primera se declara sin marca o con ella.
+    const vacia = await declararEdicion(
+      rutasDelCorpus(await corpusConFicha()),
+      FICHA,
+      { tienda: SIN_MARCA.clave, formato: 'impresa', url: `https://${DOMINIO_SIN_MARCA}/x` },
+      { tiendas: [], congelacion: null },
+    );
+    expect(vacia.ok).toBe(false);
+    expect(vacia.ok ? '' : vacia.motivos.join('\n')).toContain('sin marca o con ella');
   });
 
-  it('Historia 33.1 — con una tienda sin marca y la familia congelada se niega y no escribe', async () => {
+  it('Historia 33.1 — con una tienda sin marca y la familia congelada se niega, no escribe y conserva lo declarado', async () => {
     const corpus = await corpusConFicha();
+    const previa = `https://${DOMINIO_SIN_MARCA}/previa`;
+    const declarada = await declararEdicion(
+      rutasDelCorpus(corpus),
+      FICHA,
+      { tienda: SIN_MARCA.clave, formato: 'electronica', url: previa },
+      { tiendas: [SIN_MARCA], congelacion: null },
+    );
+    expect(declarada.ok, declarada.ok ? '' : declarada.motivos.join('\n')).toBe(true);
     const antes = await leerFicha(corpus);
+    expect(antes).toContain(previa);
     const hecho = await declararEdicion(
       rutasDelCorpus(corpus),
       FICHA,

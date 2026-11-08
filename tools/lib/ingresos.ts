@@ -450,7 +450,7 @@ export function textoDeTiendas(tiendas: readonly Tienda[] = TIENDAS): string {
   const sinMarca = tiendas.filter((t) => !tieneMarca(t)).length;
   return (
     `${tiendas.length} declarada${tiendas.length === 1 ? '' : 's'}: ${tiendas
-      .map((t) => `${t.nombre} (${t.dominio})${tieneMarca(t) ? '' : ' (sin marca)'}`)
+      .map((t) => `${t.nombre} (${t.dominio}${tieneMarca(t) ? '' : ', sin marca'})`)
       .join(', ')}` +
     (sinMarca === 0
       ? ''

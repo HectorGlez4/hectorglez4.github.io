@@ -5,11 +5,18 @@ created: '2026-11-07'
 status: 'done'
 baseline_revision: 'd9ddd61e81c4065962d796da4e85beb4e4465c51'
 review_loop_iteration: 0
-followup_review_recommended: false
+followup_review_recommended: true
 context:
   - '{project-root}/_bmad-output/implementation-artifacts/epic-33-context.md'
 warnings: ['oversized']
-deferred: []
+deferred:
+  - summary: >-
+      Las construcciones del mismo fuente pueden salir con otro hash del .woff2 de Source Serif 4 que sirve Google Fonts, y eso tumba de forma intermitente las comparaciones byte a byte de dist/ (14.1, 24.7 y las cuatro variantes de la 33.1).
+    evidence: |-
+      El ac-auditor vio en una primera pasada de tests/unit/ediciones-en-venta.test.ts fallar 4 pruebas de la 24.7 solo por 2ac760deb895e1c4.woff2 frente a 47b2991b86247b23.woff2, y la segunda pasada salió verde; el npm test de la 33.1 mostró lo mismo en la 14.1. La causa es la descarga de fuentes en cada astro build, anterior a esta historia; la prueba de identidad no se debilita.
+    location: >-
+      astro.config.mjs (fuentes de Google) / tests/unit/ediciones-en-venta.test.ts
+    severity: medium
 ---
 
 <intent-contract>
@@ -131,6 +138,23 @@ Hoy la ruta encendida es inalcanzable con una tienda sin marca: la puerta corta 
 - addressed_findings:
   - none
 
+### 2026-11-08 — Review pass (capas externas: blind-hunter, edge-case-hunter, verification-gap, intent-alignment, ac-auditor)
+- intent_gap: 0
+- bad_spec: 0
+- patch: 9: (high 0, medium 1, low 8)
+- defer: 1: (high 0, medium 1, low 0)
+- reject: 11: (high 0, medium 0, low 11)
+- addressed_findings:
+  - `[medium]` `[patch]` Tres copias de la regla de la marca (`tieneMarca` sin mirar los blancos interiores, `revisarTiendas` y `urlDeEdicion` en línea): una marca `'con espacio'` salía `conMarca: true` en el informe y pasaba la puerta. Ahora hay un solo predicado, `esMarcaValida` (cadena sin ningún blanco), que usan `tieneMarca`, `urlDeEdicion` y `revisarTiendas` (blind-hunter 1 y 2, edge-case-hunter 1).
+  - `[low]` `[patch]` Sin prueba directa de `tieneMarca`: una prueba recorre marcas válidas e inválidas (`undefined`, `null`, número, vacía, espacios, tabulador, salto) y exige que `esMarcaValida`, `tieneMarca`, `revisarTiendas` y `urlDeEdicion` coincidan.
+  - `[low]` `[patch]` La puerta en plural decía «unas tiendas» sin recuento: ahora «N tiendas de TIENDAS no tienen marca», y la prueba de dos sin marca lo fija.
+  - `[low]` `[patch]` El parte de `edicion` decía «La marca de afiliado la pone el build» justo antes de «no tiene marca»: con una tienda sin marca la frase general se sustituye (sin perder FR-54), y la prueba exige que no aparezca.
+  - `[low]` `[patch]` `fuenteConTiendaDePrueba` interpolaba sin escapar y decidía la `marca` por valor: ahora cada valor va como literal JSON y la `marca` se escribe si la tienda tiene el campo (también `undefined` escrito); prueba nueva con un apóstrofo y una barra (blind-hunter 8, edge-case-hunter 2 y 3).
+  - `[low]` `[patch]` AGENTS.md no decía cómo quitar la marca de una tienda (cuenta cerrada): párrafo nuevo tras «Retirar una tienda», apagar antes el Modelo.
+  - `[low]` `[patch]` «Librería sin Marca (sinmarca.example) (sin marca)»: ahora «(sinmarca.example, sin marca)».
+  - `[low]` `[patch]` Los textos del conjunto vacío («sin marca o con ella») de `textoDeTiendas` y del rechazo de `edicion` no tenían prueba: ahora sí.
+  - `[low]` `[patch]` La prueba de `edicion` congelada con tienda sin marca no partía de ediciones previas: ahora declara una antes y comprueba que la ficha queda idéntica y la conserva (ac-auditor).
+
 ## Auto Run Result
 
 **Resumen.** `Tienda.marca` pasa a ser opcional (se omite sin valor) y se exportan `TiendaConMarca` y `tieneMarca`. `urlDeEdicion` solo acepta por su tipo una `TiendaConMarca` y lanza nombrando la tienda si le llega una sin marca; `edicionesEnVenta` recibe el nombre de la ficha y lanza nombrando tienda y ficha. `revisarTiendas` rechaza una marca presente vacía, con espacios o escrita como `undefined` (`Object.hasOwn`), y acepta una tienda sin el campo. `revisarDeclaracionDeIngreso`, con la afiliación encendida y tiendas declaradas, para el build nombrando cada tienda sin marca por clave y nombre. `TIENDAS` sigue vacío y la afiliación apagada; el comentario da las dos formas con valores inventados (`libreria.example`).
@@ -156,3 +180,29 @@ Hoy la ruta encendida es inalcanzable con una tienda sin marca: la puerta corta 
 - `npm test` completo, dos pasadas con cinco worktrees en paralelo (carga ~43): 7178/7180 y 7177/7180. Los fallos son ajenos a esta historia y pasan al repetirse: un `.woff2` de Google Fonts cuyo hash cambia entre dos construcciones del mismo fuente (rompió también la 14.1 y la 24.7, que no tocan esta historia) y dos plazos de 120 s por carga (`extraer-cli`, `objetivo-cli`). Los tres ficheros, repetidos, pasan.
 
 **Riesgos residuales.** Las cuatro variantes byte a byte suman dos construcciones más a las comparaciones expuestas a la variación de las fuentes de Google al construir; cuando Google sirve otro `.woff2` entre una construcción y otra, fallan igual que la 14.1 y la 24.7.
+
+### Pasada de revisión del 2026-11-08 (capas externas)
+
+**Resumen.** Una sola regla de marca, `esMarcaValida` (cadena sin ningún blanco) en `src/lib/ingreso.ts`, que usan `tieneMarca`, `urlDeEdicion` y `revisarTiendas`: antes una marca con espacios dentro salía `conMarca: true` en el informe y pasaba la puerta, y solo la paraba `revisarTiendas`. La puerta del encendido da el recuento («N tiendas de TIENDAS no tienen marca»); el parte de `edicion` con tienda sin marca sustituye la frase «la pone el build» en vez de contradecirla; el informe dice «(dominio, sin marca)»; el ayudante de las copias escapa cada valor como literal JSON y escribe la `marca` por presencia del campo; AGENTS.md dice cómo quitar la marca de una tienda (apagar antes el Modelo).
+
+**Ficheros de esta pasada.**
+- `src/lib/ingreso.ts` — `esMarcaValida`, usada por `tieneMarca`, `urlDeEdicion` y `revisarTiendas`; recuento en la puerta.
+- `tools/lib/obras.ts` — el parte de `edicion` con tienda sin marca, sin la frase general.
+- `tools/lib/ingresos.ts` — «(dominio, sin marca)».
+- `tests/unit/ayuda/construir.ts` — literales JSON y `Object.hasOwn` en `fuenteConTiendaDePrueba`.
+- `tests/unit/ediciones-en-venta.test.ts` — pruebas de la regla única, del recuento, del ayudante, de los textos del conjunto vacío, del parte y de la congelación con ediciones previas.
+- `AGENTS.md` — «Quitar la marca de una tienda».
+
+**Hallazgos.** 9 parches (1 medium, 8 low), 1 diferido (la variación del `.woff2` de Google Fonts entre construcciones, anterior a la historia), 11 rechazados (doble fallo con `marca: undefined` encendida, que es correcto; el mensaje de la 22.9, que la historia manda mantener y que es cierto para encender; la búsqueda de dominios solo en «ambas», cubierta por la identidad byte a byte; la referencia sin parchear, elegida a propósito; el orden de parámetros de `edicionesEnVenta`, con un solo llamador; el `not.toContain` sobre la salida entera; la credibilidad de la pasada anterior, que no tenía hallazgos externos; el `npm test` completo, que esta pasada corre; el build encendido con dos tiendas con marca y la orden por consola con tiendas, cubiertos por funciones y por la unitaria; los `amazon.com.mx` de comentarios de dominio, fuera del comentario de `TIENDAS`).
+
+**Recomendación de revisión de seguimiento.** `true`: parches 0 high, 1 medium, 8 low; puntuación 3 × 1 + 8 = 11 ≥ 5.
+
+**Verificación.**
+- `npx vitest run tests/unit/ediciones-en-venta.test.ts` — 69/69.
+- `npx vitest run tests/unit/ingreso-construido.test.ts` — 43/43, también repetido a solas tras el `npm test`.
+- `npx vitest run tests/unit/obras.test.ts tests/unit/ingreso-cli.test.ts tests/unit/ingreso.test.ts` — 213/213.
+- `npx astro check` — 0 errores, 0 avisos.
+- `npm test` completo (carga ~17, cinco worktrees en paralelo) — 7180/7182. Los dos fallos son las comparaciones byte a byte de la 26.3 y la 26.4 en `ingreso-construido.test.ts`, y la única diferencia es el hash del `.woff2` de Inter que sirve Google Fonts (`e868cdf4720e9ea5` frente a `c59b01ad90d7d13d`) entre dos construcciones del mismo fuente. El fichero, repetido a solas, pasa 43/43. La prueba de identidad no se ha debilitado.
+
+**Riesgos residuales.** La variación de las fuentes de Google sigue pudiendo tumbar de forma intermitente cualquier comparación byte a byte de `dist/` (diferido).
+

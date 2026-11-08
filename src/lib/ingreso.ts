@@ -262,9 +262,18 @@ export interface Tienda {
 /** Una tienda que ya trae su marca: la única que `urlDeEdicion` acepta por su tipo. */
 export type TiendaConMarca = Tienda & { marca: string };
 
-/** Si la tienda trae una marca de verdad: una cadena no vacía. */
+/**
+ * La única regla de qué es una marca: una cadena sin ningún blanco —ni vacía, ni con espacios
+ * dentro o alrededor—. La usan `tieneMarca`, `urlDeEdicion` y `revisarTiendas`, para que el
+ * informe, la puerta del encendido y el enlace no puedan discrepar (Historia 33.1).
+ */
+export function esMarcaValida(marca: unknown): marca is string {
+  return typeof marca === 'string' && /^\S+$/.test(marca);
+}
+
+/** Si la tienda trae una marca de verdad, por la regla de `esMarcaValida`. */
 export function tieneMarca(tienda: Tienda): tienda is TiendaConMarca {
-  return typeof tienda.marca === 'string' && tienda.marca.trim() !== '';
+  return esMarcaValida(tienda.marca);
 }
 
 /** Cómo se nombra una tienda en un mensaje: su clave y su nombre. */
@@ -329,7 +338,7 @@ export function esDelDominio(anfitrion: string, dominio: string): boolean {
 export function urlDeEdicion(edicion: Pick<EdicionDeclarada, 'url'>, tienda: TiendaConMarca): string {
   // Historia 33.1 — el tipo ya lo impide; esto es para quien llegue con un `as`. Un `tag=`
   // vacío o `tag=undefined` publicaría un enlace de afiliado que no atribuye nada.
-  if (typeof tienda.marca !== 'string' || tienda.marca.trim() === '') {
+  if (!esMarcaValida(tienda.marca)) {
     throw new Error(
       `La tienda ${nombreDeTienda(tienda)} no tiene marca, y una edición suya no lleva enlace ` +
         'de afiliado hasta que Héctor declare la marca en TIENDAS de src/lib/ingreso.ts.',
@@ -417,7 +426,7 @@ export function revisarTiendas(tiendas: readonly Tienda[] = TIENDAS): string[] {
           `${quien} escribe la marca sin valor: una tienda sin marca omite el campo, nunca lo ` +
             'deja en `undefined`.',
         );
-      } else if (tienda.marca.trim() === '' || /\s/.test(tienda.marca)) {
+      } else if (!esMarcaValida(tienda.marca)) {
         fallos.push(`${quien} declara una marca vacía o con espacios: el enlace no la llevaría.`);
       }
     }
@@ -777,7 +786,7 @@ export function revisarDeclaracionDeIngreso(
         const sinMarca = tiendas.filter((tienda) => !tieneMarca(tienda));
         if (sinMarca.length > 0) {
           fallos.push(
-            `«${modelo.nombre}» está encendido y ${sinMarca.length === 1 ? 'una tienda' : 'unas tiendas'} ` +
+            `«${modelo.nombre}» está encendido y ${sinMarca.length === 1 ? 'una tienda' : `${sinMarca.length} tiendas`} ` +
               `de TIENDAS no ${sinMarca.length === 1 ? 'tiene' : 'tienen'} marca: ` +
               `${sinMarca.map(nombreDeTienda).join(', ')}. El Modelo no se enciende mientras ` +
               'alguna tienda declarada no tenga marca: declárela, o vuelva a apagarlo.',

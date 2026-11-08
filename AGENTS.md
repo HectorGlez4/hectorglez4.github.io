@@ -1419,6 +1419,11 @@ de **toda** ficha, activa en `corpus/obras/` o retirada en `corpus/_obras-retira
 esquema rechaza una edición de una tienda que no existe, y eso rompe el build y cualquier orden
 que lea las fichas (y restaurar una ficha retirada que la traiga).
 
+**Quitar la marca de una tienda** —la cuenta de afiliado se cierra, como ya pasó una vez— exige
+**apagar antes el Modelo**: encendido, una tienda sin marca para el build. Apagado, la tienda se
+queda declarada sin marca, con sus ediciones curadas, y `dist/` no cambia; el campo se omite,
+nunca se deja en `''` ni en `undefined`.
+
 **El programa de afiliados puede exigir su propia declaración literal en el sitio** —un texto
 fijo, en un sitio concreto—. La del bloque («Enlace de afiliado: si compras, el sitio recibe una
 comisión sin coste para ti.», en `EdicionesEnVenta.astro`) es la de `EXPERIENCE.md`, no la del
