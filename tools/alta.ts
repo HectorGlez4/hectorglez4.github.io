@@ -111,10 +111,16 @@ export interface InformeDeAlta {
   /** Autores citados en el lote que no existen en el corpus. No se crean (FR-15). */
   autoresDesconocidos: string[];
   /**
-   * Personajes citados en el lote que no existen en `corpus/personajes/` — Historia 35.2. Una
-   * entrada sin Autor cuyo Personaje no existe no tiene dueño: no se escribe en ningún sitio.
+   * Personajes citados en el lote que no existen en `corpus/personajes/` — Historia 35.2. No se
+   * crean: la entrada que además trae Autor va a revisión con el motivo; la que no, a `sinDueño`.
    */
   personajesDesconocidos?: string[];
+  /**
+   * Entradas sin Autor cuyo Personaje no existe — Historia 35.2: no tienen dueño, ni prefijo ni
+   * fichero, y no se escriben en ningún sitio. Van con su posición en el lote y su texto para que
+   * se vea cuáles se quedaron fuera.
+   */
+  sinDueño?: { indice: number; texto: string; personaje: string }[];
   /**
    * Publicadas cuya Ficha de Obra, resuelta antes de escribir la Cita, no se pudo escribir
    * después —un fallo de disco entre medias—. `npm run obra -- sembrar` la completa
@@ -335,8 +341,11 @@ export async function darDeAltaLote(
         if (!(informe.personajesDesconocidos ?? []).includes(personaje)) {
           informe.personajesDesconocidos = [...(informe.personajesDesconocidos ?? []), personaje];
         }
-        // Sin Autor no hay dueño: nada se escribe de esta entrada.
-        if (referenciaAutor === '') continue;
+        // Sin Autor no hay dueño: nada se escribe de esta entrada, y el parte la nombra.
+        if (referenciaAutor === '') {
+          informe.sinDueño = [...(informe.sinDueño ?? []), { indice, texto, personaje }];
+          continue;
+        }
         motivos.push(
           `El Personaje «${personaje}» no existe en el corpus. Créelo antes con ` +
             '«npx tsx tools/personaje.ts crear».',
@@ -625,11 +634,15 @@ export function formatearInforme(informe: InformeDeAlta): string {
   }
 
   if ((informe.personajesDesconocidos ?? []).length > 0) {
-    lineas.push(
-      '',
-      'Personajes que no existen en el corpus (sin Autor, sus entradas no tienen dueño y no se han escrito):',
-    );
+    lineas.push('', 'Personajes que no existen en el corpus (no se crean; antes, «npx tsx tools/personaje.ts crear»):');
     for (const p of informe.personajesDesconocidos ?? []) lineas.push(`  · ${p}`);
+  }
+
+  if ((informe.sinDueño ?? []).length > 0) {
+    lineas.push('', 'Entradas sin Autor y con un Personaje que no existe: no tienen dueño y no se han escrito:');
+    for (const e of informe.sinDueño ?? []) {
+      lineas.push(`  · entrada ${e.indice + 1} (Personaje «${e.personaje}»): «${e.texto}»`);
+    }
   }
 
   return lineas.join('\n');

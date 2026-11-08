@@ -26,6 +26,7 @@ import {
   dueñoDeFicha,
   esGrafiaLiteral,
   fichasDeCita,
+  fichasDeForma,
   formaDeObra,
   grafiaPorOmision,
   grafiasDeFicha,
@@ -1076,7 +1077,7 @@ export async function quitarEdicion(
 }
 
 /**
- * Pone al día el título de las fichas de un Autor que reclaman alguna de `formas`, si ha
+ * Pone al día el título de las fichas de una Cita que reclaman alguna de `formas`, si ha
  * dejado de sostenerse: cuando ya no lo declara ninguna Cita publicada de la Obra, pasa a ser
  * el de `grafiaPorOmision`. Lo llaman, en el mismo gesto, quien cambia o retira una
  * Procedencia: `documentar`, `documentar --retirar` y `restituir-grafia`.
@@ -1086,8 +1087,12 @@ export async function quitarEdicion(
  */
 export async function ajustarTitulosDeObra(
   rutas: Rutas,
-  /** El dueño de las fichas (`dueñoDeFicha`): el Autor de la Cita que cambió. */
-  autor: string,
+  /**
+   * La Cita que cambió —su Autor y su Personaje—: sus fichas son las que la resolverían con la
+   * regla de dos pasos (`fichasDeForma`, Historia 35.2), también la de un Personaje que la
+   * reclama por su `autor` informativo.
+   */
+  quien: { autor?: string; personaje?: string },
   formas: readonly string[],
   /** Para las pruebas: el esquema de un conjunto de tiendas dado (22.9). */
   esquema?: EsquemaDeFicha,
@@ -1096,8 +1101,9 @@ export async function ajustarTitulosDeObra(
   try {
     const fichas = await leerFichasDeObra(rutas, esquema);
     const citas = await leerCitas(rutas.citas);
+    const suyas = new Set(formas.flatMap((forma) => fichasDeForma(quien, forma, fichas)));
     for (const ficha of fichas) {
-      if (dueñoDeFicha(ficha).slug !== autor || !ficha.formas.some((f) => formas.includes(f))) continue;
+      if (!suyas.has(ficha)) continue;
       const grafias = grafiasDeFicha(ficha, fichas, citas);
       if (grafias.length === 0 || grafias.some((g) => mismaGrafia(g.literal, ficha.titulo))) {
         continue;
@@ -1253,7 +1259,7 @@ export async function restituirGrafia(rutas: Rutas, slug: string): Promise<Resul
     return { ok: false, motivos: [`No se pudo escribir ${cita.ruta}: ${texto(fallo)}`, NADA_ESCRITO] };
   }
 
-  const titulos = await ajustarTitulosDeObra(rutas, dueñoDeCita(cita).slug, [forma]);
+  const titulos = await ajustarTitulosDeObra(rutas, cita, [forma]);
 
   return {
     ok: true,

@@ -14,7 +14,7 @@
  */
 
 import { readFile, rm, writeFile } from 'node:fs/promises';
-import { join } from 'node:path';
+import { basename, join } from 'node:path';
 import { citaAdmisible } from '../../src/lib/admision.ts';
 import { cargaDeCandidata, type SeñalDeOrden } from '../../src/lib/ordenDeRevision.ts';
 import { esAparatoDeLaFuente, esTrozoDeCitaAjena, tienePuntuacionRota } from './extraccion.ts';
@@ -25,6 +25,7 @@ import {
   fechaLocal,
   leerAutores,
   leerCitas,
+  leerPersonajes,
   leerRegistroDeClases,
   leerTemas,
   mover,
@@ -315,6 +316,8 @@ export async function aprobar(
    */
   const registro = await leerRegistroDeClases(rutas);
   const autorPorSlug = new Map((await leerAutores(rutas)).map((a) => [a.slug, a]));
+  // Historia 35.2 — el Personaje de una candidata existe en corpus/personajes/, o el build rompería.
+  const personajesDelCorpus = new Set((await leerPersonajes(rutas)).map((p) => p.slug));
   const claseQueLeToca = (candidata: CandidataEnRevision): Clase => {
     // La de un Personaje sin Autor: la clase la dice el Personaje (Historia 35.2).
     if (candidata.autor === undefined) {
@@ -360,6 +363,16 @@ export async function aprobar(
     }
     if (!candidata.admisible) {
       resultado.rechazadasPorAdmision.push({ slug, motivos: candidata.motivos });
+      continue;
+    }
+    if (candidata.personaje !== undefined && !personajesDelCorpus.has(candidata.personaje)) {
+      resultado.rechazadasPorAdmision.push({
+        slug,
+        motivos: [
+          `su Personaje «${candidata.personaje}» no existe en corpus/personajes/: publicada, rompería ` +
+            'la construcción. Dele de alta con «npx tsx tools/personaje.ts crear» o corrija la candidata.',
+        ],
+      });
       continue;
     }
     /*
@@ -543,10 +556,16 @@ async function reescribirConSlug(
   );
   const conTemas = conTemasDeclarados(conNuevoSlug, temas);
 
-  const destino = join(
-    rutas.citas,
-    `${nombreDeFicheroDeCita(dueñoDeCita(candidata).slug, definitivo)}.md`,
-  );
+  /*
+   * Historia 35.2 — el prefijo del fichero es el de su dueño **al darla de alta**, que es el del
+   * slug: saber después el Autor de la Cita de un Personaje no cambia ni el slug ni el nombre.
+   * Se toma del fichero de la candidata mientras el slug definitivo lo conserve; si no, el dueño.
+   */
+  const partes = basename(candidata.ruta, '.md').split('--');
+  const delFichero = partes.length > 1 ? partes[0] : undefined;
+  const prefijo =
+    delFichero !== undefined && definitivo.startsWith(`${delFichero}-`) ? delFichero : dueñoDeCita(candidata).slug;
+  const destino = join(rutas.citas, `${nombreDeFicheroDeCita(prefijo, definitivo)}.md`);
 
   // Se escribe el destino antes de borrar el origen: si algo falla en medio, la
   // candidata sigue en revisión en lugar de haberse evaporado.

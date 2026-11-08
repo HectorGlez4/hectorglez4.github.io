@@ -123,6 +123,29 @@ describe('AD-2 — retirar un documento arrastra sus candidatas', () => {
     expect(await readdir(rutas.revision)).toHaveLength(3);
   });
 
+  /*
+   * Historia 35.2 — el fichero de una candidata lleva el prefijo de su dueño al darla de alta, y
+   * saber después su Autor no lo cambia: la orden borra el fichero que leyó, no uno recalculado.
+   */
+  it('arrastra también las candidatas de un Personaje, con Autor sabido después o sin él', async () => {
+    const rutas = await corpusCon();
+    const dePersonaje = (slug: string, autor?: string) =>
+      candidata(slug, URL)
+        .replace('autor: "miguel-de-cervantes"\n', autor === undefined ? '' : `autor: "${autor}"\n`)
+        .replace(`slug: "${slug}"`, `slug: "${slug}"\npersonaje: "batman"\nclase: "atribuida"`);
+    await writeFile(join(rutas.revision, 'batman--sin-autor.md'), dePersonaje('batman-sin-autor'), 'utf8');
+    await writeFile(
+      join(rutas.revision, 'batman--autor-despues.md'),
+      dePersonaje('batman-autor-despues', 'miguel-de-cervantes'),
+      'utf8',
+    );
+
+    const r = await retirarFuente(rutas, 'wikisource-es--el-retablo.txt');
+
+    expect(r.ok).toBe(true);
+    expect(await readdir(rutas.revision)).toEqual(['miguel-de-cervantes--c.md']);
+  });
+
   it('y si el documento no existe, lo dice en vez de callar', async () => {
     const rutas = await corpusCon();
     const r = await retirarFuente(rutas, 'wikisource-es--no-existe.txt');

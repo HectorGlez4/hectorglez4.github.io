@@ -1017,9 +1017,9 @@ export function filtrosDeLaBusqueda(
         valor: cita.obra.nombre,
         rotulo: cita.obra.titulo,
         recuento: 0,
-        // El dueño de la Obra: su Autor, mientras ninguna Obra de Personaje tenga Citas
-        // publicadas (lo rompe el build hasta la Historia 35.4).
-        autor: cita.obra.dueño.slug,
+        // El Autor de la Obra —el dueño de una ficha de Autor, el informativo de una de
+        // Personaje— y, si la ficha no lo sabe, el de la Cita: nunca el slug de un Personaje.
+        autor: cita.obra.autor ?? autor.slug,
       };
       opcionDeObra.recuento++;
       deObra.set(cita.obra.nombre, opcionDeObra);

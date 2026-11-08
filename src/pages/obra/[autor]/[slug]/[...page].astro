@@ -36,6 +36,7 @@ import {
 } from '../../../../lib/publicado.ts';
 import {
   ANCLA_DE_DONDE_LEER,
+  MENSAJE_OBRA_DE_PERSONAJE_PUBLICADA,
   ROTULO_DE_DONDE_LEER,
   dondeLeer,
   rutaDeLaObra,
@@ -66,6 +67,7 @@ export const getStaticPaths = (async ({ paginate }) => {
     const autor = obra.autor === undefined ? undefined : autores.get(obra.autor);
     // No debería pasar —la integridad del conjunto y la puerta de las fichas lo impiden—, pero
     // si pasara, la Cabecera enlazaría a un 404 sin que nada lo dijera: el build se para aquí.
+    if (obra.dueño.tipo === 'personaje') throw new Error(`${obra.nombre}: ${MENSAJE_OBRA_DE_PERSONAJE_PUBLICADA}`);
     if (autor === undefined) {
       throw new Error(
         `La Obra «${obra.nombre}» es de «${obra.autor ?? obra.dueño.slug}», que no tiene Página de Autor publicada: ` +

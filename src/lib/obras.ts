@@ -324,7 +324,10 @@ export function indiceDeFichas(fichas: readonly FichaDeObra[]): IndiceDeFichas {
     for (const forma of ficha.formas) {
       if (ficha.autor !== undefined) añadir(porAutor, clave(ficha.autor, forma), ficha);
       if (ficha.personaje !== undefined) {
-        for (const p of ficha.personajes ?? [ficha.personaje]) añadir(porPersonaje, clave(p, forma), ficha);
+        // El dueño cuenta siempre, aunque una ficha hecha fuera del esquema no lo liste.
+        for (const p of new Set([ficha.personaje, ...(ficha.personajes ?? [])])) {
+          añadir(porPersonaje, clave(p, forma), ficha);
+        }
       }
     }
   }
@@ -351,10 +354,24 @@ export function fichasDeCita(
 ): readonly FichaDeObra[] {
   const forma = formaDeCita(cita);
   if (forma === undefined) return [];
+  return fichasDeForma(cita, forma, fichas);
+}
+
+/**
+ * La misma regla de dos pasos de `fichasDeCita`, sobre una forma ya canónica: las fichas que
+ * reclaman `forma` para el Autor —dueño o informativo— y, si ninguna, para el Personaje. La usan
+ * quienes ya tienen la forma —la relación de AD-27, el ajuste de títulos—, para que nadie resuelva
+ * la Obra de una Cita con otra regla.
+ */
+export function fichasDeForma(
+  quien: { autor?: string; personaje?: string },
+  forma: string,
+  fichas: readonly FichaDeObra[] | IndiceDeFichas,
+): readonly FichaDeObra[] {
   const indice = esIndice(fichas) ? fichas : indiceDeFichas(fichas);
-  const paso1 = cita.autor === undefined ? [] : (indice.porAutor.get(clave(cita.autor, forma)) ?? []);
+  const paso1 = quien.autor === undefined ? [] : (indice.porAutor.get(clave(quien.autor, forma)) ?? []);
   if (paso1.length > 0) return paso1;
-  return cita.personaje === undefined ? [] : (indice.porPersonaje.get(clave(cita.personaje, forma)) ?? []);
+  return quien.personaje === undefined ? [] : (indice.porPersonaje.get(clave(quien.personaje, forma)) ?? []);
 }
 
 /**
@@ -580,6 +597,8 @@ export function fallosDeObras(
           `${candidatas.map((f) => f.ruta).join(', ')}. Una Cita la resuelve una sola ficha: ` +
           'una de ellas reclama una forma que no es suya.',
       );
+      // Ambigua, no se la atribuye a ninguna: la guarda de abajo no la cuenta por la primera.
+      continue;
     }
     const ficha = candidatas[0];
     if (ficha.personaje !== undefined) {

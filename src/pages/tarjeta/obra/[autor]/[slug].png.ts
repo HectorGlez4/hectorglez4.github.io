@@ -14,7 +14,7 @@
 import type { APIRoute, GetStaticPaths } from 'astro';
 import sharp from 'sharp';
 import { autoresPublicados, conjuntoPublicable, obrasPublicadas } from '../../../../lib/publicado.ts';
-import { segmentosDeObra } from '../../../../lib/obras.ts';
+import { MENSAJE_OBRA_DE_PERSONAJE_PUBLICADA, segmentosDeObra } from '../../../../lib/obras.ts';
 import {
   datosDeTarjetaDeObra,
   svgDeTarjetaDeListado,
@@ -32,6 +32,7 @@ export const getStaticPaths = (async () => {
     // Historia 35.2 — la Obra de un Personaje no llega aquí con Citas publicadas (la pinta la 35.4).
     const autor = obra.autor === undefined ? undefined : autores.get(obra.autor);
     // La Tarjeta firmaría con un hueco: el build se para, como la Página de Obra.
+    if (obra.dueño.tipo === 'personaje') throw new Error(`${obra.nombre}: ${MENSAJE_OBRA_DE_PERSONAJE_PUBLICADA}`);
     if (autor === undefined) {
       throw new Error(`La Obra «${obra.nombre}» es de «${obra.autor ?? obra.dueño.slug}», que no tiene Página de Autor publicada.`);
     }

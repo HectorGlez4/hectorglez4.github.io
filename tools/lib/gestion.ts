@@ -58,7 +58,6 @@ import {
   type Rutas,
 } from './corpus.ts';
 import { dueñoPorPrefijo } from './autoria.ts';
-import { dueñoDeCita } from '../../src/lib/obras.ts';
 import { leerColeccionesRetiradas } from './curacion.ts';
 import { descartesPorCandidato, slugsSembrados } from './epocas.ts';
 import { readFile } from 'node:fs/promises';
@@ -904,12 +903,9 @@ export async function retirarFuente(rutas: Rutas, fichero: string): Promise<Resu
 
   await mkdir(rutas.fuentesRetiradas, { recursive: true });
   await rename(origen, join(rutas.fuentesRetiradas, fichero));
-  for (const candidata of suyas) {
-    await rm(
-      join(rutas.revision, `${nombreDeFicheroDeCita(dueñoDeCita(candidata).slug, candidata.slug)}.md`),
-      { force: true },
-    );
-  }
+  // Su propio fichero, tal como se leyó: el prefijo del nombre es el del dueño **al darla de
+  // alta** y no se recalcula (Historia 35.2: saber después el Autor no cambia el slug).
+  for (const candidata of suyas) await rm(candidata.ruta, { force: true });
 
   return {
     ok: true,

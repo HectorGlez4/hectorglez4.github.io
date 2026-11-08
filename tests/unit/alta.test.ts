@@ -481,8 +481,20 @@ describe('Historia 35.1 — el alta deriva la clase y la anota', () => {
     expect(informe.publicadas).toEqual([]);
     expect(informe.enRevision).toEqual([]);
     expect(informe.personajesDesconocidos).toEqual(['joker']);
+    expect(informe.sinDueño).toEqual([{ indice: 0, texto: 'Por qué tan serio.', personaje: 'joker' }]);
     expect(await readdir(rutas.revision)).toEqual([]);
-    expect(formatearInforme(informe)).toContain('joker');
+    expect(formatearInforme(informe)).toContain('entrada 1 (Personaje «joker»): «Por qué tan serio.»');
+  });
+
+  it('Historia 35.2 — con Autor y un Personaje que no existe, va a revisión y el parte no la da por perdida', async () => {
+    const rutas = await corpusDePrueba();
+    const informe = await darDeAltaLote([{ ...COMPLETA, personaje: 'joker', texto: 'Por qué tan serio.' }], rutas);
+    expect(informe.publicadas).toEqual([]);
+    expect(informe.enRevision).toHaveLength(1);
+    expect(informe.enRevision[0].motivos.join('\n')).toMatch(/El Personaje «joker» no existe/u);
+    expect(informe.personajesDesconocidos).toEqual(['joker']);
+    expect(informe.sinDueño).toBeUndefined();
+    expect(formatearInforme(informe)).not.toMatch(/no se han escrito/u);
   });
 
   it('una clase tecleada en el lote no se obedece: la entrada va a revisión con el motivo', async () => {

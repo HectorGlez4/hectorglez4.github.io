@@ -97,6 +97,10 @@ if (orden === 'crear' && opcion(argumentos, '--universo') === undefined && !noRe
 if (orden === 'semblanza' && opcion(argumentos, '--responde') === undefined && !noReconocidos.some((m) => m.includes('--responde'))) {
   noReconocidos.push('Falta «--responde "<quién>"»: una semblanza propia dice quién responde de ella.');
 }
+// Una bandera con valor vacío es la forma de la invocación, no lo que dice: sale con 2.
+for (const bandera of forma.conValor) {
+  if (opcion(argumentos, bandera) === '') noReconocidos.push(`«${bandera}» va vacía.`);
+}
 if (noReconocidos.length > 0) salirPorLaForma(noReconocidos);
 
 const rutas = rutasDelCorpus(raizDeCorpusDe(argumentos));

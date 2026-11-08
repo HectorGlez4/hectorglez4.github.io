@@ -668,6 +668,8 @@ describe('Historia 35.1 — aprobar deriva la clase y la anota', () => {
     const { estadoDerechos: _e, autor: _a, ...sinAutor } = CANDIDATA_COMPLETA;
     const dePersonaje = { ...sinAutor, personaje: 'batman', slug: 'batman-la-noche-es-larga', clase: 'atribuida' };
     const rutas = await conAutores([]);
+    await mkdir(rutas.personajes, { recursive: true });
+    await writeFile(join(rutas.personajes, 'batman.yml'), 'nombre: "Batman"\nuniverso: "DC Comics"\n', 'utf8');
     await writeFile(join(rutas.revision, 'batman--la-noche-es-larga.md'), ficheroDeCita(dePersonaje), 'utf8');
     const antes = await readFile(join(rutas.revision, 'batman--la-noche-es-larga.md'), 'utf8');
     const lote = await loteEnRevision(rutas);
@@ -680,6 +682,18 @@ describe('Historia 35.1 — aprobar deriva la clase y la anota', () => {
       { slug: dePersonaje.slug, motivos: ['la puerta de la atribuida está cerrada (Historia 35.1b)'] },
     ]);
     expect(await readFile(join(rutas.revision, 'batman--la-noche-es-larga.md'), 'utf8')).toBe(antes);
+    expect(await ficherosPublicados(rutas)).toEqual([]);
+  });
+
+  it('Historia 35.2 — la de un Personaje que no existe no se aprueba, y lo dice antes que la puerta', async () => {
+    const { estadoDerechos: _e, autor: _a, ...sinAutor } = CANDIDATA_COMPLETA;
+    const dePersonaje = { ...sinAutor, personaje: 'joker', slug: 'joker-por-que-tan-serio', clase: 'atribuida' };
+    const rutas = await conAutores([]);
+    await writeFile(join(rutas.revision, 'joker--por-que-tan-serio.md'), ficheroDeCita(dePersonaje), 'utf8');
+    const resultado = await aprobar(rutas, [dePersonaje.slug]);
+    expect(resultado.publicadas).toEqual([]);
+    expect(resultado.rechazadasPorAdmision).toHaveLength(1);
+    expect(resultado.rechazadasPorAdmision[0].motivos.join('\n')).toMatch(/Personaje «joker» no existe en corpus\/personajes\//u);
     expect(await ficherosPublicados(rutas)).toEqual([]);
   });
 

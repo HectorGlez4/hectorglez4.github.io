@@ -1477,7 +1477,7 @@ describe('22.6 — la nota de la ficha: ninguna orden la escribe, y las que rees
     // Cita pasa a la grafía por omisión, y la ficha conserva lo demás.
     const ruta = join(rutas.obras, `${destino}.yml`);
     await writeFile(ruta, (await readFile(ruta, 'utf8')).replace(/^titulo: .*$/m, 'titulo: "Título viejo"'), 'utf8');
-    const lineas = await ajustarTitulosDeObra(rutas, 'seneca', ['de la brevedad de la vida'], ESQUEMA);
+    const lineas = await ajustarTitulosDeObra(rutas, { autor: 'seneca' }, ['de la brevedad de la vida'], ESQUEMA);
     expect(lineas.join('\n')).toContain('Título viejo');
     expect(await yamlDe(destino)).not.toContain('Título viejo');
     await comprobar(destino);

@@ -174,7 +174,7 @@ export const personaje = z
 
 /** Sin Autor ni Personaje, una Cita no tiene dueño: ni prefijo, ni fichero, ni página. */
 export const MENSAJE_CITA_SIN_DUEÑO =
-  'Regla incumplida: falta el Autor de la Cita. Toda Cita lleva Autor o Personaje, al menos uno: ' +
+  'Regla incumplida: falta el Autor o el Personaje de la Cita. Toda Cita lleva uno de los dos, al menos: ' +
   'es su dueño, y de él salen el prefijo de su slug y su fichero.';
 
 /**

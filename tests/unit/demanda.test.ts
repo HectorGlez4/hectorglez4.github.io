@@ -472,6 +472,30 @@ describe('la orden', () => {
     expect(Object.keys(movil.familias)).toEqual(['cita', 'autor', 'directorio']);
     // Lo que es solo del informe no se escribe.
     expect(escrito).not.toMatch(/slugsSinAutor|citasConClic/);
+    // Historia 35.2 — sin Personajes, la entrada no lleva la clave.
+    expect(movil).not.toHaveProperty('personajes');
+  });
+
+  it('Historia 35.2 — la orden lee corpus/personajes/: la Cita de un Personaje va a su fila, en la serie y en el informe', async () => {
+    const corpus = await corpusDePrueba();
+    await writeFile(join(corpus, 'autores', 'bruce.yml'), AUTOR('Bruce'), 'utf8');
+    await mkdir(join(corpus, 'personajes'), { recursive: true });
+    await writeFile(join(corpus, 'personajes', 'bruce-wayne.yml'), 'nombre: "Bruce Wayne"\nuniverso: "DC Comics"\n', 'utf8');
+    const filas: FilaDeTrafico[] = [
+      { keys: [URL('/cita/bruce-wayne-la-noche-es-larga/')], clicks: 2, impressions: 20, position: 5 },
+      { keys: [URL('/cita/bruce-la-noche-es-larga/')], clicks: 1, impressions: 8, position: 9 },
+    ];
+    const salida = capturarSalida();
+
+    expect(await principal(['--corpus', corpus, '--registrar'], conCliente(fuente([], filas).consultar), CREDENCIAL, HOY)).toBe(0);
+
+    const movil = parsearYaml(await readFile(join(corpus, FICHERO_DE_DEMANDA), 'utf8')).lecturas.find(
+      (e: { clase: string }) => e.clase === '28-dias',
+    );
+    expect(movil.personajes).toEqual([{ personaje: 'bruce-wayne', clics: 2, impresiones: 20 }]);
+    expect(movil.autores).toEqual([{ autor: 'bruce', clics: 1, impresiones: 8 }]);
+    expect(movil.sinAutor).toEqual({ rutas: 0, clics: 0, impresiones: 0 });
+    expect(salida.join('')).toMatch(/Por Personaje, por impresiones:\n\s+bruce-wayne: 20 impresiones, 2 clics/u);
   });
 
   it('lectura siguiente: la serie ya tiene meses, solo se lee la ventana de 28 días', async () => {

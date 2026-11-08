@@ -417,7 +417,14 @@ const ocupados = new Set([
  */
 const clave = (autorDeLaCita: string, texto: string) => `${autorDeLaCita} ${normalizar(texto)}`;
 
-const yaEnRevision = new Set(enRevision.map((c) => clave(dueñoDeCita(c).slug, c.texto)));
+/*
+ * El dueño de cada una, sin lanzar: lo que está en `_revision/` no lo ha juzgado ningún esquema, y
+ * una candidata sin Autor ni Personaje no casa con nada antes que tumbar la orden (Historia 35.2).
+ */
+const dueñoDe = (c: { slug: string; autor?: string; personaje?: string }) =>
+  c.autor === undefined && c.personaje === undefined ? '' : dueñoDeCita(c).slug;
+
+const yaEnRevision = new Set(enRevision.map((c) => clave(dueñoDe(c), c.texto)));
 
 /*
  * Y lo que ya **es Cita publicada**, también por texto.
@@ -431,7 +438,7 @@ const yaEnRevision = new Set(enRevision.map((c) => clave(dueñoDeCita(c).slug, c
  * Y re-extraer no es raro: es lo que se hace cada vez que entra una puerta nueva y hay que
  * pasar por ella los documentos viejos.
  */
-const yaPublicadas = new Set(publicadas.map((c) => clave(dueñoDeCita(c).slug, c.texto)));
+const yaPublicadas = new Set(publicadas.map((c) => clave(dueñoDe(c), c.texto)));
 
 let repetidas = 0;
 let yaEstaban = 0;

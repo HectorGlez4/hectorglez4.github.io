@@ -175,6 +175,27 @@ describe('tools/personaje.ts', () => {
     expect(hecho.ok).toBe(false);
     if (!hecho.ok) expect(hecho.motivos.join('\n')).toMatch(/slug de un Personaje/);
     expect(existsSync(join(corpus, 'autores', 'batman.yml'))).toBe(false);
+    // Y la orden sale con 1, no con 2: la invocación es buena, lo que dice choca.
+    const r = await ejecutar(
+      'npx',
+      ['tsx', join(RAIZ, 'tools/autor.ts'), 'crear', '--nombre', 'Batman', '--fallecimiento', '1900', '--semblanza', 'Un hombre.', '--corpus', corpus],
+      { cwd: RAIZ },
+    ).then(
+      () => ({ codigo: 0, error: '' }),
+      (fallo: { code?: number; stderr?: string }) => ({ codigo: fallo.code ?? 1, error: fallo.stderr ?? '' }),
+    );
+    expect(r.codigo, r.error).toBe(1);
+    expect(r.error).toMatch(/slug de un Personaje/);
+    expect(existsSync(join(corpus, 'autores', 'batman.yml'))).toBe(false);
+  });
+
+  it('una bandera con valor vacío es la forma de la invocación: sale con 2', async () => {
+    const corpus = await corpusVacio();
+    await writeFile(join(corpus, 'personajes', 'batman.yml'), BATMAN, 'utf8');
+    const antes = await foto(corpus);
+    expect((await correr(corpus, ['semblanza', 'batman', 'Un texto.', '--responde', ''])).codigo).toBe(2);
+    expect((await correr(corpus, ['crear', 'Robin', '--universo', ''])).codigo).toBe(2);
+    expect(await foto(corpus)).toEqual(antes);
   });
 
   it('listar, proponer-claves y clave: la clave de un Personaje, con su revisión', async () => {

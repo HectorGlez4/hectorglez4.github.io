@@ -108,7 +108,13 @@ import {
   rutaDeTema,
   rutaNormalizada,
 } from '../../src/lib/superficies.ts';
-import { dueñoDeCita, dueñoDeFicha, formaDeObra, rutaDeLaObra } from '../../src/lib/obras.ts';
+import {
+  fichasDeForma,
+  formaDeObra,
+  indiceDeFichas,
+  rutaDeLaObra,
+  type FichaDeObra,
+} from '../../src/lib/obras.ts';
 import { documentoDeCita, documentosDeCita } from './cotejo.ts';
 import { obraDeIndice } from './indice.ts';
 import type { FamiliaDeFichero, FamiliaDeRuta } from './avisar.ts';
@@ -380,6 +386,8 @@ export interface ObraParaFechar {
   autor?: string;
   /** El Personaje dueño, en la ficha de un Personaje (35.2). */
   personaje?: string;
+  /** Los Personajes de la Obra, dueño incluido (35.2): resuelven sus Citas en el segundo paso. */
+  personajes?: readonly string[];
   /** Las formas canónicas que reclama: resuelven las bajas de Cita y las de ficha. */
   formas?: readonly string[];
   ruta: string;
@@ -466,17 +474,24 @@ export function relacionDeSuperficies(corpus: CorpusParaFechar): Map<string, Sup
   const bajas = corpus.bajas ?? {};
   const vivos = new Set(ficherosDelCorpus(corpus));
 
-  /** La ficha viva que reclama (Autor, forma): resuelve la Obra de una Cita que se fue. */
-  const fichaViva = new Map<string, ObraParaFechar>();
-  for (const ficha of fichas) {
-    for (const forma of ficha.formas ?? []) fichaViva.set(clave(dueñoDeLaFicha(ficha), forma), ficha);
-  }
-  /** Las fichas que se fueron, por (Autor, forma): fechan las Citas de hoy que reclamaban. */
-  const fichasDeBaja = new Map<string, string[]>();
-  for (const ficha of bajas.obras ?? []) {
-    if (vivos.has(ficha.ruta)) continue;
-    for (const forma of ficha.formas ?? []) apilar(fichasDeBaja, clave(dueñoDeLaFicha(ficha), forma), ficha.ruta);
-  }
+  /*
+   * Las fichas vivas y las que se fueron, indexadas con la regla de dos pasos de la resolución
+   * (`fichasDeForma`, Historia 35.2): una Cita encuentra su ficha por su Autor —dueño o `autor`
+   * informativo— y, si no, por su Personaje, aquí igual que en el build. La viva resuelve la Obra
+   * de una Cita que se fue; las de baja fechan las Citas de hoy que reclamaban.
+   */
+  const comoFicha = (ficha: ObraParaFechar): FichaDeObra => ({
+    nombre: ficha.nombre,
+    ruta: ficha.ruta,
+    titulo: '',
+    formas: ficha.formas ?? [],
+    ...(ficha.autor !== undefined ? { autor: ficha.autor } : {}),
+    ...(ficha.personaje !== undefined ? { personaje: ficha.personaje } : {}),
+    ...(ficha.personajes !== undefined ? { personajes: ficha.personajes } : {}),
+  });
+  const vivasPorNombre = new Map(fichas.map((ficha) => [ficha.nombre, ficha]));
+  const indiceVivo = indiceDeFichas(fichas.map(comoFicha));
+  const indiceDeBaja = indiceDeFichas((bajas.obras ?? []).filter((ficha) => !vivos.has(ficha.ruta)).map(comoFicha));
   /**
    * Los documentos, de hoy y de baja, por su nombre sin extensión; y aparte, los índices de
    * subpáginas (Historia 24.9), por la Obra de los documentos que ordenan (`{fuente}--{obra}`):
@@ -495,7 +510,7 @@ export function relacionDeSuperficies(corpus: CorpusParaFechar): Map<string, Sup
     const forma = formaDe(cita);
     return [
       ...(cita.obra === undefined ? [] : [ficheroDeObra.get(cita.obra)].filter(definido)),
-      ...(forma === undefined ? [] : (fichasDeBaja.get(clave(dueñoDeLaCita(cita), forma)) ?? [])),
+      ...(forma === undefined ? [] : fichasDeForma(cita, forma, indiceDeBaja).map((ficha) => ficha.ruta)),
     ];
   };
 
@@ -621,7 +636,7 @@ export function relacionDeSuperficies(corpus: CorpusParaFechar): Map<string, Sup
   for (const slug of new Set(conObra.map((cita) => cita.autor))) {
     componer(directorioDeObras, deAutor(slug), 'autor');
   }
-  for (const slug of new Set(corpus.citas.map((cita) => cita.personaje))) {
+  for (const slug of new Set(conObra.map((cita) => cita.personaje))) {
     componer(directorioDeObras, dePersonaje(slug), 'personaje');
   }
 
@@ -669,7 +684,8 @@ export function relacionDeSuperficies(corpus: CorpusParaFechar): Map<string, Sup
     for (const tema of baja.temas ?? []) componer(rutaDeTema(tema), baja.ruta, 'cita');
     for (const ruta of coleccionesDe.get(baja.slug) ?? []) componer(ruta, baja.ruta, 'cita');
     const forma = formaDe(baja);
-    const obra = forma === undefined ? undefined : fichaViva.get(clave(dueñoDeLaCita(baja), forma));
+    const resuelta = forma === undefined ? undefined : fichasDeForma(baja, forma, indiceVivo)[0];
+    const obra = resuelta === undefined ? undefined : vivasPorNombre.get(resuelta.nombre);
     if (obra !== undefined) componer(rutaDeLaObra(obra), baja.ruta, 'cita');
   }
 
@@ -806,22 +822,28 @@ export function bajasDelHistorial(
     const version = ultima.antes;
     if (version === null || version === VERSION_OPACA) continue;
     if (familia === 'cita') {
-      const { slug, autor, temas, procedencia } = version as Record<string, unknown>;
-      if (typeof slug !== 'string' || typeof autor !== 'string') continue;
+      const { slug, autor, personaje, temas, procedencia } = version as Record<string, unknown>;
+      // Historia 35.2 — una Cita tiene dueño: su Autor o, sin él, su Personaje.
+      if (typeof slug !== 'string' || (typeof autor !== 'string' && typeof personaje !== 'string')) continue;
       const obra = (procedencia as { obra?: unknown } | null | undefined)?.obra;
       citas.push({
         slug,
-        autor,
+        ...(typeof autor === 'string' ? { autor } : {}),
+        ...(typeof personaje === 'string' ? { personaje } : {}),
         temas: Array.isArray(temas) ? temas.filter((t): t is string => typeof t === 'string') : [],
         ...(typeof obra === 'string' ? { obraDeclarada: obra } : {}),
         ruta: fichero,
       });
     } else if (familia === 'obra') {
-      const { autor, formas } = version as Record<string, unknown>;
-      if (typeof autor !== 'string' || !Array.isArray(formas)) continue;
+      const { autor, personaje, personajes, formas } = version as Record<string, unknown>;
+      if ((typeof autor !== 'string' && typeof personaje !== 'string') || !Array.isArray(formas)) continue;
       obras.push({
         nombre: nombreDeFicha(fichero),
-        autor,
+        ...(typeof autor === 'string' ? { autor } : {}),
+        ...(typeof personaje === 'string' ? { personaje } : {}),
+        ...(Array.isArray(personajes)
+          ? { personajes: personajes.filter((p): p is string => typeof p === 'string') }
+          : {}),
         formas: formas.filter((f): f is string => typeof f === 'string'),
         ruta: fichero,
       });
@@ -941,18 +963,6 @@ function formaDe(cita: CitaParaFechar): string | undefined {
   return forma === '' ? undefined : forma;
 }
 
-function clave(dueño: string, forma: string): string {
-  return `${dueño}\u0000${forma}`;
-}
-
-/* El dueño de una ficha y el de una Cita (Historia 35.2): la regla única de `src/lib/obras.ts`. */
-function dueñoDeLaFicha(ficha: ObraParaFechar): string {
-  return dueñoDeFicha(ficha).slug;
-}
-
-function dueñoDeLaCita(cita: CitaParaFechar): string {
-  return dueñoDeCita(cita).slug;
-}
 
 /** El nombre de un fichero sin directorio y, si es un documento, sin su `.txt`. */
 function nombreDeDocumento(ruta: string): string {

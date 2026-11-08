@@ -5,7 +5,7 @@ created: '2026-11-08'
 status: 'done'
 baseline_revision: '4bdf6dff7db0151bae8d17bcb212280f599c154c'
 review_loop_iteration: 0
-followup_review_recommended: false
+followup_review_recommended: true
 context:
   - '{project-root}/_bmad-output/implementation-artifacts/epic-35-context.md'
   - '{project-root}/_bmad-output/implementation-artifacts/spec-35-1-la-clase-se-fija-al-dar-de-alta-y-queda-registrada.md'
@@ -43,6 +43,18 @@ deferred:
       el primer Personaje.
     evidence: |-
       src/content.config.ts, colección `personajes`; ningún byte de `dist/` cambia por ello.
+    severity: low
+  - summary: >-
+      El criterio «`diff -r` de `dist/` sin ninguna diferencia» no se cumple al pie de la letra
+      por un no determinismo previo de Pagefind: los nombres de `pagefind/filter/*.pf_filter`,
+      `pagefind.es_*.pf_meta` y `pagefind-entry.json` cambian entre dos pasadas sobre el mismo
+      árbol. Se compara `dist/` sin `pagefind/`; si el criterio debe exigir también eso (o una
+      comparación por contenido del índice), lo decide Héctor.
+    evidence: |-
+      Verificación de la implementación y de la primera pasada de revisión externa (35.2-1): dos
+      construcciones de la misma revisión con la misma FECHA_JORNADA difieren solo en esos nombres.
+    location: >-
+      dist/pagefind/
     severity: low
 ---
 
@@ -147,6 +159,34 @@ deferred:
 - addressed_findings:
   - none
 
+### 2026-11-08 — Review pass
+- intent_gap: 0
+- bad_spec: 0
+- patch: 20 (high 0, medium 6, low 14)
+- defer: 1 (high 0, medium 0, low 1)
+- reject: 26 (high 0, medium 3, low 23)
+- addressed_findings:
+  - `[medium]` `[patch]` Dos nociones de dueño: la relación de AD-27 (bajas de Cita y de ficha) y `ajustarTitulosDeObra` buscaban la ficha por (dueño de la ficha) frente a (dueño de la Cita), y no encontraban la de un Personaje resuelta por su `autor` informativo. Ahora las dos usan la regla de dos pasos (`fichasDeForma`, nueva en `src/lib/obras.ts`, que también usa `fichasDeCita`); `ObraParaFechar` y `bajasDelHistorial` llevan `personajes` y leen bajas con Autor o Personaje.
+  - `[medium]` `[patch]` El nombre de fichero se recalculaba con `dueñoDeCita` y divergía del prefijo del slug cuando el Autor se supo después: `retirarFuente` borra ahora el fichero que leyó (`candidata.ruta`) y `reescribirConSlug` conserva el prefijo del fichero de la candidata mientras el slug definitivo lo lleve.
+  - `[medium]` `[patch]` Prueba de `retirarAutor` con Autor `bruce` y Personaje `bruce-wayne` (Colección y portada), y su contraprueba sin el Personaje (`gestion.test.ts`).
+  - `[medium]` `[patch]` Pruebas de la composición de AD-27 con Personajes (`fecha-de-cambio.test.ts`): `nombre` en Cita, listados y Obra de que es dueño; `ordenAlfabetico` en los Directorios; `universo` en ninguna; bajas por el `autor` informativo y por `personajes`; versiones sin dueño sin lanzar.
+  - `[medium]` `[patch]` Construcción con un Personaje cuya semblanza no es literal de su biografía: rompe nombrando su fichero (`personajes-build.test.ts`).
+  - `[medium]` `[patch]` `principal` de la demanda con un Personaje y `--registrar`: su fila va a `personajes` en la serie y «Por Personaje» en el informe; sin Personajes la entrada no lleva la clave (`demanda.test.ts`).
+  - `[low]` `[patch]` El parte del alta separa los Personajes desconocidos (no se crean) de las entradas sin dueño, que ahora salen en `sinDueño` con su posición y su texto; una con Autor y Personaje desconocido ya no se da por no escrita.
+  - `[low]` `[patch]` `revisar --aprobar` rechaza la candidata cuyo Personaje no existe en `corpus/personajes/`, antes que la puerta de la atribuida.
+  - `[low]` `[patch]` El filtro de la búsqueda lleva en `autor` el Autor de la Obra (o el de la Cita), nunca el slug de un Personaje.
+  - `[low]` `[patch]` La Página de Obra y su Tarjeta Social, ante una Obra de Personaje, se paran con `MENSAJE_OBRA_DE_PERSONAJE_PUBLICADA` en vez de culpar a una Página de Autor.
+  - `[low]` `[patch]` `/obras/` lo componen los Personajes de las Citas con Obra, como los Autores.
+  - `[low]` `[patch]` `MENSAJE_CITA_SIN_DUEÑO` empieza por «falta el Autor o el Personaje de la Cita».
+  - `[low]` `[patch]` `dos-jornadas.test.ts` compara en secuencia todos los avisos salvo los «No files found» de los cargadores, que compara como conjunto.
+  - `[low]` `[patch]` `indiceDeFichas` indexa siempre al dueño, aunque una ficha hecha fuera del esquema no lo liste en `personajes`.
+  - `[low]` `[patch]` Una Cita ambigua no se atribuye a la primera ficha: no dispara además la guarda de la 35.4.
+  - `[low]` `[patch]` La relación no lanza ante una versión de baja sin Autor ni Personaje (no se lee), y lee las de Personaje.
+  - `[low]` `[patch]` `extraer` no lanza al arrancar ante una candidata de `_revision/` sin Autor ni Personaje.
+  - `[low]` `[patch]` `tools/personaje.ts` sale con 2 ante una bandera con valor vacío (`--responde ""`, `--universo ""`).
+  - `[low]` `[patch]` Prueba del código 1 de `tools/autor.ts crear` ante el slug de un Personaje, por la orden y no solo por la biblioteca.
+  - `[low]` `[patch]` Prueba de `retirarFuente` con candidatas de Personaje, sin Autor y con el Autor sabido después.
+
 ## Design Notes
 
 **Por qué dos guardas temporales en el build.** La puerta de la atribuida está cerrada (35.1b): ninguna orden publica una Cita de Personaje, y las de Personaje solo existen en `_revision/` o en fixtures. Las páginas que nombran a un Personaje llegan en la 35.3/35.4; mientras, un fichero escrito a mano rompe el build con un mensaje que nombra la historia, en vez de pintar una página que no nombra a nadie (la misma técnica que la 35.1 usó con «Toda Cita lleva Autor hasta la 35.2»). Por eso la resolución, la ruta y la indexabilidad de la Obra de Personaje se prueban puras.
@@ -209,3 +249,28 @@ Blocking condition: ninguna
 - `npm test` (`npm-test-35.2.log`): 159/163 ficheros; tres fallos eran pruebas del contrato viejo (la Cita de Personaje sin Autor, las familias de fichero, las bases de colección), puestas al día; el cuarto, el agotamiento conocido de 120 s de `extraer-cli` con carga ~16. Las cuatro, juntas (`reintento-35.2.log`): 114/114, EXIT=0. La segunda pasada entera (`npm-test-35.2-b.log`) dio 162/163: `dos-jornadas.test.ts` comparaba los avisos del build en orden, y con dos colecciones vacías en el fixture (`colecciones` y `personajes`) los dos «No files found» salen en cualquier orden; ahora los compara como conjunto. La tercera (`npm-test-35.2-c.log`): FINISHED EXIT=0, 163/163 ficheros, 7.301 pruebas.
 
 **Riesgos residuales.** `extraer-cli` y `objetivo-cli` siguen rozando su plazo de 120 s con varios worktrees construyendo. La 35.3 tendrá que levantar la guarda de la Obra de Personaje o esperar a la 35.4 (diferido del plan).
+
+### Revisión externa, primera pasada (35.2-1, 2026-11-08)
+
+**Resumen.** Cinco capas externas (blind-hunter, edge-case-hunter, verification-gap, intent-alignment, ac-auditor). Sin intent_gap ni bad_spec: el contrato se sostiene, y lo que las capas leían como R1 —las dos guardas de la 35.4, la semblanza con biografía juntas— es lo que dice el `<intent-contract>` («Never: pintar nada de Personajes»; «`semblanza` + `biografia`, juntas»). 20 parches: el principal, que la relación de AD-27 y el ajuste de títulos resuelven la ficha de una Cita con la misma regla de dos pasos que el build (`fichasDeForma`), y que el nombre del fichero de una candidata no se recalcula con el Autor sabido después.
+
+**Ficheros de esta pasada.**
+- `src/lib/obras.ts` — `fichasDeForma` (la regla de dos pasos sobre una forma); el índice cuenta siempre al dueño; una Cita ambigua no se atribuye a ninguna ficha.
+- `tools/lib/cambios.ts`, `integraciones/historial.ts` — la relación resuelve bajas con `fichasDeForma`; `ObraParaFechar.personajes`; bajas con Autor o Personaje; `/obras/` lo componen los Personajes de Citas con Obra.
+- `tools/lib/obras.ts`, `tools/lib/documentacion.ts` — `ajustarTitulosDeObra(rutas, cita, formas)` con la regla de dos pasos.
+- `tools/lib/gestion.ts`, `tools/lib/revision.ts` — el fichero de la candidata conserva su prefijo; `aprobar` rechaza un Personaje inexistente.
+- `tools/alta.ts` — `sinDueño` en el parte, separado de los Personajes desconocidos.
+- `tools/extraer.ts`, `tools/personaje.ts` — sin lanzar ante una candidata sin dueño; bandera vacía con 2.
+- `src/lib/publicado.ts`, `src/lib/admision.ts`, `src/pages/obra/…`, `src/pages/tarjeta/obra/…` — el filtro de Autor de la búsqueda, el mensaje sin dueño y el de la Obra de Personaje.
+- Pruebas: `gestion.test.ts`, `retirar-fuente.test.ts`, `fecha-de-cambio.test.ts`, `personajes-build.test.ts`, `demanda.test.ts`, `personaje.test.ts`, `alta.test.ts`, `revision.test.ts`, `clase.test.ts`, `obras.test.ts`, `dos-jornadas.test.ts`.
+
+**Hallazgos.** 20 parches (0 high, 6 medium, 14 low), 1 diferido (el no determinismo de Pagefind frente al criterio literal de `dist/`, low), 26 rechazados (ya diferidos en el plan, conformes al contrato o calcados del Autor a propósito). `followup_review_recommended: true` (puntuación 3 × 6 + 14 = 32).
+
+**Verificación.**
+- `npx vitest run` de autoria, personaje, demanda, obras, orden-del-libro, gestion, retirar-fuente, indexnow — 8 ficheros, 363 pruebas, verde.
+- `npx vitest run` de personajes-build (seis construcciones), fecha-de-cambio, alta, revision, clase, aislamiento-de-revision — verde.
+- `npx astro check` — 0 errores, 0 avisos, 9 indicaciones (las mismas de antes).
+- `FECHA_JORNADA=2026-11-08 astro build` de `0c4fefb53e88c9facdf10c5c0c682ad3bb375f69` (worktree aparte, con el mismo `_revision/`) y de la rama con los parches; `diff -rq` de `dist/`: **ninguna diferencia**, `pagefind/` incluido esta vez (`logs/s-35/distdiff-35.2-1.log`).
+- `npm test` (`logs/s-35/npm-test-35.2-r1.log`): FINISHED EXIT=0, 163/163 ficheros, 7.313 pruebas.
+
+**Riesgos residuales.** `reescribirConSlug` con el prefijo del Personaje y el Autor sabido después solo se alcanza al abrirse la puerta de la atribuida (35.1b): hoy no hay prueba que lo recorra por `aprobar`. Las rutas de una Obra de Personaje siguen probadas solo puras hasta la 35.4.

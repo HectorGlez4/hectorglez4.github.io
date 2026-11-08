@@ -4,6 +4,7 @@ import { AUTOR_VALIDO, TEMA_VALIDO, citaValida, construirConCorpus, limpiar, pag
 import { MENSAJE_PUBLICADA_SIN_AUTOR } from '../../src/lib/admision.ts';
 import { MENSAJE_OBRA_DE_PERSONAJE_PUBLICADA } from '../../src/lib/obras.ts';
 import { ORDEN_PROPONER_CLAVES_DE_PERSONAJE } from '../../tools/lib/claves.ts';
+import { componerBiografia, nombreDeBiografia } from '../../tools/lib/documento.ts';
 
 /**
  * Historia 35.2 — el Personaje y la Obra de un solo dueño, como puertas del build.
@@ -142,6 +143,38 @@ describe('Historia 35.2 — el Personaje en el build', () => {
     );
     expect(r.salida).toContain(`corpus/obras/joker--el-alba.yml → ${MENSAJE_OBRA_DE_PERSONAJE_PUBLICADA}`);
     expect(r.salida).toMatch(/«la cueva» la reclaman 2 fichas de Personaje: corpus\/obras\/batman--la-cueva\.yml, corpus\/obras\/robin--la-cueva\.yml/u);
+  });
+
+  it('la semblanza por AD-26 de un Personaje se coteja literal contra su biografía, como la del Autor', async () => {
+    const cabecera = {
+      fuente: 'wikipedia-es',
+      titulo: 'Batman',
+      revision: 123,
+      fechaDeRevision: '2024-05-01',
+      licencia: 'CC BY-SA 4.0',
+      url: 'https://es.wikipedia.org/w/index.php?title=Batman&oldid=123',
+      recuperado: '2026-10-10',
+    } as const;
+    const documento = nombreDeBiografia(cabecera.fuente, cabecera.titulo, cabecera.revision);
+    const r = await construirConCorpus({
+      ...BASE,
+      [`biografias/${documento}.txt`]: componerBiografia(
+        cabecera,
+        'Batman',
+        'Batman es un personaje de cómic creado por Bob Kane y Bill Finger en 1939.',
+      ),
+      'personajes/batman.yml':
+        `${personaje('Batman', 'Batman')}semblanza: "Batman es un justiciero inventado que esta revisión no dice."
+` +
+        `biografia:
+  documento: "${documento}"
+  revision: 123
+`,
+    });
+    aLimpiar.push(r.proyecto);
+    expect(r.codigo).not.toBe(0);
+    expect(r.salida).toContain('corpus/personajes/batman.yml');
+    expect(r.salida).toMatch(/el Personaje declara la biografía [^\n]*su semblanza no aparece literal/u);
   });
 
   it('el esquema: una Cita publicada sin Autor rompe hasta la 35.4', async () => {

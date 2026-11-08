@@ -134,7 +134,7 @@ describe('35.1 — el esquema', () => {
     const { autor: _autor, ...sinAutor } = base;
     expect(citaAdmisible.safeParse({ ...sinAutor, clase: CLASE_ATRIBUIDA, personaje: 'sancho' }).success).toBe(true);
     expect(mensajes({ ...sinAutor, estadoDerechos: 'dominio-público' }).join('\n')).toMatch(
-      /^autor: .*Autor o Personaje, al menos uno/mu,
+      /^autor: .*falta el Autor o el Personaje de la Cita/mu,
     );
   });
 

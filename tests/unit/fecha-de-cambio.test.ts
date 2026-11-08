@@ -1331,3 +1331,78 @@ describe('Historia 18.4 — el cruce entre lo que git dice y lo que el Corpus ti
     }
   });
 });
+
+describe('Historia 35.2 — la relación de AD-27 conoce al Personaje', () => {
+  const PERSONAJE = 'personajes/batman.yml';
+  const CON_PERSONAJES: CorpusParaFechar = {
+    citas: [
+      // Con Autor y Personaje, en la ficha de su Autor.
+      { slug: 'seneca-la-noche', autor: 'seneca', personaje: 'batman', temas: ['el-tiempo'], obra: 'seneca--la-noche', obraDeclarada: 'La noche', ruta: 'citas/c1.md' },
+      // De un Personaje sin Autor, en la ficha del Personaje.
+      { slug: 'batman-el-alba', personaje: 'batman', temas: [], obra: 'batman--el-alba', obraDeclarada: 'El alba', ruta: 'citas/c2.md' },
+      // Resuelve, en el segundo paso, una ficha de Personaje que se fue.
+      { slug: 'robin-la-cueva', personaje: 'robin', temas: [], obraDeclarada: 'La cueva', ruta: 'citas/c3.md' },
+      // Un Personaje cuyas Citas no tienen Obra no figura en `/obras/`.
+      { slug: 'joker-sin-obra', personaje: 'joker', temas: [], ruta: 'citas/c4.md' },
+    ],
+    autores: [{ slug: 'seneca', ruta: 'autores/seneca.yml' }],
+    personajes: [
+      { slug: 'batman', ruta: PERSONAJE },
+      { slug: 'robin', ruta: 'personajes/robin.yml' },
+      { slug: 'joker', ruta: 'personajes/joker.yml' },
+    ],
+    temas: [{ slug: 'el-tiempo', ruta: 'temas/el-tiempo.yml' }],
+    colecciones: [],
+    obras: [
+      { nombre: 'seneca--la-noche', autor: 'seneca', formas: ['la noche'], ruta: 'obras/s.yml' },
+      // De Batman, con Séneca informativo: una Cita solo de Séneca la resuelve en el primer paso.
+      { nombre: 'batman--el-alba', personaje: 'batman', personajes: ['batman'], autor: 'seneca', formas: ['el alba'], ruta: 'obras/b.yml' },
+    ],
+    bajas: {
+      citas: [{ slug: 'seneca-el-alba-se-fue', autor: 'seneca', temas: [], obraDeclarada: 'El alba', ruta: 'citas/baja.md' }],
+      obras: [{ nombre: 'batman--la-cueva', personaje: 'batman', personajes: ['batman', 'robin'], formas: ['la cueva'], ruta: 'obras/cueva.yml' }],
+      documentos: [],
+    },
+  };
+  const componentes = componentesPorSuperficie(CON_PERSONAJES);
+  const camposDe = (ruta: string, fichero: string) =>
+    componentes.get(rutaNormalizada(ruta))?.find((c) => c.fichero === fichero)?.campos;
+
+  it('su `nombre` compone la Página de Cita, los listados y la Obra de que es dueño', () => {
+    expect(camposDe('/cita/seneca-la-noche/', PERSONAJE)).toEqual(['nombre']);
+    expect(camposDe('/autor/seneca/', PERSONAJE)).toEqual(['nombre']);
+    expect(camposDe('/tema/el-tiempo/', PERSONAJE)).toEqual(['nombre']);
+    expect(camposDe('/obra/batman/el-alba/', PERSONAJE)).toEqual(['nombre']);
+  });
+
+  it('su `ordenAlfabetico` fecha los Directorios, y `universo` no fecha nada', () => {
+    expect(camposDe('/autores/', PERSONAJE)).toContain('ordenAlfabetico');
+    expect(camposDe('/obras/', PERSONAJE)).toContain('ordenAlfabetico');
+    for (const lista of componentes.values()) {
+      for (const { fichero, campos } of lista) {
+        if (fichero.startsWith('personajes/')) expect(campos).not.toContain('universo');
+      }
+    }
+    // Sin Obra, el Personaje no compone `/obras/`, aunque sí `/autores/`.
+    expect(camposDe('/obras/', 'personajes/joker.yml')).toBeUndefined();
+    expect(camposDe('/autores/', 'personajes/joker.yml')).toBeDefined();
+  });
+
+  it('las bajas se resuelven con la regla de dos pasos, también por el `autor` informativo', () => {
+    // La Cita de Séneca que se fue resolvía la ficha de Batman que lo nombra: fecha esa Obra.
+    expect(camposDe('/obra/batman/el-alba/', 'citas/baja.md')).toBeDefined();
+    // La ficha de Personaje que se fue la reclamaba la Cita de Robin, por `personajes`.
+    expect(camposDe('/cita/robin-la-cueva/', 'obras/cueva.yml')).toBeDefined();
+  });
+
+  it('una baja sin Autor ni Personaje no se lee, y la relación no lanza', () => {
+    const historial: Historial = new Map([
+      ['citas/rota.md', [{ fecha: '2026-11-01T00:00:00Z', antes: { slug: 'rota', temas: [] }, despues: null }]],
+      ['obras/rota.yml', [{ fecha: '2026-11-01T00:00:00Z', antes: { formas: ['x'] }, despues: null }]],
+    ]);
+    const bajas = bajasDelHistorial(historial, familiaDeFichero, new Set());
+    expect(bajas.citas).toEqual([]);
+    expect(bajas.obras).toEqual([]);
+    expect(() => relacionDeSuperficies({ ...CON_PERSONAJES, bajas })).not.toThrow();
+  });
+});

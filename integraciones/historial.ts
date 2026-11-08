@@ -474,6 +474,7 @@ export async function corpusParaFechar(
       nombre: ficha.nombre,
       ...(ficha.autor !== undefined ? { autor: ficha.autor } : {}),
       ...(ficha.personaje !== undefined ? { personaje: ficha.personaje } : {}),
+      ...(ficha.personajes !== undefined ? { personajes: ficha.personajes } : {}),
       formas: ficha.formas,
       ruta: resolve(ficha.ruta),
     })),
