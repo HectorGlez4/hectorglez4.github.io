@@ -1,5 +1,5 @@
 ---
-texto: "Celia, a aquesos hombres llama que lleven esta mujer, que no estoy acostumbrada a oír estas liviandades."
+texto: "Celia, a aquesos hombres llama\nque lleven esta mujer,\nque no estoy acostumbrada\na oír estas liviandades."
 autor: "sor-juana-ines-de-la-cruz"
 slug: "sor-juana-ines-de-la-cruz-celia-a-aquesos-hombres-llama-que-lleven"
 procedencia:

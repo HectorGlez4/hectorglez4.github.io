@@ -1,5 +1,5 @@
 ---
-texto: "¿Y cuánto nombre claro no das también al templo de memoria?"
+texto: "¿Y cuánto nombre claro\nno das también al templo de memoria?"
 autor: "andres-bello"
 slug: "andres-bello-y-cuanto-nombre-claro-no-das-tambien"
 procedencia:

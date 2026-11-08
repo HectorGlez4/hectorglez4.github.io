@@ -1,5 +1,5 @@
 ---
-texto: "No más, no, borceguí; mi chimenea, basten los años que ni aun breve raja de encina la perfuma, o de aceituno."
+texto: "No más, no, borceguí; mi chimenea,\nbasten los años que ni aun breve raja\nde encina la perfuma, o de aceituno."
 autor: "luis-de-gongora"
 slug: "luis-de-gongora-no-mas-no-borcegui-mi-chimenea-basten"
 procedencia:

@@ -1,5 +1,5 @@
 ---
-texto: "SARGENTO: Éstas, señor, no de los hombre se prendan como tú."
+texto: "SARGENTO: Éstas, señor,\nno de los hombre se prendan\ncomo tú."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-sargento-estas-senor-no-de-los-hombre"
 procedencia:

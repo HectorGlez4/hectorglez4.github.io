@@ -1,5 +1,5 @@
 ---
-texto: "Calabozo de la alma, y tan estrecho, fue vuestro breve pecho, que desde aquí mi sufrimiento admiro y del vuestro me espanto, cuando miro que aún vos tenéis la alma de rodillas, si no es que entre las almas hay almillas."
+texto: "Calabozo de la alma, y tan estrecho,\nfue vuestro breve pecho,\nque desde aquí mi sufrimiento admiro\ny del vuestro me espanto, cuando miro\nque aún vos tenéis la alma de rodillas,\nsi no es que entre las almas hay almillas."
 autor: "francisco-de-quevedo"
 slug: "francisco-de-quevedo-calabozo-de-la-alma-y-tan-estrecho"
 procedencia:

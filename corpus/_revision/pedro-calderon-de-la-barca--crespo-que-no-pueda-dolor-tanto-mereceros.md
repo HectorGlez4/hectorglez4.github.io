@@ -1,5 +1,5 @@
 ---
-texto: "CRESPO: ¿Que no pueda dolor tanto mereceros un consuelo?"
+texto: "CRESPO: ¿Que no pueda dolor tanto\nmereceros un consuelo?"
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-crespo-que-no-pueda-dolor-tanto-mereceros"
 procedencia:

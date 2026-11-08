@@ -1,5 +1,5 @@
 ---
-texto: "ISABEL: Esta tarde diz que ha hecho la villa elección de oficios."
+texto: "ISABEL: Esta tarde diz que ha hecho\nla villa elección de oficios."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-isabel-esta-tarde-diz-que-ha-hecho"
 procedencia:

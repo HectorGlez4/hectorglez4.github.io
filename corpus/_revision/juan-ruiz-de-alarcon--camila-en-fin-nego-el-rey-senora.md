@@ -1,5 +1,5 @@
 ---
-texto: "CAMILA En fin negò el Rey, señora, a tu padre la licencia?"
+texto: "CAMILA\nEn fin negò el Rey, señora,\na tu padre la licencia?"
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-camila-en-fin-nego-el-rey-senora"
 procedencia:

@@ -1,5 +1,5 @@
 ---
-texto: "Retirado en la paz de estos desiertos, Con pocos, pero doctos libros juntos, Vivo en conversación con los difuntos, Y escucho con mis ojos a los muertos."
+texto: "Retirado en la paz de estos desiertos,\nCon pocos, pero doctos libros juntos,\nVivo en conversación con los difuntos,\nY escucho con mis ojos a los muertos."
 autor: "francisco-de-quevedo"
 slug: "francisco-de-quevedo-retirado-en-la-paz-de-estos-desiertos"
 procedencia:

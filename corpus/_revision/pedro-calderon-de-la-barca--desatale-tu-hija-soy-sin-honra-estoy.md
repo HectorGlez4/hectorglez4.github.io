@@ -1,5 +1,5 @@
 ---
-texto: "Desátale Tu hija soy, sin honra estoy, y tú libre; solicita con mi muerte tu alabanza, para que de ti se diga que, por dar vida a tu honor diste la muerte a tu hija."
+texto: "Desátale\nTu hija soy, sin honra estoy,\ny tú libre; solicita\ncon mi muerte tu alabanza,\npara que de ti se diga\nque, por dar vida a tu honor\ndiste la muerte a tu hija."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-desatale-tu-hija-soy-sin-honra-estoy"
 procedencia:

@@ -1,5 +1,5 @@
 ---
-texto: "Alma a quien todo un dios prisión ha sido, venas que humor a tanto fuego han dado, médulas que han gloriosamente ardido, su cuerpo dejará, no su cuidado; serán ceniza, mas tendrá sentido; polvo serán, mas polvo enamorado."
+texto: "Alma a quien todo un dios prisión ha sido,\nvenas que humor a tanto fuego han dado,\nmédulas que han gloriosamente ardido,\nsu cuerpo dejará, no su cuidado;\nserán ceniza, mas tendrá sentido;\npolvo serán, mas polvo enamorado."
 autor: "francisco-de-quevedo"
 temas:
   - "la-muerte"

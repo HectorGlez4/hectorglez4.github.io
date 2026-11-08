@@ -1,5 +1,5 @@
 ---
-texto: "LOPE: Ésta es, señor, la mayor temeridad de un villano, que vio el mundo."
+texto: "LOPE: Ésta es, señor,\nla mayor temeridad\nde un villano, que vio el mundo."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-lope-esta-es-senor-la-mayor-temeridad"
 procedencia:

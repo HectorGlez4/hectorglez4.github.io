@@ -1,5 +1,5 @@
 ---
-texto: "IULIA Ha Leonardo, poco entiendes 825 de condicion de muger: ¿no es harta razon, saber, que ausentarteme pretendes?"
+texto: "IULIA\nHa Leonardo, poco entiendes 825\nde condicion de muger:\n¿no es harta razon, saber,\nque ausentarteme pretendes?"
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-iulia-ha-leonardo-poco-entiendes-825-de"
 procedencia:

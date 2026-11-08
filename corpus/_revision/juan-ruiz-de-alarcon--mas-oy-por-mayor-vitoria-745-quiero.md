@@ -1,5 +1,5 @@
 ---
-texto: "Mas oy, por mayor vitoria, 745 quiero hurtar con esta ausencia el cuerpo a vuestra inclemencia, y el alma a vuestra memoria."
+texto: "Mas oy, por mayor vitoria, 745\nquiero hurtar con esta ausencia\nel cuerpo a vuestra inclemencia,\ny el alma a vuestra memoria."
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-mas-oy-por-mayor-vitoria-745-quiero"
 procedencia:

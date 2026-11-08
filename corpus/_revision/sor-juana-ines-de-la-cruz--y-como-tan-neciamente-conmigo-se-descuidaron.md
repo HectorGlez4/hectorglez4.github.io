@@ -1,5 +1,5 @@
 ---
-texto: "Y como tan neciamente conmigo se descuidaron, fue preciso hallarme el riesgo donde me perdió el cuidado."
+texto: "Y como tan neciamente\nconmigo se descuidaron,\nfue preciso hallarme el riesgo\ndonde me perdió el cuidado."
 autor: "sor-juana-ines-de-la-cruz"
 slug: "sor-juana-ines-de-la-cruz-y-como-tan-neciamente-conmigo-se-descuidaron"
 procedencia:

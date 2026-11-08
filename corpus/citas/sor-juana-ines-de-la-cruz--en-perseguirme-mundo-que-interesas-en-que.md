@@ -1,5 +1,5 @@
 ---
-texto: "En perseguirme, Mundo, ¿Qué interesas? ¿En qué te ofendo, cuando sólo intento poner bellezas en mi entendimiento y no mi entendimiento en las bellezas?"
+texto: "En perseguirme, Mundo, ¿Qué interesas?\n¿En qué te ofendo, cuando sólo intento\nponer bellezas en mi entendimiento\ny no mi entendimiento en las bellezas?"
 autor: "sor-juana-ines-de-la-cruz"
 temas:
   - "la-riqueza"

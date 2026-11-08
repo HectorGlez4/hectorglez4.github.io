@@ -6,6 +6,7 @@ import {
   esFormaDeLineas,
   FORMAS_DE_LINEAS,
   formaDeLasLineas,
+  saltosDeLaCita,
   textoConSaltos,
   type FormaDeLineas,
 } from '../../tools/lib/lineas.ts';
@@ -294,6 +295,7 @@ describe('dueños del salto (AD-29)', () => {
       [/function\s+formaDeLasLineas\b/u, 'tools/lib/lineas.ts'],
       [/function\s+textoConSaltos\b/u, 'tools/lib/lineas.ts'],
       [/function\s+documentoParaLosSaltos\b/u, 'tools/lib/lineas.ts'],
+      [/function\s+saltosDeLaCita\b/u, 'tools/lib/lineas.ts'],
       [/\bFORMAS_DE_LINEAS\s*=/u, 'tools/lib/lineas.ts'],
       [/function\s+tramoEnCrudo\b/u, 'tools/lib/cotejo.ts'],
       [/function\s+rachasDeEspacio\b/u, 'tools/lib/cotejo.ts'],
@@ -304,8 +306,15 @@ describe('dueños del salto (AD-29)', () => {
   });
 
   it('las cinco formas solo se escriben como literal en tools/lib/lineas.ts', () => {
-    const literal = /(['"])(?:verso|verso-espaciado|prosa-por-lineas|prosa-ajustada|indeterminada)\1/u;
-    expect(todos.filter((f) => literal.test(f.contenido)).map((f) => f.ruta)).toEqual(['tools/lib/lineas.ts']);
+    // `class="verso"` no es la forma de un documento: es la clase con que `TextoDeCita.astro`
+    // pinta cada verso desde la 29.3, y queda fuera de la guarda —ella sola: `class=` delante de
+    // otra de las cinco formas sigue contando como literal—.
+    const literal = /(['"])(?:verso|verso-espaciado|prosa-por-lineas|prosa-ajustada|indeterminada)\1/gu;
+    const escribeLaForma = (f: { ruta: string; contenido: string }) =>
+      [...f.contenido.matchAll(literal)].some(
+        (m) => !(m[0] === '"verso"' && f.contenido.slice(Math.max(0, m.index - 6), m.index) === 'class=' && f.ruta === 'src/components/TextoDeCita.astro'),
+      );
+    expect(todos.filter(escribeLaForma).map((f) => f.ruta)).toEqual(['tools/lib/lineas.ts']);
   });
 
   it('quien importa tools/lib/lineas.ts es exactamente la lista declarada (la 31.1 y la 32.3 la amplían)', () => {
@@ -325,6 +334,8 @@ describe('dueños del salto (AD-29)', () => {
         'tools/lib/documentacion.ts',
         'tools/lib/pasaje.ts',
         'tools/lib/posiciones.ts',
+        // La aprobación publica con sus saltos la candidata que llega sin ellos (29.2, `saltosDeLaCita`).
+        'tools/lib/revision.ts',
         'tools/lineas.ts',
         'tools/recuperar.ts',
       ].sort(),
@@ -344,5 +355,79 @@ describe('dueños del salto (AD-29)', () => {
       .map((f) => f.ruta)
       .sort();
     expect(importadores).toEqual(['tools/lib/lineas.ts', 'tools/lib/pasaje.ts']);
+  });
+});
+
+describe('Historia 29.2 — saltosDeLaCita, la decisión que comparten la restitución y la puerta', () => {
+  const versos = { nombre: 'versos', cuerpo: cuerpoDe(VERSOS_SENCILLOS), forma: 'verso' as const };
+  const espaciado = { nombre: 'avariento', cuerpo: cuerpoDe(AVARIENTO), forma: 'verso-espaciado' as const };
+  const enUnaLinea =
+    'Yo vengo de todas partes, Y hacia todas partes voy: Arte soy entre las artes, En los montes, monte soy.';
+  const enVerso =
+    'Yo vengo de todas partes,\nY hacia todas partes voy:\nArte soy entre las artes,\nEn los montes, monte soy.';
+
+  it('sin documentos: sin-documento', () => {
+    expect(saltosDeLaCita(enUnaLinea, [])).toEqual({ tipo: 'sin-documento' });
+  });
+
+  it('en ninguno se localiza: no-se-localiza', () => {
+    expect(saltosDeLaCita('Esto no está en el poema.', [versos])).toEqual({ tipo: 'no-se-localiza' });
+  });
+
+  it('solo en prosa: prosa, con la forma del primero donde se localiza', () => {
+    const prosa = { nombre: 'p', cuerpo: versos.cuerpo, forma: 'prosa-por-lineas' as const };
+    const otra = { nombre: 'q', cuerpo: versos.cuerpo, forma: 'indeterminada' as const };
+    expect(saltosDeLaCita(enUnaLinea, [prosa, otra])).toEqual({ tipo: 'prosa', forma: 'prosa-por-lineas', documento: 'p' });
+  });
+
+  it('de verso: el texto del escritor único, con su documento y su forma', () => {
+    expect(saltosDeLaCita(enUnaLinea, [versos])).toEqual({
+      tipo: 'saltos',
+      texto: enVerso,
+      documento: 'versos',
+      forma: 'verso',
+    });
+    // Ya restituida: la misma decisión, el mismo texto.
+    expect(saltosDeLaCita(enVerso, [versos])).toMatchObject({ tipo: 'saltos', texto: enVerso });
+    // Con el colapsado dado, lo mismo.
+    expect(saltosDeLaCita(enUnaLinea, [{ ...versos, colapsado: colapsarEspacios(versos.cuerpo) }])).toMatchObject({
+      tipo: 'saltos',
+      texto: enVerso,
+    });
+  });
+
+  it('verso espaciado: un solo \\n entre dos versos', () => {
+    expect(saltosDeLaCita('Un hombre rico avariento. Murió con cien mil dolores', [espaciado])).toMatchObject({
+      tipo: 'saltos',
+      texto: 'Un hombre rico avariento.\nMurió con cien mil dolores',
+      forma: 'verso-espaciado',
+    });
+  });
+
+  it('de verso, con el tramo dentro de una línea: sin-saltos', () => {
+    expect(saltosDeLaCita('Yo vengo de todas partes,', [versos])).toEqual({ tipo: 'sin-saltos', documento: 'versos' });
+  });
+
+  it('dos de verso que dan textos distintos: conflicto; si dan el mismo, no', () => {
+    const otraDisposicion = {
+      nombre: 'otra',
+      cuerpo: 'Yo vengo de todas partes, Y hacia todas partes voy:\nArte soy entre las artes, En los montes, monte soy.\nUno\nDos\nTres',
+      forma: 'verso' as const,
+    };
+    expect(saltosDeLaCita(enUnaLinea, [versos, otraDisposicion])).toEqual({
+      tipo: 'conflicto',
+      documentos: ['versos', 'otra'],
+    });
+    // También si uno no da ningún salto y el otro sí.
+    const deUnaLinea = { nombre: 'llana', cuerpo: `${enUnaLinea}\nUno\nDos`, forma: 'verso' as const };
+    expect(saltosDeLaCita(enUnaLinea, [versos, deUnaLinea])).toMatchObject({ tipo: 'conflicto' });
+    expect(saltosDeLaCita(enUnaLinea, [versos, { ...versos, nombre: 'copia' }])).toMatchObject({
+      tipo: 'saltos',
+      documento: 'versos',
+    });
+    // Uno de prosa al lado no es conflicto.
+    expect(
+      saltosDeLaCita(enUnaLinea, [{ ...deUnaLinea, forma: 'prosa-ajustada' as const }, versos]),
+    ).toMatchObject({ tipo: 'saltos', documento: 'versos' });
   });
 });

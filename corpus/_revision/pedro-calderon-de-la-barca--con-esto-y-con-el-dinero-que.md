@@ -1,5 +1,5 @@
 ---
-texto: "Con esto y con el dinero que llevas para el camino, y para hacer, en llegando de asiento, un par de vestidos, al amparo de don Lope y mi bendición, yo fío en Dios, que tengo de verte en otro puesto."
+texto: "Con esto y con el dinero\nque llevas para el camino,\ny para hacer, en llegando\nde asiento, un par de vestidos,\nal amparo de don Lope\ny mi bendición, yo fío\nen Dios, que tengo de verte\nen otro puesto."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-con-esto-y-con-el-dinero-que"
 procedencia:

@@ -1,5 +1,5 @@
 ---
-texto: "Salen don ÁLVARO y todos ÁLVARO: Mirad..."
+texto: "Salen don ÁLVARO y todos\nÁLVARO: Mirad..."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-salen-don-alvaro-y-todos-alvaro-mirad"
 procedencia:

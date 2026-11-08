@@ -1,5 +1,5 @@
 ---
-texto: "Es la otra, que ahora han traído a la villa de secreto unos soldados a curarse con gran prisa aquel capitán que ayer tuvo aquí su compañía."
+texto: "Es la otra,\nque ahora han traído a la villa\nde secreto unos soldados\na curarse con gran prisa\naquel capitán que ayer\ntuvo aquí su compañía."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-es-la-otra-que-ahora-han-traido"
 procedencia:

@@ -5,9 +5,14 @@ import {
   citaConObraMasLarga,
   citaConProcedenciaCompleta,
   citaConLosDosBloques,
+  citaConObraDeTextoMasLargo,
   citaConTarjetaCompleta,
   citaConTituloDeObraMasLargo,
+  citaDeTramo,
+  citaSinImagen,
   citaSinObra,
+  citasEnVerso,
+  estaPublicada,
   procedenciaDe,
 } from './ayuda/corpus.ts';
 import { apuntarGuiones, fueraDeLaListaAlCargar } from './ayuda/guiones.ts';
@@ -583,12 +588,12 @@ test.describe('Historia 22.5 — los enlaces en tinta de la Atribución', () => 
 /**
  * Historia 24.4 — bajo la Cita, la obra de la que sale.
  *
- * La Tarjeta de Obra va entre la Línea de la Fuente y Copiar. Se mide en el navegador lo que la
- * prueba unitaria no ve: que el texto de la Cita sigue empezando en la primera pantalla de
- * 360 × 640 (que Copiar quede justo debajo es deuda aceptada que vigila SM-C5: su posición se
- * anota, y se exige que no pase de la segunda pantalla), los tokens calculados de la tarjeta y
- * de su fila, y la separación de las acciones de debajo. Las Citas salen del Corpus, nunca
- * fijadas a mano. Los valores esperados salen de los tokens de la propia página.
+ * Desde la Historia 30.1 la Tarjeta de Obra va tras Copiar, la Imagen y compartir, antes de las
+ * Rutas de salida. Se mide en el navegador lo que la prueba unitaria no ve: que el texto de la
+ * Cita sigue empezando en la primera pantalla de 360 × 640 y que Copiar va por encima de la
+ * tarjeta (su posición se anota), el orden de tabulación, los tokens calculados de la tarjeta y
+ * de su fila. Las Citas salen del Corpus, nunca fijadas a mano. Los valores esperados salen de los
+ * tokens de la propia página.
  */
 test.describe('Historia 24.4 — la Tarjeta de Obra en la Página de Cita', () => {
   // La cara es obligatoria: si el Corpus de hoy no la tiene, fallan las pruebas que la piden, y
@@ -605,32 +610,107 @@ test.describe('Historia 24.4 — la Tarjeta de Obra en la Página de Cita', () =
     });
   }
 
-  for (const ruta of conTarjeta) {
-    test(`${ruta}: la Cita empieza en la primera pantalla de 360 × 640 y Copiar va debajo de la tarjeta`, async ({
+  /*
+   * Historia 30.1 — las de la medida: la cara completa, la de título de Obra más largo, la de texto
+   * más largo con Obra (la Cita en verso más larga la sustituye cuando la Épica 29 llegue a la rama)
+   * y las tres de la auditoría del 2026-11-05, si están publicadas.
+   */
+  const deTextoLargo = citaConObraDeTextoMasLargo();
+  const AUDITORIA = [
+    'antonio-machado-caminante-no-hay-camino-se-hace-camino',
+    'jose-marti-yo-soy-un-hombre-sincero-de-donde',
+    'jose-marti-yo-vengo-de-todas-partes-y-hacia',
+  ];
+  // Una de la auditoría que el Corpus de hoy no publica no se mide en silencio: se dice por qué.
+  for (const slug of AUDITORIA.filter((s) => !estaPublicada(s))) {
+    test(`/cita/${slug}/: la medida de la auditoría a 360 × 640`, () => {
+      test.skip(true, `La Cita de la auditoría ${slug} no está publicada hoy: su medida no se repite.`);
+    });
+  }
+  const medidas = [
+    ...new Set([
+      ...conTarjeta,
+      ...(deTextoLargo === undefined ? [] : [`/cita/${deTextoLargo.slug}/`]),
+      ...AUDITORIA.filter(estaPublicada).map((slug) => `/cita/${slug}/`),
+    ]),
+  ];
+
+  for (const ruta of medidas) {
+    test(`${ruta}: la Cita empieza en la primera pantalla de 360 × 640 y Copiar va por encima de la tarjeta`, async ({
       page,
     }, info) => {
       test.skip(info.project.name !== 'movil', 'El criterio se enuncia sobre 360×640.');
       await abrir(page, ruta === '(sin tarjeta completa)' ? undefined : ruta);
       expect(await page.evaluate(() => window.scrollY)).toBe(0);
       const cita = await page.locator('blockquote .texto').boundingBox();
-      const tarjeta = await page.locator('.tarjeta-de-obra').boundingBox();
       const copiar = await page.locator('button.copiar').boundingBox();
+      const tarjeta = (await page.locator('.tarjeta-de-obra').count()) === 0 ? null : await page.locator('.tarjeta-de-obra').boundingBox();
       expect(cita).not.toBeNull();
-      expect(tarjeta).not.toBeNull();
       expect(copiar).not.toBeNull();
       expect(cita!.y, ruta).toBeGreaterThan(0);
       expect(cita!.y, ruta).toBeLessThan(640);
-      expect(copiar!.y, ruta).toBeGreaterThanOrEqual(tarjeta!.y + tarjeta!.height);
-      // «Justo debajo»: la deuda aceptada es que Copiar salga de la primera pantalla, no que se
-      // vaya más allá de la segunda (medido el 2026-10-27 con una fila: y = 756 y 867; desde la
-      // 24.5 la tarjeta suma la fila de «Siguiente…» y la cifra se anota con su nombre).
-      expect(copiar!.y, `${ruta}: Copiar pasa de la segunda pantalla`).toBeLessThan(640 * 2);
+      // Las de `conTarjeta` la traen siempre: que falte es una regresión, no una Cita sin Obra.
+      if (conTarjeta.includes(ruta)) expect(tarjeta, `${ruta}: sin .tarjeta-de-obra`).not.toBeNull();
+      if (tarjeta !== null) expect(copiar!.y + copiar!.height, ruta).toBeLessThanOrEqual(tarjeta.y);
+      // Sin tope para la larga: la cifra se anota, y la de la auditoría se compara en el spec.
       info.annotations.push({
-        type: '24.5 a 360 × 640',
-        description: `${ruta}: tarjeta de ${Math.round(tarjeta!.height)} px desde y = ${Math.round(tarjeta!.y)}; Copiar en y = ${Math.round(copiar!.y)} (${copiar!.y + copiar!.height <= 640 ? 'dentro' : 'fuera'} de la primera pantalla)`,
+        type: '30.1 a 360 × 640',
+        description: `${ruta}: Copiar en y = ${Math.round(copiar!.y)} (${copiar!.y + copiar!.height <= 640 ? 'dentro' : 'fuera'} de la primera pantalla); ${tarjeta === null ? 'sin tarjeta' : `tarjeta desde y = ${Math.round(tarjeta.y)}`}`,
       });
     });
   }
+
+  test('30.1 — el orden de tabulación es el del marcado: Atribución y Fuente, acciones, compartir, tarjeta, salidas y pie', async ({
+    page,
+  }, info) => {
+    test.skip(info.project.name !== 'escritorio', 'El teclado se recorre una vez, en escritorio.');
+    await abrir(page, completa);
+    // Historia 30.3 — tras la tarjeta, el bloque de desplegables («Cómo citar» e «Inserta esta cita», cerrados).
+    const GRUPOS = ['atribucion', 'copiar', 'imagen', 'compartir', 'tarjeta', 'desplegables', 'salidas', 'pie'];
+    const recorrido: { grupo: string; indice: number }[] = [];
+    for (let i = 0; i < 400; i++) {
+      await page.keyboard.press('Tab');
+      const foco = await page.evaluate(() => {
+        const activo = document.activeElement;
+        if (activo === null || activo === document.body) return null;
+        const grupo = activo.closest('footer')
+          ? 'pie'
+          : activo.closest('article figure.bloque, article p.fuente')
+            ? 'atribucion'
+            : activo.closest('article .isla[data-compartir]')
+              ? 'compartir'
+              : activo.closest('article .isla[data-imagen]')
+                ? 'imagen'
+                : activo.closest('article .isla')?.querySelector('button.copiar')
+                  ? 'copiar'
+                  : activo.closest('article .tarjeta-de-obra')
+                    ? 'tarjeta'
+                    : activo.closest('article nav.salidas')
+                      ? 'salidas'
+                      : activo.closest('article .desplegables')
+                        ? 'desplegables'
+                      : activo.closest('article')
+                        ? `article: ${activo.outerHTML.slice(0, 120)}`
+                        : 'otro';
+        const indice = [...document.querySelectorAll('*')].indexOf(activo);
+        return { grupo, indice };
+      });
+      if (foco === null) break;
+      recorrido.push(foco);
+      if (foco.grupo === 'pie') break;
+    }
+    // El recorrido llega al pie: si no, lo de abajo fallaría por un orden que no es el problema.
+    expect(recorrido.at(-1)?.grupo, JSON.stringify(recorrido.map((f) => f.grupo))).toBe('pie');
+    // Ninguna parada del `article` fuera de sus grupos: una de más o fuera de sitio se nombra.
+    expect(recorrido.filter((f) => f.grupo.startsWith('article: ')).map((f) => f.grupo)).toEqual([]);
+    const dentro = recorrido.filter((f) => f.grupo !== 'otro');
+    // Cada foco sigue al anterior en el marcado.
+    const indices = dentro.map((f) => f.indice);
+    expect(indices).toEqual([...indices].sort((a, b) => a - b));
+    // Y los grupos van en su orden, todos presentes en la cara completa.
+    const grupos = dentro.map((f) => f.grupo).filter((g, i, todos) => i === 0 || todos[i - 1] !== g);
+    expect(grupos).toEqual(GRUPOS);
+  });
 
   test('24.5 — la tarjeta de la cara completa tiene dos filas, «Siguiente…» primero y del mismo trato', async ({
     page,
@@ -814,32 +894,50 @@ test.describe('Historia 24.4 — la Tarjeta de Obra en la Página de Cita', () =
     });
   });
 
-  test('las acciones de debajo: Copiar a 32 px de la tarjeta, Imagen a 16 px de Copiar, cada botón en su línea', async ({
+  // Historia 30.1 — las acciones bajo la Atribución, y la tarjeta tras compartir (UX-DR114). Desde
+  // la 30.2 van en la Fila de acciones: se mide la fila y los botones, no la isla de Copiar, que
+  // dentro de la fila es `display: contents` y no tiene caja.
+  test('las acciones bajo la Fuente: la fila a 32 px, Imagen a 16 px de Copiar —debajo o al lado—, compartir a 24 px, y la tarjeta detrás', async ({
     page,
   }) => {
     await abrir(page, completa);
     const medida = await page.evaluate(() => {
       const caja = (n: Element | null) => (n as HTMLElement).getBoundingClientRect();
+      const fila = document.querySelector('main article > .fila-de-acciones')!;
+      const compartir = document.querySelector('main .isla[data-compartir]')!;
+      const anterior = fila.previousElementSibling!;
       const tarjeta = caja(document.querySelector('.tarjeta-de-obra'));
-      const islas = [...document.querySelectorAll('main .isla')];
-      const copiar = islas.find((n) => n.querySelector('button.copiar') !== null)!;
-      const imagen = islas.find((n) => n.hasAttribute('data-imagen'))!;
-      const botonCopiar = caja(copiar.querySelector('button.copiar'));
-      const botonImagen = caja(imagen.querySelector('button[data-abrir]'));
+      const botonCopiar = caja(fila.querySelector('button.copiar'));
+      const botonImagen = caja(fila.querySelector('.isla[data-imagen] button[data-abrir]'));
       const columna = caja(document.querySelector('main article'));
       return {
-        tarjetaACopiar: caja(copiar).top - tarjeta.bottom,
-        copiarAImagen: caja(imagen).top - caja(copiar).bottom,
+        anterior: anterior.matches('p.fuente'),
+        fuenteAFila: caja(fila).top - caja(anterior).bottom,
+        filaEnCopiar: Math.abs(caja(fila).top - botonCopiar.top),
+        enFila: window.innerWidth >= 600,
+        copiarAImagen: botonImagen.top - botonCopiar.bottom,
+        alLado: botonImagen.left - botonCopiar.right,
+        mismaAltura: Math.abs(botonImagen.top - botonCopiar.top),
+        filaACompartir: caja(compartir).top - caja(fila).bottom,
+        compartirATarjeta: tarjeta.top - caja(compartir).bottom,
         unidad: parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--unidad')),
-        enSuLinea: botonImagen.top >= botonCopiar.bottom,
         anchos: [botonCopiar.width, botonImagen.width],
         columna: columna.width,
       };
     });
-    expect(Math.abs(medida.tarjetaACopiar - medida.unidad * 4), JSON.stringify(medida)).toBeLessThanOrEqual(1);
-    expect(Math.abs(medida.copiarAImagen - medida.unidad * 2), JSON.stringify(medida)).toBeLessThanOrEqual(1);
-    expect(medida.enSuLinea, JSON.stringify(medida)).toBe(true);
-    for (const ancho of medida.anchos) expect(ancho, JSON.stringify(medida)).toBeLessThan(medida.columna);
+    const dice = JSON.stringify(medida);
+    expect(medida.anterior, dice).toBe(true);
+    expect(Math.abs(medida.fuenteAFila - medida.unidad * 4), dice).toBeLessThanOrEqual(1);
+    expect(medida.filaEnCopiar, dice).toBeLessThanOrEqual(1);
+    if (medida.enFila) {
+      expect(medida.mismaAltura, dice).toBeLessThanOrEqual(1);
+      expect(Math.abs(medida.alLado - medida.unidad * 2), dice).toBeLessThanOrEqual(1);
+    } else {
+      expect(Math.abs(medida.copiarAImagen - medida.unidad * 2), dice).toBeLessThanOrEqual(1);
+    }
+    expect(Math.abs(medida.filaACompartir - medida.unidad * 3), dice).toBeLessThanOrEqual(1);
+    expect(medida.compartirATarjeta, dice).toBeGreaterThan(0);
+    for (const ancho of medida.anchos) expect(ancho, dice).toBeLessThan(medida.columna);
   });
 
   test('sin Obra, Copiar sigue donde estaba: a 32 px de la Atribución o de la Línea de la Fuente', async ({ page }) => {
@@ -850,18 +948,418 @@ test.describe('Historia 24.4 — la Tarjeta de Obra en la Página de Cita', () =
       await document.fonts.ready;
     });
     const medida = await page.evaluate(() => {
-      const copiar = [...document.querySelectorAll('main .isla')].find((n) => n.querySelector('button.copiar') !== null)!;
-      const anterior = copiar.previousElementSibling as HTMLElement;
+      const fila = document.querySelector('main article > .fila-de-acciones')!;
+      const anterior = fila.previousElementSibling as HTMLElement;
       return {
         tarjetas: document.querySelectorAll('.tarjeta-de-obra').length,
         anterior: anterior.matches('figure, p.fuente'),
-        hueco: copiar.getBoundingClientRect().top - anterior.getBoundingClientRect().bottom,
+        hueco: fila.querySelector('button.copiar')!.getBoundingClientRect().top - anterior.getBoundingClientRect().bottom,
         unidad: parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--unidad')),
       };
     });
     expect(medida.tarjetas, JSON.stringify(medida)).toBe(0);
     expect(medida.anterior, JSON.stringify(medida)).toBe(true);
     expect(Math.abs(medida.hueco - medida.unidad * 4), JSON.stringify(medida)).toBeLessThanOrEqual(1);
+  });
+});
+
+/**
+ * Historia 30.2 — la Cita a su medida y las acciones en fila desde 600 px (FR-64, UX-DR114,
+ * UX-DR115, UX-DR123).
+ *
+ * La medida de 34ch se resuelve en el cuerpo del texto de la Cita, no en el del contenedor; se
+ * compara con una sonda «0» en la misma fuente y con `letter-spacing: 0`, porque el `ch` es el
+ * avance del «0» sin el espaciado del tramo. La Cita en verso más larga entra aquí cuando la
+ * Épica 29 llegue a la rama (deferred del spec).
+ */
+test.describe('Historia 30.2 — la Cita a su medida y la Fila de acciones', () => {
+  const completa = ((c) => (c === undefined ? undefined : `/cita/${c.slug}/`))(citaConTarjetaCompleta());
+  const TRAMOS = ['xl', 'lg', 'md', 'sm'] as const;
+  const sinImagen = ((s) => (s === undefined ? undefined : `/cita/${s}/`))(citaSinImagen());
+  const SIN_CITA_SIN_IMAGEN =
+    'El Corpus de hoy no tiene ninguna Cita de más de MAX_CARACTERES_IMAGEN: la fila con Copiar solo la cubre el fixture SIN_IMAGEN de tests/unit/tarjeta-de-obra.test.ts.';
+  const SIN_TRAMO_SM =
+    'El Corpus de hoy no tiene ninguna Cita de tramo sm (más de 240 caracteres): la regla de .texto es la misma en todos los tramos, y la vigila tests/unit/tarjeta-de-obra.test.ts.';
+
+  async function abrirEn(page: Page, ruta: string, ancho: number, alto: number) {
+    await page.setViewportSize({ width: ancho, height: alto });
+    const respuesta = await page.goto(ruta);
+    await page.evaluate(async () => {
+      await document.fonts.ready;
+    });
+    return respuesta;
+  }
+
+  /** La medida resuelta del texto, 34 «0» en su fuente y su cuerpo, y las cajas de alrededor. */
+  async function medirLaCita(page: Page) {
+    return page.evaluate(() => {
+      const texto = document.querySelector('blockquote.cita .texto') as HTMLElement;
+      const estilo = getComputedStyle(texto);
+      const cero = (de: HTMLElement) => {
+        const sonda = document.createElement('span');
+        sonda.textContent = '0';
+        sonda.style.letterSpacing = '0';
+        sonda.style.whiteSpace = 'nowrap';
+        sonda.style.position = 'absolute';
+        sonda.style.visibility = 'hidden';
+        de.append(sonda);
+        const ancho = sonda.getBoundingClientRect().width;
+        sonda.remove();
+        return ancho;
+      };
+      const bloque = document.querySelector('figure.bloque') as HTMLElement;
+      const article = document.querySelector('main article')!.getBoundingClientRect();
+      const contenedor = document.querySelector('main article') as HTMLElement;
+      const deArticle = getComputedStyle(contenedor);
+      const columna = contenedor.clientWidth - parseFloat(deArticle.paddingLeft) - parseFloat(deArticle.paddingRight);
+      const caja = texto.getBoundingClientRect();
+      return {
+        tramo: texto.closest('blockquote')!.getAttribute('data-tramo'),
+        cuerpo: parseFloat(estilo.fontSize),
+        maxWidth: parseFloat(estilo.maxWidth),
+        ceroDelTexto: cero(texto),
+        ceroDelBloque: cero(bloque),
+        maxDelBloque: getComputedStyle(bloque).maxWidth,
+        caja: { left: caja.left, right: caja.right, width: caja.width },
+        article: { left: article.left, right: article.right },
+        columna,
+      };
+    });
+  }
+
+  for (const nombre of TRAMOS) {
+    test(`a 1280 × 800, tramo ${nombre}: la medida es 34 «0» de su cuerpo y la caja cabe en la columna`, async ({
+      page,
+    }, info) => {
+      test.skip(info.project.name !== 'escritorio', 'La medida de escritorio se toma una vez.');
+      const slug = citaDeTramo(nombre);
+      // El Corpus real no trae hoy Citas de más de 240 caracteres: el tramo sm se salta diciéndolo
+      // (lo cubre el fixture de tests/unit/tarjeta-de-obra.test.ts); los otros tres son obligatorios.
+      test.skip(nombre === 'sm' && slug === undefined, SIN_TRAMO_SM);
+      expect(slug, `el Corpus no tiene ninguna Cita de tramo ${nombre}`).toBeDefined();
+      const ruta = `/cita/${slug}/`;
+      await abrirEn(page, ruta, 1280, 800);
+      const m = await medirLaCita(page);
+      const dice = `${ruta}: ${JSON.stringify(m)}`;
+      expect(m.tramo, dice).toBe(nombre);
+      expect(Math.abs(m.maxWidth - 34 * m.ceroDelTexto), dice).toBeLessThanOrEqual(1);
+      expect(m.maxDelBloque, dice).toBe('none');
+      expect(m.caja.right, dice).toBeLessThanOrEqual(m.article.right + 0.5);
+      expect(m.caja.width, dice).toBeLessThanOrEqual(m.columna + 0.5);
+      info.annotations.push({
+        type: '30.2 a 1280 × 800',
+        description: `${slug}: tramo ${nombre}, cuerpo ${m.cuerpo} px, max-width ${m.maxWidth.toFixed(1)} px, caja ${m.caja.width.toFixed(1)} px (columna ${m.columna} px)`,
+      });
+    });
+
+    test(`a 360 × 640, tramo ${nombre}: la medida no ata, ni la nueva ni la de antes`, async ({ page }, info) => {
+      test.skip(info.project.name !== 'movil', 'El criterio se enuncia sobre 360 × 640.');
+      const slug = citaDeTramo(nombre);
+      // El Corpus real no trae hoy Citas de más de 240 caracteres: el tramo sm se salta diciéndolo
+      // (lo cubre el fixture de tests/unit/tarjeta-de-obra.test.ts); los otros tres son obligatorios.
+      test.skip(nombre === 'sm' && slug === undefined, SIN_TRAMO_SM);
+      expect(slug, `el Corpus no tiene ninguna Cita de tramo ${nombre}`).toBeDefined();
+      const ruta = `/cita/${slug}/`;
+      await abrirEn(page, ruta, 360, 640);
+      const m = await medirLaCita(page);
+      const dice = `${ruta}: ${JSON.stringify(m)}`;
+      expect(m.maxWidth, dice).toBeGreaterThan(m.columna);
+      expect(34 * m.ceroDelBloque, dice).toBeGreaterThan(m.columna);
+      expect(Math.abs(m.caja.width - m.columna), dice).toBeLessThanOrEqual(0.5);
+    });
+  }
+
+  /** Las cajas de los dos botones de la fila, y si la página desborda en horizontal. */
+  async function medirLaFila(page: Page) {
+    return page.evaluate(() => {
+      const fila = document.querySelector('main article > .fila-de-acciones')!;
+      const c = fila.querySelector('button.copiar')!.getBoundingClientRect();
+      const i = fila.querySelector('.isla[data-imagen] button[data-abrir]')!.getBoundingClientRect();
+      const article = document.querySelector('main article')!.getBoundingClientRect();
+      const caja = (r: DOMRect) => ({ top: r.top, bottom: r.bottom, left: r.left, right: r.right, width: r.width });
+      return {
+        copiar: caja(c),
+        imagen: caja(i),
+        article: caja(article),
+        unidad: parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--unidad')),
+        desborda: document.documentElement.scrollWidth > document.documentElement.clientWidth,
+      };
+    });
+  }
+
+  for (const ancho of [360, 599, 600, 768, 1280]) {
+    test(`a ${ancho} px: ${ancho >= 600 ? 'Copiar e Imagen en fila, a 16 px' : 'Imagen a 16 px bajo Copiar, cada uno a su ancho'}`, async ({
+      page,
+    }, info) => {
+      test.skip(info.project.name !== 'escritorio', 'Los anchos se fijan a mano; se miden una vez.');
+      expect(completa, SIN_TARJETA_COMPLETA).toBeDefined();
+      await abrirEn(page, completa!, ancho, 800);
+      const m = await medirLaFila(page);
+      const dice = JSON.stringify(m);
+      if (ancho >= 600) {
+        expect(Math.abs(m.imagen.top - m.copiar.top), dice).toBeLessThanOrEqual(1);
+        expect(Math.abs(m.imagen.left - m.copiar.right - m.unidad * 2), dice).toBeLessThanOrEqual(1);
+      } else {
+        expect(Math.abs(m.imagen.top - m.copiar.bottom - m.unidad * 2), dice).toBeLessThanOrEqual(1);
+        expect(Math.abs(m.imagen.left - m.copiar.left), dice).toBeLessThanOrEqual(1);
+      }
+      for (const boton of [m.copiar, m.imagen]) {
+        expect(boton.width, dice).toBeLessThan(m.article.width);
+        expect(boton.right, dice).toBeLessThanOrEqual(m.article.right + 0.5);
+      }
+      expect(m.desborda, dice).toBe(false);
+    });
+  }
+
+  for (const ancho of [600, 768]) {
+    test(`a ${ancho} px con el texto al 200 %: sin solapes ni desplazamiento horizontal`, async ({ page }, info) => {
+      test.skip(info.project.name !== 'escritorio', 'Los anchos se fijan a mano; se miden una vez.');
+      expect(completa, SIN_TARJETA_COMPLETA).toBeDefined();
+      await abrirEn(page, completa!, ancho, 800);
+      const zoom = await page.evaluate(() => {
+        document.documentElement.style.zoom = '2';
+        return getComputedStyle(document.documentElement).zoom;
+      });
+      expect(zoom).toBe('2');
+      const m = await medirLaFila(page);
+      const dice = JSON.stringify(m);
+      const solapan =
+        m.imagen.left < m.copiar.right && m.copiar.left < m.imagen.right && m.imagen.top < m.copiar.bottom && m.copiar.top < m.imagen.bottom;
+      expect(solapan, dice).toBe(false);
+      // A 600 px los dos no caben en la columna con el texto al doble: Imagen baja a la línea
+      // siguiente. A 768 px puede caber aún: en la misma línea dentro de la columna, o bajo Copiar.
+      const baja = m.imagen.top >= m.copiar.bottom;
+      const enLinea = Math.abs(m.imagen.top - m.copiar.top) <= 1 && m.imagen.right <= m.article.right + 0.5;
+      if (ancho === 600) expect(baja, dice).toBe(true);
+      else expect(enLinea || baja, dice).toBe(true);
+      info.annotations.push({ type: '30.2 al 200 %', description: `${ancho} px: ${baja ? 'Imagen bajo Copiar' : 'en la misma línea'}` });
+      expect(m.desborda, dice).toBe(false);
+    });
+  }
+
+  /** Rechaza el portapapeles, pulsa Copiar y mide el respaldo frente a los botones de la fila. */
+  async function respaldoBajoLaFila(page: Page, ruta: string, ancho?: number) {
+    await page.addInitScript(() => {
+      Object.defineProperty(navigator, 'clipboard', {
+        configurable: true,
+        value: { writeText: () => Promise.reject(new Error('denegado')) },
+      });
+    });
+    if (ancho === undefined) {
+      await page.goto(ruta);
+      await page.evaluate(async () => {
+        await document.fonts.ready;
+      });
+    } else await abrirEn(page, ruta, ancho, 800);
+    await page.locator('button.copiar').click();
+    await expect(page.locator('.fila-de-acciones [data-respaldo]')).toBeVisible();
+    return page.evaluate(() => {
+      const fila = document.querySelector('main article > .fila-de-acciones')!;
+      const r = fila.querySelector('[data-respaldo]')!;
+      const botones = [...fila.querySelectorAll('button.copiar, .isla[data-imagen] button[data-abrir]')].map((b) =>
+        b.getBoundingClientRect(),
+      );
+      const sonda = document.createElement('span');
+      sonda.textContent = '0';
+      sonda.style.position = 'absolute';
+      sonda.style.letterSpacing = '0';
+      r.append(sonda);
+      const cero = sonda.getBoundingClientRect().width;
+      sonda.remove();
+      return {
+        top: r.getBoundingClientRect().top,
+        width: r.getBoundingClientRect().width,
+        fondo: Math.max(...botones.map((b) => b.bottom)),
+        prosa: 68 * cero,
+        desborda: document.documentElement.scrollWidth > document.documentElement.clientWidth,
+      };
+    });
+  }
+
+  test('si el portapapeles falla, el campo de copia manual aparece bajo la fila, en la medida de prosa', async ({ page }) => {
+    expect(completa, SIN_TARJETA_COMPLETA).toBeDefined();
+    const m = await respaldoBajoLaFila(page, completa!);
+    expect(m.top, JSON.stringify(m)).toBeGreaterThanOrEqual(m.fondo);
+    expect(m.width, JSON.stringify(m)).toBeLessThanOrEqual(m.prosa + 1);
+  });
+
+  // Donde los dos botones van en fila, el respaldo no puede quedar entre ellos.
+  for (const ancho of [600, 768]) {
+    test(`a ${ancho} px, con la fila en línea, el campo de copia manual baja bajo los dos botones`, async ({ page }, info) => {
+      test.skip(info.project.name !== 'escritorio', 'Los anchos se fijan a mano; se miden una vez.');
+      expect(completa, SIN_TARJETA_COMPLETA).toBeDefined();
+      const m = await respaldoBajoLaFila(page, completa!, ancho);
+      expect(m.top, JSON.stringify(m)).toBeGreaterThanOrEqual(m.fondo);
+      expect(m.width, JSON.stringify(m)).toBeLessThanOrEqual(m.prosa + 1);
+      expect(m.desborda, JSON.stringify(m)).toBe(false);
+    });
+  }
+
+  // Desde 600 px Imagen va a la derecha de Copiar: si «Copiar la cita» → «Copiado.» encogiera el
+  // botón, Imagen se correría bajo el puntero durante dos segundos. Copiar guarda su ancho.
+  for (const ancho of [360, 600, 768, 1280]) {
+    test(`a ${ancho} px, «Copiado.» no cambia el ancho de Copiar ni mueve Imagen`, async ({ page }, info) => {
+      test.skip(info.project.name !== 'escritorio', 'Los anchos se fijan a mano; se miden una vez.');
+      expect(completa, SIN_TARJETA_COMPLETA).toBeDefined();
+      await page.addInitScript(() => {
+        Object.defineProperty(navigator, 'clipboard', {
+          configurable: true,
+          value: { writeText: () => Promise.resolve() },
+        });
+      });
+      await abrirEn(page, completa!, ancho, 800);
+      const antes = await medirLaFila(page);
+      await page.locator('.fila-de-acciones button.copiar').click();
+      await expect(page.locator('.fila-de-acciones button.copiar [data-etiqueta]')).toHaveText('Copiado.');
+      const despues = await medirLaFila(page);
+      const dice = JSON.stringify({ antes, despues });
+      expect(Math.abs(despues.copiar.width - antes.copiar.width), dice).toBeLessThanOrEqual(0.5);
+      expect(Math.abs(despues.imagen.left - antes.imagen.left), dice).toBeLessThanOrEqual(0.5);
+      expect(Math.abs(despues.imagen.top - antes.imagen.top), dice).toBeLessThanOrEqual(0.5);
+      // Y el nombre accesible sigue siendo el del rótulo: la reserva de ancho no se lee.
+      await expect(page.locator('.fila-de-acciones button.copiar')).toHaveAccessibleName('Copiar la cita');
+    });
+  }
+
+  // FR-10 — sin Acción Imagen la fila lleva solo Copiar, y «Compartir en» sigue a 3 × de ella.
+  for (const ancho of [360, 1280]) {
+    test(`a ${ancho} px, una Cita sin Imagen: la fila solo trae Copiar, sin hueco`, async ({ page }, info) => {
+      test.skip(info.project.name !== 'escritorio', 'Los anchos se fijan a mano; se miden una vez.');
+      test.skip(sinImagen === undefined, SIN_CITA_SIN_IMAGEN);
+      await abrirEn(page, sinImagen!, ancho, 800);
+      const m = await page.evaluate(() => {
+        const fila = document.querySelector('main article > .fila-de-acciones') as HTMLElement;
+        const copiar = fila.querySelector('button.copiar')!.getBoundingClientRect();
+        const caja = fila.getBoundingClientRect();
+        const compartir = fila.nextElementSibling as HTMLElement;
+        return {
+          botones: fila.querySelectorAll('button').length,
+          imagen: fila.querySelectorAll('[data-imagen]').length,
+          altoDeLaFila: caja.height,
+          altoDeCopiar: copiar.height,
+          compartir: compartir.hasAttribute('data-compartir'),
+          aCompartir: compartir.getBoundingClientRect().top - caja.bottom,
+          unidad: parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--unidad')),
+        };
+      });
+      const dice = `${sinImagen}: ${JSON.stringify(m)}`;
+      expect(m.imagen, dice).toBe(0);
+      expect(m.botones, dice).toBe(1);
+      expect(Math.abs(m.altoDeLaFila - m.altoDeCopiar), dice).toBeLessThanOrEqual(1);
+      expect(m.compartir, dice).toBe(true);
+      expect(Math.abs(m.aCompartir - m.unidad * 3), dice).toBeLessThanOrEqual(1);
+    });
+  }
+
+  // Es el mismo Bloque: la medida en el texto vale también en la Cita del Día de la portada y del 404.
+  for (const ruta of ['/', '/una-ruta-que-no-existe-30-2/']) {
+    test(`${ruta === '/' ? 'la portada' : 'el 404'} construido, a 1280 × 800: la medida en el texto, la Atribución en la de prosa`, async ({
+      page,
+    }, info) => {
+      test.skip(info.project.name !== 'escritorio', 'La medida de escritorio se toma una vez.');
+      const respuesta = await abrirEn(page, ruta, 1280, 800);
+      // Que se mide la superficie que se dice: la portada responde 200 y el 404, 404.
+      expect(respuesta?.status(), ruta).toBe(ruta === '/' ? 200 : 404);
+      const m = await page.evaluate(() => {
+        const cero = (de: HTMLElement) => {
+          const sonda = document.createElement('span');
+          sonda.textContent = '0';
+          sonda.style.letterSpacing = '0';
+          sonda.style.whiteSpace = 'nowrap';
+          sonda.style.position = 'absolute';
+          sonda.style.visibility = 'hidden';
+          de.append(sonda);
+          const ancho = sonda.getBoundingClientRect().width;
+          sonda.remove();
+          return ancho;
+        };
+        const texto = document.querySelector('main figure.bloque blockquote.cita .texto') as HTMLElement;
+        const bloque = texto.closest('figure.bloque') as HTMLElement;
+        const pie = bloque.querySelector('figcaption') as HTMLElement;
+        return {
+          maxDelTexto: parseFloat(getComputedStyle(texto).maxWidth),
+          medida: 34 * cero(texto),
+          maxDelBloque: getComputedStyle(bloque).maxWidth,
+          maxDelPie: parseFloat(getComputedStyle(pie).maxWidth),
+          prosa: 68 * cero(pie),
+        };
+      });
+      const dice = `${ruta}: ${JSON.stringify(m)}`;
+      expect(Math.abs(m.maxDelTexto - m.medida), dice).toBeLessThanOrEqual(1);
+      expect(m.maxDelBloque, dice).toBe('none');
+      expect(Math.abs(m.maxDelPie - m.prosa), dice).toBeLessThanOrEqual(1);
+    });
+  }
+
+  test('«Compartir en» sigue en su bloque, dentro de la medida de prosa', async ({ page }, info) => {
+    test.skip(info.project.name !== 'escritorio', 'La medida de escritorio se toma una vez.');
+    expect(completa, SIN_TARJETA_COMPLETA).toBeDefined();
+    await abrirEn(page, completa!, 1280, 800);
+    const m = await page.evaluate(() => {
+      const isla = document.querySelector('main article > .fila-de-acciones + [data-compartir]') as HTMLElement;
+      const sonda = document.createElement('span');
+      sonda.textContent = '0';
+      sonda.style.position = 'absolute';
+      sonda.style.letterSpacing = '0';
+      isla.append(sonda);
+      const cero = sonda.getBoundingClientRect().width;
+      sonda.remove();
+      const izquierda = isla.getBoundingClientRect().left;
+      const visibles = [...isla.querySelectorAll('a, button')].filter((e) => (e as HTMLElement).offsetParent !== null);
+      return {
+        alcance: Math.max(...visibles.map((e) => e.getBoundingClientRect().right)) - izquierda,
+        visibles: visibles.length,
+        prosa: 68 * cero,
+      };
+    });
+    expect(m.visibles, JSON.stringify(m)).toBeGreaterThan(0);
+    expect(m.alcance, JSON.stringify(m)).toBeLessThanOrEqual(m.prosa + 1);
+  });
+
+  test('la Atribución y la Línea de la Fuente, en la medida de prosa', async ({ page }) => {
+    expect(completa, SIN_TARJETA_COMPLETA).toBeDefined();
+    await abrirEn(page, completa!, 1280, 800);
+    const m = await page.evaluate(() =>
+      ['figure.bloque figcaption', 'article > p.fuente'].map((selector) => {
+        const n = document.querySelector(selector) as HTMLElement;
+        const sonda = document.createElement('span');
+        sonda.textContent = '0';
+        sonda.style.position = 'absolute';
+        sonda.style.letterSpacing = '0';
+        n.append(sonda);
+        const cero = sonda.getBoundingClientRect().width;
+        sonda.remove();
+        return { selector, ancho: n.getBoundingClientRect().width, maxWidth: parseFloat(getComputedStyle(n).maxWidth), prosa: 68 * cero };
+      }),
+    );
+    for (const una of m) {
+      expect(Math.abs(una.maxWidth - una.prosa), JSON.stringify(una)).toBeLessThanOrEqual(1);
+      expect(una.ancho, JSON.stringify(una)).toBeLessThanOrEqual(una.prosa + 1);
+    }
+  });
+
+  test('Copiar antes que Imagen al tabular, con los mismos nombres accesibles y sus regiones de estado', async ({
+    page,
+  }, info) => {
+    test.skip(info.project.name !== 'escritorio', 'El teclado se recorre una vez, en escritorio.');
+    expect(completa, SIN_TARJETA_COMPLETA).toBeDefined();
+    await page.goto(completa!);
+    await page.locator('figure.bloque figcaption a').last().focus();
+    const nombres: string[] = [];
+    for (let i = 0; i < 20 && nombres.length < 2; i++) {
+      await page.keyboard.press('Tab');
+      const dentro = await page.evaluate(() => {
+        const a = document.activeElement;
+        if (!a?.closest('.fila-de-acciones')) return null;
+        return a.matches('button.copiar') ? 'copiar' : a.matches('.isla[data-imagen] button[data-abrir]') ? 'imagen' : 'otro';
+      });
+      if (dentro !== null) nombres.push(dentro);
+    }
+    expect(nombres).toEqual(['copiar', 'imagen']);
+    await expect(page.getByRole('button', { name: 'Copiar la cita' })).toHaveCount(1);
+    await expect(page.getByRole('button', { name: 'Descargar como imagen' })).toHaveCount(1);
+    // Una región de estado por isla, en el marcado desde la carga: la de Copiar y la del diálogo.
+    await expect(page.locator('.fila-de-acciones [role="status"]')).toHaveCount(2);
   });
 });
 
@@ -972,4 +1470,67 @@ test.describe('Historia 24.6 — el pie de la Página de Cita', () => {
       description: `${ruta}: página de ${pagina} px de alto; pie de ${Math.round(pie)} px`,
     });
   });
+});
+
+/**
+ * Historia 29.3 — una Cita en verso, a 360 × 640: «Yo vengo de todas partes» (que la AC nombra)
+ * y otra de *Versos sencillos* sacada del Corpus. «Yo soy un hombre sincero», la de la auditoría,
+ * sigue en el censo sin documento y no lleva saltos (deferido en el spec de la 29.3).
+ */
+test.describe('Historia 29.3 — la Cita en verso, verso a verso', () => {
+  const MARTI = 'jose-marti-yo-vengo-de-todas-partes-y-hacia';
+  const deVersosSencillos = () => {
+    const enVerso = citasEnVerso();
+    const marti = enVerso.find((c) => c.slug === MARTI);
+    const otra = enVerso.find((c) => c.slug !== MARTI && c.obra === 'Versos sencillos');
+    return [marti, otra];
+  };
+
+  for (const [indice, cual] of ['«Yo vengo de todas partes»', 'otra de Versos sencillos'].entries()) {
+    test(`${cual}: el h1 es lo primero visible sin desplazar y cada verso empieza renglón`, async ({ page }, info) => {
+      test.skip(info.project.name !== 'movil', 'El criterio se enuncia sobre 360×640.');
+      const cita = deVersosSencillos()[indice];
+      expect(cita, 'no hay esa Cita en verso: falta el commit de restitución de la 29.2').toBeDefined();
+
+      // El tamaño que nombra la AC, fijado aquí y no heredado del proyecto.
+      await page.setViewportSize({ width: 360, height: 640 });
+      await page.goto(`/cita/${cita!.slug}`);
+      const h1 = page.locator('h1.texto');
+      await expect(h1).toBeVisible();
+      const caja = (await h1.boundingBox())!;
+      expect(caja.y).toBeGreaterThan(0);
+      expect(caja.y).toBeLessThan(640);
+      expect(await page.evaluate(() => window.scrollY)).toBe(0);
+      // Nada visible del `<main>` empieza por encima del h1.
+      const encima = await page.evaluate((y) => {
+        const main = document.querySelector('main')!;
+        return [...main.querySelectorAll<HTMLElement>('*')].filter((n) => {
+          const r = n.getBoundingClientRect();
+          return r.height > 0 && r.width > 0 && r.bottom <= y && n.innerText?.trim();
+        }).length;
+      }, caja.y);
+      expect(encima).toBe(0);
+
+      const versos = h1.locator('span.verso');
+      await expect(versos).toHaveCount(cita!.versos.length);
+      const desfases = await h1.evaluate((elemento) => {
+        const izquierda = elemento.getBoundingClientRect().left;
+        return [...elemento.querySelectorAll('span.verso')].map((verso) => {
+          const nodo = verso.firstChild!;
+          const rango = document.createRange();
+          rango.setStart(nodo, 0);
+          rango.setEnd(nodo, Math.min(2, nodo.textContent!.length));
+          return Math.abs(rango.getBoundingClientRect().left - izquierda);
+        });
+      });
+      for (const desfase of desfases) expect(desfase).toBeLessThanOrEqual(1);
+
+      await page.setViewportSize({ width: 320, height: 640 });
+      const { scrollWidth, clientWidth } = await page.evaluate(() => ({
+        scrollWidth: document.documentElement.scrollWidth,
+        clientWidth: document.documentElement.clientWidth,
+      }));
+      expect(scrollWidth).toBeLessThanOrEqual(clientWidth);
+    });
+  }
 });

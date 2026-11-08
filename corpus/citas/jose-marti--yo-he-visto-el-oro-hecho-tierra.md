@@ -1,5 +1,5 @@
 ---
-texto: "Yo he visto el oro hecho tierra Barbullendo en la redoma: Prefiero estar en la sierra Cuando vuela una paloma."
+texto: "Yo he visto el oro hecho tierra\nBarbullendo en la redoma:\nPrefiero estar en la sierra\nCuando vuela una paloma."
 autor: "jose-marti"
 temas:
   - "la-riqueza"

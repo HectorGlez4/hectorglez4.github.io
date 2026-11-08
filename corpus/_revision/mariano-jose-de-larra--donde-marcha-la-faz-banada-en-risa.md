@@ -1,5 +1,5 @@
 ---
-texto: "donde marcha la faz bañada en risa, el crimen descarado, alta la frente, corrompiendo el terreno por do pisa..."
+texto: "donde marcha la faz bañada en risa,\nel crimen descarado, alta la frente,\ncorrompiendo el terreno por do pisa..."
 autor: "mariano-jose-de-larra"
 slug: "mariano-jose-de-larra-donde-marcha-la-faz-banada-en-risa"
 procedencia:

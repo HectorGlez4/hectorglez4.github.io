@@ -1,5 +1,5 @@
 ---
-texto: "Hoy, arrogante, te ha brotado a pares húmedas crestas tu soberbia frente, y ayer me dijo humilde tu corriente que eran en marzo los caniculares."
+texto: "Hoy, arrogante, te ha brotado a pares\nhúmedas crestas tu soberbia frente,\ny ayer me dijo humilde tu corriente\nque eran en marzo los caniculares."
 autor: "luis-de-gongora"
 slug: "luis-de-gongora-hoy-arrogante-te-ha-brotado-a-pares"
 procedencia:

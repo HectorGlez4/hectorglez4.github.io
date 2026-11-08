@@ -1,5 +1,5 @@
 ---
-texto: "AURORA Estoy aguardando a saber si es el intento de mi tio ser mi esposo."
+texto: "AURORA\nEstoy aguardando\na saber si es el intento\nde mi tio ser mi esposo."
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-aurora-estoy-aguardando-a-saber-si-es"
 procedencia:

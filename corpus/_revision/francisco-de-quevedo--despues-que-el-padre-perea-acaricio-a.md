@@ -1,5 +1,5 @@
 ---
-texto: "Después que el Padre Perea Acarició a Satanás Con el alma del corchete Vaciada a lo Catalán,"
+texto: "Después que el Padre Perea\nAcarició a Satanás\nCon el alma del corchete\nVaciada a lo Catalán,"
 autor: "francisco-de-quevedo"
 slug: "francisco-de-quevedo-despues-que-el-padre-perea-acaricio-a"
 procedencia:

@@ -1,5 +1,5 @@
 ---
-texto: "Fuera de que, como he preso un hijo mío, es verdad que no escuchara a mi hija, pues era la sangre igual."
+texto: "Fuera de que, como he preso\nun hijo mío, es verdad\nque no escuchara a mi hija,\npues era la sangre igual."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-fuera-de-que-como-he-preso-un"
 procedencia:

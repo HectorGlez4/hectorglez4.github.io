@@ -1,5 +1,5 @@
 ---
-texto: "CRESPO: Sean disculpa y respuesta hacer lo que vos hicisteis."
+texto: "CRESPO: Sean disculpa y respuesta\nhacer lo que vos hicisteis."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-crespo-sean-disculpa-y-respuesta-hacer-lo"
 procedencia:

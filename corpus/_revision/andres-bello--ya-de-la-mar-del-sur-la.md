@@ -1,5 +1,5 @@
 ---
-texto: "Ya de la mar del Sur la bella reina, a cuyas hijas dio la gracia en dote Naturaleza, habitación te brinda bajo su blando cielo, que no turban lluvias jamás, ni embravecidos vientos."
+texto: "Ya de la mar del Sur la bella reina,\na cuyas hijas dio la gracia en dote\nNaturaleza, habitación te brinda\nbajo su blando cielo, que no turban\nlluvias jamás, ni embravecidos vientos."
 autor: "andres-bello"
 slug: "andres-bello-ya-de-la-mar-del-sur-la"
 procedencia:

@@ -157,6 +157,38 @@ describe('Historia 29.1 — la puerta del salto de verso, en el build (AD-29)', 
   });
 });
 
+describe('Historia 29.2 — regla 4: una Cita de documento de verso sin sus saltos, en el build', () => {
+  // La misma con sus saltos construye: es la primera prueba de la 29.1, arriba.
+  it('en una línea, de un documento de verso: rompe con el fichero y la orden exacta', async () => {
+    const { codigo, salida } = await construir({
+      ...CORPUS_BASE,
+      [FICHERO_DE_LA_CITA]: citaSembrada(),
+      [NOMBRE_DEL_DOCUMENTO]: documento(CUERPO_CON_LA_CITA, 'verso'),
+    });
+    expect(codigo).not.toBe(0);
+    expect(salida).toContain('seneca--no-es-que-tengamos-poco-tiempo-es.md');
+    expect(salida).toMatch(/salto de verso, 4/);
+    expect(salida).toContain(`npm run documentar -- --restituir-saltos ${SLUG}`);
+  });
+
+  it('dos documentos de verso que le dan saltos distintos: avisa con los dos y construye', async () => {
+    const { codigo, salida } = await construir({
+      ...CORPUS_BASE,
+      [FICHERO_DE_LA_CITA]: citaSembrada(),
+      [NOMBRE_DEL_DOCUMENTO]: documento(CUERPO_CON_LA_CITA, 'verso'),
+      'fuentes/wikisource-es--sobre-la-brevedad-de-la-vida--ii.txt': documento(
+        `${TEXTO}\nUno\nDos\nTres\nCuatro\n`,
+        'verso',
+      ),
+    });
+    expect(salida).not.toMatch(/Regla incumplida/);
+    expect(codigo).toBe(0);
+    expect(salida).toMatch(/saltos distintos/);
+    expect(salida).toContain('wikisource-es--sobre-la-brevedad-de-la-vida--ii.txt');
+    expect(salida).toContain('wikisource-es--sobre-la-brevedad-de-la-vida.txt');
+  });
+});
+
 describe('Historia 11.2 — el cotejo corre en el build y rompe la construcción', () => {
   it('una Cita cuyo texto está en el cuerpo de su documento construye', async () => {
     const { codigo, salida } = await construir({

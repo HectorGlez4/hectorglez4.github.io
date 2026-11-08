@@ -1,5 +1,5 @@
 ---
-texto: "Pero, si ya ha sucedido un peligro, de quien nadie Se libró, porque el honor es de materia tan frágil, Que con una acción se quiebra ó se mancha con un aire: ¿Qué más puede hacer, qué más, el que es noble, de su parte."
+texto: "Pero, si ya ha sucedido un peligro, de quien nadie\nSe libró, porque el honor es de materia tan frágil,\nQue con una acción se quiebra ó se mancha con un aire:\n¿Qué más puede hacer, qué más, el que es noble, de su parte."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-pero-si-ya-ha-sucedido-un-peligro"
 procedencia:

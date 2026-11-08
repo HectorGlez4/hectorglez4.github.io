@@ -1,5 +1,5 @@
 ---
-texto: "Vime con esto tal, que el alma mia, tal que la vida, tal, solo quien sabe de amor, podrà saber qual me veria. 290 Mas pintan al amor con alas de aue, por la velozidad del pensamiento del que ha vencido su furor suaue."
+texto: "Vime con esto tal, que el alma mia,\ntal que la vida, tal, solo quien sabe\nde amor, podrà saber qual me veria. 290\nMas pintan al amor con alas de aue,\npor la velozidad del pensamiento\ndel que ha vencido su furor suaue."
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-vime-con-esto-tal-que-el-alma"
 procedencia:

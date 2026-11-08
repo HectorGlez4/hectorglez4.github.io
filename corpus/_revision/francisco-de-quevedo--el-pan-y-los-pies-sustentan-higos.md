@@ -1,5 +1,5 @@
 ---
-texto: "El pan y los pies sustentan, higos y tiempos se pasan, corren monedas y ríos, músicos y potros cantan."
+texto: "El pan y los pies sustentan,\nhigos y tiempos se pasan,\ncorren monedas y ríos,\nmúsicos y potros cantan."
 autor: "francisco-de-quevedo"
 slug: "francisco-de-quevedo-el-pan-y-los-pies-sustentan-higos"
 procedencia:

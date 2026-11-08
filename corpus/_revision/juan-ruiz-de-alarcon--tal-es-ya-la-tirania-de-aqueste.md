@@ -1,5 +1,5 @@
 ---
-texto: "Tal es ya la tirania de aqueste genero infame, que el eco de vengo, es dame, 650 y el eco de voyme, embia."
+texto: "Tal es ya la tirania\nde aqueste genero infame,\nque el eco de vengo, es dame, 650\ny el eco de voyme, embia."
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-tal-es-ya-la-tirania-de-aqueste"
 procedencia:

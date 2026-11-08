@@ -1,5 +1,5 @@
 ---
-texto: "FILIPO Yo lo creo, vete, vete. (A parte.)"
+texto: "FILIPO\nYo lo creo,\nvete, vete.\n(A parte.)"
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-filipo-yo-lo-creo-vete-vete-a"
 procedencia:

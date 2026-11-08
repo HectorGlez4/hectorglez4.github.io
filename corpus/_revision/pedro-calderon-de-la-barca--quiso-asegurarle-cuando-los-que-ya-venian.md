@@ -1,5 +1,5 @@
 ---
-texto: "Quiso asegurarle... cuando los que ya venían buscando a su capitán en su venganza se incitan."
+texto: "Quiso asegurarle...\ncuando los que ya venían\nbuscando a su capitán\nen su venganza se incitan."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-quiso-asegurarle-cuando-los-que-ya-venian"
 procedencia:

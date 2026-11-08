@@ -1,5 +1,5 @@
 ---
-texto: "En el hoy y mañana y ayer, junto pañales y mortaja, y he quedado presentes sucesiones de difunto."
+texto: "En el hoy y mañana y ayer, junto\npañales y mortaja, y he quedado\npresentes sucesiones de difunto."
 autor: "francisco-de-quevedo"
 slug: "francisco-de-quevedo-en-el-hoy-y-manana-y-ayer"
 procedencia:

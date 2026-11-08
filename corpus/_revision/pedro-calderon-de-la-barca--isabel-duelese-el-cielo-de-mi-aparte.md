@@ -1,5 +1,5 @@
 ---
-texto: "ISABEL: (¡Duélese el cielo de mí!) Aparte Yo he de acompañarte."
+texto: "ISABEL: (¡Duélese el cielo de mí!) Aparte\nYo he de acompañarte."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-isabel-duelese-el-cielo-de-mi-aparte"
 procedencia:

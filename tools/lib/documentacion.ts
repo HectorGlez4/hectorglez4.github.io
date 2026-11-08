@@ -38,16 +38,20 @@
 
 import { readFile, writeFile } from 'node:fs/promises';
 import { basename, dirname, extname, isAbsolute, relative, resolve, sep } from 'node:path';
-import { normalizar } from '../../src/lib/normalizar.ts';
+import { MIN_PARECIDO_PARA_CORREGIR, parecidoDeTextos } from './parecido.ts';
 import {
   apareceEnDocumento,
+  candidatosDeLosSaltos,
   censoSinLaCita,
   colapsarEspacios,
+  documentoDeCita,
   documentosDeCita,
+  documentosLegibles,
   FICHERO_DEL_CENSO,
   huellaDeTexto,
 } from './cotejo.ts';
 import {
+  conLaLineaDeTexto,
   escribirCenso,
   escribirCita,
   fechaLocal,
@@ -56,6 +60,7 @@ import {
   leerCensoDeCotejo,
   leerCitas,
   leerDocumentosDeclarados,
+  leerDocumentosParaElCotejo,
   leerFichasDeObra,
   mover,
   separarFrontmatter,
@@ -84,7 +89,18 @@ import { formaDeObra } from '../../src/lib/obras.ts';
 import { fuenteDeUrl } from './fuentes.ts';
 import type { Resultado } from './gestion.ts';
 import { negativaPorAlcance } from './alcance.ts';
-import { documentoParaLosSaltos, parteDeSaltosDescartados, textoConSaltos } from './lineas.ts';
+import {
+  documentoParaLosSaltos,
+  FORMAS_DE_LINEAS,
+  formaDeLasLineas,
+  parteDeSaltosDescartados,
+  saltosDeLaCita,
+  textoConSaltos,
+  type FormaDeLineas,
+} from './lineas.ts';
+import { relacionDeSuperficies } from './cambios.ts';
+import { rutasAvisadasPor } from './avisar.ts';
+import { corpusParaFechar } from '../../integraciones/historial.ts';
 
 /**
  * Lo que se dice antes de escribir, cuando lo que se va a escribir cambia lo que lee el
@@ -99,75 +115,6 @@ import { documentoParaLosSaltos, parteDeSaltosDescartados, textoConSaltos } from
 export type Avisar = (linea: string) => void;
 
 const CALLAR: Avisar = () => {};
-
-// ─────────────────────────────────────────────────────────────────────────────
-// El parecido, que es lo que distingue corregir de sustituir
-// ─────────────────────────────────────────────────────────────────────────────
-
-/**
- * Cuánto tiene que parecerse el texto corregido al publicado para que sea **la misma Cita**.
- *
- * El caso real que obliga a que exista `--texto` está en el censo: el Corpus dice «Hombres
- * necios que acusáis a la mujer sin razón, sin ver que sois la ocasión de lo mismo que
- * culpáis.» y las *Redondillas* dicen lo mismo con una coma más y un punto y coma final. No
- * es una paráfrasis: es la misma Cita con la puntuación normalizada al teclearla en la v1, y
- * ese es el patrón general del censo. Sin esta salida, la única sería retirar Citas
- * verdaderas por una coma.
- *
- * El parecido se mide sobre la **forma canónica de AD-3**, que es la definición que el
- * proyecto ya tiene de «dos textos son la misma Cita» y la que usa la detección de
- * duplicados de FR-14. Eso hace que una corrección que solo toca signos o acentos —el caso
- * de las *Redondillas*— valga 1, sin margen de duda, y que lo que el umbral juzgue de verdad
- * sean las diferencias de **palabras**, que son las que pueden convertir una Cita en otra.
- *
- * 0,85 deja restituir una palabra elidida o una forma verbal en un texto de la longitud
- * habitual —una frase de 100 caracteres canónicos admite 15 de corrección— y se queda muy
- * por encima de lo que puntúan dos Citas distintas de la misma página: «El sabio hace luego
- * lo que el necio al fin» contra «Haga al principio el cuerdo lo que el necio al fin»
- * —justamente el par que descubrió el problema— se queda en 0,60. Entre las dos cosas hay
- * espacio de sobra, y el umbral vive en esa holgura y no pegado a ningún caso concreto.
- *
- * No es la puerta: la puerta es que el texto nuevo **aparezca literal en el documento**, que
- * es lo que impide inventárselo. Esto es lo que impide lo otro, cambiar una Cita por otra
- * distinta de la misma página, que sí aparecería literal.
- */
-export const MIN_PARECIDO_PARA_CORREGIR = 0.85;
-
-/**
- * Cuánto se parecen dos textos, entre 0 y 1, sobre su forma canónica.
- *
- * Distancia de edición normalizada por la longitud del más largo. Se cuenta por caracteres
- * y no por palabras porque una corrección típica del censo cambia media palabra —una `s`
- * final, una tilde que en forma canónica ni se ve— y un parecido por palabras la contaría
- * como palabra entera cambiada, castigando más una corrección menor en un texto corto que
- * una reescritura en uno largo.
- */
-export function parecidoDeTextos(a: string, b: string): number {
-  const uno = normalizar(a);
-  const otro = normalizar(b);
-  if (uno === otro) return 1;
-  if (uno === '' || otro === '') return 0;
-  return 1 - distanciaDeEdicion(uno, otro) / Math.max(uno.length, otro.length);
-}
-
-/** Distancia de Levenshtein, con una sola fila viva: los textos de una Cita son cortos. */
-function distanciaDeEdicion(uno: string, otro: string): number {
-  let fila = Array.from({ length: otro.length + 1 }, (_, i) => i);
-
-  for (let i = 1; i <= uno.length; i += 1) {
-    const siguiente = [i];
-    for (let j = 1; j <= otro.length; j += 1) {
-      siguiente[j] = Math.min(
-        fila[j] + 1,
-        siguiente[j - 1] + 1,
-        fila[j - 1] + (uno[i - 1] === otro[j - 1] ? 0 : 1),
-      );
-    }
-    fila = siguiente;
-  }
-
-  return fila[otro.length];
-}
 
 // ─────────────────────────────────────────────────────────────────────────────
 // La Cita sobre la que se opera
@@ -1207,6 +1154,361 @@ export async function restituirTraducciones(rutas: Rutas): Promise<Resultado> {
         ? [`No se han tocado ${citas(omitidas.length)}, y hay que mirarlas:`, ...omitidas]
         : []),
       'Ni el texto ni el slug han cambiado. El cambio del corpus va en un commit propio.',
+    ].join('\n'),
+  };
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// La restitución de los saltos de verso — Historia 29.2
+// ─────────────────────────────────────────────────────────────────────────────
+
+export interface OpcionesDeRestitucionDeSaltos {
+  /** Solo estas Citas, publicadas o candidatas. Sin ellas, todas. */
+  slugs?: readonly string[];
+  /** Decide y da el parte, sin escribir nada. */
+  seco?: boolean;
+}
+
+/** Por qué una Cita se queda en una línea: el motivo del parte. */
+const MOTIVOS_DE_CONSERVAR = {
+  'sin-documento': 'sin documento',
+  'no-se-localiza': 'no se localiza en su documento',
+  prosa: 'documento en prosa',
+  'sin-saltos': 'documento sin saltos en su tramo',
+} as const;
+
+type MotivoDeConservar = keyof typeof MOTIVOS_DE_CONSERVAR;
+
+interface SaltoPendiente {
+  ruta: string;
+  slug: string;
+  enRevision: boolean;
+  documento: string;
+  forma: FormaDeLineas;
+  original: string;
+  nuevo: string;
+  antes: Record<string, unknown>;
+  despues: Record<string, unknown>;
+}
+
+interface Lote {
+  restituidas: SaltoPendiente[];
+  ya: number;
+  conservan: Map<MotivoDeConservar, number>;
+  /** Por forma, las que conservan por estar en prosa. */
+  enProsa: Map<FormaDeLineas, number>;
+  conflictos: string[];
+  /** Lo que se dice de cada Cita nombrada que no se restituye. */
+  nombradas: string[];
+}
+
+function loteVacio(): Lote {
+  return { restituidas: [], ya: 0, conservan: new Map(), enProsa: new Map(), conflictos: [], nombradas: [] };
+}
+
+/**
+ * Restituye los saltos de verso de las Citas publicadas **y, aparte, de las candidatas** desde su
+ * documento — Historia 29.2, AD-29.
+ *
+ * Decide con `saltosDeLaCita`, la misma función que la regla 4 de la puerta del cotejo, así que
+ * tras correr la orden el build pasa. Reescribe solo la línea `texto:` de cada fichero, y solo si
+ * lo nuevo colapsa a lo mismo que lo publicado (NFR-12); slug, nombre de fichero y URL no cambian.
+ * **Primero se decide todo y después se escribe**; si una escritura falla, lo ya escrito en la
+ * pasada vuelve a su contenido original. Con `seco`, el mismo parte y nada escrito. Idempotente.
+ */
+export async function restituirSaltos(
+  rutas: Rutas,
+  opciones: OpcionesDeRestitucionDeSaltos = {},
+): Promise<Resultado> {
+  const inicio = Date.now();
+  const seco = opciones.seco === true;
+  const nombradas = opciones.slugs === undefined ? undefined : new Set(opciones.slugs);
+
+  let publicadas: CitaEnCorpus[];
+  let candidatas: CitaEnCorpus[];
+  let leidos: Awaited<ReturnType<typeof leerDocumentosParaElCotejo>>;
+  let censo: string[];
+  try {
+    [publicadas, candidatas, leidos, censo] = await Promise.all([
+      leerCitas(rutas.citas),
+      leerCitas(rutas.revision),
+      leerDocumentosParaElCotejo(rutas),
+      leerCensoDeCotejo(rutas),
+    ]);
+  } catch (fallo) {
+    return {
+      ok: false,
+      motivos: [
+        `El Corpus no se deja leer (${fallo instanceof Error ? fallo.message : String(fallo)}): ` +
+          'sin él no se sabe qué saltos le tocan a cada Cita. No se ha escrito nada.',
+      ],
+    };
+  }
+  const { documentos, lineasDeclaradas } = leidos;
+  const enCenso = new Set(censo);
+
+  if (nombradas !== undefined) {
+    const conocidas = new Set([...publicadas, ...candidatas].map((c) => c.slug));
+    const desconocidas = [...nombradas].filter((s) => !conocidas.has(s));
+    if (desconocidas.length > 0) {
+      return {
+        ok: false,
+        motivos: [
+          `No ${desconocidas.length === 1 ? 'es' : 'son'} de ninguna Cita publicada ni candidata: ` +
+            `«${desconocidas.join('», «')}». No se ha escrito nada.`,
+        ],
+      };
+    }
+  }
+
+  // Lo que se calcula una vez por documento, aunque lo pregunten miles de Citas: los mismos
+  // candidatos que arma la regla 4 del cotejo (`candidatosDeLosSaltos`).
+  const { candidatos: conForma } = candidatosDeLosSaltos(documentos, lineasDeclaradas);
+  const porObra = new Map<string, string[]>();
+  const legiblesDe = (cita: CitaEnCorpus): string[] => {
+    if (enCenso.has(cita.slug) || cita.fuente === undefined) return [];
+    const corto = documentoDeCita(cita.fuente, cita.procedencia?.obra);
+    if (corto === undefined) return [];
+    let nombres = porObra.get(corto);
+    if (nombres === undefined) {
+      nombres = documentosLegibles(documentosDeCita(cita.fuente, cita.procedencia?.obra, documentos), documentos);
+      porObra.set(corto, nombres);
+    }
+    return nombres;
+  };
+
+  const sinDocumentoNombradas: string[] = [];
+  const lotes = { publicadas: loteVacio(), candidatas: loteVacio() };
+  for (const [citasDelLote, enRevision] of [
+    [publicadas, false],
+    [candidatas, true],
+  ] as const) {
+    const lote = enRevision ? lotes.candidatas : lotes.publicadas;
+    for (const cita of citasDelLote) {
+      if (nombradas !== undefined && !nombradas.has(cita.slug)) continue;
+      if (typeof cita.texto !== 'string') continue;
+      const legibles = legiblesDe(cita);
+      const decision = saltosDeLaCita(cita.texto, conForma(legibles));
+      const enumerar = (nombres: readonly string[]) => nombres.map((n) => `corpus/fuentes/${n}.txt`).join(', ');
+
+      if (decision.tipo === 'conflicto') {
+        lote.conflictos.push(
+          `  ${cita.slug}: sus documentos de verso le dan saltos distintos (${enumerar(decision.documentos)}).`,
+        );
+        continue;
+      }
+      if (decision.tipo !== 'saltos') {
+        lote.conservan.set(decision.tipo, (lote.conservan.get(decision.tipo) ?? 0) + 1);
+        if (decision.tipo === 'prosa') {
+          lote.enProsa.set(decision.forma, (lote.enProsa.get(decision.forma) ?? 0) + 1);
+        }
+        if (nombradas !== undefined) {
+          if (decision.tipo === 'sin-documento') sinDocumentoNombradas.push(cita.slug);
+          lote.nombradas.push(
+            `  ${cita.slug}: se queda en una línea, ${MOTIVOS_DE_CONSERVAR[decision.tipo]}` +
+              (decision.tipo === 'prosa' ? ` (${decision.forma}, ${enumerar([decision.documento])})` : '') +
+              (decision.tipo === 'sin-saltos' ? ` (${enumerar([decision.documento])})` : '') +
+              '.',
+          );
+        }
+        continue;
+      }
+      if (decision.texto === cita.texto) {
+        lote.ya += 1;
+        continue;
+      }
+      // NFR-12: lo escrito colapsa a lo publicado, letra a letra y signo a signo.
+      if (colapsarEspacios(decision.texto) !== colapsarEspacios(cita.texto)) {
+        lote.conflictos.push(
+          `  ${cita.slug}: lo restituido no colapsa a lo publicado (${enumerar([decision.documento])}); ` +
+            'no se toca.',
+        );
+        continue;
+      }
+      let original: string;
+      try {
+        original = await readFile(cita.ruta, 'utf8');
+      } catch (fallo) {
+        return {
+          ok: false,
+          motivos: [
+            `El Corpus no se deja leer (${cita.ruta}: ${fallo instanceof Error ? fallo.message : String(fallo)}): ` +
+              'sin él no se sabe qué saltos le tocan a cada Cita. No se ha escrito nada.',
+          ],
+        };
+      }
+      const nuevo = conLaLineaDeTexto(original, cita.texto, decision.texto);
+      const antes = nuevo === undefined ? null : separarFrontmatter(original);
+      const despues = nuevo === undefined ? null : separarFrontmatter(nuevo);
+      if (nuevo === undefined || antes === null || despues === null || despues.texto !== decision.texto) {
+        lote.conflictos.push(
+          `  ${cita.slug}: ${cita.ruta} no tiene una sola línea «texto:» como la escribe el Corpus; ` +
+            'no se toca.',
+        );
+        continue;
+      }
+      lote.restituidas.push({
+        ruta: cita.ruta,
+        slug: cita.slug,
+        enRevision,
+        documento: decision.documento,
+        forma: decision.forma,
+        original,
+        nuevo,
+        antes,
+        despues,
+      });
+    }
+  }
+
+  if (sinDocumentoNombradas.length > 0) {
+    return {
+      ok: false,
+      motivos: [
+        `${sinDocumentoNombradas.length === 1 ? 'La Cita nombrada no tiene' : 'Las Citas nombradas no tienen'} ` +
+          `documento del que salgan sus saltos: «${sinDocumentoNombradas.join('», «')}». ` +
+          'No se ha escrito nada.',
+      ],
+    };
+  }
+
+  // Qué superficies cambian de fecha: la relación de AD-27, con el comparador de campos.
+  const cambios = lotes.publicadas.restituidas.map((p) => ({
+    fichero: resolve(p.ruta),
+    antes: p.antes,
+    despues: p.despues,
+  }));
+  const porFamilia = new Map<string, number>();
+  if (cambios.length > 0) {
+    // Se cuenta **antes** de escribir: solo cambia `texto`, que no mueve ninguna arista de la
+    // relación, y un fallo aquí no puede dejar escrito lo que el código 1 dice que no se escribió.
+    try {
+      const corpus = await corpusParaFechar(rutas.raiz, { corpus: rutas.raiz });
+      const relacion = relacionDeSuperficies(corpus);
+      for (const ruta of rutasAvisadasPor(cambios, relacion)) {
+        const familia = relacion.get(ruta)?.familia ?? 'sin familia';
+        porFamilia.set(familia, (porFamilia.get(familia) ?? 0) + 1);
+      }
+    } catch (fallo) {
+      return {
+        ok: false,
+        motivos: [
+          `No se pueden contar las superficies que cambian de fecha (${fallo instanceof Error ? fallo.message : String(fallo)}): ` +
+            'el Corpus no se deja leer entero. No se ha escrito nada.',
+        ],
+      };
+    }
+  }
+  const pendientes = [...lotes.publicadas.restituidas, ...lotes.candidatas.restituidas];
+  const escritas: SaltoPendiente[] = [];
+  if (!seco) {
+    for (const pendiente of pendientes) {
+      let escribiendo = false;
+      try {
+        // Lo decidido se decidió sobre `original`: si el fichero cambió entretanto (otra sesión en
+        // el mismo checkout), escribir encima perdería ese cambio.
+        if ((await readFile(pendiente.ruta, 'utf8')) !== pendiente.original) {
+          throw new Error('ha cambiado desde que se decidió; vuelva a correr la orden');
+        }
+        escribiendo = true;
+        await writeFile(pendiente.ruta, pendiente.nuevo, 'utf8');
+        escritas.push(pendiente);
+      } catch (fallo) {
+        const sinDeshacer: string[] = [];
+        // Una escritura que falla a medias (disco lleno, E/S) puede dejar truncado el propio
+        // fichero: vuelve también a su original. Si falló antes de escribir, no se toca.
+        if (escribiendo) {
+          try {
+            if ((await readFile(pendiente.ruta, 'utf8')) !== pendiente.original) {
+              await writeFile(pendiente.ruta, pendiente.original, 'utf8');
+            }
+          } catch {
+            sinDeshacer.push(`  ${pendiente.ruta}`);
+          }
+        }
+        for (const escrita of escritas) {
+          try {
+            await writeFile(escrita.ruta, escrita.original, 'utf8');
+          } catch {
+            sinDeshacer.push(`  ${escrita.ruta}`);
+          }
+        }
+        return {
+          ok: false,
+          motivos: [
+            `No se pudo escribir ${pendiente.ruta}: ${fallo instanceof Error ? fallo.message : String(fallo)}`,
+            sinDeshacer.length > 0
+              ? 'No se pudieron devolver a su contenido original, y hay que mirarlas:'
+              : escritas.length === 0
+                ? 'No se había escrito ninguna antes: no queda nada escrito.'
+                : `Las ${citas(escritas.length)} ya escritas en esta pasada han vuelto a su contenido original: no queda nada escrito.`,
+            ...sinDeshacer,
+          ],
+        };
+      }
+    }
+  }
+
+  const paginasDeCita = porFamilia.get('cita') ?? 0;
+  const listados = [...porFamilia].filter(([f]) => f !== 'cita').sort(([a], [b]) => a.localeCompare(b, 'es'));
+  const totalListados = listados.reduce((s, [, n]) => s + n, 0);
+
+  const parteDelLote = (titulo: string, lote: Lote, conDetalle: boolean): string[] => {
+    const porForma = FORMAS_DE_LINEAS.map((f) => [f, lote.restituidas.filter((r) => r.forma === f).length] as const).filter(
+      ([, n]) => n > 0,
+    );
+    const docs = new Set(lote.restituidas.map((r) => r.documento)).size;
+    const conservan = (Object.keys(MOTIVOS_DE_CONSERVAR) as MotivoDeConservar[])
+      .map((m) => [m, lote.conservan.get(m) ?? 0] as const)
+      .filter(([, n]) => n > 0);
+    return [
+      `${titulo}:`,
+      `  ${seco ? 'Ganarían saltos' : 'Restituidas'}: ${lote.restituidas.length}` +
+        (lote.restituidas.length === 0
+          ? '.'
+          : `, de ${docs} ${docs === 1 ? 'documento' : 'documentos'} (${porForma.map(([f, n]) => `${f}: ${n}`).join(', ')}).`),
+      ...(conDetalle
+        ? lote.restituidas.map(
+            (r) => `    ${r.slug} — corpus/fuentes/${r.documento}.txt, ${String(r.despues.texto).split('\n').length} versos`,
+          )
+        : []),
+      `  Ya restituidas, sin cambios: ${lote.ya}.`,
+      `  Conservan el texto en una línea: ${[...lote.conservan.values()].reduce((s, n) => s + n, 0)}` +
+        (conservan.length === 0 ? '.' : ':'),
+      ...conservan.map(
+        ([m, n]) =>
+          `    ${MOTIVOS_DE_CONSERVAR[m]}: ${n}` +
+          (m === 'prosa'
+            ? ` (${FORMAS_DE_LINEAS.filter((f) => lote.enProsa.has(f))
+                .map((f) => `${f}: ${lote.enProsa.get(f)}`)
+                .join(', ')})`
+            : ''),
+      ),
+      ...lote.nombradas,
+      `  Conflictos, que no se tocan y decide una persona: ${lote.conflictos.length}` +
+        (lote.conflictos.length === 0 ? '.' : ':'),
+      ...lote.conflictos.map((c) => `  ${c}`),
+    ];
+  };
+
+  const segundos = ((Date.now() - inicio) / 1000).toFixed(1);
+  return {
+    ok: true,
+    ruta: rutas.citas,
+    mensaje: [
+      `Saltos de verso${seco ? ', en seco' : ''} (${segundos} s):`,
+      ...parteDelLote('Citas publicadas', lotes.publicadas, true),
+      ...parteDelLote('Candidatas de revisión', lotes.candidatas, false),
+      `Cambian de fecha ${paginasDeCita} ${paginasDeCita === 1 ? 'Página de Cita' : 'Páginas de Cita'} y ` +
+        `${totalListados} ${totalListados === 1 ? 'listado' : 'listados'}` +
+        (listados.length === 0 ? '.' : ` (${listados.map(([f, n]) => `${f}: ${n}`).join(', ')}).`),
+      ...(cambios.length > 0
+        ? ['Tras el commit, lo que avisaría: npx tsx tools/avisar.ts --ensayo --desde <A> --hasta <B>']
+        : []),
+      seco || escritas.length === 0
+        ? 'No se ha escrito nada.'
+        : `Escritas ${citas(escritas.length)}: solo su línea «texto:». Ni una letra, ni un signo, ni el ` +
+          'slug han cambiado. El cambio del corpus va en un commit propio.',
     ].join('\n'),
   };
 }

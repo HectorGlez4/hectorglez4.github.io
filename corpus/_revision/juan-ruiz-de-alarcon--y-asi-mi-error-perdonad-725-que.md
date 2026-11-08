@@ -1,5 +1,5 @@
 ---
-texto: "Y asi mi error perdonad, 725 que en el primer mouimiento ni juzga el entendimiento ni elige la voluntad."
+texto: "Y asi mi error perdonad, 725\nque en el primer mouimiento\nni juzga el entendimiento\nni elige la voluntad."
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-y-asi-mi-error-perdonad-725-que"
 procedencia:

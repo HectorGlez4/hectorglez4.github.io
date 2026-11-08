@@ -1,5 +1,5 @@
 ---
-texto: "Para hacerlas tú alegrías, Las hubieras recogido."
+texto: "Para hacerlas tú alegrías,\nLas hubieras recogido."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-para-hacerlas-tu-alegrias-las-hubieras-recogido"
 procedencia:

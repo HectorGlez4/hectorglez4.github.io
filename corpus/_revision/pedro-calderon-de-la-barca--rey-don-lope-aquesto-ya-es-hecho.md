@@ -1,5 +1,5 @@
 ---
-texto: "REY: Don Lope, aquesto ya es hecho, bien dada la muerte está; no importa error lo menos quien acertó lo demás."
+texto: "REY: Don Lope, aquesto ya es hecho,\nbien dada la muerte está;\nno importa error lo menos\nquien acertó lo demás."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-rey-don-lope-aquesto-ya-es-hecho"
 procedencia:

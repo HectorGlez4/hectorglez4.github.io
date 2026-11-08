@@ -32,7 +32,8 @@
  * falla nombrándolo mientras no lo esté.
  *
  *   · **Página de Cita** — su fichero, su Autor (nombre y años: título, meta, JSON-LD y Tarjeta
- *     de Obra), sus Temas (el nombre de cada chip) y su ficha de Obra (el título de la
+ *     de Obra; y, desde la 30.3, el nombre de «Cómo citar», que una clave revisada invierte:
+ *     `NOMBRE_EN_REFERENCIA`), sus Temas (el nombre de cada chip) y su ficha de Obra (el título de la
  *     Atribución y del `isPartOf`). **Nunca Citas hermanas**: la Tarjeta de Obra (24.4) pinta
  *     el año, el recuento y si hay edición cotejada de la Obra, «Siguiente…» (24.5) depende del
  *     orden del libro y del listado del Tema, y las Rutas de salida del pie (24.6) pintan textos,
@@ -109,6 +110,7 @@ import {
   rutaNormalizada,
 } from '../../src/lib/superficies.ts';
 import { formaDeObra, rutaDeLaObra } from '../../src/lib/obras.ts';
+import { ESTILOS_DE_REFERENCIA, nombreEnReferencia } from '../../src/lib/atribucion.ts';
 import { documentoDeCita, documentosDeCita } from './cotejo.ts';
 import { obraDeIndice } from './indice.ts';
 import type { FamiliaDeFichero, FamiliaDeRuta } from './avisar.ts';
@@ -160,8 +162,43 @@ export interface CambioDeFichero extends Transicion {
 /** Que cualquier cambio del fichero cuenta: el documento de Fuente en la Página de Obra. */
 export const CUALQUIER_CAMBIO: unique symbol = Symbol('cualquier cambio');
 
+/**
+ * Un campo que una superficie no pinta tal cual sino **derivado** de varios del fichero — Historia
+ * 30.3: el nombre invertido de «Cómo citar» sale de `nombre`, `ordenAlfabetico` y `ordenRevisado`.
+ * `de` son las claves del esquema que lee (las clasifica la prueba de la 24.8) y `valor` lo que la
+ * superficie pinta de ellas; `cambiaronLosCampos` compara ese valor como compara un campo.
+ */
+export interface CampoDerivado {
+  readonly derivado: string;
+  readonly de: readonly string[];
+  valor(version: Readonly<Record<string, unknown>>): unknown;
+}
+
+/** Un campo que se pinta: una clave —o un subcampo con punto— o un campo derivado. */
+export type Campo = string | CampoDerivado;
+
 /** Los campos que una superficie pinta de un fichero, o que le basta con que cambie. */
-export type Campos = typeof CUALQUIER_CAMBIO | readonly string[];
+export type Campos = typeof CUALQUIER_CAMBIO | readonly Campo[];
+
+/**
+ * El nombre del Autor en las tres Referencias de «Cómo citar» — Historia 30.3, AD-27. Lo pinta la
+ * Página de Cita con `nombreEnReferencia` de `src/lib/atribucion.ts`, la misma función que aquí:
+ * revisar una clave que es palabra del nombre lo invierte («Martí, J.») y cambia la página; un lote
+ * de `proponer-claves` sin revisar no cambia ninguna Referencia y no la fecha.
+ */
+export const NOMBRE_EN_REFERENCIA: CampoDerivado = {
+  derivado: 'nombreEnReferencia',
+  de: ['nombre', 'ordenAlfabetico', 'ordenRevisado'],
+  valor: (version) =>
+    typeof version.nombre !== 'string'
+      ? version.nombre
+      : ESTILOS_DE_REFERENCIA.map((estilo) =>
+          nombreEnReferencia(
+            { nombre: version.nombre as string, ordenAlfabetico: version.ordenAlfabetico, ordenRevisado: version.ordenRevisado },
+            estilo,
+          ),
+        ),
+};
 
 /**
  * Si una transición cambió alguno de los campos dados — **la** regla de AD-27.
@@ -180,8 +217,9 @@ export function cambiaronLosCampos(transicion: Transicion, campos: Campos): bool
   return campos.some((campo) => canonica(valorDelCampo(antes, campo)) !== canonica(valorDelCampo(despues, campo)));
 }
 
-/** El valor de un campo —o de un subcampo con punto— de una versión; ausente si no está. */
-function valorDelCampo(version: Readonly<Record<string, unknown>>, campo: string): unknown {
+/** El valor de un campo —o de un subcampo con punto, o uno derivado— de una versión; ausente si no está. */
+function valorDelCampo(version: Readonly<Record<string, unknown>>, campo: Campo): unknown {
+  if (typeof campo !== 'string') return campo.valor(version);
   return campo
     .split('.')
     .reduce<unknown>(
@@ -267,7 +305,7 @@ export const CAMPOS_QUE_PINTA = {
     directorioDeObras: ['autor', 'procedencia.obra', 'procedencia.año'],
   },
   autor: {
-    cita: CAMPOS_DEL_AUTOR_FUERA,
+    cita: [...CAMPOS_DEL_AUTOR_FUERA, NOMBRE_EN_REFERENCIA],
     autor: [...CAMPOS_DEL_AUTOR_FUERA, 'semblanza', 'biografia'],
     tema: CAMPOS_DEL_AUTOR_FUERA,
     coleccion: CAMPOS_DEL_AUTOR_FUERA,
@@ -303,16 +341,17 @@ export const CAMPOS_QUE_PINTA = {
  *   · `estadoDerechos` es una puerta de admisión, no un texto publicado;
  *   · `tradicion` es del suelo del 40 % de tradición latinoamericana (§6.1);
  *   · `distintaDe` solo silencia un aviso del build (22.2).
- *   · `ordenRevisado` (26.1) solo dice que una persona revisó la clave: no lo pinta ninguna
- *     superficie, nunca. La clave, `ordenAlfabetico`, sí: la pintan los dos Directorios (26.3,
- *     26.4), y por eso está en la tabla y no aquí.
+ *   · `ordenRevisado` (26.1) estuvo aquí hasta la 30.3: desde entonces decide si la Página de
+ *     Cita invierte el nombre del Autor en «Cómo citar», y entra en la tabla por el campo
+ *     derivado `NOMBRE_EN_REFERENCIA`, nunca como clave suelta (`proponer-claves` sin revisar no
+ *     cambia ninguna Referencia).
  *
  * Está escrita para que un campo no fechable sea una decisión con nombre y no un olvido: la
  * prueba de clasificación exige que cada clave de los esquemas esté aquí o en la tabla.
  */
 export const CAMPOS_QUE_NO_FECHAN = {
   cita: ['aptaParaPortada', 'estadoDerechos'],
-  autor: ['tradicion', 'ordenRevisado'],
+  autor: ['tradicion'],
   obra: ['distintaDe'],
 } as const satisfies Partial<Record<FamiliaDeFichero, readonly string[]>>;
 

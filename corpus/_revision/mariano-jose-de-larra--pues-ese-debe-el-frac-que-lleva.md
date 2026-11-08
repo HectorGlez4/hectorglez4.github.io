@@ -1,5 +1,5 @@
 ---
-texto: "Pues ese debe el frac que lleva puesto, y el sobre-todo, a un sastre de esta villa, y el caballo al chalán, la casa a Ernesto, la comida en la fonda, y cien sorbetes en el café, y cigarros, por supuesto."
+texto: "Pues ese debe el frac que lleva puesto,\ny el sobre-todo, a un sastre de esta villa,\ny el caballo al chalán, la casa a Ernesto,\nla comida en la fonda, y cien sorbetes\nen el café, y cigarros, por supuesto."
 autor: "mariano-jose-de-larra"
 slug: "mariano-jose-de-larra-pues-ese-debe-el-frac-que-lleva"
 procedencia:

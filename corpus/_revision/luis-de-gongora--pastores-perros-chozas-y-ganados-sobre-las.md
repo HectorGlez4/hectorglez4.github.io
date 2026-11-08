@@ -1,5 +1,5 @@
 ---
-texto: "Pastores, perros, chozas y ganados sobre las aguas vi, sin forma y vidas, y nada temí más que mis cuidados."
+texto: "Pastores, perros, chozas y ganados\nsobre las aguas vi, sin forma y vidas,\ny nada temí más que mis cuidados."
 autor: "luis-de-gongora"
 slug: "luis-de-gongora-pastores-perros-chozas-y-ganados-sobre-las"
 procedencia:

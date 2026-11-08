@@ -1,5 +1,5 @@
 ---
-texto: "LEONARDO No atribuyais a vengança, 785 no aueros obedecido, que sabe Dios, que ha nacido solo de desconfiança."
+texto: "LEONARDO\nNo atribuyais a vengança, 785\nno aueros obedecido,\nque sabe Dios, que ha nacido\nsolo de desconfiança."
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-leonardo-no-atribuyais-a-venganca-785-no"
 procedencia:

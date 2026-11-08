@@ -1,5 +1,5 @@
 ---
-texto: "Arroja don LOPE la mesa CRESPO: Pues, ¡y cómo si lo es!"
+texto: "Arroja don LOPE la mesa\nCRESPO: Pues, ¡y cómo si lo es!"
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-arroja-don-lope-la-mesa-crespo-pues"
 procedencia:

@@ -1,5 +1,5 @@
 ---
-texto: "CRESPO: Pues, ¡juro a Dios, [Levántase y] toma la vara que me lo habéis de pagar!"
+texto: "CRESPO: Pues, ¡juro a Dios,\n[Levántase y] toma la vara\nque me lo habéis de pagar!"
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-crespo-pues-juro-a-dios-levantase-y"
 procedencia:

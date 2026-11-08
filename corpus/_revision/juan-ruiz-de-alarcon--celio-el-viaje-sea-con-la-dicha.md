@@ -1,5 +1,5 @@
 ---
-texto: "CELIO El viaje sea con la dicha que os desea 935 el que como yo os estima."
+texto: "CELIO\nEl viaje sea\ncon la dicha que os desea 935\nel que como yo os estima."
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-celio-el-viaje-sea-con-la-dicha"
 procedencia:

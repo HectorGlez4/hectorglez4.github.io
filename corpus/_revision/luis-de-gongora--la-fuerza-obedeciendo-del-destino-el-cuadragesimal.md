@@ -1,5 +1,5 @@
 ---
-texto: "la fuerza obedeciendo del destino, el cuadragesimal voto en tus manos, desengaño, haré, corrector santo."
+texto: "la fuerza obedeciendo del destino,\nel cuadragesimal voto en tus manos,\ndesengaño, haré, corrector santo."
 autor: "luis-de-gongora"
 slug: "luis-de-gongora-la-fuerza-obedeciendo-del-destino-el-cuadragesimal"
 procedencia:

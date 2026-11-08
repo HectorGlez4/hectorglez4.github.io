@@ -16,10 +16,15 @@ import Fuente from '../../components/Fuente.astro';
 import TarjetaDeObra from '../../components/TarjetaDeObra.astro';
 import CopiarCita from '../../islands/CopiarCita.astro';
 import ImagenDeCita from '../../islands/ImagenDeCita.astro';
+import FilaDeAcciones from '../../components/FilaDeAcciones.astro';
 import CompartirEnlace from '../../islands/CompartirEnlace.astro';
 import RutasDeSalida from '../../components/RutasDeSalida.astro';
 import DatosEstructurados from '../../components/DatosEstructurados.astro';
 import FiltrosDeLaCita from '../../components/FiltrosDeLaCita.astro';
+import Desplegable from '../../components/Desplegable.astro';
+import ComoCitar from '../../components/ComoCitar.astro';
+import InsertaEstaCita from '../../components/InsertaEstaCita.astro';
+import { citaTieneComoCitar, fragmentoParaInsertar, referenciasDeCita } from '../../lib/atribucion.ts';
 import {
   citasDeLasObras,
   citasDeTema,
@@ -33,6 +38,7 @@ import { tituloDe } from '../../lib/marca.ts';
 import type { GetStaticPaths } from 'astro';
 import { rutaDeCita } from '../../lib/superficies.ts';
 import { clavesDeOrden } from '../../lib/obras.ts';
+import { enUnaLinea } from '../../lib/verso.ts';
 
 export const getStaticPaths = (async () => {
   const conjunto = await conjuntoPublicable();
@@ -91,14 +97,23 @@ const { cita, autor, siguiente, rutas, filtros, clave } = Astro.props;
  * desde un buscador decide si entrar leyendo esto, así que recortarlo con puntos
  * suspensivos donde no hace falta cuesta clics.
  */
-const recorte = cita.texto.length > 110 ? `${cita.texto.slice(0, 109)}…` : cita.texto;
+/*
+ * Ninguno de los dos admite saltos: el verso va en una línea, con « / » (`enUnaLinea`, Historia
+ * 29.3). El recorte se mide sobre el texto —cada salto, un carácter— y en el mismo índice de
+ * siempre; si cae en o junto a un salto, la racha final que lo contiene se quita para que ni el
+ * salto ni « / » queden colgando antes de «…». Una Cita sin saltos no cambia ni un byte.
+ */
+const recorte =
+  cita.texto.length > 110
+    ? `${enUnaLinea(cita.texto.slice(0, 109).replace(/\s*\n\s*$/, ''))}…`
+    : enUnaLinea(cita.texto);
 const titulo = tituloDe(`«${recorte}» — ${autor.nombre}`);
 const canonica = new URL(rutaDeCita(cita.slug), Astro.site).href;
 ---
 
 <Armazon
   titulo={titulo}
-  descripcion={`${cita.texto} — ${autor.nombre}.`}
+  descripcion={`${enUnaLinea(cita.texto)} — ${autor.nombre}.`}
   ruta={rutaDeCita(cita.slug)}
   tarjeta={`/tarjeta/${cita.slug}.png`}
   tipo="cita"
@@ -115,16 +130,43 @@ const canonica = new URL(rutaDeCita(cita.slug), Astro.site).href;
       */}
     <Fuente cita={cita} />
     {/*
-      * Historia 24.4 — la Obra de la que sale la Cita, entre lo que la Cita es (atribución y
-      * Fuente) y lo que se hace con ella (las acciones). Aquí y no en `BloqueDeCita` por lo
-      * mismo que la Fuente: la portada y el 404 no cambian con esta historia. Sin Obra no pinta
-      * nada, y Copiar sigue a la Fuente o a la Atribución. Desde la 24.5 lleva además
-      * «Siguiente…» cuando hay a dónde ir (`siguiente`, decidido arriba).
+      * Historia 30.1 — nada se intercala entre la Atribución —con su Línea de la Fuente— y
+      * Copiar: a 360 × 640 la Tarjeta de Obra empujaba Copiar entre 661 y 756 px, fuera de la
+      * primera pantalla, y quien viene a llevarse la Cita tenía que pasar antes por la Obra
+      * (SM-C5). Primero lo que se hace con la Cita —Copiar, Imagen, compartir— y después la
+      * Tarjeta de Obra (UX-DR113, UX-DR122). Desde la 30.2 Copiar e Imagen van en la Fila de
+      * acciones —en fila desde 600 px, apilados por debajo (UX-DR114, UX-DR123)—, y «Compartir
+      * en» queda fuera, detrás, en su bloque propio.
+      */}
+    <FilaDeAcciones>
+      <CopiarCita cita={cita} autor={autor} />
+      <ImagenDeCita cita={cita} autor={autor} />
+    </FilaDeAcciones>
+    <CompartirEnlace cita={cita} autor={autor} canonica={canonica} />
+    {/*
+      * Historia 24.4, movida tras compartir por la 30.1 — la Obra de la que sale la Cita. Aquí
+      * y no en `BloqueDeCita` por lo mismo que la Fuente: la portada y el 404 no cambian (la Cita
+      * del Día nace en este orden con la 28.2). Sin Obra no pinta nada, y las Rutas de salida
+      * siguen a compartir. Desde la 24.5 lleva además «Siguiente…» cuando hay a dónde ir
+      * (`siguiente`, decidido arriba).
       */}
     <TarjetaDeObra cita={cita} autor={autor} nivel={2} siguiente={siguiente} />
-    <CopiarCita cita={cita} autor={autor} />
-    <ImagenDeCita cita={cita} autor={autor} />
-    <CompartirEnlace cita={cita} autor={autor} canonica={canonica} />
+    {/*
+      * Historia 30.3 — el bloque de desplegables, tras la Tarjeta de Obra —o tras compartir, sin
+      * Obra— y antes de las Rutas de salida (UX-DR119). Es **un solo sitio** a propósito: la
+      * palanca de SM-C5 es un diff de aquí. Lleva «Cómo citar» —si la Cita lo tiene— y, el último,
+      * «Inserta esta cita» (30.4); el pasaje de la Épica 31 irá delante, sin hueco reservado. Desde
+      * la 30.4 el bloque se pinta siempre: el Fragmento existe para toda Cita. Fuera de Pagefind
+      * (`all`): las Referencias y el Fragmento repiten el texto, el título y el Autor, y la página
+      * no se encuentra por ellos; fuera del JSON-LD. Sin `data-zona`: no hay enlaces, la canónica
+      * es texto de las Referencias y del campo.
+      */}
+    <div class="desplegables" data-pagefind-ignore="all">
+      {citaTieneComoCitar(cita) && (
+        <Desplegable rotulo="Cómo citar"><ComoCitar referencias={referenciasDeCita(cita, autor, canonica)} /></Desplegable>
+      )}
+      <Desplegable rotulo="Inserta esta cita"><InsertaEstaCita fragmento={fragmentoParaInsertar(cita, autor, canonica)} /></Desplegable>
+    </div>
     {/*
       * Historia 24.6 — tras las acciones, los tres grupos del pie. Un grupo sin Citas no pinta
       * nada, y sin ninguno no hay `nav`: la Atribución sigue enlazando al Autor y a la Obra.
@@ -147,5 +189,10 @@ const canonica = new URL(rutaDeCita(cita.slug), Astro.site).href;
      * primera pantalla de 360×640, que es justo lo que FR-1 prohíbe.
      */
     padding-block: var(--respiracion);
+  }
+
+  /* Historia 30.3 — el primer filete a 4 × unidad de la Tarjeta de Obra o de «Compartir en». */
+  .desplegables {
+    margin-top: calc(var(--unidad) * 4);
   }
 </style>

@@ -1,5 +1,5 @@
 ---
-texto: "Y despues se mostrò ayrada 860 quando el amor entendio del Rey, quiçà porque vio su imaginacion burlada."
+texto: "Y despues se mostrò ayrada 860\nquando el amor entendio\ndel Rey, quiçà porque vio\nsu imaginacion burlada."
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-y-despues-se-mostro-ayrada-860-quando"
 procedencia:

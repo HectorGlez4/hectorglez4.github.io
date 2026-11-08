@@ -21,6 +21,7 @@
 import { citaDelDia, type Jornada } from './citaDelDia.ts';
 import type { Autor, Cita } from './publicado.ts';
 import { rutaDeCita } from './superficies.ts';
+import { enUnaLinea } from './verso.ts';
 
 const UN_DIA = 86_400_000;
 
@@ -114,7 +115,7 @@ export function canalRss(
         `      <link>${escapar(url)}</link>`,
         `      <guid isPermaLink="true">${escapar(url)}</guid>`,
         `      <pubDate>${fechaRfc822(e.jornada)}</pubDate>`,
-        `      <description><![CDATA[«${e.cita.texto}» — ${e.autor.nombre}]]></description>`,
+        `      <description><![CDATA[«${enUnaLinea(e.cita.texto)}» — ${e.autor.nombre}]]></description>`,
         '    </item>',
       ].join('\n');
     })

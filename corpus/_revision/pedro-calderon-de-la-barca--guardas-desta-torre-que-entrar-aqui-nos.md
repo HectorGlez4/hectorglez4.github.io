@@ -1,5 +1,5 @@
 ---
-texto: "Guardas desta torre, que entrar aquí nos dejasteis, Pues que nos dais á escoger, el prendernos es más fácil. (Salen Clotaldo y los soldados: él con una pistola y todos con los rostros cubiertos.)"
+texto: "Guardas desta torre, que entrar\naquí nos dejasteis,\nPues que nos dais á escoger, el prendernos es más fácil.\n(Salen Clotaldo y los soldados: él con una pistola y todos con los rostros cubiertos.)"
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-guardas-desta-torre-que-entrar-aqui-nos"
 procedencia:

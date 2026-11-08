@@ -1,5 +1,5 @@
 ---
-texto: "JUAN: Tengo de darte la muerte, ¡viven los cielos!"
+texto: "JUAN: Tengo de darte la muerte,\n¡viven los cielos!"
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-juan-tengo-de-darte-la-muerte-viven"
 procedencia:

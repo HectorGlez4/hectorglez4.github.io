@@ -1,5 +1,5 @@
 ---
-texto: "ÁLVARO: ¿Qué más causa había de haber, llegando a verla, que verla?"
+texto: "ÁLVARO: ¿Qué más causa había de haber,\nllegando a verla, que verla?"
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-alvaro-que-mas-causa-habia-de-haber"
 procedencia:

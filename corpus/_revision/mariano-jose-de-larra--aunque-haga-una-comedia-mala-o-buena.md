@@ -1,5 +1,5 @@
 ---
-texto: "Aunque haga una comedia mala o buena, si no entiendo del teatro las intrigas, ¿cuándo a pública luz saldrá mi vena?"
+texto: "Aunque haga una comedia mala o buena,\nsi no entiendo del teatro las intrigas,\n¿cuándo a pública luz saldrá mi vena?"
 autor: "mariano-jose-de-larra"
 slug: "mariano-jose-de-larra-aunque-haga-una-comedia-mala-o-buena"
 procedencia:

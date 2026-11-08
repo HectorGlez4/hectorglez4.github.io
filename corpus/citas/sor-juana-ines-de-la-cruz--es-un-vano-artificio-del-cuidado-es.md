@@ -1,5 +1,5 @@
 ---
-texto: "Es un vano artificio del cuidado, es una flor al viento delicada, es un resguardo inútil para el hado: Es una necia diligencia errada, es un afán caduco y, bien mirado, es cadáver, es polvo, es sombra, es nada."
+texto: "Es un vano artificio del cuidado,\nes una flor al viento delicada,\nes un resguardo inútil para el hado:\nEs una necia diligencia errada,\nes un afán caduco y, bien mirado,\nes cadáver, es polvo, es sombra, es nada."
 autor: "sor-juana-ines-de-la-cruz"
 temas:
   - "el-tiempo"

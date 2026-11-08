@@ -1,5 +1,5 @@
 ---
-texto: "Pisando el suelo con ademán pulido, barbilucio, gayado de colores el pañuelo,"
+texto: "Pisando el suelo\ncon ademán pulido, barbilucio,\ngayado de colores el pañuelo,"
 autor: "mariano-jose-de-larra"
 slug: "mariano-jose-de-larra-pisando-el-suelo-con-ademan-pulido-barbilucio"
 procedencia:

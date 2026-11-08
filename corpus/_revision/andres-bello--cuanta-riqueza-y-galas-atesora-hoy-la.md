@@ -1,5 +1,5 @@
 ---
-texto: "Cuanta riqueza y galas atesora, hoy la Naturaleza hace patente, tributando homenaje reverente a la deidad que el corazón adora."
+texto: "Cuanta riqueza y galas atesora,\nhoy la Naturaleza hace patente,\ntributando homenaje reverente\na la deidad que el corazón adora."
 autor: "andres-bello"
 slug: "andres-bello-cuanta-riqueza-y-galas-atesora-hoy-la"
 procedencia:

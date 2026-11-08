@@ -1,5 +1,5 @@
 ---
-texto: "Tu misma ausencia me muestra, 845 que me es tu presencia grata: triste yo, que a quien me mata vengo a tener por maestra."
+texto: "Tu misma ausencia me muestra, 845\nque me es tu presencia grata:\ntriste yo, que a quien me mata\nvengo a tener por maestra."
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-tu-misma-ausencia-me-muestra-845-que"
 procedencia:

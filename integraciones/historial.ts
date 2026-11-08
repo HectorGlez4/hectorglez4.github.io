@@ -429,9 +429,16 @@ async function documentosEnDisco(directorio: string): Promise<string[]> {
  */
 export async function corpusParaFechar(
   raiz: string,
-  opciones: { documentos?: readonly string[] } = {},
+  opciones: {
+    documentos?: readonly string[];
+    /**
+     * Historia 29.2 — la raíz del Corpus, si no es `{raiz}/corpus`: la de `--corpus` de quien
+     * cuenta las fechas que movería una orden.
+     */
+    corpus?: string;
+  } = {},
 ): Promise<CorpusParaFechar> {
-  const rutas = rutasDelCorpus(join(raiz, 'corpus'));
+  const rutas = rutasDelCorpus(opciones.corpus ?? join(raiz, 'corpus'));
   const [leidas, autores, temas, colecciones, fichas, documentos] = await Promise.all([
     leerCitas(rutas.citas),
     leerAutores(rutas),

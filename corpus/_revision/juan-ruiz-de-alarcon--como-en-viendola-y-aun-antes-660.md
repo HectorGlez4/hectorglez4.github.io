@@ -1,5 +1,5 @@
 ---
-texto: "¿Como en viendola? y aun antes, 660 allegaos a vna tapada, y antes de mostraros nada pedirà cintas, y guantes."
+texto: "¿Como en viendola? y aun antes, 660\nallegaos a vna tapada,\ny antes de mostraros nada\npedirà cintas, y guantes."
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-como-en-viendola-y-aun-antes-660"
 procedencia:

@@ -1,5 +1,5 @@
 ---
-texto: "Hoy lo sea con los dos, Y que pare este concierto En que seáis Reina vos, Pero Reina en mi albedrío."
+texto: "Hoy lo sea con los dos,\nY que pare este concierto\nEn que seáis Reina vos,\nPero Reina en mi albedrío."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-hoy-lo-sea-con-los-dos-y"
 procedencia:

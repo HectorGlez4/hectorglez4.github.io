@@ -1,5 +1,5 @@
 ---
-texto: "Érase un hombre a una nariz pegado, érase una nariz superlativa, érase una alquitara medio viva, érase un peje espada mal barbado;"
+texto: "Érase un hombre a una nariz pegado,\nérase una nariz superlativa,\nérase una alquitara medio viva,\nérase un peje espada mal barbado;"
 autor: "francisco-de-quevedo"
 slug: "francisco-de-quevedo-erase-un-hombre-a-una-nariz-pegado"
 procedencia:

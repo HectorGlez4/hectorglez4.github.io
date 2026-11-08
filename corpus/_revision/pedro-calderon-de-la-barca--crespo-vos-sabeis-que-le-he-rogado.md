@@ -1,5 +1,5 @@
 ---
-texto: "CRESPO: ¿Vos sabéis que le he rogado con la paz y no la quiere?"
+texto: "CRESPO: ¿Vos sabéis que le he rogado\ncon la paz y no la quiere?"
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-crespo-vos-sabeis-que-le-he-rogado"
 procedencia:

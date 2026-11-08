@@ -1,5 +1,5 @@
 ---
-texto: "FILIPO Mil vezes en hora buena, bella Aurora, os enojad, pues assegura piedad esse rigor a mi pena: Nunca ha sido tan gustosa 820 la furia, nunca se ha visto el enojo tambien quisto, ni la yra tan hermosa."
+texto: "FILIPO\nMil vezes en hora buena,\nbella Aurora, os enojad,\npues assegura piedad\nesse rigor a mi pena:\nNunca ha sido tan gustosa 820\nla furia, nunca se ha visto\nel enojo tambien quisto,\nni la yra tan hermosa."
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-filipo-mil-vezes-en-hora-buena-bella"
 procedencia:

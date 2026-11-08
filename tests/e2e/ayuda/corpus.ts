@@ -334,6 +334,28 @@ export function citaConTituloDeObraMasLargo(): { slug: string; autor: string; ti
 }
 
 /**
+ * Historia 30.1 — la Cita publicada con Obra y el texto más largo (el primer slug, si empatan):
+ * la que más empuja Copiar hacia abajo. Sustituye a la Cita en verso más larga hasta que la Épica
+ * 29 esté en la rama (deferred de la 30.1).
+ */
+export function citaConObraDeTextoMasLargo(): { slug: string; caracteres: number } | undefined {
+  let mejor: { slug: string; caracteres: number } | undefined;
+  for (const cita of citasResueltas()) {
+    if (cita.obra === undefined) continue;
+    const caracteres = [...cita.texto].length;
+    if (mejor === undefined || caracteres > mejor.caracteres || (caracteres === mejor.caracteres && cita.slug < mejor.slug)) {
+      mejor = { slug: cita.slug, caracteres };
+    }
+  }
+  return mejor;
+}
+
+/** Historia 30.1 — si una Cita está publicada hoy en el Corpus. */
+export function estaPublicada(slug: string): boolean {
+  return citasResueltas().some((c) => c.slug === slug);
+}
+
+/**
  * Una Cita del Corpus que no lleva línea de Obra —no declara obra o ninguna ficha la reclama—,
  * con su Autor y su texto, si hoy hay alguna. Historia 24.3. La primera por slug.
  */
@@ -443,6 +465,16 @@ export function citaDeTramo(nombre: string): string | undefined {
 }
 
 /**
+ * Historia 30.2 — la primera Cita por slug de más de `MAX_CARACTERES_IMAGEN`, sin Acción Imagen:
+ * la de la fila con Copiar solo. `undefined` si el Corpus de hoy no tiene ninguna.
+ */
+export function citaSinImagen(): string | undefined {
+  return citasResueltas()
+    .filter((c) => !admiteImagen(c.texto))
+    .sort(porSlug)[0]?.slug;
+}
+
+/**
  * Historia 26.12 — la primera Colección por slug con al menos `MIN_CITAS_POR_COLECCION` miembros
  * que son Citas publicadas: la que tiene página. `undefined` si hoy no hay ninguna.
  */
@@ -457,4 +489,67 @@ export function coleccionPublicada(): string | undefined {
       return (miembros ?? []).filter((m) => publicadas.has(m)).length >= MIN_CITAS_POR_COLECCION;
     })
     ?.replace(/\.ya?ml$/, '');
+}
+
+/** Historia 29.3 — una Cita publicada en verso: su texto lleva saltos (U+000A). */
+export interface CitaEnVerso {
+  slug: string;
+  autor: string;
+  texto: string;
+  /** El tramo de `src/lib/tramos.ts`: `xl`, `lg`, `md` o `sm`. */
+  tramo: string;
+  versos: string[];
+  /** La Obra resuelta, como la pinta el build. */
+  obra?: string;
+}
+
+/**
+ * Historia 29.3 — las Citas publicadas con saltos de verso, por slug. Vacío si el Corpus del que
+ * se construyó el sitio no tiene ninguna (antes del commit de restitución de la 29.2): quien la
+ * pide falla diciéndolo, no se salta.
+ */
+export function citasEnVerso(): CitaEnVerso[] {
+  return citasResueltas()
+    .filter((c) => c.texto.includes('\n'))
+    .sort(porSlug)
+    .map((c) => ({
+      slug: c.slug,
+      autor: c.autor,
+      texto: c.texto,
+      tramo: tramoDe(c.texto).nombre,
+      versos: c.texto.split('\n'),
+      ...(c.obra !== undefined ? { obra: c.obra } : {}),
+    }));
+}
+
+const masLarga = (a: { texto: string; slug: string }, b: { texto: string; slug: string }) =>
+  [...b.texto].length - [...a.texto].length || porSlug(a, b);
+
+/**
+ * Historia 29.3 — por cada tramo que admite Imagen, la Cita publicada más larga en caracteres
+ * (empate: la primera por slug). Un tramo sin ninguna Cita no aparece.
+ */
+export function citaMasLargaPorTramo(): Map<string, string> {
+  const porTramo = new Map<string, string>();
+  for (const c of citasResueltas().filter((c) => admiteImagen(c.texto)).sort(masLarga)) {
+    const tramo = tramoDe(c.texto).nombre;
+    if (!porTramo.has(tramo)) porTramo.set(tramo, c.slug);
+  }
+  return porTramo;
+}
+
+/**
+ * Historia 29.3 — por cada tramo que admite Imagen y tenga Citas en verso, la más larga en
+ * caracteres y, aparte, la de más versos (pueden ser la misma).
+ */
+export function citaEnVersoMasLargaPorTramo(): Map<string, { porCaracteres: string; porVersos: string }> {
+  const porTramo = new Map<string, { porCaracteres: string; porVersos: string }>();
+  const enVerso = citasEnVerso().filter((c) => admiteImagen(c.texto));
+  for (const tramo of new Set(enVerso.map((c) => c.tramo))) {
+    const delTramo = enVerso.filter((c) => c.tramo === tramo);
+    const porCaracteres = [...delTramo].sort(masLarga)[0].slug;
+    const porVersos = [...delTramo].sort((a, b) => b.versos.length - a.versos.length || porSlug(a, b))[0].slug;
+    porTramo.set(tramo, { porCaracteres, porVersos });
+  }
+  return porTramo;
 }

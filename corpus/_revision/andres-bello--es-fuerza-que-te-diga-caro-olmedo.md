@@ -1,5 +1,5 @@
 ---
-texto: "Es fuerza que te diga, caro Olmedo, que del dulce solaz destitüido de tu tierna amistad, vivir no puedo."
+texto: "Es fuerza que te diga, caro Olmedo,\nque del dulce solaz destitüido\nde tu tierna amistad, vivir no puedo."
 autor: "andres-bello"
 slug: "andres-bello-es-fuerza-que-te-diga-caro-olmedo"
 procedencia:

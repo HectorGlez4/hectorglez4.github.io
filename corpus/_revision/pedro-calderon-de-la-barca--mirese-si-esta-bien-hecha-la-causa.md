@@ -1,5 +1,5 @@
 ---
-texto: "Mírese, si está bien hecha la causa; miren, si hay quien diga que yo haya hecho en ella alguna maldad, si he inducido algún testigo, si está algo escrito demás de lo que he dicho, y entonces me den muerte."
+texto: "Mírese, si está bien hecha\nla causa; miren, si hay\nquien diga que yo haya hecho\nen ella alguna maldad,\nsi he inducido algún testigo,\nsi está algo escrito demás\nde lo que he dicho, y entonces\nme den muerte."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-mirese-si-esta-bien-hecha-la-causa"
 procedencia:

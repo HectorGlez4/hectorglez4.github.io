@@ -1,5 +1,5 @@
 ---
-texto: "Mucho, nación bizarra mejicana, de tu poder y de tu ejemplo espera la libertad; ni su esperanza es vana, si ajeno riesgo escarmentarte sabe, y no en un mar te engolfas que sembrado de los fragmentos ves de tanta nave."
+texto: "Mucho, nación bizarra mejicana,\nde tu poder y de tu ejemplo espera\nla libertad; ni su esperanza es vana,\nsi ajeno riesgo escarmentarte sabe,\ny no en un mar te engolfas que sembrado\nde los fragmentos ves de tanta nave."
 autor: "andres-bello"
 slug: "andres-bello-mucho-nacion-bizarra-mejicana-de-tu-poder"
 procedencia:

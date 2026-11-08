@@ -1,5 +1,5 @@
 ---
-texto: "De ellas me acuso en esta despedida, y partiré a lo menos confesado."
+texto: "De ellas me acuso en esta despedida,\ny partiré a lo menos confesado."
 autor: "luis-de-gongora"
 slug: "luis-de-gongora-de-ellas-me-acuso-en-esta-despedida"
 procedencia:

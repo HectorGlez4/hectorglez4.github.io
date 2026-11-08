@@ -1,5 +1,5 @@
 ---
-texto: "LOPE: No me fuera sin besaros las manos y sin pediros que liberal perdonéis un atrevimiento digno de perdón, porque no el precio hace el don, sino el servicio."
+texto: "LOPE: No me fuera sin besaros\nlas manos y sin pediros\nque liberal perdonéis\nun atrevimiento digno\nde perdón, porque no el precio\nhace el don, sino el servicio."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-lope-no-me-fuera-sin-besaros-las"
 procedencia:

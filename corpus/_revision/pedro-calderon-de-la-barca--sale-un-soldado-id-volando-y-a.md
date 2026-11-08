@@ -1,5 +1,5 @@
 ---
-texto: "Sale un SOLDADO Id volando, y a todas las compañías que alojadas estos días han estado y van marchando decid que bien ordenadas lleguen aquí en escuadrones, con balas en los cañones y con las cuerdas caladas."
+texto: "Sale un SOLDADO\nId volando,\ny a todas las compañías\nque alojadas estos días\nhan estado y van marchando\ndecid que bien ordenadas\nlleguen aquí en escuadrones,\ncon balas en los cañones\ny con las cuerdas caladas."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-sale-un-soldado-id-volando-y-a"
 procedencia:

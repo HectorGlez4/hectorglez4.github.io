@@ -1,5 +1,5 @@
 ---
-texto: "Y perdonad, que a hacer vuelvo diligencias no excusadas en tal caso."
+texto: "Y perdonad, que a hacer vuelvo\ndiligencias no excusadas\nen tal caso."
 autor: "sor-juana-ines-de-la-cruz"
 slug: "sor-juana-ines-de-la-cruz-y-perdonad-que-a-hacer-vuelvo-diligencias"
 procedencia:

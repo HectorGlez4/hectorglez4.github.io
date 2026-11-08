@@ -1,5 +1,5 @@
 ---
-texto: "Los archivos van al polvo y a la sombra impenetrable de un lenguaje incomprensible como cuentos de otros mundos, como el verbo de unos seres que no fuesen ni siquiera el antropoide, ni siquiera una vislumbre de razón, de humanidad."
+texto: "Los archivos van al polvo\ny a la sombra impenetrable\nde un lenguaje incomprensible\ncomo cuentos de otros mundos,\ncomo el verbo de unos seres que no fuesen\nni siquiera el antropoide,\nni siquiera una vislumbre de razón,\nde humanidad."
 autor: "pedro-bonifacio-palacios"
 slug: "pedro-bonifacio-palacios-los-archivos-van-al-polvo-y-a"
 procedencia:

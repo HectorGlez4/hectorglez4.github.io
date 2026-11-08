@@ -1,5 +1,5 @@
 ---
-texto: "Con esto yo en mi casa alegre trato mi jornada, y dispongo mi partida, que importa en engañar este recato."
+texto: "Con esto yo en mi casa alegre trato\nmi jornada, y dispongo mi partida,\nque importa en engañar este recato."
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-con-esto-yo-en-mi-casa-alegre"
 procedencia:

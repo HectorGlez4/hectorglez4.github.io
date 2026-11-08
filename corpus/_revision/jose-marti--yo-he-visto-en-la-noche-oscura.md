@@ -1,5 +1,5 @@
 ---
-texto: "Yo he visto en la noche oscura Llover sobre mi cabeza Los rayos de lumbre pura De la divina belleza."
+texto: "Yo he visto en la noche oscura\nLlover sobre mi cabeza\nLos rayos de lumbre pura\nDe la divina belleza."
 autor: "jose-marti"
 slug: "jose-marti-yo-he-visto-en-la-noche-oscura"
 procedencia:

@@ -782,6 +782,25 @@ export async function leerCitasTolerante(
   return { citas, ilegibles };
 }
 
+/**
+ * La línea `texto:` del frontmatter tal y como la escribe `aYaml`, sustituida por la del texto
+ * nuevo; `undefined` si el fichero no la tiene exactamente una vez. Solo esa línea cambia: el
+ * resto del fichero queda byte a byte, aunque se haya escrito a mano con otra disposición. La usan
+ * la restitución de saltos (Historia 29.2) y la aprobación de una candidata que llega sin ellos.
+ */
+export function conLaLineaDeTexto(contenido: string, viejo: string, nuevo: string): string | undefined {
+  const fin = /\r?\n---\r?\n?/u.exec(contenido.slice(3));
+  if (!contenido.startsWith('---') || fin === null) return undefined;
+  const cabecera = contenido.slice(0, 3 + fin.index);
+  const linea = `texto: ${JSON.stringify(viejo)}`;
+  const lineas = cabecera.split('\n');
+  const donde = lineas.map((l, i) => (l.replace(/\r$/u, '') === linea ? i : -1)).filter((i) => i !== -1);
+  if (donde.length !== 1) return undefined;
+  const [i] = donde;
+  lineas[i] = `texto: ${JSON.stringify(nuevo)}${lineas[i].endsWith('\r') ? '\r' : ''}`;
+  return lineas.join('\n') + contenido.slice(cabecera.length);
+}
+
 const FRONTMATTER = /^---\r?\n([\s\S]*?)\r?\n---\r?\n?/;
 
 export function separarFrontmatter(contenido: string): Record<string, unknown> | null {

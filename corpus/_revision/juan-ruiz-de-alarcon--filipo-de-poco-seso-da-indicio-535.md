@@ -1,5 +1,5 @@
 ---
-texto: "FILIPO De poco seso da indicio; 535 pero no sucede en mi lo que piensas."
+texto: "FILIPO\nDe poco seso da indicio; 535\npero no sucede en mi\nlo que piensas."
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-filipo-de-poco-seso-da-indicio-535"
 procedencia:

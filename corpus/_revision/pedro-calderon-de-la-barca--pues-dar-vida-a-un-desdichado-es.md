@@ -1,5 +1,5 @@
 ---
-texto: "Pues dar vida á un desdichado Es dar á un dichoso muerte."
+texto: "Pues dar vida á un desdichado\nEs dar á un dichoso muerte."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-pues-dar-vida-a-un-desdichado-es"
 procedencia:

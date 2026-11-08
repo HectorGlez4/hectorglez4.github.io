@@ -1,5 +1,5 @@
 ---
-texto: "SARGENTO: ¿No fuera mucho peor que te hubieras desangrado?"
+texto: "SARGENTO: ¿No fuera mucho peor\nque te hubieras desangrado?"
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-sargento-no-fuera-mucho-peor-que-te"
 procedencia:

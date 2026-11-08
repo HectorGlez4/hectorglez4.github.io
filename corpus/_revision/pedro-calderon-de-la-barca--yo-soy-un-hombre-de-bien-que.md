@@ -1,5 +1,5 @@
 ---
-texto: "Yo soy un hombre de bien; que a escoger mi nacimiento, no dejara, es Dios Testigo, un escrúpulo, un defecto en mí, que suplir pudiera la ambición de mi deseo."
+texto: "Yo soy un hombre de bien;\nque a escoger mi nacimiento,\nno dejara, es Dios Testigo,\nun escrúpulo, un defecto\nen mí, que suplir pudiera\nla ambición de mi deseo."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-yo-soy-un-hombre-de-bien-que"
 procedencia:

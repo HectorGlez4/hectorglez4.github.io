@@ -1,5 +1,5 @@
 ---
-texto: "Y en sus notas, que van prolongándose Por los llanos y los cerros, Hay algo de candoroso, De apacible y de halagüeño."
+texto: "Y en sus notas, que van prolongándose\nPor los llanos y los cerros,\nHay algo de candoroso,\nDe apacible y de halagüeño."
 autor: "rosalia-de-castro"
 slug: "rosalia-de-castro-y-en-sus-notas-que-van-prolongandose"
 procedencia:

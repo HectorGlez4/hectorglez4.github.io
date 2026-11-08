@@ -1,5 +1,5 @@
 ---
-texto: "¿De la sustancia de cien pueblos, graves la avara Cádiz ve volver sus naves?"
+texto: "¿De la sustancia de cien pueblos, graves\nla avara Cádiz ve volver sus naves?"
 autor: "andres-bello"
 slug: "andres-bello-de-la-sustancia-de-cien-pueblos-graves"
 procedencia:

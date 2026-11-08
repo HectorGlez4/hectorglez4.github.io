@@ -1,5 +1,5 @@
 ---
-texto: "Pero ya te lo he dicho, sin saber que lo decía."
+texto: "Pero ya te lo he dicho,\nsin saber que lo decía."
 autor: "sor-juana-ines-de-la-cruz"
 slug: "sor-juana-ines-de-la-cruz-pero-ya-te-lo-he-dicho-sin"
 procedencia:

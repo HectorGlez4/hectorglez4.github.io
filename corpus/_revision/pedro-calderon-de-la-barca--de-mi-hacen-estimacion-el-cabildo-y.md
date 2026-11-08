@@ -1,5 +1,5 @@
 ---
-texto: "De mí hacen estimación el cabildo y el concejo."
+texto: "De mí hacen estimación\nel cabildo y el concejo."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-de-mi-hacen-estimacion-el-cabildo-y"
 procedencia:

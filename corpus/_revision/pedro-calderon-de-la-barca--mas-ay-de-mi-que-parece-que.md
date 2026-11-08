@@ -1,5 +1,5 @@
 ---
-texto: "Mas, ¡ay de mí!, que parece que es fiera tu tiranía; pues desde que te rogué que te detuvieses, miran mis ojos tu faz hermosa descollarse por encima de los montes."
+texto: "Mas, ¡ay de mí!, que parece\nque es fiera tu tiranía;\npues desde que te rogué\nque te detuvieses, miran\nmis ojos tu faz hermosa\ndescollarse por encima\nde los montes."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-mas-ay-de-mi-que-parece-que"
 procedencia:

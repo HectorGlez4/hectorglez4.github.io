@@ -1,5 +1,5 @@
 ---
-texto: "SANCHO Que la bellaca del agua 120 quiso alçarse con la tierra, pues el vino ¿donde estaua?"
+texto: "SANCHO\nQue la bellaca del agua 120\nquiso alçarse con la tierra,\npues el vino ¿donde estaua?"
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-sancho-que-la-bellaca-del-agua-120"
 procedencia:

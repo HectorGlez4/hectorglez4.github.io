@@ -1,5 +1,5 @@
 ---
-texto: "Salen REBOLLEDO y la CHISPA LOPE: Vuestro hijo falta; porque siendo mi soldado ya, no ha de quedar preso."
+texto: "Salen REBOLLEDO y la CHISPA\nLOPE: Vuestro hijo falta; porque\nsiendo mi soldado ya,\nno ha de quedar preso."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-salen-rebolledo-y-la-chispa-lope-vuestro"
 procedencia:

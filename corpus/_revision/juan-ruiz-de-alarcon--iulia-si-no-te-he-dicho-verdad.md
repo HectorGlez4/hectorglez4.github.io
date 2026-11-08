@@ -1,5 +1,5 @@
 ---
-texto: "IULIA Si no te he dicho verdad, no halle mi amor piedad, ni mi deseo esperança. 820 LEONARDO Quando fue razon, señora, nunca te pude ablandar, y sin ella he de pensar, ¿que te has ablandado agora?"
+texto: "IULIA\nSi no te he dicho verdad,\nno halle mi amor piedad,\nni mi deseo esperança. 820\nLEONARDO\nQuando fue razon, señora,\nnunca te pude ablandar,\ny sin ella he de pensar,\n¿que te has ablandado agora?"
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-iulia-si-no-te-he-dicho-verdad"
 procedencia:

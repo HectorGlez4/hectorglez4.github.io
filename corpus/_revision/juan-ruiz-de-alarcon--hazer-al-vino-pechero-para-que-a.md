@@ -1,5 +1,5 @@
 ---
-texto: "Hazer al vino pechero, para que a su costa se hagan al agua de canteria 135 caminos por donde salga."
+texto: "Hazer al vino pechero,\npara que a su costa se hagan\nal agua de canteria 135\ncaminos por donde salga."
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-hazer-al-vino-pechero-para-que-a"
 procedencia:

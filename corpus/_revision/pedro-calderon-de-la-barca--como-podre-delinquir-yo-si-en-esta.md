@@ -1,5 +1,5 @@
 ---
-texto: "¿Cómo podré delinquir yo, si en esta hora misma me ponen a mí por juez para que otros no delincan?"
+texto: "¿Cómo podré delinquir\nyo, si en esta hora misma\nme ponen a mí por juez\npara que otros no delincan?"
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-como-podre-delinquir-yo-si-en-esta"
 procedencia:

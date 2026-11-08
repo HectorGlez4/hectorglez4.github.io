@@ -1,5 +1,5 @@
 ---
-texto: "¿Quién es aquél que ayer aun hecho un tuno, roto paseaba y andrajoso el Prado, y hoy no saluda en zancos a ninguno?"
+texto: "¿Quién es aquél que ayer aun hecho un tuno,\nroto paseaba y andrajoso el Prado,\ny hoy no saluda en zancos a ninguno?"
 autor: "mariano-jose-de-larra"
 slug: "mariano-jose-de-larra-quien-es-aquel-que-ayer-aun-hecho"
 procedencia:

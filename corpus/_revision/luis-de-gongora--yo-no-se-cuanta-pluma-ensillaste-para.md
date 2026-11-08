@@ -1,5 +1,5 @@
 ---
-texto: "Yo no sé cuánta pluma ensillaste para el que sirviéndote la copa aún hoy está."
+texto: "Yo no sé\ncuánta pluma ensillaste para el que\nsirviéndote la copa aún hoy está."
 autor: "luis-de-gongora"
 slug: "luis-de-gongora-yo-no-se-cuanta-pluma-ensillaste-para"
 procedencia:

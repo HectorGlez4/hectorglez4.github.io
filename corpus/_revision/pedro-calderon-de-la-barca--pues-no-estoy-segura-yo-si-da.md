@@ -1,5 +1,5 @@
 ---
-texto: "Pues no estoy segura yo, si da conmigo el que dio al barbero que coser."
+texto: "Pues no estoy segura yo,\nsi da conmigo el que dio\nal barbero que coser."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-pues-no-estoy-segura-yo-si-da"
 procedencia:

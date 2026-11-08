@@ -1,5 +1,5 @@
 ---
-texto: "¡Ay triste!) Señora, vuestros cuidados siento como es justo."
+texto: "¡Ay triste!)\nSeñora, vuestros cuidados\nsiento como es justo."
 autor: "sor-juana-ines-de-la-cruz"
 slug: "sor-juana-ines-de-la-cruz-ay-triste-senora-vuestros-cuidados-siento-como"
 procedencia:

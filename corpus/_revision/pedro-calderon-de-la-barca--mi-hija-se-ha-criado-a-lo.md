@@ -1,5 +1,5 @@
 ---
-texto: "Mi hija se ha crïado, a lo que pienso, con la mejor opinión, virtud y recogimiento del mundo."
+texto: "Mi hija\nse ha crïado, a lo que pienso,\ncon la mejor opinión,\nvirtud y recogimiento\ndel mundo."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-mi-hija-se-ha-criado-a-lo"
 procedencia:

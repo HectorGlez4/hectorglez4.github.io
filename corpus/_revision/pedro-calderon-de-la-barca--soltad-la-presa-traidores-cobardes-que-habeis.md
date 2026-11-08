@@ -1,5 +1,5 @@
 ---
-texto: "Soltad la presa, traidores cobardes, que habéis traído, que he de cobrarla o la vida he de perder."
+texto: "Soltad la presa, traidores\ncobardes, que habéis traído,\nque he de cobrarla o la vida\nhe de perder."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-soltad-la-presa-traidores-cobardes-que-habeis"
 procedencia:

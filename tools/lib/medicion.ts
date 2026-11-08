@@ -207,7 +207,16 @@ const FORMA_DE_LA_CONSULTA: {
   },
   salidas: { eventos: [EVENTOS.salidaInterna], columnas: ['jornada', 'ruta', 'zona'] },
   acciones: {
-    eventos: [EVENTOS.copiado, EVENTOS.descargaDeImagen, EVENTOS.comparticionDeImagen, EVENTOS.comparticionDeEnlace],
+    // Historia 30.5 — con las dos de citar, que la lectura informa aparte: en la misma consulta, sin
+    // un recorrido más de la tabla (Historia 23.13).
+    eventos: [
+      EVENTOS.copiado,
+      EVENTOS.descargaDeImagen,
+      EVENTOS.comparticionDeImagen,
+      EVENTOS.comparticionDeEnlace,
+      EVENTOS.copiadoDeReferencia,
+      EVENTOS.copiadoDeFragmento,
+    ],
     columnas: ['jornada', 'ruta', 'evento', 'destino', 'primera'],
   },
   busquedas: { eventos: [EVENTOS.busqueda], columnas: ['jornada', 'ruta', 'tramo', 'filtros'] },

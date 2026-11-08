@@ -1,5 +1,5 @@
 ---
-texto: "Sino, cual paladín de los que errantes de yermo en yermo, abandonando el nido patrio, iban a caza de gigantes."
+texto: "Sino, cual paladín de los que errantes\nde yermo en yermo, abandonando el nido\npatrio, iban a caza de gigantes."
 autor: "andres-bello"
 slug: "andres-bello-sino-cual-paladin-de-los-que-errantes"
 procedencia:

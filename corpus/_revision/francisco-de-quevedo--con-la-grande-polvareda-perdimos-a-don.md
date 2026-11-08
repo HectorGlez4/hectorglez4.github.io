@@ -1,5 +1,5 @@
 ---
-texto: "Con la grande polvareda, Perdimos a Don Beltrán, Y porque paró en Galicia, Se teme que paró en mal."
+texto: "Con la grande polvareda,\nPerdimos a Don Beltrán,\nY porque paró en Galicia,\nSe teme que paró en mal."
 autor: "francisco-de-quevedo"
 slug: "francisco-de-quevedo-con-la-grande-polvareda-perdimos-a-don"
 procedencia:

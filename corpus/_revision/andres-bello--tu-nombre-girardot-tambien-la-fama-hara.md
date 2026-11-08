@@ -1,5 +1,5 @@
 ---
-texto: "Tu nombre, Girardot, también la fama hará sonar con inmortales cantos, que del Santo Domingo en las orillas dejas de tu valor indicios tantos."
+texto: "Tu nombre, Girardot, también la fama\nhará sonar con inmortales cantos,\nque del Santo Domingo en las orillas\ndejas de tu valor indicios tantos."
 autor: "andres-bello"
 slug: "andres-bello-tu-nombre-girardot-tambien-la-fama-hara"
 procedencia:

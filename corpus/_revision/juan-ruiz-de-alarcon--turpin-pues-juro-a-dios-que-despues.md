@@ -1,5 +1,5 @@
 ---
-texto: "TURPIN Pues juro a Dios que despues, pues recelas que Turpin no serà buen secretario, 565 si se que a Aurora desseas, aunque mas priuado seas, me has de tener por contrario."
+texto: "TURPIN\nPues juro a Dios que despues,\npues recelas que Turpin\nno serà buen secretario, 565\nsi se que a Aurora desseas,\naunque mas priuado seas,\nme has de tener por contrario."
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-turpin-pues-juro-a-dios-que-despues"
 procedencia:

@@ -1,5 +1,5 @@
 ---
-texto: "ÁLVARO: Pues la fuga nos socorra del riesgo de estos villanos, que, si se llega a saber que estoy aquí, habrá de ser fuerza apelar a las manos."
+texto: "ÁLVARO: Pues la fuga nos socorra\ndel riesgo de estos villanos,\nque, si se llega a saber\nque estoy aquí, habrá de ser\nfuerza apelar a las manos."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-alvaro-pues-la-fuga-nos-socorra-del"
 procedencia:

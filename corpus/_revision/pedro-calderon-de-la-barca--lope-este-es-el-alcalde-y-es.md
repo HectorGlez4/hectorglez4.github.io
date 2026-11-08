@@ -1,5 +1,5 @@
 ---
-texto: "LOPE: Éste es el alcalde, y es su padre."
+texto: "LOPE: Éste es el alcalde, y es\nsu padre."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-lope-este-es-el-alcalde-y-es"
 procedencia:

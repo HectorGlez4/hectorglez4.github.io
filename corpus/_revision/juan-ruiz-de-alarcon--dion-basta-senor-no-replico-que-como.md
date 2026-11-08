@@ -1,5 +1,5 @@
 ---
-texto: "DION Basta, señor, no replico, que como el fin se consiga, para assegurar la vuestra, consagro alegre mi vida. 280 REY Con esto a vuestra amistad deuerè otra vez la mia, y su quietud y su Rey a vuestra lealtad Sicilia. (Vase.)"
+texto: "DION\nBasta, señor, no replico,\nque como el fin se consiga,\npara assegurar la vuestra,\nconsagro alegre mi vida. 280\nREY\nCon esto a vuestra amistad\ndeuerè otra vez la mia,\ny su quietud y su Rey\na vuestra lealtad Sicilia.\n(Vase.)"
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-dion-basta-senor-no-replico-que-como"
 procedencia:

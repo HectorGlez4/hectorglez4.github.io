@@ -1,5 +1,5 @@
 ---
-texto: "Quédate en este monte, Donde tengan los brutos su Faetonte;"
+texto: "Quédate en este monte,\nDonde tengan los brutos su Faetonte;"
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-quedate-en-este-monte-donde-tengan-los"
 procedencia:

@@ -1,5 +1,5 @@
 ---
-texto: "DOÑA ANA Ay Dios, ¿quien tendra paciencia, mi don Iuan, para escuchar sin deshazerse en llorar estos preceptos de ausencia? 590 DON IUAN ¿Lloras?"
+texto: "DOÑA ANA\nAy Dios, ¿quien tendra paciencia,\nmi don Iuan, para escuchar\nsin deshazerse en llorar\nestos preceptos de ausencia? 590\nDON IUAN\n¿Lloras?"
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-dona-ana-ay-dios-quien-tendra-paciencia"
 procedencia:

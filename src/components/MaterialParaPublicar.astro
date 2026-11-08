@@ -24,6 +24,7 @@ import { REDES, enlaceConOrigen } from '../lib/redes.ts';
 import { tramoDe } from '../lib/tramos.ts';
 import type { Cita, Autor } from '../lib/publicado.ts';
 import { rutaDeCita } from '../lib/superficies.ts';
+import TextoDeCita from './TextoDeCita.astro';
 
 interface Props {
   cita: Cita;
@@ -49,7 +50,7 @@ const tramo = tramoDe(cita.texto);
   {nivel === 3 ? <h3>{titulo}</h3> : <h2>{titulo}</h2>}
 
   <blockquote class="texto" data-tramo={tramo.nombre}>
-    «{cita.texto}»
+    <TextoDeCita texto={cita.texto} />
   </blockquote>
 
   {

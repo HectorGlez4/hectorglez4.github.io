@@ -1,5 +1,5 @@
 ---
-texto: "Demás de que yo he tomado por política discreta, jurar con aquel que jura, rezar con aquel que reza."
+texto: "Demás de que yo he tomado\npor política discreta,\njurar con aquel que jura,\nrezar con aquel que reza."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-demas-de-que-yo-he-tomado-por"
 procedencia:

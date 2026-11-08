@@ -1,5 +1,5 @@
 ---
-texto: "Bien mi suerte lo dice; Mas ¿Dónde halló piedad un infelice?"
+texto: "Bien mi suerte lo dice;\nMas ¿Dónde halló piedad un infelice?"
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-bien-mi-suerte-lo-dice-mas-donde"
 procedencia:

@@ -1,5 +1,5 @@
 ---
-texto: "POLICIANO Pues a Dion se puede el Rey oponer? ignora vuestro poder? 295 oluida su obligacion? o mis meritos desprecia?"
+texto: "POLICIANO\nPues a Dion\nse puede el Rey oponer?\nignora vuestro poder? 295\noluida su obligacion?\no mis meritos desprecia?"
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-policiano-pues-a-dion-se-puede-el"
 procedencia:

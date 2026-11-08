@@ -1,5 +1,5 @@
 ---
-texto: "Gocé una vez, de tal suerte Que gocé cual nunca: cuando La sentencia de mi muerte Leyó el alcalde llorando."
+texto: "Gocé una vez, de tal suerte\nQue gocé cual nunca: cuando\nLa sentencia de mi muerte\nLeyó el alcalde llorando."
 autor: "jose-marti"
 slug: "jose-marti-goce-una-vez-de-tal-suerte-que"
 procedencia:

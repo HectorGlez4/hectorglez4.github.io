@@ -1,5 +1,5 @@
 ---
-texto: "Arroja Pedro CRESPO la silla LOPE: Llevéme de mi impaciencia."
+texto: "Arroja Pedro CRESPO la silla\nLOPE: Llevéme de mi impaciencia."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-arroja-pedro-crespo-la-silla-lope-lleveme"
 procedencia:

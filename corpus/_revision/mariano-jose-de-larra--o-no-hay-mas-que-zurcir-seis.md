@@ -1,5 +1,5 @@
 ---
-texto: "¿O no hay más que zurcir seis disparates para granjear aplauso?"
+texto: "¿O no hay más que zurcir seis disparates\npara granjear aplauso?"
 autor: "mariano-jose-de-larra"
 slug: "mariano-jose-de-larra-o-no-hay-mas-que-zurcir-seis"
 procedencia:

@@ -1,5 +1,5 @@
 ---
-texto: "Música le pidió ayer su albedrío a un descendiente de don Peranzules; templáronle al momento dos baúles con más cuerdas que jarcias un navío."
+texto: "Música le pidió ayer su albedrío\na un descendiente de don Peranzules;\ntempláronle al momento dos baúles\ncon más cuerdas que jarcias un navío."
 autor: "luis-de-gongora"
 slug: "luis-de-gongora-musica-le-pidio-ayer-su-albedrio-a"
 procedencia:

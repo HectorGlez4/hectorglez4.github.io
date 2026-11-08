@@ -21,6 +21,7 @@
  */
 
 import { MAX_CARACTERES_IMAGEN } from './umbrales.ts';
+import { versosDe } from './verso.ts';
 
 export type NombreDeTramo = 'xl' | 'lg' | 'md' | 'sm';
 
@@ -113,4 +114,32 @@ export function tramoDe(texto: string): Tramo {
 /** Atajo para la condición que más se consulta: si se ofrece la acción de Imagen. */
 export function admiteImagen(texto: string): boolean {
   return tramoDe(texto).admiteImagen;
+}
+
+/**
+ * El cuerpo de la Tarjeta Social de un texto — decisión de Héctor del 2026-11-08 (Historia 29.3).
+ *
+ * Con un renglón por verso, tres Citas de Calderón (7 versos, tramo `md`) pedían 631 px en una
+ * Tarjeta de 630. Héctor decidió que **una Cita en verso** cuyo bloque no cabe en la Tarjeta se
+ * compone con el tramo siguiente más pequeño, y el siguiente, hasta que quepa; nunca por slug y
+ * nunca por debajo de `sm`, la última fila de la tabla. Es una regla de esta columna y de
+ * ninguna otra: la Página de Cita, la Imagen y la Pieza conservan su tramo.
+ *
+ * - `undefined` si el texto no admite Imagen (la Tarjeta se compone sin texto, como siempre).
+ * - Sin saltos, el `pixelesEnTarjeta` de su tramo, sin preguntar a `cabe`: la decisión es para el
+ *   verso, y la prosa conserva su tramo por construcción.
+ * - Con saltos, el de su tramo si cabe; si no, el de cada fila siguiente de la tabla mientras
+ *   `cabe` diga que no; `undefined` si no cabe ni en `sm` (quien compone lanza).
+ *
+ * La geometría —qué alto ocupa el bloque con un cuerpo dado— la inyecta la Tarjeta: esta tabla
+ * decide tamaños, no mide lienzos.
+ */
+export function cuerpoEnTarjeta(texto: string, cabe: (cuerpo: number) => boolean): number | undefined {
+  const tramo = tramoDe(texto);
+  if (!tramo.admiteImagen) return undefined;
+  if (versosDe(texto).length === 1) return tramo.pixelesEnTarjeta;
+  const desde = TABLA.findIndex((fila) => fila.tramo === tramo);
+  return TABLA.slice(desde)
+    .map((fila) => fila.tramo.pixelesEnTarjeta)
+    .find(cabe);
 }

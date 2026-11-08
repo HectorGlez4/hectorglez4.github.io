@@ -1,5 +1,5 @@
 ---
-texto: "Cuando Cielo y Tierra pasen, mi palabra quedará."
+texto: "Cuando Cielo y Tierra pasen,\nmi palabra quedará."
 autor: "antonio-machado"
 temas:
   - "la-palabra"

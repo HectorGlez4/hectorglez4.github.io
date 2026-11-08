@@ -1,5 +1,5 @@
 ---
-texto: "La música, la dulce poesía ¿son tu delicia ahora, como un día?"
+texto: "La música, la dulce poesía\n¿son tu delicia ahora, como un día?"
 autor: "andres-bello"
 slug: "andres-bello-la-musica-la-dulce-poesia-son-tu"
 procedencia:

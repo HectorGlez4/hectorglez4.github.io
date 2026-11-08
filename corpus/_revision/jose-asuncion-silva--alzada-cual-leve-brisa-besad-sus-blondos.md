@@ -1,5 +1,5 @@
 ---
-texto: "Alzada cual leve brisa besad sus blondos cabellos y penetrad en su alma y en los espacios perdeos como en la santa capilla las espirales de incienso!..."
+texto: "Alzada cual leve brisa\nbesad sus blondos cabellos\ny penetrad en su alma\ny en los espacios perdeos\ncomo en la santa capilla\nlas espirales de incienso!..."
 autor: "jose-asuncion-silva"
 slug: "jose-asuncion-silva-alzada-cual-leve-brisa-besad-sus-blondos"
 procedencia:

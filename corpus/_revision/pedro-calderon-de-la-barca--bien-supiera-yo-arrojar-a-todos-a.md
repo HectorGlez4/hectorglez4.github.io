@@ -1,5 +1,5 @@
 ---
-texto: "Bien supiera yo arrojar a todos a cuchilladas de aquí; mas disimuladas mis desdichas han de estar hasta ver, si ella ha tenido culpa de ello."
+texto: "Bien supiera yo arrojar\na todos a cuchilladas\nde aquí; mas disimuladas\nmis desdichas han de estar\nhasta ver, si ella ha tenido\nculpa de ello."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-bien-supiera-yo-arrojar-a-todos-a"
 procedencia:

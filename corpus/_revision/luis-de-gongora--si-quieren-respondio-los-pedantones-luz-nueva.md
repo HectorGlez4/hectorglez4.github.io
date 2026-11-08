@@ -1,5 +1,5 @@
 ---
-texto: "«Si quieren», respondió, «los pedantones luz nueva en hemisferio diferente, den su memorïal a mis calzones»."
+texto: "«Si quieren», respondió, «los pedantones\nluz nueva en hemisferio diferente,\nden su memorïal a mis calzones»."
 autor: "luis-de-gongora"
 slug: "luis-de-gongora-si-quieren-respondio-los-pedantones-luz-nueva"
 procedencia:

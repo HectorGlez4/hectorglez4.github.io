@@ -1,5 +1,5 @@
 ---
-texto: "Ojos hidrópicos creo Que mis ojos deben ser; Pues cuando es muerte el beber, Beben más; y desta suerte."
+texto: "Ojos hidrópicos creo\nQue mis ojos deben ser;\nPues cuando es muerte el beber,\nBeben más; y desta suerte."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-ojos-hidropicos-creo-que-mis-ojos-deben"
 procedencia:

@@ -166,4 +166,35 @@ describe('Historia 9.2 — sembrar es una sesión, no treinta', () => {
     expect(await ficherosPublicados({ citas: join(dir, 'citas') })).toHaveLength(0);
     expect(await readdir(join(dir, '_revision'))).toHaveLength(1);
   });
+  it('Historia 29.4 — la candidata contenida en una publicada lleva el aviso al listar y en el parte de --aprobar', async () => {
+    const { dir } = await corpus();
+    await correr('tools/extraer.ts', [
+      join(dir, 'fuentes', NOMBRE_DEL_DOCUMENTO), '--autor', 'seneca', '--corpus', dir,
+    ]);
+    const CONTIENE = 'seneca-publicada-que-la-contiene';
+    await writeFile(
+      join(dir, 'citas', 'seneca--publicada-que-la-contiene.md'),
+      '---\ntexto: "No es que tengamos poco tiempo para vivir, sino que perdemos una gran parte de él. Y así pasa."\n' +
+        `autor: "seneca"\ntemas: ["${TEMA_PUBLICADO}"]\nslug: "${CONTIENE}"\nestadoDerechos: "dominio-público"\n---\n`,
+      'utf8',
+    );
+
+    const listado = await correr('tools/revisar.ts', ['--corpus', dir]);
+    expect(listado.codigo, listado.error).toBe(0);
+    const contenida = listado.salida
+      .split('\n')
+      .map((linea) => linea.trim())
+      .find((linea) => linea.startsWith('seneca-no-es-que-tengamos'));
+    expect(contenida).toBeDefined();
+    expect(listado.salida).toContain(`⚠ Contenida en ${CONTIENE} (publicadas; contenida, 0,`);
+
+    const aprobacion = await correr('tools/revisar.ts', [
+      '--corpus', dir, '--aprobar', contenida!, '--temas', TEMA_PUBLICADO,
+    ]);
+    expect(aprobacion.codigo, aprobacion.salida + aprobacion.error).toBe(0);
+    expect(aprobacion.salida).toMatch(/Publicadas: 1/);
+    expect(aprobacion.salida).toMatch(
+      new RegExp(`  ⚠ ${contenida}: Contenida en ${CONTIENE} \\(publicadas; contenida, 0,\\d\\d\\)\\.\\n`),
+    );
+  });
 });

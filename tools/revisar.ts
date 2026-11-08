@@ -21,14 +21,22 @@
  * por arriba **diciendo cuántas quedan debajo**: con veintiún mil candidatas pendientes,
  * leerlas todas no es un plan, y esconderlas tampoco.
  *
- * Sin argumentos lista lo que queda por decidir, con el aviso de duplicado y lo que le
- * falta a cada candidata para poder publicarse. Volver otro día es volver a ejecutarlo:
+ * Sin argumentos lista lo que queda por decidir, con el aviso de duplicado —la repetida y, desde
+ * la Historia 29.4, la contenida frente a todo y la casi igual frente a las publicadas de su
+ * Obra— y lo que le falta a cada candidata para poder publicarse. Volver otro día es volver a ejecutarlo:
  * lo pendiente es lo que sigue en `corpus/_revision/`, así que no hay progreso que
  * guardar ni que pueda desincronizarse.
  */
 
 import { rutasDelCorpus } from './lib/corpus.ts';
-import { aprobar, formatearLote, loteEnRevision, rechazar } from './lib/revision.ts';
+import {
+  aprobar,
+  formatearLote,
+  loteEnRevision,
+  rechazar,
+  textoDeParecida,
+  textoDeRepetida,
+} from './lib/revision.ts';
 import { raizDeCorpusDe } from './lib/cli.ts';
 import { MIN_CITAS_POR_TEMA } from '../src/lib/umbrales.ts';
 
@@ -117,6 +125,17 @@ if (aAprobar.length > 0) {
   const conTemas = temas.length > 0 ? `, en ${temas.map((t) => `«${t}»`).join(', ')}` : '';
   lineas.push(`Publicadas: ${resultado.publicadas.length}${conTemas}`);
   for (const slug of resultado.publicadas) lineas.push(`  ✓ ${slug}`);
+
+  for (const aviso of resultado.avisos) {
+    // Historia 29.4: se publicó igual; lo que se señalaba de ella, para quien aprueba.
+    if (aviso.duplicaA !== undefined) lineas.push(`  ⚠ ${aviso.slug}: ${textoDeRepetida(aviso.duplicaA)}.`);
+    for (const parecida of aviso.parecidas) lineas.push(`  ⚠ ${aviso.slug}: ${textoDeParecida(parecida)}.`);
+  }
+
+  for (const { slug, documento } of resultado.conSaltos) {
+    // Historia 29.2: llegaba en una línea; se publica con los saltos de su documento de verso.
+    lineas.push(`  ↵ ${slug} se publicó con los saltos de verso de corpus/fuentes/${documento}.txt.`);
+  }
 
   for (const cambio of resultado.renombradas) {
     // El slug es la URL. Que cambie está bien —el ocupado no se pisa— pero enterarse

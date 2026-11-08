@@ -1,5 +1,5 @@
 ---
-texto: "LEONARDO Vitoria tan merecida 420 no es dudosa."
+texto: "LEONARDO\nVitoria tan merecida 420\nno es dudosa."
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-leonardo-vitoria-tan-merecida-420-no-es"
 procedencia:

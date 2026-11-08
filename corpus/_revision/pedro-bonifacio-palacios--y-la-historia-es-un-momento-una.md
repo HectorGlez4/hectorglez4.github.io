@@ -1,5 +1,5 @@
 ---
-texto: "Y la Historia es un momento, una mísera palabra,- una mísera palabra que resuena altisonante-, un clamor en el desierto, nada más."
+texto: "Y la Historia es un momento,\nuna mísera palabra,-\nuna mísera palabra que resuena altisonante-,\nun clamor en el desierto, nada más."
 autor: "pedro-bonifacio-palacios"
 slug: "pedro-bonifacio-palacios-y-la-historia-es-un-momento-una"
 procedencia:

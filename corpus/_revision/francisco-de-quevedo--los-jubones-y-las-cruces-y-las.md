@@ -1,5 +1,5 @@
 ---
-texto: "Los jubones y las cruces, y las guerras tienen mangas: Y tan sólo tiene cielos los ángeles y las camas."
+texto: "Los jubones y las cruces,\ny las guerras tienen mangas:\nY tan sólo tiene cielos\nlos ángeles y las camas."
 autor: "francisco-de-quevedo"
 slug: "francisco-de-quevedo-los-jubones-y-las-cruces-y-las"
 procedencia:

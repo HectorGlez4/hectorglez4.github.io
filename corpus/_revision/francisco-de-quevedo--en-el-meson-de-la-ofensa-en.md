@@ -1,5 +1,5 @@
 ---
-texto: "En el mesón de la ofensa, En el Palacio mortal, En la casa de más cuartos De toda la Cristiandad."
+texto: "En el mesón de la ofensa,\nEn el Palacio mortal,\nEn la casa de más cuartos\nDe toda la Cristiandad."
 autor: "francisco-de-quevedo"
 slug: "francisco-de-quevedo-en-el-meson-de-la-ofensa-en"
 procedencia:

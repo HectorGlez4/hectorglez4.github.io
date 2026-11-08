@@ -1,5 +1,5 @@
 ---
-texto: "¿A quién no admira querer de un instante a otro hacer la ofensa caricia?"
+texto: "¿A quién no admira\nquerer de un instante a otro\nhacer la ofensa caricia?"
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-a-quien-no-admira-querer-de-un"
 procedencia:

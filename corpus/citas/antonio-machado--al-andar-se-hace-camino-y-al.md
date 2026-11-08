@@ -1,5 +1,5 @@
 ---
-texto: "Al andar se hace camino, y al volver la vista atrás se ve la senda que nunca se ha de volver a pisar."
+texto: "Al andar se hace camino,\ny al volver la vista atrás\nse ve la senda que nunca\nse ha de volver a pisar."
 autor: "antonio-machado"
 temas:
   - "la-vida"

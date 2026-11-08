@@ -1,5 +1,5 @@
 ---
-texto: "ISABEL: ¿Tú, que quisiste ocultar nuestra ofensa, eres ahora quien más trata publicarla?"
+texto: "ISABEL: ¿Tú, que quisiste ocultar\nnuestra ofensa, eres ahora\nquien más trata publicarla?"
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-isabel-tu-que-quisiste-ocultar-nuestra-ofensa"
 procedencia:

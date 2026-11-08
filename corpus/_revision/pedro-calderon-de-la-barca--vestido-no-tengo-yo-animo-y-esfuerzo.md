@@ -1,5 +1,5 @@
 ---
-texto: "Vestido no tengo yo; ánimo y esfuerzo, sí."
+texto: "Vestido no tengo yo;\nánimo y esfuerzo, sí."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-vestido-no-tengo-yo-animo-y-esfuerzo"
 procedencia:
