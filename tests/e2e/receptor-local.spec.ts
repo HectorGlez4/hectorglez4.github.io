@@ -3,6 +3,7 @@ import { execFile } from 'node:child_process';
 import { join } from 'node:path';
 import { EVENTOS } from '../../src/lib/vocabulario.ts';
 import { rutaDeCita } from '../../src/lib/superficies.ts';
+import { citaConTarjetaCompleta } from './ayuda/corpus.ts';
 import {
   DIRECTORIO_DEL_RECEPTOR,
   argumentosDeConsulta,
@@ -48,12 +49,12 @@ const RUTA = rutaDeCita('antonio-machado-hoy-es-siempre-todavia');
 const CONTENCION = /Failed to get session commit token/;
 const ESPERA_POR_CONTENCION = 45_000;
 
-/** Las vistas de Cita de una ruta que guarda el D1 local, leídas con `wrangler d1 execute --local`. */
-async function vistasEnElD1Local(ruta: string): Promise<number> {
+/** Los registros de un evento en una ruta que guarda el D1 local, leídos con `wrangler d1 execute --local`. */
+async function registrosEnElD1Local(ruta: string, evento: string = EVENTOS.vistaDeCita): Promise<number> {
   const hasta = Date.now() + ESPERA_POR_CONTENCION;
   for (;;) {
     try {
-      return await vistasEnElD1LocalUnaVez(ruta);
+      return await registrosEnElD1LocalUnaVez(ruta, evento);
     } catch (error) {
       if (!CONTENCION.test(String(error)) || Date.now() > hasta) throw error;
       await new Promise((siga) => setTimeout(siga, 2_000));
@@ -61,8 +62,8 @@ async function vistasEnElD1Local(ruta: string): Promise<number> {
   }
 }
 
-function vistasEnElD1LocalUnaVez(ruta: string): Promise<number> {
-  const sql = `SELECT COUNT(*) AS n FROM eventos WHERE evento = '${EVENTOS.vistaDeCita}' AND ruta = '${ruta}'`;
+function registrosEnElD1LocalUnaVez(ruta: string, evento: string): Promise<number> {
+  const sql = `SELECT COUNT(*) AS n FROM eventos WHERE evento = '${evento}' AND ruta = '${ruta}'`;
   return new Promise((listo, fallo) => {
     execFile(
       'npx',
@@ -85,7 +86,7 @@ test.describe('Historia 23.2 — el sitio de las pruebas mide en el D1 local', (
     test.skip(info.project.name !== PERFIL, 'el cableado es el mismo en los dos perfiles');
     test.setTimeout(120_000);
 
-    const antes = await vistasEnElD1Local(RUTA);
+    const antes = await registrosEnElD1Local(RUTA);
     expect(Number.isInteger(antes)).toBe(true);
 
     const pedidos: string[] = [];
@@ -99,7 +100,45 @@ test.describe('Historia 23.2 — el sitio de las pruebas mide en el D1 local', (
 
     // Otras pruebas visitan la misma página a la vez: basta con que crezca.
     await expect
-      .poll(() => vistasEnElD1Local(RUTA), { timeout: 60_000, intervals: [1_000, 2_000, 4_000] })
+      .poll(() => registrosEnElD1Local(RUTA), { timeout: 60_000, intervals: [1_000, 2_000, 4_000] })
       .toBeGreaterThan(antes);
+  });
+
+  /*
+   * Historia 30.5, fase B — las dos acciones de citar, ya sueltas en `EVENTOS_DEL_GUION`, llegan por
+   * el Worker de la rama al D1 local: copiar una Referencia de «Cómo citar» y copiar el Fragmento de
+   * «Inserta esta cita». Qué pide la isla, y cuándo no, lo miran `como-citar.spec.ts` e
+   * `inserta-esta-cita.spec.ts` con el espía; aquí, solo que el receptor las guarda.
+   */
+  test('copiar una Referencia y copiar el Fragmento llegan al D1 local', async ({ page, context }, info) => {
+    test.skip(info.project.name !== PERFIL, 'el cableado es el mismo en los dos perfiles');
+    test.setTimeout(180_000);
+    const cita = citaConTarjetaCompleta();
+    expect(cita, 'el Corpus de hoy no trae una Cita con Tarjeta completa').toBeDefined();
+    const ruta = rutaDeCita(cita!.slug);
+    await context.grantPermissions(['clipboard-read', 'clipboard-write']);
+
+    const referenciasAntes = await registrosEnElD1Local(ruta, EVENTOS.copiadoDeReferencia);
+    const fragmentosAntes = await registrosEnElD1Local(ruta, EVENTOS.copiadoDeFragmento);
+    expect(Number.isInteger(referenciasAntes)).toBe(true);
+    expect(Number.isInteger(fragmentosAntes)).toBe(true);
+
+    await page.goto(ruta, { waitUntil: 'networkidle' });
+    const comoCitar = page.locator('details.desplegable', { has: page.locator('[data-como-citar]') });
+    await comoCitar.locator('summary').click();
+    await page.getByRole('button', { name: 'Copiar APA', exact: true }).click();
+    await expect(page.locator('[data-como-citar] > [role="status"]')).toHaveText('Copiado.');
+    const inserta = page.locator('details.desplegable', { has: page.locator('[data-inserta-esta-cita]') });
+    await inserta.locator('summary').click();
+    await page.getByRole('button', { name: 'Copiar el fragmento', exact: true }).click();
+    await expect(page.locator('[data-inserta-esta-cita] > [role="status"]')).toHaveText('Copiado.');
+
+    // Otras pruebas copian en la misma página a la vez: basta con que crezcan.
+    await expect
+      .poll(() => registrosEnElD1Local(ruta, EVENTOS.copiadoDeReferencia), { timeout: 60_000, intervals: [1_000, 2_000, 4_000] })
+      .toBeGreaterThan(referenciasAntes);
+    await expect
+      .poll(() => registrosEnElD1Local(ruta, EVENTOS.copiadoDeFragmento), { timeout: 60_000, intervals: [1_000, 2_000, 4_000] })
+      .toBeGreaterThan(fragmentosAntes);
   });
 });

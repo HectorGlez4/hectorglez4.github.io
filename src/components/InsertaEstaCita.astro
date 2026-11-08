@@ -1,0 +1,86 @@
+---
+/**
+ * «Inserta esta cita» — FR-57, Historia 30.4 (UX-DR120, UX-DR121, UX-DR144, UX-DR145).
+ *
+ * El Fragmento de HTML estático que quien tiene un blog pega en su página: la Cita, su Autor, su
+ * Obra y el enlace de vuelta a la canónica. Recibe el Fragmento **ya compuesto**
+ * (`fragmentoParaInsertar` de `src/lib/atribucion.ts`, el único dueño, AD-28) y no compone nada.
+ * Va dentro del Desplegable «Inserta esta cita» (`Desplegable.astro`), que es quien lo pliega.
+ *
+ * El `<label>` visible dice qué es; a una unidad, el campo de solo lectura en `code` (`--mono`,
+ * `--codigo`), en la medida de prosa, que parte donde haga falta para no desplazar nada a 320 px;
+ * a dos unidades, «Copiar el fragmento», `hidden` en el marcado. Sin vista previa: el Fragmento se
+ * ve como lo que se pega. El campo va en una sola línea de marcado para que su valor sea el
+ * Fragmento exacto.
+ *
+ * **Sin guion propio.** Lo enseña y lo atiende la única isla de Copiar de la página
+ * (`CopiarCita.astro`), por los atributos neutros del bloque: `data-copiables`, el botón
+ * `data-copiar-texto` y lo que copia, `data-copiable` (el `textContent` del campo es su valor).
+ * «Copiado.» se anuncia por la región `role="status"` de aquí dentro —dentro del `<details>`—,
+ * vacía y sin `hidden` desde la carga. Sin guion, el campo se enfoca y se selecciona y el botón no
+ * se ve. El enlace del Fragmento es texto del campo, no un `<a>` de la página: sin `data-zona`.
+ */
+interface Props {
+  fragmento: string;
+}
+
+const { fragmento } = Astro.props;
+---
+
+<div class="inserta" data-inserta-esta-cita data-copiables>
+  <label for="fragmento-para-insertar">Pega este fragmento en tu página: lleva la cita, su autor y el enlace a esta página.</label>
+  <textarea id="fragmento-para-insertar" data-copiable readonly rows="6" spellcheck="false">{fragmento}</textarea>
+  <button type="button" class="copiar-fragmento" data-copiar-texto aria-label="Copiar el fragmento" hidden><span data-etiqueta>Copiar el fragmento</span></button>
+  <p class="solo-para-lectores" role="status" data-anuncio></p>
+</div>
+
+<style>
+  label {
+    display: block;
+    font-family: var(--sans);
+    font-size: var(--pie);
+    line-height: var(--interlineado-pie);
+    color: var(--tinta-apagada);
+  }
+
+  textarea {
+    display: block;
+    box-sizing: border-box;
+    margin-top: var(--unidad);
+    inline-size: 100%;
+    max-inline-size: var(--medida-prosa);
+    font-family: var(--mono);
+    font-size: var(--codigo);
+    font-weight: var(--peso-regular);
+    line-height: var(--interlineado-codigo);
+    color: var(--tinta);
+    background: var(--contenedor-bajo);
+    border: var(--grosor-filete) solid var(--contorno);
+    border-radius: var(--radio);
+    padding: var(--unidad);
+    overflow-wrap: anywhere;
+    resize: vertical;
+  }
+
+  /* UX-DR9 — secundario, el trato de `.copiar-referencia`: texto en siena con filete, 44px de alto. */
+  .copiar-fragmento {
+    margin-top: calc(var(--unidad) * 2);
+    font-family: var(--sans);
+    font-size: var(--cuerpo-md);
+    line-height: var(--interlineado-cuerpo-md);
+    color: var(--siena);
+    background: transparent;
+    border: var(--grosor-filete) solid var(--siena);
+    border-radius: var(--radio);
+    min-height: var(--zona-de-toque);
+    padding-inline: calc(var(--unidad) * 3);
+    cursor: pointer;
+    transition: background-color 150ms, color 150ms;
+  }
+
+  .copiar-fragmento:hover,
+  .copiar-fragmento[data-estado='copiado'] {
+    background: var(--siena);
+    color: var(--sobre-siena);
+  }
+</style>

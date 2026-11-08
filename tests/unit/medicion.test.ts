@@ -184,7 +184,8 @@ describe('Historia 2.9 — el vocabulario es cerrado', () => {
      * para ampliarla es el punto: los cuatro primeros son de la v1 y los dos de
      * compartición los añadió la Historia 10.4, y `vista-de-superficie` la 20.1. La 23.2 trae
      * los cuatro de la v8 —`lectura`, `salida-interna`, `busqueda` y `vista-de-obra`— al
-     * vocabulario, antes de que nadie los envíe.
+     * vocabulario, antes de que nadie los envíe. La 30.5, los dos de citar —`copiado-de-referencia`
+     * y `copiado-de-fragmento`—, retenidos en su fase A y sueltos en la B, tras desplegar el receptor.
      */
     expect([...EVENTOS_VALIDOS].sort()).toEqual(
       [
@@ -193,6 +194,8 @@ describe('Historia 2.9 — el vocabulario es cerrado', () => {
         'comparticion-de-enlace',
         'comparticion-de-imagen',
         'copiado',
+        'copiado-de-fragmento',
+        'copiado-de-referencia',
         'descarga-de-imagen',
         'lectura',
         'salida-interna',
@@ -2581,6 +2584,61 @@ describe('Historia 23.1 — ningún guion en línea lleva contenido', () => {
   }, 240_000);
 });
 
+describe('Historia 30.5 — Copiar pide las acciones de citar, con su nombre del vocabulario', () => {
+  it('el guion de Copiar lleva las dos constantes y pide la del bloque tras una copia buena, fuera del `try`', async () => {
+    const html = await leerMedida(CITA);
+    const [copiar, ...otros] = guionesEnLinea(html).filter((g) => g.includes("'[data-copiar]'"));
+    expect(otros).toEqual([]);
+    // Los nombres viajan como constantes, con los valores de `EVENTOS`, y nunca como literal fuera de ellas.
+    const declaraciones = {
+      EVENTO_REFERENCIA: EVENTOS.copiadoDeReferencia,
+      EVENTO_FRAGMENTO: EVENTOS.copiadoDeFragmento,
+    };
+    for (const [nombre, evento] of Object.entries(declaraciones)) {
+      const declaracion = `const ${nombre} = ${JSON.stringify(evento)};`;
+      expect(copiar, nombre).toContain(declaracion);
+      expect(copiar.split(JSON.stringify(evento)).length - 1, `${evento}, una sola vez`).toBe(1);
+      expect(copiar, evento).not.toContain(`'${evento}'`);
+    }
+    // En el manejador de los bloques: tras el `catch { return; }` del portapapeles, a secas, y
+    // decidido por la identidad del bloque.
+    const bloques = copiar.slice(copiar.indexOf('const citar ='));
+    const rechazo = bloques.indexOf('catch { return; }');
+    // El evento sale de la identidad del bloque, por sus dos atributos: lo que no es ninguno no pide nada.
+    expect(bloques).toContain(
+      "const c = k.hasAttribute('data-inserta-esta-cita') ? EVENTO_FRAGMENTO : k.hasAttribute('data-como-citar') ? EVENTO_REFERENCIA : '';",
+    );
+    const pide = bloques.indexOf('if (c) __medir(c);');
+    expect(rechazo).toBeGreaterThan(0);
+    expect(pide).toBeGreaterThan(rechazo);
+    expect(bloques.slice(rechazo, pide)).toContain('anunciar(r,');
+    // Copiar la cita sigue pidiendo `copiado`, y nada más pide un evento en la isla.
+    expect([...copiar.matchAll(/__medir\(/g)]).toHaveLength(2);
+    expect(copiar).toContain('__medir(EVENTO_COPIADO);');
+    console.log(`Historia 30.5 — guion en línea de la Página de Cita con Imagen: ${bytesDeGuionEnLinea(html)} de ${MAX_BYTES_DE_GUION} bytes`);
+  }, 240_000);
+
+  it('los bloques copiables solo están en la Página de Cita, y cada uno con una identidad que el guion conoce', async () => {
+    // El guion elige el evento por `data-inserta-esta-cita` y `data-como-citar`: si un componente
+    // renombra su atributo, o un bloque copiable aparece en otra superficie (la portada, el 404, el
+    // Kit), esto lo para en `npm test`, que no corre el navegador.
+    const identidades = ['data-inserta-esta-cita', 'data-como-citar'];
+    const bloquesDe = (html: string) => [...html.matchAll(/<[a-z][a-z0-9-]*\s[^<>]*\bdata-copiables\b[^<>]*>/g)].map((m) => m[0]);
+    for (const [ruta, html] of paginasDe(await sitioMedido())) {
+      const bloques = bloquesDe(html);
+      if (!ruta.startsWith('/cita/')) {
+        expect(bloques, ruta).toEqual([]);
+        continue;
+      }
+      for (const bloque of bloques) {
+        expect(identidades.filter((a) => new RegExp(`\\s${a}(?=[\\s=>])`).test(bloque)), `${ruta}: ${bloque}`).toHaveLength(1);
+      }
+    }
+    const enLaCita = bloquesDe(await leerMedida(CITA));
+    for (const a of identidades) expect(enLaCita.some((b) => b.includes(a)), a).toBe(true);
+  }, 240_000);
+});
+
 describe('Historia 23.1 — las islas llaman `__medir` a secas y anuncian con `anunciar`', () => {
   /** Los guiones en línea de una página, por la isla que los lleva. */
   const isla = (guiones: string[], marca: string) => {
@@ -3347,11 +3405,16 @@ describe('Historia 23.1 — toda isla que anuncia lleva `anunciar`', () => {
       const deLaBusqueda = busquedaAnuncia
         ? etiquetasDeGuionExterno(html).filter((e) => guionExternoDe(e.src)?.id === 'busqueda').length * (anunciaLaTanda ? 2 : 1)
         : 0;
-      const anunciantes =
-        delFiltro +
-        deLaBusqueda +
-        guionesEnLinea(html).filter((g) => colapsado(g).includes(ANUNCIAR) && /\banunciar\(/.test(sinAnunciar(g)))
-          .length;
+      /*
+       * Historia 30.3 — la isla de Copiar anuncia además por la región de cada bloque que recorre
+       * («Cómo citar» y, desde la 30.4, «Inserta esta cita», los dos `data-copiables`): el guion en
+       * línea que los recorre cuenta como anunciante de cada bloque.
+       */
+      const enLinea = guionesEnLinea(html).filter((g) => colapsado(g).includes(ANUNCIAR) && /\banunciar\(/.test(sinAnunciar(g)));
+      const deComoCitar = enLinea.some((g) => g.includes('[data-copiables]'))
+        ? (html.match(/<div\b[^>]*\bdata-copiables\b/g) ?? []).length
+        : 0;
+      const anunciantes = delFiltro + deLaBusqueda + enLinea.length + deComoCitar;
       regionesVistas += regiones;
       expect(anunciantes, `${ruta}: ${regiones} regiones de estado y ${anunciantes} guiones con anunciar`).toBeGreaterThanOrEqual(
         regiones,

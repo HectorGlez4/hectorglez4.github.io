@@ -1,4 +1,5 @@
 import type { Page } from '@playwright/test';
+import { EVENTOS } from '../../../src/lib/vocabulario.ts';
 
 /** Lo que una superficie pasó a `__medir`, en el orden en que lo pasó. */
 export interface Emitido {
@@ -43,4 +44,43 @@ export async function espiarMedicion(page: Page): Promise<void> {
 /** Lo que el espía ha visto hasta ahora. */
 export function emitidos(page: Page): Promise<Emitido[]> {
   return page.evaluate(() => (window as unknown as { __emitidos: Emitido[] }).__emitidos);
+}
+
+/** Las acciones de copiar, por su nombre del vocabulario (Historia 30.5). */
+const DE_COPIAR: readonly string[] = [EVENTOS.copiado, EVENTOS.copiadoDeReferencia, EVENTOS.copiadoDeFragmento];
+
+/**
+ * Lo que el espía vio de las acciones de copiar, en orden. Sin datos ni destino: lo que la isla no
+ * pasa llega como `undefined`, y aquí se lee como nulo.
+ */
+export async function emitidosDeCopiar(page: Page): Promise<Emitido[]> {
+  return (await emitidos(page))
+    .filter((e) => DE_COPIAR.includes(e.evento))
+    .map((e) => ({ evento: e.evento, datos: e.datos ?? null, destino: e.destino ?? null }));
+}
+
+/**
+ * Un portapapeles que rechaza toda escritura y cuenta los intentos en `window.__escrituras`, para
+ * que una prueba de «no pide nada» compruebe antes que la rama del rechazo corrió.
+ */
+export async function denegarPortapapeles(page: Page): Promise<void> {
+  await page.addInitScript(() => {
+    const ventana = window as unknown as { __escrituras: number };
+    ventana.__escrituras = 0;
+    Object.defineProperty(navigator, 'clipboard', {
+      value: {
+        writeText: () => {
+          ventana.__escrituras++;
+          return Promise.reject(new Error('denegado'));
+        },
+        readText: () => Promise.resolve(''),
+      },
+      configurable: true,
+    });
+  });
+}
+
+/** Cuántas escrituras intentó la página en el portapapeles de `denegarPortapapeles`. */
+export function escriturasDenegadas(page: Page): Promise<number> {
+  return page.evaluate(() => (window as unknown as { __escrituras: number }).__escrituras);
 }

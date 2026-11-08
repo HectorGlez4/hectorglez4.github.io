@@ -11,6 +11,7 @@ import {
   type ResultadoBuild,
 } from './ayuda/construir.js';
 import { indiceDe } from './ayuda/pagefind.js';
+import { enUnaLinea } from '../../src/lib/verso.ts';
 import { componerDocumento, nombreDeDocumento } from '../../tools/lib/documento.ts';
 import { FICHERO_DEL_CENSO } from '../../tools/lib/cotejo.ts';
 
@@ -114,11 +115,18 @@ describe('Historia 29.3 — la Cita en verso, verso a verso', () => {
     expect(h1).not.toContain('\n');
   });
 
-  it('ningún `<br>` ni « / » en el `<main>` de las dos Páginas de Cita en verso', async () => {
-    for (const slug of [SLUG_MARTI, SLUG_LARGA]) {
+  it('ningún `<br>` ni « / » en el `<main>` de las dos Páginas de Cita en verso, salvo la Referencia de «Cómo citar»', async () => {
+    // UX-DR116: la única salida en línea es la Referencia (30.3), y la da `enUnaLinea`; el `<br>`
+    // del Fragmento (30.4) va escapado dentro de su campo, como texto, y no es marcado de la página.
+    const REFERENCIA = /<p class="referencia"[^>]*>([\s\S]*?)<\/p>/g;
+    for (const [slug, texto] of [[SLUG_MARTI, MARTI], [SLUG_LARGA, LARGA]]) {
       const cuerpo = main(await leer(`/cita/${slug}/`));
-      expect(cuerpo).not.toMatch(/<br\b/i);
-      expect(cuerpo).not.toContain(' / ');
+      const referencias = [...cuerpo.matchAll(REFERENCIA)].map((m) => m[1]);
+      expect(referencias, slug).toHaveLength(3);
+      for (const referencia of referencias) expect(referencia, slug).toContain(`«${enUnaLinea(texto)}».`);
+      const fuera = cuerpo.replace(REFERENCIA, '');
+      expect(fuera).not.toMatch(/<br\b/i);
+      expect(fuera).not.toContain(' / ');
     }
   });
 
