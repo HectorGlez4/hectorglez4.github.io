@@ -327,3 +327,67 @@ export function parteDeSaltosDescartados(descartados: number): string | undefine
     'verso no se teclea; sale del documento (AD-29).'
   );
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Los saltos que le tocan a una Cita
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** Un documento de una Cita con su forma ya juzgada, para `saltosDeLaCita`. */
+export interface DocumentoConForma {
+  nombre: string;
+  cuerpo: string;
+  /** La forma de sus líneas: la da quien llama, que la memoiza por nombre. */
+  forma: FormaDeLineas;
+  /**
+   * El cuerpo ya colapsado, si quien llama lo tiene a mano: quien recorre miles de Citas de los
+   * mismos documentos no lo colapsa una vez por Cita. Si se da, tiene que ser
+   * `colapsarEspacios(cuerpo)`.
+   */
+  colapsado?: ReturnType<typeof colapsarEspacios>;
+}
+
+/**
+ * Lo que `saltosDeLaCita` decide de una Cita — Historia 29.2.
+ *
+ * - `sin-documento`: no hay ningún documento legible de su obra.
+ * - `no-se-localiza`: su texto no aparece en ninguno.
+ * - `prosa`: aparece, pero en ninguno de verso; `forma` es la del primero donde aparece.
+ * - `sin-saltos`: aparece en documentos de verso, que no parten línea en su tramo.
+ * - `conflicto`: aparece en dos o más de verso y el escritor les da textos distintos.
+ * - `saltos`: el texto con sus saltos, del primer documento de verso donde aparece.
+ */
+export type SaltosDeLaCita =
+  | { tipo: 'sin-documento' }
+  | { tipo: 'no-se-localiza' }
+  | { tipo: 'prosa'; forma: FormaDeLineas; documento: string }
+  | { tipo: 'sin-saltos'; documento: string }
+  | { tipo: 'conflicto'; documentos: string[] }
+  | { tipo: 'saltos'; texto: string; documento: string; forma: FormaDeLineas };
+
+/**
+ * Los saltos de verso que le tocan a una Cita desde sus documentos — Historia 29.2, AD-29.
+ *
+ * Es la **única** decisión que comparten la restitución (`documentar --restituir-saltos`) y la
+ * regla 4 de la puerta del cotejo: si la orden y el build decidieran por separado, el build
+ * podría romper tras correr la orden, o pasar con una Cita que la orden restituiría. Llama al
+ * escritor único, `textoConSaltos`, por cada documento de verso donde el texto se localiza; los
+ * candidatos van en el orden de `documentosDeCita`. Hay conflicto cuando dos de esos documentos
+ * le darían textos distintos —también si uno da saltos y otro ninguno—: entonces no se elige.
+ */
+export function saltosDeLaCita(texto: string, candidatos: readonly DocumentoConForma[]): SaltosDeLaCita {
+  if (candidatos.length === 0) return { tipo: 'sin-documento' };
+  const buscado = colapsarEspacios(texto);
+  const localizados = candidatos.filter(
+    (c) => localizar(buscado, c.colapsado ?? colapsarEspacios(c.cuerpo)) !== -1,
+  );
+  if (localizados.length === 0) return { tipo: 'no-se-localiza' };
+  const deVerso = localizados.filter((c) => esFormaDeVerso(c.forma));
+  if (deVerso.length === 0) {
+    return { tipo: 'prosa', forma: localizados[0].forma, documento: localizados[0].nombre };
+  }
+  const escritos = deVerso.map((c) => textoConSaltos(texto, { cuerpo: c.cuerpo, forma: c.forma }).texto);
+  if (new Set(escritos).size > 1) return { tipo: 'conflicto', documentos: deVerso.map((c) => c.nombre) };
+  const [primero] = deVerso;
+  if (!escritos[0].includes('\n')) return { tipo: 'sin-saltos', documento: primero.nombre };
+  return { tipo: 'saltos', texto: escritos[0], documento: primero.nombre, forma: primero.forma };
+}

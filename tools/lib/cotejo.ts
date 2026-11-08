@@ -21,6 +21,7 @@ import {
   formaDeLasLineas,
   textoConSaltos,
   type FormaDeLineas,
+  saltosDeLaCita,
 } from './lineas.ts';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -533,6 +534,11 @@ export interface ResultadoDeCotejo {
   pendientes: string[];
   /** Citas cuyo texto se ha localizado en su documento. */
   cotejadas: number;
+  /**
+   * Historia 29.2 — lo que se dice sin romper: una Cita cuyos documentos de verso le darían
+   * saltos distintos. Ni la puerta elige uno ni la restitución la toca.
+   */
+  avisos: string[];
 }
 
 /**
@@ -549,7 +555,12 @@ export function cotejar(entrada: EntradaDeCotejo): ResultadoDeCotejo {
 
   const fallos: FalloDeCotejo[] = [];
   const pendientes: string[] = [];
+  const avisos: string[] = [];
   let cotejadas = 0;
+  /** Historia 29.2, regla 4: las Citas de documento de verso a las que les faltan sus saltos. */
+  const sinSusSaltos: { slug: string; ruta: string; documento: string }[] = [];
+  /** El cuerpo colapsado de cada documento que la regla 4 mira, una vez por documento. */
+  const colapsados = new Map<string, Colapsado>();
 
   const publicadas = new Map(citas.map((c) => [c.slug, c]));
   const enCenso = new Set(censo);
@@ -569,7 +580,10 @@ export function cotejar(entrada: EntradaDeCotejo): ResultadoDeCotejo {
         'edita a mano.',
     });
   }
-  /** La forma de cada documento, calculada solo si una Cita con saltos lo coteja. */
+  /**
+   * La forma de cada documento, calculada una vez por nombre la primera vez que una Cita lo
+   * coteja: desde la 29.2 la regla 4 la pide para todo documento legible de toda Cita.
+   */
   const formas = new Map<string, FormaDeLineas>();
   const formaDe = (nombre: string, cuerpo: string): FormaDeLineas => {
     let forma = formas.get(nombre);
@@ -747,10 +761,64 @@ export function cotejar(entrada: EntradaDeCotejo): ResultadoDeCotejo {
       }
     }
 
+    /*
+     * Historia 29.2, regla 4 — una Cita de documento de verso sin los saltos que le compondría
+     * el escritor único. Decide `saltosDeLaCita`, la misma función que la restitución, así que
+     * tras correr la orden el build pasa. Solo se mira si algún documento suyo es de verso: sin
+     * ninguno, la decisión no puede ser `saltos` ni `conflicto`.
+     */
+    if (legibles.some((n) => esFormaDeVerso(formaDe(n, documentos.get(n) as string)))) {
+      const decision = saltosDeLaCita(
+        cita.texto,
+        legibles.map((n) => {
+          const cuerpo = documentos.get(n) as string;
+          let colapsado = colapsados.get(n);
+          if (colapsado === undefined) {
+            colapsado = colapsarEspacios(cuerpo);
+            colapsados.set(n, colapsado);
+          }
+          return { nombre: n, cuerpo, forma: formaDe(n, cuerpo), colapsado };
+        }),
+      );
+      if (decision.tipo === 'saltos' && decision.texto !== cita.texto) {
+        sinSusSaltos.push({ slug: cita.slug, ruta: cita.ruta, documento: decision.documento });
+        continue;
+      }
+      if (decision.tipo === 'conflicto') {
+        avisos.push(
+          `${cita.ruta}: sus documentos de verso le darían saltos distintos ` +
+            `(${decision.documentos.map((n) => `corpus/fuentes/${n}.txt`).join(', ')}); no se ` +
+            'elige ninguno y la Cita sigue como está. Lo decide una persona (Historia 29.2).',
+        );
+      }
+    }
+
     cotejadas += 1;
   }
 
-  return { ok: fallos.length === 0, fallos, pendientes, cotejadas };
+  const orden = (slugs: readonly string[]) => `npm run documentar -- --restituir-saltos ${slugs.join(' ')}`;
+  for (const { slug, ruta, documento } of sinSusSaltos) {
+    fallos.push({
+      ruta,
+      regla:
+        'Regla incumplida (salto de verso, 4): la Cita sale de un documento de verso ' +
+        `(corpus/fuentes/${documento}.txt) y no lleva los saltos que le corresponden. Los ` +
+        'saltos no se teclean: los restituye la orden, que solo toca el espacio. ' +
+        (sinSusSaltos.length === 1
+          ? `Restitúyalos con: ${orden([slug])}`
+          : 'La orden que restituye todas las de esta lista va al final.'),
+    });
+  }
+  if (sinSusSaltos.length > 1) {
+    fallos.push({
+      ruta: 'corpus/citas/',
+      regla:
+        `Regla incumplida (salto de verso, 4): ${sinSusSaltos.length} Citas de documento de verso ` +
+        `no llevan sus saltos. Restitúyalos todos con: ${orden(sinSusSaltos.map((c) => c.slug))}`,
+    });
+  }
+
+  return { ok: fallos.length === 0, fallos, pendientes, cotejadas, avisos };
 }
 
 /**

@@ -471,7 +471,7 @@ development_status:
   # 29.2 la rama está en rojo hasta su commit de restitución de saltos (acto de Héctor).
   epic-29: backlog
   29-1-el-salto-de-verso-sobrevive-en-el-corpus-el-cotejo-y-el-slug: review
-  29-2-una-orden-restituye-los-saltos-de-las-citas-publicadas-desde: backlog  # v9-ralph 2026-11-08: desbloqueada, Héctor delegó la decisión de la Tarjeta Social del verso (tramo menor en la Tarjeta, ver spec de la 29.1)
+  29-2-una-orden-restituye-los-saltos-de-las-citas-publicadas-desde: review  # v9-ralph 2026-11-08: desde su commit, el build de la rama sobre el Corpus real está en rojo a propósito (regla 4, 75 Citas) hasta el commit de restitución; correr la orden sin --seco es acto de Héctor/orquestador, nunca de un agente
   29-3-el-verso-en-toda-superficie-y-todo-lo-que-sale: backlog  # v9-ralph 2026-11-08: desbloqueada, Héctor delegó la decisión de la Tarjeta Social del verso (tramo menor en la Tarjeta, ver spec de la 29.1)
   29-4-los-casi-duplicados-dentro-de-una-obra-y-entre-clases-se-señ: backlog  # v9-ralph 2026-11-08: desbloqueada, Héctor delegó la decisión de la Tarjeta Social del verso (tramo menor en la Tarjeta, ver spec de la 29.1)
   epic-29-retrospective: optional

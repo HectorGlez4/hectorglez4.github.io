@@ -656,7 +656,13 @@ describe('Historia 29.1 — el salto de verso en el cotejo (AD-29)', () => {
     expect(apareceEnDocumento(EN_UNA_LINEA, CUERPO_MARTI)).toBe(true);
     expect(huellaDeTexto(VERSOS)).toBe(huellaDeTexto(EN_UNA_LINEA));
     for (const texto of [VERSOS, EN_UNA_LINEA]) {
-      const r = cotejar({ citas: [deMarti(texto)], documentos: new Map([[DOC, CUERPO_MARTI]]), censo: [] });
+      // Contra el documento en prosa, para que la regla 4 de la 29.2 no hable de la forma.
+      const r = cotejar({
+        citas: [deMarti(texto.replace(/\n/gu, texto === VERSOS ? '\n' : ' '))],
+        documentos: new Map([[DOC, CUERPO_MARTI]]),
+        censo: [],
+        ...(texto === EN_UNA_LINEA ? { lineasDeclaradas: new Map([[DOC, 'prosa-por-lineas']]) } : {}),
+      });
       expect(r.fallos).toEqual([]);
       expect(r.cotejadas).toBe(1);
     }
@@ -738,5 +744,98 @@ describe('Historia 29.1 — el salto de verso en el cotejo (AD-29)', () => {
     expect(r.fallos).toEqual([
       { ruta: `corpus/fuentes/${DOC}.txt`, regla: expect.stringMatching(/«lineas: »/) },
     ]);
+  });
+});
+
+describe('Historia 29.2 — regla 4: una Cita de documento de verso sin sus saltos (AD-29)', () => {
+  const MARTI = readFileSync(
+    join(import.meta.dirname, 'ayuda/lineas/wikisource-es--versos-sencillos--versos-sencillos-i.txt'),
+    'utf8',
+  );
+  const CUERPO_MARTI = MARTI.slice(MARTI.indexOf('\n---\n', MARTI.indexOf('\n---\n') + 1) + 5);
+  const DOC = 'wikisource-es--versos-sencillos--versos-sencillos-i';
+  const VERSOS = 'Yo vengo de todas partes,\nY hacia todas partes voy:\nArte soy entre las artes,\nEn los montes, monte soy.';
+  const OTROS = 'Yo sé los nombres extraños\nDe las yerbas y las flores,';
+  const deMarti = (slug: string, texto: string): CitaParaCotejar => ({
+    slug,
+    ruta: `corpus/citas/${slug}.md`,
+    texto,
+    obra: 'Versos sencillos',
+    fuente: { id: 'wikisource-es', url: 'https://es.wikisource.org/wiki/Versos_sencillos/I' },
+  });
+  const documentos = new Map([[DOC, CUERPO_MARTI]]);
+
+  it('una sola: rompe con su fichero, el documento y la orden exacta', () => {
+    const r = cotejar({ citas: [deMarti('jose-marti-yo-vengo', VERSOS.replace(/\n/gu, ' '))], documentos, censo: [] });
+    expect(r.ok).toBe(false);
+    expect(r.fallos).toEqual([
+      {
+        ruta: 'corpus/citas/jose-marti-yo-vengo.md',
+        regla: expect.stringMatching(/salto de verso, 4/),
+      },
+    ]);
+    expect(r.fallos[0].regla).toContain(`corpus/fuentes/${DOC}.txt`);
+    expect(r.fallos[0].regla).toContain('npm run documentar -- --restituir-saltos jose-marti-yo-vengo');
+    expect(r.cotejadas).toBe(0);
+  });
+
+  it('dos: cada una remite al final, y una sola orden con los dos slugs, en su orden', () => {
+    const r = cotejar({
+      citas: [
+        deMarti('jose-marti-yo-vengo', VERSOS.replace(/\n/gu, ' ')),
+        deMarti('jose-marti-yo-se', OTROS.replace(/\n/gu, ' ')),
+      ],
+      documentos,
+      censo: [],
+    });
+    expect(r.fallos.map((f) => f.ruta)).toEqual([
+      'corpus/citas/jose-marti-yo-vengo.md',
+      'corpus/citas/jose-marti-yo-se.md',
+      'corpus/citas/',
+    ]);
+    expect(r.fallos[0].regla).not.toContain('npm run documentar');
+    expect(r.fallos[0].regla).toMatch(/va al final/);
+    expect(r.fallos[2].regla).toContain('npm run documentar -- --restituir-saltos jose-marti-yo-vengo jose-marti-yo-se');
+    expect(r.fallos.filter((f) => f.regla.includes('npm run documentar'))).toHaveLength(1);
+  });
+
+  it('ya restituida, en prosa o sin saltos en su tramo: no falla', () => {
+    const r = cotejar({
+      citas: [
+        deMarti('ya-restituida', VERSOS),
+        deMarti('sin-saltos-en-su-tramo', 'Yo vengo de todas partes,'),
+      ],
+      documentos,
+      censo: [],
+    });
+    expect(r.fallos).toEqual([]);
+    expect(r.cotejadas).toBe(2);
+    const enProsa = cotejar({
+      citas: [deMarti('en-prosa', VERSOS.replace(/\n/gu, ' '))],
+      documentos,
+      censo: [],
+      lineasDeclaradas: new Map([[DOC, 'prosa-ajustada']]),
+    });
+    expect(enProsa.fallos).toEqual([]);
+    expect(enProsa.avisos).toEqual([]);
+  });
+
+  it('dos documentos de verso que dan textos distintos: aviso con los dos, y no fallo', () => {
+    const otro = `${DOC}--bis`;
+    const r = cotejar({
+      citas: [deMarti('jose-marti-yo-vengo', VERSOS.replace(/\n/gu, ' '))],
+      documentos: new Map([
+        [DOC, CUERPO_MARTI],
+        [otro, `${VERSOS.replace(/\n/gu, ' ')}\nUno\nDos\nTres\nCuatro`],
+      ]),
+      lineasDeclaradas: new Map([[otro, 'verso']]),
+      censo: [],
+    });
+    expect(r.fallos).toEqual([]);
+    expect(r.cotejadas).toBe(1);
+    expect(r.avisos).toHaveLength(1);
+    expect(r.avisos[0]).toContain(`corpus/fuentes/${DOC}.txt`);
+    expect(r.avisos[0]).toContain(`corpus/fuentes/${otro}.txt`);
+    expect(r.avisos[0]).toContain('corpus/citas/jose-marti-yo-vengo.md');
   });
 });

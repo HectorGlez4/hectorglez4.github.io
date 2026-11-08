@@ -100,7 +100,7 @@ parte lo dice, y el build rompe ante un salto sin respaldo. El reparto del Corpu
 cifras de la Tarjeta del verso, sin escribir nada: `npx tsx tools/lineas.ts formas|tarjeta`.
 Las candidatas que ya estaban en `corpus/_revision/` antes de la 29.1 se escribieron en una línea y
 `revisar --aprobar` las publica tal cual: para que lleven su verso, regenéralas con `extraer` desde
-su documento antes de aprobar, o quedan para la restitución de la 29.2.
+su documento antes de aprobar, o restitúyelas con `documentar --restituir-saltos` (abajo).
 
 **Un Autor dado de alta en la sesión trae una clave de orden sin revisar** (Historia 26.1).
 `crear` la propone —la última palabra del `nombre`, la regla fija de `tools/lib/claves.ts`— y
@@ -614,6 +614,35 @@ salto tecleado sin respaldo queda en espacio y el parte lo dice (Historia 29.1).
 ese documento la orden lee las cabeceras de todo `corpus/fuentes/` (unos 2–3 s), y si alguno no se
 puede abrir se niega con 1 sin escribir; un documento que se abre pero cuya cabecera no se entiende
 no cuenta como candidato, y de él no salen saltos (la Cita queda en una línea, como hoy).
+
+**Los saltos de verso de lo ya publicado se restituyen con una orden** (Historia 29.2, AD-29):
+
+```
+npm run documentar -- --restituir-saltos --seco          # el parte entero, sin escribir nada
+npm run documentar -- --restituir-saltos [<slug>...]     # escribe; sin slugs, todas
+```
+
+Decide cada Cita —las publicadas y, aparte, las candidatas de `corpus/_revision/`— con
+`saltosDeLaCita` de `tools/lib/lineas.ts`, la misma función que la puerta del build, y reescribe
+**solo la línea `texto:`** del fichero, y solo si lo nuevo colapsa a lo publicado (NFR-12): slug,
+nombre de fichero, URL y los demás campos quedan byte a byte. Se queda en una línea la Cita sin
+documento (el censo, o sin Fuente u obra), la que no se localiza en su documento, la de documento
+en prosa (`prosa-por-lineas`, `prosa-ajustada` o `indeterminada`) y la de documento de verso sin
+saltos en su tramo; el parte las cuenta por motivo. Dos documentos de verso que le darían saltos
+distintos son un **conflicto**: no se toca, el parte lo lista con los dos documentos y el build
+solo avisa —lo decide una persona—. Primero decide todo y después escribe; si una escritura falla,
+devuelve lo ya escrito a su contenido original y sale con 1. Es idempotente. El parte dice además
+cuántas Páginas de Cita y listados cambian de fecha (la relación de AD-27) y recuerda
+`npx tsx tools/avisar.ts --ensayo --desde <A> --hasta <B>`. Códigos: 2 la forma (bandera
+desconocida o repetida, junto a `--restituir-traduccion`, `--retirar` o `--texto`); 1 un slug que
+no es de ninguna Cita o una nombrada sin documento, un Corpus ilegible o una escritura que falla.
+Lee todo `_revision/` y tarda minuto y medio sobre el Corpus real.
+
+**El build rompe ante una Cita de documento de verso sin sus saltos** (regla 4 de la puerta del
+salto), con la orden exacta: con una, en su fallo; con varias, una sola al final con todos los
+slugs. **La orden sin `--seco` la corre Héctor** —ningún agente— en un commit propio de
+`corpus/`, y se repite tras cada puesta al día de la rama con la principal: lo sembrado allí llega
+en una línea. Hasta ese commit, el build de la rama sobre el Corpus real está en rojo a propósito.
 
 **De una obra traducida se conserva lo que la Fuente declara** (Historia 19.1). `recuperar`
 registra el traductor en la cabecera del documento (`traductor:` y, si consta,
