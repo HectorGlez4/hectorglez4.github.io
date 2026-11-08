@@ -494,6 +494,33 @@ describe('Historia 35.1 — el alta deriva la clase y la anota', () => {
     expect(await readFile(rutas.clasesDeCita, 'utf8')).toBe(CABECERA_DE_CLASES);
   });
 
+  it('la orden, con publicadas sin anotar, sale con 1 y da la siembra', async () => {
+    const { execFile } = await import('node:child_process');
+    const { promisify } = await import('node:util');
+    const { resolve } = await import('node:path');
+    const ejecutar = promisify(execFile);
+    const raiz = resolve(import.meta.dirname, '../..');
+    const rutas = await corpusDePrueba();
+    await writeFile(rutas.clasesDeCita, CABECERA_DE_CLASES, 'utf8');
+    await chmod(rutas.clasesDeCita, 0o444);
+    const lote = join(rutas.raiz, '..', 'lote.yaml');
+    await writeFile(lote, JSON.stringify([COMPLETA]), 'utf8');
+    let codigo = 0;
+    let salida = '';
+    try {
+      ({ stdout: salida } = await ejecutar('npx', ['tsx', join(raiz, 'tools/alta.ts'), lote, '--corpus', rutas.raiz], {
+        cwd: raiz,
+      }));
+    } catch (fallo) {
+      codigo = (fallo as { code?: number }).code ?? 1;
+      salida = (fallo as { stdout?: string }).stdout ?? '';
+    }
+    expect(codigo, salida).toBe(1);
+    expect(salida).toContain(ORDEN_SEMBRAR_CLASES);
+    expect(await ficherosPublicados(rutas)).toHaveLength(1);
+    expect(await readFile(rutas.clasesDeCita, 'utf8')).toBe(CABECERA_DE_CLASES);
+  });
+
   it('el parte de un alta que lanzó: «nada escrito» solo si no se publicó nada', () => {
     expect(mensajeDeAltaFallida(new Error('registro ilegible'))).toMatch(/registro ilegible\nNo se ha escrito nada\./u);
     const interrumpida = new PublicacionInterrumpida(new Error('disco lleno'), ['seneca-a'], undefined);

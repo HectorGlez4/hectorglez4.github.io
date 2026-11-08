@@ -344,7 +344,8 @@ export function reglasDeAutor(valor: unknown, contexto: z.RefinementCtx): void {
   if (valor === null || typeof valor !== 'object') return;
   const autor = valor as Record<string, unknown>;
   const conAño = autor.añoFallecimiento !== undefined;
-  const esVivo = autor.vivo !== undefined;
+  // Solo `vivo: true` es vivo: otro valor lo rechaza el literal de `vivo`, sin un segundo error.
+  const esVivo = autor.vivo === true;
   if (conAño && esVivo) {
     contexto.addIssue({
       code: 'custom',

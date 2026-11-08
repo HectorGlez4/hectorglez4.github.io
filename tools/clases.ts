@@ -26,7 +26,8 @@ export function analizarArgumentos(argumentos: readonly string[]): { corpus: str
   let corpus: string | undefined;
   for (let i = 0; i < resto.length; i += 1) {
     if (resto[i] === '--corpus' && corpus !== undefined) return { error: 'Bandera repetida: «--corpus».' };
-    if (resto[i] === '--corpus' && resto[i + 1] !== undefined && !resto[i + 1].startsWith('--')) {
+    if (resto[i] === '--corpus') {
+      if (resto[i + 1] === undefined || resto[i + 1].startsWith('--')) return { error: 'Falta el valor de «--corpus».' };
       corpus = resto[i + 1];
       i += 1;
       continue;

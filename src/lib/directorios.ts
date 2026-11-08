@@ -28,7 +28,7 @@ export interface FilaDelDirectorioDeAutores {
   nombre: string;
   ruta: string;
   /**
-   * «1547–1616», «Fallecido en 65», «n. 1950» de un Autor vivo; ausente si `añosDeAutor` no da
+   * «1547–1616», «Fallecido en 65», «N. 1950» de un Autor vivo; ausente si `añosDeAutor` no da
    * ninguno (`hechosDeFilaDeAutor`): un Autor vivo sin año de nacimiento (Historia 35.1).
    */
   años?: string;

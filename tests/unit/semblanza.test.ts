@@ -114,7 +114,8 @@ describe('los hechos del Corpus', () => {
   });
 
   it('Historia 35.1 — un Autor vivo: «n. {año}», y sin nacimiento ningún año, ni paréntesis ni hueco', () => {
-    expect(añosDeAutor({ vivo: true, añoNacimiento: 1950 })).toBe('n. 1950');
+    expect(añosDeAutor({ vivo: true, añoNacimiento: 1950 })).toBe('N. 1950');
+    expect(añosDeAutor({ vivo: true, añoNacimiento: 1950 }, 'minúscula')).toBe('n. 1950');
     expect(añosDeAutor({ vivo: true })).toBeUndefined();
     expect(hechosDeAutor({ nombre: 'Ana', vivo: true }, 2)).toBe('Ana. 2 citas documentadas en Sabiduría de Bolsillo.');
     expect(hechosDeAutor({ nombre: 'Ana', vivo: true, añoNacimiento: 1950 }, 0)).toBe('Ana (n. 1950).');
@@ -281,7 +282,7 @@ describe('la Tarjeta Social de Autor, con hechos', () => {
   it('Historia 35.1 — un Autor vivo sin nacimiento no tiene línea de años', () => {
     const viva = { slug: 'ana', nombre: 'Ana', vivo: true as const };
     expect(datosDeTarjetaDeAutor(viva, [cita('ana', true, 1)])).toEqual({ titulo: 'Ana', hechos: ['1 cita documentada'] });
-    expect(datosDeTarjetaDeAutor({ ...viva, añoNacimiento: 1950 }, [])).toEqual({ titulo: 'Ana', hechos: ['n. 1950'] });
+    expect(datosDeTarjetaDeAutor({ ...viva, añoNacimiento: 1950 }, [])).toEqual({ titulo: 'Ana', hechos: ['N. 1950'] });
   });
 
   it('con cero documentadas omite la línea del recuento', () => {

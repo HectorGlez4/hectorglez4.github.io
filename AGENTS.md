@@ -170,7 +170,7 @@ cotejada— **no lleva** el campo `clase` y declara `estadoDerechos: dominio-pú
 derechos vigentes— lleva `clase: atribuida` y nunca `estadoDerechos`; `personaje` (un slug, que
 resuelve la 35.2) solo lo admite ella, y hasta la 35.2 toda Cita lleva Autor. El Autor lleva su
 `añoFallecimiento` **o** `vivo: true` (+`añoNacimiento` opcional), uno de los dos: sus años se
-escriben «n. 1950» —sin nacimiento, ninguno, ni hueco— y no hay `deathDate`.
+escriben «N. 1950» —«n. 1950» dentro de una frase; sin nacimiento, ninguno, ni hueco— y no hay `deathDate`.
 
 `src/lib/clase.ts` es el **único lector** del campo (`esAtribuida`, `claseDe`) y el único que decide
 los derechos (`derechosVigentes` y su complemento `esDeDominioPublico`); la cadena `'atribuida'`
@@ -192,7 +192,11 @@ clase y la jornada. Lo escriben el alta y la aprobación —un solo `appendFile`
 y la siembra; **ningún agente lo edita a mano**, ni reescribe ni borra una entrada: cambiar de clase
 es retirar la Cita y dar de alta otra con otro slug (un slug registrado con la otra clase cuenta como
 ocupado en `slugLibre`). `npm test` comprueba que el fichero empieza, byte a byte, por el del primer
-padre del commit (en el CI, con `fetch-depth: 0`). El build (`integraciones/clases.ts`) lo lee solo
+padre del commit (en el CI, con `fetch-depth: 0`). **Solo mira ese par**: en un empuje de varios
+commits, una reescritura en uno anterior pasa si el último solo añade, y en una fusión no ve las
+entradas que trae el segundo padre. Antes de empujar varios commits que tocan el registro, compruébalo
+contra la principal: `git show origin/main:corpus/clases-de-cita.yml` tiene que ser prefijo exacto del
+fichero de la punta. El build (`integraciones/clases.ts`) lo lee solo
 para romper —una Cita publicada sin entrada, con otra clase, un slug con dos, una de siempre de un
 Autor que no es de dominio público, una atribuida sin derechos—; no es familia de AD-27, no fecha ni
 avisa y ningún byte de `dist/` sale de él. Un registro ilegible niega el alta y la aprobación con 1
@@ -214,11 +218,16 @@ alta); 2 con un argumento desconocido o repetido. Las pruebas de build siembran 
 **Al fundir dos ramas que anotaron, el registro choca al final del fichero**: las dos añadieron tras
 la misma última línea, y git no sabe en qué orden. No se resuelve a mano entremezclando entradas: se
 toma **la versión del primer padre** del commit de fusión (`git checkout --ours
-corpus/clases-de-cita.yml` al poner al día una rama con la principal, o al fundir en la principal
-desde ella) y se corre `npx tsx tools/clases.ts sembrar`, que añade al final las que falten —con la
-jornada de hoy—. Así el fichero de la fusión empieza, byte a byte, por el del primer padre, que es lo
-que comprueba `npm test`. La siembra solo anota la clase de siempre: si la otra rama traía una
-entrada `atribuida`, se niega con 1, y esa entrada se copia al final tal cual, sin reescribirla.
+corpus/clases-de-cita.yml` en un `git merge`, al poner al día una rama con la principal o al fundir en
+la principal desde ella) y se corre `npx tsx tools/clases.ts sembrar`, que añade al final las que
+falten. **En un `git rebase` los lados se invierten**: `--ours` es la rama sobre la que se reaplica (la
+principal) y `--theirs` el commit propio, así que ahí se toma `--ours` igualmente —lo que ya está en
+la principal no se toca— y se siembra. Así el fichero empieza, byte a byte, por el del primer padre,
+que es lo que comprueba `npm test`. Lo que cuesta: las entradas de la otra rama vuelven con la jornada
+de la siembra, no con la suya —la jornada del registro es la de la anotación, no un dato que lea nada—.
+La siembra solo anota la clase de siempre: si la otra rama traía una entrada `atribuida`, se niega con
+1, y esa entrada —la única excepción a «nadie lo edita a mano», porque ninguna orden puede volver a
+derivarla— se copia al final tal cual, carácter a carácter, desde el lado que la trajo.
 
 ## Leer el estado de indexación
 

@@ -21,8 +21,18 @@
 
 import { AÑO_DE_REFERENCIA, PLAZO_DE_PROTECCION_AÑOS } from './umbrales.ts';
 
-/** Las dos clases de Cita, como se anotan en el registro. La de siempre, primero. */
-export const CLASES = ['siempre', 'atribuida'] as const;
+/** La clase de siempre, como se anota en el registro: la Cita no lleva el campo. */
+export const CLASE_DE_SIEMPRE = 'siempre';
+
+/** La clase atribuida, como se anota en el registro y se escribe en la Cita. */
+export const CLASE_ATRIBUIDA = 'atribuida';
+
+/**
+ * Las dos clases de Cita, como se anotan en el registro. La de siempre, primero. Se recorre,
+ * nunca se indexa: cada clase se nombra por su constante, para que el orden de la lista no
+ * decida qué es cada una.
+ */
+export const CLASES = [CLASE_DE_SIEMPRE, CLASE_ATRIBUIDA] as const;
 
 export type Clase = (typeof CLASES)[number];
 
@@ -33,12 +43,12 @@ export function esClase(valor: unknown): valor is Clase {
 
 /** El único lector del campo `clase`: si la Cita es atribuida. */
 export function esAtribuida(cita: { clase?: unknown }): boolean {
-  return cita.clase === CLASES[1];
+  return cita.clase === CLASE_ATRIBUIDA;
 }
 
 /** La clase de una Cita ya escrita: la atribuida lo dice, la de siempre calla. */
 export function claseDe(cita: { clase?: unknown }): Clase {
-  return esAtribuida(cita) ? CLASES[1] : CLASES[0];
+  return esAtribuida(cita) ? CLASE_ATRIBUIDA : CLASE_DE_SIEMPRE;
 }
 
 /**
@@ -122,6 +132,6 @@ export function claseQueCorresponde(
   autor: { vivo?: unknown; añoFallecimiento?: unknown },
   referencia: ReferenciaDeDerechos = REFERENCIA_DEL_ÁRBOL,
 ): Clase {
-  if (cita.personaje !== undefined) return CLASES[1];
-  return derechosVigentes(dueñoAutor(autor), referencia) ? CLASES[1] : CLASES[0];
+  if (cita.personaje !== undefined) return CLASE_ATRIBUIDA;
+  return derechosVigentes(dueñoAutor(autor), referencia) ? CLASE_ATRIBUIDA : CLASE_DE_SIEMPRE;
 }

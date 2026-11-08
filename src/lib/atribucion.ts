@@ -173,7 +173,7 @@ export const SUPERFICIES_SIN_SEMBLANZA: readonly string[] = [
  * de la Tarjeta Social de Autor—. Las partes van sin separador: la fila pone el punto medio para la
  * vista y la coma para el lector.
  *
- * Los años salen de `añosDeAutor` («1547–1616», «Fallecido en 65», «n. 1950» de un Autor vivo)
+ * Los años salen de `añosDeAutor` («1547–1616», «Fallecido en 65», «N. 1950» de un Autor vivo)
  * y, cuando no da ninguno —un Autor vivo sin año de nacimiento (Historia 35.1)—, la fila va sin
  * ellos: sin punto medio ni hueco.
  */
@@ -237,9 +237,9 @@ export function añoLegible(año: number, era: '' | ' d. C.' = ''): string {
  *   · «1864–1936»; los dos antes de Cristo, «65–8 a. C.»; solo el primero, «4 a. C.–65 d. C.»;
  *   · sin año de nacimiento en el Corpus, «Fallecido en 65» o «Fallecido en 8 a. C.» —FR-2:
  *     nunca un año aproximado—;
- *   · un Autor vivo (Historia 35.1), «n. 1950»; sin año de nacimiento, ninguno: `undefined`, y
- *     quien pinta los años no pinta línea, paréntesis ni hueco. La forma «n. {año}» está
- *     pendiente de Héctor (bmad-ux).
+ *   · un Autor vivo (Historia 35.1), «N. 1950» —«n. 1950» en minúscula, como «fallecido»—; sin
+ *     año de nacimiento, ninguno: `undefined`, y quien pinta los años no pinta línea, paréntesis
+ *     ni hueco. La forma «n. {año}» está pendiente de Héctor (bmad-ux).
  *
  * Hasta la 17.2 el año negativo salía con su signo —«-4–65»—, que no es como se escribe.
  */
@@ -248,7 +248,9 @@ export function añosDeAutor(
   inicial: 'mayúscula' | 'minúscula' = 'mayúscula',
 ): string | undefined {
   const { añoNacimiento: nace, añoFallecimiento: muere } = autor;
-  if (autor.vivo === true) return nace === undefined ? undefined : `n. ${añoLegible(nace, '')}`;
+  if (autor.vivo === true) {
+    return nace === undefined ? undefined : `${inicial === 'mayúscula' ? 'N.' : 'n.'} ${añoLegible(nace, '')}`;
+  }
   if (muere === undefined) return undefined;
   if (nace === undefined) {
     return `${inicial === 'mayúscula' ? 'Fallecido' : 'fallecido'} en ${añoLegible(muere, '')}`;

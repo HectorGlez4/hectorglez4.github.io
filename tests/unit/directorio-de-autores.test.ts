@@ -138,7 +138,7 @@ describe('Historia 26.3 — el orden y los grupos del Directorio de Autores', ()
     expect(hechosDeFilaDeAutor({}, 3)).toEqual({ recuento: '3 citas' });
     expect(hechosDeFilaDeAutor({ añoNacimiento: 1547 }, 1)).toEqual({ recuento: '1 cita' });
     // Historia 35.1 — un Autor vivo dice su nacimiento, y sin él no tiene años.
-    expect(hechosDeFilaDeAutor({ vivo: true, añoNacimiento: 1950 }, 1)).toEqual({ años: 'n. 1950', recuento: '1 cita' });
+    expect(hechosDeFilaDeAutor({ vivo: true, añoNacimiento: 1950 }, 1)).toEqual({ años: 'N. 1950', recuento: '1 cita' });
     expect(hechosDeFilaDeAutor({ vivo: true }, 1)).toEqual({ recuento: '1 cita' });
     expect(hechosDeFilaDeAutor({ añoNacimiento: -4, añoFallecimiento: 65 }, 2)).toEqual({
       años: '4 a. C.–65 d. C.',

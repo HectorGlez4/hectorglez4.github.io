@@ -30,11 +30,11 @@ import {
 } from '../../tools/lib/clases.ts';
 import { analizarArgumentos } from '../../tools/clases.ts';
 import { FAMILIAS_DE_FICHERO, familiaDeFichero } from '../../tools/lib/avisar.ts';
-import { CLASES } from '../../src/lib/clase.ts';
+import { CLASE_ATRIBUIDA } from '../../src/lib/clase.ts';
 
 const ejecutar = promisify(execFile);
 const RAIZ_DEL_REPO = join(import.meta.dirname, '..', '..');
-const ATRIBUIDA = CLASES[1];
+const ATRIBUIDA = CLASE_ATRIBUIDA;
 
 const temporales: string[] = [];
 afterEach(async () => {
@@ -135,6 +135,8 @@ describe('35.1 — la siembra', () => {
     expect(analizarArgumentos(['sembrar', '--corpus', 'a', '--corpus', 'b'])).toEqual({ error: 'Bandera repetida: «--corpus».' });
     expect(analizarArgumentos(['sembrar', '--corpus', 'a'])).toEqual({ corpus: 'a' });
     expect(analizarArgumentos(['sembrar'])).toEqual({ corpus: 'corpus' });
+    expect(analizarArgumentos(['sembrar', '--corpus'])).toEqual({ error: 'Falta el valor de «--corpus».' });
+    expect(analizarArgumentos(['sembrar', '--corpus', '--otra'])).toEqual({ error: 'Falta el valor de «--corpus».' });
   });
 
   it('se niega sin escribir ante una atribuida sin registrar', () => {

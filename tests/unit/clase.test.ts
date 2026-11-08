@@ -10,6 +10,8 @@ import { describe, expect, it } from 'vitest';
 import { readdir, readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import {
+  CLASE_ATRIBUIDA,
+  CLASE_DE_SIEMPRE,
   CLASES,
   claseDe,
   claseQueCorresponde,
@@ -80,19 +82,20 @@ describe('35.1 — derechosVigentes y esDeDominioPublico', () => {
 
 describe('35.1 — la clase', () => {
   it('la atribuida lo dice; la de siempre calla', () => {
-    expect(CLASES).toEqual(['siempre', 'atribuida']);
+    expect(CLASES).toEqual([CLASE_DE_SIEMPRE, CLASE_ATRIBUIDA]);
+    expect([CLASE_DE_SIEMPRE, CLASE_ATRIBUIDA]).toEqual(['siempre', 'atribuida']);
     expect(claseDe({})).toBe('siempre');
-    expect(claseDe({ clase: CLASES[1] })).toBe(CLASES[1]);
-    expect(esAtribuida({ clase: CLASES[1] })).toBe(true);
+    expect(claseDe({ clase: CLASE_ATRIBUIDA })).toBe(CLASE_ATRIBUIDA);
+    expect(esAtribuida({ clase: CLASE_ATRIBUIDA })).toBe(true);
     expect(esAtribuida({ clase: 'siempre' })).toBe(false);
     expect(esAtribuida({})).toBe(false);
   });
 
   it('se deriva del Personaje y de los derechos del Autor', () => {
     expect(claseQueCorresponde({}, { añoFallecimiento: 1616 })).toBe('siempre');
-    expect(claseQueCorresponde({}, { vivo: true })).toBe(CLASES[1]);
-    expect(claseQueCorresponde({ personaje: 'sancho' }, { añoFallecimiento: 1616 })).toBe(CLASES[1]);
-    expect(claseQueCorresponde({}, { añoFallecimiento: 1980 }, CON_PLAZO)).toBe(CLASES[1]);
+    expect(claseQueCorresponde({}, { vivo: true })).toBe(CLASE_ATRIBUIDA);
+    expect(claseQueCorresponde({ personaje: 'sancho' }, { añoFallecimiento: 1616 })).toBe(CLASE_ATRIBUIDA);
+    expect(claseQueCorresponde({}, { añoFallecimiento: 1980 }, CON_PLAZO)).toBe(CLASE_ATRIBUIDA);
     expect(dueñoAutor({ vivo: true, añoFallecimiento: 'x' })).toEqual({ tipo: 'autor', vivo: true });
   });
 });
@@ -119,17 +122,17 @@ describe('35.1 — el esquema', () => {
   });
 
   it('la atribuida no lleva estadoDerechos, y su Personaje tiene forma de slug', () => {
-    expect(citaAdmisible.safeParse({ ...base, clase: CLASES[1] }).success).toBe(true);
-    expect(citaAdmisible.safeParse({ ...base, clase: CLASES[1], personaje: 'sancho-panza' }).success).toBe(true);
-    expect(mensajes({ ...base, clase: CLASES[1], estadoDerechos: 'dominio-público' }).join('\n')).toMatch(
+    expect(citaAdmisible.safeParse({ ...base, clase: CLASE_ATRIBUIDA }).success).toBe(true);
+    expect(citaAdmisible.safeParse({ ...base, clase: CLASE_ATRIBUIDA, personaje: 'sancho-panza' }).success).toBe(true);
+    expect(mensajes({ ...base, clase: CLASE_ATRIBUIDA, estadoDerechos: 'dominio-público' }).join('\n')).toMatch(
       /^estadoDerechos: .*atribuida no lleva estadoDerechos/mu,
     );
-    expect(mensajes({ ...base, clase: CLASES[1], personaje: 'Sancho Panza' }).join('\n')).toMatch(/^personaje: /mu);
+    expect(mensajes({ ...base, clase: CLASE_ATRIBUIDA, personaje: 'Sancho Panza' }).join('\n')).toMatch(/^personaje: /mu);
   });
 
   it('toda Cita lleva Autor, y la que declara Personaje sin él nombra la Historia 35.2', () => {
     const { autor: _autor, ...sinAutor } = base;
-    expect(mensajes({ ...sinAutor, clase: CLASES[1], personaje: 'sancho' }).join('\n')).toMatch(/^autor: .*35\.2/mu);
+    expect(mensajes({ ...sinAutor, clase: CLASE_ATRIBUIDA, personaje: 'sancho' }).join('\n')).toMatch(/^autor: .*35\.2/mu);
     expect(mensajes({ ...sinAutor, estadoDerechos: 'dominio-público' }).join('\n')).not.toMatch(/35\.2/u);
   });
 
@@ -143,6 +146,10 @@ describe('35.1 — el esquema', () => {
     const ninguno = autorAdmisible.safeParse(autor);
     expect(ninguno.error?.issues.map((i) => i.message).join('\n')).toMatch(/falta el año de fallecimiento/u);
     expect(autorAdmisible.safeParse({ ...autor, vivo: false }).success).toBe(false);
+    // `vivo: false` con su año: lo rechaza el literal, sin decir que declara «vivo: true».
+    const falso = autorAdmisible.safeParse({ ...autor, vivo: false, añoFallecimiento: 1900 });
+    expect(falso.success).toBe(false);
+    expect(falso.error?.issues.map((i) => i.message).join('\n')).not.toMatch(/a la vez/u);
   });
 });
 
@@ -236,5 +243,19 @@ describe('35.1 — el literal de la atribuida vive en dos ficheros', () => {
       if (LITERAL.test(contenido)) conLiteral.push(ruta);
     }
     expect(conLiteral.sort()).toEqual(['src/lib/admision.ts', 'src/lib/clase.ts']);
+  });
+
+  it('nadie nombra una clase por su posición en CLASES: cada una tiene su constante', async () => {
+    const POR_POSICION = /\bCLASES\s*\[/u;
+    expect(POR_POSICION.test('return CLASES[1];')).toBe(true);
+    expect(POR_POSICION.test('CLASES.includes(valor)')).toBe(false);
+    const todos = (await Promise.all(VIGILADOS.map(ficheros))).flat();
+    const conPosicion: string[] = [];
+    for (const ruta of [...todos, 'tests/unit/clase.test.ts', 'tests/unit/clases-de-cita.test.ts']) {
+      const contenido = await readFile(join(RAIZ_DEL_REPO, ruta), 'utf8');
+      const sinEstaPrueba = contenido.replace(/'return CLASES\[1\];'/gu, '');
+      if (POR_POSICION.test(sinEstaPrueba)) conPosicion.push(ruta);
+    }
+    expect(conPosicion).toEqual([]);
   });
 });

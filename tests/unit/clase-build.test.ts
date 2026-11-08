@@ -17,7 +17,7 @@ import { CABECERA_DE_CLASES } from '../../tools/lib/corpus.ts';
  * Historia 35.1 — la clase de una Cita es puerta del build.
  *
  * Lo puro está en `clase.test.ts` y `clases-de-cita.test.ts`; aquí, sobre proyectos construidos de
- * verdad: la atribuida de un Autor vivo construye y su ficha dice «n. 1950» sin `deathDate`, un
+ * verdad: la atribuida de un Autor vivo construye y su ficha dice «N. 1950» sin `deathDate`, un
  * Autor vivo sin nacimiento no pinta años ni hueco, cada desacuerdo de la integración rompe
  * nombrando lo suyo, `clase: siempre` es error del esquema y, con plazo en una copia, la Cita de
  * siempre de un Autor protegido rompe. Las constantes se parchean en la copia, nunca en el árbol.
@@ -70,7 +70,7 @@ const BASE = {
 };
 
 describe('Historia 35.1 — la clase en el build', () => {
-  it('la atribuida de un Autor vivo construye; su ficha dice «n. 1950» sin deathDate, y sin nacimiento no hay años', async () => {
+  it('la atribuida de un Autor vivo construye; su ficha dice «N. 1950» sin deathDate, y sin nacimiento no hay años', async () => {
     const r = await construirConCorpus({
       ...BASE,
       'autores/ana-ejemplo.yml': VIVA,
@@ -89,7 +89,7 @@ describe('Historia 35.1 — la clase en el build', () => {
 
     const ana = readFileSync(paginaConstruida(r.proyecto, '/autor/ana-ejemplo/'), 'utf8');
     expect(ana).toContain('<p class="años"');
-    expect(ana).toMatch(/>n\. 1950</u);
+    expect(ana).toMatch(/>N\. 1950</u);
     expect(ana).toContain('"birthDate":"1950"');
     expect(ana).not.toContain('deathDate');
 
@@ -100,11 +100,11 @@ describe('Historia 35.1 — la clase en el build', () => {
 
     const directorio = readFileSync(paginaConstruida(r.proyecto, '/autores/'), 'utf8');
     const fila = (nombre: string) => directorio.slice(directorio.indexOf(`>${nombre}<`)).split('</a>')[0];
-    expect(fila('Ana Ejemplo')).toMatch(/n\. 1950<span aria-hidden="true"[^>]*> · <\/span>/u);
+    expect(fila('Ana Ejemplo')).toMatch(/N\. 1950<span aria-hidden="true"[^>]*> · <\/span>/u);
     expect(fila('Luis Prueba')).not.toContain(' · ');
     expect(fila('Luis Prueba')).toContain('1 cita');
 
-    // La página de Cita de la de siempre sigue diciendo los años de siempre.
+    // La Página de Autor del Autor de siempre sigue diciendo sus años de siempre.
     const seneca = readFileSync(paginaConstruida(r.proyecto, '/autor/seneca/'), 'utf8');
     expect(seneca).toContain('"deathDate":"65"');
 
@@ -170,13 +170,14 @@ describe('Historia 35.1 — la clase en el build', () => {
 
   it('con plazo en la copia, la Cita de siempre de un Autor protegido rompe nombrando la Cita', async () => {
     const umbrales = readFileSync(join(RAIZ, 'src/lib/umbrales.ts'), 'utf8');
+    // Sustituye el valor que tengan, sea cual sea: ninguna prueba fija el de las constantes.
     const parcheado = umbrales
       .replace(
-        'export const PLAZO_DE_PROTECCION_AÑOS: number | undefined = undefined;',
+        /^export const PLAZO_DE_PROTECCION_AÑOS: number \| undefined = [^;\n]+;/mu,
         'export const PLAZO_DE_PROTECCION_AÑOS: number | undefined = 70;',
       )
-      .replace('export const AÑO_DE_REFERENCIA: number | undefined = undefined;', 'export const AÑO_DE_REFERENCIA: number | undefined = 2026;');
-    expect(parcheado.match(/= 70;|= 2026;/gu)).toHaveLength(2);
+      .replace(/^export const AÑO_DE_REFERENCIA: number \| undefined = [^;\n]+;/mu, 'export const AÑO_DE_REFERENCIA: number | undefined = 2026;');
+    expect(parcheado.match(/^export const (PLAZO_DE_PROTECCION_AÑOS|AÑO_DE_REFERENCIA): number \| undefined = (70|2026);$/gmu)).toHaveLength(2);
     const r = await construirConCorpus(
       {
         ...BASE,

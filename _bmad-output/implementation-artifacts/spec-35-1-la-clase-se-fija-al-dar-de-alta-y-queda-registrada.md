@@ -36,6 +36,20 @@ deferred:
     location: >-
       tests/unit/clases-de-cita.test.ts
     severity: low
+  - summary: >-
+      Las lecturas en crudo de `añoFallecimiento` en `tools/` (cruce por épocas, auditoría, suelo de tradición, `objetivo`) no se han revisado para un Autor vivo, donde el campo falta y la aritmética daría `NaN`.
+    evidence: |-
+      Revisión 2 de la 35.1 (blind-hunter). Hoy no ocurre: ningún Autor del Corpus es `vivo` y ninguna orden lo crea (`crear` no admite `--vivo`). Lo revisa quien dé de alta el primer Autor vivo (35.1b).
+    location: >-
+      tools/
+    severity: low
+  - summary: >-
+      `registrarClases` relee el registro antes del `appendFile`, no después: el «appendFile y relectura» del criterio se cumple por la lectura y el análisis previos, sin comprobar que la última entrada escrita es la nueva, como sí hace `publicaciones-de-canal.yml`.
+    evidence: |-
+      Revisión 2 de la 35.1 (ac-auditor, gap 6). tools/lib/corpus.ts, `registrarClases`. Un añadido cortado se ve en el build siguiente (Cita sin entrada, con la siembra en el mensaje).
+    location: >-
+      tools/lib/corpus.ts
+    severity: low
 ---
 
 <intent-contract>
@@ -175,6 +189,25 @@ deferred:
 - addressed_findings:
   - none
 
+### 2026-11-08 — Review pass (revisión 2, cinco capas externas)
+- intent_gap: 0
+- bad_spec: 0
+- patch: 11: (high 0, medium 2, low 9)
+- defer: 2: (high 0, medium 0, low 2)
+- reject: 30: (high 0, medium 1, low 29)
+- addressed_findings:
+  - `[medium]` `[patch]` La salida de `tools/alta.ts` con lo publicado sin anotar no la ejecutaba ninguna prueba: `alta.test.ts` corre la orden con el registro de solo lectura y exige salida 1, la siembra en el parte, la Cita escrita y el registro intacto.
+  - `[medium]` `[patch]` `clase-build.test.ts` parcheaba el texto exacto `= undefined;` de `PLAZO_DE_PROTECCION_AÑOS` y `AÑO_DE_REFERENCIA`, así que fijaba su valor: ahora sustituye el que tengan.
+  - `[low]` `[patch]` `añosDeAutor` ignoraba `inicial` para un Autor vivo: «N. 1950» en mayúscula (ficha, fila del Directorio, Tarjeta Social, meta) y «n. 1950» dentro de la frase, como «Fallecido»/«fallecido» (`semblanza.test.ts`, `directorio-de-autores.test.ts`, `clase-build.test.ts`, `AGENTS.md`).
+  - `[low]` `[patch]` `CLASES[1]` por posición: `CLASE_DE_SIEMPRE` y `CLASE_ATRIBUIDA` con nombre en `src/lib/clase.ts`, y una prueba de `clase.test.ts` rechaza indexar `CLASES` en el código y en las pruebas de la historia.
+  - `[low]` `[patch]` `editarAutor` no podía registrar la muerte de un Autor vivo (el esquema rechaza `vivo` con el año): con `--fallecimiento` deja de ser `vivo` (`gestion.test.ts`).
+  - `[low]` `[patch]` `reglasDeAutor` contaba `vivo: false` como vivo y añadía «declara a la vez vivo: true»: solo `vivo: true` es vivo (`clase.test.ts`).
+  - `[low]` `[patch]` `tools/clases.ts sembrar --corpus` sin valor decía «Argumento desconocido»: «Falta el valor de «--corpus»» (`clases-de-cita.test.ts`).
+  - `[low]` `[patch]` `AGENTS.md`: la comprobación de «solo añade» mira solo la punta contra su primer padre (varios commits, segundo padre), y cómo comprobarlo contra `origin/main` antes de empujar.
+  - `[low]` `[patch]` `AGENTS.md`: la receta de fusión dice que en `git rebase` `--ours` es la principal, que las entradas de la otra rama vuelven con la jornada de la siembra, y que copiar una entrada `atribuida` es la única excepción a «nadie lo edita a mano».
+  - `[low]` `[patch]` El comentario de `clase-build.test.ts` hablaba de «la página de Cita» sobre una Página de Autor.
+  - `[low]` `[patch]` El «Auto Run Result» se contradecía con el frontmatter y la Revisión 1, y había dos entradas vacías sin explicar: la sección dice ahora qué pasada describe cada parte.
+
 ## Design Notes
 
 **Puerta cerrada en las órdenes.** El contexto de la épica dice «todo se construye con la puerta cerrada… no se publica ninguna atribuida»; por eso, hasta la 35.1b, alta y aprobación derivan y escriben la clase pero dejan la atribuida en revisión. La 35.1b sustituye el motivo por el de sus constantes. Las atribuidas del build solo existen en copias de prueba, y hasta la 35.1b pasan el cotejo como cualquier Cita (el andamio siembra su documento).
@@ -223,7 +256,7 @@ Blocking condition: ninguna
 - Pruebas: `clase.test.ts`, `clases-de-cita.test.ts`, `clase-build.test.ts` (nuevas); `alta.test.ts`, `revision.test.ts`, `semblanza.test.ts`, `directorio-de-autores.test.ts` ampliadas; `fecha-de-cambio.test.ts` lee las claves a través de `.superRefine`; `fecha-de-cambio-build.test.ts` anota la Cita nueva de su siembra; `orden-de-revision.test.ts` da `clase` a su fixture.
 - `AGENTS.md` — sección «La Cita atribuida».
 
-**Revisión.** Las capas externas no traen hallazgos en esta pasada: 0 parches, 0 diferidos, 0 rechazados. `followup_review_recommended: false` (parcheados: 0 high, 0 medium, 0 low; puntuación 0).
+**Revisión (pasada de la construcción, antes de las capas externas).** Sin hallazgos externos en esa pasada: 0 parches. Las dos entradas vacías del registro de triaje («reanudación» y la siguiente) son esa misma pasada, sin capas externas, al reanudarse la ejecución. Las revisiones con capas externas son «Revisión 1» y «Revisión 2», abajo; el estado vigente de `followup_review_recommended` es el del frontmatter, que fija la última.
 
 **Verificación.**
 - `npx vitest run tests/unit/clase.test.ts tests/unit/clases-de-cita.test.ts` — verde (18 + 12).
@@ -262,3 +295,26 @@ Además: La atribuida de un Personaje sin Autor espera a la 35.2; `tools/autor.t
 
 **Riesgos residuales.** Si el disco falla también al anotar tras la interrupción, la orden lo dice y da la siembra, pero lo publicado queda sin anotar hasta correrla. Una Cita a medio reescribir (`reescribirConSlug` que lanza tras escribir el fichero nuevo) no entra en lo anotado: la siembra la recoge.
 
+
+### Revisión 2 (2026-11-08)
+
+**Resumen.** Once parches proporcionados de la segunda revisión con cinco capas externas, sin tocar el contrato: la salida 1 de `tools/alta.ts` con lo publicado sin anotar tiene prueba de la orden; la prueba de build con plazo deja de fijar el valor de las constantes de Héctor; «N. 1950»/«n. 1950» según `inicial`, como «Fallecido»/«fallecido»; las clases tienen constante con nombre (`CLASE_DE_SIEMPRE`, `CLASE_ATRIBUIDA`) y nadie indexa `CLASES`; `editar --fallecimiento` registra la muerte de un Autor vivo; `vivo: false` no da un error ajeno; `--corpus` sin valor lo dice; y `AGENTS.md` nombra los límites de la comprobación de «solo añade» y completa la receta de fusión (rebase, jornadas, la entrada `atribuida`).
+
+**Ficheros.**
+- `src/lib/clase.ts` — `CLASE_DE_SIEMPRE`, `CLASE_ATRIBUIDA`; `CLASES` se compone de ellas.
+- `src/lib/atribucion.ts`, `src/lib/directorios.ts` — «N. 1950» en mayúscula, «n. 1950» en minúscula.
+- `src/lib/admision.ts` — `reglasDeAutor`: solo `vivo: true` es vivo.
+- `tools/lib/gestion.ts` — `editarAutor` quita `vivo` al recibir el año de fallecimiento.
+- `tools/clases.ts` — «Falta el valor de «--corpus»».
+- `tests/unit/alta.test.ts`, `clase.test.ts`, `clases-de-cita.test.ts`, `clase-build.test.ts`, `gestion.test.ts`, `semblanza.test.ts`, `directorio-de-autores.test.ts` — las pruebas de cada parche.
+- `AGENTS.md` — «N. 1950», los límites de «solo añade» y la receta de fusión.
+
+**Revisión.** 11 parches (0 high, 2 medium, 9 low), 2 diferidos (lecturas en crudo de `añoFallecimiento` en `tools/` para un Autor vivo; la relectura tras el añadido), 30 rechazados (exenciones del lector único por fichero, entradas huérfanas o repetidas del registro, `chmod` como root, rendimiento de la lectura del Corpus y de `slugLibre`, contexto del error del build, el corte por texto de la prueba de `fetch-depth`, mensajes de fallos de disco a media pasada, superficies ya cubiertas por `añosDeAutor`, lecturas del intent ya diferidas o resueltas por el contrato). `followup_review_recommended: true`: puntuación 3 × 2 + 9 × 1 = 15 ≥ 5 (es la última ronda del bucle; la recomendación se anota tal cual).
+
+**Verificación.**
+- `npx vitest run` de clase, clases-de-cita, semblanza, directorio-de-autores, gestion, alta y clase-build — verde.
+- `npx astro check` — 0 errores (420 ficheros).
+- `npm test` (`correr.sh`/`esperar.pl`, `npm-test-triage-35.1-2.log`) — FINISHED EXIT=0: 159/159 ficheros, 7.233 pruebas.
+- `dist/` no se reconstruyó: el Corpus real no tiene ningún Autor vivo, así que «N. 1950» no aparece en ninguna página, y las constantes con nombre valen lo mismo que las posiciones.
+
+**Riesgos residuales.** Los de la Revisión 1, más: la comprobación de «solo añade» sigue mirando solo la punta; `AGENTS.md` da la comprobación manual contra `origin/main`.

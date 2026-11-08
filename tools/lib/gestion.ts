@@ -186,6 +186,10 @@ export async function editarAutor(
   const enFichero: Record<string, unknown> = { ...actual };
   delete enFichero.slug;
   delete enFichero.ruta;
+  // Historia 35.1 — el año de fallecimiento de un Autor vivo registra su muerte: deja de ser
+  // `vivo`. Sin esto, la orden no podría escribirlo (el esquema rechaza los dos a la vez) y
+  // solo quedaría editar la ficha a mano.
+  if (cambios.añoFallecimiento !== undefined) delete enFichero.vivo;
 
   // Solo pisa lo que la orden trae con valor: una bandera ausente llega como `undefined`.
   const fusion = {

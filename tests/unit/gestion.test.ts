@@ -129,6 +129,22 @@ describe('Historia 1.7 — Autores', () => {
     const contenido = await readFile(join(rutas.autores, 'seneca.yml'), 'utf8');
     expect(contenido).toContain('Lucio Anneo Séneca');
   });
+
+  it('Historia 35.1 — editar con --fallecimiento registra la muerte de un Autor vivo: deja de ser vivo', async () => {
+    const rutas = await corpusVacio();
+    await writeFile(
+      join(rutas.autores, 'ana-ejemplo.yml'),
+      'nombre: "Ana Ejemplo"\nvivo: true\nañoNacimiento: 1950\nsemblanza: "Escritora."\n',
+      'utf8',
+    );
+    const resultado = await editarAutor(rutas, 'ana-ejemplo', { añoFallecimiento: 2025 });
+
+    expect(resultado.ok, resultado.ok ? '' : resultado.motivos.join('\n')).toBe(true);
+    const ficha = parsearYaml(await readFile(join(rutas.autores, 'ana-ejemplo.yml'), 'utf8'));
+    expect(ficha.añoFallecimiento).toBe(2025);
+    expect(ficha.añoNacimiento).toBe(1950);
+    expect(ficha).not.toHaveProperty('vivo');
+  });
 });
 
 describe('Historia 1.7 — Temas', () => {
