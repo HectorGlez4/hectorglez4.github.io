@@ -184,7 +184,8 @@ describe('Historia 2.9 — el vocabulario es cerrado', () => {
      * para ampliarla es el punto: los cuatro primeros son de la v1 y los dos de
      * compartición los añadió la Historia 10.4, y `vista-de-superficie` la 20.1. La 23.2 trae
      * los cuatro de la v8 —`lectura`, `salida-interna`, `busqueda` y `vista-de-obra`— al
-     * vocabulario, antes de que nadie los envíe.
+     * vocabulario, antes de que nadie los envíe. La 30.5, los dos de citar —`copiado-de-referencia`
+     * y `copiado-de-fragmento`—, retenidos hasta que se despliegue el receptor.
      */
     expect([...EVENTOS_VALIDOS].sort()).toEqual(
       [
@@ -193,6 +194,8 @@ describe('Historia 2.9 — el vocabulario es cerrado', () => {
         'comparticion-de-enlace',
         'comparticion-de-imagen',
         'copiado',
+        'copiado-de-fragmento',
+        'copiado-de-referencia',
         'descarga-de-imagen',
         'lectura',
         'salida-interna',
@@ -2578,6 +2581,37 @@ describe('Historia 23.1 — ningún guion en línea lleva contenido', () => {
       }
     }
     expect(mirados).toBeGreaterThan(SLUGS_DE_CITA.length);
+  }, 240_000);
+});
+
+describe('Historia 30.5 — Copiar pide las acciones de citar, con su nombre del vocabulario', () => {
+  it('el guion de Copiar lleva las dos constantes y pide la del bloque tras una copia buena, fuera del `try`', async () => {
+    const html = await leerMedida(CITA);
+    const [copiar, ...otros] = guionesEnLinea(html).filter((g) => g.includes("'[data-copiar]'"));
+    expect(otros).toEqual([]);
+    // Los nombres viajan como constantes, con los valores de `EVENTOS`, y nunca como literal fuera de ellas.
+    const declaraciones = {
+      EVENTO_REFERENCIA: EVENTOS.copiadoDeReferencia,
+      EVENTO_FRAGMENTO: EVENTOS.copiadoDeFragmento,
+    };
+    for (const [nombre, evento] of Object.entries(declaraciones)) {
+      const declaracion = `const ${nombre} = ${JSON.stringify(evento)};`;
+      expect(copiar, nombre).toContain(declaracion);
+      expect(copiar.split(JSON.stringify(evento)).length - 1, `${evento}, una sola vez`).toBe(1);
+      expect(copiar, evento).not.toContain(`'${evento}'`);
+    }
+    // En el manejador de los bloques: tras el `catch { return; }` del portapapeles, a secas, y
+    // decidido por la identidad del bloque.
+    const bloques = copiar.slice(copiar.indexOf('const citar ='));
+    const rechazo = bloques.indexOf('catch { return; }');
+    const pide = bloques.indexOf("__medir(k.hasAttribute('data-inserta-esta-cita') ? EVENTO_FRAGMENTO : EVENTO_REFERENCIA);");
+    expect(rechazo).toBeGreaterThan(0);
+    expect(pide).toBeGreaterThan(rechazo);
+    expect(bloques.slice(rechazo, pide)).toContain('anunciar(r,');
+    // Copiar la cita sigue pidiendo `copiado`, y nada más pide un evento en la isla.
+    expect([...copiar.matchAll(/__medir\(/g)]).toHaveLength(2);
+    expect(copiar).toContain('__medir(EVENTO_COPIADO);');
+    console.log(`Historia 30.5 — guion en línea de la Página de Cita con Imagen: ${bytesDeGuionEnLinea(html)} de ${MAX_BYTES_DE_GUION} bytes`);
   }, 240_000);
 });
 

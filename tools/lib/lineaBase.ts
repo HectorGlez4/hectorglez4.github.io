@@ -501,7 +501,11 @@ export interface CifrasDeSuperficie {
   vistas?: number;
   lecturas?: number;
   salidas?: number;
-  /** Todas sus acciones, sin mirar `primera` ni destino: todo registro se reparte, también estos. */
+  /**
+   * Todas sus acciones, sin mirar `primera` ni destino: todo registro se reparte, también estos.
+   * Sin las de citar (`ACCIONES_DE_CITAR`, Historia 30.5), que se informan aparte en `citar`: así la
+   * cifra sigue siendo comparable con la de antes de que existieran.
+   */
   acciones?: number;
   continuacion: Tasa;
   porZona: { zona: string; continuacion: Tasa }[];
@@ -554,9 +558,33 @@ export interface CifrasDeObra {
   vistasDeObra?: number;
   lecturas?: number;
   salidas?: number;
+  /** Como en `CifrasDeSuperficie`: sin las de citar. */
   acciones?: number;
   continuacion: Tasa;
 }
+
+/**
+ * Las acciones de citar (Historia 30.5): copiar una Referencia de «Cómo citar» (FR-58) y copiar el
+ * Fragmento de «Inserta esta cita» (FR-57), en el tramo vigente de la lectura. Se informan aparte:
+ * ninguna tasa de SM-5, SM-7, SM-12, SM-C3 ni SM-C5 las cuenta, ni el `acciones` de una superficie,
+ * hasta que su línea base diga cómo se leen (pregunta 15 del PRD). Lo de fuera del censo va en
+ * `fueraDelCenso`, como todo evento.
+ */
+export type CifrasDeCitar =
+  | {
+      porEvento: {
+        evento: string;
+        /** Lo de las superficies del censo: la suma de `porSuperficie`. */
+        total: number;
+        /** Por superficie declarada, solo las que tienen alguno. */
+        porSuperficie: { superficie: string; n: number }[];
+      }[];
+      /** La tesis de la v9, sin juzgarla: en la Página de Cita, las copias de la Referencia… */
+      referenciasEnCita: number;
+      /** …frente a los copiados de la Cita (`copiado`, todos los registros, sin mirar `primera`). */
+      copiadosEnCita: number;
+    }
+  | { faltan: ConsultaDeLaLectura[] };
 
 /** SM-8 en un tramo o en una jornada de llegada: vistas por red y evento. */
 export interface TramoDeSm8 {
@@ -689,6 +717,8 @@ export interface LecturaDeMedicion {
   cita?: TasasDeLaPaginaDeCita;
   portada?: TasasDeAccion;
   obraTasas?: TasasDeAccion;
+  /** Historia 30.5 — las acciones de citar, aparte. */
+  citar: CifrasDeCitar;
   sm12: { destinos: DestinoDeSm12[]; imagenCuadrada?: number } | { faltan: ConsultaDeLaLectura[] };
   busquedas: Busquedas;
   minimo?: number;
@@ -707,6 +737,12 @@ const THREADS: Red = 'threads';
 const FACEBOOK: Red = 'facebook';
 const ACCIONES_DE_SM5: readonly string[] = [EVENTOS.copiado, EVENTOS.descargaDeImagen];
 const COMPARTICIONES: readonly string[] = [EVENTOS.comparticionDeEnlace, EVENTOS.comparticionDeImagen];
+/**
+ * Historia 30.5 — las acciones de citar: se leen en la consulta `acciones` y se informan aparte, fuera
+ * del `acciones` de superficie y de Obra y de toda tasa (pregunta 15 del PRD).
+ */
+export const ACCIONES_DE_CITAR: readonly string[] = [EVENTOS.copiadoDeReferencia, EVENTOS.copiadoDeFragmento];
+const noEsDeCitar = (r: Recuento) => !ACCIONES_DE_CITAR.includes(r.evento);
 
 const sumar = (recuentos: readonly Recuento[] | undefined, filtro: (r: Recuento) => boolean): number | undefined =>
   recuentos === undefined ? undefined : recuentos.reduce((total, r) => (filtro(r) ? total + r.n : total), 0);
@@ -983,7 +1019,7 @@ export function componerLecturaDeMedicion(
     const filtro = conJornada(enLectura, deSuperficie(superficie.nombre));
     const lecturas = sumar(vistasYLecturas, (r) => esLectura(r) && filtro(r));
     const deSalidas = sumar(salidas, filtro);
-    const deAcciones = sumar(acciones, filtro);
+    const deAcciones = sumar(acciones, (r) => noEsDeCitar(r) && filtro(r));
     return {
       nombre: superficie.nombre,
       unidad: superficieDeLineaBase(superficie),
@@ -1058,7 +1094,7 @@ export function componerLecturaDeMedicion(
       const filtro = conJornada(enLectura, (r) => esDeObra(r) && marcaDeLaJornada(r) === marca);
       const lecturas = sumar(vistasYLecturas, (r) => esLectura(r) && filtro(r));
       const deSalidas = sumar(salidas, filtro);
-      const deAcciones = sumar(acciones, filtro);
+      const deAcciones = sumar(acciones, (r) => noEsDeCitar(r) && filtro(r));
       return {
         marca,
         vistasDeObra: sumar(vistasYLecturas, (r) => r.evento === EVENTOS.vistaDeObra && filtro(r)),
@@ -1111,6 +1147,33 @@ export function componerLecturaDeMedicion(
   }
   const portada = portadaDeclarada ? tasasDeAccion(deSuperficie(portadaDeclarada.nombre), enLectura) : undefined;
   const obraTasas = superficies.some((s) => s.vistaConMarca !== undefined) ? tasasDeAccion(esDeObra, enLectura) : undefined;
+
+  // Historia 30.5 — las acciones de citar, aparte, en el tramo vigente de la lectura.
+  let citar: CifrasDeCitar;
+  if (acciones === undefined) {
+    citar = { faltan: ['acciones'] };
+  } else {
+    const porEvento = ACCIONES_DE_CITAR.map((evento) => {
+      const porNombre = new Map<string, number>();
+      for (const r of acciones) {
+        if (r.evento !== evento || !enLectura(r.jornada)) continue;
+        const superficie = superficieDe(r);
+        if (superficie === undefined) continue;
+        porNombre.set(superficie.nombre, (porNombre.get(superficie.nombre) ?? 0) + r.n);
+      }
+      const porSuperficie = ordenarPorClave(porNombre)
+        .filter(([, n]) => n > 0)
+        .map(([superficie, n]) => ({ superficie, n }));
+      return { evento, total: porSuperficie.reduce((total, { n }) => total + n, 0), porSuperficie };
+    });
+    const enLasCitas = (evento: string) =>
+      sumar(acciones, (r) => r.evento === evento && enLectura(r.jornada) && deLasCitas(r)) ?? 0;
+    citar = {
+      porEvento,
+      referenciasEnCita: enLasCitas(EVENTOS.copiadoDeReferencia),
+      copiadosEnCita: enLasCitas(EVENTOS.copiado),
+    };
+  }
 
   // SM-12: lecturas con `via` = D entre las comparticiones con destino D, de toda ruta.
   let sm12: LecturaDeMedicion['sm12'];
@@ -1541,6 +1604,7 @@ export function componerLecturaDeMedicion(
     ...(cita === undefined ? {} : { cita }),
     ...(portada === undefined ? {} : { portada }),
     ...(obraTasas === undefined ? {} : { obraTasas }),
+    citar,
     sm12,
     busquedas: busquedasLeidas,
     ...(minimo === undefined ? {} : { minimo }),
@@ -1826,6 +1890,25 @@ export function lineasDeLecturaDeMedicion(lectura: LecturaDeMedicion): string[] 
     );
   }
   lineas.push('  Las metas de SM-3 a SM-7 están en suspenso hasta su línea base: ninguna cifra de aquí se compara con ellas.');
+
+  // Historia 30.5 — las acciones de citar, aparte.
+  lineas.push('', `Citar — copiar una Referencia y copiar el Fragmento, ${textoDeTramo(vigente, lectura.hoy)} de la lectura, aparte`);
+  if ('faltan' in lectura.citar) {
+    lineas.push(`  Sin leer (${nombresDe(lectura.citar.faltan)}).`);
+  } else {
+    for (const { evento, total, porSuperficie } of lectura.citar.porEvento) {
+      lineas.push(
+        `  ${evento}: ${entero(total)}` +
+          (porSuperficie.length === 0 ? '.' : ` (${porSuperficie.map(({ superficie, n }) => `${superficie} ${entero(n)}`).join(', ')}).`),
+      );
+    }
+    lineas.push(
+      `  En la Página de Cita, copias de la Referencia ${entero(lectura.citar.referenciasEnCita)} frente a copiados de la Cita ` +
+        `${entero(lectura.citar.copiadosEnCita)} (todos los registros de copiado): la tesis de la v9, sin juzgarla.`,
+      '  No tienen meta: no cuentan en SM-5, SM-7, SM-C3 ni en las acciones de las superficies. Contarlas en SM-5 o en SM-C3 ' +
+        'es la pregunta 15 del PRD, y se decide con su línea base declarando el corte. Lo de fuera del censo va en su bloque.',
+    );
+  }
 
   // SM-12.
   lineas.push('', 'SM-12 — lecturas con via entre las comparticiones de su destino, de toda ruta, sin mirar primera');

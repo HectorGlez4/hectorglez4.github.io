@@ -680,14 +680,100 @@ describe('Historia 23.10 — la Página de Cita, la portada y la Obra', () => {
 
   it('ninguna cifra se compara con las metas en suspenso de SM-3 a SM-7', () => {
     const lineas = lineasDeLecturaDeMedicion(l);
-    // La única línea que nombra las metas es la que dice que están en suspenso.
+    // Las únicas líneas que nombran las metas son la que dice que están en suspenso y, desde la
+    // 30.5, la que dice que las acciones de citar no tienen ninguna.
     expect(lineas.filter((linea) => /meta/i.test(linea))).toEqual([
       '  Las metas de SM-3 a SM-7 están en suspenso hasta su línea base: ninguna cifra de aquí se compara con ellas.',
+      LINEA_SIN_META,
     ]);
     // Y ninguna de sus cifras —65 %, 1,8, 3 %, 15 % y 2 %— aparece, con o sin el decimal del informe.
     const metas = /(?<![\d,])(?:65|15|3|2)(?:,0)? %|(?<![\d,])1,8(?![\d])/;
     expect(metas.test('SM-3: 65,0 %'), 'la expresión detecta una meta con el decimal').toBe(true);
     expect(texto(l)).not.toMatch(metas);
+  });
+});
+
+const LINEA_SIN_META =
+  '  No tienen meta: no cuentan en SM-5, SM-7, SM-C3 ni en las acciones de las superficies. Contarlas en SM-5 o en SM-C3 ' +
+  'es la pregunta 15 del PRD, y se decide con su línea base declarando el corte. Lo de fuera del censo va en su bloque.';
+
+describe('Historia 30.5 — copiar una Referencia y copiar el Fragmento, aparte', () => {
+  const base = {
+    vistasYLecturas: [lectura(D1, '/cita/una/', 10), lectura(D1, '/', 4), lectura(D1, '/obra/a/b/', 2)],
+    salidas: [salida(D1, '/cita/una/', 'atribucion', 3)],
+    acciones: [
+      accion(D1, '/cita/una/', EVENTOS.copiado, 2),
+      accion(D1, '/cita/una/', EVENTOS.copiado, 3, { primera: 'no' }),
+      accion(D1, '/cita/una/', EVENTOS.descargaDeImagen, 1),
+      accion(D1, '/cita/una/', EVENTOS.comparticionDeEnlace, 1, { destino: 'whatsapp' }),
+      accion(D1, '/', EVENTOS.copiado, 1),
+      accion(D1, '/obra/a/b/', EVENTOS.copiado, 1),
+    ],
+  };
+  // Lo mismo, con las acciones de citar: en dos Citas, una retirada y una jornada fuera del tramo.
+  const deCitar = [
+    accion(D1, '/cita/una/', EVENTOS.copiadoDeReferencia, 4, { primera: null }),
+    accion(D2, '/cita/dos/', EVENTOS.copiadoDeReferencia, 2, { primera: null }),
+    accion(D1, '/cita/una/', EVENTOS.copiadoDeFragmento, 1, { primera: null }),
+    accion(D1, '/cita/retirada/', EVENTOS.copiadoDeReferencia, 5, { primera: null }), // fuera del censo
+    accion('2026-10-30', '/cita/una/', EVENTOS.copiadoDeReferencia, 7, { primera: null }), // antes del tramo
+  ];
+  const sin = leer(base);
+  const con = leer({ ...base, acciones: [...base.acciones, ...deCitar] });
+
+  it('cada evento, por superficie declarada del censo, en el tramo vigente de la lectura', () => {
+    expect(con.citar).toEqual({
+      porEvento: [
+        { evento: EVENTOS.copiadoDeReferencia, total: 6, porSuperficie: [{ superficie: 'la Página de Cita', n: 6 }] },
+        { evento: EVENTOS.copiadoDeFragmento, total: 1, porSuperficie: [{ superficie: 'la Página de Cita', n: 1 }] },
+      ],
+      referenciasEnCita: 6,
+      copiadosEnCita: 5,
+    });
+    // Lo de fuera del censo, en su sitio de siempre.
+    expect(con.fueraDelCenso).toEqual([{ clase: YA_NO_SE_PUBLICA, porEvento: [{ evento: EVENTOS.copiadoDeReferencia, n: 5 }] }]);
+  });
+
+  it('ninguna tasa ni el acciones de superficie o de Obra cambian por ellas', () => {
+    expect(con.cita).toEqual(sin.cita);
+    expect(con.portada).toEqual(sin.portada);
+    expect(con.obraTasas).toEqual(sin.obraTasas);
+    expect(con.sm12).toEqual(sin.sm12);
+    expect(con.superficies).toEqual(sin.superficies);
+    expect(con.obra).toEqual(sin.obra);
+    expect(superficie(con, 'la Página de Cita').acciones).toBe(7);
+  });
+
+  it('sin ninguna, la lectura las da a cero, que es un cero leído', () => {
+    expect(sin.citar).toEqual({
+      porEvento: [
+        { evento: EVENTOS.copiadoDeReferencia, total: 0, porSuperficie: [] },
+        { evento: EVENTOS.copiadoDeFragmento, total: 0, porSuperficie: [] },
+      ],
+      referenciasEnCita: 0,
+      copiadosEnCita: 5,
+    });
+  });
+
+  it('el informe: un renglón por evento, la tesis sin juzgarla y la pregunta 15', () => {
+    const informe = texto(con);
+    expect(informe).toContain('Citar — copiar una Referencia y copiar el Fragmento, ');
+    expect(informe).toContain(`  ${EVENTOS.copiadoDeReferencia}: 6 (la Página de Cita 6).`);
+    expect(informe).toContain(`  ${EVENTOS.copiadoDeFragmento}: 1 (la Página de Cita 1).`);
+    expect(informe).toContain(
+      '  En la Página de Cita, copias de la Referencia 6 frente a copiados de la Cita 5 (todos los registros de copiado): ' +
+        'la tesis de la v9, sin juzgarla.',
+    );
+    expect(lineasDeLecturaDeMedicion(con)).toContain(LINEA_SIN_META);
+  });
+
+  it('con las acciones sin leer, «Sin leer (las acciones)», nunca cero', () => {
+    const l = leer({ ...base, acciones: 'D1_ERROR' });
+    expect(l.citar).toEqual({ faltan: ['acciones'] });
+    const lineas = lineasDeLecturaDeMedicion(l);
+    const desde = lineas.findIndex((linea) => linea.startsWith('Citar — '));
+    expect(lineas[desde + 1]).toBe('  Sin leer (las acciones).');
+    expect(lineas).not.toContain(LINEA_SIN_META);
   });
 });
 

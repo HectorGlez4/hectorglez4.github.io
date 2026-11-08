@@ -1,5 +1,6 @@
 import { expect, test, type Page } from '@playwright/test';
 import { citaConTarjetaCompleta, citaSinObra, textoDe } from './ayuda/corpus.ts';
+import { emitidos, espiarMedicion } from './ayuda/espia.ts';
 
 /**
  * Historia 30.3 — «Cómo citar» en la Página de Cita, en el navegador (FR-58, UX-DR119).
@@ -173,6 +174,54 @@ test.describe('Historia 30.3 — «Cómo citar», con JavaScript', () => {
       return n.getBoundingClientRect().top - antes.bottom;
     });
     expect(Math.round(distancia)).toBe(32);
+  });
+});
+
+/** Lo que el espía vio de las acciones de copiar, en orden. */
+const deCopiar = async (page: Page) =>
+  (await emitidos(page)).filter((e) => ['copiado', 'copiado-de-referencia', 'copiado-de-fragmento'].includes(e.evento))
+    // Sin datos ni destino: lo que la isla no pasa llega como `undefined`, y aquí se lee como nulo.
+    .map((e) => ({ evento: e.evento, datos: e.datos ?? null, destino: e.destino ?? null }));
+
+test.describe('Historia 30.5 — copiar una Referencia pide su evento', () => {
+  test.beforeEach(async ({ context }) => {
+    await context.grantPermissions(['clipboard-read', 'clipboard-write']);
+  });
+
+  test('cada estilo, una vez por pulsación, «copiado-de-referencia» sin datos ni destino', async ({ page }) => {
+    await espiarMedicion(page);
+    await page.goto(`/cita/${COMPLETA!.slug}/`);
+    await resumen(page).click();
+    for (const rotulo of ['APA', 'MLA', 'Chicago', 'APA']) {
+      await page.getByRole('button', { name: `Copiar ${rotulo}`, exact: true }).click();
+      await expect(region(page)).toHaveText('Copiado.');
+    }
+    expect(await deCopiar(page)).toEqual(
+      Array.from({ length: 4 }, () => ({ evento: 'copiado-de-referencia', datos: null, destino: null })),
+    );
+  });
+
+  test('con el portapapeles denegado no pide nada', async ({ page }) => {
+    await espiarMedicion(page);
+    await page.addInitScript(() => {
+      Object.defineProperty(navigator, 'clipboard', {
+        value: { writeText: () => Promise.reject(new Error('denegado')), readText: () => Promise.resolve('') },
+        configurable: true,
+      });
+    });
+    await page.goto(`/cita/${COMPLETA!.slug}/`);
+    await resumen(page).click();
+    await page.getByRole('button', { name: 'Copiar MLA', exact: true }).click();
+    await page.waitForTimeout(300);
+    expect(await deCopiar(page)).toEqual([]);
+  });
+
+  test('«Copiar la cita» sigue pidiendo «copiado», y ninguna de citar', async ({ page }) => {
+    await espiarMedicion(page);
+    await page.goto(`/cita/${COMPLETA!.slug}/`);
+    await page.getByRole('button', { name: 'Copiar la cita', exact: true }).click();
+    await expect(page.locator('[data-copiar] [data-etiqueta]')).toHaveText('Copiado.');
+    expect((await deCopiar(page)).map((e) => e.evento)).toEqual(['copiado']);
   });
 });
 
