@@ -1154,6 +1154,7 @@ describe('31.1 — posicionesDeCitas: el pasaje de cada aparición, con el tope 
       texto: 'Un párrafo entero en su línea, con la frase de dentro y algo más.',
       inicio: 'Un párrafo entero en su línea, con '.length,
       fin: 'Un párrafo entero en su línea, con la frase de dentro'.length,
+      parrafos: [[[0, 'Un párrafo entero en su línea, con la frase de dentro y algo más.'.length]]],
     });
     // `verso-espaciado` no tiene párrafo, y la línea que es la Cita no dice más.
     expect(Object.keys(dentro[1]).sort()).toEqual(['documento', 'posicion']);
@@ -1217,7 +1218,13 @@ describe('31.1 — leerPosicionesDelCorpus: el pasaje leído de disco, con la fo
         {
           documento: 'ws--la-obra',
           posicion: 'Verso primero, '.length,
-          pasaje: { texto: estrofa, inicio: 'Verso primero,\n'.length, fin: 'Verso primero,\nverso segundo,\nverso tercero'.length },
+          pasaje: {
+            texto: estrofa,
+            inicio: 'Verso primero,\n'.length,
+            fin: 'Verso primero,\nverso segundo,\nverso tercero'.length,
+            // Historia 31.2 — un párrafo, un verso por línea.
+            parrafos: [[[0, 14], [15, 29], [30, 44], [45, 58]]],
+          },
         },
       ]);
       const sin = await leerPosicionesDelCorpus(corpus, { tope: undefined });
@@ -1230,7 +1237,7 @@ describe('31.1 — leerPosicionesDelCorpus: el pasaje leído de disco, con la fo
 
 describe('31.1 — pasajesDeCitas: el pasaje de la aparición que cuenta', () => {
   const base = 'wikisource-es--obra';
-  const pasaje = (texto: string): PasajeDeAparicion => ({ texto, inicio: 0, fin: 1 });
+  const pasaje = (texto: string): PasajeDeAparicion => ({ texto, inicio: 0, fin: 1, parrafos: [[[0, texto.length]]] });
   const conPasaje = (documento: string, posicion: number, texto: string): AparicionDeCita => ({
     documento,
     posicion,

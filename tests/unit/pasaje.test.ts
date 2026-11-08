@@ -44,8 +44,37 @@ function exigeElTramo(resultado: ReturnType<typeof pasajeDe>, textoDeCita: strin
   const { texto, inicio, fin } = resultado.pasaje;
   expect(colapsarEspacios(texto.slice(inicio, fin))).toBe(colapsarEspacios(textoDeCita));
   expect(texto).toBe(texto.trim());
+  exigeLosParrafos(resultado.pasaje);
   return resultado.pasaje;
 }
+
+/**
+ * Historia 31.2 — el invariante de los párrafos: tramos no vacíos dentro de `texto`, crecientes y
+ * sin solaparse; lo que queda fuera es solo blanco (las líneas en blanco entre bloques), así que
+ * su unión contiene el tramo de la Cita salvo ese blanco y, colapsados, dicen todo `texto`.
+ */
+function exigeLosParrafos(pasaje: { texto: string; inicio: number; fin: number; parrafos: readonly (readonly (readonly [number, number])[])[] }) {
+  const { texto, parrafos } = pasaje;
+  expect(parrafos.length).toBeGreaterThan(0);
+  let anterior = 0;
+  for (const lineas of parrafos) {
+    expect(lineas.length).toBeGreaterThan(0);
+    for (const [desde, hasta] of lineas) {
+      expect(desde).toBeGreaterThanOrEqual(anterior);
+      expect(hasta).toBeGreaterThan(desde);
+      expect(hasta).toBeLessThanOrEqual(texto.length);
+      expect(texto.slice(anterior, desde).trim()).toBe('');
+      anterior = hasta;
+    }
+  }
+  expect(texto.slice(anterior).trim()).toBe('');
+  const pintado = parrafos.flatMap((lineas) => lineas.map(([d, h]) => texto.slice(d, h))).join(' ');
+  expect(colapsarEspacios(pintado)).toBe(colapsarEspacios(texto));
+}
+
+/** Los párrafos como textos: cada uno, la lista de sus líneas. */
+const textosDe = (pasaje: { texto: string; parrafos: readonly (readonly (readonly [number, number])[])[] }) =>
+  pasaje.parrafos.map((lineas) => lineas.map(([d, h]) => pasaje.texto.slice(d, h)));
 
 const ESTROFAS = [
   'En el principio era el verso,',
@@ -73,6 +102,8 @@ describe('31.1 — pasajeDeAparicion: el trozo por forma', () => {
     expect(pasaje.texto).toBe(ESTROFAS.split('\n\n')[0]);
     expect(pasaje.texto).toContain('\n');
     expect(pasaje.texto.slice(pasaje.inicio, pasaje.fin)).toBe('y el verso era una casa,\ny en la casa vivía el viento');
+    // 31.2 — un párrafo, un verso por línea.
+    expect(textosDe(pasaje)).toEqual([ESTROFAS.split('\n\n')[0].split('\n')]);
   });
 
   it('verso, Cita que cruza dos estrofas: las dos y la línea en blanco entre ellas', () => {
@@ -80,6 +111,8 @@ describe('31.1 — pasajeDeAparicion: el trozo por forma', () => {
     const pasaje = exigeElTramo(pasajeDe(verso, cita), cita);
     const [primera, segunda] = ESTROFAS.split('\n\n');
     expect(pasaje.texto).toBe(`${primera}\n\n${segunda}`);
+    // 31.2 — dos párrafos, sin la línea en blanco.
+    expect(textosDe(pasaje)).toEqual([primera.split('\n'), segunda.split('\n')]);
   });
 
   it('prosa-ajustada, Cita que cruza dos bloques: los dos, saltos interiores tal cual', () => {
@@ -96,6 +129,8 @@ describe('31.1 — pasajeDeAparicion: el trozo por forma', () => {
     const cita = 'donde no cabe la palabra siguiente. Segundo párrafo, también ajustado';
     const pasaje = exigeElTramo(pasajeDe(doc, cita), cita);
     expect(pasaje.texto).toBe(cuerpo.split('\n\n').slice(0, 2).join('\n\n'));
+    // 31.2 — un párrafo por bloque, de una sola línea con sus saltos interiores dentro.
+    expect(textosDe(pasaje)).toEqual(cuerpo.split('\n\n').slice(0, 2).map((bloque) => [bloque]));
   });
 
   it('prosa-por-lineas: la línea', () => {
@@ -108,6 +143,7 @@ describe('31.1 — pasajeDeAparicion: el trozo por forma', () => {
     const pasaje = exigeElTramo(pasajeDe(doc, cita), cita);
     expect(pasaje.texto).toBe(cuerpo.split('\n')[0]);
     expect(pasaje.inicio).toBe(cuerpo.split('\n')[0].indexOf(cita));
+    expect(textosDe(pasaje)).toEqual([[cuerpo.split('\n')[0]]]);
   });
 
   it('prosa-por-lineas con líneas en blanco entre párrafos: la línea, sin la vecina', () => {
@@ -171,6 +207,8 @@ describe('31.1 — pasajeDeAparicion: el trozo por forma', () => {
     const cita = 'con la frase que se busca partida entre dos líneas';
     const pasaje = exigeElTramo(pasajeDe(doc, cita), cita);
     expect(pasaje.texto).toBe(cuerpo.split('\n\n')[1]);
+    expect(textosDe(pasaje)).toEqual([[cuerpo.split('\n\n')[1]]]);
+    expect(pasaje.parrafos[0][0]).toEqual([0, pasaje.texto.length]);
   });
 
   it('prosa-por-lineas, Cita que cruza dos líneas: las dos, como dos bloques seguidos', () => {
@@ -184,6 +222,8 @@ describe('31.1 — pasajeDeAparicion: el trozo por forma', () => {
     const cita = 'el principio de la Cita que sigue en la línea de después';
     const pasaje = exigeElTramo(pasajeDe(doc, cita), cita);
     expect(pasaje.texto).toBe(cuerpo.split('\n').slice(1, 3).join('\n'));
+    // 31.2 — cada línea, un párrafo de una línea.
+    expect(textosDe(pasaje)).toEqual(cuerpo.split('\n').slice(1, 3).map((linea) => [linea]));
   });
 
   it('en los bordes del documento: primera y última línea, y blancos alrededor', () => {
@@ -220,6 +260,7 @@ describe('31.1 — pasajeDeAparicion: el trozo por forma', () => {
     );
     expect(unico.texto).toBe(solo.trim());
     expect(unico.inicio).toBe(0);
+    expect(textosDe(unico)).toEqual([solo.trim().split('\n')]);
   });
 
   it('con finales de línea CRLF: la línea con solo `\\r` separa bloques y el `\\r` del borde se quita', () => {
@@ -238,6 +279,8 @@ describe('31.1 — pasajeDeAparicion: el trozo por forma', () => {
     );
     // Literal: el `\r` interior se queda tal cual; el del borde es blanco y se quita.
     expect(pasaje.texto).toBe('La estrofa con la frase buscada,\r\ny su segundo verso.');
+    // 31.2 — el `\r` del final de la línea queda en su tramo, literal; la línea es una.
+    expect(textosDe(pasaje)).toEqual([['La estrofa con la frase buscada,\r', 'y su segundo verso.']]);
   });
 
   it('dos Citas del mismo párrafo: el mismo texto, cada una con su inicio y su fin', () => {
@@ -245,6 +288,7 @@ describe('31.1 — pasajeDeAparicion: el trozo por forma', () => {
     const otra = exigeElTramo(pasajeDe(verso, 'a vivir entre los árboles.'), 'a vivir entre los árboles.');
     expect(una.texto).toBe(otra.texto);
     expect([una.inicio, una.fin]).not.toEqual([otra.inicio, otra.fin]);
+    expect(una.parrafos).toEqual(otra.parrafos);
   });
 
   it('invariante con los saltos de verso de la 29.1 en el texto de la Cita', () => {

@@ -35,6 +35,8 @@ export type MotivoSinPasaje = 'forma-sin-parrafo' | 'sin-tope' | 'no-dice-mas' |
 const FORMAS_POR_BLOQUES: readonly FormaDeLineas[] = [FORMAS_DE_LINEAS[0], FORMAS_DE_LINEAS[3]];
 /** La forma cuyo trozo es la línea. */
 const FORMA_POR_LINEAS: FormaDeLineas = FORMAS_DE_LINEAS[2];
+/** La forma cuyo bloque es un solo párrafo de una línea, con sus saltos interiores literales. */
+const FORMA_AJUSTADA: FormaDeLineas = FORMAS_DE_LINEAS[3];
 
 const BLANCO = /\s/u;
 
@@ -137,5 +139,49 @@ export function pasajeDeAparicion(opciones: {
 
   const decision = ofrecePasaje({ trozo: texto, textoDeCita, tope });
   if (!decision.ofrece) return { motivo: decision.motivo };
-  return { pasaje: { texto, inicio: tramo.inicio - a, fin: tramo.fin - a } };
+  const parrafos = parrafosDelTrozo({ crudo, lineas, primera, ultima, a, b, porBloques, ajustada: forma === FORMA_AJUSTADA });
+  return { pasaje: { texto, inicio: tramo.inicio - a, fin: tramo.fin - a, parrafos } };
+}
+
+/**
+ * Cómo se pinta el trozo — Historia 31.2, AD-29: los párrafos y, dentro, las líneas, como
+ * tramos `[desde, hasta)` UTF-16 sobre `texto`. Es aquí, y solo aquí, donde un salto del
+ * documento se interpreta; quien pinta solo corta `texto` por estos tramos.
+ *   · `verso`: cada bloque entre líneas en blanco es un párrafo, y cada línea suya, una línea;
+ *   · `prosa-ajustada`: cada bloque es un párrafo de una sola línea, con sus `\n` interiores
+ *     dentro del tramo, literales;
+ *   · `prosa-por-lineas`: cada línea es un párrafo de una línea.
+ * Las líneas en blanco no entran en ningún tramo: separan párrafos.
+ */
+function parrafosDelTrozo(opciones: {
+  crudo: string;
+  lineas: readonly { inicio: number; fin: number }[];
+  primera: number;
+  ultima: number;
+  a: number;
+  b: number;
+  porBloques: boolean;
+  ajustada: boolean;
+}): [number, number][][] {
+  const { crudo, lineas, primera, ultima, a, b, porBloques, ajustada } = opciones;
+  const parrafos: [number, number][][] = [];
+  let actual: [number, number][] | undefined;
+  for (let n = primera; n <= ultima; n += 1) {
+    const desde = Math.max(lineas[n].inicio, a);
+    const hasta = Math.min(lineas[n].fin, b);
+    if (hasta <= desde || enBlanco(crudo, desde, hasta)) {
+      actual = undefined;
+      continue;
+    }
+    const tramo: [number, number] = [desde - a, hasta - a];
+    if (!porBloques || actual === undefined) {
+      actual = [tramo];
+      parrafos.push(actual);
+    } else if (ajustada) {
+      actual[0] = [actual[0][0], tramo[1]];
+    } else {
+      actual.push(tramo);
+    }
+  }
+  return parrafos;
 }

@@ -912,8 +912,8 @@ ninguna línea. Dónde cae cada Cita lo entrega la colección `posiciones` de `s
 cuyo cargador solo cablea `tools/lib/posiciones.ts`: los mismos lectores que el cotejo, el mismo
 casado (`documentosDeCita`) y **el mismo localizador** (`localizar` de `tools/lib/cotejo.ts`, sobre
 formas ya colapsadas, que `apareceEnDocumento` también usa). Da, por el `slug` del frontmatter,
-`{documento, posicion}` de cada documento en que aparece el texto, sin texto y sin elegir; nada
-se escribe en `corpus/`. **Solo `ordenDelLibro` de `src/lib/obras.ts` ordena**, con las
+`{documento, posicion}` de cada documento en que aparece el texto —y, desde la 31.1, su pasaje
+cuando lo hay (abajo, «Lee el pasaje»)—, sin elegir; nada se escribe en `corpus/`. **Solo `ordenDelLibro` de `src/lib/obras.ts` ordena**, con las
 posiciones por parámetro: primero la Fuente que más Citas sitúa, luego el documento —en el orden
 del índice de la Fuente si está capturado (24.9, abajo); si no, en orden natural (`compararDocumentos`: trozos por `-`, arábigos y romanos canónicos por su valor, la
 palabra antes que el número —«proemio» antes que «i»— y el nombre corto antes que sus páginas),
@@ -922,7 +922,8 @@ La página lo toma de `citasDeLasObras` de `src/lib/publicado.ts`. Ningún fiche
 importa de `tools/lib/`, salvo los cargadores de `content.config.ts`. **La Página de Obra depende
 así también de `corpus/fuentes/`**, y desde la 24.8 la relación lo sabe: recuperar o retirar un
 documento —que puede reordenar una Obra y pasar Citas de su página 1 a la `/2/`— mueve el
-`lastmod` de esa Obra y la avisa, y a ninguna otra superficie.
+`lastmod` de esa Obra y la avisa, y desde la 31.2 también los de sus Páginas de Cita, que sacan de
+esos documentos su pasaje (abajo, «Lee el pasaje»).
 
 **El orden entre los documentos lo declara la Fuente (Historia 24.9).** Una Obra paginada cuyas
 páginas se nombran por título (*Novelas ejemplares*: «la-gitanilla», «el-coloquio-de-los-perros»)
@@ -979,9 +980,12 @@ analizar cuenta como cambio de todo; un campo ausente es `undefined`; el orden d
   de la 26.1— se clasifica en el mismo commit que lo añade**.
 - **Página de Cita** = su fichero, su Autor (nombre y años, y desde la 30.3 el nombre derivado
   de «Cómo citar», `NOMBRE_EN_REFERENCIA`, de `nombre`, `ordenAlfabetico` y `ordenRevisado`), sus
-  Temas (nombre) y su ficha de Obra (título). Nunca Citas hermanas: la Tarjeta de Obra, «Siguiente», «De la misma obra», «Más
+  Temas (nombre), su ficha de Obra (título y, desde la 31.2, `formas`) y, desde la 31.2, **los
+  documentos de su Obra** —la unión de `documentosDeCita` de sus Citas vivas, con su índice de
+  subpáginas—, de los que sale su pasaje; una Cita sin Obra, solo los suyos. Nunca los ficheros de
+  Citas hermanas: la Tarjeta de Obra, «Siguiente», «De la misma obra», «Más
   de», sus recuentos y el año del `isPartOf` son navegación (excepción de Héctor, FR-47). Una
-  Cita nueva no refecha ninguna otra Página de Cita, y un commit que solo toca `aptaParaPortada`
+  Cita nueva no refecha ninguna otra Página de Cita (recuperar una página nueva de su Obra sí), y un commit que solo toca `aptaParaPortada`
   no fecha nada y solo avisa la portada.
 - **Autor, Tema y Colección** = su fichero, sus Citas, los Autores de esas Citas y **las fichas
   de Obra de esas Citas** (el título de la línea de Obra, 24.3). La semblanza y la biografía solo
@@ -1130,8 +1134,9 @@ Página de Cita lleva **un solo bloque** de desplegables, `<div class="desplegab
 data-pagefind-ignore="all">` en `src/pages/cita/[slug].astro`, a 4 × unidad de lo de arriba: la
 palanca de SM-C5 es un diff de ese sitio. Contiene el Desplegable «Cómo citar»
 (`Desplegable.astro`, la primitiva de la 34.0, que no se copia ni se cambia) y, el último, «Inserta
-esta cita» (30.4); el pasaje (Épica 31) irá delante, sin hueco. Desde la 30.4 el bloque se pinta en
-toda Página de Cita. Sin `data-zona` —no hay enlaces: la canónica es texto— y fuera del JSON-LD.
+esta cita» (30.4); delante, «Lee el pasaje» (31.2, abajo), solo si la Cita lo tiene y sin hueco si
+no. Desde la 30.4 el bloque se pinta en toda Página de Cita. Sin `data-zona` —el único enlace es el
+de salida a la edición, en el pasaje: la canónica es texto— y fuera del JSON-LD.
 
 - **La composición es solo de `src/lib/atribucion.ts`** (AD-28): `referenciaDeCita` (segmentos,
   con la Obra en cursiva y un segmento vacío para la fecha), `referenciasDeCita`,
@@ -1159,6 +1164,35 @@ toda Página de Cita. Sin `data-zona` —no hay enlaces: la canónica es texto�
 - Pendiente al fundir la Épica 29: el texto de la Referencia pasa por `enUnaLinea` de
   `src/lib/verso.ts` (« / » entre versos); hasta entonces va `cita.texto` tal cual (AD-29: nadie
   escribe su unión de versos).
+
+### Lee el pasaje (Historia 31.2)
+
+**El texto de `corpus/fuentes/` se publica como pasaje** (AD-30): el párrafo —o la estrofa, o los
+bloques contiguos que la Cita cruza— del documento del que sale cada Cita, literal, y es lo único
+del cuerpo de un documento de Fuente que entra en el almacén de contenido. **Lo entrega solo el
+cargador de posiciones** (`tools/lib/posiciones.ts` → `tools/lib/pasaje.ts`, con el mismo
+localizador que el orden del libro), y lo elige `aparicionQueCuenta`; la página lo toma de
+`pasajesDeLasCitas` de `src/lib/publicado.ts`, que **solo** llama `src/pages/cita/[slug].astro`.
+
+- Es el primer Desplegable de `.desplegables`, `src/components/LeeElPasaje.astro`, cerrado y solo
+  para la Cita con pasaje: un `<p>` por párrafo, un `<br>` entre líneas, las palabras de la Cita en
+  `<mark>` y, debajo, la línea de la Fuente con su licencia y el enlace a la edición (misma
+  pestaña, `rel="noopener nofollow"`), que compone `lineaDeLaFuente` de `src/lib/atribucion.ts`
+  —la misma que pinta `Fuente.astro`—; `'pasaje'` está en `PORTAN_LA_ATRIBUCION`.
+- **Qué es un salto lo dice solo `tools/lib/pasaje.ts`** (AD-29): el pasaje trae `parrafos`, los
+  tramos de sus párrafos y sus líneas sobre `texto` —`verso`: un verso por línea;
+  `prosa-ajustada`: el bloque es una línea y sus `\n` quedan literales; `prosa-por-lineas`: cada
+  línea, un párrafo—, y `partesDelPasaje` de `src/lib/pasaje.ts` solo corta. Nunca se recorta.
+- Fuera de Pagefind, del JSON-LD, de lo copiado, la Imagen, el Fragmento y la Tarjeta Social
+  (`tests/unit/lee-el-pasaje.test.ts`); sin guion, sin zona ni exención, sin `data-ingreso`, e
+  idéntico con cualquier Modelo encendido.
+- **`MAX_CARACTERES_DEL_PASAJE` es de Héctor**, y en el árbol está en `undefined`: así ninguna
+  página lo pinta. Ninguna prueba fija su valor; las construcciones lo parchean en su copia.
+- **`DESPLIEGUE_DEL_PASAJE`** (`src/lib/umbrales.ts`) es la jornada UTC del **primer despliegue en
+  que el tope tiene valor** —nunca la del merge, que publica la puerta cerrada—, y la pone Héctor
+  en un commit aparte. Es un corte de `CORTES_DE_SERIE_DECLARADOS` que parte solo
+  `continuacion-de-cita`; SM-C5 declara sus dos llegadas (`corte.llegadas`), y mientras no llegue
+  el informe de `npm run medicion` lo dice con su marca.
 
 ### Inserta esta cita (Historia 30.4)
 

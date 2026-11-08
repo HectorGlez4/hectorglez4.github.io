@@ -970,6 +970,12 @@ export interface PasajeDeAparicion {
   texto: string;
   inicio: number;
   fin: number;
+  /**
+   * Cómo se pinta — Historia 31.2, AD-29: los párrafos y, dentro, sus líneas, como tramos
+   * `[desde, hasta)` UTF-16 sobre `texto`, crecientes y sin solaparse. Los calcula
+   * `tools/lib/pasaje.ts`, el único que interpreta un salto; quien pinta solo corta `texto`.
+   */
+  parrafos: readonly (readonly (readonly [number, number])[])[];
 }
 
 /** Las apariciones de cada Cita, por el `slug` de su frontmatter; sin ordenar ni elegir. */

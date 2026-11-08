@@ -89,8 +89,8 @@ function conElTope(umbrales: string, valor: string): string {
 }
 
 interface Volcado {
-  posiciones: Record<string, { documento: string; posicion: number; pasaje?: { texto: string; inicio: number; fin: number } }[]>;
-  pasajes: Record<string, { texto: string; inicio: number; fin: number }>;
+  posiciones: Record<string, { documento: string; posicion: number; pasaje?: { texto: string; inicio: number; fin: number; parrafos: [number, number][][] } }[]>;
+  pasajes: Record<string, { texto: string; inicio: number; fin: number; parrafos: [number, number][][] }>;
 }
 
 async function leerSonda(proyecto: string): Promise<Volcado> {
@@ -141,6 +141,8 @@ describe('Historia 31.1 — el pasaje en el cargador de posiciones, construido',
       texto: LINEA_CON_LA_CITA,
       inicio: LINEA_CON_LA_CITA.indexOf(DENTRO),
       fin: LINEA_CON_LA_CITA.indexOf(DENTRO) + DENTRO.length,
+      // Historia 31.2 — un párrafo de una línea: la línea entera.
+      parrafos: [[[0, LINEA_CON_LA_CITA.length]]],
     });
     expect(colapsarEspacios(aparicion.pasaje!.texto.slice(aparicion.pasaje!.inicio, aparicion.pasaje!.fin))).toBe(DENTRO);
     expect(conTope.pasajes['seneca-no-es-que-tengamos-poco-tiempo']).toEqual(aparicion.pasaje);
@@ -154,12 +156,13 @@ describe('Historia 31.1 — el pasaje en el cargador de posiciones, construido',
 
   it('con tope, la Cita que abre su línea y la que la cierra traen el pasaje: los bordes pasan el esquema', () => {
     const [abre] = conTope.posiciones['seneca-quien-todo-lo-quiere-todo-lo-pierde'];
-    expect(abre.pasaje).toEqual({ texto: LINEA_QUE_ABRE, inicio: 0, fin: AL_PRINCIPIO.length });
+    expect(abre.pasaje).toEqual({ texto: LINEA_QUE_ABRE, inicio: 0, fin: AL_PRINCIPIO.length, parrafos: [[[0, LINEA_QUE_ABRE.length]]] });
     const [cierra] = conTope.posiciones['seneca-nadie-es-sabio-por-casualidad'];
     expect(cierra.pasaje).toEqual({
       texto: LINEA_QUE_CIERRA,
       inicio: LINEA_QUE_CIERRA.length - AL_FINAL.length,
       fin: LINEA_QUE_CIERRA.length,
+      parrafos: [[[0, LINEA_QUE_CIERRA.length]]],
     });
     expect(conTope.pasajes['seneca-quien-todo-lo-quiere-todo-lo-pierde']).toEqual(abre.pasaje);
     expect(conTope.pasajes['seneca-nadie-es-sabio-por-casualidad']).toEqual(cierra.pasaje);

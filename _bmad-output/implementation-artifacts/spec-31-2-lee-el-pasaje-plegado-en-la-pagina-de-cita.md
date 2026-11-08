@@ -2,15 +2,29 @@
 title: 'Historia 31.2 — «Lee el pasaje», plegado en la Página de Cita'
 type: 'feature'
 created: '2026-11-08'
-status: 'ready-for-dev'
-baseline_revision: '1d1cb5ebd687029031cf742fd0970b074c013afd'
+status: 'done'
+baseline_revision: '020a4dce8a6ab4f323122b254522f1248f17b94b'
 review_loop_iteration: 0
 followup_review_recommended: false
 context:
   - '{project-root}/_bmad-output/implementation-artifacts/epic-31-context.md'
   - '{project-root}/_bmad-output/implementation-artifacts/spec-31-1-el-pasaje-se-localiza-con-el-localizador-del-orden-del-libro.md'
 warnings: [oversized]
-deferred: []
+deferred:
+  - summary: >-
+      Pendiente de Héctor (antes de dar valor a MAX_CARACTERES_DEL_PASAJE): con el tope en 1.200, tres pasajes traen caracteres que las fuentes no componen y la puerta de cobertura tipográfica detiene el build.
+    evidence: |-
+      Copia del Corpus de la rama construida el 2026-11-08 con el tope en 1.200: [cobertura-tipografica] «11 caracteres publicados se quedan sin fuente que los componga» — griego (α ο δ ι ξ π ρ ς τ) en cita/miguel-de-unamuno-no-empiezan-los-pueblos-todos-por-creer, «ş» U+015F en cita/platon-en-efecto-nadie-conoce-la-muerte-ni y «г» U+0433 en cita/emilio-castelar-el-esclavo-que-sabe-que-le-han. Con el tope en undefined (el árbol) no hay pasaje y el build pasa. Salidas: ensanchar subsets en astro.config.mjs (se mide), un motivo nuevo en ofrecePasaje (ausencia antes que mutilación) o corregir el documento; decide Héctor.
+    location: >-
+      integraciones/cobertura.ts; tools/lib/pasaje.ts (ofrecePasaje)
+    severity: high
+  - summary: >-
+      Pendiente de Héctor: el literal de la línea de la Fuente del pasaje (hoy el de la Línea de la Fuente, «Texto tomado de {rótulo}. {licencia}.») y el valor del tope.
+    evidence: |-
+      Design Notes del spec: los dos son de Héctor y van como diferidos.
+    location: >-
+      src/lib/atribucion.ts (lineaDeLaFuente); src/lib/umbrales.ts (MAX_CARACTERES_DEL_PASAJE)
+    severity: low
 ---
 
 <intent-contract>
@@ -115,6 +129,17 @@ deferred: []
 
 ## Review Triage Log
 
+### 2026-11-08 — Review pass
+- intent_gap: 0
+- bad_spec: 0
+- patch: 0
+- defer: 0
+- reject: 0
+- addressed_findings:
+  - none
+
+Sin hallazgos externos en esta pasada: el orquestador no pasó secciones «## Hallazgos externos — …». No cuenta como revisión: la primera revisión con hallazgos es la siguiente.
+
 ## Design Notes
 
 **Por qué `parrafos` y no la forma.** Pintar exige saber si un `\n` es verso, espacio o párrafo, y eso es interpretar un salto del documento, que AD-29 reserva a `tools/`; además la guarda de `tests/unit/lineas.test.ts` prohíbe escribir las formas fuera de `lineas.ts`. Con tramos, el componente solo corta cadenas. Ejemplo (verso, dos estrofas, Cita en la última línea de la primera y la primera de la segunda): `texto = "A\nB\n\nC\nD"`, `parrafos = [[[0,1],[2,3]], [[5,6],[7,8]]]`, `inicio = 2`, `fin = 6` → `<p>A<br><mark>B</mark></p><p><mark>C</mark><br>D</p>`.
@@ -139,7 +164,43 @@ deferred: []
 
 ## Auto Run Result
 
-Status: ready-for-dev
+Status: done
 Blocking condition: none
 
-Planificación cerrada sobre `1d1cb5ebd687029031cf742fd0970b074c013afd` (v9/epica-31 con la principal de las Épicas 29 y 30 fundida); parada tras planificar, como pidió la invocación. Sin implementación.
+**Qué se hizo.** «Lee el pasaje» es el primer `Desplegable` de `.desplegables` de la Página de Cita, solo para la Cita con pasaje: un `<p>` por párrafo, un `<br>` entre líneas, las palabras de la Cita en `<mark>` y, debajo, la línea de la Fuente con su licencia y el enlace a la edición. Qué es un salto lo dice solo `tools/lib/pasaje.ts`, que da al pasaje sus `parrafos` (tramos UTF-16 de párrafos y líneas); `src/lib/pasaje.ts` solo corta. La relación de superficies compone en la Página de Cita los documentos de su Obra (con su índice) y las `formas` de su ficha; `DESPLIEGUE_DEL_PASAJE` entra como corte de `continuacion-de-cita` y SM-C5 declara sus dos llegadas. Con el tope en `undefined` ningún `.html` cambia.
+
+**Ficheros.**
+- `tools/lib/pasaje.ts` — `parrafosDelTrozo`: los `parrafos` por forma (verso, prosa ajustada, prosa por líneas).
+- `src/lib/obras.ts`, `src/content.config.ts` — `parrafos` en `PasajeDeAparicion` y en el esquema, con su refinamiento (tramos dentro del texto, crecientes, sin solaparse).
+- `src/lib/pasaje.ts` (nuevo) — `partesDelPasaje`: párrafos → líneas → segmentos marcados, sin interpretar saltos.
+- `src/lib/atribucion.ts` — `lineaDeLaFuente` (dueño único de la línea) y `'pasaje'` en `PORTAN_LA_ATRIBUCION`.
+- `src/components/Fuente.astro` — usa `lineaDeLaFuente`; su HTML no cambia ni un byte (`dist/` idéntico).
+- `src/components/LeeElPasaje.astro` (nuevo) — el marcado; lanza si llega un pasaje sin Fuente.
+- `src/components/EstiloDeLeeElPasaje.astro` (nuevo) — la presentación, `<style is:inline>` en la cabeza solo donde hay pasaje.
+- `src/pages/cita/[slug].astro` — `pasajesDeLasCitas` en `getStaticPaths`, el desplegable primero y condicional, la hoja en `slot="cabeza"`.
+- `tools/lib/cambios.ts` — `documento.cita = CUALQUIER_CAMBIO`, `obra.cita = ['titulo', 'formas']`, los documentos de la Obra en cada Página de Cita (calculados una vez por Obra).
+- `src/lib/umbrales.ts` — `DESPLIEGUE_DEL_PASAJE` y su corte; `CorteDeSerie` gana `deDondeLlega`.
+- `tools/lib/lineaBase.ts` — `corte.llegadas` con `marca`; `JuicioLeido.pendientes`; el informe nombra cada llegada pendiente con su marca y la línea base propia por la constante del último corte llegado.
+- Pruebas: `tests/unit/lee-el-pasaje.test.ts` y `tests/e2e/lee-el-pasaje.spec.ts` (nuevas); al día `pasaje`, `orden-del-libro`, `pasaje-build`, `fecha-de-cambio`, `fecha-de-cambio-build`, `avisar-rango`, `indexnow`, `linea-base`, `semblanza`.
+- `AGENTS.md` — «Lee el pasaje», la composición de la Página de Cita, el tope y la jornada del corte de Héctor.
+
+**Desviaciones del spec, y por qué.**
+- El `mark` lleva `font-weight: var(--peso-regular)` y no `inherit`: `tests/unit/tipografia-en-tokens.test.ts` rechaza todo peso que no sea `var(--peso-…)`, y el spec prohíbe una excepción nueva. El efecto es el mismo (el párrafo es regular).
+- La presentación no va en un `<style>` de `LeeElPasaje.astro` sino en `EstiloDeLeeElPasaje.astro`, puesto en la cabeza solo en las páginas con pasaje: con el `<style>` del componente, Astro lo metía en la hoja de toda Página de Cita y el nombre con huella de esa hoja cambiaba las 4.424 páginas con el tope en `undefined` (Block If). Coste: unos 650 bytes por página con pasaje.
+- La Cita sin Obra con pasaje de la matriz no se puede construir: un documento solo casa con una Cita que declara obra y toda obra con forma tiene ficha. Su regla la prueba `orden-del-libro.test.ts` (`pasajesDeCitas` sin Obra); el filete es la regla de `.desplegables`, que no depende de la Tarjeta de Obra.
+- E2E: todo en el perfil `movil` (el de `escritorio` se salta), porque el montaje levanta un puerto fijo (4403); las medidas fijan su ventana. El receptor de la medida NFR-7 fue el de 204 de la Épica 30 en 8787, no `wrangler dev`.
+- `fecha-de-cambio-build.test.ts`: el documento ya trae el texto de la Cita sembrada desde el primer commit (la siembra real no reescribe documentos); reescribirlo en el commit de la siembra fecha ahora, a sabiendas, las hermanas.
+
+**Verificación (2026-11-08).**
+- `npx vitest run` por fichero de lo tocado — en verde; `npx astro check` — 0 errores, 0 avisos; `npm test` entero — 168 ficheros, 7.661 pruebas, en verde.
+- `npx playwright test tests/e2e/lee-el-pasaje.spec.ts` — 5 en verde (movil), 5 saltadas (escritorio); `pagina-de-cita`, `como-citar` e `inserta-esta-cita` con `--project=movil` — 70 en verde, 26 saltadas.
+- `FECHA_JORNADA=2026-11-08 npm run build`, base (`020a4dce8a`) frente al árbol: 0 `.html` distintos; fuera de `pagefind/`, solo `sitemap-0.xml`, con el `lastmod` de 483 Páginas de Cita movido a la fecha de un documento de su Obra.
+- Copia con el tope en 1.200 (y la puerta de cobertura degradada a aviso **solo en la copia**, ver diferidos): 2.104 Citas con pasaje; +4.206.699 bytes en `dist/`; por Página de Cita con pasaje, mediana +1.983 y máximo +2.705 bytes (`mariano-jose-de-larra-hay-entre-nosotros-unos-pocos-hombres-que`). Pagefind: 4.881 páginas y 9.161 palabras en las dos.
+  - Tope del árbol: «Peso de dist/: 542.418.177 bytes (517,3 MiB) en 15.371 ficheros» · «Rotan con la jornada, aparte: 111.990 bytes» · «Juzgado sin lo que rota: 542.306.187 bytes (517,2 MiB); quedan 244.125.813 bytes hasta el aviso» · «Tarjetas Sociales: 312.892.904 bytes, 57,7 %» · «Filtros y mapa: 97.029 bytes».
+  - Tope 1.200: «Peso de dist/: 546.624.876 bytes (521,3 MiB) en 15.371 ficheros» · «Rotan con la jornada, aparte: 111.990 bytes» · «Juzgado sin lo que rota: 546.512.886 bytes (521,2 MiB); quedan 239.919.114 bytes hasta el aviso» · «Tarjetas Sociales: 312.892.904 bytes, 57,3 %» · «Filtros y mapa: 97.014 bytes». Muy por debajo de `AVISO_DE_PESO_DE_DIST` (750 MiB).
+- NFR-7, Lighthouse 13.5.0 `simulate`, 10 corridas alternas, `max-age=600` y gzip; la Cita en verso con el pasaje más largo es `fernan-gonzalez-de-eslava-por-que-mi-dios-me-soltais-y` (697 caracteres, 27 saltos). Medias, tope del árbol → 1.200: Fernán González LCP 1.595 → 1.626 (+31), FCP 948 → 922 (−25); Machado LCP 1.639 → 1.610 (−29), FCP 939 → 900 (−39); Martí «sincero» LCP 1.596 → 1.626 (+30), FCP 922 → 919 (−2); Martí «vengo» LCP 1.580 → 1.624 (+44), FCP 896 → 917 (+21). Todas dentro del margen de 100 ms. Las tres de la auditoría no tienen pasaje (su HTML es igual en las dos copias): su diferencia es ruido.
+- `git diff --stat 020a4dce8a -- corpus/` — vacío. La copia se borró.
+
+**Revisión.** Pasada sin hallazgos externos: 0 parches, 0 diferidos, 0 rechazados. `followup_review_recommended: false` (parches: high 0, medium 0, low 0; puntuación 0).
+
+**Riesgos residuales.** Con el tope en 1.200 el build se para por la cobertura tipográfica (tres pasajes): darle valor exige antes la decisión de Héctor (diferido). La hoja en la cabeza suma unos 650 bytes por Página de Cita con pasaje. El orden de tabulación se comprobó en una Cita con Tarjeta de Obra; sin Obra no hay Cita con pasaje.

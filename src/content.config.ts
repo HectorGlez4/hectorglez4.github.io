@@ -335,6 +335,18 @@ const cargadorDePosiciones: Loader = {
   },
 };
 
+/** Si los tramos de los párrafos de un pasaje caben en su texto, crecientes y sin solaparse. */
+function tramosDePasajeEnOrden(parrafos: readonly (readonly (readonly [number, number])[])[], largo: number): boolean {
+  let anterior = 0;
+  for (const parrafo of parrafos) {
+    for (const [desde, hasta] of parrafo) {
+      if (desde < anterior || desde >= hasta || hasta > largo) return false;
+      anterior = hasta;
+    }
+  }
+  return true;
+}
+
 const posiciones = defineCollection({
   loader: cargadorDePosiciones,
   schema: z.object({
@@ -348,9 +360,17 @@ const posiciones = defineCollection({
             texto: z.string().min(1),
             inicio: z.number().int().nonnegative(),
             fin: z.number().int(),
+            // Historia 31.2 — los párrafos y sus líneas, tramos [desde, hasta) sobre el texto.
+            parrafos: z
+              .array(z.array(z.tuple([z.number().int().nonnegative(), z.number().int()])).min(1))
+              .min(1),
           })
           .refine((p) => p.inicio < p.fin && p.fin <= p.texto.length, {
             message: 'El tramo de la Cita no cabe en su pasaje: hace falta inicio < fin ≤ largo del texto.',
+          })
+          .refine((p) => tramosDePasajeEnOrden(p.parrafos, p.texto.length), {
+            message:
+              'Los párrafos del pasaje no son tramos de su texto: hace falta 0 ≤ desde < hasta ≤ largo, crecientes y sin solaparse.',
           })
           .optional(),
       }),

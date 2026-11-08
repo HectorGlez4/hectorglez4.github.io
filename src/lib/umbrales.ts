@@ -192,6 +192,21 @@ export const DESPLIEGUE_DE_LA_BUSQUEDA_CON_FILTROS: string | undefined = '2026-1
  */
 export const DESPLIEGUE_DE_CITAR_Y_LLEVARSE: string | undefined = undefined;
 
+/**
+ * La llegada en vivo de «Lee el pasaje» — la Épica 31, AD-9, AD-13, Historia 31.2.
+ *
+ * Es la jornada UTC del **primer despliegue en que una Página de Cita enseña un pasaje en vivo**:
+ * el que sigue a que Héctor dé valor a `MAX_CARACTERES_DEL_PASAJE`, porque con el tope en
+ * `undefined` ninguna página lo pinta. **Nunca la del merge**: el merge publica la puerta cerrada.
+ * `undefined` mientras no haya llegado; **le da valor Héctor, en un commit aparte, y ningún
+ * agente la elige.**
+ *
+ * El pasaje entra en el bloque de desplegables de la Página de Cita, delante de «Cómo citar», y
+ * cambia lo que miden la continuación de la Página de Cita y SM-C5: su entrada en
+ * `CORTES_DE_SERIE_DECLARADOS` parte solo la serie `continuacion-de-cita`, como la de la 30.1.
+ */
+export const DESPLIEGUE_DEL_PASAJE: string | undefined = undefined;
+
 /*
  * Los cortes de serie de la medición — AD-9, AD-13, Historia 23.10.
  *
@@ -221,6 +236,11 @@ export type SerieDeMedicion = 'sm8' | 'lectura' | 'busqueda' | 'continuacion-de-
 export interface CorteDeSerie {
   /** La jornada UTC de la llegada en vivo, `AAAA-MM-DD`; `undefined` mientras no haya llegado. */
   readonly jornada: string | undefined;
+  /**
+   * El nombre de la constante de la que sale `jornada` (Historia 31.2): con él se nombra la línea
+   * base que abre y un juicio declara las llegadas que lo parten.
+   */
+  readonly deDondeLlega: string;
   /** Qué cambió, como lo nombra el informe. */
   readonly que: string;
   /** Las series que parte. */
@@ -237,22 +257,32 @@ export interface CorteLlegado extends CorteDeSerie {
  * La de la Épica 23 parte SM-8 —la marca se cuenta una vez por llegada y la vista sale del fichero
  * diferido—, la serie de la lectura y la de la búsqueda, que empiezan con ella; la de la 24 con la
  * 26 parte SM-8, porque los Directorios emiten vista; la de la 30 parte solo la continuación de la
- * Página de Cita y SM-C5 (Historia 30.1).
+ * Página de Cita y SM-C5 (Historia 30.1), y la del pasaje de la 31, lo mismo (Historia 31.2).
+ * Cada entrada nombra su constante en `deDondeLlega`, y una prueba lo coteja con su `jornada:`.
  */
 export const CORTES_DE_SERIE_DECLARADOS: readonly CorteDeSerie[] = [
   {
     jornada: DESPLIEGUE_DE_LA_LECTURA,
+    deDondeLlega: 'DESPLIEGUE_DE_LA_LECTURA',
     que: 'la llegada de la Épica 23 (la lectura, las marcas contadas una vez, las salidas y la búsqueda asentada)',
     series: ['sm8', 'lectura', 'busqueda'],
   },
   {
     jornada: DESPLIEGUE_DE_OBRA_Y_DIRECTORIOS,
+    deDondeLlega: 'DESPLIEGUE_DE_OBRA_Y_DIRECTORIOS',
     que: 'la llegada de la Tarjeta de Obra con los Directorios (Épicas 24 y 26)',
     series: ['sm8'],
   },
   {
     jornada: DESPLIEGUE_DE_CITAR_Y_LLEVARSE,
+    deDondeLlega: 'DESPLIEGUE_DE_CITAR_Y_LLEVARSE',
     que: 'el orden nuevo de la Página de Cita: las acciones antes de la Tarjeta de Obra, con “Cómo citar” e “Inserta esta cita” detrás',
+    series: ['continuacion-de-cita'],
+  },
+  {
+    jornada: DESPLIEGUE_DEL_PASAJE,
+    deDondeLlega: 'DESPLIEGUE_DEL_PASAJE',
+    que: '“Lee el pasaje” en la Página de Cita',
     series: ['continuacion-de-cita'],
   },
 ];

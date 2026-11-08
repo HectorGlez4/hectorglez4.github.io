@@ -24,12 +24,15 @@ import FiltrosDeLaCita from '../../components/FiltrosDeLaCita.astro';
 import Desplegable from '../../components/Desplegable.astro';
 import ComoCitar from '../../components/ComoCitar.astro';
 import InsertaEstaCita from '../../components/InsertaEstaCita.astro';
+import LeeElPasaje from '../../components/LeeElPasaje.astro';
+import EstiloDeLeeElPasaje from '../../components/EstiloDeLeeElPasaje.astro';
 import { citaTieneComoCitar, fragmentoParaInsertar, referenciasDeCita } from '../../lib/atribucion.ts';
 import {
   citasDeLasObras,
   citasDeTema,
   conjuntoPublicable,
   filtrosDeLaBusqueda,
+  pasajesDeLasCitas,
   rutasDeSalidaDeCita,
   siguienteCita,
   temasPublicados,
@@ -60,6 +63,12 @@ export const getStaticPaths = (async () => {
    */
   const { porCita } = filtrosDeLaBusqueda(conjunto);
   const claves = clavesDeOrden(conjunto.autores, conjunto.citas, porObra);
+  /*
+   * Historia 31.2 — el pasaje de cada Cita, de la aparición que cuenta (`aparicionQueCuenta`, la
+   * misma que la ordena en el libro), calculado una vez para todas. Esta página es la única que
+   * lo lee: ni la portada, ni el 404, ni la Página de Obra, ni ninguna tarjeta lo pintan.
+   */
+  const pasajes = await pasajesDeLasCitas(conjunto);
 
   return conjunto.citas.map((cita) => {
     const siguiente = siguienteCita(cita, porObra, publicados, listados);
@@ -85,12 +94,13 @@ export const getStaticPaths = (async () => {
         rutas: rutasDeSalidaDeCita(cita, conjunto.citas, porObra, publicados, siguiente),
         filtros,
         clave,
+        pasaje: pasajes.get(cita.slug),
       },
     };
   });
 }) satisfies GetStaticPaths;
 
-const { cita, autor, siguiente, rutas, filtros, clave } = Astro.props;
+const { cita, autor, siguiente, rutas, filtros, clave, pasaje } = Astro.props;
 
 /**
  * El título de pestaña y la meta descripción llevan la Cita entera si cabe. Quien llega
@@ -119,6 +129,8 @@ const canonica = new URL(rutaDeCita(cita.slug), Astro.site).href;
   tipo="cita"
 >
   <DatosEstructurados slot="cabeza" cita={cita} autor={autor} canonica={canonica} />
+  {/* Historia 31.2 — la presentación del pasaje, solo donde se pinta: sin él, ni un byte más. */}
+  {pasaje !== undefined && <EstiloDeLeeElPasaje slot="cabeza" />}
   <article class="pagina contenedor">
     <BloqueDeCita cita={cita} autor={autor} comoTitulo />
     {/*
@@ -155,13 +167,17 @@ const canonica = new URL(rutaDeCita(cita.slug), Astro.site).href;
       * Historia 30.3 — el bloque de desplegables, tras la Tarjeta de Obra —o tras compartir, sin
       * Obra— y antes de las Rutas de salida (UX-DR119). Es **un solo sitio** a propósito: la
       * palanca de SM-C5 es un diff de aquí. Lleva «Cómo citar» —si la Cita lo tiene— y, el último,
-      * «Inserta esta cita» (30.4); el pasaje de la Épica 31 irá delante, sin hueco reservado. Desde
-      * la 30.4 el bloque se pinta siempre: el Fragmento existe para toda Cita. Fuera de Pagefind
-      * (`all`): las Referencias y el Fragmento repiten el texto, el título y el Autor, y la página
-      * no se encuentra por ellos; fuera del JSON-LD. Sin `data-zona`: no hay enlaces, la canónica
-      * es texto de las Referencias y del campo.
+      * «Inserta esta cita» (30.4). Delante va «Lee el pasaje» (31.2), solo si la Cita tiene
+      * pasaje y sin hueco reservado si no. Desde la 30.4 el bloque se pinta siempre: el Fragmento
+      * existe para toda Cita. Fuera de Pagefind (`all`): el pasaje, las Referencias y el Fragmento
+      * repiten el texto, el título y el Autor —o dicen lo que la Cita no dice—, y la página no se
+      * encuentra por ellos; fuera del JSON-LD. Sin `data-zona`: el único enlace es el de salida a
+      * la edición, en el pasaje; la canónica es texto de las Referencias y del campo.
       */}
     <div class="desplegables" data-pagefind-ignore="all">
+      {pasaje !== undefined && (
+        <Desplegable rotulo="Lee el pasaje"><LeeElPasaje pasaje={pasaje} fuente={cita.fuente} slug={cita.slug} /></Desplegable>
+      )}
       {citaTieneComoCitar(cita) && (
         <Desplegable rotulo="Cómo citar"><ComoCitar referencias={referenciasDeCita(cita, autor, canonica)} /></Desplegable>
       )}

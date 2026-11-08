@@ -130,12 +130,38 @@ export const SUPERFICIES_DE_LA_SEMBLANZA = [
 export type SuperficieDeLaSemblanza = (typeof SUPERFICIES_DE_LA_SEMBLANZA)[number];
 
 /**
+ * La Línea de la Fuente — FR-2, Historia 31.2, AD-28: «Texto tomado de {rótulo}. {licencia}.»,
+ * con el rótulo enlazado a la edición. La pintan dos superficies, la Línea de la Fuente bajo la
+ * Atribución (`Fuente.astro`) y la de «Lee el pasaje» (`LeeElPasaje.astro`), y este es su único
+ * dueño: las dos ponen el enlace entre `antes` y `despues`, y `licencia` —ya con su espacio y su
+ * punto— detrás, solo si consta. Sin rótulo no hay línea.
+ */
+export function lineaDeLaFuente(
+  fuente: Pick<NonNullable<Cita['fuente']>, 'url' | 'nombre' | 'licencia'> & { id?: string },
+): { antes: string; url: string; rotulo: string; despues: string; licencia?: string } | undefined {
+  const rotulo = rotuloDeFuente(fuente);
+  if (rotulo === undefined) return undefined;
+  return {
+    antes: 'Texto tomado de ',
+    url: fuente.url,
+    rotulo,
+    despues: '.',
+    ...(fuente.licencia !== undefined && { licencia: ` ${fuente.licencia}.` }),
+  };
+}
+
+/**
  * Las superficies que **portan** la atribución de un texto ajeno: la Ficha de Autor de la
  * página 1, que la publica visible justo debajo. AD-28 pone aquí el único dueño de esta
  * lista; ninguna página decide por su cuenta dónde se reproduce texto de tercero.
  */
-export const PORTAN_LA_ATRIBUCION: ReadonlySet<SuperficieDeLaSemblanza> = new Set([
+export const PORTAN_LA_ATRIBUCION: ReadonlySet<SuperficieDeLaSemblanza | 'pasaje'> = new Set<
+  SuperficieDeLaSemblanza | 'pasaje'
+>([
   'ficha-de-autor',
+  // Historia 31.2 — «Lee el pasaje» reproduce texto del documento de Fuente, con su línea de la
+  // Fuente y su licencia debajo (`lineaDeLaFuente`).
+  'pasaje',
 ]);
 
 /**
