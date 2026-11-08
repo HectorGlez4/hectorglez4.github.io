@@ -518,7 +518,9 @@ export function cotejarAutorDeLaEntidad(
       ok: false,
       motivo:
         `${entidad} declara por autor a ${ajenas.join(', ')} y el Autor de la ficha es ` +
-        `«${nombreDelAutor}». No son el mismo: atarla describiría otra obra.`,
+        `«${nombreDelAutor}». No son el mismo: atarla describiría otra obra.` +
+        // Con varios autores, el que falta podría ser justo el que concuerda: se dice también.
+        (faltas.length > 0 ? `\nDe sus otros autores no se pudo cotejar:\n${faltas.join('\n')}` : ''),
     };
   }
   return { ok: false, motivo: faltas.join('\n') };
@@ -702,7 +704,13 @@ export async function leerFichasTecnicasDelCorpus(raizDelCorpus: string): Promis
     (rota) => `${rutas.vigentesDeWikidata} declara una vigente sin su documento: ${rota}`,
   );
 
-  const [fichas, autores] = await Promise.all([leerFichasDeObra(rutas), leerAutores(rutas)]);
+  let fichas: Awaited<ReturnType<typeof leerFichasDeObra>>;
+  let autores: Awaited<ReturnType<typeof leerAutores>>;
+  try {
+    [fichas, autores] = await Promise.all([leerFichasDeObra(rutas), leerAutores(rutas)]);
+  } catch (fallo) {
+    throw new Error(`Regla incumplida: Wikidata (AD-31): ${fallo instanceof Error ? fallo.message : String(fallo)}`);
+  }
   const nombres = new Map(autores.map((a) => [a.slug, a.nombre]));
   const salida = new Map<string, FichaTecnicaDeObra>();
 

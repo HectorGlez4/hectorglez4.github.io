@@ -368,6 +368,40 @@ describe('Historia 32.1 — npm run obra -- wikidata y wikidata-vigente', () => 
     expect(otra.error).toMatch(/ya declara Q480 en la revisión 100/);
   });
 
+  it('atar otra revisión de la misma entidad la sustituye y lo dice', async () => {
+    const corpus = await preparado([CARTAS, obra({ P50: [wd.aEntidad('Q2054')] }, 101), SENECA, NOVELA]);
+    expect((await correr(corpus, ['wikidata', FICHA, doc(corpus, 'Q480--r100.json')])).codigo).toBe(0);
+    const hecho = await correr(corpus, ['wikidata', FICHA, doc(corpus, 'Q480--r101.json')]);
+    expect(hecho.codigo, hecho.error).toBe(0);
+    expect(hecho.salida).toContain('Sustituye a Q480, revisión 100.');
+    expect(await fichaYaml(corpus)).toMatch(/\nwikidata:\n {2}entidad: "Q480"\n {2}revision: 101\n$/);
+  });
+
+  it('atar con una vigente sin su documento se niega nombrándola y no escribe', async () => {
+    const corpus = await preparado([CARTAS, SENECA, NOVELA], { Q2054: 30, Q8261: 40, Q9: 3 });
+    const antes = await fichaYaml(corpus);
+    const hecho = await correr(corpus, ['wikidata', FICHA, doc(corpus, 'Q480--r100.json')]);
+    expect(hecho.codigo).toBe(1);
+    expect(hecho.error).toMatch(/vigentes sin su documento/);
+    expect(hecho.error).toContain('Q9: 3');
+    expect(await fichaYaml(corpus)).toBe(antes);
+  });
+
+  it('atar una entidad que ya declara otra ficha se niega nombrándola', async () => {
+    const corpus = await preparado();
+    const OTRA = 'seneca--de-la-ira';
+    await writeFile(
+      join(corpus, 'obras', `${OTRA}.yml`),
+      'autor: "seneca"\ntitulo: "De la ira"\nformas:\n  - "de la ira"\nwikidata:\n  entidad: "Q480"\n  revision: 100\n',
+      'utf8',
+    );
+    const antes = await fichaYaml(corpus);
+    const hecho = await correr(corpus, ['wikidata', FICHA, doc(corpus, 'Q480--r100.json')]);
+    expect(hecho.codigo).toBe(1);
+    expect(hecho.error).toContain(`«${OTRA}» ya declara Q480`);
+    expect(await fichaYaml(corpus)).toBe(antes);
+  });
+
   it('un autor ajeno pone delante las dos partes y no escribe', async () => {
     const ajena = obra({ P50: [wd.aEntidad('Q3')] });
     const corpus = await preparado([ajena, PRADA], { Q3: 31 });
@@ -450,6 +484,23 @@ describe('Historia 32.1 — npm run obra -- wikidata y wikidata-vigente', () => 
     expect(hecho.salida).toContain('Remite a ella 1 Obra');
     expect(hecho.salida).toContain(`· ${FICHA}`);
     expect(await readFile(join(corpus, 'wikidata', 'vigentes.yml'), 'utf8')).toMatch(/\nQ2054: 30\nQ8261: 41\n$/);
+  });
+
+  it('wikidata-vigente se niega si con la revisión nueva el autor de una Obra dejaría de concordar', async () => {
+    const corpus = await preparado([CARTAS, SENECA, NOVELA, wd.entidad('Q2054', 32, { otras: { en: 'Seneca' } })]);
+    expect((await correr(corpus, ['wikidata', FICHA, doc(corpus, 'Q480--r100.json')])).codigo).toBe(0);
+    const antes = await readFile(join(corpus, 'wikidata', 'vigentes.yml'), 'utf8');
+    const hecho = await correr(corpus, ['wikidata-vigente', 'Q2054', '32']);
+    expect(hecho.codigo).toBe(1);
+    expect(hecho.error).toMatch(/el cotejo del autor dejaría de pasar/);
+    expect(hecho.error).toContain(`${FICHA}.yml`);
+    expect(hecho.error).toMatch(/no tiene etiqueta en español/);
+    expect(await readFile(join(corpus, 'wikidata', 'vigentes.yml'), 'utf8')).toBe(antes);
+  });
+
+  it('wikidata-vigente con una revisión de más de 2^53 sale con 2', async () => {
+    const corpus = await corpusConCita();
+    expect((await correr(corpus, ['wikidata-vigente', 'Q8261', '9007199254740993'])).codigo).toBe(2);
   });
 
   it.each([

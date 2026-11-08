@@ -2116,6 +2116,18 @@ describe('Historia 32.1 — Wikidata entra por revisión, a corpus/wikidata/', (
     expect(await vigentesDe(t)).toEqual(['Q5682: 70', 'Q8261: 80']);
   });
 
+  it('ya versionada, con una dirección que nombra otra entidad: 1 nombrando las dos, sin pedir ni escribir', async () => {
+    const t = await taller();
+    await wd.sembrarWikidata(t.corpus, [Q480]);
+    const antes = await ficheros(t);
+    const resultado = await recuperar(permanente('Q481', 100), t, GUION_COMPLETO);
+    expect(resultado.codigo).toBe(1);
+    expect(resultado.error).toContain('«Q481»');
+    expect(resultado.error).toContain('«Q480»');
+    expect(await pedidas(t)).toEqual([]);
+    expect(await ficheros(t)).toEqual(antes);
+  });
+
   it('una referida ya vigente en otra revisión no se pide ni cambia', async () => {
     const t = await taller();
     const Q8261_viejo = wd.entidad('Q8261', 60, { es: 'novela' });

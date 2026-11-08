@@ -146,6 +146,19 @@ describe('Historia 32.1 — cotejarAutorDeLaEntidad', () => {
     }
   });
 
+  it('con varios autores, uno ajeno y otro sin vigente, la negativa dice los dos', () => {
+    const prada = entidad('Q2', 2, { es: 'Manuel González Prada' });
+    const dos = entidad('Q480', 100, { claims: { P50: [aEntidad('Q2'), aEntidad('Q777')] } });
+    const r = cotejarAutorDeLaEntidad(dos, 'Miguel de Cervantes', (q) =>
+      q === 'Q2' ? { ok: true, datos: prada } : { ok: false, motivo: `${q} sin vigente` },
+    );
+    expect(r.ok).toBe(false);
+    if (!r.ok) {
+      expect(r.motivo).toContain('«Manuel González Prada»');
+      expect(r.motivo).toContain('Q777 sin vigente');
+    }
+  });
+
   it('sin P50, sin vigente o sin etiqueta en español se niega', () => {
     const sinP50 = cotejarAutorDeLaEntidad(entidad('Q480', 1), 'Miguel de Cervantes', conVigente);
     expect(sinP50.ok || sinP50.motivo).toMatch(/no declara autor/);

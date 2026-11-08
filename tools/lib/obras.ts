@@ -1577,11 +1577,39 @@ export async function atarEntidadDeWikidata(
 
   let nombreDelAutor: string | undefined;
   let wikidata: WikidataDelCorpus;
+  let otraQueLaDeclara: string | undefined;
   try {
     nombreDelAutor = (await leerAutores(rutas)).find((a) => a.slug === ficha.autor)?.nombre;
     wikidata = await leerWikidataDelCorpus(rutas);
+    otraQueLaDeclara = (await leerFichasDeObra(rutas, esquema)).find(
+      (f) => f.nombre !== ficha.nombre && f.wikidata?.entidad === entidad,
+    )?.nombre;
   } catch (fallo) {
     return { ok: false, motivos: [texto(fallo), NADA_ESCRITO] };
+  }
+  // Una vigente sin su documento rompe el build entero (el cargador la nombra): atar ahora daría
+  // por buena una ficha que la construcción siguiente no deja pasar.
+  if (wikidata.rotas.length > 0) {
+    return {
+      ok: false,
+      motivos: [
+        `${rutas.vigentesDeWikidata} declara vigentes sin su documento, y el build no construiría:`,
+        ...wikidata.rotas.map((rota) => `  · ${rota}`),
+        NADA_ESCRITO,
+      ],
+    };
+  }
+  // Una entidad describe una sola obra: dos Fichas que la declaran serían dos Obras con la misma
+  // Ficha técnica.
+  if (otraQueLaDeclara !== undefined) {
+    return {
+      ok: false,
+      motivos: [
+        `«${otraQueLaDeclara}» ya declara ${entidad}: una entidad de Wikidata es una sola Obra. Si son ` +
+          'la misma, se reúnen (`npm run obra -- reunir`); si no, una de las dos lleva otra entidad.',
+        NADA_ESCRITO,
+      ],
+    };
   }
   if (nombreDelAutor === undefined) {
     return { ok: false, motivos: [`El Autor «${ficha.autor}» de «${ficha.nombre}» no existe.`, NADA_ESCRITO] };
@@ -1657,8 +1685,16 @@ export async function cambiarVigenteDeWikidata(rutas: Rutas, entidad: string, re
   }
 
   let remiten: string[];
+  const discordantes: string[] = [];
   try {
     const fichas = await leerFichasDeObra(rutas);
+    const nombres = new Map((await leerAutores(rutas)).map((a) => [a.slug, a.nombre]));
+    const wikidata = await leerWikidataDelCorpus(rutas);
+    // Las vigentes tal como quedarían: el cotejo del autor se repite con la revisión nueva antes de
+    // escribir, para que la orden no deje un build que rompe (el cargador hace el mismo cotejo).
+    const nuevos = suyo.documento.datos;
+    const vigenteTrasElCambio: WikidataDelCorpus['vigente'] = (q) =>
+      q === entidad ? { ok: true, datos: nuevos } : wikidata.vigente(q);
     const conDocumento: { nombre: string; datos: Record<string, unknown> }[] = [];
     for (const ficha of fichas) {
       if (ficha.wikidata === undefined) continue;
@@ -1667,10 +1703,27 @@ export async function cambiarVigenteDeWikidata(rutas: Rutas, entidad: string, re
         return { ok: false, motivos: [`${ficha.ruta}: ${lectura.motivo}`, NADA_ESCRITO] };
       }
       conDocumento.push({ nombre: ficha.nombre, datos: lectura.documento.datos });
+      const nombre = nombres.get(ficha.autor);
+      if (nombre === undefined) {
+        discordantes.push(`${ficha.ruta}: su Autor «${ficha.autor}» no existe.`);
+        continue;
+      }
+      const cotejo = cotejarAutorDeLaEntidad(lectura.documento.datos, nombre, vigenteTrasElCambio);
+      if (!cotejo.ok) discordantes.push(`${ficha.ruta}: ${cotejo.motivo}`);
     }
     remiten = obrasQueRemitenA(entidad, conDocumento);
   } catch (fallo) {
     return { ok: false, motivos: [texto(fallo), NADA_ESCRITO] };
+  }
+  if (discordantes.length > 0) {
+    return {
+      ok: false,
+      motivos: [
+        `Con ${entidad} en la revisión ${revision}, el cotejo del autor dejaría de pasar y el build no construiría:`,
+        ...discordantes.map((d) => `  · ${d}`),
+        NADA_ESCRITO,
+      ],
+    };
   }
 
   try {

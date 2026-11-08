@@ -882,7 +882,16 @@ async function recuperarDeWikidata(pedida: string): Promise<never> {
   if (yaVersionados.length > 0) {
     const nombre = yaVersionados[0];
     const ruta = join(rutas.wikidata, nombre);
-    const lectura = leerDocumentoDeWikidata(nombre, await readFile(ruta, 'utf8'));
+    let texto: string;
+    try {
+      texto = await readFile(ruta, 'utf8');
+    } catch (fallo) {
+      terminar({
+        ok: false,
+        motivos: [`No se puede leer ${ruta}: ${fallo instanceof Error ? fallo.message : String(fallo)}`, 'No se ha pedido nada.'],
+      });
+    }
+    const lectura = leerDocumentoDeWikidata(nombre, texto);
     if (!lectura.ok) {
       terminar({ ok: false, motivos: [lectura.motivo, `Revise ${ruta}: no se ha pedido nada.`] });
     }

@@ -268,7 +268,7 @@ async function principal(): Promise<never> {
     case 'wikidata-vigente': {
       const [entidad, revision] = exactamente(2, 'la entidad y la revisión');
       if (!/^Q[1-9]\d*$/u.test(entidad)) usoMal([`«${entidad}» no es una entidad de Wikidata («Q…»).`]);
-      if (!/^[1-9]\d{0,15}$/u.test(revision)) usoMal([`«${revision}» no es una revisión: un entero positivo.`]);
+      if (!/^[1-9]\d{0,15}$/u.test(revision) || !Number.isSafeInteger(Number(revision))) usoMal([`«${revision}» no es una revisión: un entero positivo.`]);
       return terminar(await cambiarVigenteDeWikidata(rutas, entidad, Number(revision)));
     }
 

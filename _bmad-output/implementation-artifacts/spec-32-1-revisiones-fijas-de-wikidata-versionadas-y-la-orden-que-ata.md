@@ -5,7 +5,7 @@ created: '2026-11-07'
 status: 'done'
 baseline_revision: '306a67f9c05d8fa31bbc4c4d1a5017ea86c96f42'
 review_loop_iteration: 0
-followup_review_recommended: false
+followup_review_recommended: true
 context:
   - '{project-root}/_bmad-output/implementation-artifacts/epic-32-context.md'
   - '{project-root}/_bmad-output/planning-artifacts/architecture/architecture-brainlySabiduria-2026-08-10/ARCHITECTURE-SPINE.md'
@@ -22,6 +22,13 @@ deferred:
     evidence: >-
       prd.md §14, pregunta 12 (l. 1813): «Bloquea curar sus ediciones y declarar su entidad de Wikidata, no la construcción; se decide antes de la primera historia de la Ficha técnica. Dueño: Héctor.» No consta respuesta en los artefactos de planificación, la memoria ni la bitácora a 2026-11-07.
     location: _bmad-output/planning-artifacts/prds/prd-brainlySabiduria-2026-08-10/prd.md
+    severity: low
+  - summary: >-
+      No hay orden que quite `wikidata` de una ficha (no existe un `quitar-wikidata` como `quitar-edicion`); una atadura equivocada solo se corrige atando otra entidad. Decidir si hace falta es de Héctor.
+    evidence: |-
+      Revisión 32.1-1 (blind-hunter): `atarEntidadDeWikidata` es el único escritor del campo y el campo no se edita a mano; hoy ninguna ficha del Corpus real lo declara, así que no hay nada que deshacer todavía.
+    location: >-
+      tools/lib/obras.ts (atarEntidadDeWikidata), tools/obra.ts
     severity: low
 ---
 
@@ -125,6 +132,7 @@ deferred:
 ## Design Notes
 
 - **`wikidata-vigente` no descarga.** El AC dice que «la recupera»; AD-22 deja la red solo en `tools/recuperar.ts` y ampliar `EXCEPCIONES` es decisión de Héctor. Así que la recuperación es el primer gesto (`recuperar` con el permanente de la revisión nueva versiona el documento sin tocar `vigentes.yml`, porque la entidad ya es vigente) y `wikidata-vigente` el segundo, sin red: si falta el documento, se niega dando la orden `recuperar` exacta. Mismo efecto, sin quinto punto de red.
+- **Resuelto (Héctor, 2026-11-08):** que `wikidata-vigente` no descargue y se niegue dando la orden `recuperar` exacta, y que cuente las Obras que remiten a la entidad, es la lectura aceptada del AC; no es una laguna de intención.
 - **«Cuántas Obras fecha»**: `obrasQueRemitenA(Q)` cuenta las fichas activas con `wikidata` cuyo documento remite a Q por P50/P136/P407 (reglas de rango). Es la función que la 32.2 usará en la relación de superficies; en la 32.1 ninguna página la pinta todavía (deferred).
 - **Referidas = las que la extracción cuenta** (sin `deprecated`, `preferred` si la hay): recuperar una entidad que nadie leerá gasta cuota y repositorio.
 - **Entidad entera, no recortada**: el documento es «el JSON de esa revisión»; el repositorio ya versiona libros enteros en `corpus/fuentes/` y `dist/` no lo ve.
@@ -152,7 +160,28 @@ deferred:
 - addressed_findings:
   - none
 
-(Las capas externas —blind-hunter, edge-case-hunter, verification-gap, intent-alignment, ac-auditor— no traen hallazgos en esta pasada.)
+(Esa pasada se hizo sin las capas externas, que aún no habían corrido: «sin hallazgos» vale solo para ella. Las capas externas llegan en la pasada siguiente.)
+
+### 2026-11-08 — Review pass
+- intent_gap: 0
+- bad_spec: 0
+- patch: 11 (high 0, medium 3, low 8)
+- defer: 1 (low 1)
+- reject: 16
+- addressed_findings:
+  - `[medium]` `[patch]` `wikidata-vigente` repite el cotejo del autor de cada ficha atada con la revisión nueva antes de escribir y se niega con 1 si alguna dejaría de concordar (blind-hunter, edge-case-hunter).
+  - `[medium]` `[patch]` `wikidata` (atar) se niega con 1 si `vigentes.yml` tiene vigentes sin su documento, nombrándolas: el build no construiría (edge-case-hunter).
+  - `[medium]` `[patch]` `wikidata` (atar) se niega si otra ficha activa ya declara la misma entidad (edge-case-hunter).
+  - `[low]` `[patch]` el cotejo con varios autores dice también los que no se pudieron cotejar cuando hay uno ajeno (edge-case-hunter).
+  - `[low]` `[patch]` el cargador envuelve la lectura de fichas y Autores con el prefijo `Regla incumplida: Wikidata (AD-31)` (blind-hunter, edge-case-hunter).
+  - `[low]` `[patch]` `wikidata-vigente` rechaza con 2 una revisión por encima de `Number.MAX_SAFE_INTEGER` (blind-hunter, edge-case-hunter).
+  - `[low]` `[patch]` `recuperar`, rama ya versionada: la lectura del documento falla con 1 y motivo, no con una excepción (blind-hunter, edge-case-hunter).
+  - `[low]` `[patch]` prueba de reatar otra revisión de la misma entidad («Sustituye a…», `revision: 101`) (verification-gap).
+  - `[low]` `[patch]` prueba de `recuperar` con documento ya versionado y dirección de otra entidad: 1, las dos nombradas, sin peticiones (verification-gap).
+  - `[low]` `[patch]` pruebas del esquema que rechaza un `wikidata` mal formado (Q0, ceros, propiedad, revisión ≤ 0, decimal, cadena, sin revisión, no objeto, clave de más) (ac-auditor).
+  - `[low]` `[patch]` el registro de la pasada anterior decía que las capas externas no traían hallazgos antes de haber corrido; corregido (blind-hunter).
+
+Rechazados (por diseño del contrato o sin consecuencia): solo se coteja el autor (AC «solo el autor»); vigentes huérfanas que rompen el build (fila Build de la matriz); título tecleado sin normalizar y direcciones `?revision=`/`wikidata.org` sin `www` (se niegan, que es lo seguro); dependencia del orden de declaración (funciona y no hay caso); expresión de la entidad repetida (`src/` no puede importar de `tools/lib/` salvo el cargador); entidad entera sin tope (Design Notes); solo `labels.es` (contrato, riesgo residual anotado); rango `preferred` antes que `snaktype` (regla de «mejor rango» del contrato); año 0 y calendario (sin caso en el Corpus); conservación de `wikidata` en `retirar`/`documentar`/`restituir-grafia` (pasan por `datosDeFicha` o mueven el fichero); prueba de red del cargador y `dist/` byte a byte (verificado en la pasada anterior y sin cambio de lo que se pinta); revisión anterior aceptada por `wikidata-vigente` (volver atrás puede ser deliberado); fecha UTC de `recuperado` (la misma que las demás ramas de `recuperar`); symlink de `corpus/wikidata/`; desviación de `wikidata-vigente` respecto del texto del AC (aceptada por Héctor, Design Notes); «cuántas Obras fecha» por remisión y no por la relación (misma decisión, diferido a la 32.2).
 
 ## Auto Run Result
 
@@ -191,3 +220,27 @@ Blocking condition: ninguna.
 **Matriz.** Cada fila tiene su prueba: recuperación (Obra, sin `oldid`, otra entidad, propiedad/otro espacio, fusionada/otra revisión, ya versionada, referida vigente, vigente sin documento, 503 persistente y repetición) en `recuperar-cli`; extracción en `wikidata.test`; atar (concuerda, ajeno, cada fallo, invocación) y `wikidata-vigente` (éxito y cada fallo) en `obra-cli`; Build en `wikidata-build`.
 
 **Riesgos residuales.** El cotejo de autor lee solo la etiqueta `es` (no los alias): una persona cuya etiqueta no recoja el nombre del Corpus se niega y habrá que decidirlo con el caso delante. La Pregunta 12 sigue abierta (deferred). Ninguna entidad real está atada y `corpus/wikidata/` solo trae `vigentes.yml` vacío.
+
+### Pasada de revisión 32.1-1 (2026-11-08, con las capas externas)
+
+**Resumen.** Once parches, sin cambio de alcance: `wikidata-vigente` repite el cotejo del autor con la revisión nueva antes de escribir; atar se niega con vigentes sin documento y con una entidad que ya declara otra ficha; el cotejo con varios autores dice también los que no pudo cotejar; el cargador da su prefijo a cualquier fallo de lectura; una revisión de más de 2^53 sale con 2; la lectura del documento ya versionado en `recuperar` sale con 1. Pruebas nuevas para «Sustituye a», para la entidad discordante con documento ya versionado y para el esquema que rechaza un `wikidata` mal formado. La desviación de `wikidata-vigente` respecto del AC la aceptó Héctor (Design Notes).
+
+**Ficheros.**
+- `tools/lib/obras.ts` — `atarEntidadDeWikidata` (vigentes rotas, entidad repetida) y `cambiarVigenteDeWikidata` (cotejo previo).
+- `tools/lib/wikidata.ts` — motivo del cotejo con varios autores; prefijo del cargador.
+- `tools/obra.ts` — `Number.isSafeInteger` para la revisión.
+- `tools/recuperar.ts` — lectura protegida en la rama ya versionada.
+- `tests/unit/obra-cli.test.ts`, `tests/unit/recuperar-cli.test.ts`, `tests/unit/obras.test.ts`, `tests/unit/wikidata.test.ts` — pruebas nuevas.
+
+**Hallazgos.** 11 parches (3 medium, 8 low), 1 diferido (orden que quite `wikidata`, de Héctor), 16 rechazados (ver el registro de triaje).
+
+**Revisión de seguimiento.** `followup_review_recommended: true`: parches 0 high, 3 medium, 8 low; puntuación 3×3 + 8 = 17 ≥ 5.
+
+**Verificación.**
+- `npx vitest run tests/unit/wikidata.test.ts tests/unit/obras.test.ts` — 156/156.
+- `npx vitest run tests/unit/obra-cli.test.ts -t 32.1` — 26/26; `npx vitest run tests/unit/recuperar-cli.test.ts -t 32.1` — 16/16.
+- `npx astro check` — 0 errores, 0 avisos.
+- `npm test` — 157/157 ficheros, 7254/7254 pruebas, código 0 (1594 s).
+- La comparación de `dist/` no se repitió: los parches tocan solo `tools/` y la rama de error del cargador, que con el Corpus real (ninguna ficha con `wikidata`) no se ejecuta; nada de lo que se pinta cambia.
+
+**Riesgos residuales.** Los de la pasada anterior (solo `labels.es`, Pregunta 12 abierta) y la falta de una orden que quite la atadura (diferida).

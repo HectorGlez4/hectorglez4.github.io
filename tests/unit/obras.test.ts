@@ -118,6 +118,15 @@ describe('el esquema de la Ficha de Obra', () => {
     ['distintaDe vacío', { autor: 'seneca', titulo: 'X', formas: ['x'], distintaDe: [] }],
     ['distintaDe no canónico', { autor: 'seneca', titulo: 'X', formas: ['x'], distintaDe: ['Y'] }],
     ['distintaDe de su propia forma', { autor: 'seneca', titulo: 'X', formas: ['x'], distintaDe: ['x'] }],
+    ['wikidata con una entidad Q0', { autor: 'seneca', titulo: 'X', formas: ['x'], wikidata: { entidad: 'Q0', revision: 1 } }],
+    ['wikidata con ceros a la izquierda', { autor: 'seneca', titulo: 'X', formas: ['x'], wikidata: { entidad: 'Q0480', revision: 1 } }],
+    ['wikidata con una propiedad', { autor: 'seneca', titulo: 'X', formas: ['x'], wikidata: { entidad: 'P31', revision: 1 } }],
+    ['wikidata con revisión negativa', { autor: 'seneca', titulo: 'X', formas: ['x'], wikidata: { entidad: 'Q480', revision: -1 } }],
+    ['wikidata con revisión cero', { autor: 'seneca', titulo: 'X', formas: ['x'], wikidata: { entidad: 'Q480', revision: 0 } }],
+    ['wikidata con revisión decimal', { autor: 'seneca', titulo: 'X', formas: ['x'], wikidata: { entidad: 'Q480', revision: 1.5 } }],
+    ['wikidata con revisión en cadena', { autor: 'seneca', titulo: 'X', formas: ['x'], wikidata: { entidad: 'Q480', revision: '1' } }],
+    ['wikidata sin revisión', { autor: 'seneca', titulo: 'X', formas: ['x'], wikidata: { entidad: 'Q480' } }],
+    ['wikidata que no es objeto', { autor: 'seneca', titulo: 'X', formas: ['x'], wikidata: 'Q480' }],
   ])('rechaza %s', (_caso, datos) => {
     expect(obraAdmisible.safeParse(datos).success).toBe(false);
   });
@@ -127,6 +136,24 @@ describe('el esquema de la Ficha de Obra', () => {
     expect(r.success).toBe(false);
     expect(r.error?.issues.map((i) => i.message).join()).toContain(
       'no reconoce «sinopsis». Sus campos son autor, titulo, formas, distintaDe, nota, ediciones y wikidata.',
+    );
+  });
+});
+
+describe('wikidata en la Ficha de Obra (Historia 32.1)', () => {
+  it('admite {entidad, revision} y rechaza una clave de más nombrando los campos', () => {
+    expect(
+      obraAdmisible.safeParse({ autor: 'seneca', titulo: 'X', formas: ['x'], wikidata: { entidad: 'Q480', revision: 7 } }).success,
+    ).toBe(true);
+    const r = obraAdmisible.safeParse({
+      autor: 'seneca',
+      titulo: 'X',
+      formas: ['x'],
+      wikidata: { entidad: 'Q480', revision: 7, etiqueta: 'Y' },
+    });
+    expect(r.success).toBe(false);
+    expect(r.error?.issues.map((i) => i.message).join()).toContain(
+      '«wikidata» no reconoce «etiqueta». Sus campos son entidad y revision.',
     );
   });
 });
