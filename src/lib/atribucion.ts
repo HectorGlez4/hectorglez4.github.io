@@ -563,6 +563,20 @@ export function nombreEnReferencia(autor: AutorParaReferencia, estilo: EstiloDeR
 }
 
 /**
+ * El punto que cierra una frase de la Referencia o del Fragmento: tras lo que ya acaba en
+ * puntuación final —un título «¿…?», un año «23 a. C.», un «…»— no va otro. Una sola regla para
+ * «Cómo citar» (30.3) e «Inserta esta cita» (30.4).
+ */
+function punto(frase: string): string {
+  return /[.?!…]$/u.test(frase) ? '' : '.';
+}
+
+/** La frase con su punto final, por la regla de `punto`. */
+function conPunto(frase: string): string {
+  return `${frase}${punto(frase)}`;
+}
+
+/**
  * La Referencia de una Cita en un estilo, en segmentos — FR-58, AD-28.
  *
  * Sale solo de lo que consta de **esa** Cita: el nombre del Autor, el título de su Obra resuelta
@@ -584,9 +598,6 @@ export function referenciaDeCita(
   estilo: EstiloDeReferencia,
 ): SegmentoDeReferencia[] {
   const nombre = nombreEnReferencia(autor, estilo);
-  // Tras lo que ya acaba en puntuación final —un título «¿…?», un año «23 a. C.»— no va otro punto.
-  const punto = (frase: string) => (/[.?!…]$/u.test(frase) ? '' : '.');
-  const conPunto = (frase: string) => `${frase}${punto(frase)}`;
   const titulo = cita.obra?.titulo;
   const año = cita.procedencia?.año === undefined ? undefined : añoLegible(cita.procedencia.año);
   const traduccion = titulo === undefined ? undefined : cita.procedencia?.traduccion;
@@ -704,7 +715,7 @@ export function nombreEnAtribucion(autor: Pick<Autor, 'nombre'>): string {
  *
  * Sin Obra, sin `<cite>`: «— {Autor}. ». El texto va entero y literal, sin comillas —el
  * `blockquote` ya dice que es cita— y a cualquier longitud. Tras el nombre o el título va «.»
- * salvo que ya acaben en «.», «?», «!» o «…», la regla de la Referencia. Nada más: ni año, ni
+ * salvo que ya acaben en «.», «?», «!» o «…»: la misma `punto` de la Referencia. Nada más: ni año, ni
  * traductor, ni edición, ni Fuente, ni la grafía que declara la Cita. Todo texto y el `href` salen escapados
  * con `escapar` de `src/lib/lienzo.ts`; sin guion, imagen, estilo, clase ni recurso del sitio, y su
  * único enlace es la canónica. Una canónica que no sea `http(s)` absoluta o lleve `?…` o `#…`
@@ -721,12 +732,11 @@ export function fragmentoParaInsertar(cita: Pick<Cita, 'texto' | 'obra'>, autor:
   if (url === undefined || !/^https?:$/.test(url.protocol) || canonica.includes('?') || canonica.includes('#')) {
     throw new Error(`fragmentoParaInsertar: la canónica «${canonica}» no es una URL http(s) absoluta sin «?» ni «#»`);
   }
-  const conPunto = (frase: string) => `${frase}${/[.?!…]$/u.test(frase) ? '' : '.'}`;
   const titulo = cita.obra?.titulo;
   const firma =
     titulo === undefined
       ? escapar(conPunto(nombreEnAtribucion(autor)))
-      : `${escapar(nombreEnAtribucion(autor))}, <cite>${escapar(titulo)}</cite>${/[.?!…]$/u.test(titulo) ? '' : '.'}`;
+      : `${escapar(nombreEnAtribucion(autor))}, <cite>${escapar(titulo)}</cite>${punto(titulo)}`;
   return [
     '<blockquote>',
     `<p>${escapar(cita.texto)}</p>`,

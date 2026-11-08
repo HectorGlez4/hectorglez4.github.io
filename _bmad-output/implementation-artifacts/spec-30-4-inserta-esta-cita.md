@@ -5,7 +5,7 @@ created: '2026-11-08'
 status: 'done'
 baseline_revision: '33b27cebb5f5e8d698a8642afbe837ba456c6711'
 review_loop_iteration: 0
-followup_review_recommended: false
+followup_review_recommended: true
 context:
   - '{project-root}/_bmad-output/implementation-artifacts/epic-30-context.md'
   - '{project-root}/_bmad-output/implementation-artifacts/spec-30-3-como-citar-en-la-pagina-de-cita.md'
@@ -127,6 +127,20 @@ deferred:
 - addressed_findings:
   - none
 
+### 2026-11-08 — Review pass
+- intent_gap: 0
+- bad_spec: 0
+- patch: 5: (high 0, medium 0, low 5)
+- defer: 0
+- reject: 27: (high 0, medium 3, low 24)
+- addressed_findings:
+  - `[low]` `[patch]` La regla del punto final estaba escrita dos veces más en `fragmentoParaInsertar`, en lugar de reutilizar la de `referenciaDeCita` como pedía el Code Map: `punto` y `conPunto` pasan a ser funciones del módulo en `src/lib/atribucion.ts`, y la Referencia y el Fragmento usan las dos (salida idéntica, tabla de Vitest en verde).
+  - `[low]` `[patch]` La prueba de Pagefind no buscaba ninguna palabra del rótulo visible («insertar» no sale en el bloque): gana «inserta».
+  - `[low]` `[patch]` La vigilancia de `--mono`/`--codigo` solo casaba `var(--x)` exacto: ahora casa también `var( --x )` y `var(--x, respaldo)`.
+  - `[low]` `[patch]` Ninguna prueba exigía que `Atribucion.astro` nombrara por `nombreEnAtribucion`: una prueba de fuente nueva en `tests/unit/inserta-esta-cita.test.ts` lo exige y rechaza `{autor.nombre}`.
+  - `[low]` `[patch]` La nota de peso decía que no se reconstruyó la base sin decir por qué la cifra de la 30.3 la representa: Design Notes dice ahora que entre la medida de la 30.3 (`f14e82d61f`) y la base solo cambian pruebas, documentación y un comentario de `umbrales.ts`.
+- Rechazados (resumen): el `id` fijo del campo (el componente solo va una vez, en la Página de Cita; el spec lo fija); `textContent` frente a `.value` (campo `readonly`, equivalentes) y la forma hermana del botón (cubierta por e2e); la canónica de otro host o con credenciales (sale de `Astro.site`); `lang`/`cite` en el `blockquote`, el texto del enlace, el traductor y el marcado en general (supuesto literal que revisa Héctor, diferido ya anotado; el criterio veda año, traductor y edición); los versos sin guarda (diferido ya anotado); una Cita sin «Cómo citar» (`citaTieneComoCitar` es hoy siempre verdadero: no existe el caso hasta la 35.4); la región de desplegables hasta `</article>`, los estilos duplicados de `.copiar-referencia`, la transición de 150 ms y el `:focus-visible` (trato heredado de la 30.3 y del armazón); el `aria-label` fijo (patrón de la 22.10); `rows="6"` (el campo se redimensiona); los tiempos y la ruta de contexto del e2e; el registro de la pasada anterior; la firma de `nombreEnAtribucion`; el orden de foco sin Obra; un fallo del portapapeles sin seleccionar el campo (lo que pide la Matriz); la región ausente; la puntuación tras «»» o «)» (la misma regla que la Referencia); el bucle del e2e (acotado a 20); la prueba sobre una copia y no el Corpus real (patrón del repositorio); y la función de nombre solo en la Atribución y el Fragmento (lo que pide el contrato).
+
 ## Design Notes
 
 **El Fragmento (supuesto; lo revisa Héctor).** Líneas unidas por `\n`, `{X}` el texto escapado, `{N}` `nombreEnAtribucion` escapado, `{O}` el título escapado, `{U}` la canónica escapada; tras `{N}` o `{O}` va «.» salvo que ya acaben en «.», «?», «!» o «…» (la regla `punto` de la 30.3):
@@ -147,7 +161,7 @@ Sin Obra, la segunda línea es `<p>— {N}. <a href="{U}">Sabiduría de Bolsillo
 **Medidas tomadas (2026-11-08):**
 
 - **Guion en línea** (`tests/unit/medicion.test.ts`, «la Página de Cita no pierde su listón», Página de Cita con Imagen y la medición puesta): **7.326 bytes**, 354 libres de `MAX_BYTES_DE_GUION` (7.680); tras la revisión 1 de la 30.3 eran unos 7.334 (346 libres). Los selectores neutros ahorran 8 bytes y el tope no cambia. La Página de Cita sin Imagen: 3.629 bytes. El resto de superficies, 65 (solo el arranque).
-- **Peso** (`FECHA_JORNADA=2026-11-08 npm run build`, juzgado sin lo que rota): **540.697.828 bytes** (515,6 MiB), sin aviso; quedan 245.734.172 bytes (234,4 MiB) hasta el aviso de 750 MiB. Frente a la cifra de la 30.3 con el mismo Corpus y el mismo código salvo un comentario (533.823.946 bytes, medida en su revisión 1; la base `33b27cebb5` no se reconstruyó aparte en esta pasada): **+6.873.882 bytes** (+6,6 MiB), unos **1.554 bytes por Página de Cita** (4.424 páginas; p. ej. `agustin-alvarez-ahora-empieza-a-haber-quienes-piensen-en`, 42.860 bytes): el Desplegable, el `label`, el Fragmento escapado dos veces y el botón, con los `data-astro-cid` de dos componentes. `index.html` y `404.html` no cambian.
+- **Peso** (`FECHA_JORNADA=2026-11-08 npm run build`, juzgado sin lo que rota): **540.697.828 bytes** (515,6 MiB), sin aviso; quedan 245.734.172 bytes (234,4 MiB) hasta el aviso de 750 MiB. Frente a la cifra de la 30.3 con el mismo Corpus y el mismo código salvo un comentario (533.823.946 bytes, medida en su revisión 1, `f14e82d61f`; la base `33b27cebb5` no se reconstruyó aparte porque entre las dos solo cambian pruebas, documentación y un comentario de `src/lib/umbrales.ts`, que no llegan a `dist/`: esa cifra es la de la base): **+6.873.882 bytes** (+6,6 MiB), unos **1.554 bytes por Página de Cita** (4.424 páginas; p. ej. `agustin-alvarez-ahora-empieza-a-haber-quienes-piensen-en`, 42.860 bytes): el Desplegable, el `label`, el Fragmento escapado dos veces y el botón, con los `data-astro-cid` de dos componentes. `index.html` y `404.html` no cambian.
 
 **Decisiones de la implementación (las revisa Héctor con la tabla):**
 
@@ -195,3 +209,23 @@ Blocking condition: ninguna.
 - Matriz: con JS, sin JS, portapapeles denegado y pegado fuera en `tests/e2e/inserta-esta-cita.spec.ts`; texto con `&<>"`, Cita sin Obra y Fragmento de un solo `blockquote` en `tests/unit/inserta-esta-cita.test.ts`; Cita larga (> `MAX_CARACTERES_IMAGEN`), título con `<`, sin Obra y canónica con marca en `tests/unit/atribucion.test.ts`. Todas corrieron y pasaron.
 
 **Riesgos residuales.** El marcado literal del Fragmento es un supuesto que revisa Héctor (diferido). Los versos se pierden en un solo `<p>` hasta fundir la Épica 29 (diferido; hoy ninguna Cita de la rama lleva U+000A). +1,5 KB por Página de Cita (+6,6 MiB en `dist/`), sin aviso; la cifra de la base es la de la 30.3 con el mismo Corpus, no una reconstrucción de `33b27cebb5` en esta pasada.
+
+### Pasada de revisión 1 (2026-11-08, capas externas)
+
+**Resumen.** Cinco parches bajos, sin cambio de comportamiento ni de `dist/`: la regla del punto final es una sola (`punto`/`conPunto` del módulo en `src/lib/atribucion.ts`, para la Referencia y el Fragmento); la prueba de Pagefind busca también «inserta»; la vigilancia de `--mono`/`--codigo` casa las variantes con espacio o respaldo; una prueba de fuente exige que `Atribucion.astro` nombre por `nombreEnAtribucion`; y la nota de peso dice por qué la cifra de la 30.3 es la de la base.
+
+**Ficheros.**
+- `src/lib/atribucion.ts` — `punto` y `conPunto` a nivel de módulo; `referenciaDeCita` y `fragmentoParaInsertar` los usan.
+- `tests/unit/inserta-esta-cita.test.ts` — término «inserta», regex ampliada y la prueba de `nombreEnAtribucion` en la Atribución.
+- Este spec — registro de la pasada, nota de peso y este resultado.
+
+**Revisión.** 5 parches (bajos), 0 diferidos, 27 rechazados (detalle en el Review Triage Log). `followup_review_recommended: true` (parches: alto 0, medio 0, bajo 5; puntuación 3 × 0 + 1 × 5 = 5).
+
+**Verificación.**
+- `npx vitest run tests/unit/atribucion.test.ts tests/unit/inserta-esta-cita.test.ts`: 91 en verde.
+- `npx astro check`: 0 errores, 0 avisos.
+- `npm test` (en segundo plano y esperado): 158 ficheros, 7.305 pruebas en verde (1.262 s).
+- Playwright `inserta-esta-cita`, `como-citar` y `copiar`, móvil y escritorio, contra el sitio construido (`npm run build` del `webServer`, con una copia temporal de la configuración que solo sube su plazo y fija `FECHA_JORNADA=2026-11-08`; borrada después): 52 en verde; los servidores pararon.
+- `npx tsx integraciones/peso.ts` sobre ese `dist/`: 540.971.222 bytes juzgados, sin aviso (234,1 MiB hasta el aviso).
+
+**Riesgos residuales.** Los de la pasada anterior siguen: los versos hasta fundir la Épica 29 y el marcado literal del Fragmento que revisa Héctor (los dos diferidos).

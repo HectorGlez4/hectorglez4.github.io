@@ -193,7 +193,7 @@ describe('Historia 30.4 — «Inserta esta cita» en la Página de Cita construi
     try {
       const rutasDe = async (termino: string) =>
         (await Promise.all((await indice.search(termino)).results.map((r) => r.data()))).map((d) => d.url);
-      for (const termino of ['fragmento', 'blockquote', 'pega', 'cite', 'insertar']) {
+      for (const termino of ['fragmento', 'blockquote', 'pega', 'cite', 'inserta', 'insertar']) {
         expect((await rutasDe(termino)).filter((u) => u.startsWith('/cita/')), termino).toEqual([]);
       }
     } finally {
@@ -210,8 +210,16 @@ describe('Historia 30.4 — `--mono` y `--codigo` son solo del campo del Fragmen
       .map((d) => join(d.parentPath, d.name));
     const nombran: string[] = [];
     for (const f of ficheros) {
-      if (/var\(--(mono|codigo)\)|--(mono|codigo)\s*:/.test(await readFile(f, 'utf8'))) nombran.push(f.slice(raiz.length + 1));
+      if (/var\(\s*--(mono|codigo)(?![\w-])|--(mono|codigo)\s*:/.test(await readFile(f, 'utf8'))) nombran.push(f.slice(raiz.length + 1));
     }
     expect(nombran.sort()).toEqual(['components/InsertaEstaCita.astro', 'styles/tokens.css']);
+  });
+});
+
+describe('Historia 30.4 — una sola función nombra al Autor en la Atribución y en el Fragmento', () => {
+  it('la Atribución nombra al Autor por `nombreEnAtribucion`, la misma función que el Fragmento', async () => {
+    const atribucion = await readFile(join(import.meta.dirname, '..', '..', 'src', 'components', 'Atribucion.astro'), 'utf8');
+    expect(atribucion).toMatch(/\{nombreEnAtribucion\(autor\)\}/);
+    expect(atribucion).not.toMatch(/\{autor\.nombre\}/);
   });
 });
