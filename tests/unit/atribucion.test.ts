@@ -398,7 +398,8 @@ describe('Historia 30.4 — el Fragmento para insertar', () => {
   });
 
   it('el `href` también sale escapado', () => {
-    expect(fragmentoParaInsertar(citaDe(), MARTI, 'https://ejemplo.org/cita/a"b/')).toContain('href="https://ejemplo.org/cita/a&quot;b/"');
+    // Una comilla no llega: el parser la escribe `%22` y la canónica no normalizada se rechaza.
+    expect(fragmentoParaInsertar(citaDe(), MARTI, 'https://ejemplo.org/cita/a&b/')).toContain('href="https://ejemplo.org/cita/a&amp;b/"');
   });
 
   it.each([
@@ -410,6 +411,11 @@ describe('Historia 30.4 — el Fragmento para insertar', () => {
     'ftp://ejemplo.org/cita/x/',
     'javascript:alert(1)',
     '',
+    'https:ejemplo.org/cita/x/',
+    'HTTPS://Ejemplo.org/cita/x/',
+    ' https://ejemplo.org/cita/x/',
+    'https://ejemplo.org/cita/x/\n',
+    'https://usuario:clave@ejemplo.org/cita/x/',
   ])('una canónica «%s» detiene la construcción', (canonica) => {
     expect(() => fragmentoParaInsertar(citaDe(), MARTI, canonica)).toThrow(/canónica/);
   });

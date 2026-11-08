@@ -173,6 +173,14 @@ describe('Historia 30.3 — «Cómo citar» en la Página de Cita construida', (
       expect(bloque).toContain(`>${rotulo}</p>`);
     }
     expect(bloque.match(/data-referencia/g)).toHaveLength(3);
+    // La isla copia el `[data-copiable]` hermano del botón: cada estilo lleva uno, en su Referencia.
+    const estilos = [...bloque.matchAll(/<div class="estilo"[^>]*>([\s\S]*?)<\/button>/g)].map((m) => m[1]);
+    expect(estilos).toHaveLength(3);
+    for (const estilo of estilos) {
+      expect(estilo.match(/\bdata-copiable\b/g), estilo).toHaveLength(1);
+      expect(estilo, estilo).toMatch(/<p\b[^>]*\bdata-referencia\b[^>]*\bdata-copiable\b/);
+      expect(estilo, estilo).toMatch(/<button\b[^>]*\bdata-copiar-texto\b/);
+    }
     expect(bloque.match(/data-sin-fecha/g)).toHaveLength(3);
     expect(bloque.match(/Sin fecha de consulta: añade la de hoy\./g)).toHaveLength(3);
     // El título en cursiva y la canónica como texto, en las tres.
@@ -235,7 +243,10 @@ describe('Historia 30.3 — «Cómo citar» en la Página de Cita construida', (
     const primero = await deCopiar(COTEJADAS[0]);
     expect(primero).toHaveLength(1);
     for (const slug of [...COTEJADAS.slice(1), SIN_OBRA]) expect(await deCopiar(slug), slug).toEqual(primero);
-    expect(primero[0]).toContain('[data-copiables]');
+    // Los tres selectores neutros del recorrido, los mismos que lleva el marcado.
+    for (const selector of ["'[data-copiables]:not([data-listo])'", "'[data-copiar-texto]'", "'[data-copiable]'"]) {
+      expect(primero[0], selector).toContain(selector);
+    }
     for (const ajeno of [...COTEJADAS, SIN_OBRA, 'Séneca', 'brevedad']) expect(primero[0], ajeno).not.toContain(ajeno);
   });
 

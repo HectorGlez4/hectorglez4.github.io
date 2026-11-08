@@ -1307,7 +1307,8 @@ test.describe('Historia 2.8 — responsive', () => {
      */
     if (abiertos) {
       const resumenes = page.locator('main details:not([open]) > summary');
-      while ((await resumenes.count()) > 0) await resumenes.first().click();
+      for (let i = 0; i < 20 && (await resumenes.count()) > 0; i++) await resumenes.first().click();
+      await expect(resumenes).toHaveCount(0);
       await expect(page.getByRole('button', { name: 'Copiar el fragmento', exact: true })).toBeVisible();
     }
 

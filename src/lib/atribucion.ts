@@ -718,7 +718,8 @@ export function nombreEnAtribucion(autor: Pick<Autor, 'nombre'>): string {
  * salvo que ya acaben en «.», «?», «!» o «…»: la misma `punto` de la Referencia. Nada más: ni año, ni
  * traductor, ni edición, ni Fuente, ni la grafía que declara la Cita. Todo texto y el `href` salen escapados
  * con `escapar` de `src/lib/lienzo.ts`; sin guion, imagen, estilo, clase ni recurso del sitio, y su
- * único enlace es la canónica. Una canónica que no sea `http(s)` absoluta o lleve `?…` o `#…`
+ * único enlace es la canónica. Una canónica que no sea `http(s)` absoluta y ya normalizada (la que
+ * escribe el parser es la que se pega), o lleve credenciales, `?…` o `#…`
  * —una Marca de llegada pegada en blogs ajenos atribuiría sus visitas a otra cosa— detiene la
  * construcción.
  */
@@ -729,8 +730,18 @@ export function fragmentoParaInsertar(cita: Pick<Cita, 'texto' | 'obra'>, autor:
   } catch {
     url = undefined;
   }
-  if (url === undefined || !/^https?:$/.test(url.protocol) || canonica.includes('?') || canonica.includes('#')) {
-    throw new Error(`fragmentoParaInsertar: la canónica «${canonica}» no es una URL http(s) absoluta sin «?» ni «#»`);
+  if (
+    url === undefined ||
+    !/^https?:$/.test(url.protocol) ||
+    url.href !== canonica ||
+    url.username !== '' ||
+    url.password !== '' ||
+    canonica.includes('?') ||
+    canonica.includes('#')
+  ) {
+    throw new Error(
+      `fragmentoParaInsertar: la canónica «${canonica}» no es una URL http(s) absoluta, en su forma normalizada, sin credenciales, «?» ni «#»`,
+    );
   }
   const titulo = cita.obra?.titulo;
   const firma =

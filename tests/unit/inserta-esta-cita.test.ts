@@ -133,6 +133,7 @@ describe('Historia 30.4 — «Inserta esta cita» en la Página de Cita construi
       expect(regiones, ruta).toHaveLength(1);
       expect(regiones[0][3], ruta).toBe('');
       expect(regiones[0][1] + regiones[0][2], ruta).not.toMatch(/\bhidden\b/);
+      expect(regiones[0][1] + regiones[0][2], ruta).toContain('solo-para-lectores');
       // Ningún enlace de la página sale del bloque: el del Fragmento es texto del campo.
       expect(inserta, ruta).not.toMatch(/<a\b|data-zona|data-sin-zona/);
     }

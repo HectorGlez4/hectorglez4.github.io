@@ -139,7 +139,21 @@ deferred:
   - `[low]` `[patch]` La vigilancia de `--mono`/`--codigo` solo casaba `var(--x)` exacto: ahora casa también `var( --x )` y `var(--x, respaldo)`.
   - `[low]` `[patch]` Ninguna prueba exigía que `Atribucion.astro` nombrara por `nombreEnAtribucion`: una prueba de fuente nueva en `tests/unit/inserta-esta-cita.test.ts` lo exige y rechaza `{autor.nombre}`.
   - `[low]` `[patch]` La nota de peso decía que no se reconstruyó la base sin decir por qué la cifra de la 30.3 la representa: Design Notes dice ahora que entre la medida de la 30.3 (`f14e82d61f`) y la base solo cambian pruebas, documentación y un comentario de `umbrales.ts`.
-- Rechazados (resumen): el `id` fijo del campo (el componente solo va una vez, en la Página de Cita; el spec lo fija); `textContent` frente a `.value` (campo `readonly`, equivalentes) y la forma hermana del botón (cubierta por e2e); la canónica de otro host o con credenciales (sale de `Astro.site`); `lang`/`cite` en el `blockquote`, el texto del enlace, el traductor y el marcado en general (supuesto literal que revisa Héctor, diferido ya anotado; el criterio veda año, traductor y edición); los versos sin guarda (diferido ya anotado); una Cita sin «Cómo citar» (`citaTieneComoCitar` es hoy siempre verdadero: no existe el caso hasta la 35.4); la región de desplegables hasta `</article>`, los estilos duplicados de `.copiar-referencia`, la transición de 150 ms y el `:focus-visible` (trato heredado de la 30.3 y del armazón); el `aria-label` fijo (patrón de la 22.10); `rows="6"` (el campo se redimensiona); los tiempos y la ruta de contexto del e2e; el registro de la pasada anterior; la firma de `nombreEnAtribucion`; el orden de foco sin Obra; un fallo del portapapeles sin seleccionar el campo (lo que pide la Matriz); la región ausente; la puntuación tras «»» o «)» (la misma regla que la Referencia); el bucle del e2e (acotado a 20); la prueba sobre una copia y no el Corpus real (patrón del repositorio); y la función de nombre solo en la Atribución y el Fragmento (lo que pide el contrato).
+- Rechazados (resumen): el `id` fijo del campo (el componente solo va una vez, en la Página de Cita; el spec lo fija); `textContent` frente a `.value` (campo `readonly`, equivalentes) y la forma hermana del botón (cubierta por e2e); la canónica de otro host o con credenciales (sale de `Astro.site`); `lang`/`cite` en el `blockquote`, el texto del enlace, el traductor y el marcado en general (supuesto literal que revisa Héctor, diferido ya anotado; el criterio veda año, traductor y edición); los versos sin guarda (diferido ya anotado); una Cita sin «Cómo citar» (`citaTieneComoCitar` es hoy siempre verdadero: no existe el caso hasta la 35.4); la región de desplegables hasta `</article>`, los estilos duplicados de `.copiar-referencia`, la transición de 150 ms y el `:focus-visible` (trato heredado de la 30.3 y del armazón); el `aria-label` fijo (patrón de la 22.10); `rows="6"` (el campo se redimensiona); los tiempos y la ruta de contexto del e2e; el registro de la pasada anterior; la firma de `nombreEnAtribucion`; el orden de foco sin Obra; un fallo del portapapeles sin seleccionar el campo (lo que pide la Matriz); la región ausente; la puntuación tras «»» o «)» (la misma regla que la Referencia); el bucle del e2e (que se creía acotado a 20; lo acota la pasada 2); la prueba sobre una copia y no el Corpus real (patrón del repositorio); y la función de nombre solo en la Atribución y el Fragmento (lo que pide el contrato).
+
+### 2026-11-08 — Review pass
+- intent_gap: 0
+- bad_spec: 0
+- patch: 5: (high 0, medium 1, low 4)
+- defer: 0
+- reject: 33: (high 0, medium 2, low 31)
+- addressed_findings:
+  - `[low]` `[patch]` La puerta de la canónica de `fragmentoParaInsertar` validaba con `new URL` pero escribía la cadena cruda: ahora exige además `url.href === canonica` (la forma normalizada es la que se pega) y rechaza usuario y contraseña; `tests/unit/atribucion.test.ts` gana cinco canónicas que lanzan (`https:ejemplo.org/…`, mayúsculas, espacio inicial, salto final, credenciales; las cinco fallaban sin el arreglo) y la del `href` escapado pasa a `&` (una comilla ya no llega: el parser la escribe `%22`).
+  - `[low]` `[patch]` El bucle `abiertos` de `medirZonasDeToque` (`tests/e2e/accesibilidad.spec.ts`) no tenía cota, aunque la pasada 1 lo dio por «acotado a 20»: ahora lo está, y exige después que no quede ningún `<details>` cerrado.
+  - `[medium]` `[patch]` Ninguna prueba de `npm test` exigía el `data-copiable` de cada Referencia de «Cómo citar», del que depende «Copiar APA/MLA/Chicago»: `tests/unit/como-citar.test.ts` exige en cada `div.estilo` un solo `data-copiable`, en el `<p data-referencia>`, junto a su botón `data-copiar-texto`.
+  - `[low]` `[patch]` La prueba del guion de Copiar solo buscaba `[data-copiables]`: exige también `[data-copiables]:not([data-listo])`, `[data-copiar-texto]` y `[data-copiable]`, los mismos atributos que el marcado.
+  - `[low]` `[patch]` La región de «Inserta esta cita» no tenía afirmada la clase `solo-para-lectores`: `tests/unit/inserta-esta-cita.test.ts` la exige.
+- Rechazados (resumen): `url.search`/`url.hash` frente a `includes` (la comprobación textual es más estricta y cubre el `?` vacío); el `id` fijo (un solo uso, en la Página de Cita); `textContent` frente a `.value` y las guardas de nulos de la isla (campo `readonly`; marcado fijado ahora por las pruebas de `dist/`); el doble clic (patrón de la 30.3); el peso por página y no medir la base (sin aviso; razonado en Design Notes); los versos (diferido ya anotado); `lang`/`cite` y el marcado literal (supuesto que revisa Héctor, diferido); la aparente contradicción del Auto Run Result (son pasadas sucesivas, y `review_loop_iteration` solo cuenta vueltas `bad_spec`); el nombre `deComoCitar`, la línea de historia de la cabecera de `CopiarCita.astro`; la espera fija del portapapeles denegado y el `favicon` de `otro.test` (verdes en las dos pasadas); el foco sin Obra y la Cita sin «Cómo citar» (no existe hoy); el control positivo de Pagefind (la prueba de «Cómo citar» ya lo hace con «brevedad»); la Atribución byte a byte (las pruebas de `dist/` que la leen siguen verdes); título, nombre o texto vacíos (el esquema los exige); la puntuación tras «»»; el `data-copiables` en otro elemento; y distancias, colores, el aire sin JS, la petición de fuente y la cifra impresa del guion (sin prueba en superficie; axe y el código los cubren).
 
 ## Design Notes
 
@@ -229,3 +243,26 @@ Blocking condition: ninguna.
 - `npx tsx integraciones/peso.ts` sobre ese `dist/`: 540.971.222 bytes juzgados, sin aviso (234,1 MiB hasta el aviso).
 
 **Riesgos residuales.** Los de la pasada anterior siguen: los versos hasta fundir la Épica 29 y el marcado literal del Fragmento que revisa Héctor (los dos diferidos).
+
+### Pasada de revisión 2 (2026-11-08, capas externas)
+
+**Resumen.** Cinco parches (uno medio, cuatro bajos), sin cambio de `dist/` con la canónica real: `fragmentoParaInsertar` exige la canónica ya normalizada (`url.href === canonica`) y sin credenciales; el bucle `abiertos` del e2e de zonas de toque queda acotado a 20 y exige que no quede nada plegado; y tres pruebas de `dist/` atan el marcado a la isla de Copiar (el `data-copiable` de cada Referencia junto a su `data-copiar-texto`, los tres selectores neutros en el guion y la clase `solo-para-lectores` de la región de «Inserta esta cita»).
+
+**Ficheros.**
+- `src/lib/atribucion.ts` — la puerta de la canónica: forma normalizada y sin usuario ni contraseña; comentario al día.
+- `tests/unit/atribucion.test.ts` — cinco canónicas más que lanzan; el `href` escapado se prueba con `&`.
+- `tests/unit/como-citar.test.ts` — `data-copiable` por estilo y los tres selectores del guion.
+- `tests/unit/inserta-esta-cita.test.ts` — `solo-para-lectores` en la región.
+- `tests/e2e/accesibilidad.spec.ts` — el bucle `abiertos`, acotado.
+- Este spec — registro de la pasada (y la corrección de la pasada 1, que daba el bucle por acotado) y este resultado.
+
+**Revisión.** 5 parches, 0 diferidos, 33 rechazados (detalle en el Review Triage Log). `followup_review_recommended: true` (parches: alto 0, medio 1, bajo 4; puntuación 3 × 1 + 1 × 4 = 7).
+
+**Verificación.**
+- `npx vitest run tests/unit/atribucion.test.ts`: 88 en verde; con el `atribucion.ts` de `HEAD`, las cinco canónicas nuevas en rojo.
+- `npx vitest run tests/unit/como-citar.test.ts tests/unit/inserta-esta-cita.test.ts`: 18 en verde.
+- `npx astro check`: 0 errores, 0 avisos.
+- `npm test` (en segundo plano y esperado): 158 ficheros, 7.310 pruebas en verde (1.114 s).
+- Playwright `accesibilidad.spec.ts -g "zonas de toque"`, móvil y escritorio, contra el sitio construido (copia temporal de la configuración que solo sube el plazo del `webServer` a 600 s, borrada después): 10 en verde; los servidores pararon.
+
+**Riesgos residuales.** Los dos diferidos siguen: los versos hasta fundir la Épica 29 y el marcado literal del Fragmento que revisa Héctor. El comportamiento de copiar solo lo observa Playwright, que no corre en el CI; ahora `npm test` sí ata el marcado a los selectores del guion.
