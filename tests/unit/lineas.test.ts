@@ -306,7 +306,9 @@ describe('dueños del salto (AD-29)', () => {
   });
 
   it('las cinco formas solo se escriben como literal en tools/lib/lineas.ts', () => {
-    const literal = /(['"])(?:verso|verso-espaciado|prosa-por-lineas|prosa-ajustada|indeterminada)\1/u;
+    // `class="verso"` no es la forma de un documento: es la clase con que `TextoDeCita.astro`
+    // pinta cada verso desde la 29.3, y queda fuera de la guarda.
+    const literal = /(?<!class=)(['"])(?:verso|verso-espaciado|prosa-por-lineas|prosa-ajustada|indeterminada)\1/u;
     expect(todos.filter((f) => literal.test(f.contenido)).map((f) => f.ruta)).toEqual(['tools/lib/lineas.ts']);
   });
 

@@ -8,6 +8,7 @@ import {
   citaConTarjetaCompleta,
   citaConTituloDeObraMasLargo,
   citaSinObra,
+  citasEnVerso,
   procedenciaDe,
 } from './ayuda/corpus.ts';
 import { apuntarGuiones, fueraDeLaListaAlCargar } from './ayuda/guiones.ts';
@@ -972,4 +973,65 @@ test.describe('Historia 24.6 — el pie de la Página de Cita', () => {
       description: `${ruta}: página de ${pagina} px de alto; pie de ${Math.round(pie)} px`,
     });
   });
+});
+
+/**
+ * Historia 29.3 — una Cita en verso, a 360 × 640: «Yo vengo de todas partes» (que la AC nombra)
+ * y otra de *Versos sencillos* sacada del Corpus. «Yo soy un hombre sincero», la de la auditoría,
+ * sigue en el censo sin documento y no lleva saltos (deferido en el spec de la 29.3).
+ */
+test.describe('Historia 29.3 — la Cita en verso, verso a verso', () => {
+  const MARTI = 'jose-marti-yo-vengo-de-todas-partes-y-hacia';
+  const deVersosSencillos = () => {
+    const enVerso = citasEnVerso();
+    const marti = enVerso.find((c) => c.slug === MARTI);
+    const otra = enVerso.find((c) => c.slug !== MARTI && c.obra === 'Versos sencillos');
+    return [marti, otra];
+  };
+
+  for (const [indice, cual] of ['«Yo vengo de todas partes»', 'otra de Versos sencillos'].entries()) {
+    test(`${cual}: el h1 es lo primero visible sin desplazar y cada verso empieza renglón`, async ({ page }, info) => {
+      test.skip(info.project.name !== 'movil', 'El criterio se enuncia sobre 360×640.');
+      const cita = deVersosSencillos()[indice];
+      expect(cita, 'no hay esa Cita en verso: falta el commit de restitución de la 29.2').toBeDefined();
+
+      await page.goto(`/cita/${cita!.slug}`);
+      const h1 = page.locator('h1.texto');
+      await expect(h1).toBeVisible();
+      const caja = (await h1.boundingBox())!;
+      expect(caja.y).toBeGreaterThan(0);
+      expect(caja.y).toBeLessThan(640);
+      expect(await page.evaluate(() => window.scrollY)).toBe(0);
+      // Nada visible del `<main>` empieza por encima del h1.
+      const encima = await page.evaluate((y) => {
+        const main = document.querySelector('main')!;
+        return [...main.querySelectorAll<HTMLElement>('*')].filter((n) => {
+          const r = n.getBoundingClientRect();
+          return r.height > 0 && r.width > 0 && r.bottom <= y && n.innerText?.trim();
+        }).length;
+      }, caja.y);
+      expect(encima).toBe(0);
+
+      const versos = h1.locator('span.verso');
+      await expect(versos).toHaveCount(cita!.versos.length);
+      const desfases = await h1.evaluate((elemento) => {
+        const izquierda = elemento.getBoundingClientRect().left;
+        return [...elemento.querySelectorAll('span.verso')].map((verso) => {
+          const nodo = verso.firstChild!;
+          const rango = document.createRange();
+          rango.setStart(nodo, 0);
+          rango.setEnd(nodo, Math.min(2, nodo.textContent!.length));
+          return Math.abs(rango.getBoundingClientRect().left - izquierda);
+        });
+      });
+      for (const desfase of desfases) expect(desfase).toBeLessThanOrEqual(1);
+
+      await page.setViewportSize({ width: 320, height: 640 });
+      const { scrollWidth, clientWidth } = await page.evaluate(() => ({
+        scrollWidth: document.documentElement.scrollWidth,
+        clientWidth: document.documentElement.clientWidth,
+      }));
+      expect(scrollWidth).toBeLessThanOrEqual(clientWidth);
+    });
+  }
 });

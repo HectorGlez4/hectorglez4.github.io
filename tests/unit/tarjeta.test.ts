@@ -12,7 +12,11 @@ import {
 } from '../../src/lib/tarjeta.ts';
 import { SANS, SERIF } from '../../src/lib/lienzo.ts';
 import { MARCA } from '../../src/lib/marca.ts';
-import { tramoDe } from '../../src/lib/tramos.ts';
+import { cuerpoEnTarjeta, tramoDe } from '../../src/lib/tramos.ts';
+import { repartirEnLineas } from '../../src/lib/lienzo.ts';
+import { leerCitas, leerDocumentosDeclarados, rutasDelCorpus } from '../../tools/lib/corpus.ts';
+import { documentosDeCita } from '../../tools/lib/cotejo.ts';
+import { documentoParaLosSaltos, textoConSaltos } from '../../tools/lib/lineas.ts';
 import { MAX_CARACTERES_IMAGEN } from '../../src/lib/umbrales.ts';
 
 const raiz = resolve(import.meta.dirname, '../..');
@@ -331,4 +335,147 @@ describe('Historia 22.7 — la Tarjeta de Obra', () => {
     const [uno, dos] = await Promise.all([rasterizar(), rasterizar()]);
     expect(uno.equals(dos)).toBe(true);
   });
+});
+
+/**
+ * Historia 29.3 — la regla de la Tarjeta del verso, decisión de Héctor del 2026-11-08: una Cita
+ * en verso que no cabe en su tramo baja al siguiente, hasta `sm`; la prosa conserva el suyo.
+ */
+describe('Historia 29.3 — cuerpoEnTarjeta', () => {
+  const VERSO = 'Corto y breve.\nOtro verso.';
+
+  it('con saltos y cabe: el cuerpo de su tramo', () => {
+    expect(cuerpoEnTarjeta(VERSO, () => true)).toBe(tramoDe(VERSO).pixelesEnTarjeta);
+    expect(cuerpoEnTarjeta(VERSO, () => true)).toBe(56);
+  });
+
+  it('con saltos y no cabe: baja una fila, y otra, hasta que quepa', () => {
+    expect(cuerpoEnTarjeta(VERSO, (c) => c <= 46)).toBe(46);
+    expect(cuerpoEnTarjeta(VERSO, (c) => c <= 32)).toBe(32);
+  });
+
+  it('con saltos y no cabe ni en `sm`: undefined', () => {
+    expect(cuerpoEnTarjeta(VERSO, () => false)).toBeUndefined();
+  });
+
+  it('sin Imagen: undefined, sin preguntar', () => {
+    const largo = `${'palabra '.repeat(Math.ceil(MAX_CARACTERES_IMAGEN / 8) + 2)}\nfin`;
+    expect(cuerpoEnTarjeta(largo, () => true)).toBeUndefined();
+  });
+
+  it('sin saltos: el cuerpo de su tramo aunque `cabe` diga que no (la decisión es para el verso)', () => {
+    let preguntas = 0;
+    const cabe = () => {
+      preguntas += 1;
+      return false;
+    };
+    expect(cuerpoEnTarjeta('Una sola línea de prosa.', cabe)).toBe(56);
+    expect(preguntas).toBe(0);
+  });
+});
+
+/** El cuerpo del texto y el `y` del último `<text>` de la Cita (antes del filete), leídos del SVG. */
+function geometria(svg: string): { cuerpo: number; lineas: string[]; ultimaY: number; fileteY: number } {
+  const textos = [...svg.matchAll(/<text x="80" y="(\d+(?:\.\d+)?)" font-family="[^"]*" font-size="(\d+)" fill="#[0-9a-f]+">([^<]*)<\/text>/g)];
+  const deCita = textos.filter((m) => m[0].includes(SERIF));
+  const filete = Number(svg.match(/<rect x="80" y="(\d+(?:\.\d+)?)" width="96"/)![1]);
+  return {
+    cuerpo: Number(deCita[0][2]),
+    lineas: deCita.map((m) => m[3]),
+    ultimaY: Number(deCita.at(-1)![1]),
+    fileteY: filete,
+  };
+}
+
+/** El alto que ocupa el bloque con ese cuerpo y esas líneas: márgenes, texto, aire y atribución. */
+const altoDelBloque = (cuerpo: number, lineas: number, conProcedencia: boolean) =>
+  80 * 2 + lineas * Math.round(cuerpo * 1.3) + 40 + 24 + 34 + (conProcedencia ? 30 : 0);
+
+describe('Historia 29.3 — la Tarjeta de una Cita en verso', () => {
+  // Literales, con los saltos que les compone `textoConSaltos` sobre su documento de Wikisource.
+  const CALDERON = [
+    'Contra vosotros, naciendo;\nAunque si nací, ya entiendo\nQué delito he cometido:\nBastante causa ha tenido\nVuestra justicia y rigor;\nPues el delito mayor\nDel hombre es haber nacido.',
+    'Entre las flores se quiebra,\nCuando, músico, celebra\nDe las flores la piedad,\nQue le da la majestad\nDel campo abierto á su huida:\n¿Y, teniendo yo mas vida,\nTengo menos libertad?',
+    'Ni qué pueda preguntarte:\nSolo diré que á esta parte\nHoy el cielo me ha guiado\nPara haberme consolado,\nSi consuelo puede ser\nDel que es desdichado, ver\nOtro que es más desdichado.',
+  ];
+
+  it.each(CALDERON)('Calderón, 7 versos de `md`: se compone a 32 px y el bloque cabe en 630 (%#)', (texto) => {
+    expect(tramoDe(texto).nombre).toBe('md');
+    const svg = svgDeTarjeta({ texto, autor: 'Pedro Calderón de la Barca', procedencia: 'La vida es sueño' });
+    const g = geometria(svg);
+    expect(g.cuerpo).toBe(32);
+    expect(g.lineas).toHaveLength(7);
+    expect(g.lineas[0].startsWith('«')).toBe(true);
+    expect(altoDelBloque(g.cuerpo, g.lineas.length, true)).toBe(582);
+    expect(altoDelBloque(g.cuerpo, g.lineas.length, true)).toBeLessThanOrEqual(ALTO);
+    // Con su tramo pediría 631: es el caso que decidió Héctor.
+    expect(altoDelBloque(38, 7, true)).toBe(631);
+    // El texto queda dentro del lienzo y por encima del filete.
+    expect(g.ultimaY).toBeLessThan(g.fileteY);
+  });
+
+  it('Martí, 4 versos de `lg`: su tramo, 46 px, un verso por línea', () => {
+    const texto =
+      'Yo vengo de todas partes,\nY hacia todas partes voy:\nArte soy entre las artes,\nEn los montes, monte soy.';
+    const g = geometria(svgDeTarjeta({ texto, autor: 'José Martí', procedencia: 'Versos sencillos' }));
+    expect(g.cuerpo).toBe(46);
+    expect(g.lineas).toEqual([
+      '«Yo vengo de todas partes,',
+      'Y hacia todas partes voy:',
+      'Arte soy entre las artes,',
+      'En los montes, monte soy.»',
+    ]);
+  });
+
+  it('sin saltos, cada tramo con su cuerpo y el reparto de siempre', () => {
+    for (const largo of [60, 150, 230, 290]) {
+      const texto = 'palabra '.repeat(Math.ceil(largo / 8)).slice(0, largo).trim();
+      const tramo = tramoDe(texto);
+      const g = geometria(svgDeTarjeta({ texto, autor: 'Séneca', procedencia: 'Cartas a Lucilio' }));
+      expect(g.cuerpo).toBe(tramo.pixelesEnTarjeta);
+      expect(g.lineas).toEqual(repartirEnLineas(`«${texto}»`, tramo.pixelesEnTarjeta, ANCHO - 160));
+    }
+  });
+
+  it('un texto en verso que no cabe ni en `sm` detiene la composición', () => {
+    const texto = Array.from({ length: 20 }, (_, i) => `verso${i}`).join('\n');
+    expect(() => svgDeTarjeta({ texto, autor: 'Nadie', procedencia: 'Ninguna' })).toThrow(/no cabe en 630 px/);
+  });
+
+  it('el PNG de la ruta nombra el slug cuando la Tarjeta no cabe', () => {
+    const ruta = readFileSync(resolve(raiz, 'src/pages/tarjeta/[slug].png.ts'), 'utf8');
+    expect(ruta).toMatch(/Tarjeta Social de «\$\{slug\}»/);
+  });
+
+  it('barrido del Corpus real: toda Cita publicada que admite Imagen, con sus saltos, tiene cuerpo y cabe', async () => {
+    const rutas = rutasDelCorpus(resolve(raiz, 'corpus'));
+    const [citas, documentos] = await Promise.all([leerCitas(rutas.citas), leerDocumentosDeclarados(rutas)]);
+    const noCaben: string[] = [];
+    let conImagen = 0;
+    let enVerso = 0;
+    for (const cita of citas) {
+      if (typeof cita.texto !== 'string') continue;
+      let texto = cita.texto;
+      if (cita.fuente !== undefined) {
+        const candidatos = documentosDeCita(cita.fuente, cita.procedencia?.obra, documentos).map((nombre) => {
+          const d = documentos.get(nombre)!;
+          return { nombre, cuerpo: d.cuerpo, ...(d.lineas !== undefined ? { lineas: d.lineas } : {}) };
+        });
+        const documento = documentoParaLosSaltos(cita.texto, candidatos);
+        if (documento !== undefined) texto = textoConSaltos(cita.texto, documento).texto;
+      }
+      if (!tramoDe(texto).admiteImagen) continue;
+      conImagen += 1;
+      if (texto.includes('\n')) enVerso += 1;
+      const conProcedencia = cita.procedencia?.obra !== undefined || cita.procedencia?.año !== undefined;
+      try {
+        svgDeTarjeta({ texto, autor: 'Autor', ...(conProcedencia ? { procedencia: 'Procedencia' } : {}) });
+      } catch {
+        noCaben.push(cita.slug);
+      }
+    }
+    expect(conImagen).toBeGreaterThan(0);
+    expect(enVerso).toBeGreaterThan(0);
+    expect(noCaben, `no caben en la Tarjeta ni en \`sm\` (lo decide Héctor): ${noCaben.join(', ')}`).toEqual([]);
+  }, 120_000);
 });
