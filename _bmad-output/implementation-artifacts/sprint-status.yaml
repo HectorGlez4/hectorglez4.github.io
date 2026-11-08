@@ -29,7 +29,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 # - Retrospective appends its action items to action_items; the status view surfaces open ones
 generated: 08-11-2026 09:00
-last_updated: 11-07-2026 16:51
+last_updated: 11-08-2026 14:00
 project: brainlySabiduria
 project_key: NOKEY
 tracking_system: file-system
@@ -495,8 +495,8 @@ development_status:
 
   # Épica 32 — la Obra como destino. Pregunta 12 («Granos de oro») antes de la 32.1;
   # incipit declarado por Héctor y MAX_CARACTERES_DEL_INCIPIT sin valor (400 propuesto).
-  epic-32: backlog
-  32-1-revisiones-fijas-de-wikidata-versionadas-y-la-orden-que-ata: backlog
+  epic-32: in-progress
+  32-1-revisiones-fijas-de-wikidata-versionadas-y-la-orden-que-ata: review  # v9-ralph 2026-11-08: recuperar por revisión fija de Wikidata y npm run obra -- wikidata; wikidata-vigente no descarga (decisión delegada); dos pasadas de revisión; pregunta 12 (antologías) sigue para Héctor
   32-2-la-línea-de-ficha-técnica-bajo-la-cabecera-de-obra: backlog
   32-3-el-incipit-lo-declara-una-persona-y-la-página-lo-enseña-pleg: backlog  # bloqueada: necesita en la principal formaDeLasLineas y tramoEnCrudo de la 29.1 (Épica 29, en v9/epica-29 sin fusionar) y el cargador de posiciones con texto y tools/lib/pasaje.ts de la 31.1 (Épica 31, sin construir); epics.md: «Llega después de la 29 (…) y la 31.1» (v9-ralph 2026-11-07)
   32-4-la-página-1-de-la-obra-reordenada-dónde-leer-esta-obra-plega: backlog  # bloqueada: va tras la 32.3 —epics.md: «la 32.3 antes de la 32.4 y la 32.5»— y su juicio de SM-C4 no compara ventanas a través de DESPLIEGUE_DEL_INCIPIT, que nace en la 32.3, bloqueada por las Épicas 29 y 31 (v9-ralph 2026-11-07)
