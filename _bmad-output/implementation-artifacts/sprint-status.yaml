@@ -29,7 +29,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 # - Retrospective appends its action items to action_items; the status view surfaces open ones
 generated: 08-11-2026 09:00
-last_updated: 11-07-2026 16:51
+last_updated: 11-08-2026 05:46
 project: brainlySabiduria
 project_key: NOKEY
 tracking_system: file-system
@@ -488,8 +488,8 @@ development_status:
 
   # Épica 31 — el pasaje; tras la 30.1 y la 30.3. MAX_CARACTERES_DEL_PASAJE nace sin valor
   # (Héctor; 1.200 propuesto): el corte cae el día en que se le da valor, no el del merge.
-  epic-31: backlog
-  31-1-el-pasaje-se-localiza-con-el-localizador-del-orden-del-libro: backlog  # v9-ralph 2026-11-07: rama v9/epica-31 apilada sobre v9/epica-29 (29.1 trae formaDeLasLineas y tramoEnCrudo); se funde después de la 29
+  epic-31: in-progress
+  31-1-el-pasaje-se-localiza-con-el-localizador-del-orden-del-libro: review  # v9-ralph 2026-11-08: el cargador de posiciones da el pasaje (pasaje.ts, ofrecePasaje); MAX_CARACTERES_DEL_PASAJE sin valor (lo fija Héctor); rama apilada sobre la Épica 29; una ronda de revisión (3 parches)
   31-2-lee-el-pasaje-plegado-en-la-página-de-cita: backlog  # bloqueada: espera la 31.1 y la Épica 30 en la principal; inserta el pasaje en el bloque de desplegables que deja la 30.3 (sin construir) tras el orden de la 30.1 (v9/epica-30, sin fundir) (v9-ralph 2026-11-07)
   epic-31-retrospective: optional
 
