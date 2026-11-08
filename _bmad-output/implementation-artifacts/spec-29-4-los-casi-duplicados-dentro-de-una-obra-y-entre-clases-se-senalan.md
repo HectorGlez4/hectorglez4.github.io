@@ -293,3 +293,17 @@ Puerta de la etapa s-29 (Épica 29, historias 29.1–29.4), intento 1.
 
   Todas dentro de main + máx(100 ms, 5 %), y el LCP de la Cita bajo 2.500 ms: veredicto **ok**, sin desempate con `devtools`.
 - **Vocabulario.** La etapa no toca `src/lib/vocabulario.ts` ni añade nada a `medicion/migrations/`.
+
+## Verificación en el sitio en vivo — 2026-11-08
+
+Fusión c3e4a49ce4, Publicar 42504380214 en verde («Desplegar» 2026-11-08T17:42:53Z). Solo curl.
+
+| URL | Qué se buscó | Resultado |
+|---|---|---|
+| https://sabiduriadebolsillo.net/ | 200 | encontrado (200) |
+| /cita/jose-marti-yo-vengo-de-todas-partes-y-hacia/ | `span class="verso"` uno por verso (29.3) | encontrado (12 en la página: el bloque y las tarjetas en verso) |
+| la misma | `<title>` en una línea con « / » (29.3) | encontrado |
+| la misma | JSON-LD `text` con « / » (29.3) | encontrado |
+| /tema/la-vida/ | Tarjetas de Cita en verso en el listado (29.3) | encontrado (22 `span.verso`) |
+| 29.1 / 29.2 | el slug de una Cita restituida no cambia | encontrado (la URL de Martí responde 200 con su slug de siempre) |
+| 29.4 | orden de `tools/`, sin superficie en el sitio | sin superficie que mirar |
