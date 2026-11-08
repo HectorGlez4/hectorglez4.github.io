@@ -213,3 +213,40 @@ Blocking condition: ninguna
 **Verificación.** No hay parches, así que no se vuelve a correr la Verificación. Sigue valiendo la de la pasada 1 sobre este mismo HEAD de código, con `npm test` en verde, más la del ac-auditor: 729 pruebas unitarias y 412 e2e en verde.
 
 **Riesgos residuales.** Los de la pasada 1, sin cambios.
+
+## Verificación previa a la fusión — 2026-11-08
+
+Puerta de la etapa s-34 (34.1, 34.2 y 34.3; la 34.0 ya está en la principal), intento 1.
+
+- **Sincronía.** `origin/main` (504db42621, con las Épicas 29 y 30 y la fase B de la 30.5) entra en
+  30ca178a7b. Único conflicto: `last_updated` de `sprint-status.yaml`; se quedan las líneas de la
+  principal y los estados de la 34.1 a la 34.3. El recorte de título y meta de la 34.1
+  (`recortarPorPalabra`) casa sin cambios con la Página de Cita de la Épica 30. `proponer-claves`
+  no escribió nada. El lock no cambia: sin `npm ci`. La etapa no toca `src/lib/vocabulario.ts` ni
+  `medicion/migrations/`.
+- **CI equivalente.** `npm run build` en verde (dist juzgado 520,7 MiB); `npx astro check` 0 errores,
+  0 avisos, 11 sugerencias (también tras el arreglo); `npm test` 167 ficheros, 7.625 pruebas en
+  verde, `huella.test.ts` incluido.
+- **E2E completa** (los dos proyectos, receptor local en 8787): 1.400 pasan, 156 se saltan, 4 caen.
+  - `busqueda.spec.ts:502` (26.2), en los dos proyectos: «colección» sin ningún resultado. Causa: en
+    la principal sus seis resultados eran Tarjetas de listado cortadas a media palabra («…no está en
+    las co…», Séneca, Quevedo, Balmes), que Pagefind casaba; ninguna Cita del Corpus dice
+    «colección». La 34.1 recorta por palabra entera y el resto desaparece. Comprobado con el
+    Pagefind real de las dos construcciones: 6 resultados en la principal, 0 en la rama, «obra» 240
+    en las dos. Arreglo ae704d6bf6: «colección» deja de exigirse con resultado, como «directorio» y
+    «portada»; sigue exigiéndose que ninguna página salga por su tipo, y la guarda contra un índice
+    vacío la sostienen «obra», «cita», «autor», «tema» y la marca.
+  - `tipografia-calculada.spec.ts:145`, `buscar-con-resultados` (`div.recuento > p.estado`), en los
+    dos proyectos: la intermitencia conocida, que cae igual en la principal; no cuenta contra la
+    puerta.
+  - Repetidos los dos ficheros tras el arreglo, en los dos proyectos: 204 pasan, 6 se saltan, 0 caen.
+- **NFR-7** (aplica: la 34.1 cambia título, meta y Tarjetas; la 34.3, el campo de `/buscar/` y de los
+  listados). Lighthouse 13.5.0 móvil, `simulate`, 10 corridas alternas por página; las dos
+  construcciones con `MEDICION_ENDPOINT=http://localhost:8787/`, servidas por `tests/servidor.mjs`
+  de la rama con `max-age=600` y gzip, y un receptor ficticio en 8787. Medias (principal → rama):
+  - Cita Machado: LCP 1.640 → 1.614 ms (−26), FCP 924 → 939 (+15).
+  - Cita en verso Martí: LCP 1.595 → 1.611 (+16), FCP 918 → 917 (−1).
+  - Obra `antonio-machado/campos-de-castilla`: LCP 1.505 → 1.504 (−0), FCP 763 → 774 (+12).
+  - `/buscar/`: LCP 1.549 → 1.595 (+46), FCP 830 → 857 (+27).
+  Margen 100 ms en todas; la LCP de Cita, bajo 2.500. Veredicto: ok, sin desempate.
+- La portada no se mide: no pinta el campo ni la Tarjeta de Cita.
