@@ -1,5 +1,5 @@
 ---
-texto: "Pujamiento de garnachas Pienso que os ha de acabar, Si el avizor y el calcorro Algún remedio no dan."
+texto: "Pujamiento de garnachas\nPienso que os ha de acabar,\nSi el avizor y el calcorro\nAlgún remedio no dan."
 autor: "francisco-de-quevedo"
 slug: "francisco-de-quevedo-pujamiento-de-garnachas-pienso-que-os-ha"
 procedencia:

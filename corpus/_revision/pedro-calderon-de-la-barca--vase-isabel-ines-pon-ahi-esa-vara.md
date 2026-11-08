@@ -1,5 +1,5 @@
 ---
-texto: "Vase [ISABEL] Inés, pon ahí esa vara; pues que por bien no ha querido ver el caso conclüido, querrá por mal."
+texto: "Vase [ISABEL]\nInés, pon ahí esa vara;\npues que por bien no ha querido\nver el caso conclüido,\nquerrá por mal."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-vase-isabel-ines-pon-ahi-esa-vara"
 procedencia:

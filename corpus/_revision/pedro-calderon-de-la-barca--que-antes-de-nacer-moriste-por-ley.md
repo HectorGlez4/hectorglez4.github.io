@@ -1,5 +1,5 @@
 ---
-texto: "Que antes de nacer moriste por ley del cielo; si sabes Que aquestas prisiones son de tus furias arrogantes Un freno que las detenga, y una rueda que las pare: ¿Por qué blasonas?"
+texto: "Que antes de nacer moriste por ley del cielo; si sabes\nQue aquestas prisiones son de tus furias arrogantes\nUn freno que las detenga, y una rueda que las pare:\n¿Por qué blasonas?"
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-que-antes-de-nacer-moriste-por-ley"
 procedencia:

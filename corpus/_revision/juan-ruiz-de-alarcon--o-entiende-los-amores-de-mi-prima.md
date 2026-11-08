@@ -1,5 +1,5 @@
 ---
-texto: "O entiende los amores de mi prima, y por emparentar con otra gente, para mi esposa el viejo no la estima."
+texto: "O entiende los amores de mi prima,\ny por emparentar con otra gente,\npara mi esposa el viejo no la estima."
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-o-entiende-los-amores-de-mi-prima"
 procedencia:

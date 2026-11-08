@@ -1,5 +1,5 @@
 ---
-texto: "oro bruñido al sol relumbra en vano; mientras con menosprecio en medio el llano mira tu blanca frente el lilio bello;"
+texto: "oro bruñido al sol relumbra en vano;\nmientras con menosprecio en medio el llano\nmira tu blanca frente el lilio bello;"
 autor: "luis-de-gongora"
 slug: "luis-de-gongora-oro-brunido-al-sol-relumbra-en-vano"
 procedencia:

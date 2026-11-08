@@ -1,5 +1,5 @@
 ---
-texto: "¿La retirada que Mac Gregor rige diré, y aquel puñado de valientes, que rompe osado por el centro mismo del poder español, y a cada huella deja un trofeo?"
+texto: "¿La retirada que Mac Gregor rige\ndiré, y aquel puñado de valientes,\nque rompe osado por el centro mismo\ndel poder español, y a cada huella\ndeja un trofeo?"
 autor: "andres-bello"
 slug: "andres-bello-la-retirada-que-mac-gregor-rige-dire"
 procedencia:

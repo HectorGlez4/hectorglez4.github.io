@@ -1,5 +1,5 @@
 ---
-texto: "Vámonos, antes que corra voz de que estamos aquí."
+texto: "Vámonos, antes que corra\nvoz de que estamos aquí."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-vamonos-antes-que-corra-voz-de-que"
 procedencia:

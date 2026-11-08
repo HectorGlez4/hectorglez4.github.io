@@ -1,5 +1,5 @@
 ---
-texto: "De todo habla incansable, y corta y raja, lanzando un epigrama a cada uno, pues no siendo sus versos, todo es paja."
+texto: "De todo habla incansable, y corta y raja,\nlanzando un epigrama a cada uno,\npues no siendo sus versos, todo es paja."
 autor: "mariano-jose-de-larra"
 slug: "mariano-jose-de-larra-de-todo-habla-incansable-y-corta-y"
 procedencia:

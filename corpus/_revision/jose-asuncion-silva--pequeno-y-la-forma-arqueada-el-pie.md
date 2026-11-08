@@ -1,5 +1,5 @@
 ---
-texto: "Pequeño y la forma arqueada el pie nervioso y breve y pálida y hoyuelada la blanca mano de nieve."
+texto: "Pequeño y la forma arqueada\nel pie nervioso y breve\ny pálida y hoyuelada\nla blanca mano de nieve."
 autor: "jose-asuncion-silva"
 slug: "jose-asuncion-silva-pequeno-y-la-forma-arqueada-el-pie"
 procedencia:

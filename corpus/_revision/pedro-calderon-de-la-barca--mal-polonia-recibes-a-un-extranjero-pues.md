@@ -1,5 +1,5 @@
 ---
-texto: "Mal, Polonia, recibes A un extranjero, pues con sangre escribes Su entrada en tus arenas, Y apenas llega, cuando llega á penas."
+texto: "Mal, Polonia, recibes\nA un extranjero, pues con sangre escribes\nSu entrada en tus arenas,\nY apenas llega, cuando llega á penas."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-mal-polonia-recibes-a-un-extranjero-pues"
 procedencia:

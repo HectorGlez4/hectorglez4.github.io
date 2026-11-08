@@ -1,5 +1,5 @@
 ---
-texto: "ÁLVARO: ¿Qué tiene que ver conmigo justicia ordinaria?"
+texto: "ÁLVARO: ¿Qué tiene que ver conmigo\njusticia ordinaria?"
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-alvaro-que-tiene-que-ver-conmigo-justicia"
 procedencia:

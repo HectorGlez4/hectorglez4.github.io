@@ -1,5 +1,5 @@
 ---
-texto: "Dándoos, para más honor, Su corona nuestro tio."
+texto: "Dándoos, para más honor,\nSu corona nuestro tio."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-dandoos-para-mas-honor-su-corona-nuestro"
 procedencia:

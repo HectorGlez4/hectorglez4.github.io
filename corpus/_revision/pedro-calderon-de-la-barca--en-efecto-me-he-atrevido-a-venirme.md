@@ -1,5 +1,5 @@
 ---
-texto: "En efecto, me he atrevido a venirme hasta el lugar y entrar dentro de mi casa, donde todo lo que pasa a mi padre he de contar."
+texto: "En efecto, me he atrevido\na venirme hasta el lugar\ny entrar dentro de mi casa,\ndonde todo lo que pasa\na mi padre he de contar."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-en-efecto-me-he-atrevido-a-venirme"
 procedencia:

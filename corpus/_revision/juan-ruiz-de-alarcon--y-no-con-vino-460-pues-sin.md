@@ -1,5 +1,5 @@
 ---
-texto: "¿y no con vino? 460 ¿pues sin vino que serà?"
+texto: "¿y no con vino? 460\n¿pues sin vino que serà?"
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-y-no-con-vino-460-pues-sin"
 procedencia:

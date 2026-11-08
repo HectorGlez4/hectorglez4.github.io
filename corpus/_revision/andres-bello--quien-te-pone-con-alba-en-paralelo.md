@@ -1,5 +1,5 @@
 ---
-texto: "Quien te pone con Alba en paralelo, ¡oh cuánto yerra!"
+texto: "Quien te pone con Alba en paralelo,\n¡oh cuánto yerra!"
 autor: "andres-bello"
 slug: "andres-bello-quien-te-pone-con-alba-en-paralelo"
 procedencia:

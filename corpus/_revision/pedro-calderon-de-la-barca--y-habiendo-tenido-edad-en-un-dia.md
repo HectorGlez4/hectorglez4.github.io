@@ -1,5 +1,5 @@
 ---
-texto: "Y habiendo tenido edad en un día su violencia de hacerme tan desdichado, ¿por qué, por qué no pudiera tener edad en un día de hacerme dichoso?"
+texto: "Y habiendo tenido edad\nen un día su violencia\nde hacerme tan desdichado,\n¿por qué, por qué no pudiera\ntener edad en un día\nde hacerme dichoso?"
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-y-habiendo-tenido-edad-en-un-dia"
 procedencia:

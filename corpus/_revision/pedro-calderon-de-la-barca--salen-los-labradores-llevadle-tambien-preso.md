@@ -1,5 +1,5 @@
 ---
-texto: "Salen los labradores ¡Llevadle también preso!"
+texto: "Salen los labradores\n¡Llevadle también\npreso!"
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-salen-los-labradores-llevadle-tambien-preso"
 procedencia:

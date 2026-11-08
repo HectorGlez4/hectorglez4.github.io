@@ -1,5 +1,5 @@
 ---
-texto: "ÁLVARO: El de callar es el mejor para vos."
+texto: "ÁLVARO: El de callar\nes el mejor para vos."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-alvaro-el-de-callar-es-el-mejor"
 procedencia:

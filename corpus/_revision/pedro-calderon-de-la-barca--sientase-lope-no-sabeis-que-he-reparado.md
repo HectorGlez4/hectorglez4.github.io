@@ -1,5 +1,5 @@
 ---
-texto: "Siéntase LOPE: ¿No sabéis qué he reparado?"
+texto: "Siéntase\nLOPE: ¿No sabéis qué he reparado?"
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-sientase-lope-no-sabeis-que-he-reparado"
 procedencia:

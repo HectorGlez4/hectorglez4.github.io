@@ -1,5 +1,5 @@
 ---
-texto: "ISABEL: Pues, ¿quién te ha dicho, ¡ay Inés!, que no aborrezco la vida?"
+texto: "ISABEL: Pues, ¿quién te ha dicho, ¡ay Inés!,\nque no aborrezco la vida?"
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-isabel-pues-quien-te-ha-dicho-ay"
 procedencia:

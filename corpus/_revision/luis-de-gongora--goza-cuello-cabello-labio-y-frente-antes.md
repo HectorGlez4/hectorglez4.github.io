@@ -1,5 +1,5 @@
 ---
-texto: "goza cuello, cabello, labio, y frente, antes que lo que fue en tu edad dorada oro, lilio, clavel, cristal luciente,"
+texto: "goza cuello, cabello, labio, y frente,\nantes que lo que fue en tu edad dorada\noro, lilio, clavel, cristal luciente,"
 autor: "luis-de-gongora"
 slug: "luis-de-gongora-goza-cuello-cabello-labio-y-frente-antes"
 procedencia:

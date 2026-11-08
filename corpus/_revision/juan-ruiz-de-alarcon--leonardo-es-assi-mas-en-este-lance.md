@@ -1,5 +1,5 @@
 ---
-texto: "LEONARDO Es assi, mas en este lance estrecho lo que el por cortès ha hecho no me desobliga a mi. 920 IULIA Falso."
+texto: "LEONARDO\nEs assi,\nmas en este lance estrecho\nlo que el por cortès ha hecho\nno me desobliga a mi. 920\nIULIA\nFalso."
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-leonardo-es-assi-mas-en-este-lance"
 procedencia:

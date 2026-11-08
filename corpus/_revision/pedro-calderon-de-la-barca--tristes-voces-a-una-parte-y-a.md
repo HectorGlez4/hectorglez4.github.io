@@ -1,5 +1,5 @@
 ---
-texto: "Tristes voces a una parte, y a otra míseros gemidos escucho, que no conozco, porque llegan mal distintos."
+texto: "Tristes voces a una parte,\ny a otra míseros gemidos\nescucho, que no conozco,\nporque llegan mal distintos."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-tristes-voces-a-una-parte-y-a"
 procedencia:

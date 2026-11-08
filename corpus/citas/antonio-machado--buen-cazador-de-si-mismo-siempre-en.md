@@ -1,5 +1,5 @@
 ---
-texto: "Buen cazador de sí mismo, siempre en acecho."
+texto: "Buen cazador de sí mismo,\nsiempre en acecho."
 autor: "antonio-machado"
 temas:
   - "el-saber"

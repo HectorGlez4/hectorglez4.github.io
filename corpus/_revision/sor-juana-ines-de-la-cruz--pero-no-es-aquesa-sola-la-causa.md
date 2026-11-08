@@ -1,5 +1,5 @@
 ---
-texto: "Pero no es aquésa sola la causa de mi despego, sino porque ya otro fuego en mi pecho se acrisola."
+texto: "Pero no es aquésa sola\nla causa de mi despego,\nsino porque ya otro fuego\nen mi pecho se acrisola."
 autor: "sor-juana-ines-de-la-cruz"
 slug: "sor-juana-ines-de-la-cruz-pero-no-es-aquesa-sola-la-causa"
 procedencia:

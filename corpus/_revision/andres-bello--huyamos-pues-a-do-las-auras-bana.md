@@ -1,5 +1,5 @@
 ---
-texto: "Huyamos, pues, a do las auras baña de alma serenidad lumbre dichosa, que, si ella engaña, dulcemente engaña;"
+texto: "Huyamos, pues, a do las auras baña\nde alma serenidad lumbre dichosa,\nque, si ella engaña, dulcemente engaña;"
 autor: "andres-bello"
 slug: "andres-bello-huyamos-pues-a-do-las-auras-bana"
 procedencia:

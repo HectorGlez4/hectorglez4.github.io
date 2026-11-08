@@ -1,5 +1,5 @@
 ---
-texto: "DOÑA ANA Primo, tente, ¿siempre hemos de andar los dos sin ocasion en questiones?"
+texto: "DOÑA ANA\nPrimo, tente,\n¿siempre hemos de andar los dos\nsin ocasion en questiones?"
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-dona-ana-primo-tente-siempre-hemos-de"
 procedencia:

@@ -1,5 +1,5 @@
 ---
-texto: "Pues la imperial monarquía Para solo hacerla vuestra Me holgara que fuera mia; Aunque no está satisfecho Mi amor de que sois ingrato."
+texto: "Pues la imperial monarquía\nPara solo hacerla vuestra\nMe holgara que fuera mia;\nAunque no está satisfecho\nMi amor de que sois ingrato."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-pues-la-imperial-monarquia-para-solo-hacerla"
 procedencia:

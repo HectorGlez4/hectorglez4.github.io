@@ -1,5 +1,5 @@
 ---
-texto: "Del Mar es cárcel la orilla, Y en el orden que hoy están, Es un cielo de otro cielo Una cárcel de cristal."
+texto: "Del Mar es cárcel la orilla,\nY en el orden que hoy están,\nEs un cielo de otro cielo\nUna cárcel de cristal."
 autor: "francisco-de-quevedo"
 slug: "francisco-de-quevedo-del-mar-es-carcel-la-orilla-y"
 procedencia:

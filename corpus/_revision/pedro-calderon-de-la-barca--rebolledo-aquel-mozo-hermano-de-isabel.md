@@ -1,5 +1,5 @@
 ---
-texto: "REBOLLEDO: Aquel mozo, hermano de Isabel."
+texto: "REBOLLEDO: Aquel\nmozo, hermano de Isabel."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-rebolledo-aquel-mozo-hermano-de-isabel"
 procedencia:

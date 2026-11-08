@@ -1,5 +1,5 @@
 ---
-texto: "Porque llevarle Al Rey, es llevarle (¡A triste!) a morir."
+texto: "Porque llevarle\nAl Rey, es llevarle (¡A triste!) a morir."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-porque-llevarle-al-rey-es-llevarle-a"
 procedencia:

@@ -1,5 +1,5 @@
 ---
-texto: "En las teclas del piano vagan aún sus marfilinos dedos, errante la mirada dice algo que no alcanza el pensamiento."
+texto: "En las teclas del piano\nvagan aún sus marfilinos dedos,\nerrante la mirada\ndice algo que no alcanza el pensamiento."
 autor: "jose-asuncion-silva"
 slug: "jose-asuncion-silva-en-las-teclas-del-piano-vagan-aun"
 procedencia:

@@ -1,5 +1,5 @@
 ---
-texto: "Y si humildad ni soberbia no te obligan — personajes Que han movido y removido mil Autos sacramentales, — Yo, ni humilde ni soberbio, sino entre las dos mitades Entreverado, te pido que nos remedies y ampares."
+texto: "Y si humildad ni soberbia no te obligan — personajes\nQue han movido y removido mil Autos sacramentales,\n— Yo, ni humilde ni soberbio, sino entre las dos mitades\nEntreverado, te pido que nos remedies y ampares."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-y-si-humildad-ni-soberbia-no-te"
 procedencia:

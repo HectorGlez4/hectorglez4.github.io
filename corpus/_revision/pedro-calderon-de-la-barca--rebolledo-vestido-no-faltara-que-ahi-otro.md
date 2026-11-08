@@ -1,5 +1,5 @@
 ---
-texto: "REBOLLEDO: Vestido no faltará; que ahí otro del paje está de jineta, que se fue."
+texto: "REBOLLEDO: Vestido no faltará;\nque ahí otro del paje está\nde jineta, que se fue."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-rebolledo-vestido-no-faltara-que-ahi-otro"
 procedencia:

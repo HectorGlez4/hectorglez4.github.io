@@ -1,5 +1,5 @@
 ---
-texto: "¿Y qué diré de la ciudad que ha dado a la sagrada lid tanto caudillo?"
+texto: "¿Y qué diré de la ciudad que ha dado\na la sagrada lid tanto caudillo?"
 autor: "andres-bello"
 slug: "andres-bello-y-que-dire-de-la-ciudad-que"
 procedencia:

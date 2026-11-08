@@ -1,5 +1,5 @@
 ---
-texto: "Si has nacido Humano, baste el postrarme A tus píés para, librarme."
+texto: "Si has nacido\nHumano, baste el postrarme\nA tus píés para, librarme."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-si-has-nacido-humano-baste-el-postrarme"
 procedencia:

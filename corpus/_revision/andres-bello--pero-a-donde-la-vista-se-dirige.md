@@ -1,5 +1,5 @@
 ---
-texto: "Pero ¿a dónde la vista se dirige que monumentos no halle de heroísmo?"
+texto: "Pero ¿a dónde la vista se dirige\nque monumentos no halle de heroísmo?"
 autor: "andres-bello"
 slug: "andres-bello-pero-a-donde-la-vista-se-dirige"
 procedencia:

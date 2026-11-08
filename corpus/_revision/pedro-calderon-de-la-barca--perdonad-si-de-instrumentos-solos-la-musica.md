@@ -1,5 +1,5 @@
 ---
-texto: "Perdonad, si de instrumentos solos la música suena, de músicos que deleiten sin voces que os entretengan; que como músicos son los pájaros que gorjean, no quieren cantar de noche, ni yo puedo hacerles fuerza."
+texto: "Perdonad, si de instrumentos\nsolos la música suena,\nde músicos que deleiten\nsin voces que os entretengan;\nque como músicos son\nlos pájaros que gorjean,\nno quieren cantar de noche,\nni yo puedo hacerles fuerza."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-perdonad-si-de-instrumentos-solos-la-musica"
 procedencia:

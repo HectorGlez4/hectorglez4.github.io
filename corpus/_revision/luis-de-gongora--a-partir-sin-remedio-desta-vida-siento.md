@@ -1,5 +1,5 @@
 ---
-texto: "a partir sin remedio desta vida; siento la causa aun más que la partida, por hambre expulso como sitïado."
+texto: "a partir sin remedio desta vida;\nsiento la causa aun más que la partida,\npor hambre expulso como sitïado."
 autor: "luis-de-gongora"
 slug: "luis-de-gongora-a-partir-sin-remedio-desta-vida-siento"
 procedencia:

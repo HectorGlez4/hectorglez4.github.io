@@ -1,5 +1,5 @@
 ---
-texto: "JUAN: Vengar así la ocasión en que hoy has puesto mi vida y mi honor."
+texto: "JUAN: Vengar así\nla ocasión en que hoy has puesto\nmi vida y mi honor."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-juan-vengar-asi-la-ocasion-en-que"
 procedencia:

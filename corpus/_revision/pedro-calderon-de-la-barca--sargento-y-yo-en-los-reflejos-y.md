@@ -1,5 +1,5 @@
 ---
-texto: "SARGENTO: Y yo en los reflejos y visos que la luna hace en el rostro, que es Isabel, imagino, ésta."
+texto: "SARGENTO: Y yo\nen los reflejos y visos\nque la luna hace en el rostro,\nque es Isabel, imagino,\nésta."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-sargento-y-yo-en-los-reflejos-y"
 procedencia:

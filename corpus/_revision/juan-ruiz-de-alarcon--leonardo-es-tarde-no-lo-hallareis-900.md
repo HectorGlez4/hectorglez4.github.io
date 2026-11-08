@@ -1,5 +1,5 @@
 ---
-texto: "LEONARDO Es tarde, no lo hallareis. 900 IULIA Ya pues don Iuan te la suelta, no alegues obligacion, ni niegues, que tu intencion està a vengarse resuelta."
+texto: "LEONARDO\nEs tarde, no lo hallareis. 900\nIULIA\nYa pues don Iuan te la suelta,\nno alegues obligacion,\nni niegues, que tu intencion\nestà a vengarse resuelta."
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-leonardo-es-tarde-no-lo-hallareis-900"
 procedencia:

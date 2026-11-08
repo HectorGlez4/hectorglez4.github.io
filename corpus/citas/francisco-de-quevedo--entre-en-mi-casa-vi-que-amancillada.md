@@ -1,5 +1,5 @@
 ---
-texto: "Entré en mi casa, ví que amancillada de anciana habitación era despojos; mi báculo más corvo y menos fuerte. Vencida de la edad sentí mi espada, y no hallé cosa en que poner los ojos que no fuese recuerdo de la muerte."
+texto: "Entré en mi casa, ví que amancillada\nde anciana habitación era despojos;\nmi báculo más corvo y menos fuerte.\nVencida de la edad sentí mi espada,\ny no hallé cosa en que poner los ojos\nque no fuese recuerdo de la muerte."
 autor: "francisco-de-quevedo"
 temas:
   - "el-tiempo"

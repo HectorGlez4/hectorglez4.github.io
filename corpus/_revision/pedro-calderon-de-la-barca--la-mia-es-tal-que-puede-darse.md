@@ -1,5 +1,5 @@
 ---
-texto: "La mia es tal, que puede darse Al más ruin: tomadla vos. (A un soldado.) ROS."
+texto: "La mia es tal, que puede darse\nAl más ruin: tomadla vos. (A un soldado.)\nROS."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-la-mia-es-tal-que-puede-darse"
 procedencia:

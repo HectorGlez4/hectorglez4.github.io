@@ -1,5 +1,5 @@
 ---
-texto: "Y ya que el cielo de ti ha ordenado que me aparte, 560 huelgo, mi bien, de dexarte este retrato de mi."
+texto: "Y ya que el cielo de ti\nha ordenado que me aparte, 560\nhuelgo, mi bien, de dexarte\neste retrato de mi."
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-y-ya-que-el-cielo-de-ti"
 procedencia:

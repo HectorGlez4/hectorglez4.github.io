@@ -1,5 +1,5 @@
 ---
-texto: "¡Qué ruegos, qué sentimientos, ya de humilde, ya de altiva, no le dije!"
+texto: "¡Qué ruegos, qué sentimientos,\nya de humilde, ya de altiva,\nno le dije!"
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-que-ruegos-que-sentimientos-ya-de-humilde"
 procedencia:

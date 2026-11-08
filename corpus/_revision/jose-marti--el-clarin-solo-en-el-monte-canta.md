@@ -1,5 +1,5 @@
 ---
-texto: "El clarín, solo en el monte, Canta al primer arrebol: La gasa del horizonte Prende, de un aliento, el Sol."
+texto: "El clarín, solo en el monte,\nCanta al primer arrebol:\nLa gasa del horizonte\nPrende, de un aliento, el Sol."
 autor: "jose-marti"
 slug: "jose-marti-el-clarin-solo-en-el-monte-canta"
 procedencia:

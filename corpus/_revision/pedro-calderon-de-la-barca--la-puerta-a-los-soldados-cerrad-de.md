@@ -1,5 +1,5 @@
 ---
-texto: "La puerta (A los soldados.) cerrad de esa estrecha cárcel; Escondedle en ella."
+texto: "La puerta (A los soldados.) cerrad de esa\nestrecha cárcel;\nEscondedle en ella."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-la-puerta-a-los-soldados-cerrad-de"
 procedencia:

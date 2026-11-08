@@ -1,5 +1,5 @@
 ---
-texto: "Si a mi casa determinan volver mis erradas plantas, será dar nueva mancilla a un anciano padre mío, que otro bien, otra alegría no tuvo, sino mirarse en la clara luna limpia de mi honor, que hoy desdichado tan torpe mancha le eclipsa."
+texto: "Si a mi casa determinan\nvolver mis erradas plantas,\nserá dar nueva mancilla\na un anciano padre mío,\nque otro bien, otra alegría\nno tuvo, sino mirarse\nen la clara luna limpia\nde mi honor, que hoy desdichado\ntan torpe mancha le eclipsa."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-si-a-mi-casa-determinan-volver-mis"
 procedencia:

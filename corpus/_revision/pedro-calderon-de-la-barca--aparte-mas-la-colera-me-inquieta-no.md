@@ -1,5 +1,5 @@
 ---
-texto: "Aparte Mas la cólera me inquieta.) ¿No sois paje de jineta?"
+texto: "Aparte\nMas la cólera me inquieta.)\n¿No sois paje de jineta?"
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-aparte-mas-la-colera-me-inquieta-no"
 procedencia:

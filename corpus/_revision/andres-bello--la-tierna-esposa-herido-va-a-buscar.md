@@ -1,5 +1,5 @@
 ---
-texto: "La tierna esposa herido va a buscar; el débil cuerpo sobre el acero ensangrentado apoya; estréchala a su seno."
+texto: "La tierna esposa\nherido va a buscar; el débil cuerpo\nsobre el acero ensangrentado apoya;\nestréchala a su seno."
 autor: "andres-bello"
 slug: "andres-bello-la-tierna-esposa-herido-va-a-buscar"
 procedencia:

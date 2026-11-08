@@ -1,5 +1,5 @@
 ---
-texto: "Vamos y no te detengas, Anda acá al cuerpo de guardia."
+texto: "Vamos y no te detengas,\nAnda acá al cuerpo de guardia."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-vamos-y-no-te-detengas-anda-aca"
 procedencia:

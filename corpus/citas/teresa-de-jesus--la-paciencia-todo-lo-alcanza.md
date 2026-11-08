@@ -1,5 +1,5 @@
 ---
-texto: "la paciencia todo lo alcanza."
+texto: "la paciencia\ntodo lo alcanza."
 autor: "teresa-de-jesus"
 temas:
   - "la-adversidad"

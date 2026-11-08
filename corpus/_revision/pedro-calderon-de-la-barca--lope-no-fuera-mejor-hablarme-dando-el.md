@@ -1,5 +1,5 @@
 ---
-texto: "LOPE: ¿No fuera mejor hablarme, dando el preso y remediar el honor de vuestra hija?"
+texto: "LOPE: ¿No fuera mejor hablarme,\ndando el preso y remediar\nel honor de vuestra hija?"
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-lope-no-fuera-mejor-hablarme-dando-el"
 procedencia:

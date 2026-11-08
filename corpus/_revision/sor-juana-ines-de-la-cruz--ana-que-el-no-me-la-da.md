@@ -1,5 +1,5 @@
 ---
-texto: "Ana: Que él no me la da, es verdad; que no la tengo, es mentira."
+texto: "Ana: Que él no me la da, es verdad;\nque no la tengo, es mentira."
 autor: "sor-juana-ines-de-la-cruz"
 slug: "sor-juana-ines-de-la-cruz-ana-que-el-no-me-la-da"
 procedencia:

@@ -1,5 +1,5 @@
 ---
-texto: "Del aire es cárcel el fuelle, Y del fuego el pedernal; Preso está el oro en la mina; Preso el diamante en Ceilán."
+texto: "Del aire es cárcel el fuelle,\nY del fuego el pedernal;\nPreso está el oro en la mina;\nPreso el diamante en Ceilán."
 autor: "francisco-de-quevedo"
 slug: "francisco-de-quevedo-del-aire-es-carcel-el-fuelle-y"
 procedencia:

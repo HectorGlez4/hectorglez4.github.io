@@ -1,5 +1,5 @@
 ---
-texto: "¿Qué páramo no dio en humanos miembros pasto al cóndor?"
+texto: "¿Qué páramo no dio en humanos miembros\npasto al cóndor?"
 autor: "andres-bello"
 slug: "andres-bello-que-paramo-no-dio-en-humanos-miembros"
 procedencia:

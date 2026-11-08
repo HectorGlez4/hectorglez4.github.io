@@ -1,5 +1,5 @@
 ---
-texto: "FILIPO Fue tan prolija 15 la ausencia, a que los enojos me desterraron de Egypto, que con tu padre priuò, que jamas lo permitiò."
+texto: "FILIPO\nFue tan prolija\n15\nla ausencia, a que los enojos\nme desterraron de Egypto,\nque con tu padre priuò,\nque jamas lo permitiò."
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-filipo-fue-tan-prolija-15-la-ausencia"
 procedencia:

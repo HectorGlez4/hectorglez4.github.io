@@ -1,5 +1,5 @@
 ---
-texto: "Ayer se fue, mañana no ha llegado; hoy se está yendo sin parar un punto: soy un fue, y un será, y un es cansado."
+texto: "Ayer se fue, mañana no ha llegado;\nhoy se está yendo sin parar un punto:\nsoy un fue, y un será, y un es cansado."
 autor: "francisco-de-quevedo"
 slug: "francisco-de-quevedo-ayer-se-fue-manana-no-ha-llegado"
 procedencia:

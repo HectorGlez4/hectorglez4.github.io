@@ -1,5 +1,5 @@
 ---
-texto: "CRESPO: Enterneciendo los cielos con las voces que apellida..."
+texto: "CRESPO: Enterneciendo los cielos\ncon las voces que apellida..."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-crespo-enterneciendo-los-cielos-con-las-voces"
 procedencia:

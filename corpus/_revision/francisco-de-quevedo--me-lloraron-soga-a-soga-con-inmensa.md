@@ -1,5 +1,5 @@
 ---
-texto: "Me lloraron soga a soga, Con inmensa propiedad, Porque llorar hilo a hilo Es muy delgado llorar."
+texto: "Me lloraron soga a soga,\nCon inmensa propiedad,\nPorque llorar hilo a hilo\nEs muy delgado llorar."
 autor: "francisco-de-quevedo"
 slug: "francisco-de-quevedo-me-lloraron-soga-a-soga-con-inmensa"
 procedencia:

@@ -1,5 +1,5 @@
 ---
-texto: "Huyamos dél, huyamos do a la vista no ponga horror y asombro tanta escena que al bien nacido corazón contrista."
+texto: "Huyamos dél, huyamos do a la vista\nno ponga horror y asombro tanta escena\nque al bien nacido corazón contrista."
 autor: "andres-bello"
 slug: "andres-bello-huyamos-del-huyamos-do-a-la-vista"
 procedencia:

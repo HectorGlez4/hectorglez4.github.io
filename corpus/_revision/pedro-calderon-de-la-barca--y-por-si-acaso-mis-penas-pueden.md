@@ -1,5 +1,5 @@
 ---
-texto: "Y, por si acaso mis penas Pueden en algo aliviarte, Óyelas atento, y toma Las que de ellas me sobraren."
+texto: "Y, por si acaso mis penas\nPueden en algo aliviarte,\nÓyelas atento, y toma\nLas que de ellas me sobraren."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-y-por-si-acaso-mis-penas-pueden"
 procedencia:

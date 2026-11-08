@@ -1,5 +1,5 @@
 ---
-texto: "RICARDO Es sin remedio mi pena; no ay consuelo en mi passion."
+texto: "RICARDO\nEs sin remedio mi pena;\nno ay consuelo en mi passion."
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-ricardo-es-sin-remedio-mi-pena-no"
 procedencia:

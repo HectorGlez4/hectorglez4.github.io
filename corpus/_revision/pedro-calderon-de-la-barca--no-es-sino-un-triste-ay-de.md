@@ -1,5 +1,5 @@
 ---
-texto: "No es sino un triste (!Ay de mí!), Que en estas bóvedas frias Oyó tus melancolías."
+texto: "No es sino un triste (!Ay de mí!),\nQue en estas bóvedas frias\nOyó tus melancolías."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-no-es-sino-un-triste-ay-de"
 procedencia:

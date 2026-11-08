@@ -1,5 +1,5 @@
 ---
-texto: "LEONARDO Oye, Iulia querida, sino dexo en ti la vida, tragueme el mar por castigo, Sino."
+texto: "LEONARDO\nOye, Iulia querida,\nsino dexo en ti la vida,\ntragueme el mar por castigo,\nSino."
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-leonardo-oye-iulia-querida-sino-dexo-en"
 procedencia:

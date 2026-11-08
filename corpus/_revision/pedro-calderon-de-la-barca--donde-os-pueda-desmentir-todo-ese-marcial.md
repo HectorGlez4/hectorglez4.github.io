@@ -1,5 +1,5 @@
 ---
-texto: "Donde os pueda desmentir Todo ese marcial trofeo, Con quien ya atrevida lucho; Pues no dicen, según creo, Las lisonjas que os escucho."
+texto: "Donde os pueda desmentir\nTodo ese marcial trofeo,\nCon quien ya atrevida lucho;\nPues no dicen, según creo,\nLas lisonjas que os escucho."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-donde-os-pueda-desmentir-todo-ese-marcial"
 procedencia:

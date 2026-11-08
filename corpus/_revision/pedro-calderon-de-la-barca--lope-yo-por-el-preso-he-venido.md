@@ -1,5 +1,5 @@
 ---
-texto: "LOPE: Yo por el preso he venido y a castigar este exceso."
+texto: "LOPE: Yo por el preso he venido\ny a castigar este exceso."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-lope-yo-por-el-preso-he-venido"
 procedencia:

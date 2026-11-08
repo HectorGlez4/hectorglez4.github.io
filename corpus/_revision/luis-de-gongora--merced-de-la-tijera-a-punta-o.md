@@ -1,5 +1,5 @@
 ---
-texto: "Merced de la tijera a punta o lomo nos conhorta aun de murtas una mesa; «Ollay» la mejor voz es portuguesa, y la mejor ciudad de Francia, Como."
+texto: "Merced de la tijera a punta o lomo\nnos conhorta aun de murtas una mesa;\n«Ollay» la mejor voz es portuguesa,\ny la mejor ciudad de Francia, Como."
 autor: "luis-de-gongora"
 slug: "luis-de-gongora-merced-de-la-tijera-a-punta-o"
 procedencia:

@@ -1,5 +1,5 @@
 ---
-texto: "LOPE: Vuestro hijo no ha parecido por allá."
+texto: "LOPE: Vuestro hijo no ha parecido\npor allá."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-lope-vuestro-hijo-no-ha-parecido-por"
 procedencia:

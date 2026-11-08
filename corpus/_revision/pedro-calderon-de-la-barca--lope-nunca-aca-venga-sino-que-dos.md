@@ -1,5 +1,5 @@
 ---
-texto: "LOPE: Nunca acá venga, sino que dos mil demonios carguen conmigo y con ella."
+texto: "LOPE: Nunca acá venga,\nsino que dos mil demonios\ncarguen conmigo y con ella."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-lope-nunca-aca-venga-sino-que-dos"
 procedencia:

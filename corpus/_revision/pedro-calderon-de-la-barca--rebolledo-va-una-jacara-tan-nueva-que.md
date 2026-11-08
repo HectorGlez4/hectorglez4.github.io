@@ -1,5 +1,5 @@
 ---
-texto: "REBOLLEDO: Va una jácara tan nueva, que corra sangre."
+texto: "REBOLLEDO: Va una jácara tan nueva,\nque corra sangre."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-rebolledo-va-una-jacara-tan-nueva-que"
 procedencia:

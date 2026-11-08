@@ -1,5 +1,5 @@
 ---
-texto: "CRESPO: No embarazo que vais, solo se repare que hay orden que al que llegare le den un arcabuzazo."
+texto: "CRESPO: No embarazo\nque vais, solo se repare\nque hay orden que al que llegare\nle den un arcabuzazo."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-crespo-no-embarazo-que-vais-solo-se"
 procedencia:

@@ -1,5 +1,5 @@
 ---
-texto: "Yo sé los nombres extraños De las yerbas y las flores, Y de mortales engaños, Y de sublimes dolores."
+texto: "Yo sé los nombres extraños\nDe las yerbas y las flores,\nY de mortales engaños,\nY de sublimes dolores."
 autor: "jose-marti"
 slug: "jose-marti-yo-se-los-nombres-extranos-de-las"
 procedencia:

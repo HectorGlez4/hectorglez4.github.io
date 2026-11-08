@@ -1,5 +1,5 @@
 ---
-texto: "Dispensa a su placer la tiranía la muerte, no la gloria, que acompaña al héroe de la patria en sus cadenas, y su cadalso en luz divina baña."
+texto: "Dispensa a su placer la tiranía\nla muerte, no la gloria, que acompaña\nal héroe de la patria en sus cadenas,\ny su cadalso en luz divina baña."
 autor: "andres-bello"
 slug: "andres-bello-dispensa-a-su-placer-la-tirania-la"
 procedencia:

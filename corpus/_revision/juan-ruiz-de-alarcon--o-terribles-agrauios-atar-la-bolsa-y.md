@@ -1,5 +1,5 @@
 ---
-texto: "O terribles agrauios, atar la bolsa, y desatar los labios. (Vase.)"
+texto: "O terribles agrauios,\natar la bolsa, y desatar los labios.\n(Vase.)"
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-o-terribles-agrauios-atar-la-bolsa-y"
 procedencia:

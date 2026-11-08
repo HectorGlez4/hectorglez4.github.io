@@ -1,5 +1,5 @@
 ---
-texto: "Vos alegáis que habéis sido Hija de hermana mayor; Yo, que varón he nacido, Y aunque de hermana menor, Os debo ser preferido."
+texto: "Vos alegáis que habéis sido\nHija de hermana mayor;\nYo, que varón he nacido,\nY aunque de hermana menor,\nOs debo ser preferido."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-vos-alegais-que-habeis-sido-hija-de"
 procedencia:

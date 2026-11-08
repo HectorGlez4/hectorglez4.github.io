@@ -1,5 +1,5 @@
 ---
-texto: "CRESPO: Basta, basta; que es error que os atreváis a venir..."
+texto: "CRESPO: Basta, basta; que es error\nque os atreváis a venir..."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-crespo-basta-basta-que-es-error-que"
 procedencia:

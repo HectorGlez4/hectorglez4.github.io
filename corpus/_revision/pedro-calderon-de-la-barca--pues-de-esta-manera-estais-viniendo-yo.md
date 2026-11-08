@@ -1,5 +1,5 @@
 ---
-texto: "Pues, ¿de esta manera estáis viniendo yo?"
+texto: "Pues, ¿de esta manera estáis\nviniendo yo?"
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-pues-de-esta-manera-estais-viniendo-yo"
 procedencia:

@@ -1,5 +1,5 @@
 ---
-texto: "Pero vos no tenéis autoridad de ejecutar la sentencia que toca a otro tribunal."
+texto: "Pero vos\nno tenéis autoridad\nde ejecutar la sentencia\nque toca a otro tribunal."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-pero-vos-no-teneis-autoridad-de-ejecutar"
 procedencia:

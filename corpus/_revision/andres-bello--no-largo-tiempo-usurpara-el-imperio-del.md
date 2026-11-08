@@ -1,5 +1,5 @@
 ---
-texto: "No largo tiempo usurpará el imperio del sol la hispana gente advenediza, ni al ver su trono en tanto vituperio de Manco Cápac gemirán los manes."
+texto: "No largo tiempo usurpará el imperio\ndel sol la hispana gente advenediza,\nni al ver su trono en tanto vituperio\nde Manco Cápac gemirán los manes."
 autor: "andres-bello"
 slug: "andres-bello-no-largo-tiempo-usurpara-el-imperio-del"
 procedencia:

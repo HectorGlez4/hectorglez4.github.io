@@ -1,5 +1,5 @@
 ---
-texto: "Para sufrir la afrenta, falta (dice) valor en mí; para imitarte, sobra."
+texto: "Para sufrir la afrenta, falta (dice)\nvalor en mí; para imitarte, sobra."
 autor: "andres-bello"
 slug: "andres-bello-para-sufrir-la-afrenta-falta-dice-valor"
 procedencia:

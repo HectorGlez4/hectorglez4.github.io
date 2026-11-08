@@ -1,5 +1,5 @@
 ---
-texto: "Para ti, para la serie larga y negra de tus crímenes horrendos, cien millones, mil millones de centurias son un soplo."
+texto: "Para ti, para la serie\nlarga y negra de tus crímenes horrendos,\ncien millones, mil millones de centurias\nson un soplo."
 autor: "pedro-bonifacio-palacios"
 slug: "pedro-bonifacio-palacios-para-ti-para-la-serie-larga-y"
 procedencia:

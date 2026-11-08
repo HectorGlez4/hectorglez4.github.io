@@ -1,5 +1,5 @@
 ---
-texto: "¡Oh quién contigo, amable Poesía, del Cauca a las orillas me llevara, y el blando aliento respirar me diera de la siempre lozana primavera que allí su reino estableció y su corte!"
+texto: "¡Oh quién contigo, amable Poesía,\ndel Cauca a las orillas me llevara,\ny el blando aliento respirar me diera\nde la siempre lozana primavera\nque allí su reino estableció y su corte!"
 autor: "andres-bello"
 slug: "andres-bello-oh-quien-contigo-amable-poesia-del-cauca"
 procedencia:

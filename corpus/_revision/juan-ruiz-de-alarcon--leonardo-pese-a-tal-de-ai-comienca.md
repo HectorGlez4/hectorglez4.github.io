@@ -1,5 +1,5 @@
 ---
-texto: "LEONARDO Pese a tal, ¿de ai comiença la maraña? 210 amor, y malauentura en todas partes se hallan."
+texto: "LEONARDO\nPese a tal,\n¿de ai comiença la maraña? 210\namor, y malauentura\nen todas partes se hallan."
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-leonardo-pese-a-tal-de-ai-comienca"
 procedencia:

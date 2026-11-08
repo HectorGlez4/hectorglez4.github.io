@@ -1,5 +1,5 @@
 ---
-texto: "Del Cotopaxi ve a extinguir la hoguera que ceban las entrañas de los Andes."
+texto: "Del Cotopaxi ve a extinguir la hoguera\nque ceban las entrañas de los Andes."
 autor: "andres-bello"
 slug: "andres-bello-del-cotopaxi-ve-a-extinguir-la-hoguera"
 procedencia:

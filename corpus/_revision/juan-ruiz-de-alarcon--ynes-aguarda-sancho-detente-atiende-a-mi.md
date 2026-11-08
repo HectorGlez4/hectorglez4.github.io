@@ -1,5 +1,5 @@
 ---
-texto: "YNES Aguarda, Sancho, detente, atiende a mi triste llanto, 675 ya lloro, ya no te pido, si con pedir te he enojado: Como a las Indias te partes, quise passar este trago con tratar de las riquezas 680 que esperaua de tus manos."
+texto: "YNES\nAguarda, Sancho, detente,\natiende a mi triste llanto, 675\nya lloro, ya no te pido,\nsi con pedir te he enojado:\nComo a las Indias te partes,\nquise passar este trago\ncon tratar de las riquezas 680\nque esperaua de tus manos."
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-ynes-aguarda-sancho-detente-atiende-a-mi"
 procedencia:

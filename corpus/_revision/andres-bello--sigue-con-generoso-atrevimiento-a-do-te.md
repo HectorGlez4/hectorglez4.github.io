@@ -1,5 +1,5 @@
 ---
-texto: "Sigue con generoso atrevimiento a do te aguarda, en medio el alto coro de las alegres Musas, digno asiento."
+texto: "Sigue con generoso atrevimiento\na do te aguarda, en medio el alto coro\nde las alegres Musas, digno asiento."
 autor: "andres-bello"
 slug: "andres-bello-sigue-con-generoso-atrevimiento-a-do-te"
 procedencia:

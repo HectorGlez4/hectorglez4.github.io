@@ -1,5 +1,5 @@
 ---
-texto: "Detente, sombra de mi bien esquivo, imagen del hechizo que más quiero, bella ilusión por quien alegre muero, dulce ficción por quien penosa vivo."
+texto: "Detente, sombra de mi bien esquivo,\nimagen del hechizo que más quiero,\nbella ilusión por quien alegre muero,\ndulce ficción por quien penosa vivo."
 autor: "sor-juana-ines-de-la-cruz"
 temas:
   - "el-amor"

@@ -1,5 +1,5 @@
 ---
-texto: "Devolvedle a la flor su perfume después de marchita; de las ondas que besan la playa y que una tras otra besándola expiran, recoged los rumores, las quejas, y en planchas de bronce grabad su armonía."
+texto: "Devolvedle a la flor su perfume\ndespués de marchita;\nde las ondas que besan la playa\ny que una tras otra besándola expiran,\nrecoged los rumores, las quejas,\ny en planchas de bronce grabad su armonía."
 autor: "rosalia-de-castro"
 slug: "rosalia-de-castro-devolvedle-a-la-flor-su-perfume-despues"
 procedencia:
