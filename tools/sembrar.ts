@@ -15,9 +15,16 @@
 
 import { readFile } from 'node:fs/promises';
 import { parse as parsearYaml } from 'yaml';
-import { altaConFallo, darDeAltaLote, formatearInforme, sinTemaPublicado, type EntradaDeLote } from './alta.ts';
+import {
+  altaConFallo,
+  darDeAltaLote,
+  formatearInforme,
+  mensajeDeAltaFallida,
+  sinTemaPublicado,
+  type EntradaDeLote,
+} from './alta.ts';
 import { crearAutor, crearTema } from './lib/gestion.ts';
-import { rutasDelCorpus } from './lib/corpus.ts';
+import { leerRegistroDeClases, rutasDelCorpus } from './lib/corpus.ts';
 import { raizDeCorpusDe } from './lib/cli.ts';
 
 interface AutorSemilla {
@@ -33,6 +40,15 @@ const seco = argumentos.includes('--seco');
 
 const autores = parsearYaml(await readFile('corpus/semilla/autores.yaml', 'utf8')) as AutorSemilla[];
 const citas = parsearYaml(await readFile('corpus/semilla/citas.yaml', 'utf8')) as EntradaDeLote[];
+
+// Historia 35.1 — el registro de clases se lee antes de crear nada: ilegible, la siembra no
+// escribe ni Autores ni Temas (el alta lo volvería a leer y se negaría después de crearlos).
+try {
+  await leerRegistroDeClases(rutas);
+} catch (fallo) {
+  process.stderr.write(`${mensajeDeAltaFallida(fallo)}\n`);
+  process.exit(1);
+}
 
 // ── Autores ──────────────────────────────────────────────────────────────────
 let autoresCreados = 0;
@@ -74,7 +90,13 @@ process.stdout.write(
 );
 
 // ── Citas, por la puerta de siempre ──────────────────────────────────────────
-const informe = await darDeAltaLote(citas, rutas, { seco });
+let informe: Awaited<ReturnType<typeof darDeAltaLote>>;
+try {
+  informe = await darDeAltaLote(citas, rutas, { seco });
+} catch (fallo) {
+  process.stderr.write(`${mensajeDeAltaFallida(fallo)}\n`);
+  process.exit(1);
+}
 process.stdout.write(`${formatearInforme(informe)}\n`);
 
 if (informe.enRevision.length > 0) {

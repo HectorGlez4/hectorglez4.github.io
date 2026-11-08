@@ -8,7 +8,7 @@
  * cada puesta al día de una rama con la principal, porque las Citas sembradas entretanto llegan
  * sin anotar y el build no las deja pasar.
  *
- * Códigos: 2 si la invocación no vale (subcomando o bandera desconocidos); 1 si el registro o el
+ * Códigos: 2 si la invocación no vale (subcomando o bandera desconocidos, o `--corpus` repetida); 1 si el registro o el
  * Corpus no se dejan leer, o si una Cita que falta es atribuida —esa la anota su alta—, y en esos
  * casos no escribe nada; 0 en lo demás.
  */
@@ -23,8 +23,9 @@ export function analizarArgumentos(argumentos: readonly string[]): { corpus: str
   if (subcomando !== 'sembrar') {
     return { error: subcomando === undefined ? 'Falta el subcomando.' : `Subcomando desconocido: «${subcomando}».` };
   }
-  let corpus = 'corpus';
+  let corpus: string | undefined;
   for (let i = 0; i < resto.length; i += 1) {
+    if (resto[i] === '--corpus' && corpus !== undefined) return { error: 'Bandera repetida: «--corpus».' };
     if (resto[i] === '--corpus' && resto[i + 1] !== undefined && !resto[i + 1].startsWith('--')) {
       corpus = resto[i + 1];
       i += 1;
@@ -32,7 +33,7 @@ export function analizarArgumentos(argumentos: readonly string[]): { corpus: str
     }
     return { error: `Argumento desconocido: «${resto[i]}».` };
   }
-  return { corpus };
+  return { corpus: corpus ?? 'corpus' };
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {

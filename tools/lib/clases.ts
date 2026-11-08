@@ -36,6 +36,50 @@ import {
 export const ORDEN_SEMBRAR_CLASES = 'npx tsx tools/clases.ts sembrar';
 
 /**
+ * Una pasada del alta o de la aprobación que se interrumpió —un fallo al mover o escribir una
+ * Cita, o al escribir su Ficha de Obra— **después** de publicar alguna. Lo escrito no se deshace,
+ * así que la orden no puede decir «no se ha escrito nada»: dice qué Citas quedaron publicadas,
+ * si se anotaron en `corpus/clases-de-cita.yml` y, si no, la orden que las anota — Historia 35.1.
+ */
+export class PublicacionInterrumpida extends Error {
+  constructor(
+    readonly causa: unknown,
+    readonly publicadas: readonly string[],
+    readonly registroSinAnotar: string | undefined,
+  ) {
+    const porque = causa instanceof Error ? causa.message : String(causa);
+    const anotadas =
+      registroSinAnotar === undefined
+        ? 'Se anotaron en corpus/clases-de-cita.yml.'
+        : `No se anotaron en corpus/clases-de-cita.yml (${registroSinAnotar}): anótelas con «${ORDEN_SEMBRAR_CLASES}» antes de construir.`;
+    super(
+      `La pasada se interrumpió tras publicar ${publicadas.length} ${publicadas.length === 1 ? 'Cita' : 'Citas'} ` +
+        `(${publicadas.join(', ')}): ${porque}. Lo publicado no se deshace. ${anotadas}`,
+    );
+    this.name = 'PublicacionInterrumpida';
+  }
+}
+
+/**
+ * Tras un fallo a media pasada, anota en el registro lo que ya se publicó y devuelve el error que
+ * lo cuenta; sin nada publicado, devuelve el fallo tal cual (no se escribió nada).
+ */
+export async function anotarTrasInterrupcion(
+  rutas: Rutas,
+  entradas: readonly ClaseRegistrada[],
+  causa: unknown,
+): Promise<unknown> {
+  if (entradas.length === 0) return causa;
+  let registroSinAnotar: string | undefined;
+  try {
+    await registrarClases(rutas, entradas);
+  } catch (fallo) {
+    registroSinAnotar = fallo instanceof Error ? fallo.message : String(fallo);
+  }
+  return new PublicacionInterrumpida(causa, entradas.map((e) => e.slug), registroSinAnotar);
+}
+
+/**
  * Por qué el alta y la aprobación dejan en revisión una Cita que deriva atribuida: su puerta,
  * con sus topes, llega con la Historia 35.1b. Hasta entonces nada se publica atribuido por orden.
  */
@@ -121,6 +165,9 @@ export function fallosDeClases(
 
     const autor = autorPorSlug.get(cita.autor);
     if (autor === undefined) continue;
+    // Un Autor sin `vivo: true` ni `añoFallecimiento` lo rechaza su esquema, con su regla; aquí no
+    // se le atribuye una razón («vive o su plazo no ha vencido») que no es la suya.
+    if (autor.vivo !== true && typeof autor.añoFallecimiento !== 'number') continue;
     const dueño = dueñoAutor(autor);
     if (!esAtribuida(cita)) {
       if (!esDeDominioPublico(dueño, referencia)) {

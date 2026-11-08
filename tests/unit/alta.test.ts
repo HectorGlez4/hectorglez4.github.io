@@ -1,9 +1,10 @@
 import { afterEach, describe, expect, it } from 'vitest';
-import { mkdtemp, mkdir, readFile, readdir, rm, writeFile } from 'node:fs/promises';
+import { chmod, mkdtemp, mkdir, readFile, readdir, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { darDeAltaLote, type EntradaDeLote } from '../../tools/alta.ts';
-import { rutasDelCorpus, type Rutas } from '../../tools/lib/corpus.ts';
+import { altaConFallo, darDeAltaLote, formatearInforme, mensajeDeAltaFallida, type EntradaDeLote } from '../../tools/alta.ts';
+import { CABECERA_DE_CLASES, rutasDelCorpus, type Rutas } from '../../tools/lib/corpus.ts';
+import { ORDEN_SEMBRAR_CLASES, PublicacionInterrumpida } from '../../tools/lib/clases.ts';
 import { CENSO_DE_PARTIDA } from '../../tools/lib/cotejo.ts';
 import { MIN_CITAS_POR_TEMA } from '../../src/lib/umbrales.ts';
 import {
@@ -477,5 +478,26 @@ describe('Historia 35.1 — el alta deriva la clase y la anota', () => {
     await expect(darDeAltaLote([COMPLETA], rutas)).rejects.toThrow(/clases-de-cita\.yml/u);
     expect(await ficherosPublicados(rutas)).toEqual([]);
     expect(await readdir(rutas.revision)).toEqual([]);
+  });
+
+  it('publicadas pero sin anotar —el añadido falla tras escribirlas—: registroSinAnotar, salida 1 y el parte da la siembra', async () => {
+    const rutas = await corpusDePrueba();
+    // Se lee bien y no se deja escribir: el fallo llega después de escribir las Citas.
+    await writeFile(rutas.clasesDeCita, CABECERA_DE_CLASES, 'utf8');
+    await chmod(rutas.clasesDeCita, 0o444);
+    const informe = await darDeAltaLote([COMPLETA], rutas);
+    expect(informe.publicadas).toHaveLength(1);
+    expect(await ficherosPublicados(rutas)).toHaveLength(1);
+    expect(informe.registroSinAnotar).toBeDefined();
+    expect(altaConFallo(informe)).toBe(true);
+    expect(formatearInforme(informe)).toContain(ORDEN_SEMBRAR_CLASES);
+    expect(await readFile(rutas.clasesDeCita, 'utf8')).toBe(CABECERA_DE_CLASES);
+  });
+
+  it('el parte de un alta que lanzó: «nada escrito» solo si no se publicó nada', () => {
+    expect(mensajeDeAltaFallida(new Error('registro ilegible'))).toMatch(/registro ilegible\nNo se ha escrito nada\./u);
+    const interrumpida = new PublicacionInterrumpida(new Error('disco lleno'), ['seneca-a'], undefined);
+    expect(mensajeDeAltaFallida(interrumpida)).toBe(interrumpida.message);
+    expect(mensajeDeAltaFallida(interrumpida)).not.toMatch(/No se ha escrito nada/u);
   });
 });

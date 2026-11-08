@@ -1,10 +1,18 @@
 import { afterEach, describe, expect, it } from 'vitest';
-import { mkdtemp, mkdir, readdir, readFile, rm, writeFile } from 'node:fs/promises';
+import { chmod, mkdtemp, mkdir, readdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { aprobar, loteEnRevision, rechazar } from '../../tools/lib/revision.ts';
-import { leerCitas, nombreDeFicheroDeCita, rutasDelCorpus, type Rutas } from '../../tools/lib/corpus.ts';
+import {
+  CABECERA_DE_CLASES,
+  leerCitas,
+  leerRegistroDeClases,
+  nombreDeFicheroDeCita,
+  rutasDelCorpus,
+  type Rutas,
+} from '../../tools/lib/corpus.ts';
+import { ORDEN_SEMBRAR_CLASES, PublicacionInterrumpida } from '../../tools/lib/clases.ts';
 import { MIN_CITAS_POR_TEMA } from '../../src/lib/umbrales.ts';
 import { TEMA_PUBLICADO, ficherosPublicados, sembrarTemaPublicado, sinRelleno } from './ayuda/relleno.ts';
 
@@ -675,4 +683,62 @@ describe('Historia 35.1 — aprobar deriva la clase y la anota', () => {
     await expect(aprobar(rutas, [CANDIDATA_COMPLETA.slug])).rejects.toThrow(/clases-de-cita\.yml/u);
     expect(await ficherosPublicados(rutas)).toEqual([]);
   });
+
+  /** `tools/revisar.ts --aprobar` sobre el Corpus dado: código y salida entera. */
+  const revisar = async (rutas: Rutas, ...slugs: string[]) => {
+    const { execFile } = await import('node:child_process');
+    const { promisify } = await import('node:util');
+    const raiz = join(import.meta.dirname, '..', '..');
+    return promisify(execFile)('npx', ['tsx', join(raiz, 'tools/revisar.ts'), '--corpus', rutas.raiz, '--aprobar', ...slugs], {
+      cwd: raiz,
+    }).then(
+      (r) => ({ codigo: 0, salida: `${r.stdout}${r.stderr}` }),
+      (e: { code?: number; stdout?: string; stderr?: string }) => ({ codigo: e.code ?? 1, salida: `${e.stdout ?? ''}${e.stderr ?? ''}` }),
+    );
+  };
+
+  it('publicada pero sin anotar —el añadido falla tras moverla—: registroSinAnotar, y la orden sale con 1 dando la siembra', async () => {
+    const rutas = await conAutores([CANDIDATA_COMPLETA]);
+    // Se lee bien y no se deja escribir: el fallo llega después de publicar.
+    await writeFile(rutas.clasesDeCita, CABECERA_DE_CLASES, 'utf8');
+    await chmod(rutas.clasesDeCita, 0o444);
+    const resultado = await aprobar(rutas, [CANDIDATA_COMPLETA.slug]);
+    expect(resultado.publicadas).toEqual([CANDIDATA_COMPLETA.slug]);
+    expect(resultado.registroSinAnotar).toBeDefined();
+    expect(await readFile(rutas.clasesDeCita, 'utf8')).toBe(CABECERA_DE_CLASES);
+
+    const otra = await conAutores([CANDIDATA_COMPLETA]);
+    await writeFile(otra.clasesDeCita, CABECERA_DE_CLASES, 'utf8');
+    await chmod(otra.clasesDeCita, 0o444);
+    const { codigo, salida } = await revisar(otra, CANDIDATA_COMPLETA.slug);
+    expect(codigo, salida).toBe(1);
+    expect(salida).toContain('Las publicadas no se anotaron en corpus/clases-de-cita.yml');
+    expect(salida).toContain(ORDEN_SEMBRAR_CLASES);
+  }, 60_000);
+
+  it('una pasada que se interrumpe tras publicar anota lo publicado, y la orden no dice «ninguna publicada»', async () => {
+    const segunda = { ...CANDIDATA_COMPLETA, texto: 'Otra sentencia distinta de Séneca.', slug: 'seneca-otra-sentencia' };
+    const preparar = async () => {
+      const rutas = await conAutores([CANDIDATA_COMPLETA, segunda]);
+      // Un fichero publicado con el nombre que tomaría la segunda (y otro slug): `mover` no pisa,
+      // y lanza a media pasada, con la primera ya en corpus/citas/.
+      await writeFile(join(rutas.citas, `${segunda.slug}.md`), ficheroDeCita({ ...CANDIDATA_COMPLETA, slug: 'seneca-ajena', texto: 'Una ajena.' }), 'utf8');
+      await writeFile(rutas.clasesDeCita, `${CABECERA_DE_CLASES}  - { slug: "seneca-ajena", clase: siempre, fecha: "2026-11-01" }\n`, 'utf8');
+      return rutas;
+    };
+
+    const rutas = await preparar();
+    const lanzado = await aprobar(rutas, [CANDIDATA_COMPLETA.slug, segunda.slug]).then(
+      () => undefined,
+      (error: unknown) => error,
+    );
+    expect(lanzado).toBeInstanceOf(PublicacionInterrumpida);
+    expect((lanzado as PublicacionInterrumpida).publicadas).toEqual([CANDIDATA_COMPLETA.slug]);
+    expect((await leerRegistroDeClases(rutas)).map((e) => e.slug)).toEqual(['seneca-ajena', CANDIDATA_COMPLETA.slug]);
+
+    const { codigo, salida } = await revisar(await preparar(), CANDIDATA_COMPLETA.slug, segunda.slug);
+    expect(codigo, salida).toBe(1);
+    expect(salida).toMatch(new RegExp(`tras publicar 1 Cita \\(${CANDIDATA_COMPLETA.slug}\\)`, 'u'));
+    expect(salida).not.toContain('No se ha publicado ninguna candidata');
+  }, 60_000);
 });

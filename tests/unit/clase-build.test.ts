@@ -107,6 +107,17 @@ describe('Historia 35.1 — la clase en el build', () => {
     // La página de Cita de la de siempre sigue diciendo los años de siempre.
     const seneca = readFileSync(paginaConstruida(r.proyecto, '/autor/seneca/'), 'utf8');
     expect(seneca).toContain('"deathDate":"65"');
+
+    // El `Person` del JSON-LD de la Página de Cita (`DatosEstructurados.astro`): sin deathDate
+    // para un Autor vivo, y sin ninguna de las dos fechas si no consta su nacimiento.
+    const citaDeAna = readFileSync(paginaConstruida(r.proyecto, '/cita/ana-ejemplo-la-vida-es-corta/'), 'utf8');
+    expect(citaDeAna).toContain('"birthDate":"1950"');
+    expect(citaDeAna).not.toContain('deathDate');
+    const citaDeLuis = readFileSync(paginaConstruida(r.proyecto, '/cita/luis-prueba-el-arte-es-largo/'), 'utf8');
+    expect(citaDeLuis).not.toContain('birthDate');
+    expect(citaDeLuis).not.toContain('deathDate');
+    const citaDeSeneca = readFileSync(paginaConstruida(r.proyecto, '/cita/seneca-no-es-que-tengamos-poco-tiempo/'), 'utf8');
+    expect(citaDeSeneca).toContain('"deathDate":"65"');
   });
 
   it('cada desacuerdo con el registro y con los derechos rompe nombrando lo suyo', async () => {

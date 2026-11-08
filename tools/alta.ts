@@ -47,9 +47,11 @@ import {
 } from './lib/corpus.ts';
 import { claseDe, claseQueCorresponde, esAtribuida, type Clase } from '../src/lib/clase.ts';
 import {
+  anotarTrasInterrupcion,
   MOTIVO_CLASE_TECLEADA,
   MOTIVO_PUERTA_CERRADA,
   ORDEN_SEMBRAR_CLASES,
+  PublicacionInterrumpida,
   slugsConOtraClase,
 } from './lib/clases.ts';
 import { aplicarFichaDeObra, resolverFichaDeObra, type PlanDeFicha } from './lib/obras.ts';
@@ -141,6 +143,15 @@ export interface InformeDeAlta {
   registroSinAnotar?: string;
 }
 
+/** Una entrada que la pasada publica (o publicaría, en el ensayo), con sus Temas y su clase. */
+interface Publicada {
+  indice: number;
+  texto: string;
+  slug: string;
+  temas: string[];
+  clase: Clase;
+}
+
 /**
  * Da de alta un lote.
  *
@@ -193,13 +204,32 @@ export async function darDeAltaLote(
     }
     ensayo = await recorrer(false);
   }
-  const { informe, aPublicar } = opciones.seco ? ensayo : await recorrer(true);
+  /*
+   * Historia 35.1 — la pasada que escribe va dejando lo publicado en `enCurso`: si se interrumpe
+   * a medias (un fallo al escribir una Cita o su ficha), lo ya escrito se anota en el registro y
+   * el error que sube lo cuenta (`PublicacionInterrumpida`), en vez de «no se ha escrito nada».
+   */
+  const hoy = fechaLocal(new Date());
+  const enCurso: Publicada[] = [];
+  let pasada: Awaited<ReturnType<typeof recorrer>>;
+  if (opciones.seco) pasada = ensayo;
+  else {
+    try {
+      pasada = await recorrer(true, enCurso);
+    } catch (fallo) {
+      throw await anotarTrasInterrupcion(
+        rutas,
+        enCurso.map((p) => ({ slug: p.slug, clase: p.clase, fecha: hoy })),
+        fallo,
+      );
+    }
+  }
+  const { informe, aPublicar } = pasada;
   if (!opciones.seco) {
     /*
      * Historia 35.1 — lo publicado se anota en el registro de clases, en un solo añadido al final.
      * Si falla, las Citas ya están escritas: el parte da la orden que las anota y sale con 1.
      */
-    const hoy = fechaLocal(new Date());
     const entradas: ClaseRegistrada[] = aPublicar.map((p) => ({ slug: p.slug, clase: p.clase, fecha: hoy }));
     try {
       await registrarClases(rutas, entradas);
@@ -235,11 +265,10 @@ export async function darDeAltaLote(
    * Una pasada por el lote sin las entradas apartadas. Con `escribir`, escribe como siempre; sin
    * él, decide lo mismo sin tocar el disco. Devuelve el informe y lo que se publica, con sus Temas.
    */
-  async function recorrer(escribir: boolean): Promise<{
-    informe: InformeDeAlta;
-    aPublicar: { indice: number; texto: string; slug: string; temas: string[]; clase: Clase }[];
-  }> {
-    const aPublicar: { indice: number; texto: string; slug: string; temas: string[]; clase: Clase }[] = [];
+  async function recorrer(
+    escribir: boolean,
+    aPublicar: Publicada[] = [],
+  ): Promise<{ informe: InformeDeAlta; aPublicar: Publicada[] }> {
     const slugsOcupados = new Set(yaPublicadas.map((c) => c.slug));
     // El conjunto publicado tal como va quedando, para la grafía por omisión de una ficha nueva.
     const publicadasParaObra: { autor: string; procedencia?: { obra?: string } }[] = [
@@ -477,6 +506,16 @@ export function sinTemaPublicado(informe: InformeDeAlta): boolean {
 }
 
 /**
+ * El parte de un alta que lanzó. Un registro de clases ilegible la niega antes de escribir nada;
+ * una pasada interrumpida tras publicar (`PublicacionInterrumpida`) no puede decir eso: dice qué
+ * quedó publicado y si se anotó — Historia 35.1.
+ */
+export function mensajeDeAltaFallida(fallo: unknown): string {
+  if (fallo instanceof PublicacionInterrumpida) return fallo.message;
+  return `${fallo instanceof Error ? fallo.message : String(fallo)}\nNo se ha escrito nada.`;
+}
+
+/**
  * Si la orden sale con 1: una Cita sin Tema publicado, o lo publicado sin anotar en el registro
  * de clases (Historia 35.1).
  */
@@ -618,8 +657,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   try {
     informe = await darDeAltaLote(lote, rutasDelCorpus(raizCorpus), { seco, conDuplicados });
   } catch (fallo) {
-    // Historia 35.1 — un registro de clases ilegible niega el alta antes de escribir nada.
-    process.stderr.write(`${fallo instanceof Error ? fallo.message : String(fallo)}\nNo se ha escrito nada.\n`);
+    process.stderr.write(`${mensajeDeAltaFallida(fallo)}\n`);
     process.exit(1);
   }
   process.stdout.write(`${formatearInforme(informe)}\n`);

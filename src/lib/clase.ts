@@ -80,6 +80,8 @@ export function derechosVigentes(
   dueño: DueñoDeDerechos,
   referencia: ReferenciaDeDerechos = REFERENCIA_DEL_ÁRBOL,
 ): boolean {
+  // Plazo sin año lanza para todo dueño, no solo para el fallecido: que lance no depende del Corpus.
+  if (referencia.plazo !== undefined) añoDe(referencia);
   if (dueño.tipo === 'personaje') return true;
   if (dueño.vivo === true) return true;
   if (referencia.plazo === undefined) return false;
@@ -96,6 +98,7 @@ export function esDeDominioPublico(
   dueño: DueñoDeDerechos,
   referencia: ReferenciaDeDerechos = REFERENCIA_DEL_ÁRBOL,
 ): boolean {
+  if (referencia.plazo !== undefined) añoDe(referencia);
   if (dueño.tipo !== 'autor' || dueño.vivo === true || dueño.añoFallecimiento === undefined) return false;
   if (referencia.plazo === undefined) return true;
   return dueño.añoFallecimiento + referencia.plazo < añoDe(referencia);

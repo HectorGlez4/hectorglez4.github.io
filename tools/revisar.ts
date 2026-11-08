@@ -29,7 +29,7 @@
 
 import { rutasDelCorpus } from './lib/corpus.ts';
 import { aprobar, formatearLote, loteEnRevision, rechazar } from './lib/revision.ts';
-import { ORDEN_SEMBRAR_CLASES } from './lib/clases.ts';
+import { ORDEN_SEMBRAR_CLASES, PublicacionInterrumpida } from './lib/clases.ts';
 import { raizDeCorpusDe } from './lib/cli.ts';
 import { MIN_CITAS_POR_TEMA } from '../src/lib/umbrales.ts';
 
@@ -108,8 +108,13 @@ if (aAprobar.length > 0) {
   try {
     resultado = await aprobar(rutas, aAprobar, temas);
   } catch (error) {
-    // Historia 35.1 — un registro de clases ilegible niega la aprobación antes de mover nada.
-    process.stderr.write(`${error instanceof Error ? error.message : String(error)}\nNo se ha publicado ninguna candidata.\n`);
+    // Historia 35.1 — un registro de clases ilegible niega la aprobación antes de mover nada; una
+    // pasada interrumpida tras publicar alguna dice cuáles y si se anotaron.
+    process.stderr.write(
+      error instanceof PublicacionInterrumpida
+        ? `${error.message}\n`
+        : `${error instanceof Error ? error.message : String(error)}\nNo se ha publicado ninguna candidata.\n`,
+    );
     process.exit(1);
   }
 

@@ -196,7 +196,10 @@ padre del commit (en el CI, con `fetch-depth: 0`). El build (`integraciones/clas
 para romper —una Cita publicada sin entrada, con otra clase, un slug con dos, una de siempre de un
 Autor que no es de dominio público, una atribuida sin derechos—; no es familia de AD-27, no fecha ni
 avisa y ningún byte de `dist/` sale de él. Un registro ilegible niega el alta y la aprobación con 1
-sin escribir nada; si falla al anotar tras publicar, el parte da la orden y sale con 1.
+sin escribir nada (uno vacío, de una primera escritura cortada, se lee vacío y el siguiente añadido le
+pone la cabecera); si falla al anotar tras publicar, el parte da la orden y sale con 1, y si la pasada
+se interrumpe a medias —al mover o escribir una Cita—, lo ya publicado se anota y el error lo nombra
+(`PublicacionInterrumpida` de `tools/lib/clases.ts`) en vez de decir «no se ha escrito nada».
 
 ```
 npx tsx tools/clases.ts sembrar     # anota como «siempre» las Citas publicadas que falten. Idempotente.
@@ -205,8 +208,17 @@ npx tsx tools/clases.ts sembrar     # anota como «siempre» las Citas publicada
 **Tras cada puesta al día de una rama con la principal se corre `npx tsx tools/clases.ts sembrar`**,
 como `proponer-claves`: las Citas sembradas entretanto en la principal llegan sin anotar y el build no
 las deja pasar. Se niega con 1, sin escribir, si una Cita que falta es atribuida (esa la anota su
-alta); 2 con un argumento desconocido. Las pruebas de build siembran el registro del fixture
+alta); 2 con un argumento desconocido o repetido. Las pruebas de build siembran el registro del fixture
 (`sembrarClases` de `tests/unit/ayuda/construir.ts`, por omisión).
+
+**Al fundir dos ramas que anotaron, el registro choca al final del fichero**: las dos añadieron tras
+la misma última línea, y git no sabe en qué orden. No se resuelve a mano entremezclando entradas: se
+toma **la versión del primer padre** del commit de fusión (`git checkout --ours
+corpus/clases-de-cita.yml` al poner al día una rama con la principal, o al fundir en la principal
+desde ella) y se corre `npx tsx tools/clases.ts sembrar`, que añade al final las que falten —con la
+jornada de hoy—. Así el fichero de la fusión empieza, byte a byte, por el del primer padre, que es lo
+que comprueba `npm test`. La siembra solo anota la clase de siempre: si la otra rama traía una
+entrada `atribuida`, se niega con 1, y esa entrada se copia al final tal cual, sin reescribirla.
 
 ## Leer el estado de indexación
 

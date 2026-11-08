@@ -440,14 +440,6 @@ function documentosDeFuenteDe(corpus: CorpusDePrueba): Record<string, string> {
 }
 
 /**
- * Las Fichas de Obra que faltan a las Citas publicadas de un fixture — Historia 22.1.
- *
- * Con las mismas reglas que la siembra real —forma, grafía por omisión y nombre salen de
- * `src/lib/obras.ts`—, y sin pisar ni duplicar lo que la prueba ya da: una Obra cuya forma
- * reclama una ficha del fixture no recibe otra. Un frontmatter o una ficha que no se dejan
- * analizar se saltan: es lo que mide alguna prueba de admisión, no un fallo del andamio.
- */
-/**
  * El registro de clases de un fixture — Historia 35.1: una entrada por Cita de `citas/` con la
  * clase que dice su fichero. Una Cita que no se deja analizar no se anota: la prueba que la trae
  * mide otra puerta, que la rechazará antes.
@@ -468,6 +460,14 @@ export function registroDeClasesDe(corpus: CorpusDePrueba): string {
   return `${CABECERA_DE_CLASES}${lineas.join('')}`;
 }
 
+/**
+ * Las Fichas de Obra que faltan a las Citas publicadas de un fixture — Historia 22.1.
+ *
+ * Con las mismas reglas que la siembra real —forma, grafía por omisión y nombre salen de
+ * `src/lib/obras.ts`—, y sin pisar ni duplicar lo que la prueba ya da: una Obra cuya forma
+ * reclama una ficha del fixture no recibe otra. Un frontmatter o una ficha que no se dejan
+ * analizar se saltan: es lo que mide alguna prueba de admisión, no un fallo del andamio.
+ */
 function fichasDeObraDe(corpus: CorpusDePrueba): Record<string, string> {
   const citas: CitaConObra[] = [];
   const reclamadas = new Set<string>();

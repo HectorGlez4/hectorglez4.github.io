@@ -65,6 +65,11 @@ describe('35.1 — derechosVigentes y esDeDominioPublico', () => {
   it('con plazo y sin año de referencia lanza, nombrando las dos constantes', () => {
     expect(() => derechosVigentes(CERVANTES, { plazo: 70 })).toThrow(/PLAZO_DE_PROTECCION_AÑOS.*AÑO_DE_REFERENCIA/su);
     expect(() => esDeDominioPublico(CERVANTES, { plazo: 70 })).toThrow(/PLAZO_DE_PROTECCION_AÑOS.*AÑO_DE_REFERENCIA/su);
+    // Para todo dueño: que lance no depende de que el Corpus tenga un Autor fallecido.
+    for (const dueño of [{ tipo: 'autor' as const, vivo: true as const }, { tipo: 'personaje' as const }]) {
+      expect(() => derechosVigentes(dueño, { plazo: 70 })).toThrow(/AÑO_DE_REFERENCIA/u);
+      expect(() => esDeDominioPublico(dueño, { plazo: 70 })).toThrow(/AÑO_DE_REFERENCIA/u);
+    }
   });
 
   it('con las constantes del árbol (sin plazo), un Autor fallecido es de dominio público', () => {

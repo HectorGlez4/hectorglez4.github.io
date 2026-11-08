@@ -20,7 +20,15 @@ import {
   registrarClases,
   rutasDelCorpus,
 } from '../../tools/lib/corpus.ts';
-import { entradasQueFaltan, fallosDeClases, ORDEN_SEMBRAR_CLASES, sembrarRegistro } from '../../tools/lib/clases.ts';
+import {
+  anotarTrasInterrupcion,
+  entradasQueFaltan,
+  fallosDeClases,
+  ORDEN_SEMBRAR_CLASES,
+  PublicacionInterrumpida,
+  sembrarRegistro,
+} from '../../tools/lib/clases.ts';
+import { analizarArgumentos } from '../../tools/clases.ts';
 import { FAMILIAS_DE_FICHERO, familiaDeFichero } from '../../tools/lib/avisar.ts';
 import { CLASES } from '../../src/lib/clase.ts';
 
@@ -75,6 +83,39 @@ describe('35.1 — el registro se lee y solo se añade', () => {
     await expect(registrarClases(rutas, [{ slug: 'bien', clase: 'siempre', fecha: '2026-11-07' }])).rejects.toThrow();
     expect(await readFile(rutas.clasesDeCita, 'utf8')).toBe('otra: []\n');
   });
+
+  it('un registro vacío —una primera escritura cortada— se lee vacío y el siguiente añadido le pone la cabecera', async () => {
+    const rutas = rutasDelCorpus(await corpusDePrueba({ 'seneca--a.md': cita('seneca-a') }));
+    for (const vacio of ['', '\n  \n']) {
+      await writeFile(rutas.clasesDeCita, vacio, 'utf8');
+      expect(await leerRegistroDeClases(rutas)).toEqual([]);
+      expect(await sembrarRegistro(rutas, '2026-11-07')).toMatchObject({ añadidas: 1 });
+      const texto = await readFile(rutas.clasesDeCita, 'utf8');
+      // Solo añade: lo que había sigue delante, byte a byte.
+      expect(texto).toBe(`${vacio}${CABECERA_DE_CLASES}  - { slug: "seneca-a", clase: siempre, fecha: "2026-11-07" }\n`);
+      expect(await leerRegistroDeClases(rutas)).toEqual([{ slug: 'seneca-a', clase: 'siempre', fecha: '2026-11-07' }]);
+    }
+  });
+
+  it('tras una pasada interrumpida anota lo ya publicado y lo cuenta; sin nada publicado, el fallo sube tal cual', async () => {
+    const rutas = rutasDelCorpus(await corpusDePrueba());
+    const causa = new Error('disco lleno');
+    expect(await anotarTrasInterrupcion(rutas, [], causa)).toBe(causa);
+    expect(existsSync(rutas.clasesDeCita)).toBe(false);
+
+    const anotada = await anotarTrasInterrupcion(rutas, [{ slug: 'seneca-a', clase: 'siempre', fecha: '2026-11-07' }], causa);
+    expect(anotada).toBeInstanceOf(PublicacionInterrumpida);
+    expect((anotada as PublicacionInterrumpida).registroSinAnotar).toBeUndefined();
+    expect((anotada as Error).message).toMatch(/tras publicar 1 Cita \(seneca-a\): disco lleno\..*Se anotaron/su);
+    expect((anotada as Error).message).not.toMatch(/No se ha escrito nada/u);
+    expect((await leerRegistroDeClases(rutas)).map((e) => e.slug)).toEqual(['seneca-a']);
+
+    await writeFile(rutas.clasesDeCita, 'otra: []\n', 'utf8');
+    const sinAnotar = await anotarTrasInterrupcion(rutas, [{ slug: 'seneca-b', clase: 'siempre', fecha: '2026-11-07' }], causa);
+    expect((sinAnotar as PublicacionInterrumpida).registroSinAnotar).toMatch(/clases:/u);
+    expect((sinAnotar as Error).message).toContain(`No se anotaron en corpus/clases-de-cita.yml`);
+    expect((sinAnotar as Error).message).toContain(ORDEN_SEMBRAR_CLASES);
+  });
 });
 
 describe('35.1 — la siembra', () => {
@@ -88,6 +129,12 @@ describe('35.1 — la siembra', () => {
       ['seneca-a', 'siempre'],
       ['seneca-b', 'siempre'],
     ]);
+  });
+
+  it('la bandera --corpus repetida es un error de la forma', () => {
+    expect(analizarArgumentos(['sembrar', '--corpus', 'a', '--corpus', 'b'])).toEqual({ error: 'Bandera repetida: «--corpus».' });
+    expect(analizarArgumentos(['sembrar', '--corpus', 'a'])).toEqual({ corpus: 'a' });
+    expect(analizarArgumentos(['sembrar'])).toEqual({ corpus: 'corpus' });
   });
 
   it('se niega sin escribir ante una atribuida sin registrar', () => {
@@ -141,6 +188,14 @@ describe('35.1 — la puerta pura', () => {
     expect(fallos).toMatch(/el slug «doble» está registrado con dos clases/u);
     expect(fallos).toMatch(/de-viva\.md: .*corpus\/autores\/viva\.yml.*no es de dominio público/u);
     expect(fallos).toMatch(/sin-derechos\.md: .*atribuida y su Autor \(corpus\/autores\/cervantes\.yml\) no tiene derechos/u);
+    // Un Autor sin ninguno de los dos campos lo rechaza su esquema: la puerta no le inventa motivo.
+    expect(
+      fallosDeClases(
+        [{ slug: 'x', ruta: 'corpus/citas/x.md', autor: 'sin-anos' }],
+        [{ slug: 'sin-anos', ruta: 'corpus/autores/sin-anos.yml' }],
+        [entrada('x')],
+      ),
+    ).toEqual([]);
   });
 
   it('dos entradas de la misma clase valen; la atribuida de un Autor vivo, o con Personaje, también', () => {

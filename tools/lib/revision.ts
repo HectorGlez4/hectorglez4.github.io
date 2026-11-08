@@ -33,7 +33,7 @@ import {
   type Rutas,
 } from './corpus.ts';
 import { claseDe, claseQueCorresponde, esAtribuida, type Clase } from '../../src/lib/clase.ts';
-import { MOTIVO_PUERTA_CERRADA, motivoClaseDistinta, slugsConOtraClase } from './clases.ts';
+import { anotarTrasInterrupcion, MOTIVO_PUERTA_CERRADA, motivoClaseDistinta, slugsConOtraClase } from './clases.ts';
 import { aplicarFichaDeObra, resolverFichaDeObra } from './obras.ts';
 import { motivoSinTemaPublicado, temaPublicadoConLaPasada } from './alcance.ts';
 import type { TemaBajoUmbral } from '../../src/lib/publicado.ts';
@@ -424,59 +424,71 @@ export async function aprobar(
   };
   replanificar();
 
-  while (pendientes.length > 0) {
-    const { slug, candidata, temas: suyos, comoPublicada } = pendientes.shift()!;
+  /*
+   * Historia 35.1 — un fallo a media pasada (al mover, reescribir o escribir la ficha) no deja sin
+   * anotar lo ya publicado: se anota, y el error que sube lo cuenta (`PublicacionInterrumpida`).
+   */
+  const hoy = fechaLocal(new Date());
+  try {
+    while (pendientes.length > 0) {
+      const { slug, candidata, temas: suyos, comoPublicada } = pendientes.shift()!;
 
-    /*
-     * Historia 22.1 — la Ficha de Obra, en el mismo gesto en que se publica (AD-25).
-     *
-     * Primero se **resuelve**, en solo lectura: si no se puede asegurar sin decidir —una
-     * colisión de nombre—, la Cita no se publica. La ficha se escribe justo **después** de
-     * mover la Cita, así que ningún fallo deja una ficha sin Citas.
-     */
-    const obra = candidata.obra;
-    const plan =
-      obra === undefined
-        ? undefined
-        : await resolverFichaDeObra(rutas, {
-            autor: candidata.autor,
-            obra,
-            citasPublicadas: [...publicadasParaObra, comoPublicada],
-          });
-    if (plan !== undefined && !plan.ok) {
-      resultado.rechazadasPorFicha.push({ slug, motivos: plan.motivos });
-      replanificar();
-      continue;
-    }
-
-    // Un slug registrado con la otra clase cuenta como ocupado: una Cita no cambia de clase.
-    const definitivo = slugLibre(candidata.slug, [...ocupados, ...slugsConOtraClase(registro, candidata.clase)]);
-    ocupados.add(definitivo);
-
-    if (definitivo === candidata.slug && temas.length === 0) {
-      await mover(candidata.ruta, rutas.citas);
-    } else {
-      await reescribirConSlug(candidata, definitivo, rutas, temas);
-      if (definitivo !== candidata.slug) {
-        resultado.renombradas.push({ de: candidata.slug, a: definitivo });
+      /*
+       * Historia 22.1 — la Ficha de Obra, en el mismo gesto en que se publica (AD-25).
+       *
+       * Primero se **resuelve**, en solo lectura: si no se puede asegurar sin decidir —una
+       * colisión de nombre—, la Cita no se publica. La ficha se escribe justo **después** de
+       * mover la Cita, así que ningún fallo deja una ficha sin Citas.
+       */
+      const obra = candidata.obra;
+      const plan =
+        obra === undefined
+          ? undefined
+          : await resolverFichaDeObra(rutas, {
+              autor: candidata.autor,
+              obra,
+              citasPublicadas: [...publicadasParaObra, comoPublicada],
+            });
+      if (plan !== undefined && !plan.ok) {
+        resultado.rechazadasPorFicha.push({ slug, motivos: plan.motivos });
+        replanificar();
+        continue;
       }
-    }
-    publicadasParaObra.push(comoPublicada);
-    escritas.push({ slug: definitivo, temas: suyos, clase: candidata.clase });
 
-    if (plan !== undefined) {
-      const ficha = await aplicarFichaDeObra(rutas, plan);
-      if (!ficha.ok) resultado.fichasSinAsegurar.push({ slug, motivos: ficha.motivos });
-    }
+      // Un slug registrado con la otra clase cuenta como ocupado: una Cita no cambia de clase.
+      const definitivo = slugLibre(candidata.slug, [...ocupados, ...slugsConOtraClase(registro, candidata.clase)]);
+      ocupados.add(definitivo);
 
-    resultado.publicadas.push(slug);
+      if (definitivo === candidata.slug && temas.length === 0) {
+        await mover(candidata.ruta, rutas.citas);
+      } else {
+        await reescribirConSlug(candidata, definitivo, rutas, temas);
+        if (definitivo !== candidata.slug) {
+          resultado.renombradas.push({ de: candidata.slug, a: definitivo });
+        }
+      }
+      publicadasParaObra.push(comoPublicada);
+      escritas.push({ slug: definitivo, temas: suyos, clase: candidata.clase });
+
+      if (plan !== undefined) {
+        const ficha = await aplicarFichaDeObra(rutas, plan);
+        if (!ficha.ok) resultado.fichasSinAsegurar.push({ slug, motivos: ficha.motivos });
+      }
+
+      resultado.publicadas.push(slug);
+    }
+  } catch (fallo) {
+    throw await anotarTrasInterrupcion(
+      rutas,
+      escritas.map((e) => ({ slug: e.slug, clase: e.clase, fecha: hoy })),
+      fallo,
+    );
   }
 
   /*
    * Historia 35.1 — lo publicado se anota en el registro de clases, en un solo añadido al final.
    * Si falla, las Citas ya están publicadas: el parte da la orden que las anota y sale con 1.
    */
-  const hoy = fechaLocal(new Date());
   try {
     await registrarClases(
       rutas,

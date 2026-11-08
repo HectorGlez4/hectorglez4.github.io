@@ -3662,10 +3662,17 @@ function analizarClases(nombre: string, contenido: string): ClaseRegistrada[] {
   return entradas as ClaseRegistrada[];
 }
 
-/** Las entradas del registro de clases. Un registro que no existe se lee como registro vacío. */
+/**
+ * Las entradas del registro de clases. Un registro que no existe se lee como registro vacío, y
+ * uno que existe sin contenido —una primera escritura interrumpida, un fichero truncado—,
+ * también: sin una sola entrada no hay nada que leer a medias, y `registrarClases` le pone la
+ * cabecera al primer añadido. Si se leyera como «falta la clave», ninguna orden lo repararía.
+ */
 export async function leerRegistroDeClases(rutas: Rutas): Promise<ClaseRegistrada[]> {
   if (!existsSync(rutas.clasesDeCita)) return [];
-  return analizarClases(`corpus/${FICHERO_DE_CLASES}`, await readFile(rutas.clasesDeCita, 'utf8'));
+  const contenido = await readFile(rutas.clasesDeCita, 'utf8');
+  if (contenido.trim() === '') return [];
+  return analizarClases(`corpus/${FICHERO_DE_CLASES}`, contenido);
 }
 
 /** Una entrada como se escribe: una línea, con el slug y la fecha entre comillas. */
@@ -3698,8 +3705,13 @@ export async function registrarClases(rutas: Rutas, entradas: readonly ClaseRegi
   }
 
   const anterior = await readFile(ruta, 'utf8');
-  const cuantasHabia = analizarClases(nombre, anterior).length;
-  const salto = anterior === '' || anterior.endsWith('\n') ? '' : '\n';
+  /*
+   * Un fichero sin contenido (una primera escritura que se cortó, uno truncado) recibe la
+   * cabecera en el mismo añadido: sigue siendo solo añadir, y deja el registro con su clave.
+   */
+  const vacio = anterior.trim() === '';
+  const cuantasHabia = vacio ? 0 : analizarClases(nombre, anterior).length;
+  const salto = vacio ? CABECERA_DE_CLASES : anterior.endsWith('\n') ? '' : '\n';
   const quedaria = analizarClases(nombre, `${anterior}${salto}${añadido}`);
   if (quedaria.length !== cuantasHabia + entradas.length) {
     throw new Error(

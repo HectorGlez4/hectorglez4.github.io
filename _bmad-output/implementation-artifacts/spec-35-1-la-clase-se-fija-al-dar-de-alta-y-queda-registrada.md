@@ -5,7 +5,7 @@ created: '2026-11-07'
 status: 'done'
 baseline_revision: '752577a43e69e2e86dc8536fc287a43df2ee7dfc'
 review_loop_iteration: 0
-followup_review_recommended: false
+followup_review_recommended: true
 context:
   - '{project-root}/_bmad-output/implementation-artifacts/epic-35-context.md'
 warnings: [oversized]
@@ -21,6 +21,20 @@ deferred:
     severity: low
   - summary: 'La forma «n. {año}» de los años de un Autor vivo es [ASSUMPTION]: pendiente de Héctor (bmad-ux).'
     evidence: 'epics.md Story 35.1, segundo Given.'
+    severity: low
+  - summary: >-
+      `tools/extraer.ts` escribe `estadoDerechos: dominio-público` sin condición: la candidata de un Autor vivo nace como de siempre y la aprobación la rechaza con `motivoClaseDistinta` («la clase no se teclea»), que culpa a quien revisa de algo que escribió el extractor.
+    evidence: |-
+      Revisión 1 de la 35.1 (blind-hunter). Hoy no ocurre: ningún Autor del Corpus es `vivo` y `crear` no admite `--vivo`. Lo cierra la 35.1b, que abre la puerta de la atribuida y decide qué escribe el extractor para un dueño con derechos.
+    location: >-
+      tools/extraer.ts
+    severity: low
+  - summary: >-
+      Ninguna prueba compone el aviso (`avisar --ensayo`) ni el historial sobre un commit que solo toca `corpus/clases-de-cita.yml`; «no fecha ni avisa (ni la portada)» se apoya en que `familiaDeFichero` lo da `undefined` y en que el diff del aviso se acota a las carpetas de familia.
+    evidence: |-
+      Revisión 1 de la 35.1 (blind-hunter, ac-auditor, intent-alignment). tools/avisar.ts:331-342 acota el `git diff` a `FAMILIAS_DE_FICHERO` más umbrales, así que hoy se cumple; falta la prueba de extremo a extremo.
+    location: >-
+      tests/unit/clases-de-cita.test.ts
     severity: low
 ---
 
@@ -124,6 +138,25 @@ deferred:
 
 ## Review Triage Log
 
+### 2026-11-08 — Review pass
+- intent_gap: 0
+- bad_spec: 0
+- patch: 11: (high 0, medium 3, low 8)
+- defer: 2: (high 0, medium 0, low 2)
+- reject: 29: (high 0, medium 0, low 29)
+- addressed_findings:
+  - `[medium]` `[patch]` Un fallo a media pasada en `aprobar` o en `darDeAltaLote` (mover, escribir la Cita) dejaba sin anotar lo ya publicado y la orden decía «nada escrito»: ahora se anota lo publicado y sube `PublicacionInterrumpida` (`tools/lib/clases.ts`, `anotarTrasInterrupcion`), que nombra las Citas y si se anotaron; `alta.ts`, `revisar.ts` y `sembrar.ts` lo dicen así. Pruebas: `alta-interrumpida.test.ts` (nuevo), `revision.test.ts` (lib y orden), `clases-de-cita.test.ts`.
+  - `[medium]` `[patch]` Un `clases-de-cita.yml` vacío dejaba el árbol sin arreglo («falta la clave» en toda orden y en el build): se lee vacío y el primer añadido le pone la cabecera, solo añadiendo. Prueba en `clases-de-cita.test.ts`.
+  - `[medium]` `[patch]` El camino `registroSinAnotar` (publicadas y el añadido falla) no lo ejecutaba ninguna prueba: un registro de solo lectura lo provoca en `alta.test.ts` (informe, `altaConFallo`, parte con la siembra) y en `revision.test.ts` (lib y `tools/revisar.ts`, salida 1 con la siembra).
+  - `[low]` `[patch]` `tools/sembrar.ts` creaba Autores y Temas y después lanzaba sin parte ante un registro ilegible: lo lee antes de crear nada y convierte el fallo del alta en parte y salida 1.
+  - `[low]` `[patch]` `deathDate` del JSON-LD de la Página de Cita de un Autor vivo sin prueba: `clase-build.test.ts` lee las Páginas de Cita de Ana (birthDate, sin deathDate), Luis (ninguna) y Séneca (deathDate 65).
+  - `[low]` `[patch]` `autor.ts listar` de un Autor vivo sin prueba: `autor-cli.test.ts` comprueba «vivo» y ningún «†».
+  - `[low]` `[patch]` El JSDoc de `fichasDeObraDe` quedó huérfano encima de `registroDeClasesDe` (`tests/unit/ayuda/construir.ts`): vuelve a su función.
+  - `[low]` `[patch]` Con plazo y sin año, `derechosVigentes` y `esDeDominioPublico` solo lanzaban para un Autor fallecido: lanzan para todo dueño, sin depender del Corpus (`clase.test.ts`).
+  - `[low]` `[patch]` `tools/clases.ts sembrar --corpus a --corpus b` tomaba el último: es error de la forma, 2 (`clases-de-cita.test.ts`).
+  - `[low]` `[patch]` Un Autor sin `vivo` ni `añoFallecimiento` recibía de `fallosDeClases` el motivo «o vive o su plazo no ha vencido»: la puerta lo deja al esquema, que lo rechaza con su regla.
+  - `[low]` `[patch]` El registro choca al final del fichero al fundir dos ramas que anotaron: `AGENTS.md` dice cómo resolverlo sin reescribir entradas (versión del primer padre y `npx tsx tools/clases.ts sembrar`), junto a la siembra tras cada puesta al día con la principal.
+
 ### 2026-11-08 — Review pass (reanudación)
 - intent_gap: 0
 - bad_spec: 0
@@ -163,6 +196,7 @@ esDeDominioPublico(a) = a.tipo === 'autor' && a.vivo !== true && a.añoFallecimi
 - `npx vitest run tests/unit/clase.test.ts tests/unit/clases-de-cita.test.ts` -- verde.
 - `npx vitest run tests/unit/clase-build.test.ts` -- verde (construye cuatro copias).
 - `npx vitest run tests/unit/fecha-de-cambio.test.ts tests/unit/puerta-de-admision.test.ts tests/unit/alta.test.ts tests/unit/revision.test.ts` -- verde.
+- `npx vitest run tests/unit/alta-interrumpida.test.ts tests/unit/autor-cli.test.ts` -- verde.
 - `npx astro check` -- 0 errores.
 - `FECHA_JORNADA=2026-11-07 npm run build` antes de tocar nada (copiar `dist/` al scratch) y al final; `diff -r` -- sin diferencias.
 - `npm test` con `correr.sh` / `esperar.pl` -- FINISHED EXIT=0.
@@ -202,3 +236,29 @@ Blocking condition: ninguna
 **Riesgos residuales.** `extraer-cli` y `objetivo-cli` rozan su plazo de 120 s con el `_revision/` real bajo carga: no es de esta historia, pero `npm test` en local puede salir rojo por ellos con varios worktrees construyendo a la vez.
 
 Además: La atribuida de un Personaje sin Autor espera a la 35.2; `tools/autor.ts crear` no admite `--vivo`; la forma «n. {año}» es [ASSUMPTION] pendiente de Héctor (bmad-ux). Tras cada puesta al día con la principal hay que correr `npx tsx tools/clases.ts sembrar`, o el build se para ante las Citas sembradas entretanto.
+
+### Revisión 1 (2026-11-08)
+
+**Resumen.** Once parches de la revisión con cinco capas externas, sin tocar el contrato: la pasada del alta y de la aprobación que se interrumpe tras publicar anota lo publicado y lo cuenta (`PublicacionInterrumpida`, `anotarTrasInterrupcion` en `tools/lib/clases.ts`) en vez de decir «nada escrito»; un registro vacío se recupera solo añadiendo la cabecera; la siembra lee el registro antes de crear Autores y Temas; con plazo y sin año, la función de derechos lanza para todo dueño; `--corpus` repetido sale con 2; un Autor sin años no recibe un motivo ajeno de la puerta; y `AGENTS.md` dice cómo resolver el choque al final del registro al fundir ramas.
+
+**Ficheros.**
+- `tools/lib/clases.ts` — `PublicacionInterrumpida`, `anotarTrasInterrupcion`; `fallosDeClases` deja al esquema el Autor sin `vivo` ni `añoFallecimiento`.
+- `tools/lib/corpus.ts` — `leerRegistroDeClases` lee vacío un fichero vacío; `registrarClases` le pone la cabecera en el mismo añadido.
+- `tools/lib/revision.ts`, `tools/alta.ts` — el bucle que publica, dentro de un `try` que anota lo ya publicado y relanza contado; `mensajeDeAltaFallida`.
+- `tools/revisar.ts`, `tools/sembrar.ts` — el parte de una pasada interrumpida; la siembra lee el registro antes de escribir y no lanza sin parte.
+- `tools/clases.ts` — `--corpus` repetido es error de la forma.
+- `src/lib/clase.ts` — plazo sin año lanza antes de mirar el dueño (sin efecto con las constantes en `undefined`).
+- `tests/unit/alta-interrumpida.test.ts` (nuevo), `alta.test.ts`, `revision.test.ts`, `clases-de-cita.test.ts`, `clase.test.ts`, `clase-build.test.ts`, `autor-cli.test.ts` — las pruebas de cada parche; `tests/unit/ayuda/construir.ts` — el JSDoc de `fichasDeObraDe` vuelve a su función.
+- `AGENTS.md` — el registro vacío, la pasada interrumpida y la fusión de ramas que anotaron.
+
+**Revisión.** 11 parches (0 high, 3 medium, 8 low), 2 diferidos (el `estadoDerechos` del extractor para un Autor vivo, a la 35.1b; la prueba de aviso/historial sobre un commit que solo toca el registro), 29 rechazados (concurrencia de dos escritores en un checkout, la comparación contra `HEAD^1` y no `HEAD`, que es la del contrato, duplicaciones menores, lecturas del intent ya diferidas o resueltas por el contrato). `followup_review_recommended: true`: puntuación 3 × 3 + 8 × 1 = 17 ≥ 5.
+
+**Verificación.**
+- `npx vitest run` de clase, clases-de-cita, fecha-de-cambio, puerta-de-admision, alta, alta-interrumpida, revision y autor-cli — 8 ficheros, 217 pruebas, verde.
+- `npx vitest run tests/unit/clase-build.test.ts` — 4 construcciones, verde.
+- `npx astro check` — 0 errores (420 ficheros).
+- `npm test` (`correr.sh`/`esperar.pl`, `npm-test-triage-35.1-1.log`) — FINISHED EXIT=0: 159/159 ficheros, 7.230 pruebas.
+- `dist/` no se reconstruyó: el único cambio de `src/` (`clase.ts`) solo actúa con `PLAZO_DE_PROTECCION_AÑOS` con valor, y está en `undefined`; ningún otro parche toca lo que pinta el sitio.
+
+**Riesgos residuales.** Si el disco falla también al anotar tras la interrupción, la orden lo dice y da la siembra, pero lo publicado queda sin anotar hasta correrla. Una Cita a medio reescribir (`reescribirConSlug` que lanza tras escribir el fichero nuevo) no entra en lo anotado: la siembra la recoge.
+
