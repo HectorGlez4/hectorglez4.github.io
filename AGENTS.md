@@ -894,8 +894,9 @@ analizar cuenta como cambio de todo; un campo ausente es `undefined`; el orden d
   son listas explícitas, nunca «todos menos», y `tests/unit/fecha-de-cambio.test.ts` falla
   nombrando la clave de un esquema que no esté en ninguna: **un campo nuevo —el `ordenAlfabetico`
   de la 26.1— se clasifica en el mismo commit que lo añade**.
-- **Página de Cita** = su fichero, su Autor (nombre y años), sus Temas (nombre) y su ficha de
-  Obra (título). Nunca Citas hermanas: la Tarjeta de Obra, «Siguiente», «De la misma obra», «Más
+- **Página de Cita** = su fichero, su Autor (nombre y años, y desde la 30.3 el nombre derivado
+  de «Cómo citar», `NOMBRE_EN_REFERENCIA`, de `nombre`, `ordenAlfabetico` y `ordenRevisado`), sus
+  Temas (nombre) y su ficha de Obra (título). Nunca Citas hermanas: la Tarjeta de Obra, «Siguiente», «De la misma obra», «Más
   de», sus recuentos y el año del `isPartOf` son navegación (excepción de Héctor, FR-47). Una
   Cita nueva no refecha ninguna otra Página de Cita, y un commit que solo toca `aptaParaPortada`
   no fecha nada y solo avisa la portada.

@@ -558,7 +558,9 @@ describe('Historia 24.8 — la matriz: qué cambia de fecha', () => {
    * Historias 26.1 y 26.3 — el lote de `proponer-claves` escribe `ordenAlfabetico` en todos los
    * Autores a la vez, y la confirmación de una persona, `ordenRevisado`. Desde la 26.3 la clave la
    * pinta el Directorio de Autores, que ordena y agrupa por ella: el lote mueve `/autores/` y nada
-   * más, ni las Páginas de Autor ni las de Cita. La revisión no la pinta nadie: nunca mueve nada.
+   * más, ni las Páginas de Autor ni las de Cita. Desde la 30.3 la revisión sí pinta: con una clave
+   * que sea palabra del nombre invierte el nombre de «Cómo citar» y fecha las Páginas de Cita del
+   * Autor (las pruebas de la 30.3, más abajo); una clave sin revisar no invierte nada.
    * Desde la 26.4 la clave ordena y agrupa también `/obras/`, que el lote mueve igual.
    */
   it('solo claves de orden, en todos los Autores: cambian solo `/autores/` y `/obras/`', () => {

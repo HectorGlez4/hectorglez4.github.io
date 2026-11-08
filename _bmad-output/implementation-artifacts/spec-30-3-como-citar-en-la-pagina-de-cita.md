@@ -52,6 +52,20 @@ deferred:
     location: >-
       tests/e2e/accesibilidad.spec.ts
     severity: low
+  - summary: >-
+      Pendiente de Héctor (formas literales): los años de una obra traducida y el punto tras la URL de Chicago.
+    evidence: |-
+      APA fecha hoy por el año del original y deja el de la traducción en el paréntesis («Horacio (23 a. C.). … En *Odas* (Germán Salinas, Trad., 1909).»), donde APA 7 fecha por la edición usada y añade «(Trabajo original publicado en …)»; MLA y Chicago ponen dos años seguidos sin decir cuál es cuál («traducido por Germán Salinas, 1909, 23 a. C.»; «23 a. C. Traducido por Germán Salinas, 1909.»); y Chicago cierra con «{U}.», que algunos editores pegan a la URL. Son formas del supuesto que fija la tabla de Design Notes y revisa Héctor (revisión 2 de la 30.3, blind-hunter).
+    location: >-
+      src/lib/atribucion.ts (referenciaDeCita)
+    severity: low
+  - summary: >-
+      Una clave revisada que no es, tal cual, una palabra del nombre (varias palabras, otra tilde) deja el nombre sin invertir sin que nada se lo diga a Héctor.
+    evidence: |-
+      Es la regla del AC («si la clave no es una palabra del nombre, va el `nombre` tal como lo escribe su ficha»), así que no se cambia; pero `npx tsx tools/autor.ts clave` y `listar` no avisan de que una clave como «García Márquez» no invertirá la Referencia. Un aviso en el parte de `clave` (o en `listar`) lo cerraría (revisión 2 de la 30.3, blind-hunter y edge-case-hunter).
+    location: >-
+      src/lib/atribucion.ts (partesDelNombre), tools/autor.ts (clave)
+    severity: low
 ---
 
 <intent-contract>
@@ -173,6 +187,21 @@ Revisión 1, con los hallazgos de las cinco capas externas (blind-hunter, edge-c
   - `[low]` `[patch]` Design Notes decía que el Kit no lleva Copiar; lo lleva (`MaterialParaPublicar.astro`) y su guion crece igual: corregido.
   - `[low]` `[patch]` `npm test` entero no se había repetido tras corregir `indexnow.test.ts`: repetido en esta pasada (ver Verificación).
 
+### 2026-11-08 — Review pass
+Revisión 2 (última ronda), con los hallazgos de las cinco capas externas, deduplicados. Ningún defecto en un camino que pise un visitante, un sembrador o el build: lo que queda son cifras y comentarios desfasados y dos huecos de prueba.
+- intent_gap: 0
+- bad_spec: 0
+- patch: 6 (high 0, medium 0, low 6)
+- defer: 4 (high 0, medium 0, low 4)
+- reject: 32 (high 0, medium 0, low 32)
+- addressed_findings:
+  - `[low]` `[patch]` El comentario de `MAX_BYTES_DE_GUION` (`umbrales.ts`) seguía en 7.251 bytes y 429 de margen: ahora dice los ~7.334 y ~346 de tras la revisión 1.
+  - `[low]` `[patch]` «Auto Run Result» contradecía al frontmatter y a la revisión 1 (`followup_review_recommended: false`, `npm test` sin repetir): esas líneas quedan como lo que fueron, la primera pasada, y remiten a las revisiones.
+  - `[low]` `[patch]` El punto de AD-27 «Página de Cita = …» de `AGENTS.md` no nombraba el nombre derivado `NOMBRE_EN_REFERENCIA`: lo nombra.
+  - `[low]` `[patch]` El comentario de `fecha-de-cambio.test.ts` («la revisión no la pinta nadie») estaba desfasado desde la 30.3: al día.
+  - `[low]` `[patch]` `punto` reconoce «…» y ninguna fila lo probaba: fila nueva «un título que acaba en puntos suspensivos» en la tabla de `atribucion.test.ts`; sin «…» en la expresión, falla en APA y Chicago (comprobado).
+  - `[low]` `[patch]` El AC pide la regla del nombre con Autores reales de una palabra y con partícula: `atribucion.test.ts` aplana ahora también las fichas reales de Horacio y de María de Zayas y Sotomayor (con la clave corregida en memoria a «Zayas»).
+
 ## Design Notes
 
 **Las formas literales (supuesto; las revisa Héctor).** Ejemplo con `U` = `https://ejemplo.org/cita/x/`, `X` = «Yo soy un hombre sincero de donde crece la palma.», fecha 8-11-2026; `*…*` es `<i>` (en el texto copiado, sin marca). Plantillas, con «[…]» lo que se omite si no consta:
@@ -236,7 +265,7 @@ Blocking condition: ninguna.
 - `AGENTS.md` — apartado «Cómo citar (Historia 30.3)».
 - Pruebas: `tests/unit/atribucion.test.ts` y `tests/unit/como-citar.test.ts` (nuevas); `fecha-de-cambio`, `indexnow`, `tarjeta-de-obra`, `medicion` y `desplegable` al día; `tests/e2e/como-citar.spec.ts` (nueva), `accesibilidad.spec.ts` y `pagina-de-cita.spec.ts` al día; ocho instantáneas de tipografía de Página de Cita regrabadas (solo claves nuevas del bloque).
 
-**Revisión.** Sin hallazgos externos en esta pasada: 0 parches, 0 diferidos, 0 rechazados. `followup_review_recommended: false` (parcheados: 0 altos, 0 medios, 0 bajos; puntuación 0).
+**Revisión (primera pasada, sin hallazgos externos).** 0 parches, 0 diferidos, 0 rechazados; puntuación 0. Lo que vale hoy de la revisión y de `followup_review_recommended` está en «Revisión 1» y «Revisión 2», más abajo.
 
 **Verificación.**
 - `npx vitest run tests/unit/atribucion.test.ts tests/unit/como-citar.test.ts` y el lote de `fecha-de-cambio`, `tarjeta-de-obra`, `medicion`, `obras`, `tipografia-en-tokens`, `desplegable`, `ingreso-construido`, `autores-destacados` y `compartir`: 11 ficheros, 1.077 pruebas en verde.
@@ -246,7 +275,7 @@ Blocking condition: ninguna.
 - `npm test`: 156 ficheros en verde y 1 en rojo, `tests/unit/indexnow.test.ts` (recorría los campos de la tabla como cadenas y el derivado no lo es); corregido para recorrer el derivado por sus claves y repetido el fichero solo: 36 en verde.
 - Matriz: con JS, sin JS y portapapeles denegado en `tests/e2e/como-citar.spec.ts`; el build con `FECHA_JORNADA` en `tests/unit/como-citar.test.ts`; la Cita sin Obra en las dos. Todas corrieron y pasaron.
 
-**Riesgos residuales.** Las formas literales de los tres estilos son un supuesto que revisa Héctor. +4,9 KB por Página de Cita (+20,5 MiB en `dist/`), sin aviso. El guion de Copiar crece 1.600 bytes y el tope queda con 429 libres para la 30.4. No se repitió `npm test` entero tras corregir `indexnow.test.ts`.
+**Riesgos residuales.** Las formas literales de los tres estilos son un supuesto que revisa Héctor. +4,9 KB por Página de Cita (+20,5 MiB en `dist/`), sin aviso. El guion de Copiar crece 1.600 bytes y el tope quedaba con 429 libres para la 30.4 (346 tras la revisión 1). En esta primera pasada no se repitió `npm test` entero tras corregir `indexnow.test.ts`; se repitió en la revisión 1.
 
 ### Revisión 1 (2026-11-08)
 
@@ -269,3 +298,24 @@ Blocking condition: ninguna.
 - `FECHA_JORNADA=2026-11-08 npm run build`: sin aviso de peso; 533.823.946 bytes juzgados.
 
 **Riesgos residuales.** Las formas literales siguen siendo un supuesto que revisa Héctor, ahora con tres decisiones más anotadas en los diferidos (punto tras comillas, comillas anidadas, traductor sin Obra). El tope de guion queda con unos 346 bytes libres para la 30.4.
+
+### Revisión 2 (2026-11-08)
+
+**Resumen.** Última ronda. Se triaron los hallazgos de las cinco capas; ninguno toca un camino que pise un visitante, un sembrador o el build. Seis parches bajos: cifras y comentarios desfasados (`umbrales.ts`, `AGENTS.md`, `fecha-de-cambio.test.ts`, el propio «Auto Run Result») y dos huecos de prueba (el «…» de `punto` y las fichas reales de Horacio y de María de Zayas y Sotomayor). Cuatro diferidos, en dos entradas: los años de una obra traducida y el punto tras la URL de Chicago (formas de Héctor), y el silencio ante una clave revisada que no es palabra del nombre (es la regla del AC; falta el aviso en `tools/autor.ts clave`). Treinta y dos rechazos: entre ellos `ordenRevisado` como `Date` (el esquema exige cadena y rompería el build en voz alta, y el lector del historial usa `yaml` con el esquema núcleo, que no da fechas), las dos copias del Kit (`guionQueAnuncia` envuelve el cuerpo en una función), el portapapeles ausente o denegado (el intent manda que calle) y lo ya diferido (verso, traductor sin Obra).
+
+**Ficheros.**
+- `src/lib/umbrales.ts` — comentario de `MAX_BYTES_DE_GUION` con la cifra y el margen de tras la revisión 1.
+- `AGENTS.md` — el punto de AD-27 de la Página de Cita nombra `NOMBRE_EN_REFERENCIA`.
+- `tests/unit/atribucion.test.ts` — fila del título en «…» y las fichas reales de Horacio y de María de Zayas y Sotomayor.
+- `tests/unit/fecha-de-cambio.test.ts` — comentario al día.
+- Este spec — diferidos, triaje y este resultado; las líneas de la primera pasada ya no contradicen las revisiones.
+
+**Hallazgos.** Parches 6 (alto 0, medio 0, bajo 6); diferidos 4; rechazados 32. `followup_review_recommended: true`: puntuación 3 × 0 + 1 × 6 = 6 (≥ 5), aunque los seis son cifras, comentarios y pruebas, sin cambio de comportamiento.
+
+**Verificación.**
+- `npx vitest run tests/unit/atribucion.test.ts`: 65 en verde; con «…» quitado de `punto`, 2 en rojo (APA y Chicago), restituido.
+- `npx astro check`: 0 errores, 0 avisos.
+- `npm test` (en segundo plano y esperado): 157 ficheros, 7.272 pruebas en verde (1.237 s).
+- No se repitieron el build ni Playwright: el código del sitio no cambia (solo un comentario de `umbrales.ts`).
+
+**Riesgos residuales.** Las formas literales siguen siendo un supuesto que revisa Héctor, ahora con los años de la traducción y el punto tras la URL de Chicago anotados. El tope de guion queda con unos 346 bytes libres para la 30.4. Una clave revisada de varias palabras no invierte el nombre, y nada se lo dice a Héctor.

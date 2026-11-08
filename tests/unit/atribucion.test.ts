@@ -135,6 +135,14 @@ const casos: { caso: string; cita: Cita; autor: Autor; apa: string; mla: string;
     chicago: `Martí, José. *¿Qué es la vida?* 1891. «${X}». Sabiduría de Bolsillo. Consultado el 8 de noviembre de 2026. ${U}.`,
   },
   {
+    caso: 'un título que acaba en puntos suspensivos: sin punto detrás',
+    cita: citaDe({ obra: obra('Y sin embargo…'), fuente: undefined }),
+    autor: MARTI,
+    apa: `Martí, J. (1891). «${X}». En *Y sin embargo…* Sabiduría de Bolsillo. Recuperado el 8 de noviembre de 2026 de ${U}`,
+    mla: `Martí, José. «${X}». *Y sin embargo…*, 1891. *Sabiduría de Bolsillo*, ${U}. Consultado el 8 nov. 2026.`,
+    chicago: `Martí, José. *Y sin embargo…* 1891. «${X}». Sabiduría de Bolsillo. Consultado el 8 de noviembre de 2026. ${U}.`,
+  },
+  {
     caso: 'en MLA, un título con exclamación que cierra el contenedor',
     cita: citaDe({ obra: obra('¡Viva la vida!'), procedencia: {}, fuente: undefined }),
     autor: MARTI,
@@ -290,6 +298,21 @@ describe('Historia 30.3 — el nombre de Autores reales del Corpus, por `aplanar
     expect(autor.ordenRevisado).toBe('2026-11-08');
     expect(ESTILOS_DE_REFERENCIA.map((estilo) => nombreEnReferencia(autor, estilo))).toEqual(esperados);
     expect(referenciaEnTexto(referenciaDeCita(citaDe(), autor, U, 'apa')).startsWith(`${esperados[0]} (1891). `)).toBe(true);
+  });
+
+  it.each([
+    // Un Autor de una sola palabra: revisado, sin coma ni iniciales en los tres estilos.
+    ['horacio', undefined, ['Horacio', 'Horacio', 'Horacio']],
+    // Con partícula: la ficha propone «Sotomayor» (la regla fija); aquí se corrige en memoria a
+    // «Zayas», como lo haría Héctor con `tools/autor.ts clave`, y la partícula queda sin inicial.
+    ['maria-de-zayas-y-sotomayor', 'Zayas', ['Zayas y Sotomayor, M.', 'Zayas y Sotomayor, María de', 'Zayas y Sotomayor, María de']],
+  ] as const)('%s, ficha real, con la clave revisada', (slug, clave, esperados) => {
+    const autor = aplanado(slug, {
+      ...ficha(slug),
+      ...(clave === undefined ? {} : { ordenAlfabetico: clave }),
+      ordenRevisado: '2026-11-08',
+    });
+    expect(ESTILOS_DE_REFERENCIA.map((estilo) => nombreEnReferencia(autor, estilo))).toEqual(esperados);
   });
 
   it.each(['jose-marti', 'jean-jacques-rousseau'])('%s sin la clave revisada: el nombre tal cual', (slug) => {

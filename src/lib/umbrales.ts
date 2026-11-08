@@ -458,8 +458,10 @@ export const META_AUTORES_DE_OTRA_TRADICION: number | undefined = undefined;
  * bytes. La Página de Cita con Imagen y la medición puesta pasa de **5.651 a 7.251 bytes**
  * (+1.600; medido en `tests/unit/medicion.test.ts`, «la Página de Cita no pierde su listón»).
  * Antes de subirlo se compactó lo nuevo —nombres cortos, sin sangría ni plantillas anidadas— desde
- * 7.590. El tope nuevo deja 429 de margen, el criterio de la v2: la 30.4, que añade «Copiar el
- * fragmento» a la misma isla, lo vuelve a medir.
+ * 7.590, y el tope nuevo dejaba 429 de margen, el criterio de la v2. La revisión 1 de la 30.3 le
+ * sumó 83 bytes (la fecha en cada pulsación, la etiqueta por `querySelector` y el dueño de la
+ * región): la página queda en unos **7.334 bytes**, con unos **346** de margen. La 30.4, que añade
+ * «Copiar el fragmento» a la misma isla, lo vuelve a medir.
  */
 export const MAX_BYTES_DE_GUION = 7680;
 
