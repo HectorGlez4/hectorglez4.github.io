@@ -602,7 +602,7 @@ export function formatearInforme(informe: InformeDeAlta): string {
     lineas.push('', `Posibles duplicados, no escritos: ${informe.posiblesDuplicados.length}`);
     for (const d of informe.posiblesDuplicados) {
       lineas.push(`  · «${recortar(d.texto)}»`);
-      lineas.push(`      Coincide con ${d.coincideCon} (${d.donde}; ${d.clase === 'repetidas' ? 'repetidas' : 'contenida'}).`);
+      lineas.push(`      Coincide con ${d.coincideCon} (${d.donde}; ${d.clase}).`);
     }
     lineas.push(
       '  Nada se ha descartado. Para incorporarlos igualmente, repita con --con-duplicados.',

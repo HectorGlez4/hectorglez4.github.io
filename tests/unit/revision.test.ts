@@ -795,6 +795,55 @@ describe('Historia 29.4 — la contenida y la casi igual se señalan al revisar'
     ]);
   });
 
+  it('una publicada dentro de una candidata más larga, aunque sea de otro Autor: «Contiene a» (publicadas)', async () => {
+    // AD-32: la contenida no filtra por Autor. La publicada es de otro, y la candidata la contiene.
+    const ajena = { ...CANDIDATA_COMPLETA, autor: 'marco-aurelio', slug: 'marco-aurelio-no-es-que-tengamos' };
+    const larga = { ...LARGA, slug: 'seneca-zeta-larga' };
+    const lote = await loteEnRevision(await corpusCon([larga], [ajena]));
+    expect(lote[0].parecidas).toEqual([
+      expect.objectContaining({ slug: ajena.slug, donde: 'publicadas', clase: 'contenida', sentido: 'contiene-a' }),
+    ]);
+  });
+
+  it('varias parecidas: las publicadas primero y luego por slug', async () => {
+    const enRevision = { ...LARGA, slug: 'seneca-aa-larga-en-revision' };
+    const otraPublicada = { ...LARGA, slug: 'seneca-zz-publicada', texto: `${LARGA.texto} Y otra frase más.` };
+    const lote = await loteEnRevision(await corpusCon([CANDIDATA_COMPLETA, enRevision], [otraPublicada, LARGA]));
+    const corta = lote.find((c) => c.slug === CANDIDATA_COMPLETA.slug);
+    expect(corta?.parecidas?.map((p) => [p.donde, p.slug])).toEqual([
+      ['publicadas', LARGA.slug],
+      ['publicadas', otraPublicada.slug],
+      ['en revisión', enRevision.slug],
+    ]);
+  });
+
+  it('el listado dice la repetida con su clase', async () => {
+    const { formatearLote } = await import('../../tools/lib/revision.ts');
+    const publicada = { ...CANDIDATA_COMPLETA, slug: 'seneca-ya-publicada' };
+    const lote = await loteEnRevision(await corpusCon([CANDIDATA_COMPLETA], [publicada]));
+    expect(formatearLote(lote)).toContain('⚠ Duplica a seneca-ya-publicada (publicadas; repetidas). Decide tú.');
+  });
+
+  it('aprobadas juntas, la otra renombrada al publicarse: el aviso la nombra por el slug con que salió', async () => {
+    const larga = { ...LARGA, slug: 'seneca-zeta-larga' };
+    const ocupada = { ...LARGA, slug: larga.slug, texto: 'Otra Cita del mismo nombre, que no tiene nada que ver con esta.' };
+    const rutas = await corpusCon([CANDIDATA_COMPLETA, larga], [ocupada]);
+    const resultado = await aprobar(rutas, [CANDIDATA_COMPLETA.slug, larga.slug]);
+    const renombrada = resultado.renombradas.find((r) => r.de === larga.slug);
+    expect(renombrada).toBeDefined();
+    const aviso = resultado.avisos.find((a) => a.slug === CANDIDATA_COMPLETA.slug);
+    expect(aviso?.parecidas).toEqual([
+      expect.objectContaining({ slug: renombrada?.a, donde: 'publicadas', sentido: 'contenida-en' }),
+    ]);
+  });
+
+  it('una Ficha de Obra ilegible para el listado, nombrando el fichero', async () => {
+    const rutas = await corpusCon([CANDIDATA_COMPLETA]);
+    await mkdir(rutas.obras, { recursive: true });
+    await writeFile(join(rutas.obras, 'seneca--rota.yml'), 'autor: [sin cerrar\n', 'utf8');
+    await expect(loteEnRevision(rutas)).rejects.toThrow(/seneca--rota\.yml/u);
+  });
+
   it('una candidata que se publica con otro slug lleva el aviso con el slug con que salió', async () => {
     const ocupada = { ...LARGA, slug: CANDIDATA_COMPLETA.slug, texto: 'Otra Cita del mismo nombre, que no tiene nada que ver con esta.' };
     const rutas = await corpusCon([CANDIDATA_COMPLETA], [ocupada, LARGA]);

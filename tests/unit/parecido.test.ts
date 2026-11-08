@@ -3,6 +3,7 @@ import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { dirname, join, relative, resolve } from 'node:path';
 import {
   MIN_PARECIDO_PARA_CORREGIR,
+  cifraDeParecido,
   formaParaComparar,
   indiceDeContencion,
   parecidoDeTextos,
@@ -139,6 +140,27 @@ describe('parecidoEntre — la matriz de la 29.4', () => {
     const contenedoras = indiceDeContencion(formas);
     expect(contenedoras(formas[1]).sort()).toEqual([0, 2]);
     expect(contenedoras(formaParaComparar('Yo sé quién soy'))).toEqual([]);
+  });
+
+  it('el índice de contención encuentra la contenedora en que la última palabra queda a medias', () => {
+    // «enero» solo aparece como «enerote» en la contenedora: la última palabra de la forma
+    // contenida puede acabar a mitad de palabra, y el índice no debe elegirla como rara.
+    const textos = [
+      'Cultivo una rosa blanca en julio como enerote para el amigo sincero',
+      'Cultivo una rosa blanca En julio como enero',
+      'Yo cultivo una rosa blanca en julio como enero, y en julio otra',
+    ];
+    const formas = textos.map(formaParaComparar);
+    const contenedoras = indiceDeContencion(formas);
+    expect(contenedoras(formas[1]).sort()).toEqual([0, 2]);
+    expect(parecidoEntre(formas[0], formas[1])?.clase).toBe('contenida');
+  });
+
+  it('la cifra de lo que no es igual nunca se escribe 1,00', () => {
+    expect(cifraDeParecido(1)).toBe('1,00');
+    expect(cifraDeParecido(0.996)).toBe('0,99');
+    expect(cifraDeParecido(0.9949)).toBe('0,99');
+    expect(cifraDeParecido(0.906)).toBe('0,91');
   });
 });
 

@@ -18,6 +18,13 @@ deferred:
     location: >-
       tools/lib/revision.ts (aprobar → loteEnRevision → parecidasDeLasCandidatas)
     severity: low
+  - summary: >-
+      `revisar --aprobar` no compara entre sí, para la casi igual, dos candidatas de la misma Obra aprobadas en la misma pasada; el alta sí lo hace dentro de su lote.
+    evidence: |-
+      `parecidasDeLasCandidatas` mira la casi igual solo frente a las publicadas de la misma Obra resuelta, como fija el criterio («frente a las publicadas de la misma Obra resuelta»); el alta compara además con «el propio lote» desde la pasada 1. Dos candidatas casi iguales de la misma Obra aprobadas juntas se publican sin aviso entre ellas (la contenida y la repetida sí se avisan). Ampliarlo cambia el criterio y es decisión de Héctor.
+    location: >-
+      tools/lib/revision.ts (parecidasDeLasCandidatas, bucle de la casi igual)
+    severity: low
 ---
 
 <intent-contract>
@@ -164,7 +171,7 @@ Son los dos casos de la auditoría del 2026-11-03. Ninguna decisión tomada: ret
 - addressed_findings:
   - none
 
-(Las capas de revisión son externas y no traen hallazgos en esta pasada.)
+(Registro de la ejecución inicial: las capas externas aún no habían corrido; sus hallazgos se tratan en las dos pasadas siguientes.)
 
 ### 2026-11-08 — Review pass
 - intent_gap: 0
@@ -188,6 +195,26 @@ Son los dos casos de la auditoría del 2026-11-03. Ninguna decisión tomada: ret
 
 Diferido: el coste de `aprobar`, que recalcula las parecidas de todo `_revision/` (frontmatter). Rechazados: el barrido lineal del alta y su rama redundante (lotes pequeños; ya era así), el objeto `CitaConObra` del alta (es el contrato del tipo), la forma en tupla de `palabra` en el JSON (coherente con `slugs` y `textos`), la rama sin palabras interiores de `indiceDeContencion` (≥ 40 caracteres en ≤ 2 palabras, exacta), la contención no alineada a palabra y el parecido de la contenida como cociente de longitudes (los define el spec), la prueba de dueños por nombres (la forma que pide el spec), la repetida de `revisar` fuera de `parecidoEntre` («se conserva tal cual»), «entre clases» por construcción y el parte real comprobado a mano (lo que pide la historia), el registro de revisión anterior, 518 frente a 520 Obras (la cifra de planificación es de otro censo; el criterio no la fija) y la medida bajo carga (las dos cifras quedan bajo el +50 %).
 
+### 2026-11-08 — Review pass
+- intent_gap: 0
+- bad_spec: 0
+- patch: 10: (high 0, medium 0, low 10)
+- defer: 1: (high 0, medium 0, low 1)
+- reject: 44: (high 0, medium 0, low 44)
+- addressed_findings:
+  - `[low]` `[patch]` `cifraDeParecido` escribía «1,00» para un par no repetido con parecido ≥ 0,995 (una letra en un texto largo): ahora «0,99»; prueba en `parecido.test.ts`.
+  - `[low]` `[patch]` El índice de contención no tenía prueba de la última palabra a medias (`slice(1, -1)`): prueba nueva con «enerote», que falla con `slice(1)`.
+  - `[low]` `[patch]` El orden del parte (Obra con más pares primero; clases por precedencia) coincidía en la prueba con el alfabético: prueba nueva con Obras «zzz»/«aaa» y slugs que invierten la clase.
+  - `[low]` `[patch]` El orden de `parecidas` (publicadas primero, luego slug) no se probaba con más de una: prueba nueva con dos publicadas y una en revisión.
+  - `[low]` `[patch]` «Contiene a <publicada>» no se probaba, ni la contenida entre Autores (AD-32): prueba nueva con la publicada de otro Autor dentro de la candidata.
+  - `[low]` `[patch]` El texto «Duplica a … (publicadas; repetidas)» del listado no se probaba: prueba nueva.
+  - `[low]` `[patch]` La reescritura de `aDondeVa` al slug definitivo de la otra Cita no se probaba: prueba nueva con la otra renombrada al publicarse, que falla sin el cambio de slug.
+  - `[low]` `[patch]` La ficha ilegible que para `revisar` (documentada en AGENTS.md) no se probaba: prueba nueva de `loteEnRevision`, que rechaza nombrando el fichero.
+  - `[low]` `[patch]` `formatearInforme` del alta tenía un ternario que devolvía su propia entrada: ahora `d.clase`.
+  - `[low]` `[patch]` La contabilidad del spec se leía contradictoria: el primer registro y el primer «Revisión» del Auto Run Result dicen ya que son de la ejecución inicial, antes de las capas.
+
+Diferido: la casi igual entre candidatas de la misma Obra aprobadas juntas en `revisar` (frontmatter). Rechazados: la línea de `sprint-status.yaml` (la escribe el cierre del bucle) y `review_loop_iteration` (no hubo vuelta por bad_spec); la medida bajo carga y sin repetir tras los parches (los parches no tocan el recorrido; las dos cifras quedan bajo el +50 %); la memoria de los trigramas, la rama sin palabras interiores del índice, el barrido del alta y sus formas por pasada, la doble normalización (coste, sin defecto observado; `revisar` terminó en las cinco medidas); la repetida fuera de `parecidoEntre` y la prueba de dueños por nombres (lo que pide el spec); la forma de `palabra` en el JSON, `contenida` opcional en el tipo, «en este orden», `localeCompare`, la Cita de mentira del alta, el análisis de banderas a mano, `--json` tras `--` y la ficha con `.yml`; la contención a mitad de palabra y la cifra 0,00 de una contenida diminuta (definidas por el spec); los casos del alta sin ficha o con ficha recién creada, el slug repetido en `_revision/`, el aviso de una pasada anterior, la coincidencia única del alta, `colgarObras` fuera del `try`, el Corpus sin Citas, los sustitutos astrales y la palabra partida o unida (especulativos); el rechazo sin capturar de `revisar` ante una ficha ilegible (como ante una Cita ilegible, desde antes, y nombra el fichero); la prueba sobre el Corpus real (el Corpus cambia por decisión de Héctor; el parte real queda en el spec), la prueba de coste, la mezcla de la 29.3 en el rango, los números de línea del Code Map y las líneas «Contiene a»/«Contenida en» duplicadas (forma pedida: cada candidata dice la suya).
+
 ## Auto Run Result
 
 Status: done
@@ -206,7 +233,7 @@ Blocking condition: ninguna (las dos condiciones de Block If no se dieron: `revi
 - `tests/unit/parecido.test.ts`, `tests/unit/casi-duplicados.test.ts` — nuevos; `tests/unit/revision.test.ts`, `tests/unit/duplicados.test.ts` — casos añadidos sin tocar los existentes; `tests/unit/documentacion.test.ts` — solo la ruta de importación.
 - `AGENTS.md` — la orden nueva en «Las fichas de Obra» y los avisos de `revisar` en «Una sesión de sembrado».
 
-**Revisión.** 0 parches, 0 diferidos, 0 rechazados. `followup_review_recommended: false` (parches: 0 high, 0 medium, 0 low; puntuación 0).
+**Revisión (ejecución inicial, antes de las capas externas).** 0 parches, 0 diferidos, 0 rechazados; las pasadas 1 y 2, abajo, tratan los hallazgos de las capas.
 
 **Verificación.** `npx vitest run` de `parecido`, `casi-duplicados`, `duplicados`, `revision`, `documentacion`, `alta`, `obra-cli` y `lineas`: verdes. `npx astro check`: 0 errores, 0 avisos (10 sugerencias ya existentes). `npm run obra -- casi-duplicados` y `--json`: exit 0, `git status --short corpus` igual antes y después. `npm test` entero (desacoplado): 162 ficheros, 7.402 pruebas, verde. Medidas de `revisar` y parte del Corpus real, en sus secciones. Auditoría de la matriz: cada fila tiene una prueba que corrió y pasó (`parecido.test.ts` para las seis de la función; `casi-duplicados.test.ts` para orden, ficha inexistente, Corpus ilegible o inexistente, banderas y sin pares, también por la orden).
 
@@ -230,3 +257,19 @@ Blocking condition: ninguna (las dos condiciones de Block If no se dieron: `revi
 **Verificación.** `npx vitest run` de `parecido`, `casi-duplicados`, `duplicados`, `revision`, `documentacion`, `alta`, `obra-cli`, `lineas` y `revisar-cli`: 9 ficheros, 244 pruebas, verdes. `npx astro check`: 0 errores, 0 avisos. `npm run obra -- casi-duplicados` y `--json` sobre el Corpus real: exit 0, el mismo parte (518 recorridas, 1 con pares, 2 contenidas de *Versos sencillos*), `git status --short corpus` vacío antes y después. `npm test` entero, desacoplado: 162 ficheros, 7.413 pruebas, verde.
 
 **Riesgos residuales.** Los de la pasada anterior siguen: la casi igual solo mira publicadas con ficha, y una ficha ilegible para `revisar` y el alta (ahora dicho en AGENTS.md). `aprobar` sigue pagando el recorrido entero de `_revision/` (diferido). Las medidas de `revisar` no se repitieron: los parches no tocan el recorrido de la contención.
+
+### Pasada de revisión 2 (2026-11-08)
+
+**Resumen.** Un parche de comportamiento —`cifraDeParecido` ya no escribe «1,00» de lo que no es igual—, una limpieza del alta y ocho pruebas que fijan lo que las capas vieron sin probar: el orden del parte y de `parecidas`, «Contiene a» una publicada de otro Autor (AD-32), el texto de la repetida, el slug definitivo de la otra Cita en `aDondeVa`, la última palabra a medias del índice de contención y la ficha ilegible de `revisar`. Sin tocar el `<intent-contract>` ni el bloqueo.
+
+**Ficheros de esta pasada.**
+- `tools/lib/parecido.ts` — `cifraDeParecido`: 0,995 ≤ p < 1 se escribe «0,99».
+- `tools/alta.ts` — la etiqueta de clase del parte es `d.clase`.
+- `tests/unit/parecido.test.ts`, `tests/unit/casi-duplicados.test.ts`, `tests/unit/revision.test.ts` — casos añadidos, ninguno existente cambiado.
+- Este spec — contabilidad de la ejecución inicial aclarada, un diferido nuevo, el registro de la pasada.
+
+**Revisión.** 10 parches (0 high, 0 medium, 10 low), 1 diferido, 44 rechazados (detalle en el Triage Log). `followup_review_recommended: true` por la regla (puntuación 3 × 0 + 10 = 10), aunque todos son bajos y ocho son solo pruebas.
+
+**Verificación.** `npx vitest run` de `parecido`, `casi-duplicados`, `duplicados`, `revision`, `documentacion`, `alta`, `obra-cli`, `lineas` y `revisar-cli`: 9 ficheros, 252 pruebas, verdes; la prueba de `aDondeVa` falla con la mutación del slug. `npx astro check`: 0 errores, 0 avisos. `npx tsx tools/obra.ts casi-duplicados --json` sobre el Corpus real: exit 0, el mismo parte, `git status --short corpus` vacío. `npm test` entero, desacoplado: 162 ficheros, 7.421 pruebas, verde.
+
+**Riesgos residuales.** Los de las pasadas anteriores; además, la casi igual entre candidatas aprobadas juntas en `revisar` (diferida, para Héctor).

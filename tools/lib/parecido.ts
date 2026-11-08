@@ -83,7 +83,10 @@ export function parecidoDeTextos(a: string, b: string): number {
  * casi duplicados—: dos decimales con coma («0,91»). Una sola forma para la misma medida.
  */
 export function cifraDeParecido(parecido: number): string {
-  return parecido.toFixed(2).replace('.', ',');
+  // Redondear 0,995 o más daría «1,00», la cifra de las repetidas: lo que no es igual no se
+  // escribe como igual, y se queda en «0,99».
+  const cifra = parecido < 1 && parecido >= 0.995 ? 0.99 : parecido;
+  return cifra.toFixed(2).replace('.', ',');
 }
 
 function parecidoCanonico(uno: string, otro: string): number {

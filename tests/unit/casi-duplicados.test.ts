@@ -141,6 +141,53 @@ describe('Historia 29.4 — casiDuplicados', () => {
     expect(texto.indexOf('conservar las dos')).toBeLessThan(texto.indexOf('restituir el literal'));
   });
 
+  it('el orden lo dan el número de pares y la clase, no el nombre ni el slug', async () => {
+    // La Obra con más pares se llama «zzz» y su casi igual tiene los slugs que van primero: un
+    // orden solo por nombre o solo por slug pondría «aaa» delante y la casi igual antes que la
+    // repetida.
+    const raiz = await mkdtemp(join(tmpdir(), 'sabiduria-casi-duplicados-orden-'));
+    temporales.push(raiz);
+    const corpus = join(raiz, 'corpus');
+    for (const dir of ['citas', 'autores', 'temas', '_revision', 'obras']) {
+      await mkdir(join(corpus, dir), { recursive: true });
+    }
+    await writeFile(
+      join(corpus, 'autores', 'seneca.yml'),
+      'nombre: Séneca\nañoFallecimiento: 65\nsemblanza: Filósofo.\nordenAlfabetico: Séneca\n',
+      'utf8',
+    );
+    for (const [nombre, titulo] of [['aaa', 'Aaa'], ['zzz', 'Zzz']]) {
+      await writeFile(
+        join(corpus, 'obras', `seneca--${nombre}.yml`),
+        `autor: "seneca"\ntitulo: "${titulo}"\nformas:\n  - "${nombre}"\n`,
+        'utf8',
+      );
+    }
+    const cita = (slug: string, texto: string, obra: string) =>
+      escribirCita(join(corpus, 'citas'), slug.replace(/^seneca-/u, 'seneca--'), {
+        texto,
+        autor: 'seneca',
+        slug,
+        procedencia: { obra, año: 64 },
+        estadoDerechos: 'dominio-público',
+      });
+    await cita('seneca-0-julio', 'Cultivo una rosa blanca en julio como enero para el amigo sincero que me da su mano franca.', 'Zzz');
+    await cita('seneca-1-junio', 'Cultivo una rosa blanca en junio como enero para el amigo sincero que me da su mano franca.', 'Zzz');
+    await cita('seneca-8-repetida', 'No es que tengamos poco tiempo, es que perdemos mucho.', 'Zzz');
+    await cita('seneca-9-repetida', '¡No es que tengamos poco tiempo; es que perdemos MUCHO!', 'Zzz');
+    await cita('seneca-a-ira', 'Ningún animal es más feroz que el hombre que se deja llevar por su cólera.', 'Aaa');
+    await cita('seneca-b-ira', 'Ningún animal es más feroz que el hombre que se deja llevar por su cólera', 'Aaa');
+
+    const resultado = await casiDuplicados(rutasDelCorpus(corpus));
+    expect(resultado.ok).toBe(true);
+    if (!resultado.ok) return;
+    expect(resultado.parte.obras.map((o) => o.obra)).toEqual(['seneca--zzz', 'seneca--aaa']);
+    expect(resultado.parte.obras[0].pares.map((p) => [p.clase, ...p.slugs])).toEqual([
+      ['repetidas', 'seneca-8-repetida', 'seneca-9-repetida'],
+      ['casi-iguales', 'seneca-0-julio', 'seneca-1-junio'],
+    ]);
+  });
+
   it('una ficha nombrada recorre solo esa', async () => {
     const corpus = await corpusConDosObras();
     const resultado = await casiDuplicados(rutasDelCorpus(corpus), ['seneca--de-la-ira']);
