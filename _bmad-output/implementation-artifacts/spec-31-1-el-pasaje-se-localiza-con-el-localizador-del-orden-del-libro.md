@@ -5,7 +5,7 @@ created: '2026-11-07'
 status: 'done'
 baseline_revision: '88629adbca6ff7174e6cc40232d0ace80e19ab8a'
 review_loop_iteration: 0
-followup_review_recommended: false
+followup_review_recommended: true
 context:
   - '{project-root}/_bmad-output/implementation-artifacts/epic-31-context.md'
 warnings: [oversized]
@@ -84,7 +84,7 @@ deferred: []
 - `tests/unit/pasaje.test.ts` (nuevo, puro) -- la matriz entera con documentos de prueba compuestos con `componerDocumento` o cuerpos con `lineas:` declarada; invariante del tramo con `\n` de verso; tope en el borde y +1; `undefined`; dos Citas del mismo párrafo; y que `pasajeDeAparicion`/`ofrecePasaje` se definen solo en `tools/lib/pasaje.ts`.
 - `tests/unit/orden-del-libro.test.ts` -- `posicionesDeCitas` con tope por parámetro entrega/omite `pasaje` (clave ausente); `leerPosicionesDelCorpus` de disco con tope; permutación de Citas, mapa y apariciones: `pasajesDeCitas` da el pasaje de la misma aparición que ordena `ordenDelLibro` (con apariciones de pasajes distintos); Cita sin Obra; lista de lectores y de importaciones al día.
 - `tests/unit/lineas.test.ts` -- añadir `tools/lib/pasaje.ts` a los importadores de `lineas.ts` y de `tramoEnCrudo`.
-- `tests/unit/pasaje-build.test.ts` (nuevo) -- dos construcciones con `construirConCorpus`: con `umbrales.ts` parcheado (tope pequeño, p. ej. 200) y una página sonda que vuelca `getCollection('posiciones')`, la aparición con pasaje lo trae y la que no, sin clave; sin parche, ninguna aparición trae `pasaje`.
+- `tests/unit/pasaje-build.test.ts` (nuevo) -- dos construcciones con `construirConCorpus`: con `umbrales.ts` parcheado (tope pequeño, p. ej. 200) y una página sonda que vuelca `getCollection('posiciones')`, la aparición con pasaje lo trae y la que no, sin clave; con el tope parcheado en `undefined` (sin parche si el árbol ya lo tiene), ninguna aparición trae `pasaje`. La declaración se reemplaza por expresión regular, sea cual sea su valor.
 - Mediciones (scratchpad, sin commitear el guion) -- anotar en este spec la sección «Cifras sobre el Corpus real» (ver Verification).
 
 **Acceptance Criteria:**
@@ -106,7 +106,20 @@ deferred: []
 - addressed_findings:
   - none
 
-Sin hallazgos externos en esta pasada: el orquestador no pasó secciones «## Hallazgos externos — …».
+Sin hallazgos externos en esta pasada: el orquestador no pasó secciones «## Hallazgos externos — …». No cuenta como revisión: la primera revisión con hallazgos es la siguiente.
+
+### 2026-11-08 — Review pass
+- intent_gap: 0
+- bad_spec: 0
+- patch: 3 (high 1, medium 1, low 1)
+- defer: 0
+- reject: 27 (medium 4, low 23)
+- addressed_findings:
+  - `[high]` `[patch]` `tests/unit/pasaje-build.test.ts` exigía la línea literal `= undefined;` de `MAX_CARACTERES_DEL_PASAJE` en `beforeAll` (blind-hunter, intent-alignment, ac-auditor): darle valor ponía `npm test` en rojo, contra «ninguna prueba fija su valor». Ahora reemplaza la declaración con una expresión regular, sea cual sea su valor, y las dos construcciones parchean su tope en la copia —200 y `undefined`—; la de `undefined` va sin parche solo cuando el árbol ya lo tiene, porque `construirConCorpus` rechaza un parche idéntico.
+  - `[medium]` `[patch]` El refinamiento `inicio < fin ≤ largo` del esquema no se pisaba en sus bordes (verification-gap): la construcción suma una Cita que abre su línea (`inicio` 0) y otra que la cierra (`fin` igual al largo), y comprueba que su pasaje llega por el esquema y por `pasajesDeLasCitas`. La rama de rechazo del refinamiento sigue sin prueba: el esquema vive en `content.config.ts` y no se deja importar fuera de Astro.
+  - `[low]` `[patch]` Casos de la matriz sin prueba pura (blind-hunter, ac-auditor): `prosa-ajustada` con la Cita en un solo bloque, `prosa-por-lineas` con una Cita que cruza dos líneas (las dos, como dos bloques seguidos, que es la regla del cruce), primera y última línea del documento con blancos alrededor, un documento de un solo bloque y finales CRLF (la línea de solo `\r` separa, el `\r` interior queda literal).
+
+Rechazados, con su motivo: las formas por índice de `FORMAS_DE_LINEAS` (las pruebas de `pasaje.test.ts` declaran cada forma por su nombre, así que reordenar la lista las pone en rojo); la línea en blanco de `pasaje.ts` (`\s`) frente a `lineas.ts` (`trim() === ''`), que son el mismo conjunto de caracteres —tampoco `lineas.ts` cuenta como blanca una línea de invisibles—, y los invisibles del borde y el `\r` suelto, que los documentos de `recuperar` no traen; el `buscado` vacío (el esquema de Cita no admite texto vacío); el coste con el tope en `undefined` y el pasaje en toda aparición, que el contrato pide (`ofrecePasaje` es el único punto de decisión; el cargador entrega el pasaje por aparición); el mapa aparte en vez de colgarlo de la Cita («u otra función»); `dist/` con 11 ficheros de `pagefind/` (el criterio del contrato); los dos valores por omisión del tope, que son los de las tareas; la memoria de `lineasDelCrudo`, igual que la de `mapaDelCrudo`; el refinamiento sin pares sustitutos ni blanco en los bordes; la `lineas:` no válida, que ya resuelve `formaDeLasLineas` en `indeterminada`; `astro dev`; la fuerza de las guardas de dueño y de la prueba de memoria; la fachada sin llamadas (31.2); los valores implícitos de `citaValida`; la redacción «uno por debajo»; la pasada vacía anterior (esta la sustituye); los tiempos con la máquina cargada (ya en riesgos residuales); el tope `NaN` o negativo (lo da Héctor en un diff visible); y las brechas parciales del auditor de AC (red y `corpus/` por inspección; permutación del cargador).
 
 ## Design Notes
 
@@ -166,7 +179,9 @@ Blocking condition: none
 - `src/lib/publicado.ts` — `pasajesDeCitas`, `pasajesDeLasCitas` y la lectura común de colecciones.
 - `tests/unit/pasaje.test.ts`, `tests/unit/pasaje-build.test.ts` (nuevos); `tests/unit/orden-del-libro.test.ts` y `tests/unit/lineas.test.ts` al día.
 
-**Revisión.** Sin hallazgos externos: 0 parches, 0 diferidos, 0 rechazados. `followup_review_recommended: false` (parches: 0 high, 0 medium, 0 low; puntuación 0).
+**Revisión.** Primera pasada sin hallazgos externos (no cuenta como revisión). Segunda pasada (2026-11-08), con los cinco revisores externos: 3 parches (1 high, 1 medium, 1 low), 0 diferidos, 27 rechazados. Los parches solo tocan pruebas: `tests/unit/pasaje-build.test.ts` deja de fijar el valor del tope (lo parchea en la copia, sea cual sea el del árbol) y pisa los bordes del refinamiento del esquema; `tests/unit/pasaje.test.ts` suma cuatro casos de la matriz. `followup_review_recommended: true` (parches: 1 high, 1 medium, 1 low; puntuación 3 × 1 + 1 = 4, pero hay un parche high).
+
+**Verificación de la segunda pasada.** `npx vitest run tests/unit/pasaje.test.ts` (21 pruebas), `tests/unit/lineas.test.ts` y `tests/unit/orden-del-libro.test.ts` (104) y `tests/unit/pasaje-build.test.ts` por `correr.sh` (4 pruebas) en verde; `npx astro check`, 0 errores; `npm test` entero por `correr.sh` (`logs/s-31/triage-31.1-1-npm-test.log`): 159 ficheros, 7.319 pruebas en verde, EXIT 0. La expresión de la declaración casa también con un valor numérico (comprobado aparte, sin tocar el árbol).
 
 **Verificación.** `npm test` entero por `correr.sh` (`logs/s-31/impl-31.1-npm-test.log`): 159 ficheros, 7.314 pruebas en verde, EXIT 0, con el código ya en su estado final. `npx astro check`: 0 errores. `npx vitest run tests/unit/pasaje.test.ts tests/unit/lineas.test.ts` en verde de nuevo al reanudar. Construcciones alternas, copia temporal con tope 1.200 y manifiestos de `dist/`: en «Cifras sobre el Corpus real»; solo difieren 11 ficheros de `pagefind/`, igual que entre dos construcciones del mismo código. `git diff --stat 88629adbca6ff7174e6cc40232d0ace80e19ab8a -- corpus/` vacío.
 

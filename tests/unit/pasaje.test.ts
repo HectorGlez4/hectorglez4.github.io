@@ -157,6 +157,89 @@ describe('31.1 — pasajeDeAparicion: el trozo por forma', () => {
     expect(pasaje.texto).toBe('Bloque dos, primera.\nBloque dos, segunda.');
   });
 
+  it('prosa-ajustada, Cita dentro de un solo bloque: ese bloque, sin los vecinos', () => {
+    const cuerpo = [
+      'Primer párrafo, ajustado a ancho fijo como lo trae la edición,',
+      'que parte la línea donde no cabe la palabra siguiente.',
+      '',
+      'Segundo párrafo, también ajustado, con la frase que se busca',
+      'partida entre dos líneas y que acaba aquí.',
+      '',
+      'Tercero, que no toca.',
+    ].join('\n');
+    const doc = documento('prosa-ajustada', cuerpo);
+    const cita = 'con la frase que se busca partida entre dos líneas';
+    const pasaje = exigeElTramo(pasajeDe(doc, cita), cita);
+    expect(pasaje.texto).toBe(cuerpo.split('\n\n')[1]);
+  });
+
+  it('prosa-por-lineas, Cita que cruza dos líneas: las dos, como dos bloques seguidos', () => {
+    const cuerpo = [
+      'Antes de todo, una línea que no toca.',
+      'Una línea que acaba con el principio de la Cita que',
+      'sigue en la línea de después, y aquí acaba ella.',
+      'Otra línea que no toca.',
+    ].join('\n');
+    const doc = documento('prosa-por-lineas', cuerpo);
+    const cita = 'el principio de la Cita que sigue en la línea de después';
+    const pasaje = exigeElTramo(pasajeDe(doc, cita), cita);
+    expect(pasaje.texto).toBe(cuerpo.split('\n').slice(1, 3).join('\n'));
+  });
+
+  it('en los bordes del documento: primera y última línea, y blancos alrededor', () => {
+    const crudo = '\n  \nPrimera estrofa, primer verso,\ny su segundo verso.\n\nÚltima estrofa, primer verso,\ny el verso final del libro.\n\n';
+    const forma = formaDeLasLineas({ cuerpo: crudo, lineas: 'verso' });
+    const de = (cita: string) =>
+      exigeElTramo(
+        pasajeDeAparicion({
+          crudo,
+          forma,
+          posicion: localizar(colapsarEspacios(cita), colapsarEspacios(crudo)),
+          buscado: colapsarEspacios(cita),
+          textoDeCita: cita,
+          tope: 1200,
+        }),
+        cita,
+      );
+    expect(de('Primera estrofa, primer verso,').texto).toBe('Primera estrofa, primer verso,\ny su segundo verso.');
+    const ultima = de('y el verso final del libro.');
+    expect(ultima.texto).toBe('Última estrofa, primer verso,\ny el verso final del libro.');
+    expect(ultima.fin).toBe(ultima.texto.length);
+    // Un documento de un solo bloque: el bloque es todo el cuerpo, sin sus blancos del borde.
+    const solo = '  Un solo bloque, primer verso,\ny el segundo verso del bloque.  ';
+    const unico = exigeElTramo(
+      pasajeDeAparicion({
+        crudo: solo,
+        forma: formaDeLasLineas({ cuerpo: solo, lineas: 'verso' }),
+        posicion: localizar(colapsarEspacios('Un solo bloque'), colapsarEspacios(solo)),
+        buscado: colapsarEspacios('Un solo bloque'),
+        textoDeCita: 'Un solo bloque',
+        tope: 1200,
+      }),
+      'Un solo bloque',
+    );
+    expect(unico.texto).toBe(solo.trim());
+    expect(unico.inicio).toBe(0);
+  });
+
+  it('con finales de línea CRLF: la línea con solo `\\r` separa bloques y el `\\r` del borde se quita', () => {
+    const crudo = 'Antes, una estrofa.\r\nQue no toca.\r\n\r\nLa estrofa con la frase buscada,\r\ny su segundo verso.\r\n\r\nDespués.';
+    const cita = 'la frase buscada';
+    const pasaje = exigeElTramo(
+      pasajeDeAparicion({
+        crudo,
+        forma: formaDeLasLineas({ cuerpo: crudo, lineas: 'verso' }),
+        posicion: localizar(colapsarEspacios(cita), colapsarEspacios(crudo)),
+        buscado: colapsarEspacios(cita),
+        textoDeCita: cita,
+        tope: 1200,
+      }),
+      cita,
+    );
+    // Literal: el `\r` interior se queda tal cual; el del borde es blanco y se quita.
+    expect(pasaje.texto).toBe('La estrofa con la frase buscada,\r\ny su segundo verso.');
+  });
+
   it('dos Citas del mismo párrafo: el mismo texto, cada una con su inicio y su fin', () => {
     const una = exigeElTramo(pasajeDe(verso, 'Después vino la prosa'), 'Después vino la prosa');
     const otra = exigeElTramo(pasajeDe(verso, 'a vivir entre los árboles.'), 'a vivir entre los árboles.');
