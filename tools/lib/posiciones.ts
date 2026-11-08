@@ -19,11 +19,15 @@
  * Quien lo cablea al build es el cargador `posiciones` de `src/content.config.ts`, que no hace
  * nada más.
  *
+ * Desde la 32.3 entrega también el **incipit** de cada Ficha de Obra que lo declara
+ * (`leerIncipitsDelCorpus`), el otro texto de `corpus/fuentes/` que se publica, cortado por
+ * `tools/lib/pasaje.ts`; lo cablea el cargador `incipits`.
+ *
  * Sin red (AD-22) y sin escribir nada en `corpus/`.
  */
 
-import type { AparicionDeCita } from '../../src/lib/obras.ts';
-import { MAX_CARACTERES_DEL_PASAJE } from '../../src/lib/umbrales.ts';
+import type { AparicionDeCita, IncipitDeObra } from '../../src/lib/obras.ts';
+import { MAX_CARACTERES_DEL_INCIPIT, MAX_CARACTERES_DEL_PASAJE } from '../../src/lib/umbrales.ts';
 import {
   colapsarEspacios,
   documentoDeCita,
@@ -31,9 +35,17 @@ import {
   localizar,
   type DocumentosDeFuente,
 } from './cotejo.ts';
-import { leerCitas, leerDocumentosParaElCotejo, leerOrdenDeLosIndices, rutasDelCorpus } from './corpus.ts';
-import { formaDeLasLineas } from './lineas.ts';
-import { pasajeDeAparicion } from './pasaje.ts';
+import {
+  leerCitas,
+  leerDocumentoDeFuente,
+  leerDocumentosParaElCotejo,
+  leerFichasDeObra,
+  leerOrdenDeLosIndices,
+  rutasDelCorpus,
+} from './corpus.ts';
+import { fuenteDe as fuenteDeclarada } from './fuentes.ts';
+import { formaDeLasLineas, FORMAS_DE_LINEAS, type FormaDeLineas } from './lineas.ts';
+import { incipitDe, pasajeDeAparicion, type MotivoSinIncipit } from './pasaje.ts';
 
 /**
  * Lo que de una Cita hace falta para situarla, tal y como sale del frontmatter. Los campos se
@@ -180,6 +192,120 @@ export async function guardarOrdenDeLosIndices(opciones: {
   const { leer, analizar, almacen } = opciones;
   const id = ENTRADA_DEL_ORDEN_DE_LOS_INDICES;
   const data = await analizar({ id, data: { porObra: Object.fromEntries(await leer()) } });
+  almacen.clear();
+  almacen.set({ id, data });
+}
+
+/** Por qué un incipit declarado no se sostiene en su documento. */
+export type FalloDelIncipit = 'forma-indeterminada' | 'no-se-localiza';
+
+/**
+ * Sitúa el `desde` de un incipit declarado en su documento y lo corta — Historia 32.3. Es lo que
+ * comprueban, con la misma función, la orden que lo escribe (`npm run obra -- incipit`) y el
+ * cargador que lo repite en cada build (`leerIncipitsDelCorpus`, aquí): que la forma de las líneas
+ * —`formaDeLasLineas` con la `lineas:` de su cabecera— no sea `indeterminada` y que `desde`,
+ * colapsado, se localice en el cuerpo con `localizar` —el mismo localizador que sitúa las Citas: el
+ * corte de `tools/lib/pasaje.ts` no localiza—. Si se sostiene, da la forma y el corte de `incipitDe`
+ * (que puede no ofrecerse: sin tope, o con la primera unidad demasiado larga).
+ */
+export function incipitDelDocumento(opciones: {
+  cuerpo: string;
+  lineas?: string;
+  desde: string;
+  tope: number | undefined;
+}):
+  | { ok: false; fallo: FalloDelIncipit }
+  | { ok: true; forma: FormaDeLineas; corte: { incipit: string } | { motivo: MotivoSinIncipit } } {
+  const { cuerpo, lineas, desde, tope } = opciones;
+  const forma = formaDeLasLineas({ cuerpo, ...(lineas !== undefined ? { lineas } : {}) });
+  if (forma === FORMAS_DE_LINEAS[4]) return { ok: false, fallo: 'forma-indeterminada' };
+  const buscado = colapsarEspacios(desde);
+  const posicion = localizar(buscado, colapsarEspacios(cuerpo));
+  if (posicion === -1) return { ok: false, fallo: 'no-se-localiza' };
+  return { ok: true, forma, corte: incipitDe({ crudo: cuerpo, forma, posicion, desde: buscado, tope }) };
+}
+
+/** El identificador de la única entrada de la colección `incipits`. */
+export const ENTRADA_DE_LOS_INCIPITS = 'incipits';
+
+/** Lo que el build dice de un incipit declarado que no se sostiene, por qué falla. */
+const FALLO_DEL_INCIPIT = {
+  falta: 'su documento no está en corpus/fuentes/',
+  ilegible: 'su documento no se deja analizar',
+  biografia: 'su documento es una biografía, no un documento de Fuente',
+  'forma-indeterminada': 'la forma de las líneas de su documento es indeterminada: no se sabe dónde acaba una frase ni un verso',
+  'no-se-localiza': 'su «desde» ya no se localiza en el documento',
+} as const;
+
+/**
+ * El incipit de cada Ficha de Obra que lo declara y lo ofrece, por nombre de ficha — Historia
+ * 32.3, AD-30. Es el cuerpo del cargador `incipits` de `src/content.config.ts`.
+ *
+ * Lee las fichas activas y, solo de las que declaran `incipit`, **su** documento: sin ninguna, no
+ * abre ningún documento. Por cada una repite lo que comprobó la orden que lo escribió —que el
+ * documento esté, se deje analizar y no sea una biografía, que su forma no sea `indeterminada` y que
+ * `desde` se localice (`incipitDelDocumento`, aquí)— y **lanza**, con «Regla
+ * incumplida: …» y nombrando cada ficha, si algo no se sostiene. No repite el casado con las
+ * Citas: retirar la última Cita de ese documento no puede romper la construcción siguiente. El
+ * tope es, si no se dice otro, `MAX_CARACTERES_DEL_INCIPIT`; un incipit que no se ofrece (sin
+ * tope, o con la primera unidad demasiado larga) no entra.
+ */
+export async function leerIncipitsDelCorpus(
+  raizDelCorpus: string,
+  opciones: { tope?: number | undefined } = {},
+): Promise<Map<string, IncipitDeObra>> {
+  const tope = 'tope' in opciones ? opciones.tope : MAX_CARACTERES_DEL_INCIPIT;
+  const rutas = rutasDelCorpus(raizDelCorpus);
+  const incipits = new Map<string, IncipitDeObra>();
+  const problemas: string[] = [];
+  for (const ficha of await leerFichasDeObra(rutas)) {
+    if (ficha.incipit === undefined) continue;
+    const { documento, desde } = ficha.incipit;
+    const leido = await leerDocumentoDeFuente(rutas, documento);
+    if (leido.estado !== 'legible') {
+      problemas.push(`${ficha.ruta} declara el incipit de «${documento}»: ${FALLO_DEL_INCIPIT[leido.estado]}.`);
+      continue;
+    }
+    const situado = incipitDelDocumento({ cuerpo: leido.cuerpo, lineas: leido.cabecera.lineas, desde, tope });
+    if (!situado.ok) {
+      problemas.push(`${ficha.ruta} declara el incipit de «${documento}»: ${FALLO_DEL_INCIPIT[situado.fallo]}.`);
+      continue;
+    }
+    if (!('incipit' in situado.corte)) continue;
+    const fuente = fuenteDeclarada(leido.cabecera.fuente);
+    incipits.set(ficha.nombre, {
+      documento,
+      texto: situado.corte.incipit,
+      fuente: {
+        nombre: fuente?.nombre ?? leido.cabecera.fuente,
+        ...(fuente !== undefined ? { licencia: fuente.licencia } : {}),
+        url: leido.cabecera.url,
+      },
+    });
+  }
+  if (problemas.length > 0) {
+    throw new Error(
+      `Regla incumplida: el incipit de una Ficha de Obra no se sostiene (AD-30). Lo declara ` +
+        `«npm run obra -- incipit»:\n${problemas.map((p) => `  · ${p}`).join('\n')}`,
+    );
+  }
+  return incipits;
+}
+
+/**
+ * Lleva los incipits al almacén de la colección `incipits` — Historia 32.3, con el patrón de
+ * `guardarOrdenDeLosIndices`: lee y analiza todo antes de tocar el almacén, y guarda **una sola
+ * entrada**, `{ porFicha }`, siempre presente aunque ninguna ficha declare incipit: así la
+ * colección nunca está vacía y se consulta sin guarda.
+ */
+export async function guardarIncipits(opciones: {
+  leer: () => Promise<Map<string, IncipitDeObra>>;
+  analizar: (entrada: EntradaDePosiciones) => Promise<Record<string, unknown>>;
+  almacen: AlmacenDePosiciones;
+}): Promise<void> {
+  const { leer, analizar, almacen } = opciones;
+  const id = ENTRADA_DE_LOS_INCIPITS;
+  const data = await analizar({ id, data: { porFicha: Object.fromEntries(await leer()) } });
   almacen.clear();
   almacen.set({ id, data });
 }

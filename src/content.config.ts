@@ -25,10 +25,12 @@ import {
   tradicion,
 } from './lib/admision.js';
 import { leerBiografia } from './lib/biografia.js';
-import { MAX_CARACTERES_DEL_PASAJE } from './lib/umbrales.js';
+import { MAX_CARACTERES_DEL_INCIPIT, MAX_CARACTERES_DEL_PASAJE } from './lib/umbrales.js';
 import {
+  guardarIncipits,
   guardarOrdenDeLosIndices,
   guardarPosiciones,
+  leerIncipitsDelCorpus,
   leerOrdenDeLosIndicesDelCorpus,
   leerPosicionesDelCorpus,
   releerAlCambiar,
@@ -401,6 +403,65 @@ const indices = defineCollection({
 });
 
 /*
+ * Los incipits — Historia 32.3, AD-30.
+ *
+ * El comienzo de cada Obra cuya ficha lo declara (`incipit: {documento, desde}`, que escribe solo
+ * `npm run obra -- incipit`). Este cargador, hermano del de posiciones y con el patrón del de
+ * índices, **solo cablea** `tools/lib/posiciones.ts`: lee las fichas y, de las que lo declaran,
+ * su documento de `corpus/fuentes/`, repite que el documento esté y sea de Fuente, que su forma no
+ * sea indeterminada y que `desde` se localice —si no, el build se para nombrando la ficha—, y
+ * entrega el incipit ya cortado en frase o verso por `tools/lib/pasaje.ts`, con la Fuente del
+ * documento. Es, con el pasaje, el único texto de `corpus/fuentes/` que entra en el almacén
+ * (AD-30), y solo cuando `MAX_CARACTERES_DEL_INCIPIT` tiene valor.
+ *
+ * Guarda una sola entrada, `incipits`, con `{ porFicha: { ficha: incipit } }`, siempre presente
+ * aunque ninguna ficha lo declare: nadie consulta una colección vacía. Sin red y sin escribir nada
+ * en `corpus/`.
+ */
+const cargadorDeIncipits: Loader = {
+  name: 'incipits',
+  load: async ({ store, parseData, config, watcher, logger }) => {
+    const raiz = join(fileURLToPath(config.root), 'corpus');
+    const cargar = () =>
+      guardarIncipits({
+        leer: () => leerIncipitsDelCorpus(raiz, { tope: MAX_CARACTERES_DEL_INCIPIT }),
+        analizar: parseData,
+        almacen: store,
+      });
+
+    await cargar();
+
+    if (watcher !== undefined) {
+      releerAlCambiar({
+        vigilante: watcher,
+        carpetas: [join(raiz, 'obras'), join(raiz, 'fuentes')],
+        releer: cargar,
+        esperaMs: ESPERA_TRAS_CAMBIO_MS,
+        avisar: (mensaje) => logger.error(mensaje),
+      });
+    }
+  },
+};
+
+const incipits = defineCollection({
+  loader: cargadorDeIncipits,
+  schema: z.object({
+    porFicha: z.record(
+      z.string().min(1),
+      z.object({
+        documento: z.string().min(1),
+        texto: z.string().min(1),
+        fuente: z.object({
+          nombre: z.string().min(1),
+          licencia: z.string().min(1).optional(),
+          url: z.string().url(),
+        }),
+      }),
+    ),
+  }),
+});
+
+/*
  * Las Fichas técnicas — Historia 32.1, AD-31.
  *
  * La **segunda excepción con nombre** a que `src/` no importe de `tools/lib/`, con el patrón del
@@ -456,5 +517,6 @@ export const collections = {
   biografias,
   posiciones,
   indices,
+  incipits,
   fichasTecnicas,
 };

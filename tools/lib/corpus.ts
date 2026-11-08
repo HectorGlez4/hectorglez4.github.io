@@ -26,7 +26,7 @@ import type {
   ObjetivoDeTradicion,
 } from '../../src/lib/objetivo.ts';
 import { BIOGRAFIA_MAL_COLOCADA, FICHERO_DEL_CENSO, type DocumentosDeFuente } from './cotejo.ts';
-import { analizarDocumento, CLASE_BIOGRAFIA, type CabeceraAnalizada } from './documento.ts';
+import { analizarDocumento, CLASE_BIOGRAFIA, type CabeceraAnalizada, type CabeceraDeDocumento } from './documento.ts';
 import {
   analizarIndice,
   documentosEnElOrdenDelIndice,
@@ -661,6 +661,10 @@ function yamlDeFicha(ficha: ObraAdmisible): string {
     ...(ficha.wikidata !== undefined
       ? { wikidata: { entidad: ficha.wikidata.entidad, revision: ficha.wikidata.revision } }
       : {}),
+    // El incipit (32.3): lo escribe solo `npm run obra -- incipit`.
+    ...(ficha.incipit !== undefined
+      ? { incipit: { documento: ficha.incipit.documento, desde: ficha.incipit.desde } }
+      : {}),
   });
 }
 
@@ -1134,6 +1138,38 @@ export async function leerDocumentosParaElCotejo(
     }
   }
   return { documentos, lineasDeclaradas };
+}
+
+/** Lo que hay en `corpus/fuentes/` con un nombre de documento — Historia 32.3. */
+export type DocumentoDeFuenteLeido =
+  | { estado: 'falta' }
+  | { estado: 'ilegible' }
+  | { estado: 'biografia' }
+  | { estado: 'legible'; cabecera: CabeceraDeDocumento; cuerpo: string };
+
+/**
+ * **Un** documento de Fuente por su nombre sin extensión, con su cabecera — Historia 32.3. Lo
+ * leen el cargador del incipit y la orden que lo declara, para no abrir los demás documentos.
+ * Busca el `.txt` en el primer nivel de `corpus/fuentes/` y, si no está, en cualquier subcarpeta,
+ * como `ficherosDe` (el nombre es la identidad del documento). No escribe nada.
+ */
+export async function leerDocumentoDeFuente(rutas: Rutas, nombre: string): Promise<DocumentoDeFuenteLeido> {
+  let ruta = join(rutas.fuentes, `${nombre}.txt`);
+  if (!existsSync(ruta)) {
+    const hallada = (await ficherosDe(rutas.fuentes, ['.txt'])).find((r) => slugDeFichero(r) === nombre);
+    if (hallada === undefined) return { estado: 'falta' };
+    ruta = hallada;
+  }
+  let contenido: string;
+  try {
+    contenido = await readFile(ruta, 'utf8');
+  } catch {
+    return { estado: 'ilegible' };
+  }
+  const analizado = analizarDocumento(contenido);
+  if (analizado === undefined) return { estado: 'ilegible' };
+  if (analizado.cabecera.clase === CLASE_BIOGRAFIA) return { estado: 'biografia' };
+  return { estado: 'legible', cabecera: analizado.cabecera, cuerpo: analizado.cuerpo };
 }
 
 /**

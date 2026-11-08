@@ -79,6 +79,15 @@ const CLASIFICADOR = {
 const PIE_DE_LICENCIA = /^(?:Esta obra se encuentra en dominio público|Public domain)/u;
 
 /**
+ * Si una línea —ya recortada o no— es el pie de licencia de Wikisource. Lo exporta la 32.3: el
+ * incipit (`incipitDe` de `tools/lib/pasaje.ts`) se para antes del pie, con el mismo patrón con
+ * que la forma lo descarta.
+ */
+export function esPieDeLicencia(linea: string): boolean {
+  return PIE_DE_LICENCIA.test(linea.trim());
+}
+
+/**
  * Una entrada de índice: «Capítulo IV», un número o un romano en mayúsculas seguidos de signo
  * («1. La tradición eterna», «I. Retrato»), o una línea que acaba en un guion suelto («XII -»).
  * Un índice de una entrada por línea tiene líneas cortas y no es verso. Un romano **solo** en

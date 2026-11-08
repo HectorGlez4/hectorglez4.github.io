@@ -182,7 +182,7 @@ describe('Historia 22.9 — el esquema de las ediciones', () => {
   it('una lista vacía no se escribe, y una clave de más se nombra', () => {
     expect(juzgar([]).success).toBe(false);
     expect(mensajes(juzgar([edicion({ precio: 3 })]))).toContain('precio');
-    expect(mensajes(esquema.safeParse({ ...fichaBase, otra: 1 }))).toContain('ediciones y wikidata');
+    expect(mensajes(esquema.safeParse({ ...fichaBase, otra: 1 }))).toContain('ediciones, wikidata e incipit');
   });
 });
 

@@ -821,6 +821,34 @@ describe('Historia 24.8 — la matriz: qué cambia de fecha', () => {
     expect(refechadas(corpusDeEjemplo([], [DOCUMENTO, ajeno]), historial({ [ajeno]: { antes: null, despues: VERSION_OPACA } }))).toEqual([]);
   });
 
+  describe('Historia 32.3 — el incipit fecha y avisa solo su Página de Obra', () => {
+    it('`incipit` de la ficha está en la tabla de la Página de Obra, y en ninguna otra', () => {
+      expect(CAMPOS_QUE_PINTA.obra.obra).toContain('incipit');
+      expect(CAMPOS_QUE_NO_FECHAN.obra).not.toContain('incipit');
+      for (const [columna, campos] of Object.entries(CAMPOS_QUE_PINTA.obra)) {
+        if (columna !== 'obra') expect(campos, columna).not.toContain('incipit');
+      }
+    });
+
+    it('declarar un incipit en una ficha fecha y avisa solo esa Obra: ni su Página de Cita, ni otra Obra, ni los listados', () => {
+      const ficha = 'corpus/obras/x--o.yml';
+      const enT1 = { [ficha]: editado(ficha, { incipit: { documento: 'fuente--obra-o', desde: 'Érase' } }) };
+      expect(refechadas(corpusDeEjemplo(), historial(enT1))).toEqual(['/obra/x/o']);
+      expect(avisadas(enT1, corpusDeEjemplo())).toEqual(['/obra/x/o']);
+      // La portada no tiene fecha (no es ninguna superficie de la relación).
+      expect(fechasPorSuperficie(corpusDeEjemplo(), historial(enT1)).has('/')).toBe(false);
+      // Cambiar el «desde» también; y quitarlo.
+      const cambiado = {
+        [ficha]: {
+          antes: { ...(VERSIONES[ficha] as object), incipit: { documento: 'fuente--obra-o', desde: 'Érase' } } as Version,
+          despues: { ...(VERSIONES[ficha] as object), incipit: { documento: 'fuente--obra-o', desde: 'Había' } } as Version,
+        },
+      };
+      expect(refechadas(corpusDeEjemplo(), historial(cambiado))).toEqual(['/obra/x/o']);
+      expect(avisadas(cambiado, corpusDeEjemplo())).toEqual(['/obra/x/o']);
+    });
+  });
+
   describe('Historia 32.2 — la Ficha técnica fecha y avisa su Página de Obra', () => {
     const DOC_X = 'corpus/wikidata/Q1--r10.json';
     const DOC_Y = 'corpus/wikidata/Q2--r20.json';

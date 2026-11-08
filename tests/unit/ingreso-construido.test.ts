@@ -371,7 +371,9 @@ describe('Historia 14.1 — el sitio con los cuatro Modelos apagados', () => {
     // importa con la afiliación apagada.
     // Historia 32.2 — y el de la línea de Ficha técnica: toda Página de Obra lo importa, y con el
     // Corpus real (ninguna ficha atada) no pinta nada.
-    for (const componente of ['Sostener.astro', 'EdicionesEnVenta.astro', 'FichaTecnica.astro']) {
+    // Historia 32.3 — y el de «Cómo empieza»: toda Página de Obra lo importa, y con el Corpus real
+    // (ninguna ficha con incipit) no pinta nada; su única hoja es la de `Desplegable.astro`.
+    for (const componente of ['Sostener.astro', 'EdicionesEnVenta.astro', 'FichaTecnica.astro', 'ComoEmpieza.astro']) {
       const fuente = await readFile(resolve(RAIZ, 'src/components', componente), 'utf8');
       expect(
         sinComentarios(fuente).match(/<style[\s>]/g) ?? [],

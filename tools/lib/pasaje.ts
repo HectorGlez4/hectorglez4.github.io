@@ -1,8 +1,11 @@
 /**
- * El pasaje de una Cita: el párrafo —o la estrofa— de su documento del que sale — Historia
- * 31.1, AD-30.
+ * El pasaje de una Cita —el párrafo o la estrofa de su documento del que sale— y el incipit de
+ * una Obra —su comienzo, cortado en frase o verso— — Historias 31.1 y 32.3, AD-30.
  *
- * Es el **único dueño** del trozo. No localiza nada: recibe la posición que dio `localizar`
+ * Son los dos únicos textos de `corpus/fuentes/` que se publican, y este módulo es el **único
+ * dueño** de los dos cortes. El incipit va al final del módulo (`incipitDe`, `ofreceIncipit`).
+ *
+ * Del pasaje, es el **único dueño** del trozo. No localiza nada: recibe la posición que dio `localizar`
  * (la misma que sitúa la Cita en el orden del libro, `tools/lib/posiciones.ts`), la lleva al
  * crudo con `tramoEnCrudo` y delimita el trozo según la forma de las líneas del documento, que
  * dice `formaDeLasLineas` (las dos de la 29.1, AD-29). Así no hay un segundo localizador ni una
@@ -25,8 +28,8 @@
 
 import { equivalentes } from '../../src/lib/normalizar.ts';
 import type { PasajeDeAparicion } from '../../src/lib/obras.ts';
-import { tramoEnCrudo, type Colapsado } from './cotejo.ts';
-import { FORMAS_DE_LINEAS, type FormaDeLineas } from './lineas.ts';
+import { colapsarEspacios, tramoEnCrudo, type Colapsado } from './cotejo.ts';
+import { esFormaDeVerso, esPieDeLicencia, FORMAS_DE_LINEAS, type FormaDeLineas } from './lineas.ts';
 
 /** Por qué una aparición no trae pasaje. */
 export type MotivoSinPasaje = 'forma-sin-parrafo' | 'sin-tope' | 'no-dice-mas' | 'pasa-del-tope';
@@ -138,4 +141,133 @@ export function pasajeDeAparicion(opciones: {
   const decision = ofrecePasaje({ trozo: texto, textoDeCita, tope });
   if (!decision.ofrece) return { motivo: decision.motivo };
   return { pasaje: { texto, inicio: tramo.inicio - a, fin: tramo.fin - a } };
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// El incipit — Historia 32.3, AD-30
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** Por qué una Obra con incipit declarado no lo enseña. */
+export type MotivoSinIncipit = 'sin-tope' | 'primera-no-cabe' | 'forma-indeterminada';
+
+/** La forma ante la que no se sabe qué es una frase ni un verso. */
+const FORMA_INDETERMINADA: FormaDeLineas = FORMAS_DE_LINEAS[4];
+/** La forma cuyo párrafo es el bloque entre líneas en blanco (los saltos interiores son espacio). */
+const FORMA_AJUSTADA: FormaDeLineas = FORMAS_DE_LINEAS[3];
+
+/**
+ * El fin de una frase en un párrafo ya colapsado: `.`, `?`, `!` o `…`, cero o más cierres, y
+ * luego espacio o fin. El fin de párrafo también la cierra, y eso lo pone quien recorre.
+ */
+const FIN_DE_FRASE = /[.?!…][»”"’')\]]*(?= |$)/gu;
+
+/**
+ * Si se ofrece un incipit — Historia 32.3. Es el **único** punto que lo decide: sin tope
+ * (`MAX_CARACTERES_DEL_INCIPIT` en `undefined`), no; si la primera unidad —la primera frase o el
+ * primer verso— pasa del tope en puntos de código, no (el incipit nunca se recorta); igual al
+ * tope, sí. Recibe un objeto para que la 35.9 lo amplíe (la Obra con derechos vigentes).
+ */
+export function ofreceIncipit(opciones: {
+  tope: number | undefined;
+  primera: string;
+}): { ofrece: true } | { ofrece: false; motivo: Exclude<MotivoSinIncipit, 'forma-indeterminada'> } {
+  const { tope, primera } = opciones;
+  if (tope === undefined) return { ofrece: false, motivo: 'sin-tope' };
+  if ([...primera].length > tope) return { ofrece: false, motivo: 'primera-no-cabe' };
+  return { ofrece: true };
+}
+
+/** Una unidad del incipit: una frase o un verso, y si con ella acaba el párrafo (o el verso). */
+interface UnidadDeIncipit {
+  texto: string;
+  cierraParrafo: boolean;
+}
+
+/**
+ * Las unidades desde un desplazamiento del crudo, en orden y perezosas: se para antes del pie de
+ * licencia de Wikisource y al fin del documento. La primera línea empieza en `inicio`; el pie solo
+ * se mira en las siguientes, así que la primera unidad existe siempre.
+ */
+function* unidadesDesde(crudo: string, forma: FormaDeLineas, inicio: number): Generator<UnidadDeIncipit> {
+  const lineas = lineasDelCrudo(crudo);
+  const primera = lineaDe(lineas, inicio);
+  const verso = esFormaDeVerso(forma);
+  const porBloques = forma === FORMA_AJUSTADA;
+  let parrafo: string[] = [];
+
+  function* soltarParrafo(): Generator<UnidadDeIncipit> {
+    const texto = colapsarEspacios(parrafo.join(' '));
+    parrafo = [];
+    if (texto === '') return;
+    let desde = 0;
+    for (const fin of texto.matchAll(FIN_DE_FRASE)) {
+      const hasta = fin.index + fin[0].length;
+      const frase = texto.slice(desde, hasta).trim();
+      desde = hasta;
+      if (frase !== '') yield { texto: frase, cierraParrafo: desde >= texto.length };
+    }
+    const resto = texto.slice(desde).trim();
+    if (resto !== '') yield { texto: resto, cierraParrafo: true };
+  }
+
+  for (let n = primera; n < lineas.length; n += 1) {
+    const linea = crudo.slice(n === primera ? inicio : lineas[n].inicio, lineas[n].fin);
+    if (n > primera && esPieDeLicencia(linea)) break;
+    const enBlancoLaLinea = enBlanco(linea, 0, linea.length);
+    if (verso) {
+      if (!enBlancoLaLinea) yield { texto: colapsarEspacios(linea), cierraParrafo: true };
+    } else if (enBlancoLaLinea) {
+      yield* soltarParrafo();
+    } else {
+      parrafo.push(linea);
+      // En `prosa-por-lineas` el párrafo es la línea; en `prosa-ajustada`, el bloque.
+      if (!porBloques) yield* soltarParrafo();
+    }
+  }
+  if (!verso) yield* soltarParrafo();
+}
+
+/**
+ * El incipit de un documento desde la posición de su `desde`, o por qué no lo hay — Historia 32.3,
+ * AD-30.
+ *
+ * `posicion` es la que dio `localizar(desde, colapsarEspacios(crudo))`, y `desde` está colapsado:
+ * el comienzo en el crudo es el `inicio` de `tramoEnCrudo` con los dos. Las unidades, por forma:
+ *   · `verso` y `verso-espaciado`: cada línea no en blanco, y el texto los une con un `\n`
+ *     (también entre estrofas);
+ *   · `prosa-ajustada` y `prosa-por-lineas`: la frase, que acaba tras `.`, `?`, `!` o `…` con sus
+ *     cierres y un espacio o el fin, o en fin de párrafo (la línea en blanco en `prosa-ajustada`;
+ *     el fin de línea en `prosa-por-lineas`); el texto une los párrafos con un `\n` y colapsa a uno
+ *     todo otro espacio —los saltos interiores de `prosa-ajustada` son espacio—;
+ *   · `indeterminada`: ninguno.
+ * Se toman unidades enteras mientras el texto quepa en `tope` puntos de código. Nunca a media
+ * palabra ni a media frase, y nada se recorta dentro. Si se ofrece lo decide `ofreceIncipit`, con
+ * la primera unidad.
+ */
+export function incipitDe(opciones: {
+  crudo: string;
+  forma: FormaDeLineas;
+  posicion: number;
+  desde: Colapsado;
+  tope: number | undefined;
+}): { incipit: string } | { motivo: MotivoSinIncipit } {
+  const { crudo, forma, posicion, desde, tope } = opciones;
+  if (forma === FORMA_INDETERMINADA) return { motivo: 'forma-indeterminada' };
+  const inicio = tramoEnCrudo(crudo, posicion, posicion + desde.length).inicio;
+  const unidades = unidadesDesde(crudo, forma, inicio);
+  const primera = unidades.next();
+  // `desde` se localizó, así que hay al menos una unidad; sin ella, nada que ofrecer.
+  if (primera.done === true) return { motivo: 'primera-no-cabe' };
+  const decision = ofreceIncipit({ tope, primera: primera.value.texto });
+  if (!decision.ofrece) return { motivo: decision.motivo };
+
+  let texto = primera.value.texto;
+  let anterior = primera.value;
+  for (const unidad of unidades) {
+    const siguiente = `${texto}${anterior.cierraParrafo ? '\n' : ' '}${unidad.texto}`;
+    if ([...siguiente].length > (tope as number)) break;
+    texto = siguiente;
+    anterior = unidad;
+  }
+  return { incipit: texto };
 }

@@ -44,6 +44,7 @@ import {
   type CitaParaObra,
   type FichaDeObra,
   type FichaTecnicaDeObra,
+  type IncipitDeObra,
   type ObraResuelta,
   type IndicesDeObras,
   type PasajeDeAparicion,
@@ -1467,6 +1468,7 @@ export function aplanarFichaDeObra(entrada: EntradaObra): FichaDeObra {
       ? { ediciones: entrada.data.ediciones.map((edicion) => ({ ...edicion })) }
       : {}),
     ...(entrada.data.wikidata !== undefined ? { wikidata: { ...entrada.data.wikidata } } : {}),
+    ...(entrada.data.incipit !== undefined ? { incipit: { ...entrada.data.incipit } } : {}),
   };
 }
 
@@ -1595,6 +1597,30 @@ export function pasajesDeLasCitas(conjunto: ConjuntoPublicable): Promise<Readonl
     const { posiciones, indices } = await posicionesEIndices();
     return pasajesDeCitas(conjunto.citas, posiciones, indices);
   });
+}
+
+let incipitsMemorizados: Promise<ReadonlyMap<string, IncipitDeObra>> | undefined;
+
+/**
+ * El incipit de cada Obra que lo ofrece, por nombre de ficha — Historia 32.3, AD-30. Lo lee de
+ * la colección `incipits` (su cargador solo cablea `tools/lib/posiciones.ts`), que guarda una sola
+ * entrada `porFicha`, siempre presente: se consulta sin guarda. Una ficha sin incipit, o cuyo
+ * incipit no se ofrece (`ofreceIncipit`: sin tope, la primera unidad no cabe), no está.
+ */
+export function incipitsDeLasObras(): Promise<ReadonlyMap<string, IncipitDeObra>> {
+  if (incipitsMemorizados !== undefined) return incipitsMemorizados;
+  const leidos = (async () => {
+    const { getCollection } = await import('astro:content');
+    return new Map<string, IncipitDeObra>(
+      (await getCollection('incipits')).flatMap((entrada) => Object.entries(entrada.data.porFicha)),
+    );
+  })();
+  // Un fallo no se memoriza: la siguiente página vuelve a intentarlo.
+  incipitsMemorizados = leidos.catch((fallo: unknown) => {
+    incipitsMemorizados = undefined;
+    throw fallo;
+  });
+  return incipitsMemorizados;
 }
 
 let memoria: ConjuntoPublicable | undefined;

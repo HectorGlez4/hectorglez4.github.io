@@ -41,6 +41,20 @@ export const MAX_CARACTERES_IMAGEN = 300;
 export const MAX_CARACTERES_DEL_PASAJE: number | undefined = undefined;
 
 /**
+ * Longitud máxima del incipit de una Obra, en puntos de código — Historia 32.3, AD-30.
+ *
+ * El incipit es el comienzo de la Obra que declara una persona en su ficha (`incipit`, con
+ * `npm run obra -- incipit`), y se corta solo en fin de frase o de verso: se toman unidades
+ * enteras mientras quepan, y si ni la primera cabe no hay incipit (`ofreceIncipit` de
+ * `tools/lib/pasaje.ts`, el único que lo decide; el borde, igual al tope, sí se ofrece).
+ *
+ * **Nace en `undefined`, y con él ninguna Página de Obra enseña «Cómo empieza»**. Su valor lo da
+ * Héctor, en un diff visible (la propuesta es 400); ningún agente se lo da, y ninguna prueba fija
+ * su valor: pasan el tope por parámetro o lo parchean en una copia.
+ */
+export const MAX_CARACTERES_DEL_INCIPIT: number | undefined = undefined;
+
+/**
  * Entradas por página en los listados de Autor, de Tema, de Colección y de Obra — FR-5.
  *
  * La Página de Obra (Historia 22.4) pagina con este mismo número y la misma `Paginacion`: un
@@ -177,6 +191,19 @@ export const DESPLIEGUE_DE_LA_LECTURA: string | undefined = '2026-10-25';
  */
 export const DESPLIEGUE_DE_LA_BUSQUEDA_CON_FILTROS: string | undefined = '2026-10-30';
 
+/**
+ * La jornada UTC del primer día en que una Página de Obra enseña «Cómo empieza» en el sitio en
+ * vivo — Historia 32.3, AD-9, AD-13.
+ *
+ * No es la del merge ni la del despliegue del código: el desplegable solo aparece cuando una ficha
+ * declara su incipit y `MAX_CARACTERES_DEL_INCIPIT` tiene valor, así que la jornada es la del
+ * primer despliegue en que las dos cosas se cumplen, tras dar valor al tope. `undefined` mientras
+ * no haya llegado. **Le da valor Héctor, en un commit aparte del día en que llega, y ningún agente
+ * la elige.** Parte la serie de la continuación de la Página de Obra (`continuacion-de-obra`, que
+ * juzga la 32.4): la página 1 de una Obra con incipit tiene otra primera pantalla.
+ */
+export const DESPLIEGUE_DEL_INCIPIT: string | undefined = undefined;
+
 /*
  * Los cortes de serie de la medición — AD-9, AD-13, Historia 23.10.
  *
@@ -195,7 +222,7 @@ export const DESPLIEGUE_DE_LA_BUSQUEDA_CON_FILTROS: string | undefined = '2026-1
  */
 
 /** Las series de la medición que un corte puede partir. */
-export type SerieDeMedicion = 'sm8' | 'lectura' | 'busqueda';
+export type SerieDeMedicion = 'sm8' | 'lectura' | 'busqueda' | 'continuacion-de-obra';
 
 /** Un corte de serie tal como se declara: su jornada es la de una constante de despliegue. */
 export interface CorteDeSerie {
@@ -228,6 +255,11 @@ export const CORTES_DE_SERIE_DECLARADOS: readonly CorteDeSerie[] = [
     jornada: DESPLIEGUE_DE_OBRA_Y_DIRECTORIOS,
     que: 'la llegada de la Tarjeta de Obra con los Directorios (Épicas 24 y 26)',
     series: ['sm8'],
+  },
+  {
+    jornada: DESPLIEGUE_DEL_INCIPIT,
+    que: '«Cómo empieza» en la página 1 de Obra',
+    series: ['continuacion-de-obra'],
   },
 ];
 

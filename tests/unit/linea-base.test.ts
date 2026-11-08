@@ -489,7 +489,7 @@ describe('Historia 23.10 — los cortes de serie y los tramos', () => {
    * sus exportaciones no la alcanza: se evalúa una copia del fuente con las dos constantes de
    * despliegue con valor. Es posible porque `umbrales.ts` no importa nada.
    */
-  async function umbralesCon(lectura: string, obraYDirectorios: string) {
+  async function umbralesCon(lectura: string, obraYDirectorios: string, incipit?: string) {
     const fuente = readFileSync(resolve(RAIZ, 'src/lib/umbrales.ts'), 'utf8');
     // La declaración, con el valor que tenga: sin él hasta la 23.11 y la 26.11, y con el suyo
     // después. Esta prueba no fija ninguno de los dos, que son de Héctor.
@@ -502,7 +502,14 @@ describe('Historia 23.10 — los cortes de serie y los tramos', () => {
       .replace(
         declaracion('DESPLIEGUE_DE_OBRA_Y_DIRECTORIOS'),
         `export const DESPLIEGUE_DE_OBRA_Y_DIRECTORIOS: string | undefined = '${obraYDirectorios}';`,
+      )
+      // Historia 32.3 — la del incipit, con valor solo si se pide; sin él, `undefined`, que es el
+      // valor con el que nace (y la prueba no fija el que tenga el árbol).
+      .replace(
+        declaracion('DESPLIEGUE_DEL_INCIPIT'),
+        `export const DESPLIEGUE_DEL_INCIPIT: string | undefined = ${incipit === undefined ? 'undefined' : `'${incipit}'`};`,
       );
+    expect(fuente).toMatch(declaracion('DESPLIEGUE_DEL_INCIPIT'));
     const dir = mkdtempSync(join(tmpdir(), 'sabiduria-umbrales-'));
     aBorrar.push(dir);
     const fichero = join(dir, 'umbrales.ts');
@@ -531,7 +538,27 @@ describe('Historia 23.10 — los cortes de serie y los tramos', () => {
     expect([...lista.matchAll(/jornada: ([A-Z_]+),/g)].map((m) => m[1])).toEqual([
       'DESPLIEGUE_DE_LA_LECTURA',
       'DESPLIEGUE_DE_OBRA_Y_DIRECTORIOS',
+      'DESPLIEGUE_DEL_INCIPIT',
     ]);
+  });
+
+  it('Historia 32.3 — con valor, el corte del incipit parte solo la continuación de la Página de Obra; sin él, no está', async () => {
+    const con = await umbralesCon('2026-11-02', '2026-11-20', '2026-12-01');
+    const delIncipit = con.CORTES_DE_SERIE.filter((c) => c.jornada === '2026-12-01');
+    expect(delIncipit).toEqual([{ jornada: '2026-12-01', que: '«Cómo empieza» en la página 1 de Obra', series: ['continuacion-de-obra'] }]);
+    // No parte SM-8.
+    expect(con.CORTES_DE_SM8.map((c) => c.jornada)).toEqual(['2026-11-02', '2026-11-20']);
+    const sin = await umbralesCon('2026-11-02', '2026-11-20');
+    expect(sin.CORTES_DE_SERIE.some((c) => c.series.includes('continuacion-de-obra'))).toBe(false);
+  });
+
+  it('Historia 32.3 — el informe nombra la serie de la continuación de la Página de Obra, partida o entera', () => {
+    const entera = texto(leer({}));
+    expect(entera).toContain('  la continuación de la Página de Obra: ningún corte ha llegado todavía; la serie va entera, en un solo tramo.');
+    const partida = leer({}, { cortes: [CORTE_23, { jornada: D3, que: '«Cómo empieza» en la página 1 de Obra', series: ['continuacion-de-obra'] }] });
+    expect(partida.series['continuacion-de-obra'].cortes).toHaveLength(1);
+    expect(partida.series.sm8.cortes).toHaveLength(1);
+    expect(texto(partida)).toMatch(/ {2}la continuación de la Página de Obra: 2 tramos, que no se suman\..*«Cómo empieza» en la página 1 de Obra/u);
   });
 });
 

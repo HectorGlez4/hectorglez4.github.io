@@ -294,7 +294,8 @@ export const CAMPOS_QUE_PINTA = {
     autor: ['titulo'],
     tema: ['titulo'],
     coleccion: ['titulo'],
-    obra: ['autor', 'titulo', 'formas', 'nota', 'ediciones', 'wikidata'],
+    // El incipit (32.3) lo pinta solo la página 1 de su Obra.
+    obra: ['autor', 'titulo', 'formas', 'nota', 'ediciones', 'wikidata', 'incipit'],
     directorioDeObras: ['titulo', 'formas'],
   },
   documento: {

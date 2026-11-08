@@ -54,6 +54,15 @@
  * cambia la revisión vigente de una entidad referida en `corpus/wikidata/vigentes.yml`, sin
  * descargar nada, y dice cuántas Obras remiten a ella. Atar una entidad real es acto de Héctor.
  *
+ * Historia 32.3 — el incipit (AD-30):
+ *
+ *   npm run obra -- incipit <ficha> corpus/fuentes/<documento>.txt "<desde>"
+ *
+ * Declara el comienzo de la Obra: el documento de Fuente —de la propia Obra, por el casado del
+ * cotejo— y el texto desde el que empieza, que tiene que aparecer literal en él. Es el único
+ * escritor del campo; la página lo corta en frase o verso y solo lo enseña con
+ * `MAX_CARACTERES_DEL_INCIPIT` con valor. Declarar un incipit real es acto de Héctor.
+ *
  * Historia 29.4 — los casi duplicados:
  *
  *   npm run obra -- casi-duplicados [<ficha>...] [--json] [--corpus corpus]
@@ -80,6 +89,7 @@ import {
 } from './lib/cli.ts';
 import {
   atarEntidadDeWikidata,
+  declararIncipit,
   cambiarVigenteDeWikidata,
   congelarObras,
   declararEdicion,
@@ -106,6 +116,7 @@ const USO = [
   '  npm run obra -- quitar-edicion <ficha> <n> [--corpus corpus]',
   '  npm run obra -- wikidata <ficha> corpus/wikidata/<Q>--r<N>.json [--corpus corpus]',
   '  npm run obra -- wikidata-vigente <Q> <N> [--corpus corpus]',
+  '  npm run obra -- incipit <ficha> corpus/fuentes/<documento>.txt "<desde>" [--corpus corpus]',
   '  npm run obra -- casi-duplicados [<ficha>...] [--json] [--corpus corpus]',
   '  npm run obra -- congelar [--corpus corpus]',
   '  npm run obra -- levantar',
@@ -274,6 +285,12 @@ async function principal(): Promise<never> {
     case 'wikidata': {
       const [ficha, documento] = exactamente(2, 'la ficha y el documento de Wikidata');
       return terminar(await atarEntidadDeWikidata(rutas, ficha, documento));
+    }
+
+    case 'incipit': {
+      const [ficha, documento, desde] = exactamente(3, 'la ficha, el documento y el texto desde el que empieza');
+      if (desde.replace(/\s+/gu, ' ').trim() === '') usoMal(['El texto desde el que empieza la Obra está en blanco.']);
+      return terminar(await declararIncipit(rutas, ficha, documento, desde));
     }
 
     case 'wikidata-vigente': {

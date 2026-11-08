@@ -246,6 +246,18 @@ function conInicialMayuscula(texto: string): string {
   return primera === undefined ? texto : `${primera.toLocaleUpperCase('es')}${resto.join('')}`;
 }
 
+/** El rótulo del desplegable del incipit en la página 1 de Obra — Historia 32.3, UX-DR128. */
+export const ROTULO_COMO_EMPIEZA = 'Cómo empieza';
+
+/**
+ * Lo que sigue al nombre enlazado de la Fuente bajo el incipit — Historia 32.3, UX-DR128:
+ * «. Licencia {licencia}.» con la licencia de la Fuente, o «.» sin ella. El nombre lo pinta el
+ * componente como enlace a la dirección del documento.
+ */
+export function lineaDeLaFuenteDelIncipit(fuente: { licencia?: string }): string {
+  return fuente.licencia !== undefined ? `. Licencia ${fuente.licencia}.` : '.';
+}
+
 /** El texto del enlace con que cierra la línea de Ficha técnica (UX-DR126). */
 export const TEXTO_DATOS_DE_WIKIDATA = 'Datos: Wikidata, CC0';
 

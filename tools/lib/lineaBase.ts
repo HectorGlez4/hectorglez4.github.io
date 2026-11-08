@@ -869,6 +869,9 @@ export function componerLecturaDeMedicion(
     sm8: partirSerie('sm8', cortes, hoy),
     lectura: partirSerie('lectura', cortes, hoy),
     busqueda: partirSerie('busqueda', cortes, hoy),
+    // Historia 32.3 — la continuación de la Página de Obra: la parte «Cómo empieza». Ningún juicio
+    // la lee todavía (el de SM-C4 es de la 32.4); el informe dice sus cortes.
+    'continuacion-de-obra': partirSerie('continuacion-de-obra', cortes, hoy),
   } as const;
   const enLectura = enTramo(series.lectura.vigente);
   const enBusqueda = enTramo(series.busqueda.vigente);
@@ -1484,6 +1487,7 @@ const NOMBRE_DE_SERIE: { readonly [S in SerieDeMedicion]: string } = {
   sm8: 'SM-8 (CORTES_DE_SM8)',
   lectura: 'la lectura',
   busqueda: 'la búsqueda',
+  'continuacion-de-obra': 'la continuación de la Página de Obra',
 };
 
 /**
@@ -1571,7 +1575,7 @@ export function lineasDeLecturaDeMedicion(lectura: LecturaDeMedicion): string[] 
 
   // Los cortes.
   lineas.push('', 'Cortes de serie (CORTES_DE_SERIE de src/lib/umbrales.ts)');
-  for (const serie of ['sm8', 'lectura', 'busqueda'] as const) {
+  for (const serie of ['sm8', 'lectura', 'busqueda', 'continuacion-de-obra'] as const) {
     const partida = lectura.series[serie];
     const cabeza = `  ${NOMBRE_DE_SERIE[serie]}: `;
     if (partida.cortes.length === 0) {

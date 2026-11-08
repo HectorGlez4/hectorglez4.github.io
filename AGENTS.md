@@ -835,6 +835,38 @@ absorbida y lo dice. **Ningún agente ata una entidad ni recupera de Wikidata so
 real**, y la Pregunta 12 del PRD —si una antología de un compilador («Granos de oro») es Obra del
 Autor— sigue abierta: hasta que Héctor responda, nadie ata entidad a esas Obras.
 
+**`incipit`** (Historia 32.3, AD-30) es el cuarto campo que decide Héctor: cómo empieza la Obra,
+`incipit: {documento, desde}`, y **lo escribe solo su orden**, nunca a mano ni un agente:
+
+```
+npm run obra -- incipit <ficha> corpus/fuentes/<documento>.txt "<desde>"
+```
+
+Se niega con 1, sin escribir, si la ficha no existe; si el documento no es un `.txt` de
+`corpus/fuentes/`, falta, no se deja analizar o es una biografía; si no es de esa Obra (no está en
+la unión de `documentosDeCita` de sus Citas publicadas); si su forma de líneas es `indeterminada`;
+si `desde` —colapsado— no se localiza; o si la ficha ya declara ese mismo incipit. Con 2, la forma
+(otra cantidad de argumentos, una bandera desconocida, `desde` en blanco). Nunca se infiere del
+orden del libro ni del primer documento. El build lo repite desde el cargador `incipits` de
+`src/content.config.ts`, que solo cablea `tools/lib/posiciones.ts` (`leerIncipitsDelCorpus`): lee
+solo los documentos que las fichas declaran y **rompe** con «Regla incumplida» nombrando la ficha si
+el documento falta, no se deja analizar o es biografía, si su forma es `indeterminada` o si `desde`
+ya no se localiza; no repite el casado, para que retirar la última Cita de ese documento no rompa la
+construcción siguiente. El corte es de `incipitDe` de `tools/lib/pasaje.ts` y **solo en fin de
+frase o de verso**: unidades enteras mientras quepan en `MAX_CARACTERES_DEL_INCIPIT`, parado antes
+del pie de licencia de Wikisource; si se ofrece lo decide solo `ofreceIncipit` (sin tope, no; si la
+primera frase o el primer verso no cabe, no). La página 1 de la Obra lo pinta en
+`src/components/ComoEmpieza.astro` —el `Desplegable.astro` «Cómo empieza», cerrado, entre la
+Cabecera y el listado, en Inter y con la Fuente enlazada debajo—, con atributos `style` y sin
+`<style>`, bajo `data-pagefind-ignore="all"` y fuera del JSON-LD; las 2+ no. Con el Corpus real
+(ninguna ficha con incipit) lo único que cambia en `dist/` es la hoja de la Página de Obra, que gana
+las reglas de `Desplegable.astro` porque Astro la emite por el grafo de importaciones. `incipit`
+está en `CAMPOS_QUE_PINTA` de la Página de Obra y nada más; las órdenes que reescriben una ficha lo
+conservan, y `reunir` no hereda el de la absorbida y lo dice. **`MAX_CARACTERES_DEL_INCIPIT`** (nace
+`undefined`: ninguna página lo enseña) y **`DESPLIEGUE_DEL_INCIPIT`** (la jornada del primer día en
+vivo con un incipit a la vista, con su corte de la serie `continuacion-de-obra` en
+`CORTES_DE_SERIE_DECLARADOS`) son de Héctor, en `src/lib/umbrales.ts`: ningún agente les da valor.
+
 ### Una obra, un nombre (Historia 22.2)
 
 ```

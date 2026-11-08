@@ -204,6 +204,23 @@ export interface FichaDeObra {
    * conservan.
    */
   wikidata?: { entidad: string; revision: number };
+  /**
+   * El incipit (32.3, AD-30): el documento de `corpus/fuentes/` y el texto desde el que empieza
+   * la Obra. Lo escribe solo `npm run obra -- incipit`; las órdenes que reescriben una ficha lo
+   * conservan.
+   */
+  incipit?: { documento: string; desde: string };
+}
+
+/**
+ * El incipit de una Obra tal como lo pinta su página 1 — Historia 32.3, AD-30: el texto ya
+ * cortado en frase o verso (`incipitDe` de `tools/lib/pasaje.ts`, con `\n` solo en fin de verso o
+ * de párrafo) y la Fuente de su documento. Lo entrega la colección `incipits`.
+ */
+export interface IncipitDeObra {
+  documento: string;
+  texto: string;
+  fuente: { nombre: string; licencia?: string; url: string };
 }
 
 /** Una edición en venta de una ficha, ya admitida por el esquema (22.9). */

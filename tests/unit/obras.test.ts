@@ -135,7 +135,7 @@ describe('el esquema de la Ficha de Obra', () => {
     const r = obraAdmisible.safeParse({ autor: 'seneca', titulo: 'X', formas: ['x'], sinopsis: 'Y' });
     expect(r.success).toBe(false);
     expect(r.error?.issues.map((i) => i.message).join()).toContain(
-      'no reconoce «sinopsis». Sus campos son autor, titulo, formas, distintaDe, nota, ediciones y wikidata.',
+      'no reconoce «sinopsis». Sus campos son autor, titulo, formas, distintaDe, nota, ediciones, wikidata e incipit.',
     );
   });
 });

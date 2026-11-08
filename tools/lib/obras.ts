@@ -15,12 +15,13 @@
 
 import { existsSync } from 'node:fs';
 import { readFile, rename, rm, writeFile } from 'node:fs/promises';
-import { basename, dirname, join, resolve } from 'node:path';
+import { basename, dirname, extname, isAbsolute, join, relative, resolve } from 'node:path';
 import {
   clave,
   colapsar,
   colgarObras,
   avisosDeEdicionesSinCotejada,
+  fichaDeCita,
   congelacionVigente,
   esGrafiaLiteral,
   formaDeObra,
@@ -43,7 +44,9 @@ import {
   leerCensoDeCotejo,
   leerCitas,
   leerCitasTolerante,
+  leerDocumentoDeFuente,
   leerDocumentosDeclarados,
+  leerDocumentosParaElCotejo,
   leerFichasDeObra,
   leerFichasDeObraRetiradas,
   mover,
@@ -52,7 +55,10 @@ import {
   separarFrontmatter,
   type Rutas,
 } from './corpus.ts';
-import { FICHERO_DEL_CENSO } from './cotejo.ts';
+import { FICHERO_DEL_CENSO, colapsarEspacios, documentosDeCita } from './cotejo.ts';
+import { type MotivoSinIncipit } from './pasaje.ts';
+import { incipitDelDocumento, type FalloDelIncipit } from './posiciones.ts';
+import { MAX_CARACTERES_DEL_INCIPIT } from '../../src/lib/umbrales.ts';
 import { derivarDeLaDeclaracion, esElMismoAutor } from './documento.ts';
 import type { Resultado } from './gestion.ts';
 import { obrasDeLosDatos } from '../../src/lib/publicado.ts';
@@ -514,6 +520,8 @@ function datosDeFicha(ficha: FichaDeObra) {
       : {}),
     // La entidad de Wikidata (32.1) la escribe solo su orden: reescribir no la toca.
     ...(ficha.wikidata !== undefined ? { wikidata: { ...ficha.wikidata } } : {}),
+    // El incipit (32.3), igual: lo escribe solo `npm run obra -- incipit`.
+    ...(ficha.incipit !== undefined ? { incipit: { ...ficha.incipit } } : {}),
   };
 }
 
@@ -595,6 +603,8 @@ export async function reunirFichas(
       : {}),
     // La entidad de Wikidata (32.1) es de la destino; la de la absorbida describe otra ficha.
     ...(a.wikidata !== undefined ? { wikidata: { ...a.wikidata } } : {}),
+    // El incipit (32.3), igual: el de la absorbida no se hereda.
+    ...(a.incipit !== undefined ? { incipit: { ...a.incipit } } : {}),
   };
 
   // Terceras fichas que se declaraban distintas de una forma de la absorbida: ahora lo son de
@@ -669,6 +679,16 @@ export async function reunirFichas(
               (a.wikidata !== undefined
                 ? `«${a.nombre}» conserva la suya (${a.wikidata.entidad}, revisión ${a.wikidata.revision}).`
                 : `Si describe la reunida, átela con «npm run obra -- wikidata ${a.nombre} <documento>».`),
+          ]
+        : []),
+      ...(b.incipit !== undefined
+        ? [
+            `El incipit de «${b.nombre}» (desde «${b.incipit.desde}» en ${b.incipit.documento}) no pasa ` +
+              `a la reunida: se queda en ${movida}. ` +
+              (a.incipit !== undefined
+                ? `«${a.nombre}» conserva el suyo (desde «${a.incipit.desde}» en ${a.incipit.documento}).`
+                : `Si es el comienzo de la reunida, declárelo con «npm run obra -- incipit ${a.nombre} ` +
+                  `corpus/fuentes/${b.incipit.documento}.txt "<desde>"».`),
           ]
         : []),
       ...(terceras.length > 0
@@ -1753,6 +1773,139 @@ export async function cambiarVigenteDeWikidata(rutas: Rutas, entidad: string, re
         ? 'Ninguna Obra remite a ella.'
         : `${remiten.length === 1 ? 'Remite a ella 1 Obra' : `Remiten a ella ${remiten.length} Obras`}:`,
       ...remiten.map((nombre) => `  · ${nombre}`),
+    ].join('\n'),
+  };
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// El incipit — Historia 32.3, AD-30
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** Por qué el documento de un incipit no se sostiene, como lo dice el parte. */
+const FALLO_DEL_INCIPIT: Record<FalloDelIncipit, string> = {
+  'forma-indeterminada':
+    'la forma de sus líneas es indeterminada (`formaDeLasLineas`): no se sabe dónde acaba una frase ni un verso, ' +
+    'y el incipit solo se corta en frase o verso.',
+  'no-se-localiza': 'el «desde» no aparece literal en su cuerpo (se compara con los espacios colapsados).',
+};
+
+/** Por qué un incipit que se sostiene no saldría en la página, como lo dice el parte. */
+const MOTIVO_SIN_INCIPIT: Record<MotivoSinIncipit, string> = {
+  'sin-tope': 'MAX_CARACTERES_DEL_INCIPIT no tiene valor: la página no lo enseña.',
+  'primera-no-cabe': 'su primera frase —o su primer verso— pasa de MAX_CARACTERES_DEL_INCIPIT: la página no lo enseña.',
+  'forma-indeterminada': 'la forma de sus líneas es indeterminada: la página no lo enseña.',
+};
+
+/**
+ * `npm run obra -- incipit <ficha> corpus/fuentes/<documento>.txt "<desde>"` — declara el comienzo
+ * de una Obra. Es el **único escritor** del campo `incipit` (AD-25, AD-30): nunca se infiere del
+ * orden del libro ni del primer documento.
+ *
+ * Se niega —código 1, nada escrito— si la ficha no existe; si el documento no es un `.txt` de
+ * `corpus/fuentes/`, falta, no se deja analizar o es una biografía; si no es de esa Obra (no está
+ * en la unión de `documentosDeCita` de sus Citas publicadas: el casado del cotejo); si su forma es
+ * `indeterminada`; si `desde` no se localiza; o si la ficha ya declara ese mismo incipit. El build
+ * repite la forma y la localización con la misma función (`incipitDelDocumento`), pero no el
+ * casado. El parte dice la forma y el incipit que saldría con el tope de hoy, o por qué no sale.
+ */
+export async function declararIncipit(
+  rutas: Rutas,
+  nombreDeFicha: string,
+  documento: string,
+  desde: string,
+  opciones: { esquema?: EsquemaDeFicha; tope?: number | undefined } = {},
+): Promise<Resultado> {
+  const { esquema } = opciones;
+  const tope = 'tope' in opciones ? opciones.tope : MAX_CARACTERES_DEL_INCIPIT;
+  const activa = await fichaActiva(rutas, nombreDeFicha, esquema);
+  if (!activa.ok) return { ok: false, motivos: [...activa.motivos, NADA_ESCRITO] };
+  const { ficha, fichas } = activa;
+
+  const ruta = resolve(documento);
+  const dentro = relative(resolve(rutas.fuentes), ruta);
+  if (dentro === '' || dentro.startsWith('..') || isAbsolute(dentro) || extname(ruta) !== '.txt') {
+    return {
+      ok: false,
+      motivos: [
+        `«${documento}» no es un documento .txt de ${rutas.fuentes}: el incipit sale de un documento de ` +
+          'Fuente versionado allí por `npx tsx tools/recuperar.ts`.',
+        NADA_ESCRITO,
+      ],
+    };
+  }
+  const nombre = basename(ruta, '.txt');
+  if (!existsSync(ruta)) {
+    return { ok: false, motivos: [`No existe el documento ${ruta}. Se versiona con recuperar.`, NADA_ESCRITO] };
+  }
+  const leido = await leerDocumentoDeFuente(rutas, nombre);
+  if (leido.estado !== 'legible') {
+    const porque =
+      leido.estado === 'biografia'
+        ? 'es una biografía, no un documento de Fuente: de una biografía no sale el comienzo de ninguna Obra.'
+        : leido.estado === 'falta'
+          ? 'no está en corpus/fuentes/.'
+          : 'no se deja analizar como documento de Fuente.';
+    return { ok: false, motivos: [`${ruta} ${porque}`, NADA_ESCRITO] };
+  }
+
+  // El casado: el documento es de esta Obra si es de alguna de sus Citas publicadas.
+  let deLaObra: Set<string>;
+  try {
+    const [citas, { documentos }] = await Promise.all([leerCitas(rutas.citas), leerDocumentosParaElCotejo(rutas)]);
+    deLaObra = new Set(
+      citas
+        .filter((cita) => fichaDeCita(cita, fichas)?.nombre === ficha.nombre)
+        .flatMap((cita) => documentosDeCita(cita.fuente, cita.procedencia?.obra, documentos)),
+    );
+  } catch (fallo) {
+    return { ok: false, motivos: [texto(fallo), NADA_ESCRITO] };
+  }
+  if (!deLaObra.has(nombre)) {
+    return {
+      ok: false,
+      motivos: [
+        `${nombre} no es un documento de «${ficha.nombre}»: ninguna de sus Citas publicadas casa con él ` +
+          '(`documentosDeCita`). El incipit sale de un documento de la propia Obra.',
+        NADA_ESCRITO,
+      ],
+    };
+  }
+
+  const situado = incipitDelDocumento({ cuerpo: leido.cuerpo, lineas: leido.cabecera.lineas, desde, tope });
+  if (!situado.ok) {
+    return { ok: false, motivos: [`${nombre}: ${FALLO_DEL_INCIPIT[situado.fallo]}`, NADA_ESCRITO] };
+  }
+
+  const incipit = { documento: nombre, desde: colapsarEspacios(desde) as string };
+  if (ficha.incipit?.documento === incipit.documento && ficha.incipit.desde === incipit.desde) {
+    return {
+      ok: false,
+      motivos: [`«${ficha.nombre}» ya declara ese incipit: no hay nada que declarar.`, NADA_ESCRITO],
+    };
+  }
+
+  try {
+    await reescribirFichaDeObra(ficha.ruta, { ...datosDeFicha(ficha), incipit }, esquema);
+  } catch (fallo) {
+    return { ok: false, motivos: [texto(fallo), NADA_ESCRITO] };
+  }
+
+  return {
+    ok: true,
+    ruta: ficha.ruta,
+    mensaje: [
+      `«${ficha.nombre}» declara su incipit en ${nombre}, desde «${incipit.desde}».`,
+      ...(ficha.incipit !== undefined
+        ? [`  Sustituye al de ${ficha.incipit.documento}, desde «${ficha.incipit.desde}».`]
+        : []),
+      `  ${ficha.ruta}`,
+      `  Forma de las líneas: ${situado.forma}`,
+      'incipit' in situado.corte
+        ? `  Incipit que saldría (tope ${tope}):\n${situado.corte.incipit
+            .split('\n')
+            .map((linea) => `    ${linea}`)
+            .join('\n')}`
+        : `  ${MOTIVO_SIN_INCIPIT[situado.corte.motivo]}`,
     ].join('\n'),
   };
 }

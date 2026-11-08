@@ -971,7 +971,15 @@ describe('24.1 — las dependencias que la historia prohíbe', () => {
     const deCotejo = /import\s*\{([^}]*)\}\s*from\s*'\.\/cotejo\.ts'/.exec(codigo)?.[1] ?? '';
     // De `corpus.ts`, solo los lectores: ninguna de sus funciones que escriben en `corpus/`.
     const nombres = (lista: string) => lista.split(',').map((n) => n.trim()).filter((n) => n !== '').sort();
-    expect(nombres(deCorpus)).toEqual(['leerCitas', 'leerDocumentosParaElCotejo', 'leerOrdenDeLosIndices', 'rutasDelCorpus']);
+    // La 32.3 añade los dos lectores del incipit: las fichas y un solo documento.
+    expect(nombres(deCorpus)).toEqual([
+      'leerCitas',
+      'leerDocumentoDeFuente',
+      'leerDocumentosParaElCotejo',
+      'leerFichasDeObra',
+      'leerOrdenDeLosIndices',
+      'rutasDelCorpus',
+    ]);
     for (const nombre of ['documentosDeCita', 'localizar']) expect(deCotejo).toMatch(new RegExp(`\\b${nombre}\\b`));
     // Y nada del sistema de ficheros por su cuenta: todo lo que importa es de `./`.
     expect(importados(codigo).filter((r) => !r.startsWith('./') && !r.startsWith('../../src/lib/'))).toEqual([]);
