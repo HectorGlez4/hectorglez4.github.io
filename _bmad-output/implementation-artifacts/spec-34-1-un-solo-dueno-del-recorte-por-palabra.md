@@ -5,7 +5,7 @@ created: '2026-11-08'
 status: 'done'
 baseline_revision: '2b9c8669b3519df7e08c053eaedfb83250afad64'
 review_loop_iteration: 0
-followup_review_recommended: true
+followup_review_recommended: false
 context:
   - '{project-root}/_bmad-output/implementation-artifacts/epic-34-context.md'
 warnings: [oversized]
@@ -15,6 +15,13 @@ deferred:
     severity: low
   - summary: 'El AC de epics.md dice que la Imagen y `/buscar/` conservan el texto íntegro, pero la prueba de `dist/` solo puede fijar lo que el build emite (el `h1` del que Pagefind toma el título, el atributo de la Imagen y el JSON-LD); el índice de Pagefind en sí no se inspecciona.'
     evidence: 'Pagefind indexa `data-pagefind-body` y toma el título del `h1`; la prueba fija el `h1`.'
+    severity: low
+  - summary: >-
+      La regla del contrato solo quita blancos y `,` `;` `:` delante de «…» y toma por blanco todo `\s`: un guion o una raya sueltos, una apertura («(», «« », «¿», «¡») separada de su palabra o un punto final pueden quedar delante de «…», y un espacio duro (U+00A0, U+202F) o un `\r` cuentan como sitio de corte. Ampliar la lista o excluir el espacio duro es cambiar la regla de UX-DR131/UX-DR132: pendiente de Héctor (bmad-ux).
+    evidence: |-
+      Recorrido del Corpus del 2026-11-08 (4.424 Citas) con los topes 120 y 110: ningún recorte acaba en un signo suelto delante de «…» (el único con signos es «domesticados--…», pegados a su palabra), ninguna Cita trae U+00A0, U+202F, `\r` ni U+2028/U+2029, y ninguna de las cinco que acaban en `,` `;` `:` se recorta por esa cola. Hoy no hay ningún caso en el sitio.
+    location: >-
+      src/lib/recorte.ts (BLANCO, COLGANTE)
     severity: low
 ---
 
@@ -128,6 +135,15 @@ deferred:
   - `[low]` `[patch]` La prueba sin build de Martí leía la Cita viva del Corpus con una expresión sobre el YAML: lleva la copia literal del texto, con su procedencia anotada; y la Página de Cita de >110 comprueba además que `data-compartir` conserva el texto íntegro.
   - `[low]` `[patch]` El spec nombraba seis de las Citas en verso cuyo corte cambia: el Code Map lleva ahora las 17 de Tarjeta y las 16 de título, del recorrido repetido (mismas cifras).
 
+### 2026-11-08 — Review pass
+- intent_gap: 0
+- bad_spec: 0
+- patch: 0
+- defer: 1: (high 0, medium 0, low 1)
+- reject: 38: (high 0, medium 0, low 38)
+- addressed_findings:
+  - none
+
 ## Design Notes
 
 El corte es un cambio respecto de la Épica 29, a propósito: la 29.1/29.3 contaban cada salto como un carácter y dejaban el corte en el mismo índice; ahora los saltos no cuentan, así que en verso el corte se adelanta unos caracteres (`LARGA`: «Cuando ell…» → «Cuando ella me…»). Ejemplo de la regla:
@@ -162,7 +178,7 @@ recortarPorPalabra('Supercalifragilístico y más', 5)          // 'Supercalifra
 - `tests/unit/verso.test.ts` — sin la exención de `src/pages/cita/[slug].astro`.
 - `AGENTS.md` — la convención del recorte en «Conventions that differ from defaults».
 
-**Revisión.** Capas externas sin hallazgos en esta pasada: 0 parches, 0 diferidos, 0 rechazados. Seguimiento recomendado: no (0 parches; puntuación 0).
+**Revisión (ejecución inicial, antes de las capas externas).** Sin hallazgos en esa pasada: 0 parches, 0 diferidos, 0 rechazados. Seguimiento recomendado: no (0 parches; puntuación 0).
 
 **Verificación.**
 - `npx vitest run tests/unit/recorte.test.ts tests/unit/verso.test.ts` — verde (19 pruebas).
@@ -198,3 +214,39 @@ recortarPorPalabra('Supercalifragilístico y más', 5)          // 'Supercalifra
 - Recorrido del Corpus repetido: 4.424 Citas, 75 en verso; 17 Tarjetas y 16 títulos en verso cambian (las mismas cifras).
 
 **Riesgos residuales.** Los dos diferidos; el escaneo no ve un alias desestructurado ni un recorte por expresión regular.
+
+### Pasada de revisión 2 (2026-11-08, hallazgos externos, última)
+
+**Resumen.** Sin cambios de código. Los hallazgos de las cinco capas se cotejaron contra el contrato y contra el Corpus real (recorrido de las 4.424 Citas con los topes 120 y 110): ninguno señala un defecto que hoy vea un visitante, un sembrador o el build.
+
+**Ficheros.**
+- este spec — triage de la pasada 2, un diferido nuevo, el seguimiento recomendado y la etiqueta de la ejecución inicial (decía «capas externas sin hallazgos», cuando esas capas aún no habían corrido).
+
+**Revisión.** 0 parches, 1 diferido, 38 rechazados.
+- **Diferido (bajo).** Los signos sueltos delante de «…», el espacio duro y el `\r` como sitio de corte. Es la regla del contrato, y no hay ningún caso en el Corpus. Ampliarla lo decide Héctor (bmad-ux).
+- **Rechazados: la regla explícita del contrato.**
+  - `Hola.…`.
+  - El rebase de « / » en título y meta en verso.
+  - La cola `,` `;` `:` que hace pasar por uno: el contrato dice «cuenta ≤ tope, si no, recorta», y ninguna de las cinco Citas que acaban así se recorta por ella.
+  - Ningún `lastmod` ni aviso por el cambio de la meta.
+- **Rechazados: sin caso en el Corpus.**
+  - Los blancos o `,` `;` `:` iniciales: no empieza así ninguna Cita.
+  - Las marcas combinantes y los grafemas.
+  - Las extensiones `.tsx`/`.vue`: el proyecto no tiene ninguna.
+- **Rechazados: ya diferidos.** La palabra única sin «…» y el índice de Pagefind.
+- **Rechazados: lectura del criterio, o ya cubiertos.**
+  - Las pruebas de `dist/` toman el valor esperado de la función. Prueban la adopción con igualdad exacta, y el punto de corte lo fijan `recorte.test.ts` y los literales de `verso-construido.test.ts`.
+  - `cortaEnPalabra` no exige el prefijo más largo: lo cubre esa igualdad exacta.
+  - Las precondiciones del fixture en prosa.
+  - El antes/después de Martí sin build: el construido está en `verso-construido.test.ts`.
+  - El escaneo por nombre: su cabecera dice que no ve alias ni expresiones regulares.
+  - `tools/` fuera de alcance: la línea de AGENTS.md acota la regla a `src/` y `public/islas/`.
+  - La excepción de `recorte.ts` en el párrafo del verso: AGENTS.md la nombra aparte de lo que enumera `verso.test.ts`.
+  - El O(n²): inocuo a estas longitudes.
+  - Una línea larga de comentario.
+
+Seguimiento recomendado: no (0 parches; puntuación 0).
+
+**Verificación.** Sin código tocado, así que no hay que repetir la sección «Verification». En la pasada 1, en el mismo HEAD de código, las pruebas corrieron en verde: `npm test` completo, con 164 ficheros y 7.461 pruebas, más `astro check` y `npm run build`. La capa ac-auditor volvió a correr en verde los cuatro ficheros de la historia y `medicion.test.ts` (749 pruebas).
+
+**Riesgos residuales.** Los tres diferidos del frontmatter.
