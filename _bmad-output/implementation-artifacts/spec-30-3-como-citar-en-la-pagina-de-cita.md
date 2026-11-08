@@ -11,7 +11,7 @@ context:
   - '{project-root}/_bmad-output/implementation-artifacts/spec-30-2-la-cita-a-su-medida-y-las-acciones-en-fila-desde-600-px.md'
 warnings: [oversized]
 deferred:
-  - summary: 'Al fundir la Épica 29 en la rama: la Referencia por enUnaLinea. `referenciaDeCita` toma hoy `cita.texto` tal cual (en esta rama ningún texto lleva U+000A); al fundir, el texto de la Referencia pasa por `enUnaLinea` de `src/lib/verso.ts` y la fila «en verso» de la tabla de Vitest gana su caso con « / ».'
+  - summary: 'Hecho en la puerta de la etapa s-30 (2026-11-08), tras fundir la Épica 29: `referenciaDeCita` pasa el texto por `enUnaLinea` y la tabla de `tests/unit/atribucion.test.ts` gana la fila «en verso» con « / » en los tres estilos. Era: al fundir la Épica 29 en la rama: la Referencia por enUnaLinea. `referenciaDeCita` toma hoy `cita.texto` tal cual (en esta rama ningún texto lleva U+000A); al fundir, el texto de la Referencia pasa por `enUnaLinea` de `src/lib/verso.ts` y la fila «en verso» de la tabla de Vitest gana su caso con « / ».'
     evidence: 'La Épica 29 (src/lib/verso.ts) no está en v9/epica-30; AD-29 prohíbe escribir una unión de versos local. El AC de la 30.3 pide la forma en una línea por `enUnaLinea` (29.3).'
     severity: medium
   - summary: 'Pendiente de Héctor (revisión del spec): las formas literales de APA, MLA y Chicago, el formato de la fecha de consulta por estilo y la línea «Sin fecha de consulta…» bajo cada Referencia son supuestos de este spec (Design Notes), fijados por la tabla de Vitest; cambiarlos es cambiar la tabla y `atribucion.ts`, nada más.'

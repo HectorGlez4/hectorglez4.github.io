@@ -31,6 +31,9 @@ import { MAX_CARACTERES_IMAGEN } from '../../src/lib/umbrales.ts';
 const U = 'https://ejemplo.org/cita/x/';
 const X = 'Yo soy un hombre sincero de donde crece la palma.';
 const HOY = new Date(2026, 10, 8, 12, 0, 0);
+/** Una Cita en verso, con su U+000A entre versos (AD-29), y su forma en una línea literal. */
+const VERSO = 'Yo vengo de todas partes,\ny hacia todas partes voy.';
+const VERSO_EN_LINEA = 'Yo vengo de todas partes, / y hacia todas partes voy.';
 
 const obra = (titulo: string) => ({ titulo }) as ObraResuelta;
 
@@ -152,6 +155,14 @@ const casos: { caso: string; cita: Cita; autor: Autor; apa: string; mla: string;
     apa: `Martí, J. «${X}». En *¡Viva la vida!* Sabiduría de Bolsillo. Recuperado el 8 de noviembre de 2026 de ${U}`,
     mla: `Martí, José. «${X}». *¡Viva la vida!* *Sabiduría de Bolsillo*, ${U}. Consultado el 8 nov. 2026.`,
     chicago: `Martí, José. *¡Viva la vida!* «${X}». Sabiduría de Bolsillo. Consultado el 8 de noviembre de 2026. ${U}.`,
+  },
+  {
+    caso: 'en verso: en una línea, con « / » entre versos',
+    cita: citaDe({ texto: VERSO }),
+    autor: MARTI,
+    apa: `Martí, J. (1891). «${VERSO_EN_LINEA}». En *Versos sencillos*. Wikisource. Sabiduría de Bolsillo. Recuperado el 8 de noviembre de 2026 de ${U}`,
+    mla: `Martí, José. «${VERSO_EN_LINEA}». *Versos sencillos*, 1891. Wikisource. *Sabiduría de Bolsillo*, ${U}. Consultado el 8 nov. 2026.`,
+    chicago: `Martí, José. *Versos sencillos*. 1891. Wikisource. «${VERSO_EN_LINEA}». Sabiduría de Bolsillo. Consultado el 8 de noviembre de 2026. ${U}.`,
   },
 ];
 

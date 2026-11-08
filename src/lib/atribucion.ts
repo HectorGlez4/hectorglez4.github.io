@@ -14,6 +14,7 @@ import type { Cita, Autor, SiguienteCita } from './publicado.ts';
 import { rotuloDeFuente, type ObraResuelta } from './obras.ts';
 import { MARCA } from './marca.ts';
 import { escapar } from './lienzo.ts';
+import { enUnaLinea } from './verso.ts';
 import { recuentoDeAutores, recuentoDeCitas, recuentoDeObras, temaEnFrase } from './recuentos.ts';
 import {
   TARJETA_DEL_DIRECTORIO_DE_AUTORES,
@@ -583,7 +584,8 @@ function conPunto(frase: string): string {
  * (`cita.obra.titulo`, nunca la grafía que declara), el año de su Procedencia, su traducción
  * —solo con Obra—, el rótulo de su edición cotejada si tiene Fuente, la marca y la canónica sin
  * marcas de llegada. Lo que no consta se omite: sin «s. f.», sin «Sin obra documentada», sin un
- * dato de otra Cita ni de la ficha. El texto de la Cita entra entero y literal. La fecha de
+ * dato de otra Cita ni de la ficha. El texto de la Cita entra entero y literal; en verso, en una
+ * línea con « / » entre versos por `enUnaLinea` de `src/lib/verso.ts` (AD-29). La fecha de
  * consulta es un segmento propio, vacío en el build; las formas literales (supuesto que revisa
  * Héctor) las fija la tabla de `tests/unit/atribucion.test.ts`:
  *
@@ -604,7 +606,9 @@ export function referenciaDeCita(
   const añoDeTraduccion = traduccion?.año === undefined ? '' : `, ${añoLegible(traduccion.año)}`;
   const traductor = traduccion === undefined ? undefined : `${traduccion.traductor}${añoDeTraduccion}`;
   const edicion = cita.fuente === undefined ? undefined : rotuloDeFuente(cita.fuente);
-  const texto = `«${cita.texto}».`;
+  // En verso, en una línea con « / » entre versos (AD-29, UX-DR116): la Referencia es la única
+  // salida en línea de «Cómo citar», y la forma la da solo `enUnaLinea`.
+  const texto = `«${enUnaLinea(cita.texto)}».`;
 
   const s: SegmentoDeReferencia[] = [];
   const t = (texto: string) => s.push({ texto });
