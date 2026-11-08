@@ -8,8 +8,9 @@ import { desviacionDelBarrido, sinDecidir } from './barrido.ts';
  *
  * Viven aquí, y no dentro de `tests/e2e/accesibilidad.spec.ts`, porque los llaman dos ficheros:
  * ese, sobre cada superficie del sitio, y `tests/e2e/desplegable.spec.ts`, sobre una sonda con
- * desplegables. Hasta que una superficie pinte uno, la sonda es lo único que hace correr la
- * pasada abierta: sin ella, un fallo de estas funciones solo saldría con el primer consumidor.
+ * desplegables. Desde la 34.2 la Página de Autor plegada (el Autor con más Obras) también hace
+ * correr la pasada abierta; la sonda sigue cubriendo lo que esa página no tiene, como varios
+ * desplegables seguidos o uno con un enlace dentro.
  */
 
 /**
@@ -77,7 +78,7 @@ export async function recorrerElFoco(page: Page, ruta: string, estado: string) {
  * Abre todos los `<details>` de la página (UX-DR146). Todo lo plegado del sitio es un
  * `Desplegable` (`src/components/Desplegable.astro`), y cada uso se barre cerrado y abierto sin
  * escribir su propio paso. Dice cuántos abrió: sin ninguno, la página abierta es la misma que la
- * cerrada y el segundo barrido no se repite (hoy ninguna superficie del sitio pinta uno).
+ * cerrada y el segundo barrido no se repite (así ocurre en toda superficie que no pinta ninguno).
  */
 export const abrirLosDesplegables = (page: Page) =>
   page.evaluate(() => {

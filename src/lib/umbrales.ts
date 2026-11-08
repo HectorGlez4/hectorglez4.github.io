@@ -339,7 +339,7 @@ export const MAX_CITAS_DE_LA_MISMA_OBRA = 3;
  *
  * Con más, la Lista pinta las primeras y pliega el resto en un Desplegable cerrado («Y {m} obras
  * más», `rotuloDeObrasPlegadas`), para que la primera Cita no quede pantallas abajo (Rafael
- * Barrett, con 59 Obras, la dejaba a unos 3.249 px a 360 × 640). `/obras/` no se pliega nunca.
+ * Barrett, con su Lista entera, la dejaba a unos 3.249 px a 360 × 640). `/obras/` no se pliega nunca.
  * Moverlo lo decide Héctor, en un diff visible. Literal: el filtro de los Directorios importa este
  * módulo y un cálculo aquí engordaría su guion.
  */

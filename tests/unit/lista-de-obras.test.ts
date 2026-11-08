@@ -547,6 +547,31 @@ describe('Historia 34.2 — la Lista de Obras plegada, construida', () => {
     }
   });
 
+  /*
+   * El HTML de `/obras/` no cambia con el pliegue (34.2), y lo frágil es el orden de las hojas de
+   * componente en su `<style>` en línea: Astro lo deriva del grafo de importaciones, y un solo
+   * `import` nuevo en `ListaDeObras.astro` (el de `umbrales.ts`) bastó para cambiar de sitio la
+   * hoja de la Lista y la del filtro sin añadir ninguna regla. Se fija la secuencia de hojas por el
+   * primer selector de cada una —no por el hash de `data-astro-cid-*`—. Si cambia a propósito,
+   * con una decisión que mueva `/obras/`, se actualiza aquí en el mismo commit; si no, es una
+   * regresión del criterio «el HTML de `/obras/` no cambia».
+   */
+  it('`/obras/` conserva el orden de las hojas de componente de su `<style>` en línea', async () => {
+    const obras = await html('/obras/');
+    const secuencias = [...obras.matchAll(/<style[^>]*>([\s\S]*?)<\/style>/g)]
+      .map(([, hoja]) => {
+        const vistas = new Map<string, string>();
+        for (const [, selector, cid] of hoja.matchAll(/([^{}]*?)\[data-astro-cid-([a-z0-9]+)\]/g)) {
+          if (!vistas.has(cid)) vistas.set(cid, selector.trim());
+        }
+        return [...vistas.values()];
+      })
+      .filter((s) => s.length > 0);
+    expect(secuencias).toEqual([
+      ['.letras', '.grupo', '.filtro', '.rotulo', '.seguir', '.saltar', '.lista-de-obras', 'label', '.pagina'],
+    ]);
+  });
+
   it('sin ningún Modelo de Ingreso en la Página de Autor plegada', async () => {
     for (const autor of ['seneca', 'epicteto']) expect(await html(`/autor/${autor}/`)).not.toContain('data-ingreso');
   });

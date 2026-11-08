@@ -184,7 +184,7 @@ test.describe('Historia 17.3 — la Lista de Obras', () => {
 
 /*
  * Historia 34.2 — la Página de Autor enseña tres Obras y pliega el resto (UX-DR130). Rafael Barrett,
- * con 59 Obras, dejaba la primera Cita a unos 3.249 px a 360 × 640. El número de Obras sale del
+ * con su Lista entera, dejaba la primera Cita a unos 3.249 px a 360 × 640 (medida del diseño). El número de Obras sale del
  * Corpus (`ayuda/corpus.ts`), nunca escrito aquí, y el umbral de `src/lib/umbrales.ts`.
  */
 test.describe('Historia 34.2 — la Lista de Obras plegada', () => {

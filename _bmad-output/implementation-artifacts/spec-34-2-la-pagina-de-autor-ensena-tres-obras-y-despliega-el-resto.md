@@ -5,7 +5,7 @@ created: '2026-11-07'
 status: 'done'
 baseline_revision: '2d4f902c0e8340287c60a6ac68a215ca696808b8'
 review_loop_iteration: 0
-followup_review_recommended: false
+followup_review_recommended: true
 context:
   - '{project-root}/_bmad-output/implementation-artifacts/epic-34-context.md'
   - '{project-root}/_bmad-output/implementation-artifacts/spec-34-0-la-primitiva-de-desplegable.md'
@@ -141,6 +141,18 @@ Golden de la parte plegada (dentro de `ListaDeObras`, `Pliegue = pliegue`):
 - addressed_findings:
   - none
 
+### 2026-11-08 — Review pass
+- intent_gap: 0
+- bad_spec: 0
+- patch: 4 (high 0, medium 1, low 3)
+- defer: 0
+- reject: 24 (high 0, medium 3, low 21)
+- addressed_findings:
+  - `[medium]` `[patch]` La identidad de `/obras/` (AC) solo la guardaba un `shasum` a mano, y lo frágil es el orden de las hojas de componente de su `<style>` en línea (blind-hunter, verification-gap, intent-alignment): nueva prueba en `tests/unit/lista-de-obras.test.ts` que fija esa secuencia por el primer selector de cada hoja; con el `import` de `umbrales.ts` repuesto a mano en `ListaDeObras.astro` falla (`.lista-de-obras` cambia de sitio), y sin él pasa.
+  - `[low]` `[patch]` Comentarios rancios que decían que ninguna superficie pinta un `<details>` (verification-gap, «Other findings»): `tests/e2e/desplegable.spec.ts` y `tests/e2e/ayuda/desplegables.ts`, al día con la Página de Autor plegada.
+  - `[low]` `[patch]` Cifras del Corpus escritas en comentarios («59 Obras» de Barrett) que ya no casan (blind-hunter): fuera de `src/lib/umbrales.ts` y de `tests/e2e/pagina-de-autor.spec.ts`; queda la medida del diseño (3.249 px).
+  - `[low]` `[patch]` La pasada abierta de `accesibilidad.spec.ts` sobre `autorConMasObras()` pasaría en vacío si ese Autor no plegara (edge-case-hunter): solo entra si tiene más de `MAX_OBRAS_ANTES_DE_LAS_CITAS` Obras.
+
 ## Auto Run Result
 
 Status: done
@@ -172,3 +184,20 @@ Blocking condition: ninguna.
 - `npm test`: 155 ficheros, 7175 pruebas, verde.
 
 **Riesgos residuales.** La cifra de Barrett del commit es la del bucle; la de Héctor queda diferida (frontmatter). El orden de las hojas en línea de Astro depende del grafo de importaciones: un `import` nuevo en `ListaDeObras.astro` puede volver a mover `/obras/` (anotado en AGENTS.md).
+
+### Pasada de revisión del 2026-11-08
+
+**Hallazgos.** Cinco capas externas. 4 parches (1 medio, 3 bajos; ver Review Triage Log), 0 diferidos nuevos (la medida de Barrett de Héctor ya constaba), 24 rechazados: decisiones del contrato (la prop `typeof Desplegable | false`, la hoja del Desplegable en toda Página de Autor, el rótulo «Y {m} obras más»), coberturas ya existentes (páginas 2+ de un Autor que pliega, zonas de los dos `<ul>`, la secuencia 26.4), mejoras de prueba sin defecto que corregir (filete medido, Espacio, medida con 4 Obras, `salida-interna` de lo plegado, Ingreso encendido sobre una Lista plegada, que no se admite por declaración) y fragilidades no demostradas (expresiones regulares de la prueba, recuento de `obrasPorAutor`). El `sprint-status.yaml` lo escribe el paso de cierre del bucle.
+
+**Ficheros de esta pasada.** `tests/unit/lista-de-obras.test.ts` (orden de hojas de `/obras/`), `tests/e2e/accesibilidad.spec.ts` (filtro del Autor plegado), `tests/e2e/desplegable.spec.ts` y `tests/e2e/ayuda/desplegables.ts` (comentarios), `tests/e2e/pagina-de-autor.spec.ts` y `src/lib/umbrales.ts` (comentarios sin cifras del Corpus).
+
+**Seguimiento.** `followup_review_recommended: true` (parcheados: 0 altos, 1 medio, 3 bajos; puntuación 3 × 1 + 3 = 6 ≥ 5).
+
+**Verificación.**
+- `npx vitest run tests/unit/lista-de-obras.test.ts -t "34.2"`: 11 pasan; con el `import` de `umbrales.ts` repuesto en `ListaDeObras.astro`, la prueba nueva falla, y se devolvió el componente a su estado.
+- `npx astro check`: 0 errores.
+- `FECHA_JORNADA=2026-11-07 npx astro build`: termina (NFR-5 no rompe); `dist/obras/index.html` y `dist/sitemap-0.xml` dan OK contra `dist-antes-34.2.sha`.
+- Playwright `accesibilidad.spec.ts`, `desplegable.spec.ts` y `pagina-de-autor.spec.ts` en escritorio: 177 pasan, 1 omitida (la ya existente).
+- `npm test`: 155 ficheros, 7176 pruebas, verde.
+
+**Riesgos residuales.** La secuencia fijada de `/obras/` cambia también con una decisión legítima que toque sus componentes; entonces se actualiza en el mismo commit, a propósito.
