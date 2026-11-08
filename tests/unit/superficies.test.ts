@@ -1164,6 +1164,14 @@ describe('Historia 35.3 — la Página de Personaje', () => {
     // Un slug enteramente numérico es un Personaje, no la página 1984 de nada.
     expect(causaDelServicio('/personaje/1984')).toBe('contenido');
   });
+
+  it('su unidad de línea base es la suya: ni comparte la del Autor ni declara otra', () => {
+    const personaje = superficieDeclaradaDe('/personaje/batman');
+    const autor = superficieDeclaradaDe('/autor/seneca');
+    expect(personaje?.lineaBase).toBeUndefined();
+    expect(superficieDeLineaBase(personaje!)).toBe(personaje!.nombre);
+    expect(superficieDeLineaBase(personaje!)).not.toBe(superficieDeLineaBase(autor!));
+  });
 });
 
 describe('Historia 23.10 — la superficie de línea base', () => {

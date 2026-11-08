@@ -48,6 +48,8 @@ const seleccion = citaDelDia(aptasParaPortada(conjunto.citas), jornada, portada.
 const autorDelDia = seleccion
   ? conjunto.autores.find((a) => a.slug === seleccion.cita.autor)
   : undefined;
+/* Historia 35.3 — el Personaje que la dice, si lo declara: la Atribución lo nombra. */
+const personajeDelDia = conjunto.personajes.find((p) => p.slug === seleccion?.cita.personaje);
 
 /* La descripción vive en `marca.ts`: la usan también los datos estructurados y la Tarjeta. */
 const DESCRIPCION = DESCRIPCION_DEL_SITIO;
@@ -79,7 +81,7 @@ const DESCRIPCION = DESCRIPCION_DEL_SITIO;
     {
       seleccion && autorDelDia ? (
         /* Historia 26.8 — el bloque, y su marca de lo que rota, los pinta un solo componente. */
-        <CitaDelDia cita={seleccion.cita} autor={autorDelDia} />
+        <CitaDelDia cita={seleccion.cita} autor={autorDelDia} personaje={personajeDelDia} />
       ) : (
         <p class="entrada" data-pagefind-ignore="all">
           Citas en español, cada una en su página, con el autor y la obra de la que

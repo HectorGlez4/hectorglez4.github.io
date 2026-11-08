@@ -900,6 +900,8 @@ describe('Historia 22.4 — lo que rompe el build', () => {
       '...indexables.map((obra) => rutaDeLaObra(obra)),',
       '...publicadas.map((obra) => rutaDeLaObra(obra)),',
     );
+    // Un fragmento que ya no está dejaría la copia sin parchear y la prueba, vacua.
+    expect(parcheada).not.toBe(original);
     const resultado = await construirConCorpus(
       {
         'autores/seneca.yml': AUTOR_VALIDO,

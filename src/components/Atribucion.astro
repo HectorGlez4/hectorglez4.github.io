@@ -32,6 +32,17 @@ interface Props {
 }
 
 const { cita, autor, personaje, zona } = Astro.props;
+/*
+ * Historia 35.3 — el Personaje que llega es el que la Cita declara, ni otro ni ninguno: un uso
+ * que lo olvidara nombraría al Autor en una superficie y al Personaje en otra, y la arista
+ * Cita → Personaje del grafo del modelo faltaría sin que nada lo dijera.
+ */
+if (personaje?.slug !== cita.personaje) {
+  throw new Error(
+    `Atribución de ${cita.slug}: la Cita declara el Personaje «${cita.personaje ?? 'ninguno'}» y ` +
+      `recibe «${personaje?.slug ?? 'ninguno'}». Quien la pinta le pasa el Personaje del conjunto.`,
+  );
+}
 const nombrado =
   personaje === undefined
     ? { ruta: rutaDeAutor(autor.slug), nombre: autor.nombre }

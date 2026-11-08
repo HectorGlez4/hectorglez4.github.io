@@ -78,6 +78,10 @@ describe('Historia 35.2 — el Personaje en el build', () => {
     expect(pagina).toMatch(/<a href="\/personaje\/batman\/" class="enlace-en-tinta"[^>]*>Batman<\/a>/u);
     expect(pagina).not.toMatch(/joker/iu);
     expect(pagina).not.toContain('DC Comics');
+    // Fuera de ese enlace de la Atribución, la Página de Cita no nombra al Personaje —ni el texto,
+    // ni el JSON-LD, ni la meta, ni los `data-*`— hasta la 35.4; el slug de la Cita sí lo lleva.
+    const sinAtribucion = pagina.replace(/<a href="\/personaje\/batman\/" class="enlace-en-tinta"[^>]*>Batman<\/a>/u, '');
+    expect(sinAtribucion).not.toMatch(/batman(?!-la-noche-es-mas-oscura)/iu);
   });
 
   it('la puerta de los Personajes: slug de un Autor activo o retirado, y la Cita de un Personaje que no existe', async () => {

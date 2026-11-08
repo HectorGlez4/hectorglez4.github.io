@@ -217,7 +217,7 @@ export function personajesIndexables<P extends { slug: string; nombre: string }>
 export function citasDePersonaje(citas: readonly Cita[], slugPersonaje: string): Cita[] {
   return citas
     .filter((c) => c.personaje === slugPersonaje)
-    .sort((a, b) => a.slug.localeCompare(b.slug, 'es'));
+    .sort(porSlug);
 }
 
 /**
@@ -349,8 +349,11 @@ export function citasDocumentadasDeAutor(citas: readonly Cita[], slugAutor: stri
 }
 
 /** Las Citas de un Autor, en orden estable para que el build sea reproducible. */
+/** El orden de los listados de Autor y de Personaje: por slug, en español. */
+const porSlug = (a: Cita, b: Cita): number => a.slug.localeCompare(b.slug, 'es');
+
 export function citasDeAutor(citas: readonly Cita[], slugAutor: string): Cita[] {
-  return citas.filter((c) => c.autor === slugAutor).sort((a, b) => a.slug.localeCompare(b.slug, 'es'));
+  return citas.filter((c) => c.autor === slugAutor).sort(porSlug);
 }
 
 export function citasDeTema(citas: Cita[], slugTema: string): Cita[] {
@@ -1206,7 +1209,7 @@ export function rutasIndexables(conjunto: ConjuntoPublicable): readonly string[]
   if (memorizada !== undefined) return memorizada;
   const obras = obrasDelConjunto(conjunto.citas, conjunto.autores);
   const indexables = new Set(obras.indexables.map((o) => rutaDeLaObra(o)));
-  // Historia 35.3 — y los Personajes que `personajesIndexables` deja fuera (hoy ninguno).
+  // Historia 35.3 — y los Personajes que `personajesIndexables` indexa (hoy, todo publicado).
   for (const personaje of personajesIndexables(conjunto.personajes, conjunto.citas)) {
     indexables.add(rutaDePersonaje(personaje.slug));
   }
@@ -1500,9 +1503,28 @@ export function aplanarAutor(entrada: EntradaAutor): Autor {
  * como `semblanza`, y su atribución la pone `resolverAtribuciones`.
  */
 export function aplanarPersonaje(entrada: EntradaPersonaje): Personaje {
-  const { nombre, universo, ordenAlfabetico, semblanza, semblanzaPropia } = entrada.data;
+  return personajePlano(entrada.id, entrada.data);
+}
+
+/**
+ * El aplanado de un Personaje, de una sola mano — Historia 35.3: lo usan `aplanarPersonaje` (la
+ * colección de Astro) y `conjuntoDeLosDatos` de `tools/lib/alcance.ts` (el Corpus leído de disco,
+ * para la puerta de NFR-5 y las órdenes), así que el build y las órdenes ven el mismo Personaje.
+ * El esquema (`src/lib/admision.ts`) no deja que `semblanza` y `semblanzaPropia` convivan.
+ */
+export function personajePlano(
+  slug: string,
+  datos: {
+    nombre: string;
+    universo: string;
+    ordenAlfabetico?: string;
+    semblanza?: string;
+    semblanzaPropia?: { texto: string; responde: string };
+  },
+): Personaje {
+  const { nombre, universo, ordenAlfabetico, semblanza, semblanzaPropia } = datos;
   return {
-    slug: entrada.id,
+    slug,
     nombre,
     universo,
     ...(ordenAlfabetico !== undefined ? { ordenAlfabetico } : {}),

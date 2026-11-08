@@ -131,6 +131,8 @@ describe('el censo por familia', () => {
     // Una Cita con Obra, para que la exclusión de abajo excluya algo de verdad.
     const conjunto: ConjuntoPublicable = {
       ...base,
+      // Historia 35.3 — un Personaje publicado, para que la igualdad de AD-11 cubra la séptima familia.
+      personajes: [{ slug: 'un-personaje', nombre: 'Un Personaje', universo: 'Un universo' }],
       citas: base.citas.map((c, i) =>
         i === 0
           ? ({
@@ -146,10 +148,13 @@ describe('el censo por familia', () => {
                 recuento: 1,
               },
             } as Cita)
-          : c,
+          : i === 1
+            ? ({ ...c, personaje: 'un-personaje' } as Cita)
+            : c,
       ),
     };
     const censo = censoPorFamilia(conjunto);
+    expect(censo.personaje).toEqual(['/personaje/un-personaje/']);
 
     const delCenso = FAMILIAS_DEL_CENSO.flatMap((f) => [...censo[f]]).sort();
     /*

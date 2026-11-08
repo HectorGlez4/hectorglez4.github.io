@@ -5,7 +5,7 @@ created: '2026-11-08'
 status: 'done'
 baseline_revision: '923a0f27b4caeb6d10986741d0a7261bfe78a20d'
 review_loop_iteration: 0
-followup_review_recommended: false
+followup_review_recommended: true
 context:
   - '{project-root}/_bmad-output/implementation-artifacts/epic-35-context.md'
   - '{project-root}/_bmad-output/implementation-artifacts/spec-35-2-el-personaje-entra-en-el-corpus-y-la-obra-tiene-un-solo-dueno.md'
@@ -23,6 +23,13 @@ deferred:
   - summary: 'El barrido de accesibilidad (tests/e2e/accesibilidad.spec.ts) deriva sus muestras de las rutas construidas con el Corpus real, que no tiene Personajes: no recorrerá la Página de Personaje hasta que haya uno. `superficiesDelBarrido` la incluye por declaración; correr el barrido sobre un Corpus con Personaje es acto de Héctor.'
     evidence: 'tests/e2e/accesibilidad.spec.ts:90 (DERIVADAS = superficiesDelBarrido(rutasConstruidas())).'
     severity: low
+  - summary: >-
+      «tools/avisar.ts la avisa solo si es indexable antes o después» (FR-38 v9.1) no tiene mecanismo propio para la Página de Personaje: el filtro por indexabilidad de tools/lib/avisar.ts solo mira las rutas de Obra, así que hoy avisa toda Página de Personaje tocada; la 35.3b, que pone MIN_CITAS_POR_PERSONAJE, tiene que extender ese filtro y su prueba.
+    evidence: |-
+      tools/lib/avisar.ts no está en el diff de la 35.3 y decide la indexabilidad con esRutaDeObra; mientras personajesIndexables sea igual a personajesPublicados, toda ruta de Personaje de la relación de --desde o --hasta es indexable en ese extremo, así que el resultado coincide con FR-38, pero el criterio de antes/después no está construido ni probado para el Personaje (revisión externa 35.3-1, intent-alignment y ac-auditor).
+    location: >-
+      tools/lib/avisar.ts (filtro de indexables por esRutaDeObra)
+    severity: medium
 ---
 
 <intent-contract>
@@ -127,6 +134,24 @@ Dueño de la página: `citasDePersonaje(citas, slug)` = Citas con `personaje ===
 
 ## Review Triage Log
 
+### 2026-11-08 — Review pass
+- intent_gap: 0
+- bad_spec: 0
+- patch: 11: (high 0, medium 6, low 5)
+- defer: 1: (high 0, medium 1, low 0)
+- reject: 24: (high 0, medium 0, low 24)
+- addressed_findings:
+  - `[medium]` `[patch]` La Cita del Día de la portada y del 404 nombraba al Autor de una Cita con Personaje mientras su Página de Cita nombraba al Personaje: `CitaDelDia.astro` recibe el Personaje (obligatorio, `Personaje | undefined`), `index.astro` y `404.astro` se lo pasan del conjunto, y `Atribucion.astro` para la construcción si el Personaje que recibe no es el que la Cita declara (ni otro ni ninguno). Prueba: `pagina-de-personaje.test.ts` (la Cita del Día, única apta, enlaza a `/personaje/b/` en `/` y `/404`).
+  - `[medium]` `[patch]` Dos copias del aplanado de Personaje (`aplanarPersonaje` y `personajeDeLosDatos` de `tools/lib/alcance.ts`): una sola, `personajePlano` de `src/lib/publicado.ts`, que usan las dos; se borra la copia de `tools/`.
+  - `[medium]` `[patch]` La puerta de NFR-5 y el censo de las series no tenían prueba de que el modelo leído de disco lleve Personajes: `alcance.test.ts` comprueba con `modeloDeLosDatos` que el Personaje sale con `personajePlano`, entra en `rutasPublicadas` y el grafo pide Cita → Personaje, y que un sitio sin esa arista rompe nombrándola; `indexacion.test.ts` da a la igualdad de AD-11 un Personaje publicado (`censo.personaje`).
+  - `[medium]` `[patch]` La semblanza de una biografía en la Página de Personaje solo se probaba en su camino de fallo: `pagina-de-personaje.test.ts` construye el Personaje C con biografía literal y fija la atribución visible («Semblanza tomada de «…» en …, revisión N · licencia») bajo `data-pagefind-ignore`.
+  - `[medium]` `[patch]` «"frases" solo en el título y la meta de Obra y de Personaje» se probaba solo en una página: `pagina-de-personaje.test.ts` recorre todo el `dist/` de su construcción (sin `<title>` ni `<meta>`, ninguna «frases»; en ellos, solo en `/obra/` y `/personaje/`).
+  - `[medium]` `[patch]` Se había quitado la comprobación negativa de que la Página de Cita no nombra al Personaje fuera de la Atribución (frontera de la 35.4): `personajes-build.test.ts` la restituye, quitando solo el enlace de la Atribución.
+  - `[low]` `[patch]` La Lista de Obras plegada no se ejercía: el Personaje D dice `MAX_OBRAS_ANTES_DE_LAS_CITAS + 1` Obras y la prueba fija «Y una obra más», sus cuatro enlaces y que toda zona de la sección, también la del Desplegable, es `lista-de-obras`.
+  - `[low]` `[patch]` `citasDePersonaje` reescribía el orden de `citasDeAutor`: las dos usan el mismo comparador `porSlug`. Y el comentario de `rutasIndexables` decía lo contrario de lo que hace: corregido.
+  - `[low]` `[patch]` El parche de `obra-pagina.test.ts` podía quedar vacuo si cambiaba el fragmento: la prueba exige que la copia parcheada difiera del original. Y la unidad de línea base de la Página de Personaje, `[ASSUMPTION]` del criterio, queda fijada en `superficies.test.ts` (la suya, sin `lineaBase`, distinta de la del Autor).
+- rejected (resumen): la Atribución que pone al Personaje en el lugar del Autor es el criterio, y el grafo del modelo no declara Cita → Autor; biografía y `semblanzaPropia` no conviven (esquema, `src/lib/admision.ts:567`); `.universo`, el `h2` «Citas», el JSON-LD sin `name` y la Lista de Obras vacía con pie calcan la Página de Autor por contrato; la cadena `style` de `AtribucionDeSemblanza` (cosmético, y reescribir su marcado arriesga el `dist/` de los Autores con biografía); la doble lectura de `corpus/citas/` al arrancar y la lectura asimétrica de `corpus/personajes/` (el cargador de Astro carga la colección igual); la prueba automática de «sin Personaje, marcado idéntico» es criterio de la 35.4; el suelo de Personaje bajo SM-11 sigue la regla escrita («el suelo de las demás»); guardas de casos que el esquema o el dueño ya impiden (semblanza sin atribución, Personaje sin Citas, «0 frases», Corpus ilegible); el `lastmod` por campos lo fija la relación (`fecha-de-cambio.test.ts`) y sale del mismo historial que las demás familias; tipografía por CSS, «ninguna Cita sin su Personaje» (la Tarjeta no cambia) y el barrido de axe (ya en `deferred`).
+
 ## Auto Run Result
 
 Status: done
@@ -137,3 +162,14 @@ Lo demás está construido y verificado:
 - `npx astro check`: 0 errores. `npm test` completo (detached, `logs/s-35/test-35.3-2.log`): 164 ficheros, 7.361 pruebas en verde, `huella.test.ts` incluida sin mover la huella. Por fichero, en verde: `pagina-de-personaje` (nuevo), `personajes-build`, `superficies`, `publicado`, `ingreso`, `tipo-de-resultado`, `semblanza`, `fecha-de-cambio`, `indexnow`, `avisar-rango`, `medicion`, `publicable-y-alcanzable`, `tarjeta-de-cita`, `obra-pagina`, `congelacion-de-obras` y las de las series.
 - Matriz: «Sin Personajes» y «Cita sin Personaje» por el `diff` de `dist/` (ninguna ruta `/personaje/`, Páginas de Cita idénticas); «Ruta sin lista» y «2+» en `superficies.test.ts` y `pagina-de-personaje.test.ts`; «Obras dichas» y «Obra propia (puro)» en `publicado.test.ts` (`obrasDelPersonaje`, `grafoDelModelo`) y en la construcción; «Modelo en Personaje» en `ingreso.test.ts`.
 - No se sembró ningún Personaje real; `vocabulario.ts`, `_bmad-output/planning-artifacts/` y `_bmad-output/specs/` intactos.
+
+### Revisión externa 1 (2026-11-08)
+
+Status: done. Cinco capas externas (blind-hunter, edge-case-hunter, verification-gap, intent-alignment, ac-auditor); ningún intent_gap ni bad_spec.
+
+- **Cambio:** la Cita del Día de la portada y del 404 nombra al Personaje como su Página de Cita, y `Atribucion.astro` para la construcción si recibe un Personaje que no es el que la Cita declara; un solo aplanado de Personaje (`personajePlano`) para el build y las órdenes; un solo comparador de orden para Autor y Personaje; pruebas nuevas de la puerta de NFR-5 sobre el modelo de disco, del censo de AD-11 con Personaje, de la semblanza de biografía, de la Lista de Obras plegada, de «frases» en todo `dist/`, de la frontera de la 35.4 en la Página de Cita y de la unidad de línea base.
+- **Ficheros:** `src/components/Atribucion.astro` (la guarda), `src/components/CitaDelDia.astro`, `src/pages/index.astro`, `src/pages/404.astro` (el Personaje del día), `src/lib/publicado.ts` (`personajePlano`, `porSlug`, comentario), `tools/lib/alcance.ts` (usa `personajePlano`), `tests/unit/{pagina-de-personaje,personajes-build,alcance,indexacion,superficies,obra-pagina}.test.ts`.
+- **Hallazgos:** 11 parches (6 medium, 4+1 low), 1 diferido (FR-38 para el Personaje, a la 35.3b), 24 rechazados.
+- **Revisión de seguimiento:** recomendada (`true`): parcheados 0 high, 6 medium y 5 low; puntuación 3 × 6 + 5 = 23 ≥ 5.
+- **Verificación:** `npx astro check` 0 errores; por fichero, en verde: `pagina-de-personaje`, `personajes-build`, `obra-pagina`, `alcance`, `indexacion`, `superficies`; `npm test` completo (detached, `logs/s-35/npm-test-triage-35.3-1.log`): 164 ficheros, 7.367 pruebas, EXIT 0. `npm run build` con el Corpus real y `FECHA_JORNADA=2026-11-08` (`logs/s-35/build-triage-35.3-1.log`) frente al `dist/` de la pasada anterior: `diff -rq` sin ninguna diferencia fuera de `pagefind/`; NFR-5 y la coincidencia de indexables en verde.
+- **Riesgos:** la `dist/` de referencia era la de la construcción anterior de este árbol (21:03), no una de la base; las diferencias aceptadas frente a la base no se volvieron a medir. Sigue el diferido de FR-38 y los de la pasada anterior.
