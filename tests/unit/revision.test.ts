@@ -664,6 +664,25 @@ describe('Historia 35.1 — aprobar deriva la clase y la anota', () => {
     expect(existsSync(rutas.clasesDeCita)).toBe(false);
   });
 
+  it('Historia 35.2 — la de un Personaje sin Autor se lee con su dueño, y la puerta cerrada la deja intacta', async () => {
+    const { estadoDerechos: _e, autor: _a, ...sinAutor } = CANDIDATA_COMPLETA;
+    const dePersonaje = { ...sinAutor, personaje: 'batman', slug: 'batman-la-noche-es-larga', clase: 'atribuida' };
+    const rutas = await conAutores([]);
+    await writeFile(join(rutas.revision, 'batman--la-noche-es-larga.md'), ficheroDeCita(dePersonaje), 'utf8');
+    const antes = await readFile(join(rutas.revision, 'batman--la-noche-es-larga.md'), 'utf8');
+    const lote = await loteEnRevision(rutas);
+    const leida = lote.find((c) => c.slug === dePersonaje.slug);
+    expect(leida).toMatchObject({ personaje: 'batman', clase: 'atribuida', admisible: true });
+    expect(leida?.autor).toBeUndefined();
+    const resultado = await aprobar(rutas, [dePersonaje.slug]);
+    expect(resultado.publicadas).toEqual([]);
+    expect(resultado.rechazadasPorAdmision).toEqual([
+      { slug: dePersonaje.slug, motivos: ['la puerta de la atribuida está cerrada (Historia 35.1b)'] },
+    ]);
+    expect(await readFile(join(rutas.revision, 'batman--la-noche-es-larga.md'), 'utf8')).toBe(antes);
+    expect(await ficherosPublicados(rutas)).toEqual([]);
+  });
+
   it('una de siempre de un Autor vivo, o una atribuida de uno de dominio público, no casa con su clase', async () => {
     const deViva = { ...CANDIDATA_COMPLETA, autor: 'ana-ejemplo', slug: 'ana-ejemplo-de-siempre' };
     const { estadoDerechos: _e, ...sinDerechos } = CANDIDATA_COMPLETA;

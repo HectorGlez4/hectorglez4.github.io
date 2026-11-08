@@ -79,7 +79,7 @@ import {
   resolverFichaDeObra,
   type PlanDeFicha,
 } from './obras.ts';
-import { formaDeObra } from '../../src/lib/obras.ts';
+import { dueñoDeCita, formaDeObra } from '../../src/lib/obras.ts';
 import { fuenteDeUrl } from './fuentes.ts';
 import type { Resultado } from './gestion.ts';
 import { negativaPorAlcance } from './alcance.ts';
@@ -752,7 +752,7 @@ export async function documentarCita(
   if (obraDeclarada !== documento.obra) {
     const formas = [formaDeObra(documento.obra)];
     if (obraDeclarada !== undefined) formas.push(formaDeObra(obraDeclarada));
-    for (const linea of await ajustarTitulosDeObra(rutas, cita.autor, formas)) avisar(linea);
+    for (const linea of await ajustarTitulosDeObra(rutas, dueñoDeCita(cita).slug, formas)) avisar(linea);
   }
 
   const pendientes = (await leerCensoDeCotejo(rutas)).length;
@@ -862,7 +862,7 @@ export async function retirarCita(
   const obraRetirada = cita.procedencia?.obra;
   const titulos =
     typeof obraRetirada === 'string' && formaDeObra(obraRetirada) !== ''
-      ? await ajustarTitulosDeObra(rutas, cita.autor, [formaDeObra(obraRetirada)])
+      ? await ajustarTitulosDeObra(rutas, dueñoDeCita(cita).slug, [formaDeObra(obraRetirada)])
       : [];
 
   const pendientes = (await leerCensoDeCotejo(rutas)).length;

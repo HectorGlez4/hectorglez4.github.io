@@ -47,6 +47,7 @@ const FLECHA = '→';
 describe('Historia 24.5 — `siguienteCita`, sin construir', () => {
   const obra = (nombre: string, recuento: number): ObraResuelta => ({
     nombre,
+    dueño: { tipo: 'autor', slug: nombre.split('--')[0] },
     autor: nombre.split('--')[0],
     titulo: nombre,
     fuentes: ['wikisource-es'],

@@ -27,6 +27,7 @@ import { MAX_OBRAS_ANTES_DE_LAS_CITAS } from '../../src/lib/umbrales.ts';
 function obra(nombre: string, titulo: string, recuento: number, año?: number): ObraResuelta {
   return {
     nombre,
+    dueño: { tipo: 'autor', slug: nombre.split('--')[0] },
     autor: nombre.split('--')[0],
     titulo,
     ...(año === undefined ? {} : { año }),

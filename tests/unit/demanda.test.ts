@@ -24,7 +24,7 @@ import {
 import { conjuntoDelCorpus } from '../../tools/indexacion.ts';
 import { rutasPublicadas } from '../../src/lib/publicado.ts';
 import { FILAS_POR_PAGINA, type FilaDeTrafico, type PeticionDeTrafico } from '../../tools/lib/trafico.ts';
-import { autorPorPrefijo } from '../../tools/lib/autoria.ts';
+import { dueñoPorPrefijo } from '../../tools/lib/autoria.ts';
 import {
   FAMILIAS_DE_LA_DEMANDA,
   MIN_IMPRESIONES_POR_FILA,
@@ -163,19 +163,19 @@ describe('las ventanas', () => {
 
 describe('la regla del prefijo, en su dueño compartido', () => {
   it('gana el prefijo más largo, y un prefijo sin guion no cuenta', () => {
-    const autores = ['seneca', 'seneca-el-viejo'];
-    expect(autorPorPrefijo('seneca-el-viejo-la-fortuna', autores)).toBe('seneca-el-viejo');
-    expect(autorPorPrefijo('seneca-no-es-que', autores)).toBe('seneca');
-    expect(autorPorPrefijo('senecaz-algo', autores)).toBeUndefined();
-    expect(autorPorPrefijo('desconocido-algo', autores)).toBeUndefined();
+    const dueños = { autores: ['seneca', 'seneca-el-viejo'] };
+    expect(dueñoPorPrefijo('seneca-el-viejo-la-fortuna', dueños)).toEqual({ tipo: 'autor', slug: 'seneca-el-viejo' });
+    expect(dueñoPorPrefijo('seneca-no-es-que', dueños)).toEqual({ tipo: 'autor', slug: 'seneca' });
+    expect(dueñoPorPrefijo('senecaz-algo', dueños)).toBeUndefined();
+    expect(dueñoPorPrefijo('desconocido-algo', dueños)).toBeUndefined();
     // Estricto, como antes en gestion.ts: un slug igual al del Autor no es suyo.
-    expect(autorPorPrefijo('seneca', autores)).toBeUndefined();
-    expect(autorPorPrefijo('seneca-el-viejo', autores)).toBe('seneca');
+    expect(dueñoPorPrefijo('seneca', dueños)).toBeUndefined();
+    expect(dueñoPorPrefijo('seneca-el-viejo', dueños)).toEqual({ tipo: 'autor', slug: 'seneca' });
   });
 
   it('tools/lib/gestion.ts lo importa en vez de copiarlo', () => {
     const gestion = readFileSync(resolve(RAIZ, 'tools/lib/gestion.ts'), 'utf8');
-    expect(gestion).toMatch(/import \{ autorPorPrefijo \} from '\.\/autoria\.ts'/);
+    expect(gestion).toMatch(/import \{ dueñoPorPrefijo \} from '\.\/autoria\.ts'/);
     expect(gestion).not.toMatch(/b\.length - a\.length/);
   });
 });
@@ -279,6 +279,28 @@ describe('el reparto de una ventana', () => {
     expect(agregado.citas).toEqual([]);
     expect(agregado.resto).toEqual({ filas: 0, clics: 0, impresiones: 0 });
     expect(agregado.sinAutor).toEqual({ rutas: 5, clics: 4, impresiones: 170 });
+  });
+
+  it('Historia 35.2 — la Cita de un Personaje va a su Personaje, nunca a un Autor que empiece igual', () => {
+    const agregado = agregarDemanda(
+      [
+        { keys: [URL('/cita/bruce-wayne-la-noche-es-larga/')], clicks: 2, impressions: 20 },
+        { keys: [URL('/cita/bruce-la-noche-es-larga/')], clicks: 1, impressions: 8 },
+      ],
+      { ...OPCIONES, slugsDeAutores: ['bruce'], slugsDePersonajes: ['bruce-wayne'] },
+    );
+    expect(agregado.personajes).toEqual([{ personaje: 'bruce-wayne', clics: 2, impresiones: 20 }]);
+    expect(agregado.autores).toEqual([{ autor: 'bruce', clics: 1, impresiones: 8 }]);
+    // Σ citas + resto = Σ autores + Σ personajes: la composición lo acepta.
+    const lectura = componerLecturaDeDemanda({
+      momento: HOY,
+      propiedad: 'p',
+      agregado,
+      ventana: { desde: '2026-09-09', hasta: '2026-10-06', clase: '28-dias' },
+    });
+    expect(lectura.personajes).toHaveLength(1);
+    // Sin Personajes, la lista va vacía.
+    expect(agregarDemanda(FILAS_FIJAS, OPCIONES).personajes).toEqual([]);
   });
 
   it('la composición se niega a una ventana al revés o mal formada', () => {

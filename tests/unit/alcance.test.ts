@@ -44,7 +44,7 @@ import { EN_LA_IRA, SIN_EFECTO, sembrarCorpusAlLimite } from './ayuda/al-limite.
 const CABECERA = ['/', '/autores', '/obras', '/buscar'];
 
 function obra(nombre: string, autor: string, recuento: number, titulo = nombre): ObraResuelta {
-  return { nombre, autor, titulo, recuento, fuentes: [], edicionCotejada: false, temas: [] } as ObraResuelta;
+  return { nombre, dueño: { tipo: 'autor', slug: autor }, autor, titulo, recuento, fuentes: [], edicionCotejada: false, temas: [] } as ObraResuelta;
 }
 
 function cita(slug: string, autor: string, temas: string[] = [], suObra?: ObraResuelta): Cita {

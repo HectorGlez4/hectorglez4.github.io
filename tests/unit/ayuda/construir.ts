@@ -200,7 +200,7 @@ export async function construirConCorpus(
   // Las carpetas siempre existen: una colección cuya base no existe emite un aviso que
   // enturbiaría la lectura del fallo que sí importa. `colecciones/` entra en la lista
   // desde la Historia 12.2, por el mismo motivo y no por comodidad.
-  for (const dir of ['citas', 'autores', 'temas', 'colecciones', 'obras', '_revision', 'fuentes']) {
+  for (const dir of ['citas', 'autores', 'personajes', 'temas', 'colecciones', 'obras', '_revision', 'fuentes']) {
     await mkdir(join(proyecto, 'corpus', dir), { recursive: true });
   }
 
@@ -516,14 +516,14 @@ function fichasDeObraDe(corpus: CorpusDePrueba): Record<string, string> {
 
   const fichas: Record<string, string> = {};
   for (const obra of obrasDeCitas(citas)) {
-    if (reclamadas.has(`${obra.autor}\u0000${obra.forma}`)) continue;
+    if (reclamadas.has(`${obra.dueño}\u0000${obra.forma}`)) continue;
     const titulo = grafiaPorOmision(obra.grafias);
-    const nombre = nombreDeFichaDeObra(obra.autor, titulo);
+    const nombre = nombreDeFichaDeObra(obra.dueño, titulo);
     if (nombre === undefined) continue;
     const ruta = `obras/${nombre}.yml`;
     if (ruta in corpus || ruta in fichas) continue;
     // Con el mismo serializador que `escribirFichaDeObra`: el fixture es el fichero real.
-    fichas[ruta] = aYamlDelCorpus({ autor: obra.autor, titulo, formas: [obra.forma] });
+    fichas[ruta] = aYamlDelCorpus({ autor: obra.dueño, titulo, formas: [obra.forma] });
   }
   return fichas;
 }

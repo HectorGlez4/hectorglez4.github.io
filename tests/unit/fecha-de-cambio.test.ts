@@ -32,6 +32,7 @@ import {
   citaAdmisible,
   coleccionAdmisible,
   esquemaDeObra,
+  personajeAdmisible,
 } from '../../src/lib/admision.ts';
 import {
   estadoDelRepositorio,
@@ -354,6 +355,8 @@ describe('Historia 24.8 — todo campo de los esquemas está clasificado', () =>
     tema: unidas(clavesDeLaColeccion('temas')),
     coleccion: Object.keys(coleccionAdmisible.shape),
     obra: Object.keys(esquemaDeObra([]).shape),
+    // Historia 35.2 — el Personaje: la colección `personajes` usa este mismo esquema, sin envolver.
+    personaje: Object.keys(personajeAdmisible.shape),
   } as const;
 
   it('lee las claves de los esquemas que el build aplica, también el de Tema', () => {

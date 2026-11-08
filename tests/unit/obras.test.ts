@@ -6,12 +6,16 @@ import { join } from 'node:path';
 import { esquemaDeObra, obraAdmisible } from '../../src/lib/admision.ts';
 import { TIENDA_DE_PRUEBA } from './ayuda/construir.js';
 import { procedenciaCompuesta, textoParaCopiar } from '../../src/lib/atribucion.ts';
-import type { Autor, Cita } from '../../src/lib/publicado.ts';
+import { obrasIndexables, type Autor, type Cita } from '../../src/lib/publicado.ts';
 import {
   avisosDeAñosDeObras,
   avisosDeDistintaRancia,
   colgarObras,
+  dueñoDeCita,
+  dueñoDeFicha,
+  fichasDeCita,
   obraDeCita,
+  rutaDeLaObra,
   resolverObras,
   avisosDeObras,
   avisosDePrefijo,
@@ -126,7 +130,7 @@ describe('el esquema de la Ficha de Obra', () => {
     const r = obraAdmisible.safeParse({ autor: 'seneca', titulo: 'X', formas: ['x'], sinopsis: 'Y' });
     expect(r.success).toBe(false);
     expect(r.error?.issues.map((i) => i.message).join()).toContain(
-      'no reconoce «sinopsis». Sus campos son autor, titulo, formas, distintaDe, nota y ediciones.',
+      'no reconoce «sinopsis». Sus campos son autor, personaje, personajes, titulo, formas, distintaDe, nota y ediciones.',
     );
   });
 });
@@ -177,7 +181,7 @@ describe('la identidad, el nombre y la grafía por omisión', () => {
     expect(obras.filter((o) => o.grafias.length > 1)).toHaveLength(1);
     expect(prefijosDeFormas(obras)).toEqual([
       {
-        autor: 'unamuno',
+        dueño: 'unamuno',
         corta: 'del sentimiento tragico de la vida',
         larga: 'del sentimiento tragico de la vida i',
       },
@@ -1487,5 +1491,252 @@ describe('22.6 — la nota de la ficha: ninguna orden la escribe, y las que rees
     expect(bloqueDeEdiciones(await readFile(join(rutas.obrasRetiradas, `${absorbida}.yml`), 'utf8'))).toBe(
       EDICIONES,
     );
+  });
+});
+
+// ─── Historia 35.2 — la Obra tiene un solo dueño ─────────────────────────────
+
+describe('35.2 — el dueño de la ficha y de la Cita, y la resolución en dos pasos', () => {
+  const dePersonaje = (
+    nombre: string,
+    personaje: string,
+    formas: string[],
+    extra: { personajes?: string[]; autor?: string } = {},
+  ): FichaDeObra => ({
+    nombre,
+    ruta: `corpus/obras/${nombre}.yml`,
+    personaje,
+    personajes: extra.personajes ?? [personaje],
+    ...(extra.autor !== undefined ? { autor: extra.autor } : {}),
+    titulo: nombre,
+    formas,
+  });
+  const citaDe = (slug: string, dueños: { autor?: string; personaje?: string }, obra: string) => ({
+    slug,
+    ...dueños,
+    procedencia: { obra },
+    ruta: `corpus/citas/${slug}.md`,
+  });
+
+  it('el dueño de una ficha es su Personaje si lo declara; el de una Cita, su Autor si lo declara', () => {
+    expect(dueñoDeFicha(ficha('seneca--x', 'seneca', 'X', ['x']))).toEqual({ tipo: 'autor', slug: 'seneca' });
+    expect(dueñoDeFicha(dePersonaje('batman--x', 'batman', ['x'], { autor: 'kane' }))).toEqual({
+      tipo: 'personaje',
+      slug: 'batman',
+    });
+    expect(dueñoDeCita({ slug: 'a', autor: 'kane', personaje: 'batman' })).toEqual({ tipo: 'autor', slug: 'kane' });
+    expect(dueñoDeCita({ slug: 'a', personaje: 'batman' })).toEqual({ tipo: 'personaje', slug: 'batman' });
+    expect(() => dueñoDeCita({ slug: 'a' })).toThrow(/dueño/);
+  });
+
+  it('primer paso: las fichas que nombran al Autor de la Cita, como dueño o informativo', () => {
+    const delAutor = ficha('kane--la-noche', 'kane', 'La noche', ['la noche']);
+    const delPersonaje = dePersonaje('batman--la-noche', 'batman', ['la noche']);
+    // Con el Autor, la de Autor gana, aunque la Cita declare también el Personaje.
+    expect(fichasDeCita(citaDe('kane-a', { autor: 'kane', personaje: 'batman' }, 'La noche'), [delAutor, delPersonaje])).toEqual([
+      delAutor,
+    ]);
+    // El Autor informativo de una ficha de Personaje cuenta en el primer paso.
+    const conAutor = dePersonaje('batman--la-noche', 'batman', ['la noche'], { autor: 'kane' });
+    expect(fichaDeCita(citaDe('kane-b', { autor: 'kane' }, 'La noche'), [conAutor])).toBe(conAutor);
+  });
+
+  it('segundo paso: sin ficha del Autor, la de Personaje cuyo «personajes» incluye el de la Cita', () => {
+    const delPersonaje = dePersonaje('batman--la-noche', 'batman', ['la noche'], { personajes: ['batman', 'joker'] });
+    expect(fichaDeCita(citaDe('joker-a', { personaje: 'joker' }, 'La noche'), [delPersonaje])).toBe(delPersonaje);
+    expect(fichaDeCita(citaDe('kane-a', { autor: 'kane', personaje: 'joker' }, 'La noche'), [delPersonaje])).toBe(delPersonaje);
+    expect(fichaDeCita(citaDe('robin-a', { personaje: 'robin' }, 'La noche'), [delPersonaje])).toBeUndefined();
+  });
+
+  it('ficha ambigua: dos candidatas en el mismo paso rompen nombrando la Cita y las dos fichas', () => {
+    const delAutor = ficha('kane--la-noche', 'kane', 'La noche', ['la noche']);
+    const delPersonaje = dePersonaje('batman--la-noche', 'batman', ['la noche'], { autor: 'kane' });
+    const fallos = fallosDeObras(
+      [delAutor, delPersonaje],
+      [citaDe('kane-a', { autor: 'kane', personaje: 'batman' }, 'La noche')],
+      ['kane'],
+      undefined,
+      ['batman'],
+    );
+    const ambigua = fallos.find((f) => f.includes('corpus/citas/kane-a.md'));
+    expect(ambigua).toContain('corpus/obras/kane--la-noche.yml');
+    expect(ambigua).toContain('corpus/obras/batman--la-noche.yml');
+  });
+
+  it('dos fichas de Personaje con la misma forma rompen nombrándolas', () => {
+    const fallos = fallosDeObras(
+      [dePersonaje('batman--la-noche', 'batman', ['la noche']), dePersonaje('joker--la-noche', 'joker', ['la noche'])],
+      [],
+      [],
+      undefined,
+      ['batman', 'joker'],
+    );
+    expect(fallos.join('\n')).toMatch(/la noche.*2 fichas de Personaje.*batman--la-noche\.yml.*joker--la-noche\.yml/u);
+  });
+
+  it('el nombre lleva el prefijo del dueño, y sus Personajes y su Autor existen', () => {
+    const mal = dePersonaje('kane--la-noche', 'batman', ['la noche'], { autor: 'kane', personajes: ['batman', 'robin'] });
+    const fallos = fallosDeObras([mal], [], ['seneca'], undefined, ['batman']).join('\n');
+    expect(fallos).toContain('declara «personaje: batman»');
+    expect(fallos).toContain('su Autor «kane» no existe');
+    expect(fallos).toContain('su Personaje «robin» no existe en corpus/personajes/');
+    const bien = dePersonaje('batman--la-noche', 'batman', ['la noche'], { autor: 'kane' });
+    expect(fallosDeObras([bien], [], ['kane'], undefined, ['batman'])).toEqual([]);
+    // Sin Citas publicadas, avisa como cualquier ficha.
+    expect(avisosDeObras([bien], [])).toHaveLength(1);
+  });
+
+  it('hasta la 35.4, una ficha de Personaje que resuelve Citas publicadas rompe nombrando la historia', () => {
+    const delPersonaje = dePersonaje('batman--la-noche', 'batman', ['la noche']);
+    const fallos = fallosDeObras(
+      [delPersonaje],
+      [citaDe('batman-a', { personaje: 'batman' }, 'La noche')],
+      [],
+      undefined,
+      ['batman'],
+    );
+    expect(fallos.join('\n')).toContain('batman--la-noche.yml');
+    expect(fallos.join('\n')).toContain('Historia 35.4');
+  });
+
+  it('una Cita de Personaje sin ficha nombra a su Personaje como dueño de la Obra', () => {
+    const fallos = fallosDeObras([], [citaDe('batman-a', { personaje: 'batman' }, 'La noche')], [], undefined, ['batman']);
+    expect(fallos.join('\n')).toContain('La Obra «La noche» de batman no tiene Ficha de Obra');
+  });
+
+  it('la Obra resuelta lleva su dueño; la ruta sale del nombre de la ficha, como siempre', () => {
+    const delPersonaje = dePersonaje('batman--la-noche', 'batman', ['la noche'], { autor: 'kane' });
+    const [resuelta] = resolverObras([], [delPersonaje]).values();
+    expect(resuelta.dueño).toEqual({ tipo: 'personaje', slug: 'batman' });
+    expect(resuelta.autor).toBe('kane');
+    expect(rutaDeLaObra(resuelta)).toBe('/obra/batman/la-noche/');
+  });
+
+  it('indexable por su dueño: el recuento es el de las Citas del Personaje, no el de un Autor', () => {
+    const delPersonaje = dePersonaje('batman--la-noche', 'batman', ['la noche']);
+    const delAutor = ficha('kane--otra', 'kane', 'Otra', ['otra']);
+    const base = (slug: string, dueños: { autor?: string; personaje?: string }, obra: string) => ({
+      ...citaDe(slug, dueños, obra),
+      texto: slug,
+      temas: [],
+      aptaParaPortada: false,
+    });
+    // Tres Citas de Batman en su Obra y siete más suyas fuera: 3/10 < MAX_PROPORCION_OBRA_DEL_AUTOR.
+    const citas = colgarObras(
+      [
+        ...[1, 2, 3].map((n) => base(`batman-n${n}`, { personaje: 'batman' }, 'La noche')),
+        ...[4, 5, 6, 7, 8, 9, 10].map((n) => base(`batman-s${n}`, { personaje: 'batman' }, 'Suelta')),
+        // Un Autor con dos Citas de su Obra y nada más: el 100 %, no se indexa.
+        base('kane-a', { autor: 'kane' }, 'Otra'),
+        base('kane-b', { autor: 'kane' }, 'Otra'),
+      ],
+      [delPersonaje, delAutor],
+    );
+    expect(obrasIndexables(citas, null).map((o) => o.nombre)).toEqual(['batman--la-noche']);
+  });
+});
+
+describe('35.2 — las órdenes de la ficha conservan su dueño', () => {
+  async function conPersonaje() {
+    const rutas = await corpusTemporal();
+    await writeFile(
+      join(rutas.obras, 'batman--la-noche.yml'),
+      'autor: "seneca"\npersonaje: "batman"\npersonajes:\n  - "batman"\n  - "joker"\ntitulo: "La noche"\nformas:\n  - "la noche"\n',
+      'utf8',
+    );
+    await writeFile(
+      join(rutas.obras, 'batman--la-noche-larga.yml'),
+      'personaje: "batman"\npersonajes:\n  - "batman"\ntitulo: "La noche larga"\nformas:\n  - "la noche larga"\n',
+      'utf8',
+    );
+    // Una Cita (Autor y Personaje) que resuelve la ficha de Personaje por su Autor informativo.
+    await publicar(rutas, { ...citaCompleta('seneca-n1', 'La Noche'), personaje: 'batman' });
+    await publicar(rutas, { ...citaCompleta('seneca-n2', 'La noche'), personaje: 'batman' });
+    return rutas;
+  }
+  const leida = async (rutas: Rutas, nombre: string) =>
+    (await leerFichasDeObra(rutas)).find((f) => f.nombre === nombre);
+
+  it('titular y separar conservan personaje, personajes y autor', async () => {
+    const rutas = await conPersonaje();
+    const titulada = await titularFicha(rutas, 'batman--la-noche', 'La Noche');
+    expect(titulada.ok, titulada.ok ? '' : titulada.motivos.join('\n')).toBe(true);
+    expect(await leida(rutas, 'batman--la-noche')).toMatchObject({
+      autor: 'seneca',
+      personaje: 'batman',
+      personajes: ['batman', 'joker'],
+      titulo: 'La Noche',
+    });
+    const separadas = await separarFichas(rutas, 'batman--la-noche', 'batman--la-noche-larga');
+    expect(separadas.ok, separadas.ok ? '' : separadas.motivos.join('\n')).toBe(true);
+    expect(await leida(rutas, 'batman--la-noche-larga')).toMatchObject({ personaje: 'batman', personajes: ['batman'] });
+    expect((await leida(rutas, 'batman--la-noche'))?.personajes).toEqual(['batman', 'joker']);
+  });
+
+  it('reunir conserva el dueño y une los Personajes; entre dueños distintos se niega', async () => {
+    const rutas = await conPersonaje();
+    await writeFile(join(rutas.obras, 'seneca--otra.yml'), 'autor: "seneca"\ntitulo: "Otra"\nformas:\n  - "otra"\n', 'utf8');
+    const antes = await readFile(join(rutas.obras, 'seneca--otra.yml'), 'utf8');
+    const negada = await reunirFichas(rutas, 'seneca--otra', 'batman--la-noche-larga');
+    expect(negada.ok).toBe(false);
+    if (!negada.ok) expect(negada.motivos.join('\n')).toMatch(/dueño/);
+    expect(await readFile(join(rutas.obras, 'seneca--otra.yml'), 'utf8')).toBe(antes);
+
+    const reunida = await reunirFichas(rutas, 'batman--la-noche', 'batman--la-noche-larga');
+    expect(reunida.ok, reunida.ok ? '' : reunida.motivos.join('\n')).toBe(true);
+    expect(await leida(rutas, 'batman--la-noche')).toMatchObject({
+      autor: 'seneca',
+      personaje: 'batman',
+      personajes: ['batman', 'joker'],
+      formas: ['la noche', 'la noche larga'],
+    });
+  });
+
+  it('retirar mueve la ficha de Personaje entera, y se niega mientras una Cita la resuelva', async () => {
+    const rutas = await conPersonaje();
+    expect((await retirarFichaDeObra(rutas, 'batman--la-noche', 'prueba')).ok).toBe(false);
+    const original = await readFile(join(rutas.obras, 'batman--la-noche-larga.yml'), 'utf8');
+    const hecho = await retirarFichaDeObra(rutas, 'batman--la-noche-larga', 'prueba');
+    expect(hecho.ok, hecho.ok ? '' : hecho.motivos.join('\n')).toBe(true);
+    expect(await readFile(join(rutas.obrasRetiradas, 'batman--la-noche-larga.yml'), 'utf8')).toBe(original);
+  });
+
+  it('asegurar la ficha de una Cita de Personaje sin Autor la crea con su dueño', async () => {
+    const rutas = await corpusTemporal();
+    const hecho = await asegurarFichaDeObra(rutas, {
+      personaje: 'batman',
+      obra: 'La noche',
+      citasPublicadas: [{ personaje: 'batman', procedencia: { obra: 'La noche' } }],
+    });
+    expect(hecho).toMatchObject({ ok: true, accion: 'creada' });
+    const [creada] = await leerFichasDeObra(rutas);
+    expect(creada).toMatchObject({ nombre: 'batman--la-noche', personaje: 'batman', personajes: ['batman'] });
+    expect(creada.autor).toBeUndefined();
+    // Y con Autor, la de Autor, como siempre.
+    const otra = await asegurarFichaDeObra(rutas, { autor: 'seneca', personaje: 'batman', obra: 'Otra', citasPublicadas: [] });
+    expect(otra).toMatchObject({ ok: true, accion: 'creada' });
+    expect(await leida(rutas, 'seneca--otra')).toMatchObject({ autor: 'seneca' });
+  });
+});
+
+describe('35.2 — el esquema del dueño de la ficha', () => {
+  it('la de Personaje lleva «personajes» que incluye al dueño; la de Autor no lleva «personajes»', () => {
+    expect(
+      obraAdmisible.safeParse({ personaje: 'batman', personajes: ['batman'], titulo: 'X', formas: ['x'] }).success,
+    ).toBe(true);
+    expect(
+      obraAdmisible.safeParse({ personaje: 'batman', personajes: ['batman'], autor: 'kane', titulo: 'X', formas: ['x'] })
+        .success,
+    ).toBe(true);
+    const sinLista = obraAdmisible.safeParse({ personaje: 'batman', titulo: 'X', formas: ['x'] });
+    expect(sinLista.error?.issues.map((i) => i.message).join()).toMatch(/personajes/);
+    const sinDueño = obraAdmisible.safeParse({ personaje: 'batman', personajes: ['joker'], titulo: 'X', formas: ['x'] });
+    expect(sinDueño.error?.issues.map((i) => i.message).join()).toMatch(/no incluye a «batman»/);
+    const repetidos = obraAdmisible.safeParse({ personaje: 'batman', personajes: ['batman', 'batman'], titulo: 'X', formas: ['x'] });
+    expect(repetidos.success).toBe(false);
+    const deAutor = obraAdmisible.safeParse({ autor: 'seneca', personajes: ['batman'], titulo: 'X', formas: ['x'] });
+    expect(deAutor.error?.issues.map((i) => i.message).join()).toMatch(/ficha de un Autor no lleva «personajes»/);
+    const nadie = obraAdmisible.safeParse({ titulo: 'X', formas: ['x'] });
+    expect(nadie.error?.issues.map((i) => i.message).join()).toMatch(/falta el Autor de la Ficha de Obra/);
   });
 });

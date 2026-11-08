@@ -53,6 +53,14 @@ export function slugDeAutor(nombre: string): string {
   return slugDeNombre(nombre);
 }
 
+/**
+ * Slug de un Personaje a partir de su nombre — Historia 35.2: la regla del Autor, porque los
+ * dos comparten un solo espacio de slugs y el prefijo de una Cita es el de su dueño.
+ */
+export function slugDePersonaje(nombre: string): string {
+  return slugDeNombre(nombre);
+}
+
 /** Slug de un Tema. No participa en ninguna ruta de Cita — solo en la suya propia. */
 export function slugDeTema(nombre: string): string {
   return slugDeNombre(nombre);
@@ -88,14 +96,16 @@ export function slugDeNombreDeColeccion(nombre: string): string {
 }
 
 /**
- * Slug de una Cita: slug del Autor más las primeras palabras del texto en forma canónica.
+ * Slug de una Cita: slug de su dueño —su Autor o, sin él, su Personaje (Historia 35.2)— más
+ * las primeras palabras del texto en forma canónica.
  *
  * No recibe los Temas de la Cita, y es deliberado: la firma hace imposible derivar la URL
- * de un dato que puede cambiar. Lo que AD-4 prohíbe no puede ni escribirse.
+ * de un dato que puede cambiar. Lo que AD-4 prohíbe no puede ni escribirse. Tampoco se
+ * recalcula si después se sabe el Autor de la Cita de un Personaje: el slug es la URL.
  */
-export function slugDeCita(slugAutor: string, texto: string): string {
+export function slugDeCita(slugDueño: string, texto: string): string {
   const fragmento = palabras(texto).slice(0, PALABRAS_EN_FRAGMENTO).join('-');
-  return unir(slugAutor, fragmento);
+  return unir(slugDueño, fragmento);
 }
 
 /**

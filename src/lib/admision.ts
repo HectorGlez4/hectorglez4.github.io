@@ -161,9 +161,9 @@ export const clase = z.literal('atribuida', {
 /**
  * El Personaje que dice una Cita atribuida — Historias 35.1 y 35.2.
  *
- * Aquí solo se juzga su **forma**, la de un slug: el Personaje como entidad del Corpus llega
- * con la Historia 35.2, que lo resuelve contra `corpus/personajes/`. Solo lo admite la
- * atribuida (`reglasDeClase`).
+ * Aquí solo se juzga su **forma**, la de un slug. Que el Personaje exista en
+ * `corpus/personajes/` es relación entre ficheros, y la comprueba la puerta del build
+ * (`integraciones/personajes.ts`). Solo lo admite la atribuida (`reglasDeClase`).
  */
 export const personaje = z
   .string({ message: 'Regla incumplida: el Personaje de la Cita es un slug.' })
@@ -172,30 +172,31 @@ export const personaje = z
     'Regla incumplida: el Personaje de la Cita es un slug: minúsculas, dígitos y guiones, sin diacríticos.',
   );
 
+/** Sin Autor ni Personaje, una Cita no tiene dueño: ni prefijo, ni fichero, ni página. */
+export const MENSAJE_CITA_SIN_DUEÑO =
+  'Regla incumplida: falta el Autor de la Cita. Toda Cita lleva Autor o Personaje, al menos uno: ' +
+  'es su dueño, y de él salen el prefijo de su slug y su fichero.';
+
 /**
  * Las reglas que una Cita cumple según su clase — Historia 35.1. Las comparten `citaAdmisible`
  * y la colección `citas` de `src/content.config.ts`, para que el alta y el build digan lo mismo:
  *
+ *   · toda Cita lleva Autor o Personaje, al menos uno (Historia 35.2): es su dueño;
  *   · la de siempre lleva `estadoDerechos: dominio-público` y no lleva `personaje`;
- *   · la atribuida no lleva `estadoDerechos`: su derecho no es el dominio público;
- *   · toda Cita lleva Autor, también la atribuida: la que solo tiene Personaje espera a la
- *     Historia 35.2, y el mensaje lo dice cuando la Cita declara uno.
+ *   · la atribuida no lleva `estadoDerechos`: su derecho no es el dominio público.
  *
- * Corre aunque falle otra regla del objeto (`when`), para que el fallo de Autor de una Cita con
- * Personaje nombre la 35.2 junto al genérico; por eso no supone nada de la forma del valor.
+ * Que una Cita **publicada** lleve además Autor es regla del build hasta la Historia 35.4
+ * (`reglaDeAutorPublicado`), no de la Cita: en `corpus/_revision/` la de un Personaje solo es
+ * admisible sin él.
+ *
+ * Corre aunque falle otra regla del objeto (`when`), así que no supone nada de la forma del valor.
  */
 export function reglasDeClase(valor: unknown, contexto: z.RefinementCtx): void {
   if (valor === null || typeof valor !== 'object') return;
   const cita = valor as Record<string, unknown>;
   const atribuida = esAtribuida(cita);
-  if (cita.autor === undefined && cita.personaje !== undefined) {
-    contexto.addIssue({
-      code: 'custom',
-      path: ['autor'],
-      message:
-        'Regla incumplida: la Cita declara Personaje y no Autor. Toda Cita lleva Autor hasta la ' +
-        'Historia 35.2, que trae al Personaje como dueño de sus Citas.',
-    });
+  if (cita.autor === undefined && cita.personaje === undefined) {
+    contexto.addIssue({ code: 'custom', path: ['autor'], message: MENSAJE_CITA_SIN_DUEÑO });
   }
   // Una clase sin valor admisible ya la rechaza el literal: no se juzga lo demás por ella.
   if (cita.clase !== undefined && !atribuida) return;
@@ -229,6 +230,28 @@ export function reglasDeClase(valor: unknown, contexto: z.RefinementCtx): void {
         'Autor de dominio público y no lleva el campo.',
     });
   }
+}
+
+/** Lo que dice el build ante una Cita publicada sin Autor — Historia 35.2. */
+export const MENSAJE_PUBLICADA_SIN_AUTOR =
+  'Regla incumplida: una Cita publicada lleva Autor hasta la Historia 35.4, que pinta la Cita de ' +
+  'un Personaje sin Autor. Se queda en corpus/_revision/.';
+
+/**
+ * Regla del build, solo para la colección `citas` — Historia 35.2.
+ *
+ * La Cita de un Personaje sin Autor es admisible (su dueño es el Personaje), pero ninguna
+ * página sabe aún nombrarla: la Atribución, la Tarjeta y el JSON-LD la pintaría sin nadie.
+ * Hasta que la Historia 35.4 la pinte, una publicada sin Autor rompe la construcción con este
+ * mensaje en vez de salir sin firma. Solo la juzga el build: el alta y la aprobación ya la dejan
+ * en `corpus/_revision/` por la puerta cerrada de la atribuida.
+ */
+export function reglaDeAutorPublicado(valor: unknown, contexto: z.RefinementCtx): void {
+  if (valor === null || typeof valor !== 'object') return;
+  const cita = valor as Record<string, unknown>;
+  // Sin dueño ya lo dice `reglasDeClase`; esto es solo la Cita de un Personaje sin Autor.
+  if (cita.autor !== undefined || cita.personaje === undefined) return;
+  contexto.addIssue({ code: 'custom', path: ['autor'], message: MENSAJE_PUBLICADA_SIN_AUTOR });
 }
 
 /** Las opciones con que se engancha `reglasDeClase`: corre también si otra regla falló. */
@@ -480,13 +503,116 @@ export const autorAdmisible = z.object({
 
 export type AutorAdmisible = z.infer<typeof autorAdmisible>;
 
+// ─────────────────────────────────────────────────────────────────────────────
+// El Personaje — Historia 35.2, AD-1, AD-33
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Lo que dice el esquema ante un año en la ficha de un Personaje — AD-33.
+ *
+ * Un Personaje no nace ni muere: sus derechos están siempre vigentes (`derechosVigentes`), y
+ * un año en su ficha haría creer que hay un plazo que vence. El mensaje lo dice en vez de
+ * contestar con la clave sobrante genérica.
+ */
+export const MENSAJE_AÑOS_DE_PERSONAJE =
+  'Regla incumplida: un Personaje no lleva años ni «vivo» (añoNacimiento, añoFallecimiento, ' +
+  'vivo): no nace ni muere, y sus derechos están siempre vigentes (AD-33). Quítelos de la ficha.';
+
+const CLAVES_DE_AÑOS = ['añoNacimiento', 'añoFallecimiento', 'vivo'];
+
+/** El universo de un Personaje: una cadena con algo escrito, sin recortarla (NFR-12). */
+export const universo = z
+  .string({ message: 'Regla incumplida: falta el universo del Personaje, que es obligatorio.' })
+  .regex(/\S/, 'Regla incumplida: el universo del Personaje no puede estar vacío ni ser solo espacios.');
+
+/**
+ * La semblanza propia de un Personaje — Historia 35.2: un texto escrito para el sitio y quién
+ * responde de él, cuando no hay revisión de una Fuente mutable que la sostenga (AD-26). La
+ * escribe `npx tsx tools/personaje.ts semblanza`, y sobre el Corpus real solo Héctor.
+ */
+export const semblanzaPropia = z
+  .object(
+    {
+      texto: z
+        .string({ message: 'Regla incumplida: la semblanza propia del Personaje no declara su texto.' })
+        .regex(/\S/, 'Regla incumplida: el texto de la semblanza propia no puede estar vacío.'),
+      responde: z
+        .string({ message: 'Regla incumplida: la semblanza propia del Personaje no dice quién responde de ella.' })
+        .regex(/\S/, 'Regla incumplida: quién responde de la semblanza propia no puede estar vacío.'),
+    },
+    { message: 'Regla incumplida: la semblanza propia es un objeto con «texto» y «responde».' },
+  )
+  .strict();
+
+/**
+ * La semblanza de un Personaje sale por una de dos vías, nunca por las dos: la de AD-26 —
+ * `semblanza` cotejada literal contra su `biografia`, las dos juntas— o `semblanzaPropia`. Sin
+ * ninguna, la ficha no lleva semblanza.
+ */
+export function reglasDePersonaje(valor: unknown, contexto: z.RefinementCtx): void {
+  if (valor === null || typeof valor !== 'object') return;
+  const p = valor as Record<string, unknown>;
+  const conSemblanza = p.semblanza !== undefined;
+  const conBiografia = p.biografia !== undefined;
+  if (conSemblanza !== conBiografia) {
+    contexto.addIssue({
+      code: 'custom',
+      path: [conSemblanza ? 'biografia' : 'semblanza'],
+      message:
+        'Regla incumplida: la semblanza de un Personaje por AD-26 va con su biografía, las dos ' +
+        'juntas: la semblanza se coteja literal contra esa revisión. Sin biografía, use la ' +
+        'semblanza propia (npx tsx tools/personaje.ts semblanza).',
+    });
+  }
+  if (p.semblanzaPropia !== undefined && (conSemblanza || conBiografia)) {
+    contexto.addIssue({
+      code: 'custom',
+      path: ['semblanzaPropia'],
+      message:
+        'Regla incumplida: un Personaje lleva la semblanza de su biografía o la semblanza propia, ' +
+        'nunca las dos.',
+    });
+  }
+}
+
+export const personajeAdmisible = z
+  .object(
+    {
+      nombre: nombre('Personaje'),
+      universo,
+      semblanza: z
+        .string({ message: 'Regla incumplida: la semblanza del Personaje es una cadena.' })
+        .min(1, 'Regla incumplida: la semblanza del Personaje no puede estar vacía.')
+        .optional(),
+      biografia: biografia.optional(),
+      semblanzaPropia: semblanzaPropia.optional(),
+      ordenAlfabetico: ordenAlfabetico.optional(),
+      ordenRevisado: ordenRevisado.optional(),
+    },
+    {
+      error: (problema) =>
+        problema.code === 'unrecognized_keys'
+          ? problema.keys.some((k) => CLAVES_DE_AÑOS.includes(k))
+            ? MENSAJE_AÑOS_DE_PERSONAJE
+            : 'Regla incumplida: el Personaje no reconoce ' +
+              `«${problema.keys.join('», «')}». Sus campos son nombre, universo, semblanza, ` +
+              'biografia, semblanzaPropia, ordenAlfabetico y ordenRevisado.'
+          : 'Regla incumplida: un Personaje es un objeto con nombre y universo.',
+    },
+  )
+  .strict()
+  .superRefine(reglasDePersonaje, CUANDO_SIEMPRE);
+
+export type PersonajeAdmisible = z.infer<typeof personajeAdmisible>;
+
 /**
  * Esquema de Cita **sin las referencias**, que son cosa de Astro. La herramienta valida
  * autor y temas contra el corpus por su cuenta; el build lo hace con `reference()`.
  */
 export const citaAdmisible = z.object({
   texto,
-  autor: z.string({ message: 'Regla incumplida: falta el Autor de la Cita.' }).min(1),
+  // Historia 35.2 — opcional: el dueño es el Autor o, sin él, el Personaje (`reglasDeClase`).
+  autor: z.string({ message: 'Regla incumplida: el Autor de la Cita es un slug.' }).min(1).optional(),
   temas: z.array(z.string()).default([]),
   slug,
   procedencia,
@@ -717,13 +843,22 @@ export function esquemaDeObra(tiendas: readonly Tienda[] = TIENDAS) {
   return z
     .object(
       {
-        autor: z
-          .string({ message: 'Regla incumplida: falta el Autor de la Ficha de Obra.' })
-          .regex(
-            /^[a-z0-9]+(?:-[a-z0-9]+)*$/,
-            'Regla incumplida: el Autor de una Ficha de Obra es el slug de un Autor: ' +
-              'minúsculas, dígitos y guiones, sin diacríticos.',
-          ),
+        /*
+         * Historia 35.2 — la ficha tiene un solo dueño: su Personaje si lo declara y, si no, su
+         * Autor (`dueñoDeFicha`). En la de un Personaje, `autor` es informativo —el Autor de la
+         * Obra, si se sabe— y no cambia el dueño ni el nombre. `reglasDeDueñoDeObra` lo juzga.
+         */
+        autor: slugDeFicha('el Autor', 'Autor').optional(),
+        personaje: slugDeFicha('el Personaje', 'Personaje').optional(),
+        personajes: z
+          .array(slugDeFicha('cada Personaje', 'Personaje'), {
+            error: 'Regla incumplida: «personajes» es la lista de slugs de los Personajes de la Obra.',
+          })
+          .min(1, 'Regla incumplida: «personajes» lleva al menos el Personaje dueño de la ficha.')
+          .refine((lista) => new Set(lista).size === lista.length, {
+            message: 'Regla incumplida: «personajes» no repite ningún Personaje.',
+          })
+          .optional(),
         titulo: z
           .string({ message: 'Regla incumplida: falta el título de la Ficha de Obra.' })
           .regex(
@@ -788,10 +923,10 @@ export function esquemaDeObra(tiendas: readonly Tienda[] = TIENDAS) {
         error: (problema) =>
           problema.code === 'unrecognized_keys'
             ? 'Regla incumplida: la Ficha de Obra no reconoce ' +
-              `«${problema.keys.join('», «')}». Sus campos son autor, titulo, formas, ` +
-              'distintaDe, nota y ediciones.'
-            : 'Regla incumplida: una Ficha de Obra es un objeto con autor, titulo y formas, y ' +
-              'opcionalmente distintaDe, nota y ediciones.',
+              `«${problema.keys.join('», «')}». Sus campos son autor, personaje, personajes, ` +
+              'titulo, formas, distintaDe, nota y ediciones.'
+            : 'Regla incumplida: una Ficha de Obra es un objeto con su dueño (autor, o personaje y ' +
+              'personajes), titulo y formas, y opcionalmente distintaDe, nota y ediciones.',
       },
     )
     .strict()
@@ -803,7 +938,75 @@ export function esquemaDeObra(tiendas: readonly Tienda[] = TIENDAS) {
           'misma reclama.',
         path: ['distintaDe'],
       },
+    )
+    .superRefine(reglasDeDueñoDeObra, CUANDO_SIEMPRE);
+}
+
+/** El slug de un Autor o de un Personaje dentro de una Ficha de Obra, con su mensaje. */
+function slugDeFicha(quien: string, entidad: string) {
+  return z
+    .string({ message: `Regla incumplida: ${quien} de una Ficha de Obra es un slug.` })
+    .regex(
+      /^[a-z0-9]+(?:-[a-z0-9]+)*$/,
+      `Regla incumplida: ${quien} de una Ficha de Obra es el slug de un ${entidad}: ` +
+        'minúsculas, dígitos y guiones, sin diacríticos.',
     );
+}
+
+/**
+ * El dueño de una Ficha de Obra — Historia 35.2, AD-25 v9.1.
+ *
+ *   · la de un Autor declara `autor` y no lleva `personaje` ni `personajes`;
+ *   · la de un Personaje declara `personaje` y `personajes`, una lista que **incluye** al dueño,
+ *     y `autor` solo si se sabe (informativo).
+ *
+ * Corre aunque falle otra regla (`when`), así que no supone la forma de los valores.
+ */
+export function reglasDeDueñoDeObra(valor: unknown, contexto: z.RefinementCtx): void {
+  if (valor === null || typeof valor !== 'object') return;
+  const ficha = valor as Record<string, unknown>;
+  if (ficha.personaje === undefined) {
+    if (ficha.autor === undefined) {
+      contexto.addIssue({
+        code: 'custom',
+        path: ['autor'],
+        message:
+          'Regla incumplida: falta el Autor de la Ficha de Obra. Una ficha declara su dueño: su ' +
+          'Autor o, si es la Obra de un Personaje, «personaje» y «personajes».',
+      });
+    }
+    if (ficha.personajes !== undefined) {
+      contexto.addIssue({
+        code: 'custom',
+        path: ['personajes'],
+        message:
+          'Regla incumplida: la ficha de un Autor no lleva «personajes»: solo la de un Personaje, ' +
+          'que declara además «personaje», su dueño.',
+      });
+    }
+    return;
+  }
+  if (!Array.isArray(ficha.personajes)) {
+    if (ficha.personajes === undefined) {
+      contexto.addIssue({
+        code: 'custom',
+        path: ['personajes'],
+        message:
+          'Regla incumplida: la ficha de un Personaje declara «personajes», la lista de los ' +
+          'Personajes de la Obra, que incluye al dueño.',
+      });
+    }
+    return;
+  }
+  if (!ficha.personajes.includes(ficha.personaje)) {
+    contexto.addIssue({
+      code: 'custom',
+      path: ['personajes'],
+      message:
+        `Regla incumplida: «personajes» no incluye a «${String(ficha.personaje)}», el Personaje ` +
+        'dueño de la ficha.',
+    });
+  }
 }
 
 /**

@@ -75,6 +75,7 @@ import { parse as parsearYaml } from 'yaml';
 import type { AstroIntegration } from 'astro';
 import {
   leerAutores,
+  leerPersonajes,
   leerCitas,
   leerColecciones,
   leerFichasDeObra,
@@ -432,9 +433,10 @@ export async function corpusParaFechar(
   opciones: { documentos?: readonly string[] } = {},
 ): Promise<CorpusParaFechar> {
   const rutas = rutasDelCorpus(join(raiz, 'corpus'));
-  const [leidas, autores, temas, colecciones, fichas, documentos] = await Promise.all([
+  const [leidas, autores, personajes, temas, colecciones, fichas, documentos] = await Promise.all([
     leerCitas(rutas.citas),
     leerAutores(rutas),
+    leerPersonajes(rutas),
     leerTemas(rutas),
     leerColecciones(rutas),
     leerFichasDeObra(rutas),
@@ -449,7 +451,8 @@ export async function corpusParaFechar(
       const fuente = (cita.fuente as { id?: unknown } | null | undefined)?.id;
       return {
         slug: cita.slug,
-        autor: cita.autor,
+        ...(cita.autor !== undefined ? { autor: cita.autor } : {}),
+        ...(cita.personaje !== undefined ? { personaje: cita.personaje } : {}),
         ...(cita.obra !== undefined ? { obra: cita.obra.nombre } : {}),
         ...(typeof obraDeclarada === 'string' ? { obraDeclarada } : {}),
         ...(typeof fuente === 'string' && fuente !== '' ? { fuente } : {}),
@@ -460,6 +463,7 @@ export async function corpusParaFechar(
       };
     }),
     autores: autores.map((autor) => ({ slug: autor.slug, ruta: resolve(autor.ruta) })),
+    personajes: personajes.map((personaje) => ({ slug: personaje.slug, ruta: resolve(personaje.ruta) })),
     temas: temas.map((tema) => ({ slug: tema.slug, ruta: resolve(tema.ruta) })),
     colecciones: colecciones.map((coleccion) => ({
       slug: coleccion.slug,
@@ -468,7 +472,8 @@ export async function corpusParaFechar(
     })),
     obras: fichas.map((ficha) => ({
       nombre: ficha.nombre,
-      autor: ficha.autor,
+      ...(ficha.autor !== undefined ? { autor: ficha.autor } : {}),
+      ...(ficha.personaje !== undefined ? { personaje: ficha.personaje } : {}),
       formas: ficha.formas,
       ruta: resolve(ficha.ruta),
     })),

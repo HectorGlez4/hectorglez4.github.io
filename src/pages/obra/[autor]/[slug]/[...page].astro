@@ -62,12 +62,13 @@ export const getStaticPaths = (async ({ paginate }) => {
   const porObra = await citasDeLasObras(conjunto);
 
   return obrasPublicadas(conjunto).flatMap((obra) => {
-    const autor = autores.get(obra.autor);
+    // Historia 35.2 — la Obra de un Personaje no llega aquí con Citas publicadas (la pinta la 35.4).
+    const autor = obra.autor === undefined ? undefined : autores.get(obra.autor);
     // No debería pasar —la integridad del conjunto y la puerta de las fichas lo impiden—, pero
     // si pasara, la Cabecera enlazaría a un 404 sin que nada lo dijera: el build se para aquí.
     if (autor === undefined) {
       throw new Error(
-        `La Obra «${obra.nombre}» es de «${obra.autor}», que no tiene Página de Autor publicada: ` +
+        `La Obra «${obra.nombre}» es de «${obra.autor ?? obra.dueño.slug}», que no tiene Página de Autor publicada: ` +
           'su Cabecera enlazaría a un 404.',
       );
     }

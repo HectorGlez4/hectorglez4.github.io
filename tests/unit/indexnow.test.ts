@@ -153,6 +153,8 @@ describe('las familias del Corpus', () => {
       ['corpus/colecciones', 'coleccion'],
       ['corpus/obras', 'obra'],
       ['corpus/fuentes', 'documento'],
+      // Historia 35.2 — los Personajes: familia de fichero antes que de ruta (su página, la 35.3).
+      ['corpus/personajes', 'personaje'],
     ]);
     for (const [directorio, familia] of FAMILIAS_DE_FICHERO) {
       expect(familiaDeFichero(`${directorio}/ejemplo.md`)).toBe(familia);
@@ -170,9 +172,12 @@ describe('las familias del Corpus', () => {
     // Historia 26.7 — no las declara el aviso: son las de `src/lib/superficies.ts`, su único dueño.
     expect(FAMILIAS_DE_RUTA).toBe(FAMILIAS);
     // Las de fichero son las cinco con directorio en el Corpus —el Directorio no tiene fichero—
-    // más `documento`, que no es familia de ruta.
+    // más `documento`, que no es familia de ruta, y `personaje` (Historia 35.2), que aún no lo es:
+    // su página llega con la 35.3.
     const deFichero = FAMILIAS_DE_FICHERO.map(([, familia]) => familia);
-    expect(deFichero.filter((f) => f !== 'documento')).toEqual(FAMILIAS.filter((f) => f !== 'directorio'));
+    expect(deFichero.filter((f) => f !== 'documento' && f !== 'personaje')).toEqual(
+      FAMILIAS.filter((f) => f !== 'directorio'),
+    );
     const familias = new Set([...relacionDeSuperficies(corpusDeEjemplo()).values()].map((s) => s.familia));
     expect([...familias].sort()).toEqual([...FAMILIAS_DE_RUTA].sort());
   });
@@ -358,7 +363,7 @@ describe('FR-38 — el aviso de las Obras (la matriz de la 22.8)', () => {
     const porAutor = new Map<string, number>();
     const porObra = new Map<string, number>();
     for (const c of corpus.citas) {
-      porAutor.set(c.autor, (porAutor.get(c.autor) ?? 0) + 1);
+      if (c.autor !== undefined) porAutor.set(c.autor, (porAutor.get(c.autor) ?? 0) + 1);
       if (c.obra !== undefined) porObra.set(c.obra, (porObra.get(c.obra) ?? 0) + 1);
     }
     return {

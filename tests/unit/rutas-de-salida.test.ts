@@ -230,7 +230,7 @@ describe('Historia 24.6 — la matriz del spec, sin construir', () => {
 describe('Historia 24.6 — `problemaDeRutasDeSalida`, lo que pararía la construcción', () => {
   const SENECA = { slug: 'seneca', nombre: 'Séneca' };
   const obra = (autor: string, recuento: number) =>
-    ({ nombre: 'seneca--libro', autor, titulo: 'Libro', recuento, fuentes: [], edicionCotejada: false, temas: [] }) as ObraResuelta;
+    ({ nombre: 'seneca--libro', dueño: { tipo: 'autor', slug: autor }, autor, titulo: 'Libro', recuento, fuentes: [], edicionCotejada: false, temas: [] }) as ObraResuelta;
   const deLaObra = (n: number) => Array.from({ length: n }, (_, i) => cita(`seneca-libro-${i}`, 'seneca', 'seneca--libro'));
   const deOtras = (n: number) => Array.from({ length: n }, (_, i) => cita(`seneca-cartas-${i}`, 'seneca', 'seneca--cartas'));
   const bien = (): RutasDeSalidaDeCita => ({

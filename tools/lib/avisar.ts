@@ -42,7 +42,13 @@ export const FAMILIAS_DE_FICHERO = [
   ['corpus/colecciones', 'coleccion'],
   ['corpus/obras', 'obra'],
   ['corpus/fuentes', 'documento'],
-] as const satisfies readonly (readonly [string, Exclude<Familia, 'directorio'> | 'documento'])[];
+  /*
+   * Historia 35.2 — los Personajes: familia de fichero antes que de ruta. Componen la Página de
+   * Cita, los listados, la Obra de la que son dueños y los Directorios por su nombre y su clave
+   * (`CAMPOS_QUE_PINTA`); su propia página, y con ella la familia de ruta, llega con la 35.3.
+   */
+  ['corpus/personajes', 'personaje'],
+] as const satisfies readonly (readonly [string, Exclude<Familia, 'directorio'> | 'documento' | 'personaje'])[];
 
 export type FamiliaDeFichero = (typeof FAMILIAS_DE_FICHERO)[number][1];
 

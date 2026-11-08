@@ -62,6 +62,7 @@ const autor = (slug: string, nombre: string, clave: string | undefined): Autor =
 function obra(nombre: string, titulo: string, recuento: number, año?: number): ObraResuelta {
   return {
     nombre,
+    dueño: { tipo: 'autor', slug: nombre.split('--')[0] },
     autor: nombre.split('--')[0],
     titulo,
     ...(año === undefined ? {} : { año }),
@@ -87,7 +88,7 @@ const cita = (deAutor: string, deObra?: ObraResuelta): Cita => {
 };
 
 /** `n` Citas de una Obra. */
-const de = (deObra: ObraResuelta) => Array.from({ length: deObra.recuento }, () => cita(deObra.autor, deObra));
+const de = (deObra: ObraResuelta) => Array.from({ length: deObra.recuento }, () => cita(deObra.dueño.slug, deObra));
 
 const BREVEDAD = obra('seneca--sobre-la-brevedad-de-la-vida', 'Sobre la brevedad de la vida', 45, 49);
 const CARTAS = obra('seneca--cartas-a-lucilio', 'Cartas a Lucilio', 3, 64);

@@ -167,8 +167,9 @@ el nombre y el listado. Meta y JSON-LD dicen hechos del Corpus; qué superficie 
 El Corpus conoce dos clases de Cita (Historia 35.1, AD-32). La **de siempre** —dominio público,
 cotejada— **no lleva** el campo `clase` y declara `estadoDerechos: dominio-público`; escribir
 `clase: siempre` es error del esquema. La **atribuida** —la frase de un Personaje o de un Autor con
-derechos vigentes— lleva `clase: atribuida` y nunca `estadoDerechos`; `personaje` (un slug, que
-resuelve la 35.2) solo lo admite ella, y hasta la 35.2 toda Cita lleva Autor. El Autor lleva su
+derechos vigentes— lleva `clase: atribuida` y nunca `estadoDerechos`; `personaje` (un slug de
+`corpus/personajes/`, «Los Personajes», abajo) solo lo admite ella. Toda Cita lleva Autor o Personaje,
+al menos uno, y una **publicada** lleva Autor hasta la Historia 35.4. El Autor lleva su
 `añoFallecimiento` **o** `vivo: true` (+`añoNacimiento` opcional), uno de los dos: sus años se
 escriben «N. 1950» —«n. 1950» dentro de una frase; sin nacimiento, ninguno, ni hueco— y no hay `deathDate`.
 
@@ -228,6 +229,53 @@ de la siembra, no con la suya —la jornada del registro es la de la anotación,
 La siembra solo anota la clase de siempre: si la otra rama traía una entrada `atribuida`, se niega con
 1, y esa entrada —la única excepción a «nadie lo edita a mano», porque ninguna orden puede volver a
 derivarla— se copia al final tal cual, carácter a carácter, desde el lado que la trajo.
+
+## Los Personajes
+
+Un Personaje (Batman) dice Citas atribuidas sin ser un Autor (Historia 35.2, AD-1, AD-33). Vive en
+`corpus/personajes/{slug}.yml` con `nombre` y `universo`, obligatorios; su clave de orden
+(`ordenAlfabetico`, `ordenRevisado`, con los validadores del Autor) y su semblanza: la de AD-26
+—`semblanza` y `biografia` juntas, cotejada literal contra esa revisión como la del Autor
+(`integraciones/cotejo.ts`)— **o** `semblanzaPropia: { texto, responde }`, nunca las dos. **No lleva
+años ni `vivo`**: el esquema (`personajeAdmisible`, estricto) los rechaza con su mensaje, porque sus
+derechos están siempre vigentes. `corpus/personajes/` se versiona vacío con su `.gitkeep`: **ningún
+agente siembra Personajes, claves ni semblanzas** en el Corpus real; mientras esté vacío, el cargador
+avisa de que no encuentra ficheros, como hacían las Colecciones, y no es ningún fallo.
+
+**Un solo espacio de slugs con los Autores**, activos y retirados: el prefijo de una Cita y de su
+ficha es el de su **dueño** —su Autor o, sin él, su Personaje (`slugDeCita`, `nombreDeFicheroDeCita`)—
+y `dueñoPorPrefijo` lo busca en la unión. `tools/personaje.ts crear` se niega ante un slug ocupado y
+`tools/autor.ts crear` ante el de un Personaje; el build (`integraciones/personajes.ts`) rompe con un
+Personaje que tiene el slug de un Autor, nombrando los dos ficheros, y con una Cita cuyo `personaje`
+no está en `corpus/personajes/`. La clave del Personaje **publicado** —alguna Cita lo declara
+(`personajesPublicados`)— la exige `integraciones/claves.ts`, con la orden del Personaje en el fallo.
+
+```
+npx tsx tools/personaje.ts crear "<nombre>" --universo "<universo>"   # propone la clave; no la teclea nadie
+npx tsx tools/personaje.ts listar
+npx tsx tools/personaje.ts proponer-claves
+npx tsx tools/personaje.ts clave <slug> ["<clave>"]                   # la única que escribe ordenRevisado
+npx tsx tools/personaje.ts semblanza <slug> "<texto>" --responde "<quién>"
+npx tsx tools/personaje.ts biografia <slug> <documento> [--semblanza "<texto>"]
+```
+
+Códigos: 2 la forma de la invocación, 1 lo que dice; en ninguno se escribe nada. `biografia` lee la
+revisión del documento (`biografiaDeclarable`, el núcleo que comparte con `tools/autor.ts`) y pide la
+semblanza si el Personaje no la tiene, porque van juntas. **`clave`, `semblanza` y `biografia` sobre el
+Corpus real son de Héctor, nunca de un agente**, como `tools/autor.ts clave`. Las claves de Personaje
+se proponen con el mismo núcleo que las del Autor (`proponerClavesDe`, `fijarClaveDe` de
+`tools/lib/gestion.ts`).
+
+El alta acepta una entrada con `personaje` y sin `autor`: su dueño es el Personaje, que tiene que
+existir —si no, la entrada no tiene dueño y no se escribe en ningún sitio—, y con la puerta de la
+atribuida cerrada (35.1b) va a `corpus/_revision/{personaje}--…md`, sin `autor` y con `clase:
+atribuida`. **Dos guardas del build esperan a la 35.4**: una Cita publicada sin Autor rompe el esquema
+(«una Cita publicada lleva Autor hasta la Historia 35.4»), y una Obra de Personaje con Citas publicadas
+rompe la puerta de las fichas. Ninguna página pinta todavía a un Personaje: su página es de la 35.3 y
+la Atribución que lo nombra, de la 35.4. Para AD-27, `corpus/personajes` es familia de fichero
+(`FAMILIAS_DE_FICHERO`) y no de ruta: su `nombre` compone la Página de Cita, los listados y la Obra
+de la que es dueño, y su clave los Directorios; el universo y la semblanza esperan a su página
+(`CAMPOS_QUE_NO_FECHAN`).
 
 ## Leer el estado de indexación
 
@@ -362,9 +410,14 @@ calcula con el calendario local de quien ejecuta la orden.
 
 **Atribución por el prefijo más largo.** Una ruta es de Cita si, normalizada, es
 `/cita/<slug>` del host canónico —decodificada y en minúsculas—, esté publicada o retirada.
-Su Autor es el slug de `corpus/autores/` que, seguido de guion, sea el prefijo más largo del
-slug —`seneca-el-viejo-…` no es de `seneca`, y un slug igual al del Autor no es suyo—, por `autorPorPrefijo` de `tools/lib/autoria.ts`, el mismo dueño que usa retirar un
-Autor. Una ruta de Cita sin prefijo de Autor va a `sinAutor` y el informe la nombra. Una Cita
+Su dueño es el slug de `corpus/autores/` —o, desde la Historia 35.2, de `corpus/personajes/`— que,
+seguido de guion, sea el prefijo más largo del slug en la unión de los dos —`seneca-el-viejo-…` no es
+de `seneca`, `bruce-wayne-…` es del Personaje y no del Autor `bruce`, y un slug igual al del dueño no
+es suyo—, por `dueñoPorPrefijo` de `tools/lib/autoria.ts`, el mismo dueño que usa retirar un Autor. La
+de un Personaje cuenta en su Personaje (`personajes` de la entrada, que se omite vacía: las entradas
+anteriores no la traen) y el informe la da «Por Personaje»; Σ `citas` + `resto` = Σ `autores` + Σ
+`personajes`. Se cuentan los Autores activos, como antes —no los retirados—, más los Personajes. Una
+ruta de Cita sin prefijo de dueño va a `sinAutor` y el informe la nombra. Una Cita
 con menos de `MIN_IMPRESIONES_POR_FILA` (5) impresiones no se versiona en `citas`: se suma en
 `resto` —cuyo `filas` cuenta Citas, no filas de la fuente—, y sí cuenta en su Autor. El reparto por familia es el de la serie de tráfico
 (`agregarPorFamilia`, con su `fueraDelCenso`), así que una Cita retirada cuenta en su Autor y,
@@ -709,8 +762,11 @@ código 1 y sin mover nada, mientras algo del Corpus apunte al Autor, y lo dice 
   build; se retira antes con `npm run obra -- retirar`— o retirada en `corpus/_obras-retiradas/`;
 - un miembro de Colección, publicada o despublicada, o una fijación de `corpus/portada.json`,
   que sea Cita suya. Estos son slugs sueltos que pueden no resolver ya a ninguna Cita, así que
-  se atribuyen por el prefijo del slug de Autor **más largo**: `seneca-el-viejo-…` no es de
-  `seneca`. Una portada ilegible también bloquea, porque no se puede afirmar que no apunte a él.
+  se atribuyen por el prefijo **más largo** de la unión de Autores (activos y retirados) y
+  Personajes (`dueñoPorPrefijo`, Historia 35.2): `seneca-el-viejo-…` no es de `seneca`, y
+  `bruce-wayne-…` es del Personaje y no del Autor `bruce`. Una Cita que existe se juzga por el
+  Autor que declara: la de un Personaje sin Autor no es de ninguno. Una portada ilegible también
+  bloquea, porque no se puede afirmar que no apunte a él.
 
 Sin `--motivo` sale con código 2. El motivo va en el mensaje, y de ahí al del commit (AD-10).
 
@@ -723,11 +779,31 @@ descartado o da la orden exacta que falta:
 ## Las fichas de Obra
 
 Cada Obra con Citas publicadas tiene una **Ficha de Obra** en
-`corpus/obras/{slug-autor}--{slug-obra}.yml`, con `autor`, `titulo`, `formas` y, opcional,
-`distintaDe` (Historias 22.1 y 22.2, AD-25). La identidad de la Obra es el par (Autor, forma
+`corpus/obras/{slug-del-dueño}--{slug-obra}.yml`, con `autor`, `titulo`, `formas` y, opcional,
+`distintaDe` (Historias 22.1 y 22.2, AD-25). La identidad de la Obra es el par (dueño, forma
 canónica de `normalizar`); el título es presentación. El nombre del fichero sale del título
 **una sola vez**, al crear la ficha, sin la truncación de los documentos de Fuente, y no se
 recalcula nunca: será la URL de la Página de Obra.
+
+**La Obra tiene un solo dueño** (Historia 35.2, AD-25 v9.1): su Autor o un Personaje. La ficha de un
+Personaje declara `personaje` (el dueño) y `personajes` —la lista de los Personajes de la Obra, sin
+repetidos, que **incluye** al dueño— y `autor` solo si se sabe, como dato informativo que no cambia el
+dueño ni el nombre; la de un Autor declara `autor` y no lleva ni `personaje` ni `personajes`. Lo
+deciden solo `dueñoDeFicha` (el Personaje si lo declara, si no el Autor) y `dueñoDeCita` (el Autor si
+lo declara, si no el Personaje) de `src/lib/obras.ts`. Una Cita resuelve su ficha **en dos pasos**
+(`fichasDeCita`): primero las que nombran a su Autor —como dueño o como `autor` informativo— y reclaman
+su forma; si ninguna, las de Personaje cuyo `personajes` incluye el suyo. Dos candidatas en el mismo
+paso rompen el build nombrando la Cita y las dos fichas, y dos fichas de Personaje con la misma forma
+lo rompen nombrándolas. Crear una ficha le da el dueño de la Cita (`personaje` y `personajes: [p]` si
+no tiene Autor); `titular`, `separar`, `reunir` y `retirar` conservan `personaje` y `personajes`, y
+`reunir` se niega entre dueños distintos. `esObraIndexable` recibe el recuento del dueño: las Citas
+del Autor o, para la de un Personaje, las que declaran ese Personaje. La ruta no cambia
+(`rutaDeObra`, por los dos segmentos del nombre), así que saberse después el Autor no mueve la URL.
+**Hasta la Historia 35.4, una ficha de Personaje que resuelve Citas publicadas rompe el build**
+(«Obra de un Personaje con Citas publicadas: la pinta la Historia 35.4»): su Cabecera «de {Personaje}»
+aún no existe. Sin Citas publicadas, avisa como cualquier ficha. Una Cita atribuida no tiene posición
+en el orden del libro aunque su Obra tenga documento (`posicionesDeCitas` la omite): va al final, por
+slug.
 
 ```
 npm run obra -- sembrar                                      # crea las que falten. Idempotente.

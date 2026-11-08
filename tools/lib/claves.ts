@@ -29,6 +29,32 @@ export const ORDEN_PROPONER_CLAVES = 'npx tsx tools/autor.ts proponer-claves';
 export const ordenFijarClave = (slug: string, clave = '<clave>'): string =>
   `npx tsx tools/autor.ts clave ${slug} "${clave}"`;
 
+/** Las mismas dos órdenes para los Personajes — Historia 35.2: `tools/personaje.ts`. */
+export const ORDEN_PROPONER_CLAVES_DE_PERSONAJE = 'npx tsx tools/personaje.ts proponer-claves';
+
+export const ordenFijarClaveDePersonaje = (slug: string, clave = '<clave>'): string =>
+  `npx tsx tools/personaje.ts clave ${slug} "${clave}"`;
+
+/** Qué órdenes nombran los fallos: las del Autor, por omisión, o las del Personaje. */
+export interface OrdenesDeClave {
+  proponer: string;
+  fijar: (slug: string, clave?: string) => string;
+  /** Cómo llama el fallo a la entidad: «el Autor» o «el Personaje». */
+  entidad: string;
+}
+
+export const ORDENES_DE_AUTOR: OrdenesDeClave = {
+  proponer: ORDEN_PROPONER_CLAVES,
+  fijar: ordenFijarClave,
+  entidad: 'el Autor',
+};
+
+export const ORDENES_DE_PERSONAJE: OrdenesDeClave = {
+  proponer: ORDEN_PROPONER_CLAVES_DE_PERSONAJE,
+  fijar: ordenFijarClaveDePersonaje,
+  entidad: 'el Personaje',
+};
+
 export interface PropuestaDeClave {
   /** La clave propuesta. Ausente si la regla no da una con forma (p. ej. «Pío 2»). */
   clave?: string;
@@ -74,6 +100,8 @@ export interface AutorParaClaves {
 export function fallosDeClaves(
   autores: readonly AutorParaClaves[],
   publicados: ReadonlySet<string>,
+  /** Historia 35.2 — la misma puerta para los Personajes, con sus órdenes. */
+  ordenes: OrdenesDeClave = ORDENES_DE_AUTOR,
 ): string[] {
   const fallos: string[] = [];
   for (const autor of [...autores].sort((a, b) => (a.ruta < b.ruta ? -1 : a.ruta > b.ruta ? 1 : 0))) {
@@ -81,7 +109,7 @@ export function fallosDeClaves(
       if (!ordenAlfabetico.safeParse(autor.ordenAlfabetico).success) {
         fallos.push(
           `${autor.ruta}: ordenAlfabetico ${JSON.stringify(autor.ordenAlfabetico)}. ${REGLA_DE_CLAVE_DE_ORDEN} ` +
-            `Corríjala con ${ordenFijarClave(autor.slug)}, no a mano.`,
+            `Corríjala con ${ordenes.fijar(autor.slug)}, no a mano.`,
         );
       }
       continue;
@@ -89,17 +117,17 @@ export function fallosDeClaves(
     if (autor.ordenRevisado !== undefined) {
       fallos.push(
         `${autor.ruta}: ordenRevisado sin ordenAlfabetico: la revisión no apunta a ninguna clave. ` +
-          `Quite ordenRevisado y fije la clave con ${ordenFijarClave(autor.slug)}`,
+          `Quite ordenRevisado y fije la clave con ${ordenes.fijar(autor.slug)}`,
       );
       continue;
     }
     if (!publicados.has(autor.slug)) continue;
     const propuesta = typeof autor.nombre === 'string' ? proponerClave(autor.nombre) : { marcada: false };
     fallos.push(
-      `${autor.ruta}: el Autor tiene Citas publicadas y no tiene clave de orden (ordenAlfabetico). ` +
+      `${autor.ruta}: ${ordenes.entidad} tiene Citas publicadas y no tiene clave de orden (ordenAlfabetico). ` +
         (propuesta.clave !== undefined
-          ? `Propóngala con: ${ORDEN_PROPONER_CLAVES}`
-          : `La regla no da clave para su nombre: la fija una persona con ${ordenFijarClave(autor.slug)}`),
+          ? `Propóngala con: ${ordenes.proponer}`
+          : `La regla no da clave para su nombre: la fija una persona con ${ordenes.fijar(autor.slug)}`),
     );
   }
   return fallos;

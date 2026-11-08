@@ -130,10 +130,12 @@ describe('35.1 — el esquema', () => {
     expect(mensajes({ ...base, clase: CLASE_ATRIBUIDA, personaje: 'Sancho Panza' }).join('\n')).toMatch(/^personaje: /mu);
   });
 
-  it('toda Cita lleva Autor, y la que declara Personaje sin él nombra la Historia 35.2', () => {
+  it('toda Cita lleva Autor o Personaje (Historia 35.2): la de un Personaje sin Autor es admisible', () => {
     const { autor: _autor, ...sinAutor } = base;
-    expect(mensajes({ ...sinAutor, clase: CLASE_ATRIBUIDA, personaje: 'sancho' }).join('\n')).toMatch(/^autor: .*35\.2/mu);
-    expect(mensajes({ ...sinAutor, estadoDerechos: 'dominio-público' }).join('\n')).not.toMatch(/35\.2/u);
+    expect(citaAdmisible.safeParse({ ...sinAutor, clase: CLASE_ATRIBUIDA, personaje: 'sancho' }).success).toBe(true);
+    expect(mensajes({ ...sinAutor, estadoDerechos: 'dominio-público' }).join('\n')).toMatch(
+      /^autor: .*Autor o Personaje, al menos uno/mu,
+    );
   });
 
   it('el Autor lleva su año de fallecimiento o vivo: true, uno de los dos', () => {

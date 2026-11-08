@@ -5,9 +5,11 @@
  * publicadas, y lo que no se puede derivar —su identidad estable y su URL futura— lo ancla
  * una **Ficha de Obra** en `corpus/obras/`, que crea el sistema.
  *
- * - **Identidad:** el par (Autor, forma canónica), con `normalizar` (AD-3). El título no
- *   interviene: corregir una tilde no mueve ninguna página.
- * - **Nombre de la ficha:** `{autor}--{slugDeObra(titulo)}`, derivado **una sola vez** al
+ * - **Identidad:** el par (dueño, forma canónica), con `normalizar` (AD-3). El dueño es el
+ *   Autor o, desde la Historia 35.2 (AD-25 v9.1), el Personaje de la ficha (`dueñoDeFicha`), y
+ *   no cambia aunque después se sepa el Autor. El título no interviene: corregir una tilde no
+ *   mueve ninguna página.
+ * - **Nombre de la ficha:** `{dueño}--{slugDeObra(titulo)}`, derivado **una sola vez** al
  *   crearla y nunca recalculado (AD-4). Sin la truncación del documento de Fuente.
  * - **Título por omisión:** la grafía literal más usada (ver `grafiaPorOmision`).
  *
@@ -92,9 +94,9 @@ export function slugDeFichaDeObra(titulo: string): string | undefined {
  * Se llama **una sola vez**, al crear la ficha. Después el nombre es la URL y no se
  * recalcula aunque el título cambie (AD-4).
  */
-export function nombreDeFichaDeObra(autor: string, titulo: string): string | undefined {
+export function nombreDeFichaDeObra(dueño: string, titulo: string): string | undefined {
   const slug = slugDeFichaDeObra(titulo);
-  return slug === undefined ? undefined : `${autor}${SEPARADOR}${slug}`;
+  return slug === undefined ? undefined : `${dueño}${SEPARADOR}${slug}`;
 }
 
 /**
@@ -173,7 +175,9 @@ export function partirLaListaDeObras<O>(
  * Si la página de una Obra se indexa — FR-52, Historia 22.4.
  *
  * Al menos `MIN_CITAS_OBRA_INDEXABLE` Citas publicadas y **menos** de
- * `MAX_PROPORCION_OBRA_DEL_AUTOR` de las Citas publicadas de su Autor. Una Obra de una sola
+ * `MAX_PROPORCION_OBRA_DEL_AUTOR` de las Citas publicadas de su dueño: las de su Autor o, si la
+ * Obra es de un Personaje, las que declaran ese Personaje (FR-52 v9.1; el recuento lo da quien
+ * llama, `obrasIndexables`). Una Obra de una sola
  * Cita repite esa Cita; una que reúne casi todo su Autor repite la Página de Autor.
  *
  * Es la única regla, y pura: la consultan el armazón (por la lista de rutas indexables), el
@@ -209,7 +213,15 @@ export interface FichaDeObra {
   nombre: string;
   /** Ruta legible del fichero, para los mensajes. */
   ruta: string;
-  autor: string;
+  /**
+   * El Autor de la Obra: el dueño en la ficha de un Autor, y solo informativo en la de un
+   * Personaje (Historia 35.2), que puede no saberlo.
+   */
+  autor?: string;
+  /** El Personaje dueño de la ficha, si es la de un Personaje (Historia 35.2). */
+  personaje?: string;
+  /** Los Personajes de la Obra, dueño incluido, en la ficha de un Personaje (Historia 35.2). */
+  personajes?: readonly string[];
   titulo: string;
   formas: readonly string[];
   /** Formas de otras Obras del mismo Autor de las que esta se declara distinta (22.2). */
@@ -236,7 +248,10 @@ export interface EdicionDeObra {
 /** Lo que de una Cita importa para resolver su Obra. */
 export interface CitaConObra {
   slug: string;
-  autor: string;
+  /** Su Autor; opcional desde la Historia 35.2: la de un Personaje puede no tenerlo. */
+  autor?: string;
+  /** El Personaje que la dice, si es atribuida a uno (Historias 35.1 y 35.2). */
+  personaje?: string;
   procedencia?: { obra?: string } | null;
   /** Ruta legible del fichero, para que la puerta ortográfica lo nombre (22.2). */
   ruta?: string;
@@ -250,59 +265,128 @@ function formaDeCita(cita: CitaConObra): string | undefined {
   return forma === '' ? undefined : forma;
 }
 
-/** Clave del par (Autor, forma): la identidad de una Obra. */
-export function clave(autor: string, forma: string): string {
-  return `${autor}\u0000${forma}`;
+/**
+ * El dueño de una Ficha de Obra o de una Cita — Historia 35.2, AD-25 v9.1: un Autor o un
+ * Personaje, por su slug. Autores y Personajes comparten un solo espacio de slugs, así que el
+ * slug basta para las claves; el tipo dice dónde buscarlo.
+ */
+export interface Dueño {
+  tipo: 'autor' | 'personaje';
+  slug: string;
 }
 
 /**
- * Índice de fichas por identidad. Si dos fichas reclaman la misma forma, gana la primera
- * por nombre: es un estado que `fallosDeObras` rompe, así que aquí solo hace falta que la
- * resolución sea determinista.
+ * El dueño de una ficha: su Personaje si lo declara y, si no, su Autor. Es la **única**
+ * regla; el esquema (`reglasDeDueñoDeObra`) garantiza que hay uno.
  */
-export function indiceDeFichas(fichas: readonly FichaDeObra[]): Map<string, FichaDeObra> {
-  const indice = new Map<string, FichaDeObra>();
+export function dueñoDeFicha(ficha: Pick<FichaDeObra, 'autor' | 'personaje' | 'ruta'>): Dueño {
+  if (ficha.personaje !== undefined) return { tipo: 'personaje', slug: ficha.personaje };
+  if (ficha.autor !== undefined) return { tipo: 'autor', slug: ficha.autor };
+  throw new Error(`${ficha.ruta}: la Ficha de Obra no declara dueño (autor o personaje).`);
+}
+
+/**
+ * El dueño de una Cita: su Autor si lo declara y, si no, su Personaje. Es la **única** regla, y
+ * de él salen el prefijo del slug y el nombre del fichero; el esquema (`reglasDeClase`)
+ * garantiza que hay uno.
+ */
+export function dueñoDeCita(cita: { slug: string; autor?: string; personaje?: string }): Dueño {
+  if (cita.autor !== undefined) return { tipo: 'autor', slug: cita.autor };
+  if (cita.personaje !== undefined) return { tipo: 'personaje', slug: cita.personaje };
+  throw new Error(`La Cita «${cita.slug}» no declara dueño (autor o personaje).`);
+}
+
+/** Clave del par (dueño, forma): la identidad de una Obra. */
+export function clave(dueño: string, forma: string): string {
+  return `${dueño}\u0000${forma}`;
+}
+
+/**
+ * Índice de fichas para la resolución en dos pasos (`fichasDeCita`): por (Autor, forma) —el
+ * dueño de una ficha de Autor o el `autor` informativo de una de Personaje— y por (Personaje,
+ * forma) —cada Personaje de `personajes`—. Cada lista va por nombre de ficha, para que la
+ * resolución sea determinista aun en el estado que `fallosDeObras` rompe.
+ */
+export interface IndiceDeFichas {
+  porAutor: ReadonlyMap<string, readonly FichaDeObra[]>;
+  porPersonaje: ReadonlyMap<string, readonly FichaDeObra[]>;
+}
+
+export function indiceDeFichas(fichas: readonly FichaDeObra[]): IndiceDeFichas {
+  const porAutor = new Map<string, FichaDeObra[]>();
+  const porPersonaje = new Map<string, FichaDeObra[]>();
+  const añadir = (indice: Map<string, FichaDeObra[]>, k: string, ficha: FichaDeObra) => {
+    const lista = indice.get(k);
+    if (lista === undefined) indice.set(k, [ficha]);
+    else if (!lista.includes(ficha)) lista.push(ficha);
+  };
   for (const ficha of [...fichas].sort((a, b) => a.nombre.localeCompare(b.nombre, 'es'))) {
     for (const forma of ficha.formas) {
-      const k = clave(ficha.autor, forma);
-      if (!indice.has(k)) indice.set(k, ficha);
+      if (ficha.autor !== undefined) añadir(porAutor, clave(ficha.autor, forma), ficha);
+      if (ficha.personaje !== undefined) {
+        for (const p of ficha.personajes ?? [ficha.personaje]) añadir(porPersonaje, clave(p, forma), ficha);
+      }
     }
   }
-  return indice;
+  return { porAutor, porPersonaje };
+}
+
+function esIndice(fichas: readonly FichaDeObra[] | IndiceDeFichas): fichas is IndiceDeFichas {
+  return !Array.isArray(fichas);
 }
 
 /**
- * La ficha que resuelve una Cita: la de su Autor cuyas formas contienen la de su obra.
+ * Las fichas candidatas de una Cita, con la regla de dos pasos — Historia 35.2, AD-25 v9.1:
+ *
+ *   1. las que nombran al Autor de la Cita —como dueño o como `autor` informativo— y reclaman
+ *      la forma de su obra;
+ *   2. si ninguna, las de Personaje cuyo `personajes` incluye el Personaje de la Cita.
+ *
+ * Vacía si la Cita no declara obra o si ninguna la reclama. Dos o más en el paso que decide es
+ * una ambigüedad que `fallosDeObras` rompe nombrando la Cita y las fichas.
+ */
+export function fichasDeCita(
+  cita: CitaConObra,
+  fichas: readonly FichaDeObra[] | IndiceDeFichas,
+): readonly FichaDeObra[] {
+  const forma = formaDeCita(cita);
+  if (forma === undefined) return [];
+  const indice = esIndice(fichas) ? fichas : indiceDeFichas(fichas);
+  const paso1 = cita.autor === undefined ? [] : (indice.porAutor.get(clave(cita.autor, forma)) ?? []);
+  if (paso1.length > 0) return paso1;
+  return cita.personaje === undefined ? [] : (indice.porPersonaje.get(clave(cita.personaje, forma)) ?? []);
+}
+
+/**
+ * La ficha que resuelve una Cita: la primera candidata de `fichasDeCita`, por nombre.
  * `undefined` si la Cita no declara obra o si ninguna ficha la reclama.
  */
 export function fichaDeCita(
   cita: CitaConObra,
-  fichas: readonly FichaDeObra[] | Map<string, FichaDeObra>,
+  fichas: readonly FichaDeObra[] | IndiceDeFichas,
 ): FichaDeObra | undefined {
-  const forma = formaDeCita(cita);
-  if (forma === undefined) return undefined;
-  const indice = fichas instanceof Map ? fichas : indiceDeFichas(fichas);
-  return indice.get(clave(cita.autor, forma));
+  return fichasDeCita(cita, fichas)[0];
 }
 
 /**
- * Las Obras de un conjunto de Citas, agrupadas por identidad, con sus grafías literales y
- * cuántas Citas usa cada una. Ordenadas por Autor y forma.
+ * Las Obras de un conjunto de Citas, agrupadas por identidad —(dueño de la Cita, forma)—, con
+ * sus grafías literales y cuántas Citas usa cada una. Ordenadas por dueño y forma.
  */
 export function obrasDeCitas(
   citas: readonly CitaConObra[],
-): { autor: string; forma: string; grafias: GrafiaDeObra[]; citas: string[] }[] {
+): { dueño: string; forma: string; grafias: GrafiaDeObra[]; citas: string[] }[] {
   const grupos = new Map<
     string,
-    { autor: string; forma: string; grafias: Map<string, number>; citas: string[] }
+    { dueño: string; forma: string; grafias: Map<string, number>; citas: string[] }
   >();
   for (const cita of citas) {
     const forma = formaDeCita(cita);
     if (forma === undefined) continue;
     const obra = cita.procedencia?.obra as string;
-    const k = clave(cita.autor, forma);
+    const dueño = dueñoDeCita(cita).slug;
+    const k = clave(dueño, forma);
     const grupo = grupos.get(k) ?? {
-      autor: cita.autor,
+      dueño,
       forma,
       grafias: new Map<string, number>(),
       citas: [] as string[],
@@ -313,14 +397,14 @@ export function obrasDeCitas(
   }
   return [...grupos.values()]
     .map((g) => ({
-      autor: g.autor,
+      dueño: g.dueño,
       forma: g.forma,
       grafias: [...g.grafias]
         .map(([literal, n]) => ({ literal, citas: n }))
         .sort((a, b) => b.citas - a.citas || a.literal.localeCompare(b.literal, 'es')),
       citas: g.citas,
     }))
-    .sort((a, b) => a.autor.localeCompare(b.autor, 'es') || a.forma.localeCompare(b.forma, 'es'));
+    .sort((a, b) => a.dueño.localeCompare(b.dueño, 'es') || a.forma.localeCompare(b.forma, 'es'));
 }
 
 /**
@@ -329,18 +413,18 @@ export function obrasDeCitas(
  * necesita para decidir reuniones, y que hoy solo se informa.
  */
 export function prefijosDeFormas(
-  pares: readonly { autor: string; forma: string }[],
-): { autor: string; corta: string; larga: string }[] {
-  const porAutor = new Map<string, Set<string>>();
-  for (const { autor, forma } of pares) {
-    porAutor.set(autor, (porAutor.get(autor) ?? new Set()).add(forma));
+  pares: readonly { dueño: string; forma: string }[],
+): { dueño: string; corta: string; larga: string }[] {
+  const porDueño = new Map<string, Set<string>>();
+  for (const { dueño, forma } of pares) {
+    porDueño.set(dueño, (porDueño.get(dueño) ?? new Set()).add(forma));
   }
-  const salida: { autor: string; corta: string; larga: string }[] = [];
-  for (const [autor, formas] of [...porAutor].sort((a, b) => a[0].localeCompare(b[0], 'es'))) {
+  const salida: { dueño: string; corta: string; larga: string }[] = [];
+  for (const [dueño, formas] of [...porDueño].sort((a, b) => a[0].localeCompare(b[0], 'es'))) {
     const lista = [...formas].sort((a, b) => a.localeCompare(b, 'es'));
     for (const corta of lista) {
       for (const larga of lista) {
-        if (larga !== corta && larga.startsWith(`${corta} `)) salida.push({ autor, corta, larga });
+        if (larga !== corta && larga.startsWith(`${corta} `)) salida.push({ dueño, corta, larga });
       }
     }
   }
@@ -348,13 +432,27 @@ export function prefijosDeFormas(
 }
 
 /**
+ * Lo que dice el build ante una Obra de Personaje con Citas publicadas — Historia 35.2.
+ *
+ * La Página de Obra de un Personaje —su Cabecera «de {Personaje}»— la pinta la Historia 35.4;
+ * hasta entonces una ficha de Personaje que resuelva una Cita publicada rompe con este mensaje
+ * en vez de salir con una Cabecera que no nombra a nadie. Sin Citas publicadas, avisa como
+ * cualquier ficha (22.1).
+ */
+export const MENSAJE_OBRA_DE_PERSONAJE_PUBLICADA =
+  'Obra de un Personaje con Citas publicadas: la pinta la Historia 35.4. Hasta entonces sus Citas ' +
+  'se quedan en corpus/_revision/ o resuelven una ficha de su Autor.';
+
+/**
  * Los incumplimientos del conjunto de fichas, ya redactados. Lista vacía es «todo en orden».
  *
  * Rompen el build:
- *   · una Cita publicada cuya obra no reclama ninguna ficha de su Autor;
- *   · una forma reclamada por dos fichas del mismo Autor;
- *   · un nombre de fichero cuyo prefijo de Autor no es su campo `autor`;
- *   · una ficha cuyo `autor` no existe en el Corpus;
+ *   · una Cita publicada cuya obra no reclama ninguna ficha (ni de su Autor ni de su Personaje);
+ *   · una Cita publicada que reclaman dos fichas en el mismo paso de `fichasDeCita` (35.2);
+ *   · una forma reclamada por dos fichas del mismo dueño, o por dos fichas de Personaje (35.2);
+ *   · un nombre de fichero cuyo prefijo no es el slug de su dueño (`dueñoDeFicha`);
+ *   · una ficha cuyo `autor`, `personaje` o alguno de sus `personajes` no existe en el Corpus;
+ *   · una ficha de Personaje que resuelve Citas publicadas, hasta la Historia 35.4;
  *   · una Obra publicada con dos o más grafías de la misma forma, si alguna no es literal de
  *     su Fuente (la puerta ortográfica de la Historia 22.2, `fallosOrtograficos`).
  *
@@ -366,16 +464,18 @@ export function fallosDeObras(
   citas: readonly CitaConObra[],
   autores: Iterable<string>,
   documentos: DocumentosDeObras = SIN_DOCUMENTOS,
+  personajes: Iterable<string> = [],
 ): string[] {
   const fallos: string[] = [];
   const conocidos = new Set(autores);
+  const personajesConocidos = new Set(personajes);
   const ordenadas = [...fichas].sort((a, b) => a.nombre.localeCompare(b.nombre, 'es'));
 
   for (const ficha of ordenadas) {
     if (!FORMA_DE_NOMBRE.test(ficha.nombre)) {
       fallos.push(
         `  · ${ficha.ruta} → el nombre «${ficha.nombre}» no tiene forma de nombre de ficha: ` +
-          '«{slug-autor}--{slug-obra}», en minúsculas, cifras y guiones, directamente en ' +
+          '«{slug-del-dueño}--{slug-obra}», en minúsculas, cifras y guiones, directamente en ' +
           'corpus/obras/ y sin subdirectorios. Es la URL futura de la Obra.',
       );
     }
@@ -398,7 +498,7 @@ export function fallosDeObras(
   for (const ficha of ordenadas) {
     /*
      * Historia 22.4 — un slug de obra enteramente numérico chocaría con «la página N» de
-     * otra Obra del mismo Autor: `/obra/orwell/1984/` sería a la vez una Obra y la página
+     * otra Obra del mismo dueño: `/obra/orwell/1984/` sería a la vez una Obra y la página
      * 1984 de nada. La URL no se recalcula, así que se para aquí y no se adivina.
      */
     const slugDeLaObra = ficha.nombre.split('/').pop()?.split(SEPARADOR).slice(1).join(SEPARADOR);
@@ -409,47 +509,93 @@ export function fallosDeObras(
           'que lleve alguna letra.',
       );
     }
-    const prefijo = `${ficha.autor}${SEPARADOR}`;
+    const dueño = dueñoDeFicha(ficha);
+    const campo = dueño.tipo === 'personaje' ? 'personaje' : 'autor';
+    const prefijo = `${dueño.slug}${SEPARADOR}`;
     if (!ficha.nombre.startsWith(prefijo) || ficha.nombre.length === prefijo.length) {
       fallos.push(
-        `  · ${ficha.ruta} → declara «autor: ${ficha.autor}», y el nombre de una Ficha de ` +
-          `Obra empieza por el slug de su Autor seguido de «${SEPARADOR}». El nombre es la URL ` +
+        `  · ${ficha.ruta} → declara «${campo}: ${dueño.slug}», y el nombre de una Ficha de ` +
+          `Obra empieza por el slug de su dueño seguido de «${SEPARADOR}». El nombre es la URL ` +
           'futura de la Obra y no se recalcula: la ficha está mal atribuida o mal nombrada.',
       );
     }
-    if (!conocidos.has(ficha.autor)) {
-      fallos.push(
-        `  · ${ficha.ruta} → su Autor «${ficha.autor}» no existe en corpus/autores/.`,
-      );
+    if (ficha.autor !== undefined && !conocidos.has(ficha.autor)) {
+      fallos.push(`  · ${ficha.ruta} → su Autor «${ficha.autor}» no existe en corpus/autores/.`);
+    }
+    if (ficha.personaje !== undefined) {
+      for (const p of new Set([ficha.personaje, ...(ficha.personajes ?? [])])) {
+        if (personajesConocidos.has(p)) continue;
+        fallos.push(`  · ${ficha.ruta} → su Personaje «${p}» no existe en corpus/personajes/.`);
+      }
     }
   }
 
-  const reclamantes = new Map<string, { forma: string; fichas: FichaDeObra[] }>();
+  const reclamantes = new Map<string, { dueño: string; forma: string; fichas: FichaDeObra[] }>();
   for (const ficha of ordenadas) {
+    const dueño = dueñoDeFicha(ficha).slug;
     for (const forma of ficha.formas) {
-      const k = clave(ficha.autor, forma);
-      const previo = reclamantes.get(k) ?? { forma, fichas: [] };
+      const k = clave(dueño, forma);
+      const previo = reclamantes.get(k) ?? { dueño, forma, fichas: [] };
       previo.fichas.push(ficha);
       reclamantes.set(k, previo);
     }
   }
-  for (const { forma, fichas: repetidas } of reclamantes.values()) {
+  for (const { dueño, forma, fichas: repetidas } of reclamantes.values()) {
     if (repetidas.length < 2) continue;
     fallos.push(
-      `  · La forma «${forma}» de ${repetidas[0].autor} la reclaman ${repetidas.length} fichas: ` +
+      `  · La forma «${forma}» de ${dueño} la reclaman ${repetidas.length} fichas: ` +
         `${repetidas.map((f) => f.ruta).join(', ')}. Una forma la reclama a lo sumo una ficha.`,
     );
   }
 
+  // Historia 35.2 — dos fichas de Personaje con la misma forma, sean del Personaje que sean.
+  const dePersonaje = new Map<string, FichaDeObra[]>();
+  for (const ficha of ordenadas) {
+    if (ficha.personaje === undefined) continue;
+    for (const forma of ficha.formas) dePersonaje.set(forma, [...(dePersonaje.get(forma) ?? []), ficha]);
+  }
+  for (const [forma, repetidas] of dePersonaje) {
+    // Las del mismo dueño ya las nombra la regla anterior.
+    if (repetidas.length < 2 || new Set(repetidas.map((f) => f.personaje)).size < 2) continue;
+    fallos.push(
+      `  · La forma «${forma}» la reclaman ${repetidas.length} fichas de Personaje: ` +
+        `${repetidas.map((f) => f.ruta).join(', ')}. Una forma la reclama a lo sumo una ficha de ` +
+        'Personaje; si es la misma Obra, sus Personajes van en «personajes» de una sola.',
+    );
+  }
+
   const indice = indiceDeFichas(fichas);
-  for (const obra of obrasDeCitas(citas)) {
-    if (indice.has(clave(obra.autor, obra.forma))) continue;
+  const sinFicha: CitaConObra[] = [];
+  const conObraDePersonaje = new Map<string, string[]>();
+  for (const cita of [...citas].sort((a, b) => a.slug.localeCompare(b.slug, 'es'))) {
+    if (formaDeCita(cita) === undefined) continue;
+    const candidatas = fichasDeCita(cita, indice);
+    if (candidatas.length === 0) {
+      sinFicha.push(cita);
+      continue;
+    }
+    if (candidatas.length > 1) {
+      fallos.push(
+        `  · ${cita.ruta ?? cita.slug} → su obra la reclaman ${candidatas.length} fichas: ` +
+          `${candidatas.map((f) => f.ruta).join(', ')}. Una Cita la resuelve una sola ficha: ` +
+          'una de ellas reclama una forma que no es suya.',
+      );
+    }
+    const ficha = candidatas[0];
+    if (ficha.personaje !== undefined) {
+      conObraDePersonaje.set(ficha.ruta, [...(conObraDePersonaje.get(ficha.ruta) ?? []), cita.slug]);
+    }
+  }
+  for (const obra of obrasDeCitas(sinFicha)) {
     const n = obra.citas.length;
     fallos.push(
-      `  · La Obra «${obra.grafias[0].literal}» de ${obra.autor} no tiene Ficha de Obra ` +
+      `  · La Obra «${obra.grafias[0].literal}» de ${obra.dueño} no tiene Ficha de Obra ` +
         `(${n} ${n === 1 ? 'Cita publicada' : 'Citas publicadas'}). Créela con ` +
         `«${ORDEN_DE_SEMBRAR_OBRAS}»; las fichas no se escriben a mano.`,
     );
+  }
+  for (const [ruta, suyas] of conObraDePersonaje) {
+    fallos.push(`  · ${ruta} → ${MENSAJE_OBRA_DE_PERSONAJE_PUBLICADA} Citas: ${suyas.join(', ')}.`);
   }
 
   fallos.push(...fallosOrtograficos(citas, documentos));
@@ -473,11 +619,13 @@ export function avisosDeObras(
   citas: readonly CitaConObra[],
 ): string[] {
   const ordenadas = [...fichas].sort((a, b) => a.nombre.localeCompare(b.nombre, 'es'));
-  const reclamadas = new Set(obrasDeCitas(citas).map((o) => clave(o.autor, o.forma)));
+  // Con la misma resolución que el resto (`fichasDeCita`, en dos pasos): una ficha de Personaje
+  // la puede resolver una Cita por su `autor` informativo.
+  const resueltas = citasPorFicha(ordenadas, citas);
   const avisos: string[] = [];
 
   for (const ficha of ordenadas) {
-    if (ficha.formas.some((forma) => reclamadas.has(clave(ficha.autor, forma)))) continue;
+    if (resueltas.has(ficha.nombre)) continue;
     avisos.push(
       `  · ${ficha.ruta} → ninguna Cita publicada resuelve esta ficha. Si la Obra salió del ` +
         'Corpus, retírela con «npm run obra -- retirar».',
@@ -608,7 +756,7 @@ export function fallosOrtograficos(
       .sort((a, b) => a.slug.localeCompare(b.slug, 'es'));
     if (noLiterales.length === 0) continue;
 
-    const hayDocumento = documentos.formasConDocumento.has(clave(obra.autor, obra.forma));
+    const hayDocumento = documentos.formasConDocumento.has(clave(obra.dueño, obra.forma));
     const lineas = noLiterales.map((c) => {
       const orden =
         hayDocumento && documentos.censo.has(c.slug)
@@ -620,7 +768,7 @@ export function fallosOrtograficos(
       );
     });
     fallos.push(
-      `  · La Obra de forma «${obra.forma}» de ${obra.autor} se publica con ` +
+      `  · La Obra de forma «${obra.forma}» de ${obra.dueño} se publica con ` +
         `${obra.grafias.length} grafías: ` +
         obra.grafias.map((g) => `«${g.literal}» ×${g.citas}`).join(', ') +
         '. Dos grafías solo se admiten si las dos son literales de su Fuente, y estas no:\n' +
@@ -698,13 +846,13 @@ export function avisosDePrefijo(fichas: readonly FichaDeObra[]): string[] {
   const ordenadas = [...fichas].sort((a, b) => a.nombre.localeCompare(b.nombre, 'es'));
   for (const corta of ordenadas) {
     for (const larga of ordenadas) {
-      if (corta === larga || corta.autor !== larga.autor) continue;
+      if (corta === larga || dueñoDeFicha(corta).slug !== dueñoDeFicha(larga).slug) continue;
       if (declaradasDistintas(corta, larga)) continue;
       for (const fc of corta.formas) {
         const fl = larga.formas.find((f) => f.startsWith(`${fc} `));
         if (fl === undefined) continue;
         avisos.push(
-          `  · ${corta.autor}: «${fc}» (${corta.ruta}) es prefijo de «${fl}» (${larga.ruta}). ` +
+          `  · ${dueñoDeFicha(corta).slug}: «${fc}» (${corta.ruta}) es prefijo de «${fl}» (${larga.ruta}). ` +
             `Si son la misma Obra: «npm run obra -- reunir ${corta.nombre} ${larga.nombre}» ` +
             '(la primera es la que queda; al revés si debe quedar la otra); si no: ' +
             `«npm run obra -- separar ${corta.nombre} ${larga.nombre}».`,
@@ -722,14 +870,17 @@ export function avisosDePrefijo(fichas: readonly FichaDeObra[]): string[] {
  * saberlo antes de que una forma nueva la herede sin que nadie la haya decidido.
  */
 export function avisosDeDistintaRancia(fichas: readonly FichaDeObra[]): string[] {
-  const reclamadas = new Set(fichas.flatMap((f) => f.formas.map((forma) => clave(f.autor, forma))));
+  const reclamadas = new Set(
+    fichas.flatMap((f) => f.formas.map((forma) => clave(dueñoDeFicha(f).slug, forma))),
+  );
   const avisos: string[] = [];
   for (const ficha of [...fichas].sort((a, b) => a.nombre.localeCompare(b.nombre, 'es'))) {
+    const dueño = dueñoDeFicha(ficha).slug;
     for (const forma of ficha.distintaDe ?? []) {
-      if (reclamadas.has(clave(ficha.autor, forma))) continue;
+      if (reclamadas.has(clave(dueño, forma))) continue;
       avisos.push(
         `  · ${ficha.ruta} → se declara distinta de «${forma}», y ninguna ficha activa de ` +
-          `${ficha.autor} reclama esa forma: es una declaración rancia, que ya no separa nada.`,
+          `${dueño} reclama esa forma: es una declaración rancia, que ya no separa nada.`,
       );
     }
   }
@@ -751,7 +902,10 @@ export function avisosDeDistintaRancia(fichas: readonly FichaDeObra[]): string[]
 export interface ObraResuelta {
   /** Nombre de la ficha: la identidad de URL de la Obra. */
   nombre: string;
-  autor: string;
+  /** Su dueño (`dueñoDeFicha`): un Autor o, desde la Historia 35.2, un Personaje. */
+  dueño: Dueño;
+  /** El Autor de la Obra: el dueño en la de un Autor; en la de un Personaje, si se sabe. */
+  autor?: string;
   /** El título que se publica: el `tituloEfectivo` de la 22.2. */
   titulo: string;
   /**
@@ -861,7 +1015,8 @@ export function resolverObras(
 
     resueltas.set(ficha.nombre, {
       nombre: ficha.nombre,
-      autor: ficha.autor,
+      dueño: dueñoDeFicha(ficha),
+      ...(ficha.autor !== undefined ? { autor: ficha.autor } : {}),
       titulo: tituloDe(ficha, grafiasDeCitas(suyas)) ?? ficha.titulo,
       ...(años.length === 1 ? { año: años[0] } : {}),
       fuentes,
@@ -882,7 +1037,7 @@ export function resolverObras(
  */
 export function obraDeCita(
   cita: CitaConObra,
-  fichas: readonly FichaDeObra[] | Map<string, FichaDeObra>,
+  fichas: readonly FichaDeObra[] | IndiceDeFichas,
   obras: ReadonlyMap<string, ObraResuelta>,
 ): ObraResuelta | undefined {
   const ficha = fichaDeCita(cita, fichas);

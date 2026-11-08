@@ -642,6 +642,11 @@ export interface AutorParaCotejar {
    * Autor con biografía y sin semblanza no pasa la puerta.
    */
   semblanza?: string;
+  /**
+   * Historia 35.2 — quién declara la biografía, como lo nombra el fallo: «el Autor», por
+   * omisión, o «el Personaje». La semblanza de un Personaje se coteja con la misma regla.
+   */
+  quien?: 'el Autor' | 'el Personaje';
 }
 
 /**
@@ -700,14 +705,16 @@ export function cotejarBiografias(
 
     const ruta = `${carpeta}/${declarada.documento}.txt`;
     const regla = (detalle: string) => ({ ruta: autor.ruta, regla: `Regla incumplida: ${detalle}` });
-    const delante = `el Autor declara la biografía ${ruta} (revisión ${declarada.revision}) y`;
+    const quien = autor.quien ?? 'el Autor';
+    const orden = quien === 'el Personaje' ? 'tools/personaje.ts' : 'tools/autor.ts';
+    const delante = `${quien} declara la biografía ${ruta} (revisión ${declarada.revision}) y`;
 
     if (!documentos.has(declarada.documento)) {
       fallos.push(
         regla(
           `${delante} ese documento no existe. Recupere esa revisión con: npx tsx ` +
             'tools/recuperar.ts "<enlace permanente con oldid>", y declárela con: npx tsx ' +
-            'tools/autor.ts biografia <slug> <documento>.',
+            `${orden} biografia <slug> <documento>.`,
         ),
       );
       continue;
@@ -742,7 +749,7 @@ export function cotejarBiografias(
     if (cabecera.revision !== declarada.revision) {
       fallos.push(
         regla(
-          `el Autor declara la revisión ${declarada.revision} de su biografía y ${ruta} es ` +
+          `${quien} declara la revisión ${declarada.revision} de su biografía y ${ruta} es ` +
             `la revisión ${cabecera.revision}. Una revisión distinta es otro documento: ` +
             'recupérela, o declare la que está versionada.',
         ),
@@ -809,7 +816,7 @@ export function cotejarBiografias(
     if (typeof autor.semblanza !== 'string' || autor.semblanza.trim() === '') {
       fallos.push(
         regla(
-          `${delante} no tiene semblanza que cotejar. La semblanza de un Autor con biografía ` +
+          `${delante} no tiene semblanza que cotejar. La semblanza de ${quien === 'el Personaje' ? 'un Personaje' : 'un Autor'} con biografía ` +
             'es el texto literal de esa revisión.',
         ),
       );

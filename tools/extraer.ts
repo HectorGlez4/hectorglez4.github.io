@@ -53,6 +53,7 @@ import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { basename, extname, isAbsolute, join, relative, resolve, sep } from 'node:path';
 import { normalizar } from '../src/lib/normalizar.ts';
 import { slugDeCita, slugLibre } from '../src/lib/slug.ts';
+import { dueñoDeCita } from '../src/lib/obras.ts';
 import {
   aYaml,
   leerAutores,
@@ -416,7 +417,7 @@ const ocupados = new Set([
  */
 const clave = (autorDeLaCita: string, texto: string) => `${autorDeLaCita} ${normalizar(texto)}`;
 
-const yaEnRevision = new Set(enRevision.map((c) => clave(c.autor, c.texto)));
+const yaEnRevision = new Set(enRevision.map((c) => clave(dueñoDeCita(c).slug, c.texto)));
 
 /*
  * Y lo que ya **es Cita publicada**, también por texto.
@@ -430,7 +431,7 @@ const yaEnRevision = new Set(enRevision.map((c) => clave(c.autor, c.texto)));
  * Y re-extraer no es raro: es lo que se hace cada vez que entra una puerta nueva y hay que
  * pasar por ella los documentos viejos.
  */
-const yaPublicadas = new Set(publicadas.map((c) => clave(c.autor, c.texto)));
+const yaPublicadas = new Set(publicadas.map((c) => clave(dueñoDeCita(c).slug, c.texto)));
 
 let repetidas = 0;
 let yaEstaban = 0;

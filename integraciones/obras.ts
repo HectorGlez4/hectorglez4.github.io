@@ -29,6 +29,7 @@ import {
   leerCitas,
   leerDocumentosDeclarados,
   leerFichasDeObra,
+  leerPersonajes,
   rutasDelCorpus,
 } from '../tools/lib/corpus.ts';
 import { documentosDeCita } from '../tools/lib/cotejo.ts';
@@ -109,7 +110,14 @@ export default function fichasDeObra(): AstroIntegration {
     };
 
     return {
-      fallos: fallosDeObras(fichas, citas, autores, documentos),
+      // Historia 35.2 — con los Personajes: una ficha puede ser de uno, y nombrar a otros.
+      fallos: fallosDeObras(
+        fichas,
+        citas,
+        autores,
+        documentos,
+        (await leerPersonajes(rutas)).map((p) => p.slug),
+      ),
       // Historia 22.3 — y la Obra cuyas Citas declaran años distintos, que no publica año.
       // Historia 22.9 — y la ficha con ediciones en venta sin ninguna edición cotejada.
       avisos: [

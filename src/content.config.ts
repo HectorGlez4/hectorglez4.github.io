@@ -21,7 +21,9 @@ import {
   ordenAlfabetico,
   ordenRevisado,
   personaje,
+  personajeAdmisible,
   procedencia,
+  reglaDeAutorPublicado,
   reglasDeAutor,
   reglasDeClase,
   semblanza,
@@ -75,14 +77,20 @@ const citas = defineCollection({
     // del texto de la Cita. NFR-12 prohíbe que el sistema altere una Cita publicada sin
     // acción explícita del editor. El frontmatter pasa intacto.
     texto,
-    autor: reference('autores'),
+    /*
+     * Historia 35.2 — opcional en el esquema: el dueño de una Cita es su Autor o, sin él, su
+     * Personaje. Pero una Cita **publicada** sin Autor rompe hasta la Historia 35.4
+     * (`reglaDeAutorPublicado`, abajo), que es la que la pinta.
+     */
+    autor: reference('autores').optional(),
     temas: z.array(reference('temas')).default([]),
     slug,
     procedencia,
     /*
      * Historia 35.1 — la clase y el Personaje, con las reglas de `admision.ts`: `estadoDerechos`
      * es obligatorio en la de siempre y prohibido en la atribuida (`reglasDeClase`), y
-     * `personaje` es solo la forma de un slug hasta la Historia 35.2.
+     * `personaje` es la forma de un slug: que exista en `corpus/personajes/` lo comprueba
+     * `integraciones/personajes.ts` (Historia 35.2).
      */
     estadoDerechos: estadoDerechos.optional(),
     clase: clase.optional(),
@@ -100,7 +108,9 @@ const citas = defineCollection({
     fuente: fuenteDeCita.optional(),
     // FR-15 — marcado de Cita apta para portada, que consume la Cita del Día (FR-9).
     aptaParaPortada: z.boolean().default(false),
-  }).superRefine(reglasDeClase, CUANDO_SIEMPRE),
+  })
+    .superRefine(reglasDeClase, CUANDO_SIEMPRE)
+    .superRefine(reglaDeAutorPublicado, CUANDO_SIEMPRE),
 });
 
 const autores = defineCollection({
@@ -122,6 +132,20 @@ const autores = defineCollection({
     ordenAlfabetico: ordenAlfabetico.optional(),
     ordenRevisado: ordenRevisado.optional(),
   }).superRefine(reglasDeAutor, CUANDO_SIEMPRE),
+});
+
+/*
+ * Los Personajes — Historia 35.2, AD-1, AD-33.
+ *
+ * El esquema es literalmente el de `admision.ts`, como la Colección y la Ficha de Obra: no
+ * tiene referencias de Astro. Un Personaje comparte un solo espacio de slugs con los Autores
+ * —la puerta que lo exige, con los retirados, es `integraciones/personajes.ts`— y se versiona
+ * vacío con su `.gitkeep`: ningún agente siembra Personajes. Mientras esté vacío, el cargador
+ * avisa de que no encuentra ficheros, igual que las Colecciones; no es ningún fallo.
+ */
+const personajes = defineCollection({
+  loader: glob({ pattern: '**/*.{yml,yaml}', base: './corpus/personajes' }),
+  schema: personajeAdmisible,
 });
 
 const temas = defineCollection({
@@ -399,4 +423,4 @@ const indices = defineCollection({
   }),
 });
 
-export const collections = { citas, autores, temas, colecciones, obras, biografias, posiciones, indices };
+export const collections = { citas, autores, personajes, temas, colecciones, obras, biografias, posiciones, indices };

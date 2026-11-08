@@ -37,6 +37,7 @@ import {
   leerAutores,
   leerCitas,
   leerRegistroDeClases,
+  leerPersonajes,
   leerTemas,
   nombreDeFicheroDeCita,
   registrarClases,
@@ -110,6 +111,11 @@ export interface InformeDeAlta {
   /** Autores citados en el lote que no existen en el corpus. No se crean (FR-15). */
   autoresDesconocidos: string[];
   /**
+   * Personajes citados en el lote que no existen en `corpus/personajes/` — Historia 35.2. Una
+   * entrada sin Autor cuyo Personaje no existe no tiene dueño: no se escribe en ningún sitio.
+   */
+  personajesDesconocidos?: string[];
+  /**
    * Publicadas cuya Ficha de Obra, resuelta antes de escribir la Cita, no se pudo escribir
    * después —un fallo de disco entre medias—. `npm run obra -- sembrar` la completa
    * (Historia 22.1). Vacío casi siempre.
@@ -164,6 +170,7 @@ export async function darDeAltaLote(
   opciones: { seco?: boolean; conDuplicados?: boolean } = {},
 ): Promise<InformeDeAlta> {
   const autores = await leerAutores(rutas);
+  const slugsDePersonaje = new Set((await leerPersonajes(rutas)).map((p) => p.slug));
   // Historia 35.1 — el registro de clases se lee antes de escribir nada: ilegible, nada se escribe.
   const registro = await leerRegistroDeClases(rutas);
   const temas = await leerTemas(rutas);
@@ -271,7 +278,7 @@ export async function darDeAltaLote(
   ): Promise<{ informe: InformeDeAlta; aPublicar: Publicada[] }> {
     const slugsOcupados = new Set(yaPublicadas.map((c) => c.slug));
     // El conjunto publicado tal como va quedando, para la grafía por omisión de una ficha nueva.
-    const publicadasParaObra: { autor: string; procedencia?: { obra?: string } }[] = [
+    const publicadasParaObra: { autor?: string; personaje?: string; procedencia?: { obra?: string } }[] = [
       ...yaPublicadas,
     ];
 
@@ -312,15 +319,35 @@ export async function darDeAltaLote(
         continue;
       }
 
-      // ── El Autor se resuelve antes que nada: sin él no hay slug que generar ──
+      /*
+       * ── El dueño se resuelve antes que nada: sin él no hay slug que generar ──
+       *
+       * Historia 35.2 — el dueño es el Autor o, sin él, el Personaje, que tiene que existir: una
+       * entrada sin Autor cuyo Personaje no existe no tiene prefijo ni fichero, y no se escribe.
+       */
       const referenciaAutor = entrada.autor ?? '';
       const slugAutor = slugsDeAutor.has(referenciaAutor)
         ? referenciaAutor
         : slugDeAutor(referenciaAutor);
+      const personaje = entrada.personaje;
+      const personajeConocido = personaje !== undefined && slugsDePersonaje.has(personaje);
+      if (personaje !== undefined && !personajeConocido) {
+        if (!(informe.personajesDesconocidos ?? []).includes(personaje)) {
+          informe.personajesDesconocidos = [...(informe.personajesDesconocidos ?? []), personaje];
+        }
+        // Sin Autor no hay dueño: nada se escribe de esta entrada.
+        if (referenciaAutor === '') continue;
+        motivos.push(
+          `El Personaje «${personaje}» no existe en el corpus. Créelo antes con ` +
+            '«npx tsx tools/personaje.ts crear».',
+        );
+      }
+      const conAutor = referenciaAutor !== '';
+      const slugDueño = conAutor ? slugAutor : (personaje ?? '');
 
-      if (referenciaAutor === '') {
-        motivos.push('Regla incumplida: falta el Autor de la Cita.');
-      } else if (!slugsDeAutor.has(slugAutor)) {
+      if (!conAutor && personaje === undefined) {
+        motivos.push('Regla incumplida: falta el Autor o el Personaje de la Cita.');
+      } else if (conAutor && !slugsDeAutor.has(slugAutor)) {
         // FR-15 — se señala, no se crea. Un Autor creado aquí saldría sin año de
         // fallecimiento, y ese hueco bloquearía después la publicación de todas sus
         // Citas sin que nadie recuerde de dónde salió.
@@ -353,20 +380,23 @@ export async function darDeAltaLote(
        * en lo demás. Una clase escrita en el lote no se obedece: se dice. Y la atribuida, con su
        * puerta cerrada hasta la 35.1b, va a revisión con la clase puesta y sin estadoDerechos.
        */
-      const autorLeido = autorPorSlug.get(slugAutor);
+      const autorLeido = conAutor ? autorPorSlug.get(slugAutor) : undefined;
       const clase: Clase =
         autorLeido === undefined
-          ? claseDe({})
-          : claseQueCorresponde(entrada.personaje !== undefined ? { personaje: entrada.personaje } : {}, autorLeido);
+          ? // Sin Autor leído: la de un Personaje es atribuida; sin nada, la de siempre (y el esquema la rechaza).
+            personaje !== undefined
+            ? claseQueCorresponde({ personaje }, {})
+            : claseDe({})
+          : claseQueCorresponde(personaje !== undefined ? { personaje } : {}, autorLeido);
       const atribuida = esAtribuida({ clase });
       if ('clase' in entrada) motivos.push(MOTIVO_CLASE_TECLEADA);
       if (atribuida) motivos.push(MOTIVO_PUERTA_CERRADA);
 
       // ── Las reglas de admisión, las mismas que aplica el build ──
-      const slugBase = slugDeCita(slugAutor, texto);
+      const slugBase = slugDeCita(slugDueño, texto);
       const candidata = {
         texto,
-        autor: slugAutor,
+        ...(conAutor ? { autor: slugAutor } : {}),
         temas: temasResueltos,
         // Un slug registrado con la otra clase cuenta como ocupado: una Cita no cambia de clase.
         slug: slugLibre(slugBase, [...slugsOcupados, ...slugsConOtraClase(registro, clase)]),
@@ -402,7 +432,7 @@ export async function darDeAltaLote(
       const sinDocumento = motivoParaNoPublicar(candidata);
       if (sinDocumento !== undefined) motivos.push(sinDocumento);
 
-      const nombreFichero = nombreDeFicheroDeCita(slugAutor, candidata.slug);
+      const nombreFichero = nombreDeFicheroDeCita(slugDueño, candidata.slug);
 
       /*
        * Historia 22.1 — la Ficha de Obra, en el mismo gesto en que se publica (AD-25).
@@ -416,13 +446,14 @@ export async function darDeAltaLote(
       const obraDeclarada = validada.success ? validada.data.procedencia?.obra : undefined;
       let plan: PlanDeFicha | undefined;
       if (motivos.length === 0 && validada.success && typeof obraDeclarada === 'string') {
+        const dueños = {
+          ...(conAutor ? { autor: slugAutor } : {}),
+          ...(personaje !== undefined ? { personaje } : {}),
+        };
         plan = await resolverFichaDeObra(rutas, {
-          autor: slugAutor,
+          ...dueños,
           obra: obraDeclarada,
-          citasPublicadas: [
-            ...publicadasParaObra,
-            { autor: slugAutor, procedencia: { obra: obraDeclarada } },
-          ],
+          citasPublicadas: [...publicadasParaObra, { ...dueños, procedencia: { obra: obraDeclarada } }],
         });
         if (!plan.ok) motivos.push(...plan.motivos);
       }
@@ -447,7 +478,11 @@ export async function darDeAltaLote(
       aPublicar.push({ indice, texto, slug: candidata.slug, temas: validada.data.temas, clase });
       if (!opciones.seco) {
         // Solo lo que de verdad se publica cuenta para la grafía por omisión.
-        publicadasParaObra.push({ autor: slugAutor, procedencia: validada.data.procedencia });
+        publicadasParaObra.push({
+          ...(conAutor ? { autor: slugAutor } : {}),
+          ...(personaje !== undefined ? { personaje } : {}),
+          procedencia: validada.data.procedencia,
+        });
         if (plan !== undefined && escribir) {
           const ficha = await aplicarFichaDeObra(rutas, plan);
           if (!ficha.ok) {
@@ -587,6 +622,14 @@ export function formatearInforme(informe: InformeDeAlta): string {
   if (informe.autoresDesconocidos.length > 0) {
     lineas.push('', 'Autores que no existen en el corpus:');
     for (const a of informe.autoresDesconocidos) lineas.push(`  · ${a}`);
+  }
+
+  if ((informe.personajesDesconocidos ?? []).length > 0) {
+    lineas.push(
+      '',
+      'Personajes que no existen en el corpus (sin Autor, sus entradas no tienen dueño y no se han escrito):',
+    );
+    for (const p of informe.personajesDesconocidos ?? []) lineas.push(`  · ${p}`);
   }
 
   return lineas.join('\n');

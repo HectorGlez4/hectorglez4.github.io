@@ -448,6 +448,7 @@ describe('UX-DR49 — pestaña y descripción', () => {
 describe('la Atribución en piezas: el título siempre es el enlace', () => {
   const OBRA = {
     nombre: 'gracian--oraculo',
+    dueño: { tipo: 'autor' as const, slug: 'gracian' },
     autor: 'gracian',
     titulo: 'Oráculo',
     fuentes: [],

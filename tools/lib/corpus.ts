@@ -18,6 +18,7 @@ import {
   type AutorAdmisible,
   type CitaAdmisible,
   type ObraAdmisible,
+  type PersonajeAdmisible,
 } from '../../src/lib/admision.ts';
 import type { FichaDeObra } from '../../src/lib/obras.ts';
 import { CLASES, esClase, type Clase } from '../../src/lib/clase.ts';
@@ -178,6 +179,12 @@ export interface Rutas {
   raiz: string;
   citas: string;
   autores: string;
+  /**
+   * Los Personajes — Historia 35.2, AD-1. Colección de Astro con esta misma base en
+   * `src/content.config.ts`; comparten un solo espacio de slugs con los Autores, activos y
+   * retirados. Se versiona vacía con su `.gitkeep`: ningún agente siembra Personajes.
+   */
+  personajes: string;
   temas: string;
   /**
    * Las Colecciones — Historia 12.2, AD-18.
@@ -365,6 +372,7 @@ export function rutasDelCorpus(raizCorpus: string): Rutas {
     raiz: raizCorpus,
     citas: join(raizCorpus, 'citas'),
     autores: join(raizCorpus, 'autores'),
+    personajes: join(raizCorpus, 'personajes'),
     temas: join(raizCorpus, 'temas'),
     colecciones: join(raizCorpus, 'colecciones'),
     coleccionesRetiradas: join(raizCorpus, '_colecciones-retiradas'),
@@ -443,6 +451,24 @@ export async function leerAutores(rutas: Rutas): Promise<AutorEnCorpus[]> {
       ...(parsearYaml(await readFile(ruta, 'utf8')) as AutorAdmisible & {
         tituloEnFuente?: string;
       }),
+      slug: slugDeFichero(ruta),
+      ruta,
+    })),
+  );
+}
+
+/** Un Personaje del Corpus, ya leído, con el slug de su fichero — Historia 35.2. */
+export interface PersonajeEnCorpus extends PersonajeAdmisible {
+  slug: string;
+  ruta: string;
+}
+
+/** Los Personajes de `corpus/personajes/`, sin juzgarlos: el esquema lo hace el build y la orden. */
+export async function leerPersonajes(rutas: Rutas): Promise<PersonajeEnCorpus[]> {
+  const ficheros = await ficherosDe(rutas.personajes, ['.yml', '.yaml']);
+  return Promise.all(
+    ficheros.map(async (ruta) => ({
+      ...(parsearYaml(await readFile(ruta, 'utf8')) as PersonajeAdmisible),
       slug: slugDeFichero(ruta),
       ruta,
     })),
@@ -639,7 +665,10 @@ export async function escribirFichaDeObra(
 /** El YAML de una ficha, con sus campos siempre en el mismo orden. Lo opcional sin valor se omite. */
 function yamlDeFicha(ficha: ObraAdmisible): string {
   return aYaml({
-    autor: ficha.autor,
+    // Historia 35.2 — el dueño: el Autor, o el Personaje con sus Personajes (y el Autor si se sabe).
+    ...(ficha.autor !== undefined ? { autor: ficha.autor } : {}),
+    ...(ficha.personaje !== undefined ? { personaje: ficha.personaje } : {}),
+    ...(ficha.personajes !== undefined ? { personajes: ficha.personajes } : {}),
     titulo: ficha.titulo,
     formas: ficha.formas,
     ...(ficha.distintaDe !== undefined && ficha.distintaDe.length > 0
@@ -882,6 +911,18 @@ export async function escribirAutor(
   return ruta;
 }
 
+/** Escribe la ficha de un Personaje entera — Historia 35.2. La escribe solo `tools/personaje.ts`. */
+export async function escribirPersonaje(
+  rutas: Rutas,
+  slug: string,
+  personaje: Record<string, unknown>,
+): Promise<string> {
+  await mkdir(rutas.personajes, { recursive: true });
+  const ruta = join(rutas.personajes, `${slug}.yml`);
+  await writeFile(ruta, aYaml(personaje), 'utf8');
+  return ruta;
+}
+
 /**
  * Fija campos escalares de un fichero de Autor **sin tocar nada más** — Historia 26.1.
  *
@@ -1059,14 +1100,15 @@ export async function mover(origen: string, destinoDir: string): Promise<string>
 }
 
 /**
- * El nombre de fichero que fija la espina: `{slug-autor}--{fragmento}.md`. Se deriva del
- * slug ya calculado, no del texto, para que fichero y URL no puedan divergir.
+ * El nombre de fichero que fija la espina: `{slug-del-dueño}--{fragmento}.md`. Se deriva del
+ * slug ya calculado, no del texto, para que fichero y URL no puedan divergir. El dueño es el
+ * Autor de la Cita o, sin él, su Personaje (Historia 35.2, `dueñoDeCita`).
  */
-export function nombreDeFicheroDeCita(slugAutor: string, slugCita: string): string {
-  const fragmento = slugCita.startsWith(`${slugAutor}-`)
-    ? slugCita.slice(slugAutor.length + 1)
+export function nombreDeFicheroDeCita(slugDueño: string, slugCita: string): string {
+  const fragmento = slugCita.startsWith(`${slugDueño}-`)
+    ? slugCita.slice(slugDueño.length + 1)
     : slugCita;
-  return `${slugAutor}--${fragmento}`;
+  return `${slugDueño}--${fragmento}`;
 }
 
 /**
@@ -2255,10 +2297,12 @@ export const CABECERA_DE_DEMANDA = [
 /** Una entrada ya escrita en la serie de demanda, tal y como se relee. */
 export type LecturaDeVentanaRegistrada = Omit<
   LecturaDeVentana,
-  'autores' | 'citas' | 'familias' | 'slugsSinAutor' | 'citasConClic'
+  'autores' | 'personajes' | 'citas' | 'familias' | 'slugsSinAutor' | 'citasConClic'
 > & {
   /** Ausentes cuando están vacías: `aYaml` omite una lista o un objeto sin elementos. */
   autores?: LecturaDeVentana['autores'];
+  /** Los Personajes (Historia 35.2); las entradas anteriores no los traen. */
+  personajes?: LecturaDeVentana['personajes'];
   citas?: LecturaDeVentana['citas'];
   familias?: LecturaDeVentana['familias'];
 };
@@ -2328,6 +2372,8 @@ export async function registrarLecturaDeDemanda(
       propiedad: v.propiedad,
       vacia: v.vacia,
       autores: v.autores,
+      // Historia 35.2 — vacía se omite: con el Corpus real, sin Personajes, la serie no cambia.
+      ...(v.personajes.length > 0 ? { personajes: v.personajes } : {}),
       citas: v.citas,
       sinAutor: v.sinAutor,
       resto: v.resto,
@@ -2365,6 +2411,7 @@ export async function registrarLecturaDeDemanda(
     if (escrita.clase !== leida.clase) problemas.push('la clase');
     if ((escrita.vacia === true) !== (leida.vacia === true)) problemas.push('la marca «vacia»');
     if ((escrita.autores ?? []).length !== leida.autores.length) problemas.push('los Autores');
+    if ((escrita.personajes ?? []).length !== leida.personajes.length) problemas.push('los Personajes');
     if ((escrita.citas ?? []).length !== leida.citas.length) problemas.push('las Citas');
     if (escrita.sinAutor === undefined) problemas.push('«sinAutor»');
     if (escrita.resto === undefined) problemas.push('«resto»');

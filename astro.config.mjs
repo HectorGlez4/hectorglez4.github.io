@@ -8,6 +8,7 @@ import historialDelCorpus, { fechasDelSitemap } from './integraciones/historial.
 import cotejoDeCitas from './integraciones/cotejo.ts';
 import clavesDeOrden from './integraciones/claves.ts';
 import clasesDeCita from './integraciones/clases.ts';
+import personajesDelCorpus from './integraciones/personajes.ts';
 import formaDeLasColecciones from './integraciones/colecciones.ts';
 import fichasDeObra from './integraciones/obras.ts';
 import coberturaTipografica from './integraciones/cobertura.ts';
@@ -144,6 +145,13 @@ export default defineConfig({
      * Rompe nombrando la Cita, la ficha y la orden que la anota.
      */
     clasesDeCita(),
+
+    /*
+     * Historia 35.2 — un Personaje no comparte slug con ningún Autor, activo o retirado, y toda
+     * Cita que nombra un Personaje lo encuentra en `corpus/personajes/`. Relaciones entre
+     * ficheros: rompe nombrando los dos.
+     */
+    personajesDelCorpus(),
 
     /*
      * Historia 22.1 — toda Obra publicada tiene Ficha de Obra (AD-25).

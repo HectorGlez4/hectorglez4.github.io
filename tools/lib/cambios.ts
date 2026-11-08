@@ -108,7 +108,7 @@ import {
   rutaDeTema,
   rutaNormalizada,
 } from '../../src/lib/superficies.ts';
-import { formaDeObra, rutaDeLaObra } from '../../src/lib/obras.ts';
+import { dueñoDeCita, dueñoDeFicha, formaDeObra, rutaDeLaObra } from '../../src/lib/obras.ts';
 import { documentoDeCita, documentosDeCita } from './cotejo.ts';
 import { obraDeIndice } from './indice.ts';
 import type { FamiliaDeFichero, FamiliaDeRuta } from './avisar.ts';
@@ -290,8 +290,23 @@ export const CAMPOS_QUE_PINTA = {
     autor: ['titulo'],
     tema: ['titulo'],
     coleccion: ['titulo'],
-    obra: ['autor', 'titulo', 'formas', 'nota', 'ediciones'],
-    directorioDeObras: ['titulo', 'formas'],
+    obra: ['autor', 'personaje', 'personajes', 'titulo', 'formas', 'nota', 'ediciones'],
+    directorioDeObras: ['titulo', 'formas', 'personaje', 'personajes'],
+  },
+  /*
+   * Historia 35.2 — el Personaje. Hoy ninguna superficie lo pinta (la Página de Personaje es de
+   * la 35.3, y la Atribución que lo nombra, de la 35.4), pero el nombre y la clave son los campos
+   * que lo nombrarán, y se clasifican en el mismo commit que entran en el esquema: con el Corpus
+   * real, sin Personajes, la relación no compone ninguno y nada se fecha.
+   */
+  personaje: {
+    cita: ['nombre'],
+    autor: ['nombre'],
+    tema: ['nombre'],
+    coleccion: ['nombre'],
+    obra: ['nombre'],
+    directorioDeAutores: ['ordenAlfabetico'],
+    directorioDeObras: ['ordenAlfabetico'],
   },
   documento: {
     obra: CUALQUIER_CAMBIO,
@@ -319,6 +334,12 @@ export const CAMPOS_QUE_NO_FECHAN = {
   cita: ['aptaParaPortada', 'estadoDerechos', 'clase'],
   autor: ['tradicion', 'ordenRevisado'],
   obra: ['distintaDe'],
+  /*
+   * Historia 35.2 — lo que solo pintará la Página de Personaje (35.3): su universo y su
+   * semblanza, que entonces pasarán a la tabla en su columna; `ordenRevisado`, como el del Autor,
+   * no lo pinta nadie nunca.
+   */
+  personaje: ['universo', 'semblanza', 'semblanzaPropia', 'biografia', 'ordenRevisado'],
 } as const satisfies Partial<Record<FamiliaDeFichero, readonly string[]>>;
 
 /**
@@ -334,7 +355,10 @@ export const CAMPOS_DE_CITA_SIN_OBRA_EN_EL_DIRECTORIO_DE_OBRAS = ['procedencia.o
 /** Una Cita del corpus, con lo justo para saber qué superficies compone. */
 export interface CitaParaFechar {
   slug: string;
-  autor: string;
+  /** Su Autor; opcional desde la Historia 35.2: la de un Personaje puede no tenerlo. */
+  autor?: string;
+  /** Su Personaje, si es atribuida a uno (Historia 35.2). */
+  personaje?: string;
   temas?: readonly string[];
   /**
    * El nombre de la Ficha de Obra que la resuelve, si alguna la resuelve — Historia 22.4. Lo
@@ -352,7 +376,10 @@ export interface CitaParaFechar {
 /** Una Ficha de Obra: su nombre compone la ruta, y su fichero —el título— una fecha. */
 export interface ObraParaFechar {
   nombre: string;
-  autor: string;
+  /** El Autor: dueño en la ficha de un Autor, informativo en la de un Personaje (35.2). */
+  autor?: string;
+  /** El Personaje dueño, en la ficha de un Personaje (35.2). */
+  personaje?: string;
   /** Las formas canónicas que reclama: resuelven las bajas de Cita y las de ficha. */
   formas?: readonly string[];
   ruta: string;
@@ -388,6 +415,8 @@ export interface BajasParaFechar {
 export interface CorpusParaFechar {
   citas: readonly CitaParaFechar[];
   autores: readonly EntidadParaFechar[];
+  /** Los Personajes — Historia 35.2. Opcional: un corpus sin Personajes no la trae. */
+  personajes?: readonly EntidadParaFechar[];
   temas: readonly EntidadParaFechar[];
   colecciones: readonly ColeccionParaFechar[];
   /** Las Fichas de Obra — Historia 22.4. Opcional: un corpus sin Obras no la trae. */
@@ -428,6 +457,9 @@ export type Relacion = ReadonlyMap<string, Superficie>;
  */
 export function relacionDeSuperficies(corpus: CorpusParaFechar): Map<string, Superficie> {
   const ficheroDeAutor = new Map(corpus.autores.map((autor) => [autor.slug, autor.ruta]));
+  const ficheroDePersonaje = new Map((corpus.personajes ?? []).map((p) => [p.slug, p.ruta]));
+  const deAutor = (slug: string | undefined) => (slug === undefined ? undefined : ficheroDeAutor.get(slug));
+  const dePersonaje = (slug: string | undefined) => (slug === undefined ? undefined : ficheroDePersonaje.get(slug));
   const ficheroDeTema = new Map(corpus.temas.map((tema) => [tema.slug, tema.ruta]));
   const fichas = corpus.obras ?? [];
   const ficheroDeObra = new Map(fichas.map((obra) => [obra.nombre, obra.ruta]));
@@ -437,13 +469,13 @@ export function relacionDeSuperficies(corpus: CorpusParaFechar): Map<string, Sup
   /** La ficha viva que reclama (Autor, forma): resuelve la Obra de una Cita que se fue. */
   const fichaViva = new Map<string, ObraParaFechar>();
   for (const ficha of fichas) {
-    for (const forma of ficha.formas ?? []) fichaViva.set(clave(ficha.autor, forma), ficha);
+    for (const forma of ficha.formas ?? []) fichaViva.set(clave(dueñoDeLaFicha(ficha), forma), ficha);
   }
   /** Las fichas que se fueron, por (Autor, forma): fechan las Citas de hoy que reclamaban. */
   const fichasDeBaja = new Map<string, string[]>();
   for (const ficha of bajas.obras ?? []) {
     if (vivos.has(ficha.ruta)) continue;
-    for (const forma of ficha.formas ?? []) apilar(fichasDeBaja, clave(ficha.autor, forma), ficha.ruta);
+    for (const forma of ficha.formas ?? []) apilar(fichasDeBaja, clave(dueñoDeLaFicha(ficha), forma), ficha.ruta);
   }
   /**
    * Los documentos, de hoy y de baja, por su nombre sin extensión; y aparte, los índices de
@@ -463,7 +495,7 @@ export function relacionDeSuperficies(corpus: CorpusParaFechar): Map<string, Sup
     const forma = formaDe(cita);
     return [
       ...(cita.obra === undefined ? [] : [ficheroDeObra.get(cita.obra)].filter(definido)),
-      ...(forma === undefined ? [] : (fichasDeBaja.get(clave(cita.autor, forma)) ?? [])),
+      ...(forma === undefined ? [] : (fichasDeBaja.get(clave(dueñoDeLaCita(cita), forma)) ?? [])),
     ];
   };
 
@@ -501,7 +533,8 @@ export function relacionDeSuperficies(corpus: CorpusParaFechar): Map<string, Sup
   /** Una Cita viva en un listado: ella, su Autor y las fichas de Obra cuyo título pinta. */
   const conLaCita = (ruta: string, cita: CitaParaFechar) => {
     componer(ruta, cita.ruta, 'cita');
-    componer(ruta, ficheroDeAutor.get(cita.autor), 'autor');
+    componer(ruta, deAutor(cita.autor), 'autor');
+    componer(ruta, dePersonaje(cita.personaje), 'personaje');
     for (const ficha of fichasDeLaCita(cita)) componer(ruta, ficha, 'obra');
   };
 
@@ -515,7 +548,8 @@ export function relacionDeSuperficies(corpus: CorpusParaFechar): Map<string, Sup
     const ruta = rutaDeCita(cita.slug);
     declarar(ruta, 'cita');
     componer(ruta, cita.ruta, 'cita');
-    componer(ruta, ficheroDeAutor.get(cita.autor), 'autor');
+    componer(ruta, deAutor(cita.autor), 'autor');
+    componer(ruta, dePersonaje(cita.personaje), 'personaje');
     for (const tema of cita.temas ?? []) componer(ruta, ficheroDeTema.get(tema), 'tema');
     for (const ficha of fichasDeLaCita(cita)) componer(ruta, ficha, 'obra');
   }
@@ -527,7 +561,7 @@ export function relacionDeSuperficies(corpus: CorpusParaFechar): Map<string, Sup
   for (const autor of corpus.autores) componer(rutaDeAutor(autor.slug), autor.ruta, 'autor');
   for (const tema of corpus.temas) componer(rutaDeTema(tema.slug), tema.ruta, 'tema');
   for (const cita of corpus.citas) {
-    conLaCita(rutaDeAutor(cita.autor), cita);
+    if (cita.autor !== undefined) conLaCita(rutaDeAutor(cita.autor), cita);
     for (const tema of cita.temas ?? []) conLaCita(rutaDeTema(tema), cita);
   }
   const deCita = new Map(corpus.citas.map((cita) => [cita.slug, cita]));
@@ -550,7 +584,11 @@ export function relacionDeSuperficies(corpus: CorpusParaFechar): Map<string, Sup
   const directorio = rutaDelDirectorioDeAutores();
   declarar(directorio, 'directorio', 'directorioDeAutores');
   for (const slug of new Set(corpus.citas.map((cita) => cita.autor))) {
-    componer(directorio, ficheroDeAutor.get(slug), 'autor');
+    componer(directorio, deAutor(slug), 'autor');
+  }
+  // Historia 35.2 — todo Personaje con alguna Cita compone los dos Directorios (35.5 los pinta).
+  for (const slug of new Set(corpus.citas.map((cita) => cita.personaje))) {
+    componer(directorio, dePersonaje(slug), 'personaje');
   }
   for (const cita of corpus.citas) componer(directorio, cita.ruta, 'cita');
 
@@ -581,7 +619,10 @@ export function relacionDeSuperficies(corpus: CorpusParaFechar): Map<string, Sup
     if (!tieneObra(cita)) componerCampos(directorioDeObras, cita.ruta, CAMPOS_DE_CITA_SIN_OBRA_EN_EL_DIRECTORIO_DE_OBRAS);
   }
   for (const slug of new Set(conObra.map((cita) => cita.autor))) {
-    componer(directorioDeObras, ficheroDeAutor.get(slug), 'autor');
+    componer(directorioDeObras, deAutor(slug), 'autor');
+  }
+  for (const slug of new Set(corpus.citas.map((cita) => cita.personaje))) {
+    componer(directorioDeObras, dePersonaje(slug), 'personaje');
   }
 
   // La Página de Obra: su ficha, sus Citas, su Autor y sus documentos. Sin Citas no tiene página.
@@ -592,7 +633,9 @@ export function relacionDeSuperficies(corpus: CorpusParaFechar): Map<string, Sup
     declarar(ruta, 'obra');
     componer(ruta, obra.ruta, 'obra');
     for (const cita of citas) componer(ruta, cita.ruta, 'cita');
-    componer(ruta, ficheroDeAutor.get(obra.autor), 'autor');
+    componer(ruta, deAutor(obra.autor), 'autor');
+    // Historia 35.2 — la Obra de un Personaje la compone su dueño.
+    componer(ruta, dePersonaje(obra.personaje), 'personaje');
     for (const cita of citas) {
       if (cita.fuente === undefined) continue;
       for (const nombre of documentosDeCita({ id: cita.fuente }, cita.obraDeclarada, documentos)) {
@@ -615,7 +658,7 @@ export function relacionDeSuperficies(corpus: CorpusParaFechar): Map<string, Sup
   }
   for (const baja of bajas.citas ?? []) {
     if (vivos.has(baja.ruta)) continue;
-    componer(rutaDeAutor(baja.autor), baja.ruta, 'cita');
+    if (baja.autor !== undefined) componer(rutaDeAutor(baja.autor), baja.ruta, 'cita');
     // El Directorio la contaba en su Autor: la baja mueve el recuento (26.3).
     componer(directorio, baja.ruta, 'cita');
     // Y el de Obras la contaba en su Obra, si declaraba una: la baja mueve su recuento (26.4).
@@ -626,7 +669,7 @@ export function relacionDeSuperficies(corpus: CorpusParaFechar): Map<string, Sup
     for (const tema of baja.temas ?? []) componer(rutaDeTema(tema), baja.ruta, 'cita');
     for (const ruta of coleccionesDe.get(baja.slug) ?? []) componer(ruta, baja.ruta, 'cita');
     const forma = formaDe(baja);
-    const obra = forma === undefined ? undefined : fichaViva.get(clave(baja.autor, forma));
+    const obra = forma === undefined ? undefined : fichaViva.get(clave(dueñoDeLaCita(baja), forma));
     if (obra !== undefined) componer(rutaDeLaObra(obra), baja.ruta, 'cita');
   }
 
@@ -816,6 +859,7 @@ export function ficherosDelCorpus(corpus: CorpusParaFechar): string[] {
     ...new Set([
       ...corpus.citas.map((cita) => cita.ruta),
       ...corpus.autores.map((autor) => autor.ruta),
+      ...(corpus.personajes ?? []).map((personaje) => personaje.ruta),
       ...corpus.temas.map((tema) => tema.ruta),
       ...corpus.colecciones.map((coleccion) => coleccion.ruta),
       ...(corpus.obras ?? []).map((obra) => obra.ruta),
@@ -897,8 +941,17 @@ function formaDe(cita: CitaParaFechar): string | undefined {
   return forma === '' ? undefined : forma;
 }
 
-function clave(autor: string, forma: string): string {
-  return `${autor}\u0000${forma}`;
+function clave(dueño: string, forma: string): string {
+  return `${dueño}\u0000${forma}`;
+}
+
+/* El dueño de una ficha y el de una Cita (Historia 35.2): la regla única de `src/lib/obras.ts`. */
+function dueñoDeLaFicha(ficha: ObraParaFechar): string {
+  return dueñoDeFicha(ficha).slug;
+}
+
+function dueñoDeLaCita(cita: CitaParaFechar): string {
+  return dueñoDeCita(cita).slug;
 }
 
 /** El nombre de un fichero sin directorio y, si es un documento, sin su `.txt`. */

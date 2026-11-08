@@ -106,7 +106,8 @@ export interface CitaParaClases {
   slug: string;
   /** La ruta de su fichero, como se nombra en el fallo (relativa a la raíz). */
   ruta: string;
-  autor: string;
+  /** Opcional desde la Historia 35.2: la de un Personaje puede no tener Autor. */
+  autor?: string;
   clase?: unknown;
   personaje?: unknown;
 }
@@ -163,6 +164,8 @@ export function fallosDeClases(
       );
     }
 
+    // La Cita de un Personaje sin Autor tiene derechos siempre vigentes: no hay Autor que juzgar.
+    if (cita.autor === undefined) continue;
     const autor = autorPorSlug.get(cita.autor);
     if (autor === undefined) continue;
     // Un Autor sin `vivo: true` ni `añoFallecimiento` lo rechaza su esquema, con su regla; aquí no

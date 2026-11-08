@@ -456,6 +456,35 @@ describe('Historia 35.1 — el alta deriva la clase y la anota', () => {
     await expect(readFile(rutas.clasesDeCita, 'utf8')).rejects.toThrow();
   });
 
+  it('Historia 35.2 — la de un Personaje sin Autor va a revisión con el prefijo del Personaje y sin autor', async () => {
+    const rutas = await corpusDePrueba();
+    await mkdir(rutas.personajes, { recursive: true });
+    await writeFile(join(rutas.personajes, 'batman.yml'), 'nombre: "Batman"\nuniverso: "DC Comics"\n', 'utf8');
+    const { autor: _autor, ...sinAutor } = COMPLETA;
+    const informe = await darDeAltaLote([{ ...sinAutor, personaje: 'batman', texto: 'La noche es más oscura antes del alba.' }], rutas);
+    expect(informe.publicadas).toEqual([]);
+    expect(informe.enRevision).toHaveLength(1);
+    expect(informe.enRevision[0].motivos).toContain('la puerta de la atribuida está cerrada (Historia 35.1b)');
+    const ruta = informe.enRevision[0].ruta!;
+    expect(ruta).toMatch(/_revision\/batman--la-noche-es-mas-oscura.*\.md$/u);
+    const fichero = await readFile(ruta, 'utf8');
+    expect(fichero).toMatch(/^slug: "batman-la-noche/mu);
+    expect(fichero).not.toMatch(/^autor:/mu);
+    expect(fichero).toMatch(/^clase: "?atribuida"?$/mu);
+    expect(fichero).toMatch(/^personaje: "?batman"?$/mu);
+  });
+
+  it('Historia 35.2 — sin Autor y con un Personaje que no existe, no se escribe nada', async () => {
+    const rutas = await corpusDePrueba();
+    const { autor: _autor, ...sinAutor } = COMPLETA;
+    const informe = await darDeAltaLote([{ ...sinAutor, personaje: 'joker', texto: 'Por qué tan serio.' }], rutas);
+    expect(informe.publicadas).toEqual([]);
+    expect(informe.enRevision).toEqual([]);
+    expect(informe.personajesDesconocidos).toEqual(['joker']);
+    expect(await readdir(rutas.revision)).toEqual([]);
+    expect(formatearInforme(informe)).toContain('joker');
+  });
+
   it('una clase tecleada en el lote no se obedece: la entrada va a revisión con el motivo', async () => {
     const rutas = await corpusDePrueba();
     const informe = await darDeAltaLote([{ ...COMPLETA, clase: 'siempre' } as EntradaDeLote], rutas);

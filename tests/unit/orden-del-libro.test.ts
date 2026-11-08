@@ -350,6 +350,23 @@ describe('24.1 — posicionesDeCitas: dónde cae cada Cita, con el localizador d
     }
   });
 
+  it('Historia 35.2 — la atribuida no se sitúa aunque su texto esté en el documento, y va al final', () => {
+    const posiciones = posicionesDeCitas(
+      [
+        frontmatter('atribuida', 'Una frase repartida en líneas.', { clase: 'atribuida', personaje: 'batman' }),
+        frontmatter('situada', 'Y otra frase.'),
+      ],
+      documentos,
+    );
+    expect(posiciones.get('atribuida')).toEqual([]);
+    expect(posiciones.get('situada')).not.toEqual([]);
+    const citas = [
+      { slug: 'atribuida', fuente: { id: 'ws' } },
+      { slug: 'situada', fuente: { id: 'ws' } },
+    ];
+    expect(ordenDelLibro(citas, posiciones, new Map()).map((c) => c.slug)).toEqual(['situada', 'atribuida']);
+  });
+
   it('censo (sin Fuente), texto vacío, sin obra o que no aparece: lista vacía', () => {
     const posiciones = posicionesDeCitas(
       [

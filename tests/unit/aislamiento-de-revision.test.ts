@@ -128,7 +128,8 @@ describe('Historia 1.3 — la ausencia es estructural, no condicional', () => {
     // Y las bases declaradas son exactamente las carpetas publicables. `colecciones/`
     // entra en la lista desde la Historia 12.2: sí es colección, a diferencia de
     // `fuentes/`, y por eso el esquema de Colección es una puerta del build.
+    // `personajes/` entra desde la Historia 35.2: es colección, con su esquema como puerta.
     const bases = [...esquema.matchAll(/base:\s*'\.\/corpus\/([a-z]+)'/g)].map((m) => m[1]);
-    expect(bases.sort()).toEqual(['autores', 'citas', 'colecciones', 'obras', 'temas']);
+    expect(bases.sort()).toEqual(['autores', 'citas', 'colecciones', 'obras', 'personajes', 'temas']);
   });
 });

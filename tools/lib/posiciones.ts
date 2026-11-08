@@ -25,6 +25,7 @@ import {
   type DocumentosDeFuente,
 } from './cotejo.ts';
 import { leerCitas, leerDocumentosDeFuente, leerOrdenDeLosIndices, rutasDelCorpus } from './corpus.ts';
+import { esAtribuida } from '../../src/lib/clase.ts';
 
 /**
  * Lo que de una Cita hace falta para situarla, tal y como sale del frontmatter. Los campos se
@@ -36,6 +37,8 @@ export interface CitaParaSituar {
   texto?: unknown;
   procedencia?: unknown;
   fuente?: unknown;
+  /** Historia 35.2 — la clase: la atribuida no tiene posición (`esAtribuida`, su único lector). */
+  clase?: unknown;
 }
 
 /** La Fuente de una Cita, si declara un identificador. */
@@ -62,6 +65,10 @@ function obraDe(cita: CitaParaSituar): string | undefined {
  * no entra, como en el cotejo. Las Citas se agrupan por el documento corto de su obra
  * (`documentoDeCita`), que es lo único de lo que depende `documentosDeCita`: así cada cuerpo se
  * colapsa una sola vez por grupo, y se suelta en cuanto el grupo termina.
+ *
+ * Historia 35.2 — la atribuida no se sitúa: no sale de su documento, aunque su Obra tenga uno
+ * (la de dominio público con alguna atribuida), así que va con la lista vacía y `ordenDelLibro`
+ * la pone al final, por slug, con las Citas sin aparición.
  */
 export function posicionesDeCitas(
   citas: readonly CitaParaSituar[],
@@ -73,6 +80,7 @@ export function posicionesDeCitas(
   for (const cita of citas) {
     if (typeof cita.slug !== 'string') continue;
     posiciones.set(cita.slug, []);
+    if (esAtribuida(cita)) continue;
     const fuente = fuenteDe(cita);
     const obra = obraDe(cita);
     const grupo = documentoDeCita(fuente, obra);

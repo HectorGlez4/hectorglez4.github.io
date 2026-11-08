@@ -37,12 +37,16 @@ import { anotarTrasInterrupcion, MOTIVO_PUERTA_CERRADA, motivoClaseDistinta, slu
 import { aplicarFichaDeObra, resolverFichaDeObra } from './obras.ts';
 import { motivoSinTemaPublicado, temaPublicadoConLaPasada } from './alcance.ts';
 import type { TemaBajoUmbral } from '../../src/lib/publicado.ts';
+import { dueñoDeCita } from '../../src/lib/obras.ts';
 
 export interface CandidataEnRevision {
   slug: string;
   texto: string;
-  /** Slug del Autor: compone el nombre del fichero al publicar. */
-  autor: string;
+  /**
+   * Slug del Autor. Con él, o sin él con el Personaje (Historia 35.2), su dueño compone el
+   * nombre del fichero al publicar (`dueñoDeCita`).
+   */
+  autor?: string;
   /** La clase que dice su fichero (`claseDe`) — Historia 35.1. */
   clase: Clase;
   /** El Personaje que declara, si declara alguno — Historia 35.1. */
@@ -154,7 +158,7 @@ export async function loteEnRevision(rutas: Rutas): Promise<CandidataEnRevision[
     lote.push({
       slug: candidata.slug,
       texto: candidata.texto,
-      autor: candidata.autor,
+      ...(candidata.autor !== undefined ? { autor: candidata.autor } : {}),
       clase: claseDe(candidata),
       ...(typeof candidata.personaje === 'string' ? { personaje: candidata.personaje } : {}),
       ...(Array.isArray(candidata.temas) && candidata.temas.length > 0 ? { temas: candidata.temas } : {}),
@@ -312,6 +316,10 @@ export async function aprobar(
   const registro = await leerRegistroDeClases(rutas);
   const autorPorSlug = new Map((await leerAutores(rutas)).map((a) => [a.slug, a]));
   const claseQueLeToca = (candidata: CandidataEnRevision): Clase => {
+    // La de un Personaje sin Autor: la clase la dice el Personaje (Historia 35.2).
+    if (candidata.autor === undefined) {
+      return candidata.personaje !== undefined ? claseQueCorresponde({ personaje: candidata.personaje }, {}) : candidata.clase;
+    }
     const autor = autorPorSlug.get(candidata.autor);
     if (autor === undefined) return candidata.clase;
     return claseQueCorresponde(candidata.personaje !== undefined ? { personaje: candidata.personaje } : {}, autor);
@@ -322,7 +330,7 @@ export async function aprobar(
   const yaPublicadas = await leerCitas(rutas.citas);
   const ocupados = new Set(yaPublicadas.map((c) => c.slug));
   // El conjunto publicado tal como va quedando, para la grafía por omisión de una ficha nueva.
-  const publicadasParaObra: { autor: string; procedencia?: { obra?: string } }[] = [
+  const publicadasParaObra: { autor?: string; personaje?: string; procedencia?: { obra?: string } }[] = [
     ...yaPublicadas,
   ];
 
@@ -341,7 +349,7 @@ export async function aprobar(
     slug: string;
     candidata: CandidataEnRevision;
     temas: string[];
-    comoPublicada: { autor: string; procedencia?: { obra?: string } };
+    comoPublicada: { autor?: string; personaje?: string; procedencia?: { obra?: string } };
   }[] = [];
   const planeadasParaObra = [...publicadasParaObra];
   for (const [indice, slug] of [...new Set(slugs)].entries()) {
@@ -369,7 +377,8 @@ export async function aprobar(
     }
     const obra = candidata.obra;
     const comoPublicada = {
-      autor: candidata.autor,
+      ...(candidata.autor !== undefined ? { autor: candidata.autor } : {}),
+      ...(candidata.personaje !== undefined ? { personaje: candidata.personaje } : {}),
       ...(obra !== undefined ? { procedencia: { obra } } : {}),
     };
     /*
@@ -379,7 +388,7 @@ export async function aprobar(
      */
     if (obra !== undefined) {
       const plan = await resolverFichaDeObra(rutas, {
-        autor: candidata.autor,
+        ...dueñosDe(candidata),
         obra,
         citasPublicadas: [...planeadasParaObra, comoPublicada],
       });
@@ -445,7 +454,7 @@ export async function aprobar(
         obra === undefined
           ? undefined
           : await resolverFichaDeObra(rutas, {
-              autor: candidata.autor,
+              ...dueñosDe(candidata),
               obra,
               citasPublicadas: [...publicadasParaObra, comoPublicada],
             });
@@ -536,7 +545,7 @@ async function reescribirConSlug(
 
   const destino = join(
     rutas.citas,
-    `${nombreDeFicheroDeCita(candidata.autor, definitivo)}.md`,
+    `${nombreDeFicheroDeCita(dueñoDeCita(candidata).slug, definitivo)}.md`,
   );
 
   // Se escribe el destino antes de borrar el origen: si algo falla en medio, la
@@ -583,7 +592,17 @@ function conTemasDeclarados(bruto: string, temas: string[]): string {
 
   const unicos = [...new Set([...suyos, ...temas])];
   const bloque = ['temas:', ...unicos.map((t) => `  - ${JSON.stringify(t)}`)].join('\n');
-  return sinLosSuyos.replace(/^(autor:.*)$/m, `$1\n${bloque}`);
+  // Tras el Autor; sin él, tras el Personaje, su dueño (Historia 35.2).
+  const ancla = /^autor:/m.test(sinLosSuyos) ? /^(autor:.*)$/m : /^(personaje:.*)$/m;
+  return sinLosSuyos.replace(ancla, `$1\n${bloque}`);
+}
+
+/** El Autor y el Personaje de una candidata, los que declare, para resolver su Ficha de Obra. */
+function dueñosDe(candidata: Pick<CandidataEnRevision, 'autor' | 'personaje'>): { autor?: string; personaje?: string } {
+  return {
+    ...(candidata.autor !== undefined ? { autor: candidata.autor } : {}),
+    ...(candidata.personaje !== undefined ? { personaje: candidata.personaje } : {}),
+  };
 }
 
 /**

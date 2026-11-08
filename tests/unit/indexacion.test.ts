@@ -136,6 +136,7 @@ describe('el censo por familia', () => {
               ...c,
               obra: {
                 nombre: `${c.autor}--una-obra`,
+                dueño: { tipo: 'autor', slug: c.autor },
                 autor: c.autor,
                 titulo: 'Una obra',
                 fuentes: [],

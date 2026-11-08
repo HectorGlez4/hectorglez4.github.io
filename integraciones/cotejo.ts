@@ -35,6 +35,7 @@ import { join } from 'node:path';
 import type { AstroIntegration } from 'astro';
 import {
   leerAutores,
+  leerPersonajes,
   leerCensoDeCotejo,
   leerCitas,
   leerDocumentosDeBiografia,
@@ -99,8 +100,15 @@ export default function cotejoDeCitas(): AstroIntegration {
       // Historia 17.2 — la semblanza se coteja literal contra el cuerpo de la biografía.
       ...(typeof autor.semblanza === 'string' ? { semblanza: autor.semblanza } : {}),
     }));
+    // Historia 35.2 — y los Personajes, con la misma regla: su semblanza por AD-26 es literal.
+    const personajes = (await leerPersonajes(rutas)).map((personaje) => ({
+      ruta: relativaALaRaiz(raiz, personaje.ruta),
+      quien: 'el Personaje' as const,
+      ...(personaje.biografia !== undefined ? { biografia: personaje.biografia } : {}),
+      ...(typeof personaje.semblanza === 'string' ? { semblanza: personaje.semblanza } : {}),
+    }));
     const deBiografias = cotejarBiografias(
-      autores,
+      [...autores, ...personajes],
       await leerDocumentosDeBiografia(rutas),
       relativaALaRaiz(raiz, rutas.biografias),
     );

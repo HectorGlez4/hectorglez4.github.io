@@ -30,6 +30,7 @@ import {
   type CongelacionDeObras,
 } from './umbrales.ts';
 import type { FuenteDeCita, Procedencia, tradicion } from './admision.ts';
+import { MENSAJE_PUBLICADA_SIN_AUTOR } from './admision.ts';
 import { cuentaParaElSuelo } from './huecos.ts';
 import { compararPorClave } from './normalizar.ts';
 import {
@@ -68,7 +69,14 @@ export { ordenDeLaListaDeObras };
 export interface Cita {
   slug: string;
   texto: string;
+  /**
+   * El Autor. Toda Cita **publicada** lo lleva hasta la Historia 35.4 (`reglaDeAutorPublicado`
+   * en el build, y `aplanarCita` lo comprueba otra vez): la de un Personaje sin Autor vive en
+   * `corpus/_revision/`.
+   */
   autor: string;
+  /** El Personaje que la dice, si es atribuida a uno — Historia 35.2. Hoy ninguna página lo pinta. */
+  personaje?: string;
   temas: string[];
   procedencia: Procedencia;
   /**
@@ -173,6 +181,29 @@ export interface ConjuntoPublicable {
  * no tiene página accesible ni indexable, y esta función es la que lo decide para todas
  * las superficies a la vez.
  */
+/** Un Personaje tal como lo leerán las superficies — Historia 35.2 (las páginas, la 35.3). */
+export interface Personaje {
+  slug: string;
+  nombre: string;
+  universo: string;
+  ordenAlfabetico?: string;
+}
+
+/**
+ * Un Personaje se publica si alguna Cita publicada lo declara — Historia 35.2, como un Autor
+ * (FR-4). Hoy lo usa la puerta de las claves de orden (`integraciones/claves.ts`): la clave se
+ * exige al Personaje publicado, como al Autor. Ordenados por nombre.
+ */
+export function personajesPublicados<P extends { slug: string; nombre: string }>(
+  personajes: readonly P[],
+  citas: readonly { personaje?: string }[],
+): P[] {
+  const conCitas = new Set(citas.map((c) => c.personaje).filter((p): p is string => p !== undefined));
+  return personajes
+    .filter((p) => conCitas.has(p.slug))
+    .sort((a, b) => a.nombre.localeCompare(b.nombre, 'es'));
+}
+
 export function autoresPublicados(autores: Autor[], citas: Cita[]): Autor[] {
   const conCitas = new Set(citas.map((c) => c.autor));
   return autores
@@ -811,7 +842,7 @@ export function rutasPublicadas(conjunto: ConjuntoPublicable): string[] {
 // ─── La Obra: existir no es indexarse (Historia 22.4, FR-52) ─────────────────
 
 /** Lo que de una Cita hace falta para saber sus Obras y si se indexan. */
-type CitaConSuObra = Pick<Cita, 'autor'> & { obra?: ObraResuelta };
+type CitaConSuObra = { autor?: string; personaje?: string; obra?: ObraResuelta };
 
 /**
  * Las Obras de unas Citas publicadas, una vez cada una y por nombre de ficha.
@@ -986,7 +1017,9 @@ export function filtrosDeLaBusqueda(
         valor: cita.obra.nombre,
         rotulo: cita.obra.titulo,
         recuento: 0,
-        autor: cita.obra.autor,
+        // El dueño de la Obra: su Autor, mientras ninguna Obra de Personaje tenga Citas
+        // publicadas (lo rompe el build hasta la Historia 35.4).
+        autor: cita.obra.dueño.slug,
       };
       opcionDeObra.recuento++;
       deObra.set(cita.obra.nombre, opcionDeObra);
@@ -1041,7 +1074,10 @@ export function obrasDelConjunto(
   // Un Autor publicado es uno del Corpus con alguna Cita publicada (`autoresPublicados`): las
   // Citas de aquí ya son publicadas, así que basta con que su Autor exista.
   const delSitio = new Set(autores.map((a) => a.slug));
-  const publicadas = citas.filter((cita) => delSitio.has(cita.autor));
+  // La de un Personaje sin Autor cuenta por su Personaje (Historia 35.2): no hay Autor que exigir.
+  const publicadas = citas.filter((cita) =>
+    cita.autor === undefined ? cita.personaje !== undefined : delSitio.has(cita.autor),
+  );
   return {
     publicadas: obrasDeLasCitas(publicadas),
     indexables: obrasIndexables(publicadas, congelacion),
@@ -1084,13 +1120,23 @@ export function obrasIndexables(
    */
   congelacion?: CongelacionDeObras | null,
 ): ObraResuelta[] {
+  /*
+   * Historia 35.2, FR-52 v9.1 — el recuento del dueño: las Citas de su Autor o, si la Obra es de
+   * un Personaje, las que declaran ese Personaje (tengan Autor o no).
+   */
   const porAutor = new Map<string, number>();
-  for (const cita of citas) porAutor.set(cita.autor, (porAutor.get(cita.autor) ?? 0) + 1);
+  const porPersonaje = new Map<string, number>();
+  for (const cita of citas) {
+    if (cita.autor !== undefined) porAutor.set(cita.autor, (porAutor.get(cita.autor) ?? 0) + 1);
+    if (cita.personaje !== undefined) porPersonaje.set(cita.personaje, (porPersonaje.get(cita.personaje) ?? 0) + 1);
+  }
+  const delDueño = (obra: ObraResuelta) =>
+    (obra.dueño.tipo === 'personaje' ? porPersonaje : porAutor).get(obra.dueño.slug) ?? 0;
   const efectiva = congelacion === undefined ? congelacionVigente() : congelacion;
   const congeladas = efectiva === null || efectiva === undefined ? undefined : new Set(efectiva.indexables);
   return obrasDeLasCitas(citas).filter(
     (obra) =>
-      esObraIndexable(obra.recuento, porAutor.get(obra.autor) ?? 0) &&
+      esObraIndexable(obra.recuento, delDueño(obra)) &&
       (congeladas === undefined || congeladas.has(obra.nombre)),
   );
 }
@@ -1336,10 +1382,14 @@ type EntradaColeccion = CollectionEntry<'colecciones'>;
 type EntradaObra = CollectionEntry<'obras'>;
 
 export function aplanarCita(entrada: EntradaCita): Cita {
+  // El build ya lo rompe (`reglaDeAutorPublicado`); aquí se dice otra vez en vez de suponerlo.
+  const autor = entrada.data.autor;
+  if (autor === undefined) throw new Error(`${entrada.id}: ${MENSAJE_PUBLICADA_SIN_AUTOR}`);
   return {
     slug: entrada.data.slug,
     texto: entrada.data.texto,
-    autor: entrada.data.autor.id,
+    autor: autor.id,
+    ...(entrada.data.personaje !== undefined ? { personaje: entrada.data.personaje } : {}),
     temas: entrada.data.temas.map((t) => t.id),
     procedencia: entrada.data.procedencia,
     ...(entrada.data.fuente !== undefined ? { fuente: entrada.data.fuente } : {}),
@@ -1440,7 +1490,10 @@ export function aplanarFichaDeObra(entrada: EntradaObra): FichaDeObra {
     // La ruta del fichero tal como la da el cargador, para que los mensajes nombren el
     // fichero de verdad (`.yml` o `.yaml`); sin ella, la forma habitual.
     ruta: entrada.filePath ?? `corpus/obras/${entrada.id}.yml`,
-    autor: entrada.data.autor,
+    // Historia 35.2 — el dueño: el Autor, o el Personaje con sus Personajes (y el Autor si se sabe).
+    ...(entrada.data.autor !== undefined ? { autor: entrada.data.autor } : {}),
+    ...(entrada.data.personaje !== undefined ? { personaje: entrada.data.personaje } : {}),
+    ...(entrada.data.personajes !== undefined ? { personajes: [...entrada.data.personajes] } : {}),
     titulo: entrada.data.titulo,
     formas: [...entrada.data.formas],
     ...(entrada.data.distintaDe !== undefined ? { distintaDe: [...entrada.data.distintaDe] } : {}),
