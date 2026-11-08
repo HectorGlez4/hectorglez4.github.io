@@ -4,8 +4,8 @@
  * **Único dueño** de cómo se acorta un texto de Cita para una superficie que no lo pinta entero:
  * la Tarjeta de Cita de los listados (`MAX_CARACTERES_DE_TARJETA_DE_CITA`) y el título de pestaña
  * y la meta descripción de la Página de Cita (`MAX_CARACTERES_DE_TITULO_Y_META`), los dos topes
- * de `src/lib/umbrales.ts`. Ningún otro fichero de `src/components/` ni de `src/pages/` recorta
- * texto de Cita con `slice` o `substring` (lo vigila `tests/unit/recorte.test.ts`). Recortar no
+ * de `src/lib/umbrales.ts`. Ningún otro fichero de `src/` ni de `public/islas/` recorta texto
+ * de Cita con `slice`, `substring` o `substr` (lo vigila `tests/unit/recorte.test.ts`). Recortar no
  * es publicar la Cita recortada: su página, el JSON-LD, lo copiado, la Imagen y `/buscar/`
  * conservan el texto íntegro (NFR-12).
  *
@@ -19,14 +19,17 @@
  *   (una racha sin blancos, con su puntuación y sus «¿»/«¡» pegados), y los saltos que quedan
  *   dentro del prefijo se conservan: quien lo quiera en una línea le pasa después `enUnaLinea`.
  * - Si ni la primera palabra cabe, sale entera, limpia igual, seguida de «…»; si esa palabra es
- *   todo el texto, sale tal cual.
+ *   todo el texto, sale tal cual. Son los dos únicos casos en que la salida pasa del tope.
+ * - El tope cuenta lo que devuelve esta función. Quien pase después el verso a una línea
+ *   (`enUnaLinea`, el título y la meta de la Página de Cita) suma « / » por cada salto que quede
+ *   dentro: es a propósito (el criterio de la 34.1 recorta sin contar los saltos y después une).
  *
  * Esto cambia el punto de corte de la Épica 29, a propósito: la 29.1/29.3 contaban cada salto
  * como un carácter y cortaban en el índice de siempre, a media palabra. Ahora en verso el corte
  * se adelanta los caracteres que antes ocupaban los saltos.
  *
  * El módulo no parte ni sustituye el salto (`tests/unit/verso.test.ts`): compara carácter a
- * carácter.
+ * carácter, solo para no contarlo y para cortar delante de él.
  */
 
 const PUNTOS = '…';
@@ -50,6 +53,9 @@ function finLimpio(caracteres: readonly string[], fin: number): number {
 
 /** El texto recortado por palabra a `tope` puntos de código sin contar los saltos. */
 export function recortarPorPalabra(texto: string, tope: number): string {
+  // Un tope sin sentido —`NaN`, fraccionario o sin sitio para una letra y «…»— no recorta nada
+  // bien: se rompe aquí, en el build, en vez de devolver el texto casi entero.
+  if (!Number.isInteger(tope) || tope < 2) throw new Error(`recortarPorPalabra: tope inválido (${tope})`);
   const caracteres = [...texto];
   if (cuenta(caracteres) <= tope) return texto;
 
@@ -64,8 +70,10 @@ export function recortarPorPalabra(texto: string, tope: number): string {
   }
   if (mejor > 0) return caracteres.slice(0, mejor).join('') + PUNTOS;
 
-  const blanco = caracteres.findIndex((c) => BLANCO.test(c));
-  if (blanco === -1) return texto;
-  const fin = finLimpio(caracteres, blanco);
-  return fin === 0 ? texto : caracteres.slice(0, fin).join('') + PUNTOS;
+  // La primera palabra: lo que va desde el primer carácter que no cuelga hasta el blanco siguiente;
+  // un texto que empieza por blancos o por `,` `;` `:` no la deja en cero.
+  const inicio = caracteres.findIndex((c) => !COLGANTE.test(c));
+  const blanco = caracteres.findIndex((c, i) => i > inicio && BLANCO.test(c));
+  if (inicio === -1 || blanco === -1) return texto;
+  return caracteres.slice(0, finLimpio(caracteres, blanco)).join('') + PUNTOS;
 }

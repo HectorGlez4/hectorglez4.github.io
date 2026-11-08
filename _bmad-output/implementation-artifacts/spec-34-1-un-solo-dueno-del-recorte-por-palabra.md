@@ -5,7 +5,7 @@ created: '2026-11-08'
 status: 'done'
 baseline_revision: '2b9c8669b3519df7e08c053eaedfb83250afad64'
 review_loop_iteration: 0
-followup_review_recommended: false
+followup_review_recommended: true
 context:
   - '{project-root}/_bmad-output/implementation-artifacts/epic-34-context.md'
 warnings: [oversized]
@@ -76,7 +76,9 @@ deferred:
 - `tests/unit/tarjeta-de-cita.test.ts:550-630,693-710` -- lee `LARGO_DE_FRAGMENTO` del componente por AST y replica `slice`: pasar a importar `MAX_CARACTERES_DE_TARJETA_DE_CITA` y `recortarPorPalabra`; el `it` «se recorta como antes» pasa a fijar el recorte por palabra.
 - `tests/unit/obras.test.ts:1068-1110` -- modelo de la prueba de escaneo («nadie lee procedencia.obra») para la de recorte.
 - `src/components/Armazon.astro:128,180` -- `description` y `og:description` desde la prop `descripcion` (solo lectura).
-- Recorrido del Corpus (2026-11-08, 4.424 Citas, 75 en verso): cambian 17 Tarjetas y 16 títulos de Citas en verso, p. ej. `jose-marti-yo-se-que-el-necio-se-entierra` (Tarjeta: «…Como la del camposant…» → entera), `luis-de-gongora-cosas-celalba-mia-he-visto-extranas-cascarse` (título: «…fundamentos…» → «…fundamentos,\ny…»), `sor-juana-ines-de-la-cruz-detente-sombra-de-mi-bien-esquivo-imagen`, `pedro-calderon-de-la-barca-contra-vosotros-naciendo-aunque-si-naci-ya`, `gonzalo-de-berceo-quanto-aqui-vivimos-en-ageno-moramos-la`, `francisco-de-quevedo-llevada-de-enganoso-pensamiento-y-de-esperanza`; en prosa cambian además 1.067 Tarjetas y 1.599 títulos (y toda meta de Cita de más de 110). La lista completa sale de reejecutar el recorrido; va resumida en el mensaje del commit.
+- Recorrido del Corpus (2026-11-08, 4.424 Citas, 75 en verso): cambian 17 Tarjetas y 16 títulos de Citas en verso, p. ej. `jose-marti-yo-se-que-el-necio-se-entierra` (Tarjeta: «…Como la del camposant…» → entera), `luis-de-gongora-cosas-celalba-mia-he-visto-extranas-cascarse` (título: «…fundamentos…» → «…fundamentos,\ny…»), `sor-juana-ines-de-la-cruz-detente-sombra-de-mi-bien-esquivo-imagen`, `pedro-calderon-de-la-barca-contra-vosotros-naciendo-aunque-si-naci-ya`, `gonzalo-de-berceo-quanto-aqui-vivimos-en-ageno-moramos-la`, `francisco-de-quevedo-llevada-de-enganoso-pensamiento-y-de-esperanza`; en prosa cambian además 1.067 Tarjetas y 1.599 títulos (y toda meta de Cita de más de 110). La lista completa en verso (recorrido repetido el 2026-11-08 en la revisión, mismas cifras):
+  - Tarjeta (17): `francisco-de-quevedo-entre-en-mi-casa-vi-que-amancillada`, `francisco-de-quevedo-llevada-de-enganoso-pensamiento-y-de-esperanza`, `gonzalo-de-berceo-quanto-aqui-vivimos-en-ageno-moramos-la`, `gonzalo-de-berceo-sennores-e-amigos-lo-que-dicho-avemos`, `gonzalo-de-berceo-todos-quantos-vevimos-que-en-piedes-andamos`, `jose-marti-yo-se-que-el-necio-se-entierra`, `luis-de-gongora-cosas-celalba-mia-he-visto-extranas-cascarse`, `luis-de-gongora-duelete-de-esa-puente-manzanares-mira-que`, `pedro-calderon-de-la-barca-contra-vosotros-naciendo-aunque-si-naci-ya`, `pedro-calderon-de-la-barca-entre-las-flores-se-quiebra-cuando-musico`, `pedro-calderon-de-la-barca-ni-que-pueda-preguntarte-solo-dire-que`, `sor-juana-ines-de-la-cruz-detente-sombra-de-mi-bien-esquivo-imagen`, `sor-juana-ines-de-la-cruz-en-perseguirme-mundo-que-interesas-en-que`, `sor-juana-ines-de-la-cruz-es-un-vano-artificio-del-cuidado-es`, `sor-juana-ines-de-la-cruz-feliciano-me-adora-y-le-aborrezco-lizardo`, `sor-juana-ines-de-la-cruz-sigan-tu-sombra-en-busca-de-tu`, `sor-juana-ines-de-la-cruz-yo-no-estimo-tesoros-ni-riquezas-y`.
+  - Título y meta (16): `antonio-machado-virtud-es-fortaleza-ser-bueno-es-ser`, `francisco-de-quevedo-alma-a-quien-todo-un-dios-prision`, `francisco-de-quevedo-llevada-de-enganoso-pensamiento-y-de-esperanza`, `gonzalo-de-berceo-quanto-aqui-vivimos-en-ageno-moramos-la`, `gonzalo-de-berceo-todos-quantos-vevimos-que-en-piedes-andamos`, `luis-de-gongora-cosas-celalba-mia-he-visto-extranas-cascarse`, `luis-de-gongora-duelete-de-esa-puente-manzanares-mira-que`, `luis-de-gongora-goza-cuello-cabello-labio-y-frente-antes`, `pedro-calderon-de-la-barca-contra-vosotros-naciendo-aunque-si-naci-ya`, `pedro-calderon-de-la-barca-ni-que-pueda-preguntarte-solo-dire-que`, `sor-juana-ines-de-la-cruz-detente-sombra-de-mi-bien-esquivo-imagen`, `sor-juana-ines-de-la-cruz-en-perseguirme-mundo-que-interesas-en-que`, `sor-juana-ines-de-la-cruz-feliciano-me-adora-y-le-aborrezco-lizardo`, `sor-juana-ines-de-la-cruz-si-a-este-pago-padece-mi-deseo`, `sor-juana-ines-de-la-cruz-sigan-tu-sombra-en-busca-de-tu`, `sor-juana-ines-de-la-cruz-yo-no-estimo-tesoros-ni-riquezas-y`.
 
 ## Tasks & Acceptance
 
@@ -109,6 +111,22 @@ deferred:
 - reject: 0
 - addressed_findings:
   - none
+
+### 2026-11-08 — Review pass
+- intent_gap: 0
+- bad_spec: 0
+- patch: 8: (high 0, medium 2, low 6)
+- defer: 0
+- reject: 18: (high 0, medium 0, low 18)
+- addressed_findings:
+  - `[medium]` `[patch]` `AGENTS.md` seguía nombrando en `verso.test.ts` la exención del recorte de `[slug].astro`, que la historia quitó, y no decía que `recorte.ts` compara el salto: el párrafo del verso ya no la nombra y explica que `recorte.ts` lo compara carácter a carácter solo para no contarlo y cortar delante, sin partirlo ni sustituirlo.
+  - `[medium]` `[patch]` La prueba de escaneo solo veía `<ident>texto.slice/substring(` en `src/components/` y `src/pages/`, marcaba `contexto` y no veía `[...texto].slice`, `Array.from(texto).slice`, `.trim().slice`, `substr` ni `cita['texto']`: `RECORTA_TEXTO` ahora ve esas formas, ancla `texto` como identificador (no marca `contexto`/`pretexto`) y el recorrido abarca todo `src/` (también `src/islands/` y `src/lib/`) y `public/islas/`, sin exenciones; AGENTS.md y la cabecera de `recorte.ts` lo dicen.
+  - `[low]` `[patch]` Un texto que empezaba por blancos o `,` `;` `:` con una primera palabra más larga que el tope salía entero sin «…»: la primera palabra se busca desde el primer carácter que no cuelga; prueba nueva.
+  - `[low]` `[patch]` El tope no se validaba (`NaN` devolvía casi todo el texto con «…»): un tope que no es entero ≥ 2 lanza; prueba nueva.
+  - `[low]` `[patch]` No se decía que el tope se rebasa en la primera palabra larga ni que el título y la meta en verso suman « / » después de recortar: lo dicen la cabecera de `recorte.ts`, los dos topes de `umbrales.ts` y la línea de AGENTS.md (lectura del criterio: recortar sin contar los saltos y después unir).
+  - `[low]` `[patch]` `cortaEnPalabra` de `tarjeta-de-cita.test.ts` aceptaba un fragmento con `,` o blanco colgando delante de «…»: ahora lo rechaza.
+  - `[low]` `[patch]` La prueba sin build de Martí leía la Cita viva del Corpus con una expresión sobre el YAML: lleva la copia literal del texto, con su procedencia anotada; y la Página de Cita de >110 comprueba además que `data-compartir` conserva el texto íntegro.
+  - `[low]` `[patch]` El spec nombraba seis de las Citas en verso cuyo corte cambia: el Code Map lleva ahora las 17 de Tarjeta y las 16 de título, del recorrido repetido (mismas cifras).
 
 ## Design Notes
 
@@ -158,3 +176,25 @@ recortarPorPalabra('Supercalifragilístico y más', 5)          // 'Supercalifra
 
 **Riesgos residuales.** Los dos diferidos del frontmatter (una sola palabra más larga que el tope sale sin «…»; el índice de Pagefind no se inspecciona, solo el `h1`). Ningún `corpus/` tocado.
 
+### Pasada de revisión 1 (2026-11-08, hallazgos externos)
+
+**Resumen.** Ocho parches sobre la historia, sin cambiar la regla: la primera palabra larga tras blancos o `,` `;` `:` iniciales ya no deja el texto entero; un tope sin sentido lanza; la prueba de escaneo ve más formas de recorte (`[...texto]`, `Array.from`, llamadas encadenadas, `substr`, corchetes), no marca `contexto` y recorre todo `src/` y `public/islas/`; AGENTS.md quita la exención huérfana de `verso.test.ts` y dice cuándo se rebasa el tope; las pruebas de `dist/` exigen que nada cuelgue delante de «…» y que `data-compartir` lleve el texto íntegro; la prueba de Martí no lee el Corpus; el spec lista las 33 entradas en verso.
+
+**Ficheros.**
+- `src/lib/recorte.ts` — validación del tope, primera palabra tras lo que cuelga, cabecera (alcance del escaneo, cuándo se rebasa el tope, por qué compara el salto).
+- `src/lib/umbrales.ts` — documentación de los dos topes (rebase por primera palabra y por « / »).
+- `tests/unit/recorte.test.ts` — `RECORTA_TEXTO` ampliado, sus formas nuevas y el recorrido de `src/` y `public/islas/`; pruebas del texto con blancos iniciales y del tope inválido.
+- `tests/unit/tarjeta-de-cita.test.ts` — Martí en línea, `cortaEnPalabra` sin colgantes, `data-compartir` íntegro.
+- `AGENTS.md` — párrafo del verso y línea del recorte.
+- este spec — triage, lista completa en verso.
+
+**Revisión.** 8 parches (2 medios, 6 bajos), 0 diferidos, 18 rechazados: el guion, «(», «»» o «¿» delante de «…» y el `Hola.…` siguen la regla explícita del criterio (solo se quitan blancos y `,` `;` `:`); el corte en U+00A0 sigue el «blanco = `\s`» del contrato; el O(n²) es inocuo a estas longitudes; las comprobaciones de integridad con comillas o saltos son hipotéticas para el fixture en prosa (el verso lo cubre `verso-construido.test.ts`); no hay `twitter:description` y el RSS no cambió; la palabra única sin «…» y el índice de Pagefind ya estaban diferidos; el «antes» reimplementado, la prueba sobre un `dist/` de fixture y la lista de ejemplos son la lectura del criterio; el lector de tarjetas que no ve versos anidados es previo y el verso se cubre aparte; el alias desestructurado y el recorte por expresión regular quedan fuera del escaneo y la cabecera de la prueba lo dice. Seguimiento recomendado: sí (2 medios y 6 bajos: 3×2 + 6 = 12 ≥ 5).
+
+**Verificación.**
+- `npx vitest run tests/unit/recorte.test.ts tests/unit/verso.test.ts tests/unit/tarjeta-de-cita.test.ts tests/unit/verso-construido.test.ts tests/unit/medicion.test.ts` — verde (5 ficheros, 749 pruebas).
+- `npx astro check` — 0 errores, 0 avisos.
+- `npm run build` — sale con 0; peso 485,4 MiB juzgados, sin aviso.
+- `npm test` completo — verde (164 ficheros, 7.461 pruebas).
+- Recorrido del Corpus repetido: 4.424 Citas, 75 en verso; 17 Tarjetas y 16 títulos en verso cambian (las mismas cifras).
+
+**Riesgos residuales.** Los dos diferidos; el escaneo no ve un alias desestructurado ni un recorte por expresión regular.

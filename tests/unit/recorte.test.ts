@@ -104,6 +104,18 @@ describe('recortarPorPalabra', () => {
   it('una sola palabra más larga que el tope: el texto tal cual', () => {
     expect(recortarPorPalabra('Supercalifragilístico', 5)).toBe('Supercalifragilístico');
   });
+
+  it('primera palabra larga tras blancos o `,` `;` `:` iniciales: esa palabra más «…», nunca el texto entero', () => {
+    expect(recortarPorPalabra(' Supercalifragilístico y más', 5)).toBe(' Supercalifragilístico…');
+    expect(recortarPorPalabra('\nSupercalifragilístico y más', 5)).toBe('\nSupercalifragilístico…');
+    expect(recortarPorPalabra(', Supercalifragilístico, y más', 5)).toBe(', Supercalifragilístico…');
+  });
+
+  it('un tope sin sentido rompe en vez de recortar mal', () => {
+    for (const tope of [Number.NaN, 0, 1, -5, 12.5, Number.POSITIVE_INFINITY]) {
+      expect(() => recortarPorPalabra('Uno dos tres', tope), String(tope)).toThrow(/tope inválido/);
+    }
+  });
 });
 
 /** Todos los ficheros de código de un directorio, recursivamente. */
@@ -115,11 +127,22 @@ function ficheros(dir: string): string[] {
   });
 }
 
+/** Una expresión que nombra el texto: `texto`, `cita.texto`, `cita?.texto`, `miTexto`, `cita['texto']`; nunca `contexto`. */
+const TEXTO = String.raw`(?<![\w$])(?:[\w$]+\??\.)*(?:texto\b|[\w$]*[a-z0-9_$]Texto\b|[\w$]+\s*\[\s*['"\x60]texto['"\x60]\s*\])`;
+/** Lo que corta: `.slice(`, `.substring(` o `.substr(`. */
+const CORTA = String.raw`\s*\??\.\s*(?:slice|substring|substr)\s*\(`;
+/** Llamadas encadenadas entre el texto y el corte: `.trim()`, `.split(' ')`. */
+const CADENA = String.raw`(?:\s*\??\.\s*[\w$]+\s*\([^()]*\))*`;
+
 /**
- * `slice` o `substring` sobre una expresión que acaba en `texto` —`cita.texto`, `texto`,
- * `cita?.texto`, `miTexto`—: el recorte a ciegas que la 34.1 retira.
+ * `slice`, `substring` o `substr` sobre el texto —directo, tras llamadas encadenadas o sobre sus
+ * puntos de código (`[...texto]`, `Array.from(texto)`)—: el recorte a ciegas que la 34.1 retira.
+ * No ve un alias desestructurado ni una expresión regular que trunque: eso lo mira quien revisa.
  */
-const RECORTA_TEXTO = /(?<![\w$])(?:[\w$]+\??\.)*[\w$]*[tT]exto\s*\??\.\s*(?:slice|substring)\s*\(/gu;
+const RECORTA_TEXTO = new RegExp(
+  String.raw`${TEXTO}${CADENA}${CORTA}|\[\s*\.\.\.\s*${TEXTO}[^\]]*\]${CORTA}|Array\.from\(\s*${TEXTO}[^)]*\)${CORTA}`,
+  'gu',
+);
 
 describe('nadie más recorta texto de Cita', () => {
   it('el patrón ve las formas del recorte y no marca lo que no lo es', () => {
@@ -130,6 +153,13 @@ describe('nadie más recorta texto de Cita', () => {
       'cita?.texto.slice(0, 1)',
       'Astro.props.cita.texto .slice (0, 2)',
       'const x = miTexto.slice(0, 3);',
+      '[...cita.texto].slice(0, 119)',
+      'Array.from(cita.texto).slice(0, 1)',
+      'cita.texto.substr(0, 1)',
+      'cita.texto.trim().slice(0, 2)',
+      'cita["texto"].slice(0, 1)',
+      "cita['texto'].slice(0, 1)",
+      "texto.split(' ').slice(0, 3)",
     ];
     for (const forma of marcadas) expect(forma.match(RECORTA_TEXTO), forma).not.toBeNull();
     const limpias = [
@@ -137,6 +167,9 @@ describe('nadie más recorta texto de Cita', () => {
       'nuevos.slice(desde, desde + TANDA_DE_RESULTADOS)',
       'textos.slice(0, 2)',
       'recortarPorPalabra(cita.texto, 120)',
+      'contexto.slice(0, 2)',
+      'pretexto.slice(0, 1)',
+      'palabras(texto).slice(0, 4)',
     ];
     for (const forma of limpias) expect(forma.match(RECORTA_TEXTO), forma).toBeNull();
     const busqueda = readFileSync(join(raiz, 'src/components/Busqueda.astro'), 'utf8');
@@ -144,8 +177,10 @@ describe('nadie más recorta texto de Cita', () => {
     expect(busqueda.match(RECORTA_TEXTO)).toBeNull();
   });
 
-  it('ningún fichero de `src/components/` ni de `src/pages/` recorta texto de Cita', () => {
-    const usos = [...ficheros(join(raiz, 'src/components')), ...ficheros(join(raiz, 'src/pages'))].flatMap((ruta) =>
+  it('ningún fichero de `src/` ni de `public/islas/` recorta texto de Cita', () => {
+    // Todo `src/` —componentes, páginas, islas y `src/lib/`— y los guiones de `public/islas/`;
+    // `src/lib/recorte.ts` recorta sus puntos de código (`caracteres`), no el texto.
+    const usos = [...ficheros(join(raiz, 'src')), ...ficheros(join(raiz, 'public/islas'))].flatMap((ruta) =>
       [...readFileSync(ruta, 'utf8').matchAll(RECORTA_TEXTO)].map((m) => `${relative(raiz, ruta)}: ${m[0]}`),
     );
     expect(usos).toEqual([]);

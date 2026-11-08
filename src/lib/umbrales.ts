@@ -28,7 +28,8 @@ export const MAX_CARACTERES_IMAGEN = 300;
 /**
  * Tope del fragmento de la Tarjeta de Cita en los listados — UX-DR132, Historia 34.1.
  *
- * Puntos de código sin contar los saltos de verso, «…» incluido. Lo aplica solo
+ * Puntos de código sin contar los saltos de verso, «…» incluido; solo lo rebasa una primera
+ * palabra que ya no cabe (sale entera). Lo aplica solo
  * `recortarPorPalabra` de `src/lib/recorte.ts`, que corta en la última palabra entera: el
  * listado resume la Cita, nunca la publica recortada (NFR-12). Literal, sin cálculo: este módulo
  * viaja en el guion del filtro de los Directorios.
@@ -40,7 +41,8 @@ export const MAX_CARACTERES_DE_TARJETA_DE_CITA = 120;
  * UX-DR131, Historia 34.1.
  *
  * Se cuenta igual que el de la Tarjeta y lo aplica la misma función; el verso pasa a una línea
- * (`enUnaLinea`) después de recortar. Quien llega desde un buscador decide si entrar leyendo
+ * (`enUnaLinea`) después de recortar, así que un título o una meta en verso lo rebasa en los
+ * « / » que suma (tres caracteres por salto que quede dentro), a propósito. Quien llega desde un buscador decide si entrar leyendo
  * esto, así que lo que cabe va entero.
  */
 export const MAX_CARACTERES_DE_TITULO_Y_META = 110;

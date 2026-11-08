@@ -333,9 +333,11 @@ describe('Historia 24.3 — el contrato del componente, sin construir', () => {
 });
 
 describe('Historia 34.1 — el fragmento se recorta por palabra, sin construir', () => {
-  it('la Cita de Martí del Corpus: antes «…camposant…», ahora entera (118 sin los saltos)', async () => {
-    const fichero = await readFile(join(RAIZ, 'corpus/citas/jose-marti--yo-se-que-el-necio-se-entierra.md'), 'utf8');
-    const texto = JSON.parse(/^texto: (".*")$/m.exec(fichero)![1]) as string;
+  it('la Cita de Martí del Corpus: antes «…camposant…», ahora entera (118 sin los saltos)', () => {
+    // Copia del `texto` de `corpus/citas/jose-marti--yo-se-que-el-necio-se-entierra.md` el día de
+    // la 34.1: la prueba fija la regla, y retirar o redocumentar esa Cita no debe romperla.
+    const texto =
+      'Yo sé que el necio se entierra\nCon gran lujo y con gran llanto, -\nY que no hay fruta en la tierra\nComo la del camposanto.';
     expect(texto.length).toBe(121);
     expect([...texto.replaceAll('\n', '')].length).toBe(118);
     // El corte de antes de la 34.1: unidades UTF-16, cada salto un carácter, a media palabra.
@@ -693,12 +695,15 @@ describe('Historia 24.3 — la Tarjeta de cada listado, construida', () => {
 
   /**
    * Un fragmento terminado en «…» es, colapsando blancos, un prefijo del texto de su Cita que
-   * acaba en una palabra entera: en el texto, lo siguiente es `[,;:\s]*` y un blanco (Historia 34.1).
+   * acaba en una palabra entera, sin blancos ni `,` `;` `:` colgando: en el texto, lo siguiente es
+   * `[,;:\s]*` y un blanco (Historia 34.1).
    */
   function cortaEnPalabra(fragmento: string, texto: string): boolean {
     const colapsar = (t: string) => t.replace(/\s+/g, ' ');
     const prefijo = colapsar(fragmento.slice(0, -1));
     const entero = colapsar(texto);
+    // Nada cuelga delante de «…»: ni un blanco ni `,` `;` `:`.
+    if (/[\s,;:]$/u.test(prefijo)) return false;
     return entero.startsWith(prefijo) && /^[,;:\s]*\s/u.test(entero.slice(prefijo.length));
   }
 
@@ -764,6 +769,7 @@ describe('Historia 24.3 — la Tarjeta de cada listado, construida', () => {
     expect(ld).toContain(`"text":${JSON.stringify(texto)}`);
     expect(pagina.match(/data-texto-plano="([^"]*)"/)![1]).toContain(texto);
     expect(pagina.match(/data-imagen[^>]*?data-texto="([^"]*)"/)![1]).toBe(texto);
+    expect(pagina.match(/data-compartir[^>]*?data-texto="([^"]*)"/)![1]).toContain(texto);
   });
 
   it('una Obra con `noindex` se nombra igual: «De la ira» en el Tema', async () => {
