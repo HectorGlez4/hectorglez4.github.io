@@ -250,6 +250,29 @@ describe('Retro épica 9 — repetir la extracción no pisa lo anterior', () => 
     expect(segunda.length).toBe(primera.length);
   });
 
+  it('Historia 35.2 — una candidata de Personaje sin Autor en revisión no la para, ni deja de contar las suyas', async () => {
+    const { corpus } = await corpusConAutores();
+    const ruta = await documento(corpus);
+    await extraer(ruta, corpus);
+    const primera = await readdir(join(corpus, '_revision'));
+    // La que deja el alta de un Personaje sin Autor: sin `autor`, con su `personaje`.
+    await writeFile(
+      join(corpus, '_revision', 'batman--la-noche-es-larga.md'),
+      '---\nslug: batman-la-noche-es-larga\ntexto: "La noche es larga."\npersonaje: batman\nclase: atribuida\n---\n',
+      'utf8',
+    );
+    // Y una escrita a mano sin Autor ni Personaje, que ningún esquema juzgó todavía.
+    await writeFile(
+      join(corpus, '_revision', 'sin-dueno--una-frase.md'),
+      '---\nslug: sin-dueno-una-frase\ntexto: "Una frase."\n---\n',
+      'utf8',
+    );
+    const segunda = await extraer(ruta, corpus);
+    expect(segunda.codigo, segunda.error).toBe(0);
+    // Las de Séneca siguen contando como «ya estaban»: no se duplican.
+    expect((await readdir(join(corpus, '_revision'))).length).toBe(primera.length + 2);
+  });
+
   it('no reutiliza el slug de una Cita ya publicada', async () => {
     const { corpus } = await corpusConAutores();
     const ruta = await documento(corpus);

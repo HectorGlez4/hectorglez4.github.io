@@ -963,7 +963,6 @@ function formaDe(cita: CitaParaFechar): string | undefined {
   return forma === '' ? undefined : forma;
 }
 
-
 /** El nombre de un fichero sin directorio y, si es un documento, sin su `.txt`. */
 function nombreDeDocumento(ruta: string): string {
   return (ruta.split(/[\\/]/u).pop() ?? ruta).replace(/\.txt$/u, '');

@@ -35,6 +35,7 @@ import {
   personajeAdmisible,
 } from '../../src/lib/admision.ts';
 import {
+  corpusParaFechar,
   estadoDelRepositorio,
   fechasDeLasSuperficies,
   historialDeLosFicheros,
@@ -1393,6 +1394,40 @@ describe('Historia 35.2 — la relación de AD-27 conoce al Personaje', () => {
     expect(camposDe('/obra/batman/el-alba/', 'citas/baja.md')).toBeDefined();
     // La ficha de Personaje que se fue la reclamaba la Cita de Robin, por `personajes`.
     expect(camposDe('/cita/robin-la-cueva/', 'obras/cueva.yml')).toBeDefined();
+  });
+
+  it('el lector del disco (`corpusParaFechar`) lleva los Personajes y sus campos a la relación', async () => {
+    const raiz = await mkdtemp(join(tmpdir(), 'sabiduria-fechar-personajes-'));
+    try {
+      const corpus = join(raiz, 'corpus');
+      for (const dir of ['citas', 'autores', 'personajes', 'temas', 'colecciones', 'obras', 'fuentes']) {
+        await mkdir(join(corpus, dir), { recursive: true });
+      }
+      await writeFile(join(corpus, 'autores', 'seneca.yml'), 'nombre: Séneca\n', 'utf8');
+      await writeFile(join(corpus, 'personajes', 'batman.yml'), 'nombre: Batman\nuniverso: DC Comics\n', 'utf8');
+      await writeFile(
+        join(corpus, 'citas', 'seneca--la-noche.md'),
+        '---\nslug: seneca-la-noche\ntexto: "La noche."\nautor: seneca\npersonaje: batman\nprocedencia:\n  obra: "La noche"\n---\n',
+        'utf8',
+      );
+      await writeFile(
+        join(corpus, 'obras', 'batman--la-noche.yml'),
+        'autor: "seneca"\npersonaje: "batman"\npersonajes:\n  - "batman"\ntitulo: "La noche"\nformas:\n  - "la noche"\n',
+        'utf8',
+      );
+      const leido = await corpusParaFechar(raiz, { documentos: [] });
+      expect(leido.personajes).toEqual([{ slug: 'batman', ruta: resolve(join(corpus, 'personajes', 'batman.yml')) }]);
+      expect(leido.citas[0]).toMatchObject({ autor: 'seneca', personaje: 'batman', obra: 'batman--la-noche' });
+      expect(leido.obras?.[0]).toMatchObject({ personaje: 'batman', personajes: ['batman'], autor: 'seneca' });
+      const relacion = componentesPorSuperficie({ ...leido, bajas: { citas: [], obras: [], documentos: [] } });
+      const ficheroDelPersonaje = resolve(join(corpus, 'personajes', 'batman.yml'));
+      const de = (ruta: string) =>
+        relacion.get(rutaNormalizada(ruta))?.find((c) => c.fichero === ficheroDelPersonaje)?.campos;
+      expect(de('/cita/seneca-la-noche/')).toEqual(['nombre']);
+      expect(de('/obra/batman/la-noche/')).toEqual(['nombre']);
+    } finally {
+      await rm(raiz, { recursive: true, force: true });
+    }
   });
 
   it('una baja sin Autor ni Personaje no se lee, y la relación no lanza', () => {

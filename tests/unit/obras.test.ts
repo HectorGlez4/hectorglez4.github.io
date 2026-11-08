@@ -1701,6 +1701,33 @@ describe('35.2 — las órdenes de la ficha conservan su dueño', () => {
     expect(await readFile(join(rutas.obrasRetiradas, 'batman--la-noche-larga.yml'), 'utf8')).toBe(original);
   });
 
+  it('el ajuste del título encuentra la ficha de Personaje por los dos pasos', async () => {
+    const rutas = await conPersonaje();
+    // Segundo paso: una Cita del Personaje sin Autor, en la ficha que no declara Autor.
+    const { autor: _sinAutor, ...sinAutor } = citaCompleta('batman-l1', 'La Noche Larga');
+    await publicar(rutas, { ...sinAutor, personaje: 'batman' });
+    const conTituloViejo = async (nombre: string) => {
+      const ruta = join(rutas.obras, `${nombre}.yml`);
+      await writeFile(ruta, (await readFile(ruta, 'utf8')).replace(/^titulo: .*$/m, 'titulo: "Título viejo"'), 'utf8');
+    };
+    await conTituloViejo('batman--la-noche');
+    await conTituloViejo('batman--la-noche-larga');
+
+    // Primer paso: la Cita de Séneca llega a la ficha de Batman por su `autor` informativo.
+    const primero = await ajustarTitulosDeObra(rutas, { autor: 'seneca', personaje: 'batman' }, ['la noche']);
+    expect(primero.join('\n')).toContain('batman--la-noche.yml');
+    expect(['La Noche', 'La noche']).toContain((await leida(rutas, 'batman--la-noche'))?.titulo);
+    expect((await leida(rutas, 'batman--la-noche-larga'))?.titulo).toBe('Título viejo');
+
+    const segundo = await ajustarTitulosDeObra(rutas, { personaje: 'batman' }, ['la noche larga']);
+    expect(segundo.join('\n')).toContain('batman--la-noche-larga.yml');
+    expect(await leida(rutas, 'batman--la-noche-larga')).toMatchObject({
+      personaje: 'batman',
+      personajes: ['batman'],
+      titulo: 'La Noche Larga',
+    });
+  });
+
   it('asegurar la ficha de una Cita de Personaje sin Autor la crea con su dueño', async () => {
     const rutas = await corpusTemporal();
     const hecho = await asegurarFichaDeObra(rutas, {

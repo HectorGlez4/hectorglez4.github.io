@@ -174,13 +174,6 @@ export interface ConjuntoPublicable {
 
 // ─── Núcleo puro ─────────────────────────────────────────────────────────────
 
-/**
- * Un Autor se publica si tiene al menos una Cita publicada — FR-4.
- *
- * No hay umbral que aplicar: la Cita existe o no existe. Un Autor sin Citas publicadas
- * no tiene página accesible ni indexable, y esta función es la que lo decide para todas
- * las superficies a la vez.
- */
 /** Un Personaje tal como lo leerán las superficies — Historia 35.2 (las páginas, la 35.3). */
 export interface Personaje {
   slug: string;
@@ -204,6 +197,13 @@ export function personajesPublicados<P extends { slug: string; nombre: string }>
     .sort((a, b) => a.nombre.localeCompare(b.nombre, 'es'));
 }
 
+/**
+ * Un Autor se publica si tiene al menos una Cita publicada — FR-4.
+ *
+ * No hay umbral que aplicar: la Cita existe o no existe. Un Autor sin Citas publicadas
+ * no tiene página accesible ni indexable, y esta función es la que lo decide para todas
+ * las superficies a la vez.
+ */
 export function autoresPublicados(autores: Autor[], citas: Cita[]): Autor[] {
   const conCitas = new Set(citas.map((c) => c.autor));
   return autores

@@ -81,7 +81,8 @@ function motivosDe(issues: readonly { path: readonly PropertyKey[]; message: str
 
 /**
  * Dónde está ya un slug, si está: la ficha de un Autor activo o retirado, o la de otro
- * Personaje. Lo que no se puede afirmar —un directorio que no se deja leer— lanza.
+ * Personaje. Mira la existencia del fichero (`existsSync`): un directorio que no se deja leer
+ * no lanza y deja el slug por libre; el build, que lee los dos directorios, lo rompe después.
  */
 function ocupante(rutas: Rutas, slug: string): string | undefined {
   return [rutas.autores, rutas.autoresRetirados, rutas.personajes]

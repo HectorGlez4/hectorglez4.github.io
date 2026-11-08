@@ -56,6 +56,46 @@ deferred:
     location: >-
       dist/pagefind/
     severity: low
+  - summary: >-
+      `reescribirConSlug` (el prefijo del fichero de una candidata cuyo Autor se supo después) no lo
+      recorre ninguna prueba por `aprobar`: hoy es inalcanzable, porque una Cita que declara
+      Personaje solo puede ser atribuida y su puerta está cerrada. La prueba entra con la 35.1b.
+    evidence: |-
+      Segunda revisión externa (35.2-2): una candidata `batman--…` con `autor: seneca` y
+      `personaje: batman` se rechaza al aprobar («solo una Cita atribuida declara Personaje»).
+    location: >-
+      tools/lib/revision.ts, reescribirConSlug
+    severity: low
+  - summary: >-
+      Para una Cita con prefijo de Personaje y Autor sabido después, la demanda (por prefijo,
+      `dueñoPorPrefijo`) la cuenta en el Personaje, mientras el build, la Obra y la Página de Autor
+      (`dueñoDeCita`) la cuentan en el Autor. Qué dueño debe mandar en la serie lo decide Héctor.
+    evidence: |-
+      Story 35.2 («un prefijo de Personaje nunca se atribuye a un Autor» y «saber después el Autor
+      no cambia el slug»); tools/lib/demanda.ts frente a src/lib/obras.ts `dueñoDeCita`.
+    location: >-
+      tools/lib/demanda.ts
+    severity: medium
+  - summary: >-
+      Cuando una Cita con Autor y Personaje resuelve una ficha de Personaje, los mensajes que
+      agrupan por `dueñoDeCita` (`fallosOrtograficos`, «no tiene Ficha de Obra», `prefijosDeFormas`,
+      el informe de `sembrar`) nombran al Autor como dueño de la Obra. Hoy la guarda de la 35.4 lo
+      para; al levantarla, la 35.4 tiene que agrupar por la ficha resuelta.
+    evidence: |-
+      src/lib/obras.ts `obrasDeCitas` (por `dueñoDeCita`) frente a `ObraResuelta.dueño`.
+    location: >-
+      src/lib/obras.ts
+    severity: low
+  - summary: >-
+      `reunir` entre dos fichas del mismo Personaje conserva solo el `autor` informativo de la
+      destino: si la absorbida declara otro, o la destino ninguno, las Citas de ese Autor dejan de
+      resolverse por el primer paso (el build lo diría como Obra sin ficha). Negarse o heredarlo lo
+      decide quien abra la 35.4.
+    evidence: |-
+      tools/lib/obras.ts `reunirFichas`, objeto `nueva`.
+    location: >-
+      tools/lib/obras.ts
+    severity: low
 ---
 
 <intent-contract>
@@ -187,6 +227,22 @@ deferred:
   - `[low]` `[patch]` Prueba del código 1 de `tools/autor.ts crear` ante el slug de un Personaje, por la orden y no solo por la biblioteca.
   - `[low]` `[patch]` Prueba de `retirarFuente` con candidatas de Personaje, sin Autor y con el Autor sabido después.
 
+### 2026-11-08 — Review pass
+- intent_gap: 0
+- bad_spec: 0
+- patch: 8 (high 0, medium 2, low 6)
+- defer: 4 (high 0, medium 1, low 3)
+- reject: 34 (high 0, medium 3, low 31)
+- addressed_findings:
+  - `[medium]` `[patch]` El ajuste del título por los dos pasos (`ajustarTitulosDeObra`, parche de la 35.2-1) no lo fijaba ninguna prueba con una ficha de Personaje: prueba nueva en `obras.test.ts` (primer paso por el `autor` informativo, segundo por `personajes`), que falla con la regla vieja del dueño de la ficha.
+  - `[medium]` `[patch]` `corpusParaFechar` —el lector del disco que alimenta el `lastmod` y el aviso— no lo recorría ninguna prueba con Personajes: prueba nueva en `fecha-de-cambio.test.ts` sobre un Corpus temporal (Personaje, Cita con Autor y Personaje, ficha de Personaje), que comprueba los campos leídos y que el `nombre` compone la Página de Cita y la de Obra.
+  - `[low]` `[patch]` `extraer` con una candidata de Personaje sin Autor y otra sin dueño en `_revision/`: prueba nueva en `extraer-cli.test.ts` (sale con 0 y no duplica las de Séneca), que falla si `dueñoDe` vuelve a `dueñoDeCita`.
+  - `[low]` `[patch]` La prueba feliz de `personajes-build.test.ts` busca el nombre y el slug del Personaje en cualquier grafía (fuera del slug de la Cita), el de Joker y el universo, no solo «Batman».
+  - `[low]` `[patch]` El JSDoc de `autoresPublicados` vuelve a su función (`src/lib/publicado.ts`).
+  - `[low]` `[patch]` El comentario de `ocupante` (`tools/lib/personajes.ts`) dice lo que hace `existsSync`: no lanza.
+  - `[low]` `[patch]` Línea en blanco doble en `tools/lib/cambios.ts`.
+  - `[low]` `[patch]` El registro del spec deja de contradecirse: «Revisión» de la implementación y comparaciones de `dist/` de cada pasada, aclaradas.
+
 ## Design Notes
 
 **Por qué dos guardas temporales en el build.** La puerta de la atribuida está cerrada (35.1b): ninguna orden publica una Cita de Personaje, y las de Personaje solo existen en `_revision/` o en fixtures. Las páginas que nombran a un Personaje llegan en la 35.3/35.4; mientras, un fichero escrito a mano rompe el build con un mensaje que nombra la historia, en vez de pintar una página que no nombra a nadie (la misma técnica que la 35.1 usó con «Toda Cita lleva Autor hasta la 35.2»). Por eso la resolución, la ruta y la indexabilidad de la Obra de Personaje se prueban puras.
@@ -238,7 +294,7 @@ Blocking condition: ninguna
 - Pruebas: `autoria.test.ts`, `personaje.test.ts`, `personajes-build.test.ts` (nuevas: cinco construcciones, una feliz y una por puerta, porque Astro se para en la primera que rompe y el esquema va antes que ninguna); `obras.test.ts`, `orden-del-libro.test.ts`, `alta.test.ts`, `revision.test.ts`, `demanda.test.ts`, `fecha-de-cambio.test.ts` ampliadas; `clase.test.ts`, `indexnow.test.ts`, `aislamiento-de-revision.test.ts` siguen el contrato nuevo; fixtures de `ObraResuelta` con `dueño` en ocho pruebas; `ayuda/construir.ts` crea `corpus/personajes/`; `dos-jornadas.test.ts` compara los avisos como conjunto.
 - `AGENTS.md` — «Los Personajes» (nueva), «La Cita atribuida», «Las fichas de Obra», «Retirar un Autor» y «Leer la demanda por página».
 
-**Revisión.** Pasada sin hallazgos externos: 0 parches, 0 diferidos, 0 rechazados. `followup_review_recommended: false` (0 high, 0 medium, 0 low; puntuación 0). Se anotan tres diferidos de la implementación (frontmatter): la bandera `--semblanza` de `biografia`, la lectura literal de «misma forma entre fichas de Personaje» y el aviso del cargador con la carpeta vacía.
+**Revisión (de la implementación, antes de las revisiones externas).** Pasada sin hallazgos externos: 0 parches, 0 diferidos, 0 rechazados. `followup_review_recommended: false` (0 high, 0 medium, 0 low; puntuación 0). Se anotan tres diferidos de la implementación (frontmatter): la bandera `--semblanza` de `biografia`, la lectura literal de «misma forma entre fichas de Personaje» y el aviso del cargador con la carpeta vacía.
 
 **Verificación.**
 - `npx vitest run tests/unit/autoria.test.ts tests/unit/personaje.test.ts tests/unit/demanda.test.ts tests/unit/obras.test.ts tests/unit/orden-del-libro.test.ts` — verde.
@@ -274,3 +330,27 @@ Blocking condition: ninguna
 - `npm test` (`logs/s-35/npm-test-35.2-r1.log`): FINISHED EXIT=0, 163/163 ficheros, 7.313 pruebas.
 
 **Riesgos residuales.** `reescribirConSlug` con el prefijo del Personaje y el Autor sabido después solo se alcanza al abrirse la puerta de la atribuida (35.1b): hoy no hay prueba que lo recorra por `aprobar`. Las rutas de una Obra de Personaje siguen probadas solo puras hasta la 35.4.
+
+### Revisión externa, segunda pasada (35.2-2, 2026-11-08)
+
+**Resumen.** Última ronda, proporcionada. Cinco capas externas; sin intent_gap ni bad_spec: las lecturas R2/R3 del alineamiento (la Obra de Personaje operativa, el dueño fijado al crear) chocan con el «Never» del `<intent-contract>` —nada de Personajes pintado hasta la 35.3/35.4— o quedan diferidas a Héctor. Los parches fijan con pruebas los arreglos de la 35.2-1 que nadie fijaba —el ajuste del título por los dos pasos, el lector del disco de AD-27, `extraer` ante candidatas sin Autor— y corrigen documentación.
+
+**Ficheros de esta pasada.**
+- `tests/unit/obras.test.ts` — el ajuste del título de una ficha de Personaje, por los dos pasos.
+- `tests/unit/fecha-de-cambio.test.ts` — `corpusParaFechar` sobre un Corpus en disco con un Personaje.
+- `tests/unit/extraer-cli.test.ts` — `extraer` con candidatas de Personaje sin Autor y sin dueño en `_revision/`.
+- `tests/unit/personajes-build.test.ts` — la comprobación de que ninguna página nombra al Personaje, sin distinguir mayúsculas y con el universo.
+- `src/lib/publicado.ts`, `tools/lib/personajes.ts`, `tools/lib/cambios.ts` — comentarios y una línea en blanco; ningún cambio de comportamiento.
+
+**Hallazgos.** 8 parches (0 high, 2 medium, 6 low), 4 diferidos (frontmatter: `reescribirConSlug` inalcanzable por `aprobar` hasta la 35.1b; el dueño de la demanda frente al del build, de Héctor; los mensajes que agrupan por `dueñoDeCita` al levantar la guarda de la 35.4; el `autor` informativo en `reunir`), 34 rechazados (conformes al contrato —captura por `autor` informativo, composición por el dueño, `CAMPOS_QUE_PINTA` exigidos por el spec—, calcados del Autor —`.min(1)` de la semblanza, sobrescritura de `semblanza`/`biografia`, `existsSync`—, inalcanzables —`Cita.autor` crudo sin dueño, un `LecturaDeVentana` sin `personajes`, el ayudante `fichasDeObraDe`, que salta las Citas sin Autor— o especulativos —carreras de ficheros, YAML escalar en `corpus/personajes/`—). `followup_review_recommended: true` por la fórmula (3 × 2 + 6 = 12), aunque los parches son pruebas y comentarios.
+
+**Sobre las comparaciones de `dist/`.** La de la implementación compara la línea base `4bdf6dff` con `0c4fefb53e` y solo difieren nombres de `pagefind/` (diferido de Pagefind); la de la 35.2-1 compara `0c4fefb53e` con la rama parcheada y no difiere nada, `pagefind/` incluido. Las dos no se contradicen: miden pares distintos. Esta pasada no toca nada que se construya (solo comentarios en `src/`), así que no repite la comparación.
+
+**Verificación.**
+- `npx vitest run` de autoria, personaje, demanda, obras, orden-del-libro — 257 pruebas, verde.
+- `npx vitest run` de personajes-build, fecha-de-cambio, alta, revision, extraer-cli — 211 pruebas, verde.
+- Cada prueba nueva falla con la regresión que fija (comprobado revirtiendo a mano `ajustarTitulosDeObra` y `dueñoDe` de `extraer`).
+- `npx astro check` — 0 errores, 0 avisos, 9 indicaciones.
+- `npm test` (`logs/s-35/npm-test-35.2-r2.log`): FINISHED EXIT=0, 163/163 ficheros, 7.316 pruebas.
+
+**Riesgos residuales.** Los cuatro diferidos de esta pasada; la Obra de Personaje sigue probada solo en puro hasta la 35.4.

@@ -70,7 +70,12 @@ describe('Historia 35.2 — el Personaje en el build', () => {
     expect(existsSync(paginaConstruida(r.proyecto, '/obra/seneca/obras-de-seneca/'))).toBe(true);
     // Ninguna página nombra todavía a un Personaje (35.3, 35.4), ni hay página de la ficha sin Citas.
     expect(existsSync(paginaConstruida(r.proyecto, '/obra/batman/el-caballero/'))).toBe(false);
-    expect(readFileSync(paginaConstruida(r.proyecto, '/cita/batman-la-noche-es-mas-oscura/'), 'utf8')).not.toContain('Batman');
+    // Ni su nombre ni su slug —fuera del de la Cita, que es su URL— en ninguna grafía, ni su
+    // universo: en el texto, el JSON-LD, los meta o un `data-*`.
+    const pagina = readFileSync(paginaConstruida(r.proyecto, '/cita/batman-la-noche-es-mas-oscura/'), 'utf8');
+    expect(pagina).not.toMatch(/batman(?!-la-noche-es-mas-oscura)/iu);
+    expect(pagina).not.toMatch(/joker/iu);
+    expect(pagina).not.toContain('DC Comics');
   });
 
   it('la puerta de los Personajes: slug de un Autor activo o retirado, y la Cita de un Personaje que no existe', async () => {
