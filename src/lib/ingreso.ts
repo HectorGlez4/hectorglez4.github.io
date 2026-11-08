@@ -263,12 +263,15 @@ export interface Tienda {
 export type TiendaConMarca = Tienda & { marca: string };
 
 /**
- * La única regla de qué es una marca: una cadena sin ningún blanco —ni vacía, ni con espacios
- * dentro o alrededor—. La usan `tieneMarca`, `urlDeEdicion` y `revisarTiendas`, para que el
- * informe, la puerta del encendido y el enlace no puedan discrepar (Historia 33.1).
+ * La única regla de qué es una marca: una cadena no vacía de caracteres no reservados de una
+ * URL —letras y cifras ASCII, `.`, `_`, `~` y `-`—, como «marca-21». Nada de blancos, ni de
+ * `&`, `=`, `#`, `?` o `%`, que partirían o falsearían la consulta del enlace, ni de caracteres
+ * invisibles como U+200B, que darían un `tag=%E2%80%8B` que no atribuye nada. La usan
+ * `tieneMarca`, `urlDeEdicion` y `revisarTiendas`, para que el informe, la puerta del
+ * encendido y el enlace no puedan discrepar (Historia 33.1).
  */
 export function esMarcaValida(marca: unknown): marca is string {
-  return typeof marca === 'string' && /^\S+$/.test(marca);
+  return typeof marca === 'string' && /^[A-Za-z0-9._~-]+$/.test(marca);
 }
 
 /** Si la tienda trae una marca de verdad, por la regla de `esMarcaValida`. */
@@ -421,13 +424,18 @@ export function revisarTiendas(tiendas: readonly Tienda[] = TIENDAS): string[] {
     }
     // Historia 33.1 — sin marca, el campo se omite; presente, tiene que ser una marca.
     if (Object.hasOwn(tienda, 'marca')) {
-      if (typeof tienda.marca !== 'string') {
+      if (tienda.marca === undefined) {
         fallos.push(
           `${quien} escribe la marca sin valor: una tienda sin marca omite el campo, nunca lo ` +
             'deja en `undefined`.',
         );
+      } else if (typeof tienda.marca !== 'string') {
+        fallos.push(`${quien} declara una marca que no es texto: una marca se escribe entre comillas.`);
       } else if (!esMarcaValida(tienda.marca)) {
-        fallos.push(`${quien} declara una marca vacía o con espacios: el enlace no la llevaría.`);
+        fallos.push(
+          `${quien} declara la marca ${JSON.stringify(tienda.marca)}, que no es una marca: solo ` +
+            'letras y cifras sin tilde, «.», «_», «~» y «-», sin blancos.',
+        );
       }
     }
   }

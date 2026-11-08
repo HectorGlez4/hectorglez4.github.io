@@ -5,7 +5,7 @@ created: '2026-11-07'
 status: 'done'
 baseline_revision: 'd9ddd61e81c4065962d796da4e85beb4e4465c51'
 review_loop_iteration: 0
-followup_review_recommended: true
+followup_review_recommended: false
 context:
   - '{project-root}/_bmad-output/implementation-artifacts/epic-33-context.md'
 warnings: ['oversized']
@@ -155,6 +155,16 @@ Hoy la ruta encendida es inalcanzable con una tienda sin marca: la puerta corta 
   - `[low]` `[patch]` Los textos del conjunto vacío («sin marca o con ella») de `textoDeTiendas` y del rechazo de `edicion` no tenían prueba: ahora sí.
   - `[low]` `[patch]` La prueba de `edicion` congelada con tienda sin marca no partía de ediciones previas: ahora declara una antes y comprueba que la ficha queda idéntica y la conserva (ac-auditor).
 
+### 2026-11-08 — Review pass (segunda ronda de capas externas, la última)
+- intent_gap: 0
+- bad_spec: 0
+- patch: 2: (high 0, medium 1, low 1)
+- defer: 0
+- reject: 30: (high 0, medium 0, low 30)
+- addressed_findings:
+  - `[medium]` `[patch]` `esMarcaValida` solo rechazaba blancos (`/^\S+$/`): una marca con `&`, `=`, `#`, `?`, `%` o un carácter invisible (U+200B no es `\s`) pasaba la puerta y el informe, y el enlace salía con `tag=%E2%80%8B` o una marca falseada. Ahora la regla única exige caracteres no reservados de URL (`/^[A-Za-z0-9._~-]+$/`), y la prueba de la regla única recorre esos casos, que fallan sin el arreglo (blind-hunter 2, edge-case-hunter 2).
+  - `[low]` `[patch]` `revisarTiendas` decía «la deja en `undefined`» también ante `marca: null` o un número: ahora distingue `undefined` escrito, «no es texto» y una cadena que no es marca (la nombra y dice qué caracteres valen); prueba nueva (blind-hunter 5, edge-case-hunter 1, other findings).
+
 ## Auto Run Result
 
 **Resumen.** `Tienda.marca` pasa a ser opcional (se omite sin valor) y se exportan `TiendaConMarca` y `tieneMarca`. `urlDeEdicion` solo acepta por su tipo una `TiendaConMarca` y lanza nombrando la tienda si le llega una sin marca; `edicionesEnVenta` recibe el nombre de la ficha y lanza nombrando tienda y ficha. `revisarTiendas` rechaza una marca presente vacía, con espacios o escrita como `undefined` (`Object.hasOwn`), y acepta una tienda sin el campo. `revisarDeclaracionDeIngreso`, con la afiliación encendida y tiendas declaradas, para el build nombrando cada tienda sin marca por clave y nombre. `TIENDAS` sigue vacío y la afiliación apagada; el comentario da las dos formas con valores inventados (`libreria.example`).
@@ -205,4 +215,24 @@ Hoy la ruta encendida es inalcanzable con una tienda sin marca: la puerta corta 
 - `npm test` completo (carga ~17, cinco worktrees en paralelo) — 7180/7182. Los dos fallos son las comparaciones byte a byte de la 26.3 y la 26.4 en `ingreso-construido.test.ts`, y la única diferencia es el hash del `.woff2` de Inter que sirve Google Fonts (`e868cdf4720e9ea5` frente a `c59b01ad90d7d13d`) entre dos construcciones del mismo fuente. El fichero, repetido a solas, pasa 43/43. La prueba de identidad no se ha debilitado.
 
 **Riesgos residuales.** La variación de las fuentes de Google sigue pudiendo tumbar de forma intermitente cualquier comparación byte a byte de `dist/` (diferido).
+
+### Segunda ronda de capas externas del 2026-11-08 (la última)
+
+**Resumen.** La regla única de la marca, `esMarcaValida` de `src/lib/ingreso.ts`, pasa de «sin blancos» a «caracteres no reservados de URL» (`A-Z a-z 0-9 . _ ~ -`): una marca con `&`, `=`, `#`, `?`, `%`, tilde o un carácter invisible ya no pasa ni la puerta del encendido ni el informe, y `revisarTiendas` la rechaza nombrándola. El mensaje de una marca presente distingue `undefined` escrito, un valor que no es texto y una cadena que no es marca.
+
+**Ficheros de esta pasada.**
+- `src/lib/ingreso.ts` — `esMarcaValida` con el conjunto de caracteres; tres mensajes en `revisarTiendas`.
+- `tests/unit/ediciones-en-venta.test.ts` — la tabla de la regla única con los caracteres que corrompen la consulta y los invisibles; prueba de los tres mensajes.
+
+**Hallazgos.** 2 parches (1 medium, 1 low), 0 diferidos, 30 rechazados. Rechazados por proporcionados o especulativos en la última ronda: la contradicción aparente del registro (las entradas anteriores son el historial de cada pasada y se conservan; esta sección es la vigente); «sin marca» para una marca presente mal formada en el informe y el doble fallo encendido (el build se para igual y `revisarTiendas` ahora nombra la marca); `edicionesEnVenta` y los errores viejos sin ficha, y su orden de parámetros (un solo llamador, tipado); el parte de `edicion` sin marcar las ediciones previas; la redacción de `textoDeTiendas` y de la puerta; el Umbral sin nombrar las tiendas; el tipo marcado (`branded`); las brechas de prueba de builds encendidos con varias tiendas, de la orden por consola con tiendas y de la búsqueda de dominios fuera de «ambas» (cubiertas por funciones y por la identidad byte a byte); `eds()` y su `replace`; la variación del `.woff2` (ya diferida); el comentario de `src/lib/admision.ts` (fuera del comentario de `TIENDAS`); y las lecturas de intención y criterios, que no contradicen ninguno.
+
+**Recomendación de revisión de seguimiento.** `false`: parches 0 high, 1 medium, 1 low; puntuación 3 × 1 + 1 = 4 < 5.
+
+**Verificación.**
+- `npx vitest run tests/unit/ediciones-en-venta.test.ts` — 70/70.
+- `npx vitest run tests/unit/obras.test.ts tests/unit/ingreso-cli.test.ts tests/unit/ingreso.test.ts` — 213/213.
+- `npx astro check` — 0 errores, 0 avisos.
+- `npm test` completo — 7183/7183, 155 ficheros, salida 0.
+
+**Riesgos residuales.** La variación de las fuentes de Google entre construcciones (diferido). Una marca real con un carácter fuera del conjunto no reservado se rechazaría; las de las tiendas previstas (como «marca-21») caben en él.
 

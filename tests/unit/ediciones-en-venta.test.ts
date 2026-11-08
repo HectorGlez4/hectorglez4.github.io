@@ -262,11 +262,30 @@ describe('Historia 33.1 — una tienda sin marca', () => {
   });
 
   it('una sola regla de marca: `esMarcaValida`, `tieneMarca`, la puerta y `urlDeEdicion` coinciden', () => {
-    for (const marca of ['marca-21', 'a_b.c']) {
+    for (const marca of ['marca-21', 'a_b.c', 'A~9']) {
       expect(esMarcaValida(marca), marca).toBe(true);
       expect(tieneMarca({ ...SIN_MARCA, marca }), marca).toBe(true);
     }
-    for (const marca of [undefined, null, 21, '', ' ', 'con espacio', ' marca', 'marca\t', 'a\nb']) {
+    for (const marca of [
+      undefined,
+      null,
+      21,
+      '',
+      ' ',
+      'con espacio',
+      ' marca',
+      'marca\t',
+      'a\nb',
+      // Lo que partiría o falsearía la consulta del enlace, y lo invisible.
+      'm&x=1',
+      'm=21',
+      'm#21',
+      'm?21',
+      'm%2621',
+      'marca\u200b',
+      '\u200b',
+      'marcá-21',
+    ]) {
       const tienda = { ...SIN_MARCA, marca } as unknown as Tienda;
       expect(esMarcaValida(marca), JSON.stringify(marca)).toBe(false);
       expect(tieneMarca(tienda), JSON.stringify(marca)).toBe(false);
@@ -279,6 +298,17 @@ describe('Historia 33.1 — una tienda sin marca', () => {
     }
     expect(tieneMarca(SIN_MARCA)).toBe(false);
     expect(tieneMarca(TIENDA)).toBe(true);
+  });
+
+  it('el fallo de una marca presente dice qué tiene: sin valor, no texto o caracteres que no valen', () => {
+    const fallo = (marca: unknown) => revisarTiendas([{ ...SIN_MARCA, marca } as unknown as Tienda]).join();
+    expect(fallo(undefined)).toContain('`undefined`');
+    for (const marca of [null, 21]) {
+      expect(fallo(marca), JSON.stringify(marca)).toContain('no es texto');
+      expect(fallo(marca), JSON.stringify(marca)).not.toContain('`undefined`');
+    }
+    expect(fallo('m&x=1')).toContain('"m&x=1"');
+    expect(fallo('m&x=1')).toContain('no es una marca');
   });
 
   it('una marca en blanco, con espacios o escrita como `undefined` se rechaza, encendida o apagada', () => {
