@@ -293,6 +293,24 @@ describe('Historia 27.8 — «Buscar en…», construido', () => {
       expect(pagina, ruta).not.toMatch(/\benterkeyhint=/);
     }
   });
+
+  it('Historia 34.3 — todo campo de búsqueda de `dist/` es el Campo de búsqueda: ningún uso pinta uno propio', async () => {
+    const conCampo = new Set<string>();
+    for (const { ruta, fichero } of await paginasDe(join(proyecto, 'dist'))) {
+      const pagina = await readFile(fichero, 'utf8');
+      recorrerElementos(pagina, (elemento, antepasados) => {
+        if (elemento.etiqueta !== 'input' || elemento.atributos.get('type') !== 'search') return;
+        const dentro = antepasados.some((a) => (a.atributos.get('class') ?? '').split(/\s+/).includes('campo-de-busqueda'));
+        expect(dentro, `${ruta}: <input type="search" id="${elemento.atributos.get('id') ?? ''}"> fuera de .campo-de-busqueda`).toBe(true);
+        // El trato es del `<style>` del componente: ningún uso lo estiliza en línea.
+        expect(elemento.atributos.has('style'), `${ruta}: <input type="search"> con style`).toBe(false);
+        conCampo.add(ruta);
+      });
+    }
+    for (const ruta of ['/buscar/', '/404', '/autores/', '/obras/', TEMA, AUTOR, CARTAS, BREVEDAD, IRA]) {
+      expect(conCampo.has(ruta), `${ruta} sin Campo de búsqueda`).toBe(true);
+    }
+  });
 });
 
 describe('Historia 27.8 — «Buscar en…» con la familia Obra congelada', () => {

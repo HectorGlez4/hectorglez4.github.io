@@ -1,14 +1,19 @@
 import { expect, test, type Page } from '@playwright/test';
 import {
   autorConBiografia,
+  autorConMasObras,
   autorEnUnaPagina,
   autorEnVariasPaginas,
   citaConTituloDeObraMasLargo,
   citaSinObra,
+  obrasPorAutor,
   paginasDeAutor,
 } from './ayuda/corpus.ts';
+import { abrirLosDesplegables, ENFOCABLES } from './ayuda/desplegables.ts';
 import { apuntarGuiones, fueraDeLaListaAlCargar } from './ayuda/guiones.ts';
 import { comprobarNombresDeTarjetas } from './ayuda/tarjetas.ts';
+import { rotuloDeObrasPlegadas } from '../../src/lib/atribucion.ts';
+import { MAX_OBRAS_ANTES_DE_LAS_CITAS } from '../../src/lib/umbrales.ts';
 
 /** Historia 2.3 — Página de Autor. */
 
@@ -132,6 +137,8 @@ test.describe('Historia 17.3 — la Lista de Obras', () => {
   }) => {
     await page.goto(UNAMUNO);
     await expect(page.getByRole('heading', { level: 2, name: 'Su obra en este Corpus' })).toBeVisible();
+    // Historia 34.2 — las Obras de más van plegadas, y plegadas miden 0: se abren antes de medir.
+    await abrirLosDesplegables(page);
     const enlaces = page.locator('.lista-de-obras li a');
     expect(await enlaces.count()).toBeGreaterThan(0);
 
@@ -142,6 +149,8 @@ test.describe('Historia 17.3 — la Lista de Obras', () => {
         subrayado: getComputedStyle(n).textDecorationLine,
       })),
     );
+    // Cada Obra una vez, esté a la vista o plegada.
+    expect(new Set(filas.map((f) => f.href)).size).toBe(filas.length);
     for (const { href, alto, subrayado } of filas) {
       expect(href).toMatch(/^\/obra\/miguel-de-unamuno\/[^/]+\/$/);
       expect(alto, href).toBeGreaterThanOrEqual(44);
@@ -171,6 +180,70 @@ test.describe('Historia 17.3 — la Lista de Obras', () => {
     test.skip((await request.get(segunda)).status() !== 200, 'Unamuno cabe hoy en una sola página.');
     await page.goto(segunda);
     await expect(page.locator('.lista-de-obras')).toHaveCount(0);
+  });
+});
+
+/*
+ * Historia 34.2 — la Página de Autor enseña tres Obras y pliega el resto (UX-DR130). Rafael Barrett,
+ * con su Lista entera, dejaba la primera Cita a unos 3.249 px a 360 × 640 (medida del diseño). El número de Obras sale del
+ * Corpus (`ayuda/corpus.ts`), nunca escrito aquí, y el umbral de `src/lib/umbrales.ts`.
+ */
+test.describe('Historia 34.2 — la Lista de Obras plegada', () => {
+  // Barrett es el Autor que nombra el criterio; si el Corpus deja de tenerlo con más Obras que el
+  // umbral, las pruebas pasan al Autor con más Obras en vez de saltarse en silencio, y fallan si
+  // ningún Autor pliega.
+  const BARRETT = 'rafael-barrett';
+  const deBarrett = obrasPorAutor().get(BARRETT) ?? 0;
+  const elegido =
+    deBarrett > MAX_OBRAS_ANTES_DE_LAS_CITAS ? { slug: BARRETT, obras: deBarrett } : autorConMasObras();
+  const RUTA = `/autor/${elegido?.slug}/`;
+  const obras = elegido?.obras ?? 0;
+
+  test.beforeEach(() => {
+    expect(obras, `ningún Autor del Corpus tiene más de ${MAX_OBRAS_ANTES_DE_LAS_CITAS} Obras`).toBeGreaterThan(MAX_OBRAS_ANTES_DE_LAS_CITAS);
+    if (elegido?.slug !== BARRETT) {
+      test.info().annotations.push({ type: 'sustituto', description: `${BARRETT} no pliega hoy; se mide ${RUTA}` });
+    }
+  });
+
+  test('a 360 × 640: «Y {m} obras más», cerrado, y la primera Cita a menos de 1.000 px', async ({ page }) => {
+    await page.setViewportSize({ width: 360, height: 640 });
+    await page.goto(RUTA);
+    const desplegable = page.locator('.obras-del-autor details');
+    await expect(desplegable).toHaveCount(1);
+    // El nombre accesible es solo el rótulo: el glifo «›» va `aria-hidden`.
+    await expect(desplegable.locator('summary')).toHaveAccessibleName(rotuloDeObrasPlegadas(obras - MAX_OBRAS_ANTES_DE_LAS_CITAS));
+    expect(await desplegable.evaluate((d) => (d as HTMLDetailsElement).open)).toBe(false);
+    await expect(page.locator('.obras-del-autor > .lista-de-obras li')).toHaveCount(MAX_OBRAS_ANTES_DE_LAS_CITAS);
+    const arriba = await page.locator('.listado li').first().evaluate((n) => n.getBoundingClientRect().top + window.scrollY);
+    test.info().annotations.push({ type: 'medida', description: `${RUTA} a 360 × 640: primera Cita a ${Math.round(arriba)} px (${obras} Obras)` });
+    expect(arriba).toBeLessThan(1000);
+  });
+
+  test('a 320 px no hay desplazamiento horizontal, cerrado ni abierto', async ({ page }) => {
+    await page.setViewportSize({ width: 320, height: 640 });
+    await page.goto(RUTA);
+    const desborda = () => page.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth);
+    expect(await desborda(), 'cerrado').toBe(false);
+    expect(await abrirLosDesplegables(page)).toBeGreaterThan(0);
+    expect(await desborda(), 'abierto').toBe(false);
+  });
+
+  test('el rótulo se alcanza con Tab y se abre con Intro sin mover el foco', async ({ page }) => {
+    await page.goto(RUTA);
+    const tope = await page.locator(ENFOCABLES).count();
+    let alcanzado = false;
+    for (let i = 0; i < tope + 3 && !alcanzado; i += 1) {
+      await page.keyboard.press('Tab');
+      alcanzado = await page.evaluate(() => document.activeElement?.matches('.obras-del-autor details > summary') ?? false);
+    }
+    expect(alcanzado, `el <summary> no se alcanzó en ${tope + 3} pasos`).toBe(true);
+    await page.keyboard.press('Enter');
+    const estado = await page.evaluate(() => ({
+      abierto: (document.querySelector('.obras-del-autor details') as HTMLDetailsElement).open,
+      foco: document.activeElement?.matches('.obras-del-autor details > summary') ?? false,
+    }));
+    expect(estado).toEqual({ abierto: true, foco: true });
   });
 });
 

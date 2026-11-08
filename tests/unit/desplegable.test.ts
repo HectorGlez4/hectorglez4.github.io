@@ -175,20 +175,6 @@ describe('Historia 34.0 — el contrato del componente, sin construir', () => {
     expect(selectoresAjenos('@media (min-width: 1px) { h2 { x: y; } }')).toEqual(['h2']);
   });
 
-  /*
-   * Temporal: la primera historia que lo use (34.2 o la Épica 30) quita esta prueba, y solo esta.
-   * La de abajo es permanente.
-   */
-  it('ninguna página ni componente del sitio lo importa todavía', async () => {
-    for (const ruta of await ficherosDelSitio()) {
-      if (ruta === join(RAIZ, COMPONENTE)) continue;
-      expect(
-        sinComentarios(await readFile(ruta, 'utf8')),
-        `${ruta}: prueba temporal de la 34.0; el primer consumidor del Desplegable (34.2 o la Épica 30) la quita, y solo esta`,
-      ).not.toContain('Desplegable.astro');
-    }
-  });
-
   it('ningún fichero del sitio, ni una isla, escribe su propio `<details>`', async () => {
     const ficheros = await ficherosDelSitio();
     expect(ficheros).toContain(join(RAIZ, 'public', 'islas', 'imagen.js'));

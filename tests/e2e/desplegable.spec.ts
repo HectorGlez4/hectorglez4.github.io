@@ -15,10 +15,10 @@ import { abrirLosDesplegables, auditar, recorrerElFoco } from './ayuda/desplegab
 /**
  * Historia 34.0 — el Desplegable en un navegador, sobre una sonda de una copia (AD-21).
  *
- * Ninguna superficie del sitio pinta todavía un `<details>`, así que en
- * `tests/e2e/accesibilidad.spec.ts` la pasada con lo plegado abierto no corre nunca: este fichero
- * es el que la hace correr, con las mismas funciones (`tests/e2e/ayuda/desplegables.ts`), sobre
- * una página construida que pinta varios desplegables seguidos, uno de ellos con un enlace dentro.
+ * En `tests/e2e/accesibilidad.spec.ts` la pasada con lo plegado abierto corre sobre las
+ * superficies que pintan un `<details>` —desde la 34.2, la Página de Autor plegada—; este fichero
+ * la hace correr además, con las mismas funciones (`tests/e2e/ayuda/desplegables.ts`), sobre una
+ * página construida que pinta varios desplegables seguidos, uno de ellos con un enlace dentro.
  * Y mira lo que solo un navegador ve: cerrado al cargar, Intro y Espacio abren y cierran sin mover
  * el foco, lo de dentro de uno cerrado no se tabula, la fila mide al menos `--zona-de-toque`, el
  * glifo gira sin saltar, abrir no mueve lo de encima y dos seguidos comparten un solo filete.

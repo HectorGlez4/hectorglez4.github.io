@@ -24,6 +24,7 @@ import { rutaDeObra } from './superficies.ts';
 import {
   AVISO_DE_RANGO_DE_LA_CLAVE_DE_ORDEN,
   CONGELACION_DE_OBRAS,
+  MAX_OBRAS_ANTES_DE_LAS_CITAS,
   MAX_POR_RANGO_DE_LA_CLAVE_DE_ORDEN,
   MAX_PROPORCION_OBRA_DEL_AUTOR,
   MIN_CITAS_OBRA_INDEXABLE,
@@ -143,6 +144,29 @@ export function ordenDeLaListaDeObras<O extends Pick<ObraResuelta, 'nombre' | 't
       a.titulo.localeCompare(b.titulo, 'es') ||
       a.nombre.localeCompare(b.nombre, 'es'),
   );
+}
+
+/**
+ * La Lista de Obras plegada de la Página de Autor, partida — UX-DR130, Historia 34.2.
+ *
+ * Las `MAX_OBRAS_ANTES_DE_LAS_CITAS` primeras, a la vista, y el resto, que va dentro del
+ * Desplegable; las dos en el orden de entrada (el de `ordenDeLaListaDeObras`), sin reordenar ni
+ * repetir. Con esa cifra o menos, `resto` es vacío y no hay Desplegable. Es el único sitio que
+ * corta: `ListaDeObras.astro` la llama solo cuando se pliega (`/obras/` no). `maximo` es el umbral,
+ * y solo una prueba pasa otro; uno que no sea un entero ≥ 1 lanza.
+ */
+export function partirLaListaDeObras<O>(
+  obras: readonly O[],
+  maximo: number = MAX_OBRAS_ANTES_DE_LAS_CITAS,
+): { primeras: readonly O[]; resto: readonly O[] } {
+  // El umbral es de Héctor y se puede mover: con 0, o con un valor que no sea entero, el primer
+  // `<ul>` saldría vacío o `slice` dejaría Obras fuera de la vista. Se para la construcción.
+  if (!Number.isInteger(maximo) || maximo < 1) {
+    throw new Error(`partirLaListaDeObras: MAX_OBRAS_ANTES_DE_LAS_CITAS tiene que ser un entero ≥ 1, y vale ${maximo}.`);
+  }
+  return obras.length > maximo
+    ? { primeras: obras.slice(0, maximo), resto: obras.slice(maximo) }
+    : { primeras: obras, resto: [] };
 }
 
 /**
