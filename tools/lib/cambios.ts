@@ -51,7 +51,8 @@
  *     declara su ficha (`corpus/wikidata/{Q}--r{N}.json`, cualquier cambio) y, de
  *     `corpus/wikidata/vigentes.yml`, solo las claves de las entidades cuya etiqueta pinta
  *     (género P136 y lengua P407; el autor P50 se coteja y no se pinta). Si su documento no se
- *     deja leer, compone `vigentes.yml` entero: antes fechar de más que de menos.
+ *     deja leer, compone `vigentes.yml` entero: antes fechar de más que de menos. Desde la
+ *     Historia 32.5, de su Autor también el nombre de «Cómo citar» (`NOMBRE_EN_REFERENCIA`).
  *   · **Directorio de Autores** (Historia 26.3) — lo que pinta: de cada Autor con alguna Cita, el
  *     nombre, los años y la clave de orden (`ordenAlfabetico`), que lo ordena y lo agrupa; de cada
  *     Cita, solo su `autor`, porque el Directorio cuenta Citas por Autor: un alta, una baja o un
@@ -187,9 +188,10 @@ export type Campos = typeof CUALQUIER_CAMBIO | readonly Campo[];
 
 /**
  * El nombre del Autor en las tres Referencias de «Cómo citar» — Historia 30.3, AD-27. Lo pinta la
- * Página de Cita con `nombreEnReferencia` de `src/lib/atribucion.ts`, la misma función que aquí:
- * revisar una clave que es palabra del nombre lo invierte («Martí, J.») y cambia la página; un lote
- * de `proponer-claves` sin revisar no cambia ninguna Referencia y no la fecha.
+ * Página de Cita con `nombreEnReferencia` de `src/lib/atribucion.ts`, la misma función que aquí, y
+ * desde la 32.5 también la Página de Obra, en las Referencias de la Obra: revisar una clave que es
+ * palabra del nombre lo invierte («Martí, J.») y cambia las dos; un lote de `proponer-claves` sin
+ * revisar no cambia ninguna Referencia y no las fecha.
  */
 export const NOMBRE_EN_REFERENCIA: CampoDerivado = {
   derivado: 'nombreEnReferencia',
@@ -316,7 +318,8 @@ export const CAMPOS_QUE_PINTA = {
     autor: [...CAMPOS_DEL_AUTOR_FUERA, 'semblanza', 'biografia'],
     tema: CAMPOS_DEL_AUTOR_FUERA,
     coleccion: CAMPOS_DEL_AUTOR_FUERA,
-    obra: CAMPOS_DEL_AUTOR_FUERA,
+    // Desde la 32.5 la página 1 de Obra lleva «Cómo citar», con el nombre en Referencia.
+    obra: [...CAMPOS_DEL_AUTOR_FUERA, NOMBRE_EN_REFERENCIA],
     directorioDeAutores: [...CAMPOS_DEL_AUTOR_FUERA, 'ordenAlfabetico'],
     directorioDeObras: ['nombre', 'ordenAlfabetico'],
   },

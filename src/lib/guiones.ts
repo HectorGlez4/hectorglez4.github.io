@@ -26,6 +26,7 @@
  */
 
 import {
+  MAX_BYTES_GUION_DE_COPIAR_REFERENCIA,
   MAX_BYTES_GUION_DE_IMAGEN,
   MAX_BYTES_GUION_DE_LA_BUSQUEDA,
   MAX_BYTES_GUION_DE_MEDICION,
@@ -44,7 +45,7 @@ export interface Arranque {
 }
 
 /** El nombre de una entrada de la lista. */
-export type IdDeGuion = 'medicion' | 'imagen' | 'pagefind' | 'filtro' | 'busqueda';
+export type IdDeGuion = 'medicion' | 'imagen' | 'pagefind' | 'filtro' | 'busqueda' | 'copiar-referencia';
 
 export interface GuionExterno {
   /** Cómo se la nombra en los mensajes de las comprobaciones. */
@@ -142,6 +143,17 @@ export const GUIONES_EXTERNOS: readonly GuionExterno[] = [
     pide: ['pagefind'],
     trozos: TROZO_COMPARTIDO,
     tope: MAX_BYTES_GUION_DE_LA_BUSQUEDA,
+  },
+  {
+    id: 'copiar-referencia',
+    cuando:
+      'al cargar la página 1 de toda Obra, con `<script type="module" src>`: es el `<script>` ' +
+      'procesado de `CopiarReferencia.astro` (Historia 32.5), que pone la fecha de consulta del ' +
+      'visitante en «Cómo citar», enseña sus botones y copia la Referencia',
+    // Como el filtro: el nombre del componente fijo y el resumen del contenido libre.
+    reconoce: /^\/_astro\/CopiarReferencia\.astro_astro_type_script_index_0_lang\.[A-Za-z0-9_-]+\.js$/,
+    trozos: TROZO_COMPARTIDO,
+    tope: MAX_BYTES_GUION_DE_COPIAR_REFERENCIA,
   },
 ];
 

@@ -10,7 +10,8 @@
  *
  * Página 1: Cabecera con la línea de Ficha técnica si la ficha está atada a Wikidata (Historia
  * 32.2) y el salto «Dónde leer esta obra ↓» (Historia 24.7), «Cómo empieza» plegado si la ficha
- * declara un incipit que se ofrece (Historia 32.3), Listado, Paginación,
+ * declara un incipit que se ofrece (Historia 32.3), «Cómo citar» plegado tras él —el último
+ * desplegable antes del listado, con su isla de copiar (Historia 32.5)—, Listado, Paginación,
  * «Buscar en esta obra» (Historia 27.8; debajo del listado desde la UX v8.4, decisión de Héctor del
  * 2026-10-30), Temas, «Dónde leer esta obra» y, si la ficha la trae, su nota (Historia 22.6).
  * Páginas 2+: solo Cabecera, sin salto, y Listado, y `noindex` por forma. Nada de prosa
@@ -23,13 +24,16 @@
 import Armazon from '../../../../components/Armazon.astro';
 import BuscarEn from '../../../../components/BuscarEn.astro';
 import Chips from '../../../../components/Chips.astro';
+import ComoCitar from '../../../../components/ComoCitar.astro';
 import ComoEmpieza from '../../../../components/ComoEmpieza.astro';
+import Desplegable from '../../../../components/Desplegable.astro';
 import DondeLeer from '../../../../components/DondeLeer.astro';
 import FichaTecnica from '../../../../components/FichaTecnica.astro';
 import Rotulo from '../../../../components/Rotulo.astro';
 import DatosDeObra from '../../../../components/DatosDeObra.astro';
 import Paginacion from '../../../../components/Paginacion.astro';
 import TarjetaDeCita from '../../../../components/TarjetaDeCita.astro';
+import CopiarReferencia from '../../../../islands/CopiarReferencia.astro';
 import {
   autoresPublicados,
   citasDeLasObras,
@@ -43,12 +47,14 @@ import {
   ANCLA_DE_DONDE_LEER,
   ROTULO_DE_DONDE_LEER,
   dondeLeer,
+  edicionQueEncabeza,
+  obraTieneComoCitar,
   rutaDeLaObra,
   segmentosDeObra,
   traductorDeLaEdicionQueEncabeza,
 } from '../../../../lib/obras.ts';
 import { edicionesEnVenta, modelosEnRuta } from '../../../../lib/ingreso.ts';
-import { descripcionDeObra } from '../../../../lib/atribucion.ts';
+import { descripcionDeObra, referenciasDeObra } from '../../../../lib/atribucion.ts';
 import { ROTULO_BUSCAR_EN_ESTA_OBRA } from '../../../../lib/busqueda.ts';
 import { CITAS_POR_PAGINA } from '../../../../lib/umbrales.ts';
 import { tituloDeObra } from '../../../../lib/marca.ts';
@@ -89,12 +95,14 @@ export const getStaticPaths = (async ({ paginate }) => {
     // «Dónde leer» (22.6) y el traductor de la edición que encabeza (32.2, la línea de Ficha
     // técnica) se calculan una vez, sobre todas las Citas de la Obra, y solo los recibe la
     // página 1: las 2+ no los pintan.
-    // El incipit (32.3), también solo para la página 1.
+    // El incipit (32.3), también solo para la página 1, y la edición que encabeza (32.5), de la
+    // que la Referencia de Obra toma su rótulo y su traductor: la misma regla que el traductor.
     const resumen = dondeLeer(citas);
     const traductor = traductorDeLaEdicionQueEncabeza(citas);
     const incipit = incipits.get(obra.nombre);
+    const edicion = edicionQueEncabeza(citas);
     return paginas.map((pagina, i) =>
-      i === 0 ? { ...pagina, props: { ...pagina.props, dondeLeer: resumen, traductor, incipit } } : pagina,
+      i === 0 ? { ...pagina, props: { ...pagina.props, dondeLeer: resumen, traductor, incipit, edicion } } : pagina,
     );
   });
 }) satisfies GetStaticPaths;
@@ -104,6 +112,7 @@ const { obra, autor, temas, page: pagina } = Astro.props;
 const resumenDondeLeer = 'dondeLeer' in Astro.props ? Astro.props.dondeLeer : undefined;
 const traductor = 'traductor' in Astro.props ? Astro.props.traductor : undefined;
 const incipit = 'incipit' in Astro.props ? Astro.props.incipit : undefined;
+const edicion = 'edicion' in Astro.props ? Astro.props.edicion : undefined;
 
 const ruta = rutaDeLaObra(obra, pagina.currentPage);
 // Historia 22.7 — la Tarjeta Social, en todas las páginas de la Obra, se indexe o no.
@@ -118,6 +127,9 @@ const primera = pagina.currentPage === 1;
  * 1, se indexe o no, congelada o no.
  */
 const conDondeLeer = primera && resumenDondeLeer !== undefined;
+/* Historia 32.5 — «Cómo citar», solo en la página 1; si la Obra lo tiene lo dice `obraTieneComoCitar`. */
+const conComoCitar = primera && obraTieneComoCitar(obra);
+const conIncipit = primera && incipit !== undefined;
 
 /*
  * Historia 22.9 — las ediciones en venta. Se pregunta por la **ruta**: la afiliación se admite
@@ -190,17 +202,27 @@ const enVenta =
 
     {
       /*
-       * Historia 32.3, UX-DR124, UX-DR128 — «Cómo empieza», plegado, entre la Cabecera y el listado,
-       * solo en la página 1 y solo si la ficha declara un incipit que se ofrece; si no, ni el
-       * desplegable ni su contenedor. Fuera de Pagefind y del JSON-LD: el comienzo de la obra no es
-       * texto buscable de cada Obra. A 3 × `--unidad` de la Cabecera (el filete del primer
-       * desplegable), con un atributo `style` para no añadir reglas a la hoja de esta página.
+       * Historias 32.3 y 32.5, UX-DR124, UX-DR128, UX-DR129 — los desplegables de la página 1,
+       * entre la Cabecera y el listado: «Cómo empieza» si la ficha declara un incipit que se
+       * ofrece y, el último, «Cómo citar» si la Obra lo tiene, como hermanos directos; sin
+       * ninguno, ni el contenedor. Fuera de Pagefind y del JSON-LD: ni el comienzo de la obra ni
+       * sus Referencias son texto buscable de cada Obra. A 3 × `--unidad` de la Cabecera (el
+       * filete del primer desplegable), con un atributo `style` para no añadir reglas a la hoja
+       * de esta página. Sin enlaces ni `data-zona`: la canónica es texto de las Referencias. La
+       * isla de copiar (`CopiarReferencia`, empaquetada) pone la fecha del visitante y copia.
        */
-      primera && incipit !== undefined && (
+      (conIncipit || conComoCitar) && (
         <div data-pagefind-ignore="all" style="margin-top: calc(var(--unidad) * 3)">
-          <ComoEmpieza incipit={incipit} />
+          {primera && incipit !== undefined && <ComoEmpieza incipit={incipit} />}
+          {conComoCitar && (
+            <Desplegable rotulo="Cómo citar"><ComoCitar referencias={referenciasDeObra(obra, autor, edicion, canonica)} /></Desplegable>
+          )}
         </div>
       )
+    }
+    {
+      /* El guion de la isla, fuera del contenedor: «Cómo citar» es su último hijo. */
+      conComoCitar && <CopiarReferencia />
     }
 
     {/*

@@ -2206,14 +2206,20 @@ test.describe('Historia 24.7 — el salto «Dónde leer esta obra ↓»', () => 
 
   /*
    * Historia 27.8, UX v8.4 — «Buscar en esta obra» va bajo el listado (decisión de Héctor del
-   * 2026-10-30): entre el salto y el listado no hay nada, y el listado sigue a 4 × `--unidad`.
+   * 2026-10-30): entre el salto y el listado no hay formulario, y el listado sigue a 4 × `--unidad`.
+   * Historia 32.5 — entre los dos va ahora el contenedor de los desplegables de la página 1, con
+   * «Cómo citar» en toda Obra: a 3 × `--unidad` de la Cabecera (el filete del primer desplegable,
+   * 32.3) y el listado a 4 × bajo él. Las distancias no cambian; cambia de qué se miden.
    */
-  test('la Cabecera: el listado a 32 px del salto en la página 1, sin «Buscar en esta obra» en medio, y de «de {Autor}» en la 2', async ({
+  test('la Cabecera: los desplegables a 24 px del salto y el listado a 32 px de ellos en la página 1, sin «Buscar en esta obra» en medio, y de «de {Autor}» en la 2', async ({
     page,
   }) => {
+    const DESPLEGABLES = 'header.cabecera-de-obra + div[data-pagefind-ignore="all"]';
     for (const ruta of [OBRAS.indexable, OBRAS.noIndexable, PIE().conPaginacion]) {
       await page.goto(ruta);
-      cerca(await hueco(page, '.cabecera-de-obra .salto', 'ul.listado'), 32, `${ruta}, salto → listado`);
+      cerca(await hueco(page, '.cabecera-de-obra .salto', DESPLEGABLES), 24, `${ruta}, salto → desplegables`);
+      cerca(await hueco(page, DESPLEGABLES, 'ul.listado'), 32, `${ruta}, desplegables → listado`);
+      await expect(page.locator(`${DESPLEGABLES} > details.desplegable > summary`).last()).toHaveText(/^Cómo citar/u);
       // El formulario está en la página 1, y por debajo del listado entero (sus distancias, en el pie).
       const bajoElListado = await hueco(page, 'ul.listado', 'form.buscar-en');
       expect(bajoElListado, `${ruta}: sin «Buscar en esta obra»`).not.toBeNull();

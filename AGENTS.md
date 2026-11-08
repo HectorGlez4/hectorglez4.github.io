@@ -1250,6 +1250,28 @@ toda Página de Cita. Sin `data-zona` —no hay enlaces: la canónica es texto�
   `src/lib/verso.ts` (« / » entre versos); hasta entonces va `cita.texto` tal cual (AD-29: nadie
   escribe su unión de versos).
 
+### Cómo citar la Obra (Historia 32.5)
+
+La página 1 de toda Obra —se indexe o no— lleva su «Cómo citar»: el **último desplegable antes del
+listado**, en el mismo contenedor `data-pagefind-ignore="all"` que «Cómo empieza» (detrás de él si
+hay incipit, solo si no; la 32.4 antepondrá «Dónde leer»). Las 2+ no lo llevan. Lo pregunta
+`obraTieneComoCitar` (`src/lib/obras.ts`; hoy `true`, la 35.9 añade las exclusiones).
+
+- Lo compone `referenciaDeObra`/`referenciasDeObra` de `src/lib/atribucion.ts`, hermanas de
+  `referenciaDeCita`: Autor (`nombreEnReferencia`), título de la ficha, año de la Obra, la edición
+  que encabeza y su traductor —solo de `edicionQueEncabeza` de `src/lib/obras.ts`, la misma regla
+  que el traductor de la Ficha técnica—, marca y canónica de la página 1. **Nunca de la Ficha
+  técnica** ni de otra Cita. Lo pinta `ComoCitar.astro` tal cual.
+- **La Página de Obra tiene isla de copiar**: `src/islands/CopiarReferencia.astro`, un `<script>`
+  empaquetado (no en línea) en la lista cerrada como `copiar-referencia`, con su tope medido
+  (`MAX_BYTES_GUION_DE_COPIAR_REFERENCIA`). Pone la fecha del visitante, enseña los botones, copia,
+  anuncia y pide `copiado-de-referencia`. **Importa solo hojas** —`src/lib/fechaDeConsulta.ts`
+  (que `atribucion.ts` reexporta) y `src/lib/anuncio.ts`— y el nombre del evento solo por su tipo:
+  importar de `atribucion.ts` o el valor de `EVENTOS` le metía el grafo de las Obras y la tabla
+  entera del vocabulario, compartida con la búsqueda (4.369 bytes en vez de 1.653).
+- Revisar la clave de un Autor fecha y avisa también sus Páginas de Obra
+  (`CAMPOS_QUE_PINTA.autor.obra` cuenta `NOMBRE_EN_REFERENCIA`).
+
 ### Inserta esta cita (Historia 30.4)
 
 El último Desplegable del bloque, «Inserta esta cita», lleva el Fragmento de HTML estático que se

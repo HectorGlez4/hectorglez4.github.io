@@ -21,6 +21,16 @@ import {
   rotuloBuscarEnAutor,
 } from '../../src/lib/busqueda.ts';
 import { ARRANQUE_DE_MEDICION, ATRIBUTO_SIN_ZONA } from '../../src/lib/medicion.ts';
+import { guionExternoDe } from '../../src/lib/guiones.ts';
+
+/**
+ * Historia 32.5 — de la Cabecera al listado no hay nada más que, en la página 1, el contenedor de
+ * los desplegables con «Cómo citar» (el único en estos fixtures, sin incipit): ninguna línea que
+ * nombre el orden ni el formulario de «Buscar en esta obra». Detrás, la etiqueta de su isla de
+ * copiar, que no pinta nada.
+ */
+const CABECERA_Y_LISTADO_1 =
+  /<\/header>\s*<div data-pagefind-ignore="all"[^>]*><details class="desplegable"[^>]*><summary[^>]*><span[^>]*>Cómo citar<(?:(?!<\/details>)[\s\S])*<\/details><\/div>\s*(?:<script type="module" src="\/_astro\/CopiarReferencia\.astro_astro_type_script_index_0_lang\.[A-Za-z0-9_-]+\.js"><\/script>\s*)?<ul class="listado"/;
 
 /**
  * Historia 27.8 — «Buscar en esta obra», «Buscar en {Autor}» y «Buscar en este tema», sobre `dist/`.
@@ -201,7 +211,10 @@ describe('Historia 27.8 — «Buscar en…», construido', () => {
       expect(segunda, ruta).not.toContain('class="buscar-en');
       const primera = await html(ruta.replace(/2\/$/, ''));
       expect(guionesEnLinea(primera), ruta).toEqual(guionesEnLinea(segunda));
-      expect(guionesExternosDe(primera), ruta).toEqual(guionesExternosDe(segunda));
+      // Salvo la isla de copiar la Referencia (32.5), que solo pide la página 1 de Obra: la 2+ no
+      // lleva «Cómo citar».
+      const sinCopiarReferencia = (guiones: string[]) => guiones.filter((g) => guionExternoDe(g)?.id !== 'copiar-referencia');
+      expect(sinCopiarReferencia(guionesExternosDe(primera)), ruta).toEqual(guionesExternosDe(segunda));
     }
   });
 
@@ -218,8 +231,8 @@ describe('Historia 27.8 — «Buscar en…», construido', () => {
     for (const ruta of [BREVEDAD, CARTAS, IRA]) {
       const pagina = await html(ruta);
       const posicion = (marca: string) => pagina.indexOf(marca);
-      // La Cabecera sigue dando directamente al listado, como sin formulario (24.1, 24.7).
-      expect(pagina, ruta).toMatch(/<\/header>\s*<ul class="listado"/);
+      // La Cabecera sigue dando al listado sin formulario en medio (24.1, 24.7): solo «Cómo citar» (32.5).
+      expect(pagina, ruta).toMatch(CABECERA_Y_LISTADO_1);
       const formulario = posicion('<form class="buscar-en"');
       expect(formulario, ruta).toBeGreaterThan(posicion('class="listado"'));
       // Justo detrás de la paginación —«Brevedad» pagina— o, sin ella, del cierre del listado.

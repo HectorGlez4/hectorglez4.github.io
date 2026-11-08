@@ -1424,7 +1424,7 @@ export const ROTULO_DE_DONDE_LEER = 'Dónde leer esta obra';
 /**
  * Las páginas distintas (normalizadas, ordenadas) y el rótulo de un grupo de Citas de la misma
  * Fuente. Es la regla de «Dónde leer esta obra» y la del desempate de
- * `traductorDeLaEdicionQueEncabeza`: una sola, para que las dos no elijan Fuentes distintas.
+ * `edicionQueEncabeza`: una sola, para que las dos no elijan Fuentes distintas.
  */
 function rotuloDeGrupo(id: string, fuentes: readonly FuenteParaLeer[]): { urls: string[]; nombre: string } {
   const urls = [...new Set(fuentes.map((f) => paginaNormalizada(f.url)))].sort();
@@ -1435,17 +1435,25 @@ function rotuloDeGrupo(id: string, fuentes: readonly FuenteParaLeer[]): { urls: 
   return { urls, nombre };
 }
 
+/** La edición cotejada que encabeza una Obra: el rótulo de su Fuente y, si es común, su traductor. */
+export interface EdicionQueEncabeza {
+  nombre: string;
+  traductor?: string;
+}
+
 /**
- * El traductor de la edición cotejada que encabeza la Obra — Historia 32.2, FR-48.
+ * La edición cotejada que encabeza la Obra — Historias 32.2 y 32.5, FR-48, AD-28.
  *
  * Agrupa las Citas **con Fuente** solo por Fuente (sumando sus traductores, a diferencia de
  * `dondeLeer`, que separa cada traducción), elige la de más Citas y, a igualdad, la de rótulo
- * menor y luego la de identificador menor. Devuelve su traductor solo si **todas** las Citas de
- * esa Fuente lo declaran y es el mismo; si no, o sin ninguna Cita con Fuente, `undefined`.
- * Nunca sale de la entidad de Wikidata, de otra Fuente ni de otra Cita. Lo pinta la línea de
- * Ficha técnica y lo usará la Referencia de Obra (32.5).
+ * menor y luego la de identificador menor. Devuelve el rótulo de esa Fuente (`rotuloDeGrupo`) y su
+ * traductor solo si **todas** las Citas de esa Fuente lo declaran y es el mismo; sin ninguna Cita
+ * con Fuente, `undefined`. Es la única regla de la edición que encabeza: de ella salen el
+ * traductor de la línea de Ficha técnica y la edición y el traductor de la Referencia de Obra, así
+ * que los dos salen siempre de la misma Fuente. Nunca sale de la entidad de Wikidata, de otra
+ * Fuente ni de otra Cita.
  */
-export function traductorDeLaEdicionQueEncabeza(citas: readonly CitaParaDondeLeer[]): string | undefined {
+export function edicionQueEncabeza(citas: readonly CitaParaDondeLeer[]): EdicionQueEncabeza | undefined {
   const porFuente = new Map<string, { fuentes: FuenteParaLeer[]; traductores: (string | undefined)[] }>();
   for (const cita of citas) {
     const fuente = cita.fuente;
@@ -1465,7 +1473,28 @@ export function traductorDeLaEdicionQueEncabeza(citas: readonly CitaParaDondeLee
   candidatas.sort(
     (a, b) => b.citas - a.citas || a.nombre.localeCompare(b.nombre, 'es') || (a.id < b.id ? -1 : a.id > b.id ? 1 : 0),
   );
-  return valorComun(candidatas[0].traductores);
+  const [primera] = candidatas;
+  const traductor = valorComun(primera.traductores);
+  return traductor === undefined ? { nombre: primera.nombre } : { nombre: primera.nombre, traductor };
+}
+
+/**
+ * El traductor de la edición cotejada que encabeza la Obra — Historia 32.2, FR-48.
+ *
+ * Es el de `edicionQueEncabeza`: solo si **todas** las Citas de esa Fuente lo declaran y es el
+ * mismo; si no, o sin ninguna Cita con Fuente, `undefined`. Lo pinta la línea de Ficha técnica.
+ */
+export function traductorDeLaEdicionQueEncabeza(citas: readonly CitaParaDondeLeer[]): string | undefined {
+  return edicionQueEncabeza(citas)?.traductor;
+}
+
+/**
+ * Si la Obra lleva «Cómo citar» en su página 1 — Historia 32.5, UX-DR129. Hoy, toda Obra; la
+ * Historia 35.9 añadirá aquí sus exclusiones, y la página solo pregunta.
+ */
+export function obraTieneComoCitar(obra: Pick<ObraResuelta, 'nombre'>): boolean {
+  void obra;
+  return true;
 }
 
 /**

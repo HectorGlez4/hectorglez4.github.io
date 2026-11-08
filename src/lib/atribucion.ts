@@ -15,6 +15,16 @@ import { rotuloDeFuente, type ObraResuelta } from './obras.ts';
 import { MARCA } from './marca.ts';
 import { escapar } from './lienzo.ts';
 import { enUnaLinea, versosDe } from './verso.ts';
+import { MARCADOR_DE_FECHA_DE_CONSULTA, fechaDeConsulta } from './fechaDeConsulta.ts';
+
+/*
+ * La fecha de consulta —su marcador y su frase— vive en una hoja sin importaciones,
+ * `src/lib/fechaDeConsulta.ts` (Historia 32.5), y este módulo la reexporta: es una sola
+ * composición, la que usan la Referencia en texto, la isla de Copiar de la Página de Cita (por su
+ * texto) y la isla empaquetada de la Página de Obra, que la importa de la hoja para no arrastrar
+ * a su guion el grafo de este módulo.
+ */
+export { MARCADOR_DE_FECHA_DE_CONSULTA, fechaDeConsulta };
 import { recuentoDeAutores, recuentoDeCitas, recuentoDeObras, temaEnFrase } from './recuentos.ts';
 import {
   TARJETA_DEL_DIRECTORIO_DE_AUTORES,
@@ -557,12 +567,6 @@ export const ROTULOS_DE_ESTILO: Readonly<Record<EstiloDeReferencia, string>> = {
   chicago: 'Chicago',
 };
 
-/**
- * El atributo del marcador vacío donde va la fecha de consulta, con el estilo por valor:
- * `<span data-fecha-de-consulta="apa"></span>`. El build lo deja vacío —la fecha es la del
- * visitante, nunca la jornada del build— y la isla de Copiar lo rellena con `fechaDeConsulta`.
- */
-export const MARCADOR_DE_FECHA_DE_CONSULTA = 'data-fecha-de-consulta';
 
 /** Un trozo de la Referencia: texto, en cursiva si el estilo la pide, o el sitio de la fecha. */
 export type SegmentoDeReferencia = { texto: string; cursiva?: true } | { fecha: EstiloDeReferencia };
@@ -735,25 +739,88 @@ export function referenciasDeCita(cita: Cita, autor: AutorParaReferencia, canoni
   }));
 }
 
+/** Lo que la Referencia de Obra toma de la edición que encabeza (`edicionQueEncabeza`). */
+export type EdicionParaReferencia = { nombre: string; traductor?: string };
+
 /**
- * La frase de la fecha de consulta de cada estilo, con el calendario local del `Date` que recibe:
- * APA «Recuperado el 8 de noviembre de 2026 de », MLA « Consultado el 8 nov. 2026.», Chicago
- * «Consultado el 8 de noviembre de 2026. ». Lleva sus espacios para que la Referencia sin fecha
- * —la del build, sin guion— no deje ninguno doble.
+ * La Referencia de una Obra en un estilo, en segmentos — Historia 32.5, FR-58, AD-28.
  *
- * Viaja a la isla de Copiar **por su texto** (`String(fechaDeConsulta)`), como `anunciar` por
- * `guionQueAnuncia`: sin importar nada, sin cierres sobre este módulo y sin comentarios dentro.
- * Las abreviaturas de MLA salen del nombre del mes: hasta cuatro letras, entero («mayo»); si no,
- * tres letras y punto, salvo septiembre, cuatro («sept.»). Está escrita corta —nombres de una letra,
- * sin plantillas anidadas— porque cuenta en `MAX_BYTES_DE_GUION` de cada Página de Cita.
+ * Hermana de `referenciaDeCita`, sin el texto de la Cita ni el «En »: sale solo de lo que consta
+ * de la Obra —el nombre del Autor (`nombreEnReferencia`, invertido solo con clave revisada), el
+ * título de la ficha en cursiva, el año de la Obra (ya resuelto con FR-42: sin él si sus Citas
+ * discrepan, nunca el de una traducción)—, de la edición cotejada que encabeza
+ * (`edicionQueEncabeza` de `src/lib/obras.ts`: su rótulo y su traductor común, **sin año**), de la
+ * marca y de la canónica de la página 1. El parámetro de la Obra es un `Pick` de `titulo` y `año`:
+ * la Ficha técnica (`wikidata`) no entra, y nada se completa desde ella ni desde otra Cita. Lo que
+ * no consta se omite. La fecha de consulta es un segmento propio, vacío en el build, que rellena
+ * la isla `CopiarReferencia.astro`. Las formas (supuesto que revisa Héctor) las fija la tabla de
+ * `tests/unit/atribucion.test.ts`:
+ *
+ *   · APA: `N (año). *Obra* (T, Trad.). Edición. Sabiduría de Bolsillo. {fecha}U`
+ *   · MLA: `N. *Obra*, traducido por T, año. Edición. *Sabiduría de Bolsillo*, U.{fecha}`
+ *   · Chicago: `N. *Obra*. año. Traducido por T. Edición. Sabiduría de Bolsillo. {fecha}U.`
  */
-export function fechaDeConsulta(estilo: string, fecha: Date): string {
-  const m = fecha.getMonth(), d = fecha.getDate(), a = fecha.getFullYear();
-  const mes = 'enero febrero marzo abril mayo junio julio agosto septiembre octubre noviembre diciembre'.split(' ')[m];
-  const larga = d + ' de ' + mes + ' de ' + a;
-  return estilo === 'mla'
-    ? ' Consultado el ' + d + ' ' + (mes.length < 5 ? mes : mes.slice(0, m === 8 ? 4 : 3) + '.') + ' ' + a + '.'
-    : estilo === 'apa' ? 'Recuperado el ' + larga + ' de ' : 'Consultado el ' + larga + '. ';
+export function referenciaDeObra(
+  obra: Pick<ObraResuelta, 'titulo' | 'año'>,
+  autor: AutorParaReferencia,
+  edicion: EdicionParaReferencia | undefined,
+  canonica: string,
+  estilo: EstiloDeReferencia,
+): SegmentoDeReferencia[] {
+  const nombre = nombreEnReferencia(autor, estilo);
+  const { titulo } = obra;
+  const año = obra.año === undefined ? undefined : añoLegible(obra.año);
+  const traductor = edicion?.traductor;
+  const rotulo = edicion?.nombre;
+
+  const s: SegmentoDeReferencia[] = [];
+  const t = (texto: string) => s.push({ texto });
+  const i = (texto: string) => s.push({ texto, cursiva: true });
+
+  if (estilo === 'apa') {
+    t(año !== undefined ? `${nombre} (${año}). ` : `${conPunto(nombre)} `);
+    i(titulo);
+    t(traductor !== undefined ? ` (${traductor}, Trad.). ` : `${punto(titulo)} `);
+    if (rotulo !== undefined) t(`${conPunto(rotulo)} `);
+    t(`${MARCA}. `);
+    s.push({ fecha: 'apa' });
+    t(canonica);
+  } else if (estilo === 'mla') {
+    t(`${conPunto(nombre)} `);
+    i(titulo);
+    const resto = [...(traductor !== undefined ? [`traducido por ${traductor}`] : []), ...(año !== undefined ? [año] : [])];
+    for (const parte of resto) t(`, ${parte}`);
+    t(`${punto(resto.at(-1) ?? titulo)} `);
+    if (rotulo !== undefined) t(`${conPunto(rotulo)} `);
+    i(MARCA);
+    t(`, ${canonica}.`);
+    s.push({ fecha: 'mla' });
+  } else {
+    t(`${conPunto(nombre)} `);
+    i(titulo);
+    t(`${punto(titulo)} `);
+    if (año !== undefined) t(`${conPunto(año)} `);
+    if (traductor !== undefined) t(`Traducido por ${conPunto(traductor)} `);
+    if (rotulo !== undefined) t(`${conPunto(rotulo)} `);
+    t(`${MARCA}. `);
+    s.push({ fecha: 'chicago' });
+    t(`${canonica}.`);
+  }
+  return s;
+}
+
+/** Las tres Referencias de una Obra, en su orden y con su rótulo, para `ComoCitar.astro`. */
+export function referenciasDeObra(
+  obra: Pick<ObraResuelta, 'titulo' | 'año'>,
+  autor: AutorParaReferencia,
+  edicion: EdicionParaReferencia | undefined,
+  canonica: string,
+): ReferenciaCompuesta[] {
+  return ESTILOS_DE_REFERENCIA.map((estilo) => ({
+    estilo,
+    rotulo: ROTULOS_DE_ESTILO[estilo],
+    segmentos: referenciaDeObra(obra, autor, edicion, canonica, estilo),
+  }));
 }
 
 /** La Referencia en texto plano —lo que copia el botón—, con la fecha dada o sin ella. */

@@ -577,7 +577,8 @@ describe('Historia 24.8 — la matriz: qué cambia de fecha', () => {
   /*
    * Historia 30.3 — la revisión ya no es invisible: «Cómo citar» invierte el nombre del Autor
    * («Equis, J.») solo con la clave revisada y siendo palabra del nombre, y lo pinta la Página de
-   * Cita. Revisarla fecha y avisa sus Páginas de Cita; si además corrige la clave, también los
+   * Cita. Revisarla fecha y avisa sus Páginas de Cita y, desde la 32.5, sus Páginas de Obra, cuya
+   * página 1 lleva las Referencias de la Obra; si además corrige la clave, también los
    * Directorios, que ordenan por ella. Una revisión que no cambia ninguna Referencia —un nombre de
    * una palabra, o una clave que no es palabra del nombre— no mueve nada.
    */
@@ -587,26 +588,26 @@ describe('Historia 24.8 — la matriz: qué cambia de fecha', () => {
     ...extra,
   });
 
-  it('solo la revisión de una clave que es palabra del nombre: cambian las Páginas de Cita del Autor', () => {
+  it('solo la revisión de una clave que es palabra del nombre: cambian las Páginas de Cita y de Obra del Autor', () => {
     const enT1 = {
       'corpus/autores/x.yml': {
         antes: conNombre('Juan Equis', { ordenAlfabetico: 'Equis' }),
         despues: conNombre('Juan Equis', { ordenAlfabetico: 'Equis', ordenRevisado: '2026-10-28' }),
       },
     };
-    const esperadas = ['/cita/x-a', '/cita/x-b', '/cita/x-c'];
+    const esperadas = ['/cita/x-a', '/cita/x-b', '/cita/x-c', '/obra/x/o'];
     expect(refechadas(corpusDeEjemplo(), historial(enT1))).toEqual(esperadas);
     expect(avisadas(enT1, corpusDeEjemplo())).toEqual(esperadas);
   });
 
-  it('revisar corrigiendo la clave: cambian sus Páginas de Cita y los Directorios', () => {
+  it('revisar corrigiendo la clave: cambian sus Páginas de Cita y de Obra y los Directorios', () => {
     const enT1 = {
       'corpus/autores/x.yml': {
         antes: conNombre('Juan Equis', { ordenAlfabetico: 'Juan' }),
         despues: conNombre('Juan Equis', { ordenAlfabetico: 'Equis', ordenRevisado: '2026-10-28' }),
       },
     };
-    const esperadas = ['/autores', '/cita/x-a', '/cita/x-b', '/cita/x-c', '/obras'];
+    const esperadas = ['/autores', '/cita/x-a', '/cita/x-b', '/cita/x-c', '/obra/x/o', '/obras'];
     expect(refechadas(corpusDeEjemplo(), historial(enT1))).toEqual(esperadas);
     expect(avisadas(enT1, corpusDeEjemplo())).toEqual(esperadas);
   });

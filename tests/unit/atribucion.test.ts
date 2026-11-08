@@ -11,8 +11,10 @@ import {
   nombreEnReferencia,
   partesDelNombre,
   referenciaDeCita,
+  referenciaDeObra,
   referenciaEnTexto,
   referenciasDeCita,
+  referenciasDeObra,
   type EstiloDeReferencia,
   type SegmentoDeReferencia,
 } from '../../src/lib/atribucion.ts';
@@ -222,6 +224,134 @@ describe('Historia 30.3 — las Referencias de la tabla, literales', () => {
 
   it('toda Cita lleva «Cómo citar» (la 35.4 añadirá la Cita atribuida)', () => {
     expect(citaTieneComoCitar(citaDe())).toBe(true);
+  });
+});
+
+/**
+ * Historia 32.5 — las Referencias de la Obra, literales. Las mismas formas que las de la Cita, sin
+ * el texto de la Cita ni el «En », y solo con lo que consta de la Obra: su título y su año, la
+ * edición que encabeza con su traductor (sin año) y la canónica de la página 1. Supuesto que
+ * revisa Héctor, como la tabla de arriba.
+ */
+const UO = 'https://ejemplo.org/obra/seneca/cartas-a-lucilio/';
+const SENECA = autorDe('Lucio Anneo Séneca', 'Séneca');
+const SENECA_SIN_REVISAR = autorDe('Lucio Anneo Séneca', 'Séneca', false);
+const NAVARRO = 'Francisco Navarro y Calvo';
+const CARTAS = { titulo: 'Cartas a Lucilio', año: 64 };
+const WIKISOURCE_CON_TRADUCTOR = { nombre: 'Wikisource', traductor: NAVARRO };
+
+const casosDeObra: {
+  caso: string;
+  obra: Pick<ObraResuelta, 'titulo' | 'año'>;
+  autor: Autor;
+  edicion: { nombre: string; traductor?: string } | undefined;
+  apa: string;
+  mla: string;
+  chicago: string;
+}[] = [
+  {
+    caso: 'completa: clave revisada, año y Fuente que encabeza con traductor común',
+    obra: CARTAS,
+    autor: SENECA,
+    edicion: WIKISOURCE_CON_TRADUCTOR,
+    apa: `Séneca, L. A. (64). *Cartas a Lucilio* (${NAVARRO}, Trad.). Wikisource. Sabiduría de Bolsillo. Recuperado el 8 de noviembre de 2026 de ${UO}`,
+    mla: `Séneca, Lucio Anneo. *Cartas a Lucilio*, traducido por ${NAVARRO}, 64. Wikisource. *Sabiduría de Bolsillo*, ${UO}. Consultado el 8 nov. 2026.`,
+    chicago: `Séneca, Lucio Anneo. *Cartas a Lucilio*. 64. Traducido por ${NAVARRO}. Wikisource. Sabiduría de Bolsillo. Consultado el 8 de noviembre de 2026. ${UO}.`,
+  },
+  {
+    caso: 'sin clave revisada: el nombre tal cual',
+    obra: CARTAS,
+    autor: SENECA_SIN_REVISAR,
+    edicion: WIKISOURCE_CON_TRADUCTOR,
+    apa: `Lucio Anneo Séneca (64). *Cartas a Lucilio* (${NAVARRO}, Trad.). Wikisource. Sabiduría de Bolsillo. Recuperado el 8 de noviembre de 2026 de ${UO}`,
+    mla: `Lucio Anneo Séneca. *Cartas a Lucilio*, traducido por ${NAVARRO}, 64. Wikisource. *Sabiduría de Bolsillo*, ${UO}. Consultado el 8 nov. 2026.`,
+    chicago: `Lucio Anneo Séneca. *Cartas a Lucilio*. 64. Traducido por ${NAVARRO}. Wikisource. Sabiduría de Bolsillo. Consultado el 8 de noviembre de 2026. ${UO}.`,
+  },
+  {
+    caso: 'sin año (sus Citas discrepan): sin año en los tres',
+    obra: { titulo: 'Cartas a Lucilio' },
+    autor: SENECA,
+    edicion: WIKISOURCE_CON_TRADUCTOR,
+    apa: `Séneca, L. A. *Cartas a Lucilio* (${NAVARRO}, Trad.). Wikisource. Sabiduría de Bolsillo. Recuperado el 8 de noviembre de 2026 de ${UO}`,
+    mla: `Séneca, Lucio Anneo. *Cartas a Lucilio*, traducido por ${NAVARRO}. Wikisource. *Sabiduría de Bolsillo*, ${UO}. Consultado el 8 nov. 2026.`,
+    chicago: `Séneca, Lucio Anneo. *Cartas a Lucilio*. Traducido por ${NAVARRO}. Wikisource. Sabiduría de Bolsillo. Consultado el 8 de noviembre de 2026. ${UO}.`,
+  },
+  {
+    caso: 'sin Fuente (ninguna Cita cotejada): sin edición ni traductor',
+    obra: CARTAS,
+    autor: SENECA,
+    edicion: undefined,
+    apa: `Séneca, L. A. (64). *Cartas a Lucilio*. Sabiduría de Bolsillo. Recuperado el 8 de noviembre de 2026 de ${UO}`,
+    mla: `Séneca, Lucio Anneo. *Cartas a Lucilio*, 64. *Sabiduría de Bolsillo*, ${UO}. Consultado el 8 nov. 2026.`,
+    chicago: `Séneca, Lucio Anneo. *Cartas a Lucilio*. 64. Sabiduría de Bolsillo. Consultado el 8 de noviembre de 2026. ${UO}.`,
+  },
+  {
+    caso: 'traductores distintos en la Fuente que encabeza: edición sin traductor',
+    obra: CARTAS,
+    autor: SENECA,
+    edicion: { nombre: 'Wikisource' },
+    apa: `Séneca, L. A. (64). *Cartas a Lucilio*. Wikisource. Sabiduría de Bolsillo. Recuperado el 8 de noviembre de 2026 de ${UO}`,
+    mla: `Séneca, Lucio Anneo. *Cartas a Lucilio*, 64. Wikisource. *Sabiduría de Bolsillo*, ${UO}. Consultado el 8 nov. 2026.`,
+    chicago: `Séneca, Lucio Anneo. *Cartas a Lucilio*. 64. Wikisource. Sabiduría de Bolsillo. Consultado el 8 de noviembre de 2026. ${UO}.`,
+  },
+  {
+    caso: 'un año antes de Cristo y un título que cierra en interrogación: sin punto doble',
+    obra: { titulo: '¿Qué es la vida?', año: -23 },
+    autor: autorDe('Horacio', 'Horacio'),
+    edicion: undefined,
+    apa: `Horacio (23 a. C.). *¿Qué es la vida?* Sabiduría de Bolsillo. Recuperado el 8 de noviembre de 2026 de ${UO}`,
+    mla: `Horacio. *¿Qué es la vida?*, 23 a. C. *Sabiduría de Bolsillo*, ${UO}. Consultado el 8 nov. 2026.`,
+    chicago: `Horacio. *¿Qué es la vida?* 23 a. C. Sabiduría de Bolsillo. Consultado el 8 de noviembre de 2026. ${UO}.`,
+  },
+];
+
+describe('Historia 32.5 — las Referencias de la Obra, literales', () => {
+  for (const { caso, obra, autor, edicion, ...esperadas } of casosDeObra) {
+    for (const estilo of ESTILOS_DE_REFERENCIA) {
+      it(`${caso}: ${estilo}`, () => {
+        expect(conMarcas(referenciaDeObra(obra, autor, edicion, UO, estilo), HOY)).toBe(esperadas[estilo]);
+      });
+    }
+  }
+
+  it('con Wikidata, idéntica a sin él: la Referencia nunca sale de la Ficha técnica', () => {
+    const conWikidata = { ...CARTAS, wikidata: { entidad: 'Q123', revision: 456 }, nombre: 'seneca--cartas-a-lucilio' } as unknown as ObraResuelta;
+    for (const estilo of ESTILOS_DE_REFERENCIA) {
+      expect(referenciaDeObra(conWikidata, SENECA, WIKISOURCE_CON_TRADUCTOR, UO, estilo)).toEqual(
+        referenciaDeObra(CARTAS, SENECA, WIKISOURCE_CON_TRADUCTOR, UO, estilo),
+      );
+    }
+    expect(referenciasDeObra(conWikidata, SENECA, undefined, UO)).toEqual(referenciasDeObra(CARTAS, SENECA, undefined, UO));
+  });
+
+  it('sin fecha —la del build, sin guion— no deja la frase, ni espacios dobles, ni la jornada', () => {
+    const sinFecha: Record<EstiloDeReferencia, string> = {
+      apa: `Séneca, L. A. (64). Cartas a Lucilio (${NAVARRO}, Trad.). Wikisource. Sabiduría de Bolsillo. ${UO}`,
+      mla: `Séneca, Lucio Anneo. Cartas a Lucilio, traducido por ${NAVARRO}, 64. Wikisource. Sabiduría de Bolsillo, ${UO}.`,
+      chicago: `Séneca, Lucio Anneo. Cartas a Lucilio. 64. Traducido por ${NAVARRO}. Wikisource. Sabiduría de Bolsillo. ${UO}.`,
+    };
+    for (const estilo of ESTILOS_DE_REFERENCIA) {
+      const texto = referenciaEnTexto(referenciaDeObra(CARTAS, SENECA, WIKISOURCE_CON_TRADUCTOR, UO, estilo));
+      expect(texto).toBe(sinFecha[estilo]);
+      expect(texto).not.toMatch(/ {2}/);
+      expect(texto).not.toMatch(/2026/);
+    }
+  });
+
+  it('una sola fecha por Referencia, en el sitio del estilo, y el título en cursiva', () => {
+    for (const estilo of ESTILOS_DE_REFERENCIA) {
+      const segmentos = referenciaDeObra(CARTAS, SENECA, WIKISOURCE_CON_TRADUCTOR, UO, estilo);
+      expect(segmentos.filter((s) => 'fecha' in s)).toEqual([{ fecha: estilo }]);
+      expect(segmentos).toContainEqual({ texto: 'Cartas a Lucilio', cursiva: true });
+    }
+  });
+
+  it('`referenciasDeObra` da los tres estilos en orden, con su rótulo', () => {
+    expect(referenciasDeObra(CARTAS, SENECA, undefined, UO).map((r) => [r.estilo, r.rotulo])).toEqual([
+      ['apa', 'APA'],
+      ['mla', 'MLA'],
+      ['chicago', 'Chicago'],
+    ]);
   });
 });
 

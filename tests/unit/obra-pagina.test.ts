@@ -142,6 +142,15 @@ async function anunciadas(proyecto: string): Promise<string[]> {
 }
 
 /**
+ * Historia 32.5 — de la Cabecera al listado no hay nada más que, en la página 1, el contenedor de
+ * los desplegables con «Cómo citar» (el único en estos fixtures, sin incipit): ninguna línea que
+ * nombre el orden ni el formulario de «Buscar en esta obra». Detrás, la etiqueta de su isla de
+ * copiar, que no pinta nada.
+ */
+const CABECERA_Y_LISTADO_1 =
+  /<\/header>\s*<div data-pagefind-ignore="all"[^>]*><details class="desplegable"[^>]*><summary[^>]*><span[^>]*>Cómo citar<(?:(?!<\/details>)[\s\S])*<\/details><\/div>\s*(?:<script type="module" src="\/_astro\/CopiarReferencia\.astro_astro_type_script_index_0_lang\.[A-Za-z0-9_-]+\.js"><\/script>\s*)?<ul class="listado"/;
+
+/**
  * Sonda: las Obras que el empaquetado de las páginas da por publicadas e indexables, con la
  * misma llamada que hace el armazón. Se compara con lo que calcula la integración de disco.
  */
@@ -456,7 +465,7 @@ describe('Historia 22.4 — la Página de Obra, construida', () => {
     expect(enlaces).toEqual(['/cita/seneca-cartas-2/', '/cita/seneca-cartas-1/', '/cita/seneca-cartas-0/']);
     expect(listado).not.toContain('class="autor"');
     // Indexable también: ninguna línea nombra el orden, y las Tarjetas no llevan el título de la Obra.
-    expect(pagina).toMatch(/<\/header>\s*<ul class="listado"/);
+    expect(pagina).toMatch(CABECERA_Y_LISTADO_1);
     expect(listado).not.toContain('Cartas a Lucilio');
     // Y los datos estructurados enumeran las Citas en ese mismo orden.
     const lista = jsonLd(pagina).find((b) => b['@type'] === 'CollectionPage')?.mainEntity as {
@@ -512,8 +521,8 @@ describe('Historia 22.4 — la Página de Obra, construida', () => {
       expect([...listado.matchAll(/href="([^"]+)"/g)].map((m) => m[1]), ruta).toEqual(citas);
       expect(listado, ruta).not.toContain('class="autor"');
       expect(listado, ruta).not.toContain('Sobre la brevedad de la vida');
-      // Ninguna línea que nombre el orden: de la Cabecera al Listado no hay nada.
-      expect(pagina, ruta).toMatch(/<\/header>\s*<ul class="listado"/);
+      // Ninguna línea que nombre el orden: de la Cabecera al Listado no hay nada (en la 1, «Cómo citar», 32.5).
+      expect(pagina, ruta).toMatch(ruta.endsWith('/2/') ? /<\/header>\s*<ul class="listado"/ : CABECERA_Y_LISTADO_1);
       const lista = jsonLd(pagina).find((b) => b['@type'] === 'CollectionPage')?.mainEntity as {
         itemListElement: { position: number; url: string }[];
       };

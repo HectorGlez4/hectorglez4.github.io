@@ -8,6 +8,11 @@ import { TIENDA_DE_PRUEBA } from './ayuda/construir.js';
 import { procedenciaCompuesta, textoParaCopiar } from '../../src/lib/atribucion.ts';
 import type { Autor, Cita } from '../../src/lib/publicado.ts';
 import {
+  edicionQueEncabeza,
+  obraTieneComoCitar,
+  traductorDeLaEdicionQueEncabeza,
+} from '../../src/lib/obras.ts';
+import {
   avisosDeAñosDeObras,
   avisosDeDistintaRancia,
   colgarObras,
@@ -1514,5 +1519,45 @@ describe('22.6 — la nota de la ficha: ninguna orden la escribe, y las que rees
     expect(bloqueDeEdiciones(await readFile(join(rutas.obrasRetiradas, `${absorbida}.yml`), 'utf8'))).toBe(
       EDICIONES,
     );
+  });
+});
+
+/*
+ * Historia 32.5 — la edición que encabeza, una sola regla: la de `traductorDeLaEdicionQueEncabeza`
+ * (32.2), que ahora delega aquí. De ella toma la Referencia de Obra su rótulo y su traductor.
+ */
+describe('edicionQueEncabeza — Historia 32.5, FR-48', () => {
+  const de = (id: string, traductor?: string, nombre?: string): CitaParaDondeLeer => ({
+    fuente: { id, url: `https://${id}.example.org/obra`, ...(nombre === undefined ? {} : { nombre }) },
+    ...(traductor === undefined ? {} : { procedencia: { traduccion: { traductor } } }),
+  });
+
+  it('la Fuente de más Citas, con su rótulo y su traductor común', () => {
+    const citas = [de('a', 'Juan Pérez', 'Biblioteca Alfa'), de('a', 'Juan Pérez', 'Biblioteca Alfa'), de('b', undefined, 'Beta')];
+    expect(edicionQueEncabeza(citas)).toEqual({ nombre: 'Biblioteca Alfa', traductor: 'Juan Pérez' });
+    expect(traductorDeLaEdicionQueEncabeza(citas)).toBe('Juan Pérez');
+  });
+
+  it('a igualdad de Citas, el rótulo menor en español y luego el identificador menor', () => {
+    const porRotulo = [de('z', undefined, 'Biblioteca Zeta'), de('y', undefined, 'Ábaco')];
+    expect(edicionQueEncabeza(porRotulo)).toEqual({ nombre: 'Ábaco' });
+    expect(edicionQueEncabeza([...porRotulo].reverse())).toEqual({ nombre: 'Ábaco' });
+    const porId = [de('q', 'De Q', 'Misma'), de('p', 'De P', 'Misma')];
+    expect(edicionQueEncabeza(porId)).toEqual({ nombre: 'Misma', traductor: 'De P' });
+    expect(edicionQueEncabeza([...porId].reverse())).toEqual({ nombre: 'Misma', traductor: 'De P' });
+  });
+
+  it('traductores distintos, o alguna Cita sin traductor: la edición, sin traductor', () => {
+    expect(edicionQueEncabeza([de('a', 'Juan Pérez', 'Alfa'), de('a', 'Ana Ruiz', 'Alfa')])).toEqual({ nombre: 'Alfa' });
+    expect(edicionQueEncabeza([de('a', 'Juan Pérez', 'Alfa'), de('a', undefined, 'Alfa')])).toEqual({ nombre: 'Alfa' });
+  });
+
+  it('sin ninguna Cita con Fuente: `undefined`', () => {
+    expect(edicionQueEncabeza([{}, { fuente: null }])).toBeUndefined();
+    expect(edicionQueEncabeza([])).toBeUndefined();
+  });
+
+  it('toda Obra lleva «Cómo citar» (la 35.9 añadirá las exclusiones)', () => {
+    expect(obraTieneComoCitar({ nombre: 'seneca--cartas-a-lucilio' })).toBe(true);
   });
 });

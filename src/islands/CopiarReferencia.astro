@@ -1,0 +1,97 @@
+---
+/**
+ * Isla de copiar la Referencia de la Página de Obra — Historia 32.5, FR-58, UX-DR129, AD-6.
+ *
+ * La Página de Obra no tiene la isla de Copiar de la Página de Cita (`CopiarCita.astro`), que es
+ * quien allí atiende «Cómo citar»; esta es su hermana para la página 1 de Obra. **Sin marcado
+ * propio**: atiende el bloque que pinta `ComoCitar.astro` dentro del Desplegable «Cómo citar»,
+ * por los mismos atributos neutros que lee `CopiarCita` (`data-como-citar`, `data-copiables`,
+ * `data-copiable`, `data-copiar-texto`, `data-etiqueta`, `data-sin-fecha`, la región
+ * `[role=status][data-anuncio]` y el marcador `MARCADOR_DE_FECHA_DE_CONSULTA`).
+ *
+ * A diferencia de `CopiarCita`, el guion **no va en línea**: es un `<script>` procesado, que Astro
+ * empaqueta en un fichero de `/_astro/` (`assetsInlineLimit` de `astro.config.mjs`), y está en la
+ * lista cerrada de `src/lib/guiones.ts` como `copiar-referencia`, con su tope medido
+ * (`MAX_BYTES_GUION_DE_COPIAR_REFERENCIA`). Lo que necesita de `src/lib/` lo importa del mismo
+ * dueño —`fechaDeConsulta` y su marcador de la hoja `src/lib/fechaDeConsulta.ts`, que reexporta
+ * `atribucion.ts`, y `anunciar` de `anuncio.ts`—, sin copiarlo; el nombre del evento lo ata al de
+ * `vocabulario.ts` su tipo (ver el guion). Importa solo hojas a propósito: importar de
+ * `atribucion.ts` arrastraría al guion el grafo de las Obras, las superficies y el vocabulario, que
+ * el empaquetado no sabe quitar. Un módulo se ejecuta una vez por página
+ * aunque se importe la isla dos veces, y lo hace con el documento ya analizado.
+ *
+ * La conducta es la del recorrido `citar` de `CopiarCita`: en cada bloque `[data-como-citar]`
+ * escribe la fecha de consulta de hoy, con el calendario del visitante, en cada marcador —y la
+ * vuelve a escribir en cada pulsación, para que una página abierta desde ayer no copie la fecha
+ * de ayer—, quita las líneas «Sin fecha…» y enseña los botones. Cada botón copia el `textContent`
+ * de la Referencia de al lado, dice «Copiado.» dos segundos y lo anuncia por la región del bloque,
+ * dentro del `<details>`; el bloque recuerda qué botón anunció lo último y solo ese vacía la región
+ * al volver. Tras una copia buena, `__medir` a secas con `copiado-de-referencia`; si el
+ * portapapeles rechaza, nada: ni «Copiado.» ni evento, y la Referencia sigue a la vista. Ningún
+ * dato de contenido en el guion: todo está en el marcado. Sin guion, la Referencia se lee sin
+ * fecha, la línea lo dice y los botones siguen `hidden`.
+ */
+---
+
+<script>
+  import { MARCADOR_DE_FECHA_DE_CONSULTA, fechaDeConsulta } from '../lib/fechaDeConsulta.ts';
+  import { anunciar } from '../lib/anuncio.ts';
+  import type { EVENTOS } from '../lib/vocabulario.ts';
+
+  /** La cola de medición que abre el arranque del armazón (AD-13). */
+  declare function __medir(...argumentos: unknown[]): void;
+
+  /*
+   * El nombre del evento, atado por su tipo al de `EVENTOS` del vocabulario: si el vocabulario lo
+   * renombra, `astro check` falla aquí. Se importa solo el tipo a propósito: importar el valor
+   * metería en el guion la tabla entera de eventos —el empaquetado no quita propiedades de un
+   * objeto— y, compartida con la búsqueda en un trozo, los nombres de la `busqueda` que solo su
+   * isla puede llevar (Historia 23.8). `tests/unit/medicion.test.ts` coteja el valor en `dist/`.
+   */
+  const EVENTO_REFERENCIA: (typeof EVENTOS)['copiadoDeReferencia'] = 'copiado-de-referencia';
+
+  /** Un bloque «Cómo citar», con el botón que anunció lo último en su región. */
+  type Bloque = HTMLElement & { anuncio?: HTMLButtonElement };
+
+  for (const bloque of document.querySelectorAll<Bloque>('[data-como-citar]')) {
+    const region = bloque.querySelector<HTMLElement>('[role=status][data-anuncio]');
+    if (region === null) continue;
+    const fechar = () => {
+      const hoy = new Date();
+      for (const marcador of bloque.querySelectorAll(`[${MARCADOR_DE_FECHA_DE_CONSULTA}]`)) {
+        marcador.textContent = fechaDeConsulta(marcador.getAttribute(MARCADOR_DE_FECHA_DE_CONSULTA) ?? '', hoy);
+      }
+    };
+    fechar();
+    for (const linea of bloque.querySelectorAll('[data-sin-fecha]')) linea.remove();
+    for (const boton of bloque.querySelectorAll<HTMLButtonElement>('[data-copiar-texto]')) {
+      const etiqueta = boton.querySelector('[data-etiqueta]');
+      const copiable = boton.parentElement?.querySelector('[data-copiable]');
+      if (etiqueta === null || copiable === null || copiable === undefined) continue;
+      const original = etiqueta.textContent;
+      let temporizador: ReturnType<typeof setTimeout> | undefined;
+      const volver = () => {
+        clearTimeout(temporizador);
+        etiqueta.textContent = original;
+        if (bloque.anuncio === boton) region.textContent = '';
+        boton.removeAttribute('data-estado');
+      };
+      boton.hidden = false;
+      boton.addEventListener('click', async () => {
+        volver();
+        fechar();
+        try {
+          await navigator.clipboard.writeText(copiable.textContent ?? '');
+        } catch {
+          return;
+        }
+        etiqueta.textContent = 'Copiado.';
+        boton.setAttribute('data-estado', 'copiado');
+        bloque.anuncio = boton;
+        anunciar(region, 'Copiado.');
+        temporizador = setTimeout(volver, 2000);
+        __medir(EVENTO_REFERENCIA);
+      });
+    }
+  }
+</script>

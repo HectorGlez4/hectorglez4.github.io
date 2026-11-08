@@ -739,6 +739,26 @@ export const MAX_BYTES_GUION_DEL_FILTRO = 3915;
 export const MAX_BYTES_GUION_DE_LA_BUSQUEDA = 18296;
 
 /**
+ * Tope del guion de copiar la Referencia de la Página de Obra — Historia 32.5, AD-6, AD-9.
+ *
+ * Es el `<script>` procesado de `src/islands/CopiarReferencia.astro`, que la página 1 de toda Obra
+ * pide con `<script type="module" src>`: pone la fecha de consulta del visitante en las tres
+ * Referencias de «Cómo citar», enseña los botones, copia, anuncia «Copiado.» y pide
+ * `copiado-de-referencia`. Cuenta los bytes UTF-8 sin comprimir del fichero y de sus trozos, como
+ * los demás topes de la lista cerrada (`src/lib/guiones.ts`), y lo vigila
+ * `tests/unit/medicion.test.ts` sobre `dist/`.
+ *
+ * Medido el 2026-11-08: **1.653 bytes** —1.349 del fichero de entrada y 304 del trozo `anuncio` que
+ * comparte con el filtro y la búsqueda—, el mismo en toda página 1 de Obra y con o sin punto final de
+ * medición, porque no lleva contenido. Más unos 400 de margen, como los demás topes de la lista. La
+ * medida cuenta con que el guion importa solo hojas —`src/lib/fechaDeConsulta.ts` y
+ * `src/lib/anuncio.ts`— y el nombre del evento solo por su tipo: importando `fechaDeConsulta` de
+ * `src/lib/atribucion.ts` arrastraba el grafo de las Obras, las superficies y la tabla de eventos
+ * del vocabulario, en un trozo compartido con la búsqueda, y medía 4.369.
+ */
+export const MAX_BYTES_GUION_DE_COPIAR_REFERENCIA = 2053;
+
+/**
  * La pausa de tecleo, en milisegundos — AD-9, UX-DR58, UX-DR86, Historia 26.6.
  *
  * Es el **segundo ritmo** de los mensajes de estado (`ritmoDeTecleo` en `src/lib/anuncio.ts`):

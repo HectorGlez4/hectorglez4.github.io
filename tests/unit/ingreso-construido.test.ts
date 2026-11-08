@@ -918,6 +918,11 @@ describe('Historia 17.5 — el tope de guion, con todo encendido donde se admite
     // Historia 27.2 — y `/buscar/`, con los Modelos encendidos, sigue pidiendo su búsqueda por la
     // entrada `busqueda` de la lista, no en línea.
     expect(guionesExternosDe(paginas['buscar/index.html']).map((e) => guionExternoDe(e)?.id)).toContain('busqueda');
+    // Historia 32.5 — y la página 1 de Obra, con la afiliación encendida, pide la isla de copiar la
+    // Referencia por su entrada de la lista, `copiar-referencia`, y no en línea.
+    const obra = paginas['obra/seneca/sobre-la-brevedad-de-la-vida/index.html'];
+    expect(obra).toBeDefined();
+    expect(guionesExternosDe(obra).map((e) => guionExternoDe(e)?.id)).toContain('copiar-referencia');
   });
 
   it('y el contador de guion cuenta bytes de guion, no el ld+json ni lo que se descarga', () => {

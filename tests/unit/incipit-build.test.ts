@@ -82,9 +82,14 @@ const conElTope = (umbrales: string, valor: string) =>
 const paginaConstruida = (proyecto: string, ruta: string) => readFileSync(rutaConstruida(proyecto, ruta), 'utf8');
 const OBRA = '/obra/seneca/sobre-la-brevedad-de-la-vida/';
 
-/** El contenedor del desplegable, tal cual sale en el HTML, o `undefined`. */
+/**
+ * El desplegable «Cómo empieza», tal cual sale en el HTML, o `undefined`. Desde la 32.5 comparte
+ * contenedor con «Cómo citar», que va detrás: se toma su `<details>`, no el contenedor entero.
+ */
 function bloqueDe(html: string): string | undefined {
-  return /<div data-pagefind-ignore="all" style="margin-top: calc\(var\(--unidad\) \* 3\)"[^>]*>[\s\S]*?<\/details>\s*<\/div>/u.exec(html)?.[0];
+  const contenedor = /<div data-pagefind-ignore="all" style="margin-top: calc\(var\(--unidad\) \* 3\)"[^>]*>/u.exec(html);
+  if (contenedor === null) return undefined;
+  return /^<details\b[^>]*><summary[^>]*><span[^>]*>Cómo empieza[\s\S]*?<\/details>/u.exec(html.slice(contenedor.index + contenedor[0].length))?.[0];
 }
 
 /** Todos los HTML de un `dist/`. */

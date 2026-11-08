@@ -174,7 +174,12 @@ test.beforeEach(({}, info) => {
   test.skip(info.project.name !== PERFIL, 'la ventana se fija dentro de cada prueba');
 });
 
-const SUMMARY = 'details.desplegable > summary';
+/*
+ * El desplegable de «Cómo empieza». Desde la 32.5 la página 1 lleva detrás «Cómo citar», en el
+ * mismo contenedor: se nombra el de la Obra por lo que pliega, no por ser el único.
+ */
+const DESPLEGABLE = 'details.desplegable:has(p.incipit)';
+const SUMMARY = `${DESPLEGABLE} > summary`;
 
 async function auditar(page: import('@playwright/test').Page) {
   const resultado = await new AxeBuilder({ page }).withTags([...ETIQUETAS_DEL_BARRIDO]).analyze();
@@ -186,8 +191,10 @@ async function auditar(page: import('@playwright/test').Page) {
 test.describe('«Cómo empieza», rendido', () => {
   test('la página 1 pasa la auditoría automática con el desplegable cerrado y abierto', async ({ page }) => {
     await page.goto(`${SITIO}${OBRA}`);
-    const desplegable = page.locator('details.desplegable');
+    const desplegable = page.locator(DESPLEGABLE);
     await expect(desplegable).toHaveCount(1);
+    // Dos desplegables, «Cómo empieza» primero y «Cómo citar» (32.5) el último.
+    await expect(page.locator('details.desplegable > summary')).toHaveText([/^Cómo empieza/u, /^Cómo citar/u]);
     await expect(desplegable).not.toHaveAttribute('open', /.*/u);
     await expect(page.locator(SUMMARY)).toHaveText(/^Cómo empieza/u);
     await expect(page.locator('p.incipit')).not.toBeVisible();
@@ -204,10 +211,10 @@ test.describe('«Cómo empieza», rendido', () => {
     const summary = page.locator(SUMMARY);
     await summary.focus();
     await page.keyboard.press('Enter');
-    await expect(page.locator('details.desplegable')).toHaveAttribute('open', '');
+    await expect(page.locator(DESPLEGABLE)).toHaveAttribute('open', '');
     // El foco sigue en **ese** `<summary>`, y lo que pliega se ve.
     expect(await summary.evaluate((nodo) => nodo === document.activeElement)).toBe(true);
-    await expect(page.locator('details.desplegable p').first()).toBeVisible();
+    await expect(page.locator(`${DESPLEGABLE} p`).first()).toBeVisible();
   });
 
   test('a 360 × 640 se mide dónde empieza la primera Tarjeta del listado, con todo cerrado', async ({ page }) => {

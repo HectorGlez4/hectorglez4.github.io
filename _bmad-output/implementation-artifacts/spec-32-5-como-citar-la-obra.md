@@ -2,8 +2,8 @@
 title: '«Cómo citar» la Obra'
 type: 'feature'
 created: '2026-11-08'
-status: 'ready-for-dev'
-baseline_revision: '85bd3766a6da0dd68e0017fdc985f34e8b8176ec'
+status: 'done'
+baseline_revision: '3d45cb258d8c5010dab16963fb2614409a51137e'
 review_loop_iteration: 0
 followup_review_recommended: false
 context:
@@ -11,7 +11,14 @@ context:
   - '{project-root}/_bmad-output/implementation-artifacts/spec-32-3-el-incipit-lo-declara-una-persona-y-la-pagina-lo-ensena-plegado.md'
   - '{project-root}/_bmad-output/planning-artifacts/architecture/architecture-brainlySabiduria-2026-08-10/ARCHITECTURE-SPINE.md'
 warnings: ['oversized']
-deferred: []
+deferred:
+  - summary: >-
+      Con Ficha técnica (la línea más larga) y el título de Larra, «Cómo citar» cerrado deja la primera Tarjeta de la página 1 de Obra a 669,5 px a 360 × 640; qué ceder en la primera pantalla es pendiente de Héctor (bmad-ux), junto con el bloqueo de la 32.4.
+    evidence: |-
+      tests/e2e/ficha-tecnica.spec.ts (corpus de prueba, ninguna Obra real atada a Wikidata) midió 669,5 px con 70 px de desplegables; la puerta de la 32.2 se juzga ahora sin ese contenedor (599,5 px). Con el Corpus real la puerta de toda página 1 sigue en verde (peor, 626,8 px).
+    location: >-
+      tests/e2e/ficha-tecnica.spec.ts
+    severity: medium
 ---
 
 <intent-contract>
@@ -106,12 +113,28 @@ deferred: []
 
 ## Review Triage Log
 
+### 2026-11-09 — Review pass
+- intent_gap: 0
+- bad_spec: 0
+- patch: 0
+- defer: 0
+- reject: 0
+- addressed_findings:
+  - none
+
+Las capas de revisión son externas (orquestador v9-ralph) y en esta pasada no trajeron hallazgos.
+
 ## Design Notes
 
 - **Sin la 32.4.** «Cómo citar» va tras «Cómo empieza» —o, sin incipit, solo— en el contenedor que la 32.3 ya pinta; la 32.4 antepondrá «Dónde leer» dentro del mismo `div` (su spec ya lo prevé: «la 32.5 meterá «Cómo citar» detrás, en el mismo contenedor»). El conflicto de fusión es de pocas líneas en la página y se resuelve conservando los tres hermanos. Hasta la 32.4, «Dónde leer» sigue al pie con su salto: es el orden de UX-DR124 «con lo que ya existe».
 - **Primera pantalla.** «Cómo citar» cerrado suma ≈ 24 + 1 + 44 px bajo la Cabecera. Con el Corpus real (sin Ficha técnica ni incipit) la peor página 1 (Larra, 514 px) queda ≈ 585 px: la prueba de toda página 1 sigue siendo puerta. El escenario de la 32.4 (Ficha técnica + incipit + los tres cerrados) pasará de 646,5 a ≈ 691 px: no es puerta aquí, se anota la medida y lo decide Héctor junto con el bloqueo de la 32.4.
 - **Isla empaquetada y no en línea.** El AC pide la isla en `GUIONES_EXTERNOS` con tope: eso solo lo admite un guion que se descarga, y lo que necesita `src/lib` se empaqueta (tabla de guiones de la espina). `fechaDeConsulta` llega por importación del mismo dueño —no se copia— en lugar de por su texto, que es la forma de las islas en línea. La conducta repite la del recorrido de `CopiarCita.astro`, que no se toca porque la Página de Cita no tiene bytes en línea de sobra.
 - **La edición que encabeza** es la del grupo por Fuente de `traductorDeLaEdicionQueEncabeza` (la «Fuente que más Citas aporta»), no la primera línea de `dondeLeer`, que separa traducciones: así edición y traductor salen siempre de la misma Fuente.
+
+- **Lo que el empaquetado obligó a decidir (implementación, 2026-11-08).** Importar `fechaDeConsulta` de `src/lib/atribucion.ts` metía en el guion el grafo de ese módulo (las Obras, las superficies y, por sus tablas de nivel superior, la de eventos del vocabulario, que rolldown no sabe quitar: no poda propiedades de un objeto ni lecturas de propiedad), en un trozo `medicion` compartido con la búsqueda: 4.369 bytes, los nombres de la `busqueda` en lo que descarga otra entrada (rompía la prueba de la 23.8) y la búsqueda a 84 bytes de su tope. Por eso la fecha de consulta y su marcador viven en una hoja sin importaciones, `src/lib/fechaDeConsulta.ts`, que `atribucion.ts` reexporta —sigue siendo una sola composición, con la misma función que `CopiarCita` lleva por su texto—, y el nombre del evento se ata a `EVENTOS` del vocabulario **por su tipo** (`import type` y una constante tipada con `(typeof EVENTOS)['copiadoDeReferencia']`): `astro check` falla si el vocabulario lo renombra, y `tests/unit/medicion.test.ts` coteja el valor en `dist/`. `vocabulario.ts` no cambia.
+- **Tope medido.** `MAX_BYTES_GUION_DE_COPIAR_REFERENCIA` = 2.053: la isla mide **1.653 bytes** (2026-11-08) —1.349 de su fichero de entrada y 304 del trozo `anuncio`, compartido con el filtro y la búsqueda—, más 400. La búsqueda y el filtro no cambian de bytes.
+- **Primera pantalla, medida.** `tests/e2e/accesibilidad.spec.ts` (toda página 1 de Obra a 360 × 640, Corpus real): la peor es la de Lastarria («Discurso de incorporación…»), con la primera Tarjeta a **626,8 px** (< 640): el Block If no salta. El corpus de prueba de `tests/e2e/incipit.spec.ts` (incipit + «Cómo citar», sin Ficha técnica) la deja a 714,5 px; esa prueba solo mide, no es puerta, y lo decide Héctor junto con la 32.4.
+- **Pruebas ajenas puestas al día.** El contenedor de desplegables existe ahora en toda página 1 de Obra: `tests/unit/incipit-build.test.ts` y `tests/e2e/incipit.spec.ts` nombran «Cómo empieza» por su `<details>` y no por ser el único; la prueba de la Cabecera de la 24.7 en `tests/e2e/accesibilidad.spec.ts` mide salto → desplegables (24 px) y desplegables → listado (32 px), las mismas distancias; `tests/unit/medicion.test.ts` admite el bloque `data-como-citar` en la página 1 de Obra y cuenta la isla como anunciante de su región.
 
 ## Verification
 
@@ -123,6 +146,30 @@ deferred: []
 
 ## Auto Run Result
 
-Status: ready-for-dev
-Blocking condition: ninguna. Se construye sin la 32.4: «Cómo citar» entra en el contenedor de desplegables que ya pinta la 32.3, tras «Cómo empieza».
-Baseline: 85bd3766a6da0dd68e0017fdc985f34e8b8176ec.
+Status: done
+Blocking condition: ninguna.
+Baseline: 3d45cb258d8c5010dab16963fb2614409a51137e.
+
+**Resumen.** La página 1 de toda Obra lleva «Cómo citar» —APA, MLA y Chicago de la Obra— como último desplegable del contenedor de la 32.3, antes del listado, con una isla empaquetada nueva (`copiar-referencia`, 1.653 bytes, tope 2.053) que pone la fecha del visitante, copia, anuncia y pide `copiado-de-referencia`. La edición que encabeza tiene una sola regla (`edicionQueEncabeza`), de la que salen el traductor de la Ficha técnica y la edición y el traductor de la Referencia. La revisión de la clave de un Autor fecha y avisa sus Páginas de Obra.
+
+**Ficheros.**
+- `src/lib/atribucion.ts` — `referenciaDeObra`, `referenciasDeObra`, `EdicionParaReferencia`; reexporta la fecha de consulta.
+- `src/lib/fechaDeConsulta.ts` (nuevo) — la hoja sin importaciones con `fechaDeConsulta` y `MARCADOR_DE_FECHA_DE_CONSULTA`, movidas de `atribucion.ts`.
+- `src/lib/obras.ts` — `edicionQueEncabeza`, `traductorDeLaEdicionQueEncabeza` delegando, `obraTieneComoCitar`.
+- `src/islands/CopiarReferencia.astro` (nuevo) — la isla empaquetada.
+- `src/pages/obra/[autor]/[slug]/[...page].astro` — «Cómo citar» en la página 1 y la isla tras el contenedor.
+- `src/lib/guiones.ts`, `src/lib/umbrales.ts` — la entrada `copiar-referencia` y su tope medido.
+- `tools/lib/cambios.ts` — `CAMPOS_QUE_PINTA.autor.obra` cuenta `NOMBRE_EN_REFERENCIA`.
+- `AGENTS.md` — la sección «Cómo citar la Obra (Historia 32.5)».
+- Pruebas nuevas: `tests/unit/como-citar-obra-build.test.ts`, `tests/e2e/como-citar-obra.spec.ts`. Al día: `atribucion`, `obras`, `fecha-de-cambio`, `medicion`, `ingreso-construido`, `incipit-build`, `obra-pagina`, `buscar-en` (unitarias) y `incipit`, `accesibilidad`, `ficha-tecnica` (e2e).
+
+**Revisión.** Sin hallazgos externos en esta pasada: 0 parches, 0 diferidos por revisión, 0 rechazados. `followup_review_recommended: false` (parches: 0 high, 0 medium, 0 low; puntuación 0). Un diferido propio, anotado en el frontmatter (primera pantalla con Ficha técnica).
+
+**Verificación.**
+- Unitarias por fichero: `atribucion`, `obras`, `ficha-tecnica`, `fecha-de-cambio`, `como-citar-obra-build`, `como-citar`, `medicion`, `ingreso-construido`, `vocabulario`, `huella`, `desplegable`, `tipografia-en-tokens`, `incipit-build`, `obra-pagina`, `buscar-en`, `superficies`, `objetivo-cli` — verdes.
+- `npx astro check` — 0 errores, 0 avisos.
+- `npm test` completo (detached) — 7.906 de 7.906 (la primera pasada dio 6 fallos: cinco de pruebas ajenas que suponían la Cabecera pegada al listado o el mismo guion en la 1 y la 2, ya al día, y un plazo de 120 s de `objetivo-cli` por carga, verde al repetirlo).
+- e2e, `escritorio`: `como-citar-obra`, `incipit`, `como-citar`, `ficha-tecnica` — verdes (una omitida: la Obra de hoy tiene una sola página). `accesibilidad -g "Obra|Cómo empieza|Historia 24.7"`, `desplegable` e `ingreso-accesible` en `escritorio` y `movil` — verdes. Primera pantalla con el Corpus real: la peor página 1 de Obra, 626,8 px (Lastarria) < 640.
+- `vocabulario.ts` sin cambios: `huella.test.ts` verde.
+
+**Riesgos residuales.** Las formas literales de la Referencia de Obra son `[ASSUMPTION]` que revisa Héctor. La primera pantalla con Ficha técnica (diferido). La entrada `copiar-referencia` se cuenta en el trozo `anuncio`, que comparte con el filtro y la búsqueda.
