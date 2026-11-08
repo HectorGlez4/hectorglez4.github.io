@@ -29,7 +29,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 # - Retrospective appends its action items to action_items; the status view surfaces open ones
 generated: 08-11-2026 09:00
-last_updated: 11-08-2026 06:28
+last_updated: 11-08-2026 12:00
 project: brainlySabiduria
 project_key: NOKEY
 tracking_system: file-system
@@ -508,7 +508,7 @@ development_status:
   epic-33: in-progress
   33-1-una-tienda-se-declara-sin-marca-y-el-modelo-no-se-enciende-c: review  # v9-ralph 2026-11-08: una tienda se declara sin marca (esMarcaValida, un solo predicado); con el Modelo encendido y una tienda sin marca, el build se para nombrándola; TIENDAS sigue vacío; dos rondas de revisión
   33-2-las-ediciones-en-venta-por-formato-y-por-tienda-dentro-de-dó: backlog  # bloqueada: necesita la 32.4 en la principal («Dónde leer esta obra» plegado, antes del listado, con su grupo «Gratis»; epics.md: «Sin esas dos historias, esta no empieza»), y la Épica 32 no está fundida (v9-ralph 2026-11-07)
-  33-3-la-orden-de-qué-obras-curar-primero: backlog
+  33-3-la-orden-de-qué-obras-curar-primero: review  # v9-ralph 2026-11-08: npm run obra -- curar-primero, solo lectura; dos pasadas de revisión
   epic-33-retrospective: optional
 
   # Épica 34 — listados que se leen. La 34.0 (Desplegable) se funde sola, antes que la 30:
