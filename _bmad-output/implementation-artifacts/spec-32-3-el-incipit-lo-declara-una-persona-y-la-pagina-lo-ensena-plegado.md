@@ -5,13 +5,34 @@ created: '2026-11-08'
 status: 'done'
 baseline_revision: '7ff35e7ab008fd8a688948f5ee62e6ef6340baa6'
 review_loop_iteration: 0
-followup_review_recommended: false
+followup_review_recommended: true
 context:
   - '{project-root}/_bmad-output/implementation-artifacts/epic-32-context.md'
   - '{project-root}/_bmad-output/implementation-artifacts/spec-32-2-la-linea-de-ficha-tecnica-bajo-la-cabecera-de-obra.md'
   - '{project-root}/_bmad-output/planning-artifacts/architecture/architecture-brainlySabiduria-2026-08-10/ARCHITECTURE-SPINE.md'
 warnings: ['oversized']
-deferred: []
+deferred:
+  - summary: >-
+      El fin de frase del incipit es por signo y no distingue abreviaturas ni ordinales («D. Ventura», «Sr. D.», «cap. I.»): el corte puede caer tras una abreviatura, a media frase.
+    evidence: |-
+      `FIN_DE_FRASE` de `tools/lib/pasaje.ts` es la definición del `<intent-contract>` («termina tras `.`, `?`, `!` o `…` … y luego espacio o fin»); una lista de abreviaturas no tiene una sola lectura y cambia el contrato. Con `MAX_CARACTERES_DEL_INCIPIT` en `undefined` nada se pinta; AGENTS.md pide mirar el incipit del parte el día que Héctor dé valor al tope. Pendiente de Héctor (bmad-spec / bmad-ux) si se quiere una guarda.
+    location: >-
+      tools/lib/pasaje.ts FIN_DE_FRASE
+    severity: medium
+  - summary: >-
+      Un punto seguido de raya («.—Dijo») no cierra la frase: varias frases se funden en una unidad que puede pasar del tope y dejar la Obra sin incipit.
+    evidence: |-
+      La misma definición contractual exige espacio o fin tras el signo. El fallo es por ausencia (no se ofrece), nunca por mutilación; se decide junto con las abreviaturas.
+    location: >-
+      tools/lib/pasaje.ts FIN_DE_FRASE
+    severity: low
+  - summary: >-
+      Si `desde` cae a media frase o a media línea, el incipit empieza en ese fragmento: nada comprueba que `desde` sea comienzo de frase o de verso.
+    evidence: |-
+      El `<intent-contract>` fija el comienzo en `tramoEnCrudo(...).inicio` del `desde` y la prueba «empieza en el «desde», aunque caiga a media línea» lo ata; la lectura estricta de «sus primeras frases… nunca a media frase» (R2 de intent-alignment) pediría negarse. Decidir si la orden debe negarse es de Héctor (bmad-spec); AGENTS.md dice ya que `desde` empieza donde quien declara dice.
+    location: >-
+      tools/lib/pasaje.ts incipitDe; tools/lib/obras.ts declararIncipit
+    severity: low
 ---
 
 <intent-contract>
@@ -124,6 +145,30 @@ deferred: []
 - addressed_findings:
   - none
 
+### 2026-11-08 — Review pass
+- intent_gap: 0
+- bad_spec: 0
+- patch: 16 (high 0, medium 5, low 11)
+- defer: 3 (high 0, medium 1, low 2)
+- reject: 21 (high 0, medium 0, low 21)
+- addressed_findings:
+  - `[medium]` `[patch]` El `url:` de la cabecera iba tal cual al `href` con solo `z.string().url()` (`javascript:`, `data:`): `fuenteDelIncipit` (`tools/lib/posiciones.ts`) exige `http(s)`, y la orden (1) y el cargador (Regla incumplida, nombrando la ficha) lo comprueban; el esquema de la colección lo repite.
+  - `[medium]` `[patch]` No se aplicaba la puerta de reutilización de `FUENTES`: la misma función niega una Fuente con `permiteReutilizacion: false` o mutable.
+  - `[low]` `[patch]` Una Fuente de cabecera fuera de `FUENTES` pintaba el id en crudo sin licencia: ahora se niega (orden 1, build roto nombrando la ficha).
+  - `[medium]` `[patch]` Un `desde` en el pie de licencia publicaba el pie como comienzo: `unidadesDesde` mira el pie también en la primera línea, entera.
+  - `[low]` `[patch]` Sin ninguna unidad se decía `primera-no-cabe`: nuevo motivo `sin-texto`, con su frase en el parte.
+  - `[low]` `[patch]` Un tope `NaN`, infinito, 0, negativo o no entero publicaba el documento entero: `ofreceIncipit` lanza `RangeError`.
+  - `[low]` `[patch]` Un `desde` repetido se anclaba en silencio en la primera aparición: `incipitDelDocumento` da `repetido` y el parte de la orden avisa.
+  - `[medium]` `[patch]` La orden comprobaba la ruta tecleada y leía por nombre otro fichero (subcarpeta frente a primer nivel): `leerDocumentoDeFuente` da la ruta leída y la orden se niega con 1 si no es la tecleada.
+  - `[low]` `[patch]` Dos documentos del mismo nombre en subcarpetas: `leerDocumentoDeFuente` da `ambiguo`, y orden y build se niegan.
+  - `[low]` `[patch]` El esquema admitía en `documento` espacios, `..`, barras invertidas o control: ahora exige forma de slug (`^[a-z0-9][a-z0-9-]*$`).
+  - `[low]` `[patch]` Un `desde` guardado sin colapsar burlaba «ya declara ese incipit»: se compara colapsado.
+  - `[low]` `[patch]` Un `desde` con caracteres de control salía con 1 por el esquema: `tools/obra.ts` sale con 2.
+  - `[medium]` `[patch]` El documento del incipit no componía la Página de Obra si ya no era de sus Citas: `ObraParaFechar.incipit` (`integraciones/historial.ts`) y `relacionDeSuperficies` lo componen; prueba en `fecha-de-cambio.test.ts`.
+  - `[low]` `[patch]` La prueba de Intro solo miraba que el foco estuviera en algún `SUMMARY`: ahora en ese mismo, y con el contenido visible.
+  - `[low]` `[patch]` El barrido de accesibilidad del desplegable no lo corre el CI: AGENTS.md lo pone como paso del commit que dé valor al tope, junto con mirar el corte del parte.
+  - `[low]` `[patch]` Sin pruebas de `lineaDeLaFuenteDelIncipit` ni de Fuentes que no sean Wikisource: pruebas de las dos ramas y de Gutenberg en `incipit.test.ts`.
+
 ## Design Notes
 
 - **La única diferencia de `dist/` con el Corpus real es CSS, y es inevitable.** Astro emite la hoja de un componente por el grafo de importaciones aunque no se pinte (lo dice la cabecera de `Desplegable.astro` y la nota de `Sostener.astro` en AGENTS.md); el AC pide a la vez `Desplegable.astro` y «`dist/` no cambia». Se lee como: ningún contenido cambia; la hoja de la Página de Obra gana exactamente las reglas acotadas de la primitiva. Por eso `ComoEmpieza.astro` va sin `<style>` y la página no gana reglas: la diferencia queda reducida a eso, y la 32.4 la tendría igual al plegar «Dónde leer».
@@ -188,3 +233,33 @@ Blocking condition: ninguna.
 - `npm test` — 171 ficheros, 7.665 pruebas, verde.
 
 **Riesgos residuales.** La primera Tarjeta de la Obra de Larra cae a 669,5 px en 360 × 640 con el desplegable puesto (lo resuelve la 32.4 al retirar el salto). La portada se sigue avisando ante cualquier cambio de ficha (regla gruesa previa). Un `desde` que coincida antes en el documento que el comienzo deseado se sitúa en la primera aparición (`localizar`): quien declara elige un `desde` que no se repita.
+
+### Pasada de revisión 1 (2026-11-08)
+
+**Resumen.** Dieciséis parches de las cinco capas externas, sin cambiar el contrato: la Fuente del incipit se valida (de `FUENTES`, reutilizable, no mutable, `url:` http(s)) en la orden y en el cargador con una sola función, `fuenteDelIncipit`; el pie de licencia se mira también en la línea del `desde` (motivo nuevo `sin-texto`); `ofreceIncipit` rechaza un tope que no sea entero positivo; un `desde` repetido se avisa; la orden comprueba que lo que lee el build por nombre es el fichero tecleado y se niega ante dos homónimos en subcarpetas; el esquema exige forma de slug en `documento`; el duplicado se compara colapsado; un `desde` con control sale con 2; y el documento del incipit compone la Página de Obra en la relación de fechas aunque deje de ser de sus Citas.
+
+**Ficheros de esta pasada.**
+- `tools/lib/pasaje.ts` — pie en la primera línea, `sin-texto`, guarda del tope.
+- `tools/lib/posiciones.ts` — `fuenteDelIncipit`, `repetido`, fallos nuevos en el cargador.
+- `tools/lib/corpus.ts` — `leerDocumentoDeFuente` da `ruta` y `ambiguo`.
+- `tools/lib/obras.ts` — la orden: ruta leída, Fuente, aviso de repetición, duplicado colapsado, `sin-texto`.
+- `tools/obra.ts` — control en `desde` → 2.
+- `src/lib/admision.ts` — `documento` con forma de slug.
+- `src/content.config.ts` — `url` http(s) en el esquema de la colección.
+- `tools/lib/cambios.ts`, `integraciones/historial.ts` — el documento del incipit compone su Página de Obra.
+- `AGENTS.md` — refusals nuevos, el barrido e2e como paso del commit del tope, el límite del corte por signo, la relación.
+- Pruebas: `tests/unit/incipit.test.ts`, `incipit-cli.test.ts`, `fecha-de-cambio.test.ts`, `tests/e2e/incipit.spec.ts`.
+
+**Revisión.** 16 parches (5 medios, 11 bajos), 3 diferidos (abreviaturas, raya tras punto, `desde` a media frase: los tres tocan la definición contractual y quedan para Héctor), 21 rechazados (decisiones ya escritas en el contrato o en Design Notes —estrofas, casado, colección hermana, `dist/` con la hoja del desplegable—, memoria de módulo igual que la preexistente, aserciones de presentación, la medida de 669,5 px de la 32.4). Seguimiento recomendado: **sí** (0 altos; 3 × 5 + 11 = 26 ≥ 5).
+
+**Verificación.**
+- `npx vitest run tests/unit/incipit.test.ts tests/unit/pasaje.test.ts tests/unit/lineas.test.ts` — 111 verdes.
+- `npx vitest run tests/unit/incipit-cli.test.ts` — 26 verdes.
+- `npx vitest run tests/unit/fecha-de-cambio.test.ts tests/unit/obras.test.ts tests/unit/orden-del-libro.test.ts tests/unit/ediciones-en-venta.test.ts` — 331 verdes.
+- `incipit-build`, `ingreso-construido`, `medicion`, `tipografia-en-tokens`, `desplegable`, `huella`, `obra-cli`, `linea-base`, `pasaje-build` — 908 verdes.
+- `npx astro check` — 0 errores.
+- `npx playwright test tests/e2e/incipit.spec.ts --project=escritorio` — 4 verdes (primera Tarjeta a 669,5 px, como antes).
+- La comparación de `dist/` con el Corpus real no se repitió: ningún cambio de esta pasada pinta nada sin un incipit declarado (solo validaciones, la relación de fechas y un `refine` del esquema de la colección).
+- `npm test` — 171 ficheros, 7.685 pruebas, verde.
+
+**Riesgos residuales.** Los tres diferidos; el corte por signo se mira a mano el día del tope (AGENTS.md).

@@ -148,7 +148,7 @@ export function pasajeDeAparicion(opciones: {
 // ─────────────────────────────────────────────────────────────────────────────
 
 /** Por qué una Obra con incipit declarado no lo enseña. */
-export type MotivoSinIncipit = 'sin-tope' | 'primera-no-cabe' | 'forma-indeterminada';
+export type MotivoSinIncipit = 'sin-tope' | 'primera-no-cabe' | 'forma-indeterminada' | 'sin-texto';
 
 /** La forma ante la que no se sabe qué es una frase ni un verso. */
 const FORMA_INDETERMINADA: FormaDeLineas = FORMAS_DE_LINEAS[4];
@@ -170,9 +170,14 @@ const FIN_DE_FRASE = /[.?!…][»”"’')\]]*(?= |$)/gu;
 export function ofreceIncipit(opciones: {
   tope: number | undefined;
   primera: string;
-}): { ofrece: true } | { ofrece: false; motivo: Exclude<MotivoSinIncipit, 'forma-indeterminada'> } {
+}): { ofrece: true } | { ofrece: false; motivo: Exclude<MotivoSinIncipit, 'forma-indeterminada' | 'sin-texto'> } {
   const { tope, primera } = opciones;
   if (tope === undefined) return { ofrece: false, motivo: 'sin-tope' };
+  // Un tope que no es un entero positivo no es un tope: con `NaN` ninguna comparación cortaría y
+  // saldría el documento entero. Lo da Héctor en `umbrales.ts`; mal dado, se para la construcción.
+  if (!Number.isInteger(tope) || tope < 1) {
+    throw new RangeError(`MAX_CARACTERES_DEL_INCIPIT ha de ser un entero positivo, y vale ${String(tope)}.`);
+  }
   if ([...primera].length > tope) return { ofrece: false, motivo: 'primera-no-cabe' };
   return { ofrece: true };
 }
@@ -185,8 +190,8 @@ interface UnidadDeIncipit {
 
 /**
  * Las unidades desde un desplazamiento del crudo, en orden y perezosas: se para antes del pie de
- * licencia de Wikisource y al fin del documento. La primera línea empieza en `inicio`; el pie solo
- * se mira en las siguientes, así que la primera unidad existe siempre.
+ * licencia de Wikisource y al fin del documento. La primera línea empieza en `inicio`; si esa línea
+ * entera es el pie —el `desde` cayó en él—, no hay ninguna unidad.
  */
 function* unidadesDesde(crudo: string, forma: FormaDeLineas, inicio: number): Generator<UnidadDeIncipit> {
   const lineas = lineasDelCrudo(crudo);
@@ -212,7 +217,7 @@ function* unidadesDesde(crudo: string, forma: FormaDeLineas, inicio: number): Ge
 
   for (let n = primera; n < lineas.length; n += 1) {
     const linea = crudo.slice(n === primera ? inicio : lineas[n].inicio, lineas[n].fin);
-    if (n > primera && esPieDeLicencia(linea)) break;
+    if (esPieDeLicencia(n === primera ? crudo.slice(lineas[n].inicio, lineas[n].fin) : linea)) break;
     const enBlancoLaLinea = enBlanco(linea, 0, linea.length);
     if (verso) {
       if (!enBlancoLaLinea) yield { texto: colapsarEspacios(linea), cierraParrafo: true };
@@ -256,8 +261,8 @@ export function incipitDe(opciones: {
   const inicio = tramoEnCrudo(crudo, posicion, posicion + desde.length).inicio;
   const unidades = unidadesDesde(crudo, forma, inicio);
   const primera = unidades.next();
-  // `desde` se localizó, así que hay al menos una unidad; sin ella, nada que ofrecer.
-  if (primera.done === true) return { motivo: 'primera-no-cabe' };
+  // Sin ninguna unidad —el `desde` cayó en el pie de licencia—, no hay texto que ofrecer.
+  if (primera.done === true) return { motivo: 'sin-texto' };
   const decision = ofreceIncipit({ tope, primera: primera.value.texto });
   if (!decision.ofrece) return { motivo: decision.motivo };
 

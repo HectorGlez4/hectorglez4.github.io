@@ -1143,22 +1143,25 @@ export async function leerDocumentosParaElCotejo(
 /** Lo que hay en `corpus/fuentes/` con un nombre de documento — Historia 32.3. */
 export type DocumentoDeFuenteLeido =
   | { estado: 'falta' }
+  | { estado: 'ambiguo' }
   | { estado: 'ilegible' }
   | { estado: 'biografia' }
-  | { estado: 'legible'; cabecera: CabeceraDeDocumento; cuerpo: string };
+  | { estado: 'legible'; ruta: string; cabecera: CabeceraDeDocumento; cuerpo: string };
 
 /**
  * **Un** documento de Fuente por su nombre sin extensión, con su cabecera — Historia 32.3. Lo
  * leen el cargador del incipit y la orden que lo declara, para no abrir los demás documentos.
  * Busca el `.txt` en el primer nivel de `corpus/fuentes/` y, si no está, en cualquier subcarpeta,
- * como `ficherosDe` (el nombre es la identidad del documento). No escribe nada.
+ * como `ficherosDe` (el nombre es la identidad del documento); si dos subcarpetas tienen un
+ * documento con ese nombre, no elige ninguno (`ambiguo`). Da la ruta que leyó. No escribe nada.
  */
 export async function leerDocumentoDeFuente(rutas: Rutas, nombre: string): Promise<DocumentoDeFuenteLeido> {
   let ruta = join(rutas.fuentes, `${nombre}.txt`);
   if (!existsSync(ruta)) {
-    const hallada = (await ficherosDe(rutas.fuentes, ['.txt'])).find((r) => slugDeFichero(r) === nombre);
-    if (hallada === undefined) return { estado: 'falta' };
-    ruta = hallada;
+    const halladas = (await ficherosDe(rutas.fuentes, ['.txt'])).filter((r) => slugDeFichero(r) === nombre);
+    if (halladas.length === 0) return { estado: 'falta' };
+    if (halladas.length > 1) return { estado: 'ambiguo' };
+    ruta = halladas[0] as string;
   }
   let contenido: string;
   try {
@@ -1169,7 +1172,7 @@ export async function leerDocumentoDeFuente(rutas: Rutas, nombre: string): Promi
   const analizado = analizarDocumento(contenido);
   if (analizado === undefined) return { estado: 'ilegible' };
   if (analizado.cabecera.clase === CLASE_BIOGRAFIA) return { estado: 'biografia' };
-  return { estado: 'legible', cabecera: analizado.cabecera, cuerpo: analizado.cuerpo };
+  return { estado: 'legible', ruta, cabecera: analizado.cabecera, cuerpo: analizado.cuerpo };
 }
 
 /**

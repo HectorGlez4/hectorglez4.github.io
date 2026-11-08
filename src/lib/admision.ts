@@ -737,10 +737,12 @@ export function esquemaDeObra(tiendas: readonly Tienda[] = TIENDAS) {
             {
               documento: z
                 .string({ message: 'Regla incumplida: el documento del incipit es una cadena.' })
-                .refine((documento) => documento.trim() !== '' && !documento.includes('/') && !/\.txt$/iu.test(documento), {
+                // El nombre de un documento de `corpus/fuentes/` tiene forma de slug: sin carpeta, sin
+                // extensión, sin espacios ni `..` ni barras de ningún tipo.
+                .refine((documento) => /^[a-z0-9][a-z0-9-]*$/u.test(documento), {
                   message:
                     'Regla incumplida: el documento del incipit es el nombre de un documento de ' +
-                    'corpus/fuentes/ sin carpeta ni extensión.',
+                    'corpus/fuentes/ sin carpeta ni extensión (minúsculas, cifras y guiones).',
                 }),
               desde: z
                 .string({ message: 'Regla incumplida: el «desde» del incipit es una cadena.' })

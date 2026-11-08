@@ -33,6 +33,7 @@ import {
   documentoDeCita,
   documentosDeCita,
   localizar,
+  type Colapsado,
   type DocumentosDeFuente,
 } from './cotejo.ts';
 import {
@@ -199,14 +200,51 @@ export async function guardarOrdenDeLosIndices(opciones: {
 /** Por qué un incipit declarado no se sostiene en su documento. */
 export type FalloDelIncipit = 'forma-indeterminada' | 'no-se-localiza';
 
+/** Por qué la Fuente que declara la cabecera del documento no puede firmar un incipit. */
+export type FalloDeLaFuenteDelIncipit = 'fuente-desconocida' | 'fuente-sin-reutilizacion' | 'fuente-mutable' | 'url-no-web';
+
+/** La Fuente con que se firma un incipit en la página: su nombre, su licencia y la dirección. */
+export interface FuenteDelIncipit {
+  nombre: string;
+  licencia: string;
+  url: string;
+}
+
+/**
+ * La Fuente que firma el incipit, de la cabecera de su documento — Historia 32.3. La comprueban,
+ * con la misma función, la orden y el cargador: el `fuente:` es una de `FUENTES`
+ * (`tools/lib/fuentes.ts`), cuya licencia permite reutilizar el texto y que no es mutable (una
+ * biografía no da el comienzo de una Obra), y el `url:` es una dirección `http(s)`: va tal cual al
+ * `href` de la página, y otro esquema —`javascript:`, `data:`— no se pinta nunca.
+ */
+export function fuenteDelIncipit(cabecera: {
+  fuente: string;
+  url: string;
+}): { ok: true; fuente: FuenteDelIncipit } | { ok: false; fallo: FalloDeLaFuenteDelIncipit } {
+  const fuente = fuenteDeclarada(cabecera.fuente);
+  if (fuente === undefined) return { ok: false, fallo: 'fuente-desconocida' };
+  if (!fuente.permiteReutilizacion) return { ok: false, fallo: 'fuente-sin-reutilizacion' };
+  if (fuente.mutable === true) return { ok: false, fallo: 'fuente-mutable' };
+  let protocolo: string;
+  try {
+    protocolo = new URL(cabecera.url).protocol;
+  } catch {
+    return { ok: false, fallo: 'url-no-web' };
+  }
+  if (protocolo !== 'https:' && protocolo !== 'http:') return { ok: false, fallo: 'url-no-web' };
+  return { ok: true, fuente: { nombre: fuente.nombre, licencia: fuente.licencia, url: cabecera.url } };
+}
+
 /**
  * Sitúa el `desde` de un incipit declarado en su documento y lo corta — Historia 32.3. Es lo que
  * comprueban, con la misma función, la orden que lo escribe (`npm run obra -- incipit`) y el
  * cargador que lo repite en cada build (`leerIncipitsDelCorpus`, aquí): que la forma de las líneas
  * —`formaDeLasLineas` con la `lineas:` de su cabecera— no sea `indeterminada` y que `desde`,
  * colapsado, se localice en el cuerpo con `localizar` —el mismo localizador que sitúa las Citas: el
- * corte de `tools/lib/pasaje.ts` no localiza—. Si se sostiene, da la forma y el corte de `incipitDe`
- * (que puede no ofrecerse: sin tope, o con la primera unidad demasiado larga).
+ * corte de `tools/lib/pasaje.ts` no localiza—. Si se sostiene, da la forma, el corte de `incipitDe`
+ * (que puede no ofrecerse: sin tope, o con la primera unidad demasiado larga) y si `desde` aparece
+ * más de una vez: se ancla en la primera, y la orden lo avisa para que quien declara elija uno que
+ * no se repita.
  */
 export function incipitDelDocumento(opciones: {
   cuerpo: string;
@@ -215,14 +253,22 @@ export function incipitDelDocumento(opciones: {
   tope: number | undefined;
 }):
   | { ok: false; fallo: FalloDelIncipit }
-  | { ok: true; forma: FormaDeLineas; corte: { incipit: string } | { motivo: MotivoSinIncipit } } {
+  | {
+      ok: true;
+      forma: FormaDeLineas;
+      repetido: boolean;
+      corte: { incipit: string } | { motivo: MotivoSinIncipit };
+    } {
   const { cuerpo, lineas, desde, tope } = opciones;
   const forma = formaDeLasLineas({ cuerpo, ...(lineas !== undefined ? { lineas } : {}) });
   if (forma === FORMAS_DE_LINEAS[4]) return { ok: false, fallo: 'forma-indeterminada' };
   const buscado = colapsarEspacios(desde);
-  const posicion = localizar(buscado, colapsarEspacios(cuerpo));
+  const colapsado = colapsarEspacios(cuerpo);
+  const posicion = localizar(buscado, colapsado);
   if (posicion === -1) return { ok: false, fallo: 'no-se-localiza' };
-  return { ok: true, forma, corte: incipitDe({ crudo: cuerpo, forma, posicion, desde: buscado, tope }) };
+  // El resto de un texto colapsado sigue colapsado por dentro: basta para saber si hay otra aparición.
+  const repetido = localizar(buscado, colapsado.slice(posicion + 1) as Colapsado) !== -1;
+  return { ok: true, forma, repetido, corte: incipitDe({ crudo: cuerpo, forma, posicion, desde: buscado, tope }) };
 }
 
 /** El identificador de la única entrada de la colección `incipits`. */
@@ -231,10 +277,15 @@ export const ENTRADA_DE_LOS_INCIPITS = 'incipits';
 /** Lo que el build dice de un incipit declarado que no se sostiene, por qué falla. */
 const FALLO_DEL_INCIPIT = {
   falta: 'su documento no está en corpus/fuentes/',
+  ambiguo: 'hay más de un documento con ese nombre en las subcarpetas de corpus/fuentes/',
   ilegible: 'su documento no se deja analizar',
   biografia: 'su documento es una biografía, no un documento de Fuente',
   'forma-indeterminada': 'la forma de las líneas de su documento es indeterminada: no se sabe dónde acaba una frase ni un verso',
   'no-se-localiza': 'su «desde» ya no se localiza en el documento',
+  'fuente-desconocida': 'la Fuente que declara su cabecera no es ninguna de FUENTES',
+  'fuente-sin-reutilizacion': 'la licencia de la Fuente que declara su cabecera no permite reutilizar el texto',
+  'fuente-mutable': 'la Fuente que declara su cabecera es mutable: no da el comienzo de ninguna Obra',
+  'url-no-web': 'el «url:» de su cabecera no es una dirección http(s)',
 } as const;
 
 /**
@@ -271,17 +322,13 @@ export async function leerIncipitsDelCorpus(
       problemas.push(`${ficha.ruta} declara el incipit de «${documento}»: ${FALLO_DEL_INCIPIT[situado.fallo]}.`);
       continue;
     }
+    const firmada = fuenteDelIncipit(leido.cabecera);
+    if (!firmada.ok) {
+      problemas.push(`${ficha.ruta} declara el incipit de «${documento}»: ${FALLO_DEL_INCIPIT[firmada.fallo]}.`);
+      continue;
+    }
     if (!('incipit' in situado.corte)) continue;
-    const fuente = fuenteDeclarada(leido.cabecera.fuente);
-    incipits.set(ficha.nombre, {
-      documento,
-      texto: situado.corte.incipit,
-      fuente: {
-        nombre: fuente?.nombre ?? leido.cabecera.fuente,
-        ...(fuente !== undefined ? { licencia: fuente.licencia } : {}),
-        url: leido.cabecera.url,
-      },
-    });
+    incipits.set(ficha.nombre, { documento, texto: situado.corte.incipit, fuente: firmada.fuente });
   }
   if (problemas.length > 0) {
     throw new Error(

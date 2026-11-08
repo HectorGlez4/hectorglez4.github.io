@@ -498,6 +498,8 @@ export async function corpusParaFechar(
       autor: ficha.autor,
       formas: ficha.formas,
       ...(deWikidata.has(ficha.nombre) ? { wikidata: deWikidata.get(ficha.nombre) } : {}),
+      // Historia 32.3 — el documento de su incipit compone su página aunque no sea de sus Citas.
+      ...(ficha.incipit !== undefined ? { incipit: ficha.incipit.documento } : {}),
       ruta: resolve(ficha.ruta),
     })),
     documentos: documentos.map((documento) => resolve(documento)),

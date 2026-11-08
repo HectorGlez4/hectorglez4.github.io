@@ -454,7 +454,11 @@ const incipits = defineCollection({
         fuente: z.object({
           nombre: z.string().min(1),
           licencia: z.string().min(1).optional(),
-          url: z.string().url(),
+          // Va tal cual al `href`: solo una dirección http(s) (lo comprueba antes `fuenteDelIncipit`).
+          url: z
+            .string()
+            .url()
+            .refine((url) => /^https?:\/\//u.test(url), 'El url de la Fuente del incipit no es http(s).'),
         }),
       }),
     ),

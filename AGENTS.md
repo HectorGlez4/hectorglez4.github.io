@@ -845,13 +845,19 @@ npm run obra -- incipit <ficha> corpus/fuentes/<documento>.txt "<desde>"
 Se niega con 1, sin escribir, si la ficha no existe; si el documento no es un `.txt` de
 `corpus/fuentes/`, falta, no se deja analizar o es una biografía; si no es de esa Obra (no está en
 la unión de `documentosDeCita` de sus Citas publicadas); si su forma de líneas es `indeterminada`;
-si `desde` —colapsado— no se localiza; o si la ficha ya declara ese mismo incipit. Con 2, la forma
-(otra cantidad de argumentos, una bandera desconocida, `desde` en blanco). Nunca se infiere del
+si `desde` —colapsado— no se localiza; si la Fuente de su cabecera no es de `FUENTES`, no permite
+reutilizar o es mutable, o su `url:` no es `http(s)` (va tal cual al `href`); si el nombre del
+documento designa en `corpus/fuentes/` otro fichero que el tecleado (la ficha guarda solo el
+nombre); o si la ficha ya declara ese mismo incipit. Con 2, la forma (otra cantidad de argumentos,
+una bandera desconocida, `desde` en blanco o con caracteres de control). Si `desde` aparece más de
+una vez en el documento, declara y avisa: el incipit se ancla en la primera aparición, y quien
+declara elige un `desde` que no se repita. `desde` no se comprueba como comienzo de frase: empieza
+donde quien declara dice. Nunca se infiere del
 orden del libro ni del primer documento. El build lo repite desde el cargador `incipits` de
 `src/content.config.ts`, que solo cablea `tools/lib/posiciones.ts` (`leerIncipitsDelCorpus`): lee
 solo los documentos que las fichas declaran y **rompe** con «Regla incumplida» nombrando la ficha si
-el documento falta, no se deja analizar o es biografía, si su forma es `indeterminada` o si `desde`
-ya no se localiza; no repite el casado, para que retirar la última Cita de ese documento no rompa la
+el documento falta, no se deja analizar o es biografía, si su forma es `indeterminada`, si `desde`
+ya no se localiza o si la Fuente o el `url:` de su cabecera no valen (lo mismo que la orden); no repite el casado, para que retirar la última Cita de ese documento no rompa la
 construcción siguiente. El corte es de `incipitDe` de `tools/lib/pasaje.ts` y **solo en fin de
 frase o de verso**: unidades enteras mientras quepan en `MAX_CARACTERES_DEL_INCIPIT`, parado antes
 del pie de licencia de Wikisource; si se ofrece lo decide solo `ofreceIncipit` (sin tope, no; si la
@@ -866,6 +872,14 @@ conservan, y `reunir` no hereda el de la absorbida y lo dice. **`MAX_CARACTERES_
 `undefined`: ninguna página lo enseña) y **`DESPLIEGUE_DEL_INCIPIT`** (la jornada del primer día en
 vivo con un incipit a la vista, con su corte de la serie `continuacion-de-obra` en
 `CORTES_DE_SERIE_DECLARADOS`) son de Héctor, en `src/lib/umbrales.ts`: ningún agente les da valor.
+El commit que dé valor a `MAX_CARACTERES_DEL_INCIPIT` corre antes, en local, el barrido del
+desplegable con el incipit puesto —`npx playwright test tests/e2e/incipit.spec.ts
+--project=escritorio`: axe cerrado y abierto, el teclado y los 320 px—, igual que el encendido de
+un Modelo corre `ingreso-accesible.spec.ts`: el CI no corre las pruebas de punta a punta, y con el
+tope en `undefined` ninguna otra prueba ve el desplegable en el sitio. Si sale en rojo, no se da el
+valor. Y como el corte en frase es por signo —`.`, `?`, `!` o `…` ante espacio—, ese día se mira el
+incipit que la orden enseña en su parte: una abreviatura («D. Ventura») o una raya tras el punto
+cortan o alargan la frase.
 
 ### Una obra, un nombre (Historia 22.2)
 
@@ -1051,7 +1065,8 @@ analizar cuenta como cambio de todo; un campo ausente es `undefined`; el orden d
   fechan la Página de Autor.
 - **Página de Obra** = su ficha (`autor`, `titulo`, `formas`, `nota`, `ediciones`), sus Citas, su
   Autor y **sus documentos**: la unión de `documentosDeCita` de sus Citas sobre los nombres de
-  `corpus/fuentes/`. `nota` y `ediciones` solo fechan la Página de Obra.
+  `corpus/fuentes/`, más el documento de su `incipit` si lo declara (32.3), sea o no de sus Citas.
+  `nota` y `ediciones` solo fechan la Página de Obra.
 - **Lo que la relación todavía no compone**, y no conviene dar por exhaustivo (diferido en el spec
   de la 24.8): la Página de Obra pinta el nombre de los Temas de sus Citas y no compone sus
   ficheros de Tema —renombrar un Tema no la fecha ni la avisa; decidirlo es de Héctor—; el título

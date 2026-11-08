@@ -201,10 +201,13 @@ test.describe('«Cómo empieza», rendido', () => {
 
   test('Intro sobre el `<summary>` lo abre sin mover el foco', async ({ page }) => {
     await page.goto(`${SITIO}${OBRA}`);
-    await page.locator(SUMMARY).focus();
+    const summary = page.locator(SUMMARY);
+    await summary.focus();
     await page.keyboard.press('Enter');
     await expect(page.locator('details.desplegable')).toHaveAttribute('open', '');
-    expect(await page.evaluate(() => document.activeElement?.tagName)).toBe('SUMMARY');
+    // El foco sigue en **ese** `<summary>`, y lo que pliega se ve.
+    expect(await summary.evaluate((nodo) => nodo === document.activeElement)).toBe(true);
+    await expect(page.locator('details.desplegable p').first()).toBeVisible();
   });
 
   test('a 360 × 640 se mide dónde empieza la primera Tarjeta del listado, con todo cerrado', async ({ page }) => {

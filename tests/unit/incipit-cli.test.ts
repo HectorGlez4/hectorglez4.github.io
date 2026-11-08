@@ -133,6 +133,15 @@ describe('Historia 32.3 — npm run obra -- incipit', () => {
     if (corta.ok) expect(corta.mensaje).toContain('pasa de MAX_CARACTERES_DEL_INCIPIT');
   });
 
+  it('un «desde» que aparece más de una vez se declara, y el parte avisa de que se ancla en la primera', async () => {
+    const rutas = await preparado();
+    const hecho = await declararIncipit(rutas, FICHA, docDe(rutas), 'es que', { tope: undefined });
+    expect(hecho.ok).toBe(true);
+    if (hecho.ok) expect(hecho.mensaje).toContain('aparece más de una vez');
+    const unico = await declararIncipit(rutas, FICHA, docDe(rutas), 'La mayor parte', { tope: undefined });
+    if (unico.ok) expect(unico.mensaje).not.toContain('aparece más de una vez');
+  });
+
   it('el «desde» sobrevive a la ida y vuelta del YAML con comillas, dos puntos y almohadilla', async () => {
     const rutas = await preparado();
     const raro = 'Dijo: «el "sabio" # no duda»';
@@ -190,6 +199,48 @@ describe('Historia 32.3 — npm run obra -- incipit', () => {
     ],
     ['el «desde» no se localiza', async (r: Rutas) => [FICHA, docDe(r), 'Érase una vez'], /no aparece literal/u],
     [
+      'el documento de una subcarpeta tiene el nombre de otro del primer nivel',
+      async (r: Rutas) => {
+        await mkdir(join(r.fuentes, 'sub'), { recursive: true });
+        await writeFile(join(r.fuentes, 'sub', `${DOC}.txt`), documento('Sobre la brevedad de la vida', CUERPO), 'utf8');
+        return [FICHA, join(r.fuentes, 'sub', `${DOC}.txt`), 'La mayor parte'];
+      },
+      /no es el documento que el nombre/u,
+    ],
+    [
+      'el url de la cabecera no es http(s)',
+      async (r: Rutas) => {
+        await writeFile(
+          docDe(r),
+          documento('Sobre la brevedad de la vida', CUERPO).replace(`url: ${URL}`, 'url: javascript:alert(1)'),
+          'utf8',
+        );
+        return [FICHA, docDe(r), 'La mayor parte'];
+      },
+      /no es una dirección http\(s\)/u,
+    ],
+    [
+      'la Fuente de la cabecera no es de FUENTES',
+      async (r: Rutas) => {
+        await writeFile(
+          docDe(r),
+          documento('Sobre la brevedad de la vida', CUERPO).replace('fuente: wikisource-es', 'fuente: wikisource-xx'),
+          'utf8',
+        );
+        return [FICHA, docDe(r), 'La mayor parte'];
+      },
+      /no es ninguna de FUENTES/u,
+    ],
+    [
+      'la ficha ya declara ese incipit, escrito a mano sin colapsar',
+      async (r: Rutas) => {
+        const ruta = join(r.obras, `${FICHA}.yml`);
+        await writeFile(ruta, `${await readFile(ruta, 'utf8')}incipit:\n  documento: "${DOC}"\n  desde: "La  mayor   parte"\n`, 'utf8');
+        return [FICHA, docDe(r), 'La mayor parte'];
+      },
+      /ya declara ese incipit/u,
+    ],
+    [
       'la ficha ya declara ese mismo incipit',
       async (r: Rutas) => {
         expect((await declararIncipit(r, FICHA, docDe(r), 'La mayor parte')).ok).toBe(true);
@@ -213,6 +264,7 @@ describe('Historia 32.3 — npm run obra -- incipit', () => {
     ['con cuatro', ['incipit', FICHA, 'corpus/fuentes/x.txt', 'Desde', 'sobra']],
     ['con el «desde» en blanco', ['incipit', FICHA, 'corpus/fuentes/x.txt', '   ']],
     ['con una bandera que no existe', ['incipit', FICHA, 'corpus/fuentes/x.txt', 'Desde', '--seco']],
+    ['con un carácter de control en el «desde»', ['incipit', FICHA, 'corpus/fuentes/x.txt', 'Des\u0007de']],
   ])('sale con 2 %s, sin escribir', async (_caso, argumentos) => {
     const rutas = await preparado();
     const antes = await fichaYaml(rutas);

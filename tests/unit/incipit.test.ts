@@ -6,7 +6,8 @@ import { colapsarEspacios, localizar } from '../../tools/lib/cotejo.ts';
 import { componerDocumento } from '../../tools/lib/documento.ts';
 import type { FormaDeLineas } from '../../tools/lib/lineas.ts';
 import { incipitDe, ofreceIncipit } from '../../tools/lib/pasaje.ts';
-import { incipitDelDocumento, leerIncipitsDelCorpus } from '../../tools/lib/posiciones.ts';
+import { fuenteDelIncipit, incipitDelDocumento, leerIncipitsDelCorpus } from '../../tools/lib/posiciones.ts';
+import { lineaDeLaFuenteDelIncipit } from '../../src/lib/atribucion.ts';
 
 /**
  * Historia 32.3 — el corte del incipit (`incipitDe`) y el único punto que decide si se ofrece
@@ -41,6 +42,12 @@ describe('32.3 — ofreceIncipit, el único punto que decide', () => {
       ofrece: false,
       motivo: 'primera-no-cabe',
     });
+  });
+
+  it('un tope que no es un entero positivo para la construcción, en vez de no cortar', () => {
+    for (const tope of [Number.NaN, Number.POSITIVE_INFINITY, 0, -3, 2.5]) {
+      expect(() => ofreceIncipit({ tope, primera: 'Corta.' }), String(tope)).toThrow(RangeError);
+    }
   });
 
   it('cuenta puntos de código, no unidades UTF-16', () => {
@@ -144,6 +151,12 @@ describe('32.3 — incipitDe, el corte en frase o verso', () => {
     expect(cortar(enVerso, 'verso', 'Un verso', 400)).toEqual({ incipit: 'Un verso,\notro verso.' });
   });
 
+  it('un «desde» que cae en el pie de licencia no da ninguna unidad: sin-texto', () => {
+    const cuerpo = 'Corto.\n\nEsta obra se encuentra en dominio público en todo el mundo.\n';
+    expect(cortar(cuerpo, 'prosa-ajustada', 'dominio público', 400)).toEqual({ motivo: 'sin-texto' });
+    expect(cortar('Un verso.\nPublic domain\n', 'verso', 'Public domain', 400)).toEqual({ motivo: 'sin-texto' });
+  });
+
   it('se para al fin del documento', () => {
     expect(cortar(MANCHA, 'prosa-por-lineas', 'En un lugar', 1000)).toEqual({ incipit: MANCHA });
   });
@@ -173,7 +186,48 @@ describe('32.3 — incipitDelDocumento, lo que comprueban la orden y el build', 
   it('el «desde» se compara con los espacios colapsados', () => {
     expect(
       incipitDelDocumento({ cuerpo: MANCHA, lineas: 'prosa-por-lineas', desde: '  En   un\tlugar ', tope: 400 }),
-    ).toMatchObject({ ok: true, forma: 'prosa-por-lineas' });
+    ).toMatchObject({ ok: true, forma: 'prosa-por-lineas', repetido: false });
+  });
+
+  it('dice si el «desde» aparece más de una vez (se ancla en la primera)', () => {
+    const cuerpo = `Capítulo I\n${MANCHA}\nCapítulo II\nOtra frase.`;
+    expect(incipitDelDocumento({ cuerpo, lineas: 'prosa-por-lineas', desde: 'Capítulo', tope: 12 })).toMatchObject({
+      ok: true,
+      repetido: true,
+      corte: { incipit: 'Capítulo I' },
+    });
+  });
+});
+
+describe('32.3 — fuenteDelIncipit, la Fuente que firma el incipit', () => {
+  const URL_WS = 'https://es.wikisource.org/wiki/X';
+  it('una Fuente conocida y reutilizable, con url http(s), firma con su nombre y su licencia', () => {
+    expect(fuenteDelIncipit({ fuente: 'wikisource-es', url: URL_WS })).toEqual({
+      ok: true,
+      fuente: { nombre: 'Wikisource en español', licencia: 'CC BY-SA 4.0', url: URL_WS },
+    });
+    expect(fuenteDelIncipit({ fuente: 'gutenberg', url: 'https://www.gutenberg.org/ebooks/1' })).toMatchObject({
+      ok: true,
+      fuente: { nombre: 'Project Gutenberg', licencia: 'dominio público' },
+    });
+  });
+
+  it.each([
+    ['una Fuente que no es de FUENTES', { fuente: 'wikisource-xx', url: URL_WS }, 'fuente-desconocida'],
+    ['una Fuente sin reutilización', { fuente: 'cervantes-virtual', url: 'https://www.cervantesvirtual.com/x' }, 'fuente-sin-reutilizacion'],
+    ['una Fuente mutable', { fuente: 'wikipedia-es', url: 'https://es.wikipedia.org/w/index.php?oldid=1' }, 'fuente-mutable'],
+    ['un url javascript:', { fuente: 'wikisource-es', url: 'javascript:alert(1)' }, 'url-no-web'],
+    ['un url data:', { fuente: 'wikisource-es', url: 'data:text/html,hola' }, 'url-no-web'],
+    ['un url que no es una dirección', { fuente: 'wikisource-es', url: 'no es una dirección' }, 'url-no-web'],
+  ])('no firma con %s', (_caso, cabecera, fallo) => {
+    expect(fuenteDelIncipit(cabecera)).toEqual({ ok: false, fallo });
+  });
+});
+
+describe('32.3 — lineaDeLaFuenteDelIncipit', () => {
+  it('con licencia, «. Licencia {licencia}.»; sin ella, «.»', () => {
+    expect(lineaDeLaFuenteDelIncipit({ licencia: 'CC BY-SA 4.0' })).toBe('. Licencia CC BY-SA 4.0.');
+    expect(lineaDeLaFuenteDelIncipit({})).toBe('.');
   });
 });
 
@@ -247,6 +301,18 @@ describe('32.3 — el cargador del incipit, sobre un Corpus en disco', () => {
       'En un lugar',
       DOCUMENTO.replace('lineas: prosa-por-lineas', 'lineas: indeterminada'),
       /indeterminada/u,
+    ],
+    [
+      'la Fuente de la cabecera no es de FUENTES',
+      'En un lugar',
+      DOCUMENTO.replace('fuente: wikisource-es', 'fuente: wikisource-xx'),
+      /no es ninguna de FUENTES/u,
+    ],
+    [
+      'el url de la cabecera no es http(s)',
+      'En un lugar',
+      DOCUMENTO.replace(`url: ${URL}`, 'url: javascript:alert(1)'),
+      /no es una dirección http\(s\)/u,
     ],
   ])('rompe nombrando la ficha cuando %s', async (_caso, desde, documento, motivo) => {
     const raiz = await corpus({

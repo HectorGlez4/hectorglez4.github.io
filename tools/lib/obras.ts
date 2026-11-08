@@ -57,7 +57,12 @@ import {
 } from './corpus.ts';
 import { FICHERO_DEL_CENSO, colapsarEspacios, documentosDeCita } from './cotejo.ts';
 import { type MotivoSinIncipit } from './pasaje.ts';
-import { incipitDelDocumento, type FalloDelIncipit } from './posiciones.ts';
+import {
+  fuenteDelIncipit,
+  incipitDelDocumento,
+  type FalloDeLaFuenteDelIncipit,
+  type FalloDelIncipit,
+} from './posiciones.ts';
 import { MAX_CARACTERES_DEL_INCIPIT } from '../../src/lib/umbrales.ts';
 import { derivarDeLaDeclaracion, esElMismoAutor } from './documento.ts';
 import type { Resultado } from './gestion.ts';
@@ -1789,11 +1794,20 @@ const FALLO_DEL_INCIPIT: Record<FalloDelIncipit, string> = {
   'no-se-localiza': 'el «desde» no aparece literal en su cuerpo (se compara con los espacios colapsados).',
 };
 
+/** Por qué la Fuente de la cabecera no firma un incipit, como lo dice el parte. */
+const FALLO_DE_LA_FUENTE_DEL_INCIPIT: Record<FalloDeLaFuenteDelIncipit, string> = {
+  'fuente-desconocida': 'la Fuente que declara su cabecera no es ninguna de FUENTES (`tools/lib/fuentes.ts`).',
+  'fuente-sin-reutilizacion': 'la licencia de la Fuente que declara su cabecera no permite reutilizar el texto.',
+  'fuente-mutable': 'la Fuente que declara su cabecera es mutable: de ella no sale el comienzo de ninguna Obra.',
+  'url-no-web': 'el «url:» de su cabecera no es una dirección http(s), y la página lo enlazaría tal cual.',
+};
+
 /** Por qué un incipit que se sostiene no saldría en la página, como lo dice el parte. */
 const MOTIVO_SIN_INCIPIT: Record<MotivoSinIncipit, string> = {
   'sin-tope': 'MAX_CARACTERES_DEL_INCIPIT no tiene valor: la página no lo enseña.',
   'primera-no-cabe': 'su primera frase —o su primer verso— pasa de MAX_CARACTERES_DEL_INCIPIT: la página no lo enseña.',
   'forma-indeterminada': 'la forma de sus líneas es indeterminada: la página no lo enseña.',
+  'sin-texto': 'tras el «desde» no queda ninguna frase ni ningún verso (cae en el pie de licencia): la página no lo enseña.',
 };
 
 /**
@@ -1844,8 +1858,26 @@ export async function declararIncipit(
         ? 'es una biografía, no un documento de Fuente: de una biografía no sale el comienzo de ninguna Obra.'
         : leido.estado === 'falta'
           ? 'no está en corpus/fuentes/.'
-          : 'no se deja analizar como documento de Fuente.';
+          : leido.estado === 'ambiguo'
+            ? 'tiene el nombre de más de un documento de las subcarpetas de corpus/fuentes/: la ficha guarda el nombre y no sabría cuál.'
+            : 'no se deja analizar como documento de Fuente.';
     return { ok: false, motivos: [`${ruta} ${porque}`, NADA_ESCRITO] };
+  }
+  // La ficha guarda solo el nombre, y el build lee el documento por él: lo que se comprueba aquí es
+  // lo que el build leerá, así que tiene que ser el documento que se nombró.
+  if (resolve(leido.ruta) !== ruta) {
+    return {
+      ok: false,
+      motivos: [
+        `${ruta} no es el documento que el nombre «${nombre}» designa en corpus/fuentes/ (${resolve(leido.ruta)}): ` +
+          'la ficha guarda solo el nombre, y el build leería el otro.',
+        NADA_ESCRITO,
+      ],
+    };
+  }
+  const firmada = fuenteDelIncipit(leido.cabecera);
+  if (!firmada.ok) {
+    return { ok: false, motivos: [`${ruta}: ${FALLO_DE_LA_FUENTE_DEL_INCIPIT[firmada.fallo]}`, NADA_ESCRITO] };
   }
 
   // El casado: el documento es de esta Obra si es de alguna de sus Citas publicadas.
@@ -1877,7 +1909,7 @@ export async function declararIncipit(
   }
 
   const incipit = { documento: nombre, desde: colapsarEspacios(desde) as string };
-  if (ficha.incipit?.documento === incipit.documento && ficha.incipit.desde === incipit.desde) {
+  if (ficha.incipit?.documento === incipit.documento && colapsarEspacios(ficha.incipit.desde) === incipit.desde) {
     return {
       ok: false,
       motivos: [`«${ficha.nombre}» ya declara ese incipit: no hay nada que declarar.`, NADA_ESCRITO],
@@ -1900,6 +1932,12 @@ export async function declararIncipit(
         : []),
       `  ${ficha.ruta}`,
       `  Forma de las líneas: ${situado.forma}`,
+      ...(situado.repetido
+        ? [
+            `  Aviso: «${incipit.desde}» aparece más de una vez en ${nombre}; el incipit se ancla en la primera ` +
+              'aparición. Si no es el comienzo de la Obra, declara un «desde» más largo que no se repita.',
+          ]
+        : []),
       'incipit' in situado.corte
         ? `  Incipit que saldría (tope ${tope}):\n${situado.corte.incipit
             .split('\n')

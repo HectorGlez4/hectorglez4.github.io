@@ -849,6 +849,19 @@ describe('Historia 24.8 — la matriz: qué cambia de fecha', () => {
     });
   });
 
+  it('Historia 32.3 — el documento del incipit compone su Página de Obra aunque no sea de ninguna de sus Citas', () => {
+    const ajeno = 'corpus/fuentes/fuente--otra-cosa.txt';
+    const conIncipit = (): CorpusParaFechar => {
+      const base = corpusDeEjemplo([], [DOCUMENTO, ajeno]);
+      return { ...base, obras: base.obras!.map((o) => (o.nombre === 'x--o' ? { ...o, incipit: 'fuente--otra-cosa' } : o)) };
+    };
+    const enT1 = { [ajeno]: { antes: VERSION_OPACA as Version, despues: VERSION_OPACA as Version } };
+    expect(refechadas(conIncipit(), historial(enT1))).toEqual(['/obra/x/o']);
+    expect(avisadas(enT1, conIncipit(), conIncipit())).toEqual(['/obra/x/o']);
+    // Sin el incipit, ese documento no compone nada.
+    expect(refechadas(corpusDeEjemplo([], [DOCUMENTO, ajeno]), historial(enT1))).toEqual([]);
+  });
+
   describe('Historia 32.2 — la Ficha técnica fecha y avisa su Página de Obra', () => {
     const DOC_X = 'corpus/wikidata/Q1--r10.json';
     const DOC_Y = 'corpus/wikidata/Q2--r20.json';

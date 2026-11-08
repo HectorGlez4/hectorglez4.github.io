@@ -367,6 +367,11 @@ export interface ObraParaFechar {
    * documento no se dejó leer», y entonces compone `vigentes.yml` con cualquier cambio.
    */
   wikidata?: { documento: string; pinta?: readonly string[] };
+  /**
+   * Historia 32.3 — el nombre del documento de `corpus/fuentes/` de su incipit, si lo declara: la
+   * página 1 pinta su texto, así que la compone aunque ya no sea de ninguna de sus Citas.
+   */
+  incipit?: string;
   ruta: string;
 }
 
@@ -610,6 +615,10 @@ export function relacionDeSuperficies(corpus: CorpusParaFechar): Map<string, Sup
     if (obra.wikidata !== undefined) {
       componer(ruta, obra.wikidata.documento, 'wikidata');
       componerCampos(ruta, corpus.vigentesDeWikidata, obra.wikidata.pinta ?? CUALQUIER_CAMBIO);
+    }
+    // Historia 32.3 — el documento de su incipit, sea o no de alguna de sus Citas.
+    if (obra.incipit !== undefined) {
+      for (const documento of documentos.get(obra.incipit) ?? []) componer(ruta, documento, 'documento');
     }
     for (const cita of citas) componer(ruta, cita.ruta, 'cita');
     componer(ruta, ficheroDeAutor.get(obra.autor), 'autor');

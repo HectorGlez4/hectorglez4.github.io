@@ -290,6 +290,11 @@ async function principal(): Promise<never> {
     case 'incipit': {
       const [ficha, documento, desde] = exactamente(3, 'la ficha, el documento y el texto desde el que empieza');
       if (desde.replace(/\s+/gu, ' ').trim() === '') usoMal(['El texto desde el que empieza la Obra está en blanco.']);
+      // Lo que el colapso de espacios no quita —un carácter de control— no cabe en una línea de la
+      // ficha: es la forma de la invocación (2), no lo que dice (1).
+      if (/[\p{Cc}\p{Zl}\p{Zp}]/u.test(desde.replace(/\s+/gu, ' '))) {
+        usoMal(['El texto desde el que empieza la Obra lleva caracteres de control: es una sola línea de texto.']);
+      }
       return terminar(await declararIncipit(rutas, ficha, documento, desde));
     }
 
