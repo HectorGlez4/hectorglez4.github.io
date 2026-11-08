@@ -320,6 +320,31 @@ dada de alta **como propietaria** (`DESPLIEGUE.md` §5). Sin ella no escribe nad
 **código 2**, igual que con una bandera desconocida; sale con **1** si no pudo leer el corpus o
 la serie, si no pudo leer ninguna ventana o si falla la escritura, y entonces no escribe nada.
 
+### Qué Obras curar primero (Historia 33.3)
+
+```
+npm run obra -- curar-primero   # informa. NO escribe nada.
+```
+
+Lee las Citas publicadas, los Autores, las fichas de Obra y esta serie, y lista las Obras
+publicadas **con edición cotejada** —las demás se cuentan, sin listarlas—, cada una con su
+ficha, su título, su Autor, cuántas ediciones declara y cuántas son de una tienda sin marca. La
+regla vive solo en `tools/lib/curarPrimero.ts`, pura y con los efectos inyectados (AD-22). Ordena
+por la demanda de la ventana `28-dias` de `hasta` más reciente, nombrada en el parte: impresiones
+y clics de las Citas de esa ventana que resuelven a la Obra (impresiones, clics y nombre de ficha
+para desempatar); las mensuales no se usan y las ventanas no se suman. Esa cifra es
+**provisional** —la serie no cuenta la Página de Obra— y **cota inferior** —lo de `resto` no se
+atribuye—, y el parte dice cuántas Citas de la ventana no cuentan. **Sin ventana de 28 días
+legible** —la serie vacía, como hoy, solo mensuales o una entrada ilegible— cada Obra sale «sin
+cifra» con ese motivo, nunca 0, y la lista va por nombre de ficha, que no es de prioridad; una
+Obra sin Citas en una ventana leída, o una ventana `vacia: true`, sí da 0, y es una lectura. Con
+la familia Obra congelada lo dice con su jornada y no propone nada. No propone ediciones ni
+tiendas ni sugiere encender o solicitar nada. Códigos: 0 si informó; 1, sin escribir, si el
+Corpus, una ficha o el fichero de la serie no se dejan leer; 2 con una bandera desconocida o un
+argumento de más. Lee la serie con `leerEntradasDeLaSerieDeDemanda`, que no juzga las entradas
+—`leerSerieDeDemanda` lanzaría ante una mal formada—, y tampoco la importa ningún módulo de
+`src/`, `integraciones/` ni `astro.config.mjs` (AD-24).
+
 ## Desplegar el receptor de la medición
 
 El esquema de D1 cambia solo por migraciones aditivas (`medicion/migrations/`, AD-14), y cuando
