@@ -15,6 +15,8 @@
 import type { Cita, Autor } from '../lib/publicado.ts';
 import { rutaDeCita } from '../lib/superficies.ts';
 import TextoDeCita from './TextoDeCita.astro';
+import { recortarPorPalabra } from '../lib/recorte.ts';
+import { MAX_CARACTERES_DE_TARJETA_DE_CITA } from '../lib/umbrales.ts';
 import type { Zona } from '../lib/vocabulario.ts';
 
 interface Props {
@@ -113,13 +115,11 @@ const partes = [
 /**
  * El fragmento. Una Cita larga se recorta **para el listado**, que no es publicarla
  * recortada: su página muestra el texto íntegro. NFR-12 prohíbe alterar la Cita, no
- * resumirla en un índice.
+ * resumirla en un índice. Se recorta en la última palabra entera, por el único dueño del
+ * recorte (Historia 34.1, UX-DR132); los saltos de verso que quedan dentro los pinta
+ * `TextoDeCita`.
  */
-const LARGO_DE_FRAGMENTO = 120;
-const fragmento =
-  cita.texto.length > LARGO_DE_FRAGMENTO
-    ? `${cita.texto.slice(0, LARGO_DE_FRAGMENTO - 1).trimEnd()}…`
-    : cita.texto;
+const fragmento = recortarPorPalabra(cita.texto, MAX_CARACTERES_DE_TARJETA_DE_CITA);
 ---
 
 {/*

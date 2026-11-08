@@ -77,8 +77,6 @@ describe('el verso tiene dos dueños y nadie más lo interpreta', () => {
         // Parte un documento de biografía, no el texto de una Cita.
         'src/lib/biografia.ts: .replace(/\\r\\n?/gu',
         "src/lib/biografia.ts: .split('\\n'",
-        // Quita el salto que el recorte de 110 deja colgando antes de unir con `enUnaLinea`.
-        'src/pages/cita/[slug].astro: .replace(/\\s*\\n\\s*$/',
       ].sort(),
     );
   });
