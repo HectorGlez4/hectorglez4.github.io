@@ -5,7 +5,7 @@ created: '2026-11-08'
 status: 'done'
 baseline_revision: '6da8d60787a1798ea3541927f9f93d292d6feed4'
 review_loop_iteration: 0
-followup_review_recommended: true
+followup_review_recommended: false
 context:
   - '{project-root}/_bmad-output/implementation-artifacts/epic-34-context.md'
 warnings: [oversized]
@@ -128,6 +128,15 @@ deferred:
   - `[low]` `[patch]` `CampoDeBusqueda.astro`: el comentario de cabecera ya no dice que `buscar-en.test.ts` impide que un uso estilice el `input`; dice lo que la prueba exige (dentro de `.campo-de-busqueda` y sin `style` en línea) y lo que no vigila (un `<style>` propio del uso), y recupera el salto de línea.
   - `[low]` `[patch]` spec: el criterio «las pruebas del filtro… sin tocarlas» separa la unitaria (sin tocar) de la e2e (solo el reposo reescrito), y la Verificación nombra el barrido completo de accesibilidad, que ya se corre (Spec Change Log).
 
+### 2026-11-08 — Review pass (revisión externa, pasada 2)
+- intent_gap: 0
+- bad_spec: 0
+- patch: 0
+- defer: 0
+- reject: 30 (high 0, medium 0, low 30)
+- addressed_findings:
+  - none
+
 ## Design Notes
 
 - Al foco, engrosar el contorno de 1 a 2 px empujaría el texto 1 px; rebajar el relleno en `--grosor-filete` compensa exacto, y `min-height` con `border-box` mantiene la caja exterior. Ejemplo:
@@ -175,3 +184,32 @@ Blocking condition: ninguna
 - `npm test` — 156 ficheros, 7.184 pruebas en verde.
 
 **Riesgos residuales.** La portada de la Épica 28 integrará el campo cuando se funda, y la prueba de `dist/` la cubrirá. Que un uso reestilice el `input` desde su propio `<style>` no lo vigila ninguna prueba. Las e2e no corren en CI: una regresión del trato visual solo la ve una pasada local.
+
+### Pasada externa 2 (2026-11-08)
+
+**Resumen.** Última ronda de revisión sobre HEAD 4289553114. No cambia el código: ningún hallazgo describe un defecto que un lector, quien siembra o el build vayan a encontrar.
+
+**Ficheros.** Solo este spec (registro de triaje y resultado).
+
+**Revisión.** 0 parches, 0 diferidos y 30 rechazados, ya agrupados los duplicados entre capas:
+- Endurecer más las e2e y la prueba de `dist/`: `fonts.ready`, el botón dentro de `.campo-de-busqueda`, un hermano fuera de flujo, `.first()`, `type`/`role` con otra grafía, el `describe` de la 360 × 640, el selector `.listado li`, la Obra tomada por la Página de Autor y el 404 de `tests/servidor.mjs`. Las pruebas pasan sobre el sitio real y ninguno de estos huecos esconde una regresión del componente. Lo mismo vale para el analizador de `tokens.css` (primera declaración, `{` dentro de cadenas, otros selectores de tema): hoy hay un solo `:root` con una declaración de cada token.
+- Lo que el contrato o el epic ya deciden:
+  - el campo de la portada: «la que llegue después integra a la otra»;
+  - el `:focus` de la 26.6 frente a `:focus-visible`;
+  - las capturas de `tipografia-calculada`, que no ven bordes, y el commit lo dice;
+  - las e2e fuera del CI, que es la regla de AGENTS.md;
+  - la contradicción de la e2e del filtro, ya diferida a Héctor.
+- Lo especulativo:
+  - fondos distintos de `--papel`: ningún uso los tiene;
+  - el autorrelleno: el campo lleva `autocomplete="off"`;
+  - un `--grosor-filete` igual o mayor que `--unidad`;
+  - un desplazamiento de menos de un píxel a DPR fraccionario;
+  - los estados `:hover` y `:disabled`, que el diseño no define.
+- El contraste del foco: siena es el anillo global ya en uso.
+- La cabecera que nombra pruebas: es la costumbre del repositorio.
+
+**Recomendación de revisión de seguimiento:** `false`. Parches de esta pasada: 0 altos, 0 medios y 0 bajos. Puntuación: 3 × 0 + 0 = 0, por debajo de 5. El `true` de la pasada 1 contaba sus 8 parches, con puntuación 3 × 1 + 7 = 10, que pasa del umbral de 5.
+
+**Verificación.** No hay parches, así que no se vuelve a correr la Verificación. Sigue valiendo la de la pasada 1 sobre este mismo HEAD de código, con `npm test` en verde, más la del ac-auditor: 729 pruebas unitarias y 412 e2e en verde.
+
+**Riesgos residuales.** Los de la pasada 1, sin cambios.
