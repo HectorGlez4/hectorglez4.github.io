@@ -259,3 +259,33 @@ Blocking condition: ninguna. `tests/unit/huella.test.ts` en rojo es **esperado**
 - La isla, el guion y `dist/` no cambian en esta pasada: los bytes (7.577 de 7.680), el `ensayo` y las e2e de la pasada 2 siguen valiendo.
 
 **Riesgos residuales.** Los de la pasada 2. Al soltar los eventos (fase B), la prueba nueva cae a propósito en su primera aserción y pide el cero leído.
+
+## Verificación previa a la fusión — 2026-11-08 (UTC)
+
+Puerta de la etapa s-30 (Épica 30, 30.1–30.5), intento 1.
+
+**Puesta al día.** `git fetch origin`; `origin/main` (369a171dd1, con la Épica 29 y la 34.0) no era antepasado y se fundió en `d181cb057f`. Dos conflictos, resueltos con los dos lados: las importaciones de `tests/e2e/ayuda/corpus.ts` en `tests/e2e/pagina-de-cita.spec.ts` (`citasEnVerso` y `estaPublicada`) y la fecha de `sprint-status.yaml` (el resto, por la fusión automática: las líneas de la principal y los estados de la rama, una clave por línea). `npx tsx tools/autor.ts proponer-claves` no escribió nada. El lock no cambió: sin `npm ci`.
+
+**Lo diferido «al fundir la Épica 29».**
+- 30.3 (`a36c8be322`): `referenciaDeCita` pasa el texto por `enUnaLinea`; la tabla literal de `tests/unit/atribucion.test.ts` gana la fila «en verso» con « / » en APA, MLA y Chicago.
+- 30.4 (`3fd04bc8e3`): el párrafo de `fragmentoParaInsertar` es `versosDe(cita.texto).map(escapar).join('<br>')`; la tabla gana la fila «en verso» y `tests/unit/inserta-esta-cita.test.ts` construye una Cita en verso respaldada por su documento de verso y comprueba que, con los `<br>` leídos como saltos, el texto es el `texto`.
+- Los dos se componen en el build: el guion de Copiar no cambia y `MAX_BYTES_DE_GUION` no se toca (`tests/unit/medicion.test.ts` en verde).
+- Arreglo de la ronda 1 (`31032eca97`): `tests/unit/verso-construido.test.ts` (29.3) exigía ningún « / » en el `<main>` de una Página de Cita en verso; con la 30.3 las tres Referencias son la excepción de UX-DR116. La prueba sigue exigiéndolo en todo lo demás del `<main>` y comprueba en positivo que las tres Referencias llevan `«${enUnaLinea(texto)}».`.
+
+**CI equivalente** (sobre `31032eca97` para `npm test`; el build y `astro check` también tras el arreglo, que solo toca una prueba):
+- `npm run build` — 0; peso juzgado 516,9 MiB (aviso en 750 MiB).
+- `npx astro check` — 0 errores, 0 avisos, 11 sugerencias.
+- `npm test` — 7.583 en verde, 1 en rojo: solo `tests/unit/huella.test.ts` (los eventos `copiado-de-referencia` y `copiado-de-fragmento` no están en la huella), el rojo aceptado hasta que la sesión principal despliegue el receptor desde la rama.
+
+**`npm run test:e2e`** (los dos proyectos, receptor local en 8787): 1.372 en verde, 155 omitidas, 1 en rojo: `tipografia-calculada.spec.ts` «buscar-con-resultados» (instantánea de `/buscar/`, clave `div.recuento > p.estado`). Repetida sola: falla de forma intermitente en los dos proyectos (5 de 6 con `--repeat-each=3`) y **falla igual sobre `origin/main`** (369a171dd1, 5 de 6 con la misma orden): no la causa la Épica 30, que no toca `/buscar/`. Queda para quien decida la instantánea o la espera de esa prueba en la principal.
+
+**NFR-7** (la etapa cambia la Página de Cita). Lighthouse 13.5.0 móvil (`--throttling-method=simulate`), los dos `dist/` construidos en local con `MEDICION_ENDPOINT=http://localhost:8787/` y servidos por el `tests/servidor.mjs` de la rama con `SERVIDOR_CACHE_CONTROL=max-age=600` y `SERVIDOR_GZIP=1` (principal en 4399, rama en 4400, receptor ficticio en 8787), 10 corridas alternas por página:
+
+| Página | LCP principal | LCP rama | Δ | FCP principal | FCP rama | Δ |
+|---|---|---|---|---|---|---|
+| `/cita/antonio-machado-caminante-no-hay-camino-sino-estelas-en/` | 1.595 | 1.610 | +14 | 908 | 934 | +26 |
+| `/cita/jose-marti-yo-vengo-de-todas-partes-y-hacia/` (en verso) | 1.595 | 1.610 | +15 | 906 | 938 | +31 |
+
+Margen max(100 ms, 5 %): las dos dentro; LCP de Cita bajo 2.500 ms. Veredicto: **ok**, sin desempate. Registro: `.claude/v9-ralph/logs/s-30/nfr7-gate1/`.
+
+**Veredicto de la puerta.** Pasa con el rojo aceptado de `huella.test.ts` y el rojo preexistente de la principal en la instantánea de `/buscar/`. `vocabulario_changed: true`: el orden es receptor (desde la rama), huella commiteada y después fusión.
