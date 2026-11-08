@@ -173,19 +173,17 @@ export const SUPERFICIES_SIN_SEMBLANZA: readonly string[] = [
  * de la Tarjeta Social de Autor—. Las partes van sin separador: la fila pone el punto medio para la
  * vista y la coma para el lector.
  *
- * Los años salen de `añosDeAutor` («1547–1616», «Fallecido en 65») y solo si consta el año de
- * fallecimiento. El esquema lo hace obligatorio, así que la rama sin años no se alcanza con el
- * Corpus; la función la admite para que la convención de ausencia —sin punto medio ni hueco— se
- * pueda probar sin relajar el tipo de `Autor`.
+ * Los años salen de `añosDeAutor` («1547–1616», «Fallecido en 65», «n. 1950» de un Autor vivo)
+ * y, cuando no da ninguno —un Autor vivo sin año de nacimiento (Historia 35.1)—, la fila va sin
+ * ellos: sin punto medio ni hueco.
  */
 export function hechosDeFilaDeAutor(
-  autor: { añoNacimiento?: number; añoFallecimiento?: number },
+  autor: { añoNacimiento?: number; añoFallecimiento?: number; vivo?: true },
   citas: number,
 ): { años?: string; recuento: string } {
   const recuento = recuentoDeCitas(citas);
-  if (autor.añoFallecimiento === undefined) return { recuento };
-  const años = añosDeAutor({ ...autor, añoFallecimiento: autor.añoFallecimiento });
-  return { años, recuento };
+  const años = añosDeAutor(autor);
+  return años === undefined ? { recuento } : { años, recuento };
 }
 
 /**
@@ -238,15 +236,20 @@ export function añoLegible(año: number, era: '' | ' d. C.' = ''): string {
  *
  *   · «1864–1936»; los dos antes de Cristo, «65–8 a. C.»; solo el primero, «4 a. C.–65 d. C.»;
  *   · sin año de nacimiento en el Corpus, «Fallecido en 65» o «Fallecido en 8 a. C.» —FR-2:
- *     nunca un año aproximado—.
+ *     nunca un año aproximado—;
+ *   · un Autor vivo (Historia 35.1), «n. 1950»; sin año de nacimiento, ninguno: `undefined`, y
+ *     quien pinta los años no pinta línea, paréntesis ni hueco. La forma «n. {año}» está
+ *     pendiente de Héctor (bmad-ux).
  *
  * Hasta la 17.2 el año negativo salía con su signo —«-4–65»—, que no es como se escribe.
  */
 export function añosDeAutor(
-  autor: Pick<Autor, 'añoNacimiento' | 'añoFallecimiento'>,
+  autor: Pick<Autor, 'añoNacimiento' | 'añoFallecimiento' | 'vivo'>,
   inicial: 'mayúscula' | 'minúscula' = 'mayúscula',
-): string {
+): string | undefined {
   const { añoNacimiento: nace, añoFallecimiento: muere } = autor;
+  if (autor.vivo === true) return nace === undefined ? undefined : `n. ${añoLegible(nace, '')}`;
+  if (muere === undefined) return undefined;
   if (nace === undefined) {
     return `${inicial === 'mayúscula' ? 'Fallecido' : 'fallecido'} en ${añoLegible(muere, '')}`;
   }
@@ -273,12 +276,13 @@ export function recuentoDeDocumentadas(documentadas: number): string | undefined
  * el sistema no compone prosa sobre una persona real (§5 del PRD).
  */
 export function hechosDeAutor(
-  autor: Pick<Autor, 'nombre' | 'añoNacimiento' | 'añoFallecimiento'>,
+  autor: Pick<Autor, 'nombre' | 'añoNacimiento' | 'añoFallecimiento' | 'vivo'>,
   documentadas: number,
 ): string {
   const recuento = recuentoDeDocumentadas(documentadas);
+  const años = añosDeAutor(autor, 'minúscula');
   return (
-    `${autor.nombre} (${añosDeAutor(autor, 'minúscula')}).` +
+    `${autor.nombre}${años === undefined ? '' : ` (${años})`}.` +
     (recuento === undefined ? '' : ` ${recuento} en ${MARCA}.`)
   );
 }
@@ -292,7 +296,7 @@ export function hechosDeAutor(
  * «documentada»—: «… 4 a. C.–65 d. C. 12 cotejadas con su documento.»
  */
 export function descripcionDeAutor(
-  autor: Pick<Autor, 'nombre' | 'semblanza' | 'atribucion' | 'añoNacimiento' | 'añoFallecimiento'>,
+  autor: Pick<Autor, 'nombre' | 'semblanza' | 'atribucion' | 'añoNacimiento' | 'añoFallecimiento' | 'vivo'>,
   documentadas: number,
 ): string {
   const prefijo = `Citas de ${autor.nombre} con su procedencia documentada.`;
@@ -304,6 +308,7 @@ export function descripcionDeAutor(
       : ` ${documentadas} ${documentadas === 1 ? 'cotejada' : 'cotejadas'} con su documento.`;
   // «65–8 a. C.» ya acaba en punto: otro sería «a. C..».
   const años = añosDeAutor(autor);
+  if (años === undefined) return `${prefijo}${cotejadas}`;
   return `${prefijo} ${años}${años.endsWith('.') ? '' : '.'}${cotejadas}`;
 }
 

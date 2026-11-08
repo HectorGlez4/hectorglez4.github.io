@@ -11,18 +11,24 @@ import {
   año,
   añoFallecimiento,
   biografia,
+  clase,
   coleccionAdmisible,
+  CUANDO_SIEMPRE,
   estadoDerechos,
   fuenteDeCita,
   obraAdmisible,
   nombre,
   ordenAlfabetico,
   ordenRevisado,
+  personaje,
   procedencia,
+  reglasDeAutor,
+  reglasDeClase,
   semblanza,
   slug,
   texto,
   tradicion,
+  vivo,
 } from './lib/admision.js';
 import { leerBiografia } from './lib/biografia.js';
 import {
@@ -73,7 +79,14 @@ const citas = defineCollection({
     temas: z.array(reference('temas')).default([]),
     slug,
     procedencia,
-    estadoDerechos,
+    /*
+     * Historia 35.1 — la clase y el Personaje, con las reglas de `admision.ts`: `estadoDerechos`
+     * es obligatorio en la de siempre y prohibido en la atribuida (`reglasDeClase`), y
+     * `personaje` es solo la forma de un slug hasta la Historia 35.2.
+     */
+    estadoDerechos: estadoDerechos.optional(),
+    clase: clase.optional(),
+    personaje: personaje.optional(),
     /*
      * Historia 11.2 — la Fuente de la que salió la Cita, y con ella su documento.
      *
@@ -87,14 +100,16 @@ const citas = defineCollection({
     fuente: fuenteDeCita.optional(),
     // FR-15 — marcado de Cita apta para portada, que consume la Cita del Día (FR-9).
     aptaParaPortada: z.boolean().default(false),
-  }),
+  }).superRefine(reglasDeClase, CUANDO_SIEMPRE),
 });
 
 const autores = defineCollection({
   loader: glob({ pattern: '**/*.{yml,yaml}', base: './corpus/autores' }),
   schema: z.object({
     nombre: nombre('Autor'),
-    añoFallecimiento,
+    // Historia 35.1 — el año de fallecimiento o `vivo: true`, uno de los dos (`reglasDeAutor`).
+    añoFallecimiento: añoFallecimiento.optional(),
+    vivo: vivo.optional(),
     añoNacimiento: año.optional(),
     semblanza,
     // §6.1 — el suelo del 40 % de tradición latinoamericana necesita saber de quién
@@ -106,7 +121,7 @@ const autores = defineCollection({
     // forma es puerta aquí; la presencia, en `integraciones/claves.ts`.
     ordenAlfabetico: ordenAlfabetico.optional(),
     ordenRevisado: ordenRevisado.optional(),
-  }),
+  }).superRefine(reglasDeAutor, CUANDO_SIEMPRE),
 });
 
 const temas = defineCollection({

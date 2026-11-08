@@ -21,7 +21,19 @@ import { esAparatoDeLaFuente, esTrozoDeCitaAjena, tienePuntuacionRota } from './
 import { motivoParaNoPublicar } from './cotejo.ts';
 import { normalizar } from '../../src/lib/normalizar.ts';
 import { slugLibre } from '../../src/lib/slug.ts';
-import { leerCitas, leerTemas, mover, nombreDeFicheroDeCita, type Rutas } from './corpus.ts';
+import {
+  fechaLocal,
+  leerAutores,
+  leerCitas,
+  leerRegistroDeClases,
+  leerTemas,
+  mover,
+  nombreDeFicheroDeCita,
+  registrarClases,
+  type Rutas,
+} from './corpus.ts';
+import { claseDe, claseQueCorresponde, esAtribuida, type Clase } from '../../src/lib/clase.ts';
+import { MOTIVO_PUERTA_CERRADA, motivoClaseDistinta, slugsConOtraClase } from './clases.ts';
 import { aplicarFichaDeObra, resolverFichaDeObra } from './obras.ts';
 import { motivoSinTemaPublicado, temaPublicadoConLaPasada } from './alcance.ts';
 import type { TemaBajoUmbral } from '../../src/lib/publicado.ts';
@@ -31,6 +43,10 @@ export interface CandidataEnRevision {
   texto: string;
   /** Slug del Autor: compone el nombre del fichero al publicar. */
   autor: string;
+  /** La clase que dice su fichero (`claseDe`) — Historia 35.1. */
+  clase: Clase;
+  /** El Personaje que declara, si declara alguno — Historia 35.1. */
+  personaje?: string;
   /**
    * Los Temas que ya declara, si declara alguno — Historia 26.8: aprobarla exige que, con los
    * de la orden, alguno quede publicado.
@@ -139,6 +155,8 @@ export async function loteEnRevision(rutas: Rutas): Promise<CandidataEnRevision[
       slug: candidata.slug,
       texto: candidata.texto,
       autor: candidata.autor,
+      clase: claseDe(candidata),
+      ...(typeof candidata.personaje === 'string' ? { personaje: candidata.personaje } : {}),
       ...(Array.isArray(candidata.temas) && candidata.temas.length > 0 ? { temas: candidata.temas } : {}),
       ruta: candidata.ruta,
       ...(typeof candidata.procedencia?.obra === 'string' ? { obra: candidata.procedencia.obra } : {}),
@@ -235,6 +253,12 @@ export interface ResultadoDeDecision {
    * antes de construir. Vacío casi siempre — Historia 26.8.
    */
   publicadasSinTema: { slug: string; temas: TemaBajoUmbral[]; motivos: string[] }[];
+  /**
+   * Si las publicadas no se pudieron anotar en `corpus/clases-de-cita.yml` después de moverlas
+   * —un fallo de disco—: el motivo. Ya están publicadas; `npx tsx tools/clases.ts sembrar` las
+   * anota, y la orden sale con 1 — Historia 35.1.
+   */
+  registroSinAnotar?: string;
   rechazadas: string[];
   noEncontradas: string[];
 }
@@ -281,6 +305,18 @@ export async function aprobar(
     if (desconocidos.length > 0) return { ...resultado, temasDesconocidos: desconocidos };
   }
 
+  /*
+   * Historia 35.1 — el registro de clases se lee antes de escribir nada (ilegible, nada se
+   * aprueba), y la clase de cada candidata se deriva de su Autor: no se teclea.
+   */
+  const registro = await leerRegistroDeClases(rutas);
+  const autorPorSlug = new Map((await leerAutores(rutas)).map((a) => [a.slug, a]));
+  const claseQueLeToca = (candidata: CandidataEnRevision): Clase => {
+    const autor = autorPorSlug.get(candidata.autor);
+    if (autor === undefined) return candidata.clase;
+    return claseQueCorresponde(candidata.personaje !== undefined ? { personaje: candidata.personaje } : {}, autor);
+  };
+
   // Los slugs que no se pueden pisar: los publicados, más los que esta misma ejecución
   // vaya publicando. Sin lo segundo, dos candidatas que colisionan entre sí se pisarían.
   const yaPublicadas = await leerCitas(rutas.citas);
@@ -318,6 +354,19 @@ export async function aprobar(
       resultado.rechazadasPorAdmision.push({ slug, motivos: candidata.motivos });
       continue;
     }
+    /*
+     * Historia 35.1 — una candidata cuya clase escrita no es la que le corresponde no se aprueba,
+     * y la atribuida tampoco: su puerta llega con la 35.1b. Las dos siguen en revisión, intactas.
+     */
+    const corresponde = claseQueLeToca(candidata);
+    if (corresponde !== candidata.clase) {
+      resultado.rechazadasPorAdmision.push({ slug, motivos: [motivoClaseDistinta(candidata.clase, corresponde)] });
+      continue;
+    }
+    if (esAtribuida(candidata)) {
+      resultado.rechazadasPorAdmision.push({ slug, motivos: [MOTIVO_PUERTA_CERRADA] });
+      continue;
+    }
     const obra = candidata.obra;
     const comoPublicada = {
       autor: candidata.autor,
@@ -350,7 +399,7 @@ export async function aprobar(
   }
 
   // Lo que esta pasada ya publicó: cuenta para los Temas de las que quedan.
-  const escritas: { slug: string; temas: string[] }[] = [];
+  const escritas: { slug: string; temas: string[]; clase: Clase }[] = [];
   let pendientes = planeadas;
   /*
    * La regla de Tema sobre lo que queda por escribir. Se repite si una Ficha de Obra falla al
@@ -400,7 +449,8 @@ export async function aprobar(
       continue;
     }
 
-    const definitivo = slugLibre(candidata.slug, ocupados);
+    // Un slug registrado con la otra clase cuenta como ocupado: una Cita no cambia de clase.
+    const definitivo = slugLibre(candidata.slug, [...ocupados, ...slugsConOtraClase(registro, candidata.clase)]);
     ocupados.add(definitivo);
 
     if (definitivo === candidata.slug && temas.length === 0) {
@@ -412,7 +462,7 @@ export async function aprobar(
       }
     }
     publicadasParaObra.push(comoPublicada);
-    escritas.push({ slug: definitivo, temas: suyos });
+    escritas.push({ slug: definitivo, temas: suyos, clase: candidata.clase });
 
     if (plan !== undefined) {
       const ficha = await aplicarFichaDeObra(rutas, plan);
@@ -420,6 +470,20 @@ export async function aprobar(
     }
 
     resultado.publicadas.push(slug);
+  }
+
+  /*
+   * Historia 35.1 — lo publicado se anota en el registro de clases, en un solo añadido al final.
+   * Si falla, las Citas ya están publicadas: el parte da la orden que las anota y sale con 1.
+   */
+  const hoy = fechaLocal(new Date());
+  try {
+    await registrarClases(
+      rutas,
+      escritas.map((e) => ({ slug: e.slug, clase: e.clase, fecha: hoy })),
+    );
+  } catch (fallo) {
+    resultado.registroSinAnotar = fallo instanceof Error ? fallo.message : String(fallo);
   }
 
   /*

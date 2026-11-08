@@ -1215,3 +1215,32 @@ export const PESO_VOCAL_SUELTA = 2;
 
 /** Nombre propio en interior de frase: 10,5 % contra 23,9 %, razón 0,44. Suele ser el traductor nombrando a un tercero. */
 export const PESO_NOMBRE_PROPIO_INTERIOR = 1;
+
+// ─────────────────────────────────────────────────────────────────────────────
+// La Cita atribuida — Historia 35.1, AD-1, AD-32
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Cuántos años después de la muerte de su Autor sigue protegida una obra — Historia 35.1.
+ *
+ * **Lo fija Héctor; ningún agente le da valor.** Con `undefined`, los derechos de un Autor
+ * vigentes son solo los del Autor vivo (`vivo: true`), y un Autor fallecido es de dominio
+ * público como lo ha sido siempre. Con valor, un Autor fallecido en `añoFallecimiento` tiene
+ * derechos vigentes mientras `añoFallecimiento + PLAZO_DE_PROTECCION_AÑOS ≥ AÑO_DE_REFERENCIA`,
+ * y una Cita de la clase de siempre suya rompe el build. Lo decide solo `derechosVigentes` de
+ * `src/lib/clase.ts`. Con plazo y sin `AÑO_DE_REFERENCIA`, esa función lanza.
+ *
+ * Es un literal a propósito: el filtro de los Directorios importa este módulo, y un literal no
+ * arrastra nada al guion del cliente.
+ */
+export const PLAZO_DE_PROTECCION_AÑOS: number | undefined = undefined;
+
+/**
+ * El año contra el que se mide el plazo de protección — Historia 35.1, AD-9, AD-12.
+ *
+ * **Lo fija Héctor en un diff**; la propuesta del agente es **2026**. Es una constante y nunca
+ * la fecha del build: un veredicto de derechos que dependiera del día de construir rompería la
+ * reproducibilidad por commit (AD-12) y movería la clase de una Cita sin que nadie lo decidiera.
+ * Solo se lee si `PLAZO_DE_PROTECCION_AÑOS` tiene valor.
+ */
+export const AÑO_DE_REFERENCIA: number | undefined = undefined;

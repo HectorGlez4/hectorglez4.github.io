@@ -4,7 +4,13 @@ import { existsSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve, dirname, sep } from 'node:path';
 import { promisify } from 'node:util';
-import { aYaml as aYamlDelCorpus, separarFrontmatter } from '../../../tools/lib/corpus.ts';
+import {
+  aYaml as aYamlDelCorpus,
+  CABECERA_DE_CLASES,
+  FICHERO_DE_CLASES,
+  separarFrontmatter,
+} from '../../../tools/lib/corpus.ts';
+import { claseDe } from '../../../src/lib/clase.ts';
 import { FICHERO_DEL_CENSO } from '../../../tools/lib/cotejo.ts';
 import { componerDocumento, nombreDeDocumento } from '../../../tools/lib/documento.ts';
 import {
@@ -164,6 +170,15 @@ export async function construirConCorpus(
      * Las que la miden —una Obra sin ficha— lo apagan.
      */
     sembrarObras?: boolean;
+    /**
+     * `false` para no sembrar el registro de clases — Historia 35.1.
+     *
+     * Por omisión, si el fixture no trae `clases-de-cita.yml`, el andamio lo escribe con una
+     * entrada por Cita de `citas/` y la clase que dice su fichero (`claseDe`), como hace con las
+     * Fichas de Obra: las pruebas que no miden la clase no tienen por qué saber que existe su
+     * puerta. Las que la miden traen el suyo o lo apagan.
+     */
+    sembrarClases?: boolean;
   } = {},
 ): Promise<ResultadoBuild> {
   // Antes de copiar nada: una ficha de prueba ilegible lanza aquí sin dejar un proyecto huérfano.
@@ -209,6 +224,10 @@ export async function construirConCorpus(
 
   for (const [ruta, contenido] of Object.entries(fichasSembradas)) {
     await writeFile(join(proyecto, 'corpus', ruta), contenido, 'utf8');
+  }
+
+  if (opciones.sembrarClases !== false && !(FICHERO_DE_CLASES in corpus)) {
+    await writeFile(join(proyecto, 'corpus', FICHERO_DE_CLASES), registroDeClasesDe(corpus), 'utf8');
   }
 
   for (const [ruta, contenido] of Object.entries(opciones.paginas ?? {})) {
@@ -428,6 +447,27 @@ function documentosDeFuenteDe(corpus: CorpusDePrueba): Record<string, string> {
  * reclama una ficha del fixture no recibe otra. Un frontmatter o una ficha que no se dejan
  * analizar se saltan: es lo que mide alguna prueba de admisión, no un fallo del andamio.
  */
+/**
+ * El registro de clases de un fixture — Historia 35.1: una entrada por Cita de `citas/` con la
+ * clase que dice su fichero. Una Cita que no se deja analizar no se anota: la prueba que la trae
+ * mide otra puerta, que la rechazará antes.
+ */
+export function registroDeClasesDe(corpus: CorpusDePrueba): string {
+  const lineas: string[] = [];
+  for (const [ruta, contenido] of Object.entries(corpus)) {
+    if (!ruta.startsWith('citas/') || !ruta.endsWith('.md')) continue;
+    let datos: Record<string, unknown> | null = null;
+    try {
+      datos = separarFrontmatter(contenido);
+    } catch {
+      continue;
+    }
+    if (datos === null || typeof datos.slug !== 'string' || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/u.test(datos.slug)) continue;
+    lineas.push(`  - { slug: ${JSON.stringify(datos.slug)}, clase: ${claseDe(datos)}, fecha: "2026-11-07" }\n`);
+  }
+  return `${CABECERA_DE_CLASES}${lineas.join('')}`;
+}
+
 function fichasDeObraDe(corpus: CorpusDePrueba): Record<string, string> {
   const citas: CitaConObra[] = [];
   const reclamadas = new Set<string>();

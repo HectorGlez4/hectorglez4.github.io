@@ -17,6 +17,7 @@ import { z } from 'astro/zod';
 import { MAX_CARACTERES_CRITERIO, MAX_CARACTERES_NOTA_DE_OBRA } from './umbrales.ts';
 import { inicialDeClave, normalizar } from './normalizar.ts';
 import { esJornada } from './jornada.ts';
+import { esAtribuida } from './clase.ts';
 import { FORMATOS_DE_EDICION, TIENDAS, esDelDominio, tiendaDe, type Tienda } from './ingreso.ts';
 
 /**
@@ -138,6 +139,102 @@ export const estadoDerechos = z.literal('dominio-público', {
 });
 
 /**
+ * La clase de una Cita — Historia 35.1, AD-32.
+ *
+ * Solo la atribuida la escribe: `clase: atribuida`. La de siempre **no lleva** el campo, y
+ * escribir `clase: siempre` es un error con mensaje propio, para que la ausencia sea la única
+ * forma de decirla y nadie tenga que adivinar si un fichero sin el campo es de siempre o un
+ * olvido. Lo lee solo `esAtribuida` de `src/lib/clase.ts`. No se teclea: el alta y la
+ * aprobación la derivan (`claseQueCorresponde`).
+ */
+export const MENSAJE_CLASE_SIEMPRE_ESCRITA =
+  'Regla incumplida: la clase de siempre no se escribe. Una Cita de dominio público, cotejada, ' +
+  'no lleva el campo «clase»; solo la atribuida lleva «clase: atribuida».';
+
+export const clase = z.literal('atribuida', {
+  error: (problema) =>
+    problema.input === 'siempre'
+      ? MENSAJE_CLASE_SIEMPRE_ESCRITA
+      : 'Regla incumplida: «clase» solo admite «atribuida»; la Cita de siempre no lleva el campo.',
+});
+
+/**
+ * El Personaje que dice una Cita atribuida — Historias 35.1 y 35.2.
+ *
+ * Aquí solo se juzga su **forma**, la de un slug: el Personaje como entidad del Corpus llega
+ * con la Historia 35.2, que lo resuelve contra `corpus/personajes/`. Solo lo admite la
+ * atribuida (`reglasDeClase`).
+ */
+export const personaje = z
+  .string({ message: 'Regla incumplida: el Personaje de la Cita es un slug.' })
+  .regex(
+    /^[a-z0-9]+(?:-[a-z0-9]+)*$/,
+    'Regla incumplida: el Personaje de la Cita es un slug: minúsculas, dígitos y guiones, sin diacríticos.',
+  );
+
+/**
+ * Las reglas que una Cita cumple según su clase — Historia 35.1. Las comparten `citaAdmisible`
+ * y la colección `citas` de `src/content.config.ts`, para que el alta y el build digan lo mismo:
+ *
+ *   · la de siempre lleva `estadoDerechos: dominio-público` y no lleva `personaje`;
+ *   · la atribuida no lleva `estadoDerechos`: su derecho no es el dominio público;
+ *   · toda Cita lleva Autor, también la atribuida: la que solo tiene Personaje espera a la
+ *     Historia 35.2, y el mensaje lo dice cuando la Cita declara uno.
+ *
+ * Corre aunque falle otra regla del objeto (`when`), para que el fallo de Autor de una Cita con
+ * Personaje nombre la 35.2 junto al genérico; por eso no supone nada de la forma del valor.
+ */
+export function reglasDeClase(valor: unknown, contexto: z.RefinementCtx): void {
+  if (valor === null || typeof valor !== 'object') return;
+  const cita = valor as Record<string, unknown>;
+  const atribuida = esAtribuida(cita);
+  if (cita.autor === undefined && cita.personaje !== undefined) {
+    contexto.addIssue({
+      code: 'custom',
+      path: ['autor'],
+      message:
+        'Regla incumplida: la Cita declara Personaje y no Autor. Toda Cita lleva Autor hasta la ' +
+        'Historia 35.2, que trae al Personaje como dueño de sus Citas.',
+    });
+  }
+  // Una clase sin valor admisible ya la rechaza el literal: no se juzga lo demás por ella.
+  if (cita.clase !== undefined && !atribuida) return;
+  if (atribuida) {
+    if (cita.estadoDerechos !== undefined) {
+      contexto.addIssue({
+        code: 'custom',
+        path: ['estadoDerechos'],
+        message:
+          'Regla incumplida: una Cita atribuida no lleva estadoDerechos. Su derecho no es el ' +
+          'dominio público, y declararlo sería afirmar lo contrario de lo que es.',
+      });
+    }
+    return;
+  }
+  if (cita.estadoDerechos === undefined) {
+    contexto.addIssue({
+      code: 'custom',
+      path: ['estadoDerechos'],
+      message:
+        'Regla incumplida: falta estadoDerechos. Una Cita de siempre declara «dominio-público», ' +
+        'que es lo que permite publicarla.',
+    });
+  }
+  if (cita.personaje !== undefined) {
+    contexto.addIssue({
+      code: 'custom',
+      path: ['personaje'],
+      message:
+        'Regla incumplida: solo una Cita atribuida declara Personaje. La de siempre es de un ' +
+        'Autor de dominio público y no lleva el campo.',
+    });
+  }
+}
+
+/** Las opciones con que se engancha `reglasDeClase`: corre también si otra regla falló. */
+export const CUANDO_SIEMPRE = { when: () => true } as const;
+
+/**
  * La Fuente de la que salió una Cita — Historia 11.2.
  *
  * Es lo que ata una Cita a su documento versionado en `corpus/fuentes/`: con el
@@ -223,11 +320,43 @@ export const nombre = (entidad: string, articulo = 'del') =>
     );
 
 /** AD-1 — sin año de fallecimiento no hay forma de sostener que la obra es de dominio
- * público. Es obligatorio y su ausencia rompe el build (FR-13, FR-15). */
-export const añoFallecimiento = añoEntero(
+ * público. Desde la Historia 35.1 el Autor lleva o su año de fallecimiento o `vivo: true`, uno
+ * de los dos y nunca los dos (`reglasDeAutor`); sin ninguno, el mensaje es este. */
+export const MENSAJE_SIN_FALLECIMIENTO =
   'Regla incumplida: falta el año de fallecimiento del Autor. Es obligatorio porque es ' +
-    'lo que sostiene que su obra está en dominio público.',
-);
+  'lo que sostiene que su obra está en dominio público.';
+
+export const añoFallecimiento = añoEntero(MENSAJE_SIN_FALLECIMIENTO);
+
+/**
+ * El Autor vivo — Historia 35.1. Solo admite `true`: un Autor que no está vivo lo dice con su
+ * año de fallecimiento, no con `vivo: false`. Sus Citas son atribuidas (`derechosVigentes`).
+ */
+export const vivo = z.literal(true, {
+  message: 'Regla incumplida: «vivo» solo admite true; un Autor fallecido declara su año de fallecimiento.',
+});
+
+/**
+ * Exactamente uno de `añoFallecimiento` y `vivo: true` — Historia 35.1. Lo comparten
+ * `autorAdmisible` y la colección `autores`.
+ */
+export function reglasDeAutor(valor: unknown, contexto: z.RefinementCtx): void {
+  if (valor === null || typeof valor !== 'object') return;
+  const autor = valor as Record<string, unknown>;
+  const conAño = autor.añoFallecimiento !== undefined;
+  const esVivo = autor.vivo !== undefined;
+  if (conAño && esVivo) {
+    contexto.addIssue({
+      code: 'custom',
+      path: ['vivo'],
+      message:
+        'Regla incumplida: el Autor declara a la vez «vivo: true» y su año de fallecimiento. ' +
+        'Lleva uno de los dos: el año si murió, «vivo: true» si vive.',
+    });
+  } else if (!conAño && !esVivo) {
+    contexto.addIssue({ code: 'custom', path: ['añoFallecimiento'], message: MENSAJE_SIN_FALLECIMIENTO });
+  }
+}
 
 export const semblanza = z
   .string({ message: 'Regla incumplida: falta la semblanza del Autor.' })
@@ -338,14 +467,15 @@ export const ordenRevisado = z
 
 export const autorAdmisible = z.object({
   nombre: nombre('Autor'),
-  añoFallecimiento,
+  añoFallecimiento: añoFallecimiento.optional(),
+  vivo: vivo.optional(),
   añoNacimiento: año.optional(),
   semblanza,
   tradicion: tradicion.optional(),
   biografia: biografia.optional(),
   ordenAlfabetico: ordenAlfabetico.optional(),
   ordenRevisado: ordenRevisado.optional(),
-});
+}).superRefine(reglasDeAutor, CUANDO_SIEMPRE);
 
 export type AutorAdmisible = z.infer<typeof autorAdmisible>;
 
@@ -359,7 +489,10 @@ export const citaAdmisible = z.object({
   temas: z.array(z.string()).default([]),
   slug,
   procedencia,
-  estadoDerechos,
+  // Historia 35.1 — obligatorio en la de siempre y prohibido en la atribuida (`reglasDeClase`).
+  estadoDerechos: estadoDerechos.optional(),
+  clase: clase.optional(),
+  personaje: personaje.optional(),
   aptaParaPortada: z.boolean().default(false),
   /*
    * Opcional, y lo será mientras quede censo. Las 38 Citas anteriores a la v3 no tienen
@@ -369,7 +502,7 @@ export const citaAdmisible = z.object({
    * esquema, no de la puerta.
    */
   fuente: fuenteDeCita.optional(),
-});
+}).superRefine(reglasDeClase, CUANDO_SIEMPRE);
 
 export type CitaAdmisible = z.infer<typeof citaAdmisible>;
 

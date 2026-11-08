@@ -162,6 +162,52 @@ La ficha —años, semblanza, atribución y Lista de Obras— va solo en la pág
 el nombre y el listado. Meta y JSON-LD dicen hechos del Corpus; qué superficie la porta lo decide
 `src/lib/atribucion.ts`. La Tarjeta de Autor, de todos, lleva solo nombre, años y Citas documentadas.
 
+## La Cita atribuida
+
+El Corpus conoce dos clases de Cita (Historia 35.1, AD-32). La **de siempre** —dominio público,
+cotejada— **no lleva** el campo `clase` y declara `estadoDerechos: dominio-público`; escribir
+`clase: siempre` es error del esquema. La **atribuida** —la frase de un Personaje o de un Autor con
+derechos vigentes— lleva `clase: atribuida` y nunca `estadoDerechos`; `personaje` (un slug, que
+resuelve la 35.2) solo lo admite ella, y hasta la 35.2 toda Cita lleva Autor. El Autor lleva su
+`añoFallecimiento` **o** `vivo: true` (+`añoNacimiento` opcional), uno de los dos: sus años se
+escriben «n. 1950» —sin nacimiento, ninguno, ni hueco— y no hay `deathDate`.
+
+`src/lib/clase.ts` es el **único lector** del campo (`esAtribuida`, `claseDe`) y el único que decide
+los derechos (`derechosVigentes` y su complemento `esDeDominioPublico`); la cadena `'atribuida'`
+solo la escriben él y `src/lib/admision.ts` (lo vigila `tests/unit/clase.test.ts`, con las demás
+`clase` del código exentas por nombre y motivo). Con `PLAZO_DE_PROTECCION_AÑOS` en `undefined`, un
+Autor tiene derechos si y solo si vive; con plazo, también el fallecido cuyo plazo llega a
+`AÑO_DE_REFERENCIA`, y con plazo y sin año la función lanza. **Las dos constantes las fija Héctor**
+(`src/lib/umbrales.ts`, en `undefined`; la propuesta del año es 2026): ningún agente les da valor, y
+las pruebas que se lo dan parchean la copia.
+
+**La clase no se teclea.** El alta y la aprobación la derivan (`claseQueCorresponde`) y la escriben
+con lo demás; una `clase` en el lote manda la entrada a revisión. Mientras la puerta de la atribuida
+esté cerrada (Historia 35.1b), lo que deriva atribuida va o se queda en `corpus/_revision/` con el
+motivo «la puerta de la atribuida está cerrada (Historia 35.1b)»: **nada se publica atribuido por
+orden**.
+
+**El registro `corpus/clases-de-cita.yml` solo añade**: una línea por Cita publicada, con su slug, su
+clase y la jornada. Lo escriben el alta y la aprobación —un solo `appendFile` al final de la pasada—
+y la siembra; **ningún agente lo edita a mano**, ni reescribe ni borra una entrada: cambiar de clase
+es retirar la Cita y dar de alta otra con otro slug (un slug registrado con la otra clase cuenta como
+ocupado en `slugLibre`). `npm test` comprueba que el fichero empieza, byte a byte, por el del primer
+padre del commit (en el CI, con `fetch-depth: 0`). El build (`integraciones/clases.ts`) lo lee solo
+para romper —una Cita publicada sin entrada, con otra clase, un slug con dos, una de siempre de un
+Autor que no es de dominio público, una atribuida sin derechos—; no es familia de AD-27, no fecha ni
+avisa y ningún byte de `dist/` sale de él. Un registro ilegible niega el alta y la aprobación con 1
+sin escribir nada; si falla al anotar tras publicar, el parte da la orden y sale con 1.
+
+```
+npx tsx tools/clases.ts sembrar     # anota como «siempre» las Citas publicadas que falten. Idempotente.
+```
+
+**Tras cada puesta al día de una rama con la principal se corre `npx tsx tools/clases.ts sembrar`**,
+como `proponer-claves`: las Citas sembradas entretanto en la principal llegan sin anotar y el build no
+las deja pasar. Se niega con 1, sin escribir, si una Cita que falta es atribuida (esa la anota su
+alta); 2 con un argumento desconocido. Las pruebas de build siembran el registro del fixture
+(`sembrarClases` de `tests/unit/ayuda/construir.ts`, por omisión).
+
 ## Leer el estado de indexación
 
 El sitio cumple desde hace tiempo la exigencia de *ser* indexable y aun así el buscador ha

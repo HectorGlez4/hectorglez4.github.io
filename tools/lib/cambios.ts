@@ -215,10 +215,13 @@ function ordenado(valor: unknown): unknown {
 // ─── La tabla de campos ──────────────────────────────────────────────────────────────
 
 /** Lo que toda superficie que pinta una Cita afirma de ella: su página, los listados y la Obra. */
-const CAMPOS_DE_CITA = ['texto', 'autor', 'temas', 'procedencia', 'fuente', 'slug'] as const;
+const CAMPOS_DE_CITA = ['texto', 'autor', 'temas', 'procedencia', 'fuente', 'slug', 'personaje'] as const;
 
-/** Lo que pinta de un Autor toda superficie que no es la suya: el nombre y los años. */
-const CAMPOS_DEL_AUTOR_FUERA = ['nombre', 'añoNacimiento', 'añoFallecimiento'] as const;
+/**
+ * Lo que pinta de un Autor toda superficie que no es la suya: el nombre y los años. `vivo`
+ * (Historia 35.1) es de los años: con él se escribe «n. 1950» y no hay `deathDate`.
+ */
+const CAMPOS_DEL_AUTOR_FUERA = ['nombre', 'añoNacimiento', 'añoFallecimiento', 'vivo'] as const;
 
 /**
  * Las columnas de la tabla de campos — Historia 26.4: una por familia de ruta, salvo la de los
@@ -301,6 +304,8 @@ export const CAMPOS_QUE_PINTA = {
  *   · `aptaParaPortada` decide la rotación de la Cita del Día, que solo la portada pinta, y la
  *     portada se avisa siempre que cambie algo del Corpus;
  *   · `estadoDerechos` es una puerta de admisión, no un texto publicado;
+ *   · `clase` (35.1) decide qué puerta cruza la Cita y no se pinta: lo que la atribuida pinta
+ *     distinto lo pintan sus otros campos (el `personaje`, que sí está en la tabla);
  *   · `tradicion` es del suelo del 40 % de tradición latinoamericana (§6.1);
  *   · `distintaDe` solo silencia un aviso del build (22.2).
  *   · `ordenRevisado` (26.1) solo dice que una persona revisó la clave: no lo pinta ninguna
@@ -311,7 +316,7 @@ export const CAMPOS_QUE_PINTA = {
  * prueba de clasificación exige que cada clave de los esquemas esté aquí o en la tabla.
  */
 export const CAMPOS_QUE_NO_FECHAN = {
-  cita: ['aptaParaPortada', 'estadoDerechos'],
+  cita: ['aptaParaPortada', 'estadoDerechos', 'clase'],
   autor: ['tradicion', 'ordenRevisado'],
   obra: ['distintaDe'],
 } as const satisfies Partial<Record<FamiliaDeFichero, readonly string[]>>;

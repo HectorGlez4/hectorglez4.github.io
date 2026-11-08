@@ -617,3 +617,62 @@ describe('Historia 26.8 — aprobar no publica una Cita sin Tema publicado', () 
     });
   });
 });
+
+describe('Historia 35.1 — aprobar deriva la clase y la anota', () => {
+  const SENECA = 'nombre: "Séneca"\nañoFallecimiento: 65\nsemblanza: "Filósofo."\nordenAlfabetico: "Séneca"\n';
+  const VIVA = 'nombre: "Ana Ejemplo"\nvivo: true\nsemblanza: "Escritora."\nordenAlfabetico: "Ejemplo"\n';
+  const conAutores = async (candidatas: Record<string, unknown>[]) => {
+    const rutas = await corpusCon(candidatas);
+    await writeFile(join(rutas.autores, 'seneca.yml'), SENECA, 'utf8');
+    await writeFile(join(rutas.autores, 'ana-ejemplo.yml'), VIVA, 'utf8');
+    return rutas;
+  };
+
+  it('la de siempre se publica y queda anotada «siempre»; repetir el slug con la otra clase lo renombra', async () => {
+    const rutas = await conAutores([CANDIDATA_COMPLETA]);
+    await writeFile(
+      rutas.clasesDeCita,
+      `clases:\n  - { slug: "${CANDIDATA_COMPLETA.slug}", clase: atribuida, fecha: "2026-11-01" }\n`,
+      'utf8',
+    );
+    const resultado = await aprobar(rutas, [CANDIDATA_COMPLETA.slug]);
+    expect(resultado.publicadas).toEqual([CANDIDATA_COMPLETA.slug]);
+    expect(resultado.renombradas).toEqual([{ de: CANDIDATA_COMPLETA.slug, a: `${CANDIDATA_COMPLETA.slug}-2` }]);
+    expect(await readFile(rutas.clasesDeCita, 'utf8')).toMatch(
+      new RegExp(`  - \\{ slug: "${CANDIDATA_COMPLETA.slug}-2", clase: siempre, fecha: "\\d{4}-\\d{2}-\\d{2}" \\}\\n$`, 'u'),
+    );
+  });
+
+  it('la atribuida no se aprueba: su puerta está cerrada, y sigue en revisión intacta', async () => {
+    const { estadoDerechos: _e, ...sinDerechos } = CANDIDATA_COMPLETA;
+    const atribuida = { ...sinDerechos, autor: 'ana-ejemplo', slug: 'ana-ejemplo-una-frase', clase: 'atribuida' };
+    const rutas = await conAutores([atribuida]);
+    const resultado = await aprobar(rutas, [atribuida.slug]);
+    expect(resultado.publicadas).toEqual([]);
+    expect(resultado.rechazadasPorAdmision).toEqual([
+      { slug: atribuida.slug, motivos: ['la puerta de la atribuida está cerrada (Historia 35.1b)'] },
+    ]);
+    expect(await readdir(rutas.revision)).toHaveLength(1);
+    expect(existsSync(rutas.clasesDeCita)).toBe(false);
+  });
+
+  it('una de siempre de un Autor vivo, o una atribuida de uno de dominio público, no casa con su clase', async () => {
+    const deViva = { ...CANDIDATA_COMPLETA, autor: 'ana-ejemplo', slug: 'ana-ejemplo-de-siempre' };
+    const { estadoDerechos: _e, ...sinDerechos } = CANDIDATA_COMPLETA;
+    const deSeneca = { ...sinDerechos, slug: 'seneca-atribuida', clase: 'atribuida' };
+    const rutas = await conAutores([deViva, deSeneca]);
+    const resultado = await aprobar(rutas, [deViva.slug, deSeneca.slug]);
+    expect(resultado.publicadas).toEqual([]);
+    expect(resultado.rechazadasPorAdmision.map((r) => [r.slug, r.motivos.join(' ')])).toEqual([
+      [deViva.slug, expect.stringMatching(/dice ser siempre y le corresponde atribuida/u)],
+      [deSeneca.slug, expect.stringMatching(/dice ser atribuida y le corresponde siempre/u)],
+    ]);
+  });
+
+  it('con el registro ilegible no publica nada', async () => {
+    const rutas = await conAutores([CANDIDATA_COMPLETA]);
+    await writeFile(rutas.clasesDeCita, 'clases: [roto\n', 'utf8');
+    await expect(aprobar(rutas, [CANDIDATA_COMPLETA.slug])).rejects.toThrow(/clases-de-cita\.yml/u);
+    expect(await ficherosPublicados(rutas)).toEqual([]);
+  });
+});

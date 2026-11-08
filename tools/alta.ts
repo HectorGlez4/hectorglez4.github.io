@@ -36,11 +36,22 @@ import {
   escribirCita,
   leerAutores,
   leerCitas,
+  leerRegistroDeClases,
   leerTemas,
   nombreDeFicheroDeCita,
+  registrarClases,
   rutasDelCorpus,
+  fechaLocal,
+  type ClaseRegistrada,
   type Rutas,
 } from './lib/corpus.ts';
+import { claseDe, claseQueCorresponde, esAtribuida, type Clase } from '../src/lib/clase.ts';
+import {
+  MOTIVO_CLASE_TECLEADA,
+  MOTIVO_PUERTA_CERRADA,
+  ORDEN_SEMBRAR_CLASES,
+  slugsConOtraClase,
+} from './lib/clases.ts';
 import { aplicarFichaDeObra, resolverFichaDeObra, type PlanDeFicha } from './lib/obras.ts';
 import { motivoSinTemaPublicado, temaPublicadoConLaPasada } from './lib/alcance.ts';
 import type { TemaBajoUmbral } from '../src/lib/publicado.ts';
@@ -63,6 +74,11 @@ export interface EntradaDeLote {
    */
   fuente?: { id?: string; nombre?: string; licencia?: string; url?: string };
   aptaParaPortada?: boolean;
+  /**
+   * El Personaje que dice la Cita — Historia 35.1. Con él, la clase que corresponde es la
+   * atribuida, y hasta la Historia 35.1b la Cita se queda en revisión.
+   */
+  personaje?: string;
 }
 
 export interface CitaPublicada {
@@ -117,6 +133,12 @@ export interface InformeDeAlta {
    * de la que dependía su Tema—. Ya están en `corpus/citas/`. Vacío casi siempre — Historia 26.8.
    */
   publicadasSinTema?: { slug: string; temas: TemaBajoUmbral[]; motivos: string[] }[];
+  /**
+   * Si las publicadas no se pudieron anotar en `corpus/clases-de-cita.yml` después de escribirlas
+   * —un fallo de disco—: el motivo. Ya están en `corpus/citas/`; la siembra las anota, y la orden
+   * sale con 1 — Historia 35.1.
+   */
+  registroSinAnotar?: string;
 }
 
 /**
@@ -131,11 +153,14 @@ export async function darDeAltaLote(
   opciones: { seco?: boolean; conDuplicados?: boolean } = {},
 ): Promise<InformeDeAlta> {
   const autores = await leerAutores(rutas);
+  // Historia 35.1 — el registro de clases se lee antes de escribir nada: ilegible, nada se escribe.
+  const registro = await leerRegistroDeClases(rutas);
   const temas = await leerTemas(rutas);
   const yaPublicadas = await leerCitas(rutas.citas);
   const enRevisionYa = await leerCitas(rutas.revision);
 
   const slugsDeAutor = new Set(autores.map((a) => a.slug));
+  const autorPorSlug = new Map(autores.map((a) => [a.slug, a]));
   const slugsDeTema = new Set(temas.map((t) => t.slug));
 
   /*
@@ -170,6 +195,17 @@ export async function darDeAltaLote(
   }
   const { informe, aPublicar } = opciones.seco ? ensayo : await recorrer(true);
   if (!opciones.seco) {
+    /*
+     * Historia 35.1 — lo publicado se anota en el registro de clases, en un solo añadido al final.
+     * Si falla, las Citas ya están escritas: el parte da la orden que las anota y sale con 1.
+     */
+    const hoy = fechaLocal(new Date());
+    const entradas: ClaseRegistrada[] = aPublicar.map((p) => ({ slug: p.slug, clase: p.clase, fecha: hoy }));
+    try {
+      await registrarClases(rutas, entradas);
+    } catch (fallo) {
+      informe.registroSinAnotar = fallo instanceof Error ? fallo.message : String(fallo);
+    }
     const sueltas = temaPublicadoConLaPasada(
       yaPublicadas,
       aPublicar.map((p) => ({ clave: p.slug, temas: p.temas })),
@@ -201,9 +237,9 @@ export async function darDeAltaLote(
    */
   async function recorrer(escribir: boolean): Promise<{
     informe: InformeDeAlta;
-    aPublicar: { indice: number; texto: string; slug: string; temas: string[] }[];
+    aPublicar: { indice: number; texto: string; slug: string; temas: string[]; clase: Clase }[];
   }> {
-    const aPublicar: { indice: number; texto: string; slug: string; temas: string[] }[] = [];
+    const aPublicar: { indice: number; texto: string; slug: string; temas: string[]; clase: Clase }[] = [];
     const slugsOcupados = new Set(yaPublicadas.map((c) => c.slug));
     // El conjunto publicado tal como va quedando, para la grafía por omisión de una ficha nueva.
     const publicadasParaObra: { autor: string; procedencia?: { obra?: string } }[] = [
@@ -281,15 +317,33 @@ export async function darDeAltaLote(
         );
       }
 
+      /*
+       * ── La clase, derivada y nunca tecleada — Historia 35.1 ──
+       *
+       * Atribuida si la entrada declara Personaje o si su Autor tiene derechos vigentes; de siempre
+       * en lo demás. Una clase escrita en el lote no se obedece: se dice. Y la atribuida, con su
+       * puerta cerrada hasta la 35.1b, va a revisión con la clase puesta y sin estadoDerechos.
+       */
+      const autorLeido = autorPorSlug.get(slugAutor);
+      const clase: Clase =
+        autorLeido === undefined
+          ? claseDe({})
+          : claseQueCorresponde(entrada.personaje !== undefined ? { personaje: entrada.personaje } : {}, autorLeido);
+      const atribuida = esAtribuida({ clase });
+      if ('clase' in entrada) motivos.push(MOTIVO_CLASE_TECLEADA);
+      if (atribuida) motivos.push(MOTIVO_PUERTA_CERRADA);
+
       // ── Las reglas de admisión, las mismas que aplica el build ──
       const slugBase = slugDeCita(slugAutor, texto);
       const candidata = {
         texto,
         autor: slugAutor,
         temas: temasResueltos,
-        slug: slugLibre(slugBase, slugsOcupados),
+        // Un slug registrado con la otra clase cuenta como ocupado: una Cita no cambia de clase.
+        slug: slugLibre(slugBase, [...slugsOcupados, ...slugsConOtraClase(registro, clase)]),
         procedencia: entrada.procedencia,
-        estadoDerechos: 'dominio-público' as const,
+        ...(atribuida ? { clase } : { estadoDerechos: 'dominio-público' as const }),
+        ...(entrada.personaje !== undefined ? { personaje: entrada.personaje } : {}),
         // Se pasa tal cual y la valida la misma puerta que el resto: un `fuente:` a medias
         // manda la Cita a revisión con la regla incumplida escrita, no al corpus.
         ...(entrada.fuente !== undefined ? { fuente: entrada.fuente } : {}),
@@ -361,7 +415,7 @@ export async function darDeAltaLote(
         ? ''
         : await escribirCita(rutas.citas, nombreFichero, aRegistroDeCita(validada.data));
       slugsOcupados.add(candidata.slug);
-      aPublicar.push({ indice, texto, slug: candidata.slug, temas: validada.data.temas });
+      aPublicar.push({ indice, texto, slug: candidata.slug, temas: validada.data.temas, clase });
       if (!opciones.seco) {
         // Solo lo que de verdad se publica cuenta para la grafía por omisión.
         publicadasParaObra.push({ autor: slugAutor, procedencia: validada.data.procedencia });
@@ -405,7 +459,10 @@ function aRegistroDeCita(datos: CitaAdmisible): Record<string, unknown> {
     ...(datos.temas.length > 0 ? { temas: datos.temas } : {}),
     slug: datos.slug,
     procedencia: datos.procedencia,
-    estadoDerechos: datos.estadoDerechos,
+    // Historia 35.1 — la de siempre lleva estadoDerechos; la atribuida, su clase (y su Personaje).
+    ...(datos.estadoDerechos !== undefined ? { estadoDerechos: datos.estadoDerechos } : {}),
+    ...(esAtribuida(datos) ? { clase: claseDe(datos) } : {}),
+    ...(datos.personaje !== undefined ? { personaje: datos.personaje } : {}),
     ...(datos.fuente !== undefined ? { fuente: datos.fuente } : {}),
     ...(datos.aptaParaPortada ? { aptaParaPortada: true } : {}),
   };
@@ -417,6 +474,14 @@ function aRegistroDeCita(datos: CitaAdmisible): Record<string, unknown> {
  */
 export function sinTemaPublicado(informe: InformeDeAlta): boolean {
   return informe.rechazadasPorTema.length > 0 || (informe.publicadasSinTema ?? []).length > 0;
+}
+
+/**
+ * Si la orden sale con 1: una Cita sin Tema publicado, o lo publicado sin anotar en el registro
+ * de clases (Historia 35.1).
+ */
+export function altaConFallo(informe: InformeDeAlta): boolean {
+  return sinTemaPublicado(informe) || informe.registroSinAnotar !== undefined;
 }
 
 /** Informe legible en terminal. Sin colores: se lee igual en un registro de CI. */
@@ -449,6 +514,14 @@ export function formatearInforme(informe: InformeDeAlta): string {
       `${suelta.slug}: publicada, pero se quedó sin ningún Tema publicado. Dele un Tema con ` +
         'página o retírela antes de construir.',
       ...suelta.motivos.map((m) => `  ${m}`),
+    );
+  }
+
+  if (informe.registroSinAnotar !== undefined) {
+    lineas.push(
+      '',
+      `Las publicadas no se anotaron en corpus/clases-de-cita.yml: ${informe.registroSinAnotar}`,
+      `  Anótelas con «${ORDEN_SEMBRAR_CLASES}» antes de construir.`,
     );
   }
 
@@ -541,9 +614,17 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     process.exit(2);
   }
 
-  const informe = await darDeAltaLote(lote, rutasDelCorpus(raizCorpus), { seco, conDuplicados });
+  let informe: InformeDeAlta;
+  try {
+    informe = await darDeAltaLote(lote, rutasDelCorpus(raizCorpus), { seco, conDuplicados });
+  } catch (fallo) {
+    // Historia 35.1 — un registro de clases ilegible niega el alta antes de escribir nada.
+    process.stderr.write(`${fallo instanceof Error ? fallo.message : String(fallo)}\nNo se ha escrito nada.\n`);
+    process.exit(1);
+  }
   process.stdout.write(`${formatearInforme(informe)}\n`);
   if (seco) process.stdout.write('\n(Ejecución en seco: no se ha escrito nada.)\n');
-  // Historia 26.8 — una entrada sin Tema publicado no se escribe, y la orden lo dice con 1.
-  if (sinTemaPublicado(informe)) process.exit(1);
+  // Historia 26.8 — una entrada sin Tema publicado no se escribe, y la orden lo dice con 1; y lo
+  // publicado sin anotar en el registro de clases (35.1), también.
+  if (altaConFallo(informe)) process.exit(1);
 }

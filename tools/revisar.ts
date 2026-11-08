@@ -29,6 +29,7 @@
 
 import { rutasDelCorpus } from './lib/corpus.ts';
 import { aprobar, formatearLote, loteEnRevision, rechazar } from './lib/revision.ts';
+import { ORDEN_SEMBRAR_CLASES } from './lib/clases.ts';
 import { raizDeCorpusDe } from './lib/cli.ts';
 import { MIN_CITAS_POR_TEMA } from '../src/lib/umbrales.ts';
 
@@ -103,7 +104,14 @@ const lineas: string[] = [];
 let fallo = false;
 
 if (aAprobar.length > 0) {
-  const resultado = await aprobar(rutas, aAprobar, temas);
+  let resultado: Awaited<ReturnType<typeof aprobar>>;
+  try {
+    resultado = await aprobar(rutas, aAprobar, temas);
+  } catch (error) {
+    // Historia 35.1 — un registro de clases ilegible niega la aprobación antes de mover nada.
+    process.stderr.write(`${error instanceof Error ? error.message : String(error)}\nNo se ha publicado ninguna candidata.\n`);
+    process.exit(1);
+  }
 
   if (resultado.temasDesconocidos !== undefined) {
     // Nada se ha publicado: el lote entero se detiene ante un Tema que no existe.
@@ -172,6 +180,14 @@ if (aAprobar.length > 0) {
   for (const slug of resultado.noEncontradas) {
     fallo = true;
     lineas.push(`  ? ${slug} — no está entre las candidatas pendientes.`);
+  }
+  if (resultado.registroSinAnotar !== undefined) {
+    // Historia 35.1: publicadas, pero sin anotar en el registro de clases; el build no las deja pasar.
+    fallo = true;
+    lineas.push(
+      `  ! Las publicadas no se anotaron en corpus/clases-de-cita.yml: ${resultado.registroSinAnotar}`,
+      `      Anótelas con «${ORDEN_SEMBRAR_CLASES}» antes de construir.`,
+    );
   }
 }
 

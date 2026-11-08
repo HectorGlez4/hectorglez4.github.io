@@ -20,6 +20,7 @@ import {
   type ObraAdmisible,
 } from '../../src/lib/admision.ts';
 import type { FichaDeObra } from '../../src/lib/obras.ts';
+import { CLASES, esClase, type Clase } from '../../src/lib/clase.ts';
 import type {
   ClaseDeObjetivo,
   ObjetivoDeTema,
@@ -162,6 +163,16 @@ export const FICHERO_DE_CANDIDATOS = 'candidatos-por-epoca.yml';
  * que un candidato dejó de proponerse, y la sesión siguiente volvería a proponerlo.
  */
 export const FICHERO_DE_DESCARTES = 'descartes-de-candidatos.yml';
+
+/**
+ * El registro de clases de Cita — Historia 35.1. Su nombre tiene un solo dueño.
+ *
+ * **Solo añade**: anota la clase con que se publicó cada Cita, y cambiar de clase no es
+ * reescribir una entrada sino retirar la Cita y dar de alta otra con otro slug (`slugLibre`).
+ * Lo escriben el alta, la aprobación y la siembra (`npx tsx tools/clases.ts sembrar`); el build
+ * lo lee solo para romper (`integraciones/clases.ts`) y ningún byte de `dist/` sale de él.
+ */
+export const FICHERO_DE_CLASES = 'clases-de-cita.yml';
 
 export interface Rutas {
   raiz: string;
@@ -331,6 +342,8 @@ export interface Rutas {
    * decisión editorial sobre lo que **no** entra, y nada de eso se publica.
    */
   descartesDeCandidatos: string;
+  /** El registro de clases de Cita — Historia 35.1. Solo añade. */
+  clasesDeCita: string;
   /**
    * Las fijaciones de jornada de la Cita del Día — FR-9, Historia 13.1.
    *
@@ -372,6 +385,7 @@ export function rutasDelCorpus(raizCorpus: string): Rutas {
     senalesExternas: join(raizCorpus, FICHERO_DE_SENALES),
     candidatosPorEpoca: join(raizCorpus, FICHERO_DE_CANDIDATOS),
     descartesDeCandidatos: join(raizCorpus, FICHERO_DE_DESCARTES),
+    clasesDeCita: join(raizCorpus, FICHERO_DE_CLASES),
     portada: join(raizCorpus, FICHERO_DE_PORTADA),
   };
 }
@@ -3558,5 +3572,142 @@ export async function registrarDescarteDeCandidato(
   }
 
   await appendFile(ruta, añadido, 'utf8');
+  return ruta;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// El registro de clases de Cita — Historia 35.1
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * La cabecera del registro de clases. Va aquí por lo mismo que la de peticiones: un Corpus de
+ * pruebas, o un clon al que le falte el fichero, tiene que poder anotar su primera Cita sin que
+ * nadie escriba la cabecera a mano.
+ */
+export const CABECERA_DE_CLASES = [
+  '# Clases de Cita — Historia 35.1, Épica 35, FR-13, FR-65',
+  '#',
+  '# QUÉ REGISTRA. La clase con que se publicó cada Cita: «siempre» —dominio público, cotejada—',
+  '# o «atribuida». Una línea por Cita: slug, clase y la jornada en que se anotó.',
+  '#',
+  '# SOLO AÑADE. Ninguna entrada se reescribe ni se borra: una Cita no cambia de clase. Para',
+  '# cambiarla se retira y se da de alta otra con otro slug, y las dos quedan aquí. `npm test`',
+  '# comprueba que el fichero del commit empieza, byte a byte, por el del commit padre.',
+  '#',
+  '# NO SE EDITA A MANO. Lo escriben el alta (tools/alta.ts) y la aprobación',
+  '# (tools/revisar.ts --aprobar), con la clase que derivan y nunca tecleada, y la siembra:',
+  '#',
+  '#   npx tsx tools/clases.ts sembrar     # anota como «siempre» las Citas publicadas que falten',
+  '#',
+  '# El build (integraciones/clases.ts) rompe si una Cita publicada no está aquí o está con otra',
+  '# clase. No es una colección: ninguna base de src/content.config.ts apunta aquí, ningún byte',
+  '# de dist/ sale de él y no fecha ni avisa ninguna superficie.',
+  '',
+  'clases:',
+  '',
+].join('\n');
+
+const CLAVE_DE_CLASES = 'clases';
+
+/** Una entrada del registro de clases, tal y como se relee. */
+export interface ClaseRegistrada {
+  slug: string;
+  clase: Clase;
+  fecha: string;
+}
+
+/**
+ * Las entradas de un registro de clases ya leído, comprobando que el fichero sea lo que dice ser:
+ * un fichero sin la clave `clases:` dejaría que lo añadido quedara en una lista huérfana.
+ */
+function analizarClases(nombre: string, contenido: string): ClaseRegistrada[] {
+  let leido: unknown;
+  try {
+    leido = parsearYaml(contenido);
+  } catch (fallo) {
+    throw new Error(
+      `${nombre} no es YAML válido: ${fallo instanceof Error ? fallo.message : String(fallo)}. ` +
+        'De este registro sale la clase de cada Cita publicada, así que no se lee a medias.',
+    );
+  }
+  if (leido === null || typeof leido !== 'object' || Array.isArray(leido) || !(CLAVE_DE_CLASES in leido)) {
+    throw new Error(
+      `${nombre}: falta la clave «${CLAVE_DE_CLASES}:» en la raíz del fichero. Las entradas cuelgan ` +
+        'de ella; sin la clave, lo que se añada no lo cuenta nadie. Restaure la cabecera del registro.',
+    );
+  }
+  const entradas = (leido as Record<string, unknown>)[CLAVE_DE_CLASES];
+  if (entradas === null || entradas === undefined) return [];
+  if (!Array.isArray(entradas)) {
+    throw new Error(`${nombre}: «${CLAVE_DE_CLASES}» tiene que ser una lista de entradas, y es ${typeof entradas}.`);
+  }
+  for (const [i, entrada] of entradas.entries()) {
+    const e = entrada as Record<string, unknown> | null;
+    const problema =
+      e === null || typeof e !== 'object' || Array.isArray(e)
+        ? 'no es una entrada'
+        : typeof e.slug !== 'string' || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/u.test(e.slug)
+          ? 'no declara un slug con forma de slug'
+          : !esClase(e.clase)
+            ? `declara la clase ${JSON.stringify(e.clase)}, y las clases son ${CLASES.join(' y ')}`
+            : typeof e.fecha !== 'string' || !esJornada(e.fecha)
+              ? 'no declara una fecha AAAA-MM-DD que exista'
+              : undefined;
+    if (problema !== undefined) {
+      throw new Error(
+        `${nombre}: la entrada ${i + 1} de «${CLAVE_DE_CLASES}» ${problema} (${JSON.stringify(entrada)}).`,
+      );
+    }
+  }
+  return entradas as ClaseRegistrada[];
+}
+
+/** Las entradas del registro de clases. Un registro que no existe se lee como registro vacío. */
+export async function leerRegistroDeClases(rutas: Rutas): Promise<ClaseRegistrada[]> {
+  if (!existsSync(rutas.clasesDeCita)) return [];
+  return analizarClases(`corpus/${FICHERO_DE_CLASES}`, await readFile(rutas.clasesDeCita, 'utf8'));
+}
+
+/** Una entrada como se escribe: una línea, con el slug y la fecha entre comillas. */
+function lineaDeClase(entrada: ClaseRegistrada): string {
+  return `  - { slug: ${JSON.stringify(entrada.slug)}, clase: ${entrada.clase}, fecha: ${JSON.stringify(entrada.fecha)} }\n`;
+}
+
+/**
+ * Añade entradas al registro de clases. **Solo añade**, con un único `appendFile`, y como
+ * `registrarPeticionesDeRastreo`: se crea con `wx` si no existe, se lee, se compone en memoria
+ * el fichero que quedaría, se analiza, y solo si la lista crece exactamente en lo añadido se
+ * escriben esos bytes al final. Un lote vacío no escribe nada.
+ */
+export async function registrarClases(rutas: Rutas, entradas: readonly ClaseRegistrada[]): Promise<string> {
+  const ruta = rutas.clasesDeCita;
+  const nombre = `corpus/${FICHERO_DE_CLASES}`;
+  if (entradas.length === 0) return ruta;
+
+  const añadido = entradas.map(lineaDeClase).join('');
+  // Se juzga antes de tocar el disco: una entrada sin forma no crea ni el fichero.
+  analizarClases(nombre, `${CABECERA_DE_CLASES}${añadido}`);
+
+  if (!existsSync(ruta)) {
+    await mkdir(rutas.raiz, { recursive: true });
+    try {
+      await writeFile(ruta, CABECERA_DE_CLASES, { encoding: 'utf8', flag: 'wx' });
+    } catch (fallo) {
+      if ((fallo as NodeJS.ErrnoException).code !== 'EEXIST') throw fallo;
+    }
+  }
+
+  const anterior = await readFile(ruta, 'utf8');
+  const cuantasHabia = analizarClases(nombre, anterior).length;
+  const salto = anterior === '' || anterior.endsWith('\n') ? '' : '\n';
+  const quedaria = analizarClases(nombre, `${anterior}${salto}${añadido}`);
+  if (quedaria.length !== cuantasHabia + entradas.length) {
+    throw new Error(
+      `${nombre}: añadir al final no deja las entradas colgando de «${CLAVE_DE_CLASES}:» (había ` +
+        `${cuantasHabia}, se añaden ${entradas.length} y quedarían ${quedaria.length}). El registro ` +
+        'se escribe solo por añadido, así que la lista tiene que ser lo último del fichero. No se ha escrito nada.',
+    );
+  }
+  await appendFile(ruta, `${salto}${añadido}`, 'utf8');
   return ruta;
 }

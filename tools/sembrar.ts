@@ -15,7 +15,7 @@
 
 import { readFile } from 'node:fs/promises';
 import { parse as parsearYaml } from 'yaml';
-import { darDeAltaLote, formatearInforme, sinTemaPublicado, type EntradaDeLote } from './alta.ts';
+import { altaConFallo, darDeAltaLote, formatearInforme, sinTemaPublicado, type EntradaDeLote } from './alta.ts';
 import { crearAutor, crearTema } from './lib/gestion.ts';
 import { rutasDelCorpus } from './lib/corpus.ts';
 import { raizDeCorpusDe } from './lib/cli.ts';
@@ -90,3 +90,6 @@ if (sinTemaPublicado(informe)) {
   );
   process.exit(1);
 }
+
+// Historia 35.1 — lo publicado sin anotar en el registro de clases también sale con 1 (el parte lo dice).
+if (altaConFallo(informe)) process.exit(1);

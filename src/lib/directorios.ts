@@ -28,9 +28,8 @@ export interface FilaDelDirectorioDeAutores {
   nombre: string;
   ruta: string;
   /**
-   * «1547–1616», «Fallecido en 65»; ausente si no consta el año de **fallecimiento**
-   * (`hechosDeFilaDeAutor`): un nacimiento solo no se pinta. El esquema exige el fallecimiento,
-   * así que con el Corpus siempre consta.
+   * «1547–1616», «Fallecido en 65», «n. 1950» de un Autor vivo; ausente si `añosDeAutor` no da
+   * ninguno (`hechosDeFilaDeAutor`): un Autor vivo sin año de nacimiento (Historia 35.1).
    */
   años?: string;
   /** «12 citas», «1 cita». */

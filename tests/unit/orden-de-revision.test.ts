@@ -256,6 +256,7 @@ describe("Historia 19.6 — el corte declara lo que deja fuera", () => {
     slug: `seneca-${n}`,
     texto: `Sentencia número ${n}.`,
     autor: "seneca",
+    clase: "siempre",
     ruta: `/tmp/seneca-${n}.md`,
     admisible: true,
     motivos: [],

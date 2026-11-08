@@ -260,13 +260,14 @@ export function svgDeTarjetaDeListado(datos: DatosDeTarjetaDeListado): string {
  * ficha y la descripción, para que digan lo mismo.
  */
 export function datosDeTarjetaDeAutor(
-  autor: Pick<Autor, 'slug' | 'nombre' | 'añoNacimiento' | 'añoFallecimiento'>,
+  autor: Pick<Autor, 'slug' | 'nombre' | 'añoNacimiento' | 'añoFallecimiento' | 'vivo'>,
   citas: readonly Cita[],
 ): DatosDeTarjetaDeListado {
   const recuento = recuentoDeDocumentadas(citasDocumentadasDeAutor(citas, autor.slug));
+  // Un Autor vivo sin año de nacimiento no tiene años que decir (Historia 35.1): ni línea ni hueco.
   return {
     titulo: autor.nombre,
-    hechos: recuento === undefined ? [añosDeAutor(autor)] : [añosDeAutor(autor), recuento],
+    hechos: [añosDeAutor(autor), recuento].filter((hecho): hecho is string => hecho !== undefined),
   };
 }
 

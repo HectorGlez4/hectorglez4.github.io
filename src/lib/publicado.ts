@@ -99,7 +99,12 @@ export interface Autor {
   nombre: string;
   semblanza: string;
   añoNacimiento?: number;
-  añoFallecimiento: number;
+  /**
+   * Historia 35.1 — el Autor lleva su año de fallecimiento **o** `vivo: true`, uno de los dos y
+   * nunca los dos (lo garantiza el esquema). Los años los escribe `añosDeAutor`.
+   */
+  añoFallecimiento?: number;
+  vivo?: true;
   /**
    * La atribución de la semblanza — Historia 17.2. Presente **solo** si el Autor declara
    * `biografia`: entonces la semblanza es texto ajeno (CC BY-SA), sale literal de esa
@@ -1348,13 +1353,14 @@ export function aplanarCita(entrada: EntradaCita): Cita {
  * `resolverAtribuciones`.
  */
 export function aplanarAutor(entrada: EntradaAutor): Autor {
-  const { nombre, semblanza, añoNacimiento, añoFallecimiento, ordenAlfabetico, tradicion } = entrada.data;
+  const { nombre, semblanza, añoNacimiento, añoFallecimiento, vivo, ordenAlfabetico, tradicion } = entrada.data;
   return {
     slug: entrada.id,
     nombre,
     semblanza,
     ...(añoNacimiento !== undefined ? { añoNacimiento } : {}),
-    añoFallecimiento,
+    ...(añoFallecimiento !== undefined ? { añoFallecimiento } : {}),
+    ...(vivo === true ? { vivo } : {}),
     // Historia 26.3 — la clave viaja para el Directorio; `ordenRevisado` no, que no lo pinta nadie.
     ...(ordenAlfabetico !== undefined ? { ordenAlfabetico } : {}),
     // Historia 27.6 — la tradición viaja para el suelo de los destacados; sin declarar, se omite.

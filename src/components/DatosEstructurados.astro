@@ -40,7 +40,8 @@ const datos: Record<string, unknown> = {
     name: autor.nombre,
     url: new URL(rutaDeAutor(autor.slug), canonica).href,
     ...(autor.añoNacimiento !== undefined ? { birthDate: String(autor.añoNacimiento) } : {}),
-    deathDate: String(autor.añoFallecimiento),
+    // Historia 35.1 — un Autor vivo no tiene fecha de muerte que declarar.
+    ...(autor.añoFallecimiento !== undefined ? { deathDate: String(autor.añoFallecimiento) } : {}),
   },
 };
 

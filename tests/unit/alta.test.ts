@@ -416,3 +416,66 @@ describe('Historia 26.8 — el alta no publica una Cita sin Tema publicado', () 
     expect(await readdir(rutas.revision)).toEqual([]);
   });
 });
+
+describe('Historia 35.1 — el alta deriva la clase y la anota', () => {
+  const VIVA = 'nombre: "Ana Ejemplo"\nvivo: true\nañoNacimiento: 1950\nsemblanza: "Escritora."\nordenAlfabetico: "Ejemplo"\n';
+
+  it('la de siempre se publica y se anota «siempre» en un solo añadido', async () => {
+    const rutas = await corpusDePrueba();
+    const informe = await darDeAltaLote([COMPLETA, { ...COMPLETA, texto: 'Otra sentencia distinta del Autor.' }], rutas);
+    expect(informe.publicadas).toHaveLength(2);
+    const registro = await readFile(rutas.clasesDeCita, 'utf8');
+    for (const { slug } of informe.publicadas) {
+      expect(registro).toContain(`  - { slug: "${slug}", clase: siempre, fecha: "`);
+    }
+    expect(informe.registroSinAnotar).toBeUndefined();
+  });
+
+  it('la que deriva atribuida —Personaje o Autor vivo— va a revisión con su clase, sin estadoDerechos ni entrada', async () => {
+    const rutas = await corpusDePrueba();
+    await writeFile(join(rutas.autores, 'ana-ejemplo.yml'), VIVA, 'utf8');
+    const informe = await darDeAltaLote(
+      [
+        { ...COMPLETA, autor: 'ana-ejemplo', texto: 'Una frase de una autora viva.' },
+        { ...COMPLETA, personaje: 'sancho-panza', texto: 'Una frase de un personaje.' },
+      ],
+      rutas,
+    );
+    expect(informe.publicadas).toEqual([]);
+    expect(informe.enRevision).toHaveLength(2);
+    for (const rechazada of informe.enRevision) {
+      expect(rechazada.motivos).toContain('la puerta de la atribuida está cerrada (Historia 35.1b)');
+      const fichero = await readFile(rechazada.ruta!, 'utf8');
+      expect(fichero).toMatch(/^clase: "?atribuida"?$/mu);
+      expect(fichero).not.toContain('estadoDerechos');
+    }
+    const conPersonaje = await Promise.all((await readdir(rutas.revision)).map((f) => readFile(join(rutas.revision, f), 'utf8')));
+    expect(conPersonaje.some((f) => /^personaje: "?sancho-panza"?$/mu.test(f))).toBe(true);
+    expect(await ficherosPublicados(rutas)).toEqual([]);
+    await expect(readFile(rutas.clasesDeCita, 'utf8')).rejects.toThrow();
+  });
+
+  it('una clase tecleada en el lote no se obedece: la entrada va a revisión con el motivo', async () => {
+    const rutas = await corpusDePrueba();
+    const informe = await darDeAltaLote([{ ...COMPLETA, clase: 'siempre' } as EntradaDeLote], rutas);
+    expect(informe.publicadas).toEqual([]);
+    expect(informe.enRevision[0].motivos.join('\n')).toMatch(/la clase no se teclea/u);
+  });
+
+  it('un slug registrado con la otra clase cuenta como ocupado', async () => {
+    const rutas = await corpusDePrueba();
+    const seco = await darDeAltaLote([COMPLETA], rutas, { seco: true });
+    const slug = seco.publicadas[0].slug;
+    await writeFile(rutas.clasesDeCita, `clases:\n  - { slug: "${slug}", clase: atribuida, fecha: "2026-11-01" }\n`, 'utf8');
+    const informe = await darDeAltaLote([COMPLETA], rutas);
+    expect(informe.publicadas[0].slug).toBe(`${slug}-2`);
+  });
+
+  it('con el registro ilegible no escribe nada', async () => {
+    const rutas = await corpusDePrueba();
+    await writeFile(rutas.clasesDeCita, 'clases: [roto\n', 'utf8');
+    await expect(darDeAltaLote([COMPLETA], rutas)).rejects.toThrow(/clases-de-cita\.yml/u);
+    expect(await ficherosPublicados(rutas)).toEqual([]);
+    expect(await readdir(rutas.revision)).toEqual([]);
+  });
+});

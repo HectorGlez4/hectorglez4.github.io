@@ -320,7 +320,15 @@ function clavesDeLaColeccion(coleccion: string): string[] | undefined {
       if (argumento === undefined || !ts.isObjectLiteralExpression(argumento)) return;
       for (const propiedad of argumento.properties) {
         if (!ts.isPropertyAssignment(propiedad) || propiedad.name.getText(fuente) !== 'schema') continue;
-        const valor = propiedad.initializer;
+        let valor = propiedad.initializer;
+        // Historia 35.1 — `z.object({…}).superRefine(…)`: las claves son las del objeto de dentro.
+        while (
+          ts.isCallExpression(valor) &&
+          ts.isPropertyAccessExpression(valor.expression) &&
+          valor.expression.name.text === 'superRefine'
+        ) {
+          valor = valor.expression.expression;
+        }
         if (!ts.isCallExpression(valor) || valor.expression.getText(fuente) !== 'z.object') continue;
         const [objeto] = valor.arguments;
         if (objeto === undefined || !ts.isObjectLiteralExpression(objeto)) continue;

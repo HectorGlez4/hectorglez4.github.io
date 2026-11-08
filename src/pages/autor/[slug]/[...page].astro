@@ -115,7 +115,7 @@ const pieDeObras =
   <div class="pagina contenedor">
     <header class="ficha">
       <h1>{autor.nombre}</h1>
-      {primera && años !== '' && <p class="años">{años}</p>}
+      {primera && años !== undefined && <p class="años">{años}</p>}
       {
         semblanza !== undefined &&
           (enElIndice ? (

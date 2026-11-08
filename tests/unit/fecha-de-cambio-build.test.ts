@@ -270,6 +270,13 @@ describe('Historia 18.4 — el sitemap declara cuándo cambió cada superficie',
       citaValida({ slug: SLUG_NUEVO, texto: textoNuevo }),
       'utf8',
     );
+    // Historia 35.1 — la Cita nueva se anota en el registro de clases, como haría su alta; el
+    // registro no es familia de nada, así que no fecha ni avisa (lo comprueba el aviso de abajo).
+    await appendFile(
+      join(proyecto, 'corpus', 'clases-de-cita.yml'),
+      `  - { slug: "${SLUG_NUEVO}", clase: siempre, fecha: "${QUINTO_COMMIT}" }\n`,
+      'utf8',
+    );
     await git(['add', 'corpus']);
     await git(['commit', '-m', 'una Cita nueva'], `${QUINTO_COMMIT}T09:00:00+0000`);
     const hasta = (await git(['rev-parse', 'HEAD'])).stdout.trim();

@@ -7,6 +7,7 @@ import { fechaDeLaEntrada } from './tools/lib/cambios.ts';
 import historialDelCorpus, { fechasDelSitemap } from './integraciones/historial.ts';
 import cotejoDeCitas from './integraciones/cotejo.ts';
 import clavesDeOrden from './integraciones/claves.ts';
+import clasesDeCita from './integraciones/clases.ts';
 import formaDeLasColecciones from './integraciones/colecciones.ts';
 import fichasDeObra from './integraciones/obras.ts';
 import coberturaTipografica from './integraciones/cobertura.ts';
@@ -134,6 +135,15 @@ export default defineConfig({
      * fichero y la orden que la propone.
      */
     clavesDeOrden(),
+
+    /*
+     * Historia 35.1 — toda Cita publicada está en `corpus/clases-de-cita.yml` con su clase, y la
+     * clase casa con los derechos de su dueño (`src/lib/clase.ts`).
+     *
+     * Es una relación entre ficheros —la Cita, su Autor y el registro—, que ningún esquema ve.
+     * Rompe nombrando la Cita, la ficha y la orden que la anota.
+     */
+    clasesDeCita(),
 
     /*
      * Historia 22.1 — toda Obra publicada tiene Ficha de Obra (AD-25).
