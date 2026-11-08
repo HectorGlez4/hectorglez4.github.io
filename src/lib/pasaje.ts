@@ -25,13 +25,14 @@ export type PartesDelPasaje = SegmentoDelPasaje[][][];
  * tramos de los párrafos —las líneas en blanco entre bloques— no se pinta.
  */
 export function partesDelPasaje(pasaje: Pick<PasajeDeAparicion, 'texto' | 'inicio' | 'fin' | 'parrafos'>): PartesDelPasaje {
-  const { texto, inicio, fin, parrafos } = pasaje;
+  // El texto del pasaje, no el de la Cita: se reparte por tramos, nunca se recorta (34.1).
+  const { texto: delPasaje, inicio, fin, parrafos } = pasaje;
   return parrafos.map((lineas) =>
     lineas.map(([desde, hasta]) => {
       const segmentos: SegmentoDelPasaje[] = [];
       const cortes = [desde, Math.min(Math.max(inicio, desde), hasta), Math.min(Math.max(fin, desde), hasta), hasta];
       for (let i = 0; i < 3; i += 1) {
-        if (cortes[i + 1] > cortes[i]) segmentos.push({ texto: texto.slice(cortes[i], cortes[i + 1]), deLaCita: i === 1 });
+        if (cortes[i + 1] > cortes[i]) segmentos.push({ texto: delPasaje.slice(cortes[i], cortes[i + 1]), deLaCita: i === 1 });
       }
       return segmentos;
     }),

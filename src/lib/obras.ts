@@ -1161,7 +1161,7 @@ export interface AparicionDeCita {
  *
  * `texto` es el párrafo —o la estrofa, o los bloques contiguos que la Cita cruza— tal como lo
  * trae el documento crudo, sin recortar dentro, sin corregir ni completar; `inicio` y `fin`
- * son desplazamientos UTF-16 sobre `texto`, y `texto.slice(inicio, fin)` colapsa al texto de
+ * son desplazamientos UTF-16 sobre `texto`, y su tramo `[inicio, fin)` colapsa al texto de
  * la Cita. Se declara aquí y no en `tools/`, porque `src/` no importa de `tools/lib/`.
  */
 export interface PasajeDeAparicion {
