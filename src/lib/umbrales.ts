@@ -184,6 +184,21 @@ export const DESPLIEGUE_DE_LA_LECTURA: string | undefined = '2026-10-25';
  */
 export const DESPLIEGUE_DE_LA_BUSQUEDA_CON_FILTROS: string | undefined = '2026-10-30';
 
+/**
+ * La llegada en vivo de «Citar y llevarse la Cita» — la Épica 30, AD-9, AD-13, Historia 30.1.
+ *
+ * Es la jornada UTC en que termina el trabajo «Desplegar» de Actions que lleva la Épica 30 al
+ * sitio en vivo —nunca la del merge—, con la misma forma que las de arriba: `undefined` mientras
+ * no haya llegado. **Le da valor Héctor, en un commit aparte (como la 23.11), y ningún agente la
+ * elige.**
+ *
+ * Con ella llega el orden nuevo de la Página de Cita —las acciones antes de la Tarjeta de Obra, y
+ * «Cómo citar» e «Inserta esta cita» detrás—, que cambia lo que miden la continuación de la Página
+ * de Cita (SM-4, y su complemento SM-3) y SM-C5: su entrada en `CORTES_DE_SERIE_DECLARADOS` parte
+ * solo la serie `continuacion-de-cita`, y el juicio de SM-C5 no compara ventanas a través de ella.
+ */
+export const DESPLIEGUE_DE_CITAR_Y_LLEVARSE: string | undefined = undefined;
+
 /*
  * Los cortes de serie de la medición — AD-9, AD-13, Historia 23.10.
  *
@@ -201,8 +216,13 @@ export const DESPLIEGUE_DE_LA_BUSQUEDA_CON_FILTROS: string | undefined = '2026-1
  * distinto motivo, son un solo «cambió».
  */
 
-/** Las series de la medición que un corte puede partir. */
-export type SerieDeMedicion = 'sm8' | 'lectura' | 'busqueda';
+/**
+ * Las series de la medición que un corte puede partir. `continuacion-de-cita` (Historia 30.1) es
+ * la continuación de la Página de Cita (SM-4 y SM-3) y SM-C5, y nada más: partir `lectura`
+ * partiría las tasas de lectura de todas las superficies. Se lee en la intersección de su tramo y
+ * del de `lectura`.
+ */
+export type SerieDeMedicion = 'sm8' | 'lectura' | 'busqueda' | 'continuacion-de-cita';
 
 /** Un corte de serie tal como se declara: su jornada es la de una constante de despliegue. */
 export interface CorteDeSerie {
@@ -223,7 +243,8 @@ export interface CorteLlegado extends CorteDeSerie {
  * La lista declarada, en el orden en que se escribió: cada jornada es una constante de arriba.
  * La de la Épica 23 parte SM-8 —la marca se cuenta una vez por llegada y la vista sale del fichero
  * diferido—, la serie de la lectura y la de la búsqueda, que empiezan con ella; la de la 24 con la
- * 26 parte SM-8, porque los Directorios emiten vista.
+ * 26 parte SM-8, porque los Directorios emiten vista; la de la 30 parte solo la continuación de la
+ * Página de Cita y SM-C5 (Historia 30.1).
  */
 export const CORTES_DE_SERIE_DECLARADOS: readonly CorteDeSerie[] = [
   {
@@ -235,6 +256,11 @@ export const CORTES_DE_SERIE_DECLARADOS: readonly CorteDeSerie[] = [
     jornada: DESPLIEGUE_DE_OBRA_Y_DIRECTORIOS,
     que: 'la llegada de la Tarjeta de Obra con los Directorios (Épicas 24 y 26)',
     series: ['sm8'],
+  },
+  {
+    jornada: DESPLIEGUE_DE_CITAR_Y_LLEVARSE,
+    que: 'el orden nuevo de la Página de Cita: las acciones antes de la Tarjeta de Obra, con “Cómo citar” e “Inserta esta cita” detrás',
+    series: ['continuacion-de-cita'],
   },
 ];
 
@@ -459,8 +485,19 @@ export const META_AUTORES_DE_OTRA_TRADICION: number | undefined = undefined;
  * `src/components/Busqueda.astro`, que se descarga aparte y se mide con su propio tope,
  * `MAX_BYTES_GUION_DE_LA_BUSQUEDA`. La superficie más justa vuelve a ser la Página de Cita con
  * Imagen.
+ *
+ * Subido de 6656 a 7680 en la Historia 30.3, con la medida: la isla de Copiar atiende también
+ * «Cómo citar» —escribe la fecha de consulta del visitante con `fechaDeConsulta`, que viaja por
+ * su texto, enseña los tres botones y copia cada Referencia—, y su guion pasa de 1.138 a 2.738
+ * bytes. La Página de Cita con Imagen y la medición puesta pasa de **5.651 a 7.251 bytes**
+ * (+1.600; medido en `tests/unit/medicion.test.ts`, «la Página de Cita no pierde su listón»).
+ * Antes de subirlo se compactó lo nuevo —nombres cortos, sin sangría ni plantillas anidadas— desde
+ * 7.590, y el tope nuevo dejaba 429 de margen, el criterio de la v2. La revisión 1 de la 30.3 le
+ * sumó 83 bytes (la fecha en cada pulsación, la etiqueta por `querySelector` y el dueño de la
+ * región): la página queda en unos **7.334 bytes**, con unos **346** de margen. La 30.4, que añade
+ * «Copiar el fragmento» a la misma isla, lo vuelve a medir.
  */
-export const MAX_BYTES_DE_GUION = 6656;
+export const MAX_BYTES_DE_GUION = 7680;
 
 /*
  * Los topes de la lista cerrada de guiones externos — AD-6, AD-9, Historia 23.1.
@@ -539,6 +576,11 @@ export const MAX_BYTES_DE_GUION = 6656;
  * coteja, el evento en la lista de vistas que salen de `data-vistas`, y la lectura de la marca del
  * atributo del `<html>` una vez al activarse, que solo viaja con la vista que declara la página. Con
  * ella el fichero emite ya todo el vocabulario.
+ *
+ * Medido de nuevo en la fase B de la Historia 30.5: **3.700 bytes** con el punto final de producción
+ * (3.701 con la barra final; 3.652 con `http://localhost:8787/`), 53 sobre los 3.647 de la 23.9 y
+ * 30 de margen, así que el tope no se mueve. Creció por las dos entradas sin campos de las acciones
+ * de citar, `copiado-de-referencia` y `copiado-de-fragmento`, en la tabla.
  */
 export const MAX_BYTES_GUION_DE_MEDICION = 3730;
 

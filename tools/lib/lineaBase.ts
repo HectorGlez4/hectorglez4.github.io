@@ -50,7 +50,8 @@ import {
   type PasadaEnProduccion,
   type SerieDeMedicion,
 } from '../../src/lib/umbrales.ts';
-import { EVENTOS, MARCAS_DE_OBRA, PRIMERA, TRAMOS, type Zona } from '../../src/lib/vocabulario.ts';
+import { EVENTOS_DEL_GUION } from '../../src/lib/medicion.ts';
+import { EVENTOS, MARCAS_DE_OBRA, PRIMERA, TRAMOS, type Evento, type Zona } from '../../src/lib/vocabulario.ts';
 import {
   CONSULTAS_DE_LA_LECTURA,
   FORMA_DE_JORNADA,
@@ -274,6 +275,16 @@ const enTramo = (tramo: Tramo) => (jornada: string) =>
   (tramo.desde === undefined || jornada >= tramo.desde) && jornada <= tramo.hasta;
 
 /**
+ * Las jornadas que dos tramos comparten (Historia 30.1): el principio más tardío y el final más
+ * temprano, con el número del primero —el de la serie que da nombre a lo que se lee—. Lo que lee dos
+ * series a la vez no reabre lo que la otra partió.
+ */
+const interseccion = (a: Tramo, b: Tramo): Tramo => {
+  const desde = a.desde === undefined ? b.desde : b.desde === undefined ? a.desde : a.desde > b.desde ? a.desde : b.desde;
+  return { numero: a.numero, ...(desde === undefined ? {} : { desde }), hasta: a.hasta < b.hasta ? a.hasta : b.hasta };
+};
+
+/**
  * Parte una serie solo por los cortes que la nombran, sin suponer cuántos hay: cada tramo nuevo
  * empieza la primera jornada UTC completa tras la llegada, la jornada de llegada no entra en
  * ninguno —es un «cambió», con los motivos de todos los cortes de esa jornada— y el último tramo
@@ -385,6 +396,16 @@ export interface JuicioPorVentanas {
    * que no puede tener lecturas.
    */
   haceMedible?: true;
+  /**
+   * El corte de serie que parte lo que juzga (Historia 30.1): la serie que nombra y la constante de
+   * la que sale su jornada. Mientras no haya llegado, el juicio sigue como si no lo tuviera y lo
+   * dice; cuando llega, su línea base es propia —empieza la primera jornada UTC completa tras la
+   * llegada, en la intersección del tramo vigente de la lectura y del de su serie— y ninguna
+   * ventana cruza esa jornada.
+   */
+  corte?: { serie: SerieDeMedicion; deDondeLlega: string };
+  /** Lo que se puede hacer si la señal salta: lo nombra el informe, y lo decide Héctor. */
+  palanca?: string;
 }
 
 /**
@@ -410,6 +431,9 @@ export const juiciosPorVentanas = (superficies: readonly Superficie[] = SUPERFIC
     deDondeLlega: 'DESPLIEGUE_DE_OBRA_Y_DIRECTORIOS',
     tasas: ['continuacion', 'sm5'],
     senal: { sube: 'continuacion', baja: 'sm5' },
+    // Historia 30.1 — el orden nuevo de la Página de Cita parte lo que SM-C5 juzga.
+    corte: { serie: 'continuacion-de-cita', deDondeLlega: 'DESPLIEGUE_DE_CITAR_Y_LLEVARSE' },
+    palanca: 'quitar de la Página de Cita los tres desplegables o bajarlos tras las Rutas de salida; lo decide Héctor',
   },
   {
     nombre: 'la continuación de los Directorios',
@@ -478,7 +502,11 @@ export interface CifrasDeSuperficie {
   vistas?: number;
   lecturas?: number;
   salidas?: number;
-  /** Todas sus acciones, sin mirar `primera` ni destino: todo registro se reparte, también estos. */
+  /**
+   * Todas sus acciones, sin mirar `primera` ni destino: todo registro se reparte, también estos.
+   * Sin las de citar (`ACCIONES_DE_CITAR`, Historia 30.5), que se informan aparte en `citar`: así la
+   * cifra sigue siendo comparable con la de antes de que existieran.
+   */
   acciones?: number;
   continuacion: Tasa;
   porZona: { zona: string; continuacion: Tasa }[];
@@ -508,6 +536,20 @@ export interface TasasDeAccion {
   sinContinuacion: Tasa;
 }
 
+/**
+ * Las de la Página de Cita (Historia 30.1): la continuación, SM-3 y SM-C5 se leen en la
+ * intersección del tramo vigente de la lectura y del de `continuacion-de-cita`; SM-5 y SM-7, en el
+ * de la lectura. Sin corte llegado, las dos lecturas coinciden.
+ */
+export interface TasasDeLaPaginaDeCita extends TasasDeAccion {
+  /** Las lecturas de la intersección: el denominador de la continuación y de SM-C5. */
+  lecturasDeLaContinuacion?: number;
+  /** SM-5 en la intersección, junto a la continuación en la línea de SM-C5. */
+  conAccionEnSmC5: Tasa;
+  /** El tramo de la intersección. */
+  tramoDeLaContinuacion: Tramo;
+}
+
 export type MarcaDeLaJornada = 'indexable' | 'no indexable' | 'nula' | 'cambió' | 'sin marca';
 export const MARCAS_DE_LA_JORNADA: readonly MarcaDeLaJornada[] = ['indexable', 'no indexable', 'cambió', 'nula', 'sin marca'];
 
@@ -517,9 +559,33 @@ export interface CifrasDeObra {
   vistasDeObra?: number;
   lecturas?: number;
   salidas?: number;
+  /** Como en `CifrasDeSuperficie`: sin las de citar. */
   acciones?: number;
   continuacion: Tasa;
 }
+
+/**
+ * Las acciones de citar (Historia 30.5): copiar una Referencia de «Cómo citar» (FR-58) y copiar el
+ * Fragmento de «Inserta esta cita» (FR-57), en el tramo vigente de la lectura. Se informan aparte:
+ * ninguna tasa de SM-5, SM-7, SM-12, SM-C3 ni SM-C5 las cuenta, ni el `acciones` de una superficie,
+ * hasta que su línea base diga cómo se leen (pregunta 15 del PRD). Lo de fuera del censo va en
+ * `fueraDelCenso`, como todo evento.
+ */
+export type CifrasDeCitar =
+  | {
+      porEvento: {
+        evento: Evento;
+        /** Lo de las superficies del censo: la suma de `porSuperficie`. */
+        total: number;
+        /** Por superficie declarada, solo las que tienen alguno. */
+        porSuperficie: { superficie: string; n: number }[];
+      }[];
+      /** La tesis de la v9, sin juzgarla: en la Página de Cita, las copias de la Referencia… */
+      referenciasEnCita: number;
+      /** …frente a los copiados de la Cita (`copiado`, todos los registros, sin mirar `primera`). */
+      copiadosEnCita: number;
+    }
+  | { faltan: ConsultaDeLaLectura[] };
 
 /** SM-8 en un tramo o en una jornada de llegada: vistas por red y evento. */
 export interface TramoDeSm8 {
@@ -602,8 +668,26 @@ export interface VentanaCortada {
   por: string;
 }
 
+/**
+ * El corte de un juicio, leído (Historia 30.1): pendiente —sin jornada, o de hoy o posterior— o
+ * llegado, con la línea base propia que abre tras él.
+ */
+export type CorteDelJuicio =
+  | { estado: 'pendiente'; deDondeLlega: string; jornada?: string }
+  | {
+      estado: 'llegado';
+      deDondeLlega: string;
+      jornada: string;
+      /** La primera jornada de su línea base: la primera completa tras la llegada. */
+      desde: string;
+      /** Lo reunido hacia el mínimo; falta si el juicio no llegó a contar (sin mínimo, sin leer…). */
+      acumulado?: number;
+      cerradaEl?: string;
+    };
+
 export interface JuicioLeido {
   juicio: JuicioPorVentanas;
+  corte?: CorteDelJuicio;
   /** Por qué no hay ventanas, si no las hay. */
   sinVentanas?: string;
   referencia?: 'linea-base' | 'serie-de-antes';
@@ -631,9 +715,11 @@ export interface LecturaDeMedicion {
   /** Las consultas que no se leyeron y faltan en lo de fuera del censo. */
   fueraDelCensoSinLeer: ConsultaDeLaLectura[];
   obra: CifrasDeObra[] | { faltan: ConsultaDeLaLectura[] };
-  cita?: TasasDeAccion;
+  cita?: TasasDeLaPaginaDeCita;
   portada?: TasasDeAccion;
   obraTasas?: TasasDeAccion;
+  /** Historia 30.5 — las acciones de citar, aparte. */
+  citar: CifrasDeCitar;
   sm12: { destinos: DestinoDeSm12[]; imagenCuadrada?: number } | { faltan: ConsultaDeLaLectura[] };
   busquedas: Busquedas;
   minimo?: number;
@@ -652,6 +738,12 @@ const THREADS: Red = 'threads';
 const FACEBOOK: Red = 'facebook';
 const ACCIONES_DE_SM5: readonly string[] = [EVENTOS.copiado, EVENTOS.descargaDeImagen];
 const COMPARTICIONES: readonly string[] = [EVENTOS.comparticionDeEnlace, EVENTOS.comparticionDeImagen];
+/**
+ * Historia 30.5 — las acciones de citar: se leen en la consulta `acciones` y se informan aparte, fuera
+ * del `acciones` de superficie y de Obra y de toda tasa (pregunta 15 del PRD).
+ */
+export const ACCIONES_DE_CITAR: readonly Evento[] = [EVENTOS.copiadoDeReferencia, EVENTOS.copiadoDeFragmento];
+const noEsDeCitar = (r: Recuento) => !(ACCIONES_DE_CITAR as readonly string[]).includes(r.evento);
 
 const sumar = (recuentos: readonly Recuento[] | undefined, filtro: (r: Recuento) => boolean): number | undefined =>
   recuentos === undefined ? undefined : recuentos.reduce((total, r) => (filtro(r) ? total + r.n : total), 0);
@@ -869,8 +961,13 @@ export function componerLecturaDeMedicion(
     sm8: partirSerie('sm8', cortes, hoy),
     lectura: partirSerie('lectura', cortes, hoy),
     busqueda: partirSerie('busqueda', cortes, hoy),
+    'continuacion-de-cita': partirSerie('continuacion-de-cita', cortes, hoy),
   } as const;
   const enLectura = enTramo(series.lectura.vigente);
+  // Historia 30.1 — la continuación de la Página de Cita y SM-C5: la intersección de los dos tramos.
+  // El número del tramo es el de `continuacion-de-cita`: es el que nombra el informe.
+  const tramoDeLaContinuacion = interseccion(series['continuacion-de-cita'].vigente, series.lectura.vigente);
+  const enLaContinuacionDeCita = enTramo(tramoDeLaContinuacion);
   const enBusqueda = enTramo(series.busqueda.vigente);
   const conJornada =
     (enPeriodo: (jornada: string) => boolean, filtro: (r: Recuento) => boolean = () => true) =>
@@ -923,7 +1020,7 @@ export function componerLecturaDeMedicion(
     const filtro = conJornada(enLectura, deSuperficie(superficie.nombre));
     const lecturas = sumar(vistasYLecturas, (r) => esLectura(r) && filtro(r));
     const deSalidas = sumar(salidas, filtro);
-    const deAcciones = sumar(acciones, filtro);
+    const deAcciones = sumar(acciones, (r) => noEsDeCitar(r) && filtro(r));
     return {
       nombre: superficie.nombre,
       unidad: superficieDeLineaBase(superficie),
@@ -998,7 +1095,7 @@ export function componerLecturaDeMedicion(
       const filtro = conJornada(enLectura, (r) => esDeObra(r) && marcaDeLaJornada(r) === marca);
       const lecturas = sumar(vistasYLecturas, (r) => esLectura(r) && filtro(r));
       const deSalidas = sumar(salidas, filtro);
-      const deAcciones = sumar(acciones, filtro);
+      const deAcciones = sumar(acciones, (r) => noEsDeCitar(r) && filtro(r));
       return {
         marca,
         vistasDeObra: sumar(vistasYLecturas, (r) => r.evento === EVENTOS.vistaDeObra && filtro(r)),
@@ -1036,9 +1133,48 @@ export function componerLecturaDeMedicion(
     const s = superficieDe(r);
     return s !== undefined && s.vista === EVENTOS.vistaDeCita;
   };
-  const cita = unidadesConCita.length > 0 ? tasasDeAccion(deLasCitas, enLectura) : undefined;
+  let cita: TasasDeLaPaginaDeCita | undefined;
+  if (unidadesConCita.length > 0) {
+    const enLaLectura = tasasDeAccion(deLasCitas, enLectura);
+    const enLaContinuacion = tasasDeAccion(deLasCitas, enLaContinuacionDeCita);
+    cita = {
+      ...enLaLectura,
+      continuacion: enLaContinuacion.continuacion,
+      sinContinuacion: enLaContinuacion.sinContinuacion,
+      ...(enLaContinuacion.lecturas === undefined ? {} : { lecturasDeLaContinuacion: enLaContinuacion.lecturas }),
+      conAccionEnSmC5: enLaContinuacion.conAccion,
+      tramoDeLaContinuacion,
+    };
+  }
   const portada = portadaDeclarada ? tasasDeAccion(deSuperficie(portadaDeclarada.nombre), enLectura) : undefined;
   const obraTasas = superficies.some((s) => s.vistaConMarca !== undefined) ? tasasDeAccion(esDeObra, enLectura) : undefined;
+
+  // Historia 30.5 — las acciones de citar, aparte, en el tramo vigente de la lectura.
+  let citar: CifrasDeCitar;
+  if (acciones === undefined) {
+    citar = { faltan: ['acciones'] };
+  } else {
+    const porEvento = ACCIONES_DE_CITAR.map((evento) => {
+      const porNombre = new Map<string, number>();
+      for (const r of acciones) {
+        if (r.evento !== evento || !enLectura(r.jornada)) continue;
+        const superficie = superficieDe(r);
+        if (superficie === undefined) continue;
+        porNombre.set(superficie.nombre, (porNombre.get(superficie.nombre) ?? 0) + r.n);
+      }
+      const porSuperficie = ordenarPorClave(porNombre)
+        .filter(([, n]) => n > 0)
+        .map(([superficie, n]) => ({ superficie, n }));
+      return { evento, total: porSuperficie.reduce((total, { n }) => total + n, 0), porSuperficie };
+    });
+    const enLasCitas = (evento: string) =>
+      sumar(acciones, (r) => r.evento === evento && enLectura(r.jornada) && deLasCitas(r)) ?? 0;
+    citar = {
+      porEvento,
+      referenciasEnCita: enLasCitas(EVENTOS.copiadoDeReferencia),
+      copiadosEnCita: enLasCitas(EVENTOS.copiado),
+    };
+  }
 
   // SM-12: lecturas con `via` = D entre las comparticiones con destino D, de toda ruta.
   let sm12: LecturaDeMedicion['sm12'];
@@ -1279,8 +1415,37 @@ export function componerLecturaDeMedicion(
       ? `continuación desde ${tasa.zona}`
       : { sm5: 'SM-5', sm7: 'SM-7', continuacion: 'continuación', 'continuacion-por-zona': 'continuación', sm6: 'SM-6', sm13: 'SM-13' }[tasa];
   const juiciosLeidos: JuicioLeido[] = juicios.map((juicio) => {
-    const sin = (sinVentanas: string): JuicioLeido => ({ juicio, sinVentanas, referencias: [], ventanas: [], cortadas: [] });
+    // Historia 30.1 — el corte que parte lo que juzga, si lo declara: el último que llegó de su serie.
+    const partidaDelCorte = juicio.corte === undefined ? undefined : series[juicio.corte.serie];
+    const llegadoDelCorte = partidaDelCorte?.cortes.at(-1);
     const lineaBase = lineasBase.find((l) => l.unidad === juicio.unidad);
+    // Un solo cálculo del principio tras el corte, para la cabecera y para la línea base propia: la
+    // primera jornada de la intersección con el tramo de la unidad, y nunca antes de su línea base.
+    const desdeTrasElCorte = (): string => {
+      const enInterseccion = interseccion(series[lineaBase?.serie ?? 'lectura'].vigente, partidaDelCorte!.vigente).desde!;
+      return lineaBase?.desde !== undefined && lineaBase.desde > enInterseccion ? lineaBase.desde : enInterseccion;
+    };
+    let corte: CorteDelJuicio | undefined;
+    if (juicio.corte !== undefined && llegadoDelCorte === undefined) {
+      const pendiente = partidaDelCorte!.pendientes[0];
+      corte = {
+        estado: 'pendiente',
+        deDondeLlega: juicio.corte.deDondeLlega,
+        ...(pendiente === undefined ? {} : { jornada: pendiente.jornada }),
+      };
+    } else if (juicio.corte !== undefined && llegadoDelCorte !== undefined) {
+      // Llegado, aunque el juicio no llegue a contar: la cabecera nombra esta llegada y no la de antes.
+      // Si cuenta, lo de abajo lo completa con la intersección y lo reunido.
+      corte = {
+        estado: 'llegado',
+        deDondeLlega: juicio.corte.deDondeLlega,
+        jornada: llegadoDelCorte.jornada,
+        desde: desdeTrasElCorte(),
+      };
+    }
+    const conCorte = (leido: JuicioLeido): JuicioLeido => (corte === undefined ? leido : { ...leido, corte });
+    const sin = (sinVentanas: string): JuicioLeido =>
+      conCorte({ juicio, sinVentanas, referencias: [], ventanas: [], cortadas: [] });
     if (lineaBase === undefined || (lineaBase.serie === 'lectura' && lineaBase.superficies.length === 0)) {
       return sin(juicio.sinUnidad ?? `ninguna superficie declara la unidad «${juicio.unidad}»`);
     }
@@ -1309,7 +1474,37 @@ export function componerLecturaDeMedicion(
     let inicio: string;
     let referenciaDe: ReadonlySet<string>;
     let referencia: JuicioLeido['referencia'];
-    if (antesDelCierre) {
+    if (llegadoDelCorte !== undefined) {
+      // Una línea base propia tras la llegada del corte, que no compara con nada de antes: empieza
+      // la primera jornada completa de la intersección y reúne el mínimo sin las jornadas saltadas.
+      const desde = desdeTrasElCorte();
+      const jornadas: string[] = [];
+      let reunidas = 0;
+      let cerradaEl: string | undefined;
+      for (const jornada of jornadasEntre(desde, tramo.hasta)) {
+        if (saltadas.has(jornada)) continue;
+        jornadas.push(jornada);
+        reunidas += porJornada.get(jornada) ?? 0;
+        if (reunidas >= minimo) {
+          cerradaEl = jornada;
+          break;
+        }
+      }
+      corte = {
+        estado: 'llegado',
+        deDondeLlega: juicio.corte!.deDondeLlega,
+        jornada: llegadoDelCorte.jornada,
+        desde,
+        acumulado: reunidas,
+        ...(cerradaEl === undefined ? {} : { cerradaEl }),
+      };
+      if (cerradaEl === undefined) {
+        return sin(`la línea base tras la llegada del ${llegadoDelCorte.jornada} no se ha cerrado todavía`);
+      }
+      inicio = desplazarJornada(cerradaEl, 1);
+      referenciaDe = new Set(jornadas);
+      referencia = 'linea-base';
+    } else if (antesDelCierre) {
       inicio = desplazarJornada(llegadaEnTramo!, 1);
       referenciaDe = new Set(jornadasEntre(lineaBase.desde, jornadaAnterior(llegadaEnTramo!)).filter((j) => !saltadas.has(j)));
       referencia = 'serie-de-antes';
@@ -1356,7 +1551,9 @@ export function componerLecturaDeMedicion(
       const ventana: Ventana = { desde: actual[0], hasta: actual[actual.length - 1], acumulado, tasas: valores };
       // Una línea base cerrada antes de la llegada da ventanas antes de ella: se juzgan, como pide
       // «contadas desde el cierre», pero se dice que no juzgan lo que llega.
-      if (juicio.llegada !== undefined && ventana.hasta < juicio.llegada) ventana.antesDeLaLlegada = juicio.llegada;
+      if (llegadoDelCorte === undefined && juicio.llegada !== undefined && ventana.hasta < juicio.llegada) {
+        ventana.antesDeLaLlegada = juicio.llegada;
+      }
       if (juicio.senal !== undefined) {
         const sube = valores[tasas.indexOf(juicio.senal.sube)]?.direccion;
         const baja = valores[tasas.indexOf(juicio.senal.baja)]?.direccion;
@@ -1377,7 +1574,7 @@ export function componerLecturaDeMedicion(
       actual = [];
       acumulado = 0;
     }
-    return {
+    return conCorte({
       juicio,
       referencia,
       referencias,
@@ -1385,7 +1582,7 @@ export function componerLecturaDeMedicion(
       ventanas,
       cortadas,
       ...(actual.length > 0 ? { enCurso: { desde: actual[0], acumulado } } : {}),
-    };
+    });
   });
 
   return {
@@ -1408,6 +1605,7 @@ export function componerLecturaDeMedicion(
     ...(cita === undefined ? {} : { cita }),
     ...(portada === undefined ? {} : { portada }),
     ...(obraTasas === undefined ? {} : { obraTasas }),
+    citar,
     sm12,
     busquedas: busquedasLeidas,
     ...(minimo === undefined ? {} : { minimo }),
@@ -1484,6 +1682,7 @@ const NOMBRE_DE_SERIE: { readonly [S in SerieDeMedicion]: string } = {
   sm8: 'SM-8 (CORTES_DE_SM8)',
   lectura: 'la lectura',
   busqueda: 'la búsqueda',
+  'continuacion-de-cita': 'la continuación de la Página de Cita (SM-4, SM-3 y SM-C5)',
 };
 
 /**
@@ -1571,7 +1770,7 @@ export function lineasDeLecturaDeMedicion(lectura: LecturaDeMedicion): string[] 
 
   // Los cortes.
   lineas.push('', 'Cortes de serie (CORTES_DE_SERIE de src/lib/umbrales.ts)');
-  for (const serie of ['sm8', 'lectura', 'busqueda'] as const) {
+  for (const serie of ['sm8', 'lectura', 'busqueda', 'continuacion-de-cita'] as const) {
     const partida = lectura.series[serie];
     const cabeza = `  ${NOMBRE_DE_SERIE[serie]}: `;
     if (partida.cortes.length === 0) {
@@ -1660,15 +1859,25 @@ export function lineasDeLecturaDeMedicion(lectura: LecturaDeMedicion): string[] 
 
   // La Página de Cita.
   if (lectura.cita !== undefined) {
-    const { conAccion, conComparticion, continuacion, sinContinuacion, lecturas } = lectura.cita;
+    const { conAccion, conComparticion, continuacion, sinContinuacion, lecturas, conAccionEnSmC5 } = lectura.cita;
     lineas.push('', `La Página de Cita — sobre sus lecturas (${cifra(lecturas)}), resueltas contra el censo`);
     lineas.push(
       `  SM-5, lecturas con su primera acción —copiado o descarga sin destino—: ${textoDeTasa(conAccion)}.`,
       `  SM-7, lecturas con su primera compartición: ${textoDeTasa(conComparticion)}; cota inferior en Chrome para Android.`,
+    );
+    // Historia 30.1 — con el corte de la continuación llegado, lo que parte se lee en su tramo.
+    if (lectura.series['continuacion-de-cita'].cortes.length > 0) {
+      lineas.push(
+        `  La continuación, SM-3 y SM-C5, desde el corte de su serie: ${textoDeTramo(lectura.cita.tramoDeLaContinuacion, lectura.hoy)}, ` +
+          `sobre ${cifra(lectura.cita.lecturasDeLaContinuacion)} lecturas. SM-5 y SM-7 de este bloque, SM-C3 y la continuación de ` +
+          `«Superficies con lectura» siguen en el tramo de la lectura y sobre sus lecturas; que el corte parta también SM-5 lo decide Héctor.`,
+      );
+    }
+    lineas.push(
       `  Continuación: ${textoDeTasa(continuacion)}; cota inferior.`,
       `  SM-3, 1 − la continuación: ${textoDeTasa(sinContinuacion)}; cota superior, porque la continuación es inferior.`,
       `  SM-C3: SM-5 ${textoDeTasa(conAccion)} junto a SM-7 ${textoDeTasa(conComparticion)}.`,
-      `  SM-C5: la continuación ${textoDeTasa(continuacion)} junto a SM-5 ${textoDeTasa(conAccion)}.`,
+      `  SM-C5: la continuación ${textoDeTasa(continuacion)} junto a SM-5 ${textoDeTasa(conAccionEnSmC5)}.`,
     );
   }
   for (const [nombre, tasas] of [
@@ -1682,6 +1891,33 @@ export function lineasDeLecturaDeMedicion(lectura: LecturaDeMedicion): string[] 
     );
   }
   lineas.push('  Las metas de SM-3 a SM-7 están en suspenso hasta su línea base: ninguna cifra de aquí se compara con ellas.');
+
+  // Historia 30.5 — las acciones de citar, aparte.
+  lineas.push('', `Citar — copiar una Referencia y copiar el Fragmento, ${textoDeTramo(vigente, lectura.hoy)} de la lectura, aparte`);
+  if ('faltan' in lectura.citar) {
+    lineas.push(`  Sin leer (${nombresDe(lectura.citar.faltan)}).`);
+  } else {
+    for (const { evento, total, porSuperficie } of lectura.citar.porEvento) {
+      // Mientras el guion de medición no lo emite (retenido fuera de `EVENTOS_DEL_GUION`, como lo
+      // estuvieron las dos de citar en la fase A de la 30.5), su cero no es una medida: el informe lo
+      // dice en vez de enseñar un 0 que parece leído. Desde la fase B las dos salen con su cifra.
+      if (total === 0 && !EVENTOS_DEL_GUION.includes(evento)) {
+        lineas.push(`  ${evento}: sin registros; el guion de medición aún no lo emite.`);
+        continue;
+      }
+      lineas.push(
+        `  ${evento}: ${entero(total)}` +
+          (porSuperficie.length === 0 ? '.' : ` (${porSuperficie.map(({ superficie, n }) => `${superficie} ${entero(n)}`).join(', ')}).`),
+      );
+    }
+    lineas.push(
+      `  En la Página de Cita, copias de la Referencia ${entero(lectura.citar.referenciasEnCita)} frente a copiados de la Cita ` +
+        `${entero(lectura.citar.copiadosEnCita)} (todos los registros de copiado): la tesis de la v9, sin juzgarla.`,
+      '  No tienen meta: no cuentan en SM-5, SM-7, SM-C3 ni en las acciones de las superficies. Contarlas en SM-5 o en SM-C3 ' +
+        'es la pregunta 15 del PRD, y se decide con su línea base declarando el corte. Las cifras son del censo de hoy: ' +
+          'lo de fuera del censo va en «Fuera del censo».',
+    );
+  }
 
   // SM-12.
   lineas.push('', 'SM-12 — lecturas con via entre las comparticiones de su destino, de toda ruta, sin mirar primera');
@@ -1792,11 +2028,31 @@ export function lineasDeLecturaDeMedicion(lectura: LecturaDeMedicion): string[] 
   // Las ventanas.
   lineas.push('', 'Ventanas — cada tasa frente a su línea base o a su serie de antes');
   for (const j of lectura.juicios) {
-    const cabeza = `  ${j.juicio.nombre} (${j.juicio.unidad}; llegada: ${
-      j.juicio.llegada === undefined ? j.juicio.deDondeLlega : `${j.juicio.llegada}, ${j.juicio.deDondeLlega}`
-    })`;
+    const llegada =
+      j.corte?.estado === 'llegado'
+        ? `${j.corte.jornada}, ${j.corte.deDondeLlega}`
+        : j.juicio.llegada === undefined
+          ? j.juicio.deDondeLlega
+          : `${j.juicio.llegada}, ${j.juicio.deDondeLlega}`;
+    const cabeza = `  ${j.juicio.nombre} (${j.juicio.unidad}; llegada: ${llegada})`;
+    // Historia 30.1 — el corte que parte lo que juzga: pendiente, o la línea base propia que abrió.
+    const lineaDelCorte =
+      j.corte === undefined
+        ? undefined
+        : j.corte.estado === 'pendiente'
+          ? j.corte.jornada === undefined
+            ? `    La llegada de ${j.corte.deDondeLlega} no ha ocurrido: la tomará de esa constante de src/lib/umbrales.ts, y hasta entonces se juzga como hasta ahora.`
+            : `    La llegada del ${j.corte.jornada} (${j.corte.deDondeLlega}) es de hoy o posterior: no ha ocurrido todavía, y hasta entonces se juzga como hasta ahora.`
+          : `    Desde la llegada del ${j.corte.jornada} (${j.corte.deDondeLlega}), su línea base es propia: empieza el ${j.corte.desde}` +
+            (j.corte.acumulado === undefined
+              ? ''
+              : j.corte.cerradaEl === undefined
+                ? `, reúne ${entero(j.corte.acumulado)} de ${entero(lectura.minimo ?? 0)} y no se ha cerrado`
+                : ` y se cerró el ${j.corte.cerradaEl}`) +
+            '; ninguna ventana cruza esa jornada.';
     if (j.sinVentanas !== undefined) {
       lineas.push(`${cabeza}: ${j.sinVentanas}.`);
+      if (lineaDelCorte !== undefined) lineas.push(lineaDelCorte);
       continue;
     }
     lineas.push(
@@ -1806,6 +2062,7 @@ export function lineasDeLecturaDeMedicion(lectura: LecturaDeMedicion): string[] 
           : 'desde el cierre de la línea base, frente a ella'
       }.`,
     );
+    if (lineaDelCorte !== undefined) lineas.push(lineaDelCorte);
     lineas.push(
       `    Referencia: ${j.referencias.length === 0 ? 'ninguna tasa' : j.referencias.map(({ tasa, valor }) => `${legible(tasa)} ${valor.estado === 'calculada' ? textoDeTasa(valor) : `sin referencia (${textoDeTasa(valor)})`}`).join('; ')}.`,
     );
@@ -1840,6 +2097,9 @@ export function lineasDeLecturaDeMedicion(lectura: LecturaDeMedicion): string[] 
       );
     }
     if (j.ventanas.length === 0) lineas.push('    Ninguna ventana completa todavía.');
+    if (j.juicio.palanca !== undefined && j.ventanas.some((v) => v.senal === 'salta')) {
+      lineas.push(`    Palanca de ${j.juicio.nombre}: ${j.juicio.palanca}.`);
+    }
     if (j.enCurso !== undefined) {
       lineas.push(`    En curso desde el ${j.enCurso.desde}: ${entero(j.enCurso.acumulado)} de ${entero(lectura.minimo ?? 0)}.`);
     }

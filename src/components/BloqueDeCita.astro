@@ -53,7 +53,6 @@ const tramo = tramoDe(cita.texto);
   .bloque {
     margin: 0;
     /* UX-DR6 — sistema plano: cero sombras, cero elevación tonal. */
-    max-width: var(--medida-cita);
   }
 
   .cita {
@@ -72,6 +71,13 @@ const tramo = tramoDe(cita.texto);
     font-size: var(--cita-sm);
     line-height: var(--interlineado-cita-sm);
     text-wrap: pretty;
+    /*
+     * Historia 30.2 — UX-DR115, FR-64: la medida va en el texto y no en `.bloque`, para que el
+     * `ch` de los 34ch salga del cuerpo de su tramo. Puesta en `.bloque` se resolvía con el
+     * cuerpo del contenedor (17 px): unos 365 px, tres palabras por línea a 1280 × 800. En
+     * móvil no ata: la columna es más estrecha que la medida y el reparto es el de siempre.
+     */
+    max-width: var(--medida-cita);
   }
 
   .cita[data-tramo='xl'] .texto {
@@ -117,6 +123,8 @@ const tramo = tramoDe(cita.texto);
 
   /* UX-DR7 — filete corto de 48px bajo la Cita, antes de la atribución. */
   figcaption {
+    /* Historia 30.2 — la Atribución, en la medida de prosa (UX-DR115). */
+    max-width: var(--medida-prosa);
     margin-top: calc(var(--unidad) * 3);
     padding-top: calc(var(--unidad) * 3);
     position: relative;

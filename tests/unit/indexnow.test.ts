@@ -280,8 +280,13 @@ describe('AD-27 — el aviso es la lectura inversa de la relación que fecha el 
       const familia = familiaDeFichero(fichero);
       if (familia === undefined) throw new Error(`${fichero} sin familia`);
       const campos = new Set([
+        // Un campo derivado —el nombre de «Cómo citar», 30.3— se recorre por las claves de que sale.
         ...Object.values(CAMPOS_QUE_PINTA[familia]).flatMap((c) =>
-          c === CUALQUIER_CAMBIO ? [] : [...(c as readonly string[])],
+          c === CUALQUIER_CAMBIO
+            ? []
+            : (c as readonly (string | { de: readonly string[] })[]).flatMap((campo) =>
+                typeof campo === 'string' ? [campo] : [...campo.de],
+              ),
         ),
         ...(noFechan[familia] ?? []),
       ]);

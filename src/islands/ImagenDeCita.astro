@@ -321,6 +321,22 @@ descargar.addEventListener('click', async () => {
   }
 
   /*
+   * Historia 30.2 — dentro de la Fila de acciones la distancia la pone el `gap` de la fila. Por
+   * debajo de 600 px la isla ocupa su línea —Imagen bajo Copiar, como siempre—, y desde 600 px
+   * toma su ancho y se pone en fila tras Copiar. Fuera de la fila no cambia nada.
+   */
+  :global(.fila-de-acciones) > .isla {
+    margin-top: 0;
+    flex-basis: 100%;
+  }
+
+  @media (min-width: 600px) {
+    :global(.fila-de-acciones) > .isla {
+      flex-basis: auto;
+    }
+  }
+
+  /*
    * UX-DR9 — secundario: texto siena con filete, 44px de alto mínimo.
    *
    * `.plantilla` va en `:global` porque esos botones los crea el guion, y Astro acota

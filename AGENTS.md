@@ -37,7 +37,7 @@ Sitio panhispánico de citas célebres en español, estático, construido con As
 - El verso tiene **dos dueños** en las salidas, en `src/lib/verso.ts` (Historia 29.3): `versosDe` para lo que admite saltos y `enUnaLinea` (« / » entre versos) para lo que no —título de pestaña, meta descripción, `text` del JSON-LD, `description` del RSS—. El texto de una Cita lo pinta en el HTML **solo** `src/components/TextoDeCita.astro`, dentro del elemento de quien lo usa (Bloque de Cita, Tarjeta de Cita y material del Kit/lote): sin saltos emite `«{texto}»` tal cual, byte a byte como antes; con saltos, un `<span class="verso" style="display:block">` por verso con un espacio entre ellos (el que leen Pagefind y el nombre accesible) y el estilo en atributo, no en `<style>`. Nunca `<br>` en el Corpus ni « / » en el cuerpo de la página (`<main>`) o en un lienzo —en `<head>` sí, porque el título y la meta van por `enUnaLinea`—; ningún otro fichero de `src/` ni de `public/islas/` lee el salto (`tests/unit/verso.test.ts` enumera cada uso y nombra sus exenciones: los dos de `src/lib/biografia.ts`), salvo `src/lib/recorte.ts`, que lo compara carácter a carácter solo para no contarlo y para cortar delante de él, sin partirlo ni sustituirlo (Historia 34.1). Los dos repartos de los lienzos —`repartirEnLineas` de `src/lib/lienzo.ts` y el privado de `public/islas/imagen.js`, que no importa de `src/`— abren línea en cada salto y nunca unen dos versos. La Tarjeta Social de una Cita **en verso** que no cabe en 630 px baja al tramo siguiente, hasta `sm` (`cuerpoEnTarjeta` de `src/lib/tramos.ts`, decisión de Héctor del 2026-11-08); la prosa conserva su tramo, y si nada cabe el build se para nombrando la Cita. La Página de Cita, la Imagen y la Pieza no cambian de tramo.
 - Todo lo que se pliega usa `src/components/Desplegable.astro` (Historia 34.0): un `<details>` nativo cerrado al cargar, con el rótulo como único texto del `<summary>` —sin `h1`…`h6` dentro—, sin guion ni `data-zona`; lo de dentro declara su zona como si no estuviera plegado. Ningún componente escribe su propio `<details>`. Un desplegable sin contenido no se pinta: quien lo usa no lo renderiza, y el componente, ante un `slot` ausente o sin contenido —en blanco, solo comentarios o elementos sin texto; un medio o un control sí cuentan—, detiene la construcción nombrando el rótulo, y también ante un rótulo ausente o en blanco. Su `<style>` solo nombra su propio marcado (se emite por el grafo de importaciones aunque no se renderice), y `tests/e2e/accesibilidad.spec.ts` barre cada superficie también con todos los `<details>` abiertos; desde la 34.2 la Página de Autor pinta uno (la Lista de Obras plegada), y la sonda de `tests/e2e/desplegable.spec.ts` (puerto 4404 libre) sigue barriendo los casos que el sitio aún no tiene. El primer consumidor no lo importa desde un componente compartido: lo pasa por prop (`pliegue` de `ListaDeObras.astro`), para que la hoja no llegue a las páginas que no pliegan.
 - Un mensaje de estado («Copiado.», la búsqueda sin resultados de `/buscar/`, la imagen lista, el fallo del generador) se anuncia por una región `role="status"` que está en el marcado desde la carga, vacía y sin `hidden` (`.solo-para-lectores` de `tokens.css`; dentro del `<dialog>` si se anuncia con él abierto, porque lo de fuera es inerte). Para anunciar se vacía la región y se escribe el mensaje en el siguiente fotograma: el mismo texto escrito sobre sí mismo no se anuncia. Lo hace `anunciar` de `src/lib/anuncio.ts` —su único dueño—; una isla en línea lo lleva dentro por `guionQueAnuncia` y `set:html` (`define:vars` y `set:html` juntos pierden el cuerpo en Astro 7.2), y ningún guion en línea usa `requestAnimationFrame` fuera de él (Historia 23.1). Lo que cambia mientras se teclea —el recuento del filtro de los Directorios, y el de `/buscar/` desde la 27.2— va por el **segundo ritmo**, `ritmoDeTecleo` del mismo `src/lib/anuncio.ts`: se escribe tras `PAUSA_DE_TECLEO_MS` (`src/lib/umbrales.ts`) sin teclear y solo si la frase cambió, y vaciar el campo vacía la región al momento (Historia 26.6); el de `/buscar/` tras un selector se escribe al llegar la búsqueda, también solo si cambió (Historia 27.2). Pestaña nueva solo para donar, compartir y comprar, con `AVISO_DE_PESTAÑA_NUEVA` de `src/lib/accesibilidad.ts` —su único dueño— oculto dentro del nombre accesible; todo lo demás, en la misma pestaña (Historia 22.10).
-- La medición se llama `__medir(…)` a secas, nunca `window.__medir && …`: el arranque (`ARRANQUE_DE_MEDICION`) abre la cola en línea en toda página del armazón y es el único guion en línea que asigna `__medir`; el fichero `/medicion/{versión}.js` la vacía y la sustituye. Qué vista emite una página lo declara su superficie en `src/lib/superficies.ts` y sale al `data-vistas` del `<html>`; ninguna página la elige. La página 1 de toda Obra declara además, se indexe o no, la `vista-de-obra` (`vistaConMarca`, Historia 23.9), con su marca —`indexable` o `no-indexable`, de `MARCAS_DE_OBRA`— en el atributo `ATRIBUTO_DE_INDEXABLE` del `<html>`: la escribe `Armazon.astro` desde `consecuenciasDe`, de la misma lista de rutas indexables que su `noindex`, el fichero la lee una vez al activarse y la envía solo con la vista que declara la página —una `vista-de-obra` que pidiera una isla saldría con la marca nula—, y `astro:build:done` (`tools/lib/indexables.ts`) para la construcción si falta en una página 1 de Obra o trae un valor ajeno a `MARCAS_DE_OBRA`, contradice su `noindex`, aparece en otra página o no va junto a la `vista-de-obra` de `data-vistas`; ninguna isla la pide ni la lee, y no entra en SM-8. La `lectura` y el `primera` de cada acción los decide solo el fichero (Historia 23.5): ninguna isla los emite ni los calcula, ni conoce `METRICA_DE_ACCION`, y `__medir('lectura')` se descarta (`EVENTOS_SOLO_DEL_FICHERO`). Las Marcas de llegada (`?de=` y `?via=`, `MARCAS_DE_LLEGADA`) las lee y las quita de la dirección solo el fichero, una vez y con el `history.state` que había (Historia 23.6), y viajan solo con las vistas que declara la página y con la lectura —una vista que pida una isla sale sin ellas—: ninguna isla las lee, y la única que escribe además en el historial es la de la búsqueda: solo `history.replaceState` con la marca de su búsqueda asentada (`MARCA_DE_BUSQUEDA_ASENTADA`, un booleano) en el objeto de estado, sin dirección, desde sus escuchas y nunca al analizarse, que corre antes que el fichero diferido (lo vigilan `tests/unit/medicion.test.ts` sobre `dist/` y, ejecutándola, el entorno simulado de `tests/unit/ayuda/busqueda.ts`). La `busqueda` y la `busqueda-sin-resultados` las emite solo esa isla al asentar un estado —enviar, pulsar un resultado, ocultarse; nunca por tecla ni por repintado— y una vez por estado y carga: qué emite, con qué tramo y si una llegada ya estaba registrada lo decide `asentamientoDeBusqueda` de `src/lib/medicion.ts`, que viaja a la isla por su texto con sus constantes del vocabulario (`ASENTAMIENTO_DE_BUSQUEDA`), y el fichero no descarta ninguna `busqueda` ni lee el historial (Historia 23.8). La `salida-interna` (Historia 23.7) la emite también solo el fichero, desde una única escucha de `click` en la ventana y en burbuja: un enlace del mismo origen a otra ruta, con el botón principal, sin modificador, sin `defaultPrevented`, sin `download` y sin abrir en otra pestaña; como mucho una por carga, detrás de la lectura, con la ruta y la zona y nada más —ni el destino ni el texto pulsado—, y `__medir('salida-interna')` se descarta. La zona la pinta el build en el **contenedor**, nunca en el `<a>`: `data-zona` con un valor de `ZONAS` del vocabulario —prop `zona: Zona` obligatoria en `TarjetaDeCita`, `Chips`, `Paginacion`, `ListaDeObras`, `RutasDeSalida` y `Atribucion`; atributo en los contenedores propios de cada página—, y lo exento lleva `data-sin-zona` con un motivo de `EXENCIONES_DE_ZONA` (`src/lib/medicion.ts`); la escucha toma la declaración más cercana al enlace, y lo que inserta una isla la hereda. Ninguna isla emite la salida ni lee zonas. Ningún guion en línea lleva datos de contenido —slug, texto, Obra—: van en `data-*` (exención nombrada: `ImagenDelKit`, hasta la 25.4). Lo que una página descarga —`<script src>`, `<link rel="modulepreload">` o `import()`, y lo que un fichero de la lista arranca al ejecutarse, como el worker de Pagefind (`arranca`)— está en `GUIONES_EXTERNOS` de `src/lib/guiones.ts`, con su tope en `umbrales.ts` (Historia 23.1).
+- La medición se llama `__medir(…)` a secas, nunca `window.__medir && …`: el arranque (`ARRANQUE_DE_MEDICION`) abre la cola en línea en toda página del armazón y es el único guion en línea que asigna `__medir`; el fichero `/medicion/{versión}.js` la vacía y la sustituye. Qué vista emite una página lo declara su superficie en `src/lib/superficies.ts` y sale al `data-vistas` del `<html>`; ninguna página la elige. La página 1 de toda Obra declara además, se indexe o no, la `vista-de-obra` (`vistaConMarca`, Historia 23.9), con su marca —`indexable` o `no-indexable`, de `MARCAS_DE_OBRA`— en el atributo `ATRIBUTO_DE_INDEXABLE` del `<html>`: la escribe `Armazon.astro` desde `consecuenciasDe`, de la misma lista de rutas indexables que su `noindex`, el fichero la lee una vez al activarse y la envía solo con la vista que declara la página —una `vista-de-obra` que pidiera una isla saldría con la marca nula—, y `astro:build:done` (`tools/lib/indexables.ts`) para la construcción si falta en una página 1 de Obra o trae un valor ajeno a `MARCAS_DE_OBRA`, contradice su `noindex`, aparece en otra página o no va junto a la `vista-de-obra` de `data-vistas`; ninguna isla la pide ni la lee, y no entra en SM-8. La `lectura` y el `primera` de cada acción los decide solo el fichero (Historia 23.5): ninguna isla los emite ni los calcula, ni conoce `METRICA_DE_ACCION`, y `__medir('lectura')` se descarta (`EVENTOS_SOLO_DEL_FICHERO`). Las dos acciones de citar (Historia 30.5) —`copiado-de-referencia`, al copiar una Referencia de «Cómo citar» en cualquiera de sus tres estilos, y `copiado-de-fragmento`, al copiar el Fragmento de «Inserta esta cita»— van fuera de `METRICA_DE_ACCION` y sin campos, y solo las pide la isla de Copiar de la Página de Cita, tras una copia buena y por la identidad del bloque (`data-inserta-esta-cita` o no); la lectura de la línea base las informa aparte, fuera del `acciones` de superficie y de toda tasa (`ACCIONES_DE_CITAR` de `tools/lib/lineaBase.ts`). Entraron retenidas en `PENDIENTES` de `tests/unit/vocabulario.test.ts` y se soltaron —a `EVENTOS_DEL_GUION`— en un commit aparte, tras desplegar el receptor desde la rama y commitear la huella: es el orden para todo evento nuevo que el guion aún no deba emitir. Las Marcas de llegada (`?de=` y `?via=`, `MARCAS_DE_LLEGADA`) las lee y las quita de la dirección solo el fichero, una vez y con el `history.state` que había (Historia 23.6), y viajan solo con las vistas que declara la página y con la lectura —una vista que pida una isla sale sin ellas—: ninguna isla las lee, y la única que escribe además en el historial es la de la búsqueda: solo `history.replaceState` con la marca de su búsqueda asentada (`MARCA_DE_BUSQUEDA_ASENTADA`, un booleano) en el objeto de estado, sin dirección, desde sus escuchas y nunca al analizarse, que corre antes que el fichero diferido (lo vigilan `tests/unit/medicion.test.ts` sobre `dist/` y, ejecutándola, el entorno simulado de `tests/unit/ayuda/busqueda.ts`). La `busqueda` y la `busqueda-sin-resultados` las emite solo esa isla al asentar un estado —enviar, pulsar un resultado, ocultarse; nunca por tecla ni por repintado— y una vez por estado y carga: qué emite, con qué tramo y si una llegada ya estaba registrada lo decide `asentamientoDeBusqueda` de `src/lib/medicion.ts`, que viaja a la isla por su texto con sus constantes del vocabulario (`ASENTAMIENTO_DE_BUSQUEDA`), y el fichero no descarta ninguna `busqueda` ni lee el historial (Historia 23.8). La `salida-interna` (Historia 23.7) la emite también solo el fichero, desde una única escucha de `click` en la ventana y en burbuja: un enlace del mismo origen a otra ruta, con el botón principal, sin modificador, sin `defaultPrevented`, sin `download` y sin abrir en otra pestaña; como mucho una por carga, detrás de la lectura, con la ruta y la zona y nada más —ni el destino ni el texto pulsado—, y `__medir('salida-interna')` se descarta. La zona la pinta el build en el **contenedor**, nunca en el `<a>`: `data-zona` con un valor de `ZONAS` del vocabulario —prop `zona: Zona` obligatoria en `TarjetaDeCita`, `Chips`, `Paginacion`, `ListaDeObras`, `RutasDeSalida` y `Atribucion`; atributo en los contenedores propios de cada página—, y lo exento lleva `data-sin-zona` con un motivo de `EXENCIONES_DE_ZONA` (`src/lib/medicion.ts`); la escucha toma la declaración más cercana al enlace, y lo que inserta una isla la hereda. Ninguna isla emite la salida ni lee zonas. Ningún guion en línea lleva datos de contenido —slug, texto, Obra—: van en `data-*` (exención nombrada: `ImagenDelKit`, hasta la 25.4). Lo que una página descarga —`<script src>`, `<link rel="modulepreload">` o `import()`, y lo que un fichero de la lista arranca al ejecutarse, como el worker de Pagefind (`arranca`)— está en `GUIONES_EXTERNOS` de `src/lib/guiones.ts`, con su tope en `umbrales.ts` (Historia 23.1).
 
 ## Known pitfalls
 
@@ -441,10 +441,18 @@ que la orden lee sin nombrar ninguna ruta. Ningún módulo de `src/`, `integraci
 (2026-10-25, la jornada UTC en que la 23 llegó al sitio en vivo; se lo dio la 23.11, en un commit
 aparte),
 `PASADAS_QUE_ESCRIBEN_EN_PRODUCCION` (vacía; la anota él el día de la 25.3 y de la 25.7) y
-`SM12_CON_FACEBOOK` (apagada; la enciende él en la 25.7). Ningún agente les da valor. Los **cortes de
+`SM12_CON_FACEBOOK` (apagada; la enciende él en la 25.7) y `DESPLIEGUE_DE_CITAR_Y_LLEVARSE` (sin
+valor; la jornada UTC en que termina «Desplegar» de la Épica 30, que pone él en un commit aparte).
+Ningún agente les da valor. Los **cortes de
 serie** viven en `CORTES_DE_SERIE_DECLARADOS`, una lista de constantes de despliegue sin ninguna
 fecha escrita —`CORTES_DE_SERIE` filtra las que llegaron y `CORTES_DE_SM8` es su proyección—: un
-corte nuevo entra con su historia y su constante, nunca con un literal. Una tasa nueva que se juzgue
+corte nuevo entra con su historia y su constante, nunca con un literal. El de la Épica 30 (Historia
+30.1) parte solo la serie `continuacion-de-cita`: la continuación de la Página de Cita (SM-4), su
+SM-3 y SM-C5 se leen en la intersección de su tramo y del de `lectura`, y SM-5, SM-7, SM-C3 y las
+demás superficies siguen en el de `lectura`. Con el corte llegado, SM-C5 abre su línea base tras
+la llegada y ninguna ventana la cruza; sin él, juzga como antes y nombra la llegada pendiente. Si
+su señal salta, el informe nombra su palanca —quitar los tres desplegables o bajarlos tras las
+Rutas de salida—, que decide Héctor. Una tasa nueva que se juzgue
 por ventanas entra en la tabla de `juiciosPorVentanas` (`JUICIOS_POR_VENTANAS`) de
 `tools/lib/lineaBase.ts`. Ninguna prueba fija el valor de esas constantes: siguen el que tengan, para
 que darles valor (23.11, 25.7, 26.11) no ponga la principal en rojo. La orden dice «cerrada»,
@@ -970,8 +978,9 @@ analizar cuenta como cambio de todo; un campo ausente es `undefined`; el orden d
   son listas explícitas, nunca «todos menos», y `tests/unit/fecha-de-cambio.test.ts` falla
   nombrando la clave de un esquema que no esté en ninguna: **un campo nuevo —el `ordenAlfabetico`
   de la 26.1— se clasifica en el mismo commit que lo añade**.
-- **Página de Cita** = su fichero, su Autor (nombre y años), sus Temas (nombre) y su ficha de
-  Obra (título). Nunca Citas hermanas: la Tarjeta de Obra, «Siguiente», «De la misma obra», «Más
+- **Página de Cita** = su fichero, su Autor (nombre y años, y desde la 30.3 el nombre derivado
+  de «Cómo citar», `NOMBRE_EN_REFERENCIA`, de `nombre`, `ordenAlfabetico` y `ordenRevisado`), sus
+  Temas (nombre) y su ficha de Obra (título). Nunca Citas hermanas: la Tarjeta de Obra, «Siguiente», «De la misma obra», «Más
   de», sus recuentos y el año del `isPartOf` son navegación (excepción de Héctor, FR-47). Una
   Cita nueva no refecha ninguna otra Página de Cita, y un commit que solo toca `aptaParaPortada`
   no fecha nada y solo avisa la portada.
@@ -1051,13 +1060,15 @@ Ninguna hace commit; las dos se niegan con 1 y sin escribir si no hay nada que h
 
 ### La Tarjeta de Obra (Historia 24.4)
 
-Bajo la Cita, entre la Línea de la Fuente —o la Atribución, sin Fuente— y Copiar, la Página de
+Tras las acciones —Copiar, Imagen y compartir— y antes de las Rutas de salida (Historia 30.1:
+nada se intercala entre la Atribución, con su Línea de la Fuente, y Copiar), la Página de
 Cita dice de qué Obra sale: `src/components/TarjetaDeObra.astro`, con el rótulo «De la obra»,
 el título de la ficha sin enlace, «{Autor} · {año} · {n} citas» y una o dos Filas de bloque:
 «Siguiente…» cuando hay a dónde ir (24.5) y, siempre, la de la página 1 de la Obra —se indexe o
 no, esté congelada o no—. **Solo en `src/pages/cita/[slug].astro`**:
 no va dentro de `BloqueDeCita.astro` porque ese bloque lo comparten la portada y el 404, que no
-la llevan (la portada la recibe en la 28.2). Sin Obra no pinta nada, ni rótulo ni hueco.
+la llevan (la portada la recibe en la 28.2, y la Cita del Día nace en el orden de la 30.1). Sin
+Obra no pinta nada, ni rótulo ni hueco, y las Rutas de salida siguen a compartir.
 
 - `nivel` (2 | 3) es obligatorio y sin valor por omisión: la Página de Cita pasa `2`; la portada
   pasará `3`. `Rotulo.astro` admite `nivel`, por omisión `2`.
@@ -1094,9 +1105,91 @@ la llevan (la portada la recibe en la 28.2). Sin Obra no pinta nada, ni rótulo 
   y no depende de la jornada, la indexabilidad, la congelación ni la afiliación. Es navegación:
   no fecha ni avisa, como el resto de la tarjeta.
 
+### La Fila de acciones y la medida de la Cita (Historia 30.2)
+
+Copiar e Imagen van dentro de
+`src/components/FilaDeAcciones.astro` —un `div.fila-de-acciones` con `<slot />`, sin `data-zona`
+ni `data-sin-zona` porque no tiene enlaces, y sin guion—: en fila desde 600 px, apilados por
+debajo; «Compartir en» queda fuera, detrás. La reutilizará la 28.2 en la Cita del Día. Dentro de
+la fila la `.isla` de Copiar es `display: contents` para que su respaldo baje tras Imagen sin
+tocar marcado ni guion, así que **una prueba que mida Copiar mide `button.copiar`, no su isla**,
+que no tiene caja. Y la medida de la Cita (`--medida-cita`, 34ch) está en `.texto` de
+`BloqueDeCita.astro`, no en `.bloque`: el `ch` se resuelve en el cuerpo del tramo; la Atribución
+(`figcaption`) y la Línea de la Fuente van en `--medida-prosa`. Con el campo de copia manual a
+la vista —el guion lo enfoca al fallar el portapapeles—, el Tabulador va de Copiar al campo y de
+ahí a Imagen: es el orden del marcado, aunque el campo se pinte bajo la fila. Dentro de la fila
+`button.copiar` reserva el ancho de su rótulo (una copia invisible de su `aria-label` en
+`::after`, en la misma celda que la etiqueta), para que «Copiado.» no lo encoja y corra Imagen.
+La fila no es autosuficiente: estas reglas, y el `flex-basis` de Imagen, viven con contexto
+(`:global(.fila-de-acciones) > .isla …`) en `CopiarCita.astro` e `ImagenDeCita.astro`, así que
+la 28.2 las hereda solo con esas dos islas, y otra acción que entre en la fila trae las suyas.
+
+### Cómo citar (Historia 30.3)
+
+Tras la Tarjeta de Obra —o tras «Compartir en», sin Obra— y antes de las Rutas de salida, la
+Página de Cita lleva **un solo bloque** de desplegables, `<div class="desplegables"
+data-pagefind-ignore="all">` en `src/pages/cita/[slug].astro`, a 4 × unidad de lo de arriba: la
+palanca de SM-C5 es un diff de ese sitio. Contiene el Desplegable «Cómo citar»
+(`Desplegable.astro`, la primitiva de la 34.0, que no se copia ni se cambia) y, el último, «Inserta
+esta cita» (30.4); el pasaje (Épica 31) irá delante, sin hueco. Desde la 30.4 el bloque se pinta en
+toda Página de Cita. Sin `data-zona` —no hay enlaces: la canónica es texto— y fuera del JSON-LD.
+
+- **La composición es solo de `src/lib/atribucion.ts`** (AD-28): `referenciaDeCita` (segmentos,
+  con la Obra en cursiva y un segmento vacío para la fecha), `referenciasDeCita`,
+  `nombreEnReferencia` y `partesDelNombre`, `citaTieneComoCitar` (hoy `true`; la 35.4 añade ahí la
+  Cita atribuida), `fechaDeConsulta` y `MARCADOR_DE_FECHA_DE_CONSULTA`. Las formas literales de
+  APA, MLA y Chicago son un supuesto que revisa Héctor, fijado por la tabla de
+  `tests/unit/atribucion.test.ts`. Lo que no consta se omite; nada lee `procedencia.obra`.
+- `src/components/ComoCitar.astro` pinta las Referencias **ya compuestas** y no sabe si son de
+  Cita o de Obra (la 32.5 lo reutiliza). Cada estilo: rótulo, Referencia en una línea de marcado
+  (`textContent` es lo que se copia), la línea «Sin fecha de consulta: añade la de hoy.» y el
+  botón «Copiar APA/MLA/Chicago» `hidden`; una región `role="status"` dentro del bloque.
+- **La fecha de consulta es del visitante.** El build deja el marcador vacío y ninguna jornada; la
+  isla de Copiar (`CopiarCita.astro`, la única de copiar de la página, con el guion idéntico en toda
+  Página de Cita) espera a `DOMContentLoaded`, escribe `fechaDeConsulta(estilo, new Date())` —que
+  viaja por su texto, como `anunciar`—, quita las líneas «Sin fecha…», enseña los botones y marca
+  el bloque (`data-listo`) para que dos copias del guion no lo repitan. Sin JavaScript se lee y se
+  selecciona sin fecha, y los botones no se ven. Si el portapapeles rechaza, ni «Copiado.» ni
+  error. Sin evento de medición: copiar una Referencia entra en el vocabulario con la 30.5.
+- **Revisar una clave fecha y avisa las Páginas de Cita del Autor** (AD-27): el nombre se invierte
+  («Martí, J.») solo con `ordenRevisado` y una clave que es palabra del `nombre`, así que
+  `CAMPOS_QUE_PINTA.autor.cita` cuenta el campo derivado `NOMBRE_EN_REFERENCIA` de
+  `tools/lib/cambios.ts`, con la misma `nombreEnReferencia`. `ordenRevisado` ya no está en
+  `CAMPOS_QUE_NO_FECHAN`; un lote de `proponer-claves` sin revisar sigue moviendo solo `/autores` y
+  `/obras`. El `Autor` de `publicado.ts` lleva desde la 30.3 `ordenRevisado`.
+- Pendiente al fundir la Épica 29: el texto de la Referencia pasa por `enUnaLinea` de
+  `src/lib/verso.ts` (« / » entre versos); hasta entonces va `cita.texto` tal cual (AD-29: nadie
+  escribe su unión de versos).
+
+### Inserta esta cita (Historia 30.4)
+
+El último Desplegable del bloque, «Inserta esta cita», lleva el Fragmento de HTML estático que se
+pega en un blog (FR-57): `src/components/InsertaEstaCita.astro` pinta su `<label>`, un `<textarea
+readonly>` con el Fragmento, el botón «Copiar el fragmento» `hidden` y su región `role="status"`.
+
+- **El Fragmento lo compone solo `fragmentoParaInsertar` de `src/lib/atribucion.ts`** (AD-28): un
+  `blockquote` con el texto entero y literal, «— {Autor}, <cite>{Obra}</cite>.» (sin Obra, sin
+  `<cite>`) y el enlace a la canónica con la marca. Nada más —ni año, ni traductor, ni Fuente—, todo
+  escapado con `escapar` de `src/lib/lienzo.ts`, sin guion, imagen, estilo, clase ni recurso del
+  sitio. Una canónica que no sea `http(s)` absoluta o lleve `?…` o `#…` detiene la construcción:
+  el Fragmento nunca lleva `?de=` ni `?via=`. El marcado literal es un supuesto que revisa Héctor,
+  fijado por la tabla de `tests/unit/atribucion.test.ts`. El nombre sale de `nombreEnAtribucion`,
+  la misma función que pinta la Atribución (la 35.4 pondrá ahí el Personaje).
+- El enlace del Fragmento es **texto del campo**, no un `<a>` de la página: sin zona ni exención.
+- `--mono` y `--codigo` (con `--interlineado-codigo`) son **solo** del campo del Fragmento; fuera de
+  `tokens.css` e `InsertaEstaCita.astro` no los nombra nadie (`tests/unit/inserta-esta-cita.test.ts`).
+- **Sin guion propio.** La isla de Copiar (`CopiarCita.astro`) atiende «Cómo citar» e «Inserta esta
+  cita» por atributos neutros: cada bloque `data-copiables`, cada botón `data-copiar-texto`, y lo
+  que copia es el `textContent` del `data-copiable` de al lado (una Referencia, o el campo). Un
+  bloque copiable nuevo usa esos tres atributos, no un segundo recorrido. `data-como-citar`,
+  `data-referencia` y `data-inserta-esta-cita` quedan como identidad (la 30.5 distinguirá el evento
+  por ella). Sin evento de medición: copiar el Fragmento entra en el vocabulario con la 30.5.
+- Pendiente al fundir la Épica 29: los saltos de verso del Fragmento como `<br>` por `versosDe` de
+  `src/lib/verso.ts` (AD-29); hasta entonces el texto va en un solo `<p>`.
+
 ### Al pie de la Página de Cita (Historia 24.6)
 
-Tras las acciones, `src/components/RutasDeSalida.astro` pinta hasta tres grupos, en este orden y
+Tras las acciones y la Tarjeta de Obra (30.1), `src/components/RutasDeSalida.astro` pinta hasta tres grupos, en este orden y
 cada uno con su `h2` (`Rotulo.astro`): **«De la misma obra»** —hasta `MAX_CITAS_DE_LA_MISMA_OBRA`
 (3) Citas de su Obra, en el orden del libro, con la Tarjeta de Cita `ninguna`, zona `misma-obra`,
 y el cierre «Las {n} citas de {título} ›» a la página 1 de la Obra—, **«Más de {Autor}»** —hasta

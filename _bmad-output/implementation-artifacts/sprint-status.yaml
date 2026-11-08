@@ -478,12 +478,12 @@ development_status:
 
   # Épica 30 — citar y llevarse la Cita: corte de serie de SM-4 y SM-C5 (jornada, Héctor).
   # La 30.5 mueve la huella: no se fusiona con huella.test.ts en rojo (despliega Héctor).
-  epic-30: backlog
-  30-1-copiar-antes-de-la-tarjeta-de-obra-en-la-página-de-cita: backlog
-  30-2-la-cita-a-su-medida-y-las-acciones-en-fila-desde-600-px: backlog
-  30-3-cómo-citar-en-la-página-de-cita: backlog
-  30-4-inserta-esta-cita: backlog
-  30-5-copiar-una-referencia-y-copiar-el-fragmento-entran-en-el-voc: backlog
+  epic-30: in-progress
+  30-1-copiar-antes-de-la-tarjeta-de-obra-en-la-página-de-cita: review  # v9-ralph 2026-11-07: Copiar antes de la Tarjeta de Obra (orden nuevo del article, compartir a 3×, corte continuacion-de-cita con DESPLIEGUE_DE_CITAR_Y_LLEVARSE sin valor). Diferido: repetir la medida a 360×640 con la Cita en verso más larga al fundir la Épica 29; la jornada del corte la da Héctor
+  30-2-la-cita-a-su-medida-y-las-acciones-en-fila-desde-600-px: review  # v9-ralph 2026-11-08: medida en el cuerpo del tramo (decisión delegada por Héctor: se queda la construida); Fila de acciones desde 600 px (FilaDeAcciones.astro, para la 28.2); dos rondas de revisión
+  30-3-cómo-citar-en-la-página-de-cita: review  # v9-ralph 2026-11-08: Cómo citar (APA, MLA, Chicago) en la Página de Cita; MAX_BYTES_DE_GUION 6656→7680 medido; diferidos para Héctor: formas literales (punto tras comillas, comillas anidadas, años de la traducción, punto tras la URL), traductor sin Obra, aviso de clave que no es palabra del nombre; el verso con enUnaLinea al fundir la 29
+  30-4-inserta-esta-cita: review  # v9-ralph 2026-11-08: Inserta esta cita (fragmentoParaInsertar, InsertaEstaCita.astro, isla de Copiar con selectores neutros, --mono); guion 7.326 de 7.680; dos pasadas de revisión; diferidos: marcado literal del Fragmento para Héctor, los <br> del verso al fundir la 29
+  30-5-copiar-una-referencia-y-copiar-el-fragmento-entran-en-el-voc: review  # v9-ralph 2026-11-08: fase A: copiado-de-referencia y copiado-de-fragmento en EVENTOS, sin campos, fuera de METRICA_DE_ACCION y retenidos en PENDIENTES; la isla de Copiar los pide; la línea base los informa aparte; guion 7.516 de 7.680; ensayo local 0. La rama de la Épica 30 NO se fusiona mientras tests/unit/huella.test.ts esté en rojo: espera al despliegue del receptor desde la rama y a la huella commiteada. Diferidos: la fase B (soltarlos, commit aparte tras el despliegue) y la medida NFR-7 de la épica
   epic-30-retrospective: optional
 
   # Épica 31 — el pasaje; tras la 30.1 y la 30.3. MAX_CARACTERES_DEL_PASAJE nace sin valor
