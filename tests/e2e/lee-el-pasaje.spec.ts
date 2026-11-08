@@ -161,16 +161,29 @@ test.beforeEach(({}, info) => {
 });
 
 test.describe('Historia 31.2 — «Lee el pasaje» en el navegador', () => {
-  test('a 360 × 640, Copiar acaba en la primera pantalla y el pasaje no lo mueve', async ({ page }) => {
+  /*
+   * Que lo de antes del pasaje sea byte a byte lo de una página sin él —y, con ello, que Copiar
+   * no se mueva respecto de la 30.3— lo fija `tests/unit/lee-el-pasaje.test.ts` sobre `dist/`.
+   * Aquí, lo que solo se ve pintado: Copiar dentro de 640 y el pasaje por debajo, cerrado y
+   * abierto, sin que abrirlo lo desplace.
+   */
+  test('a 360 × 640, Copiar acaba en la primera pantalla y el pasaje va por debajo, cerrado y abierto', async ({ page }) => {
     await page.setViewportSize({ width: 360, height: 640 });
     await irA(page, CON_PASAJE);
     await expect(pasaje(page)).toHaveCount(1);
-    const antes = await page.locator('button.copiar').boundingBox();
-    expect(antes).not.toBeNull();
-    expect(antes!.y + antes!.height).toBeLessThanOrEqual(640);
-    await pasaje(page).evaluate((detalle) => detalle.remove());
-    const despues = await page.locator('button.copiar').boundingBox();
-    expect(despues!.y).toBe(antes!.y);
+    const copiar = await page.locator('button.copiar').boundingBox();
+    expect(copiar).not.toBeNull();
+    expect(copiar!.y + copiar!.height).toBeLessThanOrEqual(640);
+    const cerrado = await pasaje(page).boundingBox();
+    expect(cerrado!.y).toBeGreaterThanOrEqual(copiar!.y + copiar!.height);
+    // Abierto, en coordenadas del documento: hacer clic puede desplazar la ventana.
+    const enElDocumento = (l: ReturnType<Page['locator']>) => l.evaluate((e) => e.getBoundingClientRect().top + window.scrollY);
+    const copiarAntes = await enElDocumento(page.locator('button.copiar'));
+    const pasajeAntes = await enElDocumento(pasaje(page));
+    await pasaje(page).locator('summary').click();
+    await expect(pasaje(page)).toHaveAttribute('open', '');
+    expect(await enElDocumento(page.locator('button.copiar'))).toBe(copiarAntes);
+    expect(await enElDocumento(pasaje(page))).toBe(pasajeAntes);
   });
 
   test('a 320 px, abierto, sin desplazamiento horizontal', async ({ page }) => {

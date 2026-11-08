@@ -279,8 +279,9 @@ describe('31.1 — pasajeDeAparicion: el trozo por forma', () => {
     );
     // Literal: el `\r` interior se queda tal cual; el del borde es blanco y se quita.
     expect(pasaje.texto).toBe('La estrofa con la frase buscada,\r\ny su segundo verso.');
-    // 31.2 — el `\r` del final de la línea queda en su tramo, literal; la línea es una.
-    expect(textosDe(pasaje)).toEqual([['La estrofa con la frase buscada,\r', 'y su segundo verso.']]);
+    // 31.2 — el `\r` del final de la línea no es de la línea: queda fuera de su tramo, entre líneas,
+    // y no se publica delante del `<br>`.
+    expect(textosDe(pasaje)).toEqual([['La estrofa con la frase buscada,', 'y su segundo verso.']]);
   });
 
   it('dos Citas del mismo párrafo: el mismo texto, cada una con su inicio y su fin', () => {

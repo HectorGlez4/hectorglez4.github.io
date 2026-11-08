@@ -26,6 +26,7 @@ import {
 } from './lib/admision.js';
 import { leerBiografia } from './lib/biografia.js';
 import { MAX_CARACTERES_DEL_PASAJE } from './lib/umbrales.js';
+import { problemaDeLosParrafos } from './lib/pasaje.js';
 import {
   guardarOrdenDeLosIndices,
   guardarPosiciones,
@@ -335,18 +336,6 @@ const cargadorDePosiciones: Loader = {
   },
 };
 
-/** Si los tramos de los párrafos de un pasaje caben en su texto, crecientes y sin solaparse. */
-function tramosDePasajeEnOrden(parrafos: readonly (readonly (readonly [number, number])[])[], largo: number): boolean {
-  let anterior = 0;
-  for (const parrafo of parrafos) {
-    for (const [desde, hasta] of parrafo) {
-      if (desde < anterior || desde >= hasta || hasta > largo) return false;
-      anterior = hasta;
-    }
-  }
-  return true;
-}
-
 const posiciones = defineCollection({
   loader: cargadorDePosiciones,
   schema: z.object({
@@ -368,9 +357,10 @@ const posiciones = defineCollection({
           .refine((p) => p.inicio < p.fin && p.fin <= p.texto.length, {
             message: 'El tramo de la Cita no cabe en su pasaje: hace falta inicio < fin ≤ largo del texto.',
           })
-          .refine((p) => tramosDePasajeEnOrden(p.parrafos, p.texto.length), {
-            message:
-              'Los párrafos del pasaje no son tramos de su texto: hace falta 0 ≤ desde < hasta ≤ largo, crecientes y sin solaparse.',
+          .superRefine((p, ctx) => {
+            // Historia 31.2 — los tramos dicen todo el texto, en orden y sin pisarse (`problemaDeLosParrafos`).
+            const problema = problemaDeLosParrafos(p);
+            if (problema !== undefined) ctx.addIssue({ code: 'custom', message: `Los párrafos del pasaje no se pueden pintar: ${problema}.` });
           })
           .optional(),
       }),

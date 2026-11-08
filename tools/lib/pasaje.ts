@@ -151,7 +151,8 @@ export function pasajeDeAparicion(opciones: {
  *   · `prosa-ajustada`: cada bloque es un párrafo de una sola línea, con sus `\n` interiores
  *     dentro del tramo, literales;
  *   · `prosa-por-lineas`: cada línea es un párrafo de una línea.
- * Las líneas en blanco no entran en ningún tramo: separan párrafos.
+ * Las líneas en blanco no entran en ningún tramo: separan párrafos. El `\r` de un final de línea
+ * CRLF tampoco: queda entre tramos, como el `\n`.
  */
 function parrafosDelTrozo(opciones: {
   crudo: string;
@@ -168,7 +169,11 @@ function parrafosDelTrozo(opciones: {
   let actual: [number, number][] | undefined;
   for (let n = primera; n <= ultima; n += 1) {
     const desde = Math.max(lineas[n].inicio, a);
-    const hasta = Math.min(lineas[n].fin, b);
+    let hasta = Math.min(lineas[n].fin, b);
+    // El `\r` de un final de línea CRLF no es de la línea: se queda fuera del tramo, entre líneas,
+    // y no se publica delante de cada `<br>`. Los `\r` interiores de un bloque ajustado sí son
+    // literales, porque quedan dentro del tramo de su bloque.
+    while (hasta > desde && crudo[hasta - 1] === '\r') hasta -= 1;
     if (hasta <= desde || enBlanco(crudo, desde, hasta)) {
       actual = undefined;
       continue;

@@ -17,7 +17,8 @@ import { indiceDe } from './ayuda/pagefind.ts';
 import { componerDocumento } from '../../tools/lib/documento.ts';
 import { colapsarEspacios } from '../../tools/lib/cotejo.ts';
 import { textoConSaltos } from '../../tools/lib/lineas.ts';
-import { partesDelPasaje } from '../../src/lib/pasaje.ts';
+import { partesDelPasaje, problemaDeLosParrafos } from '../../src/lib/pasaje.ts';
+import { lineaDeLaFuente, lineaDeLaFuenteDelPasaje } from '../../src/lib/atribucion.ts';
 import { MODELOS } from '../../src/lib/ingreso.ts';
 
 /**
@@ -97,6 +98,62 @@ describe('31.2 — partesDelPasaje: el reparto, sin interpretar saltos', () => {
     const texto = 'Toda la línea es la Cita y algo.';
     const partes = partesDelPasaje({ texto, inicio: 0, fin: texto.length, parrafos: [[[0, texto.length]]] });
     expect(partes).toEqual([[[{ texto, deLaCita: true }]]]);
+  });
+
+  it('problemaDeLosParrafos: un pasaje bien formado pasa, y cada forma de romperlo se nombra', () => {
+    const texto = 'A\nB\n\nC\nD';
+    const bueno = { texto, inicio: 2, fin: 6, parrafos: [[[0, 1], [2, 3]], [[5, 6], [7, 8]]] as [number, number][][] };
+    expect(problemaDeLosParrafos(bueno)).toBeUndefined();
+    const con = (cambio: Partial<typeof bueno>) => problemaDeLosParrafos({ ...bueno, ...cambio });
+    // El tramo de la Cita, vacío o fuera del texto.
+    expect(con({ inicio: 6, fin: 6 })).toMatch(/tramo de la Cita/);
+    expect(con({ fin: texto.length + 1 })).toMatch(/tramo de la Cita/);
+    // Sin párrafos, o un párrafo sin líneas.
+    expect(con({ parrafos: [] })).toMatch(/al menos un párrafo/);
+    expect(con({ parrafos: [[[0, 1]], []] })).toMatch(/al menos un párrafo/);
+    // Fuera del texto, vacío, al revés o pisando al anterior.
+    expect(con({ parrafos: [[[0, 1], [2, 3]], [[5, 6], [7, 9]]] })).toMatch(/no es un tramo/);
+    expect(con({ parrafos: [[[0, 1], [2, 2]], [[5, 6], [7, 8]]] })).toMatch(/no es un tramo/);
+    expect(con({ parrafos: [[[0, 3], [2, 3]], [[5, 6], [7, 8]]] })).toMatch(/no es un tramo/);
+    // Al revés: lo primero que se ve es el texto que el primer tramo deja atrás.
+    expect(con({ parrafos: [[[5, 6], [7, 8]], [[0, 1], [2, 3]]] })).toBeDefined();
+    // Texto que no cae en ningún tramo: antes, entre dos o tras el último —también una palabra de la Cita—.
+    expect(con({ parrafos: [[[2, 3]], [[5, 6], [7, 8]]] })).toMatch(/entre 0 y 2/);
+    expect(con({ parrafos: [[[0, 1]], [[5, 6], [7, 8]]] })).toMatch(/entre 1 y 5/);
+    expect(con({ parrafos: [[[0, 1], [2, 3]], [[5, 6]]] })).toMatch(/desde 6/);
+    // El blanco fuera de los tramos sí vale: es el de las líneas en blanco y los finales de línea.
+    expect(problemaDeLosParrafos({ texto: 'A\r\nB', inicio: 0, fin: 1, parrafos: [[[0, 1], [3, 4]]] })).toBeUndefined();
+  });
+
+  it('la línea de la Fuente: el texto exacto, con licencia y sin ella, y sin rótulo no hay línea', () => {
+    const url = 'https://es.wikisource.org/wiki/Coplas';
+    expect(lineaDeLaFuente({ url, nombre: 'Wikisource en español', licencia: 'CC BY-SA 4.0' })).toEqual({
+      antes: 'Texto tomado de ',
+      url,
+      rotulo: 'Wikisource en español',
+      despues: '.',
+      licencia: ' CC BY-SA 4.0.',
+    });
+    expect(lineaDeLaFuente({ url, nombre: 'Wikisource en español' })).toEqual({
+      antes: 'Texto tomado de ',
+      url,
+      rotulo: 'Wikisource en español',
+      despues: '.',
+    });
+    // Sin nombre, el anfitrión; sin anfitrión ni identificador, nada.
+    expect(lineaDeLaFuente({ url })?.rotulo).toBe('es.wikisource.org');
+    expect(lineaDeLaFuente({ url: 'no es una dirección', id: '' })).toBeUndefined();
+  });
+
+  it('un pasaje sin Fuente, o con una que no da rótulo, para la construcción nombrando la Cita y el motivo', () => {
+    const url = 'https://es.wikisource.org/wiki/Coplas';
+    expect(lineaDeLaFuenteDelPasaje({ url, nombre: 'Wikisource en español' }, 'una-cita')).toEqual(
+      lineaDeLaFuente({ url, nombre: 'Wikisource en español' }),
+    );
+    expect(() => lineaDeLaFuenteDelPasaje(undefined, 'una-cita')).toThrow(/«una-cita» trae pasaje sin Fuente/);
+    expect(() => lineaDeLaFuenteDelPasaje({ url: 'no es una dirección', id: '' }, 'otra-cita')).toThrow(
+      /«otra-cita» trae pasaje, pero su Fuente \(no es una dirección\) no da rótulo/,
+    );
   });
 
   it('src/lib/pasaje.ts no interpreta saltos ni nombra ninguna forma de las líneas', async () => {
@@ -224,6 +281,7 @@ describe('Historia 31.2 — «Lee el pasaje» en la Página de Cita construida',
   const aLimpiar: string[] = [];
   let proyecto = '';
   let encendido = '';
+  let sinTope = '';
   const html = (ruta: string, de = proyecto) => readFile(paginaConstruida(de, ruta), 'utf8');
 
   beforeAll(async () => {
@@ -245,6 +303,18 @@ describe('Historia 31.2 — «Lee el pasaje» en la Página de Cita construida',
     aLimpiar.push(otra.proyecto);
     expect(otra.codigo, otra.salida).toBe(0);
     encendido = otra.proyecto;
+
+    // El mismo Corpus con el tope en `undefined`, como el árbol: la página de antes, sin pasaje.
+    // Si el árbol ya lo tiene así no hay nada que parchear (la copia rechaza un parche idéntico).
+    const delArbol = await readFile(join(RAIZ, 'src/lib/umbrales.ts'), 'utf8');
+    const sinValor = conElTope(delArbol, 'undefined');
+    expect(sinValor).toContain('MAX_CARACTERES_DEL_PASAJE: number | undefined = undefined;');
+    const sin = await construirConCorpus(corpus(), {
+      ficheros: sinValor === delArbol ? {} : { 'src/lib/umbrales.ts': sinValor },
+    });
+    aLimpiar.push(sin.proyecto);
+    expect(sin.codigo, sin.salida).toBe(0);
+    sinTope = sin.proyecto;
   }, 600_000);
 
   afterAll(async () => {
@@ -375,11 +445,48 @@ describe('Historia 31.2 — «Lee el pasaje» en la Página de Cita construida',
     }
   });
 
+  it('fuera del desplegable y de su hoja, la página es byte a byte la del tope en `undefined`: nada se intercala antes de Copiar y lo copiado, la Imagen y el JSON-LD son los de antes', async () => {
+    for (const slug of CON_PASAJE) {
+      const con = await html(`/cita/${slug}/`);
+      const hoja = /<style>[^<]*\.pasaje \.parrafo[^<]*<\/style>/.exec(con)?.[0];
+      expect(hoja, slug).toBeDefined();
+      const detalle = pasajeDe(con)!;
+      // El pasaje va detrás de Copiar en el orden del documento, y por tanto en el flujo.
+      expect(con.indexOf(detalle), slug).toBeGreaterThan(con.indexOf('<button type="button" class="copiar"'));
+      expect(con.indexOf('<button type="button" class="copiar"'), slug).toBeGreaterThan(-1);
+      expect(con.replace(hoja!, '').replace(detalle, ''), slug).toBe(await html(`/cita/${slug}/`, sinTope));
+    }
+    // Y sin pasaje por su motivo, la página es la misma con el tope o sin él.
+    for (const slug of [SIN_PASAJE, SIN_DOCUMENTO]) {
+      expect(await html(`/cita/${slug}/`), slug).toBe(await html(`/cita/${slug}/`, sinTope));
+    }
+  });
+
   it('con todos los Modelos admitidos encendidos, el desplegable sale byte a byte igual', async () => {
     for (const slug of CON_PASAJE) {
       expect(pasajeDe(await html(`/cita/${slug}/`, encendido)), slug).toBe(pasajeDe(await html(`/cita/${slug}/`)));
     }
   });
+});
+
+describe('Historia 31.2 — un pasaje que no se puede pintar para la construcción', () => {
+  const aLimpiar: string[] = [];
+  afterAll(async () => {
+    for (const p of aLimpiar) await limpiar(p);
+  });
+
+  it('si el productor deja fuera de los tramos una letra del texto, el esquema de `posiciones` la nombra y el build no publica', async () => {
+    const productor = await readFile(join(RAIZ, 'tools/lib/pasaje.ts'), 'utf8');
+    const devuelve = '  return parrafos;\n}';
+    expect(productor.split(devuelve)).toHaveLength(2);
+    // Un fallo del productor: cada tramo pierde su última letra.
+    const roto = productor.replace(devuelve, '  return parrafos.map((l) => l.map(([d, h]) => [d, h - 1] as [number, number]));\n}');
+    const umbrales = conElTope(await readFile(join(RAIZ, 'src/lib/umbrales.ts'), 'utf8'), '400');
+    const con = await construirConCorpus(corpus(), { ficheros: { 'src/lib/umbrales.ts': umbrales, 'tools/lib/pasaje.ts': roto } });
+    aLimpiar.push(con.proyecto);
+    expect(con.codigo, con.salida).not.toBe(0);
+    expect(con.salida).toMatch(/Los párrafos del pasaje no se pueden pintar: el texto entre \d+ y \d+ no cae en ningún tramo/);
+  }, 600_000);
 });
 
 describe('Historia 31.2 — el pasaje solo lo lee la Página de Cita', () => {

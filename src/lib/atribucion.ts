@@ -151,6 +151,31 @@ export function lineaDeLaFuente(
 }
 
 /**
+ * La línea de la Fuente de «Lee el pasaje» — Historia 31.2, AD-28: la de `lineaDeLaFuente`, o
+ * lanza. El pasaje sale de un documento casado con la Fuente de la Cita (`documentosDeCita`), así
+ * que sin Fuente el contrato está roto; y con Fuente pero sin rótulo —ni nombre, ni anfitrión, ni
+ * identificador— no hay con qué atribuirlo. En los dos casos no se pinta un texto ajeno sin decir
+ * de dónde sale, y la construcción se para nombrando la Cita y cuál de los dos es.
+ */
+export function lineaDeLaFuenteDelPasaje(
+  fuente: Parameters<typeof lineaDeLaFuente>[0] | undefined,
+  slug: string,
+): NonNullable<ReturnType<typeof lineaDeLaFuente>> {
+  if (fuente === undefined) {
+    throw new Error(
+      `La Cita «${slug}» trae pasaje sin Fuente que lo atribuya: un pasaje solo sale de un documento de su Fuente (Historia 31.2, AD-28).`,
+    );
+  }
+  const linea = lineaDeLaFuente(fuente);
+  if (linea === undefined) {
+    throw new Error(
+      `La Cita «${slug}» trae pasaje, pero su Fuente (${fuente.url}) no da rótulo —ni nombre, ni anfitrión, ni identificador— con que atribuirlo (Historia 31.2, AD-28).`,
+    );
+  }
+  return linea;
+}
+
+/**
  * Las superficies que **portan** la atribución de un texto ajeno: la Ficha de Autor de la
  * página 1, que la publica visible justo debajo. AD-28 pone aquí el único dueño de esta
  * lista; ninguna página decide por su cuenta dónde se reproduce texto de tercero.

@@ -1294,6 +1294,14 @@ describe('Historia 30.1 — el corte del orden nuevo de la Página de Cita', () 
     // Historia 31.2 — la del pasaje parte la misma serie, y solo esa.
     const delPasaje = CORTES_DE_SERIE_DECLARADOS.find((c) => c.deDondeLlega === 'DESPLIEGUE_DEL_PASAJE')!;
     expect(delPasaje).toMatchObject({ que: '“Lee el pasaje” en la Página de Cita', series: ['continuacion-de-cita'] });
+    // Cada juicio con corte declara como llegadas exactamente los cortes declarados que parten su
+    // serie, en su orden: un nombre a mano en `llegadas` que no fuera una constante de la lista, o
+    // un corte nuevo de la serie que el juicio no declarara, se ve aquí.
+    for (const juicio of JUICIOS_POR_VENTANAS.filter((j) => j.corte !== undefined)) {
+      expect(juicio.corte!.llegadas.map((l) => l.deDondeLlega), juicio.nombre).toEqual(
+        CORTES_DE_SERIE_DECLARADOS.filter((c) => c.series.includes(juicio.corte!.serie)).map((c) => c.deDondeLlega),
+      );
+    }
   });
 
   it('sin jornada: SM-C5 juzga como hasta ahora y nombra la llegada pendiente y, al saltar, la palanca', () => {

@@ -1183,6 +1183,10 @@ localizador que el orden del libro), y lo elige `aparicionQueCuenta`; la página
   tramos de sus párrafos y sus líneas sobre `texto` —`verso`: un verso por línea;
   `prosa-ajustada`: el bloque es una línea y sus `\n` quedan literales; `prosa-por-lineas`: cada
   línea, un párrafo—, y `partesDelPasaje` de `src/lib/pasaje.ts` solo corta. Nunca se recorta.
+  El esquema de `posiciones` rechaza, con `problemaDeLosParrafos` del mismo módulo, unos tramos
+  que se pisen, se salgan del texto o dejen fuera algo que no sea blanco (una palabra perdida de la
+  Cita para el build); el `\r` de un final de línea CRLF queda fuera de los tramos. Un pasaje sin
+  Fuente, o con una sin rótulo, para el build nombrando la Cita (`lineaDeLaFuenteDelPasaje`).
 - Fuera de Pagefind, del JSON-LD, de lo copiado, la Imagen, el Fragmento y la Tarjeta Social
   (`tests/unit/lee-el-pasaje.test.ts`); sin guion, sin zona ni exención, sin `data-ingreso`, e
   idéntico con cualquier Modelo encendido.

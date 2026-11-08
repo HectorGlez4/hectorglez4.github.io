@@ -37,3 +37,37 @@ export function partesDelPasaje(pasaje: Pick<PasajeDeAparicion, 'texto' | 'inici
     }),
   );
 }
+
+/** Lo que no es blanco. */
+const NO_BLANCO = /\S/u;
+
+/**
+ * Por qué un pasaje no se puede pintar tal como llega, o `undefined` si se puede. Lo juzga el
+ * esquema de `posiciones` (`src/content.config.ts`) antes de que ninguna página lo lea, porque
+ * `partesDelPasaje` corta sin mirar: un tramo fuera del texto, uno que pisa al anterior o un
+ * trozo de texto que no cae en ningún tramo publicarían texto repetido o perderían palabras —de
+ * la Cita, también— sin que nada lo dijera.
+ *   · el tramo de la Cita, `inicio < fin ≤ largo`;
+ *   · cada tramo, `desde < hasta ≤ largo`, sin pisar al anterior;
+ *   · lo que queda fuera de los tramos —entre ellos, antes del primero y tras el último— es solo
+ *     blanco: así la unión de los tramos dice todo `texto` y, con él, toda la Cita.
+ */
+export function problemaDeLosParrafos(
+  pasaje: Pick<PasajeDeAparicion, 'texto' | 'inicio' | 'fin' | 'parrafos'>,
+): string | undefined {
+  const { texto, inicio, fin, parrafos } = pasaje;
+  if (!(inicio < fin && fin <= texto.length)) return 'el tramo de la Cita no cabe en su pasaje: hace falta inicio < fin ≤ largo del texto';
+  if (parrafos.length === 0 || parrafos.some((lineas) => lineas.length === 0)) return 'hace falta al menos un párrafo, y cada uno con al menos una línea';
+  let anterior = 0;
+  for (const lineas of parrafos) {
+    for (const [desde, hasta] of lineas) {
+      if (!(Number.isInteger(desde) && Number.isInteger(hasta) && anterior <= desde && desde < hasta && hasta <= texto.length)) {
+        return `el tramo [${desde}, ${hasta}) no es un tramo de su texto: hace falta 0 ≤ desde < hasta ≤ largo, crecientes y sin solaparse`;
+      }
+      if (NO_BLANCO.test(texto.slice(anterior, desde))) return `el texto entre ${anterior} y ${desde} no cae en ningún tramo y no es blanco`;
+      anterior = hasta;
+    }
+  }
+  if (NO_BLANCO.test(texto.slice(anterior))) return `el texto desde ${anterior} no cae en ningún tramo y no es blanco`;
+  return undefined;
+}
