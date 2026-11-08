@@ -15,6 +15,7 @@ import {
   cortesQueLlegaron,
   type CorteLlegado,
 } from '../../src/lib/umbrales.ts';
+import { EVENTOS_DEL_GUION } from '../../src/lib/medicion.ts';
 import { EVENTOS } from '../../src/lib/vocabulario.ts';
 import {
   CONSULTAS_DE_LA_LECTURA,
@@ -751,6 +752,20 @@ describe('Historia 30.5 — copiar una Referencia y copiar el Fragmento, aparte'
     expect(con.superficies).toEqual(sin.superficies);
     expect(con.obra).toEqual(sin.obra);
     expect(superficie(con, 'la Página de Cita').acciones).toBe(7);
+  });
+
+  it('sin ninguna y retenidas, el informe no enseña un cero que parezca leído', () => {
+    const lineas = lineasDeLecturaDeMedicion(sin);
+    const desde = lineas.findIndex((linea) => linea.startsWith('Citar — '));
+    // Fase A: siguen retenidas. Al soltarlas (fase B), este renglón cae y la prueba pide un 0 leído.
+    expect(EVENTOS_DEL_GUION).not.toContain(EVENTOS.copiadoDeReferencia);
+    expect(lineas.slice(desde + 1, desde + 4)).toEqual([
+      `  ${EVENTOS.copiadoDeReferencia}: sin registros; el guion de medición aún no lo emite.`,
+      `  ${EVENTOS.copiadoDeFragmento}: sin registros; el guion de medición aún no lo emite.`,
+      '  En la Página de Cita, copias de la Referencia 0 frente a copiados de la Cita 5 (todos los registros de copiado): ' +
+        'la tesis de la v9, sin juzgarla.',
+    ]);
+    expect(lineas).toContain(LINEA_SIN_META);
   });
 
   it('sin ninguna, la lectura las da a cero, que es un cero leído', () => {

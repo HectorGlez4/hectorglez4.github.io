@@ -5,7 +5,7 @@ created: '2026-11-08'
 status: 'done'
 baseline_revision: 'f81a36ff7dd5ade29c7f78fdf83ee7dad062ccc8'
 review_loop_iteration: 0
-followup_review_recommended: true
+followup_review_recommended: false
 context:
   - '{project-root}/_bmad-output/implementation-artifacts/epic-30-context.md'
   - '{project-root}/_bmad-output/implementation-artifacts/spec-30-4-inserta-esta-cita.md'
@@ -142,6 +142,18 @@ Las capas de revisión son externas (orquestador v9-ralph) y no trajeron hallazg
 
 Rechazados, con su motivo: el `status: done` frente a `review` de `sprint-status.yaml` es el reparto del bucle (el spec cierra la fase A; la línea del tablero la escribe el paso de cierre y la fase B está diferida); el `findLastIndex` es correcto por construcción (la descartable va siempre detrás) y la baliza la distingue; la prueba por texto del guion es el patrón de la casa para guiones en línea y el comportamiento lo cubren las e2e; `total` del censo queda dicho en el informe; `citar` obligatorio compila (`astro check` 0 errores; no hay otro constructor); `textoDeTramo(vigente, …)` es el mismo encabezado que «Superficies con lectura»; `referenciasEnCita` y `porEvento` clasifican con el mismo `superficieDe`; la tesis declara su denominador, que es la lectura (a) que el spec fija; el estilo de la Referencia ya está diferido a Héctor; el margen del guion es riesgo residual anotado; el párrafo transitorio de AGENTS.md lo reescribe la fase B diferida; la cabecera de la isla deja de describir el vocabulario; el receptor local para la fase A no aplica (los eventos están retenidos y la fase B está diferida); `ACCIONES_DE_CITAR` frente a la consulta ya lo fija la prueba del SQL de `medicion-orden`; sin Página de Cita declarada no hay sitio; lo anterior al tramo vigente no entra, como en toda cifra de la lectura.
 
+### 2026-11-08 — Review pass (3)
+- intent_gap: 0
+- bad_spec: 0
+- patch: 2 (high 0, medium 1, low 1)
+- defer: 0
+- reject: 40 (medium 1, low 39)
+- addressed_findings:
+  - `[medium]` `[patch]` Mientras las dos acciones siguen retenidas, el informe de `npm run medicion` enseñaba `copiado-de-referencia: 0.` y `copiado-de-fragmento: 0.`, un cero que el guion garantiza y que parece medido, y la rama del cero no tenía prueba (blind-hunter, edge-case-hunter, verification-gap, intent-alignment). `lineasDeLecturaDeMedicion` (`tools/lib/lineaBase.ts`) dice ahora «sin registros; el guion de medición aún no lo emite» para un evento sin registros que no está en `EVENTOS_DEL_GUION` (`src/lib/medicion.ts`); al soltarlos en la fase B vuelve solo al 0 leído. Prueba nueva en `tests/unit/linea-base.test.ts` sobre los renglones del caso sin filas, en rojo sin el arreglo y en verde con él.
+  - `[low]` `[patch]` El primer bloque del «Auto Run Result» (7.516 bytes, recomendación `false`) quedaba sin marcar como superado por la pasada 2 (blind-hunter, verification-gap, ac-auditor). Lleva ahora la marca «superado por la pasada 2».
+
+Rechazados, con su motivo (casi todos repiten hallazgos ya rechazados en la pasada 2, con el mismo motivo): el `status`/`review` del tablero y el comentario «7.516» de `sprint-status.yaml` son del paso de cierre del bucle, que escribe esa línea; `review_loop_iteration: 0` es el reinicio que manda el flujo al abrir una pasada sobre un spec `done`; lo anterior al tramo vigente no entra, como en toda cifra de la lectura; `total` del censo y «Fuera del censo» ya los dice el informe; la tesis no se juzga, así que no pasa por `MIN_LECTURAS_DE_LINEA_BASE`; sin Página de Cita declarada no hay sitio; una `copiado-de-referencia` en la Obra es la de la 32.5, no una anomalía; `referenciasEnCita` y `porEvento` clasifican con el mismo `superficieDe`; `citar` obligatorio compila y no tiene otro constructor; la prueba por texto del guion es el patrón de la casa y el comportamiento lo cubren las e2e locales; el evento calculado al preparar el bloque, un bloque con las dos identidades o `data-anuncio` ausente los impide la prueba de `dist/` del marcado; `__medir` sin arranque lo impide el armazón (toda página que carga el fichero lo abre); varias pulsaciones son varias copias, por diseño; la expresión `data-copiables` y el `>` en un atributo son especulativos sobre un marcado que genera el build; `findLastIndex` y las cifras derivadas (91, 1638…) ya se explicaron; `null` frente a `undefined` en el espía y los 300 ms de espera son de pruebas locales que hoy pasan; el acoplamiento de las e2e a la 30.4 es deliberado (la secuencia mezclada); el párrafo transitorio de AGENTS.md y el receptor de la fase A los cubre la fase B diferida; los cuatro diferidos del frontmatter son anteriores a la revisión (salen del plan).
+
 ## Design Notes
 
 Por qué la exclusión en `acciones` de superficie: es un recuento de registros que ya tiene historia; sumarle los copiados de citar movería la serie el día que se suelten, sin decirlo. Por qué la consulta `acciones` y no una sexta: cada consulta es un recorrido de la tabla contra la cuota de lectura de D1 (Historia 23.13).
@@ -187,6 +199,8 @@ Blocking condition: ninguna. `tests/unit/huella.test.ts` en rojo es **esperado**
 - `AGENTS.md` — el párrafo de la medición nombra las dos acciones y la fase B.
 - `sprint-status.yaml` (commit aparte) — la 30.5 en `review`, con el aviso de no fusionar mientras la huella esté en rojo.
 
+*(Pasada 1, superada por la pasada 2: sus bytes y su recomendación ya no valen; véase abajo.)*
+
 **Revisión.** Sin hallazgos externos en esta pasada: 0 parches, 0 diferidos, 0 rechazados. Recomendación de revisión de seguimiento: `false` (0 parches; puntuación 0).
 
 **Verificación.**
@@ -226,3 +240,22 @@ Blocking condition: ninguna. `tests/unit/huella.test.ts` en rojo es **esperado**
 - `npm test` — 7.322 en verde, 1 en rojo: solo `tests/unit/huella.test.ts`, el rojo esperado hasta el despliegue del receptor.
 
 **Riesgos residuales.** El margen del guion baja a 103 bytes para la Épica 31 (la fase B no toca la isla). Un bloque copiable nuevo copia sin medir hasta que su historia declare su evento y su identidad (la prueba de `dist/` lo para si no trae una de las dos conocidas). Fase B, NFR-7 de la épica y el despliegue siguen diferidos.
+
+### Pasada de revisión 3 (hallazgos externos de las cinco capas)
+
+**Resumen.** Dos parches, ningún `bad_spec` ni `intent_gap`, nada diferido; 40 rechazados con su motivo en el Review Triage Log (casi todos repiten los de la pasada 2). Mientras las dos acciones siguen retenidas, el informe de la línea base ya no enseña un `0.` que parezca medido: dice «sin registros; el guion de medición aún no lo emite», y vuelve solo al cero leído cuando la fase B las suelte en `EVENTOS_DEL_GUION`. El primer bloque de este resultado queda marcado como superado.
+
+**Ficheros.**
+- `tools/lib/lineaBase.ts` — el renglón de un evento de citar sin registros y retenido lo dice; importa `EVENTOS_DEL_GUION` de `src/lib/medicion.ts`.
+- `tests/unit/linea-base.test.ts` — prueba nueva de los renglones del caso sin filas (en rojo sin el arreglo, en verde con él).
+- Este spec — triage de la pasada 3 y la marca de superado en el bloque de la pasada 1.
+
+**Revisión.** Parches 2 (alta 0, media 1, baja 1); diferidos 0; rechazados 40. Recomendación de revisión de seguimiento: `false` (3 × 1 + 1 × 1 = 4 < 5).
+
+**Verificación.**
+- `npx vitest run` de vocabulario, migraciones, receptor, linea-base, medicion-orden, medicion-secuencias y orden-de-llegada — 514 en verde.
+- `npx astro check` — 0 errores, 0 avisos.
+- `npm test` — 7.323 en verde, 1 en rojo: solo `tests/unit/huella.test.ts`, el rojo esperado hasta el despliegue del receptor.
+- La isla, el guion y `dist/` no cambian en esta pasada: los bytes (7.577 de 7.680), el `ensayo` y las e2e de la pasada 2 siguen valiendo.
+
+**Riesgos residuales.** Los de la pasada 2. Al soltar los eventos (fase B), la prueba nueva cae a propósito en su primera aserción y pide el cero leído.
