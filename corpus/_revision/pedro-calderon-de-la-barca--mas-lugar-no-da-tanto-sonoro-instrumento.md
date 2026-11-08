@@ -1,5 +1,5 @@
 ---
-texto: "Mas lugar no da 'Tanto sonoro instrumento, (Tocan cajas.) Que avisa que sale ya El Rey con su parlamento."
+texto: "Mas lugar no da\n'Tanto sonoro instrumento, (Tocan cajas.)\nQue avisa que sale ya\nEl Rey con su parlamento."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-mas-lugar-no-da-tanto-sonoro-instrumento"
 procedencia:

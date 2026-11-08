@@ -1,5 +1,5 @@
 ---
-texto: "Madre de engaño y traición, El halagar con la boca Y matar con la intención."
+texto: "Madre de engaño y traición,\nEl halagar con la boca\nY matar con la intención."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-madre-de-engano-y-traicion-el-halagar"
 procedencia:

@@ -1,5 +1,5 @@
 ---
-texto: "Y tú, al abrir los ojos, no en oscuro aposento, entre sábanas fragantes, te encuentres, blando alumno de Epicuro;"
+texto: "Y tú, al abrir los ojos, no en oscuro\naposento, entre sábanas fragantes,\nte encuentres, blando alumno de Epicuro;"
 autor: "andres-bello"
 slug: "andres-bello-y-tu-al-abrir-los-ojos-no"
 procedencia:

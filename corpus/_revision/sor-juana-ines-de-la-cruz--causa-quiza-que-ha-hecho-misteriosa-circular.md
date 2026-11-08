@@ -1,5 +1,5 @@
 ---
-texto: "Causa, quizá, que ha hecho misteriosa, circular, denotando, la corona, en círculo dorado, que el afán es no menos continuado."
+texto: "Causa, quizá, que ha hecho misteriosa,\ncircular, denotando, la corona,\nen círculo dorado,\nque el afán es no menos continuado."
 autor: "sor-juana-ines-de-la-cruz"
 slug: "sor-juana-ines-de-la-cruz-causa-quiza-que-ha-hecho-misteriosa-circular"
 procedencia:

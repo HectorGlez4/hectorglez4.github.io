@@ -1,5 +1,5 @@
 ---
-texto: "Vase [ISABEL] CRESPO: Como echáis de ver, ¡ah, impíos!, que estoy sin espada, aleves, falsos y traidores!"
+texto: "Vase [ISABEL]\nCRESPO: Como echáis de ver, ¡ah, impíos!,\nque estoy sin espada, aleves,\nfalsos y traidores!"
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-vase-isabel-crespo-como-echais-de-ver"
 procedencia:

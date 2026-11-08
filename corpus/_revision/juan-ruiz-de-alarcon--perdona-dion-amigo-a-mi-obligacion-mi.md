@@ -1,5 +1,5 @@
 ---
-texto: "Perdona, Dion amigo, a mi obligacion mi error, que estando loco de amor, 135 no hablan las leyes conmigo."
+texto: "Perdona, Dion amigo,\na mi obligacion mi error,\nque estando loco de amor, 135\nno hablan las leyes conmigo."
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-perdona-dion-amigo-a-mi-obligacion-mi"
 procedencia:

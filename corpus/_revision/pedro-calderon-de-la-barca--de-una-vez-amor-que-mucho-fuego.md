@@ -1,5 +1,5 @@
 ---
-texto: "De una vez amor, ¿qué mucho, fuego de cuatro maneras, mina, incendio, pieza y rayo, postre, abrase, asombre y hiera?"
+texto: "De una vez amor, ¿qué mucho,\nfuego de cuatro maneras,\nmina, incendio, pieza y rayo,\npostre, abrase, asombre y hiera?"
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-de-una-vez-amor-que-mucho-fuego"
 procedencia:

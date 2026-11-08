@@ -1,5 +1,5 @@
 ---
-texto: "Arrodíllase CRESPO: Álzate, Isabel, del suelo; no, no estás más de rodillas; que a no haber estos sucesos que atormenten y persigan, ociosas fueran las penas, sin estimación las dichas."
+texto: "Arrodíllase\nCRESPO: Álzate, Isabel, del suelo;\nno, no estás más de rodillas;\nque a no haber estos sucesos\nque atormenten y persigan,\nociosas fueran las penas,\nsin estimación las dichas."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-arrodillase-crespo-alzate-isabel-del-suelo-no"
 procedencia:

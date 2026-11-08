@@ -1,5 +1,5 @@
 ---
-texto: "LOPE: ...que un alcaldillo de aquí al capitán tiene preso; y, ¡voto a Dios!, no he sentido en toda aquesta jornada esta pierna excomulgada si no es hoy, que me ha impedido el haber antes llegado donde el castigo le dé."
+texto: "LOPE: ...que un alcaldillo de aquí\nal capitán tiene preso;\ny, ¡voto a Dios!, no he sentido\nen toda aquesta jornada\nesta pierna excomulgada\nsi no es hoy, que me ha impedido\nel haber antes llegado\ndonde el castigo le dé."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-lope-que-un-alcaldillo-de-aqui-al"
 procedencia:

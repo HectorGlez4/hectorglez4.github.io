@@ -1,5 +1,5 @@
 ---
-texto: "El más truhán se lleva la mano al corazón, y el bruto más espeso se carga de razón."
+texto: "El más truhán se lleva la mano al corazón,\ny el bruto más espeso se carga de razón."
 autor: "antonio-machado"
 temas:
   - "la-virtud"

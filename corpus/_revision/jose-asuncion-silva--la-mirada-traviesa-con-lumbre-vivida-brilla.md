@@ -1,5 +1,5 @@
 ---
-texto: "La mirada traviesa con lumbre vívida brilla bajo de la blonda espesa de la española mantilla."
+texto: "La mirada traviesa\ncon lumbre vívida brilla\nbajo de la blonda espesa\nde la española mantilla."
 autor: "jose-asuncion-silva"
 slug: "jose-asuncion-silva-la-mirada-traviesa-con-lumbre-vivida-brilla"
 procedencia:

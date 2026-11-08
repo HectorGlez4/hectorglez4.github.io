@@ -1,5 +1,5 @@
 ---
-texto: "Del tiempo, más inclinado A los estudios que dado A mujeres, enviudó Sin hijos; y vos y yo Aspiramos á este Estado."
+texto: "Del tiempo, más inclinado\nA los estudios que dado\nA mujeres, enviudó\nSin hijos; y vos y yo\nAspiramos á este Estado."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-del-tiempo-mas-inclinado-a-los-estudios"
 procedencia:

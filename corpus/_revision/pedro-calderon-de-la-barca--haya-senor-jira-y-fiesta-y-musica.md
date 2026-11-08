@@ -1,5 +1,5 @@
 ---
-texto: "Haya, señor, jira y fiesta y música a su ventana; que con esto podrás verla y aun hablarla."
+texto: "Haya, señor, jira y fiesta\ny música a su ventana;\nque con esto podrás verla\ny aun hablarla."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-haya-senor-jira-y-fiesta-y-musica"
 procedencia:

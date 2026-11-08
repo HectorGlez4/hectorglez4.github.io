@@ -1,5 +1,5 @@
 ---
-texto: "¿No valiera más que su cólera altiva me diera la muerte, cuando llegó a ver la suerte mía?"
+texto: "¿No valiera\nmás que su cólera altiva\nme diera la muerte, cuando\nllegó a ver la suerte mía?"
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-no-valiera-mas-que-su-colera-altiva"
 procedencia:

@@ -1,5 +1,5 @@
 ---
-texto: "El así, como no sabe Lo que pasa, y oye el ruido, va á los ojos á asomarse."
+texto: "El así, como no sabe\nLo que pasa, y oye el ruido, va á los ojos á asomarse."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-el-asi-como-no-sabe-lo-que"
 procedencia:

@@ -1,5 +1,5 @@
 ---
-texto: "fingido bien que ansioso el pensamiento pensaba asir, y aéreo espectro apaña, luz a los ojos y a las manos viento."
+texto: "fingido bien que ansioso el pensamiento\npensaba asir, y aéreo espectro apaña,\nluz a los ojos y a las manos viento."
 autor: "andres-bello"
 slug: "andres-bello-fingido-bien-que-ansioso-el-pensamiento-pensaba"
 procedencia:

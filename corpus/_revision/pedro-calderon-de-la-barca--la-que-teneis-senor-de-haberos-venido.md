@@ -1,5 +1,5 @@
 ---
-texto: "La que tenéis, señor, de haberos venido, me haced merced de contar; que venís mortal, señor."
+texto: "La que tenéis,\nseñor, de haberos venido,\nme haced merced de contar;\nque venís mortal, señor."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-la-que-teneis-senor-de-haberos-venido"
 procedencia:

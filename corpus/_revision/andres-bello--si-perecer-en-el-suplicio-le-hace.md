@@ -1,5 +1,5 @@
 ---
-texto: "¿Si perecer en el suplicio le hace a vista de los suyos?"
+texto: "¿Si perecer en el suplicio le hace\na vista de los suyos?"
 autor: "andres-bello"
 slug: "andres-bello-si-perecer-en-el-suplicio-le-hace"
 procedencia:

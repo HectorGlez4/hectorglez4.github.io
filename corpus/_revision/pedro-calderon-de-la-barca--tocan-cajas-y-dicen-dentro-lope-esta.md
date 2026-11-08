@@ -1,5 +1,5 @@
 ---
-texto: "Tocan cajas y dicen dentro LOPE: Ésta es la cárcel, soldados, adonde está del capitán."
+texto: "Tocan cajas y dicen dentro\nLOPE: Ésta es la cárcel, soldados,\nadonde está del capitán."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-tocan-cajas-y-dicen-dentro-lope-esta"
 procedencia:

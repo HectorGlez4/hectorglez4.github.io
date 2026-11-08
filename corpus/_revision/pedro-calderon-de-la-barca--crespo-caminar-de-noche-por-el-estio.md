@@ -1,5 +1,5 @@
 ---
-texto: "CRESPO: Caminar de noche por el estío, antes es comodidad, que fatigo; y es preciso que a don Lope alcance luego al instante. (Enternecido Aparte me deja, cierto, el muchacho, aunque en público me animo.) ISABEL: Éntrate, señor, en casa."
+texto: "CRESPO: Caminar\nde noche por el estío,\nantes es comodidad,\nque fatigo; y es preciso\nque a don Lope alcance luego\nal instante. (Enternecido Aparte\nme deja, cierto, el muchacho,\naunque en público me animo.)\nISABEL: Éntrate, señor, en casa."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-crespo-caminar-de-noche-por-el-estio"
 procedencia:

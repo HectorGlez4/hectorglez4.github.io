@@ -1,0 +1,31 @@
+---
+/**
+ * Texto de Cita — Historia 29.3, el único pintor del texto de una Cita en el HTML.
+ *
+ * Lo usan el Bloque de Cita (Página de Cita, Cita del Día), la Tarjeta de Cita de los listados
+ * y el material del Kit y del lote, siempre **dentro** de su elemento de hoy: este componente
+ * no pone ninguno alrededor.
+ *
+ * - Un verso (texto sin saltos): `«{texto}»` tal cual, sin elemento ni atributo nuevo, para que
+ *   el HTML de una Cita de prosa no cambie un byte.
+ * - Varios versos: un `span.verso` por verso, « dentro del primero y » dentro del último, con un
+ *   nodo de texto `' '` entre dos `span`: el texto que extrae Pagefind y el nombre accesible
+ *   salen de los nodos de texto, y sin ese espacio «voy:Arte» sería una palabra.
+ *
+ * El `display:block` va en atributo y no en un `<style>` por lo mismo que `Sostener.astro`:
+ * Astro emite el `<style>` de todo componente importado aunque no se pinte, y cambiaría el CSS
+ * de toda página. Ni color ni tipografía: el verso hereda el `quote-*` de su tramo y la serif
+ * del elemento padre. Los versos los da `versosDe` de `src/lib/verso.ts`, su único dueño.
+ */
+import { versosDe } from '../lib/verso.ts';
+
+interface Props {
+  texto: string;
+}
+
+const { texto } = Astro.props;
+const versos = versosDe(texto);
+const ultimo = versos.length - 1;
+---
+
+{versos.length === 1 ? `«${texto}»` : versos.map((verso, i) => (<>{i > 0 && ' '}<span class="verso" style="display:block">{i === 0 && '«'}{verso}{i === ultimo && '»'}</span></>))}

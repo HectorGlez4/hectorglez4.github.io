@@ -1,5 +1,5 @@
 ---
-texto: "Pues muerte aquí te daré, Porque no sepas que sé (Asela.) Que sabes ﬂaquezas mías."
+texto: "Pues muerte aquí te daré,\nPorque no sepas que sé (Asela.)\nQue sabes ﬂaquezas mías."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-pues-muerte-aqui-te-dare-porque-no"
 procedencia:

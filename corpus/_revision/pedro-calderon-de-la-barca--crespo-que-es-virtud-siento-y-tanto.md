@@ -1,5 +1,5 @@
 ---
-texto: "CRESPO: Que es virtud siento, y tanto, que un instrumento tengo en que cantéis mejor."
+texto: "CRESPO: Que es virtud siento,\ny tanto, que un instrumento\ntengo en que cantéis mejor."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-crespo-que-es-virtud-siento-y-tanto"
 procedencia:

@@ -1,5 +1,5 @@
 ---
-texto: "¡Que estoy perdido, os confieso, de cólera!..."
+texto: "¡Que estoy perdido, os confieso,\nde cólera!..."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-que-estoy-perdido-os-confieso-de-colera"
 procedencia:

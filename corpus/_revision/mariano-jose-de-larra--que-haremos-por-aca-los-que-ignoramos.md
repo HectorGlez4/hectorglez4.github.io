@@ -1,5 +1,5 @@
 ---
-texto: "¿Qué haremos por acá los que ignoramos el fraude, y la lisonja, y la mentira, y los que por orgullo no adulamos?"
+texto: "¿Qué haremos por acá los que ignoramos\nel fraude, y la lisonja, y la mentira,\ny los que por orgullo no adulamos?"
 autor: "mariano-jose-de-larra"
 slug: "mariano-jose-de-larra-que-haremos-por-aca-los-que-ignoramos"
 procedencia:

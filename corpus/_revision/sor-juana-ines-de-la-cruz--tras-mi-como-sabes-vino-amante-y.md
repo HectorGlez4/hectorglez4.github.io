@@ -1,5 +1,5 @@
 ---
-texto: "Tras mí, como sabes, vino amante y fino don Juan, quitándose de galán lo que se añade de fino, sin dejar a qué aspirar a la ley del albedrío, porque si él es ya tan mío ¿qué tengo que desear?"
+texto: "Tras mí, como sabes, vino\namante y fino don Juan,\nquitándose de galán\nlo que se añade de fino,\nsin dejar a qué aspirar\na la ley del albedrío,\nporque si él es ya tan mío\n¿qué tengo que desear?"
 autor: "sor-juana-ines-de-la-cruz"
 slug: "sor-juana-ines-de-la-cruz-tras-mi-como-sabes-vino-amante-y"
 procedencia:

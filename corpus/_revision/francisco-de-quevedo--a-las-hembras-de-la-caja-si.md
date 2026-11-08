@@ -1,5 +1,5 @@
 ---
-texto: "A las hembras de la caja, Si con la expulsión fatal La desventurada Corte No ha acabado de enviudar,"
+texto: "A las hembras de la caja,\nSi con la expulsión fatal\nLa desventurada Corte\nNo ha acabado de enviudar,"
 autor: "francisco-de-quevedo"
 slug: "francisco-de-quevedo-a-las-hembras-de-la-caja-si"
 procedencia:

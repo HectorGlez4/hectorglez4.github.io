@@ -1,5 +1,5 @@
 ---
-texto: "Fuera, mas que muerte fiera, Ira, rabia y dolor fuerte; Fuera muerte: desta suerte Su rigor he ponderado."
+texto: "Fuera, mas que muerte fiera,\nIra, rabia y dolor fuerte;\nFuera muerte: desta suerte\nSu rigor he ponderado."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-fuera-mas-que-muerte-fiera-ira-rabia"
 procedencia:

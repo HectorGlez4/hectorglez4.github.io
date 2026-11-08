@@ -1,5 +1,5 @@
 ---
-texto: "A éste, ¡ay de mí!, Celia mía, no sé si es gusto o capricho, y..."
+texto: "A éste, ¡ay de mí!, Celia mía,\nno sé si es gusto o capricho,\ny..."
 autor: "sor-juana-ines-de-la-cruz"
 slug: "sor-juana-ines-de-la-cruz-a-este-ay-de-mi-celia-mia"
 procedencia:

@@ -1,5 +1,5 @@
 ---
-texto: "IULIA Ya me parece, señor, que vais boluiendo la hoja. 800 LEONARDO Negar lo que os he querido, es negar olas al mar."
+texto: "IULIA\nYa me parece, señor,\nque vais boluiendo la hoja. 800\nLEONARDO\nNegar lo que os he querido,\nes negar olas al mar."
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-iulia-ya-me-parece-senor-que-vais"
 procedencia:

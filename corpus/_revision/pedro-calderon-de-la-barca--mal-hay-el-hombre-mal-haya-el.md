@@ -1,5 +1,5 @@
 ---
-texto: "¡Mal hay el hombre, mal haya el hombre que solicita por fuerza ganar un alma!"
+texto: "¡Mal hay el hombre, mal haya\nel hombre que solicita\npor fuerza ganar un alma!"
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-mal-hay-el-hombre-mal-haya-el"
 procedencia:

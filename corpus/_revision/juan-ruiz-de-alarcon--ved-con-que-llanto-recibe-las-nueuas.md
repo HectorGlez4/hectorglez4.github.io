@@ -1,5 +1,5 @@
 ---
-texto: "Ved con que llanto recibe las nueuas tristes de ausencia, 645 notad, como de paciencia, para sufrir se apercibe."
+texto: "Ved con que llanto recibe\nlas nueuas tristes de ausencia, 645\nnotad, como de paciencia,\npara sufrir se apercibe."
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-ved-con-que-llanto-recibe-las-nueuas"
 procedencia:

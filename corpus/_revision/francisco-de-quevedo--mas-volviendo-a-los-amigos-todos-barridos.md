@@ -1,5 +1,5 @@
 ---
-texto: "Mas volviendo a los amigos, Todos barridos están, Los más se fueron en uvas Y los menos en agraz."
+texto: "Mas volviendo a los amigos,\nTodos barridos están,\nLos más se fueron en uvas\nY los menos en agraz."
 autor: "francisco-de-quevedo"
 slug: "francisco-de-quevedo-mas-volviendo-a-los-amigos-todos-barridos"
 procedencia:

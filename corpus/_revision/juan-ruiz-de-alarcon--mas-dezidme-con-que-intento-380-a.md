@@ -1,5 +1,5 @@
 ---
-texto: "Mas dezidme, ¿con que intento 380 a vuestra prima engañais; y no le comunicais este sutil pensamiento?"
+texto: "Mas dezidme, ¿con que intento 380\na vuestra prima engañais;\ny no le comunicais\neste sutil pensamiento?"
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-mas-dezidme-con-que-intento-380-a"
 procedencia:

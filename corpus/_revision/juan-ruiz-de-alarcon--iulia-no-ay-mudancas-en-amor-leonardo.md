@@ -1,5 +1,5 @@
 ---
-texto: "IULIA ¿No ay mudanças en amor, Leonardo no soy muger?"
+texto: "IULIA\n¿No ay mudanças en amor,\nLeonardo no soy muger?"
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-iulia-no-ay-mudancas-en-amor-leonardo"
 procedencia:

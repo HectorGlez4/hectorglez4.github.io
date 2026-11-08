@@ -1,5 +1,5 @@
 ---
-texto: "MENDO: Pasar procura, sin que entiendan mi tristeza."
+texto: "MENDO: Pasar procura,\nsin que entiendan mi tristeza."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-mendo-pasar-procura-sin-que-entiendan-mi"
 procedencia:

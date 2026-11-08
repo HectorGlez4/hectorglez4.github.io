@@ -1,5 +1,5 @@
 ---
-texto: "REBOLLEDO: Yo no pienso ya cantar en mi vida."
+texto: "REBOLLEDO: Yo no pienso ya cantar\nen mi vida."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-rebolledo-yo-no-pienso-ya-cantar-en"
 procedencia:

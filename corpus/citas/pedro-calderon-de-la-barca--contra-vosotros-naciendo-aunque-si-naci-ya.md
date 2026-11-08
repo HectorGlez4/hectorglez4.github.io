@@ -1,5 +1,5 @@
 ---
-texto: "Contra vosotros, naciendo; Aunque si nací, ya entiendo Qué delito he cometido: Bastante causa ha tenido Vuestra justicia y rigor; Pues el delito mayor Del hombre es haber nacido."
+texto: "Contra vosotros, naciendo;\nAunque si nací, ya entiendo\nQué delito he cometido:\nBastante causa ha tenido\nVuestra justicia y rigor;\nPues el delito mayor\nDel hombre es haber nacido."
 autor: "pedro-calderon-de-la-barca"
 temas:
   - "la-vida"

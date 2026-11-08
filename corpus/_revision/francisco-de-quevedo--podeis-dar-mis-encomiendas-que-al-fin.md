@@ -1,5 +1,5 @@
 ---
-texto: "Podéis dar mis encomiendas, Que al fin es cosa de dar: Besamanos a las niñas, Saludes a las de edad."
+texto: "Podéis dar mis encomiendas,\nQue al fin es cosa de dar:\nBesamanos a las niñas,\nSaludes a las de edad."
 autor: "francisco-de-quevedo"
 slug: "francisco-de-quevedo-podeis-dar-mis-encomiendas-que-al-fin"
 procedencia:

@@ -1,5 +1,5 @@
 ---
-texto: "¡Cuántos, teniendo en el mundo algún defecto consigo, le han borrado por humildes; y cuántos, que no han tenido defecto, se le han hallado, por estar ellos mal vistos!"
+texto: "¡Cuántos, teniendo en el mundo\nalgún defecto consigo,\nle han borrado por humildes;\ny cuántos, que no han tenido\ndefecto, se le han hallado,\npor estar ellos mal vistos!"
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-cuantos-teniendo-en-el-mundo-algun-defecto"
 procedencia:

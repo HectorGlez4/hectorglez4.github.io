@@ -1,5 +1,5 @@
 ---
-texto: "Apenas es flor de pluma Ó ramillete con alas, Cuando las etéreas salas Corta con velocidad."
+texto: "Apenas es flor de pluma\nÓ ramillete con alas,\nCuando las etéreas salas\nCorta con velocidad."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-apenas-es-flor-de-pluma-o-ramillete"
 procedencia:

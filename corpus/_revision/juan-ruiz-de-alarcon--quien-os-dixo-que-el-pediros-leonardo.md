@@ -1,5 +1,5 @@
 ---
-texto: "¿Quien os dixo que el pediros Leonardo, que no os partais, es porque pena me dais, 755 porque os amo con partiros?"
+texto: "¿Quien os dixo que el pediros\nLeonardo, que no os partais,\nes porque pena me dais, 755\nporque os amo con partiros?"
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-quien-os-dixo-que-el-pediros-leonardo"
 procedencia:

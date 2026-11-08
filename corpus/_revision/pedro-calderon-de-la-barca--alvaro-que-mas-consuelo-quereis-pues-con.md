@@ -1,5 +1,5 @@
 ---
-texto: "ÁLVARO: ¿Qué más consuelo queréis, pues con la vida volvéis?"
+texto: "ÁLVARO: ¿Qué más consuelo queréis,\npues con la vida volvéis?"
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-alvaro-que-mas-consuelo-quereis-pues-con"
 procedencia:

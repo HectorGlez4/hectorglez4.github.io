@@ -1,5 +1,5 @@
 ---
-texto: "Todo cañón, todo guro, Todo mandil jayán, Y toda iza con greña, Y cuantos saben fuñar,"
+texto: "Todo cañón, todo guro,\nTodo mandil jayán,\nY toda iza con greña,\nY cuantos saben fuñar,"
 autor: "francisco-de-quevedo"
 slug: "francisco-de-quevedo-todo-canon-todo-guro-todo-mandil-jayan"
 procedencia:

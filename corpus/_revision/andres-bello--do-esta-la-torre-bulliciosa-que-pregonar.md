@@ -1,5 +1,5 @@
 ---
-texto: "¿Dó está la torre bulliciosa que pregonar solía, de antorchas coronada, la pompa augusta del solemne día?"
+texto: "¿Dó está la torre bulliciosa\nque pregonar solía,\nde antorchas coronada,\nla pompa augusta del solemne día?"
 autor: "andres-bello"
 slug: "andres-bello-do-esta-la-torre-bulliciosa-que-pregonar"
 procedencia:

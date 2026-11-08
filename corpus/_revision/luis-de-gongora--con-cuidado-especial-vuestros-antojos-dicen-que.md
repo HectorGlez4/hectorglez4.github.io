@@ -1,5 +1,5 @@
 ---
-texto: "Con cuidado especial vuestros antojos dicen que quieren traducir al griego, no habiéndolo mirado vuestros ojos."
+texto: "Con cuidado especial vuestros antojos\ndicen que quieren traducir al griego,\nno habiéndolo mirado vuestros ojos."
 autor: "luis-de-gongora"
 slug: "luis-de-gongora-con-cuidado-especial-vuestros-antojos-dicen-que"
 procedencia:

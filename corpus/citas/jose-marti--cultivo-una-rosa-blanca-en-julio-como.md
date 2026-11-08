@@ -1,5 +1,5 @@
 ---
-texto: "Cultivo una rosa blanca En julio como enero, Para el amigo sincero Que me da su mano franca."
+texto: "Cultivo una rosa blanca\nEn julio como enero,\nPara el amigo sincero\nQue me da su mano franca."
 autor: "jose-marti"
 temas:
   - "la-amistad"

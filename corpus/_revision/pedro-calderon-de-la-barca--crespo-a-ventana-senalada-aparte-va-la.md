@@ -1,5 +1,5 @@
 ---
-texto: "CRESPO: (A ventana señalada Aparte va la música."
+texto: "CRESPO: (A ventana señalada Aparte\nva la música."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-crespo-a-ventana-senalada-aparte-va-la"
 procedencia:

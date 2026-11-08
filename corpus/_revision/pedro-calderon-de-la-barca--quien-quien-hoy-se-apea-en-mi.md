@@ -1,5 +1,5 @@
 ---
-texto: "¿Quién, quién hoy se apea en mi casa así?"
+texto: "¿Quién,\nquién hoy\nse apea en mi casa así?"
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-quien-quien-hoy-se-apea-en-mi"
 procedencia:

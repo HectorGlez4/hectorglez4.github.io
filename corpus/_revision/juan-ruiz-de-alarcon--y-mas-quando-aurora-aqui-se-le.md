@@ -1,5 +1,5 @@
 ---
-texto: "Y mas quando Aurora aqui se le mostrò tan cruel, pues de los desprecios del mis fauores colegi. 855 Que mientras sus alabanças publicò mi suspension, dio su benigna atencion aliento a mis esperanças."
+texto: "Y mas quando Aurora aqui\nse le mostrò tan cruel,\npues de los desprecios del\nmis fauores colegi. 855\nQue mientras sus alabanças\npublicò mi suspension,\ndio su benigna atencion\naliento a mis esperanças."
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-y-mas-quando-aurora-aqui-se-le"
 procedencia:

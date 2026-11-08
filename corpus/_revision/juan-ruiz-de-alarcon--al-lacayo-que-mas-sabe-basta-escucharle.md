@@ -1,5 +1,5 @@
 ---
-texto: "Al lacayo, que mas sabe, basta escucharle sus gracias, si pueden serlo aprendidas entre el mandil y almohaça. 200 SANCHO Almohaçame mas quedo, si pudieres."
+texto: "Al lacayo, que mas sabe,\nbasta escucharle sus gracias,\nsi pueden serlo aprendidas\nentre el mandil y almohaça. 200\nSANCHO\nAlmohaçame mas quedo,\nsi pudieres."
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-al-lacayo-que-mas-sabe-basta-escucharle"
 procedencia:

@@ -1,5 +1,5 @@
 ---
-texto: "Quando preso te tenia, dormia el Alcaide Amor, 830 mas fue su despertador, el saber que el preso huia."
+texto: "Quando preso te tenia,\ndormia el Alcaide Amor, 830\nmas fue su despertador,\nel saber que el preso huia."
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-quando-preso-te-tenia-dormia-el-alcaide"
 procedencia:

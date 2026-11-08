@@ -1,5 +1,5 @@
 ---
-texto: "La gallarda Recisunda, Que guarde mil años Dios; Casó en Moscovia, de quien Nací yo."
+texto: "La gallarda Recisunda,\nQue guarde mil años Dios;\nCasó en Moscovia, de quien\nNací yo."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-la-gallarda-recisunda-que-guarde-mil-anos"
 procedencia:

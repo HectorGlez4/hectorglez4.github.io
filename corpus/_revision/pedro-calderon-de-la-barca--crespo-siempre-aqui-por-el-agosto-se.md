@@ -1,5 +1,5 @@
 ---
-texto: "CRESPO: Siempre aquí por el agosto se hace."
+texto: "CRESPO: Siempre aquí por el agosto\nse hace."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-crespo-siempre-aqui-por-el-agosto-se"
 procedencia:

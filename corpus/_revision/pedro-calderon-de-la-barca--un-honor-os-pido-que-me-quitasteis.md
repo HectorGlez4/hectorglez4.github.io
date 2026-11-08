@@ -1,5 +1,5 @@
 ---
-texto: "Un honor os pido, que me quitasteis vos mesmo; y con ser mío, parece, según os lo estoy pidiendo con humildad, que no os pido lo que es mío, sino vuestro."
+texto: "Un honor os pido,\nque me quitasteis vos mesmo;\ny con ser mío, parece,\nsegún os lo estoy pidiendo\ncon humildad, que no os pido\nlo que es mío, sino vuestro."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-un-honor-os-pido-que-me-quitasteis"
 procedencia:

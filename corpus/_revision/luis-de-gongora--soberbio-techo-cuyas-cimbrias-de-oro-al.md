@@ -1,5 +1,5 @@
 ---
-texto: "soberbio techo, cuyas cimbrias de oro al claro sol, en cuanto en torno gira, ornan de luz, coronan de belleza;"
+texto: "soberbio techo, cuyas cimbrias de oro\nal claro sol, en cuanto en torno gira,\nornan de luz, coronan de belleza;"
 autor: "luis-de-gongora"
 slug: "luis-de-gongora-soberbio-techo-cuyas-cimbrias-de-oro-al"
 procedencia:

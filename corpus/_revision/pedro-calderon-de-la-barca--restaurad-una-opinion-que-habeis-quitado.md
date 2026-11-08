@@ -1,5 +1,5 @@
 ---
-texto: "Restaurad una opinión que habéis quitado."
+texto: "Restaurad una opinión\nque habéis quitado."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-restaurad-una-opinion-que-habeis-quitado"
 procedencia:

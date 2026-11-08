@@ -1,5 +1,5 @@
 ---
-texto: "CRESPO: ¡Par Dios!, aunque no llegara no tenía remedio ya."
+texto: "CRESPO: ¡Par Dios!, aunque no llegara\nno tenía remedio ya."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-crespo-par-dios-aunque-no-llegara-no"
 procedencia:

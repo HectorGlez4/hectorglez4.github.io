@@ -1,5 +1,5 @@
 ---
-texto: "Es el mayor desatino que hombre ninguno intentó."
+texto: "Es el mayor desatino\nque hombre ninguno intentó."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-es-el-mayor-desatino-que-hombre-ninguno"
 procedencia:

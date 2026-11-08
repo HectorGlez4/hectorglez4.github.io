@@ -1,5 +1,5 @@
 ---
-texto: "¿Qué a ti, silvestre ninfa, con las pompas de dorados alcázares reales?"
+texto: "¿Qué a ti, silvestre ninfa, con las pompas\nde dorados alcázares reales?"
 autor: "andres-bello"
 slug: "andres-bello-que-a-ti-silvestre-ninfa-con-las"
 procedencia:

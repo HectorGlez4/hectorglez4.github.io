@@ -1,5 +1,5 @@
 ---
-texto: "En Vélez a dos de marzo, Que por los putos de allá No quiere volver las ancas, Y no me parece mal."
+texto: "En Vélez a dos de marzo,\nQue por los putos de allá\nNo quiere volver las ancas,\nY no me parece mal."
 autor: "francisco-de-quevedo"
 slug: "francisco-de-quevedo-en-velez-a-dos-de-marzo-que"
 procedencia:

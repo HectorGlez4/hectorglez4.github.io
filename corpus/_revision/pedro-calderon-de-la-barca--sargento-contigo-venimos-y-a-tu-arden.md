@@ -1,5 +1,5 @@
 ---
-texto: "SARGENTO: Contigo venimos y a tu arden hemos de estar."
+texto: "SARGENTO: Contigo\nvenimos y a tu arden hemos\nde estar."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-sargento-contigo-venimos-y-a-tu-arden"
 procedencia:

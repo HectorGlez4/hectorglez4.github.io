@@ -1,5 +1,5 @@
 ---
-texto: "¿Cuándo, cuándo, ah suerte impía, llegaron a un desdichado los favores con más prisa?"
+texto: "¿Cuándo, cuándo, ah suerte impía,\nllegaron a un desdichado\nlos favores con más prisa?"
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-cuando-cuando-ah-suerte-impia-llegaron-a"
 procedencia:

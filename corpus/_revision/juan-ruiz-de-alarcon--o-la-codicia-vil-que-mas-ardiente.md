@@ -1,5 +1,5 @@
 ---
-texto: "O la codicia vil, que mas ardiente 285 reina en la sangre de la edad mas fria, le ha obligado a mandarme que me ausente."
+texto: "O la codicia vil, que mas ardiente 285\nreina en la sangre de la edad mas fria,\nle ha obligado a mandarme que me ausente."
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-o-la-codicia-vil-que-mas-ardiente"
 procedencia:

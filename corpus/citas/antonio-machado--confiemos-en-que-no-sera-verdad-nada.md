@@ -1,5 +1,5 @@
 ---
-texto: "Confiemos en que no será verdad nada de lo que sabemos."
+texto: "Confiemos\nen que no será verdad\nnada de lo que sabemos."
 autor: "antonio-machado"
 temas:
   - "el-saber"

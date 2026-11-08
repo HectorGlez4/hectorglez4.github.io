@@ -1,5 +1,5 @@
 ---
-texto: "ISABEL: Atadas atrás las manos a una rigurosa encina..."
+texto: "ISABEL: Atadas atrás las manos\na una rigurosa encina..."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-isabel-atadas-atras-las-manos-a-una"
 procedencia:

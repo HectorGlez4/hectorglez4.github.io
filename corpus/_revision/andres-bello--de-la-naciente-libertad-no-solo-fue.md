@@ -1,5 +1,5 @@
 ---
-texto: "De la naciente libertad, no sólo fue defensor, sino maestro y padre."
+texto: "De la naciente libertad, no sólo\nfue defensor, sino maestro y padre."
 autor: "andres-bello"
 slug: "andres-bello-de-la-naciente-libertad-no-solo-fue"
 procedencia:

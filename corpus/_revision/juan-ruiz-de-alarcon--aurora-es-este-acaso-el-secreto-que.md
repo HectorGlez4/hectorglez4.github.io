@@ -1,5 +1,5 @@
 ---
-texto: "AURORA Es este acaso el secreto que teneis que hablarme?"
+texto: "AURORA\nEs este acaso el secreto\nque teneis que hablarme?"
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-aurora-es-este-acaso-el-secreto-que"
 procedencia:

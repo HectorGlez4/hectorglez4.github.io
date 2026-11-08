@@ -1,5 +1,5 @@
 ---
-texto: "Feliciano me adora y le aborrezco; Lizardo me aborrece y yo le adoro; Por quien no me apetece ingrato, lloro, Y al que me llora tierno, no apetezco."
+texto: "Feliciano me adora y le aborrezco;\nLizardo me aborrece y yo le adoro;\nPor quien no me apetece ingrato, lloro,\nY al que me llora tierno, no apetezco."
 autor: "sor-juana-ines-de-la-cruz"
 temas:
   - "el-amor"

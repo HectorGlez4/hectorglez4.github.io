@@ -1,5 +1,5 @@
 ---
-texto: "CHISPA: \"Topó, digo, a la Chillona, que, brindando entre dos luces, ocupaba con el Garlo la casa de los azumbres."
+texto: "CHISPA: \"Topó, digo, a la Chillona,\nque, brindando entre dos luces,\nocupaba con el Garlo\nla casa de los azumbres."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-chispa-topo-digo-a-la-chillona-que"
 procedencia:

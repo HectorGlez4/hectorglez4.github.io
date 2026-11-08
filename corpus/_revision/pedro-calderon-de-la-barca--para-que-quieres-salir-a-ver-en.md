@@ -1,5 +1,5 @@
 ---
-texto: "¿Para qué quieres salir a ver en la historia mía la más enorme maldad, la más fiera tiranía, que en venganza de los hombre quiere el cielo que se escriba?"
+texto: "¿Para qué quieres salir\na ver en la historia mía\nla más enorme maldad,\nla más fiera tiranía,\nque en venganza de los hombre\nquiere el cielo que se escriba?"
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-para-que-quieres-salir-a-ver-en"
 procedencia:

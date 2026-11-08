@@ -1,5 +1,5 @@
 ---
-texto: "ni victorioso capitán pregona lides que por la patria ha sustentado, y en galardón le pide la corona."
+texto: "ni victorioso capitán pregona\nlides que por la patria ha sustentado,\ny en galardón le pide la corona."
 autor: "andres-bello"
 slug: "andres-bello-ni-victorioso-capitan-pregona-lides-que-por"
 procedencia:

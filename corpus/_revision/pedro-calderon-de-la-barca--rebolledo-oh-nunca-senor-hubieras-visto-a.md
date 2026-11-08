@@ -1,5 +1,5 @@
 ---
-texto: "REBOLLEDO: ¡Oh nunca, señor, hubieras visto a la hermosa villana, que tantas ansias te cuesta!"
+texto: "REBOLLEDO: ¡Oh nunca, señor, hubieras\nvisto a la hermosa villana,\nque tantas ansias te cuesta!"
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-rebolledo-oh-nunca-senor-hubieras-visto-a"
 procedencia:

@@ -1,5 +1,5 @@
 ---
-texto: "CRESPO: Quiero también, señor, castigar el desacato que tuvo de herir a su capitán; que, aunque es verdad que su honor a esto le pudo obligar, de otra manera pudiera."
+texto: "CRESPO: Quiero\ntambién, señor, castigar\nel desacato que tuvo\nde herir a su capitán;\nque, aunque es verdad que su honor\na esto le pudo obligar,\nde otra manera pudiera."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-crespo-quiero-tambien-senor-castigar-el-desacato"
 procedencia:

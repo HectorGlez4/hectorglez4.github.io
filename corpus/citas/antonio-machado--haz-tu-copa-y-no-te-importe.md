@@ -1,5 +1,5 @@
 ---
-texto: "Haz tu copa, y no te importe si no puedes hacer barro."
+texto: "Haz tu copa, y no te importe\nsi no puedes hacer barro."
 autor: "antonio-machado"
 temas:
   - "la-virtud"

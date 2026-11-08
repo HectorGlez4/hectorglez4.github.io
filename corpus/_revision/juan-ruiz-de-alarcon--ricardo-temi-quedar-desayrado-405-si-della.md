@@ -1,5 +1,5 @@
 ---
-texto: "RICARDO Temi quedar desayrado, 405 si della no era admitido, que se arrepiente corrido, quien no alcança declarado."
+texto: "RICARDO\nTemi quedar desayrado, 405\nsi della no era admitido,\nque se arrepiente corrido,\nquien no alcança declarado."
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-ricardo-temi-quedar-desayrado-405-si-della"
 procedencia:

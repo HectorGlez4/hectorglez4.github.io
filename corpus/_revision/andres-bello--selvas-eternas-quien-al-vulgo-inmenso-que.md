@@ -1,5 +1,5 @@
 ---
-texto: "Selvas eternas, ¿quién al vulgo inmenso que vuestros verdes laberintos puebla, y en varias formas y estatura y galas hacer parece alarde de sí mismo, poner presumirá nombre o guarismo?"
+texto: "Selvas eternas, ¿quién al vulgo inmenso\nque vuestros verdes laberintos puebla,\ny en varias formas y estatura y galas\nhacer parece alarde de sí mismo,\nponer presumirá nombre o guarismo?"
 autor: "andres-bello"
 slug: "andres-bello-selvas-eternas-quien-al-vulgo-inmenso-que"
 procedencia:

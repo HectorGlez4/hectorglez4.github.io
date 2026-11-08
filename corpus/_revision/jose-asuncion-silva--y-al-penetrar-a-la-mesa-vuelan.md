@@ -1,5 +1,5 @@
 ---
-texto: "Y al penetrar, a la mesa vuelan –do lee o delira- o hacia el Cristo al cual le reza, o al espejo do se mira."
+texto: "Y al penetrar, a la mesa\nvuelan –do lee o delira-\no hacia el Cristo al cual le reza,\no al espejo do se mira."
 autor: "jose-asuncion-silva"
 slug: "jose-asuncion-silva-y-al-penetrar-a-la-mesa-vuelan"
 procedencia:

@@ -1,5 +1,5 @@
 ---
-texto: "REBOLLEDO: Pues ya el hombre se ha sentado --si ya no es, que ser ordena algún alma que anda en pena de las cañas que ha jugado con su adarga a cuestas."
+texto: "REBOLLEDO: Pues ya el hombre se ha sentado\n--si ya no es, que ser ordena\nalgún alma que anda en pena\nde las cañas que ha jugado\ncon su adarga a cuestas."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-rebolledo-pues-ya-el-hombre-se-ha"
 procedencia:

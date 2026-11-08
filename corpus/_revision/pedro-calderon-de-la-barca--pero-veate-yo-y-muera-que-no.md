@@ -1,5 +1,5 @@
 ---
-texto: "Pero véate yo y muera; Que no sé, rendido ya."
+texto: "Pero véate yo y muera;\nQue no sé, rendido ya."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-pero-veate-yo-y-muera-que-no"
 procedencia:

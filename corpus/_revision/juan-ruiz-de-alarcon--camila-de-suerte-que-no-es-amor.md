@@ -1,5 +1,5 @@
 ---
-texto: "CAMILA De suerte que no es amor el que tienes?"
+texto: "CAMILA\nDe suerte que no es amor\nel que tienes?"
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-camila-de-suerte-que-no-es-amor"
 procedencia:

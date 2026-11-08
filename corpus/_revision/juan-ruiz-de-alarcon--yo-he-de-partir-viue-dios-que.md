@@ -1,5 +1,5 @@
 ---
-texto: "Yo he de partir, viue Dios, que quiero prouar assi su firmeza para mi, y mi amistad para vos. 960"
+texto: "Yo he de partir, viue Dios,\nque quiero prouar assi\nsu firmeza para mi,\ny mi amistad para vos. 960"
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-yo-he-de-partir-viue-dios-que"
 procedencia:

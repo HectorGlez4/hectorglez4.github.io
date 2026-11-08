@@ -1,5 +1,5 @@
 ---
-texto: "Viva aquí el abogado que en su oficio hace blanco lo negro, y que defiende la virtud ofendida como el vicio."
+texto: "Viva aquí el abogado que en su oficio\nhace blanco lo negro, y que defiende\nla virtud ofendida como el vicio."
 autor: "mariano-jose-de-larra"
 slug: "mariano-jose-de-larra-viva-aqui-el-abogado-que-en-su"
 procedencia:

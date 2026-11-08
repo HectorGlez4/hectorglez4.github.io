@@ -1,5 +1,5 @@
 ---
-texto: "CRESPO: Y aun a mi padre también con tal rigor le tratara. (Aquesto es asegurar Aparte su vida, y han de pensar que es la justicia más rara del mundo.) JUAN: Escucha por qué."
+texto: "CRESPO: Y aun a mi padre también\ncon tal rigor le tratara.\n(Aquesto es asegurar Aparte\nsu vida, y han de pensar\nque es la justicia más rara\ndel mundo.)\nJUAN: Escucha por qué."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-crespo-y-aun-a-mi-padre-tambien"
 procedencia:

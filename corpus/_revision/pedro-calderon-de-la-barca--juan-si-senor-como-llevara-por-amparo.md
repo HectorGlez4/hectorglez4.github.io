@@ -1,5 +1,5 @@
 ---
-texto: "JUAN: Sí, señor, como llevara por amparo a vueselencia."
+texto: "JUAN: Sí, señor, como llevara\npor amparo a vueselencia."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-juan-si-senor-como-llevara-por-amparo"
 procedencia:

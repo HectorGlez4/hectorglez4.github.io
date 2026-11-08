@@ -1,5 +1,5 @@
 ---
-texto: "Mancebo llena tu jarro que ya te lo beberán."
+texto: "Mancebo llena tu jarro\nque ya te lo beberán."
 autor: "antonio-machado"
 temas:
   - "el-tiempo"

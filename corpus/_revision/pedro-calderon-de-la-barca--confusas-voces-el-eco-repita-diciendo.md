@@ -1,5 +1,5 @@
 ---
-texto: "Confusas voces el eco repita, diciendo..."
+texto: "Confusas\nvoces el eco repita,\ndiciendo..."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-confusas-voces-el-eco-repita-diciendo"
 procedencia:

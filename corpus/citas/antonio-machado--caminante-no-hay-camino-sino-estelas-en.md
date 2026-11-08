@@ -1,5 +1,5 @@
 ---
-texto: "Caminante, no hay camino, sino estelas en la mar."
+texto: "Caminante, no hay camino,\nsino estelas en la mar."
 autor: "antonio-machado"
 temas:
   - "la-vida"

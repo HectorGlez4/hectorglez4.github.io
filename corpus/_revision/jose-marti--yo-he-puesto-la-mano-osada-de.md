@@ -1,5 +1,5 @@
 ---
-texto: "Yo he puesto la mano osada De horror y júbilo yerta, Sobre la estrella apagada Que cayó frente a mi puerta."
+texto: "Yo he puesto la mano osada\nDe horror y júbilo yerta,\nSobre la estrella apagada\nQue cayó frente a mi puerta."
 autor: "jose-marti"
 slug: "jose-marti-yo-he-puesto-la-mano-osada-de"
 procedencia:

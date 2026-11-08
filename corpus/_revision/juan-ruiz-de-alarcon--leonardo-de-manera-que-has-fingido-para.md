@@ -1,5 +1,5 @@
 ---
-texto: "LEONARDO ¿De manera que has fingido para quedarte, don Iuan, 365 que a don Diego de Luxan tu primo, eres parecido?"
+texto: "LEONARDO\n¿De manera que has fingido\npara quedarte, don Iuan, 365\nque a don Diego de Luxan\ntu primo, eres parecido?"
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-leonardo-de-manera-que-has-fingido-para"
 procedencia:
