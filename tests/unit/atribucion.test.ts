@@ -391,6 +391,12 @@ describe('Historia 30.4 — el Fragmento para insertar', () => {
       esperado: fragmento(largo, 'José Martí, <cite>Versos sencillos</cite>.'),
     },
     {
+      caso: 'en verso: cada salto, un <br> entre versos escapados',
+      cita: citaDe({ texto: 'Yo vengo de todas partes,\ny hacia <todas> partes voy.' }),
+      autor: MARTI,
+      esperado: fragmento('Yo vengo de todas partes,<br>y hacia &lt;todas&gt; partes voy.', 'José Martí, <cite>Versos sencillos</cite>.'),
+    },
+    {
       caso: 'nombre sin invertir aunque la clave esté revisada, y sin año, traductor ni edición',
       cita: citaDe({ procedencia: { año: 1891, traduccion: { traductor: 'Nadie', año: 1900 } } as Cita['procedencia'] }),
       autor: autorDe('María de Zayas y Sotomayor', 'Zayas'),

@@ -3,6 +3,7 @@ import { readFile, readdir } from 'node:fs/promises';
 import { join } from 'node:path';
 import {
   AUTOR_VALIDO,
+  RAIZ,
   TEMA_VALIDO,
   citaValida,
   construirConCorpus,
@@ -35,10 +36,35 @@ const TEXTOS = [
 const COTEJADAS = TEXTOS.map((_, i) => `seneca-brevedad-${i}`);
 const TEXTO_SIN_OBRA = 'Mientras esperamos vivir, la vida pasa.';
 
-function corpus(): Record<string, string> {
+/**
+ * Una Cita en verso (AD-29), respaldada por su documento de verso —el mismo fixture de la 29.3—:
+ * su Fragmento lleva cada salto como `<br>`, y leídos como saltos, el texto es su `texto`.
+ */
+const DOC_MARTI = 'fuentes/wikisource-es--versos-sencillos--versos-sencillos-i.txt';
+const URL_MARTI = 'https://es.wikisource.org/wiki/Versos_sencillos/I';
+const EN_VERSO = 'jose-marti-yo-vengo-de-todas-partes-y-hacia';
+const TEXTO_EN_VERSO =
+  'Yo vengo de todas partes,\nY hacia todas partes voy:\nArte soy entre las artes,\nEn los montes, monte soy.';
+const AUTOR_MARTI = `nombre: José Martí
+añoNacimiento: 1853
+añoFallecimiento: 1895
+semblanza: Poeta y político cubano.
+ordenAlfabetico: Martí
+`;
+
+async function corpus(): Promise<Record<string, string>> {
   const url = `${WS}Sobre_la_brevedad_de_la_vida`;
   const c: Record<string, string> = {
     'autores/seneca.yml': AUTOR_VALIDO,
+    'autores/jose-marti.yml': AUTOR_MARTI,
+    [DOC_MARTI]: await readFile(join(RAIZ, 'tests/unit/ayuda/lineas', 'wikisource-es--versos-sencillos--versos-sencillos-i.txt'), 'utf8'),
+    'citas/jose-marti--yo-vengo-de-todas-partes-y-hacia.md': citaValida({
+      slug: EN_VERSO,
+      texto: TEXTO_EN_VERSO,
+      autor: 'jose-marti',
+      procedencia: { obra: 'Versos sencillos' },
+      fuente: { id: 'wikisource-es', url: URL_MARTI },
+    }),
     'temas/el-tiempo.yml': TEMA_VALIDO,
     'pendientes-de-cotejo.yml': `citas:\n  - ${SIN_OBRA}\n`,
     'citas/seneca--sin-obra.md': citaValida({
@@ -67,6 +93,7 @@ function corpus(): Record<string, string> {
 const TEXTO_DE: Record<string, string> = {
   ...Object.fromEntries(COTEJADAS.map((slug, i) => [slug, TEXTOS[i]])),
   [SIN_OBRA]: TEXTO_SIN_OBRA,
+  [EN_VERSO]: TEXTO_EN_VERSO,
 };
 
 const VEDADOS = ['script', 'img', 'iframe', 'link', 'style', 'object', 'embed', 'svg'];
@@ -101,7 +128,7 @@ describe('Historia 30.4 — «Inserta esta cita» en la Página de Cita construi
   const html = (ruta: string) => readFile(paginaConstruida(proyecto, ruta), 'utf8');
 
   beforeAll(async () => {
-    const resultado = await construirConCorpus(corpus(), { conBusqueda: true });
+    const resultado = await construirConCorpus(await corpus(), { conBusqueda: true });
     aLimpiar.push(resultado.proyecto);
     expect(resultado.codigo, resultado.salida).toBe(0);
     proyecto = resultado.proyecto;
@@ -111,7 +138,7 @@ describe('Historia 30.4 — «Inserta esta cita» en la Página de Cita construi
   }, 300_000);
 
   it('toda Página de Cita lo lleva: el último `<details>` del bloque, cerrado, con su `label`, su región vacía y su botón `hidden`', async () => {
-    expect(rutas.sort()).toEqual([...COTEJADAS, SIN_OBRA].map((s) => `/cita/${s}/`).sort());
+    expect(rutas.sort()).toEqual([...COTEJADAS, SIN_OBRA, EN_VERSO].map((s) => `/cita/${s}/`).sort());
     for (const ruta of rutas) {
       const region = regionDeDesplegables(await html(ruta));
       expect(region, ruta).toMatch(/^<div class="desplegables[^"]*"[^>]*data-pagefind-ignore="all"/);
@@ -163,7 +190,9 @@ describe('Historia 30.4 — «Inserta esta cita» en la Página de Cita construi
       expect(fragmento, ruta).not.toMatch(/\bsrc=|[?&](de|via)=/);
       const primero = /<p>([\s\S]*?)<\/p>/.exec(fragmento)![1];
       const slug = ruta.split('/')[2];
-      expect(decodificar(primero), ruta).toBe(TEXTO_DE[slug]);
+      // Los `<br>` son los saltos de verso (versosDe): leídos como U+000A, el texto es el `texto`.
+      expect(decodificar(primero.replaceAll('<br>', '\n')), ruta).toBe(TEXTO_DE[slug]);
+      expect(primero, ruta).not.toContain('\n');
     }
   });
 
@@ -172,6 +201,12 @@ describe('Historia 30.4 — «Inserta esta cita» en la Página de Cita construi
     const sinObra = fragmentoDe(await html(`/cita/${SIN_OBRA}/`));
     expect(sinObra).not.toContain('<cite>');
     expect(sinObra).toContain('<p>— Séneca. <a href=');
+  });
+
+  it('en verso, cada salto es un `<br>` entre versos, y el campo no parte ningún U+000A', async () => {
+    const primero = /<p>([\s\S]*?)<\/p>/.exec(fragmentoDe(await html(`/cita/${EN_VERSO}/`)))![1];
+    expect(primero).toBe('Yo vengo de todas partes,<br>Y hacia todas partes voy:<br>Arte soy entre las artes,<br>En los montes, monte soy.');
+    expect(primero.match(/<br>/g)).toHaveLength(3);
   });
 
   it('el texto con `&`, `<`, `>` y `"` va escapado en el Fragmento, y doblemente en el marcado del campo', async () => {

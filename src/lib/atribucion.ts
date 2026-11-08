@@ -14,7 +14,7 @@ import type { Cita, Autor, SiguienteCita } from './publicado.ts';
 import { rotuloDeFuente, type ObraResuelta } from './obras.ts';
 import { MARCA } from './marca.ts';
 import { escapar } from './lienzo.ts';
-import { enUnaLinea } from './verso.ts';
+import { enUnaLinea, versosDe } from './verso.ts';
 import { recuentoDeAutores, recuentoDeCitas, recuentoDeObras, temaEnFrase } from './recuentos.ts';
 import {
   TARJETA_DEL_DIRECTORIO_DE_AUTORES,
@@ -718,8 +718,9 @@ export function nombreEnAtribucion(autor: Pick<Autor, 'nombre'>): string {
  *   </blockquote>
  *
  * Sin Obra, sin `<cite>`: «— {Autor}. ». El texto va entero y literal, sin comillas —el
- * `blockquote` ya dice que es cita— y a cualquier longitud. Tras el nombre o el título va «.»
- * salvo que ya acaben en «.», «?», «!» o «…»: la misma `punto` de la Referencia. Nada más: ni año, ni
+ * `blockquote` ya dice que es cita— y a cualquier longitud; en verso, cada salto como `<br>`
+ * entre los versos que da `versosDe` de `src/lib/verso.ts` (AD-29), que es quien parte.
+ * Tras el nombre o el título va «.» salvo que ya acaben en «.», «?», «!» o «…»: la misma `punto` de la Referencia. Nada más: ni año, ni
  * traductor, ni edición, ni Fuente, ni la grafía que declara la Cita. Todo texto y el `href` salen escapados
  * con `escapar` de `src/lib/lienzo.ts`; sin guion, imagen, estilo, clase ni recurso del sitio, y su
  * único enlace es la canónica. Una canónica que no sea `http(s)` absoluta y ya normalizada (la que
@@ -754,7 +755,7 @@ export function fragmentoParaInsertar(cita: Pick<Cita, 'texto' | 'obra'>, autor:
       : `${escapar(nombreEnAtribucion(autor))}, <cite>${escapar(titulo)}</cite>${punto(titulo)}`;
   return [
     '<blockquote>',
-    `<p>${escapar(cita.texto)}</p>`,
+    `<p>${versosDe(cita.texto).map(escapar).join('<br>')}</p>`,
     `<p>— ${firma} <a href="${escapar(canonica)}">${escapar(MARCA)}</a></p>`,
     '</blockquote>',
   ].join('\n');
