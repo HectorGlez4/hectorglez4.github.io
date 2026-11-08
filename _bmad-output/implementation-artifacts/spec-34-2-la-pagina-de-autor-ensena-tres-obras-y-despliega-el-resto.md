@@ -14,6 +14,13 @@ deferred:
   - summary: 'La medida de Barrett a 360 × 640 («Y {m} obras más» y la primera Cita a menos de 1.000 px) la corre Héctor en local y va en el mensaje del commit; el bucle la corre también como verificación, pero la cifra del commit es la de Héctor.'
     evidence: 'epics.md Story 34.2, Given «el Corpus real»: «La prueba la corre Héctor, y la medida va en el mensaje del commit».'
     severity: low
+  - summary: >-
+      Una salida a una Obra plegada se mide igual que a una a la vista (`salida-interna`, zona `lista-de-obras`), así que el coste de plegar (UX-DR130) en visitas a Obras no se podrá separar después.
+    evidence: |-
+      Los dos `<ul>` llevan `data-zona="lista-de-obras"` por contrato (sin zona nueva); distinguirlos exigiría una zona o un campo nuevo, que decide Héctor (UX-DR111, bmad-ux).
+    location: >-
+      src/components/ListaDeObras.astro
+    severity: low
 ---
 
 <intent-contract>
@@ -97,7 +104,7 @@ deferred:
 **Acceptance Criteria:**
 - Given un uso de `ListaDeObras` sin `pliegue`, when corre `npx astro check`, then falla; con los dos usos declarados, 0 errores.
 - Given el sitio real construido antes y después con la misma `FECHA_JORNADA`, when se comparan, then `dist/obras/index.html` y `dist/sitemap-0.xml` son idénticos byte a byte, y la sección `obras-del-autor` de un Autor de tres Obras o menos es idéntica.
-- Given `/autor/rafael-barrett/` a 360 × 640 en Playwright local, when carga, then dice «Y {n − 3} obras más» (hoy 56), el desplegable está cerrado y la primera Cita queda a menos de 1.000 px del borde superior; a 320 px no hay desplazamiento horizontal cerrado ni abierto; el `<summary>` se alcanza con Tab y se abre con Intro sin mover el foco.
+- Given `/autor/rafael-barrett/` a 360 × 640 en Playwright local, when carga, then dice «Y {n − 3} obras más» (n del Corpus del día; 59 era la cifra del diseño), el desplegable está cerrado y la primera Cita queda a menos de 1.000 px del borde superior; a 320 px no hay desplazamiento horizontal cerrado ni abierto; el `<summary>` se alcanza con Tab y se abre con Intro sin mover el foco.
 - Given `tests/e2e/accesibilidad.spec.ts` con la página del Autor con más Obras, when corre en local, then axe y el recorrido de foco pasan cerrados y abiertos.
 - Given `npx vitest run tests/unit/ingreso-construido.test.ts`, when construye con los Modelos admitidos encendidos, then pasa y la Página de Autor no lleva `data-ingreso`.
 
@@ -128,7 +135,7 @@ Golden de la parte plegada (dentro de `ListaDeObras`, `Pliegue = pliegue`):
 
 ## Spec Change Log
 
-- 2026-11-07 — sin bucle de revisión. Desviación de implementación, fuera del contrato: el corte no se hace con un `import` de `MAX_OBRAS_ANTES_DE_LAS_CITAS` en `ListaDeObras.astro`, sino con `partirLaListaDeObras` en `src/lib/obras.ts`, que ya importa `umbrales.ts`. Con el `import` directo, `dist/obras/index.html` cambiaba en bytes (mismo largo: la hoja de `ListaDeObras` y la del filtro del Directorio cambiaban de orden en el `<style>` en línea); se aisló con tres construcciones (sin el `import type`, sin el `Desplegable` en la Página de Autor, sin el `import` de umbrales: solo la última devolvía `/obras/` idéntico). KEEP: la prop `pliegue: typeof Desplegable | false` con `import type`, el `Desplegable` importado y pasado por la Página de Autor, `pliegue={false}` en `/obras/`.
+- 2026-11-07 — sin vuelta de bad_spec (`review_loop_iteration` cuenta solo esas; las pasadas de revisión están en el Review Triage Log). Desviación de implementación, fuera del contrato: el corte no se hace con un `import` de `MAX_OBRAS_ANTES_DE_LAS_CITAS` en `ListaDeObras.astro`, sino con `partirLaListaDeObras` en `src/lib/obras.ts`, que ya importa `umbrales.ts`. Con el `import` directo, `dist/obras/index.html` cambiaba en bytes (mismo largo: la hoja de `ListaDeObras` y la del filtro del Directorio cambiaban de orden en el `<style>` en línea); se aisló con tres construcciones (sin el `import type`, sin el `Desplegable` en la Página de Autor, sin el `import` de umbrales: solo la última devolvía `/obras/` idéntico). KEEP: la prop `pliegue: typeof Desplegable | false` con `import type`, el `Desplegable` importado y pasado por la Página de Autor, `pliegue={false}` en `/obras/`.
 
 ## Review Triage Log
 
@@ -152,6 +159,17 @@ Golden de la parte plegada (dentro de `ListaDeObras`, `Pliegue = pliegue`):
   - `[low]` `[patch]` Comentarios rancios que decían que ninguna superficie pinta un `<details>` (verification-gap, «Other findings»): `tests/e2e/desplegable.spec.ts` y `tests/e2e/ayuda/desplegables.ts`, al día con la Página de Autor plegada.
   - `[low]` `[patch]` Cifras del Corpus escritas en comentarios («59 Obras» de Barrett) que ya no casan (blind-hunter): fuera de `src/lib/umbrales.ts` y de `tests/e2e/pagina-de-autor.spec.ts`; queda la medida del diseño (3.249 px).
   - `[low]` `[patch]` La pasada abierta de `accesibilidad.spec.ts` sobre `autorConMasObras()` pasaría en vacío si ese Autor no plegara (edge-case-hunter): solo entra si tiene más de `MAX_OBRAS_ANTES_DE_LAS_CITAS` Obras.
+
+### 2026-11-08 — Review pass
+- intent_gap: 0
+- bad_spec: 0
+- patch: 3 (high 0, medium 1, low 2)
+- defer: 1 (low 1)
+- reject: 19 (high 0, medium 2, low 17)
+- addressed_findings:
+  - `[medium]` `[patch]` La describe «Historia 34.2» de `tests/e2e/pagina-de-autor.spec.ts` se saltaba entera si Barrett dejaba de plegar (blind-hunter, intent-alignment): ahora pasa a `autorConMasObras()` con una anotación `sustituto`, y falla —no se salta— si ningún Autor del Corpus tiene más de `MAX_OBRAS_ANTES_DE_LAS_CITAS` Obras.
+  - `[low]` `[patch]` `partirLaListaDeObras` con un umbral 0, negativo o no entero (edge-case-hunter): toma el umbral como parámetro con `MAX_OBRAS_ANTES_DE_LAS_CITAS` por omisión y lanza si no es un entero ≥ 1; prueba nueva en `tests/unit/lista-de-obras.test.ts` (0, −1, 1.5, NaN), que sin la guarda falla.
+  - `[low]` `[patch]` Contabilidad de la spec (blind-hunter, ac-auditor): el criterio de Barrett ya no fija «hoy 56» (n sale del Corpus del día) y el Spec Change Log aclara que `review_loop_iteration` cuenta solo vueltas de bad_spec.
 
 ## Auto Run Result
 
@@ -201,3 +219,20 @@ Blocking condition: ninguna.
 - `npm test`: 155 ficheros, 7176 pruebas, verde.
 
 **Riesgos residuales.** La secuencia fijada de `/obras/` cambia también con una decisión legítima que toque sus componentes; entonces se actualiza en el mismo commit, a propósito.
+
+### Segunda pasada de revisión del 2026-11-08
+
+**Hallazgos.** Cinco capas externas (verification-gap sin hallazgos). 3 parches (1 medio, 2 bajos; ver Review Triage Log), 1 diferido nuevo (la salida a una Obra plegada no se distingue de la de una a la vista; zona nueva de Héctor), 19 rechazados: decisiones del contrato ya juzgadas (hoja del Desplegable en toda Página de Autor, la prop como componente, la regla de AGENTS.md sobre pasarlo por prop), mejoras de prueba sin defecto (filete medido, Espacio y tabulabilidad de lo plegado, espera de fuentes, prueba de tipos de `astro check` sin `pliegue`, Ingreso encendido sobre una Lista plegada, que la declaración ya veda), redacción interna (IIFE y la comprobación redundante de `ListaDeObras.astro`), la guarda en tiempo de ejecución de `pliegue` (la prop es obligatoria y `astro check` la exige), `obrasPorAutor` frente a `obrasDelAutor` (hoy concuerdan: «Y 54» con 57 Obras en las dos), y la cifra de Héctor, que ya consta diferida.
+
+**Ficheros de esta pasada.** `src/lib/obras.ts` (umbral por parámetro con guarda), `tests/unit/lista-de-obras.test.ts` (prueba de la guarda), `tests/e2e/pagina-de-autor.spec.ts` (Barrett o, si no pliega, el Autor con más Obras; falla si ninguno pliega), y esta spec (criterio de Barrett sin «hoy 56», nota del Change Log, diferido).
+
+**Seguimiento.** `followup_review_recommended: true` (parcheados: 0 altos, 1 medio, 2 bajos; puntuación 3 × 1 + 2 = 5 ≥ 5). Es la última ronda del bucle; los parches son pequeños y están verificados.
+
+**Verificación.**
+- `npx vitest run tests/unit/lista-de-obras.test.ts`: 32 pasan (la guarda nueva incluida; sin la guarda, 0, −1, 1.5 y NaN no lanzan y la prueba falla).
+- `npx astro check`: 0 errores.
+- `FECHA_JORNADA=2026-11-07 npx astro build`: termina (NFR-5 no rompe); `dist/obras/index.html` y `dist/sitemap-0.xml` OK contra `dist-antes-34.2.sha`.
+- Playwright `pagina-de-autor.spec.ts` en movil y escritorio: 42 pasan, 2 omitidas (17.4, ya existentes); la describe 34.2 corre sobre Barrett.
+- `npm test`: 155 ficheros, 7177 pruebas, verde.
+
+**Riesgos residuales.** Los de la pasada anterior; la sustitución de Barrett solo se anota, y el criterio que lo nombra sigue esperando la medida de Héctor.

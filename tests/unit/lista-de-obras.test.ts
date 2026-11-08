@@ -397,6 +397,14 @@ describe('Historia 34.2 — el corte de la Lista', () => {
     expect(partirLaListaDeObras(lista(MAX_OBRAS_ANTES_DE_LAS_CITAS))).toEqual({ primeras: lista(MAX_OBRAS_ANTES_DE_LAS_CITAS), resto: [] });
     expect(partirLaListaDeObras([])).toEqual({ primeras: [], resto: [] });
   });
+
+  it('un umbral que no es un entero ≥ 1 para la construcción, con la lista que sea', () => {
+    expect(partirLaListaDeObras([0, 1], 1)).toEqual({ primeras: [0], resto: [1] });
+    for (const maximo of [0, -1, 1.5, Number.NaN]) {
+      expect(() => partirLaListaDeObras([0, 1, 2], maximo), String(maximo)).toThrow(/partirLaListaDeObras/);
+      expect(() => partirLaListaDeObras([], maximo), String(maximo)).toThrow(/partirLaListaDeObras/);
+    }
+  });
 });
 
 describe('Historia 34.2 — la Lista de Obras plegada, construida', () => {

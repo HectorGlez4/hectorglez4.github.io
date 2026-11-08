@@ -1,6 +1,7 @@
 import { expect, test, type Page } from '@playwright/test';
 import {
   autorConBiografia,
+  autorConMasObras,
   autorEnUnaPagina,
   autorEnVariasPaginas,
   citaConTituloDeObraMasLargo,
@@ -188,12 +189,21 @@ test.describe('Historia 17.3 — la Lista de Obras', () => {
  * Corpus (`ayuda/corpus.ts`), nunca escrito aquí, y el umbral de `src/lib/umbrales.ts`.
  */
 test.describe('Historia 34.2 — la Lista de Obras plegada', () => {
+  // Barrett es el Autor que nombra el criterio; si el Corpus deja de tenerlo con más Obras que el
+  // umbral, las pruebas pasan al Autor con más Obras en vez de saltarse en silencio, y fallan si
+  // ningún Autor pliega.
   const BARRETT = 'rafael-barrett';
-  const RUTA = `/autor/${BARRETT}/`;
-  const obras = obrasPorAutor().get(BARRETT) ?? 0;
+  const deBarrett = obrasPorAutor().get(BARRETT) ?? 0;
+  const elegido =
+    deBarrett > MAX_OBRAS_ANTES_DE_LAS_CITAS ? { slug: BARRETT, obras: deBarrett } : autorConMasObras();
+  const RUTA = `/autor/${elegido?.slug}/`;
+  const obras = elegido?.obras ?? 0;
 
   test.beforeEach(() => {
-    test.skip(obras <= MAX_OBRAS_ANTES_DE_LAS_CITAS, `El Corpus no tiene a ${BARRETT} con más de ${MAX_OBRAS_ANTES_DE_LAS_CITAS} Obras.`);
+    expect(obras, `ningún Autor del Corpus tiene más de ${MAX_OBRAS_ANTES_DE_LAS_CITAS} Obras`).toBeGreaterThan(MAX_OBRAS_ANTES_DE_LAS_CITAS);
+    if (elegido?.slug !== BARRETT) {
+      test.info().annotations.push({ type: 'sustituto', description: `${BARRETT} no pliega hoy; se mide ${RUTA}` });
+    }
   });
 
   test('a 360 × 640: «Y {m} obras más», cerrado, y la primera Cita a menos de 1.000 px', async ({ page }) => {
