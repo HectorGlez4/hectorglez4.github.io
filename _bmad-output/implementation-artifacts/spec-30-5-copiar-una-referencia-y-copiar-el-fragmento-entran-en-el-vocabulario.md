@@ -289,3 +289,17 @@ Puerta de la etapa s-30 (Épica 30, 30.1–30.5), intento 1.
 Margen max(100 ms, 5 %): las dos dentro; LCP de Cita bajo 2.500 ms. Veredicto: **ok**, sin desempate. Registro: `.claude/v9-ralph/logs/s-30/nfr7-gate1/`.
 
 **Veredicto de la puerta.** Pasa con el rojo aceptado de `huella.test.ts` y el rojo preexistente de la principal en la instantánea de `/buscar/`. `vocabulario_changed: true`: el orden es receptor (desde la rama), huella commiteada y después fusión.
+
+## Verificación en el sitio en vivo — 2026-11-08
+
+Receptor desplegado antes (desplegar y comprobar con 0; huella d9a663b600). Fusión 97e0073166, Publicar 42517374294 en verde («Desplegar» 2026-11-08T20:13:29Z). Solo curl.
+
+| URL | Qué se buscó | Resultado |
+|---|---|---|
+| /cita/jose-marti-yo-vengo-de-todas-partes-y-hacia/ | 200 | encontrado |
+| la misma | «Copiar» antes de la Tarjeta de Obra dentro de `<main>` (30.1) | encontrado (botón en el byte 19.755, tarjeta en el 33.354) |
+| la misma | «Cómo citar» con tres Referencias copiables (30.3) | encontrado (`data-como-citar`, `data-referencia data-copiable`) |
+| la misma | la Referencia de una Cita en verso en una línea con « / » (30.3, tras la 29) | encontrado |
+| la misma | «Inserta esta cita» con el Fragmento y sus `<br>` (30.4) | encontrado (`data-inserta-esta-cita`, `&lt;br&gt;` en el campo) |
+| 30.2 | medida y fila de acciones desde 600 px | sin superficie que mirar con curl (CSS); cubierto por la e2e de la puerta |
+| 30.5 | los dos eventos nuevos | sin datos que enseñar: fase A, retenidos en PENDIENTES; el receptor ya los acepta |
