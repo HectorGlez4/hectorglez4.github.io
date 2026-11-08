@@ -143,10 +143,27 @@ Sin hallazgos externos en este pase (el orquestador no pasó ninguna sección «
 
 Rechazados: `ruta` en un resultado de solo lectura (`terminar` no la imprime y el tipo la exige); demanda de Obras sin edición cotejada (ya se cuentan como «fuera»); longitud de la ventana de 28 días (el escritor la fija); `congelada` siempre falso (lo pide el contrato y es coherente); cifras sin separador de miles y familias en crudo (como los demás partes de la serie); frontera de no escritura fuera del corpus y sin red (inspección de código, sin `fetch` ni credencial); prueba sobre el Corpus real (verificación manual repetida en este pase); `--corpus` sin valor o repetido (ayudante común ya probado); bookkeeping del pase anterior (este pase lo corrige); referencias `fichero:línea` del Code Map; clase desconocida que veta una ventana más reciente (es la lectura del contrato); serie ilegible con familia congelada (el contrato da 1 a la serie ilegible); y las observaciones de intent-alignment y ac-auditor sin acción, que el contrato ya resuelve.
 
+### 2026-11-08 — Review pass
+- intent_gap: 0
+- bad_spec: 0
+- patch: 5 (high 0, medium 1, low 4)
+- defer: 0
+- reject: 37
+- addressed_findings:
+  - `[medium]` `[patch]` La congelación declarada no llegaba a ninguna prueba por el camino de la CLI (verification-gap, ac-auditor 4, intent-alignment 3): `tests/unit/curar-primero-congelada.test.ts` sustituye `src/lib/umbrales.ts` con un `CONGELACION_DE_OBRAS` y llama `curarPrimero` sin `opciones`, como `tools/obra.ts`; con la línea reducida a `opciones.congelacion ?? undefined` falla.
+  - `[low]` `[patch]` El fallo de la serie repetía el nombre del fichero («No se pudo leer corpus/serie-de-demanda.yml: corpus/serie-de-demanda.yml: …»): la etiqueta es «la serie de demanda» y el fichero lo nombra el error del lector.
+  - `[low]` `[patch]` El `null` de `obrasDeLosDatos` no decía qué significa: comentario (sin congelación para las indexables, que la orden no lee).
+  - `[low]` `[patch]` El párrafo de AGENTS.md se leía como si una entrada ilegible fuera una Cita repetida: redactado de nuevo.
+  - `[low]` `[patch]` El registro del spec se contradecía (el resultado inicial decía 0 parches y 29 pruebas junto a un pase con 9): el primer bloque del resultado se rotula como pase inicial y este pase añade el suyo.
+
+Rechazados: ventana sin `citas` ni `vacia` como lectura de 0, `congelada` siempre falso, `tiendas` por omisión `TIENDAS`, clase desconocida que veta una ventana más reciente, `--corpus` admitido (los fija el contrato); `hasta` futura, longitud de la ventana, clics mayores que impresiones, fichero de cero bytes (entradas escritas a mano o imposibles: la serie la escribe `demanda:registrar`); la demanda de las Obras «fuera» (se cuentan aparte); dos resoluciones del modelo (las dos salen de `colgarObras` y la prueba de disco del pase 1 las cruza); `ruta` en el resultado; cast del fixture; plazos de las pruebas de CLI; solo el primer par repetido; ICU de `localeCompare`; `corpus/` fijo en el nombre (el de todas las órdenes de la serie); referencias `fichero:línea`; pruebas de cero candidatas o todo en «no cuentan»; el parte que solo imprime el recuento de tienda sin marca cuando pasa de 0 y nunca `congelada` (menor; con la familia congelada no se lista nada); prueba sobre una copia del Corpus real (verificada a mano); red y escrituras fuera de `corpus/` (solo inspección, sin `fetch` ni escritura en el módulo); `vacia: true` en disco.
+
 ## Auto Run Result
 
 Status: done
 Blocking condition: ninguna.
+
+### Pase inicial (implementación)
 
 **Resumen.** Suborden nueva `npm run obra -- curar-primero`: lee Citas publicadas, Autores, fichas de Obra y `corpus/serie-de-demanda.yml` y lista las Obras publicadas con edición cotejada (ficha, título, Autor, ediciones declaradas, de ellas de tienda sin marca, congelada), ordenadas por la demanda de la ventana `28-dias` más reciente; sin ventana legible, cada una «sin cifra» con su motivo y por nombre de ficha. Con congelación lo dice con su jornada y no propone nada. No escribe nada (AD-24).
 
@@ -179,3 +196,13 @@ Blocking condition: ninguna.
 
 **Riesgos residuales.** Los mismos del primer pase; el camino con cifra queda ya cubierto sobre el Corpus resuelto de verdad.
 
+
+### Pase de revisión 2 (2026-11-08, con hallazgos externos; último)
+
+**Cambios.** `tests/unit/curar-primero-congelada.test.ts` (nuevo): `curarPrimero` sin `opciones`, como lo llama `tools/obra.ts`, con `CONGELACION_DE_OBRAS` sustituido en `src/lib/umbrales.ts`: dice «congelada por SM-11 desde el 2026-12-06» y no propone ninguna Obra (comprobado en rojo con la línea reducida a `opciones.congelacion ?? undefined`). `tools/lib/curarPrimero.ts`: el fallo de la serie se etiqueta «la serie de demanda» —el error del lector ya nombra el fichero— y un comentario dice qué es el `null` de `obrasDeLosDatos`. `tests/unit/curar-primero.test.ts`: la etiqueta nueva. `AGENTS.md`: el párrafo de las entradas ilegibles, redactado de nuevo. Este registro: el primer bloque del resultado se rotula «Pase inicial».
+
+**Hallazgos.** 5 parches (alta 0, media 1, baja 4), 0 diferidos, 37 rechazados. `followup_review_recommended: true` por la regla (puntuación 3 × 1 + 4 = 7 ≥ 5); el único parche de código es una prueba, una etiqueta de mensaje y un comentario.
+
+**Verificación.** `npx vitest run tests/unit/curar-primero.test.ts tests/unit/curar-primero-congelada.test.ts` 41/41; `tests/unit/demanda.test.ts tests/unit/obra-cli.test.ts` 74/74; `npx tsx tools/obra.ts curar-primero` código 0, 511 «sin cifra», árbol sin cambios; `npx astro check` 0 errores; `npm test` 7220/7227: los 7 fallos, en ficheros que este pase no toca, son las comparaciones byte a byte de dos construcciones (`ediciones-en-venta` ×4, `ingreso-construido` ×2) y el plazo de 120 s de `objetivo-cli` con carga 13–16; repetidos solos, `ingreso-construido` 43/43, `ediciones-en-venta` verde y la prueba de `objetivo-cli` verde.
+
+**Riesgos residuales.** Los de los pases anteriores.

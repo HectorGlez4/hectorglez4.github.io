@@ -519,7 +519,7 @@ describe('Historia 33.3 — curarPrimero con los efectos inyectados (AD-22)', ()
     ['leerCitas', 'las Citas publicadas'],
     ['leerAutores', 'los Autores'],
     ['leerFichasDeObra', 'las fichas de Obra'],
-    ['leerEntradas', 'corpus/serie-de-demanda.yml'],
+    ['leerEntradas', 'la serie de demanda'],
   ] as const)('si %s falla, no sale bien y nombra %s', async (efecto, que) => {
     const r = await curarPrimero(
       RUTAS,

@@ -45,7 +45,8 @@ import {
 } from './demanda.ts';
 import type { Resultado } from './gestion.ts';
 
-const SERIE = 'corpus/serie-de-demanda.yml';
+/** El error del lector ya nombra el fichero: la etiqueta no lo repite. */
+const SERIE = 'la serie de demanda';
 const NADA_ESCRITO = 'No se ha escrito nada.';
 
 /** Una fila de `citas` de la ventana elegida, ya validada. */
@@ -375,6 +376,8 @@ export async function curarPrimero(
     opciones.congelacion === undefined ? congelacionVigente() : (opciones.congelacion ?? undefined);
   const delSitio = new Set(autores.map((a) => a.slug));
   const colgadas = colgarObras(citas, fichas).filter((c) => delSitio.has(c.autor));
+  // `null`: sin congelación para las indexables, que esta orden no lee; las `publicadas` no
+  // dependen de ella. La congelación de la orden es la de arriba, y corta antes de proponer.
   const { publicadas } = obrasDeLosDatos({ citas, autores, fichas }, null);
 
   const informe = componerCuracion({

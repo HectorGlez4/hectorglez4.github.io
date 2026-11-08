@@ -336,9 +336,9 @@ y clics de las Citas de esa ventana que resuelven a la Obra (impresiones, clics 
 para desempatar); las mensuales no se usan y las ventanas no se suman. Esa cifra es
 **provisional** —la serie no cuenta la Página de Obra— y **cota inferior** —lo de `resto` no se
 atribuye—, y el parte dice cuántas Citas de la ventana no cuentan. **Sin ventana de 28 días
-legible** —la serie vacía, como hoy, solo mensuales o una entrada ilegible, que también es una
-Cita repetida en sus filas, `vacia: true` con filas o la misma ventana dos veces— cada Obra sale «sin
-cifra» con ese motivo, nunca 0, y la lista va por nombre de ficha, que no es de prioridad; una
+legible** —la serie vacía, como hoy, solo mensuales o una entrada ilegible; y es ilegible también
+la que repite una Cita en sus filas, la `vacia: true` con filas y la misma ventana dos veces— cada
+Obra sale «sin cifra» con ese motivo, nunca 0, y la lista va por nombre de ficha, que no es de prioridad; una
 Obra sin Citas en una ventana leída, o una ventana `vacia: true`, sí da 0, y es una lectura. Con
 la familia Obra congelada lo dice con su jornada y no propone nada. No propone ediciones ni
 tiendas ni sugiere encender o solicitar nada. Códigos: 0 si informó; 1, sin escribir, si el
