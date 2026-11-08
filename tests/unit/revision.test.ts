@@ -617,3 +617,62 @@ describe('Historia 26.8 — aprobar no publica una Cita sin Tema publicado', () 
     });
   });
 });
+
+describe('Historia 29.2 — aprobar publica la candidata con los saltos de su documento de verso', () => {
+  const EN_UNA_LINEA =
+    'Yo vengo de todas partes, Y hacia todas partes voy: Arte soy entre las artes, En los montes, monte soy.';
+  const EN_VERSO =
+    'Yo vengo de todas partes,\nY hacia todas partes voy:\nArte soy entre las artes,\nEn los montes, monte soy.';
+  const DOCUMENTO = 'wikisource-es--versos-sencillos--versos-sencillos-i';
+  const candidata = (texto: string) => ({
+    texto,
+    autor: 'jose-marti',
+    temas: [TEMA_PUBLICADO],
+    slug: 'jose-marti-yo-vengo-de-todas-partes',
+    procedencia: { obra: 'Versos sencillos' },
+    estadoDerechos: 'dominio-público',
+    fuente: {
+      id: 'wikisource-es',
+      nombre: 'Wikisource en español',
+      licencia: 'CC BY-SA 4.0',
+      url: 'https://es.wikisource.org/wiki/Versos_sencillos/I',
+    },
+  });
+
+  async function conElDocumento(texto: string): Promise<Rutas> {
+    const rutas = await corpusCon([candidata(texto)]);
+    await mkdir(rutas.fuentes, { recursive: true });
+    await writeFile(
+      join(rutas.fuentes, `${DOCUMENTO}.txt`),
+      await readFile(join(import.meta.dirname, 'ayuda/lineas', `${DOCUMENTO}.txt`), 'utf8'),
+      'utf8',
+    );
+    return rutas;
+  }
+
+  const publicada = async (rutas: Rutas) =>
+    readFile(join(rutas.citas, `${nombreDeFicheroDeCita('jose-marti', 'jose-marti-yo-vengo-de-todas-partes')}.md`), 'utf8');
+
+  it('una candidata en una línea sale publicada en verso, cambiando solo su línea «texto:», y lo dice', async () => {
+    const rutas = await conElDocumento(EN_UNA_LINEA);
+    const antes = ficheroDeCita(candidata(EN_UNA_LINEA));
+    const resultado = await aprobar(rutas, ['jose-marti-yo-vengo-de-todas-partes']);
+    expect(resultado.publicadas).toEqual(['jose-marti-yo-vengo-de-todas-partes']);
+    expect(resultado.conSaltos).toEqual([{ slug: 'jose-marti-yo-vengo-de-todas-partes', documento: DOCUMENTO }]);
+    const [citada] = (await leerCitas(rutas.citas)).filter((c) => c.slug === 'jose-marti-yo-vengo-de-todas-partes');
+    expect(citada.texto).toBe(EN_VERSO);
+    expect(await publicada(rutas)).toBe(
+      antes.replace(`texto: ${JSON.stringify(EN_UNA_LINEA)}`, `texto: ${JSON.stringify(EN_VERSO)}`),
+    );
+  });
+
+  it('una que ya trae sus saltos se publica tal cual, sin anotarla', async () => {
+    const rutas = await conElDocumento(EN_VERSO);
+    const resultado = await aprobar(rutas, ['jose-marti-yo-vengo-de-todas-partes']);
+    expect(resultado.publicadas).toEqual(['jose-marti-yo-vengo-de-todas-partes']);
+    expect(resultado.conSaltos).toEqual([]);
+    const [citada] = (await leerCitas(rutas.citas)).filter((c) => c.slug === 'jose-marti-yo-vengo-de-todas-partes');
+    expect(citada.texto).toBe(EN_VERSO);
+    expect(await readFile(citada.ruta, 'utf8')).toBe(ficheroDeCita(candidata(EN_VERSO)));
+  });
+});

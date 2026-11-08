@@ -99,9 +99,12 @@ U+000A, uno también entre estrofas) solo donde un documento `verso` o `verso-es
 parte línea. **Un salto nunca se teclea**: el tecleado que el documento no respalda se pierde y el
 parte lo dice, y el build rompe ante un salto sin respaldo. El reparto del Corpus por forma y las
 cifras de la Tarjeta del verso, sin escribir nada: `npx tsx tools/lineas.ts formas|tarjeta`.
-Las candidatas que ya estaban en `corpus/_revision/` antes de la 29.1 se escribieron en una línea y
-`revisar --aprobar` las publica tal cual: para que lleven su verso, regenéralas con `extraer` desde
-su documento antes de aprobar, o restitúyelas con `documentar --restituir-saltos` (abajo).
+Las candidatas que ya estaban en `corpus/_revision/` antes de la 29.1 se escribieron en una línea:
+`revisar --aprobar` las publica **con sus saltos**, decididos con `saltosDeLaCita` como en la regla 4
+del build y escritos solo en la línea `texto:`, y el parte lo dice («↵ … se publicó con los saltos de
+verso de …»). Si esa línea no es la que escribe `aYaml`, no la publica y da la orden
+`documentar --restituir-saltos <slug>` (abajo); un conflicto entre dos documentos de verso se publica
+como está, porque el build solo avisa.
 
 **Un Autor dado de alta en la sesión trae una clave de orden sin revisar** (Historia 26.1).
 `crear` la propone —la última palabra del `nombre`, la regla fija de `tools/lib/claves.ts`— y

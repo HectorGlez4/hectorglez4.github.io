@@ -327,6 +327,8 @@ describe('dueños del salto (AD-29)', () => {
         'tools/extraer.ts',
         'tools/lib/cotejo.ts',
         'tools/lib/documentacion.ts',
+        // La aprobación publica con sus saltos la candidata que llega sin ellos (29.2, `saltosDeLaCita`).
+        'tools/lib/revision.ts',
         'tools/lineas.ts',
         'tools/recuperar.ts',
       ].sort(),

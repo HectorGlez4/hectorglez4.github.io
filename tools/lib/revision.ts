@@ -18,10 +18,24 @@ import { join } from 'node:path';
 import { citaAdmisible } from '../../src/lib/admision.ts';
 import { cargaDeCandidata, type SeñalDeOrden } from '../../src/lib/ordenDeRevision.ts';
 import { esAparatoDeLaFuente, esTrozoDeCitaAjena, tienePuntuacionRota } from './extraccion.ts';
-import { motivoParaNoPublicar } from './cotejo.ts';
+import {
+  candidatosDeLosSaltos,
+  documentosDeCita,
+  documentosLegibles,
+  motivoParaNoPublicar,
+} from './cotejo.ts';
+import { saltosDeLaCita } from './lineas.ts';
 import { normalizar } from '../../src/lib/normalizar.ts';
 import { slugLibre } from '../../src/lib/slug.ts';
-import { leerCitas, leerTemas, mover, nombreDeFicheroDeCita, type Rutas } from './corpus.ts';
+import {
+  conLaLineaDeTexto,
+  leerCitas,
+  leerDocumentosParaElCotejo,
+  leerTemas,
+  mover,
+  nombreDeFicheroDeCita,
+  type Rutas,
+} from './corpus.ts';
 import { aplicarFichaDeObra, resolverFichaDeObra } from './obras.ts';
 import { motivoSinTemaPublicado, temaPublicadoConLaPasada } from './alcance.ts';
 import type { TemaBajoUmbral } from '../../src/lib/publicado.ts';
@@ -42,6 +56,8 @@ export interface CandidataEnRevision {
    * asegura la Ficha de Obra de (Autor, obra) en el mismo gesto en que publica.
    */
   obra?: string;
+  /** Su Fuente, si declara una: de ella salen los documentos de los que toma sus saltos (29.2). */
+  fuente?: { id: string };
   /**
    * La Cita ya presente con la que coincide, si coincide con alguna — FR-14.
    *
@@ -142,6 +158,7 @@ export async function loteEnRevision(rutas: Rutas): Promise<CandidataEnRevision[
       ...(Array.isArray(candidata.temas) && candidata.temas.length > 0 ? { temas: candidata.temas } : {}),
       ruta: candidata.ruta,
       ...(typeof candidata.procedencia?.obra === 'string' ? { obra: candidata.procedencia.obra } : {}),
+      ...(typeof candidata.fuente?.id === 'string' ? { fuente: { id: candidata.fuente.id } } : {}),
       // La publicada gana: lo que el editor necesita saber es que ya está publicada.
       ...(duplicadaPublicada !== undefined
         ? { duplicaA: { slug: duplicadaPublicada, donde: 'publicadas' as const } }
@@ -236,6 +253,13 @@ export interface ResultadoDeDecision {
    */
   publicadasSinTema: { slug: string; temas: TemaBajoUmbral[]; motivos: string[] }[];
   rechazadas: string[];
+  /**
+   * Publicadas que llegaban sin los saltos de verso de su documento —una candidata extraída antes de
+   * la 29.1, o de un documento en prosa de una obra que también tiene uno de verso— y se publicaron
+   * con ellos, con el documento del que salen — Historia 29.2. Sin esto, la regla 4 del cotejo
+   * rompería el build siguiente.
+   */
+  conSaltos: { slug: string; documento: string }[];
   noEncontradas: string[];
 }
 
@@ -252,6 +276,12 @@ export async function aprobar(
   temas: string[] = [],
 ): Promise<ResultadoDeDecision> {
   const lote = await loteEnRevision(rutas);
+  let leidos:
+    | Promise<{
+        documentos: Awaited<ReturnType<typeof leerDocumentosParaElCotejo>>['documentos'];
+        candidatos: ReturnType<typeof candidatosDeLosSaltos>['candidatos'];
+      }>
+    | undefined;
   const resultado: ResultadoDeDecision = {
     publicadas: [],
     renombradas: [],
@@ -262,6 +292,7 @@ export async function aprobar(
     publicadasSinTema: [],
     rechazadas: [],
     noEncontradas: [],
+    conSaltos: [],
   };
 
   /*
@@ -306,6 +337,8 @@ export async function aprobar(
     candidata: CandidataEnRevision;
     temas: string[];
     comoPublicada: { autor: string; procedencia?: { obra?: string } };
+    /** El `texto` con sus saltos de verso, si llega sin ellos (Historia 29.2). */
+    conSaltos?: { texto: string; documento: string };
   }[] = [];
   const planeadasParaObra = [...publicadasParaObra];
   for (const [indice, slug] of [...new Set(slugs)].entries()) {
@@ -318,6 +351,19 @@ export async function aprobar(
       resultado.rechazadasPorAdmision.push({ slug, motivos: candidata.motivos });
       continue;
     }
+    /*
+     * Historia 29.2 — los saltos de verso, con la misma decisión que la regla 4 del cotejo
+     * (`saltosDeLaCita` sobre `candidatosDeLosSaltos`). Una candidata extraída antes de la 29.1 —el
+     * `_revision/` de la principal no se versiona y no lo restituye nadie— llega en una línea, y
+     * publicarla así rompería el build siguiente. Se publica con sus saltos; un conflicto entre dos
+     * documentos de verso se publica como está, igual que la regla 4 solo avisa.
+     */
+    const saltos = await saltosQueLeFaltan(candidata);
+    if (saltos !== undefined && !saltos.ok) {
+      resultado.rechazadasPorAdmision.push({ slug, motivos: [saltos.motivo] });
+      continue;
+    }
+    const conSaltos = saltos?.ok ? { texto: saltos.texto, documento: saltos.documento } : undefined;
     const obra = candidata.obra;
     const comoPublicada = {
       autor: candidata.autor,
@@ -346,6 +392,7 @@ export async function aprobar(
       candidata,
       temas: [...new Set([...(candidata.temas ?? []), ...temas])],
       comoPublicada,
+      ...(conSaltos !== undefined ? { conSaltos } : {}),
     });
   }
 
@@ -376,7 +423,7 @@ export async function aprobar(
   replanificar();
 
   while (pendientes.length > 0) {
-    const { slug, candidata, temas: suyos, comoPublicada } = pendientes.shift()!;
+    const { slug, candidata, temas: suyos, comoPublicada, conSaltos } = pendientes.shift()!;
 
     /*
      * Historia 22.1 — la Ficha de Obra, en el mismo gesto en que se publica (AD-25).
@@ -403,10 +450,10 @@ export async function aprobar(
     const definitivo = slugLibre(candidata.slug, ocupados);
     ocupados.add(definitivo);
 
-    if (definitivo === candidata.slug && temas.length === 0) {
+    if (definitivo === candidata.slug && temas.length === 0 && conSaltos === undefined) {
       await mover(candidata.ruta, rutas.citas);
     } else {
-      await reescribirConSlug(candidata, definitivo, rutas, temas);
+      await reescribirConSlug(candidata, definitivo, rutas, temas, conSaltos?.texto);
       if (definitivo !== candidata.slug) {
         resultado.renombradas.push({ de: candidata.slug, a: definitivo });
       }
@@ -420,6 +467,7 @@ export async function aprobar(
     }
 
     resultado.publicadas.push(slug);
+    if (conSaltos !== undefined) resultado.conSaltos.push({ slug: definitivo, documento: conSaltos.documento });
   }
 
   /*
@@ -436,6 +484,36 @@ export async function aprobar(
   }
 
   return resultado;
+
+  /**
+   * Los saltos de verso que le faltan a una candidata: `undefined` si no le falta ninguno —sin
+   * documento, en prosa, sin saltos en su tramo, en conflicto o ya con ellos—; `ok: false` si le
+   * faltan y su fichero no tiene la línea `texto:` que se sabe reescribir. Los documentos se leen
+   * una vez por pasada, como los lee el build.
+   */
+  async function saltosQueLeFaltan(
+    candidata: CandidataEnRevision,
+  ): Promise<{ ok: true; texto: string; documento: string } | { ok: false; motivo: string } | undefined> {
+    if (candidata.fuente === undefined) return undefined;
+    leidos ??= leerDocumentosParaElCotejo(rutas).then(({ documentos, lineasDeclaradas }) => ({
+      documentos,
+      candidatos: candidatosDeLosSaltos(documentos, lineasDeclaradas).candidatos,
+    }));
+    const { documentos, candidatos } = await leidos;
+    const legibles = documentosLegibles(documentosDeCita(candidata.fuente, candidata.obra, documentos), documentos);
+    const decision = saltosDeLaCita(candidata.texto, candidatos(legibles));
+    if (decision.tipo !== 'saltos' || decision.texto === candidata.texto) return undefined;
+    if (conLaLineaDeTexto(await readFile(candidata.ruta, 'utf8'), candidata.texto, decision.texto) === undefined) {
+      return {
+        ok: false,
+        motivo:
+          `le faltan los saltos de verso de corpus/fuentes/${decision.documento}.txt y su línea «texto:» no ` +
+          'es la que se sabe reescribir: publicada así rompería el build (regla 4 del cotejo). Corra ' +
+          `«npm run documentar -- --restituir-saltos ${candidata.slug}» y apruébela después.`,
+      };
+    }
+    return { ok: true, texto: decision.texto, documento: decision.documento };
+  }
 }
 
 /**
@@ -450,8 +528,14 @@ async function reescribirConSlug(
   definitivo: string,
   rutas: Rutas,
   temas: string[] = [],
+  conSaltos?: string,
 ): Promise<void> {
-  const bruto = await readFile(candidata.ruta, 'utf8');
+  const leido = await readFile(candidata.ruta, 'utf8');
+  // Historia 29.2 — solo cambia la línea `texto:`, como en la restitución.
+  const bruto = conSaltos === undefined ? leido : conLaLineaDeTexto(leido, candidata.texto, conSaltos);
+  if (bruto === undefined) {
+    throw new Error(`${candidata.ruta} cambió mientras se aprobaba: su línea «texto:» ya no es la que se decidió.`);
+  }
   const conNuevoSlug = bruto.replace(
     /^slug:.*$/m,
     `slug: ${JSON.stringify(definitivo)}`,
@@ -530,6 +614,7 @@ export async function rechazar(rutas: Rutas, slugs: string[]): Promise<Resultado
     publicadasSinTema: [],
     rechazadas: [],
     noEncontradas: [],
+    conSaltos: [],
   };
 
   for (const slug of slugs) {

@@ -798,6 +798,22 @@ describe('Historia 29.2 — --restituir-saltos', () => {
     expect(await instantanea(corpus)).toEqual(antes);
   });
 
+  it.skipIf(ROOT)('si las fechas no se pueden contar: 1 y nada escrito, porque se cuentan antes de escribir', async () => {
+    // Las Citas y los documentos se leen; solo falla lo que lee el recuento de AD-27 (los Autores).
+    const corpus = await enDisco(await corpusDeVerso());
+    const antes = await instantanea(corpus);
+    await chmod(join(corpus, 'autores/seneca.yml'), 0o000);
+    try {
+      const hecho = await correr(corpus, ['--restituir-saltos']);
+      expect(hecho.codigo).toBe(1);
+      expect(hecho.error).toMatch(/No se pueden contar las superficies/);
+      expect(hecho.error).toContain('No se ha escrito nada.');
+    } finally {
+      await chmod(join(corpus, 'autores/seneca.yml'), 0o644);
+    }
+    expect(await instantanea(corpus)).toEqual(antes);
+  });
+
   it('el Corpus restituido construye: la regla 4 la decide la misma función que la orden', async () => {
     const DOC_DE_VERSO = componerDocumento(
       {

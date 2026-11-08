@@ -5,12 +5,19 @@ created: '2026-11-08'
 status: 'done'
 baseline_revision: 'ae2c803b97f967f4ec28ba6767b4295685e21773'
 review_loop_iteration: 0
-followup_review_recommended: true
+followup_review_recommended: false
 context:
   - '{project-root}/_bmad-output/implementation-artifacts/epic-29-context.md'
   - '{project-root}/_bmad-output/implementation-artifacts/spec-29-1-el-salto-de-verso-sobrevive-en-el-corpus-el-cotejo-y-el-slug.md'
 warnings: [oversized]
-deferred: []
+deferred:
+  - summary: >-
+      En la rama v9/epica-29 `corpus/_revision/` está versionado (288.595 ficheros) contra la decisión del 2026-10-16, y el commit de restitución 3906b28d50 lleva 1.259 candidatas; hay que dejarlo sin versionar antes de fusionar con la principal.
+    evidence: |-
+      `git ls-files corpus/_revision | wc -l` en la rama da 288.595; AGENTS.md § Policy dice que las candidatas sin aprobar no se versionan. No lo causa la 29.2 (el versionado viene de antes en la rama), pero su commit de restitución lo amplía y nada lo anota para la fusión.
+    location: >-
+      corpus/_revision/ (rama v9/epica-29)
+    severity: medium
 ---
 
 <intent-contract>
@@ -208,6 +215,18 @@ Y se repite (`--seco` primero) tras cada puesta al día de la rama con la princi
 
 Rechazados, con su razón: `corpusParaFechar(rutas.raiz, { corpus: rutas.raiz })` es correcto —con `corpus` dado, `raiz` no se usa y la función no lee git, solo el disco—; la clave de `porObra` por nombre corto es exacta, porque `documentosDeCita` solo depende de `fuente.id` y la obra; los slugs que no acotan la lectura, el coste de la regla 4 (~2 s medidos) y el recolapso de `textoConSaltos` (solo documentos de verso) son coste aceptado; restringir a publicadas y el versionado de `_revision/` en esta rama no son defectos de la historia (`git add -u corpus/_revision` es la forma documentada); los avisos de conflicto fuera de la integración (las órdenes de alta y revisión cotejan una Cita para dejarla pasar o no); el estado de `sprint-status.yaml` lo escribe el cierre del bucle; las comprobaciones redundantes de argumentos y la repetición de `--corpus` (más estricto, sin pérdida); el 0 de una nombrada en conflicto o que no se localiza (la matriz manda 0 «en lo demás», ahora documentado); las suposiciones de `conLaLineaDeTexto` (comprobadas sobre todos los ficheros al planificar, y el desajuste sale como conflicto nombrando el fichero, que es lo que hay que mirar); la orden única de 75 slugs (la exige la épica); la rama «colapso distinto», inalcanzable con el escritor único; `texto` no cadena (lo rechaza el esquema antes); la forma posicional de documentar junto a `--restituir-saltos` (los posicionales son slugs, por el spec) y el contador `cotejadas` (presentación).
 
+### 2026-11-08 — Review pass (segunda revisión externa, última ronda)
+- intent_gap: 0
+- bad_spec: 0
+- patch: 2 (high 0, medium 1, low 1)
+- defer: 1 (medium 1)
+- reject: 34 (medium 3, low 31)
+- addressed_findings:
+  - `[medium]` `[patch]` `revisar --aprobar` publicaba tal cual una candidata en una línea de documento de verso —las del `_revision/` sin versionar de la principal, extraídas antes de la 29.1, o una extraída de un documento en prosa de una obra que también tiene uno de verso—, y la regla 4 rompía el build siguiente. Ahora `aprobar` (`tools/lib/revision.ts`) decide con `saltosDeLaCita` sobre `candidatosDeLosSaltos` —la misma decisión que la regla 4— y publica con sus saltos reescribiendo solo la línea `texto:` (`conLaLineaDeTexto`, que pasa a `tools/lib/corpus.ts` para compartirla con la restitución); si esa línea no es la de `aYaml`, no la publica y da la orden `documentar --restituir-saltos <slug>`; un conflicto se publica como está, como la regla 4 solo avisa. `revisar` lo dice en el parte («↵ … se publicó con los saltos de verso de …»), y AGENTS.md cambia la frase que pedía regenerar antes. Prueba nueva en `tests/unit/revision.test.ts` (en una línea → publicada en verso cambiando solo `texto:`; ya en verso → tal cual), que sin el arreglo falla; la guarda de importadores de `lineas.test.ts` declara `tools/lib/revision.ts`.
+  - `[low]` `[patch]` Ninguna prueba hacía fallar solo el recuento de fechas: caso nuevo en `documentar-cli.test.ts` con la ficha de Autor ilegible (citas y documentos legibles) → 1, «No se pueden contar las superficies», «No se ha escrito nada.» e instantánea igual.
+
+Diferido: el versionado de `corpus/_revision/` en la rama (frontmatter). Rechazados, con su razón: las dos funciones de decisión (`documentoParaLosSaltos` y `saltosDeLaCita`) coinciden fuera del conflicto —las dos toman el primer documento de verso donde se localiza, con el mismo escritor— y en el conflicto la regla 4 solo avisa, así que no hay build rojo; quién corre la restitución y la escritura atómica (temporal + `rename`) los aceptó Héctor por delegación; el estado de `sprint-status.yaml` y del épico lo escribe el cierre del bucle; la entrada vacía del log es histórica y no se reescribe; `corpusParaFechar(rutas.raiz, { corpus })`, el `texto` no cadena (lo rechaza el esquema), el slug en los dos sitios (el build ya rompe por duplicado), la cuenta del mensaje de vuelta atrás, la guarda de repetición más estricta, el posicional con forma de ruta, el coste de memoria y de la regla 4, la ruta de directorio del fallo agregado, los conflictos de candidatas en el build, el ruido de ayudas de prueba, los estilos YAML a mano (comprobado al planificar: ningún fichero) y la rama «colapso distinto» inalcanzable; las lagunas de prueba de «ha cambiado desde que se decidió» y del fallo a medias de `writeFile` (exigen una costura inyectable en la orden para una ventana que Héctor aceptó al delegar la escritura atómica) y de las formas `prosa-por-lineas`/`prosa-ajustada` (misma rama de código que `indeterminada`).
+
 ## Auto Run Result
 
 Status: done
@@ -270,3 +289,24 @@ Copia restituida: orden 0 (1.334 escritas), segunda pasada 0 sin escribir, diff 
   puede quedarse sin saltos (conservador).
 - La fila «colapso distinto» de la matriz no se puede provocar con el escritor único (colapsa por
   construcción); la comprobación queda como cinturón, sin prueba que la dispare.
+
+**Segunda revisión externa (última ronda).** 2 parches, 1 diferido, 34 rechazados (detalle en el
+Review Triage Log). Recomendación de revisión de seguimiento: `false` — parches de esta pasada:
+high 0, medium 1, low 1; puntuación 3 × 1 + 1 = 4 < 5.
+
+**Ficheros de la segunda pasada.**
+- `tools/lib/revision.ts` — `aprobar` publica con sus saltos (`saltosDeLaCita`) la candidata que llega en una línea, o no la publica y da la orden si su línea `texto:` no es la de `aYaml`; `conSaltos` en el resultado.
+- `tools/revisar.ts` — el parte nombra las publicadas con saltos y su documento.
+- `tools/lib/corpus.ts` — `conLaLineaDeTexto`, movida desde `tools/lib/documentacion.ts`, que la importa.
+- `tests/unit/revision.test.ts` — aprobar en una línea → en verso, solo cambia `texto:`; ya en verso → tal cual.
+- `tests/unit/documentar-cli.test.ts` — el recuento de fechas que falla solo: 1 y nada escrito.
+- `tests/unit/lineas.test.ts` — `tools/lib/revision.ts` en la lista de importadores de `lineas.ts`.
+- `AGENTS.md` — aprobar ya no publica en una línea lo que su documento de verso parte.
+
+**Verificación de la segunda pasada.** `npx vitest run` de `revision` (36), `revisar-cli`, `lineas`
+y `cotejo`: en verde; el caso nuevo de `documentar-cli`: en verde. `npx astro check`: 0 errores,
+0 avisos. `npm test` entero (`logs/s-29/triage-29.2-2-npm-test.log`): 160 ficheros, 7.362 pruebas,
+en verde (1.345 s), con la 29.3 encima.
+
+**Riesgo residual nuevo.** Aprobar lee ahora todo `corpus/fuentes/` una vez por pasada cuando
+alguna candidata declara Fuente (unos 2–3 s, como el alta).

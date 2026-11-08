@@ -118,6 +118,11 @@ if (aAprobar.length > 0) {
   lineas.push(`Publicadas: ${resultado.publicadas.length}${conTemas}`);
   for (const slug of resultado.publicadas) lineas.push(`  ✓ ${slug}`);
 
+  for (const { slug, documento } of resultado.conSaltos) {
+    // Historia 29.2: llegaba en una línea; se publica con los saltos de su documento de verso.
+    lineas.push(`  ↵ ${slug} se publicó con los saltos de verso de corpus/fuentes/${documento}.txt.`);
+  }
+
   for (const cambio of resultado.renombradas) {
     // El slug es la URL. Que cambie está bien —el ocupado no se pisa— pero enterarse
     // después, no: quien aprueba tiene que poder anotarlo antes de compartir el enlace.
