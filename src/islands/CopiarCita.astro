@@ -43,8 +43,23 @@
  * copias del Kit y `document.currentScript` sigue siendo el guion. Se inserta con `set:html`.
  * El texto del guion no lleva comentarios: viajarían al visitante y contarían en
  * `MAX_BYTES_DE_GUION`.
+ *
+ * Historia 30.3 — **la única isla de copiar de la página** atiende también «Cómo citar»
+ * (`ComoCitar.astro`), que va después en el marcado. Por eso espera al documento analizado
+ * (`DOMContentLoaded` si aún se está leyendo) y entonces recorre cada bloque `[data-como-citar]`
+ * que no esté marcado (`data-listo`, para que las dos copias del Kit o la Cita del Día no lo
+ * hagan dos veces): escribe en cada marcador la fecha de consulta de hoy, con
+ * `fechaDeConsulta` de `src/lib/atribucion.ts` —que viaja por su texto, como `anunciar`, y usa el
+ * calendario del visitante; el build no escribe ninguna jornada—, quita las líneas «Sin fecha…»
+ * y enseña los botones. Cada botón copia el `textContent` de su Referencia, dice «Copiado.» dos
+ * segundos y lo anuncia por la región del bloque, dentro del `<details>`. Si el portapapeles
+ * rechaza, nada: ni «Copiado.» ni error, y la Referencia sigue a la vista y seleccionable. El
+ * guion sigue sin contenido —nada de la Cita, todo en el marcado— e idéntico en toda Página de
+ * Cita, y copiar la Cita copia lo mismo que antes. Sin `__medir` nuevo: el evento de copiar una
+ * Referencia es de la 30.5. Donde no hay «Cómo citar» (portada, 404, Kit), el recorrido no
+ * encuentra nada.
  */
-import { textoParaCopiar } from '../lib/atribucion.ts';
+import { MARCADOR_DE_FECHA_DE_CONSULTA, fechaDeConsulta, textoParaCopiar } from '../lib/atribucion.ts';
 import { guionQueAnuncia } from '../lib/anuncio.ts';
 import { EVENTOS } from '../lib/medicion.ts';
 import type { Cita, Autor } from '../lib/publicado.ts';
@@ -84,8 +99,9 @@ const instancia = cita.slug;
 const ROTULO = 'Copiar la cita';
 
 const guion = guionQueAnuncia(
-  { EVENTO_COPIADO: EVENTOS.copiado },
-  `const isla = document.currentScript.previousElementSibling;
+  { EVENTO_COPIADO: EVENTOS.copiado, MARCADOR: MARCADOR_DE_FECHA_DE_CONSULTA },
+  `const fechaDeConsulta = ${String(fechaDeConsulta)};
+const isla = document.currentScript.previousElementSibling;
 const boton = isla.querySelector('[data-copiar]');
 const etiqueta = boton.querySelector('[data-etiqueta]');
 const anuncio = isla.querySelector('[data-anuncio]');
@@ -116,6 +132,30 @@ boton.addEventListener('click', async () => {
   temporizador = setTimeout(volver, 2000);
   __medir(EVENTO_COPIADO);
 });
+
+const citar = () => {
+for (const k of document.querySelectorAll('[data-como-citar]:not([data-listo])')) {
+k.setAttribute('data-listo', '');
+const r = k.querySelector('[data-anuncio]'), hoy = new Date();
+for (const m of k.querySelectorAll('[' + MARCADOR + ']')) m.textContent = fechaDeConsulta(m.getAttribute(MARCADOR), hoy);
+for (const l of k.querySelectorAll('[data-sin-fecha]')) l.remove();
+for (const b of k.querySelectorAll('[data-copiar-referencia]')) {
+const e = b.firstChild, t = e.textContent;
+let s;
+const v = () => { clearTimeout(s); e.textContent = t; r.textContent = ''; b.removeAttribute('data-estado'); };
+b.hidden = false;
+b.onclick = async () => {
+v();
+try { await navigator.clipboard.writeText(b.parentNode.querySelector('[data-referencia]').textContent); } catch { return; }
+e.textContent = 'Copiado.';
+b.setAttribute('data-estado', 'copiado');
+anunciar(r, 'Copiado.');
+s = setTimeout(v, 2000);
+};
+}
+}
+};
+document.readyState === 'loading' ? document.addEventListener('DOMContentLoaded', citar) : citar();
 `,
 );
 ---

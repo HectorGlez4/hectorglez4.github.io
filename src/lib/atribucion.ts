@@ -11,7 +11,7 @@
  */
 
 import type { Cita, Autor, SiguienteCita } from './publicado.ts';
-import type { ObraResuelta } from './obras.ts';
+import { rotuloDeFuente, type ObraResuelta } from './obras.ts';
 import { MARCA } from './marca.ts';
 import { recuentoDeAutores, recuentoDeCitas, recuentoDeObras, temaEnFrase } from './recuentos.ts';
 import {
@@ -466,4 +466,206 @@ export function lineaDeProcedencia(cita: Cita): { titulo?: string; resto: string
   const siguientes = frases.map(conPunto).join(' ');
   if (titulo === undefined) return { resto: siguientes };
   return { titulo, resto: siguientes === '' ? trasElTitulo : `${trasElTitulo} ${siguientes}` };
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// «Cómo citar» — Historia 30.3, FR-58, AD-28
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Los estilos de la Referencia, en el orden en que se apilan: APA, MLA y Chicago (la entrada de
+ * bibliografía de notas y bibliografía, decisión de Héctor). Sin pestañas: una composición.
+ */
+export const ESTILOS_DE_REFERENCIA = ['apa', 'mla', 'chicago'] as const;
+
+export type EstiloDeReferencia = (typeof ESTILOS_DE_REFERENCIA)[number];
+
+/** El rótulo de cada estilo, y la segunda palabra de su botón: «Copiar APA». */
+export const ROTULOS_DE_ESTILO: Readonly<Record<EstiloDeReferencia, string>> = {
+  apa: 'APA',
+  mla: 'MLA',
+  chicago: 'Chicago',
+};
+
+/**
+ * El atributo del marcador vacío donde va la fecha de consulta, con el estilo por valor:
+ * `<span data-fecha-de-consulta="apa"></span>`. El build lo deja vacío —la fecha es la del
+ * visitante, nunca la jornada del build— y la isla de Copiar lo rellena con `fechaDeConsulta`.
+ */
+export const MARCADOR_DE_FECHA_DE_CONSULTA = 'data-fecha-de-consulta';
+
+/** Un trozo de la Referencia: texto, en cursiva si el estilo la pide, o el sitio de la fecha. */
+export type SegmentoDeReferencia = { texto: string; cursiva?: true } | { fecha: EstiloDeReferencia };
+
+/** Una Referencia ya compuesta, como la recibe `ComoCitar.astro`, que no compone nada. */
+export interface ReferenciaCompuesta {
+  estilo: EstiloDeReferencia;
+  rotulo: string;
+  segmentos: readonly SegmentoDeReferencia[];
+}
+
+/**
+ * Si la Cita lleva «Cómo citar». Hoy, toda Cita; la Historia 35.4 añadirá aquí la Cita atribuida
+ * (FR-65), y la página solo pregunta.
+ */
+export function citaTieneComoCitar(cita: Pick<Cita, 'slug'>): boolean {
+  void cita;
+  return true;
+}
+
+/** Lo que del Autor decide su nombre en una Referencia. */
+export type AutorParaReferencia = Pick<Autor, 'nombre'> & { ordenAlfabetico?: unknown; ordenRevisado?: unknown };
+
+/**
+ * El nombre partido en apellidos y nombre de pila, **solo** si una persona revisó la clave de
+ * orden (`ordenRevisado`) y la clave es, tal cual, una palabra del `nombre` partido por espacios
+ * (la primera vez que aparece): los apellidos van desde esa palabra hasta el final; el nombre de
+ * pila, lo de antes, y sin nada antes no hay nombre de pila. Si no, `undefined`: el nombre se
+ * escribe tal cual. Una clave sin revisar es una propuesta de la regla fija, no un dato.
+ *
+ * La comparten `nombreEnReferencia` y la relación de `tools/lib/cambios.ts` (AD-27), que fecha
+ * las Páginas de Cita de un Autor cuando cambia lo que esto devuelve.
+ */
+export function partesDelNombre(autor: AutorParaReferencia): { apellidos: string; pila?: string } | undefined {
+  const { nombre, ordenAlfabetico: clave, ordenRevisado } = autor;
+  if (typeof nombre !== 'string' || typeof clave !== 'string' || typeof ordenRevisado !== 'string') return undefined;
+  const palabras = nombre.split(' ');
+  const desde = palabras.indexOf(clave);
+  if (desde === -1) return undefined;
+  const apellidos = palabras.slice(desde).join(' ');
+  return desde === 0 ? { apellidos } : { apellidos, pila: palabras.slice(0, desde).join(' ') };
+}
+
+/**
+ * El nombre del Autor como lo escribe cada estilo: APA «Apellidos, I.» —inicial solo de las
+ * palabras del nombre de pila que empiezan por mayúscula: «Zayas y Sotomayor, M.»—, MLA y Chicago
+ * «Apellidos, Nombre de pila». Sin nombre de pila, solo los apellidos («Horacio»); sin clave
+ * revisada, el `nombre` tal cual en los tres.
+ */
+export function nombreEnReferencia(autor: AutorParaReferencia, estilo: EstiloDeReferencia): string {
+  const partes = partesDelNombre(autor);
+  if (partes === undefined) return autor.nombre;
+  if (partes.pila === undefined) return partes.apellidos;
+  if (estilo !== 'apa') return `${partes.apellidos}, ${partes.pila}`;
+  const iniciales = partes.pila
+    .split(' ')
+    .filter((palabra) => /^\p{Lu}/u.test(palabra))
+    .map((palabra) => `${[...palabra][0]}.`);
+  return iniciales.length === 0 ? partes.apellidos : `${partes.apellidos}, ${iniciales.join(' ')}`;
+}
+
+/**
+ * La Referencia de una Cita en un estilo, en segmentos — FR-58, AD-28.
+ *
+ * Sale solo de lo que consta de **esa** Cita: el nombre del Autor, el título de su Obra resuelta
+ * (`cita.obra.titulo`, nunca la grafía que declara), el año de su Procedencia, su traducción
+ * —solo con Obra—, el rótulo de su edición cotejada si tiene Fuente, la marca y la canónica sin
+ * marcas de llegada. Lo que no consta se omite: sin «s. f.», sin «Sin obra documentada», sin un
+ * dato de otra Cita ni de la ficha. El texto de la Cita entra entero y literal. La fecha de
+ * consulta es un segmento propio, vacío en el build; las formas literales (supuesto que revisa
+ * Héctor) las fija la tabla de `tests/unit/atribucion.test.ts`:
+ *
+ *   · APA: `N (año). «X». En *Obra* (T, Trad., añoT). Edición. Sabiduría de Bolsillo. Recuperado el {fecha} de U`
+ *   · MLA: `N. «X». *Obra*, traducido por T, añoT, año. Edición. *Sabiduría de Bolsillo*, U. Consultado el {fecha}.`
+ *   · Chicago: `N. *Obra*. año. Traducido por T, añoT. Edición. «X». Sabiduría de Bolsillo. Consultado el {fecha}. U.`
+ */
+export function referenciaDeCita(
+  cita: Cita,
+  autor: AutorParaReferencia,
+  canonica: string,
+  estilo: EstiloDeReferencia,
+): SegmentoDeReferencia[] {
+  const nombre = nombreEnReferencia(autor, estilo);
+  const conPunto = (frase: string) => (frase.endsWith('.') ? frase : `${frase}.`);
+  const titulo = cita.obra?.titulo;
+  const año = cita.procedencia?.año === undefined ? undefined : añoLegible(cita.procedencia.año);
+  const traduccion = titulo === undefined ? undefined : cita.procedencia?.traduccion;
+  const añoDeTraduccion = traduccion?.año === undefined ? '' : `, ${añoLegible(traduccion.año)}`;
+  const traductor = traduccion === undefined ? undefined : `${traduccion.traductor}${añoDeTraduccion}`;
+  const edicion = cita.fuente === undefined ? undefined : rotuloDeFuente(cita.fuente);
+  const texto = `«${cita.texto}».`;
+
+  const s: SegmentoDeReferencia[] = [];
+  const t = (texto: string) => s.push({ texto });
+  const i = (texto: string) => s.push({ texto, cursiva: true });
+
+  if (estilo === 'apa') {
+    t(año !== undefined ? `${nombre} (${año}). ` : `${conPunto(nombre)} `);
+    t(`${texto} `);
+    if (titulo !== undefined) {
+      t('En ');
+      i(titulo);
+      t(traduccion !== undefined ? ` (${traduccion.traductor}, Trad.${añoDeTraduccion}). ` : '. ');
+    }
+    if (edicion !== undefined) t(`${conPunto(edicion)} `);
+    t(`${MARCA}. `);
+    s.push({ fecha: 'apa' });
+    t(canonica);
+  } else if (estilo === 'mla') {
+    t(`${conPunto(nombre)} ${texto} `);
+    const contenedor: { texto: string; cursiva?: true }[] = [];
+    if (titulo !== undefined) contenedor.push({ texto: titulo, cursiva: true });
+    if (traductor !== undefined) contenedor.push({ texto: `traducido por ${traductor}` });
+    if (año !== undefined) contenedor.push({ texto: año });
+    contenedor.forEach((parte, n) => {
+      if (n > 0) t(', ');
+      s.push(parte);
+    });
+    const ultimo = contenedor.at(-1);
+    if (ultimo !== undefined) t(ultimo.texto.endsWith('.') ? ' ' : '. ');
+    if (edicion !== undefined) t(`${conPunto(edicion)} `);
+    i(MARCA);
+    t(`, ${canonica}.`);
+    s.push({ fecha: 'mla' });
+  } else {
+    t(`${conPunto(nombre)} `);
+    if (titulo !== undefined) {
+      i(titulo);
+      t('. ');
+    }
+    if (año !== undefined) t(`${conPunto(año)} `);
+    if (traductor !== undefined) t(`Traducido por ${traductor}. `);
+    if (edicion !== undefined) t(`${conPunto(edicion)} `);
+    t(`${texto} ${MARCA}. `);
+    s.push({ fecha: 'chicago' });
+    t(`${canonica}.`);
+  }
+  return s;
+}
+
+/** Las tres Referencias de una Cita, en su orden y con su rótulo, para `ComoCitar.astro`. */
+export function referenciasDeCita(cita: Cita, autor: AutorParaReferencia, canonica: string): ReferenciaCompuesta[] {
+  return ESTILOS_DE_REFERENCIA.map((estilo) => ({
+    estilo,
+    rotulo: ROTULOS_DE_ESTILO[estilo],
+    segmentos: referenciaDeCita(cita, autor, canonica, estilo),
+  }));
+}
+
+/**
+ * La frase de la fecha de consulta de cada estilo, con el calendario local del `Date` que recibe:
+ * APA «Recuperado el 8 de noviembre de 2026 de », MLA « Consultado el 8 nov. 2026.», Chicago
+ * «Consultado el 8 de noviembre de 2026. ». Lleva sus espacios para que la Referencia sin fecha
+ * —la del build, sin guion— no deje ninguno doble.
+ *
+ * Viaja a la isla de Copiar **por su texto** (`String(fechaDeConsulta)`), como `anunciar` por
+ * `guionQueAnuncia`: sin importar nada, sin cierres sobre este módulo y sin comentarios dentro.
+ * Las abreviaturas de MLA salen del nombre del mes: hasta cuatro letras, entero («mayo»); si no,
+ * tres letras y punto, salvo septiembre, cuatro («sept.»). Está escrita corta —nombres de una letra,
+ * sin plantillas anidadas— porque cuenta en `MAX_BYTES_DE_GUION` de cada Página de Cita.
+ */
+export function fechaDeConsulta(estilo: string, fecha: Date): string {
+  const m = fecha.getMonth(), d = fecha.getDate(), a = fecha.getFullYear();
+  const mes = 'enero febrero marzo abril mayo junio julio agosto septiembre octubre noviembre diciembre'.split(' ')[m];
+  const larga = d + ' de ' + mes + ' de ' + a;
+  return estilo === 'mla'
+    ? ' Consultado el ' + d + ' ' + (mes.length < 5 ? mes : mes.slice(0, m === 8 ? 4 : 3) + '.') + ' ' + a + '.'
+    : estilo === 'apa' ? 'Recuperado el ' + larga + ' de ' : 'Consultado el ' + larga + '. ';
+}
+
+/** La Referencia en texto plano —lo que copia el botón—, con la fecha dada o sin ella. */
+export function referenciaEnTexto(segmentos: readonly SegmentoDeReferencia[], fecha?: Date): string {
+  return segmentos
+    .map((s) => ('fecha' in s ? (fecha === undefined ? '' : fechaDeConsulta(s.fecha, fecha)) : s.texto))
+    .join('');
 }

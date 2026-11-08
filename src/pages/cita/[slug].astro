@@ -21,6 +21,9 @@ import CompartirEnlace from '../../islands/CompartirEnlace.astro';
 import RutasDeSalida from '../../components/RutasDeSalida.astro';
 import DatosEstructurados from '../../components/DatosEstructurados.astro';
 import FiltrosDeLaCita from '../../components/FiltrosDeLaCita.astro';
+import Desplegable from '../../components/Desplegable.astro';
+import ComoCitar from '../../components/ComoCitar.astro';
+import { citaTieneComoCitar, referenciasDeCita } from '../../lib/atribucion.ts';
 import {
   citasDeLasObras,
   citasDeTema,
@@ -138,6 +141,20 @@ const canonica = new URL(rutaDeCita(cita.slug), Astro.site).href;
       */}
     <TarjetaDeObra cita={cita} autor={autor} nivel={2} siguiente={siguiente} />
     {/*
+      * Historia 30.3 — el bloque de desplegables, tras la Tarjeta de Obra —o tras compartir, sin
+      * Obra— y antes de las Rutas de salida (UX-DR119). Es **un solo sitio** a propósito: la
+      * palanca de SM-C5 es un diff de aquí. Hoy lleva «Cómo citar»; «Inserta esta cita» (30.4)
+      * va detrás y el pasaje de la Épica 31 delante, sin hueco reservado. Sin ningún desplegable
+      * para esta Cita, el bloque no se pinta. Fuera de Pagefind (`all`): las Referencias repiten
+      * el título y el Autor, y la página no se encuentra por ellas; fuera del JSON-LD. Sin
+      * `data-zona`: no hay enlaces, la canónica de las Referencias es texto.
+      */}
+    {citaTieneComoCitar(cita) && (
+      <div class="desplegables" data-pagefind-ignore="all">
+        <Desplegable rotulo="Cómo citar"><ComoCitar referencias={referenciasDeCita(cita, autor, canonica)} /></Desplegable>
+      </div>
+    )}
+    {/*
       * Historia 24.6 — tras las acciones, los tres grupos del pie. Un grupo sin Citas no pinta
       * nada, y sin ninguno no hay `nav`: la Atribución sigue enlazando al Autor y a la Obra.
       */}
@@ -159,5 +176,10 @@ const canonica = new URL(rutaDeCita(cita.slug), Astro.site).href;
      * primera pantalla de 360×640, que es justo lo que FR-1 prohíbe.
      */
     padding-block: var(--respiracion);
+  }
+
+  /* Historia 30.3 — el primer filete a 4 × unidad de la Tarjeta de Obra o de «Compartir en». */
+  .desplegables {
+    margin-top: calc(var(--unidad) * 4);
   }
 </style>

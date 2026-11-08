@@ -451,8 +451,17 @@ export const META_AUTORES_DE_OTRA_TRADICION: number | undefined = undefined;
  * `src/components/Busqueda.astro`, que se descarga aparte y se mide con su propio tope,
  * `MAX_BYTES_GUION_DE_LA_BUSQUEDA`. La superficie más justa vuelve a ser la Página de Cita con
  * Imagen.
+ *
+ * Subido de 6656 a 7680 en la Historia 30.3, con la medida: la isla de Copiar atiende también
+ * «Cómo citar» —escribe la fecha de consulta del visitante con `fechaDeConsulta`, que viaja por
+ * su texto, enseña los tres botones y copia cada Referencia—, y su guion pasa de 1.138 a 2.738
+ * bytes. La Página de Cita con Imagen y la medición puesta pasa de **5.651 a 7.251 bytes**
+ * (+1.600; medido en `tests/unit/medicion.test.ts`, «la Página de Cita no pierde su listón»).
+ * Antes de subirlo se compactó lo nuevo —nombres cortos, sin sangría ni plantillas anidadas— desde
+ * 7.590. El tope nuevo deja 429 de margen, el criterio de la v2: la 30.4, que añade «Copiar el
+ * fragmento» a la misma isla, lo vuelve a medir.
  */
-export const MAX_BYTES_DE_GUION = 6656;
+export const MAX_BYTES_DE_GUION = 7680;
 
 /*
  * Los topes de la lista cerrada de guiones externos — AD-6, AD-9, Historia 23.1.

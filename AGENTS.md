@@ -1039,6 +1039,43 @@ La fila no es autosuficiente: estas reglas, y el `flex-basis` de Imagen, viven c
 (`:global(.fila-de-acciones) > .isla …`) en `CopiarCita.astro` e `ImagenDeCita.astro`, así que
 la 28.2 las hereda solo con esas dos islas, y otra acción que entre en la fila trae las suyas.
 
+### Cómo citar (Historia 30.3)
+
+Tras la Tarjeta de Obra —o tras «Compartir en», sin Obra— y antes de las Rutas de salida, la
+Página de Cita lleva **un solo bloque** de desplegables, `<div class="desplegables"
+data-pagefind-ignore="all">` en `src/pages/cita/[slug].astro`, a 4 × unidad de lo de arriba: la
+palanca de SM-C5 es un diff de ese sitio. Hoy contiene el Desplegable «Cómo citar»
+(`Desplegable.astro`, la primitiva de la 34.0, que no se copia ni se cambia); «Inserta esta cita»
+(30.4) va detrás y el pasaje (Épica 31) delante, sin hueco. Sin ningún desplegable para la Cita no
+se pinta el bloque. Sin `data-zona` —no hay enlaces: la canónica es texto— y fuera del JSON-LD.
+
+- **La composición es solo de `src/lib/atribucion.ts`** (AD-28): `referenciaDeCita` (segmentos,
+  con la Obra en cursiva y un segmento vacío para la fecha), `referenciasDeCita`,
+  `nombreEnReferencia` y `partesDelNombre`, `citaTieneComoCitar` (hoy `true`; la 35.4 añade ahí la
+  Cita atribuida), `fechaDeConsulta` y `MARCADOR_DE_FECHA_DE_CONSULTA`. Las formas literales de
+  APA, MLA y Chicago son un supuesto que revisa Héctor, fijado por la tabla de
+  `tests/unit/atribucion.test.ts`. Lo que no consta se omite; nada lee `procedencia.obra`.
+- `src/components/ComoCitar.astro` pinta las Referencias **ya compuestas** y no sabe si son de
+  Cita o de Obra (la 32.5 lo reutiliza). Cada estilo: rótulo, Referencia en una línea de marcado
+  (`textContent` es lo que se copia), la línea «Sin fecha de consulta: añade la de hoy.» y el
+  botón «Copiar APA/MLA/Chicago» `hidden`; una región `role="status"` dentro del bloque.
+- **La fecha de consulta es del visitante.** El build deja el marcador vacío y ninguna jornada; la
+  isla de Copiar (`CopiarCita.astro`, la única de copiar de la página, con el guion idéntico en toda
+  Página de Cita) espera a `DOMContentLoaded`, escribe `fechaDeConsulta(estilo, new Date())` —que
+  viaja por su texto, como `anunciar`—, quita las líneas «Sin fecha…», enseña los botones y marca
+  el bloque (`data-listo`) para que dos copias del guion no lo repitan. Sin JavaScript se lee y se
+  selecciona sin fecha, y los botones no se ven. Si el portapapeles rechaza, ni «Copiado.» ni
+  error. Sin evento de medición: copiar una Referencia entra en el vocabulario con la 30.5.
+- **Revisar una clave fecha y avisa las Páginas de Cita del Autor** (AD-27): el nombre se invierte
+  («Martí, J.») solo con `ordenRevisado` y una clave que es palabra del `nombre`, así que
+  `CAMPOS_QUE_PINTA.autor.cita` cuenta el campo derivado `NOMBRE_EN_REFERENCIA` de
+  `tools/lib/cambios.ts`, con la misma `nombreEnReferencia`. `ordenRevisado` ya no está en
+  `CAMPOS_QUE_NO_FECHAN`; un lote de `proponer-claves` sin revisar sigue moviendo solo `/autores` y
+  `/obras`. El `Autor` de `publicado.ts` lleva desde la 30.3 `ordenRevisado`.
+- Pendiente al fundir la Épica 29: el texto de la Referencia pasa por `enUnaLinea` de
+  `src/lib/verso.ts` (« / » entre versos); hasta entonces va `cita.texto` tal cual (AD-29: nadie
+  escribe su unión de versos).
+
 ### Al pie de la Página de Cita (Historia 24.6)
 
 Tras las acciones y la Tarjeta de Obra (30.1), `src/components/RutasDeSalida.astro` pinta hasta tres grupos, en este orden y

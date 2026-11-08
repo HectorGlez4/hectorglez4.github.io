@@ -1,0 +1,115 @@
+---
+/**
+ * «Cómo citar» — FR-58, Historia 30.3 (UX-DR119, UX-DR145, UX-DR146).
+ *
+ * Los tres estilos apilados —APA, MLA y Chicago—, sin pestañas: una sola composición en todas
+ * las anchuras. Recibe las Referencias **ya compuestas** (`referenciasDeCita` de
+ * `src/lib/atribucion.ts`, el único dueño de la composición, AD-28) y no compone nada ni sabe si
+ * son de una Cita o de una Obra: la Historia 32.5 lo reutiliza en la Página de Obra con las suyas.
+ * Va dentro del Desplegable «Cómo citar» (`Desplegable.astro`), que es quien lo pliega.
+ *
+ * Por estilo: el rótulo en caption con el peso del Autor; a una unidad, la Referencia en
+ * `body-md` e Inter —nunca serif: no es la Cita— en una sola línea de marcado, para que su
+ * `textContent` sea lo que se copia, con la Obra (y en MLA la marca) en `<i>`; bajo ella, la
+ * línea «Sin fecha de consulta: añade la de hoy.»; a dos unidades, el botón secundario «Copiar
+ * APA», `hidden` en el marcado. Entre estilos, tres unidades.
+ *
+ * **La fecha de consulta es del visitante.** El build deja en cada Referencia un marcador vacío
+ * (`MARCADOR_DE_FECHA_DE_CONSULTA`) y ninguna jornada; la isla de Copiar de la página
+ * (`CopiarCita.astro`) escribe la fecha de hoy con `fechaDeConsulta`, quita las líneas «Sin
+ * fecha…» y enseña los botones. Sin guion, la Referencia se lee y se selecciona sin fecha, la
+ * línea lo dice y los botones no se ven.
+ *
+ * «Copiado.» se anuncia por la región `role="status"` del bloque, que está aquí dentro —dentro
+ * del `<details>`— desde la carga, vacía y sin `hidden`. Los botones fijan su nombre accesible
+ * con `aria-label`, como Copiar. Sin enlaces —la canónica es texto—, así que sin `data-zona`.
+ */
+import { MARCADOR_DE_FECHA_DE_CONSULTA, type ReferenciaCompuesta } from '../lib/atribucion.ts';
+
+interface Props {
+  referencias: readonly ReferenciaCompuesta[];
+}
+
+const { referencias } = Astro.props;
+
+if (referencias.length === 0) {
+  throw new Error('«Cómo citar» sin Referencias: quien lo usa no lo renderiza (UX-DR144)');
+}
+
+/*
+ * El marcador de la fecha se escribe con su nombre literal, `data-fecha-de-consulta`, y no con un
+ * atributo esparcido: Astro le pondría además la clase de ámbito del componente. El nombre es el de
+ * `MARCADOR_DE_FECHA_DE_CONSULTA`, que es el que lee la isla; si no coincidieran, la construcción
+ * se para aquí.
+ */
+if (MARCADOR_DE_FECHA_DE_CONSULTA !== 'data-fecha-de-consulta') {
+  throw new Error('ComoCitar.astro: el marcador de la fecha no es MARCADOR_DE_FECHA_DE_CONSULTA');
+}
+---
+
+<div class="como-citar" data-como-citar>
+  {
+    referencias.map(({ estilo, rotulo, segmentos }) => (
+      <div class="estilo">
+        <p class="rotulo">{rotulo}</p>
+        <p class="referencia" data-referencia>{segmentos.map((s) => ('fecha' in s ? <span data-fecha-de-consulta={s.fecha} /> : s.cursiva ? <i>{s.texto}</i> : s.texto))}</p>
+        <p class="sin-fecha" data-sin-fecha>Sin fecha de consulta: añade la de hoy.</p>
+        <button type="button" class="copiar-referencia" data-copiar-referencia aria-label={`Copiar ${rotulo}`} hidden><span data-etiqueta>Copiar {rotulo}</span></button>
+      </div>
+    ))
+  }
+  <p class="solo-para-lectores" role="status" data-anuncio></p>
+</div>
+
+<style>
+  .estilo + .estilo {
+    margin-top: calc(var(--unidad) * 3);
+  }
+
+  .rotulo {
+    margin: 0;
+    font-family: var(--sans);
+    font-size: var(--pie);
+    font-weight: var(--peso-fuerte);
+    line-height: var(--interlineado-pie);
+    color: var(--tinta);
+  }
+
+  .referencia {
+    margin: var(--unidad) 0 0;
+    font-family: var(--sans);
+    font-size: var(--cuerpo-md);
+    line-height: var(--interlineado-cuerpo-md);
+    color: var(--tinta);
+  }
+
+  .sin-fecha {
+    margin: 0;
+    font-family: var(--sans);
+    font-size: var(--pie);
+    line-height: var(--interlineado-pie);
+    color: var(--tinta-apagada);
+  }
+
+  /* UX-DR9 — secundario, el trato de Copiar: texto en siena con filete, 44px de alto mínimo. */
+  .copiar-referencia {
+    margin-top: calc(var(--unidad) * 2);
+    font-family: var(--sans);
+    font-size: var(--cuerpo-md);
+    line-height: var(--interlineado-cuerpo-md);
+    color: var(--siena);
+    background: transparent;
+    border: var(--grosor-filete) solid var(--siena);
+    border-radius: var(--radio);
+    min-height: var(--zona-de-toque);
+    padding-inline: calc(var(--unidad) * 3);
+    cursor: pointer;
+    transition: background-color 150ms, color 150ms;
+  }
+
+  .copiar-referencia:hover,
+  .copiar-referencia[data-estado='copiado'] {
+    background: var(--siena);
+    color: var(--sobre-siena);
+  }
+</style>

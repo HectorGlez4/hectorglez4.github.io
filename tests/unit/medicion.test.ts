@@ -3347,11 +3347,15 @@ describe('Historia 23.1 — toda isla que anuncia lleva `anunciar`', () => {
       const deLaBusqueda = busquedaAnuncia
         ? etiquetasDeGuionExterno(html).filter((e) => guionExternoDe(e.src)?.id === 'busqueda').length * (anunciaLaTanda ? 2 : 1)
         : 0;
-      const anunciantes =
-        delFiltro +
-        deLaBusqueda +
-        guionesEnLinea(html).filter((g) => colapsado(g).includes(ANUNCIAR) && /\banunciar\(/.test(sinAnunciar(g)))
-          .length;
+      /*
+       * Historia 30.3 — la isla de Copiar anuncia además por la región de cada «Cómo citar» de la
+       * página: el guion en línea que los recorre cuenta como anunciante de cada bloque.
+       */
+      const enLinea = guionesEnLinea(html).filter((g) => colapsado(g).includes(ANUNCIAR) && /\banunciar\(/.test(sinAnunciar(g)));
+      const deComoCitar = enLinea.some((g) => g.includes('[data-como-citar]'))
+        ? (html.match(/<div\b[^>]*\bdata-como-citar\b/g) ?? []).length
+        : 0;
+      const anunciantes = delFiltro + deLaBusqueda + enLinea.length + deComoCitar;
       regionesVistas += regiones;
       expect(anunciantes, `${ruta}: ${regiones} regiones de estado y ${anunciantes} guiones con anunciar`).toBeGreaterThanOrEqual(
         regiones,

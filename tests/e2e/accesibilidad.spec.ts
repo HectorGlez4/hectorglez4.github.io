@@ -628,7 +628,8 @@ test.describe('Historia 2.8 — foco', () => {
    *
    * Con Tab de verdad, desde el enlace del Autor hasta el primer enlace de las salidas: cada
    * parada se clasifica por dónde está —`figcaption` o `.fuente` es contenido, `.tarjeta-de-obra`
-   * es tarjeta, `.isla` es acción y `nav` es salida— y cualquier otra es un fallo.
+   * es tarjeta, `.isla` es acción, `.desplegables` (30.3) es desplegable y `nav` es salida— y
+   * cualquier otra es un fallo.
    */
   async function paradasDesdeElAutor(page: Page, ruta: string) {
     await page.goto(ruta);
@@ -648,6 +649,8 @@ test.describe('Historia 2.8 — foco', () => {
             ? 'fuera'
             : n.closest('nav')
               ? 'salida'
+              : n.closest('.desplegables')
+                ? 'desplegable'
               : n.closest('.tarjeta-de-obra')
                 ? 'tarjeta'
                 : n.closest('.isla')
@@ -670,7 +673,9 @@ test.describe('Historia 2.8 — foco', () => {
   test('en la Página de Cita el orden es contenido, acciones, tarjeta y después salidas', async ({ page }) => {
     const ruta = obligatoria(CITAS_24_4.completa, SIN_TARJETA_COMPLETA);
     const { paradas, grupos } = await paradasDesdeElAutor(page, ruta);
-    expect(grupos, `${ruta}\n${JSON.stringify(paradas)}`).toEqual(['contenido', 'accion', 'tarjeta', 'salida']);
+    // Historia 30.3 — tras la tarjeta, el rótulo de «Cómo citar», cerrado: una sola parada.
+    expect(grupos, `${ruta}\n${JSON.stringify(paradas)}`).toEqual(['contenido', 'accion', 'tarjeta', 'desplegable', 'salida']);
+    expect(paradas.filter((p) => p.grupo === 'desplegable').map((p) => p.texto), ruta).toEqual(['Cómo citar ›']);
     const contenido = paradas.filter((p) => p.grupo === 'contenido');
     // El Autor, el título de la Obra y la Fuente, delante de las acciones.
     expect(contenido[0].href, ruta).toMatch(/^\/autor\//);
@@ -724,7 +729,7 @@ test.describe('Historia 2.8 — foco', () => {
   test('sin Obra, el orden es contenido, acciones y después salidas', async ({ page }) => {
     const ruta = obligatoria(CITAS_24_4.sinObra, SIN_CITA_SIN_OBRA);
     const { paradas, grupos } = await paradasDesdeElAutor(page, ruta);
-    expect(grupos, `${ruta}\n${JSON.stringify(paradas)}`).toEqual(['contenido', 'accion', 'salida']);
+    expect(grupos, `${ruta}\n${JSON.stringify(paradas)}`).toEqual(['contenido', 'accion', 'desplegable', 'salida']);
   });
 
   test('el enlace de salto es lo primero que recibe foco', async ({ page }) => {
@@ -1296,6 +1301,12 @@ test.describe('Historia 2.8 — responsive', () => {
     const cajas = await page.evaluate(() =>
       [...document.querySelectorAll('main a, main button')]
         .filter((n) => {
+          /*
+           * Historia 30.3 — lo de dentro de un `<details>` cerrado no se pinta ni se toca: solo su
+           * `<summary>`. El navegador le da caja igual (`content-visibility: hidden`), encima de lo
+           * que sigue, y se mediría como un objetivo que no existe.
+           */
+          if (n.closest('details:not([open])') !== null && n.closest('summary') === null) return false;
           /*
            * La exención en línea de EXPERIENCE.md § Interaction Primitives: queda fuera el
            * objetivo que va dentro de una frase y cuya altura fija el interlineado del
@@ -2757,6 +2768,38 @@ test.describe('Historia 30.2 — sin desplazamiento horizontal con la medida y l
         const resumen = resultado.violations.map((v) => `${v.id}: ${v.help} (${v.nodes.map((n) => n.target.join(' ')).join(', ')})`);
         expect.soft(resumen, `${ruta} a ${ancho} px\n${resumen.join('\n')}`).toEqual([]);
       }
+    });
+  }
+});
+
+test.describe('Historia 30.3 — «Cómo citar» pasa el barrido cerrado y abierto, y no desborda a 320 px', () => {
+  const caras: [string, string | undefined, string][] = [
+    ['la cara completa', citaConTarjetaCompleta()?.slug, SIN_TARJETA_COMPLETA],
+    ['una Cita sin Obra', citaSinObra()?.slug, 'el Corpus no tiene ninguna Cita sin Obra'],
+  ];
+  for (const [cara, slug, falta] of caras) {
+    test(`${cara}: axe con «Cómo citar» cerrado y abierto, y el reflujo a 320 px abierto`, async ({ page }) => {
+      expect(slug, falta).toBeDefined();
+      const ruta = `/cita/${slug}/`;
+      await page.goto(ruta);
+      const detalles = page.locator('details.desplegable', { has: page.locator('[data-como-citar]') });
+      await expect(detalles).toHaveCount(1);
+      await auditar(page, ruta, 'con «Cómo citar» cerrado');
+      await detalles.locator('summary').click();
+      await expect(detalles).toHaveAttribute('open', '');
+      await auditar(page, ruta, 'con «Cómo citar» abierto');
+
+      await page.setViewportSize({ width: 320, height: 640 });
+      await page.evaluate(async () => {
+        await document.fonts.ready;
+      });
+      const m = await page.evaluate(() => ({
+        scroll: document.documentElement.scrollWidth,
+        ventana: document.documentElement.clientWidth,
+        bloque: document.querySelector('[data-como-citar]')!.getBoundingClientRect().right,
+      }));
+      expect(m.scroll, `${ruta} a 320 px: ${m.scroll} frente a ${m.ventana}`).toBeLessThanOrEqual(m.ventana);
+      expect(m.bloque, `${ruta}: el bloque acaba en ${m.bloque}`).toBeLessThanOrEqual(m.ventana);
     });
   }
 });

@@ -10,8 +10,10 @@ import { formaDeObra } from '../../src/lib/obras.ts';
 import { rutaNormalizada } from '../../src/lib/superficies.ts';
 import {
   CAMPOS_QUE_NO_FECHAN,
+  type Campo,
   CAMPOS_QUE_PINTA,
   CUALQUIER_CAMBIO,
+  NOMBRE_EN_REFERENCIA,
   VERSION_OPACA,
   bajasDelHistorial,
   relacionDeSuperficies,
@@ -338,6 +340,10 @@ function clavesDeLaColeccion(coleccion: string): string[] | undefined {
   return claves;
 }
 
+/** Las claves del esquema que nombra una lista de campos: la de un subcampo y las de un derivado. */
+const clavesDeLosCampos = (campos: readonly Campo[]): string[] =>
+  campos.flatMap((campo) => (typeof campo === 'string' ? [campo.split('.')[0]] : [...campo.de]));
+
 describe('Historia 24.8 — todo campo de los esquemas está clasificado', () => {
   const unidas = (...listas: (readonly string[] | undefined)[]) => [...new Set(listas.flatMap((l) => l ?? []))];
   const ESQUEMAS = {
@@ -357,9 +363,10 @@ describe('Historia 24.8 — todo campo de los esquemas está clasificado', () =>
   });
 
   const clasificados = (familia: keyof typeof ESQUEMAS): Set<string> => {
-    // Un subcampo —`procedencia.obra`, 26.4— clasifica la clave del esquema que lo contiene.
+    // Un subcampo —`procedencia.obra`, 26.4— clasifica la clave del esquema que lo contiene, y un
+    // campo derivado —el nombre de «Cómo citar», 30.3— las claves de las que sale.
     const enLaTabla = Object.values(CAMPOS_QUE_PINTA[familia]).flatMap((campos) =>
-      campos === CUALQUIER_CAMBIO ? [] : (campos as readonly string[]).map((campo) => campo.split('.')[0]),
+      campos === CUALQUIER_CAMBIO ? [] : clavesDeLosCampos(campos as readonly Campo[]),
     );
     const queNoFechan = (CAMPOS_QUE_NO_FECHAN as Partial<Record<string, readonly string[]>>)[familia] ?? [];
     return new Set([...enLaTabla, ...queNoFechan]);
@@ -379,7 +386,7 @@ describe('Historia 24.8 — todo campo de los esquemas está clasificado', () =>
   it('ninguna clave fecha y a la vez está entre las que no fechan', () => {
     for (const [familia, lista] of Object.entries(CAMPOS_QUE_NO_FECHAN)) {
       const enLaTabla = Object.values(CAMPOS_QUE_PINTA[familia as keyof typeof CAMPOS_QUE_PINTA]).flatMap(
-        (campos) => (campos === CUALQUIER_CAMBIO ? [] : (campos as readonly string[]).map((campo) => campo.split('.')[0])),
+        (campos) => (campos === CUALQUIER_CAMBIO ? [] : clavesDeLosCampos(campos as readonly Campo[])),
       );
       expect(lista.filter((clave) => enLaTabla.includes(clave)), familia).toEqual([]);
     }
@@ -563,13 +570,63 @@ describe('Historia 24.8 — la matriz: qué cambia de fecha', () => {
     expect(avisadas(enT1, corpusDeEjemplo())).toEqual(['/autores', '/obras']);
   });
 
-  it('solo la revisión de las claves, en todos los Autores: nada cambia de fecha', () => {
+  /*
+   * Historia 30.3 — la revisión ya no es invisible: «Cómo citar» invierte el nombre del Autor
+   * («Equis, J.») solo con la clave revisada y siendo palabra del nombre, y lo pinta la Página de
+   * Cita. Revisarla fecha y avisa sus Páginas de Cita; si además corrige la clave, también los
+   * Directorios, que ordenan por ella. Una revisión que no cambia ninguna Referencia —un nombre de
+   * una palabra, o una clave que no es palabra del nombre— no mueve nada.
+   */
+  const conNombre = (nombre: string, extra: Record<string, unknown>): Readonly<Record<string, unknown>> => ({
+    ...VERSIONES['corpus/autores/x.yml'],
+    nombre,
+    ...extra,
+  });
+
+  it('solo la revisión de una clave que es palabra del nombre: cambian las Páginas de Cita del Autor', () => {
+    const enT1 = {
+      'corpus/autores/x.yml': {
+        antes: conNombre('Juan Equis', { ordenAlfabetico: 'Equis' }),
+        despues: conNombre('Juan Equis', { ordenAlfabetico: 'Equis', ordenRevisado: '2026-10-28' }),
+      },
+    };
+    const esperadas = ['/cita/x-a', '/cita/x-b', '/cita/x-c'];
+    expect(refechadas(corpusDeEjemplo(), historial(enT1))).toEqual(esperadas);
+    expect(avisadas(enT1, corpusDeEjemplo())).toEqual(esperadas);
+  });
+
+  it('revisar corrigiendo la clave: cambian sus Páginas de Cita y los Directorios', () => {
+    const enT1 = {
+      'corpus/autores/x.yml': {
+        antes: conNombre('Juan Equis', { ordenAlfabetico: 'Juan' }),
+        despues: conNombre('Juan Equis', { ordenAlfabetico: 'Equis', ordenRevisado: '2026-10-28' }),
+      },
+    };
+    const esperadas = ['/autores', '/cita/x-a', '/cita/x-b', '/cita/x-c', '/obras'];
+    expect(refechadas(corpusDeEjemplo(), historial(enT1))).toEqual(esperadas);
+    expect(avisadas(enT1, corpusDeEjemplo())).toEqual(esperadas);
+  });
+
+  it('una revisión que no cambia ninguna Referencia —nombre de una palabra, o clave ajena al nombre—: nada', () => {
     const enT1 = {
       'corpus/autores/x.yml': editado('corpus/autores/x.yml', { ordenRevisado: '2026-10-28' }),
-      'corpus/autores/y.yml': editado('corpus/autores/y.yml', { ordenRevisado: '2026-10-28' }),
+      'corpus/autores/y.yml': {
+        antes: { ...VERSIONES['corpus/autores/y.yml'], nombre: 'Ye Zeta', ordenAlfabetico: 'Zed' },
+        despues: { ...VERSIONES['corpus/autores/y.yml'], nombre: 'Ye Zeta', ordenAlfabetico: 'Zed', ordenRevisado: '2026-10-28' },
+      },
     };
     expect(refechadas(corpusDeEjemplo(), historial(enT1))).toEqual([]);
     expect(avisadas(enT1, corpusDeEjemplo())).toEqual([]);
+  });
+
+  it('el nombre derivado lo da `nombreEnReferencia`, la función de la Página de Cita', () => {
+    const version = conNombre('Juan Equis', { ordenAlfabetico: 'Equis', ordenRevisado: '2026-10-28' });
+    expect(NOMBRE_EN_REFERENCIA.valor(version)).toEqual(['Equis, J.', 'Equis, Juan', 'Equis, Juan']);
+    expect(NOMBRE_EN_REFERENCIA.valor(conNombre('Juan Equis', { ordenAlfabetico: 'Equis' }))).toEqual([
+      'Juan Equis',
+      'Juan Equis',
+      'Juan Equis',
+    ]);
   });
 
   it('el texto de una Cita no mueve los Directorios; cambiarle el Autor, sí', () => {

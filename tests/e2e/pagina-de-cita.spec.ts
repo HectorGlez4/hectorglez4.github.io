@@ -664,7 +664,8 @@ test.describe('Historia 24.4 — la Tarjeta de Obra en la Página de Cita', () =
   }, info) => {
     test.skip(info.project.name !== 'escritorio', 'El teclado se recorre una vez, en escritorio.');
     await abrir(page, completa);
-    const GRUPOS = ['atribucion', 'copiar', 'imagen', 'compartir', 'tarjeta', 'salidas', 'pie'];
+    // Historia 30.3 — tras la tarjeta, el bloque de desplegables («Cómo citar», cerrado).
+    const GRUPOS = ['atribucion', 'copiar', 'imagen', 'compartir', 'tarjeta', 'desplegables', 'salidas', 'pie'];
     const recorrido: { grupo: string; indice: number }[] = [];
     for (let i = 0; i < 400; i++) {
       await page.keyboard.press('Tab');
@@ -685,6 +686,8 @@ test.describe('Historia 24.4 — la Tarjeta de Obra en la Página de Cita', () =
                     ? 'tarjeta'
                     : activo.closest('article nav.salidas')
                       ? 'salidas'
+                      : activo.closest('article .desplegables')
+                        ? 'desplegables'
                       : activo.closest('article')
                         ? `article: ${activo.outerHTML.slice(0, 120)}`
                         : 'otro';

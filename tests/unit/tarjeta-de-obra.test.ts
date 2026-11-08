@@ -779,6 +779,8 @@ function hijosDelArticle(pagina: string): {
     const a = elemento.atributos;
     const que = elemento.etiqueta === 'div' && clase.split(/\s+/).includes('fila-de-acciones')
       ? 'acciones'
+      : elemento.etiqueta === 'div' && clase.split(/\s+/).includes('desplegables')
+        ? 'desplegables'
       : copiar
       ? 'copiar'
       : a.has('data-imagen')
@@ -859,12 +861,14 @@ describe('Historia 24.4 — la tarjeta en cada Página de Cita, construida', () 
         expect(marcado, slug).not.toContain('tarjeta-de-obra');
         expect(marcado, slug).not.toContain('De la obra');
         expect(marcado, slug).not.toContain('fila-de-bloque');
-        // Las Rutas de salida siguen a compartir, sin hueco (Historia 30.1).
+        // Los desplegables siguen a compartir, sin hueco (Historias 30.1 y 30.3), y las Rutas de
+        // salida a ellos.
         const hijos = hijosDelArticle(pagina);
         const compartir = hijos.findIndex((h) => h.clase === 'compartir');
         expect(compartir, slug).toBeGreaterThan(-1);
         const clases = hijos.map((h) => h.clase);
-        expect(clases[compartir + 1], slug).toBe(clases.includes('salidas') ? 'salidas' : 'filtros');
+        expect(clases[compartir + 1], slug).toBe('desplegables');
+        expect(clases[compartir + 2], slug).toBe(clases.includes('salidas') ? 'salidas' : 'filtros');
       } else {
         expect(cuantasTarjetasDeObra(pagina), slug).toBe(1);
       }
@@ -959,8 +963,10 @@ describe('Historia 24.4 — la tarjeta en cada Página de Cita, construida', () 
       const enTarjeta = clases.indexOf('tarjeta-de-obra');
       expect(enTarjeta, slug).toBeGreaterThan(-1);
       expect(clases[enTarjeta - 1], slug).toBe('compartir');
-      // Las Rutas de salida, si hay alguna; sin ninguna, los filtros, sin hueco.
-      expect(clases[enTarjeta + 1], slug).toBe(clases.includes('salidas') ? 'salidas' : 'filtros');
+      // Historia 30.3 — los desplegables tras la tarjeta; después, las Rutas de salida, si hay
+      // alguna, y sin ninguna, los filtros, sin hueco.
+      expect(clases[enTarjeta + 1], slug).toBe('desplegables');
+      expect(clases[enTarjeta + 2], slug).toBe(clases.includes('salidas') ? 'salidas' : 'filtros');
       expect(clases.indexOf('acciones'), slug).toBeLessThan(enTarjeta);
       expect(clases.at(-1), slug).toBe('filtros');
 
