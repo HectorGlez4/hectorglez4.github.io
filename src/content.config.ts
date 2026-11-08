@@ -428,6 +428,7 @@ const fichasTecnicas = defineCollection({
     generos: z.array(z.string().min(1)),
     lenguas: z.array(z.string().min(1)),
     año: z.number().int().optional(),
+    enlace: z.string().url(),
   }),
 });
 

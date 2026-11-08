@@ -730,9 +730,24 @@ otra vigente no tiene su documento, y dice cuántas Obras remiten a ella. Wikida
 leen `corpus/wikidata/`. El build repite las comprobaciones desde el cargador `fichasTecnicas` de
 `src/content.config.ts`, la **segunda excepción** a que `src/` no importe de `tools/lib/` (la
 primera es el de posiciones) —también que dos fichas activas no declaren la misma entidad—, y
-rompe nombrando la ficha o `vigentes.yml`. Ninguna página pinta
-nada todavía (la 32.2 pinta la Ficha técnica), y `wikidata` está en `CAMPOS_QUE_NO_FECHAN` hasta
-entonces. Las órdenes que reescriben una ficha lo conservan; `reunir` no hereda el de la
+rompe nombrando la ficha o `vigentes.yml`.
+
+**La línea de Ficha técnica** (Historia 32.2, UX-DR126) es lo único que se pinta de Wikidata: en
+la página 1 de la Obra atada, dentro de la Cabecera tras «de {Autor} · {año}»,
+«Novela · 1605 · Escrita en español · Traducción de X · Datos: Wikidata, CC0» —solo las partes que
+constan; sin género, año ni lengua no hay línea ni hueco, y el traductor solo no basta—. El texto
+lo compone `partesDeFichaTecnica` de `src/lib/atribucion.ts`; la Ficha técnica llega del cargador
+a `colgarObras` por parámetro (`obra.fichaTecnica`, `getCollection('fichasTecnicas')` solo si
+alguna ficha declara `wikidata`); el traductor es el de `traductorDeLaEdicionQueEncabeza` de
+`src/lib/obras.ts` —la Fuente con más Citas, si **todas** las suyas declaran el mismo—, nunca de
+la entidad; y el enlace, el permanente de la revisión (`enlacePermanenteDeWikidata`), en la misma
+pestaña y sin zona. `src/components/FichaTecnica.astro` va con atributos `style` y sin `<style>`
+(como `Sostener.astro`), bajo `data-pagefind-ignore="all"` y fuera del JSON-LD. El build **avisa**
+«Ficha técnica con año discrepante» cuando el año de Wikidata no es el de la Obra, y no corrige
+ninguno. La Página de Obra se fecha y se avisa por su documento `corpus/wikidata/{Q}--r{N}.json`
+y, de `vigentes.yml`, solo por las claves de las entidades que pinta (género y lengua; el autor
+no), y `wikidata` está en `CAMPOS_QUE_PINTA`; `corpus/wikidata/` es la familia de fichero
+`wikidata`, que no avisa la portada. Las órdenes que reescriben una ficha lo conservan; `reunir` no hereda el de la
 absorbida y lo dice. **Ningún agente ata una entidad ni recupera de Wikidata sobre el Corpus
 real**, y la Pregunta 12 del PRD —si una antología de un compilador («Granos de oro») es Obra del
 Autor— sigue abierta: hasta que Héctor responda, nadie ata entidad a esas Obras.

@@ -26,7 +26,7 @@ import {
   type TransicionFechada,
   type Version,
 } from '../../tools/lib/cambios.ts';
-import { familiaDeFichero, rutasAvisadasPor } from '../../tools/lib/avisar.ts';
+import { componerAviso, familiaDeFichero, rutasAvisadasPor } from '../../tools/lib/avisar.ts';
 import {
   autorAdmisible,
   citaAdmisible,
@@ -817,6 +817,98 @@ describe('Historia 24.8 — la matriz: qué cambia de fecha', () => {
     // Y el índice de otra Obra no compone esta, ni el índice compone ninguna Página de Cita.
     const ajeno = 'corpus/fuentes/fuente--otra-cosa.indice.yml';
     expect(refechadas(corpusDeEjemplo([], [DOCUMENTO, ajeno]), historial({ [ajeno]: { antes: null, despues: VERSION_OPACA } }))).toEqual([]);
+  });
+
+  describe('Historia 32.2 — la Ficha técnica fecha y avisa su Página de Obra', () => {
+    const DOC_X = 'corpus/wikidata/Q1--r10.json';
+    const DOC_Y = 'corpus/wikidata/Q2--r20.json';
+    const VIGENTES = 'corpus/wikidata/vigentes.yml';
+    /** x--o pinta Q5 (género) y Q6 (lengua); y--p, solo Q5. Q9 es el autor: se coteja y no se pinta. */
+    const VIGENTES_HOY = { Q1: 10, Q2: 20, Q5: 3, Q6: 4, Q9: 7 };
+    const atadas = (pintaX: readonly string[] | 'ilegible' = ['Q5', 'Q6']): CorpusParaFechar => {
+      const corpus = corpusDeEjemplo();
+      return {
+        ...corpus,
+        obras: (corpus.obras ?? []).map((o) =>
+          o.nombre === 'x--o'
+            ? { ...o, wikidata: { documento: DOC_X, ...(pintaX === 'ilegible' ? {} : { pinta: pintaX }) } }
+            : { ...o, wikidata: { documento: DOC_Y, pinta: ['Q5'] } },
+        ),
+        vigentesDeWikidata: VIGENTES,
+      };
+    };
+    const conVigente = (cambio: Record<string, number>) => ({
+      [VIGENTES]: { antes: VIGENTES_HOY as Version, despues: { ...VIGENTES_HOY, ...cambio } as Version },
+    });
+
+    it('`wikidata` de la ficha está en la tabla de la Página de Obra, y ya no entre lo que no fecha', () => {
+      expect(CAMPOS_QUE_PINTA.obra.obra).toContain('wikidata');
+      expect(CAMPOS_QUE_NO_FECHAN.obra).not.toContain('wikidata');
+      expect(CAMPOS_QUE_PINTA.wikidata).toEqual({ obra: CUALQUIER_CAMBIO });
+      expect(familiaDeFichero(DOC_X)).toBe('wikidata');
+      expect(familiaDeFichero(VIGENTES)).toBe('wikidata');
+    });
+
+    it('atar una entidad (ficha y documentos nuevos) fecha y avisa solo esa Obra, y no la portada si solo cambia `corpus/wikidata/`', () => {
+      const ficha = 'corpus/obras/x--o.yml';
+      const sinAtar = corpusDeEjemplo();
+      const despues: CorpusParaFechar = {
+        ...sinAtar,
+        obras: (sinAtar.obras ?? []).map((o) => (o.nombre === 'x--o' ? { ...o, wikidata: { documento: DOC_X, pinta: ['Q5', 'Q6'] } } : o)),
+        vigentesDeWikidata: VIGENTES,
+      };
+      const enT1 = {
+        [ficha]: editado(ficha, { wikidata: { entidad: 'Q1', revision: 10 } }),
+        [DOC_X]: { antes: null, despues: VERSION_OPACA as Version },
+        [VIGENTES]: { antes: { Q2: 20 } as Version, despues: { Q1: 10, Q2: 20, Q5: 3, Q6: 4, Q9: 7 } as Version },
+      };
+      expect(refechadas(despues, historial(enT1))).toEqual(['/obra/x/o']);
+      expect(avisadas(enT1, despues, sinAtar)).toEqual(['/obra/x/o']);
+
+      // Solo los ficheros de `corpus/wikidata/`: la portada no se avisa (no pinta nada de Wikidata).
+      const soloWikidata = [
+        { fichero: DOC_X, antes: null, despues: VERSION_OPACA as Version },
+        { fichero: VIGENTES, ...enT1[VIGENTES] },
+      ];
+      const relacion = relacionDeSuperficies(despues);
+      const indexables = { rutas: [...relacion.keys()].filter((r) => r.startsWith('/obra/')) };
+      const { rutas } = componerAviso({
+        cambios: soloWikidata,
+        relacionAntes: relacion,
+        relacionDespues: relacion,
+        indexablesAntes: indexables,
+        indexablesDespues: indexables,
+      });
+      expect(rutas.map(rutaNormalizada)).toEqual(['/obra/x/o']);
+    });
+
+    it('cambiar en `vigentes.yml` la revisión de un género fecha y avisa toda Obra que lo pinta y nada más', () => {
+      const corpus = atadas();
+      // Q5 lo pintan las dos Obras; ninguna Página de Cita, ningún listado, ningún Directorio.
+      expect(refechadas(corpus, historial(conVigente({ Q5: 8 })))).toEqual(['/obra/x/o', '/obra/y/p']);
+      expect(avisadas(conVigente({ Q5: 8 }), corpus)).toEqual(['/obra/x/o', '/obra/y/p']);
+      // Q6 (lengua) solo la pinta x--o.
+      expect(refechadas(corpus, historial(conVigente({ Q6: 9 })))).toEqual(['/obra/x/o']);
+      expect(avisadas(conVigente({ Q6: 9 }), corpus)).toEqual(['/obra/x/o']);
+    });
+
+    it('cambiar la vigente de su autor (P50), que no se pinta, no fecha ni avisa nada', () => {
+      const corpus = atadas();
+      expect(refechadas(corpus, historial(conVigente({ Q9: 11 })))).toEqual([]);
+      expect(avisadas(conVigente({ Q9: 11 }), corpus)).toEqual([]);
+    });
+
+    it('un documento ilegible compone `vigentes.yml` con cualquier cambio: fechar de más antes que de menos', () => {
+      const corpus = atadas('ilegible');
+      expect(refechadas(corpus, historial(conVigente({ Q9: 11 })))).toEqual(['/obra/x/o']);
+      expect(avisadas(conVigente({ Q9: 11 }), corpus)).toEqual(['/obra/x/o']);
+    });
+
+    it('un cambio del documento de su revisión fecha solo esa Obra', () => {
+      const enT1 = { [DOC_X]: { antes: VERSION_OPACA as Version, despues: VERSION_OPACA as Version } };
+      expect(refechadas(atadas(), historial(enT1))).toEqual(['/obra/x/o']);
+      expect(avisadas(enT1, atadas())).toEqual(['/obra/x/o']);
+    });
   });
 
   it('el documento que sale fecha la Obra cuyas Citas lo casaban', () => {

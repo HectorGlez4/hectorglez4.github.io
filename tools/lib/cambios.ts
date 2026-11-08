@@ -45,7 +45,12 @@
  *   · **Página de Obra** — su ficha, sus Citas, su Autor y **sus documentos**: la unión de
  *     `documentosDeCita` de sus Citas sobre los nombres de `corpus/fuentes/`, y el índice de
  *     subpáginas que los ordena (`{fuente}--{obra}.indice.yml`, Historia 24.9). Un documento no se
- *     analiza: cualquier cambio suyo puede reordenar la Obra, y solo fecha esa página.
+ *     analiza: cualquier cambio suyo puede reordenar la Obra, y solo fecha esa página. Desde la
+ *     Historia 32.2, también **su Ficha técnica**: el documento de Wikidata de la revisión que
+ *     declara su ficha (`corpus/wikidata/{Q}--r{N}.json`, cualquier cambio) y, de
+ *     `corpus/wikidata/vigentes.yml`, solo las claves de las entidades cuya etiqueta pinta
+ *     (género P136 y lengua P407; el autor P50 se coteja y no se pinta). Si su documento no se
+ *     deja leer, compone `vigentes.yml` entero: antes fechar de más que de menos.
  *   · **Directorio de Autores** (Historia 26.3) — lo que pinta: de cada Autor con alguna Cita, el
  *     nombre, los años y la clave de orden (`ordenAlfabetico`), que lo ordena y lo agrupa; de cada
  *     Cita, solo su `autor`, porque el Directorio cuenta Citas por Autor: un alta, una baja o un
@@ -241,8 +246,10 @@ export type Columna = Exclude<FamiliaDeRuta, 'directorio'> | 'directorioDeAutore
  *
  *   · la **semblanza** y la **biografía** de un Autor solo las pinta su página (1);
  *   · la ficha de Obra pinta su `titulo` en la Página de Cita y en los listados, y en su propia
- *     página además `autor`, `formas` —qué Citas reúne—, `nota` y `ediciones`;
- *   · un documento, cualquier cambio, y solo en la Página de Obra;
+ *     página además `autor`, `formas` —qué Citas reúne—, `nota`, `ediciones` y `wikidata` (la
+ *     línea de Ficha técnica, 32.2);
+ *   · un documento, cualquier cambio, y solo en la Página de Obra; lo mismo un documento de
+ *     Wikidata (32.2), cuya `vigentes.yml` la relación compone por claves, fuera de la tabla;
  *   · el Directorio de Autores (26.3) pinta de un Autor el nombre, los años y su clave de orden,
  *     y de una Cita solo su `autor`: la cuenta por Autor;
  *   · el Directorio de Obras (26.4) pinta de un Autor el nombre y la clave —no los años—, de una
@@ -287,10 +294,13 @@ export const CAMPOS_QUE_PINTA = {
     autor: ['titulo'],
     tema: ['titulo'],
     coleccion: ['titulo'],
-    obra: ['autor', 'titulo', 'formas', 'nota', 'ediciones'],
+    obra: ['autor', 'titulo', 'formas', 'nota', 'ediciones', 'wikidata'],
     directorioDeObras: ['titulo', 'formas'],
   },
   documento: {
+    obra: CUALQUIER_CAMBIO,
+  },
+  wikidata: {
     obra: CUALQUIER_CAMBIO,
   },
 } as const satisfies Record<FamiliaDeFichero, Partial<Record<Columna, Campos>>>;
@@ -303,8 +313,6 @@ export const CAMPOS_QUE_PINTA = {
  *   · `estadoDerechos` es una puerta de admisión, no un texto publicado;
  *   · `tradicion` es del suelo del 40 % de tradición latinoamericana (§6.1);
  *   · `distintaDe` solo silencia un aviso del build (22.2).
- *   · `wikidata` (32.1) ata la ficha a una revisión de Wikidata que ninguna página pinta todavía;
- *     la 32.2, que pinta la Ficha técnica, lo pasa a la tabla.
  *   · `ordenRevisado` (26.1) solo dice que una persona revisó la clave: no lo pinta ninguna
  *     superficie, nunca. La clave, `ordenAlfabetico`, sí: la pintan los dos Directorios (26.3,
  *     26.4), y por eso está en la tabla y no aquí.
@@ -315,8 +323,7 @@ export const CAMPOS_QUE_PINTA = {
 export const CAMPOS_QUE_NO_FECHAN = {
   cita: ['aptaParaPortada', 'estadoDerechos'],
   autor: ['tradicion', 'ordenRevisado'],
-  // `wikidata` (32.1) todavía no lo pinta ninguna página: no fecha hasta la 32.2, que la pinta.
-  obra: ['distintaDe', 'wikidata'],
+  obra: ['distintaDe'],
 } as const satisfies Partial<Record<FamiliaDeFichero, readonly string[]>>;
 
 /**
@@ -353,6 +360,12 @@ export interface ObraParaFechar {
   autor: string;
   /** Las formas canónicas que reclama: resuelven las bajas de Cita y las de ficha. */
   formas?: readonly string[];
+  /**
+   * Historia 32.2 — la ficha atada a Wikidata: la ruta de su documento y las entidades cuya
+   * etiqueta pinta su línea de Ficha técnica (`entidadesQuePinta`). `pinta` ausente es «el
+   * documento no se dejó leer», y entonces compone `vigentes.yml` con cualquier cambio.
+   */
+  wikidata?: { documento: string; pinta?: readonly string[] };
   ruta: string;
 }
 
@@ -392,6 +405,8 @@ export interface CorpusParaFechar {
   obras?: readonly ObraParaFechar[];
   /** Las rutas de los documentos de `corpus/fuentes/` — Historia 24.8. */
   documentos?: readonly string[];
+  /** La ruta de `corpus/wikidata/vigentes.yml` — Historia 32.2. */
+  vigentesDeWikidata?: string;
   /** Las bajas, que salen del historial y no del disco — Historia 24.8. */
   bajas?: BajasParaFechar;
 }
@@ -589,6 +604,12 @@ export function relacionDeSuperficies(corpus: CorpusParaFechar): Map<string, Sup
     const ruta = rutaDeLaObra(obra);
     declarar(ruta, 'obra');
     componer(ruta, obra.ruta, 'obra');
+    // Historia 32.2 — su Ficha técnica: el documento de su revisión y, de las vigentes, solo las
+    // claves que pinta (o todas, si su documento no se dejó leer).
+    if (obra.wikidata !== undefined) {
+      componer(ruta, obra.wikidata.documento, 'wikidata');
+      componerCampos(ruta, corpus.vigentesDeWikidata, obra.wikidata.pinta ?? CUALQUIER_CAMBIO);
+    }
     for (const cita of citas) componer(ruta, cita.ruta, 'cita');
     componer(ruta, ficheroDeAutor.get(obra.autor), 'autor');
     for (const cita of citas) {
@@ -788,7 +809,11 @@ export function bajasDelHistorial(
 /** El mismo corpus con cada ruta de fichero traducida —a relativa, por ejemplo—. */
 export function conRutas(corpus: CorpusParaFechar, traducir: (ruta: string) => string): CorpusParaFechar {
   const cita = (c: CitaParaFechar) => ({ ...c, ruta: traducir(c.ruta) });
-  const obra = (o: ObraParaFechar) => ({ ...o, ruta: traducir(o.ruta) });
+  const obra = (o: ObraParaFechar): ObraParaFechar => ({
+    ...o,
+    ruta: traducir(o.ruta),
+    ...(o.wikidata === undefined ? {} : { wikidata: { ...o.wikidata, documento: traducir(o.wikidata.documento) } }),
+  });
   return {
     citas: corpus.citas.map(cita),
     autores: corpus.autores.map((a) => ({ ...a, ruta: traducir(a.ruta) })),
@@ -796,6 +821,7 @@ export function conRutas(corpus: CorpusParaFechar, traducir: (ruta: string) => s
     colecciones: corpus.colecciones.map((c) => ({ ...c, ruta: traducir(c.ruta) })),
     ...(corpus.obras === undefined ? {} : { obras: corpus.obras.map(obra) }),
     ...(corpus.documentos === undefined ? {} : { documentos: corpus.documentos.map(traducir) }),
+    ...(corpus.vigentesDeWikidata === undefined ? {} : { vigentesDeWikidata: traducir(corpus.vigentesDeWikidata) }),
     ...(corpus.bajas === undefined
       ? {}
       : {
@@ -817,7 +843,9 @@ export function ficherosDelCorpus(corpus: CorpusParaFechar): string[] {
       ...corpus.temas.map((tema) => tema.ruta),
       ...corpus.colecciones.map((coleccion) => coleccion.ruta),
       ...(corpus.obras ?? []).map((obra) => obra.ruta),
+      ...(corpus.obras ?? []).flatMap((obra) => (obra.wikidata === undefined ? [] : [obra.wikidata.documento])),
       ...(corpus.documentos ?? []),
+      ...(corpus.vigentesDeWikidata === undefined ? [] : [corpus.vigentesDeWikidata]),
     ]),
   ];
 }

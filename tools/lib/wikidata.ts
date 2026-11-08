@@ -419,6 +419,19 @@ export function entidadesReferidas(datos: Record<string, unknown>): string[] {
   return todas;
 }
 
+/**
+ * Las entidades de las que la línea de Ficha técnica pinta la etiqueta: género y lengua, con las
+ * reglas de rango. El autor (P50) se coteja y no se pinta. La relación de superficies
+ * (`tools/lib/cambios.ts`) compone con estas claves de `vigentes.yml` la Página de Obra.
+ */
+export function entidadesQuePinta(datos: Record<string, unknown>): string[] {
+  const todas: string[] = [];
+  for (const propiedad of [P_GENERO, P_LENGUA]) {
+    for (const id of entidadesDe(datos, propiedad)) if (!todas.includes(id)) todas.push(id);
+  }
+  return todas;
+}
+
 /** La etiqueta en español de una entidad, si la tiene. Nunca otra lengua ni el identificador. */
 export function etiquetaEnEspanol(datos: Record<string, unknown>): string | undefined {
   const labels = (datos as { labels?: unknown }).labels;
@@ -683,6 +696,8 @@ export async function leerWikidataDelCorpus(rutas: Rutas): Promise<WikidataDelCo
 export interface FichaTecnicaDeObra extends FichaTecnica {
   entidad: string;
   revision: number;
+  /** El permanente de la revisión, de `enlacePermanenteDeWikidata`: el «Datos: Wikidata, CC0» de la línea. */
+  enlace: string;
 }
 
 /**
@@ -746,7 +761,7 @@ export async function leerFichasTecnicasDelCorpus(raizDelCorpus: string): Promis
       const v = wikidata.vigente(q);
       return v.ok ? v.datos : undefined;
     });
-    salida.set(ficha.nombre, { entidad, revision, ...tecnica });
+    salida.set(ficha.nombre, { entidad, revision, ...tecnica, enlace: enlacePermanenteDeWikidata(entidad, revision) });
   }
 
   if (problemas.length > 0) {

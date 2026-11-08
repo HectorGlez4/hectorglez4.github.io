@@ -233,6 +233,48 @@ export function añoLegible(año: number, era: '' | ' d. C.' = ''): string {
 }
 
 /**
+ * Una enumeración en español: «A», «A y B», «A, B y C». Solo la usa la línea de Ficha técnica.
+ */
+function enumeracion(partes: readonly string[]): string {
+  if (partes.length <= 1) return partes.join('');
+  return `${partes.slice(0, -1).join(', ')} y ${partes[partes.length - 1]}`;
+}
+
+/** La primera letra en mayúscula; el resto, tal cual. */
+function conInicialMayuscula(texto: string): string {
+  const [primera, ...resto] = [...texto];
+  return primera === undefined ? texto : `${primera.toLocaleUpperCase('es')}${resto.join('')}`;
+}
+
+/** El texto del enlace con que cierra la línea de Ficha técnica (UX-DR126). */
+export const TEXTO_DATOS_DE_WIKIDATA = 'Datos: Wikidata, CC0';
+
+/**
+ * Las partes de texto de la línea de Ficha técnica — Historia 32.2, UX-DR126.
+ *
+ * En orden fijo y solo las que constan: los géneros unidos por «, », con mayúscula solo en el
+ * primer carácter de la parte; el año de publicación de Wikidata (`añoLegible`); «Escrita en
+ * {lenguas}», enumeradas; y, si lo hay, «Traducción de {traductor}» (el de
+ * `traductorDeLaEdicionQueEncabeza`, nunca de la entidad). El enlace «Datos: Wikidata, CC0» no es
+ * una de las partes: lo pone el componente al final.
+ *
+ * `undefined` si no consta ni género, ni año, ni lengua: el traductor solo no hace línea. Así la
+ * Obra sin datos no pinta rótulo ni hueco.
+ */
+export function partesDeFichaTecnica(
+  ficha: { generos: readonly string[]; lenguas: readonly string[]; año?: number },
+  traductor?: string,
+): string[] | undefined {
+  const partes: string[] = [];
+  if (ficha.generos.length > 0) partes.push(conInicialMayuscula(ficha.generos.join(', ')));
+  if (ficha.año !== undefined) partes.push(añoLegible(ficha.año));
+  if (ficha.lenguas.length > 0) partes.push(`Escrita en ${enumeracion(ficha.lenguas)}`);
+  if (partes.length === 0) return undefined;
+  if (traductor !== undefined) partes.push(`Traducción de ${traductor}`);
+  return partes;
+}
+
+/**
  * Los años de un Autor tal y como se escriben — en la ficha, la descripción, el JSON-LD y la
  * Tarjeta Social, que es por lo que tienen un solo dueño.
  *

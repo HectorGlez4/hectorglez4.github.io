@@ -18,6 +18,9 @@
  *
  * Historia 22.9 — y de la ficha con ediciones en venta sin ninguna Cita cotejada: la página no
  * las pinta, porque la edición en venta nunca va sola (FR-54).
+ *
+ * Historia 32.2 — y de la «Ficha técnica con año discrepante»: el año de publicación de Wikidata
+ * no es el de la Obra. La línea pinta el de Wikidata y la Cabecera el de las Citas.
  */
 
 import { fileURLToPath } from 'node:url';
@@ -33,7 +36,9 @@ import {
 } from '../tools/lib/corpus.ts';
 import { documentosDeCita } from '../tools/lib/cotejo.ts';
 import { derivarDeLaDeclaracion, esElMismoAutor } from '../tools/lib/documento.ts';
+import { leerFichasTecnicasDelCorpus, type FichaTecnicaDeObra } from '../tools/lib/wikidata.ts';
 import {
+  avisosDeAñoDeFichaTecnica,
   avisosDeAñosDeObras,
   avisosDeEdicionesSinCotejada,
   avisosDeObras,
@@ -42,6 +47,7 @@ import {
   formaDeObra,
   formatearAvisosDeObras,
   formatearFallosDeObras,
+  resolverObras,
   titularDeFallosDeObras,
   type DocumentosDeObras,
 } from '../src/lib/obras.ts';
@@ -108,6 +114,29 @@ export default function fichasDeObra(): AstroIntegration {
       censo: new Set(await leerCensoDeCotejo(rutas)),
     };
 
+    /*
+     * Historia 32.2 — el año de publicación de Wikidata frente al de la Obra. Solo se leen las
+     * Fichas técnicas si alguna ficha está atada; si la lectura lanza, aquí no se avisa de nada:
+     * el cargador `fichasTecnicas` rompe la construcción con su propio mensaje.
+     */
+    let fichasTecnicas = new Map<string, FichaTecnicaDeObra>();
+    if (fichas.some((f) => f.wikidata !== undefined)) {
+      try {
+        fichasTecnicas = await leerFichasTecnicasDelCorpus(join(raiz, 'corpus'));
+      } catch {
+        fichasTecnicas = new Map();
+      }
+    }
+    const rutaDeFicha = new Map(fichas.map((f) => [f.nombre, f.ruta]));
+    const avisosDeFichaTecnica =
+      fichasTecnicas.size === 0
+        ? []
+        : avisosDeAñoDeFichaTecnica(
+            resolverObras(citas, fichas, fichasTecnicas),
+            fichasTecnicas,
+            (nombre) => rutaDeFicha.get(nombre) ?? `corpus/obras/${nombre}.yml`,
+          );
+
     return {
       fallos: fallosDeObras(fichas, citas, autores, documentos),
       // Historia 22.3 — y la Obra cuyas Citas declaran años distintos, que no publica año.
@@ -116,6 +145,8 @@ export default function fichasDeObra(): AstroIntegration {
         ...avisosDeObras(fichas, citas),
         ...avisosDeAñosDeObras(fichas, citas),
         ...avisosDeEdicionesSinCotejada(fichas, citas),
+        // Historia 32.2 — y la Ficha técnica cuyo año de Wikidata no es el de la Obra.
+        ...avisosDeFichaTecnica,
       ],
     };
   }

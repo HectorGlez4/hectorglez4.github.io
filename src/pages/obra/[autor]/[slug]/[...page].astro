@@ -8,7 +8,8 @@
  * la declaración de `src/lib/superficies.ts`. Una Obra que no se indexa es esta misma página,
  * sin marca ni aviso, con `noindex, follow` y fuera del sitemap y de Pagefind.
  *
- * Página 1: Cabecera con el salto «Dónde leer esta obra ↓» (Historia 24.7), Listado, Paginación,
+ * Página 1: Cabecera con la línea de Ficha técnica si la ficha está atada a Wikidata (Historia
+ * 32.2) y el salto «Dónde leer esta obra ↓» (Historia 24.7), Listado, Paginación,
  * «Buscar en esta obra» (Historia 27.8; debajo del listado desde la UX v8.4, decisión de Héctor del
  * 2026-10-30), Temas, «Dónde leer esta obra» y, si la ficha la trae, su nota (Historia 22.6).
  * Páginas 2+: solo Cabecera, sin salto, y Listado, y `noindex` por forma. Nada de prosa
@@ -22,6 +23,7 @@ import Armazon from '../../../../components/Armazon.astro';
 import BuscarEn from '../../../../components/BuscarEn.astro';
 import Chips from '../../../../components/Chips.astro';
 import DondeLeer from '../../../../components/DondeLeer.astro';
+import FichaTecnica from '../../../../components/FichaTecnica.astro';
 import Rotulo from '../../../../components/Rotulo.astro';
 import DatosDeObra from '../../../../components/DatosDeObra.astro';
 import Paginacion from '../../../../components/Paginacion.astro';
@@ -40,6 +42,7 @@ import {
   dondeLeer,
   rutaDeLaObra,
   segmentosDeObra,
+  traductorDeLaEdicionQueEncabeza,
 } from '../../../../lib/obras.ts';
 import { edicionesEnVenta, modelosEnRuta } from '../../../../lib/ingreso.ts';
 import { descripcionDeObra } from '../../../../lib/atribucion.ts';
@@ -78,11 +81,13 @@ export const getStaticPaths = (async ({ paginate }) => {
       props: { obra, autor, temas: temasDeLaObra(citas, publicados) },
       pageSize: CITAS_POR_PAGINA,
     });
-    // «Dónde leer» (22.6) se calcula una vez, sobre todas las Citas de la Obra, y solo lo
-    // recibe la página 1: las 2+ no lo pintan.
+    // «Dónde leer» (22.6) y el traductor de la edición que encabeza (32.2, la línea de Ficha
+    // técnica) se calculan una vez, sobre todas las Citas de la Obra, y solo los recibe la
+    // página 1: las 2+ no los pintan.
     const resumen = dondeLeer(citas);
+    const traductor = traductorDeLaEdicionQueEncabeza(citas);
     return paginas.map((pagina, i) =>
-      i === 0 ? { ...pagina, props: { ...pagina.props, dondeLeer: resumen } } : pagina,
+      i === 0 ? { ...pagina, props: { ...pagina.props, dondeLeer: resumen, traductor } } : pagina,
     );
   });
 }) satisfies GetStaticPaths;
@@ -90,6 +95,7 @@ export const getStaticPaths = (async ({ paginate }) => {
 type Props = InferGetStaticPropsType<typeof getStaticPaths>;
 const { obra, autor, temas, page: pagina } = Astro.props;
 const resumenDondeLeer = 'dondeLeer' in Astro.props ? Astro.props.dondeLeer : undefined;
+const traductor = 'traductor' in Astro.props ? Astro.props.traductor : undefined;
 
 const ruta = rutaDeLaObra(obra, pagina.currentPage);
 // Historia 22.7 — la Tarjeta Social, en todas las páginas de la Obra, se indexe o no.
@@ -155,6 +161,11 @@ const enVenta =
           )
         }
       </p>
+      {/*
+        * Historia 32.2, UX-DR126 — la línea de Ficha técnica, solo en la página 1 y solo si la
+        * ficha está atada a Wikidata y consta género, año o lengua; si no, no pinta nada.
+        */}
+      {primera && <FichaTecnica obra={obra} traductor={traductor} />}
       {
         /*
          * Historia 24.7, UX-DR96 — el salto a «Dónde leer esta obra», en su propia línea y fuera de

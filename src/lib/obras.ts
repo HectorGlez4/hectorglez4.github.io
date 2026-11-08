@@ -763,6 +763,29 @@ export interface ObraResuelta {
    * con la afiliación encendida y alguna edición cotejada (FR-54): nunca van solas.
    */
   ediciones?: readonly EdicionDeObra[];
+  /**
+   * La Ficha técnica de la entidad de Wikidata atada a la ficha (32.1, 32.2), tal como la entrega
+   * el cargador `fichasTecnicas`. Solo la pinta la página 1 de la Página de Obra; sin entidad
+   * atada, el campo se omite.
+   */
+  fichaTecnica?: FichaTecnicaDeObra;
+}
+
+/**
+ * La Ficha técnica de una Obra — Historia 32.2, AD-31.
+ *
+ * La misma forma que entrega la colección `fichasTecnicas` de `src/content.config.ts` (la
+ * declara para sí `tools/lib/wikidata.ts`, de donde `src/` no importa): géneros y lenguas con
+ * su etiqueta en español, el año de publicación si Wikidata da uno solo, y el permanente de la
+ * revisión.
+ */
+export interface FichaTecnicaDeObra {
+  entidad: string;
+  revision: number;
+  generos: readonly string[];
+  lenguas: readonly string[];
+  año?: number;
+  enlace: string;
 }
 
 /** Lo que de una Cita importa para derivar los atributos de su Obra. */
@@ -824,6 +847,7 @@ function añosDeclarados(citas: readonly CitaParaObra[]): number[] {
 export function resolverObras(
   citas: readonly CitaParaObra[],
   fichas: readonly FichaDeObra[],
+  fichasTecnicas?: ReadonlyMap<string, FichaTecnicaDeObra>,
 ): Map<string, ObraResuelta> {
   // Un único origen de grafías por ficha: `citasPorFicha`, el mismo del que tira
   // `grafiasPorFicha` y, por ella, `tituloEfectivo`.
@@ -840,6 +864,7 @@ export function resolverObras(
     const temas = [...new Set(suyas.flatMap((c) => c.temas ?? []))].sort((a, b) =>
       a.localeCompare(b, 'es'),
     );
+    const fichaTecnica = fichasTecnicas?.get(ficha.nombre);
 
     resueltas.set(ficha.nombre, {
       nombre: ficha.nombre,
@@ -852,6 +877,7 @@ export function resolverObras(
       recuento: suyas.length,
       ...(ficha.nota !== undefined ? { nota: ficha.nota } : {}),
       ...(ficha.ediciones !== undefined ? { ediciones: ficha.ediciones } : {}),
+      ...(fichaTecnica !== undefined ? { fichaTecnica } : {}),
     });
   }
 
@@ -878,8 +904,9 @@ export function obraDeCita(
 export function colgarObras<C extends CitaParaObra>(
   citas: readonly C[],
   fichas: readonly FichaDeObra[],
+  fichasTecnicas?: ReadonlyMap<string, FichaTecnicaDeObra>,
 ): (C & { obra?: ObraResuelta })[] {
-  const obras = resolverObras(citas, fichas);
+  const obras = resolverObras(citas, fichas, fichasTecnicas);
   const indice = indiceDeFichas(fichas);
   return citas.map((cita) => {
     const obra = obraDeCita(cita, indice, obras);
@@ -908,6 +935,33 @@ export function avisosDeAñosDeObras(
     avisos.push(
       `  · Obra con años discrepantes: ${ficha.ruta} → sus Citas declaran ${años.join(', ')}. ` +
         'La Obra no publica año; cada Cita sigue mostrando el de su Procedencia.',
+    );
+  }
+  return avisos;
+}
+
+/**
+ * «Ficha técnica con año discrepante» — Historia 32.2, FR-60.
+ *
+ * El año de publicación que da Wikidata y el año de la Obra que declaran sus Citas no
+ * coinciden. Avisa y no rompe, y no corrige ninguno: la línea de Ficha técnica pinta el de
+ * Wikidata y la Cabecera el de las Citas, y decidir cuál está mal es de una persona. Si falta
+ * uno de los dos, no hay nada que comparar.
+ */
+export function avisosDeAñoDeFichaTecnica(
+  obras: ReadonlyMap<string, ObraResuelta>,
+  fichasTecnicas: ReadonlyMap<string, FichaTecnicaDeObra>,
+  rutaDeFicha: (nombre: string) => string,
+): string[] {
+  const avisos: string[] = [];
+  for (const nombre of [...fichasTecnicas.keys()].sort((a, b) => a.localeCompare(b, 'es'))) {
+    const deWikidata = fichasTecnicas.get(nombre)?.año;
+    const deLasCitas = obras.get(nombre)?.año;
+    if (deWikidata === undefined || deLasCitas === undefined || deWikidata === deLasCitas) continue;
+    avisos.push(
+      `  · Ficha técnica con año discrepante: ${rutaDeFicha(nombre)} → Wikidata dice ${deWikidata}; ` +
+        `sus Citas, ${deLasCitas}. La línea de Ficha técnica pinta el de Wikidata y la Cabecera el de ` +
+        'las Citas; ninguno se corrige solo.',
     );
   }
   return avisos;
@@ -1324,6 +1378,53 @@ export const ANCLA_DE_DONDE_LEER = 'donde-leer-esta-obra';
 export const ROTULO_DE_DONDE_LEER = 'Dónde leer esta obra';
 
 /**
+ * Las páginas distintas (normalizadas, ordenadas) y el rótulo de un grupo de Citas de la misma
+ * Fuente. Es la regla de «Dónde leer esta obra» y la del desempate de
+ * `traductorDeLaEdicionQueEncabeza`: una sola, para que las dos no elijan Fuentes distintas.
+ */
+function rotuloDeGrupo(id: string, fuentes: readonly FuenteParaLeer[]): { urls: string[]; nombre: string } {
+  const urls = [...new Set(fuentes.map((f) => paginaNormalizada(f.url)))].sort();
+  // Con nombres que discrepan no se elige el primero que llegue: se rotula como sin nombre.
+  const nombre =
+    rotuloDeFuente({ id, url: urls[0], nombre: valorComun(fuentes.map((f) => f.nombre)) }) ??
+    ROTULO_DE_FUENTE_SIN_NOMBRE;
+  return { urls, nombre };
+}
+
+/**
+ * El traductor de la edición cotejada que encabeza la Obra — Historia 32.2, FR-48.
+ *
+ * Agrupa las Citas **con Fuente** solo por Fuente (sumando sus traductores, a diferencia de
+ * `dondeLeer`, que separa cada traducción), elige la de más Citas y, a igualdad, la de rótulo
+ * menor y luego la de identificador menor. Devuelve su traductor solo si **todas** las Citas de
+ * esa Fuente lo declaran y es el mismo; si no, o sin ninguna Cita con Fuente, `undefined`.
+ * Nunca sale de la entidad de Wikidata, de otra Fuente ni de otra Cita. Lo pinta la línea de
+ * Ficha técnica y lo usará la Referencia de Obra (32.5).
+ */
+export function traductorDeLaEdicionQueEncabeza(citas: readonly CitaParaDondeLeer[]): string | undefined {
+  const porFuente = new Map<string, { fuentes: FuenteParaLeer[]; traductores: (string | undefined)[] }>();
+  for (const cita of citas) {
+    const fuente = cita.fuente;
+    if (fuente === undefined || fuente === null) continue;
+    const grupo = porFuente.get(fuente.id) ?? { fuentes: [], traductores: [] };
+    grupo.fuentes.push(fuente);
+    grupo.traductores.push(cita.procedencia?.traduccion?.traductor);
+    porFuente.set(fuente.id, grupo);
+  }
+  const candidatas = [...porFuente.entries()].map(([id, g]) => ({
+    id,
+    citas: g.fuentes.length,
+    nombre: rotuloDeGrupo(id, g.fuentes).nombre,
+    traductores: g.traductores,
+  }));
+  if (candidatas.length === 0) return undefined;
+  candidatas.sort(
+    (a, b) => b.citas - a.citas || a.nombre.localeCompare(b.nombre, 'es') || (a.id < b.id ? -1 : a.id > b.id ? 1 : 0),
+  );
+  return valorComun(candidatas[0].traductores);
+}
+
+/**
  * Dónde leer una Obra — Historia 22.6, UX-DR42.
  *
  * Agrupa las Citas **con Fuente** por (Fuente, traductor): una traducción es otra edición, así
@@ -1358,11 +1459,7 @@ export function dondeLeer(citas: readonly CitaParaDondeLeer[]): ResumenDondeLeer
 
   const lineas: LineaDondeLeer[] = [];
   for (const { id, fuentes, traducciones } of grupos.values()) {
-    const urls = [...new Set(fuentes.map((f) => paginaNormalizada(f.url)))].sort();
-    // Con nombres que discrepan no se elige el primero que llegue: se rotula como sin nombre.
-    const nombre =
-      rotuloDeFuente({ id, url: urls[0], nombre: valorComun(fuentes.map((f) => f.nombre)) }) ??
-      ROTULO_DE_FUENTE_SIN_NOMBRE;
+    const { urls, nombre } = rotuloDeGrupo(id, fuentes);
     const licencia = valorComun(fuentes.map((f) => f.licencia));
     const traductor = traducciones[0]?.traductor;
     const año = valorComun(traducciones.map((t) => t?.año));

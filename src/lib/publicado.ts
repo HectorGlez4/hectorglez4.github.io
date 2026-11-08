@@ -42,6 +42,7 @@ import {
   type AparicionDeCita,
   type CitaParaObra,
   type FichaDeObra,
+  type FichaTecnicaDeObra,
   type ObraResuelta,
   type IndicesDeObras,
   type PosicionesDeCitas,
@@ -1442,6 +1443,7 @@ export function aplanarFichaDeObra(entrada: EntradaObra): FichaDeObra {
     ...(entrada.data.ediciones !== undefined
       ? { ediciones: entrada.data.ediciones.map((edicion) => ({ ...edicion })) }
       : {}),
+    ...(entrada.data.wikidata !== undefined ? { wikidata: { ...entrada.data.wikidata } } : {}),
   };
 }
 
@@ -1555,7 +1557,18 @@ export async function conjuntoPublicable(): Promise<ConjuntoPublicable> {
    * antes de que se construya ninguna página.
    */
   const fichas = (await getCollection('obras')).map(aplanarFichaDeObra);
-  const citas: Cita[] = colgarObras((await getCollection('citas')).map(aplanarCita), fichas);
+  /*
+   * Historia 32.2 — la Ficha técnica de las Obras atadas a Wikidata, por nombre de ficha. La
+   * colección solo se consulta si alguna ficha declara `wikidata`: vacía, `getCollection`
+   * avisaría de una colección vacía en cada construcción.
+   */
+  const fichasTecnicas = new Map<string, FichaTecnicaDeObra>();
+  if (fichas.some((f) => f.wikidata !== undefined)) {
+    for (const entrada of await getCollection('fichasTecnicas')) {
+      fichasTecnicas.set(entrada.id, entrada.data);
+    }
+  }
+  const citas: Cita[] = colgarObras((await getCollection('citas')).map(aplanarCita), fichas, fichasTecnicas);
   /*
    * Las Colecciones **declaradas** viven en esta variable local y no salen de aquí.
    *

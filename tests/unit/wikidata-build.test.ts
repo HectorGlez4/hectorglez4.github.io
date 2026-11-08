@@ -1,6 +1,6 @@
 import { afterAll, describe, expect, it } from 'vitest';
 import { readdir, readFile } from 'node:fs/promises';
-import { join } from 'node:path';
+import { join, relative, sep } from 'node:path';
 import { AUTOR_VALIDO, TEMA_VALIDO, citaValida, construirConCorpus, limpiar } from './ayuda/construir.js';
 import { formaDeObra } from '../../src/lib/obras.ts';
 import { componerVigentes, nombreDeDocumentoDeWikidata } from '../../tools/lib/wikidata.ts';
@@ -10,7 +10,8 @@ import { aEntidad, aTiempo, documento, entidad } from './ayuda/wikidata.ts';
  * Historia 32.1 — el build repite las comprobaciones de `npm run obra -- wikidata`.
  *
  * `wikidata.test.ts` prueba las reglas sin construir. Esto construye: una ficha con una entidad
- * bien atada construye y su `dist/` no contiene nada de Wikidata (la 32.1 no pinta nada), y cada
+ * bien atada construye y en su `dist/` Wikidata solo aparece en la página 1 de su Obra (la línea de
+ * Ficha técnica de la 32.2), y cada
  * fallo —documento ausente, de otra revisión o de otra entidad, autor que no concuerda o sin
  * vigente, `vigentes.yml` ilegible o con una vigente sin documento— rompe nombrando la ficha (o
  * `vigentes.yml`).
@@ -68,18 +69,22 @@ const BASE = {
   'citas/seneca--el-tiempo.md': citaValida(),
 };
 
-async function textoDeDist(proyecto: string): Promise<string> {
+/** Los ficheros de texto de `dist/` (relativos) que contienen una cadena. */
+async function ficherosQueContienen(proyecto: string, aguja: string): Promise<string[]> {
   const dist = join(proyecto, 'dist');
-  const partes: string[] = [];
+  const encontrados: string[] = [];
   for (const entrada of await readdir(dist, { recursive: true, withFileTypes: true })) {
-    if (!entrada.isFile() || !/\.(html|xml|json|txt|js|css|webmanifest)$/u.test(entrada.name)) continue;
-    partes.push(await readFile(join(entrada.parentPath, entrada.name), 'utf8'));
+    if (!entrada.isFile() || !/\.(html|xml|json|txt|js|css|webmanifest|pf_meta|pf_fragment|pf_index)$/u.test(entrada.name)) continue;
+    const ruta = join(entrada.parentPath, entrada.name);
+    if ((await readFile(ruta, 'utf8')).includes(aguja)) encontrados.push(relative(dist, ruta).split(sep).join('/'));
   }
-  return partes.join('\n');
+  return encontrados.sort();
 }
 
+const PAGINA_1 = 'obra/seneca/sobre-la-brevedad-de-la-vida/index.html';
+
 describe('Historia 32.1 — el build repite el cotejo de Wikidata', () => {
-  it('una ficha bien atada construye, y su dist/ no contiene nada de Wikidata', async () => {
+  it('una ficha bien atada construye, y Wikidata solo aparece en la página 1 de su Obra, fuera del JSON-LD', async () => {
     const { codigo, salida, proyecto } = await construir({
       ...BASE,
       'obras/seneca--sobre-la-brevedad-de-la-vida.yml': ficha('Sobre la brevedad de la vida', {
@@ -91,10 +96,15 @@ describe('Historia 32.1 — el build repite el cotejo de Wikidata', () => {
     });
     expect(salida).not.toMatch(/Regla incumplida/);
     expect(codigo, salida).toBe(0);
-    const texto = await textoDeDist(proyecto);
-    for (const ausente of ['Q480', String(REVISION), GENERO, LENGUA, 'wikidata.org']) {
-      expect(texto, ausente).not.toContain(ausente);
+    // Historia 32.2 — la línea de Ficha técnica pinta las etiquetas y el permanente de la revisión
+    // solo en la página 1 de esa Obra: ni en otra superficie, ni en Pagefind, ni en el JSON-LD.
+    for (const presente of ['Q480', String(REVISION), GENERO, LENGUA, 'wikidata.org']) {
+      expect(await ficherosQueContienen(proyecto, presente), presente).toEqual([PAGINA_1]);
     }
+    const html = await readFile(join(proyecto, 'dist', PAGINA_1), 'utf8');
+    const jsonLd = [...html.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)].map((m) => m[1]).join('\n');
+    expect(jsonLd.length).toBeGreaterThan(0);
+    for (const ausente of ['Q480', GENERO, LENGUA, 'wikidata']) expect(jsonLd, ausente).not.toContain(ausente);
   });
 
   it('cada fallo de una ficha, y una vigente sin documento, rompen nombrando la ficha y vigentes.yml', async () => {
