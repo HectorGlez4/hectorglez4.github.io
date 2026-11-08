@@ -48,11 +48,14 @@
  * (`ComoCitar.astro`), que va después en el marcado. Por eso espera al documento analizado
  * (`DOMContentLoaded` si aún se está leyendo) y entonces recorre cada bloque `[data-como-citar]`
  * que no esté marcado (`data-listo`, para que las dos copias del Kit o la Cita del Día no lo
- * hagan dos veces): escribe en cada marcador la fecha de consulta de hoy, con
+ * hagan dos veces): escribe en cada marcador la fecha de consulta de hoy —y la vuelve a escribir en
+ * cada pulsación, para que una página abierta desde ayer no copie la fecha de ayer—, con
  * `fechaDeConsulta` de `src/lib/atribucion.ts` —que viaja por su texto, como `anunciar`, y usa el
  * calendario del visitante; el build no escribe ninguna jornada—, quita las líneas «Sin fecha…»
  * y enseña los botones. Cada botón copia el `textContent` de su Referencia, dice «Copiado.» dos
- * segundos y lo anuncia por la región del bloque, dentro del `<details>`. Si el portapapeles
+ * segundos y lo anuncia por la región del bloque, dentro del `<details>`. La región la comparten los
+ * tres botones, así que el bloque recuerda cuál anunció lo último (`d`) y solo ese la vacía al
+ * volver: el temporizador de «Copiar APA» no borra el «Copiado.» de un «Copiar MLA» posterior. Si el portapapeles
  * rechaza, nada: ni «Copiado.» ni error, y la Referencia sigue a la vista y seleccionable. El
  * guion sigue sin contenido —nada de la Cita, todo en el marcado— e idéntico en toda Página de
  * Cita, y copiar la Cita copia lo mismo que antes. Sin `__medir` nuevo: el evento de copiar una
@@ -136,19 +139,22 @@ boton.addEventListener('click', async () => {
 const citar = () => {
 for (const k of document.querySelectorAll('[data-como-citar]:not([data-listo])')) {
 k.setAttribute('data-listo', '');
-const r = k.querySelector('[data-anuncio]'), hoy = new Date();
-for (const m of k.querySelectorAll('[' + MARCADOR + ']')) m.textContent = fechaDeConsulta(m.getAttribute(MARCADOR), hoy);
+const r = k.querySelector('[data-anuncio]');
+const w = () => { const hoy = new Date(); for (const m of k.querySelectorAll('[' + MARCADOR + ']')) m.textContent = fechaDeConsulta(m.getAttribute(MARCADOR), hoy); };
+w();
 for (const l of k.querySelectorAll('[data-sin-fecha]')) l.remove();
 for (const b of k.querySelectorAll('[data-copiar-referencia]')) {
-const e = b.firstChild, t = e.textContent;
+const e = b.querySelector('[data-etiqueta]'), t = e.textContent;
 let s;
-const v = () => { clearTimeout(s); e.textContent = t; r.textContent = ''; b.removeAttribute('data-estado'); };
+const v = () => { clearTimeout(s); e.textContent = t; if (k.d === b) r.textContent = ''; b.removeAttribute('data-estado'); };
 b.hidden = false;
 b.onclick = async () => {
 v();
+w();
 try { await navigator.clipboard.writeText(b.parentNode.querySelector('[data-referencia]').textContent); } catch { return; }
 e.textContent = 'Copiado.';
 b.setAttribute('data-estado', 'copiado');
+k.d = b;
 anunciar(r, 'Copiado.');
 s = setTimeout(v, 2000);
 };

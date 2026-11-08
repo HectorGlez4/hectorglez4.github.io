@@ -88,6 +88,36 @@ test.describe('Historia 30.3 — «Cómo citar», con JavaScript', () => {
     expect(textos.slice(textos.indexOf('Copiado.') + 1)).toContain('');
   });
 
+  test('la vuelta de «Copiar APA» no borra el «Copiado.» de un «Copiar MLA» posterior', async ({ page }) => {
+    await page.goto(`/cita/${COMPLETA!.slug}/`);
+    await resumen(page).click();
+    const apa = page.getByRole('button', { name: 'Copiar APA', exact: true });
+    const mla = page.getByRole('button', { name: 'Copiar MLA', exact: true });
+    await apa.click();
+    await expect(region(page)).toHaveText('Copiado.');
+    await page.waitForTimeout(1000);
+    await mla.click();
+    // Vence el temporizador de APA (dos segundos desde su pulsación); el de MLA, un segundo después.
+    await expect(apa.locator('[data-etiqueta]')).toHaveText('Copiar APA', { timeout: 4000 });
+    await expect(mla.locator('[data-etiqueta]')).toHaveText('Copiado.');
+    await expect(region(page)).toHaveText('Copiado.');
+    await expect(mla.locator('[data-etiqueta]')).toHaveText('Copiar MLA', { timeout: 4000 });
+    await expect(region(page)).toHaveText('');
+  });
+
+  test('una página abierta desde ayer copia la fecha del día en que se pulsa', async ({ page }) => {
+    await page.clock.setFixedTime(new Date(2026, 10, 8, 23, 59));
+    await page.goto(`/cita/${COMPLETA!.slug}/`);
+    await resumen(page).click();
+    const referencia = desplegable(page).locator('[data-referencia]').first();
+    await expect(referencia).toContainText('Recuperado el 8 de noviembre de 2026 de ');
+    await page.clock.setFixedTime(new Date(2026, 10, 9, 0, 1));
+    await page.getByRole('button', { name: 'Copiar APA', exact: true }).click();
+    const copiada = await page.evaluate(() => navigator.clipboard.readText());
+    expect(copiada).toContain('Recuperado el 9 de noviembre de 2026 de ');
+    await expect(referencia).toContainText('Recuperado el 9 de noviembre de 2026 de ');
+  });
+
   test('con el portapapeles denegado no dice «Copiado.» ni ningún error, y la Referencia sigue', async ({ page }) => {
     await page.addInitScript(() => {
       Object.defineProperty(navigator, 'clipboard', {

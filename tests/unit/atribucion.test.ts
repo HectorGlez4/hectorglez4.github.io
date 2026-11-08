@@ -1,4 +1,7 @@
 import { describe, expect, it } from 'vitest';
+import { readFileSync } from 'node:fs';
+import { join, resolve } from 'node:path';
+import { parse as parsearYaml } from 'yaml';
 import {
   ESTILOS_DE_REFERENCIA,
   fechaDeConsulta,
@@ -11,7 +14,7 @@ import {
   type EstiloDeReferencia,
   type SegmentoDeReferencia,
 } from '../../src/lib/atribucion.ts';
-import type { Autor, Cita } from '../../src/lib/publicado.ts';
+import { aplanarAutor, type Autor, type Cita } from '../../src/lib/publicado.ts';
 import type { ObraResuelta } from '../../src/lib/obras.ts';
 
 /**
@@ -123,6 +126,22 @@ const casos: { caso: string; cita: Cita; autor: Autor; apa: string; mla: string;
     mla: `Horacio. «Aprovecha el día.». *Odas*, traducido por Germán Salinas. Wikisource. *Sabiduría de Bolsillo*, ${U}. Consultado el 8 nov. 2026.`,
     chicago: `Horacio. *Odas*. Traducido por Germán Salinas. Wikisource. «Aprovecha el día.». Sabiduría de Bolsillo. Consultado el 8 de noviembre de 2026. ${U}.`,
   },
+  {
+    caso: 'un título que acaba en interrogación: sin punto detrás',
+    cita: citaDe({ obra: obra('¿Qué es la vida?'), fuente: undefined }),
+    autor: MARTI,
+    apa: `Martí, J. (1891). «${X}». En *¿Qué es la vida?* Sabiduría de Bolsillo. Recuperado el 8 de noviembre de 2026 de ${U}`,
+    mla: `Martí, José. «${X}». *¿Qué es la vida?*, 1891. *Sabiduría de Bolsillo*, ${U}. Consultado el 8 nov. 2026.`,
+    chicago: `Martí, José. *¿Qué es la vida?* 1891. «${X}». Sabiduría de Bolsillo. Consultado el 8 de noviembre de 2026. ${U}.`,
+  },
+  {
+    caso: 'en MLA, un título con exclamación que cierra el contenedor',
+    cita: citaDe({ obra: obra('¡Viva la vida!'), procedencia: {}, fuente: undefined }),
+    autor: MARTI,
+    apa: `Martí, J. «${X}». En *¡Viva la vida!* Sabiduría de Bolsillo. Recuperado el 8 de noviembre de 2026 de ${U}`,
+    mla: `Martí, José. «${X}». *¡Viva la vida!* *Sabiduría de Bolsillo*, ${U}. Consultado el 8 nov. 2026.`,
+    chicago: `Martí, José. *¡Viva la vida!* «${X}». Sabiduría de Bolsillo. Consultado el 8 de noviembre de 2026. ${U}.`,
+  },
 ];
 
 describe('Historia 30.3 — las Referencias de la tabla, literales', () => {
@@ -206,6 +225,14 @@ describe('Historia 30.3 — el nombre en la Referencia', () => {
     expect(nombreEnReferencia(autorDe('José Martí'), 'apa')).toBe('José Martí');
   });
 
+  it('un nombre de pila compuesto con guion da una inicial por trozo en APA', () => {
+    expect(ESTILOS_DE_REFERENCIA.map((estilo) => nombreEnReferencia(autorDe('Jean-Jacques Rousseau', 'Rousseau'), estilo))).toEqual([
+      'Rousseau, J.-J.',
+      'Rousseau, Jean-Jacques',
+      'Rousseau, Jean-Jacques',
+    ]);
+  });
+
   it('la clave es la primera aparición de la palabra', () => {
     expect(partesDelNombre(autorDe('Juan Juan Pérez', 'Juan'))).toEqual({ apellidos: 'Juan Juan Pérez' });
   });
@@ -238,5 +265,42 @@ describe('Historia 30.3 — la fecha de consulta', () => {
         expect(evaluada(estilo, fecha)).toBe(fechaDeConsulta(estilo, fecha));
       }
     }
+  });
+});
+
+describe('Historia 30.3 — el nombre de Autores reales del Corpus, por `aplanarAutor`', () => {
+  /*
+   * En el build el Autor llega a la Página de Cita por `aplanarAutor`: si el aplanado perdiera
+   * `ordenRevisado`, toda Referencia llevaría el nombre sin invertir y ninguna prueba con Autores
+   * escritos a mano lo vería. Aquí se leen las fichas reales de `corpus/autores/` y la revisión se
+   * pone o se quita en memoria: revisar las claves del Corpus es de Héctor, y la prueba no depende
+   * de si ya lo hizo.
+   */
+  const RAIZ = resolve(import.meta.dirname, '../..');
+  const ficha = (slug: string) =>
+    parsearYaml(readFileSync(join(RAIZ, 'corpus/autores', `${slug}.yml`), 'utf8')) as Record<string, unknown>;
+  const aplanado = (slug: string, data: Record<string, unknown>) =>
+    aplanarAutor({ id: slug, collection: 'autores', data } as unknown as Parameters<typeof aplanarAutor>[0]);
+
+  it.each([
+    ['jose-marti', ['Martí, J.', 'Martí, José', 'Martí, José']],
+    ['jean-jacques-rousseau', ['Rousseau, J.-J.', 'Rousseau, Jean-Jacques', 'Rousseau, Jean-Jacques']],
+  ] as const)('%s con la clave revisada: invertido', (slug, esperados) => {
+    const autor = aplanado(slug, { ...ficha(slug), ordenRevisado: '2026-11-08' });
+    expect(autor.ordenRevisado).toBe('2026-11-08');
+    expect(ESTILOS_DE_REFERENCIA.map((estilo) => nombreEnReferencia(autor, estilo))).toEqual(esperados);
+    expect(referenciaEnTexto(referenciaDeCita(citaDe(), autor, U, 'apa')).startsWith(`${esperados[0]} (1891). `)).toBe(true);
+  });
+
+  it.each(['jose-marti', 'jean-jacques-rousseau'])('%s sin la clave revisada: el nombre tal cual', (slug) => {
+    const { ordenRevisado, ...datos } = ficha(slug);
+    void ordenRevisado;
+    const autor = aplanado(slug, datos);
+    expect(autor).not.toHaveProperty('ordenRevisado');
+    expect(ESTILOS_DE_REFERENCIA.map((estilo) => nombreEnReferencia(autor, estilo))).toEqual([
+      datos.nombre,
+      datos.nombre,
+      datos.nombre,
+    ]);
   });
 });

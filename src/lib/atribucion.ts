@@ -538,7 +538,8 @@ export function partesDelNombre(autor: AutorParaReferencia): { apellidos: string
 
 /**
  * El nombre del Autor como lo escribe cada estilo: APA «Apellidos, I.» —inicial solo de las
- * palabras del nombre de pila que empiezan por mayúscula: «Zayas y Sotomayor, M.»—, MLA y Chicago
+ * palabras del nombre de pila que empiezan por mayúscula: «Zayas y Sotomayor, M.», y una por trozo
+ * en un nombre compuesto con guion: «Rousseau, J.-J.»—, MLA y Chicago
  * «Apellidos, Nombre de pila». Sin nombre de pila, solo los apellidos («Horacio»); sin clave
  * revisada, el `nombre` tal cual en los tres.
  */
@@ -550,7 +551,13 @@ export function nombreEnReferencia(autor: AutorParaReferencia, estilo: EstiloDeR
   const iniciales = partes.pila
     .split(' ')
     .filter((palabra) => /^\p{Lu}/u.test(palabra))
-    .map((palabra) => `${[...palabra][0]}.`);
+    .map((palabra) =>
+      palabra
+        .split('-')
+        .filter((trozo) => trozo !== '')
+        .map((trozo) => `${[...trozo][0]}.`)
+        .join('-'),
+    );
   return iniciales.length === 0 ? partes.apellidos : `${partes.apellidos}, ${iniciales.join(' ')}`;
 }
 
@@ -576,7 +583,9 @@ export function referenciaDeCita(
   estilo: EstiloDeReferencia,
 ): SegmentoDeReferencia[] {
   const nombre = nombreEnReferencia(autor, estilo);
-  const conPunto = (frase: string) => (frase.endsWith('.') ? frase : `${frase}.`);
+  // Tras lo que ya acaba en puntuación final —un título «¿…?», un año «23 a. C.»— no va otro punto.
+  const punto = (frase: string) => (/[.?!…]$/u.test(frase) ? '' : '.');
+  const conPunto = (frase: string) => `${frase}${punto(frase)}`;
   const titulo = cita.obra?.titulo;
   const año = cita.procedencia?.año === undefined ? undefined : añoLegible(cita.procedencia.año);
   const traduccion = titulo === undefined ? undefined : cita.procedencia?.traduccion;
@@ -595,7 +604,7 @@ export function referenciaDeCita(
     if (titulo !== undefined) {
       t('En ');
       i(titulo);
-      t(traduccion !== undefined ? ` (${traduccion.traductor}, Trad.${añoDeTraduccion}). ` : '. ');
+      t(traduccion !== undefined ? ` (${traduccion.traductor}, Trad.${añoDeTraduccion}). ` : `${punto(titulo)} `);
     }
     if (edicion !== undefined) t(`${conPunto(edicion)} `);
     t(`${MARCA}. `);
@@ -612,7 +621,7 @@ export function referenciaDeCita(
       s.push(parte);
     });
     const ultimo = contenedor.at(-1);
-    if (ultimo !== undefined) t(ultimo.texto.endsWith('.') ? ' ' : '. ');
+    if (ultimo !== undefined) t(`${punto(ultimo.texto)} `);
     if (edicion !== undefined) t(`${conPunto(edicion)} `);
     i(MARCA);
     t(`, ${canonica}.`);
@@ -621,7 +630,7 @@ export function referenciaDeCita(
     t(`${conPunto(nombre)} `);
     if (titulo !== undefined) {
       i(titulo);
-      t('. ');
+      t(`${punto(titulo)} `);
     }
     if (año !== undefined) t(`${conPunto(año)} `);
     if (traductor !== undefined) t(`Traducido por ${traductor}. `);

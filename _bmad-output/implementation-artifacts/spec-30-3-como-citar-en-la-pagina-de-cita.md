@@ -5,7 +5,7 @@ created: '2026-11-08'
 status: 'done'
 baseline_revision: 'ed97032da5da9cdc4ab456d721b3ea8cd0153897'
 review_loop_iteration: 0
-followup_review_recommended: false
+followup_review_recommended: true
 context:
   - '{project-root}/_bmad-output/implementation-artifacts/epic-30-context.md'
   - '{project-root}/_bmad-output/implementation-artifacts/spec-30-2-la-cita-a-su-medida-y-las-acciones-en-fila-desde-600-px.md'
@@ -16,6 +16,41 @@ deferred:
     severity: medium
   - summary: 'Pendiente de Héctor (revisión del spec): las formas literales de APA, MLA y Chicago, el formato de la fecha de consulta por estilo y la línea «Sin fecha de consulta…» bajo cada Referencia son supuestos de este spec (Design Notes), fijados por la tabla de Vitest; cambiarlos es cambiar la tabla y `atribucion.ts`, nada más.'
     evidence: 'AC de la 30.3: «la forma literal de las tres … la fija una tabla de ejemplos literales en Vitest [ASSUMPTION] que Héctor revisa en el spec»; formato de fecha [ASSUMPTION].'
+    severity: low
+  - summary: >-
+      Pendiente de Héctor (formas literales): el punto tras las comillas de cierre cuando el texto de la Cita ya acaba en puntuación —hoy «…palma.». y «¿…?».—.
+    evidence: |-
+      `referenciaDeCita` escribe siempre `«${cita.texto}».`, como fija la tabla de Design Notes. La ortografía académica suprime el punto interior y deja el exterior («…palma».), mientras que tras «?»/«!» el punto exterior sí va; 254 de las 4.424 Citas acaban en «?», «!» o «…». Quitar el punto final del texto choca con «el texto de la Cita entra entero y literal» del intent: es decisión de forma de Héctor (revisión 1 de la 30.3, blind-hunter).
+    location: >-
+      src/lib/atribucion.ts (referenciaDeCita, const texto)
+    severity: low
+  - summary: >-
+      Pendiente de Héctor (formas literales): comillas anidadas cuando el texto de la Cita ya lleva «…».
+    evidence: |-
+      La Referencia envuelve el texto en «…» y 8 Citas del Corpus ya traen «…» dentro, que queda «…«…»…» en vez de pasar a “…”; cambiar las comillas interiores altera el texto literal que el intent manda conservar (revisión 1 de la 30.3, blind-hunter).
+    location: >-
+      src/lib/atribucion.ts (referenciaDeCita)
+    severity: low
+  - summary: >-
+      Pendiente de Héctor (formas literales): el traductor de una Cita sin Obra se omite en los tres estilos.
+    evidence: |-
+      El AC pone la traducción «si la Cita los declara», y Design Notes la ata al tramo de Obra («Sin Obra: sin el tramo de Obra ni su traducción»), porque en APA va junto al título. Hoy ninguna Cita del Corpus declara traductor sin Obra (0 de 4.424), así que no se publica ninguna Referencia que lo pierda; dónde iría sin título es una forma que decide Héctor (revisión 1, intent-alignment y ac-auditor G2).
+    location: >-
+      src/lib/atribucion.ts (referenciaDeCita, const traduccion)
+    severity: low
+  - summary: >-
+      Para la 32.5: `ComoCitar.astro` depende de que la página lleve la isla de Copiar (`CopiarCita.astro`), que es quien escribe la fecha y enseña los botones.
+    evidence: |-
+      La Página de Obra no lleva Copiar; reutilizar allí `ComoCitar.astro` sin un guion que recorra `[data-como-citar]` dejaría las Referencias sin fecha y los botones ocultos para siempre, y ninguna puerta del build ata el bloque a ese guion (revisión 1, blind-hunter). La 32.5 decide de dónde le llega el guion.
+    location: >-
+      src/components/ComoCitar.astro, src/islands/CopiarCita.astro
+    severity: low
+  - summary: >-
+      La prueba de zonas de toque de `accesibilidad.spec.ts` excluye todo lo de dentro de un `<details>` cerrado salvo su `<summary>`, y no vuelve a medirlo abierto.
+    evidence: |-
+      La exclusión es necesaria (el navegador da caja a lo plegado), pero los desplegables que vienen —el pasaje (Épica 31), «Inserta esta cita» (30.4)— quedarían sin medir sus objetivos si nadie los mide abiertos (revisión 1, blind-hunter).
+    location: >-
+      tests/e2e/accesibilidad.spec.ts
     severity: low
 ---
 
@@ -121,6 +156,23 @@ Primera pasada sin hallazgos externos que triar (el orquestador corre las capas 
 - addressed_findings:
   - none
 
+### 2026-11-08 — Review pass
+Revisión 1, con los hallazgos de las cinco capas externas (blind-hunter, edge-case-hunter, verification-gap, intent-alignment, ac-auditor), deduplicados.
+- intent_gap: 0
+- bad_spec: 0
+- patch: 8 (high 0, medium 1, low 7)
+- defer: 5 (high 0, medium 0, low 5)
+- reject: 15 (high 0, medium 0, low 15)
+- addressed_findings:
+  - `[low]` `[patch]` La región de estado compartida: el temporizador de un botón borraba el «Copiado.» de otro pulsado después. El bloque recuerda qué botón anunció lo último (`k.d`) y solo ese vacía la región al volver; e2e nueva en `como-citar.spec.ts`.
+  - `[low]` `[patch]` `b.firstChild` como etiqueta dependía del formato del marcado: ahora `b.querySelector('[data-etiqueta]')`, como Copiar.
+  - `[low]` `[patch]` La fecha de consulta se fijaba al cargar: cada pulsación la vuelve a escribir en los marcadores antes de copiar (una página abierta desde ayer copia la de hoy); e2e nueva con `page.clock`.
+  - `[low]` `[patch]` `conPunto` solo reconocía «.»: el título, el año, la edición y el cierre del contenedor de MLA no llevan punto tras «.», «?», «!» o «…» (43 Citas del Corpus tienen Obra con título en «?», «!» o «…»); dos filas nuevas en la tabla de `atribucion.test.ts`.
+  - `[low]` `[patch]` Iniciales de APA en un nombre de pila con guion: «Rousseau, J.-J.» y no «J.» (Jean-Jacques Rousseau está en el Corpus).
+  - `[medium]` `[patch]` Ninguna prueba veía `ordenRevisado` llegar por `aplanarAutor`: `atribucion.test.ts` aplana ahora las fichas reales de `corpus/autores/` (José Martí, Jean-Jacques Rousseau) con la revisión puesta y quitada en memoria y comprueba el nombre invertido en la Referencia (cierra también «Autores reales del Corpus», intent-alignment 3 y ac-auditor G3).
+  - `[low]` `[patch]` Design Notes decía que el Kit no lleva Copiar; lo lleva (`MaterialParaPublicar.astro`) y su guion crece igual: corregido.
+  - `[low]` `[patch]` `npm test` entero no se había repetido tras corregir `indexnow.test.ts`: repetido en esta pasada (ver Verificación).
+
 ## Design Notes
 
 **Las formas literales (supuesto; las revisa Héctor).** Ejemplo con `U` = `https://ejemplo.org/cita/x/`, `X` = «Yo soy un hombre sincero de donde crece la palma.», fecha 8-11-2026; `*…*` es `<i>` (en el texto copiado, sin marca). Plantillas, con «[…]» lo que se omite si no consta:
@@ -129,7 +181,7 @@ Primera pasada sin hallazgos externos que triar (el orquestador corre las capas 
 - MLA: `{N}. «{X}». [{contenedor}. ][{Edición}. ]*Sabiduría de Bolsillo*, {U}.[ Consultado el {fecha}.]`, donde `{contenedor}` une con «, » lo que conste de `*{Obra}*`, `traducido por {traductor}[, {añoTrad}]` (solo con Obra) y `{año}`; si no consta nada, no va.
 - Chicago: `{N}. [*{Obra}*. ][{año}. ][Traducido por {traductor}[, {añoTrad}]. ][{Edición}. ]«{X}». Sabiduría de Bolsillo. [Consultado el {fecha}. ]{U}.`
 
-`{N}` con «.» detrás salvo que ya acabe en «.» (APA «Martí, J.»); APA sin año: `{N}. «{X}».…`. Sin Obra: sin el tramo de Obra ni su traducción. Martí revisado, con todo: APA `Martí, J. (1891). «Yo soy un hombre sincero de donde crece la palma.». En *Versos sencillos*. Wikisource. Sabiduría de Bolsillo. Recuperado el 8 de noviembre de 2026 de https://ejemplo.org/cita/x/`; MLA `Martí, José. «Yo soy…palma.». *Versos sencillos*, 1891. Wikisource. *Sabiduría de Bolsillo*, https://ejemplo.org/cita/x/. Consultado el 8 nov. 2026.`; Chicago `Martí, José. *Versos sencillos*. 1891. Wikisource. «Yo soy…palma.». Sabiduría de Bolsillo. Consultado el 8 de noviembre de 2026. https://ejemplo.org/cita/x/.` Sin revisar: `José Martí` en los tres (APA `José Martí (1891). …`). María de Zayas y Sotomayor con clave revisada «Zayas»: APA `Zayas y Sotomayor, M.`, MLA/Chicago `Zayas y Sotomayor, María de`. Horacio: `Horacio` sin coma.
+`{N}`, el título, el año y la edición con «.» detrás salvo que ya acaben en «.», «?», «!» o «…» (APA «Martí, J.»; «En *¿Qué es la vida?* Sabiduría…»; revisión 1); APA sin año: `{N}. «{X}».…`. Sin Obra: sin el tramo de Obra ni su traducción. Martí revisado, con todo: APA `Martí, J. (1891). «Yo soy un hombre sincero de donde crece la palma.». En *Versos sencillos*. Wikisource. Sabiduría de Bolsillo. Recuperado el 8 de noviembre de 2026 de https://ejemplo.org/cita/x/`; MLA `Martí, José. «Yo soy…palma.». *Versos sencillos*, 1891. Wikisource. *Sabiduría de Bolsillo*, https://ejemplo.org/cita/x/. Consultado el 8 nov. 2026.`; Chicago `Martí, José. *Versos sencillos*. 1891. Wikisource. «Yo soy…palma.». Sabiduría de Bolsillo. Consultado el 8 de noviembre de 2026. https://ejemplo.org/cita/x/.` Sin revisar: `José Martí` en los tres (APA `José Martí (1891). …`). María de Zayas y Sotomayor con clave revisada «Zayas»: APA `Zayas y Sotomayor, M.`, MLA/Chicago `Zayas y Sotomayor, María de`. Horacio: `Horacio` sin coma.
 
 `fechaDeConsulta`: APA `Recuperado el 8 de noviembre de 2026 de `, MLA ` Consultado el 8 nov. 2026.` (meses: ene., feb., mar., abr., mayo, jun., jul., ago., sept., oct., nov., dic.), Chicago `Consultado el 8 de noviembre de 2026. `; día sin cero. El marcador vacío va donde va esa frase, y el texto sin fecha no deja espacios dobles.
 
@@ -141,13 +193,14 @@ Primera pasada sin hallazgos externos que triar (el orquestador corre las capas 
 
 **Medidas tomadas (2026-11-08):**
 
-- **Guion en línea** (`tests/unit/medicion.test.ts`, «la Página de Cita no pierde su listón», Página de Cita con Imagen y la medición puesta): **5.651 → 7.251 bytes** (+1.600). El guion de Copiar pasa de 1.138 a 2.738 bytes (`fechaDeConsulta` por su texto, ~520, y el recorrido de «Cómo citar»). Antes de subir el tope se compactó lo nuevo desde 7.590. `MAX_BYTES_DE_GUION` sube de 6.656 a **7.680** en el mismo diff (429 libres, el margen de la v2), con la cifra en su comentario de `umbrales.ts`. Portada, 404 y Kit no llevan hoy Copiar en la página construida (la portada lo recibirá con la 28.2), así que no crecen.
+- **Guion en línea** (`tests/unit/medicion.test.ts`, «la Página de Cita no pierde su listón», Página de Cita con Imagen y la medición puesta): **5.651 → 7.251 bytes** (+1.600). El guion de Copiar pasa de 1.138 a 2.738 bytes (`fechaDeConsulta` por su texto, ~520, y el recorrido de «Cómo citar»). Antes de subir el tope se compactó lo nuevo desde 7.590. `MAX_BYTES_DE_GUION` sube de 6.656 a **7.680** en el mismo diff (429 libres, el margen de la v2), con la cifra en su comentario de `umbrales.ts`. La portada y el 404 no llevan hoy Copiar en la página construida (la portada lo recibirá con la 28.2), así que no crecen; el Kit (`MaterialParaPublicar.astro`, dos copias) sí lo lleva y su guion crece igual, sin «Cómo citar» que recorrer (corregido en la revisión 1: decía que el Kit tampoco).
+- **Tras la revisión 1:** el recorrido de «Cómo citar» del guion de Copiar crece 83 bytes (1.023 → 1.106: la fecha en cada pulsación, la etiqueta por `querySelector` y el dueño de la región), así que el guion de la Página de Cita con Imagen queda en unos **7.334 bytes**, 346 bajo el tope de 7.680; `medicion.test.ts` sigue verde. `dist/` juzgado: **533.823.946 bytes**, sin aviso (240,9 MiB hasta el aviso).
 - **Peso** (`FECHA_JORNADA=2026-11-08 npm run build`, juzgado sin lo que rota): base (`ed97032da5`, construida en un `git worktree --detach` aparte) **512.080.993 bytes**; con la historia **533.616.179 bytes**: +21.535.186 (+20,5 MiB), unos **4.902 bytes por Página de Cita** (4.424 páginas; p. ej. 36.355 → 41.257) —1.600 de guion y el resto el marcado de las tres Referencias, con los `data-astro-cid` de dos componentes—. Sin aviso: quedan 252.815.821 bytes (241,1 MiB) hasta el aviso de 750 MiB. `index.html` y `404.html` idénticos en tamaño.
 
 **Decisiones de la implementación (las revisa Héctor con la tabla):**
 
 - El año va por `añoLegible` («23 a. C.»), la forma del sitio para los negativos; sin él, la Referencia de Horacio diría «(-23)». Tras un año que acaba en punto no se añade otro (MLA y Chicago).
-- APA sin nombre de pila con mayúscula (todo el nombre de pila en minúscula) deja solo los apellidos.
+- APA sin nombre de pila con mayúscula (todo el nombre de pila en minúscula) deja solo los apellidos. Un nombre de pila con guion da una inicial por trozo: «Rousseau, J.-J.» (revisión 1).
 - El rótulo de la edición cotejada es `rotuloDeFuente(cita.fuente)`: con una Fuente sin `nombre` declarado sale el anfitrión («es.wikisource.org»), igual que en la Línea de la Fuente.
 - El botón de cada Referencia lleva la clase `copiar-referencia`, no `copiar`: el trato es el mismo (declaraciones copiadas, solo tokens), pero `button.copiar` ya nombra en las pruebas el Copiar de la Cita.
 - El marcador de la fecha se escribe con su nombre literal (`data-fecha-de-consulta`) y `ComoCitar.astro` para la construcción si `MARCADOR_DE_FECHA_DE_CONSULTA` dejara de ser ese nombre: un atributo esparcido le ponía a Astro la clase de ámbito y la clave de las instantáneas de tipografía llevaba su hash.
@@ -194,3 +247,25 @@ Blocking condition: ninguna.
 - Matriz: con JS, sin JS y portapapeles denegado en `tests/e2e/como-citar.spec.ts`; el build con `FECHA_JORNADA` en `tests/unit/como-citar.test.ts`; la Cita sin Obra en las dos. Todas corrieron y pasaron.
 
 **Riesgos residuales.** Las formas literales de los tres estilos son un supuesto que revisa Héctor. +4,9 KB por Página de Cita (+20,5 MiB en `dist/`), sin aviso. El guion de Copiar crece 1.600 bytes y el tope queda con 429 libres para la 30.4. No se repitió `npm test` entero tras corregir `indexnow.test.ts`.
+
+### Revisión 1 (2026-11-08)
+
+**Resumen.** Se triaron los hallazgos de las cinco capas externas. Ocho parches: la región de estado compartida que vaciaba el temporizador de otro botón, la etiqueta del botón por `querySelector`, la fecha de consulta reescrita en cada pulsación, el punto que no se añade tras un título, año o edición que ya acaba en «?», «!» o «…», las iniciales de APA para un nombre de pila con guion («Rousseau, J.-J.»), la prueba de que `ordenRevisado` llega por `aplanarAutor` con fichas reales del Corpus, la nota de Design Notes sobre el Kit y la repetición de `npm test` entero. Cinco diferidos (tres formas para Héctor, uno para la 32.5 y uno de la prueba de zonas de toque). Quince rechazos.
+
+**Ficheros.**
+- `src/islands/CopiarCita.astro` — guion: `w()` reescribe la fecha al cargar y en cada pulsación, la etiqueta por `[data-etiqueta]`, y solo el botón que anunció lo último (`k.d`) vacía la región; cabecera al día.
+- `src/lib/atribucion.ts` — `punto`/`conPunto` reconocen «.», «?», «!» y «…», y se aplican al título (APA, Chicago) y al cierre del contenedor de MLA; iniciales por trozo en un nombre de pila con guion.
+- `tests/unit/atribucion.test.ts` — dos filas de la tabla (títulos con «?» y «!»), el caso de Jean-Jacques Rousseau y un bloque que aplana las fichas reales de José Martí y Jean-Jacques Rousseau con la revisión puesta y quitada.
+- `tests/e2e/como-citar.spec.ts` — la vuelta de «Copiar APA» no borra el «Copiado.» de «Copiar MLA», y una página abierta desde ayer copia la fecha del día de la pulsación (`page.clock`).
+- Este spec — diferidos, Design Notes (punto tras puntuación final, nombre con guion, el Kit sí lleva Copiar, bytes nuevos) y el triage.
+
+**Hallazgos.** Parches 8 (alto 0, medio 1, bajo 7); diferidos 5; rechazados 15. `followup_review_recommended: true`: puntuación 3 × 1 + 1 × 7 = 10 (≥ 5).
+
+**Verificación.**
+- `npx vitest run tests/unit/atribucion.test.ts`: 60 en verde.
+- `npx astro check`: 0 errores, 0 avisos.
+- `npm test` (en segundo plano y esperado): 157 ficheros, 7.267 pruebas en verde (1.275 s).
+- `npx playwright test` de `como-citar`, `copiar`, `accesibilidad`, `pagina-de-cita` y `tipografia-calculada`, móvil y escritorio: 473 en verde y 49 omitidas, con las dos e2e nuevas; ningún servidor quedó levantado.
+- `FECHA_JORNADA=2026-11-08 npm run build`: sin aviso de peso; 533.823.946 bytes juzgados.
+
+**Riesgos residuales.** Las formas literales siguen siendo un supuesto que revisa Héctor, ahora con tres decisiones más anotadas en los diferidos (punto tras comillas, comillas anidadas, traductor sin Obra). El tope de guion queda con unos 346 bytes libres para la 30.4.
