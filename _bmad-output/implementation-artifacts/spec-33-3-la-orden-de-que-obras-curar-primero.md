@@ -5,7 +5,7 @@ created: '2026-11-08'
 status: 'done'
 baseline_revision: 'a8f304ce0833d36b7df2a3bd6899e821d991a37c'
 review_loop_iteration: 0
-followup_review_recommended: false
+followup_review_recommended: true
 context:
   - '{project-root}/_bmad-output/implementation-artifacts/epic-33-context.md'
 warnings: ['oversized']
@@ -124,6 +124,25 @@ Fuera por no tener edición cotejada: 37 Obras. Citas de la ventana que no cuent
 
 Sin hallazgos externos en este pase (el orquestador no pasó ninguna sección «## Hallazgos externos — …»).
 
+### 2026-11-08 — Review pass
+- intent_gap: 0
+- bad_spec: 0
+- patch: 9 (high 0, medium 3, low 6)
+- defer: 0
+- reject: 27
+- addressed_findings:
+  - `[medium]` `[patch]` El camino con cifra no se ejercía de punta a punta (verification-gap, intent-alignment, blind-hunter sobre `obraDe` frente a `obrasDeLosDatos`): prueba de disco nueva que corre `curar-primero` sobre un corpus con tres Obras, una Cita retirada a `_revision/` y una Obra sin edición cotejada, y comprueba ventana, orden, cifras y «no cuentan».
+  - `[medium]` `[patch]` Ida y vuelta escritor–lector sin prueba: esa misma prueba siembra la serie con `registrarLecturaDeDemanda` (dos ventanas de 28 días y una mensual) en vez de un YAML a mano.
+  - `[medium]` `[patch]` Una Cita repetida en las filas de la ventana se sumaba dos veces: `problemaDeVentana` la rechaza («sin cifra», nombrando la fila y el slug).
+  - `[low]` `[patch]` `vacia: true` con filas en `citas` se contradecía en el parte: ahora es entrada ilegible.
+  - `[low]` `[patch]` Dos entradas de 28 días con el mismo par `desde`–`hasta` se resolvían por orden de fichero: ahora «sin cifra», nombrando las dos.
+  - `[low]` `[patch]` Los motivos podían decir «clase: undefined» o «[object Object]»: `declarado` dice «no declara «campo»» o el valor serializado; la prueba que fijaba «undefined» se corrige.
+  - `[low]` `[patch]` `curarPrimero` con efectos inyectados sin probar: pruebas de la congelación (sale bien, ninguna Obra), de `congelacion: null` y del fallo de cada uno de los cuatro efectos.
+  - `[low]` `[patch]` La regex AD-24 era sensible a mayúsculas y no veía `…SerieDeDemanda`: ahora `[sS]erieDeDemanda`.
+  - `[low]` `[patch]` `esEntero` comprobaba un entero no negativo: renombrado `esEnteroNoNegativo`; AGENTS.md dice «si alguna lo es» para el recuento de tienda sin marca y nombra las entradas ilegibles nuevas.
+
+Rechazados: `ruta` en un resultado de solo lectura (`terminar` no la imprime y el tipo la exige); demanda de Obras sin edición cotejada (ya se cuentan como «fuera»); longitud de la ventana de 28 días (el escritor la fija); `congelada` siempre falso (lo pide el contrato y es coherente); cifras sin separador de miles y familias en crudo (como los demás partes de la serie); frontera de no escritura fuera del corpus y sin red (inspección de código, sin `fetch` ni credencial); prueba sobre el Corpus real (verificación manual repetida en este pase); `--corpus` sin valor o repetido (ayudante común ya probado); bookkeeping del pase anterior (este pase lo corrige); referencias `fichero:línea` del Code Map; clase desconocida que veta una ventana más reciente (es la lectura del contrato); serie ilegible con familia congelada (el contrato da 1 a la serie ilegible); y las observaciones de intent-alignment y ac-auditor sin acción, que el contrato ya resuelve.
+
 ## Auto Run Result
 
 Status: done
@@ -149,3 +168,14 @@ Blocking condition: ninguna.
 - `npm test` — 7208/7214; los 6 fallos eran los inestables conocidos: hash del woff2 de Google Fonts (`ingreso-construido` ×2, `ediciones-en-venta` ×1), plazo de 120 s bajo carga (`extraer-cli` ×1) y `avisar-rango` ×2 contando copias temporales en el `tmpdir` compartido mientras otro worktree corría su suite. Repetidos solos los cuatro ficheros: 196/196 verde.
 
 **Riesgos residuales.** Con la serie vacía, hoy no hay orden por demanda; el primer `demanda:registrar` de Héctor lo enciende. Una entrada mensual mal formada no estorba (no es de 28 días), a propósito; `leerSerieDeDemanda` sí la rechazaría al registrar.
+
+### Pase de revisión 1 (2026-11-08, con hallazgos externos)
+
+**Cambios.** `tools/lib/curarPrimero.ts`: una Cita repetida en las filas, `vacia: true` con filas y dos entradas de 28 días con el mismo par `desde`–`hasta` son entradas ilegibles («sin cifra», nombradas); los motivos dicen «no declara «campo»» en vez de «undefined»; `esEntero` pasa a `esEnteroNoNegativo`. `tests/unit/curar-primero.test.ts`: la orden de punta a punta con una ventana escrita por `registrarLecturaDeDemanda` sobre un corpus con Cita retirada en `_revision/` (orden, cifras, «no cuentan»), y `curarPrimero` con efectos inyectados (congelación, `congelacion: null`, fallo de cada efecto); 40 pruebas. `tests/unit/demanda.test.ts`: la regex AD-24 ve `[sS]erieDeDemanda`. `AGENTS.md`: el recuento de tienda sin marca «si alguna lo es» y las entradas ilegibles nuevas.
+
+**Hallazgos.** 9 parches (media 3, baja 6), 0 diferidos, 27 rechazados. `followup_review_recommended: true` (parcheados: alta 0, media 3, baja 6; puntuación 3 × 3 + 6 = 15 ≥ 5).
+
+**Verificación.** `npx vitest run tests/unit/curar-primero.test.ts` 40/40; `tests/unit/demanda.test.ts tests/unit/obra-cli.test.ts` 74/74; `npx tsx tools/obra.ts curar-primero` código 0, 511 «sin cifra», sin cambios en el árbol; `npx astro check` 0 errores; `npm test` 7219/7225: los 6 fallos, en ficheros que este pase no toca, son el hash del woff2 de Google Fonts (`ediciones-en-venta` ×5, repetido solo: 1 sigue por el mismo hash) y el plazo de 120 s de `objetivo-cli` con carga 22 (`tools/auditoria.ts` tarda 85 s solo; sus porcentajes salen con coma, que es lo que la prueba exige).
+
+**Riesgos residuales.** Los mismos del primer pase; el camino con cifra queda ya cubierto sobre el Corpus resuelto de verdad.
+

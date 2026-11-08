@@ -5,9 +5,10 @@ import { tmpdir } from 'node:os';
 import { join, relative } from 'node:path';
 import { promisify } from 'node:util';
 import { RAIZ } from './ayuda/construir.js';
-import { escribirCita } from '../../tools/lib/corpus.ts';
+import { escribirCita, registrarLecturaDeDemanda, rutasDelCorpus } from '../../tools/lib/corpus.ts';
 import {
   componerCuracion,
+  curarPrimero,
   lineasDeCuracion,
   ventanaDeCuracion,
   type InformeDeCuracion,
@@ -113,7 +114,9 @@ describe('Historia 33.3 — la ventana de la curación', () => {
     ['sin «desde»', { clase: '28-dias', hasta: '2026-11-04' }, 'desde'],
     ['una fecha imposible', ventana28('2026-02-30', '2026-03-20'), '2026-02-30'],
     ['una clase desconocida', { desde: '2026-10-08', hasta: '2026-11-04', clase: 'semana' }, 'semana'],
-    ['sin clase', { desde: '2026-10-08', hasta: '2026-11-04' }, 'undefined'],
+    ['sin clase', { desde: '2026-10-08', hasta: '2026-11-04' }, 'no declara «clase»'],
+    ['una Cita repetida', ventana28('2026-10-08', '2026-11-04', [fila('seneca-a', 9, 1), fila('seneca-a', 9, 1)]), 'repite «seneca-a»'],
+    ['«vacia: true» con filas', ventana28('2026-10-08', '2026-11-04', [fila('seneca-a', 9, 1)], { vacia: true }), '«vacia: true» y a la vez filas'],
     ['una «cita» que no es texto', ventana28('2026-10-08', '2026-11-04', [{ cita: 3, impresiones: 1, clics: 0 }]), 'cita'],
     ['métricas que no son enteros', ventana28('2026-10-08', '2026-11-04', [fila('seneca-a', 1.5, 0)]), 'enteros'],
     ['métricas negativas', ventana28('2026-10-08', '2026-11-04', [fila('seneca-a', 4, -1)]), 'enteros'],
@@ -124,6 +127,27 @@ describe('Historia 33.3 — la ventana de la curación', () => {
     if (!v.conCifra) {
       expect(v.motivo).toContain('la entrada 2');
       expect(v.motivo).toContain(pista);
+    }
+  });
+
+  it('un motivo nunca dice «undefined» ni «[object Object]»', () => {
+    for (const mala of [{ clase: '28-dias', hasta: '2026-11-04' }, ventana28('2026-10-08', '2026-11-04', [], { vacia: { x: 1 } })]) {
+      const v = ventanaDeCuracion([mala]);
+      expect(v.conCifra).toBe(false);
+      if (!v.conCifra) expect(v.motivo).not.toMatch(/undefined|\[object Object\]/);
+    }
+  });
+
+  it('dos entradas de la misma ventana de 28 días dejan todo «sin cifra», nombrando las dos', () => {
+    const v = ventanaDeCuracion([
+      ventana28('2026-10-08', '2026-11-04', [fila('seneca-a', 10, 1)]),
+      mes('2026-10-01', '2026-10-31'),
+      ventana28('2026-10-08', '2026-11-04', [fila('seneca-a', 99, 9)]),
+    ]);
+    expect(v.conCifra).toBe(false);
+    if (!v.conCifra) {
+      expect(v.motivo).toContain('las entradas 1 y 3');
+      expect(v.motivo).toContain('2026-10-08–2026-11-04');
     }
   });
 
@@ -388,9 +412,124 @@ describe('Historia 33.3 — npm run obra -- curar-primero sobre disco', () => {
     expect(r.error).toContain('las fichas de Obra');
   });
 
+  it('con una ventana escrita por registrarLecturaDeDemanda, ordena por su demanda sobre el Corpus real', async () => {
+    const corpus = await corpusMinimo();
+    // Una tercera Obra con edición cotejada, y una Cita retirada a `_revision/` cuyo slug sigue en la ventana.
+    await escribirCita(join(corpus, 'citas'), 'seneca--c', {
+      texto: 'Tercer texto.',
+      autor: 'seneca',
+      slug: 'seneca-c',
+      procedencia: { obra: 'Sobre la ira', año: 41 },
+      fuente: { id: 'wikisource-es', url: 'https://es.wikisource.org/wiki/Ira' },
+      estadoDerechos: 'dominio-público',
+    });
+    await writeFile(
+      join(corpus, 'obras', 'seneca--sobre-la-ira.yml'),
+      'autor: seneca\ntitulo: Sobre la ira\nformas:\n  - sobre la ira\n',
+      'utf8',
+    );
+    await escribirCita(join(corpus, '_revision'), 'seneca--retirada', {
+      texto: 'Texto retirado.',
+      autor: 'seneca',
+      slug: 'seneca-retirada',
+      procedencia: { obra: 'Sobre la ira', año: 41 },
+      estadoDerechos: 'dominio-público',
+    });
+    const citas = [
+      { cita: 'seneca-a', clics: 2, impresiones: 40 },
+      { cita: 'seneca-retirada', clics: 9, impresiones: 90 },
+      { cita: 'seneca-c', clics: 1, impresiones: 12 },
+      { cita: 'seneca-b', clics: 0, impresiones: 7 },
+    ];
+    const sumas = { clics: 12, impresiones: 149 };
+    const ventana = (desde: string, hasta: string, clase: '28-dias' | 'mes', filas: typeof citas) => ({
+      desde,
+      hasta,
+      clase,
+      leidoEl: '2026-11-07',
+      propiedad: 'sc-domain:ejemplo.example',
+      autores: [{ autor: 'seneca', ...sumas }],
+      citas: filas,
+      sinAutor: { rutas: 0, clics: 0, impresiones: 0 },
+      resto: { filas: 0, clics: 0, impresiones: 0 },
+      familias: { cita: sumas },
+      fueraDelCenso: { clics: 0, impresiones: 0 },
+      slugsSinAutor: [],
+      citasConClic: [],
+    });
+    await registrarLecturaDeDemanda(rutasDelCorpus(corpus), {
+      propiedad: 'sc-domain:ejemplo.example',
+      leidoEl: '2026-11-07',
+      primeraLectura: true,
+      ventanas: [
+        ventana('2026-10-08', '2026-11-04', '28-dias', citas),
+        // Una más antigua, con otro orden: ni se usa ni se suma.
+        ventana('2026-09-01', '2026-09-28', '28-dias', [{ cita: 'seneca-c', clics: 9, impresiones: 999 }]),
+        ventana('2026-10-01', '2026-10-31', 'mes', [{ cita: 'seneca-c', clics: 9, impresiones: 999 }]),
+      ],
+      sinLeer: [],
+    });
+    const antes = await foto(corpus);
+
+    const r = await correr(corpus, ['curar-primero']);
+    expect(r.codigo, r.error).toBe(0);
+    expect(r.salida).toContain('Ventana de 28 días: 2026-10-08 – 2026-11-04 (la más reciente de 2).');
+    expect(r.salida).toContain(
+      '1. seneca--cartas-a-lucilio · Cartas a Lucilio · Séneca — 40 impresiones, 2 clics · 0 ediciones declaradas',
+    );
+    expect(r.salida).toContain('2. seneca--sobre-la-ira · Sobre la ira · Séneca — 12 impresiones, 1 clic');
+    expect(r.salida).not.toContain('brevedad');
+    expect(r.salida).not.toContain('sin cifra');
+    expect(r.salida).toContain('Citas de la ventana que no cuentan (no publicadas o sin Obra): 1.');
+    expect(await foto(corpus)).toEqual(antes);
+  });
+
   it('una bandera desconocida o un argumento de más salen 2', async () => {
     const corpus = await corpusMinimo();
     expect((await correr(corpus, ['curar-primero', '--bandera'])).codigo).toBe(2);
     expect((await correr(corpus, ['curar-primero', 'algo'])).codigo).toBe(2);
+  });
+});
+
+describe('Historia 33.3 — curarPrimero con los efectos inyectados (AD-22)', () => {
+  const RUTAS = rutasDelCorpus('/no/existe/corpus');
+  const vacio = {
+    leerCitas: async () => [],
+    leerAutores: async () => [],
+    leerFichasDeObra: async () => [],
+    leerEntradas: async () => [],
+  };
+
+  it('congelada: lo dice con su jornada, no propone ninguna Obra y termina bien', async () => {
+    const r = await curarPrimero(RUTAS, vacio, { congelacion: { desde: '2026-11-01', indexables: [] } });
+    expect(r.ok).toBe(true);
+    if (r.ok) {
+      expect(r.mensaje).toContain('congelada por SM-11 desde el 2026-11-01');
+      expect(r.mensaje).not.toMatch(/^1\. /m);
+    }
+  });
+
+  it('«congelacion: null» fuerza que no la haya, sin leer la del repositorio', async () => {
+    const r = await curarPrimero(RUTAS, vacio, { congelacion: null });
+    expect(r.ok).toBe(true);
+    if (r.ok) expect(r.mensaje).toContain('Qué Obras curar primero: 0 Obras publicadas');
+  });
+
+  it.each([
+    ['leerCitas', 'las Citas publicadas'],
+    ['leerAutores', 'los Autores'],
+    ['leerFichasDeObra', 'las fichas de Obra'],
+    ['leerEntradas', 'corpus/serie-de-demanda.yml'],
+  ] as const)('si %s falla, no sale bien y nombra %s', async (efecto, que) => {
+    const r = await curarPrimero(
+      RUTAS,
+      { ...vacio, [efecto]: async () => Promise.reject(new Error('roto')) },
+      { congelacion: null },
+    );
+    expect(r.ok).toBe(false);
+    if (!r.ok) {
+      expect(r.motivos[0]).toBe(`No se pudo leer ${que}: roto`);
+      expect(r.motivos).toContain('No se ha escrito nada.');
+    }
   });
 });

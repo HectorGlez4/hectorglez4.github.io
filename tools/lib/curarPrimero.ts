@@ -68,25 +68,38 @@ export type VentanaDeCuracion =
     }
   | { conCifra: false; motivo: string };
 
-const esEntero = (v: unknown): v is number => typeof v === 'number' && Number.isInteger(v) && v >= 0;
+const esEnteroNoNegativo = (v: unknown): v is number =>
+  typeof v === 'number' && Number.isInteger(v) && v >= 0;
+
+/** «campo: valor» para el parte, o «sin «campo»» si no lo declara: nunca «undefined». */
+const declarado = (campo: string, valor: unknown): string =>
+  valor === undefined || valor === null
+    ? `no declara «${campo}»`
+    : `declara «${campo}: ${typeof valor === 'object' ? JSON.stringify(valor) : String(valor)}»`;
 
 /** Por qué una entrada de 28 días no se deja leer, o `undefined` si se deja. */
 function problemaDeVentana(entrada: Record<string, unknown>): string | undefined {
   const { desde, hasta, citas, vacia } = entrada;
   for (const [campo, valor] of [['desde', desde], ['hasta', hasta]] as const) {
-    if (!esJornadaDeSerie(valor)) return `«${campo}: ${String(valor)}» no es un día AAAA-MM-DD que exista`;
+    if (!esJornadaDeSerie(valor)) return `${declarado(campo, valor)}, y no es un día AAAA-MM-DD que exista`;
   }
   if ((desde as string) > (hasta as string)) return `la ventana ${String(desde)}–${String(hasta)} empieza después de terminar`;
-  if (vacia !== undefined && vacia !== true) return `«vacia: ${String(vacia)}» solo puede valer true`;
+  if (vacia !== undefined && vacia !== true) return `${declarado('vacia', vacia)}, que solo puede valer true`;
   if (citas === undefined || citas === null) return undefined;
   if (!Array.isArray(citas)) return '«citas» no es una lista';
+  // Una ventana leída sin filas no trae filas: las dos cosas a la vez se contradicen.
+  if (vacia === true && citas.length > 0) return '«vacia: true» y a la vez filas en «citas»';
+  // El escritor funde cada Cita en una fila: repetida, se contaría dos veces en su Obra.
+  const vistas = new Set<string>();
   for (const [j, fila] of citas.entries()) {
     if (fila === null || typeof fila !== 'object' || Array.isArray(fila)) return `la fila ${j + 1} de «citas» no es una fila`;
     const { cita, clics, impresiones } = fila as Record<string, unknown>;
     if (typeof cita !== 'string') return `la fila ${j + 1} de «citas» no declara «cita» como texto`;
-    if (!esEntero(clics) || !esEntero(impresiones)) {
+    if (!esEnteroNoNegativo(clics) || !esEnteroNoNegativo(impresiones)) {
       return `la fila ${j + 1} de «citas» no trae clics e impresiones enteros y no negativos`;
     }
+    if (vistas.has(cita)) return `la fila ${j + 1} de «citas» repite «${cita}»`;
+    vistas.add(cita);
   }
   return undefined;
 }
@@ -113,7 +126,7 @@ export function ventanaDeCuracion(entradas: readonly unknown[]): VentanaDeCuraci
       return {
         conCifra: false,
         motivo:
-          `la entrada ${n} de la serie de demanda declara «clase: ${String(clase)}», que no es ` +
+          `la entrada ${n} de la serie de demanda ${declarado('clase', clase)}, que no es ` +
           `${CLASES_DE_VENTANA.map((c) => `«${c}»`).join(' ni ')}, y podría ser de 28 días`,
       };
     }
@@ -123,6 +136,17 @@ export function ventanaDeCuracion(entradas: readonly unknown[]): VentanaDeCuraci
       return {
         conCifra: false,
         motivo: `la entrada ${n} de la serie de demanda, de 28 días, no se deja leer: ${problema}`,
+      };
+    }
+    // La serie reemplaza por el par `desde`–`hasta`: dos entradas con el mismo par son un
+    // registro roto, y quedarse con la primera escondería cuál de las dos se leyó.
+    const otra = legibles.findIndex((v) => v.desde === registro.desde && v.hasta === registro.hasta);
+    if (otra !== -1) {
+      return {
+        conCifra: false,
+        motivo:
+          `las entradas ${entradas.indexOf(legibles[otra]) + 1} y ${n} de la serie de demanda son la ` +
+          `misma ventana de 28 días, ${String(registro.desde)}–${String(registro.hasta)}`,
       };
     }
     legibles.push(registro);

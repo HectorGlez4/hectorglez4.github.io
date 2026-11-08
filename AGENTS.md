@@ -328,14 +328,16 @@ npm run obra -- curar-primero   # informa. NO escribe nada.
 
 Lee las Citas publicadas, los Autores, las fichas de Obra y esta serie, y lista las Obras
 publicadas **con edición cotejada** —las demás se cuentan, sin listarlas—, cada una con su
-ficha, su título, su Autor, cuántas ediciones declara y cuántas son de una tienda sin marca. La
+ficha, su título, su Autor, cuántas ediciones declara y, si alguna lo es, cuántas son de una
+tienda sin marca. La
 regla vive solo en `tools/lib/curarPrimero.ts`, pura y con los efectos inyectados (AD-22). Ordena
 por la demanda de la ventana `28-dias` de `hasta` más reciente, nombrada en el parte: impresiones
 y clics de las Citas de esa ventana que resuelven a la Obra (impresiones, clics y nombre de ficha
 para desempatar); las mensuales no se usan y las ventanas no se suman. Esa cifra es
 **provisional** —la serie no cuenta la Página de Obra— y **cota inferior** —lo de `resto` no se
 atribuye—, y el parte dice cuántas Citas de la ventana no cuentan. **Sin ventana de 28 días
-legible** —la serie vacía, como hoy, solo mensuales o una entrada ilegible— cada Obra sale «sin
+legible** —la serie vacía, como hoy, solo mensuales o una entrada ilegible, que también es una
+Cita repetida en sus filas, `vacia: true` con filas o la misma ventana dos veces— cada Obra sale «sin
 cifra» con ese motivo, nunca 0, y la lista va por nombre de ficha, que no es de prioridad; una
 Obra sin Citas en una ventana leída, o una ventana `vacia: true`, sí da 0, y es una lectura. Con
 la familia Obra congelada lo dice con su jornada y no propone nada. No propone ediciones ni
