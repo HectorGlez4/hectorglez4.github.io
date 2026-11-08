@@ -478,15 +478,16 @@ test.describe('Historia 26.6 — el campo, su sitio y su foco', () => {
       await expect(page.locator('.filtro button, .filtro [role="button"]')).toHaveCount(0);
       await expect(page.getByText(ETIQUETA_DEL_FILTRO[directorio], { exact: true })).toBeVisible();
 
-      // Sin foco: filete inferior de `--grosor-filete` en `--contorno`, y nada más; la etiqueta,
-      // a `--unidad` encima.
+      // Sin foco: contorno completo de `--grosor-filete` en `--contorno`, radio `--radio` y fondo
+      // `--papel` (Historia 34.3, UX-DR133: antes, solo el filete inferior); la etiqueta, a `--unidad`
+      // encima.
       const reposo = await entrada.evaluate((e) => {
         const sonda = (css: string) => {
           const d = document.createElement('div');
           d.style.cssText = css;
           document.body.append(d);
           const c = getComputedStyle(d);
-          const r = { ancho: c.width, color: c.color };
+          const r = { ancho: c.width, color: c.color, fondo: c.backgroundColor };
           d.remove();
           return r;
         };
@@ -495,8 +496,14 @@ test.describe('Historia 26.6 — el campo, su sitio y su foco', () => {
           grosor: sonda('width: var(--grosor-filete)').ancho,
           contorno: sonda('color: var(--contorno)').color,
           u1: parseFloat(sonda('width: var(--unidad)').ancho),
+          radioDelToken: sonda('width: var(--radio)').ancho,
+          papel: sonda('background-color: var(--papel)').fondo,
           abajo: { ancho: c.borderBottomWidth, estilo: c.borderBottomStyle, color: c.borderBottomColor },
-          otros: [c.borderTopWidth, c.borderLeftWidth, c.borderRightWidth],
+          otros: [
+            { ancho: c.borderTopWidth, estilo: c.borderTopStyle, color: c.borderTopColor },
+            { ancho: c.borderLeftWidth, estilo: c.borderLeftStyle, color: c.borderLeftColor },
+            { ancho: c.borderRightWidth, estilo: c.borderRightStyle, color: c.borderRightColor },
+          ],
           sombra: c.boxShadow,
           radio: c.borderRadius,
           fondo: c.backgroundColor,
@@ -504,10 +511,10 @@ test.describe('Historia 26.6 — el campo, su sitio y su foco', () => {
         };
       });
       expect(reposo.abajo).toEqual({ ancho: reposo.grosor, estilo: 'solid', color: reposo.contorno });
-      expect(reposo.otros).toEqual(['0px', '0px', '0px']);
+      expect(reposo.otros).toEqual(Array(3).fill(reposo.abajo));
       expect(reposo.sombra).toBe('none');
-      expect(reposo.radio).toBe('0px');
-      expect(reposo.fondo).toBe('rgba(0, 0, 0, 0)');
+      expect(reposo.radio).toBe(reposo.radioDelToken);
+      expect(reposo.fondo).toBe(reposo.papel);
       expect(reposo.etiqueta).toBeCloseTo(reposo.u1, 0);
 
       await entrada.fill('a');
