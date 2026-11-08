@@ -1,5 +1,5 @@
 ---
-texto: "Traxòla a nuestra casa, que imagina guardalla mas assi: necio quien guarda la poluora, y al fuego la auezina."
+texto: "Traxòla a nuestra casa, que imagina\nguardalla mas assi: necio quien guarda\nla poluora, y al fuego la auezina."
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-traxola-a-nuestra-casa-que-imagina-guardalla"
 procedencia:

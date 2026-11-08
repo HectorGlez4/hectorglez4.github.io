@@ -1,5 +1,5 @@
 ---
-texto: "ISABEL: (¿Qué culpa tengo yo, cielos, Aparte para estar a esto sujeta?) LOPE: Ya no se puede sufrir, porque es cosa muy mal hecha."
+texto: "ISABEL: (¿Qué culpa tengo yo, cielos, Aparte\npara estar a esto sujeta?)\nLOPE: Ya no se puede sufrir,\nporque es cosa muy mal hecha."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-isabel-que-culpa-tengo-yo-cielos-aparte"
 procedencia:

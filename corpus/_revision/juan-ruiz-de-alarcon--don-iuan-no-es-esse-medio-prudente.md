@@ -1,5 +1,5 @@
 ---
-texto: "DON IUAN No es esse medio prudente, que puede cobralle amor, 395 y el prouarla de esse modo es perdella, mas assi, si me trueca a mi por mi, en casa se queda todo."
+texto: "DON IUAN\nNo es esse medio prudente,\nque puede cobralle amor, 395\ny el prouarla de esse modo\nes perdella, mas assi,\nsi me trueca a mi por mi,\nen casa se queda todo."
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-don-iuan-no-es-esse-medio-prudente"
 procedencia:

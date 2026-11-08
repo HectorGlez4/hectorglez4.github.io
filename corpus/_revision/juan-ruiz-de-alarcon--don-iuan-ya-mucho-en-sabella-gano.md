@@ -1,5 +1,5 @@
 ---
-texto: "DON IUAN Ya mucho en sabella gano, pues vos assi la alabais. 50 LEONARDO Pues es, porque la sepais el desague Mexicano."
+texto: "DON IUAN\nYa mucho en sabella gano,\npues vos assi la alabais. 50\nLEONARDO\nPues es, porque la sepais\nel desague Mexicano."
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-don-iuan-ya-mucho-en-sabella-gano"
 procedencia:

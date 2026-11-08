@@ -1,5 +1,5 @@
 ---
-texto: "ni a la plebe deslumbra, insulsa y vana, de la extranjera seda el atavío, con que tal vez el crimen se engalana;"
+texto: "ni a la plebe deslumbra, insulsa y vana,\nde la extranjera seda el atavío,\ncon que tal vez el crimen se engalana;"
 autor: "andres-bello"
 slug: "andres-bello-ni-a-la-plebe-deslumbra-insulsa-y"
 procedencia:

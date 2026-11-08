@@ -1,5 +1,5 @@
 ---
-texto: "Aquese intricado, oculto monte que está a la salida del lugar, fue su sagrado."
+texto: "Aquese intricado, oculto\nmonte que está a la salida\ndel lugar, fue su sagrado."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-aquese-intricado-oculto-monte-que-esta-a"
 procedencia:

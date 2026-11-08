@@ -1,5 +1,5 @@
 ---
-texto: "Virtud es fortaleza, ser bueno es ser valiente; escudo, espada y maza llevar bajo la frente; porque el valor honrado de todas armas viste: no sólo para, hiere, y más que aguarda, embiste."
+texto: "Virtud es fortaleza, ser bueno es ser valiente;\nescudo, espada y maza llevar bajo la frente;\nporque el valor honrado de todas armas viste:\nno sólo para, hiere, y más que aguarda, embiste."
 autor: "antonio-machado"
 temas:
   - "la-virtud"

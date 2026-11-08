@@ -1,5 +1,5 @@
 ---
-texto: "Tú cantarás cómo a las nuevas gentes Nenqueteba piadoso leyes y artes y culto dio; después que a la maligna ninfa mudó en lumbrera de la noche, y de la luna por la vez primera surcó el Olimpo el argentado coche."
+texto: "Tú cantarás cómo a las nuevas gentes\nNenqueteba piadoso leyes y artes\ny culto dio; después que a la maligna\nninfa mudó en lumbrera de la noche,\ny de la luna por la vez primera\nsurcó el Olimpo el argentado coche."
 autor: "andres-bello"
 slug: "andres-bello-tu-cantaras-como-a-las-nuevas-gentes"
 procedencia:

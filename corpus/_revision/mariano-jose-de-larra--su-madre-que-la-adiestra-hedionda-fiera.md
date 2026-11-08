@@ -1,5 +1,5 @@
 ---
-texto: "Su madre, que la adiestra, hedionda, fiera, vieja, pintada y con postizo, a infame precio vendió su doncellez primera."
+texto: "Su madre, que la adiestra, hedionda, fiera,\nvieja, pintada y con postizo, a infame\nprecio vendió su doncellez primera."
 autor: "mariano-jose-de-larra"
 slug: "mariano-jose-de-larra-su-madre-que-la-adiestra-hedionda-fiera"
 procedencia:

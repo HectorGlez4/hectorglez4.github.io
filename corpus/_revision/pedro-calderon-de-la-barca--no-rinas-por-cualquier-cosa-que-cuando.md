@@ -1,5 +1,5 @@
 ---
-texto: "No riñas por cualquier cosa; que cuando en los pueblos miro muchos, que a reñir se enseñan, mil veces entre mí digo: \"Aquesta escuela no es la que ha de ser\"."
+texto: "No riñas por cualquier cosa;\nque cuando en los pueblos miro\nmuchos, que a reñir se enseñan,\nmil veces entre mí digo:\n\"Aquesta escuela no es\nla que ha de ser\"."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-no-rinas-por-cualquier-cosa-que-cuando"
 procedencia:

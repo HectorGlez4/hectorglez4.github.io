@@ -1,5 +1,5 @@
 ---
-texto: "¡Oh ponzoñosa víbora escondida de verde prado en oloroso seno!"
+texto: "¡Oh ponzoñosa víbora escondida\nde verde prado en oloroso seno!"
 autor: "luis-de-gongora"
 slug: "luis-de-gongora-oh-ponzonosa-vibora-escondida-de-verde-prado"
 procedencia:

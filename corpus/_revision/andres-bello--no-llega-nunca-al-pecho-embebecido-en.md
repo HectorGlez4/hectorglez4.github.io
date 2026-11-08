@@ -1,5 +1,5 @@
 ---
-texto: "No llega nunca al pecho embebecido en la visión de la ideal belleza de insensatas contiendas el rüido."
+texto: "No llega nunca al pecho embebecido\nen la visión de la ideal belleza\nde insensatas contiendas el rüido."
 autor: "andres-bello"
 slug: "andres-bello-no-llega-nunca-al-pecho-embebecido-en"
 procedencia:

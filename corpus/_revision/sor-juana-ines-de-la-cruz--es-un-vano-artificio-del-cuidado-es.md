@@ -1,5 +1,5 @@
 ---
-texto: "Es un vano artificio del cuidado, es una flor al viento delicada, es un resguardo inútil para el hado:"
+texto: "Es un vano artificio del cuidado,\nes una flor al viento delicada,\nes un resguardo inútil para el hado:"
 autor: "sor-juana-ines-de-la-cruz"
 slug: "sor-juana-ines-de-la-cruz-es-un-vano-artificio-del-cuidado-es"
 procedencia:

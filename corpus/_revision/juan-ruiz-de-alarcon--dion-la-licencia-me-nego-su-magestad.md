@@ -1,5 +1,5 @@
 ---
-texto: "DION La licencia me negò su Magestad. 290 POLICIANO Quando vuestra voluntad ha hallado en el resistencia?"
+texto: "DION\nLa licencia\nme negò su Magestad. 290\nPOLICIANO\nQuando vuestra voluntad\nha hallado en el resistencia?"
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-dion-la-licencia-me-nego-su-magestad"
 procedencia:

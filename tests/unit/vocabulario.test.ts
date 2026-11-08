@@ -106,7 +106,7 @@ describe('Historia 23.2 — el vocabulario es un módulo puro que solo importa d
 });
 
 describe('Historia 23.2 — los eventos y los conjuntos cerrados', () => {
-  it('son los siete de la v7.1 y los cuatro de la v8', () => {
+  it('son los siete de la v7.1, los cuatro de la v8 y los dos de citar de la v9 (30.5)', () => {
     expect([...EVENTOS_VALIDOS].sort()).toEqual(
       [
         'busqueda',
@@ -114,6 +114,8 @@ describe('Historia 23.2 — los eventos y los conjuntos cerrados', () => {
         'comparticion-de-enlace',
         'comparticion-de-imagen',
         'copiado',
+        'copiado-de-fragmento',
+        'copiado-de-referencia',
         'descarga-de-imagen',
         'lectura',
         'salida-interna',
@@ -239,7 +241,9 @@ describe('Historia 23.2 — los eventos y los conjuntos cerrados', () => {
  * interna, con su zona; la 23.8, la búsqueda, con su tramo y sus filtros; y la 23.9, la vista de
  * Obra, con su marca `indexable`. Las pruebas que la recorren con `it.each` se quedan sin casos y no
  * fallan por ello; un evento o un campo que el vocabulario gane después, y que el guion no sepa
- * producir todavía, vuelve a entrar aquí con su historia.
+ * producir todavía, vuelve a entrar aquí con su historia. La primera en volver fue la 30.5, con
+ * `copiado-de-referencia` y `copiado-de-fragmento`, retenidos en su fase A hasta el despliegue del
+ * receptor y sueltos en su fase B.
  */
 const PENDIENTES: readonly { historia: string; eventos?: readonly Evento[]; campos?: readonly [Evento, Campo][] }[] = [];
 
@@ -489,7 +493,7 @@ describe('Historia 23.2 — la correspondencia: guion, receptor y esquema, event
     expect(columnas).toEqual(['jornada', 'evento', 'ruta', ...CAMPOS]);
   });
 
-  it('lo no pendiente son los once eventos de hoy, y es lo que el guion emite', () => {
+  it('lo no pendiente son los trece eventos de hoy, y es lo que el guion emite', () => {
     const vigentes = EVENTOS_VALIDOS.filter((evento) => !eventoPendiente(evento));
     expect([...vigentes].sort()).toEqual(
       [
@@ -504,6 +508,8 @@ describe('Historia 23.2 — la correspondencia: guion, receptor y esquema, event
         EVENTOS.busquedaSinResultados,
         EVENTOS.comparticionDeImagen,
         EVENTOS.comparticionDeEnlace,
+        EVENTOS.copiadoDeReferencia,
+        EVENTOS.copiadoDeFragmento,
       ].sort(),
     );
     expect([...EVENTOS_DEL_GUION].sort()).toEqual([...vigentes].sort());

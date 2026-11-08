@@ -1,5 +1,5 @@
 ---
-texto: "Y en la quietud del nido, que de brozas y lodo instable hamaca formó en la más opaca parte del árbol, duerme recogida la leve turba, descansando el viento del que le corta, alado movimiento."
+texto: "Y en la quietud del nido,\nque de brozas y lodo instable hamaca\nformó en la más opaca\nparte del árbol, duerme recogida\nla leve turba, descansando el viento\ndel que le corta, alado movimiento."
 autor: "sor-juana-ines-de-la-cruz"
 slug: "sor-juana-ines-de-la-cruz-y-en-la-quietud-del-nido-que"
 procedencia:

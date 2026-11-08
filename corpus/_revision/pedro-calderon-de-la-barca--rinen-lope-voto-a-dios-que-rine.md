@@ -1,5 +1,5 @@
 ---
-texto: "Riñen LOPE: ¡Voto a Dios, que riñe bien!"
+texto: "Riñen\nLOPE: ¡Voto a Dios, que riñe bien!"
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-rinen-lope-voto-a-dios-que-rine"
 procedencia:

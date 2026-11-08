@@ -1,5 +1,5 @@
 ---
-texto: "Pero, ¿si acaso volviese don Lope, y te conociese al volver?"
+texto: "Pero, ¿si acaso volviese\ndon Lope, y te conociese\nal volver?"
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-pero-si-acaso-volviese-don-lope-y"
 procedencia:

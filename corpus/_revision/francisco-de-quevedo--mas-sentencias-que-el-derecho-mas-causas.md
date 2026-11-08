@@ -1,5 +1,5 @@
 ---
-texto: "Más sentencias que el Derecho, Más causas que el no pagar, Más autos que el día del Corpus, Más registros que el Misal,"
+texto: "Más sentencias que el Derecho,\nMás causas que el no pagar,\nMás autos que el día del Corpus,\nMás registros que el Misal,"
 autor: "francisco-de-quevedo"
 slug: "francisco-de-quevedo-mas-sentencias-que-el-derecho-mas-causas"
 procedencia:

@@ -1,5 +1,5 @@
 ---
-texto: "Los diez años de mi vida Los he vivido hacia atrás, Con más grillos que el Verano, Cadenas que el Escorial."
+texto: "Los diez años de mi vida\nLos he vivido hacia atrás,\nCon más grillos que el Verano,\nCadenas que el Escorial."
 autor: "francisco-de-quevedo"
 slug: "francisco-de-quevedo-los-diez-anos-de-mi-vida-los"
 procedencia:

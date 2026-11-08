@@ -1,5 +1,5 @@
 ---
-texto: "Para un juego de títeres sois dama, que no para la cama, pues una vez que la merced me hicisteis, cuando menos, pensaba que os perdisteis; y dos horas después, envuelta en risa, en un pliegue os hallé de la camisa."
+texto: "Para un juego de títeres sois dama,\nque no para la cama,\npues una vez que la merced me hicisteis,\ncuando menos, pensaba que os perdisteis;\ny dos horas después, envuelta en risa,\nen un pliegue os hallé de la camisa."
 autor: "francisco-de-quevedo"
 slug: "francisco-de-quevedo-para-un-juego-de-titeres-sois-dama"
 procedencia:

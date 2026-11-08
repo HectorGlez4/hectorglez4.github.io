@@ -1,5 +1,5 @@
 ---
-texto: "Decidme, ¡por vida vuestra!, cuál es y sépalo yo porque una sola me duela."
+texto: "Decidme, ¡por vida vuestra!,\ncuál es y sépalo yo\nporque una sola me duela."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-decidme-por-vida-vuestra-cual-es-y"
 procedencia:

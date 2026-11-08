@@ -1,5 +1,5 @@
 ---
-texto: "Es solo (hablemos verdades, pues para partir estoy) 730 porque os falta, si me voy, materia a vuestras crueldades."
+texto: "Es solo (hablemos verdades,\npues para partir estoy) 730\nporque os falta, si me voy,\nmateria a vuestras crueldades."
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-es-solo-hablemos-verdades-pues-para-partir"
 procedencia:

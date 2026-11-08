@@ -1,5 +1,5 @@
 ---
-texto: "Menguas ponen en mi honra, que las estodian en sí: traidor me llaman a voces, a vos os toca el mentir."
+texto: "Menguas ponen en mi honra,\nque las estodian en sí:\ntraidor me llaman a voces,\na vos os toca el mentir."
 autor: "francisco-de-quevedo"
 slug: "francisco-de-quevedo-menguas-ponen-en-mi-honra-que-las"
 procedencia:

@@ -1,5 +1,5 @@
 ---
-texto: "LEONARDO El alma mia buelue a adorar su belleza."
+texto: "LEONARDO\nEl alma mia\nbuelue a adorar su belleza."
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-leonardo-el-alma-mia-buelue-a-adorar"
 procedencia:

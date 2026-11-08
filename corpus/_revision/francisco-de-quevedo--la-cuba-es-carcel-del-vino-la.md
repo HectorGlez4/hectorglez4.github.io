@@ -1,5 +1,5 @@
 ---
-texto: "La cuba es cárcel del vino, La troj es cárcel del pan, La cáscara, de las frutas Y la espina del rosal."
+texto: "La cuba es cárcel del vino,\nLa troj es cárcel del pan,\nLa cáscara, de las frutas\nY la espina del rosal."
 autor: "francisco-de-quevedo"
 slug: "francisco-de-quevedo-la-cuba-es-carcel-del-vino-la"
 procedencia:

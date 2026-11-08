@@ -1,5 +1,5 @@
 ---
-texto: "CRESPO: Nuna me enajena a mí de mí nada."
+texto: "CRESPO: Nuna me enajena\na mí de mí nada."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-crespo-nuna-me-enajena-a-mi-de"
 procedencia:

@@ -1,5 +1,5 @@
 ---
-texto: "Ya para recibirte su canoro concento se suspende, y la armonía de las acordes nueve liras de oro."
+texto: "Ya para recibirte su canoro\nconcento se suspende, y la armonía\nde las acordes nueve liras de oro."
 autor: "andres-bello"
 slug: "andres-bello-ya-para-recibirte-su-canoro-concento-se"
 procedencia:

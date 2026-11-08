@@ -1,5 +1,5 @@
 ---
-texto: "JUAN: Siempre a vuestros pies rendido me tendréis, y vos veréis de la manera que os sirvo, procurando obedeceros en todo."
+texto: "JUAN: Siempre a vuestros pies rendido\nme tendréis, y vos veréis\nde la manera que os sirvo,\nprocurando obedeceros\nen todo."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-juan-siempre-a-vuestros-pies-rendido-me"
 procedencia:

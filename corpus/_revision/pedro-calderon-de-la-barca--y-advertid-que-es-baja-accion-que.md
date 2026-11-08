@@ -1,5 +1,5 @@
 ---
-texto: "Y advertid que es baja acción, Que solo á una fiera toca."
+texto: "Y advertid que es baja acción,\nQue solo á una fiera toca."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-y-advertid-que-es-baja-accion-que"
 procedencia:

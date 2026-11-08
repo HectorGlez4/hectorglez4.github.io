@@ -1,5 +1,5 @@
 ---
-texto: "CRESPO: ¡Huid vos, que sabréis hüír más bien!"
+texto: "CRESPO: ¡Huid vos,\nque sabréis hüír más bien!"
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-crespo-huid-vos-que-sabreis-huir-mas"
 procedencia:

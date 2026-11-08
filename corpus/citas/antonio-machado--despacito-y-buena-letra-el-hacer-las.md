@@ -1,5 +1,5 @@
 ---
-texto: "Despacito y buena letra: el hacer las cosas bien importa más que el hacerlas."
+texto: "Despacito y buena letra:\nel hacer las cosas bien\nimporta más que el hacerlas."
 autor: "antonio-machado"
 temas:
   - "la-virtud"

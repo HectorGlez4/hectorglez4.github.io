@@ -1,5 +1,5 @@
 ---
-texto: "Mírale andar en coche como un conde, la bolsa llena de oro, y por su oficio pregúntale por ver si te responde."
+texto: "Mírale andar en coche como un conde,\nla bolsa llena de oro, y por su oficio\npregúntale por ver si te responde."
 autor: "mariano-jose-de-larra"
 slug: "mariano-jose-de-larra-mirale-andar-en-coche-como-un-conde"
 procedencia:

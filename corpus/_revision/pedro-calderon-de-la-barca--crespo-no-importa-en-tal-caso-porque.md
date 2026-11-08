@@ -1,5 +1,5 @@
 ---
-texto: "CRESPO: No importa en tal caso; porque, si un extraño se viniera a querellar, ¿no había de hacer justicia?"
+texto: "CRESPO: No importa en tal\ncaso; porque, si un extraño\nse viniera a querellar,\n¿no había de hacer justicia?"
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-crespo-no-importa-en-tal-caso-porque"
 procedencia:

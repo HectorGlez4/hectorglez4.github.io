@@ -1,5 +1,5 @@
 ---
-texto: "Un hombre a tientas camina; lleva a la espalda un farol."
+texto: "Un hombre a tientas camina;\nlleva a la espalda un farol."
 autor: "antonio-machado"
 temas:
   - "la-vida"

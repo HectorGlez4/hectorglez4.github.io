@@ -1,5 +1,5 @@
 ---
-texto: "Donde ganó tan claro nombre Bueras, que con sus caballeros denodados rompió del enemigo las hileras; y donde el regimiento de Coquimbo tantos héroes contó como soldados. ..........................."
+texto: "Donde ganó tan claro nombre Bueras,\nque con sus caballeros denodados\nrompió del enemigo las hileras;\ny donde el regimiento de Coquimbo\ntantos héroes contó como soldados.\n..........................."
 autor: "andres-bello"
 slug: "andres-bello-donde-gano-tan-claro-nombre-bueras-que"
 procedencia:

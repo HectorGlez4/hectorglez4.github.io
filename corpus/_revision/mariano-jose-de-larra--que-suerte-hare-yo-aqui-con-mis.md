@@ -1,5 +1,5 @@
 ---
-texto: "¿Qué suerte haré yo aquí con mis renglones, yo que el humo jamás echo a ninguno del incienso vertido en mis borrones?"
+texto: "¿Qué suerte haré yo aquí con mis renglones,\nyo que el humo jamás echo a ninguno\ndel incienso vertido en mis borrones?"
 autor: "mariano-jose-de-larra"
 slug: "mariano-jose-de-larra-que-suerte-hare-yo-aqui-con-mis"
 procedencia:

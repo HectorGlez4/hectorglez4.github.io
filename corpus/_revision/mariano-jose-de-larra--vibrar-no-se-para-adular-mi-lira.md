@@ -1,5 +1,5 @@
 ---
-texto: "Vibrar no sé para adular mi lira, ni aguantar supe nunca humillaciones; la voz entonces de mi labio espira."
+texto: "Vibrar no sé para adular mi lira,\nni aguantar supe nunca humillaciones;\nla voz entonces de mi labio espira."
 autor: "mariano-jose-de-larra"
 slug: "mariano-jose-de-larra-vibrar-no-se-para-adular-mi-lira"
 procedencia:

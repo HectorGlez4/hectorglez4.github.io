@@ -1,5 +1,5 @@
 ---
-texto: "DON IUAN Aunque con firmeza estraña me muestra mi prima amor, 385 tengo indicios, y temor de que me miente y engaña."
+texto: "DON IUAN\nAunque con firmeza estraña\nme muestra mi prima amor, 385\ntengo indicios, y temor\nde que me miente y engaña."
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-don-iuan-aunque-con-firmeza-estrana-me"
 procedencia:

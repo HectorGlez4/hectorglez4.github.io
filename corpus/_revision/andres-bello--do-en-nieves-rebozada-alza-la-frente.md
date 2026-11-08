@@ -1,5 +1,5 @@
 ---
-texto: "do en nieves rebozada alza la frente el jayán de los Andes, y la vía abre ya a nuevos hados nueva gente."
+texto: "do en nieves rebozada alza la frente\nel jayán de los Andes, y la vía\nabre ya a nuevos hados nueva gente."
 autor: "andres-bello"
 slug: "andres-bello-do-en-nieves-rebozada-alza-la-frente"
 procedencia:

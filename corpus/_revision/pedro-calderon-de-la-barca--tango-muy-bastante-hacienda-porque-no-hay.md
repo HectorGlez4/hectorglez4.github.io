@@ -1,5 +1,5 @@
 ---
-texto: "Tango muy bastante hacienda, porque no hay, gracias al cielo, otro labrador más rico en todos aquestos pueblos de la comarca."
+texto: "Tango muy bastante hacienda,\nporque no hay, gracias al cielo,\notro labrador más rico\nen todos aquestos pueblos\nde la comarca."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-tango-muy-bastante-hacienda-porque-no-hay"
 procedencia:

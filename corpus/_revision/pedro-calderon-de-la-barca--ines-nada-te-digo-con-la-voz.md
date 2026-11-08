@@ -1,5 +1,5 @@
 ---
-texto: "INÉS: Nada te digo con la voz, porque los ojos hurtan a la voz su oficio."
+texto: "INÉS: Nada te digo\ncon la voz, porque los ojos\nhurtan a la voz su oficio."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-ines-nada-te-digo-con-la-voz"
 procedencia:

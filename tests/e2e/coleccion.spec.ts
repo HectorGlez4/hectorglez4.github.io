@@ -149,13 +149,21 @@ test.describe('Historia 12.3 — la Página de Colección', () => {
      * UX-DR31 — la serif está reservada al texto de Cita, al nombre de Autor, al de Tema y,
      * desde esta historia, al de Colección. El criterio editorial y la paginación van en
      * Inter. Se mide sobre la fuente calculada de todo el contenido, que es la única forma
-     * de cazar una regla que se cuele por herencia.
+     * de cazar una regla que se cuele por herencia. Desde la 29.3 el texto de una Cita en verso
+     * lleva un `span.verso` por verso dentro de su `span.fragmento`: es texto de Cita, y se
+     * nombra con el fragmento que lo contiene para que siga juzgándose como tal.
      */
     await page.goto(laColeccion());
     const conSerif = await page.evaluate(() =>
       [...document.querySelectorAll('main *')]
         .filter((n) => getComputedStyle(n).fontFamily.includes('Source Serif'))
-        .map((n) => `${n.tagName.toLowerCase()}.${n.className}`),
+        .map((n) => {
+          const propio = `${n.tagName.toLowerCase()}.${n.className}`;
+          const fragmento = n.parentElement?.closest('span.fragmento');
+          return n.matches('span.verso') && fragmento !== null && fragmento !== undefined
+            ? `span.fragmento > ${propio}`
+            : propio;
+        }),
     );
 
     for (const elemento of conSerif) {

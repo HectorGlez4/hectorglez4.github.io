@@ -1,5 +1,5 @@
 ---
-texto: "Él, a la dudosa luz que, si no alumbra, domina, reconoce el daño antes que ninguno se lo diga --que son linces los pesares que penetran con la vista--."
+texto: "Él, a la dudosa luz\nque, si no alumbra, domina,\nreconoce el daño antes\nque ninguno se lo diga\n--que son linces los pesares\nque penetran con la vista--."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-el-a-la-dudosa-luz-que-si"
 procedencia:

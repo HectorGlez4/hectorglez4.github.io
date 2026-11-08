@@ -1,5 +1,5 @@
 ---
-texto: "me dí ¿cómo has menguado y has crecido?, ¿cómo ayer te vi en pena, y hoy en gloria? —Bebióme un asno ayer, y hoy me ha meado."
+texto: "me dí ¿cómo has menguado y has crecido?,\n¿cómo ayer te vi en pena, y hoy en gloria?\n—Bebióme un asno ayer, y hoy me ha meado."
 autor: "luis-de-gongora"
 slug: "luis-de-gongora-me-di-como-has-menguado-y-has"
 procedencia:

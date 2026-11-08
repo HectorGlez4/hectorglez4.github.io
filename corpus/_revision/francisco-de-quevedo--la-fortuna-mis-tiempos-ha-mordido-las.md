@@ -1,5 +1,5 @@
 ---
-texto: "La Fortuna mis tiempos ha mordido, las Horas mi locura las esconde."
+texto: "La Fortuna mis tiempos ha mordido,\nlas Horas mi locura las esconde."
 autor: "francisco-de-quevedo"
 slug: "francisco-de-quevedo-la-fortuna-mis-tiempos-ha-mordido-las"
 procedencia:

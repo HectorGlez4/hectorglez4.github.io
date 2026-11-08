@@ -1,5 +1,5 @@
 ---
-texto: "ídolo bello, a quien humilde adoro, oye piadoso al que por ti suspira, tus himnos canta, y tus virtudes reza."
+texto: "ídolo bello, a quien humilde adoro,\noye piadoso al que por ti suspira,\ntus himnos canta, y tus virtudes reza."
 autor: "luis-de-gongora"
 slug: "luis-de-gongora-idolo-bello-a-quien-humilde-adoro-oye"
 procedencia:

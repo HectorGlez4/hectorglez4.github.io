@@ -1,5 +1,5 @@
 ---
-texto: "Érase un naricísimo infinito, frisón archinariz, caratulera, sabañón garrafal, morado y frito;"
+texto: "Érase un naricísimo infinito,\nfrisón archinariz, caratulera,\nsabañón garrafal, morado y frito;"
 autor: "francisco-de-quevedo"
 slug: "francisco-de-quevedo-erase-un-naricisimo-infinito-frison-archinariz-caratulera"
 procedencia:

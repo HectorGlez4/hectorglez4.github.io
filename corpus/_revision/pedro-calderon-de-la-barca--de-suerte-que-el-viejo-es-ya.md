@@ -1,5 +1,5 @@
 ---
-texto: "De suerte que el viejo es ya quien pesadumbre nos da."
+texto: "De suerte que el viejo es ya\nquien pesadumbre nos da."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-de-suerte-que-el-viejo-es-ya"
 procedencia:

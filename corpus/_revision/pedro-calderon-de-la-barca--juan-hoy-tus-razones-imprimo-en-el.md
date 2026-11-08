@@ -1,5 +1,5 @@
 ---
-texto: "JUAN: Hoy tus razones imprimo en el corazón, adonde vivirán, mientras yo vivo."
+texto: "JUAN: Hoy tus razones imprimo\nen el corazón, adonde\nvivirán, mientras yo vivo."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-juan-hoy-tus-razones-imprimo-en-el"
 procedencia:

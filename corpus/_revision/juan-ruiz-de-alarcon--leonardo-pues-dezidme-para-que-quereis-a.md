@@ -1,5 +1,5 @@
 ---
-texto: "LEONARDO Pues dezidme, ¿para que quereis a don Diego al lado? 405 DON IUAN Para que mas engañado mi padre, y el suyo estè."
+texto: "LEONARDO\nPues dezidme, ¿para que\nquereis a don Diego al lado? 405\nDON IUAN\nPara que mas engañado\nmi padre, y el suyo estè."
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-leonardo-pues-dezidme-para-que-quereis-a"
 procedencia:

@@ -1,5 +1,5 @@
 ---
-texto: "SANCHO Basta de plegas, 620 que viene señor el viejo."
+texto: "SANCHO\nBasta de plegas, 620\nque viene señor el viejo."
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-sancho-basta-de-plegas-620-que-viene"
 procedencia:

@@ -1,5 +1,5 @@
 ---
-texto: "Yo no estimo tesoros ni riquezas; y así, siempre me causa más contento poner riquezas en mi pensamiento que no mi pensamiento en las riquezas."
+texto: "Yo no estimo tesoros ni riquezas;\ny así, siempre me causa más contento\nponer riquezas en mi pensamiento\nque no mi pensamiento en las riquezas."
 autor: "sor-juana-ines-de-la-cruz"
 temas:
   - "la-riqueza"

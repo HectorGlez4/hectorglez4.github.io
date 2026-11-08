@@ -1,5 +1,5 @@
 ---
-texto: "AURORA Su compuesta grauedad sus nobles partes pregona. 620 CAMILA Que querra?"
+texto: "AURORA\nSu compuesta grauedad\nsus nobles partes pregona. 620\nCAMILA\nQue querra?"
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-aurora-su-compuesta-grauedad-sus-nobles-partes"
 procedencia:

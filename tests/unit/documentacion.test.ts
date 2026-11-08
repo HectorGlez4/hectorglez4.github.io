@@ -5,13 +5,12 @@ import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import {
   documentarCita,
-  parecidoDeTextos,
   restitucionDeTraduccion,
   restituirTraducciones,
   retirarCita,
-  MIN_PARECIDO_PARA_CORREGIR,
 } from '../../tools/lib/documentacion.ts';
-import { censoSinLaCita } from '../../tools/lib/cotejo.ts';
+import { MIN_PARECIDO_PARA_CORREGIR, parecidoDeTextos } from '../../tools/lib/parecido.ts';
+import { censoSinLaCita, colapsarEspacios } from '../../tools/lib/cotejo.ts';
 import { leerCensoDeCotejo, rutasDelCorpus, separarFrontmatter } from '../../tools/lib/corpus.ts';
 import { componerDocumento } from '../../tools/lib/documento.ts';
 import { TEMA_VALIDO, citaValida } from './ayuda/construir.js';
@@ -218,8 +217,10 @@ describe('Historia 11.6 — documentar una Cita publicada', () => {
       año: AÑO,
       referencia: 'Conocido como «Nada te turbe»',
     });
-    // El texto no se toca (NFR-12), y el slug tampoco (AD-4).
-    expect(datos.texto).toBe(TEXTO);
+    // El texto no se toca (NFR-12), y el slug tampoco (AD-4). El documento es de verso, así que
+    // gana su salto de verso y nada más (Historia 29.1).
+    expect(datos.texto).toBe('Quien a Dios tiene,\nnada le falta.');
+    expect(colapsarEspacios(datos.texto as string)).toBe(TEXTO);
     expect(datos.slug).toBe(SLUG);
 
     expect(await leerCensoDeCotejo(rutas)).toEqual(['teresa-de-jesus-la-paciencia-todo-lo-alcanza']);
@@ -457,7 +458,9 @@ describe('Historia 11.6 — corregir el texto contra su edición', () => {
     expect(resultado.ok, resultado.ok ? '' : resultado.motivos.join('\n')).toBe(true);
 
     const datos = await frontmatterDe(join(rutas.citas, 'teresa-de-jesus--nada-te-turbe.md'));
-    expect(datos.texto).toBe(EDICION);
+    // Lo de la edición, con los saltos de verso de su documento (Historia 29.1).
+    expect(colapsarEspacios(datos.texto as string)).toBe(EDICION);
+    expect(datos.texto).toContain('\n');
     // El slug es la URL y no se recalcula aunque el texto cambie (AD-4).
     expect(datos.slug).toBe(SLUG_TERESA);
     expect(datos.fuente).toMatchObject({ id: 'wikisource-es' });
@@ -465,7 +468,7 @@ describe('Historia 11.6 — corregir el texto contra su edición', () => {
     const dicho = avisos.join('\n');
     expect(dicho).toContain('El texto se corrige contra la edición');
     expect(dicho).toContain(TECLEADO);
-    expect(dicho).toContain(EDICION);
+    expect(dicho).toContain(datos.texto as string);
     expect(dicho).toContain('no se recalcula');
 
     // Y sale del censo en el mismo gesto: su exención iba atada a la huella del texto

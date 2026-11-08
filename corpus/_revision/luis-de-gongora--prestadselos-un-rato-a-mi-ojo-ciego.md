@@ -1,5 +1,5 @@
 ---
-texto: "Prestádselos un rato a mi ojo ciego, porque a luz saque ciertos versos flojos, y entenderéis cualquier gregüesco luego."
+texto: "Prestádselos un rato a mi ojo ciego,\nporque a luz saque ciertos versos flojos,\ny entenderéis cualquier gregüesco luego."
 autor: "luis-de-gongora"
 slug: "luis-de-gongora-prestadselos-un-rato-a-mi-ojo-ciego"
 procedencia:

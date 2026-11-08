@@ -1,5 +1,5 @@
 ---
-texto: "Dádivas han granjeado, que apadrine mi cuidado."
+texto: "Dádivas han granjeado,\nque apadrine mi cuidado."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-dadivas-han-granjeado-que-apadrine-mi-cuidado"
 procedencia:

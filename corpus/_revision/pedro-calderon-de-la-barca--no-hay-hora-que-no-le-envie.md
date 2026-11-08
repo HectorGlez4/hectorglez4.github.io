@@ -1,5 +1,5 @@
 ---
-texto: "No hay hora, que no le envíe recados; con ellos entra y sale un mal soldadillo, confidente suyo."
+texto: "No hay hora, que no le envíe\nrecados; con ellos entra\ny sale un mal soldadillo,\nconfidente suyo."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-no-hay-hora-que-no-le-envie"
 procedencia:

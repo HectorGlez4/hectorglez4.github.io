@@ -1,5 +1,5 @@
 ---
-texto: "AURORA Y mas su calidad se conforma con su talle."
+texto: "AURORA\nY mas su calidad\nse conforma con su talle."
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-aurora-y-mas-su-calidad-se-conforma"
 procedencia:

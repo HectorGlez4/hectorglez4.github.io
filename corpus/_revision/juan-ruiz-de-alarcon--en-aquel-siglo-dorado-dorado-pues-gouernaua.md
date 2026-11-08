@@ -1,5 +1,5 @@
 ---
-texto: "En aquel siglo dorado, dorado, pues gouernaua el gran Marques de salinas, de Velasco heroica rama, 80 simbolo de la prudencia, puesto que por tener tanta, despues de tres Virreinatos vino a presidir a España."
+texto: "En aquel siglo dorado,\ndorado, pues gouernaua\nel gran Marques de salinas,\nde Velasco heroica rama, 80\nsimbolo de la prudencia,\npuesto que por tener tanta,\ndespues de tres Virreinatos\nvino a presidir a España."
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-en-aquel-siglo-dorado-dorado-pues-gouernaua"
 procedencia:

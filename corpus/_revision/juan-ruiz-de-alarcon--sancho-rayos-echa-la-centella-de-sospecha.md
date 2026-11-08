@@ -1,5 +1,5 @@
 ---
-texto: "SANCHO Rayos echa la centella de sospecha dio en el poluorin de zelos. 470 DON IUAN Matalla, o matarme es poco."
+texto: "SANCHO\nRayos echa\nla centella de sospecha\ndio en el poluorin de zelos. 470\nDON IUAN\nMatalla, o matarme es poco."
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-sancho-rayos-echa-la-centella-de-sospecha"
 procedencia:

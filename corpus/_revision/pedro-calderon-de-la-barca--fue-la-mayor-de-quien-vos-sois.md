@@ -1,5 +1,5 @@
 ---
-texto: "Fué la mayor, de quien vos Sois hija; fué la segunda."
+texto: "Fué la mayor, de quien vos\nSois hija; fué la segunda."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-fue-la-mayor-de-quien-vos-sois"
 procedencia:

@@ -1,5 +1,5 @@
 ---
-texto: "FILIPO Como puede dejarse de suspender 690 quien os ha llegado a ver?"
+texto: "FILIPO\nComo puede\ndejarse de suspender 690\nquien os ha llegado a ver?"
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-filipo-como-puede-dejarse-de-suspender-690"
 procedencia:

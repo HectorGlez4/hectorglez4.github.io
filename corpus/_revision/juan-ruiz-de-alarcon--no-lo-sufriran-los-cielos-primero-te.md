@@ -1,5 +1,5 @@
 ---
-texto: "No lo sufriran los cielos, primero te abrasaran las llamas deste Vulcan 475 que arroja rayos de zelos."
+texto: "No lo sufriran los cielos,\nprimero te abrasaran\nlas llamas deste Vulcan 475\nque arroja rayos de zelos."
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-no-lo-sufriran-los-cielos-primero-te"
 procedencia:

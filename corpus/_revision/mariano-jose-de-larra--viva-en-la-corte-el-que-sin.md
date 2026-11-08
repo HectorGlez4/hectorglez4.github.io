@@ -1,5 +1,5 @@
 ---
-texto: "Viva en la corte el que sin renta diaria triunfa y pelecha, y sin saber por dónde fija la rueda de la suerte varia."
+texto: "Viva en la corte el que sin renta diaria\ntriunfa y pelecha, y sin saber por dónde\nfija la rueda de la suerte varia."
 autor: "mariano-jose-de-larra"
 slug: "mariano-jose-de-larra-viva-en-la-corte-el-que-sin"
 procedencia:

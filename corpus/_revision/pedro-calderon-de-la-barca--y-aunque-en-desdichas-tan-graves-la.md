@@ -1,5 +1,5 @@
 ---
-texto: "Y aunque, en desdichas tan graves, La política he estudiado, De los brutos enseñado."
+texto: "Y aunque, en desdichas tan graves,\nLa política he estudiado,\nDe los brutos enseñado."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-y-aunque-en-desdichas-tan-graves-la"
 procedencia:

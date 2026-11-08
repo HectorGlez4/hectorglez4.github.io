@@ -1,5 +1,5 @@
 ---
-texto: "En Castilla, el refrán dice que el caballo--y es lo cierto-- lleva la silla."
+texto: "En Castilla, el refrán dice\nque el caballo--y es lo cierto--\nlleva la silla."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-en-castilla-el-refran-dice-que-el"
 procedencia:

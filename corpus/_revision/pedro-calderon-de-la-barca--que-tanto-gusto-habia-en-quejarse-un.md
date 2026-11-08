@@ -1,5 +1,5 @@
 ---
-texto: "Que tanto gusto habia En quejarse, un filósofo decia."
+texto: "Que tanto gusto habia\nEn quejarse, un filósofo decia."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-que-tanto-gusto-habia-en-quejarse-un"
 procedencia:

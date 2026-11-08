@@ -1,5 +1,5 @@
 ---
-texto: "En casa de don Pedro Salen doña Ana y Celia"
+texto: "En casa de don Pedro\nSalen doña Ana y Celia"
 autor: "sor-juana-ines-de-la-cruz"
 slug: "sor-juana-ines-de-la-cruz-en-casa-de-don-pedro-salen-dona"
 procedencia:

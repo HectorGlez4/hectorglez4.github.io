@@ -1,5 +1,5 @@
 ---
-texto: "Y no estimo hermosura que vencida, es despojo civil de las edades, ni riqueza me agrada fementida,"
+texto: "Y no estimo hermosura que vencida,\nes despojo civil de las edades,\nni riqueza me agrada fementida,"
 autor: "sor-juana-ines-de-la-cruz"
 slug: "sor-juana-ines-de-la-cruz-y-no-estimo-hermosura-que-vencida-es"
 procedencia:

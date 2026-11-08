@@ -1,5 +1,5 @@
 ---
-texto: "Si, pues a sus reflejos Puedo determinar (aunque de lejos,) Una prisión oscura, Que es de un vivo cadáver sepultura; Y, porque mas me asombre, En el traje de fiera yace un hombre De prisiones cargado, Y sólo de una luz acompañado."
+texto: "Si, pues a sus reflejos\nPuedo determinar (aunque de lejos,)\nUna prisión oscura,\nQue es de un vivo cadáver sepultura;\nY, porque mas me asombre,\nEn el traje de fiera yace un hombre\nDe prisiones cargado,\nY sólo de una luz acompañado."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-si-pues-a-sus-reflejos-puedo-determinar"
 procedencia:

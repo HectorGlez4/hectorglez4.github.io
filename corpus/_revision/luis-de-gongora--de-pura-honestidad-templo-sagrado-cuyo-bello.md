@@ -1,5 +1,5 @@
 ---
-texto: "De pura honestidad templo sagrado, cuyo bello cimiento y gentil muro de blanco nácar y alabastro duro fue por divina mano fabricado;"
+texto: "De pura honestidad templo sagrado,\ncuyo bello cimiento y gentil muro\nde blanco nácar y alabastro duro\nfue por divina mano fabricado;"
 autor: "luis-de-gongora"
 slug: "luis-de-gongora-de-pura-honestidad-templo-sagrado-cuyo-bello"
 procedencia:

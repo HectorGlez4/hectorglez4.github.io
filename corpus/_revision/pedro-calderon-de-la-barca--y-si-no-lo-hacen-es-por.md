@@ -1,5 +1,5 @@
 ---
-texto: "Y si no lo hacen es por no hacer cosa buena."
+texto: "Y si no lo hacen\nes por no hacer cosa buena."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-y-si-no-lo-hacen-es-por"
 procedencia:

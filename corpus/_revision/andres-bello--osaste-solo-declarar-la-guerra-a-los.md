@@ -1,5 +1,5 @@
 ---
-texto: "Osaste, solo, declarar la guerra a los tiranos de tu tierra amada; y desde las orillas de Inglaterra, diste aliento al clarín, que el largo sueño disipó de la América, arrullada por la superstición."
+texto: "Osaste, solo, declarar la guerra\na los tiranos de tu tierra amada;\ny desde las orillas de Inglaterra,\ndiste aliento al clarín, que el largo sueño\ndisipó de la América, arrullada\npor la superstición."
 autor: "andres-bello"
 slug: "andres-bello-osaste-solo-declarar-la-guerra-a-los"
 procedencia:

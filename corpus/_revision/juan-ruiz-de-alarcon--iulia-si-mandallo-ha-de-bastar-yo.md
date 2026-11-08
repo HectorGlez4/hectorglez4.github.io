@@ -1,5 +1,5 @@
 ---
-texto: "IULIA Si mandallo ha de bastar, yo os mando, que no os partais. 720 El estilo perdonad, que lo hize por cogeros la palabra."
+texto: "IULIA\nSi mandallo ha de bastar,\nyo os mando, que no os partais. 720\nEl estilo perdonad,\nque lo hize por cogeros\nla palabra."
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-iulia-si-mandallo-ha-de-bastar-yo"
 procedencia:

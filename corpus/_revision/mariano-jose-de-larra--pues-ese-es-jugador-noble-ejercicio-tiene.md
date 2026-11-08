@@ -1,5 +1,5 @@
 ---
-texto: "Pues ese es jugador; noble ejercicio; tiene en el candelero que sustenta, sino un condado real, un beneficio."
+texto: "Pues ese es jugador; noble ejercicio;\ntiene en el candelero que sustenta,\nsino un condado real, un beneficio."
 autor: "mariano-jose-de-larra"
 slug: "mariano-jose-de-larra-pues-ese-es-jugador-noble-ejercicio-tiene"
 procedencia:

@@ -1,5 +1,5 @@
 ---
-texto: "Salen REBOLLEDO, la CHISPA, el ESCRIBANO y CRESPO ESCRIBANO: Este paje, este soldado, son los que mi cüidado sólo ha podido prender; que otro se puso en hüida."
+texto: "Salen REBOLLEDO, la\nCHISPA, el ESCRIBANO y CRESPO\nESCRIBANO: Este paje, este soldado,\nson los que mi cüidado\nsólo ha podido prender;\nque otro se puso en hüida."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-salen-rebolledo-la-chispa-el-escribano-y"
 procedencia:

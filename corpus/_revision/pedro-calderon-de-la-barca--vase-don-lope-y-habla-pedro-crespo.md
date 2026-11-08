@@ -1,5 +1,5 @@
 ---
-texto: "Vase [don LOPE y habla Pedro CRESPO] a JUAN En tanto que se acomoda el señor don Lope, hijo, ante tu prima y tu hermana, escucha lo que te digo."
+texto: "Vase [don LOPE y habla Pedro CRESPO] a JUAN\nEn tanto que se acomoda\nel señor don Lope, hijo,\nante tu prima y tu hermana,\nescucha lo que te digo."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-vase-don-lope-y-habla-pedro-crespo"
 procedencia:

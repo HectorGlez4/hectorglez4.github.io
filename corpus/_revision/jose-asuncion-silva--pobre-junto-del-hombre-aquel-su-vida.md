@@ -1,5 +1,5 @@
 ---
-texto: "¡Pobre! junto del hombre aquel, su vida fue como un rayo del estivo sol, que se pierde en un caos de neblinas sin forma ni color. ................................................................"
+texto: "¡Pobre! junto del hombre aquel, su vida\nfue como un rayo del estivo sol,\nque se pierde en un caos de neblinas\nsin forma ni color.\n................................................................"
 autor: "jose-asuncion-silva"
 slug: "jose-asuncion-silva-pobre-junto-del-hombre-aquel-su-vida"
 procedencia:

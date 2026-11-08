@@ -1,5 +1,5 @@
 ---
-texto: "Sólo admirado me han, por las acciones que has hecho, los indicios que tu pecho da de olvidar a don Juan, y no sé por qué el cuidado das en trocar en olvido, cuando ni causa has tenido tú, ni don Juan te la ha dado."
+texto: "Sólo admirado me han,\npor las acciones que has hecho,\nlos indicios que tu pecho\nda de olvidar a don Juan,\ny no sé por qué el cuidado\ndas en trocar en olvido,\ncuando ni causa has tenido\ntú, ni don Juan te la ha dado."
 autor: "sor-juana-ines-de-la-cruz"
 slug: "sor-juana-ines-de-la-cruz-solo-admirado-me-han-por-las-acciones"
 procedencia:

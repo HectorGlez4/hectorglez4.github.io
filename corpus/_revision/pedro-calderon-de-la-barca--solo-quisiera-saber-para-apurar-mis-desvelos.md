@@ -1,5 +1,5 @@
 ---
-texto: "Sólo quisiera saber, Para apurar mis desvelos (Dejando á una parte, cielos, El delito del nacer), ¿Qué más os pude ofender Para castigarme más?"
+texto: "Sólo quisiera saber,\nPara apurar mis desvelos\n(Dejando á una parte, cielos,\nEl delito del nacer),\n¿Qué más os pude ofender\nPara castigarme más?"
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-solo-quisiera-saber-para-apurar-mis-desvelos"
 procedencia:

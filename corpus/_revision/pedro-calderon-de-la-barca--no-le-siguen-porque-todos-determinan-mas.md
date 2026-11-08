@@ -1,5 +1,5 @@
 ---
-texto: "No le siguen, porque todos determinan más acudir al remedio que a la venganza que incitan."
+texto: "No le siguen,\nporque todos determinan\nmás acudir al remedio\nque a la venganza que incitan."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-no-le-siguen-porque-todos-determinan-mas"
 procedencia:

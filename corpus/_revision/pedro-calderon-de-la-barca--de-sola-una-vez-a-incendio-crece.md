@@ -1,5 +1,5 @@
 ---
-texto: "De sola una vez a incendio crece una breve pavesa; de una vez sola un abismo fulgúreo volcán revienta; de una vez se enciende el rayo que destruye cuanto encuentra; de una vez escupe horror la más reformada pieza."
+texto: "De sola una vez a incendio\ncrece una breve pavesa;\nde una vez sola un abismo\nfulgúreo volcán revienta;\nde una vez se enciende el rayo\nque destruye cuanto encuentra;\nde una vez escupe horror\nla más reformada pieza."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-de-sola-una-vez-a-incendio-crece"
 procedencia:

@@ -1,5 +1,5 @@
 ---
-texto: "Uno ha quedado de ellos, que es el que está aquí."
+texto: "Uno ha quedado\nde ellos, que es el que está aquí."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-uno-ha-quedado-de-ellos-que-es"
 procedencia:

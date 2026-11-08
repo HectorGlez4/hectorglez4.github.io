@@ -1,5 +1,5 @@
 ---
-texto: "¿Qué había de hacer conmigo sino ser toda su vida un holgazán, un perdido?"
+texto: "¿Qué había de hacer conmigo\nsino ser toda su vida\nun holgazán, un perdido?"
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-que-habia-de-hacer-conmigo-sino-ser"
 procedencia:

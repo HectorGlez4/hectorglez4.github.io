@@ -1,5 +1,5 @@
 ---
-texto: "¿O más te sonreirán, Musa, los valles de Chile afortunado, que enriquecen rubias cosechas, y süaves frutos; do la inocencia y el candor ingenuo y la hospitalidad del mundo antiguo con el valor y el patriotismo habitan?"
+texto: "¿O más te sonreirán, Musa, los valles\nde Chile afortunado, que enriquecen\nrubias cosechas, y süaves frutos;\ndo la inocencia y el candor ingenuo\ny la hospitalidad del mundo antiguo\ncon el valor y el patriotismo habitan?"
 autor: "andres-bello"
 slug: "andres-bello-o-mas-te-sonreiran-musa-los-valles"
 procedencia:

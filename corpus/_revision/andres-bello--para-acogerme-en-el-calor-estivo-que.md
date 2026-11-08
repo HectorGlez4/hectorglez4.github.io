@@ -1,5 +1,5 @@
 ---
-texto: "Para acogerme en el calor estivo, que tenga un arboleda también quiero, do crezca junto al sauce el coco altivo."
+texto: "Para acogerme en el calor estivo,\nque tenga un arboleda también quiero,\ndo crezca junto al sauce el coco altivo."
 autor: "andres-bello"
 slug: "andres-bello-para-acogerme-en-el-calor-estivo-que"
 procedencia:

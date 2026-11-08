@@ -1,5 +1,5 @@
 ---
-texto: "IULIA Leonardo, que mas negar, ¿que negarme lo que os pido?"
+texto: "IULIA\nLeonardo, que mas negar,\n¿que negarme lo que os pido?"
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-iulia-leonardo-que-mas-negar-que-negarme"
 procedencia:

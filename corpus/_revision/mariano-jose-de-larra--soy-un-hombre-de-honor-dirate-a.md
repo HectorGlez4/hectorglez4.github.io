@@ -1,5 +1,5 @@
 ---
-texto: "-¡Soy un hombre de honor! -dirate a voces, que está de vanidad que ya revienta el muy..."
+texto: "-¡Soy un hombre de honor! -dirate a voces,\nque está de vanidad que ya revienta\nel muy..."
 autor: "mariano-jose-de-larra"
 slug: "mariano-jose-de-larra-soy-un-hombre-de-honor-dirate-a"
 procedencia:

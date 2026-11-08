@@ -1,5 +1,5 @@
 ---
-texto: "¿De Buenos Aires la gallarda gente no ves, que el premio del valor te pide?"
+texto: "¿De Buenos Aires la gallarda gente\nno ves, que el premio del valor te pide?"
 autor: "andres-bello"
 slug: "andres-bello-de-buenos-aires-la-gallarda-gente-no"
 procedencia:

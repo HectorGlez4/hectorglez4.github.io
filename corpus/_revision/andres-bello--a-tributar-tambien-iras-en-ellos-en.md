@@ -1,5 +1,5 @@
 ---
-texto: "¿A tributar también irás en ellos, en medio de la turba cortesana, el torpe incienso de servil lisonja?"
+texto: "¿A tributar también irás en ellos,\nen medio de la turba cortesana,\nel torpe incienso de servil lisonja?"
 autor: "andres-bello"
 slug: "andres-bello-a-tributar-tambien-iras-en-ellos-en"
 procedencia:

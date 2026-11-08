@@ -1,5 +1,5 @@
 ---
-texto: "Duermo en mi cama de roca Mi sueño dulce y profundo: Roza una abeja mi boca Y crece en mi cuerpo el mundo."
+texto: "Duermo en mi cama de roca\nMi sueño dulce y profundo:\nRoza una abeja mi boca\nY crece en mi cuerpo el mundo."
 autor: "jose-marti"
 slug: "jose-marti-duermo-en-mi-cama-de-roca-mi"
 procedencia:

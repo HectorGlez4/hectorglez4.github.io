@@ -1,5 +1,5 @@
 ---
-texto: "LOPE: La desvergüenza es mayor que se puede imaginar."
+texto: "LOPE: La desvergüenza es mayor\nque se puede imaginar."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-lope-la-desverguenza-es-mayor-que-se"
 procedencia:

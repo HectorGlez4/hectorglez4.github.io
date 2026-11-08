@@ -1,5 +1,5 @@
 ---
-texto: "Al Limosnero a Zaguirre Le desjarretó el tragar: Con el Limosnero pienso Que se descuidó San Blas."
+texto: "Al Limosnero a Zaguirre\nLe desjarretó el tragar:\nCon el Limosnero pienso\nQue se descuidó San Blas."
 autor: "francisco-de-quevedo"
 slug: "francisco-de-quevedo-al-limosnero-a-zaguirre-le-desjarreto-el"
 procedencia:

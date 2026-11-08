@@ -1,5 +1,5 @@
 ---
-texto: "JUAN: Es satisfacer, señor, una injuria, y es vengar una ofensa, y castigar..."
+texto: "JUAN: Es satisfacer, señor,\nuna injuria, y es vengar\nuna ofensa, y castigar..."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-juan-es-satisfacer-senor-una-injuria-y"
 procedencia:

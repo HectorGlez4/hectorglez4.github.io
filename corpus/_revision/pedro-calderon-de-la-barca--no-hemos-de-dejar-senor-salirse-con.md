@@ -1,5 +1,5 @@
 ---
-texto: "No hemos de dejar, señor, salirse con todo al tiempo; algo hemos de hacer nosotros para encubrir sus defectos."
+texto: "No hemos de dejar, señor,\nsalirse con todo al tiempo;\nalgo hemos de hacer nosotros\npara encubrir sus defectos."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-no-hemos-de-dejar-senor-salirse-con"
 procedencia:

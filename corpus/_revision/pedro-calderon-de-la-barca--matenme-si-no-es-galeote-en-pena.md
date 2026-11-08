@@ -1,5 +1,5 @@
 ---
-texto: "Mátenme, si no es galeote en pena: Bien mi temor lo dice."
+texto: "Mátenme, si no es galeote en pena:\nBien mi temor lo dice."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-matenme-si-no-es-galeote-en-pena"
 procedencia:

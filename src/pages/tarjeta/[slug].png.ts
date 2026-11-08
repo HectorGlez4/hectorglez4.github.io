@@ -31,6 +31,7 @@ export const getStaticPaths = (async () => {
   return conjunto.citas.map((cita) => ({
     params: { slug: cita.slug },
     props: {
+      slug: cita.slug,
       texto: cita.texto,
       autor: autores.get(cita.autor)!.nombre,
       procedencia: procedenciaCompuesta(cita),
@@ -39,7 +40,14 @@ export const getStaticPaths = (async () => {
 }) satisfies GetStaticPaths;
 
 export const GET: APIRoute = async ({ props }) => {
-  const svg = svgDeTarjeta(props as Parameters<typeof svgDeTarjeta>[0]);
+  const { slug, ...datos } = props as Parameters<typeof svgDeTarjeta>[0] & { slug: string };
+  let svg: string;
+  try {
+    svg = svgDeTarjeta(datos);
+  } catch (error) {
+    // Historia 29.3 — el fallo nombra la Cita: es lo que Héctor necesita para decidir.
+    throw new Error(`Tarjeta Social de «${slug}»: ${error instanceof Error ? error.message : String(error)}`);
+  }
   const png = await sharp(Buffer.from(svg)).png().toBuffer();
 
   return new Response(new Uint8Array(png), {

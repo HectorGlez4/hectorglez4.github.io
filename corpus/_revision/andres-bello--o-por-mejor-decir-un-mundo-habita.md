@@ -1,5 +1,5 @@
 ---
-texto: "O por mejor decir, un mundo habita suyo, donde más bello el suelo y rico la edad feliz del oro resucita;"
+texto: "O por mejor decir, un mundo habita\nsuyo, donde más bello el suelo y rico\nla edad feliz del oro resucita;"
 autor: "andres-bello"
 slug: "andres-bello-o-por-mejor-decir-un-mundo-habita"
 procedencia:

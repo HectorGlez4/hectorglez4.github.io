@@ -1,5 +1,5 @@
 ---
-texto: "Claro està, pues por lo menos estimò mis desuarios, 865 quien humana oyò los mios, y enojada los agenos."
+texto: "Claro està, pues por lo menos\nestimò mis desuarios, 865\nquien humana oyò los mios,\ny enojada los agenos."
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-claro-esta-pues-por-lo-menos-estimo"
 procedencia:

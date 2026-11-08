@@ -1,5 +1,5 @@
 ---
-texto: "Como no sabéis la hora en que os han de despertar, os despertarán dormidos si no veláis; despertad."
+texto: "Como no sabéis la hora\nen que os han de despertar,\nos despertarán dormidos\nsi no veláis; despertad."
 autor: "antonio-machado"
 temas:
   - "el-tiempo"

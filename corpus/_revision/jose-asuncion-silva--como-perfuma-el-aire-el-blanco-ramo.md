@@ -1,5 +1,5 @@
 ---
-texto: "¡Cómo perfuma el aire el blanco ramo marchito en el florero, cuán suave es el suspiro que vaga entre sus labios entreabiertos! ................................................................"
+texto: "¡Cómo perfuma el aire el blanco ramo\nmarchito en el florero,\ncuán suave es el suspiro\nque vaga entre sus labios entreabiertos!\n................................................................"
 autor: "jose-asuncion-silva"
 slug: "jose-asuncion-silva-como-perfuma-el-aire-el-blanco-ramo"
 procedencia:

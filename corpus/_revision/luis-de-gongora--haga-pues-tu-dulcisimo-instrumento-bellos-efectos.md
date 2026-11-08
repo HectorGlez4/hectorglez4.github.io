@@ -1,5 +1,5 @@
 ---
-texto: "Haga, pues, tu dulcísimo instrumento bellos efectos, pues la causa es bella,"
+texto: "Haga, pues, tu dulcísimo instrumento\nbellos efectos, pues la causa es bella,"
 autor: "luis-de-gongora"
 slug: "luis-de-gongora-haga-pues-tu-dulcisimo-instrumento-bellos-efectos"
 procedencia:

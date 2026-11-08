@@ -1,5 +1,5 @@
 ---
-texto: "LOPE: Ni aun éste no ha de escapar sin almagre."
+texto: "LOPE: Ni aun éste no ha de escapar\nsin almagre."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-lope-ni-aun-este-no-ha-de"
 procedencia:

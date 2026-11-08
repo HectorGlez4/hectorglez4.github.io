@@ -1,5 +1,5 @@
 ---
-texto: "JUAN: (¿Qué es lo que mirando estoy?) Aparte CRESPO: ...delante así de mí hoy, acabando ahora de herir en el monte un capitán."
+texto: "JUAN: (¿Qué es lo que mirando estoy?) Aparte\nCRESPO: ...delante así de mí hoy,\nacabando ahora de herir\nen el monte un capitán."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-juan-que-es-lo-que-mirando-estoy"
 procedencia:

@@ -1,5 +1,5 @@
 ---
-texto: "Llevada de engañoso pensamiento y de esperanza burladora y ciega, tropezará en el mismo monumento. Como el que, divertido, el mar navega, y, sin moverse, vuela con el viento, y antes que piense en acercarse, llega."
+texto: "Llevada de engañoso pensamiento\ny de esperanza burladora y ciega,\ntropezará en el mismo monumento.\nComo el que, divertido, el mar navega,\ny, sin moverse, vuela con el viento,\ny antes que piense en acercarse, llega."
 autor: "francisco-de-quevedo"
 temas:
   - "la-vida"

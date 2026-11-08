@@ -1,5 +1,5 @@
 ---
-texto: "LEONARDO Aunque sea tan larga, que al Antipoda visite, Libia ardiente, o Scitia elada."
+texto: "LEONARDO\nAunque sea tan larga,\nque al Antipoda visite,\nLibia ardiente, o Scitia elada."
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-leonardo-aunque-sea-tan-larga-que-al"
 procedencia:

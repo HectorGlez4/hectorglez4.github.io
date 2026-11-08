@@ -1,5 +1,5 @@
 ---
-texto: "REBOLLEDO: ¿Ya no sabes sus respuestas? [Don MENDO habla aparte] a NUÑO MENDO: Esto ha de ser; pues ya tiende lo noche sus sombras negras, antes que se haya resuelto a lo mejor mi prudencia, ven a armarme."
+texto: "REBOLLEDO: ¿Ya no sabes sus respuestas?\n[Don MENDO habla aparte] a NUÑO\nMENDO: Esto ha de ser; pues ya tiende\nlo noche sus sombras negras,\nantes que se haya resuelto\na lo mejor mi prudencia,\nven a armarme."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-rebolledo-ya-no-sabes-sus-respuestas-don"
 procedencia:

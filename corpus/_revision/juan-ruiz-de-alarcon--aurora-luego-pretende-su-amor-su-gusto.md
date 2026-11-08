@@ -1,5 +1,5 @@
 ---
-texto: "AURORA Luego pretende su amor su gusto en mi deshonor?"
+texto: "AURORA\nLuego pretende su amor\nsu gusto en mi deshonor?"
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-aurora-luego-pretende-su-amor-su-gusto"
 procedencia:

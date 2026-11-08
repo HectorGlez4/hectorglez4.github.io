@@ -1,5 +1,5 @@
 ---
-texto: "LOPE: Pues dárselos sin que deje dárselos."
+texto: "LOPE: Pues dárselos sin que deje\ndárselos."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-lope-pues-darselos-sin-que-deje-darselos"
 procedencia:

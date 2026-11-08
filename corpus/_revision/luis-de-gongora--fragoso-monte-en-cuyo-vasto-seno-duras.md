@@ -1,5 +1,5 @@
 ---
-texto: "Fragoso monte, en cuyo vasto seno duras cortezas de robustas plantas contienen aquel nombre en partes tantas de quien pagó a la tierra lo terreno:"
+texto: "Fragoso monte, en cuyo vasto seno\nduras cortezas de robustas plantas\ncontienen aquel nombre en partes tantas\nde quien pagó a la tierra lo terreno:"
 autor: "luis-de-gongora"
 slug: "luis-de-gongora-fragoso-monte-en-cuyo-vasto-seno-duras"
 procedencia:

@@ -1,5 +1,5 @@
 ---
-texto: "Españolito que vienes al mundo, te guarde Dios."
+texto: "Españolito que vienes\nal mundo, te guarde Dios."
 autor: "antonio-machado"
 temas:
   - "la-vida"

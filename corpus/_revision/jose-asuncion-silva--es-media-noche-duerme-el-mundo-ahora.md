@@ -1,5 +1,5 @@
 ---
-texto: "Es media noche. –Duerme el mundo ahora bajo el ala de niebla del silencio vagos rayos de luna y el fulgor incierto de lámpara velada alumbran su aposento."
+texto: "Es media noche. –Duerme el mundo ahora\nbajo el ala de niebla del silencio\nvagos rayos de luna\ny el fulgor incierto\nde lámpara velada\nalumbran su aposento."
 autor: "jose-asuncion-silva"
 slug: "jose-asuncion-silva-es-media-noche-duerme-el-mundo-ahora"
 procedencia:

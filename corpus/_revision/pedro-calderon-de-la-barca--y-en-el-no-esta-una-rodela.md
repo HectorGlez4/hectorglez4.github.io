@@ -1,5 +1,5 @@
 ---
-texto: "Y en él, ¿no está una rodela?) CRESPO: (¿No tiene puerta el corral, Aparte y yo una espadilla vieja?) LOPE: Buenas noches."
+texto: "Y en él, ¿no está una rodela?)\nCRESPO: (¿No tiene puerta el corral, Aparte\ny yo una espadilla vieja?)\nLOPE: Buenas noches."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-y-en-el-no-esta-una-rodela"
 procedencia:

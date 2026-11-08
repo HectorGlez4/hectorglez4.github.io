@@ -1,5 +1,5 @@
 ---
-texto: "así cubra de hoy más cielo sereno la siempre verde cumbre que levantas, que me escondas aquellas letras santas de que a pesar del tiempo has de estar lleno."
+texto: "así cubra de hoy más cielo sereno\nla siempre verde cumbre que levantas,\nque me escondas aquellas letras santas\nde que a pesar del tiempo has de estar lleno."
 autor: "luis-de-gongora"
 slug: "luis-de-gongora-asi-cubra-de-hoy-mas-cielo-sereno"
 procedencia:

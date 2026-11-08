@@ -1,5 +1,5 @@
 ---
-texto: "¿Ves aquel otro, erguido de cogote, que también opulento y sin empleo sabe existir?, pues ese es un pegote."
+texto: "¿Ves aquel otro, erguido de cogote,\nque también opulento y sin empleo\nsabe existir?, pues ese es un pegote."
 autor: "mariano-jose-de-larra"
 slug: "mariano-jose-de-larra-ves-aquel-otro-erguido-de-cogote-que"
 procedencia:

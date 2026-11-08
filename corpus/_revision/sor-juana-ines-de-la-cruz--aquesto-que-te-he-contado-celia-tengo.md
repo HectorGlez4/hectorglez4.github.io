@@ -1,5 +1,5 @@
 ---
-texto: "Aquesto que te he contado, Celia, tengo que esperar; mira ¿cómo puedo entrar a acostarme sin cuidado?"
+texto: "Aquesto que te he contado,\nCelia, tengo que esperar;\nmira ¿cómo puedo entrar\na acostarme sin cuidado?"
 autor: "sor-juana-ines-de-la-cruz"
 slug: "sor-juana-ines-de-la-cruz-aquesto-que-te-he-contado-celia-tengo"
 procedencia:

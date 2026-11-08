@@ -4,6 +4,7 @@
  *   npx tsx tools/documentar.ts <slug> <corpus/fuentes/documento.txt> [--texto "<literal>"]
  *   npx tsx tools/documentar.ts --retirar <slug> "<motivo>"
  *   npx tsx tools/documentar.ts --restituir-traduccion
+ *   npx tsx tools/documentar.ts --restituir-saltos [<slug>...] [--seco]
  *
  * Un interruptor fino sobre `tools/lib/documentacion.ts`, con el patrón de
  * `tools/coleccion.ts`: aquí se leen argumentos y se escribe la salida, y toda la lógica
@@ -22,7 +23,7 @@
  * 0 dejaría a un guion de ingesta creyendo que la Cita quedó documentada.
  */
 
-import { documentarCita, restituirTraducciones, retirarCita } from './lib/documentacion.ts';
+import { documentarCita, restituirSaltos, restituirTraducciones, retirarCita } from './lib/documentacion.ts';
 import { rutasDelCorpus } from './lib/corpus.ts';
 import {
   motivosDeArgumentosNoReconocidos,
@@ -40,6 +41,7 @@ const USO = [
   '  npx tsx tools/documentar.ts <slug> <corpus/fuentes/documento.txt> [--texto "<literal>"]',
   '  npx tsx tools/documentar.ts --retirar <slug> "<motivo>"',
   '  npx tsx tools/documentar.ts --restituir-traduccion',
+  '  npx tsx tools/documentar.ts --restituir-saltos [<slug>...] [--seco]',
   '',
   'Documentar escribe la Fuente y la Procedencia derivadas del documento, y saca la Cita',
   'del censo de pendientes de cotejo. Solo si su texto aparece literal en el documento.',
@@ -50,6 +52,11 @@ const USO = [
   '--restituir-traduccion escribe en las Citas publicadas la traducción que declara su',
   'documento (traductor y año), y el año publicado igual al de la traducción deja de ser',
   'el de la Obra. Idempotente; lo que no puede restituir sin inventar lo lista.',
+  '',
+  '--restituir-saltos escribe en las Citas publicadas —y, aparte, en las candidatas— los',
+  'saltos de verso de su documento de verso, tocando solo el espacio de su línea «texto:».',
+  'Sin slugs, todas. --seco da el mismo parte sin escribir. Idempotente; un conflicto entre',
+  'dos documentos de verso no se toca. La corre Héctor, en un commit propio de corpus/.',
   '',
   'Toda orden admite --corpus <ruta>.',
   '',
@@ -65,6 +72,7 @@ const rutas = rutasDelCorpus(raizDeCorpusDe(argumentos));
 const sueltos = posicionales(argumentos, CON_VALOR);
 const retirando = argumentos.includes('--retirar');
 const restituyendo = argumentos.includes('--restituir-traduccion');
+const restituyendoSaltos = argumentos.includes('--restituir-saltos');
 
 /*
  * Una bandera con errata no es «lo mismo pero sin ella», y aquí menos que en ninguna otra
@@ -75,12 +83,40 @@ const restituyendo = argumentos.includes('--restituir-traduccion');
  * `posicionales`— y lo que sobra es cualquier opción que esta orden no tenga.
  */
 const noReconocidos = motivosDeArgumentosNoReconocidos(argumentos, {
-  solas: [...sueltos, '--retirar', '--restituir-traduccion'],
-  conValor: retirando || restituyendo ? (['--corpus'] as const) : CON_VALOR,
+  solas: [
+    ...sueltos,
+    '--retirar',
+    '--restituir-traduccion',
+    // Historia 29.2 — `--seco` solo es de `--restituir-saltos`.
+    ...(restituyendoSaltos ? ['--restituir-saltos', '--seco'] : []),
+  ],
+  conValor: retirando || restituyendo || restituyendoSaltos ? (['--corpus'] as const) : CON_VALOR,
 });
 if (noReconocidos.length > 0) porLaForma(...noReconocidos);
 
+/*
+ * Una bandera repetida tampoco es «lo mismo»: `motivosDeArgumentosNoReconocidos` no la ve, y un
+ * `--corpus` dos veces dejaría a la orden escoger en silencio en qué Corpus escribe.
+ */
+const repetidas = ['--seco', '--corpus', '--restituir-saltos'].filter(
+  (bandera) => argumentos.filter((a) => a === bandera).length > 1,
+);
+if (repetidas.length > 0) porLaForma(...repetidas.map((b) => `«${b}» va una sola vez.`));
+
 try {
+  if (restituyendoSaltos) {
+    const otras = ['--restituir-traduccion', '--retirar', '--texto'].filter((b) => argumentos.includes(b));
+    if (otras.length > 0) {
+      porLaForma(`--restituir-saltos y ${otras.join(', ')} son órdenes distintas.`);
+    }
+    terminar(
+      await restituirSaltos(rutas, {
+        ...(sueltos.length > 0 ? { slugs: sueltos } : {}),
+        seco: argumentos.includes('--seco'),
+      }),
+    );
+  }
+
   if (restituyendo) {
     if (retirando) porLaForma('--restituir-traduccion y --retirar son órdenes distintas.');
     if (sueltos.length > 0) {

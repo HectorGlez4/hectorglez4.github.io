@@ -486,3 +486,35 @@ describe('Historia 13.3 — el título entra en la cuenta del apilado', () => {
     expect(Math.min(...textos.map((t) => t.y))).toBeGreaterThanOrEqual(MARGEN);
   });
 });
+
+describe('Historia 29.3 — el apilado cuenta los versos', () => {
+  const NUMEROS = ['uno', 'dos', 'tres', 'cuatro', 'cinco', 'seis', 'siete', 'ocho', 'nueve', 'diez', 'once', 'doce'];
+  /** Doce versos de una palabra: de corrido caben en dos o tres líneas; en verso, doce. */
+  const enVerso = (autor: string): CitaEnPieza => ({ texto: NUMEROS.join(',\n'), autor, procedencia: 'Coplas, 1600' });
+  const deCorrido = (cita: CitaEnPieza): CitaEnPieza => ({ ...cita, texto: cita.texto.replaceAll('\n', ' ') });
+
+  it('una selección que cabe de corrido no cabe con sus saltos, y `maximo` lo dice', () => {
+    const seleccion = [enVerso('Uno'), enVerso('Otro')];
+    expect(cabenEnPieza(seleccion.map(deCorrido))).toEqual({ cabe: true });
+    const cabida = cabenEnPieza(seleccion);
+    expect(cabida.cabe).toBe(false);
+    if (!cabida.cabe) expect(cabida.maximo).toBeLessThan(seleccion.length);
+  });
+
+  it('cada verso abre línea en el SVG y ninguna línea une dos versos', () => {
+    const marti: CitaEnPieza = {
+      texto: 'Yo vengo de todas partes,\nY hacia todas partes voy:\nArte soy entre las artes,\nEn los montes, monte soy.',
+      autor: 'José Martí',
+      procedencia: 'Versos sencillos, 1891',
+    };
+    const svg = svgDePieza([marti, BREVE]);
+    const lineas = [...svg.matchAll(/<text[^>]*font-family="[^"]*Source Serif[^"]*"[^>]*>([^<]*)<\/text>/g)].map((m) => m[1]);
+    expect(lineas).toEqual(expect.arrayContaining([
+      '«Yo vengo de todas partes,',
+      'Y hacia todas partes voy:',
+      'Arte soy entre las artes,',
+      'En los montes, monte soy.»',
+    ]));
+    for (const linea of lineas) expect(linea).not.toMatch(/partes, Y|voy: Arte|artes, En/);
+  });
+});

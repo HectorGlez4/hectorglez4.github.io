@@ -1,5 +1,5 @@
 ---
-texto: "Escondida debajo de tu armada, Gime la mar, la vela llama al viento, Y a las Lunas del Turco el firmamento Eclipse les promete en tu jornada."
+texto: "Escondida debajo de tu armada,\nGime la mar, la vela llama al viento,\nY a las Lunas del Turco el firmamento\nEclipse les promete en tu jornada."
 autor: "francisco-de-quevedo"
 slug: "francisco-de-quevedo-escondida-debajo-de-tu-armada-gime-la"
 procedencia:

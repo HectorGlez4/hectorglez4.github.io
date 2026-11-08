@@ -1,5 +1,5 @@
 ---
-texto: "DON IUAN Al tiempo la prueua dexo dessas finezas que alegas. (Vase.)"
+texto: "DON IUAN\nAl tiempo la prueua dexo\ndessas finezas que alegas.\n(Vase.)"
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-don-iuan-al-tiempo-la-prueua-dexo"
 procedencia:

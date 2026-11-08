@@ -1,5 +1,5 @@
 ---
-texto: "CRESPO: Como arrojasteis la mesa vos, no tuve que arrojar otra cosa yo más cerca. (¡Disimulemos honor!) Aparte LOPE: (¡Quién en la calle estuviera!) Aparte Ahora bien, cenar no quiero."
+texto: "CRESPO: Como arrojasteis la mesa\nvos, no tuve que arrojar\notra cosa yo más cerca.\n(¡Disimulemos honor!) Aparte\nLOPE: (¡Quién en la calle estuviera!) Aparte\nAhora bien, cenar no quiero."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-crespo-como-arrojasteis-la-mesa-vos-no"
 procedencia:

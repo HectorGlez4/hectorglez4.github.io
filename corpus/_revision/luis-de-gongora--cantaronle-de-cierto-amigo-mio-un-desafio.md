@@ -1,5 +1,5 @@
 ---
-texto: "Cantáronle de cierto amigo mío un desafío campal de dos Gazules, que en ser por unos ojos entreazules fue peor que gatesco el desafío."
+texto: "Cantáronle de cierto amigo mío\nun desafío campal de dos Gazules,\nque en ser por unos ojos entreazules\nfue peor que gatesco el desafío."
 autor: "luis-de-gongora"
 slug: "luis-de-gongora-cantaronle-de-cierto-amigo-mio-un-desafio"
 procedencia:

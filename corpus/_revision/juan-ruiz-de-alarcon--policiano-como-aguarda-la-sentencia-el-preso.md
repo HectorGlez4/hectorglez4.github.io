@@ -1,5 +1,5 @@
 ---
-texto: "POLICIANO Como aguarda la sentencia el preso, yo la licencia, en que està mi vida, espero: (A parte.)"
+texto: "POLICIANO\nComo aguarda la sentencia\nel preso, yo la licencia,\nen que està mi vida, espero:\n(A parte.)"
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-policiano-como-aguarda-la-sentencia-el-preso"
 procedencia:

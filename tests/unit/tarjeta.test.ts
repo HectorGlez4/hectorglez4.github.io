@@ -12,7 +12,11 @@ import {
 } from '../../src/lib/tarjeta.ts';
 import { SANS, SERIF } from '../../src/lib/lienzo.ts';
 import { MARCA } from '../../src/lib/marca.ts';
-import { tramoDe } from '../../src/lib/tramos.ts';
+import { cuerpoEnTarjeta, tramoDe } from '../../src/lib/tramos.ts';
+import { repartirEnLineas } from '../../src/lib/lienzo.ts';
+import { leerCitas, leerDocumentosDeclarados, rutasDelCorpus } from '../../tools/lib/corpus.ts';
+import { documentosDeCita } from '../../tools/lib/cotejo.ts';
+import { documentoParaLosSaltos, textoConSaltos } from '../../tools/lib/lineas.ts';
 import { MAX_CARACTERES_IMAGEN } from '../../src/lib/umbrales.ts';
 
 const raiz = resolve(import.meta.dirname, '../..');
@@ -331,4 +335,196 @@ describe('Historia 22.7 — la Tarjeta de Obra', () => {
     const [uno, dos] = await Promise.all([rasterizar(), rasterizar()]);
     expect(uno.equals(dos)).toBe(true);
   });
+});
+
+/**
+ * Historia 29.3 — la regla de la Tarjeta del verso, decisión de Héctor del 2026-11-08: una Cita
+ * en verso que no cabe en su tramo baja al siguiente, hasta `sm`; la prosa conserva el suyo.
+ */
+describe('Historia 29.3 — cuerpoEnTarjeta', () => {
+  const VERSO = 'Corto y breve.\nOtro verso.';
+
+  it('con saltos y cabe: el cuerpo de su tramo', () => {
+    expect(cuerpoEnTarjeta(VERSO, () => true)).toBe(tramoDe(VERSO).pixelesEnTarjeta);
+    expect(cuerpoEnTarjeta(VERSO, () => true)).toBe(56);
+  });
+
+  it('con saltos y no cabe: baja una fila, y otra, hasta que quepa', () => {
+    expect(cuerpoEnTarjeta(VERSO, (c) => c <= 46)).toBe(46);
+    expect(cuerpoEnTarjeta(VERSO, (c) => c <= 32)).toBe(32);
+  });
+
+  it('con saltos y no cabe ni en `sm`: undefined', () => {
+    expect(cuerpoEnTarjeta(VERSO, () => false)).toBeUndefined();
+  });
+
+  it('sin Imagen: undefined, sin preguntar', () => {
+    const largo = `${'palabra '.repeat(Math.ceil(MAX_CARACTERES_IMAGEN / 8) + 2)}\nfin`;
+    expect(cuerpoEnTarjeta(largo, () => true)).toBeUndefined();
+  });
+
+  it('sin saltos: el cuerpo de su tramo aunque `cabe` diga que no (la decisión es para el verso)', () => {
+    let preguntas = 0;
+    const cabe = () => {
+      preguntas += 1;
+      return false;
+    };
+    expect(cuerpoEnTarjeta('Una sola línea de prosa.', cabe)).toBe(56);
+    expect(preguntas).toBe(0);
+  });
+});
+
+/**
+ * La geometría dibujada, leída del SVG: el cuerpo y las líneas de la Cita, el `y` de su última
+ * línea, el del filete, el de la última línea de la atribución (Autor o procedencia) y el de la
+ * marca.
+ */
+function geometria(svg: string): {
+  cuerpo: number;
+  lineas: string[];
+  ultimaY: number;
+  fileteY: number;
+  atribucionY: number;
+  marcaY: number;
+  marcaCuerpo: number;
+} {
+  const textos = [...svg.matchAll(/<text x="80" y="(\d+(?:\.\d+)?)" font-family="([^"]*)" font-size="(\d+)"[^>]*>([^<]*)<\/text>/g)].map(
+    (m) => ({ y: Number(m[1]), familia: m[2], cuerpo: Number(m[3]), contenido: m[4] }),
+  );
+  const marcaEnSvg = MARCA.toLocaleUpperCase('es');
+  const deCita = textos.filter((t) => t.familia === SERIF);
+  const marca = textos.find((t) => t.contenido === marcaEnSvg)!;
+  const atribucion = textos.filter((t) => t.familia === SANS && t !== marca);
+  const filete = Number(svg.match(/<rect x="80" y="(\d+(?:\.\d+)?)" width="96"/)![1]);
+  return {
+    cuerpo: deCita[0].cuerpo,
+    lineas: deCita.map((t) => t.contenido),
+    ultimaY: deCita.at(-1)!.y,
+    fileteY: filete,
+    atribucionY: Math.max(...atribucion.map((t) => t.y)),
+    marcaY: marca.y,
+    marcaCuerpo: marca.cuerpo,
+  };
+}
+
+/**
+ * Lo dibujado cabe: la última línea de la atribución, con su descendente (un cuarto de su
+ * cuerpo, 24), acaba por encima del ojo de la marca (tres cuartos del suyo). Se lee del SVG,
+ * no de la cuenta con la que `svgDeTarjeta` decide el cuerpo.
+ */
+function caeSobreLaMarca(svg: string): boolean {
+  const g = geometria(svg);
+  return g.ultimaY < g.fileteY && g.atribucionY + 24 / 4 > g.marcaY - (g.marcaCuerpo * 3) / 4;
+}
+
+/** El alto que ocupa el bloque con ese cuerpo y esas líneas: márgenes, texto, aire y atribución. */
+const altoDelBloque = (cuerpo: number, lineas: number, conProcedencia: boolean) =>
+  80 * 2 + lineas * Math.round(cuerpo * 1.3) + 40 + 24 + 34 + (conProcedencia ? 30 : 0);
+
+describe('Historia 29.3 — la Tarjeta de una Cita en verso', () => {
+  // Literales, con los saltos que les compone `textoConSaltos` sobre su documento de Wikisource.
+  const CALDERON = [
+    'Contra vosotros, naciendo;\nAunque si nací, ya entiendo\nQué delito he cometido:\nBastante causa ha tenido\nVuestra justicia y rigor;\nPues el delito mayor\nDel hombre es haber nacido.',
+    'Entre las flores se quiebra,\nCuando, músico, celebra\nDe las flores la piedad,\nQue le da la majestad\nDel campo abierto á su huida:\n¿Y, teniendo yo mas vida,\nTengo menos libertad?',
+    'Ni qué pueda preguntarte:\nSolo diré que á esta parte\nHoy el cielo me ha guiado\nPara haberme consolado,\nSi consuelo puede ser\nDel que es desdichado, ver\nOtro que es más desdichado.',
+  ];
+
+  it.each(CALDERON)('Calderón, 7 versos de `md`: se compone a 32 px y el bloque cabe en 630 (%#)', (texto) => {
+    expect(tramoDe(texto).nombre).toBe('md');
+    const svg = svgDeTarjeta({ texto, autor: 'Pedro Calderón de la Barca', procedencia: 'La vida es sueño' });
+    const g = geometria(svg);
+    expect(g.cuerpo).toBe(32);
+    expect(g.lineas).toHaveLength(7);
+    expect(g.lineas[0].startsWith('«')).toBe(true);
+    expect(altoDelBloque(g.cuerpo, g.lineas.length, true)).toBe(582);
+    expect(altoDelBloque(g.cuerpo, g.lineas.length, true)).toBeLessThanOrEqual(ALTO);
+    // Con su tramo pediría 631: es el caso que decidió Héctor.
+    expect(altoDelBloque(38, 7, true)).toBe(631);
+    // Lo dibujado: el texto por encima del filete y la atribución por encima de la marca.
+    expect(g.ultimaY).toBeLessThan(g.fileteY);
+    expect(caeSobreLaMarca(svg)).toBe(false);
+  });
+
+  it('Martí, 4 versos de `lg`: su tramo, 46 px, un verso por línea', () => {
+    const texto =
+      'Yo vengo de todas partes,\nY hacia todas partes voy:\nArte soy entre las artes,\nEn los montes, monte soy.';
+    const svg = svgDeTarjeta({ texto, autor: 'José Martí', procedencia: 'Versos sencillos' });
+    const g = geometria(svg);
+    expect(caeSobreLaMarca(svg)).toBe(false);
+    expect(g.cuerpo).toBe(46);
+    expect(g.lineas).toEqual([
+      '«Yo vengo de todas partes,',
+      'Y hacia todas partes voy:',
+      'Arte soy entre las artes,',
+      'En los montes, monte soy.»',
+    ]);
+  });
+
+  it('sin saltos, cada tramo con su cuerpo y el reparto de siempre', () => {
+    for (const largo of [60, 150, 230, 290]) {
+      const texto = 'palabra '.repeat(Math.ceil(largo / 8)).slice(0, largo).trim();
+      const tramo = tramoDe(texto);
+      const g = geometria(svgDeTarjeta({ texto, autor: 'Séneca', procedencia: 'Cartas a Lucilio' }));
+      expect(g.cuerpo).toBe(tramo.pixelesEnTarjeta);
+      expect(g.lineas).toEqual(repartirEnLineas(`«${texto}»`, tramo.pixelesEnTarjeta, ANCHO - 160));
+    }
+  });
+
+  it('un texto en verso que no cabe ni en `sm` detiene la composición', () => {
+    const texto = Array.from({ length: 20 }, (_, i) => `verso${i}`).join('\n');
+    expect(() => svgDeTarjeta({ texto, autor: 'Nadie', procedencia: 'Ninguna' })).toThrow(/no cabe en 630 px/);
+  });
+
+  it('el PNG de la ruta nombra el slug cuando la Tarjeta no cabe', () => {
+    const ruta = readFileSync(resolve(raiz, 'src/pages/tarjeta/[slug].png.ts'), 'utf8');
+    expect(ruta).toMatch(/Tarjeta Social de «\$\{slug\}»/);
+  });
+
+  it('la cabida se lee de lo dibujado: un bloque al límite queda por encima de la marca', () => {
+    // El caso más justo que admite la regla: el bloque centrado toca el margen de arriba.
+    for (const cuerpo of [32, 38, 46, 56]) {
+      const lineas = Math.floor((ALTO - 80 * 2 - 40 - 24 - 34 - 30) / Math.round(cuerpo * 1.3));
+      const texto = Array.from({ length: lineas }, (_, i) => `verso${i}`).join('\n');
+      if (!tramoDe(texto).admiteImagen) continue;
+      const svg = svgDeTarjeta({ texto, autor: 'Nadie', procedencia: 'Ninguna' });
+      expect(caeSobreLaMarca(svg)).toBe(false);
+    }
+  });
+
+  it('barrido del Corpus real: toda Cita publicada que admite Imagen, con sus saltos, tiene cuerpo y cabe', async () => {
+    const rutas = rutasDelCorpus(resolve(raiz, 'corpus'));
+    const [citas, documentos] = await Promise.all([leerCitas(rutas.citas), leerDocumentosDeclarados(rutas)]);
+    const noCaben: string[] = [];
+    let conImagen = 0;
+    let enVerso = 0;
+    for (const cita of citas) {
+      if (typeof cita.texto !== 'string') continue;
+      let texto = cita.texto;
+      if (cita.fuente !== undefined) {
+        const candidatos = documentosDeCita(cita.fuente, cita.procedencia?.obra, documentos).map((nombre) => {
+          const d = documentos.get(nombre)!;
+          return { nombre, cuerpo: d.cuerpo, ...(d.lineas !== undefined ? { lineas: d.lineas } : {}) };
+        });
+        const documento = documentoParaLosSaltos(cita.texto, candidatos);
+        if (documento !== undefined) texto = textoConSaltos(cita.texto, documento).texto;
+      }
+      if (!tramoDe(texto).admiteImagen) continue;
+      conImagen += 1;
+      if (texto.includes('\n')) enVerso += 1;
+      const conProcedencia = cita.procedencia?.obra !== undefined || cita.procedencia?.año !== undefined;
+      // La procedencia solo cuenta por estar (una línea a 24 px): la presencia de obra o año
+      // es la de `procedenciaCompuesta`, o la sobrestima. El nombre del Autor va en una línea.
+      // Se juzga lo dibujado, no la cuenta del cuerpo: así también la prosa, que conserva su
+      // tramo sin preguntar, se nombra si no cupiera (lo decidiría Héctor).
+      try {
+        const svg = svgDeTarjeta({ texto, autor: 'Autor', ...(conProcedencia ? { procedencia: 'Procedencia' } : {}) });
+        if (caeSobreLaMarca(svg)) noCaben.push(cita.slug);
+      } catch {
+        noCaben.push(cita.slug);
+      }
+    }
+    expect(conImagen).toBeGreaterThan(0);
+    expect(enVerso).toBeGreaterThan(0);
+    expect(noCaben, `no caben en la Tarjeta ni en \`sm\` (lo decide Héctor): ${noCaben.join(', ')}`).toEqual([]);
+  }, 120_000);
 });

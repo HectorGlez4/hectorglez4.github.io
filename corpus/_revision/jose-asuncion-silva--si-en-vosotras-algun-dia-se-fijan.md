@@ -1,5 +1,5 @@
 ---
-texto: "Si en vosotras algún día se fijan sus ojos bellos, ¡pobres estrofas! habladle con rumor suäve y ledo como notas de una música que oímos ha mucho tiempo, y que impregnada de aromas torna en las alas del viento."
+texto: "Si en vosotras algún día\nse fijan sus ojos bellos,\n¡pobres estrofas! habladle\ncon rumor suäve y ledo\ncomo notas de una música\nque oímos ha mucho tiempo,\ny que impregnada de aromas\ntorna en las alas del viento."
 autor: "jose-asuncion-silva"
 slug: "jose-asuncion-silva-si-en-vosotras-algun-dia-se-fijan"
 procedencia:

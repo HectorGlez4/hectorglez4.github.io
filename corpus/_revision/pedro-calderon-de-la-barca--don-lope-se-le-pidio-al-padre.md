@@ -1,5 +1,5 @@
 ---
-texto: "Don Lope se le pidió al padre, y él se le dio, y va a la guerra con él."
+texto: "Don Lope se le pidió\nal padre, y él se le dio,\ny va a la guerra con él."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-don-lope-se-le-pidio-al-padre"
 procedencia:

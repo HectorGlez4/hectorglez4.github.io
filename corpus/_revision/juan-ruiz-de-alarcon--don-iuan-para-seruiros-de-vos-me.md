@@ -1,5 +1,5 @@
 ---
-texto: "DON IUAN Para seruiros: de vos me alcancè nueua dichosa Iulia, de que sois esposa de quien os merezca."
+texto: "DON IUAN\nPara seruiros: de vos\nme alcancè nueua dichosa\nIulia, de que sois esposa\nde quien os merezca."
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-don-iuan-para-seruiros-de-vos-me"
 procedencia:

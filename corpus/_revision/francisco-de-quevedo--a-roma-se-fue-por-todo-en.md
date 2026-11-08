@@ -1,5 +1,5 @@
 ---
-texto: "A Roma se fue por todo, En donde la enfermedad Le ajustició en una cama, Ahorrando de procesar."
+texto: "A Roma se fue por todo,\nEn donde la enfermedad\nLe ajustició en una cama,\nAhorrando de procesar."
 autor: "francisco-de-quevedo"
 slug: "francisco-de-quevedo-a-roma-se-fue-por-todo-en"
 procedencia:

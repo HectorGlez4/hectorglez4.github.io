@@ -1,5 +1,5 @@
 ---
-texto: "DIANA Nada temo su crueldad, que el amor es ceguedad, y los zelos son locura. 520 (Vase. )"
+texto: "DIANA\nNada temo su crueldad,\nque el amor es ceguedad,\ny los zelos son locura. 520\n(Vase. )"
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-diana-nada-temo-su-crueldad-que-el"
 procedencia:

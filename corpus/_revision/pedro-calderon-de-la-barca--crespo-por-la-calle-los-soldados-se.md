@@ -1,5 +1,5 @@
 ---
-texto: "CRESPO: Por la calle los soldados se pasean, cantando y bailando."
+texto: "CRESPO: Por la calle\nlos soldados se pasean,\ncantando y bailando."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-crespo-por-la-calle-los-soldados-se"
 procedencia:

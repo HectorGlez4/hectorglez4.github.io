@@ -1,5 +1,5 @@
 ---
-texto: "Con un hombre como yo, en servicio del Rey, no se puede hacer."
+texto: "Con un hombre como yo,\nen servicio del Rey, no\nse puede hacer."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-con-un-hombre-como-yo-en-servicio"
 procedencia:

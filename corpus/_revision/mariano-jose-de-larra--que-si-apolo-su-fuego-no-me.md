@@ -1,5 +1,5 @@
 ---
-texto: "Que si Apolo su fuego no me inspira para hacer buenos versos contra el vicio, sabrá mi indignación templar mi lira."
+texto: "Que si Apolo su fuego no me inspira\npara hacer buenos versos contra el vicio,\nsabrá mi indignación templar mi lira."
 autor: "mariano-jose-de-larra"
 slug: "mariano-jose-de-larra-que-si-apolo-su-fuego-no-me"
 procedencia:

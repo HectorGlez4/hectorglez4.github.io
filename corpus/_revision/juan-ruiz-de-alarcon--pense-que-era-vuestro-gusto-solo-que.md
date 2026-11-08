@@ -1,5 +1,5 @@
 ---
-texto: "Pensè que era vuestro gusto solo que yo me ausentara, 250 y hasta el Pirù no parasse, y a executallo empeçaua."
+texto: "Pensè que era vuestro gusto\nsolo que yo me ausentara, 250\ny hasta el Pirù no parasse,\ny a executallo empeçaua."
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-pense-que-era-vuestro-gusto-solo-que"
 procedencia:

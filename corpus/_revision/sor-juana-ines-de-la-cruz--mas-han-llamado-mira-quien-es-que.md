@@ -1,5 +1,5 @@
 ---
-texto: "Mas han llamado; mira quién es, que después te hablaré, Celia."
+texto: "Mas han llamado;\nmira quién es, que después\nte hablaré, Celia."
 autor: "sor-juana-ines-de-la-cruz"
 slug: "sor-juana-ines-de-la-cruz-mas-han-llamado-mira-quien-es-que"
 procedencia:

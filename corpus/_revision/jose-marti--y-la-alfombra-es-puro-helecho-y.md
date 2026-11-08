@@ -1,5 +1,5 @@
 ---
-texto: "Y la alfombra es puro helecho, Y los muros abedul, Y la luz viene del techo, Del techo de cielo azul."
+texto: "Y la alfombra es puro helecho,\nY los muros abedul,\nY la luz viene del techo,\nDel techo de cielo azul."
 autor: "jose-marti"
 slug: "jose-marti-y-la-alfombra-es-puro-helecho-y"
 procedencia:

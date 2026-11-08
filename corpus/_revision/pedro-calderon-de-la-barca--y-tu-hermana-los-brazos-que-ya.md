@@ -1,5 +1,5 @@
 ---
-texto: "Y tú, hermana, los brazos; que ya ha partido don Lope mi señor, y es fuerza alcanzarlo."
+texto: "Y tú, hermana,\nlos brazos; que ya ha partido\ndon Lope mi señor, y es\nfuerza alcanzarlo."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-y-tu-hermana-los-brazos-que-ya"
 procedencia:

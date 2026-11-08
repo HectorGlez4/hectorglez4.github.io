@@ -1,5 +1,5 @@
 ---
-texto: "IULIA Señor Leonardo, ¿era ya tiempo de vernos los dos? 710 LEONARDO Esso preguntaldo a vos."
+texto: "IULIA\nSeñor Leonardo, ¿era ya\ntiempo de vernos los dos? 710\nLEONARDO\nEsso preguntaldo a vos."
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-iulia-senor-leonardo-era-ya-tiempo-de"
 procedencia:

@@ -1,5 +1,5 @@
 ---
-texto: "CRESPO: Pues, ¡voto a Dios!, que antes yo haré lo que se ha de hacer!"
+texto: "CRESPO: Pues, ¡voto a Dios!, que antes yo\nharé lo que se ha de hacer!"
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-crespo-pues-voto-a-dios-que-antes"
 procedencia:

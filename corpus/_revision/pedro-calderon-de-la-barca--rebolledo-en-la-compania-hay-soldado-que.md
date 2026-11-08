@@ -1,5 +1,5 @@
 ---
-texto: "REBOLLEDO: En la compañía hay soldado que canta por excelencia, y la Chispa, que es mi alcaida del boliche, es la primera mujer en jacarear."
+texto: "REBOLLEDO: En la compañía hay soldado\nque canta por excelencia,\ny la Chispa, que es mi alcaida\ndel boliche, es la primera\nmujer en jacarear."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-rebolledo-en-la-compania-hay-soldado-que"
 procedencia:

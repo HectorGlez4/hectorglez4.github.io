@@ -1,5 +1,5 @@
 ---
-texto: "Salen don ÁLVARO, el SARGENTO, la CHISPA y REBOLLEDO, con guitarras, y soldados REBOLLEDO: Mejor estamos aquí, el sitio es más oportuno; tome rancho cada uno."
+texto: "Salen don ÁLVARO, el\nSARGENTO, la CHISPA y REBOLLEDO, con guitarras, y soldados\nREBOLLEDO: Mejor estamos aquí,\nel sitio es más oportuno;\ntome rancho cada uno."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-salen-don-alvaro-el-sargento-la-chispa"
 procedencia:

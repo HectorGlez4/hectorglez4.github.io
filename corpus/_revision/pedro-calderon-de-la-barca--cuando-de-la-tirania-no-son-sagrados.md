@@ -1,5 +1,5 @@
 ---
-texto: "¿Cuándo de la tiranía no son sagrados los montes?"
+texto: "¿Cuándo de la tiranía\nno son sagrados los montes?"
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-cuando-de-la-tirania-no-son-sagrados"
 procedencia:

@@ -1,5 +1,5 @@
 ---
-texto: "¡Ay, Isabel, qué de cuidados me cuestas!"
+texto: "¡Ay, Isabel,\nqué de cuidados me cuestas!"
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-ay-isabel-que-de-cuidados-me-cuestas"
 procedencia:

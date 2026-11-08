@@ -1,5 +1,5 @@
 ---
-texto: "Vase JUAN LOPE: Mi poca salud me deja sin sospecha en esta parte."
+texto: "Vase JUAN\nLOPE: Mi poca salud me deja\nsin sospecha en esta parte."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-vase-juan-lope-mi-poca-salud-me"
 procedencia:

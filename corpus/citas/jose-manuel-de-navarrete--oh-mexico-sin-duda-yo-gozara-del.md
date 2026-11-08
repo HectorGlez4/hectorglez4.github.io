@@ -1,5 +1,5 @@
 ---
-texto: "¡Oh México!, sin duda yo gozara del gusto que me brinda tu grandeza, si causa superior no lo estorbara."
+texto: "¡Oh México!, sin duda yo gozara\ndel gusto que me brinda tu grandeza,\nsi causa superior no lo estorbara."
 autor: "jose-manuel-de-navarrete"
 temas:
   - "la-patria"

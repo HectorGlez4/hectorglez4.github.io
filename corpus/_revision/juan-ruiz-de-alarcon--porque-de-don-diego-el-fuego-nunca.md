@@ -1,5 +1,5 @@
 ---
-texto: "Porque de don Diego el fuego nunca en ti halle lugar, 580 siempre a don Iuan has de hablar, aunque te hable don Diego."
+texto: "Porque de don Diego el fuego\nnunca en ti halle lugar, 580\nsiempre a don Iuan has de hablar,\naunque te hable don Diego."
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-porque-de-don-diego-el-fuego-nunca"
 procedencia:

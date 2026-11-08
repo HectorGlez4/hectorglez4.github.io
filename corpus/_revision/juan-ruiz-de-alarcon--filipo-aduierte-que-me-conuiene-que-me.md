@@ -1,5 +1,5 @@
 ---
-texto: "FILIPO Aduierte que me conuiene, que me auises luego, en viendo que viene Dion."
+texto: "FILIPO\nAduierte que me conuiene,\nque me auises luego, en viendo\nque viene Dion."
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-filipo-aduierte-que-me-conuiene-que-me"
 procedencia:

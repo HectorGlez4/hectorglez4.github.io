@@ -1,5 +1,5 @@
 ---
-texto: "Más Alcaides he tenido Que el castillo de Milán, Más guardas que Monumento, Más hierros que el Alcorán,"
+texto: "Más Alcaides he tenido\nQue el castillo de Milán,\nMás guardas que Monumento,\nMás hierros que el Alcorán,"
 autor: "francisco-de-quevedo"
 slug: "francisco-de-quevedo-mas-alcaides-he-tenido-que-el-castillo"
 procedencia:

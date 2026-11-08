@@ -1,5 +1,5 @@
 ---
-texto: "ÁLVARO: La justicia, cuando vos de ayer acá lo seáis, no tiene, si lo miráis, que ver conmigo."
+texto: "ÁLVARO: La justicia, cuando vos\nde ayer acá lo seáis,\nno tiene, si lo miráis,\nque ver conmigo."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-alvaro-la-justicia-cuando-vos-de-ayer"
 procedencia:

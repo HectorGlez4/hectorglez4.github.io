@@ -1,5 +1,5 @@
 ---
-texto: "Muévate en mí la piedad; que será rigor notable Que no hallen favor en tí ni soberbias ni humildades."
+texto: "Muévate en mí la piedad; que será rigor notable\nQue no hallen favor en tí ni soberbias ni humildades."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-muevate-en-mi-la-piedad-que-sera"
 procedencia:

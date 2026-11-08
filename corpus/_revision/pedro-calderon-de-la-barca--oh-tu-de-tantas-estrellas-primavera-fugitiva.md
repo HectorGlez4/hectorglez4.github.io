@@ -1,5 +1,5 @@
 ---
-texto: "¡Oh tú, de tantas estrellas primavera fugitiva, no des lugar a la aurora, que tu azul campaña pisa, para que con risa y llanto borre tu apacible vista!"
+texto: "¡Oh tú, de tantas estrellas\nprimavera fugitiva,\nno des lugar a la aurora,\nque tu azul campaña pisa,\npara que con risa y llanto\nborre tu apacible vista!"
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-oh-tu-de-tantas-estrellas-primavera-fugitiva"
 procedencia:

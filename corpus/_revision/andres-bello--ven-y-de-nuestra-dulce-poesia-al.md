@@ -1,5 +1,5 @@
 ---
-texto: "Ven, y de nuestra dulce poesía al apacible y delicioso culto, vuelva ya tu inspirada fantasía."
+texto: "Ven, y de nuestra dulce poesía\nal apacible y delicioso culto,\nvuelva ya tu inspirada fantasía."
 autor: "andres-bello"
 slug: "andres-bello-ven-y-de-nuestra-dulce-poesia-al"
 procedencia:

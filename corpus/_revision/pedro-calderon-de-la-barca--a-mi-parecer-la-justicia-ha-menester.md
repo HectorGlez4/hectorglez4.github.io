@@ -1,5 +1,5 @@
 ---
-texto: "A mi parecer la justicia ha menester más licencia, a lo que creo."
+texto: "A mi parecer\nla justicia ha menester\nmás licencia, a lo que creo."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-a-mi-parecer-la-justicia-ha-menester"
 procedencia:

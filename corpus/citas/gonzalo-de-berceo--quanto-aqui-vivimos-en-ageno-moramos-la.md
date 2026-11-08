@@ -1,5 +1,5 @@
 ---
-texto: "Quanto aqui vivimos, en ageno moramos; La ficanza durable suso la esperamos. La nuestra romeria estonz la acabamos Quando a paraiso las almas enviamos."
+texto: "Quanto aqui vivimos, en ageno moramos;\nLa ficanza durable suso la esperamos.\nLa nuestra romeria estonz la acabamos\nQuando a paraiso las almas enviamos."
 autor: "gonzalo-de-berceo"
 temas:
   - "la-muerte"

@@ -12,7 +12,7 @@
  */
 import type { Cita, Autor, Personaje } from '../lib/publicado.ts';
 import { rutaDeAutor, rutaDePersonaje } from '../lib/superficies.ts';
-import { lineaDeProcedencia } from '../lib/atribucion.ts';
+import { lineaDeProcedencia, nombreEnAtribucion } from '../lib/atribucion.ts';
 import { rutaDeLaObra } from '../lib/obras.ts';
 import type { Zona } from '../lib/vocabulario.ts';
 
@@ -47,7 +47,7 @@ if (personaje?.slug !== cita.personaje) {
 }
 const nombrado =
   personaje === undefined
-    ? { ruta: rutaDeAutor(autor.slug), nombre: autor.nombre }
+    ? { ruta: rutaDeAutor(autor.slug), nombre: nombreEnAtribucion(autor) }
     : { ruta: rutaDePersonaje(personaje.slug), nombre: personaje.nombre };
 /*
  * La línea de procedencia la compone `lineaDeProcedencia` (src/lib/atribucion.ts) en piezas:

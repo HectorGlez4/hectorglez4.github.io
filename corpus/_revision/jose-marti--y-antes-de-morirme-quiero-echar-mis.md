@@ -1,5 +1,5 @@
 ---
-texto: "Y antes de morirme quiero Echar mis versos del alma."
+texto: "Y antes de morirme quiero\nEchar mis versos del alma."
 autor: "jose-marti"
 slug: "jose-marti-y-antes-de-morirme-quiero-echar-mis"
 procedencia:

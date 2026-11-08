@@ -1,5 +1,5 @@
 ---
-texto: "¡Feliz, oh Musa, al que miraste pía cuando a la nueva luz recién nacido los tiernezuelos párpados abría!"
+texto: "¡Feliz, oh Musa, al que miraste pía\ncuando a la nueva luz recién nacido\nlos tiernezuelos párpados abría!"
 autor: "andres-bello"
 slug: "andres-bello-feliz-oh-musa-al-que-miraste-pia"
 procedencia:

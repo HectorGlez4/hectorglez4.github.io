@@ -1,5 +1,5 @@
 ---
-texto: "Temor y piedad en mí Sus razones han causado."
+texto: "Temor y piedad en mí\nSus razones han causado."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-temor-y-piedad-en-mi-sus-razones"
 procedencia:

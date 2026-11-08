@@ -1,5 +1,5 @@
 ---
-texto: "Vanse [don MENDO y NUÑO] ÁLVARO: Yo he de volver al lugar, porque tengo prevenida una criada a mirar si puedo por dicha hablar a aquesta hermosa homicida."
+texto: "Vanse [don MENDO y NUÑO]\nÁLVARO: Yo he de volver al lugar,\nporque tengo prevenida\nuna criada a mirar\nsi puedo por dicha hablar\na aquesta hermosa homicida."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-vanse-don-mendo-y-nuno-alvaro-yo"
 procedencia:

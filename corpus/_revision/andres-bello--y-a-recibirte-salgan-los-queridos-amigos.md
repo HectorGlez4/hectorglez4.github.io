@@ -1,5 +1,5 @@
 ---
-texto: "Y a recibirte salgan los queridos amigos con cantares de alegría, por cien bocas y ciento repetidos!"
+texto: "Y a recibirte salgan los queridos\namigos con cantares de alegría,\npor cien bocas y ciento repetidos!"
 autor: "andres-bello"
 slug: "andres-bello-y-a-recibirte-salgan-los-queridos-amigos"
 procedencia:

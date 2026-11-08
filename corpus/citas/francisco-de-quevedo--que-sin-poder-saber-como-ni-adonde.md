@@ -1,5 +1,5 @@
 ---
-texto: "¡Que sin poder saber cómo ni adónde la salud y la edad se hayan huido!"
+texto: "¡Que sin poder saber cómo ni adónde\nla salud y la edad se hayan huido!"
 autor: "francisco-de-quevedo"
 temas:
   - "el-tiempo"

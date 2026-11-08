@@ -1,5 +1,5 @@
 ---
-texto: "DON IUAN Basta que el numero crece. 45 LEONARDO Si vèras hemos de hablar, vna quiero yo contar, que las demas obscurece."
+texto: "DON IUAN\nBasta que el numero crece. 45\nLEONARDO\nSi vèras hemos de hablar,\nvna quiero yo contar,\nque las demas obscurece."
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-don-iuan-basta-que-el-numero-crece"
 procedencia:

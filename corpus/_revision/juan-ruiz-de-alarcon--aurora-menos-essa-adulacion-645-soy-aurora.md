@@ -1,5 +1,5 @@
 ---
-texto: "AURORA Menos essa adulacion 645 soy Aurora, y ya deseo de la nouedad que veo escucharos la ocasion, y saber quien sois."
+texto: "AURORA\nMenos essa adulacion 645\nsoy Aurora, y ya deseo\nde la nouedad que veo\nescucharos la ocasion,\ny saber quien sois."
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-aurora-menos-essa-adulacion-645-soy-aurora"
 procedencia:

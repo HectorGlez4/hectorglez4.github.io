@@ -1,5 +1,5 @@
 ---
-texto: "MENDO: ¡Vive Dios, si por el honor no fuera de Isabel, que lo matara!"
+texto: "MENDO: ¡Vive Dios,\nsi por el honor no fuera\nde Isabel, que lo matara!"
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-mendo-vive-dios-si-por-el-honor"
 procedencia:

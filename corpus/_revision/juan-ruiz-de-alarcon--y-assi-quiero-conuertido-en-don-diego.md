@@ -1,5 +1,5 @@
 ---
-texto: "Y assi quiero conuertido en don Diego pretendella, y ver si el amor en ella 390 es verdadero, o fingido."
+texto: "Y assi quiero conuertido\nen don Diego pretendella,\ny ver si el amor en ella 390\nes verdadero, o fingido."
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-y-assi-quiero-conuertido-en-don-diego"
 procedencia:

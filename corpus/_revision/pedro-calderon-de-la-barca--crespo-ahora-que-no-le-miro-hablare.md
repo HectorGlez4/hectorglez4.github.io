@@ -1,5 +1,5 @@
 ---
-texto: "CRESPO: Ahora,que no le miro, hablaré más consolado."
+texto: "CRESPO: Ahora,que no le miro,\nhablaré más consolado."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-crespo-ahora-que-no-le-miro-hablare"
 procedencia:

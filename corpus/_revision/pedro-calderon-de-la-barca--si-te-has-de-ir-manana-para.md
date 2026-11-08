@@ -1,5 +1,5 @@
 ---
-texto: "Si te has de ir mañana, ¿para qué intentas, que una mujer en un día te escuche y te favorezca?"
+texto: "Si te has de ir\nmañana, ¿para qué intentas,\nque una mujer en un día\nte escuche y te favorezca?"
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-si-te-has-de-ir-manana-para"
 procedencia:

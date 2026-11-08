@@ -1,5 +1,5 @@
 ---
-texto: "¿Pido limosna acaso, o perdulario coplero soy de esquina por ventura?"
+texto: "¿Pido limosna acaso, o perdulario\ncoplero soy de esquina por ventura?"
 autor: "mariano-jose-de-larra"
 slug: "mariano-jose-de-larra-pido-limosna-acaso-o-perdulario-coplero-soy"
 procedencia:

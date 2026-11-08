@@ -1,5 +1,5 @@
 ---
-texto: "Llegó, en efecto, el sol cerrando el giro que esculpió de oro sobre azul zafiro."
+texto: "Llegó, en efecto, el sol cerrando el giro\nque esculpió de oro sobre azul zafiro."
 autor: "sor-juana-ines-de-la-cruz"
 slug: "sor-juana-ines-de-la-cruz-llego-en-efecto-el-sol-cerrando-el"
 procedencia:

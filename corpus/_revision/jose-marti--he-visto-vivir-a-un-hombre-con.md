@@ -1,5 +1,5 @@
 ---
-texto: "He visto vivir a un hombre Con el puñal al costado, Sin decir jamás el nombre De aquélla que lo ha matado."
+texto: "He visto vivir a un hombre\nCon el puñal al costado,\nSin decir jamás el nombre\nDe aquélla que lo ha matado."
 autor: "jose-marti"
 slug: "jose-marti-he-visto-vivir-a-un-hombre-con"
 procedencia:

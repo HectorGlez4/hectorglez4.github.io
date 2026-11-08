@@ -1,5 +1,5 @@
 ---
-texto: "Ya tengo honra, pues ya tengo espada con que seguirlos."
+texto: "Ya tengo honra, pues ya tengo\nespada con que seguirlos."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-ya-tengo-honra-pues-ya-tengo-espada"
 procedencia:

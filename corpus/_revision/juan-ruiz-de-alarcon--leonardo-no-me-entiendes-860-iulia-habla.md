@@ -1,5 +1,5 @@
 ---
-texto: "LEONARDO No me entiendes. 860 IULIA Habla, pues."
+texto: "LEONARDO\nNo me entiendes.\n860\nIULIA\nHabla, pues."
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-leonardo-no-me-entiendes-860-iulia-habla"
 procedencia:

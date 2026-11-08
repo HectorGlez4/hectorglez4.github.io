@@ -1,5 +1,5 @@
 ---
-texto: "Sentaos, pues, y divertidd esa continua dolencia."
+texto: "Sentaos, pues, y divertidd\nesa continua dolencia."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-sentaos-pues-y-divertidd-esa-continua-dolencia"
 procedencia:

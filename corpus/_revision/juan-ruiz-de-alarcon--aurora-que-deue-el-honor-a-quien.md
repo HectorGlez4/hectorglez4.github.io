@@ -1,5 +1,5 @@
 ---
-texto: "AURORA Que deue el honor, a quien se atreue a ofender en el honor? 795 Assi paga beneficios?"
+texto: "AURORA\nQue deue\nel honor, a quien se atreue\na ofender en el honor? 795\nAssi paga beneficios?"
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-aurora-que-deue-el-honor-a-quien"
 procedencia:

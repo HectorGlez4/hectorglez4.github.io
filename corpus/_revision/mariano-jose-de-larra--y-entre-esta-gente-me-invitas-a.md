@@ -1,5 +1,5 @@
 ---
-texto: "¿Y entre esta gente me invitas a quedarme?"
+texto: "¿Y entre esta gente\nme invitas a quedarme?"
 autor: "mariano-jose-de-larra"
 slug: "mariano-jose-de-larra-y-entre-esta-gente-me-invitas-a"
 procedencia:

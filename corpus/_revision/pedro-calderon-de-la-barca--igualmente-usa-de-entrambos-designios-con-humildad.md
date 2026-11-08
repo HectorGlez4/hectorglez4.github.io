@@ -1,5 +1,5 @@
 ---
-texto: "Igualmente usa de entrambos designios con humildad; porque, siendo humilde, con cuerdo arbitrio acordarás lo mejor y como tal, en olvido pondrás cosas, que suceden al revés en los altivos."
+texto: "Igualmente\nusa de entrambos designios\ncon humildad; porque, siendo\nhumilde, con cuerdo arbitrio\nacordarás lo mejor\ny como tal, en olvido\npondrás cosas, que suceden\nal revés en los altivos."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-igualmente-usa-de-entrambos-designios-con-humildad"
 procedencia:

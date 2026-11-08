@@ -1,5 +1,5 @@
 ---
-texto: "CRESPO: Unos pliegos de papel, que voy juntando, en razón de hacer la averiguación de la causa."
+texto: "CRESPO: Unos pliegos de papel,\nque voy juntando, en razón\nde hacer la averiguación\nde la causa."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-crespo-unos-pliegos-de-papel-que-voy"
 procedencia:

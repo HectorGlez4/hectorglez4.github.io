@@ -1,5 +1,5 @@
 ---
-texto: "Aparte ¡Oh, cómo tiene prudencia!) Salen INÉS e ISABEL [y JUAN] ISABEL: ¿Qué es, señor, lo que me mandas?"
+texto: "Aparte\n¡Oh, cómo tiene prudencia!)\nSalen INÉS e ISABEL [y JUAN]\nISABEL: ¿Qué es, señor, lo que me mandas?"
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-aparte-oh-como-tiene-prudencia-salen-ines"
 procedencia:

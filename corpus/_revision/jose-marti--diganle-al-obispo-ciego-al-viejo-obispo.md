@@ -1,5 +1,5 @@
 ---
-texto: "¡Díganle al obispo ciego, Al viejo obispo de España Que venga, que venga luego, A mi templo, a la montaña!"
+texto: "¡Díganle al obispo ciego,\nAl viejo obispo de España\nQue venga, que venga luego,\nA mi templo, a la montaña!"
 autor: "jose-marti"
 slug: "jose-marti-diganle-al-obispo-ciego-al-viejo-obispo"
 procedencia:

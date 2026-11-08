@@ -1,5 +1,5 @@
 ---
-texto: "Si no siempre entendidos, siempre abiertos, O enmiendan, o fecundan mis asuntos; Y en músicos callados contrapuntos Al sueño de la vida hablan despiertos."
+texto: "Si no siempre entendidos, siempre abiertos,\nO enmiendan, o fecundan mis asuntos;\nY en músicos callados contrapuntos\nAl sueño de la vida hablan despiertos."
 autor: "francisco-de-quevedo"
 slug: "francisco-de-quevedo-si-no-siempre-entendidos-siempre-abiertos-o"
 procedencia:

@@ -1,5 +1,5 @@
 ---
-texto: "CRESPO: El señor don Lope intenta honraros."
+texto: "CRESPO: El señor don Lope intenta\nhonraros."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-crespo-el-senor-don-lope-intenta-honraros"
 procedencia:

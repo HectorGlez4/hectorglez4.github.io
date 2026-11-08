@@ -1,5 +1,5 @@
 ---
-texto: "De Angulo y Pumacagua la ceniza nuevos y más felices capitanes vengarán, y a los hados de su pueblo abrirán vencedores el camino."
+texto: "De Angulo y Pumacagua la ceniza\nnuevos y más felices capitanes\nvengarán, y a los hados de su pueblo\nabrirán vencedores el camino."
 autor: "andres-bello"
 slug: "andres-bello-de-angulo-y-pumacagua-la-ceniza-nuevos"
 procedencia:

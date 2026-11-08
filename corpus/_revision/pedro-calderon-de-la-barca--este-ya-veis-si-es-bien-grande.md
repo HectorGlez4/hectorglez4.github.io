@@ -1,5 +1,5 @@
 ---
-texto: "Éste ya veis si es bien grande, pues aunque encubrirle quiero, no puedo; que sabe Dios, que a poder estar secreto y sepultado en mí mismo, no viniera a lo que vengo; que todo esto remitiera, por no hablar, al sufrimiento."
+texto: "Éste ya veis si es bien grande,\npues aunque encubrirle quiero,\nno puedo; que sabe Dios,\nque a poder estar secreto\ny sepultado en mí mismo,\nno viniera a lo que vengo;\nque todo esto remitiera,\npor no hablar, al sufrimiento."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-este-ya-veis-si-es-bien-grande"
 procedencia:

@@ -1,5 +1,5 @@
 ---
-texto: "Fuera, señor, que la culpa si se entiende,será nuestra, no tuya, si de rebozo vas en la tropa."
+texto: "Fuera, señor, que la culpa\nsi se entiende,será nuestra,\nno tuya, si de rebozo\nvas en la tropa."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-fuera-senor-que-la-culpa-si-se"
 procedencia:

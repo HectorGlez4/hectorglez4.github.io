@@ -1,5 +1,5 @@
 ---
-texto: "FILIPO Señora si del amor no habeis probado el rigor, 675 al menos su ceguedad por fama habreis entendido."
+texto: "FILIPO\nSeñora si del amor\nno habeis probado el rigor, 675\nal menos su ceguedad\npor fama habreis entendido."
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-filipo-senora-si-del-amor-no-habeis"
 procedencia:

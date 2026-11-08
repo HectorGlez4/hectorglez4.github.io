@@ -1,5 +1,5 @@
 ---
-texto: "Anacreonte español, no hay quien os tope, que no diga con mucha cortesía, que ya que vuestros pies son de elegía, que vuestras suavidades son de arrope."
+texto: "Anacreonte español, no hay quien os tope,\nque no diga con mucha cortesía,\nque ya que vuestros pies son de elegía,\nque vuestras suavidades son de arrope."
 autor: "luis-de-gongora"
 slug: "luis-de-gongora-anacreonte-espanol-no-hay-quien-os-tope"
 procedencia:

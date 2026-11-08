@@ -1,5 +1,5 @@
 ---
-texto: "Otro se goce en el feroz tumulto de la batalla y la sangrienta gloria, a la llorosa humanidad insulto;"
+texto: "Otro se goce en el feroz tumulto\nde la batalla y la sangrienta gloria,\na la llorosa humanidad insulto;"
 autor: "andres-bello"
 slug: "andres-bello-otro-se-goce-en-el-feroz-tumulto"
 procedencia:

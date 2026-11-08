@@ -1,5 +1,5 @@
 ---
-texto: "Baste decir que a las quejas de los vientos repetidas, en que ya no pedía al cielo socorro sino justicia, salió el alba, y con el alba, trayendo a la luz por guía, sentí ruido entre unas ramas."
+texto: "Baste decir que a las quejas\nde los vientos repetidas,\nen que ya no pedía al cielo\nsocorro sino justicia,\nsalió el alba, y con el alba,\ntrayendo a la luz por guía,\nsentí ruido entre unas ramas."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-baste-decir-que-a-las-quejas-de"
 procedencia:

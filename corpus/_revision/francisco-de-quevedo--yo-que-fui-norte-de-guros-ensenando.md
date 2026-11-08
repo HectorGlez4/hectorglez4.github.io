@@ -1,5 +1,5 @@
 ---
-texto: "Yo, que fui Norte de guros, Enseñando a navegar A las Godeñas en ansias, A los buzos en afán,"
+texto: "Yo, que fui Norte de guros,\nEnseñando a navegar\nA las Godeñas en ansias,\nA los buzos en afán,"
 autor: "francisco-de-quevedo"
 slug: "francisco-de-quevedo-yo-que-fui-norte-de-guros-ensenando"
 procedencia:

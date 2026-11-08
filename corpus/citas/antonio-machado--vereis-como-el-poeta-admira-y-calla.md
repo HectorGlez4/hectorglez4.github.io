@@ -1,5 +1,5 @@
 ---
-texto: "Veréis cómo el poeta admira y calla, el sabio mira y piensa..."
+texto: "Veréis cómo el poeta admira y calla,\nel sabio mira y piensa..."
 autor: "antonio-machado"
 temas:
   - "el-saber"

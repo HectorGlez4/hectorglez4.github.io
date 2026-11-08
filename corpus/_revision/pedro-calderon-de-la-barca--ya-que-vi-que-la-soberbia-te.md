@@ -1,5 +1,5 @@
 ---
-texto: "Ya que vi que la soberbia te ofendió tanto, ignorante Fuera en no pedirte humilde vida que á tus plantas yace."
+texto: "Ya que vi que la soberbia te ofendió tanto, ignorante\nFuera en no pedirte humilde vida que á tus plantas yace."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-ya-que-vi-que-la-soberbia-te"
 procedencia:

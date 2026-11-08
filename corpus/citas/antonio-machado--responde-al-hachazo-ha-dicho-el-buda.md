@@ -1,5 +1,5 @@
 ---
-texto: "Responde al hachazo -ha dicho el Buda ¡y el Cristo!- con tu aroma, como el sándalo."
+texto: "Responde al hachazo\n-ha dicho el Buda ¡y el Cristo!-\ncon tu aroma, como el sándalo."
 autor: "antonio-machado"
 temas:
   - "la-virtud"

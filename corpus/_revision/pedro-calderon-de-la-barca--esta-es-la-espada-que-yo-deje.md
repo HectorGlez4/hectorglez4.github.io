@@ -1,5 +1,5 @@
 ---
-texto: "Esta es la espada que yo dejé á la hermosa Violante, Por señas que el que ceñida la trajera, habia de hallarme Amoroso como hijo, y piadoso como padre."
+texto: "Esta es la espada que yo dejé á la hermosa Violante,\nPor señas que el que ceñida la trajera, habia de hallarme\nAmoroso como hijo, y piadoso como padre."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-esta-es-la-espada-que-yo-deje"
 procedencia:

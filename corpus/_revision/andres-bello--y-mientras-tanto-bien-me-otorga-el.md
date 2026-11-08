@@ -1,5 +1,5 @@
 ---
-texto: "Y mientras tanto bien me otorga el cielo, ¡oh Musas!"
+texto: "Y mientras tanto bien me otorga el cielo,\n¡oh Musas!"
 autor: "andres-bello"
 slug: "andres-bello-y-mientras-tanto-bien-me-otorga-el"
 procedencia:

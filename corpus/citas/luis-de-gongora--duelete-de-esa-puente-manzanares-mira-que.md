@@ -1,5 +1,5 @@
 ---
-texto: "Duélete de esa puente, Manzanares; mira que dice por ahí la gente, que no eres río para media puente, y que ella es puente para muchos mares."
+texto: "Duélete de esa puente, Manzanares;\nmira que dice por ahí la gente,\nque no eres río para media puente,\ny que ella es puente para muchos mares."
 autor: "luis-de-gongora"
 temas:
   - "la-verdad"

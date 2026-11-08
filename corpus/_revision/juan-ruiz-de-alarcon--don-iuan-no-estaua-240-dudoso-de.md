@@ -1,5 +1,5 @@
 ---
-texto: "DON IUAN No estaua 240 dudoso de esta fineza: pero sin saber la causa y el fin, ¿os vais a embarcar?"
+texto: "DON IUAN\nNo estaua\n240\ndudoso de esta fineza:\npero sin saber la causa\ny el fin, ¿os vais a embarcar?"
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-don-iuan-no-estaua-240-dudoso-de"
 procedencia:

@@ -1,5 +1,5 @@
 ---
-texto: "Por ventura la Tierra de envidiosa Contra ti arma ejércitos triunfantes, En sus monstruos soberbios poderosa;"
+texto: "Por ventura la Tierra de envidiosa\nContra ti arma ejércitos triunfantes,\nEn sus monstruos soberbios poderosa;"
 autor: "francisco-de-quevedo"
 slug: "francisco-de-quevedo-por-ventura-la-tierra-de-envidiosa-contra"
 procedencia:

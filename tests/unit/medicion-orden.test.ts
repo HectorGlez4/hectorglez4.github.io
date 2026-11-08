@@ -599,9 +599,19 @@ describe('Historia 23.2 — las balizas de prueba', () => {
       ...Object.fromEntries(campos.map((campo) => [campo, null])),
     });
     for (const [evento, declarados] of Object.entries(vocabularioDeLaV8.eventos)) {
-      const i = esperadas.findIndex((fila) => fila !== null && fila.evento === evento && campos.every((c) => fila[c] === null));
+      // La descartable es la última fila vacía de su evento: `balizasDePrueba` la empuja detrás de las
+      // válidas. «Descartable» es de sus campos, no de la fila: lleva un valor en cada campo ajeno a su
+      // evento, el receptor guarda la fila con esos campos a nulo, y el bucle de abajo exige que la
+      // baliza los lleve. Un evento sin campos (los de citar, Historia 30.5) deja además vacía su baliza
+      // válida —no tiene campo que llenar—: dos filas vacías, la buena y la descartada, que se
+      // distinguen por la baliza. La única fila que el receptor no guarda es la del evento ajeno
+      // (`EVENTO_AJENO`): de ahí las 91 balizas enviadas y 90 filas leídas del ensayo.
+      const i = esperadas.findLastIndex((fila) => fila !== null && fila.evento === evento && campos.every((c) => fila[c] === null));
       expect(i, evento).toBeGreaterThanOrEqual(0);
-      expect(esperadas.filter((fila) => fila !== null && JSON.stringify(fila) === JSON.stringify(vacia(evento)))).toHaveLength(1);
+      const sinCampos = Object.keys(declarados).length === 0;
+      expect(esperadas.filter((fila) => fila !== null && JSON.stringify(fila) === JSON.stringify(vacia(evento)))).toHaveLength(
+        sinCampos ? 2 : 1,
+      );
       const baliza = balizas[i];
       for (const campo of campos) {
         const declaracion = declarados[campo];
@@ -776,7 +786,7 @@ describe('Historia 23.2 — la cuota y los recuentos', () => {
   it('las escrituras de las balizas se dicen, y peca por exceso: cada una, insertada y borrada en cada intento', () => {
     const balizas = escriturasDeLasBalizas(huellaDelVocabulario());
     expect(balizas).toBe(balizasDePrueba(huellaDelVocabulario()).balizas.length * FILAS_ESCRITAS_POR_FILA_BARAJADA * 2 * INTENTOS_DE_COMPROBACION);
-    expect(balizas).toBe(87 * 3 * 2 * 3);
+    expect(balizas).toBe(91 * 3 * 2 * 3);
     const barajado = cabeElBarajado({ filas: 10, escritas24h: 1_000 + balizas, cuota: 100_000, balizas });
     expect(barajado.mensaje).toContain(`van ${1_000 + balizas} en las últimas 24 h (contadas unas ${balizas} de las balizas de esta orden)`);
     expect(cabeElBarajado({ filas: 10, escritas24h: 1_000, cuota: 100_000 }).mensaje).not.toContain('balizas de esta orden');
@@ -1012,6 +1022,8 @@ describe('Historia 23.10 — el SQL de la lectura', () => {
       EVENTOS.descargaDeImagen,
       EVENTOS.comparticionDeImagen,
       EVENTOS.comparticionDeEnlace,
+      EVENTOS.copiadoDeReferencia,
+      EVENTOS.copiadoDeFragmento,
     ]);
     expect(eventosDe(sentencias.busquedas)).toEqual([EVENTOS.busqueda]);
     expect(eventosDe(sentencias.sinResultados)).toEqual([EVENTOS.busquedaSinResultados]);

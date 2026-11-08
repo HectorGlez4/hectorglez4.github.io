@@ -1,5 +1,5 @@
 ---
-texto: "CRESPO: Con que fin el autor da a esta historia verdadera."
+texto: "CRESPO: Con que fin el autor da\na esta historia verdadera."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-crespo-con-que-fin-el-autor-da"
 procedencia:

@@ -1,5 +1,5 @@
 ---
-texto: "El Garlo, que siempre fue en todo lo que le cumple rayo de tejado abajo, porque era rayo sin nube, sacó la espada, y a un tiempo un tajo y revés sacude.\" Acuchíllanlos don LOPE y Pedro CRESPO CRESPO: Sería de esta manera."
+texto: "El Garlo, que siempre fue\nen todo lo que le cumple\nrayo de tejado abajo,\nporque era rayo sin nube,\nsacó la espada, y a un tiempo\nun tajo y revés sacude.\"\nAcuchíllanlos don LOPE y Pedro CRESPO\nCRESPO: Sería de esta manera."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-el-garlo-que-siempre-fue-en-todo"
 procedencia:

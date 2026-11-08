@@ -1,5 +1,5 @@
 ---
-texto: "Por quien las noticias sé De cielo y tierra; y aunque Aquí, porque mas te asombres Y monstruo humano me nombres."
+texto: "Por quien las noticias sé\nDe cielo y tierra; y aunque\nAquí, porque mas te asombres\nY monstruo humano me nombres."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-por-quien-las-noticias-se-de-cielo"
 procedencia:

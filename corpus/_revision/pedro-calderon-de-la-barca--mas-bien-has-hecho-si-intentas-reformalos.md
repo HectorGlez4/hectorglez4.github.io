@@ -1,5 +1,5 @@
 ---
-texto: "Mas bien has hecho, si intentas reformalos por familia, que no sirve ni aprovecha."
+texto: "Mas bien has hecho, si intentas\nreformalos por familia,\nque no sirve ni aprovecha."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-mas-bien-has-hecho-si-intentas-reformalos"
 procedencia:

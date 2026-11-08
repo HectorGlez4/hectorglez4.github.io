@@ -1,5 +1,5 @@
 ---
-texto: "CRESPO: Yo lo dijera, señor, si allí supiera, al oíros, que erais..."
+texto: "CRESPO: Yo lo dijera, señor,\nsi allí supiera, al oíros,\nque erais..."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-crespo-yo-lo-dijera-senor-si-alli"
 procedencia:

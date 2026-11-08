@@ -1,5 +1,5 @@
 ---
-texto: "El filósofo era Un borracho barbón: ¡Oh!"
+texto: "El filósofo era\nUn borracho barbón: ¡Oh!"
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-el-filosofo-era-un-borracho-barbon-oh"
 procedencia:

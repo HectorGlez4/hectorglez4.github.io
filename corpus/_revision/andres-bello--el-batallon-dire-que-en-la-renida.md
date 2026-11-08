@@ -1,5 +1,5 @@
 ---
-texto: "¿El batallón diré que, en la reñida función de Bomboná, las bayonetas en los pendientes precipicios clava, osa escalar por ellos la alta cima, y de la. fortaleza se hace dueño que a las armas patricias desafiaba?"
+texto: "¿El batallón diré que, en la reñida\nfunción de Bomboná, las bayonetas\nen los pendientes precipicios clava,\nosa escalar por ellos la alta cima,\ny de la. fortaleza se hace dueño\nque a las armas patricias desafiaba?"
 autor: "andres-bello"
 slug: "andres-bello-el-batallon-dire-que-en-la-renida"
 procedencia:

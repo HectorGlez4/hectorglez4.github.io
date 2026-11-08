@@ -1,5 +1,5 @@
 ---
-texto: "CRESPO: Un villanote será que, si cabezudo da, en que ha de darle garrote, ¡par Dios!, se salga con ello."
+texto: "CRESPO: Un villanote será\nque, si cabezudo da,\nen que ha de darle garrote,\n¡par Dios!, se salga con ello."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-crespo-un-villanote-sera-que-si-cabezudo"
 procedencia:

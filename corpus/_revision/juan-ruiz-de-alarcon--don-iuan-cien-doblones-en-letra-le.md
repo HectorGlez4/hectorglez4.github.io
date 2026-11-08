@@ -1,5 +1,5 @@
 ---
-texto: "DON IUAN Cien doblones en letra le remiti para el gasto."
+texto: "DON IUAN\nCien doblones\nen letra le remiti\npara el gasto."
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-don-iuan-cien-doblones-en-letra-le"
 procedencia:

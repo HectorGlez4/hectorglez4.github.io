@@ -1,5 +1,5 @@
 ---
-texto: "¿Por qué indicio pudiste sospechar que esté demente?"
+texto: "¿Por qué indicio\npudiste sospechar que esté demente?"
 autor: "mariano-jose-de-larra"
 slug: "mariano-jose-de-larra-por-que-indicio-pudiste-sospechar-que-este"
 procedencia:

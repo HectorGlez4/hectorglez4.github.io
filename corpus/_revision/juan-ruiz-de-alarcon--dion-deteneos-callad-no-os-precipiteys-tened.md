@@ -1,5 +1,5 @@
 ---
-texto: "DION Deteneos, callad, no os precipiteys; tened, tened sufrimiento, que solo de vuestro intento 335 es dilacion la que veys: (A parte.)"
+texto: "DION\nDeteneos,\ncallad, no os precipiteys;\ntened, tened sufrimiento,\nque solo de vuestro intento 335\nes dilacion la que veys:\n(A parte.)"
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-dion-deteneos-callad-no-os-precipiteys-tened"
 procedencia:

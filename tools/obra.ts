@@ -44,6 +44,15 @@
  * `quitar-edicion` quita la de la posición `n` (desde 1, como las numera el parte de `edicion`);
  * código 1 si no existe esa posición. Las ediciones las decide Héctor: ningún agente declara una.
  *
+ * Historia 29.4 — los casi duplicados:
+ *
+ *   npm run obra -- casi-duplicados [<ficha>...] [--json] [--corpus corpus]
+ *
+ * Recorre los pares de Citas publicadas de cada Obra —o de las fichas nombradas— y señala los
+ * repetidos, los contenidos y los casi iguales, con la única medida de `tools/lib/parecido.ts`. Es
+ * un parte: no escribe nada y no decide nada (retirar, conservar o restituir lo decide una
+ * persona). Código 1 si una ficha nombrada no existe o el Corpus no se deja leer, sin parte.
+ *
  * Códigos: 2 es la forma de la invocación (falta un argumento, sobra uno, una bandera que no
  * existe); 1 es lo que la invocación dice.
  *
@@ -51,6 +60,7 @@
  */
 
 import { fechaLocal, rutasDelCorpus } from './lib/corpus.ts';
+import { casiDuplicados, formatearCasiDuplicados } from './lib/casiDuplicados.ts';
 import {
   motivosDeArgumentosNoReconocidos,
   opcion,
@@ -82,6 +92,7 @@ const USO = [
   '  npm run obra -- titular <ficha> "<grafía>" [--corpus corpus]',
   '  npm run obra -- edicion <ficha> <tienda> <impresa|electronica> <url> [--descripcion "<texto>"] [--corpus corpus]',
   '  npm run obra -- quitar-edicion <ficha> <n> [--corpus corpus]',
+  '  npm run obra -- casi-duplicados [<ficha>...] [--json] [--corpus corpus]',
   '  npm run obra -- congelar [--corpus corpus]',
   '  npm run obra -- levantar',
   '',
@@ -244,6 +255,28 @@ async function principal(): Promise<never> {
         usoMal([`«${n}» no es una posición: las ediciones se numeran desde 1, como las lista \`edicion\`.`]);
       }
       return terminar(await quitarEdicion(rutas, ficha, Number(n)));
+    }
+
+    case 'casi-duplicados': {
+      const conValor = ['--corpus'];
+      const soloOpciones = resto.filter((a, i) => a.startsWith('--') || (i > 0 && resto[i - 1] === '--corpus'));
+      const mal = motivosDeArgumentosNoReconocidos(soloOpciones, { solas: ['--json'], conValor });
+      if (mal.length > 0) usoMal(mal);
+      for (const bandera of ['--corpus', '--json']) {
+        if (resto.filter((a) => a === bandera).length > 1) usoMal([`«${bandera}» se da dos veces.`]);
+      }
+      const fichas = [...posicionales(resto, conValor), ...trasElSeparador];
+      const resultado = await casiDuplicados(rutas, fichas);
+      if (!resultado.ok) {
+        process.stderr.write(`${resultado.motivos.join('\n')}\n`);
+        return process.exit(1);
+      }
+      process.stdout.write(
+        resto.includes('--json')
+          ? `${JSON.stringify(resultado.parte, null, 2)}\n`
+          : `${formatearCasiDuplicados(resultado.parte)}\n`,
+      );
+      return process.exit(0);
     }
 
     case 'congelar':

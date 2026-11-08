@@ -1,5 +1,5 @@
 ---
-texto: "Y de que le entendió yo os lo prometo, pues envió a decir con don Bermudo: «que vuelvan a cantar aquel soneto»."
+texto: "Y de que le entendió yo os lo prometo,\npues envió a decir con don Bermudo:\n«que vuelvan a cantar aquel soneto»."
 autor: "luis-de-gongora"
 slug: "luis-de-gongora-y-de-que-le-entendio-yo-os"
 procedencia:

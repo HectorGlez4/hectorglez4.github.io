@@ -1,5 +1,5 @@
 ---
-texto: "¿Si audaz cantare al que la helada cima superó de los Andes, y de Chile despedazó los hierros, y de Lima? ................................"
+texto: "¿Si audaz cantare al que la helada cima\nsuperó de los Andes, y de Chile\ndespedazó los hierros, y de Lima?\n................................"
 autor: "andres-bello"
 slug: "andres-bello-si-audaz-cantare-al-que-la-helada"
 procedencia:

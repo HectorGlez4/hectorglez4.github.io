@@ -1,5 +1,5 @@
 ---
-texto: "Cuentan de un sabio, que un dia Tan pobre y mísero estaba, Que sólo se sustentaba De unas yerbas que cogia."
+texto: "Cuentan de un sabio, que un dia\nTan pobre y mísero estaba,\nQue sólo se sustentaba\nDe unas yerbas que cogia."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-cuentan-de-un-sabio-que-un-dia"
 procedencia:

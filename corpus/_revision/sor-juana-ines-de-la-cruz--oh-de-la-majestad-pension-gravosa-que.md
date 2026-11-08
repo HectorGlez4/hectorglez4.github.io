@@ -1,5 +1,5 @@
 ---
-texto: "¡Oh de la Majestad pensión gravosa, que aun el menor descuido no perdona!"
+texto: "¡Oh de la Majestad pensión gravosa,\nque aun el menor descuido no perdona!"
 autor: "sor-juana-ines-de-la-cruz"
 slug: "sor-juana-ines-de-la-cruz-oh-de-la-majestad-pension-gravosa-que"
 procedencia:

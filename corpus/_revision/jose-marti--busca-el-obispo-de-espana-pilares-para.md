@@ -1,5 +1,5 @@
 ---
-texto: "Busca el obispo de España Pilares para su altar; ¡En mi templo, en la montaña, El álamo es el pilar!"
+texto: "Busca el obispo de España\nPilares para su altar;\n¡En mi templo, en la montaña,\nEl álamo es el pilar!"
 autor: "jose-marti"
 slug: "jose-marti-busca-el-obispo-de-espana-pilares-para"
 procedencia:

@@ -1,5 +1,5 @@
 ---
-texto: "ÁLVARO: (No me puedo defender Aparte fuerza es dejarme prender.) Al Rey de esta sinrazón me quejaré."
+texto: "ÁLVARO: (No me puedo defender Aparte\nfuerza es dejarme prender.)\nAl Rey de esta sinrazón\nme quejaré."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-alvaro-no-me-puedo-defender-aparte-fuerza"
 procedencia:

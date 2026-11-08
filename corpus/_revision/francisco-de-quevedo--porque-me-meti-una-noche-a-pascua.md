@@ -1,5 +1,5 @@
 ---
-texto: "Porque me metí una noche A Pascua de Navidad Y libré todos los presos Me mandaron cercenar."
+texto: "Porque me metí una noche\nA Pascua de Navidad\nY libré todos los presos\nMe mandaron cercenar."
 autor: "francisco-de-quevedo"
 slug: "francisco-de-quevedo-porque-me-meti-una-noche-a-pascua"
 procedencia:

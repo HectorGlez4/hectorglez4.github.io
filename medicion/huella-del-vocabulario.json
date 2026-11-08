@@ -1,6 +1,6 @@
 {
-  "escritaEl": "2026-10-24",
-  "commit": "b4303b0e7c809ab1862a63ca8737008f1b66e802",
+  "escritaEl": "2026-11-08",
+  "commit": "1ce3dbf051e89cab44eba8bbabf8791e4c0b9d1b",
   "vocabulario": {
     "eventos": {
       "busqueda": {
@@ -84,6 +84,8 @@
           "nulo": false
         }
       },
+      "copiado-de-fragmento": {},
+      "copiado-de-referencia": {},
       "descarga-de-imagen": {
         "destino": {
           "valores": [

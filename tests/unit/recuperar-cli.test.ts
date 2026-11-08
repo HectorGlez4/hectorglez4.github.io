@@ -1954,3 +1954,52 @@ describe('Historia 24.9 — recuperar --indice', () => {
     expect(await pedidas(t)).toEqual([]);
   });
 });
+
+describe('Historia 29.1 — el documento nuevo declara la forma de sus líneas (AD-29)', () => {
+  const URL_POEMA = 'https://es.wikisource.org/wiki/Versos_sencillos/I';
+  const POEMA = `<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"/>
+<title>Versos sencillos/I - Wikisource</title></head><body>
+<h1 id="firstHeading">Versos sencillos/I</h1>
+<div id="mw-content-text"><div class="mw-parser-output">
+<p>Yo soy un hombre sincero<br/>De donde crece la palma.<br/>Y antes de morirme quiero<br/>Echar mis versos del alma.</p>
+<p>Yo vengo de todas partes,<br/>Y hacia todas partes voy:<br/>Arte soy entre las artes,<br/>En los montes, monte soy.</p>
+<p>Yo sé los nombres extraños<br/>De las yerbas y las flores,<br/>Y de mortales engaños,<br/>Y de sublimes dolores.</p>
+</div></div></body></html>`;
+  const parrafo = (n: number) =>
+    `<p>Párrafo ${n} de la obra en prosa, largo como los de una edición de verdad, que no parte ` +
+    'la línea a ningún ancho fijo y que sigue y sigue hasta acabar la frase en su sitio.</p>';
+  const PROSA = `<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"/>
+<title>Sobre la brevedad de la vida - Wikisource</title></head><body>
+<h1 id="firstHeading">Sobre la brevedad de la vida</h1>
+<div id="mw-content-text"><div class="mw-parser-output">
+${[1, 2, 3, 4, 5].map(parrafo).join('\n')}
+</div></div></body></html>`;
+
+  it('un poema lleva «lineas: verso» y una prosa, su forma de prosa', async () => {
+    const t = await taller();
+    const poema = await recuperar(URL_POEMA, t, { [URL_POEMA]: OK(POEMA) });
+    expect(poema.codigo, poema.error).toBe(0);
+    const prosa = await recuperar(URL_WIKISOURCE, t, { [URL_WIKISOURCE]: OK(PROSA) });
+    expect(prosa.codigo, prosa.error).toBe(0);
+
+    const ficheros = (await readdir(join(t.corpus, 'fuentes'))).sort();
+    const leer = (nombre: string) => readFile(join(t.corpus, 'fuentes', nombre), 'utf8');
+    const delPoema = await leer(ficheros.find((f) => f.includes('versos-sencillos'))!);
+    const deLaProsa = await leer('wikisource-es--sobre-la-brevedad-de-la-vida.txt');
+    expect(delPoema).toMatch(/^lineas: verso$/m);
+    expect(deLaProsa).toMatch(/^lineas: (?:prosa-ajustada|prosa-por-lineas)$/m);
+  });
+
+  it('recuperar uno ya versionado no lo reescribe', async () => {
+    const t = await taller();
+    await recuperar(URL_POEMA, t, { [URL_POEMA]: OK(POEMA) });
+    const [nombre] = await readdir(join(t.corpus, 'fuentes'));
+    const ruta = join(t.corpus, 'fuentes', nombre);
+    // Un documento versionado antes de la v9 no trae «lineas:»; recuperarlo otra vez no se la pone.
+    const sinLineas = (await readFile(ruta, 'utf8')).replace(/^lineas: .*\n/m, '');
+    await writeFile(ruta, sinLineas, 'utf8');
+    const segunda = await recuperar(URL_POEMA, t, { [URL_POEMA]: OK(POEMA) });
+    expect(segunda.salida).toMatch(/Ya versionado/);
+    expect(await readFile(ruta, 'utf8')).toBe(sinLineas);
+  });
+});

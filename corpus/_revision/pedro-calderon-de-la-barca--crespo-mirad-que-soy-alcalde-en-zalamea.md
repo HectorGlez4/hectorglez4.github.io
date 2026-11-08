@@ -1,5 +1,5 @@
 ---
-texto: "CRESPO: Mirad que soy alcalde en Zalamea hoy."
+texto: "CRESPO: Mirad que soy\nalcalde en Zalamea hoy."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-crespo-mirad-que-soy-alcalde-en-zalamea"
 procedencia:

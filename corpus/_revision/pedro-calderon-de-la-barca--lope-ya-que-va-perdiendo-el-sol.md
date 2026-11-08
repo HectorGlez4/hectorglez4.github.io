@@ -1,5 +1,5 @@
 ---
-texto: "LOPE: Ya que va perdiendo el sol la fuerza, irme determino."
+texto: "LOPE: Ya que va perdiendo el sol\nla fuerza, irme determino."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-lope-ya-que-va-perdiendo-el-sol"
 procedencia:

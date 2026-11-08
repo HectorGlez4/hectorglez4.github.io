@@ -1,5 +1,5 @@
 ---
-texto: "SANCHO Yo se siete marauillas nueuas, que con mas razon 10 dignas deste nombre son."
+texto: "SANCHO\nYo se siete marauillas\nnueuas, que con mas razon 10\ndignas deste nombre son."
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-sancho-yo-se-siete-marauillas-nueuas-que"
 procedencia:

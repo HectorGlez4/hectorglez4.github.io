@@ -1,5 +1,5 @@
 ---
-texto: "¡Así los mares favorables te allanen su ancha espalda, cuando a tu bella patria retornares;"
+texto: "¡Así los mares\nfavorables te allanen su ancha espalda,\ncuando a tu bella patria retornares;"
 autor: "andres-bello"
 slug: "andres-bello-asi-los-mares-favorables-te-allanen-su"
 procedencia:

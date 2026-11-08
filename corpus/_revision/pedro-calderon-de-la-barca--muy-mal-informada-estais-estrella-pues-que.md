@@ -1,5 +1,5 @@
 ---
-texto: "Muy mal informada estáis, Estrella, pues que la fe De mis finezas dudáis, Y os suplico que me oigáis La causa, á ver si la sé."
+texto: "Muy mal informada estáis,\nEstrella, pues que la fe\nDe mis finezas dudáis,\nY os suplico que me oigáis\nLa causa, á ver si la sé."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-muy-mal-informada-estais-estrella-pues-que"
 procedencia:

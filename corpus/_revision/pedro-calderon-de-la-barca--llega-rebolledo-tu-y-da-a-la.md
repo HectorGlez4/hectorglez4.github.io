@@ -1,5 +1,5 @@
 ---
-texto: "Llega, Rebolledo, tú, y da a la criada aviso de que ya estoy en la calle."
+texto: "Llega, Rebolledo, tú,\ny da a la criada aviso\nde que ya estoy en la calle."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-llega-rebolledo-tu-y-da-a-la"
 procedencia:

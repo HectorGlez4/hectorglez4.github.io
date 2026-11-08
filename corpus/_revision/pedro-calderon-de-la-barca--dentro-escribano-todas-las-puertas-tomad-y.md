@@ -1,5 +1,5 @@
 ---
-texto: "Dentro ESCRIBANO: Todas las puertas tomad, y no me salga de aquí soldado que aquí estuviere; y al que salirse quisiere, matadle."
+texto: "Dentro\nESCRIBANO: Todas las puertas tomad,\ny no me salga de aquí\nsoldado que aquí estuviere;\ny al que salirse quisiere,\nmatadle."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-dentro-escribano-todas-las-puertas-tomad-y"
 procedencia:
