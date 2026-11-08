@@ -200,6 +200,7 @@ describe('35.1 — esAtribuida es el único lector del campo clase', () => {
     'tools/lib/clases.ts': 'las entradas del registro de clases',
     'tools/alta.ts': 'la clase ya derivada por claseQueCorresponde de cada publicada',
     'tools/lib/revision.ts': 'la clase de la candidata ya leída por claseDe',
+    'tools/lib/casiDuplicados.ts': 'la clase de coincidencia de parecidoEntre (Historia 29.4)',
   };
   const LEE = [/\.clase\b/u, /\[\s*['"`]clase['"`]\s*\]/u, /\{[^{}]*\bclase\b[^{}]*\}\s*=/u];
 
