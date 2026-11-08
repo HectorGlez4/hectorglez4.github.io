@@ -2,7 +2,8 @@
 title: 'La página 1 de la Obra, reordenada: «Dónde leer esta obra» plegado y por formato, antes del listado'
 type: 'feature'
 created: '2026-11-08'
-status: 'ready-for-dev'
+status: 'blocked'
+baseline_revision: '6400bfb5d27486a3120be043ef2278f42930628a'
 review_loop_iteration: 0
 followup_review_recommended: false
 context:
@@ -120,6 +121,7 @@ deferred: []
 ## Design Notes
 
 - **Primera pantalla, estimación previa.** La 32.3 midió 669,5 px (Larra, Ficha técnica completa, salto y «Cómo empieza» cerrado). El salto costaba 24 + 44 = 68 px; «Dónde leer» cerrado cuesta 44 + filete, y «Cómo empieza» pierde su margen y su filete superior al pasar a hermano. Queda ≈ 646 px: probablemente por encima de 640. Si la medida lo confirma, es el Block If (lo decide Héctor con `bmad-ux`), no un ajuste de distancias por nuestra cuenta. En el Corpus real (sin Wikidata ni incipit) la prueba de toda página 1 cambia ≈ +2 px.
+- **Primera pantalla, medida (2026-11-08).** Con la página 1 reordenada (sin el salto, contenedor único a 3 × de la Cabecera, «Dónde leer esta obra» y «Cómo empieza» hermanos y cerrados, listado a 4 × con su filete), `tests/e2e/incipit.spec.ts` en `escritorio` a 360 × 640 sobre la Obra de Larra con Ficha técnica completa e incipit mide la primera Tarjeta del listado a **646,5 px** (≥ 640): se cumple el Block If. Desglose bajo la Cabecera: 24 (contenedor) + 1 (filete) + 44 («Dónde leer») + 44 («Cómo empieza») + 1 (filete) + 32 (listado) + 1 (filete del listado) = 147 px, frente a los 170 de antes (salto 68 + «Cómo empieza» 70 + 32). Faltan 6,5 px; mover distancias o el orden lo decide Héctor con `bmad-ux`.
 - **Un contenedor, hermanos.** Dos `div` con su propio `data-pagefind-ignore` separarían los `<details>` y la regla `.desplegable + .desplegable` no actuaría: dos filetes juntos.
 - **El rótulo de grupo no es encabezado.** El `h2` pasa a `<summary>` (UX-DR125) y Desplegable prohíbe encabezados en él; un `h3` dentro del contenido colgaría del `h1`. `EdicionesEnVenta` conserva su `h3` porque la historia la quiere «tal como lo pinta»; la 33.2 la reparte.
 - **La hoja.** `DondeLeer.astro` se pinta en toda página 1, así que su `<style>` no crea hueco en páginas que no lo usan; la página no gana reglas (el contenedor lleva `style`).
@@ -135,5 +137,7 @@ deferred: []
 
 ## Auto Run Result
 
-Status: ready-for-dev
-Blocking condition: ninguna. Planificación detenida a petición («Halt after planning»). Riesgo anotado: la medida de 360 × 640 con Ficha técnica, incipit y desplegables cerrados se estima en ≈ 646 px (Block If).
+Status: blocked
+Blocking condition: Block If de la primera pantalla — a 360 × 640, en la Obra de Larra con Ficha técnica completa, incipit y los dos desplegables cerrados, la primera Tarjeta del listado empieza a 646,5 px (≥ 640). Mover distancias o el orden es de Héctor (`bmad-ux`): pendiente de Héctor (bmad-ux).
+Baseline: 6400bfb5d27486a3120be043ef2278f42930628a.
+Lo construido hasta la medida (fuente: `textoDeLoTomado`, `RotuloDeGrupo.astro`, `DondeLeer.astro` como desplegable con «Gratis», la página sin salto y con el contenedor único, `ANCLA_DE_DONDE_LEER` retirada, `DESPLIEGUE_DE_LA_OBRA_COMO_DESTINO` en `undefined`, SM-C4 en `juiciosPorVentanas`, y `tests/e2e/incipit.spec.ts` con la medida como puerta) queda en la rama local `v9/wip-32-4` (5bbead812a3), sin fusionar en `v9/epica-32`; `astro check` solo da el error esperado de `tests/unit/obra-pagina.test.ts` (importa la `ANCLA` retirada). Las pruebas unitarias, AGENTS.md, el resto de e2e y los snapshots de tipografía no se han tocado. No se corrió `npm test`.
