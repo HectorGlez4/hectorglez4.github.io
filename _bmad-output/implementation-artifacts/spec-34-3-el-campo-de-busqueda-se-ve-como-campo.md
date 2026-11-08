@@ -5,11 +5,18 @@ created: '2026-11-08'
 status: 'done'
 baseline_revision: '6da8d60787a1798ea3541927f9f93d292d6feed4'
 review_loop_iteration: 0
-followup_review_recommended: false
+followup_review_recommended: true
 context:
   - '{project-root}/_bmad-output/implementation-artifacts/epic-34-context.md'
 warnings: [oversized]
-deferred: []
+deferred:
+  - summary: >-
+      El epic de la 34.3 pide a la vez el contorno completo y que la e2e del filtro de los Directorios siga en verde «sin tocarla», y la e2e de la 26.6 afirmaba en reposo el filete inferior; pendiente de Héctor (bmad-create-epics-and-stories) aceptar la reescritura de esas aserciones de reposo o reformular el criterio.
+    evidence: |-
+      tests/e2e/filtro-del-directorio.spec.ts (prueba «a 3 × --unidad del h1…») fijaba tres lados a 0px, radio 0 y fondo transparente, exactamente el trato que UX-DR133 sustituye; el criterio del epic y el «Never» del contrato no se pueden cumplir a la vez. Señalado por blind-hunter y ac-auditor en la revisión externa.
+    location: >-
+      _bmad-output/planning-artifacts/epics.md (Historia 34.3); tests/e2e/filtro-del-directorio.spec.ts
+    severity: low
 ---
 
 <intent-contract>
@@ -78,7 +85,7 @@ deferred: []
 - Given el sitio construido, when se abre cualquier superficie con campo (Tema, Autor, Obra, `/buscar/`, 404, `/autores/`, `/obras/`), then el campo se ve con contorno completo de 1 px en `--contorno`, radio 3 px y fondo `--papel`, y lo tecleado no toca el contorno.
 - Given el campo enfocado con el teclado, when se mide, then el contorno es siena a 2 px en los cuatro lados, el anillo global sigue presente, y ni lo tecleado ni lo que sigue al campo se ha movido.
 - Given `dist/`, when se recorre, then no hay `input[type="search"]` fuera de `.campo-de-busqueda`, los selectores de `/buscar/` y el botón «Buscar» salen idénticos, y ningún guion de `/_astro/` ni `GUIONES_EXTERNOS` cambia.
-- Given `npx vitest run tests/unit/medicion.test.ts` y las pruebas del filtro, when se corren sin tocarlas, then pasan.
+- Given `npx vitest run tests/unit/medicion.test.ts` y `tests/unit/filtro-del-directorio.test.ts`, when se corren sin tocarlas, then pasan; y la e2e del filtro (`tests/e2e/filtro-del-directorio.spec.ts`) pasa con sus pruebas de comportamiento, recuento y foco sin tocar, y solo sus aserciones de reposo del trato de la 26.6 reescritas al contrato nuevo (Spec Change Log, 2026-11-08).
 - Given la página 1 de `/tema/la-vida/` a 360 × 640, when carga, then «Buscar en este tema» sigue bajo el título y sobre el listado, y la primera Cita empieza en la primera pantalla.
 
 ## Spec Change Log
@@ -87,6 +94,12 @@ deferred: []
 - Hallazgo: `tests/e2e/filtro-del-directorio.spec.ts:472` («a 3 × --unidad del h1…») afirmaba en reposo el trato de la 26.6 —solo el filete inferior, los otros tres lados a `0px`, radio `0px` y fondo transparente—, que es exactamente lo que UX-DR133 reemplaza; el Code Map solo había revisado la prueba de foco (l. 553), que sigue verde sin tocarla. El «Never» de no tocar las pruebas del filtro y el primer criterio de aceptación no se podían cumplir a la vez.
 - Qué se hizo: solo se reescribieron las cuatro aserciones de reposo de esa prueba al contrato nuevo (cuatro lados iguales al inferior, radio `--radio`, fondo `--papel`, resueltos por sondas), que es más exigente, no menos; el resto de la prueba —posición, etiqueta, recuento, foco— queda igual. Se dice en el mensaje del commit para que Héctor lo vea.
 - KEEP: el componente con relleno compensado al foco; la prueba de `dist/` en `buscar-en.test.ts`; las sondas de tokens de `campo-de-busqueda.spec.ts`.
+
+### 2026-11-08 — Revisión externa: el criterio del filtro decía más de lo que la implementación cumple
+- Hallazgo (blind-hunter, ac-auditor): el criterio «las pruebas del filtro… sin tocarlas» seguía afirmando lo contrario de lo que el registro anterior recoge —la e2e del filtro sí se tocó, en sus aserciones de reposo—.
+- Qué se enmendó: fuera del `<intent-contract>`, el criterio de aceptación distingue la prueba unitaria del filtro (sin tocar) de la e2e (comportamiento, recuento y foco sin tocar; reposo al contrato nuevo), y la Verificación nombra `tests/unit/filtro-del-directorio.test.ts`, `pagina-de-tema.spec.ts` y el barrido completo de `accesibilidad.spec.ts`. La contradicción de fondo —el epic pide a la vez el contorno completo y la e2e del filtro «sin tocarla»— es del artefacto de planificación y queda en `deferred` para Héctor.
+- Estado malo evitado: un `status: done` que afirma un criterio que HEAD no cumple.
+- KEEP: todo lo del registro anterior; el código no se re-deriva (la enmienda es del texto del criterio, no del contrato).
 
 ## Review Triage Log
 
@@ -98,6 +111,22 @@ deferred: []
 - reject: 0
 - addressed_findings:
   - none
+
+### 2026-11-08 — Review pass (revisión externa, pasada 1)
+- intent_gap: 0
+- bad_spec: 0
+- patch: 8 (high 0, medium 1, low 7)
+- defer: 1 (high 0, medium 0, low 1)
+- reject: 22
+- addressed_findings:
+  - `[medium]` `[patch]` `contraste-del-contorno.test.ts` cortaba el `:root` en el primer `}`, que hoy cae en el comentario `{typography.code}` (l. 54 de `tokens.css`), y no miraba otros bloques `:root`: ahora quita comentarios, corta por llaves emparejadas, juzga el `:root` de partida y todo bloque que redefina `--contorno` o `--papel`, con una prueba propia de la lectura.
+  - `[low]` `[patch]` e2e `campo-de-busqueda.spec.ts`: el Tema sale del Corpus («La vida» si tiene página, si no el primero que llegue a `MIN_CITAS_POR_TEMA`) y se salta si no hay ninguno, en vez de fijar `/tema/la-vida/`.
+  - `[low]` `[patch]` e2e: la Obra se busca con `count()` antes de `getAttribute`, así que una Página de Autor sin Obras salta la superficie en vez de agotar el plazo.
+  - `[low]` `[patch]` e2e: el 404 exige estado 404 (antes no comprobaba ninguno).
+  - `[low]` `[patch]` e2e: se exige que haya algo pintado tras el campo antes de comparar su posición, para que «lo que sigue no se mueve» no pase en vacío.
+  - `[low]` `[patch]` e2e: también el relleno de arriba y de abajo a `--unidad`.
+  - `[low]` `[patch]` `CampoDeBusqueda.astro`: el comentario de cabecera ya no dice que `buscar-en.test.ts` impide que un uso estilice el `input`; dice lo que la prueba exige (dentro de `.campo-de-busqueda` y sin `style` en línea) y lo que no vigila (un `<style>` propio del uso), y recupera el salto de línea.
+  - `[low]` `[patch]` spec: el criterio «las pruebas del filtro… sin tocarlas» separa la unitaria (sin tocar) de la e2e (solo el reposo reescrito), y la Verificación nombra el barrido completo de accesibilidad, que ya se corre (Spec Change Log).
 
 ## Design Notes
 
@@ -117,30 +146,32 @@ deferred: []
 - `npx vitest run tests/unit/buscar-en.test.ts` -- expected: verde, con el `it` nuevo.
 - `npx vitest run tests/unit/tipografia-en-tokens.test.ts` -- expected: verde sin excepción nueva.
 - `npx vitest run tests/unit/medicion.test.ts` -- expected: verde sin tocarla.
+- `npx vitest run tests/unit/filtro-del-directorio.test.ts` -- expected: verde sin tocarla.
 - `npx astro check` -- expected: 0 errores.
 - `npx playwright test tests/e2e/campo-de-busqueda.spec.ts tests/e2e/filtro-del-directorio.spec.ts tests/e2e/tipografia-calculada.spec.ts --project=escritorio` (y `--project=movil`) -- expected: verde; instantáneas sin cambios o regrabadas y nombradas.
+- `npx playwright test tests/e2e/pagina-de-tema.spec.ts tests/e2e/accesibilidad.spec.ts` (los dos proyectos) -- expected: verde; el barrido completo incluye axe 2.2 AA y el reflujo a 320 px con el contorno nuevo.
 
 ## Auto Run Result
 
 Status: done
 Blocking condition: ninguna
 
-**Resumen.** El Campo de búsqueda (`src/components/CampoDeBusqueda.astro`) pasa de filete inferior a contorno completo: `--grosor-filete` en `--contorno`, radio `--radio`, fondo `--papel`, relleno `--unidad` en los cuatro lados; al foco, los cuatro lados a 2 × `--grosor-filete` en siena, sumados al anillo global, con el relleno rebajado en un `--grosor-filete` para que ni la caja ni lo tecleado se muevan. Todos los usos lo heredan; ningún uso, guion, `GUIONES_EXTERNOS` ni vocabulario cambia.
+**Resumen.** El Campo de búsqueda (`src/components/CampoDeBusqueda.astro`) pasa de filete inferior a contorno completo: `--grosor-filete` en `--contorno`, radio `--radio`, fondo `--papel`, relleno `--unidad` en los cuatro lados; al foco, los cuatro lados a 2 × `--grosor-filete` en siena, sumados al anillo global, con el relleno rebajado en un `--grosor-filete` para que ni la caja ni lo tecleado se muevan. Todos los usos lo heredan; ningún uso, guion, `GUIONES_EXTERNOS` ni vocabulario cambia (`git diff 6da8d60787 HEAD -- src` solo toca este componente).
 
 **Ficheros.**
-- `src/components/CampoDeBusqueda.astro` — el trato nuevo y su comentario de cabecera y de foco.
-- `tests/unit/contraste-del-contorno.test.ts` (nuevo) — `--contorno` sobre `--papel` ≥ 3:1 desde `tokens.css`, y rechazo de tokens ausentes o no hex.
+- `src/components/CampoDeBusqueda.astro` — el trato nuevo y su comentario de cabecera y de foco (en la revisión: el comentario dice con exactitud qué vigila la prueba de `dist/`).
+- `tests/unit/contraste-del-contorno.test.ts` (nuevo) — `--contorno` sobre `--papel` ≥ 3:1 en todo bloque `:root` de `tokens.css` que los declare, leído sin comentarios y por llaves emparejadas; rechazo de tokens ausentes o no hex.
 - `tests/unit/buscar-en.test.ts` — todo `input[type="search"]` de `dist/` está dentro de `.campo-de-busqueda` y sin `style`, y las nueve superficies lo llevan.
-- `tests/e2e/campo-de-busqueda.spec.ts` (nuevo) — Tema, Autor, Obra, `/buscar/`, 404, `/autores/`, `/obras/`: reposo y foco por sondas, caja, contenido y lo siguiente quietos.
+- `tests/e2e/campo-de-busqueda.spec.ts` (nuevo) — Tema y Autor del Corpus, Obra, `/buscar/`, 404 (con estado 404), `/autores/`, `/obras/`: reposo (bordes, radio, fondo, relleno en los cuatro lados, sombra, alto) y foco por sondas; caja, contenido y lo siguiente (que tiene que existir) quietos.
 - `tests/e2e/pagina-de-tema.spec.ts` — a 360 × 640, «Buscar en este tema» entre el `h1` y la primera Tarjeta, que empieza en la primera pantalla.
-- `tests/e2e/filtro-del-directorio.spec.ts` — solo las aserciones de reposo, al contrato nuevo (ver Spec Change Log).
+- `tests/e2e/filtro-del-directorio.spec.ts` — solo las aserciones de reposo, al contrato nuevo (Spec Change Log; diferido para Héctor).
 
-**Revisión.** Capas externas sin hallazgos en esta pasada: 0 parches, 0 diferidos, 0 rechazados. Recomendación de revisión de seguimiento: `false` (0 parches; puntuación 0).
+**Revisión (pasada externa 1).** 8 parches aplicados (1 medio, 7 bajos), 1 diferido (pendiente de Héctor, `bmad-create-epics-and-stories`), 22 rechazados (entre ellos: el campo de la portada, que el contrato excluye; el contraste contra otro fondo —todos los usos se pintan sobre el `body` en `--papel`, así que el contorno y el `placeholder` no cambian de fondo—; `forced-colors`, donde el borde se sigue pintando en color del sistema; el foco con ratón, que es el `:focus` de la 26.6; y pruebas de selectores de `/buscar/` idénticos, que el diff deja sin tocar). Recomendación de revisión de seguimiento: `true` — parches por gravedad: 0 altos, 1 medio, 7 bajos; puntuación 3 × 1 + 7 = 10, que llega a 5.
 
 **Verificación.**
-- `npx vitest run tests/unit/buscar-en.test.ts tests/unit/contraste-del-contorno.test.ts tests/unit/tipografia-en-tokens.test.ts tests/unit/medicion.test.ts` — 4 ficheros, 706 pruebas en verde (la nueva de `buscar-en` confirmada en modo detallado).
+- `npx vitest run tests/unit/contraste-del-contorno.test.ts tests/unit/buscar-en.test.ts tests/unit/tipografia-en-tokens.test.ts tests/unit/medicion.test.ts tests/unit/filtro-del-directorio.test.ts` — 5 ficheros, 729 pruebas en verde.
 - `npx astro check` — 0 errores, 0 avisos.
-- `npx playwright test tests/e2e/campo-de-busqueda.spec.ts tests/e2e/filtro-del-directorio.spec.ts tests/e2e/tipografia-calculada.spec.ts tests/e2e/pagina-de-tema.spec.ts` (móvil y escritorio) — 112 en verde, 4 saltadas (las de «Tema bajo el umbral», que ya se saltaban); instantáneas de `tipografia-calculada` sin cambios.
-- `npx playwright test tests/e2e/accesibilidad.spec.ts -g "campo de búsqueda"` — 4 en verde.
+- `npx playwright test tests/e2e/campo-de-busqueda.spec.ts tests/e2e/filtro-del-directorio.spec.ts tests/e2e/pagina-de-tema.spec.ts tests/e2e/tipografia-calculada.spec.ts tests/e2e/accesibilidad.spec.ts` (móvil y escritorio, contra `tests/servidor.mjs` con el receptor local) — 412 en verde, 4 saltadas (las de «Tema bajo el umbral», que el Corpus no tiene); las 14 de `campo-de-busqueda` corrieron; instantáneas de `tipografia-calculada` sin cambios. El barrido completo de `accesibilidad.spec.ts` (axe 2.2 AA, anillo, reflujo a 320 px) en verde con el contorno nuevo.
+- `npm test` — 156 ficheros, 7.184 pruebas en verde.
 
-**Riesgos residuales.** El barrido completo de `accesibilidad.spec.ts` (axe y reflujo a 320 px) no se corrió entero aquí; lo corre Héctor en local. La portada de la Épica 28 integrará el campo cuando se funda, y la prueba de `dist/` la cubrirá.
+**Riesgos residuales.** La portada de la Épica 28 integrará el campo cuando se funda, y la prueba de `dist/` la cubrirá. Que un uso reestilice el `input` desde su propio `<style>` no lo vigila ninguna prueba. Las e2e no corren en CI: una regresión del trato visual solo la ve una pasada local.

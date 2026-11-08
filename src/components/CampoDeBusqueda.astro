@@ -19,7 +19,12 @@
  * `--unidad` a los lados. Al recibir el foco, los cuatro lados pasan a siena y al doble de grueso
  * **además** del anillo global de `tokens.css`, nunca en su lugar, y el relleno cede lo que el
  * contorno gana: ni lo tecleado ni lo que sigue al campo se mueven. Es la única composición del
- * campo: ningún uso estiliza el `input` (lo exige `tests/unit/buscar-en.test.ts` sobre `dist/`). El alto mínimo es la zona de toque. Ni mayúscula automática ni autocorrección: lo que se
+ * campo: ningún uso estiliza el `input`. Sobre `dist/`, `tests/unit/buscar-en.test.ts` exige que
+ * todo `input[type="search"]` esté dentro de `.campo-de-busqueda` y sin `style` en línea; que
+ * ningún uso lo reestilice desde su propio `<style>` no lo vigila ninguna prueba, y lo mira quien
+ * revisa.
+ *
+ * El alto mínimo es la zona de toque. Ni mayúscula automática ni autocorrección: lo que se
  * teclea es parte de un nombre, y el teclado del móvil no tiene que cambiarlo por otra palabra.
  *
  * Historia 27.2 — `/buscar/` lo usa con tres cosas que el filtro no lleva, todas opcionales y sin

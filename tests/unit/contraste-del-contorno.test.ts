@@ -14,14 +14,28 @@ import { join } from 'node:path';
 const RAIZ = join(import.meta.dirname, '..', '..');
 const MINIMO = 3;
 
-/** El bloque `:root { … }` de `tokens.css`: el primero, que es el único. */
-function bloqueRaiz(css: string): string {
-  const inicio = css.indexOf(':root');
-  if (inicio < 0) throw new Error('tokens.css no declara `:root`');
-  const abre = css.indexOf('{', inicio);
-  const cierra = css.indexOf('}', abre);
-  if (abre < 0 || cierra < 0) throw new Error('el `:root` de tokens.css no se deja leer');
-  return css.slice(abre + 1, cierra);
+/**
+ * Los cuerpos de todo bloque `:root…{ … }` de `tokens.css` —también los de dentro de un `@media`
+ * o con `:not(…)`/`[data-theme]`—, sin comentarios y cortando por llaves emparejadas: un `}` en un
+ * comentario (el de `{typography.code}`) o un bloque anidado no truncan la lectura. El primero es
+ * el de los valores de partida.
+ */
+function bloquesRaiz(css: string): string[] {
+  const limpio = css.replace(/\/\*[\s\S]*?\*\//g, '');
+  const bloques: string[] = [];
+  for (const selector of limpio.matchAll(/:root[^{};]*\{/g)) {
+    const abre = selector.index! + selector[0].length;
+    let profundidad = 1;
+    let i = abre;
+    for (; i < limpio.length && profundidad > 0; i++) {
+      if (limpio[i] === '{') profundidad++;
+      else if (limpio[i] === '}') profundidad--;
+    }
+    if (profundidad > 0) throw new Error('un `:root` de tokens.css no se deja leer');
+    bloques.push(limpio.slice(abre, i - 1));
+  }
+  if (bloques.length === 0) throw new Error('tokens.css no declara `:root`');
+  return bloques;
 }
 
 /** El valor de un token del `:root`, que tiene que ser un hex de 6 cifras. */
@@ -53,12 +67,30 @@ describe('Historia 34.3 — el contorno del Campo de búsqueda contra el papel',
     expect(contraste('#8a7f72', '#8a7f72')).toBeCloseTo(1, 5);
   });
 
-  it('`--contorno` sobre `--papel` da al menos 3:1', async () => {
-    const raiz = bloqueRaiz(await readFile(join(RAIZ, 'src', 'styles', 'tokens.css'), 'utf8'));
-    const contorno = token(raiz, '--contorno');
-    const papel = token(raiz, '--papel');
-    const razon = contraste(contorno, papel);
-    expect(razon, `--contorno ${contorno} sobre --papel ${papel}: ${razon.toFixed(2)}:1`).toBeGreaterThanOrEqual(MINIMO);
+  it('`--contorno` sobre `--papel` da al menos 3:1, en el `:root` de partida y en todo bloque que los redefina', async () => {
+    const [partida, ...demas] = bloquesRaiz(await readFile(join(RAIZ, 'src', 'styles', 'tokens.css'), 'utf8'));
+    const pares = [{ contorno: token(partida, '--contorno'), papel: token(partida, '--papel') }];
+    // Un tema u otra variante que redefina uno de los dos se juzga con el otro de partida.
+    const redefine = (raiz: string, nombre: string) => new RegExp(`(?:^|[;{\\s])${nombre}\\s*:`).test(raiz);
+    for (const bloque of demas) {
+      if (!redefine(bloque, '--contorno') && !redefine(bloque, '--papel')) continue;
+      pares.push({
+        contorno: redefine(bloque, '--contorno') ? token(bloque, '--contorno') : pares[0].contorno,
+        papel: redefine(bloque, '--papel') ? token(bloque, '--papel') : pares[0].papel,
+      });
+    }
+    for (const { contorno, papel } of pares) {
+      const razon = contraste(contorno, papel);
+      expect(razon, `--contorno ${contorno} sobre --papel ${papel}: ${razon.toFixed(2)}:1`).toBeGreaterThanOrEqual(MINIMO);
+    }
+  });
+
+  it('la lectura del `:root` no se deja truncar por un `}` en un comentario ni confundir por otro bloque', () => {
+    const css = ':root {\n  /* `{typography.code}` */\n  --papel: #faf7f0;\n}\n@media (min-width: 600px) {\n  :root { --unidad: 9px; }\n}\n:root[data-theme="oscuro"] { --contorno: #111111; }';
+    const bloques = bloquesRaiz(css);
+    expect(bloques).toHaveLength(3);
+    expect(token(bloques[0], '--papel')).toBe('#faf7f0');
+    expect(token(bloques[2], '--contorno')).toBe('#111111');
   });
 
   it('un token que falta o no es hex de 6 cifras no se da por bueno', () => {

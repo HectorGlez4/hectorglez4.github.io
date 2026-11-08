@@ -1,5 +1,6 @@
 import { expect, test, type Locator, type Page } from '@playwright/test';
-import { autorEnUnaPagina, autorEnVariasPaginas } from './ayuda/corpus.ts';
+import { autorEnUnaPagina, autorEnVariasPaginas, citasPorTema } from './ayuda/corpus.ts';
+import { MIN_CITAS_POR_TEMA } from '../../src/lib/umbrales.ts';
 
 /**
  * Historia 34.3, UX-DR133, FR-6 — el Campo de búsqueda se ve como campo, en cada superficie que lo
@@ -8,21 +9,30 @@ import { autorEnUnaPagina, autorEnVariasPaginas } from './ayuda/corpus.ts';
  * lados a 2 × `--grosor-filete` en siena, el anillo global puesto, y ni la caja ni lo tecleado se
  * mueven. Los tokens se resuelven con sondas en el propio navegador, nunca con un literal.
  *
- * La Obra se toma de la Página de Autor (su primer enlace a `/obra/`), y el Autor, del Corpus: así
- * ninguna siembra deja la prueba mirando una ruta que ya no existe.
+ * El Tema y el Autor se toman del Corpus —«La vida» si tiene página, si no el primer Tema que la
+ * tenga— y la Obra, de la Página de Autor (su primer enlace a `/obra/`): así ninguna siembra deja la
+ * prueba mirando una ruta que ya no existe; sin la superficie, la prueba se salta diciéndolo.
  */
 
 const autor = autorEnVariasPaginas() ?? autorEnUnaPagina();
+const temas = citasPorTema();
+const tema =
+  (temas.get('la-vida') ?? 0) >= MIN_CITAS_POR_TEMA
+    ? 'la-vida'
+    : [...temas].find(([, citas]) => citas >= MIN_CITAS_POR_TEMA)?.[0];
 
 const SUPERFICIES: { nombre: string; ruta: (page: Page) => Promise<string | undefined> }[] = [
-  { nombre: 'Tema', ruta: async () => '/tema/la-vida/' },
+  { nombre: 'Tema', ruta: async () => (tema === undefined ? undefined : `/tema/${tema}/`) },
   { nombre: 'Autor', ruta: async () => (autor === undefined ? undefined : `/autor/${autor.slug}/`) },
   {
     nombre: 'Obra',
     ruta: async (page) => {
       if (autor === undefined) return undefined;
       await page.goto(`/autor/${autor.slug}/`);
-      return (await page.locator('main a[href^="/obra/"]').first().getAttribute('href')) ?? undefined;
+      // `count()` no espera: sin ningún enlace a una Obra la superficie se salta, no agota el plazo.
+      const enlaces = page.locator('main a[href^="/obra/"]');
+      if ((await enlaces.count()) === 0) return undefined;
+      return (await enlaces.first().getAttribute('href')) ?? undefined;
     },
   },
   { nombre: '/buscar/', ruta: async () => '/buscar/' },
@@ -80,6 +90,8 @@ function medir(entrada: Locator) {
       fondo: c.backgroundColor,
       rellenoIzquierdo: c.paddingLeft,
       rellenoDerecho: c.paddingRight,
+      rellenoArriba: c.paddingTop,
+      rellenoAbajo: c.paddingBottom,
       sombra: c.boxShadow,
       anillo: c.outlineStyle,
       colorDelAnillo: c.outlineColor,
@@ -101,7 +113,7 @@ test.describe('Historia 34.3 — el Campo de búsqueda se ve como campo', () => 
       const ruta = await superficie.ruta(page);
       test.skip(ruta === undefined, `${superficie.nombre}: el Corpus no tiene hoy esta superficie`);
       const respuesta = await page.goto(ruta!);
-      if (superficie.nombre !== '404') expect(respuesta?.status(), ruta).toBe(200);
+      expect(respuesta?.status(), ruta).toBe(superficie.nombre === '404' ? 404 : 200);
       const entrada = page.locator('.campo-de-busqueda input[type="search"]').first();
       await expect(entrada, `${ruta}: sin Campo de búsqueda`).toBeVisible();
 
@@ -114,8 +126,11 @@ test.describe('Historia 34.3 — el Campo de búsqueda se ve como campo', () => 
       expect(reposo.fondo, ruta).toBe(t.papel);
       expect(reposo.rellenoIzquierdo, ruta).toBe(t.unidad);
       expect(reposo.rellenoDerecho, ruta).toBe(t.unidad);
+      expect([reposo.rellenoArriba, reposo.rellenoAbajo], ruta).toEqual([t.unidad, t.unidad]);
       expect(reposo.sombra, ruta).toBe('none');
       expect(reposo.caja.alto, ruta).toBeGreaterThanOrEqual(t.toque);
+      // Sin algo pintado tras el campo, «lo que sigue no se mueve» se cumpliría en vacío.
+      expect(reposo.siguiente, `${ruta}: nada pintado tras el campo`).toBeDefined();
 
       // Al campo con el teclado: se enfoca, se sale hacia atrás y se vuelve con Tab.
       await entrada.focus();
