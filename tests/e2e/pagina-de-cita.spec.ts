@@ -995,6 +995,8 @@ test.describe('Historia 29.3 — la Cita en verso, verso a verso', () => {
       const cita = deVersosSencillos()[indice];
       expect(cita, 'no hay esa Cita en verso: falta el commit de restitución de la 29.2').toBeDefined();
 
+      // El tamaño que nombra la AC, fijado aquí y no heredado del proyecto.
+      await page.setViewportSize({ width: 360, height: 640 });
       await page.goto(`/cita/${cita!.slug}`);
       const h1 = page.locator('h1.texto');
       await expect(h1).toBeVisible();

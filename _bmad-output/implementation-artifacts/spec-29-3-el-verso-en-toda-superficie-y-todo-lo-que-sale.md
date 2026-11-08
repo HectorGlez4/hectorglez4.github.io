@@ -5,7 +5,7 @@ created: '2026-11-08'
 status: 'done'
 baseline_revision: '3906b28d503978ab8efd55311110bd70c7644436'
 review_loop_iteration: 0
-followup_review_recommended: false
+followup_review_recommended: true
 context:
   - '{project-root}/_bmad-output/implementation-artifacts/epic-29-context.md'
   - '{project-root}/_bmad-output/implementation-artifacts/spec-29-1-el-salto-de-verso-sobrevive-en-el-corpus-el-cotejo-y-el-slug.md'
@@ -16,6 +16,18 @@ deferred:
     evidence: |-
       corpus/citas/jose-marti--yo-soy-un-hombre-sincero-de-donde.md trae «Yo soy un hombre sincero de donde crece la palma.» con procedencia tecleada; no figura entre las 75 Citas que la 29.1 contó con saltos. Documentarla (y, con ello, restituir sus saltos) es curar el Corpus real: pendiente de Héctor (`npm run documentar`), fuera de esta historia. La prueba usa «Yo vengo de todas partes» y una segunda Cita en verso de *Versos sencillos* sacada de los datos.
     location: tests/e2e/pagina-de-cita.spec.ts
+    severity: low
+  - summary: >-
+      El barrido de axe de la portada no lleva una Cita en verso: la AC de NFR-9 la nombra, y ponerla exige fijar una jornada, que es de Héctor.
+    evidence: |-
+      tests/e2e/accesibilidad.spec.ts barre la Página de Cita en verso y su listado; la portada se construye con la Cita del Día de la rotación del día. `verso-construido.test.ts` prueba el marcado del componente en la portada, el 404 y el Kit, pero sin axe. Pendiente de Héctor: fijar una jornada con una Cita en verso apta (`npm run jornada -- fijar`) o aceptar la cobertura de la construcción de fixtures.
+    location: tests/e2e/accesibilidad.spec.ts
+    severity: low
+  - summary: >-
+      `public/islas/imagen.js` queda a 23 bytes de su tope (7.527 de 7.550): el pie de la 25.2 y el 9:16 de la 25.4 no caben sin subir `MAX_BYTES_GUION_DE_IMAGEN`, que es de Héctor.
+    evidence: |-
+      `wc -c public/islas/imagen.js` da 7.527; el tope está en `src/lib/umbrales.ts`. Antes de la 29.3 el margen era de 33 bytes, y la 29.3 ganó el sitio del reparto por versos recortando prosa de dos comentarios. La razón de AD-7 sigue escrita en la espina y en `ImagenDeCita.astro`.
+    location: public/islas/imagen.js
     severity: low
 ---
 
@@ -241,6 +253,24 @@ la principal + máx(100 ms, 5 %), y la Cita en verso no empeora frente a la de p
 
 (Sin hallazgos externos en la invocación: las capas de revisión las corre el orquestador después.)
 
+### 2026-11-08 — Review pass
+- intent_gap: 0
+- bad_spec: 0
+- patch: 10: (high 0, medium 5, low 5)
+- defer: 2: (high 0, medium 0, low 2)
+- reject: 25: (high 0, medium 3, low 22)
+- addressed_findings:
+  - `[medium]` `[patch]` La prueba de cabida de la Tarjeta repetía a mano la cuenta del dibujo (blind-hunter, verification-gap, ac-auditor). `svgDeTarjeta` saca de una sola `disposicion(c)` las líneas, el alto del texto y lo que sobra arriba al centrar, y el predicado de `cuerpoEnTarjeta` es `arriba >= MARGEN`, la misma cuenta que coloca `inicio` (equivalente exacta a la de antes: ningún SVG cambia). `tests/unit/tarjeta.test.ts` lee del SVG el `y` de la atribución y de la marca (`caeSobreLaMarca`) para Calderón, Martí, un bloque al límite en cada cuerpo y el barrido del Corpus; cambiar el `+ 76` de la procedencia la pone en rojo (comprobado).
+  - `[medium]` `[patch]` El barrido de la Tarjeta no podía nombrar una Cita de prosa que no cupiera (blind-hunter, edge-case-hunter, ac-auditor): ahora juzga lo dibujado de toda Tarjeta, prosa incluida, y nombra el slug. Ninguna sale.
+  - `[medium]` `[patch]` La prueba de cabida de la Imagen elegía sus casos por caracteres y por versos (blind-hunter, edge-case-hunter): mide la más larga de cada tramo y **toda** Cita en verso que admite Imagen (75 casos por proyecto).
+  - `[medium]` `[patch]` El formato vertical de `imagen.js` no se medía (blind-hunter, edge-case-hunter): cada caso dibuja los dos formatos y juzga cada uno contra su franja y su ancho útil.
+  - `[low]` `[patch]` Cotas que faltaban en la cabida (blind-hunter): el margen de arriba de la franja y que la línea base sea `top`, que la cuenta supone.
+  - `[medium]` `[patch]` El nombre de la Tarjeta de Cita con versos no se fijaba (intent-alignment, ac-auditor): `verso-construido.test.ts` exige que el texto del enlace del listado sea el visible, en orden, con los versos separados por un espacio y «, » solo para lectores delante del Autor y de la Obra.
+  - `[low]` `[patch]` El respaldo del diálogo de Imagen y Compartir no tenían prueba con verso (intent-alignment, ac-auditor): la misma construcción exige `textoParaCopiar` con sus saltos en `data-texto-plano`, en el `textarea` y en el `data-texto` de Compartir.
+  - `[low]` `[patch]` La guarda de los dos dueños se saltaba con `replace`, `replaceAll`, una expresión regular o `fromCharCode(10)`, y eximía `biografia.ts` entero (blind-hunter, edge-case-hunter): `tests/unit/verso.test.ts` enumera cada uso del salto en `src/` y `public/islas/` y nombra las exenciones una a una (las dos de `biografia.ts` y el recorte del título de `[slug].astro`).
+  - `[low]` `[patch]` La exención de `tests/unit/lineas.test.ts` valía para `class=` delante de cualquiera de las cinco formas (blind-hunter): solo exime `class="verso"` de `TextoDeCita.astro`.
+  - `[low]` `[patch]` La prueba de 360 × 640 heredaba el tamaño del proyecto (blind-hunter): lo fija antes de navegar.
+
 ## Auto Run Result
 
 Status: done
@@ -281,3 +311,36 @@ NFR-7 en «Medidas tras la restitución» y en el Spec Change Log.
 **Riesgos.** La portada no se barre con axe con una Cita en verso (haría falta fijar una jornada); la
 cubre la construcción de fixtures. Ningún Corpus de hoy cae en el tramo `sm`, así que la cabida de ese
 tramo solo la prueban las pruebas unitarias.
+
+### Pasada de revisión 1 (2026-11-08)
+
+**Resumen.** Diez parches sobre la cabida y las guardas, sin cambiar ninguna salida: la Tarjeta
+Social decide el cuerpo con la misma cuenta con que dibuja (`disposicion` en `svgDeTarjeta`, cuyo
+predicado `arriba >= MARGEN` es equivalente exacto al de antes), y las pruebas juzgan lo dibujado
+y no una copia de la fórmula; la cabida de la Imagen mide toda Cita en verso en los dos formatos;
+se fijan el nombre de la Tarjeta de Cita con versos, lo copiado del respaldo de Imagen y de
+Compartir, y las guardas de los dos dueños y de las cinco formas se estrechan a lo que eximen.
+
+**Ficheros.**
+- `src/lib/tarjeta.ts` — una sola `disposicion(c)` para la cabida y para colocar el bloque.
+- `tests/unit/tarjeta.test.ts` — `geometria` lee atribución y marca; `caeSobreLaMarca`; bloque al límite por cuerpo; el barrido juzga lo dibujado (prosa incluida).
+- `tests/unit/verso-construido.test.ts` — texto del enlace de la Tarjeta de Cita; `data-texto-plano`, `textarea` y Compartir con saltos.
+- `tests/unit/verso.test.ts` — la guarda enumera cada uso del salto y nombra las exenciones.
+- `tests/unit/lineas.test.ts` — solo `class="verso"` de `TextoDeCita.astro` queda exento.
+- `tests/e2e/cabida-de-imagen.spec.ts` — toda Cita en verso, los dos formatos, margen de arriba y línea base.
+- `tests/e2e/pagina-de-cita.spec.ts` — fija 360 × 640 antes de navegar.
+
+**Revisión.** 10 parches (5 medios, 5 bajos), 2 diferidos (bajos, de Héctor: axe de la portada con
+verso y el margen de bytes de `imagen.js`), 25 rechazados. La regla de la Tarjeta es la decisión
+delegada de Héctor del 2026-11-08 (spec de la 29.1): los hallazgos de que «la eligió el agente» se
+rechazan. `followup_review_recommended: true` (parches: 0 altos, 5 medios, 5 bajos; 3·5 + 5 = 20).
+
+**Verificación.** `npx vitest run` de `tarjeta`, `verso`, `verso-construido`, `lineas`, en verde (una
+mutación del `+ 76` de la procedencia pone `tarjeta.test.ts` en rojo); `npx astro check` 0 errores;
+`npx playwright test tests/e2e/cabida-de-imagen.spec.ts tests/e2e/pagina-de-cita.spec.ts` en los dos
+proyectos: 230 pasan, 6 se saltan (75 casos de cabida en verso por proyecto, los dos formatos);
+`npm test` entero en verde (160 ficheros, 7.365 pruebas, 22,7 min).
+
+**Riesgos.** El margen del bloque al límite frente al ojo de la marca es de 2 px a 32 px: la prueba
+lo vigila, pero cualquier retoque de la marca o de la atribución lo agota. La portada sigue sin
+barrido de axe con verso.

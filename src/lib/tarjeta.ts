@@ -92,28 +92,31 @@ export function svgDeTarjeta(datos: DatosDeTarjeta): string {
   }
 
   const altoAtribucion = 24 + 34 + (datos.procedencia ? 30 : 0);
-  const lineasCon = (c: number) => repartirEnLineas(`«${datos.texto}»`, c, anchoUtil);
   /*
-   * El alto del bloque con un cuerpo: márgenes, texto, filete y atribución. Con él pregunta
-   * `cuerpoEnTarjeta` si una Cita en verso cabe en su tramo o baja al siguiente (decisión de
-   * Héctor del 2026-11-08). Una Cita que admite Imagen nunca se compone sin texto: si no cabe
-   * ni en `sm`, la construcción se para.
+   * La disposición del bloque con un cuerpo: sus líneas y lo que sobra arriba al centrar
+   * texto, aire del filete (40) y atribución. Es la misma cuenta con la que se dibuja y con la
+   * que `cuerpoEnTarjeta` pregunta si una Cita en verso cabe en su tramo o baja al siguiente
+   * (decisión de Héctor del 2026-11-08): cabe si centrar no la empuja por encima del margen.
+   * Una sola cuenta para las dos cosas, para que la prueba de cabida no pueda separarse de lo
+   * dibujado. Una Cita que admite Imagen nunca se compone sin texto: si no cabe ni en `sm`, la
+   * construcción se para.
    */
-  const cuerpo = cuerpoEnTarjeta(
-    datos.texto,
-    (c) => MARGEN * 2 + lineasCon(c).length * Math.round(c * 1.3) + 40 + altoAtribucion <= ALTO,
-  );
+  const disposicion = (c: number) => {
+    const lineas = repartirEnLineas(`«${datos.texto}»`, c, anchoUtil);
+    const alturaLinea = Math.round(c * 1.3);
+    const altoTexto = lineas.length * alturaLinea;
+    return { lineas, alturaLinea, altoTexto, arriba: (ALTO - altoTexto - altoAtribucion - 40) / 2 };
+  };
+  const cuerpo = cuerpoEnTarjeta(datos.texto, (c) => disposicion(c).arriba >= MARGEN);
   if (cuerpo === undefined) {
     throw new Error(
       `La Tarjeta Social no cabe en ${ALTO} px ni con el tramo más pequeño (${datos.autor}): ` +
         'lo decide Héctor (Historia 29.3).',
     );
   }
-  const lineas = lineasCon(cuerpo);
-  const alturaLinea = Math.round(cuerpo * 1.3);
-  const altoTexto = lineas.length * alturaLinea;
+  const { lineas, alturaLinea, altoTexto, arriba } = disposicion(cuerpo);
 
-  const inicio = Math.max(MARGEN, (ALTO - altoTexto - altoAtribucion - 40) / 2) + cuerpo;
+  const inicio = Math.max(MARGEN, arriba) + cuerpo;
   const trasTexto = inicio + altoTexto - alturaLinea + 44;
 
   return [

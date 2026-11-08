@@ -374,17 +374,47 @@ describe('Historia 29.3 — cuerpoEnTarjeta', () => {
   });
 });
 
-/** El cuerpo del texto y el `y` del último `<text>` de la Cita (antes del filete), leídos del SVG. */
-function geometria(svg: string): { cuerpo: number; lineas: string[]; ultimaY: number; fileteY: number } {
-  const textos = [...svg.matchAll(/<text x="80" y="(\d+(?:\.\d+)?)" font-family="[^"]*" font-size="(\d+)" fill="#[0-9a-f]+">([^<]*)<\/text>/g)];
-  const deCita = textos.filter((m) => m[0].includes(SERIF));
+/**
+ * La geometría dibujada, leída del SVG: el cuerpo y las líneas de la Cita, el `y` de su última
+ * línea, el del filete, el de la última línea de la atribución (Autor o procedencia) y el de la
+ * marca.
+ */
+function geometria(svg: string): {
+  cuerpo: number;
+  lineas: string[];
+  ultimaY: number;
+  fileteY: number;
+  atribucionY: number;
+  marcaY: number;
+  marcaCuerpo: number;
+} {
+  const textos = [...svg.matchAll(/<text x="80" y="(\d+(?:\.\d+)?)" font-family="([^"]*)" font-size="(\d+)"[^>]*>([^<]*)<\/text>/g)].map(
+    (m) => ({ y: Number(m[1]), familia: m[2], cuerpo: Number(m[3]), contenido: m[4] }),
+  );
+  const marcaEnSvg = MARCA.toLocaleUpperCase('es');
+  const deCita = textos.filter((t) => t.familia === SERIF);
+  const marca = textos.find((t) => t.contenido === marcaEnSvg)!;
+  const atribucion = textos.filter((t) => t.familia === SANS && t !== marca);
   const filete = Number(svg.match(/<rect x="80" y="(\d+(?:\.\d+)?)" width="96"/)![1]);
   return {
-    cuerpo: Number(deCita[0][2]),
-    lineas: deCita.map((m) => m[3]),
-    ultimaY: Number(deCita.at(-1)![1]),
+    cuerpo: deCita[0].cuerpo,
+    lineas: deCita.map((t) => t.contenido),
+    ultimaY: deCita.at(-1)!.y,
     fileteY: filete,
+    atribucionY: Math.max(...atribucion.map((t) => t.y)),
+    marcaY: marca.y,
+    marcaCuerpo: marca.cuerpo,
   };
+}
+
+/**
+ * Lo dibujado cabe: la última línea de la atribución, con su descendente (un cuarto de su
+ * cuerpo, 24), acaba por encima del ojo de la marca (tres cuartos del suyo). Se lee del SVG,
+ * no de la cuenta con la que `svgDeTarjeta` decide el cuerpo.
+ */
+function caeSobreLaMarca(svg: string): boolean {
+  const g = geometria(svg);
+  return g.ultimaY < g.fileteY && g.atribucionY + 24 / 4 > g.marcaY - (g.marcaCuerpo * 3) / 4;
 }
 
 /** El alto que ocupa el bloque con ese cuerpo y esas líneas: márgenes, texto, aire y atribución. */
@@ -410,14 +440,17 @@ describe('Historia 29.3 — la Tarjeta de una Cita en verso', () => {
     expect(altoDelBloque(g.cuerpo, g.lineas.length, true)).toBeLessThanOrEqual(ALTO);
     // Con su tramo pediría 631: es el caso que decidió Héctor.
     expect(altoDelBloque(38, 7, true)).toBe(631);
-    // El texto queda dentro del lienzo y por encima del filete.
+    // Lo dibujado: el texto por encima del filete y la atribución por encima de la marca.
     expect(g.ultimaY).toBeLessThan(g.fileteY);
+    expect(caeSobreLaMarca(svg)).toBe(false);
   });
 
   it('Martí, 4 versos de `lg`: su tramo, 46 px, un verso por línea', () => {
     const texto =
       'Yo vengo de todas partes,\nY hacia todas partes voy:\nArte soy entre las artes,\nEn los montes, monte soy.';
-    const g = geometria(svgDeTarjeta({ texto, autor: 'José Martí', procedencia: 'Versos sencillos' }));
+    const svg = svgDeTarjeta({ texto, autor: 'José Martí', procedencia: 'Versos sencillos' });
+    const g = geometria(svg);
+    expect(caeSobreLaMarca(svg)).toBe(false);
     expect(g.cuerpo).toBe(46);
     expect(g.lineas).toEqual([
       '«Yo vengo de todas partes,',
@@ -447,6 +480,17 @@ describe('Historia 29.3 — la Tarjeta de una Cita en verso', () => {
     expect(ruta).toMatch(/Tarjeta Social de «\$\{slug\}»/);
   });
 
+  it('la cabida se lee de lo dibujado: un bloque al límite queda por encima de la marca', () => {
+    // El caso más justo que admite la regla: el bloque centrado toca el margen de arriba.
+    for (const cuerpo of [32, 38, 46, 56]) {
+      const lineas = Math.floor((ALTO - 80 * 2 - 40 - 24 - 34 - 30) / Math.round(cuerpo * 1.3));
+      const texto = Array.from({ length: lineas }, (_, i) => `verso${i}`).join('\n');
+      if (!tramoDe(texto).admiteImagen) continue;
+      const svg = svgDeTarjeta({ texto, autor: 'Nadie', procedencia: 'Ninguna' });
+      expect(caeSobreLaMarca(svg)).toBe(false);
+    }
+  });
+
   it('barrido del Corpus real: toda Cita publicada que admite Imagen, con sus saltos, tiene cuerpo y cabe', async () => {
     const rutas = rutasDelCorpus(resolve(raiz, 'corpus'));
     const [citas, documentos] = await Promise.all([leerCitas(rutas.citas), leerDocumentosDeclarados(rutas)]);
@@ -468,8 +512,13 @@ describe('Historia 29.3 — la Tarjeta de una Cita en verso', () => {
       conImagen += 1;
       if (texto.includes('\n')) enVerso += 1;
       const conProcedencia = cita.procedencia?.obra !== undefined || cita.procedencia?.año !== undefined;
+      // La procedencia solo cuenta por estar (una línea a 24 px): la presencia de obra o año
+      // es la de `procedenciaCompuesta`, o la sobrestima. El nombre del Autor va en una línea.
+      // Se juzga lo dibujado, no la cuenta del cuerpo: así también la prosa, que conserva su
+      // tramo sin preguntar, se nombra si no cupiera (lo decidiría Héctor).
       try {
-        svgDeTarjeta({ texto, autor: 'Autor', ...(conProcedencia ? { procedencia: 'Procedencia' } : {}) });
+        const svg = svgDeTarjeta({ texto, autor: 'Autor', ...(conProcedencia ? { procedencia: 'Procedencia' } : {}) });
+        if (caeSobreLaMarca(svg)) noCaben.push(cita.slug);
       } catch {
         noCaben.push(cita.slug);
       }

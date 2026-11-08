@@ -141,6 +141,28 @@ describe('Historia 29.3 — la Cita en verso, verso a verso', () => {
     ]);
   });
 
+  it('Tarjeta de Cita del listado: su texto es el visible, en orden, con «, » solo para lectores', async () => {
+    const html = await leer('/tema/el-tiempo/');
+    const enlace = html.match(new RegExp(`<a href="/cita/${SLUG_MARTI}/"[^>]*>([\\s\\S]*?)</a>`))![1];
+    // El texto del enlace, del que sale su nombre accesible: los versos separados por el
+    // espacio entre `span`, y la pausa «, » de `.solo-para-lectores` delante de cada parte.
+    const texto = decodificar(enlace.replace(/<[^>]+>/g, ''));
+    expect(texto).toBe(
+      '«Yo vengo de todas partes, Y hacia todas partes voy: Arte soy entre las artes, En los montes, monte soy.», José Martí, Versos sencillos',
+    );
+    expect(enlace.match(/<span class="solo-para-lectores"[^>]*>, <\/span>/g)).toHaveLength(2);
+    expect(enlace).not.toContain('\n');
+  });
+
+  it('lo copiado y compartido de la Página de Cita lleva los saltos en texto plano', async () => {
+    const html = decodificar(await leer(`/cita/${SLUG_MARTI}/`));
+    const plano = `«${MARTI}» — José Martí, Versos sencillos.`;
+    // El respaldo del diálogo de Imagen (atributo y `textarea`) y el texto de Compartir.
+    expect(html.match(/data-texto-plano="([^"]*)"/)![1]).toBe(plano);
+    expect(html.match(/<textarea data-fallo-texto[^>]*>([^<]*)<\/textarea>/)![1]).toBe(plano);
+    expect(html.match(/data-compartir data-texto="([^"]*)"/)![1]).toBe(plano);
+  });
+
   it('la Cita del Día de la portada y del 404, y el material del Kit, salen verso a verso con el mismo componente', async () => {
     for (const ruta of ['/', '/404', '/kit/']) {
       const html = await leer(ruta);

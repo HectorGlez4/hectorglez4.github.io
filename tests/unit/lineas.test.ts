@@ -307,9 +307,14 @@ describe('dueños del salto (AD-29)', () => {
 
   it('las cinco formas solo se escriben como literal en tools/lib/lineas.ts', () => {
     // `class="verso"` no es la forma de un documento: es la clase con que `TextoDeCita.astro`
-    // pinta cada verso desde la 29.3, y queda fuera de la guarda.
-    const literal = /(?<!class=)(['"])(?:verso|verso-espaciado|prosa-por-lineas|prosa-ajustada|indeterminada)\1/u;
-    expect(todos.filter((f) => literal.test(f.contenido)).map((f) => f.ruta)).toEqual(['tools/lib/lineas.ts']);
+    // pinta cada verso desde la 29.3, y queda fuera de la guarda —ella sola: `class=` delante de
+    // otra de las cinco formas sigue contando como literal—.
+    const literal = /(['"])(?:verso|verso-espaciado|prosa-por-lineas|prosa-ajustada|indeterminada)\1/gu;
+    const escribeLaForma = (f: { ruta: string; contenido: string }) =>
+      [...f.contenido.matchAll(literal)].some(
+        (m) => !(m[0] === '"verso"' && f.contenido.slice(Math.max(0, m.index - 6), m.index) === 'class=' && f.ruta === 'src/components/TextoDeCita.astro'),
+      );
+    expect(todos.filter(escribeLaForma).map((f) => f.ruta)).toEqual(['tools/lib/lineas.ts']);
   });
 
   it('quien importa tools/lib/lineas.ts es exactamente la lista declarada (la 31.1 y la 32.3 la amplían)', () => {

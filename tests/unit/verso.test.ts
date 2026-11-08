@@ -60,14 +60,27 @@ const CODIGO = [...ficheros(join(raiz, 'src')), ...ficheros(join(raiz, 'public/i
 }));
 
 describe('el verso tiene dos dueños y nadie más lo interpreta', () => {
-  /** `split` por el salto, en cualquiera de sus grafías. */
-  const PARTE_POR_SALTO = /\.split\(\s*(?:'\\n'|"\\n"|`\\n`|\/\\n\/)/;
+  /**
+   * Partir, sustituir o quitar el salto: `split`, `replace` o `replaceAll` con una cadena o una
+   * expresión regular que lo nombre, o el salto por su código.
+   */
+  const LEE_EL_SALTO = /\.(?:split|replace|replaceAll)\(\s*(?:'\\n'|"\\n"|`\\n`|\/(?:[^/\n\\]|\\.)*\\n(?:[^/\n\\]|\\.)*\/[a-z]*)|fromCharCode\(\s*10\s*\)/gu;
   /** « / » como separador escrito en el código. */
   const SEPARADOR = /(['"]) \/ \1|join\(\s*` \/ `/;
 
-  it('solo `src/lib/verso.ts` y `public/islas/imagen.js` parten por el salto (exención: `src/lib/biografia.ts`, que parte un documento)', () => {
-    const fuera = CODIGO.filter(({ contenido }) => PARTE_POR_SALTO.test(contenido)).map(({ ruta }) => ruta);
-    expect(fuera.sort()).toEqual(['public/islas/imagen.js', 'src/lib/biografia.ts', 'src/lib/verso.ts']);
+  it('solo `src/lib/verso.ts` y `public/islas/imagen.js` parten por el salto; las exenciones, nombradas una a una', () => {
+    const usos = CODIGO.flatMap(({ ruta, contenido }) => [...contenido.matchAll(LEE_EL_SALTO)].map((m) => `${ruta}: ${m[0]}`));
+    expect(usos.sort()).toEqual(
+      [
+        "public/islas/imagen.js: .split('\\n'",
+        "src/lib/verso.ts: .split('\\n'",
+        // Parte un documento de biografía, no el texto de una Cita.
+        'src/lib/biografia.ts: .replace(/\\r\\n?/gu',
+        "src/lib/biografia.ts: .split('\\n'",
+        // Quita el salto que el recorte de 110 deja colgando antes de unir con `enUnaLinea`.
+        'src/pages/cita/[slug].astro: .replace(/\\s*\\n\\s*$/',
+      ].sort(),
+    );
   });
 
   it('solo `src/lib/verso.ts` escribe « / » como separador', () => {
