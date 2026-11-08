@@ -21,6 +21,7 @@ import {
   citaConTituloDeObraMasLargo,
   citaDeObraSinCotejar,
   citaDeTramo,
+  citaSinImagen,
   citaSinObra,
   citasDeObraDeUnaCita,
 } from './ayuda/corpus.ts';
@@ -2716,18 +2717,31 @@ test.describe('Historia 27.7 — los avisos de /buscar/ pasan la auditoría y no
  * Cita —la cara completa y una de cada tramo— ni en la portada, que comparte el Bloque de Cita.
  */
 test.describe('Historia 30.2 — sin desplazamiento horizontal con la medida y la fila', () => {
-  const completa = citaConTarjetaCompleta()?.slug;
-  const rutas = [
-    ...new Set([
-      '/',
-      ...(completa === undefined ? [] : [`/cita/${completa}/`]),
-      ...(['xl', 'lg', 'md'] as const).flatMap((t) => ((s) => (s === undefined ? [] : [`/cita/${s}/`]))(citaDeTramo(t))),
-    ]),
+  // Cada cara con su nombre: si el Corpus no la tiene, su prueba falla diciéndolo, en vez de
+  // desaparecer de la lista.
+  // `opcional`: el Corpus real no trae hoy Citas de más de 240 caracteres, así que el tramo sm y
+  // la Cita sin Imagen se saltan diciéndolo (la fila sin Imagen la cubre el fixture SIN_IMAGEN de
+  // tests/unit/tarjeta-de-obra.test.ts).
+  const caras: [string, string | undefined, string, boolean][] = [
+    ['la portada', '/', '', false],
+    ['la cara completa', citaConTarjetaCompleta()?.slug, SIN_TARJETA_COMPLETA, false],
+    ...(['xl', 'lg', 'md', 'sm'] as const).map(
+      (t): [string, string | undefined, string, boolean] => [
+        `el tramo ${t}`,
+        citaDeTramo(t),
+        `el Corpus no tiene ninguna Cita de tramo ${t}`,
+        t === 'sm',
+      ],
+    ),
+    ['una Cita sin Imagen', citaSinImagen(), 'el Corpus no tiene ninguna Cita de más de MAX_CARACTERES_IMAGEN', true],
   ];
-  for (const ruta of rutas) {
-    test(`${ruta} no desborda a 320, 600, 768 ni 1280 px`, async ({ page }, info) => {
+  for (const [cara, slug, falta, opcional] of caras) {
+    test(`${cara} no desborda a 320, 600, 768 ni 1280 px, y pasa el barrido a cada ancho`, async ({ page }, info) => {
       test.skip(info.project.name !== 'escritorio', 'Los anchos se fijan a mano; se miden una vez.');
-      if (ruta !== '/') expect(completa, SIN_TARJETA_COMPLETA).toBeDefined();
+      test.slow();
+      test.skip(opcional && slug === undefined, `${falta} hoy.`);
+      expect(slug, falta).toBeDefined();
+      const ruta = slug === '/' ? '/' : `/cita/${slug}/`;
       for (const ancho of [320, 600, 768, 1280]) {
         await page.setViewportSize({ width: ancho, height: 800 });
         await page.goto(ruta);
@@ -2739,6 +2753,9 @@ test.describe('Historia 30.2 — sin desplazamiento horizontal con la medida y l
           ventana: document.documentElement.clientWidth,
         }));
         expect.soft(m.scroll, `${ruta} a ${ancho} px: ${m.scroll} frente a ${m.ventana}`).toBeLessThanOrEqual(m.ventana);
+        const resultado = await new AxeBuilder({ page }).withTags([...ETIQUETAS_DEL_BARRIDO]).analyze();
+        const resumen = resultado.violations.map((v) => `${v.id}: ${v.help} (${v.nodes.map((n) => n.target.join(' ')).join(', ')})`);
+        expect.soft(resumen, `${ruta} a ${ancho} px\n${resumen.join('\n')}`).toEqual([]);
       }
     });
   }

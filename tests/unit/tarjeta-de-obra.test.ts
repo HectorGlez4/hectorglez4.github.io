@@ -747,7 +747,10 @@ function hijosDelArticle(pagina: string): {
   clase: string;
   copiar: boolean;
   elemento: Elemento;
-  /** Historia 30.2 — en la Fila de acciones, sus hijos directos en orden, `script` incluidos. */
+  /**
+   * Historia 30.2 — los hijos directos del hijo del `article`, en orden y `script` incluidos. Se
+   * recogen para todos; solo los de la Fila de acciones se leen.
+   */
   dentro: Elemento[];
 }[] {
   const hijos: { elemento: Elemento; copiar: boolean; filtros: boolean; dentro: Elemento[] }[] = [];
@@ -804,7 +807,7 @@ function dentroDeLaFila(dentro: Elemento[]): string[] {
       ? 'script'
       : e.atributos.has('data-imagen')
         ? 'imagen'
-        : e.atributos.get('class') === 'isla' && !e.atributos.has('data-imagen')
+        : (e.atributos.get('class') ?? '').split(/\s+/).includes('isla') && !e.atributos.has('data-imagen')
           ? 'copiar'
           : `${e.etiqueta}.${e.atributos.get('class') ?? ''}`,
   );
@@ -876,7 +879,10 @@ describe('Historia 24.4 — la tarjeta en cada Página de Cita, construida', () 
       const conFuente = hijos[bloque + 1]?.clase === 'fuente';
       // Las cotejadas tienen Línea de la Fuente; las de Cartas y la sin Obra, no.
       expect(conFuente, slug).toBe(esperada?.fila === FILA_VER_LA_OBRA_Y_DONDE_LEERLA);
+      // Lo siguiente es la Fila de acciones, que contiene a Copiar (`copiar` marca al hijo del
+      // `article` que lleva el botón, y desde la 30.2 ese hijo es la fila).
       const siguiente = hijos[bloque + (conFuente ? 2 : 1)];
+      expect(siguiente?.clase, slug).toBe('acciones');
       expect(siguiente?.copiar, slug).toBe(true);
       // Historia 30.2 — tras la Fila de acciones, compartir, fuera de ella.
       const desdeCopiar = hijos.slice(bloque + (conFuente ? 2 : 1)).map((h) => h.clase);
@@ -898,7 +904,12 @@ describe('Historia 24.4 — la tarjeta en cada Página de Cita, construida', () 
       expect([...fila.elemento.atributos.keys()].filter((n) => !n.startsWith('data-astro-cid')), slug).toEqual([
         'class',
       ]);
-      const [copiar, , imagen] = fila.dentro;
+      // Cada isla por lo que es, no por su posición: el orden lo juzga «nada se intercala…».
+      const islas = fila.dentro.filter((e) => e.etiqueta !== 'script');
+      const copiar = islas.find((e) => !e.atributos.has('data-imagen'))!;
+      const imagen = islas.find((e) => e.atributos.has('data-imagen'));
+      expect(islas, slug).toHaveLength(slug === SIN_IMAGEN ? 1 : 2);
+      expect(copiar, slug).toBeDefined();
       expect([...copiar.atributos.keys()].filter((n) => !n.startsWith('data-astro-cid')).sort(), slug).toEqual([
         'class',
         'data-pagefind-ignore',
@@ -907,7 +918,7 @@ describe('Historia 24.4 — la tarjeta en cada Página de Cita, construida', () 
         expect(imagen, slug).toBeUndefined();
         continue;
       }
-      expect([...imagen.atributos.keys()].filter((n) => !n.startsWith('data-astro-cid')).sort(), slug).toEqual(
+      expect([...imagen!.atributos.keys()].filter((n) => !n.startsWith('data-astro-cid')).sort(), slug).toEqual(
         [
           'class',
           'data-autor',

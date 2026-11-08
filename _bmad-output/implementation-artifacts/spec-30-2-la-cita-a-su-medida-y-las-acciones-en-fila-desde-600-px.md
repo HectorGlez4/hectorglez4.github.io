@@ -5,7 +5,7 @@ created: '2026-11-07'
 status: 'done'
 baseline_revision: '74341bdb78670af7cd9ed61986e46418f9f65c0a'
 review_loop_iteration: 0
-followup_review_recommended: false
+followup_review_recommended: true
 context:
   - '{project-root}/_bmad-output/implementation-artifacts/epic-30-context.md'
 warnings: [oversized]
@@ -13,11 +13,25 @@ deferred:
   - summary: 'Al fundir la Épica 29 en la rama: repetir a 1280 × 800 la medida de 34ch con la Cita en verso más larga (sus saltos de `versosDe`) y comprobar que la fila de acciones no cambia con ella; anotarlo en este spec.'
     evidence: 'La Épica 29 (src/lib/verso.ts) no está en v9/epica-30; ninguna pieza de la 30.2 parte ni une versos (AD-29). Hoy se mide con `citaDeTramo` (xl, lg, md).'
     severity: low
-  - summary: 'Pendiente de Héctor (bmad-create-epics-and-stories / bmad-ux): el AC dice «una Cita de tramo xl a 36 px, unos 610 px», pero desde 600 px el tramo xl se compone a `--cita-xl` (44 px) y 36 px es el tramo lg; en el ch de la Cita, xl resuelve unos 745 px, más que la columna de 720, que es la que lo limita. Lo construido sigue el contrato literal (34ch en el cuerpo de su tramo, sin valor nuevo, sin desbordar la columna); la cifra de cada tramo queda anotada.'
+  - summary: 'Resuelto por Héctor (2026-11-08): la medida queda como está construida. Antes, pendiente de Héctor (bmad-create-epics-and-stories / bmad-ux): el AC dice «una Cita de tramo xl a 36 px, unos 610 px», pero desde 600 px el tramo xl se compone a `--cita-xl` (44 px) y 36 px es el tramo lg; en el ch de la Cita, xl resuelve unos 745 px, más que la columna de 720, que es la que lo limita. Lo construido sigue el contrato literal (34ch en el cuerpo de su tramo, sin valor nuevo, sin desbordar la columna); la cifra de cada tramo queda anotada.'
     evidence: 'src/components/BloqueDeCita.astro (media ≥600: xl→--cita-xl); src/styles/tokens.css:37-38; DESIGN.md § Layout «Medida de la Cita» («a 36px son unos 610px»).'
     severity: low
-  - summary: 'Pendiente de Héctor (bmad-create-epics-and-stories): el AC pide que las instantáneas de móvil de tests/e2e/tipografia-calculada.spec.ts no cambien, pero su clave es la ruta de clases desde <body>, y el contenedor de la fila (pedido por el mismo AC) añade un segmento a la ruta de Copiar e Imagen en móvil y escritorio. Se regraban las de las páginas de Cita con los mismos valores (peso | interlineado) y solo esa reclave; las claves de la Cita no cambian.'
+  - summary: 'Aceptado por Héctor (2026-11-08): la regrabación de las instantáneas de móvil (solo claves, mismos valores). Antes, pendiente de Héctor (bmad-create-epics-and-stories): el AC pide que las instantáneas de móvil de tests/e2e/tipografia-calculada.spec.ts no cambien, pero su clave es la ruta de clases desde <body>, y el contenedor de la fila (pedido por el mismo AC) añade un segmento a la ruta de Copiar e Imagen en móvil y escritorio. Se regraban las de las páginas de Cita con los mismos valores (peso | interlineado) y solo esa reclave; las claves de la Cita no cambian.'
     evidence: 'tests/e2e/tipografia-calculada.spec.ts:100-140 (ruta de clases); epics.md Story 30.2, tercer y cuarto Given.'
+    severity: low
+  - summary: >-
+      Resuelto por decisión de Héctor (2026-11-08): la medida queda como está construida, 34ch en el cuerpo de su tramo, y la columna de 720 px limita xl; la cifra del AC («xl a 36 px, unos 610 px») mezcla tramos y no pide cambio. Era la pregunta de qué medida quería el AC, incoherente con tokens.css (xl se compone a 44 px desde 600 px; 36 px es lg).
+    evidence: |-
+      Revisión 1 (blind-hunter, intent-alignment, ac-auditor). Medido a 1280 × 800 con la sonda «0» de Source Serif 4: xl 44 px → max-width 791,4 px (la caja la limita la columna, 720 px); lg 36 px → 647,5 px; md 28 px → 503,6 px. Ningún tramo da ~610 px: con el «0» real (~0,53 em) 610 px corresponden a ~34 px de cuerpo. Si se quiere ~610 px en algún tramo, cambia la medida o el cuerpo, y eso es de Héctor (DESIGN.md § Layout «Medida de la Cita»).
+    location: >-
+      src/components/BloqueDeCita.astro (.texto); src/styles/tokens.css (--cita-*, --medida-cita)
+    severity: medium
+  - summary: >-
+      Aceptado por Héctor (2026-11-08): las instantáneas de móvil de tipografia-calculada se regrabaron en esta historia aunque el AC dice que «no cambian»; cambian solo las claves (la ruta de clases gana « > div.fila-de-acciones» en Copiar e Imagen), y ningún valor, como consecuencia del contenedor que el mismo AC pide.
+    evidence: |-
+      Revisión 1 (blind-hunter, intent-alignment, ac-auditor). Cotejado por programa: quitando ese segmento de las claves nuevas, cada tipografia-cita*-movil.json es idéntico al de 74341bdb78 (mismas claves, mismos pares peso | interlineado); la Cita, la portada y el 404 no cambian. Si Héctor prefiere que la clave no dependa del contenedor o que el AC lo diga, es bmad-create-epics-and-stories; la regrabación no se deshace sin quitar la fila.
+    location: >-
+      tests/e2e/tipografia-calculada.spec.ts-snapshots/tipografia-cita*-movil.json
     severity: low
 ---
 
@@ -120,7 +134,32 @@ deferred:
 - addressed_findings:
   - none
 
+### 2026-11-07 — Review pass
+- intent_gap: 0
+- bad_spec: 0
+- patch: 13: (high 0, medium 5, low 8)
+- defer: 2: (high 0, medium 1, low 1)
+- reject: 9: (high 0, medium 0, low 9)
+- addressed_findings:
+  - `[medium]` `[patch]` La medida en el texto solo se leía del fuente en la portada y el 404 (blind-hunter, intent-alignment, ac-auditor): pruebas nuevas de `pagina-de-cita.spec.ts` sobre `/` y un 404 construidos a 1280 × 800 (`max-width` de `.texto` = 34 «0», `.bloque` sin él, `figcaption` = 68 «0»).
+  - `[medium]` `[patch]` El respaldo no se medía donde los botones van en fila (blind-hunter, edge-case-hunter, intent-alignment, ac-auditor): prueba a 600 y 768 px con el portapapeles rechazado, bajo los dos botones, en la medida de prosa y sin desplazamiento.
+  - `[medium]` `[patch]` El barrido WCAG 2.2 AA no corría a 320/600/768/1280 (intent-alignment): la prueba de reflujo de `accesibilidad.spec.ts` pasa axe a cada ancho, en la portada y en cada Página de Cita que mide.
+  - `[medium]` `[patch]` La prueba de reflujo perdía en silencio una ruta sin Cita y fallaba en falso las de tramo sin cara completa (blind-hunter, edge-case-hunter): cada cara va con su nombre y su motivo; la que falta falla diciéndolo, y la que el Corpus de hoy no puede traer se salta diciéndolo.
+  - `[medium]` `[patch]` «Compartir en… dentro de la medida de prosa» no se mostraba (ac-auditor): prueba que el alcance de sus controles visibles no pasa de 68 «0» a 1280 × 800; verde sin tocar `CompartirEnlace.astro`.
+  - `[low]` `[patch]` El tramo sm y la Cita sin Imagen no se medían en el navegador (edge-case-hunter, intent-alignment): entran en las pruebas de medida, de fila y de reflujo con `citaSinImagen` (`tests/e2e/ayuda/corpus.ts`); el Corpus real no trae hoy ninguna Cita de más de 240 caracteres, así que se saltan con ese motivo y las cubre el fixture `SIN_IMAGEN` de la unitaria.
+  - `[low]` `[patch]` La prueba de tabulación daba por Imagen cualquier foco de la fila (blind-hunter, edge-case-hunter): lo que no es `button.copiar` ni el botón de Imagen cuenta como «otro» y la hace fallar.
+  - `[low]` `[patch]` La prueba del 200 % casi nunca podía fallar (blind-hunter, intent-alignment): a 600 px Imagen tiene que bajar bajo Copiar; a 768, en línea o debajo, anotado.
+  - `[low]` `[patch]` La sonda «0» del respaldo no anulaba el espaciado (blind-hunter): `letter-spacing: 0`, como las demás.
+  - `[low]` `[patch]` La unitaria tomaba las islas por posición y por `class === 'isla'` (blind-hunter): las toma por lo que son y por la lista de clases, y exige cuántas hay.
+  - `[low]` `[patch]` `hijosDelArticle` decía «en la Fila de acciones» de lo que recoge para todos, y `siguiente?.copiar` no decía que es la fila (blind-hunter): comentario al día y la fila exigida por su clase.
+  - `[low]` `[patch]` El párrafo de la fila partía el apartado de la Tarjeta de Obra en `AGENTS.md` (blind-hunter): va en su propio apartado, «La Fila de acciones y la medida de la Cita (Historia 30.2)», antes de «Al pie de la Página de Cita».
+  - `[low]` `[patch]` Con el respaldo a la vista el foco va Copiar → campo → Imagen, aunque el campo se pinte bajo la fila (blind-hunter): es el orden del marcado, que la historia no puede cambiar, y el guion enfoca el campo al revelarlo; queda dicho en `AGENTS.md` y en Design Notes.
+
 ## Design Notes
+
+**Orden del foco con el respaldo (revisión 1):** el respaldo vive dentro de la isla de Copiar, así que con él a la vista el Tabulador va de Copiar al campo y de ahí a Imagen, aunque el campo se pinte bajo la fila. Es el orden del marcado —que la historia no cambia— y conserva el sentido: el campo es la respuesta a Copiar, y el guion lo enfoca y lo selecciona al revelarlo. Ponerlo detrás de Imagen en el marcado exigiría cambiar el guion de Copiar en toda Página de Cita.
+
+**Tramo sm y Cita sin Imagen en el navegador (revisión 1):** el Corpus real no trae hoy ninguna Cita de más de 240 caracteres, así que las pruebas e2e de esos dos casos se saltan con ese motivo y empiezan a correr solas el día que llegue una; hasta entonces los cubren la regla única de `.texto` y el fixture `SIN_IMAGEN` de `tests/unit/tarjeta-de-obra.test.ts`.
 
 **Por qué `display: contents` en la isla de Copiar:** el respaldo vive dentro de su `.isla` porque el guion lo busca con `isla.querySelector('[data-respaldo]')`. Sacarlo cambiaría el guion de toda Página de Cita (y su tope de bytes). Con la isla `display: contents` dentro de la fila, el botón y el respaldo son elementos flexibles de la fila y el respaldo puede ir detrás de Imagen con `order`, sin tocar ni el marcado ni el guion. La región `.solo-para-lectores` es `position: absolute`, así que no ocupa sitio en la fila. Un `div` sin rol con `display: contents` no pierde nada en el árbol de accesibilidad.
 
@@ -160,7 +199,7 @@ Las tres casan con 34 × el «0» de Source Serif 4 en su cuerpo (±1 px). Las c
 Status: done
 Blocking condition: ninguna.
 
-**Resumen:** la medida de 34ch pasa de `.bloque` a `.texto` de `BloqueDeCita.astro`, así que se resuelve en el cuerpo del tramo (xl 791 px —la caja la limita la columna de 720—, lg 648, md 504 a 1280 × 800; en móvil no ata). `figcaption` y `.fuente` llevan `--medida-prosa`. Copiar e Imagen van en `FilaDeAcciones.astro` (sin zona ni guion): apilados por debajo de 600 px, en fila a 2 × desde 600 px; el respaldo de Copiar baja bajo la fila por `display: contents` y `order: 1`, sin tocar el marcado ni los guiones de las islas. «Compartir en» sigue fuera, a 3 ×.
+**Resumen:** la medida de 34ch pasa de `.bloque` a `.texto` de `BloqueDeCita.astro`, así que se resuelve en el cuerpo del tramo (xl 791 px —la caja la limita la columna de 720—, lg 648, md 504 a 1280 × 800; en móvil no ata). `figcaption` y `.fuente` llevan `--medida-prosa`. Copiar e Imagen van en `FilaDeAcciones.astro` (sin zona ni guion): apilados por debajo de 600 px, en fila a 2 × desde 600 px; el respaldo de Copiar baja bajo la fila por `display: contents` y `order: 1`, sin tocar el marcado ni los guiones de las islas. «Compartir en» sigue fuera, a 3 ×. La revisión 1 endurece las pruebas: portada y 404 construidos, respaldo a 600/768, axe a 320/600/768/1280, tramo sm y Cita sin Imagen (se saltan diciéndolo mientras el Corpus no las traiga), tabulación estricta, 200 % a 600 px exigiendo que Imagen baje, y Compartir en la medida de prosa.
 
 **Ficheros:**
 - `src/components/BloqueDeCita.astro` — `max-width: var(--medida-cita)` en `.texto`, fuera de `.bloque`; `figcaption` a `--medida-prosa`.
@@ -169,14 +208,15 @@ Blocking condition: ninguna.
 - `src/islands/CopiarCita.astro` — reglas con contexto de la fila: isla `display: contents`, respaldo `order: 1; flex-basis: 100%; margin-top: 0`.
 - `src/islands/ImagenDeCita.astro` — reglas con contexto: `margin-top: 0`, `flex-basis` 100 % y `auto` desde 600 px.
 - `src/pages/cita/[slug].astro` — la fila envuelve Copiar e Imagen; comentario de la 30.1 al día.
-- `tests/unit/tarjeta-de-obra.test.ts` — la fila como hijo del `article` (`acciones`), su contenido y atributos, sus reglas y la medida.
-- `tests/e2e/pagina-de-cita.spec.ts` — las dos pruebas de distancias de la 30.1 miden la fila y los botones; `describe` de la 30.2 (medida por tramo a 1280 × 800 y 360 × 640, geometría a 360/599/600/768/1280, 200 %, respaldo, prosa, tabulación).
-- `tests/e2e/accesibilidad.spec.ts` — sin desplazamiento horizontal a 320/600/768/1280 en portada, cara completa y un tramo de cada.
-- `tests/e2e/tipografia-calculada.spec.ts-snapshots/tipografia-cita*.json` — reclave bajo `div.fila-de-acciones`, mismos valores.
-- `AGENTS.md` — la Fila de acciones y la medida en el texto, en el apartado de la Tarjeta de Obra.
+- `tests/unit/tarjeta-de-obra.test.ts` — la fila como hijo del `article` (`acciones`), su contenido y atributos (islas por lo que son, no por posición), sus reglas y la medida.
+- `tests/e2e/pagina-de-cita.spec.ts` — distancias de la 30.1 desde la fila y los botones; `describe` de la 30.2 (medida por tramo xl/lg/md/sm, portada y 404, geometría, 200 %, respaldo a cada ancho, Cita sin Imagen, Compartir y Atribución en la medida de prosa, tabulación).
+- `tests/e2e/accesibilidad.spec.ts` — sin desplazamiento horizontal y barrido axe a 320/600/768/1280 en portada, cara completa, cada tramo y la Cita sin Imagen, cada cara con su nombre y su motivo.
+- `tests/e2e/ayuda/corpus.ts` — `citaSinImagen`.
+- `tests/e2e/tipografia-calculada.spec.ts-snapshots/tipografia-cita*.json` — reclave bajo `div.fila-de-acciones`, mismos valores (aceptado por Héctor, 2026-11-08).
+- `AGENTS.md` — apartado propio «La Fila de acciones y la medida de la Cita (Historia 30.2)», con el orden del foco con el respaldo.
 
-**Revisión:** las capas externas no traen hallazgos en esta pasada: 0 parches, 0 diferidos, 0 rechazados. Recomendación de segunda revisión: `false` (0 parches; puntuación 0).
+**Revisión 1:** 13 parches (medium 5, low 8), 2 diferidos (los dos, resueltos por decisión de Héctor del 2026-11-08: la medida queda como está construida —34ch en el cuerpo del tramo; la columna de 720 px limita xl; la cifra «xl a 36 px, unos 610 px» del AC mezcla tramos— y la regrabación de las instantáneas de móvil, solo claves, queda aceptada), 9 rechazados. Recomendación de segunda revisión: `true` (puntuación 3 × 5 + 1 × 8 = 23; ningún parche high).
 
-**Verificación:** `npx vitest run tests/unit/tarjeta-de-obra.test.ts` (36 verdes); `tests/unit/medicion.test.ts` y `tipografia-en-tokens.test.ts` (695 verdes); `npx astro check` (0 errores); `FECHA_JORNADA=2026-11-07 npm run build` (EXIT 0, sin aviso de peso; +1.225.749 bytes juzgados); `npx playwright test tests/e2e/pagina-de-cita.spec.ts tests/e2e/accesibilidad.spec.ts tests/e2e/copiar.spec.ts tests/e2e/imagen.spec.ts --project=movil --project=escritorio` (469 verdes, 27 omitidas por proyecto); `tests/e2e/tipografia-calculada.spec.ts` con `--update-snapshots` y después sin ella (28 verdes), con el diff cotejado por programa; `npm test` (155 ficheros, 7187 verdes).
+**Verificación:** sobre el mismo árbol de código: `npx vitest run tests/unit/tarjeta-de-obra.test.ts` (36 verdes, repetida el 2026-11-08); `npx astro check` (0 errores, repetida); `npx playwright test tests/e2e/pagina-de-cita.spec.ts tests/e2e/accesibilidad.spec.ts --project=movil --project=escritorio` (475 verdes; las 6 rojas eran las caras sm y sin Imagen, que el Corpus no trae, y pasaron a saltarse con su motivo; la repetición de las pruebas de la 30.2, 28 verdes y 36 omitidas); `npm test` (155 ficheros, 7187 verdes, EXIT 0). Tras eso solo cambió este spec.
 
-**Riesgos:** la medida de la Cita en verso más larga queda para cuando la Épica 29 llegue a la rama (diferido). Las cifras de xl y lg superan las estimadas en el spec por el ancho real del «0» de Source Serif; el AC de la épica sigue con la cifra de 36 px pendiente de Héctor (diferido). La suite e2e completa no se corrió (acto de Héctor).
+**Riesgos:** la medida de la Cita en verso más larga queda para cuando la Épica 29 llegue a la rama (diferido). El tramo sm y la Cita sin Imagen no se ejercen en el navegador hasta que el Corpus traiga una Cita de más de 240 caracteres; los cubre el fixture `SIN_IMAGEN`. La suite e2e completa no se corrió.

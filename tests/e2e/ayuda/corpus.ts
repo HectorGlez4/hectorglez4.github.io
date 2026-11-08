@@ -465,6 +465,16 @@ export function citaDeTramo(nombre: string): string | undefined {
 }
 
 /**
+ * Historia 30.2 — la primera Cita por slug de más de `MAX_CARACTERES_IMAGEN`, sin Acción Imagen:
+ * la de la fila con Copiar solo. `undefined` si el Corpus de hoy no tiene ninguna.
+ */
+export function citaSinImagen(): string | undefined {
+  return citasResueltas()
+    .filter((c) => !admiteImagen(c.texto))
+    .sort(porSlug)[0]?.slug;
+}
+
+/**
  * Historia 26.12 — la primera Colección por slug con al menos `MIN_CITAS_POR_COLECCION` miembros
  * que son Citas publicadas: la que tiene página. `undefined` si hoy no hay ninguna.
  */
