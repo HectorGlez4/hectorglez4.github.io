@@ -499,8 +499,8 @@ development_status:
   32-1-revisiones-fijas-de-wikidata-versionadas-y-la-orden-que-ata: review  # v9-ralph 2026-11-08: recuperar por revisión fija de Wikidata y npm run obra -- wikidata; wikidata-vigente no descarga (decisión delegada); dos pasadas de revisión; pregunta 12 (antologías) sigue para Héctor
   32-2-la-línea-de-ficha-técnica-bajo-la-cabecera-de-obra: review  # v9-ralph 2026-11-08: línea de Ficha técnica bajo la Cabecera de Obra (solo con ficha atada; dist/ del Corpus real sin cambios); dos pasadas de revisión; [ASSUMPTION] de UX-DR126 (orden de la línea, años sin rótulo) para Héctor con bmad-ux
   32-3-el-incipit-lo-declara-una-persona-y-la-página-lo-enseña-pleg: review  # v9-ralph 2026-11-09: el incipit lo declara una persona (npm run obra -- incipit) y la Página de Obra lo enseña plegado («Cómo empieza»); dos pasadas de revisión; diferidos para Héctor: corte por frase (abreviaturas, punto y raya, desde a media línea); MAX_CARACTERES_DEL_INCIPIT y DESPLIEGUE_DEL_INCIPIT sin valor
-  32-4-la-página-1-de-la-obra-reordenada-dónde-leer-esta-obra-plega: backlog  # bloqueada: va tras la 32.3 —epics.md: «la 32.3 antes de la 32.4 y la 32.5»— y su juicio de SM-C4 no compara ventanas a través de DESPLIEGUE_DEL_INCIPIT, que nace en la 32.3, bloqueada por las Épicas 29 y 31 (v9-ralph 2026-11-07)
-  32-5-cómo-citar-la-obra: backlog  # bloqueada: reutiliza ComoCitar.astro, referenciaDeCita, nombreEnReferencia, fechaDeConsulta y MARCADOR_DE_FECHA_DE_CONSULTA de la 30.3 y el evento copiado-de-referencia de la 30.5 (Épica 30, sin fusionar, a la espera de la 29), y va tras la 32.3 (v9-ralph 2026-11-07)
+  32-4-la-página-1-de-la-obra-reordenada-dónde-leer-esta-obra-plega: backlog  # v9-ralph 2026-11-09: desbloqueada, la 32.3 en review y la Épica 30 en la principal
+  32-5-cómo-citar-la-obra: backlog  # v9-ralph 2026-11-09: desbloqueada, la 32.3 en review y la Épica 30 en la principal
   epic-32-retrospective: optional
 
   # Épica 33 — afiliación sin reloj. Las tiendas las declara Héctor; ninguna cuenta con
