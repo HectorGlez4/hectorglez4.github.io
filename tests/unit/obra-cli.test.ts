@@ -498,6 +498,26 @@ describe('Historia 32.1 — npm run obra -- wikidata y wikidata-vigente', () => 
     expect(await readFile(join(corpus, 'wikidata', 'vigentes.yml'), 'utf8')).toBe(antes);
   });
 
+  it('wikidata-vigente se niega si otra vigente no tiene su documento, y no escribe', async () => {
+    const corpus = await preparado(
+      [CARTAS, SENECA, NOVELA, wd.entidad('Q8261', 41, { es: 'novela epistolar' })],
+      { Q2054: 30, Q8261: 40, Q9: 3 },
+    );
+    const antes = await readFile(join(corpus, 'wikidata', 'vigentes.yml'), 'utf8');
+    const hecho = await correr(corpus, ['wikidata-vigente', 'Q8261', '41']);
+    expect(hecho.codigo).toBe(1);
+    expect(hecho.error).toMatch(/vigentes sin su documento/);
+    expect(hecho.error).toContain('Q9: 3');
+    expect(await readFile(join(corpus, 'wikidata', 'vigentes.yml'), 'utf8')).toBe(antes);
+  });
+
+  it('wikidata-vigente arregla la vigente sin documento de su propia entidad', async () => {
+    const corpus = await preparado([CARTAS, SENECA, wd.entidad('Q8261', 41, { es: 'novela epistolar' })]);
+    const hecho = await correr(corpus, ['wikidata-vigente', 'Q8261', '41']);
+    expect(hecho.codigo, hecho.error).toBe(0);
+    expect(await readFile(join(corpus, 'wikidata', 'vigentes.yml'), 'utf8')).toMatch(/\nQ8261: 41\n$/);
+  });
+
   it('wikidata-vigente con una revisión de más de 2^53 sale con 2', async () => {
     const corpus = await corpusConCita();
     expect((await correr(corpus, ['wikidata-vigente', 'Q8261', '9007199254740993'])).codigo).toBe(2);

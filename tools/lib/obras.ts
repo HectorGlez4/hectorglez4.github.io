@@ -1690,6 +1690,19 @@ export async function cambiarVigenteDeWikidata(rutas: Rutas, entidad: string, re
     const fichas = await leerFichasDeObra(rutas);
     const nombres = new Map((await leerAutores(rutas)).map((a) => [a.slug, a.nombre]));
     const wikidata = await leerWikidataDelCorpus(rutas);
+    // Otra vigente sin su documento rompe el build igual tras el cambio (la de esta entidad, no:
+    // el cambio la arregla): la orden no da por bueno un estado que no construye, como atar.
+    const otrasRotas = wikidata.rotas.filter((rota) => !rota.startsWith(`${entidad}: `));
+    if (otrasRotas.length > 0) {
+      return {
+        ok: false,
+        motivos: [
+          `${rutas.vigentesDeWikidata} declara vigentes sin su documento, y el build no construiría:`,
+          ...otrasRotas.map((rota) => `  · ${rota}`),
+          NADA_ESCRITO,
+        ],
+      };
+    }
     // Las vigentes tal como quedarían: el cotejo del autor se repite con la revisión nueva antes de
     // escribir, para que la orden no deje un build que rompe (el cargador hace el mismo cotejo).
     const nuevos = suyo.documento.datos;

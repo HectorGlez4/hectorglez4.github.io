@@ -689,8 +689,8 @@ export interface FichaTecnicaDeObra extends FichaTecnica {
  * Las Fichas técnicas de un Corpus en disco, por nombre de ficha — el cuerpo del cargador
  * `fichasTecnicas` de `src/content.config.ts`. Repite lo que comprueba la orden que ata: que el
  * documento de la ficha exista y sea de esa entidad y esa revisión, que su autor tenga vigente y
- * concuerde con el Autor de la ficha; y además que `vigentes.yml` se deje leer y cada vigente
- * tenga su documento. Lanza `Regla incumplida: …` nombrando la ficha (o `vigentes.yml`).
+ * concuerde con el Autor de la ficha, y que ninguna otra ficha activa declare la misma entidad;
+ * y además que `vigentes.yml` se deje leer y cada vigente tenga su documento. Lanza `Regla incumplida: …` nombrando la ficha (o `vigentes.yml`).
  */
 export async function leerFichasTecnicasDelCorpus(raizDelCorpus: string): Promise<Map<string, FichaTecnicaDeObra>> {
   const rutas = rutasDelCorpus(raizDelCorpus);
@@ -713,10 +713,20 @@ export async function leerFichasTecnicasDelCorpus(raizDelCorpus: string): Promis
   }
   const nombres = new Map(autores.map((a) => [a.slug, a.nombre]));
   const salida = new Map<string, FichaTecnicaDeObra>();
+  // Una entidad describe una sola Obra (la misma regla que la orden que ata): dos fichas activas
+  // que la declaran —una editada a mano, una retirada que vuelve— serían dos Obras con la misma
+  // Ficha técnica.
+  const primeraQueLaDeclara = new Map<string, string>();
 
   for (const ficha of fichas) {
     if (ficha.wikidata === undefined) continue;
     const { entidad, revision } = ficha.wikidata;
+    const otra = primeraQueLaDeclara.get(entidad);
+    if (otra !== undefined) {
+      problemas.push(`${ficha.ruta}: ${entidad} ya la declara ${otra}; una entidad de Wikidata es una sola Obra.`);
+    } else {
+      primeraQueLaDeclara.set(entidad, ficha.ruta);
+    }
     const lectura = await documentoDeLaCarpeta(rutas.wikidata, entidad, revision);
     if (!lectura.ok) {
       problemas.push(`${ficha.ruta} declara wikidata ${entidad} r${revision}: ${lectura.motivo}`);

@@ -129,6 +129,8 @@ describe('Historia 32.1 — el build repite el cotejo de Wikidata', () => {
     expect(salida).toMatch(/seneca--fedra\.yml declara wikidata Q483 r503: Q77 no tiene revisión vigente/);
     expect(salida).toMatch(/vigentes\.yml declara una vigente sin su documento: Q999: 9/);
     expect(salida).not.toMatch(/seneca--sobre-la-brevedad-de-la-vida\.yml declara/);
+    // Tres fichas declaran Q480: la primera pasa, las otras dos se nombran (la regla de atar).
+    expect(salida.match(/seneca--[a-z-]+\.yml: Q480 ya la declara .*seneca--[a-z-]+\.yml; una entidad de Wikidata es una sola Obra/g)).toHaveLength(2);
   });
 
   it('un vigentes.yml ilegible rompe nombrándolo', async () => {

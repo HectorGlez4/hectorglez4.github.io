@@ -715,18 +715,22 @@ exige cada edición: «Encender la afiliación de libros».
 **`wikidata`** (Historia 32.1, AD-31) es el tercer campo que decide Héctor, y tampoco se escribe
 a mano: `wikidata: {entidad, revision}` lo escribe solo `npm run obra -- wikidata <ficha>
 corpus/wikidata/<Q>--r<N>.json`, que se niega con 1 —nada escrito— si el autor (P50) de esa
-revisión no concuerda con el `nombre` del Autor de la ficha por `esElMismoAutor` (o no hay P50,
-ni revisión vigente de la persona, ni etiqueta en español). La revisión se versiona antes, por
+revisión no concuerda con el `nombre` del Autor de la ficha por `esElMismoAutor` o no se puede
+cotejar (falta el P50, la revisión vigente de la persona o su etiqueta en español), si otra ficha
+activa ya declara esa entidad —una entidad es una sola Obra— y si `vigentes.yml` trae una vigente
+sin su documento, que rompe el build aunque ninguna ficha esté atada. La revisión se versiona antes, por
 `oldid`, con `npx tsx tools/recuperar.ts "https://www.wikidata.org/w/index.php?title=<Q>&oldid=<N>"`:
 la entidad y la fecha las declara Wikidata por su API, se guarda el JSON entero de esa revisión
 en `corpus/wikidata/{Q}--r{N}.json` (CC0, nunca sobrescrito) y se recuperan las entidades a las
 que remite —autor, género P136, lengua P407— que falten en `corpus/wikidata/vigentes.yml`, que
 **solo se amplía**; cambiar una vigente es `npm run obra -- wikidata-vigente <Q> <N>`, que no
-descarga (si falta el documento, da la orden `recuperar` exacta) y dice cuántas Obras remiten a
-ella. Wikidata no es una Fuente de `FUENTES`: el cotejo de Citas, las posiciones y `extraer` no
+descarga (si falta el documento, da la orden `recuperar` exacta), repite antes el cotejo del
+autor de cada ficha atada con la revisión nueva y se niega si alguna dejaría de concordar o si
+otra vigente no tiene su documento, y dice cuántas Obras remiten a ella. Wikidata no es una Fuente de `FUENTES`: el cotejo de Citas, las posiciones y `extraer` no
 leen `corpus/wikidata/`. El build repite las comprobaciones desde el cargador `fichasTecnicas` de
 `src/content.config.ts`, la **segunda excepción** a que `src/` no importe de `tools/lib/` (la
-primera es el de posiciones), y rompe nombrando la ficha o `vigentes.yml`. Ninguna página pinta
+primera es el de posiciones) —también que dos fichas activas no declaren la misma entidad—, y
+rompe nombrando la ficha o `vigentes.yml`. Ninguna página pinta
 nada todavía (la 32.2 pinta la Ficha técnica), y `wikidata` está en `CAMPOS_QUE_NO_FECHAN` hasta
 entonces. Las órdenes que reescriben una ficha lo conservan; `reunir` no hereda el de la
 absorbida y lo dice. **Ningún agente ata una entidad ni recupera de Wikidata sobre el Corpus

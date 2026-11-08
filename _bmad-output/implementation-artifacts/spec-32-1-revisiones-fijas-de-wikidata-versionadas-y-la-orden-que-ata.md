@@ -183,6 +183,19 @@ deferred:
 
 Rechazados (por diseño del contrato o sin consecuencia): solo se coteja el autor (AC «solo el autor»); vigentes huérfanas que rompen el build (fila Build de la matriz); título tecleado sin normalizar y direcciones `?revision=`/`wikidata.org` sin `www` (se niegan, que es lo seguro); dependencia del orden de declaración (funciona y no hay caso); expresión de la entidad repetida (`src/` no puede importar de `tools/lib/` salvo el cargador); entidad entera sin tope (Design Notes); solo `labels.es` (contrato, riesgo residual anotado); rango `preferred` antes que `snaktype` (regla de «mejor rango» del contrato); año 0 y calendario (sin caso en el Corpus); conservación de `wikidata` en `retirar`/`documentar`/`restituir-grafia` (pasan por `datosDeFicha` o mueven el fichero); prueba de red del cargador y `dist/` byte a byte (verificado en la pasada anterior y sin cambio de lo que se pinta); revisión anterior aceptada por `wikidata-vigente` (volver atrás puede ser deliberado); fecha UTC de `recuperado` (la misma que las demás ramas de `recuperar`); symlink de `corpus/wikidata/`; desviación de `wikidata-vigente` respecto del texto del AC (aceptada por Héctor, Design Notes); «cuántas Obras fecha» por remisión y no por la relación (misma decisión, diferido a la 32.2).
 
+### 2026-11-08 — Review pass
+- intent_gap: 0
+- bad_spec: 0
+- patch: 3 (high 0, medium 2, low 1)
+- defer: 0
+- reject: 23
+- addressed_findings:
+  - `[medium]` `[patch]` el cargador `fichasTecnicas` repite la regla de atar «una entidad, una Obra»: dos fichas activas con la misma `wikidata.entidad` rompen el build nombrándolas (blind-hunter, edge-case-hunter, otros). Camino real: `reunir` deja la absorbida con su entidad en `_obras-retiradas/` y una aprobación la restaura. Prueba en `wikidata-build.test.ts`, que falla sin el arreglo.
+  - `[medium]` `[patch]` `wikidata-vigente` se niega con 1, sin escribir, si otra vigente de `vigentes.yml` no tiene su documento —el build no construiría—, como ya hace atar; la de la propia entidad no bloquea, porque el cambio la arregla (edge-case-hunter). Dos pruebas en `obra-cli.test.ts`; la de la negativa falla sin el arreglo.
+  - `[low]` `[patch]` el párrafo de AGENTS.md dice ahora las negativas de atar (entidad ya declarada, vigente sin documento), el cotejo previo de `wikidata-vigente` y la regla de unicidad del build, y corrige «(o no hay P50, ni …)», que decía lo contrario (blind-hunter).
+
+Rechazados (proporcionalidad de la última ronda; sin camino de usuario, por contrato o ya decididos): redirección a `http:` (el reconocedor admite `http:` por contrato, como las Fuentes); entidad referida fusionada y su mensaje «repita» (solo el texto del parte, sin caso en el Corpus); deshacer un `recuperar` (git lo deshace; ya diferida la orden que quita `wikidata`); P31 obra frente a edición y alias/homónimos (AC «solo el autor»; riesgo residual anotado); recuperar el permanente de una referida trae sus propias referidas (es la entidad pedida; cuesta una petición); género/lengua sin vigente en el parte; `--corpus` en la orden sugerida; `esquema` en `wikidata-vigente` (la CLI nunca lo pasa); cotejo de todas las fichas atadas (una rota ya rompe el build); comparación de rutas con symlink/mayúsculas; `preferred` sin valor con `normal` con valor (regla de rango del contrato); prueba del contenido del almacén y de la relectura (la 32.2 lo consume y lo prueba); coste de leer las entidades enteras (Design Notes); diagnósticos `invalid`/`missing` de la API; carrera del temporal de `vigentes.yml` (órdenes de una persona, no concurrentes); restauración de una retirada con entidad repetida (la cubre ya la regla del build); mensaje de la relectura en `astro dev` atribuido a las Citas (solo el aviso de desarrollo, y el cargador de índices ya lo comparte); pasajes antiguos del Auto Run Result (son el registro de su pasada, y la frontmatter es la vigente); y los huecos del auditor de AC (desviación de `wikidata-vigente` aceptada por Héctor, dos escritores sobre un serializador por contrato, conservación por `datosDeFicha`, `dist/` y red por evidencia estática y `andamiaje`).
+
 ## Auto Run Result
 
 Status: done
@@ -244,3 +257,26 @@ Blocking condition: ninguna.
 - La comparación de `dist/` no se repitió: los parches tocan solo `tools/` y la rama de error del cargador, que con el Corpus real (ninguna ficha con `wikidata`) no se ejecuta; nada de lo que se pinta cambia.
 
 **Riesgos residuales.** Los de la pasada anterior (solo `labels.es`, Pregunta 12 abierta) y la falta de una orden que quite la atadura (diferida).
+
+### Pasada de revisión 32.1-2 (2026-11-08, con las capas externas; última ronda)
+
+**Resumen.** Tres parches, sin cambio de alcance: el cargador `fichasTecnicas` repite la regla de atar «una entidad, una Obra» y rompe el build si dos fichas activas declaran la misma entidad; `wikidata-vigente` se niega, sin escribir, si otra vigente de `vigentes.yml` no tiene su documento (la de su propia entidad no bloquea: el cambio la arregla); y el párrafo de AGENTS.md recoge esas negativas y corrige la frase que decía lo contrario.
+
+**Ficheros.**
+- `tools/lib/wikidata.ts` — `leerFichasTecnicasDelCorpus` nombra la segunda (y siguientes) ficha que declara una entidad ya declarada.
+- `tools/lib/obras.ts` — `cambiarVigenteDeWikidata` se niega con las otras vigentes sin documento.
+- `tests/unit/wikidata-build.test.ts`, `tests/unit/obra-cli.test.ts` — pruebas que fallan sin el arreglo (comprobado revirtiendo el código), más la de que la vigente rota de la propia entidad no bloquea.
+- `AGENTS.md` — párrafo de `wikidata` al día.
+
+**Hallazgos.** 3 parches (2 medium, 1 low), 0 diferidos, 23 rechazados (ver el registro de triaje).
+
+**Revisión de seguimiento.** `followup_review_recommended: true` por la fórmula: parches 0 high, 2 medium, 1 low; puntuación 3×2 + 1 = 7 ≥ 5. Era la última ronda del bucle.
+
+**Verificación.**
+- `npx vitest run tests/unit/wikidata.test.ts tests/unit/wikidata-build.test.ts tests/unit/obra-cli.test.ts tests/unit/recuperar-cli.test.ts tests/unit/orden-del-libro.test.ts tests/unit/andamiaje.test.ts tests/unit/obras.test.ts tests/unit/fecha-de-cambio.test.ts` — 8/8 ficheros, 494/494.
+- Sin el arreglo: `wikidata-build` 1 fallo (la unicidad) y `obra-cli -t wikidata-vigente` 1 fallo (la vigente rota ajena).
+- `npx astro check` — 0 errores, 0 avisos.
+- `npm test` — 157/157 ficheros, 7256/7256 pruebas, código 0 (1373 s).
+- `dist/` no se recompara: los parches tocan la rama de error del cargador y una orden de `tools/`; con el Corpus real (ninguna ficha con `wikidata`) nada de lo pintado cambia.
+
+**Riesgos residuales.** Los de las pasadas anteriores (solo `labels.es` y sin alias; Pregunta 12 abierta; sin orden que quite la atadura, diferida) y que una entidad de edición (P31) se puede atar si su autor concuerda: lo juzga quien ata.
