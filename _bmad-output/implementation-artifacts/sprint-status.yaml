@@ -29,7 +29,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 # - Retrospective appends its action items to action_items; the status view surfaces open ones
 generated: 08-11-2026 09:00
-last_updated: 11-07-2026 16:51
+last_updated: 11-08-2026 06:28
 project: brainlySabiduria
 project_key: NOKEY
 tracking_system: file-system
@@ -505,9 +505,8 @@ development_status:
 
   # Épica 33 — afiliación sin reloj. Las tiendas las declara Héctor; ninguna cuenta con
   # plazo de ventas antes de la pregunta 11.
-  epic-33: backlog
-  33-1-una-tienda-se-declara-sin-marca-y-el-modelo-no-se-enciende-c: backlog
-  33-2-las-ediciones-en-venta-por-formato-y-por-tienda-dentro-de-dó: backlog  # bloqueada: necesita la 32.4 en la principal («Dónde leer esta obra» plegado, antes del listado, con su grupo «Gratis»; epics.md: «Sin esas dos historias, esta no empieza»), y la Épica 32 no está fundida (v9-ralph 2026-11-07)
+  epic-33: in-progress
+  33-1-una-tienda-se-declara-sin-marca-y-el-modelo-no-se-enciende-c: review  # v9-ralph 2026-11-08: una tienda se declara sin marca (esMarcaValida, un solo predicado); con el Modelo encendido y una tienda sin marca, el build se para nombrándola; TIENDAS sigue vacío; dos rondas de revisión  33-2-las-ediciones-en-venta-por-formato-y-por-tienda-dentro-de-dó: backlog  # bloqueada: necesita la 32.4 en la principal («Dónde leer esta obra» plegado, antes del listado, con su grupo «Gratis»; epics.md: «Sin esas dos historias, esta no empieza»), y la Épica 32 no está fundida (v9-ralph 2026-11-07)
   33-3-la-orden-de-qué-obras-curar-primero: backlog
   epic-33-retrospective: optional
 
