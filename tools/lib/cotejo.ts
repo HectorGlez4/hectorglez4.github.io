@@ -20,6 +20,7 @@ import {
   esFormaDeVerso,
   formaDeLasLineas,
   textoConSaltos,
+  type DocumentoConForma,
   type FormaDeLineas,
   saltosDeLaCita,
 } from './lineas.ts';
@@ -373,6 +374,51 @@ export function documentosDeCita(
     .sort((a, b) => (a === corto ? -1 : b === corto ? 1 : a.localeCompare(b, 'es')));
 }
 
+/** De los documentos de una obra, los que tienen cuerpo: los mismos para la puerta y la restitución. */
+export function documentosLegibles(nombres: readonly string[], documentos: DocumentosDeFuente): string[] {
+  return nombres.filter((n) => typeof documentos.get(n) === 'string');
+}
+
+/**
+ * Lo que `saltosDeLaCita` recibe de cada documento —su forma y su cuerpo colapsado—, calculado una
+ * vez por nombre — Historia 29.2.
+ *
+ * Lo comparten la regla 4 del cotejo y `documentar --restituir-saltos`: si cada una armara sus
+ * candidatos por su lado, la misma decisión podría recibir entradas distintas y el build romper
+ * tras correr la orden, que es la divergencia que AD-29 impide. Una `lineas:` declarada válida
+ * manda sobre el cálculo de la forma, como en la 29.1.
+ */
+export function candidatosDeLosSaltos(
+  documentos: DocumentosDeFuente,
+  lineasDeclaradas: ReadonlyMap<string, string> = new Map(),
+): {
+  formaDe: (nombre: string, cuerpo: string) => FormaDeLineas;
+  candidatos: (nombres: readonly string[]) => DocumentoConForma[];
+} {
+  const formas = new Map<string, FormaDeLineas>();
+  const colapsados = new Map<string, Colapsado>();
+  const formaDe = (nombre: string, cuerpo: string): FormaDeLineas => {
+    let forma = formas.get(nombre);
+    if (forma === undefined) {
+      const lineas = lineasDeclaradas.get(nombre);
+      forma = formaDeLasLineas({ cuerpo, ...(lineas !== undefined ? { lineas } : {}) });
+      formas.set(nombre, forma);
+    }
+    return forma;
+  };
+  const candidatos = (nombres: readonly string[]): DocumentoConForma[] =>
+    nombres.map((nombre) => {
+      const cuerpo = documentos.get(nombre) as string;
+      let colapsado = colapsados.get(nombre);
+      if (colapsado === undefined) {
+        colapsado = colapsarEspacios(cuerpo);
+        colapsados.set(nombre, colapsado);
+      }
+      return { nombre, cuerpo, forma: formaDe(nombre, cuerpo), colapsado };
+    });
+  return { formaDe, candidatos };
+}
+
 const RECUPERAR =
   'Recupere su Fuente con: npx tsx tools/recuperar.ts <url> — y siembre desde el ' +
   'documento con tools/extraer.ts.';
@@ -559,8 +605,6 @@ export function cotejar(entrada: EntradaDeCotejo): ResultadoDeCotejo {
   let cotejadas = 0;
   /** Historia 29.2, regla 4: las Citas de documento de verso a las que les faltan sus saltos. */
   const sinSusSaltos: { slug: string; ruta: string; documento: string }[] = [];
-  /** El cuerpo colapsado de cada documento que la regla 4 mira, una vez por documento. */
-  const colapsados = new Map<string, Colapsado>();
 
   const publicadas = new Map(citas.map((c) => [c.slug, c]));
   const enCenso = new Set(censo);
@@ -581,19 +625,10 @@ export function cotejar(entrada: EntradaDeCotejo): ResultadoDeCotejo {
     });
   }
   /**
-   * La forma de cada documento, calculada una vez por nombre la primera vez que una Cita lo
-   * coteja: desde la 29.2 la regla 4 la pide para todo documento legible de toda Cita.
+   * La forma y el colapsado de cada documento, una vez por nombre: desde la 29.2 la regla 4 la
+   * pide para todo documento legible de toda Cita, con los mismos candidatos que la restitución.
    */
-  const formas = new Map<string, FormaDeLineas>();
-  const formaDe = (nombre: string, cuerpo: string): FormaDeLineas => {
-    let forma = formas.get(nombre);
-    if (forma === undefined) {
-      const lineas = lineasDeclaradas.get(nombre);
-      forma = formaDeLasLineas({ cuerpo, ...(lineas !== undefined ? { lineas } : {}) });
-      formas.set(nombre, forma);
-    }
-    return forma;
-  };
+  const { formaDe, candidatos: candidatosDeSaltos } = candidatosDeLosSaltos(documentos, lineasDeclaradas);
 
   // El trinquete se aplica **aquí**, donde corre el cotejo, y no solo en una prueba: un
   // tope que solo vigila la suite no detiene ninguna construcción, y el build imprime el
@@ -726,7 +761,7 @@ export function cotejar(entrada: EntradaDeCotejo): ResultadoDeCotejo {
      * analiza, el fallo es ese y no «no aparece». Con varios, uno roto no puede tapar a los
      * sanos, así que solo se informa cuando ninguno sirvió.
      */
-    const legibles = candidatos.filter((n) => typeof documentos.get(n) === 'string');
+    const legibles = documentosLegibles(candidatos, documentos);
     if (legibles.length === 0) {
       fallos.push({
         ruta: `corpus/fuentes/${candidatos[0]}.txt`,
@@ -768,18 +803,7 @@ export function cotejar(entrada: EntradaDeCotejo): ResultadoDeCotejo {
      * ninguno, la decisión no puede ser `saltos` ni `conflicto`.
      */
     if (legibles.some((n) => esFormaDeVerso(formaDe(n, documentos.get(n) as string)))) {
-      const decision = saltosDeLaCita(
-        cita.texto,
-        legibles.map((n) => {
-          const cuerpo = documentos.get(n) as string;
-          let colapsado = colapsados.get(n);
-          if (colapsado === undefined) {
-            colapsado = colapsarEspacios(cuerpo);
-            colapsados.set(n, colapsado);
-          }
-          return { nombre: n, cuerpo, forma: formaDe(n, cuerpo), colapsado };
-        }),
-      );
+      const decision = saltosDeLaCita(cita.texto, candidatosDeSaltos(legibles));
       if (decision.tipo === 'saltos' && decision.texto !== cita.texto) {
         sinSusSaltos.push({ slug: cita.slug, ruta: cita.ruta, documento: decision.documento });
         continue;

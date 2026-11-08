@@ -631,11 +631,15 @@ en prosa (`prosa-por-lineas`, `prosa-ajustada` o `indeterminada`) y la de docume
 saltos en su tramo; el parte las cuenta por motivo. Dos documentos de verso que le darían saltos
 distintos son un **conflicto**: no se toca, el parte lo lista con los dos documentos y el build
 solo avisa —lo decide una persona—. Primero decide todo y después escribe; si una escritura falla,
-devuelve lo ya escrito a su contenido original y sale con 1. Es idempotente. El parte dice además
+devuelve lo ya escrito —y el propio fichero que falló— a su contenido original y sale con 1;
+un fichero que cambió en disco entre la decisión y la escritura cuenta como escritura fallida, y
+no se pisa. Las fechas se cuentan antes de escribir. Es idempotente. El parte dice además
 cuántas Páginas de Cita y listados cambian de fecha (la relación de AD-27) y recuerda
 `npx tsx tools/avisar.ts --ensayo --desde <A> --hasta <B>`. Códigos: 2 la forma (bandera
 desconocida o repetida, junto a `--restituir-traduccion`, `--retirar` o `--texto`); 1 un slug que
-no es de ninguna Cita o una nombrada sin documento, un Corpus ilegible o una escritura que falla.
+no es de ninguna Cita o una nombrada sin documento, un Corpus ilegible o una escritura que falla;
+0 en lo demás, también con una nombrada en prosa, sin saltos en su tramo, que no se localiza o en
+conflicto: el parte dice por qué se queda como está.
 Lee todo `_revision/` y tarda minuto y medio sobre el Corpus real.
 
 **El build rompe ante una Cita de documento de verso sin sus saltos** (regla 4 de la puerta del

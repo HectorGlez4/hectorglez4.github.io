@@ -656,9 +656,11 @@ describe('Historia 29.1 — el salto de verso en el cotejo (AD-29)', () => {
     expect(apareceEnDocumento(EN_UNA_LINEA, CUERPO_MARTI)).toBe(true);
     expect(huellaDeTexto(VERSOS)).toBe(huellaDeTexto(EN_UNA_LINEA));
     for (const texto of [VERSOS, EN_UNA_LINEA]) {
-      // Contra el documento en prosa, para que la regla 4 de la 29.2 no hable de la forma.
+      // Con saltos, contra el documento de verso (ya restituida: la regla 4 no la toca); en una
+      // línea, contra el mismo documento declarado en prosa, porque desde la 29.2 la regla 4
+      // rompe ante una Cita de documento de verso sin sus saltos.
       const r = cotejar({
-        citas: [deMarti(texto.replace(/\n/gu, texto === VERSOS ? '\n' : ' '))],
+        citas: [deMarti(texto)],
         documentos: new Map([[DOC, CUERPO_MARTI]]),
         censo: [],
         ...(texto === EN_UNA_LINEA ? { lineasDeclaradas: new Map([[DOC, 'prosa-por-lineas']]) } : {}),
@@ -797,6 +799,17 @@ describe('Historia 29.2 — regla 4: una Cita de documento de verso sin sus salt
     expect(r.fallos[0].regla).toMatch(/va al final/);
     expect(r.fallos[2].regla).toContain('npm run documentar -- --restituir-saltos jose-marti-yo-vengo jose-marti-yo-se');
     expect(r.fallos.filter((f) => f.regla.includes('npm run documentar'))).toHaveLength(1);
+  });
+
+  it('con solo parte de sus saltos: rompe igual, porque compara con lo que escribe la orden', () => {
+    const [primero, ...resto] = VERSOS.split('\n');
+    const parcial = `${primero}\n${resto.join(' ')}`;
+    const r = cotejar({ citas: [deMarti('jose-marti-parcial', parcial)], documentos, censo: [] });
+    expect(r.ok).toBe(false);
+    expect(r.fallos).toEqual([
+      { ruta: 'corpus/citas/jose-marti-parcial.md', regla: expect.stringMatching(/salto de verso, 4/) },
+    ]);
+    expect(r.fallos[0].regla).toContain('npm run documentar -- --restituir-saltos jose-marti-parcial');
   });
 
   it('ya restituida, en prosa o sin saltos en su tramo: no falla', () => {

@@ -5,7 +5,7 @@ created: '2026-11-08'
 status: 'done'
 baseline_revision: 'ae2c803b97f967f4ec28ba6767b4295685e21773'
 review_loop_iteration: 0
-followup_review_recommended: false
+followup_review_recommended: true
 context:
   - '{project-root}/_bmad-output/implementation-artifacts/epic-29-context.md'
   - '{project-root}/_bmad-output/implementation-artifacts/spec-29-1-el-salto-de-verso-sobrevive-en-el-corpus-el-cotejo-y-el-slug.md'
@@ -186,6 +186,28 @@ Y se repite (`--seco` primero) tras cada puesta al día de la rama con la princi
 
 (Las capas externas no traen hallazgos en esta pasada: el orquestador de v9-ralph las corre aparte.)
 
+### 2026-11-08 — Review pass (primera revisión externa: blind-hunter, edge-case-hunter, verification-gap, intent-alignment, ac-auditor)
+- intent_gap: 0
+- bad_spec: 0
+- patch: 12 (high 0, medium 3, low 9)
+- defer: 0
+- reject: 18 (medium 2, low 16)
+- addressed_findings:
+  - `[medium]` `[patch]` El recuento de fechas (`corpusParaFechar`, relación de AD-27) corría tras escribir y sin guarda: un fallo salía con 1 con todo escrito. Ahora se cuenta **antes** de escribir (solo cambia `texto`, que no mueve aristas de la relación) y un fallo sale con 1 «No se ha escrito nada».
+  - `[medium]` `[patch]` La vuelta atrás no cubría el fichero cuya escritura falló a medias (truncado por disco lleno o E/S). Ahora, si el fallo ocurre durante `writeFile`, ese fichero vuelve también a su original, y el mensaje no dice «no queda nada escrito» si algo no se pudo devolver.
+  - `[medium]` `[patch]` Ninguna prueba escribía una candidata (la pasada real escribe 1.259). `documentar-cli` gana una candidata en una línea que su documento de verso restituye: se afirma su texto, que cambia una sola línea, «Candidatas de revisión: Restituidas: 1», «Ya restituidas, sin cambios: 1» en la segunda pasada y que no mueve «Cambian de fecha».
+  - `[low]` `[patch]` `readFile(cita.ruta)` del bucle de decisión, sin guarda: ahora da «El Corpus no se deja leer … No se ha escrito nada.» con 1.
+  - `[low]` `[patch]` Un fichero que cambia en disco entre la decisión y la escritura (checkout compartido) se pisaba con contenido rancio: ahora se comprueba antes de escribir, cuenta como escritura fallida y se deshace lo escrito sin tocarlo.
+  - `[low]` `[patch]` La puerta y la orden armaban por separado los candidatos de `saltosDeLaCita`: `documentosLegibles` y `candidatosDeLosSaltos` (forma con `lineas:` declarada y colapsado, memoizados por nombre) en `tools/lib/cotejo.ts`, usados por los dos.
+  - `[low]` `[patch]` La regla 4 no se probaba con una Cita que tiene solo parte de sus saltos: caso puro nuevo en `cotejo.test.ts` (primer verso partido, resto de corrido → rompe con la orden).
+  - `[low]` `[patch]` El `replace` sin efecto de la prueba de la 29.1 en `cotejo.test.ts` se quita, y el comentario dice lo que la prueba hace de verdad (verso restituido contra el documento de verso; en una línea, contra el mismo declarado en prosa).
+  - `[low]` `[patch]` La prueba de la vuelta atrás dependía del orden de `readdir` y no actuaba como root: ahora falla la candidata, que se escribe después de las dos publicadas (orden por lote, no por directorio), se afirman «Las 2 Citas ya escritas … han vuelto», y se salta como root.
+  - `[low]` `[patch]` «Corpus ilegible → 1» sin prueba: caso nuevo con una Cita sin permiso de lectura (1, «El Corpus no se deja leer», nada escrito; se salta como root).
+  - `[low]` `[patch]` El recuento de listados que cambian de fecha no se afirmaba: se fija «Cambian de fecha 2 Páginas de Cita y 1 listado (tema: 1).».
+  - `[low]` `[patch]` `AGENTS.md`: la vuelta atrás incluye el fichero que falla, el fichero cambiado entretanto no se pisa, las fechas se cuentan antes de escribir, y una nombrada en prosa, sin saltos, que no se localiza o en conflicto sale con 0 y el parte dice por qué.
+
+Rechazados, con su razón: `corpusParaFechar(rutas.raiz, { corpus: rutas.raiz })` es correcto —con `corpus` dado, `raiz` no se usa y la función no lee git, solo el disco—; la clave de `porObra` por nombre corto es exacta, porque `documentosDeCita` solo depende de `fuente.id` y la obra; los slugs que no acotan la lectura, el coste de la regla 4 (~2 s medidos) y el recolapso de `textoConSaltos` (solo documentos de verso) son coste aceptado; restringir a publicadas y el versionado de `_revision/` en esta rama no son defectos de la historia (`git add -u corpus/_revision` es la forma documentada); los avisos de conflicto fuera de la integración (las órdenes de alta y revisión cotejan una Cita para dejarla pasar o no); el estado de `sprint-status.yaml` lo escribe el cierre del bucle; las comprobaciones redundantes de argumentos y la repetición de `--corpus` (más estricto, sin pérdida); el 0 de una nombrada en conflicto o que no se localiza (la matriz manda 0 «en lo demás», ahora documentado); las suposiciones de `conLaLineaDeTexto` (comprobadas sobre todos los ficheros al planificar, y el desajuste sale como conflicto nombrando el fichero, que es lo que hay que mirar); la orden única de 75 slugs (la exige la épica); la rama «colapso distinto», inalcanzable con el escritor único; `texto` no cadena (lo rechaza el esquema antes); la forma posicional de documentar junto a `--restituir-saltos` (los posicionales son slugs, por el spec) y el contador `cotejadas` (presentación).
+
 ## Auto Run Result
 
 Status: done
@@ -213,10 +235,26 @@ documentos de verso. Entra activa.
 - `AGENTS.md` — la orden, la regla 4 y quién corre la restitución.
 - `sprint-status.yaml` — solo la línea de la 29.2 (`review`, con el comentario del rojo a propósito).
 
-**Hallazgos de revisión:** 0 parches, 0 diferidos, 0 rechazados. Recomendación de revisión de
-seguimiento: `false` (0 parches; puntuación 0).
+**Hallazgos de revisión** (primera revisión externa, cinco capas): 12 parches, 0 diferidos, 18
+rechazados (el detalle, en el Review Triage Log). Recomendación de revisión de seguimiento:
+`true` — parches de esta pasada: high 0, medium 3, low 9; puntuación 3 × 3 + 9 = 18 ≥ 5.
 
-**Verificación.** `npx vitest run` de `lineas` (46), `cotejo` (69), `cotejo-build` (27) y
+**Ficheros de la pasada de revisión.**
+- `tools/lib/cotejo.ts` — `documentosLegibles` y `candidatosDeLosSaltos`, los candidatos de `saltosDeLaCita` que comparten la regla 4 y la orden.
+- `tools/lib/documentacion.ts` — `restituirSaltos`: los candidatos compartidos, la lectura de cada Cita con guarda, las fechas contadas antes de escribir y con guarda, la comprobación de que el fichero no cambió y la vuelta atrás que incluye el fichero que falla.
+- `tests/unit/documentar-cli.test.ts` — la candidata que se restituye, el recuento de listados, la vuelta atrás con orden determinista y el Corpus ilegible.
+- `tests/unit/cotejo.test.ts` — la regla 4 ante saltos parciales, sin el `replace` sin efecto de la 29.1.
+- `AGENTS.md` — la vuelta atrás, las fechas y los códigos de una nombrada que se queda como está.
+
+**Verificación de la pasada de revisión.** `npx vitest run` de `lineas` y `cotejo` (116),
+`documentar-cli` (32) y `cotejo-build` (27): en verde. `npx astro check`: 0 errores, 0 avisos.
+`npm run documentar -- --restituir-saltos --seco` en `W` sobre el Corpus real
+(`logs/s-29/triage-29.2-1-seco.log`): 0, las mismas cifras (75 publicadas de 26 documentos, 65 +
+10; 1.259 candidatas; 0 conflictos; 75 Páginas de Cita y 59 listados), 100,6 s, nada escrito.
+`npm test` entero (`logs/s-29/triage-29.2-1-npm-test.log`): 157 ficheros, 7.304 pruebas, en verde
+(1.494 s, con otras suites de otros worktrees a la vez).
+
+**Verificación de la implementación.** `npx vitest run` de `lineas` (46), `cotejo` (69), `cotejo-build` (27) y
 `documentar-cli` (31): en verde, uno a uno. `npx astro check`: 0 errores, 0 avisos.
 `npm run documentar -- --restituir-saltos --seco` en `W`: 0, nada escrito (parte arriba).
 Copia restituida: orden 0 (1.334 escritas), segunda pasada 0 sin escribir, diff solo líneas

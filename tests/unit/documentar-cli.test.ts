@@ -593,6 +593,9 @@ describe('Historia 29.2 — --restituir-saltos', () => {
   const CONFLICTO = 'citas/jose-marti--yo-se-los-nombres.md';
   const RARO = 'citas/jose-marti--y-de-mortales-enganos.md';
   const AJENA = '_revision/jose-marti--esto-no-esta-en-el-poema.md';
+  /** Una candidata de antes de la 29.1, en una línea, que su documento de verso restituye. */
+  const CANDIDATA = '_revision/jose-marti--yo-vengo-candidata.md';
+  const ROOT = process.getuid?.() === 0;
 
   const EN_UNA_LINEA =
     'Yo vengo de todas partes, Y hacia todas partes voy: Arte soy entre las artes, En los montes, monte soy.';
@@ -647,6 +650,7 @@ describe('Historia 29.2 — --restituir-saltos', () => {
         'slug: jose-marti-y-de-mortales-enganos\nprocedencia:\n  obra: Versos sencillos\n' +
         'fuente:\n  id: wikisource-es\n  url: https://es.wikisource.org/wiki/Versos_sencillos/I\n---\n',
       [AJENA]: deMarti('jose-marti-esto-no-esta-en-el-poema', 'Esto no está en el poema.'),
+      [CANDIDATA]: deMarti('jose-marti-yo-vengo-candidata', EN_UNA_LINEA),
     };
   }
 
@@ -667,12 +671,16 @@ describe('Historia 29.2 — --restituir-saltos', () => {
     expect(parte).toMatch(/sin documento: 2/); // las dos censadas
     expect(parte).toMatch(/documento en prosa: 1 \(indeterminada: 1\)/);
     expect(parte).toMatch(/documento sin saltos en su tramo: 1/);
-    expect(parte).toMatch(/no se localiza en su documento: 1/); // la candidata
+    expect(parte).toMatch(/no se localiza en su documento: 1/); // la candidata ajena
+    // Las candidatas, en su bloque: la que su documento de verso restituye, contada aparte.
+    const candidatas = parte.slice(parte.indexOf('Candidatas de revisión:'));
+    expect(candidatas).toMatch(/^Candidatas de revisión:\n {2}Ganarían saltos: 1, de 1 documento \(verso: 1\)\./u);
     expect(parte).toContain('jose-marti-yo-se-los-nombres: sus documentos de verso le dan saltos distintos');
     expect(parte).toContain('corpus/fuentes/wikisource-es--versos-sencillos--otra.txt');
     expect(parte).toContain('jose-marti-y-de-mortales-enganos');
     expect(parte).toMatch(/no tiene una sola línea «texto:»/);
-    expect(parte).toMatch(/Cambian de fecha 2 Páginas de Cita/);
+    // Solo las publicadas fechan: la candidata no mueve ninguna superficie.
+    expect(parte).toContain('Cambian de fecha 2 Páginas de Cita y 1 listado (tema: 1).');
     expect(parte).toContain('npx tsx tools/avisar.ts --ensayo --desde <A> --hasta <B>');
     expect(parte).toContain('No se ha escrito nada.');
   });
@@ -686,7 +694,10 @@ describe('Historia 29.2 — --restituir-saltos', () => {
 
     expect(separarFrontmatter(despues[MARTI])?.texto).toBe(EN_VERSO);
     expect(separarFrontmatter(despues[AVARIENTO])?.texto).toBe('Un hombre rico avariento.\nMurió con cien mil dolores');
-    for (const fichero of [MARTI, AVARIENTO]) {
+    expect(separarFrontmatter(despues[CANDIDATA])?.texto).toBe(EN_VERSO);
+    expect(hecho.salida).toMatch(/Candidatas de revisión:\n {2}Restituidas: 1,/u);
+    expect(hecho.salida).toMatch(/Cambian de fecha 2 Páginas de Cita/);
+    for (const fichero of [MARTI, AVARIENTO, CANDIDATA]) {
       const viejas = antes[fichero].split('\n');
       const nuevas = despues[fichero].split('\n');
       expect(nuevas).toHaveLength(viejas.length);
@@ -699,7 +710,7 @@ describe('Historia 29.2 — --restituir-saltos', () => {
       expect(nuevo.slug).toBe(viejo.slug);
     }
     // Lo demás, byte a byte.
-    for (const fichero of Object.keys(antes).filter((f) => f !== MARTI && f !== AVARIENTO)) {
+    for (const fichero of Object.keys(antes).filter((f) => ![MARTI, AVARIENTO, CANDIDATA].includes(f))) {
       expect(despues[fichero], fichero).toBe(antes[fichero]);
     }
     expect(Object.keys(despues).sort()).toEqual(Object.keys(antes).sort());
@@ -707,6 +718,7 @@ describe('Historia 29.2 — --restituir-saltos', () => {
     const otra = await correr(corpus, ['--restituir-saltos']);
     expect(otra.codigo, otra.error).toBe(0);
     expect(otra.salida).toMatch(/Ya restituidas, sin cambios: 2/);
+    expect(otra.salida).toMatch(/Candidatas de revisión:\n {2}Restituidas: 0\.\n {2}Ya restituidas, sin cambios: 1\./u);
     expect(otra.salida).toContain('No se ha escrito nada.');
     expect(await instantanea(corpus)).toEqual(despues);
   });
@@ -753,16 +765,33 @@ describe('Historia 29.2 — --restituir-saltos', () => {
     expect(await instantanea(corpus)).toEqual(antes);
   });
 
-  it('si una escritura falla, lo ya escrito vuelve a su contenido original y sale con 1', async () => {
+  // Como root, `chmod` no impide escribir y la prueba no ejercitaría nada.
+  it.skipIf(ROOT)('si una escritura falla, lo ya escrito vuelve a su contenido original y sale con 1', async () => {
     const corpus = await enDisco(await corpusDeVerso());
     const antes = await instantanea(corpus);
-    // Se escriben en el orden de los ficheros: Quevedo primero, Martí después.
-    await chmod(join(corpus, MARTI), 0o444);
+    // Las publicadas se escriben antes que las candidatas: la que falla es la candidata, así que
+    // las dos publicadas ya están escritas y tienen que volver atrás.
+    await chmod(join(corpus, CANDIDATA), 0o444);
     try {
       const hecho = await correr(corpus, ['--restituir-saltos']);
       expect(hecho.codigo).toBe(1);
-      expect(hecho.error).toContain('No se pudo escribir');
-      expect(hecho.error).toMatch(/vuelto a su contenido original: no queda nada escrito/);
+      expect(hecho.error).toContain(`No se pudo escribir ${join(corpus, CANDIDATA)}`);
+      expect(hecho.error).toMatch(/Las 2 Citas ya escritas en esta pasada han vuelto a su contenido original: no queda nada escrito/);
+    } finally {
+      await chmod(join(corpus, CANDIDATA), 0o644);
+    }
+    expect(await instantanea(corpus)).toEqual(antes);
+  });
+
+  it.skipIf(ROOT)('un Corpus que no se deja leer: 1 y nada escrito', async () => {
+    const corpus = await enDisco(await corpusDeVerso());
+    const antes = await instantanea(corpus);
+    await chmod(join(corpus, MARTI), 0o000);
+    try {
+      const hecho = await correr(corpus, ['--restituir-saltos']);
+      expect(hecho.codigo).toBe(1);
+      expect(hecho.error).toMatch(/El Corpus no se deja leer/);
+      expect(hecho.error).toContain('No se ha escrito nada.');
     } finally {
       await chmod(join(corpus, MARTI), 0o644);
     }

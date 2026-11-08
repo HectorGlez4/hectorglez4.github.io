@@ -41,10 +41,12 @@ import { basename, dirname, extname, isAbsolute, relative, resolve, sep } from '
 import { normalizar } from '../../src/lib/normalizar.ts';
 import {
   apareceEnDocumento,
+  candidatosDeLosSaltos,
   censoSinLaCita,
   colapsarEspacios,
   documentoDeCita,
   documentosDeCita,
+  documentosLegibles,
   FICHERO_DEL_CENSO,
   huellaDeTexto,
 } from './cotejo.ts';
@@ -1345,34 +1347,17 @@ export async function restituirSaltos(
     }
   }
 
-  // Lo que se calcula una vez por documento, aunque lo pregunten miles de Citas.
-  const formas = new Map<string, FormaDeLineas>();
-  const colapsados = new Map<string, ReturnType<typeof colapsarEspacios>>();
+  // Lo que se calcula una vez por documento, aunque lo pregunten miles de Citas: los mismos
+  // candidatos que arma la regla 4 del cotejo (`candidatosDeLosSaltos`).
+  const { candidatos: conForma } = candidatosDeLosSaltos(documentos, lineasDeclaradas);
   const porObra = new Map<string, string[]>();
-  const conForma = (nombre: string) => {
-    const cuerpo = documentos.get(nombre) as string;
-    let forma = formas.get(nombre);
-    if (forma === undefined) {
-      const lineas = lineasDeclaradas.get(nombre);
-      forma = formaDeLasLineas({ cuerpo, ...(lineas !== undefined ? { lineas } : {}) });
-      formas.set(nombre, forma);
-    }
-    let colapsado = colapsados.get(nombre);
-    if (colapsado === undefined) {
-      colapsado = colapsarEspacios(cuerpo);
-      colapsados.set(nombre, colapsado);
-    }
-    return { nombre, cuerpo, forma, colapsado };
-  };
   const legiblesDe = (cita: CitaEnCorpus): string[] => {
     if (enCenso.has(cita.slug) || cita.fuente === undefined) return [];
     const corto = documentoDeCita(cita.fuente, cita.procedencia?.obra);
     if (corto === undefined) return [];
     let nombres = porObra.get(corto);
     if (nombres === undefined) {
-      nombres = documentosDeCita(cita.fuente, cita.procedencia?.obra, documentos).filter(
-        (n) => typeof documentos.get(n) === 'string',
-      );
+      nombres = documentosLegibles(documentosDeCita(cita.fuente, cita.procedencia?.obra, documentos), documentos);
       porObra.set(corto, nombres);
     }
     return nombres;
@@ -1389,7 +1374,7 @@ export async function restituirSaltos(
       if (nombradas !== undefined && !nombradas.has(cita.slug)) continue;
       if (typeof cita.texto !== 'string') continue;
       const legibles = legiblesDe(cita);
-      const decision = saltosDeLaCita(cita.texto, legibles.map(conForma));
+      const decision = saltosDeLaCita(cita.texto, conForma(legibles));
       const enumerar = (nombres: readonly string[]) => nombres.map((n) => `corpus/fuentes/${n}.txt`).join(', ');
 
       if (decision.tipo === 'conflicto') {
@@ -1426,7 +1411,18 @@ export async function restituirSaltos(
         );
         continue;
       }
-      const original = await readFile(cita.ruta, 'utf8');
+      let original: string;
+      try {
+        original = await readFile(cita.ruta, 'utf8');
+      } catch (fallo) {
+        return {
+          ok: false,
+          motivos: [
+            `El Corpus no se deja leer (${cita.ruta}: ${fallo instanceof Error ? fallo.message : String(fallo)}): ` +
+              'sin él no se sabe qué saltos le tocan a cada Cita. No se ha escrito nada.',
+          ],
+        };
+      }
       const nuevo = conLaLineaDeTexto(original, cita.texto, decision.texto);
       const antes = nuevo === undefined ? null : separarFrontmatter(original);
       const despues = nuevo === undefined ? null : separarFrontmatter(nuevo);
@@ -1462,15 +1458,60 @@ export async function restituirSaltos(
     };
   }
 
+  // Qué superficies cambian de fecha: la relación de AD-27, con el comparador de campos.
+  const cambios = lotes.publicadas.restituidas.map((p) => ({
+    fichero: resolve(p.ruta),
+    antes: p.antes,
+    despues: p.despues,
+  }));
+  const porFamilia = new Map<string, number>();
+  if (cambios.length > 0) {
+    // Se cuenta **antes** de escribir: solo cambia `texto`, que no mueve ninguna arista de la
+    // relación, y un fallo aquí no puede dejar escrito lo que el código 1 dice que no se escribió.
+    try {
+      const corpus = await corpusParaFechar(rutas.raiz, { corpus: rutas.raiz });
+      const relacion = relacionDeSuperficies(corpus);
+      for (const ruta of rutasAvisadasPor(cambios, relacion)) {
+        const familia = relacion.get(ruta)?.familia ?? 'sin familia';
+        porFamilia.set(familia, (porFamilia.get(familia) ?? 0) + 1);
+      }
+    } catch (fallo) {
+      return {
+        ok: false,
+        motivos: [
+          `No se pueden contar las superficies que cambian de fecha (${fallo instanceof Error ? fallo.message : String(fallo)}): ` +
+            'el Corpus no se deja leer entero. No se ha escrito nada.',
+        ],
+      };
+    }
+  }
   const pendientes = [...lotes.publicadas.restituidas, ...lotes.candidatas.restituidas];
   const escritas: SaltoPendiente[] = [];
   if (!seco) {
     for (const pendiente of pendientes) {
+      let escribiendo = false;
       try {
+        // Lo decidido se decidió sobre `original`: si el fichero cambió entretanto (otra sesión en
+        // el mismo checkout), escribir encima perdería ese cambio.
+        if ((await readFile(pendiente.ruta, 'utf8')) !== pendiente.original) {
+          throw new Error('ha cambiado desde que se decidió; vuelva a correr la orden');
+        }
+        escribiendo = true;
         await writeFile(pendiente.ruta, pendiente.nuevo, 'utf8');
         escritas.push(pendiente);
       } catch (fallo) {
         const sinDeshacer: string[] = [];
+        // Una escritura que falla a medias (disco lleno, E/S) puede dejar truncado el propio
+        // fichero: vuelve también a su original. Si falló antes de escribir, no se toca.
+        if (escribiendo) {
+          try {
+            if ((await readFile(pendiente.ruta, 'utf8')) !== pendiente.original) {
+              await writeFile(pendiente.ruta, pendiente.original, 'utf8');
+            }
+          } catch {
+            sinDeshacer.push(`  ${pendiente.ruta}`);
+          }
+        }
         for (const escrita of escritas) {
           try {
             await writeFile(escrita.ruta, escrita.original, 'utf8');
@@ -1482,11 +1523,11 @@ export async function restituirSaltos(
           ok: false,
           motivos: [
             `No se pudo escribir ${pendiente.ruta}: ${fallo instanceof Error ? fallo.message : String(fallo)}`,
-            escritas.length === 0
-              ? 'No se había escrito ninguna antes: no se ha escrito nada.'
-              : sinDeshacer.length === 0
-                ? `Las ${citas(escritas.length)} ya escritas en esta pasada han vuelto a su contenido original: no queda nada escrito.`
-                : `No se pudieron devolver a su contenido original, y hay que mirarlas:`,
+            sinDeshacer.length > 0
+              ? 'No se pudieron devolver a su contenido original, y hay que mirarlas:'
+              : escritas.length === 0
+                ? 'No se había escrito ninguna antes: no queda nada escrito.'
+                : `Las ${citas(escritas.length)} ya escritas en esta pasada han vuelto a su contenido original: no queda nada escrito.`,
             ...sinDeshacer,
           ],
         };
@@ -1494,21 +1535,6 @@ export async function restituirSaltos(
     }
   }
 
-  // Qué superficies cambian de fecha: la relación de AD-27, con el comparador de campos.
-  const cambios = lotes.publicadas.restituidas.map((p) => ({
-    fichero: resolve(p.ruta),
-    antes: p.antes,
-    despues: p.despues,
-  }));
-  const porFamilia = new Map<string, number>();
-  if (cambios.length > 0) {
-    const corpus = await corpusParaFechar(rutas.raiz, { corpus: rutas.raiz });
-    const relacion = relacionDeSuperficies(corpus);
-    for (const ruta of rutasAvisadasPor(cambios, relacion)) {
-      const familia = relacion.get(ruta)?.familia ?? 'sin familia';
-      porFamilia.set(familia, (porFamilia.get(familia) ?? 0) + 1);
-    }
-  }
   const paginasDeCita = porFamilia.get('cita') ?? 0;
   const listados = [...porFamilia].filter(([f]) => f !== 'cita').sort(([a], [b]) => a.localeCompare(b, 'es'));
   const totalListados = listados.reduce((s, [, n]) => s + n, 0);
