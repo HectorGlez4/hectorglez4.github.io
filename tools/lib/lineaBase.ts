@@ -402,8 +402,17 @@ export interface JuicioPorVentanas {
    * dice; cuando llega, su línea base es propia —empieza la primera jornada UTC completa tras la
    * llegada, en la intersección del tramo vigente de la lectura y del de su serie— y ninguna
    * ventana cruza esa jornada.
+   *
+   * Desde la 31.2 declara **todas las llegadas** que parten su serie, cada una por su constante
+   * (`deDondeLlega` de `CORTES_DE_SERIE_DECLARADOS`) y, si su jornada no es la del merge, con lo
+   * que la marca (`marca`). La línea base propia sale del último corte llegado de la serie
+   * (`partirSerie`) y se nombra por su constante; cada llegada declarada que no ha llegado se dice
+   * pendiente, con su jornada si es de hoy o posterior y con su marca.
    */
-  corte?: { serie: SerieDeMedicion; deDondeLlega: string };
+  corte?: {
+    serie: SerieDeMedicion;
+    llegadas: readonly { deDondeLlega: string; marca?: string }[];
+  };
   /** Lo que se puede hacer si la señal salta: lo nombra el informe, y lo decide Héctor. */
   palanca?: string;
 }
@@ -431,8 +440,15 @@ export const juiciosPorVentanas = (superficies: readonly Superficie[] = SUPERFIC
     deDondeLlega: 'DESPLIEGUE_DE_OBRA_Y_DIRECTORIOS',
     tasas: ['continuacion', 'sm5'],
     senal: { sube: 'continuacion', baja: 'sm5' },
-    // Historia 30.1 — el orden nuevo de la Página de Cita parte lo que SM-C5 juzga.
-    corte: { serie: 'continuacion-de-cita', deDondeLlega: 'DESPLIEGUE_DE_CITAR_Y_LLEVARSE' },
+    // Historia 30.1 — el orden nuevo de la Página de Cita parte lo que SM-C5 juzga; y, desde la
+    // 31.2, «Lee el pasaje», cuya jornada no la marca el merge sino el tope con valor.
+    corte: {
+      serie: 'continuacion-de-cita',
+      llegadas: [
+        { deDondeLlega: 'DESPLIEGUE_DE_CITAR_Y_LLEVARSE' },
+        { deDondeLlega: 'DESPLIEGUE_DEL_PASAJE', marca: 'el primer despliegue con valor en MAX_CARACTERES_DEL_PASAJE, no el merge' },
+      ],
+    },
     palanca: 'quitar de la Página de Cita los tres desplegables o bajarlos tras las Rutas de salida; lo decide Héctor',
   },
   {
@@ -673,7 +689,7 @@ export interface VentanaCortada {
  * llegado, con la línea base propia que abre tras él.
  */
 export type CorteDelJuicio =
-  | { estado: 'pendiente'; deDondeLlega: string; jornada?: string }
+  | { estado: 'pendiente'; deDondeLlega: string; jornada?: string; marca?: string }
   | {
       estado: 'llegado';
       deDondeLlega: string;
@@ -687,7 +703,13 @@ export type CorteDelJuicio =
 
 export interface JuicioLeido {
   juicio: JuicioPorVentanas;
+  /** El corte que manda: el último llegado de su serie o, sin ninguno, la primera llegada pendiente. */
   corte?: CorteDelJuicio;
+  /**
+   * Historia 31.2 — las llegadas declaradas que no han llegado, en el orden declarado; falta si el
+   * juicio no declara corte.
+   */
+  pendientes?: Extract<CorteDelJuicio, { estado: 'pendiente' }>[];
   /** Por qué no hay ventanas, si no las hay. */
   sinVentanas?: string;
   referencia?: 'linea-base' | 'serie-de-antes';
@@ -1425,25 +1447,37 @@ export function componerLecturaDeMedicion(
       const enInterseccion = interseccion(series[lineaBase?.serie ?? 'lectura'].vigente, partidaDelCorte!.vigente).desde!;
       return lineaBase?.desde !== undefined && lineaBase.desde > enInterseccion ? lineaBase.desde : enInterseccion;
     };
+    // Historia 31.2 — cada llegada declarada que no está entre las llegadas de la serie, pendiente:
+    // con su jornada si es de hoy o posterior, y con su marca.
+    const pendientes: Extract<CorteDelJuicio, { estado: 'pendiente' }>[] =
+      juicio.corte === undefined
+        ? []
+        : juicio.corte.llegadas
+            .filter(({ deDondeLlega }) => !partidaDelCorte!.cortes.some((c) => c.deDondeLlega === deDondeLlega))
+            .map(({ deDondeLlega, marca }) => {
+              const deHoy = partidaDelCorte!.pendientes.find((c) => c.deDondeLlega === deDondeLlega);
+              return {
+                estado: 'pendiente' as const,
+                deDondeLlega,
+                ...(deHoy === undefined ? {} : { jornada: deHoy.jornada }),
+                ...(marca === undefined ? {} : { marca }),
+              };
+            });
     let corte: CorteDelJuicio | undefined;
     if (juicio.corte !== undefined && llegadoDelCorte === undefined) {
-      const pendiente = partidaDelCorte!.pendientes[0];
-      corte = {
-        estado: 'pendiente',
-        deDondeLlega: juicio.corte.deDondeLlega,
-        ...(pendiente === undefined ? {} : { jornada: pendiente.jornada }),
-      };
+      corte = pendientes[0];
     } else if (juicio.corte !== undefined && llegadoDelCorte !== undefined) {
       // Llegado, aunque el juicio no llegue a contar: la cabecera nombra esta llegada y no la de antes.
       // Si cuenta, lo de abajo lo completa con la intersección y lo reunido.
       corte = {
         estado: 'llegado',
-        deDondeLlega: juicio.corte.deDondeLlega,
+        deDondeLlega: llegadoDelCorte.deDondeLlega,
         jornada: llegadoDelCorte.jornada,
         desde: desdeTrasElCorte(),
       };
     }
-    const conCorte = (leido: JuicioLeido): JuicioLeido => (corte === undefined ? leido : { ...leido, corte });
+    const conCorte = (leido: JuicioLeido): JuicioLeido =>
+      juicio.corte === undefined ? leido : { ...leido, ...(corte === undefined ? {} : { corte }), pendientes };
     const sin = (sinVentanas: string): JuicioLeido =>
       conCorte({ juicio, sinVentanas, referencias: [], ventanas: [], cortadas: [] });
     if (lineaBase === undefined || (lineaBase.serie === 'lectura' && lineaBase.superficies.length === 0)) {
@@ -1492,7 +1526,7 @@ export function componerLecturaDeMedicion(
       }
       corte = {
         estado: 'llegado',
-        deDondeLlega: juicio.corte!.deDondeLlega,
+        deDondeLlega: llegadoDelCorte.deDondeLlega,
         jornada: llegadoDelCorte.jornada,
         desde,
         acumulado: reunidas,
@@ -2035,24 +2069,32 @@ export function lineasDeLecturaDeMedicion(lectura: LecturaDeMedicion): string[] 
           ? j.juicio.deDondeLlega
           : `${j.juicio.llegada}, ${j.juicio.deDondeLlega}`;
     const cabeza = `  ${j.juicio.nombre} (${j.juicio.unidad}; llegada: ${llegada})`;
-    // Historia 30.1 — el corte que parte lo que juzga: pendiente, o la línea base propia que abrió.
-    const lineaDelCorte =
-      j.corte === undefined
-        ? undefined
-        : j.corte.estado === 'pendiente'
-          ? j.corte.jornada === undefined
-            ? `    La llegada de ${j.corte.deDondeLlega} no ha ocurrido: la tomará de esa constante de src/lib/umbrales.ts, y hasta entonces se juzga como hasta ahora.`
-            : `    La llegada del ${j.corte.jornada} (${j.corte.deDondeLlega}) es de hoy o posterior: no ha ocurrido todavía, y hasta entonces se juzga como hasta ahora.`
-          : `    Desde la llegada del ${j.corte.jornada} (${j.corte.deDondeLlega}), su línea base es propia: empieza el ${j.corte.desde}` +
-            (j.corte.acumulado === undefined
-              ? ''
-              : j.corte.cerradaEl === undefined
-                ? `, reúne ${entero(j.corte.acumulado)} de ${entero(lectura.minimo ?? 0)} y no se ha cerrado`
-                : ` y se cerró el ${j.corte.cerradaEl}`) +
-            '; ninguna ventana cruza esa jornada.';
+    // Historia 30.1 — el corte que parte lo que juzga: la línea base propia que abrió, si llegó,
+    // y cada llegada declarada pendiente (31.2), con lo que la marca.
+    const dePendiente = (p: Extract<CorteDelJuicio, { estado: 'pendiente' }>) => {
+      const marca = p.marca === undefined ? '' : ` La marca ${p.marca}.`;
+      return p.jornada === undefined
+        ? `    La llegada de ${p.deDondeLlega} no ha ocurrido: la tomará de esa constante de src/lib/umbrales.ts, y hasta entonces se juzga como hasta ahora.${marca}`
+        : `    La llegada del ${p.jornada} (${p.deDondeLlega}) es de hoy o posterior: no ha ocurrido todavía, y hasta entonces se juzga como hasta ahora.${marca}`;
+    };
+    const lineasDelCorte: string[] = [];
+    if (j.corte?.estado === 'llegado') {
+      lineasDelCorte.push(
+        `    Desde la llegada del ${j.corte.jornada} (${j.corte.deDondeLlega}), su línea base es propia: empieza el ${j.corte.desde}` +
+          (j.corte.acumulado === undefined
+            ? ''
+            : j.corte.cerradaEl === undefined
+              ? `, reúne ${entero(j.corte.acumulado)} de ${entero(lectura.minimo ?? 0)} y no se ha cerrado`
+              : ` y se cerró el ${j.corte.cerradaEl}`) +
+          '; ninguna ventana cruza esa jornada.',
+      );
+    }
+    for (const pendiente of j.pendientes ?? (j.corte?.estado === 'pendiente' ? [j.corte] : [])) {
+      lineasDelCorte.push(dePendiente(pendiente));
+    }
     if (j.sinVentanas !== undefined) {
       lineas.push(`${cabeza}: ${j.sinVentanas}.`);
-      if (lineaDelCorte !== undefined) lineas.push(lineaDelCorte);
+      lineas.push(...lineasDelCorte);
       continue;
     }
     lineas.push(
@@ -2062,7 +2104,7 @@ export function lineasDeLecturaDeMedicion(lectura: LecturaDeMedicion): string[] 
           : 'desde el cierre de la línea base, frente a ella'
       }.`,
     );
-    if (lineaDelCorte !== undefined) lineas.push(lineaDelCorte);
+    lineas.push(...lineasDelCorte);
     lineas.push(
       `    Referencia: ${j.referencias.length === 0 ? 'ninguna tasa' : j.referencias.map(({ tasa, valor }) => `${legible(tasa)} ${valor.estado === 'calculada' ? textoDeTasa(valor) : `sin referencia (${textoDeTasa(valor)})`}`).join('; ')}.`,
     );

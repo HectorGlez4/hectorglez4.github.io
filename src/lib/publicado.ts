@@ -33,6 +33,7 @@ import type { FuenteDeCita, Procedencia, tradicion } from './admision.ts';
 import { cuentaParaElSuelo } from './huecos.ts';
 import { compararPorClave } from './normalizar.ts';
 import {
+  aparicionQueCuenta,
   colgarObras,
   congelacionVigente,
   esObraIndexable,
@@ -44,6 +45,7 @@ import {
   type FichaDeObra,
   type ObraResuelta,
   type IndicesDeObras,
+  type PasajeDeAparicion,
   type PosicionesDeCitas,
 } from './obras.ts';
 import { atribucionDeBiografia, type AtribucionDeSemblanza } from './biografia.ts';
@@ -877,6 +879,27 @@ export function citasPorObra<C extends Pick<Cita, 'slug' | 'fuente' | 'obra'>>(
   return new Map([...porObra].map(([nombre, suyas]) => [nombre, ordenDelLibro(suyas, posiciones, indices)]));
 }
 
+/**
+ * El pasaje de cada Cita, por su slug — Historia 31.1, AD-30.
+ *
+ * Pura. Toda Cita, con Obra o sin ella, toma el pasaje de **su aparición que cuenta**
+ * (`aparicionQueCuenta`), la misma que la sitúa en el orden del libro; si esa aparición no lo
+ * trae, la Cita no está en el mapa —no se busca en otra—. Lo que las páginas lean del pasaje
+ * sale de aquí (la 31.2), nunca de una elección propia.
+ */
+export function pasajesDeCitas(
+  citas: readonly Pick<Cita, 'slug'>[],
+  posiciones: PosicionesDeCitas,
+  indices: IndicesDeObras,
+): Map<string, PasajeDeAparicion> {
+  const pasajes = new Map<string, PasajeDeAparicion>();
+  for (const cita of citas) {
+    const pasaje = aparicionQueCuenta(posiciones.get(cita.slug) ?? [], indices)?.pasaje;
+    if (pasaje !== undefined) pasajes.set(cita.slug, pasaje);
+  }
+  return pasajes;
+}
+
 /** Las Obras con página: las que resuelve alguna Cita publicada de un Autor publicado. */
 export function obrasPublicadas(conjunto: Pick<ConjuntoPublicable, 'citas' | 'autores'>): ObraResuelta[] {
   return obrasDelConjunto(conjunto.citas, conjunto.autores).publicadas;
@@ -1510,6 +1533,43 @@ export function avisoDeDesajustes(
   ].join('\n');
 }
 
+/**
+ * Las posiciones y el orden de los índices, de las colecciones `posiciones` e `indices` (los dos
+ * cargadores de `src/content.config.ts`). Es la lectura común de `citasDeLasObras` y de
+ * `pasajesDeLasCitas`.
+ */
+async function posicionesEIndices(): Promise<{ posiciones: PosicionesDeCitas; indices: IndicesDeObras }> {
+  const { getCollection } = await import('astro:content');
+  const posiciones = new Map<string, readonly AparicionDeCita[]>(
+    (await getCollection('posiciones')).map((entrada) => [entrada.id, entrada.data.apariciones]),
+  );
+  // Una sola entrada, siempre presente aunque no haya ningún índice: ver el cargador.
+  const indices: IndicesDeObras = new Map(
+    (await getCollection('indices')).flatMap((entrada) => Object.entries(entrada.data.porObra)),
+  );
+  return { posiciones, indices };
+}
+
+/**
+ * Memoriza por conjunto un cálculo que pide cada página, como `rutasIndexables`. Un fallo no se
+ * memoriza: la siguiente página que lo pida vuelve a intentarlo, como `conjuntoPublicable`, que
+ * solo guarda lo que terminó bien.
+ */
+function memorizadoPorConjunto<T>(
+  memoria: WeakMap<ConjuntoPublicable, Promise<T>>,
+  conjunto: ConjuntoPublicable,
+  calcular: () => Promise<T>,
+): Promise<T> {
+  const memorizada = memoria.get(conjunto);
+  if (memorizada !== undefined) return memorizada;
+  const calculo = calcular();
+  memoria.set(conjunto, calculo);
+  calculo.catch(() => {
+    if (memoria.get(conjunto) === calculo) memoria.delete(conjunto);
+  });
+  return calculo;
+}
+
 const citasDeLasObrasPorConjunto = new WeakMap<ConjuntoPublicable, Promise<ReadonlyMap<string, Cita[]>>>();
 
 /**
@@ -1521,27 +1581,26 @@ const citasDeLasObrasPorConjunto = new WeakMap<ConjuntoPublicable, Promise<Reado
  * página que la pida comparte el mismo. Sin ninguna Cita con Obra no consulta las colecciones.
  */
 export function citasDeLasObras(conjunto: ConjuntoPublicable): Promise<ReadonlyMap<string, Cita[]>> {
-  const memorizada = citasDeLasObrasPorConjunto.get(conjunto);
-  if (memorizada !== undefined) return memorizada;
-  const calculo = (async (): Promise<ReadonlyMap<string, Cita[]>> => {
+  return memorizadoPorConjunto(citasDeLasObrasPorConjunto, conjunto, async () => {
     if (!conjunto.citas.some((cita) => cita.obra !== undefined)) return new Map();
-    const { getCollection } = await import('astro:content');
-    const posiciones = new Map<string, readonly AparicionDeCita[]>(
-      (await getCollection('posiciones')).map((entrada) => [entrada.id, entrada.data.apariciones]),
-    );
-    // Una sola entrada, siempre presente aunque no haya ningún índice: ver el cargador.
-    const indices: IndicesDeObras = new Map(
-      (await getCollection('indices')).flatMap((entrada) => Object.entries(entrada.data.porObra)),
-    );
+    const { posiciones, indices } = await posicionesEIndices();
     return citasPorObra(conjunto.citas, posiciones, indices);
-  })();
-  citasDeLasObrasPorConjunto.set(conjunto, calculo);
-  // Un fallo no se memoriza: la siguiente página que la pida vuelve a intentarlo, como
-  // `conjuntoPublicable`, que solo guarda lo que terminó bien.
-  calculo.catch(() => {
-    if (citasDeLasObrasPorConjunto.get(conjunto) === calculo) citasDeLasObrasPorConjunto.delete(conjunto);
   });
-  return calculo;
+}
+
+const pasajesPorConjunto = new WeakMap<ConjuntoPublicable, Promise<ReadonlyMap<string, PasajeDeAparicion>>>();
+
+/**
+ * El pasaje de cada Cita del conjunto, por su slug — Historia 31.1. Es la fachada de
+ * `pasajesDeCitas`, con la misma lectura y la misma memoria que `citasDeLasObras`. Sin ninguna
+ * Cita no consulta las colecciones.
+ */
+export function pasajesDeLasCitas(conjunto: ConjuntoPublicable): Promise<ReadonlyMap<string, PasajeDeAparicion>> {
+  return memorizadoPorConjunto(pasajesPorConjunto, conjunto, async () => {
+    if (conjunto.citas.length === 0) return new Map();
+    const { posiciones, indices } = await posicionesEIndices();
+    return pasajesDeCitas(conjunto.citas, posiciones, indices);
+  });
 }
 
 let memoria: ConjuntoPublicable | undefined;

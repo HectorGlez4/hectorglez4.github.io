@@ -974,6 +974,32 @@ export function avisosDeEdicionesSinCotejada(
 export interface AparicionDeCita {
   documento: string;
   posicion: number;
+  /**
+   * El pasaje de esa aparición — Historia 31.1, AD-30: el trozo literal del documento crudo
+   * del que sale la Cita y el tramo de la Cita sobre él. Lo calcula `tools/lib/pasaje.ts`
+   * con el mismo tramo que da `posicion`; se **omite** cuando no hay pasaje, nunca vacío.
+   */
+  pasaje?: PasajeDeAparicion;
+}
+
+/**
+ * El pasaje de una Cita en uno de sus documentos — Historia 31.1, AD-30.
+ *
+ * `texto` es el párrafo —o la estrofa, o los bloques contiguos que la Cita cruza— tal como lo
+ * trae el documento crudo, sin recortar dentro, sin corregir ni completar; `inicio` y `fin`
+ * son desplazamientos UTF-16 sobre `texto`, y el tramo `[inicio, fin)` de `texto` colapsa al
+ * texto de la Cita. Se declara aquí y no en `tools/`, porque `src/` no importa de `tools/lib/`.
+ */
+export interface PasajeDeAparicion {
+  texto: string;
+  inicio: number;
+  fin: number;
+  /**
+   * Cómo se pinta — Historia 31.2, AD-29: los párrafos y, dentro, sus líneas, como tramos
+   * `[desde, hasta)` UTF-16 sobre `texto`, crecientes y sin solaparse. Los calcula
+   * `tools/lib/pasaje.ts`, el único que interpreta un salto; quien pinta solo corta `texto`.
+   */
+  parrafos: readonly (readonly (readonly [number, number])[])[];
 }
 
 /** Las apariciones de cada Cita, por el `slug` de su frontmatter; sin ordenar ni elegir. */
@@ -1107,8 +1133,14 @@ export function compararEnElLibro(a: string, b: string, indices: IndicesDeObras)
   return compararDocumentos(a, b);
 }
 
-/** De las apariciones de una Cita, la del primer documento en el orden del libro. */
-function primeraAparicion(
+/**
+ * De las apariciones de una Cita, **la que cuenta**: la del primer documento en el orden del
+ * libro — Historias 24.1 y 31.1. Es la única elección: con ella `ordenDelLibro` sitúa la Cita
+ * y de ella sale su pasaje (`pasajesDeCitas` de `src/lib/publicado.ts`). Si esa aparición no
+ * trae pasaje, la Cita no tiene pasaje: no se busca en otra. No depende del orden de las
+ * apariciones, porque `compararEnElLibro` es un orden total y cada documento aparece una vez.
+ */
+export function aparicionQueCuenta(
   apariciones: readonly AparicionDeCita[],
   indices: IndicesDeObras,
 ): AparicionDeCita | undefined {
@@ -1156,7 +1188,7 @@ export function ordenDelLibro<C extends { slug: string; fuente?: { id: string } 
   const sueltas: C[] = [];
   for (const cita of citas) {
     const fuente = cita.fuente?.id;
-    const aparicion = primeraAparicion(posiciones.get(cita.slug) ?? [], indices);
+    const aparicion = aparicionQueCuenta(posiciones.get(cita.slug) ?? [], indices);
     if (typeof fuente !== 'string' || fuente === '' || aparicion === undefined) sueltas.push(cita);
     else situadas.push({ cita, fuente, aparicion });
   }

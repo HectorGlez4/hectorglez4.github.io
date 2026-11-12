@@ -31,7 +31,7 @@ import {
   type TransicionFechada,
   type Version,
 } from '../../tools/lib/cambios.ts';
-import { FAMILIAS, rutaNormalizada } from '../../src/lib/superficies.ts';
+import { FAMILIAS, rutaDeCita, rutaNormalizada } from '../../src/lib/superficies.ts';
 import { esObraIndexable } from '../../src/lib/obras.ts';
 
 /**
@@ -606,7 +606,7 @@ describe('Historia 24.8 — el aviso lee la relación por campos', () => {
     expect(rutas).toEqual(['/']);
   });
 
-  it('un documento nuevo avisa su Obra y no la portada', () => {
+  it('un documento nuevo avisa su Obra y, desde la 31.2, sus Páginas de Cita —su pasaje sale de él—, y no la portada', () => {
     const corpus: CorpusParaFechar = {
       ...corpusDeEjemplo(),
       citas: corpusDeEjemplo().citas.map((c) =>
@@ -623,7 +623,9 @@ describe('Historia 24.8 — el aviso lee la relación por campos', () => {
       indexablesAntes: indexables(corpus),
       indexablesDespues: indexables(corpus),
     });
-    expect(rutas).toEqual([NIEBLA]);
+    const deNiebla = corpus.citas.filter((c) => c.obra === 'unamuno--niebla').map((c) => rutaDeCita(c.slug));
+    expect(deNiebla.length).toBeGreaterThan(0);
+    expect([...rutas].sort()).toEqual([NIEBLA, ...deNiebla].sort());
   });
 
   it('inversas: lo avisado de después, más lo de antes que sigue vivo, es exactamente lo que el commit refecha', () => {

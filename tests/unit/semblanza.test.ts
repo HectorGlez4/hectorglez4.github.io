@@ -69,8 +69,10 @@ const BIOGRAFIA = componerBiografia(
 );
 
 describe('qué superficie reproduce la semblanza', () => {
-  it('solo la ficha de la página 1 porta la atribución', () => {
-    expect([...PORTAN_LA_ATRIBUCION]).toEqual(['ficha-de-autor']);
+  it('de la semblanza, solo la ficha de la página 1 porta la atribución; desde la 31.2, también el pasaje', () => {
+    expect([...PORTAN_LA_ATRIBUCION]).toEqual(['ficha-de-autor', 'pasaje']);
+    // El pasaje no es superficie de la semblanza: `semblanzaEn` no cambia.
+    expect((SUPERFICIES_DE_LA_SEMBLANZA as readonly string[]).includes('pasaje')).toBe(false);
   });
 
   it('una semblanza ajena solo aparece en la ficha de la página 1', () => {
