@@ -287,3 +287,13 @@ Puerta de la etapa s-31 (31.1 y 31.2 en revisión), primer intento.
 | `/cita/antonio-machado-caminante-no-hay-camino-se-hace-camino/` | 1.640 | 1.655 | +15 | 936 | 934 | −2 |
 
 Medias en ms; margen max(100 ms, 5 %). LCP de Cita por debajo de 2.500 ms y dentro del margen en las dos: veredicto **ok**, sin desempate con `devtools`. Registros en `.claude/v9-ralph/logs/s-31/nfr7-gate1/`.
+
+## Verificación en el sitio en vivo — 2026-11-12
+
+Fusión d36cd944c9, Publicar 43284008696 en verde. Solo curl.
+
+| URL | Qué se buscó | Resultado |
+|---|---|---|
+| /cita/jose-marti-yo-vengo-de-todas-partes-y-hacia/ | 200 y la página sin cambios de contenido | encontrado (200; «Cómo citar» sigue) |
+| la misma | «Lee el pasaje» (31.2) | sin datos que enseñar: MAX_CARACTERES_DEL_PASAJE sigue sin valor, así que ningún pasaje se pinta hasta que Héctor le dé valor |
+| 31.1 | localizador del pasaje (tools/ y cargador) | sin superficie que mirar en el sitio |
