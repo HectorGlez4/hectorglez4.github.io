@@ -8,7 +8,9 @@ import { describe, expect, it } from 'vitest';
 import {
   constantesSinValor,
   fallosDeAtribuidas,
+  fichaPlaneada,
   lineaDelBuild,
+  planDaFichaAlAutor,
   motivoPuertaCerrada,
   motivosDe,
   VALORES_DEL_ARBOL,
@@ -79,6 +81,16 @@ describe('la puerta cerrada', () => {
     expect(lineaDelBuild(fallos[0])).toMatch(/^corpus\/citas\/ana-x\.md: la puerta de la atribuida está cerrada/u);
   });
 
+  it.each([
+    ['un tope en 0', { maxPorObra: 0 }, 'MAX_ATRIBUIDAS_POR_OBRA'],
+    ['un tope negativo', { maxPorDueño: -1 }, 'MAX_ATRIBUIDAS_POR_DUEÑO'],
+    ['un tope decimal', { maxCaracteres: 12.5 }, 'MAX_CARACTERES_DE_ATRIBUIDA'],
+    ['un mínimo NaN', { minAtestiguaciones: Number.NaN }, 'MIN_ATESTIGUACIONES_DE_ATRIBUIDA'],
+    ['un buzón en blanco', { buzon: '  ' }, 'BUZON_DE_PETICIONES'],
+  ] as const)('con %s no se abre: cuenta como sin valor', (_, cambio, nombre) => {
+    expect(constantesSinValor({ ...ABIERTA, ...cambio })).toEqual([nombre]);
+  });
+
   it('con las cinco, abierta: la feliz no tiene fallos, y la de siempre no se juzga nunca', () => {
     expect(motivoPuertaCerrada(ABIERTA)).toBeUndefined();
     expect(juicio([atribuida('ana-x', 'Una frase de Ana.'), deSiempre('seneca-y', 'Otra cosa que nada tiene que ver.')])).toEqual([]);
@@ -133,6 +145,67 @@ describe('los topes, con la puerta abierta', () => {
     expect(fallos.map((f) => f.motivo)).toEqual([
       'el Personaje «batman» tendría 4 atribuidas y el tope es 3 (MAX_ATRIBUIDAS_POR_DUEÑO): batman-a, batman-b, batman-c, batman-d.',
     ]);
+  });
+});
+
+describe('el mínimo de dominios, con el valor de la puerta', () => {
+  it('una atribuida atestiguada por un solo dominio registrable no pasa con MIN 2, aunque el árbol no tenga valor', () => {
+    const una = atribuida('ana-una', 'Una frase de Ana.', {
+      atestiguaciones: [
+        { url: 'https://es.wikiquote.org/wiki/Ana', consultadaEl: '2026-11-01' },
+        { url: 'https://en.wikiquote.org/wiki/Ana', consultadaEl: '2026-11-01' },
+      ],
+    });
+    const motivos = motivosDe(juicio([una]), 'ana-una');
+    expect(motivos).toHaveLength(1);
+    expect(motivos[0]).toContain('la atribuida «ana-una»');
+    expect(motivos[0]).toContain(motivoDeAtestiguacionesEscasas(['https://es.wikiquote.org/'], 2)!);
+    const dos = { ...una, atestiguaciones: [...(una.atestiguaciones as object[]), { url: 'https://www.bbc.co.uk/x', consultadaEl: '2026-11-01' }] };
+    expect(juicio([dos])).toEqual([]);
+  });
+});
+
+describe('las fichas que crea la pasada', () => {
+  const crear = {
+    ok: true as const,
+    accion: 'crear' as const,
+    nombre: 'ana--nueva',
+    titulo: 'Nueva',
+    dueño: { tipo: 'autor' as const, slug: 'ana' },
+    forma: 'nueva',
+  };
+
+  it('una ficha planeada cuenta para el tope por Obra antes de estar en el disco', () => {
+    const nueva = fichaPlaneada(crear)!;
+    expect(nueva).toEqual({ nombre: 'ana--nueva', ruta: 'ana--nueva', titulo: 'Nueva', formas: ['nueva'], autor: 'ana' });
+    const tres = ['Primera de la nueva.', 'Segunda, distinta del todo.', 'Tercera, que no cabe.'].map((t, i) =>
+      atribuida(`ana-n${i}`, t, { procedencia: { obra: 'Nueva' } }),
+    );
+    expect(juicio(tres, { fichas: [...FICHAS, nueva] }).map((f) => f.motivo)).toContain(
+      'la Obra «ana--nueva» tendría 3 atribuidas y el tope es 2 (MAX_ATRIBUIDAS_POR_OBRA): ana-n0, ana-n1, ana-n2.',
+    );
+    expect(lineaDelBuild(juicio(tres, { fichas: [...FICHAS, nueva] })[0])).toMatch(/^ana--nueva: la Obra/u);
+  });
+
+  it('solo crear o restaurar dan Ficha al Autor; «existente» no (ya está en el disco, o la obra no deja forma)', () => {
+    expect(planDaFichaAlAutor(crear)).toBe(true);
+    expect(planDaFichaAlAutor({ ...crear, dueño: { tipo: 'personaje', slug: 'batman' } })).toBe(false);
+    expect(planDaFichaAlAutor({ ok: true, accion: 'restaurar', origen: 'x', titulo: 'X' })).toBe(true);
+    expect(planDaFichaAlAutor({ ok: true, accion: 'existente' })).toBe(false);
+    expect(planDaFichaAlAutor({ ok: false, motivos: ['choca'] })).toBe(false);
+    expect(planDaFichaAlAutor(undefined)).toBe(false);
+    expect(fichaPlaneada({ ok: true, accion: 'existente' })).toBeUndefined();
+  });
+
+  it('el dueño de una ficha de Personaje es el Personaje, aunque declare un Autor informativo', () => {
+    // Un Autor muerto como `autor` informativo no quita el tope: el dueño es el Personaje.
+    const dePersonaje: FichaDeObra = { ...ficha('batman--noche', 'seneca', 'noche'), personaje: 'batman', personajes: ['batman'] };
+    const tres = ['Soy la noche.', 'La ciudad me llama.', 'Nunca llego tarde.'].map((t, i) =>
+      atribuida(`batman-${i}`, t, { autor: 'seneca', personaje: 'batman', procedencia: { obra: 'Noche' } }),
+    );
+    expect(juicio(tres, { fichas: [dePersonaje] }).map((f) => f.motivo)).toContain(
+      'la Obra «batman--noche» tendría 3 atribuidas y el tope es 2 (MAX_ATRIBUIDAS_POR_OBRA): batman-0, batman-1, batman-2.',
+    );
   });
 });
 

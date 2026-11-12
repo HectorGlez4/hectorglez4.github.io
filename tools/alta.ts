@@ -53,11 +53,14 @@ import {
 import { CLASE_ATRIBUIDA, claseDe, claseQueCorresponde, esAtribuida, type Clase } from '../src/lib/clase.ts';
 import {
   fallosDeAtribuidas,
+  fichaPlaneada,
   motivoPuertaCerrada,
   motivosDe,
+  planDaFichaAlAutor,
   type CitaParaAtribuidas,
   type ValoresDeLaPuerta,
 } from './lib/atribuidas.ts';
+import type { FichaDeObra } from '../src/lib/obras.ts';
 import {
   anotarTrasInterrupcion,
   MOTIVO_CLASE_TECLEADA,
@@ -396,6 +399,9 @@ export async function darDeAltaLote(
     // a los que la pasada da una Ficha de Obra, que cuentan como con Obra.
     const publicadasEnLaPasada: CitaParaAtribuidas[] = [];
     const autoresConFichaEnLaPasada = new Set<string>();
+    // Y las fichas que la pasada crea: en seco no se escriben nunca, y aun escritas, los topes por
+    // Obra cuentan juntas las atribuidas de una Obra nueva desde la primera.
+    const fichasEnLaPasada: FichaDeObra[] = [];
     // El conjunto publicado tal como va quedando, para la grafía por omisión de una ficha nueva.
     const publicadasParaObra: { autor?: string; personaje?: string; procedencia?: { obra?: string } }[] = [
       ...yaPublicadas,
@@ -661,10 +667,14 @@ export async function darDeAltaLote(
         const fallos = fallosDeAtribuidas({
           citas: [...publicadasParaAtribuidas, ...publicadasEnLaPasada, propia],
           autores,
-          fichas: await leerFichasDeObra(rutas),
+          fichas: [
+            ...(await leerFichasDeObra(rutas)),
+            ...fichasEnLaPasada,
+            ...[fichaPlaneada(plan, conAutor ? slugAutor : undefined)].filter((f) => f !== undefined),
+          ],
           autoresConFichaNueva: [
             ...autoresConFichaEnLaPasada,
-            ...(plan?.ok === true && conAutor ? [slugAutor] : []),
+            ...(planDaFichaAlAutor(plan) && conAutor ? [slugAutor] : []),
           ],
           comparables: [
             ...enRevisionParaAtribuidas,
@@ -695,7 +705,9 @@ export async function darDeAltaLote(
       slugsOcupados.add(candidata.slug);
       aPublicar.push({ indice, texto, slug: candidata.slug, temas: validada.data.temas, clase });
       publicadasEnLaPasada.push(paraAtribuidas(validada.data));
-      if (plan?.ok === true && conAutor) autoresConFichaEnLaPasada.add(slugAutor);
+      if (planDaFichaAlAutor(plan) && conAutor) autoresConFichaEnLaPasada.add(slugAutor);
+      const fichaNueva = fichaPlaneada(plan, conAutor ? slugAutor : undefined);
+      if (fichaNueva !== undefined) fichasEnLaPasada.push(fichaNueva);
       if (!opciones.seco) {
         // Solo lo que de verdad se publica cuenta para la grafía por omisión.
         publicadasParaObra.push({
@@ -771,10 +783,12 @@ function paraAtribuidas(c: {
   personaje?: string;
   clase?: unknown;
   procedencia?: { obra?: string } | null;
+  atestiguaciones?: unknown;
 }): CitaParaAtribuidas {
   return {
     slug: c.slug,
     texto: c.texto,
+    ...(c.atestiguaciones !== undefined ? { atestiguaciones: c.atestiguaciones } : {}),
     ...(c.autor !== undefined ? { autor: c.autor } : {}),
     ...(c.personaje !== undefined ? { personaje: c.personaje } : {}),
     ...(esAtribuida(c) ? { clase: claseDe(c) } : {}),

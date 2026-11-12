@@ -869,12 +869,16 @@ export function conLaPuertaAbierta(
 ): Record<string, string> {
   const todos: ValoresDeLaPuerta = { ...PUERTA_DE_PRUEBA, ...valores };
   const resultado = { ...ficheros };
+  // Cada constante tiene que encontrarse en uno de los dos ficheros: si su declaración cambia de
+  // forma y el parche no la casa, la prueba correría con el valor del árbol sin decirlo.
+  const parcheadas = new Set<string>();
   for (const ruta of ['src/lib/umbrales.ts', 'src/lib/dominio.ts']) {
     const original = resultado[ruta] ?? readFileSync(join(RAIZ, ruta), 'utf8');
     let contenido = original;
     for (const [nombre, valor] of Object.entries(todos)) {
       const declaracion = new RegExp(`(export const ${nombre}: (?:number|string) \\| undefined = )[^;]*;`, 'u');
       if (!declaracion.test(contenido)) continue;
+      parcheadas.add(nombre);
       contenido = contenido.replace(
         declaracion,
         `$1${valor === undefined ? 'undefined' : JSON.stringify(valor)};`,
@@ -882,6 +886,13 @@ export function conLaPuertaAbierta(
     }
     // Un fichero que no cambia no se parchea: el andamio rechaza el parche idéntico.
     if (contenido !== original || ruta in ficheros) resultado[ruta] = contenido;
+  }
+  const sinParchear = Object.keys(todos).filter((nombre) => !parcheadas.has(nombre));
+  if (sinParchear.length > 0) {
+    throw new Error(
+      `conLaPuertaAbierta: no se encontró la declaración «export const NOMBRE: number|string | undefined = …;» ` +
+        `de ${sinParchear.join(', ')} en src/lib/umbrales.ts ni en src/lib/dominio.ts.`,
+    );
   }
   return resultado;
 }

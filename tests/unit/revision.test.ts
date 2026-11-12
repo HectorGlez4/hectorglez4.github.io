@@ -791,6 +791,37 @@ describe('Historia 35.1 — aprobar deriva la clase y la anota', () => {
       expect(sinFicha.rechazadasPorAdmision[0].motivos.join(' ')).toMatch(/«ana-ejemplo», sin Personaje.*pregunta 23/u);
     });
 
+    it('la primera de una Obra sin ficha se aprueba y escribe su ficha; dos de esa Obra nueva cuentan juntas', async () => {
+      const una = deAna('ana-ejemplo-una-nueva', 'La primera de una obra que aún no tiene ficha.');
+      const rutas = await conAutores([una]);
+      const resultado = await aprobar(rutas, [una.slug], [], { puerta: ABIERTA });
+      expect(resultado.rechazadasPorAdmision).toEqual([]);
+      expect(resultado.publicadas).toEqual([una.slug]);
+      expect(await readdir(rutas.obras)).toContain('ana-ejemplo--obras-de-ana.yml');
+
+      const dos = deAna('ana-ejemplo-dos-nueva', 'La segunda de esa obra, que ya no cabe en ella.');
+      const juntas = await conAutores([una, dos]);
+      const pasada = await aprobar(juntas, [una.slug, dos.slug], [], { puerta: { ...ABIERTA, maxPorObra: 1 } });
+      expect(pasada.publicadas).toEqual([una.slug]);
+      expect(pasada.rechazadasPorAdmision.map((r) => [r.slug, r.motivos.join(' ')])).toEqual([
+        [dos.slug, expect.stringMatching(/la Obra «ana-ejemplo--obras-de-ana» tendría 2 atribuidas y el tope es 1/u)],
+      ]);
+    });
+
+    it('el mínimo de dominios sigue a la puerta: dos direcciones de un mismo dominio no bastan con MIN 2', async () => {
+      const escasa = deAna('ana-ejemplo-escasa', 'Una frase atestiguada dos veces por el mismo sitio.', {
+        atestiguaciones: [
+          { url: 'https://es.wikiquote.org/wiki/Ana', consultadaEl: '2026-11-01' },
+          { url: 'https://en.wikiquote.org/wiki/Ana', consultadaEl: '2026-11-01' },
+        ],
+      });
+      const rutas = await conAutores([escasa]);
+      await fichaDeAna(rutas);
+      const resultado = await aprobar(rutas, [escasa.slug], [], { puerta: ABIERTA });
+      expect(resultado.publicadas).toEqual([]);
+      expect(resultado.rechazadasPorAdmision[0].motivos.join(' ')).toMatch(/la atestigua 1 dominio registrable/u);
+    });
+
     it('sin Tema publicado tampoco se aprueba: la atribuida necesita Tema como toda Cita', async () => {
       const feliz = deAna('ana-ejemplo-sin-tema', 'Una frase que nadie más ha dicho nunca.', { temas: [] });
       const rutas = await conAutores([feliz]);

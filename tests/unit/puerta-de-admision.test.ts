@@ -307,7 +307,7 @@ describe('Historia 35.1b — la puerta de la atribuida en el build', () => {
     );
     expect(r.codigo).not.toBe(0);
     expect(r.salida).toMatch(/corpus\/citas\/ana-ejemplo--larga\.md: la atribuida «ana-ejemplo-larga» tiene \d+ caracteres y el tope es 40 \(MAX_CARACTERES_DE_ATRIBUIDA\)/u);
-    expect(r.salida).toMatch(/la Obra «ana-ejemplo--obras-de-ana» tendría 2 atribuidas y el tope es 1 \(MAX_ATRIBUIDAS_POR_OBRA\)/u);
+    expect(r.salida).toMatch(/corpus\/obras\/ana-ejemplo--obras-de-ana\.yml: la Obra «ana-ejemplo--obras-de-ana» tendría 2 atribuidas y el tope es 1 \(MAX_ATRIBUIDAS_POR_OBRA\)/u);
     expect(r.salida).toMatch(/el Autor «ana-ejemplo» tendría 4 atribuidas y el tope es 3 \(MAX_ATRIBUIDAS_POR_DUEÑO\)/u);
     expect(r.salida).toMatch(/luis-prueba--sin-obra\.md: .*«luis-prueba», sin Personaje.*pregunta 23/u);
     expect(r.salida).toMatch(/ana-ejemplo--copia\.md: la atribuida «ana-ejemplo-copia» coincide con «seneca-no-es-que-tengamos-poco-tiempo», de la clase siempre/u);
@@ -344,7 +344,7 @@ describe('Historia 35.1b — la puerta de la atribuida en el build', () => {
     }
   }, 900_000);
 
-  it('con la puerta cerrada —el árbol, o una sola constante sin valor— rompe nombrando el fichero y las que faltan', async () => {
+  it('con la puerta cerrada en el árbol rompe nombrando el fichero y las cinco que faltan', async () => {
     const corpus = {
       ...BASE,
       'citas/ana-ejemplo--la-feliz.md': atribuida('ana-ejemplo', 'ana-ejemplo-la-feliz', 'Una frase que nadie más ha dicho nunca.'),
@@ -354,8 +354,23 @@ describe('Historia 35.1b — la puerta de la atribuida en el build', () => {
     expect(arbol.salida).toMatch(
       /corpus\/citas\/ana-ejemplo--la-feliz\.md: la puerta de la atribuida está cerrada: no tienen valor MAX_CARACTERES_DE_ATRIBUIDA, MAX_ATRIBUIDAS_POR_OBRA, MAX_ATRIBUIDAS_POR_DUEÑO, MIN_ATESTIGUACIONES_DE_ATRIBUIDA, BUZON_DE_PETICIONES/u,
     );
-    const sinBuzon = await construirCon(corpus, conLaPuertaAbierta({ BUZON_DE_PETICIONES: undefined }));
-    expect(sinBuzon.codigo).not.toBe(0);
-    expect(sinBuzon.salida).toMatch(/ana-ejemplo--la-feliz\.md: la puerta de la atribuida está cerrada: no tiene valor BUZON_DE_PETICIONES \(/u);
-  });
+  }, 300_000);
+
+  it.each([
+    'MAX_CARACTERES_DE_ATRIBUIDA',
+    'MAX_ATRIBUIDAS_POR_OBRA',
+    'MAX_ATRIBUIDAS_POR_DUEÑO',
+    'MIN_ATESTIGUACIONES_DE_ATRIBUIDA',
+    'BUZON_DE_PETICIONES',
+  ])('con %s sola sin valor en la copia, rompe nombrándola a ella sola', async (nombre) => {
+    const corpus = {
+      ...BASE,
+      'citas/ana-ejemplo--la-feliz.md': atribuida('ana-ejemplo', 'ana-ejemplo-la-feliz', 'Una frase que nadie más ha dicho nunca.'),
+    };
+    const sola = await construirCon(corpus, conLaPuertaAbierta({ [nombre]: undefined }));
+    expect(sola.codigo).not.toBe(0);
+    expect(sola.salida).toMatch(
+      new RegExp(`ana-ejemplo--la-feliz\\.md: la puerta de la atribuida está cerrada: no tiene valor ${nombre} \\(`, 'u'),
+    );
+  }, 300_000);
 });

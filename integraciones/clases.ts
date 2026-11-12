@@ -77,14 +77,15 @@ export default function clasesDeCita(): AstroIntegration {
         ...(c.procedencia !== undefined ? { procedencia: c.procedencia } : {}),
       })),
       autores,
-      fichas,
+      // Con su ruta relativa a la raíz: el fallo de un tope por Obra nombra el fichero de la ficha.
+      fichas: fichas.map((f) => ({ ...f, ruta: relativaALaRaiz(raiz, f.ruta) })),
     }).map(lineaDelBuild);
     return [...deClases, ...deAtribuidas];
   }
 
   const titular = (n: number) =>
-    `Clases de Cita: ${n} ${n === 1 ? 'desacuerdo' : 'desacuerdos'} entre las Citas, sus Autores y ` +
-    'corpus/clases-de-cita.yml. Toda Cita publicada está registrada con su clase, la de siempre es de ' +
+    `Clases de Cita: ${n} ${n === 1 ? 'desacuerdo' : 'desacuerdos'} entre las Citas, sus Autores, ` +
+    'corpus/clases-de-cita.yml y la puerta de la atribuida (sus constantes, sus topes, sus Fichas de Obra). Toda Cita publicada está registrada con su clase, la de siempre es de ' +
     'dominio público y la atribuida de un dueño con derechos vigentes, por su puerta y dentro de sus topes.';
 
   return {

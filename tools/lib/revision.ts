@@ -55,11 +55,14 @@ import { claseDe, claseQueCorresponde, esAtribuida, type Clase } from '../../src
 import { anotarTrasInterrupcion, motivoClaseDistinta, slugsConOtraClase } from './clases.ts';
 import {
   fallosDeAtribuidas,
+  fichaPlaneada,
   motivoPuertaCerrada,
   motivosDe,
+  planDaFichaAlAutor,
   type CitaParaAtribuidas,
   type ValoresDeLaPuerta,
 } from './atribuidas.ts';
+import type { FichaDeObra } from '../../src/lib/obras.ts';
 import { aplicarFichaDeObra, resolverFichaDeObra } from './obras.ts';
 import { motivoSinTemaPublicado, temaPublicadoConLaPasada } from './alcance.ts';
 import type { TemaBajoUmbral } from '../../src/lib/publicado.ts';
@@ -90,6 +93,11 @@ export interface CandidataEnRevision {
   obra?: string;
   /** Su Fuente, si declara una: de ella salen los documentos de los que toma sus saltos (29.2). */
   fuente?: { id: string };
+  /**
+   * Sus atestiguaciones tal como las declara su fichero, si declara alguna — Historia 35.1b: la
+   * puerta de la atribuida cuenta sus dominios con el mínimo de la puerta.
+   */
+  atestiguaciones?: unknown;
   /**
    * La Cita ya presente con la que coincide, si coincide con alguna — FR-14.
    *
@@ -294,6 +302,7 @@ export async function loteEnRevision(rutas: Rutas): Promise<CandidataEnRevision[
       ruta: candidata.ruta,
       ...(typeof candidata.procedencia?.obra === 'string' ? { obra: candidata.procedencia.obra } : {}),
       ...(typeof candidata.fuente?.id === 'string' ? { fuente: { id: candidata.fuente.id } } : {}),
+      ...(candidata.atestiguaciones !== undefined ? { atestiguaciones: candidata.atestiguaciones } : {}),
       // La publicada gana: lo que el editor necesita saber es que ya está publicada.
       ...(duplicadaPublicada !== undefined
         ? { duplicaA: { slug: duplicadaPublicada, donde: 'publicadas' as const } }
@@ -487,6 +496,11 @@ export async function aprobar(
   // vaya publicando. Sin lo segundo, dos candidatas que colisionan entre sí se pisarían.
   const yaPublicadas = await leerCitas(rutas.citas);
   const ocupados = new Set(yaPublicadas.map((c) => c.slug));
+  // Historia 35.1b — las fichas del disco (se leen una vez: las de la pasada se escriben después de
+  // planear) y las que la pasada crea, con los Autores a los que da una.
+  let fichasEnDisco: FichaDeObra[] | undefined;
+  const fichasPlaneadas: FichaDeObra[] = [];
+  const autoresConFichaPlaneada: string[] = [];
   // Historia 35.1b — lo publicado, como lo juzga la puerta de la atribuida; se compone una vez.
   let paraAtribuidas: CitaParaAtribuidas[] | undefined;
   const publicadasParaAtribuidas = (): CitaParaAtribuidas[] =>
@@ -583,8 +597,9 @@ export async function aprobar(
      * cuenta para los Temas de las demás, y así ninguna se publica apoyada en una que no saldrá.
      * Al escribir se vuelve a resolver, porque el disco cambia con cada ficha escrita.
      */
+    let plan: Awaited<ReturnType<typeof resolverFichaDeObra>> | undefined;
     if (obra !== undefined) {
-      const plan = await resolverFichaDeObra(rutas, {
+      plan = await resolverFichaDeObra(rutas, {
         ...dueñosDe(candidata),
         obra,
         citasPublicadas: [...planeadasParaObra, comoPublicada],
@@ -604,10 +619,16 @@ export async function aprobar(
       const fallos = fallosDeAtribuidas({
         citas: [...publicadasParaAtribuidas(), ...planeadas.map((p) => candidataParaAtribuidas(p.candidata)), propia],
         autores: [...autorPorSlug.values()],
-        fichas: await leerFichasDeObra(rutas),
+        // Las fichas del disco más las que esta pasada crea: las fichas se escriben después de
+        // planear, y sin las planeadas dos atribuidas de una Obra nueva no contarían juntas.
+        fichas: [
+          ...(fichasEnDisco ??= await leerFichasDeObra(rutas)),
+          ...fichasPlaneadas,
+          ...[fichaPlaneada(plan, candidata.autor)].filter((f) => f !== undefined),
+        ],
         autoresConFichaNueva: [
-          ...planeadas.filter((p) => p.candidata.obra !== undefined && p.candidata.autor !== undefined).map((p) => p.candidata.autor!),
-          ...(obra !== undefined && candidata.autor !== undefined ? [candidata.autor] : []),
+          ...autoresConFichaPlaneada,
+          ...(planDaFichaAlAutor(plan) && candidata.autor !== undefined ? [candidata.autor] : []),
         ],
         comparables: lote.filter((c) => c.slug !== candidata.slug).map(candidataParaAtribuidas),
         juzgar: new Set([propia.slug]),
@@ -620,6 +641,9 @@ export async function aprobar(
       }
     }
     planeadasParaObra.push(comoPublicada);
+    const fichaNueva = fichaPlaneada(plan, candidata.autor);
+    if (fichaNueva !== undefined) fichasPlaneadas.push(fichaNueva);
+    if (planDaFichaAlAutor(plan) && candidata.autor !== undefined) autoresConFichaPlaneada.push(candidata.autor);
     planeadas.push({
       indice,
       slug,
@@ -810,6 +834,7 @@ function candidataParaAtribuidas(c: CandidataEnRevision): CitaParaAtribuidas {
     ...(c.personaje !== undefined ? { personaje: c.personaje } : {}),
     ...(esAtribuida(c) ? { clase: claseDe(c) } : {}),
     ...(c.obra !== undefined ? { procedencia: { obra: c.obra } } : {}),
+    ...(c.atestiguaciones !== undefined ? { atestiguaciones: c.atestiguaciones } : {}),
   };
 }
 

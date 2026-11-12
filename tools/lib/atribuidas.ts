@@ -39,8 +39,10 @@ import {
   type DueñoDeDerechos,
   type ReferenciaDeDerechos,
 } from '../../src/lib/clase.ts';
-import { dueñoDeCita, fichaDeCita, indiceDeFichas, type FichaDeObra } from '../../src/lib/obras.ts';
+import { dueñoDeCita, dueñoDeFicha, fichaDeCita, indiceDeFichas, type FichaDeObra } from '../../src/lib/obras.ts';
 import { formaParaComparar, parecidoEntre, type FormaParaComparar } from './parecido.ts';
+import { motivoDeAtestiguacionesEscasas } from '../../src/lib/admision.ts';
+import type { PlanDeFicha } from './obras.ts';
 
 /** Los cinco valores que gobiernan la puerta. Sin alguno, está cerrada. */
 export interface ValoresDeLaPuerta {
@@ -69,9 +71,20 @@ const NOMBRES: readonly [keyof ValoresDeLaPuerta, string][] = [
   ['buzon', 'BUZON_DE_PETICIONES'],
 ];
 
+/**
+ * Si una constante tiene un valor con el que la puerta puede juzgar: un tope o un mínimo es un
+ * entero positivo, y el buzón, una cadena con contenido. Un `0`, un negativo, un decimal, un
+ * `NaN` o un buzón en blanco no abren la puerta: cuentan como sin valor.
+ */
+function conValor(valor: number | string | undefined): boolean {
+  if (valor === undefined) return false;
+  if (typeof valor === 'number') return Number.isInteger(valor) && valor > 0;
+  return valor.trim() !== '';
+}
+
 /** Las constantes sin valor, por su nombre. Vacía, la puerta está abierta. */
 export function constantesSinValor(valores: ValoresDeLaPuerta = VALORES_DEL_ARBOL): string[] {
-  return NOMBRES.filter(([clave]) => valores[clave] === undefined).map(([, nombre]) => nombre);
+  return NOMBRES.filter(([clave]) => !conValor(valores[clave])).map(([, nombre]) => nombre);
 }
 
 /**
@@ -83,7 +96,8 @@ export function motivoPuertaCerrada(valores: ValoresDeLaPuerta = VALORES_DEL_ARB
   if (faltan.length === 0) return undefined;
   return (
     `la puerta de la atribuida está cerrada: ${faltan.length === 1 ? 'no tiene valor' : 'no tienen valor'} ` +
-    `${faltan.join(', ')} (src/lib/umbrales.ts y src/lib/dominio.ts). Las fija Héctor (Historia 35.1b).`
+    `${faltan.join(', ')} (src/lib/umbrales.ts y src/lib/dominio.ts; un tope o un mínimo vale si es un entero ` +
+    'positivo, y el buzón si tiene contenido). Las fija Héctor (Historia 35.1b).'
   );
 }
 
@@ -97,6 +111,12 @@ export interface CitaParaAtribuidas {
   personaje?: string;
   clase?: unknown;
   procedencia?: { obra?: string } | null;
+  /**
+   * Sus atestiguaciones, tal como las declara: el mínimo de dominios se juzga aquí también, con
+   * el valor de la puerta, para que las órdenes que la abren por parámetro lo apliquen igual que
+   * el esquema con el del árbol.
+   */
+  atestiguaciones?: unknown;
 }
 
 /** Un fallo del juicio: las Citas a que se debe, su ruta si es una y el motivo. */
@@ -121,9 +141,46 @@ export interface EntradaDelJuicio {
   referencia?: ReferenciaDeDerechos;
 }
 
-/** Los puntos de código de un texto, como `MAX_CARACTERES_IMAGEN`. */
+/** Los puntos de código de un texto, como `MAX_CARACTERES_IMAGEN`, en su forma NFC. */
 function puntosDeCodigo(texto: string): number {
-  return [...texto].length;
+  return [...texto.normalize('NFC')].length;
+}
+
+/** Las direcciones de una lista de atestiguaciones tal como llega del fichero. */
+function urlsDe(atestiguaciones: unknown): string[] {
+  if (!Array.isArray(atestiguaciones)) return [];
+  return atestiguaciones
+    .map((a) => (a !== null && typeof a === 'object' ? (a as { url?: unknown }).url : undefined))
+    .filter((u): u is string => typeof u === 'string');
+}
+
+/**
+ * La Ficha de Obra que un plan crea en la pasada, como la leerá el build cuando esté escrita:
+ * así los topes por Obra cuentan juntas las atribuidas de una Obra nueva aunque su ficha aún no
+ * esté en el disco (y en seco, que nunca la escribe). `undefined` si el plan no crea ninguna.
+ */
+export function fichaPlaneada(plan: PlanDeFicha | undefined, autor?: string): FichaDeObra | undefined {
+  if (plan === undefined || !plan.ok || plan.accion !== 'crear') return undefined;
+  return {
+    nombre: plan.nombre,
+    ruta: plan.nombre,
+    titulo: plan.titulo,
+    formas: [plan.forma],
+    ...(plan.dueño.tipo === 'autor'
+      ? { autor: plan.dueño.slug }
+      : { personaje: plan.dueño.slug, personajes: [plan.dueño.slug], ...(autor !== undefined ? { autor } : {}) }),
+  };
+}
+
+/**
+ * Si el plan deja al Autor con una Ficha de Obra activa que hoy no está en el disco: la crea a su
+ * nombre o restaura una retirada. Un plan `existente` no da ninguna —o ya está en el disco, o la
+ * obra no deja forma y no la necesita—.
+ */
+export function planDaFichaAlAutor(plan: PlanDeFicha | undefined): boolean {
+  if (plan === undefined || !plan.ok) return false;
+  if (plan.accion === 'crear') return plan.dueño.tipo === 'autor';
+  return plan.accion === 'restaurar';
 }
 
 /**
@@ -148,6 +205,13 @@ export function fallosDeAtribuidas(entrada: EntradaDelJuicio): FalloDeAtribuida[
   const fallos: FalloDeAtribuida[] = [];
   const autorPorSlug = new Map(entrada.autores.map((a) => [a.slug, a]));
   const juzgada = (slug: string) => juzgadas.some((c) => c.slug === slug);
+
+  // ── El mínimo de dominios, con el valor de la puerta (el esquema lo juzga con el del árbol) ──
+  for (const c of juzgadas) {
+    if (c.atestiguaciones === undefined) continue;
+    const motivo = motivoDeAtestiguacionesEscasas(urlsDe(c.atestiguaciones), valores.minAtestiguaciones);
+    if (motivo !== undefined) fallos.push(deUna(c, `la atribuida «${c.slug}»: ${motivo}`));
+  }
 
   // ── El texto ──
   for (const c of juzgadas) {
@@ -184,13 +248,13 @@ export function fallosDeAtribuidas(entrada: EntradaDelJuicio): FalloDeAtribuida[
   }
   for (const { ficha, slugs } of [...porObra.values()].sort((a, b) => (a.ficha.nombre < b.ficha.nombre ? -1 : 1))) {
     if (slugs.length <= valores.maxPorObra! || !slugs.some(juzgada)) continue;
-    const dueño =
-      ficha.autor !== undefined
-        ? { tipo: 'autor' as const, slug: ficha.autor }
-        : { tipo: 'personaje' as const, slug: ficha.personaje ?? '' };
-    if (!tieneDerechos(dueño)) continue;
+    // El dueño de la ficha, por su única regla (`dueñoDeFicha`): su Personaje si es la de un
+    // Personaje (35.2), cuyo `autor` es solo informativo, y si no su Autor.
+    if (!tieneDerechos(dueñoDeFicha(ficha))) continue;
     fallos.push({
       slugs,
+      // El build nombra el fichero de la ficha; las órdenes, cada Cita por su slug.
+      ruta: ficha.ruta,
       motivo:
         `la Obra «${ficha.nombre}» tendría ${slugs.length} atribuidas y el tope es ${valores.maxPorObra} ` +
         `(MAX_ATRIBUIDAS_POR_OBRA): ${slugs.join(', ')}.`,

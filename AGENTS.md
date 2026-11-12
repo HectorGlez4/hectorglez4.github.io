@@ -271,16 +271,20 @@ constantes que fija Héctor** y que el repositorio versiona en `undefined` —`M
 valor**, ni siembra atribuidas, Autores vivos, Personajes ni atestiguaciones en el Corpus real. Con
 alguna sin valor la puerta está **cerrada**: el build rompe ante cada atribuida de `corpus/citas/`
 nombrando su fichero y cada constante que falta, y el alta y `revisar --aprobar` la dejan en
-`corpus/_revision/` con ese mismo motivo (`motivoPuertaCerrada`). Las pruebas la abren en la copia
-(`conLaPuertaAbierta` de `tests/unit/ayuda/construir.ts`, que sustituye el valor que tengan) o por
-parámetro (`puerta` de `darDeAltaLote` y de `aprobar`); ninguna fija el valor del árbol.
+`corpus/_revision/` con ese mismo motivo (`motivoPuertaCerrada`). Un valor que no es un entero
+positivo —`0`, negativo, decimal— o un buzón en blanco cuenta como sin valor. Las pruebas la abren en
+la copia (`conLaPuertaAbierta` de `tests/unit/ayuda/construir.ts`, que sustituye el valor que tengan y
+lanza si no encuentra la declaración de alguna) o por parámetro (`puerta` de `darDeAltaLote` y de
+`aprobar`); ninguna fija el valor del árbol.
 
 - **El esquema** (`src/lib/admision.ts`, `reglasDeClase`) exige a la atribuida `atestiguaciones`
   —lista no vacía de `{url (http/https), consultadaEl (jornada)}`— y `origen` (`original`, `doblaje`
   o `traduccion-publicada`, `ORIGENES`), su texto en una sola línea aunque traiga Fuente, y la rechaza
   con `aptaParaPortada: true` (pregunta 22). Con `MIN_ATESTIGUACIONES_DE_ATRIBUIDA` con valor, la
   atestiguan al menos tantos **dominios registrables** distintos. La de siempre con `atestiguaciones`
-  u `origen` es error que nombra el fichero. Los dos campos no se pintan: van en
+  u `origen` es error que nombra el fichero. Una `url` con usuario o contraseña no vale. Las órdenes
+  repiten el mínimo de dominios en `fallosDeAtribuidas` con el valor de su `puerta`, para que abrirla
+  por parámetro lo aplique igual que el esquema con el del árbol. Los dos campos no se pintan: van en
   `CAMPOS_QUE_NO_FECHAN.cita` y no viajan a `publicado.ts` ni a `dist/`.
 - **El dominio lo cuenta solo `dominioDeAtestiguacion`** de `src/lib/atestiguaciones.ts`: eTLD+1 con
   `tldts` (7.4.19, versión exacta), solo la lista ICANN —dos `*.github.io` cuentan uno—, y no cuentan
@@ -293,10 +297,13 @@ parámetro (`puerta` de `darDeAltaLote` y de `aprobar`); ninguna fija el valor d
   en puntos de código, más atribuidas de las que admite una Obra cuyo dueño tiene derechos vigentes o
   un dueño (Autor o, sin él, Personaje) con derechos vigentes —cada fallo con recuento y tope—, la
   **figura pública sin Obra** —una atribuida de Autor y sin Personaje solo si ese Autor es `autor` de
-  alguna Ficha de Obra activa; en el alta cuenta la que crea la misma entrada; «pregunta 23»— y los
+  alguna Ficha de Obra activa; en el alta y en la aprobación cuentan las que crea la pasada, y también
+  para el tope por Obra (`fichaPlaneada`), aun en seco; «pregunta 23»— y los
   **duplicados entre clases** con `parecidoEntre` (sus tres clases), contra lo publicado de las dos
   clases y, en las órdenes, contra `corpus/_revision/` y el lote: cualquier coincidencia la niega,
-  también con `--con-duplicados`. El build (`integraciones/clases.ts`) lo repite contra `corpus/citas/`.
+  también con `--con-duplicados`. El build (`integraciones/clases.ts`) lo repite contra `corpus/citas/`,
+  nombrando el fichero de la Cita o, en el tope por Obra, el de la ficha. El dueño de una Obra es el
+  de `dueñoDeFicha`: el Personaje en la ficha de un Personaje, aunque traiga `autor` informativo.
 - **El cotejo salta la atribuida** (`cotejar` y `motivoParaNoPublicar` de `tools/lib/cotejo.ts`): no
   se le exige Fuente aunque la declare, no cuenta como cotejada y, en `pendientes-de-cotejo.yml`, rompe
   el build. Con Fuente la conserva y pinta su Línea de la Fuente; sin ella, nada. `aprobar` no le

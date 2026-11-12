@@ -22,10 +22,20 @@ import { join } from 'node:path';
  * Sin la segunda lectura, toda construcción se caía al generar las páginas.
  */
 function leerCname(): string {
+  const junto = new URL('../../public/CNAME', import.meta.url);
   try {
-    return readFileSync(new URL('../../public/CNAME', import.meta.url), 'utf8');
+    return readFileSync(junto, 'utf8');
   } catch {
-    return readFileSync(join(process.cwd(), 'public', 'CNAME'), 'utf8');
+    const enLaRaiz = join(process.cwd(), 'public', 'CNAME');
+    try {
+      return readFileSync(enLaRaiz, 'utf8');
+    } catch {
+      // Se nombran las dos: un ENOENT a secas no dice que la construcción se lanzó fuera de la raíz.
+      throw new Error(
+        `No se encuentra public/CNAME: ni junto al módulo (${junto.pathname}) ni en la raíz desde la que se ` +
+          `construye (${enLaRaiz}). Construye desde la raíz del proyecto.`,
+      );
+    }
   }
 }
 

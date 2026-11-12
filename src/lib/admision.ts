@@ -235,11 +235,15 @@ export const atestiguacion = z
         .refine((valor) => {
           try {
             const leida = new URL(valor);
-            return leida.protocol === 'http:' || leida.protocol === 'https:';
+            return (
+              (leida.protocol === 'http:' || leida.protocol === 'https:') &&
+              leida.username === '' &&
+              leida.password === ''
+            );
           } catch {
             return false;
           }
-        }, 'Regla incumplida: la «url» de una atestiguación es una dirección http:// o https://.'),
+        }, 'Regla incumplida: la «url» de una atestiguación es una dirección http:// o https://, sin usuario ni contraseña.'),
       consultadaEl: z
         .string({ message: 'Regla incumplida: una atestiguación declara «consultadaEl», la jornada AAAA-MM-DD.' })
         .refine(esJornada, 'Regla incumplida: «consultadaEl» es una jornada AAAA-MM-DD que existe.'),

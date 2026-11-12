@@ -4,7 +4,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { altaConFallo, darDeAltaLote, formatearInforme, mensajeDeAltaFallida, type EntradaDeLote } from '../../tools/alta.ts';
 import { componerDocumento } from '../../tools/lib/documento.ts';
-import { CABECERA_DE_CLASES, rutasDelCorpus, separarFrontmatter, type Rutas } from '../../tools/lib/corpus.ts';
+import { CABECERA_DE_CLASES, escribirCita, rutasDelCorpus, separarFrontmatter, type Rutas } from '../../tools/lib/corpus.ts';
 import { ORDEN_SEMBRAR_CLASES, PublicacionInterrumpida } from '../../tools/lib/clases.ts';
 import { motivoPuertaCerrada, type ValoresDeLaPuerta } from '../../tools/lib/atribuidas.ts';
 import { CENSO_DE_PARTIDA } from '../../tools/lib/cotejo.ts';
@@ -570,6 +570,59 @@ describe('Historia 35.1 — el alta deriva la clase y la anota', () => {
         expect.stringMatching(/tiene \d+ caracteres y el tope es 200 \(MAX_CARACTERES_DE_ATRIBUIDA\)/u),
         expect.stringMatching(/«ana-ejemplo», sin Personaje.*pregunta 23/u),
       ]);
+    });
+
+    it('los topes cuentan lo que la misma pasada publica: la Obra nueva, también en seco, y el dueño', async () => {
+      const dos = [deAna('Primera frase de una obra nueva.'), deAna('Segunda, que ya no tiene sitio en ella.')];
+      for (const seco of [true, false]) {
+        const rutas = await conAna();
+        const informe = await darDeAltaLote(dos, rutas, { puerta: { ...ABIERTA, maxPorObra: 1 }, seco });
+        expect(informe.publicadas).toHaveLength(1);
+        expect(informe.enRevision.map((r) => r.motivos.join(' '))).toEqual([
+          expect.stringMatching(/la Obra «ana-ejemplo--obras-de-ana» tendría 2 atribuidas y el tope es 1 \(MAX_ATRIBUIDAS_POR_OBRA\)/u),
+        ]);
+      }
+      const rutas = await conAna();
+      const informe = await darDeAltaLote(dos, rutas, { puerta: { ...ABIERTA, maxPorDueño: 1 } });
+      expect(informe.publicadas).toHaveLength(1);
+      expect(informe.enRevision.map((r) => r.motivos.join(' '))).toEqual([
+        expect.stringMatching(/el Autor «ana-ejemplo» tendría 2 atribuidas y el tope es 1 \(MAX_ATRIBUIDAS_POR_DUEÑO\)/u),
+      ]);
+    });
+
+    it('un duplicado de una candidata de corpus/_revision/ tampoco se publica', async () => {
+      const rutas = await conAna();
+      await escribirCita(rutas.revision, 'seneca--una-frase-que-espera.md', {
+        slug: 'seneca-una-frase-que-espera',
+        texto: 'Una frase que espera en revisión su turno.',
+        autor: 'seneca',
+        temas: [NOMBRE_DEL_TEMA_PUBLICADO],
+      });
+      // Con `--con-duplicados` el señalamiento de FR-14 no la para: la para la puerta de la atribuida.
+      const informe = await darDeAltaLote([deAna('Una frase que espera en revisión su turno.')], rutas, {
+        puerta: ABIERTA,
+        conDuplicados: true,
+      });
+      expect(informe.publicadas).toEqual([]);
+      expect(informe.enRevision[0].motivos.join('\n')).toMatch(/coincide con «seneca-una-frase-que-espera», de la clase siempre/u);
+    });
+
+    it('el mínimo de dominios sigue a la puerta: dos direcciones de un mismo dominio no bastan con MIN 2', async () => {
+      const rutas = await conAna();
+      const informe = await darDeAltaLote(
+        [
+          deAna('Una frase atestiguada dos veces por el mismo sitio.', {
+            atestiguaciones: [
+              { url: 'https://es.wikiquote.org/wiki/Ana', consultadaEl: '2026-11-01' },
+              { url: 'https://en.wikiquote.org/wiki/Ana', consultadaEl: '2026-11-01' },
+            ],
+          }),
+        ],
+        rutas,
+        { puerta: ABIERTA },
+      );
+      expect(informe.publicadas).toEqual([]);
+      expect(informe.enRevision[0].motivos.join(' ')).toMatch(/la atestigua 1 dominio registrable/u);
     });
 
     it('sin Tema publicado no se escribe, como toda Cita', async () => {

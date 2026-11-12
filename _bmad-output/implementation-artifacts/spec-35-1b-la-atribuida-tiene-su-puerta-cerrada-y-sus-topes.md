@@ -5,7 +5,7 @@ created: '2026-11-09'
 status: 'done'
 baseline_revision: 'fbf5692012104972d0d9300716caf1193974ebb7'
 review_loop_iteration: 0
-followup_review_recommended: false
+followup_review_recommended: true
 context:
   - '{project-root}/_bmad-output/implementation-artifacts/epic-35-context.md'
   - '{project-root}/_bmad-output/implementation-artifacts/spec-35-1-la-clase-se-fija-al-dar-de-alta-y-queda-registrada.md'
@@ -19,6 +19,27 @@ deferred:
     severity: low
   - summary: '`MAX_CARACTERES_DE_ATRIBUIDA` sobre la `variante` se aplica cuando exista el campo (Historia 35.6): hoy solo juzga el `texto`.'
     evidence: 'epics.md Story 35.1b («y, cuando exista, la variante»).'
+    severity: low
+  - summary: >-
+      `consultadaEl` admite una jornada futura: el esquema solo exige que exista (`esJornada`), y juzgarla contra el día haría depender el veredicto del build de la jornada.
+    evidence: |-
+      Revisión externa 35.1b-1 (blind-hunter, edge-case-hunter). La intent-contract pide «consultadaEl (jornada, `esJornada`)»; una comparación con hoy la decidiría Héctor (y el build ya evita juicios que roten con la jornada, AD-12).
+    location: >-
+      src/lib/admision.ts (atestiguacion.consultadaEl)
+    severity: low
+  - summary: >-
+      `tools/extraer.ts` escribe la candidata atribuida sin `atestiguaciones` ni `origen`, y su parte no dice que la aprobación los exigirá: el motivo sale solo al aprobar, del esquema.
+    evidence: |-
+      Revisión externa 35.1b-1 (blind-hunter, edge-case-hunter). Con la puerta cerrada y ningún Autor con derechos vigentes en el Corpus real no se ejerce; completar una atribuida es la orden `atribuida` de la Historia 35.6.
+    location: >-
+      tools/extraer.ts
+    severity: low
+  - summary: >-
+      El tope por Obra no cuenta juntas, en la aprobación o en un alta en seco, las atribuidas de una Obra cuya ficha retirada la pasada restaura (`accion: restaurar`): sus formas no se conocen hasta leer la retirada.
+    evidence: |-
+      Revisión externa 35.1b-1: esta pasada cuenta ya las fichas que la pasada crea (`fichaPlaneada`), no las que restaura; el build sí las cuenta en cuanto están escritas.
+    location: >-
+      tools/lib/atribuidas.ts (fichaPlaneada)
     severity: low
 ---
 
@@ -131,6 +152,26 @@ deferred:
 - addressed_findings:
   - none
 
+### 2026-11-12 — Review pass
+- intent_gap: 0
+- bad_spec: 0
+- patch: 12: (high 0, medium 5, low 7)
+- defer: 3: (high 0, medium 0, low 3)
+- reject: 22: (high 0, medium 0, low 22)
+- addressed_findings:
+  - `[medium]` `[patch]` El mínimo de dominios no seguía a la `puerta` por parámetro: `fallosDeAtribuidas` lo juzga con `valores.minAtestiguaciones` (`motivoDeAtestiguacionesEscasas`), y el alta y la aprobación le pasan las atestiguaciones; pruebas en `atribuidas`, `alta` y `revision`.
+  - `[medium]` `[patch]` El tope por Obra no contaba juntas las atribuidas de una Obra que la pasada crea (en el alta en seco, nunca; en la aprobación, nunca, porque las fichas se escriben al final): `fichaPlaneada` las añade a las fichas del juicio en las dos órdenes; pruebas de alta (seco y real) y de aprobación.
+  - `[medium]` `[patch]` El dueño de una Ficha de Personaje con `autor` informativo se tomaba por el Autor (y un Autor muerto quitaba el tope): ahora es `dueñoDeFicha`, la única regla; prueba pura.
+  - `[medium]` `[patch]` La figura sin Obra contaba como con ficha nueva un plan `existente` sin ruta (obra sin forma) o, en la aprobación, cualquier `obra` declarada: `planDaFichaAlAutor` (solo crear a nombre del Autor o restaurar); prueba pura y de aprobación (la primera de una Obra sin ficha se publica y escribe su ficha).
+  - `[medium]` `[patch]` Faltaban pruebas del alta para los topes por Obra y dueño con lo de la pasada y para el duplicado contra `corpus/_revision/`: añadidas en `alta.test.ts`.
+  - `[low]` `[patch]` Un `0`, un negativo, un decimal, un `NaN` o un buzón en blanco abrían la puerta: cuentan como sin valor (`conValor`), y el motivo dice qué vale; pruebas puras.
+  - `[low]` `[patch]` `puntosDeCodigo` cuenta sobre la forma NFC.
+  - `[low]` `[patch]` Una `url` de atestiguación con usuario o contraseña se rechaza en el esquema.
+  - `[low]` `[patch]` `leerCname` nombra las dos rutas que probó en vez de un ENOENT a secas.
+  - `[low]` `[patch]` `conLaPuertaAbierta` lanza si no encuentra la declaración de alguna constante, en vez de seguir con el valor del árbol.
+  - `[low]` `[patch]` El fallo del tope por Obra lleva la ruta de la ficha (relativa a la raíz) y el build la nombra; el titular de `integraciones/clases.ts` nombra también la puerta de la atribuida.
+  - `[low]` `[patch]` La construcción con cada una de las cinco constantes sola sin valor (antes, solo el árbol y el buzón): `it.each` en `puerta-de-admision.test.ts`.
+
 ## Design Notes
 
 El juicio que necesita el Corpus entero vive en `tools/lib/atribuidas.ts` y no en el esquema: el esquema juzga un fichero (forma, recuento de dominios), el módulo relaciona ficheros (topes, fichas, duplicados). Las órdenes lo llaman antes de escribir con lo publicado más lo de la pasada; el build, con lo versionado. Los topes entran por parámetro para que las pruebas unitarias no parcheen nada; solo las de construcción parchean la copia.
@@ -192,3 +233,36 @@ Recomendación de revisión de seguimiento: `false` (parches 0 alto, 0 medio, 0 
 - `src/lib/dominio.ts` entra ahora en el empaquetado de las páginas (el esquema viaja con `publicado.ts` y necesita el dominio propio): su lectura de `public/CNAME` relativa al módulo falla ahí, y la segunda, desde `process.cwd()`, supone que se construye desde la raíz del proyecto, como hacen `npm run build`, el CI y las pruebas.
 - Con la puerta abierta, las órdenes juzgan los duplicados de cada atribuida contra todo `corpus/_revision/` (cientos de miles de candidatas en la principal): las formas se calculan una vez por candidata (`WeakMap`), pero aprobar muchas atribuidas de golpe será lento. Hoy no se ejerce: la puerta está cerrada.
 - El tope por Obra cuenta una Obra por su ficha resuelta: en el alta, varias atribuidas de una Obra que la misma pasada crea no cuentan juntas hasta que la ficha existe (el build sí las cuenta).
+
+### Pasada de revisión 35.1b-1 (2026-11-12)
+
+**Resumen.** Las cinco capas externas (blind-hunter, edge-case-hunter, verification-gap,
+intent-alignment, ac-auditor) trajeron 37 hallazgos tras deduplicar: 12 parches, 3 diferidos y 22
+rechazados (lo que la intent-contract prescribe —duplicados contra toda `_revision/` y el lote, la
+Línea de la Fuente sin cotejo, el dominio propio de `public/CNAME`—, lo que el build ya rompe por otra
+puerta, y lo que es de la 35.4 o de la 35.6). Ningún intent_gap ni bad_spec.
+
+**Ficheros de esta pasada.**
+- `tools/lib/atribuidas.ts` — el mínimo de dominios con el valor de la puerta; `conValor` (un valor que no es entero positivo, o un buzón en blanco, cuenta como sin valor); `fichaPlaneada` y `planDaFichaAlAutor`; el dueño de la ficha por `dueñoDeFicha`; la ruta de la ficha en el fallo por Obra; puntos de código en NFC.
+- `tools/alta.ts`, `tools/lib/revision.ts` — las fichas que crea la pasada cuentan para el tope por Obra (también en seco) y solo crear/restaurar dan Obra al Autor; las atestiguaciones viajan al juicio; la aprobación lee las fichas del disco una vez.
+- `integraciones/clases.ts` — fichas con ruta relativa a la raíz; titular que nombra la puerta.
+- `src/lib/admision.ts` — `url` sin usuario ni contraseña.
+- `src/lib/dominio.ts` — `leerCname` nombra las dos rutas si falla.
+- `tests/unit/ayuda/construir.ts` — `conLaPuertaAbierta` lanza si no casa una declaración.
+- Pruebas: `atribuidas.test.ts` (valores inválidos, mínimo por parámetro, fichas planeadas, dueño de ficha de Personaje), `alta.test.ts` (topes con lo de la pasada en seco y real, duplicado de `_revision/`, mínimo), `revision.test.ts` (primera de Obra sin ficha, dos de Obra nueva, mínimo), `puerta-de-admision.test.ts` (cada constante sola sin valor; el fichero de la ficha en el tope por Obra).
+- `AGENTS.md` — la sección de la puerta, al día.
+
+**Revisión.** Parches 12 (alto 0, medio 5, bajo 7), diferidos 3, rechazados 22. Puntuación
+3 × 5 + 7 = 22 ≥ 5: `followup_review_recommended: true`.
+
+**Verificación.**
+- `npx vitest run` de `atestiguaciones`, `atribuidas`, `clase`, `alta`, `revision`, `cotejo`, `gestion`, `jornadas` — 335 pruebas, verde.
+- Con `correr.sh`/`esperar.pl`: `puerta-de-admision`, `clase-build`, `dominio`, `fecha-de-cambio`, `medicion`, `personajes-build`, `pagina-de-personaje`, `extraer-cli` — 939 pruebas, FINISHED EXIT=0.
+- `npx astro check` — 0 errores, 0 avisos.
+- `npm test` entero — FINISHED EXIT=0: 180 ficheros, 7.957 pruebas.
+- El `diff -r` de `dist/` con el Corpus real no se repitió: los cambios de `src/` de esta pasada solo tocan el camino de error de `leerCname` y la regla de `url` de una atestiguación, que el Corpus real no declara; lo demás es de `tools/`, `integraciones/` (solo con fallos) y pruebas.
+
+**Riesgos residuales.**
+- El tope por Obra no cuenta juntas, antes de escribirla, las atribuidas de una Obra cuya ficha retirada la pasada restaura (diferido).
+- Dos atribuidas casi iguales que esperan en `corpus/_revision/` se bloquean entre sí, como pide la intent-contract («cualquier coincidencia la niega»): una de las dos se descarta a mano.
+
