@@ -29,7 +29,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 # - Retrospective appends its action items to action_items; the status view surfaces open ones
 generated: 08-11-2026 09:00
-last_updated: 11-08-2026 21:00
+last_updated: 11-12-2026 15:00
 project: brainlySabiduria
 project_key: NOKEY
 tracking_system: file-system
@@ -490,7 +490,7 @@ development_status:
   # (Héctor; 1.200 propuesto): el corte cae el día en que se le da valor, no el del merge.
   epic-31: in-progress
   31-1-el-pasaje-se-localiza-con-el-localizador-del-orden-del-libro: review  # v9-ralph 2026-11-08: el cargador de posiciones da el pasaje (pasaje.ts, ofrecePasaje); MAX_CARACTERES_DEL_PASAJE sin valor (lo fija Héctor); rama apilada sobre la Épica 29; una ronda de revisión (3 parches)
-  31-2-lee-el-pasaje-plegado-en-la-página-de-cita: backlog  # v9-ralph 2026-11-08: desbloqueada, la 31.1 en review y la Épica 30 en la principal
+  31-2-lee-el-pasaje-plegado-en-la-página-de-cita: review  # v9-ralph 2026-11-12: «Lee el pasaje» plegado en la Página de Cita (tope sin valor: no se pinta en el Corpus real); dos pasadas de revisión; diferidos para Héctor: con el tope a 1.200 la cobertura tipográfica para el build (griego, «ş», cirílico), el tope no compone la relación de superficies, <mark> en colores forzados
   epic-31-retrospective: optional
 
   # Épica 32 — la Obra como destino. Pregunta 12 («Granos de oro») antes de la 32.1;
