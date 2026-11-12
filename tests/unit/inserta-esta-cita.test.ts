@@ -255,9 +255,10 @@ describe('Historia 30.4 — `--mono` y `--codigo` son solo del campo del Fragmen
 describe('Historia 30.4 — una sola función nombra al Autor en la Atribución y en el Fragmento', () => {
   it('la Atribución nombra al Autor por `nombreEnAtribucion`, la misma función que el Fragmento', async () => {
     const atribucion = await readFile(join(import.meta.dirname, '..', '..', 'src', 'components', 'Atribucion.astro'), 'utf8');
-    // Desde la 35.3 el nombre se elige antes del marcado (`nombrado`): el del Personaje si la Cita lo
-    // declara y, si no, el del Autor por `nombreEnAtribucion`. Ningún camino lee `autor.nombre`.
-    expect(atribucion).toMatch(/nombre: nombreEnAtribucion\(autor\)/);
+    // Desde la 35.4 el nombre de la primera línea lo da `nombreEnAtribucion` —por `firmaDeCita`, la
+    // misma que compone el Fragmento—: el del Personaje si la Cita lo declara y, si no, el del Autor.
+    // Ningún camino lee `autor.nombre`.
+    expect(atribucion).toMatch(/const nombre = nombreEnAtribucion\(cita, quienes\);/);
     expect(atribucion).toMatch(/\{nombrado\.nombre\}/);
     expect(atribucion).not.toMatch(/autor\.nombre\b/);
   });

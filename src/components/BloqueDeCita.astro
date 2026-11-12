@@ -13,11 +13,12 @@ import { tramoDe } from '../lib/tramos.ts';
 import Atribucion from './Atribucion.astro';
 import TextoDeCita from './TextoDeCita.astro';
 import type { Cita, Autor, Personaje } from '../lib/publicado.ts';
-import { rutaDeAutor } from '../lib/superficies.ts';
+import { rutaDeAutor, rutaDePersonaje } from '../lib/superficies.ts';
 
 interface Props {
   cita: Cita;
-  autor: Autor;
+  /** El Autor que declara la Cita, o `undefined` si no declara ninguno (Historia 35.4). */
+  autor: Autor | undefined;
   /**
    * El Personaje que dice la Cita, si lo declara (Historia 35.3): lo nombra la Atribución.
    * Obligatoria (`undefined` si no declara ninguno), para que un uso nuevo no la olvide.
@@ -29,10 +30,16 @@ interface Props {
 
 const { cita, autor, personaje, comoTitulo = false } = Astro.props;
 const tramo = tramoDe(cita.texto);
+/*
+ * Historia 35.4 — el `cite` apunta a quien nombra la primera línea de la Atribución: el Personaje
+ * si lo hay; si no, el Autor. Sin ninguno de los dos, la Atribución detiene la construcción.
+ */
+const citada =
+  personaje !== undefined ? rutaDePersonaje(personaje.slug) : autor !== undefined ? rutaDeAutor(autor.slug) : undefined;
 ---
 
 <figure class="bloque">
-  <blockquote class="cita" data-tramo={tramo.nombre} cite={rutaDeAutor(autor.slug)}>
+  <blockquote class="cita" data-tramo={tramo.nombre} cite={citada}>
     {
       /*
        * El texto va envuelto en comillas angulares por marcado y no por `::before`

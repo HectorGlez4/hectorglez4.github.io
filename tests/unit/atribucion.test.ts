@@ -7,6 +7,11 @@ import {
   fechaDeConsulta,
   fragmentoParaInsertar,
   citaTieneComoCitar,
+  cierreDeMasDelPersonaje,
+  firmaDeCita,
+  lineaDeProcedencia,
+  procedenciaCompuesta,
+  textoParaCopiar,
   nombreEnAtribucion,
   nombreEnReferencia,
   partesDelNombre,
@@ -220,8 +225,10 @@ describe('Historia 30.3 — las Referencias de la tabla, literales', () => {
     ]);
   });
 
-  it('toda Cita lleva «Cómo citar» (la 35.4 añadirá la Cita atribuida)', () => {
+  it('toda Cita lleva «Cómo citar» salvo la atribuida (Historia 35.4, FR-65)', () => {
     expect(citaTieneComoCitar(citaDe())).toBe(true);
+    expect(citaTieneComoCitar(citaDe({ clase: 'atribuida' }))).toBe(false);
+    expect(citaTieneComoCitar({})).toBe(true);
   });
 });
 
@@ -438,8 +445,86 @@ describe('Historia 30.4 — el Fragmento para insertar', () => {
   });
 
   it('`nombreEnAtribucion` da el `nombre`, revisada la clave o no', () => {
-    expect(nombreEnAtribucion(MARTI)).toBe('José Martí');
-    expect(nombreEnAtribucion(MARTI_SIN_REVISAR)).toBe('José Martí');
-    expect(nombreEnAtribucion(autorDe('Horacio', 'Horacio'))).toBe('Horacio');
+    expect(nombreEnAtribucion(citaDe(), { autor: MARTI })).toBe('José Martí');
+    expect(nombreEnAtribucion(citaDe(), { autor: MARTI_SIN_REVISAR })).toBe('José Martí');
+    expect(nombreEnAtribucion(citaDe(), { autor: autorDe('Horacio', 'Horacio') })).toBe('Horacio');
+  });
+
+  it('`nombreEnAtribucion` da el Personaje si lo hay (Historia 35.4)', () => {
+    expect(nombreEnAtribucion(citaDe(), { autor: MARTI, personaje: { nombre: 'Batman' } })).toBe('Batman');
+    expect(nombreEnAtribucion(citaDe(), { personaje: { nombre: 'Batman' } })).toBe('Batman');
+    expect(() => nombreEnAtribucion(citaDe(), {})).toThrow(/sin Autor ni Personaje/);
+  });
+});
+
+// ─── Historia 35.4 — el Personaje va donde va el Autor ───────────────────────
+
+describe('Historia 35.4 — la firma de una Cita, en orden fijo Personaje, Obra, Autor', () => {
+  const SENECA = autorDe('Séneca');
+  const BATMAN = { nombre: 'Batman' };
+  const conObra = citaDe({ texto: 'Soy la noche.', procedencia: { año: 2000 }, obra: obra('Obras de Séneca') });
+  const sinObra = citaDe({ texto: 'Soy la noche.', procedencia: { año: 2000 }, obra: undefined });
+  const sinObraNiAño = citaDe({ texto: 'Soy la noche.', procedencia: {}, obra: undefined });
+  const soloObra = citaDe({ texto: 'Soy la noche.', procedencia: {}, obra: obra('El caballero') });
+
+  it.each<[string, Cita, Parameters<typeof firmaDeCita>[1], ReturnType<typeof firmaDeCita>]>([
+    ['Personaje y Autor, con Obra', conObra, { autor: SENECA, personaje: BATMAN }, { nombre: 'Batman', titulo: 'Obras de Séneca', deAutor: 'Séneca', año: 2000 }],
+    ['Personaje y Autor, sin Obra', sinObra, { autor: SENECA, personaje: BATMAN }, { nombre: 'Batman', deAutor: 'Séneca', año: 2000 }],
+    ['Personaje solo, con Obra', soloObra, { personaje: BATMAN }, { nombre: 'Batman', titulo: 'El caballero' }],
+    ['Autor solo, como siempre', conObra, { autor: SENECA }, { nombre: 'Séneca', titulo: 'Obras de Séneca', año: 2000 }],
+  ])('%s', (_, cita, quienes, esperada) => {
+    expect(firmaDeCita(cita, quienes)).toEqual(esperada);
+  });
+
+  it.each<[string, Cita, Parameters<typeof firmaDeCita>[1], string, string | undefined]>([
+    ['Personaje y Autor, con Obra', conObra, { autor: SENECA, personaje: BATMAN }, '«Soy la noche.» — Batman, Obras de Séneca, de Séneca, 2000.', 'Obras de Séneca, de Séneca, 2000'],
+    ['Personaje y Autor, sin Obra', sinObra, { autor: SENECA, personaje: BATMAN }, '«Soy la noche.» — Batman, de Séneca, 2000.', 'de Séneca, 2000'],
+    ['Personaje y Autor, sin Obra ni año', sinObraNiAño, { autor: SENECA, personaje: BATMAN }, '«Soy la noche.» — Batman, de Séneca.', 'de Séneca'],
+    ['Personaje solo, con Obra', soloObra, { personaje: BATMAN }, '«Soy la noche.» — Batman, El caballero.', 'El caballero'],
+    ['Autor solo, como siempre', conObra, { autor: SENECA }, '«Soy la noche.» — Séneca, Obras de Séneca, 2000.', 'Obras de Séneca, 2000'],
+  ])('lo copiado y la procedencia de la Imagen y la Tarjeta: %s', (_, cita, quienes, copiado, procedencia) => {
+    expect(textoParaCopiar(cita, quienes.autor, quienes.personaje)).toBe(copiado);
+    expect(procedenciaCompuesta(cita, quienes)).toBe(procedencia);
+  });
+
+  it('la traducción sigue detrás, como siempre', () => {
+    const traducida = citaDe({
+      texto: 'Soy la noche.',
+      procedencia: { año: 2000, traduccion: { traductor: 'Ana Ruiz', año: 2001 } },
+      obra: obra('Obras de Séneca'),
+    });
+    expect(textoParaCopiar(traducida, SENECA, BATMAN)).toBe(
+      '«Soy la noche.» — Batman, Obras de Séneca, de Séneca, 2000, trad. de Ana Ruiz, 2001.',
+    );
+  });
+
+  it.each<[string, Cita, Parameters<typeof firmaDeCita>[1], string]>([
+    ['Personaje y Autor, con Obra', conObra, { autor: SENECA, personaje: BATMAN }, '<p>— Batman, <cite>Obras de Séneca</cite>, de Séneca. <a'],
+    ['Personaje y Autor, sin Obra', sinObra, { autor: SENECA, personaje: BATMAN }, '<p>— Batman, de Séneca. <a'],
+    ['Personaje solo, con Obra', soloObra, { personaje: BATMAN }, '<p>— Batman, <cite>El caballero</cite>. <a'],
+    ['Personaje solo, sin Obra', sinObraNiAño, { personaje: BATMAN }, '<p>— Batman. <a'],
+    ['Autor solo, como siempre', conObra, { autor: SENECA }, '<p>— Séneca, <cite>Obras de Séneca</cite>. <a'],
+  ])('el Fragmento: %s', (_, cita, quienes, firma) => {
+    expect(fragmentoParaInsertar(cita, quienes.autor, U, quienes.personaje)).toContain(firma);
+  });
+
+  it.each<[string, Cita, Parameters<typeof firmaDeCita>[1], ReturnType<typeof lineaDeProcedencia>]>([
+    ['Personaje y Autor, con Obra', conObra, { autor: SENECA, personaje: BATMAN }, { titulo: 'Obras de Séneca', deAutor: { antes: ', de ', nombre: 'Séneca' }, resto: ', 2000.' }],
+    ['Personaje y Autor, sin Obra', sinObra, { autor: SENECA, personaje: BATMAN }, { deAutor: { antes: 'de ', nombre: 'Séneca' }, resto: ', 2000.' }],
+    ['Personaje y Autor, sin Obra ni año', sinObraNiAño, { autor: SENECA, personaje: BATMAN }, { deAutor: { antes: 'de ', nombre: 'Séneca' }, resto: '.' }],
+    ['Personaje solo, sin Obra: la línea de siempre', sinObraNiAño, { personaje: BATMAN }, { resto: 'Sin obra documentada.' }],
+    ['Autor solo, como siempre', conObra, { autor: SENECA }, { titulo: 'Obras de Séneca', resto: ', 2000.' }],
+  ])('la línea de Obra de la Atribución: %s', (_, cita, quienes, esperada) => {
+    expect(lineaDeProcedencia(cita, quienes)).toEqual(esperada);
+  });
+
+  it('una Cita sin Autor ni Personaje no tiene firma', () => {
+    expect(() => firmaDeCita(conObra, {})).toThrow(/sin Autor ni Personaje/);
+    expect(() => textoParaCopiar(conObra, undefined)).toThrow(/sin Autor ni Personaje/);
+  });
+
+  it('el cierre de «Más de {Personaje}», con la regla del de Autor', () => {
+    expect(cierreDeMasDelPersonaje(BATMAN, 5)).toBe('Las 5 citas de Batman');
+    expect(() => cierreDeMasDelPersonaje(BATMAN, 1)).toThrow(/dos Citas o más/);
   });
 });

@@ -1996,6 +1996,14 @@ const TEXTOS_DE_BATMAN = [
 if (TEXTOS_DE_BATMAN.length < SLUGS_DE_BATMAN.length) {
   throw new Error(`MIN_CITAS_POR_PERSONAJE (${MIN_CITAS_POR_PERSONAJE}) pide más textos de Batman que los de la prueba`);
 }
+/**
+ * Historia 35.4 — una Cita de Batman sin Autor, de su Obra «La noche del murciélago» (ficha de
+ * Personaje), en el Tema: su slug la deja en la página 1 del listado, a tres saltos de la portada.
+ * Da a la Página de Cita de un Personaje su «Más de Batman» y a la Obra de un Personaje su Cabecera.
+ */
+const SLUG_SIN_AUTOR = 'batman-sin-autor-en-la-noche';
+const TEXTO_SIN_AUTOR = 'Ningún tejado de la prueba guarda tantos secretos como el campanario.';
+const OBRA_DE_BATMAN = '/obra/batman/la-noche-del-murcielago/';
 const CORPUS_MEDIDO: Record<string, string> = {
   'autores/seneca.yml': AUTOR_VALIDO,
   'temas/el-tiempo.yml': TEMA_VALIDO,
@@ -2040,6 +2048,19 @@ const CORPUS_MEDIDO: Record<string, string> = {
    * «Cartas a Lucilio», que sigue indexable (3 de 55) y da a la página su Lista de Obras.
    */
   'personajes/batman.yml': 'nombre: "Batman"\nuniverso: "DC Comics"\nordenAlfabetico: "Batman"\n',
+  'obras/batman--la-noche-del-murcielago.yml':
+    'personaje: "batman"\npersonajes:\n  - "batman"\ntitulo: "La noche del murciélago"\nformas:\n  - "la noche del murcielago"\n',
+  [`citas/batman--sin-autor-en-la-noche.md`]: citaValida({
+    texto: TEXTO_SIN_AUTOR,
+    slug: SLUG_SIN_AUTOR,
+    autor: undefined,
+    personaje: 'batman',
+    clase: 'atribuida',
+    estadoDerechos: undefined,
+    ...ATESTIGUADA,
+    procedencia: { obra: 'La noche del murciélago', año: 2000 },
+    fuente: undefined,
+  }),
   [`citas/${SLUG_DE_PERSONAJE}.md`]: citaValida({
     texto: TEXTO_DE_PERSONAJE,
     slug: SLUG_DE_PERSONAJE,
@@ -2079,6 +2100,7 @@ const SLUGS_DE_CITA = [
   'seneca-carta-1',
   SLUG_DE_PERSONAJE,
   ...SLUGS_DE_BATMAN,
+  SLUG_SIN_AUTOR,
 ];
 const TEXTOS_DE_CITA = [
   ...SLUGS.map((_, i) => `Frase número ${i} del catálogo de prueba.`),
@@ -2086,6 +2108,7 @@ const TEXTOS_DE_CITA = [
   ...[0, 1].map((i) => `Carta número ${i} del catálogo de prueba.`),
   TEXTO_DE_PERSONAJE,
   ...TEXTOS_DE_BATMAN,
+  TEXTO_SIN_AUTOR,
 ];
 
 /** Construye una vez por entorno y apunta el proyecto para limpiarlo, falle o no. */
@@ -2630,6 +2653,9 @@ describe('Historia 23.1 — ningún guion en línea lleva contenido', () => {
     const contenido = [
       ...SLUGS_DE_CITA,
       ...TEXTOS_DE_CITA,
+      // Historia 35.4 — el nombre del Personaje y su Obra van en `data-*`, nunca en un guion.
+      'Batman',
+      'La noche del murciélago',
       'Séneca',
       'Sobre la brevedad de la vida',
       'Cartas a Lucilio',
@@ -3280,8 +3306,17 @@ describe('Historia 23.7 — toda salida interna de `dist/` dice su zona', () => 
     ['/coleccion/frases-cortas/2/', /^\/cita\//, [{ zona: 'listado' }]],
     ['/coleccion/frases-cortas/2/', /^\/coleccion\/frases-cortas\/?$/, [{ zona: 'paginacion' }]],
     // Historia 35.3 — la Atribución de la Cita que dice un Personaje lo enlaza a él, y su página
-    // lista sus Obras y sus Citas.
-    [`/cita/${SLUG_DE_PERSONAJE}/`, PERSONAJE, [{ zona: 'atribucion' }]],
+    // lista sus Obras y sus Citas. Historia 35.4 — y su pie, «Más de Batman», con su cierre a su
+    // página; el Autor va en la línea de Obra de la Atribución.
+    [`/cita/${SLUG_DE_PERSONAJE}/`, PERSONAJE, [{ zona: 'atribucion' }, { zona: 'rutas-de-salida' }]],
+    [`/cita/${SLUG_DE_PERSONAJE}/`, '/autor/seneca/', [{ zona: 'atribucion' }]],
+    [`/cita/${SLUG_DE_PERSONAJE}/`, `/cita/${SLUG_SIN_AUTOR}/`, [{ zona: 'rutas-de-salida' }]],
+    [`/cita/${SLUG_SIN_AUTOR}/`, PERSONAJE, [{ zona: 'atribucion' }, { zona: 'rutas-de-salida' }]],
+    [`/cita/${SLUG_SIN_AUTOR}/`, OBRA_DE_BATMAN, [{ zona: 'atribucion' }]],
+    [`/cita/${SLUG_SIN_AUTOR}/`, /^\/cita\//, [{ zona: 'rutas-de-salida' }]],
+    // Historia 35.4 — la Cabecera de la Obra de un Personaje, por la zona de la Atribución.
+    [OBRA_DE_BATMAN, PERSONAJE, [{ zona: 'atribucion' }]],
+    [OBRA_DE_BATMAN, /^\/cita\//, [{ zona: 'listado' }]],
     [PERSONAJE, /^\/obra\//, [{ zona: 'lista-de-obras' }]],
     [PERSONAJE, /^\/cita\//, [{ zona: 'listado' }]],
     [OBRA_INDEXABLE, '/autor/seneca/', [{ zona: 'atribucion' }]],

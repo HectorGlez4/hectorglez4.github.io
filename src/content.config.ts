@@ -25,7 +25,6 @@ import {
   origen,
   personajeAdmisible,
   procedencia,
-  reglaDeAutorPublicado,
   reglasDeAutor,
   reglasDeClase,
   semblanza,
@@ -82,8 +81,7 @@ const citas = defineCollection({
     texto,
     /*
      * Historia 35.2 — opcional en el esquema: el dueño de una Cita es su Autor o, sin él, su
-     * Personaje. Pero una Cita **publicada** sin Autor rompe hasta la Historia 35.4
-     * (`reglaDeAutorPublicado`, abajo), que es la que la pinta.
+     * Personaje. Desde la 35.4 se publica también la de un Personaje sin Autor.
      */
     autor: reference('autores').optional(),
     temas: z.array(reference('temas')).default([]),
@@ -118,8 +116,7 @@ const citas = defineCollection({
     // FR-15 — marcado de Cita apta para portada, que consume la Cita del Día (FR-9).
     aptaParaPortada: z.boolean().default(false),
   })
-    .superRefine(reglasDeClase, CUANDO_SIEMPRE)
-    .superRefine(reglaDeAutorPublicado, CUANDO_SIEMPRE),
+    .superRefine(reglasDeClase, CUANDO_SIEMPRE),
 });
 
 const autores = defineCollection({

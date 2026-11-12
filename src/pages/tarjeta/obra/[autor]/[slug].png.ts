@@ -13,8 +13,13 @@
  */
 import type { APIRoute, GetStaticPaths } from 'astro';
 import sharp from 'sharp';
-import { autoresPublicados, conjuntoPublicable, obrasPublicadas } from '../../../../lib/publicado.ts';
-import { MENSAJE_OBRA_DE_PERSONAJE_PUBLICADA, segmentosDeObra } from '../../../../lib/obras.ts';
+import {
+  autoresPublicados,
+  conjuntoPublicable,
+  obrasPublicadas,
+  personajesPublicados,
+} from '../../../../lib/publicado.ts';
+import { segmentosDeObra } from '../../../../lib/obras.ts';
 import {
   datosDeTarjetaDeObra,
   svgDeTarjetaDeListado,
@@ -23,23 +28,25 @@ import {
 
 export const getStaticPaths = (async () => {
   const conjunto = await conjuntoPublicable();
-  // Los mismos Autores que la Página de Obra: los publicados.
+  // Los mismos dueños que la Página de Obra: los Autores y los Personajes publicados.
   const autores = new Map(
     autoresPublicados(conjunto.autores, conjunto.citas).map((a) => [a.slug, a]),
   );
+  const personajes = new Map(
+    personajesPublicados(conjunto.personajes, conjunto.citas).map((p) => [p.slug, p]),
+  );
 
   return obrasPublicadas(conjunto).map((obra) => {
-    // Historia 35.2 — la Obra de un Personaje no llega aquí con Citas publicadas (la pinta la 35.4).
-    const autor = obra.autor === undefined ? undefined : autores.get(obra.autor);
+    // Historia 35.4 — «{n} citas de {dueño}, {año}»: el Autor de la Obra o su Personaje.
+    const dueño = (obra.dueño.tipo === 'personaje' ? personajes : autores).get(obra.dueño.slug);
     // La Tarjeta firmaría con un hueco: el build se para, como la Página de Obra.
-    if (obra.dueño.tipo === 'personaje') throw new Error(`${obra.nombre}: ${MENSAJE_OBRA_DE_PERSONAJE_PUBLICADA}`);
-    if (autor === undefined) {
-      throw new Error(`La Obra «${obra.nombre}» es de «${obra.autor ?? obra.dueño.slug}», que no tiene Página de Autor publicada.`);
+    if (dueño === undefined) {
+      throw new Error(`La Obra «${obra.nombre}» es de «${obra.dueño.slug}», que no tiene página publicada.`);
     }
     const { autor: segmentoDeAutor, obra: segmentoDeObra } = segmentosDeObra(obra.nombre);
     return {
       params: { autor: segmentoDeAutor, slug: segmentoDeObra },
-      props: { ...datosDeTarjetaDeObra(obra, autor) },
+      props: { ...datosDeTarjetaDeObra(obra, dueño) },
     };
   });
 }) satisfies GetStaticPaths;

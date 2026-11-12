@@ -981,7 +981,7 @@ describe('Historia 12.1 — sobre un sitio construido de verdad', () => {
         expect(de(FILTROS_DE_CITA.tema), ruta).toEqual([...esperado!.temas]);
         const metas = metadatosDe(html, 'autor');
         expect(metas.elementos, ruta).toBe(1);
-        expect(metas.valores, ruta).toEqual([nombres.get(esperado!.autor)]);
+        expect(metas.valores, ruta).toEqual([nombres.get(esperado!.autor ?? '')]);
       }
       // Todas las Citas publicadas, y no en vacío.
       expect([...vistas].sort()).toEqual([...porCita.keys()].sort());

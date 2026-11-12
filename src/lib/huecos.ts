@@ -62,7 +62,8 @@ export function cuentaParaElSuelo(autor: Pick<AutorParaHuecos, 'tradicion'>): bo
 
 export interface CitaParaHuecos {
   slug: string;
-  autor: string;
+  /** Historia 35.4 — la de un Personaje sin Autor no lo lleva, y no cuenta para ninguno. */
+  autor?: string;
   temas?: string[];
 }
 
@@ -545,6 +546,7 @@ export function verHuecos(
    */
   const citasPorAutor = new Map<string, number>(autores.map((a) => [a.slug, 0]));
   for (const cita of citas) {
+    if (cita.autor === undefined) continue;
     citasPorAutor.set(cita.autor, (citasPorAutor.get(cita.autor) ?? 0) + 1);
   }
   const margenPorAutor = [...citasPorAutor.entries()]

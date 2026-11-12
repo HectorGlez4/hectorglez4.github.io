@@ -10,8 +10,6 @@ import {
   limpiar,
   paginaConstruida,
 } from './ayuda/construir.js';
-import { MENSAJE_PUBLICADA_SIN_AUTOR } from '../../src/lib/admision.ts';
-import { MENSAJE_OBRA_DE_PERSONAJE_PUBLICADA } from '../../src/lib/obras.ts';
 import { ORDEN_PROPONER_CLAVES_DE_PERSONAJE } from '../../tools/lib/claves.ts';
 import { componerBiografia, nombreDeBiografia } from '../../tools/lib/documento.ts';
 
@@ -91,10 +89,9 @@ describe('Historia 35.2 — el Personaje en el build', () => {
     expect(pagina).toMatch(/<a href="\/personaje\/batman\/" class="enlace-en-tinta"[^>]*>Batman<\/a>/u);
     expect(pagina).not.toMatch(/joker/iu);
     expect(pagina).not.toContain('DC Comics');
-    // Fuera de ese enlace de la Atribución, la Página de Cita no nombra al Personaje —ni el texto,
-    // ni el JSON-LD, ni la meta, ni los `data-*`— hasta la 35.4; el slug de la Cita sí lo lleva.
-    const sinAtribucion = pagina.replace(/<a href="\/personaje\/batman\/" class="enlace-en-tinta"[^>]*>Batman<\/a>/u, '');
-    expect(sinAtribucion).not.toMatch(/batman(?!-la-noche-es-mas-oscura)/iu);
+    // Historia 35.4 — el Personaje va donde va el Autor: también en lo copiado y en el JSON-LD.
+    expect(pagina).toContain('— Batman, Obras de seneca, de Séneca, 2000.');
+    expect(pagina).toContain('"spokenByCharacter":{"@type":"Person","name":"Batman"');
   });
 
   it('la puerta de los Personajes: slug de un Autor activo o retirado, y la Cita de un Personaje que no existe', async () => {
@@ -128,7 +125,7 @@ describe('Historia 35.2 — el Personaje en el build', () => {
     expect(r.salida).toContain(ORDEN_PROPONER_CLAVES_DE_PERSONAJE);
   });
 
-  it('las fichas: ambigua, de Personaje con Citas publicadas, y misma forma entre fichas de Personaje', async () => {
+  it('las fichas: ambigua y misma forma entre fichas de Personaje', async () => {
     const r = await construirConCorpus(
       {
         ...BASE,
@@ -146,14 +143,8 @@ describe('Historia 35.2 — el Personaje en el build', () => {
           { autor: 'seneca', personaje: 'batman' },
           'La noche',
         ),
-        // De Personaje con Citas publicadas: sin ficha de Séneca, la del Joker incluye a Batman.
-        'obras/joker--el-alba.yml': fichaDePersonaje('joker', ['joker', 'batman'], 'El alba', 'el alba'),
-        'citas/seneca--el-alba-llega.md': atribuida(
-          'seneca-el-alba-llega',
-          'El alba llega siempre.',
-          { autor: 'seneca', personaje: 'batman' },
-          'El alba',
-        ),
+        // Desde la Historia 35.4, una ficha de Personaje con Citas publicadas ya no rompe: la
+        // pinta su Página de Obra (`personaje-donde-el-autor.test.ts`).
         // La misma forma en dos fichas de Personaje.
         'obras/batman--la-cueva.yml': fichaDePersonaje('batman', ['batman'], 'La cueva', 'la cueva'),
         'obras/robin--la-cueva.yml': fichaDePersonaje('robin', ['robin'], 'La cueva', 'la cueva'),
@@ -165,7 +156,6 @@ describe('Historia 35.2 — el Personaje en el build', () => {
     expect(r.salida).toMatch(
       /corpus\/citas\/seneca--la-noche-es-larga\.md → su obra la reclaman 2 fichas: corpus\/obras\/batman--la-noche\.yml, corpus\/obras\/seneca--la-noche\.yml/u,
     );
-    expect(r.salida).toContain(`corpus/obras/joker--el-alba.yml → ${MENSAJE_OBRA_DE_PERSONAJE_PUBLICADA}`);
     expect(r.salida).toMatch(/«la cueva» la reclaman 2 fichas de Personaje: corpus\/obras\/batman--la-cueva\.yml, corpus\/obras\/robin--la-cueva\.yml/u);
   });
 
@@ -201,14 +191,6 @@ describe('Historia 35.2 — el Personaje en el build', () => {
     expect(r.salida).toMatch(/el Personaje declara la biografía [^\n]*su semblanza no aparece literal/u);
   });
 
-  it('el esquema: una Cita publicada sin Autor rompe hasta la 35.4', async () => {
-    const r = await construirConCorpus({
-      ...BASE,
-      'personajes/batman.yml': personaje('Batman', 'Batman'),
-      'citas/batman--sin-autor.md': atribuida('batman-sin-autor', 'Soy la noche.', { personaje: 'batman' }),
-    }, PUERTA);
-    aLimpiar.push(r.proyecto);
-    expect(r.codigo).not.toBe(0);
-    expect(r.salida).toContain(MENSAJE_PUBLICADA_SIN_AUTOR);
-  });
+  // Historia 35.4 — la Cita publicada sin Autor ya no rompe el esquema: la construye, con su Obra
+  // de Personaje y alcanzable desde la portada, `personaje-donde-el-autor.test.ts`.
 });

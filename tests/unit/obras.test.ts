@@ -1586,7 +1586,7 @@ describe('35.2 — el dueño de la ficha y de la Cita, y la resolución en dos p
     expect(avisosDeObras([bien], [])).toHaveLength(1);
   });
 
-  it('hasta la 35.4, una ficha de Personaje que resuelve Citas publicadas rompe nombrando la historia', () => {
+  it('desde la 35.4, una ficha de Personaje que resuelve Citas publicadas no rompe: tiene página', () => {
     const delPersonaje = dePersonaje('batman--la-noche', 'batman', ['la noche']);
     const fallos = fallosDeObras(
       [delPersonaje],
@@ -1595,8 +1595,7 @@ describe('35.2 — el dueño de la ficha y de la Cita, y la resolución en dos p
       undefined,
       ['batman'],
     );
-    expect(fallos.join('\n')).toContain('batman--la-noche.yml');
-    expect(fallos.join('\n')).toContain('Historia 35.4');
+    expect(fallos).toEqual([]);
   });
 
   it('una Cita de Personaje sin ficha nombra a su Personaje como dueño de la Obra', () => {

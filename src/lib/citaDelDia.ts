@@ -91,6 +91,9 @@ export interface SeleccionDeCitaDelDia {
 export function ordenEnRondas(aptas: Cita[]): Cita[] {
   const porAutor = new Map<string, Cita[]>();
   for (const cita of aptas) {
+    // Historia 35.4 — una Cita sin Autor no cuenta para ninguno: la atribuida nunca es apta para
+    // portada, así que no llega aquí; si llegara, no entra en ninguna ronda.
+    if (cita.autor === undefined) continue;
     const suyas = porAutor.get(cita.autor);
     if (suyas) suyas.push(cita);
     else porAutor.set(cita.autor, [cita]);

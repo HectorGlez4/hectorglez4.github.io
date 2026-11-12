@@ -18,7 +18,11 @@ import type { Zona } from '../lib/vocabulario.ts';
 
 interface Props {
   cita: Cita;
-  autor: Autor;
+  /**
+   * El Autor que declara la Cita, o `undefined` si no declara ninguno (la de un Personaje sin
+   * Autor, Historia 35.4). Ni otro ni ninguno de más: detiene la construcción.
+   */
+  autor: Autor | undefined;
   /**
    * El Personaje que dice la Cita, si lo declara — Historia 35.3: entonces el párrafo del nombre
    * lo nombra a él y enlaza a su página. Sin él, el marcado es el de siempre. Obligatoria, como
@@ -45,18 +49,32 @@ if (personaje?.slug !== cita.personaje) {
       `recibe «${personaje?.slug ?? 'ninguno'}». Quien la pinta le pasa el Personaje del conjunto.`,
   );
 }
+if (autor?.slug !== cita.autor) {
+  throw new Error(
+    `Atribución de ${cita.slug}: la Cita declara el Autor «${cita.autor ?? 'ninguno'}» y ` +
+      `recibe «${autor?.slug ?? 'ninguno'}». Quien la pinta le pasa el Autor del conjunto.`,
+  );
+}
+/*
+ * Historia 35.4, UX-DR135 — la primera línea nombra al Personaje si lo hay y, si no, al Autor: lo
+ * decide `firmaDeCita`, por `nombreEnAtribucion`. Con Personaje y Autor, el Autor va en la línea
+ * de la Obra, enlazado a su página.
+ */
+const quienes = { autor, personaje };
+const nombre = nombreEnAtribucion(cita, quienes);
 const nombrado =
-  personaje === undefined
-    ? { ruta: rutaDeAutor(autor.slug), nombre: nombreEnAtribucion(autor) }
-    : { ruta: rutaDePersonaje(personaje.slug), nombre: personaje.nombre };
+  personaje !== undefined
+    ? { ruta: rutaDePersonaje(personaje.slug), nombre }
+    : { ruta: autor === undefined ? undefined : rutaDeAutor(autor.slug), nombre };
 /*
  * La línea de procedencia la compone `lineaDeProcedencia` (src/lib/atribucion.ts) en piezas:
- * el título de la Obra, si consta, y lo que le sigue. Historia 22.4 — el título enlaza a la
- * Página de Obra, también si esa página no se indexa; «, año», la traducción y la referencia
- * quedan fuera del enlace.
+ * el título de la Obra, si consta, «de {Autor}» si la Cita tiene Personaje y Autor, y lo que les
+ * sigue. Historia 22.4 — el título enlaza a la Página de Obra, también si esa página no se
+ * indexa; «, año», la traducción y la referencia quedan fuera del enlace.
  */
-const linea = lineaDeProcedencia(cita);
+const linea = lineaDeProcedencia(cita, quienes);
 const enlaceDeObra = cita.obra === undefined ? undefined : rutaDeLaObra(cita.obra);
+const enlaceDelAutor = linea.deAutor === undefined || autor === undefined ? undefined : rutaDeAutor(autor.slug);
 ---
 
 {/* La zona va en los dos párrafos, que son los contenedores que pinta el build (Historia 23.7). */}
@@ -64,7 +82,9 @@ const enlaceDeObra = cita.obra === undefined ? undefined : rutaDeLaObra(cita.obr
   <a href={nombrado.ruta} class="enlace-en-tinta">{nombrado.nombre}</a>
 </p>
 {
-  linea.titulo !== undefined && enlaceDeObra !== undefined ? (
+  linea.deAutor !== undefined && enlaceDelAutor !== undefined ? (
+    <p class="procedencia" data-zona={zona}>{linea.titulo !== undefined && enlaceDeObra !== undefined && <a href={enlaceDeObra} class="enlace-en-tinta">{linea.titulo}</a>}{linea.deAutor.antes}<a href={enlaceDelAutor} class="enlace-en-tinta">{linea.deAutor.nombre}</a>{linea.resto}</p>
+  ) : linea.titulo !== undefined && enlaceDeObra !== undefined ? (
     <p class="procedencia" data-zona={zona}><a href={enlaceDeObra} class="enlace-en-tinta">{linea.titulo}</a>{linea.resto}</p>
   ) : (
     <p class="procedencia" data-zona={zona}>{linea.resto}</p>

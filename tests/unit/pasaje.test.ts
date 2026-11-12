@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { join, relative, resolve } from 'node:path';
+import { CLASE_ATRIBUIDA } from '../../src/lib/clase.ts';
 import { ofrecePasaje, pasajeDeAparicion } from '../../tools/lib/pasaje.ts';
 import { colapsarEspacios, localizar } from '../../tools/lib/cotejo.ts';
 import { formaDeLasLineas, type FormaDeLineas } from '../../tools/lib/lineas.ts';
@@ -35,7 +36,7 @@ function pasajeDe(doc: { cuerpo: string; forma: FormaDeLineas }, textoDeCita: st
   const buscado = colapsarEspacios(textoDeCita);
   const posicion = localizar(buscado, colapsarEspacios(doc.cuerpo));
   expect(posicion, 'la Cita de prueba tiene que aparecer en su documento').not.toBe(-1);
-  return pasajeDeAparicion({ crudo: doc.cuerpo, forma: doc.forma, posicion, buscado, textoDeCita, tope });
+  return pasajeDeAparicion({ atribuida: false, crudo: doc.cuerpo, forma: doc.forma, posicion, buscado, textoDeCita, tope });
 }
 
 /** El invariante de la matriz: el tramo del pasaje colapsa al texto de la Cita. */
@@ -164,6 +165,7 @@ describe('31.1 — pasajeDeAparicion: el trozo por forma', () => {
     const crudo = 'Antes.\n\n   Una línea con sangría,\n\tY  otra   con espacios dentro.   \n\nDespués.';
     const pasaje = exigeElTramo(
       pasajeDeAparicion({
+        atribuida: false,
         crudo,
         forma: formaDeLasLineas({ cuerpo: crudo, lineas: 'verso' }),
         posicion: localizar(colapsarEspacios('Y otra'), colapsarEspacios(crudo)),
@@ -181,6 +183,7 @@ describe('31.1 — pasajeDeAparicion: el trozo por forma', () => {
     const cita = 'Bloque dos, primera.';
     const pasaje = exigeElTramo(
       pasajeDeAparicion({
+        atribuida: false,
         crudo,
         forma: formaDeLasLineas({ cuerpo: crudo, lineas: 'verso' }),
         posicion: localizar(colapsarEspacios(cita), colapsarEspacios(crudo)),
@@ -232,6 +235,7 @@ describe('31.1 — pasajeDeAparicion: el trozo por forma', () => {
     const de = (cita: string) =>
       exigeElTramo(
         pasajeDeAparicion({
+          atribuida: false,
           crudo,
           forma,
           posicion: localizar(colapsarEspacios(cita), colapsarEspacios(crudo)),
@@ -249,6 +253,7 @@ describe('31.1 — pasajeDeAparicion: el trozo por forma', () => {
     const solo = '  Un solo bloque, primer verso,\ny el segundo verso del bloque.  ';
     const unico = exigeElTramo(
       pasajeDeAparicion({
+        atribuida: false,
         crudo: solo,
         forma: formaDeLasLineas({ cuerpo: solo, lineas: 'verso' }),
         posicion: localizar(colapsarEspacios('Un solo bloque'), colapsarEspacios(solo)),
@@ -268,6 +273,7 @@ describe('31.1 — pasajeDeAparicion: el trozo por forma', () => {
     const cita = 'la frase buscada';
     const pasaje = exigeElTramo(
       pasajeDeAparicion({
+        atribuida: false,
         crudo,
         forma: formaDeLasLineas({ cuerpo: crudo, lineas: 'verso' }),
         posicion: localizar(colapsarEspacios(cita), colapsarEspacios(crudo)),
@@ -301,6 +307,7 @@ describe('31.1 — pasajeDeAparicion: el trozo por forma', () => {
     const crudo = 'Antes 𝄞 del 𝄞 tramo, la frase 𝄞 buscada, y después.\nOtra línea.';
     const cita = 'la frase 𝄞 buscada';
     const resultado = pasajeDeAparicion({
+      atribuida: false,
       crudo,
       forma: formaDeLasLineas({ cuerpo: crudo, lineas: 'prosa-por-lineas' }),
       posicion: localizar(colapsarEspacios(cita), colapsarEspacios(crudo)),
@@ -319,7 +326,7 @@ describe('31.1 — ofrecePasaje: la única decisión', () => {
   it('no dice más: el bloque es la Cita y un punto', () => {
     const doc = documento('prosa-por-lineas', 'Una línea que es toda la Cita.\nOtra línea.');
     expect(pasajeDe(doc, 'Una línea que es toda la Cita')).toEqual({ motivo: 'no-dice-mas' });
-    expect(ofrecePasaje({ trozo: 'La Cita.', textoDeCita: 'la cita', tope: 1200 })).toEqual({ ofrece: false, motivo: 'no-dice-mas' });
+    expect(ofrecePasaje({ atribuida: false, trozo: 'La Cita.', textoDeCita: 'la cita', tope: 1200 })).toEqual({ ofrece: false, motivo: 'no-dice-mas' });
   });
 
   it('el tope en el borde se ofrece; uno por encima, no — en puntos de código', () => {
@@ -330,20 +337,44 @@ describe('31.1 — ofrecePasaje: la única decisión', () => {
     // Un carácter fuera del plano básico cuenta uno, no dos.
     const trozo = 'ab𝄞';
     expect(trozo.length).toBe(4);
-    expect(ofrecePasaje({ trozo, textoDeCita: 'a', tope: 3 })).toEqual({ ofrece: true });
-    expect(ofrecePasaje({ trozo, textoDeCita: 'a', tope: 2 })).toEqual({ ofrece: false, motivo: 'pasa-del-tope' });
+    expect(ofrecePasaje({ atribuida: false, trozo, textoDeCita: 'a', tope: 3 })).toEqual({ ofrece: true });
+    expect(ofrecePasaje({ atribuida: false, trozo, textoDeCita: 'a', tope: 2 })).toEqual({ ofrece: false, motivo: 'pasa-del-tope' });
   });
 
   it('sin tope, ninguna aparición trae pasaje', () => {
     expect(pasajeDe(verso, 'Después vino la prosa', undefined)).toEqual({ motivo: 'sin-tope' });
-    expect(ofrecePasaje({ trozo: 'Un párrafo largo.', textoDeCita: 'largo', tope: undefined })).toEqual({
+    expect(ofrecePasaje({ atribuida: false, trozo: 'Un párrafo largo.', textoDeCita: 'largo', tope: undefined })).toEqual({
       ofrece: false,
       motivo: 'sin-tope',
     });
   });
 
+  it('Historia 35.4 — la Cita atribuida no trae pasaje, y lo decide antes que nada', () => {
+    expect(ofrecePasaje({ atribuida: true, trozo: 'Un párrafo que dice más que la Cita.', textoDeCita: 'la Cita', tope: 1200 })).toEqual({
+      ofrece: false,
+      motivo: CLASE_ATRIBUIDA,
+    });
+    expect(ofrecePasaje({ atribuida: true, trozo: 'La Cita.', textoDeCita: 'la cita', tope: undefined })).toEqual({
+      ofrece: false,
+      motivo: CLASE_ATRIBUIDA,
+    });
+    const doc = documento('prosa-por-lineas', 'Antes de la frase, la frase buscada, y después.\nOtra línea.');
+    const cita = 'la frase buscada';
+    expect(
+      pasajeDeAparicion({
+        atribuida: true,
+        crudo: doc.cuerpo,
+        forma: doc.forma,
+        posicion: localizar(colapsarEspacios(cita), colapsarEspacios(doc.cuerpo)),
+        buscado: colapsarEspacios(cita),
+        textoDeCita: cita,
+        tope: 1200,
+      }),
+    ).toEqual({ motivo: CLASE_ATRIBUIDA });
+  });
+
   it('«no dice más» va antes que el tope', () => {
-    expect(ofrecePasaje({ trozo: 'Larguísima Cita.', textoDeCita: 'Larguísima Cita', tope: 1 })).toEqual({
+    expect(ofrecePasaje({ atribuida: false, trozo: 'Larguísima Cita.', textoDeCita: 'Larguísima Cita', tope: 1 })).toEqual({
       ofrece: false,
       motivo: 'no-dice-mas',
     });

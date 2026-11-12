@@ -449,18 +449,6 @@ export function prefijosDeFormas(
 }
 
 /**
- * Lo que dice el build ante una Obra de Personaje con Citas publicadas — Historia 35.2.
- *
- * La Página de Obra de un Personaje —su Cabecera «de {Personaje}»— la pinta la Historia 35.4;
- * hasta entonces una ficha de Personaje que resuelva una Cita publicada rompe con este mensaje
- * en vez de salir con una Cabecera que no nombra a nadie. Sin Citas publicadas, avisa como
- * cualquier ficha (22.1).
- */
-export const MENSAJE_OBRA_DE_PERSONAJE_PUBLICADA =
-  'Obra de un Personaje con Citas publicadas: la pinta la Historia 35.4. Hasta entonces sus Citas ' +
-  'se quedan en corpus/_revision/ o resuelven una ficha de su Autor.';
-
-/**
  * Los incumplimientos del conjunto de fichas, ya redactados. Lista vacía es «todo en orden».
  *
  * Rompen el build:
@@ -469,7 +457,6 @@ export const MENSAJE_OBRA_DE_PERSONAJE_PUBLICADA =
  *   · una forma reclamada por dos fichas del mismo dueño, o por dos fichas de Personaje (35.2);
  *   · un nombre de fichero cuyo prefijo no es el slug de su dueño (`dueñoDeFicha`);
  *   · una ficha cuyo `autor`, `personaje` o alguno de sus `personajes` no existe en el Corpus;
- *   · una ficha de Personaje que resuelve Citas publicadas, hasta la Historia 35.4;
  *   · una Obra publicada con dos o más grafías de la misma forma, si alguna no es literal de
  *     su Fuente (la puerta ortográfica de la Historia 22.2, `fallosOrtograficos`).
  *
@@ -583,7 +570,6 @@ export function fallosDeObras(
 
   const indice = indiceDeFichas(fichas);
   const sinFicha: CitaConObra[] = [];
-  const conObraDePersonaje = new Map<string, string[]>();
   for (const cita of [...citas].sort((a, b) => a.slug.localeCompare(b.slug, 'es'))) {
     if (formaDeCita(cita) === undefined) continue;
     const candidatas = fichasDeCita(cita, indice);
@@ -597,12 +583,6 @@ export function fallosDeObras(
           `${candidatas.map((f) => f.ruta).join(', ')}. Una Cita la resuelve una sola ficha: ` +
           'una de ellas reclama una forma que no es suya.',
       );
-      // Ambigua, no se la atribuye a ninguna: la guarda de abajo no la cuenta por la primera.
-      continue;
-    }
-    const ficha = candidatas[0];
-    if (ficha.personaje !== undefined) {
-      conObraDePersonaje.set(ficha.ruta, [...(conObraDePersonaje.get(ficha.ruta) ?? []), cita.slug]);
     }
   }
   for (const obra of obrasDeCitas(sinFicha)) {
@@ -612,9 +592,6 @@ export function fallosDeObras(
         `(${n} ${n === 1 ? 'Cita publicada' : 'Citas publicadas'}). Créela con ` +
         `«${ORDEN_DE_SEMBRAR_OBRAS}»; las fichas no se escriben a mano.`,
     );
-  }
-  for (const [ruta, suyas] of conObraDePersonaje) {
-    fallos.push(`  · ${ruta} → ${MENSAJE_OBRA_DE_PERSONAJE_PUBLICADA} Citas: ${suyas.join(', ')}.`);
   }
 
   fallos.push(...fallosOrtograficos(citas, documentos));
@@ -1630,7 +1607,10 @@ export interface LimitesDeLaClaveDeOrden {
   aviso: number | undefined;
 }
 
-/** Lo que de un Autor hace falta para su rango: su slug y su clave del Directorio. */
+/**
+ * Lo que de un Autor —o de un Personaje, Historia 35.4: los dos comparten un espacio de slugs—
+ * hace falta para su rango: su slug y su clave del Directorio.
+ */
 export interface AutorParaLaClave {
   slug: string;
   ordenAlfabetico?: string;
@@ -1639,8 +1619,10 @@ export interface AutorParaLaClave {
 /** Lo que de una Cita hace falta para su clave: su Autor y, si la tiene, su Obra resuelta. */
 export interface CitaParaLaClave {
   slug: string;
-  autor: string;
-  obra?: Pick<ObraResuelta, 'nombre' | 'titulo' | 'recuento'>;
+  autor?: string;
+  /** Historia 35.4 — el de la Cita de un Personaje sin Autor: su dueño (`dueñoDeCita`). */
+  personaje?: string;
+  obra?: Pick<ObraResuelta, 'nombre' | 'titulo' | 'recuento'> & { dueño?: Dueño };
 }
 
 /**
@@ -1743,8 +1725,15 @@ export function clavesDeOrden(
     }
     vistasDeCita.add(cita.slug);
     if (cita.obra !== undefined) obrasDeLaEntrada.add(cita.obra.nombre);
-    const suyas = delAutor.get(cita.autor);
-    if (suyas === undefined) delAutor.set(cita.autor, [cita]);
+    /*
+     * Historia 35.4 — se agrupa por dueño (`dueñoDeCita`: el Autor y, sin él, el Personaje), en un
+     * solo espacio de slugs. Una Cita con Obra va con el dueño de su Obra, que es el suyo salvo en
+     * la de un Personaje que resuelve una ficha de Personaje: así toda la lista de una Obra cae en
+     * un solo rango.
+     */
+    const dueño = cita.obra?.dueño?.slug ?? dueñoDeCita(cita).slug;
+    const suyas = delAutor.get(dueño);
+    if (suyas === undefined) delAutor.set(dueño, [cita]);
     else suyas.push(cita);
   }
   for (const [nombre, lista] of porObra) {

@@ -28,17 +28,20 @@ interface Props {
   filtros: FiltrosDeCita;
   /** La clave de orden de la Cita, ya compuesta: ocho cifras. */
   clave: string;
-  /** El nombre del Autor, tal como se lee. */
-  nombreDelAutor: string;
+  /**
+   * El nombre del Autor, tal como se lee; `undefined` en la Cita de un Personaje sin Autor
+   * (Historia 35.4), que no lleva ni el filtro ni el metadato `autor`.
+   */
+  nombreDelAutor: string | undefined;
 }
 
 const { filtros, clave, nombreDelAutor } = Astro.props;
 ---
 
 <div hidden data-pagefind-ignore>
-  <span data-pagefind-filter={`${FILTROS_DE_CITA.autor}:${filtros.autor}`}></span>
+  {filtros.autor !== undefined && <span data-pagefind-filter={`${FILTROS_DE_CITA.autor}:${filtros.autor}`}></span>}
   {filtros.obra !== undefined && <span data-pagefind-filter={`${FILTROS_DE_CITA.obra}:${filtros.obra}`}></span>}
   {filtros.temas.map((tema) => <span data-pagefind-filter={`${FILTROS_DE_CITA.tema}:${tema}`}></span>)}
   <span data-pagefind-sort={`${ORDEN_DE_CITA}:${clave}`}></span>
-  <span data-pagefind-meta="autor">{nombreDelAutor}</span>
+  {nombreDelAutor !== undefined && <span data-pagefind-meta="autor">{nombreDelAutor}</span>}
 </div>

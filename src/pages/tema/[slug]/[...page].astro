@@ -25,6 +25,7 @@ import {
   conjuntoPublicable,
   temasPublicados,
   type Autor,
+  type Personaje,
   type Cita,
 } from '../../../lib/publicado.ts';
 import { ROTULO_BUSCAR_EN_ESTE_TEMA } from '../../../lib/busqueda.ts';
@@ -36,17 +37,23 @@ import { rutaDeTema } from '../../../lib/superficies.ts';
 export const getStaticPaths = (async ({ paginate }) => {
   const conjunto = await conjuntoPublicable();
   const autores = new Map(conjunto.autores.map((a) => [a.slug, a]));
+  // Historia 35.4 — el Personaje de cada Cita va en su tarjeta, en el sitio del Autor.
+  const personajes = new Map(conjunto.personajes.map((p) => [p.slug, p]));
 
   return temasPublicados(conjunto.temas, conjunto.citas).flatMap((tema) =>
     paginate(citasDeTema(conjunto.citas, tema.slug), {
       params: { slug: tema.slug },
-      props: { tema, autores },
+      props: { tema, autores, personajes },
       pageSize: CITAS_POR_PAGINA,
     }),
   );
 }) satisfies GetStaticPaths;
 
-const { tema, autores } = Astro.props as { tema: { slug: string; nombre: string }; autores: Map<string, Autor> };
+const { tema, autores, personajes } = Astro.props as {
+  tema: { slug: string; nombre: string };
+  autores: Map<string, Autor>;
+  personajes: Map<string, Personaje>;
+};
 const pagina = Astro.props.page as import('astro').Page<Cita>;
 
 const ruta = rutaDeTema(tema.slug, pagina.currentPage);
@@ -80,7 +87,7 @@ const primera = pagina.currentPage === 1;
     }
 
     <ul class="listado">
-      {pagina.data.map((cita) => <TarjetaDeCita cita={cita} atribucion="autor-y-obra" autor={autores.get(cita.autor)} zona="listado" />)}
+      {pagina.data.map((cita) => <TarjetaDeCita cita={cita} atribucion="autor-y-obra" autor={cita.autor === undefined ? undefined : autores.get(cita.autor)} personaje={cita.personaje === undefined ? undefined : personajes.get(cita.personaje)} zona="listado" />)}
     </ul>
 
     <Paginacion pagina={pagina} zona="paginacion" />

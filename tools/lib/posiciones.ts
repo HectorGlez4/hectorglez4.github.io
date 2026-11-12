@@ -117,7 +117,7 @@ export function posicionesDeCitas(
   for (const { fuente, obra, citas: delGrupo } of porGrupo.values()) {
     const buscadas = delGrupo.map((cita) => {
       const texto = typeof cita.texto === 'string' ? cita.texto : '';
-      return { slug: cita.slug as string, texto, buscado: colapsarEspacios(texto) };
+      return { slug: cita.slug as string, texto, buscado: colapsarEspacios(texto), atribuida: esAtribuida(cita) };
     });
     const apariciones = buscadas.map((): AparicionDeCita[] => []);
     for (const nombre of documentosDeCita(fuente, obra, documentos)) {
@@ -125,10 +125,11 @@ export function posicionesDeCitas(
       if (typeof crudo !== 'string') continue;
       const cuerpo = colapsarEspacios(crudo);
       const forma = formaDeLasLineas({ cuerpo: crudo, lineas: lineasDeclaradas?.get(nombre) });
-      buscadas.forEach(({ texto, buscado }, i) => {
+      buscadas.forEach(({ texto, buscado, atribuida }, i) => {
         const posicion = localizar(buscado, cuerpo);
         if (posicion === -1) return;
-        const resultado = pasajeDeAparicion({ crudo, forma, posicion, buscado, textoDeCita: texto, tope });
+        // Historia 35.4 — la clase llega a la única decisión del pasaje, `ofrecePasaje`.
+        const resultado = pasajeDeAparicion({ crudo, forma, posicion, buscado, textoDeCita: texto, tope, atribuida });
         apariciones[i].push(
           'pasaje' in resultado ? { documento: nombre, posicion, pasaje: resultado.pasaje } : { documento: nombre, posicion },
         );

@@ -14,7 +14,8 @@ import { gradoDeProcedencia, type GradoDeProcedencia, type Procedencia } from '.
 
 export interface CitaParaAuditar {
   slug: string;
-  autor: string;
+  /** Historia 35.4 — la de un Personaje sin Autor no lo lleva, y no cuenta para ninguno. */
+  autor?: string;
   procedencia?: Procedencia;
   /** La Fuente declarada, si la hay: solo importa su presencia (Historia 19.1). */
   fuente?: unknown;
@@ -56,6 +57,8 @@ function recontar(citas: CitaParaAuditar[]): Recuento {
 export function auditar(citas: CitaParaAuditar[]): AuditoriaDelCorpus {
   const porAutor = new Map<string, CitaParaAuditar[]>();
   for (const cita of citas) {
+    // Historia 35.4 — la Cita de un Personaje sin Autor no cuenta para ninguno.
+    if (cita.autor === undefined) continue;
     const grupo = porAutor.get(cita.autor);
     if (grupo) grupo.push(cita);
     else porAutor.set(cita.autor, [cita]);
@@ -95,7 +98,7 @@ export function sinTraduccionDeclarada(
     // Solo las que tienen documento: una Cita sin Fuente no puede traer la traducción que
     // su documento declararía, y contarla mezclaría dos deudas distintas.
     if (c.fuente === undefined || c.fuente === null) continue;
-    if (!autoresDeTradicionOtra.has(c.autor)) continue;
+    if (c.autor === undefined || !autoresDeTradicionOtra.has(c.autor)) continue;
     if (c.procedencia?.traduccion !== undefined) continue;
     porAutor.set(c.autor, (porAutor.get(c.autor) ?? 0) + 1);
   }

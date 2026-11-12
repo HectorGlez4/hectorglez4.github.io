@@ -22,13 +22,18 @@
  */
 interface Props {
   fragmento: string;
+  /**
+   * Historia 35.4 — si la Cita la dice un Personaje: el rótulo dice entonces «su personaje», que es
+   * a quien nombra el Fragmento. Obligatoria, para que un uso nuevo lo declare.
+   */
+  conPersonaje: boolean;
 }
 
-const { fragmento } = Astro.props;
+const { fragmento, conPersonaje } = Astro.props;
 ---
 
 <div class="inserta" data-inserta-esta-cita data-copiables>
-  <label for="fragmento-para-insertar">Pega este fragmento en tu página: lleva la cita, su autor y el enlace a esta página.</label>
+  <label for="fragmento-para-insertar">Pega este fragmento en tu página: lleva la cita, {conPersonaje ? 'su personaje' : 'su autor'} y el enlace a esta página.</label>
   <textarea id="fragmento-para-insertar" data-copiable readonly rows="6" spellcheck="false">{fragmento}</textarea>
   <button type="button" class="copiar-fragmento" data-copiar-texto aria-label="Copiar el fragmento" hidden><span data-etiqueta>Copiar el fragmento</span></button>
   <p class="solo-para-lectores" role="status" data-anuncio></p>

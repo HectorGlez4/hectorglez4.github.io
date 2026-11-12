@@ -316,7 +316,8 @@ export function datosDeTarjetaDePersonaje(personaje: {
  */
 export function bajadaDeTarjetaDeObra(
   obra: Pick<ObraResuelta, 'recuento' | 'año'>,
-  autor: Pick<Autor, 'nombre'>,
+  /** El dueño de la Obra: su Autor o, desde la Historia 35.4, su Personaje. */
+  autor: { nombre: string },
 ): string {
   const citas = recuentoDeCitas(obra.recuento);
   const año = obra.año === undefined ? '' : `, ${añoLegible(obra.año)}`;
@@ -333,7 +334,8 @@ export function bajadaDeTarjetaDeObra(
  */
 export function datosDeTarjetaDeObra(
   obra: Pick<ObraResuelta, 'titulo' | 'recuento' | 'año'>,
-  autor: Pick<Autor, 'nombre'>,
+  /** El dueño de la Obra: su Autor o, desde la Historia 35.4, su Personaje. */
+  autor: { nombre: string },
 ): DatosDeTarjetaDeListado {
   return {
     titulo: obra.titulo,

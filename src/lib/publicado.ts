@@ -31,7 +31,7 @@ import {
   type CongelacionDeObras,
 } from './umbrales.ts';
 import type { FuenteDeCita, Procedencia, tradicion } from './admision.ts';
-import { MENSAJE_PUBLICADA_SIN_AUTOR } from './admision.ts';
+import { CLASE_ATRIBUIDA, esAtribuida } from './clase.ts';
 import { cuentaParaElSuelo } from './huecos.ts';
 import { compararPorClave } from './normalizar.ts';
 import {
@@ -44,6 +44,7 @@ import {
   rutaDeLaObra,
   type AparicionDeCita,
   type CitaParaObra,
+  type Dueño,
   type FichaDeObra,
   type ObraResuelta,
   type IndicesDeObras,
@@ -74,13 +75,20 @@ export interface Cita {
   slug: string;
   texto: string;
   /**
-   * El Autor. Toda Cita **publicada** lo lleva hasta la Historia 35.4 (`reglaDeAutorPublicado`
-   * en el build, y `aplanarCita` lo comprueba otra vez): la de un Personaje sin Autor vive en
-   * `corpus/_revision/`.
+   * El Autor, si lo declara. Toda Cita lleva Autor o Personaje, al menos uno (el esquema); desde
+   * la Historia 35.4 se publica también la de un Personaje sin Autor, que no cuenta para ninguno.
    */
-  autor: string;
-  /** El Personaje que la dice, si es atribuida a uno — Historia 35.2. Hoy ninguna página lo pinta. */
+  autor?: string;
+  /**
+   * El Personaje que la dice, si es atribuida a uno — Historia 35.2. Desde la 35.4 va donde va el
+   * Autor: la Atribución, lo copiado, la Imagen, la Tarjeta, el Fragmento y el JSON-LD lo nombran.
+   */
   personaje?: string;
+  /**
+   * La clase, solo si es atribuida — Historia 35.4: la de siempre no lleva el campo, como en el
+   * Corpus. La lee únicamente `esAtribuida` de `src/lib/clase.ts`.
+   */
+  clase?: typeof CLASE_ATRIBUIDA;
   temas: string[];
   procedencia: Procedencia;
   /**
@@ -239,6 +247,29 @@ export function citasDePersonaje(citas: readonly Cita[], slugPersonaje: string):
 }
 
 /**
+ * El dueño de una Cita para las rutas que salen de su página — Historia 35.4: su Personaje si lo
+ * declara y, si no, su Autor (decisión de Héctor del 2026-11-05). Es el de «Más de {…}» y su
+ * cierre, y el que «Siguiente cita sobre {tema}» exige distinto. A propósito **no** es
+ * `dueñoDeCita` de `src/lib/obras.ts`, que prefiere al Autor porque decide el prefijo del slug
+ * y la ficha: dos reglas distintas con dos nombres, para que ninguna use la de la otra.
+ */
+export function dueñoDeLaRuta(cita: Pick<Cita, 'slug' | 'autor' | 'personaje'>): Dueño {
+  if (cita.personaje !== undefined) return { tipo: 'personaje', slug: cita.personaje };
+  if (cita.autor !== undefined) return { tipo: 'autor', slug: cita.autor };
+  throw new Error(`La Cita «${cita.slug}» no declara Autor ni Personaje: no tiene dueño de sus rutas.`);
+}
+
+/** Si la Cita es del dueño: la declara como su Autor o como su Personaje, según el tipo. */
+export function esDelDueño(cita: Pick<Cita, 'autor' | 'personaje'>, dueño: Dueño): boolean {
+  return (dueño.tipo === 'personaje' ? cita.personaje : cita.autor) === dueño.slug;
+}
+
+/** Las Citas de un dueño, en el orden de su página: las de su Autor o las de su Personaje. */
+export function citasDelDueño(citas: readonly Cita[], dueño: Dueño): Cita[] {
+  return dueño.tipo === 'personaje' ? citasDePersonaje(citas, dueño.slug) : citasDeAutor(citas, dueño.slug);
+}
+
+/**
  * Un Personaje se publica si alguna Cita publicada lo declara — Historia 35.2, como un Autor
  * (FR-4). Hoy lo usa la puerta de las claves de orden (`integraciones/claves.ts`): la clave se
  * exige al Personaje publicado, como al Autor. Ordenados por nombre.
@@ -261,7 +292,8 @@ export function personajesPublicados<P extends { slug: string; nombre: string }>
  * las superficies a la vez.
  */
 export function autoresPublicados(autores: Autor[], citas: Cita[]): Autor[] {
-  const conCitas = new Set(citas.map((c) => c.autor));
+  // Historia 35.4 — una Cita sin Autor no publica a ninguno.
+  const conCitas = new Set(citas.map((c) => c.autor).filter((a): a is string => a !== undefined));
   return autores
     .filter((a) => conCitas.has(a.slug))
     .sort((a, b) => a.nombre.localeCompare(b.nombre, 'es'));
@@ -295,7 +327,10 @@ export function autoresPublicados(autores: Autor[], citas: Cita[]): Autor[] {
  */
 export function autoresDestacados(autores: readonly Autor[], citas: readonly Pick<Cita, 'autor'>[]): Autor[] {
   const recuento = new Map<string, number>();
-  for (const cita of citas) recuento.set(cita.autor, (recuento.get(cita.autor) ?? 0) + 1);
+  for (const cita of citas) {
+    // Historia 35.4 — una Cita sin Autor no cuenta para ninguno.
+    if (cita.autor !== undefined) recuento.set(cita.autor, (recuento.get(cita.autor) ?? 0) + 1);
+  }
 
   const publicados = autores
     .filter((autor) => (recuento.get(autor.slug) ?? 0) > 0)
@@ -607,7 +642,8 @@ export function repartir<T>(candidatas: readonly T[], maximo: number): T[] {
 }
 
 /**
- * «Más de {Autor}» — FR-12, UX-DR17, UX-DR69, Historia 24.6.
+ * «Más de {Autor}» — FR-12, UX-DR17, UX-DR69, Historia 24.6 — o, desde la 35.4, «Más de
+ * {Personaje}» si la Cita lo declara (`dueñoDeLaRuta`), con la misma regla.
  *
  * Se deriva de Autor y de Tema, sin motor de recomendación: primero las del mismo Autor que además
  * comparten algún Tema con esta, y después el resto de las suyas. Ordenar así no es «recomendar»;
@@ -624,7 +660,8 @@ export function citasRelacionadas(
   siguiente: Cita | undefined,
 ): Cita[] {
   const obra = cita.obra?.nombre;
-  const suyas = citasDeAutor(citas, cita.autor).filter(
+  // Historia 35.4 — del dueño de sus rutas: su Personaje si lo declara; si no, su Autor.
+  const suyas = citasDelDueño(citas, dueñoDeLaRuta(cita)).filter(
     (c) =>
       c.slug !== cita.slug &&
       c.slug !== siguiente?.slug &&
@@ -675,10 +712,11 @@ export interface RutasDeSalidaDeCita {
   /** «De la misma obra»: la Obra (su `recuento` y su ruta, para el cierre) y sus Citas. */
   mismaObra: { obra: ObraResuelta; citas: Cita[] } | undefined;
   /**
-   * «Más de {Autor}»: cuántas Citas publicadas tiene el Autor —todas, la propia incluida: las que
-   * lista su Página de Autor, a la que lleva el cierre— y las elegidas.
+   * «Más de {Autor}» —o «Más de {Personaje}», Historia 35.4—: de quién (`dueñoDeLaRuta`), cuántas
+   * Citas publicadas tiene —todas, la propia incluida: las que lista su página, a la que lleva el
+   * cierre— y las elegidas.
    */
-  delAutor: { recuento: number; citas: Cita[] } | undefined;
+  delDueño: { dueño: Dueño; recuento: number; citas: Cita[] } | undefined;
   /** Los Temas publicados de la Cita, en el orden en que los declara. */
   temas: Tema[];
 }
@@ -710,12 +748,13 @@ export function rutasDeSalidaDeCita(
 ): RutasDeSalidaDeCita {
   const otra = siguiente?.cita;
   const deLaObra = citasDeLaMismaObra(cita, porObra, otra, MAX_CITAS_DE_LA_MISMA_OBRA);
-  const delAutor = citasRelacionadas(citas, cita, MAX_CITAS_RELACIONADAS, otra);
+  const delDueño = citasRelacionadas(citas, cita, MAX_CITAS_RELACIONADAS, otra);
+  const dueño = dueñoDeLaRuta(cita);
   return {
     mismaObra: cita.obra !== undefined && deLaObra.length > 0 ? { obra: cita.obra, citas: deLaObra } : undefined,
-    delAutor:
-      delAutor.length > 0
-        ? { recuento: citas.filter((c) => c.autor === cita.autor).length, citas: delAutor }
+    delDueño:
+      delDueño.length > 0
+        ? { dueño, recuento: citas.filter((c) => esDelDueño(c, dueño)).length, citas: delDueño }
         : undefined,
     temas: temasDeLaCita(cita, publicados),
   };
@@ -734,21 +773,27 @@ export function rutasDeSalidaDeCita(
  * traen—: lo garantiza solo `rutasDeSalidaDeCita`. `undefined` si no hay nada que objetar.
  */
 export function problemaDeRutasDeSalida(
-  autor: Pick<Autor, 'slug' | 'nombre'>,
+  /** El dueño de las rutas (`dueñoDeLaRuta` de la Cita) con su nombre: el de «Más de {…}». */
+  dueño: Dueño & { nombre: string },
   rutas: RutasDeSalidaDeCita,
 ): string | undefined {
-  const { mismaObra, delAutor } = rutas;
+  const { mismaObra, delDueño } = rutas;
+  const mismo = (a: Dueño, b: Dueño) => a.tipo === b.tipo && a.slug === b.slug;
   if (mismaObra !== undefined) {
     const { obra, citas: deLaObra } = mismaObra;
     if (deLaObra.length === 0) return '«De la misma obra» llega sin Citas: un grupo vacío es `undefined`.';
-    if (obra.autor !== autor.slug) {
-      return `«De la misma obra» es de la Obra «${obra.nombre}», de «${obra.autor}» y no de «${autor.slug}».`;
+    /*
+     * Historia 35.4 — la Obra de una Cita sin Personaje es de su Autor; la de una con Personaje
+     * puede ser de su Autor o de un Personaje, así que solo se exige la de un dueño Autor.
+     */
+    if (dueño.tipo === 'autor' && !mismo(obra.dueño, dueño)) {
+      return `«De la misma obra» es de la Obra «${obra.nombre}», de «${obra.dueño.slug}» y no de «${dueño.slug}».`;
     }
     if (deLaObra.length > MAX_CITAS_DE_LA_MISMA_OBRA) {
       return `«De la misma obra» lleva ${deLaObra.length} Citas, y no caben más de ${MAX_CITAS_DE_LA_MISMA_OBRA}.`;
     }
     for (const otra of deLaObra) {
-      if (otra.obra?.nombre !== obra.nombre) {
+      if (otra.obra?.nombre !== obra.nombre || !mismo(otra.obra.dueño, obra.dueño)) {
         return `«De la misma obra» lleva la Cita «${otra.slug}», que no es de la Obra «${obra.nombre}».`;
       }
     }
@@ -759,26 +804,30 @@ export function problemaDeRutasDeSalida(
       );
     }
   }
-  if (delAutor !== undefined) {
-    const { recuento, citas: suyas } = delAutor;
-    if (suyas.length === 0) return `«Más de ${autor.nombre}» llega sin Citas: un grupo vacío es \`undefined\`.`;
+  if (delDueño !== undefined) {
+    const { recuento, citas: suyas } = delDueño;
+    if (!mismo(delDueño.dueño, dueño)) {
+      return `«Más de ${dueño.nombre}» es de «${delDueño.dueño.slug}» y no de «${dueño.slug}».`;
+    }
+    if (suyas.length === 0) return `«Más de ${dueño.nombre}» llega sin Citas: un grupo vacío es \`undefined\`.`;
     if (suyas.length > MAX_CITAS_RELACIONADAS) {
-      return `«Más de ${autor.nombre}» lleva ${suyas.length} Citas, y no caben más de ${MAX_CITAS_RELACIONADAS}.`;
+      return `«Más de ${dueño.nombre}» lleva ${suyas.length} Citas, y no caben más de ${MAX_CITAS_RELACIONADAS}.`;
     }
     for (const otra of suyas) {
-      if (otra.autor !== autor.slug) {
-        return `«Más de ${autor.nombre}» lleva la Cita «${otra.slug}», que es de «${otra.autor}» y no de «${autor.slug}».`;
+      if (!esDelDueño(otra, dueño)) {
+        const suyo = dueño.tipo === 'personaje' ? otra.personaje : otra.autor;
+        return `«Más de ${dueño.nombre}» lleva la Cita «${otra.slug}», que es de «${suyo ?? 'nadie'}» y no de «${dueño.slug}».`;
       }
     }
     if (recuento < suyas.length + 1) {
       return (
-        `el cierre de «Más de ${autor.nombre}» cuenta ${recuento} Citas, ` +
+        `el cierre de «Más de ${dueño.nombre}» cuenta ${recuento} Citas, ` +
         `y el pie enseña ${suyas.length} más la que se lee.`
       );
     }
   }
   const vistas = new Set<string>();
-  for (const otra of [...(mismaObra?.citas ?? []), ...(delAutor?.citas ?? [])]) {
+  for (const otra of [...(mismaObra?.citas ?? []), ...(delDueño?.citas ?? [])]) {
     if (vistas.has(otra.slug)) return `la Cita «${otra.slug}» sale dos veces en las Rutas de salida.`;
     vistas.add(otra.slug);
   }
@@ -845,10 +894,13 @@ export function siguienteCita(
         'citasDeTema lista toda Cita que lo declara: el mapa no es el de este conjunto.',
     );
   }
-  // Una vuelta entera desde la siguiente: la propia Cita cae la última y no cuenta.
+  // Una vuelta entera desde la siguiente: la propia Cita cae la última y no cuenta. Historia 35.4
+  // — «otro Autor» es otro dueño de sus rutas (`dueñoDeLaRuta`): otro Personaje, u otro Autor.
+  const suyo = dueñoDeLaRuta(cita);
   for (let paso = 1; paso <= listado.length; paso++) {
     const candidata = listado[(aqui + paso) % listado.length];
-    if (candidata.slug !== cita.slug && candidata.autor !== cita.autor) {
+    const suyoDeLaOtra = dueñoDeLaRuta(candidata);
+    if (candidata.slug !== cita.slug && (suyoDeLaOtra.tipo !== suyo.tipo || suyoDeLaOtra.slug !== suyo.slug)) {
       return { por: 'tema', cita: candidata, tema };
     }
   }
@@ -1006,8 +1058,8 @@ export function obrasPublicadas(conjunto: Pick<ConjuntoPublicable, 'citas' | 'au
 
 /** Los valores de filtro de una Cita: su Autor, su Obra si la tiene y sus Temas publicados. */
 export interface FiltrosDeCita {
-  /** El slug del Autor. */
-  autor: string;
+  /** El slug del Autor; una Cita sin Autor (la de un Personaje, Historia 35.4) no lo lleva. */
+  autor?: string;
   /** El nombre de la ficha de su Obra —nunca el título—; sin Obra resuelta, se omite. */
   obra?: string;
   /** Sus Temas publicados, sin repetir, en el orden en que la Cita los declara. */
@@ -1087,29 +1139,37 @@ export function filtrosDeLaBusqueda(
   const deTema = new Map<string, OpcionDeFiltro>();
 
   for (const cita of conjunto.citas) {
-    const autor = autores.get(cita.autor);
-    if (autor === undefined) {
+    /*
+     * Historia 35.4 — una Cita sin Autor no tiene filtro ni metadato `autor` (los de Personaje son
+     * de la 35.5), ni cuenta para ninguno; su Obra, si no es de ningún Autor, no entra en el mapa.
+     */
+    const autor = cita.autor === undefined ? undefined : autores.get(cita.autor);
+    if (cita.autor !== undefined && autor === undefined) {
       throw new Error(`La Cita «${cita.slug}» nombra al Autor «${cita.autor}», que no está en el Corpus.`);
     }
     const suyos = [...new Set(cita.temas)].filter((slug) => temas.has(slug));
     porCita.set(cita.slug, {
-      autor: autor.slug,
+      ...(autor !== undefined ? { autor: autor.slug } : {}),
       ...(cita.obra !== undefined ? { obra: cita.obra.nombre } : {}),
       temas: suyos,
     });
 
-    const opcionDeAutor = deAutor.get(autor.slug) ?? { valor: autor.slug, rotulo: autor.nombre, recuento: 0 };
-    opcionDeAutor.recuento++;
-    deAutor.set(autor.slug, opcionDeAutor);
+    if (autor !== undefined) {
+      const opcionDeAutor = deAutor.get(autor.slug) ?? { valor: autor.slug, rotulo: autor.nombre, recuento: 0 };
+      opcionDeAutor.recuento++;
+      deAutor.set(autor.slug, opcionDeAutor);
+    }
 
-    if (cita.obra !== undefined) {
+    // El Autor de la Obra —el dueño de una ficha de Autor, el informativo de una de Personaje— y,
+    // si la ficha no lo sabe, el de la Cita: nunca el slug de un Personaje. Sin ninguno, la Obra
+    // no tiene opción en el filtro de Obra, que se elige dentro de un Autor.
+    const autorDeLaObra = cita.obra?.autor ?? autor?.slug;
+    if (cita.obra !== undefined && autorDeLaObra !== undefined) {
       const opcionDeObra = deObra.get(cita.obra.nombre) ?? {
         valor: cita.obra.nombre,
         rotulo: cita.obra.titulo,
         recuento: 0,
-        // El Autor de la Obra —el dueño de una ficha de Autor, el informativo de una de
-        // Personaje— y, si la ficha no lo sabe, el de la Cita: nunca el slug de un Personaje.
-        autor: cita.obra.autor ?? autor.slug,
+        autor: autorDeLaObra,
       };
       opcionDeObra.recuento++;
       deObra.set(cita.obra.nombre, opcionDeObra);
@@ -1124,6 +1184,7 @@ export function filtrosDeLaBusqueda(
 
   const citasPorAutor = new Map<string, (typeof conjunto.citas)[number][]>();
   for (const cita of conjunto.citas) {
+    if (cita.autor === undefined) continue;
     const suyas = citasPorAutor.get(cita.autor);
     if (suyas === undefined) citasPorAutor.set(cita.autor, [cita]);
     else suyas.push(cita);
@@ -1393,8 +1454,17 @@ export function grafoDelModelo(
       enlazar(rutaDeCita(cita.slug), rutaDePersonaje(cita.personaje));
     }
   }
+  /*
+   * Historia 35.4 — el Directorio de Obras enlaza lo que pinta `directorioDeObras`: las Obras de
+   * cada Autor publicado (`obrasDelAutor`, la misma llamada). La Obra de un Personaje sin ningún
+   * Autor no sale ahí hasta la sección «Personajes» de la 35.5; la alcanza su Página de Personaje.
+   */
+  const enElDirectorio = new Set<string>();
+  for (const autor of autoresPublicados(conjunto.autores, conjunto.citas)) {
+    for (const obra of obrasDelAutor(conjunto.citas, autor.slug).obras) enElDirectorio.add(obra.nombre);
+  }
   for (const obra of obrasPublicadas(conjunto)) {
-    enlazar(rutaDelDirectorioDeObras(), rutaDeLaObra(obra));
+    if (enElDirectorio.has(obra.nombre)) enlazar(rutaDelDirectorioDeObras(), rutaDeLaObra(obra));
     const suyas = citasDeCadaObra.get(obra.nombre);
     // Una Obra publicada tiene Citas: sin ellas en el mapa, el modelo callaría todas sus aristas.
     if (suyas === undefined) throw new Error(`grafoDelModelo: la Obra ${obra.nombre} no trae sus Citas en citasDeCadaObra.`);
@@ -1463,7 +1533,8 @@ export function verificarIntegridad(conjunto: ConjuntoPublicable): void {
   const fallos: string[] = [];
 
   for (const cita of conjunto.citas) {
-    if (!autores.has(cita.autor)) {
+    // Historia 35.4 — la de un Personaje sin Autor no tiene Autor que buscar.
+    if (cita.autor !== undefined && !autores.has(cita.autor)) {
       fallos.push(`  · ${cita.slug} → el Autor «${cita.autor}» no existe en el corpus.`);
     }
     if (cita.personaje !== undefined && !personajes.has(cita.personaje)) {
@@ -1497,14 +1568,14 @@ type EntradaObra = CollectionEntry<'obras'>;
 type EntradaPersonaje = CollectionEntry<'personajes'>;
 
 export function aplanarCita(entrada: EntradaCita): Cita {
-  // El build ya lo rompe (`reglaDeAutorPublicado`); aquí se dice otra vez en vez de suponerlo.
   const autor = entrada.data.autor;
-  if (autor === undefined) throw new Error(`${entrada.id}: ${MENSAJE_PUBLICADA_SIN_AUTOR}`);
   return {
     slug: entrada.data.slug,
     texto: entrada.data.texto,
-    autor: autor.id,
+    ...(autor !== undefined ? { autor: autor.id } : {}),
     ...(entrada.data.personaje !== undefined ? { personaje: entrada.data.personaje } : {}),
+    // Historia 35.4 — la clase viaja solo en la atribuida, para «Cómo citar» y el pasaje.
+    ...(esAtribuida(entrada.data) ? { clase: CLASE_ATRIBUIDA } : {}),
     temas: entrada.data.temas.map((t) => t.id),
     procedencia: entrada.data.procedencia,
     ...(entrada.data.fuente !== undefined ? { fuente: entrada.data.fuente } : {}),

@@ -40,7 +40,8 @@ const jornada = jornadaDelBuild(process.env, new Date());
 const fijaciones = fijacionesDeclaradas(portada);
 const lote = materialDelLote(aptasParaPortada(conjunto.citas), fijaciones, jornada);
 
-const autorDe = (slug: string) => conjunto.autores.find((a) => a.slug === slug)!;
+// Las Citas del material son aptas para portada, y una apta lleva Autor (la atribuida nunca lo es).
+const autorDe = (slug: string | undefined) => conjunto.autores.find((a) => a.slug === slug)!;
 
 /** Cada jornada con sus piezas ya emparejadas con su Autor, como hace el Kit. */
 const jornadas = lote.map((dia) => ({

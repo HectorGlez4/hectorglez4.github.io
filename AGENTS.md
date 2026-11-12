@@ -32,7 +32,7 @@ Sitio panhispánico de citas célebres en español, estático, construido con As
 - Nombra las entidades en español según el glosario del PRD §3: `Cita`, `Autor`, `Tema`, `Procedencia`, `Colección`. Nunca `quote`, `frase` ni `author`, tampoco en identificadores de código.
 - Un campo opcional sin valor se omite del fichero; nunca cadena vacía ni `null`. La distinción entre procedencia completa, parcial y ausente es de presencia de campos.
 - Ningún componente lleva valores literales de color o tipografía — usa los tokens de `DESIGN.md` como propiedades personalizadas de CSS, también para el peso (`--peso-regular`, `--peso-fuerte`) y el interlineado (`--interlineado-*`, el del token cuyo cuerpo toma la regla), tampoco en el atajo `font` ni en una cadena `style` (Historia 26.12). Las únicas excepciones son de `DESIGN.md` § Typography: el `line-height: 1` de las letras de salto (`LetrasDeSalto.astro`, `a`) y `--interlineado-autor` (1,4) en `.fila-de-bloque a`, en el `.titulo` de `ListaDeObras` y en el de `TarjetaDeObra`; las vigila `tests/unit/tipografia-en-tokens.test.ts`, y otra la decide Héctor con `bmad-ux`.
-- La familia serif se aplica solo a texto de Cita, nombre de Autor y nombre de Tema.
+- La familia serif se aplica solo a texto de Cita y a los nombres de Autor, Personaje, Tema y Colección.
 - El texto de Cita solo se recorta con `recortarPorPalabra` de `src/lib/recorte.ts` y los topes de `src/lib/umbrales.ts` (`MAX_CARACTERES_DE_TARJETA_DE_CITA`, `MAX_CARACTERES_DE_TITULO_Y_META`): corta en la última palabra entera, cuenta puntos de código sin los saltos de verso y, en título y meta, pasa a una línea con `enUnaLinea` después de recortar (Historia 34.1), así que un título o una meta en verso pasa del tope en los « / » que suma, a propósito. El tope solo se rebasa cuando ni la primera palabra cabe (sale entera, con «…», o tal cual si es todo el texto). Ningún `slice`/`substring`/`substr` sobre texto de Cita en `src/` ni en `public/islas/`; lo vigila `tests/unit/recorte.test.ts`.
 - El verso tiene **dos dueños** en las salidas, en `src/lib/verso.ts` (Historia 29.3): `versosDe` para lo que admite saltos y `enUnaLinea` (« / » entre versos) para lo que no —título de pestaña, meta descripción, `text` del JSON-LD, `description` del RSS—. El texto de una Cita lo pinta en el HTML **solo** `src/components/TextoDeCita.astro`, dentro del elemento de quien lo usa (Bloque de Cita, Tarjeta de Cita y material del Kit/lote): sin saltos emite `«{texto}»` tal cual, byte a byte como antes; con saltos, un `<span class="verso" style="display:block">` por verso con un espacio entre ellos (el que leen Pagefind y el nombre accesible) y el estilo en atributo, no en `<style>`. Nunca `<br>` en el Corpus ni « / » en el cuerpo de la página (`<main>`) o en un lienzo —en `<head>` sí, porque el título y la meta van por `enUnaLinea`—; ningún otro fichero de `src/` ni de `public/islas/` lee el salto (`tests/unit/verso.test.ts` enumera cada uso y nombra sus exenciones: los dos de `src/lib/biografia.ts`), salvo `src/lib/recorte.ts`, que lo compara carácter a carácter solo para no contarlo y para cortar delante de él, sin partirlo ni sustituirlo (Historia 34.1). Los dos repartos de los lienzos —`repartirEnLineas` de `src/lib/lienzo.ts` y el privado de `public/islas/imagen.js`, que no importa de `src/`— abren línea en cada salto y nunca unen dos versos. La Tarjeta Social de una Cita **en verso** que no cabe en 630 px baja al tramo siguiente, hasta `sm` (`cuerpoEnTarjeta` de `src/lib/tramos.ts`, decisión de Héctor del 2026-11-08); la prosa conserva su tramo, y si nada cabe el build se para nombrando la Cita. La Página de Cita, la Imagen y la Pieza no cambian de tramo.
 - Todo lo que se pliega usa `src/components/Desplegable.astro` (Historia 34.0): un `<details>` nativo cerrado al cargar, con el rótulo como único texto del `<summary>` —sin `h1`…`h6` dentro—, sin guion ni `data-zona`; lo de dentro declara su zona como si no estuviera plegado. Ningún componente escribe su propio `<details>`. Un desplegable sin contenido no se pinta: quien lo usa no lo renderiza, y el componente, ante un `slot` ausente o sin contenido —en blanco, solo comentarios o elementos sin texto; un medio o un control sí cuentan—, detiene la construcción nombrando el rótulo, y también ante un rótulo ausente o en blanco. Su `<style>` solo nombra su propio marcado (se emite por el grafo de importaciones aunque no se renderice), y `tests/e2e/accesibilidad.spec.ts` barre cada superficie también con todos los `<details>` abiertos; desde la 34.2 la Página de Autor pinta uno (la Lista de Obras plegada), y la sonda de `tests/e2e/desplegable.spec.ts` (puerto 4404 libre) sigue barriendo los casos que el sitio aún no tiene. El primer consumidor no lo importa desde un componente compartido: lo pasa por prop (`pliegue` de `ListaDeObras.astro`), para que la hoja no llegue a las páginas que no pliegan.
@@ -200,7 +200,7 @@ cotejada— **no lleva** el campo `clase` y declara `estadoDerechos: dominio-pú
 `clase: siempre` es error del esquema. La **atribuida** —la frase de un Personaje o de un Autor con
 derechos vigentes— lleva `clase: atribuida` y nunca `estadoDerechos`; `personaje` (un slug de
 `corpus/personajes/`, «Los Personajes», abajo) solo lo admite ella. Toda Cita lleva Autor o Personaje,
-al menos uno, y una **publicada** lleva Autor hasta la Historia 35.4. El Autor lleva su
+al menos uno, y desde la Historia 35.4 se publica también la de un Personaje sin Autor. El Autor lleva su
 `añoFallecimiento` **o** `vivo: true` (+`añoNacimiento` opcional), uno de los dos: sus años se
 escriben «N. 1950» —«n. 1950» dentro de una frase; sin nacimiento, ninguno, ni hueco— y no hay `deathDate`.
 
@@ -350,9 +350,8 @@ se proponen con el mismo núcleo que las del Autor (`proponerClavesDe`, `fijarCl
 El alta acepta una entrada con `personaje` y sin `autor`: su dueño es el Personaje, que tiene que
 existir —si no, la entrada no tiene dueño y no se escribe en ningún sitio—, y con la puerta de la
 atribuida cerrada (35.1b) va a `corpus/_revision/{personaje}--…md`, sin `autor` y con `clase:
-atribuida`. **Dos guardas del build esperan a la 35.4**: una Cita publicada sin Autor rompe el esquema
-(«una Cita publicada lleva Autor hasta la Historia 35.4»), y una Obra de Personaje con Citas publicadas
-rompe la puerta de las fichas.
+atribuida`. Desde la 35.4 la Cita publicada sin Autor y la Obra de Personaje con Citas publicadas se
+construyen («El Personaje va donde va el Autor», abajo).
 
 **La Página de Personaje** (Historia 35.3, UX-DR134) vive en `/personaje/{slug}/` (`rutaDePersonaje`,
 `PAGINA_DE_PERSONAJE` en `src/lib/superficies.ts`) y calca la de Autor: en la página 1, el `h1` con el
@@ -382,8 +381,33 @@ sin él, el marcado es el de siempre. El grafo de NFR-5 (`grafoDelModelo`) gana 
 `ETIQUETAS_DE_RESULTADO`). Para AD-27 `personaje` es familia de fichero y de ruta: su página la
 componen su fichero (`nombre`, `universo`, la semblanza y la biografía), sus Citas y los títulos de
 sus Obras, y su `nombre` compone además la Página de Cita, los listados y la Obra de la que es dueño, y
-su clave los Directorios. La Tarjeta de Cita, las Rutas de salida, la Tarjeta de Obra, lo copiado y el
-JSON-LD de Cita siguen sin nombrarlo hasta la 35.4.
+su clave los Directorios.
+
+**El Personaje va donde va el Autor** (Historia 35.4, AD-33, UX-DR135–137). El nombre lo compone una
+sola función, `firmaDeCita` de `src/lib/atribucion.ts`, en orden fijo Personaje, Obra, Autor: el de la
+primera línea (el Personaje si lo hay; si no, el Autor) y, detrás, el título de la Obra resuelta, «de
+{Autor}» **solo** con Personaje y Autor, y el año de la Procedencia de esa Cita. La usan lo copiado
+(«— Batman, {título}, de Séneca, 2000.», y por él lo compartido y el `data-texto-plano`), la procedencia
+de la Imagen y de la Tarjeta Social de Cita (`procedenciaCompuesta`), el Fragmento («— Batman,
+<cite>{título}</cite>, de Séneca.», sin año), `nombreEnAtribucion` y la línea de Obra de la Atribución
+(`lineaDeProcedencia`): «{título}, de <a>{Autor}</a>, {año}.» con el Autor `enlace-en-tinta` a su
+página, y sin Obra «de <a>{Autor}</a>, {año}.», sin «Sin obra documentada»; los dos párrafos con zona
+`atribucion`, y el `cite` del `blockquote` apunta a quien nombra la primera línea. Sin Personaje, todo
+sale byte a byte como antes. El título de pestaña y la meta de la Página de Cita llevan el Autor si lo
+hay; si no, el Personaje. El JSON-LD de Cita conserva `creator` para el Autor, solo si lo hay (el
+`author` de la espina está diferido a Héctor), y añade `spokenByCharacter` (`Person` con `name` y
+`url`, sin fechas); su `isPartOf` es `CreativeWork` si la Obra es de un Personaje. La Tarjeta de Cita
+`autor-y-obra` (Tema, Colección) recibe además `personaje` —obligatorio en la llamada, el que declara
+la Cita— y lo pinta en el sitio del Autor, sin el Autor; la construcción se para si no casa. Una Cita
+sin Autor no cuenta para ningún Autor (meta, huecos, salud, la Cita del Día, la sindicación, la Pieza),
+no lleva filtro ni metadato `autor` de Pagefind (`FiltrosDeLaCita`) y su Obra sin Autor no entra en el
+mapa de Obras de `/buscar/`; `clavesDeOrden` agrupa por dueño (`dueñoDeCita`, o el de su Obra) sobre
+Autores y Personajes. La Página de Obra de un Personaje (1 y 2+) dice «de <a href=/personaje/…>{Personaje}</a>
+· {año}» con zona `atribucion` y el mismo `data-pagefind-meta="autor"`, lleva su nombre en el título y
+la meta, un JSON-LD `about` `CreativeWork` con `character` y sin `author`, y su Tarjeta Social «{n}
+citas de {Personaje}, {año}»; no lleva «Buscar en esta obra» hasta la 35.5, ni sale en `/obras/` (la
+arista Directorio de Obras → Obra de `grafoDelModelo` sale de lo que pinta `directorioDeObras`): la
+alcanza su Página de Personaje.
 
 ## Leer el estado de indexación
 
@@ -959,9 +983,9 @@ no tiene Autor); `titular`, `separar`, `reunir` y `retirar` conservan `personaje
 `reunir` se niega entre dueños distintos. `esObraIndexable` recibe el recuento del dueño: las Citas
 del Autor o, para la de un Personaje, las que declaran ese Personaje. La ruta no cambia
 (`rutaDeObra`, por los dos segmentos del nombre), así que saberse después el Autor no mueve la URL.
-**Hasta la Historia 35.4, una ficha de Personaje que resuelve Citas publicadas rompe el build**
-(«Obra de un Personaje con Citas publicadas: la pinta la Historia 35.4»): su Cabecera «de {Personaje}»
-aún no existe. Sin Citas publicadas, avisa como cualquier ficha. Una Cita atribuida no tiene posición
+Desde la Historia 35.4 una ficha de Personaje que resuelve Citas publicadas tiene su Página de Obra,
+con la Cabecera «de {Personaje}» («Los Personajes», arriba); sin Citas publicadas, avisa como
+cualquier ficha. Una Cita atribuida no tiene posición
 en el orden del libro aunque su Obra tenga documento (`posicionesDeCitas` la omite): va al final, por
 slug.
 
@@ -1297,7 +1321,9 @@ Ninguna hace commit; las dos se niegan con 1 y sin escribir si no hay nada que h
 Tras las acciones —Copiar, Imagen y compartir— y antes de las Rutas de salida (Historia 30.1:
 nada se intercala entre la Atribución, con su Línea de la Fuente, y Copiar), la Página de
 Cita dice de qué Obra sale: `src/components/TarjetaDeObra.astro`, con el rótulo «De la obra»,
-el título de la ficha sin enlace, «{Autor} · {año} · {n} citas» y una o dos Filas de bloque:
+el título de la ficha sin enlace, «{dueño} · {año} · {n} citas» —el dueño de la Obra (`obra.dueño`):
+su Autor o, desde la 35.4, su Personaje; la prop es `dueño` y la construcción se para si no es el de la
+Obra— y una o dos Filas de bloque:
 «Siguiente…» cuando hay a dónde ir (24.5) y, siempre, la de la página 1 de la Obra —se indexe o
 no, esté congelada o no—. **Solo en `src/pages/cita/[slug].astro`**:
 no va dentro de `BloqueDeCita.astro` porque ese bloque lo comparten la portada y el 404, que no
@@ -1371,8 +1397,10 @@ de salida a la edición, en el pasaje: la canónica es texto— y fuera del JSON
 
 - **La composición es solo de `src/lib/atribucion.ts`** (AD-28): `referenciaDeCita` (segmentos,
   con la Obra en cursiva y un segmento vacío para la fecha), `referenciasDeCita`,
-  `nombreEnReferencia` y `partesDelNombre`, `citaTieneComoCitar` (hoy `true`; la 35.4 añade ahí la
-  Cita atribuida), `fechaDeConsulta` y `MARCADOR_DE_FECHA_DE_CONSULTA`. Las formas literales de
+  `nombreEnReferencia` y `partesDelNombre`, `citaTieneComoCitar` (toda Cita salvo la atribuida,
+  `!esAtribuida`, Historia 35.4: la atribuida no lleva «Cómo citar» ni pasaje —`ofrecePasaje` lo niega
+  primero, con el motivo `atribuida`—, y de los desplegables solo «Inserta esta cita»),
+  `fechaDeConsulta` y `MARCADOR_DE_FECHA_DE_CONSULTA`. Las formas literales de
   APA, MLA y Chicago son un supuesto que revisa Héctor, fijado por la tabla de
   `tests/unit/atribucion.test.ts`. Lo que no consta se omite; nada lee `procedencia.obra`.
 - `src/components/ComoCitar.astro` pinta las Referencias **ya compuestas** y no sabe si son de
@@ -1437,8 +1465,9 @@ readonly>` con el Fragmento, el botón «Copiar el fragmento» `hidden` y su reg
   escapado con `escapar` de `src/lib/lienzo.ts`, sin guion, imagen, estilo, clase ni recurso del
   sitio. Una canónica que no sea `http(s)` absoluta o lleve `?…` o `#…` detiene la construcción:
   el Fragmento nunca lleva `?de=` ni `?via=`. El marcado literal es un supuesto que revisa Héctor,
-  fijado por la tabla de `tests/unit/atribucion.test.ts`. El nombre sale de `nombreEnAtribucion`,
-  la misma función que pinta la Atribución (la 35.4 pondrá ahí el Personaje).
+  fijado por la tabla de `tests/unit/atribucion.test.ts`. El nombre sale de `firmaDeCita`, la misma
+  que pinta la Atribución: con Personaje, «— {Personaje}, <cite>{Obra}</cite>, de {Autor}.» (Historia
+  35.4), y el `<label>` dice «su personaje» en vez de «su autor» (prop `conPersonaje`).
 - El enlace del Fragmento es **texto del campo**, no un `<a>` de la página: sin zona ni exención.
 - `--mono` y `--codigo` (con `--interlineado-codigo`) son **solo** del campo del Fragmento; fuera de
   `tokens.css` e `InsertaEstaCita.astro` no los nombra nadie (`tests/unit/inserta-esta-cita.test.ts`).
@@ -1458,7 +1487,12 @@ cada uno con su `h2` (`Rotulo.astro`): **«De la misma obra»** —hasta `MAX_CI
 (3) Citas de su Obra, en el orden del libro, con la Tarjeta de Cita `ninguna`, zona `misma-obra`,
 y el cierre «Las {n} citas de {título} ›» a la página 1 de la Obra—, **«Más de {Autor}»** —hasta
 `MAX_CITAS_RELACIONADAS` (4) del Autor **sin las de su Obra**, con la Tarjeta `obra`, zona
-`rutas-de-salida`, y el cierre «Las {n} citas de {Autor} ›» a su Página de Autor— y **«Temas»**
+`rutas-de-salida`, y el cierre «Las {n} citas de {Autor} ›» a su Página de Autor; desde la 35.4,
+**«Más de {Personaje}»** si la Cita lo declara, con `citasDePersonaje`, el recuento de las Citas que lo
+declaran y `cierreDeMasDelPersonaje` a su página: el dueño de las rutas es `dueñoDeLaRuta` de
+`src/lib/publicado.ts` (el Personaje si lo hay, si no el Autor; a propósito no es `dueñoDeCita`), que
+`RutasDeSalida.astro` recibe por `dueño`, que «Siguiente cita sobre…» exige distinto y que
+`problemaDeRutasDeSalida` coteja— y **«Temas»**
 (chips, `chip-de-tema`). Como mucho `MAX_CITAS_DE_LA_MISMA_OBRA` + `MAX_CITAS_RELACIONADAS`
 tarjetas (hoy, siete); ninguna es la propia ni la de «Siguiente», ni
 sale en los dos grupos. El orden de tabulación es el del marcado.

@@ -11,28 +11,52 @@
  * Solo lo que consta (FR-2, FR-51): `datePublished` solo si la Obra tiene año —que ya se omite
  * si sus Citas discrepan y nunca es el de una traducción—, y ninguna descripción compuesta.
  *
+ * Historia 35.4 — la Obra de un Personaje es una `CreativeWork` con su `character` (nombre y
+ * página, sin fechas) y sin `author`: el `isPartOf` de sus Citas lleva el mismo tipo.
+ *
  * `application/ld+json` no es JavaScript ejecutable: no toca AD-6.
  */
-import type { Autor, Cita } from '../lib/publicado.ts';
+import type { Autor, Cita, Personaje } from '../lib/publicado.ts';
 import type { ObraResuelta } from '../lib/obras.ts';
 import { rutaDeLaObra } from '../lib/obras.ts';
 import { listaDeCitas, type TramoDeLaLista } from '../lib/datosDeListado.ts';
-import { rutaDeAutor } from '../lib/superficies.ts';
+import { rutaDeAutor, rutaDePersonaje } from '../lib/superficies.ts';
 
 interface Props {
   obra: ObraResuelta;
-  autor: Autor;
+  /** El dueño de la Obra (`obra.dueño`): su Autor o, desde la Historia 35.4, su Personaje. */
+  dueño: { tipo: 'autor'; autor: Autor } | { tipo: 'personaje'; personaje: Personaje };
   /** Las Citas de **esta** página, no las de la Obra entera. */
   citas: readonly Cita[];
   canonica: string;
   tramo: TramoDeLaLista;
 }
 
-const { obra, autor, citas, canonica, tramo } = Astro.props;
+const { obra, dueño, citas, canonica, tramo } = Astro.props;
 
 // La página 1 sin número, también desde la 2+: la obra es la misma en todas sus páginas.
 const idDeLaObra = new URL(rutaDeLaObra(obra), canonica).href;
-const idDeLaPersona = new URL(`${rutaDeAutor(autor.slug)}#persona`, canonica).href;
+
+const about =
+  dueño.tipo === 'personaje'
+    ? {
+        '@type': 'CreativeWork',
+        '@id': idDeLaObra,
+        name: obra.titulo,
+        character: {
+          '@type': 'Person',
+          name: dueño.personaje.nombre,
+          url: new URL(rutaDePersonaje(dueño.personaje.slug), canonica).href,
+        },
+        ...(obra.año !== undefined ? { datePublished: String(obra.año) } : {}),
+      }
+    : {
+        '@type': 'Book',
+        '@id': idDeLaObra,
+        name: obra.titulo,
+        author: { '@id': new URL(`${rutaDeAutor(dueño.autor.slug)}#persona`, canonica).href },
+        ...(obra.año !== undefined ? { datePublished: String(obra.año) } : {}),
+      };
 
 const datos = {
   '@context': 'https://schema.org',
@@ -40,13 +64,7 @@ const datos = {
   '@id': canonica,
   url: canonica,
   inLanguage: 'es',
-  about: {
-    '@type': 'Book',
-    '@id': idDeLaObra,
-    name: obra.titulo,
-    author: { '@id': idDeLaPersona },
-    ...(obra.año !== undefined ? { datePublished: String(obra.año) } : {}),
-  },
+  about,
   mainEntity: listaDeCitas(citas, canonica, tramo),
 };
 ---

@@ -68,7 +68,8 @@ const tramo = tramoDe(cita.texto);
     )
   }
 
-  <CopiarCita cita={cita} autor={autor} />
+  {/* Historia 35.4 — el material son Citas aptas para portada, y una atribuida nunca lo es. */}
+  <CopiarCita cita={cita} autor={autor} personaje={undefined} />
 
   <p class="enlace">
     <a href={rutaDeCita(cita.slug)} data-enlace-cita>Ver la Página de Cita</a>

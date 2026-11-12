@@ -1,7 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import { readFileSync } from 'node:fs';
+import { readFileSync, readdirSync } from 'node:fs';
 import { resolve } from 'node:path';
+import { parse as parsearYaml } from 'yaml';
 import { admiteImagen, tramoDe } from '../../src/lib/tramos.ts';
+import { svgDeTarjeta } from '../../src/lib/tarjeta.ts';
 import { MAX_CARACTERES_IMAGEN } from '../../src/lib/umbrales.ts';
 
 const RAIZ = resolve(import.meta.dirname, '../..');
@@ -84,5 +86,35 @@ describe('Historia 2.1 / UX-DR19 — tramos por longitud', () => {
     const codigo = readFileSync(resolve(RAIZ, 'src/lib/tramos.ts'), 'utf8');
     expect(codigo).not.toMatch(/from 'node:fs/);
     expect(codigo).not.toMatch(/from 'astro/);
+  });
+});
+
+describe('Historia 35.4 — la firma de un Personaje no cambia el tramo de la Tarjeta Social (AD-8)', () => {
+  /** Lo más largo que hoy puede ir en la procedencia: el título de Obra y el nombre de Autor del Corpus. */
+  const masLargo = (carpeta: string, campo: string) =>
+    readdirSync(resolve(RAIZ, 'corpus', carpeta))
+      .filter((f) => /\.ya?ml$/u.test(f))
+      .map((f) => (parsearYaml(readFileSync(resolve(RAIZ, 'corpus', carpeta, f), 'utf8')) as Record<string, unknown>)[campo])
+      .filter((v): v is string => typeof v === 'string')
+      .reduce((a, b) => ([...b].length > [...a].length ? b : a), '');
+  const TITULO = masLargo('obras', 'titulo');
+  const AUTOR = masLargo('autores', 'nombre');
+  /** Prosa de `n` caracteres, en palabras que el reparto puede partir. */
+  const prosa = (n: number) => 'palabra '.repeat(Math.ceil(n / 8)).slice(0, n - 1).trimEnd().padEnd(n - 1, 'a') + '.';
+  const cuerpo = (svg: string) => /font-family="[^"]*" font-size="(\d+)" fill="[^"]*">«/u.exec(svg)?.[1];
+
+  it('el Corpus da un título y un nombre que medir', () => {
+    expect(TITULO.length).toBeGreaterThan(0);
+    expect(AUTOR.length).toBeGreaterThan(0);
+  });
+
+  it.each([80, 160, 240, MAX_CARACTERES_IMAGEN])('con %i caracteres, la atribución más larga de un Personaje cabe en el mismo cuerpo', (n) => {
+    const texto = prosa(n);
+    expect([...texto]).toHaveLength(n);
+    const sinPersonaje = svgDeTarjeta({ texto, autor: AUTOR, procedencia: `${TITULO}, 2000` });
+    const conPersonaje = svgDeTarjeta({ texto, autor: 'Batman', procedencia: `${TITULO}, de ${AUTOR}, 2000` });
+    expect(cuerpo(conPersonaje)).toBeDefined();
+    expect(cuerpo(conPersonaje)).toBe(cuerpo(sinPersonaje));
+    expect(Number(cuerpo(conPersonaje))).toBe(tramoDe(texto).pixelesEnTarjeta);
   });
 });

@@ -276,10 +276,6 @@ export const MENSAJE_CITA_SIN_DUEÑO =
  *   · la de siempre lleva `estadoDerechos: dominio-público` y no lleva `personaje`;
  *   · la atribuida no lleva `estadoDerechos`: su derecho no es el dominio público.
  *
- * Que una Cita **publicada** lleve además Autor es regla del build hasta la Historia 35.4
- * (`reglaDeAutorPublicado`), no de la Cita: en `corpus/_revision/` la de un Personaje solo es
- * admisible sin él.
- *
  * Corre aunque falle otra regla del objeto (`when`), así que no supone nada de la forma del valor.
  */
 export function reglasDeClase(valor: unknown, contexto: z.RefinementCtx): void {
@@ -398,28 +394,6 @@ function reglasDeLaAtribuida(cita: Record<string, unknown>, contexto: z.Refineme
       message: 'Regla incumplida: una Cita atribuida no es apta para portada (pregunta 22).',
     });
   }
-}
-
-/** Lo que dice el build ante una Cita publicada sin Autor — Historia 35.2. */
-export const MENSAJE_PUBLICADA_SIN_AUTOR =
-  'Regla incumplida: una Cita publicada lleva Autor hasta la Historia 35.4, que pinta la Cita de ' +
-  'un Personaje sin Autor. Se queda en corpus/_revision/.';
-
-/**
- * Regla del build, solo para la colección `citas` — Historia 35.2.
- *
- * La Cita de un Personaje sin Autor es admisible (su dueño es el Personaje), pero ninguna
- * página sabe aún nombrarla: la Atribución, la Tarjeta y el JSON-LD la pintaría sin nadie.
- * Hasta que la Historia 35.4 la pinte, una publicada sin Autor rompe la construcción con este
- * mensaje en vez de salir sin firma. Solo la juzga el build: el alta y la aprobación ya la dejan
- * en `corpus/_revision/` por la puerta cerrada de la atribuida.
- */
-export function reglaDeAutorPublicado(valor: unknown, contexto: z.RefinementCtx): void {
-  if (valor === null || typeof valor !== 'object') return;
-  const cita = valor as Record<string, unknown>;
-  // Sin dueño ya lo dice `reglasDeClase`; esto es solo la Cita de un Personaje sin Autor.
-  if (cita.autor !== undefined || cita.personaje === undefined) return;
-  contexto.addIssue({ code: 'custom', path: ['autor'], message: MENSAJE_PUBLICADA_SIN_AUTOR });
 }
 
 /** Las opciones con que se engancha `reglasDeClase`: corre también si otra regla falló. */

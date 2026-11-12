@@ -32,7 +32,8 @@ const jornada = jornadaDelBuild(process.env, new Date());
 const fijaciones = fijacionesDeclaradas(portada);
 const material = materialDelKit(aptasParaPortada(conjunto.citas), jornada, fijaciones);
 
-const autorDe = (slug: string) => conjunto.autores.find((a) => a.slug === slug)!;
+// Las Citas del material son aptas para portada, y una apta lleva Autor (la atribuida nunca lo es).
+const autorDe = (slug: string | undefined) => conjunto.autores.find((a) => a.slug === slug)!;
 
 const delDia = material && { cita: material.delDia.cita, autor: autorDe(material.delDia.cita.autor) };
 const alternativa = material?.alternativa

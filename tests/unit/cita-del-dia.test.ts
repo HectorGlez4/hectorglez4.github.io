@@ -252,7 +252,7 @@ describe('Historia 21.1 — la rotación recorre las aptas en rondas por Autor',
       // La ronda de cada Cita es su posición dentro de las de su Autor.
       const rondaDe = new Map<string, number>();
       const porAutor = new Map<string, string[]>();
-      for (const c of conjunto) porAutor.set(c.autor, [...(porAutor.get(c.autor) ?? []), c.slug]);
+      for (const c of conjunto) porAutor.set((c.autor ?? ''), [...(porAutor.get((c.autor ?? '')) ?? []), c.slug]);
       for (const slugs of porAutor.values()) {
         slugs.sort((a, b) => a.localeCompare(b, 'es')).forEach((s, i) => rondaDe.set(s, i));
       }
@@ -323,12 +323,12 @@ describe('Historia 21.1 — la rotación recorre las aptas en rondas por Autor',
     const jornadas = vuelta(2 * n);
     const ahora = jornadas.map((j) => citaDelDia(conjunto, j)!.cita);
     expect(new Set(ahora.slice(0, n).map((c) => c.slug)).size).toBe(n);
-    expect(rachaMaxima(ahora.map((c) => c.autor))).toBeLessThanOrEqual(2);
+    expect(rachaMaxima(ahora.map((c) => (c.autor ?? '')))).toBeLessThanOrEqual(2);
 
     // El orden de antes, con el mismo índice: días desde la época módulo n.
     const porSlug = [...conjunto].sort((a, b) => a.slug.localeCompare(b.slug, 'es'));
     const antes = jornadas.map((_, d) => porSlug[d % n]);
-    expect(rachaMaxima(antes.map((c) => c.autor))).toBe(3);
+    expect(rachaMaxima(antes.map((c) => (c.autor ?? '')))).toBe(3);
   });
 
   it('una fijación a una apta manda sobre las rondas', () => {

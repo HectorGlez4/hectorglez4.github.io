@@ -161,7 +161,8 @@ export function textoDeLaPieza(
   red: Red,
   destino: string,
 ): string {
-  const atribuidas = citas.map((cita) => textoParaCopiar(cita, autores.get(cita.autor)!));
+  // Las Citas de una Pieza ya traen su Autor (`seleccionarCitas` las rechaza sin él).
+  const atribuidas = citas.map((cita) => textoParaCopiar(cita, cita.autor === undefined ? undefined : autores.get(cita.autor)));
   return `${atribuidas.join('\n\n')}\n\n${SITIO}${enlaceConOrigen(destino, red)}`;
 }
 
@@ -262,6 +263,7 @@ export async function componerPieza(
   );
 
   const elegidas: Cita[] = [];
+  const conAutor = new Map<string, Autor>();
   for (const slug of slugs) {
     if (typeof slug !== 'string' || !FORMA_DE_SLUG.test(slug)) {
       motivos.push(
@@ -301,14 +303,18 @@ export async function componerPieza(
      * épica entera. Se comprueba que el Autor esté **y** que traiga nombre: un `.yml` con la
      * clave vacía compondría la Cita con un hueco donde va la firma.
      */
-    const autor = autores.get(cita.autor);
+    // Historia 35.4 — la Cita de un Personaje sin Autor no tiene Autor que firmar la Pieza.
+    const autor = cita.autor === undefined ? undefined : autores.get(cita.autor);
     if (autor === undefined) {
       motivos.push(
-        `El Autor «${cita.autor}» de la Cita «${slug}» no está en el corpus, así que la Pieza ` +
-          'la mostraría sin atribución.',
+        cita.autor === undefined
+          ? `La Cita «${slug}» no declara Autor, así que la Pieza la mostraría sin atribución.`
+          : `El Autor «${cita.autor}» de la Cita «${slug}» no está en el corpus, así que la Pieza ` +
+              'la mostraría sin atribución.',
       );
       continue;
     }
+
     if (typeof autor.nombre !== 'string' || autor.nombre.trim() === '') {
       motivos.push(
         `El Autor «${cita.autor}» de la Cita «${slug}» no tiene nombre en su ficha, así que la ` +
@@ -318,6 +324,7 @@ export async function componerPieza(
     }
 
     elegidas.push(cita);
+    conAutor.set(cita.slug, autor);
   }
 
   if (motivos.length > 0) {
@@ -325,7 +332,7 @@ export async function componerPieza(
     return { ok: false, motivos };
   }
 
-  const enPieza = elegidas.map((cita) => citaEnPieza(cita, autores.get(cita.autor)!));
+  const enPieza = elegidas.map((cita) => citaEnPieza(cita, conAutor.get(cita.slug) as Autor));
 
   const cabida = cabenEnPieza(enPieza);
   if (!cabida.cabe) {

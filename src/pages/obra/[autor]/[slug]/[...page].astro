@@ -15,6 +15,11 @@
  * compuesta (FR-51): ni sinopsis, ni contexto, ni adjetivos; todo lo que se dice sale de hechos
  * del Corpus, salvo la nota, que escribe Héctor a mano.
  *
+ * Historia 35.4 — la Obra de un Personaje es esta misma página con su dueño: la Cabecera dice «de
+ * {Personaje}» enlazado a su página, el título y la meta llevan su nombre, el JSON-LD describe una
+ * `CreativeWork` con su `character`, y no lleva «Buscar en esta obra» hasta la 35.5 (`/buscar/`
+ * aún no filtra por Personaje).
+ *
  * El parámetro se llama `page` porque `paginate()` lo exige por nombre, como en la Página de
  * Autor; los dos segmentos públicos salen del nombre de la ficha (`segmentosDeObra`).
  */
@@ -29,6 +34,7 @@ import TarjetaDeCita from '../../../../components/TarjetaDeCita.astro';
 import {
   autoresPublicados,
   citasDeLasObras,
+  personajesPublicados,
   conjuntoPublicable,
   obrasPublicadas,
   temasDeLaObra,
@@ -36,7 +42,6 @@ import {
 } from '../../../../lib/publicado.ts';
 import {
   ANCLA_DE_DONDE_LEER,
-  MENSAJE_OBRA_DE_PERSONAJE_PUBLICADA,
   ROTULO_DE_DONDE_LEER,
   dondeLeer,
   rutaDeLaObra,
@@ -47,7 +52,7 @@ import { descripcionDeObra } from '../../../../lib/atribucion.ts';
 import { ROTULO_BUSCAR_EN_ESTA_OBRA } from '../../../../lib/busqueda.ts';
 import { CITAS_POR_PAGINA } from '../../../../lib/umbrales.ts';
 import { tituloDeObra } from '../../../../lib/marca.ts';
-import { rutaDeAutor, rutaDeTema } from '../../../../lib/superficies.ts';
+import { rutaDeAutor, rutaDePersonaje, rutaDeTema } from '../../../../lib/superficies.ts';
 import type { GetStaticPaths, InferGetStaticPropsType } from 'astro';
 
 export const getStaticPaths = (async ({ paginate }) => {
@@ -56,6 +61,10 @@ export const getStaticPaths = (async ({ paginate }) => {
   const autores = new Map(
     autoresPublicados(conjunto.autores, conjunto.citas).map((a) => [a.slug, a]),
   );
+  // Historia 35.4 — y el Personaje dueño de una Obra, también uno publicado: enlaza a su página.
+  const personajes = new Map(
+    personajesPublicados(conjunto.personajes, conjunto.citas).map((p) => [p.slug, p]),
+  );
   const publicados = temasPublicados(conjunto.temas, conjunto.citas);
 
   // Historia 24.1 — las Citas de cada Obra en el orden del libro, en todas sus páginas y en sus
@@ -63,14 +72,20 @@ export const getStaticPaths = (async ({ paginate }) => {
   const porObra = await citasDeLasObras(conjunto);
 
   return obrasPublicadas(conjunto).flatMap((obra) => {
-    // Historia 35.2 — la Obra de un Personaje no llega aquí con Citas publicadas (la pinta la 35.4).
-    const autor = obra.autor === undefined ? undefined : autores.get(obra.autor);
+    // El dueño de la Cabecera (`obra.dueño`): su Autor o su Personaje, los dos publicados.
+    const autor = obra.dueño.tipo === 'autor' ? autores.get(obra.dueño.slug) : undefined;
+    const personaje = obra.dueño.tipo === 'personaje' ? personajes.get(obra.dueño.slug) : undefined;
+    const dueño =
+      autor !== undefined
+        ? ({ tipo: 'autor', autor } as const)
+        : personaje !== undefined
+          ? ({ tipo: 'personaje', personaje } as const)
+          : undefined;
     // No debería pasar —la integridad del conjunto y la puerta de las fichas lo impiden—, pero
     // si pasara, la Cabecera enlazaría a un 404 sin que nada lo dijera: el build se para aquí.
-    if (obra.dueño.tipo === 'personaje') throw new Error(`${obra.nombre}: ${MENSAJE_OBRA_DE_PERSONAJE_PUBLICADA}`);
-    if (autor === undefined) {
+    if (dueño === undefined) {
       throw new Error(
-        `La Obra «${obra.nombre}» es de «${obra.autor ?? obra.dueño.slug}», que no tiene Página de Autor publicada: ` +
+        `La Obra «${obra.nombre}» es de «${obra.dueño.slug}», que no tiene página publicada: ` +
           'su Cabecera enlazaría a un 404.',
       );
     }
@@ -78,7 +93,7 @@ export const getStaticPaths = (async ({ paginate }) => {
     const citas = porObra.get(obra.nombre) ?? [];
     const paginas = paginate(citas, {
       params: { autor: segmentoDeAutor, slug: segmentoDeObra },
-      props: { obra, autor, temas: temasDeLaObra(citas, publicados) },
+      props: { obra, dueño, temas: temasDeLaObra(citas, publicados) },
       pageSize: CITAS_POR_PAGINA,
     });
     // «Dónde leer» (22.6) se calcula una vez, sobre todas las Citas de la Obra, y solo lo
@@ -91,7 +106,9 @@ export const getStaticPaths = (async ({ paginate }) => {
 }) satisfies GetStaticPaths;
 
 type Props = InferGetStaticPropsType<typeof getStaticPaths>;
-const { obra, autor, temas, page: pagina } = Astro.props;
+const { obra, dueño, temas, page: pagina } = Astro.props;
+const nombreDelDueño = dueño.tipo === 'autor' ? dueño.autor.nombre : dueño.personaje.nombre;
+const rutaDelDueño = dueño.tipo === 'autor' ? rutaDeAutor(dueño.autor.slug) : rutaDePersonaje(dueño.personaje.slug);
 const resumenDondeLeer = 'dondeLeer' in Astro.props ? Astro.props.dondeLeer : undefined;
 
 const ruta = rutaDeLaObra(obra, pagina.currentPage);
@@ -121,8 +138,8 @@ const enVenta =
 ---
 
 <Armazon
-  titulo={tituloDeObra(autor.nombre, obra.titulo, pagina.currentPage)}
-  descripcion={descripcionDeObra(autor, obra, pagina.currentPage)}
+  titulo={tituloDeObra(nombreDelDueño, obra.titulo, pagina.currentPage)}
+  descripcion={descripcionDeObra({ nombre: nombreDelDueño }, obra, pagina.currentPage)}
   ruta={ruta}
   tipo="obra"
   tarjeta={tarjeta}
@@ -130,7 +147,7 @@ const enVenta =
   <DatosDeObra
     slot="cabeza"
     obra={obra}
-    autor={autor}
+    dueño={dueño}
     citas={pagina.data}
     canonica={canonica}
     tramo={{ actual: pagina.currentPage, porPagina: CITAS_POR_PAGINA }}
@@ -150,7 +167,7 @@ const enVenta =
         */}
       {/* Historia 23.7 — el Autor de la Cabecera de Obra sale por la zona de la Atribución. */}
       <p class="de" data-zona="atribucion">
-        de <a href={rutaDeAutor(autor.slug)} class="enlace-en-tinta" data-pagefind-meta="autor">{autor.nombre}</a>{
+        de <a href={rutaDelDueño} class="enlace-en-tinta" data-pagefind-meta="autor">{nombreDelDueño}</a>{
           obra.año !== undefined && (
             <>
               <span aria-hidden="true"> · </span><span class="oculto">, </span>{obra.año}
@@ -192,8 +209,8 @@ const enVenta =
        * desde el formulario. Lleva los dos filtros, el Autor y la Obra por el nombre de su ficha,
        * que es su interfaz pública (nunca el título). Las 2+ no lo llevan.
        */
-      primera && (
-        <BuscarEn id="buscar-en-esta-obra" rotulo={ROTULO_BUSCAR_EN_ESTA_OBRA} filtros={{ autor: autor.slug, obra: obra.nombre }} />
+      primera && dueño.tipo === 'autor' && (
+        <BuscarEn id="buscar-en-esta-obra" rotulo={ROTULO_BUSCAR_EN_ESTA_OBRA} filtros={{ autor: dueño.autor.slug, obra: obra.nombre }} />
       )
     }
 

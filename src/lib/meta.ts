@@ -181,7 +181,10 @@ function concentracionDe(citas: CitaParaHuecos[]): Concentracion | undefined {
   if (citas.length === 0) return undefined;
 
   const porAutor = new Map<string, number>();
-  for (const cita of citas) porAutor.set(cita.autor, (porAutor.get(cita.autor) ?? 0) + 1);
+  for (const cita of citas) {
+    // Historia 35.4 — la Cita de un Personaje sin Autor no cuenta para ninguno.
+    if (cita.autor !== undefined) porAutor.set(cita.autor, (porAutor.get(cita.autor) ?? 0) + 1);
+  }
 
   const ordenados = [...porAutor.entries()].sort(
     (a, b) => b[1] - a[1] || a[0].localeCompare(b[0], 'es'),
@@ -259,7 +262,7 @@ export function verMeta(
      * —todos menos los de tradición `otra`—; lo que no cambia es que cuenta **altas** y no
      * Citas, que es el punto de este comentario.
      */
-    autores: tramo(new Set(citas.map((c) => c.autor)).size, META_AUTORES),
+    autores: tramo(new Set(citas.flatMap((c) => (c.autor === undefined ? [] : [c.autor]))).size, META_AUTORES),
     colecciones: tramo(colecciones.length - huecos.colecciones.length, META_COLECCIONES_PUBLICADAS),
     concentracion: concentracionDe(citas),
     /*

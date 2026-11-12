@@ -15,6 +15,7 @@ import { leerRutasDeSalida, navDeSalidas, type GrupoLeido } from './ayuda/rutas-
 import {
   citasDeLaMismaObra,
   citasRelacionadas,
+  dueñoDeLaRuta,
   problemaDeRutasDeSalida,
   repartir,
   rutasDeSalidaDeCita,
@@ -61,7 +62,9 @@ function cita(slug: string, autor: string, obra?: string, temas: string[] = ['el
     temas,
     procedencia: {},
     aptaParaPortada: false,
-    ...(obra !== undefined ? { obra: { nombre: obra, titulo: obra, recuento: 0 } as ObraResuelta } : {}),
+    ...(obra !== undefined
+      ? { obra: { nombre: obra, dueño: { tipo: 'autor', slug: autor }, titulo: obra, recuento: 0 } as ObraResuelta }
+      : {}),
   } as Cita;
 }
 
@@ -155,9 +158,9 @@ describe('Historia 24.6 — la matriz del spec, sin construir', () => {
 
   it('Más de, con Obra — Autor con 15, 8 de su Obra: 4 de las 7 de fuera, ninguna de su Obra, recuento 15', () => {
     const rutas = rutasDeSalidaDeCita(C, TODAS, POR_OBRA, [TEMA], { por: 'obra', cita: D });
-    expect(rutas.delAutor?.recuento).toBe(15);
-    expect(rutas.delAutor?.citas).toHaveLength(MAX_CITAS_RELACIONADAS);
-    for (const otra of rutas.delAutor!.citas) {
+    expect(rutas.delDueño?.recuento).toBe(15);
+    expect(rutas.delDueño?.citas).toHaveLength(MAX_CITAS_RELACIONADAS);
+    for (const otra of rutas.delDueño!.citas) {
       expect(slugs(OTRAS)).toContain(otra.slug);
       expect(otra.obra?.nombre).not.toBe('seneca--libro');
     }
@@ -170,13 +173,13 @@ describe('Historia 24.6 — la matriz del spec, sin construir', () => {
     const candidatas = citasRelacionadas(TODAS, suelta, 100, undefined);
     expect(candidatas).toHaveLength(14);
     expect(slugs(candidatas)).toEqual(expect.arrayContaining(slugs(LIBRO)));
-    expect(rutasDeSalidaDeCita(suelta, TODAS, POR_OBRA, [TEMA], undefined).delAutor?.citas).toHaveLength(4);
+    expect(rutasDeSalidaDeCita(suelta, TODAS, POR_OBRA, [TEMA], undefined).delDueño?.citas).toHaveLength(4);
   });
 
   it('Autor de una sola Obra — sin «Más de {Autor}»', () => {
     const manual = Array.from({ length: 5 }, (_, i) => cita(`epicteto-manual-${i}`, 'epicteto', 'epicteto--manual'));
     const rutas = rutasDeSalidaDeCita(manual[0], [...manual, ...TODAS], porObraDe(manual), [TEMA], { por: 'obra', cita: manual[1] });
-    expect(rutas.delAutor).toBeUndefined();
+    expect(rutas.delDueño).toBeUndefined();
     expect(slugs(rutas.mismaObra!.citas)).toEqual(slugs(manual.slice(2)));
   });
 
@@ -189,7 +192,7 @@ describe('Historia 24.6 — la matriz del spec, sin construir', () => {
   it('Ningún grupo — Autor de una Cita, Obra de 1, sin Tema', () => {
     const sola = cita('antonio-machado-sola', 'antonio-machado', 'antonio-machado--soledades', []);
     const rutas = rutasDeSalidaDeCita(sola, [sola, ...TODAS], porObraDe([sola]), [TEMA], undefined);
-    expect(rutas).toEqual({ mismaObra: undefined, delAutor: undefined, temas: [] });
+    expect(rutas).toEqual({ mismaObra: undefined, delDueño: undefined, temas: [] });
   });
 
   it('Siguiente por Tema, de otra Obra y otro Autor — no afecta a los grupos', () => {
@@ -218,7 +221,7 @@ describe('Historia 24.6 — la matriz del spec, sin construir', () => {
         grupo !== undefined && grupo.length >= 2 ? { por: 'obra', cita: grupo[(i + 1) % grupo.length] } : undefined;
       const rutas = rutasDeSalidaDeCita(propia, TODAS, POR_OBRA, [TEMA], siguiente);
       expect(rutasDeSalidaDeCita(propia, al_reves, POR_OBRA, [TEMA], siguiente), propia.slug).toEqual(rutas);
-      const elegidas = [...(rutas.mismaObra?.citas ?? []), ...(rutas.delAutor?.citas ?? [])].map((c) => c.slug);
+      const elegidas = [...(rutas.mismaObra?.citas ?? []), ...(rutas.delDueño?.citas ?? [])].map((c) => c.slug);
       expect(elegidas, propia.slug).not.toContain(propia.slug);
       if (siguiente !== undefined) expect(elegidas, propia.slug).not.toContain(siguiente.cita.slug);
       expect(new Set(elegidas).size, propia.slug).toBe(elegidas.length);
@@ -227,34 +230,77 @@ describe('Historia 24.6 — la matriz del spec, sin construir', () => {
   });
 });
 
+describe('Historia 35.4 — las Rutas de salida del dueño: el Personaje si lo hay', () => {
+  // Batman: dos Citas sin Autor de su Obra, una con Séneca de la Obra de Séneca y una sin Obra.
+  const conPersonaje = (c: Cita, personaje: string, sinAutor = false): Cita =>
+    ({ ...c, personaje, ...(sinAutor ? { autor: undefined } : {}) }) as Cita;
+  const deBatman = (slug: string, obra?: string) => conPersonaje(cita(slug, 'batman', obra), 'batman', true);
+  const B1 = deBatman('batman-1', 'batman--caballero');
+  const B2 = deBatman('batman-2', 'batman--caballero');
+  const B3 = conPersonaje(cita('seneca-b3', 'seneca', 'seneca--libro'), 'batman');
+  const B4 = conPersonaje(cita('seneca-b4', 'seneca'), 'batman');
+  const S = cita('seneca-sola', 'seneca', 'seneca--otra');
+  const todas = [B1, B2, B3, B4, S];
+
+  it('`dueñoDeLaRuta` prefiere al Personaje; sin él, el Autor', () => {
+    expect(dueñoDeLaRuta(B1)).toEqual({ tipo: 'personaje', slug: 'batman' });
+    expect(dueñoDeLaRuta(B3)).toEqual({ tipo: 'personaje', slug: 'batman' });
+    expect(dueñoDeLaRuta(S)).toEqual({ tipo: 'autor', slug: 'seneca' });
+  });
+
+  it('«Más de Batman»: las suyas de otra Obra o sin ella, con el recuento de las que lo declaran', () => {
+    const rutas = rutasDeSalidaDeCita(B1, todas, porObraDe(todas), [TEMA], { por: 'obra', cita: B2 });
+    expect(rutas.delDueño?.dueño).toEqual({ tipo: 'personaje', slug: 'batman' });
+    expect(rutas.delDueño?.recuento).toBe(4);
+    expect(slugs(rutas.delDueño!.citas).sort()).toEqual(['seneca-b3', 'seneca-b4']);
+    expect(problemaDeRutasDeSalida({ tipo: 'personaje', slug: 'batman', nombre: 'Batman' }, rutas)).toBeUndefined();
+  });
+
+  it('«Más de Séneca» de una de siempre lleva también las suyas con Personaje', () => {
+    const rutas = rutasDeSalidaDeCita(S, todas, porObraDe(todas), [TEMA], undefined);
+    expect(rutas.delDueño?.dueño).toEqual({ tipo: 'autor', slug: 'seneca' });
+    expect(rutas.delDueño?.recuento).toBe(todas.filter((c) => c.autor === 'seneca').length);
+  });
+
+  it('objeta un pie de otro dueño, o una Cita que no es del dueño', () => {
+    const rutas = rutasDeSalidaDeCita(B1, todas, porObraDe(todas), [TEMA], { por: 'obra', cita: B2 });
+    const SENECA = { tipo: 'autor', slug: 'seneca', nombre: 'Séneca' } as const;
+    expect(problemaDeRutasDeSalida(SENECA, rutas)).toMatch(/«Más de Séneca» es de «batman» y no de «seneca»/);
+    const ajena = { ...rutas, delDueño: { ...rutas.delDueño!, citas: [S] } };
+    expect(problemaDeRutasDeSalida({ tipo: 'personaje', slug: 'batman', nombre: 'Batman' }, ajena)).toMatch(
+      /«seneca-sola», que es de «nadie» y no de «batman»/,
+    );
+  });
+});
+
 describe('Historia 24.6 — `problemaDeRutasDeSalida`, lo que pararía la construcción', () => {
-  const SENECA = { slug: 'seneca', nombre: 'Séneca' };
+  const SENECA = { tipo: 'autor', slug: 'seneca', nombre: 'Séneca' } as const;
   const obra = (autor: string, recuento: number) =>
     ({ nombre: 'seneca--libro', dueño: { tipo: 'autor', slug: autor }, autor, titulo: 'Libro', recuento, fuentes: [], edicionCotejada: false, temas: [] }) as ObraResuelta;
   const deLaObra = (n: number) => Array.from({ length: n }, (_, i) => cita(`seneca-libro-${i}`, 'seneca', 'seneca--libro'));
   const deOtras = (n: number) => Array.from({ length: n }, (_, i) => cita(`seneca-cartas-${i}`, 'seneca', 'seneca--cartas'));
   const bien = (): RutasDeSalidaDeCita => ({
     mismaObra: { obra: obra('seneca', 8), citas: deLaObra(3) },
-    delAutor: { recuento: 15, citas: deOtras(4) },
+    delDueño: { dueño: { tipo: 'autor', slug: 'seneca' }, recuento: 15, citas: deOtras(4) },
     temas: [],
   });
 
   it('nada que objetar a un pie como los que da `rutasDeSalidaDeCita`', () => {
     expect(problemaDeRutasDeSalida(SENECA, bien())).toBeUndefined();
-    expect(problemaDeRutasDeSalida(SENECA, { mismaObra: undefined, delAutor: undefined, temas: [TEMA] })).toBeUndefined();
+    expect(problemaDeRutasDeSalida(SENECA, { mismaObra: undefined, delDueño: undefined, temas: [TEMA] })).toBeUndefined();
   });
 
   it.each<[string, (r: RutasDeSalidaDeCita) => RutasDeSalidaDeCita, RegExp]>([
     ['un grupo de la Obra vacío', (r) => ({ ...r, mismaObra: { ...r.mismaObra!, citas: [] } }), /«De la misma obra» llega sin Citas/],
-    ['un grupo del Autor vacío', (r) => ({ ...r, delAutor: { ...r.delAutor!, citas: [] } }), /«Más de Séneca» llega sin Citas/],
+    ['un grupo del Autor vacío', (r) => ({ ...r, delDueño: { ...r.delDueño!, citas: [] } }), /«Más de Séneca» llega sin Citas/],
     ['la Obra de otro Autor', (r) => ({ ...r, mismaObra: { ...r.mismaObra!, obra: obra('epicteto', 8) } }), /de «epicteto» y no de «seneca»/],
     ['más tarjetas de la Obra de las que caben', (r) => ({ ...r, mismaObra: { ...r.mismaObra!, citas: deLaObra(4) } }), /lleva 4 Citas, y no caben más de 3/],
-    ['más tarjetas del Autor de las que caben', (r) => ({ ...r, delAutor: { ...r.delAutor!, citas: deOtras(5) } }), /lleva 5 Citas, y no caben más de 4/],
+    ['más tarjetas del Autor de las que caben', (r) => ({ ...r, delDueño: { ...r.delDueño!, citas: deOtras(5) } }), /lleva 5 Citas, y no caben más de 4/],
     ['una Cita de otra Obra', (r) => ({ ...r, mismaObra: { ...r.mismaObra!, citas: deOtras(1) } }), /la Cita «seneca-cartas-0», que no es de la Obra «seneca--libro»/],
-    ['una Cita de otro Autor', (r) => ({ ...r, delAutor: { ...r.delAutor!, citas: [cita('epicteto-manual-0', 'epicteto')] } }), /«epicteto-manual-0», que es de «epicteto» y no de «seneca»/],
+    ['una Cita de otro Autor', (r) => ({ ...r, delDueño: { ...r.delDueño!, citas: [cita('epicteto-manual-0', 'epicteto')] } }), /«epicteto-manual-0», que es de «epicteto» y no de «seneca»/],
     ['un cierre de la Obra que cuenta menos de lo que se enseña', (r) => ({ ...r, mismaObra: { ...r.mismaObra!, obra: obra('seneca', 3) } }), /cuenta 3 Citas de «seneca--libro», y el pie enseña 3 más la que se lee/],
-    ['un cierre del Autor que cuenta menos de lo que se enseña', (r) => ({ ...r, delAutor: { ...r.delAutor!, recuento: 4 } }), /«Más de Séneca» cuenta 4 Citas, y el pie enseña 4 más la que se lee/],
-    ['una tarjeta en los dos grupos', (r) => ({ ...r, delAutor: { ...r.delAutor!, citas: [deLaObra(1)[0]] } }), /la Cita «seneca-libro-0» sale dos veces/],
+    ['un cierre del Autor que cuenta menos de lo que se enseña', (r) => ({ ...r, delDueño: { ...r.delDueño!, recuento: 4 } }), /«Más de Séneca» cuenta 4 Citas, y el pie enseña 4 más la que se lee/],
+    ['una tarjeta en los dos grupos', (r) => ({ ...r, delDueño: { ...r.delDueño!, citas: [deLaObra(1)[0]] } }), /la Cita «seneca-libro-0» sale dos veces/],
   ])('objeta %s', (_, romper, mensaje) => {
     expect(problemaDeRutasDeSalida(SENECA, romper(bien()))).toMatch(mensaje);
   });
@@ -387,15 +433,15 @@ function corpusDelPie(): { corpus: Record<string, string>; citas: CitaDelFixture
 }
 
 /** Lo que espera cada Página de Cita: cuántas tarjetas en cada grupo, y si hay chip. */
-const ESPERADO: Record<string, { mismaObra: number; delAutor: number; chip: boolean } | 'sin-nav'> = {
-  ...Object.fromEntries(Array.from({ length: 8 }, (_, i) => [`seneca-brevedad-${i}`, { mismaObra: 3, delAutor: 4, chip: true }])),
-  ...Object.fromEntries(Array.from({ length: 3 }, (_, i) => [`seneca-cartas-${i}`, { mismaObra: 1, delAutor: 4, chip: true }])),
-  ...Object.fromEntries(Array.from({ length: 2 }, (_, i) => [`seneca-feliz-${i}`, { mismaObra: 0, delAutor: 4, chip: true }])),
-  'seneca-ira-0': { mismaObra: 0, delAutor: 4, chip: false },
-  [SIN_OBRA]: { mismaObra: 0, delAutor: 4, chip: true },
-  ...Object.fromEntries(Array.from({ length: 5 }, (_, i) => [`epicteto-manual-${i}`, { mismaObra: 3, delAutor: 0, chip: true }])),
+const ESPERADO: Record<string, { mismaObra: number; delDueño: number; chip: boolean } | 'sin-nav'> = {
+  ...Object.fromEntries(Array.from({ length: 8 }, (_, i) => [`seneca-brevedad-${i}`, { mismaObra: 3, delDueño: 4, chip: true }])),
+  ...Object.fromEntries(Array.from({ length: 3 }, (_, i) => [`seneca-cartas-${i}`, { mismaObra: 1, delDueño: 4, chip: true }])),
+  ...Object.fromEntries(Array.from({ length: 2 }, (_, i) => [`seneca-feliz-${i}`, { mismaObra: 0, delDueño: 4, chip: true }])),
+  'seneca-ira-0': { mismaObra: 0, delDueño: 4, chip: false },
+  [SIN_OBRA]: { mismaObra: 0, delDueño: 4, chip: true },
+  ...Object.fromEntries(Array.from({ length: 5 }, (_, i) => [`epicteto-manual-${i}`, { mismaObra: 3, delDueño: 0, chip: true }])),
   'antonio-machado-soledades-0': 'sin-nav',
-  ...Object.fromEntries(Array.from({ length: 4 }, (_, i) => [`marco-aurelio-meditaciones-${i}`, { mismaObra: 2, delAutor: 0, chip: false }])),
+  ...Object.fromEntries(Array.from({ length: 4 }, (_, i) => [`marco-aurelio-meditaciones-${i}`, { mismaObra: 2, delDueño: 0, chip: false }])),
 };
 
 /** Los cierres que espera el fixture, todos los que hay. */
@@ -570,7 +616,7 @@ describe('Historia 24.6 — el pie de cada Página de Cita, en `dist/`', () => {
       }
       const clases = leidas!.grupos.map((g) => g.clase);
       expect(clases.includes('de-la-misma-obra'), slug).toBe(esperado.mismaObra > 0);
-      expect(clases.includes('mas-del-autor'), slug).toBe(esperado.delAutor > 0);
+      expect(clases.includes('mas-del-autor'), slug).toBe(esperado.delDueño > 0);
       expect(clases.includes('temas-de-la-cita'), slug).toBe(esperado.chip);
       for (const g of leidas!.grupos) {
         expect(g.rotulo, `${slug}: ${g.clase}`).toBeDefined();
@@ -644,7 +690,7 @@ describe('Historia 24.6 — el pie de cada Página de Cita, en `dist/`', () => {
       const esperado = ESPERADO[slug];
       if (esperado === 'sin-nav') continue;
       expect(grupo(html, slug, 'de-la-misma-obra')?.tarjetas.length ?? 0, slug).toBe(esperado.mismaObra);
-      expect(grupo(html, slug, 'mas-del-autor')?.tarjetas.length ?? 0, slug).toBe(esperado.delAutor);
+      expect(grupo(html, slug, 'mas-del-autor')?.tarjetas.length ?? 0, slug).toBe(esperado.delDueño);
       for (const g of leerRutasDeSalida(html, slug)!.grupos) if (g.cierre !== undefined) cierres.add(g.cierre.texto);
     }
     expect([...cierres].sort()).toEqual([...CIERRES_ESPERADOS].sort());
@@ -671,7 +717,7 @@ const obra = de('seneca-brevedad-0').obra!;
 ---
 <!doctype html>
 <html lang="es"><head><meta charset="utf-8" /><title>Sonda</title></head>
-<body><RutasDeSalida autor={autor} rutas={${rutas}} zona="rutas-de-salida" /></body></html>
+<body><RutasDeSalida dueño={{ tipo: 'autor', slug: autor.slug, nombre: autor.nombre }} rutas={${rutas}} zona="rutas-de-salida" /></body></html>
 `;
   const construirSonda = async (rutas: string) => {
     const resultado = await construirConCorpus(corpusDelPie().corpus, {
@@ -683,7 +729,7 @@ const obra = de('seneca-brevedad-0').obra!;
 
   it('«Más de {Autor}» con una Cita de otro Autor, nombrando la ruta, la Cita y los dos Autores', async () => {
     const resultado = await construirSonda(
-      "{ mismaObra: undefined, delAutor: { recuento: 15, citas: [de('epicteto-manual-0')] }, temas: [] }",
+      "{ mismaObra: undefined, delDueño: { dueño: { tipo: 'autor', slug: 'seneca' }, recuento: 15, citas: [de('epicteto-manual-0')] }, temas: [] }",
     );
     expect(resultado.codigo, resultado.salida).not.toBe(0);
     expect(resultado.salida).toMatch(
@@ -693,7 +739,7 @@ const obra = de('seneca-brevedad-0').obra!;
 
   it('«De la misma obra» con una Cita de otra Obra, nombrando la ruta y la Cita', async () => {
     const resultado = await construirSonda(
-      "{ mismaObra: { obra, citas: [de('seneca-cartas-0')] }, delAutor: undefined, temas: [] }",
+      "{ mismaObra: { obra, citas: [de('seneca-cartas-0')] }, delDueño: undefined, temas: [] }",
     );
     expect(resultado.codigo, resultado.salida).not.toBe(0);
     expect(resultado.salida).toMatch(
@@ -703,7 +749,7 @@ const obra = de('seneca-brevedad-0').obra!;
 
   it('una tarjeta en los dos grupos, nombrando la ruta y la Cita', async () => {
     const resultado = await construirSonda(
-      "{ mismaObra: { obra, citas: [de('seneca-brevedad-1')] }, delAutor: { recuento: 15, citas: [de('seneca-brevedad-1')] }, temas: [] }",
+      "{ mismaObra: { obra, citas: [de('seneca-brevedad-1')] }, delDueño: { dueño: { tipo: 'autor', slug: 'seneca' }, recuento: 15, citas: [de('seneca-brevedad-1')] }, temas: [] }",
     );
     expect(resultado.codigo, resultado.salida).not.toBe(0);
     expect(resultado.salida).toMatch(/\/sonda-rutas-de-salida\/?[^\n]*la Cita «seneca-brevedad-1» sale dos veces/);

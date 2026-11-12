@@ -107,11 +107,15 @@ export function seleccionDeColeccion(
      * épica entera. Se mira que el Autor esté **y** que traiga nombre: un `.yml` con la clave
      * vacía compondría la Cita con un hueco donde va la firma.
      */
-    const autor = autores.get(cita.autor);
+    // Historia 35.4 — la Cita de un Personaje sin Autor no tiene Autor que firmar la Pieza.
+    const autor = cita.autor === undefined ? undefined : autores.get(cita.autor);
     if (autor === undefined) {
       fuera.push({
         slug: cita.slug,
-        motivo: `su Autor «${cita.autor}» no está en el corpus, así que aparecería sin atribución`,
+        motivo:
+          cita.autor === undefined
+            ? 'no declara Autor, así que aparecería sin atribución'
+            : `su Autor «${cita.autor}» no está en el corpus, así que aparecería sin atribución`,
       });
       continue;
     }
