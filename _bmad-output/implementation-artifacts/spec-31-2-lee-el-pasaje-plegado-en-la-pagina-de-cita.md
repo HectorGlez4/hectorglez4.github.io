@@ -266,3 +266,24 @@ Blocking condition: none
 - `tests/unit/puertos-e2e.test.ts` (nueva, sin construir) — ningún `const PUERTO… = N` de `tests/e2e/` se repite entre ficheros ni pisa 4321 u 8787; en rojo antes del cambio.
 
 **Verificación de la tercera pasada.** `npx vitest run tests/unit/puertos-e2e.test.ts` — en rojo antes, en verde después; `npx playwright test tests/e2e/lee-el-pasaje.spec.ts tests/e2e/busqueda-historial.spec.ts` (los dos proyectos, en paralelo) — 8 en verde, 8 saltadas; `npx astro check` — 0 errores; `npm test` entero — 169 ficheros, 7.669 pruebas, en verde. Nada de lo que se pinta cambia: no se repitieron construcciones del Corpus real, la copia con 1.200 ni Lighthouse.
+
+## Verificación previa a la fusión — 2026-11-12
+
+Puerta de la etapa s-31 (31.1 y 31.2 en revisión), primer intento.
+
+**Sincronización.** `origin/main` (ad3a0edbc7: Épicas 29, 30 con la fase B de la 30.5, y 34) no era antepasado: fusionada en 965c3491fc. Dos conflictos, resueltos con los dos lados: `src/lib/umbrales.ts` (el tope del pasaje de la 31.1 junto a los topes de Tarjeta y de título/meta de la 34.1) y `sprint-status.yaml` (la fecha de esta rama; las líneas de la principal entraron solas). `npx tsx tools/autor.ts proponer-claves` no escribió nada. Sin cambios en `package-lock.json`, así que sin `npm ci`.
+
+**Interacción real con la 34.1, corregida (916b14086a).** La prueba «nadie más recorta texto de Cita» de `tests/unit/recorte.test.ts` marcaba `src/lib/pasaje.ts` (tres `texto.slice(`) y el comentario de `PasajeDeAparicion` en `src/lib/obras.ts`. No es un recorte de la Cita —es el reparto del texto del pasaje por sus tramos—, así que se renombró el local a `delPasaje` y el comentario dejó de escribir la forma; la prueba no se tocó. Con la 34.3 (el campo) no hubo choque: la e2e entera lo cubre.
+
+**CI equivalente** (`publicar.yml`): `npm run build` en verde (Directorio de Obras 235.999 bytes; `dist/` 520,7 MiB juzgados, por debajo del aviso); `npx astro check` — 0 errores, 0 avisos; `npm test` — 171 ficheros, 7.710 pruebas: una sola caída, `objetivo-cli.test.ts` «las dos órdenes hermanas escriben los porcentajes igual» por el plazo de 120 s de la CLI bajo carga; repetida sola, 41/41 en verde. `huella.test.ts` en verde: la etapa no toca `src/lib/vocabulario.ts` ni `medicion/migrations/` respecto de la principal.
+
+**`npm run test:e2e` entero** (los dos proyectos, contra el receptor local en 8787): 1.408 en verde, 161 saltadas, 1 caída —`tipografia-calculada.spec.ts` «buscar-con-resultados» en móvil, el `p.estado` de la instantánea, la caída conocida que también da la principal—; el fichero repetido entero, 28/28 en verde. El choque del puerto 4403 entre `lee-el-pasaje.spec.ts` y `busqueda-historial.spec.ts` ya no aparece en la pasada entera: los dos en verde.
+
+**NFR-7** (Página de Cita; con `MAX_CARACTERES_DEL_PASAJE` en `undefined` no se pinta ningún pasaje, se midió igual). Lighthouse 13.5.0 móvil, `--throttling-method=simulate`, 10 corridas alternas principal/rama por página, las dos construidas con `MEDICION_ENDPOINT=http://localhost:8787/` y servidas por `tests/servidor.mjs` de la rama con `SERVIDOR_CACHE_CONTROL=max-age=600` y `SERVIDOR_GZIP=1`, receptor ficticio en 8787:
+
+| Página | LCP principal | LCP rama | Δ | FCP principal | FCP rama | Δ |
+|---|---|---|---|---|---|---|
+| `/cita/jose-marti-yo-soy-un-hombre-sincero-de-donde/` | 1.642 | 1.537 | −105 | 901 | 899 | −1 |
+| `/cita/antonio-machado-caminante-no-hay-camino-se-hace-camino/` | 1.640 | 1.655 | +15 | 936 | 934 | −2 |
+
+Medias en ms; margen max(100 ms, 5 %). LCP de Cita por debajo de 2.500 ms y dentro del margen en las dos: veredicto **ok**, sin desempate con `devtools`. Registros en `.claude/v9-ralph/logs/s-31/nfr7-gate1/`.
