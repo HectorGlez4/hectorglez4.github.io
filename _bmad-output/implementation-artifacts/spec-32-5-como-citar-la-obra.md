@@ -5,7 +5,7 @@ created: '2026-11-08'
 status: 'done'
 baseline_revision: '3d45cb258d8c5010dab16963fb2614409a51137e'
 review_loop_iteration: 0
-followup_review_recommended: false
+followup_review_recommended: true
 context:
   - '{project-root}/_bmad-output/implementation-artifacts/epic-32-context.md'
   - '{project-root}/_bmad-output/implementation-artifacts/spec-32-3-el-incipit-lo-declara-una-persona-y-la-pagina-lo-ensena-plegado.md'
@@ -18,6 +18,13 @@ deferred:
       tests/e2e/ficha-tecnica.spec.ts (corpus de prueba, ninguna Obra real atada a Wikidata) midió 669,5 px con 70 px de desplegables; la puerta de la 32.2 se juzga ahora sin ese contenedor (599,5 px). Con el Corpus real la puerta de toda página 1 sigue en verde (peor, 626,8 px).
     location: >-
       tests/e2e/ficha-tecnica.spec.ts
+    severity: medium
+  - summary: >-
+      Pendiente de Héctor (bmad-ux): la puerta de primera pantalla de la 32.2 con Ficha técnica y el título de Larra queda en test.fixme, sin rebajar, hasta que decida qué ceder en la primera pantalla de la página 1 de Obra; sustituye la resta del contenedor de la pasada anterior.
+    evidence: |-
+      La revisión externa (blind-hunter, verification-gap) señaló que restar los 70 px de desplegables debilitaba la puerta. Restaurada la aserción original (caja.y < 640), el caso sintético mide 669,5 px (2026-11-09), así que se marca test.fixme con la decisión pendiente y la medida en su comentario. La puerta del Corpus real (tests/e2e/accesibilidad.spec.ts, toda página 1 de Obra) sigue estricta: peor 626,8 px (Lastarria) < 640, verde el 2026-11-12.
+    location: >-
+      tests/e2e/ficha-tecnica.spec.ts:166
     severity: medium
 ---
 
@@ -124,6 +131,20 @@ deferred:
 
 Las capas de revisión son externas (orquestador v9-ralph) y en esta pasada no trajeron hallazgos.
 
+### 2026-11-12 — Review pass
+- intent_gap: 0
+- bad_spec: 0
+- patch: 4 (high 1, medium 1, low 2)
+- defer: 1 (medium 1)
+- reject: 39
+- addressed_findings:
+  - `[high]` `[patch]` La puerta de primera pantalla de la 32.2 (`tests/e2e/ficha-tecnica.spec.ts`) restaba el contenedor de desplegables: se restaura la aserción original `caja.y < 640` y el caso sintético (669,5 px) va en `test.fixme` con la decisión pendiente de Héctor (bmad-ux) y la medida en el comentario; diferido en el frontmatter. La puerta del Corpus real sigue estricta.
+  - `[medium]` `[patch]` Ninguna prueba observaba que solo el botón que anunció lo último vacía la región: nueva prueba de `tests/e2e/como-citar-obra.spec.ts` con el reloj parado (APA, 1,5 s, MLA, vence APA, la región sigue con «Copiado.»); comprobado que falla sin la guarda (l. 117) y pasa con ella.
+  - `[low]` `[patch]` Dos pulsaciones del mismo botón antes de que resuelva la primera dejaban huérfano el primer temporizador: `CopiarReferencia.astro` limpia el temporizador antes de armar el nuevo.
+  - `[low]` `[patch]` La condición de «Cómo empieza» se escribía dos veces en la página: el hijo usa `conIncipit`.
+
+Rechazados, con su motivo: el portapapeles que rechaza o no existe se atiende en silencio y los botones se enseñan sin sondear, como en `CopiarCita` y como fija la matriz del contrato («silencio»); APA sin año sin «s. f.» y la edición como rótulo de la Fuente son formas del contrato; `obraTieneComoCitar` sin exclusiones, el acoplamiento por `parentElement`, la conducta repetida de `CopiarCita` (no se toca, por contrato), la fecha importada en lugar de por su texto, «Cómo citar» solo sin la 32.4 y el recuento de la isla en su propio tope son decisiones del contrato y de Design Notes; la página 2 y el resto de casos e2e están cubiertos en `dist/`; las variantes de entrada vacía, año 0 o pequeño, región o marcador ausentes son marcado propio o esquema del Corpus; el reexporte entre importaciones sigue el patrón del fichero; el resto, ruido.
+
 ## Design Notes
 
 - **Sin la 32.4.** «Cómo citar» va tras «Cómo empieza» —o, sin incipit, solo— en el contenedor que la 32.3 ya pinta; la 32.4 antepondrá «Dónde leer» dentro del mismo `div` (su spec ya lo prevé: «la 32.5 meterá «Cómo citar» detrás, en el mismo contenedor»). El conflicto de fusión es de pocas líneas en la página y se resuelve conservando los tres hermanos. Hasta la 32.4, «Dónde leer» sigue al pie con su salto: es el orden de UX-DR124 «con lo que ya existe».
@@ -173,3 +194,24 @@ Baseline: 3d45cb258d8c5010dab16963fb2614409a51137e.
 - `vocabulario.ts` sin cambios: `huella.test.ts` verde.
 
 **Riesgos residuales.** Las formas literales de la Referencia de Obra son `[ASSUMPTION]` que revisa Héctor. La primera pantalla con Ficha técnica (diferido). La entrada `copiar-referencia` se cuenta en el trozo `anuncio`, que comparte con el filtro y la búsqueda.
+
+### Pasada de revisión del 2026-11-12
+
+**Cambio.** Cuatro parches de la revisión externa: la puerta de primera pantalla de la 32.2 vuelve a su aserción original y su caso sintético va en `test.fixme` (pendiente de Héctor, bmad-ux); una prueba nueva fija que solo el último anunciante vacía la región; la isla no deja temporizadores huérfanos; la página escribe la condición del incipit una vez.
+
+**Ficheros.**
+- `tests/e2e/ficha-tecnica.spec.ts` — la aserción `caja.y < 640` sin restar nada, en `test.fixme` con la medida (669,5 px) y la decisión pendiente.
+- `tests/e2e/como-citar-obra.spec.ts` — la prueba del último anunciante con el reloj parado.
+- `src/islands/CopiarReferencia.astro` — `clearTimeout` antes de armar el temporizador.
+- `src/pages/obra/[autor]/[slug]/[...page].astro` — `conIncipit` en el hijo.
+
+**Revisión.** 4 parches (high 1, medium 1, low 2), 1 diferido (pendiente de Héctor, bmad-ux), 39 rechazados. `followup_review_recommended: true`: hubo un parche high (puntuación 3 × 1 + 1 × 2 = 5).
+
+**Verificación.**
+- e2e `como-citar-obra` y `ficha-tecnica` en `escritorio`: 10 verdes, 2 omitidas (la página 2 de la Obra de hoy no existe; la puerta sintética en `fixme`). La prueba nueva falla con la guarda quitada (mutación comprobada y revertida).
+- `accesibilidad.spec.ts -g "Obra|Historia 24.7"` en `escritorio` y `movil`: 96 verdes; la peor página 1 de Obra del Corpus real, 626,8 px (Lastarria) < 640.
+- `npx astro check`: 0 errores, 0 avisos.
+- `npm test` completo (detached): 175 ficheros, 7.906 de 7.906 verdes.
+
+**Riesgos residuales.** La primera pantalla con Ficha técnica no tiene puerta activa hasta la decisión de Héctor; el caso se ve en cada corrida como `fixme`.
+

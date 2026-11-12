@@ -89,6 +89,8 @@
         boton.setAttribute('data-estado', 'copiado');
         bloque.anuncio = boton;
         anunciar(region, 'Copiado.');
+        // Dos pulsaciones antes de que resuelva la primera: el temporizador de la primera no queda huérfano.
+        clearTimeout(temporizador);
         temporizador = setTimeout(volver, 2000);
         __medir(EVENTO_REFERENCIA);
       });

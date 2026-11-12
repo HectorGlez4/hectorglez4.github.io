@@ -93,6 +93,34 @@ test.describe('Historia 32.5 — «Cómo citar» de la Obra, con JavaScript', ()
     );
   });
 
+  test('solo el botón que anunció lo último vacía la región: otra copia a medio plazo no se borra con el temporizador de la anterior', async ({ page }) => {
+    await page.clock.install({ time: new Date(2026, 10, 9, 10, 0) });
+    await page.goto(OBRA!);
+    await resumen(page).click();
+    // El reloj, parado: solo avanza con `runFor` (también el fotograma de `anunciar`).
+    await page.clock.pauseAt(new Date(2026, 10, 9, 10, 0, 5));
+    const apa = page.getByRole('button', { name: 'Copiar APA', exact: true });
+    const mla = page.getByRole('button', { name: 'Copiar MLA', exact: true });
+    await apa.click();
+    await expect(apa.locator('[data-etiqueta]')).toHaveText('Copiado.');
+    await page.clock.runFor(100);
+    await expect(region(page)).toHaveText('Copiado.');
+    await page.clock.runFor(1400);
+    await mla.click();
+    await expect(mla.locator('[data-etiqueta]')).toHaveText('Copiado.');
+    await page.clock.runFor(100);
+    await expect(region(page)).toHaveText('Copiado.');
+    // Vence el temporizador de APA (2 s desde su pulsación): APA vuelve, la región sigue con MLA.
+    await page.clock.runFor(500);
+    await expect(apa.locator('[data-etiqueta]')).toHaveText('Copiar APA');
+    await expect(mla.locator('[data-etiqueta]')).toHaveText('Copiado.');
+    await expect(region(page)).toHaveText('Copiado.');
+    // Vence el de MLA (2 s desde la suya): entonces sí se vacía.
+    await page.clock.runFor(1500);
+    await expect(mla.locator('[data-etiqueta]')).toHaveText('Copiar MLA');
+    await expect(region(page)).toHaveText('');
+  });
+
   test('una página abierta desde ayer copia la fecha del día en que se pulsa', async ({ page }) => {
     await page.clock.setFixedTime(new Date(2026, 10, 8, 23, 59));
     await page.goto(OBRA!);

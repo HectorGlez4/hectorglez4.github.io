@@ -213,7 +213,7 @@ const enVenta =
        */
       (conIncipit || conComoCitar) && (
         <div data-pagefind-ignore="all" style="margin-top: calc(var(--unidad) * 3)">
-          {primera && incipit !== undefined && <ComoEmpieza incipit={incipit} />}
+          {conIncipit && <ComoEmpieza incipit={incipit!} />}
           {conComoCitar && (
             <Desplegable rotulo="Cómo citar"><ComoCitar referencias={referenciasDeObra(obra, autor, edicion, canonica)} /></Desplegable>
           )}
