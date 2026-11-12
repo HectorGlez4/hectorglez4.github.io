@@ -25,13 +25,13 @@ export type PartesDelPasaje = SegmentoDelPasaje[][][];
  * tramos de los párrafos —las líneas en blanco entre bloques— no se pinta.
  */
 export function partesDelPasaje(pasaje: Pick<PasajeDeAparicion, 'texto' | 'inicio' | 'fin' | 'parrafos'>): PartesDelPasaje {
-  const { texto, inicio, fin, parrafos } = pasaje;
+  const { texto: delPasaje, inicio, fin, parrafos } = pasaje;
   return parrafos.map((lineas) =>
     lineas.map(([desde, hasta]) => {
       const segmentos: SegmentoDelPasaje[] = [];
       const cortes = [desde, Math.min(Math.max(inicio, desde), hasta), Math.min(Math.max(fin, desde), hasta), hasta];
       for (let i = 0; i < 3; i += 1) {
-        if (cortes[i + 1] > cortes[i]) segmentos.push({ texto: texto.slice(cortes[i], cortes[i + 1]), deLaCita: i === 1 });
+        if (cortes[i + 1] > cortes[i]) segmentos.push({ texto: delPasaje.slice(cortes[i], cortes[i + 1]), deLaCita: i === 1 });
       }
       return segmentos;
     }),
@@ -55,19 +55,19 @@ const NO_BLANCO = /\S/u;
 export function problemaDeLosParrafos(
   pasaje: Pick<PasajeDeAparicion, 'texto' | 'inicio' | 'fin' | 'parrafos'>,
 ): string | undefined {
-  const { texto, inicio, fin, parrafos } = pasaje;
-  if (!(inicio < fin && fin <= texto.length)) return 'el tramo de la Cita no cabe en su pasaje: hace falta inicio < fin ≤ largo del texto';
+  const { texto: delPasaje, inicio, fin, parrafos } = pasaje;
+  if (!(inicio < fin && fin <= delPasaje.length)) return 'el tramo de la Cita no cabe en su pasaje: hace falta inicio < fin ≤ largo del texto';
   if (parrafos.length === 0 || parrafos.some((lineas) => lineas.length === 0)) return 'hace falta al menos un párrafo, y cada uno con al menos una línea';
   let anterior = 0;
   for (const lineas of parrafos) {
     for (const [desde, hasta] of lineas) {
-      if (!(Number.isInteger(desde) && Number.isInteger(hasta) && anterior <= desde && desde < hasta && hasta <= texto.length)) {
+      if (!(Number.isInteger(desde) && Number.isInteger(hasta) && anterior <= desde && desde < hasta && hasta <= delPasaje.length)) {
         return `el tramo [${desde}, ${hasta}) no es un tramo de su texto: hace falta 0 ≤ desde < hasta ≤ largo, crecientes y sin solaparse`;
       }
-      if (NO_BLANCO.test(texto.slice(anterior, desde))) return `el texto entre ${anterior} y ${desde} no cae en ningún tramo y no es blanco`;
+      if (NO_BLANCO.test(delPasaje.slice(anterior, desde))) return `el texto entre ${anterior} y ${desde} no cae en ningún tramo y no es blanco`;
       anterior = hasta;
     }
   }
-  if (NO_BLANCO.test(texto.slice(anterior))) return `el texto desde ${anterior} no cae en ningún tramo y no es blanco`;
+  if (NO_BLANCO.test(delPasaje.slice(anterior))) return `el texto desde ${anterior} no cae en ningún tramo y no es blanco`;
   return undefined;
 }
