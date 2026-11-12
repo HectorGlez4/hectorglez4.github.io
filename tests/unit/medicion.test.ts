@@ -37,6 +37,7 @@ import {
   MAX_BYTES_DE_GUION,
   MAX_BYTES_GUION_DE_MEDICION,
   MAX_CARACTERES_IMAGEN,
+  MIN_CITAS_POR_PERSONAJE,
   MIN_MS_VISIBLES_PARA_LA_LECTURA,
   PAUSA_DE_LOS_SELECTORES_MS,
   PAUSA_DE_TECLEO_MS,
@@ -1985,6 +1986,13 @@ const SLUG_LARGO = 'seneca-frase-larga';
 const SLUG_DE_PERSONAJE = 'seneca-a-batman-le-dice';
 const TEXTO_DE_PERSONAJE = 'La noche del catálogo de prueba es más oscura antes del alba.';
 const PERSONAJE = '/personaje/batman/';
+/** Historia 35.3b — las demás Citas de Batman, hasta `MIN_CITAS_POR_PERSONAJE`. */
+const SLUGS_DE_BATMAN = Array.from({ length: MIN_CITAS_POR_PERSONAJE - 1 }, (_, i) => `seneca-a-batman-otra-${i + 1}`);
+const TEXTOS_DE_BATMAN = [
+  'Un murciélago vigila el campanario mientras la ciudad duerme tranquila.',
+  'Quien guarda silencio en el tejado conoce el precio de cada promesa rota.',
+  'La capa negra pesa menos que el recuerdo de aquella calle sin farolas.',
+].slice(0, SLUGS_DE_BATMAN.length);
 const CORPUS_MEDIDO: Record<string, string> = {
   'autores/seneca.yml': AUTOR_VALIDO,
   'temas/el-tiempo.yml': TEMA_VALIDO,
@@ -2039,13 +2047,42 @@ const CORPUS_MEDIDO: Record<string, string> = {
     procedencia: { obra: 'Cartas a Lucilio', año: 64 },
     fuente: { id: 'wikisource-es', url: 'https://es.wikisource.org/wiki/Cartas_a_Lucilio' },
   }),
+  /*
+   * Historia 35.3b — las que le faltan a Batman para `MIN_CITAS_POR_PERSONAJE`, así su página 1
+   * se indexa y emite su vista: fuera del Tema y de la Colección, para no tocar sus listados, y con
+   * un slug que las deja en la página 1 del Autor. «Cartas a Lucilio» sigue indexable.
+   */
+  ...Object.fromEntries(
+    SLUGS_DE_BATMAN.map((slug, i) => [
+      `citas/${slug}.md`,
+      citaValida({
+        texto: TEXTOS_DE_BATMAN[i],
+        slug,
+        temas: [],
+        personaje: 'batman',
+        clase: 'atribuida',
+        estadoDerechos: undefined,
+        ...ATESTIGUADA,
+        procedencia: { obra: 'Cartas a Lucilio', año: 64 },
+        fuente: { id: 'wikisource-es', url: 'https://es.wikisource.org/wiki/Cartas_a_Lucilio' },
+      }),
+    ]),
+  ),
 };
-const SLUGS_DE_CITA = [...SLUGS, SLUG_LARGO, 'seneca-carta-0', 'seneca-carta-1', SLUG_DE_PERSONAJE];
+const SLUGS_DE_CITA = [
+  ...SLUGS,
+  SLUG_LARGO,
+  'seneca-carta-0',
+  'seneca-carta-1',
+  SLUG_DE_PERSONAJE,
+  ...SLUGS_DE_BATMAN,
+];
 const TEXTOS_DE_CITA = [
   ...SLUGS.map((_, i) => `Frase número ${i} del catálogo de prueba.`),
   TEXTO_LARGO,
   ...[0, 1].map((i) => `Carta número ${i} del catálogo de prueba.`),
   TEXTO_DE_PERSONAJE,
+  ...TEXTOS_DE_BATMAN,
 ];
 
 /** Construye una vez por entorno y apunta el proyecto para limpiarlo, falle o no. */

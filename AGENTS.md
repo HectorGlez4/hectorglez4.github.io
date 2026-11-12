@@ -362,10 +362,20 @@ biografía con `AtribucionDeSemblanza`, o la propia con «Semblanza de {responde
 («Obras en este Corpus», `obrasDelPersonaje`), el rótulo «Citas» y el listado (`citasDePersonaje`, el
 orden de `citasDeAutor`); las 2+, el `h1` y el listado, `noindex` por forma. Pestaña «Frases de
 {nombre}» (`tituloDePersonaje`) y meta «{n} frases de {nombre}, personaje de {universo}.»
-(`descripcionDePersonaje`); JSON-LD `CollectionPage` sin `Person`; sin Tarjeta Social ni «Buscar en…»
-(35.3b, 35.5) y sin ningún Modelo (`SUPERFICIES_SIN_INGRESO`). Se publica la de todo Personaje que una
-Cita publicada declara, y **existir no es indexarse**: la página 1 es `indexablePorContenido`, con la
-lista de `personajesIndexables` —hoy, todo Personaje publicado; el umbral lo pone la 35.3b—. La
+(`descripcionDePersonaje`); JSON-LD `CollectionPage` sin `Person`; sin «Buscar en…» (35.5) y sin
+ningún Modelo (`SUPERFICIES_SIN_INGRESO`). «personaje de {universo}» tiene un dueño,
+`universoDePersonaje` de `src/lib/atribucion.ts`, que usan la ficha, la meta y la Tarjeta Social. Se
+publica la de todo Personaje que una Cita publicada declara, y **existir no es indexarse** (Historia
+35.3b): la página 1 es `indexablePorContenido`, con la lista de `personajesIndexables` —los
+Personajes con al menos `MIN_CITAS_POR_PERSONAJE` (2, `src/lib/umbrales.ts`) Citas que los declaran;
+el umbral se aplica ahí y solo ahí, y de ahí lo heredan las dos instancias de `superficies.ts`, el
+sitemap, Pagefind, la vista, el rastreo y el aviso—. Bajo el umbral es la misma página, sin marca ni
+aviso, con `noindex, follow`, fuera del sitemap y de Pagefind y sin vista de superficie
+(`causaDelServicio` = `contenido`); nunca se declara en la ficha. **Toda** página de Personaje —la 1 y
+las 2+, se indexe o no— declara su Tarjeta Social, `/tarjeta/personaje/{slug}.png`
+(`src/pages/tarjeta/personaje/[slug].png.ts`): la plantilla de listado del Autor con el nombre en la
+serif y «personaje de {universo}» como único hecho (`datosDeTarjetaDePersonaje` de
+`src/lib/tarjeta.ts`), sin semblanza ni recuento. La
 Atribución de una Cita con `personaje` nombra al Personaje y enlaza a su página (zona `atribucion`);
 sin él, el marcado es el de siempre. El grafo de NFR-5 (`grafoDelModelo`) gana su listado, su página 1
 → sus Obras y cada Cita → su Personaje, y la búsqueda propia el tipo `personaje` («Personaje» en
@@ -429,7 +439,8 @@ presupuesto a Autor ni a Obra: su suelo no se reserva por delante de ellas, sino
 que queda tras leerlas enteras, y con un presupuesto tan justo que no sobre ni una petición lo
 paga el suelo de Cita (dos por debajo del mínimo); si no queda nada, va a `sinLeer` con su motivo. **El `publicadas` de la entrada sigue sumando
 solo las cuatro de siempre** —Cita, Autor, Tema y Colección—: la Obra, el Directorio y el Personaje
-(«Personaje», con su censo de lo publicado; sin Personajes publicados no tiene URL) van cada uno en
+(«Personaje», con su censo de lo publicado —también los `noindex` bajo `MIN_CITAS_POR_PERSONAJE`—;
+sin Personajes publicados no tiene URL) van cada uno en
 su familia, para que el total siga siendo comparable. Una lectura fallida va a `sinLeer`
 con su motivo, jamás a cero, y las entradas anteriores, sin `directorio`, se siguen leyendo.
 
@@ -463,7 +474,8 @@ casa —la portada, páginas 2+, Citas retiradas, otro host como `www.`— se su
 `fueraDelCenso`, que se escribe y se informa: nunca se descarta en silencio. La familia Obra no
 se cuenta todavía (`FAMILIAS_DEL_TRAFICO` son todas menos `obra`), ni una familia sin URL
 publicadas. Los Directorios (`/autores/` y `/obras/`) cuentan desde la Historia 26.7 en su
-familia, `directorio` («Directorio» en el informe), y no en Autor ni en Obra. **Cada pasada
+familia, `directorio` («Directorio» en el informe), y no en Autor ni en Obra; las Páginas de
+Personaje, desde la 35.3, en `personaje` («Personaje»), con su censo de lo publicado. **Cada pasada
 reatribuye los meses pasados con el censo de hoy**: una Cita retirada desde entonces pasa a
 `fueraDelCenso`, y lo que de los Directorios estaba en `fueraDelCenso` pasa a `directorio` en
 cada mes que se relee tras la 26.7 —los 16 en una pasada sin `--meses`; con `--meses N`, solo
@@ -522,7 +534,8 @@ con menos de `MIN_IMPRESIONES_POR_FILA` (5) impresiones no se versiona en `citas
 (`agregarPorFamilia`, con su `fueraDelCenso`), así que una Cita retirada cuenta en su Autor y,
 por familia, fuera del censo. Los Directorios (`/autores/` y `/obras/`) no son ruta de Cita: no
 cuentan en ningún Autor y, por familia, cuentan en `directorio` (Historia 26.7;
-`FAMILIAS_DE_LA_DEMANDA`, todas menos `obra`) **en las ventanas leídas desde entonces**. La
+`FAMILIAS_DE_LA_DEMANDA`, todas menos `obra`) **en las ventanas leídas desde entonces**; las
+Páginas de Personaje, desde la 35.3, en `personaje` («Personaje»). La
 demanda no relee lo registrado —`--rellenar` solo pide los meses que faltan—, así que las
 ventanas anteriores a la 26.7 conservan los Directorios en `fueraDelCenso`: la serie mezcla las
 dos atribuciones y no se comparan sin decirlo.
@@ -679,7 +692,9 @@ no tener el registro. Mientras la familia Obra esté congelada (`CONGELACION_DE_
 Directorios (`/autores/` y `/obras/`) se anota —el sitio la publica, y `/obras/` no es una Obra:
 la congelación no la alcanza— y la consulta la cuenta en su familia, «Directorio» (Historia
 26.7, `FAMILIAS_DEL_RASTREO`); «sin familia» queda para la portada y para una Obra, que el
-rastreo no cuenta todavía.
+rastreo no cuenta todavía. Una Página de Personaje indexable se anota y cuenta en «Personaje»; la
+que se sirve `noindex` por estar bajo `MIN_CITAS_POR_PERSONAJE` se rechaza con 1, con un motivo que
+nombra ese umbral y no el de la Obra (Historia 35.3b).
 
 ## Anotar lo que se publica en el canal
 
@@ -1249,7 +1264,11 @@ commit y `corpus/` está limpio —sin una siembra a medias—, o una copia de `
 se lista con `git ls-tree` y nunca se extrae. Sin `--sitemap` pide el sitemap publicado para
 saber qué Obras se indexan.
 
-Para el aviso, el estado de una Obra es uno: **indexable o no**. Una Obra tocada se avisa si
+Para el aviso, el estado de una Obra es uno: **indexable o no**, y desde la 35.3b el aviso trata
+igual a toda superficie `indexablePorContenido` —la Obra y el Personaje, por `dependeDelContenido` de
+`src/lib/superficies.ts`—: lo que sigue de la Obra vale para el Personaje, cuya lista de antes sale de
+`personajesIndexablesEnDisco` sobre la misma copia, y un cambio de `MIN_CITAS_POR_PERSONAJE` en el
+rango se dice como el de los umbrales de la Obra. Una Obra tocada se avisa si
 es indexable después —lo dice el sitemap desplegado, `{SITIO}/sitemap-0.xml`, o
 `--sitemap <fichero>`— o si lo era antes; una hermana, solo si entra o sale de la lista
 indexable. La lista de antes sale de `obrasDelCorpusEnDisco` sobre una copia temporal del

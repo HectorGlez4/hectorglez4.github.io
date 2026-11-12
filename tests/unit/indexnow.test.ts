@@ -14,6 +14,7 @@ import {
   componerAviso,
   familiaDeFichero,
   rutasAvisadasPor,
+  rutasDeObraDelSitemap,
 } from '../../tools/lib/avisar.ts';
 import {
   CAMPOS_QUE_NO_FECHAN,
@@ -33,6 +34,8 @@ import {
 } from '../../tools/lib/cambios.ts';
 import { FAMILIAS, rutaDeCita, rutaNormalizada } from '../../src/lib/superficies.ts';
 import { esObraIndexable } from '../../src/lib/obras.ts';
+import { personajesIndexables } from '../../src/lib/publicado.ts';
+import { MIN_CITAS_POR_PERSONAJE } from '../../src/lib/umbrales.ts';
 
 /**
  * IndexNow — lo decidible sin salir a la red.
@@ -514,7 +517,7 @@ describe('FR-38 — el aviso de las Obras (la matriz de la 22.8)', () => {
       indexablesDespues: indexablesDe(corpus),
     });
     expect(rutas).not.toContain(IRA);
-    expect(avisos.join('\n')).toMatch(new RegExp(`Obra\\(s\\) tocada\\(s\\) sin avisar.*${IRA}`, 'su'));
+    expect(avisos.join('\n')).toMatch(new RegExp(`Obra\\(s\\) o Personaje\\(s\\) tocado\\(s\\) sin avisar.*${IRA}`, 'su'));
   });
 
   it('un cambio de la regla sin tocar el Corpus compara las listas y no avisa la portada', () => {
@@ -577,7 +580,7 @@ describe('FR-38 — el aviso de las Obras (la matriz de la 22.8)', () => {
     expect(rutas).not.toContain(BREVEDAD);
     expect(rutas).toContain('/cita/seneca-cartas-2/');
     expect(rutas).toContain('/autor/seneca/');
-    expect(avisos.join('\n')).toMatch(/ninguna Obra hermana.*sitemap ilegible: fetch failed/su);
+    expect(avisos.join('\n')).toMatch(/ninguna Obra ni ningún Personaje hermano.*sitemap ilegible: fetch failed/su);
   });
 
   it('sin el Corpus de antes: tampoco hermanas, y se dice', () => {
@@ -588,11 +591,110 @@ describe('FR-38 — el aviso de las Obras (la matriz de la 22.8)', () => {
       indexablesAntes: { motivo: 'Corpus de abc ilegible' },
       indexablesDespues: indexablesDe(despues),
     });
-    expect(avisos.join('\n')).toMatch(/ninguna Obra hermana.*antes: Corpus de abc ilegible/su);
+    expect(avisos.join('\n')).toMatch(/ninguna Obra ni ningún Personaje hermano.*antes: Corpus de abc ilegible/su);
   });
 });
 
 // ─── Historia 24.8 — el aviso por campos ─────────────────────────────────────────────
+
+describe('Historia 35.3b — FR-38 trata igual el Personaje: se avisa por su indexabilidad', () => {
+  const BATMAN = '/personaje/batman/';
+  const JOKER = '/personaje/joker/';
+  /** El Corpus de ejemplo con `n` Citas de Batman y `j` de Joker. */
+  const conPersonajes = (n: number, j = 0): CorpusParaFechar => {
+    const ejemplo = corpusDeEjemplo();
+    const dichas = (de: string, k: number): CitaParaFechar[] =>
+      Array.from({ length: k }, (_, i) => ({
+        slug: `seneca-${de}-${i}`,
+        autor: 'seneca',
+        personaje: de,
+        temas: [],
+        ruta: `corpus/citas/seneca-${de}-${i}.md`,
+      }));
+    return {
+      ...ejemplo,
+      citas: [...ejemplo.citas, ...dichas('batman', n), ...dichas('joker', j)],
+      personajes: [
+        { slug: 'batman', ruta: 'corpus/personajes/batman.yml' },
+        { slug: 'joker', ruta: 'corpus/personajes/joker.yml' },
+      ],
+    };
+  };
+  /** La lista indexable de los Personajes, con la misma `personajesIndexables` que el build. */
+  const indexablesDe = (corpus: CorpusParaFechar) => ({
+    rutas: personajesIndexables(
+      (corpus.personajes ?? []).map((p) => ({ slug: p.slug, nombre: p.slug })),
+      corpus.citas,
+    ).map((p) => `/personaje/${p.slug}/`),
+  });
+  const aviso = (antes: CorpusParaFechar, despues: CorpusParaFechar, cambios: CambioDeFichero[]) =>
+    componerAviso({
+      cambios,
+      relacionAntes: relacionDeSuperficies(antes),
+      relacionDespues: relacionDeSuperficies(despues),
+      indexablesAntes: indexablesDe(antes),
+      indexablesDespues: indexablesDe(despues),
+    }).rutas;
+
+  it.runIf(MIN_CITAS_POR_PERSONAJE > 1)('un Personaje que sigue bajo el mínimo no se avisa aunque se toque su Cita', () => {
+    const corpus = conPersonajes(MIN_CITAS_POR_PERSONAJE - 1);
+    expect(indexablesDe(corpus).rutas).not.toContain(BATMAN);
+    const rutas = aviso(corpus, corpus, [editado('corpus/citas/seneca-batman-0.md')]);
+    expect(rutas).toContain('/cita/seneca-batman-0/');
+    expect(rutas).not.toContain(BATMAN);
+  });
+
+  it.runIf(MIN_CITAS_POR_PERSONAJE > 1)('uno que llega al mínimo con una Cita nueva se avisa', () => {
+    const n = MIN_CITAS_POR_PERSONAJE;
+    const rutas = aviso(conPersonajes(n - 1), conPersonajes(n), [alta(`corpus/citas/seneca-batman-${n - 1}.md`)]);
+    expect(rutas).toContain(BATMAN);
+  });
+
+  it.runIf(MIN_CITAS_POR_PERSONAJE > 1)('uno que cae bajo el mínimo al retirar una Cita se avisa', () => {
+    const n = MIN_CITAS_POR_PERSONAJE;
+    const rutas = aviso(conPersonajes(n), conPersonajes(n - 1), [baja(`corpus/citas/seneca-batman-${n - 1}.md`)]);
+    expect(rutas).toContain(BATMAN);
+  });
+
+  it('uno indexable que se toca se avisa', () => {
+    const corpus = conPersonajes(MIN_CITAS_POR_PERSONAJE);
+    expect(aviso(corpus, corpus, [editado('corpus/citas/seneca-batman-0.md')])).toContain(BATMAN);
+  });
+
+  it('un Personaje hermano que cruza la indexabilidad sin tocar sus ficheros se avisa; el que no, no', () => {
+    const corpus = conPersonajes(MIN_CITAS_POR_PERSONAJE, MIN_CITAS_POR_PERSONAJE);
+    const relacion = relacionDeSuperficies(corpus);
+    const { rutas } = componerAviso({
+      cambios: [],
+      reglaCambiada: true,
+      relacionAntes: relacion,
+      relacionDespues: relacion,
+      indexablesAntes: { rutas: [BATMAN, JOKER] },
+      indexablesDespues: { rutas: [BATMAN] },
+    });
+    expect(rutas).toEqual([JOKER]);
+  });
+
+  it('sin la lista de antes, un Personaje tocado que hoy es noindex se nombra en vez de callarlo', () => {
+    const corpus = conPersonajes(MIN_CITAS_POR_PERSONAJE);
+    const { rutas, avisos } = componerAviso({
+      cambios: [editado('corpus/citas/seneca-batman-0.md')],
+      relacionDespues: relacionDeSuperficies(corpus),
+      indexablesAntes: { motivo: 'Corpus de abc ilegible' },
+      indexablesDespues: { rutas: [] },
+    });
+    expect(rutas).not.toContain(BATMAN);
+    expect(avisos.join('\n')).toMatch(/Personaje\(s\) tocado\(s\) sin avisar.*\/personaje\/batman\//su);
+  });
+
+  it('las rutas del sitemap que el aviso juzga son las de Obra y las de Personaje, no las de Autor', () => {
+    const xml =
+      '<urlset><url><loc>https://sabiduriadebolsillo.net/obra/a/b/</loc></url>' +
+      '<url><loc>https://sabiduriadebolsillo.net/personaje/batman/</loc></url>' +
+      '<url><loc>https://sabiduriadebolsillo.net/autor/a/</loc></url></urlset>';
+    expect(rutasDeObraDelSitemap(xml)).toEqual(['/obra/a/b/', BATMAN]);
+  });
+});
 
 describe('Historia 24.8 — el aviso lee la relación por campos', () => {
   const indexables = (corpus: CorpusParaFechar) => ({

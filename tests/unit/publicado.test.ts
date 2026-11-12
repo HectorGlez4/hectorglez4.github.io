@@ -21,7 +21,7 @@ import {
   type Tema,
 } from '../../src/lib/publicado.ts';
 import type { ObraResuelta } from '../../src/lib/obras.ts';
-import { MIN_CITAS_POR_COLECCION, MIN_CITAS_POR_TEMA } from '../../src/lib/umbrales.ts';
+import { MIN_CITAS_POR_COLECCION, MIN_CITAS_POR_PERSONAJE, MIN_CITAS_POR_TEMA } from '../../src/lib/umbrales.ts';
 
 const RAIZ = resolve(import.meta.dirname, '../..');
 
@@ -314,14 +314,39 @@ describe('Historia 35.3 — el Personaje en el conjunto publicable', () => {
     personajes,
   });
 
-  it('se publica, y se indexa, el Personaje que alguna Cita declara; el que no, no tiene ruta', () => {
-    const c = conjunto([...nCitas(MIN_CITAS_POR_TEMA, 't'), dicha('a-batman', 'batman')], [personaje('batman'), personaje('joker')]);
+  /** `n` Citas dichas por un Personaje, con slugs propios. */
+  const dichas = (n: number, de: string) => Array.from({ length: n }, (_, i) => dicha(`a-${de}-${i}`, de));
+
+  it('se publica, y se indexa en el umbral, el Personaje que alguna Cita declara; el que no, no tiene ruta', () => {
+    const c = conjunto(
+      [...nCitas(MIN_CITAS_POR_TEMA, 't'), ...dichas(MIN_CITAS_POR_PERSONAJE, 'batman')],
+      [personaje('batman'), personaje('joker')],
+    );
     const rutas = rutasPublicadas(c);
     expect(rutas).toContain('/personaje/batman/');
     expect(rutas).not.toContain('/personaje/joker/');
     expect(rutas.indexOf('/personaje/batman/')).toBe(rutas.indexOf('/autor/a/') + 1);
     expect(rutasIndexables(c)).toContain('/personaje/batman/');
     expect(personajesIndexables(c.personajes, c.citas).map((p) => p.slug)).toEqual(['batman']);
+  });
+
+  it('Historia 35.3b — bajo MIN_CITAS_POR_PERSONAJE se publica y no se indexa; las Citas de otro Personaje no cuentan', () => {
+    const bajo = MIN_CITAS_POR_PERSONAJE - 1;
+    const c = conjunto(
+      [
+        ...nCitas(MIN_CITAS_POR_TEMA, 't'),
+        // Joker llega al umbral él solo; las suyas no suben a Batman.
+        ...dichas(MIN_CITAS_POR_PERSONAJE, 'joker'),
+        ...dichas(Math.max(bajo, 1), 'batman'),
+      ],
+      [personaje('batman'), personaje('joker')],
+    );
+    expect(rutasPublicadas(c)).toContain('/personaje/batman/');
+    expect(personajesIndexables(c.personajes, c.citas).map((p) => p.slug)).toEqual(
+      bajo >= 1 ? ['joker'] : ['batman', 'joker'],
+    );
+    if (bajo >= 1) expect(rutasIndexables(c)).not.toContain('/personaje/batman/');
+    expect(rutasIndexables(c)).toContain('/personaje/joker/');
   });
 
   it('sus Citas, en el orden de las de Autor; una Cita con Autor y Personaje está en las dos páginas', () => {

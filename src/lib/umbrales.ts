@@ -83,6 +83,21 @@ export const CITAS_POR_PAGINA = 50;
 export const MIN_CITAS_OBRA_INDEXABLE = 2;
 
 /**
+ * Citas publicadas que necesita un Personaje para que su página se **indexe** — Historia 35.3b
+ * (FR-66, NFR-1 v9.1).
+ *
+ * **Inclusivo**: con al menos esto, se indexa. Todo Personaje con una Cita publicada tiene página
+ * —es el destino de su nombre en la Atribución—, pero la de una sola frase repite la Página de
+ * esa Cita con otro título. Con menos, la página se sirve con `noindex, follow`, fuera del sitemap,
+ * del índice de Pagefind y sin vista de superficie. Cuenta las Citas que declaran el Personaje
+ * (`citasDePersonaje`), no las de su Obra ni las de su universo.
+ *
+ * Quien lo aplica es `personajesIndexables` (`src/lib/publicado.ts`), y nadie más. El valor lo fija
+ * la historia mientras Héctor no dé otro; ninguna prueba lo fija.
+ */
+export const MIN_CITAS_POR_PERSONAJE = 2;
+
+/**
  * Proporción de las Citas de su Autor a partir de la cual una Obra **no** se indexa — FR-52.
  *
  * **Excluyente**: una Obra con el 90 % exacto de las Citas de su Autor ya no se indexa. Una

@@ -202,8 +202,8 @@ export const SUPERFICIES: readonly Superficie[] = [
     caracter: 'producto',
     vista: EVENTOS.vistaDeSuperficie,
     // Que se indexe lo decide el Corpus (la lista de rutas indexables, `personajesIndexables` de
-    // `src/lib/publicado.ts`): hoy, todo Personaje publicado; la 35.3b le pone su umbral. Sin la
-    // lista declarada, `caracterDe` rompe ante un Personaje como ante una Obra.
+    // `src/lib/publicado.ts`): el Personaje con al menos `MIN_CITAS_POR_PERSONAJE` Citas (35.3b).
+    // Sin la lista declarada, `caracterDe` rompe ante un Personaje como ante una Obra.
     indexablePorContenido: true,
     // Anclada a la ruta entera, como Autor: `/personaje/1984` es un Personaje.
     noPublicableEn: /^\/personaje\/[^/]+\/\d+$/,
@@ -596,6 +596,24 @@ export function esRutaDeObra(rutaOUrl: string): boolean {
 }
 
 /**
+ * Si una ruta es de la Página de Personaje —la 1 o una 2+—, por la declaración y no por el
+ * prefijo — Historia 35.3b. La usa el rastreo para nombrar el umbral del Personaje.
+ */
+export function esRutaDePersonaje(rutaOUrl: string): boolean {
+  return superficieDeclaradaDe(rutaOUrl)?.pagina === PAGINA_DE_PERSONAJE;
+}
+
+/**
+ * Si una ruta es de una superficie cuya indexación depende del Corpus —la que declara
+ * `indexablePorContenido`: la Página de Obra y la de Personaje, la 1 o una 2+— — Historia 35.3b.
+ * Es lo que el aviso de IndexNow (FR-38) juzga por la lista indexable de antes y de después, en
+ * lugar de avisar toda ruta tocada. No necesita la lista declarada: lee solo la declaración.
+ */
+export function dependeDelContenido(rutaOUrl: string): boolean {
+  return superficieDeclaradaDe(rutaOUrl)?.indexablePorContenido === true;
+}
+
+/**
  * Si una ruta es de un Directorio —`/autores/` o `/obras/`—, por la declaración y
  * nunca por el prefijo — Historia 26.3. `/autor/x/` no lo es aunque empiece igual. Lo usan las
  * pruebas; la familia `directorio` de las series no sale de aquí sino del censo
@@ -684,7 +702,8 @@ export type CausaDelServicio = 'forma' | 'contenido';
  *
  *   · `forma` — es una página 2+ de un listado (`noPublicableEn`). Se lee en la ruta.
  *   · `contenido` — es la página 1 de una superficie que depende del contenido y no está en la
- *     lista de rutas indexables: una Obra que repite otra página (FR-52).
+ *     lista de rutas indexables: una Obra que repite otra página (FR-52) o un Personaje bajo
+ *     `MIN_CITAS_POR_PERSONAJE` (35.3b).
  *
  * Una superficie que es `servicio` por declaración —`/buscar`, `/404`— no tiene causa: no es
  * un producto degradado, es lo que es. Rompe, como `caracterDe`, si la ruta no está declarada o

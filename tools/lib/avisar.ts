@@ -13,7 +13,7 @@
  * no toca disco ni red.
  */
 import { SITIO } from '../../src/lib/dominio.ts';
-import { FAMILIAS, esRutaDeObra, rutaNormalizada, type Familia } from '../../src/lib/superficies.ts';
+import { FAMILIAS, dependeDelContenido, rutaNormalizada, type Familia } from '../../src/lib/superficies.ts';
 import {
   cambiaronLosCampos,
   type CambioDeFichero,
@@ -142,7 +142,8 @@ export interface AvisoCompuesto {
  * no fecha nada, como `aptaParaPortada`, que es justo lo que decide su rotación—: enumera
  * Autores, Temas y Colecciones y cambia con la jornada. Lo demás es la lectura inversa de la
  * relación, por campos, sobre el Corpus de antes y el de después, con una sola excepción, que es
- * de la Obra (FR-38, 22.8).
+ * de las superficies cuya indexación depende del Corpus (`dependeDelContenido`): la Obra (FR-38,
+ * 22.8) y, desde la 35.3b, el Personaje, que se juzgan igual. Lo que sigue dice «Obra» por las dos.
  * Una Obra tiene tres estados —indexable, `noindex` o ausente—, y:
  *
  *   · una Obra cuya ficha, Citas, Autor o documentos cambiaron —en lo que ella pinta— se avisa si su estado cambió en cualquier
@@ -198,7 +199,7 @@ export function componerAviso(entrada: EntradaDelAviso): AvisoCompuesto {
 
   const obrasSinDecidir: string[] = [];
   for (const ruta of tocadas) {
-    if (!esRutaDeObra(ruta)) {
+    if (!dependeDelContenido(ruta)) {
       rutas.add(ruta);
       continue;
     }
@@ -222,7 +223,7 @@ export function componerAviso(entrada: EntradaDelAviso): AvisoCompuesto {
       ...(listaDespues === undefined ? [`después: ${motivoDe(entrada.indexablesDespues)}`] : []),
     ];
     avisos.push(
-      `${obrasSinDecidir.length} Obra(s) tocada(s) sin avisar: no se sabe si se indexan ni si ` +
+      `${obrasSinDecidir.length} Obra(s) o Personaje(s) tocado(s) sin avisar: no se sabe si se indexan ni si ` +
         `se indexaban (${faltan.join('; ')}): ${obrasSinDecidir.join(', ')}.`,
     );
   }
@@ -233,11 +234,11 @@ export function componerAviso(entrada: EntradaDelAviso): AvisoCompuesto {
       ...(listaDespues === undefined ? [`después: ${motivoDe(entrada.indexablesDespues)}`] : []),
     ];
     avisos.push(
-      `No se avisa ninguna Obra hermana por cambio de indexabilidad: falta una de las dos ` +
+      `No se avisa ninguna Obra ni ningún Personaje hermano por cambio de indexabilidad: falta una de las dos ` +
         `listas (${motivos.join('; ')}).`,
     );
   } else {
-    // Toda ruta de Obra que entra o sale del conjunto indexable, en cualquier sentido.
+    // Toda ruta de Obra o de Personaje que entra o sale del conjunto indexable, en cualquier sentido.
     for (const [normalizada, ruta] of listaAntes) {
       if (!listaDespues.has(normalizada)) rutas.add(despues.get(normalizada) ?? antes.get(normalizada) ?? ruta);
     }
@@ -257,7 +258,8 @@ function motivoDe(lista: ListaDeObras): string {
 }
 
 /**
- * Las rutas de Obra de un sitemap, canónicas y con su barra final. Solo las del origen del
+ * Las rutas de Obra —y, desde la 35.3b, de Personaje: las que `dependeDelContenido`— de un
+ * sitemap, canónicas y con su barra final. Solo las del origen del
  * sitio: una `<loc>` de otro host —`www.` incluido— no es una página de esta propiedad.
  */
 export function rutasDeObraDelSitemap(xml: string, sitio: string = SITIO): string[] {
@@ -271,7 +273,7 @@ export function rutasDeObraDelSitemap(xml: string, sitio: string = SITIO): strin
       continue;
     }
     if (url.origin !== origen) continue;
-    if (esRutaDeObra(url.pathname)) rutas.push(url.pathname);
+    if (dependeDelContenido(url.pathname)) rutas.push(url.pathname);
   }
   return rutas;
 }

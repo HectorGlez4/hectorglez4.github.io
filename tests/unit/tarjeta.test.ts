@@ -7,6 +7,7 @@ import {
   ANCHO,
   bajadaDeTarjetaDeObra,
   datosDeTarjetaDeObra,
+  datosDeTarjetaDePersonaje,
   svgDeTarjeta,
   svgDeTarjetaDeListado,
 } from '../../src/lib/tarjeta.ts';
@@ -341,6 +342,27 @@ describe('Historia 22.7 — la Tarjeta de Obra', () => {
  * Historia 29.3 — la regla de la Tarjeta del verso, decisión de Héctor del 2026-11-08: una Cita
  * en verso que no cabe en su tramo baja al siguiente, hasta `sm`; la prosa conserva el suyo.
  */
+describe('Historia 35.3b — la Tarjeta de Personaje', () => {
+  it('la de listado: el nombre y «personaje de {universo}» como único hecho, serif y sin bajada', () => {
+    expect(datosDeTarjetaDePersonaje({ nombre: 'Sancho Panza', universo: 'el Quijote' })).toEqual({
+      titulo: 'Sancho Panza',
+      hechos: ['personaje de el Quijote'],
+    });
+  });
+
+  it('nunca la semblanza, aunque la tenga, ni un recuento', () => {
+    const datos = datosDeTarjetaDePersonaje({
+      nombre: 'Batman',
+      universo: 'DC',
+      semblanza: 'Un justiciero de Gotham que nadie debería leer en la tarjeta.',
+      responde: 'Héctor González',
+    } as { nombre: string; universo: string });
+    expect(datos).toEqual({ titulo: 'Batman', hechos: ['personaje de DC'] });
+    expect(svgDeTarjetaDeListado(datos)).not.toContain('Gotham');
+    expect(svgDeTarjetaDeListado(datos)).toContain('personaje de DC');
+  });
+});
+
 describe('Historia 29.3 — cuerpoEnTarjeta', () => {
   const VERSO = 'Corto y breve.\nOtro verso.';
 

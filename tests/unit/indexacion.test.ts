@@ -1357,6 +1357,29 @@ describe('Historia 22.8 — la familia Obra en la serie', () => {
     expect(lectura.sinLeer).toEqual({});
   });
 
+  it('Historia 35.3b — los Personajes que trae la lista del sitemap no entran en el censo de la Obra', async () => {
+    const { lectura } = await leerIndexacion({
+      conjunto: conjuntoDe(MIN_CITAS_POR_TEMA),
+      propiedad: 'sc-domain:x',
+      presupuesto: TECHO_DIARIO_DE_INSPECCIONES,
+      inspeccionar: inspectorQueContesta(() => 'FAIL'),
+      pasoMs: 0,
+      obras: { rutas: [...OBRAS, '/personaje/batman/'] },
+    });
+    expect(lectura.familias.obra?.publicadas).toBe(2);
+    // Solo Personajes en la lista: la Obra va a sinLeer, jamás a cero.
+    const soloPersonajes = await leerIndexacion({
+      conjunto: conjuntoDe(MIN_CITAS_POR_TEMA),
+      propiedad: 'sc-domain:x',
+      presupuesto: TECHO_DIARIO_DE_INSPECCIONES,
+      inspeccionar: inspectorQueContesta(() => 'FAIL'),
+      pasoMs: 0,
+      obras: { rutas: ['/personaje/batman/'] },
+    });
+    expect(soloPersonajes.lectura.familias.obra).toBeUndefined();
+    expect(soloPersonajes.lectura.sinLeer.obra).toMatch(/ninguna Obra/u);
+  });
+
   it('sin sitemap legible, la Obra va a sinLeer con su motivo y jamás a cero', async () => {
     const corpus = await corpusConCitas(MIN_CITAS_POR_TEMA);
     capturarSalida();

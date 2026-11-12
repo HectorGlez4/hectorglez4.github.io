@@ -34,7 +34,7 @@ import {
   rutaNormalizada,
   superficiesDelBarrido,
 } from '../../src/lib/superficies.ts';
-import { CITAS_POR_PAGINA, MAX_SALTOS_DESDE_LA_PORTADA } from '../../src/lib/umbrales.ts';
+import { CITAS_POR_PAGINA, MAX_SALTOS_DESDE_LA_PORTADA, MIN_CITAS_POR_PERSONAJE } from '../../src/lib/umbrales.ts';
 import { MARCA } from '../../src/lib/marca.ts';
 import {
   FILTRO_DE_TIPO,
@@ -287,6 +287,30 @@ const CORPUS_COMPLETO: Record<string, string> = {
     procedencia: { obra: 'Cartas a Lucilio', año: 64 },
     fuente: { id: 'wikisource-es', url: 'https://es.wikisource.org/wiki/Cartas_a_Lucilio' },
   }),
+  /*
+   * Historia 35.3b — las que le faltan a Batman para `MIN_CITAS_POR_PERSONAJE`, así su página se
+   * indexa y entra en Pagefind: fuera del Tema, para no mover su página 1, y en la 1 del Autor.
+   */
+  ...Object.fromEntries(
+    Array.from({ length: MIN_CITAS_POR_PERSONAJE - 1 }, (_, i) => [
+      `citas/seneca--a-batman-otra-${i + 1}.md`,
+      citaValida({
+        slug: `seneca-a-batman-otra-${i + 1}`,
+        texto: [
+          'Un murciélago vigila el campanario mientras la ciudad duerme tranquila.',
+          'Quien guarda silencio en el tejado conoce el precio de cada promesa rota.',
+          'La capa negra pesa menos que el recuerdo de aquella calle sin farolas.',
+        ][i],
+        temas: [],
+        personaje: 'batman',
+        clase: 'atribuida',
+        estadoDerechos: undefined,
+        ...ATESTIGUADA,
+        procedencia: { obra: 'Cartas a Lucilio', año: 64 },
+        fuente: { id: 'wikisource-es', url: 'https://es.wikisource.org/wiki/Cartas_a_Lucilio' },
+      }),
+    ]),
+  ),
 };
 
 describe('Historia 12.1 — sobre un sitio construido de verdad', () => {
@@ -765,7 +789,8 @@ describe('Historia 12.1 — sobre un sitio construido de verdad', () => {
       // Historia 35.3 — y la Página de Personaje, con la Cita que lo declara.
       expect(rutas).toContain(PERSONAJE);
       expect(rutas.filter((r) => r.startsWith('/cita/')).length).toBe(
-        CITAS_POR_PAGINA + 1 + CITAS_DE_CARTAS.length + 1,
+        // Las de Batman: `MIN_CITAS_POR_PERSONAJE` (Historia 35.3b).
+        CITAS_POR_PAGINA + 1 + CITAS_DE_CARTAS.length + MIN_CITAS_POR_PERSONAJE,
       );
     });
 

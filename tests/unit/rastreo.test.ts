@@ -12,7 +12,7 @@ import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { parse as parsearYaml } from 'yaml';
 import { rutasPublicadas, type ConjuntoPublicable } from '../../src/lib/publicado.ts';
-import { MIN_CITAS_POR_TEMA } from '../../src/lib/umbrales.ts';
+import { MIN_CITAS_POR_PERSONAJE, MIN_CITAS_POR_TEMA } from '../../src/lib/umbrales.ts';
 import { DOMINIO } from '../../src/lib/dominio.ts';
 import {
   CABECERA_DE_PETICIONES,
@@ -889,6 +889,24 @@ describe('Historia 22.4 — pedir rastreo de una Página de Obra', () => {
     expect(await principal(['--corpus', corpus, '--registrar', '/obra/autor-0/no-existe/'])).toBe(1);
     expect(salida.join('')).toMatch(/no la publica el sitio/);
     expect(existsSync(join(corpus, FICHERO_DE_PETICIONES))).toBe(false);
+  });
+
+  it('Historia 35.3b — un Personaje publicado bajo MIN_CITAS_POR_PERSONAJE se rechaza con su motivo, no con el de la Obra', () => {
+    const juzgar = (ruta: string) =>
+      componerPeticiones({
+        seleccion: [ruta],
+        publicadas: ['/personaje/batman/', '/personaje/joker/'],
+        indexables: ['/personaje/batman/'],
+        fecha: HOY,
+        hoy: HOY,
+      });
+    expect(juzgar('/personaje/batman/').ok).toBe(true);
+    const noindex = juzgar('/personaje/joker/');
+    expect(noindex.ok).toBe(false);
+    const motivo = noindex.ok ? '' : noindex.motivos.join();
+    expect(motivo).toMatch(/se publica con «noindex»: es una Página de Personaje/u);
+    expect(motivo).toContain(`menos de ${MIN_CITAS_POR_PERSONAJE} Citas (MIN_CITAS_POR_PERSONAJE`);
+    expect(motivo).not.toMatch(/Página de Obra|FR-52/u);
   });
 
   it('el juicio puro: contra las indexables, con el motivo según el caso', () => {

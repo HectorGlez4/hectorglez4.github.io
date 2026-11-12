@@ -378,6 +378,24 @@ describe('Historia 26.7 — los Directorios en el canal', () => {
   });
 });
 
+describe('Historia 35.3b — el Personaje en el canal, se indexe o no', () => {
+  it('una publicación a un Personaje publicado —también bajo MIN_CITAS_POR_PERSONAJE— se desglosa «Personaje»', () => {
+    // El censo es lo publicado: la página `noindex` de un Personaje bajo el umbral está en él
+    // (`rutasPublicadas`, probado en `publicado.test.ts`), y una publicación puede enlazarla.
+    const censo = { cita: [], autor: [], tema: [], coleccion: [], directorio: [], personaje: ['/personaje/batman/'] };
+    const publicadas = ['/', '/personaje/batman/'];
+    expect(destinoDePublicacion('/personaje/batman/', censo, publicadas)).toBe('personaje');
+    const resumen = resumenPorSemana(
+      [{ fecha: '2026-10-05', red: 'facebook', formato: 'foto', ruta: '/personaje/batman/', marcado: true }],
+      censo,
+      publicadas,
+    );
+    expect(lineasDeCanal(resumen, rachasPorRed(resumen, '2026-10-05')).join('\n')).toMatch(
+      /2026-W41\n {2}facebook: 1 {2}\(Personaje 1\)/,
+    );
+  });
+});
+
 describe('el cierre de la 18.2', () => {
   it('cuatro semanas ISO consecutivas con foto los 7 días y todo marcado la cierran', () => {
     // De 2026-W38 (lunes 14/09) a 2026-W41 (domingo 11/10).

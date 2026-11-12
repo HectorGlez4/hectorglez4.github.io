@@ -26,6 +26,7 @@ import {
   recuentoDeCitas,
   recuentoDeDocumentadas,
   recuentoDeObras,
+  universoDePersonaje,
 } from './atribucion.ts';
 import { citasDocumentadasDeAutor, type Autor, type Cita } from './publicado.ts';
 import type { ObraResuelta } from './obras.ts';
@@ -288,6 +289,22 @@ export function datosDeTarjetaDeAutor(
     titulo: autor.nombre,
     hechos: [añosDeAutor(autor), recuento].filter((hecho): hecho is string => hecho !== undefined),
   };
+}
+
+/**
+ * Los datos de la Tarjeta Social de un Personaje — Historia 35.3b, UX-DR134, AD-28.
+ *
+ * La plantilla de listado de la de Autor, con **solo hechos del Corpus**: el nombre y «personaje
+ * de {universo}» (`universoDePersonaje`, la misma frase que su ficha y su descripción), en serif y
+ * sin bajada. Ni la semblanza —propia o de una biografía, por lo mismo que la del Autor— ni un
+ * recuento: el de documentadas de la de Autor sería siempre 0, porque solo la atribuida admite
+ * Personaje y la atribuida nunca se coteja.
+ */
+export function datosDeTarjetaDePersonaje(personaje: {
+  nombre: string;
+  universo: string;
+}): DatosDeTarjetaDeListado {
+  return { titulo: personaje.nombre, hechos: [universoDePersonaje(personaje)] };
 }
 
 /**

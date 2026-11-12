@@ -2,7 +2,12 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { ATESTIGUADA, citaValida, conLaPuertaAbierta, construirConCorpus, limpiar, paginaConstruida } from './ayuda/construir.js';
-import { CITAS_POR_PAGINA, MAX_OBRAS_ANTES_DE_LAS_CITAS, MAX_SALTOS_DESDE_LA_PORTADA } from '../../src/lib/umbrales.ts';
+import {
+  CITAS_POR_PAGINA,
+  MAX_OBRAS_ANTES_DE_LAS_CITAS,
+  MAX_SALTOS_DESDE_LA_PORTADA,
+  MIN_CITAS_POR_PERSONAJE,
+} from '../../src/lib/umbrales.ts';
 import { EVENTOS } from '../../src/lib/medicion.ts';
 import { componerBiografia, nombreDeBiografia } from '../../tools/lib/documento.ts';
 
@@ -10,13 +15,15 @@ import { componerBiografia, nombreDeBiografia } from '../../tools/lib/documento.
  * Historia 35.3 — la Página de Personaje, sobre un sitio construido de verdad.
  *
  * Personaje A dice `CITAS_POR_PAGINA + 1` Citas —así tiene página 2—, todas de una Obra de su
- * Autor; Personaje B dice una, de otra Obra, y lleva semblanza propia; su slug la pone en la página 1
- * del Tema, a tres saltos de la portada (si no, la puerta de NFR-5 rompe la construcción). Todas tienen Autor (`vivo`, con derechos
+ * Autor; Personaje B dice exactamente `MIN_CITAS_POR_PERSONAJE` (Historia 35.3b: su página se indexa),
+ * de otra Obra, y lleva semblanza propia; sus slugs la ponen en la página 1 del Tema, a tres saltos de
+ * la portada (si no, la puerta de NFR-5 rompe la construcción). Todas tienen Autor (`vivo`, con derechos
  * vigentes) y el Tema `el-tiempo`, que con ellas se publica. Ninguna es apta para portada —una
  * atribuida no lo es nunca (Historia 35.1b, pregunta 22)—, así que la portada y el 404 no tienen
  * Cita del Día. La puerta de la atribuida se abre en la copia, y los textos no se parecen entre
  * sí: un duplicado entre atribuidas tampoco se publica. Personaje C lleva su semblanza de
- * una biografía (AD-26), y Personaje D dice una Cita de cada una de `MAX_OBRAS_ANTES_DE_LAS_CITAS + 1`
+ * una biografía (AD-26) y dice una sola Cita —bajo el umbral, si es mayor que 1: su página se sirve
+ * `noindex`—, y Personaje D dice una Cita de cada una de `MAX_OBRAS_ANTES_DE_LAS_CITAS + 1`
  * Obras, así que su Lista de Obras se pliega. Lo puro —`obrasDelPersonaje` con una
  * Obra de dueño Personaje, el grafo del modelo, la superficie— está en `publicado.test.ts`,
  * `alcance.test.ts` y `superficies.test.ts`.
@@ -126,6 +133,10 @@ const CORPUS: Record<string, string> = {
     `${SEMBLANZA_DE_C} Aparece en varias obras de su universo.`,
   ),
 };
+// Historia 35.3b — B llega justo al umbral: las que le faltan, con slug que las deja en la página 1.
+for (let i = 1; i < MIN_CITAS_POR_PERSONAJE; i += 1) {
+  CORPUS[`citas/vivo--b-la-otra-${i}.md`] = atribuida(`vivo-b-la-otra-${i}`, textoPropio('De B', 200 + i), 'b', 'Otra obra');
+}
 OBRAS_DE_D.forEach((obra, i) => {
   CORPUS[`citas/vivo--c-de-d-${i + 1}.md`] = atribuida(
     `vivo-c-de-d-${i + 1}`,
@@ -231,7 +242,9 @@ describe('Historia 35.3 — la Página de Personaje construida', () => {
     );
     expect(html('/personaje/a/2/')).toContain('<title>Frases de Personaje A — página 2 | Sabiduría de Bolsillo</title>');
     expect(html('/personaje/a/2/')).toContain(`content="${n} frases de Personaje A, personaje de Universo de A. Página 2."`);
-    expect(html('/personaje/b/')).toContain('content="1 frase de Personaje B, personaje de Universo de B."');
+    const deB = `${MIN_CITAS_POR_PERSONAJE} ${(MIN_CITAS_POR_PERSONAJE as number) === 1 ? 'frase' : 'frases'}`;
+    expect(html('/personaje/b/')).toContain(`content="${deB} de Personaje B, personaje de Universo de B."`);
+    expect(html('/personaje/c/')).toContain('content="1 frase de Personaje C, personaje de Universo de C."');
     // «Frases» solo en la pestaña y en la descripción: el cuerpo dice «Citas».
     expect(main('/personaje/a/')).not.toMatch(/frases/iu);
   });
@@ -247,14 +260,12 @@ describe('Historia 35.3 — la Página de Personaje construida', () => {
     expect((pagina?.mainEntity as { '@type': string })['@type']).toBe('ItemList');
   });
 
-  it('entra en la búsqueda propia como «personaje», sin tarjeta social', () => {
+  it('entra en la búsqueda propia como «personaje»', () => {
     expect(html('/personaje/a/')).toContain('data-pagefind-filter="tipo:personaje"');
-    expect(html('/personaje/a/')).not.toContain('og:image');
     const sitemap = readFileSync(join(proyecto, 'dist', 'sitemap-0.xml'), 'utf8');
     expect(sitemap).toContain('/personaje/a/</loc>');
     expect(sitemap).not.toContain('/personaje/a/2/</loc>');
   });
-
   it('la Atribución de la Cita nombra al Personaje y enlaza a su página, en la zona `atribucion`', () => {
     const cita = main('/cita/vivo-de-a-con-obra/');
     expect(cita).toMatch(
@@ -315,5 +326,61 @@ describe('Historia 35.3 — la Página de Personaje construida', () => {
     expect(main('/tema/el-tiempo/')).toContain('href="/cita/vivo-b-la-unica/"');
     expect(main('/cita/vivo-b-la-unica/')).toContain('href="/personaje/b/"');
     expect(MAX_SALTOS_DESDE_LA_PORTADA).toBeGreaterThanOrEqual(3);
+  });
+});
+
+/** Las páginas de Personaje construidas, como rutas («/personaje/a/», «/personaje/a/2/»). */
+const paginasDePersonaje = () =>
+  readdirSync(join(proyecto, 'dist', 'personaje'), { recursive: true, encoding: 'utf8' })
+    .filter((f) => f.endsWith('index.html'))
+    .map((f) => `/personaje/${f.split(/[\\/]/u).slice(0, -1).join('/')}/`);
+
+describe('Historia 35.3b — cuándo se indexa la Página de Personaje, y su Tarjeta Social', () => {
+  const sitemap = () => readFileSync(join(proyecto, 'dist', 'sitemap-0.xml'), 'utf8');
+
+  it(`con MIN_CITAS_POR_PERSONAJE (${MIN_CITAS_POR_PERSONAJE}) Citas, su página 1 se indexa`, () => {
+    expect(codigo, salida).toBe(0);
+    expect(sitemap()).toContain('/personaje/b/</loc>');
+    expect(html('/personaje/b/')).not.toMatch(/<meta name="robots"/u);
+    expect(html('/personaje/b/')).toMatch(/<main[^>]*data-pagefind-body/u);
+    expect(vistas('/personaje/b/')).toBe(EVENTOS.vistaDeSuperficie);
+    expect(sitemap()).toContain('/personaje/d/</loc>');
+  });
+
+  it.runIf(1 < MIN_CITAS_POR_PERSONAJE)('con menos, la misma página con noindex, follow, fuera del sitemap, de Pagefind y sin vista', () => {
+    const pagina = html('/personaje/c/');
+    expect(pagina).toContain('<meta name="robots" content="noindex, follow">');
+    expect(sitemap()).not.toContain('/personaje/c/</loc>');
+    expect(pagina).not.toContain('data-pagefind-body');
+    expect(vistas('/personaje/c/')).not.toContain(EVENTOS.vistaDeSuperficie);
+    // El mismo `<main>` que tendría indexable: la ficha, la semblanza y el listado, sin marca ni aviso.
+    const cuerpo = main('/personaje/c/');
+    expect(cuerpo).toMatch(/<h1[^>]*>Personaje C<\/h1>/u);
+    expect(cuerpo).toMatch(/<p class="universo"[^>]*>personaje de Universo de C<\/p>/u);
+    expect(cuerpo).toContain(SEMBLANZA_DE_C);
+    expect(cuerpo).toMatch(/<h2 class="rotulo"[^>]*>Citas<\/h2>/u);
+    expect(cuerpo).toContain('href="/cita/vivo-c-la-de-c/"');
+    expect(cuerpo).not.toMatch(/noindex|no se indexa/iu);
+  });
+
+  it('toda página de Personaje —la 1 y las 2+, se indexe o no— declara su Tarjeta Social, que es un PNG de dist/', () => {
+    const rutas = paginasDePersonaje();
+    expect(rutas).toEqual(expect.arrayContaining(['/personaje/a/', '/personaje/a/2/', '/personaje/b/', '/personaje/c/', '/personaje/d/']));
+    for (const ruta of rutas) {
+      const imagen = /<meta property="og:image" content="([^"]+)">/u.exec(html(ruta))?.[1];
+      expect(imagen, ruta).toBeDefined();
+      const { pathname } = new URL(imagen ?? '');
+      const slug = ruta.split('/')[2];
+      expect(pathname, ruta).toBe(`/tarjeta/personaje/${slug}.png`);
+      const fichero = join(proyecto, 'dist', pathname);
+      expect(existsSync(fichero), ruta).toBe(true);
+      // La firma de un PNG: 89 50 4E 47 0D 0A 1A 0A.
+      expect(readFileSync(fichero).subarray(0, 8).toString('hex'), ruta).toBe('89504e470d0a1a0a');
+    }
+  });
+
+  it('dist/tarjeta/personaje/ tiene un PNG por Personaje publicado, y nada más', () => {
+    const tarjetas = readdirSync(join(proyecto, 'dist', 'tarjeta', 'personaje')).sort();
+    expect(tarjetas).toEqual(['a.png', 'b.png', 'c.png', 'd.png']);
   });
 });

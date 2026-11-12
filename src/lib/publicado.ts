@@ -25,6 +25,7 @@ import {
   MAX_CITAS_RELACIONADAS,
   MAX_SALTOS_DESDE_LA_PORTADA,
   MIN_CITAS_POR_COLECCION,
+  MIN_CITAS_POR_PERSONAJE,
   MIN_CITAS_POR_TEMA,
   SUELO_TRADICION_LATINOAMERICANA,
   type CongelacionDeObras,
@@ -206,16 +207,22 @@ export interface Personaje {
 }
 
 /**
- * Los Personajes cuya página se indexa — Historia 35.3. Hoy, todo Personaje publicado: la 35.3b
- * le pone su umbral aquí, y solo aquí. La usan `rutasIndexables` (las páginas) e
- * `integraciones/indexables.ts` (la configuración), así que las dos instancias de
- * `src/lib/superficies.ts` reciben la misma lista.
+ * Los Personajes cuya página se indexa — Historias 35.3 y 35.3b: los publicados con al menos
+ * `MIN_CITAS_POR_PERSONAJE` Citas que los declaran. El umbral se aplica aquí, y solo aquí. La usan
+ * `rutasIndexables` (las páginas), `integraciones/indexables.ts` (la configuración), el rastreo y
+ * el aviso, así que las dos instancias de `src/lib/superficies.ts` reciben la misma lista.
  */
 export function personajesIndexables<P extends { slug: string; nombre: string }>(
   personajes: readonly P[],
   citas: readonly { personaje?: string }[],
 ): P[] {
-  return personajesPublicados(personajes, citas);
+  const cuentas = new Map<string, number>();
+  for (const cita of citas) {
+    if (cita.personaje !== undefined) cuentas.set(cita.personaje, (cuentas.get(cita.personaje) ?? 0) + 1);
+  }
+  return personajesPublicados(personajes, citas).filter(
+    (p) => (cuentas.get(p.slug) ?? 0) >= MIN_CITAS_POR_PERSONAJE,
+  );
 }
 
 /** El orden de los listados de Autor y de Personaje: por slug, en español. */
@@ -1238,7 +1245,7 @@ export function rutasIndexables(conjunto: ConjuntoPublicable): readonly string[]
   if (memorizada !== undefined) return memorizada;
   const obras = obrasDelConjunto(conjunto.citas, conjunto.autores);
   const indexables = new Set(obras.indexables.map((o) => rutaDeLaObra(o)));
-  // Historia 35.3 — y los Personajes que `personajesIndexables` indexa (hoy, todo publicado).
+  // Historias 35.3 y 35.3b — y los Personajes que `personajesIndexables` indexa (los del umbral).
   for (const personaje of personajesIndexables(conjunto.personajes, conjunto.citas)) {
     indexables.add(rutaDePersonaje(personaje.slug));
   }

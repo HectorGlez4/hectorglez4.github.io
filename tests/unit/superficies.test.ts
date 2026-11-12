@@ -20,7 +20,9 @@ import {
   declararRutasIndexables,
   elBarridoLaCorre,
   esRutaDeDirectorio,
+  dependeDelContenido,
   esRutaDeObra,
+  esRutaDePersonaje,
   esServicioPorForma,
   etiquetaDeAxe,
   olvidarRutasIndexables,
@@ -1163,6 +1165,21 @@ describe('Historia 35.3 — la Página de Personaje', () => {
     expect(consecuenciasDe('/personaje/batman/2')).toMatchObject({ noIndexar: true, vistas: [] });
     // Un slug enteramente numérico es un Personaje, no la página 1984 de nada.
     expect(causaDelServicio('/personaje/1984')).toBe('contenido');
+  });
+
+  it('Historia 35.3b — un Personaje fuera de la lista se sirve por contenido, y depende del contenido como la Obra', () => {
+    declararRutasIndexables([]);
+    expect(causaDelServicio('/personaje/batman')).toBe('contenido');
+    expect(consecuenciasDe('/personaje/batman')).toMatchObject({ noIndexar: true, vistas: [] });
+    for (const ruta of ['/personaje/batman', '/personaje/batman/2/', '/obra/a/b/', '/obra/a/b/2/']) {
+      expect(dependeDelContenido(ruta), ruta).toBe(true);
+    }
+    for (const ruta of ['/autor/seneca/', '/autor/seneca/2/', '/tema/la-vida/', '/', '/obras/']) {
+      expect(dependeDelContenido(ruta), ruta).toBe(false);
+    }
+    expect(esRutaDePersonaje('/personaje/batman/2/')).toBe(true);
+    expect(esRutaDePersonaje('/obra/a/b/')).toBe(false);
+    expect(esRutaDeObra('/personaje/batman/')).toBe(false);
   });
 
   it('su unidad de línea base es la suya: ni comparte la del Autor ni declara otra', () => {

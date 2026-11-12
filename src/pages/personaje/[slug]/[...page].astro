@@ -9,7 +9,8 @@
  *
  * Lo que la separa de la de Autor: «personaje de {universo}» donde van los años; la semblanza,
  * propia o de una biografía, **siempre** fuera de Pagefind y con su atribución visible; el rótulo
- * «Citas»; sin «Buscar en…» (35.5), sin Tarjeta Social (35.3b) y sin `Person` en el JSON-LD.
+ * «Citas»; sin «Buscar en…» (35.5) y sin `Person` en el JSON-LD. Su Tarjeta Social (35.3b) es la
+ * de listado, `/tarjeta/personaje/{slug}.png`, en todas sus páginas.
  * Las 2+ llevan el `h1` y el listado, y son `noindex` por forma (`superficies.ts`).
  */
 import Armazon from '../../../components/Armazon.astro';
@@ -27,7 +28,11 @@ import {
   personajesPublicados,
   type Cita,
 } from '../../../lib/publicado.ts';
-import { descripcionDePersonaje, semblanzaEn } from '../../../lib/atribucion.ts';
+import {
+  descripcionDePersonaje,
+  semblanzaEn,
+  universoDePersonaje,
+} from '../../../lib/atribucion.ts';
 import { CITAS_POR_PAGINA } from '../../../lib/umbrales.ts';
 import { tituloDePersonaje } from '../../../lib/marca.ts';
 import type { GetStaticPaths } from 'astro';
@@ -85,6 +90,7 @@ const pieDeObras =
   titulo={tituloDePersonaje(personaje.nombre, pagina.currentPage)}
   descripcion={descripcionDePersonaje(personaje, total, pagina.currentPage)}
   ruta={ruta}
+  tarjeta={`/tarjeta/personaje/${personaje.slug}.png`}
   tipo="personaje"
 >
   <DatosDePersonaje
@@ -96,7 +102,7 @@ const pieDeObras =
   <div class="pagina contenedor">
     <header class="ficha">
       <h1>{personaje.nombre}</h1>
-      {primera && <p class="universo">personaje de {personaje.universo}</p>}
+      {primera && <p class="universo">{universoDePersonaje(personaje)}</p>}
       {
         semblanza !== undefined && (
           <div data-pagefind-ignore>

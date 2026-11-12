@@ -41,12 +41,13 @@ import { DOMINIO } from '../../src/lib/dominio.ts';
 import {
   FAMILIAS,
   esRutaDeObra,
+  esRutaDePersonaje,
   esServicioPorForma,
   rutaNormalizada,
   superficieDeclaradaDe,
 } from '../../src/lib/superficies.ts';
 import { NOMBRE_DE_FAMILIA, type CensoPorFamilia, type FamiliaDelCenso } from './indexacion.ts';
-import type { CongelacionDeObras } from '../../src/lib/umbrales.ts';
+import { MIN_CITAS_POR_PERSONAJE, type CongelacionDeObras } from '../../src/lib/umbrales.ts';
 
 /**
  * Las familias que reparte **este registro**: todas menos la Obra — Historia 26.7, AD-24.
@@ -268,6 +269,16 @@ export function componerPeticiones(entrada: {
        * no publicable» se arreglan de maneras distintas. Consultar la declaración para
        * decidir sería un segundo criterio de publicabilidad, y eso no ocurre.
        */
+      if (publicadas.has(normalizada) && esRutaDePersonaje(normalizada)) {
+        // Historia 35.3b — existe y se sirve, pero con `noindex`: un Personaje bajo su umbral.
+        motivos.push(
+          `«${dada}» se publica con «noindex»: es una Página de Personaje con menos de ` +
+            `${MIN_CITAS_POR_PERSONAJE} Citas (MIN_CITAS_POR_PERSONAJE en src/lib/umbrales.ts), ` +
+            'así que queda fuera del sitemap. Pedir su rastreo gasta la petición en algo que el ' +
+            'buscador no va a indexar.',
+        );
+        continue;
+      }
       if (publicadas.has(normalizada)) {
         // Historia 22.4 — existe y se sirve, pero con `noindex`: una Obra que repite otra página.
         motivos.push(

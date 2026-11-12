@@ -241,7 +241,7 @@ describe('Historia 22.8 — rutasTocadas contra un git de verdad', () => {
     const antes = await copiasDeAviso();
     const { rutas, avisos } = await rango('sin-corpus', 'con-obras', [CARTAS, BREVEDAD]);
     expect(avisos.join('\n')).toMatch(/Sin el Corpus de/);
-    expect(avisos.join('\n')).toMatch(/ninguna Obra hermana/);
+    expect(avisos.join('\n')).toMatch(/ninguna Obra ni ningún Personaje hermano/);
     expect(rutas).toContain('/cita/seneca-cartas-0/');
     expect(await copiasDeAviso()).toBe(antes);
   });

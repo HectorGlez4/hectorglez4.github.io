@@ -350,6 +350,15 @@ export function descripcionDeAutor(
 }
 
 /**
+ * «personaje de {universo}» — Historia 35.3b, el único dueño de la frase: la ficha de la Página de
+ * Personaje, su `<meta description>` (`descripcionDePersonaje`) y su Tarjeta Social
+ * (`datosDeTarjetaDePersonaje`). El universo va tal cual lo declara la ficha del Personaje.
+ */
+export function universoDePersonaje(personaje: { universo: string }): string {
+  return `personaje de ${personaje.universo}`;
+}
+
+/**
  * El `<meta description>` de una Página de Personaje — Historia 35.3, UX-DR134:
  * «{n} frases de {nombre}, personaje de {universo}.», con «1 frase» en singular; las 2+ añaden
  * « Página N.», como la de Obra. {n} son las Citas publicadas del Personaje. Solo hechos del
@@ -362,7 +371,7 @@ export function descripcionDePersonaje(
 ): string {
   const cuantas = `${citas} ${citas === 1 ? 'frase' : 'frases'}`;
   const tramo = pagina > 1 ? ` Página ${pagina}.` : '';
-  return `${cuantas} de ${personaje.nombre}, personaje de ${personaje.universo}.${tramo}`;
+  return `${cuantas} de ${personaje.nombre}, ${universoDePersonaje(personaje)}.${tramo}`;
 }
 
 /**

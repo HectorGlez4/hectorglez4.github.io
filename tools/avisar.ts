@@ -64,6 +64,7 @@ import { rutaDeLaObra } from '../src/lib/obras.ts';
 import {
   MAX_PROPORCION_OBRA_DEL_AUTOR,
   MIN_CITAS_OBRA_INDEXABLE,
+  MIN_CITAS_POR_PERSONAJE,
   type CongelacionDeObras,
 } from '../src/lib/umbrales.ts';
 import { constanteNumerica, leerCongelacionDeclarada } from './lib/obras.ts';
@@ -74,7 +75,7 @@ import {
   soloDeModo,
   versionesDeBlobs,
 } from '../integraciones/historial.ts';
-import { obrasDelCorpusEnDisco } from '../integraciones/indexables.ts';
+import { obrasDelCorpusEnDisco, personajesIndexablesEnDisco } from '../integraciones/indexables.ts';
 import {
   VERSION_OPACA,
   bajasDelHistorial,
@@ -86,7 +87,7 @@ import {
   type CorpusParaFechar,
   type Version,
 } from './lib/cambios.ts';
-import { esRutaDeObra } from '../src/lib/superficies.ts';
+import { esRutaDeObra, esRutaDePersonaje } from '../src/lib/superficies.ts';
 /*
  * Las rutas se componen con los constructores y no a mano, por lo mismo que en el sitio:
  * lo que se anuncia aquí tiene que ser la canónica. Escritas a mano se quedaron sin barra
@@ -403,12 +404,18 @@ async function leerRango(
     try {
       if (copia === undefined || relacionAntes === undefined) throw new Error(`Corpus de ${desde} ilegible`);
       const { congelacion, texto } = await congelacionEnRevision(raiz, desde);
-      for (const nombre of ['MIN_CITAS_OBRA_INDEXABLE', 'MAX_PROPORCION_OBRA_DEL_AUTOR'] as const) {
+      // Historia 35.3b — también el umbral del Personaje, que decide su lista de antes igual.
+      const umbralesDeHoy = {
+        MIN_CITAS_OBRA_INDEXABLE,
+        MAX_PROPORCION_OBRA_DEL_AUTOR,
+        MIN_CITAS_POR_PERSONAJE,
+      } as const;
+      for (const [nombre, hoy] of Object.entries(umbralesDeHoy)) {
         const entonces = constanteNumerica(texto, nombre);
-        const hoy = nombre === 'MIN_CITAS_OBRA_INDEXABLE' ? MIN_CITAS_OBRA_INDEXABLE : MAX_PROPORCION_OBRA_DEL_AUTOR;
         if (entonces !== undefined && entonces !== hoy) {
+          const lista = nombre === 'MIN_CITAS_POR_PERSONAJE' ? 'Personajes' : 'Obras';
           avisar(
-            `${nombre} cambió en el rango (${entonces} → ${hoy}): la lista de Obras indexables ` +
+            `${nombre} cambió en el rango (${entonces} → ${hoy}): la lista de ${lista} indexables ` +
               'de antes se calcula con los umbrales de hoy.',
           );
         }
@@ -419,7 +426,13 @@ async function leerRango(
        * AD-11 prohíbe.
        */
       const { indexables } = await obrasDelCorpusEnDisco(copia, congelacion);
-      antes = { rutas: indexables.map((obra) => rutaDeLaObra(obra)) };
+      // Historia 35.3b — y los Personajes indexables de `desde`, con la misma función que el build.
+      antes = {
+        rutas: [
+          ...indexables.map((obra) => rutaDeLaObra(obra)),
+          ...(await personajesIndexablesEnDisco(copia)),
+        ],
+      };
     } catch (fallo) {
       antes = { motivo: fallo instanceof Error ? fallo.message : String(fallo) };
     }
@@ -530,7 +543,7 @@ export async function ensayoDelRango(
     const familia =
       lectura.relacionDespues.get(ruta)?.familia ??
       lectura.relacionAntes?.get(ruta)?.familia ??
-      (esRutaDeObra(ruta) ? 'obra' : undefined);
+      (esRutaDeObra(ruta) ? 'obra' : esRutaDePersonaje(ruta) ? 'personaje' : undefined);
     if (familia !== undefined) reparto[familia].seAvisarian += 1;
   }
   return { aviso, reparto, portada, msDelHistorial };
