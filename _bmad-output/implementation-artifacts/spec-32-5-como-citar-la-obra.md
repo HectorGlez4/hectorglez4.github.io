@@ -5,7 +5,7 @@ created: '2026-11-08'
 status: 'done'
 baseline_revision: '3d45cb258d8c5010dab16963fb2614409a51137e'
 review_loop_iteration: 0
-followup_review_recommended: true
+followup_review_recommended: false
 context:
   - '{project-root}/_bmad-output/implementation-artifacts/epic-32-context.md'
   - '{project-root}/_bmad-output/implementation-artifacts/spec-32-3-el-incipit-lo-declara-una-persona-y-la-pagina-lo-ensena-plegado.md'
@@ -13,18 +13,25 @@ context:
 warnings: ['oversized']
 deferred:
   - summary: >-
-      Con Ficha técnica (la línea más larga) y el título de Larra, «Cómo citar» cerrado deja la primera Tarjeta de la página 1 de Obra a 669,5 px a 360 × 640; qué ceder en la primera pantalla es pendiente de Héctor (bmad-ux), junto con el bloqueo de la 32.4.
+      Con Ficha técnica (la línea más larga) y el título de Larra, «Cómo citar» cerrado deja la primera Tarjeta de la página 1 de Obra a 669,5 px a 360 × 640, y con el Corpus real la holgura es de 13 px; qué ceder en la primera pantalla es pendiente de Héctor (bmad-ux), junto con el bloqueo de la 32.4.
     evidence: |-
-      tests/e2e/ficha-tecnica.spec.ts (corpus de prueba, ninguna Obra real atada a Wikidata) midió 669,5 px con 70 px de desplegables; la puerta de la 32.2 se juzga ahora sin ese contenedor (599,5 px). Con el Corpus real la puerta de toda página 1 sigue en verde (peor, 626,8 px).
+      tests/e2e/ficha-tecnica.spec.ts (corpus de prueba, ninguna Obra real atada a Wikidata) mide 669,5 px con los desplegables cerrados; su puerta conserva la aserción original (caja.y < 640) y va en test.fixme (entrada siguiente). Con el Corpus real la puerta de toda página 1 de tests/e2e/accesibilidad.spec.ts sigue estricta y en verde, con la peor a 626,8 px (Lastarria): 13 px bajo el límite, así que otro desplegable delante del listado —el «Dónde leer» que anuncia la 32.4— o un título más largo la cruzaría. Revisado el 2026-11-12 (segunda pasada): la versión anterior de esta entrada describía la resta del contenedor, ya revertida.
     location: >-
       tests/e2e/ficha-tecnica.spec.ts
     severity: medium
   - summary: >-
       Pendiente de Héctor (bmad-ux): la puerta de primera pantalla de la 32.2 con Ficha técnica y el título de Larra queda en test.fixme, sin rebajar, hasta que decida qué ceder en la primera pantalla de la página 1 de Obra; sustituye la resta del contenedor de la pasada anterior.
     evidence: |-
-      La revisión externa (blind-hunter, verification-gap) señaló que restar los 70 px de desplegables debilitaba la puerta. Restaurada la aserción original (caja.y < 640), el caso sintético mide 669,5 px (2026-11-09), así que se marca test.fixme con la decisión pendiente y la medida en su comentario. La puerta del Corpus real (tests/e2e/accesibilidad.spec.ts, toda página 1 de Obra) sigue estricta: peor 626,8 px (Lastarria) < 640, verde el 2026-11-12.
+      La revisión externa (blind-hunter, verification-gap) señaló que restar los 70 px de desplegables debilitaba la puerta. Restaurada la aserción original (caja.y < 640), el caso sintético mide 669,5 px (2026-11-09), así que se marca test.fixme con la decisión pendiente y la medida en su comentario. La puerta del Corpus real (tests/e2e/accesibilidad.spec.ts, toda página 1 de Obra) sigue estricta: peor 626,8 px (Lastarria) < 640, verde el 2026-11-12. La misma decisión pendiente abarca el caso sintético incipit + «Cómo citar» (sin Ficha técnica) de tests/e2e/incipit.spec.ts, que mide la primera Tarjeta a 714,5 px (2026-11-12) y solo la registra, sin aserción: se deja así, sin rebajar ninguna puerta, hasta que Héctor decida.
     location: >-
       tests/e2e/ficha-tecnica.spec.ts:166
+    severity: medium
+  - summary: >-
+      La conducta en ejecución de la isla `copiar-referencia` (fecha en los marcadores, botones sin `hidden`, retirada de «Sin fecha», copia, anuncio y `__medir` solo tras la copia buena) solo la prueba Playwright en local; `npm test` comprueba el marcado sin JS y el texto del fichero construido, no lo ejecuta.
+    evidence: |-
+      Revisión externa (verification-gap, 2026-11-12): quitar `boton.hidden = false`, la llamada a `fechar()` o que deje de casar `parentElement?.querySelector('[data-copiable]')` tras cambiar `ComoCitar.astro` deja todas las Referencias de Obra sin fecha y sin botones, y todas las aserciones de `tests/unit/medicion.test.ts` y `tests/unit/como-citar-obra-build.test.ts` siguen verdes; solo fallaría `tests/e2e/como-citar-obra.spec.ts`, que el CI no corre (AGENTS.md). Es la misma situación que la isla `CopiarCita` de la Página de Cita; la forma propuesta es una prueba unitaria que ejecute el guion construido en un DOM simulado, al modo de `tests/unit/ayuda/busqueda.ts`.
+    location: >-
+      src/islands/CopiarReferencia.astro
     severity: medium
 ---
 
@@ -145,6 +152,20 @@ Las capas de revisión son externas (orquestador v9-ralph) y en esta pasada no t
 
 Rechazados, con su motivo: el portapapeles que rechaza o no existe se atiende en silencio y los botones se enseñan sin sondear, como en `CopiarCita` y como fija la matriz del contrato («silencio»); APA sin año sin «s. f.» y la edición como rótulo de la Fuente son formas del contrato; `obraTieneComoCitar` sin exclusiones, el acoplamiento por `parentElement`, la conducta repetida de `CopiarCita` (no se toca, por contrato), la fecha importada en lugar de por su texto, «Cómo citar» solo sin la 32.4 y el recuento de la isla en su propio tope son decisiones del contrato y de Design Notes; la página 2 y el resto de casos e2e están cubiertos en `dist/`; las variantes de entrada vacía, año 0 o pequeño, región o marcador ausentes son marcado propio o esquema del Corpus; el reexporte entre importaciones sigue el patrón del fichero; el resto, ruido.
 
+### 2026-11-12 — Review pass
+- intent_gap: 0
+- bad_spec: 0
+- patch: 2 (high 0, medium 0, low 2)
+- defer: 1 (medium 1)
+- reject: 45
+- addressed_findings:
+  - `[low]` `[patch]` El primer bloque de «Auto Run Result» seguía diciendo `followup_review_recommended: false` junto a un frontmatter en `true` (blind-hunter, verification-gap): se fecha como la pasada del 2026-11-09 y se dice que la sustituyen las siguientes.
+  - `[low]` `[patch]` La primera entrada de `deferred` describía la resta del contenedor ya revertida («se juzga ahora sin ese contenedor (599,5 px)») (blind-hunter, verification-gap): se reescribe con el estado vigente —la puerta original en `test.fixme`, la holgura de 13 px del Corpus real (626,8 px) que señaló blind-hunter—, y junto a la entrada del `test.fixme` se anota la medida de incipit + «Cómo citar» (714,5 px), parte de la misma decisión pendiente de Héctor (bmad-ux), sin rebajar ninguna aserción.
+
+Diferido: la conducta en ejecución de la isla solo la prueba Playwright en local (verification-gap; ac-auditor, hueco 6), en el frontmatter con la forma de prueba propuesta.
+
+Rechazados, con su motivo: el portapapeles que rechaza o no existe, en silencio y sin sondear, es la matriz del contrato («silencio») y la conducta de `CopiarCita`; el acoplamiento por `parentElement`, la región ausente y el marcador de estilo ajeno dependen del marcado de `ComoCitar.astro`, que el contrato prohíbe tocar, y su rotura la caza la e2e (diferido arriba); `bloque.anuncio` sin limpiar tras vencer es inocuo y la prueba del último anunciante lo cubre; `obraTieneComoCitar` siempre `true` y su rama negativa inalcanzable son el contrato (la 35.9 añade las exclusiones); `incipit!`, el doble cálculo de la edición, los dos tipos de edición, el agrupado de importaciones, la expresión duplicada entre dos pruebas, `hoyEn` en la e2e, el tope de 12 tabulaciones, `RUTAS_DE_COPIAR_REFERENCIA` fijas y las cifras de bytes en los comentarios son estilo o mantenimiento sin consecuencia para quien usa el sitio; APA sin «s. f.» y la edición como rótulo de la Fuente son formas del contrato (`[ASSUMPTION]` de Héctor); «Fuente sin nombre» exige una Fuente sin nombre, anfitrión ni identificador, y ningún anfitrión sale como edición en las 518 páginas 1 de Obra de `dist/`; el traductor vacío, el año 0 y cero Referencias no los admite el esquema ni `referenciasDeObra`; `CAMPOS_QUE_PINTA.cita.obra` ya es `CAMPOS_DE_CITA` entero (Fuente y traducción incluidas); `ingreso-construido` cuenta solo lo que va en línea por diseño, y el tope propio de la isla lo juzga `medicion.test.ts`; la posición sin incipit, la fecha por importación de la hoja y la espaciación heredada de `ComoCitar.astro` son decisiones del contrato y de Design Notes ya justificadas; la página 2 omitida en la e2e la cubre `dist/`; las variantes de Pagefind y de `contenedorDe` con índice −1 son especulativas; el resto, duplicados de los anteriores.
+
 ## Design Notes
 
 - **Sin la 32.4.** «Cómo citar» va tras «Cómo empieza» —o, sin incipit, solo— en el contenedor que la 32.3 ya pinta; la 32.4 antepondrá «Dónde leer» dentro del mismo `div` (su spec ya lo prevé: «la 32.5 meterá «Cómo citar» detrás, en el mismo contenedor»). El conflicto de fusión es de pocas líneas en la página y se resuelve conservando los tres hermanos. Hasta la 32.4, «Dónde leer» sigue al pie con su salto: es el orden de UX-DR124 «con lo que ya existe».
@@ -184,7 +205,7 @@ Baseline: 3d45cb258d8c5010dab16963fb2614409a51137e.
 - `AGENTS.md` — la sección «Cómo citar la Obra (Historia 32.5)».
 - Pruebas nuevas: `tests/unit/como-citar-obra-build.test.ts`, `tests/e2e/como-citar-obra.spec.ts`. Al día: `atribucion`, `obras`, `fecha-de-cambio`, `medicion`, `ingreso-construido`, `incipit-build`, `obra-pagina`, `buscar-en` (unitarias) y `incipit`, `accesibilidad`, `ficha-tecnica` (e2e).
 
-**Revisión.** Sin hallazgos externos en esta pasada: 0 parches, 0 diferidos por revisión, 0 rechazados. `followup_review_recommended: false` (parches: 0 high, 0 medium, 0 low; puntuación 0). Un diferido propio, anotado en el frontmatter (primera pantalla con Ficha técnica).
+**Revisión (pasada del 2026-11-09, sustituida por las del 2026-11-12, más abajo).** Aquella pasada no trajo hallazgos externos: 0 parches, 0 diferidos por revisión, 0 rechazados, y entonces `followup_review_recommended` era `false`. El valor vigente del frontmatter es el de la última pasada. Un diferido propio, anotado en el frontmatter (primera pantalla con Ficha técnica).
 
 **Verificación.**
 - Unitarias por fichero: `atribucion`, `obras`, `ficha-tecnica`, `fecha-de-cambio`, `como-citar-obra-build`, `como-citar`, `medicion`, `ingreso-construido`, `vocabulario`, `huella`, `desplegable`, `tipografia-en-tokens`, `incipit-build`, `obra-pagina`, `buscar-en`, `superficies`, `objetivo-cli` — verdes.
@@ -215,3 +236,16 @@ Baseline: 3d45cb258d8c5010dab16963fb2614409a51137e.
 
 **Riesgos residuales.** La primera pantalla con Ficha técnica no tiene puerta activa hasta la decisión de Héctor; el caso se ve en cada corrida como `fixme`.
 
+
+### Segunda pasada de revisión del 2026-11-12
+
+**Cambio.** Solo la contabilidad del spec: el primer bloque de este resultado queda fechado como la pasada del 2026-11-09, la primera entrada de `deferred` describe el estado vigente (puerta original en `test.fixme`, 13 px de holgura con el Corpus real) y la entrada del `test.fixme` anota la medida de incipit + «Cómo citar» (714,5 px) como parte de la misma decisión pendiente de Héctor (bmad-ux). Ningún fichero de código ni de pruebas cambia.
+
+**Ficheros.**
+- `_bmad-output/implementation-artifacts/spec-32-5-como-citar-la-obra.md` — frontmatter `deferred` al día (dos entradas reescritas o ampliadas, una nueva) y este registro.
+
+**Revisión.** 2 parches (high 0, medium 0, low 2), 1 diferido (la conducta de la isla solo en Playwright local), 45 rechazados. `followup_review_recommended: false` (puntuación 3 × 0 + 1 × 2 = 2).
+
+**Verificación.** Sin cambios de código desde 7032fbc925, así que los mandatos de Verification siguen valiendo lo que dieron sobre ese mismo código: la primera pasada del 2026-11-12 corrió `npm test` completo (7.906 de 7.906) y `astro check` (0 errores), y en esta revisión la capa ac-auditor repitió sobre 7032fbc925 las unitarias por fichero (`atribucion`, `obras`, `fecha-de-cambio`, `vocabulario`, `huella`, `como-citar-obra-build`, `ingreso-construido`, `obra-pagina`, `buscar-en`, `incipit-build`, `medicion`: 1.217 verdes) y Playwright `como-citar-obra`, `ficha-tecnica`, `incipit` (14 verdes, 2 omitidas) y `accesibilidad -g "Obra|Historia 24.7"` en `escritorio` y `movil` (96 verdes; peor página 1 de Obra, 626,8 px). El frontmatter se comprobó como YAML válido con las tres entradas de `deferred`.
+
+**Riesgos residuales.** La primera pantalla de la página 1 de Obra con Ficha técnica, o con incipit y «Cómo citar», no tiene puerta activa hasta la decisión de Héctor; con el Corpus real quedan 13 px. La isla puede romperse sin que el CI lo vea (diferido).
