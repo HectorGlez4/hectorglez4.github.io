@@ -38,8 +38,12 @@ test.describe.configure({ mode: 'serial' });
  */
 const PERFIL = 'movil';
 
-/** Puerto propio: 4321 es el sitio del repositorio, 4399/4400 el de medición, 4402 el de ingreso. */
-const PUERTO_SITIO = 4403;
+/**
+ * Puerto propio: 4321 es el sitio del repositorio, 4399/4400 los de `receptor.spec.ts`, 4402 el de
+ * `ingreso-accesible.spec.ts`, 4403 el de `busqueda-historial.spec.ts` y 4404 el de
+ * `desplegable.spec.ts`. Que no se repita lo vigila `tests/unit/puertos-e2e.test.ts`.
+ */
+const PUERTO_SITIO = 4405;
 const SITIO = `http://localhost:${PUERTO_SITIO}`;
 
 /** Una ruta que solo publica este corpus: un 200 en ella dice que el servidor es el nuestro. */
@@ -175,6 +179,7 @@ test.describe('Historia 31.2 — «Lee el pasaje» en el navegador', () => {
     expect(copiar).not.toBeNull();
     expect(copiar!.y + copiar!.height).toBeLessThanOrEqual(640);
     const cerrado = await pasaje(page).boundingBox();
+    expect(cerrado).not.toBeNull();
     expect(cerrado!.y).toBeGreaterThanOrEqual(copiar!.y + copiar!.height);
     // Abierto, en coordenadas del documento: hacer clic puede desplazar la ventana.
     const enElDocumento = (l: ReturnType<Page['locator']>) => l.evaluate((e) => e.getBoundingClientRect().top + window.scrollY);
