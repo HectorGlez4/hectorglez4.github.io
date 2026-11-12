@@ -4,12 +4,15 @@ import { join, resolve } from 'node:path';
 import { citaAdmisible } from '../../src/lib/admision.ts';
 import { separarFrontmatter } from '../../tools/lib/corpus.ts';
 import {
+  ATESTIGUADA,
   AUTOR_VALIDO,
   RAIZ,
   TEMA_VALIDO,
   citaValida,
+  conLaPuertaAbierta,
   construirConCorpus,
   limpiar,
+  paginaConstruida,
 } from './ayuda/construir.js';
 
 const aLimpiar: string[] = [];
@@ -230,5 +233,129 @@ describe('Historia 1.2 — la puerta no vive en tools/', () => {
     // convertiría la puerta en una sugerencia. No debe existir.
     const config = readFileSync(resolve(RAIZ, 'astro.config.mjs'), 'utf8');
     expect(config).not.toMatch(/try\s*\{|catch\s*\(/);
+  });
+});
+
+/*
+ * Historia 35.1b, AD-32 — la puerta de la atribuida, sobre proyectos construidos de verdad. Las
+ * cinco constantes se abren en la copia (`conLaPuertaAbierta`, que sustituye el valor que tengan);
+ * lo puro está en `atribuidas.test.ts` y `atestiguaciones.test.ts`.
+ */
+describe('Historia 35.1b — la puerta de la atribuida en el build', () => {
+  const VIVA = 'nombre: "Ana Ejemplo"\nvivo: true\nsemblanza: "Escritora."\nordenAlfabetico: "Ejemplo"\n';
+  const VIVO = 'nombre: "Luis Prueba"\nvivo: true\nsemblanza: "Escritor."\nordenAlfabetico: "Prueba"\n';
+  const atribuida = (autor: string, slug: string, texto: string, extra: Record<string, unknown> = {}) =>
+    citaValida({
+      texto,
+      autor,
+      slug,
+      clase: 'atribuida',
+      estadoDerechos: undefined,
+      ...ATESTIGUADA,
+      procedencia: { obra: 'Obras de Ana', año: 2020 },
+      fuente: undefined,
+      ...extra,
+    });
+  const BASE = {
+    ...CORPUS_BASE,
+    'autores/ana-ejemplo.yml': VIVA,
+    'citas/seneca--el-tiempo.md': citaValida(),
+  };
+  const construirCon = async (corpus: Record<string, string>, ficheros?: Record<string, string>) => {
+    const resultado = await construirConCorpus(corpus, ficheros === undefined ? {} : { ficheros });
+    aLimpiar.push(resultado.proyecto);
+    return resultado;
+  };
+  const html = (proyecto: string, ruta: string) => readFileSync(paginaConstruida(proyecto, ruta), 'utf8');
+
+  it('con los cinco valores publica la feliz: sin Fuente no pinta la Línea de la Fuente; con ella, sí', async () => {
+    const r = await construirCon(
+      {
+        ...BASE,
+        'citas/ana-ejemplo--la-feliz.md': atribuida('ana-ejemplo', 'ana-ejemplo-la-feliz', 'Una frase que nadie más ha dicho nunca.'),
+        'citas/ana-ejemplo--con-fuente.md': atribuida('ana-ejemplo', 'ana-ejemplo-con-fuente', 'Otra que sí trae su Fuente declarada.', {
+          fuente: { id: 'wikisource-es', url: 'https://es.wikisource.org/wiki/Obras_de_Ana' },
+        }),
+      },
+      conLaPuertaAbierta(),
+    );
+    expect(r.codigo, r.salida).toBe(0);
+    expect(html(r.proyecto, '/cita/ana-ejemplo-la-feliz/')).not.toMatch(/<p class="fuente"/u);
+    expect(html(r.proyecto, '/cita/ana-ejemplo-con-fuente/')).toMatch(/<p class="fuente"/u);
+    // Las atestiguaciones y el origen no viajan a `dist/`.
+    expect(html(r.proyecto, '/cita/ana-ejemplo-la-feliz/')).not.toMatch(/elpais\.com|wikiquote/u);
+  });
+
+  it('con la puerta abierta rompe por cada tope, la figura sin Obra y el duplicado, nombrando recuento y tope', async () => {
+    const r = await construirCon(
+      {
+        ...BASE,
+        'autores/luis-prueba.yml': VIVO,
+        'citas/ana-ejemplo--larga.md': atribuida('ana-ejemplo', 'ana-ejemplo-larga', `Larga ${'muy '.repeat(20)}larga.`, {
+          procedencia: { obra: 'Otra obra de Ana', año: 2020 },
+        }),
+        'citas/ana-ejemplo--uno.md': atribuida('ana-ejemplo', 'ana-ejemplo-uno', 'La primera de su obra.'),
+        'citas/ana-ejemplo--dos.md': atribuida('ana-ejemplo', 'ana-ejemplo-dos', 'Y la segunda, que no cabe.'),
+        'citas/ana-ejemplo--copia.md': atribuida('ana-ejemplo', 'ana-ejemplo-copia', 'No es que tengamos poco tiempo, es que perdemos mucho.', {
+          procedencia: { obra: 'Tercera obra de Ana', año: 2020 },
+        }),
+        'citas/luis-prueba--sin-obra.md': atribuida('luis-prueba', 'luis-prueba-sin-obra', 'Sin obra no hay atribuida.', {
+          procedencia: { año: 2020 },
+        }),
+      },
+      conLaPuertaAbierta({ MAX_CARACTERES_DE_ATRIBUIDA: 40, MAX_ATRIBUIDAS_POR_OBRA: 1, MAX_ATRIBUIDAS_POR_DUEÑO: 3 }),
+    );
+    expect(r.codigo).not.toBe(0);
+    expect(r.salida).toMatch(/corpus\/citas\/ana-ejemplo--larga\.md: la atribuida «ana-ejemplo-larga» tiene \d+ caracteres y el tope es 40 \(MAX_CARACTERES_DE_ATRIBUIDA\)/u);
+    expect(r.salida).toMatch(/la Obra «ana-ejemplo--obras-de-ana» tendría 2 atribuidas y el tope es 1 \(MAX_ATRIBUIDAS_POR_OBRA\)/u);
+    expect(r.salida).toMatch(/el Autor «ana-ejemplo» tendría 4 atribuidas y el tope es 3 \(MAX_ATRIBUIDAS_POR_DUEÑO\)/u);
+    expect(r.salida).toMatch(/luis-prueba--sin-obra\.md: .*«luis-prueba», sin Personaje.*pregunta 23/u);
+    expect(r.salida).toMatch(/ana-ejemplo--copia\.md: la atribuida «ana-ejemplo-copia» coincide con «seneca-no-es-que-tengamos-poco-tiempo», de la clase siempre/u);
+  });
+
+  it('el esquema: dominio de menos, BrainyQuote, salto de línea, apta para portada, y la de siempre con lo de la atribuida', async () => {
+    const r = await construirCon(
+      {
+        ...BASE,
+        'citas/ana-ejemplo--un-dominio.md': atribuida('ana-ejemplo', 'ana-ejemplo-un-dominio', 'Dos subdominios y un dominio.', {
+          atestiguaciones: [
+            { url: 'https://es.wikiquote.org/wiki/A', consultadaEl: '2026-11-01' },
+            { url: 'https://www.brainyquote.com/a', consultadaEl: '2026-11-01' },
+            { url: 'https://en.wikiquote.org/wiki/A', consultadaEl: '2026-11-01' },
+          ],
+        }),
+      },
+      conLaPuertaAbierta(),
+    );
+    expect(r.codigo).not.toBe(0);
+    expect(r.salida).toContain('ana-ejemplo--un-dominio');
+    expect(r.salida).toMatch(/la atestigua 1 dominio registrable \(wikiquote\.org\) y hacen falta 2/u);
+
+    for (const [fichero, cita, regla] of [
+      ['ana-ejemplo--salto.md', atribuida('ana-ejemplo', 'ana-ejemplo-salto', 'Un verso\nY otro verso'), /una sola línea/u],
+      ['ana-ejemplo--apta.md', atribuida('ana-ejemplo', 'ana-ejemplo-apta', 'Apta para portada.', { aptaParaPortada: true }), /pregunta 22/u],
+      ['seneca--con-origen.md', citaValida({ slug: 'seneca-con-origen', texto: 'Otra de siempre.', ...ATESTIGUADA }), /solo una Cita atribuida declara «atestiguaciones»/u],
+      ['seneca--con-personaje.md', citaValida({ slug: 'seneca-con-personaje', texto: 'Otra más.', personaje: 'batman' }), /solo una Cita atribuida declara Personaje/u],
+    ] as const) {
+      const otro = await construirCon({ ...BASE, [`citas/${fichero}`]: cita }, conLaPuertaAbierta());
+      expect(otro.codigo, fichero).not.toBe(0);
+      expect(otro.salida, fichero).toContain(fichero.replace(/\.md$/u, ''));
+      expect(otro.salida, fichero).toMatch(regla);
+    }
+  }, 900_000);
+
+  it('con la puerta cerrada —el árbol, o una sola constante sin valor— rompe nombrando el fichero y las que faltan', async () => {
+    const corpus = {
+      ...BASE,
+      'citas/ana-ejemplo--la-feliz.md': atribuida('ana-ejemplo', 'ana-ejemplo-la-feliz', 'Una frase que nadie más ha dicho nunca.'),
+    };
+    const arbol = await construirCon(corpus);
+    expect(arbol.codigo).not.toBe(0);
+    expect(arbol.salida).toMatch(
+      /corpus\/citas\/ana-ejemplo--la-feliz\.md: la puerta de la atribuida está cerrada: no tienen valor MAX_CARACTERES_DE_ATRIBUIDA, MAX_ATRIBUIDAS_POR_OBRA, MAX_ATRIBUIDAS_POR_DUEÑO, MIN_ATESTIGUACIONES_DE_ATRIBUIDA, BUZON_DE_PETICIONES/u,
+    );
+    const sinBuzon = await construirCon(corpus, conLaPuertaAbierta({ BUZON_DE_PETICIONES: undefined }));
+    expect(sinBuzon.codigo).not.toBe(0);
+    expect(sinBuzon.salida).toMatch(/ana-ejemplo--la-feliz\.md: la puerta de la atribuida está cerrada: no tiene valor BUZON_DE_PETICIONES \(/u);
   });
 });

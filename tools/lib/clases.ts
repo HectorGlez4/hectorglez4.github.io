@@ -79,11 +79,11 @@ export async function anotarTrasInterrupcion(
   return new PublicacionInterrumpida(causa, entradas.map((e) => e.slug), registroSinAnotar);
 }
 
-/**
- * Por qué el alta y la aprobación dejan en revisión una Cita que deriva atribuida: su puerta,
- * con sus topes, llega con la Historia 35.1b. Hasta entonces nada se publica atribuido por orden.
+/*
+ * Por qué el alta y la aprobación dejan en revisión una atribuida con la puerta cerrada lo dice
+ * `motivoPuertaCerrada` de `tools/lib/atribuidas.ts`, que nombra las constantes sin valor
+ * (Historia 35.1b).
  */
-export const MOTIVO_PUERTA_CERRADA = 'la puerta de la atribuida está cerrada (Historia 35.1b)';
 
 /** Por qué no se obedece una clase escrita en el lote: la clase se deriva, no se teclea. */
 export const MOTIVO_CLASE_TECLEADA =

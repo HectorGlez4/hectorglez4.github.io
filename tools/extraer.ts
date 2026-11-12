@@ -54,6 +54,7 @@ import { basename, extname, isAbsolute, join, relative, resolve, sep } from 'nod
 import { normalizar } from '../src/lib/normalizar.ts';
 import { slugDeCita, slugLibre } from '../src/lib/slug.ts';
 import { dueñoDeCita } from '../src/lib/obras.ts';
+import { CLASE_ATRIBUIDA, claseQueCorresponde, esAtribuida } from '../src/lib/clase.ts';
 import {
   aYaml,
   leerAutores,
@@ -122,7 +123,7 @@ if (!existsSync(rutas.autores)) {
   });
 }
 
-let delCorpus: { slug: string; nombre?: string } | undefined;
+let delCorpus: { slug: string; nombre?: string; vivo?: unknown; añoFallecimiento?: unknown } | undefined;
 try {
   delCorpus = (await leerAutores(rutas)).find((a) => a.slug === autor);
 } catch (fallo) {
@@ -478,7 +479,15 @@ for (const candidata of resultado.candidatas) {
     escritas += 1;
     continue;
   }
-  const escrito = textoConSaltos(candidata.texto, deEsteDocumento);
+  /*
+   * Historia 35.1b — la clase se deriva del Autor, nunca se teclea: la de un Autor con derechos
+   * vigentes es atribuida, va en una línea y lleva su clase en vez de `estadoDerechos`. Llega a
+   * revisión sin atestiguaciones ni origen, que se declaran antes de aprobarla.
+   */
+  const atribuida = esAtribuida({ clase: claseQueCorresponde({}, delCorpus ?? {}) });
+  const escrito = atribuida
+    ? { texto: candidata.texto, descartados: 0 }
+    : textoConSaltos(candidata.texto, deEsteDocumento);
   saltosDescartados += escrito.descartados;
   await writeFile(
     fichero,
@@ -488,7 +497,7 @@ for (const candidata of resultado.candidatas) {
       temas: [],
       slug,
       procedencia: candidata.procedencia,
-      estadoDerechos: 'dominio-público',
+      ...(atribuida ? { clase: CLASE_ATRIBUIDA } : { estadoDerechos: 'dominio-público' }),
       fuente: candidata.fuente,
     })}---\n`,
     'utf8',

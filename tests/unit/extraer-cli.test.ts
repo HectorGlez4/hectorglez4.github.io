@@ -1,4 +1,5 @@
 import { afterEach, describe, expect, it } from 'vitest';
+import { CLASE_ATRIBUIDA } from '../../src/lib/clase.ts';
 import { execFile } from 'node:child_process';
 import { mkdtemp, mkdir, readFile, readdir, rename, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
@@ -179,6 +180,25 @@ describe('Historia 9.1 — las candidatas quedan en revisión, no publicadas', (
         comprobacion.success ? [] : comprobacion.error.issues.map((i) => i.message),
         fichero,
       ).toEqual([]);
+    }
+  });
+
+  it('Historia 35.1b — de un Autor con derechos vigentes salen atribuidas: su clase y sin estadoDerechos', async () => {
+    const { corpus } = await corpusConAutores();
+    await writeFile(
+      join(corpus, 'autores', 'seneca.yml'),
+      fichaDeAutor('seneca').replace('añoFallecimiento: 65', 'vivo: true'),
+      'utf8',
+    );
+    const resultado = await extraer(await documento(corpus), corpus);
+    expect(resultado.codigo, resultado.error).toBe(0);
+    const ficheros = await readdir(join(corpus, '_revision'));
+    expect(ficheros.length).toBeGreaterThan(0);
+    for (const fichero of ficheros) {
+      const frontmatter = await frontmatterDe(corpus, fichero);
+      expect(frontmatter.clase, fichero).toBe(CLASE_ATRIBUIDA);
+      expect(frontmatter).not.toHaveProperty('estadoDerechos');
+      expect(String(frontmatter.texto)).not.toContain('\n');
     }
   });
 

@@ -11,6 +11,7 @@
  *     porque ese hueco bloquea después la publicación de todas sus Citas.
  */
 
+import { esAtribuida } from '../../src/lib/clase.ts';
 import { mkdir, rename, rm } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import { join } from 'node:path';
@@ -634,6 +635,14 @@ export async function marcarAptaParaPortada(
         `La Cita «${slugCita}» no está publicada. Solo se marca lo publicado: una Cita ` +
           'en revisión no puede salir en portada.',
       ],
+    };
+  }
+
+  // Historia 35.1b — una atribuida no es apta para portada (pregunta 22): no se marca.
+  if (apta && esAtribuida(cita)) {
+    return {
+      ok: false,
+      motivos: [`La Cita «${slugCita}» es atribuida, y una atribuida no es apta para portada (pregunta 22).`],
     };
   }
 

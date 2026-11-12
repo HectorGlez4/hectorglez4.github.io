@@ -100,6 +100,15 @@ describe('35.1 — la clase', () => {
   });
 });
 
+/** Historia 35.1b — lo que la atribuida declara además: sus atestiguaciones y su origen. */
+const ATESTIGUADA = {
+  atestiguaciones: [
+    { url: 'https://es.wikiquote.org/wiki/X', consultadaEl: '2026-11-01' },
+    { url: 'https://www.elpais.com/x', consultadaEl: '2026-11-01' },
+  ],
+  origen: 'original',
+};
+
 describe('35.1 — el esquema', () => {
   const base = {
     texto: 'La pluma es la lengua del alma.',
@@ -122,8 +131,8 @@ describe('35.1 — el esquema', () => {
   });
 
   it('la atribuida no lleva estadoDerechos, y su Personaje tiene forma de slug', () => {
-    expect(citaAdmisible.safeParse({ ...base, clase: CLASE_ATRIBUIDA }).success).toBe(true);
-    expect(citaAdmisible.safeParse({ ...base, clase: CLASE_ATRIBUIDA, personaje: 'sancho-panza' }).success).toBe(true);
+    expect(citaAdmisible.safeParse({ ...base, clase: CLASE_ATRIBUIDA, ...ATESTIGUADA }).success).toBe(true);
+    expect(citaAdmisible.safeParse({ ...base, clase: CLASE_ATRIBUIDA, ...ATESTIGUADA, personaje: 'sancho-panza' }).success).toBe(true);
     expect(mensajes({ ...base, clase: CLASE_ATRIBUIDA, estadoDerechos: 'dominio-público' }).join('\n')).toMatch(
       /^estadoDerechos: .*atribuida no lleva estadoDerechos/mu,
     );
@@ -132,7 +141,7 @@ describe('35.1 — el esquema', () => {
 
   it('toda Cita lleva Autor o Personaje (Historia 35.2): la de un Personaje sin Autor es admisible', () => {
     const { autor: _autor, ...sinAutor } = base;
-    expect(citaAdmisible.safeParse({ ...sinAutor, clase: CLASE_ATRIBUIDA, personaje: 'sancho' }).success).toBe(true);
+    expect(citaAdmisible.safeParse({ ...sinAutor, clase: CLASE_ATRIBUIDA, ...ATESTIGUADA, personaje: 'sancho' }).success).toBe(true);
     expect(mensajes({ ...sinAutor, estadoDerechos: 'dominio-público' }).join('\n')).toMatch(
       /^autor: .*falta el Autor o el Personaje de la Cita/mu,
     );

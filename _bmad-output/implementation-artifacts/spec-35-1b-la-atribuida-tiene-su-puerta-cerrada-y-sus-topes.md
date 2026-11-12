@@ -2,8 +2,8 @@
 title: 'Historia 35.1b — La atribuida tiene su puerta, cerrada, y sus topes'
 type: 'feature'
 created: '2026-11-09'
-status: 'ready-for-dev'
-baseline_revision: '2bc8e6070789d1f07cc6471e5ce318619a02fdf7'
+status: 'done'
+baseline_revision: 'fbf5692012104972d0d9300716caf1193974ebb7'
 review_loop_iteration: 0
 followup_review_recommended: false
 context:
@@ -122,6 +122,15 @@ deferred:
 
 ## Review Triage Log
 
+### 2026-11-12 — Review pass
+- intent_gap: 0
+- bad_spec: 0
+- patch: 0
+- defer: 0
+- reject: 0
+- addressed_findings:
+  - none
+
 ## Design Notes
 
 El juicio que necesita el Corpus entero vive en `tools/lib/atribuidas.ts` y no en el esquema: el esquema juzga un fichero (forma, recuento de dominios), el módulo relaciona ficheros (topes, fichas, duplicados). Las órdenes lo llaman antes de escribir con lo publicado más lo de la pasada; el build, con lo versionado. Los topes entran por parámetro para que las pruebas unitarias no parcheen nada; solo las de construcción parchean la copia.
@@ -139,5 +148,47 @@ El juicio que necesita el Corpus entero vive en `tools/lib/atribuidas.ts` y no e
 
 ## Auto Run Result
 
-Status: ready-for-dev
-Blocking condition: ninguna (alto tras la planificación, como pedía la invocación)
+Status: done
+Blocking condition: ninguna
+
+**Resumen.** La atribuida tiene su puerta, y la puerta está cerrada en el árbol. Las cinco constantes
+entran en `undefined` con su dueño (Héctor); con alguna sin valor, el build rompe ante cada atribuida
+de `corpus/citas/` nombrando su fichero y las constantes que faltan, y el alta y `revisar --aprobar`
+la dejan en `corpus/_revision/` con ese mismo motivo (`motivoPuertaCerrada`, que sustituye a
+`MOTIVO_PUERTA_CERRADA` de la 35.1). Con la puerta abierta (en una copia o por parámetro) se juzgan el
+esquema de la atribuida, sus topes, la figura sin Obra y los duplicados entre clases; el cotejo la
+salta; portada y jornada la rechazan. Con el Corpus real, `dist/` no cambia.
+
+**Ficheros.**
+- `package.json`, `package-lock.json` — `tldts` 7.4.19 exacta (`--save-exact`).
+- `src/lib/umbrales.ts`, `src/lib/dominio.ts` — las cuatro constantes y `BUZON_DE_PETICIONES`, en `undefined`, literales; `dominio.ts` lee además `public/CNAME` desde la raíz de la construcción si no está junto al módulo (el empaquetado de las páginas).
+- `src/lib/atestiguaciones.ts` (nuevo) — `dominioDeAtestiguacion` (eTLD+1 ICANN con `tldts`), `dominiosQueAtestiguan`, `DOMINIOS_QUE_NO_ATESTIGUAN` (`brainyquote.com`); el propio dominio sale de `DOMINIO`.
+- `src/lib/admision.ts` — `atestiguacion(es)`, `ORIGENES`/`origen`, `motivoDeAtestiguacionesEscasas`; `reglasDeClase` exige a la atribuida atestiguaciones, origen, una línea y no apta, cuenta dominios con el mínimo, y rechaza los dos campos en la de siempre; `citaAdmisible` los gana.
+- `src/content.config.ts` — los dos campos en la colección `citas`.
+- `tools/lib/atribuidas.ts` (nuevo, puro) — `constantesSinValor`, `motivoPuertaCerrada`, `fallosDeAtribuidas` (topes, figura sin Obra «pregunta 23», duplicados con `parecidoEntre`), `motivosDe`, `lineaDelBuild`, valores por parámetro y por omisión los del árbol.
+- `integraciones/clases.ts` — añade `fallosDeAtribuidas` sobre lo versionado, con las fichas de Obra.
+- `tools/lib/cotejo.ts`, `integraciones/cotejo.ts` — la atribuida no se coteja ni se le exige Fuente, no cuenta como cotejada, y en el censo rompe.
+- `tools/alta.ts` — `atestiguaciones`/`origen` en el lote y en lo escrito; puerta cerrada → motivo; abierta → juicio con lo publicado, lo de la pasada, `_revision/` y el lote (la ficha que crea la entrada cuenta); la atribuida no recibe saltos; opción `puerta`.
+- `tools/lib/revision.ts` — el mismo juicio en `aprobar` (opción `puerta`), sin restituir saltos a la atribuida; `loteEnRevision` no le exige Fuente.
+- `tools/lib/clases.ts` — retira `MOTIVO_PUERTA_CERRADA`.
+- `tools/extraer.ts` — deriva la clase: de un Autor con derechos vigentes escribe `clase` y no `estadoDerechos`, y el texto en una línea.
+- `tools/lib/gestion.ts`, `tools/lib/jornadas.ts` — marcar y fijar se niegan ante una atribuida («pregunta 22»).
+- `tools/lib/cambios.ts` — `atestiguaciones` y `origen` en `CAMPOS_QUE_NO_FECHAN.cita`.
+- `tests/unit/ayuda/construir.ts` — `ATESTIGUADA`, `PUERTA_DE_PRUEBA` y `conLaPuertaAbierta` (sustituye el valor que tengan las constantes en la copia).
+- Pruebas nuevas: `atestiguaciones.test.ts`, `atribuidas.test.ts`; ampliadas: `puerta-de-admision.test.ts` (cuatro construcciones de la puerta), `alta.test.ts`, `revision.test.ts`, `cotejo.test.ts`, `gestion.test.ts`, `jornadas.test.ts`, `extraer-cli.test.ts`, `clase.test.ts`; ajustadas a la puerta (atestiguadas y con la puerta abierta en la copia): `clase-build`, `personajes-build`, `pagina-de-personaje` (sin atribuida apta: la portada y el 404 ya no tienen Cita del Día; textos de serie que no casan por `parecidoEntre`), `publicable-y-alcanzable`, `medicion`.
+- `AGENTS.md` — «La puerta de la atribuida (Historia 35.1b)» dentro de «La Cita atribuida».
+
+**Revisión.** Las capas externas no traen hallazgos en esta pasada: 0 parches, 0 diferidos, 0 rechazados.
+Recomendación de revisión de seguimiento: `false` (parches 0 alto, 0 medio, 0 bajo; puntuación 0).
+
+**Verificación.**
+- `npx vitest run tests/unit/atestiguaciones.test.ts tests/unit/atribuidas.test.ts tests/unit/clase.test.ts` — verde.
+- `npx vitest run tests/unit/puerta-de-admision.test.ts -t 35.1b` (4 construcciones), `clase-build`, `personajes-build`, `pagina-de-personaje`, `publicable-y-alcanzable` (64), `alta`, `revision`, `cotejo`, `gestion`, `jornadas`, `extraer-cli`, `medicion`, `fecha-de-cambio`, `huella`, `clases-de-cita`, `peso` (882) — verde; `medicion.test.ts` pasa sin tocar ningún tope de guion y `fecha-de-cambio.test.ts` sin eximir los dos campos.
+- `npx astro check` — 0 errores, 0 avisos.
+- `FECHA_JORNADA=2026-11-09 npm run build` antes (en `fbf5692012`) y después; `diff -r`: fuera de `pagefind/` no difiere ningún fichero; en `pagefind/` solo los nombres de `filter/*.pf_filter`, `pf_meta` y `pagefind-entry.json`, el no determinismo previo de Pagefind que ya anotaron la 35.1 y la 35.2.
+- `npm test` entero con `correr.sh`/`esperar.pl` — FINISHED EXIT=0: 180 ficheros, 7.938 pruebas. (Dos pasadas anteriores cayeron en una prueba cada una —`cotejo.test.ts`, «la única lectura de disco de src/lib/ sigue siendo el dominio»; `dominio.test.ts`, «ninguna página ni componente lo lleva escrito a mano»— y se corrigieron leyendo el dominio propio de `DOMINIO`.)
+
+**Riesgos residuales.**
+- `src/lib/dominio.ts` entra ahora en el empaquetado de las páginas (el esquema viaja con `publicado.ts` y necesita el dominio propio): su lectura de `public/CNAME` relativa al módulo falla ahí, y la segunda, desde `process.cwd()`, supone que se construye desde la raíz del proyecto, como hacen `npm run build`, el CI y las pruebas.
+- Con la puerta abierta, las órdenes juzgan los duplicados de cada atribuida contra todo `corpus/_revision/` (cientos de miles de candidatas en la principal): las formas se calculan una vez por candidata (`WeakMap`), pero aprobar muchas atribuidas de golpe será lento. Hoy no se ejerce: la puerta está cerrada.
+- El tope por Obra cuenta una Obra por su ficha resuelta: en el alta, varias atribuidas de una Obra que la misma pasada crea no cuentan juntas hasta que la ficha existe (el build sí las cuenta).

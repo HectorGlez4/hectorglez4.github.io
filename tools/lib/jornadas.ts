@@ -22,6 +22,7 @@
  * AD-22 — aquí no entra la red: esto lee y escribe ficheros del corpus, y nada más.
  */
 
+import { esAtribuida } from '../../src/lib/clase.ts';
 import { esJornada, type Jornada } from '../../src/lib/citaDelDia.ts';
 import { escribirPortada, leerCitas, leerPortada, type Rutas } from './corpus.ts';
 import type { Resultado } from './gestion.ts';
@@ -227,6 +228,15 @@ export async function fijarJornadas(
           ? `La Cita «${cita}» no está publicada: sigue en corpus/_revision/. Apruébela ` +
             'antes de fijarla; una fijación no adelanta contenido en revisión.'
           : `La Cita «${cita}» no existe en el corpus. Compruebe el slug.`,
+      );
+      continue;
+    }
+
+    // Historia 35.1b — una atribuida no sale en portada (pregunta 22): no se fija.
+    if (esAtribuida(porSlug.get(cita)!)) {
+      motivos.push(
+        `La Cita «${cita}» es atribuida, y una atribuida no sale en portada (pregunta 22): ` +
+          'no se fija ninguna jornada con ella.',
       );
       continue;
     }

@@ -2,10 +2,12 @@ import { afterAll, describe, expect, it } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import {
+  ATESTIGUADA,
   AUTOR_VALIDO,
   RAIZ,
   TEMA_VALIDO,
   citaValida,
+  conLaPuertaAbierta,
   construirConCorpus,
   limpiar,
   paginaConstruida,
@@ -20,7 +22,9 @@ import { CABECERA_DE_CLASES } from '../../tools/lib/corpus.ts';
  * verdad: la atribuida de un Autor vivo construye y su ficha dice «N. 1950» sin `deathDate`, un
  * Autor vivo sin nacimiento no pinta años ni hueco, cada desacuerdo de la integración rompe
  * nombrando lo suyo, `clase: siempre` es error del esquema y, con plazo en una copia, la Cita de
- * siempre de un Autor protegido rompe. Las constantes se parchean en la copia, nunca en el árbol.
+ * siempre de un Autor protegido rompe. Las constantes se parchean en la copia, nunca en el árbol;
+ * también las cinco de la puerta de la atribuida (Historia 35.1b), que aquí se abre en la copia
+ * para medir la clase y no la puerta (`puerta-de-admision.test.ts`).
  */
 
 const aLimpiar: string[] = [];
@@ -78,12 +82,14 @@ describe('Historia 35.1 — la clase en el build', () => {
       'citas/ana-ejemplo--la-vida-es-corta.md': citaDe('ana-ejemplo', 'ana-ejemplo-la-vida-es-corta', 'La vida es corta.', {
         clase: ATRIBUIDA,
         estadoDerechos: undefined,
+        ...ATESTIGUADA,
       }),
       'citas/luis-prueba--el-arte-es-largo.md': citaDe('luis-prueba', 'luis-prueba-el-arte-es-largo', 'El arte es largo.', {
         clase: ATRIBUIDA,
         estadoDerechos: undefined,
+        ...ATESTIGUADA,
       }),
-    });
+    }, { ficheros: conLaPuertaAbierta() });
     aLimpiar.push(r.proyecto);
     expect(r.codigo, r.salida).toBe(0);
 
@@ -133,7 +139,7 @@ describe('Historia 35.1 — la clase en el build', () => {
         'miguel-de-cervantes',
         'miguel-de-cervantes-sin-derechos',
         'Atribuida sin derechos.',
-        { clase: ATRIBUIDA, estadoDerechos: undefined },
+        { clase: ATRIBUIDA, estadoDerechos: undefined, ...ATESTIGUADA },
       ),
       'citas/ana-ejemplo--de-siempre.md': citaDe('ana-ejemplo', 'ana-ejemplo-de-siempre', 'De siempre y viva.'),
       'clases-de-cita.yml':
@@ -144,7 +150,7 @@ describe('Historia 35.1 — la clase en el build', () => {
         linea('miguel-de-cervantes-doble', ATRIBUIDA) +
         linea('miguel-de-cervantes-sin-derechos', ATRIBUIDA) +
         linea('ana-ejemplo-de-siempre', 'siempre'),
-    });
+    }, { ficheros: conLaPuertaAbierta() });
     aLimpiar.push(r.proyecto);
     expect(r.codigo).not.toBe(0);
     expect(r.salida).toContain(

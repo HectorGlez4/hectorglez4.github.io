@@ -50,11 +50,17 @@ import {
   type ClaseRegistrada,
   type Rutas,
 } from './lib/corpus.ts';
-import { claseDe, claseQueCorresponde, esAtribuida, type Clase } from '../src/lib/clase.ts';
+import { CLASE_ATRIBUIDA, claseDe, claseQueCorresponde, esAtribuida, type Clase } from '../src/lib/clase.ts';
+import {
+  fallosDeAtribuidas,
+  motivoPuertaCerrada,
+  motivosDe,
+  type CitaParaAtribuidas,
+  type ValoresDeLaPuerta,
+} from './lib/atribuidas.ts';
 import {
   anotarTrasInterrupcion,
   MOTIVO_CLASE_TECLEADA,
-  MOTIVO_PUERTA_CERRADA,
   ORDEN_SEMBRAR_CLASES,
   PublicacionInterrumpida,
   slugsConOtraClase,
@@ -86,6 +92,12 @@ export interface EntradaDeLote {
    * atribuida, y hasta la Historia 35.1b la Cita se queda en revisión.
    */
   personaje?: string;
+  /**
+   * Historia 35.1b — las atestiguaciones de una atribuida, `{url, consultadaEl}`, y de dónde sale
+   * su letra. Las exige el esquema a la atribuida y se las prohíbe a la de siempre.
+   */
+  atestiguaciones?: { url?: string; consultadaEl?: string }[];
+  origen?: string;
 }
 
 export interface CitaPublicada {
@@ -204,7 +216,8 @@ interface Publicada {
 export async function darDeAltaLote(
   lote: EntradaDeLote[],
   rutas: Rutas,
-  opciones: { seco?: boolean; conDuplicados?: boolean } = {},
+  /** `puerta`: los valores de la puerta de la atribuida (Historia 35.1b); por omisión, los del árbol. */
+  opciones: { seco?: boolean; conDuplicados?: boolean; puerta?: ValoresDeLaPuerta } = {},
 ): Promise<InformeDeAlta> {
   const autores = await leerAutores(rutas);
   const slugsDePersonaje = new Set((await leerPersonajes(rutas)).map((p) => p.slug));
@@ -261,6 +274,27 @@ export async function darDeAltaLote(
     });
     return textoConSaltos(recibido, documentoParaLosSaltos(recibido, candidatos));
   }
+
+  /*
+   * Historia 35.1b — si una entrada derivará atribuida, antes de resolver nada: la atribuida va en
+   * una línea (no recibe saltos de su documento) y se compara con las demás del lote.
+   */
+  function derivaAtribuida(entrada: EntradaDeLote): boolean {
+    const referencia = entrada.autor ?? '';
+    const autor = autorPorSlug.get(slugsDeAutor.has(referencia) ? referencia : slugDeAutor(referencia));
+    return esAtribuida({
+      clase: claseQueCorresponde(entrada.personaje !== undefined ? { personaje: entrada.personaje } : {}, autor ?? {}),
+    });
+  }
+  const delLote: CitaParaAtribuidas[] = lote.map((entrada, indice) => ({
+    slug: `entrada ${indice + 1} del lote`,
+    texto: typeof entrada.texto === 'string' ? entrada.texto : '',
+    ...(derivaAtribuida(entrada) ? { clase: CLASE_ATRIBUIDA } : {}),
+  }));
+  const enRevisionParaAtribuidas: CitaParaAtribuidas[] = enRevisionYa
+    .filter((c) => typeof c.texto === 'string')
+    .map((c) => ({ slug: c.slug, texto: c.texto, ...(esAtribuida(c) ? { clase: claseDe(c) } : {}) }));
+  const publicadasParaAtribuidas: CitaParaAtribuidas[] = yaPublicadas.map(paraAtribuidas);
 
   /*
    * Historia 26.8 — antes de escribir nada se **ensaya** el lote entero (`recorrer` sin
@@ -358,6 +392,10 @@ export async function darDeAltaLote(
     aPublicar: Publicada[] = [],
   ): Promise<{ informe: InformeDeAlta; aPublicar: Publicada[] }> {
     const slugsOcupados = new Set(yaPublicadas.map((c) => c.slug));
+    // Historia 35.1b — lo que esta pasada publica, para los topes de la atribuida; y los Autores
+    // a los que la pasada da una Ficha de Obra, que cuentan como con Obra.
+    const publicadasEnLaPasada: CitaParaAtribuidas[] = [];
+    const autoresConFichaEnLaPasada = new Set<string>();
     // El conjunto publicado tal como va quedando, para la grafía por omisión de una ficha nueva.
     const publicadasParaObra: { autor?: string; personaje?: string; procedencia?: { obra?: string } }[] = [
       ...yaPublicadas,
@@ -393,7 +431,10 @@ export async function darDeAltaLote(
 
     for (const [indice, entrada] of lote.entries()) {
       if (apartadas.has(indice)) continue;
-      const escrito = textoDelAlta(entrada);
+      // Historia 35.1b — la atribuida va en una línea: no recibe los saltos de su documento.
+      const escrito = derivaAtribuida(entrada)
+        ? { texto: entrada.texto ?? '', descartados: 0 }
+        : textoDelAlta(entrada);
       const texto = escrito.texto;
       const motivos: string[] = [];
 
@@ -536,7 +577,9 @@ export async function darDeAltaLote(
           : claseQueCorresponde(personaje !== undefined ? { personaje } : {}, autorLeido);
       const atribuida = esAtribuida({ clase });
       if ('clase' in entrada) motivos.push(MOTIVO_CLASE_TECLEADA);
-      if (atribuida) motivos.push(MOTIVO_PUERTA_CERRADA);
+      // Historia 35.1b — con la puerta cerrada, ninguna atribuida se publica, y se dice por qué.
+      const cerrada = atribuida ? motivoPuertaCerrada(opciones.puerta) : undefined;
+      if (cerrada !== undefined) motivos.push(cerrada);
 
       // ── Las reglas de admisión, las mismas que aplica el build ──
       const slugBase = slugDeCita(slugDueño, texto);
@@ -549,6 +592,9 @@ export async function darDeAltaLote(
         procedencia: entrada.procedencia,
         ...(atribuida ? { clase } : { estadoDerechos: 'dominio-público' as const }),
         ...(entrada.personaje !== undefined ? { personaje: entrada.personaje } : {}),
+        // Historia 35.1b — se pasan tal cual: el esquema los exige a la atribuida y los prohíbe a la de siempre.
+        ...(entrada.atestiguaciones !== undefined ? { atestiguaciones: entrada.atestiguaciones } : {}),
+        ...(entrada.origen !== undefined ? { origen: entrada.origen } : {}),
         // Se pasa tal cual y la valida la misma puerta que el resto: un `fuente:` a medias
         // manda la Cita a revisión con la regla incumplida escrita, no al corpus.
         ...(entrada.fuente !== undefined ? { fuente: entrada.fuente } : {}),
@@ -604,6 +650,32 @@ export async function darDeAltaLote(
         if (!plan.ok) motivos.push(...plan.motivos);
       }
 
+      /*
+       * Historia 35.1b — con la puerta abierta, la atribuida se juzga con lo publicado más lo que
+       * esta pasada publica: topes, figura sin Obra (la ficha que la misma entrada crea cuenta) y
+       * duplicados entre clases contra lo publicado, `corpus/_revision/` y el lote. Un duplicado
+       * de la atribuida no se salta con `--con-duplicados`.
+       */
+      if (atribuida && cerrada === undefined && motivos.length === 0 && validada.success) {
+        const propia: CitaParaAtribuidas = paraAtribuidas(validada.data);
+        const fallos = fallosDeAtribuidas({
+          citas: [...publicadasParaAtribuidas, ...publicadasEnLaPasada, propia],
+          autores,
+          fichas: await leerFichasDeObra(rutas),
+          autoresConFichaNueva: [
+            ...autoresConFichaEnLaPasada,
+            ...(plan?.ok === true && conAutor ? [slugAutor] : []),
+          ],
+          comparables: [
+            ...enRevisionParaAtribuidas,
+            ...delLote.filter((_, i) => i !== indice && !apartadas.has(i)),
+          ],
+          juzgar: new Set([propia.slug]),
+          ...(opciones.puerta !== undefined ? { valores: opciones.puerta } : {}),
+        });
+        motivos.push(...motivosDe(fallos, propia.slug));
+      }
+
       if (motivos.length > 0 || !validada.success) {
         // A revisión con lo que se sepa. El fichero conserva el trabajo hecho para que
         // completarlo sea rellenar un campo, no volver a teclear la Cita.
@@ -622,6 +694,8 @@ export async function darDeAltaLote(
         : await escribirCita(rutas.citas, nombreFichero, aRegistroDeCita(validada.data));
       slugsOcupados.add(candidata.slug);
       aPublicar.push({ indice, texto, slug: candidata.slug, temas: validada.data.temas, clase });
+      publicadasEnLaPasada.push(paraAtribuidas(validada.data));
+      if (plan?.ok === true && conAutor) autoresConFichaEnLaPasada.add(slugAutor);
       if (!opciones.seco) {
         // Solo lo que de verdad se publica cuenta para la grafía por omisión.
         publicadasParaObra.push({
@@ -681,8 +755,30 @@ function aRegistroDeCita(datos: CitaAdmisible): Record<string, unknown> {
     ...(datos.estadoDerechos !== undefined ? { estadoDerechos: datos.estadoDerechos } : {}),
     ...(esAtribuida(datos) ? { clase: claseDe(datos) } : {}),
     ...(datos.personaje !== undefined ? { personaje: datos.personaje } : {}),
+    // Historia 35.1b — las atestiguaciones y el origen de la atribuida.
+    ...(datos.atestiguaciones !== undefined ? { atestiguaciones: datos.atestiguaciones } : {}),
+    ...(datos.origen !== undefined ? { origen: datos.origen } : {}),
     ...(datos.fuente !== undefined ? { fuente: datos.fuente } : {}),
     ...(datos.aptaParaPortada ? { aptaParaPortada: true } : {}),
+  };
+}
+
+/** Lo que la puerta de la atribuida necesita de una Cita ya leída o validada (Historia 35.1b). */
+function paraAtribuidas(c: {
+  slug: string;
+  texto: string;
+  autor?: string;
+  personaje?: string;
+  clase?: unknown;
+  procedencia?: { obra?: string } | null;
+}): CitaParaAtribuidas {
+  return {
+    slug: c.slug,
+    texto: c.texto,
+    ...(c.autor !== undefined ? { autor: c.autor } : {}),
+    ...(c.personaje !== undefined ? { personaje: c.personaje } : {}),
+    ...(esAtribuida(c) ? { clase: claseDe(c) } : {}),
+    ...(c.procedencia !== undefined && c.procedencia !== null ? { procedencia: c.procedencia } : {}),
   };
 }
 

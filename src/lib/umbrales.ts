@@ -1365,3 +1365,39 @@ export const PLAZO_DE_PROTECCION_AÑOS: number | undefined = undefined;
  * Solo se lee si `PLAZO_DE_PROTECCION_AÑOS` tiene valor.
  */
 export const AÑO_DE_REFERENCIA: number | undefined = undefined;
+
+/*
+ * La puerta de la atribuida — Historia 35.1b, AD-32.
+ *
+ * Las cuatro constantes que siguen y `BUZON_DE_PETICIONES` (`src/lib/dominio.ts`) son la puerta:
+ * **las fija Héctor; ningún agente les da valor**. Mientras alguna de las cinco esté en
+ * `undefined`, la puerta está cerrada: el build rompe ante cada atribuida de `corpus/citas/`
+ * nombrando las que faltan, y el alta y `revisar --aprobar` la dejan en `corpus/_revision/`
+ * con ese mismo motivo (`tools/lib/atribuidas.ts`). Son literales a propósito: el filtro de los
+ * Directorios importa este módulo, y un literal no arrastra nada al guion del cliente.
+ */
+
+/**
+ * El texto más largo de una atribuida, en puntos de código — Historia 35.1b. Lo fija Héctor.
+ * Una más larga no se publica (y, cuando exista, también se juzga la variante, 35.6).
+ */
+export const MAX_CARACTERES_DE_ATRIBUIDA: number | undefined = undefined;
+
+/**
+ * Cuántas atribuidas admite, como mucho, una Obra cuyo dueño tiene derechos vigentes —
+ * Historia 35.1b. Lo fija Héctor. Se cuenta sobre todo el Corpus más lo que la pasada publica.
+ */
+export const MAX_ATRIBUIDAS_POR_OBRA: number | undefined = undefined;
+
+/**
+ * Cuántas atribuidas admite, como mucho, un dueño —el Autor o, sin él, el Personaje— con
+ * derechos vigentes — Historia 35.1b. Lo fija Héctor.
+ */
+export const MAX_ATRIBUIDAS_POR_DUEÑO: number | undefined = undefined;
+
+/**
+ * Cuántos dominios registrables distintos tienen que atestiguar una atribuida — Historia 35.1b.
+ * Lo fija Héctor. Cuenta solo `dominioDeAtestiguacion` (`src/lib/atestiguaciones.ts`): BrainyQuote
+ * y el propio dominio no atestiguan, y dos subdominios del mismo dominio cuentan uno.
+ */
+export const MIN_ATESTIGUACIONES_DE_ATRIBUIDA: number | undefined = undefined;

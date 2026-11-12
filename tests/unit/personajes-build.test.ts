@@ -1,6 +1,15 @@
 import { afterAll, describe, expect, it } from 'vitest';
 import { existsSync, readFileSync } from 'node:fs';
-import { AUTOR_VALIDO, TEMA_VALIDO, citaValida, construirConCorpus, limpiar, paginaConstruida } from './ayuda/construir.js';
+import {
+  ATESTIGUADA,
+  AUTOR_VALIDO,
+  TEMA_VALIDO,
+  citaValida,
+  conLaPuertaAbierta,
+  construirConCorpus,
+  limpiar,
+  paginaConstruida,
+} from './ayuda/construir.js';
 import { MENSAJE_PUBLICADA_SIN_AUTOR } from '../../src/lib/admision.ts';
 import { MENSAJE_OBRA_DE_PERSONAJE_PUBLICADA } from '../../src/lib/obras.ts';
 import { ORDEN_PROPONER_CLAVES_DE_PERSONAJE } from '../../tools/lib/claves.ts';
@@ -33,9 +42,13 @@ const atribuida = (slug: string, texto: string, dueños: { autor?: string; perso
     personaje: dueños.personaje,
     clase: 'atribuida',
     estadoDerechos: undefined,
+    ...ATESTIGUADA,
     procedencia: { obra, año: 2000 },
     fuente: { id: 'wikisource-es', url: `https://es.wikisource.org/wiki/${encodeURIComponent(obra)}` },
   });
+
+/** Historia 35.1b — la puerta de la atribuida, abierta en la copia: aquí se mide el Personaje. */
+const PUERTA = { ficheros: conLaPuertaAbierta() };
 
 const BASE = {
   'autores/seneca.yml': AUTOR_VALIDO,
@@ -61,7 +74,7 @@ describe('Historia 35.2 — el Personaje en el build', () => {
         { autor: 'seneca', personaje: 'batman' },
       ),
       'obras/batman--el-caballero.yml': fichaDePersonaje('batman', ['batman', 'joker'], 'El caballero', 'el caballero'),
-    });
+    }, PUERTA);
     aLimpiar.push(r.proyecto);
     expect(r.codigo, r.salida).toBe(0);
     expect(r.salida).toContain('batman--el-caballero.yml → ninguna Cita publicada resuelve esta ficha');
@@ -94,7 +107,7 @@ describe('Historia 35.2 — el Personaje en el build', () => {
         autor: 'seneca',
         personaje: 'joker',
       }),
-    });
+    }, PUERTA);
     aLimpiar.push(r.proyecto);
     expect(r.codigo).not.toBe(0);
     expect(r.salida).toMatch(/corpus\/personajes\/seneca\.yml: .*corpus\/autores\/seneca\.yml/u);
@@ -108,7 +121,7 @@ describe('Historia 35.2 — el Personaje en el build', () => {
       ...BASE,
       'personajes/batman.yml': personaje('Batman'),
       'citas/seneca--la-noche.md': atribuida('seneca-la-noche', 'La noche es larga.', { autor: 'seneca', personaje: 'batman' }),
-    });
+    }, PUERTA);
     aLimpiar.push(r.proyecto);
     expect(r.codigo).not.toBe(0);
     expect(r.salida).toMatch(/corpus\/personajes\/batman\.yml: el Personaje tiene Citas publicadas y no tiene clave/u);
@@ -145,7 +158,7 @@ describe('Historia 35.2 — el Personaje en el build', () => {
         'obras/batman--la-cueva.yml': fichaDePersonaje('batman', ['batman'], 'La cueva', 'la cueva'),
         'obras/robin--la-cueva.yml': fichaDePersonaje('robin', ['robin'], 'La cueva', 'la cueva'),
       },
-      { sembrarObras: false },
+      { sembrarObras: false, ...PUERTA },
     );
     aLimpiar.push(r.proyecto);
     expect(r.codigo).not.toBe(0);
@@ -181,7 +194,7 @@ describe('Historia 35.2 — el Personaje en el build', () => {
   documento: "${documento}"
   revision: 123
 `,
-    });
+    }, PUERTA);
     aLimpiar.push(r.proyecto);
     expect(r.codigo).not.toBe(0);
     expect(r.salida).toContain('corpus/personajes/batman.yml');
@@ -193,7 +206,7 @@ describe('Historia 35.2 — el Personaje en el build', () => {
       ...BASE,
       'personajes/batman.yml': personaje('Batman', 'Batman'),
       'citas/batman--sin-autor.md': atribuida('batman-sin-autor', 'Soy la noche.', { personaje: 'batman' }),
-    });
+    }, PUERTA);
     aLimpiar.push(r.proyecto);
     expect(r.codigo).not.toBe(0);
     expect(r.salida).toContain(MENSAJE_PUBLICADA_SIN_AUTOR);

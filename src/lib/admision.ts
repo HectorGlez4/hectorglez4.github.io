@@ -14,7 +14,12 @@
  */
 
 import { z } from 'astro/zod';
-import { MAX_CARACTERES_CRITERIO, MAX_CARACTERES_NOTA_DE_OBRA } from './umbrales.ts';
+import {
+  MAX_CARACTERES_CRITERIO,
+  MAX_CARACTERES_NOTA_DE_OBRA,
+  MIN_ATESTIGUACIONES_DE_ATRIBUIDA,
+} from './umbrales.ts';
+import { dominiosQueAtestiguan } from './atestiguaciones.ts';
 import { inicialDeClave, normalizar } from './normalizar.ts';
 import { esJornada } from './jornada.ts';
 import { esAtribuida } from './clase.ts';
@@ -217,6 +222,43 @@ export const personaje = z
     'Regla incumplida: el Personaje de la Cita es un slug: minúsculas, dígitos y guiones, sin diacríticos.',
   );
 
+/**
+ * Una atestiguación de una Cita atribuida — Historia 35.1b, AD-32: la dirección `http(s)` de un
+ * sitio que la atribuye y la jornada en que se consultó. No se descarga ni se coteja: cuenta su
+ * dominio registrable (`dominioDeAtestiguacion` de `src/lib/atestiguaciones.ts`).
+ */
+export const atestiguacion = z
+  .object(
+    {
+      url: z
+        .string({ message: 'Regla incumplida: una atestiguación declara su «url».' })
+        .refine((valor) => {
+          try {
+            const leida = new URL(valor);
+            return leida.protocol === 'http:' || leida.protocol === 'https:';
+          } catch {
+            return false;
+          }
+        }, 'Regla incumplida: la «url» de una atestiguación es una dirección http:// o https://.'),
+      consultadaEl: z
+        .string({ message: 'Regla incumplida: una atestiguación declara «consultadaEl», la jornada AAAA-MM-DD.' })
+        .refine(esJornada, 'Regla incumplida: «consultadaEl» es una jornada AAAA-MM-DD que existe.'),
+    },
+    { message: 'Regla incumplida: una atestiguación es un objeto con «url» y «consultadaEl».' },
+  )
+  .strict();
+
+export const atestiguaciones = z
+  .array(atestiguacion, { message: 'Regla incumplida: «atestiguaciones» es una lista de {url, consultadaEl}.' })
+  .min(1, 'Regla incumplida: una atribuida declara al menos una atestiguación.');
+
+/** De dónde sale la letra de una atribuida — Historia 35.1b, AD-32. */
+export const ORIGENES = ['original', 'doblaje', 'traduccion-publicada'] as const;
+
+export const origen = z.enum(ORIGENES, {
+  message: `Regla incumplida: «origen» es uno de ${ORIGENES.map((o) => `«${o}»`).join(', ')}.`,
+});
+
 /** Sin Autor ni Personaje, una Cita no tiene dueño: ni prefijo, ni fichero, ni página. */
 export const MENSAJE_CITA_SIN_DUEÑO =
   'Regla incumplida: falta el Autor o el Personaje de la Cita. Toda Cita lleva uno de los dos, al menos: ' +
@@ -246,6 +288,7 @@ export function reglasDeClase(valor: unknown, contexto: z.RefinementCtx): void {
   // Una clase sin valor admisible ya la rechaza el literal: no se juzga lo demás por ella.
   if (cita.clase !== undefined && !atribuida) return;
   if (atribuida) {
+    reglasDeLaAtribuida(cita, contexto);
     if (cita.estadoDerechos !== undefined) {
       contexto.addIssue({
         code: 'custom',
@@ -256,6 +299,16 @@ export function reglasDeClase(valor: unknown, contexto: z.RefinementCtx): void {
       });
     }
     return;
+  }
+  for (const campo of ['atestiguaciones', 'origen'] as const) {
+    if (cita[campo] === undefined) continue;
+    contexto.addIssue({
+      code: 'custom',
+      path: [campo],
+      message:
+        `Regla incumplida: solo una Cita atribuida declara «${campo}». La de siempre se coteja ` +
+        'contra su documento: no se atestigua ni declara origen.',
+    });
   }
   if (cita.estadoDerechos === undefined) {
     contexto.addIssue({
@@ -273,6 +326,72 @@ export function reglasDeClase(valor: unknown, contexto: z.RefinementCtx): void {
       message:
         'Regla incumplida: solo una Cita atribuida declara Personaje. La de siempre es de un ' +
         'Autor de dominio público y no lleva el campo.',
+    });
+  }
+}
+
+/**
+ * Por qué no bastan las atestiguaciones de una atribuida, o `undefined` si bastan — Historia 35.1b.
+ * Cuentan los dominios registrables distintos de `dominiosQueAtestiguan`; sin mínimo (`undefined`,
+ * la puerta cerrada), no se juzga: la puerta ya no deja publicar nada.
+ */
+export function motivoDeAtestiguacionesEscasas(urls: readonly string[], minimo: number | undefined): string | undefined {
+  if (minimo === undefined) return undefined;
+  const dominios = dominiosQueAtestiguan(urls);
+  if (dominios.length >= minimo) return undefined;
+  return (
+    `Regla incumplida: la atestigua${dominios.length === 1 ? '' : 'n'} ${dominios.length} ` +
+    `${dominios.length === 1 ? 'dominio registrable' : 'dominios registrables distintos'}` +
+    `${dominios.length > 0 ? ` (${dominios.join(', ')})` : ''} y hacen falta ${minimo} ` +
+    '(MIN_ATESTIGUACIONES_DE_ATRIBUIDA). Los subdominios de un mismo dominio cuentan uno, y BrainyQuote y el ' +
+    'propio sitio no cuentan.'
+  );
+}
+
+/**
+ * Lo que la atribuida cumple sola, sin mirar otros ficheros — Historia 35.1b, AD-32: declara sus
+ * atestiguaciones y su origen, va en una línea aunque traiga Fuente, no es apta para portada y,
+ * con `MIN_ATESTIGUACIONES_DE_ATRIBUIDA` con valor, la atestiguan al menos tantos dominios
+ * registrables distintos. Lo que relaciona ficheros —topes, Obra, duplicados— lo juzga
+ * `tools/lib/atribuidas.ts`.
+ */
+function reglasDeLaAtribuida(cita: Record<string, unknown>, contexto: z.RefinementCtx): void {
+  if (cita.atestiguaciones === undefined) {
+    contexto.addIssue({
+      code: 'custom',
+      path: ['atestiguaciones'],
+      message:
+        'Regla incumplida: una Cita atribuida declara sus «atestiguaciones» ({url, consultadaEl}): ' +
+        'no se coteja, se publica porque otros sitios la atestiguan.',
+    });
+  } else if (Array.isArray(cita.atestiguaciones)) {
+    const urls = cita.atestiguaciones
+      .map((a) => (a !== null && typeof a === 'object' ? (a as { url?: unknown }).url : undefined))
+      .filter((u): u is string => typeof u === 'string');
+    const motivo = motivoDeAtestiguacionesEscasas(urls, MIN_ATESTIGUACIONES_DE_ATRIBUIDA);
+    if (motivo !== undefined) contexto.addIssue({ code: 'custom', path: ['atestiguaciones'], message: motivo });
+  }
+  if (cita.origen === undefined) {
+    contexto.addIssue({
+      code: 'custom',
+      path: ['origen'],
+      message: `Regla incumplida: una Cita atribuida declara su «origen»: ${ORIGENES.join(', ')}.`,
+    });
+  }
+  if (typeof cita.texto === 'string' && cita.texto.includes('\n')) {
+    contexto.addIssue({
+      code: 'custom',
+      path: ['texto'],
+      message:
+        'Regla incumplida: una Cita atribuida va en una sola línea, aunque traiga Fuente: el salto ' +
+        'de verso es de la Cita cotejada contra su documento.',
+    });
+  }
+  if (cita.aptaParaPortada === true) {
+    contexto.addIssue({
+      code: 'custom',
+      path: ['aptaParaPortada'],
+      message: 'Regla incumplida: una Cita atribuida no es apta para portada (pregunta 22).',
     });
   }
 }
@@ -665,6 +784,9 @@ export const citaAdmisible = z.object({
   estadoDerechos: estadoDerechos.optional(),
   clase: clase.optional(),
   personaje: personaje.optional(),
+  // Historia 35.1b — solo de la atribuida, y en ella obligatorios (`reglasDeClase`).
+  atestiguaciones: atestiguaciones.optional(),
+  origen: origen.optional(),
   aptaParaPortada: z.boolean().default(false),
   /*
    * Opcional, y lo será mientras quede censo. Las 38 Citas anteriores a la v3 no tienen

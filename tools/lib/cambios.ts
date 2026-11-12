@@ -391,7 +391,8 @@ export const CAMPOS_QUE_PINTA = {
  * prueba de clasificación exige que cada clave de los esquemas esté aquí o en la tabla.
  */
 export const CAMPOS_QUE_NO_FECHAN = {
-  cita: ['aptaParaPortada', 'estadoDerechos', 'clase'],
+  // Historia 35.1b — las atestiguaciones y el origen de la atribuida no se pintan (35.4 decide lo que pinta).
+  cita: ['aptaParaPortada', 'estadoDerechos', 'clase', 'atestiguaciones', 'origen'],
   autor: ['tradicion'],
   obra: ['distintaDe'],
   /*

@@ -8,6 +8,8 @@ import {
   TEMA_VALIDO,
   citaValida,
   coleccionValida,
+  ATESTIGUADA,
+  conLaPuertaAbierta,
   construirConCorpus,
   limpiar,
   paginaConstruida,
@@ -281,6 +283,7 @@ const CORPUS_COMPLETO: Record<string, string> = {
     personaje: 'batman',
     clase: 'atribuida',
     estadoDerechos: undefined,
+    ...ATESTIGUADA,
     procedencia: { obra: 'Cartas a Lucilio', año: 64 },
     fuente: { id: 'wikisource-es', url: 'https://es.wikisource.org/wiki/Cartas_a_Lucilio' },
   }),
@@ -291,7 +294,7 @@ describe('Historia 12.1 — sobre un sitio construido de verdad', () => {
   let salidaDelBuild: string;
 
   beforeAll(async () => {
-    const resultado = await construirConCorpus(CORPUS_COMPLETO);
+    const resultado = await construirConCorpus(CORPUS_COMPLETO, { ficheros: conLaPuertaAbierta() });
     expect(resultado.codigo, resultado.salida).toBe(0);
     proyecto = resultado.proyecto;
     salidaDelBuild = resultado.salida;

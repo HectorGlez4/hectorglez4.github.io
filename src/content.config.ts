@@ -21,6 +21,8 @@ import {
   ordenAlfabetico,
   ordenRevisado,
   personaje,
+  atestiguaciones,
+  origen,
   personajeAdmisible,
   procedencia,
   reglaDeAutorPublicado,
@@ -96,6 +98,12 @@ const citas = defineCollection({
     estadoDerechos: estadoDerechos.optional(),
     clase: clase.optional(),
     personaje: personaje.optional(),
+    /*
+     * Historia 35.1b — las atestiguaciones y el origen de la atribuida, obligatorios en ella y
+     * prohibidos en la de siempre (`reglasDeClase`). No viajan a `publicado.ts` ni a `dist/`.
+     */
+    atestiguaciones: atestiguaciones.optional(),
+    origen: origen.optional(),
     /*
      * Historia 11.2 — la Fuente de la que salió la Cita, y con ella su documento.
      *

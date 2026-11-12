@@ -6,6 +6,7 @@ import { altaConFallo, darDeAltaLote, formatearInforme, mensajeDeAltaFallida, ty
 import { componerDocumento } from '../../tools/lib/documento.ts';
 import { CABECERA_DE_CLASES, rutasDelCorpus, separarFrontmatter, type Rutas } from '../../tools/lib/corpus.ts';
 import { ORDEN_SEMBRAR_CLASES, PublicacionInterrumpida } from '../../tools/lib/clases.ts';
+import { motivoPuertaCerrada, type ValoresDeLaPuerta } from '../../tools/lib/atribuidas.ts';
 import { CENSO_DE_PARTIDA } from '../../tools/lib/cotejo.ts';
 import { MIN_CITAS_POR_TEMA } from '../../src/lib/umbrales.ts';
 import {
@@ -446,7 +447,7 @@ describe('Historia 35.1 — el alta deriva la clase y la anota', () => {
     expect(informe.publicadas).toEqual([]);
     expect(informe.enRevision).toHaveLength(2);
     for (const rechazada of informe.enRevision) {
-      expect(rechazada.motivos).toContain('la puerta de la atribuida está cerrada (Historia 35.1b)');
+      expect(rechazada.motivos).toContain(motivoPuertaCerrada());
       const fichero = await readFile(rechazada.ruta!, 'utf8');
       expect(fichero).toMatch(/^clase: "?atribuida"?$/mu);
       expect(fichero).not.toContain('estadoDerechos');
@@ -465,7 +466,7 @@ describe('Historia 35.1 — el alta deriva la clase y la anota', () => {
     const informe = await darDeAltaLote([{ ...sinAutor, personaje: 'batman', texto: 'La noche es más oscura antes del alba.' }], rutas);
     expect(informe.publicadas).toEqual([]);
     expect(informe.enRevision).toHaveLength(1);
-    expect(informe.enRevision[0].motivos).toContain('la puerta de la atribuida está cerrada (Historia 35.1b)');
+    expect(informe.enRevision[0].motivos).toContain(motivoPuertaCerrada());
     const ruta = informe.enRevision[0].ruta!;
     expect(ruta).toMatch(/_revision\/batman--la-noche-es-mas-oscura.*\.md$/u);
     const fichero = await readFile(ruta, 'utf8');
@@ -496,6 +497,87 @@ describe('Historia 35.1 — el alta deriva la clase y la anota', () => {
     expect(informe.personajesDesconocidos).toEqual(['joker']);
     expect(informe.sinDueño).toBeUndefined();
     expect(formatearInforme(informe)).not.toMatch(/no se han escrito/u);
+  });
+
+  describe('Historia 35.1b — con la puerta abierta por parámetro', () => {
+    const ABIERTA: ValoresDeLaPuerta = {
+      maxCaracteres: 200,
+      maxPorObra: 5,
+      maxPorDueño: 5,
+      minAtestiguaciones: 2,
+      buzon: 'peticiones@ejemplo.org',
+    };
+    const deAna = (texto: string, extra: Partial<EntradaDeLote> = {}): EntradaDeLote => ({
+      texto,
+      autor: 'ana-ejemplo',
+      temas: [NOMBRE_DEL_TEMA_PUBLICADO],
+      procedencia: { obra: 'Obras de Ana', año: 2020 },
+      atestiguaciones: [
+        { url: 'https://es.wikiquote.org/wiki/Ana', consultadaEl: '2026-11-01' },
+        { url: 'https://www.elpais.com/ana', consultadaEl: '2026-11-02' },
+      ],
+      origen: 'original',
+      ...extra,
+    });
+    const conAna = async () => {
+      const rutas = await corpusDePrueba();
+      await writeFile(join(rutas.autores, 'ana-ejemplo.yml'), VIVA, 'utf8');
+      return rutas;
+    };
+
+    it('publica la feliz con sus atestiguaciones y su origen, sin Fuente ni estadoDerechos, y la anota', async () => {
+      const rutas = await conAna();
+      const informe = await darDeAltaLote([deAna('Una frase que nadie más ha dicho nunca.')], rutas, { puerta: ABIERTA });
+      expect(informe.enRevision).toEqual([]);
+      expect(informe.publicadas).toHaveLength(1);
+      const fichero = await readFile(informe.publicadas[0].ruta, 'utf8');
+      expect(fichero).toMatch(/^clase: "?atribuida"?$/mu);
+      expect(fichero).toContain('es.wikiquote.org');
+      expect(fichero).toMatch(/^origen: "?original"?$/mu);
+      expect(fichero).not.toContain('estadoDerechos');
+      // La ficha que la misma entrada crea cuenta como Obra de la Autora (pregunta 23).
+      expect(await readdir(rutas.obras)).toContain('ana-ejemplo--obras-de-ana.yml');
+      expect(await readFile(rutas.clasesDeCita, 'utf8')).toMatch(/clase: atribuida/u);
+    });
+
+    it('un duplicado de una publicada de siempre no se publica, ni con --con-duplicados', async () => {
+      const rutas = await conAna();
+      expect((await darDeAltaLote([COMPLETA], rutas)).publicadas).toHaveLength(1);
+      const informe = await darDeAltaLote([deAna(COMPLETA.texto!)], rutas, { puerta: ABIERTA, conDuplicados: true });
+      expect(informe.publicadas).toEqual([]);
+      expect(informe.enRevision[0].motivos.join('\n')).toMatch(/coincide con «seneca-no-es-que-tengamos-poco-tiempo[^»]*», de la clase siempre/u);
+    });
+
+    it('un duplicado de otra entrada del lote tampoco', async () => {
+      const rutas = await conAna();
+      const informe = await darDeAltaLote(
+        [deAna('Una frase que se repite en el mismo lote.'), { ...COMPLETA, texto: 'Una frase que se repite en el mismo lote' }],
+        rutas,
+        { puerta: ABIERTA },
+      );
+      expect(informe.enRevision.map((r) => r.motivos.join(' '))).toEqual([expect.stringMatching(/coincide con «entrada 2 del lote»/u)]);
+    });
+
+    it('el tope del texto y la figura sin Obra la mandan a revisión con su motivo', async () => {
+      const rutas = await conAna();
+      const informe = await darDeAltaLote(
+        [deAna(`Larga ${'muy '.repeat(60)}larga.`), deAna('Sin obra no hay atribuida.', { procedencia: { año: 2020 } })],
+        rutas,
+        { puerta: ABIERTA },
+      );
+      expect(informe.publicadas).toEqual([]);
+      expect(informe.enRevision.map((r) => r.motivos.join(' '))).toEqual([
+        expect.stringMatching(/tiene \d+ caracteres y el tope es 200 \(MAX_CARACTERES_DE_ATRIBUIDA\)/u),
+        expect.stringMatching(/«ana-ejemplo», sin Personaje.*pregunta 23/u),
+      ]);
+    });
+
+    it('sin Tema publicado no se escribe, como toda Cita', async () => {
+      const rutas = await conAna();
+      const informe = await darDeAltaLote([deAna('Una frase sin Tema que la acerque.', { temas: [] })], rutas, { puerta: ABIERTA });
+      expect(informe.publicadas).toEqual([]);
+      expect(informe.rechazadasPorTema).toHaveLength(1);
+    });
   });
 
   it('una clase tecleada en el lote no se obedece: la entrada va a revisión con el motivo', async () => {

@@ -32,6 +32,7 @@
 
 import { fileURLToPath } from 'node:url';
 import { join } from 'node:path';
+import { claseDe, esAtribuida } from '../src/lib/clase.ts';
 import type { AstroIntegration } from 'astro';
 import {
   leerAutores,
@@ -86,6 +87,8 @@ export default function cotejoDeCitas(): AstroIntegration {
       texto: cita.texto ?? '',
       ...(cita.procedencia?.obra !== undefined ? { obra: cita.procedencia.obra } : {}),
       ...(cita.fuente !== undefined ? { fuente: cita.fuente } : {}),
+      // Historia 35.1b — la atribuida no se coteja: la clase la lee `esAtribuida`.
+      ...(esAtribuida(cita) ? { clase: claseDe(cita) } : {}),
     }));
 
     const deCitas = cotejar({

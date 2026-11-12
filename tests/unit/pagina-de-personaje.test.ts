@@ -1,7 +1,7 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
-import { citaValida, construirConCorpus, limpiar, paginaConstruida } from './ayuda/construir.js';
+import { ATESTIGUADA, citaValida, conLaPuertaAbierta, construirConCorpus, limpiar, paginaConstruida } from './ayuda/construir.js';
 import { CITAS_POR_PAGINA, MAX_OBRAS_ANTES_DE_LAS_CITAS, MAX_SALTOS_DESDE_LA_PORTADA } from '../../src/lib/umbrales.ts';
 import { EVENTOS } from '../../src/lib/medicion.ts';
 import { componerBiografia, nombreDeBiografia } from '../../tools/lib/documento.ts';
@@ -12,8 +12,10 @@ import { componerBiografia, nombreDeBiografia } from '../../tools/lib/documento.
  * Personaje A dice `CITAS_POR_PAGINA + 1` Citas —así tiene página 2—, todas de una Obra de su
  * Autor; Personaje B dice una, de otra Obra, y lleva semblanza propia; su slug la pone en la página 1
  * del Tema, a tres saltos de la portada (si no, la puerta de NFR-5 rompe la construcción). Todas tienen Autor (`vivo`, con derechos
- * vigentes) y el Tema `el-tiempo`, que con ellas se publica. La de B es además la única apta para
- * portada, así que es la Cita del Día de la portada y del 404. Personaje C lleva su semblanza de
+ * vigentes) y el Tema `el-tiempo`, que con ellas se publica. Ninguna es apta para portada —una
+ * atribuida no lo es nunca (Historia 35.1b, pregunta 22)—, así que la portada y el 404 no tienen
+ * Cita del Día. La puerta de la atribuida se abre en la copia, y los textos no se parecen entre
+ * sí: un duplicado entre atribuidas tampoco se publica. Personaje C lleva su semblanza de
  * una biografía (AD-26), y Personaje D dice una Cita de cada una de `MAX_OBRAS_ANTES_DE_LAS_CITAS + 1`
  * Obras, así que su Lista de Obras se pliega. Lo puro —`obrasDelPersonaje` con una
  * Obra de dueño Personaje, el grafo del modelo, la superficie— está en `publicado.test.ts`,
@@ -71,10 +73,31 @@ const OBRAS_DE_D = Array.from({ length: MAX_OBRAS_ANTES_DE_LAS_CITAS + 1 }, (_, 
 const pad = (n: number) => String(n).padStart(3, '0');
 
 /**
+ * Historia 35.1b — un texto propio para la Cita n.º `n` de una serie: dos atribuidas casi iguales
+ * («La número 1…», «La número 2…») son un duplicado entre clases y no se publican.
+ */
+const PALABRAS = ['río', 'piedra', 'luz', 'sombra', 'camino', 'viento', 'mar', 'fuego', 'nube', 'árbol', 'pan',
+  'sal', 'hierro', 'vidrio', 'lluvia', 'nieve', 'campo', 'puerta', 'casa', 'libro', 'sueño', 'voz', 'mano'];
+const textoPropio = (serie: string, n: number) => {
+  // Seis palabras por un xorshift sembrado con n: ninguna pareja de la prueba casa por `parecidoEntre`.
+  let x = (n * 2654435761) >>> 0;
+  const palabras: string[] = [];
+  for (let k = 0; k < 6; k += 1) {
+    x ^= x << 13;
+    x >>>= 0;
+    x ^= x >>> 17;
+    x ^= x << 5;
+    x >>>= 0;
+    palabras.push(PALABRAS[x % PALABRAS.length]);
+  }
+  return `${serie}: ${palabras.join(' y ')}.`;
+};
+
+/**
  * Una atribuida de la Autora Viva, dicha por un Personaje, con su obra y su Fuente: el cotejo la
  * sitúa como a cualquiera. Las Citas sin obra y su pie se prueban puros (`publicado.test.ts`).
  */
-const atribuida = (slug: string, texto: string, personaje: string, obra: string, aptaParaPortada?: true) =>
+const atribuida = (slug: string, texto: string, personaje: string, obra: string) =>
   citaValida({
     texto,
     slug,
@@ -82,7 +105,7 @@ const atribuida = (slug: string, texto: string, personaje: string, obra: string,
     personaje,
     clase: 'atribuida',
     estadoDerechos: undefined,
-    aptaParaPortada,
+    ...ATESTIGUADA,
     procedencia: { obra, año: 2000 },
     fuente: { id: 'wikisource-es', url: `https://es.wikisource.org/wiki/${encodeURIComponent(obra)}` },
   });
@@ -95,7 +118,7 @@ const CORPUS: Record<string, string> = {
   'citas/vivo--de-a-con-obra.md': atribuida('vivo-de-a-con-obra', 'La de A con obra dice algo del tiempo.', 'a', 'Obras de la autora'),
   'personajes/c.yml': PERSONAJE_C,
   'personajes/d.yml': PERSONAJE_D,
-  'citas/vivo--b-la-unica.md': atribuida('vivo-b-la-unica', 'La única de B también habla del tiempo.', 'b', 'Otra obra', true),
+  'citas/vivo--b-la-unica.md': atribuida('vivo-b-la-unica', 'La única de B también habla del tiempo.', 'b', 'Otra obra'),
   'citas/vivo--c-la-de-c.md': atribuida('vivo-c-la-de-c', 'La de C cuenta también el tiempo.', 'c', 'Otra obra'),
   [`biografias/${DOCUMENTO_DE_C}.txt`]: componerBiografia(
     BIOGRAFIA_DE_C,
@@ -106,7 +129,7 @@ const CORPUS: Record<string, string> = {
 OBRAS_DE_D.forEach((obra, i) => {
   CORPUS[`citas/vivo--c-de-d-${i + 1}.md`] = atribuida(
     `vivo-c-de-d-${i + 1}`,
-    `La ${i + 1} de D dice algo del tiempo.`,
+    textoPropio('De D', i + 101),
     'd',
     obra,
   );
@@ -114,7 +137,7 @@ OBRAS_DE_D.forEach((obra, i) => {
 for (let i = 1; i <= CITAS_POR_PAGINA; i += 1) {
   CORPUS[`citas/vivo--de-a-${pad(i)}.md`] = atribuida(
     `vivo-de-a-${pad(i)}`,
-    `La número ${pad(i)} de A sobre el tiempo.`,
+    textoPropio('De A', i),
     'a',
     'Obras de la autora',
   );
@@ -125,7 +148,7 @@ let salida = '';
 let codigo = -1;
 
 beforeAll(async () => {
-  const r = await construirConCorpus(CORPUS, { jornada: '2026-11-08' });
+  const r = await construirConCorpus(CORPUS, { jornada: '2026-11-08', ficheros: conLaPuertaAbierta() });
   proyecto = r.proyecto;
   salida = r.salida;
   codigo = r.codigo;
@@ -262,11 +285,9 @@ describe('Historia 35.3 — la Página de Personaje construida', () => {
     expect([...zonas]).toEqual(['lista-de-obras']);
   });
 
-  it('la Cita del Día de la portada y del 404 nombra a su Personaje, como su Página de Cita', () => {
+  it('ninguna atribuida es la Cita del Día: sin otra apta, la portada y el 404 no la tienen (35.1b, pregunta 22)', () => {
     for (const ruta of ['/', '/404']) {
-      const delDia = /<section class="del-dia"[\s\S]*?<\/section>/u.exec(html(ruta))?.[0] ?? '';
-      expect(delDia, ruta).toContain('href="/cita/vivo-b-la-unica/"');
-      expect(delDia, ruta).toMatch(/<p class="autor"[^>]*>\s*<a href="\/personaje\/b\/" class="enlace-en-tinta"[^>]*>Personaje B<\/a>/u);
+      expect(html(ruta), ruta).not.toMatch(/<section class="del-dia"/u);
     }
   });
 

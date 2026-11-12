@@ -108,6 +108,8 @@ import {
   TEMA_VALIDO,
   citaValida,
   coleccionValida,
+  ATESTIGUADA,
+  conLaPuertaAbierta,
   construirConCorpus,
   limpiar,
   paginaConstruida,
@@ -2033,6 +2035,7 @@ const CORPUS_MEDIDO: Record<string, string> = {
     personaje: 'batman',
     clase: 'atribuida',
     estadoDerechos: undefined,
+    ...ATESTIGUADA,
     procedencia: { obra: 'Cartas a Lucilio', año: 64 },
     fuente: { id: 'wikisource-es', url: 'https://es.wikisource.org/wiki/Cartas_a_Lucilio' },
   }),
@@ -2052,7 +2055,7 @@ function construccionUnica(
 ): () => Promise<string> {
   let construccion: Promise<string> | undefined;
   return () => {
-    construccion ??= construirConCorpus(CORPUS_MEDIDO, { entorno, conBusqueda }).then(
+    construccion ??= construirConCorpus(CORPUS_MEDIDO, { entorno, conBusqueda, ficheros: conLaPuertaAbierta() }).then(
       (resultado) => {
         // Se apunta **antes** de afirmar: un build fallido también deja su proyecto temporal.
         aLimpiar.push(resultado.proyecto);
@@ -2319,6 +2322,7 @@ describe('Historia 2.9 y 23.1 — sin punto final, el sitio no pide ni envía na
     const malEscrito = 'medicion.ejemplo.workers.dev/e';
     const { codigo, salida } = await construirConCorpus(CORPUS_MEDIDO, {
       entorno: { MEDICION_ENDPOINT: malEscrito },
+      ficheros: conLaPuertaAbierta(),
       conservar: false,
     });
     expect(codigo, salida).not.toBe(0);

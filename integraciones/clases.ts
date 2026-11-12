@@ -14,8 +14,15 @@
 import { fileURLToPath } from 'node:url';
 import { join } from 'node:path';
 import type { AstroIntegration } from 'astro';
-import { leerAutores, leerCitas, leerRegistroDeClases, rutasDelCorpus } from '../tools/lib/corpus.ts';
+import {
+  leerAutores,
+  leerCitas,
+  leerFichasDeObra,
+  leerRegistroDeClases,
+  rutasDelCorpus,
+} from '../tools/lib/corpus.ts';
 import { fallosDeClases } from '../tools/lib/clases.ts';
+import { fallosDeAtribuidas, lineaDelBuild } from '../tools/lib/atribuidas.ts';
 import { claseDe, esAtribuida } from '../src/lib/clase.ts';
 
 /** La ruta relativa a la raíz, con barras `/`, que es como se teclea. */
@@ -31,12 +38,13 @@ export default function clasesDeCita(): AstroIntegration {
 
   async function revisar(): Promise<string[]> {
     const rutas = rutasDelCorpus(join(raiz, 'corpus'));
-    const [autores, citas, registro] = await Promise.all([
+    const [autores, citas, registro, fichas] = await Promise.all([
       leerAutores(rutas),
       leerCitas(rutas.citas),
       leerRegistroDeClases(rutas),
+      leerFichasDeObra(rutas),
     ]);
-    return fallosDeClases(
+    const deClases = fallosDeClases(
       citas.map((c) => ({
         slug: c.slug,
         ruta: relativaALaRaiz(raiz, c.ruta),
@@ -53,12 +61,31 @@ export default function clasesDeCita(): AstroIntegration {
       })),
       registro,
     );
+    /*
+     * Historia 35.1b — la puerta de la atribuida: con alguna de sus cinco constantes sin valor,
+     * cada atribuida de corpus/citas/ rompe nombrándolas; con todas, sus topes, la figura sin
+     * Obra y los duplicados entre clases, contra lo versionado (`tools/lib/atribuidas.ts`).
+     */
+    const deAtribuidas = fallosDeAtribuidas({
+      citas: citas.map((c) => ({
+        slug: c.slug,
+        ruta: relativaALaRaiz(raiz, c.ruta),
+        texto: c.texto,
+        ...(c.autor !== undefined ? { autor: c.autor } : {}),
+        ...(c.personaje !== undefined ? { personaje: c.personaje } : {}),
+        ...(esAtribuida(c) ? { clase: claseDe(c) } : {}),
+        ...(c.procedencia !== undefined ? { procedencia: c.procedencia } : {}),
+      })),
+      autores,
+      fichas,
+    }).map(lineaDelBuild);
+    return [...deClases, ...deAtribuidas];
   }
 
   const titular = (n: number) =>
     `Clases de Cita: ${n} ${n === 1 ? 'desacuerdo' : 'desacuerdos'} entre las Citas, sus Autores y ` +
     'corpus/clases-de-cita.yml. Toda Cita publicada está registrada con su clase, la de siempre es de ' +
-    'dominio público y la atribuida de un dueño con derechos vigentes.';
+    'dominio público y la atribuida de un dueño con derechos vigentes, por su puerta y dentro de sus topes.';
 
   return {
     name: 'clases-de-cita',

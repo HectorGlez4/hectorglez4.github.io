@@ -215,9 +215,10 @@ las pruebas que se lo dan parchean la copia.
 
 **La clase no se teclea.** El alta y la aprobación la derivan (`claseQueCorresponde`) y la escriben
 con lo demás; una `clase` en el lote manda la entrada a revisión. Mientras la puerta de la atribuida
-esté cerrada (Historia 35.1b), lo que deriva atribuida va o se queda en `corpus/_revision/` con el
-motivo «la puerta de la atribuida está cerrada (Historia 35.1b)»: **nada se publica atribuido por
-orden**.
+esté cerrada («La puerta de la atribuida», abajo), lo que deriva atribuida va o se queda en
+`corpus/_revision/` con el motivo que nombra las constantes sin valor: **nada se publica atribuido por
+orden**. `tools/extraer.ts` deriva la clase igual: de un Autor con derechos vigentes escribe `clase`
+en vez de `estadoDerechos`, y el texto en una línea.
 
 **El registro `corpus/clases-de-cita.yml` solo añade**: una línea por Cita publicada, con su slug, su
 clase y la jornada. Lo escriben el alta y la aprobación —un solo `appendFile` al final de la pasada—
@@ -260,6 +261,48 @@ de la siembra, no con la suya —la jornada del registro es la de la anotación,
 La siembra solo anota la clase de siempre: si la otra rama traía una entrada `atribuida`, se niega con
 1, y esa entrada —la única excepción a «nadie lo edita a mano», porque ninguna orden puede volver a
 derivarla— se copia al final tal cual, carácter a carácter, desde el lado que la trajo.
+
+### La puerta de la atribuida (Historia 35.1b)
+
+La atribuida no se coteja: se publica por su propia puerta, y la puerta la gobiernan **cinco
+constantes que fija Héctor** y que el repositorio versiona en `undefined` —`MAX_CARACTERES_DE_ATRIBUIDA`,
+`MAX_ATRIBUIDAS_POR_OBRA`, `MAX_ATRIBUIDAS_POR_DUEÑO`, `MIN_ATESTIGUACIONES_DE_ATRIBUIDA`
+(`src/lib/umbrales.ts`) y `BUZON_DE_PETICIONES` (`src/lib/dominio.ts`)—. **Ningún agente les da
+valor**, ni siembra atribuidas, Autores vivos, Personajes ni atestiguaciones en el Corpus real. Con
+alguna sin valor la puerta está **cerrada**: el build rompe ante cada atribuida de `corpus/citas/`
+nombrando su fichero y cada constante que falta, y el alta y `revisar --aprobar` la dejan en
+`corpus/_revision/` con ese mismo motivo (`motivoPuertaCerrada`). Las pruebas la abren en la copia
+(`conLaPuertaAbierta` de `tests/unit/ayuda/construir.ts`, que sustituye el valor que tengan) o por
+parámetro (`puerta` de `darDeAltaLote` y de `aprobar`); ninguna fija el valor del árbol.
+
+- **El esquema** (`src/lib/admision.ts`, `reglasDeClase`) exige a la atribuida `atestiguaciones`
+  —lista no vacía de `{url (http/https), consultadaEl (jornada)}`— y `origen` (`original`, `doblaje`
+  o `traduccion-publicada`, `ORIGENES`), su texto en una sola línea aunque traiga Fuente, y la rechaza
+  con `aptaParaPortada: true` (pregunta 22). Con `MIN_ATESTIGUACIONES_DE_ATRIBUIDA` con valor, la
+  atestiguan al menos tantos **dominios registrables** distintos. La de siempre con `atestiguaciones`
+  u `origen` es error que nombra el fichero. Los dos campos no se pintan: van en
+  `CAMPOS_QUE_NO_FECHAN.cita` y no viajan a `publicado.ts` ni a `dist/`.
+- **El dominio lo cuenta solo `dominioDeAtestiguacion`** de `src/lib/atestiguaciones.ts`: eTLD+1 con
+  `tldts` (7.4.19, versión exacta), solo la lista ICANN —dos `*.github.io` cuentan uno—, y no cuentan
+  una dirección sin dominio registrable, los de `DOMINIOS_QUE_NO_ATESTIGUAN` (`brainyquote.com`; un
+  espejo nuevo lo añade Héctor en un diff de ese fichero) ni el propio `DOMINIO`. Sin red: ninguna
+  atestiguación se descarga ni se coteja. **`tldts` lo usan solo el esquema y las órdenes**, nunca un
+  guion del cliente (`GUIONES_EXTERNOS` no crece).
+- **Lo que relaciona ficheros** lo juzga `fallosDeAtribuidas` de `tools/lib/atribuidas.ts`, puro y con
+  los valores por parámetro, sobre lo publicado más lo que la pasada publica: el texto sobre su tope
+  en puntos de código, más atribuidas de las que admite una Obra cuyo dueño tiene derechos vigentes o
+  un dueño (Autor o, sin él, Personaje) con derechos vigentes —cada fallo con recuento y tope—, la
+  **figura pública sin Obra** —una atribuida de Autor y sin Personaje solo si ese Autor es `autor` de
+  alguna Ficha de Obra activa; en el alta cuenta la que crea la misma entrada; «pregunta 23»— y los
+  **duplicados entre clases** con `parecidoEntre` (sus tres clases), contra lo publicado de las dos
+  clases y, en las órdenes, contra `corpus/_revision/` y el lote: cualquier coincidencia la niega,
+  también con `--con-duplicados`. El build (`integraciones/clases.ts`) lo repite contra `corpus/citas/`.
+- **El cotejo salta la atribuida** (`cotejar` y `motivoParaNoPublicar` de `tools/lib/cotejo.ts`): no
+  se le exige Fuente aunque la declare, no cuenta como cotejada y, en `pendientes-de-cotejo.yml`, rompe
+  el build. Con Fuente la conserva y pinta su Línea de la Fuente; sin ella, nada. `aprobar` no le
+  restituye saltos de verso. La atribuida necesita un Tema publicado como toda Cita.
+- **No sale en portada**: `npx tsx tools/portada.ts marcar` y `npm run jornada -- fijar` se niegan
+  ante una atribuida con 1, nombrando la Cita y «pregunta 22».
 
 ## Los Personajes
 

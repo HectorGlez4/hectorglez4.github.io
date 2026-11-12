@@ -90,6 +90,21 @@ async function portadaDe(rutas: Rutas): Promise<Record<string, unknown>> {
 const fijacionesDe = async (rutas: Rutas) =>
   (await portadaDe(rutas)).fijaciones as Record<string, string>;
 
+describe('Historia 35.1b — una atribuida no se fija (pregunta 22)', () => {
+  it('se niega nombrando la Cita, aunque la marque apta a mano, y no escribe nada', async () => {
+    const rutas = await corpusDePrueba();
+    await writeFile(
+      join(rutas.citas, 'ana--atribuida.md'),
+      cita('ana-atribuida', true).replace('---\n', '---\nclase: "atribuida"\n'),
+      'utf8',
+    );
+    const resultado = await fijarJornadas(rutas, [{ jornada: MANANA, cita: 'ana-atribuida' }], HOY);
+    expect(resultado.ok).toBe(false);
+    expect(resultado.ok ? '' : resultado.motivos.join('\n')).toMatch(/«ana-atribuida» es atribuida.*pregunta 22/u);
+    expect(existsSync(rutas.portada)).toBe(false);
+  });
+});
+
 describe('Historia 13.1 — fijar varias jornadas de una sentada', () => {
   it('deja las jornadas escritas en corpus/portada.json, que es de donde sale la Cita del Día', async () => {
     const rutas = await corpusDePrueba();

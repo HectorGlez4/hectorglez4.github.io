@@ -234,6 +234,18 @@ describe('Historia 1.7 — marcado de Cita apta para portada', () => {
     expect(contenido).toContain('aptaParaPortada: true');
   });
 
+  it('Historia 35.1b — una atribuida no se marca: no es apta para portada (pregunta 22)', async () => {
+    const { rutas } = await corpusConUnaCita();
+    const fichero = join(rutas.citas, 'ana--una-atribuida.md');
+    const contenido =
+      '---\ntexto: "Una frase atribuida."\nautor: "ana"\nslug: "ana-una-atribuida"\nclase: "atribuida"\n---\n';
+    await writeFile(fichero, contenido, 'utf8');
+    const resultado = await marcarAptaParaPortada(rutas, 'ana-una-atribuida', true);
+    expect(resultado.ok).toBe(false);
+    expect(resultado.ok ? '' : resultado.motivos.join('\n')).toMatch(/«ana-una-atribuida» es atribuida.*pregunta 22/u);
+    expect(await readFile(fichero, 'utf8')).toBe(contenido);
+  });
+
   it('al desmarcar el campo se omite, no se escribe como false', async () => {
     const { rutas, slug } = await corpusConUnaCita();
     await marcarAptaParaPortada(rutas, slug, true);

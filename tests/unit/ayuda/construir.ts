@@ -1,6 +1,6 @@
 import { execFile } from 'node:child_process';
 import { cp, mkdir, mkdtemp, readFile, readdir, rm, symlink, writeFile } from 'node:fs/promises';
-import { existsSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve, dirname, sep } from 'node:path';
 import { promisify } from 'node:util';
@@ -828,4 +828,60 @@ export function paginaEnDist(dist: string, ruta: string): string {
 /** Lo mismo, desde la raíz del proyecto, que es como lo tienen casi todas las pruebas. */
 export function paginaConstruida(proyecto: string, ruta: string): string {
   return paginaEnDist(join(proyecto, 'dist'), ruta);
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// La puerta de la atribuida, abierta en la copia — Historia 35.1b
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Las atestiguaciones y el origen de una atribuida de prueba: dos dominios registrables
+ * distintos, ninguno vetado. Se pasan a `citaValida` con lo demás de la atribuida.
+ */
+export const ATESTIGUADA = {
+  atestiguaciones: [
+    { url: 'https://es.wikiquote.org/wiki/Prueba', consultadaEl: '2026-11-01' },
+    { url: 'https://www.elpais.com/cultura/prueba.html', consultadaEl: '2026-11-02' },
+  ],
+  origen: 'original',
+} as const;
+
+/** Los cinco valores con que las pruebas abren la puerta en la copia. Holgados a propósito. */
+export const PUERTA_DE_PRUEBA = {
+  MAX_CARACTERES_DE_ATRIBUIDA: 1000,
+  MAX_ATRIBUIDAS_POR_OBRA: 1000,
+  MAX_ATRIBUIDAS_POR_DUEÑO: 1000,
+  MIN_ATESTIGUACIONES_DE_ATRIBUIDA: 2,
+  BUZON_DE_PETICIONES: 'peticiones@ejemplo.org',
+} as const;
+
+type ValoresDeLaPuerta = { -readonly [K in keyof typeof PUERTA_DE_PRUEBA]?: number | string | undefined };
+
+/**
+ * Los parches de la copia que dan valor a la puerta de la atribuida: `src/lib/umbrales.ts` y
+ * `src/lib/dominio.ts`, sustituyendo **el valor que tengan** —nunca el texto `= undefined;`—, para
+ * que ninguna prueba fije el valor del árbol. Un valor `undefined` en `valores` deja esa constante
+ * sin valor (la puerta, cerrada por ella). Si `ficheros` ya trae uno de los dos, se parchea ese.
+ */
+export function conLaPuertaAbierta(
+  valores: ValoresDeLaPuerta = {},
+  ficheros: Record<string, string> = {},
+): Record<string, string> {
+  const todos: ValoresDeLaPuerta = { ...PUERTA_DE_PRUEBA, ...valores };
+  const resultado = { ...ficheros };
+  for (const ruta of ['src/lib/umbrales.ts', 'src/lib/dominio.ts']) {
+    const original = resultado[ruta] ?? readFileSync(join(RAIZ, ruta), 'utf8');
+    let contenido = original;
+    for (const [nombre, valor] of Object.entries(todos)) {
+      const declaracion = new RegExp(`(export const ${nombre}: (?:number|string) \\| undefined = )[^;]*;`, 'u');
+      if (!declaracion.test(contenido)) continue;
+      contenido = contenido.replace(
+        declaracion,
+        `$1${valor === undefined ? 'undefined' : JSON.stringify(valor)};`,
+      );
+    }
+    // Un fichero que no cambia no se parchea: el andamio rechaza el parche idéntico.
+    if (contenido !== original || ruta in ficheros) resultado[ruta] = contenido;
+  }
+  return resultado;
 }

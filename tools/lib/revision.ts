@@ -52,7 +52,14 @@ import {
   type Rutas,
 } from './corpus.ts';
 import { claseDe, claseQueCorresponde, esAtribuida, type Clase } from '../../src/lib/clase.ts';
-import { anotarTrasInterrupcion, MOTIVO_PUERTA_CERRADA, motivoClaseDistinta, slugsConOtraClase } from './clases.ts';
+import { anotarTrasInterrupcion, motivoClaseDistinta, slugsConOtraClase } from './clases.ts';
+import {
+  fallosDeAtribuidas,
+  motivoPuertaCerrada,
+  motivosDe,
+  type CitaParaAtribuidas,
+  type ValoresDeLaPuerta,
+} from './atribuidas.ts';
 import { aplicarFichaDeObra, resolverFichaDeObra } from './obras.ts';
 import { motivoSinTemaPublicado, temaPublicadoConLaPasada } from './alcance.ts';
 import type { TemaBajoUmbral } from '../../src/lib/publicado.ts';
@@ -240,6 +247,8 @@ export async function loteEnRevision(rutas: Rutas): Promise<CandidataEnRevision[
       slug: candidata.slug,
       texto: candidata.texto ?? '',
       ...(candidata.fuente !== undefined ? { fuente: candidata.fuente } : {}),
+      // Historia 35.1b — a la atribuida no se le exige Fuente: no se coteja.
+      ...(esAtribuida(candidata) ? { clase: claseDe(candidata) } : {}),
     });
 
     /*
@@ -412,6 +421,11 @@ export async function aprobar(
   rutas: Rutas,
   slugs: string[],
   temas: string[] = [],
+  /**
+   * Historia 35.1b — los valores de la puerta de la atribuida. Por omisión, los del árbol; las
+   * pruebas la abren por aquí sin parchear nada.
+   */
+  opciones: { puerta?: ValoresDeLaPuerta } = {},
 ): Promise<ResultadoDeDecision> {
   const lote = await loteEnRevision(rutas);
   let leidos:
@@ -473,6 +487,17 @@ export async function aprobar(
   // vaya publicando. Sin lo segundo, dos candidatas que colisionan entre sí se pisarían.
   const yaPublicadas = await leerCitas(rutas.citas);
   const ocupados = new Set(yaPublicadas.map((c) => c.slug));
+  // Historia 35.1b — lo publicado, como lo juzga la puerta de la atribuida; se compone una vez.
+  let paraAtribuidas: CitaParaAtribuidas[] | undefined;
+  const publicadasParaAtribuidas = (): CitaParaAtribuidas[] =>
+    (paraAtribuidas ??= yaPublicadas.map((c) => ({
+      slug: c.slug,
+      texto: c.texto,
+      ...(c.autor !== undefined ? { autor: c.autor } : {}),
+      ...(c.personaje !== undefined ? { personaje: c.personaje } : {}),
+      ...(esAtribuida(c) ? { clase: claseDe(c) } : {}),
+      ...(c.procedencia !== undefined && c.procedencia !== null ? { procedencia: c.procedencia } : {}),
+    })));
   // El conjunto publicado tal como va quedando, para la grafía por omisión de una ficha nueva.
   const publicadasParaObra: { autor?: string; personaje?: string; procedencia?: { obra?: string } }[] = [
     ...yaPublicadas,
@@ -527,8 +552,10 @@ export async function aprobar(
       resultado.rechazadasPorAdmision.push({ slug, motivos: [motivoClaseDistinta(candidata.clase, corresponde)] });
       continue;
     }
-    if (esAtribuida(candidata)) {
-      resultado.rechazadasPorAdmision.push({ slug, motivos: [MOTIVO_PUERTA_CERRADA] });
+    // Historia 35.1b — con la puerta cerrada, la atribuida sigue en revisión, intacta, y se dice por qué.
+    const cerrada = esAtribuida(candidata) ? motivoPuertaCerrada(opciones.puerta) : undefined;
+    if (cerrada !== undefined) {
+      resultado.rechazadasPorAdmision.push({ slug, motivos: [cerrada] });
       continue;
     }
     /*
@@ -538,7 +565,8 @@ export async function aprobar(
      * publicarla así rompería el build siguiente. Se publica con sus saltos; un conflicto entre dos
      * documentos de verso se publica como está, igual que la regla 4 solo avisa.
      */
-    const saltos = await saltosQueLeFaltan(candidata);
+    // Historia 35.1b — la atribuida va en una línea: no se le restituyen saltos.
+    const saltos = esAtribuida(candidata) ? undefined : await saltosQueLeFaltan(candidata);
     if (saltos !== undefined && !saltos.ok) {
       resultado.rechazadasPorAdmision.push({ slug, motivos: [saltos.motivo] });
       continue;
@@ -563,6 +591,31 @@ export async function aprobar(
       });
       if (!plan.ok) {
         resultado.rechazadasPorFicha.push({ slug, motivos: plan.motivos });
+        continue;
+      }
+    }
+    /*
+     * Historia 35.1b — con la puerta abierta, la atribuida se juzga con lo publicado más lo que esta
+     * pasada publica: topes, figura sin Obra (la ficha que se resuelve aquí cuenta) y duplicados
+     * entre clases contra lo publicado y las demás candidatas de corpus/_revision/.
+     */
+    if (esAtribuida(candidata)) {
+      const propia = candidataParaAtribuidas(candidata);
+      const fallos = fallosDeAtribuidas({
+        citas: [...publicadasParaAtribuidas(), ...planeadas.map((p) => candidataParaAtribuidas(p.candidata)), propia],
+        autores: [...autorPorSlug.values()],
+        fichas: await leerFichasDeObra(rutas),
+        autoresConFichaNueva: [
+          ...planeadas.filter((p) => p.candidata.obra !== undefined && p.candidata.autor !== undefined).map((p) => p.candidata.autor!),
+          ...(obra !== undefined && candidata.autor !== undefined ? [candidata.autor] : []),
+        ],
+        comparables: lote.filter((c) => c.slug !== candidata.slug).map(candidataParaAtribuidas),
+        juzgar: new Set([propia.slug]),
+        ...(opciones.puerta !== undefined ? { valores: opciones.puerta } : {}),
+      });
+      const suyos = motivosDe(fallos, propia.slug);
+      if (suyos.length > 0) {
+        resultado.rechazadasPorAdmision.push({ slug, motivos: suyos });
         continue;
       }
     }
@@ -746,6 +799,18 @@ export async function aprobar(
     }
     return { ok: true, texto: decision.texto, documento: decision.documento };
   }
+}
+
+/** Lo que la puerta de la atribuida necesita de una candidata ya leída (Historia 35.1b). */
+function candidataParaAtribuidas(c: CandidataEnRevision): CitaParaAtribuidas {
+  return {
+    slug: c.slug,
+    texto: typeof c.texto === 'string' ? c.texto : '',
+    ...(c.autor !== undefined ? { autor: c.autor } : {}),
+    ...(c.personaje !== undefined ? { personaje: c.personaje } : {}),
+    ...(esAtribuida(c) ? { clase: claseDe(c) } : {}),
+    ...(c.obra !== undefined ? { procedencia: { obra: c.obra } } : {}),
+  };
 }
 
 /**
