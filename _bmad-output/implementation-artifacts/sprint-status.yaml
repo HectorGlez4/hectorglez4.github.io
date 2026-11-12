@@ -29,7 +29,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 # - Retrospective appends its action items to action_items; the status view surfaces open ones
 generated: 08-11-2026 09:00
-last_updated: 11-09-2026 06:00
+last_updated: 11-13-2026 06:00
 project: brainlySabiduria
 project_key: NOKEY
 tracking_system: file-system
@@ -525,7 +525,7 @@ development_status:
   # a la pregunta 18; la Página de Personaje, criterios de patrón hasta UJ-8 (pregunta 24).
   epic-35: in-progress
   35-1-la-clase-se-fija-al-dar-de-alta-y-queda-registrada: review  # v9-ralph 2026-11-08: clase fijada al alta y registro; diferidos: lecturas crudas de añoFallecimiento en tools (35.1b), relectura tras el append
-  35-1b-la-atribuida-tiene-su-puerta-cerrada-y-sus-topes: backlog  # v9-ralph 2026-11-09: desbloqueada: la 29.4, la 30.3/30.4, la 31.1 y la 34.1 ya están en esta rama
+  35-1b-la-atribuida-tiene-su-puerta-cerrada-y-sus-topes: review  # v9-ralph 2026-11-13: la puerta de la atribuida, cerrada (cinco constantes sin valor que pone Héctor), sus topes y el esquema de atestiguaciones (tldts 7.4.19); dos pasadas de revisión; diferidos en el spec
   35-2-el-personaje-entra-en-el-corpus-y-la-obra-tiene-un-solo-dueñ: review  # v9-ralph 2026-11-08: el Personaje entra en el Corpus (corpus/personajes/ vacío, tools/personaje.ts, un espacio de slugs con el Autor) y la Obra tiene un solo dueño; dos guardas hasta la 35.4; dos pasadas de revisión; diferidos para Héctor: --semblanza en biografia, dueño de la demanda para un slug de Personaje con Autor conocido, Autores retirados en la demanda
   35-3-la-página-de-personaje: review  # v9-ralph 2026-11-09: la Página de Personaje (/personaje/{slug}/, Lista de Obras con Desplegable, Atribución que nombra al Personaje, séptima familia); guardas de la 35.2 hasta la 35.4; dos pasadas de revisión; decisiones delegadas: rótulo «Personaje» en el guion de /buscar/ y reordenado del <style> en /autor/**; diferido: avisar por indexabilidad de /personaje/ (35.3b)
   35-3b-la-tarjeta-social-del-personaje-y-cuándo-se-indexa-su-página: backlog
