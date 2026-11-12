@@ -250,3 +250,14 @@ Puerta de la etapa s-34 (34.1, 34.2 y 34.3; la 34.0 ya está en la principal), i
   - `/buscar/`: LCP 1.549 → 1.595 (+46), FCP 830 → 857 (+27).
   Margen 100 ms en todas; la LCP de Cita, bajo 2.500. Veredicto: ok, sin desempate.
 - La portada no se mide: no pinta el campo ni la Tarjeta de Cita.
+
+## Verificación en el sitio en vivo — 2026-11-12
+
+Fusión e5bc76a719. El Publicar del push (42535712837) falló por el plazo de GitHub Pages («syncing_files», sin error del sitio); la reconstrucción diaria 42629875972 desplegó el mismo commit en verde («Desplegar» 2026-11-09T14:25:26Z), y las de los días siguientes también. Solo curl.
+
+| URL | Qué se buscó | Resultado |
+|---|---|---|
+| /autor/rafael-barrett/ | tres Obras antes del pliegue y un `<details>` con el resto (34.2) | encontrado (3 enlaces de Obra antes de `<details>`) |
+| /tema/la-vida/ | el campo con `campo-de-busqueda` (34.3) | encontrado |
+| /tema/la-vida/ | Tarjetas recortadas por palabra entera con «…» (34.1) | encontrado |
+| /cita/jose-marti-yo-vengo-de-todas-partes-y-hacia/ | `<title>` sin cortar a media palabra (34.1) | encontrado (cabe entero) |
