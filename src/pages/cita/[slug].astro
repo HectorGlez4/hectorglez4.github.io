@@ -42,6 +42,8 @@ import type { GetStaticPaths } from 'astro';
 import { rutaDeCita } from '../../lib/superficies.ts';
 import { clavesDeOrden } from '../../lib/obras.ts';
 import { enUnaLinea } from '../../lib/verso.ts';
+import { recortarPorPalabra } from '../../lib/recorte.ts';
+import { MAX_CARACTERES_DE_TITULO_Y_META } from '../../lib/umbrales.ts';
 
 export const getStaticPaths = (async () => {
   const conjunto = await conjuntoPublicable();
@@ -105,25 +107,24 @@ const { cita, autor, siguiente, rutas, filtros, clave, pasaje } = Astro.props;
 /**
  * El título de pestaña y la meta descripción llevan la Cita entera si cabe. Quien llega
  * desde un buscador decide si entrar leyendo esto, así que recortarlo con puntos
- * suspensivos donde no hace falta cuesta clics.
+ * suspensivos donde no hace falta cuesta clics. Si no cabe, se recorta en la última palabra
+ * entera antes de `MAX_CARACTERES_DE_TITULO_Y_META`, por el único dueño del recorte
+ * (`recortarPorPalabra`, Historia 34.1, UX-DR131), que no cuenta los saltos de verso.
  */
 /*
  * Ninguno de los dos admite saltos: el verso va en una línea, con « / » (`enUnaLinea`, Historia
- * 29.3). El recorte se mide sobre el texto —cada salto, un carácter— y en el mismo índice de
- * siempre; si cae en o junto a un salto, la racha final que lo contiene se quita para que ni el
- * salto ni « / » queden colgando antes de «…». Una Cita sin saltos no cambia ni un byte.
+ * 29.3), **después** de recortar. El recorte nunca deja un blanco —el salto lo es— delante de
+ * «…», así que ni el salto ni « / » quedan colgando. El `h1`, el JSON-LD, lo copiado y la Imagen
+ * llevan el texto íntegro (NFR-12).
  */
-const recorte =
-  cita.texto.length > 110
-    ? `${enUnaLinea(cita.texto.slice(0, 109).replace(/\s*\n\s*$/, ''))}…`
-    : enUnaLinea(cita.texto);
+const recorte = enUnaLinea(recortarPorPalabra(cita.texto, MAX_CARACTERES_DE_TITULO_Y_META));
 const titulo = tituloDe(`«${recorte}» — ${autor.nombre}`);
 const canonica = new URL(rutaDeCita(cita.slug), Astro.site).href;
 ---
 
 <Armazon
   titulo={titulo}
-  descripcion={`${enUnaLinea(cita.texto)} — ${autor.nombre}.`}
+  descripcion={`${recorte} — ${autor.nombre}.`}
   ruta={rutaDeCita(cita.slug)}
   tarjeta={`/tarjeta/${cita.slug}.png`}
   tipo="cita"

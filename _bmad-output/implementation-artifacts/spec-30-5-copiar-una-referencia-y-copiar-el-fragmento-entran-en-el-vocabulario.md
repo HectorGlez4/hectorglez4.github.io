@@ -11,15 +11,8 @@ context:
   - '{project-root}/_bmad-output/implementation-artifacts/spec-30-4-inserta-esta-cita.md'
 warnings: ['oversized']
 deferred:
-  - summary: 'Soltar los dos eventos tras el despliegue del receptor (fase B de la 30.5): sacarlos de PENDIENTES y meterlos en EVENTOS_DEL_GUION en un commit aparte, ganar el caso de tests/e2e/receptor-local.spec.ts y el renglón «once» pasa a «trece».'
-    evidence: 'epics.md, Story 30.5, «Given que Héctor ha desplegado el receptor desde la rama y commiteado la huella»: «en un commit aparte de la rama y nunca antes».'
-    severity: 'high'
-    location: 'src/lib/medicion.ts, tests/unit/vocabulario.test.ts, tests/e2e/receptor-local.spec.ts'
-  - summary: 'Medición de NFR-7 de la épica con los eventos sueltos (Lighthouse móvil 4G, 10 corridas alternas, max-age=600, receptor local, frente a la principal del mismo día) y anotar cifras, peso de la Página de Cita y de dist/ y dónde cae Copiar a 360×640 en las tres Citas de la auditoría. Después de la fase B; si se degrada, decide Héctor.'
-    evidence: 'epics.md, Story 30.5, «Given la épica entera en la rama, con los eventos ya sueltos».'
-    severity: 'medium'
-  - summary: 'Actos de Héctor (o de la sesión principal con su autorización): `npm run medicion -- desplegar` y `comprobar` desde la rama tras `git fetch`, commitear medicion/huella-del-vocabulario.json, `npm run test:e2e` entero, el merge y el valor de DESPLIEGUE_DE_CITAR_Y_LLEVARSE.'
-    evidence: 'AGENTS.md «Desplegar el receptor de la medición»; RULES.md de s-30.'
+  - summary: 'Actos de Héctor: `npm run test:e2e` entero sobre la principal con la fase B, el despliegue del sitio que la lleva y el valor de DESPLIEGUE_DE_CITAR_Y_LLEVARSE (30.1) en un commit aparte. El receptor ya está desplegado y la huella commiteada (d9a663b600); la fase B y la medida NFR-7 están hechas (§ Fase B — 2026-11-08).'
+    evidence: 'AGENTS.md «Desplegar el receptor de la medición»; epics.md, Story 30.5, último criterio; RULES.md de s-30.'
     severity: 'high'
   - summary: 'Pendiente de Héctor: si `copiado-de-referencia` debe llevar el estilo (APA/MLA/Chicago) como campo, es una columna nueva con migración; sin decisión, ninguno lleva campo.'
     evidence: 'epics.md, Épica 30, Preguntas abiertas, «Los nombres de los dos eventos».'
@@ -303,3 +296,41 @@ Receptor desplegado antes (desplegar y comprobar con 0; huella d9a663b600). Fusi
 | la misma | «Inserta esta cita» con el Fragmento y sus `<br>` (30.4) | encontrado (`data-inserta-esta-cita`, `&lt;br&gt;` en el campo) |
 | 30.2 | medida y fila de acciones desde 600 px | sin superficie que mirar con curl (CSS); cubierto por la e2e de la puerta |
 | 30.5 | los dos eventos nuevos | sin datos que enseñar: fase A, retenidos en PENDIENTES; el receptor ya los acepta |
+
+## Fase B — 2026-11-08
+
+Tras el despliegue del receptor desde la rama (desplegar y comprobar con 0, huella `d9a663b600`) y la fusión de la épica (`97e0073166`, docs `155c24a600`). `git fetch origin`: `HEAD` era `origin/main`, sin fusión que hacer. Commit `feat(medicion): copiado-de-referencia y copiado-de-fragmento salen del guion (30.5)`, aparte de la fase A y sin empujar.
+
+**Qué cambia.**
+- `src/lib/medicion.ts` — `EVENTOS_DEL_GUION` gana `copiado-de-referencia` y `copiado-de-fragmento` (sin campos: el guion los envía con `evento` y `ruta`). `src/lib/vocabulario.ts` **no cambia**, y la huella tampoco: `tests/unit/huella.test.ts` en verde.
+- `tests/unit/vocabulario.test.ts` — `PENDIENTES` vuelve a estar vacía; «lo no pendiente son los **trece** eventos de hoy». La prueba «está pendiente» se queda sin casos, como tras la 23.9.
+- `tests/unit/linea-base.test.ts` — la prueba de la pasada 3 pasa a pedir el cero leído: `copiado-de-referencia: 0.` y `copiado-de-fragmento: 0.`, y ningún renglón «aún no lo emite». La rama de `lineasDeLecturaDeMedicion` que lo dice se conserva para el próximo evento retenido.
+- `tests/e2e/receptor-local.spec.ts` — caso nuevo (escritorio): copiar APA en «Cómo citar» y el Fragmento de «Inserta esta cita» en una Página de Cita con Tarjeta completa, y los dos eventos crecen en el D1 local para esa ruta. La consulta de la prueba, generalizada a un evento.
+- Fichero de medición: **3.700 bytes** con el punto final de producción (3.652 con `http://localhost:8787/`), 53 sobre la 23.9; `MAX_BYTES_GUION_DE_MEDICION` (3.730) no se mueve y su comentario anota la medida. La isla de Copiar no cambia: `MAX_BYTES_DE_GUION` tampoco.
+- `AGENTS.md` (las dos acciones, ya sueltas), comentarios de `CopiarCita.astro`, `tools/lib/lineaBase.ts` y `tests/unit/medicion.test.ts`.
+
+**Verificación.**
+- `npx vitest run tests/unit/vocabulario.test.ts tests/unit/linea-base.test.ts tests/unit/huella.test.ts tests/unit/medicion-orden.test.ts` — 259 en verde; `tests/unit/medicion.test.ts tests/unit/como-citar.test.ts tests/unit/inserta-esta-cita.test.ts` — 718 en verde.
+- `npx astro check` — 0 errores, 0 avisos, 11 sugerencias.
+- `npm test` — 165 ficheros, **7.584 en verde**, ninguno en rojo (la huella incluida).
+- Playwright, los dos proyectos, receptor local en 8787: `como-citar`, `inserta-esta-cita`, `copiar` y `receptor-local` — 68 en verde, 2 omitidas (las de `receptor-local` en móvil, por diseño).
+
+**NFR-7** (la épica entera con los eventos sueltos). Lighthouse 13.5.0 móvil (`--throttling-method=simulate`), principal (`origin/main`, 155c24a600, con la fase A) y rama (fase B) construidas en local con `MEDICION_ENDPOINT=http://localhost:8787/`, servidas por `tests/servidor.mjs` con `SERVIDOR_CACHE_CONTROL=max-age=600` y `SERVIDOR_GZIP=1` (4399 y 4400; receptor ficticio en 8787), 10 corridas alternas por página:
+
+| Página | LCP principal | LCP rama | Δ | FCP principal | FCP rama | Δ |
+|---|---|---|---|---|---|---|
+| `/cita/antonio-machado-caminante-no-hay-camino-sino-estelas-en/` | 1.596 | 1.566 | −30 | 904 | 892 | −13 |
+| `/cita/jose-marti-yo-vengo-de-todas-partes-y-hacia/` (en verso) | 1.628 | 1.640 | +13 | 921 | 953 | +31 |
+
+Margen max(100 ms, 5 %): las dos dentro; LCP de Cita bajo 2.500 ms; rendimiento 100 en todas las corridas. Veredicto: **ok**. Registro: `.claude/v9-ralph/logs/s-30/nfr7-faseb/`.
+
+**Peso que añade la épica** (frente a la principal de antes de la fusión, 369a171dd1, construida igual): `dist/` juzgado 509.240.151 → 542.306.277 bytes (+33.066.126, +31,5 MiB; aviso en 750 MiB), de ellos +32.990.274 en las 4.424 Páginas de Cita (unos 7,5 KB cada una). La Página de Cita de Machado, 36.515 → 43.707 bytes (8.288 → 9.746 en gzip); la de Martí en verso, 37.565 → 44.923 (8.536 → 10.016). La fase B suma 86 bytes a `dist/` (el fichero de medición).
+
+**Dónde cae Copiar a 360 × 640** (perfil móvil de las e2e, `button.copiar`, arriba–abajo), rama y principal iguales:
+
+| Cita de la auditoría | Antes (2026-11-05) | Ahora |
+|---|---|---|
+| `antonio-machado-caminante-no-hay-camino-se-hace-camino` | 707 | 466–510 (dentro) |
+| `jose-marti-yo-soy-un-hombre-sincero-de-donde` | 661 | 419–463 (dentro) |
+| `jose-marti-yo-vengo-de-todas-partes-y-hacia` (en verso, restituida por la Épica 29) | 756 | 590–634 (dentro) |
+

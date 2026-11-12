@@ -1932,8 +1932,9 @@ export function lineasDeLecturaDeMedicion(lectura: LecturaDeMedicion): string[] 
     lineas.push(`  Sin leer (${nombresDe(lectura.citar.faltan)}).`);
   } else {
     for (const { evento, total, porSuperficie } of lectura.citar.porEvento) {
-      // Mientras el guion de medición no lo emite (sigue retenido fuera de `EVENTOS_DEL_GUION`), su cero
-      // no es una medida: el informe lo dice en vez de enseñar un 0 que parece leído.
+      // Mientras el guion de medición no lo emite (retenido fuera de `EVENTOS_DEL_GUION`, como lo
+      // estuvieron las dos de citar en la fase A de la 30.5), su cero no es una medida: el informe lo
+      // dice en vez de enseñar un 0 que parece leído. Desde la fase B las dos salen con su cifra.
       if (total === 0 && !EVENTOS_DEL_GUION.includes(evento)) {
         lineas.push(`  ${evento}: sin registros; el guion de medición aún no lo emite.`);
         continue;

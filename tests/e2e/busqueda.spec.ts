@@ -536,7 +536,9 @@ test.describe('Historia 26.2 — el tipo no casa como texto y la portada tiene e
     // Estas palabras salen en el contenido de muchas páginas, y la marca en el `h1` de la portada.
     // «directorio» y «portada» pueden no salir en ningún contenido todavía (los Directorios son de
     // la 26.3), y por eso no se les exige resultado: su prueba es que ninguno salga por su tipo.
-    const vacios = ['obra', 'cita', 'autor', 'tema', 'colección', MARCA].filter((termino) => porTermino[termino].total === 0);
+    // «colección» tampoco: ninguna Cita del Corpus la dice, y sus resultados de antes eran Tarjetas
+    // de listado cortadas a media palabra («…en las co…»), que la 34.1 (UX-DR132) ya no deja.
+    const vacios = ['obra', 'cita', 'autor', 'tema', MARCA].filter((termino) => porTermino[termino].total === 0);
     expect(vacios, 'términos sin ningún resultado').toEqual([]);
   });
 

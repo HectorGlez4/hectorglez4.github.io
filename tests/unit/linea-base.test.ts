@@ -769,17 +769,19 @@ describe('Historia 30.5 — copiar una Referencia y copiar el Fragmento, aparte'
     expect(superficie(con, 'la Página de Cita').acciones).toBe(7);
   });
 
-  it('sin ninguna y retenidas, el informe no enseña un cero que parezca leído', () => {
+  it('sin ninguna y ya sueltas, el informe da el cero leído', () => {
     const lineas = lineasDeLecturaDeMedicion(sin);
     const desde = lineas.findIndex((linea) => linea.startsWith('Citar — '));
-    // Fase A: siguen retenidas. Al soltarlas (fase B), este renglón cae y la prueba pide un 0 leído.
-    expect(EVENTOS_DEL_GUION).not.toContain(EVENTOS.copiadoDeReferencia);
+    // Fase B: el guion ya las emite, así que su cero es una medida y sale como la cifra a secas.
+    expect(EVENTOS_DEL_GUION).toContain(EVENTOS.copiadoDeReferencia);
+    expect(EVENTOS_DEL_GUION).toContain(EVENTOS.copiadoDeFragmento);
     expect(lineas.slice(desde + 1, desde + 4)).toEqual([
-      `  ${EVENTOS.copiadoDeReferencia}: sin registros; el guion de medición aún no lo emite.`,
-      `  ${EVENTOS.copiadoDeFragmento}: sin registros; el guion de medición aún no lo emite.`,
+      `  ${EVENTOS.copiadoDeReferencia}: 0.`,
+      `  ${EVENTOS.copiadoDeFragmento}: 0.`,
       '  En la Página de Cita, copias de la Referencia 0 frente a copiados de la Cita 5 (todos los registros de copiado): ' +
         'la tesis de la v9, sin juzgarla.',
     ]);
+    expect(lineas.some((linea) => linea.includes('aún no lo emite'))).toBe(false);
     expect(lineas).toContain(LINEA_SIN_META);
   });
 

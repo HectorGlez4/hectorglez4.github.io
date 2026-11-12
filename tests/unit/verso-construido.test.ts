@@ -130,7 +130,7 @@ describe('Historia 29.3 — la Cita en verso, verso a verso', () => {
     }
   });
 
-  it('Tarjeta de Cita del listado del Tema: los versos del fragmento, y el corte de 120 en el mismo índice', async () => {
+  it('Tarjeta de Cita del listado del Tema: los versos del fragmento, y el corte de 120 por palabra', async () => {
     const html = await leer('/tema/el-tiempo/');
     const tarjeta = (slug: string) => html.match(new RegExp(`href="/cita/${slug}/"[^>]*><span class="fragmento"[^>]*>([\\s\\S]*?)</span><span class="solo`))![1];
     expect(versos(tarjeta(SLUG_MARTI))).toEqual([
@@ -139,13 +139,14 @@ describe('Historia 29.3 — la Cita en verso, verso a verso', () => {
       'Arte soy entre las artes,',
       'En los montes, monte soy.»',
     ]);
-    // 135 caracteres: el fragmento corta en el 119 —dentro del quinto verso— como siempre.
+    // 131 caracteres sin los saltos: el fragmento corta en la última palabra entera que cabe en
+    // 120 —los saltos no cuentan (Historia 34.1)—, dentro del quinto verso.
     expect(versos(tarjeta(SLUG_LARGA))).toEqual([
       '«De aquélla que lo ha matado.',
       'Rápida como un reflejo,',
       'Dos veces vi el alma, dos:',
       'Cuando murió el pobre viejo,',
-      'Cuando ell…»',
+      'Cuando ella me…»',
     ]);
   });
 
@@ -193,13 +194,18 @@ describe('Historia 29.3 — la Cita en verso, verso a verso', () => {
     }
   });
 
-  it('el recorte del título cae en el mismo índice y no deja salto ni « / » colgando antes de «…»', async () => {
+  it('el recorte del título cae en palabra entera y no deja salto ni « / » colgando antes de «…»', async () => {
     const html = await leer(`/cita/${SLUG_LARGA}/`);
     const titulo = decodificar(html.match(/<title>([^<]*)<\/title>/)![1]);
     expect(titulo).toContain(
-      '«De aquélla que lo ha matado. / Rápida como un reflejo, / Dos veces vi el alma, dos: / Cuando murió el pobre viejo,…»',
+      '«De aquélla que lo ha matado. / Rápida como un reflejo, / Dos veces vi el alma, dos: / Cuando murió el pobre viejo…»',
     );
     expect(titulo).not.toMatch(/(\/|\s)…/);
+    // La meta lleva el mismo recorte (Historia 34.1), ya no la Cita entera.
+    const meta = decodificar(html.match(/<meta name="description" content="([^"]*)"/)![1]);
+    expect(meta).toBe(
+      'De aquélla que lo ha matado. / Rápida como un reflejo, / Dos veces vi el alma, dos: / Cuando murió el pobre viejo… — José Martí.',
+    );
   });
 
   it('el `text` del JSON-LD y la `description` del RSS van con « / »', async () => {
