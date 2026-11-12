@@ -1993,6 +1993,9 @@ const TEXTOS_DE_BATMAN = [
   'Quien guarda silencio en el tejado conoce el precio de cada promesa rota.',
   'La capa negra pesa menos que el recuerdo de aquella calle sin farolas.',
 ].slice(0, SLUGS_DE_BATMAN.length);
+if (TEXTOS_DE_BATMAN.length < SLUGS_DE_BATMAN.length) {
+  throw new Error(`MIN_CITAS_POR_PERSONAJE (${MIN_CITAS_POR_PERSONAJE}) pide más textos de Batman que los de la prueba`);
+}
 const CORPUS_MEDIDO: Record<string, string> = {
   'autores/seneca.yml': AUTOR_VALIDO,
   'temas/el-tiempo.yml': TEMA_VALIDO,

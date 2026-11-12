@@ -5,7 +5,7 @@ created: '2026-11-12'
 status: 'done'
 baseline_revision: '126de0c260a6600b5cca13e20e31274b09998b11'
 review_loop_iteration: 0
-followup_review_recommended: false
+followup_review_recommended: true
 context:
   - '{project-root}/_bmad-output/implementation-artifacts/epic-35-context.md'
   - '{project-root}/_bmad-output/implementation-artifacts/spec-35-3-la-pagina-de-personaje.md'
@@ -122,6 +122,18 @@ El umbral vive en un solo sitio (`personajesIndexables`) porque las dos instanci
 - addressed_findings:
   - none
 
+### 2026-11-12 — Review pass (capas externas, pasada 1)
+- intent_gap: 0
+- bad_spec: 0
+- patch: 3 (high 0, medium 1, low 2)
+- defer: 0
+- reject: 28 (high 0, medium 0, low 28)
+- addressed_findings:
+  - `[medium]` `[patch]` El camino del rango de `tools/avisar.ts` con Personajes no tenía prueba (blind-hunter, verification-gap ×3, ac-auditor): `tests/unit/avisar-rango.test.ts` gana cuatro commits con `corpus/personajes/batman.yml` —`MIN_CITAS_POR_PERSONAJE` Citas, una menos, el umbral subido y restituido— y cuatro casos: el Personaje que llega al umbral se avisa, el que baja se avisa por la lista de antes (`personajesIndexablesEnDisco(copia)`), el ensayo lo cuenta en `reparto.personaje`, y el aviso «MIN_CITAS_POR_PERSONAJE cambió en el rango … la lista de Personajes indexables». Quitar la lista de Personajes de antes pone en rojo dos de ellos (comprobado).
+  - `[low]` `[patch]` Las fixtures de Batman de `medicion.test.ts` y `publicable-y-alcanzable.test.ts` fallaban a ciegas con un `MIN_CITAS_POR_PERSONAJE` mayor que sus textos: ahora rompen nombrando la constante.
+  - `[low]` `[patch]` Fuera del endpoint de la Tarjeta la línea «Con el Corpus de hoy, sin Personajes, no construye ninguna», que caducaría con el primer Personaje.
+- Rechazados, con su razón: «personaje de el …» (el universo es un título y «de El Quijote» es la grafía con título; la frase es la de UX-DR134 y ya la pintaba la 35.3); el `desde` anterior a la 35.3b sin la constante y la copia sin `corpus/personajes/` (las épicas se fusionan enteras: ningún `desde` de la principal tiene Personajes sin su umbral, y el build exige la ficha de todo Personaje declarado); la clave `personaje` del reparto (sale de `FAMILIAS_DE_RUTA`, que la trae: la prueba del ensayo la afirma); contar Citas «en disco» frente a «publicadas» y el recuento propio de `personajesIndexables` (toda Cita de `corpus/citas/` se publica —`conjuntoPublicable` lee la misma colección sin filtrar; la puerta de la atribuida actúa al aprobar—, y la regla `personaje === slug` es la de `citasDePersonaje`); el nombre de `rutasDeObraDelSitemap` (sus dos consumidores son el aviso, que quiere las dos, y la indexación, que filtra); el motivo del rastreo (`personajesIndexables` es la única regla que deja fuera a un Personaje publicado); `Cache-Control immutable` y la tarjeta sin comprobación de ancho (calco de la de Autor; en un build estático la cabecera del endpoint no se sirve); el nombre de los ficheros de fixture, `it.runIf`, la expresión regular de `og:image`, el `as number`, el censo a mano del canal, el `as` del endpoint (estilo, calco de la de Autor); el triaje vacío de la pasada anterior (no había capas externas; esta lo corrige); que el `diff` de `dist/` con el Corpus real no ejerce lo nuevo (es su propósito: lo nuevo lo prueban las construcciones de fixture) y que excluya `pagefind/` (excepción del propio Block-If); `AGENTS.md` documenta la 35.3 en las series (es la misma familia, que la tarea pedía documentar); las páginas 2+ en `componerAviso` (igual que la Obra desde la 22.8); el universo vacío (el esquema lo exige); el tope del Tema con más Citas de B (la construcción rompería nombrándolo); el +1 PNG por Personaje sin observar en `peso` (el criterio lo resuelve el spec anotándolo; `dist/tarjeta/personaje/` tiene uno por Personaje y `peso` cuenta todo PNG de `dist/`); «mismo marcado» como presencia de las partes, el código 1 del rastreo por la orden y las series de tráfico y demanda (cubiertos por la función pura que la orden llama, `tools/rastreo.ts` sale con 1 en `!ok`, y por las pruebas de la 35.3); FR-38 fuera del relato de la épica (el intent-contract lo incluye); SM-C2 (sin código).
+
 ## Auto Run Result
 
 Status: done
@@ -153,3 +165,10 @@ Blocking condition: ninguna.
 - Matriz: cada fila tiene prueba que corrió (B en el mínimo y C bajo él, Tarjeta y `og:image` en `pagina-de-personaje`; aviso que sigue `noindex`, que cruza en los dos sentidos, hermana y sin lista en `indexnow`; rastreo en `rastreo`); la del Corpus real, por el `diff` de `dist/`.
 
 **Riesgos residuales.** El aviso sin `--sitemap` lee el sitemap en vivo, que hoy no trae Personajes: sin cambio. Si `MIN_CITAS_POR_PERSONAJE` supera 4, las fixtures de Batman necesitan más textos.
+
+### Pasada de revisión 1 (capas externas)
+
+- Parches: 3 (medium 1, low 2), en `tests/unit/avisar-rango.test.ts`, `tests/unit/medicion.test.ts`, `tests/unit/publicable-y-alcanzable.test.ts` y `src/pages/tarjeta/personaje/[slug].png.ts`. Diferidos: 0. Rechazados: 28.
+- `followup_review_recommended: true` — puntuación 3 × 1 + 1 × 2 = 5 (0 high).
+- Verificación: `npx astro check` 0 errores; `npx vitest run tests/unit/avisar-rango.test.ts` 34 en verde, y con la lista de Personajes de antes quitada de `tools/avisar.ts` dos de los casos nuevos fallan; `npm test` completo detached (`logs/s-35/test-35.3b-r1.log`): FINISHED EXIT=0, 180 ficheros y 7987 pruebas en verde, `huella.test.ts` incluida.
+- Riesgo residual: lo nuevo de la historia no lo ejerce ninguna construcción con el Corpus real, que no tiene Personajes; lo cubren las construcciones de fixture.

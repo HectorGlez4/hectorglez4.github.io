@@ -10,7 +10,6 @@
  * Las rutas salen de `personajesPublicados`, se indexe su página o no: toda página de Personaje
  * —la 1 y las 2+, también bajo `MIN_CITAS_POR_PERSONAJE`— declara esta tarjeta en su `og:image`.
  * Un Personaje declarado sin Citas publicadas no tiene página, y su tarjeta no la enlazaría nadie.
- * Con el Corpus de hoy, sin Personajes, no construye ninguna.
  */
 import type { APIRoute, GetStaticPaths } from 'astro';
 import sharp from 'sharp';

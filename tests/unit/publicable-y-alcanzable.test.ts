@@ -300,7 +300,10 @@ const CORPUS_COMPLETO: Record<string, string> = {
           'Un murciélago vigila el campanario mientras la ciudad duerme tranquila.',
           'Quien guarda silencio en el tejado conoce el precio de cada promesa rota.',
           'La capa negra pesa menos que el recuerdo de aquella calle sin farolas.',
-        ][i],
+        ][i] ??
+          ((): never => {
+            throw new Error(`MIN_CITAS_POR_PERSONAJE (${MIN_CITAS_POR_PERSONAJE}) pide más textos de Batman que los de la prueba`);
+          })(),
         temas: [],
         personaje: 'batman',
         clase: 'atribuida',

@@ -4,7 +4,8 @@ import { chmod, mkdir, mkdtemp, readFile, readdir, rm, unlink, writeFile } from 
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { promisify } from 'node:util';
-import { AUTOR_VALIDO, RAIZ, TEMA_VALIDO, citaValida } from './ayuda/construir.js';
+import { ATESTIGUADA, AUTOR_VALIDO, RAIZ, TEMA_VALIDO, citaValida } from './ayuda/construir.js';
+import { MIN_CITAS_POR_PERSONAJE } from '../../src/lib/umbrales.ts';
 import { formaDeObra } from '../../src/lib/obras.ts';
 import { SITIO } from '../../src/lib/dominio.ts';
 import { ensayoDelRango, informeDelEnsayo, obrasDelSitemap, rutasTocadas } from '../../tools/avisar.ts';
@@ -50,6 +51,7 @@ const ENTORNO = {
 };
 
 const CARTAS = '/obra/seneca/cartas/';
+const BATMAN = '/personaje/batman/';
 const BREVEDAD = '/obra/seneca/brevedad/';
 const IRA = '/obra/seneca/ira/';
 
@@ -80,6 +82,26 @@ function ficherosDelCorpus(): Record<string, string> {
   obra('Brevedad', 'brevedad', 5);
   obra('Ira', 'ira', 1);
   return corpus;
+}
+
+/** Historia 35.3b — la Cita n.º `i` de Batman: una atribuida de Séneca, con textos que no se parecen. */
+const TEXTOS_DE_BATMAN = ['La noche guarda a quien vela por la ciudad.', 'El miedo es un arma que se aprende a usar.',
+  'Nadie elige su herida, pero sí lo que hace con ella.', 'Una máscara dice más verdad que muchas caras.'];
+function citaDeBatman(i: number): string {
+  const texto = TEXTOS_DE_BATMAN[i];
+  if (texto === undefined) {
+    throw new Error(`MIN_CITAS_POR_PERSONAJE (${MIN_CITAS_POR_PERSONAJE}) pide más textos de Batman que los ${TEXTOS_DE_BATMAN.length} de la prueba`);
+  }
+  return citaValida({
+    slug: `seneca-batman-${i}`,
+    texto,
+    personaje: 'batman',
+    clase: 'atribuida',
+    estadoDerechos: undefined,
+    procedencia: undefined,
+    fuente: undefined,
+    ...ATESTIGUADA,
+  });
 }
 
 const ficha = (titulo: string) => `autor: seneca\ntitulo: ${titulo}\nformas:\n  - ${formaDeObra(titulo)}\n`;
@@ -189,6 +211,25 @@ beforeAll(async () => {
   await commit('nota-puesta');
   await escribir('corpus/obras/seneca--cartas.yml', ficha('Cartas'));
   await commit('nota-quitada');
+
+  /*
+   * Historia 35.3b — un Personaje que llega a `MIN_CITAS_POR_PERSONAJE` Citas y vuelve a bajar,
+   * y un commit que solo mueve su umbral. Las Citas son atribuidas de Séneca, sin Obra.
+   */
+  await escribir('corpus/personajes/batman.yml', 'nombre: "Batman"\nuniverso: "DC Comics"\nordenAlfabetico: "Batman"\n');
+  for (let i = 0; i < MIN_CITAS_POR_PERSONAJE; i += 1) {
+    await escribir(`corpus/citas/seneca--batman-${i}.md`, citaDeBatman(i));
+  }
+  await commit('personaje-en-el-umbral');
+  await unlink(join(raiz, `corpus/citas/seneca--batman-${MIN_CITAS_POR_PERSONAJE - 1}.md`));
+  await commit('personaje-bajo-el-umbral');
+
+  const umbralDelPersonaje = `MIN_CITAS_POR_PERSONAJE = ${MIN_CITAS_POR_PERSONAJE};`;
+  if (!UMBRALES.includes(umbralDelPersonaje)) throw new Error(`umbrales.ts no declara «${umbralDelPersonaje}»`);
+  await escribir('src/lib/umbrales.ts', UMBRALES.replace(umbralDelPersonaje, `MIN_CITAS_POR_PERSONAJE = ${MIN_CITAS_POR_PERSONAJE + 1};`));
+  await commit('umbral-de-personaje-subido');
+  await escribir('src/lib/umbrales.ts', UMBRALES);
+  await commit('umbral-de-personaje-restituido');
 }, 60_000);
 
 afterAll(async () => {
@@ -426,6 +467,35 @@ describe('Historia 24.8 — lo que la revisión arregló, con git de verdad', ()
     expect(ensayo.portada).toBe(false);
     expect(ensayo.reparto.obra).toEqual({ cambianDeFecha: 1, seAvisarian: 0 });
     expect(ensayo.reparto.cita).toEqual({ cambianDeFecha: 0, seAvisarian: 0 });
+  });
+});
+
+describe('Historia 35.3b — el Personaje en el aviso de un rango, con git de verdad', () => {
+  it('un Personaje que llega al umbral se avisa', async () => {
+    const { rutas } = await rango('nota-quitada', 'personaje-en-el-umbral', [CARTAS, BREVEDAD, BATMAN]);
+    expect(rutas).toContain(BATMAN);
+  });
+
+  it('un Personaje que baja del umbral se avisa por la lista de antes, que lo indexaba', async () => {
+    const { rutas, avisos } = await rango('personaje-en-el-umbral', 'personaje-bajo-el-umbral', [CARTAS, BREVEDAD]);
+    expect(rutas).toContain(BATMAN);
+    expect(avisos).toEqual([]);
+  });
+
+  it('el ensayo de esa bajada cuenta el Personaje en su familia', async () => {
+    await git(['checkout', '-q', sha['personaje-bajo-el-umbral']]);
+    const ensayo = await ensayoDelRango(raiz, sha['personaje-en-el-umbral'], sha['personaje-bajo-el-umbral'], {
+      rutas: [CARTAS, BREVEDAD],
+    });
+    expect(ensayo.reparto.personaje.seAvisarian).toBe(1);
+  });
+
+  it('si el rango cambió MIN_CITAS_POR_PERSONAJE, se dice que la lista de Personajes de antes usa el de hoy', async () => {
+    const { avisos } = await rango('umbral-de-personaje-subido', 'umbral-de-personaje-restituido', [CARTAS, BREVEDAD]);
+    expect(avisos.join('\n')).toContain(
+      `MIN_CITAS_POR_PERSONAJE cambió en el rango (${MIN_CITAS_POR_PERSONAJE + 1} → ${MIN_CITAS_POR_PERSONAJE}): ` +
+        'la lista de Personajes indexables',
+    );
   });
 });
 
