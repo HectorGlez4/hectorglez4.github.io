@@ -283,8 +283,10 @@ export function fallosDeAtribuidas(entrada: EntradaDelJuicio): FalloDeAtribuida[
   }
 
   // ── La figura pública sin Obra (pregunta 23) ──
+  // Con Obra es **dueño** de una ficha (`dueñoDeFicha`): el `autor` de la ficha de un Personaje es
+  // solo informativo, y no le da Obra al Autor que nombra.
   const conObra = new Set([
-    ...entrada.fichas.map((f) => f.autor).filter((a): a is string => a !== undefined),
+    ...entrada.fichas.flatMap((f) => (f.personaje === undefined && f.autor !== undefined ? [f.autor] : [])),
     ...(entrada.autoresConFichaNueva ?? []),
   ]);
   for (const c of juzgadas) {
@@ -304,7 +306,9 @@ export function fallosDeAtribuidas(entrada: EntradaDelJuicio): FalloDeAtribuida[
   for (const c of juzgadas) {
     const suya = formaDe(c);
     for (const otra of otras) {
-      if (otra === c || otra.slug === c.slug) continue;
+      // Por identidad, no por slug: una candidata con el texto exacto de una publicada del mismo
+      // dueño tiene su mismo slug (la aprobación la renombraría), y es justo el duplicado que se veda.
+      if (otra === c) continue;
       if (typeof otra.texto !== 'string') continue;
       const coincidencia = parecidoEntre(suya, formaDe(otra));
       if (coincidencia === undefined) continue;

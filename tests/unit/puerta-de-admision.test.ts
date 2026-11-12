@@ -344,12 +344,22 @@ describe('Historia 35.1b — la puerta de la atribuida en el build', () => {
     }
   }, 900_000);
 
-  it('con la puerta cerrada en el árbol rompe nombrando el fichero y las cinco que faltan', async () => {
+  it('con las cinco sin valor en la copia rompe nombrando el fichero y las cinco que faltan', async () => {
     const corpus = {
       ...BASE,
       'citas/ana-ejemplo--la-feliz.md': atribuida('ana-ejemplo', 'ana-ejemplo-la-feliz', 'Una frase que nadie más ha dicho nunca.'),
     };
-    const arbol = await construirCon(corpus);
+    // Las cinco en `undefined` en la copia, sea cual sea su valor en el árbol (no se fija).
+    const arbol = await construirCon(
+      corpus,
+      conLaPuertaAbierta({
+        MAX_CARACTERES_DE_ATRIBUIDA: undefined,
+        MAX_ATRIBUIDAS_POR_OBRA: undefined,
+        MAX_ATRIBUIDAS_POR_DUEÑO: undefined,
+        MIN_ATESTIGUACIONES_DE_ATRIBUIDA: undefined,
+        BUZON_DE_PETICIONES: undefined,
+      }),
+    );
     expect(arbol.codigo).not.toBe(0);
     expect(arbol.salida).toMatch(
       /corpus\/citas\/ana-ejemplo--la-feliz\.md: la puerta de la atribuida está cerrada: no tienen valor MAX_CARACTERES_DE_ATRIBUIDA, MAX_ATRIBUIDAS_POR_OBRA, MAX_ATRIBUIDAS_POR_DUEÑO, MIN_ATESTIGUACIONES_DE_ATRIBUIDA, BUZON_DE_PETICIONES/u,

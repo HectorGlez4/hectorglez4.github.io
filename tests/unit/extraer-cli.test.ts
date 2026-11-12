@@ -1395,6 +1395,24 @@ describe('Historia 29.1 — la candidata conserva el verso de su documento (AD-2
     }
   });
 
+  it('Historia 35.1b — de verso, la de un Autor con derechos vigentes sale atribuida y en una línea', async () => {
+    const { corpus } = await corpusConAutores();
+    await writeFile(
+      join(corpus, 'autores', 'seneca.yml'),
+      fichaDeAutor('seneca').replace('añoFallecimiento: 65', 'vivo: true'),
+      'utf8',
+    );
+    const resultado = await extraer(await documento(corpus, CABECERA, { texto: VERSO }), corpus);
+    expect(resultado.codigo, resultado.error).toBe(0);
+    const ficheros = await readdir(join(corpus, '_revision'));
+    expect(ficheros.length).toBeGreaterThan(0);
+    for (const fichero of ficheros) {
+      const frontmatter = await frontmatterDe(corpus, fichero);
+      expect(frontmatter.clase, fichero).toBe(CLASE_ATRIBUIDA);
+      expect(String(frontmatter.texto), fichero).not.toContain('\n');
+    }
+  });
+
   it('de un documento de prosa, en una línea', async () => {
     const { corpus } = await corpusConAutores();
     const resultado = await extraer(await documento(corpus), corpus);

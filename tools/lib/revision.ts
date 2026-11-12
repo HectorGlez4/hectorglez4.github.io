@@ -630,7 +630,7 @@ export async function aprobar(
           ...autoresConFichaPlaneada,
           ...(planDaFichaAlAutor(plan) && candidata.autor !== undefined ? [candidata.autor] : []),
         ],
-        comparables: lote.filter((c) => c.slug !== candidata.slug).map(candidataParaAtribuidas),
+        comparables: lote.filter((c) => c !== candidata).map(candidataParaAtribuidas),
         juzgar: new Set([propia.slug]),
         ...(opciones.puerta !== undefined ? { valores: opciones.puerta } : {}),
       });

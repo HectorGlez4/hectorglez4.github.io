@@ -2,7 +2,7 @@
 title: 'Historia 35.1b — La atribuida tiene su puerta, cerrada, y sus topes'
 type: 'feature'
 created: '2026-11-09'
-status: 'done'
+status: done
 baseline_revision: 'fbf5692012104972d0d9300716caf1193974ebb7'
 review_loop_iteration: 0
 followup_review_recommended: true
@@ -40,6 +40,13 @@ deferred:
       Revisión externa 35.1b-1: esta pasada cuenta ya las fichas que la pasada crea (`fichaPlaneada`), no las que restaura; el build sí las cuenta en cuanto están escritas.
     location: >-
       tools/lib/atribuidas.ts (fichaPlaneada)
+    severity: low
+  - summary: >-
+      En la aprobación, una atribuida planeada que después cae por su Tema (`temaPublicadoConLaPasada`) sigue contando en los topes de las candidatas siguientes de la misma pasada.
+    evidence: |-
+      Revisión externa 35.1b-2 (edge-case-hunter). Solo se ejerce con la puerta abierta, un tope casi lleno y un rechazo por Tema en la misma pasada; el efecto es un rechazo de más (la Cita sigue en revisión), nunca una publicación indebida.
+    location: >-
+      tools/lib/revision.ts (aprobar, planeadas frente a temaPublicadoConLaPasada)
     severity: low
 ---
 
@@ -172,6 +179,19 @@ deferred:
   - `[low]` `[patch]` El fallo del tope por Obra lleva la ruta de la ficha (relativa a la raíz) y el build la nombra; el titular de `integraciones/clases.ts` nombra también la puerta de la atribuida.
   - `[low]` `[patch]` La construcción con cada una de las cinco constantes sola sin valor (antes, solo el árbol y el buzón): `it.each` en `puerta-de-admision.test.ts`.
 
+### 2026-11-12 — Review pass
+- intent_gap: 0
+- bad_spec: 0
+- patch: 5: (high 0, medium 3, low 2)
+- defer: 1: (high 0, medium 0, low 1)
+- reject: 38: (high 0, medium 0, low 38)
+- addressed_findings:
+  - `[medium]` `[patch]` La figura sin Obra contaba como «con Obra» al Autor que solo es `autor` informativo de la ficha de un Personaje: `conObra` toma solo las fichas cuyo dueño es el Autor (la regla de `dueñoDeFicha`); prueba pura.
+  - `[medium]` `[patch]` El duplicado entre clases se saltaba por slug: en la aprobación, la copia exacta de una atribuida publicada del mismo dueño —mismo slug— no se comparaba y se publicaba renombrada. Ahora se salta por identidad (`otra === c`, y la aprobación excluye de los comparables la propia candidata, no su slug); prueba pura y de `aprobar`.
+  - `[medium]` `[patch]` Cinco pruebas fijaban el valor del árbol (cerrado) y se pondrían en rojo el día que Héctor dé valor a las constantes: la pura sigue al árbol, las de alta y aprobación pasan la puerta cerrada por parámetro (`puerta: {}`) y la del build las pone en `undefined` en la copia.
+  - `[low]` `[patch]` La prueba de `extraer` de la atribuida «en una línea» no podía fallar (documento de prosa): una nueva con un documento de verso.
+  - `[low]` `[patch]` El registro de la primera pasada contradecía a las siguientes: se anota como superado.
+
 ## Design Notes
 
 El juicio que necesita el Corpus entero vive en `tools/lib/atribuidas.ts` y no en el esquema: el esquema juzga un fichero (forma, recuento de dominios), el módulo relaciona ficheros (topes, fichas, duplicados). Las órdenes lo llaman antes de escribir con lo publicado más lo de la pasada; el build, con lo versionado. Los topes entran por parámetro para que las pruebas unitarias no parcheen nada; solo las de construcción parchean la copia.
@@ -221,6 +241,7 @@ salta; portada y jornada la rechazan. Con el Corpus real, `dist/` no cambia.
 
 **Revisión.** Las capas externas no traen hallazgos en esta pasada: 0 parches, 0 diferidos, 0 rechazados.
 Recomendación de revisión de seguimiento: `false` (parches 0 alto, 0 medio, 0 bajo; puntuación 0).
+(Registro de la primera pasada; lo superan las pasadas de revisión 35.1b-1 y 35.1b-2, más abajo.)
 
 **Verificación.**
 - `npx vitest run tests/unit/atestiguaciones.test.ts tests/unit/atribuidas.test.ts tests/unit/clase.test.ts` — verde.
@@ -232,7 +253,7 @@ Recomendación de revisión de seguimiento: `false` (parches 0 alto, 0 medio, 0 
 **Riesgos residuales.**
 - `src/lib/dominio.ts` entra ahora en el empaquetado de las páginas (el esquema viaja con `publicado.ts` y necesita el dominio propio): su lectura de `public/CNAME` relativa al módulo falla ahí, y la segunda, desde `process.cwd()`, supone que se construye desde la raíz del proyecto, como hacen `npm run build`, el CI y las pruebas.
 - Con la puerta abierta, las órdenes juzgan los duplicados de cada atribuida contra todo `corpus/_revision/` (cientos de miles de candidatas en la principal): las formas se calculan una vez por candidata (`WeakMap`), pero aprobar muchas atribuidas de golpe será lento. Hoy no se ejerce: la puerta está cerrada.
-- El tope por Obra cuenta una Obra por su ficha resuelta: en el alta, varias atribuidas de una Obra que la misma pasada crea no cuentan juntas hasta que la ficha existe (el build sí las cuenta).
+- El tope por Obra cuenta una Obra por su ficha resuelta: en el alta, varias atribuidas de una Obra que la misma pasada crea no cuentan juntas hasta que la ficha existe (el build sí las cuenta). *(Corregido en la pasada 35.1b-1: `fichaPlaneada`.)*
 
 ### Pasada de revisión 35.1b-1 (2026-11-12)
 
@@ -266,3 +287,29 @@ puerta, y lo que es de la 35.4 o de la 35.6). Ningún intent_gap ni bad_spec.
 - El tope por Obra no cuenta juntas, antes de escribirla, las atribuidas de una Obra cuya ficha retirada la pasada restaura (diferido).
 - Dos atribuidas casi iguales que esperan en `corpus/_revision/` se bloquean entre sí, como pide la intent-contract («cualquier coincidencia la niega»): una de las dos se descarta a mano.
 
+
+### Pasada de revisión 35.1b-2 (2026-11-12)
+
+**Resumen.** Última ronda, proporcionada. De las cinco capas externas: 5 parches, 1 diferido y 38
+rechazados (lo que la intent-contract prescribe —duplicados contra el lote y `_revision/`, la Línea de
+la Fuente sin cotejo, el dominio propio de `public/CNAME`—, lo ya diferido, lo especulativo —aserciones
+no nulas, un sufijo con punto final, un buzón mal formado— y huecos de prueba de caminos que el código
+ya cubre o que la 35.4 hace alcanzables). Ningún intent_gap ni bad_spec.
+
+**Ficheros de esta pasada.**
+- `tools/lib/atribuidas.ts` — la figura sin Obra cuenta solo las fichas cuyo dueño es el Autor; el duplicado entre clases se salta por identidad, no por slug.
+- `tools/lib/revision.ts` — los comparables de la aprobación excluyen la propia candidata por identidad.
+- Pruebas: `atribuidas.test.ts` (ficha de Personaje con `autor` informativo; duplicado con el mismo slug; el árbol, seguido y no fijado), `revision.test.ts` (copia exacta de una atribuida publicada; la puerta cerrada por parámetro), `alta.test.ts` (la puerta cerrada por parámetro), `puerta-de-admision.test.ts` (las cinco en `undefined` en la copia), `extraer-cli.test.ts` (atribuida de verso, en una línea).
+
+**Revisión.** Parches 5 (alto 0, medio 3, bajo 2), diferidos 1, rechazados 38. Puntuación
+3 × 3 + 2 = 11 ≥ 5: `followup_review_recommended: true`.
+
+**Verificación.**
+- Sin la corrección, las dos pruebas puras nuevas y la de `aprobar` fallan; con ella, `atribuidas`, `alta`, `revision` y `extraer-cli -t 35.1b` en verde.
+- `npx astro check` — 0 errores, 0 avisos.
+- `npm test` entero con `correr.sh`/`esperar.pl` — FINISHED EXIT=0: 180 ficheros, 7.961 pruebas.
+- El `diff -r` de `dist/` no se repitió: esta pasada no toca `src/`.
+
+**Riesgos residuales.**
+- Con la puerta abierta, una atribuida planeada que cae por Tema sigue contando en los topes de la misma pasada (diferido).
+- El día que Héctor dé valor a las constantes, las pruebas de la 35.1 que dan de alta o aprueban atribuidas con el árbol (sin `puerta`) las juzgarán con la puerta abierta; las de la puerta cerrada de esta historia ya no dependen del árbol.

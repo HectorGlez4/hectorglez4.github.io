@@ -645,7 +645,8 @@ describe('Historia 35.1 — aprobar deriva la clase y la anota', () => {
     minAtestiguaciones: 2,
     buzon: 'peticiones@ejemplo.org',
   };
-  const CERRADA = motivoPuertaCerrada()!;
+  // La puerta cerrada se pasa por parámetro: las pruebas no dependen del valor que tenga el árbol.
+  const CERRADA = motivoPuertaCerrada({})!;
   const conAutores = async (candidatas: Record<string, unknown>[], publicadas: Record<string, unknown>[] = []) => {
     const rutas = await corpusCon(candidatas, publicadas);
     await writeFile(join(rutas.autores, 'seneca.yml'), SENECA, 'utf8');
@@ -672,7 +673,7 @@ describe('Historia 35.1 — aprobar deriva la clase y la anota', () => {
     const { estadoDerechos: _e, ...sinDerechos } = CANDIDATA_COMPLETA;
     const atribuida = { ...sinDerechos, ...ATESTIGUADA, autor: 'ana-ejemplo', slug: 'ana-ejemplo-una-frase', clase: 'atribuida' };
     const rutas = await conAutores([atribuida]);
-    const resultado = await aprobar(rutas, [atribuida.slug]);
+    const resultado = await aprobar(rutas, [atribuida.slug], [], { puerta: {} });
     expect(resultado.publicadas).toEqual([]);
     expect(CERRADA).toMatch(/MAX_CARACTERES_DE_ATRIBUIDA, .*BUZON_DE_PETICIONES/u);
     expect(resultado.rechazadasPorAdmision).toEqual([{ slug: atribuida.slug, motivos: [CERRADA] }]);
@@ -692,7 +693,7 @@ describe('Historia 35.1 — aprobar deriva la clase y la anota', () => {
     const leida = lote.find((c) => c.slug === dePersonaje.slug);
     expect(leida).toMatchObject({ personaje: 'batman', clase: 'atribuida', admisible: true });
     expect(leida?.autor).toBeUndefined();
-    const resultado = await aprobar(rutas, [dePersonaje.slug]);
+    const resultado = await aprobar(rutas, [dePersonaje.slug], [], { puerta: {} });
     expect(resultado.publicadas).toEqual([]);
     expect(resultado.rechazadasPorAdmision).toEqual([{ slug: dePersonaje.slug, motivos: [CERRADA] }]);
     expect(await readFile(join(rutas.revision, 'batman--la-noche-es-larga.md'), 'utf8')).toBe(antes);
@@ -769,6 +770,17 @@ describe('Historia 35.1 — aprobar deriva la clase y la anota', () => {
       expect(resultado.rechazadasPorAdmision.map((r) => [r.slug, r.motivos.join(' ')])).toEqual([
         [copia.slug, expect.stringMatching(new RegExp(`coincide con «${CANDIDATA_COMPLETA.slug}», de la clase siempre`, 'u'))],
         [gemelaA.slug, expect.stringMatching(/coincide con «seneca-otra-gemela», de la clase siempre/u)],
+      ]);
+    });
+
+    it('la copia exacta de una atribuida publicada —el mismo slug— no se aprueba renombrada', async () => {
+      const publicada = deAna('ana-ejemplo-la-misma', 'Una frase que Ana ya tiene publicada.');
+      const rutas = await conAutores([publicada], [publicada]);
+      await fichaDeAna(rutas);
+      const resultado = await aprobar(rutas, [publicada.slug], [], { puerta: ABIERTA });
+      expect(resultado.publicadas).toEqual([]);
+      expect(resultado.rechazadasPorAdmision.map((r) => [r.slug, r.motivos.join(' ')])).toEqual([
+        [publicada.slug, expect.stringMatching(/coincide con «ana-ejemplo-la-misma», de la clase atribuida/u)],
       ]);
     });
 

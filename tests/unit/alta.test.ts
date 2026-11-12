@@ -443,11 +443,12 @@ describe('Historia 35.1 — el alta deriva la clase y la anota', () => {
         { ...COMPLETA, personaje: 'sancho-panza', texto: 'Una frase de un personaje.' },
       ],
       rutas,
+      { puerta: {} },
     );
     expect(informe.publicadas).toEqual([]);
     expect(informe.enRevision).toHaveLength(2);
     for (const rechazada of informe.enRevision) {
-      expect(rechazada.motivos).toContain(motivoPuertaCerrada());
+      expect(rechazada.motivos).toContain(motivoPuertaCerrada({}));
       const fichero = await readFile(rechazada.ruta!, 'utf8');
       expect(fichero).toMatch(/^clase: "?atribuida"?$/mu);
       expect(fichero).not.toContain('estadoDerechos');
@@ -463,10 +464,10 @@ describe('Historia 35.1 — el alta deriva la clase y la anota', () => {
     await mkdir(rutas.personajes, { recursive: true });
     await writeFile(join(rutas.personajes, 'batman.yml'), 'nombre: "Batman"\nuniverso: "DC Comics"\n', 'utf8');
     const { autor: _autor, ...sinAutor } = COMPLETA;
-    const informe = await darDeAltaLote([{ ...sinAutor, personaje: 'batman', texto: 'La noche es más oscura antes del alba.' }], rutas);
+    const informe = await darDeAltaLote([{ ...sinAutor, personaje: 'batman', texto: 'La noche es más oscura antes del alba.' }], rutas, { puerta: {} });
     expect(informe.publicadas).toEqual([]);
     expect(informe.enRevision).toHaveLength(1);
-    expect(informe.enRevision[0].motivos).toContain(motivoPuertaCerrada());
+    expect(informe.enRevision[0].motivos).toContain(motivoPuertaCerrada({}));
     const ruta = informe.enRevision[0].ruta!;
     expect(ruta).toMatch(/_revision\/batman--la-noche-es-mas-oscura.*\.md$/u);
     const fichero = await readFile(ruta, 'utf8');

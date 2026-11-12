@@ -64,9 +64,13 @@ const juicio = (citas: CitaParaAtribuidas[], extra: Partial<Parameters<typeof fa
   fallosDeAtribuidas({ citas, autores: [VIVA, MUERTO], fichas: FICHAS, valores: ABIERTA, ...extra });
 
 describe('la puerta cerrada', () => {
-  it('el árbol la tiene cerrada: ninguna de las cinco tiene valor', () => {
-    expect(constantesSinValor(VALORES_DEL_ARBOL)).toEqual(NOMBRES);
-    expect(motivoPuertaCerrada()).toContain(NOMBRES.join(', '));
+  it('sin ninguna de las cinco con valor está cerrada y las nombra todas; el árbol, por las que no tenga', () => {
+    expect(constantesSinValor({})).toEqual(NOMBRES);
+    expect(motivoPuertaCerrada({})).toContain(NOMBRES.join(', '));
+    // Sigue el valor que tenga el árbol, sin fijarlo: darles valor (Héctor) no pone esto en rojo.
+    const faltan = constantesSinValor(VALORES_DEL_ARBOL);
+    if (faltan.length === 0) expect(motivoPuertaCerrada()).toBeUndefined();
+    else expect(motivoPuertaCerrada()).toContain(faltan.join(', '));
   });
 
   it.each(NOMBRES.map((n, i) => [n, i] as const))('con %s sin valor sigue cerrada y la nombra a ella sola', (nombre, i) => {
@@ -222,6 +226,12 @@ describe('la figura pública sin Obra (pregunta 23)', () => {
     expect(juicio([atribuida('ana-x', 'Una frase de Ana.')], { fichas: [], autoresConFichaNueva: ['ana'] })).toEqual([]);
     expect(juicio([atribuida('ana-x', 'Una frase de Ana.', { personaje: 'batman' })], { fichas: [] })).toEqual([]);
   });
+
+  it('el `autor` informativo de la ficha de un Personaje no le da Obra al Autor: no es su dueño', () => {
+    const deBatman: FichaDeObra = { ...ficha('batman--el-caballero', 'ana', 'el caballero'), personaje: 'batman', personajes: ['batman'] };
+    const fallos = juicio([atribuida('ana-x', 'Una frase de Ana.', { procedencia: undefined })], { fichas: [deBatman] });
+    expect(fallos.map((f) => f.motivo)).toEqual([expect.stringMatching(/Autor «ana», sin Personaje.*\(pregunta 23\)\.$/u)]);
+  });
 });
 
 describe('los duplicados entre clases', () => {
@@ -250,6 +260,15 @@ describe('los duplicados entre clases', () => {
       comparables: [{ slug: 'candidata-z', texto: 'La vida es corta y el arte es largo' }],
     });
     expect(motivosDe(fallos, 'ana-x')[0]).toMatch(/coincide con «candidata-z», de la clase siempre/u);
+  });
+
+  it('con una publicada del mismo slug —el mismo texto del mismo dueño—: se compara por identidad, no por slug', () => {
+    const publicada = atribuida('ana-la-vida-es-corta', 'La vida es corta y el arte es largo.');
+    const candidata = atribuida('ana-la-vida-es-corta', 'La vida es corta y el arte es largo.', { ruta: 'corpus/_revision/x.md' });
+    const fallos = juicio([publicada, candidata], { juzgar: new Set([candidata.slug]) });
+    expect(fallos.map((f) => f.motivo)).toContainEqual(
+      expect.stringMatching(/^la atribuida «ana-la-vida-es-corta» coincide con «ana-la-vida-es-corta», de la clase atribuida/u),
+    );
   });
 });
 
