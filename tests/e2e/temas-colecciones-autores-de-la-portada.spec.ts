@@ -36,9 +36,10 @@ const PERFIL = 'escritorio';
 
 /**
  * Puerto propio: 4321 es el sitio de la suite, 4399/4400 los del receptor, 4402 el del ingreso,
- * 4403 el del historial y 4404 el de las Obras de la portada.
+ * 4403 el del historial, 4404 el del Desplegable, 4405 el de «Lee el pasaje» y 4406 el de las Obras
+ * de la portada.
  */
-const PUERTO = 4405;
+const PUERTO = 4407;
 const SITIO = `http://localhost:${PUERTO}`;
 const JORNADA = '2026-10-30';
 
