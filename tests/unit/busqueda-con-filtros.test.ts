@@ -640,8 +640,22 @@ describe('Historia 35.5 — lo puro: el Personaje en el estado de /buscar/', () 
       'seneca--obras-de-seneca',
     ]);
     expect(dueñoDeLaObra(MAPA, RECUENTOS, 'batman--el-caballero')).toBe('personaje:batman');
-    // En la lista de Batman, pero de Séneca: su dueño es el del tercer elemento.
+    // En la lista de Séneca, que es la primera que la lleva: su dueño es esa lista.
     expect(dueñoDeLaObra(MAPA, RECUENTOS, 'seneca--obras-de-seneca')).toBe('seneca');
+    // La primera lista que la lleva es la de quien la dice, no la de su ficha: decide el tercer
+    // elemento, nunca la lista en que se encontró.
+    const DICHA_ANTES: MapaDeObras = {
+      'personaje:alfa': [['zeta--x', 'X', 'personaje:zeta']],
+      'personaje:zeta': [['zeta--x', 'X']],
+    };
+    expect(Object.keys(DICHA_ANTES)[0]).toBe('personaje:alfa');
+    expect(dueñoDeLaObra(DICHA_ANTES, { 'zeta--x': 1 }, 'zeta--x')).toBe('personaje:zeta');
+    // Y lo mismo con un Autor que dice la Obra de un Personaje, delante de él en el mapa.
+    const DE_BATMAN_EN_SENECA: MapaDeObras = {
+      seneca: [['batman--el-caballero', 'El caballero', 'personaje:batman']],
+      'personaje:batman': [['batman--el-caballero', 'El caballero']],
+    };
+    expect(dueñoDeLaObra(DE_BATMAN_EN_SENECA, RECUENTOS, 'batman--el-caballero')).toBe('personaje:batman');
     expect(ofreceLaObra(MAPA, RECUENTOS, 'personaje:batman', 'seneca--obras-de-seneca')).toBe(true);
     expect(ofreceLaObra(MAPA, RECUENTOS, 'seneca', 'batman--el-caballero')).toBe(false);
   });
