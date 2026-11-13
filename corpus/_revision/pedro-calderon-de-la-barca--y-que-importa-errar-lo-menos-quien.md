@@ -1,5 +1,5 @@
 ---
-texto: "¿Y qué importa errar lo menos quien acertó lo demás?"
+texto: "¿Y qué importa errar lo menos\nquien acertó lo demás?"
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-y-que-importa-errar-lo-menos-quien"
 procedencia:

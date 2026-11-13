@@ -808,6 +808,71 @@ protege de nadie, y en cambio descarta eventos de verdad en silencio el día que
 dominio. Si algún día la tabla se llena de ruido, la respuesta es un límite de frecuencia
 en la plataforma, no una comprobación que aparenta seguridad.
 
+### La cuota de lectura de D1, orden por orden — Historia 23.13 (AD-14)
+
+D1 cuenta las filas que lee cada consulta contra una cuota diaria: **5 millones de filas leídas al
+día en el plan gratuito, por cuenta y no por base** (`CUOTA_DE_FILAS_LEIDAS_POR_DIA_EN_D1`, en
+`src/lib/umbrales.ts`, junto a la de escritura). Pasada, las consultas fallan hasta las 00:00 UTC.
+Tres órdenes de `tools/` recorren la tabla `eventos` y su gasto crece con ella: la lectura de la
+línea base (`npm run medicion`), `desplegar` y `comprobar`. `eventos` no tiene índice por `ruta`,
+así que cada sentencia de las balizas —el borrado y la lectura de cada intento, y el borrado del
+final— también la recorre entera.
+
+**Condición del Entorno operativo** *(Héctor, 2026-10-31)*: **la cuenta de Cloudflare aloja una sola
+base D1, la de la medición.** La cuota es de la cuenta, pero `d1 info` cuenta solo esta base: con
+otra base en la cuenta, lo que ella leyera no se vería en el juicio. **Crear otra base D1 en la cuenta
+reabre la regla.**
+
+**Qué juzga cada orden, y cuándo.** Cada una juzga **su coste entero antes de leer ninguna fila de la
+tabla salvo el `COUNT(*)` que da N**, las filas de la tabla:
+
+1. Pide `d1 info` y lee `rows_read_24h`, las filas leídas en las últimas 24 h (por horas, de esta
+   base). Es **precondición**: si `d1 info` no lo trae —falla, o su consulta a la analítica de
+   Cloudflare no contestó—, lo dice y sale con 1 **sin leer ninguna fila de la tabla**.
+2. Si lo leído en 24 h ya está en la cuota o por encima, sale con 1 sin el `COUNT(*)` siquiera.
+3. Si no, el `COUNT(*)`: el único recorrido antes del juicio, y su coste entra en la cuenta.
+4. **El juicio:** el coste es N × la lista declarada de las sentencias de esa orden que recorren la
+   tabla (`recorridosDeLaLectura`, `recorridosDeDesplegar`, `recorridosDeComprobar`, en
+   `tools/lib/medicion.ts`), nunca una cifra escrita: la lectura, el recuento y sus cinco consultas
+   (6); `comprobar`, el recuento y las balizas (8); `desplegar`, el recuento, los recuentos de antes y
+   de después, las balizas y el barajado (11). Cabe si **lo leído en 24 h, otro tanto de reserva para
+   el resto del día y el coste** caben en la cuota, como el barajado reserva lo escrito. Es una
+   **estimación, y una cota inferior**: `rows_read` cuenta también las filas de índice que recorre
+   una consulta, y mientras las balizas están en la tabla cada recorrido suyo lee también las suyas.
+5. **Si no cabe**, sale con 1 sin leer más filas que las del `COUNT(*)`, y dice la estimación, lo
+   leído en 24 h, la reserva y la cuota. No trocea por consultas ni por jornadas: **se repite otro
+   día**.
+
+El juez es uno, `juzgarCuota` de `tools/lib/medicion.ts`, puro, y juzga también la cuota de escritura
+del barajado: ninguna orden escribe su propio juicio.
+
+- **La lectura** (`npm run medicion`) hace todo lo local antes —los valores de `umbrales.ts` y el
+  Corpus del que sale el censo— y juzga antes de su primera consulta. Tras leer, el informe da, en el
+  bloque de la cuota y cada una aparte, lo leído en 24 h frente a la cuota, la **estimación** y la
+  **medida**: la suma de los `rows_read` que D1 devolvió de cada sentencia, frente a la cuota (si
+  alguna no lo trajo, lo dice: la medida se queda corta).
+- **`desplegar` juzga dos veces.** La primera, escritura y lectura juntas, antes de migrar y de la
+  primera sentencia que recorre la tabla: si no caben, sale con 1 **sin tocar nada**. La segunda,
+  antes de barajar, juzga lo que falta —el barajado y los recuentos de después— con el mayor de dos
+  valores, lo que diga `d1 info` y lo del primer juicio más lo que la orden ya leyó, porque `d1 info`
+  llega con retraso; si no cabe, **no baraja ni escribe la huella**, lo dice y sale con 1, con el
+  parte de lo aplicado, como cuando el barajado no cabe en la cuota de escritura. Al terminar, dice
+  lo leído medido frente a lo estimado. N es el del primer juicio: no se vuelve a contar.
+- **`comprobar`** juzga antes de la primera baliza; si no cabe, sale con 1 **sin enviar ninguna**.
+
+**Por qué la reserva, sin confirmar.** Pasar la cuota de lectura podría impedir también los
+`INSERT` del receptor: si fuera así, perdería **en silencio** —el Worker traga el error— los eventos
+del resto de la jornada UTC, que se leerían después como un cero. Está **sin confirmar**, y se
+confirma la primera vez que se observe; mientras, la reserva lo cubre.
+
+**Pendiente de Héctor: cotejar `rows_read_24h` con la medida.** Hay informes de que el contador de
+24 h de D1 subestima, y un contador que subestima no protege. Un agente no puede cotejarlo —es
+`--remote`—, así que queda para la primera lectura que corra Héctor: anotar lo leído en 24 h y la
+medida que da el informe, esperar a que la analítica se ponga al día (unos minutos; luego otra vez
+pasada la hora) y repetir `npx --yes wrangler@4.151.1 d1 info medicion --json` en `medicion/`: el
+`rows_read_24h` tendría que haber crecido al menos en la medida. El resultado se anota aquí debajo,
+con la fecha. Ninguno todavía.
+
 ### Leer la línea base — Historia 23.10
 
 ```bash
@@ -815,16 +880,18 @@ npm run medicion            # lee D1 en remoto, informa y no escribe nada
 ```
 
 **Qué lee.** Con sesión de `wrangler` —`npx --yes wrangler@4.151.1 login`, en `medicion/`—, lee el
-Corpus de este equipo y cinco recuentos agrupados de las **jornadas UTC cerradas** —anteriores a
+Corpus de este equipo; después `d1 info`, el `COUNT(*)` que da las filas de la tabla y, si la cuota de
+lectura cabe (arriba, «La cuota de lectura de D1, orden por orden»), cinco recuentos agrupados de las
+**jornadas UTC cerradas** —anteriores a
 hoy— sin las balizas de prueba, con `wrangler` 4.151.1 y `--remote` siempre explícito: las vistas y
 las lecturas por (jornada, ruta, evento, origen, via, indexable); las salidas internas por
 (jornada, ruta, zona); las acciones por (jornada, ruta, evento, destino, primera); las búsquedas
 asentadas por (jornada, ruta, tramo, filtros), y las búsquedas sin resultados por (jornada, ruta,
-consulta). Y `d1 info`, para la cuota. Solo recuentos, sin sesiones ni recorridos (NFR-11), sin
-`ORDER BY` —se ordena en JavaScript— y sin nombrar el `rowid`. Cada lectura recorre la tabla cinco
-veces, una por consulta, y D1 cuenta esas filas leídas contra su cuota de lectura, que la orden no
-informa todavía (es una pregunta abierta de la arquitectura). Lo que se hace con lo leído vive en
-`tools/lib/medicion.ts` (la secuencia, `leer`) y `tools/lib/lineaBase.ts` (todo lo demás, puro).
+consulta). `d1 info` da también la cuota. Solo recuentos, sin sesiones ni recorridos (NFR-11), sin
+`ORDER BY` —se ordena en JavaScript— y sin nombrar el `rowid`. Cada lectura recorre la tabla seis
+veces —el recuento y una por consulta, `recorridosDeLaLectura`—, y D1 cuenta esas filas leídas contra
+su cuota de lectura, que la orden juzga antes de leer e informa después. Lo que se hace con lo leído
+vive en `tools/lib/medicion.ts` (la secuencia, `leer`) y `tools/lib/lineaBase.ts` (todo lo demás, puro).
 
 **Qué no hace.** No escribe nada, ni en D1 ni en el repositorio, y no pide `MEDICION_ENDPOINT`:
 no envía nada al receptor. No hay punto final de lectura: el receptor sigue contestando 204 a todo
@@ -835,10 +902,13 @@ de lectura: no se corre en bucle.
 un argumento que no son de la orden (la lectura no lleva opciones), antes de tocar nada; **1** si un
 valor de `src/lib/umbrales.ts` que la lectura lee no se sostiene —una jornada que no existe, como
 `2026-11-3`; una pasada sin rutas o con una ruta que el sitio no declara; un mínimo o un umbral de
-ráfaga que no son enteros positivos—, que se juzga **antes de tocar nada**, para no gastar cinco
+ráfaga que no son enteros positivos—, que se juzga **antes de tocar nada**, para no gastar los
 recorridos de la tabla en una lectura que no se compondría; si la sesión no se deja leer; si el
-Corpus no se deja leer o no se saca de él el censo; o si no se leyó nada de D1 —ni una consulta con
-recuentos con forma ni ninguna cifra de `d1 info`—, nombrando cada cosa; **0** si leyó algo. Una consulta que falla —también una en la que
+Corpus no se deja leer o no se saca de él el censo; si `d1 info` no trae `rows_read_24h` o la cuota de
+lectura no cabe, antes de leer más que el `COUNT(*)`; o si **ninguna consulta trae recuentos con
+forma** —«Ninguna consulta con forma»—, nombrando cada una, aunque `d1 info` diera sus cifras; **0** si
+alguna consulta los trajo. Las filas escritas y el tamaño de la base siguen yendo a «Sin leer» cada una
+por su lado cuando `d1 info` no las trae, sin arrastrar a la otra. Una consulta que falla —también una en la que
 `wrangler` se corta por su tope— no para la orden: sale en «Sin leer» con su motivo, y toda cifra que
 dependa de ella se omite y se nombra, **jamás como cero**. Una tasa sin denominador dice «sin
 denominador», nunca 0 %.
@@ -879,7 +949,8 @@ lectura, y las búsquedas sobre el de la búsqueda.
 `CUOTA_DE_BYTES_POR_BASE_EN_D1`, 500 MB decimales; al pasar cualquiera de las dos, las escrituras
 fallan en silencio, pero no igual: pasada la de filas escritas, hasta las 00:00 UTC, cuando se
 renueva; pasada la de tamaño, hasta que se borren filas o cambie el plan, porque esa no se renueva
-sola—; los descuentos; los cortes; SM-8 —sin la vista de Obra; Threads no se lee
+sola; y la de lectura: lo leído en 24 h antes de leer frente a `CUOTA_DE_FILAS_LEIDAS_POR_DIA_EN_D1`,
+con la reserva, la estimación de esta lectura y, aparte, su medida—; los descuentos; los cortes; SM-8 —sin la vista de Obra; Threads no se lee
 como personas mientras no conste quién publica sus enlaces—; las superficies, con sus vistas,
 lecturas, salidas y acciones y la continuación por zona, que es cota inferior —todas las superficies
 con lectura, también a cero—; lo de fuera del censo; la Obra por la marca de sus vistas de Obra
@@ -1029,12 +1100,15 @@ aplicado —sin reintentar migraciones ni despliegues—:
    Hasta la merge la principal es la v7.1, con la Marca de origen en las acciones, y eso lo
    pide aunque la huella ya sea de la v8. Si el receptor nuevo no guarda algo de eso, lo nombra
    y se para: **nunca se despliega un receptor que no cubra lo que emite el sitio en vivo**.
-4. Cuenta las filas por jornada y evento (sin las balizas) y mira la tabla: si no es la de
-   partida ni la migrada, la nombra y se para sin aplicar nada, porque `ADD COLUMN` no es
-   idempotente. Mira también **la cuota antes de tocar nada** (paso 7, con las escrituras de las
-   balizas ya sumadas): si hoy el barajado no cabría, sale con 1 sin migrar ni desplegar —migrar y
-   desplegar para pararse después no ahorra nada: se repite otro día igual—. Dice el instante
-   anterior a la migración.
+4. Mira la tabla —su esquema y `d1_migrations`, sin recorrerla—: si no es la de partida ni la
+   migrada, la nombra y se para sin aplicar nada, porque `ADD COLUMN` no es idempotente. Juzga
+   después **las dos cuotas antes de tocar nada** (Historia 23.13): con `d1 info` —sin
+   `rows_read_24h`, sale con 1 antes de leer ninguna fila— y el `COUNT(*)` que da N, la de
+   escritura del barajado (paso 7, con las escrituras de las balizas ya sumadas) y la de lectura de
+   toda la orden, juntas («La cuota de lectura de D1, orden por orden», arriba). Si alguna no cabe,
+   sale con 1 sin migrar ni desplegar —migrar y desplegar para pararse después no ahorra nada: se
+   repite otro día igual—. Cuenta entonces las filas por jornada y evento (sin las balizas) y dice el
+   instante anterior a la migración.
 5. Aplica las migraciones en remoto (`d1 migrations apply --remote`) y despliega el receptor
    (`wrangler deploy`), con `wrangler` 4.151.1 y `--remote` siempre explícito. Cada paso tiene un
    tope de 300 s: uno que no termina se corta, y el parte dice que **quizá** se aplicó.
@@ -1059,9 +1133,11 @@ aplicado —sin reintentar migraciones ni despliegues—:
    D1 rechaza cada `INSERT` hasta la medianoche y el Worker lo calla, así que un barajado que la
    agotara justo dejaría el resto del día a cero. Lo escrito en 24 h lleva sumadas las
    escrituras de las balizas de la orden (unas 1.566, por exceso), que `d1 info` puede no ver
-   todavía. La cuota es de la cuenta: lo que escriba otra base D1 suya no está contado. Si no
-   cabe, lo dice con las cifras y sale con 1: **se repite otro día, nunca troceado**. Dice el
-   instante anterior al barajado.
+   todavía. La cuota es de la cuenta: lo que escriba otra base D1 suya no está contado. Con ella
+   juzga también la de lectura de lo que falta —el barajado y los recuentos de después—, con lo leído
+   en 24 h al menos lo del primer juicio más lo que la orden ya leyó. Si alguna no cabe, lo dice con
+   las cifras y sale con 1 sin barajar ni escribir la huella: **se repite otro día, nunca troceado**.
+   Dice el instante anterior al barajado.
 8. Vuelve a contar, **da los recuentos de antes y de después** —una línea por jornada, que la
    23.3 anota con fecha en su spec— y exige que las jornadas cerradas sean idénticas y que la de
    hoy y la víspera solo hayan crecido (el reloj del Worker puede ir unos segundos por detrás al
@@ -1093,8 +1169,10 @@ huella commiteada, se despliega el sitio. `npm test` está en rojo entre que la 
 npm run medicion -- comprobar   # acto de Héctor
 ```
 
-Envía las balizas del vocabulario de la huella —las que guarda y las que descarta—, las coteja,
-mira que el `rowid` sea aleatorio y las borra. Sale con 1 nombrando la diferencia si el receptor
+Antes de la primera baliza juzga su cuota de lectura —`d1 info`, el `COUNT(*)` y el coste de sus
+recorridos—, y si no cabe sale con 1 sin enviar ninguna (Historia 23.13). Envía las balizas del
+vocabulario de la huella —las que guarda y las que descarta—, las coteja, mira que el `rowid` sea
+aleatorio y las borra. Sale con 1 nombrando la diferencia si el receptor
 en vivo no guarda lo que la huella dice, guarda lo que debía descartar o numera en orden de
 llegada —un receptor anterior a la 23.12, también tras una vuelta
 atrás—; lo cierra repetir la 23.3, `npm run medicion -- desplegar`. Es lo que sustituye a las
@@ -1127,7 +1205,7 @@ npm run medicion -- ensayo   # en otra terminal: la comprobación de desplegar, 
 ```
 
 `ensayo` corre la secuencia de `desplegar` contra el D1 local, salvo lo que solo existe en remoto
-—migrar, que ya hizo `local`, desplegar y `d1 info`— y la huella: recuentos, estado de la tabla,
+—migrar, que ya hizo `local`, desplegar y `d1 info`, y con él los juicios de las cuotas— y la huella: recuentos, estado de la tabla,
 balizas, `rowid`, recuento de filas, barajado y recuentos otra vez, con las respuestas de verdad
 de `wrangler`. Sale con 0 si la tabla es la migrada, cada evento y cada valor del vocabulario
 llegó al D1 local, lo ajeno se descartó, el `rowid` es aleatorio, las balizas se borraron y

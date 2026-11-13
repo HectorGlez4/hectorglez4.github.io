@@ -15,8 +15,11 @@ import {
   limpiar,
   paginaConstruida,
 } from './ayuda/construir.js';
-import { listadoDe, obraDeLaTarjeta, tarjetasDelListado } from './ayuda/listado.js';
+import { decodificar, listadoDe, obraDeLaTarjeta, tarjetasDe, tarjetasDelListado } from './ayuda/listado.js';
 import { componerDocumento, nombreDeDocumento } from '../../tools/lib/documento.ts';
+import { recortarPorPalabra } from '../../src/lib/recorte.ts';
+import { MAX_CARACTERES_DE_TARJETA_DE_CITA, MAX_CARACTERES_DE_TITULO_Y_META } from '../../src/lib/umbrales.ts';
+import { enUnaLinea } from '../../src/lib/verso.ts';
 
 /**
  * Historia 24.3 — cada Cita de un listado dice de qué obra es (UX-DR70).
@@ -282,8 +285,8 @@ describe('Historia 24.3 — el contrato del componente, sin construir', () => {
     expect(deObra.map((r) => r.selector)).toContain('.obra');
     expect(declaraciones.get('font-family')).toBe('var(--sans)');
     expect(declaraciones.get('font-size')).toBe('var(--pie)');
-    expect(declaraciones.get('font-weight')).toBe('400');
-    expect(declaraciones.get('line-height')).toBe('1.5');
+    expect(declaraciones.get('font-weight')).toBe('var(--peso-regular)');
+    expect(declaraciones.get('line-height')).toBe('var(--interlineado-pie)');
     expect(declaraciones.get('color')).toBe('var(--tinta-apagada)');
     for (const prohibida of [
       'text-transform',
@@ -326,6 +329,21 @@ describe('Historia 24.3 — el contrato del componente, sin construir', () => {
       expect(m[2].trim(), m[0]).toMatch(/^(var\(--[\w-]+\)|inherit)$/);
     }
     expect(estilo).not.toMatch(/white-space\s*:\s*nowrap|text-overflow|line-clamp|overflow\s*:\s*hidden/);
+  });
+});
+
+describe('Historia 34.1 — el fragmento se recorta por palabra, sin construir', () => {
+  it('la Cita de Martí del Corpus: antes «…camposant…», ahora entera (118 sin los saltos)', () => {
+    // Copia del `texto` de `corpus/citas/jose-marti--yo-se-que-el-necio-se-entierra.md` el día de
+    // la 34.1: la prueba fija la regla, y retirar o redocumentar esa Cita no debe romperla.
+    const texto =
+      'Yo sé que el necio se entierra\nCon gran lujo y con gran llanto, -\nY que no hay fruta en la tierra\nComo la del camposanto.';
+    expect(texto.length).toBe(121);
+    expect([...texto.replaceAll('\n', '')].length).toBe(118);
+    // El corte de antes de la 34.1: unidades UTF-16, cada salto un carácter, a media palabra.
+    const antes = texto.length > 120 ? `${texto.slice(0, 119).trimEnd()}…` : texto;
+    expect(antes.endsWith('Como la del camposant…')).toBe(true);
+    expect(recortarPorPalabra(texto, MAX_CARACTERES_DE_TARJETA_DE_CITA)).toBe(texto);
   });
 });
 
@@ -548,8 +566,8 @@ describe('Historia 24.3 — la Tarjeta de cada listado, construida', () => {
   corpus[`colecciones/${COLECCION}.yml`] = coleccionValida({ miembros: MIEMBROS });
 
   let proyecto = '';
-  /** El recorte del fragmento, leído del componente: la prueba no fija una copia del número. */
-  let largoDeFragmento = 0;
+  /** El tope del fragmento, el de `umbrales.ts`: la prueba no fija una copia del número. */
+  const largoDeFragmento = MAX_CARACTERES_DE_TARJETA_DE_CITA;
   const html = (ruta: string) => readFile(paginaConstruida(proyecto, ruta), 'utf8');
 
   /** La ruta y sus páginas 2+, mientras existan en `dist/`. */
@@ -559,11 +577,10 @@ describe('Historia 24.3 — la Tarjeta de cada listado, construida', () => {
     return rutas;
   }
 
-  const tarjetasDe = async (ruta: string) => tarjetasDelListado(await html(ruta), ruta);
+  const tarjetasDeLaRuta = async (ruta: string) => tarjetasDelListado(await html(ruta), ruta);
 
-  /** El fragmento que la tarjeta enseña: el texto, recortado como antes de la 24.3 si pasa. */
-  const fragmentoDe = (texto: string) =>
-    texto.length > largoDeFragmento ? `${texto.slice(0, largoDeFragmento - 1).trimEnd()}…` : texto;
+  /** El fragmento que la tarjeta enseña: el texto, recortado por palabra si pasa (Historia 34.1). */
+  const fragmentoDe = (texto: string) => recortarPorPalabra(texto, largoDeFragmento);
 
   /** Lo que la Tarjeta de una Cita tiene que llevar en un contexto. */
   function esperado(slug: string, atribucion: Atribucion) {
@@ -585,7 +602,7 @@ describe('Historia 24.3 — la Tarjeta de cada listado, construida', () => {
   async function comprobarListado(ruta: string, atribucion: Atribucion): Promise<string[]> {
     const slugs: string[] = [];
     for (const pagina of paginasDe(ruta)) {
-      const tarjetas = await tarjetasDe(pagina);
+      const tarjetas = await tarjetasDeLaRuta(pagina);
       expect(tarjetas.length, pagina).toBeGreaterThan(0);
       for (const tarjeta of tarjetas) {
         const motivo = `${pagina} · ${tarjeta.slug}`;
@@ -605,19 +622,6 @@ describe('Historia 24.3 — la Tarjeta de cada listado, construida', () => {
   const deAutor = (autor: string) => [...sembradas].filter(([, c]) => c.autor === autor).map(([slug]) => slug);
 
   beforeAll(async () => {
-    const { fuente } = await frontmatterDe(COMPONENTE);
-    const visitar = (nodo: ts.Node) => {
-      if (
-        ts.isVariableDeclaration(nodo) &&
-        nodo.name.getText(fuente) === 'LARGO_DE_FRAGMENTO' &&
-        nodo.initializer !== undefined &&
-        ts.isNumericLiteral(nodo.initializer)
-      ) {
-        largoDeFragmento = Number(nodo.initializer.text);
-      }
-      ts.forEachChild(nodo, visitar);
-    };
-    visitar(fuente);
     const resultado = await construirConCorpus(corpus);
     aLimpiar.push(resultado.proyecto);
     proyecto = resultado.proyecto;
@@ -625,7 +629,6 @@ describe('Historia 24.3 — la Tarjeta de cada listado, construida', () => {
   }, 300_000);
 
   it('el fixture: el título largo y los textos de su Obra pasan del recorte del fragmento', () => {
-    expect(largoDeFragmento, 'sin `LARGO_DE_FRAGMENTO` en el componente').toBeGreaterThan(0);
     expect(LARGO.length).toBeGreaterThan(largoDeFragmento);
     for (const slug of ['antonio-machado-soledades-0', 'antonio-machado-soledades-1']) {
       expect(sembradas.get(slug)!.texto.length, slug).toBeGreaterThan(largoDeFragmento);
@@ -682,7 +685,7 @@ describe('Historia 24.3 — la Tarjeta de cada listado, construida', () => {
 
   it('el título de 125 caracteres sale entero, sin «…», en Tema, Colección y Autor', async () => {
     for (const ruta of ['/tema/el-tiempo/', `/coleccion/${COLECCION}/`, '/autor/antonio-machado/']) {
-      const tarjeta = (await tarjetasDe(ruta)).find((t) => t.slug === 'antonio-machado-soledades-0');
+      const tarjeta = (await tarjetasDeLaRuta(ruta)).find((t) => t.slug === 'antonio-machado-soledades-0');
       expect(tarjeta, ruta).toBeDefined();
       const obra = obraDeLaTarjeta(tarjeta!);
       expect(obra, ruta).toBe(LARGO);
@@ -690,7 +693,21 @@ describe('Historia 24.3 — la Tarjeta de cada listado, construida', () => {
     }
   });
 
-  it('el fragmento de una Cita larga se recorta como antes, en la misma tarjeta que el título entero', async () => {
+  /**
+   * Un fragmento terminado en «…» es, colapsando blancos, un prefijo del texto de su Cita que
+   * acaba en una palabra entera, sin blancos ni `,` `;` `:` colgando: en el texto, lo siguiente es
+   * `[,;:\s]*` y un blanco (Historia 34.1).
+   */
+  function cortaEnPalabra(fragmento: string, texto: string): boolean {
+    const colapsar = (t: string) => t.replace(/\s+/g, ' ');
+    const prefijo = colapsar(fragmento.slice(0, -1));
+    const entero = colapsar(texto);
+    // Nada cuelga delante de «…»: ni un blanco ni `,` `;` `:`.
+    if (/[\s,;:]$/u.test(prefijo)) return false;
+    return entero.startsWith(prefijo) && /^[,;:\s]*\s/u.test(entero.slice(prefijo.length));
+  }
+
+  it('el fragmento de una Cita larga se recorta por palabra, en la misma tarjeta que el título entero', async () => {
     const slug = 'antonio-machado-soledades-0';
     const texto = sembradas.get(slug)!.texto;
     for (const ruta of ['/tema/el-tiempo/', `/coleccion/${COLECCION}/`, '/autor/antonio-machado/', '/obra/antonio-machado/']) {
@@ -698,22 +715,68 @@ describe('Historia 24.3 — la Tarjeta de cada listado, construida', () => {
         ? (await readdir(join(proyecto, 'dist', 'obra', 'antonio-machado'))).map((o) => `/obra/antonio-machado/${o}/`)
         : [ruta];
       for (const pagina of paginas) {
-        const tarjeta = (await tarjetasDe(pagina)).find((t) => t.slug === slug);
+        const tarjeta = (await tarjetasDeLaRuta(pagina)).find((t) => t.slug === slug);
         expect(tarjeta, pagina).toBeDefined();
         const fragmento = tarjeta!.visibles[0];
         expect(fragmento.clase, pagina).toBe('fragmento');
         expect(fragmento.texto, pagina).toMatch(/…»$/);
-        expect(fragmento.texto.length, pagina).toBeLessThanOrEqual(largoDeFragmento + 2);
-        expect(texto.startsWith(fragmento.texto.slice(1, -2)), pagina).toBe(true);
+        const sinComillas = fragmento.texto.slice(1, -1);
+        expect([...sinComillas.replaceAll('\n', '')].length, pagina).toBeLessThanOrEqual(largoDeFragmento);
+        expect(cortaEnPalabra(sinComillas, texto), `${pagina}: ${sinComillas}`).toBe(true);
       }
     }
+  });
+
+  it('en todo listado y en el pie de la Página de Cita, cada fragmento con «…» corta tras una palabra entera', async () => {
+    const rutas = [
+      ...paginasDe('/tema/el-tiempo/'),
+      ...paginasDe(`/coleccion/${COLECCION}/`),
+      ...paginasDe('/autor/seneca/'),
+      '/autor/antonio-machado/',
+    ];
+    for (const autor of await readdir(join(proyecto, 'dist', 'obra'))) {
+      for (const obra of await readdir(join(proyecto, 'dist', 'obra', autor))) rutas.push(...paginasDe(`/obra/${autor}/${obra}/`));
+    }
+    const pies = [...sembradas.keys()].map((slug) => `/cita/${slug}/`);
+    let recortados = 0;
+    for (const ruta of [...rutas, ...pies]) {
+      const tarjetas = ruta.startsWith('/cita/') ? tarjetasDe(await html(ruta), ruta) : await tarjetasDeLaRuta(ruta);
+      for (const tarjeta of tarjetas) {
+        const fragmento = tarjeta.visibles[0].texto.slice(1, -1);
+        if (!fragmento.endsWith('…')) continue;
+        recortados += 1;
+        expect(cortaEnPalabra(fragmento, sembradas.get(tarjeta.slug)!.texto), `${ruta} · ${tarjeta.slug}: ${fragmento}`).toBe(true);
+      }
+    }
+    expect(recortados).toBeGreaterThan(0);
+  });
+
+  it('la Página de Cita de más de 110: título y metas recortados por palabra; `h1`, JSON-LD, lo copiado y la Imagen, íntegros', async () => {
+    const slug = 'antonio-machado-soledades-0';
+    const texto = sembradas.get(slug)!.texto;
+    expect([...texto].length).toBeGreaterThan(MAX_CARACTERES_DE_TITULO_Y_META);
+    const recorte = enUnaLinea(recortarPorPalabra(texto, MAX_CARACTERES_DE_TITULO_Y_META));
+    expect(recorte).toMatch(/[^\s,;:]…$/u);
+    expect(cortaEnPalabra(recorte, texto)).toBe(true);
+    const pagina = decodificar(await html(`/cita/${slug}/`));
+    expect(pagina.match(/<title>([^<]*)<\/title>/)![1]).toContain(`«${recorte}» — Antonio Machado`);
+    const meta = `${recorte} — Antonio Machado.`;
+    expect(pagina.match(/<meta name="description" content="([^"]*)"/)![1]).toBe(meta);
+    expect(pagina.match(/<meta property="og:description" content="([^"]*)"/)![1]).toBe(meta);
+    // Íntegros (NFR-12).
+    expect(pagina.match(/<h1[^>]*>([\s\S]*?)<\/h1>/)![1].replace(/<[^>]+>/g, '').replace(/\s+/g, ' ')).toContain(texto);
+    const ld = [...pagina.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)].map((m) => m[1]).join('\n');
+    expect(ld).toContain(`"text":${JSON.stringify(texto)}`);
+    expect(pagina.match(/data-texto-plano="([^"]*)"/)![1]).toContain(texto);
+    expect(pagina.match(/data-imagen[^>]*?data-texto="([^"]*)"/)![1]).toBe(texto);
+    expect(pagina.match(/data-compartir[^>]*?data-texto="([^"]*)"/)![1]).toContain(texto);
   });
 
   it('una Obra con `noindex` se nombra igual: «De la ira» en el Tema', async () => {
     const NOINDEX = /<meta name="robots" content="noindex, follow"/;
     expect(await html('/obra/seneca/de-la-ira/')).toMatch(NOINDEX);
     expect(await html('/obra/seneca/sobre-la-brevedad-de-la-vida/')).toMatch(NOINDEX);
-    const tarjetas = (await Promise.all(paginasDe('/tema/el-tiempo/').map(tarjetasDe))).flat();
+    const tarjetas = (await Promise.all(paginasDe('/tema/el-tiempo/').map(tarjetasDeLaRuta))).flat();
     expect(tarjetas.find((t) => t.slug === 'seneca-ira-0')?.visibles.at(-1)).toEqual({ clase: 'obra', texto: IRA });
     expect(tarjetas.find((t) => t.slug === 'seneca-brevedad-0')?.visibles.at(-1)).toEqual({
       clase: 'obra',

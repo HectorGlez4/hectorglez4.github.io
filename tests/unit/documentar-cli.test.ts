@@ -1,6 +1,6 @@
 import { afterAll, afterEach, describe, expect, it } from 'vitest';
 import { execFile } from 'node:child_process';
-import { mkdir, mkdtemp, readFile, readdir, rm, writeFile } from 'node:fs/promises';
+import { chmod, mkdir, mkdtemp, readFile, readdir, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { promisify } from 'node:util';
@@ -14,8 +14,8 @@ import {
   type CorpusDePrueba,
 } from './ayuda/construir.js';
 import { componerBiografia, componerDocumento } from '../../tools/lib/documento.ts';
-import { CENSO_DE_PARTIDA, FICHERO_DEL_CENSO } from '../../tools/lib/cotejo.ts';
-import { rutasDelCorpus } from '../../tools/lib/corpus.ts';
+import { CENSO_DE_PARTIDA, FICHERO_DEL_CENSO, colapsarEspacios } from '../../tools/lib/cotejo.ts';
+import { rutasDelCorpus, separarFrontmatter } from '../../tools/lib/corpus.ts';
 import { DE_EPICTETO, EN_LA_IRA, instantaneaDe, sembrarCorpusAlLimite } from './ayuda/al-limite.ts';
 
 const ejecutar = promisify(execFile);
@@ -492,5 +492,360 @@ describe('Historia 26.8 — documentar --retirar no deja una Cita fuera de alcan
     const rutas = await corpusAlLimite();
     const resultado = await correr(rutas.raiz, ['--retirar', 'seneca-a-001', 'No aparece en la edición.']);
     expect(resultado.codigo, resultado.error).toBe(0);
+  });
+});
+
+describe('Historia 29.1 — documentar escribe el verso del documento, no el tecleado (AD-29)', () => {
+  const EN_VERSO = 'No es que tengamos poco tiempo,\nes que perdemos mucho.';
+  const documentoDeVerso = componerDocumento(
+    {
+      fuente: 'wikisource-es',
+      obra: OBRA,
+      año: AÑO,
+      lineas: 'verso',
+      url: 'https://es.wikisource.org/wiki/Sobre_la_brevedad_de_la_vida',
+      recuperado: '2026-08-21',
+    },
+    [OBRA, `Año de publicación: ${AÑO}`, `|autor=${AUTOR_DECLARADO}`].join('\n'),
+    CUERPO.replace(TEXTO, EN_VERSO),
+  );
+  const textoEscrito = async (corpus: string) =>
+    separarFrontmatter(await readFile(join(corpus, FICHERO), 'utf8'))?.texto;
+
+  it('de un documento de verso, la Cita toma sus saltos; el slug no cambia', async () => {
+    const corpus = await enDisco({ ...CORPUS, [DOCUMENTO]: documentoDeVerso });
+    const hecho = await correr(corpus, [SLUG, rutaDelDocumento(corpus)]);
+    expect(hecho.codigo, hecho.error).toBe(0);
+    expect(await textoEscrito(corpus)).toBe(EN_VERSO);
+    expect(`${hecho.salida}${hecho.error}`).toMatch(/toma 1 salto de verso/);
+    expect(separarFrontmatter(await readFile(join(corpus, FICHERO), 'utf8'))?.slug).toBe(SLUG);
+  });
+
+  it('con --texto, los saltos salen del documento y el tecleado sin respaldo se descarta', async () => {
+    const corpus = await enDisco({ ...CORPUS, [DOCUMENTO]: documentoDeVerso });
+    const hecho = await correr(corpus, [
+      SLUG,
+      rutaDelDocumento(corpus),
+      '--texto',
+      'No es que tengamos\npoco tiempo, es que perdemos mucho.',
+    ]);
+    expect(hecho.codigo, hecho.error).toBe(0);
+    expect(await textoEscrito(corpus)).toBe(EN_VERSO);
+    expect(`${hecho.salida}${hecho.error}`).toMatch(/salto tecleado no sobrevive/);
+  });
+
+  it('de un documento de prosa, en una línea, también con un \\n tecleado', async () => {
+    const corpus = await enDisco(CORPUS);
+    const hecho = await correr(corpus, [
+      SLUG,
+      rutaDelDocumento(corpus),
+      '--texto',
+      'No es que tengamos poco tiempo,\nes que perdemos mucho.',
+    ]);
+    expect(hecho.codigo, hecho.error).toBe(0);
+    expect(await textoEscrito(corpus)).toBe(TEXTO);
+    expect(`${hecho.salida}${hecho.error}`).toMatch(/salto tecleado no sobrevive/);
+  });
+
+  // Revisión 2: el parte dice que la Cita publicada pierde un salto que su documento no respalda.
+  it('una Cita publicada con un salto, documentada contra prosa, lo pierde y el parte lo dice', async () => {
+    const conSalto = citaValida({
+      slug: SLUG,
+      texto: EN_VERSO,
+      procedencia: { obra: 'De brevitate vitae' },
+      fuente: undefined,
+    });
+    const corpus = await enDisco({ ...CORPUS, [FICHERO]: conSalto });
+    const hecho = await correr(corpus, [SLUG, rutaDelDocumento(corpus)]);
+    expect(hecho.codigo, hecho.error).toBe(0);
+    expect(await textoEscrito(corpus)).toBe(TEXTO);
+    expect(`${hecho.salida}${hecho.error}`).toMatch(/pierde 1 salto de verso que su documento no respalda/);
+  });
+
+  // Revisión 2: sin poder leer corpus/fuentes/ no se sabe de qué documento salen los saltos.
+  it('si corpus/fuentes/ no se deja leer, sale con 1 y no escribe ni la Cita ni el censo', async () => {
+    const corpus = await enDisco(CORPUS);
+    await mkdir(join(corpus, 'fuentes', 'wikisource-es--ilegible.txt'));
+    const antes = instantaneaDeDocumentar(corpus);
+    const hecho = await correr(corpus, [SLUG, rutaDelDocumento(corpus)]);
+    expect(hecho.codigo).toBe(1);
+    expect(`${hecho.salida}${hecho.error}`).toMatch(/corpus\/fuentes\/ no se deja leer/);
+    expect(await instantaneaDeDocumentar(corpus)).toEqual(await antes);
+  });
+});
+
+async function instantaneaDeDocumentar(corpus: string) {
+  return {
+    cita: await readFile(join(corpus, FICHERO), 'utf8'),
+    censo: await readFile(join(corpus, FICHERO_DEL_CENSO), 'utf8'),
+  };
+}
+
+describe('Historia 29.2 — --restituir-saltos', () => {
+  const FIXTURES = join(RAIZ, 'tests/unit/ayuda/lineas');
+  const MARTI_DOC = 'fuentes/wikisource-es--versos-sencillos--versos-sencillos-i.txt';
+  const OTRA_DE_MARTI = 'fuentes/wikisource-es--versos-sencillos--otra.txt';
+  const AVARIENTO_DOC = 'fuentes/wikisource-es--a-un-avariento.txt';
+  const MARTI = 'citas/jose-marti--yo-vengo-de-todas-partes.md';
+  const AVARIENTO = 'citas/francisco-de-quevedo--un-hombre-rico-avariento.md';
+  const PROSA = 'citas/seneca--no-es-que-tengamos-poco-tiempo-es-prosa.md';
+  const TRAMO = 'citas/jose-marti--yo-vengo-de-todas-partes-solo.md';
+  const CONFLICTO = 'citas/jose-marti--yo-se-los-nombres.md';
+  const RARO = 'citas/jose-marti--y-de-mortales-enganos.md';
+  const AJENA = '_revision/jose-marti--esto-no-esta-en-el-poema.md';
+  /** Una candidata de antes de la 29.1, en una línea, que su documento de verso restituye. */
+  const CANDIDATA = '_revision/jose-marti--yo-vengo-candidata.md';
+  const ROOT = process.getuid?.() === 0;
+
+  const EN_UNA_LINEA =
+    'Yo vengo de todas partes, Y hacia todas partes voy: Arte soy entre las artes, En los montes, monte soy.';
+  const EN_VERSO =
+    'Yo vengo de todas partes,\nY hacia todas partes voy:\nArte soy entre las artes,\nEn los montes, monte soy.';
+
+  const deMarti = (slug: string, texto: string, obra = 'Versos sencillos') =>
+    citaValida({
+      slug,
+      texto,
+      autor: 'jose-marti',
+      procedencia: { obra },
+      fuente: { id: 'wikisource-es', url: 'https://es.wikisource.org/wiki/Versos_sencillos/I' },
+    });
+
+  async function corpusDeVerso(): Promise<CorpusDePrueba> {
+    return {
+      ...CORPUS,
+      [MARTI_DOC]: await readFile(join(FIXTURES, 'wikisource-es--versos-sencillos--versos-sencillos-i.txt'), 'utf8'),
+      [AVARIENTO_DOC]: await readFile(join(FIXTURES, 'wikisource-es--a-un-avariento.txt'), 'utf8'),
+      [OTRA_DE_MARTI]: componerDocumento(
+        {
+          fuente: 'wikisource-es',
+          obra: 'Versos sencillos',
+          lineas: 'verso',
+          url: 'https://es.wikisource.org/wiki/Versos_sencillos/Otra',
+          recuperado: '2026-11-08',
+        },
+        'Versos sencillos/Otra',
+        'Yo sé los nombres extraños De las yerbas y las flores,\nUno\nDos\nTres\nCuatro',
+      ),
+      [MARTI]: deMarti('jose-marti-yo-vengo-de-todas-partes', EN_UNA_LINEA),
+      [AVARIENTO]: citaValida({
+        slug: 'francisco-de-quevedo-un-hombre-rico-avariento',
+        texto: 'Un hombre rico avariento. Murió con cien mil dolores',
+        autor: 'francisco-de-quevedo',
+        procedencia: { obra: 'A un avariento' },
+        fuente: { id: 'wikisource-es', url: 'https://es.wikisource.org/wiki/A_un_avariento' },
+      }),
+      // Documento en prosa: el de Séneca, que no es de verso.
+      [PROSA]: citaValida({
+        slug: 'seneca-no-es-que-tengamos-poco-tiempo-es-prosa',
+        texto: TEXTO,
+        procedencia: { obra: OBRA },
+        fuente: { id: 'wikisource-es', url: 'https://es.wikisource.org/wiki/Sobre_la_brevedad_de_la_vida' },
+      }),
+      [TRAMO]: deMarti('jose-marti-yo-vengo-solo', 'Yo vengo de todas partes,'),
+      [CONFLICTO]: deMarti('jose-marti-yo-se-los-nombres', 'Yo sé los nombres extraños De las yerbas y las flores,'),
+      // Un fichero escrito a mano, con el texto entre comillas simples: no es la línea de `aYaml`.
+      [RARO]:
+        "---\ntexto: 'Y de mortales engaños, Y de sublimes dolores.'\nautor: jose-marti\n" +
+        'slug: jose-marti-y-de-mortales-enganos\nprocedencia:\n  obra: Versos sencillos\n' +
+        'fuente:\n  id: wikisource-es\n  url: https://es.wikisource.org/wiki/Versos_sencillos/I\n---\n',
+      [AJENA]: deMarti('jose-marti-esto-no-esta-en-el-poema', 'Esto no está en el poema.'),
+      [CANDIDATA]: deMarti('jose-marti-yo-vengo-candidata', EN_UNA_LINEA),
+    };
+  }
+
+  async function instantanea(corpus: string) {
+    const todo = await leerCorpus(corpus);
+    return todo;
+  }
+
+  it('en seco: el parte entero y nada escrito', async () => {
+    const corpus = await enDisco(await corpusDeVerso());
+    const antes = await instantanea(corpus);
+    const hecho = await correr(corpus, ['--restituir-saltos', '--seco']);
+    expect(hecho.codigo, hecho.error).toBe(0);
+    expect(await instantanea(corpus)).toEqual(antes);
+    const parte = hecho.salida;
+    expect(parte).toMatch(/Ganarían saltos: 2, de 2 documentos \(verso: 1, verso-espaciado: 1\)/);
+    expect(parte).toContain('jose-marti-yo-vengo-de-todas-partes — corpus/fuentes/wikisource-es--versos-sencillos--versos-sencillos-i.txt, 4 versos');
+    expect(parte).toMatch(/sin documento: 2/); // las dos censadas
+    expect(parte).toMatch(/documento en prosa: 1 \(indeterminada: 1\)/);
+    expect(parte).toMatch(/documento sin saltos en su tramo: 1/);
+    expect(parte).toMatch(/no se localiza en su documento: 1/); // la candidata ajena
+    // Las candidatas, en su bloque: la que su documento de verso restituye, contada aparte.
+    const candidatas = parte.slice(parte.indexOf('Candidatas de revisión:'));
+    expect(candidatas).toMatch(/^Candidatas de revisión:\n {2}Ganarían saltos: 1, de 1 documento \(verso: 1\)\./u);
+    expect(parte).toContain('jose-marti-yo-se-los-nombres: sus documentos de verso le dan saltos distintos');
+    expect(parte).toContain('corpus/fuentes/wikisource-es--versos-sencillos--otra.txt');
+    expect(parte).toContain('jose-marti-y-de-mortales-enganos');
+    expect(parte).toMatch(/no tiene una sola línea «texto:»/);
+    // Solo las publicadas fechan: la candidata no mueve ninguna superficie.
+    expect(parte).toContain('Cambian de fecha 2 Páginas de Cita y 1 listado (tema: 1).');
+    expect(parte).toContain('npx tsx tools/avisar.ts --ensayo --desde <A> --hasta <B>');
+    expect(parte).toContain('No se ha escrito nada.');
+  });
+
+  it('restituye solo la línea texto:, colapsa a lo mismo, y la segunda pasada no escribe nada', async () => {
+    const corpus = await enDisco(await corpusDeVerso());
+    const antes = await instantanea(corpus);
+    const hecho = await correr(corpus, ['--restituir-saltos']);
+    expect(hecho.codigo, hecho.error).toBe(0);
+    const despues = await instantanea(corpus);
+
+    expect(separarFrontmatter(despues[MARTI])?.texto).toBe(EN_VERSO);
+    expect(separarFrontmatter(despues[AVARIENTO])?.texto).toBe('Un hombre rico avariento.\nMurió con cien mil dolores');
+    expect(separarFrontmatter(despues[CANDIDATA])?.texto).toBe(EN_VERSO);
+    expect(hecho.salida).toMatch(/Candidatas de revisión:\n {2}Restituidas: 1,/u);
+    expect(hecho.salida).toMatch(/Cambian de fecha 2 Páginas de Cita/);
+    for (const fichero of [MARTI, AVARIENTO, CANDIDATA]) {
+      const viejas = antes[fichero].split('\n');
+      const nuevas = despues[fichero].split('\n');
+      expect(nuevas).toHaveLength(viejas.length);
+      const distintas = nuevas.map((l, i) => i).filter((i) => nuevas[i] !== viejas[i]);
+      expect(distintas).toHaveLength(1);
+      expect(nuevas[distintas[0]]).toMatch(/^texto: "/u);
+      const viejo = separarFrontmatter(antes[fichero])!;
+      const nuevo = separarFrontmatter(despues[fichero])!;
+      expect(colapsarEspacios(String(nuevo.texto))).toBe(colapsarEspacios(String(viejo.texto)));
+      expect(nuevo.slug).toBe(viejo.slug);
+    }
+    // Lo demás, byte a byte.
+    for (const fichero of Object.keys(antes).filter((f) => ![MARTI, AVARIENTO, CANDIDATA].includes(f))) {
+      expect(despues[fichero], fichero).toBe(antes[fichero]);
+    }
+    expect(Object.keys(despues).sort()).toEqual(Object.keys(antes).sort());
+
+    const otra = await correr(corpus, ['--restituir-saltos']);
+    expect(otra.codigo, otra.error).toBe(0);
+    expect(otra.salida).toMatch(/Ya restituidas, sin cambios: 2/);
+    expect(otra.salida).toMatch(/Candidatas de revisión:\n {2}Restituidas: 0\.\n {2}Ya restituidas, sin cambios: 1\./u);
+    expect(otra.salida).toContain('No se ha escrito nada.');
+    expect(await instantanea(corpus)).toEqual(despues);
+  });
+
+  it('con slugs: solo esos; uno en prosa sale con 0 y dice por qué', async () => {
+    const corpus = await enDisco(await corpusDeVerso());
+    const hecho = await correr(corpus, ['--restituir-saltos', 'seneca-no-es-que-tengamos-poco-tiempo-es-prosa']);
+    expect(hecho.codigo, hecho.error).toBe(0);
+    expect(hecho.salida).toMatch(/seneca-no-es-que-tengamos-poco-tiempo-es-prosa: se queda en una línea, documento en prosa \(indeterminada/);
+    const marti = await correr(corpus, ['--restituir-saltos', 'jose-marti-yo-vengo-de-todas-partes']);
+    expect(marti.codigo, marti.error).toBe(0);
+    expect(separarFrontmatter(await readFile(join(corpus, MARTI), 'utf8'))?.texto).toBe(EN_VERSO);
+    expect(separarFrontmatter(await readFile(join(corpus, AVARIENTO), 'utf8'))?.texto).not.toContain('\n');
+  });
+
+  it('un slug que no es de ninguna Cita, o una nombrada sin documento: 1 y nada escrito', async () => {
+    const corpus = await enDisco(await corpusDeVerso());
+    const antes = await instantanea(corpus);
+    const inexistente = await correr(corpus, ['--restituir-saltos', 'no-existe']);
+    expect(inexistente.codigo).toBe(1);
+    expect(inexistente.error).toContain('«no-existe»');
+    const sinDocumento = await correr(corpus, ['--restituir-saltos', SLUG, 'jose-marti-yo-vengo-de-todas-partes']);
+    expect(sinDocumento.codigo).toBe(1);
+    expect(sinDocumento.error).toMatch(/no tiene documento/);
+    expect(await instantanea(corpus)).toEqual(antes);
+  });
+
+  it('la forma de la invocación: 2 y nada escrito', async () => {
+    const corpus = await enDisco(await corpusDeVerso());
+    const antes = await instantanea(corpus);
+    for (const argumentos of [
+      ['--restituir-saltos', '--seco', '--seco'],
+      ['--restituir-saltos', '--restituir-saltos'],
+      ['--restituir-saltos', '--restituir-traduccion'],
+      ['--restituir-saltos', '--retirar', SLUG, 'motivo'],
+      ['--restituir-saltos', '--texto', 'algo'],
+      ['--restituir-saltos', '--frobnicar'],
+      ['--restituir-saltos', '--corpus', corpus],
+      ['--seco', SLUG, rutaDelDocumento(corpus)],
+    ]) {
+      const hecho = await correr(corpus, argumentos);
+      expect(hecho.codigo, argumentos.join(' ')).toBe(2);
+    }
+    expect(await instantanea(corpus)).toEqual(antes);
+  });
+
+  // Como root, `chmod` no impide escribir y la prueba no ejercitaría nada.
+  it.skipIf(ROOT)('si una escritura falla, lo ya escrito vuelve a su contenido original y sale con 1', async () => {
+    const corpus = await enDisco(await corpusDeVerso());
+    const antes = await instantanea(corpus);
+    // Las publicadas se escriben antes que las candidatas: la que falla es la candidata, así que
+    // las dos publicadas ya están escritas y tienen que volver atrás.
+    await chmod(join(corpus, CANDIDATA), 0o444);
+    try {
+      const hecho = await correr(corpus, ['--restituir-saltos']);
+      expect(hecho.codigo).toBe(1);
+      expect(hecho.error).toContain(`No se pudo escribir ${join(corpus, CANDIDATA)}`);
+      expect(hecho.error).toMatch(/Las 2 Citas ya escritas en esta pasada han vuelto a su contenido original: no queda nada escrito/);
+    } finally {
+      await chmod(join(corpus, CANDIDATA), 0o644);
+    }
+    expect(await instantanea(corpus)).toEqual(antes);
+  });
+
+  it.skipIf(ROOT)('un Corpus que no se deja leer: 1 y nada escrito', async () => {
+    const corpus = await enDisco(await corpusDeVerso());
+    const antes = await instantanea(corpus);
+    await chmod(join(corpus, MARTI), 0o000);
+    try {
+      const hecho = await correr(corpus, ['--restituir-saltos']);
+      expect(hecho.codigo).toBe(1);
+      expect(hecho.error).toMatch(/El Corpus no se deja leer/);
+      expect(hecho.error).toContain('No se ha escrito nada.');
+    } finally {
+      await chmod(join(corpus, MARTI), 0o644);
+    }
+    expect(await instantanea(corpus)).toEqual(antes);
+  });
+
+  it.skipIf(ROOT)('si las fechas no se pueden contar: 1 y nada escrito, porque se cuentan antes de escribir', async () => {
+    // Las Citas y los documentos se leen; solo falla lo que lee el recuento de AD-27 (los Autores).
+    const corpus = await enDisco(await corpusDeVerso());
+    const antes = await instantanea(corpus);
+    await chmod(join(corpus, 'autores/seneca.yml'), 0o000);
+    try {
+      const hecho = await correr(corpus, ['--restituir-saltos']);
+      expect(hecho.codigo).toBe(1);
+      expect(hecho.error).toMatch(/No se pueden contar las superficies/);
+      expect(hecho.error).toContain('No se ha escrito nada.');
+    } finally {
+      await chmod(join(corpus, 'autores/seneca.yml'), 0o644);
+    }
+    expect(await instantanea(corpus)).toEqual(antes);
+  });
+
+  it('el Corpus restituido construye: la regla 4 la decide la misma función que la orden', async () => {
+    const DOC_DE_VERSO = componerDocumento(
+      {
+        fuente: 'wikisource-es',
+        obra: OBRA,
+        año: AÑO,
+        lineas: 'verso',
+        url: 'https://es.wikisource.org/wiki/Sobre_la_brevedad_de_la_vida',
+        recuperado: '2026-08-21',
+      },
+      [OBRA, `Año de publicación: ${AÑO}`, `|autor=${AUTOR_DECLARADO}`].join('\n'),
+      CUERPO.replace(TEXTO, 'No es que tengamos poco tiempo,\nes que perdemos mucho.'),
+    );
+    const corpus = await enDisco({
+      ...CORPUS,
+      [FICHERO]: citaValida({
+        slug: SLUG,
+        texto: TEXTO,
+        procedencia: { obra: OBRA, año: AÑO },
+        fuente: { id: 'wikisource-es', url: 'https://es.wikisource.org/wiki/Sobre_la_brevedad_de_la_vida' },
+      }),
+      [DOCUMENTO]: DOC_DE_VERSO,
+      [FICHERO_DEL_CENSO]: `citas:\n  - ${OTRA_CENSADA}\n`,
+    });
+    const rojo = await construir(await leerCorpus(corpus));
+    expect(rojo.codigo).not.toBe(0);
+    expect(rojo.salida).toContain(`npm run documentar -- --restituir-saltos ${SLUG}`);
+
+    const hecho = await correr(corpus, ['--restituir-saltos']);
+    expect(hecho.codigo, hecho.error).toBe(0);
+    const verde = await construir(await leerCorpus(corpus));
+    expect(verde.salida).not.toMatch(/Regla incumplida/);
+    expect(verde.codigo, verde.salida).toBe(0);
   });
 });

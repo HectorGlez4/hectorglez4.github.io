@@ -1,5 +1,5 @@
 ---
-texto: "Viuirè con mi padre, y con mi dama, sin ser del vno y otro conocido, que se atreue a emprender tanto quien ama."
+texto: "Viuirè con mi padre, y con mi dama,\nsin ser del vno y otro conocido,\nque se atreue a emprender tanto quien ama."
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-viuire-con-mi-padre-y-con-mi"
 procedencia:

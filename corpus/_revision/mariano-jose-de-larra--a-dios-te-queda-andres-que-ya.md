@@ -1,5 +1,5 @@
 ---
-texto: "A Dios te queda, Andrés, que ya no puedo tanta bilis sufrir, ni tanta ira, y ¡ay de mí, triste, si a verterla quedo!"
+texto: "A Dios te queda, Andrés, que ya no puedo\ntanta bilis sufrir, ni tanta ira,\ny ¡ay de mí, triste, si a verterla quedo!"
 autor: "mariano-jose-de-larra"
 slug: "mariano-jose-de-larra-a-dios-te-queda-andres-que-ya"
 procedencia:

@@ -1,5 +1,5 @@
 ---
-texto: "De luto está cubierta Venezuela, Cundinamarca desolada gime, Quito sus hijos más ilustres llora."
+texto: "De luto está cubierta Venezuela,\nCundinamarca desolada gime,\nQuito sus hijos más ilustres llora."
 autor: "andres-bello"
 slug: "andres-bello-de-luto-esta-cubierta-venezuela-cundinamarca-desolada"
 procedencia:

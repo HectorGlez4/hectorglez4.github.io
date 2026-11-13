@@ -53,24 +53,12 @@ import {
 import { clavesDeOrden, ordenDeLaListaDeObras, porSlug as porSlugDeCita, rutaDeLaObra } from '../../src/lib/obras.ts';
 import { CITAS_POR_PAGINA, PAUSA_DE_TECLEO_MS, TANDA_DE_RESULTADOS } from '../../src/lib/umbrales.ts';
 import { conjuntoDeLosDatos, leerDatosDelCorpus } from '../../tools/lib/alcance.ts';
-import { leerDocumentosDeFuente, rutasDelCorpus } from '../../tools/lib/corpus.ts';
+import { leerDocumentosDeFuente, leerOrdenDeLosIndices, rutasDelCorpus } from '../../tools/lib/corpus.ts';
 import { posicionesDeCitas } from '../../tools/lib/posiciones.ts';
 import { emitidos as emitidosEn, espiarMedicion } from './ayuda/espia.ts';
+import { buscar } from './ayuda/buscar.ts';
 
 /** Historias 3.1 y 3.2 — búsqueda y resultado vacío. */
-
-/** Escribe la consulta y espera a que la lista se estabilice. */
-async function buscar(page: import('@playwright/test').Page, consulta: string) {
-  await page.goto('/buscar/');
-  await page.locator('[data-consulta]').fill(consulta);
-  await page.waitForFunction(
-    () =>
-      document.querySelector('[data-resultados]')!.children.length > 0 ||
-      !document.querySelector('[data-salida]')!.hasAttribute('hidden'),
-    undefined,
-    { timeout: 10_000 },
-  );
-}
 
 async function resultados(page: import('@playwright/test').Page) {
   return page.locator('[data-resultados] .resultado').evaluateAll((ns) =>
@@ -551,7 +539,9 @@ test.describe('Historia 26.2 — el tipo no casa como texto y la portada tiene e
     // Estas palabras salen en el contenido de muchas páginas, y la marca en el título que declara la portada.
     // «directorio» y «portada» pueden no salir en ningún contenido todavía (los Directorios son de
     // la 26.3), y por eso no se les exige resultado: su prueba es que ninguno salga por su tipo.
-    const vacios = ['obra', 'cita', 'autor', 'tema', 'colección', MARCA].filter((termino) => porTermino[termino].total === 0);
+    // «colección» tampoco: ninguna Cita del Corpus la dice, y sus resultados de antes eran Tarjetas
+    // de listado cortadas a media palabra («…en las co…»), que la 34.1 (UX-DR132) ya no deja.
+    const vacios = ['obra', 'cita', 'autor', 'tema', MARCA].filter((termino) => porTermino[termino].total === 0);
     expect(vacios, 'términos sin ningún resultado').toEqual([]);
   });
 
@@ -804,7 +794,7 @@ test.describe('Historia 27.1 — la Cita declara sus filtros y su resultado llev
       const datos = await leerDatosDelCorpus(rutas);
       const conjunto = conjuntoDeLosDatos(datos);
       const posiciones = posicionesDeCitas(datos.citas, await leerDocumentosDeFuente(rutas));
-      return { conjunto, porObra: citasPorObra(conjunto.citas, posiciones) };
+      return { conjunto, porObra: citasPorObra(conjunto.citas, posiciones, await leerOrdenDeLosIndices(rutas)) };
     })());
 
   const recuentos = (opciones: readonly { valor: string; recuento: number }[]) =>
@@ -957,7 +947,7 @@ test.describe('Historia 27.1 — la Cita declara sus filtros y su resultado llev
     return page.evaluate(() => {
       const sonda = document.createElement('span');
       sonda.style.cssText =
-        'font-family: var(--sans); font-size: var(--autor); font-weight: 600; text-transform: uppercase; color: var(--tinta-apagada)';
+        'font-family: var(--sans); font-size: var(--autor); font-weight: var(--peso-fuerte); text-transform: uppercase; color: var(--tinta-apagada)';
       const serif = document.createElement('span');
       serif.style.fontFamily = 'var(--serif)';
       document.body.append(sonda, serif);

@@ -1,5 +1,5 @@
 ---
-texto: "Crecio este pequeño mar 65 el año, que se contauan mil y seiscientos y cinco, hasta entrarse por las casas."
+texto: "Crecio este pequeño mar 65\nel año, que se contauan\nmil y seiscientos y cinco,\nhasta entrarse por las casas."
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-crecio-este-pequeno-mar-65-el-ano"
 procedencia:

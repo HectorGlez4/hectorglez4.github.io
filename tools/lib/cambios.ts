@@ -32,8 +32,13 @@
  * falla nombrándolo mientras no lo esté.
  *
  *   · **Página de Cita** — su fichero, su Autor (nombre y años: título, meta, JSON-LD y Tarjeta
- *     de Obra), sus Temas (el nombre de cada chip) y su ficha de Obra (el título de la
- *     Atribución y del `isPartOf`). **Nunca Citas hermanas**: la Tarjeta de Obra (24.4) pinta
+ *     de Obra; y, desde la 30.3, el nombre de «Cómo citar», que una clave revisada invierte:
+ *     `NOMBRE_EN_REFERENCIA`), sus Temas (el nombre de cada chip), su ficha de Obra (el título de la
+ *     Atribución y del `isPartOf` y, desde la 31.2, sus `formas`) y, desde la 31.2, **los
+ *     documentos de su Obra** —la unión de `documentosDeCita` de sus Citas vivas, con su índice de
+ *     subpáginas—, de los que sale «Lee el pasaje»; una Cita sin Obra, solo los suyos. Recuperar
+ *     una página nueva de una Obra fecha así sus Páginas de Cita a sabiendas: puede darles pasaje.
+ *     **Nunca los ficheros de Citas hermanas**: la Tarjeta de Obra (24.4) pinta
  *     el año, el recuento y si hay edición cotejada de la Obra, «Siguiente…» (24.5) depende del
  *     orden del libro y del listado del Tema, y las Rutas de salida del pie (24.6) pintan textos,
  *     Obras y recuentos de otras Citas. Todo eso es navegación y, por excepción declarada de
@@ -43,8 +48,10 @@
  *     línea de Obra de cada tarjeta, 24.3, y de la Lista de Obras del Autor). Son listados: si
  *     entra una Cita nueva en un Tema, la página cambió aunque el fichero del Tema no se toque.
  *   · **Página de Obra** — su ficha, sus Citas, su Autor y **sus documentos**: la unión de
- *     `documentosDeCita` de sus Citas sobre los nombres de `corpus/fuentes/`. Un documento no se
- *     analiza: cualquier cambio suyo puede reordenar la Obra, y solo fecha esa página.
+ *     `documentosDeCita` de sus Citas sobre los nombres de `corpus/fuentes/`, y el índice de
+ *     subpáginas que los ordena (`{fuente}--{obra}.indice.yml`, Historia 24.9). Un documento no se
+ *     analiza: cualquier cambio suyo puede reordenar la Obra —y, desde la 31.2, cambiar el pasaje
+ *     de sus Citas—, y fecha esa página y sus Páginas de Cita.
  *   · **Directorio de Autores** (Historia 26.3) — lo que pinta: de cada Autor con alguna Cita, el
  *     nombre, los años y la clave de orden (`ordenAlfabetico`), que lo ordena y lo agrupa; de cada
  *     Cita, solo su `autor`, porque el Directorio cuenta Citas por Autor: un alta, una baja o un
@@ -108,7 +115,9 @@ import {
   rutaNormalizada,
 } from '../../src/lib/superficies.ts';
 import { formaDeObra, rutaDeLaObra } from '../../src/lib/obras.ts';
-import { documentosDeCita } from './cotejo.ts';
+import { ESTILOS_DE_REFERENCIA, nombreEnReferencia } from '../../src/lib/atribucion.ts';
+import { documentoDeCita, documentosDeCita } from './cotejo.ts';
+import { obraDeIndice } from './indice.ts';
 import type { FamiliaDeFichero, FamiliaDeRuta } from './avisar.ts';
 
 /**
@@ -158,8 +167,43 @@ export interface CambioDeFichero extends Transicion {
 /** Que cualquier cambio del fichero cuenta: el documento de Fuente en la Página de Obra. */
 export const CUALQUIER_CAMBIO: unique symbol = Symbol('cualquier cambio');
 
+/**
+ * Un campo que una superficie no pinta tal cual sino **derivado** de varios del fichero — Historia
+ * 30.3: el nombre invertido de «Cómo citar» sale de `nombre`, `ordenAlfabetico` y `ordenRevisado`.
+ * `de` son las claves del esquema que lee (las clasifica la prueba de la 24.8) y `valor` lo que la
+ * superficie pinta de ellas; `cambiaronLosCampos` compara ese valor como compara un campo.
+ */
+export interface CampoDerivado {
+  readonly derivado: string;
+  readonly de: readonly string[];
+  valor(version: Readonly<Record<string, unknown>>): unknown;
+}
+
+/** Un campo que se pinta: una clave —o un subcampo con punto— o un campo derivado. */
+export type Campo = string | CampoDerivado;
+
 /** Los campos que una superficie pinta de un fichero, o que le basta con que cambie. */
-export type Campos = typeof CUALQUIER_CAMBIO | readonly string[];
+export type Campos = typeof CUALQUIER_CAMBIO | readonly Campo[];
+
+/**
+ * El nombre del Autor en las tres Referencias de «Cómo citar» — Historia 30.3, AD-27. Lo pinta la
+ * Página de Cita con `nombreEnReferencia` de `src/lib/atribucion.ts`, la misma función que aquí:
+ * revisar una clave que es palabra del nombre lo invierte («Martí, J.») y cambia la página; un lote
+ * de `proponer-claves` sin revisar no cambia ninguna Referencia y no la fecha.
+ */
+export const NOMBRE_EN_REFERENCIA: CampoDerivado = {
+  derivado: 'nombreEnReferencia',
+  de: ['nombre', 'ordenAlfabetico', 'ordenRevisado'],
+  valor: (version) =>
+    typeof version.nombre !== 'string'
+      ? version.nombre
+      : ESTILOS_DE_REFERENCIA.map((estilo) =>
+          nombreEnReferencia(
+            { nombre: version.nombre as string, ordenAlfabetico: version.ordenAlfabetico, ordenRevisado: version.ordenRevisado },
+            estilo,
+          ),
+        ),
+};
 
 /**
  * Si una transición cambió alguno de los campos dados — **la** regla de AD-27.
@@ -178,8 +222,9 @@ export function cambiaronLosCampos(transicion: Transicion, campos: Campos): bool
   return campos.some((campo) => canonica(valorDelCampo(antes, campo)) !== canonica(valorDelCampo(despues, campo)));
 }
 
-/** El valor de un campo —o de un subcampo con punto— de una versión; ausente si no está. */
-function valorDelCampo(version: Readonly<Record<string, unknown>>, campo: string): unknown {
+/** El valor de un campo —o de un subcampo con punto, o uno derivado— de una versión; ausente si no está. */
+function valorDelCampo(version: Readonly<Record<string, unknown>>, campo: Campo): unknown {
+  if (typeof campo !== 'string') return campo.valor(version);
   return campo
     .split('.')
     .reduce<unknown>(
@@ -265,7 +310,7 @@ export const CAMPOS_QUE_PINTA = {
     directorioDeObras: ['autor', 'procedencia.obra', 'procedencia.año'],
   },
   autor: {
-    cita: CAMPOS_DEL_AUTOR_FUERA,
+    cita: [...CAMPOS_DEL_AUTOR_FUERA, NOMBRE_EN_REFERENCIA],
     autor: [...CAMPOS_DEL_AUTOR_FUERA, 'semblanza', 'biografia'],
     tema: CAMPOS_DEL_AUTOR_FUERA,
     coleccion: CAMPOS_DEL_AUTOR_FUERA,
@@ -281,7 +326,9 @@ export const CAMPOS_QUE_PINTA = {
     coleccion: ['nombre', 'criterio', 'miembros'],
   },
   obra: {
-    cita: ['titulo'],
+    // Historia 31.2 — las `formas` deciden qué Citas son de la Obra y, con ellas, qué documentos
+    // componen el pasaje de cada Página de Cita.
+    cita: ['titulo', 'formas'],
     autor: ['titulo'],
     tema: ['titulo'],
     coleccion: ['titulo'],
@@ -289,6 +336,8 @@ export const CAMPOS_QUE_PINTA = {
     directorioDeObras: ['titulo', 'formas'],
   },
   documento: {
+    // Historia 31.2 — el pasaje de la Página de Cita sale de los documentos de su Obra.
+    cita: CUALQUIER_CAMBIO,
     obra: CUALQUIER_CAMBIO,
   },
 } as const satisfies Record<FamiliaDeFichero, Partial<Record<Columna, Campos>>>;
@@ -301,16 +350,17 @@ export const CAMPOS_QUE_PINTA = {
  *   · `estadoDerechos` es una puerta de admisión, no un texto publicado;
  *   · `tradicion` es del suelo del 40 % de tradición latinoamericana (§6.1);
  *   · `distintaDe` solo silencia un aviso del build (22.2).
- *   · `ordenRevisado` (26.1) solo dice que una persona revisó la clave: no lo pinta ninguna
- *     superficie, nunca. La clave, `ordenAlfabetico`, sí: la pintan los dos Directorios (26.3,
- *     26.4), y por eso está en la tabla y no aquí.
+ *   · `ordenRevisado` (26.1) estuvo aquí hasta la 30.3: desde entonces decide si la Página de
+ *     Cita invierte el nombre del Autor en «Cómo citar», y entra en la tabla por el campo
+ *     derivado `NOMBRE_EN_REFERENCIA`, nunca como clave suelta (`proponer-claves` sin revisar no
+ *     cambia ninguna Referencia).
  *
  * Está escrita para que un campo no fechable sea una decisión con nombre y no un olvido: la
  * prueba de clasificación exige que cada clave de los esquemas esté aquí o en la tabla.
  */
 export const CAMPOS_QUE_NO_FECHAN = {
   cita: ['aptaParaPortada', 'estadoDerechos'],
-  autor: ['tradicion', 'ordenRevisado'],
+  autor: ['tradicion'],
   obra: ['distintaDe'],
 } as const satisfies Partial<Record<FamiliaDeFichero, readonly string[]>>;
 
@@ -438,10 +488,17 @@ export function relacionDeSuperficies(corpus: CorpusParaFechar): Map<string, Sup
     if (vivos.has(ficha.ruta)) continue;
     for (const forma of ficha.formas ?? []) apilar(fichasDeBaja, clave(ficha.autor, forma), ficha.ruta);
   }
-  /** Los documentos, de hoy y de baja, por su nombre sin extensión. */
+  /**
+   * Los documentos, de hoy y de baja, por su nombre sin extensión; y aparte, los índices de
+   * subpáginas (Historia 24.9), por la Obra de los documentos que ordenan (`{fuente}--{obra}`):
+   * un índice no es un documento y no casa con ninguna Cita por prefijo.
+   */
   const documentos = new Map<string, string[]>();
+  const indices = new Map<string, string[]>();
   for (const ruta of [...(corpus.documentos ?? []), ...(bajas.documentos ?? [])]) {
-    apilar(documentos, nombreDeDocumento(ruta), ruta);
+    const deIndice = obraDeIndice(ruta);
+    if (deIndice === undefined) apilar(documentos, nombreDeDocumento(ruta), ruta);
+    else apilar(indices, deIndice, ruta);
   }
 
   /** Las fichas de Obra cuyo título pinta una Cita viva: la suya y las de baja que la reclamaban. */
@@ -496,7 +553,34 @@ export function relacionDeSuperficies(corpus: CorpusParaFechar): Map<string, Sup
     if (cita.obra !== undefined) apilar(citasDeObra, cita.obra, cita);
   }
 
-  // La Página de Cita: su fichero, su Autor, sus Temas y su ficha de Obra. Nunca sus hermanas.
+  /**
+   * Los ficheros de `corpus/fuentes/` de unas Citas: la unión de `documentosDeCita` de cada una
+   * y el índice de subpáginas que ordena los documentos de su obra (Historia 24.9), que compone
+   * como uno de ellos. Lo usan la Página de Obra y, desde la 31.2, la Página de Cita.
+   */
+  const documentosDeLasCitas = (citas: readonly CitaParaFechar[]): Set<string> => {
+    const ficheros = new Set<string>();
+    for (const cita of citas) {
+      if (cita.fuente === undefined) continue;
+      for (const nombre of documentosDeCita({ id: cita.fuente }, cita.obraDeclarada, documentos)) {
+        for (const documento of documentos.get(nombre) ?? []) ficheros.add(documento);
+      }
+      const corto = documentoDeCita({ id: cita.fuente }, cita.obraDeclarada);
+      for (const indice of corto === undefined ? [] : (indices.get(corto) ?? [])) ficheros.add(indice);
+    }
+    return ficheros;
+  };
+  /** Los documentos de cada Obra con Citas, calculados una vez para todas sus Páginas de Cita. */
+  const documentosDeObra = new Map<string, Set<string>>();
+  for (const [obra, citas] of citasDeObra) documentosDeObra.set(obra, documentosDeLasCitas(citas));
+
+  /*
+   * La Página de Cita: su fichero, su Autor, sus Temas y su ficha de Obra —el título y, desde la
+   * 31.2, las `formas`— y, desde la 31.2, **los documentos de su Obra** —los de todas sus Citas
+   * vivas, con su índice—, de los que sale su pasaje; sin Obra, solo los suyos. Nunca los ficheros
+   * de sus hermanas: un documento nuevo de la Obra puede darle pasaje, una Cita nueva no le cambia
+   * nada que afirme.
+   */
   for (const cita of corpus.citas) {
     const ruta = rutaDeCita(cita.slug);
     declarar(ruta, 'cita');
@@ -504,6 +588,9 @@ export function relacionDeSuperficies(corpus: CorpusParaFechar): Map<string, Sup
     componer(ruta, ficheroDeAutor.get(cita.autor), 'autor');
     for (const tema of cita.temas ?? []) componer(ruta, ficheroDeTema.get(tema), 'tema');
     for (const ficha of fichasDeLaCita(cita)) componer(ruta, ficha, 'obra');
+    const deSusDocumentos =
+      (cita.obra === undefined ? undefined : documentosDeObra.get(cita.obra)) ?? documentosDeLasCitas([cita]);
+    for (const documento of deSusDocumentos) componer(ruta, documento, 'documento');
   }
 
   // Los listados de Autor, Tema y Colección.
@@ -579,12 +666,8 @@ export function relacionDeSuperficies(corpus: CorpusParaFechar): Map<string, Sup
     componer(ruta, obra.ruta, 'obra');
     for (const cita of citas) componer(ruta, cita.ruta, 'cita');
     componer(ruta, ficheroDeAutor.get(obra.autor), 'autor');
-    for (const cita of citas) {
-      if (cita.fuente === undefined) continue;
-      for (const nombre of documentosDeCita({ id: cita.fuente }, cita.obraDeclarada, documentos)) {
-        for (const documento of documentos.get(nombre) ?? []) componer(ruta, documento, 'documento');
-      }
-    }
+    // Sus documentos, con el índice que los ordena (Historia 24.9) como uno de ellos.
+    for (const documento of documentosDeObra.get(obra.nombre) ?? []) componer(ruta, documento, 'documento');
   }
 
   /*

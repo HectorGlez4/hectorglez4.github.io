@@ -1,5 +1,5 @@
 ---
-texto: "Ahora, que ya las sabes, generosamente anima contra mi vida el acero, el valor contra mi vida; que ya para que me mates aquestos lazos te quitan mis manos; alguno de ellos mi cuello infeliz oprima."
+texto: "Ahora, que ya las sabes,\ngenerosamente anima\ncontra mi vida el acero,\nel valor contra mi vida;\nque ya para que me mates\naquestos lazos te quitan\nmis manos; alguno de ellos\nmi cuello infeliz oprima."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-ahora-que-ya-las-sabes-generosamente-anima"
 procedencia:

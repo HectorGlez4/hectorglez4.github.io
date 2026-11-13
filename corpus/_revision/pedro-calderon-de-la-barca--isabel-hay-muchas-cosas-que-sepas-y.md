@@ -1,5 +1,5 @@
 ---
-texto: "ISABEL: Hay muchas cosas que sepas, y es forzoso que al decirlas tu valor se irrite, y quieras vengarlas antes de oírlas."
+texto: "ISABEL: Hay muchas cosas que sepas,\ny es forzoso que al decirlas\ntu valor se irrite, y quieras\nvengarlas antes de oírlas."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-isabel-hay-muchas-cosas-que-sepas-y"
 procedencia:

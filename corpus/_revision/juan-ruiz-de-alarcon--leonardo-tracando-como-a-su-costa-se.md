@@ -1,5 +1,5 @@
 ---
-texto: "LEONARDO Traçando como a su costa se efetuase esta hazaña, que dos reales impuestos 125 en cada açumbre del dauan cada año cien mil ducados, que en el desague se gastan."
+texto: "LEONARDO\nTraçando como a su costa\nse efetuase esta hazaña,\nque dos reales impuestos 125\nen cada açumbre del dauan\ncada año cien mil ducados,\nque en el desague se gastan."
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-leonardo-tracando-como-a-su-costa-se"
 procedencia:

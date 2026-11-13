@@ -1,0 +1,54 @@
+---
+/**
+ * «Lee el pasaje» — Historia 31.2, FR-59, AD-28, AD-29, AD-30.
+ *
+ * El párrafo —o la estrofa, o los bloques contiguos que la Cita cruza— de la edición cotejada
+ * del que sale la Cita, literal, con las palabras de la Cita en `<mark>` y, debajo, la Línea de
+ * la Fuente con su licencia y el enlace a esa edición. Lo pinta solo la Página de Cita, dentro
+ * del primer `Desplegable` de su bloque, y solo cuando la Cita tiene pasaje: sin pasaje, quien
+ * lo usa no lo renderiza.
+ *
+ * No interpreta ningún salto: un `<p>` por párrafo y un `<br>` entre líneas, tal como los da
+ * `partesDelPasaje` desde los tramos que calculó `tools/lib/pasaje.ts`. Nunca recorta, resume,
+ * corrige ni completa el texto (NFR-12).
+ *
+ * Sin guion, sin `data-zona` ni `data-sin-zona` —su único enlace es de salida, a la edición—,
+ * sin `data-ingreso`. Queda fuera de Pagefind por el bloque que lo contiene (`all`).
+ *
+ * **Sin bloque `<style>`, a propósito.** Astro emite los estilos de un componente por el grafo
+ * de importaciones, no por lo que se dibuja: un `<style>` aquí entraría en la hoja de toda Página
+ * de Cita —también con `MAX_CARACTERES_DEL_PASAJE` en `undefined`, sin pasaje en ninguna—, y su
+ * nombre con huella cambiaría el HTML de las 4.424. La presentación va en
+ * `EstiloDeLeeElPasaje.astro`, que la página pone en la cabeza solo cuando pinta un pasaje.
+ */
+import type { PasajeDeAparicion } from '../lib/obras.ts';
+import type { Cita } from '../lib/publicado.ts';
+import { lineaDeLaFuenteDelPasaje } from '../lib/atribucion.ts';
+import { partesDelPasaje } from '../lib/pasaje.ts';
+
+interface Props {
+  pasaje: PasajeDeAparicion;
+  fuente: Cita['fuente'];
+  slug: string;
+}
+
+const { pasaje, fuente, slug } = Astro.props;
+
+/*
+ * Sin Fuente, o con una que no da rótulo, no se pinta un texto ajeno sin decir de dónde sale:
+ * `lineaDeLaFuenteDelPasaje` lanza y la construcción se para nombrando la Cita.
+ */
+const linea = lineaDeLaFuenteDelPasaje(fuente, slug);
+
+const partes = partesDelPasaje(pasaje);
+---
+
+<div class="pasaje">
+  {partes.map((lineas) => (
+    <p class="parrafo">{lineas.map((segmentos, n) => (<Fragment>{n > 0 && <br />}{segmentos.map((s) => (s.deLaCita ? <mark>{s.texto}</mark> : s.texto))}</Fragment>))}</p>
+  ))}
+  <p class="fuente-del-pasaje">
+    {linea.antes}<a href={linea.url} rel="noopener nofollow">{linea.rotulo}</a>{linea.despues}
+    {linea.licencia}
+  </p>
+</div>

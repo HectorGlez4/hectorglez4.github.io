@@ -1,5 +1,5 @@
 ---
-texto: "Veré lo que me aconseja que haga, cielos, en favor de mi vida y de mi honor."
+texto: "Veré lo que me aconseja\nque haga, cielos, en favor\nde mi vida y de mi honor."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-vere-lo-que-me-aconseja-que-haga"
 procedencia:

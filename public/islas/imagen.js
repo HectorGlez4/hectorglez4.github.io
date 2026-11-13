@@ -6,9 +6,8 @@
  * reescriba. Es lo que hace que la Página de Cita no descargue ni un byte de este fichero
  * mientras nadie pulse — que es lo que AD-6 pide para las islas caras, y esta lo es.
  *
- * AD-7 — se dibuja en el cliente. Las dos alternativas eran pregenerar unas seis mil
- * imágenes en el build o servirlas desde una función en servidor; la primera es
- * insostenible en peso y tiempo, y la segunda rompe el despliegue puramente estático.
+ * AD-7 — se dibuja en el cliente: pregenerar miles de imágenes es insostenible en peso y
+ * tiempo, y una función en servidor rompe el despliegue estático.
  *
  * AD-8 — el tamaño tipográfico **no se decide aquí**. Llega en `data-tamano` desde el
  * marcado, calculado por `src/lib/tramos.ts`, que es el mismo módulo que compone la
@@ -16,9 +15,14 @@
  * fichero descargado, que es exactamente lo que AD-8 impide.
  */
 
-/** Lienzo cuadrado: la proporción que aceptan todas las redes sin recortar. */
 const LADO = 1080;
 const MARGEN = 96;
+
+/** `franja`: donde se compone todo. Ver por qué en `ImagenDeCita.astro`. */
+export const FORMATOS = [
+  { id: 'cuadrado', nombre: 'Cuadrado', alto: LADO, franja: [0, LADO] },
+  { id: 'vertical', nombre: 'Vertical', alto: 1920, franja: [240, 1500] },
+];
 
 /**
  * Las tres plantillas de FR-11. Cambian el color y el adorno, **nunca el contenido**:
@@ -30,21 +34,25 @@ export const PLANTILLAS = [
   { id: 'siena', nombre: 'Siena', fondo: '#8c4a2f', tinta: '#ffffff', apagada: '#f7e3d8', filete: '#f7e3d8' },
 ];
 
-/** Parte el texto en líneas que quepan en el ancho dado. Nunca recorta: solo reparte. */
+/**
+ * Parte el texto en líneas que quepan en el ancho. Nunca recorta: solo reparte. Cada verso
+ * (`\n`) abre línea: dos versos no se unen nunca (29.3; aquí y no en `src/lib/verso.ts`
+ * porque este fichero no importa de `src/`).
+ */
 function repartirEnLineas(ctx, texto, anchoMaximo) {
   const lineas = [];
-  let actual = '';
-
-  for (const palabra of texto.split(/\s+/)) {
-    const tentativa = actual === '' ? palabra : `${actual} ${palabra}`;
-    if (ctx.measureText(tentativa).width <= anchoMaximo || actual === '') {
-      actual = tentativa;
-    } else {
-      lineas.push(actual);
-      actual = palabra;
+  for (const verso of texto.split('\n')) {
+    let actual = '';
+    for (const palabra of verso.split(/\s+/)) {
+      const tentativa = actual === '' ? palabra : `${actual} ${palabra}`;
+      if (ctx.measureText(tentativa).width <= anchoMaximo || actual === '') actual = tentativa;
+      else {
+        lineas.push(actual);
+        actual = palabra;
+      }
     }
+    if (actual !== '') lineas.push(actual);
   }
-  if (actual !== '') lineas.push(actual);
   return lineas;
 }
 
@@ -56,15 +64,17 @@ function repartirEnLineas(ctx, texto, anchoMaximo) {
  */
 export function dibujar(lienzo, datos) {
   const plantilla = PLANTILLAS.find((p) => p.id === datos.plantilla) ?? PLANTILLAS[0];
+  const formato = FORMATOS.find((f) => f.id === datos.formato) ?? FORMATOS[0];
+  const [arriba, abajo] = formato.franja;
   const ctx = lienzo.getContext('2d');
 
   lienzo.width = LADO;
-  lienzo.height = LADO;
+  lienzo.height = formato.alto;
 
   ctx.fillStyle = plantilla.fondo;
-  ctx.fillRect(0, 0, LADO, LADO);
+  ctx.fillRect(0, 0, LADO, formato.alto);
 
-  const anchoUtil = LADO - MARGEN * 2;
+  const anchoUtil = LADO - MARGEN * (formato.alto > LADO ? 3 : 2);
 
   // ── Texto de la Cita ──────────────────────────────────────────────────────
   const tamaño = datos.tamaño;
@@ -78,7 +88,8 @@ export function dibujar(lienzo, datos) {
 
   // Bloque de atribución: filete corto, autor y procedencia.
   const altoAtribucion = 24 + 34 + (datos.procedencia ? 30 : 0);
-  const inicio = Math.max(MARGEN, (LADO - altoTexto - altoAtribucion - 48) / 2);
+  const inicio =
+    arriba + Math.max(MARGEN, (abajo - arriba - altoTexto - altoAtribucion - 48) / 2);
 
   lineas.forEach((linea, i) => {
     ctx.fillText(linea, MARGEN, inicio + i * alturaLinea);
@@ -107,7 +118,7 @@ export function dibujar(lienzo, datos) {
   // por las redes con un nombre que el sitio ya no usa.
   ctx.fillStyle = plantilla.apagada;
   ctx.font = '600 20px Inter, system-ui, sans-serif';
-  ctx.fillText(datos.marca.toLocaleUpperCase('es'), MARGEN, LADO - MARGEN + 8);
+  ctx.fillText(datos.marca.toLocaleUpperCase('es'), MARGEN, abajo - MARGEN + 8);
 
   return lienzo;
 }
@@ -115,10 +126,9 @@ export function dibujar(lienzo, datos) {
 /**
  * El PNG del lienzo.
  *
- * Lo consumen la descarga y la compartición, y de ahí sale la propiedad que pide el
- * criterio: la imagen que se comparte y la que se descarga **son el mismo fichero**,
- * porque salen de la misma generación sobre el mismo lienzo. Dos caminos de generación
- * habrían podido divergir sin que nadie lo notara hasta comparar dos ficheros.
+ * Lo consumen la descarga y la compartición: la imagen que se comparte y la que se
+ * descarga **son el mismo fichero**, porque salen de la misma generación sobre el mismo
+ * lienzo. Dos caminos habrían podido divergir sin que nadie lo notara.
  */
 export function aBlob(lienzo) {
   return new Promise((resolver) => lienzo.toBlob(resolver, 'image/png'));

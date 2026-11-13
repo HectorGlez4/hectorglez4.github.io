@@ -1,5 +1,5 @@
 ---
-texto: "DON IUAN No os pudiera dar el cielo juez mas de vuestra mano."
+texto: "DON IUAN\nNo os pudiera dar el cielo\njuez mas de vuestra mano."
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-don-iuan-no-os-pudiera-dar-el"
 procedencia:

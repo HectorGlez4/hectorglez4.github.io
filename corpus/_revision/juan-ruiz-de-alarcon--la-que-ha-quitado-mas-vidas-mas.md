@@ -1,5 +1,5 @@
 ---
-texto: "La que ha quitado mas vidas, mas haziendas."
+texto: "La que ha quitado mas vidas,\nmas haziendas."
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-la-que-ha-quitado-mas-vidas-mas"
 procedencia:

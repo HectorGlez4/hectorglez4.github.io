@@ -1,5 +1,5 @@
 ---
-texto: "CRESPO: Si no creéis que es esto, señor, verdad, volved los ojos y vello."
+texto: "CRESPO: Si no creéis\nque es esto, señor, verdad,\nvolved los ojos y vello."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-crespo-si-no-creeis-que-es-esto"
 procedencia:

@@ -1,5 +1,5 @@
 ---
-texto: "CRESPO: Mis males son infinitos, y riñen todos por mí."
+texto: "CRESPO: Mis males son infinitos,\ny riñen todos por mí."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-crespo-mis-males-son-infinitos-y-rinen"
 procedencia:

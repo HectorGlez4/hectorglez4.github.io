@@ -1,5 +1,5 @@
 ---
-texto: "Aquí habemos llegado, Y dos los que del monte hemos rodado: ¿No es razón que yo sienta Meterme en el pesar, y no en la cuenta?"
+texto: "Aquí habemos llegado,\nY dos los que del monte hemos rodado:\n¿No es razón que yo sienta\nMeterme en el pesar, y no en la cuenta?"
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-aqui-habemos-llegado-y-dos-los-que"
 procedencia:

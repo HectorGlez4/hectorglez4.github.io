@@ -1,5 +1,5 @@
 ---
-texto: "A Micaela de Castro Favoreced y amparad, Que se come de Gabachos Y no se sabe espulgar."
+texto: "A Micaela de Castro\nFavoreced y amparad,\nQue se come de Gabachos\nY no se sabe espulgar."
 autor: "francisco-de-quevedo"
 slug: "francisco-de-quevedo-a-micaela-de-castro-favoreced-y-amparad"
 procedencia:

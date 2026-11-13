@@ -69,7 +69,12 @@ const { href, zona, avance } = Astro.props;
     padding-block: calc(var(--unidad) * 1.25);
     font-family: var(--sans);
     font-size: var(--cuerpo-md);
-    line-height: 1.4;
+    /*
+     * Historia 26.12 — excepción de DESIGN.md § Typography: el rótulo de la Fila de bloque toma el
+     * interlineado de `author` (1,4) y no el de su cuerpo. No es un descuido: la nombra, por fichero
+     * y selector, `tests/unit/tipografia-en-tokens.test.ts`.
+     */
+    line-height: var(--interlineado-autor);
     color: var(--tinta);
     text-decoration: none;
     /* Parte palabras antes que desbordar: `anywhere` y no `break-word`, porque en un elemento

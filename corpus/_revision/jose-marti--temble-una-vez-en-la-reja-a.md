@@ -1,5 +1,5 @@
 ---
-texto: "Temblé una vez -en la reja, A la entrada de la viña,- Cuando la bárbara abeja Picó en la frente a mi niña."
+texto: "Temblé una vez -en la reja,\nA la entrada de la viña,-\nCuando la bárbara abeja\nPicó en la frente a mi niña."
 autor: "jose-marti"
 slug: "jose-marti-temble-una-vez-en-la-reja-a"
 procedencia:

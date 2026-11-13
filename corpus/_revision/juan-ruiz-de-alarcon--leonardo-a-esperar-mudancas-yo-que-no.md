@@ -1,5 +1,5 @@
 ---
-texto: "LEONARDO A esperar mudanças yo, ¿que no hiziera, Iulia mia? 810 IULIA Pues haz lo que digo, y fia, que ya el desden se acabo."
+texto: "LEONARDO\nA esperar mudanças yo,\n¿que no hiziera, Iulia mia? 810\nIULIA\nPues haz lo que digo, y fia,\nque ya el desden se acabo."
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-leonardo-a-esperar-mudancas-yo-que-no"
 procedencia:

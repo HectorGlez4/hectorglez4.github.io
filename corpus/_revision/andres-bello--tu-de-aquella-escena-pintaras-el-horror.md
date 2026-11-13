@@ -1,5 +1,5 @@
 ---
-texto: "Tú de aquella escena pintarás el horror, tú que a las sombras belleza das, y al cuadro de la muerte sabes encadenar la mente absorta."
+texto: "Tú de aquella escena\npintarás el horror, tú que a las sombras\nbelleza das, y al cuadro de la muerte\nsabes encadenar la mente absorta."
 autor: "andres-bello"
 slug: "andres-bello-tu-de-aquella-escena-pintaras-el-horror"
 procedencia:

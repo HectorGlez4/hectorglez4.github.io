@@ -1,5 +1,5 @@
 ---
-texto: "Brillan las grandes molduras Al fuego de la mañana Que tiñe las colgaduras De rosa, violeta y grana."
+texto: "Brillan las grandes molduras\nAl fuego de la mañana\nQue tiñe las colgaduras\nDe rosa, violeta y grana."
 autor: "jose-marti"
 slug: "jose-marti-brillan-las-grandes-molduras-al-fuego-de"
 procedencia:

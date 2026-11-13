@@ -1,5 +1,5 @@
 ---
-texto: "Sus triunfos vuestro valor, Y su imperio el amor mio."
+texto: "Sus triunfos vuestro valor,\nY su imperio el amor mio."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-sus-triunfos-vuestro-valor-y-su-imperio"
 procedencia:

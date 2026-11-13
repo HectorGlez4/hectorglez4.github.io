@@ -1,5 +1,5 @@
 ---
-texto: "Mal habéis hecho en decir Finezas tan cortesanas."
+texto: "Mal habéis hecho en decir\nFinezas tan cortesanas."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-mal-habeis-hecho-en-decir-finezas-tan"
 procedencia:

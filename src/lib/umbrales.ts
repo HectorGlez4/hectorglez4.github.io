@@ -26,6 +26,43 @@ export const MIN_CITAS_POR_TEMA = 15;
 export const MAX_CARACTERES_IMAGEN = 300;
 
 /**
+ * Longitud máxima del pasaje de una Cita, en puntos de código — Historia 31.1, AD-30.
+ *
+ * El pasaje es el párrafo —o la estrofa— del documento cotejado del que sale la Cita, literal
+ * y entero. Por encima de esto no se ofrece: un pasaje nunca se recorta ni se resume, así que
+ * el que no cabe no está (`ofrecePasaje` de `tools/lib/pasaje.ts`, el único que lo decide; el
+ * borde, igual al tope, sí se ofrece). Se cuenta como `MAX_CARACTERES_IMAGEN`, por puntos de
+ * código y no por unidades UTF-16.
+ *
+ * **Nace en `undefined`, y con él no se ofrece ningún pasaje**: la puerta nace cerrada. Su
+ * valor lo da Héctor, en un diff visible (la propuesta es 1.200); ningún agente se lo da, y
+ * ninguna prueba fija su valor: pasan el tope por parámetro o lo parchean en una copia.
+ */
+export const MAX_CARACTERES_DEL_PASAJE: number | undefined = undefined;
+
+/**
+ * Tope del fragmento de la Tarjeta de Cita en los listados — UX-DR132, Historia 34.1.
+ *
+ * Puntos de código sin contar los saltos de verso, «…» incluido; solo lo rebasa una primera
+ * palabra que ya no cabe (sale entera). Lo aplica solo
+ * `recortarPorPalabra` de `src/lib/recorte.ts`, que corta en la última palabra entera: el
+ * listado resume la Cita, nunca la publica recortada (NFR-12). Literal, sin cálculo: este módulo
+ * viaja en el guion del filtro de los Directorios.
+ */
+export const MAX_CARACTERES_DE_TARJETA_DE_CITA = 120;
+
+/**
+ * Tope de la Cita en el título de pestaña y la meta descripción de la Página de Cita —
+ * UX-DR131, Historia 34.1.
+ *
+ * Se cuenta igual que el de la Tarjeta y lo aplica la misma función; el verso pasa a una línea
+ * (`enUnaLinea`) después de recortar, así que un título o una meta en verso lo rebasa en los
+ * « / » que suma (tres caracteres por salto que quede dentro), a propósito. Quien llega desde un buscador decide si entrar leyendo
+ * esto, así que lo que cabe va entero.
+ */
+export const MAX_CARACTERES_DE_TITULO_Y_META = 110;
+
+/**
  * Entradas por página en los listados de Autor, de Tema, de Colección y de Obra — FR-5.
  *
  * La Página de Obra (Historia 22.4) pagina con este mismo número y la misma `Paginacion`: un
@@ -162,6 +199,36 @@ export const DESPLIEGUE_DE_LA_LECTURA: string | undefined = '2026-10-25';
  */
 export const DESPLIEGUE_DE_LA_BUSQUEDA_CON_FILTROS: string | undefined = '2026-10-30';
 
+/**
+ * La llegada en vivo de «Citar y llevarse la Cita» — la Épica 30, AD-9, AD-13, Historia 30.1.
+ *
+ * Es la jornada UTC en que termina el trabajo «Desplegar» de Actions que lleva la Épica 30 al
+ * sitio en vivo —nunca la del merge—, con la misma forma que las de arriba: `undefined` mientras
+ * no haya llegado. **Le da valor Héctor, en un commit aparte (como la 23.11), y ningún agente la
+ * elige.**
+ *
+ * Con ella llega el orden nuevo de la Página de Cita —las acciones antes de la Tarjeta de Obra, y
+ * «Cómo citar» e «Inserta esta cita» detrás—, que cambia lo que miden la continuación de la Página
+ * de Cita (SM-4, y su complemento SM-3) y SM-C5: su entrada en `CORTES_DE_SERIE_DECLARADOS` parte
+ * solo la serie `continuacion-de-cita`, y el juicio de SM-C5 no compara ventanas a través de ella.
+ */
+export const DESPLIEGUE_DE_CITAR_Y_LLEVARSE: string | undefined = undefined;
+
+/**
+ * La llegada en vivo de «Lee el pasaje» — la Épica 31, AD-9, AD-13, Historia 31.2.
+ *
+ * Es la jornada UTC del **primer despliegue en que una Página de Cita enseña un pasaje en vivo**:
+ * el que sigue a que Héctor dé valor a `MAX_CARACTERES_DEL_PASAJE`, porque con el tope en
+ * `undefined` ninguna página lo pinta. **Nunca la del merge**: el merge publica la puerta cerrada.
+ * `undefined` mientras no haya llegado; **le da valor Héctor, en un commit aparte, y ningún
+ * agente la elige.**
+ *
+ * El pasaje entra en el bloque de desplegables de la Página de Cita, delante de «Cómo citar», y
+ * cambia lo que miden la continuación de la Página de Cita y SM-C5: su entrada en
+ * `CORTES_DE_SERIE_DECLARADOS` parte solo la serie `continuacion-de-cita`, como la de la 30.1.
+ */
+export const DESPLIEGUE_DEL_PASAJE: string | undefined = undefined;
+
 /*
  * Los cortes de serie de la medición — AD-9, AD-13, Historia 23.10.
  *
@@ -179,13 +246,23 @@ export const DESPLIEGUE_DE_LA_BUSQUEDA_CON_FILTROS: string | undefined = '2026-1
  * distinto motivo, son un solo «cambió».
  */
 
-/** Las series de la medición que un corte puede partir. */
-export type SerieDeMedicion = 'sm8' | 'lectura' | 'busqueda';
+/**
+ * Las series de la medición que un corte puede partir. `continuacion-de-cita` (Historia 30.1) es
+ * la continuación de la Página de Cita (SM-4 y SM-3) y SM-C5, y nada más: partir `lectura`
+ * partiría las tasas de lectura de todas las superficies. Se lee en la intersección de su tramo y
+ * del de `lectura`.
+ */
+export type SerieDeMedicion = 'sm8' | 'lectura' | 'busqueda' | 'continuacion-de-cita';
 
 /** Un corte de serie tal como se declara: su jornada es la de una constante de despliegue. */
 export interface CorteDeSerie {
   /** La jornada UTC de la llegada en vivo, `AAAA-MM-DD`; `undefined` mientras no haya llegado. */
   readonly jornada: string | undefined;
+  /**
+   * El nombre de la constante de la que sale `jornada` (Historia 31.2): con él se nombra la línea
+   * base que abre y un juicio declara las llegadas que lo parten.
+   */
+  readonly deDondeLlega: string;
   /** Qué cambió, como lo nombra el informe. */
   readonly que: string;
   /** Las series que parte. */
@@ -201,18 +278,34 @@ export interface CorteLlegado extends CorteDeSerie {
  * La lista declarada, en el orden en que se escribió: cada jornada es una constante de arriba.
  * La de la Épica 23 parte SM-8 —la marca se cuenta una vez por llegada y la vista sale del fichero
  * diferido—, la serie de la lectura y la de la búsqueda, que empiezan con ella; la de la 24 con la
- * 26 parte SM-8, porque los Directorios emiten vista.
+ * 26 parte SM-8, porque los Directorios emiten vista; la de la 30 parte solo la continuación de la
+ * Página de Cita y SM-C5 (Historia 30.1), y la del pasaje de la 31, lo mismo (Historia 31.2).
+ * Cada entrada nombra su constante en `deDondeLlega`, y una prueba lo coteja con su `jornada:`.
  */
 export const CORTES_DE_SERIE_DECLARADOS: readonly CorteDeSerie[] = [
   {
     jornada: DESPLIEGUE_DE_LA_LECTURA,
+    deDondeLlega: 'DESPLIEGUE_DE_LA_LECTURA',
     que: 'la llegada de la Épica 23 (la lectura, las marcas contadas una vez, las salidas y la búsqueda asentada)',
     series: ['sm8', 'lectura', 'busqueda'],
   },
   {
     jornada: DESPLIEGUE_DE_OBRA_Y_DIRECTORIOS,
+    deDondeLlega: 'DESPLIEGUE_DE_OBRA_Y_DIRECTORIOS',
     que: 'la llegada de la Tarjeta de Obra con los Directorios (Épicas 24 y 26)',
     series: ['sm8'],
+  },
+  {
+    jornada: DESPLIEGUE_DE_CITAR_Y_LLEVARSE,
+    deDondeLlega: 'DESPLIEGUE_DE_CITAR_Y_LLEVARSE',
+    que: 'el orden nuevo de la Página de Cita: las acciones antes de la Tarjeta de Obra, con “Cómo citar” e “Inserta esta cita” detrás',
+    series: ['continuacion-de-cita'],
+  },
+  {
+    jornada: DESPLIEGUE_DEL_PASAJE,
+    deDondeLlega: 'DESPLIEGUE_DEL_PASAJE',
+    que: '“Lee el pasaje” en la Página de Cita',
+    series: ['continuacion-de-cita'],
   },
 ];
 
@@ -334,6 +427,18 @@ export const MAX_CITAS_RELACIONADAS = 4;
 export const MAX_CITAS_DE_LA_MISMA_OBRA = 3;
 
 /**
+ * Obras que la Lista de Obras de la Página de Autor enseña antes de las Citas — UX-DR130, FR-4,
+ * AD-9, Historia 34.2. Valor de Héctor del 2026-11-05.
+ *
+ * Con más, la Lista pinta las primeras y pliega el resto en un Desplegable cerrado («Y {m} obras
+ * más», `rotuloDeObrasPlegadas`), para que la primera Cita no quede pantallas abajo (Rafael
+ * Barrett, con su Lista entera, la dejaba a unos 3.249 px a 360 × 640). `/obras/` no se pliega nunca.
+ * Moverlo lo decide Héctor, en un diff visible. Literal: el filtro de los Directorios importa este
+ * módulo y un cálculo aquí engordaría su guion.
+ */
+export const MAX_OBRAS_ANTES_DE_LAS_CITAS = 3;
+
+/**
  * Saltos de enlace interno desde la portada en los que toda superficie publicada debe
  * alcanzarse — NFR-5, AD-11 extendido.
  *
@@ -425,8 +530,19 @@ export const META_AUTORES_DE_OTRA_TRADICION: number | undefined = undefined;
  * `src/components/Busqueda.astro`, que se descarga aparte y se mide con su propio tope,
  * `MAX_BYTES_GUION_DE_LA_BUSQUEDA`. La superficie más justa vuelve a ser la Página de Cita con
  * Imagen.
+ *
+ * Subido de 6656 a 7680 en la Historia 30.3, con la medida: la isla de Copiar atiende también
+ * «Cómo citar» —escribe la fecha de consulta del visitante con `fechaDeConsulta`, que viaja por
+ * su texto, enseña los tres botones y copia cada Referencia—, y su guion pasa de 1.138 a 2.738
+ * bytes. La Página de Cita con Imagen y la medición puesta pasa de **5.651 a 7.251 bytes**
+ * (+1.600; medido en `tests/unit/medicion.test.ts`, «la Página de Cita no pierde su listón»).
+ * Antes de subirlo se compactó lo nuevo —nombres cortos, sin sangría ni plantillas anidadas— desde
+ * 7.590, y el tope nuevo dejaba 429 de margen, el criterio de la v2. La revisión 1 de la 30.3 le
+ * sumó 83 bytes (la fecha en cada pulsación, la etiqueta por `querySelector` y el dueño de la
+ * región): la página queda en unos **7.334 bytes**, con unos **346** de margen. La 30.4, que añade
+ * «Copiar el fragmento» a la misma isla, lo vuelve a medir.
  */
-export const MAX_BYTES_DE_GUION = 6656;
+export const MAX_BYTES_DE_GUION = 7680;
 
 /*
  * Los topes de la lista cerrada de guiones externos — AD-6, AD-9, Historia 23.1.
@@ -505,6 +621,11 @@ export const MAX_BYTES_DE_GUION = 6656;
  * coteja, el evento en la lista de vistas que salen de `data-vistas`, y la lectura de la marca del
  * atributo del `<html>` una vez al activarse, que solo viaja con la vista que declara la página. Con
  * ella el fichero emite ya todo el vocabulario.
+ *
+ * Medido de nuevo en la fase B de la Historia 30.5: **3.700 bytes** con el punto final de producción
+ * (3.701 con la barra final; 3.652 con `http://localhost:8787/`), 53 sobre los 3.647 de la 23.9 y
+ * 30 de margen, así que el tope no se mueve. Creció por las dos entradas sin campos de las acciones
+ * de citar, `copiado-de-referencia` y `copiado-de-fragmento`, en la tabla.
  */
 export const MAX_BYTES_GUION_DE_MEDICION = 3730;
 
@@ -852,6 +973,23 @@ export const AVISO_DE_RANGO_DE_LA_CLAVE_DE_ORDEN: number | undefined = undefined
  * día, nunca troceado—. Si el proyecto pasa al plan de pago, cambia aquí y en ningún otro sitio.
  */
 export const CUOTA_DE_FILAS_ESCRITAS_POR_DIA_EN_D1 = 100_000;
+
+/**
+ * Filas que D1 deja leer al día en el plan gratuito, **por cuenta** — AD-9, AD-14, Historia 23.13.
+ *
+ * La tercera cuota de «Cuotas del receptor» de la espina, y tampoco la decide el proyecto: 5
+ * millones. **Es de la cuenta, no de una base**: D1 suma las filas leídas de todas las bases de la
+ * cuenta de Cloudflare, y `d1 info` da solo las de la medición. Por eso la cuenta aloja una sola
+ * base D1, la de la medición (Héctor, 2026-10-31), y crear otra reabre la regla. Cada índice que
+ * una consulta recorre cuenta también. Pasada, las consultas fallan hasta las 00:00 UTC.
+ *
+ * La juzgan, antes de leer más que el `COUNT(*)` que da las filas de la tabla, las tres órdenes de
+ * `tools/` que recorren `eventos` —`npm run medicion` (la lectura), `desplegar` y `comprobar`—,
+ * con el juez de `tools/lib/medicion.ts`: si no cabe su coste más otro tanto de lo leído en 24 h,
+ * salen con 1 y se repiten otro día. Si el proyecto pasa al plan de pago, cambia aquí, en un diff
+ * visible, y en ningún otro sitio.
+ */
+export const CUOTA_DE_FILAS_LEIDAS_POR_DIA_EN_D1 = 5_000_000;
 
 /**
  * Bytes que D1 admite por base en el plan gratuito — AD-9, Historia 23.10.

@@ -1,5 +1,5 @@
 ---
-texto: "CRESPO: Un convento tiene ya elegido y tiene esposo que no mira en calidad."
+texto: "CRESPO: Un convento tiene ya\nelegido y tiene esposo\nque no mira en calidad."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-crespo-un-convento-tiene-ya-elegido-y"
 procedencia:

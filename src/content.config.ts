@@ -25,7 +25,15 @@ import {
   tradicion,
 } from './lib/admision.js';
 import { leerBiografia } from './lib/biografia.js';
-import { guardarPosiciones, leerPosicionesDelCorpus, releerAlCambiar } from '../tools/lib/posiciones.ts';
+import { MAX_CARACTERES_DEL_PASAJE } from './lib/umbrales.js';
+import { problemaDeLosParrafos } from './lib/pasaje.js';
+import {
+  guardarOrdenDeLosIndices,
+  guardarPosiciones,
+  leerOrdenDeLosIndicesDelCorpus,
+  leerPosicionesDelCorpus,
+  releerAlCambiar,
+} from '../tools/lib/posiciones.ts';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // AD-1 — La puerta de admisión vive aquí, no en `tools/`.
@@ -290,8 +298,11 @@ const ESPERA_TRAS_CAMBIO_MS = 250;
  * Quien ordena es `src/lib/obras.ts` (`ordenDelLibro`), con lo que esta colección entrega.
  *
  * Guarda, por el `slug` del frontmatter de cada Cita publicada, una aparición por documento en
- * que aparece su texto —nombre del documento y posición—, **y nada del texto**: el cuerpo de un
- * documento de Fuente no entra en el almacén de contenido (AD-2). También las Citas sin ninguna
+ * que aparece su texto —nombre del documento y posición— y, desde la 31.1, su **pasaje** cuando
+ * lo hay: el párrafo literal del documento y el tramo de la Cita en él, que es lo único del
+ * cuerpo de un documento de Fuente que entra en el almacén de contenido (AD-30). Sin pasaje la
+ * clave se omite, y con `MAX_CARACTERES_DEL_PASAJE` en `undefined` no lo trae ninguna aparición:
+ * el cuerpo de un documento, entero, no entra nunca (AD-2). También las Citas sin ninguna
  * aparición —las del censo, sin Fuente— llevan su entrada, con la lista vacía: la colección no
  * queda vacía mientras haya Citas, y nadie consulta una colección vacía. No escribe nada en
  * `corpus/` ni pide nada por la red.
@@ -303,7 +314,7 @@ const cargadorDePosiciones: Loader = {
     const vigiladas = [join(raiz, 'citas'), join(raiz, 'fuentes')];
 
     const cargar = () =>
-      guardarPosiciones({ leer: () => leerPosicionesDelCorpus(raiz), analizar: parseData, almacen: store });
+      guardarPosiciones({ leer: () => leerPosicionesDelCorpus(raiz, { tope: MAX_CARACTERES_DEL_PASAJE }), analizar: parseData, almacen: store });
 
     await cargar();
 
@@ -332,9 +343,70 @@ const posiciones = defineCollection({
       z.object({
         documento: z.string().min(1),
         posicion: z.number().int().nonnegative(),
+        // Historia 31.1 — el pasaje, omitido si no lo hay; su tramo cabe en su texto.
+        pasaje: z
+          .object({
+            texto: z.string().min(1),
+            inicio: z.number().int().nonnegative(),
+            fin: z.number().int(),
+            // Historia 31.2 — los párrafos y sus líneas, tramos [desde, hasta) sobre el texto.
+            parrafos: z
+              .array(z.array(z.tuple([z.number().int().nonnegative(), z.number().int()])).min(1))
+              .min(1),
+          })
+          .refine((p) => p.inicio < p.fin && p.fin <= p.texto.length, {
+            message: 'El tramo de la Cita no cabe en su pasaje: hace falta inicio < fin ≤ largo del texto.',
+          })
+          .superRefine((p, ctx) => {
+            // Historia 31.2 — los tramos dicen todo el texto, en orden y sin pisarse (`problemaDeLosParrafos`).
+            const problema = problemaDeLosParrafos(p);
+            if (problema !== undefined) ctx.addIssue({ code: 'custom', message: `Los párrafos del pasaje no se pueden pintar: ${problema}.` });
+          })
+          .optional(),
       }),
     ),
   }),
 });
 
-export const collections = { citas, autores, temas, colecciones, obras, biografias, posiciones };
+/*
+ * Los índices de subpáginas — Historia 24.9, AD-23, AD-25.
+ *
+ * El orden entre los documentos de una Obra paginada lo declara la Fuente, y `tools/recuperar.ts
+ * --indice` lo versiona aparte de ellos, en `corpus/fuentes/{fuente}--{obra}.indice.yml`. Este
+ * cargador, hermano del de posiciones y con su patrón, **solo cablea** `tools/lib/posiciones.ts`,
+ * que lee esos índices y los casa con los documentos por la dirección de su cabecera. Quien
+ * ordena es `ordenDelLibro` de `src/lib/obras.ts`, que lo recibe por parámetro.
+ *
+ * Guarda una sola entrada, `orden`, con `{ porObra: { obra: [documentos en su orden] } }`, siempre
+ * presente aunque no haya ningún índice: nadie consulta una colección vacía. Sin red y sin
+ * escribir nada en `corpus/`.
+ */
+const cargadorDeIndices: Loader = {
+  name: 'indices',
+  load: async ({ store, parseData, config, watcher, logger }) => {
+    const raiz = join(fileURLToPath(config.root), 'corpus');
+    const cargar = () =>
+      guardarOrdenDeLosIndices({ leer: () => leerOrdenDeLosIndicesDelCorpus(raiz), analizar: parseData, almacen: store });
+
+    await cargar();
+
+    if (watcher !== undefined) {
+      releerAlCambiar({
+        vigilante: watcher,
+        carpetas: [join(raiz, 'fuentes')],
+        releer: cargar,
+        esperaMs: ESPERA_TRAS_CAMBIO_MS,
+        avisar: (mensaje) => logger.error(mensaje),
+      });
+    }
+  },
+};
+
+const indices = defineCollection({
+  loader: cargadorDeIndices,
+  schema: z.object({
+    porObra: z.record(z.string().min(1), z.array(z.string().min(1))),
+  }),
+});
+
+export const collections = { citas, autores, temas, colecciones, obras, biografias, posiciones, indices };

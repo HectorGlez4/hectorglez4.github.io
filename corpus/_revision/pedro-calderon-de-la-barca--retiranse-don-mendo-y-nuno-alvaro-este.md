@@ -1,5 +1,5 @@
 ---
-texto: "Retíranse [don MENDO y NUÑO] ÁLVARO: Este fuego, esta pasión no es amor solo, que es tema, es ira, es rabia, es furor."
+texto: "Retíranse [don MENDO y NUÑO]\nÁLVARO: Este fuego, esta pasión\nno es amor solo, que es tema,\nes ira, es rabia, es furor."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-retiranse-don-mendo-y-nuno-alvaro-este"
 procedencia:

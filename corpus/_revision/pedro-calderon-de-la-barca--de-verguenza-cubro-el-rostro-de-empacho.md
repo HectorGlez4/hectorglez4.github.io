@@ -1,5 +1,5 @@
 ---
-texto: "De vergüenza cubro el rostro, de empacho lloro ofendida, de rabia tuerzo las manos, el pecho rompe de ira."
+texto: "De vergüenza cubro el rostro,\nde empacho lloro ofendida,\nde rabia tuerzo las manos,\nel pecho rompe de ira."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-de-verguenza-cubro-el-rostro-de-empacho"
 procedencia:

@@ -1,5 +1,5 @@
 ---
-texto: "Y para el cruel que me arranca El corazón con que vivo, Cardo ni ortiga cultivo; Cultivo la rosa blanca."
+texto: "Y para el cruel que me arranca\nEl corazón con que vivo,\nCardo ni ortiga cultivo;\nCultivo la rosa blanca."
 autor: "jose-marti"
 temas:
   - "la-virtud"

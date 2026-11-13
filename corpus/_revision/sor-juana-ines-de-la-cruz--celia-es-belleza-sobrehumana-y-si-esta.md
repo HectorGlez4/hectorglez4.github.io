@@ -1,5 +1,5 @@
 ---
-texto: "Celia: (Es belleza sobrehumana; y si está así en la tormenta ¿cómo estará en la bonanza?)"
+texto: "Celia: (Es belleza sobrehumana;\ny si está así en la tormenta\n¿cómo estará en la bonanza?)"
 autor: "sor-juana-ines-de-la-cruz"
 slug: "sor-juana-ines-de-la-cruz-celia-es-belleza-sobrehumana-y-si-esta"
 procedencia:

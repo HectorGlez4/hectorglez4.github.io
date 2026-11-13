@@ -1,5 +1,5 @@
 ---
-texto: "Mas esto Aparte de tirar es desvergüenza."
+texto: "Mas esto Aparte\nde tirar es desvergüenza."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-mas-esto-aparte-de-tirar-es-desverguenza"
 procedencia:

@@ -1,5 +1,5 @@
 ---
-texto: "Di dos, y no me dejes En la posada á mí cuando te quejes; Que si dos hemos sido Los que de nuestra patria hemos salido A probar aventuras, Dos los que, entre desdichas y locuras."
+texto: "Di dos, y no me dejes\nEn la posada á mí cuando te quejes;\nQue si dos hemos sido\nLos que de nuestra patria hemos salido\nA probar aventuras,\nDos los que, entre desdichas y locuras."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-di-dos-y-no-me-dejes-en"
 procedencia:

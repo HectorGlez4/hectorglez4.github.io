@@ -95,6 +95,7 @@ import { esRutaDeObra } from '../src/lib/superficies.ts';
  * da la relación de `tools/lib/cambios.ts`, que las compone con esos constructores.
  */
 import { opcion } from './lib/cli.ts';
+import { obraDeIndice } from './lib/indice.ts';
 import {
   FAMILIAS_DE_FICHERO,
   FAMILIAS_DE_RUTA,
@@ -147,7 +148,8 @@ async function documentosDeRevision(raiz: string, revision: string): Promise<str
     ['ls-tree', '-r', '-z', '--name-only', revision, '--', DIRECTORIO_DE_DOCUMENTOS],
     { cwd: raiz, maxBuffer: 64 * 1024 * 1024 },
   );
-  return stdout.split('\0').filter((ruta) => ruta.endsWith('.txt'));
+  // Los documentos y, desde la 24.9, los índices de subpáginas que los ordenan.
+  return stdout.split('\0').filter((ruta) => ruta.endsWith('.txt') || obraDeIndice(ruta) !== undefined);
 }
 
 /**

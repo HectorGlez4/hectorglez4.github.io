@@ -1,0 +1,23 @@
+# Índice de subpáginas de una Obra paginada (Historia 24.9, AD-23): el orden de sus
+# documentos lo declara la Fuente. Lo escribe «npx tsx tools/recuperar.ts --indice <url>»
+# y no se edita a mano; no es un documento y ningún cotejo lo lee.
+fuente: wikisource-es
+url: https://es.wikisource.org/wiki/Novelas_ejemplares_(1825)
+recuperado: 2026-10-31
+paginas:
+  - Novelas ejemplares
+  - Novelas ejemplares (1878)
+  - Novelas ejemplares (1883)
+  - Novelas ejemplares (Calpe)
+  - La gitanilla (1825)
+  - El amante liberal (1825)
+  - Rinconete y Cortadillo (1825)
+  - La española inglesa (1825)
+  - El licenciado Vidriera (1825)
+  - La fuerza de la sangre (1825)
+  - El celoso extremeño (1825)
+  - La ilustre fregona (1825)
+  - Las dos doncellas (1825)
+  - La señora Cornelia (1825)
+  - El casamiento engañoso (1825)
+  - El coloquio de los perros (1825)

@@ -1,5 +1,5 @@
 ---
-texto: "Todo este mundo es prisiones, Todo es cárcel y penar: Los dineros están presos En la bolsa donde están;"
+texto: "Todo este mundo es prisiones,\nTodo es cárcel y penar:\nLos dineros están presos\nEn la bolsa donde están;"
 autor: "francisco-de-quevedo"
 slug: "francisco-de-quevedo-todo-este-mundo-es-prisiones-todo-es"
 procedencia:

@@ -1,5 +1,5 @@
 ---
-texto: "Que yo, sin más camino Que el que me dan las leyes del destino."
+texto: "Que yo, sin más camino\nQue el que me dan las leyes del destino."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-que-yo-sin-mas-camino-que-el"
 procedencia:

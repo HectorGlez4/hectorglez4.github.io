@@ -1,5 +1,5 @@
 ---
-texto: "LOPE: No podré; que es imposible, que divertimiento tenga."
+texto: "LOPE: No podré; que es imposible,\nque divertimiento tenga."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-lope-no-podre-que-es-imposible-que"
 procedencia:

@@ -1,5 +1,5 @@
 ---
-texto: "Pues colijo que no ha de enseñarse a un hombre con destreza, gala y brío a reñir, sino a por qué ha de reñir; que yo afirmo que, si hubiera un maestro solo que enseñara prevenido, no el cómo, el por qué se riña, todos le dieran sus hijos."
+texto: "Pues colijo\nque no ha de enseñarse a un hombre\ncon destreza, gala y brío\na reñir, sino a por qué\nha de reñir; que yo afirmo\nque, si hubiera un maestro solo\nque enseñara prevenido,\nno el cómo, el por qué se riña,\ntodos le dieran sus hijos."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-pues-colijo-que-no-ha-de-ensenarse"
 procedencia:

@@ -1,5 +1,5 @@
 ---
-texto: "Que es mucho veneno, mucho, para que el alma lo beba de una vez."
+texto: "Que es mucho veneno, mucho,\npara que el alma lo beba\nde una vez."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-que-es-mucho-veneno-mucho-para-que"
 procedencia:

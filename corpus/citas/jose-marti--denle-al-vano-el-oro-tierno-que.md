@@ -1,5 +1,5 @@
 ---
-texto: "Denle al vano el oro tierno Que arde y brilla en el crisol: A mí denme el bosque eterno Cuando rompe en él el Sol."
+texto: "Denle al vano el oro tierno\nQue arde y brilla en el crisol:\nA mí denme el bosque eterno\nCuando rompe en él el Sol."
 autor: "jose-marti"
 temas:
   - "la-riqueza"

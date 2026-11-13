@@ -1,5 +1,5 @@
 ---
-texto: "CRESPO: Que ya que,como quisiera me quita esta obligación, satisfacer mi opinión ha de ser de esta manera."
+texto: "CRESPO: Que ya que,como quisiera\nme quita esta obligación,\nsatisfacer mi opinión\nha de ser de esta manera."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-crespo-que-ya-que-como-quisiera-me"
 procedencia:

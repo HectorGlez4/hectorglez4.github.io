@@ -1,5 +1,5 @@
 ---
-texto: "Nace el ave, y con las galas Que le dan belleza suma,"
+texto: "Nace el ave, y con las galas\nQue le dan belleza suma,"
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-nace-el-ave-y-con-las-galas"
 procedencia:

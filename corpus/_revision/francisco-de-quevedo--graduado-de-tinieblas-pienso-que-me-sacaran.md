@@ -1,5 +1,5 @@
 ---
-texto: "Graduado de tinieblas Pienso que me sacarán Para ser noche de Invierno, O en culto algún Madrigal."
+texto: "Graduado de tinieblas\nPienso que me sacarán\nPara ser noche de Invierno,\nO en culto algún Madrigal."
 autor: "francisco-de-quevedo"
 slug: "francisco-de-quevedo-graduado-de-tinieblas-pienso-que-me-sacaran"
 procedencia:

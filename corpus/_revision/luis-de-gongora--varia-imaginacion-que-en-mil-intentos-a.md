@@ -1,5 +1,5 @@
 ---
-texto: "Varia imaginación que, en mil intentos, a pesar gastas de tu triste amor la dulce munición del blando sueño, alimentando vanos pensamientos,"
+texto: "Varia imaginación que, en mil intentos,\na pesar gastas de tu triste amor\nla dulce munición del blando sueño,\nalimentando vanos pensamientos,"
 autor: "luis-de-gongora"
 slug: "luis-de-gongora-varia-imaginacion-que-en-mil-intentos-a"
 procedencia:

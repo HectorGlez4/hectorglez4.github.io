@@ -1,5 +1,5 @@
 ---
-texto: "En la calle le he topado muy galán, muy alentado, mezclando a un tiempo, señor, rezagos de labrador con primicias de soldado."
+texto: "En la calle le he topado\nmuy galán, muy alentado,\nmezclando a un tiempo, señor,\nrezagos de labrador\ncon primicias de soldado."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-en-la-calle-le-he-topado-muy"
 procedencia:

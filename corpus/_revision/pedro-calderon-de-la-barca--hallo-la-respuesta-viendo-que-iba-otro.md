@@ -1,5 +1,5 @@
 ---
-texto: "Halló la respuesta, viendo Que iba otro sabio cogiendo Las hojas que él arrojó."
+texto: "Halló la respuesta, viendo\nQue iba otro sabio cogiendo\nLas hojas que él arrojó."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-hallo-la-respuesta-viendo-que-iba-otro"
 procedencia:

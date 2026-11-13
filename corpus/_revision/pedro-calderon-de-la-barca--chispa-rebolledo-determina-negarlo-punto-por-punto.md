@@ -1,5 +1,5 @@
 ---
-texto: "CHISPA: Rebolledo, determina negarlo punto por punto; serás, si niegas, asunto para una jacarandina que cantaré."
+texto: "CHISPA: Rebolledo, determina\nnegarlo punto por punto;\nserás, si niegas, asunto\npara una jacarandina\nque cantaré."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-chispa-rebolledo-determina-negarlo-punto-por-punto"
 procedencia:

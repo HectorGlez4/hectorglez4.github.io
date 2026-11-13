@@ -1,5 +1,5 @@
 ---
-texto: "DOÑA ANA Siempre, don Iuan, te has quexado en tu fortuna de vicio."
+texto: "DOÑA ANA\nSiempre, don Iuan, te has quexado\nen tu fortuna de vicio."
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-dona-ana-siempre-don-iuan-te-has"
 procedencia:

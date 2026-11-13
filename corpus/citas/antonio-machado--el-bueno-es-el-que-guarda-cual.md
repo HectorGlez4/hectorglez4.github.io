@@ -1,5 +1,5 @@
 ---
-texto: "El bueno es el que guarda, cual venta del camino, para el sediento, el agua; para el borracho, el vino."
+texto: "El bueno es el que guarda, cual venta del camino,\npara el sediento, el agua; para el borracho, el vino."
 autor: "antonio-machado"
 temas:
   - "la-virtud"

@@ -451,3 +451,118 @@ Se listan para que no se tomen por omisión, cada una con la propuesta del dise�
 - **En la Página de Obra, «Buscar en esta obra» va debajo del listado y su paginación *(v8.4, decisión de Héctor del 2026-10-30: encima echaba de la primera pantalla la primera Cita de las Obras de título más largo)*, y el bloque de compartir, tras él y antes de los Temas**; «Buscar en {Autor}», al empezar el catálogo de la Página de Autor, y «Buscar en este tema», bajo el título de la Página de Tema, encima del listado (decisiones de Héctor). El recorrido que alcanza cada Directorio lo dan UJ-6, el de Autores, y UJ-3, desde la v8.1, el de Obras.
 - **En la portada, la marca de la cabecera es el `h1`**, así que sale una sola vez arriba, y la línea de cifras queda con la redacción de «La línea de cifras de la portada» (decisión de Héctor).
 - **Ningún token nuevo**: la Tarjeta de Obra va plana, en tinta, con los de las Rutas de salida (decisión de Héctor), y el bloque «Compartir en» tampoco pide ninguno (revisión de la UX).
+
+# Addendum de la v9
+
+Lo que la pasada «De la cita al libro», del 2026-11-03, decidió y no cabe en el PRD: los datos que la ordenaron, lo que se descartó y el mecanismo que se deja escrito para Arquitectura y UX. Las decisiones están en `.memlog.md`, y la mesa redonda que fijó el alcance, en la memoria de party-mode.
+
+## El estudio de BrainyQuote
+
+El brief tomó BrainyQuote como modelo de producto: una red enorme de páginas pequeñas, cada una para una búsqueda concreta. La v9 volvió a mirarlo con otra pregunta —qué le da a quien quiere citar bien o leer más— y la respuesta es corta: **ninguna de sus citas trae obra ni procedencia**. Da la frase, el autor y los temas; no dice de qué libro sale, ni de qué edición, ni deja leer el texto que la rodea. Es lo que este Corpus tiene y el modelo no, y por eso la v9 invierte ahí: «Cómo citar», el pasaje y la Obra como destino son las tres cosas que solo puede ofrecer un Corpus con la Procedencia cotejada. El detalle del estudio no se versionó; lo que se conserva es esa conclusión.
+
+## Afiliación — lo que se investigó el 2026-11-03
+
+- **La interfaz de Amazon cambió.** PA-API se sustituye por la Creators API, que exige 10 ventas cualificadas en 30 días para dar acceso. Antes de esa cifra no hay ningún dato del libro que salga de Amazon.
+- **La política de Amazon veda guardar sus imágenes y teclear sus precios.** Por eso la portada y el precio no salen de la tienda (FR-35), y la portada, cuando entre, saldrá de Wikimedia Commons (§6.8 del PRD, «Después»).
+- **El plazo.** Amazon cierra la cuenta que no logra 3 ventas cualificadas en los 180 días siguientes a la solicitud, y la del proyecto ya se cerró una vez así. Es la razón de la pregunta 11 de §14.
+- **Cobertura por país.** `amazon.com.mx` exige RFC y cuenta bancaria mexicanos, y OneLink no cubre México. Buscalibre es el único programa confirmado en Colombia y Perú, con hasta un 5 %. Mercado Libre Afiliados solo opera en México, Argentina, Brasil y Chile. Casa del Libro paga en España, por Awin, del 5 al 11 %.
+- **La tienda principal es `amazon.com`**, con el formulario fiscal W-8BEN, y la segunda `amazon.es`, por el tráfico español (decisiones de Héctor del 2026-11-03). El orden es la elección de Héctor, no el del tráfico. Son dos programas, cada uno con su cuenta y su plazo de 180 días, y el criterio de la pregunta 11 se aplica a cada uno por separado.
+
+## Search Console, 28 días (leído por Chrome el 2026-11-03)
+
+Ventana del 2026-10-05 al 2026-11-01: **63 clics, 2,09 mil impresiones, CTR del 3 %, posición media 10,5**, con 814 páginas con impresiones. Por país, en clics e impresiones: España 22 / 601, Cuba 10 / 87, México 9 / 247, Venezuela 4 / 101, Argentina 3 / 171, Perú 3 / 118 y Colombia 2 / 92. Las páginas con clics son Páginas de Cita y de Autor; **ninguna Página de Obra está entre las diez primeras**. Es una lectura del panel, no una entrada de las series versionadas (`serie-de-trafico.yml`, `serie-de-demanda.yml`), que siguen sin credencial: no se compara con ellas sin decirlo.
+
+## La auditoría de la lectura en vivo (2026-11-03)
+
+Recorrida por Chrome, en escritorio —el móvil no se pudo emular—, sobre la Página de Cita, la de Obra, la de Autor, la portada, la de Tema, `/buscar/`, `/obras/` y la Imagen de Cita.
+
+**Hallazgos altos:**
+
+1. El verso pierde los saltos de línea: en *Versos sencillos*, «partes, Y hacia…», con mayúsculas a media frase (FR-63).
+2. Casi duplicados dentro de una Obra: la rosa blanca «en julio» y «en junio» con su fragmento suelto, y «Con los pobres de la tierra» dos veces (FR-14).
+3. La Página de Obra es solo una lista: nada sobre el libro, «Dónde leer esta obra» al final, la frase interna «2 de sus 15 citas no tienen documento cotejado», y sin compartir (FR-51, FR-54, FR-60, FR-61).
+4. La Imagen de Cita lleva al pie «SABIDURÍA DE BOLSILLO» diminuto y sin dominio (FR-10, Historia 25.2).
+5. La Página de Autor pone 21 Obras antes de la primera Cita de Martí (FR-4, FR-64).
+6. `/obras/` pone a Terencio bajo la A, por su clave «Africano» (Historia 26.10; es un acto de Héctor, §6.8).
+7. «Granos de oro» es una antología de un compilador y es la Obra de Martí con más Citas (pregunta 12 de §14).
+
+**Hallazgos medios:** la Cita de su página ocupa unos 365 px de una columna de unos 600, tres palabras por línea en escritorio; las tres acciones van apiladas; la portada repite la marca y no tiene campo de búsqueda ni propuesta (Historia 28.1, de la Épica 28 sin fusionar); el campo «Buscar en este tema» no se ve —sin borde ni fondo— y va arriba, al revés que en la Obra; los listados cortan a media palabra («camposant…»).
+
+**Funciona:** Copiar, con su «Copiado.»; «Siguiente cita»; la búsqueda con filtros, y la Fuente a la vista.
+
+## Alternativas descartadas en la v9
+
+- **Una sinopsis de la Obra.** La pidió la primera propuesta; §5 la veda, y el incipit la sustituye: dice cómo empieza el libro sin decir de qué trata.
+- **Solicitar ya la cuenta de Amazon.** Arrancaría el plazo de 180 días sin tráfico que lo sostenga, que es como se cerró la primera.
+- **`amazon.com.mx` como tienda de México.** Exige RFC y cuenta bancaria mexicanos.
+- **Mercado Libre Afiliados para Colombia y Perú.** No opera en ninguno de los dos.
+- **Precios y portadas de Amazon en la Página de Obra.** Los veda su política, y la interfaz que los da exige 10 ventas en 30 días.
+- **Leer Wikidata en vivo al construir.** Un dato que cambia entre dos construcciones del mismo commit rompe el determinismo y no deja rastro de qué se publicó. Se acepta solo versionado, como Wikisource.
+- **El fragmento para insertar con un guion o un marco del sitio.** Mediría a quien lee el blog ajeno y dejaría de leerse si el sitio no responde.
+- **El enlace del fragmento con marca de difusión** (`?via=`). Abriría el conjunto cerrado de destinos de FR-20 con algo que no es un destino, y un enlace que se queda publicado debe sumar a la canónica.
+- **Un «Top 100» de lo más leído.** El sitio no lee sus propias series (AD-24).
+- **Efemérides.** El Corpus solo guarda el año.
+
+## Decisiones de mecanismo — v9
+
+- **La entidad de Wikidata se versiona como un documento de Fuente.** Una orden, con el enlace permanente de una revisión, descarga solo esa revisión y la escribe en el Corpus con la revisión en el nombre y en la cabecera, como `recuperar` hace con una biografía de Wikipedia: otra revisión es otro documento y no reemplaza al anterior. La licencia es CC0. Una segunda orden ata la Ficha de Obra a ese documento sin teclear el campo, cotejando el autor de la entidad con el Autor de la Obra. El build rompe si el documento falta, no se deja leer o no es esa revisión. Los campos —género, fecha de publicación, lengua original— se leen de esa revisión. El género y la lengua no son texto en ella: son referencias a otras entidades, y su etiqueta en español está en la revisión de cada una de esas entidades, que se versiona igual, con su revisión fija; la ficha técnica de una Obra es así un conjunto de revisiones fijas, nunca una lectura en vivo. Sin revisión versionada de la entidad referida, o sin etiqueta en español en ella, el valor se omite.
+- **El traductor de la ficha técnica sale de la Fuente**, la de la edición cotejada (FR-48), no de la entidad, que describe la obra y no esa edición.
+- **El pasaje sale del mismo documento y del mismo localizador que el orden del libro** (la colección de posiciones de la Historia 24.1): no hay un segundo cotejo. Lo que la posición da es el lugar de la Cita; el pasaje es el párrafo —o la estrofa— del documento que lo contiene. Su longitud máxima es un umbral con nombre.
+- **El peso del pasaje se mide contra el techo de `dist/`**, el mismo del paso del peso que cierra `npm run build`. Si con el Corpus entero lo pasa, la arquitectura elige otra forma de servirlo —por ejemplo, un fichero estático por Cita pedido al abrir el bloque, que cuenta en los guiones externos—, y el techo no se sube para hacerle sitio.
+- **El incipit sale del documento que empieza la Obra**, sin aparato editorial, hasta un tope con nombre, cortado al final de una frase o de un verso; si la primera frase ya pasa del tope, no hay incipit. Ese documento no es, sin más, el primero del orden del libro, que puede poner delante un «proemio», unas «notas» o un «epílogo» (Historia 24.1): sin un criterio que lo afirme no hay incipit, y si lo afirma una persona es la pregunta 16 de §14.
+- **«Inserta esta cita» es HTML estático**: un `blockquote` con el texto, la atribución y un enlace a la canónica, sin guion, sin estilos externos, sin imágenes y sin marco. Lo que la página ofrece es ese texto para copiar; el sitio no sirve ningún recurso para incrustar.
+- **«Cómo citar» compone en el build**, con los datos de la Cita y de su Obra; la fecha de consulta la pone el cliente al copiar o al abrir el bloque, y sin guion la referencia va sin ella. Las adaptaciones al español de cada estilo y la marca de los datos que faltan —«s. f.» en APA— son de UX: lo que el PRD fija es que no se infiere ningún dato.
+- **Las ediciones se curan sin cuenta.** Hoy el esquema de la Ficha de Obra rechaza toda edición mientras `TIENDAS` esté vacío, y una tienda se declara con su marca, que solo existe tras solicitar la cuenta. Para curar sin reloj (FR-35) una tienda tiene que poder declararse sin marca, y el Modelo no encenderse mientras alguna de sus tiendas no la tenga. La regla ya no es de mecanismo: es de FR-35, por decisión de Héctor del 2026-11-03, y la construcción la comprueba. Cómo se declara una tienda sin marca lo decide la arquitectura.
+- **La prioridad de curación por demanda** sale de `serie-de-demanda.yml`, que reparte por Autor y por Cita y todavía no cuenta la familia Obra. La demanda de una Obra se compone con la de sus Citas, por su Ficha de Obra, más la de su página cuando la familia entre en la serie. La orden vive en `tools/` y ningún módulo de `src/` la importa (AD-24).
+- **Los eventos nuevos de medición** de FR-57 y FR-58 entran en el vocabulario cerrado con su migración, y el sitio no los emite antes de que Héctor despliegue el receptor que los admite: migración, receptor y sitio, en ese orden.
+- **El verso y la forma canónica.** Conservar los saltos de línea cambia lo que se guarda, no lo que se coteja: la forma canónica de AD-3 trata el salto como un espacio, y el cotejo y la búsqueda no cambian de veredicto. Restituirlos en lo publicado es una orden, desde el documento de cada Cita, que no cambia el slug (AD-4).
+
+## Deuda conocida que entra a propósito en la v9
+
+- **Lo que sube en la Página de Obra puede echar el listado de la primera pantalla.** La v8.4 bajó «Buscar en esta obra» por esa razón, y la v9 sube «Dónde leer esta obra», la ficha técnica y el incipit. UX lo compone, y SM-C4 lo vigila en esa superficie también con el Modelo apagado.
+- **El pasaje repite texto entre Páginas de Cita** del mismo párrafo. Es el supuesto de §15 sobre duplicados.
+- **Lo añadido a la Página de Cita va antes de Copiar** si UX lo pone ahí, y en móvil Copiar ya está bajo la primera pantalla desde la v8. Lo vigila SM-C5.
+- **México sigue sin tienda**, y Colombia y Perú hasta que entre Buscalibre (pregunta 14 de §14).
+
+## Decisiones de mecanismo diferidas — v9
+
+**De Arquitectura (`bmad-architecture`):** la forma de servir el pasaje si no cabe en el techo de peso, y su longitud máxima; si el documento del pasaje fecha la Página de Cita, y el del incipit la de Obra (AD-27); cómo trata la forma canónica los saltos de línea; cómo se declara una tienda sin marca y cómo comprueba la construcción que ninguna falta al encender; el formato versionado de la revisión de Wikidata y de las revisiones de las entidades a las que remiten el género y la lengua; y cómo se sabe que un documento empieza donde empieza la Obra (pregunta 16 de §14 si no hay criterio).
+
+**De UX (`bmad-ux`):** el lugar de «Lee el pasaje», «Cómo citar» e «Inserta esta cita» en la Página de Cita; el orden de la ficha técnica, el incipit y «Dónde leer esta obra» en la de Obra sin echar el listado; la redacción que sustituye a «N de sus M citas no tienen documento cotejado»; cómo se agrupa «Consíguelo»; la medida de línea de la Cita y la fila de acciones en escritorio, con el ancho desde el que cuenta; dónde va la lista de obras en la Página de Autor y el tope de lo que enseña de ella antes de la primera Cita; cómo se ve el campo de «Buscar en este tema» —no dónde va, que sigue la decisión de la v8—; qué textos de los listados se recortan; si se conserva el salto a «Dónde leer esta obra»; el sitio de la nota de la Ficha de Obra, si no es el pie; la variante de Chicago; las adaptaciones de cada estilo al español; el espacio reservado del dominio al pie de cada formato de la Imagen, de la Pieza y del material del Kit y del lote; y, antes de cerrar, la auditoría en móvil a 360 × 640 px que no se pudo hacer (§6.8 del PRD).
+
+**De las épicas (`bmad-create-epics-and-stories`):** el troceado en el orden de §6.8 del PRD —primero el verso con sus saltos y los casi duplicados, después la Historia 25.2 adelantada, con el resto de la Épica 25 dentro—, y una historia aparte, o un paso de Héctor declarado, para el despliegue del receptor con los eventos de FR-57 y FR-58.
+
+## El triaje del borrador (2026-11-03)
+
+Dos revisiones del borrador de la v9 —una de calidad y una conciliación con el memlog— encontraron contradicciones que solo podía resolver Héctor. Las resolvió el mismo día, y el PRD las aplica:
+
+1. **La auditoría entra entera** (FR-63, FR-64, FR-14 ampliado), salvo que «Buscar en este tema» se queda arriba, bajo el título del Tema, como decidió en la v8: solo se arregla que el campo no se ve.
+2. **Una tienda se declara sin marca** y las ediciones se curan ya; el Modelo no se enciende mientras alguna tienda declarada no tenga marca, y lo comprueba la construcción; declarar la marca es acto de Héctor el día que solicita la cuenta (FR-35).
+3. **El orden de construcción** es el de §6.8 —verso y casi duplicados, dominio, «Cómo citar», pasaje, Obra, afiliación sin reloj, «Inserta esta cita» y el resto de la auditoría—; el de citar, compartir, leer y comprar es el de la experiencia.
+4. **«Cómo citar» invierte el nombre** —apellido e iniciales— solo con la clave de orden revisada; sin revisar, lleva el nombre tal cual (FR-58).
+5. **Ninguna cuenta que cierre por falta de ventas** se solicita hasta el criterio de la pregunta 11; las que no tienen plazo pueden solicitarse antes (FR-35, §12.1, pregunta 11).
+
+El borrador había escrito «cada edición la elige Héctor» como hecho; era un supuesto sin confirmar, y vuelve a §15 como tal.
+
+## Addendum de la v9.1 — la Cita atribuida (2026-11-04)
+
+**Entrada:** la lluvia de ideas del 2026-11-03, «Citas de autores vivos y de personajes de ficción» (`_bmad-output/brainstorming/brainstorm-citas-recientes-y-ficcion-2026-11-03/`), modo facilitador con la técnica «Sí, y…».
+
+**La decisión de la lluvia que la v9.1 enmienda.** La sesión decidió que «el Autor es quien dice la Cita» y que, en la ficción, el Autor era el personaje. Héctor la corrigió el 2026-11-04: el Personaje es una entidad aparte, y una Cita puede tener a la vez Personaje y Autor. Así el concepto de Autor no se parte en persona y personaje, y no se toca su clave de orden. *(Corregido en el cierre de la v9.1: la frase decía que tampoco se tocaban su año de fallecimiento ni «la cuota latinoamericana de las Épocas». El año de fallecimiento deja de exigirse al Autor con derechos vigentes que vive (FR-15), y la cuota es la del suelo de §6.1, que se cuenta sobre la clase de siempre (FR-8).)*
+
+**Alternativas que se descartaron:**
+- **Relajar la Procedencia para todas las Citas.** Habría que reescribir SM-C1, FR-13, FR-23 y la puerta del cotejo, y habría desaparecido el diferencial que el sitio tiene frente a BrainyQuote.
+- **Que la otra clase la defina no estar cotejada.** Héctor eligió que la defina tener Personaje o un Autor con derechos vigentes, también en obras de dominio público.
+- **Dejarlo para una v10.** Entra en la v9 como paso 8.
+
+**Por qué la clase se juzga aparte.**
+- Si contara en SM-C1, la cifra bajaría con cada Personaje publicado sin que se hubiera relajado nada en la clase de siempre. Esa caída no se distinguiría de la que SM-C1 existe para delatar.
+- El precio de publicar sin cotejo se mide en reclamaciones (SM-C6), no en Procedencia.
+
+**El riesgo jurídico, que sigue abierto (pregunta 18).** Esto no es asesoramiento legal.
+- **España:** el art. 32 LPI admite la cita de fragmentos breves con atribución, para análisis, comentario o juicio crítico, y la ilustración con fines educativos.
+- **EE. UU.:** el *fair use* pondera la finalidad, la naturaleza de la obra, la cantidad tomada y el efecto en el mercado.
+- **En ningún sitio** «frase célebre» equivale a dominio público.
+- **Personajes:** muchos son además marcas registradas, y eso limita sobre todo su uso comercial en la imagen.
+- **BrainyQuote:** sus condiciones prohíben reutilizar el contenido. En la UE, la Directiva 96/9/CE protege la inversión en una base de datos aunque cada frase sea libre.
+- **Lo que la v9.1 pone como freno:** los topes por Obra y por longitud, el canal de retirada y la semilla acotada.

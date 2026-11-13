@@ -12,7 +12,7 @@ import {
   limpiar,
   paginaConstruida,
 } from './ayuda/construir.js';
-import { enlacesDe, recorrerElementos } from './ayuda/enlaces.js';
+import { enlacesDe, recorrerElementos, type Elemento } from './ayuda/enlaces.js';
 import { navDeSalidas } from './ayuda/rutas-de-salida.js';
 import {
   cuantasTarjetasDeObra,
@@ -26,6 +26,7 @@ import {
   contenidoDeTarjetaDeObra,
 } from '../../src/lib/atribucion.ts';
 import { formaDeObra, resolverObras, type FichaDeObra } from '../../src/lib/obras.ts';
+import { MAX_CARACTERES_IMAGEN } from '../../src/lib/umbrales.ts';
 import { componerDocumento, nombreDeDocumento } from '../../tools/lib/documento.ts';
 
 /**
@@ -310,12 +311,90 @@ describe('Historia 24.4 — el contrato de los componentes, sin construir', () =
     const pagina = await readFile(join(RAIZ, 'src/pages/cita/[slug].astro'), 'utf8');
     const usos = [...sinComentarios(pagina).matchAll(/<TarjetaDeObra\b[^>]*\/>/g)].map((m) => m[0]);
     expect(usos).toEqual(['<TarjetaDeObra cita={cita} autor={autor} nivel={2} siguiente={siguiente} />']);
-    // Entre la Fuente y Copiar.
+    // Historia 30.1 — tras las acciones y compartir, antes de las Rutas de salida.
     const plantilla = sinComentarios(pagina);
-    const posicion = (marca: string) => plantilla.indexOf(marca);
-    expect(posicion('<Fuente cita={cita} />')).toBeGreaterThan(-1);
-    expect(posicion('<Fuente cita={cita} />')).toBeLessThan(posicion('<TarjetaDeObra'));
-    expect(posicion('<TarjetaDeObra')).toBeLessThan(posicion('<CopiarCita'));
+    const orden = [
+      '<BloqueDeCita',
+      '<Fuente cita={cita} />',
+      '<FilaDeAcciones>',
+      '<CopiarCita',
+      '<ImagenDeCita',
+      '</FilaDeAcciones>',
+      '<CompartirEnlace',
+      '<TarjetaDeObra',
+      '<RutasDeSalida',
+      '<FiltrosDeLaCita',
+    ].map((marca) => {
+      const donde = plantilla.indexOf(marca);
+      expect(donde, marca).toBeGreaterThan(-1);
+      return donde;
+    });
+    expect(orden).toEqual([...orden].sort((a, b) => a - b));
+  });
+
+  it('Historia 30.1 — las distancias de las acciones salen de la unidad: Copiar 4 ×, Imagen 2 ×, compartir 3 × (UX-DR114)', async () => {
+    // La medida en el navegador es local (e2e); esto la sostiene en `npm test`: la regla de la raíz
+    // de cada isla, en su `<style>`.
+    const margen = async (ruta: string) => {
+      const fuente = await readFile(join(RAIZ, ruta), 'utf8');
+      const estilo = fuente.slice(fuente.lastIndexOf('<style'));
+      return /\.isla\s*\{[^}]*margin-top:\s*([^;]+);/.exec(estilo)?.[1].trim();
+    };
+    expect(await margen('src/islands/CopiarCita.astro')).toBe('calc(var(--unidad) * 4)');
+    expect(await margen('src/islands/ImagenDeCita.astro')).toBe('calc(var(--unidad) * 2)');
+    expect(await margen('src/islands/CompartirEnlace.astro')).toBe('calc(var(--unidad) * 3)');
+  });
+
+  it('Historia 30.2 — la Fila de acciones: 4 × de lo de arriba, 2 × entre los dos, en fila desde 600 px', async () => {
+    // Dentro de la fila las distancias las pone ella: la isla de Copiar no tiene caja y la de
+    // Imagen pierde su margen; por debajo de 600 px Imagen ocupa su línea, desde 600 toma su ancho.
+    const fila = await reglasDe('src/components/FilaDeAcciones.astro');
+    const raiz = fila.find((r) => r.selector === '.fila-de-acciones')!.declaraciones;
+    expect(Object.fromEntries(raiz)).toEqual({
+      'margin-top': 'calc(var(--unidad) * 4)',
+      display: 'flex',
+      'flex-wrap': 'wrap',
+      'align-items': 'flex-start',
+      gap: 'calc(var(--unidad) * 2)',
+    });
+    const fuente = await readFile(join(RAIZ, 'src/components/FilaDeAcciones.astro'), 'utf8');
+    const marcado = sinComentarios(fuente.slice(fuente.indexOf('---', 3) + 3, fuente.indexOf('<style')));
+    expect(marcado.trim()).toBe('<div class="fila-de-acciones">\n  <slot />\n</div>');
+    expect(sinComentarios(fuente)).not.toMatch(/data-zona|data-sin-zona|<script/);
+
+    const copiar = await reglasDe('src/islands/CopiarCita.astro');
+    const enCopiar = (selector: string) => Object.fromEntries(copiar.find((r) => r.selector === selector)!.declaraciones);
+    expect(enCopiar(':global(.fila-de-acciones) > .isla')).toEqual({ display: 'contents' });
+    expect(enCopiar(':global(.fila-de-acciones) > .isla > .respaldo')).toEqual({
+      order: '1',
+      'flex-basis': '100%',
+      'margin-top': '0',
+    });
+    const imagen = await reglasDe('src/islands/ImagenDeCita.astro');
+    const enImagen = imagen.filter((r) => r.selector.endsWith(':global(.fila-de-acciones) > .isla'));
+    expect(enImagen.map((r) => [r.selector.replace(/\s+/g, ' '), Object.fromEntries(r.declaraciones)])).toEqual([
+      [':global(.fila-de-acciones) > .isla', { 'margin-top': '0', 'flex-basis': '100%' }],
+      [':global(.fila-de-acciones) > .isla', { 'flex-basis': 'auto' }],
+    ]);
+    // La segunda, la de `flex-basis: auto`, dentro del punto de ruptura de 600 px.
+    const fuenteDeImagen = await readFile(join(RAIZ, 'src/islands/ImagenDeCita.astro'), 'utf8');
+    expect(fuenteDeImagen).toMatch(
+      /@media \(min-width: 600px\) \{\s*:global\(\.fila-de-acciones\) > \.isla \{\s*flex-basis: auto;\s*\}\s*\}/,
+    );
+  });
+
+  it('Historia 30.2 — la medida de la Cita en su texto, la Atribución y la Fuente en la de prosa (UX-DR115)', async () => {
+    const bloque = await reglasDe('src/components/BloqueDeCita.astro');
+    const de = (selector: string) => bloque.find((r) => r.selector === selector)!.declaraciones;
+    expect(de('.bloque').has('max-width')).toBe(false);
+    expect(de('.texto').get('max-width')).toBe('var(--medida-cita)');
+    expect(de('figcaption').get('max-width')).toBe('var(--medida-prosa)');
+    const fuente = await reglasDe('src/components/Fuente.astro');
+    expect(fuente.find((r) => r.selector === '.fuente')!.declaraciones.get('max-width')).toBe('var(--medida-prosa)');
+    // Ningún otro `max-width` con la medida de la Cita en el Bloque: ni la columna entera.
+    expect(bloque.filter((r) => r.declaraciones.get('max-width') === 'var(--medida-cita)').map((r) => r.selector)).toEqual([
+      '.texto',
+    ]);
   });
 
   it('`Rotulo` admite `nivel?: 2 | 3`, por omisión 2', async () => {
@@ -354,8 +433,9 @@ describe('Historia 24.4 — el contrato de los componentes, sin construir', () =
     expect(titulo.get('margin')).toBe('var(--unidad) 0 0');
     expect(titulo.get('font-family')).toBe('var(--sans)');
     expect(titulo.get('font-size')).toBe('var(--cuerpo-lg)');
-    expect(titulo.get('font-weight')).toBe('600');
-    expect(titulo.get('line-height')).toBe('1.4');
+    expect(titulo.get('font-weight')).toBe('var(--peso-fuerte)');
+    // DESIGN.md § Typography: el título toma el interlineado de `author`, no el de su cuerpo.
+    expect(titulo.get('line-height')).toBe('var(--interlineado-autor)');
     expect(titulo.get('color')).toBe('var(--tinta)');
     expect(titulo.get('text-wrap')).toBe('balance');
     expect(titulo.get('overflow-wrap')).toBe('break-word');
@@ -365,8 +445,8 @@ describe('Historia 24.4 — el contrato de los componentes, sin construir', () =
     expect(hechos.get('margin')).toBe('var(--unidad) 0 0');
     expect(hechos.get('font-family')).toBe('var(--sans)');
     expect(hechos.get('font-size')).toBe('var(--pie)');
-    expect(hechos.get('font-weight')).toBe('400');
-    expect(hechos.get('line-height')).toBe('1.5');
+    expect(hechos.get('font-weight')).toBe('var(--peso-regular)');
+    expect(hechos.get('line-height')).toBe('var(--interlineado-pie)');
     expect(hechos.get('color')).toBe('var(--tinta-apagada)');
 
     const filas = de('.filas');
@@ -411,7 +491,7 @@ describe('Historia 24.4 — el contrato de los componentes, sin construir', () =
     expect(a!.get('padding-block')).toBe('calc(var(--unidad) * 1.25)');
     expect(a!.get('font-family')).toBe('var(--sans)');
     expect(a!.get('font-size')).toBe('var(--cuerpo-md)');
-    expect(a!.get('line-height')).toBe('1.4');
+    expect(a!.get('line-height')).toBe('var(--interlineado-autor)');
     expect(a!.get('color')).toBe('var(--tinta)');
     expect(a!.get('text-decoration')).toBe('none');
     expect(['anywhere', 'break-word']).toContain(a!.get('overflow-wrap'));
@@ -452,6 +532,11 @@ const LARGO =
 /** Las Citas sin Fuente van en el censo, que es cerrado (11.2): slugs suyos. */
 const CARTAS_SIN = ['seneca-la-vida-si-sabes-usarla-es-larga', 'seneca-no-hay-viento-favorable-para-el-que'];
 const SIN_OBRA = 'seneca-mientras-esperamos-vivir-la-vida-pasa';
+const UNAMUNO =
+  'nombre: Miguel de Unamuno\nañoNacimiento: 1864\nañoFallecimiento: 1936\nsemblanza: Escritor bilbaíno de la generación del 98.\nordenAlfabetico: Unamuno\n';
+const DEL_SENTIMIENTO = 'Del sentimiento trágico de la vida';
+/** Historia 30.1 — la Cita sin Imagen de la matriz: más larga que `MAX_CARACTERES_IMAGEN`. */
+const SIN_IMAGEN = 'miguel-de-unamuno-sentimiento-0';
 
 interface Esperada {
   titulo: string;
@@ -467,18 +552,30 @@ function corpusDeLaTarjeta(): { corpus: Record<string, string>; esperadas: Map<s
   const corpus: Record<string, string> = {
     'autores/seneca.yml': AUTOR_VALIDO,
     'autores/antonio-machado.yml': MACHADO,
+    'autores/miguel-de-unamuno.yml': UNAMUNO,
     'temas/el-tiempo.yml': TEMA_VALIDO,
     // Con el censo en el fixture el andamio no siembra documentos: se escriben aquí.
     'pendientes-de-cotejo.yml': `citas:\n${[...CARTAS_SIN, SIN_OBRA].map((s) => `  - ${s}\n`).join('')}`,
   };
 
   /** `n` Citas cotejadas de una Obra, con su documento. */
-  function sembrar(autor: string, clave: string, titulo: string, n: number, año: number, esperada: Omit<Esperada, 'titulo'>) {
+  function sembrar(
+    autor: string,
+    clave: string,
+    titulo: string,
+    n: number,
+    año: number,
+    esperada: Omit<Esperada, 'titulo'>,
+    repeticiones = 1,
+  ) {
     const url = `${WS}${titulo.replaceAll(' ', '_')}`;
     const textos: string[] = [];
     for (let i = 0; i < n; i += 1) {
       const slug = `${autor}-${clave}-${i}`;
-      const texto = `${clave} ${i}: una sentencia distinta para cada número, la ${i}.`;
+      const texto = Array.from(
+        { length: repeticiones },
+        (_, r) => `${clave} ${i}: una sentencia distinta para cada número, la ${i}${r === 0 ? '' : `, otra vez la ${r}`}.`,
+      ).join(' ');
       textos.push(texto);
       corpus[`citas/${autor}--${clave}-${i}.md`] = citaValida({
         autor,
@@ -540,6 +637,16 @@ function corpusDeLaTarjeta(): { corpus: Record<string, string>; esperadas: Map<s
     obra: /^\/obra\/antonio-machado\/soledades-[a-z0-9-]+\/$/,
     noindex: true,
   });
+  // Historia 30.1 — Unamuno: una Cita cotejada más larga que la Imagen admite, en su única Obra.
+  sembrar(
+    'miguel-de-unamuno',
+    'sentimiento',
+    DEL_SENTIMIENTO,
+    1,
+    1913,
+    { hechos: ['Miguel de Unamuno', '1913', '1 cita'], fila: FILA_VER_LA_OBRA_Y_DONDE_LEERLA, obra: '/obra/miguel-de-unamuno/del-sentimiento-tragico-de-la-vida/', noindex: true },
+    6,
+  );
   return { corpus, esperadas };
 }
 
@@ -631,6 +738,83 @@ const autor = conjunto.autores.find((a) => a.slug === cita.autor)!;
 <Rotulo id="destino-2" destino>Destino 2</Rotulo><Rotulo id="destino-3" nivel={3} destino>Destino 3</Rotulo></body></html>
 `;
 
+/**
+ * Historia 30.1 — los hijos de `<article>` de una página construida, en orden de marcado y sin
+ * `script`, `style`, `template` ni `noscript`: lo que se lee y se tabula. Cada uno con lo que es.
+ */
+function hijosDelArticle(pagina: string): {
+  etiqueta: string;
+  clase: string;
+  copiar: boolean;
+  elemento: Elemento;
+  /**
+   * Historia 30.2 — los hijos directos del hijo del `article`, en orden y `script` incluidos. Se
+   * recogen para todos; solo los de la Fila de acciones se leen.
+   */
+  dentro: Elemento[];
+}[] {
+  const hijos: { elemento: Elemento; copiar: boolean; filtros: boolean; dentro: Elemento[] }[] = [];
+  recorrerElementos(pagina, (elemento, antepasados) => {
+    const k = antepasados.findIndex((e) => e.etiqueta === 'article');
+    if (k === -1) return;
+    const hijo = k === antepasados.length - 1 ? elemento : antepasados[k + 1];
+    if (hijo === elemento) {
+      if (['script', 'style', 'template', 'noscript'].includes(elemento.etiqueta)) return;
+      hijos.push({ elemento, copiar: false, filtros: false, dentro: [] });
+    }
+    const entrada = hijos.find((h) => h.elemento === hijo);
+    if (entrada !== undefined && hijo !== elemento && antepasados.length - 1 === k + 1) {
+      entrada.dentro.push(elemento);
+    }
+    if (entrada !== undefined && elemento.etiqueta === 'button' && elemento.atributos.has('data-copiar')) {
+      entrada.copiar = true;
+    }
+    // `FiltrosDeLaCita`: el contenedor oculto que lleva el orden de Pagefind de la Cita.
+    if (entrada !== undefined && hijo.atributos.has('hidden') && elemento.atributos.has('data-pagefind-sort')) {
+      entrada.filtros = true;
+    }
+  });
+  return hijos.map(({ elemento, copiar, filtros, dentro }) => {
+    const clase = elemento.atributos.get('class') ?? '';
+    const a = elemento.atributos;
+    const que = elemento.etiqueta === 'div' && clase.split(/\s+/).includes('fila-de-acciones')
+      ? 'acciones'
+      : elemento.etiqueta === 'div' && clase.split(/\s+/).includes('desplegables')
+        ? 'desplegables'
+      : copiar
+      ? 'copiar'
+      : a.has('data-imagen')
+        ? 'imagen'
+        : a.has('data-compartir')
+          ? 'compartir'
+          : elemento.etiqueta === 'figure' && clase.split(/\s+/).includes('bloque')
+            ? 'bloque'
+            : elemento.etiqueta === 'p' && clase.split(/\s+/).includes('fuente')
+              ? 'fuente'
+              : elemento.etiqueta === 'section' && clase.split(/\s+/).includes('tarjeta-de-obra')
+                ? 'tarjeta-de-obra'
+                : elemento.etiqueta === 'nav' && clase.split(/\s+/).includes('salidas')
+                  ? 'salidas'
+                  : filtros
+                    ? 'filtros'
+                    : `${elemento.etiqueta}.${clase}`;
+    return { etiqueta: elemento.etiqueta, clase: que, copiar, elemento, dentro };
+  });
+}
+
+/** Historia 30.2 — lo que hay dentro de la Fila de acciones: cada isla y su guion, en orden. */
+function dentroDeLaFila(dentro: Elemento[]): string[] {
+  return dentro.map((e) =>
+    e.etiqueta === 'script'
+      ? 'script'
+      : e.atributos.has('data-imagen')
+        ? 'imagen'
+        : (e.atributos.get('class') ?? '').split(/\s+/).includes('isla') && !e.atributos.has('data-imagen')
+          ? 'copiar'
+          : `${e.etiqueta}.${e.atributos.get('class') ?? ''}`,
+  );
+}
+
 /** El enlace de la fila «Ver la obra» de una tarjeta: el único con la zona `tarjeta-de-obra`. */
 function filaDeLaObra(tarjeta: string) {
   const filas = enlacesDe(tarjeta).filter(
@@ -654,6 +838,9 @@ describe('Historia 24.4 — la tarjeta en cada Página de Cita, construida', () 
 
   it('el fixture es el de la matriz', () => {
     expect(LARGO).toHaveLength(163);
+    expect(corpus['citas/miguel-de-unamuno--sentimiento-0.md']).toBeDefined();
+    const texto = /^texto: (.*)$/m.exec(corpus['citas/miguel-de-unamuno--sentimiento-0.md'])![1];
+    expect(texto.length).toBeGreaterThan(MAX_CARACTERES_IMAGEN);
     expect([...esperadas.values()].filter((e) => e === undefined)).toHaveLength(1);
   });
 
@@ -674,31 +861,114 @@ describe('Historia 24.4 — la tarjeta en cada Página de Cita, construida', () 
         expect(marcado, slug).not.toContain('tarjeta-de-obra');
         expect(marcado, slug).not.toContain('De la obra');
         expect(marcado, slug).not.toContain('fila-de-bloque');
-        // Copiar sigue a la Atribución, sin nada entre medias.
-        const article = pagina.slice(pagina.indexOf('<article'));
-        expect(article.indexOf('</figure>'), slug).toBeLessThan(article.indexOf('<div class="isla"'));
+        // Los desplegables siguen a compartir, sin hueco (Historias 30.1 y 30.3), y las Rutas de
+        // salida a ellos.
+        const hijos = hijosDelArticle(pagina);
+        const compartir = hijos.findIndex((h) => h.clase === 'compartir');
+        expect(compartir, slug).toBeGreaterThan(-1);
+        const clases = hijos.map((h) => h.clase);
+        expect(clases[compartir + 1], slug).toBe('desplegables');
+        expect(clases[compartir + 2], slug).toBe(clases.includes('salidas') ? 'salidas' : 'filtros');
       } else {
         expect(cuantasTarjetasDeObra(pagina), slug).toBe(1);
       }
     }
   });
 
-  it('después de la Cita y su Fuente, antes de Copiar, dentro de `article`, fuera de Pagefind y sin Modelo', async () => {
+  it('nada se intercala entre la Atribución —con su Línea de la Fuente— y Copiar', async () => {
+    for (const [slug, esperada] of esperadas) {
+      const hijos = hijosDelArticle(await html(`/cita/${slug}/`));
+      const bloque = hijos.findIndex((h) => h.clase === 'bloque');
+      expect(bloque, slug).toBe(0);
+      const conFuente = hijos[bloque + 1]?.clase === 'fuente';
+      // Las cotejadas tienen Línea de la Fuente; las de Cartas y la sin Obra, no.
+      expect(conFuente, slug).toBe(esperada?.fila === FILA_VER_LA_OBRA_Y_DONDE_LEERLA);
+      // Lo siguiente es la Fila de acciones, que contiene a Copiar (`copiar` marca al hijo del
+      // `article` que lleva el botón, y desde la 30.2 ese hijo es la fila).
+      const siguiente = hijos[bloque + (conFuente ? 2 : 1)];
+      expect(siguiente?.clase, slug).toBe('acciones');
+      expect(siguiente?.copiar, slug).toBe(true);
+      // Historia 30.2 — tras la Fila de acciones, compartir, fuera de ella.
+      const desdeCopiar = hijos.slice(bloque + (conFuente ? 2 : 1)).map((h) => h.clase);
+      expect(desdeCopiar.slice(0, 2), slug).toEqual(['acciones', 'compartir']);
+      // Dentro, Copiar y, si la Cita la admite, Imagen, cada una con su guion detrás; sin
+      // Imagen, sin hueco ni celda vacía.
+      const conImagen = slug !== SIN_IMAGEN;
+      expect(dentroDeLaFila(siguiente!.dentro), slug).toEqual(
+        conImagen ? ['copiar', 'script', 'imagen', 'script'] : ['copiar', 'script'],
+      );
+    }
+  });
+
+  it('Historia 30.2 — la fila no lleva zona ni exención, y cada isla conserva sus atributos', async () => {
+    for (const [slug] of esperadas) {
+      const hijos = hijosDelArticle(await html(`/cita/${slug}/`));
+      const fila = hijos.find((h) => h.clase === 'acciones')!;
+      expect(fila, slug).toBeDefined();
+      expect([...fila.elemento.atributos.keys()].filter((n) => !n.startsWith('data-astro-cid')), slug).toEqual([
+        'class',
+      ]);
+      // Cada isla por lo que es, no por su posición: el orden lo juzga «nada se intercala…».
+      const islas = fila.dentro.filter((e) => e.etiqueta !== 'script');
+      const copiar = islas.find((e) => !e.atributos.has('data-imagen'))!;
+      const imagen = islas.find((e) => e.atributos.has('data-imagen'));
+      expect(islas, slug).toHaveLength(slug === SIN_IMAGEN ? 1 : 2);
+      expect(copiar, slug).toBeDefined();
+      expect([...copiar.atributos.keys()].filter((n) => !n.startsWith('data-astro-cid')).sort(), slug).toEqual([
+        'class',
+        'data-pagefind-ignore',
+      ]);
+      if (slug === SIN_IMAGEN) {
+        expect(imagen, slug).toBeUndefined();
+        continue;
+      }
+      expect([...imagen!.atributos.keys()].filter((n) => !n.startsWith('data-astro-cid')).sort(), slug).toEqual(
+        [
+          'class',
+          'data-autor',
+          'data-imagen',
+          'data-marca',
+          'data-nombre',
+          'data-pagefind-ignore',
+          'data-procedencia',
+          'data-tamano',
+          'data-texto',
+          'data-texto-plano',
+        ].sort(),
+      );
+    }
+  });
+
+  it('la portada, si lleva Copiar, lo lleva tras su Atribución (hoy no lo lleva, ni la tarjeta)', async () => {
+    // La regla queda escrita para la 28.2: la Cita del Día nace en el orden nuevo.
+    const portada = await readFile(join(proyecto, 'dist', 'index.html'), 'utf8');
+    if (!portada.includes('data-copiar')) {
+      expect(cuantasTarjetasDeObra(portada)).toBe(0);
+      return;
+    }
+    const hijos = hijosDelArticle(portada);
+    const bloque = hijos.findIndex((h) => h.clase === 'bloque');
+    expect(bloque).toBeGreaterThan(-1);
+    const conFuente = hijos[bloque + 1]?.clase === 'fuente';
+    expect(hijos[bloque + (conFuente ? 2 : 1)]?.copiar).toBe(true);
+  });
+
+  it('tras compartir y antes de las Rutas de salida, dentro de `article`, fuera de Pagefind y sin Modelo', async () => {
     for (const [slug, esperada] of esperadas) {
       if (esperada === undefined) continue;
       const pagina = await html(`/cita/${slug}/`);
       const tarjeta = tarjetaDeObraDe(pagina)!;
-      const donde = pagina.indexOf(tarjeta);
-      const inicioDeArticle = pagina.indexOf('<article');
-      expect(inicioDeArticle, slug).toBeGreaterThan(-1);
-      expect(donde, slug).toBeGreaterThan(inicioDeArticle);
-      expect(donde, slug).toBeLessThan(pagina.indexOf('</article>'));
-      expect(donde, slug).toBeGreaterThan(pagina.indexOf('</figure>', inicioDeArticle));
-      const fuente = pagina.indexOf('<p class="fuente"', inicioDeArticle);
-      if (fuente !== -1) expect(donde, slug).toBeGreaterThan(fuente);
-      // Las cotejadas tienen Línea de la Fuente; las de Cartas, no.
-      expect(fuente !== -1, slug).toBe(esperada.fila === FILA_VER_LA_OBRA_Y_DONDE_LEERLA);
-      expect(donde + tarjeta.length, slug).toBeLessThanOrEqual(pagina.indexOf('<div class="isla"', inicioDeArticle));
+      const hijos = hijosDelArticle(pagina);
+      const clases = hijos.map((h) => h.clase);
+      const enTarjeta = clases.indexOf('tarjeta-de-obra');
+      expect(enTarjeta, slug).toBeGreaterThan(-1);
+      expect(clases[enTarjeta - 1], slug).toBe('compartir');
+      // Historia 30.3 — los desplegables tras la tarjeta; después, las Rutas de salida, si hay
+      // alguna, y sin ninguna, los filtros, sin hueco.
+      expect(clases[enTarjeta + 1], slug).toBe('desplegables');
+      expect(clases[enTarjeta + 2], slug).toBe(clases.includes('salidas') ? 'salidas' : 'filtros');
+      expect(clases.indexOf('acciones'), slug).toBeLessThan(enTarjeta);
+      expect(clases.at(-1), slug).toBe('filtros');
 
       // Un antepasado —o ella misma— fuera de Pagefind con `all`, y ningún Modelo dentro.
       let ignorada = false;
@@ -775,8 +1045,8 @@ describe('Historia 24.4 — la tarjeta en cada Página de Cita, construida', () 
       // El glifo va detrás del texto, pegado.
       expect(interior.replace(/<[^>]+>/g, '').replace(/&nbsp;/g, '\u00A0'), slug).toBe(`${esperada.fila}\u00A0${AVANCE}`);
     }
-    // «Siguiente…» solo en las Obras de dos Citas o más: Brevedad, Cartas y Machado; De la ira,
-    // de una Cita y sin Tema publicado, no lo lleva.
+    // «Siguiente…» solo en las Obras de dos Citas o más: Brevedad, Cartas y Machado; De la ira y
+    // la de Unamuno (30.1), de una Cita y sin Tema publicado, no lo llevan.
     expect(conSiguiente.sort()).toEqual(
       [...esperadas]
         .filter(([, e]) => e !== undefined && e.hechos.at(-1) !== '1 cita')
@@ -796,7 +1066,12 @@ describe('Historia 24.4 — la tarjeta en cada Página de Cita, construida', () 
       expect(/<meta name="robots" content="noindex, follow"/.test(obra), `${slug} → ${href}`).toBe(esperada.noindex);
       if (esperada.noindex) vistas.push(slug);
     }
-    expect(vistas.sort()).toEqual(['antonio-machado-soledades-0', 'antonio-machado-soledades-1', 'seneca-ira-0']);
+    expect(vistas.sort()).toEqual([
+      'antonio-machado-soledades-0',
+      'antonio-machado-soledades-1',
+      'miguel-de-unamuno-sentimiento-0',
+      'seneca-ira-0',
+    ]);
   });
 
   it('la página a la que lleva cumple lo que promete la fila: «y dónde leerla» solo con edición cotejada', async () => {

@@ -1,5 +1,5 @@
 ---
-texto: "Huye el loco tumulto de las gentes; y a los dolores que codicia irrita, prefiere el campo, y árboles, y fuentes."
+texto: "Huye el loco tumulto de las gentes;\ny a los dolores que codicia irrita,\nprefiere el campo, y árboles, y fuentes."
 autor: "andres-bello"
 slug: "andres-bello-huye-el-loco-tumulto-de-las-gentes"
 procedencia:

@@ -1,5 +1,5 @@
 ---
-texto: "FILIPO No señora, no el veneno he querido disfrazar que en lo que os vengo a tratar 750 solicito gusto ageno."
+texto: "FILIPO\nNo señora, no el veneno\nhe querido disfrazar\nque en lo que os vengo a tratar 750\nsolicito gusto ageno."
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-filipo-no-senora-no-el-veneno-he"
 procedencia:

@@ -1,5 +1,5 @@
 ---
-texto: "Sin hablar palabra, saca el acero, que aquel día le ceñiste."
+texto: "Sin hablar palabra, saca\nel acero, que aquel día\nle ceñiste."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-sin-hablar-palabra-saca-el-acero-que"
 procedencia:

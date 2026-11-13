@@ -1,5 +1,5 @@
 ---
-texto: "Perdona mi desuario, 105 Diana, que el ofenderte es violencia de la suerte, no eleccion de mi aluedrio. (Vase.)"
+texto: "Perdona mi desuario, 105\nDiana, que el ofenderte\nes violencia de la suerte,\nno eleccion de mi aluedrio.\n(Vase.)"
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-perdona-mi-desuario-105-diana-que-el"
 procedencia:

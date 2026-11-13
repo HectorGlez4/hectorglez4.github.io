@@ -1,5 +1,5 @@
 ---
-texto: "Para que assi a mi padre sospechoso vuestras cartas le quiten la sospecha, que dalle yo de mi serà forçoso."
+texto: "Para que assi a mi padre sospechoso\nvuestras cartas le quiten la sospecha,\nque dalle yo de mi serà forçoso."
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-para-que-assi-a-mi-padre-sospechoso"
 procedencia:

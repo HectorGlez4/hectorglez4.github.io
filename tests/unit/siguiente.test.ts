@@ -186,7 +186,7 @@ describe('Historia 24.5 — `siguienteCita`, sin construir', () => {
       libro.map((slug, posicion) => [slug, [{ documento: 'wikisource-es--brevedad', posicion: posicion * 10 }]]),
     );
     const destinos = (citas: Cita[]) => {
-      const porObra = citasPorObra(citas, posiciones);
+      const porObra = citasPorObra(citas, posiciones, new Map());
       const listados = new Map([['la-vida', citasDeTema(citas, 'la-vida')]]);
       return Object.fromEntries(
         citas

@@ -1,5 +1,5 @@
 ---
-texto: "Ni penseis, que auer errado el tiro, me da pesar, 770 que doy por bien el errar, a trueco de auer tirado."
+texto: "Ni penseis, que auer errado\nel tiro, me da pesar, 770\nque doy por bien el errar,\na trueco de auer tirado."
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-ni-penseis-que-auer-errado-el-tiro"
 procedencia:

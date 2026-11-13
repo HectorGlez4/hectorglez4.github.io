@@ -1,5 +1,5 @@
 ---
-texto: "No es peor ponerse en corro 185 con la quadrilla lacaya a no dexar honra en pie de sus amos, ni sus amas."
+texto: "No es peor ponerse en corro 185\ncon la quadrilla lacaya\na no dexar honra en pie\nde sus amos, ni sus amas."
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-no-es-peor-ponerse-en-corro-185"
 procedencia:

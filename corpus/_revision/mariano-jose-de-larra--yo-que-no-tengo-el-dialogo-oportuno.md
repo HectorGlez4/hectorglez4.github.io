@@ -1,5 +1,5 @@
 ---
-texto: "¿Yo que no tengo el diálogo oportuno de Inarco, ni su sal para la escena, ni el aura injusta y popular de alguno?"
+texto: "¿Yo que no tengo el diálogo oportuno\nde Inarco, ni su sal para la escena,\nni el aura injusta y popular de alguno?"
 autor: "mariano-jose-de-larra"
 slug: "mariano-jose-de-larra-yo-que-no-tengo-el-dialogo-oportuno"
 procedencia:

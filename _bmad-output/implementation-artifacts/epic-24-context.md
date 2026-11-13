@@ -16,6 +16,7 @@ Quien lee una Cita ve justo debajo de qué Obra sale —título, Autor, año si 
 - Story 24.6: Al pie, más de la misma obra y más del Autor
 - Story 24.7: La Obra salta a dónde leerla
 - Story 24.8: Una Cita nueva no refecha las demás Páginas de Cita
+- Story 24.9: El orden del libro lo declara la Fuente
 
 ## Requirements & Constraints
 
@@ -35,7 +36,7 @@ Quien lee una Cita ve justo debajo de qué Obra sale —título, Autor, año si 
 
 - **Paradigma v8:** `tools/lib/` es la segunda capa pura y sin red; la importan el build, `content.config.ts` y las órdenes, y `src/lib/` nunca importa de ella (una prueba lo fija). `content.config.ts` pasa `z` a `astro/zod`.
 - **Posiciones (AD-23):** un cargador de contenido, al patrón del de biografías, lee Citas y documentos con los mismos lectores que el cotejo, casa por `documentosDeCita` y localiza con el **mismo** `indexOf` sobre formas colapsadas (no hay segundo localizador). Entrega `{slug → [{documento, posición}]}` con el `slug` del frontmatter, todas las apariciones, sin ordenar, elegir ni guardar texto. La lógica vive en `tools/lib/`; `content.config.ts` solo la cablea.
-- **Orden del libro (AD-25):** solo `src/lib/obras.ts` ordena, con las posiciones por parámetro (AD-5): Fuente que más Citas aporta primero; documentos por orden natural del slug de página con romanos leídos; Citas sin documento al final por slug. Lo leen el listado de Obra, «Siguiente», «De la misma obra» y, más tarde, la búsqueda. El índice de subpáginas de la Fuente queda aplazado.
+- **Orden del libro (AD-25):** solo `src/lib/obras.ts` ordena, con las posiciones por parámetro (AD-5): Fuente que más Citas aporta primero; documentos por orden natural del slug de página con romanos leídos; Citas sin documento al final por slug. Lo leen el listado de Obra, «Siguiente», «De la misma obra» y, más tarde, la búsqueda. *(v8.5)* Una Obra paginada cuyas páginas se nombran por título se ordena por el **índice de subpáginas** que declara la Fuente: lo recupera una vez una orden de `tools/`, se versiona en `corpus/fuentes/` junto a los documentos y aparte de ellos (ningún lector de documentos lo toma por uno), llega a `src/` por un cargador que solo cablea `tools/lib/`, y `ordenDelLibro` lo recibe por parámetro; sin índice rige el orden natural. Capturarlo fecha y avisa su Página de Obra como un documento suyo, y ninguna Página de Cita.
 - **Un solo dueño de lo enumerado (AD-11):** la Obra resuelta (`cita.obra.titulo`, año, recuento, si hay edición cotejada), los recuentos de tarjeta y cierres y las elecciones de las rutas salen de `publicado.ts`/`obras.ts`; ningún componente cuenta. «Siguiente» de una Obra de una Cita lee el listado del dueño que pinta la Página de Tema. Fuera de `obras.ts` y `admision.ts`, nada de `src/` lee `procedencia.obra`.
 - **Componentes únicos (AD-19):** una sola `TarjetaDeCita.astro`, cuyo uso declara su atribución en un conjunto cerrado sin valor por omisión; una sola `TarjetaDeObra.astro`, que recibe el nivel de su encabezado porque la portada la reutilizará.
 - **Paso final del build (AD-9, AD-16):** la comprobación del peso corre tras Pagefind en `npm run build`, nunca en `astro:build:done`, sobre lo que se despliega (`dist/pagefind/` incluido), desglosando `/tarjeta/` y contando PNG y ficheros. El veredicto no depende de la jornada: la función pura recibe la medida ya sin la portada, el 404, `/kit`, `/lote` y `rss.xml`. Las decisiones son funciones puras probadas en Vitest; el caso de error se prueba con el tope rebajado en una copia temporal, nunca en el árbol. La caché de PNG es deuda declarada cuyo disparador es el tope de PNG.
@@ -54,6 +55,6 @@ Quien lee una Cita ve justo debajo de qué Obra sale —título, Autor, año si 
 ## Cross-Story Dependencies
 
 - **Rama y merge compartidos con la Épica 26** (SM-11): un solo merge con CI verde y `npm run test:e2e` entero; lo cierra la 26.11, que mide NFR-7 y da valor a `DESPLIEGUE_DE_OBRA_Y_DIRECTORIOS`. Depende de la Épica 23 por las zonas (23.7).
-- **Orden:** 24.1 primero (de ella cuelgan 24.5 y 24.6); 24.3 y 24.4 tras la 23.7; 24.5 tras 24.1 y 24.4; 24.6 tras 24.1, 24.2, 24.3 y 24.5; 24.7 libre; 24.8 la última, y antes que la 26.1.
+- **Orden:** 24.1 primero (de ella cuelgan 24.5, 24.6 y 24.9); 24.3 y 24.4 tras la 23.7; 24.5 tras 24.1 y 24.4; 24.6 tras 24.1, 24.2, 24.3 y 24.5; 24.7 libre; 24.8 la última, y antes que la 26.1.
 - **La 24.2 es excepción a la fusión por épica:** entra sola en la principal en cuanto Héctor fije aviso y tope (acto suyo, del que cuelgan 24.6, 24.8 y la 26); la rama 24+26 la recibe de la principal y los valores se revisan tras la 24.6.
 - **Fuera:** «Compartir en» (25.1, 25.6), «Buscar en…» (27.8), `data-pagefind-sort` (27.1), la Tarjeta de Obra en la portada (28.2), la vista de Obra (23.9) y los Directorios en AD-27 (26). El orden de la 21.2 respecto de esta épica lo decide Héctor.

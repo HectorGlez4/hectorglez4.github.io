@@ -1,5 +1,5 @@
 ---
-texto: "Alguaciles y alfileres prenden todo cuanto agarran: Levántanse solamente los testimonios y faldas."
+texto: "Alguaciles y alfileres\nprenden todo cuanto agarran:\nLevántanse solamente\nlos testimonios y faldas."
 autor: "francisco-de-quevedo"
 slug: "francisco-de-quevedo-alguaciles-y-alfileres-prenden-todo-cuanto-agarran"
 procedencia:

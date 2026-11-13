@@ -1,5 +1,5 @@
 ---
-texto: "Mis padres, en mi mesura vanamente asegurados, se descuidaron conmigo; ¡qué dictamen tan errado, pues fue quitar por de fuera las guardas y los candados a una fuerza que en sí propia encierra tantos contrarios!"
+texto: "Mis padres, en mi mesura\nvanamente asegurados,\nse descuidaron conmigo;\n¡qué dictamen tan errado,\npues fue quitar por de fuera\nlas guardas y los candados\na una fuerza que en sí propia\nencierra tantos contrarios!"
 autor: "sor-juana-ines-de-la-cruz"
 slug: "sor-juana-ines-de-la-cruz-mis-padres-en-mi-mesura-vanamente-asegurados"
 procedencia:

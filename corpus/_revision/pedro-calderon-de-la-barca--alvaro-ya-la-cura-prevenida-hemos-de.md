@@ -1,5 +1,5 @@
 ---
-texto: "ÁLVARO: Ya la cura prevenida, hemos de considerar, que no es bien aventurar hoy la vida por la herida."
+texto: "ÁLVARO: Ya la cura prevenida,\nhemos de considerar,\nque no es bien aventurar\nhoy la vida por la herida."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-alvaro-ya-la-cura-prevenida-hemos-de"
 procedencia:

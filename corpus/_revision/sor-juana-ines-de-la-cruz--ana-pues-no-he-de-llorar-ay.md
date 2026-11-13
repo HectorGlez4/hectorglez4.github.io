@@ -1,5 +1,5 @@
 ---
-texto: "Ana: ¿Pues no he de llorar, ¡ay infeliz de mí!, cuando conozco que estoy errando y no me puedo enmendar?"
+texto: "Ana: ¿Pues no he de llorar,\n¡ay infeliz de mí!, cuando\nconozco que estoy errando\ny no me puedo enmendar?"
 autor: "sor-juana-ines-de-la-cruz"
 slug: "sor-juana-ines-de-la-cruz-ana-pues-no-he-de-llorar-ay"
 procedencia:

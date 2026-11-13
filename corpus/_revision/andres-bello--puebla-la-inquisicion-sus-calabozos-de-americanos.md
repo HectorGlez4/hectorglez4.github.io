@@ -1,5 +1,5 @@
 ---
-texto: "¿Puebla la inquisición sus calabozos de americanos; o españolas cortes dan a la servidumbre formas nuevas?"
+texto: "¿Puebla la inquisición sus calabozos\nde americanos; o españolas cortes\ndan a la servidumbre formas nuevas?"
 autor: "andres-bello"
 slug: "andres-bello-puebla-la-inquisicion-sus-calabozos-de-americanos"
 procedencia:

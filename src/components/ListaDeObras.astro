@@ -21,10 +21,24 @@
  * Nada se recorta (NFR-12): el título parte palabras y, si no cabe a su lado, el recuento baja a
  * la línea siguiente sin encogerse. Sin guion y sin enlace comercial: ninguna de sus dos
  * superficies admite un Modelo.
+ *
+ * **El pliegue (Historia 34.2, UX-DR130).** En la Página de Autor, con más de
+ * `MAX_OBRAS_ANTES_DE_LAS_CITAS` Obras, pinta las primeras y pliega el resto, en el mismo orden y
+ * con las mismas filas, en un segundo `<ul>` dentro del Desplegable (34.0), rotulado por
+ * `rotuloDeObrasPlegadas` («Y {m} obras más»): la primera Cita deja de quedar pantallas abajo.
+ * Sin `<li>` que envuelva el Desplegable: sus filetes son los suyos. `/obras/` no se pliega nunca.
+ *
+ * La prop `pliegue` es **el componente** `Desplegable`, o `false`, y no un booleano: Astro emite
+ * la hoja de todo lo que un componente importa, se renderice o no (como con `Sostener.astro`).
+ * Si este componente importara el Desplegable, el `<style>` de `/obras/` ganaría sus reglas y su
+ * HTML cambiaría sin plegar nada. Por eso aquí solo se importa su tipo, y lo importa —y lo pasa—
+ * la Página de Autor, que es la que pliega. Obligatoria y sin valor por omisión: cada uso dice si
+ * se pliega, y uno nuevo que la olvide no pasa `astro check`.
  */
-import { rutaDeLaObra, type ObraResuelta } from '../lib/obras.ts';
-import { añoLegible, recuentoDeCitas } from '../lib/atribucion.ts';
+import { partirLaListaDeObras, rutaDeLaObra, type ObraResuelta } from '../lib/obras.ts';
+import { añoLegible, recuentoDeCitas, rotuloDeObrasPlegadas } from '../lib/atribucion.ts';
 import type { Zona } from '../lib/vocabulario.ts';
+import type Desplegable from './Desplegable.astro';
 
 interface Props {
   obras: readonly ObraResuelta[];
@@ -33,28 +47,49 @@ interface Props {
    * uso dice desde qué zona se sale, y un uso nuevo que la olvide no pasa `astro check`.
    */
   zona: Zona;
+  /**
+   * El Desplegable con que se pliegan las Obras de más (Historia 34.2), o `false` si la lista no se
+   * pliega nunca (`/obras/`). El componente y no un booleano: ver la cabecera.
+   */
+  pliegue: typeof Desplegable | false;
 }
 
-const { obras, zona } = Astro.props;
+const { obras, zona, pliegue } = Astro.props;
+const Pliegue = pliegue;
+/*
+ * El corte lo decide `partirLaListaDeObras` (`src/lib/obras.ts`, con `MAX_OBRAS_ANTES_DE_LAS_CITAS`),
+ * y no un `import` de `umbrales.ts` aquí: esa arista nueva del grafo bastaba para que Astro
+ * reordenara la hoja en línea de `/obras/` —la de este componente y la del filtro cambiaban de
+ * sitio—, y su HTML cambiaba sin plegar nada.
+ */
+const { primeras, resto } = Pliegue === false ? { primeras: obras, resto: [] } : partirLaListaDeObras(obras);
 ---
 
 {
-  obras.length > 0 && (
-    <ul class="lista-de-obras" data-zona={zona}>
-      {obras.map((obra) => (
-        <li>
-          <a href={rutaDeLaObra(obra)}>
-            <span class="titulo">{obra.titulo}{
-              obra.año !== undefined && (
-                <><span aria-hidden="true"> · </span><span class="oculto">, </span>{añoLegible(obra.año)}</>
-              )
-            }</span>
-            <span class="recuento"><span class="oculto">, </span>{recuentoDeCitas(obra.recuento)}</span>
-          </a>
-        </li>
-      ))}
-    </ul>
-  )
+  obras.length > 0 && (() => {
+    const fila = (obra: ObraResuelta) => (
+      <li>
+        <a href={rutaDeLaObra(obra)}>
+          <span class="titulo">{obra.titulo}{
+            obra.año !== undefined && (
+              <><span aria-hidden="true"> · </span><span class="oculto">, </span>{añoLegible(obra.año)}</>
+            )
+          }</span>
+          <span class="recuento"><span class="oculto">, </span>{recuentoDeCitas(obra.recuento)}</span>
+        </a>
+      </li>
+    );
+    return Pliegue === false || resto.length === 0 ? (
+      <ul class="lista-de-obras" data-zona={zona}>{primeras.map(fila)}</ul>
+    ) : (
+      <>
+        <ul class="lista-de-obras" data-zona={zona}>{primeras.map(fila)}</ul>
+        <Pliegue rotulo={rotuloDeObrasPlegadas(resto.length)}>
+          <ul class="lista-de-obras" data-zona={zona}>{resto.map(fila)}</ul>
+        </Pliegue>
+      </>
+    );
+  })()
 }
 
 <style>
@@ -105,7 +140,12 @@ const { obras, zona } = Astro.props;
     max-width: 100%;
     font-family: var(--sans);
     font-size: var(--cuerpo-md);
-    line-height: 1.4;
+    /*
+     * Historia 26.12 — excepción de DESIGN.md § Typography: el título de la Obra en la Lista de
+     * Obras toma el interlineado de `author` (1,4) y no el de su cuerpo. No es un descuido: la
+     * nombra, por fichero y selector, `tests/unit/tipografia-en-tokens.test.ts`.
+     */
+    line-height: var(--interlineado-autor);
     overflow-wrap: break-word;
   }
 

@@ -1,5 +1,5 @@
 ---
-texto: "El sueño todo, en fin, lo poseía; todo, en fin, el silencio lo ocupaba: aun el ladrón dormía; aun el amante no se desvelaba."
+texto: "El sueño todo, en fin, lo poseía;\ntodo, en fin, el silencio lo ocupaba:\naun el ladrón dormía;\naun el amante no se desvelaba."
 autor: "sor-juana-ines-de-la-cruz"
 slug: "sor-juana-ines-de-la-cruz-el-sueno-todo-en-fin-lo-poseia"
 procedencia:

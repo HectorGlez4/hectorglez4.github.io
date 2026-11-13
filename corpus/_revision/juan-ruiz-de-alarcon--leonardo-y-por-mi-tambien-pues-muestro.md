@@ -1,5 +1,5 @@
 ---
-texto: "LEONARDO Y por mi tambien, pues muestro viniendo al mandado vuestro, 715 que esso està en vuestro aluedrio."
+texto: "LEONARDO\nY por mi tambien, pues muestro\nviniendo al mandado vuestro, 715\nque esso està en vuestro aluedrio."
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-leonardo-y-por-mi-tambien-pues-muestro"
 procedencia:

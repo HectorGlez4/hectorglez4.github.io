@@ -1,5 +1,5 @@
 ---
-texto: "Yo soy perdido, que Aurora no se ha enojado. 765 AURORA Engañose mi cuidado."
+texto: "Yo soy perdido,\nque Aurora no se ha enojado. 765\nAURORA\nEngañose mi cuidado."
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-yo-soy-perdido-que-aurora-no-se"
 procedencia:

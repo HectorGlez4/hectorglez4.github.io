@@ -1,5 +1,5 @@
 ---
-texto: "Si haber sido del Carmen culpa ha sido, sobra el que se me dio hábito un día: huélgome que es templada Andalucía, ya que vuelvo descalzo al patrio nido."
+texto: "Si haber sido del Carmen culpa ha sido,\nsobra el que se me dio hábito un día:\nhuélgome que es templada Andalucía,\nya que vuelvo descalzo al patrio nido."
 autor: "luis-de-gongora"
 slug: "luis-de-gongora-si-haber-sido-del-carmen-culpa-ha"
 procedencia:

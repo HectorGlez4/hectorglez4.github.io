@@ -1,5 +1,5 @@
 ---
-texto: "¿No gimes de mirar cuál lleva el viento tantos ardientes votos, sangre tanta, cuatro lustros de horror y asolamiento,"
+texto: "¿No gimes de mirar cuál lleva el viento\ntantos ardientes votos, sangre tanta,\ncuatro lustros de horror y asolamiento,"
 autor: "andres-bello"
 slug: "andres-bello-no-gimes-de-mirar-cual-lleva-el"
 procedencia:

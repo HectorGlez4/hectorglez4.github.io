@@ -34,6 +34,7 @@ import { cuentaParaElSuelo } from './huecos.ts';
 import { milesEnEspañol } from './formato.ts';
 import { compararPorClave } from './normalizar.ts';
 import {
+  aparicionQueCuenta,
   colgarObras,
   congelacionVigente,
   esObraIndexable,
@@ -44,6 +45,8 @@ import {
   type CitaParaObra,
   type FichaDeObra,
   type ObraResuelta,
+  type IndicesDeObras,
+  type PasajeDeAparicion,
   type PosicionesDeCitas,
 } from './obras.ts';
 import { atribucionDeBiografia, type AtribucionDeSemblanza } from './biografia.ts';
@@ -114,6 +117,12 @@ export interface Autor {
    * Citas puede no tenerla. Sin valor se omite.
    */
   ordenAlfabetico?: string;
+  /**
+   * La jornada en que una persona revisó la clave — Historia 26.1. Viaja desde la 30.3 porque
+   * decide el nombre invertido de «Cómo citar» (`partesDelNombre` de `src/lib/atribucion.ts`):
+   * sin revisar, la Referencia lleva el `nombre` tal cual. Sin valor se omite.
+   */
+  ordenRevisado?: string;
   /**
    * La tradición del Autor — Historia 27.6, §6.1 del PRD: con el tipo del esquema (`tradicion` de
    * `src/lib/admision.ts`), opcional como allí y omitida sin valor. La lee `autoresDestacados`
@@ -888,13 +897,14 @@ export function obrasDelAutor(citas: readonly CitaConSuObra[], slugAutor: string
  * Las Citas de cada Obra, por nombre de ficha y **en el orden del libro** — Historia 24.1.
  *
  * Agrupa por la Obra resuelta de cada Cita (`cita.obra.nombre`) y ordena cada grupo con
- * `ordenDelLibro`, el único que ordena las Citas de una Obra (AD-25). Pura: las posiciones
- * llegan por parámetro. Lo que la Página de Obra pagina —y después «Siguiente» y «De la misma
+ * `ordenDelLibro`, el único que ordena las Citas de una Obra (AD-25). Pura: las posiciones y
+ * los índices de subpáginas de la Fuente (Historia 24.9) llegan por parámetro. Lo que la Página de Obra pagina —y después «Siguiente» y «De la misma
  * obra»— sale de aquí, nunca de un agrupado propio (AD-11).
  */
 export function citasPorObra<C extends Pick<Cita, 'slug' | 'fuente' | 'obra'>>(
   citas: readonly C[],
   posiciones: PosicionesDeCitas,
+  indices: IndicesDeObras,
 ): Map<string, C[]> {
   const porObra = new Map<string, C[]>();
   for (const cita of citas) {
@@ -903,7 +913,28 @@ export function citasPorObra<C extends Pick<Cita, 'slug' | 'fuente' | 'obra'>>(
     if (suyas === undefined) porObra.set(cita.obra.nombre, [cita]);
     else suyas.push(cita);
   }
-  return new Map([...porObra].map(([nombre, suyas]) => [nombre, ordenDelLibro(suyas, posiciones)]));
+  return new Map([...porObra].map(([nombre, suyas]) => [nombre, ordenDelLibro(suyas, posiciones, indices)]));
+}
+
+/**
+ * El pasaje de cada Cita, por su slug — Historia 31.1, AD-30.
+ *
+ * Pura. Toda Cita, con Obra o sin ella, toma el pasaje de **su aparición que cuenta**
+ * (`aparicionQueCuenta`), la misma que la sitúa en el orden del libro; si esa aparición no lo
+ * trae, la Cita no está en el mapa —no se busca en otra—. Lo que las páginas lean del pasaje
+ * sale de aquí (la 31.2), nunca de una elección propia.
+ */
+export function pasajesDeCitas(
+  citas: readonly Pick<Cita, 'slug'>[],
+  posiciones: PosicionesDeCitas,
+  indices: IndicesDeObras,
+): Map<string, PasajeDeAparicion> {
+  const pasajes = new Map<string, PasajeDeAparicion>();
+  for (const cita of citas) {
+    const pasaje = aparicionQueCuenta(posiciones.get(cita.slug) ?? [], indices)?.pasaje;
+    if (pasaje !== undefined) pasajes.set(cita.slug, pasaje);
+  }
+  return pasajes;
 }
 
 /** Las Obras con página: las que resuelve alguna Cita publicada de un Autor publicado. */
@@ -1383,15 +1414,17 @@ export function aplanarCita(entrada: EntradaCita): Cita {
  * `resolverAtribuciones`.
  */
 export function aplanarAutor(entrada: EntradaAutor): Autor {
-  const { nombre, semblanza, añoNacimiento, añoFallecimiento, ordenAlfabetico, tradicion } = entrada.data;
+  const { nombre, semblanza, añoNacimiento, añoFallecimiento, ordenAlfabetico, ordenRevisado, tradicion } = entrada.data;
   return {
     slug: entrada.id,
     nombre,
     semblanza,
     ...(añoNacimiento !== undefined ? { añoNacimiento } : {}),
     añoFallecimiento,
-    // Historia 26.3 — la clave viaja para el Directorio; `ordenRevisado` no, que no lo pinta nadie.
+    // Historia 26.3 — la clave viaja para el Directorio; desde la 30.3 también su revisión, que
+    // decide si «Cómo citar» invierte el nombre (`partesDelNombre`).
     ...(ordenAlfabetico !== undefined ? { ordenAlfabetico } : {}),
+    ...(ordenRevisado !== undefined ? { ordenRevisado } : {}),
     // Historia 27.6 — la tradición viaja para el suelo de los destacados; sin declarar, se omite.
     ...(tradicion !== undefined ? { tradicion } : {}),
   };
@@ -1537,33 +1570,74 @@ export function avisoDeDesajustes(
   ].join('\n');
 }
 
+/**
+ * Las posiciones y el orden de los índices, de las colecciones `posiciones` e `indices` (los dos
+ * cargadores de `src/content.config.ts`). Es la lectura común de `citasDeLasObras` y de
+ * `pasajesDeLasCitas`.
+ */
+async function posicionesEIndices(): Promise<{ posiciones: PosicionesDeCitas; indices: IndicesDeObras }> {
+  const { getCollection } = await import('astro:content');
+  const posiciones = new Map<string, readonly AparicionDeCita[]>(
+    (await getCollection('posiciones')).map((entrada) => [entrada.id, entrada.data.apariciones]),
+  );
+  // Una sola entrada, siempre presente aunque no haya ningún índice: ver el cargador.
+  const indices: IndicesDeObras = new Map(
+    (await getCollection('indices')).flatMap((entrada) => Object.entries(entrada.data.porObra)),
+  );
+  return { posiciones, indices };
+}
+
+/**
+ * Memoriza por conjunto un cálculo que pide cada página, como `rutasIndexables`. Un fallo no se
+ * memoriza: la siguiente página que lo pida vuelve a intentarlo, como `conjuntoPublicable`, que
+ * solo guarda lo que terminó bien.
+ */
+function memorizadoPorConjunto<T>(
+  memoria: WeakMap<ConjuntoPublicable, Promise<T>>,
+  conjunto: ConjuntoPublicable,
+  calcular: () => Promise<T>,
+): Promise<T> {
+  const memorizada = memoria.get(conjunto);
+  if (memorizada !== undefined) return memorizada;
+  const calculo = calcular();
+  memoria.set(conjunto, calculo);
+  calculo.catch(() => {
+    if (memoria.get(conjunto) === calculo) memoria.delete(conjunto);
+  });
+  return calculo;
+}
+
 const citasDeLasObrasPorConjunto = new WeakMap<ConjuntoPublicable, Promise<ReadonlyMap<string, Cita[]>>>();
 
 /**
  * Las Citas de cada Obra del conjunto, en el orden del libro — Historia 24.1.
  *
- * Es la fachada de `citasPorObra`: lee las posiciones de la colección `posiciones` (el cargador
- * de `src/content.config.ts`) y se memoriza por conjunto, como `rutasIndexables`, porque cada
- * página que la pida comparte el mismo. Sin ninguna Cita con Obra no consulta la colección.
+ * Es la fachada de `citasPorObra`: lee las posiciones de la colección `posiciones` y el orden de
+ * los índices de subpáginas de la colección `indices` (Historia 24.9; los dos cargadores de
+ * `src/content.config.ts`) y se memoriza por conjunto, como `rutasIndexables`, porque cada
+ * página que la pida comparte el mismo. Sin ninguna Cita con Obra no consulta las colecciones.
  */
 export function citasDeLasObras(conjunto: ConjuntoPublicable): Promise<ReadonlyMap<string, Cita[]>> {
-  const memorizada = citasDeLasObrasPorConjunto.get(conjunto);
-  if (memorizada !== undefined) return memorizada;
-  const calculo = (async (): Promise<ReadonlyMap<string, Cita[]>> => {
+  return memorizadoPorConjunto(citasDeLasObrasPorConjunto, conjunto, async () => {
     if (!conjunto.citas.some((cita) => cita.obra !== undefined)) return new Map();
-    const { getCollection } = await import('astro:content');
-    const posiciones = new Map<string, readonly AparicionDeCita[]>(
-      (await getCollection('posiciones')).map((entrada) => [entrada.id, entrada.data.apariciones]),
-    );
-    return citasPorObra(conjunto.citas, posiciones);
-  })();
-  citasDeLasObrasPorConjunto.set(conjunto, calculo);
-  // Un fallo no se memoriza: la siguiente página que la pida vuelve a intentarlo, como
-  // `conjuntoPublicable`, que solo guarda lo que terminó bien.
-  calculo.catch(() => {
-    if (citasDeLasObrasPorConjunto.get(conjunto) === calculo) citasDeLasObrasPorConjunto.delete(conjunto);
+    const { posiciones, indices } = await posicionesEIndices();
+    return citasPorObra(conjunto.citas, posiciones, indices);
   });
-  return calculo;
+}
+
+const pasajesPorConjunto = new WeakMap<ConjuntoPublicable, Promise<ReadonlyMap<string, PasajeDeAparicion>>>();
+
+/**
+ * El pasaje de cada Cita del conjunto, por su slug — Historia 31.1. Es la fachada de
+ * `pasajesDeCitas`, con la misma lectura y la misma memoria que `citasDeLasObras`. Sin ninguna
+ * Cita no consulta las colecciones.
+ */
+export function pasajesDeLasCitas(conjunto: ConjuntoPublicable): Promise<ReadonlyMap<string, PasajeDeAparicion>> {
+  return memorizadoPorConjunto(pasajesPorConjunto, conjunto, async () => {
+    if (conjunto.citas.length === 0) return new Map();
+    const { posiciones, indices } = await posicionesEIndices();
+    return pasajesDeCitas(conjunto.citas, posiciones, indices);
+  });
 }
 
 let memoria: ConjuntoPublicable | undefined;

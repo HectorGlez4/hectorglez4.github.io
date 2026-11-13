@@ -64,9 +64,9 @@ export const EVENTOS_DE_VISTA = [EVENTOS.vistaDeCita, EVENTOS.vistaDeSuperficie,
 export type EventoDeVista = (typeof EVENTOS_DE_VISTA)[number];
 
 /**
- * Los eventos que el fichero sabe emitir — Historias 23.2, 23.5, 23.7, 23.8 y 23.9.
+ * Los eventos que el fichero sabe emitir — Historias 23.2, 23.5, 23.7, 23.8, 23.9 y 30.5.
  *
- * Desde la Historia 23.9 son **todos** los del vocabulario: `vista-de-obra` fue el último, y entró
+ * Desde la Historia 23.9 son **todos** los del vocabulario: `vista-de-obra` fue el último de la v8, y entró
  * aquí en el mismo diff que lo sacó de los pendientes de `tests/unit/vocabulario.test.ts`. Sale de
  * `data-vistas` como las otras dos vistas —la página 1 de toda Obra la declara, se indexe o no—,
  * con la marca que el build escribe en el `<html>` (`ATRIBUTO_DE_INDEXABLE`); no es de
@@ -74,7 +74,9 @@ export type EventoDeVista = (typeof EVENTOS_DE_VISTA)[number];
  * `salida-interna` con la 23.7, y las dos las emite solo el fichero (`EVENTOS_SOLO_DEL_FICHERO`).
  * La `busqueda` entró con la 23.8, y al revés: la pide la isla de `/buscar/` al asentarse un
  * estado, y el fichero envía **cada una** que recibe —qué estado cuenta y cuándo lo decide la isla
- * con `asentamientoDeBusqueda`, nunca el fichero—.
+ * con `asentamientoDeBusqueda`, nunca el fichero—. Las dos de citar, `copiado-de-referencia` y
+ * `copiado-de-fragmento`, entraron con la fase B de la 30.5, tras desplegar el receptor que ya las
+ * guardaba: las pide la isla de Copiar de la Página de Cita, sin campos, y el fichero envía cada una.
  */
 export const EVENTOS_DEL_GUION: readonly Evento[] = [
   EVENTOS.vistaDeCita,
@@ -88,6 +90,8 @@ export const EVENTOS_DEL_GUION: readonly Evento[] = [
   EVENTOS.busquedaSinResultados,
   EVENTOS.comparticionDeImagen,
   EVENTOS.comparticionDeEnlace,
+  EVENTOS.copiadoDeReferencia,
+  EVENTOS.copiadoDeFragmento,
 ];
 
 /**
@@ -165,10 +169,44 @@ export function camposQueEmite(evento: string): Campo[] {
  *
  * Qué producto se contrata se decide al desplegar; lo que no se decide al desplegar son
  * las propiedades, que son estas y están cerradas aquí.
+ *
+ * Con valor, tiene que ser `http(s)://` —la misma regla que `npm run medicion` aplica con
+ * `puntoFinalDeComprobacion`, por `problemaDelPuntoFinal`—, y si no lo es **la construcción se
+ * para**: un secreto mal escrito construía en verde y `sendBeacon` mandaba cada evento a una
+ * ruta relativa del propio sitio, donde se perdía sin que nada protestara. La máquina propia sí
+ * vale aquí, a diferencia de en la orden: las pruebas de punta a punta construyen contra el
+ * receptor local.
  */
 export function puntoFinal(entorno: Record<string, string | undefined>): string | null {
   const url = entorno.MEDICION_ENDPOINT?.trim();
-  return url ? url : null;
+  if (!url) return null;
+  const problema = problemaDelPuntoFinal(url);
+  if (problema !== undefined) {
+    throw new Error(
+      `${problema} Sin una dirección absoluta, cada evento iría a una ruta del propio sitio y se ` +
+        'perdería: corrija el secreto (DESPLIEGUE.md §3) o quítelo para construir sin medición.',
+    );
+  }
+  return url;
+}
+
+/**
+ * Por qué una dirección no vale como punto final de la medición, o `undefined` si vale: tiene
+ * que ser una URL absoluta `http:` o `https:`. Es la regla única de `MEDICION_ENDPOINT`, que
+ * comparten el build (`puntoFinal`) y `npm run medicion` (`puntoFinalDeComprobacion`), y el
+ * motivo **no repite el valor**: es un secreto del repositorio.
+ */
+export function problemaDelPuntoFinal(url: string): string | undefined {
+  let direccion: URL;
+  try {
+    direccion = new URL(url);
+  } catch {
+    return 'MEDICION_ENDPOINT no es una dirección http(s).';
+  }
+  if (direccion.protocol !== 'http:' && direccion.protocol !== 'https:') {
+    return 'MEDICION_ENDPOINT no es una dirección http(s).';
+  }
+  return undefined;
 }
 
 

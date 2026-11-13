@@ -1,5 +1,5 @@
 ---
-texto: "Bien al ver los excelentes Rayos, que fueron cometas, Mezclan salvas diferentes Las cajas y las trompetas, Los pájaros y las fuentes: Siendo, con música igual, Y con maravilla suma, A tu vista celestial Unos, clarines de pluma."
+texto: "Bien al ver los excelentes\nRayos, que fueron cometas,\nMezclan salvas diferentes\nLas cajas y las trompetas,\nLos pájaros y las fuentes:\nSiendo, con música igual,\nY con maravilla suma,\nA tu vista celestial\nUnos, clarines de pluma."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-bien-al-ver-los-excelentes-rayos-que"
 procedencia:

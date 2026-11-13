@@ -13,16 +13,21 @@ import {
 } from '../../src/lib/superficies.ts';
 import { desviacionDelBarrido, reglasDeLaPagina, sinDecidir, versionesDeAxe } from './ayuda/barrido.ts';
 import { CONDICIONES, anchoDeLaPagina, cargarEn320 } from './ayuda/reflujo.ts';
+import { abrirLosDesplegables, auditar, recorrerElFoco } from './ayuda/desplegables.ts';
 import {
   SIN_TARJETA_COMPLETA,
+  autorConMasObras,
   citaConLosDosBloques,
   citaConTarjetaCompleta,
   citaSinMasDelAutor,
   citaSinMismaObra,
   citaConTituloDeObraMasLargo,
   citaDeObraSinCotejar,
+  citaDeTramo,
+  citaSinImagen,
   citaSinObra,
   citasDeObraDeUnaCita,
+  citasEnVerso,
 } from './ayuda/corpus.ts';
 import { leerTarjetaDeObra, tarjetaDeObraDe } from '../unit/ayuda/tarjeta-de-obra.js';
 import { filtrosDeLaBusqueda } from '../../src/lib/publicado.ts';
@@ -37,7 +42,7 @@ import {
   rotuloBuscarEnAutor,
 } from '../../src/lib/busqueda.ts';
 import { guionExternoDe } from '../../src/lib/guiones.ts';
-import { TANDA_DE_RESULTADOS } from '../../src/lib/umbrales.ts';
+import { MAX_OBRAS_ANTES_DE_LAS_CITAS, TANDA_DE_RESULTADOS } from '../../src/lib/umbrales.ts';
 
 /**
  * Historia 2.8 — accesibilidad y comportamiento responsive.
@@ -180,10 +185,54 @@ const CITAS_DEL_BARRIDO = [
   CITAS_24_6.sinMasDelAutor,
 ].filter((ruta): ruta is string => ruta !== undefined);
 
+/**
+ * Historia 29.3 — una Cita en verso en su Página y en un listado que la lleva (su Obra o su Tema),
+ * sacados del Corpus y del `dist/` construido. La portada no entra aquí: su Cita del Día depende
+ * de la jornada y llevar una en verso exigiría fijar una, que es de Héctor; el componente en la
+ * portada (y en el 404 y el Kit) lo cubre `tests/unit/verso-construido.test.ts`.
+ */
+const CITAS_29_3 = (() => {
+  const enVerso =
+    citasEnVerso().find((c) => c.slug === 'jose-marti-yo-vengo-de-todas-partes-y-hacia') ?? citasEnVerso()[0];
+  if (enVerso === undefined) return { pagina: undefined, listado: undefined };
+  const enlace = `href="/cita/${enVerso.slug}/"`;
+  const listado = rutasConstruidas()
+    .filter((ruta) => /^\/(obra|tema)\//.test(ruta) && ruta.endsWith('/'))
+    .sort((a, b) => a.localeCompare(b, 'es'))
+    .find((ruta) => readFileSync(join(dist, ...ruta.split('/').filter(Boolean), 'index.html'), 'utf8').includes(enlace));
+  return { pagina: `/cita/${enVerso.slug}/`, listado };
+})();
+const SIN_CITA_EN_VERSO = 'El Corpus no tiene ninguna Cita en verso: falta el commit de restitución de la 29.2.';
+
+test('29.3 — el barrido lleva una Cita en verso en su Página y en un listado, verso a verso', () => {
+  const pagina = obligatoria(CITAS_29_3.pagina, SIN_CITA_EN_VERSO);
+  const listado = obligatoria(CITAS_29_3.listado, `Ningún listado de Obra o Tema enlaza ${pagina}.`);
+  for (const ruta of [pagina, listado]) {
+    expect(SUPERFICIES, ruta).toContain(ruta);
+    expect(construida(ruta), ruta).toContain('<span class="verso" style="display:block">');
+  }
+});
+
 /** Una ruta sin su barra final: la muestra derivada las da sin ella, y las de arriba con ella. */
 const sinBarra = (ruta: string) => (ruta.length > 1 ? ruta.replace(/\/$/, '') : ruta);
+/**
+ * Historia 34.2 — la Página del Autor con más Obras, la de la Lista de Obras plegada más larga:
+ * axe y el foco la barren cerrada y abierta (el paso de la 34.0). Sale del Corpus, nunca fijada,
+ * y solo entra si de verdad pliega: con `MAX_OBRAS_ANTES_DE_LAS_CITAS` Obras o menos no hay
+ * `<details>` y la pasada abierta pasaría en vacío.
+ */
+const AUTORES_DEL_BARRIDO = [autorConMasObras()]
+  .filter((a): a is { slug: string; obras: number } => a !== undefined && a.obras > MAX_OBRAS_ANTES_DE_LAS_CITAS)
+  .map((a) => `/autor/${a.slug}/`);
+
 /** Sin repetir una página por escribirse con barra final y sin ella: axe la barrería dos veces. */
-const SUPERFICIES = [...DERIVADAS, ...OBRAS_DEL_BARRIDO, ...CITAS_DEL_BARRIDO].filter(
+const SUPERFICIES = [
+  ...DERIVADAS,
+  ...OBRAS_DEL_BARRIDO,
+  ...CITAS_DEL_BARRIDO,
+  ...AUTORES_DEL_BARRIDO,
+  ...[CITAS_29_3.pagina, CITAS_29_3.listado].filter((ruta): ruta is string => ruta !== undefined),
+].filter(
   (ruta, i, todas) => todas.findIndex((otra) => sinBarra(otra) === sinBarra(ruta)) === i,
 );
 
@@ -355,18 +404,9 @@ test.describe('Historia 2.8, elevada por la 23.4 — WCAG 2.2 AA', () => {
   for (const ruta of SUPERFICIES) {
     test(`${ruta} pasa la auditoría automática`, async ({ page }) => {
       await page.goto(ruta);
-      const resultado = await new AxeBuilder({ page }).withTags([...ETIQUETAS_DEL_BARRIDO]).analyze();
-
-      const resumen = resultado.violations.map((v) => `${v.id}: ${v.help} (${v.nodes.length})`);
-      expect(resumen, `${ruta}\n${resumen.join('\n')}`).toEqual([]);
-      // Historia 23.4 — y lo que no es violación tampoco se calla: el barrido corrió entero, y
-      // axe decidió en cada nodo la regla con la que responde de 2.5.8.
-      expect(await desviacionDelBarrido(page, resultado), `${ruta}: el barrido no corrió lo que pide`).toEqual({
-        faltan: [],
-        sobran: [],
-      });
-      const dudas = sinDecidir(resultado);
-      expect(dudas, `${ruta}: axe no supo decidir\n${dudas.join('\n')}`).toEqual([]);
+      await auditar(page, ruta, 'con los desplegables cerrados');
+      // Historia 34.0 — y otra vez con todo lo plegado abierto.
+      if ((await abrirLosDesplegables(page)) > 0) await auditar(page, ruta, 'con los desplegables abiertos');
     });
   }
 });
@@ -577,48 +617,13 @@ test.describe('Historia 2.8 — foco', () => {
     test.slow();
     for (const ruta of SUPERFICIES) {
       await page.goto(ruta);
+      await recorrerElFoco(page, ruta, 'con los desplegables cerrados');
       /*
-       * Cada enfocable lleva una marca única antes de tabular: así se reconoce sin ambigüedad
-       * cuándo el recorrido vuelve al primero, y el tope sale de cuántos hay, no de un número
-       * escrito a mano que una página larga superaría sin que nadie lo notara.
+       * Historia 34.0 — y otra vez con todo lo plegado abierto: lo de dentro de un `<details>`
+       * cerrado no se tabula, y abierto sí. Sin ninguno, la pasada sería la misma y no se repite;
+       * la sonda de `tests/e2e/desplegable.spec.ts` hace correr las dos mientras tanto.
        */
-      const enfocables = await page.evaluate(() => {
-        const candidatos = [
-          ...document.querySelectorAll<HTMLElement>(
-            'a[href], button, input, textarea, select, [tabindex]:not([tabindex="-1"])',
-          ),
-        ];
-        candidatos.forEach((n, i) => n.setAttribute('data-barrido-de-foco', String(i)));
-        return candidatos.length;
-      });
-      expect(enfocables, `${ruta}: no hay nada enfocable`).toBeGreaterThan(0);
-
-      const suprimidos: string[] = [];
-      let primero: string | null = null;
-      let vuelta = false;
-      // Cada enfocable una vez, más las paradas fuera del documento al dar la vuelta.
-      for (let i = 0; i < enfocables + 3 && !vuelta; i += 1) {
-        await page.keyboard.press('Tab');
-        const foco = await page.evaluate(() => {
-          const n = document.activeElement as HTMLElement | null;
-          if (n === null || n === document.body || n === document.documentElement) return null;
-          const s = getComputedStyle(n);
-          return {
-            marca: n.getAttribute('data-barrido-de-foco') ?? `sin marca: ${n.outerHTML.slice(0, 80)}`,
-            descripcion: n.outerHTML.slice(0, 100),
-            suprimido: s.outlineStyle === 'none' || s.outlineWidth === '0px',
-          };
-        });
-        if (foco === null) continue;
-        if (primero === null) primero = foco.marca;
-        else if (foco.marca === primero) {
-          vuelta = true;
-          break;
-        }
-        if (foco.suprimido) suprimidos.push(foco.descripcion);
-      }
-      expect(vuelta, `${ruta}: el recorrido con el tabulador no dio la vuelta en ${enfocables + 3} pasos`).toBe(true);
-      expect(suprimidos, ruta).toEqual([]);
+      if ((await abrirLosDesplegables(page)) > 0) await recorrerElFoco(page, ruta, 'con los desplegables abiertos');
     }
   });
 
@@ -672,7 +677,8 @@ test.describe('Historia 2.8 — foco', () => {
    *
    * Con Tab de verdad, desde el enlace del Autor hasta el primer enlace de las salidas: cada
    * parada se clasifica por dónde está —`figcaption` o `.fuente` es contenido, `.tarjeta-de-obra`
-   * es tarjeta, `.isla` es acción y `nav` es salida— y cualquier otra es un fallo.
+   * es tarjeta, `.isla` es acción, `.desplegables` (30.3) es desplegable y `nav` es salida— y
+   * cualquier otra es un fallo.
    */
   async function paradasDesdeElAutor(page: Page, ruta: string) {
     await page.goto(ruta);
@@ -692,6 +698,8 @@ test.describe('Historia 2.8 — foco', () => {
             ? 'fuera'
             : n.closest('nav')
               ? 'salida'
+              : n.closest('.desplegables')
+                ? 'desplegable'
               : n.closest('.tarjeta-de-obra')
                 ? 'tarjeta'
                 : n.closest('.isla')
@@ -710,12 +718,19 @@ test.describe('Historia 2.8 — foco', () => {
     return { paradas, grupos };
   }
 
-  test('en la Página de Cita el orden es contenido, tarjeta, acciones y después salidas', async ({ page }) => {
+  // Historia 30.1 — las acciones (Copiar, Imagen y compartir) suben delante de la tarjeta.
+  test('en la Página de Cita el orden es contenido, acciones, tarjeta y después salidas', async ({ page }) => {
     const ruta = obligatoria(CITAS_24_4.completa, SIN_TARJETA_COMPLETA);
     const { paradas, grupos } = await paradasDesdeElAutor(page, ruta);
-    expect(grupos, `${ruta}\n${JSON.stringify(paradas)}`).toEqual(['contenido', 'tarjeta', 'accion', 'salida']);
+    // Historia 30.3 — tras la tarjeta, los rótulos de los desplegables, cerrados: una parada cada
+    // uno, «Cómo citar» y —desde la 30.4— «Inserta esta cita».
+    expect(grupos, `${ruta}\n${JSON.stringify(paradas)}`).toEqual(['contenido', 'accion', 'tarjeta', 'desplegable', 'salida']);
+    expect(paradas.filter((p) => p.grupo === 'desplegable').map((p) => p.texto), ruta).toEqual([
+      'Cómo citar ›',
+      'Inserta esta cita ›',
+    ]);
     const contenido = paradas.filter((p) => p.grupo === 'contenido');
-    // El Autor, el título de la Obra y la Fuente, delante de la tarjeta.
+    // El Autor, el título de la Obra y la Fuente, delante de las acciones.
     expect(contenido[0].href, ruta).toMatch(/^\/autor\//);
     expect(contenido.some((p) => p.href?.startsWith('/obra/')), ruta).toBe(true);
     expect(contenido.some((p) => /^https?:/.test(p.href ?? '')), `${ruta}: sin parada en la Fuente`).toBe(true);
@@ -767,7 +782,7 @@ test.describe('Historia 2.8 — foco', () => {
   test('sin Obra, el orden es contenido, acciones y después salidas', async ({ page }) => {
     const ruta = obligatoria(CITAS_24_4.sinObra, SIN_CITA_SIN_OBRA);
     const { paradas, grupos } = await paradasDesdeElAutor(page, ruta);
-    expect(grupos, `${ruta}\n${JSON.stringify(paradas)}`).toEqual(['contenido', 'accion', 'salida']);
+    expect(grupos, `${ruta}\n${JSON.stringify(paradas)}`).toEqual(['contenido', 'accion', 'desplegable', 'salida']);
   });
 
   test('el enlace de salto es lo primero que recibe foco', async ({ page }) => {
@@ -1150,6 +1165,8 @@ test.describe('Historia 2.8 — responsive', () => {
         const esperado = esperadoDe();
         for (const condicion of CONDICIONES) {
           if (!(await cargarEn320(page, ruta!, condicion))) continue;
+          // Historia 34.2 — una fila plegada mide cero: se abren los Desplegables antes de medir.
+          await abrirLosDesplegables(page);
           for (const conPalabra of [false, true]) {
             const { listado, medidas } = await page.evaluate(
               ({ filas, titulo, conPalabra, palabra, esperado }) => {
@@ -1250,13 +1267,29 @@ test.describe('Historia 2.8 — responsive', () => {
    * Las zonas de toque de `main` en una página, a 360 px: 44 px de alto y 8 px entre vecinas,
    * salvo las filas apiladas de un enlace de bloque, que basta con que no se solapen.
    */
-  async function medirZonasDeToque(page: Page, ruta: string) {
+  async function medirZonasDeToque(page: Page, ruta: string, { abiertos = false } = {}) {
     await page.setViewportSize({ width: 360, height: 640 });
     await page.goto(ruta);
+    /*
+     * Historia 30.4 — con `abiertos`, se miden también los botones de dentro de los desplegables
+     * («Copiar APA»…, «Copiar el fragmento»), que la isla enseña al cargar: se abren todos antes.
+     */
+    if (abiertos) {
+      const resumenes = page.locator('main details:not([open]) > summary');
+      for (let i = 0; i < 20 && (await resumenes.count()) > 0; i++) await resumenes.first().click();
+      await expect(resumenes).toHaveCount(0);
+      await expect(page.getByRole('button', { name: 'Copiar el fragmento', exact: true })).toBeVisible();
+    }
 
     const cajas = await page.evaluate(() =>
       [...document.querySelectorAll('main a, main button')]
         .filter((n) => {
+          /*
+           * Historia 30.3 — lo de dentro de un `<details>` cerrado no se pinta ni se toca: solo su
+           * `<summary>`. El navegador le da caja igual (`content-visibility: hidden`), encima de lo
+           * que sigue, y se mediría como un objetivo que no existe.
+           */
+          if (n.closest('details:not([open])') !== null && n.closest('summary') === null) return false;
           /*
            * La exención en línea de EXPERIENCE.md § Interaction Primitives: queda fuera el
            * objetivo que va dentro de una frase y cuya altura fija el interlineado del
@@ -1352,6 +1385,10 @@ test.describe('Historia 2.8 — responsive', () => {
 
   test('las zonas de toque miden 44px con 8px de separación', async ({ page }) => {
     await medirZonasDeToque(page, '/cita/antonio-machado-hoy-es-siempre-todavia/');
+  });
+
+  test('30.4 — las zonas de toque con los desplegables abiertos', async ({ page }) => {
+    await medirZonasDeToque(page, obligatoria(CITAS_24_4.completa, SIN_TARJETA_COMPLETA), { abiertos: true });
   });
 
   test('24.6 — las zonas de toque del pie con los dos bloques', async ({ page }) => {
@@ -2671,3 +2708,123 @@ test.describe('Historia 27.7 — los avisos de /buscar/ pasan la auditoría y no
     });
   }
 });
+
+/*
+ * Historia 30.2 — la medida de la Cita sale del cuerpo de su tramo y Copiar e Imagen van en fila
+ * desde 600 px: ninguna de las dos cosas puede pedir desplazamiento horizontal, ni en la Página de
+ * Cita —la cara completa y una de cada tramo— ni en la portada, que comparte el Bloque de Cita.
+ */
+test.describe('Historia 30.2 — sin desplazamiento horizontal con la medida y la fila', () => {
+  // Cada cara con su nombre: si el Corpus no la tiene, su prueba falla diciéndolo, en vez de
+  // desaparecer de la lista.
+  // `opcional`: el Corpus real no trae hoy Citas de más de 240 caracteres, así que el tramo sm y
+  // la Cita sin Imagen se saltan diciéndolo (la fila sin Imagen la cubre el fixture SIN_IMAGEN de
+  // tests/unit/tarjeta-de-obra.test.ts).
+  const caras: [string, string | undefined, string, boolean][] = [
+    ['la portada', '/', '', false],
+    ['la cara completa', citaConTarjetaCompleta()?.slug, SIN_TARJETA_COMPLETA, false],
+    ...(['xl', 'lg', 'md', 'sm'] as const).map(
+      (t): [string, string | undefined, string, boolean] => [
+        `el tramo ${t}`,
+        citaDeTramo(t),
+        `el Corpus no tiene ninguna Cita de tramo ${t}`,
+        t === 'sm',
+      ],
+    ),
+    ['una Cita sin Imagen', citaSinImagen(), 'el Corpus no tiene ninguna Cita de más de MAX_CARACTERES_IMAGEN', true],
+  ];
+  for (const [cara, slug, falta, opcional] of caras) {
+    test(`${cara} no desborda a 320, 600, 768 ni 1280 px, y pasa el barrido a cada ancho`, async ({ page }, info) => {
+      test.skip(info.project.name !== 'escritorio', 'Los anchos se fijan a mano; se miden una vez.');
+      test.slow();
+      test.skip(opcional && slug === undefined, `${falta} hoy.`);
+      expect(slug, falta).toBeDefined();
+      const ruta = slug === '/' ? '/' : `/cita/${slug}/`;
+      for (const ancho of [320, 600, 768, 1280]) {
+        await page.setViewportSize({ width: ancho, height: 800 });
+        await page.goto(ruta);
+        await page.evaluate(async () => {
+          await document.fonts.ready;
+        });
+        const m = await page.evaluate(() => ({
+          scroll: document.documentElement.scrollWidth,
+          ventana: document.documentElement.clientWidth,
+        }));
+        expect.soft(m.scroll, `${ruta} a ${ancho} px: ${m.scroll} frente a ${m.ventana}`).toBeLessThanOrEqual(m.ventana);
+        const resultado = await new AxeBuilder({ page }).withTags([...ETIQUETAS_DEL_BARRIDO]).analyze();
+        const resumen = resultado.violations.map((v) => `${v.id}: ${v.help} (${v.nodes.map((n) => n.target.join(' ')).join(', ')})`);
+        expect.soft(resumen, `${ruta} a ${ancho} px\n${resumen.join('\n')}`).toEqual([]);
+      }
+    });
+  }
+});
+
+test.describe('Historia 30.3 — «Cómo citar» pasa el barrido cerrado y abierto, y no desborda a 320 px', () => {
+  const caras: [string, string | undefined, string][] = [
+    ['la cara completa', citaConTarjetaCompleta()?.slug, SIN_TARJETA_COMPLETA],
+    ['una Cita sin Obra', citaSinObra()?.slug, 'el Corpus no tiene ninguna Cita sin Obra'],
+  ];
+  for (const [cara, slug, falta] of caras) {
+    test(`${cara}: axe con «Cómo citar» cerrado y abierto, y el reflujo a 320 px abierto`, async ({ page }) => {
+      expect(slug, falta).toBeDefined();
+      const ruta = `/cita/${slug}/`;
+      await page.goto(ruta);
+      const detalles = page.locator('details.desplegable', { has: page.locator('[data-como-citar]') });
+      await expect(detalles).toHaveCount(1);
+      await auditar(page, ruta, 'con «Cómo citar» cerrado');
+      await detalles.locator('summary').click();
+      await expect(detalles).toHaveAttribute('open', '');
+      await auditar(page, ruta, 'con «Cómo citar» abierto');
+
+      await page.setViewportSize({ width: 320, height: 640 });
+      await page.evaluate(async () => {
+        await document.fonts.ready;
+      });
+      const m = await page.evaluate(() => ({
+        scroll: document.documentElement.scrollWidth,
+        ventana: document.documentElement.clientWidth,
+        bloque: document.querySelector('[data-como-citar]')!.getBoundingClientRect().right,
+      }));
+      expect(m.scroll, `${ruta} a 320 px: ${m.scroll} frente a ${m.ventana}`).toBeLessThanOrEqual(m.ventana);
+      expect(m.bloque, `${ruta}: el bloque acaba en ${m.bloque}`).toBeLessThanOrEqual(m.ventana);
+    });
+  }
+});
+test.describe('Historia 30.4 — «Inserta esta cita» pasa el barrido cerrado y abierto, y no desborda a 320 px', () => {
+  const caras: [string, string | undefined, string][] = [
+    ['la cara completa', citaConTarjetaCompleta()?.slug, SIN_TARJETA_COMPLETA],
+    ['una Cita sin Obra', citaSinObra()?.slug, 'el Corpus no tiene ninguna Cita sin Obra'],
+  ];
+  for (const [cara, slug, falta] of caras) {
+    test(`${cara}: axe con «Inserta esta cita» cerrado y abierto, y el reflujo a 320 px abierto`, async ({ page }) => {
+      expect(slug, falta).toBeDefined();
+      const ruta = `/cita/${slug}/`;
+      await page.goto(ruta);
+      const detalles = page.locator('details.desplegable', { has: page.locator('[data-inserta-esta-cita]') });
+      await expect(detalles).toHaveCount(1);
+      await auditar(page, ruta, 'con «Inserta esta cita» cerrado');
+      await detalles.locator('summary').click();
+      await expect(detalles).toHaveAttribute('open', '');
+      await auditar(page, ruta, 'con «Inserta esta cita» abierto');
+
+      await page.setViewportSize({ width: 320, height: 640 });
+      await page.evaluate(async () => {
+        await document.fonts.ready;
+      });
+      const m = await page.evaluate(() => {
+        const campo = document.querySelector('#fragmento-para-insertar')!;
+        return {
+          scroll: document.documentElement.scrollWidth,
+          ventana: document.documentElement.clientWidth,
+          campo: campo.getBoundingClientRect().right,
+          campoScroll: campo.scrollWidth,
+          campoAncho: campo.clientWidth,
+        };
+      });
+      expect(m.scroll, `${ruta} a 320 px: ${m.scroll} frente a ${m.ventana}`).toBeLessThanOrEqual(m.ventana);
+      expect(m.campo, `${ruta}: el campo acaba en ${m.campo}`).toBeLessThanOrEqual(m.ventana);
+      expect(m.campoScroll, `${ruta}: el campo desplaza en horizontal`).toBeLessThanOrEqual(m.campoAncho);
+    });
+  }
+});
+

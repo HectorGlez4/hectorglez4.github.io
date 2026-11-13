@@ -1,5 +1,5 @@
 ---
-texto: "Entiende tú las acciones; pues no hay voces que lo digan."
+texto: "Entiende tú las acciones;\npues no hay voces que lo digan."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-entiende-tu-las-acciones-pues-no-hay"
 procedencia:

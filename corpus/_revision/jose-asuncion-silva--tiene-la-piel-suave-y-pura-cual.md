@@ -1,5 +1,5 @@
 ---
-texto: "Tiene la piel suave y pura cual las hojas de las lilas, ensueños de honda ternura rebosan en sus pupilas."
+texto: "Tiene la piel suave y pura\ncual las hojas de las lilas,\nensueños de honda ternura\nrebosan en sus pupilas."
 autor: "jose-asuncion-silva"
 slug: "jose-asuncion-silva-tiene-la-piel-suave-y-pura-cual"
 procedencia:

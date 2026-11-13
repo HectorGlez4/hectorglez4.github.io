@@ -1,5 +1,5 @@
 ---
-texto: "Entre estos aplausos yo, con la atención zozobrando entre tanta muchedumbre, sin hallar seguro blanco, no acertaba a amar a alguno, viéndome amada de tantos."
+texto: "Entre estos aplausos yo,\ncon la atención zozobrando\nentre tanta muchedumbre,\nsin hallar seguro blanco,\nno acertaba a amar a alguno,\nviéndome amada de tantos."
 autor: "sor-juana-ines-de-la-cruz"
 slug: "sor-juana-ines-de-la-cruz-entre-estos-aplausos-yo-con-la-atencion"
 procedencia:

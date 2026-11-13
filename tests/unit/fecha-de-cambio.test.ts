@@ -10,8 +10,10 @@ import { formaDeObra } from '../../src/lib/obras.ts';
 import { rutaNormalizada } from '../../src/lib/superficies.ts';
 import {
   CAMPOS_QUE_NO_FECHAN,
+  type Campo,
   CAMPOS_QUE_PINTA,
   CUALQUIER_CAMBIO,
+  NOMBRE_EN_REFERENCIA,
   VERSION_OPACA,
   bajasDelHistorial,
   relacionDeSuperficies,
@@ -338,6 +340,10 @@ function clavesDeLaColeccion(coleccion: string): string[] | undefined {
   return claves;
 }
 
+/** Las claves del esquema que nombra una lista de campos: la de un subcampo y las de un derivado. */
+const clavesDeLosCampos = (campos: readonly Campo[]): string[] =>
+  campos.flatMap((campo) => (typeof campo === 'string' ? [campo.split('.')[0]] : [...campo.de]));
+
 describe('Historia 24.8 — todo campo de los esquemas está clasificado', () => {
   const unidas = (...listas: (readonly string[] | undefined)[]) => [...new Set(listas.flatMap((l) => l ?? []))];
   const ESQUEMAS = {
@@ -357,9 +363,10 @@ describe('Historia 24.8 — todo campo de los esquemas está clasificado', () =>
   });
 
   const clasificados = (familia: keyof typeof ESQUEMAS): Set<string> => {
-    // Un subcampo —`procedencia.obra`, 26.4— clasifica la clave del esquema que lo contiene.
+    // Un subcampo —`procedencia.obra`, 26.4— clasifica la clave del esquema que lo contiene, y un
+    // campo derivado —el nombre de «Cómo citar», 30.3— las claves de las que sale.
     const enLaTabla = Object.values(CAMPOS_QUE_PINTA[familia]).flatMap((campos) =>
-      campos === CUALQUIER_CAMBIO ? [] : (campos as readonly string[]).map((campo) => campo.split('.')[0]),
+      campos === CUALQUIER_CAMBIO ? [] : clavesDeLosCampos(campos as readonly Campo[]),
     );
     const queNoFechan = (CAMPOS_QUE_NO_FECHAN as Partial<Record<string, readonly string[]>>)[familia] ?? [];
     return new Set([...enLaTabla, ...queNoFechan]);
@@ -379,7 +386,7 @@ describe('Historia 24.8 — todo campo de los esquemas está clasificado', () =>
   it('ninguna clave fecha y a la vez está entre las que no fechan', () => {
     for (const [familia, lista] of Object.entries(CAMPOS_QUE_NO_FECHAN)) {
       const enLaTabla = Object.values(CAMPOS_QUE_PINTA[familia as keyof typeof CAMPOS_QUE_PINTA]).flatMap(
-        (campos) => (campos === CUALQUIER_CAMBIO ? [] : (campos as readonly string[]).map((campo) => campo.split('.')[0])),
+        (campos) => (campos === CUALQUIER_CAMBIO ? [] : clavesDeLosCampos(campos as readonly Campo[])),
       );
       expect(lista.filter((clave) => enLaTabla.includes(clave)), familia).toEqual([]);
     }
@@ -551,7 +558,9 @@ describe('Historia 24.8 — la matriz: qué cambia de fecha', () => {
    * Historias 26.1 y 26.3 — el lote de `proponer-claves` escribe `ordenAlfabetico` en todos los
    * Autores a la vez, y la confirmación de una persona, `ordenRevisado`. Desde la 26.3 la clave la
    * pinta el Directorio de Autores, que ordena y agrupa por ella: el lote mueve `/autores/` y nada
-   * más, ni las Páginas de Autor ni las de Cita. La revisión no la pinta nadie: nunca mueve nada.
+   * más, ni las Páginas de Autor ni las de Cita. Desde la 30.3 la revisión sí pinta: con una clave
+   * que sea palabra del nombre invierte el nombre de «Cómo citar» y fecha las Páginas de Cita del
+   * Autor (las pruebas de la 30.3, más abajo); una clave sin revisar no invierte nada.
    * Desde la 26.4 la clave ordena y agrupa también `/obras/`, que el lote mueve igual.
    */
   it('solo claves de orden, en todos los Autores: cambian solo `/autores/` y `/obras/`', () => {
@@ -563,13 +572,63 @@ describe('Historia 24.8 — la matriz: qué cambia de fecha', () => {
     expect(avisadas(enT1, corpusDeEjemplo())).toEqual(['/autores', '/obras']);
   });
 
-  it('solo la revisión de las claves, en todos los Autores: nada cambia de fecha', () => {
+  /*
+   * Historia 30.3 — la revisión ya no es invisible: «Cómo citar» invierte el nombre del Autor
+   * («Equis, J.») solo con la clave revisada y siendo palabra del nombre, y lo pinta la Página de
+   * Cita. Revisarla fecha y avisa sus Páginas de Cita; si además corrige la clave, también los
+   * Directorios, que ordenan por ella. Una revisión que no cambia ninguna Referencia —un nombre de
+   * una palabra, o una clave que no es palabra del nombre— no mueve nada.
+   */
+  const conNombre = (nombre: string, extra: Record<string, unknown>): Readonly<Record<string, unknown>> => ({
+    ...VERSIONES['corpus/autores/x.yml'],
+    nombre,
+    ...extra,
+  });
+
+  it('solo la revisión de una clave que es palabra del nombre: cambian las Páginas de Cita del Autor', () => {
+    const enT1 = {
+      'corpus/autores/x.yml': {
+        antes: conNombre('Juan Equis', { ordenAlfabetico: 'Equis' }),
+        despues: conNombre('Juan Equis', { ordenAlfabetico: 'Equis', ordenRevisado: '2026-10-28' }),
+      },
+    };
+    const esperadas = ['/cita/x-a', '/cita/x-b', '/cita/x-c'];
+    expect(refechadas(corpusDeEjemplo(), historial(enT1))).toEqual(esperadas);
+    expect(avisadas(enT1, corpusDeEjemplo())).toEqual(esperadas);
+  });
+
+  it('revisar corrigiendo la clave: cambian sus Páginas de Cita y los Directorios', () => {
+    const enT1 = {
+      'corpus/autores/x.yml': {
+        antes: conNombre('Juan Equis', { ordenAlfabetico: 'Juan' }),
+        despues: conNombre('Juan Equis', { ordenAlfabetico: 'Equis', ordenRevisado: '2026-10-28' }),
+      },
+    };
+    const esperadas = ['/autores', '/cita/x-a', '/cita/x-b', '/cita/x-c', '/obras'];
+    expect(refechadas(corpusDeEjemplo(), historial(enT1))).toEqual(esperadas);
+    expect(avisadas(enT1, corpusDeEjemplo())).toEqual(esperadas);
+  });
+
+  it('una revisión que no cambia ninguna Referencia —nombre de una palabra, o clave ajena al nombre—: nada', () => {
     const enT1 = {
       'corpus/autores/x.yml': editado('corpus/autores/x.yml', { ordenRevisado: '2026-10-28' }),
-      'corpus/autores/y.yml': editado('corpus/autores/y.yml', { ordenRevisado: '2026-10-28' }),
+      'corpus/autores/y.yml': {
+        antes: { ...VERSIONES['corpus/autores/y.yml'], nombre: 'Ye Zeta', ordenAlfabetico: 'Zed' },
+        despues: { ...VERSIONES['corpus/autores/y.yml'], nombre: 'Ye Zeta', ordenAlfabetico: 'Zed', ordenRevisado: '2026-10-28' },
+      },
     };
     expect(refechadas(corpusDeEjemplo(), historial(enT1))).toEqual([]);
     expect(avisadas(enT1, corpusDeEjemplo())).toEqual([]);
+  });
+
+  it('el nombre derivado lo da `nombreEnReferencia`, la función de la Página de Cita', () => {
+    const version = conNombre('Juan Equis', { ordenAlfabetico: 'Equis', ordenRevisado: '2026-10-28' });
+    expect(NOMBRE_EN_REFERENCIA.valor(version)).toEqual(['Equis, J.', 'Equis, Juan', 'Equis, Juan']);
+    expect(NOMBRE_EN_REFERENCIA.valor(conNombre('Juan Equis', { ordenAlfabetico: 'Equis' }))).toEqual([
+      'Juan Equis',
+      'Juan Equis',
+      'Juan Equis',
+    ]);
   });
 
   it('el texto de una Cita no mueve los Directorios; cambiarle el Autor, sí', () => {
@@ -682,10 +741,11 @@ describe('Historia 24.8 — la matriz: qué cambia de fecha', () => {
     }
   });
 
-  it('las formas de una ficha mueven su Obra y `/obras/`, y su `distintaDe` nada', () => {
+  it('las formas de una ficha mueven su Obra, sus Páginas de Cita (31.2) y `/obras/`, y su `distintaDe` nada', () => {
     const formas = { 'corpus/obras/x--o.yml': editado('corpus/obras/x--o.yml', { formas: ['obra o', 'la obra o'] }) };
-    expect(refechadas(corpusDeEjemplo(), historial(formas))).toEqual(['/obra/x/o', '/obras']);
-    expect(avisadas(formas, corpusDeEjemplo())).toEqual(['/obra/x/o', '/obras']);
+    const esperadas = ['/cita/x-a', '/cita/x-b', '/cita/x-c', '/obra/x/o', '/obras'];
+    expect(refechadas(corpusDeEjemplo(), historial(formas))).toEqual(esperadas);
+    expect(avisadas(formas, corpusDeEjemplo())).toEqual(esperadas);
   });
 
   it('un Autor cuyas Citas no tienen Obra no mueve `/obras/`: no figura en él, aunque sí en `/autores/`', () => {
@@ -779,11 +839,11 @@ describe('Historia 24.8 — la matriz: qué cambia de fecha', () => {
     expect(avisadas(enT1, corpusDeEjemplo())).toEqual(esperadas);
   });
 
-  it('un documento nuevo de una Obra paginada: solo esa Obra', () => {
+  it('un documento nuevo de una Obra paginada: esa Obra y sus Páginas de Cita (31.2), que pueden ganar pasaje', () => {
     const pagina = 'corpus/fuentes/fuente--obra-o--iii.txt';
     const enT1 = { [pagina]: { antes: null, despues: VERSION_OPACA as Version } };
-    expect(refechadas(corpusDeEjemplo([], [DOCUMENTO, pagina]), historial(enT1))).toEqual(['/obra/x/o']);
-    expect(avisadas(enT1, corpusDeEjemplo([], [DOCUMENTO, pagina]), corpusDeEjemplo())).toEqual(['/obra/x/o']);
+    expect(refechadas(corpusDeEjemplo([], [DOCUMENTO, pagina]), historial(enT1))).toEqual(['/cita/x-a', '/cita/x-b', '/cita/x-c', '/obra/x/o']);
+    expect(avisadas(enT1, corpusDeEjemplo([], [DOCUMENTO, pagina]), corpusDeEjemplo())).toEqual(['/cita/x-a', '/cita/x-b', '/cita/x-c', '/obra/x/o']);
     // Y un documento de otra obra no compone esta.
     const ajeno = 'corpus/fuentes/fuente--otra-cosa.txt';
     expect(refechadas(corpusDeEjemplo([], [DOCUMENTO, ajeno]), historial({ [ajeno]: { antes: null, despues: VERSION_OPACA } }))).toEqual([]);
@@ -802,11 +862,52 @@ describe('Historia 24.8 — la matriz: qué cambia de fecha', () => {
     expect(fechasPorSuperficie(corpus, h).has('/cita/x-b')).toBe(false);
   });
 
+  it('24.9 — capturar o cambiar el índice de una Obra: esa Obra y, desde la 31.2, sus Páginas de Cita, como un documento suyo', () => {
+    const indice = 'corpus/fuentes/fuente--obra-o.indice.yml';
+    const nuevo = { [indice]: { antes: null, despues: VERSION_OPACA as Version } };
+    expect(refechadas(corpusDeEjemplo([], [DOCUMENTO, indice]), historial(nuevo))).toEqual(['/cita/x-a', '/cita/x-b', '/cita/x-c', '/obra/x/o']);
+    expect(avisadas(nuevo, corpusDeEjemplo([], [DOCUMENTO, indice]), corpusDeEjemplo())).toEqual(['/cita/x-a', '/cita/x-b', '/cita/x-c', '/obra/x/o']);
+    const cambiado = { [indice]: { antes: VERSION_OPACA as Version, despues: VERSION_OPACA as Version } };
+    expect(avisadas(cambiado, corpusDeEjemplo([], [DOCUMENTO, indice]))).toEqual(['/cita/x-a', '/cita/x-b', '/cita/x-c', '/obra/x/o']);
+    // El índice que sale fecha la Obra que ordenaba.
+    const h = historial({ [indice]: { antes: VERSION_OPACA, despues: null } });
+    const corpus = conBajas(corpusDeEjemplo([], [DOCUMENTO]), h);
+    expect(corpus.bajas?.documentos).toEqual([indice]);
+    expect(refechadas(corpus, h)).toEqual(['/cita/x-a', '/cita/x-b', '/cita/x-c', '/obra/x/o']);
+    // Y el índice de otra Obra no compone esta, ni ninguna de sus Páginas de Cita.
+    const ajeno = 'corpus/fuentes/fuente--otra-cosa.indice.yml';
+    expect(refechadas(corpusDeEjemplo([], [DOCUMENTO, ajeno]), historial({ [ajeno]: { antes: null, despues: VERSION_OPACA } }))).toEqual([]);
+  });
+
   it('el documento que sale fecha la Obra cuyas Citas lo casaban', () => {
     const h = historial({ [DOCUMENTO]: { antes: VERSION_OPACA, despues: null } });
     const corpus = conBajas(corpusDeEjemplo([], []), h);
     expect(corpus.bajas?.documentos).toEqual([DOCUMENTO]);
-    expect(refechadas(corpus, h)).toEqual(['/obra/x/o']);
+    // Y, desde la 31.2, las Páginas de Cita de esa Obra, cuyo pasaje salía de él.
+    expect(refechadas(corpus, h)).toEqual(['/cita/x-a', '/cita/x-b', '/cita/x-c', '/obra/x/o']);
+  });
+
+  it('31.2 — una Cita sin Obra compone solo sus documentos, y la de otra Obra, ninguno de esta', () => {
+    const base = corpusDeEjemplo();
+    const sinObra: CorpusParaFechar = {
+      ...base,
+      citas: base.citas.map((c) => {
+        if (c.slug !== 'x-c') return c;
+        const { obra: _obra, ...sinSuObra } = c;
+        return sinSuObra;
+      }),
+    };
+    // `x-c` sin Obra sigue casando el documento de su obra declarada: lo compone ella sola.
+    const relacion = relacionDeSuperficies(sinObra);
+    const documentosDe = (ruta: string) =>
+      [...(relacion.get(ruta)?.componentes ?? [])].map((c) => c.fichero).filter((f) => f.startsWith('corpus/fuentes/'));
+    expect(documentosDe('/cita/x-c/')).toEqual([DOCUMENTO]);
+    const pagina = 'corpus/fuentes/fuente--obra-o--iii.txt';
+    const enT1 = { [pagina]: { antes: null, despues: VERSION_OPACA as Version } };
+    expect(refechadas({ ...sinObra, documentos: [DOCUMENTO, pagina] }, historial(enT1))).toEqual(['/cita/x-a', '/cita/x-b', '/cita/x-c', '/obra/x/o']);
+    // La Cita de otra Obra no compone el documento de esta.
+    expect(relacion.has('/cita/y-b/')).toBe(true);
+    expect(documentosDe('/cita/y-b/')).toEqual([]);
   });
 
   it('reunir: la Obra destino y las Páginas de Cita y listados de las Citas que la absorbida reclamaba', () => {
@@ -831,7 +932,8 @@ describe('Historia 24.8 — la matriz: qué cambia de fecha', () => {
     );
     expect(corpus.bajas?.obras?.map((o) => o.ruta)).toEqual([absorbida]);
     // Y `/obras/`, por las formas de la destino y la absorbida que sale (26.4).
-    const esperadas = ['/obra/x/o', '/cita/x-d', '/autor/x', '/tema/u', '/obras'].sort();
+    // Y, desde la 31.2, las demás Páginas de Cita de la destino, por sus `formas`.
+    const esperadas = ['/obra/x/o', '/cita/x-a', '/cita/x-b', '/cita/x-c', '/cita/x-d', '/autor/x', '/tema/u', '/obras'].sort();
     expect(refechadas(corpus, h)).toEqual(esperadas);
     // Fecha y aviso coinciden: la absorbida la encuentra el aviso en la relación de antes.
     const enT1 = {

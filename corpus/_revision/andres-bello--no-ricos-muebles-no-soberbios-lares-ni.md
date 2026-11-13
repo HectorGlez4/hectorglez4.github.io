@@ -1,5 +1,5 @@
 ---
-texto: "No ricos muebles, no soberbios lares, ni una mesa que adule al apetito."
+texto: "No ricos muebles, no soberbios lares,\nni una mesa que adule al apetito."
 autor: "andres-bello"
 slug: "andres-bello-no-ricos-muebles-no-soberbios-lares-ni"
 procedencia:

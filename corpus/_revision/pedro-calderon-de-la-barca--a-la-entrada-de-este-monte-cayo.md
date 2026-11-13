@@ -1,5 +1,5 @@
 ---
-texto: "A la entrada de este monte cayó mi rocín conmigo, veloz corriendo, y yo ciego por la maleza le sido."
+texto: "A la entrada de este monte\ncayó mi rocín conmigo,\nveloz corriendo, y yo ciego\npor la maleza le sido."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-a-la-entrada-de-este-monte-cayo"
 procedencia:

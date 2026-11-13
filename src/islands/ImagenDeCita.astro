@@ -83,6 +83,22 @@
  * `import()` desde la lista cerrada de `src/lib/guiones.ts`; el reintento añade `?{n}` por
  * concatenación y no con una plantilla, que en el frontmatter habría que escapar. El texto
  * del guion no lleva comentarios: viajarían al visitante.
+ *
+ * El formato (cuadrado o vertical, `FORMATOS` en `imagen.js`) es un grupo aparte de las
+ * plantillas y los dos los pinta `pintarGrupo`: elegir uno no cambia el otro. El vertical
+ * lleva `-vertical` en el nombre del fichero; el cuadrado conserva el de siempre.
+ *
+ * Por qué hay vertical (9:16): un cuadrado dentro de una Story o de un Reel se amplía hasta
+ * llenar el alto y pierde el texto por los lados, en la portada del Reel y en la cuadrícula
+ * del perfil. La `franja` de cada formato es la banda donde se compone todo —texto,
+ * atribución y marca—; en vertical es y 240–1500: dentro de la central 3:4 (240–1680) que
+ * conserva la cuadrícula del perfil, bajo la cabecera del visor de Stories y por encima de la
+ * franja de abajo que tapan los controles del Reel (botones del editor; nombre, pie y música en
+ * el visor). Con 1680 la marca caía en esa franja y el revisor tumbó 9 de 30 Reels (7 nov 2026).
+ * En vertical el texto deja además 192 px a la derecha (dos márgenes): la columna de herramientas
+ * del editor de Stories ocupa x ≥ 917 y tapaba el final de la primera línea (7 nov 2026).
+ * Fuera de ella solo hay fondo. Esta nota vive aquí y no en `imagen.js` porque ese
+ * fichero se sirve tal cual y tiene tope de bytes (`MAX_BYTES_GUION_DE_IMAGEN`).
  */
 import { guionQueAnuncia } from '../lib/anuncio.ts';
 import { procedenciaCompuesta, textoParaCopiar } from '../lib/atribucion.ts';
@@ -118,7 +134,6 @@ const guion = guionQueAnuncia(
 const $ = (s) => isla.querySelector(s);
 const dialogo = $('[data-dialogo]');
 const lienzo = $('[data-lienzo]');
-const contenedorPlantillas = $('[data-plantillas]');
 const descargar = $('[data-descargar]');
 const fallo = $('[data-fallo]');
 const anuncio = $('[data-anuncio]');
@@ -127,7 +142,7 @@ const campo = $('[data-fallo-texto]');
 
 let pendiente = null;
 let fallos = 0;
-let plantillaActual = 'papel';
+const eleccion = { plantilla: 'papel', formato: 'cuadrado' };
 
 let compartible = false;
 try {
@@ -146,7 +161,7 @@ const datos = () => ({
   procedencia: isla.dataset.procedencia,
   tamaño: Number(isla.dataset.tamano),
   marca: isla.dataset.marca,
-  plantilla: plantillaActual,
+  ...eleccion,
 });
 
 const cargar = () =>
@@ -165,24 +180,25 @@ const pintar = (g) => {
   anunciar(anuncio, 'La imagen está lista.');
 };
 
-function pintarBotonesDePlantilla(plantillas) {
-  contenedorPlantillas.replaceChildren();
-  for (const plantilla of plantillas) {
+function pintarGrupo(clave, opciones) {
+  const grupo = $('[data-' + clave + 's]');
+  grupo.replaceChildren();
+  for (const opcion of opciones) {
     const boton = document.createElement('button');
     boton.type = 'button';
-    boton.className = 'plantilla';
-    boton.textContent = plantilla.nombre;
-    boton.dataset.plantilla = plantilla.id;
-    boton.setAttribute('aria-pressed', String(plantilla.id === plantillaActual));
+    boton.className = clave;
+    boton.textContent = opcion.nombre;
+    boton.dataset.id = opcion.id;
+    boton.setAttribute('aria-pressed', String(opcion.id === eleccion[clave]));
     boton.addEventListener('click', async () => {
-      plantillaActual = plantilla.id;
-      for (const otro of contenedorPlantillas.children) {
-        otro.setAttribute('aria-pressed', String(otro.dataset.plantilla === plantillaActual));
+      eleccion[clave] = opcion.id;
+      for (const otro of grupo.children) {
+        otro.setAttribute('aria-pressed', String(otro.dataset.id === eleccion[clave]));
       }
       const g = await cargar();
       g && pintar(g);
     });
-    contenedorPlantillas.append(boton);
+    grupo.append(boton);
   }
 }
 
@@ -190,7 +206,8 @@ $('[data-abrir]').addEventListener('click', async () => {
   dialogo.showModal();
   const g = await cargar();
   if (!g) return;
-  pintarBotonesDePlantilla(g.PLANTILLAS);
+  pintarGrupo('plantilla', g.PLANTILLAS);
+  pintarGrupo('formato', g.FORMATOS);
   pintar(g);
 });
 
@@ -219,7 +236,7 @@ descargar.addEventListener('click', async () => {
   const g = await cargar();
   if (!g) return;
   g.dibujar(lienzo, datos());
-  const nombre = isla.dataset.nombre;
+  const nombre = isla.dataset.nombre + (eleccion.formato === 'cuadrado' ? '' : '-' + eleccion.formato);
   const salida = compartible ? await g.compartir(lienzo, nombre) : 'descarga';
   if (salida === 'cancelada') return;
 
@@ -268,6 +285,8 @@ descargar.addEventListener('click', async () => {
 
         <div class="plantillas" role="group" aria-label="Diseño de la imagen" data-plantillas />
 
+        <div class="plantillas" role="group" aria-label="Formato de la imagen" data-formatos />
+
         <canvas class="lienzo" data-lienzo width="1080" height="1080" aria-label="Previsualización de la imagen" />
 
         <div class="fallo" data-fallo hidden>
@@ -302,6 +321,22 @@ descargar.addEventListener('click', async () => {
   }
 
   /*
+   * Historia 30.2 — dentro de la Fila de acciones la distancia la pone el `gap` de la fila. Por
+   * debajo de 600 px la isla ocupa su línea —Imagen bajo Copiar, como siempre—, y desde 600 px
+   * toma su ancho y se pone en fila tras Copiar. Fuera de la fila no cambia nada.
+   */
+  :global(.fila-de-acciones) > .isla {
+    margin-top: 0;
+    flex-basis: 100%;
+  }
+
+  @media (min-width: 600px) {
+    :global(.fila-de-acciones) > .isla {
+      flex-basis: auto;
+    }
+  }
+
+  /*
    * UX-DR9 — secundario: texto siena con filete, 44px de alto mínimo.
    *
    * `.plantilla` va en `:global` porque esos botones los crea el guion, y Astro acota
@@ -312,7 +347,8 @@ descargar.addEventListener('click', async () => {
    */
   .abrir,
   .cerrar,
-  :global(.plantilla) {
+  :global(.plantilla),
+  :global(.formato) {
     font-family: var(--sans);
     font-size: var(--cuerpo-md);
     color: var(--siena);
@@ -327,12 +363,14 @@ descargar.addEventListener('click', async () => {
 
   .abrir:hover,
   .cerrar:hover,
-  :global(.plantilla:hover) {
+  :global(.plantilla:hover),
+  :global(.formato:hover) {
     background: var(--siena);
     color: var(--sobre-siena);
   }
 
-  :global(.plantilla[aria-pressed='true']) {
+  :global(.plantilla[aria-pressed='true']),
+  :global(.formato[aria-pressed='true']) {
     background: var(--siena);
     color: var(--sobre-siena);
   }
@@ -427,10 +465,17 @@ descargar.addEventListener('click', async () => {
     display: none;
   }
 
+  /*
+   * El vertical a todo el ancho mediría casi dos pantallas de móvil y empujaría el botón
+   * de compartir fuera de la vista. Se acota el alto y el ancho sigue a la proporción.
+   */
   .lienzo {
     display: block;
-    width: 100%;
+    max-width: 100%;
+    max-height: 50vh;
+    width: auto;
     height: auto;
+    margin-inline: auto;
     margin-block: calc(var(--unidad) * 3);
     /* La Imagen de Cita tiene esquinas rectas: es un objeto para publicar fuera. */
     border-radius: 0;

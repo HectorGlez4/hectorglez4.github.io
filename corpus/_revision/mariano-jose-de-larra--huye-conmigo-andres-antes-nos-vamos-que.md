@@ -1,5 +1,5 @@
 ---
-texto: "Huye, conmigo, Andrés; antes nos vamos, que trague tanto crimen el Cocito."
+texto: "Huye, conmigo, Andrés; antes nos vamos,\nque trague tanto crimen el Cocito."
 autor: "mariano-jose-de-larra"
 slug: "mariano-jose-de-larra-huye-conmigo-andres-antes-nos-vamos-que"
 procedencia:

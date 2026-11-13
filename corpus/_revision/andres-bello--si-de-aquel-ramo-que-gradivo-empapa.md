@@ -1,5 +1,5 @@
 ---
-texto: "Si de aquel ramo que Gradivo empapa de sangre y llanto está su sien desnuda, ¿cuál otro honor habrá que no le cuadre?"
+texto: "Si de aquel ramo que Gradivo empapa\nde sangre y llanto está su sien desnuda,\n¿cuál otro honor habrá que no le cuadre?"
 autor: "andres-bello"
 slug: "andres-bello-si-de-aquel-ramo-que-gradivo-empapa"
 procedencia:

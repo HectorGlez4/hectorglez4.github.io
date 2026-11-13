@@ -1,5 +1,5 @@
 ---
-texto: "LOPE: Un alcalde ha prendido un capitán y viniendo yo por él no le quieren entregar."
+texto: "LOPE: Un alcalde\nha prendido un capitán\ny viniendo yo por él\nno le quieren entregar."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-lope-un-alcalde-ha-prendido-un-capitan"
 procedencia:

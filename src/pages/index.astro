@@ -308,8 +308,7 @@ const DESCRIPCION = DESCRIPCION_DEL_SITIO;
     margin: 0;
     max-width: var(--medida-prosa);
     font-size: var(--cuerpo-md);
-    /* El interlineado de `body-md` (DESIGN.md); `tokens.css` no lo declara como token. */
-    line-height: 1.6;
+    line-height: var(--interlineado-cuerpo-md);
     color: var(--tinta-apagada);
   }
 
@@ -358,8 +357,13 @@ const DESCRIPCION = DESCRIPCION_DEL_SITIO;
     display: block;
     font-family: var(--sans);
     font-size: var(--cuerpo-lg);
-    font-weight: 600;
-    line-height: 1.4;
+    font-weight: var(--peso-fuerte);
+    /*
+     * Historia 26.12 — excepción de DESIGN.md § Typography: el título de las Obras de la portada,
+     * como el de la Tarjeta de Obra, toma el interlineado de `author` (1,4) y no el de su cuerpo.
+     * La nombra, por fichero y selector, `tests/unit/tipografia-en-tokens.test.ts`.
+     */
+    line-height: var(--interlineado-autor);
     color: var(--tinta);
     overflow-wrap: anywhere;
   }
@@ -368,8 +372,8 @@ const DESCRIPCION = DESCRIPCION_DEL_SITIO;
     display: block;
     font-family: var(--sans);
     font-size: var(--pie);
-    font-weight: 400;
-    line-height: 1.5;
+    font-weight: var(--peso-regular);
+    line-height: var(--interlineado-pie);
     color: var(--tinta-apagada);
   }
 
@@ -387,13 +391,13 @@ const DESCRIPCION = DESCRIPCION_DEL_SITIO;
 
   p[data-zona='obras-de-portada'] a,
   p[data-zona='autores-de-portada'] a {
-    /* El relleno completa una línea hasta la zona de toque: se calcula con el mismo interlineado. */
-    --interlineado-del-cierre: 1.5;
+    /* El relleno completa una línea hasta la zona de toque: se calcula con el interlineado de
+     * `body-md`, el del cuerpo del cierre (Historia 26.12). */
     display: inline-block;
     box-sizing: border-box;
     min-height: var(--zona-de-toque);
-    padding-block: calc((var(--zona-de-toque) - var(--interlineado-del-cierre) * 1em) / 2);
-    line-height: var(--interlineado-del-cierre);
+    padding-block: calc((var(--zona-de-toque) - var(--interlineado-cuerpo-md) * 1em) / 2);
+    line-height: var(--interlineado-cuerpo-md);
     font-family: var(--sans);
     font-size: var(--cuerpo-md);
     color: var(--tinta);
@@ -453,7 +457,7 @@ const DESCRIPCION = DESCRIPCION_DEL_SITIO;
     margin: 0;
     font-family: var(--sans);
     font-size: var(--pie);
-    line-height: 1.5;
+    line-height: var(--interlineado-pie);
     color: var(--tinta-apagada);
     overflow-wrap: anywhere;
   }
@@ -475,7 +479,7 @@ const DESCRIPCION = DESCRIPCION_DEL_SITIO;
     display: block;
     font-family: var(--serif);
     font-size: var(--titular-sm);
-    font-weight: 400;
+    font-weight: var(--peso-regular);
     color: var(--tinta);
     overflow-wrap: anywhere;
   }

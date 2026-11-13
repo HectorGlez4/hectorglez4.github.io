@@ -1,0 +1,17 @@
+# Índice de subpáginas de una Obra paginada (Historia 24.9, AD-23): el orden de sus
+# documentos lo declara la Fuente. Lo escribe «npx tsx tools/recuperar.ts --indice <url>»
+# y no se edita a mano; no es un documento y ningún cotejo lo lee.
+fuente: wikisource-es
+url: https://es.wikisource.org/wiki/Novelas_y_cuadros_de_la_vida_sur-americana
+recuperado: 2026-10-31
+paginas:
+  - "Novelas y cuadros: Dos palabras al lector"
+  - Dolores
+  - Teresa la limeña
+  - El corazón de la mujer
+  - La Perla del Valle
+  - Ilusión y realidad
+  - Luz y sombra (Samper)
+  - La monja
+  - Mi madrina
+  - Un crimen (Samper)

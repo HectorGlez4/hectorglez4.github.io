@@ -1,5 +1,5 @@
 ---
-texto: "Él todo el día no se quita de su puerta."
+texto: "Él todo el día\nno se quita de su puerta."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-el-todo-el-dia-no-se-quita"
 procedencia:

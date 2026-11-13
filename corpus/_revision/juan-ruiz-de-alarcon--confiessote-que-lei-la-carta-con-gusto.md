@@ -1,5 +1,5 @@
 ---
-texto: "Confiessote, que lei la carta con gusto, primo, 540 y aun mas que a su dueño estimo, porque se parece a ti."
+texto: "Confiessote, que lei\nla carta con gusto, primo, 540\ny aun mas que a su dueño estimo,\nporque se parece a ti."
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-confiessote-que-lei-la-carta-con-gusto"
 procedencia:

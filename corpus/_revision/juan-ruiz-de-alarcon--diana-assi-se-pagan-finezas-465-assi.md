@@ -1,5 +1,5 @@
 ---
-texto: "DIANA Assi se pagan finezas? 465 Assi se premian lealtades?"
+texto: "DIANA\nAssi se pagan finezas? 465\nAssi se premian lealtades?"
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-diana-assi-se-pagan-finezas-465-assi"
 procedencia:

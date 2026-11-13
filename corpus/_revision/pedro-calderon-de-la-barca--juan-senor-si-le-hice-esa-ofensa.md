@@ -1,5 +1,5 @@
 ---
-texto: "JUAN: Señor, si le hice esa ofensa, que fue en honrada defensa de tu honor."
+texto: "JUAN: Señor, si le hice esa ofensa,\nque fue en honrada defensa\nde tu honor."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-juan-senor-si-le-hice-esa-ofensa"
 procedencia:

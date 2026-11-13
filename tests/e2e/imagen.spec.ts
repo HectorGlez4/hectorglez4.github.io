@@ -387,3 +387,75 @@ test.describe('Historia 22.10 — revisión: re-anuncio, respaldo y una sola car
     expect(pedidas[1]).toMatch(/imagen\.js\?1$/);
   });
 });
+
+test.describe('Formato vertical para Stories y Reels', () => {
+  test('el cuadrado es el de partida y el vertical mide 1080×1920', async ({ page }) => {
+    await abrirDialogo(page);
+    const botones = page.locator('[data-formatos] .formato');
+    await expect(botones).toHaveCount(2);
+    await expect(botones.nth(0)).toHaveAttribute('aria-pressed', 'true');
+
+    await botones.nth(1).click();
+    await expect(botones.nth(1)).toHaveAttribute('aria-pressed', 'true');
+    const medidas = await page
+      .locator('[data-lienzo]')
+      .evaluate((l) => ({ w: (l as HTMLCanvasElement).width, h: (l as HTMLCanvasElement).height }));
+    expect(medidas).toEqual({ w: 1080, h: 1920 });
+  });
+
+  test('en vertical, fuera de la franja 240–1500 solo hay fondo', async ({ page }) => {
+    /*
+     * La cuadrícula del perfil recorta el 9:16 a su franja central 3:4, el visor de
+     * Stories tapa arriba la cabecera y los controles del Reel tapan desde ~1500 hacia
+     * abajo. Si algo se pinta fuera de la franja, se corta en alguno de los tres.
+     */
+    await abrirDialogo(page);
+    await page.locator('[data-formatos] .formato').nth(1).click();
+    const fueraLimpio = await page.locator('[data-lienzo]').evaluate((l) => {
+      const c = l as HTMLCanvasElement;
+      const ctx = c.getContext('2d')!;
+      const fondo = ctx.getImageData(0, 0, 1, 1).data.join();
+      for (const [y0, y1] of [[0, 240], [1500, 1920]]) {
+        const d = ctx.getImageData(0, y0, c.width, y1 - y0).data;
+        for (let i = 0; i < d.length; i += 4) {
+          if (`${d[i]},${d[i + 1]},${d[i + 2]},${d[i + 3]}` !== fondo) return false;
+        }
+      }
+      return true;
+    });
+    expect(fueraLimpio).toBe(true);
+  });
+
+  test('en vertical, la columna de la derecha (x ≥ 900) solo tiene fondo', async ({ page }) => {
+    /* La columna de herramientas del editor de Stories ocupa x ≥ 917 y taparía el texto. */
+    await abrirDialogo(page);
+    await page.locator('[data-formatos] .formato').nth(1).click();
+    const libre = await page.locator('[data-lienzo]').evaluate((l) => {
+      const c = l as HTMLCanvasElement;
+      const ctx = c.getContext('2d')!;
+      const fondo = ctx.getImageData(0, 0, 1, 1).data.join();
+      const d = ctx.getImageData(900, 0, c.width - 900, c.height).data;
+      for (let i = 0; i < d.length; i += 4) {
+        if (`${d[i]},${d[i + 1]},${d[i + 2]},${d[i + 3]}` !== fondo) return false;
+      }
+      return true;
+    });
+    expect(libre).toBe(true);
+  });
+
+  test('los botones de formato son zonas de toque de 44px', async ({ page }) => {
+    await abrirDialogo(page);
+    const altos = await page
+      .locator('[data-formatos] .formato')
+      .evaluateAll((ns) => ns.map((n) => n.getBoundingClientRect().height));
+    for (const alto of altos) expect(alto).toBeGreaterThanOrEqual(44);
+  });
+
+  test('el fichero vertical lleva el formato en el nombre', async ({ page }) => {
+    await abrirDialogo(page);
+    await page.locator('[data-formatos] .formato').nth(1).click();
+    const descarga = page.waitForEvent('download');
+    await page.getByRole('button', { name: 'Descargar', exact: true }).click();
+    expect((await descarga).suggestedFilename()).toMatch(/-vertical\.png$/);
+  });
+});

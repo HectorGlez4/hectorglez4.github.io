@@ -56,12 +56,13 @@ const FUENTE = {
 };
 
 /** Un documento como el que deja `tools/recuperar.ts`: cabecera, declaración y cuerpo. */
-function documento(cuerpo: string): string {
+function documento(cuerpo: string, lineas?: string): string {
   return componerDocumento(
     {
       fuente: 'wikisource-es',
       obra: OBRA,
       año: 49,
+      ...(lineas !== undefined ? { lineas } : {}),
       url: FUENTE.url,
       recuperado: '2026-08-19',
     },
@@ -99,6 +100,96 @@ function citaSembrada(campos: Record<string, unknown> = {}): string {
     ...campos,
   });
 }
+
+describe('Historia 29.1 — la puerta del salto de verso, en el build (AD-29)', () => {
+  const EN_VERSO = 'No es que tengamos poco\ntiempo, es que perdemos mucho.';
+
+  it('saltos respaldados por un documento de verso: construye', async () => {
+    const { codigo, salida } = await construir({
+      ...CORPUS_BASE,
+      [FICHERO_DE_LA_CITA]: citaSembrada({ texto: EN_VERSO }),
+      [NOMBRE_DEL_DOCUMENTO]: documento(CUERPO_CON_LA_CITA, 'verso'),
+    });
+    expect(salida).not.toMatch(/Regla incumplida/);
+    expect(codigo).toBe(0);
+  });
+
+  it('regla 1: saltos sin documento de verso rompen, nombrando el fichero', async () => {
+    const { codigo, salida } = await construir({
+      ...CORPUS_BASE,
+      [FICHERO_DE_LA_CITA]: citaSembrada({ texto: EN_VERSO }),
+      [NOMBRE_DEL_DOCUMENTO]: documento(CUERPO_CON_LA_CITA),
+    });
+    expect(codigo).not.toBe(0);
+    expect(salida).toContain('seneca--no-es-que-tengamos-poco-tiempo-es.md');
+    expect(salida).toMatch(/salto de verso, 1/);
+  });
+
+  it('regla 2: un \\n sobre una racha sin salto del documento rompe', async () => {
+    const { codigo, salida } = await construir({
+      ...CORPUS_BASE,
+      [FICHERO_DE_LA_CITA]: citaSembrada({ texto: 'No es que tengamos\npoco tiempo, es que perdemos mucho.' }),
+      [NOMBRE_DEL_DOCUMENTO]: documento(CUERPO_CON_LA_CITA, 'verso'),
+    });
+    expect(codigo).not.toBe(0);
+    expect(salida).toContain('seneca--no-es-que-tengamos-poco-tiempo-es.md');
+    expect(salida).toMatch(/salto de verso, 2/);
+  });
+
+  it('regla 3: una Cita del censo con salto rompe', async () => {
+    const { codigo, salida } = await construir({
+      ...CORPUS_BASE,
+      [FICHERO_DEL_CENSO]: `citas:\n  - ${SLUG}\n`,
+      [FICHERO_DE_LA_CITA]: citaSembrada({ texto: EN_VERSO, fuente: undefined }),
+    });
+    expect(codigo).not.toBe(0);
+    expect(salida).toContain('seneca--no-es-que-tengamos-poco-tiempo-es.md');
+    expect(salida).toMatch(/salto de verso, 3/);
+  });
+
+  it('una lineas: fuera del conjunto rompe nombrando el documento', async () => {
+    const { codigo, salida } = await construir({
+      ...CORPUS_BASE,
+      [FICHERO_DE_LA_CITA]: citaSembrada(),
+      [NOMBRE_DEL_DOCUMENTO]: documento(CUERPO_CON_LA_CITA, 'poesia'),
+    });
+    expect(codigo).not.toBe(0);
+    expect(salida).toContain('wikisource-es--sobre-la-brevedad-de-la-vida.txt');
+    expect(salida).toMatch(/lineas: poesia/);
+  });
+});
+
+describe('Historia 29.2 — regla 4: una Cita de documento de verso sin sus saltos, en el build', () => {
+  // La misma con sus saltos construye: es la primera prueba de la 29.1, arriba.
+  it('en una línea, de un documento de verso: rompe con el fichero y la orden exacta', async () => {
+    const { codigo, salida } = await construir({
+      ...CORPUS_BASE,
+      [FICHERO_DE_LA_CITA]: citaSembrada(),
+      [NOMBRE_DEL_DOCUMENTO]: documento(CUERPO_CON_LA_CITA, 'verso'),
+    });
+    expect(codigo).not.toBe(0);
+    expect(salida).toContain('seneca--no-es-que-tengamos-poco-tiempo-es.md');
+    expect(salida).toMatch(/salto de verso, 4/);
+    expect(salida).toContain(`npm run documentar -- --restituir-saltos ${SLUG}`);
+  });
+
+  it('dos documentos de verso que le dan saltos distintos: avisa con los dos y construye', async () => {
+    const { codigo, salida } = await construir({
+      ...CORPUS_BASE,
+      [FICHERO_DE_LA_CITA]: citaSembrada(),
+      [NOMBRE_DEL_DOCUMENTO]: documento(CUERPO_CON_LA_CITA, 'verso'),
+      'fuentes/wikisource-es--sobre-la-brevedad-de-la-vida--ii.txt': documento(
+        `${TEXTO}\nUno\nDos\nTres\nCuatro\n`,
+        'verso',
+      ),
+    });
+    expect(salida).not.toMatch(/Regla incumplida/);
+    expect(codigo).toBe(0);
+    expect(salida).toMatch(/saltos distintos/);
+    expect(salida).toContain('wikisource-es--sobre-la-brevedad-de-la-vida--ii.txt');
+    expect(salida).toContain('wikisource-es--sobre-la-brevedad-de-la-vida.txt');
+  });
+});
 
 describe('Historia 11.2 — el cotejo corre en el build y rompe la construcción', () => {
   it('una Cita cuyo texto está en el cuerpo de su documento construye', async () => {

@@ -1,5 +1,5 @@
 ---
-texto: "CRESPO: Eso excusará a los dos del tormento."
+texto: "CRESPO: Eso excusará a los dos\ndel tormento."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-crespo-eso-excusara-a-los-dos-del"
 procedencia:

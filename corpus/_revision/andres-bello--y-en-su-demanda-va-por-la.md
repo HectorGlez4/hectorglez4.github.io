@@ -1,5 +1,5 @@
 ---
-texto: "Y en su demanda va por la pradera, y cuando cree llegar, y a la encantada aparición poner la mano espera,"
+texto: "Y en su demanda va por la pradera,\ny cuando cree llegar, y a la encantada\naparición poner la mano espera,"
 autor: "andres-bello"
 slug: "andres-bello-y-en-su-demanda-va-por-la"
 procedencia:

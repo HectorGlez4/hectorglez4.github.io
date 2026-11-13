@@ -12,7 +12,7 @@
  */
 import type { Cita, Autor } from '../lib/publicado.ts';
 import { rutaDeAutor } from '../lib/superficies.ts';
-import { lineaDeProcedencia } from '../lib/atribucion.ts';
+import { lineaDeProcedencia, nombreEnAtribucion } from '../lib/atribucion.ts';
 import { rutaDeLaObra } from '../lib/obras.ts';
 import type { Zona } from '../lib/vocabulario.ts';
 
@@ -39,7 +39,7 @@ const enlaceDeObra = cita.obra === undefined ? undefined : rutaDeLaObra(cita.obr
 
 {/* La zona va en los dos párrafos, que son los contenedores que pinta el build (Historia 23.7). */}
 <p class="autor" data-zona={zona}>
-  <a href={rutaDeAutor(autor.slug)} class="enlace-en-tinta">{autor.nombre}</a>
+  <a href={rutaDeAutor(autor.slug)} class="enlace-en-tinta">{nombreEnAtribucion(autor)}</a>
 </p>
 {
   linea.titulo !== undefined && enlaceDeObra !== undefined ? (
@@ -54,9 +54,9 @@ const enlaceDeObra = cita.obra === undefined ? undefined : rutaDeLaObra(cita.obr
     margin: 0;
     font-family: var(--sans);
     font-size: var(--autor);
-    font-weight: 600;
+    font-weight: var(--peso-fuerte);
     letter-spacing: 0.09em;
-    line-height: 1.4;
+    line-height: var(--interlineado-autor);
     text-transform: uppercase;
   }
 
@@ -94,8 +94,8 @@ const enlaceDeObra = cita.obra === undefined ? undefined : rutaDeLaObra(cita.obr
     margin: var(--unidad) 0 0;
     font-family: var(--sans);
     font-size: var(--pie);
-    font-weight: 400;
-    line-height: 1.5;
+    font-weight: var(--peso-regular);
+    line-height: var(--interlineado-pie);
     color: var(--tinta-apagada);
   }
 

@@ -1,5 +1,5 @@
 ---
-texto: "¡Oh celo, del favor verdugo eterno!, Vuélvete al lugar triste donde estabas, o al reino (si allá cabes) del espanto;"
+texto: "¡Oh celo, del favor verdugo eterno!,\nVuélvete al lugar triste donde estabas,\no al reino (si allá cabes) del espanto;"
 autor: "luis-de-gongora"
 slug: "luis-de-gongora-oh-celo-del-favor-verdugo-eterno-vuelvete"
 procedencia:

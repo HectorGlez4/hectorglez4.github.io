@@ -1,5 +1,5 @@
 ---
-texto: "De una parte el amor propio, y la lealtad de otra parte Me rinden."
+texto: "De una parte el amor propio, y la lealtad de otra parte\nMe rinden."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-de-una-parte-el-amor-propio-y"
 procedencia:

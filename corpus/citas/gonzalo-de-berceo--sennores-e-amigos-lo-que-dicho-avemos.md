@@ -1,5 +1,5 @@
 ---
-texto: "Sennores e amigos, lo que dicho avemos, Palabra es oscura, esponerla queremos: Tolgamos la corteza, al meollo entremos, Prendamos lo de dentro, lo de fuera dessemos."
+texto: "Sennores e amigos, lo que dicho avemos,\nPalabra es oscura, esponerla queremos:\nTolgamos la corteza, al meollo entremos,\nPrendamos lo de dentro, lo de fuera dessemos."
 autor: "gonzalo-de-berceo"
 temas:
   - "el-saber"

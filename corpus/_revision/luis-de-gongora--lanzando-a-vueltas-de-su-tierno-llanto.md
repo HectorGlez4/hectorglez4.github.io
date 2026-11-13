@@ -1,5 +1,5 @@
 ---
-texto: "lanzando a vueltas de su tierno llanto un ardiente suspiro de su pecho, tal que el más duro canto enterneciera:"
+texto: "lanzando a vueltas de su tierno llanto\nun ardiente suspiro de su pecho,\ntal que el más duro canto enterneciera:"
 autor: "luis-de-gongora"
 slug: "luis-de-gongora-lanzando-a-vueltas-de-su-tierno-llanto"
 procedencia:

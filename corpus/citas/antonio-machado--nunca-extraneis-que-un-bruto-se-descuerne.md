@@ -1,5 +1,5 @@
 ---
-texto: "Nunca extrañéis que un bruto se descuerne luchando por la idea."
+texto: "Nunca extrañéis que un bruto\nse descuerne luchando por la idea."
 autor: "antonio-machado"
 temas:
   - "el-saber"

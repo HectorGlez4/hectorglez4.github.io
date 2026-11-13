@@ -1,5 +1,5 @@
 ---
-texto: "mas ¡ay! en vano mi flaqueza anima tu vuelo audaz, que, al fatigado aliento, pone pavor la levantada cima."
+texto: "mas ¡ay! en vano mi flaqueza anima\ntu vuelo audaz, que, al fatigado aliento,\npone pavor la levantada cima."
 autor: "andres-bello"
 slug: "andres-bello-mas-ay-en-vano-mi-flaqueza-anima"
 procedencia:

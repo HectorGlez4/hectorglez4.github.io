@@ -1,5 +1,5 @@
 ---
-texto: "DON IUAN Confiesso, que no esperè tal excesso de tu coraçon esquiuo."
+texto: "DON IUAN\nConfiesso,\nque no esperè tal excesso\nde tu coraçon esquiuo."
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-don-iuan-confiesso-que-no-espere-tal"
 procedencia:

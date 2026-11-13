@@ -1,5 +1,5 @@
 ---
-texto: "¿Es fuerza que se engendren más despacio las glorias que las ofensas?"
+texto: "¿Es fuerza\nque se engendren más despacio\nlas glorias que las ofensas?"
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-es-fuerza-que-se-engendren-mas-despacio"
 procedencia:

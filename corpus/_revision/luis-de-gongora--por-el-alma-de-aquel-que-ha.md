@@ -1,5 +1,5 @@
 ---
-texto: "Por el alma de aquel que ha pretendido con cuatro onzas de agua de chicoria purgar la villa y darte lo purgado,"
+texto: "Por el alma de aquel que ha pretendido\ncon cuatro onzas de agua de chicoria\npurgar la villa y darte lo purgado,"
 autor: "luis-de-gongora"
 slug: "luis-de-gongora-por-el-alma-de-aquel-que-ha"
 procedencia:

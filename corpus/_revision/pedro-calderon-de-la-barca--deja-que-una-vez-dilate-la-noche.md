@@ -1,5 +1,5 @@
 ---
-texto: "Deja que una vez dilate la noche fría su trémulo imperio; deja que de tu deidad se diga, atenta a mis ruegos, que es voluntaria y no precisa!"
+texto: "Deja que una vez\ndilate la noche fría\nsu trémulo imperio; deja\nque de tu deidad se diga,\natenta a mis ruegos, que es\nvoluntaria y no precisa!"
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-deja-que-una-vez-dilate-la-noche"
 procedencia:

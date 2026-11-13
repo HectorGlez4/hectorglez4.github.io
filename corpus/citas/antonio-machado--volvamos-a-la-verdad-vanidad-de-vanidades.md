@@ -1,5 +1,5 @@
 ---
-texto: "Volvamos a la verdad: vanidad de vanidades."
+texto: "Volvamos a la verdad:\nvanidad de vanidades."
 autor: "antonio-machado"
 temas:
   - "el-saber"

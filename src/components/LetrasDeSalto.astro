@@ -59,7 +59,12 @@ const { letras, entidades } = Astro.props;
     height: var(--zona-de-toque);
     font-family: var(--sans);
     font-size: var(--cuerpo-md);
-    font-weight: 600;
+    font-weight: var(--peso-fuerte);
+    /*
+     * Historia 26.12 — la única excepción nombrada a los tokens de interlineado (DESIGN.md
+     * § Typography): cada letra es un glifo suelto centrado en su zona de toque, sin renglones
+     * que espaciar. La admite, por fichero y selector, `tests/unit/tipografia-en-tokens.test.ts`.
+     */
     line-height: 1;
     color: var(--siena);
     text-decoration: none;

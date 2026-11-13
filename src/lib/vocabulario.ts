@@ -85,6 +85,20 @@ export const EVENTOS = {
   comparticionDeImagen: 'comparticion-de-imagen',
   /** SM-7 — el enlace salió hacia un destino (FR-18). */
   comparticionDeEnlace: 'comparticion-de-enlace',
+  /**
+   * FR-58 — el visitante copió una Referencia de «Cómo citar» (APA, MLA o Chicago: los tres
+   * estilos son el mismo evento). Historia 30.5. Se informa aparte y fuera de SM-5, SM-7 y
+   * SM-C3 hasta que su línea base diga cómo se lee (pregunta 15 del PRD; AD-13, NFR-11); por eso
+   * no está en `METRICA_DE_ACCION` y no lleva campos. Hoy solo la pide la isla de Copiar de la
+   * Página de Cita.
+   */
+  copiadoDeReferencia: 'copiado-de-referencia',
+  /**
+   * FR-57 — el visitante copió el Fragmento de «Inserta esta cita». Historia 30.5, con el mismo
+   * trato que `copiado-de-referencia`: aparte, fuera de SM-5, SM-7 y SM-C3, sin campos, y hoy
+   * solo la pide la isla de Copiar de la Página de Cita.
+   */
+  copiadoDeFragmento: 'copiado-de-fragmento',
 } as const;
 
 export type Evento = (typeof EVENTOS)[keyof typeof EVENTOS];
@@ -277,6 +291,8 @@ export const CAMPOS_DE_EVENTO: {
   },
   [EVENTOS.comparticionDeImagen]: { destino: DESTINO_DE_COMPARTICION, primera: DE_LA_ACCION },
   [EVENTOS.comparticionDeEnlace]: { destino: DESTINO_DE_COMPARTICION, primera: DE_LA_ACCION },
+  [EVENTOS.copiadoDeReferencia]: {},
+  [EVENTOS.copiadoDeFragmento]: {},
 };
 
 /**

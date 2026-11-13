@@ -1,5 +1,5 @@
 ---
-texto: "LOPE: (A la puerta Aparte de la calle, ¿no es mi cuarto?"
+texto: "LOPE: (A la puerta Aparte\nde la calle, ¿no es mi cuarto?"
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-lope-a-la-puerta-aparte-de-la"
 procedencia:

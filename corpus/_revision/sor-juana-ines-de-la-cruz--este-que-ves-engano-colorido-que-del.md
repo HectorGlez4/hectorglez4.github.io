@@ -1,5 +1,5 @@
 ---
-texto: "Este que ves, engaño colorido, que, del arte ostentando los primores, con falsos silogismos de colores es cauteloso engaño del sentido;"
+texto: "Este que ves, engaño colorido,\nque, del arte ostentando los primores,\ncon falsos silogismos de colores\nes cauteloso engaño del sentido;"
 autor: "sor-juana-ines-de-la-cruz"
 slug: "sor-juana-ines-de-la-cruz-este-que-ves-engano-colorido-que-del"
 procedencia:

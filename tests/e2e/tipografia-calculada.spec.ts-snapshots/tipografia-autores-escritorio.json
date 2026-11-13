@@ -1,0 +1,56 @@
+{
+  "a.saltar": {
+    "400 | 1.650": 1
+  },
+  "footer.contenedor.pie > nav.seguir > ul > li > a": {
+    "400 | 1.650": 5
+  },
+  "footer.contenedor.pie > p": {
+    "400 | 1.650": 1
+  },
+  "header.cabecera.contenedor > a.marca": {
+    "600 | 1.650": 1
+  },
+  "header.cabecera.contenedor > nav > ul.principal > li > a.buscar": {
+    "400 | 1.650": 1
+  },
+  "header.cabecera.contenedor > nav > ul.principal > li > a.enlace-en-tinta": {
+    "400 | 1.650": 2
+  },
+  "header.cabecera.contenedor > nav > ul.principal > li > span.punto": {
+    "400 | 1.650": 2
+  },
+  "main > div.contenedor.pagina > div.prosa > div.filtro > div.campo > div.campo-de-busqueda > label": {
+    "400 | 1.650": 1
+  },
+  "main > div.contenedor.pagina > div.prosa > div.listado > nav.letras > ul > li > a": {
+    "600 | 1.000": 23
+  },
+  "main > div.contenedor.pagina > div.prosa > div.listado > nav.letras > ul > li > a > span.solo-para-lectores": {
+    "600 | 1.000": 23
+  },
+  "main > div.contenedor.pagina > div.prosa > div.listado > section.grupo > h2.rotulo": {
+    "600 | 1.400": 23
+  },
+  "main > div.contenedor.pagina > div.prosa > div.listado > section.grupo > p.volver > a": {
+    "400 | 1.650": 23
+  },
+  "main > div.contenedor.pagina > div.prosa > div.listado > section.grupo > ul > li.fila-de-bloque > a > span > span.hechos": {
+    "400 | 1.400": 135
+  },
+  "main > div.contenedor.pagina > div.prosa > div.listado > section.grupo > ul > li.fila-de-bloque > a > span > span.hechos > span": {
+    "400 | 1.400": 135
+  },
+  "main > div.contenedor.pagina > div.prosa > div.listado > section.grupo > ul > li.fila-de-bloque > a > span > span.hechos > span.solo-para-lectores": {
+    "400 | 1.400": 135
+  },
+  "main > div.contenedor.pagina > div.prosa > div.listado > section.grupo > ul > li.fila-de-bloque > a > span > span.nombre": {
+    "400 | 1.400": 135
+  },
+  "main > div.contenedor.pagina > div.prosa > div.listado > section.grupo > ul > li.fila-de-bloque > a > span > span.solo-para-lectores": {
+    "400 | 1.400": 135
+  },
+  "main > div.contenedor.pagina > div.prosa > h1": {
+    "600 | 1.650": 1
+  }
+}

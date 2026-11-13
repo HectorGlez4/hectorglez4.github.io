@@ -1,5 +1,5 @@
 ---
-texto: "A vna infame patricida, ¿Que quiso anegar su patria?"
+texto: "A vna infame patricida,\n¿Que quiso anegar su patria?"
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-a-vna-infame-patricida-que-quiso-anegar"
 procedencia:

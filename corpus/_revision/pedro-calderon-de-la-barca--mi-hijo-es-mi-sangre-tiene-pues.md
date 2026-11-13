@@ -1,5 +1,5 @@
 ---
-texto: "Mi hijo es, mi sangre tiene, pues tiene valor tan grande; Y así, entre una y otra duda, el medio más importante Es irme al Rey, y decirle que es mi hijo y que le mate."
+texto: "Mi hijo es, mi sangre tiene, pues tiene valor tan grande;\nY así, entre una y otra duda, el medio más importante\nEs irme al Rey, y decirle que es mi hijo y que le mate."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-mi-hijo-es-mi-sangre-tiene-pues"
 procedencia:

@@ -1,5 +1,5 @@
 ---
-texto: "LEONARDO Mandarme quedar, despues de tanto rigor."
+texto: "LEONARDO\nMandarme quedar,\ndespues de tanto rigor."
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-leonardo-mandarme-quedar-despues-de-tanto-rigor"
 procedencia:

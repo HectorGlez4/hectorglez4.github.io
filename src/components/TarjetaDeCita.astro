@@ -14,6 +14,9 @@
  */
 import type { Cita, Autor } from '../lib/publicado.ts';
 import { rutaDeCita } from '../lib/superficies.ts';
+import TextoDeCita from './TextoDeCita.astro';
+import { recortarPorPalabra } from '../lib/recorte.ts';
+import { MAX_CARACTERES_DE_TARJETA_DE_CITA } from '../lib/umbrales.ts';
 import type { Zona } from '../lib/vocabulario.ts';
 
 interface Props {
@@ -112,13 +115,11 @@ const partes = [
 /**
  * El fragmento. Una Cita larga se recorta **para el listado**, que no es publicarla
  * recortada: su página muestra el texto íntegro. NFR-12 prohíbe alterar la Cita, no
- * resumirla en un índice.
+ * resumirla en un índice. Se recorta en la última palabra entera, por el único dueño del
+ * recorte (Historia 34.1, UX-DR132); los saltos de verso que quedan dentro los pinta
+ * `TextoDeCita`.
  */
-const LARGO_DE_FRAGMENTO = 120;
-const fragmento =
-  cita.texto.length > LARGO_DE_FRAGMENTO
-    ? `${cita.texto.slice(0, LARGO_DE_FRAGMENTO - 1).trimEnd()}…`
-    : cita.texto;
+const fragmento = recortarPorPalabra(cita.texto, MAX_CARACTERES_DE_TARJETA_DE_CITA);
 ---
 
 {/*
@@ -139,7 +140,7 @@ const fragmento =
   * comas y nada más.
   */}
 <li class="tarjeta" data-zona={zona}>
-  <a href={rutaDeCita(cita.slug)}><span class="fragmento">«{fragmento}»</span>{partes.map((parte) => (<><span class="solo-para-lectores">, </span><span class={parte.clase}>{parte.texto}</span></>))}</a>
+  <a href={rutaDeCita(cita.slug)}><span class="fragmento"><TextoDeCita texto={fragmento} /></span>{partes.map((parte) => (<><span class="solo-para-lectores">, </span><span class={parte.clase}>{parte.texto}</span></>))}</a>
 </li>
 
 <style>
@@ -170,8 +171,8 @@ const fragmento =
   .fragmento {
     font-family: var(--serif);
     font-size: var(--titular-sm);
-    font-weight: 600;
-    line-height: 1.3;
+    font-weight: var(--peso-fuerte);
+    line-height: var(--interlineado-titular-sm);
     color: var(--tinta);
     text-wrap: pretty;
   }
@@ -179,7 +180,7 @@ const fragmento =
   .autor {
     font-family: var(--sans);
     font-size: var(--autor);
-    font-weight: 600;
+    font-weight: var(--peso-fuerte);
     letter-spacing: 0.09em;
     text-transform: uppercase;
     color: var(--tinta-apagada);
@@ -192,8 +193,8 @@ const fragmento =
   .obra {
     font-family: var(--sans);
     font-size: var(--pie);
-    font-weight: 400;
-    line-height: 1.5;
+    font-weight: var(--peso-regular);
+    line-height: var(--interlineado-pie);
     color: var(--tinta-apagada);
     overflow-wrap: anywhere;
   }

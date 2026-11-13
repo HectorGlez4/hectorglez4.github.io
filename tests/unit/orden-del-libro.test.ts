@@ -3,10 +3,14 @@ import { mkdir, mkdtemp, readFile, readdir, rm, writeFile } from 'node:fs/promis
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import {
+  aparicionQueCuenta,
   colgarObras,
   compararDocumentos,
+  compararEnElLibro,
   ordenDelLibro,
   type AparicionDeCita,
+  type IndicesDeObras,
+  type PasajeDeAparicion,
   type PosicionesDeCitas,
 } from '../../src/lib/obras.ts';
 import {
@@ -17,7 +21,12 @@ import {
   type CitaParaSituar,
   type VigilanteDeFicheros,
 } from '../../tools/lib/posiciones.ts';
-import { citasDeLasObras, type ConjuntoPublicable } from '../../src/lib/publicado.ts';
+import {
+  citasDeLasObras,
+  pasajesDeCitas,
+  pasajesDeLasCitas,
+  type ConjuntoPublicable,
+} from '../../src/lib/publicado.ts';
 import { componerDocumento } from '../../tools/lib/documento.ts';
 import {
   apareceEnDocumento,
@@ -32,6 +41,7 @@ import {
   leerCitas,
   leerDocumentosDeFuente,
   leerFichasDeObra,
+  leerOrdenDeLosIndices,
   rutasDelCorpus,
   separarFrontmatter,
   type CitaEnCorpus,
@@ -53,6 +63,9 @@ const RAIZ_DEL_REPO = join(import.meta.dirname, '..', '..');
 const cita = (slug: string, fuente?: string) => ({ slug, ...(fuente !== undefined ? { fuente: { id: fuente } } : {}) });
 const en = (documento: string, posicion: number): AparicionDeCita => ({ documento, posicion });
 const slugs = (citas: readonly { slug: string }[]) => citas.map((c) => c.slug);
+
+/** Sin ningún índice de subpáginas capturado: el orden natural de la 24.1 (Historia 24.9). */
+const SIN_INDICES: IndicesDeObras = new Map();
 
 /** Todas las permutaciones de una lista corta. */
 function permutaciones<T>(lista: readonly T[]): T[][] {
@@ -212,7 +225,7 @@ describe('24.1 — ordenDelLibro: la matriz de la historia', () => {
       ['a', [en('ws--obra', 30)]],
       ['b', [en('ws--obra', 10)]],
     ]);
-    expect(slugs(ordenDelLibro([cita('a', 'ws'), cita('b', 'ws')], posiciones))).toEqual(['b', 'a']);
+    expect(slugs(ordenDelLibro([cita('a', 'ws'), cita('b', 'ws')], posiciones, SIN_INDICES))).toEqual(['b', 'a']);
   });
 
   it('varias Fuentes: primero la que más Citas sitúa; a igualdad, el identificador menor', () => {
@@ -224,11 +237,11 @@ describe('24.1 — ordenDelLibro: la matriz de la historia', () => {
       ['g2', [en('gutenberg--obra', 2)]],
     ]);
     const citas = [cita('g1', 'gutenberg'), cita('g2', 'gutenberg'), cita('w1', 'wikisource-es'), cita('w2', 'wikisource-es'), cita('w3', 'wikisource-es')];
-    expect(slugs(ordenDelLibro(citas, tres))).toEqual(['w3', 'w2', 'w1', 'g1', 'g2']);
+    expect(slugs(ordenDelLibro(citas, tres, SIN_INDICES))).toEqual(['w3', 'w2', 'w1', 'g1', 'g2']);
 
     // Con 2 y 2, `gutenberg` < `wikisource-es` por unidades de código.
     const dos = new Map([...tres].filter(([slug]) => slug !== 'w3'));
-    expect(slugs(ordenDelLibro(citas.filter((c) => c.slug !== 'w3'), dos))).toEqual(['g1', 'g2', 'w2', 'w1']);
+    expect(slugs(ordenDelLibro(citas.filter((c) => c.slug !== 'w3'), dos, SIN_INDICES))).toEqual(['g1', 'g2', 'w2', 'w1']);
   });
 
   it('paginada: proemio, i, ii, ix, x; el corto antes que sus páginas', () => {
@@ -243,14 +256,14 @@ describe('24.1 — ordenDelLibro: la matriz de la historia', () => {
       ['c-corto', [en(base, 9_999)]],
     ]);
     const citas = [...posiciones.keys()].map((s) => cita(s, 'wikisource-es'));
-    expect(slugs(ordenDelLibro(citas, posiciones))).toEqual(['c-corto', 'c-proemio', 'c-i', 'c-ii', 'c-ix', 'c-x']);
+    expect(slugs(ordenDelLibro(citas, posiciones, SIN_INDICES))).toEqual(['c-corto', 'c-proemio', 'c-i', 'c-ii', 'c-ix', 'c-x']);
 
     // Y los números, por valor: el libro 2 antes que el 10.
     const libros = new Map([
       ['diez', [en('ws--etica--etica-libro-10', 0)]],
       ['dos', [en('ws--etica--etica-libro-2', 50)]],
     ]);
-    expect(slugs(ordenDelLibro([cita('diez', 'ws'), cita('dos', 'ws')], libros))).toEqual(['dos', 'diez']);
+    expect(slugs(ordenDelLibro([cita('diez', 'ws'), cita('dos', 'ws')], libros, SIN_INDICES))).toEqual(['dos', 'diez']);
   });
 
   it('varias apariciones: la Cita toma la del primer documento en orden natural', () => {
@@ -263,7 +276,7 @@ describe('24.1 — ordenDelLibro: la matriz de la historia', () => {
       ['f', [en(`${base}-x`, 1)]],
     ]);
     const citas = ['c', 'd', 'e', 'f'].map((s) => cita(s, 'wikisource-es'));
-    expect(slugs(ordenDelLibro(citas, posiciones))).toEqual(['d', 'c', 'e', 'f']);
+    expect(slugs(ordenDelLibro(citas, posiciones, SIN_INDICES))).toEqual(['d', 'c', 'e', 'f']);
   });
 
   it('empate en documento y posición: decide el slug', () => {
@@ -271,7 +284,7 @@ describe('24.1 — ordenDelLibro: la matriz de la historia', () => {
       ['zeta', [en('ws--obra', 7)]],
       ['alfa', [en('ws--obra', 7)]],
     ]);
-    expect(slugs(ordenDelLibro([cita('zeta', 'ws'), cita('alfa', 'ws')], posiciones))).toEqual(['alfa', 'zeta']);
+    expect(slugs(ordenDelLibro([cita('zeta', 'ws'), cita('alfa', 'ws')], posiciones, SIN_INDICES))).toEqual(['alfa', 'zeta']);
   });
 
   it('sin documento: sin Fuente, o con posiciones vacías o ausentes, al final y por slug', () => {
@@ -282,7 +295,7 @@ describe('24.1 — ordenDelLibro: la matriz de la historia', () => {
       ['sin-fuente', [en('ws--obra', 0)]],
     ]);
     const citas = [cita('vacia', 'ws'), cita('sin-fuente'), cita('ausente', 'ws'), cita('situada', 'ws'), { slug: 'nula', fuente: null }];
-    expect(slugs(ordenDelLibro(citas, posiciones))).toEqual(['situada', 'ausente', 'nula', 'sin-fuente', 'vacia']);
+    expect(slugs(ordenDelLibro(citas, posiciones, SIN_INDICES))).toEqual(['situada', 'ausente', 'nula', 'sin-fuente', 'vacia']);
   });
 
   it('permutación: el orden de las Citas, del mapa y de las apariciones no cambia nada (AD-23)', () => {
@@ -297,15 +310,15 @@ describe('24.1 — ordenDelLibro: la matriz de la historia', () => {
     const citas = [cita('a', 'wikisource-es'), cita('b', 'wikisource-es'), cita('c', 'wikisource-es'), cita('d', 'gutenberg'), cita('e', 'wikisource-es'), cita('f')];
     const esperado = ['c', 'a', 'b', 'd', 'e', 'f'];
     for (const orden of permutaciones(citas)) {
-      expect(slugs(ordenDelLibro(orden, posiciones))).toEqual(esperado);
-      expect(slugs(ordenDelLibro(orden, revuelto(posiciones)))).toEqual(esperado);
+      expect(slugs(ordenDelLibro(orden, posiciones, SIN_INDICES))).toEqual(esperado);
+      expect(slugs(ordenDelLibro(orden, revuelto(posiciones), SIN_INDICES))).toEqual(esperado);
     }
   });
 
   it('no toca la entrada', () => {
     const citas = [cita('b', 'ws'), cita('a', 'ws')];
     const copia = structuredClone(citas);
-    ordenDelLibro(citas, new Map([['b', [en('ws--o', 0)]], ['a', [en('ws--o', 1)]]]));
+    ordenDelLibro(citas, new Map([['b', [en('ws--o', 0)]], ['a', [en('ws--o', 1)]]]), SIN_INDICES);
     expect(citas).toEqual(copia);
   });
 });
@@ -689,9 +702,14 @@ describe('24.1 — el Corpus real, sin construir', () => {
   let citas: CitaEnCorpus[] = [];
   let documentos: DocumentosDeFuente = new Map();
   let posiciones: Map<string, AparicionDeCita[]> = new Map();
+  let indices: IndicesDeObras = new Map();
 
   beforeAll(async () => {
-    [citas, documentos] = await Promise.all([leerCitas(rutas.citas), leerDocumentosDeFuente(rutas)]);
+    [citas, documentos, indices] = await Promise.all([
+      leerCitas(rutas.citas),
+      leerDocumentosDeFuente(rutas),
+      leerOrdenDeLosIndices(rutas),
+    ]);
     posiciones = posicionesDeCitas(citas, documentos);
   });
 
@@ -757,7 +775,7 @@ describe('24.1 — el Corpus real, sin construir', () => {
     for (const suyas of porObra.values()) {
       const documentadas = suyas.filter((c) => (posiciones.get(c.slug) ?? []).length > 0);
       if (documentadas.length < 2) continue;
-      const delLibro = slugs(ordenDelLibro(suyas, posiciones));
+      const delLibro = slugs(ordenDelLibro(suyas, posiciones, indices));
       const porSlug = slugs([...suyas].sort((a, b) => a.slug.localeCompare(b.slug, 'es')));
       expect(new Set(delLibro)).toEqual(new Set(porSlug));
       if (delLibro.join() !== porSlug.join()) distintas += 1;
@@ -779,11 +797,11 @@ describe('24.1 — el Corpus real, sin construir', () => {
       porObra.set(c.obra.nombre, [...(porObra.get(c.obra.nombre) ?? []), c]);
     }
     const primera = (slug: string) =>
-      [...(posiciones.get(slug) ?? [])].sort((a, b) => compararDocumentos(a.documento, b.documento) || a.posicion - b.posicion)[0];
+      [...(posiciones.get(slug) ?? [])].sort((a, b) => compararEnElLibro(a.documento, b.documento, indices) || a.posicion - b.posicion)[0];
     const fallos: string[] = [];
     let comparadas = 0;
     for (const [obra, suyas] of porObra) {
-      const enOrden = ordenDelLibro(suyas, posiciones);
+      const enOrden = ordenDelLibro(suyas, posiciones, indices);
       const situada = (c: CitaEnCorpus) => typeof c.fuente?.id === 'string' && primera(c.slug) !== undefined;
       const nSituadas = enOrden.filter(situada).length;
       if (enOrden.slice(0, nSituadas).some((c) => !situada(c))) fallos.push(`${obra}: una suelta entre las situadas`);
@@ -803,7 +821,7 @@ describe('24.1 — el Corpus real, sin construir', () => {
         const [a, b] = [situadas[i - 1], situadas[i]];
         if (a.fuente!.id !== b.fuente!.id) continue;
         const [pa, pb] = [primera(a.slug), primera(b.slug)];
-        const orden = compararDocumentos(pa.documento, pb.documento) || pa.posicion - pb.posicion;
+        const orden = compararEnElLibro(pa.documento, pb.documento, indices) || pa.posicion - pb.posicion;
         if (orden > 0) fallos.push(`${obra}: ${a.slug} (${pa.documento} ${pa.posicion}) antes que ${b.slug} (${pb.documento} ${pb.posicion})`);
         comparadas += 1;
       }
@@ -949,9 +967,330 @@ describe('24.1 — las dependencias que la historia prohíbe', () => {
     const deCotejo = /import\s*\{([^}]*)\}\s*from\s*'\.\/cotejo\.ts'/.exec(codigo)?.[1] ?? '';
     // De `corpus.ts`, solo los lectores: ninguna de sus funciones que escriben en `corpus/`.
     const nombres = (lista: string) => lista.split(',').map((n) => n.trim()).filter((n) => n !== '').sort();
-    expect(nombres(deCorpus)).toEqual(['leerCitas', 'leerDocumentosDeFuente', 'rutasDelCorpus']);
+    expect(nombres(deCorpus)).toEqual(['leerCitas', 'leerDocumentosParaElCotejo', 'leerOrdenDeLosIndices', 'rutasDelCorpus']);
     for (const nombre of ['documentosDeCita', 'localizar']) expect(deCotejo).toMatch(new RegExp(`\\b${nombre}\\b`));
     // Y nada del sistema de ficheros por su cuenta: todo lo que importa es de `./`.
     expect(importados(codigo).filter((r) => !r.startsWith('./') && !r.startsWith('../../src/lib/'))).toEqual([]);
+  });
+});
+
+/**
+ * Historia 24.9 — el orden del libro lo declara la Fuente: con el índice de subpáginas
+ * capturado, los documentos de una Obra van en su orden; sin él, rige el natural de la 24.1.
+ */
+describe('24.9 — compararEnElLibro: el índice manda sobre el orden natural', () => {
+  const obra = 'wikisource-es--novelas-ejemplares';
+  const gitanilla = `${obra}--la-gitanilla-1825`;
+  const coloquio = `${obra}--el-coloquio-de-los-perros-1825`;
+  const cornelia = `${obra}--la-senora-cornelia`;
+  const fregona = `${obra}--la-ilustre-fregona-1825`;
+  const indices: IndicesDeObras = new Map([[obra, [obra, gitanilla, fregona, coloquio]]]);
+
+  it('con índice, su orden; sin índice, el natural', () => {
+    expect(compararEnElLibro(gitanilla, coloquio, indices)).toBeLessThan(0);
+    expect(compararEnElLibro(gitanilla, coloquio, SIN_INDICES)).toBeGreaterThan(0);
+    expect(Math.sign(compararEnElLibro(gitanilla, coloquio, SIN_INDICES))).toBe(Math.sign(compararDocumentos(gitanilla, coloquio)));
+  });
+
+  it('lo que el índice no enlaza va detrás, en orden natural', () => {
+    const otro = `${obra}--a-otra-pagina`;
+    expect([cornelia, coloquio, otro, gitanilla, obra].sort((a, b) => compararEnElLibro(a, b, indices))).toEqual([
+      obra,
+      gitanilla,
+      coloquio,
+      otro,
+      cornelia,
+    ]);
+  });
+
+  it('el índice de una Obra no toca los documentos de otra', () => {
+    const ajenos = ['wikisource-es--vidas-paralelas--vidas-paralelas-pericles', 'wikisource-es--vidas-paralelas--vidas-paralelas-ciceron'];
+    expect([...ajenos].sort((a, b) => compararEnElLibro(a, b, indices))).toEqual(natural(ajenos));
+  });
+
+  it('es un orden total: cero solo consigo mismo, antisimétrico y transitivo', () => {
+    const nombres = [
+      obra, gitanilla, coloquio, cornelia, fregona, `${obra}--a-otra-pagina`,
+      'wikisource-es--novelas-ejemplares-x', 'wikisource-es--novelas', 'gutenberg--novelas-ejemplares--i',
+      'wikisource-es--la-ciudad-de-dios--la-ciudad-de-dios-ii', 'wikisource-es--la-ciudad-de-dios--la-ciudad-de-dios-proemio',
+    ];
+    const c = (a: string, b: string) => compararEnElLibro(a, b, indices);
+    for (const a of nombres) {
+      for (const b of nombres) {
+        expect(c(a, b) === 0, `${a} ${b}`).toBe(a === b);
+        expect(Math.sign(c(a, b)) + Math.sign(c(b, a)), `${a} ${b}`).toBe(0);
+        for (const d of nombres) if (c(a, b) < 0 && c(b, d) < 0) expect(c(a, d), `${a} ${b} ${d}`).toBeLessThan(0);
+      }
+    }
+  });
+});
+
+describe('24.9 — ordenDelLibro con el índice por parámetro', () => {
+  const obra = 'ws--libro';
+  const indices: IndicesDeObras = new Map([[obra, [`${obra}--b`, `${obra}--a`]]]);
+
+  it('las Citas siguen el índice; lo demás de la regla de la 24.1 no cambia', () => {
+    const posiciones: PosicionesDeCitas = new Map([
+      ['en-a', [en(`${obra}--a`, 0)]],
+      ['en-b-tarde', [en(`${obra}--b`, 90)]],
+      ['en-b-pronto', [en(`${obra}--b`, 10)]],
+      ['en-c', [en(`${obra}--c`, 0)]],
+      // En dos documentos: toma el primero en el orden del índice, no en el natural.
+      ['en-a-y-b', [en(`${obra}--a`, 1), en(`${obra}--b`, 50)]],
+    ]);
+    const citas = [cita('suelta'), cita('en-c', 'ws'), cita('en-a', 'ws'), cita('en-b-tarde', 'ws'), cita('en-a-y-b', 'ws'), cita('en-b-pronto', 'ws')];
+    expect(slugs(ordenDelLibro(citas, posiciones, indices))).toEqual(['en-b-pronto', 'en-a-y-b', 'en-b-tarde', 'en-a', 'en-c', 'suelta']);
+    expect(slugs(ordenDelLibro(citas, posiciones, SIN_INDICES))).toEqual(['en-a', 'en-a-y-b', 'en-b-pronto', 'en-b-tarde', 'en-c', 'suelta']);
+    for (const orden of permutaciones(citas.slice(0, 4))) {
+      expect(slugs(ordenDelLibro(orden, revuelto(posiciones), indices))).toEqual(slugs(ordenDelLibro(citas.slice(0, 4), posiciones, indices)));
+    }
+  });
+});
+
+describe('24.9 — las cuatro Obras del Corpus real, sin construir', () => {
+  const rutas = rutasDelCorpus(join(RAIZ_DEL_REPO, 'corpus'));
+  let porObra = new Map<string, CitaEnCorpus[]>();
+  let posiciones: Map<string, AparicionDeCita[]> = new Map();
+  let indices: IndicesDeObras = new Map();
+
+  beforeAll(async () => {
+    const [citas, documentos, fichas] = await Promise.all([
+      leerCitas(rutas.citas),
+      leerDocumentosDeFuente(rutas),
+      leerFichasDeObra(rutas),
+    ]);
+    indices = await leerOrdenDeLosIndices(rutas);
+    posiciones = posicionesDeCitas(citas, documentos);
+    porObra = new Map();
+    for (const c of colgarObras(citas, fichas)) {
+      if (c.obra !== undefined) porObra.set(c.obra.nombre, [...(porObra.get(c.obra.nombre) ?? []), c]);
+    }
+  });
+
+  /** Los documentos de las Citas de una Obra, en el orden en que salen, sin repetir seguidos. */
+  const documentosEnOrden = (obra: string, conIndices: IndicesDeObras) =>
+    ordenDelLibro(porObra.get(obra) ?? [], posiciones, conIndices)
+      .map((c) => (posiciones.get(c.slug) ?? [])[0]?.documento.split('--').pop())
+      .filter((d, i, todos): d is string => d !== undefined && d !== todos[i - 1]);
+
+  it('las cuatro tienen su índice versionado, y cada uno ordena documentos suyos', () => {
+    for (const obra of [
+      'wikisource-es--novelas-ejemplares',
+      'wikisource-es--vidas-paralelas',
+      'wikisource-es--recuerdos-de-provincia',
+      'wikisource-es--novelas-y-cuadros-de-la-vida-sur-americana',
+    ]) {
+      const suyos = indices.get(obra);
+      expect(suyos, obra).toBeDefined();
+      expect(suyos!.length, obra).toBeGreaterThan(1);
+      expect(suyos!.every((d) => d === obra || d.startsWith(`${obra}--`)), obra).toBe(true);
+    }
+  });
+
+  it('Novelas ejemplares: «la-gitanilla» antes que «el-coloquio-de-los-perros», que antes iba delante', () => {
+    const obra = 'miguel-de-cervantes--novelas-ejemplares';
+    expect(documentosEnOrden(obra, indices)).toEqual([
+      'la-gitanilla-1825',
+      'el-licenciado-vidriera-1825',
+      'la-ilustre-fregona-1825',
+      'el-coloquio-de-los-perros-1825',
+    ]);
+    expect(documentosEnOrden(obra, SIN_INDICES)[0]).toBe('el-coloquio-de-los-perros-1825');
+  });
+
+  it('Vidas paralelas: «pericles» antes que «ciceron», que antes iba delante', () => {
+    const obra = 'plutarco--vidas-paralelas';
+    expect(documentosEnOrden(obra, indices)).toEqual(['vidas-paralelas-pericles', 'vidas-paralelas-ciceron']);
+    expect(documentosEnOrden(obra, SIN_INDICES)).toEqual(['vidas-paralelas-ciceron', 'vidas-paralelas-pericles']);
+  });
+
+  it('Recuerdos de provincia y Novelas y cuadros: en el orden de su índice, no en el de sus títulos', () => {
+    for (const [obra, grupo] of [
+      ['domingo-faustino-sarmiento--recuerdos-de-provincia', 'wikisource-es--recuerdos-de-provincia'],
+      ['soledad-acosta-de-samper--novelas-y-cuadros-de-la-vida-sur-americana', 'wikisource-es--novelas-y-cuadros-de-la-vida-sur-americana'],
+    ] as const) {
+      const delIndice = (indices.get(grupo) ?? []).map((d) => d.split('--').pop());
+      const enOrden = documentosEnOrden(obra, indices);
+      expect(enOrden.length, obra).toBeGreaterThan(1);
+      expect(enOrden, obra).toEqual([...enOrden].sort((a, b) => delIndice.indexOf(a) - delIndice.indexOf(b)));
+      expect(enOrden.every((d) => delIndice.includes(d)), obra).toBe(true);
+    }
+    expect(documentosEnOrden('domingo-faustino-sarmiento--recuerdos-de-provincia', indices).slice(0, 3)).toEqual([
+      'recuerdos-de-provincia-a-mis-compatriotas-solamente',
+      'recuerdos-de-provincia-los-huarpes',
+      'recuerdos-de-provincia-los-albarracines',
+    ]);
+  });
+});
+
+/**
+ * Historia 31.1 — el pasaje sale del mismo localizador y de la misma aparición que el orden del
+ * libro (AD-30). Las formas de los documentos se declaran (`lineasDeclaradas` o la cabecera
+ * `lineas:`), que es lo que manda en `formaDeLasLineas`; el tope llega por parámetro y nunca se
+ * toma de `src/lib/umbrales.ts`.
+ */
+describe('31.1 — posicionesDeCitas: el pasaje de cada aparición, con el tope por parámetro', () => {
+  const frontmatter = (slug: string, texto: string): CitaParaSituar => ({
+    slug,
+    texto,
+    procedencia: { obra: 'La obra' },
+    fuente: { id: 'ws', url: 'https://ejemplo.org/obra' },
+  });
+  const documentos: DocumentosDeFuente = new Map<string, string | null | typeof BIOGRAFIA_MAL_COLOCADA>([
+    ['ws--la-obra', 'Un párrafo entero en su línea, con la frase de dentro y algo más.\nUna línea que es la Cita.'],
+    ['ws--la-obra--la-obra-ii', 'Verso primero de la estrofa,\nverso segundo con la frase de dentro,\nverso tercero.'],
+  ]);
+  const lineasDeclaradas = new Map([
+    ['ws--la-obra', 'prosa-por-lineas'],
+    ['ws--la-obra--la-obra-ii', 'verso-espaciado'],
+  ]);
+  const citas = [frontmatter('dentro', 'la frase de dentro'), frontmatter('entera', 'Una línea que es la Cita')];
+
+  it('con tope, la aparición con pasaje lo trae y la que no, sin la clave', () => {
+    const posiciones = posicionesDeCitas(citas, documentos, { tope: 1200, lineasDeclaradas });
+    const dentro = posiciones.get('dentro') ?? [];
+    expect(dentro.map((a) => a.documento)).toEqual(['ws--la-obra', 'ws--la-obra--la-obra-ii']);
+    expect(dentro[0].pasaje).toEqual({
+      texto: 'Un párrafo entero en su línea, con la frase de dentro y algo más.',
+      inicio: 'Un párrafo entero en su línea, con '.length,
+      fin: 'Un párrafo entero en su línea, con la frase de dentro'.length,
+      parrafos: [[[0, 'Un párrafo entero en su línea, con la frase de dentro y algo más.'.length]]],
+    });
+    // `verso-espaciado` no tiene párrafo, y la línea que es la Cita no dice más.
+    expect(Object.keys(dentro[1]).sort()).toEqual(['documento', 'posicion']);
+    expect(Object.keys((posiciones.get('entera') ?? [])[0]).sort()).toEqual(['documento', 'posicion']);
+  });
+
+  it('sin tope —ni opciones— ninguna aparición trae pasaje, y lo demás no cambia', () => {
+    const sin = posicionesDeCitas(citas, documentos, { tope: undefined, lineasDeclaradas });
+    const conTope = posicionesDeCitas(citas, documentos, { tope: 1200, lineasDeclaradas });
+    const quitar = (p: Map<string, AparicionDeCita[]>) =>
+      [...p].map(([slug, l]) => [slug, l.map(({ documento, posicion }) => ({ documento, posicion }))]);
+    expect(quitar(sin)).toEqual(quitar(conTope));
+    for (const p of [sin, posicionesDeCitas(citas, documentos)]) {
+      for (const apariciones of p.values()) for (const a of apariciones) expect('pasaje' in a).toBe(false);
+    }
+  });
+
+  it('el tope en el borde lo ofrece; uno por debajo, no', () => {
+    const largo = [...'Un párrafo entero en su línea, con la frase de dentro y algo más.'].length;
+    const con = (tope: number) => posicionesDeCitas(citas, documentos, { tope, lineasDeclaradas }).get('dentro')?.[0];
+    expect(con(largo)?.pasaje).toBeDefined();
+    expect(con(largo - 1)).toEqual({ documento: 'ws--la-obra', posicion: expect.any(Number) });
+  });
+
+  it('el invariante: el tramo de cada pasaje colapsa al texto de la Cita', () => {
+    const posiciones = posicionesDeCitas(citas, documentos, { tope: 1200, lineasDeclaradas });
+    for (const c of citas) {
+      for (const { pasaje } of posiciones.get(c.slug as string) ?? []) {
+        if (pasaje === undefined) continue;
+        expect(colapsarEspacios(pasaje.texto.slice(pasaje.inicio, pasaje.fin))).toBe(colapsarEspacios(c.texto as string));
+      }
+    }
+  });
+});
+
+describe('31.1 — leerPosicionesDelCorpus: el pasaje leído de disco, con la forma de la cabecera', () => {
+  it('con tope, el pasaje de la estrofa; sin tope, ninguno', async () => {
+    const raiz = await mkdtemp(join(tmpdir(), 'pasaje-'));
+    try {
+      const corpus = join(raiz, 'corpus');
+      await mkdir(join(corpus, 'citas'), { recursive: true });
+      await mkdir(join(corpus, 'fuentes'), { recursive: true });
+      const fuente = 'fuente:\n  id: ws\n  url: https://ejemplo.org/la-obra\n';
+      await writeFile(
+        join(corpus, 'citas', 'c.md'),
+        `---\nslug: c\ntexto: "verso segundo, verso tercero"\nprocedencia:\n  obra: La obra\n${fuente}---\n`,
+        'utf8',
+      );
+      const estrofa = 'Verso primero,\nverso segundo,\nverso tercero,\nverso cuarto.';
+      await writeFile(
+        join(corpus, 'fuentes', 'ws--la-obra.txt'),
+        componerDocumento(
+          { fuente: 'ws', obra: 'La obra', url: 'https://ejemplo.org/la-obra', recuperado: '2026-11-07', lineas: 'verso' },
+          'La obra',
+          `${estrofa}\n\nOtra estrofa,\nque no entra.`,
+        ),
+        'utf8',
+      );
+      const con = await leerPosicionesDelCorpus(corpus, { tope: 1200 });
+      expect(con.get('c')).toEqual([
+        {
+          documento: 'ws--la-obra',
+          posicion: 'Verso primero, '.length,
+          pasaje: {
+            texto: estrofa,
+            inicio: 'Verso primero,\n'.length,
+            fin: 'Verso primero,\nverso segundo,\nverso tercero'.length,
+            // Historia 31.2 — un párrafo, un verso por línea.
+            parrafos: [[[0, 14], [15, 29], [30, 44], [45, 58]]],
+          },
+        },
+      ]);
+      const sin = await leerPosicionesDelCorpus(corpus, { tope: undefined });
+      expect(sin.get('c')).toEqual([{ documento: 'ws--la-obra', posicion: 'Verso primero, '.length }]);
+    } finally {
+      await rm(raiz, { recursive: true, force: true });
+    }
+  });
+});
+
+describe('31.1 — pasajesDeCitas: el pasaje de la aparición que cuenta', () => {
+  const base = 'wikisource-es--obra';
+  const pasaje = (texto: string): PasajeDeAparicion => ({ texto, inicio: 0, fin: 1, parrafos: [[[0, texto.length]]] });
+  const conPasaje = (documento: string, posicion: number, texto: string): AparicionDeCita => ({
+    documento,
+    posicion,
+    pasaje: pasaje(texto),
+  });
+
+  it('para toda permutación de Citas, mapa y apariciones, el de la aparición con que ordena ordenDelLibro', () => {
+    const posiciones = new Map<string, AparicionDeCita[]>([
+      // Cuenta la de `obra-ii`, que va antes que `obra-x` en el libro.
+      ['a', [conPasaje(`${base}--obra-x`, 1, 'X'), conPasaje(`${base}--obra-ii`, 4, 'II')]],
+      // La que cuenta no trae pasaje: la Cita tampoco, aunque otra lo traiga.
+      ['b', [conPasaje(`${base}--obra-x`, 0, 'otra'), en(`${base}--obra-i`, 80)]],
+      ['c', [conPasaje(`${base}--obra-i`, 3, 'I')]],
+      ['d', []],
+    ]);
+    const citas = [cita('a', 'wikisource-es'), cita('b', 'wikisource-es'), cita('c', 'wikisource-es'), cita('d', 'wikisource-es')];
+    const esperado = new Map([
+      ['a', pasaje('II')],
+      ['c', pasaje('I')],
+    ]);
+    const ordenEsperado = ['c', 'b', 'a', 'd'];
+    for (const orden of permutaciones(citas)) {
+      for (const p of [posiciones, revuelto(posiciones)]) {
+        expect(pasajesDeCitas(orden, p, SIN_INDICES)).toEqual(esperado);
+        expect(slugs(ordenDelLibro(orden, p, SIN_INDICES))).toEqual(ordenEsperado);
+        for (const c of orden) {
+          expect(pasajesDeCitas([c], p, SIN_INDICES).get(c.slug)).toBe(
+            aparicionQueCuenta(p.get(c.slug) ?? [], SIN_INDICES)?.pasaje,
+          );
+        }
+      }
+    }
+  });
+
+  it('con el índice de la Fuente, la que cuenta es la primera en el índice', () => {
+    const indices: IndicesDeObras = new Map([[base, [`${base}--obra-x`, `${base}--obra-ii`]]]);
+    const posiciones = new Map([['a', [conPasaje(`${base}--obra-ii`, 4, 'II'), conPasaje(`${base}--obra-x`, 1, 'X')]]]);
+    expect(pasajesDeCitas([cita('a', 'wikisource-es')], posiciones, indices).get('a')).toEqual(pasaje('X'));
+  });
+
+  it('una Cita sin Obra toma el suyo con la misma regla', () => {
+    const posiciones = new Map([['suelta', [conPasaje(`${base}--obra-x`, 0, 'X'), conPasaje(base, 9, 'corto')]]]);
+    // Sin `obra`: `citasPorObra` no la agrupa, y aun así tiene pasaje.
+    expect(pasajesDeCitas([{ slug: 'suelta' }], posiciones, SIN_INDICES)).toEqual(new Map([['suelta', pasaje('corto')]]));
+  });
+
+  it('pasajesDeLasCitas: un fallo no se memoriza; sin Citas no consulta nada', async () => {
+    const conjunto = { citas: [{ slug: 'a' }], autores: [], temas: [], colecciones: [] } as unknown as ConjuntoPublicable;
+    const primera = pasajesDeLasCitas(conjunto);
+    expect(pasajesDeLasCitas(conjunto)).toBe(primera);
+    await expect(primera).rejects.toThrow();
+    expect(pasajesDeLasCitas(conjunto)).not.toBe(primera);
+    const vacio = { citas: [], autores: [], temas: [], colecciones: [] } as unknown as ConjuntoPublicable;
+    expect(await pasajesDeLasCitas(vacio)).toEqual(new Map());
   });
 });

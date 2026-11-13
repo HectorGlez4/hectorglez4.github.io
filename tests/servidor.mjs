@@ -75,7 +75,7 @@ async function primeroQueExista(candidatos) {
   return null;
 }
 
-createServer(async (peticion, respuesta) => {
+const servidor = createServer(async (peticion, respuesta) => {
   const entrante = new URL(peticion.url, 'http://localhost');
   const ruta = normalize(decodeURIComponent(entrante.pathname));
   // Sin escapes hacia arriba: `normalize` deja `..` si sobran, y aquí se corta.
@@ -121,6 +121,26 @@ createServer(async (peticion, respuesta) => {
     ...(comprimir ? { 'content-encoding': 'gzip', vary: 'Accept-Encoding' } : {}),
   });
   respuesta.end(comprimir ? gzipSync(cuerpo) : cuerpo);
-}).listen(puerto, () => {
+});
+
+/*
+ * Sin plazo de keep-alive — retrospectiva de la Épica 27, H3: el «socket hang up» intermitente
+ * de `busqueda.spec.ts` («filtrar por una Obra y ordenar por la clave…») en las pasadas largas.
+ *
+ * Node cierra por omisión una conexión keep-alive tras 5 s sin peticiones
+ * (`keepAliveTimeout`), y el `request` de Playwright pide por un agente keep-alive **global**
+ * de su proceso, que reutiliza las conexiones libres sin plazo propio. Si el cierre del
+ * servidor llega mientras el agente escribe una petición nueva en esa conexión —una ventana que
+ * se ensancha cuanto más ocupado está el bucle de eventos de Playwright, que en la suite entera
+ * conduce dos navegadores—, la petición cae con «socket hang up» antes de recibir nada. Aislada,
+ * la prueba pasa: es la conexión, no la aserción.
+ *
+ * Con `0` el servidor nunca cierra una conexión ociosa, así que solo la cierra quien la abrió y
+ * la carrera desaparece. `server.timeout` ya es 0 por omisión. El proceso muere con la sesión
+ * de Playwright (o con el `kill()` de la prueba que lo lanzó), así que no queda nada abierto.
+ */
+servidor.keepAliveTimeout = 0;
+
+servidor.listen(puerto, () => {
   process.stdout.write(`Sirviendo dist/ en http://localhost:${puerto}\n`);
 });

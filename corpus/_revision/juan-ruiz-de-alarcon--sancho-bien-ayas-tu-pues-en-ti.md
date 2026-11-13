@@ -1,5 +1,5 @@
 ---
-texto: "SANCHO Bien ayas tu, pues en ti tan buen abogado halla el santissimo licor. 175 DON IUAN Piensa, bufon, que me agrada que digas del tanto bien."
+texto: "SANCHO\nBien ayas tu, pues en ti\ntan buen abogado halla\nel santissimo licor. 175\nDON IUAN\nPiensa, bufon, que me agrada\nque digas del tanto bien."
 autor: "juan-ruiz-de-alarcon"
 slug: "juan-ruiz-de-alarcon-sancho-bien-ayas-tu-pues-en-ti"
 procedencia:

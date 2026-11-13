@@ -1,5 +1,5 @@
 ---
-texto: "LOPE: Yo me he de llevar el preso; ya estoy en ello empeñado."
+texto: "LOPE: Yo me he de llevar el preso;\nya estoy en ello empeñado."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-lope-yo-me-he-de-llevar-el"
 procedencia:

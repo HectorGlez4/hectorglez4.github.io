@@ -1,5 +1,5 @@
 ---
-texto: "ÁLVARO: ¡Que no haya un ventana entreabierto esta villana!"
+texto: "ÁLVARO: ¡Que no haya un ventana\nentreabierto esta villana!"
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-alvaro-que-no-haya-un-ventana-entreabierto"
 procedencia:

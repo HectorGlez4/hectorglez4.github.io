@@ -26,22 +26,34 @@
  * ── La lectura ───────────────────────────────────────────────────────────────────────────
  *
  * Sin subcomando, la orden lee lo que el receptor guardó: sesión de `wrangler`, el Corpus de este
- * equipo —del que sale el censo—, cinco recuentos agrupados con `d1 execute --remote` y `d1 info`.
- * No pide `MEDICION_ENDPOINT` —no envía nada al receptor— y **no escribe nada**, ni en D1 ni en el
- * repositorio: no hay punto final de lectura, y el receptor sigue contestando 204 a todo lo que no
- * sea un `POST` (AD-14). Cada lectura recorre la tabla cinco veces, una por consulta. Lo que se
- * hace con lo leído es de `tools/lib/lineaBase.ts`.
+ * equipo —del que sale el censo—, `d1 info`, el `COUNT(*)` que da las filas de la tabla, el juicio
+ * de la cuota de lectura (Historia 23.13) y, si cabe, cinco recuentos agrupados con
+ * `d1 execute --remote`. No pide `MEDICION_ENDPOINT` —no envía nada al receptor— y **no escribe
+ * nada**, ni en D1 ni en el repositorio: no hay punto final de lectura, y el receptor sigue
+ * contestando 204 a todo lo que no sea un `POST` (AD-14). Lo que recorre la tabla está declarado en
+ * `recorridosDeLaLectura`, y de ahí sale su coste. Lo que se hace con lo leído es de
+ * `tools/lib/lineaBase.ts`.
+ *
+ * ── La cuota de lectura ──────────────────────────────────────────────────────────────────
+ *
+ * La lectura, `desplegar` y `comprobar` recorren la tabla, y D1 cuenta lo leído contra una cuota
+ * diaria de la cuenta. Cada una juzga **su coste entero antes de leer ninguna fila salvo el
+ * `COUNT(*)`** que da N —que va primero y solo si `rows_read_24h` de `d1 info` está bajo la cuota—:
+ * N × su lista de recorridos, con una reserva de otro tanto de lo leído en 24 h. Si no cabe, sale
+ * con 1 sin trocear. `desplegar` juzga dos veces, la segunda antes de barajar. El juez es uno, en
+ * `tools/lib/medicion.ts`.
  *
  * ── Códigos ──────────────────────────────────────────────────────────────────────────────
  *
  * 2 si la invocación no vale —subcomando, bandera o argumento desconocidos—, si falta
  * `MEDICION_ENDPOINT` (salvo en la lectura, que no lo usa), no es una dirección http(s) o apunta a
  * la máquina propia, o si `wrangler` no tiene sesión: en todos, antes de tocar nada. 1 para todo lo
- * demás, con el parte de lo que quedó aplicado; en la lectura, si un valor de `src/lib/umbrales.ts`
- * que la lectura lee no se sostiene —una jornada mal escrita, un mínimo que no es un entero
- * positivo—, que se juzga **antes de tocar nada**, si la sesión no se deja leer, si no se pudo leer
- * el Corpus o sacar de él el censo, o si no se leyó nada de D1 —ni una consulta con recuentos ni
- * ninguna cifra de `d1 info`—, nombrando cada cosa. La lectura sale con 0 si leyó algo. Se para en
+ * demás, con el parte de lo que quedó aplicado; también si `d1 info` no trae `rows_read_24h` o la
+ * cuota de lectura no cabe, antes de leer más que el `COUNT(*)`. En la lectura, además, si un valor
+ * de `src/lib/umbrales.ts` que la lectura lee no se sostiene —una jornada mal escrita, un mínimo que
+ * no es un entero positivo—, que se juzga **antes de tocar nada**, si la sesión no se deja leer, si
+ * no se pudo leer el Corpus o sacar de él el censo, o si ninguna consulta trae recuentos con forma,
+ * nombrando cada una. La lectura sale con 0 si alguna consulta trajo recuentos con forma. Se para en
  * el primer fallo y no reintenta migraciones ni despliegues.
  *
  * ── Red ──────────────────────────────────────────────────────────────────────────────────
@@ -65,7 +77,7 @@ import {
   censoDeLaMedicion,
   componerLecturaDeMedicion,
   lineasDeLecturaDeMedicion,
-  nadaSeLeyo,
+  ningunaConsultaConForma,
   problemasDeLaLectura,
   valoresDeLaLectura,
 } from './lib/lineaBase.ts';
@@ -73,6 +85,7 @@ import {
   ARGUMENTOS_DEL_RECEPTOR_LOCAL,
   DIRECTORIO_DE_MIGRACIONES,
   DIRECTORIO_DEL_RECEPTOR,
+  NINGUNA_CONSULTA_CON_FORMA,
   Parada,
   RUTA_DE_LA_HUELLA,
   WRANGLER,
@@ -304,7 +317,7 @@ async function principal(): Promise<number> {
   if (subcomando === null) {
     // La lectura: sin MEDICION_ENDPOINT —no envía nada— y sin aviso de interrupción, porque cortada
     // a mitad no deja nada aplicado. Lo escrito a mano en `umbrales.ts` se juzga antes de tocar
-    // nada: con un valor que no se sostiene, cinco recorridos de la tabla no compondrían informe.
+    // nada: con un valor que no se sostiene, los recorridos de la tabla no compondrían informe.
     const problemas = problemasDeLaLectura(valoresDeLaLectura());
     if (problemas.length > 0) {
       throw new Parada(
@@ -330,14 +343,15 @@ async function principal(): Promise<number> {
         censo: lectura.corpus,
         consultas: lectura.consultas,
         cuota: lectura.cuota,
+        gasto: lectura.gasto,
       });
-      // `wrangler` contestó, pero ninguna consulta trajo recuentos con forma y `d1 info` tampoco
-      // dio nada: es no haber leído nada, y sale con 1 como cuando no contesta.
-      if (nadaSeLeyo(informe)) {
+      // `wrangler` contestó, pero ninguna consulta trajo recuentos con forma: es no haber leído
+      // nada, y sale con 1 como cuando no contesta (Historia 23.13).
+      if (ningunaConsultaConForma(informe)) {
         throw new Parada(
           1,
           [
-            'No se leyó nada de D1:',
+            NINGUNA_CONSULTA_CON_FORMA,
             ...informe.sinLeer.map(({ que, motivo }) => `  ${que}: ${motivo}`),
             'Consulta: no se ha escrito nada.',
           ].join('\n'),

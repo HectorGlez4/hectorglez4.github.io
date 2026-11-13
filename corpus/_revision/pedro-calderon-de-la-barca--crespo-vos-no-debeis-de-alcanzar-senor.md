@@ -1,5 +1,5 @@
 ---
-texto: "CRESPO: Vos no debéis de alcanzar, señor, lo que en un lugar es un alcalde ordinario."
+texto: "CRESPO: Vos no debéis de alcanzar,\nseñor, lo que en un lugar\nes un alcalde ordinario."
 autor: "pedro-calderon-de-la-barca"
 slug: "pedro-calderon-de-la-barca-crespo-vos-no-debeis-de-alcanzar-senor"
 procedencia:
