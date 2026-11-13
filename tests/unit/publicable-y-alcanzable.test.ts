@@ -912,9 +912,11 @@ describe('Historia 12.1 — sobre un sitio construido de verdad', () => {
      * Historia 27.1, AD-11, AD-25 — los filtros `autor`, `obra` y `tema` y la clave de orden los
      * lleva solo la Página de Cita, y toda Página de Cita lleva su clave: Pagefind saca de los
      * resultados ordenados a la página que no la trae. El tipo de la 26.2 queda exento por nombre.
+     * Historia 35.5 (AD-33) — y lo mismo el de `personaje`, que es uno más de `FILTROS_DE_CITA`.
      */
-    it('fuera de `/cita/…` ningún HTML lleva filtro `autor`, `obra` ni `tema` ni clave de orden, y toda Página de Cita lleva la suya', async () => {
+    it('fuera de `/cita/…` ningún HTML lleva filtro `autor`, `personaje`, `obra` ni `tema` ni clave de orden, y toda Página de Cita lleva la suya', async () => {
       const deCita = new Set<string>(Object.values(FILTROS_DE_CITA));
+      expect(deCita.has('personaje')).toBe(true);
       const fuera: string[] = [];
       const claves = new Map<string, string[]>();
       for (const [ruta, html] of await paginas()) {
@@ -967,6 +969,7 @@ describe('Historia 12.1 — sobre un sitio construido de verdad', () => {
       const conjunto = await conjuntoDelCorpus(rutasDelCorpus(join(proyecto, 'corpus')));
       const { porCita } = filtrosDeLaBusqueda(conjunto);
       const nombres = new Map(conjunto.autores.map((autor) => [autor.slug, autor.nombre]));
+      const deLosPersonajes = new Map(conjunto.personajes.map((personaje) => [personaje.slug, personaje.nombre]));
       const vistas = new Set<string>();
       for (const [ruta, html] of await paginas()) {
         const slug = /^\/cita\/([^/]+)$/.exec(ruta)?.[1];
@@ -976,12 +979,17 @@ describe('Historia 12.1 — sobre un sitio construido de verdad', () => {
         vistas.add(slug);
         const valores = filtrosDe(html).map((f) => f.valor);
         const de = (clave: string) => valores.filter((v) => v.startsWith(`${clave}:`)).map((v) => v.slice(clave.length + 1));
-        expect(de(FILTROS_DE_CITA.autor), ruta).toEqual([esperado!.autor]);
+        expect(de(FILTROS_DE_CITA.autor), ruta).toEqual(esperado!.autor === undefined ? [] : [esperado!.autor]);
+        // Historia 35.5 — el del Personaje, si la Cita lo declara.
+        expect(de(FILTROS_DE_CITA.personaje), ruta).toEqual(esperado!.personaje === undefined ? [] : [esperado!.personaje]);
         expect(de(FILTROS_DE_CITA.obra), ruta).toEqual(esperado!.obra === undefined ? [] : [esperado!.obra]);
         expect(de(FILTROS_DE_CITA.tema), ruta).toEqual([...esperado!.temas]);
         const metas = metadatosDe(html, 'autor');
         expect(metas.elementos, ruta).toBe(1);
-        expect(metas.valores, ruta).toEqual([nombres.get(esperado!.autor ?? '')]);
+        // El metadato `autor` lleva a quien va en la línea del resultado: el Personaje, si lo hay (35.5).
+        expect(metas.valores, ruta).toEqual([
+          esperado!.personaje !== undefined ? deLosPersonajes.get(esperado!.personaje) : nombres.get(esperado!.autor ?? ''),
+        ]);
       }
       // Todas las Citas publicadas, y no en vacío.
       expect([...vistas].sort()).toEqual([...porCita.keys()].sort());

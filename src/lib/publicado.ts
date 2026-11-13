@@ -52,6 +52,7 @@ import {
   type PosicionesDeCitas,
 } from './obras.ts';
 import { atribucionDeBiografia, type AtribucionDeSemblanza } from './biografia.ts';
+import { claveDelDueño } from './busqueda.ts';
 import {
   rutaDeAutor,
   rutaDeCita,
@@ -1088,6 +1089,8 @@ export function obrasPublicadas(conjunto: Pick<ConjuntoPublicable, 'citas' | 'au
 export interface FiltrosDeCita {
   /** El slug del Autor; una Cita sin Autor (la de un Personaje, Historia 35.4) no lo lleva. */
   autor?: string;
+  /** Historia 35.5 — el slug del Personaje, si la Cita lo declara: con Autor o sin él. */
+  personaje?: string;
   /** El nombre de la ficha de su Obra —nunca el título—; sin Obra resuelta, se omite. */
   obra?: string;
   /** Sus Temas publicados, sin repetir, en el orden en que la Cita los declara. */
@@ -1111,13 +1114,23 @@ export interface OpcionDeObra extends OpcionDeFiltro {
  * Obras como pares `[nombre de ficha, título]`, en el orden de su Lista de Obras. Es lo que
  * `src/pages/buscar/obras.json.ts` escribe en `/buscar/obras.json`; el tipo del cliente,
  * `MapaDeObras`, vive en `src/lib/busqueda.ts`.
+ *
+ * Historia 35.5, AD-33 — la clave es la del dueño (`claveDelDueño` de `src/lib/busqueda.ts`): el
+ * slug a secas de un Autor, `personaje:{slug}` de un Personaje, con su Lista de Obras
+ * (`obrasDelPersonaje`). El par lleva un tercer elemento, la clave del dueño de la ficha, solo
+ * cuando no es el de la lista. Sin Personajes, la forma y los bytes de siempre.
  */
-export type MapaDeObrasPorAutor = Record<string, [nombre: string, titulo: string][]>;
+export type MapaDeObrasPorAutor = Record<
+  string,
+  ([nombre: string, titulo: string] | [nombre: string, titulo: string, dueño: string])[]
+>;
 
 /** Los filtros de cada Cita y las opciones de los filtros de `/buscar/`, de una sola vez. */
 export interface FiltrosDeLaBusqueda {
   porCita: ReadonlyMap<string, FiltrosDeCita>;
   autores: readonly OpcionDeFiltro[];
+  /** Historia 35.5 — los Personajes con Citas publicadas, para el grupo «Personajes» del selector. */
+  personajes: readonly OpcionDeFiltro[];
   obras: readonly OpcionDeObra[];
   temas: readonly OpcionDeFiltro[];
   /**
@@ -1156,28 +1169,36 @@ const porValor = (a: OpcionDeFiltro, b: OpcionDeFiltro): number =>
  * (AD-25): el selector de Obra no ordena por su cuenta.
  */
 export function filtrosDeLaBusqueda(
-  conjunto: Pick<ConjuntoPublicable, 'citas' | 'autores' | 'temas'>,
+  conjunto: Pick<ConjuntoPublicable, 'citas' | 'autores' | 'temas'> & Partial<Pick<ConjuntoPublicable, 'personajes'>>,
 ): FiltrosDeLaBusqueda {
   const autores = new Map(conjunto.autores.map((autor) => [autor.slug, autor]));
+  const personajes = new Map((conjunto.personajes ?? []).map((personaje) => [personaje.slug, personaje]));
   const temas = new Map(temasPublicados(conjunto.temas, conjunto.citas).map((tema) => [tema.slug, tema]));
 
   const porCita = new Map<string, FiltrosDeCita>();
   const deAutor = new Map<string, OpcionDeFiltro>();
+  const dePersonaje = new Map<string, OpcionDeFiltro>();
   const deObra = new Map<string, OpcionDeObra>();
   const deTema = new Map<string, OpcionDeFiltro>();
 
   for (const cita of conjunto.citas) {
     /*
-     * Historia 35.4 — una Cita sin Autor no tiene filtro ni metadato `autor` (los de Personaje son
-     * de la 35.5), ni cuenta para ninguno; su Obra, si no es de ningún Autor, no entra en el mapa.
+     * Historia 35.4 — una Cita sin Autor no tiene filtro `autor` ni cuenta para ninguno. Historia
+     * 35.5 — la que declara un Personaje lleva su filtro `personaje`, tenga Autor o no, y cuenta
+     * para él: es su opción del grupo «Personajes» y su Lista de Obras en el mapa.
      */
     const autor = cita.autor === undefined ? undefined : autores.get(cita.autor);
     if (cita.autor !== undefined && autor === undefined) {
       throw new Error(`La Cita «${cita.slug}» nombra al Autor «${cita.autor}», que no está en el Corpus.`);
     }
+    const personaje = cita.personaje === undefined ? undefined : personajes.get(cita.personaje);
+    if (cita.personaje !== undefined && personaje === undefined) {
+      throw new Error(`La Cita «${cita.slug}» nombra al Personaje «${cita.personaje}», que no está en el Corpus.`);
+    }
     const suyos = [...new Set(cita.temas)].filter((slug) => temas.has(slug));
     porCita.set(cita.slug, {
       ...(autor !== undefined ? { autor: autor.slug } : {}),
+      ...(personaje !== undefined ? { personaje: personaje.slug } : {}),
       ...(cita.obra !== undefined ? { obra: cita.obra.nombre } : {}),
       temas: suyos,
     });
@@ -1186,6 +1207,11 @@ export function filtrosDeLaBusqueda(
       const opcionDeAutor = deAutor.get(autor.slug) ?? { valor: autor.slug, rotulo: autor.nombre, recuento: 0 };
       opcionDeAutor.recuento++;
       deAutor.set(autor.slug, opcionDeAutor);
+    }
+    if (personaje !== undefined) {
+      const opcion = dePersonaje.get(personaje.slug) ?? { valor: personaje.slug, rotulo: personaje.nombre, recuento: 0 };
+      opcion.recuento++;
+      dePersonaje.set(personaje.slug, opcion);
     }
 
     // El Autor de la Obra —el dueño de una ficha de Autor, el informativo de una de Personaje— y,
@@ -1217,15 +1243,29 @@ export function filtrosDeLaBusqueda(
     if (suyas === undefined) citasPorAutor.set(cita.autor, [cita]);
     else suyas.push(cita);
   }
+  /** El par de una Obra en la lista de `clave`: con la clave de su dueño, si no es el de la lista. */
+  const par = (obra: ObraResuelta, clave: string): MapaDeObrasPorAutor[string][number] => {
+    const delDueño = claveDelDueño(
+      obra.dueño.tipo === 'personaje' ? { autor: '', personaje: obra.dueño.slug } : { autor: obra.dueño.slug },
+    );
+    return delDueño === clave ? [obra.nombre, obra.titulo] : [obra.nombre, obra.titulo, delDueño];
+  };
   const mapaDeObras: MapaDeObrasPorAutor = {};
   for (const slug of [...citasPorAutor.keys()].sort()) {
     const { obras } = obrasDelAutor(citasPorAutor.get(slug)!, slug);
-    if (obras.length > 0) mapaDeObras[slug] = obras.map((o) => [o.nombre, o.titulo]);
+    if (obras.length > 0) mapaDeObras[slug] = obras.map((o) => par(o, slug));
+  }
+  // Historia 35.5 — tras los Autores, cada Personaje con Obras, por slug y con su clave de dueño.
+  for (const slug of [...dePersonaje.keys()].sort()) {
+    const clave = claveDelDueño({ autor: '', personaje: slug });
+    const { obras } = obrasDelPersonaje(conjunto.citas, slug);
+    if (obras.length > 0) mapaDeObras[clave] = obras.map((o) => par(o, clave));
   }
 
   return {
     porCita,
     autores: [...deAutor.values()].sort(porValor),
+    personajes: [...dePersonaje.values()].sort(porValor),
     obras: [...deObra.values()].sort(porValor),
     temas: [...deTema.values()].sort(porValor),
     mapaDeObras,
@@ -1409,7 +1449,9 @@ export function superficiesInalcanzables(
  *   · la página 1 de un Autor → sus Obras (la Lista de Obras va solo en la página 1);
  *   · `/autores/` → todo Autor publicado; `/obras/` → toda Obra publicada;
  *   · desde la Historia 35.3, el listado de cada Personaje publicado, su página 1 → sus Obras
- *     (`obrasDelPersonaje`) y cada Cita que lo declara → su página (la Atribución lo enlaza).
+ *     (`obrasDelPersonaje`) y cada Cita que lo declara → su página (la Atribución lo enlaza);
+ *   · desde la 35.5, `/autores/` → todo Personaje publicado (su sección «Personajes»), y `/obras/`
+ *     → toda Obra publicada, también la de un Personaje sin Autor, que pinta bajo su Personaje.
  *
  * **Ni la portada → los Autores** —la lista de la portada se va en la Épica 28, y esta historia
  * existe para que quitarla no deje nada fuera sin verse— **ni Cita → Cita**: las Rutas de salida
@@ -1471,6 +1513,7 @@ export function grafoDelModelo(
   }
   const personajes = personajesPublicados(conjunto.personajes, conjunto.citas);
   for (const personaje of personajes) {
+    enlazar(rutaDelDirectorioDeAutores(), rutaDePersonaje(personaje.slug));
     listado((n) => rutaDePersonaje(personaje.slug, n), citasDePersonaje(conjunto.citas, personaje.slug));
     for (const obra of obrasDelPersonaje(conjunto.citas, personaje.slug).obras) {
       enlazar(rutaDePersonaje(personaje.slug), rutaDeLaObra(obra));
@@ -1483,16 +1526,11 @@ export function grafoDelModelo(
     }
   }
   /*
-   * Historia 35.4 — el Directorio de Obras enlaza lo que pinta `directorioDeObras`: las Obras de
-   * cada Autor publicado (`obrasDelAutor`, la misma llamada). La Obra de un Personaje sin ningún
-   * Autor no sale ahí hasta la sección «Personajes» de la 35.5; la alcanza su Página de Personaje.
+   * Historia 35.5 — el Directorio de Obras enlaza toda Obra publicada: las de los Autores bajo su
+   * Autor y, en la sección «Personajes», las que no caen bajo ninguno (`directorioDeObras`).
    */
-  const enElDirectorio = new Set<string>();
-  for (const autor of autoresPublicados(conjunto.autores, conjunto.citas)) {
-    for (const obra of obrasDelAutor(conjunto.citas, autor.slug).obras) enElDirectorio.add(obra.nombre);
-  }
   for (const obra of obrasPublicadas(conjunto)) {
-    if (enElDirectorio.has(obra.nombre)) enlazar(rutaDelDirectorioDeObras(), rutaDeLaObra(obra));
+    enlazar(rutaDelDirectorioDeObras(), rutaDeLaObra(obra));
     const suyas = citasDeCadaObra.get(obra.nombre);
     // Una Obra publicada tiene Citas: sin ellas en el mapa, el modelo callaría todas sus aristas.
     if (suyas === undefined) throw new Error(`grafoDelModelo: la Obra ${obra.nombre} no trae sus Citas en citasDeCadaObra.`);

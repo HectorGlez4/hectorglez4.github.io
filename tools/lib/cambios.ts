@@ -298,6 +298,8 @@ export type Columna = Exclude<FamiliaDeRuta, 'directorio'> | 'directorioDeAutore
  *   · un documento, cualquier cambio, y solo en la Página de Obra;
  *   · el Directorio de Autores (26.3) pinta de un Autor el nombre, los años y su clave de orden,
  *     y de una Cita solo su `autor`: la cuenta por Autor;
+ *   · desde la 35.5, los dos pintan además su sección «Personajes»: de un Personaje el nombre y
+ *     la clave —y en `/autores/` su universo—, y de una Cita su `personaje`;
  *   · el Directorio de Obras (26.4) pinta de un Autor el nombre y la clave —no los años—, de una
  *     Cita su `autor` y, de su Procedencia, solo `procedencia.obra` y `procedencia.año` —su Obra
  *     y el año de la Obra; ni la referencia ni la traducción— y de una ficha el `titulo` y las
@@ -318,8 +320,9 @@ export const CAMPOS_QUE_PINTA = {
     obra: CAMPOS_DE_CITA,
     // Historia 35.3 — el listado de la Página de Personaje.
     personaje: CAMPOS_DE_CITA,
-    directorioDeAutores: ['autor'],
-    directorioDeObras: ['autor', 'procedencia.obra', 'procedencia.año'],
+    // Historia 35.5 — y su `personaje`: la cuenta por Personaje de la sección «Personajes».
+    directorioDeAutores: ['autor', 'personaje'],
+    directorioDeObras: ['autor', 'personaje', 'procedencia.obra', 'procedencia.año'],
   },
   autor: {
     cita: [...CAMPOS_DEL_AUTOR_FUERA, NOMBRE_EN_REFERENCIA],
@@ -362,8 +365,9 @@ export const CAMPOS_QUE_PINTA = {
     tema: ['nombre'],
     coleccion: ['nombre'],
     obra: ['nombre'],
-    directorioDeAutores: ['ordenAlfabetico'],
-    directorioDeObras: ['ordenAlfabetico'],
+    // Historia 35.5 — la sección «Personajes»: la Fila de Personaje y la cabecera de su grupo.
+    directorioDeAutores: ['nombre', 'universo', 'ordenAlfabetico'],
+    directorioDeObras: ['nombre', 'ordenAlfabetico'],
   },
   documento: {
     // Historia 31.2 — el pasaje de la Página de Cita sale de los documentos de su Obra.

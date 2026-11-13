@@ -14,17 +14,23 @@
  * Mueve dentro de la página, y eso es actuar: siena, sin subrayado ni caja, como los números de
  * la Paginación. Las anclas son de la misma página y no llevan zona (AD-13, una de las exenciones
  * escritas de la prueba de zonas). La reutilizará `/obras/` (26.4).
+ *
+ * Historia 35.5 — la sección «Personajes» de `/autores/` lleva sus propias letras: `id` las aparta
+ * de las de la A–Z (`letras-de-personajes`), y su «Volver a las letras» salta a ellas. Sin `id`, el
+ * de siempre, `letras`, y la salida es la misma.
  */
 interface Props {
   letras: readonly { inicial: string; ancla: string }[];
-  /** Lo que lista el Directorio, con mayúscula: «Autores», «Obras». */
+  /** Lo que lista el Directorio, con mayúscula: «Autores», «Obras», «Personajes». */
   entidades: string;
+  /** El `id` de la navegación, destino de «Volver a las letras»; por omisión, `letras`. */
+  id?: string;
 }
 
-const { letras, entidades } = Astro.props;
+const { letras, entidades, id = 'letras' } = Astro.props;
 ---
 
-<nav id="letras" class="letras" aria-label="Letras" tabindex="-1">
+<nav id={id} class="letras" aria-label="Letras" tabindex="-1">
   <ul role="list">
     {letras.map(({ inicial, ancla }) => (
       <li><a href={`#${ancla}`}><span class="solo-para-lectores">{entidades} por la </span>{inicial}</a></li>

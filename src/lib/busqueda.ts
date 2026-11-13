@@ -52,6 +52,12 @@ export function rotuloBuscarEnAutor(nombre: string): string {
   return `Buscar en ${nombre}`;
 }
 
+/**
+ * El rótulo de «Buscar en…» en la página 1 de un Personaje — Historia 35.5: «Buscar en Batman», con
+ * la misma regla que el del Autor, porque el Personaje va donde va el Autor.
+ */
+export const rotuloBuscarEnPersonaje = rotuloBuscarEnAutor;
+
 /** El rótulo de «Buscar en…» en la página 1 de un Tema. */
 export const ROTULO_BUSCAR_EN_ESTE_TEMA = 'Buscar en este tema';
 
@@ -65,35 +71,61 @@ export const BOTON_DE_BUSCAR = 'Buscar';
 /**
  * Lo que está elegido en los selectores: el **valor** de cada filtro (el slug del Autor, el nombre
  * de la ficha de la Obra, el slug del Tema), vacío si está en «Todos…». `obra` se omite —o va
- * vacía— sin Obra elegida (Historia 27.3).
+ * vacía— sin Obra elegida (Historia 27.3). Historia 35.5 — `personaje`, el slug del Personaje
+ * elegido en el grupo «Personajes» del selector de Autor; el selector es uno, así que con
+ * `personaje` el `autor` va vacío. Se omite —o va vacío— sin Personaje.
  */
 export interface FiltrosElegidos {
   autor: string;
+  personaje?: string;
   obra?: string;
   tema: string;
 }
 
 /**
- * La Obra elegida, o `''`. **La Obra nunca va sin su Autor** (FR-7, `filtrosUsados`): sin Autor
- * elegido no cuenta, ni para buscar, ni para la combinación, ni para la clave del asentamiento.
+ * El prefijo de la clave de un Personaje — Historia 35.5, AD-33. En el mapa de rótulos de las Obras,
+ * la clave de un Autor es su slug a secas y la de un Personaje, `personaje:{slug}`: los dos puntos
+ * no caben en un slug, así que la clave dice el tipo del dueño por su sintaxis. La misma forma va en
+ * el hueco del Autor de la clave del asentamiento (`valoresDeFiltros`).
+ */
+export const PREFIJO_DE_PERSONAJE = 'personaje:';
+
+/** La clave del dueño elegido: el slug del Autor, `personaje:{slug}` del Personaje, o `''`. */
+export function claveDelDueño(elegidos: Pick<FiltrosElegidos, 'autor' | 'personaje'>): string {
+  return elegidos.personaje ? PREFIJO_DE_PERSONAJE + elegidos.personaje : elegidos.autor;
+}
+
+/** El Autor o el Personaje que dice una clave de dueño (`claveDelDueño`). */
+export function dueñoDeLaClave(clave: string): { autor: string; personaje: string } {
+  return clave.startsWith(PREFIJO_DE_PERSONAJE)
+    ? { autor: '', personaje: clave.slice(PREFIJO_DE_PERSONAJE.length) }
+    : { autor: clave, personaje: '' };
+}
+
+/**
+ * La Obra elegida, o `''`. **La Obra nunca va sin su dueño** (FR-7, `filtrosUsados`): sin Autor ni
+ * Personaje elegido no cuenta, ni para buscar, ni para la combinación, ni para la clave del
+ * asentamiento.
  */
 function obraElegida(elegidos: FiltrosElegidos): string {
-  return elegidos.autor !== '' && elegidos.obra !== undefined ? elegidos.obra : '';
+  return claveDelDueño(elegidos) !== '' && elegidos.obra !== undefined ? elegidos.obra : '';
 }
 
 /** Si hay algún filtro elegido. */
 export function hayFiltros(elegidos: FiltrosElegidos): boolean {
-  return elegidos.autor !== '' || elegidos.tema !== '';
+  return claveDelDueño(elegidos) !== '' || elegidos.tema !== '';
 }
 
 /**
  * Los `filters` que se le pasan a Pagefind: `autor`, `obra` y `tema` con los valores que escribe la
- * 27.1 en cada Página de Cita (`FILTROS_DE_CITA`), solo los elegidos. Sin ninguno, un objeto vacío.
+ * 27.1 en cada Página de Cita (`FILTROS_DE_CITA`) y, desde la 35.5, `personaje`; solo los elegidos.
+ * Sin ninguno, un objeto vacío.
  */
 export function filtrosDePagefind(elegidos: FiltrosElegidos): Record<string, string> {
   const filtros: Record<string, string> = {};
   const obra = obraElegida(elegidos);
   if (elegidos.autor !== '') filtros[FILTROS_DE_CITA.autor] = elegidos.autor;
+  if (elegidos.personaje) filtros[FILTROS_DE_CITA.personaje] = elegidos.personaje;
   if (obra !== '') filtros[FILTROS_DE_CITA.obra] = obra;
   if (elegidos.tema !== '') filtros[FILTROS_DE_CITA.tema] = elegidos.tema;
   return filtros;
@@ -105,9 +137,10 @@ export function filtrosDePagefind(elegidos: FiltrosElegidos): Record<string, str
  * «autor-obra-tema».
  */
 export function combinacionDeFiltros(elegidos: FiltrosElegidos): Filtros {
-  // La Obra solo cuenta con Autor (`obraElegida`): `filtrosUsados` no devuelve `null`.
+  // La Obra solo cuenta con Autor (`obraElegida`): `filtrosUsados` no devuelve `null`. Historia
+  // 35.5 — el Personaje cuenta como `autor`: el vocabulario no cambia (va donde va el Autor).
   return filtrosUsados({
-    autor: elegidos.autor !== '',
+    autor: claveDelDueño(elegidos) !== '',
     obra: obraElegida(elegidos) !== '',
     tema: elegidos.tema !== '',
   })!;
@@ -125,14 +158,18 @@ export function combinacionDeFiltros(elegidos: FiltrosElegidos): Filtros {
 export function valoresDeFiltros(elegidos: FiltrosElegidos): string | undefined {
   if (!hayFiltros(elegidos)) return undefined;
   const obra = obraElegida(elegidos);
-  return `${elegidos.autor}|${elegidos.tema}` + (obra !== '' ? `|${obra}` : '');
+  // Historia 35.5 — el hueco del Autor lleva la clave del dueño: un Personaje es otro estado.
+  return `${claveDelDueño(elegidos)}|${elegidos.tema}` + (obra !== '' ? `|${obra}` : '');
 }
 
 /** Lo que el recuento necesita: el total, el texto tal como se buscó y los **nombres** elegidos. */
 export interface DatosDelRecuento {
   total: number;
   texto: string;
-  /** El nombre del Autor elegido, tal como se lee; sin filtro de Autor, se omite. */
+  /**
+   * El nombre del Autor elegido, tal como se lee; sin filtro de Autor, se omite. Historia 35.5 —
+   * con un Personaje elegido, su nombre: va donde va el Autor («2 citas de Batman.»).
+   */
   autor?: string;
   /**
    * Historia 27.3 — el **título** de la Obra elegida, del mapa de rótulos («Maestros
@@ -233,11 +270,14 @@ export function sugerenciaSinResultados({ texto, autor, obra, tema }: Omit<Datos
 export const RUTA_DEL_MAPA_DE_OBRAS = '/buscar/obras.json';
 
 /**
- * El mapa de rótulos tal como llega al cliente: por slug de Autor, sus Obras como pares
+ * El mapa de rótulos tal como llega al cliente: por clave de dueño —el slug de un Autor o, desde la
+ * Historia 35.5, `personaje:{slug}` (`PREFIJO_DE_PERSONAJE`)—, sus Obras como pares
  * `[nombre de ficha, título]`, ya en el orden de su Lista de Obras (`filtrosDeLaBusqueda`, AD-25).
- * El Autor de una Obra sale de aquí —de en qué lista está—, nunca de partir su nombre (27.4).
+ * Cuando el dueño de la ficha no es el de la lista —la Obra de un Personaje dicha con un Autor—, el
+ * par lleva un tercer elemento con la clave de su dueño. El dueño de una Obra sale de aquí —de en
+ * qué lista está, o de ese tercer elemento—, nunca de partir su nombre (27.4).
  */
-export type MapaDeObras = Readonly<Record<string, readonly (readonly [string, string])[]>>;
+export type MapaDeObras = Readonly<Record<string, readonly (readonly [string, string] | readonly [string, string, string])[]>>;
 
 /** Una opción del selector de Obra: el nombre de la ficha, el título y sus Citas en el índice. */
 export interface OpcionDelSelectorDeObra {
@@ -261,6 +301,7 @@ export interface OpcionDelSelectorDeObra {
 export function opcionesDeObra(
   mapa: MapaDeObras,
   recuentos: Readonly<Record<string, number>> | undefined,
+  /** La clave del dueño elegido (`claveDelDueño`): el slug del Autor o `personaje:{slug}`. */
   autor: string,
 ): OpcionDelSelectorDeObra[] {
   if (autor === '' || !Object.prototype.hasOwnProperty.call(mapa, autor)) return [];
@@ -302,19 +343,27 @@ export interface EstadoDeLaBusqueda {
   /** Lo tecleado, tal como llegó; al componer la dirección se recorta (solo espacios = sin `q`). */
   texto: string;
   autor: string;
-  /** El nombre de la ficha de la Obra; **solo cuenta con `autor`** al componer la dirección. */
+  /**
+   * Historia 35.5, AD-33 — el slug del Personaje elegido en el grupo «Personajes» del selector de
+   * Autor: el dueño, como `autor`. No es una Marca de llegada. Con `autor` a la vez, la resolución
+   * lo descarta.
+   */
+  personaje: string;
+  /** El nombre de la ficha de la Obra; **solo cuenta con su dueño** al componer la dirección. */
   obra: string;
   tema: string;
 }
 
 /**
- * Los cuatro parámetros de la dirección de `/buscar/`, **en el orden en que se componen**:
- * `?q=&autor=&obra=&tema=`. La clave es el campo de `EstadoDeLaBusqueda`; el valor, el nombre del
- * parámetro. `q` es el `name` del campo desde la v1: el formulario sin guion envía lo mismo.
+ * Los cinco parámetros de la dirección de `/buscar/`, **en el orden en que se componen**:
+ * `?q=&autor=&personaje=&obra=&tema=` —el dueño delante de su `obra`—. La clave es el campo de
+ * `EstadoDeLaBusqueda`; el valor, el nombre del parámetro. `q` es el `name` del campo desde la v1:
+ * el formulario sin guion envía lo mismo.
  */
 export const PARAMETROS_DE_LA_BUSQUEDA = {
   texto: 'q',
   autor: 'autor',
+  personaje: 'personaje',
   obra: 'obra',
   tema: 'tema',
 } as const satisfies Record<keyof EstadoDeLaBusqueda, string>;
@@ -322,7 +371,7 @@ export const PARAMETROS_DE_LA_BUSQUEDA = {
 const CAMPOS_DEL_ESTADO = Object.keys(PARAMETROS_DE_LA_BUSQUEDA) as (keyof EstadoDeLaBusqueda)[];
 
 /** El estado sin nada: la búsqueda de `/buscar/` a secas. */
-export const ESTADO_VACIO: Readonly<EstadoDeLaBusqueda> = Object.freeze({ texto: '', autor: '', obra: '', tema: '' });
+export const ESTADO_VACIO: Readonly<EstadoDeLaBusqueda> = Object.freeze({ texto: '', autor: '', personaje: '', obra: '', tema: '' });
 
 /**
  * El estado que dice una dirección — su `location.search`, con o sin `?`. De cada parámetro, la
@@ -346,7 +395,8 @@ function parametrosDe(estado: EstadoDeLaBusqueda): [string, string][] {
   const valores: Record<keyof EstadoDeLaBusqueda, string> = {
     texto: estado.texto.trim(),
     autor: estado.autor,
-    obra: estado.autor !== '' ? estado.obra : '',
+    personaje: estado.personaje,
+    obra: estado.autor !== '' || estado.personaje !== '' ? estado.obra : '',
     tema: estado.tema,
   };
   return CAMPOS_DEL_ESTADO.filter((campo) => valores[campo] !== '').map((campo) => [
@@ -360,7 +410,9 @@ function parametrosDe(estado: EstadoDeLaBusqueda): [string, string][] {
  * sin `autor` **sí** cuenta aquí —la dirección la puede traer, y la resolución le busca su Autor—.
  */
 export function estadoSinNada(estado: EstadoDeLaBusqueda): boolean {
-  return estado.texto.trim() === '' && estado.autor === '' && estado.obra === '' && estado.tema === '';
+  return (
+    estado.texto.trim() === '' && estado.autor === '' && estado.personaje === '' && estado.obra === '' && estado.tema === ''
+  );
 }
 
 /**
@@ -382,7 +434,13 @@ export function direccionDeLaBusqueda(estado: EstadoDeLaBusqueda, ruta: string):
  * la isla la reemplaza.
  */
 export function mismoEstado(a: EstadoDeLaBusqueda, b: EstadoDeLaBusqueda): boolean {
-  return a.texto.trim() === b.texto.trim() && a.autor === b.autor && a.obra === b.obra && a.tema === b.tema;
+  return (
+    a.texto.trim() === b.texto.trim() &&
+    a.autor === b.autor &&
+    a.personaje === b.personaje &&
+    a.obra === b.obra &&
+    a.tema === b.tema
+  );
 }
 
 /**
@@ -430,43 +488,66 @@ export function entradaConEstado(estadoDelHistorial: unknown, estado: EstadoDeLa
 }
 
 /**
- * El Autor de una Obra, por su nombre de ficha: el Autor **en cuya lista del mapa** está y cuyo
- * selector de Obra la ofrecería (`opcionesDeObra`, con los recuentos de `filters()`), o `null`.
- * **Nunca partiendo el nombre**: el prefijo del nombre de la ficha no se lee en el cliente (AD-25),
- * y una Obra que ya no tiene Citas —o que se absorbió al reunir— no tiene Autor aquí.
+ * El dueño de una Obra, por su nombre de ficha, como clave de dueño (`claveDelDueño`): el de su
+ * ficha —el tercer elemento de su par si lo lleva y, si no, la lista **en cuyo mapa** está—, solo
+ * si el selector de Obra de ese dueño la ofrecería (`opcionesDeObra`, con los recuentos de
+ * `filters()`); si no, `null`. **Nunca partiendo el nombre**: el prefijo del nombre de la ficha no
+ * se lee en el cliente (AD-25), y una Obra que ya no tiene Citas —o que se absorbió al reunir— no
+ * tiene dueño aquí. Sin Personajes, es el Autor en cuya lista está, como en la 27.4.
  */
-export function autorDeLaObra(
+export function dueñoDeLaObra(
   mapa: MapaDeObras,
   recuentos: Readonly<Record<string, number>> | undefined,
   nombre: string,
 ): string | null {
   if (nombre === '') return null;
-  for (const autor of Object.keys(mapa)) {
-    if (opcionesDeObra(mapa, recuentos, autor).some((o) => o.valor === nombre)) return autor;
+  for (const clave of Object.keys(mapa)) {
+    const lista: unknown = mapa[clave];
+    if (!Array.isArray(lista)) continue;
+    const par = (lista as unknown[]).find((p) => Array.isArray(p) && p[0] === nombre) as unknown[] | undefined;
+    if (par === undefined) continue;
+    const dueño = typeof par[2] === 'string' && par[2] !== '' ? par[2] : clave;
+    return ofreceLaObra(mapa, recuentos, dueño, nombre) ? dueño : null;
   }
   return null;
+}
+
+/** Si el selector de Obra del dueño (`clave`) ofrece la Obra: si casan. */
+export function ofreceLaObra(
+  mapa: MapaDeObras,
+  recuentos: Readonly<Record<string, number>> | undefined,
+  clave: string,
+  nombre: string,
+): boolean {
+  return opcionesDeObra(mapa, recuentos, clave).some((o) => o.valor === nombre);
 }
 
 /** Lo que la resolución necesita saber del sitio: qué se puede elegir y de quién es cada Obra. */
 export interface LoQueSePuedeElegir {
   /** Los valores de las opciones del selector de Autor (sin «Todos los autores»). */
   autores: readonly string[];
+  /** Historia 35.5 — los del grupo «Personajes» del mismo selector. */
+  personajes: readonly string[];
   /** Los valores de las opciones del selector de Tema (sin «Todos los temas»). */
   temas: readonly string[];
-  /** El Autor de una Obra ofrecible, o `null` (`autorDeLaObra`). Solo se pregunta con `obra`. */
-  autorDeLaObra: (nombre: string) => string | null;
+  /** La clave del dueño de una Obra ofrecible, o `null` (`dueñoDeLaObra`). Solo se pregunta con `obra`. */
+  dueñoDeLaObra: (nombre: string) => string | null;
+  /** Si el dueño elegido (su clave) ofrece la Obra (`ofreceLaObra`): si casan. */
+  ofrece: (clave: string, nombre: string) => boolean;
 }
 
 /**
- * La resolución de un estado leído de la dirección o de una entrada — Historia 27.4, en un **orden
- * fijo**:
+ * La resolución de un estado leído de la dirección o de una entrada — Historia 27.4 y, con el
+ * Personaje, 35.5 (AD-33), en un **orden fijo**:
  *
  *   1. se descarta, contando uno por cada uno, el `autor` que no es opción del selector de Autor,
- *      el `tema` que no es opción del de Tema y la `obra` que no es ofrecible: sin Autor en
- *      `autorDeLaObra`, o con un Autor del mapa que no es opción del selector de Autor (un mapa y
- *      un selector de construcciones distintas);
- *   2. una `obra` sin `autor` toma el Autor de la Obra;
- *   3. un `autor` y una `obra` que no casan: se descarta la `obra` (uno más).
+ *      el `personaje` que no es opción de su grupo «Personajes», el `tema` que no es opción del de
+ *      Tema y la `obra` que no es ofrecible: sin dueño en `dueñoDeLaObra`, o con un dueño del mapa
+ *      que no es opción del selector (un mapa y un selector de construcciones distintas); y con
+ *      `autor` y `personaje` a la vez —ningún control lo produce—, el `personaje` (uno más);
+ *   2. una `obra` sin dueño toma el dueño de la Obra, con su tipo;
+ *   3. un dueño y una `obra` que no casan —la Obra no está en la lista del dueño elegido
+ *      (`ofrece`)—: se descarta la `obra` (uno más).
  *
  * Nunca se cambia el Autor por el de la Obra, ni se traduce una Obra absorbida a la que la
  * absorbió: lo que no existe se dice (`avisoDeLaDireccion`) y la búsqueda va sin ello. El texto
@@ -482,18 +563,26 @@ export function resolverEstado(
     estado.autor = '';
     noSeUsan++;
   }
+  if (estado.personaje !== '' && (!sitio.personajes.includes(estado.personaje) || estado.autor !== '')) {
+    estado.personaje = '';
+    noSeUsan++;
+  }
   if (estado.tema !== '' && !sitio.temas.includes(estado.tema)) {
     estado.tema = '';
     noSeUsan++;
   }
-  const deLaObra = estado.obra !== '' ? sitio.autorDeLaObra(estado.obra) : null;
-  // Una Obra cuyo Autor no es opción del selector de Autor (datos de otra construcción) tampoco se ofrece.
-  if (estado.obra !== '' && (deLaObra === null || !sitio.autores.includes(deLaObra))) {
+  const deLaObra = estado.obra !== '' ? sitio.dueñoDeLaObra(estado.obra) : null;
+  const elegible = (clave: string) => {
+    const { autor, personaje } = dueñoDeLaClave(clave);
+    return autor !== '' ? sitio.autores.includes(autor) : sitio.personajes.includes(personaje);
+  };
+  // Una Obra cuyo dueño no es opción del selector (datos de otra construcción) tampoco se ofrece.
+  if (estado.obra !== '' && (deLaObra === null || !elegible(deLaObra))) {
     estado.obra = '';
     noSeUsan++;
   }
-  if (estado.obra !== '' && estado.autor === '') estado.autor = deLaObra!;
-  if (estado.obra !== '' && estado.autor !== deLaObra) {
+  if (estado.obra !== '' && claveDelDueño(estado) === '') Object.assign(estado, dueñoDeLaClave(deLaObra!));
+  if (estado.obra !== '' && !sitio.ofrece(claveDelDueño(estado), estado.obra)) {
     estado.obra = '';
     noSeUsan++;
   }

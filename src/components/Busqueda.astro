@@ -234,6 +234,13 @@
  *     búsqueda quita los saltos de línea, y la clave de la llegada tiene que ser la del texto que
  *     Enter buscará. Con estado en la dirección, la búsqueda se ejecuta al cargar.
  *   · Lo tecleado vuelve a la página solo por `textContent` y `value`, nunca como HTML.
+ *   · Historia 35.5 (AD-33, UX-DR142) — el selector de Autor lleva tras los Autores un `optgroup`
+ *     «Personajes» (solo si hay Personajes publicados). El valor de cada opción es el slug, y el
+ *     grupo de la opción elegida dice si es un Autor o un Personaje: con un Personaje, el estado
+ *     lleva `personaje=` —`?q=&autor=&personaje=&obra=&tema=`—, Pagefind filtra por `personaje` y
+ *     el selector de Obra sale de su clave del mapa (`personaje:{slug}`). Para la medición cuenta
+ *     como `autor`; el vocabulario no cambia. La resolución descarta el `personaje` que no es
+ *     opción, el que llega junto a un `autor`, y la Obra que no está en la lista del dueño elegido.
  */
 import AvisoDeLaBusqueda from './AvisoDeLaBusqueda.astro';
 import CampoDeBusqueda from './CampoDeBusqueda.astro';
@@ -247,11 +254,16 @@ import { rutaDeLaBusqueda } from '../lib/superficies.ts';
 interface Props {
   /** Las opciones del selector de Autor, ya en su orden (`ordenDeAutoresPorNombre`). */
   autores: readonly OpcionPorNombre[];
+  /**
+   * Historia 35.5 — las del grupo «Personajes» del mismo selector, tras los Autores y en su orden.
+   * Vacío, no hay grupo: el selector sale como siempre.
+   */
+  personajes: readonly OpcionPorNombre[];
   /** Las opciones del selector de Tema, ya en su orden (`ordenDeTemasPorNombre`). */
   temas: readonly OpcionPorNombre[];
 }
 
-const { autores, temas } = Astro.props;
+const { autores, personajes, temas } = Astro.props;
 ---
 
 <div data-busqueda>
@@ -285,6 +297,11 @@ const { autores, temas } = Astro.props;
           <select id="filtro-de-autor" data-selector-de-autor autocomplete="off">
             <option value="">Todos los autores</option>
             {autores.map((opcion) => <option value={opcion.valor}>{opcion.rotulo}</option>)}
+            {personajes.length > 0 && (
+              <optgroup label="Personajes">
+                {personajes.map((opcion) => <option value={opcion.valor}>{opcion.rotulo}</option>)}
+              </optgroup>
+            )}
           </select>
         </div>
         {/*
@@ -464,10 +481,11 @@ const { autores, temas } = Astro.props;
     ANUNCIO_DEL_FALLO_DE_LA_BUSQUEDA,
     FALLO_DE_LA_TANDA,
     RUTA_DEL_MAPA_DE_OBRAS,
-    autorDeLaObra,
     avisoDeLaDireccion,
+    claveDelDueño,
     combinacionDeFiltros,
     direccionDeLaBusqueda,
+    dueñoDeLaObra,
     entradaConEstado,
     escrituraDelHistorial,
     estadoDeLaDireccion,
@@ -477,6 +495,7 @@ const { autores, temas } = Astro.props;
     fraseDelRecuento,
     hayFiltros,
     mismoEstado,
+    ofreceLaObra,
     opcionesDeObra,
     resolverEstado,
     rotuloDeMostrarMas,
@@ -655,18 +674,26 @@ const { autores, temas } = Astro.props;
     };
 
     const obraEnElDom = () => compuestoPara !== null;
+    /** Historia 35.5 — si una opción es del grupo «Personajes» del selector de Autor. */
+    const dePersonaje = (o: HTMLOptionElement | undefined) => o?.parentElement?.tagName === 'OPTGROUP';
+    /** El dueño elegido: el valor es el slug, y el grupo de la opción dice si es Autor o Personaje (AD-33). */
+    const dueño = () =>
+      dePersonaje(autor.options[autor.selectedIndex]) ? { autor: '', personaje: autor.value } : { autor: autor.value, personaje: '' };
+    /** La clave del dueño elegido (`claveDelDueño`): la del mapa de rótulos y la del Autor vigente. */
+    const clave = () => claveDelDueño(dueño());
     const elegidos = (): FiltrosElegidos => ({
-      autor: autor.value,
+      ...dueño(),
       ...(obraEnElDom() && obra.value !== '' ? { obra: obra.value } : {}),
       tema: tema.value,
     });
     /** Historia 27.4 — el estado de la isla, con identificadores: lo que dice el campo y lo elegido. */
     const estadoDeLaIsla = (): EstadoDeLaBusqueda => {
       const f = elegidos();
-      return { texto: campo.value, autor: f.autor, obra: f.obra ?? '', tema: f.tema };
+      return { texto: campo.value, autor: f.autor, personaje: f.personaje ?? '', obra: f.obra ?? '', tema: f.tema };
     };
-    /** Los valores de las opciones de un selector, sin la primera («Todos…»). */
-    const valoresDe = (selector: HTMLSelectElement) => [...selector.options].map((o) => o.value).filter((v) => v !== '');
+    /** Los valores de las opciones de un selector, sin la primera («Todos…»); con `grupo`, solo los de «Personajes» o los de fuera. */
+    const valoresDe = (selector: HTMLSelectElement, grupo?: boolean) =>
+      [...selector.options].filter((o) => o.value !== '' && (grupo === undefined || dePersonaje(o) === grupo)).map((o) => o.value);
     /** El nombre de la opción elegida, tal como se lee. */
     const nombreDe = (selector: HTMLSelectElement) => selector.options[selector.selectedIndex]?.textContent?.trim() ?? '';
 
@@ -753,7 +780,7 @@ const { autores, temas } = Astro.props;
      * su hueco, tras el `.selector` de Autor, no mueve el foco.
      */
     function componerObra() {
-      if (vigente === '' || vigente !== autor!.value || compuestoPara === vigente || !mapa || !recuentos) return;
+      if (vigente === '' || vigente !== clave() || compuestoPara === vigente || !mapa || !recuentos) return;
       const opciones = opcionesDeObra(mapa, recuentos, vigente);
       if (opciones.length === 0) return;
       obra!.replaceChildren(todasSusObras!, ...opciones.map((o) => new Option(rotuloDeObra(o), o.valor)));
@@ -918,13 +945,13 @@ const { autores, temas } = Astro.props;
 
     function buscar(origen: Origen, control: ControlDeLaBusqueda | null, aviso = ''): Promise<void> {
       // El Autor de esta búsqueda pasa a ser el vigente: con los datos ya aquí, su Obra aparece.
-      vigente = autor!.value;
+      vigente = clave();
       componerObra();
       const texto = campo!.value;
       const filtros = elegidos();
-      const clave = JSON.stringify([texto, filtros.autor, filtros.obra ?? '', filtros.tema]);
-      if (clave === ultima) return pendiente;
-      ultima = clave;
+      const deLaBusqueda = JSON.stringify([texto, claveDelDueño(filtros), filtros.obra ?? '', filtros.tema]);
+      if (deLaBusqueda === ultima) return pendiente;
+      ultima = deLaBusqueda;
       const mio = ++turno;
       // Historia 27.5 — una búsqueda lanzada deja sin efecto la tanda en vuelo de la que se ve.
       tanda = 0;
@@ -943,13 +970,20 @@ const { autores, temas } = Astro.props;
         estadoVisto = null;
         return (pendiente = Promise.resolve());
       }
-      const deEsta: EstadoDeLaBusqueda = { texto, autor: filtros.autor, obra: filtros.obra ?? '', tema: filtros.tema };
+      const deEsta: EstadoDeLaBusqueda = {
+        texto,
+        autor: filtros.autor,
+        personaje: filtros.personaje ?? '',
+        obra: filtros.obra ?? '',
+        tema: filtros.tema,
+      };
 
       // Los nombres, de lo elegido al lanzar la búsqueda: el recuento dice lo que se buscó.
       // El título del mapa, nunca el rótulo de la opción con su recuento; sin título, no se nombra.
       const tituloDeObra = filtros.obra ? titulos.get(filtros.obra) : undefined;
       const nombres = {
-        ...(filtros.autor ? { autor: nombreDe(autor!) } : {}),
+        // Historia 35.5 — el nombre del dueño, Autor o Personaje: va donde va el Autor.
+        ...(claveDelDueño(filtros) ? { autor: nombreDe(autor!) } : {}),
         ...(tituloDeObra ? { obra: tituloDeObra } : {}),
         ...(filtros.tema ? { tema: nombreDe(tema!) } : {}),
       };
@@ -1122,11 +1156,11 @@ const { autores, temas } = Astro.props;
     const alCambiarElAutor = () => {
       vigente = '';
       if (obraEnElDom()) quitarObra();
-      if (autor.value === '') return;
-      const elegido = autor.value;
+      const elegido = clave();
+      if (elegido === '') return;
       const deOtro = pidiendo !== null && pedidaPara !== elegido;
       pedirDatosDeObra(elegido)
-        .then((datos) => (datos === null && deOtro && autor!.value === elegido ? pedirDatosDeObra(elegido) : datos))
+        .then((datos) => (datos === null && deOtro && clave() === elegido ? pedirDatosDeObra(elegido) : datos))
         .then(componerObra)
         .catch(() => {});
     };
@@ -1245,15 +1279,16 @@ const { autores, temas } = Astro.props;
      */
     function ponerEstado(nuevo: EstadoDeLaBusqueda) {
       campo!.value = nuevo.texto;
-      if (obraEnElDom() && compuestoPara !== nuevo.autor) quitarObra();
+      if (obraEnElDom() && compuestoPara !== claveDelDueño(nuevo)) quitarObra();
+      // Historia 35.5 — un solo espacio de slugs (AD-33): el Personaje se elige en el mismo selector.
       for (const [selector, valor] of [
-        [autor!, nuevo.autor],
+        [autor!, nuevo.personaje || nuevo.autor],
         [tema!, nuevo.tema],
       ] as const) {
         selector.value = valor;
         if (selector.value !== valor) selector.value = '';
       }
-      vigente = autor!.value;
+      vigente = clave();
       componerObra();
       if (obraEnElDom()) {
         obra!.value = nuevo.obra;
@@ -1272,9 +1307,11 @@ const { autores, temas } = Astro.props;
      */
     function resolverYBuscar(leido: EstadoDeLaBusqueda, datos: DatosDeObra | null, tipo?: string) {
       const { estado: resuelto, noSeUsan } = resolverEstado(leido, {
-        autores: valoresDe(autor!),
+        autores: valoresDe(autor!, false),
+        personajes: valoresDe(autor!, true),
         temas: valoresDe(tema!),
-        autorDeLaObra: (nombre) => (datos ? autorDeLaObra(datos.mapa, datos.recuentos, nombre) : null),
+        dueñoDeLaObra: (nombre) => (datos ? dueñoDeLaObra(datos.mapa, datos.recuentos, nombre) : null),
+        ofrece: (de, nombre) => (datos ? ofreceLaObra(datos.mapa, datos.recuentos, de, nombre) : false),
       });
       const registrada = A.yaRegistrada(history.state, tipo);
       ponerEstado(resuelto);
@@ -1283,8 +1320,8 @@ const { autores, temas } = Astro.props;
       const quedaAlgo = !estadoSinNada(puesto);
       const aviso = avisoDeLaDireccion(noSeUsan, quedaAlgo);
       const f = elegidos();
-      const clave = A.clave(puesto.texto, combinacionDeFiltros(f), valoresDeFiltros(f));
-      if (registrada && quedaAlgo && !hechos.includes(clave)) hechos.push(clave);
+      const delAsentamiento = A.clave(puesto.texto, combinacionDeFiltros(f), valoresDeFiltros(f));
+      if (registrada && quedaAlgo && !hechos.includes(delAsentamiento)) hechos.push(delAsentamiento);
       // Una llegada siempre busca, aunque sea lo último que se buscó: pinta su estado y su aviso.
       ultima = null;
       buscar('gesto', null, aviso);
@@ -1332,7 +1369,7 @@ const { autores, temas } = Astro.props;
         return;
       }
       cargar();
-      const datos = pedirDatosDeObra(leido.autor);
+      const datos = pedirDatosDeObra(claveDelDueño(leido));
       if (leido.obra === '') {
         resolverYBuscar(leido, null, tipo);
         datos.then(componerObra).catch(() => {});

@@ -21,6 +21,15 @@ export function recuentoDeAutores(m: number): string {
 }
 
 /**
+ * «1 personaje», «3 personajes»: el recuento de Personajes con su unidad — Historia 35.5. Lo dice el
+ * filtro de `/autores/` cuando la sección «Personajes» queda con filas: los Personajes no se cuentan
+ * nunca como Autores.
+ */
+export function recuentoDePersonajes(p: number): string {
+  return p === 1 ? '1 personaje' : `${p} personajes`;
+}
+
+/**
  * «1 obra», «5 obras»: el recuento de Obras con su unidad, en singular cuando es una — Historia
  * 26.4. Un solo dueño para la meta del Directorio de Obras, su Tarjeta Social y el recuento de su
  * filtro (26.6).

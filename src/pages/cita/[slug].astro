@@ -231,7 +231,7 @@ const comoCitar = (() => {
       * clave de orden. El último hijo de `<article>`, fuera de todo bloque que se repite en otra
       * página; lo escribe solo este componente.
       */}
-    <FiltrosDeLaCita filtros={filtros} clave={clave} nombreDelAutor={autor?.nombre} />
+    <FiltrosDeLaCita filtros={filtros} clave={clave} nombreDelAutor={personaje?.nombre ?? autor?.nombre} />
   </article>
 </Armazon>
 

@@ -35,8 +35,10 @@ import { rutaDeLaBusqueda } from '../lib/superficies.ts';
  * el Tema solo—: un «Buscar en…» sin filtro, una Obra sin Autor o un Autor con Tema no compilan.
  */
 type Filtros =
-  | { autor: string; obra?: string; tema?: never }
-  | { tema: string; autor?: never; obra?: never };
+  | { autor: string; obra?: string; tema?: never; personaje?: never }
+  // Historia 35.5 — «Buscar en {Personaje}» y «Buscar en esta obra» de la Obra de un Personaje.
+  | { personaje: string; obra?: string; autor?: never; tema?: never }
+  | { tema: string; autor?: never; obra?: never; personaje?: never };
 
 interface Props {
   /** El `id` del campo, único en la página: al que apunta su etiqueta. */

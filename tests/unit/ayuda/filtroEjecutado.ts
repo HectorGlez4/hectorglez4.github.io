@@ -235,9 +235,14 @@ function decodificar(texto: string): string {
     .replace(/&amp;/gu, '&');
 }
 
-/** Lo leído del HTML: por grupo, sus bloques; por bloque, la cabecera y las filas. */
+/**
+ * Lo leído del HTML: por grupo, sus bloques; por bloque, la cabecera y las filas. Historia 35.5 —
+ * y qué grupos son de la sección «Personajes», y si la página trae el salto a ella.
+ */
 interface Leido {
   grupos: { cabecera?: string; filas: string[] }[][];
+  personajes: boolean[];
+  salto: boolean;
 }
 
 /** Trozos de `html` que empiezan en cada aparición de `inicio`. */
@@ -258,9 +263,24 @@ function construir(html: string, directorio: DirectorioFiltrable): { documento: 
 
   const inicioDelListado = html.indexOf('<div class="listado"');
   const listadoHtml = html.slice(inicioDelListado, html.indexOf('</main>', inicioDelListado));
-  const leido: Leido = { grupos: [] };
+  const leido: Leido = { grupos: [], personajes: [], salto: html.includes('data-salto') };
   const grupos: Elemento[] = [];
-  for (const grupoHtml of trozos(listadoHtml, '<section class="grupo"')) {
+  /*
+   * Historia 35.5 — la sección «Personajes»: en `/autores/`, un `<section data-personajes>` con sus
+   * letras y sus grupos de letra tras los de la A–Z; en `/obras/`, un `section.grupo` más, marcado.
+   */
+  const inicioDePersonajes = listadoHtml.indexOf('<section data-personajes');
+  let desde = 0;
+  for (const trozo of trozos(listadoHtml, '<section class="grupo"')) {
+    desde = listadoHtml.indexOf(trozo, desde);
+    // El último grupo de la A–Z acaba donde empieza la sección: sus letras no son filas suyas.
+    const grupoHtml =
+      inicioDePersonajes > desde && inicioDePersonajes < desde + trozo.length ? trozo.slice(0, inicioDePersonajes - desde) : trozo;
+    const dePersonajes =
+      directorio === 'autores'
+        ? inicioDePersonajes >= 0 && desde > inicioDePersonajes
+        : grupoHtml.startsWith('<section class="grupo" data-personajes');
+    desde += 1;
     const bloques: { cabecera?: string; filas: string[] }[] = [];
     const hijos: Elemento[] = [el('h2', {}, ['?'])];
     if (directorio === 'autores') {
@@ -327,10 +347,20 @@ function construir(html: string, directorio: DirectorioFiltrable): { documento: 
         );
       }
     }
-    expect(grupoHtml, 'un grupo sin «Volver a las letras»').toMatch(/<p class="volver"/u);
-    hijos.push(el('p', { class: 'volver' }, [el('a', { href: '#letras' }, ['Volver a las letras'])]));
+    // La sección de `/obras/` es un grupo sin letras propias, así que no lleva «Volver».
+    if (!(dePersonajes && directorio === 'obras')) {
+      expect(grupoHtml, 'un grupo sin «Volver a las letras»').toMatch(/<p class="volver"/u);
+      hijos.push(el('p', { class: 'volver' }, [el('a', { href: '#letras' }, ['Volver a las letras'])]));
+    }
     leido.grupos.push(bloques);
-    grupos.push(el('section', { class: 'grupo' }, hijos));
+    leido.personajes.push(dePersonajes);
+    grupos.push(el('section', { class: 'grupo', ...(dePersonajes && directorio === 'obras' ? { 'data-personajes': '' } : {}) }, hijos));
+  }
+  // En `/autores/`, los grupos de la sección van dentro de ella, tras su `h2` y sus letras.
+  const deLaAZ = grupos.filter((_, g) => directorio === 'obras' || !leido.personajes[g]);
+  const deLaSeccion = grupos.filter((_, g) => directorio === 'autores' && leido.personajes[g]);
+  if (deLaSeccion.length > 0) {
+    expect(listadoHtml, 'la sección «Personajes» sin sus letras').toMatch(/<nav id="letras-de-personajes"/u);
   }
   expect(grupos.length, 'el listado no tiene grupos').toBeGreaterThan(0);
   expect(listadoHtml, 'el listado no tiene letras').toMatch(/<nav id="letras"/u);
@@ -350,8 +380,21 @@ function construir(html: string, directorio: DirectorioFiltrable): { documento: 
     el('main', {}, [
       el('div', { class: 'prosa' }, [
         el('h1', {}, ['Directorio']),
+        ...(leido.salto ? [el('p', { 'data-salto': '' }, [el('a', { href: '#personajes' }, ['Personajes'])])] : []),
         raiz,
-        el('div', { class: 'listado', 'data-pagefind-ignore': 'all' }, [el('nav', { id: 'letras', class: 'letras' }), ...grupos]),
+        el('div', { class: 'listado', 'data-pagefind-ignore': 'all' }, [
+          el('nav', { id: 'letras', class: 'letras' }),
+          ...deLaAZ,
+          ...(deLaSeccion.length > 0
+            ? [
+                el('section', { 'data-personajes': '' }, [
+                  el('h2', { id: 'personajes' }, ['Personajes']),
+                  el('nav', { id: 'letras-de-personajes', class: 'letras' }),
+                  ...deLaSeccion,
+                ]),
+              ]
+            : []),
+        ]),
       ]),
     ]),
   ]);
@@ -376,7 +419,13 @@ export function guionDelFiltro(proyecto: string, html: string): string {
  * sombra del recuento, el enlace a cero y la frase, que llega tras la pausa y no antes y no se
  * reescribe igual.
  */
-export function comprobarFiltroEjecutado(html: string, guion: string, directorio: DirectorioFiltrable): void {
+export function comprobarFiltroEjecutado(
+  html: string,
+  guion: string,
+  directorio: DirectorioFiltrable,
+  /** Historia 35.5 — consultas de más, tras las sacadas de lo leído (la de un Personaje, por ejemplo). */
+  otras: readonly string[] = [],
+): void {
   // Aplanado, sin importaciones: se ejecuta como guion clásico.
   expect(guion, 'el guion del filtro importa o exporta: el entorno no lo sabe ejecutar').not.toMatch(/^\s*(?:import|export)\b|\bimport\s*\(/mu);
   const { documento, leido } = construir(html, directorio);
@@ -425,9 +474,18 @@ export function comprobarFiltroEjecutado(html: string, guion: string, directorio
   expect(region.textContent).toBe('');
 
   const listado = documento.querySelector('.listado')!;
-  const letras = listado.querySelector('#letras')!;
+  const letras = listado.querySelectorAll('nav.letras');
   const volveres = listado.querySelectorAll('p.volver');
   const grupos = listado.querySelectorAll('section.grupo');
+  // Historia 35.5 — la sección «Personajes» (en `/obras/`, un grupo) y el salto de la cabecera.
+  const secciones = listado.querySelectorAll('[data-personajes]');
+  const salto = documento.querySelector('[data-salto]');
+  const conPersonajes = leido.personajes.some(Boolean);
+  /** La frase esperada: en `/autores/` con la sección, los Personajes aparte (`fraseDelFiltro`). */
+  const fraseEsperada = (quedan: number, dePersonajes: number, texto: string) =>
+    directorio === 'autores' && conPersonajes
+      ? fraseDelFiltro(directorio, quedan - dePersonajes, texto, dePersonajes)
+      : fraseDelFiltro(directorio, quedan, texto);
   const aCero = raiz.querySelector('.a-cero')!;
   const enlace = aCero.querySelector('a')!;
   const filasDe = (grupo: Elemento) =>
@@ -446,6 +504,8 @@ export function comprobarFiltroEjecutado(html: string, guion: string, directorio
     const n = normalizar(texto);
     const vacia = n === '';
     let quedan = 0;
+    let dePersonajes = 0;
+    let algunPersonaje = false;
     leido.grupos.forEach((bloques, g) => {
       const filasDelGrupo = filasDe(grupos[g]);
       let grupoVisible = false;
@@ -459,13 +519,17 @@ export function comprobarFiltroEjecutado(html: string, guion: string, directorio
         }
         grupoVisible ||= bloqueVisible;
         quedan += visibles.filter(Boolean).length;
+        if (leido.personajes[g]) dePersonajes += visibles.filter(Boolean).length;
       });
       expect(grupos[g].hidden, `«${texto}»: el grupo ${g}`).toBe(!grupoVisible);
+      if (leido.personajes[g]) algunPersonaje ||= grupoVisible;
     });
-    expect(letras.hidden, `«${texto}»: las letras`).toBe(!vacia);
+    for (const nav of letras) expect(nav.hidden, `«${texto}»: las letras ${nav.getAttribute('id')}`).toBe(!vacia);
     for (const volver of volveres) expect(volver.hidden, `«${texto}»: un «Volver»`).toBe(!vacia);
+    if (salto !== null) expect(salto.hidden, `«${texto}»: el salto a «Personajes»`).toBe(!vacia);
+    for (const seccion of secciones) expect(seccion.hidden, `«${texto}»: la sección «Personajes»`).toBe(!algunPersonaje);
     // La sombra lleva ya la frase que la región escribirá tras la pausa: guarda su alto.
-    expect(sombra.textContent, `«${texto}»: la sombra del recuento`).toBe(vacia ? '' : fraseDelFiltro(directorio, quedan, texto));
+    expect(sombra.textContent, `«${texto}»: la sombra del recuento`).toBe(vacia ? '' : fraseEsperada(quedan, dePersonajes, texto));
     const aCeroVisible = !vacia && quedan === 0;
     expect(aCero.hidden, `«${texto}»: el enlace a cero`).toBe(!aCeroVisible);
     if (aCeroVisible) {
@@ -474,7 +538,7 @@ export function comprobarFiltroEjecutado(html: string, guion: string, directorio
     } else {
       expect(enlace.hasAttribute('href'), `«${texto}»: el enlace a cero conserva su href`).toBe(false);
     }
-    return { vacia, quedan };
+    return { vacia, quedan, dePersonajes };
   };
 
   // Consultas sacadas de lo leído: una fila entera en mayúsculas y sin tildes, un trozo de dentro
@@ -487,18 +551,19 @@ export function comprobarFiltroEjecutado(html: string, guion: string, directorio
     ...(directorio === 'obras' ? [leido.grupos.flat()[0].cabecera!] : []),
     'qqqqzzzz',
     '<img src=x onerror="__hostil=1">',
+    ...otras,
   ];
   let alguna = false;
   for (const consulta of consultas) {
     const escriturasAntes = region.escrituras;
     teclear(consulta);
-    const { quedan } = juzgar(consulta);
+    const { quedan, dePersonajes } = juzgar(consulta);
     alguna ||= quedan > 0 && quedan < total;
     // La frase, tras la pausa y no antes.
     avanzar(PAUSA_DE_TECLEO_MS - 1);
     expect(region.escrituras, `«${consulta}»: la región se escribió antes de la pausa`).toBe(escriturasAntes);
     avanzar(1);
-    const frase = fraseDelFiltro(directorio, quedan, consulta);
+    const frase = fraseEsperada(quedan, dePersonajes, consulta);
     expect(region.textContent, `«${consulta}»`).toBe(frase);
     // La misma consulta otra vez: la misma frase no se reescribe.
     const escrituras = region.escrituras;

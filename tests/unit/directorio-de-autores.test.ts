@@ -163,8 +163,73 @@ describe('Historia 26.3 — el orden y los grupos del Directorio de Autores', ()
   });
 
   it('con el Corpus vacío no hay letras ni grupos, y la descripción dice ceros', () => {
-    expect(directorioDeAutores([], [])).toEqual({ grupos: [], autores: 0, citas: 0 });
+    expect(directorioDeAutores([], [])).toEqual({ grupos: [], autores: 0, citas: 0, personajes: [] });
     expect(descripcionDelDirectorioDeAutores(directorioDeAutores([], []))).toBe('0 autores, de la A a la Z, con 0 citas publicadas.');
+  });
+});
+
+describe('Historia 35.5 — la sección «Personajes» del Directorio de Autores', () => {
+  const personaje = (slug: string, nombre: string, clave: string | undefined, universo = 'DC Comics') => ({
+    slug,
+    nombre,
+    universo,
+    ...(clave === undefined ? {} : { ordenAlfabetico: clave }),
+  });
+  const dicha = (slug: string, dePersonaje: string, deAutor?: string): Cita => ({
+    slug,
+    texto: `Texto de ${slug}.`,
+    ...(deAutor === undefined ? {} : { autor: deAutor }),
+    personaje: dePersonaje,
+    temas: [],
+    procedencia: {},
+    aptaParaPortada: false,
+  });
+  const SENECA = autor('seneca', 'Séneca', 'Séneca');
+  const CITAS: Cita[] = [
+    cita('seneca-1', 'seneca'),
+    dicha('batman-1', 'batman'),
+    dicha('batman-2', 'batman'),
+    dicha('seneca-con-batman', 'batman', 'seneca'),
+    dicha('homero-1', 'homero'),
+  ];
+  const PERSONAJES = [
+    personaje('homero', 'Homero Simpson', 'Simpson', 'Los Simpson'),
+    personaje('batman', 'Batman', 'Batman'),
+    personaje('sin-citas', 'Nadie', 'Nadie'),
+  ];
+
+  it('tras la A–Z, por su clave y con anclas propias; la Fila dice «personaje de {universo}» y sus Citas', () => {
+    const directorio = directorioDeAutores([SENECA], CITAS, PERSONAJES);
+    expect(directorio.grupos.map((g) => [g.ancla, g.entradas.map((a) => a.slug)])).toEqual([['letra-s', ['seneca']]]);
+    expect(directorio.personajes).toEqual([
+      {
+        inicial: 'B',
+        ancla: 'personajes-letra-b',
+        entradas: [{ slug: 'batman', nombre: 'Batman', ruta: '/personaje/batman/', años: 'personaje de DC Comics', recuento: '3 citas' }],
+      },
+      {
+        inicial: 'S',
+        ancla: 'personajes-letra-s',
+        entradas: [
+          { slug: 'homero', nombre: 'Homero Simpson', ruta: '/personaje/homero/', años: 'personaje de Los Simpson', recuento: '1 cita' },
+        ],
+      },
+    ]);
+    expect(anclaDeLetra('B', 'personajes-')).toBe('personajes-letra-b');
+  });
+
+  it('los Personajes no se cuentan como Autores: ni en las cifras ni en la meta', () => {
+    const directorio = directorioDeAutores([SENECA], CITAS, PERSONAJES);
+    expect(directorio).toMatchObject({ autores: 1, citas: 2 });
+    expect(descripcionDelDirectorioDeAutores(directorio)).toBe('1 autor, de la A a la Z, con 2 citas publicadas.');
+    expect(datosDeTarjetaDelDirectorioDeAutores(directorio.autores)).toEqual(datosDeTarjetaDelDirectorioDeAutores(1));
+  });
+
+  it('sin Personajes publicados no hay sección; un Personaje publicado sin clave lanza nombrándolo', () => {
+    expect(directorioDeAutores([SENECA], [cita('seneca-1', 'seneca')], PERSONAJES).personajes).toEqual([]);
+    expect(() => directorioDeAutores([SENECA], CITAS, [personaje('batman', 'Batman', undefined)])).toThrow(
+      /El Personaje «batman».*Directorio de Autores.*npx tsx tools\/personaje\.ts proponer-claves/su,
+    );
   });
 });
 

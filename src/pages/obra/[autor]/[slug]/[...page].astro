@@ -16,9 +16,9 @@
  * del Corpus, salvo la nota, que escribe Héctor a mano.
  *
  * Historia 35.4 — la Obra de un Personaje es esta misma página con su dueño: la Cabecera dice «de
- * {Personaje}» enlazado a su página, el título y la meta llevan su nombre, el JSON-LD describe una
- * `CreativeWork` con su `character`, y no lleva «Buscar en esta obra» hasta la 35.5 (`/buscar/`
- * aún no filtra por Personaje).
+ * {Personaje}» enlazado a su página, el título y la meta llevan su nombre y el JSON-LD describe una
+ * `CreativeWork` con su `character`. Desde la 35.5 lleva también «Buscar en esta obra», con el
+ * Personaje en lugar del Autor (`?personaje=&obra=`).
  *
  * El parámetro se llama `page` porque `paginate()` lo exige por nombre, como en la Página de
  * Autor; los dos segmentos públicos salen del nombre de la ficha (`segmentosDeObra`).
@@ -211,8 +211,16 @@ const enVenta =
        * desde el formulario. Lleva los dos filtros, el Autor y la Obra por el nombre de su ficha,
        * que es su interfaz pública (nunca el título). Las 2+ no lo llevan.
        */
-      primera && dueño.tipo === 'autor' && (
-        <BuscarEn id="buscar-en-esta-obra" rotulo={ROTULO_BUSCAR_EN_ESTA_OBRA} filtros={{ autor: dueño.autor.slug, obra: obra.nombre }} />
+      primera && (
+        <BuscarEn
+          id="buscar-en-esta-obra"
+          rotulo={ROTULO_BUSCAR_EN_ESTA_OBRA}
+          filtros={
+            dueño.tipo === 'autor'
+              ? { autor: dueño.autor.slug, obra: obra.nombre }
+              : { personaje: dueño.personaje.slug, obra: obra.nombre }
+          }
+        />
       )
     }
 

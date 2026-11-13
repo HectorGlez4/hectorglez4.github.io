@@ -9,7 +9,8 @@
  *
  * Lo que la separa de la de Autor: «personaje de {universo}» donde van los años; la semblanza,
  * propia o de una biografía, **siempre** fuera de Pagefind y con su atribución visible; el rótulo
- * «Citas»; sin «Buscar en…» (35.5) y sin `Person` en el JSON-LD. Su Tarjeta Social (35.3b) es la
+ * «Citas» y sin `Person` en el JSON-LD. Desde la 35.5, «Buscar en {Personaje}» en la página 1, bajo
+ * «Citas» y encima del listado, como «Buscar en {Autor}»: lleva a `/buscar/?personaje=`. Su Tarjeta Social (35.3b) es la
  * de listado, `/tarjeta/personaje/{slug}.png`, en todas sus páginas.
  * Las 2+ llevan el `h1` y el listado, y son `noindex` por forma (`superficies.ts`).
  */
@@ -21,6 +22,8 @@ import AtribucionDeSemblanza from '../../../components/AtribucionDeSemblanza.ast
 import ListaDeObras from '../../../components/ListaDeObras.astro';
 import Desplegable from '../../../components/Desplegable.astro';
 import Rotulo from '../../../components/Rotulo.astro';
+import BuscarEn from '../../../components/BuscarEn.astro';
+import { rotuloBuscarEnPersonaje } from '../../../lib/busqueda.ts';
 import {
   citasDePersonaje,
   conjuntoPublicable,
@@ -125,6 +128,16 @@ const pieDeObras =
 
     <h2 class="rotulo">Citas</h2>
 
+    {
+      /*
+       * Historia 35.5, UX-DR134 — «Buscar en {Personaje}», solo en la página 1, con los ritmos de
+       * «Buscar en {Autor}»: a 2 × `--unidad` del rótulo, y el listado 3 × más abajo.
+       */
+      primera && (
+        <BuscarEn id="buscar-en-el-personaje" rotulo={rotuloBuscarEnPersonaje(personaje.nombre)} filtros={{ personaje: personaje.slug }} />
+      )
+    }
+
     {/* Cada tarjeta lleva el título de su Obra (`atribucion="obra"`), como en la de Autor. */}
     <ul class="listado">
       {pagina.data.map((cita) => <TarjetaDeCita cita={cita} atribucion="obra" zona="listado" />)}
@@ -196,5 +209,15 @@ const pieDeObras =
     margin: calc(var(--unidad) * 2) 0 0;
     padding: 0;
     border-top: var(--grosor-filete) solid var(--filete);
+  }
+
+  /* Historia 35.5 — «Buscar en {Personaje}», a 2 × `--unidad` del rótulo, como en la de Autor. */
+  .pagina > :global(.buscar-en) {
+    margin-top: calc(var(--unidad) * 2);
+  }
+
+  /* En la página 1, el listado empieza 3 × `--unidad` bajo «Buscar en {Personaje}». */
+  :global(.buscar-en) + .listado {
+    margin-top: calc(var(--unidad) * 3);
   }
 </style>

@@ -702,8 +702,14 @@ export const MAX_BYTES_GUION_DE_PAGEFIND = 87200;
  * para el rótulo de cada Obra del selector de `/buscar/`, y el trozo pasa a medir 552. El filtro
  * mide **3.515 bytes** (2026-10-29): 2.963 de su fichero y 552 del trozo. Tope, con la misma
  * regla: 3.515 más unos 400.
+ *
+ * Historia 35.5 — el filtro alcanza la sección «Personajes»: lee qué grupos son de la sección,
+ * oculta la sección entera, aparta las letras de los dos bloques y el salto, y cuenta aparte a los
+ * Personajes (`fraseDelFiltro` con sus letras y `recuentoDePersonajes`, que pasa al trozo). Mide
+ * **4.329 bytes** (2026-11-13): 3.706 de su fichero y 623 del trozo, medidos por
+ * `tests/unit/medicion.test.ts` sobre el Corpus real. Tope, con la misma regla: 4.329 más unos 400.
  */
-export const MAX_BYTES_GUION_DEL_FILTRO = 3915;
+export const MAX_BYTES_GUION_DEL_FILTRO = 4729;
 
 /**
  * La búsqueda de `/buscar/`, el `<script>` de `src/components/Busqueda.astro` que Astro emite como
@@ -780,10 +786,17 @@ export const MAX_BYTES_GUION_DEL_FILTRO = 3915;
  * quitarlo (`mostrarFallo`, `quitarFallo`) desde el fallo de `buscar`, `sinDatos`, `pintar` y la
  * búsqueda vacía, con la frase que anuncia la región (`ANUNCIO_DEL_FALLO_DE_LA_BUSQUEDA`, de
  * `src/lib/busqueda.ts`): **17.896 bytes** (2026-10-29), el fichero de entrada con el trozo de
- * `recuentos`, medidos por `tests/unit/medicion.test.ts`. **Tope vigente**, con la misma regla:
- * 17.896 más unos 400.
+ * `recuentos`, medidos por `tests/unit/medicion.test.ts`. Tope de entonces, con la misma regla:
+ * 17.896 más unos 400 (18.296, que ya no rige).
+ *
+ * Historia 35.5 — rederivado con la misma regla. El Personaje en el estado de `/buscar/`
+ * (`personaje=`), el grupo «Personajes» del selector de Autor —el dueño elegido sale del grupo de la
+ * opción—, la clave de dueño del mapa de rótulos (`claveDelDueño`, `dueñoDeLaObra`, `ofreceLaObra`)
+ * y la resolución con sus descartes nuevos: **19.211 bytes** (2026-11-13), 18.588 del fichero de
+ * entrada y 623 del trozo de `recuentos`, medidos sobre el Corpus real. **Tope vigente**: 19.211 más
+ * unos 400.
  */
-export const MAX_BYTES_GUION_DE_LA_BUSQUEDA = 18296;
+export const MAX_BYTES_GUION_DE_LA_BUSQUEDA = 19611;
 
 /**
  * La pausa de tecleo, en milisegundos — AD-9, UX-DR58, UX-DR86, Historia 26.6.

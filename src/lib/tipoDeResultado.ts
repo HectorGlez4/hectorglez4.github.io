@@ -92,12 +92,13 @@ export const TIPOS_CON_LINEA_DE_AUTOR: readonly TipoDeResultado[] = ['obra', 'ci
 /**
  * Los nombres de los filtros de Pagefind que lleva cada Página de Cita — Historia 27.1, AD-11.
  *
- * Los valores los compone `filtrosDeLaBusqueda` de `src/lib/publicado.ts` (slug del Autor,
- * nombre de la ficha de la Obra, slug de cada Tema publicado) y los escribe solo
+ * Los valores los compone `filtrosDeLaBusqueda` de `src/lib/publicado.ts` (slug del Autor, desde
+ * la Historia 35.5 slug del Personaje, nombre de la ficha de la Obra, slug de cada Tema publicado)
+ * y los escribe solo
  * `src/components/FiltrosDeLaCita.astro`. No llevan tilde ni mayúscula: son claves de
  * `filters()`, no texto que se lea. El del tipo (`FILTRO_DE_TIPO`) va aparte, en el armazón.
  */
-export const FILTROS_DE_CITA = { autor: 'autor', obra: 'obra', tema: 'tema' } as const;
+export const FILTROS_DE_CITA = { autor: 'autor', personaje: 'personaje', obra: 'obra', tema: 'tema' } as const;
 
 /**
  * El nombre de la clave de orden de Pagefind de toda Página de Cita — Historia 27.1, AD-25.

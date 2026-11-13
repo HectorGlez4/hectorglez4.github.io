@@ -10,8 +10,8 @@
  * nunca bajo un `data-pagefind-ignore="all"`, que sí los descartaría.
  *
  * - Los valores salen de `filtrosDeLaBusqueda` de `src/lib/publicado.ts`, la misma función que
- *   compone las opciones de `/buscar/`: un elemento vacío por filtro (`autor`, `obra` si la Cita
- *   tiene Obra, uno por Tema publicado).
+ *   compone las opciones de `/buscar/`: un elemento vacío por filtro (`autor`, desde la Historia
+ *   35.5 `personaje` si la Cita lo declara, `obra` si la Cita tiene Obra, uno por Tema publicado).
  * - La clave (`data-pagefind-sort`) la compone `clavesDeOrden` de `src/lib/obras.ts` y va en
  *   toda Página de Cita: Pagefind saca de los resultados ordenados a la página que no la lleva.
  * - El metadato `autor` va **por contenido** y no en el atributo (`autor:José Martí`), porque en
@@ -29,8 +29,9 @@ interface Props {
   /** La clave de orden de la Cita, ya compuesta: ocho cifras. */
   clave: string;
   /**
-   * El nombre del Autor, tal como se lee; `undefined` en la Cita de un Personaje sin Autor
-   * (Historia 35.4), que no lleva ni el filtro ni el metadato `autor`.
+   * El nombre de quien va en la línea del Autor del resultado, tal como se lee: el del Personaje si
+   * la Cita lo declara (Historia 35.5, va donde va el Autor) y, si no, el del Autor. Sin metadato
+   * nuevo: es el mismo `autor`, que pesa 0 y cuyo texto ya está en el cuerpo por la Atribución.
    */
   nombreDelAutor: string | undefined;
 }
@@ -40,6 +41,7 @@ const { filtros, clave, nombreDelAutor } = Astro.props;
 
 <div hidden data-pagefind-ignore>
   {filtros.autor !== undefined && <span data-pagefind-filter={`${FILTROS_DE_CITA.autor}:${filtros.autor}`}></span>}
+  {filtros.personaje !== undefined && <span data-pagefind-filter={`${FILTROS_DE_CITA.personaje}:${filtros.personaje}`}></span>}
   {filtros.obra !== undefined && <span data-pagefind-filter={`${FILTROS_DE_CITA.obra}:${filtros.obra}`}></span>}
   {filtros.temas.map((tema) => <span data-pagefind-filter={`${FILTROS_DE_CITA.tema}:${tema}`}></span>)}
   <span data-pagefind-sort={`${ORDEN_DE_CITA}:${clave}`}></span>

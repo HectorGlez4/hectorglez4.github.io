@@ -16,12 +16,19 @@
  * y las letras, como antes—. Sin ningún Modelo de Ingreso (`SUPERFICIES_SIN_INGRESO`): la página
  * sale idéntica con todos encendidos o apagados. Sin semblanzas ni Citas
  * (`SUPERFICIES_SIN_SEMBLANZA`): lista entidades y dice hechos del Corpus.
+ *
+ * Historia 35.5, UX-DR140 — tras la A–Z, dentro del mismo `.listado` para que el filtro la alcance,
+ * la sección «Personajes» (`directorio.personajes`): su `h2`, destino del salto que va bajo el `h1`,
+ * sus propias letras (`letras-de-personajes`, anclas `personajes-letra-…`), un `h3` por letra y la
+ * misma Fila de Autor, con «personaje de {universo}» donde van los años. Los Personajes no cuentan
+ * en la meta ni en la Tarjeta Social. Sin Personajes publicados no hay sección, salto ni hueco.
  */
 import Armazon from '../components/Armazon.astro';
 import LetrasDeSalto from '../components/LetrasDeSalto.astro';
 import GrupoDeLetra from '../components/GrupoDeLetra.astro';
 import FilaDeAutor from '../components/FilaDeAutor.astro';
 import FiltroDelDirectorio from '../components/FiltroDelDirectorio.astro';
+import Rotulo from '../components/Rotulo.astro';
 import { conjuntoPublicable } from '../lib/publicado.ts';
 import { directorioDeAutores } from '../lib/directorios.ts';
 import { descripcionDelDirectorioDeAutores } from '../lib/atribucion.ts';
@@ -29,8 +36,30 @@ import { NOMBRE_DEL_DIRECTORIO_DE_AUTORES, tituloDelDirectorioDeAutores } from '
 import { TARJETA_DEL_DIRECTORIO_DE_AUTORES, rutaDelDirectorioDeAutores } from '../lib/superficies.ts';
 
 const conjunto = await conjuntoPublicable();
-const directorio = directorioDeAutores(conjunto.autores, conjunto.citas);
+const directorio = directorioDeAutores(conjunto.autores, conjunto.citas, conjunto.personajes);
 const descripcion = descripcionDelDirectorioDeAutores(directorio);
+
+/*
+ * Historia 35.5 — la presentación de la sección «Personajes» y de su salto va en atributos `style`,
+ * no en el `<style>` de la página: Astro emite el `<style>` aunque no haya nada que pintar, y sin
+ * Personajes la página tiene que salir byte a byte como antes (como `Sostener.astro`). Solo tokens.
+ */
+/** El salto, en su propia línea bajo el `h1`, con el trato de «Volver a las letras». */
+const DEL_SALTO = 'margin: calc(var(--unidad) * 2) 0 0';
+/** Mueve dentro de la página: siena y subrayado, con su zona de toque entera. */
+const DEL_ENLACE_DEL_SALTO = [
+  'display: inline-flex',
+  'align-items: center',
+  'min-height: var(--zona-de-toque)',
+  'font-family: var(--sans)',
+  'font-size: var(--cuerpo-md)',
+  'color: var(--siena)',
+  'text-decoration: underline',
+].join('; ');
+/** La sección, a 5 × `--unidad` del cierre del último grupo [ASSUMPTION de la UX]. */
+const DE_LA_SECCION = 'margin-top: calc(var(--unidad) * 5)';
+/** Sus letras, a 3 × `--unidad` de su rótulo, como las de la A–Z del `h1`. */
+const DE_SUS_LETRAS = 'margin-top: calc(var(--unidad) * 3)';
 ---
 
 <Armazon
@@ -43,6 +72,12 @@ const descripcion = descripcionDelDirectorioDeAutores(directorio);
   <div class="pagina contenedor">
     <div class="prosa">
       <h1>{NOMBRE_DEL_DIRECTORIO_DE_AUTORES}</h1>
+
+      {
+        directorio.personajes.length > 0 && (
+          <p data-salto style={DEL_SALTO}><a href="#personajes" style={DEL_ENLACE_DEL_SALTO}>Personajes</a></p>
+        )
+      }
 
       <FiltroDelDirectorio directorio="autores" />
 
@@ -57,6 +92,25 @@ const descripcion = descripcionDelDirectorioDeAutores(directorio);
             </ul>
           </GrupoDeLetra>
         ))}
+        {
+          directorio.personajes.length > 0 && (
+            <section data-personajes style={DE_LA_SECCION}>
+              <Rotulo id="personajes" destino>Personajes</Rotulo>
+              <div style={DE_SUS_LETRAS}>
+                <LetrasDeSalto id="letras-de-personajes" letras={directorio.personajes} entidades="Personajes" />
+              </div>
+              {directorio.personajes.map((grupo) => (
+                <GrupoDeLetra inicial={grupo.inicial} ancla={grupo.ancla} nivel={3} volver="#letras-de-personajes">
+                  <ul role="list">
+                    {grupo.entradas.map((personaje) => (
+                      <FilaDeAutor ruta={personaje.ruta} nombre={personaje.nombre} años={personaje.años} recuento={personaje.recuento} />
+                    ))}
+                  </ul>
+                </GrupoDeLetra>
+              ))}
+            </section>
+          )
+        }
       </div>
     </div>
   </div>

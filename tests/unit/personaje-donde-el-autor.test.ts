@@ -281,9 +281,11 @@ describe('Historia 35.4 — la Página de Cita, fila a fila de la matriz', () =>
     // Título y meta: sin Autor, el Personaje.
     expect(titulo(pagina)).toContain(`— Batman`);
     expect(meta(pagina)).toBe(`${TEXTOS[B1]} — Batman.`);
-    // Sin Autor, ni filtro ni metadato `autor`.
+    // Sin Autor, ni filtro `autor`; desde la 35.5, el filtro `personaje` y el metadato `autor` con
+    // el nombre del Personaje, que va donde va el Autor en el resultado.
     expect(pagina).not.toContain('data-pagefind-filter="autor:');
-    expect(pagina).not.toContain('data-pagefind-meta="autor"');
+    expect(pagina).toContain('data-pagefind-filter="personaje:batman"');
+    expect(pagina).toContain('data-pagefind-meta="autor">Batman</span>');
   });
 
   it('Personaje y Autor con Obra (B3)', () => {
@@ -311,6 +313,9 @@ describe('Historia 35.4 — la Página de Cita, fila a fila de la matriz', () =>
     // Título y meta: con Autor, el Autor.
     expect(meta(pagina)).toBe(`${TEXTOS[B3]} — Séneca.`);
     expect(pagina).toContain('data-pagefind-filter="autor:seneca"');
+    // Historia 35.5 — con Autor y Personaje, los dos filtros; el metadato, el del Personaje.
+    expect(pagina).toContain('data-pagefind-filter="personaje:batman"');
+    expect(pagina).toContain('data-pagefind-meta="autor">Batman</span>');
     expect(desplegables(pagina)).toEqual(['Inserta esta cita']);
   });
 
@@ -395,8 +400,10 @@ describe('Historia 35.4 — la Página de Obra de un Personaje', () => {
     );
     expect(titulo(pagina)).toContain('Frases de Batman en El caballero');
     expect(meta(pagina)).toContain('2 frases de Batman en El caballero (2000)');
-    // Sin «Buscar en esta obra» hasta la 35.5.
-    expect(pagina).not.toContain('buscar-en-esta-obra');
+    // Historia 35.5 — «Buscar en esta obra», con el Personaje en lugar del Autor.
+    expect(pagina).toContain('id="buscar-en-esta-obra"');
+    expect(pagina).toMatch(/<input type="hidden" name="personaje" value="batman"[^>]*>\s*<input type="hidden" name="obra" value="batman--el-caballero"/u);
+    expect(pagina).not.toMatch(/<input type="hidden" name="autor"/u);
   });
 
   it('JSON-LD: una CreativeWork con su `character`, sin `author`', () => {

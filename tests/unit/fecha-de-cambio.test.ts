@@ -1461,12 +1461,18 @@ describe('Historia 35.2 — la relación de AD-27 conoce al Personaje', () => {
     expect(camposDe('/obra/batman/el-alba/', PERSONAJE)).toEqual(['nombre']);
   });
 
-  it('su `ordenAlfabetico` fecha los Directorios, y `universo` solo su página (Historia 35.3)', () => {
+  it('su `ordenAlfabetico` fecha los Directorios, y `universo` solo su página y `/autores/` (Historias 35.3 y 35.5)', () => {
     expect(camposDe('/autores/', PERSONAJE)).toContain('ordenAlfabetico');
     expect(camposDe('/obras/', PERSONAJE)).toContain('ordenAlfabetico');
+    // Historia 35.5 — la sección «Personajes» de los Directorios pinta el nombre, y la Fila de `/autores/`
+    // dice «personaje de {universo}».
+    expect(camposDe('/autores/', PERSONAJE)).toEqual(['nombre', 'universo', 'ordenAlfabetico']);
+    expect(camposDe('/obras/', PERSONAJE)).toEqual(['nombre', 'ordenAlfabetico']);
     for (const [ruta, lista] of componentes) {
       for (const { fichero, campos } of lista) {
-        if (fichero.startsWith('personajes/') && !ruta.startsWith('/personaje/')) expect(campos).not.toContain('universo');
+        if (fichero.startsWith('personajes/') && !ruta.startsWith('/personaje/') && ruta !== '/autores') {
+          expect(campos).not.toContain('universo');
+        }
       }
     }
     // Sin Obra, el Personaje no compone `/obras/`, aunque sí `/autores/`.

@@ -178,6 +178,47 @@ describe('Historia 26.6 — las frases y el enlace a cero', () => {
   });
 });
 
+describe('Historia 35.5 — el filtro alcanza la sección «Personajes»', () => {
+  /** `/autores/` con su sección: dos letras de Autores y una de Personajes. */
+  const CON_PERSONAJES: GrupoFiltrable[] = [
+    { bloques: [{ filas: ['Leopoldo Alas'] }] },
+    { bloques: [{ filas: ['Séneca'] }] },
+    { personajes: true, bloques: [{ filas: ['Batman'] }] },
+    { personajes: true, bloques: [{ filas: ['Homero Simpson'] }] },
+  ];
+
+  it('casa con el nombre del Personaje y lo cuenta aparte', () => {
+    const r = filtroDe(CON_PERSONAJES)('bat');
+    expect(r.grupos.map((g) => g.visible)).toEqual([false, false, true, false]);
+    expect(r).toMatchObject({ vacia: false, filas: 1, personajes: 1 });
+    expect(fraseDelFiltro('autores', r.filas - r.personajes, 'bat', r.personajes)).toBe('1 personaje.');
+    // Sin la sección, el recuento de siempre: los Personajes nunca cuentan como Autores.
+    expect(filtroDe(AUTORES)('mar')).toMatchObject({ personajes: 0 });
+  });
+
+  it('las letras de la frase: los dos, uno solo, y a cero con la sección en la página', () => {
+    // «n»: Séneca, Batman y Homero Simpson.
+    const n = filtroDe(CON_PERSONAJES)('n');
+    expect(n).toMatchObject({ filas: 3, personajes: 2 });
+    expect(fraseDelFiltro('autores', n.filas - n.personajes, 'n', n.personajes)).toBe('1 autor y 2 personajes.');
+    expect(fraseDelFiltro('autores', 2, 'x', 2)).toBe('2 autores y 2 personajes.');
+    expect(fraseDelFiltro('autores', 1, 'x', 1)).toBe('1 autor y 1 personaje.');
+    expect(fraseDelFiltro('autores', 3, 'x', 0)).toBe('3 autores.');
+    expect(fraseDelFiltro('autores', 0, ' zzz ', 0)).toBe('Ningún autor ni personaje tiene «zzz» en el nombre.');
+    // Sin sección (`undefined`), las de siempre.
+    expect(fraseDelFiltro('autores', 0, 'zzz')).toBe('Ningún autor tiene «zzz» en el nombre.');
+    // En `/obras/` las Obras de los Personajes son Obras: el recuento no cambia de letra.
+    expect(fraseDelFiltro('obras', 2, 'x', 1)).toBe(fraseDelFiltro('obras', 2, 'x'));
+  });
+
+  it('vacía, todo vuelve, también la sección', () => {
+    const r = filtroDe(CON_PERSONAJES)('  ');
+    expect(r.vacia).toBe(true);
+    expect(r.grupos.every((g) => g.visible)).toBe(true);
+    expect(r.personajes).toBe(2);
+  });
+});
+
 describe('Historia 26.6 — el segundo ritmo', () => {
   beforeEach(() => {
     vi.useFakeTimers();

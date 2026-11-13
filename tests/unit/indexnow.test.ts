@@ -350,7 +350,7 @@ describe('AD-27 — el aviso es la lectura inversa de la relación que fecha el 
     );
   });
 
-  it('Historia 35.3 — cambiar el universo de un Personaje avisa su página y nada más', () => {
+  it('Historias 35.3 y 35.5 — cambiar el universo de un Personaje avisa su página y `/autores/`, y nada más', () => {
     const ejemplo = corpusDeEjemplo();
     const relacion = relacionDeSuperficies({
       ...ejemplo,
@@ -362,7 +362,8 @@ describe('AD-27 — el aviso es la lectura inversa de la relación que fecha el 
       antes: { nombre: 'Batman', universo: 'DC' } as unknown as Version,
       despues: { nombre: 'Batman', universo: 'DC Comics' } as unknown as Version,
     };
-    expect([...rutasAvisadasPor([cambio], relacion)]).toEqual(['/personaje/batman/']);
+    // Desde la 35.5, la Fila de Personaje de `/autores/` dice «personaje de {universo}».
+    expect([...rutasAvisadasPor([cambio], relacion)].sort()).toEqual(['/autores/', '/personaje/batman/']);
     // Y un cambio de la Cita que lo declara avisa también su página.
     expect([...rutasAvisadasPor([editado('corpus/citas/noche.md')], relacion)]).toContain('/personaje/batman/');
   });

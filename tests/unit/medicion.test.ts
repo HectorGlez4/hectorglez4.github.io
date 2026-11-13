@@ -3319,6 +3319,10 @@ describe('Historia 23.7 — toda salida interna de `dist/` dice su zona', () => 
     [OBRA_DE_BATMAN, /^\/cita\//, [{ zona: 'listado' }]],
     [PERSONAJE, /^\/obra\//, [{ zona: 'lista-de-obras' }]],
     [PERSONAJE, /^\/cita\//, [{ zona: 'listado' }]],
+    // Historia 35.5 — la sección «Personajes» de los Directorios enlaza a Batman y a su Obra con
+    // `directorio`, una zona de la Épica 26 que esta tabla no compara (`esDeOtraEpica`): la fija
+    // `tests/unit/personajes-en-los-directorios.test.ts`, y aquí, la prueba de que todo enlace de
+    // `main` tiene zona.
     [OBRA_INDEXABLE, '/autor/seneca/', [{ zona: 'atribucion' }]],
     [OBRA_INDEXABLE, /^\/cita\//, [{ zona: 'listado' }]],
     [OBRAS[1], '/autor/seneca/', [{ zona: 'atribucion' }]],
@@ -6028,6 +6032,71 @@ describe('Historia 23.8 — una búsqueda cuenta una vez, cuando se asienta', ()
         expect(escritas(entorno).at(-1)).toEqual(['replaceState', `/buscar/?autor=jose-marti&obra=${MAESTROS}`]);
         expect(entorno.longitud()).toBe(3);
         expect(plano(entorno.estadoDelHistorial())).toEqual({ [CLAVE_DEL_ESTADO_EN_LA_ENTRADA]: { autor: 'jose-marti', obra: MAESTROS } });
+      }, 240_000);
+    });
+    describe('Historia 35.5 — el Personaje se elige en el grupo «Personajes» del selector de Autor', () => {
+      const PERSONAJE_ = FILTROS_DE_CITA.personaje;
+      const OBRA = FILTROS_DE_CITA.obra;
+      const ORDEN = { [ORDEN_DE_CITA]: 'asc' };
+      const CABALLERO = 'batman--el-caballero';
+      const CON_BATMAN: OpcionesDeLaIsla = {
+        personajes: [{ valor: 'batman', rotulo: 'Batman' }],
+        mapa: {
+          'jose-marti': [['jose-marti--cartas', 'Cartas']],
+          'personaje:batman': [[CABALLERO, 'El caballero']],
+        },
+        recuentosDeObra: { 'jose-marti--cartas': 1, [CABALLERO]: 2 },
+      };
+      type Entorno = Awaited<ReturnType<typeof isla>>;
+      const escritas = (entorno: Entorno) => entorno.direcciones().map((d) => [d.metodo, d.direccion]);
+      const busquedas = (entorno: Entorno) => entorno.llamadas().filter((l) => l[0] === 'search');
+      const elegirYEsperar = async (entorno: Entorno, cual: 'autor' | 'obra' | 'tema', valor: string) => {
+        entorno.elegir(cual, valor);
+        entorno.avanzar(PAUSA_DE_LOS_SELECTORES_MS);
+        await entorno.vaciar();
+      };
+
+      it('elegirlo: `?personaje=`, el filtro `personaje`, su Obra del mapa, y se asienta como un Autor', async () => {
+        const entorno = await isla(CON_BATMAN);
+        await elegirYEsperar(entorno, 'autor', 'batman');
+        expect(escritas(entorno)).toEqual([['pushState', '/buscar/?personaje=batman']]);
+        expect(plano(entorno.estadoDelHistorial())).toEqual({ [CLAVE_DEL_ESTADO_EN_LA_ENTRADA]: { personaje: 'batman' } });
+        expect(busquedas(entorno)).toEqual([['search', null, { filters: { [PERSONAJE_]: 'batman' }, sort: ORDEN }]]);
+        expect(entorno.region().texto).toBe('4 citas de Batman.');
+        // El selector de Obra sale de la lista del Personaje en el mapa.
+        expect(entorno.obra()).toMatchObject({ enElDom: true, opciones: [{ valor: '' }, { valor: CABALLERO, rotulo: 'El caballero (2 citas)' }] });
+        await elegirYEsperar(entorno, 'obra', CABALLERO);
+        expect(escritas(entorno).at(-1)).toEqual(['pushState', `/buscar/?personaje=batman&obra=${CABALLERO}`]);
+        expect(busquedas(entorno).at(-1)).toEqual(['search', null, { filters: { [PERSONAJE_]: 'batman', [OBRA]: CABALLERO }, sort: ORDEN }]);
+        expect(entorno.region().texto).toBe('2 citas de Batman en El caballero.');
+        entorno.pulsarResultado(0);
+        // La misma combinación que daría un Autor: el vocabulario no cambia.
+        expect(entorno.emitidos()).toEqual([[BUSQUEDA, '1-9', 'autor-obra']]);
+        expect(entorno.marcas()).toHaveLength(1);
+      }, 240_000);
+
+      it('llegar con `?obra=` sola de un Personaje: el dueño sale del mapa, con su tipo, y se reemplaza la entrada', async () => {
+        const entorno = await isla({ ...CON_BATMAN, busqueda: `?obra=${CABALLERO}` });
+        expect(entorno.elegidos()).toEqual({ autor: 'batman', tema: '' });
+        expect(entorno.obra().valor).toBe(CABALLERO);
+        expect(escritas(entorno)).toEqual([['replaceState', `/buscar/?personaje=batman&obra=${CABALLERO}`]]);
+        expect(busquedas(entorno).at(-1)).toEqual(['search', null, { filters: { [PERSONAJE_]: 'batman', [OBRA]: CABALLERO }, sort: ORDEN }]);
+      }, 240_000);
+
+      it('un `personaje` que no existe se descarta y se dice; con `autor` a la vez, también', async () => {
+        const nadie = await isla({ ...CON_BATMAN, busqueda: '?q=vida&personaje=nadie' });
+        expect(nadie.elegidos()).toEqual({ autor: '', tema: '' });
+        expect(escritas(nadie)).toEqual([['replaceState', '/buscar/?q=vida']]);
+        expect(nadie.region().texto).toMatch(/^Uno de los filtros de esta dirección no se puede usar, y la búsqueda va sin él\. /u);
+        const losDos = await isla({ ...CON_BATMAN, busqueda: '?autor=jose-marti&personaje=batman' });
+        expect(losDos.elegidos()).toEqual({ autor: 'jose-marti', tema: '' });
+        expect(escritas(losDos)).toEqual([['replaceState', '/buscar/?autor=jose-marti']]);
+      }, 240_000);
+
+      it('sin Personajes, ningún `optgroup` en el selector y la isla de siempre', async () => {
+        const entorno = await isla();
+        await elegirYEsperar(entorno, 'autor', 'jose-marti');
+        expect(escritas(entorno)).toEqual([['pushState', '/buscar/?autor=jose-marti']]);
       }, 240_000);
     });
     describe('Historia 27.5 — los resultados llegan de 30 en 30', () => {

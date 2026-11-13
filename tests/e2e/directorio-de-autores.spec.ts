@@ -225,3 +225,30 @@ test.describe('Historia 26.3 — los tokens y el ritmo del Directorio', () => {
     expect(m.rotulo.margenDeDesplazamiento).toBe(t.u2);
   });
 });
+
+test.describe('Historia 35.5 — la sección «Personajes»', () => {
+  test('el salto lleva el foco al `h2`, sus letras a su `h3`, y el filtro la alcanza y la cuenta aparte', async ({ page }) => {
+    await page.goto(RUTA);
+    const salto = page.locator('[data-salto] a');
+    test.skip((await salto.count()) === 0, 'el sitio construido no tiene Personajes (el Corpus real de hoy)');
+    await salto.click();
+    await expect.poll(() => foco(page)).toEqual({ etiqueta: 'h2', id: 'personajes', texto: 'Personajes' });
+
+    const letra = page.locator('#letras-de-personajes a').first();
+    const destino = (await letra.getAttribute('href'))!.slice(1);
+    expect(destino).toMatch(/^personajes-letra-/u);
+    const inicial = (await letra.textContent())!.replace('Personajes por la ', '').trim();
+    await expect(letra).toHaveAccessibleName(`Personajes por la ${inicial}`);
+    await letra.click();
+    await expect.poll(() => foco(page)).toEqual({ etiqueta: 'h3', id: destino, texto: inicial });
+
+    // El filtro: el nombre del primer Personaje deja su sección y la cuenta aparte.
+    const nombre = (await page.locator('[data-personajes] .nombre').first().textContent())!.trim();
+    await page.locator('#filtro-de-autores').fill(nombre);
+    await expect(page.locator('[data-personajes]')).toBeVisible();
+    await expect(page.locator('[data-salto]')).toBeHidden();
+    await expect(page.locator('.filtro [role="status"]')).toContainText(/personaje/u, { timeout: 5_000 });
+    await page.locator('#filtro-de-autores').fill('');
+    await expect(page.locator('[data-salto]')).toBeVisible();
+  });
+});

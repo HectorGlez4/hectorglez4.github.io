@@ -295,6 +295,15 @@ export function hechosDeFilaDeAutor(
 }
 
 /**
+ * Los hechos de la Fila de Personaje del Directorio de Autores — Historia 35.5, UX-DR140: donde la
+ * de Autor lleva los años, «personaje de {universo}» (`universoDePersonaje`, su único dueño), y el
+ * recuento de las Citas publicadas que lo declaran. La pinta la misma `FilaDeAutor`.
+ */
+export function hechosDeFilaDePersonaje(personaje: { universo: string }, citas: number): { años: string; recuento: string } {
+  return { años: universoDePersonaje(personaje), recuento: recuentoDeCitas(citas) };
+}
+
+/**
  * El `<meta description>` del Directorio de Autores — Historia 26.3, UX-DR80, UX-DR107:
  * «{m} autores, de la A a la Z, con {n} citas publicadas.», en singular cuando la cifra es una
  * —«1 autor», «1 cita publicada»—, con la redacción que aprobó Héctor el 2026-10-19.
