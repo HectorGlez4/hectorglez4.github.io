@@ -61,6 +61,7 @@ describe('Historia 35.6 — el esquema de la Variante', () => {
     ['una lista en vez de un objeto', [VARIANTE], /«variante» es un objeto con «texto», «region» y «origen»; una como mucho/],
     ['una clave de más', { ...VARIANTE, idioma: 'es' }, /la Variante solo declara «texto», «region» y «origen»/],
     ['un texto vacío', { ...VARIANTE, texto: '' }, /el texto de la Variante no puede estar vacío/],
+    ['un texto en blanco', { ...VARIANTE, texto: '   ' }, /el texto de la Variante no puede estar en blanco/],
     ['sin texto', { region: 'espana', origen: 'doblaje' }, /la Variante declara su «texto»/],
   ])('rechaza %s con su regla', (_, v, regla) => {
     expect(variante.safeParse(v).success).toBe(false);
@@ -71,6 +72,14 @@ describe('Historia 35.6 — el esquema de la Variante', () => {
     expect(mensajes(atribuida({ variante: { ...VARIANTE, texto: 'Hasta el infinito\ny más allá' } })).join('\n')).toMatch(
       /la Variante de una Cita atribuida va en una sola línea/,
     );
+  });
+
+  it('rechaza una Variante que repite el texto de su Cita, también con otra puntuación', () => {
+    for (const texto of ['Hasta el infinito y más allá', '¡Hasta el infinito, y más allá!']) {
+      expect(mensajes(atribuida({ variante: { ...VARIANTE, texto } })).join('\n')).toMatch(
+        /la Variante repite el texto de la Cita/,
+      );
+    }
   });
 
   it('la Cita de siempre no lleva Variante (`reglasDeClase`)', () => {
@@ -99,6 +108,12 @@ describe('Historia 35.6 — la línea de la Variante', () => {
       'En España: «Hasta el infinito y aún más allá»',
     );
     expect(lineaDeVariante({})).toBeUndefined();
+  });
+
+  it('una región sin rótulo no se pinta como «En undefined»: se para', () => {
+    expect(() =>
+      lineaDeVariante({ variante: { texto: 'x', region: 'mexico', origen: 'doblaje' } } as unknown as Parameters<typeof lineaDeVariante>[0]),
+    ).toThrow(/no es de REGIONES_DE_VARIANTE/);
   });
 });
 

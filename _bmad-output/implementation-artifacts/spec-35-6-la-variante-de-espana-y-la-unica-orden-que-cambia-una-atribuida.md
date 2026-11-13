@@ -5,7 +5,7 @@ created: '2026-11-13'
 status: 'done'
 baseline_revision: 'ec89fecf2cca398f25032bba6408fa323be17e59'
 review_loop_iteration: 0
-followup_review_recommended: false
+followup_review_recommended: true
 context:
   - '{project-root}/AGENTS.md'
   - '{project-root}/_bmad-output/implementation-artifacts/epic-35-context.md'
@@ -134,6 +134,29 @@ deferred:
 - addressed_findings:
   - none
 
+### 2026-11-13 — Review pass
+- intent_gap: 0
+- bad_spec: 0
+- patch: 15: (high 0, medium 7, low 8)
+- defer: 0
+- reject: 21
+- addressed_findings:
+  - `[medium]` `[patch]` El intercambio escribía la letra guardada y tiraba la tecleada (una corrección de puntuación se perdía con éxito): `intercambio` recibe ya los dos textos que resultan y el tecleado entra con su letra; prueba nueva en `atribuida-cli.test.ts`.
+  - `[medium]` `[patch]` Un cambio que no cambia nada (`texto` o `variante` iguales a lo que hay) reescribía el fichero y decía «Cambiada»: ahora se niega con 1, «Nada que cambiar», sin escribir; dos pruebas.
+  - `[medium]` `[patch]` El esquema admitía una Variante igual (forma canónica) a su propio texto, y solo la orden lo vedaba: regla en `reglasDeLaAtribuida` de `src/lib/admision.ts`, que vale para el alta, la aprobación, el build y la orden; prueba en `variante.test.ts`.
+  - `[medium]` `[patch]` La restitución tras fallar la ficha no tenía `try`: si fallaba, la promesa rechazaba sin `Resultado`. Ahora devuelve un motivo que dice que la Cita quedó sin ficha; y la rama de restitución tiene prueba (directorio de fichas de solo lectura en la copia → la Cita queda byte a byte igual).
+  - `[medium]` `[patch]` Sin prueba de que la aprobación juzgue el texto de una candidata contra la Variante de una publicada: prueba nueva en `duplicados.test.ts` (comprobada por mutación: quitar la Variante del juicio de `aprobar` la pone en rojo).
+  - `[medium]` `[patch]` Sin prueba del alta forzada (`--con-duplicados`) contra la Variante de una publicada y de una candidata: dos pruebas nuevas en `duplicados.test.ts`.
+  - `[medium]` `[patch]` Sin prueba del `duplicaA` de `revisar` por Variante: prueba nueva (texto de la candidata = Variante publicada; Variante de la candidata = texto publicado).
+  - `[low]` `[patch]` «La Variante nuevo se parece»: concordancia corregida («El texto nuevo», «La Variante nueva») y la prueba ya no fija el error.
+  - `[low]` `[patch]` Una Variante en blanco («   ») pasaba el esquema: `.refine` de no blanco; prueba nueva.
+  - `[low]` `[patch]` Una bandera con valor dada la última o seguida de otra bandera salía con 1 (««» no es una región»): ahora es forma, código 2 («va sin valor»); fila nueva en la prueba por proceso.
+  - `[low]` `[patch]` `lineaDeVariante` pintaría «En undefined» ante una región sin rótulo: ahora lanza nombrando la región; prueba nueva.
+  - `[low]` `[patch]` Un Autor declarado que no está en el Corpus dejaba juzgar la clase con `{}`: la orden se niega nombrándolo; y la rama «sería de la clase siempre» tiene prueba (Autor de la Cita pasado a dominio público en la copia).
+  - `[low]` `[patch]` La Obra se escribía sin recortar los espacios de los bordes: se recorta; prueba nueva.
+  - `[low]` `[patch]` Índice FR-14 del alta: la Variante de una candidata podía pisar el texto de otra, y una Variante de forma canónica vacía se indexaba bajo «»: las Variantes se indexan después de los textos sin pisarlos y nunca con clave vacía (también en `revisar`).
+  - `[low]` `[patch]` Pruebas débiles: el duplicado por Variante del build fija ahora que el fallo nombra la otra Cita de Buzz (los textos difieren), la línea fija su `margin: var(--unidad) 0 0`, y `fecha-de-cambio.test.ts` prueba que un cambio solo de `variante` fecha la Página de Cita y ningún listado. AGENTS.md dice el intercambio con la letra tecleada, el `--origen` del intercambio por `variante`, «Nada que cambiar», la Variante en blanco o igual al texto y la bandera sin valor.
+
 ## Design Notes
 
 - **Duplicados, dos niveles.** La puerta estricta de la atribuida (`fallosDeAtribuidas`, sin `--con-duplicados`) compara las formas {texto, variante} de cada atribuida juzgada contra las de toda otra Cita; el build la corre sobre todas las atribuidas, así que una de siempre que repita la Variante de una publicada también rompe el build. El aviso FR-14 del alta y la aprobación (`posiblesDuplicados`, `duplicaA`) indexa además las variantes, para que el alta de una de siempre lo vea antes de escribir.
@@ -184,3 +207,27 @@ Blocking condition: ninguna.
 - Auditoría de la matriz: cada fila tiene prueba que corrió y pasó (forma y regla de clase en `variante.test.ts`; línea, búsqueda y roturas del build en `variante-build.test.ts`; las filas de la orden en `atribuida-cli.test.ts`; FR-14, alta y aprobación en `duplicados.test.ts`; documentar en `documentar-cli.test.ts`).
 
 **Riesgos residuales.** El intercambio y el «solo añaden» siguen las suposiciones diferidas del frontmatter (las decide Héctor). La Variante de una candidata se compara con la forma canónica en el aviso FR-14 de `revisar` (repetidas), no por contención; la puerta estricta de la atribuida sí usa `parecidoEntre` entero. Pagefind no es determinista en sus filtros (25 bytes de diferencia entre las dos construcciones, dentro de `pagefind/`, excluido del cotejo).
+
+### Pasada de revisión 1 (2026-11-13)
+
+**Resumen.** Quince parches sobre la 35.6, sin tocar el contrato: el intercambio conserva la letra tecleada; un cambio que no cambia nada se niega con 1 («Nada que cambiar»); el esquema veda una Variante en blanco o igual (forma canónica) a su propio texto, para toda puerta y no solo para la orden; la restitución tras fallar la ficha ya no puede rechazar sin parte; una bandera con valor dada sin él es forma (2); un Autor declarado que no está en el Corpus se niega antes de juzgar la clase; la Obra se recorta; `lineaDeVariante` no pinta «En undefined»; el índice FR-14 del alta y de `revisar` no pisa un texto con una Variante ni indexa una forma vacía; y las pruebas que faltaban (aprobación y alta forzada contra la Variante publicada o de una candidata, `duplicaA` de `revisar` por Variante, restitución tras fallar la ficha, rama de cambio de clase, fecha solo de la Página de Cita, margen de la línea, causa del duplicado del build).
+
+**Ficheros.**
+- `tools/lib/cambioDeAtribuida.ts` — intercambio con la letra tecleada, «Nada que cambiar», Autor ausente, Obra recortada, restitución con `try`, concordancia del motivo.
+- `tools/atribuida.ts` — bandera con valor sin valor → 2.
+- `src/lib/admision.ts` — Variante no en blanco y distinta de su texto.
+- `src/lib/atribucion.ts` — `lineaDeVariante` lanza ante una región sin rótulo.
+- `tools/alta.ts`, `tools/lib/revision.ts` — índices FR-14 de la Variante sin pisar textos ni clave vacía.
+- `tests/unit/atribuida-cli.test.ts`, `variante.test.ts`, `duplicados.test.ts`, `fecha-de-cambio.test.ts`, `variante-build.test.ts` — pruebas nuevas o reforzadas.
+- `AGENTS.md` — lo nuevo de la orden y del esquema.
+
+**Revisión.** 15 parches (medium 7, low 8), 0 diferidos, 21 rechazados (entre ellos: hacer cumplir «el único camino» contra una edición a mano, que ningún build puede distinguir; el tope en la puerta y no en el esquema, porque su valor es de la puerta; `/buscar/` frente al índice, que es lo que la historia nombra; el orden de claves; los `cast`; la escritura concurrente; las suposiciones ya diferidas). Seguimiento recomendado: sí (parcheados high 0, medium 7, low 8; puntuación 3×7+8 = 29).
+
+**Verificación.**
+- `npx vitest run` de variante, variante-build, atribuida-cli, documentar-cli, duplicados, atribuidas, clase-build, fecha-de-cambio, tipografia-en-tokens y medicion: 10 ficheros, 1.004 pruebas, verde.
+- Mutación: sin la Variante de las publicadas en el juicio de `aprobar`, la prueba nueva de la aprobación cae.
+- `npx astro check`: 0 errores.
+- Dos `npm run build` con `FECHA_JORNADA=2026-11-13` (base `ec89fecf2cca398f25032bba6408fa323be17e59` en un `git worktree add --detach` temporal, ya retirado; después, el árbol con los parches): los dos con 0 y `diff -rq -x pagefind` vacío.
+- `npm test` entero, desatendido: 185 ficheros, 8.190 pruebas, verde.
+
+**Riesgos residuales.** El aviso FR-14 de `revisar` sigue comparando por forma canónica igual, como hace con los textos; la puerta estricta usa `parecidoEntre`. «El único camino» es procedimiento (AGENTS.md, la negativa de `documentar`): una edición a mano que pase el esquema y la puerta no se detecta.

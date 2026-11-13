@@ -345,11 +345,15 @@ siendo atribuida, y si la Cita ya tenía Obra, la ficha que resuelve tiene que s
 cuya ficha reclama la misma forma mudaría la Obra, y se niega. `texto` y `variante` exigen que lo
 nuevo se parezca al texto **o** a la Variante publicados por encima de `MIN_PARECIDO_PARA_CORREGIR`
 (`parecidoDeTextos`); un texto igual a la Variante —o una Variante igual al texto— **intercambia** los
-dos con sus dos `origen`, sin tocar la región. El slug y el nombre del fichero no cambian nunca. Lo
+dos con sus dos `origen`, sin tocar la región, y lo tecleado entra con su letra (puede corregir la
+puntuación de la guardada). En el intercambio por `variante`, `--region` y `--origen` son los de la
+Variante **que resulta** —la región de la actual y el `origen` del texto principal actual—, y con otros
+se niega. Un cambio que deja la Cita como estaba se niega con 1 («Nada que cambiar»). El esquema veda
+una Variante en blanco o igual (forma canónica) a su propio texto. El slug y el nombre del fichero no cambian nunca. Lo
 nuevo pasa por el esquema y por `fallosDeAtribuidas` contra lo publicado y `corpus/_revision/`. La
 puerta se carga como en el alta (`opciones.puerta`, por omisión la del árbol): **cerrada, toda
 invocación válida sale con 1 sin escribir**. Códigos: 2 la forma (suborden desconocida, argumentos de
-menos o de más, bandera desconocida, repetida o vacía, `variante` sin `--region` o `--origen`), 1 lo
+menos o de más, bandera desconocida, repetida, vacía o sin valor, `variante` sin `--region` o `--origen`), 1 lo
 que dice; en ningún caso se escribe nada. Se escribe la Cita y después la ficha; si la ficha falla, la
 Cita vuelve a su contenido original. Vive en `tools/lib/cambioDeAtribuida.ts`; ningún agente la corre
 sobre el Corpus real.

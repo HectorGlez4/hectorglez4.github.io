@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it } from 'vitest';
 import { execFile } from 'node:child_process';
-import { mkdir, mkdtemp, readFile, readdir, rm, writeFile } from 'node:fs/promises';
+import { chmod, mkdir, mkdtemp, readFile, readdir, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { promisify } from 'node:util';
@@ -214,6 +214,24 @@ describe('Historia 35.6 — `texto` y `variante`', () => {
     expect(datos.slug).toBe(A1);
   });
 
+  it('el intercambio se queda con la letra tecleada, no con la guardada', async () => {
+    const directorio = await enDisco();
+    const tecleado = `¡${VARIANTE_A1.slice(0, -1)}!`;
+    const r = await cambiar(directorio, { tipo: 'texto', slug: A1, texto: tecleado });
+    expect(r.ok, r.ok ? '' : r.motivos.join('\n')).toBe(true);
+    const datos = await datosDe(directorio, FICHEROS.A1);
+    expect(datos.texto).toBe(tecleado);
+    expect(datos.variante).toEqual({ texto: TEXTO_A1, region: 'espana', origen: 'original' });
+  });
+
+  it('un texto igual al que ya hay no reescribe nada: nada que cambiar', async () => {
+    await seNiega({ tipo: 'texto', slug: A1, texto: TEXTO_A1 }, /Nada que cambiar/u);
+  });
+
+  it('una Variante igual a la que ya hay, con su región y su origen, no reescribe nada', async () => {
+    await seNiega({ tipo: 'variante', slug: A1, texto: VARIANTE_A1, region: 'espana', origen: 'doblaje' }, /Nada que cambiar/u);
+  });
+
   it('una Variante igual al texto, con la región y el origen que resultan, intercambia igual', async () => {
     const directorio = await enDisco();
     const r = await cambiar(directorio, { tipo: 'variante', slug: A1, texto: TEXTO_A1, region: 'espana', origen: 'original' });
@@ -239,7 +257,7 @@ describe('Historia 35.6 — `texto` y `variante`', () => {
   it('una Variante que no se parece se niega', async () => {
     await seNiega(
       { tipo: 'variante', slug: A4, texto: 'Nada que ver con la frase de la Cita, otra cosa entera.', region: 'espana', origen: 'doblaje' },
-      /La Variante nuevo se parece/u,
+      /La Variante nueva se parece/u,
     );
   });
 
@@ -319,6 +337,48 @@ describe('Historia 35.6 — `obra`, `autor` y `personaje` añaden', () => {
     expect(await readFile(join(directorio, 'obras/buzz--al-rescate.yml'), 'utf8')).toMatch(/personaje: "buzz"/u);
   });
 
+  it('la Obra se escribe sin los espacios de los bordes', async () => {
+    const directorio = await enDisco();
+    const r = await cambiar(directorio, { tipo: 'obra', slug: A4, obra: '  Al rescate  ' });
+    expect(r.ok, r.ok ? '' : r.motivos.join('\n')).toBe(true);
+    expect((await datosDe(directorio, FICHEROS.A4)).procedencia).toEqual({ obra: 'Al rescate', año: 1995 });
+  });
+
+  it('si la ficha no se puede escribir, la Cita vuelve byte a byte a como estaba', async () => {
+    const directorio = await enDisco();
+    const antes = await instantanea(directorio);
+    await chmod(join(directorio, 'obras'), 0o555);
+    try {
+      const r = await cambiar(directorio, { tipo: 'obra', slug: A4, obra: 'Al rescate' });
+      expect(r.ok).toBe(false);
+      if (!r.ok) expect(r.motivos.join('\n')).toMatch(/ha vuelto a su contenido original/u);
+    } finally {
+      await chmod(join(directorio, 'obras'), 0o755);
+    }
+    expect(await instantanea(directorio)).toEqual(antes);
+  });
+
+  it('un cambio con el que la Cita sería de otra clase se niega sin escribir', async () => {
+    // El Autor de la Cita, hoy de dominio público en el Corpus: la clase que correspondería es otra.
+    const directorio = await enDisco({ ...CORPUS, 'autores/vivo.yml': AUTOR_VALIDO });
+    const antes = await instantanea(directorio);
+    const r = await cambiar(directorio, { tipo: 'texto', slug: A3, texto: 'El tiempo cabe en una taza si se bebe despacito.' });
+    expect(r.ok).toBe(false);
+    if (!r.ok) expect(r.motivos.join('\n')).toMatch(/sería de la clase siempre, y la clase no cambia/u);
+    expect(await instantanea(directorio)).toEqual(antes);
+  });
+
+  it('un Autor declarado que no está en el Corpus no deja juzgar la clase: se niega', async () => {
+    const corpus: CorpusDePrueba = { ...CORPUS };
+    delete corpus['autores/vivo.yml'];
+    const directorio = await enDisco(corpus);
+    const antes = await instantanea(directorio);
+    const r = await cambiar(directorio, { tipo: 'texto', slug: A3, texto: 'El tiempo cabe en una taza si se bebe despacito.' });
+    expect(r.ok).toBe(false);
+    if (!r.ok) expect(r.motivos.join('\n')).toMatch(/El Autor «vivo» que declara/u);
+    expect(await instantanea(directorio)).toEqual(antes);
+  });
+
   it('añadir la Obra de una ficha que ya existe no crea otra', async () => {
     const directorio = await enDisco();
     const antes = await instantanea(directorio);
@@ -385,6 +445,7 @@ describe('Historia 35.6 — la orden por proceso', () => {
     ['una bandera vacía', ['variante', A1, 'x', '--region', '', '--origen', 'doblaje']],
     ['variante sin --region', ['variante', A1, 'x', '--origen', 'doblaje']],
     ['variante sin --origen', ['variante', A1, 'x', '--region', 'espana']],
+    ['una bandera con valor dada sin él', ['variante', A1, 'x', '--origen', 'doblaje', '--region']],
   ])('%s sale con 2 sin escribir', async (_, argumentos) => {
     const directorio = await enDisco();
     const antes = await instantanea(directorio);

@@ -1557,3 +1557,14 @@ describe('Historia 35.2 — la relación de AD-27 conoce al Personaje', () => {
     expect(() => relacionDeSuperficies({ ...CON_PERSONAJES, bajas })).not.toThrow();
   });
 });
+
+describe('Historia 35.6 — la Variante fecha solo la Página de Cita', () => {
+  it('un cambio que solo toca `variante` cambia los campos de la Página de Cita y de ningún listado', () => {
+    const antes = { texto: 'Hasta el infinito y más allá.', personaje: 'buzz', clase: 'atribuida' };
+    const despues = { ...antes, variante: { texto: 'Hasta el infinito y aún más allá.', region: 'espana', origen: 'doblaje' } };
+    const queCambian = Object.entries(CAMPOS_QUE_PINTA.cita)
+      .filter(([, campos]) => cambiaronLosCampos({ antes, despues }, campos as Parameters<typeof cambiaronLosCampos>[1]))
+      .map(([superficie]) => superficie);
+    expect(queCambian).toEqual(['cita']);
+  });
+});

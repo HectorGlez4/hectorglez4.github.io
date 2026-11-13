@@ -236,7 +236,10 @@ export function lineaDeLaFuente(
 export function lineaDeVariante(cita: Pick<Cita, 'variante'>): string | undefined {
   const variante = cita.variante;
   if (variante === undefined) return undefined;
-  return `En ${REGIONES_DE_VARIANTE[variante.region]}: «${variante.texto}»`;
+  const rotulo: string | undefined = REGIONES_DE_VARIANTE[variante.region];
+  // El esquema solo admite regiones del conjunto; si una llegara sin rótulo, no se pinta «En undefined».
+  if (rotulo === undefined) throw new Error(`La Variante declara la región «${String(variante.region)}», que no es de REGIONES_DE_VARIANTE.`);
+  return `En ${rotulo}: «${variante.texto}»`;
 }
 
 /**

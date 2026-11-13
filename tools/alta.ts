@@ -430,10 +430,14 @@ export async function darDeAltaLote(
     for (const c of enRevisionYa) {
       const f = formaParaComparar(c.texto);
       yaEnCorpus.set(f.canonica, { slug: c.slug, donde: 'en revisión', forma: f });
-      // Historia 35.6 — también su Variante, con el mismo slug: repetirla es repetir la Cita.
+    }
+    // Historia 35.6 — también su Variante, con el mismo slug: repetirla es repetir la Cita. Después
+    // de los textos y sin pisarlos: si la Variante de una coincide con el texto de otra, gana el texto.
+    for (const c of enRevisionYa) {
       const v = textoDeVariante(c);
-      if (v !== undefined) {
-        const fv = formaParaComparar(v);
+      if (v === undefined) continue;
+      const fv = formaParaComparar(v);
+      if (fv.canonica !== '' && !yaEnCorpus.has(fv.canonica)) {
         yaEnCorpus.set(fv.canonica, { slug: c.slug, donde: 'en revisión', forma: fv });
       }
     }
@@ -441,10 +445,11 @@ export async function darDeAltaLote(
     // sitios, lo que el editor necesita saber es que ya está publicado.
     for (const c of yaPublicadas) {
       const v = textoDeVariante(c);
-      if (v !== undefined) {
-        const fv = formaParaComparar(v);
-        yaEnCorpus.set(fv.canonica, { slug: c.slug, donde: 'publicadas', forma: fv });
-      }
+      if (v === undefined) continue;
+      const fv = formaParaComparar(v);
+      if (fv.canonica !== '') yaEnCorpus.set(fv.canonica, { slug: c.slug, donde: 'publicadas', forma: fv });
+    }
+    for (const c of yaPublicadas) {
       const f = formaParaComparar(c.texto);
       yaEnCorpus.set(f.canonica, { slug: c.slug, donde: 'publicadas', forma: f });
     }

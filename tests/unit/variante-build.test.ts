@@ -164,6 +164,7 @@ describe('Historia 35.6 — la Página de Cita atribuida con Variante', () => {
     expect(p).toMatch(/font-family: var\(--sans\)/u);
     expect(p).toMatch(/font-size: var\(--pie\)/u);
     expect(p).toMatch(/color: var\(--tinta-apagada\)/u);
+    expect(p).toMatch(/margin: var\(--unidad\) 0 0/u);
   });
 
   it('va dentro de data-pagefind-body y fuera de todo data-pagefind-ignore', () => {
@@ -234,6 +235,7 @@ describe('Historia 35.6 — lo que la Variante no puede ser', () => {
     });
     const r = await construirConCorpus(corpus, { jornada: '2026-11-12', ficheros: conLaPuertaAbierta(), conservar: false });
     expect(r.codigo).not.toBe(0);
-    expect(r.salida).toMatch(/coincide con «buzz-/u);
+    // Los dos textos son distintos: lo que coincide es la Variante, y el fallo nombra a la otra Cita.
+    expect(r.salida).toMatch(new RegExp(`atribuida «(${SV}|${CV})»[^\\n]*coincide con «(${CV}|${SV})»`, 'u'));
   }, 600_000);
 });

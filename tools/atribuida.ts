@@ -13,7 +13,7 @@
  * válida sale con 1 sin escribir.
  *
  * Códigos: 2 es la forma de la invocación (suborden desconocida, argumentos de menos o de más,
- * bandera desconocida, repetida o vacía, `variante` sin `--region` o `--origen`), 1 lo que la
+ * bandera desconocida, repetida, vacía o sin valor, `variante` sin `--region` o `--origen`), 1 lo que la
  * invocación dice; en ninguno de los dos se escribe nada.
  */
 
@@ -81,6 +81,10 @@ if (orden === 'variante') {
 }
 for (const bandera of forma.conValor) {
   if (opcion(argumentos, bandera) === '') noReconocidos.push(`«${bandera}» va vacía.`);
+  // Dada sin valor —la última, o seguida de otra bandera—: es la forma, no lo que dice.
+  else if (argumentos.includes(bandera) && opcion(argumentos, bandera) === undefined) {
+    noReconocidos.push(`«${bandera}» va sin valor.`);
+  }
 }
 for (const [i, suelto] of sueltos.entries()) {
   if (suelto.trim() === '') noReconocidos.push(`El argumento ${i + 1} va vacío.`);

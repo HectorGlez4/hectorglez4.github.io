@@ -243,7 +243,8 @@ export async function loteEnRevision(rutas: Rutas): Promise<CandidataEnRevision[
   // Cita. El texto se indexa después y gana si los dos coinciden con otra.
   for (const c of publicadas) {
     const v = textoDeVariante(c);
-    if (v !== undefined) yaPublicadas.set(normalizar(v), c.slug);
+    const k = v !== undefined ? normalizar(v) : '';
+    if (k !== '') yaPublicadas.set(k, c.slug);
   }
   for (const c of publicadas) yaPublicadas.set(normalizar(c.texto), c.slug);
 

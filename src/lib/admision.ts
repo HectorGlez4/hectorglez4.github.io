@@ -275,7 +275,8 @@ export const variante = z.strictObject(
   {
     texto: z
       .string({ message: 'Regla incumplida: la Variante declara su «texto».' })
-      .min(1, 'Regla incumplida: el texto de la Variante no puede estar vacío.'),
+      .min(1, 'Regla incumplida: el texto de la Variante no puede estar vacío.')
+      .refine((t) => t.trim() !== '', 'Regla incumplida: el texto de la Variante no puede estar en blanco.'),
     region: z
       .string({ message: 'Regla incumplida: la Variante declara su «region».' })
       .refine(
@@ -432,6 +433,18 @@ function reglasDeLaAtribuida(cita: Record<string, unknown>, contexto: z.Refineme
       code: 'custom',
       path: ['variante', 'texto'],
       message: 'Regla incumplida: la Variante de una Cita atribuida va en una sola línea, como su texto.',
+    });
+  }
+  // Una Variante es otra letra de la frase: igual al texto (forma canónica, AD-3) no dice nada.
+  if (
+    typeof deLaVariante === 'string' &&
+    typeof cita.texto === 'string' &&
+    normalizar(deLaVariante) === normalizar(cita.texto)
+  ) {
+    contexto.addIssue({
+      code: 'custom',
+      path: ['variante', 'texto'],
+      message: 'Regla incumplida: la Variante repite el texto de la Cita; una Variante es otra letra de la frase.',
     });
   }
   if (cita.aptaParaPortada === true) {

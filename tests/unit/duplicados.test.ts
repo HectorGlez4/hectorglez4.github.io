@@ -444,4 +444,74 @@ describe('Historia 35.6 — la Variante cuenta como duplicado', () => {
     ]);
     expect(await readdir(rutas.revision)).toEqual(['buzz--una-frase-del-doblaje.md']);
   });
+
+  /** Una candidata atribuida de Buzz en `corpus/_revision/`. */
+  async function candidataDeBuzz(rutas: Rutas, nombre: string, texto: string, variante?: string) {
+    const { escribirCita } = await import('../../tools/lib/corpus.ts');
+    await escribirCita(rutas.revision, `buzz--${nombre}`, {
+      texto,
+      personaje: 'buzz',
+      temas: ['con-pagina'],
+      slug: `buzz-${nombre}`,
+      procedencia: { año: 1995 },
+      clase: 'atribuida',
+      atestiguaciones: ATESTIGUACIONES,
+      origen: 'doblaje',
+      ...(variante !== undefined ? { variante: { texto: variante, region: 'espana', origen: 'doblaje' } } : {}),
+    });
+  }
+
+  it('la aprobación de una candidata cuyo texto repite la Variante de una publicada la deja en revisión', async () => {
+    const rutas = await conBuzz();
+    const { aprobar } = await import('../../tools/lib/revision.ts');
+    await candidataDeBuzz(rutas, 'hasta-el-infinito-y-aun-mas-alla', VARIANTE_PUBLICADA);
+    const resultado = await aprobar(rutas, ['buzz-hasta-el-infinito-y-aun-mas-alla'], [], { puerta: PUERTA });
+    expect(resultado.publicadas).toEqual([]);
+    expect(resultado.rechazadasPorAdmision.map((r) => r.motivos.join(' '))).toEqual([
+      expect.stringMatching(new RegExp(`coincide con «${DE_BUZZ}»`, 'u')),
+    ]);
+  });
+
+  it('el alta forzada de una atribuida cuyo texto repite la Variante de una publicada va a revisión', async () => {
+    const rutas = await conBuzz();
+    const antes = await ficherosPublicados(rutas);
+    const forzada = await darDeAltaLote([deBuzz(VARIANTE_PUBLICADA, 'Una letra distinta del todo para el doblaje.')], rutas, {
+      puerta: PUERTA,
+      conDuplicados: true,
+    });
+    expect(forzada.publicadas).toEqual([]);
+    expect(forzada.enRevision).toHaveLength(1);
+    expect(forzada.enRevision[0].motivos.join('\n')).toMatch(new RegExp(`coincide con «${DE_BUZZ}»`, 'u'));
+    expect(await ficherosPublicados(rutas)).toEqual(antes);
+  });
+
+  it('el alta forzada de una atribuida cuyo texto repite la Variante de una candidata va a revisión', async () => {
+    const rutas = await conBuzz();
+    const deLaCandidata = 'La patrulla nunca duerme cuando la ciudad sueña despierta.';
+    await candidataDeBuzz(rutas, 'la-patrulla-vigila', 'La patrulla vigila mientras la ciudad duerme tranquila.', deLaCandidata);
+    const forzada = await darDeAltaLote([deBuzz(deLaCandidata, 'Una letra distinta del todo para el doblaje.')], rutas, {
+      puerta: PUERTA,
+      conDuplicados: true,
+    });
+    expect(forzada.publicadas).toEqual([]);
+    expect(forzada.enRevision.map((e) => e.motivos.join('\n'))).toEqual([
+      expect.stringMatching(/coincide con «buzz-la-patrulla-vigila»/u),
+    ]);
+  });
+
+  it('el aviso FR-14 de revisar señala la candidata que repite la Variante de una publicada, o cuya Variante repite otra', async () => {
+    const rutas = await conBuzz();
+    const { loteEnRevision } = await import('../../tools/lib/revision.ts');
+    await candidataDeBuzz(rutas, 'hasta-el-infinito-y-aun-mas-alla', VARIANTE_PUBLICADA);
+    await candidataDeBuzz(
+      rutas,
+      'una-frase-del-doblaje',
+      'Una frase del doblaje latino que nadie más dijo.',
+      'Hasta el infinito y más allá, guardián del cosmos.',
+    );
+    const lote = await loteEnRevision(rutas);
+    const duplica = Object.fromEntries(lote.map((c) => [c.slug, c.duplicaA]));
+    expect(duplica['buzz-hasta-el-infinito-y-aun-mas-alla']).toEqual({ slug: DE_BUZZ, donde: 'publicadas' });
+    expect(duplica['buzz-una-frase-del-doblaje']).toEqual({ slug: DE_BUZZ, donde: 'publicadas' });
+  });
 });

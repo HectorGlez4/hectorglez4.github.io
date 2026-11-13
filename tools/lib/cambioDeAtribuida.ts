@@ -139,8 +139,9 @@ function componer(
           ],
         };
       }
-      if (cambio.obra.trim() === '') return { ok: false, motivos: ['La Obra no puede ir en blanco.'] };
-      nuevos.procedencia = { obra: cambio.obra, ...procedencia };
+      const obra = cambio.obra.trim();
+      if (obra === '') return { ok: false, motivos: ['La Obra no puede ir en blanco.'] };
+      nuevos.procedencia = { obra, ...procedencia };
       return { ok: true, datos: nuevos };
     }
     case 'autor': {
@@ -197,44 +198,51 @@ function componer(
             ],
           };
         }
-        return intercambio(nuevos, texto, datos.origen, textoDeLaVariante, variante!);
+        // La Variante que resulta es la letra tecleada, no la guardada: puede corregirla.
+        return intercambio(nuevos, textoDeLaVariante, variante!.origen, cambio.texto, variante!.region, datos.origen);
       }
       const contra = [texto, ...(textoDeLaVariante !== undefined ? [textoDeLaVariante] : [])];
       const parecido = mejorParecido(cambio.texto, contra);
-      if (parecido < MIN_PARECIDO_PARA_CORREGIR) return { ok: false, motivos: [motivoDeParecido('La Variante', parecido)] };
+      if (parecido < MIN_PARECIDO_PARA_CORREGIR) return { ok: false, motivos: [motivoDeParecido('La Variante nueva', parecido)] };
       nuevos.variante = { texto: cambio.texto, region: cambio.region, origen: cambio.origen };
       return { ok: true, datos: nuevos };
     }
     case 'texto': {
       if (textoDeLaVariante !== undefined && normalizar(cambio.texto) === normalizar(textoDeLaVariante)) {
-        return intercambio(nuevos, texto, datos.origen, textoDeLaVariante, variante!);
+        // El texto que resulta es la letra tecleada, no la guardada: puede corregirla.
+        return intercambio(nuevos, cambio.texto, variante!.origen, texto, variante!.region, datos.origen);
       }
       const contra = [texto, ...(textoDeLaVariante !== undefined ? [textoDeLaVariante] : [])];
       const parecido = mejorParecido(cambio.texto, contra);
-      if (parecido < MIN_PARECIDO_PARA_CORREGIR) return { ok: false, motivos: [motivoDeParecido('El texto', parecido)] };
+      if (parecido < MIN_PARECIDO_PARA_CORREGIR) return { ok: false, motivos: [motivoDeParecido('El texto nuevo', parecido)] };
       nuevos.texto = cambio.texto;
       return { ok: true, datos: nuevos };
     }
   }
 }
 
-/** El intercambio de principal y Variante: los dos textos y sus dos `origen`; la región, igual. */
+/**
+ * El intercambio de principal y Variante: los dos textos y sus dos `origen`; la región, igual.
+ * Recibe ya el texto principal y el de la Variante que resultan —el que se tecleó entra con su
+ * letra, que puede corregir la guardada en la puntuación o en las mayúsculas—.
+ */
 function intercambio(
   nuevos: Record<string, unknown>,
-  texto: string,
-  origen: unknown,
-  textoDeLaVariante: string,
-  variante: { region?: unknown; origen?: unknown },
+  principal: string,
+  origenDelPrincipal: unknown,
+  deLaVariante: string,
+  region: unknown,
+  origenDeLaVariante: unknown,
 ): { ok: true; datos: Record<string, unknown>; nota: string } {
-  nuevos.texto = textoDeLaVariante;
-  nuevos.origen = variante.origen;
-  nuevos.variante = { texto, region: variante.region, origen };
+  nuevos.texto = principal;
+  nuevos.origen = origenDelPrincipal;
+  nuevos.variante = { texto: deLaVariante, region, origen: origenDeLaVariante };
   return { ok: true, datos: nuevos, nota: 'Intercambiados el texto y la Variante, con sus dos origen; la región no cambia.' };
 }
 
 function motivoDeParecido(que: string, parecido: number): string {
   return (
-    `${que} nuevo se parece ${cifraDeParecido(parecido)} al texto o a la Variante publicados, y hace falta ` +
+    `${que} se parece ${cifraDeParecido(parecido)} al texto o a la Variante publicados, y hace falta ` +
     `${cifraDeParecido(MIN_PARECIDO_PARA_CORREGIR)} (MIN_PARECIDO_PARA_CORREGIR): esta orden corrige la letra de ` +
     'una atribuida, no la cambia por otra frase. Otra frase es otra Cita.'
   );
@@ -295,6 +303,10 @@ export async function cambiarAtribuida(
   const compuesto = componer(cambio, datos);
   if (!compuesto.ok) return negar(...compuesto.motivos);
   const nuevos = compuesto.datos;
+  // Un cambio que deja la Cita como estaba no reescribe nada ni se da por hecho.
+  if (JSON.stringify(nuevos) === JSON.stringify(datos)) {
+    return negar(`Nada que cambiar: «${cambio.slug}» ya dice eso.`);
+  }
 
   // ── El Autor o el Personaje que se añade existe ──
   const [autores, personajes, fichasEnDisco] = await Promise.all([
@@ -320,6 +332,10 @@ export async function cambiarAtribuida(
 
   // ── La clase sigue siendo atribuida ──
   const autorNuevo = typeof nuevos.autor === 'string' ? autores.find((a) => a.slug === nuevos.autor) : undefined;
+  // Un Autor declarado que no está en el Corpus no deja juzgar la clase: no se adivina.
+  if (typeof nuevos.autor === 'string' && autorNuevo === undefined) {
+    return negar(`El Autor «${nuevos.autor}» que declara «${cambio.slug}» no existe en ${rutas.autores}.`);
+  }
   const clase = claseQueCorresponde(
     typeof nuevos.personaje === 'string' ? { personaje: nuevos.personaje } : {},
     autorNuevo ?? {},
@@ -346,7 +362,7 @@ export async function cambiarAtribuida(
     plan = await resolverFichaDeObra(rutas, {
       ...(typeof nuevos.autor === 'string' ? { autor: nuevos.autor } : {}),
       ...(typeof nuevos.personaje === 'string' ? { personaje: nuevos.personaje } : {}),
-      obra: cambio.obra,
+      obra: procedenciaNueva.obra ?? cambio.obra.trim(),
       citasPublicadas: conLaSustituida as Parameters<typeof resolverFichaDeObra>[1]['citasPublicadas'],
     });
     if (!plan.ok) return negar(...plan.motivos);
@@ -393,7 +409,18 @@ export async function cambiarAtribuida(
   if (plan !== undefined) {
     const ficha = await aplicarFichaDeObra(rutas, plan);
     if (!ficha.ok) {
-      await writeFile(cita.ruta, original, 'utf8');
+      try {
+        await writeFile(cita.ruta, original, 'utf8');
+      } catch (fallo) {
+        return {
+          ok: false,
+          motivos: [
+            `La Ficha de Obra no se pudo asegurar, y ${cita.ruta} no se pudo devolver a su contenido original ` +
+              `(${fallo instanceof Error ? fallo.message : String(fallo)}): quedó escrita sin su ficha. Restitúyala con git.`,
+            ...ficha.motivos,
+          ],
+        };
+      }
       return negar(`La Ficha de Obra no se pudo asegurar, y ${cita.ruta} ha vuelto a su contenido original:`, ...ficha.motivos);
     }
     if (ficha.accion !== 'existente') deLaFicha = `Ficha de Obra ${ficha.accion}: ${ficha.ruta}.`;
