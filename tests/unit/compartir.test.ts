@@ -44,7 +44,7 @@ const AUTOR = { slug: 'seneca', nombre: 'Séneca' } as unknown as Autor;
 const URL_CITA = 'https://sabiduriadebolsillo.net/cita/seneca-una';
 
 describe('Historia 10.3 — el texto propuesto', () => {
-  const texto = textoParaCompartir(CITA, AUTOR);
+  const texto = textoParaCompartir(CITA, AUTOR, undefined);
 
   it('incluye la Cita y el nombre del Autor', () => {
     expect(texto).toContain(CITA.texto);
@@ -58,7 +58,7 @@ describe('Historia 10.3 — el texto propuesto', () => {
 
   it('es exactamente el mismo que se copia y el que lleva la Imagen', () => {
     // Tres atribuciones distintas de la misma Cita no se ven hasta compararlas juntas.
-    expect(texto).toBe(textoParaCopiar(CITA, AUTOR));
+    expect(texto).toBe(textoParaCopiar(CITA, AUTOR, undefined));
   });
 });
 
@@ -68,7 +68,7 @@ const DESTINOS = Object.values(CONSTRUCTORES);
 describe('Historia 10.3 — los destinos', () => {
   it('cada uno lleva el texto y el enlace dentro, salvo Facebook, que solo admite el enlace', () => {
     for (const destino of DESTINOS.filter((d) => d.id !== 'facebook')) {
-      const enlace = destino.enlace(textoParaCompartir(CITA, AUTOR), URL_CITA);
+      const enlace = destino.enlace(textoParaCompartir(CITA, AUTOR, undefined), URL_CITA);
       expect(enlace, destino.id).toContain(encodeURIComponent(AUTOR.nombre));
       expect(decodeURIComponent(enlace), destino.id).toContain(URL_CITA);
     }
@@ -99,7 +99,7 @@ describe('Historia 10.3 — los destinos', () => {
     const conSignos = { ...CITA, texto: '¿Y ahora qué? Todo & nada #así' } as unknown as Cita;
     // Facebook no lleva el texto (abajo, Historia 23.2): su enlace va escapado igual.
     for (const destino of DESTINOS.filter((d) => d.id !== 'facebook')) {
-      const enlace = destino.enlace(textoParaCompartir(conSignos, AUTOR), URL_CITA);
+      const enlace = destino.enlace(textoParaCompartir(conSignos, AUTOR, undefined), URL_CITA);
       // Sin escapar, el `#` cortaría la dirección y el `&` inventaría un parámetro.
       expect(enlace, destino.id).not.toContain('#así');
       expect(decodeURIComponent(enlace), destino.id).toContain('¿Y ahora qué?');
@@ -128,7 +128,7 @@ describe('Historia 23.2 — un constructor por destino de enlace, y se ofrecen l
   });
 
   it('Facebook lleva el enlace y no el texto: su diálogo no admite otro', () => {
-    const enlace = CONSTRUCTORES.facebook.enlace(textoParaCompartir(CITA, AUTOR), URL_CITA);
+    const enlace = CONSTRUCTORES.facebook.enlace(textoParaCompartir(CITA, AUTOR, undefined), URL_CITA);
     expect(enlace).toBe(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(URL_CITA)}`);
     expect(decodeURIComponent(enlace)).not.toContain(AUTOR.nombre);
   });
@@ -177,7 +177,7 @@ describe('Historia 19.1 — lo copiado nombra la traducción', () => {
   const HORACIO = { slug: 'horacio', nombre: 'Horacio' } as unknown as Autor;
 
   it('«… — Horacio, Odas, trad. de Germán Salinas, 1909.»', () => {
-    expect(textoParaCopiar(ODA, HORACIO)).toBe(
+    expect(textoParaCopiar(ODA, HORACIO, undefined)).toBe(
       '«Feliz quien lejos de negocios vive.» — Horacio, Odas, trad. de Germán Salinas, 1909.',
     );
   });
@@ -190,7 +190,7 @@ describe('Historia 19.1 — lo copiado nombra la traducción', () => {
       } as unknown as Cita,
       ODAS,
     );
-    expect(textoParaCopiar(cita, HORACIO)).toBe(
+    expect(textoParaCopiar(cita, HORACIO, undefined)).toBe(
       '«Feliz quien lejos de negocios vive.» — Horacio, Odas, -23, trad. de Wikisource.',
     );
   });

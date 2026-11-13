@@ -412,18 +412,18 @@ describe('Historia 30.4 — el Fragmento para insertar', () => {
   ];
 
   it.each(tabla)('$caso', ({ cita, autor, esperado }) => {
-    expect(fragmentoParaInsertar(cita, autor, U)).toBe(esperado);
+    expect(fragmentoParaInsertar(cita, autor, U, undefined)).toBe(esperado);
   });
 
   it('la Cita de prueba larga pasa de `MAX_CARACTERES_IMAGEN` y va entera', () => {
     expect(largo.length).toBeGreaterThanOrEqual(400);
     expect(largo.length).toBeGreaterThan(MAX_CARACTERES_IMAGEN);
-    expect(fragmentoParaInsertar(citaDe({ texto: largo }), MARTI, U)).toContain(`<p>${largo}</p>`);
+    expect(fragmentoParaInsertar(citaDe({ texto: largo }), MARTI, U, undefined)).toContain(`<p>${largo}</p>`);
   });
 
   it('el `href` también sale escapado', () => {
     // Una comilla no llega: el parser la escribe `%22` y la canónica no normalizada se rechaza.
-    expect(fragmentoParaInsertar(citaDe(), MARTI, 'https://ejemplo.org/cita/a&b/')).toContain('href="https://ejemplo.org/cita/a&amp;b/"');
+    expect(fragmentoParaInsertar(citaDe(), MARTI, 'https://ejemplo.org/cita/a&b/', undefined)).toContain('href="https://ejemplo.org/cita/a&amp;b/"');
   });
 
   it.each([
@@ -441,7 +441,7 @@ describe('Historia 30.4 — el Fragmento para insertar', () => {
     'https://ejemplo.org/cita/x/\n',
     'https://usuario:clave@ejemplo.org/cita/x/',
   ])('una canónica «%s» detiene la construcción', (canonica) => {
-    expect(() => fragmentoParaInsertar(citaDe(), MARTI, canonica)).toThrow(/canónica/);
+    expect(() => fragmentoParaInsertar(citaDe(), MARTI, canonica, undefined)).toThrow(/canónica/);
   });
 
   it('`nombreEnAtribucion` da el `nombre`, revisada la clave o no', () => {
@@ -520,7 +520,7 @@ describe('Historia 35.4 — la firma de una Cita, en orden fijo Personaje, Obra,
 
   it('una Cita sin Autor ni Personaje no tiene firma', () => {
     expect(() => firmaDeCita(conObra, {})).toThrow(/sin Autor ni Personaje/);
-    expect(() => textoParaCopiar(conObra, undefined)).toThrow(/sin Autor ni Personaje/);
+    expect(() => textoParaCopiar(conObra, undefined, undefined)).toThrow(/sin Autor ni Personaje/);
   });
 
   it('el cierre de «Más de {Personaje}», con la regla del de Autor', () => {

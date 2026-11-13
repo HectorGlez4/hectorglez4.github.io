@@ -189,7 +189,10 @@ function concentracionDe(citas: CitaParaHuecos[]): Concentracion | undefined {
   const ordenados = [...porAutor.entries()].sort(
     (a, b) => b[1] - a[1] || a[0].localeCompare(b[0], 'es'),
   );
-  const [autor, suyas] = ordenados[0]!;
+  // Historia 35.4 — si ninguna Cita declara Autor, no hay concentración por Autor que medir.
+  const primero = ordenados[0];
+  if (primero === undefined) return undefined;
+  const [autor, suyas] = primero;
 
   const total = citas.length;
   /*

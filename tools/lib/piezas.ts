@@ -162,7 +162,10 @@ export function textoDeLaPieza(
   destino: string,
 ): string {
   // Las Citas de una Pieza ya traen su Autor (`seleccionarCitas` las rechaza sin él).
-  const atribuidas = citas.map((cita) => textoParaCopiar(cita, cita.autor === undefined ? undefined : autores.get(cita.autor)));
+  // Sin Personaje: la Pieza solo compone la firma de un Autor (`citaEnPieza`), y lo copiado lo sigue.
+  const atribuidas = citas.map((cita) =>
+    textoParaCopiar(cita, cita.autor === undefined ? undefined : autores.get(cita.autor), undefined),
+  );
   return `${atribuidas.join('\n\n')}\n\n${SITIO}${enlaceConOrigen(destino, red)}`;
 }
 
@@ -332,7 +335,12 @@ export async function componerPieza(
     return { ok: false, motivos };
   }
 
-  const enPieza = elegidas.map((cita) => citaEnPieza(cita, conAutor.get(cita.slug) as Autor));
+  const enPieza = elegidas.map((cita) => {
+    // Toda elegida entra con su Autor (arriba); si faltara, se dice en vez de componer un hueco.
+    const autor = conAutor.get(cita.slug);
+    if (autor === undefined) throw new Error(`La Cita «${cita.slug}» se eligió sin su Autor.`);
+    return citaEnPieza(cita, autor);
+  });
 
   const cabida = cabenEnPieza(enPieza);
   if (!cabida.cabe) {

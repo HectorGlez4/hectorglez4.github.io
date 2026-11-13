@@ -673,7 +673,7 @@ const otro = conjunto.autores.find((a) => a.slug === 'antonio-machado')!;
     aLimpiar.push(resultado.proyecto);
     expect(resultado.codigo, resultado.salida).not.toBe(0);
     expect(resultado.salida).toMatch(
-      new RegExp(`«${PRIMERA}»[^\\n]*/sonda-tarjeta-de-obra/?[^\\n]*«antonio-machado»[^\\n]*«seneca»`),
+      new RegExp(`«${PRIMERA}»[^\\n]*/sonda-tarjeta-de-obra/?[^\\n]*autor «antonio-machado»[^\\n]*autor «seneca»`),
     );
   }, 300_000);
 

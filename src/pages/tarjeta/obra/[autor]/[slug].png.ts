@@ -17,6 +17,7 @@ import {
   autoresPublicados,
   conjuntoPublicable,
   obrasPublicadas,
+  mensajeDeDueñoSinPagina,
   personajesPublicados,
 } from '../../../../lib/publicado.ts';
 import { segmentosDeObra } from '../../../../lib/obras.ts';
@@ -41,7 +42,7 @@ export const getStaticPaths = (async () => {
     const dueño = (obra.dueño.tipo === 'personaje' ? personajes : autores).get(obra.dueño.slug);
     // La Tarjeta firmaría con un hueco: el build se para, como la Página de Obra.
     if (dueño === undefined) {
-      throw new Error(`La Obra «${obra.nombre}» es de «${obra.dueño.slug}», que no tiene página publicada.`);
+      throw new Error(mensajeDeDueñoSinPagina(obra));
     }
     const { autor: segmentoDeAutor, obra: segmentoDeObra } = segmentosDeObra(obra.nombre);
     return {

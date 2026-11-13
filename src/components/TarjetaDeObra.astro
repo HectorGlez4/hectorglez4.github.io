@@ -85,7 +85,8 @@ if (
 ) {
   throw new Error(
     `TarjetaDeObra: la Cita «${cita.slug}» se pinta en ${Astro.url.pathname} con el dueño ` +
-      `«${dueño?.slug ?? 'ninguno'}», pero su Obra es de «${obra?.dueño.slug ?? 'nadie: no tiene Obra'}».`,
+      `${dueño === undefined ? '«ninguno»' : `${dueño.tipo} «${dueño.slug}»`}, pero su Obra es de ` +
+      `${obra === undefined ? '«nadie: no tiene Obra»' : `${obra.dueño.tipo} «${obra.dueño.slug}»`}.`,
   );
 }
 

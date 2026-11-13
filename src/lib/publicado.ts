@@ -285,6 +285,23 @@ export function personajesPublicados<P extends { slug: string; nombre: string }>
 }
 
 /**
+ * Por qué una Obra publicada no tiene a dónde enlazar su dueño — Historia 35.4. La Página de
+ * Obra y su Tarjeta Social se paran con esto: un Autor siempre tiene página (las Citas que
+ * resuelven su ficha lo declaran), pero la ficha de un Personaje la resuelven también las Citas
+ * de los demás Personajes de su `personajes`, y si ninguna declara al dueño, el dueño no se
+ * publica. Qué hacer con esa ficha —otro dueño, o una Cita del dueño— no lo decide el build.
+ */
+export function mensajeDeDueñoSinPagina(obra: Pick<ObraResuelta, 'nombre' | 'dueño'>): string {
+  const { tipo, slug } = obra.dueño;
+  return tipo === 'personaje'
+    ? `La Obra «${obra.nombre}» es del Personaje «${slug}», y ninguna Cita publicada lo declara: no ` +
+        'tiene página y su Cabecera enlazaría a un 404. Las Citas que resuelven la ficha son de otros ' +
+        'Personajes de su «personajes»: la ficha necesita por dueño a uno que tenga Citas, o el dueño una Cita.'
+    : `La Obra «${obra.nombre}» es del Autor «${slug}», que no tiene página publicada: su Cabecera ` +
+        'enlazaría a un 404.';
+}
+
+/**
  * Un Autor se publica si tiene al menos una Cita publicada — FR-4.
  *
  * No hay umbral que aplicar: la Cita existe o no existe. Un Autor sin Citas publicadas
@@ -776,6 +793,12 @@ export function problemaDeRutasDeSalida(
   /** El dueño de las rutas (`dueñoDeLaRuta` de la Cita) con su nombre: el de «Más de {…}». */
   dueño: Dueño & { nombre: string },
   rutas: RutasDeSalidaDeCita,
+  /**
+   * El Autor que declara la Cita que se lee (`cita.autor`), o `undefined` si no declara ninguno.
+   * Obligatorio: con un dueño Personaje, la Obra de «De la misma obra» puede ser la del Personaje
+   * o la de ese Autor, y ninguna otra (Historia 35.4).
+   */
+  autorDeLaCita: string | undefined,
 ): string | undefined {
   const { mismaObra, delDueño } = rutas;
   const mismo = (a: Dueño, b: Dueño) => a.tipo === b.tipo && a.slug === b.slug;
@@ -784,10 +807,15 @@ export function problemaDeRutasDeSalida(
     if (deLaObra.length === 0) return '«De la misma obra» llega sin Citas: un grupo vacío es `undefined`.';
     /*
      * Historia 35.4 — la Obra de una Cita sin Personaje es de su Autor; la de una con Personaje
-     * puede ser de su Autor o de un Personaje, así que solo se exige la de un dueño Autor.
+     * es de ese Personaje o del Autor que la Cita declara. Ningún otro dueño cabe.
      */
-    if (dueño.tipo === 'autor' && !mismo(obra.dueño, dueño)) {
-      return `«De la misma obra» es de la Obra «${obra.nombre}», de «${obra.dueño.slug}» y no de «${dueño.slug}».`;
+    const admitidos: Dueño[] = [dueño];
+    if (dueño.tipo === 'personaje' && autorDeLaCita !== undefined) admitidos.push({ tipo: 'autor', slug: autorDeLaCita });
+    if (!admitidos.some((d) => mismo(obra.dueño, d))) {
+      return (
+        `«De la misma obra» es de la Obra «${obra.nombre}», del ${obra.dueño.tipo} «${obra.dueño.slug}» ` +
+        `y no de ${admitidos.map((d) => `«${d.slug}»`).join(' ni de ')}.`
+      );
     }
     if (deLaObra.length > MAX_CITAS_DE_LA_MISMA_OBRA) {
       return `«De la misma obra» lleva ${deLaObra.length} Citas, y no caben más de ${MAX_CITAS_DE_LA_MISMA_OBRA}.`;

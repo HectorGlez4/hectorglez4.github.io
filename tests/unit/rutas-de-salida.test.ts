@@ -253,7 +253,7 @@ describe('Historia 35.4 — las Rutas de salida del dueño: el Personaje si lo h
     expect(rutas.delDueño?.dueño).toEqual({ tipo: 'personaje', slug: 'batman' });
     expect(rutas.delDueño?.recuento).toBe(4);
     expect(slugs(rutas.delDueño!.citas).sort()).toEqual(['seneca-b3', 'seneca-b4']);
-    expect(problemaDeRutasDeSalida({ tipo: 'personaje', slug: 'batman', nombre: 'Batman' }, rutas)).toBeUndefined();
+    expect(problemaDeRutasDeSalida({ tipo: 'personaje', slug: 'batman', nombre: 'Batman' }, rutas, undefined)).toBeUndefined();
   });
 
   it('«Más de Séneca» de una de siempre lleva también las suyas con Personaje', () => {
@@ -265,11 +265,31 @@ describe('Historia 35.4 — las Rutas de salida del dueño: el Personaje si lo h
   it('objeta un pie de otro dueño, o una Cita que no es del dueño', () => {
     const rutas = rutasDeSalidaDeCita(B1, todas, porObraDe(todas), [TEMA], { por: 'obra', cita: B2 });
     const SENECA = { tipo: 'autor', slug: 'seneca', nombre: 'Séneca' } as const;
-    expect(problemaDeRutasDeSalida(SENECA, rutas)).toMatch(/«Más de Séneca» es de «batman» y no de «seneca»/);
+    expect(problemaDeRutasDeSalida(SENECA, rutas, 'seneca')).toMatch(/«Más de Séneca» es de «batman» y no de «seneca»/);
     const ajena = { ...rutas, delDueño: { ...rutas.delDueño!, citas: [S] } };
-    expect(problemaDeRutasDeSalida({ tipo: 'personaje', slug: 'batman', nombre: 'Batman' }, ajena)).toMatch(
+    expect(problemaDeRutasDeSalida({ tipo: 'personaje', slug: 'batman', nombre: 'Batman' }, ajena, undefined)).toMatch(
       /«seneca-sola», que es de «nadie» y no de «batman»/,
     );
+  });
+
+  it('«De la misma obra» de un dueño Personaje: la Obra del Personaje o la del Autor de la Cita, ninguna otra', () => {
+    const BATMAN = { tipo: 'personaje', slug: 'batman', nombre: 'Batman' } as const;
+    const obraDe = (dueño: { tipo: 'autor' | 'personaje'; slug: string }, nombre: string) =>
+      ({ nombre, dueño, autor: dueño.tipo === 'autor' ? dueño.slug : undefined, titulo: 'Libro', recuento: 8, fuentes: [], edicionCotejada: false, temas: [] }) as unknown as ObraResuelta;
+    const grupo = (obra: ObraResuelta) => ({
+      mismaObra: { obra, citas: [{ ...cita(`${obra.nombre}-0`, 'seneca', obra.nombre), obra }] },
+      delDueño: undefined,
+      temas: [],
+    });
+    const deBatman = obraDe({ tipo: 'personaje', slug: 'batman' }, 'batman--libro');
+    const deSeneca = obraDe({ tipo: 'autor', slug: 'seneca' }, 'seneca--libro');
+    const deEpicteto = obraDe({ tipo: 'autor', slug: 'epicteto' }, 'epicteto--manual');
+    const deJoker = obraDe({ tipo: 'personaje', slug: 'joker' }, 'joker--libro');
+    expect(problemaDeRutasDeSalida(BATMAN, grupo(deBatman), undefined)).toBeUndefined();
+    expect(problemaDeRutasDeSalida(BATMAN, grupo(deSeneca), 'seneca')).toBeUndefined();
+    expect(problemaDeRutasDeSalida(BATMAN, grupo(deSeneca), undefined)).toMatch(/del autor «seneca» y no de «batman»/);
+    expect(problemaDeRutasDeSalida(BATMAN, grupo(deEpicteto), 'seneca')).toMatch(/del autor «epicteto» y no de «batman» ni de «seneca»/);
+    expect(problemaDeRutasDeSalida(BATMAN, grupo(deJoker), 'seneca')).toMatch(/del personaje «joker»/);
   });
 });
 
@@ -286,14 +306,14 @@ describe('Historia 24.6 — `problemaDeRutasDeSalida`, lo que pararía la constr
   });
 
   it('nada que objetar a un pie como los que da `rutasDeSalidaDeCita`', () => {
-    expect(problemaDeRutasDeSalida(SENECA, bien())).toBeUndefined();
-    expect(problemaDeRutasDeSalida(SENECA, { mismaObra: undefined, delDueño: undefined, temas: [TEMA] })).toBeUndefined();
+    expect(problemaDeRutasDeSalida(SENECA, bien(), 'seneca')).toBeUndefined();
+    expect(problemaDeRutasDeSalida(SENECA, { mismaObra: undefined, delDueño: undefined, temas: [TEMA] }, 'seneca')).toBeUndefined();
   });
 
   it.each<[string, (r: RutasDeSalidaDeCita) => RutasDeSalidaDeCita, RegExp]>([
     ['un grupo de la Obra vacío', (r) => ({ ...r, mismaObra: { ...r.mismaObra!, citas: [] } }), /«De la misma obra» llega sin Citas/],
     ['un grupo del Autor vacío', (r) => ({ ...r, delDueño: { ...r.delDueño!, citas: [] } }), /«Más de Séneca» llega sin Citas/],
-    ['la Obra de otro Autor', (r) => ({ ...r, mismaObra: { ...r.mismaObra!, obra: obra('epicteto', 8) } }), /de «epicteto» y no de «seneca»/],
+    ['la Obra de otro Autor', (r) => ({ ...r, mismaObra: { ...r.mismaObra!, obra: obra('epicteto', 8) } }), /del autor «epicteto» y no de «seneca»/],
     ['más tarjetas de la Obra de las que caben', (r) => ({ ...r, mismaObra: { ...r.mismaObra!, citas: deLaObra(4) } }), /lleva 4 Citas, y no caben más de 3/],
     ['más tarjetas del Autor de las que caben', (r) => ({ ...r, delDueño: { ...r.delDueño!, citas: deOtras(5) } }), /lleva 5 Citas, y no caben más de 4/],
     ['una Cita de otra Obra', (r) => ({ ...r, mismaObra: { ...r.mismaObra!, citas: deOtras(1) } }), /la Cita «seneca-cartas-0», que no es de la Obra «seneca--libro»/],
@@ -302,7 +322,7 @@ describe('Historia 24.6 — `problemaDeRutasDeSalida`, lo que pararía la constr
     ['un cierre del Autor que cuenta menos de lo que se enseña', (r) => ({ ...r, delDueño: { ...r.delDueño!, recuento: 4 } }), /«Más de Séneca» cuenta 4 Citas, y el pie enseña 4 más la que se lee/],
     ['una tarjeta en los dos grupos', (r) => ({ ...r, delDueño: { ...r.delDueño!, citas: [deLaObra(1)[0]] } }), /la Cita «seneca-libro-0» sale dos veces/],
   ])('objeta %s', (_, romper, mensaje) => {
-    expect(problemaDeRutasDeSalida(SENECA, romper(bien()))).toMatch(mensaje);
+    expect(problemaDeRutasDeSalida(SENECA, romper(bien()), 'seneca')).toMatch(mensaje);
   });
 });
 
@@ -717,7 +737,7 @@ const obra = de('seneca-brevedad-0').obra!;
 ---
 <!doctype html>
 <html lang="es"><head><meta charset="utf-8" /><title>Sonda</title></head>
-<body><RutasDeSalida dueño={{ tipo: 'autor', slug: autor.slug, nombre: autor.nombre }} rutas={${rutas}} zona="rutas-de-salida" /></body></html>
+<body><RutasDeSalida dueño={{ tipo: 'autor', slug: autor.slug, nombre: autor.nombre }} autorDeLaCita={autor.slug} rutas={${rutas}} zona="rutas-de-salida" /></body></html>
 `;
   const construirSonda = async (rutas: string) => {
     const resultado = await construirConCorpus(corpusDelPie().corpus, {

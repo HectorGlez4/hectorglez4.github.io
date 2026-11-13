@@ -37,6 +37,7 @@ import {
   personajesPublicados,
   conjuntoPublicable,
   obrasPublicadas,
+  mensajeDeDueñoSinPagina,
   temasDeLaObra,
   temasPublicados,
 } from '../../../../lib/publicado.ts';
@@ -81,13 +82,14 @@ export const getStaticPaths = (async ({ paginate }) => {
         : personaje !== undefined
           ? ({ tipo: 'personaje', personaje } as const)
           : undefined;
-    // No debería pasar —la integridad del conjunto y la puerta de las fichas lo impiden—, pero
-    // si pasara, la Cabecera enlazaría a un 404 sin que nada lo dijera: el build se para aquí.
+    /*
+     * Un dueño sin página: la Cabecera enlazaría a un 404 sin que nada lo dijera, y el build se
+     * para aquí. Un Autor siempre la tiene —las Citas que resuelven su ficha lo declaran—, pero
+     * la ficha de un Personaje la resuelven también las Citas de los demás de su `personajes`,
+     * y si ninguna declara al dueño, el dueño no tiene página (Historia 35.4).
+     */
     if (dueño === undefined) {
-      throw new Error(
-        `La Obra «${obra.nombre}» es de «${obra.dueño.slug}», que no tiene página publicada: ` +
-          'su Cabecera enlazaría a un 404.',
-      );
+      throw new Error(mensajeDeDueñoSinPagina(obra));
     }
     const { autor: segmentoDeAutor, obra: segmentoDeObra } = segmentosDeObra(obra.nombre);
     const citas = porObra.get(obra.nombre) ?? [];

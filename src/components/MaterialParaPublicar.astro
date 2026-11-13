@@ -43,6 +43,11 @@ interface Props {
 }
 
 const { cita, autor, titulo, nivel = 2, esAlternativa = false } = Astro.props;
+// Historia 35.4 — lo copiado va sin Personaje porque el material es apto para portada y una
+// atribuida nunca lo es: si alguna llegara con él, lo copiado lo callaría. Se para aquí.
+if (cita.personaje !== undefined) {
+  throw new Error(`El material de «${cita.slug}» lleva una Cita con Personaje, que no es apta para portada.`);
+}
 const tramo = tramoDe(cita.texto);
 ---
 

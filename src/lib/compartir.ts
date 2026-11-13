@@ -119,7 +119,8 @@ export function rotuloDeDestino(destino: Destino): string {
 export function textoParaCompartir(
   cita: Cita,
   autor: Pick<Autor, 'nombre'> | undefined,
-  personaje?: Pick<Personaje, 'nombre'>,
+  /** El Personaje que declara la Cita, o `undefined`. Obligatorio, como en `textoParaCopiar`. */
+  personaje: Pick<Personaje, 'nombre'> | undefined,
 ): string {
   // Historia 35.4 — los mismos quienes que lo copiado: el Personaje delante, si lo hay.
   return textoParaCopiar(cita, autor, personaje);

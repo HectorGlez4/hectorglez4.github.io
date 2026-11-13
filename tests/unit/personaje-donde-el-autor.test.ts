@@ -11,6 +11,7 @@ import {
   limpiar,
   paginaConstruida,
 } from './ayuda/construir.js';
+import { mensajeDeDueñoSinPagina } from '../../src/lib/publicado.ts';
 
 /**
  * Historia 35.4 — el Personaje va donde va el Autor, sobre un sitio construido de verdad.
@@ -143,12 +144,26 @@ for (let i = 1; i <= 12; i += 1) {
   });
 }
 
+/** Sonda: lo que la Tarjeta Social de cada Cita lleva escrito, antes de rasterizarlo. */
+const SONDA_DE_TARJETAS = `---
+import { getStaticPaths } from './tarjeta/[slug].png.ts';
+const rutas = await getStaticPaths();
+---
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8" /><title>Sonda</title></head>
+<body><pre id="tarjetas">{JSON.stringify(rutas.map((r) => ({ slug: r.params.slug, ...r.props })))}</pre></body></html>
+`;
+
 let proyecto = '';
 let salida = '';
 let codigo = -1;
 
 beforeAll(async () => {
-  const r = await construirConCorpus(CORPUS, { jornada: '2026-11-12', ficheros: conLaPuertaAbierta() });
+  const r = await construirConCorpus(CORPUS, {
+    jornada: '2026-11-12',
+    ficheros: conLaPuertaAbierta(),
+    paginas: { 'sonda-tarjetas.astro': SONDA_DE_TARJETAS },
+  });
   proyecto = r.proyecto;
   salida = r.salida;
   codigo = r.codigo;
@@ -184,6 +199,17 @@ const hechos = (slug: string) =>
     .replace(/<[^>]*>/gu, '');
 const deEntidades = (texto: string) =>
   texto.replaceAll('&lt;', '<').replaceAll('&gt;', '>').replaceAll('&quot;', '"').replaceAll('&#34;', '"').replaceAll('&amp;', '&');
+/** Lo que se lleva «Compartir en»: el texto de la isla. */
+const compartido = (pagina: string) => {
+  const crudo = /<div[^>]*data-compartir[^>]*data-texto="([^"]*)"/u.exec(pagina)?.[1];
+  return crudo === undefined ? undefined : deEntidades(crudo);
+};
+/** Lo que la Tarjeta Social de una Cita lleva escrito (la sonda de `getStaticPaths`). */
+const tarjetaSocial = (slug: string) => {
+  const crudo = /<pre id="tarjetas">([\s\S]*?)<\/pre>/u.exec(html('/sonda-tarjetas/'))?.[1] ?? '[]';
+  const todas = JSON.parse(deEntidades(crudo)) as { slug: string; autor: string; procedencia: string }[];
+  return todas.find((t) => t.slug === slug);
+};
 const fragmento = (pagina: string) =>
   deEntidades(/<textarea id="fragmento-para-insertar"[^>]*>([\s\S]*?)<\/textarea>/u.exec(pagina)?.[1] ?? '');
 
@@ -220,6 +246,12 @@ describe('Historia 35.4 — la Página de Cita, fila a fila de la matriz', () =>
     expect(pagina).toContain('data-autor="Batman"');
     expect(pagina).toContain('data-procedencia="El caballero, 2000"');
     expect(fragmento(pagina)).toContain('<p>— Batman, <cite>El caballero</cite>. <a href=');
+    // Lo compartido es lo copiado, y la Tarjeta Social firma con el Personaje.
+    expect(compartido(pagina)).toBe(copiado(pagina) === undefined ? undefined : deEntidades(copiado(pagina)!));
+    expect(tarjetaSocial(B1)).toMatchObject({ autor: 'Batman', procedencia: 'El caballero, 2000' });
+    // Nada entre la Atribución —sin Fuente: la atribuida no la lleva— y Copiar (UX-DR113).
+    expect(pagina).not.toContain('class="fuente"');
+    expect(pagina).toMatch(/<\/figure>\s*<div class="fila-de-acciones"/u);
     // JSON-LD: sin `creator`, con `spokenByCharacter`; la Obra de un Personaje es una CreativeWork.
     const datos = jsonLd(pagina);
     expect(datos.creator).toBeUndefined();
@@ -247,6 +279,8 @@ describe('Historia 35.4 — la Página de Cita, fila a fila de la matriz', () =>
     expect(copiado(pagina)).toBe(`«${TEXTOS[B3]}» — Batman, Obras de Séneca, de Séneca, 2000.`);
     expect(pagina).toContain('data-procedencia="Obras de Séneca, de Séneca, 2000"');
     expect(fragmento(pagina)).toContain('<p>— Batman, <cite>Obras de Séneca</cite>, de Séneca. <a href=');
+    expect(compartido(pagina)).toBe(`«${TEXTOS[B3]}» — Batman, Obras de Séneca, de Séneca, 2000.`);
+    expect(tarjetaSocial(B3)).toMatchObject({ autor: 'Batman', procedencia: 'Obras de Séneca, de Séneca, 2000' });
     // Tarjeta de Obra: la Obra es de Séneca.
     expect(hechos(B3)).toBe('Séneca · 2000 · 1 cita');
     const datos = jsonLd(pagina);
@@ -273,6 +307,8 @@ describe('Historia 35.4 — la Página de Cita, fila a fila de la matriz', () =>
     expect(a).not.toContain('Sin obra documentada');
     expect(copiado(pagina)).toBe(`«${TEXTOS[B4]}» — Batman, de Séneca, 2000.`);
     expect(fragmento(pagina)).toContain('<p>— Batman, de Séneca. <a href=');
+    expect(compartido(pagina)).toBe(`«${TEXTOS[B4]}» — Batman, de Séneca, 2000.`);
+    expect(tarjetaSocial(B4)).toMatchObject({ autor: 'Batman', procedencia: 'de Séneca, 2000' });
     expect(tarjetaDeObra(B4)).toBe('');
     expect(jsonLd(pagina).isPartOf).toBeUndefined();
   });
@@ -301,6 +337,8 @@ describe('Historia 35.4 — la Página de Cita, fila a fila de la matriz', () =>
     expect(copiado(pagina)).toBe('«No es que tengamos poco tiempo, es que perdemos mucho.» — Séneca, Sobre la brevedad de la vida, 49.');
     expect(pagina).toContain('data-autor="Séneca"');
     expect(pagina).toContain('data-procedencia="Sobre la brevedad de la vida, 49"');
+    expect(compartido(pagina)).toBe('«No es que tengamos poco tiempo, es que perdemos mucho.» — Séneca, Sobre la brevedad de la vida, 49.');
+    expect(tarjetaSocial(S1)).toMatchObject({ autor: 'Séneca', procedencia: 'Sobre la brevedad de la vida, 49' });
     expect(fragmento(pagina)).toContain('<p>— Séneca, <cite>Sobre la brevedad de la vida</cite>. <a href=');
     expect(desplegables(pagina)).toContain('Cómo citar');
     expect(desplegables(pagina).at(-1)).toBe('Inserta esta cita');
@@ -380,5 +418,16 @@ describe('Historia 35.4 — una Cita con Personaje y Autor está en los dos', ()
     expect(tarjeta(B3)).toMatch(/class="autor"[^>]*>Batman</u);
     expect(tarjeta(B3)).not.toMatch(/class="autor"[^>]*>Séneca</u);
     expect(tarjeta(S1)).toMatch(/class="autor"[^>]*>Séneca</u);
+  });
+});
+
+describe('Historia 35.4 — una Obra cuyo dueño no tiene página', () => {
+  it('lo dice con su tipo y, si es un Personaje, por qué y qué hace falta', () => {
+    const dePersonaje = mensajeDeDueñoSinPagina({ nombre: 'batman--el-alba', dueño: { tipo: 'personaje', slug: 'batman' } });
+    expect(dePersonaje).toMatch(/«batman--el-alba» es del Personaje «batman», y ninguna Cita publicada lo declara/u);
+    expect(dePersonaje).toContain('«personajes»');
+    expect(mensajeDeDueñoSinPagina({ nombre: 'seneca--x', dueño: { tipo: 'autor', slug: 'seneca' } })).toMatch(
+      /del Autor «seneca», que no tiene página publicada/u,
+    );
   });
 });

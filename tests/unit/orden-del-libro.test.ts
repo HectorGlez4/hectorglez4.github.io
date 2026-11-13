@@ -1189,6 +1189,14 @@ describe('31.1 — posicionesDeCitas: el pasaje de cada aparición, con el tope 
     }
   });
 
+  it('Historia 35.4 — una atribuida con Fuente y su texto en el documento no trae pasaje, ni con tope', () => {
+    const atribuida = { ...frontmatter('atribuida', 'la frase de dentro'), clase: 'atribuida', personaje: 'batman' };
+    const posiciones = posicionesDeCitas([atribuida, ...citas], documentos, { tope: 1200, lineasDeclaradas });
+    expect(posiciones.get('atribuida')).toEqual([]);
+    // La de siempre con el mismo texto, en la misma pasada, sí lo trae.
+    expect(posiciones.get('dentro')?.[0].pasaje).toBeDefined();
+  });
+
   it('el tope en el borde lo ofrece; uno por debajo, no', () => {
     const largo = [...'Un párrafo entero en su línea, con la frase de dentro y algo más.'].length;
     const con = (tope: number) => posicionesDeCitas(citas, documentos, { tope, lineasDeclaradas }).get('dentro')?.[0];

@@ -41,7 +41,12 @@ const fijaciones = fijacionesDeclaradas(portada);
 const lote = materialDelLote(aptasParaPortada(conjunto.citas), fijaciones, jornada);
 
 // Las Citas del material son aptas para portada, y una apta lleva Autor (la atribuida nunca lo es).
-const autorDe = (slug: string | undefined) => conjunto.autores.find((a) => a.slug === slug)!;
+// El material son Citas aptas para portada, que declaran Autor: si no lo trajera, se para aquí.
+const autorDe = (slug: string | undefined) => {
+  const autor = conjunto.autores.find((a) => a.slug === slug);
+  if (autor === undefined) throw new Error(`El material lleva una Cita cuyo Autor «${slug ?? 'ninguno'}» no está en el Corpus.`);
+  return autor;
+};
 
 /** Cada jornada con sus piezas ya emparejadas con su Autor, como hace el Kit. */
 const jornadas = lote.map((dia) => ({

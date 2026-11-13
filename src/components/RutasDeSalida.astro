@@ -53,6 +53,11 @@ interface Props {
    * si lo declara; si no, su Autor. Es el de «Más de {…}» y su cierre.
    */
   dueño: Dueño & { nombre: string };
+  /**
+   * El Autor que declara la Cita que se lee (`cita.autor`, `undefined` si ninguno): con un dueño
+   * Personaje, la Obra de «De la misma obra» puede ser la suya (Historia 35.4). Obligatoria.
+   */
+  autorDeLaCita: string | undefined;
   /** Lo que pinta el pie, decidido por `rutasDeSalidaDeCita`. */
   rutas: RutasDeSalidaDeCita;
   /**
@@ -64,7 +69,7 @@ interface Props {
   zona: Zona;
 }
 
-const { dueño, rutas, zona } = Astro.props;
+const { dueño, autorDeLaCita, rutas, zona } = Astro.props;
 const { mismaObra, delDueño, temas } = rutas;
 
 /*
@@ -75,7 +80,7 @@ const { mismaObra, delDueño, temas } = rutas;
  * «Siguiente» lo garantiza solo `rutasDeSalidaDeCita`: el componente no recibe ninguna de las dos,
  * y un uso nuevo (la portada, 28.2) la llama a ella.
  */
-const problema = problemaDeRutasDeSalida(dueño, rutas);
+const problema = problemaDeRutasDeSalida(dueño, rutas, autorDeLaCita);
 if (problema !== undefined) {
   throw new Error(`RutasDeSalida: en ${Astro.url.pathname}, ${problema}`);
 }

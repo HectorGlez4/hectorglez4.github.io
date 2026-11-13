@@ -156,7 +156,8 @@ export function fraseDeTraduccion(
 export function textoParaCopiar(
   cita: Cita,
   autor: Pick<Autor, 'nombre'> | undefined,
-  personaje?: Pick<Personaje, 'nombre'>,
+  /** El Personaje que declara la Cita, o `undefined`. Obligatorio: un uso nuevo no lo olvida. */
+  personaje: Pick<Personaje, 'nombre'> | undefined,
 ): string {
   // Historia 35.4 — «— {Personaje}, {título}, de {Autor}, {año}.»; sin Personaje, como siempre.
   const quienes = { autor, personaje };
@@ -911,7 +912,8 @@ export function fragmentoParaInsertar(
   cita: Pick<Cita, 'slug' | 'texto' | 'obra' | 'procedencia'>,
   autor: Pick<Autor, 'nombre'> | undefined,
   canonica: string,
-  personaje?: Pick<Personaje, 'nombre'>,
+  /** El Personaje que declara la Cita, o `undefined`. Obligatorio: un uso nuevo no lo olvida. */
+  personaje: Pick<Personaje, 'nombre'> | undefined,
 ): string {
   let url: URL | undefined;
   try {

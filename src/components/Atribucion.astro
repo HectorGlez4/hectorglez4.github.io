@@ -62,10 +62,13 @@ if (autor?.slug !== cita.autor) {
  */
 const quienes = { autor, personaje };
 const nombre = nombreEnAtribucion(cita, quienes);
-const nombrado =
-  personaje !== undefined
-    ? { ruta: rutaDePersonaje(personaje.slug), nombre }
-    : { ruta: autor === undefined ? undefined : rutaDeAutor(autor.slug), nombre };
+// Sin ninguno de los dos no hay a quién nombrar ni a dónde enlazar: se para aquí, con su nombre.
+const rutaDelNombre =
+  personaje !== undefined ? rutaDePersonaje(personaje.slug) : autor !== undefined ? rutaDeAutor(autor.slug) : undefined;
+if (rutaDelNombre === undefined) {
+  throw new Error(`Atribución de ${cita.slug}: la Cita no declara ni Autor ni Personaje, y no hay a quién nombrar.`);
+}
+const nombrado = { ruta: rutaDelNombre, nombre };
 /*
  * La línea de procedencia la compone `lineaDeProcedencia` (src/lib/atribucion.ts) en piezas:
  * el título de la Obra, si consta, «de {Autor}» si la Cita tiene Personaje y Autor, y lo que les
@@ -74,6 +77,13 @@ const nombrado =
  */
 const linea = lineaDeProcedencia(cita, quienes);
 const enlaceDeObra = cita.obra === undefined ? undefined : rutaDeLaObra(cita.obra);
+/*
+ * «de {Autor}» solo lo compone `lineaDeProcedencia` con un Autor: si llegara sin él, `resto` ya
+ * va cortado tras el Autor y la línea lo perdería en silencio. Se para.
+ */
+if (linea.deAutor !== undefined && autor === undefined) {
+  throw new Error(`Atribución de ${cita.slug}: la línea de la Obra dice «de ${linea.deAutor.nombre}» y no llega ningún Autor.`);
+}
 const enlaceDelAutor = linea.deAutor === undefined || autor === undefined ? undefined : rutaDeAutor(autor.slug);
 ---
 

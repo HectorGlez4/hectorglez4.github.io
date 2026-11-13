@@ -5,7 +5,7 @@ created: '2026-11-12'
 status: 'done'
 baseline_revision: 'c9718b39ebb774fa8b3b537444ce784d764eb368'
 review_loop_iteration: 0
-followup_review_recommended: false
+followup_review_recommended: true
 context:
   - '{project-root}/AGENTS.md'
   - '{project-root}/_bmad-output/implementation-artifacts/epic-35-context.md'
@@ -30,6 +30,30 @@ deferred:
   - summary: 'La línea de procedencia de la Tarjeta Social y de la Imagen es una sola línea sin reparto: una atribución larga («{título}, de {Autor}, {año}») puede salirse por el ancho, como ya puede hoy un título largo. La prueba de tramos mide el alto (la tabla de AD-8), no el ancho de esa línea.'
     evidence: 'src/lib/tarjeta.ts svgDeTarjeta (procedencia en un solo <text>); public/islas/imagen.js (fillText de la procedencia).'
     severity: low
+  - summary: >-
+      La prueba e2e `tests/e2e/busqueda.spec.ts:502` exige que «colección» dé algún resultado, y ninguna página del Corpus real la contiene: queda en rojo por el Corpus, no por esta historia.
+    evidence: |-
+      Verificación de la 35.4 (logs/s-35/e2e-35.4.log): 1 en rojo previa al cambio; dist/ idéntico fuera de pagefind/ con el Corpus real. Que una Cita diga la palabra o que la prueba deje de exigirla lo decide Héctor.
+    location: >-
+      tests/e2e/busqueda.spec.ts:502
+    severity: low
+  - summary: >-
+      `concentracionDe` (src/lib/meta.ts) sigue dividiendo por todas las Citas, también las de un Personaje sin Autor, así que el peso de cada Autor frente al techo se diluye cuando haya atribuidas; qué cuenta solo la clase de siempre es de la Historia 35.7.
+    evidence: |-
+      `const total = citas.length` tras saltar en `porAutor` las Citas sin Autor (revisión 35.4, edge-case-hunter). Con el Corpus real no hay ninguna, así que hoy no mueve ninguna cifra.
+    location: >-
+      src/lib/meta.ts concentracionDe
+    severity: low
+  - summary: >-
+      Las páginas 2+ de la Página de Obra de un Personaje (Cabecera, título, meta, sin «Buscar en esta obra») no tienen prueba sobre dist/: el fixture de la 35.4 tiene dos Citas de Batman y una sola página.
+    evidence: |-
+      tests/unit/personaje-donde-el-autor.test.ts solo construye /obra/batman/el-caballero/; la Cabecera de las 2+ sale del mismo marcado que la página 1 (src/pages/obra/[autor]/[slug]/[...page].astro).
+    severity: low
+  - summary: >-
+      Una ficha de Personaje que solo resuelven Citas de otros Personajes de su `personajes` (ninguna declara al dueño) para la construcción: su dueño no tiene página y la Cabecera enlazaría a un 404. El build lo dice ahora con su causa (`mensajeDeDueñoSinPagina`); si una ficha así debe admitirse —y a dónde enlaza entonces— lo decide Héctor (bmad-architecture).
+    evidence: |-
+      src/pages/obra/[autor]/[slug]/[...page].astro y src/pages/tarjeta/obra/[autor]/[slug].png.ts resuelven el dueño entre `personajesPublicados`; `fichasDeCita` resuelve una ficha de Personaje por su lista `personajes` (src/lib/obras.ts). La guarda de la 35.2 que lo tapaba se levantó en esta historia.
+    severity: medium
 ---
 
 <intent-contract>
@@ -131,6 +155,31 @@ deferred:
 - addressed_findings:
   - none
 
+### 2026-11-13 — Review pass
+- intent_gap: 0
+- bad_spec: 0
+- patch: 17: (high 0, medium 4, low 13)
+- defer: 4: (high 0, medium 1, low 3)
+- reject: 21: (high 0, medium 0, low 21)
+- addressed_findings:
+  - `[medium]` `[patch]` `problemaDeRutasDeSalida` no juzgaba el dueño de «De la misma obra» con un dueño Personaje: recibe ahora `autorDeLaCita` (obligatorio, también como prop de `RutasDeSalida.astro`) y solo admite la Obra del Personaje o la del Autor que declara la Cita; prueba con Batman, Séneca, Epicteto y Joker en `rutas-de-salida.test.ts`.
+  - `[medium]` `[patch]` La ficha de un Personaje que solo resuelven Citas de otros Personajes paraba la construcción con «no debería pasar» y un mensaje sin causa: `mensajeDeDueñoSinPagina` (`src/lib/publicado.ts`) lo dice con su tipo, su causa y qué hace falta, en la Página de Obra y en su Tarjeta Social; la decisión de fondo, diferida a Héctor.
+  - `[medium]` `[patch]` La Tarjeta Social de una Cita con Personaje no tenía prueba: una sonda de `getStaticPaths` en `personaje-donde-el-autor.test.ts` fija nombre y procedencia de B1, B3, B4 y S1.
+  - `[medium]` `[patch]` Lo compartido (`data-compartir data-texto`) no tenía prueba con Personaje: se fija en B1, B3, B4 y S1.
+  - `[low]` `[patch]` `Atribucion.astro` pintaba `<a>` sin `href` sin Autor ni Personaje: se para con su nombre.
+  - `[low]` `[patch]` `Atribucion.astro` perdía en silencio «, de {Autor}» si llegaba `deAutor` sin Autor: se para.
+  - `[low]` `[patch]` El título y la meta de la Página de Cita podían decir «— undefined»: se para.
+  - `[low]` `[patch]` «Cómo citar» se escondía en silencio con `autor === undefined`: lo decide solo `citaTieneComoCitar`, y una de siempre sin Autor para la construcción.
+  - `[low]` `[patch]` `kit.astro` y `lote.astro` callaban el tipo con `!`: buscan el Autor y se paran si falta.
+  - `[low]` `[patch]` `tools/lib/piezas.ts` callaba el tipo con `as Autor`: se comprueba.
+  - `[low]` `[patch]` `textoParaCopiar`, `textoParaCompartir` y `fragmentoParaInsertar` tomaban `personaje?` opcional: ahora es obligatorio (`Personaje | undefined`), como en los componentes.
+  - `[low]` `[patch]` El mensaje de `TarjetaDeObra.astro` no decía el tipo de los dos dueños: lo dice.
+  - `[low]` `[patch]` `concentracionDe` rompía con `ordenados[0]!` si ninguna Cita declara Autor: devuelve `undefined`.
+  - `[low]` `[patch]` `MaterialParaPublicar.astro` copiaba sin Personaje por supuesto: se para si una Cita del material lo declara.
+  - `[low]` `[patch]` `clavesDeOrden` sin prueba de una Obra de Personaje con Citas que declaran Autor: caso en `clave-de-orden.test.ts`.
+  - `[low]` `[patch]` La exclusión del pasaje de la atribuida en el cargador no tenía prueba con Fuente y tope: caso en `orden-del-libro.test.ts`.
+  - `[low]` `[patch]` «Nada entre la Atribución y Copiar» de la atribuida no se afirmaba: se fija en B1.
+
 ## Design Notes
 
 - **`creator` y no `author`**: ver `deferred[0]`. La prueba de los tres casos mira `creator` y `spokenByCharacter`.
@@ -153,7 +202,25 @@ deferred:
 ## Auto Run Result
 
 Status: done
-Blocking condition: ninguna. Capas de revisión externas, sin hallazgos en esta pasada.
+Blocking condition: ninguna.
+
+### Pasada de revisión 1 (2026-11-13), con los hallazgos de las cinco capas externas
+
+**Cambio de esta pasada.** Se cierran los huecos que señalaron las capas: `problemaDeRutasDeSalida` juzga el dueño de «De la misma obra» también con un dueño Personaje (nuevo parámetro obligatorio `autorDeLaCita`, y prop de `RutasDeSalida.astro`); lo que antes se callaba o pintaba un hueco ahora para la construcción con su nombre (Atribución sin dueño o con «de {Autor}» sin Autor, título y meta sin nombre, «Cómo citar» de una de siempre sin Autor, material del Kit con Personaje, `!` de `kit`/`lote`, `as Autor` de las Piezas, `concentracionDe` sin Autores); el Personaje es parámetro obligatorio de `textoParaCopiar`, `textoParaCompartir` y `fragmentoParaInsertar`; el dueño sin página de una Obra de Personaje se dice con su causa (`mensajeDeDueñoSinPagina`), y el mensaje de `TarjetaDeObra` nombra el tipo de los dos dueños. Pruebas nuevas: lo compartido y la Tarjeta Social de Cita con Personaje (sonda de `getStaticPaths`), nada entre Atribución y Copiar en la atribuida, «De la misma obra» con dueño Personaje, la clave de orden de una Obra de Personaje con Citas que declaran Autor y el pasaje de una atribuida con Fuente y tope.
+
+**Ficheros de esta pasada.** `src/lib/publicado.ts` (`problemaDeRutasDeSalida` con `autorDeLaCita`, `mensajeDeDueñoSinPagina`); `src/lib/atribucion.ts` y `src/lib/compartir.ts` (Personaje obligatorio); `src/lib/meta.ts` (sin Autores, sin concentración); `src/components/{Atribucion,RutasDeSalida,TarjetaDeObra,MaterialParaPublicar}.astro` (guardas y prop); `src/pages/cita/[slug].astro` (título, meta y «Cómo citar»); `src/pages/{kit,lote}.astro`; `src/pages/obra/[autor]/[slug]/[...page].astro` y `src/pages/tarjeta/obra/[autor]/[slug].png.ts` (mensaje del dueño sin página); `tools/lib/piezas.ts`; pruebas `personaje-donde-el-autor`, `rutas-de-salida`, `tarjeta-de-obra`, `clave-de-orden`, `orden-del-libro`, `atribucion`, `compartir`, `obras`.
+
+**Revisión.** Parches 17 (0 high, 4 medium, 13 low), diferidos 4 (la e2e de «colección» que rompe por el Corpus, el denominador de `concentracionDe` para la 35.7, las páginas 2+ de una Obra de Personaje sin prueba y la ficha de Personaje cuyo dueño no tiene página, para Héctor), rechazados 21 (duplicados de los diferidos de `creator`/`author`, la serif y el año sin Obra; decisiones del intent como «Más de {Personaje}» con Autor y lo aplazado a la 35.5; supuestos que el esquema ya impide —Cita sin dueño, nombre vacío, Autor desconocido en la clave—, y estilo de las pruebas). Revisión de seguimiento: recomendada (`true`): 4 medium y 13 low, puntuación 3 × 4 + 13 = 25.
+
+**Verificación de esta pasada.**
+- `npx astro check`: 0 errores, 0 avisos.
+- Por fichero: `clave-de-orden`, `compartir`, `atribucion` (164) y, detached, `personaje-donde-el-autor`, `rutas-de-salida`, `tarjeta-de-obra`, `orden-del-libro`, `obras`, `pasaje`, `tarjeta-de-cita`, `medicion`, `personajes-build` (1.082) en verde (`logs/s-35/triage-35.4-1-ficheros.log`).
+- `npm test` completo (detached, `logs/s-35/npm-test-35.4-t1.log`): 181 ficheros, 8.047 pruebas, EXIT 0.
+- Corpus real con `FECHA_JORNADA=2026-11-12`: base en `git worktree add --detach` de `14303d941d` y árbol con los parches; `diff -r -x pagefind` sin salida (`logs/s-35/triage-35.4-1-distdiff.log`, 0 bytes).
+
+**Riesgos de esta pasada.** Una Pieza (`tools/lib/piezas.ts`) firma una Cita con Personaje y Autor solo con el Autor —su firma la compone `citaEnPieza`, no `firmaDeCita`—; con el Corpus real no hay ninguna. La comprobación `atribuida` de `ofrecePasaje` sigue siendo defensa en profundidad: en el cargador, la atribuida ya se salta antes (35.2).
+
+### Primera pasada (construcción)
 
 **Cambio.** Se levantan las dos guardas de la 35.2 (`reglaDeAutorPublicado`/`MENSAJE_PUBLICADA_SIN_AUTOR` y `MENSAJE_OBRA_DE_PERSONAJE_PUBLICADA`) y `Cita.autor` pasa a opcional en `src/`; la Cita plana lleva además `clase` solo si es atribuida (por `esAtribuida`). El nombre lo compone una sola función, `firmaDeCita` de `src/lib/atribucion.ts` (Personaje, Obra, «de {Autor}» solo con los dos, año), que usan lo copiado, lo compartido, la Imagen, la Tarjeta Social de Cita, el Fragmento, `nombreEnAtribucion` y la línea de Obra de la Atribución (`lineaDeProcedencia` con `deAutor`). El dueño de las Rutas y de «Siguiente» es `dueñoDeLaRuta` (Personaje primero), con `delDueño`, «Más de {Personaje}» y `cierreDeMasDelPersonaje`; la Tarjeta de Obra recibe `dueño` (`obra.dueño`); la Tarjeta de Cita `autor-y-obra` recibe `personaje`; JSON-LD con `creator` solo si hay Autor, `spokenByCharacter` y `isPartOf` `CreativeWork` para la Obra de un Personaje; la Página de Obra de un Personaje con su Cabecera, título, meta, JSON-LD `character` y Tarjeta Social, sin «Buscar en esta obra»; «Cómo citar» y el pasaje excluyen la atribuida (`citaTieneComoCitar`, `ofrecePasaje` con motivo `CLASE_ATRIBUIDA`). Una Cita sin Autor no cuenta para ningún Autor (filtros, mapa de Obras, claves por dueño, meta, huecos, salud, Cita del Día, sindicación, Pieza), y la arista Directorio de Obras → Obra sale de lo que pinta `/obras/`.
 
