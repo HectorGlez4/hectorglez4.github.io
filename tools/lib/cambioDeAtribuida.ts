@@ -29,6 +29,7 @@
 
 import { readFile, writeFile } from 'node:fs/promises';
 import { basename, dirname } from 'node:path';
+import { isDeepStrictEqual } from 'node:util';
 import {
   escribirCita,
   leerAutores,
@@ -296,24 +297,37 @@ export async function cambiarAtribuida(
     );
   }
 
-  const original = await readFile(cita.ruta, 'utf8');
+  let original: string;
+  try {
+    original = await readFile(cita.ruta, 'utf8');
+  } catch (fallo) {
+    return negar(`${cita.ruta} no se deja leer (${fallo instanceof Error ? fallo.message : String(fallo)}).`);
+  }
   const datos = separarFrontmatter(original);
   if (datos === null) return negar(`${cita.ruta} no tiene frontmatter.`);
 
   const compuesto = componer(cambio, datos);
   if (!compuesto.ok) return negar(...compuesto.motivos);
   const nuevos = compuesto.datos;
-  // Un cambio que deja la Cita como estaba no reescribe nada ni se da por hecho.
-  if (JSON.stringify(nuevos) === JSON.stringify(datos)) {
+  // Un cambio que deja la Cita como estaba no reescribe nada ni se da por hecho; el orden de las
+  // claves en el fichero no cuenta.
+  if (isDeepStrictEqual(nuevos, datos)) {
     return negar(`Nada que cambiar: «${cambio.slug}» ya dice eso.`);
   }
 
   // ── El Autor o el Personaje que se añade existe ──
-  const [autores, personajes, fichasEnDisco] = await Promise.all([
-    leerAutores(rutas),
-    leerPersonajes(rutas),
-    leerFichasDeObra(rutas),
-  ]);
+  let autores: Awaited<ReturnType<typeof leerAutores>>;
+  let personajes: Awaited<ReturnType<typeof leerPersonajes>>;
+  let fichasEnDisco: Awaited<ReturnType<typeof leerFichasDeObra>>;
+  try {
+    [autores, personajes, fichasEnDisco] = await Promise.all([
+      leerAutores(rutas),
+      leerPersonajes(rutas),
+      leerFichasDeObra(rutas),
+    ]);
+  } catch (fallo) {
+    return negar(`El Corpus no se deja leer (${fallo instanceof Error ? fallo.message : String(fallo)}).`);
+  }
   if (cambio.tipo === 'autor' && !autores.some((a) => a.slug === cambio.autor)) {
     return negar(`El Autor «${cambio.autor}» no existe en ${rutas.autores}.`);
   }
@@ -359,12 +373,16 @@ export async function cambiarAtribuida(
   let plan: PlanDeFicha | undefined;
   const conLaSustituida = [...publicadas.filter((c) => c !== cita), { ...nuevos, slug: cambio.slug }];
   if (cambio.tipo === 'obra') {
-    plan = await resolverFichaDeObra(rutas, {
-      ...(typeof nuevos.autor === 'string' ? { autor: nuevos.autor } : {}),
-      ...(typeof nuevos.personaje === 'string' ? { personaje: nuevos.personaje } : {}),
-      obra: procedenciaNueva.obra ?? cambio.obra.trim(),
-      citasPublicadas: conLaSustituida as Parameters<typeof resolverFichaDeObra>[1]['citasPublicadas'],
-    });
+    try {
+      plan = await resolverFichaDeObra(rutas, {
+        ...(typeof nuevos.autor === 'string' ? { autor: nuevos.autor } : {}),
+        ...(typeof nuevos.personaje === 'string' ? { personaje: nuevos.personaje } : {}),
+        obra: procedenciaNueva.obra ?? cambio.obra.trim(),
+        citasPublicadas: conLaSustituida as Parameters<typeof resolverFichaDeObra>[1]['citasPublicadas'],
+      });
+    } catch (fallo) {
+      return negar(`Las Fichas de Obra no se dejan leer (${fallo instanceof Error ? fallo.message : String(fallo)}).`);
+    }
     if (!plan.ok) return negar(...plan.motivos);
   } else if (typeof procedenciaNueva.obra === 'string') {
     const antes = fichaDeCita(comoCitaDeObra(datos), indice)?.nombre;

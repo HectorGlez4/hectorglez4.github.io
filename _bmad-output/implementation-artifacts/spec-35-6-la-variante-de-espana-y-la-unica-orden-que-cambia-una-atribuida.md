@@ -157,6 +157,19 @@ deferred:
   - `[low]` `[patch]` Índice FR-14 del alta: la Variante de una candidata podía pisar el texto de otra, y una Variante de forma canónica vacía se indexaba bajo «»: las Variantes se indexan después de los textos sin pisarlos y nunca con clave vacía (también en `revisar`).
   - `[low]` `[patch]` Pruebas débiles: el duplicado por Variante del build fija ahora que el fallo nombra la otra Cita de Buzz (los textos difieren), la línea fija su `margin: var(--unidad) 0 0`, y `fecha-de-cambio.test.ts` prueba que un cambio solo de `variante` fecha la Página de Cita y ningún listado. AGENTS.md dice el intercambio con la letra tecleada, el `--origen` del intercambio por `variante`, «Nada que cambiar», la Variante en blanco o igual al texto y la bandera sin valor.
 
+### 2026-11-13 — Review pass
+- intent_gap: 0
+- bad_spec: 0
+- patch: 4: (high 0, medium 1, low 3)
+- defer: 0
+- reject: 38
+- addressed_findings:
+  - `[medium]` `[patch]` Un fichero del Corpus que no se deja leer (un YAML de Autor, Personaje u Obra mal formado, la propia Cita ilegible, o las fichas al resolver la Obra) hacía que `cambiarAtribuida` rechazara la promesa y la orden muriera con una traza en vez del código 1 con su motivo: las lecturas fuera del primer `try` van ahora dentro de uno y se niegan con «El Corpus no se deja leer»; prueba nueva en `atribuida-cli.test.ts` (Autor con YAML roto en la copia → negativa, nada escrito; en rojo sin el arreglo).
+  - `[low]` `[patch]` «Nada que cambiar» comparaba con `JSON.stringify`, sensible al orden de las claves: una Variante igual guardada como `{origen, region, texto}` se reescribía y se daba por «Cambiada». Ahora `isDeepStrictEqual`; prueba nueva (en rojo sin el arreglo).
+  - `[low]` `[patch]` Sin prueba de que el intercambio por `variante` con el `--origen` de la Variante (y no el del texto) se niegue nombrando los valores: fila nueva en `atribuida-cli.test.ts`.
+  - `[low]` `[patch]` Sin prueba del aviso FR-14 contra la Variante de una **candidata** (alta sin forzar) ni del `duplicaA` de `revisar` entre dos candidatas por Variante: dos pruebas nuevas en `duplicados.test.ts`, comprobadas por mutación (sin el índice de Variantes en revisión del alta, o sin `vistasEnRevision.set` de la Variante en `revisar`, caen las dos).
+  - Rechazados, entre otros: el parecido entre el texto y su propia Variante (la regla de la historia mide lo nuevo contra lo publicado; el esquema ya veda la igualdad canónica), el `--` como fin de opciones, la escritura no atómica o concurrente, los `cast`, los `null` en campos que la convención omite, el tope en la puerta y no en el esquema, `/buscar/` frente al índice, la Tarjeta Social por su punto final (este cambio no lo toca), «el único camino» como propiedad comprobada y las suposiciones ya diferidas (solo añadir, el intercambio en un gesto): ya juzgados en la pasada anterior o especulativos.
+
 ## Design Notes
 
 - **Duplicados, dos niveles.** La puerta estricta de la atribuida (`fallosDeAtribuidas`, sin `--con-duplicados`) compara las formas {texto, variante} de cada atribuida juzgada contra las de toda otra Cita; el build la corre sobre todas las atribuidas, así que una de siempre que repita la Variante de una publicada también rompe el build. El aviso FR-14 del alta y la aprobación (`posiblesDuplicados`, `duplicaA`) indexa además las variantes, para que el alta de una de siempre lo vea antes de escribir.
@@ -231,3 +244,22 @@ Blocking condition: ninguna.
 - `npm test` entero, desatendido: 185 ficheros, 8.190 pruebas, verde.
 
 **Riesgos residuales.** El aviso FR-14 de `revisar` sigue comparando por forma canónica igual, como hace con los textos; la puerta estricta usa `parecidoEntre`. «El único camino» es procedimiento (AGENTS.md, la negativa de `documentar`): una edición a mano que pase el esquema y la puerta no se detecta.
+
+### Pasada de revisión 2 (2026-11-13)
+
+**Resumen.** Cuatro parches pequeños, sin tocar el contrato: la orden ya no muere con una traza ante un fichero del Corpus ilegible —se niega con 1 y su motivo—; «Nada que cambiar» no depende del orden de las claves del fichero; y tres pruebas que faltaban (la negativa del intercambio por `variante` con el `--origen` equivocado, el aviso FR-14 del alta contra la Variante de una candidata y el `duplicaA` de `revisar` entre dos candidatas por Variante).
+
+**Ficheros.**
+- `tools/lib/cambioDeAtribuida.ts` — lecturas de la Cita, de Autores, Personajes y fichas, y `resolverFichaDeObra`, dentro de `try` con negativa; comparación con `isDeepStrictEqual`.
+- `tests/unit/atribuida-cli.test.ts` — tres pruebas nuevas.
+- `tests/unit/duplicados.test.ts` — dos pruebas nuevas.
+
+**Revisión.** 4 parches (medium 1, low 3), 0 diferidos, 38 rechazados. Seguimiento recomendado: sí por la regla (parcheados high 0, medium 1, low 3; puntuación 3×1+3 = 6 ≥ 5), aunque tres de los cuatro parches son solo pruebas.
+
+**Verificación.**
+- `npx vitest run tests/unit/atribuida-cli.test.ts` (46) y `tests/unit/duplicados.test.ts` (30): verde; las dos pruebas de la orden en rojo antes del arreglo, y las dos de FR-14 en rojo bajo mutación.
+- `npx astro check`: 0 errores.
+- El cambio no toca `src/`, `integraciones/` ni la configuración: `dist/` no puede cambiar (el cotejo de la pasada anterior sigue valiendo).
+- `npm test` entero, desatendido: 185 ficheros, 8.195 pruebas, verde.
+
+**Riesgos residuales.** Los de la pasada anterior: el aviso FR-14 de `revisar` compara por forma canónica igual; «el único camino» es procedimiento; las dos suposiciones diferidas las decide Héctor.

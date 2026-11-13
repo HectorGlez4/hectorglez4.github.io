@@ -232,6 +232,32 @@ describe('Historia 35.6 — `texto` y `variante`', () => {
     await seNiega({ tipo: 'variante', slug: A1, texto: VARIANTE_A1, region: 'espana', origen: 'doblaje' }, /Nada que cambiar/u);
   });
 
+  it('una Variante igual a la que ya hay, guardada con sus claves en otro orden, tampoco reescribe nada', async () => {
+    const corpus = { ...CORPUS };
+    corpus[FICHEROS.A1] = atribuida({
+      slug: A1,
+      texto: TEXTO_A1,
+      autor: undefined,
+      personaje: 'buzz',
+      procedencia: { año: 1995 },
+      origen: 'original',
+      variante: { origen: 'doblaje', region: 'espana', texto: VARIANTE_A1 },
+    });
+    const directorio = await enDisco(corpus);
+    const antes = await instantanea(directorio);
+    const r = await cambiar(directorio, { tipo: 'variante', slug: A1, texto: VARIANTE_A1, region: 'espana', origen: 'doblaje' });
+    expect(r.ok).toBe(false);
+    if (!r.ok) expect(r.motivos.join('\n')).toMatch(/Nada que cambiar/u);
+    expect(await instantanea(directorio)).toEqual(antes);
+  });
+
+  it('el intercambio por `variante` con el origen de la Variante, y no el del texto, se niega nombrando los valores', async () => {
+    await seNiega(
+      { tipo: 'variante', slug: A1, texto: TEXTO_A1, region: 'espana', origen: 'doblaje' },
+      /\{region: espana, origen: original\}.*Declárela con esos valores/su,
+    );
+  });
+
   it('una Variante igual al texto, con la región y el origen que resultan, intercambia igual', async () => {
     const directorio = await enDisco();
     const r = await cambiar(directorio, { tipo: 'variante', slug: A1, texto: TEXTO_A1, region: 'espana', origen: 'original' });
@@ -259,6 +285,15 @@ describe('Historia 35.6 — `texto` y `variante`', () => {
       { tipo: 'variante', slug: A4, texto: 'Nada que ver con la frase de la Cita, otra cosa entera.', region: 'espana', origen: 'doblaje' },
       /La Variante nueva se parece/u,
     );
+  });
+
+  it('un fichero del Corpus que no se deja leer niega la orden con su motivo, sin escribir ni lanzar', async () => {
+    const directorio = await enDisco({ ...CORPUS, 'autores/roto.yml': 'nombre: [sin cerrar\n' });
+    const antes = await instantanea(directorio);
+    const r = await cambiar(directorio, { tipo: 'texto', slug: A1, texto: 'Hasta el infinito y más allá, ¡guardián del cosmos!' });
+    expect(r.ok).toBe(false);
+    if (!r.ok) expect(r.motivos.join('\n')).toMatch(/El Corpus no se deja leer/u);
+    expect(await instantanea(directorio)).toEqual(antes);
   });
 
   it('una Variante de una región ajena se niega', async () => {

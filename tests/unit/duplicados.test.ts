@@ -499,6 +499,31 @@ describe('Historia 35.6 — la Variante cuenta como duplicado', () => {
     ]);
   });
 
+  it('el alta de una de siempre que repite la Variante de una candidata la señala (FR-14) en revisión y no escribe nada', async () => {
+    const rutas = await conBuzz();
+    const deLaCandidata = 'La patrulla nunca duerme cuando la ciudad sueña despierta.';
+    await candidataDeBuzz(rutas, 'la-patrulla-vigila', 'La patrulla vigila mientras la ciudad duerme tranquila.', deLaCandidata);
+    const antes = await ficherosPublicados(rutas);
+    const informe = await darDeAltaLote([{ ...ORIGINAL, texto: deLaCandidata }], rutas);
+    expect(informe.posiblesDuplicados).toEqual([
+      expect.objectContaining({ coincideCon: 'buzz-la-patrulla-vigila', donde: 'en revisión' }),
+    ]);
+    expect(informe.publicadas).toEqual([]);
+    expect(await ficherosPublicados(rutas)).toEqual(antes);
+  });
+
+  it('el aviso FR-14 de revisar señala la candidata cuyo texto repite la Variante de otra candidata', async () => {
+    const rutas = await conBuzz();
+    const { loteEnRevision } = await import('../../tools/lib/revision.ts');
+    const deLaPrimera = 'La patrulla nunca duerme cuando la ciudad sueña despierta.';
+    await candidataDeBuzz(rutas, 'a-la-patrulla-vigila', 'La patrulla vigila mientras la ciudad duerme tranquila.', deLaPrimera);
+    await candidataDeBuzz(rutas, 'b-la-patrulla-nunca-duerme', deLaPrimera);
+    const lote = await loteEnRevision(rutas);
+    const duplica = Object.fromEntries(lote.map((c) => [c.slug, c.duplicaA]));
+    expect(lote.map((c) => c.slug)).toEqual(['buzz-a-la-patrulla-vigila', 'buzz-b-la-patrulla-nunca-duerme']);
+    expect(duplica['buzz-b-la-patrulla-nunca-duerme']).toEqual({ slug: 'buzz-a-la-patrulla-vigila', donde: 'en revisión' });
+  });
+
   it('el aviso FR-14 de revisar señala la candidata que repite la Variante de una publicada, o cuya Variante repite otra', async () => {
     const rutas = await conBuzz();
     const { loteEnRevision } = await import('../../tools/lib/revision.ts');
