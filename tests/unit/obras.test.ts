@@ -1065,7 +1065,7 @@ describe('22.3 — la Obra resuelta, pura', () => {
     expect(conAño.obra?.año).toBe(1835);
     expect(textoParaCopiar(otraConAño, AUTOR, undefined)).toBe('«Texto.» — Mariano José de Larra, Artículos, 1835.');
     expect(textoParaCopiar(sinAño, AUTOR, undefined)).toBe('«Texto.» — Mariano José de Larra, Artículos.');
-    expect(procedenciaCompuesta(sinAño)).toBe('Artículos');
+    expect(procedenciaCompuesta(sinAño, {})).toBe('Artículos');
   });
 });
 

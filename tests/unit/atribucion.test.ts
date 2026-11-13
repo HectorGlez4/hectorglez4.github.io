@@ -513,6 +513,9 @@ describe('Historia 35.4 — la firma de una Cita, en orden fijo Personaje, Obra,
     ['Personaje y Autor, sin Obra', sinObra, { autor: SENECA, personaje: BATMAN }, { deAutor: { antes: 'de ', nombre: 'Séneca' }, resto: ', 2000.' }],
     ['Personaje y Autor, sin Obra ni año', sinObraNiAño, { autor: SENECA, personaje: BATMAN }, { deAutor: { antes: 'de ', nombre: 'Séneca' }, resto: '.' }],
     ['Personaje solo, sin Obra: la línea de siempre', sinObraNiAño, { personaje: BATMAN }, { resto: 'Sin obra documentada.' }],
+    ['Personaje y Autor, con Obra y sin año: la ausencia del año se dice, como con el Autor solo', soloObra, { autor: SENECA, personaje: BATMAN }, { titulo: 'El caballero', deAutor: { antes: ', de ', nombre: 'Séneca' }, resto: '. Sin año documentado.' }],
+    ['Personaje solo, con Obra y sin año', soloObra, { personaje: BATMAN }, { titulo: 'El caballero', resto: '. Sin año documentado.' }],
+    ['Autor solo, con Obra y sin año, como siempre', soloObra, { autor: SENECA }, { titulo: 'El caballero', resto: '. Sin año documentado.' }],
     ['Autor solo, como siempre', conObra, { autor: SENECA }, { titulo: 'Obras de Séneca', resto: ', 2000.' }],
   ])('la línea de Obra de la Atribución: %s', (_, cita, quienes, esperada) => {
     expect(lineaDeProcedencia(cita, quienes)).toEqual(esperada);

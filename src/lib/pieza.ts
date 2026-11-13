@@ -157,7 +157,18 @@ export interface CitaEnPieza {
  * para que la obra escrita **dentro** de la imagen y la del pie digan lo mismo hasta la coma.
  */
 export function citaEnPieza(cita: Cita, autor: Autor): CitaEnPieza {
-  return { texto: cita.texto, autor: autor.nombre, procedencia: procedenciaCompuesta(cita) };
+  // Historia 35.4 — la firma de una Cita con Personaje es suya (`firmaDeCita`): la Pieza no la
+  // compone, y quien la llame ya la ha dejado fuera.
+  if (cita.personaje !== undefined) {
+    throw new Error(
+      `La Cita «${cita.slug}» la dice un Personaje («${cita.personaje}»): la Pieza solo firma con un Autor.`,
+    );
+  }
+  return {
+    texto: cita.texto,
+    autor: autor.nombre,
+    procedencia: procedenciaCompuesta(cita, { autor, personaje: undefined }),
+  };
 }
 
 /**

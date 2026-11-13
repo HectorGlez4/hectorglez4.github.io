@@ -161,8 +161,8 @@ export function textoDeLaPieza(
   red: Red,
   destino: string,
 ): string {
-  // Las Citas de una Pieza ya traen su Autor (`seleccionarCitas` las rechaza sin él).
-  // Sin Personaje: la Pieza solo compone la firma de un Autor (`citaEnPieza`), y lo copiado lo sigue.
+  // Las Citas de una Pieza ya traen su Autor y ninguna dice un Personaje: `componerPieza` y
+  // `seleccionDeColeccion` las rechazan antes, y `citaEnPieza` se para si llegara alguna.
   const atribuidas = citas.map((cita) =>
     textoParaCopiar(cita, cita.autor === undefined ? undefined : autores.get(cita.autor), undefined),
   );
@@ -306,7 +306,19 @@ export async function componerPieza(
      * épica entera. Se comprueba que el Autor esté **y** que traiga nombre: un `.yml` con la
      * clave vacía compondría la Cita con un hueco donde va la firma.
      */
-    // Historia 35.4 — la Cita de un Personaje sin Autor no tiene Autor que firmar la Pieza.
+    /*
+     * Historia 35.4 — la Pieza firma con el Autor (`citaEnPieza`), y una Cita que dice un
+     * Personaje se firma con él en todo lo que sale del sitio (`firmaDeCita`): compuesta aquí
+     * saldría atribuida solo al Autor, o sin firma. Se rechaza, como en el material del Kit.
+     */
+    if (cita.personaje !== undefined) {
+      motivos.push(
+        `La Cita «${slug}» la dice un Personaje («${cita.personaje}»), y la Pieza solo firma ` +
+          'con un Autor: no se compone para no atribuírsela a quien no la dice.',
+      );
+      continue;
+    }
+
     const autor = cita.autor === undefined ? undefined : autores.get(cita.autor);
     if (autor === undefined) {
       motivos.push(

@@ -265,7 +265,7 @@ describe('Historia 35.4 — las Rutas de salida del dueño: el Personaje si lo h
   it('objeta un pie de otro dueño, o una Cita que no es del dueño', () => {
     const rutas = rutasDeSalidaDeCita(B1, todas, porObraDe(todas), [TEMA], { por: 'obra', cita: B2 });
     const SENECA = { tipo: 'autor', slug: 'seneca', nombre: 'Séneca' } as const;
-    expect(problemaDeRutasDeSalida(SENECA, rutas, 'seneca')).toMatch(/«Más de Séneca» es de «batman» y no de «seneca»/);
+    expect(problemaDeRutasDeSalida(SENECA, rutas, 'seneca')).toMatch(/«Más de Séneca» es del personaje «batman» y no del autor «seneca»/);
     const ajena = { ...rutas, delDueño: { ...rutas.delDueño!, citas: [S] } };
     expect(problemaDeRutasDeSalida({ tipo: 'personaje', slug: 'batman', nombre: 'Batman' }, ajena, undefined)).toMatch(
       /«seneca-sola», que es de «nadie» y no de «batman»/,

@@ -502,6 +502,28 @@ describe('Historia 13.2 — la orden rechaza en vez de descartar en silencio', (
     expect(fallida.error).toContain('sin atribución');
   });
 
+  it('una Cita que dice un Personaje se rechaza: la Pieza solo firma con un Autor (35.4)', async () => {
+    /*
+     * Con Personaje y Autor, lo que sale del sitio firma «— {Personaje}, …, de {Autor}»
+     * (`firmaDeCita`); la Pieza firma con el Autor (`citaEnPieza`) y se la atribuiría a él.
+     */
+    const corpus = await enDisco(
+      corpusCon({ 1: textoBreve(1) }, {
+        'citas/seneca--atribuida.md': citaValida({
+          slug: 'seneca-atribuida',
+          texto: textoBreve(3),
+          personaje: 'batman',
+        }),
+      }),
+    );
+    const antes = await instantanea(corpus);
+    const fallida = await correr(corpus, ['componer', '--red', 'instagram', slugDe(1), 'seneca-atribuida']);
+    expect(fallida.codigo).toBe(1);
+    expect(fallida.error).toContain('seneca-atribuida');
+    expect(fallida.error).toContain('Personaje');
+    expect(await instantanea(corpus)).toEqual(antes);
+  });
+
   it('un Autor sin nombre en su ficha se rechaza por la misma razón', async () => {
     const corpus = await enDisco(
       corpusCon({ 1: textoBreve(1), 2: textoBreve(2) }, {

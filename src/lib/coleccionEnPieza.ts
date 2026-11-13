@@ -107,7 +107,18 @@ export function seleccionDeColeccion(
      * épica entera. Se mira que el Autor esté **y** que traiga nombre: un `.yml` con la clave
      * vacía compondría la Cita con un hueco donde va la firma.
      */
-    // Historia 35.4 — la Cita de un Personaje sin Autor no tiene Autor que firmar la Pieza.
+    /*
+     * Historia 35.4 — la Pieza firma con el Autor (`citaEnPieza`), y una Cita que dice un
+     * Personaje se firma con él en todo lo que sale del sitio: anunciada aquí saldría atribuida
+     * solo al Autor, o sin firma. Se queda fuera con su motivo.
+     */
+    if (cita.personaje !== undefined) {
+      fuera.push({
+        slug: cita.slug,
+        motivo: `la dice un Personaje («${cita.personaje}»), y la Pieza solo firma con un Autor`,
+      });
+      continue;
+    }
     const autor = cita.autor === undefined ? undefined : autores.get(cita.autor);
     if (autor === undefined) {
       fuera.push({

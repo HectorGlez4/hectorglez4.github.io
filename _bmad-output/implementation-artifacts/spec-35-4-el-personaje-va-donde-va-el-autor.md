@@ -180,6 +180,22 @@ deferred:
   - `[low]` `[patch]` La exclusión del pasaje de la atribuida en el cargador no tenía prueba con Fuente y tope: caso en `orden-del-libro.test.ts`.
   - `[low]` `[patch]` «Nada entre la Atribución y Copiar» de la atribuida no se afirmaba: se fija en B1.
 
+### 2026-11-13 — Review pass
+- intent_gap: 0
+- bad_spec: 0
+- patch: 8: (high 0, medium 2, low 6)
+- defer: 0
+- reject: 34: (high 0, medium 0, low 34)
+- addressed_findings:
+  - `[medium]` `[patch]` La Pieza (`componer` y la de Colección) firmaba con el Autor solo una Cita con Personaje y Autor: `componerPieza` la rechaza con código 1 nombrándola, `seleccionDeColeccion` la deja fuera con su motivo y `citaEnPieza` se para si llegara alguna; pruebas en `pieza-cli.test.ts` y `coleccion-en-pieza.test.ts`.
+  - `[medium]` `[patch]` La Tarjeta de Cita con Personaje en el listado de Colección no se construía en ninguna prueba: el fixture de `personaje-donde-el-autor.test.ts` gana una Colección con B1, B3 y S1, y se fija que la tarjeta nombra a Batman y no a Séneca.
+  - `[low]` `[patch]` `procedenciaCompuesta` y `lineaDeProcedencia` tomaban `quienes = {}` por omisión: ahora es obligatorio; `citaEnPieza` e `ImagenDelKit.astro` pasan su Autor, y las pruebas de una sola Cita pasan `{}` explícito.
+  - `[low]` `[patch]` `data-autor` y el `cite` del `blockquote` de una Cita con Personaje y Autor (B3) no se fijaban: se afirma Batman y `/personaje/batman/`.
+  - `[low]` `[patch]` La Tarjeta Social de la Obra de un Personaje solo se comprobaba que existiera: una sonda de `getStaticPaths` fija «2 citas de Batman, 2000».
+  - `[low]` `[patch]` La línea de Obra con Obra y sin año, con Personaje y Autor o con Personaje solo, no tenía caso: tres filas en `atribucion.test.ts` («. Sin año documentado.», como con el Autor solo).
+  - `[low]` `[patch]` El mensaje de `problemaDeRutasDeSalida` por un «Más de» de otro dueño no decía el tipo: dice «del personaje «batman» y no del autor «seneca»».
+  - `[low]` `[patch]` `kit.astro` y `lote.astro` llevaban dos comentarios seguidos que decían lo mismo: uno solo.
+
 ## Design Notes
 
 - **`creator` y no `author`**: ver `deferred[0]`. La prueba de los tres casos mira `creator` y `spokenByCharacter`.
@@ -203,6 +219,22 @@ deferred:
 
 Status: done
 Blocking condition: ninguna.
+
+### Pasada de revisión 2 (2026-11-13), con los hallazgos de las cinco capas externas
+
+**Cambio de esta pasada.** La Pieza deja de firmar con el Autor solo una Cita que dice un Personaje: `componerPieza` (`tools/lib/piezas.ts`) la rechaza con código 1, `seleccionDeColeccion` (`src/lib/coleccionEnPieza.ts`) la deja fuera con su motivo y `citaEnPieza` (`src/lib/pieza.ts`) se para si llegara. `procedenciaCompuesta` y `lineaDeProcedencia` piden `quienes` sin valor por omisión. El mensaje de `problemaDeRutasDeSalida` por un «Más de» ajeno dice el tipo de los dos dueños, y `kit.astro`/`lote.astro` pierden un comentario repetido. Pruebas nuevas: la Pieza y la Colección en Pieza con una atribuida; la Tarjeta de Cita de una Colección con Personaje, `data-autor` y `cite` de B3 y la Tarjeta Social de la Obra de Batman («2 citas de Batman, 2000»), sobre el `dist/` del fixture; y la línea de Obra con Obra y sin año.
+
+**Ficheros de esta pasada.** `tools/lib/piezas.ts`, `src/lib/coleccionEnPieza.ts`, `src/lib/pieza.ts` (la atribuida no entra en una Pieza); `src/lib/atribucion.ts` (`quienes` obligatorio); `src/islands/ImagenDelKit.astro` (pasa su Autor); `src/lib/publicado.ts` (mensaje con el tipo); `src/pages/{kit,lote}.astro` (comentario); pruebas `personaje-donde-el-autor`, `pieza-cli`, `coleccion-en-pieza`, `atribucion`, `rutas-de-salida`, `compartir`, `obras`, `obra-indexable`.
+
+**Revisión.** Parches 8 (0 high, 2 medium, 6 low), diferidos 0, rechazados 34 (duplicados de lo ya diferido —`creator`/`author`, la serif, el año sin Obra, las páginas 2+ de una Obra de Personaje, el denominador de `concentracionDe`, el ancho de la línea de procedencia—; decisiones del intent —la microcopia «su personaje», el `data-pagefind-meta="autor"` de la Cabecera, la arista del Directorio de Obras, la prueba de tramos sobre la Tarjeta, el `diff -r` como prueba de «idéntico»—; supuestos que el esquema ya impide —una atribuida apta para portada, un nombre vacío, una Cita sin dueño, slugs compartidos—, y estilo —orden de parámetros, `mas-del-autor`, coerciones `?? ''` de pruebas sobre Corpus de fixture—). Revisión de seguimiento: recomendada (`true`) por la regla: 2 medium y 6 low, puntuación 3 × 2 + 6 = 12; es la última ronda del bucle.
+
+**Verificación de esta pasada.**
+- `npx astro check`: 0 errores, 0 avisos (470 ficheros).
+- Por fichero, detached (`logs/s-35/triage-35.4-2-ficheros.log`): `personaje-donde-el-autor`, `pieza-cli`, `pieza-coleccion-cli`, `coleccion-en-pieza`, `pieza`, `rutas-de-salida`, `atribucion`, `compartir`, `obras`, `obra-indexable`, `medicion`: 11 ficheros, 1.217 pruebas, EXIT 0.
+- Corpus real con `FECHA_JORNADA=2026-11-12`: base en `git worktree add --detach` de `6f85d950356a2fd8eef052e28cb6241567fccf5b` (`logs/s-35/triage-35.4-2-build-base.log`) y el árbol con los parches (`logs/s-35/triage-35.4-2-build-tras.log`); `diff -r -x pagefind` sin salida (`logs/s-35/triage-35.4-2-distdiff.log`, 0 bytes).
+- `npm test` completo (detached, `logs/s-35/npm-test-35.4-t2.log`): 181 ficheros, 8.054 pruebas, EXIT 0.
+
+**Riesgos de esta pasada.** Una Pieza no puede anunciar todavía una Cita con Personaje: se rechaza en vez de firmarla mal; componerla con su firma (`firmaDeCita`) queda para cuando Héctor la pida.
 
 ### Pasada de revisión 1 (2026-11-13), con los hallazgos de las cinco capas externas
 

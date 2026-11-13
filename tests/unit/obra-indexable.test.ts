@@ -476,14 +476,14 @@ describe('la Atribución en piezas: el título siempre es el enlace', () => {
     ['título con signo final', { obra: '¿Qué es?' }, '¿Qué es?', ' Sin año documentado.'],
     ['título distinto de la grafía de la Cita', { obra: 'Oraculo manual', año: 1647 }, 'Oráculo', ', 1647.'],
   ] as const)('%s', (_caso, procedencia, titulo, resto) => {
-    const linea = lineaDeProcedencia(conProcedencia(procedencia as Cita['procedencia'], titulo));
+    const linea = lineaDeProcedencia(conProcedencia(procedencia as Cita['procedencia'], titulo), {});
     expect(linea).toEqual({ titulo, resto });
   });
 
   it('sin Obra no hay título que enlazar, y la ausencia se dice', () => {
-    expect(lineaDeProcedencia(conProcedencia({ año: 1647 }))).toEqual({
+    expect(lineaDeProcedencia(conProcedencia({ año: 1647 }), {})).toEqual({
       resto: 'Sin obra documentada. Año 1647.',
     });
-    expect(lineaDeProcedencia(conProcedencia({}))).toEqual({ resto: 'Sin obra documentada.' });
+    expect(lineaDeProcedencia(conProcedencia({}), {})).toEqual({ resto: 'Sin obra documentada.' });
   });
 });

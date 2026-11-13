@@ -6,6 +6,7 @@ import {
   AUTOR_VALIDO,
   TEMA_VALIDO,
   citaValida,
+  coleccionValida,
   conLaPuertaAbierta,
   construirConCorpus,
   limpiar,
@@ -144,6 +145,22 @@ for (let i = 1; i <= 12; i += 1) {
   });
 }
 
+// Una Colección con las atribuidas y la de siempre, hasta `MIN_CITAS_POR_COLECCION` (15) con relleno.
+CORPUS['colecciones/con-batman.yml'] = coleccionValida({
+  nombre: 'Con Batman',
+  miembros: [B1, B2, B3, B4, V1, S1, ...Array.from({ length: 9 }, (_, i) => `vivo-relleno-${String(i + 1).padStart(2, '0')}`)],
+});
+
+/** Sonda: lo que la Tarjeta Social de cada Obra lleva escrito, antes de rasterizarlo. */
+const SONDA_DE_TARJETAS_DE_OBRA = `---
+import { getStaticPaths } from './tarjeta/obra/[autor]/[slug].png.ts';
+const rutas = await getStaticPaths();
+---
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8" /><title>Sonda</title></head>
+<body><pre id="tarjetas">{JSON.stringify(rutas.map((r) => ({ ...r.params, ...r.props })))}</pre></body></html>
+`;
+
 /** Sonda: lo que la Tarjeta Social de cada Cita lleva escrito, antes de rasterizarlo. */
 const SONDA_DE_TARJETAS = `---
 import { getStaticPaths } from './tarjeta/[slug].png.ts';
@@ -162,7 +179,7 @@ beforeAll(async () => {
   const r = await construirConCorpus(CORPUS, {
     jornada: '2026-11-12',
     ficheros: conLaPuertaAbierta(),
-    paginas: { 'sonda-tarjetas.astro': SONDA_DE_TARJETAS },
+    paginas: { 'sonda-tarjetas.astro': SONDA_DE_TARJETAS, 'sonda-tarjetas-de-obra.astro': SONDA_DE_TARJETAS_DE_OBRA },
   });
   proyecto = r.proyecto;
   salida = r.salida;
@@ -278,6 +295,10 @@ describe('Historia 35.4 — la Página de Cita, fila a fila de la matriz', () =>
     );
     expect(copiado(pagina)).toBe(`«${TEXTOS[B3]}» — Batman, Obras de Séneca, de Séneca, 2000.`);
     expect(pagina).toContain('data-procedencia="Obras de Séneca, de Séneca, 2000"');
+    // La Imagen firma y el `cite` apunta al nombre de la primera línea: el Personaje, no el Autor.
+    expect(pagina).toContain('data-autor="Batman"');
+    expect(pagina).not.toContain('data-autor="Séneca"');
+    expect(pagina).toMatch(/<blockquote class="cita"[^>]*cite="\/personaje\/batman\/"/u);
     expect(fragmento(pagina)).toContain('<p>— Batman, <cite>Obras de Séneca</cite>, de Séneca. <a href=');
     expect(compartido(pagina)).toBe(`«${TEXTOS[B3]}» — Batman, Obras de Séneca, de Séneca, 2000.`);
     expect(tarjetaSocial(B3)).toMatchObject({ autor: 'Batman', procedencia: 'Obras de Séneca, de Séneca, 2000' });
@@ -387,6 +408,13 @@ describe('Historia 35.4 — la Página de Obra de un Personaje', () => {
     expect(String((about.character as Record<string, unknown>).url)).toMatch(/\/personaje\/batman\/$/u);
   });
 
+  it('su Tarjeta Social firma con el Personaje: «2 citas de Batman, 2000»', () => {
+    const crudo = /<pre id="tarjetas">([\s\S]*?)<\/pre>/u.exec(html('/sonda-tarjetas-de-obra/'))?.[1] ?? '[]';
+    const todas = JSON.parse(deEntidades(crudo)) as { autor: string; slug: string; hechos: string[] }[];
+    const deBatman = todas.find((t) => t.autor === 'batman' && t.slug === 'el-caballero');
+    expect(deBatman?.hechos).toEqual(['2 citas de Batman, 2000']);
+  });
+
   it('su Tarjeta Social existe', () => {
     expect(existsSync(join(proyecto, 'dist', 'tarjeta', 'obra', 'batman', 'el-caballero.png'))).toBe(true);
     expect(html('/obra/batman/el-caballero/')).toContain('/tarjeta/obra/batman/el-caballero.png');
@@ -414,6 +442,15 @@ describe('Historia 35.4 — una Cita con Personaje y Autor está en los dos', ()
   it('en el Tema, la Tarjeta de Cita nombra al Personaje en el sitio del Autor', () => {
     const tema = html('/tema/el-tiempo/');
     const tarjeta = (slug: string) => new RegExp(`<a[^>]*href="/cita/${slug}/"[\\s\\S]*?</a>`, 'u').exec(tema)?.[0] ?? '';
+    expect(tarjeta(B1)).toMatch(/class="autor"[^>]*>Batman</u);
+    expect(tarjeta(B3)).toMatch(/class="autor"[^>]*>Batman</u);
+    expect(tarjeta(B3)).not.toMatch(/class="autor"[^>]*>Séneca</u);
+    expect(tarjeta(S1)).toMatch(/class="autor"[^>]*>Séneca</u);
+  });
+
+  it('en la Colección, la Tarjeta de Cita nombra al Personaje en el sitio del Autor', () => {
+    const coleccion = html('/coleccion/con-batman/');
+    const tarjeta = (slug: string) => new RegExp(`<a[^>]*href="/cita/${slug}/"[\\s\\S]*?</a>`, 'u').exec(coleccion)?.[0] ?? '';
     expect(tarjeta(B1)).toMatch(/class="autor"[^>]*>Batman</u);
     expect(tarjeta(B3)).toMatch(/class="autor"[^>]*>Batman</u);
     expect(tarjeta(B3)).not.toMatch(/class="autor"[^>]*>Séneca</u);

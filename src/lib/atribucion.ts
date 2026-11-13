@@ -52,7 +52,7 @@ export { recuentoDeAutores, recuentoDeCitas, recuentoDeObras, temaEnFrase };
  * `TypeError` crudo en una orden que promete rechazos redactados. Lo que no consta no se
  * escribe, que es la regla de siempre (FR-2).
  */
-export function procedenciaCompuesta(cita: Cita, quienes: QuienesDeLaCita = {}): string | undefined {
+export function procedenciaCompuesta(cita: Cita, quienes: QuienesDeLaCita): string | undefined {
   /*
    * Historia 22.3 — la obra se nombra con el título de su Obra resuelta, nunca con la grafía
    * que declara la Cita: una Obra que reúne dos grafías se llama igual en todas partes. El
@@ -613,7 +613,7 @@ export function rotuloDeObrasPlegadas(m: number): string {
  */
 export function lineaDeProcedencia(
   cita: Cita,
-  quienes: QuienesDeLaCita = {},
+  quienes: QuienesDeLaCita,
 ): { titulo?: string; deAutor?: { antes: string; nombre: string }; resto: string } {
   const { referencia, traduccion } = cita.procedencia;
   /*

@@ -196,7 +196,7 @@ describe('Historia 19.1 — lo copiado nombra la traducción', () => {
   });
 
   it('procedenciaCompuesta, que es lo que rasterizan la Imagen y la Pieza, no la nombra', () => {
-    expect(procedenciaCompuesta(ODA)).toBe('Odas');
+    expect(procedenciaCompuesta(ODA, {})).toBe('Odas');
     expect(citaEnPieza(ODA, HORACIO)).toEqual({
       texto: 'Feliz quien lejos de negocios vive.',
       autor: 'Horacio',

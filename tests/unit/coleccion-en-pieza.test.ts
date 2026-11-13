@@ -195,6 +195,14 @@ describe('Historia 13.3 — se excluye, pero se dice con su motivo', () => {
     expect(seleccion.fuera.find((f) => f.slug === 'huerfana')!.motivo).toContain('sin atribución');
   });
 
+  it('una Cita que dice un Personaje queda fuera con su motivo: la Pieza no la firma (35.4)', () => {
+    const atribuida: Cita = { ...cita('atribuida', 'Nada hay más parecido a un hombre que otro hombre.'), personaje: 'batman' };
+    const seleccion = seleccionDeColeccion(publicada([atribuida, ...nBreves()]), autores);
+
+    expect(seleccion.citas.map((c) => c.slug)).not.toContain('atribuida');
+    expect(seleccion.fuera.find((f) => f.slug === 'atribuida')!.motivo).toContain('Personaje');
+  });
+
   it('un Autor cuya ficha no trae nombre queda fuera por la misma razón', () => {
     const sinNombre = new Map<string, Autor>([['seneca', { ...SENECA, nombre: '  ' }]]);
     const seleccion = seleccionDeColeccion(publicada(nBreves()), sinNombre);

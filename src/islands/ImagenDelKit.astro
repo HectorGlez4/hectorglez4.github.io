@@ -28,7 +28,8 @@ const { cita, autor } = Astro.props;
 const tramo = tramoDe(cita.texto);
 // Historia 22.3 — compuesta por `atribucion.ts` con el título de la Obra resuelta; la isla
 // (`public/islas/imagen.js`) la recibe ya compuesta en `data-procedencia`.
-const procedencia = procedenciaCompuesta(cita) ?? '';
+// Historia 35.4 — el material del Kit no lleva Citas con Personaje (`MaterialParaPublicar` se para).
+const procedencia = procedenciaCompuesta(cita, { autor, personaje: undefined }) ?? '';
 ---
 
 <div

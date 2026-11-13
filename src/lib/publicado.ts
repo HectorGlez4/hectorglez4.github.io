@@ -835,7 +835,7 @@ export function problemaDeRutasDeSalida(
   if (delDueño !== undefined) {
     const { recuento, citas: suyas } = delDueño;
     if (!mismo(delDueño.dueño, dueño)) {
-      return `«Más de ${dueño.nombre}» es de «${delDueño.dueño.slug}» y no de «${dueño.slug}».`;
+      return `«Más de ${dueño.nombre}» es del ${delDueño.dueño.tipo} «${delDueño.dueño.slug}» y no del ${dueño.tipo} «${dueño.slug}».`;
     }
     if (suyas.length === 0) return `«Más de ${dueño.nombre}» llega sin Citas: un grupo vacío es \`undefined\`.`;
     if (suyas.length > MAX_CITAS_RELACIONADAS) {
