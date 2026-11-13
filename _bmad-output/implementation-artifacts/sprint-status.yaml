@@ -29,7 +29,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 # - Retrospective appends its action items to action_items; the status view surfaces open ones
 generated: 08-11-2026 09:00
-last_updated: 11-14-2026 18:00
+last_updated: 11-15-2026 06:00
 project: brainlySabiduria
 project_key: NOKEY
 tracking_system: file-system
@@ -531,7 +531,7 @@ development_status:
   35-3b-la-tarjeta-social-del-personaje-y-cuándo-se-indexa-su-página: review  # v9-ralph 2026-11-13: Tarjeta Social del Personaje y MIN_CITAS_POR_PERSONAJE = 2 (la fija la historia; Héctor puede cambiarla); avisar por indexabilidad de /personaje/ (cierra el diferido de la 35.3); una pasada de revisión (3 parches)
   35-4-el-personaje-va-donde-va-el-autor: review  # v9-ralph 2026-11-14: el Personaje va donde va el Autor (firmaDeCita única, guardas de la 35.2 levantadas, Obra de Personaje con su Cabecera y JSON-LD character); dos pasadas de revisión; diferidos para Héctor: creator frente a author, serif o Inter para el Personaje, el año en la línea sin Obra, ficha de Personaje resuelta solo por Citas de otros
   35-5-los-personajes-en-los-directorios-y-en-la-búsqueda: review  # v9-ralph 2026-11-14: Personajes en los Directorios (sección tras la A–Z en /autores/ y /obras/) y en /buscar/ (personaje=, optgroup, filtro de Pagefind); topes de los guiones de búsqueda y filtro subidos con la cifra medida; una pasada de revisión (2 parches); diferidos para Héctor en el spec
-  35-6-la-variante-de-españa-y-la-única-orden-que-cambia-una-atribu: backlog  # v9-ralph 2026-11-14: desbloqueada, la 35.1b en review
+  35-6-la-variante-de-españa-y-la-única-orden-que-cambia-una-atribu: review  # v9-ralph 2026-11-15: la Variante de España de la atribuida y npm run atribuida, la única orden que cambia una atribuida (la puerta sigue cerrada en el árbol); dos pasadas de revisión; supuestos para Héctor en el spec
   35-7-lo-que-cuenta-solo-la-clase-de-siempre: backlog  # bloqueada: tras la 35.1b y, además, la 28.1 de la Épica 28 de la v8, sin fundir en la principal, que decide Héctor (la línea de cifras que enmienda es suya) (v9-ralph 2026-11-09)
   35-8-pedir-que-se-corrija-o-se-retire-y-que-conste: backlog  # bloqueada: tras la 35.1b (BUZON_DE_PETICIONES) y la 35.7 (formas-vedadas.yml), y, además, la 28.1 de la Épica 28 de la v8, sin fundir en la principal, que decide Héctor (v9-ralph 2026-11-09)
   35-9-la-obra-con-derechos-vigentes-se-vende-sola: backlog  # bloqueada: tras la 32.4 (bloqueada para Héctor, bmad-ux), la 32.5, la 33.2 y la 35.4 (v9-ralph 2026-11-09)
