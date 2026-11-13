@@ -22,7 +22,7 @@ import {
   rutasDelCorpus,
 } from '../tools/lib/corpus.ts';
 import { fallosDeClases } from '../tools/lib/clases.ts';
-import { fallosDeAtribuidas, lineaDelBuild } from '../tools/lib/atribuidas.ts';
+import { fallosDeAtribuidas, lineaDelBuild, textoDeVariante } from '../tools/lib/atribuidas.ts';
 import { claseDe, esAtribuida } from '../src/lib/clase.ts';
 
 /** La ruta relativa a la raíz, con barras `/`, que es como se teclea. */
@@ -75,6 +75,8 @@ export default function clasesDeCita(): AstroIntegration {
         ...(c.personaje !== undefined ? { personaje: c.personaje } : {}),
         ...(esAtribuida(c) ? { clase: claseDe(c) } : {}),
         ...(c.procedencia !== undefined ? { procedencia: c.procedencia } : {}),
+        // Historia 35.6 — la Variante cuenta para el tope y para los duplicados entre clases.
+        ...(textoDeVariante(c) !== undefined ? { variante: textoDeVariante(c) } : {}),
       })),
       autores,
       // Con su ruta relativa a la raíz: el fallo de un tope por Obra nombra el fichero de la ficha.

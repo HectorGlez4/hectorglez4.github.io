@@ -23,6 +23,7 @@ import { dominiosQueAtestiguan } from './atestiguaciones.ts';
 import { inicialDeClave, normalizar } from './normalizar.ts';
 import { esJornada } from './jornada.ts';
 import { esAtribuida } from './clase.ts';
+import { CLAVES_DE_REGION, esRegionDeVariante } from './variante.ts';
 import { FORMATOS_DE_EDICION, TIENDAS, esDelDominio, tiendaDe, type Tienda } from './ingreso.ts';
 
 /**
@@ -263,6 +264,34 @@ export const origen = z.enum(ORIGENES, {
   message: `Regla incumplida: «origen» es uno de ${ORIGENES.map((o) => `«${o}»`).join(', ')}.`,
 });
 
+/**
+ * La Variante de una Cita atribuida — Historia 35.6, AD-34: la misma frase en otra región
+ * —hoy, el doblaje de España—, con su `origen`. Una como mucho, y solo en la atribuida
+ * (`reglasDeClase`). No crea slug ni URL: el slug sale solo del texto principal (AD-4).
+ * Que no repita otra Cita lo juzga `fallosDeAtribuidas` (`tools/lib/atribuidas.ts`); que vaya en
+ * una línea, `reglasDeLaAtribuida`.
+ */
+export const variante = z.strictObject(
+  {
+    texto: z
+      .string({ message: 'Regla incumplida: la Variante declara su «texto».' })
+      .min(1, 'Regla incumplida: el texto de la Variante no puede estar vacío.'),
+    region: z
+      .string({ message: 'Regla incumplida: la Variante declara su «region».' })
+      .refine(
+        esRegionDeVariante,
+        `Regla incumplida: la «region» de la Variante es una de ${CLAVES_DE_REGION.map((r) => `«${r}»`).join(', ')}.`,
+      ),
+    origen,
+  },
+  {
+    error: (problema) =>
+      problema.code === 'unrecognized_keys'
+        ? 'Regla incumplida: la Variante solo declara «texto», «region» y «origen».'
+        : 'Regla incumplida: «variante» es un objeto con «texto», «region» y «origen»; una como mucho.',
+  },
+);
+
 /** Sin Autor ni Personaje, una Cita no tiene dueño: ni prefijo, ni fichero, ni página. */
 export const MENSAJE_CITA_SIN_DUEÑO =
   'Regla incumplida: falta el Autor o el Personaje de la Cita. Toda Cita lleva uno de los dos, al menos: ' +
@@ -308,6 +337,15 @@ export function reglasDeClase(valor: unknown, contexto: z.RefinementCtx): void {
       message:
         `Regla incumplida: solo una Cita atribuida declara «${campo}». La de siempre se coteja ` +
         'contra su documento: no se atestigua ni declara origen.',
+    });
+  }
+  if (cita.variante !== undefined) {
+    contexto.addIssue({
+      code: 'custom',
+      path: ['variante'],
+      message:
+        'Regla incumplida: solo una Cita atribuida declara «variante». La de siempre se publica ' +
+        'con la letra de su documento, y otra letra sería otra Cita.',
     });
   }
   if (cita.estadoDerechos === undefined) {
@@ -385,6 +423,15 @@ function reglasDeLaAtribuida(cita: Record<string, unknown>, contexto: z.Refineme
       message:
         'Regla incumplida: una Cita atribuida va en una sola línea, aunque traiga Fuente: el salto ' +
         'de verso es de la Cita cotejada contra su documento.',
+    });
+  }
+  const deLaVariante =
+    cita.variante !== null && typeof cita.variante === 'object' ? (cita.variante as { texto?: unknown }).texto : undefined;
+  if (typeof deLaVariante === 'string' && /[\n\r\u2028\u2029\u0085\v\f]/u.test(deLaVariante)) {
+    contexto.addIssue({
+      code: 'custom',
+      path: ['variante', 'texto'],
+      message: 'Regla incumplida: la Variante de una Cita atribuida va en una sola línea, como su texto.',
     });
   }
   if (cita.aptaParaPortada === true) {
@@ -765,6 +812,8 @@ export const citaAdmisible = z.object({
   // Historia 35.1b — solo de la atribuida, y en ella obligatorios (`reglasDeClase`).
   atestiguaciones: atestiguaciones.optional(),
   origen: origen.optional(),
+  // Historia 35.6 — solo de la atribuida, una como mucho (`reglasDeClase`).
+  variante: variante.optional(),
   aptaParaPortada: z.boolean().default(false),
   /*
    * Opcional, y lo será mientras quede censo. Las 38 Citas anteriores a la v3 no tienen

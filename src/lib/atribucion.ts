@@ -15,6 +15,7 @@ import { esAtribuida } from './clase.ts';
 import { rotuloDeFuente, type ObraResuelta } from './obras.ts';
 import type { AtribucionDeSemblanza } from './biografia.ts';
 import { MARCA } from './marca.ts';
+import { REGIONES_DE_VARIANTE } from './variante.ts';
 import { escapar } from './lienzo.ts';
 import { enUnaLinea, versosDe } from './verso.ts';
 import { recuentoDeAutores, recuentoDeCitas, recuentoDeObras, temaEnFrase } from './recuentos.ts';
@@ -224,6 +225,18 @@ export function lineaDeLaFuente(
     despues: '.',
     ...(fuente.licencia !== undefined && { licencia: ` ${fuente.licencia}.` }),
   };
+}
+
+/**
+ * La línea de la Variante — Historia 35.6, UX-DR138: «En España: «{texto}»», bajo la Línea de la
+ * Fuente de la Página de Cita atribuida. Este es su único dueño; el rótulo de la región sale de
+ * `REGIONES_DE_VARIANTE` (`src/lib/variante.ts`). Sin Variante, `undefined`: no se pinta nada.
+ * La Variante no entra en lo copiado, el Fragmento, la Imagen ni la Tarjeta: solo esta línea la dice.
+ */
+export function lineaDeVariante(cita: Pick<Cita, 'variante'>): string | undefined {
+  const variante = cita.variante;
+  if (variante === undefined) return undefined;
+  return `En ${REGIONES_DE_VARIANTE[variante.region]}: «${variante.texto}»`;
 }
 
 /**

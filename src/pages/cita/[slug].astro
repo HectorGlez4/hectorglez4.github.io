@@ -13,6 +13,7 @@
 import Armazon from '../../components/Armazon.astro';
 import BloqueDeCita from '../../components/BloqueDeCita.astro';
 import Fuente from '../../components/Fuente.astro';
+import Variante from '../../components/Variante.astro';
 import TarjetaDeObra from '../../components/TarjetaDeObra.astro';
 import CopiarCita from '../../islands/CopiarCita.astro';
 import ImagenDeCita from '../../islands/ImagenDeCita.astro';
@@ -178,6 +179,8 @@ const comoCitar = (() => {
       * verificar una atribución.
       */}
     <Fuente cita={cita} />
+    {/* Historia 35.6 — la Variante de la atribuida, si la declara; sin ella, nada. */}
+    <Variante cita={cita} />
     {/*
       * Historia 30.1 — nada se intercala entre la Atribución —con su Línea de la Fuente— y
       * Copiar: a 360 × 640 la Tarjeta de Obra empujaba Copiar entre 661 y 756 px, fuera de la

@@ -117,6 +117,23 @@ export interface CitaParaAtribuidas {
    * el esquema con el del árbol.
    */
   atestiguaciones?: unknown;
+  /**
+   * El texto de su Variante, si la declara — Historia 35.6: el tope de caracteres la juzga como
+   * al texto, y los duplicados comparan las dos formas contra las de cada otra Cita.
+   */
+  variante?: string;
+}
+
+/**
+ * El texto de la Variante de una Cita leída en bruto, o `undefined` si no declara ninguna (o no
+ * tiene forma: eso lo dice el esquema) — Historia 35.6. Lo usan el build, el alta y la aprobación
+ * para pasarla al juicio y al aviso de duplicados.
+ */
+export function textoDeVariante(cita: { variante?: unknown }): string | undefined {
+  const v = cita.variante;
+  if (v === null || typeof v !== 'object') return undefined;
+  const t = (v as { texto?: unknown }).texto;
+  return typeof t === 'string' && t !== '' ? t : undefined;
 }
 
 /** Un fallo del juicio: las Citas a que se debe, su ruta si es una y el motivo. */
@@ -226,6 +243,20 @@ export function fallosDeAtribuidas(entrada: EntradaDelJuicio): FalloDeAtribuida[
       );
     }
   }
+  // ── La Variante, con el mismo tope que el texto (Historia 35.6) ──
+  for (const c of juzgadas) {
+    if (typeof c.variante !== 'string') continue;
+    const n = puntosDeCodigo(c.variante);
+    if (n > valores.maxCaracteres!) {
+      fallos.push(
+        deUna(
+          c,
+          `la variante de la atribuida «${c.slug}» tiene ${n} caracteres y el tope es ${valores.maxCaracteres} ` +
+            '(MAX_CARACTERES_DE_ATRIBUIDA).',
+        ),
+      );
+    }
+  }
 
   // ── Los derechos de un dueño ──
   const tieneDerechos = (dueño: { tipo: 'autor' | 'personaje'; slug: string }): boolean => {
@@ -303,14 +334,24 @@ export function fallosDeAtribuidas(entrada: EntradaDelJuicio): FalloDeAtribuida[
 
   // ── Los duplicados entre clases ──
   const otras = [...entrada.citas, ...(entrada.comparables ?? [])];
+  // Desde la 35.6 cada Cita aporta sus formas —texto y, si la declara, Variante—, y la juzgada
+  // coincide con otra si cualquiera de las suyas coincide con cualquiera de las de la otra.
   for (const c of juzgadas) {
-    const suya = formaDe(c);
+    const suyas = formasDe(c);
     for (const otra of otras) {
       // Por identidad, no por slug: una candidata con el texto exacto de una publicada del mismo
       // dueño tiene su mismo slug (la aprobación la renombraría), y es justo el duplicado que se veda.
       if (otra === c) continue;
       if (typeof otra.texto !== 'string') continue;
-      const coincidencia = parecidoEntre(suya, formaDe(otra));
+      const deLaOtra = formasDe(otra);
+      let coincidencia: ReturnType<typeof parecidoEntre> = undefined;
+      for (const suya of suyas) {
+        for (const ajena of deLaOtra) {
+          coincidencia = parecidoEntre(suya, ajena);
+          if (coincidencia !== undefined) break;
+        }
+        if (coincidencia !== undefined) break;
+      }
       if (coincidencia === undefined) continue;
       fallos.push(
         deUna(
@@ -331,11 +372,14 @@ export function fallosDeAtribuidas(entrada: EntradaDelJuicio): FalloDeAtribuida[
  * las mismas candidatas de `corpus/_revision/`, y rehacer la forma de cada una por atribuida
  * multiplicaría el trabajo.
  */
-const FORMAS = new WeakMap<CitaParaAtribuidas, FormaParaComparar>();
-function formaDe(c: CitaParaAtribuidas): FormaParaComparar {
+const FORMAS = new WeakMap<CitaParaAtribuidas, readonly FormaParaComparar[]>();
+function formasDe(c: CitaParaAtribuidas): readonly FormaParaComparar[] {
   let f = FORMAS.get(c);
   if (f === undefined) {
-    f = formaParaComparar(c.texto);
+    f = [
+      formaParaComparar(c.texto),
+      ...(typeof c.variante === 'string' && c.variante !== '' ? [formaParaComparar(c.variante)] : []),
+    ];
     FORMAS.set(c, f);
   }
   return f;

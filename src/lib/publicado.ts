@@ -30,7 +30,8 @@ import {
   SUELO_TRADICION_LATINOAMERICANA,
   type CongelacionDeObras,
 } from './umbrales.ts';
-import type { FuenteDeCita, Procedencia, tradicion } from './admision.ts';
+import type { FuenteDeCita, ORIGENES, Procedencia, tradicion } from './admision.ts';
+import type { RegionDeVariante } from './variante.ts';
 import { CLASE_ATRIBUIDA, esAtribuida } from './clase.ts';
 import { cuentaParaElSuelo } from './huecos.ts';
 import { compararPorClave } from './normalizar.ts';
@@ -112,7 +113,20 @@ export interface Cita {
    * partes. Una Cita sin obra declarada no la lleva.
    */
   obra?: ObraResuelta;
+  /**
+   * La Variante, solo de la atribuida que la declara — Historia 35.6, AD-34: la misma frase en
+   * otra región. La pinta solo la Página de Cita, con `lineaDeVariante` de `src/lib/atribucion.ts`;
+   * no entra en el slug, ni en lo copiado, compartido, la Imagen, el Fragmento ni la Tarjeta.
+   */
+  variante?: VarianteDeCita;
   aptaParaPortada: boolean;
+}
+
+/** La Variante de una Cita atribuida, tal como la declara el Corpus — Historia 35.6. */
+export interface VarianteDeCita {
+  texto: string;
+  region: RegionDeVariante;
+  origen: (typeof ORIGENES)[number];
 }
 
 export interface Autor {
@@ -1645,6 +1659,16 @@ export function aplanarCita(entrada: EntradaCita): Cita {
     temas: entrada.data.temas.map((t) => t.id),
     procedencia: entrada.data.procedencia,
     ...(entrada.data.fuente !== undefined ? { fuente: entrada.data.fuente } : {}),
+    // Historia 35.6 — la Variante viaja solo si la declara, para la línea de la Página de Cita.
+    ...(entrada.data.variante !== undefined
+      ? {
+          variante: {
+            texto: entrada.data.variante.texto,
+            region: entrada.data.variante.region as RegionDeVariante,
+            origen: entrada.data.variante.origen,
+          },
+        }
+      : {}),
     aptaParaPortada: entrada.data.aptaParaPortada,
   };
 }

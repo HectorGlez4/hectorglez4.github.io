@@ -57,6 +57,7 @@ import {
   motivoPuertaCerrada,
   motivosDe,
   planDaFichaAlAutor,
+  textoDeVariante,
   type CitaParaAtribuidas,
   type ValoresDeLaPuerta,
 } from './lib/atribuidas.ts';
@@ -101,6 +102,11 @@ export interface EntradaDeLote {
    */
   atestiguaciones?: { url?: string; consultadaEl?: string }[];
   origen?: string;
+  /**
+   * Historia 35.6 — la Variante de una atribuida, `{texto, region, origen}`. La juzga el esquema
+   * (solo la atribuida) y no entra en el slug, que sale solo de `texto`.
+   */
+  variante?: { texto?: string; region?: string; origen?: string };
 }
 
 export interface CitaPublicada {
@@ -292,11 +298,17 @@ export async function darDeAltaLote(
   const delLote: CitaParaAtribuidas[] = lote.map((entrada, indice) => ({
     slug: `entrada ${indice + 1} del lote`,
     texto: typeof entrada.texto === 'string' ? entrada.texto : '',
+    ...(textoDeVariante(entrada) !== undefined ? { variante: textoDeVariante(entrada) } : {}),
     ...(derivaAtribuida(entrada) ? { clase: CLASE_ATRIBUIDA } : {}),
   }));
   const enRevisionParaAtribuidas: CitaParaAtribuidas[] = enRevisionYa
     .filter((c) => typeof c.texto === 'string')
-    .map((c) => ({ slug: c.slug, texto: c.texto, ...(esAtribuida(c) ? { clase: claseDe(c) } : {}) }));
+    .map((c) => ({
+      slug: c.slug,
+      texto: c.texto,
+      ...(textoDeVariante(c) !== undefined ? { variante: textoDeVariante(c) } : {}),
+      ...(esAtribuida(c) ? { clase: claseDe(c) } : {}),
+    }));
   const publicadasParaAtribuidas: CitaParaAtribuidas[] = yaPublicadas.map(paraAtribuidas);
 
   /*
@@ -418,10 +430,21 @@ export async function darDeAltaLote(
     for (const c of enRevisionYa) {
       const f = formaParaComparar(c.texto);
       yaEnCorpus.set(f.canonica, { slug: c.slug, donde: 'en revisión', forma: f });
+      // Historia 35.6 — también su Variante, con el mismo slug: repetirla es repetir la Cita.
+      const v = textoDeVariante(c);
+      if (v !== undefined) {
+        const fv = formaParaComparar(v);
+        yaEnCorpus.set(fv.canonica, { slug: c.slug, donde: 'en revisión', forma: fv });
+      }
     }
     // Las publicadas se indexan después para que ganen: si el mismo texto está en los dos
     // sitios, lo que el editor necesita saber es que ya está publicado.
     for (const c of yaPublicadas) {
+      const v = textoDeVariante(c);
+      if (v !== undefined) {
+        const fv = formaParaComparar(v);
+        yaEnCorpus.set(fv.canonica, { slug: c.slug, donde: 'publicadas', forma: fv });
+      }
       const f = formaParaComparar(c.texto);
       yaEnCorpus.set(f.canonica, { slug: c.slug, donde: 'publicadas', forma: f });
     }
@@ -516,7 +539,12 @@ export async function darDeAltaLote(
         });
       }
 
-      const yaEsta = repetidaOContenida(nueva, yaEnCorpus);
+      // Historia 35.6 — la entrada se mira también por su Variante, si la declara.
+      const varianteDeLaEntrada = textoDeVariante(entrada);
+      const nuevaVariante = varianteDeLaEntrada !== undefined ? formaParaComparar(varianteDeLaEntrada) : undefined;
+      const yaEsta =
+        repetidaOContenida(nueva, yaEnCorpus) ??
+        (nuevaVariante !== undefined ? repetidaOContenida(nuevaVariante, yaEnCorpus) : undefined);
       if (yaEsta && !opciones.conDuplicados) {
         // No se escribe y no se descarta: se señala y el editor decide. El sistema no
         // tiene criterio para saber si dos textos equivalentes son la misma Cita o dos
@@ -601,6 +629,8 @@ export async function darDeAltaLote(
         // Historia 35.1b — se pasan tal cual: el esquema los exige a la atribuida y los prohíbe a la de siempre.
         ...(entrada.atestiguaciones !== undefined ? { atestiguaciones: entrada.atestiguaciones } : {}),
         ...(entrada.origen !== undefined ? { origen: entrada.origen } : {}),
+        // Historia 35.6 — la Variante, tal cual: el esquema la admite solo en la atribuida.
+        ...(entrada.variante !== undefined ? { variante: entrada.variante } : {}),
         // Se pasa tal cual y la valida la misma puerta que el resto: un `fuente:` a medias
         // manda la Cita a revisión con la regla incumplida escrita, no al corpus.
         ...(entrada.fuente !== undefined ? { fuente: entrada.fuente } : {}),
@@ -696,6 +726,9 @@ export async function darDeAltaLote(
         if (canonico !== '') {
           yaEnCorpus.set(canonico, { slug: candidata.slug, donde: 'el propio lote', forma: nueva });
         }
+        if (nuevaVariante !== undefined && nuevaVariante.canonica !== '') {
+          yaEnCorpus.set(nuevaVariante.canonica, { slug: candidata.slug, donde: 'el propio lote', forma: nuevaVariante });
+        }
         continue;
       }
 
@@ -728,6 +761,9 @@ export async function darDeAltaLote(
       // Lo aceptado entra en el índice: así un lote que repite la misma Cita dos veces se
       // detecta igual que si la segunda llegara mañana en otro lote.
       yaEnCorpus.set(canonico, { slug: candidata.slug, donde: 'el propio lote', forma: nueva });
+      if (nuevaVariante !== undefined && nuevaVariante.canonica !== '') {
+        yaEnCorpus.set(nuevaVariante.canonica, { slug: candidata.slug, donde: 'el propio lote', forma: nuevaVariante });
+      }
       // Y la casi igual, igual: la siguiente entrada de su Obra se compara también con esta.
       if (obraDeComparacion !== undefined) {
         publicadasPorObra.set(obraDeComparacion, [
@@ -770,6 +806,10 @@ function aRegistroDeCita(datos: CitaAdmisible): Record<string, unknown> {
     // Historia 35.1b — las atestiguaciones y el origen de la atribuida.
     ...(datos.atestiguaciones !== undefined ? { atestiguaciones: datos.atestiguaciones } : {}),
     ...(datos.origen !== undefined ? { origen: datos.origen } : {}),
+    // Historia 35.6 — la Variante de la atribuida, en el orden texto, region, origen.
+    ...(datos.variante !== undefined
+      ? { variante: { texto: datos.variante.texto, region: datos.variante.region, origen: datos.variante.origen } }
+      : {}),
     ...(datos.fuente !== undefined ? { fuente: datos.fuente } : {}),
     ...(datos.aptaParaPortada ? { aptaParaPortada: true } : {}),
   };
@@ -784,10 +824,13 @@ function paraAtribuidas(c: {
   clase?: unknown;
   procedencia?: { obra?: string } | null;
   atestiguaciones?: unknown;
+  variante?: unknown;
 }): CitaParaAtribuidas {
+  const variante = textoDeVariante(c);
   return {
     slug: c.slug,
     texto: c.texto,
+    ...(variante !== undefined ? { variante } : {}),
     ...(c.atestiguaciones !== undefined ? { atestiguaciones: c.atestiguaciones } : {}),
     ...(c.autor !== undefined ? { autor: c.autor } : {}),
     ...(c.personaje !== undefined ? { personaje: c.personaje } : {}),

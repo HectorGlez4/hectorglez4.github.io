@@ -336,3 +336,112 @@ describe('Historia 29.4 — la clase de la coincidencia y la casi igual', () => 
     ]);
   });
 });
+
+describe('Historia 35.6 — la Variante cuenta como duplicado', () => {
+  const PUERTA = { maxCaracteres: 1000, maxPorObra: 1000, maxPorDueño: 1000, minAtestiguaciones: 2, buzon: 'b@ejemplo.org' };
+  const ATESTIGUACIONES = [
+    { url: 'https://es.wikiquote.org/wiki/Prueba', consultadaEl: '2026-11-01' },
+    { url: 'https://www.elpais.com/cultura/prueba.html', consultadaEl: '2026-11-02' },
+  ];
+  const VARIANTE_PUBLICADA = 'Hasta el infinito y aún más allá, vigía de las estrellas.';
+  const DE_BUZZ = 'buzz-hasta-el-infinito-y-mas-alla';
+
+  /** El corpus de siempre, con Buzz y una atribuida suya publicada con Variante. */
+  async function conBuzz(): Promise<Rutas> {
+    const rutas = await corpusDePrueba();
+    const { escribirCita } = await import('../../tools/lib/corpus.ts');
+    await mkdir(rutas.personajes, { recursive: true });
+    await writeFile(join(rutas.personajes, 'buzz.yml'), 'nombre: "Buzz Lightyear"\nuniverso: "Toy Story"\n', 'utf8');
+    await escribirCita(rutas.citas, 'buzz--hasta-el-infinito-y-mas-alla', {
+      texto: 'Hasta el infinito y más allá, guardián del cosmos.',
+      personaje: 'buzz',
+      slug: DE_BUZZ,
+      procedencia: { año: 1995 },
+      clase: 'atribuida',
+      atestiguaciones: ATESTIGUACIONES,
+      origen: 'original',
+      variante: { texto: VARIANTE_PUBLICADA, region: 'espana', origen: 'doblaje' },
+    });
+    return rutas;
+  }
+
+  /** Una entrada atribuida de Buzz con Variante. */
+  const deBuzz = (texto: string, variante: string): EntradaDeLote => ({
+    texto,
+    personaje: 'buzz',
+    temas: [NOMBRE_DEL_TEMA_PUBLICADO],
+    procedencia: { año: 1995 },
+    atestiguaciones: ATESTIGUACIONES,
+    origen: 'doblaje',
+    variante: { texto: variante, region: 'espana', origen: 'doblaje' },
+  });
+
+  it('el alta de una de siempre que repite la Variante de una publicada la señala (FR-14) y no escribe nada', async () => {
+    const rutas = await conBuzz();
+    const antes = await ficherosPublicados(rutas);
+    const informe = await darDeAltaLote([{ ...ORIGINAL, texto: VARIANTE_PUBLICADA }], rutas);
+    expect(informe.posiblesDuplicados).toEqual([
+      expect.objectContaining({ coincideCon: DE_BUZZ, donde: 'publicadas', clase: 'repetidas' }),
+    ]);
+    expect(informe.publicadas).toEqual([]);
+    expect(await ficherosPublicados(rutas)).toEqual(antes);
+  });
+
+  it('el alta de una atribuida cuya Variante repite una de siempre: señalada, y con --con-duplicados, en revisión', async () => {
+    const rutas = await conBuzz();
+    await darDeAltaLote([ORIGINAL], rutas);
+    const entrada = deBuzz('Una frase del doblaje latino que nadie más dijo.', ORIGINAL.texto!);
+
+    const señalada = await darDeAltaLote([entrada], rutas, { puerta: PUERTA });
+    expect(señalada.posiblesDuplicados).toEqual([
+      expect.objectContaining({ coincideCon: 'seneca-la-vida-si-sabes-usarla-es-larga', donde: 'publicadas' }),
+    ]);
+    expect(señalada.publicadas).toEqual([]);
+
+    const forzada = await darDeAltaLote([entrada], rutas, { puerta: PUERTA, conDuplicados: true });
+    expect(forzada.publicadas).toEqual([]);
+    expect(forzada.enRevision).toHaveLength(1);
+    expect(forzada.enRevision[0].motivos.join('\n')).toMatch(
+      /coincide con «seneca-la-vida-si-sabes-usarla-es-larga», de la clase siempre/u,
+    );
+  });
+
+  it('el alta de una atribuida con Variante sin duplicado se publica con la Variante, y el slug sale solo del texto', async () => {
+    const rutas = await conBuzz();
+    const informe = await darDeAltaLote(
+      [deBuzz('Al rescate, que la galaxia no se defiende sola.', 'Al rescate, que la galaxia no se defiende solita.')],
+      rutas,
+      { puerta: PUERTA },
+    );
+    expect(informe.enRevision).toEqual([]);
+    const { slugDeCita } = await import('../../src/lib/slug.ts');
+    expect(informe.publicadas.map((p) => p.slug)).toEqual([slugDeCita('buzz', 'Al rescate, que la galaxia no se defiende sola.')]);
+    const { readFile } = await import('node:fs/promises');
+    const escrita = await readFile(informe.publicadas[0].ruta, 'utf8');
+    expect(escrita).toContain('variante:\n  texto: "Al rescate, que la galaxia no se defiende solita."\n  region: "espana"\n  origen: "doblaje"\n');
+  });
+
+  it('la aprobación de una atribuida cuya Variante repite una publicada la deja en revisión', async () => {
+    const rutas = await conBuzz();
+    const { escribirCita } = await import('../../tools/lib/corpus.ts');
+    const { aprobar } = await import('../../tools/lib/revision.ts');
+    await darDeAltaLote([ORIGINAL], rutas);
+    await escribirCita(rutas.revision, 'buzz--una-frase-del-doblaje', {
+      texto: 'Una frase del doblaje latino que nadie más dijo.',
+      personaje: 'buzz',
+      temas: ['con-pagina'],
+      slug: 'buzz-una-frase-del-doblaje',
+      procedencia: { año: 1995 },
+      clase: 'atribuida',
+      atestiguaciones: ATESTIGUACIONES,
+      origen: 'doblaje',
+      variante: { texto: ORIGINAL.texto, region: 'espana', origen: 'doblaje' },
+    });
+    const resultado = await aprobar(rutas, ['buzz-una-frase-del-doblaje'], [], { puerta: PUERTA });
+    expect(resultado.publicadas).toEqual([]);
+    expect(resultado.rechazadasPorAdmision.map((r) => r.motivos.join(' '))).toEqual([
+      expect.stringMatching(/coincide con «seneca-la-vida-si-sabes-usarla-es-larga», de la clase siempre/u),
+    ]);
+    expect(await readdir(rutas.revision)).toEqual(['buzz--una-frase-del-doblaje.md']);
+  });
+});

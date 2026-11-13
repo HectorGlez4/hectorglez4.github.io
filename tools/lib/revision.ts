@@ -59,6 +59,7 @@ import {
   motivoPuertaCerrada,
   motivosDe,
   planDaFichaAlAutor,
+  textoDeVariante,
   type CitaParaAtribuidas,
   type ValoresDeLaPuerta,
 } from './atribuidas.ts';
@@ -98,6 +99,11 @@ export interface CandidataEnRevision {
    * puerta de la atribuida cuenta sus dominios con el mínimo de la puerta.
    */
   atestiguaciones?: unknown;
+  /**
+   * El texto de su Variante, si declara una — Historia 35.6: la puerta de la atribuida la juzga
+   * con el tope y la compara como duplicado, y el aviso FR-14 la mira también.
+   */
+  variante?: string;
   /**
    * La Cita ya presente con la que coincide, si coincide con alguna — FR-14.
    *
@@ -232,7 +238,14 @@ export async function loteEnRevision(rutas: Rutas): Promise<CandidataEnRevision[
   // El índice de comparación usa la forma canónica de AD-3, la misma que la búsqueda:
   // si duplicados y búsqueda usaran criterios distintos, el corpus podría acabar con dos
   // Citas que la búsqueda presenta como una sola.
-  const yaPublicadas = new Map(publicadas.map((c) => [normalizar(c.texto), c.slug]));
+  const yaPublicadas = new Map<string, string>();
+  // Historia 35.6 — también la Variante de cada publicada, con su slug: repetirla es repetir la
+  // Cita. El texto se indexa después y gana si los dos coinciden con otra.
+  for (const c of publicadas) {
+    const v = textoDeVariante(c);
+    if (v !== undefined) yaPublicadas.set(normalizar(v), c.slug);
+  }
+  for (const c of publicadas) yaPublicadas.set(normalizar(c.texto), c.slug);
 
   const vistasEnRevision = new Map<string, string>();
   const lote: CandidataEnRevision[] = [];
@@ -289,8 +302,13 @@ export async function loteEnRevision(rutas: Rutas): Promise<CandidataEnRevision[
      */
     const puntuacion = tienePuntuacionRota(candidata.texto ?? '');
 
-    const duplicadaPublicada = yaPublicadas.get(canonico);
-    const duplicadaEnRevision = vistasEnRevision.get(canonico);
+    // Historia 35.6 — la candidata se mira también por su Variante, si la declara.
+    const varianteDeLaCandidata = textoDeVariante(candidata);
+    const canonicoDeLaVariante = varianteDeLaCandidata !== undefined ? normalizar(varianteDeLaCandidata) : '';
+    const enYa = (indice: Map<string, string>) =>
+      indice.get(canonico) ?? (canonicoDeLaVariante !== '' ? indice.get(canonicoDeLaVariante) : undefined);
+    const duplicadaPublicada = enYa(yaPublicadas);
+    const duplicadaEnRevision = enYa(vistasEnRevision);
 
     lote.push({
       slug: candidata.slug,
@@ -303,6 +321,7 @@ export async function loteEnRevision(rutas: Rutas): Promise<CandidataEnRevision[
       ...(typeof candidata.procedencia?.obra === 'string' ? { obra: candidata.procedencia.obra } : {}),
       ...(typeof candidata.fuente?.id === 'string' ? { fuente: { id: candidata.fuente.id } } : {}),
       ...(candidata.atestiguaciones !== undefined ? { atestiguaciones: candidata.atestiguaciones } : {}),
+      ...(varianteDeLaCandidata !== undefined ? { variante: varianteDeLaCandidata } : {}),
       // La publicada gana: lo que el editor necesita saber es que ya está publicada.
       ...(duplicadaPublicada !== undefined
         ? { duplicaA: { slug: duplicadaPublicada, donde: 'publicadas' as const } }
@@ -335,6 +354,9 @@ export async function loteEnRevision(rutas: Rutas): Promise<CandidataEnRevision[
     });
 
     if (canonico !== '') vistasEnRevision.set(canonico, candidata.slug);
+    if (canonicoDeLaVariante !== '' && !vistasEnRevision.has(canonicoDeLaVariante)) {
+      vistasEnRevision.set(canonicoDeLaVariante, candidata.slug);
+    }
   }
 
   /*
@@ -507,6 +529,7 @@ export async function aprobar(
     (paraAtribuidas ??= yaPublicadas.map((c) => ({
       slug: c.slug,
       texto: c.texto,
+      ...(textoDeVariante(c) !== undefined ? { variante: textoDeVariante(c) } : {}),
       ...(c.autor !== undefined ? { autor: c.autor } : {}),
       ...(c.personaje !== undefined ? { personaje: c.personaje } : {}),
       ...(esAtribuida(c) ? { clase: claseDe(c) } : {}),
@@ -835,6 +858,7 @@ function candidataParaAtribuidas(c: CandidataEnRevision): CitaParaAtribuidas {
     ...(esAtribuida(c) ? { clase: claseDe(c) } : {}),
     ...(c.obra !== undefined ? { procedencia: { obra: c.obra } } : {}),
     ...(c.atestiguaciones !== undefined ? { atestiguaciones: c.atestiguaciones } : {}),
+    ...(c.variante !== undefined ? { variante: c.variante } : {}),
   };
 }
 

@@ -313,7 +313,8 @@ export type Columna = Exclude<FamiliaDeRuta, 'directorio'> | 'directorioDeAutore
  */
 export const CAMPOS_QUE_PINTA = {
   cita: {
-    cita: CAMPOS_DE_CITA,
+    // Historia 35.6 — la Variante de una atribuida la pinta solo su Página de Cita.
+    cita: [...CAMPOS_DE_CITA, 'variante'],
     autor: CAMPOS_DE_CITA,
     tema: CAMPOS_DE_CITA,
     coleccion: CAMPOS_DE_CITA,

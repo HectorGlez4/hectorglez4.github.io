@@ -86,6 +86,7 @@ import {
   type PlanDeFicha,
 } from './obras.ts';
 import { formaDeObra } from '../../src/lib/obras.ts';
+import { esAtribuida } from '../../src/lib/clase.ts';
 import { fuenteDeUrl } from './fuentes.ts';
 import type { Resultado } from './gestion.ts';
 import { negativaPorAlcance } from './alcance.ts';
@@ -132,6 +133,21 @@ type Localizada = { ok: true; cita: CitaEnCorpus } | { ok: false; motivos: strin
 async function localizarPublicada(rutas: Rutas, slug: string): Promise<Localizada> {
   const publicadas = await leerCitas(rutas.citas);
   const cita = publicadas.find((c) => c.slug === slug);
+  /*
+   * Historia 35.6, AD-35 — documentar no toca una atribuida: no se coteja contra un documento, y
+   * su única puerta para cambiar es `npm run atribuida`, que guarda su Ficha de Obra, sus topes y
+   * su clase. Ni documentarla ni retirarla por aquí.
+   */
+  if (cita !== undefined && esAtribuida(cita)) {
+    return {
+      ok: false,
+      motivos: [
+        `«${slug}» es una Cita atribuida: documentar no la toca, porque no se coteja contra ningún documento.`,
+        'Una atribuida publicada solo se cambia con su orden:',
+        `  npm run atribuida -- {obra|autor|personaje|variante|texto} ${slug} …`,
+      ],
+    };
+  }
   if (cita !== undefined) return { ok: true, cita };
 
   const enRevision = (await leerCitas(rutas.revision)).some((c) => c.slug === slug);
@@ -1066,12 +1082,18 @@ export async function restituirTraducciones(rutas: Rutas): Promise<Resultado> {
   const pendientes: Pendiente[] = [];
   const omitidas: string[] = [];
   let iguales = 0;
+  // Historia 35.6, AD-35 — documentar no toca una atribuida: se salta y se cuenta.
+  let atribuidas = 0;
 
   for (const [lote, enRevision] of [
     [publicadas, false],
     [candidatas, true],
   ] as const) {
     for (const cita of lote) {
+      if (esAtribuida(cita)) {
+        atribuidas += 1;
+        continue;
+      }
       const restitucion = restitucionDeTraduccion(cita as CitaParaRestituir, documentos);
       if (restitucion.tipo === 'nada') continue;
       if (restitucion.tipo === 'igual') {
@@ -1150,12 +1172,21 @@ export async function restituirTraducciones(rutas: Rutas): Promise<Resultado> {
       `Candidatas de revisión restituidas: ${deRevision.length}` +
         (deRevisionMovidas > 0 ? ` (${deRevisionMovidas} con el año movido).` : '.'),
       ...(iguales > 0 ? [`Ya restituidas, sin cambios: ${iguales}.`] : []),
+      ...(atribuidas > 0 ? [lineaDeAtribuidasSaltadas(atribuidas)] : []),
       ...(omitidas.length > 0
         ? [`No se han tocado ${citas(omitidas.length)}, y hay que mirarlas:`, ...omitidas]
         : []),
       'Ni el texto ni el slug han cambiado. El cambio del corpus va en un commit propio.',
     ].join('\n'),
   };
+}
+
+/** La línea del parte por las atribuidas que un modo por lote salta — Historia 35.6. */
+function lineaDeAtribuidasSaltadas(n: number): string {
+  return (
+    `Atribuidas saltadas, sin tocar: ${n}. Documentar no toca una atribuida; ` +
+    'se cambia con «npm run atribuida».'
+  );
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -1278,6 +1309,8 @@ export async function restituirSaltos(
   };
 
   const sinDocumentoNombradas: string[] = [];
+  // Historia 35.6, AD-35 — documentar no toca una atribuida: se salta y se cuenta.
+  let atribuidasSaltadas = 0;
   const lotes = { publicadas: loteVacio(), candidatas: loteVacio() };
   for (const [citasDelLote, enRevision] of [
     [publicadas, false],
@@ -1287,6 +1320,10 @@ export async function restituirSaltos(
     for (const cita of citasDelLote) {
       if (nombradas !== undefined && !nombradas.has(cita.slug)) continue;
       if (typeof cita.texto !== 'string') continue;
+      if (esAtribuida(cita)) {
+        atribuidasSaltadas += 1;
+        continue;
+      }
       const legibles = legiblesDe(cita);
       const decision = saltosDeLaCita(cita.texto, conForma(legibles));
       const enumerar = (nombres: readonly string[]) => nombres.map((n) => `corpus/fuentes/${n}.txt`).join(', ');
@@ -1499,6 +1536,7 @@ export async function restituirSaltos(
       `Saltos de verso${seco ? ', en seco' : ''} (${segundos} s):`,
       ...parteDelLote('Citas publicadas', lotes.publicadas, true),
       ...parteDelLote('Candidatas de revisión', lotes.candidatas, false),
+      ...(atribuidasSaltadas > 0 ? [lineaDeAtribuidasSaltadas(atribuidasSaltadas)] : []),
       `Cambian de fecha ${paginasDeCita} ${paginasDeCita === 1 ? 'Página de Cita' : 'Páginas de Cita'} y ` +
         `${totalListados} ${totalListados === 1 ? 'listado' : 'listados'}` +
         (listados.length === 0 ? '.' : ` (${listados.map(([f, n]) => `${f}: ${n}`).join(', ')}).`),
