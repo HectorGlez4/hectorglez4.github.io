@@ -28,7 +28,7 @@ import {
   PLAZO_DE_RESPUESTA_A_RETIRADA_DIAS,
 } from '../src/lib/umbrales.ts';
 import { esAtribuida } from '../src/lib/clase.ts';
-import { fechaLocal, leerCitas, leerRegistroDeClases, mover, rutasDelCorpus, type Rutas } from './lib/corpus.ts';
+import { fechaLocal, leerCitas, leerRegistroDeClases, rutasDelCorpus, type Rutas } from './lib/corpus.ts';
 import { leerFormasVedadas } from './lib/formasVedadas.ts';
 import { motivosDeArgumentosNoReconocidos, opcion, posicionales, raizDeCorpusDe } from './lib/cli.ts';
 import {
@@ -126,6 +126,30 @@ function rechazo(motivos: string[]): number {
 const mensajeDe = (fallo: unknown) => (fallo instanceof Error ? fallo.message : String(fallo));
 
 /**
+ * Lo que no se sostiene de las constantes con valor: el plazo es un entero de días ≥ 0, la muestra
+ * y el mínimo son enteros positivos y la proporción máxima está entre 0 y 1. Sin valor no se juzga
+ * (lo fija Héctor); con uno imposible la orden sale con 1 antes de leer nada, en vez de dar una
+ * muestra vacía o un juicio que no significa nada.
+ */
+export function problemasDeLasConstantes(constantes: Constantes): string[] {
+  const { plazo, muestra, minimo, maximo } = constantes;
+  return [
+    ...(plazo !== undefined && !(Number.isInteger(plazo) && plazo >= 0)
+      ? [`PLAZO_DE_RESPUESTA_A_RETIRADA_DIAS vale ${plazo}, y tiene que ser un entero de días mayor o igual que 0.`]
+      : []),
+    ...(muestra !== undefined && !(Number.isInteger(muestra) && muestra >= 1)
+      ? [`MUESTRA_DE_AUDITORIA_SM_C6 vale ${muestra}, y tiene que ser un entero positivo.`]
+      : []),
+    ...(minimo !== undefined && !(Number.isInteger(minimo) && minimo >= 1)
+      ? [`MIN_ATRIBUIDAS_PARA_JUZGAR_SM_C6 vale ${minimo}, y tiene que ser un entero positivo.`]
+      : []),
+    ...(maximo !== undefined && !(Number.isFinite(maximo) && maximo >= 0 && maximo <= 1)
+      ? [`MAX_PROPORCION_MAL_ATRIBUIDA_SM_C6 vale ${maximo}, y tiene que ser una proporción entre 0 y 1.`]
+      : []),
+  ];
+}
+
+/**
  * La orden. Devuelve el código de salida en vez de terminar el proceso, para que las pruebas la
  * recorran entera; las constantes llegan por parámetro, con las de `umbrales.ts` por omisión.
  */
@@ -181,6 +205,8 @@ export async function principal(
     return rechazo([`«${fechaDada}» es una fecha futura: se anota lo que ya pasó, y hoy es ${hoy}.`]);
   }
   const fecha = fechaDada ?? hoy;
+  const imposibles = problemasDeLasConstantes(constantes);
+  if (imposibles.length > 0) return rechazo([...imposibles, 'Esos valores son de src/lib/umbrales.ts y los fija Héctor.']);
 
   if (clave === 'anotar') return anotar(argumentos, resto[0], fecha, rutas, quiereJson);
   if (clave === 'resolver') return resolver(resto[0], resto[1], fecha, rutas, quiereJson);
@@ -218,6 +244,15 @@ async function anotar(argumentos: string[], slug: string, fecha: string, rutas: 
   }
   const problema = problemaDeLaCita(slug, contexto.publicadas, contexto.clases);
   if (problema !== undefined) return rechazo([problema]);
+  // Una petición no es anterior a la Cita atribuida sobre la que se pide: contaría en un mes en
+  // que no estaba, y fecharía atrás su forma vedada.
+  const desde = contexto.clases
+    .filter((e) => e.slug === slug && esAtribuida(e))
+    .map((e) => e.fecha)
+    .sort()[0];
+  if (desde !== undefined && fecha < desde) {
+    return rechazo([`«${slug}» es atribuida desde el ${desde} (corpus/clases-de-cita.yml): una petición del ${fecha} sería anterior a ella.`]);
+  }
 
   const nueva: Peticion = {
     id: siguienteId(contexto.entradas),
@@ -229,14 +264,19 @@ async function anotar(argumentos: string[], slug: string, fecha: string, rutas: 
   };
   const retiraPrimero = nueva.solicitante === SOLICITANTE_QUE_RETIRA_PRIMERO && nueva.peticion === 'retirar';
   const publicada = contexto.publicadas.some((c) => c.slug === slug);
+  // Anotar dos veces lo mismo se admite —pueden ser dos correos—, pero se avisa: casi siempre es
+  // un descuido, y cada entrada cuenta en las peticiones por cada cien.
+  const igual = separarEntradas(contexto.entradas).peticiones.find(
+    (p) => p.cita === slug && p.fecha === fecha && p.solicitante === nueva.solicitante && p.peticion === nueva.peticion,
+  );
 
   let lineasDeRetirada: string[] = [];
-  let devolver: (() => Promise<string>) | undefined;
+  let devolver: (() => Promise<string[]>) | undefined;
   if (retiraPrimero && publicada) {
     const retirada = await retirarPorPeticion(rutas, slug, fecha);
     if (!retirada.ok) return rechazo(retirada.motivos);
     lineasDeRetirada = retirada.lineas;
-    devolver = () => mover(retirada.destino, retirada.origen);
+    devolver = retirada.devolver;
   }
 
   let registro: string;
@@ -254,6 +294,9 @@ async function anotar(argumentos: string[], slug: string, fecha: string, rutas: 
         ? ['La de retirar de un titular de derechos se atiende retirando primero:', ...lineasDeRetirada.map((l) => `  ${l}`)]
         : ['La Cita ya no está publicada: no hay nada que retirar.']
       : []),
+    ...(igual !== undefined
+      ? [`Aviso: ya había una igual, la petición ${igual.id} (${igual.fecha}, ${igual.solicitante}, ${igual.peticion}). Si es la misma, no son dos.`]
+      : []),
     `Queda sin resolver. Para resolverla: npm run peticion -- resolver ${nueva.id} ${RESOLUCIONES.join('|')}`,
     `Registrado en ${registro}`,
   ];
@@ -261,14 +304,17 @@ async function anotar(argumentos: string[], slug: string, fecha: string, rutas: 
   return 0;
 }
 
-/** Si la entrada no se pudo anotar tras retirar, la Cita vuelve; la forma vedada con su slug no la veda. */
-async function deshacer(devolver: (() => Promise<string>) | undefined, fallo: unknown): Promise<number> {
+/**
+ * Si la entrada no se pudo anotar tras retirar, la Cita vuelve y su Ficha de Obra recupera el
+ * título; la forma vedada se queda (solo añade), y con su slug no veda a esa misma Cita.
+ */
+async function deshacer(devolver: (() => Promise<string[]>) | undefined, fallo: unknown): Promise<number> {
   const motivos = [`No se pudo anotar en corpus/peticiones-de-retirada.yml: ${mensajeDe(fallo)}`];
   if (devolver !== undefined) {
     try {
-      await devolver();
+      motivos.push(...(await devolver()));
       motivos.push(
-        'La Cita ha vuelto a corpus/citas/. Su forma quedó anotada en corpus/formas-vedadas.yml con su slug, que no veda a esa misma Cita.',
+        'Su forma quedó anotada en corpus/formas-vedadas.yml con su slug, que no veda a esa misma Cita: el registro solo añade.',
       );
     } catch (otro) {
       motivos.push(`Y la Cita no pudo volver (${mensajeDe(otro)}): sigue en corpus/_revision/. Devuélvala a mano.`);
@@ -313,12 +359,12 @@ async function resolver(idDado: string, resolucion: string, fecha: string, rutas
   const cita = contexto.publicadas.find((c) => c.slug === peticion.cita);
   const retiraAhora = resolucion === 'retirada' && cita !== undefined && esAtribuida(cita);
   let lineasDeRetirada: string[] = [];
-  let devolver: (() => Promise<string>) | undefined;
+  let devolver: (() => Promise<string[]>) | undefined;
   if (retiraAhora) {
     const retirada = await retirarPorPeticion(rutas, peticion.cita, fecha);
     if (!retirada.ok) return rechazo(retirada.motivos);
     lineasDeRetirada = retirada.lineas;
-    devolver = () => mover(retirada.destino, retirada.origen);
+    devolver = retirada.devolver;
   }
 
   let registro: string;
@@ -335,7 +381,12 @@ async function resolver(idDado: string, resolucion: string, fecha: string, rutas
     resolucion === 'retirada'
       ? retiraAhora
         ? lineasDeRetirada.map((l) => `  ${l}`)
-        : ['  La Cita ya no estaba publicada: no se ha movido nada.']
+        : cita === undefined
+          ? ['  La Cita ya no estaba publicada: no se ha movido nada, y SM-C6 no la cuenta como retirada.']
+          : [
+              '  La Cita sigue publicada, pero ya no es atribuida: no se ha movido nada, y SM-C6 no la cuenta como retirada.',
+              '  Una Cita de siempre se retira con «npm run documentar -- --retirar».',
+            ]
       : resolucion === 'corregida'
         ? ['  La corrección de una atribuida publicada se hace con su orden: npm run atribuida -- {obra|autor|personaje|variante|texto} …']
         : retiradaPrimero && cita === undefined
@@ -384,7 +435,7 @@ async function auditar(
       leerFormasVedadas(rutas),
       leerCitas(rutas.citas),
     ]);
-    atribuidas = atribuidasAlCierre(mes, clases, vedadas, new Set(publicadas.map((c) => c.slug)));
+    atribuidas = atribuidasAlCierre(mes, clases, vedadas, atribuidasPublicadas(publicadas));
   } catch (fallo) {
     return rechazo([mensajeDe(fallo)]);
   }
@@ -393,8 +444,10 @@ async function auditar(
       return rechazo(['MUESTRA_DE_AUDITORIA_SM_C6 no tiene valor (lo fija Héctor): no hay muestra, así que ningún resultado es de ella.']);
     }
     process.stdout.write(
-      `MUESTRA_DE_AUDITORIA_SM_C6 no tiene valor (lo fija Héctor): no se elige muestra para ${mes}. ` +
-        `Hay ${atribuidas.length} atribuidas publicadas al cierre del mes.\n`,
+      quiereJson
+        ? `${JSON.stringify({ mes, muestra: null, atribuidas: atribuidas.length }, null, 2)}\n`
+        : `MUESTRA_DE_AUDITORIA_SM_C6 no tiene valor (lo fija Héctor): no se elige muestra para ${mes}. ` +
+            `Hay ${atribuidas.length} atribuidas publicadas al cierre del mes.\n`,
     );
     return 0;
   }
@@ -454,12 +507,19 @@ async function auditar(
 
 // ─── consulta ────────────────────────────────────────────────────────────────
 
+/** Los slugs de las atribuidas publicadas hoy: las de siempre no cuentan para SM-C6. */
+const atribuidasPublicadas = (publicadas: readonly { slug: string; clase?: unknown }[]) =>
+  new Set(publicadas.filter((c) => esAtribuida(c)).map((c) => c.slug));
+
 const porCien = (v: number | undefined) => (v === undefined ? 'sin tasa' : v.toFixed(2));
 
 /** Lo que la consulta dice del juicio de SM-C6. Nunca propone el freno. */
 export function lineaDelJuicio(juicio: JuicioDeSmC6): string[] {
   if (juicio.estado === 'sin-valores') {
     return [`SM-C6 no se juzga: no tienen valor ${juicio.faltan.join(' ni ')} (los fija Héctor). Se informa sin juzgar.`];
+  }
+  if (juicio.estado === 'sin-pareja') {
+    return ['SM-C6 no se juzga: todavía no hay dos meses cerrados seguidos que comparar.'];
   }
   if (juicio.estado === 'bajo-minimo') {
     return [
@@ -484,7 +544,7 @@ async function consultar(rutas: Rutas, hoy: string, quiereJson: boolean, constan
       leerFormasVedadas(rutas),
       leerCitas(rutas.citas),
     ]);
-    leido = { entradas, auditorias, clases, vedadas, publicadasHoy: new Set(publicadas.map((c) => c.slug)) };
+    leido = { entradas, auditorias, clases, vedadas, publicadasHoy: atribuidasPublicadas(publicadas) };
   } catch (fallo) {
     process.stderr.write(`${mensajeDe(fallo)}\nNo se ha podido consultar: no se cuenta nada a medias.\n`);
     return 1;
@@ -549,7 +609,8 @@ async function consultar(rutas: Rutas, hoy: string, quiereJson: boolean, constan
               `${porCien(m.retiradasPorCien).padStart(13)}  ` +
               (m.auditoria === undefined
                 ? 'sin auditar'
-                : `${m.auditoria.malAtribuidas} de ${m.auditoria.muestra} (${m.auditoria.proporcion.toFixed(2)})`),
+                : `${m.auditoria.malAtribuidas} de ${m.auditoria.muestra} (${m.auditoria.proporcion.toFixed(2)}), ` +
+                  `${m.auditoria.sinFuente} sin fuente`),
           ),
           '* mes en curso: no se juzga.',
         ]),

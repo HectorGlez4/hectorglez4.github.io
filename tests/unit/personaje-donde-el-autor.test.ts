@@ -477,20 +477,23 @@ describe('Historia 35.4 — una Obra cuyo dueño no tiene página', () => {
 });
 
 describe('Historia 35.8 — la línea de retirada, en toda Página de Cita atribuida y de Personaje, y en ninguna otra', () => {
-  /** Toda página HTML del `dist/`, como ruta del sitio. */
+  /** Toda página HTML del `dist/`: el fichero que se lee y su ruta del sitio. Ninguna se salta. */
   const paginas = () =>
     (readdirSync(join(proyecto, 'dist'), { recursive: true }) as string[])
       .filter((f) => String(f).endsWith('.html'))
-      .map((f) => `/${String(f).replace(/(?:^|\/)index\.html$/u, '').replace(/\.html$/u, '')}`.replace(/\/?$/u, '/'));
+      .map((f) => ({
+        fichero: join(proyecto, 'dist', String(f)),
+        ruta: `/${String(f).replace(/(?:^|\/)index\.html$/u, '').replace(/\.html$/u, '')}`.replace(/\/?$/u, '/'),
+      }));
   const LINEA = /<p class="linea-de-retirada"[^>]*>[\s\S]*?<\/p>/u;
   const lineaDe = (pagina: string) => LINEA.exec(pagina)?.[0];
 
   it('la llevan exactamente las Páginas de Cita atribuidas y la de Personaje', () => {
     expect(codigo, salida).toBe(0);
     const conLinea: string[] = [];
-    for (const ruta of paginas()) {
-      const fichero = ruta === '/404/' ? join(proyecto, 'dist', '404.html') : paginaConstruida(proyecto, ruta);
-      if (!existsSync(fichero)) continue;
+    const todas = paginas();
+    expect(todas.length).toBeGreaterThan(0);
+    for (const { fichero, ruta } of todas) {
       if (lineaDe(readFileSync(fichero, 'utf8')) !== undefined) conLinea.push(ruta);
     }
     const atribuidas = [B1, B2, B3, B4, V1, ...Array.from({ length: 12 }, (_, i) => `vivo-relleno-${String(i + 1).padStart(2, '0')}`)];

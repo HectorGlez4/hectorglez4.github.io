@@ -396,7 +396,7 @@ corrija o se retire.» («¿Alguna cita de esta página…» en la de Personaje)
 `mailto:` a `BUZON_DE_PETICIONES` con `?subject=` y el slug codificado, en la misma pestaña, y la
 dirección va también como texto, entre paréntesis. La pinta solo `src/components/LineaDeRetirada.astro`,
 con la redacción de `lineaDeRetirada` de `src/lib/atribucion.ts`, que **para la construcción sin
-buzón**. Sin guion, sin zona ni exención (no es enlace interno), bajo `data-pagefind-ignore="all"` y
+buzón** o con uno que no es una dirección de correo (`usuario@dominio`, sin espacios, `?`, `&` ni `#`). Sin guion, sin zona ni exención (no es enlace interno), bajo `data-pagefind-ignore="all"` y
 con la presentación en `style` —un `<style>` de componente cambiaría el CSS de toda Página de Cita—.
 Una prueba de `dist/` (`tests/unit/personaje-donde-el-autor.test.ts`) exige la línea en toda Página
 de Cita atribuida y de Personaje y en ninguna otra. Desde aquí WCAG 3.2.6 es `ux`, no `no-aplica`
@@ -415,19 +415,25 @@ npm run peticion -- resolver <id> corregida|retirada|rechazada [--fecha AAAA-MM-
 npm run peticion -- auditar <AAAA-MM> [--resultado <slug>=bien|mal-atribuida|sin-fuente …]
 ```
 
-**Ningún campo admite contacto**: el repositorio es público, y un `--motivo` con forma de correo o de
-teléfono (`tieneContacto` de `tools/lib/peticiones.ts`) se rechaza con 1. La Cita se valida contra lo
-publicado o contra el registro de clases —una atribuida ya retirada se resuelve; una de siempre se
-rechaza con 1—. El `id` es correlativo. Códigos: 2 por la forma (bandera desconocida o repetida,
-argumentos de menos o de más, fecha o mes sin forma, motivo vacío, un valor fuera de su conjunto); 1
-por lo que dice (fecha futura, registro o Corpus ilegible, id inexistente o ya resuelto, resolución
-anterior a su petición). En ninguno se escribe nada.
+**Ningún campo admite contacto**: el repositorio es público, y un `--motivo` con forma de correo, de
+teléfono, de usuario de red social («@ana») o con la palabra «arroba» (`tieneContacto` de
+`tools/lib/peticiones.ts`) se rechaza con 1; un año, unos años o una fecha no son un teléfono. La Cita
+se valida contra lo publicado o contra el registro de clases —una atribuida ya retirada se resuelve;
+una de siempre se rechaza con 1—, y la petición no puede ser anterior a su primera entrada
+`atribuida` en el registro de clases. El `id` es correlativo; anotar dos veces lo mismo el mismo día
+se admite con un aviso. El registro se juzga también entre entradas: una `resolucion` sigue a su
+petición en la lista y no la antecede en fecha. Códigos: 2 por la forma (bandera desconocida o
+repetida, argumentos de menos o de más, fecha o mes sin forma, motivo vacío, un valor fuera de su
+conjunto); 1 por lo que dice (fecha futura o anterior a la clasificación, registro o Corpus ilegible,
+id inexistente o ya resuelto, resolución anterior a su petición, una de las cuatro constantes con un
+valor imposible). En ninguno se escribe nada.
 
 **Retirar por petición** lo hacen la petición de retirar de un **titular de derechos**, en el mismo
 gesto de anotarla —la resolución queda para después—, y `resolver <id> retirada` sobre cualquier otra
 si la Cita sigue publicada: mueve el fichero a `corpus/_revision/` (AD-2), anota su forma en
 `formas-vedadas.yml` con `retirada`, pone al día el título de su Ficha de Obra y, después, anota la
-entrada; si algo falla, la Cita vuelve. **No se niega por NFR-5**: informa de lo que quedaría fuera de
+entrada; si algo falla, la Cita vuelve y la Ficha recupera el título que tenía (la forma vedada se
+queda, porque su registro solo añade, y con su slug no veda a esa misma Cita). **No se niega por NFR-5**: informa de lo que quedaría fuera de
 alcance con su Tema y su recuento, y eso se resuelve en el mismo commit antes de fusionar, porque el
 build sigue rompiendo. `rechazada` sobre una retirada primero no la devuelve: devolverla es moverla de
 vuelta a mano, con su commit. **El fichero retirado se añade a mano con `git add`** —`_revision/` no se
@@ -435,13 +441,17 @@ versiona y git es su única copia— y su texto sigue en el historial de git (pr
 
 **La consulta** lista por mes y nombra las peticiones sin resolver pasado
 `PLAZO_DE_RESPUESTA_A_RETIRADA_DIAS`; sin valor, las lista sin juzgar y lo dice. Da por mes, para
-SM-C6, las atribuidas publicadas al cierre —del registro de clases menos las retiradas que fecha
-`formas-vedadas.yml`, sin leer git—, las peticiones y las retiradas por cada cien («sin tasa» sin
-atribuidas, nunca 0 %) y la proporción mal atribuida de la última auditoría del mes. **Salta**
+SM-C6, las atribuidas publicadas al cierre —del registro de clases menos las retiradas o cambiadas de
+clase que fecha `formas-vedadas.yml`, salvo que hoy se publiquen **como atribuidas**, sin leer git—,
+las peticiones y las retiradas por cada cien («sin tasa» sin atribuidas, nunca 0 %) y la proporción
+mal atribuida de la última auditoría del mes, con sus sin fuente. Una retirada cuenta solo si el gesto
+movió la Cita —lo prueba su forma vedada `retirada` con su slug y la fecha del gesto— y una vez por
+Cita. **Salta**
 (`juicioDeSmC6`) en el segundo de dos meses cerrados seguidos con al menos
 `MIN_ATRIBUIDAS_PARA_JUZGAR_SM_C6` atribuidas si las peticiones por cada cien suben, o si la proporción
-pasa de `MAX_PROPORCION_MAL_ATRIBUIDA_SM_C6` en los dos; sin esas constantes informa y no juzga, por
-debajo del mínimo lo dice, y el freno no lo propone: lo decide Héctor.
+pasa de `MAX_PROPORCION_MAL_ATRIBUIDA_SM_C6` en los dos; sin esas constantes informa y no juzga, sin
+dos meses cerrados seguidos o por debajo del mínimo dice cuál de las dos, y el freno no lo propone: lo
+decide Héctor.
 
 **La auditoría** de un mes cerrado: la muestra son las `MUESTRA_DE_AUDITORIA_SM_C6` atribuidas al
 cierre con menor SHA-256 de `{slug}|{mes}` (sin valor, lo dice y no elige); con un `--resultado` por

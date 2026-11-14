@@ -24,8 +24,8 @@
 
 import { createHash } from 'node:crypto';
 import { existsSync } from 'node:fs';
-import { readFile } from 'node:fs/promises';
-import { dirname } from 'node:path';
+import { readFile, readdir, writeFile } from 'node:fs/promises';
+import { dirname, join } from 'node:path';
 import { parse as parsearYaml } from 'yaml';
 import { esJornada } from '../../src/lib/citaDelDia.ts';
 import { esAtribuida } from '../../src/lib/clase.ts';
@@ -115,22 +115,30 @@ export function esMes(valor: string): boolean {
 // ─── Contacto ────────────────────────────────────────────────────────────────
 
 const CORREO = /[^\s@]+@[^\s@]+\.[^\s@]+/u;
+/** Un usuario de red social («@ana_perez») o un correo dicho con palabras («ana arroba …»). */
+const USUARIO_DE_RED = /(?:^|[\s(«"'])@[\p{L}\p{N}_.]{2,}/u;
+const ARROBA_ESCRITA = /\barroba\b/iu;
 /** Un tramo de cifras con los separadores que lleva un teléfono. */
 const TRAMO_DE_CIFRAS = /\+?\(?\d[\d\s().-]*\d/gu;
-/** Dos años unidos por un guion no son un teléfono: «1984-1990». */
-const DOS_AÑOS = /^\d{4}\s?[-–]\s?\d{4}$/u;
+/**
+ * Tramos de siete cifras o más que no son un teléfono: años sueltos o unidos («1984-1990»,
+ * «1984 1990») y fechas («2026-11-14», «14.11.2026»).
+ */
+const NO_ES_TELEFONO = [/^\d{4}(?:\s*[-–.]\s*|\s+)\d{4}(?:(?:\s*[-–.]\s*|\s+)\d{4})*$/u, /^\d{4}-\d{2}-\d{2}$/u, /^\d{1,2}[.-]\d{1,2}[.-]\d{4}$/u];
 
 /**
  * Si un texto lleva un dato de contacto: algo con forma de correo, o un tramo de al menos siete
- * cifras con los separadores de un teléfono (espacios, puntos, guiones, paréntesis, `+`). Un año o
- * un número de capítulo no lo son. Ningún campo del registro admite contacto (AD-35): el
+ * cifras con los separadores de un teléfono (espacios, puntos, guiones, paréntesis, `+`), un
+ * usuario de red social («@ana») o la palabra «arroba». Un año, unos años, una fecha o un número de
+ * capítulo no lo son. Ningún campo del registro admite contacto (AD-35): el
  * repositorio es público.
  */
 export function tieneContacto(texto: string): boolean {
-  if (CORREO.test(texto)) return true;
+  if (CORREO.test(texto) || USUARIO_DE_RED.test(texto) || ARROBA_ESCRITA.test(texto)) return true;
   for (const [tramo] of texto.matchAll(TRAMO_DE_CIFRAS)) {
     const cifras = tramo.replace(/\D/gu, '').length;
-    if (cifras >= 7 && !DOS_AÑOS.test(tramo.trim())) return true;
+    const limpio = tramo.trim();
+    if (cifras >= 7 && !NO_ES_TELEFONO.some((forma) => forma.test(limpio))) return true;
   }
   return false;
 }
@@ -164,8 +172,12 @@ export const CABECERA_DE_PETICIONES_DE_RETIRADA = [
   '',
 ].join('\n');
 
-/** Las entradas de un registro de peticiones ya leído; lanza nombrando lo que falla. */
-export function analizarPeticiones(nombre: string, contenido: string): EntradaDePeticiones[] {
+/**
+ * Las entradas de un registro de peticiones ya leído; lanza nombrando lo que falla. Juzga cada
+ * entrada y también sus relaciones (una resolución sigue a su petición y no la antecede en fecha);
+ * `sueltas` juzga solo cada entrada, para validar una que se va a añadir antes de leer el resto.
+ */
+export function analizarPeticiones(nombre: string, contenido: string, sueltas = false): EntradaDePeticiones[] {
   let leido: unknown;
   try {
     leido = parsearYaml(contenido);
@@ -185,10 +197,10 @@ export function analizarPeticiones(nombre: string, contenido: string): EntradaDe
   if (!Array.isArray(lista)) {
     throw new Error(`${nombre}: «${CLAVE_DE_PETICIONES}» tiene que ser una lista de entradas, y es ${typeof lista}.`);
   }
-  const ids = new Set<number>();
+  const ids = new Map<number, string>();
   const resueltas = new Set<number>();
   for (const [i, bruta] of lista.entries()) {
-    const problema = problemaDeEntrada(bruta, ids, resueltas);
+    const problema = problemaDeEntrada(bruta, ids, resueltas, sueltas);
     if (problema !== undefined) {
       throw new Error(`${nombre}: la entrada ${i + 1} ${problema} (${JSON.stringify(bruta)}).`);
     }
@@ -198,7 +210,17 @@ export function analizarPeticiones(nombre: string, contenido: string): EntradaDe
 
 const esObjeto = (v: unknown): v is Record<string, unknown> => v !== null && typeof v === 'object' && !Array.isArray(v);
 
-function problemaDeEntrada(bruta: unknown, ids: Set<number>, resueltas: Set<number>): string | undefined {
+/**
+ * Lo que falla en una entrada, también en su relación con las anteriores: el id de una petición no
+ * se repite, y una resolución nombra una petición que la precede en la lista, con una fecha que no
+ * es anterior a la suya. `ids` lleva la fecha de cada petición ya vista.
+ */
+function problemaDeEntrada(
+  bruta: unknown,
+  ids: Map<number, string>,
+  resueltas: Set<number>,
+  sueltas: boolean,
+): string | undefined {
   if (!esObjeto(bruta) || Object.keys(bruta).length !== 1) return 'no es ni una «peticion» ni una «resolucion»';
   if ('peticion' in bruta) {
     const p = bruta.peticion;
@@ -213,7 +235,7 @@ function problemaDeEntrada(bruta: unknown, ids: Set<number>, resueltas: Set<numb
     if (!esTipoDePeticion(p.peticion)) return `declara la petición ${JSON.stringify(p.peticion)}, y son ${PETICIONES.join(' o ')}`;
     if (p.motivo !== undefined && (typeof p.motivo !== 'string' || p.motivo.trim() === '')) return 'declara un motivo vacío o que no es texto';
     if (typeof p.motivo === 'string' && tieneContacto(p.motivo)) return 'lleva un dato de contacto en el motivo, que ningún campo admite';
-    ids.add(p.id);
+    ids.set(p.id, p.fecha);
     return undefined;
   }
   if ('resolucion' in bruta) {
@@ -225,6 +247,13 @@ function problemaDeEntrada(bruta: unknown, ids: Set<number>, resueltas: Set<numb
     if (resueltas.has(r.peticion)) return `resuelve otra vez la petición ${r.peticion}`;
     if (typeof r.fecha !== 'string' || !esJornada(r.fecha)) return 'no declara una fecha AAAA-MM-DD que exista';
     if (!esTipoDeResolucion(r.resolucion)) return `declara la resolución ${JSON.stringify(r.resolucion)}, y son ${RESOLUCIONES.join(', ')}`;
+    const deLaPeticion = ids.get(r.peticion);
+    if (sueltas) {
+      resueltas.add(r.peticion);
+      return undefined;
+    }
+    if (deLaPeticion === undefined) return `resuelve la petición ${r.peticion}, que no está anotada antes en la lista`;
+    if (r.fecha < deLaPeticion) return `resuelve la petición ${r.peticion} el ${r.fecha}, antes de su fecha (${deLaPeticion})`;
     resueltas.add(r.peticion);
     return undefined;
   }
@@ -245,6 +274,9 @@ export async function registrarEntradaDePeticiones(rutas: Rutas, entrada: Entrad
     'peticion' in entrada
       ? `  - peticion: ${JSON.stringify(entrada.peticion)}\n`
       : `  - resolucion: ${JSON.stringify(entrada.resolucion)}\n`;
+  // La entrada sola se juzga sin sus relaciones —su petición está en el fichero, no en el bloque—;
+  // el fichero entero que quedaría, con ellas.
+  const sola = `${CLAVE_DE_PETICIONES}:\n${bloque}`;
   return añadirAlRegistro({
     ruta: rutas.peticionesDeRetirada,
     raiz: rutas.raiz,
@@ -253,7 +285,7 @@ export async function registrarEntradaDePeticiones(rutas: Rutas, entrada: Entrad
     cabecera: CABECERA_DE_PETICIONES_DE_RETIRADA,
     laEntrada: 'peticion' in entrada ? 'la petición' : 'la resolución',
     bloque,
-    analizar: analizarPeticiones,
+    analizar: (nombre, contenido) => analizarPeticiones(nombre, contenido, contenido === sola),
   });
 }
 
@@ -386,8 +418,28 @@ export function problemaDeLaCita(
 // ─── Retirar por petición ────────────────────────────────────────────────────
 
 export type RetiradaPorPeticion =
-  | { ok: true; destino: string; origen: string; lineas: string[] }
+  | {
+      ok: true;
+      destino: string;
+      origen: string;
+      lineas: string[];
+      /**
+       * Deshace lo que se puede deshacer si después no se anota la petición: la Cita vuelve a su
+       * sitio y las Fichas de Obra cuyo título cambió recuperan el de antes. La forma vedada se
+       * queda (el registro solo añade), y con su slug no veda a esa misma Cita. Devuelve qué hizo.
+       */
+      devolver: () => Promise<string[]>;
+    }
   | { ok: false; motivos: string[] };
+
+/** El contenido de cada Ficha de Obra activa, para devolverla tal cual. */
+async function instantaneaDeFichas(directorio: string): Promise<Map<string, string>> {
+  if (!existsSync(directorio)) return new Map();
+  const nombres = (await readdir(directorio)).filter((n) => /\.ya?ml$/u.test(n));
+  return new Map(
+    await Promise.all(nombres.map(async (n) => [join(directorio, n), await readFile(join(directorio, n), 'utf8')] as const)),
+  );
+}
 
 /**
  * Lo que la retirada por petición dice de NFR-5 — AD-11 v9.1: **informa y no se niega**. Las Citas
@@ -465,13 +517,43 @@ export async function retirarPorPeticion(rutas: Rutas, slug: string, fecha: stri
   }
 
   const obra = cita.procedencia?.obra;
-  const titulos =
-    typeof obra === 'string' && formaDeObra(obra) !== '' ? await ajustarTitulosDeObra(rutas, cita, [formaDeObra(obra)]) : [];
+  const conObra = typeof obra === 'string' && formaDeObra(obra) !== '';
+  let fichasDeAntes = new Map<string, string>();
+  try {
+    if (conObra) fichasDeAntes = await instantaneaDeFichas(rutas.obras);
+  } catch {
+    // Sin instantánea no se podría devolver el título: se ajusta igual y devolver lo dice.
+  }
+  // `ajustarTitulosDeObra` no lanza: lo que no pudo hacer lo devuelve como línea.
+  const titulos = conObra ? await ajustarTitulosDeObra(rutas, cita, [formaDeObra(obra as string)]) : [];
+  const cambiadas: [string, string][] = [];
+  for (const [ruta, antes] of fichasDeAntes) {
+    const ahora = existsSync(ruta) ? await readFile(ruta, 'utf8') : undefined;
+    if (ahora !== antes) cambiadas.push([ruta, antes]);
+  }
+
+  const devolver = async (): Promise<string[]> => {
+    await mover(destino, origen);
+    const lineas = ['La Cita ha vuelto a corpus/citas/.'];
+    for (const [ruta, antes] of cambiadas) {
+      try {
+        await writeFile(ruta, antes);
+        lineas.push(`  ${ruta} recupera el título que tenía.`);
+      } catch (fallo) {
+        lineas.push(`  ${ruta} no pudo recuperar su título (${fallo instanceof Error ? fallo.message : String(fallo)}): elíjalo con «npm run obra -- titular».`);
+      }
+    }
+    if (conObra && titulos.length > 0 && cambiadas.length === 0) {
+      lineas.push('  Revise el título de su Ficha de Obra: el build avisará si no lo declara ninguna Cita publicada.');
+    }
+    return lineas;
+  };
 
   return {
     ok: true,
     destino,
     origen,
+    devolver,
     lineas: [
       `«${slug}» retirada a ${destino} (${rutaDeCita(slug)} deja de publicarse).`,
       ...(vedada !== undefined ? ['  Su forma queda vedada a la atribuida en corpus/formas-vedadas.yml (retirada).'] : []),
@@ -504,13 +586,16 @@ export function diasEntre(a: string, b: string): number {
  * Las atribuidas publicadas al cierre de un mes, sin leer el historial de git: las entradas
  * de la clase atribuida en el registro de clases con fecha ≤ fin de mes, menos las que tienen en
  * `formas-vedadas.yml` una entrada con su slug (`retirada` o `cambio-de-clase`) con fecha ≤ fin de
- * mes y no están publicadas hoy. Una Cita devuelta a mano cuenta como publicada en los meses de en
- * medio. Ordenadas por slug.
+ * mes y no están publicadas hoy como atribuidas. `publicadasHoy` son, por eso, las **atribuidas**
+ * publicadas hoy: una que pasó a ser de siempre (`cambio-de-clase`) deja de contar desde ese mes
+ * aunque siga publicada. Una Cita devuelta a mano cuenta como publicada en los meses de en medio.
+ * Ordenadas por slug.
  */
 export function atribuidasAlCierre(
   mes: string,
   clases: readonly ClaseRegistrada[],
   vedadas: readonly FormaVedada[],
+  /** Los slugs de las atribuidas publicadas hoy (`esAtribuida`), no de todas las Citas. */
   publicadasHoy: ReadonlySet<string>,
 ): string[] {
   const fin = `${mes}-31`;
@@ -557,12 +642,39 @@ export interface MesDeSmC6 {
 }
 
 /**
- * En qué mes cuenta una petición como retirada (SM-C6): la de retirar de un titular, en el de la
- * petición —se retira en el mismo gesto—; cualquier otra, en el de su resolución `retirada`.
+ * El mes en que cada petición cuenta como retirada (SM-C6), por su id. El gesto que retira es el de
+ * la petición de retirar de un titular —se retira al anotarla— o el de una resolución `retirada`,
+ * y cuenta **solo si movió la Cita**: la retirada por petición anota la forma vedada con su slug,
+ * `retirada` y la fecha del gesto, así que sin esa entrada no se retiró nada (la Cita ya no estaba
+ * publicada, o ya no era atribuida). Una Cita cuenta una vez: la primera petición que la retira.
  */
-export function mesDeLaRetirada(p: Peticion, resolucion: Resolucion | undefined): string | undefined {
-  if (p.solicitante === SOLICITANTE_QUE_RETIRA_PRIMERO && p.peticion === 'retirar') return mesDe(p.fecha);
-  return resolucion?.resolucion === 'retirada' ? mesDe(resolucion.fecha) : undefined;
+export function mesesDeLasRetiradas(
+  peticiones: readonly Peticion[],
+  resoluciones: ReadonlyMap<number, Resolucion>,
+  vedadas: readonly FormaVedada[],
+): Map<number, string> {
+  const gestos = peticiones
+    .map((p) => {
+      const resolucion = resoluciones.get(p.id);
+      const fecha =
+        p.solicitante === SOLICITANTE_QUE_RETIRA_PRIMERO && p.peticion === 'retirar'
+          ? p.fecha
+          : resolucion?.resolucion === 'retirada'
+            ? resolucion.fecha
+            : undefined;
+      return { p, fecha };
+    })
+    .filter((g): g is { p: Peticion; fecha: string } => g.fecha !== undefined)
+    .sort((a, b) => (a.fecha < b.fecha ? -1 : a.fecha > b.fecha ? 1 : a.p.id - b.p.id));
+  const meses = new Map<number, string>();
+  const yaRetiradas = new Set<string>();
+  for (const { p, fecha } of gestos) {
+    if (yaRetiradas.has(p.cita)) continue;
+    if (!vedadas.some((v) => v.slug === p.cita && v.motivo === 'retirada' && v.fecha === fecha)) continue;
+    yaRetiradas.add(p.cita);
+    meses.set(p.id, mesDe(fecha));
+  }
+  return meses;
 }
 
 /**
@@ -588,10 +700,11 @@ export function mesesDeSmC6(contexto: {
   const meses: MesDeSmC6[] = [];
   const ultimaAuditoria = new Map<string, Auditoria>();
   for (const a of auditorias) ultimaAuditoria.set(a.mes, a);
+  const retiradasPorMes = mesesDeLasRetiradas(peticiones, resoluciones, vedadas);
   for (let mes = candidatos.sort()[0]; mes <= mesDeHoy; mes = mesSiguiente(mes)) {
     const atribuidas = atribuidasAlCierre(mes, clases, vedadas, publicadasHoy).length;
     const deMes = peticiones.filter((p) => mesDe(p.fecha) === mes).length;
-    const retiradas = peticiones.filter((p) => mesDeLaRetirada(p, resoluciones.get(p.id)) === mes).length;
+    const retiradas = [...retiradasPorMes.values()].filter((m) => m === mes).length;
     const a = ultimaAuditoria.get(mes);
     const malAtribuidas = a === undefined ? 0 : Object.values(a.resultados).filter((r) => r === 'mal-atribuida').length;
     meses.push({
@@ -618,6 +731,7 @@ export function mesesDeSmC6(contexto: {
 
 export type JuicioDeSmC6 =
   | { estado: 'sin-valores'; faltan: string[] }
+  | { estado: 'sin-pareja' }
   | { estado: 'bajo-minimo'; minimo: number }
   | { estado: 'juzgado'; minimo: number; maximo: number; saltos: { mes: string; motivos: string[] }[] };
 
@@ -625,8 +739,8 @@ export type JuicioDeSmC6 =
  * El juicio de SM-C6 — Historia 35.8 [ASSUMPTION del PRD]. Salta en el segundo de dos meses
  * cerrados y seguidos, los dos con al menos `minimo` atribuidas publicadas al cierre, si (a) las
  * peticiones por cada cien del segundo superan las del primero, o (b) la proporción mal atribuida
- * de la auditoría pasa de `maximo` en los dos. Sin las dos constantes no juzga; si ninguna pareja
- * llega al mínimo, tampoco, y lo dice. No propone ningún freno: eso lo decide Héctor.
+ * de la auditoría pasa de `maximo` en los dos. Sin las dos constantes no juzga; sin dos meses
+ * cerrados seguidos (`sin-pareja`), o si ninguna pareja llega al mínimo, tampoco, y dice cuál. No propone ningún freno: eso lo decide Héctor.
  */
 export function juicioDeSmC6(
   meses: readonly MesDeSmC6[],
@@ -641,10 +755,13 @@ export function juicioDeSmC6(
   const cerrados = meses.filter((m) => m.cerrado);
   const saltos: { mes: string; motivos: string[] }[] = [];
   let juzgadas = 0;
+  let parejas = 0;
   for (let i = 1; i < cerrados.length; i += 1) {
     const a = cerrados[i - 1];
     const b = cerrados[i];
-    if (mesSiguiente(a.mes) !== b.mes || a.atribuidas < minimo || b.atribuidas < minimo) continue;
+    if (mesSiguiente(a.mes) !== b.mes) continue;
+    parejas += 1;
+    if (a.atribuidas < minimo || b.atribuidas < minimo) continue;
     juzgadas += 1;
     const motivos: string[] = [];
     if (a.peticionesPorCien !== undefined && b.peticionesPorCien !== undefined && b.peticionesPorCien > a.peticionesPorCien) {
@@ -659,6 +776,7 @@ export function juicioDeSmC6(
     }
     if (motivos.length > 0) saltos.push({ mes: b.mes, motivos });
   }
+  if (parejas === 0) return { estado: 'sin-pareja' };
   if (juzgadas === 0) return { estado: 'bajo-minimo', minimo };
   return { estado: 'juzgado', minimo, maximo, saltos };
 }

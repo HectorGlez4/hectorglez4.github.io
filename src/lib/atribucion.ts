@@ -262,7 +262,7 @@ export interface LineaDeRetirada {
  * segunda frase es un `mailto:` a `buzon` con un `?subject=` que lleva el slug codificado; la
  * dirección se dice también como texto. El buzón lo pasa quien pinta (`BUZON_DE_PETICIONES` de
  * `src/lib/dominio.ts`), porque este módulo lo importan islas del cliente y `dominio.ts` lee el
- * disco. **Sin buzón lanza**: la línea nunca falta donde hay una atribuida (con la puerta de la
+ * disco. **Sin buzón, o con uno que no es una dirección de correo, lanza**: la línea nunca falta donde hay una atribuida (con la puerta de la
  * 35.1b, sin buzón no se publica ninguna).
  */
 export function lineaDeRetirada({ sobre, slug }: SobreLaRetirada, buzon: string | undefined): LineaDeRetirada {
@@ -273,6 +273,14 @@ export function lineaDeRetirada({ sobre, slug }: SobreLaRetirada, buzon: string 
     );
   }
   const direccion = buzon.trim();
+  // Va tal cual al `href`: una dirección con espacios, `?`, `&` o `#`, o sin `@` y dominio,
+  // compondría un `mailto:` roto en cada página que la pinta.
+  if (!/^[^\s@?&#]+@[^\s@?&#]+\.[^\s@?&#]+$/u.test(direccion)) {
+    throw new Error(
+      `La línea de retirada de «${slug}» no tiene a dónde pedir: BUZON_DE_PETICIONES (src/lib/dominio.ts) vale «${direccion}», ` +
+        'que no es una dirección de correo (usuario@dominio, sin espacios, «?», «&» ni «#»).',
+    );
+  }
   const asunto =
     sobre === 'cita' ? `Corregir o retirar la cita ${slug}` : `Corregir o retirar citas del personaje ${slug}`;
   return {

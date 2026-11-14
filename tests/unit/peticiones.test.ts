@@ -6,10 +6,11 @@ import { promisify } from 'node:util';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { parse as parsearYaml } from 'yaml';
-import { principal, type Constantes } from '../../tools/peticion.ts';
+import { principal, problemasDeLasConstantes, type Constantes } from '../../tools/peticion.ts';
 import {
   CABECERA_DE_AUDITORIAS,
   CABECERA_DE_PETICIONES_DE_RETIRADA,
+  analizarPeticiones,
   atribuidasAlCierre,
   informeDeAlcanceDeLaRetirada,
   juicioDeSmC6,
@@ -111,6 +112,37 @@ async function corpusDePrueba(): Promise<{ raiz: string; rutas: Rutas }> {
 
 const orden = (raiz: string, ...args: string[]) => principal([...args, '--corpus', raiz], AHORA, SIN_VALORES);
 
+const BUZZ_DOS = 'buzz-al-rescate-de-los-juguetes';
+const FICHA_DE_TOY_STORY = 'personaje: "buzz"\npersonajes:\n  - "buzz"\ntitulo: "Toy Story"\nformas:\n  - "toy story"\n';
+
+/**
+ * Le da Obra a la atribuida de Buzz: «Toy Story», que es el título de su Ficha, y otra atribuida
+ * de Buzz de la misma Obra con la grafía «TOY STORY». Retirar la primera deja el título sin
+ * ninguna Cita publicada que lo declare, y `ajustarTitulosDeObra` lo cambia.
+ */
+async function conObra(rutas: Rutas): Promise<string> {
+  const atribuida = (slug: string, texto: string, obra: string) =>
+    citaValida({
+      texto,
+      slug,
+      autor: undefined,
+      personaje: 'buzz',
+      clase: 'atribuida',
+      estadoDerechos: undefined,
+      temas: [TEMA_PUBLICADO],
+      procedencia: { obra, año: 1995 },
+      fuente: undefined,
+      ...ATESTIGUADA,
+    });
+  await writeFile(join(rutas.citas, 'buzz--hasta-el-infinito.md'), atribuida(BUZZ, 'Hasta el infinito y más allá de las estrellas.', 'Toy Story'));
+  await writeFile(join(rutas.citas, 'buzz--al-rescate.md'), atribuida(BUZZ_DOS, 'Al rescate de todos los juguetes perdidos.', 'TOY STORY'));
+  await registrarClases(rutas, [{ slug: BUZZ_DOS, clase: 'atribuida', fecha: '2026-10-05' }]);
+  await mkdir(rutas.obras, { recursive: true });
+  const ficha = join(rutas.obras, 'buzz--toy-story.yml');
+  await writeFile(ficha, FICHA_DE_TOY_STORY);
+  return ficha;
+}
+
 describe('35.8 — anotar', () => {
   it('anota una petición de corregir con id 1 y la fecha de hoy, y la siguiente con id 2', async () => {
     const { raiz, rutas } = await corpusDePrueba();
@@ -161,6 +193,8 @@ describe('35.8 — anotar', () => {
     'tel. 600112233',
     'llamad al (91) 555-1234',
     '600.11.22.33',
+    'búscame en @ana_perez',
+    'ana arroba gmail punto com',
   ])('rechaza un motivo con contacto (1) y no escribe: %s', async (motivo) => {
     const { raiz, rutas } = await corpusDePrueba();
     capturarSalida();
@@ -169,7 +203,16 @@ describe('35.8 — anotar', () => {
   });
 
   it('un año, un capítulo o un intervalo de años no son un teléfono', () => {
-    for (const inocente of ['la escribió en 1984', 'capítulo 12, página 345', 'entre 1984-1990', 'la frase dice «uno, dos»']) {
+    for (const inocente of [
+      'la escribió en 1984',
+      'capítulo 12, página 345',
+      'entre 1984-1990',
+      'la frase dice «uno, dos»',
+      'publicada el 2026-11-14',
+      'la edición del 14.11.2026',
+      'entre 1984 1990',
+      'ediciones de 1984, 1990 y 2001',
+    ]) {
       expect(tieneContacto(inocente), inocente).toBe(false);
     }
   });
@@ -203,6 +246,25 @@ describe('35.8 — anotar', () => {
     capturarSalida();
     expect(await orden(raiz, ...args)).toBe(2);
     expect(existsSync(rutas.peticionesDeRetirada)).toBe(false);
+  });
+
+  it('una petición anterior a la clasificación de la Cita como atribuida sale con 1 y no escribe', async () => {
+    const { raiz, rutas } = await corpusDePrueba();
+    const salida = capturarSalida();
+    expect(await orden(raiz, 'anotar', BUZZ, '--solicitante', 'otro', '--peticion', 'corregir', '--fecha', '2026-10-04')).toBe(1);
+    expect(salida.join('')).toContain('es atribuida desde el 2026-10-05');
+    expect(existsSync(rutas.peticionesDeRetirada)).toBe(false);
+    expect(await orden(raiz, 'anotar', BUZZ, '--solicitante', 'otro', '--peticion', 'corregir', '--fecha', '2026-10-05')).toBe(0);
+  });
+
+  it('anotar dos veces lo mismo el mismo día se admite y se avisa', async () => {
+    const { raiz, rutas } = await corpusDePrueba();
+    const salida = capturarSalida();
+    expect(await orden(raiz, 'anotar', BUZZ, '--solicitante', 'otro', '--peticion', 'corregir')).toBe(0);
+    expect(salida.join('')).not.toContain('ya había una igual');
+    expect(await orden(raiz, 'anotar', BUZZ, '--solicitante', 'otro', '--peticion', 'corregir')).toBe(0);
+    expect(salida.join('')).toContain('Aviso: ya había una igual, la petición 1');
+    expect(await leerPeticiones(rutas)).toHaveLength(2);
   });
 
   it('una fecha futura o un registro ilegible salen con 1 y no escriben', async () => {
@@ -247,6 +309,52 @@ describe('35.8 — resolver', () => {
     expect(await leerPeticiones(rutas)).toHaveLength(2);
   });
 
+  it('«retirada» sobre una Cita que sigue publicada pero ya no es atribuida no mueve nada, lo dice y SM-C6 no la cuenta', async () => {
+    const { raiz, rutas } = await corpusDePrueba();
+    const salida = capturarSalida();
+    expect(await orden(raiz, 'anotar', BUZZ, '--solicitante', 'otro', '--peticion', 'retirar', '--fecha', '2026-10-10')).toBe(0);
+    // Pasa a ser de siempre (la orden de la 35.7 lo haría; aquí basta el fichero).
+    await writeFile(
+      join(rutas.citas, 'buzz--hasta-el-infinito.md'),
+      citaValida({ texto: 'Hasta el infinito y más allá de las estrellas.', slug: BUZZ, temas: [TEMA_PUBLICADO] }),
+    );
+    expect(await orden(raiz, 'resolver', '1', 'retirada', '--fecha', '2026-10-12')).toBe(0);
+    expect(salida.join('')).toContain('sigue publicada, pero ya no es atribuida');
+    expect(existsSync(join(rutas.citas, 'buzz--hasta-el-infinito.md'))).toBe(true);
+    salida.length = 0;
+    expect(await principal(['--json', '--corpus', raiz], AHORA, SIN_VALORES)).toBe(0);
+    const { smC6 } = JSON.parse(salida.join('')) as { smC6: { meses: MesDeSmC6[] } };
+    expect(smC6.meses.find((m) => m.mes === '2026-10')?.retiradas).toBe(0);
+  });
+
+  it('una retirada por petición con Obra pone al día el título de la Ficha y lo dice', async () => {
+    const { raiz, rutas } = await corpusDePrueba();
+    const ficha = await conObra(rutas);
+    const salida = capturarSalida();
+    expect(await orden(raiz, 'anotar', BUZZ, '--solicitante', 'titular-de-derechos', '--peticion', 'retirar')).toBe(0);
+    expect(await readFile(ficha, 'utf8')).toContain('titulo: "TOY STORY"');
+    expect(salida.join('')).toMatch(/pasa de «Toy Story» a «TOY STORY»/u);
+  });
+
+  it('si la petición no se puede anotar tras retirar, la Cita vuelve, la Ficha recupera su título y el registro no cambia (1)', async () => {
+    const { raiz, rutas } = await corpusDePrueba();
+    const ficha = await conObra(rutas);
+    // Un registro que se deja leer pero al que no se puede añadir: la lista no es lo último.
+    const roto = `${CABECERA_DE_PETICIONES_DE_RETIRADA}otra: 1\n`;
+    await writeFile(rutas.peticionesDeRetirada, roto);
+    expect(await leerPeticiones(rutas)).toEqual([]);
+    const salida = capturarSalida();
+    expect(await orden(raiz, 'anotar', BUZZ, '--solicitante', 'titular-de-derechos', '--peticion', 'retirar')).toBe(1);
+    expect(existsSync(join(rutas.citas, 'buzz--hasta-el-infinito.md'))).toBe(true);
+    expect(await readdir(rutas.revision)).toEqual([]);
+    expect(await readFile(ficha, 'utf8')).toBe(FICHA_DE_TOY_STORY);
+    expect(await readFile(rutas.peticionesDeRetirada, 'utf8')).toBe(roto);
+    const texto = salida.join('');
+    expect(texto).toContain('La Cita ha vuelto a corpus/citas/.');
+    expect(texto).toContain('recupera el título que tenía');
+    expect(texto).toContain('formas-vedadas.yml');
+  });
+
   it('la forma de la invocación sale con 2', async () => {
     const { raiz } = await corpusDePrueba();
     capturarSalida();
@@ -276,16 +384,29 @@ describe('35.8 — la consulta', () => {
   it('lista por mes y, sin plazo, no juzga y lo dice; no escribe nada', async () => {
     const { raiz, rutas } = await corpusDePrueba();
     const salida = capturarSalida();
-    expect(await orden(raiz, 'anotar', BUZZ, '--solicitante', 'otro', '--peticion', 'corregir', '--fecha', '2026-10-02')).toBe(0);
+    expect(await orden(raiz, 'anotar', BUZZ, '--solicitante', 'otro', '--peticion', 'corregir', '--fecha', '2026-10-06')).toBe(0);
     const antes = await readFile(rutas.peticionesDeRetirada, 'utf8');
     salida.length = 0;
     expect(await orden(raiz)).toBe(0);
     const texto = salida.join('');
-    expect(texto).toMatch(/2026-10\n  1  2026-10-02  buzz-hasta-el-infinito  otro  corregir  → sin resolver/u);
+    expect(texto).toMatch(/2026-10\n  1  2026-10-06  buzz-hasta-el-infinito  otro  corregir  → sin resolver/u);
     expect(texto).toContain('PLAZO_DE_RESPUESTA_A_RETIRADA_DIAS no tiene valor');
     expect(texto).toContain('SM-C6 no se juzga');
     expect(await readFile(rutas.peticionesDeRetirada, 'utf8')).toBe(antes);
     expect(existsSync(rutas.auditoriasDeAtribuidas)).toBe(false);
+  });
+
+  it('dice la resolución de cada petición resuelta y nunca propone el freno', async () => {
+    const { raiz } = await corpusDePrueba();
+    const salida = capturarSalida();
+    expect(await orden(raiz, 'anotar', BUZZ, '--solicitante', 'otro', '--peticion', 'corregir', '--fecha', '2026-10-06')).toBe(0);
+    expect(await orden(raiz, 'resolver', '1', 'rechazada', '--fecha', '2026-10-08')).toBe(0);
+    salida.length = 0;
+    const constantes: Constantes = { plazo: 30, muestra: 5, minimo: 1, maximo: 0.1 };
+    expect(await principal(['--corpus', raiz], AHORA, constantes)).toBe(0);
+    const texto = salida.join('');
+    expect(texto).toContain('  1  2026-10-06  buzz-hasta-el-infinito  otro  corregir  → rechazada el 2026-10-08');
+    expect(texto).not.toMatch(/freno|bajar (?:los )?topes|parar la siembra|detener la siembra/iu);
   });
 
   it('con plazo, nombra las sin resolver que lo pasan', () => {
@@ -297,6 +418,34 @@ describe('35.8 — la consulta', () => {
     ];
     expect(peticionesVencidas(entradas, undefined, HOY)).toBeUndefined();
     expect(peticionesVencidas(entradas, 30, HOY)?.map((p) => p.id)).toEqual([1]);
+  });
+
+  it('una resolución sin su petición antes en la lista, o anterior a ella, no se deja leer', () => {
+    const fichero = (...lineas: string[]) => `entradas:\n${lineas.map((l) => `  - ${l}\n`).join('')}`;
+    const peticion = `peticion: {"id":1,"fecha":"2026-10-05","cita":"${BUZZ}","solicitante":"otro","peticion":"corregir"}`;
+    expect(() => analizarPeticiones('r', fichero('resolucion: {"peticion":1,"fecha":"2026-10-06","resolucion":"rechazada"}'))).toThrow(
+      /no está anotada antes/u,
+    );
+    expect(() =>
+      analizarPeticiones('r', fichero('resolucion: {"peticion":1,"fecha":"2026-10-06","resolucion":"rechazada"}', peticion)),
+    ).toThrow(/no está anotada antes/u);
+    expect(() => analizarPeticiones('r', fichero(peticion, 'resolucion: {"peticion":1,"fecha":"2026-10-04","resolucion":"rechazada"}'))).toThrow(
+      /antes de su fecha/u,
+    );
+    expect(analizarPeticiones('r', fichero(peticion, 'resolucion: {"peticion":1,"fecha":"2026-10-05","resolucion":"rechazada"}'))).toHaveLength(2);
+  });
+
+  it('una constante con un valor imposible hace salir la orden con 1 sin escribir', async () => {
+    expect(problemasDeLasConstantes(SIN_VALORES)).toEqual([]);
+    expect(problemasDeLasConstantes({ plazo: 30, muestra: 10, minimo: 50, maximo: 0.1 })).toEqual([]);
+    expect(problemasDeLasConstantes({ plazo: -1, muestra: 0, minimo: 2.5, maximo: 1.5 })).toHaveLength(4);
+    expect(problemasDeLasConstantes({ ...SIN_VALORES, muestra: Number.NaN })).toHaveLength(1);
+    const { raiz, rutas } = await corpusDePrueba();
+    capturarSalida();
+    const raro: Constantes = { ...SIN_VALORES, muestra: 0 };
+    expect(await principal(['anotar', BUZZ, '--solicitante', 'otro', '--peticion', 'corregir', '--corpus', raiz], AHORA, raro)).toBe(1);
+    expect(await principal(['auditar', '2026-10', '--corpus', raiz], AHORA, raro)).toBe(1);
+    expect(existsSync(rutas.peticionesDeRetirada)).toBe(false);
   });
 
   it('un registro ilegible hace salir la consulta con 1', async () => {
@@ -331,6 +480,23 @@ describe('35.8 — SM-C6', () => {
     expect(atribuidasAlCierre('2026-10', clases, vedadas, new Set(['a', 'b']))).toEqual(['a', 'b']);
   });
 
+  it('una atribuida que pasó a ser de siempre deja de contar desde ese mes, aunque siga publicada', async () => {
+    const clases = [
+      { slug: 'a', clase: 'atribuida' as const, fecha: '2026-09-10' },
+      { slug: 'b', clase: 'atribuida' as const, fecha: '2026-09-10' },
+      { slug: 'b', clase: 'siempre' as const, fecha: '2026-10-03' },
+    ];
+    const vedadas = [{ forma: 'b', slug: 'b', motivo: 'cambio-de-clase' as const, fecha: '2026-10-03' }];
+    // `publicadasHoy` son las atribuidas publicadas hoy: «b» se publica, pero ya de siempre.
+    expect(atribuidasAlCierre('2026-09', clases, vedadas, new Set(['a']))).toEqual(['a', 'b']);
+    expect(atribuidasAlCierre('2026-10', clases, vedadas, new Set(['a']))).toEqual(['a']);
+    // La orden pasa solo las atribuidas: la Cita de siempre de Séneca no entra en la muestra.
+    const { raiz } = await corpusDePrueba();
+    const salida = capturarSalida();
+    expect(await principal(['auditar', '2026-10', '--json', '--corpus', raiz], AHORA, { ...SIN_VALORES, muestra: 5 })).toBe(0);
+    expect(JSON.parse(salida.join(''))).toEqual({ mes: '2026-10', muestra: [BUZZ], atribuidas: 1 });
+  });
+
   const mes = (m: string, atribuidas: number, peticionesPorCien?: number, proporcion?: number): MesDeSmC6 => ({
     mes: m,
     cerrado: true,
@@ -360,25 +526,41 @@ describe('35.8 — SM-C6', () => {
     const solo = juicioDeSmC6([mes('2026-09', 100, 1, 0.1), mes('2026-10', 100, 1, 0.4)], { minimo: 50, maximo: 0.2 });
     expect(solo.estado === 'juzgado' && solo.saltos).toEqual([]);
     // Dos meses que no son seguidos no forman pareja.
-    expect(juicioDeSmC6([mes('2026-08', 100, 1), mes('2026-10', 100, 9)], { minimo: 50, maximo: 0.5 }).estado).toBe('bajo-minimo');
+    expect(juicioDeSmC6([mes('2026-08', 100, 1), mes('2026-10', 100, 9)], { minimo: 50, maximo: 0.5 }).estado).toBe('sin-pareja');
+    expect(juicioDeSmC6([mes('2026-10', 100, 9)], { minimo: 50, maximo: 0.5 })).toEqual({ estado: 'sin-pareja' });
   });
 
   it('las tasas: sin atribuidas no hay tasa; la retirada del titular cuenta en el mes de la petición', () => {
+    const clases = [
+      { slug: 'a', clase: 'atribuida' as const, fecha: '2026-10-01' },
+      { slug: 'b', clase: 'atribuida' as const, fecha: '2026-10-01' },
+      { slug: 'c', clase: 'atribuida' as const, fecha: '2026-10-01' },
+    ];
     const meses = mesesDeSmC6({
       entradas: [
         { peticion: { id: 1, fecha: '2026-10-03', cita: 'a', solicitante: 'titular-de-derechos', peticion: 'retirar' } },
-        { peticion: { id: 2, fecha: '2026-10-04', cita: 'a', solicitante: 'otro', peticion: 'retirar' } },
+        { peticion: { id: 2, fecha: '2026-10-04', cita: 'b', solicitante: 'otro', peticion: 'retirar' } },
         { resolucion: { peticion: 2, fecha: '2026-11-02', resolucion: 'retirada' } },
+        // Un segundo titular sobre «a», ya retirada: no se retiró nada, y no cuenta otra vez.
+        { peticion: { id: 3, fecha: '2026-10-20', cita: 'a', solicitante: 'titular-de-derechos', peticion: 'retirar' } },
+        // «retirada» sobre «c» cuando ya no se publicaba: sin forma vedada de ese día, no cuenta.
+        { peticion: { id: 4, fecha: '2026-10-05', cita: 'c', solicitante: 'otro', peticion: 'retirar' } },
+        { resolucion: { peticion: 4, fecha: '2026-11-03', resolucion: 'retirada' } },
       ],
       auditorias: [],
-      clases: [{ slug: 'a', clase: 'atribuida', fecha: '2026-10-01' }, { slug: 'b', clase: 'atribuida', fecha: '2026-10-01' }],
-      vedadas: [],
-      publicadasHoy: new Set(['a', 'b']),
+      clases,
+      // Las formas vedadas que dejó cada retirada que movió la Cita, con la fecha del gesto.
+      vedadas: [
+        { forma: 'a', slug: 'a', motivo: 'retirada', fecha: '2026-10-03' },
+        { forma: 'b', slug: 'b', motivo: 'retirada', fecha: '2026-11-02' },
+        { forma: 'c', slug: 'c', motivo: 'retirada', fecha: '2026-10-04' },
+      ],
+      publicadasHoy: new Set(),
       hoy: HOY,
     });
     expect(meses.map((m) => [m.mes, m.atribuidas, m.peticiones, m.retiradas, m.peticionesPorCien])).toEqual([
-      ['2026-10', 2, 2, 1, 100],
-      ['2026-11', 2, 0, 1, 0],
+      ['2026-10', 1, 4, 1, 400],
+      ['2026-11', 0, 0, 1, undefined],
     ]);
     const vacio = mesesDeSmC6({
       entradas: [{ peticion: { id: 1, fecha: '2026-10-03', cita: 'a', solicitante: 'otro', peticion: 'corregir' } }],
@@ -391,6 +573,32 @@ describe('35.8 — SM-C6', () => {
     expect(vacio[0].peticionesPorCien).toBeUndefined();
   });
 
+  it('cada mes toma su última auditoría: mal atribuidas, sin fuente y la proporción sobre la muestra', () => {
+    const meses = mesesDeSmC6({
+      entradas: [],
+      auditorias: [
+        { mes: '2026-10', muestra: ['a', 'b'], resultados: { a: 'bien', b: 'bien' }, auditadoEl: '2026-11-02' },
+        { mes: '2026-10', muestra: ['a', 'b', 'c', 'd'], resultados: { a: 'bien', b: 'mal-atribuida', c: 'sin-fuente', d: 'sin-fuente' }, auditadoEl: '2026-11-05' },
+      ],
+      clases: [{ slug: 'a', clase: 'atribuida', fecha: '2026-10-01' }],
+      vedadas: [],
+      publicadasHoy: new Set(['a']),
+      hoy: HOY,
+    });
+    expect(meses.find((m) => m.mes === '2026-10')?.auditoria).toEqual({ muestra: 4, malAtribuidas: 1, sinFuente: 2, proporcion: 0.25 });
+    expect(meses.find((m) => m.mes === '2026-11')?.auditoria).toBeUndefined();
+  });
+
+  it('la consulta dice la auditoría del mes, con las sin fuente', async () => {
+    const { raiz } = await corpusDePrueba();
+    const salida = capturarSalida();
+    const conMuestra: Constantes = { ...SIN_VALORES, muestra: 5 };
+    expect(await principal(['auditar', '2026-10', '--resultado', `${BUZZ}=sin-fuente`, '--corpus', raiz], AHORA, conMuestra)).toBe(0);
+    salida.length = 0;
+    expect(await principal(['--corpus', raiz], AHORA, conMuestra)).toBe(0);
+    expect(salida.join('')).toMatch(/^2026-10 .* 0 de 1 \(0\.00\), 1 sin fuente$/mu);
+  });
+
   it('auditar: imprime la muestra, anota un resultado por slug y rechaza lo ajeno, lo incompleto y el mes abierto', async () => {
     const { raiz, rutas } = await corpusDePrueba();
     const salida = capturarSalida();
@@ -399,6 +607,9 @@ describe('35.8 — SM-C6', () => {
     // Sin valor de la muestra, lo dice y no elige; con resultados, 1.
     expect(await principal(['auditar', '2026-10', '--corpus', raiz], AHORA, SIN_VALORES)).toBe(0);
     expect(salida.join('')).toContain('MUESTRA_DE_AUDITORIA_SM_C6 no tiene valor');
+    salida.length = 0;
+    expect(await principal(['auditar', '2026-10', '--json', '--corpus', raiz], AHORA, SIN_VALORES)).toBe(0);
+    expect(JSON.parse(salida.join(''))).toEqual({ mes: '2026-10', muestra: null, atribuidas: 1 });
     expect(await principal(['auditar', '2026-10', '--resultado', `${BUZZ}=bien`, '--corpus', raiz], AHORA, SIN_VALORES)).toBe(1);
     salida.length = 0;
     expect(await auditar('2026-10')).toBe(0);
