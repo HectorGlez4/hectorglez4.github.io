@@ -274,3 +274,14 @@ Planificación (pasada anterior): `avisoDeFueraDelModelo` no dejaba ninguna Cita
 - Puertos 4321, 4405 y 8787 libres antes y después.
 
 **Riesgos residuales.** El diferido de la pasada 1, sin cambios: los destacados cambian con los recuentos y una orden puede sacar de los ocho al Autor que acerca una Cita ya fuera del modelo; hoy no hay ninguna. No se corrió `npm test` entero (los trece ficheros de la Verificación sí).
+
+## Verificación en el sitio en vivo
+
+2026-11-14. Héctor declaró la fecha de la 28.5: fusionar ya, sin esperar el juicio de SM-11. Fusión `8a8fe217ba` en main; Publicar 43574361495 en verde. Con curl sobre https://sabiduriadebolsillo.net/:
+
+- la línea de cifras (`p.cifras`): «4.424 citas de 135 autores; 4.403 cotejadas con el texto de su fuente.», y el campo de búsqueda;
+- seis títulos de Obra (`.titulo-de-obra`) y el cierre «Las {n} obras»;
+- la lista de Colecciones (`data-zona="colecciones"`), ocho Autores destacados con su cierre (`data-zona="autores-de-portada"`, nueve enlaces) y «… autores, de la A a la Z»;
+- una Página de Cita responde 200.
+
+Puerta antes de fusionar: build, astro check, 7.791 pruebas unitarias, e2e (1.452) y NFR-7 con 10 corridas alternas de Lighthouse 13.5.0: portada, Cita, Obra y /buscar/ dentro del margen (LCP +0, −0, +0 y −60 ms).

@@ -458,7 +458,7 @@ development_status:
   28-2-la-cita-de-hoy-lleva-su-obra-y-las-acciones-de-su-página: backlog  # bloqueada: respuesta de bmad-ux sobre DESCRIPCION_DEL_SITIO y la Épica 25 (v8-ralph 2026-10-30)
   28-3-seis-obras-que-cambian-con-la-jornada: review  # v8-ralph 2026-10-30: seis Obras de la portada que rotan con la jornada; sin diferidos para Héctor
   28-4-todos-los-temas-las-colecciones-con-su-criterio-y-ocho-autor: review # v8-ralph 2026-10-30: la portada lista todos los Temas, las Colecciones con su criterio y ocho Autores destacados; diferido para Héctor: si las órdenes que retiran deben comparar también los destacados de antes y de después (NFR-5)
-  28-5-la-portada-nueva-llega-en-vivo-tras-el-juicio-de-sm-11: backlog  # operativa: acto de Héctor (merge desde el 2026-12-05 o con la fecha que declare Héctor)
+  28-5-la-portada-nueva-llega-en-vivo-tras-el-juicio-de-sm-11: done  # Héctor declaró la fecha el 2026-11-14; en vivo con 8a8fe217ba (28.2 sigue fuera)
   epic-28-retrospective: optional
 
   # ── v9 y v9.1, de la cita al libro y la Cita atribuida ─────────────────────────────
