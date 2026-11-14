@@ -9162,6 +9162,14 @@ El sitio publica, con su propia puerta, Citas de Personajes y de Autores con der
 
 **Notas de implementación:** se construye entera con la puerta cerrada: sin valor de los tres topes ni `BUZON_DE_PETICIONES`, no publica ninguna atribuida. La siembra a escala espera a la pregunta 18; la Página de Personaje lleva criterios de patrón hasta que Héctor narre UJ-8. Su corte de serie toma la jornada de la primera atribuida publicada en vivo, no la del merge, que con la puerta cerrada no cambia ninguna página *(v9, Héctor, 2026-11-07)*. El desplegable de la Lista de Obras del Personaje es la primitiva de la 34.0. La 35.1 y la 35.3 se parten en dos, la 35.1b y la 35.3b, sin renumerar las demás *(v9, Héctor, 2026-11-07)*.
 
+### Épica 36: Las secciones se distinguen *(UX v9.3, 2026-11-14)*
+
+Cada bloque de la Página de Cita, de Autor y de Obra va en un panel con el tinte de su familia, las Citas relacionadas como fichas compactas y la Cita principal sin caja.
+
+**FRs covered:** FR-12, FR-64; NFR-8, NFR-9, NFR-13; CAP-26 *(v9.3)*; `DESIGN.md` y `EXPERIENCE.md` v9.3.
+
+**Notas de implementación:** se construye después de fundir las Épicas 29 a 35; pasada visual, sin cambios de orden, texto ni zonas. *(La Épica 35 gana además la 35.11, la traducción propia del PRD v9.2.)*
+
 ## Epic 29: La Cita se lee como se escribió
 
 Quien llega a una Cita en verso la lee en sus versos, cada uno en su renglón y con su mayúscula donde la puso el poeta: «Yo vengo de todas partes, / Y hacia todas partes voy» deja de leerse de corrido. Así sale también en la Tarjeta de Cita de los listados, en la Cita del Día, en lo que se copia y se comparte, en la Imagen, en la Tarjeta Social, en la Pieza de Canal y en el material del Kit y del lote, sin que cambie la URL, el veredicto del cotejo ni lo que encuentra la búsqueda. Los saltos no se teclean: salen del documento versionado de cada Cita, y solo de uno que sea de verso, por una orden que Héctor lanza sobre lo publicado. Y al curar, la herramienta señala las Citas de una misma Obra que casi coinciden, que se repiten o que son fragmento de otra, para que una persona decida; el sistema no retira ni fusiona nada. Va primera en la v9 porque lo citado, lo insertado, el pasaje y el incipit llevan el verso, y la Imagen lo necesita para comprobar que sus tramos caben.
@@ -11256,3 +11264,119 @@ So that pueda probar la Cita atribuida sin teclear metadato y sin abrir la siemb
 **When** se cierra
 **Then** no se ha sembrado nada: la lista de la semilla sigue vacía en el árbol y ningún agente corre la orden sobre el Corpus real
 **And** `AGENTS.md` gana «Una sesión de sembrado de la Cita atribuida», con la semilla de prueba, la versión en español que circula con su origen, la puerta de calidad, que aprobar es de una persona y que la siembra a escala espera a la pregunta 18
+
+### Story 35.11: La traducción propia, como la decidió Héctor *(v9.2, 2026-11-14)*
+
+As a Héctor,
+I want que la Cita atribuida sin versión en español que circule entre con la traducción del sitio, propuesta por un agente y aprobada por otro, sin decirlo en la página y con cada aprobación registrada,
+So that la semilla no se quede casi vacía, y la auditoría de SM-C6 me diga si dos agentes traducen bien sin que yo apruebe cada frase.
+
+**Notas de implementación:** ajusta lo que la 35.10 construyó el 2026-11-14 antes de que el PRD v9.2 (FR-68), la espina v9.2 (AD-24, AD-27, AD-32, AD-34, AD-35), la UX v9.3 y el SPEC lo fijaran. Va después de la 35.10 y de la 35.8, de las que toca código, y la Épica 35 no se funde sin ella. No cambia `src/lib/vocabulario.ts`. Con el Corpus real sin atribuidas, `dist/` no cambia salvo por lo que quita.
+
+**Acceptance Criteria:**
+
+**Given** la línea visible de la 35.10 —«Traducción de Sabiduría de Bolsillo: no circula ninguna versión en español.», `lineaDeTraduccionPropia` de `src/lib/atribucion.ts` y `src/components/TraduccionPropia.astro`—
+**When** se construye una Página de Cita atribuida con `origen: traduccion-propia`
+**Then** la página no dice que la traducción es del sitio: ni línea, ni sello, ni nota, ni hueco, ni nodo vacío (PRD v9.2, UX v9.3, `EXPERIENCE.md` § State Patterns); el componente y la función se retiran
+**And** `origen` vuelve a `CAMPOS_QUE_NO_FECHAN` de `tools/lib/cambios.ts`, junto a `partida` (AD-27 v9.2), y `tests/unit/fecha-de-cambio.test.ts` sigue clasificando toda clave
+**And** una prueba de `dist/` con una atribuida de traducción propia en la copia comprueba que su página es idéntica a la de la misma Cita con `origen: doblaje`, salvo el texto
+
+**Given** una atribuida con `origen: traduccion-propia` (AD-32 v9.2)
+**When** el esquema la juzga
+**Then** exige `partida: {texto, lengua}` —la frase que dijo su dueño, en su lengua, con `lengua` de un conjunto cerrado `[nombre de trabajo]`— y la rechaza en cualquier otro origen; sus `atestiguaciones` atestiguan la `partida`, con el mismo mínimo de dominios
+**And** la `variante` nunca lleva ese origen (`ORIGENES_DE_VARIANTE`, AD-34), y una Cita de traducción propia no lleva `variante`
+**And** ninguna superficie pinta `partida`, que queda en `CAMPOS_QUE_NO_FECHAN`
+
+**Given** el registro de la doble aprobación (AD-32 v9.2)
+**When** se crea
+**Then** `corpus/aprobaciones-de-atribuidas.yml` entra con su cabecera y la lista vacía, solo añade `{slug, propone, aprueba, fecha}` por `appendFile` con relectura, y lo escriben solo el alta y `revisar --aprobar` que publican una traducción propia y `atribuida texto` que la cambia conservando ese origen, después de escribir la Cita y con vuelta atrás de la Cita si la escritura falla
+**And** esas órdenes piden `--propone <agente> --aprueba <agente>` `[nombre de trabajo]` para una traducción propia, comparan los dos recortados y en minúsculas y se niegan, con 1 y sin escribir, si coinciden o falta alguno
+**And** el build rompe si una atribuida publicada con ese origen no tiene una entrada de fecha igual o posterior a su último cambio de texto, o si alguna entrada suya tiene `propone` igual a `aprueba`; una entrada de una Cita retirada o sustituida no rompe nada
+**And** `npm test` comprueba que el registro solo añade contra su versión en el primer padre, como `clases-de-cita.yml`, y `AGENTS.md` lo nombra entre los registros de actos (AD-24: cinco, tres leídos por el build)
+
+**Given** la orden `proponer` de la 35.10
+**When** recibe una candidata sin versión en español que circule
+**Then** acepta su traducción propia con su `partida` y la deja en `corpus/_revision/` como cualquier candidata; el `MOTIVO_SIN_ESPAÑOL` de la 35.10 sigue rechazando la que llega sin `texto`
+**And** la aprobación de una atribuida con otro origen sigue siendo de una persona por convención (AGENTS.md), sin puerta
+
+**Given** una Cita de traducción propia publicada y una versión que circula aparecida después (AD-35 v9.2)
+**When** una persona corre `atribuida texto --origen <original|doblaje|traduccion-publicada> --atestiguacion <url>…`
+**Then** la orden no exige `MIN_PARECIDO_PARA_CORREGIR`, exige un origen que circula y atestiguaciones nuevas que reemplazan a las de la `partida`, quita la `partida`, repite los topes, el mínimo de dominios y FR-14, y conserva el slug
+**And** retraducirla conservando `traduccion-propia` exige el parecido de siempre y los dos agentes, con su entrada nueva en el registro
+
+**Given** la auditoría de SM-C6 de la 35.8 (AD-32 v9.2)
+**When** se pide la de un mes
+**Then** imprime además una segunda muestra del mismo tamaño solo entre las atribuidas de `origen: traduccion-propia`, por el SHA-256 de `traduccion|{slug}|{mes}`, y anota sus resultados en la misma entrada, en `muestraDeTraduccion` y `resultadosDeTraduccion`, que admiten además `mal-traducida`, que decide una persona leyendo la `partida`
+**And** la consulta da aparte la proporción mal traducida y salta con `MAX_PROPORCION_MAL_TRADUCIDA_SM_C6` de `src/lib/umbrales.ts`, en `undefined` en el árbol, con la regla de los dos meses y el mínimo aplicado a cada población; sin valor, informa y no juzga
+**And** una Cita que sale en las dos muestras se juzga en cada una por separado, y `tests/unit/` fija la segunda muestra con slugs de prueba
+
+**Given** esta historia terminada
+**When** se cierra
+**Then** ningún agente ha sembrado, traducido ni aprobado nada sobre el Corpus real, y `MAX_PROPORCION_MAL_TRADUCIDA_SM_C6` sigue sin valor
+**And** `AGENTS.md` cuenta la traducción propia en «Una sesión de sembrado de la Cita atribuida»: último recurso, la `partida`, los dos agentes y su registro, que la página no lo dice y cómo se sustituye
+
+## Epic 36: Las secciones se distinguen *(UX v9.3, 2026-11-14)*
+
+Quien lee una Página de Cita, de Autor o de Obra distingue cada bloque a la vista: la Cita principal va sola, sin caja, y lo demás —la Obra, las herramientas de citar, «De la misma obra», «Más de», los Temas, la semblanza y la Lista de Obras— va en paneles con el tinte de su familia, con las Citas relacionadas como fichas compactas que no compiten con la principal. Responde a Héctor (2026-11-14): «las secciones Autor, Obra, Citas en general se leen difícil; todo viste igual».
+
+**FRs covered:** FR-12, FR-64 *(la lectura de los bloques)*; NFR-8, NFR-9 *(AA sobre cada tinte)*, NFR-13; CAP-26 *(v9.3)*; `DESIGN.md` v9.3 § Colors, § Shapes, § Components (Panel de bloque, Ficha de Cita, Rótulo de panel), § Do's and Don'ts; `EXPERIENCE.md` v9.3 § Página de Cita, Página de Autor, Página de Obra, Listados y Accessibility Floor; maqueta `ux-designs/ux-brainlySabiduria-2026-08-10/mockups/v9-3-fichas.html` (mandan las espinas).
+
+**Notas de implementación:**
+- **Se construye después de fundir las Épicas 29 a 35 en la principal** (decisión de Héctor, 2026-11-14): todas tocan los componentes de la Página de Cita, de Autor y de Obra, y construirla antes obligaría a rehacerla sobre ellas.
+- Es una pasada **visual**: no cambia el orden de ningún bloque, ningún texto, ninguna zona `data-zona`, ni la tabla `COLOCACION` de `tests/unit/medicion.test.ts`; no toca `src/lib/vocabulario.ts`. Los textos que añadió la maqueta («Para usarla», «De otras obras suyas.», «201 citas, en orden alfabético.») no entran.
+- Todo valor sale de los tokens nuevos de `DESIGN.md` v9.3 como propiedades de `src/styles/tokens.css` (`--contenedor-obra`, `--contenedor-autor`, `--contenedor-tema`, sus tintas, contornos y filetes, `--cita-xs`, `--radio-panel`, `--radio-ficha`), y `tests/unit/tipografia-en-tokens.test.ts` sigue en verde sin excepción nueva.
+- El `secondary` sigue reservado a la curación: el Autor usa su token propio.
+- Corta series de SM-4 y SM-C5 si mueve la primera pantalla de la Página de Cita: el corte se declara con su constante de despliegue, como en la v9.
+- **Preguntas abiertas:** ninguna de bloqueo; los paneles de Obra, Personaje, Tema y Colección son `[ASSUMPTION]` de la UX v9.3, sin maqueta.
+
+### Story 36.1: Los paneles de la Página de Cita y de la de Autor
+
+As a lector que llega a una Cita,
+I want ver la Cita sola y cada bloque de alrededor en su panel,
+So that sepa sin esfuerzo qué es la Obra, qué más dijo el Autor y por dónde seguir.
+
+**Acceptance Criteria:**
+
+**Given** `DESIGN.md` v9.3
+**When** se construye el sitio
+**Then** `src/styles/tokens.css` define una vez cada token nuevo de color, tipografía y radio como propiedad personalizada, con el valor del frontmatter, y ningún componente lleva un valor literal
+
+**Given** la Página de Cita
+**When** se pinta en 360 px y en escritorio
+**Then** la Cita, su atribución y sus acciones van sobre el papel, sin caja; la Tarjeta de Obra va en un Panel de bloque de la familia Obra; «Cómo citar» e «Inserta esta cita» en el panel de herramientas; «De la misma obra», en panel Obra con fichas; «Más de {Autor}», en panel Autor con fichas; y los Temas, en panel Tema; en el orden de hoy
+**And** cada panel lleva su Rótulo de panel en la tinta de su familia en lugar de la versalita gris, sin cambiar el `h2` de `Rotulo.astro` ni su texto; un panel no es un landmark
+**And** la Tarjeta de Cita de «De la misma obra» y «Más de» se compone como Ficha de Cita, con `--cita-xs`, y la Cita principal conserva su cuerpo
+**And** el texto de la Cita sigue siendo el primer contenido visible sin desplazamiento a 360 × 640 (CAP-1)
+
+**Given** la Página de Autor
+**When** se pinta
+**Then** la semblanza va en panel Autor, la Lista de Obras en panel Obra y su listado de Citas como Fichas de Cita, sin cambiar el tope de la 34.2 ni el desplegable
+
+**Given** cualquier panel o ficha
+**When** se mide
+**Then** todo texto sobre su tinte cumple AA (4,5:1; 3:1 para texto grande y bordes de controles), las áreas táctiles siguen en 44 px, el foco se ve sobre cada tinte, y el barrido de axe de `tests/e2e/accesibilidad.spec.ts` sigue en verde
+**And** NFR-7 se mide con Lighthouse antes del merge y no empeora
+
+### Story 36.2: El mismo patrón en Obra, Personaje, Tema y Colección
+
+As a lector que navega por el sitio,
+I want que la Página de Obra, de Personaje, de Tema y de Colección distingan sus bloques igual que la de Cita,
+So that el sitio se lea igual en todas partes.
+
+**Acceptance Criteria:**
+
+**Given** la Página de Obra (`EXPERIENCE.md` v9.3, `[ASSUMPTION]`)
+**When** se pinta
+**Then** su cabecera y su Ficha técnica van en panel Obra en todas sus páginas, sus desplegables en el panel de herramientas, la Nota fuera de todo panel y sus Citas como Fichas de Cita
+
+**Given** la Página de Personaje, de Tema y de Colección
+**When** se pintan
+**Then** «Más de {Personaje}» y la semblanza del Personaje van en panel Autor; el `h1`, el nombre y el criterio de Tema y Colección quedan sobre el papel, y sus listados como Fichas de Cita
+
+**Given** los Directorios y la portada
+**When** se construye
+**Then** no cambian en esta épica, y su Tarjeta de Obra en la portada sigue plana
+
+**Given** cualquier página tocada
+**When** se mide
+**Then** cumple lo mismo que la 36.1 en contraste, foco, áreas táctiles, axe y NFR-7

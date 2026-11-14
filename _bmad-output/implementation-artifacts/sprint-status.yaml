@@ -536,7 +536,12 @@ development_status:
   35-8-pedir-que-se-corrija-o-se-retire-y-que-conste: backlog
   35-9-la-obra-con-derechos-vigentes-se-vende-sola: backlog
   35-10-la-siembra-acotada-desde-brainyquote: backlog
+  35-11-la-traducción-propia-como-la-decidió-héctor: backlog  # v9.2 (2026-11-14): ajusta la 35.10; la Épica 35 no se funde sin ella
   epic-35-retrospective: optional
+  epic-36: backlog  # UX v9.3 (2026-11-14): se construye tras fundir las Épicas 29 a 35
+  36-1-los-paneles-de-la-página-de-cita-y-de-la-de-autor: backlog
+  36-2-el-mismo-patrón-en-obra-personaje-tema-y-colección: backlog
+  epic-36-retrospective: optional
 
 action_items:
   - id: "epic-6-retro-item-1-separar-los-artefactos-de-planificación"
