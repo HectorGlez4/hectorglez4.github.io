@@ -1,0 +1,228 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dirección Fichas</title>
+<style>
+/*
+  Dirección 2 — «Fichas». Cada bloque es un panel con caja, radio 16px y fondo tintado según lo que es.
+  Tokens existentes que pasan a superficie pública:
+   · primary-container #f7e3d8 + on-primary-container #5c2c18 = Obra. Texto: 9,26:1. Tinta apagada encima: 6,27:1.
+   · secondary-container #dde5ef + on-secondary-container #2b3a4a = Autor. Texto: 9,15:1. Tinta apagada encima: 6,12:1.
+     OJO: DESIGN.md § Colors reserva hoy el azul para la herramienta de curación. Esta dirección lo saca
+     a lo público, y eso lo decide Héctor con bmad-ux.
+   · surface-container #f1ece2 = herramientas (Cómo citar, Inserta). Tinta: 14,54:1.
+   · surface-container-lowest #ffffff = la ficha de cada Cita relacionada. Tinta apagada sobre blanco: 7,77:1.
+  Hex NUEVOS:
+   · --tema-container  #e4ebdc  verde salvia muy claro, panel de Temas. Tinta sobre él: 14,03:1.
+   · --on-tema-container #2e4228  texto del rótulo de Temas sobre #e4ebdc: 8,94:1.
+   · --tema-borde      #55704a  borde del chip de Tema sobre #e4ebdc: 4,53:1 (pide 3:1, WCAG 1.4.11).
+   · --filete-obra     #ebcdbd  divisoria decorativa entre filas dentro del panel de Obra (no es borde de control: no necesita 3:1).
+   · --filete-autor    #c9d5e3  divisoria decorativa dentro del panel de Autor (ídem).
+   · --ficha-borde     #e6dccd  borde decorativo de la ficha blanca (la ficha entera es el enlace y su forma la da el fondo).
+  Radio nuevo: 16px para paneles (rounded.xl propuesto), 12px para fichas (rounded.lg+ propuesto).
+  Siena sobre primary-container: 5,40:1. Contorno #8a7f72 sobre blanco: 3,92:1.
+*/
+:root{
+  --surface:#faf7f0; --surface-dim:#efe9dd; --c-low:#f6f2ea; --c:#f1ece2; --white:#ffffff;
+  --ink:#1f1b16; --ink-2:#5a5147; --outline:#8a7f72; --rule:#ddd5c7;
+  --primary:#8c4a2f; --p-cont:#f7e3d8; --on-p-cont:#5c2c18;
+  --s-cont:#dde5ef; --on-s-cont:#2b3a4a;
+  --tema-container:#e4ebdc; --on-tema-container:#2e4228; --tema-borde:#55704a;
+  --filete-obra:#ebcdbd; --filete-autor:#c9d5e3; --ficha-borde:#e6dccd;
+  --r-panel:16px; --r-ficha:12px;
+  --serif:'Source Serif 4', Georgia, serif; --sans:Inter, system-ui, sans-serif;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--surface-dim);color:var(--ink);font-family:var(--sans)}
+.intro{max-width:860px;margin:0 auto;padding:40px 20px 8px}
+.intro h1{font-size:26px;font-weight:600;margin:0 0 8px}
+.intro p{font-size:15px;line-height:1.6;color:var(--ink-2);margin:0 0 8px;max-width:68ch}
+.mesa{display:flex;flex-wrap:wrap;gap:40px;justify-content:center;padding:24px 16px 64px;align-items:flex-start}
+.columna{display:flex;flex-direction:column;gap:12px;align-items:center}
+.etiqueta{font-size:13px;font-weight:600;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-2)}
+.movil{width:400px;max-width:100%;background:var(--surface);border:1px solid var(--outline);border-radius:32px;overflow:hidden;box-shadow:0 12px 32px rgba(31,27,22,.12)}
+a{color:inherit}
+.cab{padding:8px 20px;border-bottom:1px solid var(--rule)}
+.marca{display:inline-flex;align-items:center;min-height:44px;font-size:13px;font-weight:600;letter-spacing:.09em;text-decoration:none}
+.nav{display:flex;align-items:center;margin-left:-8px}
+.nav a{display:inline-flex;align-items:center;justify-content:center;min-height:44px;min-width:44px;padding:0 8px;font-size:15px;text-decoration:none}
+.nav a.buscar{color:var(--primary)}
+.nav span{color:var(--ink-2)}
+.cita{padding:48px 20px 0}
+.cita blockquote{margin:0;font-family:var(--serif);font-size:40px;line-height:1.25;letter-spacing:-.015em}
+.filete-corto{width:48px;height:1px;background:var(--rule);margin:28px 0 18px}
+.autor-l{font-size:13px;font-weight:600;letter-spacing:.09em}
+.autor-l a{text-decoration:underline;text-underline-offset:3px}
+.caption{font-size:13px;line-height:1.5;color:var(--ink-2);margin:4px 0 0}
+.caption a.obra{color:var(--ink);text-decoration:underline}
+.caption a.salida{color:var(--primary);text-decoration:underline}
+.acciones{display:flex;flex-direction:column;align-items:flex-start;gap:12px;padding:28px 20px 32px}
+.btn{display:inline-flex;align-items:center;min-height:44px;padding:0 22px;border:1px solid var(--primary);border-radius:9999px;color:var(--primary);background:var(--surface);font:inherit;font-size:15px}
+/* Paneles */
+.paneles{display:flex;flex-direction:column;gap:16px;padding:0 12px 24px}
+.panel{border-radius:var(--r-panel);padding:20px 16px 8px}
+.panel.obra{background:var(--p-cont)}
+.panel.autor{background:var(--s-cont)}
+.panel.tema{background:var(--tema-container);padding-bottom:20px}
+.panel.util{background:var(--c)}
+.rotulo{font-size:13px;font-weight:600;letter-spacing:.06em;margin:0 0 4px}
+.obra .rotulo{color:var(--on-p-cont)}
+.autor .rotulo{color:var(--on-s-cont)}
+.tema .rotulo{color:var(--on-tema-container)}
+.util .rotulo{color:var(--ink-2)}
+.tit{font-size:19px;font-weight:600;line-height:1.3;margin:0}
+.hechos{font-size:13px;color:var(--ink-2);margin:4px 0 0}
+.filas{list-style:none;margin:12px 0 0;padding:0}
+.filas li + li{border-top:1px solid var(--filete-obra)}
+.autor .filas li + li{border-top-color:var(--filete-autor)}
+.util .filas li + li{border-top-color:var(--rule)}
+.filas a,.filas summary{display:flex;justify-content:space-between;align-items:center;gap:12px;min-height:48px;padding:10px 4px;text-decoration:none;font-size:15px;font-weight:500;cursor:pointer;list-style:none}
+.filas summary::-webkit-details-marker{display:none}
+.glifo{font-size:19px;color:var(--ink-2)}
+.fichas{list-style:none;margin:14px 0 12px;padding:0;display:flex;flex-direction:column;gap:8px}
+.fichas a{display:block;background:var(--white);border:1px solid var(--ficha-borde);border-radius:var(--r-ficha);padding:14px 14px;text-decoration:none;min-height:44px}
+.fichas q{quotes:"«" "»";display:block;font-family:var(--serif);font-size:17px;line-height:1.45}
+.fichas .de{display:block;font-size:13px;color:var(--ink-2);margin-top:6px}
+.fichas .sin{font-style:italic}
+.cierre{border-top:0}
+.cierre a{font-weight:600}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0 0;padding:0;list-style:none}
+.chips a{display:inline-flex;align-items:center;min-height:44px;padding:0 18px;border:1px solid var(--tema-borde);border-radius:9999px;font-family:var(--serif);font-size:17px;background:var(--white);text-decoration:none}
+.pie{padding:24px 20px 36px;font-size:13px;color:var(--ink-2)}
+/* Autor */
+.ficha-autor{margin:16px 12px;background:var(--s-cont);border-radius:var(--r-panel);padding:28px 20px 24px}
+.ficha-autor h1{font-family:var(--serif);font-size:32px;font-weight:600;line-height:1.15;margin:0;color:var(--on-s-cont)}
+.anos{font-size:15px;color:var(--ink-2);margin:6px 0 16px}
+.semblanza{font-size:16px;line-height:1.65;margin:0}
+.obras-l a{font-weight:600}
+.obras-l .hechos{font-weight:400;margin:0}
+.busca{display:flex;gap:8px;margin:12px 0 0}
+.busca label{position:absolute;left:-9999px}
+.busca input{flex:1;min-width:0;min-height:44px;border:1px solid var(--outline);border-radius:9999px;padding:0 16px;font:inherit;font-size:15px;background:var(--white);color:var(--ink)}
+.lista{padding:8px 12px 16px}
+.lista .rotulo{color:var(--ink-2);padding:0 4px}
+.estado{font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-2);border:1px dashed var(--outline);border-radius:9999px;padding:2px 8px;margin-top:8px;display:inline-block}
+.nota{font-size:13px;line-height:1.5;color:var(--ink-2);max-width:400px;margin:0}
+</style>
+</head>
+<body>
+<div class="intro">
+  <h1>Fichas</h1>
+  <p>Cada bloque se vuelve un objeto que se puede tocar: un panel con esquinas redondeadas y un fondo que dice qué es —siena claro para la Obra, pizarra claro para el Autor, salvia para los Temas, papel tostado para las herramientas—. Las Citas relacionadas pasan a fichas blancas y compactas apiladas dentro de su panel, a 17 px regular, y la Cita principal es lo único que queda sin caja, flotando sobre el papel. Es la más amable y táctil, y también la que más se aleja de la regla «separa sin encerrar».</p>
+</div>
+<div class="mesa">
+<div class="columna">
+<span class="etiqueta">Página de Cita · 400 px</span>
+<div class="movil">
+  <header class="cab">
+    <a class="marca" href="#">SABIDURÍA DE BOLSILLO</a>
+    <nav class="nav" aria-label="Principal"><a href="#">Autores</a><span aria-hidden="true">·</span><a href="#">Obras</a><span aria-hidden="true">·</span><a class="buscar" href="#">Buscar</a></nav>
+  </header>
+  <main>
+    <section class="cita">
+      <blockquote>«Se posee lo que se es, y en cuanto se da.»</blockquote>
+      <div class="filete-corto"></div>
+      <div class="autor-l"><a href="#">RAFAEL BARRETT</a></div>
+      <p class="caption"><a class="obra" href="#">Filosofía del altruismo</a>. Sin año documentado.</p>
+      <p class="caption">Texto tomado de <a class="salida" href="#">Wikisource en español</a>. CC BY-SA 4.0.</p>
+    </section>
+    <div class="acciones">
+      <button class="btn">Copiar la cita</button>
+      <button class="btn">Compartir como imagen</button>
+      <button class="btn">Compartir la cita</button>
+    </div>
+
+    <div class="paneles">
+      <section class="panel obra">
+        <h2 class="rotulo">De la obra</h2>
+        <p class="tit">Filosofía del altruismo</p>
+        <p class="hechos">Rafael Barrett · 28 citas</p>
+        <ul class="filas">
+          <li><a href="#">Siguiente cita de esta obra <span class="glifo" aria-hidden="true">›</span></a></li>
+          <li><a href="#">Ver la obra y dónde leerla <span class="glifo" aria-hidden="true">›</span></a></li>
+        </ul>
+      </section>
+
+      <section class="panel util">
+        <h2 class="rotulo">Para usarla</h2>
+        <ul class="filas">
+          <li><details><summary>Cómo citar <span class="glifo" aria-hidden="true">›</span></summary></details></li>
+          <li><details><summary>Inserta esta cita <span class="glifo" aria-hidden="true">›</span></summary></details></li>
+        </ul>
+      </section>
+
+      <section class="panel obra">
+        <h2 class="rotulo">De la misma obra</h2>
+        <ul class="fichas">
+          <li><a href="#"><q>Los gritos más profundos de la vida han salido de hombres ignorantes.</q></a></li>
+          <li><a href="#"><q>Siento que soy indispensable a un plan desconocido y que debo entregarme heroicamente.</q></a></li>
+          <li><a href="#"><q>Adaptarse a las leyes físicas, ser un conjunto de leyes físicas equivale a desaparecer.</q></a></li>
+        </ul>
+        <ul class="filas cierre"><li><a href="#">Las 28 citas de Filosofía del altruismo <span class="glifo" aria-hidden="true">›</span></a></li></ul>
+      </section>
+
+      <section class="panel autor">
+        <h2 class="rotulo">Más de Rafael Barrett</h2>
+        <ul class="fichas">
+          <li><a href="#"><q>Dichoso el día en que ni la fortuna ni la miseria se hereden.</q><span class="de">Doctores</span></a></li>
+          <li><a href="#"><q>El justo, como el fiel de la balanza simbólica, debe petrificarse en su gesto solemne.</q><span class="de">La justicia</span></a></li>
+          <li><a href="#"><q>Las ideas, flechas sublimes, se forjan en el reposo, pero es la voluntad la que tiende el arco.</q><span class="de">El valor</span></a></li>
+          <li><a href="#"><q>Y una caridad que se detiene en las fronteras no es más que odio.</q><span class="de">Patriotismo</span></a></li>
+        </ul>
+        <ul class="filas cierre"><li><a href="#">Las 201 citas de Rafael Barrett <span class="glifo" aria-hidden="true">›</span></a></li></ul>
+      </section>
+
+      <section class="panel tema">
+        <h2 class="rotulo">Temas</h2>
+        <ul class="chips"><li><a href="#">La riqueza</a></li></ul>
+      </section>
+    </div>
+  </main>
+  <footer class="pie">Citas de dominio público, con su procedencia documentada cuando consta.</footer>
+</div>
+</div>
+
+<div class="columna">
+<span class="etiqueta">Página de Autor · 400 px</span>
+<div class="movil">
+  <header class="cab">
+    <a class="marca" href="#">SABIDURÍA DE BOLSILLO</a>
+    <nav class="nav" aria-label="Principal"><a href="#">Autores</a><span aria-hidden="true">·</span><a href="#">Obras</a><span aria-hidden="true">·</span><a class="buscar" href="#">Buscar</a></nav>
+  </header>
+  <main>
+    <section class="ficha-autor">
+      <h1>Rafael Barrett</h1>
+      <p class="anos">1876–1910</p>
+      <p class="semblanza">Ensayista de lengua española afincado en el Paraguay, donde escribió toda su obra. Cronista moral de la injusticia cotidiana, con una prosa breve y encendida.</p>
+    </section>
+    <div class="paneles">
+      <section class="panel obra">
+        <h2 class="rotulo">Su obra en este corpus</h2>
+        <ul class="filas obras-l">
+          <li><a href="#">Filosofía del altruismo <span class="hechos">28 citas</span></a></li>
+          <li><a href="#">El altruismo y la energía <span class="hechos">8 citas</span></a></li>
+          <li><a href="#">Patriotismo <span class="hechos">8 citas</span></a></li>
+          <li><a href="#" style="font-weight:500">Y 54 obras más <span class="glifo" aria-hidden="true">›</span></a></li>
+        </ul>
+      </section>
+    </div>
+    <section class="lista">
+      <h2 class="rotulo">Citas documentadas · 201</h2>
+      <div class="busca"><label for="b2">Buscar en Rafael Barrett</label><input id="b2" placeholder="Buscar en Rafael Barrett"><button class="btn" type="button">Buscar</button></div>
+      <ul class="fichas">
+        <li><a href="#"><q>A fuerza de acallar su pensamiento lo han enmudecido para siempre; a fuerza de amordazarlo le han estrangulado.</q><span class="de">La sinceridad</span></a></li>
+        <li><a href="#"><q>A fuerza de ejercitar la caridad a pesar nuestro, acabaremos por sentirla.</q><span class="de">Deudas</span></a></li>
+        <li><a href="#"><q>Aislado, el hombre se vuelve hombre verdaderamente.</q><span class="de sin">Procedencia no documentada.</span><span class="estado">Estado: sin Obra</span></a></li>
+        <li><a href="#"><q>Al egoísta le falta siempre algo: por eso se lo quita al prójimo.</q><span class="de">El altruismo y la energía</span></a></li>
+      </ul>
+    </section>
+  </main>
+  <footer class="pie">Citas de dominio público, con su procedencia documentada cuando consta.</footer>
+</div>
+<p class="nota">La tercera ficha enseña el estado sin Obra: «Procedencia no documentada.» en cursiva, en el sitio de la Obra. (En el Corpus esa Cita es de «El retorno a la tierra»; aquí va sin ella solo para ver el estado.)</p>
+</div>
+</div>
+</body>
+</html>
