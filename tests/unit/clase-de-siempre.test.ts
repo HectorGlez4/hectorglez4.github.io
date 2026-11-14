@@ -80,6 +80,13 @@ describe('35.7 — destacados, suelo y huecos', () => {
     expect(autoresDestacados(autores, citas).map((a) => a.slug)).toEqual(['seneca']);
   });
 
+  it('un Autor vivo no entra en los destacados aunque traiga Citas de la clase de siempre', () => {
+    // Aísla el filtro del `vivo`: sin él, sus dos Citas de siempre lo meterían.
+    const autores = [autor('seneca'), autor('vivo', { vivo: true })];
+    const citas = [cita('s1'), cita('v1', { autor: 'vivo' }), cita('v2', { autor: 'vivo' })];
+    expect(autoresDestacados(autores, citas).map((a) => a.slug)).toEqual(['seneca']);
+  });
+
   it('verHuecos: el vivo fuera de la tradición y del margen; el hueco y el margen, solo con las de siempre', () => {
     const temas = [{ slug: 'tiempo', nombre: 'El tiempo' }];
     const autores = [
@@ -122,7 +129,7 @@ describe('35.7 — destacados, suelo y huecos', () => {
     expect(citasQueCabenDe(1, 20)).not.toBe(citasQueCabenDe(1, 30));
   });
 
-    it('MIN_CITAS_POR_TEMA sigue contando las dos clases (AD-11)', () => {
+  it('MIN_CITAS_POR_TEMA sigue contando las dos clases (AD-11)', () => {
     const temas: Tema[] = [{ slug: 'tiempo', nombre: 'El tiempo', descripcion: 'x' } as unknown as Tema];
     const citas = [
       ...Array.from({ length: MIN_CITAS_POR_TEMA - 1 }, (_, i) => cita(`s${i}`, { temas: ['tiempo'] })),

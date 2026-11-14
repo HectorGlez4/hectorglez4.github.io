@@ -5,7 +5,7 @@ created: '2026-11-14'
 status: 'done'
 baseline_revision: '281328151309233f068d168ac51531cf36e8e2eb'
 review_loop_iteration: 0
-followup_review_recommended: true
+followup_review_recommended: false
 context:
   - '{project-root}/AGENTS.md'
   - '{project-root}/_bmad-output/implementation-artifacts/epic-35-context.md'
@@ -35,6 +35,13 @@ deferred:
     location: >-
       src/lib/huecos.ts verHuecos; tools/lib/epocas.ts slugsSembrados
     severity: medium
+  - summary: >-
+      `corpus/formas-vedadas.yml` solo añade y no se edita a mano, pero no hay camino para deshacer una entrada equivocada (por ejemplo, una que veda a una atribuida ya publicada): hoy la única salida es editar el fichero, que la prueba de «solo añade» contra `HEAD^1` rechaza. Si hace falta una entrada de anulación (como `--retira` de las señales) u otra vía, lo decide Héctor (bmad-architecture, AD-32).
+    evidence: |-
+      tools/lib/formasVedadas.ts no tiene ninguna orden ni motivo que retire una entrada; tests/unit/formas-vedadas.test.ts exige que el fichero del árbol empiece por el del primer padre. Hallazgo blind-hunter, pasada 2.
+    location: >-
+      tools/lib/formasVedadas.ts; AGENTS.md «Una sesión de sembrado»
+    severity: low
 ---
 
 <intent-contract>
@@ -171,6 +178,21 @@ deferred:
   - `[low]` `[patch]` La aprobación que anota `sin-procedencia` no tenía prueba: caso en `formas-vedadas.test.ts`.
   - `[low]` `[patch]` El aviso «es atribuida» de `npm run jornada -- listar` no tenía prueba: caso por proceso en `jornadas.test.ts`.
 
+### 2026-11-14 — Review pass
+- intent_gap: 0
+- bad_spec: 0
+- patch: 7 (high 0, medium 1, low 6)
+- defer: 1 (high 0, medium 0, low 1)
+- reject: 29 (high 0, medium 6, low 23)
+- addressed_findings:
+  - `[medium]` `[patch]` `tools/revisar.ts` con `--aprobar` y `--rechazar` a la vez: si el rechazo no podía anotar las formas vedadas, salía con 1 sin escribir el parte de lo que la aprobación ya había publicado. Ahora lo escribe antes del 1; prueba por proceso en `formas-vedadas.test.ts` (falla sin el arreglo).
+  - `[low]` `[patch]` Sin prueba de que rechazar una candidata atribuida no anota su forma: caso en `formas-vedadas.test.ts`.
+  - `[low]` `[patch]` Sin prueba de la negativa de `registrarFormasVedadas` cuando `formas:` no es lo último del fichero: caso en `formas-vedadas.test.ts` que exige el fichero intacto.
+  - `[low]` `[patch]` Sin prueba por proceso de que `sesion:registrar` suma las atribuidas en `citasPublicadas` y mide `procedenciaCompleta` sin ellas: caso en `objetivo-cli.test.ts`.
+  - `[low]` `[patch]` La prueba de destacados no aislaba el filtro `vivo`: caso nuevo con un Autor vivo que trae Citas de siempre en `clase-de-siempre.test.ts`.
+  - `[low]` `[patch]` Sangría del caso `MIN_CITAS_POR_TEMA` en `clase-de-siempre.test.ts`.
+  - `[low]` `[patch]` El primer `## Auto Run Result` del spec seguía diciendo «0 parches» y «sin prueba propia» tras la pasada 1: anotado como estado previo a las pasadas.
+
 ## Verification
 
 **Commands:**
@@ -200,11 +222,11 @@ Status: done
 - `AGENTS.md` — formas vedadas, lo que cuenta solo la clase de siempre, `--retirar` y la constante.
 - Pruebas: `clase-de-siempre.test.ts`, `formas-vedadas.test.ts`, `clase-de-siempre-build.test.ts` (nuevas); `atribuida-cli`, `auditoria-cli`, `coleccion-en-pieza`, `documentacion`, `jornadas`, `linea-base`, `lote`, `pieza-cli`, `publicable-y-alcanzable`; y `alcance-construido` (rota desde `d1cf408201`, que renombró `clase` a `nombreDeClase` en `LoQueRota.astro`: el patrón de la prueba lo sigue).
 
-**Revisión.** Pasada sin hallazgos externos: 0 parches, 0 diferidos, 0 rechazados. `followup_review_recommended: false` (puntuación 0).
+**Revisión.** (Estado de la primera construcción, antes de las pasadas 1 y 2, que siguen abajo.) Pasada sin hallazgos externos: 0 parches, 0 diferidos, 0 rechazados.
 
 **Verificación.** `npm test` 193 ficheros / 8.327 pruebas en verde; `npx astro check` 0 errores; `FECHA_JORNADA=2026-11-14 npm run build` en la base (worktree desacoplado en `2813281513`) y en la rama, `diff -rq -x pagefind` sin diferencias (repetido tras los últimos cambios).
 
-**Riesgos residuales.** Los supuestos del frontmatter `deferred` (hueco de Tema, quién escribe `cambio-de-clase`, motivo del rechazo, periodo de las bajas, series del corte) los decide Héctor. La rama de `retirarCita` en que la anotación falla **tras** mover la Cita (devolverla) no tiene prueba propia; la de registro ilegible, sí.
+**Riesgos residuales.** Los supuestos del frontmatter `deferred` (hueco de Tema, quién escribe `cambio-de-clase`, motivo del rechazo, periodo de las bajas, series del corte) los decide Héctor. La rama de `retirarCita` en que la anotación falla **tras** mover la Cita (devolverla) no tenía prueba propia en ese momento; la añadió la pasada 1.
 
 ### Pasada de revisión 1 (2026-11-14, sobre `fb35359edd`)
 
@@ -226,3 +248,19 @@ Status: done
 **Verificación.** `npx vitest run` de los 12 ficheros tocados o cercanos (383 pruebas) en verde; `npx astro check` 0 errores; `npm test` desacoplado: 193 ficheros / 8.334 pruebas en verde (log `.claude/v9-ralph/logs/s-35/triage-35.7-1-npmtest.log`). El `diff` de `dist/` no se repitió: lo único de `src/` que cambia es una refactorización sin efecto de `verHuecos`, que ninguna página importa (`publicado.ts` solo toma `cuentaParaElSuelo`).
 
 **Riesgos residuales.** Los dos diferidos nuevos y los supuestos anteriores, para Héctor.
+
+### Pasada de revisión 2 (2026-11-14, sobre `d90a5a5d5a`; última permitida)
+
+**Resumen.** Cinco capas externas: 7 parches, 1 diferido, 29 rechazados, ningún intent_gap ni bad_spec. El único defecto de código: `revisar --aprobar … --rechazar …` perdía el parte de lo ya aprobado cuando el rechazo no podía anotar las formas vedadas; ahora lo escribe antes de salir con 1. Lo demás son pruebas que fijan lo que ya hacía el código (rechazar una atribuida no anota, la negativa de «`formas:` lo último del fichero», la suma de `citasPublicadas` de la sesión por proceso, el filtro `vivo` de los destacados aislado), una sangría y la contabilidad del spec.
+
+**Ficheros de esta pasada.**
+- `tools/revisar.ts` — el parte de la aprobación sale aunque el rechazo de la misma invocación falle.
+- `tests/unit/formas-vedadas.test.ts`, `tests/unit/objetivo-cli.test.ts`, `tests/unit/clase-de-siempre.test.ts` — las pruebas nuevas.
+
+**Hallazgos.** Parches 7 (medium 1, low 6). Diferido 1: no hay vía para deshacer una entrada equivocada del registro que solo añade (Héctor, AD-32). Rechazados 29: los ya diferidos a Héctor (criterio `vivo` frente a dominio público, la veda que alcanza a una atribuida viva, el motivo del rechazo y de la aprobación sin Fuente, el periodo de las bajas), lo que fija el `<intent-contract>` (`fijacionesSinAtribuidas`, la excepción del propio slug —una atribuida con el slug de una de siempre rechazada exigiría un Autor de dominio público con clase atribuida, que `claseQueCorresponde` no da—, la redacción de la línea de cifras), el `aprobar` con registro ilegible (ya lo recoge el `catch` con «No se ha publicado ninguna candidata»), la vuelta atrás de `retirarCita` (la pasada 1 ya restituye y avisa del censo), y lo especulativo o cosmético (pruebas como root, caché del módulo, concurrencia, calendario local, duplicado del error en la auditoría, la candidata sin clase de un Autor que pasó a vivo, `pendienteEnEpocas` con un Autor vivo, que no es candidato de ninguna época).
+
+**Revisión de seguimiento.** Puntuación 3×1 + 6 = 9, que por la fórmula pediría otra pasada; esta era la última permitida por el bucle, así que `followup_review_recommended: false`. Ningún parche es high, y solo uno toca código.
+
+**Verificación.** `npx vitest run` de `formas-vedadas`, `clase-de-siempre` y `objetivo-cli` en verde, y la prueba nueva de `revisar` falla sin el arreglo; `npx astro check` 0 errores; `npm test` desacoplado: 193 ficheros / 8.339 pruebas en verde (log `.claude/v9-ralph/logs/s-35/triage-35.7-2-npmtest.log`). El `diff` de `dist/` no se repitió: esta pasada no toca `src/` ni `integraciones/` (el ac-auditor lo midió sobre `d90a5a5d5a`: sin diferencias en 10.433 ficheros).
+
+**Riesgos residuales.** Los diferidos del frontmatter, para Héctor.

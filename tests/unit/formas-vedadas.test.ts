@@ -202,6 +202,53 @@ describe('35.7 — quién lo escribe, desde la terminal', () => {
       await chmod(rutas.formasVedadas, 0o644);
     }
   });
+
+  it('con --aprobar y --rechazar a la vez, si el rechazo no puede anotar, el parte de la aprobación sale igual', async () => {
+    const rutas = await corpusDePrueba();
+    await candidataSinFuente(rutas, 'una', TEXTO, { obra: 'Cartas', año: 62 });
+    await candidataSinFuente(rutas, 'otra', 'Otra frase de Séneca que también se rechaza.', { obra: 'Cartas', año: 62 });
+    await writeFile(rutas.formasVedadas, CABECERA_DE_FORMAS_VEDADAS, 'utf8');
+    await chmod(rutas.formasVedadas, 0o444);
+    try {
+      const salida = await revisar(rutas, ['--aprobar', 'seneca-una', '--rechazar', 'seneca-otra']);
+      expect(salida.codigo, salida.salida).toBe(1);
+      expect(salida.salida).toContain('Las formas vedadas no se anotaron en corpus/formas-vedadas.yml');
+      expect(salida.salida).toContain('No se ha rechazado ninguna candidata.');
+      expect((await readdir(rutas.revision)).sort()).toEqual(['seneca--otra.md', 'seneca--una.md']);
+    } finally {
+      await chmod(rutas.formasVedadas, 0o644);
+    }
+  });
+});
+
+describe('35.7 — lo que no se anota', () => {
+  it('rechazar una candidata atribuida no anota su forma: solo se veda la de siempre', async () => {
+    const rutas = await corpusDePrueba();
+    await escribirCita(rutas.revision, 'buzz--al-infinito', {
+      texto: 'Hasta el infinito y más allá, siempre adelante.',
+      personaje: 'buzz',
+      clase: 'atribuida',
+      temas: ['con-pagina'],
+      slug: 'buzz-al-infinito',
+      procedencia: { año: 1995 },
+    });
+    const resultado = await rechazar(rutas, ['buzz-al-infinito']);
+    expect(resultado.rechazadas).toEqual(['buzz-al-infinito']);
+    expect(resultado.vedadas).toEqual([]);
+    expect(await leerFormasVedadas(rutas)).toEqual([]);
+  });
+
+  it('si «formas:» no es lo último del fichero, registrar se niega y no toca nada', async () => {
+    const rutas = await corpusDePrueba();
+    await registrarFormasVedadas(rutas, [entradaVedada('Otra frase cualquiera.', 'cotejo-fallido', '2026-11-14')!]);
+    // Otra clave de raíz detrás de la lista: lo añadido colgaría de ella, no de «formas:».
+    const conOtraClave = `${await readFile(rutas.formasVedadas, 'utf8')}otra:\n`;
+    await writeFile(rutas.formasVedadas, conOtraClave, 'utf8');
+    await expect(
+      registrarFormasVedadas(rutas, [entradaVedada(TEXTO, 'retirada', '2026-11-14', 'seneca-la-paciencia')!]),
+    ).rejects.toThrow(/lo último del fichero/u);
+    expect(await readFile(rutas.formasVedadas, 'utf8')).toBe(conOtraClave);
+  });
 });
 
 describe('35.7 — la puerta de la atribuida lo lee', () => {

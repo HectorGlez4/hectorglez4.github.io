@@ -297,6 +297,20 @@ describe('Historia 11.3 — el resultado medido lo deriva la orden del Corpus', 
     expect(despues.resultado).toMatchObject({ citasPublicadas: 3, procedenciaCompleta: 66.7 });
   });
 
+  it('Historia 35.7 — citasPublicadas suma las atribuidas; procedenciaCompleta se mide sin ellas', async () => {
+    const corpus = await corpusDePrueba({ citasPorTema: { 'el-tiempo': 2 }, conProcedencia: 2 });
+    // Una atribuida con su Procedencia parcial: si contara para SM-C1, lo bajaría a 66,7.
+    await writeFile(
+      join(corpus, 'citas', 'el-tiempo-atribuida.md'),
+      ['---', 'slug: "autor-0-atribuida"', 'texto: "Una atribuida de prueba."', 'autor: "autor-0"',
+        'clase: "atribuida"', 'temas:', '  - el-tiempo', 'procedencia:', '  año: 2000', '---', ''].join('\n'),
+      'utf8',
+    );
+    await correr(['--corpus', corpus, '--registrar']);
+    const [sesion] = await sesionesRegistradas(corpus);
+    expect(sesion.resultado).toMatchObject({ citasPublicadas: 3, procedenciaCompleta: 100 });
+  });
+
   it('y la orden lo enseña al registrar, con la coma decimal en su sitio', async () => {
     const corpus = await corpusDePrueba({ citasPorTema: { 'el-tiempo': 3 }, conProcedencia: 1 });
     const { salida } = await correr(['--corpus', corpus, '--registrar']);

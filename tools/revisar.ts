@@ -228,7 +228,9 @@ if (aRechazar.length > 0) {
   try {
     resultado = await rechazar(rutas, aRechazar);
   } catch (error) {
-    // Historia 35.7 — sin poder anotar las formas vedadas, no se rechaza ninguna.
+    // Historia 35.7 — sin poder anotar las formas vedadas, no se rechaza ninguna. Lo que la misma
+    // invocación ya aprobó sí está escrito, así que su parte sale igual antes del 1.
+    if (lineas.length > 0) process.stdout.write(`${lineas.join('\n')}\n`);
     process.stderr.write(
       `${error instanceof Error ? error.message : String(error)}\nNo se ha rechazado ninguna candidata.\n`,
     );
