@@ -11,7 +11,21 @@ context:
   - '{project-root}/_bmad-output/implementation-artifacts/spec-32-3-el-incipit-lo-declara-una-persona-y-la-pagina-lo-ensena-plegado.md'
   - '{project-root}/_bmad-output/planning-artifacts/architecture/architecture-brainlySabiduria-2026-08-10/ARCHITECTURE-SPINE.md'
 warnings: ['oversized']
-deferred: []
+deferred:
+  - summary: >-
+      Pendiente de Héctor (bmad-ux): asentar en DESIGN.md la distancia de 2 × unidad del contenedor de desplegables.
+    evidence: |-
+      Decisión delegada por Héctor (chat, 2026-11-14): el contenedor único de desplegables bajo la Cabecera pasa de 3 × `--unidad` a 2 × `--unidad`, mismo orden. Aplicada en la rama local v9/wip-32-4-fusion (b478e35f48).
+    location: >-
+      src/pages/obra/[autor]/[slug]/[...page].astro
+    severity: medium
+  - summary: >-
+      Pendiente de Héctor (bmad-ux): la primera pantalla de 360 × 640 con tres desplegables (Dónde leer, Cómo empieza, Cómo citar) no cabe con la distancia delegada; falta decidir qué más ceder.
+    evidence: |-
+      Con la 32.5 fusionada y el contenedor a 2 × `--unidad`, `tests/e2e/incipit.spec.ts` (escritorio, 360 × 640, Larra con Ficha técnica completa e incipit, todo cerrado) mide la primera Tarjeta a 683,5 px (2026-11-14). La decisión de 8 px se calculó sobre 646,5 px con dos desplegables; «Cómo citar» (32.5, en toda página 1) suma otros 45 px. Faltan 43,5 px.
+    location: >-
+      tests/e2e/incipit.spec.ts:236
+    severity: high
 ---
 
 <intent-contract>
@@ -122,6 +136,8 @@ deferred: []
 
 - **Primera pantalla, estimación previa.** La 32.3 midió 669,5 px (Larra, Ficha técnica completa, salto y «Cómo empieza» cerrado). El salto costaba 24 + 44 = 68 px; «Dónde leer» cerrado cuesta 44 + filete, y «Cómo empieza» pierde su margen y su filete superior al pasar a hermano. Queda ≈ 646 px: probablemente por encima de 640. Si la medida lo confirma, es el Block If (lo decide Héctor con `bmad-ux`), no un ajuste de distancias por nuestra cuenta. En el Corpus real (sin Wikidata ni incipit) la prueba de toda página 1 cambia ≈ +2 px.
 - **Primera pantalla, medida (2026-11-08).** Con la página 1 reordenada (sin el salto, contenedor único a 3 × de la Cabecera, «Dónde leer esta obra» y «Cómo empieza» hermanos y cerrados, listado a 4 × con su filete), `tests/e2e/incipit.spec.ts` en `escritorio` a 360 × 640 sobre la Obra de Larra con Ficha técnica completa e incipit mide la primera Tarjeta del listado a **646,5 px** (≥ 640): se cumple el Block If. Desglose bajo la Cabecera: 24 (contenedor) + 1 (filete) + 44 («Dónde leer») + 44 («Cómo empieza») + 1 (filete) + 32 (listado) + 1 (filete del listado) = 147 px, frente a los 170 de antes (salto 68 + «Cómo empieza» 70 + 32). Faltan 6,5 px; mover distancias o el orden lo decide Héctor con `bmad-ux`.
+- **Decisión delegada por Héctor (chat, 2026-11-14).** El contenedor único de desplegables bajo la Cabecera va a 2 × `--unidad` (16 px) en lugar de 3 × (24 px), mismo orden; todo lo demás como dice el spec. Se calculó para los 646,5 px de dos desplegables (≈ 638,5 < 640).
+- **Primera pantalla, medida con la 32.5 (2026-11-14).** Fusionada la 32.5 —«Cómo citar», cerrado, en toda página 1, último hermano del contenedor— y aplicada la decisión delegada, la misma medida da **683,5 px**: 646,5 + 45 («Cómo citar» y su filete) − 8. Sigue el Block If; faltan 43,5 px y la decisión delegada no los cubre. Lo construido está en la rama local `v9/wip-32-4-fusion` (b478e35f48, sobre 25ee042e57).
 - **Un contenedor, hermanos.** Dos `div` con su propio `data-pagefind-ignore` separarían los `<details>` y la regla `.desplegable + .desplegable` no actuaría: dos filetes juntos.
 - **El rótulo de grupo no es encabezado.** El `h2` pasa a `<summary>` (UX-DR125) y Desplegable prohíbe encabezados en él; un `h3` dentro del contenido colgaría del `h1`. `EdicionesEnVenta` conserva su `h3` porque la historia la quiere «tal como lo pinta»; la 33.2 la reparte.
 - **La hoja.** `DondeLeer.astro` se pinta en toda página 1, así que su `<style>` no crea hueco en páginas que no lo usan; la página no gana reglas (el contenedor lleva `style`).
@@ -138,6 +154,6 @@ deferred: []
 ## Auto Run Result
 
 Status: blocked
-Blocking condition: Block If de la primera pantalla — a 360 × 640, en la Obra de Larra con Ficha técnica completa, incipit y los dos desplegables cerrados, la primera Tarjeta del listado empieza a 646,5 px (≥ 640). Mover distancias o el orden es de Héctor (`bmad-ux`): pendiente de Héctor (bmad-ux).
+Blocking condition: Block If de la primera pantalla, otra vez — con la 32.5 fusionada (tres desplegables: «Dónde leer esta obra», «Cómo empieza», «Cómo citar») y el contenedor a 2 × `--unidad` por la decisión delegada por Héctor (chat, 2026-11-14), a 360 × 640 en la Obra de Larra con Ficha técnica completa, incipit y todo cerrado, la primera Tarjeta del listado empieza a 683,5 px (≥ 640; faltan 43,5). La decisión de 8 px se tomó sobre los 646,5 px de dos desplegables. Qué más ceder es de Héctor (`bmad-ux`).
 Baseline: 6400bfb5d27486a3120be043ef2278f42930628a.
-Lo construido hasta la medida (fuente: `textoDeLoTomado`, `RotuloDeGrupo.astro`, `DondeLeer.astro` como desplegable con «Gratis», la página sin salto y con el contenedor único, `ANCLA_DE_DONDE_LEER` retirada, `DESPLIEGUE_DE_LA_OBRA_COMO_DESTINO` en `undefined`, SM-C4 en `juiciosPorVentanas`, y `tests/e2e/incipit.spec.ts` con la medida como puerta) queda en la rama local `v9/wip-32-4` (5bbead812a3), sin fusionar en `v9/epica-32`; `astro check` solo da el error esperado de `tests/unit/obra-pagina.test.ts` (importa la `ANCLA` retirada). Las pruebas unitarias, AGENTS.md, el resto de e2e y los snapshots de tipografía no se han tocado. No se corrió `npm test`.
+Lo construido: la rama local `v9/wip-32-4-fusion` (b478e35f48) lleva el trabajo de `v9/wip-32-4` (5bbead812a, que se conserva) llevado sobre `v9/epica-32` (25ee042e57) con los conflictos de la página y de `tests/e2e/incipit.spec.ts` resueltos conservando los tres hermanos, y el contenedor a 2 × `--unidad`. `astro check`: solo el error esperado de `tests/unit/obra-pagina.test.ts` (importa la `ANCLA` retirada). `tests/e2e/incipit.spec.ts` en `escritorio`: 2 verdes, la puerta de 360 × 640 en rojo con 683,5 px. Siguen sin tocar las pruebas unitarias, AGENTS.md, el resto de e2e y los snapshots de tipografía. No se corrió `npm test`.
