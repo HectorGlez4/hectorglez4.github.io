@@ -497,13 +497,19 @@ npx tsx tools/objetivo.ts --registrar --clase-de-cita atribuida         # la ses
   la atribuida): quien compone el lote traduce cada frase inglesa sin versión en español lo más fiel
   posible y la marca `origen: traduccion-propia`, que la Página de Cita dice en una línea propia
   («Traducción de Sabiduría de Bolsillo: no circula ninguna versión en español.», `lineaDeTraduccionPropia`
-  de `src/lib/atribucion.ts`; redacción pendiente de Héctor con `bmad-ux`). La Variante no admite ese
+  de `src/lib/atribucion.ts`; redacción pendiente de Héctor con `bmad-ux`), fuera del índice de Pagefind
+  (`data-pagefind-ignore`: es la misma frase en toda Cita traducida). Con ese origen la Cita guarda,
+  obligatoria, la frase que se tradujo en `textoOriginal` —tal cual la trae su atestiguación; una línea,
+  no se pinta ni fecha—, que con cualquier otro origen se rechaza, y **no declara Variante** (el esquema
+  rechaza el par, también en `npm run atribuida -- variante`): una Variante es una versión que circula,
+  y con ella el texto sería esa versión. La Variante tampoco admite ese
   origen (`ORIGENES_DE_VARIANTE`): es la letra que circula en otra región. La clase de siempre **nunca
   se traduce** (§4.11). Una candidata sin `texto` sigue rechazada: el español lo escribe alguien, y
   **aprobarla sigue siendo de una persona**. El lote es una lista YAML de candidatas con
   `texto`, `personaje` y/o `autor` (slugs que ya existen: se dan de alta con sus órdenes, nunca
   tecleando el campo), `obra`, `año` o `referencia` (la Procedencia que el esquema exige), `origen`,
-  `atestiguaciones` (`{url, consultadaEl}`), y si acaso `variante` y `temas`. Sin `clase`: se deriva.
+  `atestiguaciones` (`{url, consultadaEl}`), `textoOriginal` con la traducción propia, y si acaso
+  `variante` y `temas`. Sin `clase`: se deriva.
 - **`proponer` es la puerta de calidad, y nunca publica.** Juzga cada candidata con el esquema de la
   35.1b y la Variante de la 35.6 (`citaAdmisible`), cuenta sus dominios con `dominiosQueAtestiguan`
   —sin BrainyQuote, sus espejos ni el propio dominio; ninguno que cuente la rechaza siempre—, resuelve

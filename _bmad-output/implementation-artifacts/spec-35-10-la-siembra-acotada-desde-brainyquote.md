@@ -5,7 +5,7 @@ created: '2026-11-14'
 status: 'done'
 baseline_revision: 'd82e6badb3b016b7be17847dc9f77bec27aa362f'
 review_loop_iteration: 0
-followup_review_recommended: true
+followup_review_recommended: false
 context:
   - '{project-root}/_bmad-output/implementation-artifacts/epic-35-context.md'
 warnings: [oversized]
@@ -45,6 +45,20 @@ deferred:
   - summary: '[ASSUMPTION] pendiente de Héctor (bmad-ux/bmad-architecture): la Variante no admite `traduccion-propia` (ORIGENES_DE_VARIANTE), porque es la letra que circula en otra región; un intercambio por `variante` que la dejaría con ese origen se niega.'
     location: >-
       src/lib/admision.ts (ORIGENES_DE_VARIANTE), tools/lib/cambioDeAtribuida.ts
+    severity: low
+  - summary: >-
+      Ninguna orden cambia el `origen` del texto principal de una atribuida publicada: cuando aparezca una versión en español que circule para una `traduccion-propia`, no hay forma sancionada de pasarla a `doblaje`/`traduccion-publicada` con su letra (y quitar su `textoOriginal`).
+    evidence: |-
+      Revisión externa, pasada 2 (blind-hunter): `npm run atribuida -- texto` corrige la letra por parecido y `variante` intercambia con la Variante, pero ninguna cambia el `origen` del principal; una atribuida publicada no se edita a mano, así que «no circula ninguna versión en español» puede quedar rancio. Pendiente de Héctor (bmad-create-epics-and-stories): una orden de cambio de origen.
+    location: >-
+      tools/lib/cambioDeAtribuida.ts
+    severity: medium
+  - summary: >-
+      Una segunda sesión atribuida real en la misma jornada con el mismo resultado no se puede registrar (se toma por reintento) ni anular (`--anular` no admite `--clase-de-cita`), y `proponer` nunca publica, así que el caso es corriente.
+    evidence: |-
+      Revisión externa, pasada 2 (blind-hunter, edge-case-hunter): la matriz de la intent-contract fija «misma jornada y mismo resultado → no anota (1)» y «--clase-de-cita con --anular → 2»; distinguirlas (hora, motivo) o anular una sesión atribuida es decisión de Héctor sobre la cadencia.
+    location: >-
+      tools/objetivo.ts (registrarSesionAtribuida)
     severity: low
 ---
 
@@ -126,7 +140,7 @@ deferred:
 - `.gitignore` -- `semillas/`.
 - `tests/unit/siembra-atribuida.test.ts` (nuevo) -- la matriz: puras (`problemasDeLaSemilla`, `frasesDeLaPagina`, `proponerAtribuidas` con semilla y mínimo por parámetro sobre un corpus temporal, incluidos todos los rechazos, lote todo rechazado sin escribir y que `aprobar` con la puerta abierta por parámetro publica lo propuesto); por proceso con el árbol (lista vacía → 1 sin petición registrada; forma → 2); por proceso en una copia del proyecto (`tools/`, `src/`, `public/CNAME`, `package.json`, `tsconfig.json`, `enlazarDependencias`) con la lista llena y el doble de red: una petición, JSON escrito, repetir → 1 sin segunda petición.
 - `tests/unit/objetivo-cli.test.ts` -- casos de `--clase-de-cita` (registra, repetida → 1, formas → 2, entradas viejas sin campo se leen `siempre`).
-- `AGENTS.md` -- la sección nueva: la semilla de prueba y su lista, la versión en español que circula con su origen (el sitio no traduce), la puerta de calidad, que aprobar es de una persona, que la escala espera a la pregunta 18, y el registro con su clase.
+- `AGENTS.md` -- la sección nueva: la semilla de prueba y su lista, la versión en español que circula con su origen —o, desde la enmienda del 2026-11-14, la traducción del sitio con `origen: traduccion-propia`—, la puerta de calidad, que aprobar es de una persona, que la escala espera a la pregunta 18, y el registro con su clase.
 
 **Acceptance Criteria:**
 - Given el árbol, when `npm run atribuida -- semilla <x>` o `-- proponer <lote>`, then sale con 1 nombrando `SEMILLA_DE_ATRIBUIDAS` y la pregunta 18, sin petición de red ni escritura.
@@ -186,6 +200,25 @@ pendientes de volver a pasar sus skills (diferido).
   - `[low]` `[patch]` `--ayuda` junto a `--clase-de-cita` muestra la ayuda y sale con 0 (las formas de `--clase-de-cita` siguen saliendo con 2); fuera la línea en blanco sobrante.
   - `[low]` `[patch]` «Una sola vez» por página: antes de pedir, `semilla` busca en `semillas/` un fichero con la misma `pagina`, sea cual sea su nombre.
   - `[low]` `[patch]` La prueba por proceso de `proponer` con la lista vacía comprueba también la pregunta 18.
+
+### 2026-11-14 — Review pass
+- intent_gap: 0
+- bad_spec: 0
+- patch: 11: (high 0, medium 3, low 8)
+- defer: 2: (high 0, medium 1, low 1)
+- reject: 19: (high 0, medium 3, low 16)
+- addressed_findings:
+  - `[medium]` `[patch]` La traducción propia convivía con una Variante (la Página diría «no circula ninguna versión» y enseñaría una): `reglasDeLaAtribuida` rechaza el par, y con él `proponer` y `npm run atribuida -- variante`, que valida con `citaAdmisible`.
+  - `[medium]` `[patch]` El original inglés no quedaba en ninguna parte: nuevo campo `textoOriginal` (una línea), obligatorio con `origen: traduccion-propia` y rechazado con cualquier otro origen y en la de siempre; lo admite el lote, se escribe en la candidata, sobrevive a `aprobar`, no se pinta y va en `CAMPOS_QUE_NO_FECHAN.cita`.
+  - `[medium]` `[patch]` La línea «Traducción de Sabiduría de Bolsillo…» se indexaba igual en toda Cita traducida: lleva `data-pagefind-ignore`; la prueba de `dist/` busca sus palabras sin devolver la Cita, y su texto sí.
+  - `[low]` `[patch]` El `aviso` de la semilla decía que el español sale siempre de una versión que circula: dice las dos salidas y `textoOriginal`; la prueba por proceso mira `aviso` y `descargadaEl`.
+  - `[low]` `[patch]` `--salida` relativa se resolvía contra el directorio de trabajo: ahora contra la raíz del proyecto, como la de por omisión (prueba desde `tools/sub`).
+  - `[low]` `[patch]` Un `personaje` o `autor` del lote que no es una cadena se descartaba y la Cita quedaba del otro dueño: se rechaza nombrándolo.
+  - `[low]` `[patch]` Nada comprobaba que `origen` fecha la Página de Cita: prueba gemela de la de la Variante, y otra de que `textoOriginal` no fecha nada.
+  - `[low]` `[patch]` La prueba de la línea no comprobaba que va antes de la Fila de acciones ni fuera del índice: lo comprueba, y que el original no se pinta.
+  - `[low]` `[patch]` La salida `--json` de la sesión atribuida no se probaba: prueba de `sesion.claseDeCita` y `sesion.resultado`.
+  - `[low]` `[patch]` Ninguna prueba aprobaba una `traduccion-propia`: se aprueba con la puerta abierta por parámetro y se publica con su origen y su `textoOriginal`.
+  - `[low]` `[patch]` El Tasks de AGENTS.md decía «(el sitio no traduce)»: dice la enmienda (la intent-contract no se toca; la enmienda vive en el Spec Change Log).
 
 ## Design Notes
 
@@ -292,3 +325,46 @@ de `src/lib/clase.ts`), no en `ORIGENES_DE_VARIANTE`. `aplanarCita` la hace viaj
 `semilla` y AGENTS.md («Una sesión de sembrado de la Cita atribuida») dicen ya las dos salidas: la versión
 que circula o la traducción propia. `src/lib/vocabulario.ts` no se toca. Con el Corpus real (sin
 atribuidas) `dist/` es idéntico al de la base 7b6a041031.
+
+### Pasada de revisión 2 (capas externas, 2026-11-14) — la última
+
+**Qué se cambió.** La traducción propia queda honesta y coherente con la enmienda de Héctor: guarda la
+frase que se tradujo (`textoOriginal`, obligatoria con `origen: traduccion-propia` y rechazada con
+cualquier otro origen y en la de siempre; una línea, no se pinta ni fecha), no convive con una Variante
+(el esquema rechaza el par, y con él `proponer` y `npm run atribuida -- variante`), su línea en la Página
+de Cita sale del índice de Pagefind, y el `aviso` de la semilla dice las dos salidas. Además `--salida`
+relativa se lee contra la raíz del proyecto, y un `personaje`/`autor` del lote que no es cadena se
+rechaza en vez de descartarse.
+
+**Ficheros.**
+- `src/lib/admision.ts` — `textoOriginal` y las dos reglas de la traducción propia en `reglasDeLaAtribuida`; prohibido en la de siempre.
+- `src/content.config.ts` — `textoOriginal` en la colección `citas`.
+- `src/components/TraduccionPropia.astro` — `data-pagefind-ignore`.
+- `tools/lib/cambios.ts` — `textoOriginal` en `CAMPOS_QUE_NO_FECHAN.cita`.
+- `tools/lib/siembraAtribuida.ts` — `aviso`, `MOTIVO_SIN_ESPAÑOL`, `textoOriginal` en el lote, dueños que no son cadena.
+- `tools/atribuida.ts` — `--salida` contra la raíz del proyecto; parte de `semilla`.
+- `AGENTS.md` — `textoOriginal`, sin Variante, fuera de Pagefind.
+- Pruebas: `variante.test.ts`, `atribuida-cli.test.ts`, `siembra-atribuida.test.ts`, `variante-build.test.ts`, `fecha-de-cambio.test.ts`, `objetivo-cli.test.ts`, `atribuidas.test.ts`.
+
+**Hallazgos.** 11 parches (3 medios, 8 bajos), 2 diferidos (cambiar el `origen` del principal cuando
+aparezca una versión que circule; la segunda sesión atribuida de la misma jornada), 19 rechazados
+(probar que no circula ninguna versión —la enmienda confía en quien compone y en quien aprueba—, las
+demás superficies que no dicen la traducción —ya diferido a `bmad-ux`—, duplicados por el inglés,
+enlaces simbólicos, `--corpus` relativo al directorio de trabajo —la convención de toda orden—, `origen`
+que fecha aunque solo cambie entre orígenes que no se pintan —el comparador es por campo y fechar de más
+es el lado seguro—, `dist/` sin prueba propia, la redacción provisional sin puerta, el mensaje de
+`--clase-de-cita --registrar`, el registro de páginas fuera del repositorio, el slug sin cotejar antes de
+pedir, el ancla de cita sin texto —el lector sigue bajo `[ASSUMPTION]` diferido—, la sobrescritura en
+`_revision/` y la vuelta atrás con `allSettled`, la semilla que no entra en `proponer` —la lectura R2 es
+defendible—, la circulación que la orden no puede observar, y PRD/espina/SPEC y espejos, ya diferidos).
+
+**Revisión de seguimiento recomendada: no** por regla del bucle (esta es la última ronda permitida). La
+cuenta del flujo daría sí: parches 0 altos, 3 medios, 8 bajos; puntuación 3×3 + 8 = 17 (≥ 5).
+
+**Verificación.** `variante`, `atribuida-cli`, `siembra-atribuida`, `objetivo-cli`, `fecha-de-cambio`,
+`atribuidas`, `variante-build` y `clase` en verde por fichero; `npx astro check` 0 errores; `npm test`
+completo, desatendido: 195 ficheros, 8522/8522 en verde; `corpus/` sin cambios.
+
+**Riesgos.** El lector de BrainyQuote sigue sin contrastar (diferido). Ninguna orden pasa una
+traducción propia a una versión que circule (diferido). `textoOriginal` se exige solo a la traducción
+propia: los demás orígenes no guardan su original.

@@ -157,7 +157,8 @@ async function semilla(slug: string): Promise<never> {
   // Las rutas se juzgan contra la raíz del proyecto —la de esta orden—, no contra el directorio de trabajo.
   const proyecto = resolve(dirname(fileURLToPath(import.meta.url)), '..');
   const semillas = join(proyecto, 'semillas');
-  const salida = resolve(opcion(argumentos, '--salida') ?? join(semillas, `${slug}.json`));
+  // Una `--salida` relativa se lee contra la raíz del proyecto, como la de por omisión.
+  const salida = resolve(proyecto, opcion(argumentos, '--salida') ?? join(semillas, `${slug}.json`));
   if (extname(salida).toLowerCase() !== '.json') {
     terminar({ ok: false, motivos: [`«${salida}» no es un fichero .json. No se ha pedido nada.`] });
   }
@@ -238,7 +239,8 @@ async function semilla(slug: string): Promise<never> {
       `Semilla de «${slug}»: ${frases.length} frases en inglés en ${salida}.`,
       'No se versiona, no se publica y no atestigua nada. El lote de candidatas se escribe en español, con la',
       'versión que circula y su origen —o, si no circula ninguna, la traducción del sitio con «origen:',
-      'traduccion-propia»—, y se propone con «npm run atribuida -- proponer <lote.yaml>».',
+      'traduccion-propia» y la frase de aquí en «textoOriginal»—, y se propone con',
+      '«npm run atribuida -- proponer <lote.yaml>».',
     ].join('\n'),
   });
 }

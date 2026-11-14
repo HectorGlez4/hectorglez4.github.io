@@ -399,7 +399,8 @@ export const CAMPOS_QUE_PINTA = {
 export const CAMPOS_QUE_NO_FECHAN = {
   // Historia 35.1b — las atestiguaciones de la atribuida no se pintan (35.4 decide lo que pinta). El
   // `origen` salió de aquí en la 35.10: la Página de Cita dice la traducción propia.
-  cita: ['aptaParaPortada', 'estadoDerechos', 'clase', 'atestiguaciones'],
+  // El `textoOriginal` de la traducción propia (35.10) se guarda para auditarla y no se pinta.
+  cita: ['aptaParaPortada', 'estadoDerechos', 'clase', 'atestiguaciones', 'textoOriginal'],
   autor: ['tradicion'],
   obra: ['distintaDe'],
   /*

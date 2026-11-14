@@ -93,6 +93,7 @@ function corpusBase(): CorpusDePrueba {
       procedencia: { año: 1995 },
       // Historia 35.10 — la traducción del sitio: su Página de Cita lo dice.
       origen: 'traduccion-propia',
+      textoOriginal: 'To the rescue, the galaxy will not defend itself.',
     }),
     'citas/seneca--no-es-que-tengamos-poco-tiempo.md': citaValida(),
   };
@@ -225,8 +226,24 @@ describe('Historia 35.10 — la atribuida que es traducción del sitio lo dice',
     expect(pagina.indexOf('class="traduccion-propia"')).toBeGreaterThan(pagina.indexOf('</figcaption>'));
     expect(p![0]).not.toMatch(/\blang=|tabindex|<a\b/u);
     expect(p![0]).toMatch(/style="[^"]*var\(--pie\)/u);
-    const ancestros = antepasados(pagina, pagina.indexOf('<p class="traduccion-propia"'));
-    expect(ancestros.some((a) => a.includes('data-pagefind-body'))).toBe(true);
+    // Antes de la Fila de acciones —Copiar—, como dice el componente (pasada de revisión 2).
+    expect(pagina.indexOf('class="traduccion-propia"')).toBeLessThan(pagina.indexOf('class="fila-de-acciones'));
+    // Fuera del índice: es la misma frase en toda Cita traducida.
+    expect(p![0]).toMatch(/\bdata-pagefind-ignore\b/u);
+    // El original que se tradujo se guarda en el fichero y no se pinta.
+    expect(pagina).not.toContain('To the rescue');
+  });
+
+  it('la búsqueda propia no la devuelve por las palabras de la línea, y sí por su texto', async () => {
+    const indice = await indiceDe(proyecto);
+    try {
+      const urlsDe = async (consulta: string) =>
+        Promise.all((await indice.search(consulta)).results.map(async (r) => (await r.data()).url));
+      expect(await urlsDe('circula ninguna versión')).not.toContain(`/cita/${SV}/`);
+      expect(await urlsDe('galaxia defiende sola')).toContain(`/cita/${SV}/`);
+    } finally {
+      indice.soltar();
+    }
   });
 
   it('una atribuida de otro origen no la lleva, ni hueco', () => {

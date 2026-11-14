@@ -345,6 +345,15 @@ describe('Historia 35.10 — la sesión de siembra de la atribuida dice su clase
     }
   });
 
+  it('con --json da la sesión atribuida como datos: su clase y su resultado (pasada de revisión 2)', async () => {
+    const corpus = await conUnaAtribuida();
+    const { codigo, salida } = await correr(['--corpus', corpus, '--registrar', '--clase-de-cita', 'atribuida', '--json']);
+    expect(codigo).toBe(0);
+    const datos = JSON.parse(salida) as { sesion: { claseDeCita: string; resultado: unknown } };
+    expect(datos.sesion.claseDeCita).toBe('atribuida');
+    expect(datos.sesion.resultado).toEqual({ citasPublicadas: 3, atribuidasPublicadas: 1 });
+  });
+
   it('un reintento con el mismo resultado no se anota dos veces', async () => {
     const corpus = await conUnaAtribuida();
     await correr(['--corpus', corpus, '--registrar', '--clase-de-cita', 'atribuida']);

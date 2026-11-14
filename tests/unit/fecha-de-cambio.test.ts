@@ -1567,4 +1567,22 @@ describe('Historia 35.6 — la Variante fecha solo la Página de Cita', () => {
       .map(([superficie]) => superficie);
     expect(queCambian).toEqual(['cita']);
   });
+
+  it('Historia 35.10 — un cambio que solo toca `origen` (a traducción propia) fecha la Página de Cita y ningún listado', () => {
+    const antes = { texto: 'Hasta el infinito y más allá.', personaje: 'buzz', clase: 'atribuida', origen: 'doblaje' };
+    const despues = { ...antes, origen: 'traduccion-propia' };
+    const queCambian = Object.entries(CAMPOS_QUE_PINTA.cita)
+      .filter(([, campos]) => cambiaronLosCampos({ antes, despues }, campos as Parameters<typeof cambiaronLosCampos>[1]))
+      .map(([superficie]) => superficie);
+    expect(queCambian).toEqual(['cita']);
+  });
+
+  it('Historia 35.10 — un cambio que solo toca `textoOriginal` no fecha nada: no se pinta', () => {
+    const antes = { texto: 'Hasta el infinito y más allá.', personaje: 'buzz', clase: 'atribuida', origen: 'traduccion-propia', textoOriginal: 'To infinity and beyond!' };
+    const despues = { ...antes, textoOriginal: 'To infinity, and beyond!' };
+    const queCambian = Object.entries(CAMPOS_QUE_PINTA.cita)
+      .filter(([, campos]) => cambiaronLosCampos({ antes, despues }, campos as Parameters<typeof cambiaronLosCampos>[1]))
+      .map(([superficie]) => superficie);
+    expect(queCambian).toEqual([]);
+  });
 });

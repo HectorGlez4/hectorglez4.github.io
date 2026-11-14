@@ -8,7 +8,9 @@
  * antes de la Variante. La compone solo `lineaDeTraduccionPropia` de `src/lib/atribucion.ts`; sin
  * traducción propia no se emite nada, ni nodo vacío. Ningún otro origen se pinta.
  *
- * Es texto: sin enlace, no enfocable y sin guion, dentro de `data-pagefind-body`. Como la Variante,
+ * Es texto: sin enlace, no enfocable y sin guion. Va bajo `data-pagefind-ignore`, al revés que la
+ * Variante: es la misma frase en toda Cita traducida, y en el índice haría que «traducción»,
+ * «versión» o «español» devolvieran todas (pasada de revisión 2). Como la Variante,
  * la presentación va en un atributo `style` con los tokens y nunca en un bloque `<style>`, que
  * Astro emitiría en toda Página de Cita aunque ninguna la pinte.
  */
@@ -26,6 +28,7 @@ const linea = lineaDeTraduccionPropia(Astro.props.cita);
   linea !== undefined && (
     <p
       class="traduccion-propia"
+      data-pagefind-ignore
       style="font-family: var(--sans); font-size: var(--pie); font-weight: var(--peso-regular); line-height: var(--interlineado-pie); color: var(--tinta-apagada); margin: var(--unidad) 0 0; max-width: var(--medida-prosa);"
     >
       {linea}

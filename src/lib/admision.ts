@@ -314,6 +314,18 @@ export const variante = z.strictObject(
   },
 );
 
+/**
+ * La frase de la que sale la traducción propia — Historia 35.10, pasada de revisión 2: con
+ * `origen: traduccion-propia` la atribuida guarda la letra que el sitio tradujo, tal cual la trae
+ * su atestiguación (hoy, en inglés), para que la fidelidad de la traducción se pueda auditar
+ * después. Obligatoria con ese origen y prohibida con cualquier otro y en la de siempre
+ * (`reglasDeClase`). Una línea; no se pinta, y por eso no fecha (`CAMPOS_QUE_NO_FECHAN`).
+ */
+export const textoOriginal = z
+  .string({ message: 'Regla incumplida: «textoOriginal» es la frase que el sitio tradujo, como texto.' })
+  .refine((t) => t.trim() !== '', 'Regla incumplida: «textoOriginal» no puede estar en blanco.')
+  .refine((t) => !/[\n\r\u2028\u2029\u0085\v\f]/u.test(t), 'Regla incumplida: «textoOriginal» va en una sola línea.');
+
 /** Sin Autor ni Personaje, una Cita no tiene dueño: ni prefijo, ni fichero, ni página. */
 export const MENSAJE_CITA_SIN_DUEÑO =
   'Regla incumplida: falta el Autor o el Personaje de la Cita. Toda Cita lleva uno de los dos, al menos: ' +
@@ -351,7 +363,7 @@ export function reglasDeClase(valor: unknown, contexto: z.RefinementCtx): void {
     }
     return;
   }
-  for (const campo of ['atestiguaciones', 'origen'] as const) {
+  for (const campo of ['atestiguaciones', 'origen', 'textoOriginal'] as const) {
     if (cita[campo] === undefined) continue;
     contexto.addIssue({
       code: 'custom',
@@ -436,6 +448,36 @@ function reglasDeLaAtribuida(cita: Record<string, unknown>, contexto: z.Refineme
       code: 'custom',
       path: ['origen'],
       message: `Regla incumplida: una Cita atribuida declara su «origen»: ${ORIGENES.join(', ')}.`,
+    });
+  }
+  // Historia 35.10 — la traducción del sitio no convive con una letra que circula, y guarda su original.
+  const traduccionPropia = cita.origen === ORIGEN_TRADUCCION_PROPIA;
+  if (traduccionPropia && cita.variante !== undefined) {
+    contexto.addIssue({
+      code: 'custom',
+      path: ['variante'],
+      message:
+        'Regla incumplida: una atribuida con «origen: traduccion-propia» no declara Variante. La traducción ' +
+        'del sitio es para la frase de la que no circula ninguna versión en español, y una Variante es una ' +
+        'que circula: con ella, el texto es esa versión y su origen, el de ella.',
+    });
+  }
+  if (traduccionPropia && cita.textoOriginal === undefined) {
+    contexto.addIssue({
+      code: 'custom',
+      path: ['textoOriginal'],
+      message:
+        'Regla incumplida: una atribuida con «origen: traduccion-propia» declara su «textoOriginal», la frase ' +
+        'que el sitio tradujo, tal cual la trae su atestiguación: sin ella, la traducción no se puede auditar.',
+    });
+  }
+  if (!traduccionPropia && cita.textoOriginal !== undefined) {
+    contexto.addIssue({
+      code: 'custom',
+      path: ['textoOriginal'],
+      message:
+        'Regla incumplida: solo una atribuida con «origen: traduccion-propia» declara «textoOriginal»: el ' +
+        'texto de las demás es la versión en español que circula, y no se tradujo de nada.',
     });
   }
   if (typeof cita.texto === 'string' && cita.texto.includes('\n')) {
@@ -848,6 +890,8 @@ export const citaAdmisible = z.object({
   origen: origen.optional(),
   // Historia 35.6 — solo de la atribuida, una como mucho (`reglasDeClase`).
   variante: variante.optional(),
+  // Historia 35.10 — solo con `origen: traduccion-propia`, y en ella obligatorio (`reglasDeClase`).
+  textoOriginal: textoOriginal.optional(),
   aptaParaPortada: z.boolean().default(false),
   /*
    * Opcional, y lo será mientras quede censo. Las 38 Citas anteriores a la v3 no tienen

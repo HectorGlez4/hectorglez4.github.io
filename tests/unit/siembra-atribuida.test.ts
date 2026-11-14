@@ -239,13 +239,15 @@ describe('Historia 35.10 — proponer: a corpus/_revision/, nunca a corpus/citas
 
   it('la traducción del sitio —origen traduccion-propia— se escribe en revisión con su origen (FR-68 enmendado, 2026-11-14)', async () => {
     const rutas = await corpusDePrueba();
-    const resultado = await proponerAtribuidas(rutas, [deBuzz({ origen: 'traduccion-propia' })], {
+    const ORIGINAL = 'To the rescue, the galaxy will not defend itself.';
+    const resultado = await proponerAtribuidas(rutas, [deBuzz({ origen: 'traduccion-propia', textoOriginal: ORIGINAL })], {
       semilla: SEMILLA,
       minAtestiguaciones: 2,
     });
     expect(resultado.ok && resultado.rechazadas).toEqual([]);
     const datos = separarFrontmatter(await readFile(join(rutas.revision, 'buzz--al-rescate-que-la-galaxia-no-se.md'), 'utf8'))!;
-    expect(datos).toMatchObject({ clase: 'atribuida', personaje: 'buzz', origen: 'traduccion-propia' });
+    // La frase que se tradujo se guarda con la candidata (pasada de revisión 2): la traducción se puede auditar.
+    expect(datos).toMatchObject({ clase: 'atribuida', personaje: 'buzz', origen: 'traduccion-propia', textoOriginal: ORIGINAL });
     expect((await readdir(rutas.citas)).sort()).not.toContain('buzz--al-rescate-que-la-galaxia-no-se.md');
   });
 
@@ -277,6 +279,19 @@ describe('Historia 35.10 — proponer: a corpus/_revision/, nunca a corpus/citas
     ['sin origen', { origen: undefined }, /origen/u],
     ['con un origen ajeno', { origen: 'traduccion-automatica' }, /origen/u],
     ['con aptaParaPortada', { aptaParaPortada: true }, /aptaParaPortada|portada/u],
+    // Pasada de revisión 2 — la traducción propia guarda su original, y no convive con una Variante.
+    ['la traducción propia sin textoOriginal', { origen: 'traduccion-propia' }, /declara su «textoOriginal»/u],
+    ['un textoOriginal con otro origen', { textoOriginal: 'To the rescue!' }, /solo una atribuida con «origen: traduccion-propia» declara «textoOriginal»/u],
+    [
+      'la traducción propia con Variante',
+      {
+        origen: 'traduccion-propia',
+        textoOriginal: 'To the rescue!',
+        variante: { texto: 'Al rescate, que la galaxia no se defiende solita.', region: 'espana', origen: 'doblaje' },
+      },
+      /no declara Variante/u,
+    ],
+    ['un Personaje que no es un slug', { personaje: 3, autor: 'vivo' }, /«personaje» tiene que ser un slug/u],
     [
       'sin ninguna atestiguación que cuente',
       { atestiguaciones: [{ url: 'https://www.brainyquote.com/quotes/buzz_1', consultadaEl: '2026-11-01' }] },
@@ -408,6 +423,21 @@ describe('Historia 35.10 — proponer: a corpus/_revision/, nunca a corpus/citas
     expect(existsSync(join(rutas.citas, 'buzz--al-rescate-que-la-galaxia-no-se.md'))).toBe(true);
     expect(await revision(rutas)).toEqual(['woody--hay-una-serpiente-en-mi-bota.md']);
   });
+
+  it('la traducción propia también es aprobable tal cual, y se publica con su origen y su textoOriginal', async () => {
+    const rutas = await corpusDePrueba();
+    const ORIGINAL = 'To the rescue, the galaxy will not defend itself.';
+    const resultado = await proponerAtribuidas(rutas, [deBuzz({ origen: 'traduccion-propia', textoOriginal: ORIGINAL })], {
+      semilla: SEMILLA,
+      minAtestiguaciones: 2,
+    });
+    expect(resultado.ok && resultado.escritas).toHaveLength(1);
+    const aprobada = await aprobar(rutas, ['buzz-al-rescate-que-la-galaxia-no-se'], [], { puerta: PUERTA });
+    expect(aprobada.rechazadasPorAdmision).toEqual([]);
+    expect(aprobada.publicadas).toEqual(['buzz-al-rescate-que-la-galaxia-no-se']);
+    const publicada = separarFrontmatter(await readFile(join(rutas.citas, 'buzz--al-rescate-que-la-galaxia-no-se.md'), 'utf8'))!;
+    expect(publicada).toMatchObject({ origen: 'traduccion-propia', textoOriginal: ORIGINAL });
+  });
 });
 
 /** La orden por proceso, con el doble de red precargado y su registro de peticiones. */
@@ -517,6 +547,12 @@ describe('Historia 35.10 — por proceso, en una copia del proyecto con la semil
     expect(primera.peticiones.map((p) => p.url)).toEqual([PAGINA_DE_BUZZ]);
     const escrita = JSON.parse(await readFile(salida, 'utf8')) as { slug: string; pagina: string; frases: unknown[] };
     expect(escrita).toMatchObject({ slug: 'buzz', pagina: PAGINA_DE_BUZZ });
+    // El aviso del fichero con el que trabaja el editor dice las dos salidas (pasada de revisión 2).
+    const conAviso = escrita as unknown as { aviso: string; descargadaEl: string };
+    expect(conAviso.descargadaEl).toMatch(/^\d{4}-\d{2}-\d{2}$/u);
+    expect(conAviso.aviso).toMatch(/traduccion-propia/u);
+    expect(conAviso.aviso).toMatch(/textoOriginal/u);
+    expect(conAviso.aviso).not.toMatch(/sale de una versión que ya circula/u);
     expect(escrita.frases).toEqual([
       { frase: 'To infinity & beyond!', quien: 'Buzz Lightyear' },
       { frase: "The Star Command's pride.", quien: 'Buzz Lightyear' },
@@ -536,6 +572,18 @@ describe('Historia 35.10 — por proceso, en una copia del proyecto con la semil
     const desdeDentro = await correr(GUION_DE_BUZZ, ['semilla', 'buzz'], orden, join(proyecto, 'tools', 'sub'));
     expect(desdeDentro.codigo).toBe(1);
     expect(desdeDentro.peticiones).toEqual([]);
+    // Y una --salida relativa se lee contra la raíz del proyecto, no contra el directorio de trabajo:
+    // cae en semillas/ del proyecto, donde la página ya está, y no «fuera de semillas/».
+    const relativaDesdeDentro = await correr(
+      GUION_DE_BUZZ,
+      ['semilla', 'buzz', '--salida', 'semillas/otra.json'],
+      orden,
+      join(proyecto, 'tools', 'sub'),
+    );
+    expect(relativaDesdeDentro.codigo).toBe(1);
+    expect(relativaDesdeDentro.error).toMatch(/una sola vez/u);
+    expect(relativaDesdeDentro.error).not.toMatch(/fuera de semillas/u);
+    expect(relativaDesdeDentro.peticiones).toEqual([]);
   });
 
   it.each([

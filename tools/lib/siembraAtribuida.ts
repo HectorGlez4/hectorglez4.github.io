@@ -191,7 +191,9 @@ export function componerSemilla(entrada: EntradaDeSemilla, descargadaEl: string,
     descargadaEl,
     aviso:
       'Semilla de prueba de la Cita atribuida (FR-68): lista de trabajo en inglés, sin versionar. ' +
-      'No se publica ni atestigua nada; el texto en español sale de una versión que ya circula.',
+      'No se publica ni atestigua nada. El texto en español es la versión que ya circula, con su origen, ' +
+      'o, si no circula ninguna, la traducción del sitio, lo más fiel posible, con «origen: traduccion-propia» ' +
+      'y la frase de aquí en «textoOriginal» (FR-68, enmendado por Héctor el 2026-11-14).',
     frases,
   };
 }
@@ -225,8 +227,8 @@ export type ResultadoDePropuesta =
 const MOTIVO_SIN_ESPAÑOL =
   'sin texto en español: falta «texto». La semilla está en inglés, y alguien escribe el español: la versión ' +
   'que circula (con su origen: original, doblaje o traduccion-publicada) o, si no circula ninguna, la ' +
-  'traducción del sitio, lo más fiel posible, con «origen: traduccion-propia» (FR-68, enmendado por Héctor ' +
-  'el 2026-11-14).';
+  'traducción del sitio, lo más fiel posible, con «origen: traduccion-propia» y la frase traducida en ' +
+  '«textoOriginal» (FR-68, enmendado por Héctor el 2026-11-14).';
 
 /**
  * Los campos que admite una entrada del lote. Lo demás se rechaza nombrándolo: una errata
@@ -244,6 +246,7 @@ const CAMPOS_DEL_LOTE = new Set([
   'atestiguaciones',
   'origen',
   'variante',
+  'textoOriginal',
 ]);
 
 const MOTIVO_SIN_DUEÑO = 'sin Personaje ni Autor: lo que llega sin ninguno de los dos no se publica (FR-68).';
@@ -332,6 +335,11 @@ export async function proponerAtribuidas(
     const personaje = typeof entrada.personaje === 'string' && entrada.personaje !== '' ? entrada.personaje : undefined;
     const autor = typeof entrada.autor === 'string' && entrada.autor !== '' ? entrada.autor : undefined;
 
+    for (const campo of ['personaje', 'autor'] as const) {
+      if (entrada[campo] !== undefined && (typeof entrada[campo] !== 'string' || entrada[campo] === '')) {
+        motivos.push(`«${campo}» tiene que ser un slug: no se descarta para atribuir la Cita solo al otro dueño.`);
+      }
+    }
     if ('clase' in entrada) motivos.push(MOTIVO_CLASE_TECLEADA);
     const ajenos = Object.keys(entrada).filter((k) => k !== 'clase' && !CAMPOS_DEL_LOTE.has(k));
     if (ajenos.length > 0) {
@@ -397,6 +405,7 @@ export async function proponerAtribuidas(
       ...(entrada.atestiguaciones !== undefined ? { atestiguaciones: entrada.atestiguaciones } : {}),
       ...(entrada.origen !== undefined ? { origen: entrada.origen } : {}),
       ...(entrada.variante !== undefined ? { variante: entrada.variante } : {}),
+      ...(entrada.textoOriginal !== undefined ? { textoOriginal: entrada.textoOriginal } : {}),
     };
 
     if (motivos.length === 0) {

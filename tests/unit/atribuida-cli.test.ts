@@ -319,6 +319,33 @@ describe('Historia 35.6 — `texto` y `variante`', () => {
     );
   });
 
+  it('una Variante en una atribuida que es traducción propia se niega, sin escribir (35.10, pasada 2)', async () => {
+    const corpus = {
+      ...CORPUS,
+      [FICHEROS.A4]: atribuida({
+        slug: A4,
+        texto: TEXTO_A4,
+        autor: undefined,
+        personaje: 'buzz',
+        procedencia: { año: 1995 },
+        origen: 'traduccion-propia',
+        textoOriginal: 'To the rescue, the galaxy will not defend itself.',
+      }),
+    };
+    const directorio = await enDisco(corpus);
+    const antes = await instantanea(directorio);
+    const r = await cambiar(directorio, {
+      tipo: 'variante',
+      slug: A4,
+      texto: 'Al rescate, que la galaxia no se defiende solita.',
+      region: 'espana',
+      origen: 'doblaje',
+    });
+    expect(r.ok).toBe(false);
+    if (!r.ok) expect(r.motivos.join('\n')).toMatch(/«origen: traduccion-propia» no declara Variante/u);
+    expect(await instantanea(directorio)).toEqual(antes);
+  });
+
   it('una Variante de una región ajena se niega', async () => {
     await seNiega({ tipo: 'variante', slug: A4, texto: TEXTO_A4, region: 'mexico', origen: 'doblaje' }, /no es una región de Variante/u);
   });

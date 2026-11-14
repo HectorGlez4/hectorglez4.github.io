@@ -129,6 +129,40 @@ describe('Historia 35.10 — la línea de la traducción propia', () => {
   });
 });
 
+describe('Historia 35.10 — el esquema de la traducción propia (pasada de revisión 2)', () => {
+  const ORIGINAL = 'To infinity and beyond!';
+
+  it('admite la traducción propia con su textoOriginal', () => {
+    expect(mensajes(atribuida({ origen: 'traduccion-propia', textoOriginal: ORIGINAL }))).toEqual([]);
+  });
+
+  it('rechaza la traducción propia sin textoOriginal: la traducción no se podría auditar', () => {
+    expect(mensajes(atribuida({ origen: 'traduccion-propia' })).join('\n')).toMatch(
+      /«origen: traduccion-propia» declara su «textoOriginal»/,
+    );
+  });
+
+  it.each([
+    ['otro origen de la atribuida', atribuida({ textoOriginal: ORIGINAL })],
+    ['la Cita de siempre', { texto: 'Una frase', autor: 'seneca', temas: [], slug: 'seneca-una-frase', procedencia: { año: 60 }, estadoDerechos: 'dominio-público', textoOriginal: ORIGINAL }],
+  ])('rechaza textoOriginal con %s', (_, cita) => {
+    expect(mensajes(cita).join('\n')).toMatch(/declara «textoOriginal»/);
+  });
+
+  it.each([
+    ['en blanco', '   ', /no puede estar en blanco/],
+    ['con un salto de línea', 'To infinity\nand beyond!', /va en una sola línea/],
+  ])('rechaza un textoOriginal %s', (_, valor, regla) => {
+    expect(mensajes(atribuida({ origen: 'traduccion-propia', textoOriginal: valor })).join('\n')).toMatch(regla);
+  });
+
+  it('rechaza la traducción propia con Variante: la Página diría que no circula ninguna y enseñaría una', () => {
+    expect(
+      mensajes(atribuida({ origen: 'traduccion-propia', textoOriginal: ORIGINAL, variante: VARIANTE })).join('\n'),
+    ).toMatch(/«origen: traduccion-propia» no declara Variante/);
+  });
+});
+
 describe('Historia 35.6 — lo que se lleva el visitante no lleva la Variante', () => {
   const cita = {
     slug: 'buzz-hasta-el-infinito-y-mas-alla',
