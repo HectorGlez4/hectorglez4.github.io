@@ -273,12 +273,13 @@ export function lineaDeRetirada({ sobre, slug }: SobreLaRetirada, buzon: string 
     );
   }
   const direccion = buzon.trim();
-  // Va tal cual al `href`: una dirección con espacios, `?`, `&` o `#`, o sin `@` y dominio,
-  // compondría un `mailto:` roto en cada página que la pinta.
-  if (!/^[^\s@?&#]+@[^\s@?&#]+\.[^\s@?&#]+$/u.test(direccion)) {
+  // Va tal cual al `href`: una dirección con espacios, `?`, `&`, `#`, `%`, comillas, `<>`, o con
+  // `,` o `;` —que en un `mailto:` separan destinatarios—, o sin `@` y dominio, compondría un
+  // `mailto:` roto o a varios en cada página que la pinta. Solo letras ASCII, cifras y `._+-`.
+  if (!/^[A-Za-z0-9._+-]+@[A-Za-z0-9-]+(?:\.[A-Za-z0-9-]+)+$/u.test(direccion)) {
     throw new Error(
       `La línea de retirada de «${slug}» no tiene a dónde pedir: BUZON_DE_PETICIONES (src/lib/dominio.ts) vale «${direccion}», ` +
-        'que no es una dirección de correo (usuario@dominio, sin espacios, «?», «&» ni «#»).',
+        'que no es una dirección de correo (usuario@dominio, con solo letras sin tilde, cifras y «._+-»).',
     );
   }
   const asunto =

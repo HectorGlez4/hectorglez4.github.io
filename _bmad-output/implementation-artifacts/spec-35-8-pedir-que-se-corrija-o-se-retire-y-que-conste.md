@@ -5,7 +5,7 @@ created: '2026-11-14'
 status: 'done'
 baseline_revision: '1242122f79733819b403bf1afc7ea0660b1977e0'
 review_loop_iteration: 0
-followup_review_recommended: true
+followup_review_recommended: false
 context:
   - '{project-root}/AGENTS.md'
   - '{project-root}/_bmad-output/implementation-artifacts/epic-35-context.md'
@@ -23,7 +23,7 @@ deferred:
     evidence: 'prd.md SM-C6 (l. 1676); epics.md Story 35.8, AC de SM-C6.'
   - summary: 'Las atribuidas publicadas al cierre de un mes [ASSUMPTION]: sin leer el historial de git, se derivan de los registros: las entradas `atribuida` de `clases-de-cita.yml` con fecha ≤ fin de mes, menos las que tienen en `formas-vedadas.yml` una entrada con su slug (`retirada` o `cambio-de-clase`) con fecha ≤ fin de mes y no están publicadas hoy. Una Cita devuelta a mano tras retirarse cuenta como publicada en los meses de en medio. De ahí salen la muestra y el denominador de las tasas.'
     evidence: 'AD-32 (registro de clases y formas vedadas, «ninguna puerta lee el historial de git»).'
-  - summary: 'Cuándo una petición cuenta como retirada en SM-C6 [ASSUMPTION]: la de un titular de derechos que pide retirar, en el mes de la petición (se retira en el mismo gesto, aunque después se resuelva rechazada); cualquier otra, en el mes de su resolución `retirada`.'
+  - summary: 'Cuándo una petición cuenta como retirada en SM-C6 [ASSUMPTION]: la de un titular de derechos que pide retirar, en el mes de la petición (se retira en el mismo gesto, aunque después se resuelva rechazada); cualquier otra, en el mes de su resolución `retirada`. Desde la revisión 1 del bucle, en los dos casos solo si el gesto movió la Cita —dejó su forma vedada `retirada` con el slug y la fecha del gesto—, y una vez por Cita (`mesesDeLasRetiradas`).'
     evidence: 'epics.md Story 35.8, AC «una petición de retirar».'
   - summary: 'La auditoría exige un resultado para cada slug de la muestra y solo de un mes cerrado [ASSUMPTION]; una segunda auditoría del mismo mes se anota (solo añade) con aviso, y la consulta toma la última. `sin-fuente` no cuenta como mal atribuida en la proporción.'
     evidence: 'AD-32, última cláusula; epics.md Story 35.8.'
@@ -37,6 +37,19 @@ deferred:
       la historia no pide cuerpo. src/lib/atribucion.ts lineaDeRetirada.
     location: >-
       src/lib/atribucion.ts lineaDeRetirada
+    severity: low
+  - summary: >-
+      Una Cita retirada por petición, devuelta a mano y retirada otra vez por otra petición no deja una
+      segunda forma vedada, porque `registrarFormasVedadas` no repite una entrada igual (forma, motivo y
+      slug, sin la fecha); esa segunda retirada no cuenta en SM-C6, y el parte dice «queda vedada» aunque
+      no se haya escrito nada. Cerrarlo pide decidir si la fecha entra en la identidad de una forma vedada
+      (AD-32), que comparten la 35.5 y la 35.7.
+    evidence: |-
+      Hallazgos edge-case-hunter (1 y 6) y verification-gap («Other findings») de la revisión 2 de la 35.8.
+      tools/lib/formasVedadas.ts registrarFormasVedadas (clave forma|motivo|slug); tools/lib/peticiones.ts
+      mesesDeLasRetiradas (v.fecha === fecha) y retirarPorPeticion (línea «queda vedada»).
+    location: >-
+      tools/lib/formasVedadas.ts registrarFormasVedadas; tools/lib/peticiones.ts mesesDeLasRetiradas
     severity: low
 ---
 
@@ -180,6 +193,27 @@ Diferido: el cuerpo prerrellenado del `mailto:` (blind-hunter), redacción de UX
 
 Rechazados: `ajustarTitulosDeObra` sin guarda (no lanza: devuelve el fallo como línea); `entradaVedada` indefinida (solo con texto vacío, imposible en una Cita publicada); que la resolución case con lo pedido (decidir `retirada` ante una petición de corregir es legítimo); la tolerancia del salto de SM-C6, el denominador con `sin-fuente` y la Cita retirada dos veces en las atribuidas al cierre (supuestos ya diferidos a Héctor); la muestra recalculada (la auditoría guarda su muestra y la consulta lee la guardada); la dirección visible a los recolectores (AD-35 la exige como texto); la fragilidad de la aserción de orden (falla en voz alta); la contabilidad del spec de la pasada 1 (esta pasada la corrige); WCAG 3.2.6 (ya diferido); `import.meta.url` (patrón de todas las órdenes de `tools/`, la ruta del repositorio es ASCII); la relectura del Corpus en `retirarPorPeticion` (rendimiento, orden de una persona); una Cita de siempre publicada con una entrada `atribuida` vieja (el contrato admite «alguna entrada del registro»); las lecturas defendibles de intent-alignment (el diff toma las que fijan el contrato y los supuestos diferidos; ninguna contradice la épica); y del ac-auditor la Cita sin Rutas de salida, la parada de construcción sin buzón, los tokens de la línea, NFR-5 de punta a punta, «dist/ no cambia» como prueba y la e2e (la línea es incondicional tras las Rutas; la puerta de la 35.1b para antes; `tipografia-en-tokens` vigila los literales; el informe puro está probado; la verificación de `dist/` es manual por el contrato; la e2e es de Héctor).
 
+### 2026-11-14 — Review pass 3 (revisión 2 del bucle, la última)
+- intent_gap: 0
+- bad_spec: 0
+- patch: 9: (high 0, medium 6, low 3)
+- defer: 1: (low 1)
+- reject: 37: (medium 3, low 34)
+- addressed_findings:
+  - '[medium] [patch] blind-hunter: `resolver <id> retirada` sobre la petición de un titular cuya Cita ya se retiró al anotarla decía que SM-C6 no la cuenta, y `mesesDeLasRetiradas` sí la cuenta en el mes de la petición. Ahora dice que se retiró al anotar y que cuenta en ese mes si aquel gesto la movió.'
+  - '[medium] [patch] blind-hunter: `tieneContacto` tomaba por teléfono las cifras de una dirección web (`oldid=1234567`, un libro de Gutenberg) y un ISBN, que el motivo puede citar. Se quitan antes de contar cifras; un correo o un usuario de red se siguen viendo en el texto entero.'
+  - '[medium] [patch] edge-case-hunter: un teléfono de 4+4 cifras («6123 4567») pasaba por unos años. Solo cuentan como años los grupos del 1000 al 2099.'
+  - '[low] [patch] blind-hunter: el rechazo de `anotar` y el uso decían «correo o teléfono»; ahora nombran también el usuario de red.'
+  - '[low] [patch] blind-hunter + edge-case-hunter: `lineaDeRetirada` admitía `,`, `;`, `%`, comillas y `<>` en el buzón, que componen un `mailto:` a varios o roto. Ahora solo letras ASCII, cifras y `._+-`, con un dominio de etiquetas.'
+  - '[medium] [patch] edge-case-hunter: la de retirar de un titular sobre una Cita publicada que ya es de siempre (con una entrada `atribuida` vieja) salía con 1 sin anotar la petición recibida, porque `retirarPorPeticion` se negaba. Ahora se anota sin retirar nada y lo dice, como `resolver`.'
+  - '[medium] [patch] verification-gap: el paso a `atribuidasPublicadas` no tenía prueba que fallara sin él. Prueba de la consulta y de `auditar` con una atribuida que pasó a siempre (sale del denominador y de la muestra) y una retirada devuelta a mano (sigue contando); falla al volver a todas las publicadas.'
+  - '[medium] [patch] verification-gap: ninguna prueba de la orden fechaba una retirada con `--fecha`. Prueba de anotar (titular) y de resolver con `--fecha` y la consulta: `retiradas: 1` en su mes.'
+  - '[low] [patch] blind-hunter: la contabilidad del spec: el supuesto diferido de las retiradas dice ya «solo si el gesto movió la Cita», y el resultado de la pasada 1 lleva su rótulo.'
+
+Diferido: la segunda retirada de una Cita devuelta a mano no deja forma vedada nueva ni cuenta en SM-C6 (edge-case-hunter 1 y 6, verification-gap), porque la identidad de una forma vedada no lleva fecha (AD-32, compartida con la 35.5 y la 35.7).
+
+Rechazados: `problemasDeLasConstantes` en `anotar` (las constantes son de Héctor y están en `undefined`; un valor imposible se corrige el mismo día); contactos ofuscados y URL de perfil (el motivo admite URL para citar la fuente; la regla es razonable, no exhaustiva); numerador con peticiones fuera de la población y repetidas (supuesto diferido; la repetida ya avisa); recuentos absolutos en la tabla (están en `--json`, y bajo el mínimo no se juzga); el modo de validación por igualdad con `sola` (un fichero sin cabecera no es el versionado); sin campo de motivo en la resolución (no lo pide la historia); la pista de `npm run atribuida` tras retirar; `auditar --fecha` y `auditadoEl` posterior al mes; fechas futuras a mano; la línea en otras superficies (la historia la pone solo en Cita atribuida y Personaje); aviso de `mailto:` para lectores (texto fijado por UX); el texto fijo de `devolver`/`deshacer` y el `git add` sin comillas (las rutas de `corpus/` no llevan espacios); el commit de los registros en el parte (AGENTS.md lo dice); `review_loop_iteration: 0` (step-01 lo pone a 0 en cada pasada nueva); los huecos de prueba de blind-hunter (sin Rutas de salida, slugs del relleno, `HEAD^1` sin historia); del edge-case-hunter la Cita republicada tras un titular, la vedada anterior a la clase, el texto vacío y el `mover` que falla en `devolver` (exóticos); las lecturas de intent-alignment (las mismas de la pasada anterior, con los supuestos ya diferidos) y los huecos «sin prueba» del ac-auditor (ninguno contradice un criterio; el contrato los hace manuales).
+
 ## Design Notes
 
 El orden de la retirada por petición pone la petición al final a propósito: si no se pudo retirar, no queda anotado que se retiró; si la petición no se pudo anotar, la Cita vuelve, y la forma vedada que queda lleva su slug, que no veda a esa misma Cita (`vedanALaAtribuida`). La forma vedada se escribe antes que la petición porque es lo que impide que la retirada vuelva como otra atribuida.
@@ -220,9 +254,9 @@ Status: done
 - `tests/unit/atribucion.test.ts`, `tests/unit/personaje-donde-el-autor.test.ts`, `tests/unit/pagina-de-personaje.test.ts` — la línea, pura y sobre `dist/`.
 - `AGENTS.md` — «Corregir o retirar una Cita atribuida».
 
-**Revisión.** Sin hallazgos externos en esta pasada: 0 parches, 0 diferidos, 0 rechazados.
+**Revisión (pasada 1 de step-04, sin hallazgos externos).** 0 parches, 0 diferidos, 0 rechazados.
 
-**Revisión de seguimiento recomendada:** false (0 parches; puntuación 0).
+**Revisión de seguimiento recomendada en la pasada 1:** false (0 parches; puntuación 0). Las revisiones del bucle, abajo, la ponen al día.
 
 **Verificación.**
 - `npx vitest run tests/unit/peticiones.test.ts tests/unit/atribucion.test.ts tests/unit/clase.test.ts` — verde.
@@ -256,3 +290,24 @@ Status: done
 - `npm test` — 194 ficheros, 8.418 pruebas verdes.
 
 **Riesgos residuales.** Los de la pasada anterior, más el cuerpo del `mailto:` (diferido a Héctor). Una Cita retirada, devuelta a mano y retirada otra vez no deja una segunda forma vedada (el registro no repite una igual), así que esa segunda retirada no cuenta en SM-C6.
+
+### Revisión 2 del bucle (pasada 3 de step-04, la última)
+
+**Resumen.** 9 parches, 1 diferido, 37 rechazados; ningún `bad_spec` ni `intent_gap`. `resolver … retirada` tras la retirada de un titular ya no contradice a SM-C6; `tieneContacto` deja pasar las cifras de una dirección web y de un ISBN y ya no toma por años un teléfono de 4+4; los mensajes nombran el usuario de red; el buzón solo admite una dirección que componga un `mailto:` a un destinatario; la petición de retirar de un titular sobre una Cita que ya es de siempre se anota sin retirar; dos pruebas de la orden cierran los huecos de verificación (denominador de atribuidas y retiradas con `--fecha`); la contabilidad del spec, al día.
+
+**Ficheros.**
+- `tools/peticion.ts` — la retirada del titular solo sobre una atribuida publicada, los dos mensajes, el texto del rechazo y del uso.
+- `tools/lib/peticiones.ts` — `tieneContacto`: direcciones web e ISBN fuera del recuento, años del 1000 al 2099.
+- `src/lib/atribucion.ts` — la forma del buzón.
+- `tests/unit/peticiones.test.ts`, `tests/unit/atribucion.test.ts` — las pruebas de cada parche (la del denominador falla al volver a pasar todas las publicadas).
+
+**Revisión de seguimiento recomendada:** false. La cuenta del flujo daría true (parches: 0 high, 6 medium, 3 low; puntuación 3 × 6 + 3 = 21), pero esta es la última ronda que el bucle admite y no se recomienda otra.
+
+**Verificación.**
+- `npx vitest run tests/unit/peticiones.test.ts tests/unit/atribucion.test.ts` — 194 verdes.
+- `npx astro check` — 0 errores.
+- `npm run peticion` en el árbol — exit 0, nada escrito.
+- `npm test` — 194 ficheros, 8.428 pruebas verdes.
+- `dist/` con el Corpus real: no se reconstruyó; el único cambio de `src/` es la validación del buzón en `lineaDeRetirada`, que solo corre donde hay una atribuida o un Personaje, y el Corpus real no tiene ninguno.
+
+**Riesgos residuales.** Los de las pasadas anteriores, más el diferido de la segunda retirada de una Cita devuelta a mano.

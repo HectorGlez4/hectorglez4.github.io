@@ -556,7 +556,7 @@ describe('Historia 35.8 — la línea de retirada', async () => {
     expect(() => lineaDeRetirada({ sobre: 'personaje', slug: 'x' }, '   ')).toThrow(/BUZON_DE_PETICIONES/u);
   });
 
-  it.each(['peticiones', 'peticiones@ejemplo', 'pe ticiones@ejemplo.org', 'peticiones@ejemplo.org?cc=otro@x.org', 'a@b.org&x'])(
+  it.each(['peticiones', 'peticiones@ejemplo', 'pe ticiones@ejemplo.org', 'peticiones@ejemplo.org?cc=otro@x.org', 'a@b.org&x', 'a@b.org,otro@x.org', 'a@b.org;otro@x.org', 'a%40@b.org', '"a"@b.org', '<a@b.org>'])(
     'con un buzón que no es una dirección de correo lanza nombrando la constante: %s',
     (buzon) => {
       expect(() => lineaDeRetirada({ sobre: 'cita', slug: 'x' }, buzon)).toThrow(/BUZON_DE_PETICIONES.*no es una dirección de correo/u);

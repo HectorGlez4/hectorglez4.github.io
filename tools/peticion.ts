@@ -102,8 +102,8 @@ const USO = [
   `  npm run peticion -- anotar <slug> --solicitante ${SOLICITANTES.join('|')}`,
   `                            --peticion ${PETICIONES.join('|')} [--motivo "…"] [--fecha AAAA-MM-DD]`,
   '      Anota una petición que YA recibió una persona. Ningún campo admite contacto: un motivo con',
-  '      forma de correo o de teléfono se rechaza. La de retirar de un titular de derechos retira',
-  '      la Cita en el mismo gesto, y la resolución queda para después.',
+  '      forma de correo, de teléfono o de usuario de red se rechaza. La de retirar de un titular de',
+  '      derechos retira la Cita en el mismo gesto, y la resolución queda para después.',
   '',
   `  npm run peticion -- resolver <id> ${RESOLUCIONES.join('|')} [--fecha AAAA-MM-DD]`,
   '      Anota cómo se resolvió. «retirada» retira la Cita si sigue publicada.',
@@ -231,7 +231,7 @@ async function anotar(argumentos: string[], slug: string, fecha: string, rutas: 
   }
   if (motivo !== undefined && tieneContacto(motivo)) {
     return rechazo([
-      'El motivo lleva algo con forma de correo o de teléfono, y ningún campo del registro admite contacto: el repositorio es público.',
+      'El motivo lleva algo con forma de correo, de teléfono o de usuario de red, y ningún campo del registro admite contacto: el repositorio es público.',
       'Anote el motivo sin el dato de contacto.',
     ]);
   }
@@ -263,7 +263,10 @@ async function anotar(argumentos: string[], slug: string, fecha: string, rutas: 
     ...(motivo !== undefined ? { motivo: motivo.trim() } : {}),
   };
   const retiraPrimero = nueva.solicitante === SOLICITANTE_QUE_RETIRA_PRIMERO && nueva.peticion === 'retirar';
-  const publicada = contexto.publicadas.some((c) => c.slug === slug);
+  const citaPublicada = contexto.publicadas.find((c) => c.slug === slug);
+  // Una Cita que sigue publicada pero ya es de siempre no se retira por este canal (y
+  // `retirarPorPeticion` se negaría): la petición se anota igual, y se dice.
+  const retiraAhora = retiraPrimero && citaPublicada !== undefined && esAtribuida(citaPublicada);
   // Anotar dos veces lo mismo se admite —pueden ser dos correos—, pero se avisa: casi siempre es
   // un descuido, y cada entrada cuenta en las peticiones por cada cien.
   const igual = separarEntradas(contexto.entradas).peticiones.find(
@@ -272,7 +275,7 @@ async function anotar(argumentos: string[], slug: string, fecha: string, rutas: 
 
   let lineasDeRetirada: string[] = [];
   let devolver: (() => Promise<string[]>) | undefined;
-  if (retiraPrimero && publicada) {
+  if (retiraAhora) {
     const retirada = await retirarPorPeticion(rutas, slug, fecha);
     if (!retirada.ok) return rechazo(retirada.motivos);
     lineasDeRetirada = retirada.lineas;
@@ -290,9 +293,14 @@ async function anotar(argumentos: string[], slug: string, fecha: string, rutas: 
     `Anotada la petición ${nueva.id}  ${nueva.fecha}  ${nueva.cita}  ${nueva.solicitante}  ${nueva.peticion}` +
       (nueva.motivo !== undefined ? `  «${nueva.motivo}»` : ''),
     ...(retiraPrimero
-      ? publicada
+      ? retiraAhora
         ? ['La de retirar de un titular de derechos se atiende retirando primero:', ...lineasDeRetirada.map((l) => `  ${l}`)]
-        : ['La Cita ya no está publicada: no hay nada que retirar.']
+        : citaPublicada === undefined
+          ? ['La Cita ya no está publicada: no hay nada que retirar.']
+          : [
+              'La Cita sigue publicada, pero ya no es atribuida: no se ha retirado nada, y SM-C6 no la cuenta como retirada.',
+              'Una Cita de siempre se retira con «npm run documentar -- --retirar».',
+            ]
       : []),
     ...(igual !== undefined
       ? [`Aviso: ya había una igual, la petición ${igual.id} (${igual.fecha}, ${igual.solicitante}, ${igual.peticion}). Si es la misma, no son dos.`]
@@ -300,7 +308,7 @@ async function anotar(argumentos: string[], slug: string, fecha: string, rutas: 
     `Queda sin resolver. Para resolverla: npm run peticion -- resolver ${nueva.id} ${RESOLUCIONES.join('|')}`,
     `Registrado en ${registro}`,
   ];
-  process.stdout.write(quiereJson ? `${JSON.stringify({ anotada: nueva, registro, retirada: retiraPrimero && publicada }, null, 2)}\n` : `${lineas.join('\n')}\n`);
+  process.stdout.write(quiereJson ? `${JSON.stringify({ anotada: nueva, registro, retirada: retiraAhora }, null, 2)}\n` : `${lineas.join('\n')}\n`);
   return 0;
 }
 
@@ -382,7 +390,12 @@ async function resolver(idDado: string, resolucion: string, fecha: string, rutas
       ? retiraAhora
         ? lineasDeRetirada.map((l) => `  ${l}`)
         : cita === undefined
-          ? ['  La Cita ya no estaba publicada: no se ha movido nada, y SM-C6 no la cuenta como retirada.']
+          ? retiradaPrimero
+            ? [
+                '  La Cita se retiró al anotar la petición, como la de retirar de un titular de derechos: ahora no se ha movido nada.',
+                '  SM-C6 la cuenta como retirada en el mes de la petición, si aquel gesto la movió.',
+              ]
+            : ['  La Cita ya no estaba publicada: no se ha movido nada, y SM-C6 no la cuenta como retirada.']
           : [
               '  La Cita sigue publicada, pero ya no es atribuida: no se ha movido nada, y SM-C6 no la cuenta como retirada.',
               '  Una Cita de siempre se retira con «npm run documentar -- --retirar».',

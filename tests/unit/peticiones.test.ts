@@ -195,6 +195,8 @@ describe('35.8 — anotar', () => {
     '600.11.22.33',
     'búscame en @ana_perez',
     'ana arroba gmail punto com',
+    'llámame al 6123 4567',
+    'mi número: 6123-4567',
   ])('rechaza un motivo con contacto (1) y no escribe: %s', async (motivo) => {
     const { raiz, rutas } = await corpusDePrueba();
     capturarSalida();
@@ -212,6 +214,9 @@ describe('35.8 — anotar', () => {
       'la edición del 14.11.2026',
       'entre 1984 1990',
       'ediciones de 1984, 1990 y 2001',
+      'según https://es.wikiquote.org/w/index.php?title=Buzz&oldid=1234567 no es suya',
+      'la edición de ISBN 978-84-376-0494-7 la da a otro',
+      'en https://www.gutenberg.org/ebooks/2000000 no aparece',
     ]) {
       expect(tieneContacto(inocente), inocente).toBe(false);
     }
@@ -325,6 +330,82 @@ describe('35.8 — resolver', () => {
     expect(await principal(['--json', '--corpus', raiz], AHORA, SIN_VALORES)).toBe(0);
     const { smC6 } = JSON.parse(salida.join('')) as { smC6: { meses: MesDeSmC6[] } };
     expect(smC6.meses.find((m) => m.mes === '2026-10')?.retiradas).toBe(0);
+  });
+
+  /** Los meses de SM-C6 de la consulta en `--json`, sobre el Corpus de `raiz`. */
+  async function mesesDeLaConsulta(raiz: string, salida: string[]): Promise<MesDeSmC6[]> {
+    salida.length = 0;
+    expect(await principal(['--json', '--corpus', raiz], AHORA, SIN_VALORES)).toBe(0);
+    return (JSON.parse(salida.join('')) as { smC6: { meses: MesDeSmC6[] } }).smC6.meses;
+  }
+
+  it('una retirada fechada con «--fecha» —la del titular al anotar y la de una resolución— cuenta en SM-C6 en su mes', async () => {
+    const { raiz, rutas } = await corpusDePrueba();
+    const salida = capturarSalida();
+    expect(await orden(raiz, 'anotar', BUZZ, '--solicitante', 'titular-de-derechos', '--peticion', 'retirar', '--fecha', '2026-10-10')).toBe(0);
+    expect((await leerFormasVedadas(rutas)).at(-1)?.fecha).toBe('2026-10-10');
+    expect((await mesesDeLaConsulta(raiz, salida)).find((m) => m.mes === '2026-10')?.retiradas).toBe(1);
+    // Resolverla «retirada» después no mueve nada, y no dice que SM-C6 no la cuente.
+    salida.length = 0;
+    expect(await orden(raiz, 'resolver', '1', 'retirada', '--fecha', '2026-11-02')).toBe(0);
+    expect(salida.join('')).toContain('se retiró al anotar la petición');
+    expect(salida.join('')).not.toContain('SM-C6 no la cuenta');
+    const meses = await mesesDeLaConsulta(raiz, salida);
+    expect(meses.find((m) => m.mes === '2026-10')?.retiradas).toBe(1);
+    expect(meses.find((m) => m.mes === '2026-11')?.retiradas).toBe(0);
+
+    const otro = await corpusDePrueba();
+    expect(await orden(otro.raiz, 'anotar', BUZZ, '--solicitante', 'otro', '--peticion', 'retirar', '--fecha', '2026-10-10')).toBe(0);
+    expect(await orden(otro.raiz, 'resolver', '1', 'retirada', '--fecha', '2026-10-12')).toBe(0);
+    expect((await leerFormasVedadas(otro.rutas)).at(-1)?.fecha).toBe('2026-10-12');
+    expect((await mesesDeLaConsulta(otro.raiz, salida)).find((m) => m.mes === '2026-10')?.retiradas).toBe(1);
+  });
+
+  it('la de retirar de un titular sobre una Cita que ya es de siempre se anota sin retirar nada, y lo dice', async () => {
+    const { raiz, rutas } = await corpusDePrueba();
+    await writeFile(
+      join(rutas.citas, 'buzz--hasta-el-infinito.md'),
+      citaValida({ texto: 'Hasta el infinito y más allá de las estrellas.', slug: BUZZ, temas: [TEMA_PUBLICADO] }),
+    );
+    const salida = capturarSalida();
+    expect(await orden(raiz, 'anotar', BUZZ, '--solicitante', 'titular-de-derechos', '--peticion', 'retirar')).toBe(0);
+    expect(existsSync(join(rutas.citas, 'buzz--hasta-el-infinito.md'))).toBe(true);
+    expect(await leerPeticiones(rutas)).toHaveLength(1);
+    expect(salida.join('')).toContain('sigue publicada, pero ya no es atribuida');
+  });
+
+  it('el denominador de SM-C6 cuenta las atribuidas publicadas hoy, no las que pasaron a ser de siempre', async () => {
+    const { raiz, rutas } = await corpusDePrueba();
+    // Buzz pasa a ser de siempre el 2026-11-02, con su registro y su forma vedada (35.7).
+    await writeFile(
+      join(rutas.citas, 'buzz--hasta-el-infinito.md'),
+      citaValida({ texto: 'Hasta el infinito y más allá de las estrellas.', slug: BUZZ, temas: [TEMA_PUBLICADO] }),
+    );
+    await registrarClases(rutas, [{ slug: BUZZ, clase: 'siempre', fecha: '2026-11-02' }]);
+    await registrarFormasVedadas(rutas, [entradaVedada('Hasta el infinito y más allá de las estrellas.', 'cambio-de-clase', '2026-11-02', BUZZ)!]);
+    // La retirada en septiembre vuelve a mano, atribuida: sigue contando desde entonces.
+    await writeFile(
+      join(rutas.citas, 'buzz--la-que-ya-se-fue.md'),
+      citaValida({
+        texto: 'La que ya se fue de aquí.',
+        slug: RETIRADA_ANTES,
+        autor: undefined,
+        personaje: 'buzz',
+        clase: 'atribuida',
+        estadoDerechos: undefined,
+        temas: [TEMA_PUBLICADO],
+        procedencia: undefined,
+        fuente: undefined,
+        ...ATESTIGUADA,
+      }),
+    );
+    const salida = capturarSalida();
+    const meses = await mesesDeLaConsulta(raiz, salida);
+    expect(meses.find((m) => m.mes === '2026-10')?.atribuidas).toBe(2);
+    expect(meses.find((m) => m.mes === '2026-11')?.atribuidas).toBe(1);
+    salida.length = 0;
+    expect(await principal(['auditar', '2026-10', '--json', '--corpus', raiz], AHORA, { ...SIN_VALORES, muestra: 5 })).toBe(0);
+    expect((JSON.parse(salida.join('')) as { muestra: string[] }).muestra.sort()).toEqual([RETIRADA_ANTES, BUZZ].sort());
   });
 
   it('una retirada por petición con Obra pone al día el título de la Ficha y lo dice', async () => {

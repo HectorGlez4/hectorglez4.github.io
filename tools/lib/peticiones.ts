@@ -124,18 +124,32 @@ const TRAMO_DE_CIFRAS = /\+?\(?\d[\d\s().-]*\d/gu;
  * Tramos de siete cifras o más que no son un teléfono: años sueltos o unidos («1984-1990»,
  * «1984 1990») y fechas («2026-11-14», «14.11.2026»).
  */
-const NO_ES_TELEFONO = [/^\d{4}(?:\s*[-–.]\s*|\s+)\d{4}(?:(?:\s*[-–.]\s*|\s+)\d{4})*$/u, /^\d{4}-\d{2}-\d{2}$/u, /^\d{1,2}[.-]\d{1,2}[.-]\d{4}$/u];
+const AÑO = '(?:1\\d|20)\\d{2}';
+const NO_ES_TELEFONO = [
+  new RegExp(`^${AÑO}(?:\\s*[-–.]\\s*|\\s+)${AÑO}(?:(?:\\s*[-–.]\\s*|\\s+)${AÑO})*$`, 'u'),
+  /^\d{4}-\d{2}-\d{2}$/u,
+  /^\d{1,2}[.-]\d{1,2}[.-]\d{4}$/u,
+];
+/**
+ * Lo que cita una Fuente y lleva cifras sin ser un teléfono: una dirección web (`oldid=1234567`, el
+ * número de un libro de Gutenberg) y un ISBN declarado como tal. Se quitan antes de contar cifras;
+ * un correo o un usuario de red dentro de una dirección se siguen viendo, porque esas pruebas van
+ * sobre el texto entero.
+ */
+const CITA_DE_FUENTE = [/\bhttps?:\/\/\S+/giu, /\bISBN(?:-1[03])?:?\s*[\dXx][\dXx\s-]*[\dXx]/giu];
 
 /**
  * Si un texto lleva un dato de contacto: algo con forma de correo, o un tramo de al menos siete
  * cifras con los separadores de un teléfono (espacios, puntos, guiones, paréntesis, `+`), un
- * usuario de red social («@ana») o la palabra «arroba». Un año, unos años, una fecha o un número de
- * capítulo no lo son. Ningún campo del registro admite contacto (AD-35): el
+ * usuario de red social («@ana») o la palabra «arroba». Un año, unos años (del 1000 al 2099), una
+ * fecha, un número de capítulo, las cifras de una dirección web o un ISBN no lo son; «6123 4567»
+ * sí, porque esos grupos no son años. Ningún campo del registro admite contacto (AD-35): el
  * repositorio es público.
  */
 export function tieneContacto(texto: string): boolean {
   if (CORREO.test(texto) || USUARIO_DE_RED.test(texto) || ARROBA_ESCRITA.test(texto)) return true;
-  for (const [tramo] of texto.matchAll(TRAMO_DE_CIFRAS)) {
+  const sinFuentes = CITA_DE_FUENTE.reduce((resto, forma) => resto.replace(forma, ' '), texto);
+  for (const [tramo] of sinFuentes.matchAll(TRAMO_DE_CIFRAS)) {
     const cifras = tramo.replace(/\D/gu, '').length;
     const limpio = tramo.trim();
     if (cifras >= 7 && !NO_ES_TELEFONO.some((forma) => forma.test(limpio))) return true;
