@@ -19,7 +19,7 @@ import {
 } from '../../tools/lib/aprobaciones.ts';
 import { FICHERO_DE_APROBACIONES, rutasDelCorpus, type Rutas } from '../../tools/lib/corpus.ts';
 import { FAMILIAS_DE_FICHERO, familiaDeFichero } from '../../tools/lib/avisar.ts';
-import { instantesDeLasAprobaciones } from '../../integraciones/clases.ts';
+import { instantesDeLasAprobaciones, juicioDeLasAprobaciones } from '../../integraciones/clases.ts';
 
 /**
  * Historia 35.11 — el registro de aprobaciones de la traducción propia,
@@ -262,14 +262,16 @@ describe('35.11 — los instantes, de un historial de git real', () => {
       const lineas = Array.from({ length: n }, (_, i) => `  - { slug: "buzz-x", propone: "a${i}", aprueba: "b${i}", fecha: "2026-11-14" }\n`);
       await writeFile(rutas.aprobacionesDeAtribuidas, `${CABECERA_DE_APROBACIONES}${lineas.join('')}`, 'utf8');
     };
+    // Por el mismo cableado que el build (`juicioDeLasAprobaciones` de `integraciones/clases.ts`).
     const juzgar = async (texto: string) => {
-      const entradas = await leerAprobaciones(rutas);
-      const instantes = await instantesDeLasAprobaciones(raiz, rutas.aprobacionesDeAtribuidas, [{ slug: 'buzz-x', ruta: cita, texto }], entradas);
-      if ('motivo' in instantes) throw new Error(instantes.motivo);
-      return fallosDeAprobaciones(
-        [{ slug: 'buzz-x', ruta: 'corpus/citas/buzz--x.md', texto: instantes.textos.get('buzz-x')! }],
-        entradas.map((e, i) => ({ entrada: e, ...(instantes.entradas[i] !== undefined ? { instante: instantes.entradas[i]! } : {}) })),
+      const { fallos, avisos } = await juicioDeLasAprobaciones(
+        raiz,
+        rutas.aprobacionesDeAtribuidas,
+        [{ slug: 'buzz-x', ruta: cita, texto }],
+        await leerAprobaciones(rutas),
       );
+      if (avisos.length > 0) throw new Error(avisos.join('\n'));
+      return fallos;
     };
     return { escribirCita, anotar, commit, juzgar, git, citaRuta: cita };
   }
@@ -282,7 +284,9 @@ describe('35.11 — los instantes, de un historial de git real', () => {
     expect(await r.juzgar('Primera letra.')).toEqual([]);
     await r.escribirCita('Segunda letra.');
     await r.commit();
-    expect((await r.juzgar('Segunda letra.'))[0]).toMatch(/su texto cambió en un commit posterior/u);
+    const [fallo] = await r.juzgar('Segunda letra.');
+    expect(fallo).toMatch(/su texto cambió en un commit posterior/u);
+    expect(fallo).toContain('corpus/citas/buzz--x.md');
     // Una entrada nueva en un commit posterior lo arregla.
     await r.anotar(2);
     await r.commit();
@@ -337,5 +341,14 @@ describe('35.11 — los instantes, de un historial de git real', () => {
     temporales.push(base);
     const instantes = await instantesDeLasAprobaciones(base, join(base, 'corpus', FICHERO_DE_APROBACIONES), [], []);
     expect('motivo' in instantes).toBe(true);
+    // Sin historial, la puerta del build comprueba solo existencia y agentes, y avisa con el motivo.
+    const { fallos, avisos } = await juicioDeLasAprobaciones(
+      base,
+      join(base, 'corpus', FICHERO_DE_APROBACIONES),
+      [{ slug: 'buzz-x', ruta: join(base, 'corpus', 'citas', 'buzz--x.md'), texto: 'x' }],
+      [{ slug: 'buzz-x', propone: 'a', aprueba: 'b', fecha: '2026-11-14' }],
+    );
+    expect(fallos).toEqual([]);
+    expect(avisos).toEqual([expect.stringMatching(/no que sea posterior a su último cambio de texto/u)]);
   });
 });

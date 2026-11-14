@@ -911,6 +911,34 @@ describe('Historia 35.1 — aprobar deriva la clase y la anota', () => {
         expect(await readFile(candidata, 'utf8')).toBe(antes);
         expect((await readdir(rutas.citas)).filter((f) => f.includes('la-traducida'))).toEqual([]);
       });
+
+      it('una pasada que se interrumpe tras publicar una traducción propia anota su aprobación', async () => {
+        const c = propia();
+        const segunda = deAna('ana-ejemplo-la-segunda', 'Otra frase que tampoco dijo nadie en ninguna parte.', {
+          origen: 'traduccion-propia',
+          partida: { texto: 'Another sentence nobody said.', lengua: 'en' },
+        });
+        const rutas = await conAutores([c, segunda]);
+        await fichaDeAna(rutas);
+        // Un fichero con el nombre que tomaría la segunda (y otro slug): `mover` no pisa y lanza a
+        // media pasada, con la primera ya en corpus/citas/.
+        await writeFile(
+          join(rutas.citas, `${segunda.slug}.md`),
+          ficheroDeCita({ ...CANDIDATA_COMPLETA, slug: 'seneca-ajena', texto: 'Una ajena.' }),
+          'utf8',
+        );
+        await writeFile(rutas.clasesDeCita, `${CABECERA_DE_CLASES}  - { slug: "seneca-ajena", clase: siempre, fecha: "2026-11-01" }\n`, 'utf8');
+        const lanzado = await aprobar(rutas, [c.slug, segunda.slug], [], {
+          puerta: ABIERTA,
+          agentes: { propone: 'agente-a', aprueba: 'agente-b' },
+        }).then(
+          () => undefined,
+          (error: unknown) => error,
+        );
+        expect(lanzado).toBeInstanceOf(PublicacionInterrumpida);
+        expect((lanzado as PublicacionInterrumpida).publicadas).toEqual([c.slug]);
+        expect((await leerAprobaciones(rutas)).map((e) => [e.slug, e.propone, e.aprueba])).toEqual([[c.slug, 'agente-a', 'agente-b']]);
+      });
     });
 
     it('el mínimo de dominios sigue a la puerta: dos direcciones de un mismo dominio no bastan con MIN 2', async () => {
@@ -949,7 +977,7 @@ describe('Historia 35.1 — aprobar deriva la clase y la anota', () => {
     const { execFile } = await import('node:child_process');
     const { promisify } = await import('node:util');
     const raiz = join(import.meta.dirname, '..', '..');
-    return promisify(execFile)('npx', ['tsx', join(raiz, 'tools/revisar.ts'), '--corpus', rutas.raiz, '--aprobar', ...slugs], {
+    return promisify(execFile)('npx', ['tsx', join(raiz, 'tools/revisar.ts'), '--corpus', rutas.raiz, ...(slugs[0]?.startsWith('--') ? [] : ['--aprobar']), ...slugs], {
       cwd: raiz,
     }).then(
       (r) => ({ codigo: 0, salida: `${r.stdout}${r.stderr}` }),
@@ -974,6 +1002,23 @@ describe('Historia 35.1 — aprobar deriva la clase y la anota', () => {
     expect(codigo, salida).toBe(1);
     expect(salida).toContain('Las publicadas no se anotaron en corpus/clases-de-cita.yml');
     expect(salida).toContain(ORDEN_SEMBRAR_CLASES);
+  }, 60_000);
+
+  it('Historia 35.11 — la orden pasa --propone y --aprueba a la aprobación, y su forma sale con 2', async () => {
+    const rutas = await conAutores([CANDIDATA_COMPLETA]);
+    const antes = await readdir(rutas.revision);
+    // Los dos agentes llegan a `aprobar`: sobre una de siempre los rechaza con su motivo, no con «falta».
+    const dados = await revisar(rutas, CANDIDATA_COMPLETA.slug, '--propone', 'agente-a', '--aprueba', 'agente-b');
+    expect(dados.codigo, dados.salida).toBe(1);
+    expect(dados.salida).toContain('solo la traducción propia lleva dos agentes');
+    const repetida = await revisar(rutas, CANDIDATA_COMPLETA.slug, '--propone', 'a', '--propone', 'b', '--aprueba', 'c');
+    expect(repetida.codigo, repetida.salida).toBe(2);
+    expect(repetida.salida).toContain('«--propone» está repetida');
+    const sinAprobar = await revisar(rutas, '--rechazar', CANDIDATA_COMPLETA.slug, '--propone', 'a');
+    expect(sinAprobar.codigo, sinAprobar.salida).toBe(2);
+    expect(sinAprobar.salida).toContain('«--propone» solo acompaña a «--aprobar»');
+    expect(await readdir(rutas.revision)).toEqual(antes);
+    expect(await ficherosPublicados(rutas)).toEqual([]);
   }, 60_000);
 
   it('una pasada que se interrumpe tras publicar anota lo publicado, y la orden no dice «ninguna publicada»', async () => {

@@ -34,6 +34,20 @@ deferred:
     location: >-
       tools/lib/peticiones.ts
     severity: low
+  - summary: >-
+      Una traducción propia devuelta a revisión por un registro de aprobaciones que falla tras escribirla puede dejar atrás lo que su publicación ya movió: un Tema que solo llegaba a MIN_CITAS_POR_TEMA con ella, o la Ficha de Obra que creó.
+    evidence: |-
+      aprobar y el alta juzgan NFR-5 y escriben la ficha contando la propia; la vuelta atrás (devolverAlaRevision, mover) no recalcula el Tema ni retira la ficha. Solo ocurre con un registro que no se deja escribir tras publicar; el build avisa de la ficha sin Citas y NFR-5 en el modelo lo nombra.
+    location: >-
+      tools/lib/revision.ts (devolverAlaRevision), tools/alta.ts
+    severity: low
+  - summary: >-
+      El registro de aprobaciones se lee por primera vez al añadir, tras publicar: uno ilegible a mano no se detecta antes de escribir (ni en --seco), y lleva a la vuelta atrás.
+    evidence: |-
+      registrarAprobaciones lo analiza en el añadido; el de clases y el de formas vedadas se leen antes. Leerlo delante obliga a rehacer las pruebas de la vuelta atrás, que lo rompen a propósito para provocarla.
+    location: >-
+      tools/lib/revision.ts, tools/alta.ts
+    severity: low
 ---
 
 <intent-contract>
@@ -162,6 +176,22 @@ Las capas de revisión son externas y no traían hallazgos en esta pasada (la or
 
 Rechazados, con su motivo: el CI publica con `fetch-depth: 0`, así que la puerta no cae al aviso; el orden por fecha del committer es la lectura de AD-32 que estas Design Notes ya difieren a Héctor (y con un solo equipo y rebases, que reescriben la fecha, no hay desfase); `leerCitas` y el historial analizan con el mismo `separarFrontmatter`, sin normalizar; romper ante una entrada de un solo agente lo pide la matriz del contrato; comprobar la `partida` contra las atestiguaciones no es mecánico, la sustitución sin parecido y la retraducción sin tocar la `partida` son AD-35 tal cual; el filtro de `publicadas` ya casa por slug de candidata; la población de la segunda muestra por el fichero de hoy y su mínimo los decidió Héctor; `--atestiguacion` sin valor ya sale con 2; la cabecera del registro de auditorías ya está diferida, la tabla de la consulta está alineada (52 + 28 + 2 columnas) y `MARCA` sigue en uso; el resto son lecturas de la intención que el contrato ya fija (los agentes se declaran al aprobar) o comprobaciones de cierre hechas a mano (el `dist/` del Corpus real).
 
+### 2026-11-14 — Review pass
+- intent_gap: 0
+- bad_spec: 0
+- patch: 6: (high 0, medium 4, low 2)
+- defer: 2: (high 0, medium 0, low 2)
+- reject: 33: (high 0, medium 3, low 30)
+- addressed_findings:
+  - `[medium]` `[patch]` `traduccionesDeHoy` (`tools/peticion.ts`) volvía a leer las ~288.000 candidatas de `corpus/_revision/` en cuanto se retiraba una sola atribuida: ahora lista los nombres y analiza solo los ficheros que, por `nombreDeFicheroDeCita`, pueden ser de las atribuidas que faltan, y el slug lo confirma el frontmatter. La prueba de la retirada de `peticiones.test.ts` sigue cubriendo el caso.
+  - `[medium]` `[patch]` La puerta del build con historial nunca se probaba por el cableado de `integraciones/clases.ts`: se extrae `juicioDeLasAprobaciones` (instantes → traducciones y entradas → `fallosDeAprobaciones`, o aviso sin historial), que usan el build y las pruebas del repositorio temporal de `aprobaciones.test.ts`; el fallo nombra además la ruta relativa, y sin git se comprueba el aviso.
+  - `[medium]` `[patch]` La aprobación de una pasada interrumpida solo se probaba sobre el ayudante: prueba nueva en `revision.test.ts` que interrumpe `aprobar` tras publicar una traducción propia (colisión de `mover`) y exige su entrada en el registro.
+  - `[medium]` `[patch]` `--propone`/`--aprueba` nunca se pasaban por el proceso de `tools/revisar.ts`: prueba de proceso que comprueba que llegan a `aprobar` (sobre una de siempre, «solo la traducción propia lleva dos agentes», no «falta»), que repetidos salen con 2 y que sin `--aprobar` salen con 2, sin escribir nada.
+  - `[low]` `[patch]` El titular del fallo del build no decía la regla de la traducción propia: ahora la nombra.
+  - `[low]` `[patch]` Prueba de una `--atestiguacion` repetida en la sustitución: se anota una vez.
+
+Rechazados, con su motivo: el orden por commits, la posición de cada entrada tras fusiones o rebases, el mismo segundo y las fusiones que añaden entradas son la lectura de AD-32 que Héctor dejó en orden de commits (diferida); un `HEAD` o una versión del historial ilegibles, una entrada de un solo agente, valores sin NFC o `realpath` que falla solo llegan escribiendo el registro a mano, que la orden impide; el orden de los dos registros tras una interrupción no cambia nada (la Cita queda publicada igual y el error lo dice); `--propone=x` sigue la convención de banderas del proyecto; la población por el fichero de hoy y el mínimo reutilizado son decisiones de Héctor; la segunda muestra se registra con su mes entero, como la primera; «pares que acaban en …» nombra el par; topes de `partida.texto`, aprobaciones rancias tras una sustitución, el lote de siempre con `origen` y una URL no `http(s)` los cubren ya el esquema y la puerta; la colisión de `mover` en el alta ya cae en `sinDevolver`; la cabecera versionada no puede reescribirse (solo añade); las lecturas del intent-alignment las fija el contrato y la comprobación del `dist/` real se hizo a mano en la pasada 0. El primer bloque del Auto Run Result es el de la pasada 0 y se conserva como historia.
+
 ## Design Notes
 
 - **«Fecha igual o posterior a su último cambio de texto», leído como orden de commits.** La orden escribe la entrada con la jornada de hoy y el commit llega después, quizá otro día: comparar la `fecha` con el instante del commit rompería un flujo legítimo, y la Cita no guarda ninguna fecha de texto. Por eso el build exige que alguna entrada del slug **apareciera en el registro** en el mismo commit que el último cambio de `texto` de la Cita, en uno posterior, o sin commitear; y que, si el texto está sin commitear, también lo esté la entrada. Instante del texto: la última transición del fichero con `cambiaronLosCampos(t, ['texto'])` (el alta cuenta), o «sin commitear» si el `texto` del disco difiere del de `HEAD` o el fichero no está en `HEAD`. Instante de la entrada *i*: la primera versión del registro con más de *i* entradas (el registro solo añade), o «sin commitear» si `HEAD` no la tiene. Sin historial fiable (`motivo` de `estadoDelRepositorio`: copia superficial, sin git) se comprueban solo la existencia y la igualdad, y el build avisa con el motivo, como el sitemap. Diferido a Héctor.
@@ -260,3 +290,33 @@ Seguimiento recomendado: `true` (puntuación 3 × 4 + 5 = 17).
 diferida a Héctor): dos ramas con relojes desfasados podrían ordenarse mal. Una Ficha de Obra creada
 para una traducción propia que vuelve a revisión se queda (el build solo avisa de una ficha sin Citas).
 
+
+### Pasada de revisión 2 (2026-11-14)
+
+**Resumen.** Seis parches de los hallazgos externos (cinco capas), sobre todo de verificación: la
+segunda muestra de SM-C6 ya no relee `corpus/_revision/` entero por una atribuida retirada (solo los
+ficheros que pueden ser de ella); el cableado de la puerta del build con historial
+(`juicioDeLasAprobaciones`) es el mismo en el build y en las pruebas con un repositorio real; la
+aprobación de una pasada interrumpida y las banderas `--propone`/`--aprueba` de `tools/revisar.ts` se
+prueban de punta a punta; el titular del fallo del build nombra la regla de la traducción propia; y la
+atestiguación repetida tiene su prueba.
+
+**Ficheros.**
+- `tools/peticion.ts` — `traduccionesDeHoy` analiza solo los ficheros de `_revision/` que casan con las atribuidas que faltan.
+- `integraciones/clases.ts` — `juicioDeLasAprobaciones` exportada y usada por `revisar`; titular con la regla de la traducción propia.
+- `tests/unit/aprobaciones.test.ts` — las pruebas de git pasan por `juicioDeLasAprobaciones`; ruta en el fallo y aviso sin historial.
+- `tests/unit/revision.test.ts` — pasada interrumpida con traducción propia; banderas de agentes por el proceso.
+- `tests/unit/atribuida-cli.test.ts` — URL repetida en la sustitución.
+
+**Revisión.** 6 parches (4 medios, 2 bajos), 2 diferidos (bajos), 33 rechazados (motivos en el Review Triage Log).
+Seguimiento recomendado: `true` (puntuación 3 × 4 + 2 = 14).
+
+**Verificación.**
+- Lote 1 de Verification: 7 ficheros, 395 pruebas en verde; lote 2: 4 ficheros, 141 pruebas en verde.
+- `npx astro check`: 0 errores, 0 avisos.
+- `npm test`: 8.607 de 8.608; el único fallo es `tipografia-en-tokens.test.ts` («quote-xs»), ya diferido y ajeno a la historia (lo cierra la puerta con el arreglo de la principal).
+- No se rehízo la comparación de `dist/`: ningún parche toca `src/`.
+
+**Riesgos.** Los de la pasada 1 (orden por fecha del committer, lectura diferida a Héctor) y los dos
+diferidos nuevos: la vuelta atrás tras un registro roto no recalcula NFR-5 ni retira la ficha creada, y
+el registro de aprobaciones se analiza al añadir, no antes de publicar.

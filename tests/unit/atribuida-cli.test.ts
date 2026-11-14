@@ -607,6 +607,19 @@ describe('Historia 35.11 — sustituir y retraducir la traducción propia', () =
     expect(datos.slug).toBe(A5);
   });
 
+  it('sustituir con la misma URL dos veces la anota una vez', async () => {
+    const directorio = await enDisco(CON_PROPIA);
+    const r = await cambiarPropia(directorio, {
+      tipo: 'texto',
+      slug: A5,
+      texto: VERSION,
+      origen: 'doblaje',
+      atestiguaciones: [NUEVAS[0]!, NUEVAS[1]!, NUEVAS[0]!],
+    });
+    expect(r.ok, r.ok ? '' : r.motivos.join('\n')).toBe(true);
+    expect((await datosDe(directorio, FICHERO_A5)).atestiguaciones).toEqual(NUEVAS.map((url) => ({ url, consultadaEl: HOY })));
+  });
+
   it('sustituir con atestiguaciones de un solo dominio no llega al mínimo, y se niega sin escribir', async () => {
     await seNiegaPropia(
       { tipo: 'texto', slug: A5, texto: VERSION, origen: 'doblaje', atestiguaciones: ['https://es.wikiquote.org/wiki/A', 'https://es.wikiquote.org/wiki/B'] },

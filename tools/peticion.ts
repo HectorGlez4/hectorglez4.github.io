@@ -27,6 +27,10 @@
  * Códigos: **2** por la forma de la invocación y **1** por lo que dice; en ninguno escribe nada.
  */
 
+import { existsSync } from 'node:fs';
+import { readdir, readFile } from 'node:fs/promises';
+import { basename, extname, join } from 'node:path';
+
 import { esJornada } from '../src/lib/citaDelDia.ts';
 import {
   MAX_PROPORCION_MAL_ATRIBUIDA_SM_C6,
@@ -36,7 +40,7 @@ import {
   PLAZO_DE_RESPUESTA_A_RETIRADA_DIAS,
 } from '../src/lib/umbrales.ts';
 import { esAtribuida, ORIGEN_TRADUCCION_PROPIA } from '../src/lib/clase.ts';
-import { fechaLocal, leerCitas, leerCitasTolerante, leerRegistroDeClases, rutasDelCorpus, type Rutas } from './lib/corpus.ts';
+import { fechaLocal, leerCitas, leerRegistroDeClases, rutasDelCorpus, separarFrontmatter, type Rutas } from './lib/corpus.ts';
 import { leerFormasVedadas } from './lib/formasVedadas.ts';
 import { motivosDeArgumentosNoReconocidos, opcion, posicionales, raizDeCorpusDe } from './lib/cli.ts';
 import {
@@ -626,8 +630,31 @@ async function traduccionesDeHoy(
 ): Promise<Set<string>> {
   const hoy = new Set(propiasDe(publicadas));
   const atribuidasHoy = atribuidasPublicadas(publicadas);
-  if (!clases.some((e) => esAtribuida(e) && !atribuidasHoy.has(e.slug))) return hoy;
-  for (const slug of propiasDe((await leerCitasTolerante(rutas.revision)).citas)) hoy.add(slug);
+  const fuera = new Set(clases.filter((e) => esAtribuida(e) && !atribuidasHoy.has(e.slug)).map((e) => e.slug));
+  if (fuera.size === 0) return hoy;
+  /*
+   * Solo los ficheros que pueden ser de las que faltan: una Cita retirada se mueve con su nombre,
+   * `{dueño}--{resto}` (`nombreDeFicheroDeCita`), y su slug es `{dueño}-{resto}` o el propio
+   * `{resto}`. Se listan los nombres —barato— y se analizan solo los que casan; el slug lo dice
+   * el frontmatter. Leer `_revision/` entero por una sola retirada devolvía la consulta a los minutos.
+   */
+  const puedeSer = (nombre: string) => {
+    const corte = nombre.indexOf('--');
+    if (corte === -1) return fuera.has(nombre);
+    return fuera.has(`${nombre.slice(0, corte)}-${nombre.slice(corte + 2)}`) || fuera.has(nombre.slice(corte + 2));
+  };
+  const nombres = existsSync(rutas.revision) ? await readdir(rutas.revision, { recursive: true }) : [];
+  const candidatas: { slug: string; clase?: unknown; origen?: unknown }[] = [];
+  for (const nombre of nombres) {
+    if (extname(nombre) !== '.md' || !puedeSer(basename(nombre, '.md'))) continue;
+    try {
+      const datos = separarFrontmatter(await readFile(join(rutas.revision, nombre), 'utf8'));
+      if (datos !== null && typeof datos.slug === 'string' && fuera.has(datos.slug)) candidatas.push(datos as { slug: string });
+    } catch {
+      // Una candidata ilegible no cuenta, como antes.
+    }
+  }
+  for (const slug of propiasDe(candidatas)) hoy.add(slug);
   return hoy;
 }
 

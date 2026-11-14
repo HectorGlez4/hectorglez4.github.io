@@ -165,6 +165,38 @@ export async function instantesDeLasAprobaciones(
   return { textos, entradas: instantes };
 }
 
+/**
+ * La puerta del registro de aprobaciones tal y como la corre el build — Historia 35.11: los
+ * instantes de git (`instantesDeLasAprobaciones`) puestos en las traducciones y las entradas que
+ * juzga `fallosDeAprobaciones`, o, sin historial fiable, solo la existencia y los dos agentes con
+ * su aviso. Exportada para que la prueba con un repositorio real recorra este mismo cableado.
+ */
+export async function juicioDeLasAprobaciones(
+  raiz: string,
+  registro: string,
+  propias: readonly PropiaEnDisco[],
+  aprobaciones: readonly AprobacionRegistrada[],
+): Promise<{ fallos: string[]; avisos: string[] }> {
+  const instantes = await instantesDeLasAprobaciones(raiz, registro, propias, aprobaciones);
+  const conHistorial = !('motivo' in instantes);
+  const avisos = conHistorial
+    ? []
+    : [
+        `Aprobaciones de la traducción propia: solo se comprueba que cada una tenga su aprobación de dos ` +
+          `agentes, no que sea posterior a su último cambio de texto — ${instantes.motivo}.`,
+      ];
+  const traducciones: TraduccionPublicada[] = propias.map((p) => ({
+    slug: p.slug,
+    ruta: relativaALaRaiz(raiz, p.ruta),
+    ...(conHistorial ? { texto: instantes.textos.get(p.slug) as Instante } : {}),
+  }));
+  const entradas: AprobacionConInstante[] = aprobaciones.map((entrada, i) => {
+    const instante = conHistorial ? instantes.entradas[i] : undefined;
+    return { entrada, ...(instante !== undefined ? { instante } : {}) };
+  });
+  return { fallos: fallosDeAprobaciones(traducciones, entradas), avisos };
+}
+
 export default function clasesDeCita(): AstroIntegration {
   let raiz = process.cwd();
 
@@ -228,35 +260,18 @@ export default function clasesDeCita(): AstroIntegration {
     const propias: PropiaEnDisco[] = citas
       .filter((c) => esAtribuida(c) && c.origen === ORIGEN_TRADUCCION_PROPIA)
       .map((c) => ({ slug: c.slug, ruta: c.ruta, texto: c.texto }));
-    const avisos: string[] = [];
-    let deAprobaciones: string[] = [];
-    if (propias.length > 0) {
-      const instantes = await instantesDeLasAprobaciones(raiz, rutas.aprobacionesDeAtribuidas, propias, aprobaciones);
-      const conHistorial = !('motivo' in instantes);
-      if (!conHistorial) {
-        avisos.push(
-          `Aprobaciones de la traducción propia: solo se comprueba que cada una tenga su aprobación de dos ` +
-            `agentes, no que sea posterior a su último cambio de texto — ${instantes.motivo}.`,
-        );
-      }
-      const traducciones: TraduccionPublicada[] = propias.map((p) => ({
-        slug: p.slug,
-        ruta: relativaALaRaiz(raiz, p.ruta),
-        ...(conHistorial ? { texto: instantes.textos.get(p.slug) as Instante } : {}),
-      }));
-      const entradas: AprobacionConInstante[] = aprobaciones.map((entrada, i) => {
-        const instante = conHistorial ? instantes.entradas[i] : undefined;
-        return { entrada, ...(instante !== undefined ? { instante } : {}) };
-      });
-      deAprobaciones = fallosDeAprobaciones(traducciones, entradas);
-    }
+    const { fallos: deAprobaciones, avisos } =
+      propias.length > 0
+        ? await juicioDeLasAprobaciones(raiz, rutas.aprobacionesDeAtribuidas, propias, aprobaciones)
+        : { fallos: [], avisos: [] };
     return { fallos: [...deClases, ...deAtribuidas, ...deAprobaciones], avisos };
   }
 
   const titular = (n: number) =>
     `Clases de Cita: ${n} ${n === 1 ? 'desacuerdo' : 'desacuerdos'} entre las Citas, sus Autores, ` +
     'corpus/clases-de-cita.yml y la puerta de la atribuida (sus constantes, sus topes, sus Fichas de Obra, corpus/formas-vedadas.yml, corpus/aprobaciones-de-atribuidas.yml). Toda Cita publicada está registrada con su clase, la de siempre es de ' +
-    'dominio público y la atribuida de un dueño con derechos vigentes, por su puerta y dentro de sus topes.';
+    'dominio público y la atribuida de un dueño con derechos vigentes, por su puerta y dentro de sus topes; la traducción propia, ' +
+    'con su aprobación de dos agentes posterior a su último cambio de texto.';
 
   return {
     name: 'clases-de-cita',
