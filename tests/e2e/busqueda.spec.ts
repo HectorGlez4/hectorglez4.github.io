@@ -18,6 +18,7 @@ import {
   AVISO_PREVIO,
   AVISO_SIN_GUION,
   BOTON_DE_BUSCAR,
+  ETIQUETA_DE_LA_BUSQUEDA,
   FALLO_DE_LA_TANDA,
   ROTULO_BUSCAR_EN_ESTA_OBRA,
   ROTULO_BUSCAR_EN_ESTE_TEMA,
@@ -40,6 +41,7 @@ import {
 } from '../../src/lib/superficies.ts';
 import { guionExternoDe } from '../../src/lib/guiones.ts';
 import { citaConLosDosBloques, temaBajoUmbral, textoDe } from './ayuda/corpus.ts';
+import { todasLasDirecciones } from './ayuda/pagefind.ts';
 import {
   autoresDestacados,
   citasPorObra,
@@ -488,7 +490,8 @@ test.describe('Historia 22.10 — el recuento y la búsqueda sin resultados se a
  * Historia 26.2 (AD-17, AD-19) — el tipo de un resultado no casa como texto, y la portada tiene el
  * suyo. Hasta la 26.2 el tipo viajaba en `data-pagefind-meta="tipo:…"`, y desde Pagefind 1.5 la
  * metadata se busca: «cita» daba 4.559 resultados y 215 de los 400 primeros de «obra» no tenían la
- * palabra. Ahora viaja como filtro, y la portada solo indexa su `h1`.
+ * palabra. Ahora viaja como filtro, y la portada solo indexa su título (desde la 28.1, el que
+ * declara el armazón con `data-pagefind-meta="title:…"`).
  */
 test.describe('Historia 26.2 — el tipo no casa como texto y la portada tiene el suyo', () => {
   /*
@@ -533,7 +536,7 @@ test.describe('Historia 26.2 — el tipo no casa como texto y la portada tiene e
     });
     expect(fallos).toEqual([]);
     // Y no en vacío: un índice roto, o uno que no devuelve nada, pasaría lo de arriba sin mirar.
-    // Estas palabras salen en el contenido de muchas páginas, y la marca en el `h1` de la portada.
+    // Estas palabras salen en el contenido de muchas páginas, y la marca en el título que declara la portada.
     // «directorio» y «portada» pueden no salir en ningún contenido todavía (los Directorios son de
     // la 26.3), y por eso no se les exige resultado: su prueba es que ninguno salga por su tipo.
     // «colección» tampoco: ninguna Cita del Corpus la dice, y sus resultados de antes eran Tarjetas
@@ -580,29 +583,6 @@ test.describe('Historia 26.2 — el tipo no casa como texto y la portada tiene e
     expect(portada!.autor).toBeUndefined();
   });
 
-  /**
-   * Todas las direcciones que da el índice real para un término, con las opciones de la búsqueda
-   * propia: no solo las 30 que pinta `/buscar/`, porque una portada en el puesto 31 seguiría
-   * respondiendo por lo que no es suyo, y una página destino por debajo de la 30 no es un fallo.
-   */
-  async function todasLasDirecciones(page: Page, termino: string): Promise<string[]> {
-    return page.evaluate(
-      async ({ termino, opciones }) => {
-        const pf = await import('/pagefind/pagefind.js' as string);
-        await pf.init();
-        await pf.options(opciones);
-        const { results } = await pf.search(termino);
-        const urls: string[] = [];
-        for (let i = 0; i < results.length; i += 200) {
-          const datos = await Promise.all(results.slice(i, i + 200).map((r: { data: () => Promise<unknown> }) => r.data()));
-          for (const dato of datos as { url: string }[]) urls.push(dato.url.replace(/\/?$/, '/'));
-        }
-        return urls;
-      },
-      { termino, opciones: OPCIONES_DE_PAGEFIND },
-    );
-  }
-
   // (c) Lo que la portada enseña ya tiene su página en el índice: la portada no sale por ello.
   test('el texto de la Cita del Día y el nombre de un Autor de la portada dan su página, no la portada', async ({ page }) => {
     test.setTimeout(300_000);
@@ -617,7 +597,8 @@ test.describe('Historia 26.2 — el tipo no casa como texto y la portada tiene e
     const fragmento = texto.split(/\s+/).slice(0, 5).join(' ');
     const destino = (await delDia.getByRole('link', { name: 'Ver esta cita' }).getAttribute('href'))!;
 
-    const autor = page.locator('ul.autores a').first();
+    // Historia 28.4 — los Autores de la portada son los destacados, Filas de bloque bajo «Autores».
+    const autor = page.locator('ul.destacados a').first();
     const nombre = (await autor.textContent())!.trim();
     const pagina = (await autor.getAttribute('href'))!;
 
@@ -627,6 +608,21 @@ test.describe('Historia 26.2 — el tipo no casa como texto y la portada tiene e
     const delAutor = await todasLasDirecciones(page, nombre);
     expect(delAutor, nombre).toContain(pagina.replace(/\/?$/, '/'));
     expect(delAutor, nombre).not.toContain('/');
+
+    // Historia 28.1 — la línea de cifras y la etiqueta del campo no son contenido: buscarlas no da
+    // la portada, que responde solo por su título.
+    await expect(page.locator('main .cifras'), 'la portada sin línea de cifras').toHaveCount(1);
+    const linea = (await page.locator('main .cifras').textContent())!.trim();
+    expect(linea, 'la portada con la línea de cifras vacía').not.toBe('');
+    // El control positivo: el índice responde y la portada está en él. Sin esto, un índice roto
+    // o vacío daría la ausencia de `/` de abajo sin haber buscado nada.
+    expect(await todasLasDirecciones(page, MARCA), MARCA).toContain('/');
+    // La palabra de la línea sale de la línea («cotejadas» con censo, «cotejada» sin él), no se fija.
+    const cotejo = /cotejadas?/.exec(linea)?.[0];
+    expect(cotejo, linea).toBeDefined();
+    for (const termino of [linea.replace(/[\d.;,]/g, ' ').replace(/\s+/g, ' ').trim(), cotejo!, ETIQUETA_DE_LA_BUSQUEDA]) {
+      expect(await todasLasDirecciones(page, termino), termino).not.toContain('/');
+    }
   });
 
   // (d) Con un Pagefind de mentira: cómo se pintan los tipos nuevos frente a una Cita.

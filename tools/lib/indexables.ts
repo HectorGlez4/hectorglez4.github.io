@@ -26,7 +26,8 @@ import {
   superficieDeclaradaDe,
 } from '../../src/lib/superficies.ts';
 import { ATRIBUTO_DE_INDEXABLE, EVENTOS } from '../../src/lib/medicion.ts';
-import { MARCAS_DE_OBRA } from '../../src/lib/vocabulario.ts';
+import { MARCAS_DE_OBRA, type Zona } from '../../src/lib/vocabulario.ts';
+import { recorrerElementos } from './html.ts';
 
 /** Las dos marcas de Obra, nombradas contra el vocabulario: la de la indexable y la de la que no. */
 const [OBRA_INDEXABLE, OBRA_NO_INDEXABLE] = MARCAS_DE_OBRA;
@@ -189,15 +190,86 @@ export function desajustesDeIndexables(
   return lineas;
 }
 
-/** El titular del corte, cuando la comprobación falla. */
-export function titularDeDesajustes(lineas: number): string {
-  return (
-    `El sitemap, los \`noindex\`, el índice de Pagefind y la marca de Obra no coinciden (${lineas} ` +
-    `${lineas === 1 ? 'desajuste' : 'desajustes'}). Salen de la misma declaración de ` +
-    'src/lib/superficies.ts y de la misma lista de rutas indexables: si discrepan, alguna ' +
-    'instancia se construyó con otra lista, o la marca de Obra no salió de `consecuenciasDe`. ' +
-    'Ver el detalle arriba.'
+/** La zona de las filas de Obras de la portada (Historia 28.3). */
+const ZONA_DE_LAS_OBRAS_DE_LA_PORTADA: Zona = 'obras-de-portada';
+
+/**
+ * Las rutas a las que llevan las filas de Obras de una portada construida —Historia 28.3—: el
+ * `href` de cada `<a>` dentro de un `<li>` con la zona `obras-de-portada`, normalizado y en su
+ * orden. El cierre a `/obras/` lleva la misma zona en un `<p>` y no cuenta.
+ */
+export function obrasEnlazadasDesdeLaPortada(html: string): string[] {
+  const rutas: string[] = [];
+  recorrerElementos(html, (elemento, antepasados) => {
+    const href = elemento.atributos.get('href');
+    if (elemento.etiqueta !== 'a' || href === undefined) return;
+    const enFila = antepasados.some(
+      (a) => a.etiqueta === 'li' && a.atributos.get('data-zona') === ZONA_DE_LAS_OBRAS_DE_LA_PORTADA,
+    );
+    if (enFila) rutas.push(rutaNormalizada(href));
+  });
+  return rutas;
+}
+
+/**
+ * Las Obras de la portada que no se sostienen en lo construido — AD-17, Historia 28.3.
+ *
+ * La portada enseña cada jornada unas Obras del conjunto indexable (`obrasDelDia`), y la jornada
+ * no la decide ningún commit: si una Obra del conjunto del que rotan no tuviera página, o la
+ * tuviera con `noindex`, la portada la enlazaría el día que le tocara y ningún build del día de
+ * hoy lo habría visto. Por eso se mira **todo** el conjunto, no las de hoy: cada ruta tiene que
+ * tener su página en `dist/` y sin `noindex`.
+ *
+ * El conjunto lo calcula la instancia de la configuración, y las filas las pinta la de las
+ * páginas: para que las dos no puedan discrepar en silencio, cada fila de la portada construida
+ * (`enlazadas`, de `obrasEnlazadasDesdeLaPortada`) tiene que llevar a una ruta del conjunto.
+ * Devuelve las líneas del informe, con las rutas nombradas, o vacío.
+ */
+export function desajustesDeLasObrasDeLaPortada(
+  rutasQueRotan: readonly string[],
+  paginas: readonly Pick<PaginaIndexable, 'ruta' | 'noindex'>[],
+  enlazadas: readonly string[],
+): string[] {
+  const porRuta = new Map(paginas.map((p) => [rutaNormalizada(p.ruta), p]));
+  const rutas = [...new Set(rutasQueRotan.map(rutaNormalizada))].sort((x, y) => x.localeCompare(y, 'es'));
+  const lineas: string[] = [];
+  const nombrar = (titulo: string, lista: readonly string[]) => {
+    if (lista.length > 0) lineas.push(`  · ${titulo}: ${lista.join(', ')}`);
+  };
+  nombrar('Obra de la portada sin página construida', rutas.filter((r) => !porRuta.has(r)));
+  nombrar('Obra de la portada con `noindex`', rutas.filter((r) => porRuta.get(r)?.noindex === true));
+  const delConjunto = new Set(rutas);
+  nombrar(
+    'Obra enlazada desde la portada que no está en el conjunto del que rotan',
+    [...new Set(enlazadas.map(rutaNormalizada))].filter((r) => !delConjunto.has(r)),
   );
+  return lineas;
+}
+
+/**
+ * El titular del corte, cuando la comprobación falla: `lineas` cuenta los desajustes entre los
+ * lectores de lo indexable y `deLaPortada` los de las Obras de la portada (Historia 28.3). Cada
+ * clase lleva su diagnóstico, y solo el de las que se dieron.
+ */
+export function titularDeDesajustes(lineas: number, deLaPortada = 0): string {
+  const cuantos = (n: number) => `${n} ${n === 1 ? 'desajuste' : 'desajustes'}`;
+  const partes: string[] = [];
+  if (lineas > 0) {
+    partes.push(
+      `El sitemap, los \`noindex\`, el índice de Pagefind y la marca de Obra no coinciden (${cuantos(lineas)}). ` +
+        'Salen de la misma declaración de src/lib/superficies.ts y de la misma lista de rutas ' +
+        'indexables: si discrepan, alguna instancia se construyó con otra lista, o la marca de Obra ' +
+        'no salió de `consecuenciasDe`.',
+    );
+  }
+  if (deLaPortada > 0) {
+    partes.push(
+      `Las Obras de la portada no se sostienen en lo construido (${cuantos(deLaPortada)}; Historia 28.3, ` +
+        'AD-17): toda Obra del conjunto del que rotan tiene que tener su página sin `noindex`, y toda ' +
+        'fila de la portada tiene que llevar a una de ellas.',
+    );
+  }
+  return `${partes.join(' ')} Ver el detalle arriba.`;
 }
 
 /** La línea del registro cuando la comprobación pasa: los cuatro lectores coinciden. */

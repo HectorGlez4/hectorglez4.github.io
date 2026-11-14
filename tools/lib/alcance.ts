@@ -57,7 +57,10 @@ import {
 import { recorrerElementos } from './html.ts';
 import { posicionesDeCitas } from './posiciones.ts';
 
-/** El atributo que marca lo que rota con la jornada. Lo emite solo `CitaDelDia.astro`. */
+/**
+ * El atributo que marca lo que rota con la jornada. Lo emite solo `LoQueRota.astro` (Historia
+ * 28.3), que envuelve la Cita del Día de la portada y del 404 y las Obras de la portada.
+ */
 export const MARCA_DE_JORNADA = 'data-jornada';
 
 /** Las etiquetas cuyo contenido no es enlace visible: su subárbol no entra en el grafo. */
@@ -364,10 +367,13 @@ export function titularDeAlcance(veredicto: VeredictoDeAlcance): string {
 
 /**
  * El aviso del build cuando el **modelo** deja Citas a más del tope aunque `dist/` las alcance:
- * hoy las acerca la lista de Autores de la portada, que el modelo no lleva porque la Épica 28 la
- * quita (`grafoDelModelo`). No rompe —`dist/` cumple NFR-5—, pero sin decirlo serían invisibles:
- * las órdenes que retiran las cuentan como «ya fuera» y no las bloquean. `undefined` si no hay
- * ninguna. No depende de la jornada.
+ * desde la Historia 28.4 solo pueden acercarlas los Autores destacados de la portada, que el modelo
+ * no lleva porque cambian con los recuentos (`grafoDelModelo`, AD-11): una Cita en la página 2+ de
+ * un Autor destacado y sin Tema publicado está a tres saltos en `dist/` y a cuatro en el modelo. No
+ * rompe por sí mismo, y el build lo escribe antes de juzgar `dist/`, así que su texto vale tanto si
+ * la puerta pasa como si no: sin decirlo serían invisibles, porque las órdenes que retiran las
+ * cuentan como «ya fuera» y no las bloquean. `undefined` si no hay ninguna. No depende de la
+ * jornada.
  */
 export function avisoDeFueraDelModelo(modelo: ModeloDelCorpus): string | undefined {
   const citas = citasPorRuta(modelo.conjunto);
@@ -375,9 +381,12 @@ export function avisoDeFueraDelModelo(modelo: ModeloDelCorpus): string | undefin
   if (fuera.length === 0) return undefined;
   return [
     `NFR-5 en el modelo: ${enNumero(fuera.length, 'Cita queda', 'Citas quedan')} a más de ` +
-      `${MAX_SALTOS_DESDE_LA_PORTADA} saltos de la portada sin la lista de Autores que quitará la ` +
-      'Épica 28. Hoy esa lista las alcanza y el build pasa; las órdenes que retiran no las ' +
-      'bloquean porque ya estaban fuera:',
+      `${MAX_SALTOS_DESDE_LA_PORTADA} saltos de la portada sin los Autores destacados de la ` +
+      'portada. En dist/ pueden acercarlas ellos, pero cambian con los recuentos: si el Autor de ' +
+      'una deja de estar entre los destacados, el build puede romper por ella, y las órdenes que ' +
+      'retiran no bloquean por estas Citas, que ya estaban fuera. Para no depender de los ' +
+      `destacados, cada una necesita un Tema publicado (desde ${MIN_CITAS_POR_TEMA} Citas) o una ` +
+      'Colección publicada:',
     ...fuera.map(lineaDeFuera),
   ].join('\n');
 }
@@ -406,8 +415,8 @@ function citasFueraDelModelo(modelo: ModeloDelCorpus): string[] {
  *
  * Solo cuenta lo **nuevo**: una Cita que ya estaba fuera del modelo antes no es efecto de la
  * orden y no la bloquea. Y solo las Citas que siguen publicadas después: la que la orden retira
- * no queda fuera de alcance, sale. El modelo no lleva la lista de Autores de la portada
- * (`grafoDelModelo`), así que esto calcula con el sitio que quedará cuando la Épica 28 la quite.
+ * no queda fuera de alcance, sale. El modelo no lleva los Autores destacados de la portada
+ * (`grafoDelModelo`): cambian con los recuentos, así que esto calcula sin apoyarse en ellos.
  *
  * Un Corpus que no se deja leer devuelve `ok: false` con el motivo: de lo que no se puede leer no
  * se puede afirmar que no deje a nadie fuera.

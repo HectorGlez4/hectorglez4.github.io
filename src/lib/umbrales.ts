@@ -819,6 +819,16 @@ export const TANDA_DE_RESULTADOS = 30;
 export const AUTORES_DESTACADOS = 8;
 
 /**
+ * Cuántas Obras enseña la portada cada jornada — AD-9, AD-12, FR-55, UX-DR56, Historia 28.3.
+ *
+ * Las elige `obrasDelDia` de `src/lib/citaDelDia.ts` entre las indexables, de Autores distintos
+ * mientras haya tantos Autores con Obras como este número (con menos, una por Autor), y la ventana
+ * avanza cada jornada tantos puestos como Obras salen. Es la cifra de «seis Obras de seis Autores»
+ * de la portada de retorno: ni la función, ni la página, ni las pruebas la escriben.
+ */
+export const OBRAS_DE_LA_PORTADA = 6;
+
+/**
  * El techo de lo que el alojamiento admite por sitio — Historia 24.2, Entorno operativo.
  *
  * GitHub Pages admite 1 GB por sitio publicado. Se lee en decimal —mil millones de bytes y no

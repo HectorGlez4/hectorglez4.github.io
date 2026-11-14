@@ -2,33 +2,80 @@
 /**
  * Portada.
  *
- * De momento es la puerta de entrada al descubrimiento: desde aquí se alcanzan todos los
- * Temas publicados, todas las Colecciones publicadas y todos los Autores, y desde ellos
- * toda Página de Cita. Eso es lo que sostiene NFR-5 —ninguna página huérfana— y lo que la
- * Historia 2.7 comprueba recorriendo enlaces de verdad.
+ * Historia 28.1 (UX-DR56) — la portada sirve a quien vuelve: `main` abre con la línea de cifras del
+ * Corpus (`lineaDeCifras` de `src/lib/publicado.ts`, su única redactora) y el Campo de búsqueda con
+ * su botón, un GET a `/buscar/` sin guion, como el del 404. Siguen, en el orden fijo de la portada,
+ * la Cita del Día, «Obras» (28.3), «Temas», «Colecciones» y «Autores», cada sección con su Rótulo,
+ * y al final la invitación a sostener si está encendida. La marca es el `h1` de la cabecera
+ * (`Armazon.astro`), y aquí no hay ninguno.
  *
- * La Cita del Día llega en la Historia 4.1 y ocupará la parte de arriba. El descubrimiento
- * de abajo se queda: sin él, la portada tendría una sola salida y el sitio dejaría de ser
- * recorrible desde ella.
+ * Historia 28.3 (AD-12, UX-DR56) — «Obras» enseña hasta `OBRAS_DE_LA_PORTADA` Obras indexables de
+ * Autores distintos, que cambian con la jornada: las elige `obrasDelDia` de `src/lib/citaDelDia.ts`,
+ * junto a la Cita del Día y con la misma jornada, y van dentro de `LoQueRota.astro`, el único emisor
+ * de la marca de lo que rota. El rótulo y el cierre «Las {n} obras ›» a `/obras/` quedan fuera de
+ * ese subárbol: no cambian de un día a otro.
+ *
+ * Historia 28.4 (FR-55, UX-DR62) — «Temas» los enseña todos; «Colecciones», cada una con su
+ * criterio debajo, que su chip lleva como descripción (`aria-describedby`); «Autores», solo los ocho
+ * de `autoresDestacados` (27.6), en el orden del Directorio, con el cierre «Los {m} autores, de la A
+ * a la Z ›» a `/autores/`. La lista entera de Autores ya no está aquí.
+ *
+ * Desde aquí se alcanzan todos los Temas publicados, todas las Colecciones publicadas y los
+ * Directorios —`/autores/` por el cierre y por la cabecera, `/obras/` por el cierre de «Obras»—, así
+ * que cada Autor queda a dos saltos y, desde él, toda Página de Cita: es lo que sostiene NFR-5
+ * —ninguna página huérfana—, y la puerta de `integraciones/alcance.ts` lo comprueba sobre `dist/`.
+ *
+ * Todo lo que esta página pinta va bajo `data-pagefind-ignore="all"` (AD-17, AD-19): la portada
+ * responde en la búsqueda propia solo por su título, que declara el armazón.
  */
 import Armazon from '../components/Armazon.astro';
+import CampoDeBusqueda from '../components/CampoDeBusqueda.astro';
 import CitaDelDia from '../components/CitaDelDia.astro';
 import DatosDelSitio from '../components/DatosDelSitio.astro';
+import FilaDeBloque from '../components/FilaDeBloque.astro';
+import LoQueRota from '../components/LoQueRota.astro';
+import Rotulo from '../components/Rotulo.astro';
 import Sostener from '../components/Sostener.astro';
 import portada from '../../corpus/portada.json';
-import { aptasParaPortada, citaDelDia, jornadaDelBuild } from '../lib/citaDelDia.ts';
+import {
+  ETIQUETA_DE_LA_BUSQUEDA,
+  PARAMETROS_DE_LA_BUSQUEDA,
+  TEXTO_DE_EJEMPLO_DE_LA_BUSQUEDA,
+} from '../lib/busqueda.ts';
+import { aptasParaPortada, citaDelDia, jornadaDelBuild, obrasDelDia } from '../lib/citaDelDia.ts';
+import { cierreDeLasObras, cierreDeLosAutores, contenidoDeTarjetaDeObra } from '../lib/atribucion.ts';
+import { directorioDeObras } from '../lib/directorios.ts';
+import { rutaDeLaObra } from '../lib/obras.ts';
 import { modelosEnRuta } from '../lib/ingreso.ts';
 import { DESCRIPCION_DEL_SITIO, MARCA } from '../lib/marca.ts';
-import { rutaDeAutor, rutaDeColeccion, rutaDeTema } from '../lib/superficies.ts';
 import {
+  rutaDeAutor,
+  rutaDeColeccion,
+  rutaDeLaBusqueda,
+  rutaDelDirectorioDeAutores,
+  rutaDelDirectorioDeObras,
+  rutaDeTema,
+} from '../lib/superficies.ts';
+import {
+  autoresDestacados,
   autoresPublicados,
   conjuntoPublicable,
+  lineaDeCifras,
+  obrasDelConjunto,
   temasPublicados,
 } from '../lib/publicado.ts';
 
 const conjunto = await conjuntoPublicable();
 const temas = temasPublicados(conjunto.temas, conjunto.citas);
+/* Todos los Autores publicados: la m de la línea de cifras y del cierre de «Autores». */
 const autores = autoresPublicados(conjunto.autores, conjunto.citas);
+/*
+ * Historia 28.4 — los ocho Autores de la portada, de la función única de la 27.6: ya vienen en el
+ * orden del Directorio y con el suelo de FR-8 aplicado. La página no los ordena ni los elige.
+ */
+const destacados = autoresDestacados(conjunto.autores, conjunto.citas);
+/* Historia 28.1 — la línea la redacta `publicado.ts`; sin ninguna Cita publicada no hay línea. */
+const cifras = lineaDeCifras(conjunto.citas, conjunto.autores);
 
 /*
  * Las Colecciones publicadas — Historia 12.3, descubrimiento de FR-28 y NFR-5.
@@ -49,6 +96,29 @@ const autorDelDia = seleccion
   ? conjunto.autores.find((a) => a.slug === seleccion.cita.autor)
   : undefined;
 
+/*
+ * Historia 28.3 — las Obras de hoy, del conjunto indexable: la misma lista que da
+ * `rutasIndexables` —con `CONGELACION_DE_OBRAS` ya la estrecha `obrasIndexables`—, así que ninguna
+ * fila lleva a una página `noindex`, y `integraciones/indexables.ts` lo comprueba sobre `dist/` para
+ * todo el conjunto, no solo para las de hoy (AD-17). La portada no consulta la congelación ni ninguna
+ * otra regla de Obra. Sin ninguna, no hay bloque.
+ *
+ * El cierre cuenta las Obras del Directorio de Obras, adonde lleva: todas las publicadas, también
+ * las que no se indexan.
+ */
+const autoresPorSlug = new Map(conjunto.autores.map((a) => [a.slug, a]));
+const obrasDeHoy = obrasDelDia(
+  obrasDelConjunto(conjunto.citas, conjunto.autores).indexables,
+  conjunto.autores,
+  jornada,
+).map((obra) => {
+  // `obrasDelDia` ya lanzó si alguna Obra es de un Autor que no está en `conjunto.autores`.
+  const autor = autoresPorSlug.get(obra.autor);
+  if (autor === undefined) throw new Error(`Portada: la Obra «${obra.nombre}» es de un Autor sin ficha, «${obra.autor}».`);
+  return { obra, hechos: contenidoDeTarjetaDeObra(autor, obra).hechos };
+});
+const obrasDelDirectorio = obrasDeHoy.length > 0 ? directorioDeObras(conjunto.autores, conjunto.citas).obras : 0;
+
 /* La descripción vive en `marca.ts`: la usan también los datos estructurados y la Tarjeta. */
 const DESCRIPCION = DESCRIPCION_DEL_SITIO;
 ---
@@ -62,26 +132,39 @@ const DESCRIPCION = DESCRIPCION_DEL_SITIO;
 >
   <DatosDelSitio slot="cabeza" descripcion={DESCRIPCION} />
 
-  <div class="pagina contenedor">
-    {
-      /*
-       * Historia 26.2 (AD-17, AD-19) — en la búsqueda propia la portada responde solo por su
-       * título: este `h1`, que es la marca y del que Pagefind saca el título del resultado. Todo lo
-       * demás —la Cita del Día, la entrada, los chips y la lista de Autores— va bajo
-       * `data-pagefind-ignore="all"`, porque ya tiene su propia página en el índice: sin esto, buscar
-       * el texto del día o cualquier Autor devolvía también la portada. La invitación a sostener
-       * lleva su propio `data-pagefind-ignore` en `Sostener.astro`. Cuando la 28.1 saque el `h1`
-       * de `main`, la portada declarará su título con `data-pagefind-meta="title:…"`.
-       */
-    }
-    <h1 class="marca-portada">{MARCA}</h1>
+  {/*
+    * Historia 28.1 (AD-17, AD-19) — en la búsqueda propia la portada responde solo por su título,
+    * que declara `Armazon.astro`. Todo lo de aquí —la línea, el campo, la Cita del Día, la entrada,
+    * las Obras con su rótulo y su cierre (28.3), los chips, los criterios y los Autores destacados
+    * con su cierre (28.4)— va bajo
+    * `data-pagefind-ignore="all"`, porque o no es contenido o ya tiene su propia página en el
+    * índice: buscar el texto del día, una Obra o cualquier Autor no devuelve la portada. La
+    * invitación a sostener lleva además su propio `data-pagefind-ignore`.
+    */}
+  <div class="pagina contenedor" data-pagefind-ignore="all">
+    {cifras !== undefined && <p class="cifras">{cifras}</p>}
+
+    {/*
+      * El Campo de búsqueda con su botón, el mismo del 404 (Historia 27.8): un GET a `/buscar/` sin
+      * guion, así que la portada no carga Pagefind. No lleva zona: no tiene enlaces, y enviarlo no
+      * es una salida interna.
+      */}
+    <form class="formulario" role="search" action={rutaDeLaBusqueda()} method="get">
+      <CampoDeBusqueda
+        id="consulta"
+        etiqueta={ETIQUETA_DE_LA_BUSQUEDA}
+        nombre={PARAMETROS_DE_LA_BUSQUEDA.texto}
+        ejemplo={TEXTO_DE_EJEMPLO_DE_LA_BUSQUEDA}
+        boton
+      />
+    </form>
 
     {
       seleccion && autorDelDia ? (
         /* Historia 26.8 — el bloque, y su marca de lo que rota, los pinta un solo componente. */
         <CitaDelDia cita={seleccion.cita} autor={autorDelDia} />
       ) : (
-        <p class="entrada" data-pagefind-ignore="all">
+        <p class="entrada">
           Citas en español, cada una en su página, con el autor y la obra de la que
           procede. Solo se publica lo que se puede documentar.
         </p>
@@ -89,9 +172,30 @@ const DESCRIPCION = DESCRIPCION_DEL_SITIO;
     }
 
     {
+      /*
+       * Historia 28.3 — «Obras», entre la Cita del Día y los Temas. Las filas, dentro de lo que rota;
+       * el rótulo y el cierre, fuera. Cada fila dice el título y, en una segunda línea, «{Autor} ·
+       * {año} · {n} citas» como la Tarjeta de Obra (`contenidoDeTarjetaDeObra`): el punto medio es
+       * decoración y el lector oye una coma. Las partes van pegadas, sin espacio entre etiquetas,
+       * por lo mismo que en `TarjetaDeObra.astro`. Sin glifo de avance en las filas: lo lleva el
+       * cierre, que va a otra superficie. Ningún enlace comercial, ni con la afiliación encendida:
+       * las ediciones en venta son de la Página de Obra.
+       */
+      obrasDeHoy.length > 0 && (
+        <section aria-labelledby="obras">
+          <Rotulo id="obras">Obras</Rotulo>
+          <LoQueRota como="div">
+            <ul class="obras">{obrasDeHoy.map(({ obra, hechos }) => (<FilaDeBloque href={rutaDeLaObra(obra)} zona="obras-de-portada"><span class="titulo-de-obra">{obra.titulo}</span><span class="solo-para-lectores">, </span><span class="hechos-de-obra">{hechos.map((parte, i) => (<>{i > 0 && (<><span aria-hidden="true"> · </span><span class="solo-para-lectores">, </span></>)}{parte}</>))}</span></FilaDeBloque>))}</ul>
+          </LoQueRota>
+          <p data-zona="obras-de-portada"><a href={rutaDelDirectorioDeObras()}>{cierreDeLasObras(obrasDelDirectorio)}<span aria-hidden="true">&nbsp;›</span></a></p>
+        </section>
+      )
+    }
+
+    {
       temas.length > 0 && (
-        <section data-pagefind-ignore="all">
-          <h2>Temas</h2>
+        <section aria-labelledby="temas">
+          <Rotulo id="temas">Temas</Rotulo>
           <ul class="chips" data-zona="chip-de-tema">
             {temas.map((tema) => (
               <li>
@@ -129,34 +233,40 @@ const DESCRIPCION = DESCRIPCION_DEL_SITIO;
     }
     {
       colecciones.length > 0 && (
-        <section data-pagefind-ignore="all">
-          <h2>Colecciones</h2>
-          {/* Chip idéntico al de Tema: la Colección es navegación lateral, no jerarquía. */}
-          <ul class="chips" data-zona="colecciones">
+        <section aria-labelledby="colecciones">
+          <Rotulo id="colecciones">Colecciones</Rotulo>
+          {/*
+            * Historia 28.4 (UX-DR62) — cada Colección en su fila: el chip, con el aspecto del de Tema,
+            * y a `--unidad` debajo su criterio entero, que el chip lleva como descripción para quien
+            * llega a él con lector de pantalla. El criterio no enlaza: el enlace es el chip. El `li` en
+            * una línea, como las filas de «Autores»: ningún blanco del formateo entra en el nombre del
+            * chip ni en el criterio, que son su nombre y su descripción accesibles.
+            */}
+          <ul class="colecciones" data-zona="colecciones">
             {colecciones.map((coleccion) => (
-              <li>
-                <a class="chip" href={rutaDeColeccion(coleccion.slug)}>
-                  {coleccion.nombre}
-                </a>
-              </li>
+              <li><a class="chip" href={rutaDeColeccion(coleccion.slug)} aria-describedby={`criterio-de-${coleccion.slug}`}>{coleccion.nombre}</a><p class="criterio" id={`criterio-de-${coleccion.slug}`}>{coleccion.criterio}</p></li>
             ))}
           </ul>
         </section>
       )
     }
 
-    <section data-pagefind-ignore="all">
-      <h2>Autores</h2>
-      <ul class="autores" data-zona="autores-de-portada">
-        {
-          autores.map((autor) => (
-            <li>
-              <a href={rutaDeAutor(autor.slug)}>{autor.nombre}</a>
-            </li>
-          ))
-        }
-      </ul>
-    </section>
+    {
+      /*
+       * Historia 28.4 (FR-55, UX-DR62) — los ocho Autores destacados como Filas de bloque, con el
+       * nombre en la serif y sin glifo de avance en las filas: lo lleva el cierre, que va al
+       * Directorio de Autores. El texto, en la misma línea que las etiquetas (`FilaDeBloque.astro`).
+       * El cierre cuenta todos los Autores publicados —la m de la línea de cifras—, no los ocho.
+       * Sin ningún Autor publicado no hay sección, ni rótulo ni cierre.
+       */
+      destacados.length > 0 && (
+        <section aria-labelledby="autores">
+          <Rotulo id="autores">Autores</Rotulo>
+          <ul class="destacados">{destacados.map((autor) => (<FilaDeBloque href={rutaDeAutor(autor.slug)} zona="autores-de-portada"><span class="nombre">{autor.nombre}</span></FilaDeBloque>))}</ul>
+          <p data-zona="autores-de-portada"><a href={rutaDelDirectorioDeAutores()}>{cierreDeLosAutores(autores.length)}<span aria-hidden="true">&nbsp;›</span></a></p>
+        </section>
+      )
+    }
 
     {
       /*
@@ -188,39 +298,113 @@ const DESCRIPCION = DESCRIPCION_DEL_SITIO;
     padding-block: var(--respiracion);
   }
 
-  .marca-portada {
-    font-family: var(--sans);
-    font-size: var(--autor);
-    font-weight: var(--peso-fuerte);
-    letter-spacing: 0.09em;
-    text-transform: uppercase;
-    color: var(--tinta-apagada);
-    line-height: var(--interlineado-autor);
+  /*
+   * Historia 28.1 (UX-DR56) — la línea de cifras en `body-md` y tinta apagada, sin cifra destacada;
+   * el campo a 3 × `--unidad` de ella; la Cita del Día, o la entrada, a 6 ×; cada sección a 6 × de
+   * lo anterior y su contenido a 2 × de su rótulo (el de la Cita del Día, 3 ×, lo pone
+   * `CitaDelDia.astro`). Nada lleva `nowrap`: la línea y los nombres se parten.
+   */
+  .cifras {
     margin: 0;
+    max-width: var(--medida-prosa);
+    font-size: var(--cuerpo-md);
+    line-height: var(--interlineado-cuerpo-md);
+    color: var(--tinta-apagada);
   }
 
-  /* La Cita del Día (su rótulo y «Ver esta cita» los estiliza `CitaDelDia.astro`). */
-  .pagina > :global(.del-dia) {
-    margin-top: calc(var(--unidad) * 4);
-  }
-
-  .entrada {
-    margin: calc(var(--unidad) * 2) 0 0;
+  .formulario {
+    margin-top: calc(var(--unidad) * 3);
     max-width: var(--medida-prosa);
   }
 
-  section {
+  /* Sin ninguna Cita publicada no hay línea: el campo abre la columna sin aire encima. */
+  .formulario:first-child {
+    margin-top: 0;
+  }
+
+  /* Historia 27.8 — la etiqueta, el campo y el botón los estiliza `CampoDeBusqueda.astro`. */
+
+  /* La Cita del Día (su rótulo y «Ver esta cita» los estiliza `CitaDelDia.astro`). */
+  .pagina > :global(.del-dia) {
     margin-top: calc(var(--unidad) * 6);
   }
 
-  h2 {
-    margin: 0 0 calc(var(--unidad) * 2);
+  .entrada {
+    margin: calc(var(--unidad) * 6) 0 0;
+    max-width: var(--medida-prosa);
+  }
+
+  /* Cada bloque, dentro de la medida de prosa (DESIGN.md § Portada). */
+  section {
+    margin-top: calc(var(--unidad) * 6);
+    max-width: var(--medida-prosa);
+  }
+
+  /*
+   * Historia 28.3 (UX-DR56) — las Obras: la lista a 2 × de su rótulo, con el filete encima de la
+   * primera (el de debajo de cada una lo pone `FilaDeBloque`), y filas que se tocan. El título en
+   * Inter `body-lg` 600 y tinta, que parte palabras antes que desbordar; los hechos en `caption` y
+   * tinta apagada. Nada se recorta (NFR-12).
+   */
+  .obras {
+    list-style: none;
+    margin: calc(var(--unidad) * 2) 0 0;
+    padding: 0;
+    border-top: var(--grosor-filete) solid var(--filete);
+  }
+
+  .titulo-de-obra {
+    display: block;
     font-family: var(--sans);
-    font-size: var(--autor);
+    font-size: var(--cuerpo-lg);
     font-weight: var(--peso-fuerte);
-    letter-spacing: 0.09em;
-    text-transform: uppercase;
+    /*
+     * Historia 26.12 — excepción de DESIGN.md § Typography: el título de las Obras de la portada,
+     * como el de la Tarjeta de Obra, toma el interlineado de `author` (1,4) y no el de su cuerpo
+     * (DESIGN.md v8.5, «el título de la Tarjeta de Obra y el de las Obras de la portada»).
+     * `tests/unit/tipografia-en-tokens.test.ts` todavía no la nombra entre sus emparejamientos
+     * excepcionales: añadir esa fila queda para Héctor.
+     */
+    line-height: var(--interlineado-autor);
+    color: var(--tinta);
+    overflow-wrap: anywhere;
+  }
+
+  .hechos-de-obra {
+    display: block;
+    font-family: var(--sans);
+    font-size: var(--pie);
+    font-weight: var(--peso-regular);
+    line-height: var(--interlineado-pie);
     color: var(--tinta-apagada);
+  }
+
+  /*
+   * Los cierres de «Obras» y de «Autores» (28.4), a 2 × de su lista: en tinta, subrayado siempre y
+   * con su zona de toque entera. Se nombran por su zona, que solo ellos llevan en un `p` (las filas
+   * la llevan en el `li`), y comparten la regla. `inline-block` con el relleno que completa la línea
+   * hasta `--zona-de-toque`, y no `inline-flex`: así el texto y el «›» son la misma línea de texto,
+   * y el glifo, pegado por su `&nbsp;`, nunca se queda en su propia columna.
+   */
+  p[data-zona='obras-de-portada'],
+  p[data-zona='autores-de-portada'] {
+    margin: calc(var(--unidad) * 2) 0 0;
+  }
+
+  p[data-zona='obras-de-portada'] a,
+  p[data-zona='autores-de-portada'] a {
+    /* El relleno completa una línea hasta la zona de toque: se calcula con el interlineado de
+     * `body-md`, el del cuerpo del cierre (Historia 26.12). */
+    display: inline-block;
+    box-sizing: border-box;
+    min-height: var(--zona-de-toque);
+    padding-block: calc((var(--zona-de-toque) - var(--interlineado-cuerpo-md) * 1em) / 2);
+    line-height: var(--interlineado-cuerpo-md);
+    font-family: var(--sans);
+    font-size: var(--cuerpo-md);
+    color: var(--tinta);
+    text-decoration: underline;
+    overflow-wrap: anywhere;
   }
 
   .chips {
@@ -228,7 +412,7 @@ const DESCRIPCION = DESCRIPCION_DEL_SITIO;
     display: flex;
     flex-wrap: wrap;
     gap: var(--unidad);
-    margin: 0;
+    margin: calc(var(--unidad) * 2) 0 0;
     padding: 0;
   }
 
@@ -249,33 +433,56 @@ const DESCRIPCION = DESCRIPCION_DEL_SITIO;
     overflow-wrap: anywhere;
   }
 
-  .autores {
+  /*
+   * Historia 28.4 (UX-DR62) — las Colecciones: la lista a 2 × de su rótulo y 2 × entre ellas; en
+   * cada una, el chip con su tamaño de contenido —la fila es una columna que no lo estira— y a
+   * `--unidad` debajo el criterio, en el pie, sans y tinta apagada, entero y partido donde haga
+   * falta (NFR-12).
+   */
+  .colecciones {
     list-style: none;
-    margin: 0;
-    padding: 0;
-    border-top: var(--grosor-filete) solid var(--filete);
-    max-width: var(--medida-prosa);
-  }
-
-  .autores li {
-    border-bottom: var(--grosor-filete) solid var(--filete);
-  }
-
-  .autores a {
     display: flex;
-    align-items: center;
-    min-height: var(--zona-de-toque);
-    font-family: var(--serif);
-    font-size: var(--titular-sm);
-    color: var(--tinta);
-    text-decoration: none;
-    /* NFR-8, Historia 26.9 — el nombre del Autor es del Corpus y va en una caja flexible, donde
-     * `break-word` no rebaja el ancho mínimo: con el texto al 200 % una palabra más ancha que la
-     * columna se parte en vez de desbordar. */
+    flex-direction: column;
+    gap: calc(var(--unidad) * 2);
+    margin: calc(var(--unidad) * 2) 0 0;
+    padding: 0;
+  }
+
+  .colecciones li {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--unidad);
+  }
+
+  .criterio {
+    margin: 0;
+    font-family: var(--sans);
+    font-size: var(--pie);
+    line-height: var(--interlineado-pie);
+    color: var(--tinta-apagada);
     overflow-wrap: anywhere;
   }
 
-  .autores a:hover {
-    text-decoration: underline;
+  /*
+   * Historia 28.4 (UX-DR62) — los Autores destacados: la lista a 2 × de su rótulo, con el filete
+   * encima de la primera (el de debajo de cada una lo pone `FilaDeBloque`). El nombre en la serif
+   * `headline-sm` 400 y tinta, como la Fila de Autor del Directorio, sin subrayado ni al pasar: lo
+   * identifican la forma y la posición de la fila.
+   */
+  .destacados {
+    list-style: none;
+    margin: calc(var(--unidad) * 2) 0 0;
+    padding: 0;
+    border-top: var(--grosor-filete) solid var(--filete);
+  }
+
+  .nombre {
+    display: block;
+    font-family: var(--serif);
+    font-size: var(--titular-sm);
+    font-weight: var(--peso-regular);
+    color: var(--tinta);
+    overflow-wrap: anywhere;
   }
 </style>

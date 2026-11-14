@@ -914,6 +914,56 @@ describe('Historia 22.4 — lo que rompe el build', () => {
     expect(resultado.salida).toContain('no coinciden');
   }, 300_000);
 
+  it('28.3 — si una Obra del conjunto del que rotan las de la portada no tiene página o la tiene con `noindex`, rompe y la nombra', async () => {
+    /*
+     * La copia de la integración toma como conjunto del que rotan todas las Obras publicadas, más una
+     * ruta que no existe: la de una sola Cita se publica con `noindex`, y la otra no tiene página. El
+     * sitemap, los `noindex` y Pagefind siguen casando entre sí; lo que para la construcción es AD-17.
+     */
+    const original = await readFile(join(RAIZ, 'integraciones/indexables.ts'), 'utf8');
+    const literal = 'rutasQueRotan = indexables.map((obra) => rutaDeLaObra(obra));';
+    expect(original).toContain(literal);
+    const parcheada = original.replace(
+      literal,
+      "rutasQueRotan = [...publicadas.map((obra) => rutaDeLaObra(obra)), '/obra/seneca/no-existe/'];",
+    );
+    const resultado = await construirConCorpus(
+      {
+        'autores/seneca.yml': AUTOR_VALIDO,
+        'temas/el-tiempo.yml': TEMA_VALIDO,
+        'citas/seneca--no-es-que-tengamos-poco-tiempo.md': citaValida(),
+      },
+      { ficheros: { 'integraciones/indexables.ts': parcheada } },
+    );
+    aLimpiar.push(resultado.proyecto);
+    expect(resultado.codigo, resultado.salida).not.toBe(0);
+    expect(resultado.salida).toContain('Obra de la portada sin página construida: /obra/seneca/no-existe');
+    expect(resultado.salida).toContain('Obra de la portada con `noindex`: /obra/seneca/sobre-la-brevedad-de-la-vida');
+    expect(resultado.salida).not.toContain('en el sitemap y con `noindex`');
+    // El titular dice el diagnóstico de la portada, y no el de las dos instancias de lo indexable.
+    expect(resultado.salida).toContain('Las Obras de la portada no se sostienen en lo construido');
+    expect(resultado.salida).not.toContain('la marca de Obra no salió de `consecuenciasDe`');
+  }, 300_000);
+
+  it('28.3 — si la portada enlaza una Obra que no está en el conjunto que comprueba la configuración, rompe y la nombra', async () => {
+    /*
+     * La copia de la integración se queda con un conjunto vacío mientras la portada, en la otra
+     * instancia, pinta la Obra indexable del corpus: las dos instancias discrepan, y la
+     * comprobación de AD-17 ya no puede pasar en vacío.
+     */
+    const original = await readFile(join(RAIZ, 'integraciones/indexables.ts'), 'utf8');
+    const literal = 'rutasQueRotan = indexables.map((obra) => rutaDeLaObra(obra));';
+    expect(original).toContain(literal);
+    const resultado = await construirConCorpus(corpus(1), {
+      ficheros: { 'integraciones/indexables.ts': original.replace(literal, 'rutasQueRotan = [];') },
+    });
+    aLimpiar.push(resultado.proyecto);
+    expect(resultado.codigo, resultado.salida).not.toBe(0);
+    expect(resultado.salida).toContain(
+      `Obra enlazada desde la portada que no está en el conjunto del que rotan: ${CARTAS.replace(/\/$/, '')}`,
+    );
+  }, 300_000);
+
   it('23.9 — si la marca de Obra no dice lo mismo que el `noindex`, rompe y nombra la Obra', async () => {
     /*
      * La copia del armazón escribe siempre la marca indexable, salga lo que salga de

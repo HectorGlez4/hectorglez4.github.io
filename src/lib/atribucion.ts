@@ -13,6 +13,7 @@
 import type { Cita, Autor, SiguienteCita } from './publicado.ts';
 import { rotuloDeFuente, type ObraResuelta } from './obras.ts';
 import { MARCA } from './marca.ts';
+import { milesEnEspañol } from './formato.ts';
 import { escapar } from './lienzo.ts';
 import { enUnaLinea, versosDe } from './verso.ts';
 import { recuentoDeAutores, recuentoDeCitas, recuentoDeObras, temaEnFrase } from './recuentos.ts';
@@ -476,6 +477,41 @@ export function cierreDeLaMismaObra(obra: Pick<ObraResuelta, 'recuento' | 'titul
  */
 export function cierreDeMasDelAutor(autor: Pick<Autor, 'nombre'>, recuento: number): string {
   return `Las ${recuentoDeCierre('cierreDeMasDelAutor', recuento)} citas de ${autor.nombre}`;
+}
+
+/**
+ * El cierre de las Obras de la portada — «Las {n} obras», FR-55, UX-DR56, Historia 28.3.
+ *
+ * Lleva a `/obras/`, así que `n` son las Obras que lista el Directorio de Obras —también las que no
+ * se indexan—, no las que la portada enseña hoy. Con punto de millar («Las 1.234 obras»), como la
+ * línea de cifras de la 28.1, y concordado con una («La 1 obra»), que solo se da en las pruebas.
+ * Sin el glifo de avance «›»: lo pone la portada, en un `span` `aria-hidden`. Lanza con un recuento
+ * que no sea un entero de 1 en adelante.
+ */
+export function cierreDeLasObras(n: number): string {
+  // Como los cierres de la 24.6 (`recuentoDeCierre`), un recuento imposible no se redacta: con
+  // ninguna Obra la portada no tiene bloque, así que «Las 0 obras» solo saldría de un uso roto.
+  if (!Number.isInteger(n) || n < 1) {
+    throw new Error(`cierreDeLasObras: «${n}» no es un recuento de Obras (un entero de 1 en adelante).`);
+  }
+  return n === 1 ? 'La 1 obra' : `Las ${milesEnEspañol(n)} obras`;
+}
+
+/**
+ * El cierre de los Autores de la portada — «Los {m} autores, de la A a la Z», FR-55, UX-DR62,
+ * Historia 28.4.
+ *
+ * Lleva a `/autores/`, así que `m` son los Autores que lista el Directorio —todos los publicados,
+ * la misma m que la línea de cifras—, no los ocho destacados que la portada enseña. Con punto de
+ * millar («Los 1.234 autores») y concordado con uno («El 1 autor»), que solo se da en las pruebas.
+ * Sin el glifo de avance «›»: lo pone la portada, en un `span` `aria-hidden`. Lanza con un recuento
+ * que no sea un entero de 1 en adelante: sin ningún Autor la portada no tiene sección.
+ */
+export function cierreDeLosAutores(m: number): string {
+  if (!Number.isInteger(m) || m < 1) {
+    throw new Error(`cierreDeLosAutores: «${m}» no es un recuento de Autores (un entero de 1 en adelante).`);
+  }
+  return m === 1 ? 'El 1 autor, de la A a la Z' : `Los ${milesEnEspañol(m)} autores, de la A a la Z`;
 }
 
 /**

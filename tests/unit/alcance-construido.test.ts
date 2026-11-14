@@ -16,12 +16,12 @@ import { MARCA_DE_JORNADA } from '../../tools/lib/alcance.ts';
 /**
  * Historia 26.8 — la puerta de NFR-5 del build, sobre sitios construidos de verdad.
  *
- * Tres construcciones: la sana, que informa con una línea fija —y avisa de la Cita que solo la
- * lista de Autores de la portada alcanza—; una con la portada parcheada
- * sin su lista de Autores —lo que la Épica 28 hará—, que deja una Cita de la página 2 de su
- * Autor a cuatro saltos y rompe nombrándola con su Tema bajo umbral; y una con la Paginación
- * sin los números y la Fila de Autor sin enlace, que rompe nombrando las aristas del modelo que
- * faltan.
+ * Tres construcciones: la sana, que informa con una línea fija —y avisa de la Cita que solo los
+ * Autores destacados de la portada (Historia 28.4) alcanzan—; una con la portada parcheada sin sus
+ * Autores destacados —que el modelo no lleva porque cambian con los recuentos—, que deja una Cita
+ * de la página 2 de su Autor a cuatro saltos y rompe nombrándola con su Tema bajo umbral; y una
+ * con la Paginación sin los números y la Fila de Autor sin enlace, que rompe nombrando las aristas
+ * del modelo que faltan.
  */
 
 const pad = (n: number) => String(n).padStart(3, '0');
@@ -34,7 +34,8 @@ const pad = (n: number) => String(n).padStart(3, '0');
  *
  * El Tema publicado, «El tiempo», es de `MIN_CITAS_POR_TEMA` Citas de **Epicteto**, de otra
  * Obra: así las Citas a dos saltos de la portada no llevan, por sus Rutas de salida, a ninguna
- * de Séneca, y lo único que acerca la página 2 de Séneca es la lista de Autores de la portada.
+ * de Séneca, y lo único que acerca la página 2 de Séneca son los Autores destacados de la portada:
+ * con dos Autores publicados, los dos lo son (`autoresDestacados`).
  */
 function corpusDeSeneca(n: number): Record<string, string> {
   const corpus: Record<string, string> = {
@@ -108,9 +109,10 @@ describe('Historia 26.8 — el build sano', () => {
     );
   });
 
-  it('avisa, sin romper, de la Cita que solo alcanza la lista de Autores de la portada', () => {
-    // La 051 está en la página 2 de Séneca y de su Obra, y «La ira» no llega: en el modelo
-    // —sin esa lista, como la dejará la Épica 28— queda a cuatro saltos.
+  it('avisa, sin romper, de la Cita que solo alcanzan los Autores destacados de la portada', () => {
+    // La 051 está en la página 2 de Séneca y de su Obra, y «La ira» no llega: en el modelo —que
+    // no lleva los destacados, porque cambian con los recuentos— queda a cuatro saltos.
+    expect(salida).toContain('sin los Autores destacados de la portada');
     expect(salida).toMatch(/NFR-5 en el modelo: 1 Cita queda a más de 3 saltos de la portada/);
     expect(salida).toContain(
       `/cita/seneca-fragmento-051 — su Tema «La ira» (la-ira) tiene 3 Citas, por debajo de ` +
@@ -118,25 +120,33 @@ describe('Historia 26.8 — el build sano', () => {
     );
   });
 
-  it('data-jornada va solo en la portada y el 404, una vez, con «Ver esta cita» dentro', async () => {
+  it('data-jornada va solo en la portada y el 404; la Cita del Día, una vez, con «Ver esta cita» dentro', async () => {
     const paginas = await htmlDe(join(proyecto, 'dist'));
     const conMarca = [...paginas].filter(([, html]) => html.includes('data-jornada'));
     expect(conMarca.map(([ruta]) => ruta).sort()).toEqual(['404.html', 'index.html']);
     for (const [ruta, html] of conMarca) {
-      expect(html.split('data-jornada').length - 1, ruta).toBe(1);
-      const marca = html.indexOf('data-jornada');
-      const seccion = html.slice(html.lastIndexOf('<section', marca), html.indexOf('</section>', marca));
-      expect(seccion, ruta).toMatch(/^<section class="del-dia" data-jornada /);
+      // La Cita del Día sale de `LoQueRota.astro` como salía de `CitaDelDia.astro` (28.3).
+      const delDia = html.split('<section class="del-dia" data-jornada data-pagefind-ignore="all">');
+      expect(delDia.length - 1, ruta).toBe(1);
+      const seccion = delDia[1].slice(0, delDia[1].indexOf('</section>'));
       expect(seccion, ruta).toContain('data-zona="cita-del-dia"');
       expect(seccion, ruta).toContain('Ver esta cita');
     }
+    // El 404 no lleva más que la Cita del Día. La portada puede llevar además el subárbol de sus
+    // Obras (28.3), y ningún otro: aquí ninguna Obra se indexa, así que tampoco ese.
+    expect(paginas.get('404.html')!.split('data-jornada').length - 1).toBe(1);
+    const portada = paginas.get('index.html')!;
+    const deObras = portada.split('<div data-jornada data-pagefind-ignore="all"><ul class="obras"').length - 1;
+    expect(portada.split('data-jornada').length - 1).toBe(1 + deObras);
+    expect(deObras).toBe(0);
     // El lote marca sus jornadas con otro atributo: la marca queda libre para lo que rota.
     expect(paginas.get('lote/index.html')).not.toContain('data-jornada');
   });
 
-  it('entre las fuentes de src/ y public/, solo CitaDelDia.astro nombra la marca que el grafo salta', async () => {
+  it('entre las fuentes de src/ y public/, solo LoQueRota.astro nombra la marca que el grafo salta', async () => {
     // La marca es la de `MARCA_DE_JORNADA`: si el componente y el grafo la llamaran distinto, el
-    // grafo dejaría de saltar la Cita del Día y esto lo diría.
+    // grafo dejaría de saltar lo que rota y esto lo diría. Desde la 28.3 la pone un componente sin
+    // otro trabajo, que usan la Cita del Día y las Obras de la portada.
     const entradas = [
       ...(await readdir(join(RAIZ, 'src'), { recursive: true, withFileTypes: true })),
       ...(await readdir(join(RAIZ, 'public'), { recursive: true, withFileTypes: true })),
@@ -145,14 +155,19 @@ describe('Historia 26.8 — el build sano', () => {
       .filter((e) => e.isFile() && !/\.(?:png|jpe?g|webp|gif|ico|woff2?|ttf|otf|pdf)$/iu.test(e.name))
       .map((e) => join(e.parentPath, e.name))
       .filter((ruta) => readFileSync(ruta, 'utf8').includes(MARCA_DE_JORNADA));
-    expect(fuentes.map((ruta) => relative(RAIZ, ruta))).toEqual(['src/components/CitaDelDia.astro']);
-    expect(readFileSync(join(RAIZ, 'src/components/CitaDelDia.astro'), 'utf8')).toMatch(
-      new RegExp(`<section class="del-dia" ${MARCA_DE_JORNADA} `),
+    expect(fuentes.map((ruta) => relative(RAIZ, ruta))).toEqual(['src/components/LoQueRota.astro']);
+    const componente = readFileSync(join(RAIZ, 'src/components/LoQueRota.astro'), 'utf8');
+    expect(componente).toMatch(new RegExp(`<section class=\\{clase\\} ${MARCA_DE_JORNADA} data-pagefind-ignore="all">`));
+    expect(componente).toMatch(new RegExp(`<div class=\\{clase\\} ${MARCA_DE_JORNADA} data-pagefind-ignore="all">`));
+    // La Cita del Día y las Obras de la portada lo usan; ninguno de los dos nombra la marca.
+    expect(readFileSync(join(RAIZ, 'src/components/CitaDelDia.astro'), 'utf8')).toContain(
+      '<LoQueRota como="section" class="del-dia">',
     );
+    expect(readFileSync(join(RAIZ, 'src/pages/index.astro'), 'utf8')).toContain('<LoQueRota como="div">');
   });
 });
 
-describe('Historia 26.8 — la portada sin su lista de Autores', () => {
+describe('Historia 26.8 — la portada sin sus Autores destacados', () => {
   let proyecto: string | undefined;
 
   afterAll(async () => {
@@ -161,10 +176,15 @@ describe('Historia 26.8 — la portada sin su lista de Autores', () => {
 
   it('rompe nombrando la Cita de la página 2 y su Tema con su recuento', async () => {
     const portada = readFileSync(join(RAIZ, 'src/pages/index.astro'), 'utf8');
+    // Historia 28.4 — la sección va dentro de `destacados.length > 0 && (…)`: se cambia la
+    // expresión entera por `null`, así que no queda ningún enlace de la portada a un Autor.
     const sinAutores = portada.replace(
-      /\n {4}<section data-pagefind-ignore="all">\n {6}<h2>Autores<\/h2>[\s\S]*?<\/section>\n/u,
-      '\n',
+      /destacados\.length > 0 && \(\n {8}<section aria-labelledby="autores">\n {10}<Rotulo id="autores">Autores<\/Rotulo>[\s\S]*?<\/section>\n {6}\)/u,
+      'null',
     );
+    // Si el marcado de la portada cambia y la expresión deja de casar, el parche no quitaría nada y
+    // el fallo de abajo no diría por qué: se dice aquí.
+    expect(sinAutores, 'la expresión ya no encuentra la sección «Autores» de la portada').not.toBe(portada);
     const resultado = await construirConCorpus(corpusDeSeneca(51), {
       jornada: '2026-10-28',
       ficheros: { 'src/pages/index.astro': sinAutores },

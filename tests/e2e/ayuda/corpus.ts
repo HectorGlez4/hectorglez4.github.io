@@ -25,6 +25,22 @@ function campo(contenido: string, nombre: string): string | undefined {
   return linea?.slice(nombre.length + 1).trim().replace(/^"|"$/g, '');
 }
 
+/**
+ * Los slugs del censo de pendientes de cotejo (Historia 11.2), o ninguno si el fichero falta o no
+ * trae lista. Lo usa la línea de cifras de la portada (Historia 28.1), cuya forma depende de si
+ * queda censo: el día que la 11.4 lo vacíe, la prueba sigue juzgando la forma que toca.
+ */
+export function censoDeCotejo(): string[] {
+  let contenido: string;
+  try {
+    contenido = readFileSync(join(raiz, 'pendientes-de-cotejo.yml'), 'utf8');
+  } catch {
+    return [];
+  }
+  const leido = parse(contenido) as { citas?: unknown } | null;
+  return Array.isArray(leido?.citas) ? leido.citas.filter((s): s is string => typeof s === 'string') : [];
+}
+
 /** Cuántas Citas publicadas declara cada Tema, por su slug. */
 export function citasPorTema(): Map<string, number> {
   const cuenta = new Map<string, number>();

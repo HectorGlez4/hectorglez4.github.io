@@ -9,7 +9,7 @@ import type { Rutas } from '../../../tools/lib/corpus.ts';
  *
  *   · Séneca tiene `CITAS_POR_PAGINA + 2` Citas sin Obra: las dos últimas por slug caen en la
  *     página 2 de su Autor, a cuatro saltos en el modelo (portada → Autores → Séneca → página 2
- *     → Cita), porque el modelo no lleva la lista de Autores de la portada.
+ *     → Cita), porque el modelo no lleva los Autores destacados de la portada.
  *   · `EN_LA_IRA` es la primera de esas dos, y su único camino es el Tema «La ira», que tiene
  *     exactamente `MIN_CITAS_POR_TEMA` Citas: ella y las de Epicteto.
  *   · `EN_LA_COLECCION` es la segunda, y su único camino es la Colección «Breves», que tiene

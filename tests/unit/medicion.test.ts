@@ -3167,6 +3167,11 @@ describe('Historia 23.7 — toda salida interna de `dist/` dice su zona', () => 
      */
     for (const ruta of [...PAGINAS_2, OBRAS[2], '/buscar/', '/404']) expect([...sinLectura], ruta).toContain(ruta);
     for (const ruta of [OBRAS[0], OBRAS[1]]) expect([...sinLectura], ruta).not.toContain(ruta);
+    // Historia 28.3 — y la portada lleva las Obras con su cierre (la Obra indexable del corpus): sus
+    // enlaces están entre los juzgados, no fuera por un bloque vacío.
+    const portada = await leerMedida('/');
+    expect(portada).toMatch(/<li class="fila-de-bloque" data-zona="obras-de-portada"[^>]*><a href="\/obra\//);
+    expect(portada).toMatch(/<p data-zona="obras-de-portada"[^>]*><a href="\/obras\/"/);
   }, 240_000);
 
   /**
@@ -3187,6 +3192,8 @@ describe('Historia 23.7 — toda salida interna de `dist/` dice su zona', () => 
   const COLOCACION: readonly (readonly [ruta: string, enlace: string | RegExp, esperadas: readonly Declaracion[]])[] = [
     ['/', CITA, [{ zona: 'cita-del-dia' }]],
     ['/', '/autor/seneca/', [{ zona: 'atribucion' }, { zona: 'autores-de-portada' }]],
+    // Historia 28.4 — el cierre «Los {m} autores, de la A a la Z ›» lleva la zona de los destacados.
+    ['/', '/autores/', [{ zona: 'autores-de-portada' }]],
     ['/', '/obra/seneca/sobre-la-brevedad-de-la-vida/', [{ zona: 'atribucion' }]],
     ['/', '/tema/el-tiempo/', [{ zona: 'chip-de-tema' }]],
     ['/', '/coleccion/frases-cortas/', [{ zona: 'colecciones' }]],
@@ -3331,7 +3338,7 @@ describe('Historia 23.7 — toda salida interna de `dist/` dice su zona', () => 
       const enlaces = enlacesDe(await leerMedida(ruta)).filter((e) => e.enMain);
       const declaracionesDe = (href: string) => enlaces.filter((e) => e.href === href).map((e) => e.declaracion);
       expect(declaracionesDe(CITA), ruta).toEqual([{ zona: 'cita-del-dia' }]);
-      // En la portada, el Autor también sale de la lista de Autores.
+      // En la portada, el Autor también sale de los Autores destacados (28.4).
       expect(declaracionesDe('/autor/seneca/'), ruta).toContainEqual({ zona: 'atribucion' });
     }
   }, 240_000);

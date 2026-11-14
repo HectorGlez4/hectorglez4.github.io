@@ -220,6 +220,23 @@ describe('Historia 26.8 — los enlaces de una página construida', () => {
     expect(enlacesInternos(html)).toEqual(['/cita/visible']);
   });
 
+  it('Historia 28.3 — en la portada salta los dos subárboles que rotan, y el cierre de las Obras, fuera, cuenta', () => {
+    const html = [
+      '<main>',
+      '<section class="del-dia" data-jornada data-pagefind-ignore="all"><p class="ir" data-zona="cita-del-dia"><a href="/cita/del-dia/">Ver esta cita</a></p></section>',
+      '<section aria-labelledby="obras"><h2 id="obras">Obras</h2>',
+      '<div data-jornada data-pagefind-ignore="all"><ul class="obras">',
+      '<li class="fila-de-bloque" data-zona="obras-de-portada"><a href="/obra/a/b/"><span>B</span></a></li>',
+      '<li class="fila-de-bloque" data-zona="obras-de-portada"><a href="/obra/z/y/"><span>Y</span></a></li>',
+      '</ul></div>',
+      '<p data-zona="obras-de-portada"><a href="/obras/">Las 2 obras<span aria-hidden="true">&nbsp;›</span></a></p>',
+      '</section>',
+      '<section aria-labelledby="temas"><ul class="chips"><li><a href="/tema/el-tiempo/">El tiempo</a></li></ul></section>',
+      '</main>',
+    ].join('');
+    expect(enlacesInternos(html).sort()).toEqual(['/obras', '/tema/el-tiempo']);
+  });
+
   it('Historia 27.7 — de las tres formas del aviso de `/buscar/`, solo los Directorios del previo entran en el grafo', () => {
     const aviso = (atributos: string) =>
       `<div class="aviso-de-la-busqueda" data-sin-zona="directorios-del-aviso"${atributos}><p>Uno.</p><p>Dos.</p>` +
@@ -268,7 +285,7 @@ describe('Historia 26.8 — contención y veredicto', () => {
   it('una Cita fuera rompe nombrando su Tema bajo umbral y su recuento', () => {
     const { conjunto, porObra } = conjuntoDePrueba();
     const modelo = grafoDelModelo(conjunto, porObra);
-    // El sitio construido es exactamente el modelo: sin la lista de Autores de la portada.
+    // El sitio construido es exactamente el modelo: sin los Autores destacados de la portada.
     const veredicto = veredictoDeAlcance(conjunto, modelo, modelo);
     expect(rompeElBuild(veredicto)).toBe(true);
     expect(veredicto.aristasQueFaltan).toEqual([]);
@@ -284,7 +301,7 @@ describe('Historia 26.8 — contención y veredicto', () => {
     ).toBe(`  · /cita/x — su Tema «La ira» (la-ira) tiene 14 Citas, por debajo de MIN_CITAS_POR_TEMA (${MIN_CITAS_POR_TEMA})`);
   });
 
-  it('con la lista de Autores de la portada no rompe, y la línea no dice ninguna fecha', () => {
+  it('con los Autores destacados de la portada no rompe, y la línea no dice ninguna fecha', () => {
     const { conjunto, porObra } = conjuntoDePrueba();
     const modelo = grafoDelModelo(conjunto, porObra);
     const construido = new Map([...modelo].map(([o, d]) => [o, [...d]]));
