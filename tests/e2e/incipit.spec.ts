@@ -19,8 +19,9 @@ import { desviacionDelBarrido, sinDecidir } from './ayuda/barrido.ts';
  * página 1 de la Obra de título más largo del Corpus (el de Larra, 177 caracteres) con la Ficha
  * técnica completa y un incipit declarado, con el tope parcheado en la copia: que axe no da
  * infracción con el desplegable cerrado ni abierto, que Intro sobre su `<summary>` lo abre sin
- * mover el foco, que a 320 px no hay desplazamiento horizontal, y a 360 × 640 dónde empieza la
- * primera Tarjeta del listado —se anota y no es puerta: la 32.4 retira el salto y juzga SM-C4—.
+ * mover el foco, que a 320 px no hay desplazamiento horizontal, y que a 360 × 640, con la línea,
+ * «Dónde leer esta obra» y «Cómo empieza» cerrados (Historia 32.4, sin el salto), la primera
+ * Tarjeta del listado empieza en la primera pantalla: es puerta, y la medida se anota.
  *
  * Ningún incipit del Corpus real se declara: el corpus es de prueba y se construye en una copia.
  */
@@ -175,8 +176,9 @@ test.beforeEach(({}, info) => {
 });
 
 /*
- * El desplegable de «Cómo empieza». Desde la 32.5 la página 1 lleva detrás «Cómo citar», en el
- * mismo contenedor: se nombra el de la Obra por lo que pliega, no por ser el único.
+ * El desplegable de «Cómo empieza». Desde la 32.4 le precede «Dónde leer esta obra», en el mismo
+ * contenedor, y «Cómo citar» (32.5) va al pie por la decisión 1b: se nombra el de la Obra por lo que
+ * pliega.
  */
 const DESPLEGABLE = 'details.desplegable:has(p.incipit)';
 const SUMMARY = `${DESPLEGABLE} > summary`;
@@ -193,8 +195,16 @@ test.describe('«Cómo empieza», rendido', () => {
     await page.goto(`${SITIO}${OBRA}`);
     const desplegable = page.locator(DESPLEGABLE);
     await expect(desplegable).toHaveCount(1);
-    // Dos desplegables, «Cómo empieza» primero y «Cómo citar» (32.5) el último.
-    await expect(page.locator('details.desplegable > summary')).toHaveText([/^Cómo empieza/u, /^Cómo citar/u]);
+    // Dos hermanos arriba —«Dónde leer esta obra» (32.4) y «Cómo empieza»— y «Cómo citar» (32.5) al pie.
+    await expect(page.locator('header.cabecera-de-obra + div > details.desplegable > summary')).toHaveText([
+      /^Dónde leer esta obra/u,
+      /^Cómo empieza/u,
+    ]);
+    await expect(page.locator('details.desplegable > summary')).toHaveText([
+      /^Dónde leer esta obra/u,
+      /^Cómo empieza/u,
+      /^Cómo citar/u,
+    ]);
     await expect(desplegable).not.toHaveAttribute('open', /.*/u);
     await expect(page.locator(SUMMARY)).toHaveText(/^Cómo empieza/u);
     await expect(page.locator('p.incipit')).not.toBeVisible();
@@ -217,13 +227,18 @@ test.describe('«Cómo empieza», rendido', () => {
     await expect(page.locator(`${DESPLEGABLE} p`).first()).toBeVisible();
   });
 
-  test('a 360 × 640 se mide dónde empieza la primera Tarjeta del listado, con todo cerrado', async ({ page }) => {
+  test('a 360 × 640 la primera Tarjeta del listado empieza en la primera pantalla, con todo cerrado', async ({ page }) => {
     await page.setViewportSize({ width: 360, height: 640 });
     await page.goto(`${SITIO}${OBRA}`);
+    // Los desplegables, cerrados: la medida es la de la primera pantalla tal como se carga.
+    for (const details of await page.locator('details.desplegable').all()) {
+      await expect(details).not.toHaveAttribute('open', /.*/u);
+    }
     const caja = await page.locator('ul.listado > li').first().boundingBox();
     expect(caja).not.toBeNull();
     test.info().annotations.push({ type: 'medida', description: `primera Tarjeta a ${caja!.y} px` });
     console.log(`[incipit] primera Tarjeta del listado a ${caja!.y} px de 640`);
+    expect(caja!.y, 'la primera Tarjeta del listado se sale de la primera pantalla de 360 × 640').toBeLessThan(640);
   });
 
   test('a 320 px no hay desplazamiento horizontal, cerrado ni abierto', async ({ page }) => {

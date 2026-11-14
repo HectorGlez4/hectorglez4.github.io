@@ -154,16 +154,15 @@ test.describe('la línea de Ficha técnica, rendida', () => {
   });
 
   /*
-   * Historia 32.5 — la puerta de la 32.2, intacta y en `test.fixme`. Desde que toda página 1 de Obra
-   * lleva «Cómo citar» (cerrado, entre la Cabecera y el listado), esta Obra de prueba —el título de
-   * Larra y la línea de Ficha técnica más larga que se puede pedir— deja la primera Tarjeta a
-   * 669,5 px (2026-11-09), por debajo de los 640. Qué ceder en la primera pantalla con Ficha técnica
-   * y desplegables es la decisión pendiente de Héctor (bmad-ux), la misma que bloquea la 32.4; la
-   * aserción no se rebaja: vuelve a correr (quitando `fixme`) cuando él decida. Ninguna Obra del
-   * Corpus real está atada a Wikidata, y la puerta de toda página 1 con el Corpus real
-   * (`tests/e2e/accesibilidad.spec.ts`, peor 626,8 px) sigue estricta.
+   * Historias 32.2 y 32.4 — la puerta de la 32.2, otra vez en pie. La 32.5 la dejó en `test.fixme`
+   * con «Cómo citar» entre la Cabecera y el listado (669,5 px el 2026-11-09); con la decisión 1b,
+   * delegada por Héctor el 2026-11-14, «Cómo citar» va al pie y arriba solo queda «Dónde leer esta
+   * obra» (32.4), a 2 × `--unidad`: esta Obra de prueba —el título de Larra y la línea de Ficha
+   * técnica más larga que se puede pedir— vuelve a dejar la primera Tarjeta en la primera pantalla.
+   * La aserción no se rebaja. Ninguna Obra del Corpus real está atada a Wikidata, y la puerta de toda
+   * página 1 con el Corpus real (`tests/e2e/accesibilidad.spec.ts`) sigue estricta.
    */
-  test.fixme('a 360 × 640 la primera Tarjeta del listado empieza en la primera pantalla', async ({ page }) => {
+  test('a 360 × 640 la primera Tarjeta del listado empieza en la primera pantalla', async ({ page }) => {
     await page.setViewportSize({ width: 360, height: 640 });
     await page.goto(`${SITIO}${OBRA}`);
     const caja = await page.locator('ul.listado > li').first().boundingBox();

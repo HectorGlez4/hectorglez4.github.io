@@ -125,6 +125,8 @@ deferred:
 
 ## Spec Change Log
 
+- 2026-11-14 (desde la 32.4) — **Decisión delegada por Héctor (chat, 2026-11-14), decisión 1b.** «Cómo citar» deja de ser el último desplegable del contenedor de arriba y va al pie de la página 1 de la Obra: tras el listado, su paginación, «Buscar en esta obra» y los Temas, antes de la Nota, cerrado, con el mismo componente, zona y comportamiento, en su propio contenedor `data-pagefind-ignore="all"` a 5 × `--unidad`. Lo que esta historia afirmaba de su sitio («antes del listado», el foco «antes del listado») lo ajusta la 32.4 en `tests/unit/como-citar-obra-build.test.ts`, `tests/e2e/como-citar-obra.spec.ts` y `tests/unit/buscar-en.test.ts`; lo demás que comprueban sigue igual. La puerta de primera pantalla de `tests/e2e/ficha-tecnica.spec.ts` sale de `test.fixme`. Asentarlo en DESIGN.md/EXPERIENCE.md es de Héctor (`bmad-ux`), diferido en el spec de la 32.4.
+
 ## Review Triage Log
 
 ### 2026-11-09 — Review pass

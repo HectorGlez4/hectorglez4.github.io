@@ -5,7 +5,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { esquemaDeObra, obraAdmisible } from '../../src/lib/admision.ts';
 import { TIENDA_DE_PRUEBA } from './ayuda/construir.js';
-import { procedenciaCompuesta, textoParaCopiar } from '../../src/lib/atribucion.ts';
+import { procedenciaCompuesta, textoDeLoTomado, textoParaCopiar } from '../../src/lib/atribucion.ts';
 import type { Autor, Cita } from '../../src/lib/publicado.ts';
 import {
   edicionQueEncabeza,
@@ -1266,6 +1266,24 @@ describe('22.6 — dondeLeer, puro', () => {
       citasSinDocumento: 0,
       total: 3,
     });
+  });
+
+  it('32.4 — dos Fuentes y Citas sin documento: la de más Citas primero, cada una con su frase de lo tomado y ninguna de las que faltan', () => {
+    const citas: CitaParaDondeLeer[] = [
+      ...Array.from({ length: 5 }, () => ws('Cartas')),
+      ...Array.from({ length: 12 }, () => ({ fuente: { ...GB, url: 'https://www.gutenberg.org/cache/epub/1/pg1.txt' } })),
+      ...Array.from({ length: 10 }, () => ({})),
+    ];
+    const r = dondeLeer(citas);
+    expect(r.total).toBe(27);
+    expect(r.lineas.map((l) => [l.nombre, l.citas])).toEqual([
+      ['Project Gutenberg', 12],
+      ['Wikisource en español', 5],
+    ]);
+    expect(r.lineas.map((l) => textoDeLoTomado(l.citas, r.total))).toEqual([
+      'De esta edición se tomaron 12 de sus 27 citas.',
+      'De esta edición se tomaron 5 de sus 27 citas.',
+    ]);
   });
 
   it('repartida: cuenta las páginas y enlaza a la entrada de la obra', () => {

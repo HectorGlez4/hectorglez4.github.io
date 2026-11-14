@@ -8,13 +8,16 @@
  * la declaración de `src/lib/superficies.ts`. Una Obra que no se indexa es esta misma página,
  * sin marca ni aviso, con `noindex, follow` y fuera del sitemap y de Pagefind.
  *
- * Página 1: Cabecera con la línea de Ficha técnica si la ficha está atada a Wikidata (Historia
- * 32.2) y el salto «Dónde leer esta obra ↓» (Historia 24.7), «Cómo empieza» plegado si la ficha
- * declara un incipit que se ofrece (Historia 32.3), «Cómo citar» plegado tras él —el último
- * desplegable antes del listado, con su isla de copiar (Historia 32.5)—, Listado, Paginación,
- * «Buscar en esta obra» (Historia 27.8; debajo del listado desde la UX v8.4, decisión de Héctor del
- * 2026-10-30), Temas, «Dónde leer esta obra» y, si la ficha la trae, su nota (Historia 22.6).
- * Páginas 2+: solo Cabecera, sin salto, y Listado, y `noindex` por forma. Nada de prosa
+ * Página 1 (UX-DR124, Historia 32.4): Cabecera con la línea de Ficha técnica si la ficha está
+ * atada a Wikidata (Historia 32.2); los desplegables cerrados, en un solo contenedor y antes del
+ * listado —«Dónde leer esta obra» (Historias 22.6 y 32.4) y «Cómo empieza» si la ficha declara un
+ * incipit que se ofrece (Historia 32.3)—; Listado, Paginación, «Buscar en esta obra» (Historia
+ * 27.8; debajo del listado desde la UX v8.4, decisión de Héctor del 2026-10-30), el sitio de
+ * «Compartir en» (25.6, sin hueco), Temas, «Cómo citar» plegado con su isla de copiar (Historia
+ * 32.5; al pie por la decisión delegada por Héctor del 2026-11-14, para la primera pantalla) y, si
+ * la ficha la trae, su nota (Historia 22.6). El salto «Dónde leer esta obra ↓» de la 24.7 se
+ * retiró con la 32.4.
+ * Páginas 2+: solo Cabecera y Listado, y `noindex` por forma. Nada de prosa
  * compuesta (FR-51): ni sinopsis, ni contexto, ni adjetivos; todo lo que se dice sale de hechos
  * del Corpus, salvo la nota, que escribe Héctor a mano.
  *
@@ -44,8 +47,6 @@ import {
   temasPublicados,
 } from '../../../../lib/publicado.ts';
 import {
-  ANCLA_DE_DONDE_LEER,
-  ROTULO_DE_DONDE_LEER,
   dondeLeer,
   edicionQueEncabeza,
   obraTieneComoCitar,
@@ -120,12 +121,7 @@ const segmentos = segmentosDeObra(obra.nombre);
 const tarjeta = `/tarjeta/obra/${segmentos.autor}/${segmentos.obra}.png`;
 const canonica = new URL(ruta, Astro.site).href;
 const primera = pagina.currentPage === 1;
-/*
- * Historia 24.7 — un solo booleano decide si la página pinta «Dónde leer esta obra» y si lleva el
- * salto que va a ella: un salto sin destino sería un enlace muerto, y un destino sin salto, el
- * bloque al pie detrás de una página entera de Tarjetas (`CITAS_POR_PAGINA`). Hoy es toda página
- * 1, se indexe o no, congelada o no.
- */
+/* «Dónde leer esta obra» va en toda página 1, se indexe o no, congelada o no. */
 const conDondeLeer = primera && resumenDondeLeer !== undefined;
 /* Historia 32.5 — «Cómo citar», solo en la página 1; si la Obra lo tiene lo dice `obraTieneComoCitar`. */
 const conComoCitar = primera && obraTieneComoCitar(obra);
@@ -186,43 +182,26 @@ const enVenta =
         * ficha está atada a Wikidata y consta género, año o lengua; si no, no pinta nada.
         */}
       {primera && <FichaTecnica obra={obra} traductor={traductor} />}
-      {
-        /*
-         * Historia 24.7, UX-DR96 — el salto a «Dónde leer esta obra», en su propia línea y fuera de
-         * `p.de`, que declara la zona de la Atribución: es un ancla de la propia página, ya exenta
-         * de zona (AD-13), y va en la misma pestaña. La flecha es decoración. Fuera de Pagefind por
-         * lo mismo que la sección: no es texto buscable de cada Obra. Su texto es el del rótulo de
-         * destino, `ROTULO_DE_DONDE_LEER`: el salto se llama como el encabezado al que lleva.
-         */
-        conDondeLeer && (
-          <p class="salto" data-pagefind-ignore><a href={`#${ANCLA_DE_DONDE_LEER}`}>{ROTULO_DE_DONDE_LEER}<span aria-hidden="true">&nbsp;↓</span></a></p>
-        )
-      }
     </header>
 
     {
       /*
-       * Historias 32.3 y 32.5, UX-DR124, UX-DR128, UX-DR129 — los desplegables de la página 1,
-       * entre la Cabecera y el listado: «Cómo empieza» si la ficha declara un incipit que se
-       * ofrece y, el último, «Cómo citar» si la Obra lo tiene, como hermanos directos; sin
-       * ninguno, ni el contenedor. Fuera de Pagefind y del JSON-LD: ni el comienzo de la obra ni
-       * sus Referencias son texto buscable de cada Obra. A 3 × `--unidad` de la Cabecera (el
-       * filete del primer desplegable), con un atributo `style` para no añadir reglas a la hoja
-       * de esta página. Sin enlaces ni `data-zona`: la canónica es texto de las Referencias. La
-       * isla de copiar (`CopiarReferencia`, empaquetada) pone la fecha del visitante y copia.
+       * Historias 32.3 y 32.4, UX-DR124, UX-DR128 — los desplegables de arriba, cerrados, entre la
+       * Cabecera y el listado, solo en la página 1: «Dónde leer esta obra» (toda página 1) y «Cómo
+       * empieza» si la ficha declara un incipit que se ofrece. Son **hermanos directos** dentro de
+       * un solo contenedor, para que la regla `.desplegable + .desplegable` de la primitiva no doble
+       * el filete entre ellos. Fuera de Pagefind y del JSON-LD: no son texto buscable de cada Obra.
+       * A 2 × `--unidad` de la Cabecera (el filete del primer desplegable; decisión delegada por
+       * Héctor del 2026-11-14 para la primera pantalla), con un atributo `style` para no añadir
+       * reglas a la hoja de esta página. Sin `data-zona`: los enlaces de «Dónde leer» son de salida.
+       * «Cómo citar» (32.5) no va aquí: va al pie (decisión 1b, delegada por Héctor el 2026-11-14).
        */
-      (conIncipit || conComoCitar) && (
-        <div data-pagefind-ignore="all" style="margin-top: calc(var(--unidad) * 3)">
+      (conDondeLeer || conIncipit) && (
+        <div data-pagefind-ignore="all" style="margin-top: calc(var(--unidad) * 2)">
+          {conDondeLeer && <DondeLeer resumen={resumenDondeLeer!} enVenta={enVenta} />}
           {conIncipit && <ComoEmpieza incipit={incipit!} />}
-          {conComoCitar && (
-            <Desplegable rotulo="Cómo citar"><ComoCitar referencias={referenciasDeObra(obra, autor, edicion, canonica)} /></Desplegable>
-          )}
         </div>
       )
-    }
-    {
-      /* El guion de la isla, fuera del contenedor: «Cómo citar» es su último hijo. */
-      conComoCitar && <CopiarReferencia />
     }
 
     {/*
@@ -259,8 +238,24 @@ const enVenta =
       )
     }
 
-    {/* UX-DR42 — al pie de la página 1, después del Listado, la Paginación y los Temas. */}
-    {conDondeLeer && <DondeLeer resumen={resumenDondeLeer} enVenta={enVenta} />}
+    {
+      /*
+       * Historia 32.5, UX-DR129 — «Cómo citar», plegado, solo en la página 1 y si la Obra lo tiene:
+       * al pie, tras los Temas (o «Buscar en esta obra», sin Temas) y antes de la nota. Lo bajó del
+       * contenedor de arriba la decisión 1b, delegada por Héctor el 2026-11-14: con él como tercer
+       * desplegable la primera Tarjeta del listado salía de la primera pantalla de 360 × 640. A
+       * 5 × `--unidad` de lo que lo precede, el ritmo de los bloques del pie, en un atributo
+       * `style`. Fuera de Pagefind y del JSON-LD; sin enlaces ni `data-zona`: la canónica es texto
+       * de las Referencias. La isla de copiar (`CopiarReferencia`, empaquetada) pone la fecha del
+       * visitante y copia, y su guion va fuera del contenedor.
+       */
+      conComoCitar && (
+        <div data-pagefind-ignore="all" style="margin-top: calc(var(--unidad) * 5)">
+          <Desplegable rotulo="Cómo citar"><ComoCitar referencias={referenciasDeObra(obra, autor, edicion, canonica)} /></Desplegable>
+        </div>
+      )
+    }
+    {conComoCitar && <CopiarReferencia />}
 
     {
       /*
@@ -320,29 +315,6 @@ const enVenta =
     overflow-wrap: anywhere;
     padding-block: calc((var(--zona-de-toque) - var(--cuerpo-md) * 1.6) / 2);
     margin-block: calc((var(--cuerpo-md) * 1.6 - var(--zona-de-toque)) / 2);
-  }
-
-  /*
-   * Historia 24.7, UX-DR96 — el salto. 3 × `--unidad` de aire sobre su línea es lo mínimo: la zona
-   * de «de {Autor}» asoma 10 px bajo `p.de`, y la de este enlace (`inline-flex` de 44 px, que llena
-   * la línea de su párrafo) empieza en el borde de `p.salto`; 24 − 10 deja 14 px entre las dos, por
-   * encima de los 8 que pide UX-DR96 (con 2 × serían 6). Siena, porque es una acción, y subrayado
-   * siempre: no hay regla de `:hover` que lo quite. El foco es el anillo global de `tokens.css`.
-   */
-  .salto {
-    margin: calc(var(--unidad) * 3) 0 0;
-    font-family: var(--sans);
-    font-size: var(--cuerpo-md);
-    line-height: var(--interlineado-cuerpo-md);
-  }
-
-  .salto a {
-    display: inline-flex;
-    align-items: center;
-    min-height: var(--zona-de-toque);
-    color: var(--siena);
-    text-decoration-line: underline;
-    text-decoration-thickness: var(--grosor-filete);
   }
 
   /* Sin clase global para esto: es la misma regla que `Paginacion.astro` declara para sí. */

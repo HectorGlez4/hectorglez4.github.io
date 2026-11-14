@@ -123,14 +123,16 @@ describe('Historia 32.2 — la línea de Ficha técnica en el dist/', () => {
     pagina1 = paginaConstruida(proyecto, OBRA);
   }, 600_000);
 
-  it('va dentro de la Cabecera de Obra, tras «de {Autor} · {año}» y antes del salto', () => {
+  it('va dentro de la Cabecera de Obra, tras «de {Autor} · {año}» y antes del contenedor de los desplegables', () => {
     const cabecera = /<header class="cabecera-de-obra"[^>]*>[\s\S]*?<\/header>/u.exec(pagina1)?.[0] ?? '';
     const de = cabecera.indexOf('<p class="de"');
     const linea = cabecera.indexOf('<p class="ficha-tecnica"');
-    const salto = cabecera.indexOf('<p class="salto"');
     expect(de).toBeGreaterThan(-1);
     expect(linea).toBeGreaterThan(de);
-    expect(salto).toBeGreaterThan(linea);
+    // Historia 32.4 — sin el salto: la línea es lo último de la Cabecera, y tras ella el contenedor.
+    expect(cabecera).not.toContain('class="salto"');
+    const tras = pagina1.slice(pagina1.indexOf(cabecera) + cabecera.length).trimStart();
+    expect(tras).toMatch(/^<div data-pagefind-ignore="all" style="margin-top: calc\(var\(--unidad\) \* 2\)"[^>]*><details class="desplegable"/u);
   });
 
   it('dice sus partes en orden, con el traductor de la edición que encabeza, y el lector oye comas', () => {

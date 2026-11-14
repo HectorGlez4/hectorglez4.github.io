@@ -1304,7 +1304,7 @@ export interface CitaParaDondeLeer {
   procedencia?: { traduccion?: { traductor: string; año?: number } } | null;
 }
 
-/** Una línea de «Edición cotejada, gratuita»: una Fuente, o una traducción en una Fuente. */
+/** Una línea del grupo «Gratis» de «Dónde leer esta obra»: una Fuente, o una traducción en una Fuente. */
 export interface LineaDondeLeer {
   /** El nombre de la Fuente (`rotuloDeFuente`). Es el texto del enlace. */
   nombre: string;
@@ -1403,21 +1403,10 @@ export function entradaComun(urls: readonly string[]): string | undefined {
 }
 
 /**
- * El `id` de «Dónde leer esta obra» — Historia 24.7, UX-DR96.
+ * El nombre de «Dónde leer esta obra» — Historias 24.7 y 32.4, UX-DR125.
  *
- * Un solo dueño para las tres lecturas del identificador: el `href` del salto de la Cabecera de
- * Obra, el `id` del rótulo de la sección y su `aria-labelledby`. Escrito en tres sitios, cambiar
- * uno dejaría el salto apuntando a nada sin que el build lo notara. El valor no cambia: es el
- * fragmento que ya llevaba la sección desde la 22.6.
- */
-export const ANCLA_DE_DONDE_LEER = 'donde-leer-esta-obra';
-
-/**
- * El nombre de «Dónde leer esta obra» — Historia 24.7, UX-DR96.
- *
- * El texto del rótulo de la sección y el del salto que va a ella son el mismo a propósito: quien
- * activa «Dónde leer esta obra ↓» tiene que llegar a un encabezado que se llame igual. Escrito
- * dos veces, renombrar la sección dejaría al salto anunciando el nombre viejo.
+ * El texto del `<summary>` del desplegable de la página 1 de la Obra (`DondeLeer.astro`). Desde
+ * la 32.4 no hay salto ni ancla que vayan a él: el desplegable está antes del listado.
  */
 export const ROTULO_DE_DONDE_LEER = 'Dónde leer esta obra';
 
@@ -1498,7 +1487,11 @@ export function obraTieneComoCitar(obra: Pick<ObraResuelta, 'nombre'>): boolean 
 }
 
 /**
- * Dónde leer una Obra — Historia 22.6, UX-DR42.
+ * Dónde leer una Obra — Historias 22.6 y 32.4, UX-DR125, UX-DR127.
+ *
+ * Es el **punto con nombre** que decide qué ediciones gratuitas enseña «Dónde leer esta obra»: hoy
+ * no excluye nada, y lo ampliará la 35.9 (las exclusiones de una Obra con derechos vigentes). Cada
+ * línea lleva sus `citas`, de las que sale la frase de lo tomado (`textoDeLoTomado`).
  *
  * Agrupa las Citas **con Fuente** por (Fuente, traductor): una traducción es otra edición, así
  * que dos traductores en la misma Fuente son dos líneas. Las ordena de más a menos Citas y, a

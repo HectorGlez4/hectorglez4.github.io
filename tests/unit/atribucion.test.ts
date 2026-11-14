@@ -17,6 +17,7 @@ import {
   referenciasDeObra,
   type EstiloDeReferencia,
   type SegmentoDeReferencia,
+  textoDeLoTomado,
 } from '../../src/lib/atribucion.ts';
 import { aplanarAutor, type Autor, type Cita } from '../../src/lib/publicado.ts';
 import type { ObraResuelta } from '../../src/lib/obras.ts';
@@ -571,5 +572,42 @@ describe('Historia 30.4 — el Fragmento para insertar', () => {
     expect(nombreEnAtribucion(MARTI)).toBe('José Martí');
     expect(nombreEnAtribucion(MARTI_SIN_REVISAR)).toBe('José Martí');
     expect(nombreEnAtribucion(autorDe('Horacio', 'Horacio'))).toBe('Horacio');
+  });
+});
+
+/*
+ * Historia 32.4, UX-DR127, FR-54 — la frase de lo tomado de cada edición en «Dónde leer esta obra».
+ * Siempre en positivo: dice cuántas Citas se tomaron, nunca cuántas no tienen documento.
+ */
+describe('Historia 32.4 — textoDeLoTomado', () => {
+  it('una sola Cita: «se tomó su cita»', () => {
+    expect(textoDeLoTomado(1, 1)).toBe('De esta edición se tomó su cita.');
+  });
+
+  it('todas las de la Obra: «se tomaron sus {n} citas»', () => {
+    expect(textoDeLoTomado(27, 27)).toBe('De esta edición se tomaron sus 27 citas.');
+    expect(textoDeLoTomado(2, 2)).toBe('De esta edición se tomaron sus 2 citas.');
+  });
+
+  it('dos Fuentes y Citas sin documento: cada línea con su parte del total, ninguna frase de las que faltan', () => {
+    // 12 + 5 cotejadas y 10 sin documento: n = 27 para las dos líneas.
+    const frases = [textoDeLoTomado(12, 27), textoDeLoTomado(5, 27)];
+    expect(frases).toEqual([
+      'De esta edición se tomaron 12 de sus 27 citas.',
+      'De esta edición se tomaron 5 de sus 27 citas.',
+    ]);
+    for (const frase of frases) expect(frase).not.toMatch(/documento|no tienen/u);
+    expect(textoDeLoTomado(1, 3)).toBe('De esta edición se tomaron 1 de sus 3 citas.');
+  });
+
+  it.each([
+    [0, 3],
+    [4, 3],
+    [1.5, 3],
+    [1, 2.5],
+    [Number.NaN, 3],
+    [-1, 3],
+  ])('lanza con k = %s y n = %s, nombrándolos', (k, n) => {
+    expect(() => textoDeLoTomado(k, n)).toThrow(new RegExp(`k = ${k} y n = ${n}`, 'u'));
   });
 });

@@ -992,6 +992,25 @@ sans y «{n} citas de {Autor}, {año}», sin nota ni traductor. En `/buscar/`, e
 resultado de Obra sale del metadato `data-pagefind-meta="autor"` del enlace de la Cabecera:
 quitarlo o moverlo fuera de `data-pagefind-body` deja los resultados de Obra sin Autor.
 
+**La página 1, en su orden (Historia 32.4, UX-DR124).** Cabecera (`h1`, «de {Autor} · {año}» y la
+línea de Ficha técnica si la hay) → un solo contenedor `data-pagefind-ignore="all"` a
+2 × `--unidad`, con los desplegables cerrados como hermanos directos —«Dónde leer esta obra» y,
+si hay incipit, «Cómo empieza»— → `ul.listado` → Paginación → «Buscar en esta obra» → [sitio de
+«Compartir en», 25.6, sin hueco] → Temas → «Cómo citar» (32.5), plegado en su propio contenedor a
+5 × → la nota. «Cómo citar» va al pie y la distancia es de 2 × por la **decisión delegada por
+Héctor el 2026-11-14**: con tres desplegables arriba la primera Tarjeta salía de la primera
+pantalla de 360 × 640 (puerta de `tests/e2e/incipit.spec.ts`); asentarlo en `DESIGN.md` y
+`EXPERIENCE.md` queda para Héctor con `bmad-ux`. El salto «Dónde leer esta obra ↓» de la 24.7 y su
+ancla se retiraron: ningún enlace ni `id` es `donde-leer-esta-obra`. «Dónde leer esta obra»
+(`DondeLeer.astro`) agrupa las ediciones en «Gratis» (`RotuloDeGrupo.astro`, un `<p>`, nunca un
+encabezado: el `<summary>` no lo es) y tras cada línea dice lo tomado de ella con
+`textoDeLoTomado` de `src/lib/atribucion.ts` —«De esta edición se tomó su cita.», «…se tomaron sus
+{n} citas.», «…se tomaron {k} de sus {n} citas.»—, siempre en positivo: ninguna frase de las Citas
+sin documento. Sin ninguna Cita con Fuente, solo «Ninguna de sus citas tiene todavía documento
+cotejado.». SM-C4 —las salidas de la zona `listado` entre lecturas de la Página de Obra— se juzga
+por ventanas desde `DESPLIEGUE_DE_LA_OBRA_COMO_DESTINO` (`src/lib/umbrales.ts`, `undefined`; le da
+valor Héctor el día que llega en vivo), con el corte del incipit partiendo su serie.
+
 **El orden del libro (Historia 24.1).** La Página de Obra lista sus Citas —en todas sus páginas
 y en su `ItemList`— en el orden en que aparecen en sus documentos, no por slug, y no lo dice en
 ninguna línea. Dónde cae cada Cita lo entrega la colección `posiciones` de `src/content.config.ts`,
@@ -1252,9 +1271,10 @@ toda Página de Cita. Sin `data-zona` —no hay enlaces: la canónica es texto�
 
 ### Cómo citar la Obra (Historia 32.5)
 
-La página 1 de toda Obra —se indexe o no— lleva su «Cómo citar»: el **último desplegable antes del
-listado**, en el mismo contenedor `data-pagefind-ignore="all"` que «Cómo empieza» (detrás de él si
-hay incipit, solo si no; la 32.4 antepondrá «Dónde leer»). Las 2+ no lo llevan. Lo pregunta
+La página 1 de toda Obra —se indexe o no— lleva su «Cómo citar»: un desplegable **al pie**, tras
+los Temas (o «Buscar en esta obra», sin ellos) y antes de la nota, en su propio contenedor
+`data-pagefind-ignore="all"` a 5 × `--unidad` (decisión 1b, delegada por Héctor el 2026-11-14, en
+la 32.4: arriba echaba de la primera pantalla la primera Tarjeta). Las 2+ no lo llevan. Lo pregunta
 `obraTieneComoCitar` (`src/lib/obras.ts`; hoy `true`, la 35.9 añade las exclusiones).
 
 - Lo compone `referenciaDeObra`/`referenciasDeObra` de `src/lib/atribucion.ts`, hermanas de
@@ -1666,8 +1686,8 @@ ficha.
 Todo el camino está construido y apagado: el conjunto cerrado de tiendas `TIENDAS` en
 `src/lib/ingreso.ts`, el campo `ediciones` de la Ficha de Obra juzgado por el esquema
 (`src/lib/admision.ts`), `urlDeEdicion`, que añade la marca a la dirección al construir, y el
-bloque «Ediciones en venta» (`src/components/EdicionesEnVenta.astro`) dentro de «Dónde leer
-esta obra», tras la edición cotejada. El repositorio versiona **`TIENDAS` vacío**, y mientras lo
+bloque «Ediciones en venta» (`src/components/EdicionesEnVenta.astro`) dentro del desplegable
+«Dónde leer esta obra», tras el grupo «Gratis». El repositorio versiona **`TIENDAS` vacío**, y mientras lo
 esté el esquema rechaza toda edición: ninguna ficha puede declarar una.
 
 1. **La primera tienda, con su marca, la declara Héctor** en `TIENDAS`

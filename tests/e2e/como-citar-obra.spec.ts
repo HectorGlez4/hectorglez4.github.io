@@ -148,7 +148,12 @@ test.describe('Historia 32.5 — «Cómo citar» de la Obra, con JavaScript', ()
     expect(await emitidosDeCopiar(page)).toEqual([]);
   });
 
-  test('el foco: desde «de {Autor}», el `<summary>` de «Cómo citar» llega tras los anteriores y antes del listado', async ({ page }) => {
+  /*
+   * Decisión 1b (delegada por Héctor, 2026-11-14, Historia 32.4): «Cómo citar» va al pie. Desde «de
+   * {Autor}», la tabulación llega al listado sin pasar por él; y desde lo último enfocable de los
+   * Temas —o de «Buscar en esta obra», sin Temas— el siguiente Tab es su `<summary>`.
+   */
+  test('el foco: «Cómo citar» no está antes del listado, y su `<summary>` sigue a los Temas (o a «Buscar en esta obra»)', async ({ page }) => {
     await page.goto(OBRA!);
     await page.locator('.cabecera-de-obra p.de a').focus();
     const enfocados: string[] = [];
@@ -164,11 +169,14 @@ test.describe('Historia 32.5 — «Cómo citar» de la Obra, con JavaScript', ()
       enfocados.push(que);
       if (que === 'listado') break;
     }
-    const comoCitar = enfocados.indexOf('summary:Cómo citar');
-    expect(comoCitar, enfocados.join(', ')).toBeGreaterThan(-1);
-    // Es el último `<summary>` antes del listado, y el listado llega justo después.
-    expect(enfocados.slice(comoCitar + 1, comoCitar + 2), enfocados.join(', ')).toEqual(['listado']);
-    expect(enfocados.slice(0, comoCitar).filter((e) => e === 'listado')).toEqual([]);
+    expect(enfocados.at(-1), enfocados.join(', ')).toBe('listado');
+    expect(enfocados, enfocados.join(', ')).not.toContain('summary:Cómo citar');
+    // Lo último enfocable antes de él: el último chip de Temas o, sin Temas, el botón del formulario.
+    const temas = page.locator('section.temas a');
+    const anterior = (await temas.count()) > 0 ? temas.last() : page.locator('form.buscar-en button').last();
+    await anterior.focus();
+    await page.keyboard.press('Tab');
+    await expect(resumen(page)).toBeFocused();
     // Abierto, los tres botones siguen al rótulo.
     await resumen(page).focus();
     await page.keyboard.press('Enter');

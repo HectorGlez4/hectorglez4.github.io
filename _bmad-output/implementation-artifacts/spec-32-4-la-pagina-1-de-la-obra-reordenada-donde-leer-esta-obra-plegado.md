@@ -2,8 +2,8 @@
 title: 'La página 1 de la Obra, reordenada: «Dónde leer esta obra» plegado y por formato, antes del listado'
 type: 'feature'
 created: '2026-11-08'
-status: 'blocked'
-baseline_revision: '6400bfb5d27486a3120be043ef2278f42930628a'
+status: 'done'
+baseline_revision: '0eb8fdaf5f6de5ee073bd9b5a8a6a606cde292cc'
 review_loop_iteration: 0
 followup_review_recommended: false
 context:
@@ -13,19 +13,12 @@ context:
 warnings: ['oversized']
 deferred:
   - summary: >-
-      Pendiente de Héctor (bmad-ux): asentar en DESIGN.md la distancia de 2 × unidad del contenedor de desplegables.
+      pendiente de Héctor (bmad-ux): asentar en DESIGN.md/EXPERIENCE.md "Cómo citar" al pie de la página 1 de la Obra y la distancia de 2 × unidad.
     evidence: |-
-      Decisión delegada por Héctor (chat, 2026-11-14): el contenedor único de desplegables bajo la Cabecera pasa de 3 × `--unidad` a 2 × `--unidad`, mismo orden. Aplicada en la rama local v9/wip-32-4-fusion (b478e35f48).
+      Decisión delegada por Héctor (chat, 2026-11-14): el contenedor único de desplegables bajo la Cabecera va a 2 × `--unidad` (no 3 ×), y —decisión 1b, del mismo día, ante los 683,5 px con tres desplegables— «Cómo citar» (32.5) sale de ese contenedor y va al pie de la página 1: tras el listado, su paginación, «Buscar en esta obra» y los Temas, antes de la Nota, cerrado, con el mismo componente, zona y comportamiento, en su propio contenedor a 5 × `--unidad`. UX-DR124 y UX-DR129 siguen diciendo otro orden; los artefactos de planificación no se tocan.
     location: >-
       src/pages/obra/[autor]/[slug]/[...page].astro
     severity: medium
-  - summary: >-
-      Pendiente de Héctor (bmad-ux): la primera pantalla de 360 × 640 con tres desplegables (Dónde leer, Cómo empieza, Cómo citar) no cabe con la distancia delegada; falta decidir qué más ceder.
-    evidence: |-
-      Con la 32.5 fusionada y el contenedor a 2 × `--unidad`, `tests/e2e/incipit.spec.ts` (escritorio, 360 × 640, Larra con Ficha técnica completa e incipit, todo cerrado) mide la primera Tarjeta a 683,5 px (2026-11-14). La decisión de 8 px se calculó sobre 646,5 px con dos desplegables; «Cómo citar» (32.5, en toda página 1) suma otros 45 px. Faltan 43,5 px.
-    location: >-
-      tests/e2e/incipit.spec.ts:236
-    severity: high
 ---
 
 <intent-contract>
@@ -130,7 +123,18 @@ deferred:
 
 ## Spec Change Log
 
+- 2026-11-14 — **Decisión delegada por Héctor (chat, 2026-11-14), decisión 1b.** «Cómo citar» (32.5) sale del contenedor de arriba y va al pie de la página 1: tras el listado y su paginación, «Buscar en esta obra» y los Temas, y antes de la Nota de la ficha; sigue siendo un desplegable cerrado con el mismo componente, zona (ninguna) y comportamiento, en su propio contenedor `data-pagefind-ignore="all"` a 5 × `--unidad` (el ritmo del pie), con la isla `CopiarReferencia` tras él. El contenedor de arriba conserva «Dónde leer esta obra» y luego «Cómo empieza», a 2 × `--unidad`. Esto sustituye, en la página, a la frase de Boundaries «la 32.5 meterá "Cómo citar" detrás, en el mismo contenedor» (el contrato no se reescribe). Lo motiva el Block If: con tres desplegables arriba la medida daba 683,5 px. Se ajustan las pruebas de la 32.5 que afirmaban su sitio (`tests/unit/como-citar-obra-build.test.ts`, `tests/e2e/como-citar-obra.spec.ts`, `tests/unit/buscar-en.test.ts`) sin rebajar lo demás que comprueban, y AGENTS.md. Asentarlo en DESIGN.md/EXPERIENCE.md queda diferido para Héctor (`bmad-ux`).
+
 ## Review Triage Log
+
+### 2026-11-14 — Review pass
+- intent_gap: 0
+- bad_spec: 0
+- patch: 0
+- defer: 0
+- reject: 0
+- addressed_findings:
+  - none
 
 ## Design Notes
 
@@ -138,6 +142,8 @@ deferred:
 - **Primera pantalla, medida (2026-11-08).** Con la página 1 reordenada (sin el salto, contenedor único a 3 × de la Cabecera, «Dónde leer esta obra» y «Cómo empieza» hermanos y cerrados, listado a 4 × con su filete), `tests/e2e/incipit.spec.ts` en `escritorio` a 360 × 640 sobre la Obra de Larra con Ficha técnica completa e incipit mide la primera Tarjeta del listado a **646,5 px** (≥ 640): se cumple el Block If. Desglose bajo la Cabecera: 24 (contenedor) + 1 (filete) + 44 («Dónde leer») + 44 («Cómo empieza») + 1 (filete) + 32 (listado) + 1 (filete del listado) = 147 px, frente a los 170 de antes (salto 68 + «Cómo empieza» 70 + 32). Faltan 6,5 px; mover distancias o el orden lo decide Héctor con `bmad-ux`.
 - **Decisión delegada por Héctor (chat, 2026-11-14).** El contenedor único de desplegables bajo la Cabecera va a 2 × `--unidad` (16 px) en lugar de 3 × (24 px), mismo orden; todo lo demás como dice el spec. Se calculó para los 646,5 px de dos desplegables (≈ 638,5 < 640).
 - **Primera pantalla, medida con la 32.5 (2026-11-14).** Fusionada la 32.5 —«Cómo citar», cerrado, en toda página 1, último hermano del contenedor— y aplicada la decisión delegada, la misma medida da **683,5 px**: 646,5 + 45 («Cómo citar» y su filete) − 8. Sigue el Block If; faltan 43,5 px y la decisión delegada no los cubre. Lo construido está en la rama local `v9/wip-32-4-fusion` (b478e35f48, sobre 25ee042e57).
+- **Decisión 1b (delegada por Héctor, chat, 2026-11-14).** «Cómo citar» va al pie de la página 1, antes de la Nota; arriba quedan «Dónde leer esta obra» y «Cómo empieza» a 2 × `--unidad`. Estimación: 683,5 − 45 ≈ 638,5 px. Medida: ver «Primera pantalla, medida con la decisión 1b».
+- **Primera pantalla, medida con la decisión 1b (2026-11-14).** Con «Cómo citar» al pie y arriba «Dónde leer esta obra» y «Cómo empieza» cerrados a 2 × `--unidad`, `tests/e2e/incipit.spec.ts` en `escritorio` a 360 × 640 sobre la Obra de Larra con Ficha técnica completa e incipit mide la primera Tarjeta del listado a **638,5 px** (< 640: la puerta pasa, con 1,5 px de margen). Desglose bajo la Cabecera: 16 (contenedor) + 1 (filete) + 44 («Dónde leer») + 44 («Cómo empieza») + 1 (filete) + 32 (listado) + 1 (filete del listado) = 139 px. La puerta de la 32.2 (`tests/e2e/ficha-tecnica.spec.ts`, sin incipit) vuelve a correr fuera de `test.fixme`: 593,5 px. Con el Corpus real (`tests/e2e/accesibilidad.spec.ts`, toda página 1), la peor deja el fin de la primera línea de la primera Cita a 550,8 px.
 - **Un contenedor, hermanos.** Dos `div` con su propio `data-pagefind-ignore` separarían los `<details>` y la regla `.desplegable + .desplegable` no actuaría: dos filetes juntos.
 - **El rótulo de grupo no es encabezado.** El `h2` pasa a `<summary>` (UX-DR125) y Desplegable prohíbe encabezados en él; un `h3` dentro del contenido colgaría del `h1`. `EdicionesEnVenta` conserva su `h3` porque la historia la quiere «tal como lo pinta»; la 33.2 la reparte.
 - **La hoja.** `DondeLeer.astro` se pinta en toda página 1, así que su `<style>` no crea hueco en páginas que no lo usan; la página no gana reglas (el contenedor lleva `style`).
@@ -153,7 +159,35 @@ deferred:
 
 ## Auto Run Result
 
-Status: blocked
-Blocking condition: Block If de la primera pantalla, otra vez — con la 32.5 fusionada (tres desplegables: «Dónde leer esta obra», «Cómo empieza», «Cómo citar») y el contenedor a 2 × `--unidad` por la decisión delegada por Héctor (chat, 2026-11-14), a 360 × 640 en la Obra de Larra con Ficha técnica completa, incipit y todo cerrado, la primera Tarjeta del listado empieza a 683,5 px (≥ 640; faltan 43,5). La decisión de 8 px se tomó sobre los 646,5 px de dos desplegables. Qué más ceder es de Héctor (`bmad-ux`).
-Baseline: 6400bfb5d27486a3120be043ef2278f42930628a.
-Lo construido: la rama local `v9/wip-32-4-fusion` (b478e35f48) lleva el trabajo de `v9/wip-32-4` (5bbead812a, que se conserva) llevado sobre `v9/epica-32` (25ee042e57) con los conflictos de la página y de `tests/e2e/incipit.spec.ts` resueltos conservando los tres hermanos, y el contenedor a 2 × `--unidad`. `astro check`: solo el error esperado de `tests/unit/obra-pagina.test.ts` (importa la `ANCLA` retirada). `tests/e2e/incipit.spec.ts` en `escritorio`: 2 verdes, la puerta de 360 × 640 en rojo con 683,5 px. Siguen sin tocar las pruebas unitarias, AGENTS.md, el resto de e2e y los snapshots de tipografía. No se corrió `npm test`.
+Status: done
+Baseline: 0eb8fdaf5f6de5ee073bd9b5a8a6a606cde292cc (la reanudación; el trabajo de `v9/wip-32-4-fusion`, b478e35f48, se trae por cherry-pick en el mismo commit).
+
+**Resumen.** La página 1 de la Obra, reordenada: «Dónde leer esta obra» es un desplegable cerrado (`DondeLeer.astro` sobre `Desplegable.astro`), primero del contenedor entre la Cabecera y el listado y a 2 × `--unidad` de ella, con «Cómo empieza» de hermano; el grupo «Gratis» (`RotuloDeGrupo.astro`) con la frase de lo tomado de cada edición (`textoDeLoTomado`); sin el salto ni el ancla de la 24.7. Por la decisión 1b delegada por Héctor (chat, 2026-11-14), «Cómo citar» (32.5) va al pie, tras los Temas y antes de la nota, en su propio contenedor a 5 × `--unidad`. `DESPLIEGUE_DE_LA_OBRA_COMO_DESTINO` (`undefined`) y el juicio SM-C4 (`continuacion-desde-listado`, unidad de la Página de Obra, corte del incipit).
+
+**Ficheros.**
+- `src/pages/obra/[autor]/[slug]/[...page].astro` — sin salto ni sus reglas; contenedor de arriba con «Dónde leer» y «Cómo empieza» a 2 ×; «Cómo citar» al pie a 5 ×; cabecera al día.
+- `src/components/DondeLeer.astro` — desplegable con «Gratis», la frase de lo tomado y el caso sin cotejo.
+- `src/components/RotuloDeGrupo.astro` — nuevo: el rótulo de grupo, un `<p>`.
+- `src/components/Rotulo.astro`, `src/lib/obras.ts` — sin `ANCLA_DE_DONDE_LEER`; docs al día.
+- `src/lib/atribucion.ts` — `textoDeLoTomado`.
+- `src/lib/umbrales.ts` — `DESPLIEGUE_DE_LA_OBRA_COMO_DESTINO`.
+- `tools/lib/lineaBase.ts` — `unidadDeLaPaginaDeObra`, la tasa «continuación desde listado» y SM-C4.
+- `tests/unit/{obra-pagina,ediciones-en-venta,ficha-tecnica-build,buscar-en,incipit-build,tarjeta-de-obra,como-citar-obra-build}.test.ts` — el salto y el pie reescritos; orden, distancias, sitio de «Compartir en», byte a byte con afiliación; «Cómo citar» al pie.
+- `tests/unit/{atribucion,obras,linea-base}.test.ts` — `textoDeLoTomado`, dos Fuentes y SM-C4 con respuestas fijas.
+- `tests/e2e/{accesibilidad,incipit,como-citar-obra,ficha-tecnica}.spec.ts` — el `describe` de la 24.7 pasa a la 32.4 (sin salto, tabulación, Intro, 320 px, distancias); la puerta de 360 × 640 de la 32.3 y la de la 32.2 (fuera de `test.fixme`).
+- `tests/e2e/tipografia-calculada.spec.ts-snapshots/tipografia-obra-{movil,escritorio}.json` — regenerados.
+- `AGENTS.md` — el orden de la página 1, la frase de lo tomado, SM-C4 y «Cómo citar» al pie.
+- `_bmad-output/implementation-artifacts/spec-32-5-como-citar-la-obra.md` — su registro de cambios anota la decisión 1b; `sprint-status.yaml` — fuera el comentario de bloqueo de la 32-4.
+
+**Revisión.** Sin hallazgos externos en esta pasada: 0 parches, 0 diferidos, 0 rechazados. Recomendación de revisión de seguimiento: `false` (parches 0 high, 0 medium, 0 low; puntuación 0).
+
+**Verificación.**
+- `npx astro check` — 0 errores, 0 avisos.
+- Unitarias, por fichero: `obra-pagina`, `buscar-en`, `incipit-build`, `ediciones-en-venta`, `ficha-tecnica-build`, `como-citar-obra-build`, `tarjeta-de-obra`, `desplegable`, `tipografia-en-tokens`, `medicion`, `ingreso-construido`, `atribucion`, `linea-base`, `obras` — verde.
+- `FECHA_JORNADA=2026-11-08 npm run build` — pasa (alcance, indexables, peso).
+- `npm test` (desatendido) — 175 ficheros, 7.927 pruebas, verde.
+- `npx playwright test tests/e2e/incipit.spec.ts tests/e2e/ficha-tecnica.spec.ts tests/e2e/como-citar-obra.spec.ts --project=escritorio` — 15 verdes, 1 saltada (la página 2 de la Obra de hoy no existe). **Puerta de 360 × 640: 638,5 px** (Larra, Ficha técnica + incipit, todo cerrado); la de la 32.2, 593,5 px.
+- `npx playwright test tests/e2e/accesibilidad.spec.ts -g "Obra"` (escritorio y móvil) — 90 verdes; peor página 1 del Corpus real, 550,8 px.
+- `tests/e2e/tipografia-calculada.spec.ts -g "cambian obra: cada" --update-snapshots` — regenerados y verdes.
+
+**Riesgos residuales.** La puerta de la primera pantalla pasa con 1,5 px de margen en el peor caso sintético (Larra con Ficha técnica completa e incipit): cualquier px más bajo la Cabecera la vuelve a romper. UX-DR124/UX-DR129 en los artefactos de planificación siguen diciendo otro sitio para «Cómo citar» hasta que Héctor lo asiente con `bmad-ux` (diferido).

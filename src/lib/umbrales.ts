@@ -215,9 +215,28 @@ export const DESPLIEGUE_DE_CITAR_Y_LLEVARSE: string | undefined = undefined;
  * primer despliegue en que las dos cosas se cumplen, tras dar valor al tope. `undefined` mientras
  * no haya llegado. **Le da valor Héctor, en un commit aparte del día en que llega, y ningún agente
  * la elige.** Parte la serie de la continuación de la Página de Obra (`continuacion-de-obra`, que
- * juzga la 32.4): la página 1 de una Obra con incipit tiene otra primera pantalla.
+ * juzga SM-C4 en la orden de la línea base, Historia 32.4): la página 1 de una Obra con incipit
+ * tiene otra primera pantalla.
  */
 export const DESPLIEGUE_DEL_INCIPIT: string | undefined = undefined;
+
+/**
+ * La llegada en vivo de «La Obra como destino» — Historia 32.4, AD-9, AD-13, PRD §7 (SM-C4).
+ *
+ * Es la jornada UTC del primer día en que la página 1 de Obra cambia en el sitio en vivo —«Dónde
+ * leer esta obra» plegado antes del listado y sin el salto de la 24.7—: la del trabajo «Desplegar»
+ * de Actions que la lleva, nunca la del merge, con la misma forma que las de arriba: `undefined`
+ * mientras no haya llegado. **Le da valor Héctor, en un commit aparte del día en que llega, y
+ * ningún agente la elige.**
+ *
+ * La lee la orden de la línea base (23.10) para contar desde ella las ventanas de SM-C4 —la
+ * continuación desde el listado de la Página de Obra—, en su tabla de juicios por ventanas: la
+ * primera empieza la primera jornada UTC completa tras la llegada, y la de llegada no entra en
+ * ninguna y se informa aparte, como «cambió». Es la llegada de un juicio, como
+ * `DESPLIEGUE_DE_LA_BUSQUEDA_CON_FILTROS`, y no un corte de serie: no entra en
+ * `CORTES_DE_SERIE_DECLARADOS`.
+ */
+export const DESPLIEGUE_DE_LA_OBRA_COMO_DESTINO: string | undefined = undefined;
 
 /*
  * Los cortes de serie de la medición — AD-9, AD-13, Historia 23.10.

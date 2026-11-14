@@ -409,6 +409,30 @@ export function descripcionDeObra(
 }
 
 /**
+ * La frase de lo tomado de una edición — Historia 32.4, UX-DR127, FR-54.
+ *
+ * Sigue a cada línea de «Gratis» en «Dónde leer esta obra»: cuántas de las `n` Citas de la Obra
+ * se tomaron de esa edición (`k`). Siempre en positivo: nunca dice cuántas no tienen documento.
+ * Dueño único de la frase (AD-28): ningún componente la redacta.
+ *
+ *   · n = 1 → «De esta edición se tomó su cita.»
+ *   · k = n → «De esta edición se tomaron sus {n} citas.»
+ *   · si no → «De esta edición se tomaron {k} de sus {n} citas.»
+ *
+ * Lanza si `k` o `n` no son enteros, si `k` < 1 o si `k` > `n`: una edición de la que no se tomó
+ * ninguna Cita no tiene línea, y una que da más Citas de las que tiene la Obra es un error de quien
+ * la llama.
+ */
+export function textoDeLoTomado(k: number, n: number): string {
+  if (!Number.isInteger(k) || !Number.isInteger(n) || k < 1 || k > n) {
+    throw new Error(`textoDeLoTomado: k = ${k} y n = ${n} no describen lo tomado de una edición (1 ≤ k ≤ n, enteros)`);
+  }
+  if (n === 1) return 'De esta edición se tomó su cita.';
+  if (k === n) return `De esta edición se tomaron sus ${n} citas.`;
+  return `De esta edición se tomaron ${k} de sus ${n} citas.`;
+}
+
+/**
  * El texto de la Fila de bloque de la Tarjeta de Obra cuando alguna Cita de la Obra está
  * cotejada: la Página de Obra tiene entonces «Dónde leer esta obra», y la fila lo promete
  * (UX-DR104, Historia 24.4).

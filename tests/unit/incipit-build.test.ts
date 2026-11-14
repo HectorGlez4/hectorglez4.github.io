@@ -83,13 +83,16 @@ const paginaConstruida = (proyecto: string, ruta: string) => readFileSync(rutaCo
 const OBRA = '/obra/seneca/sobre-la-brevedad-de-la-vida/';
 
 /**
- * El desplegable «Cómo empieza», tal cual sale en el HTML, o `undefined`. Desde la 32.5 comparte
- * contenedor con «Cómo citar», que va detrás: se toma su `<details>`, no el contenedor entero.
+ * El desplegable «Cómo empieza», tal cual sale en el HTML, o `undefined`. Desde la 32.4 comparte el
+ * contenedor de arriba —a 2 × `--unidad` de la Cabecera— con «Dónde leer esta obra», que va
+ * delante: se toma su `<details>`, hermano directo del anterior, no el contenedor entero.
  */
 function bloqueDe(html: string): string | undefined {
-  const contenedor = /<div data-pagefind-ignore="all" style="margin-top: calc\(var\(--unidad\) \* 3\)"[^>]*>/u.exec(html);
+  const contenedor = /<div data-pagefind-ignore="all" style="margin-top: calc\(var\(--unidad\) \* 2\)"[^>]*>/u.exec(html);
   if (contenedor === null) return undefined;
-  return /^<details\b[^>]*><summary[^>]*><span[^>]*>Cómo empieza[\s\S]*?<\/details>/u.exec(html.slice(contenedor.index + contenedor[0].length))?.[0];
+  return /^<details\b[^>]*><summary[^>]*><span[^>]*>Dónde leer esta obra<(?:(?!<\/details>)[\s\S])*<\/details>(<details\b[^>]*><summary[^>]*><span[^>]*>Cómo empieza[\s\S]*?<\/details>)/u.exec(
+    html.slice(contenedor.index + contenedor[0].length),
+  )?.[1];
 }
 
 /** Todos los HTML de un `dist/`. */

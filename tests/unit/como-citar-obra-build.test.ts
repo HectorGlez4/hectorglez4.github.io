@@ -24,8 +24,9 @@ import { componerDocumento } from '../../tools/lib/documento.ts';
  * Historia 32.5 — «Cómo citar» en la página 1 de la Obra, leído de `dist/` (FR-58, UX-DR129).
  *
  * Las formas literales las fija `tests/unit/atribucion.test.ts`; aquí, lo que solo dice lo
- * construido: que es el último desplegable del contenedor de la página 1 —tras «Cómo empieza» si
- * hay incipit, solo si no— y va antes del listado; que lleva los tres estilos sin fecha, con su
+ * construido: que va al pie de la página 1 —tras los Temas, o «Buscar en esta obra» sin ellos, y
+ * antes de la nota—, solo en su propio contenedor, fuera del de arriba (decisión 1b, delegada por
+ * Héctor el 2026-11-14, Historia 32.4); que lleva los tres estilos sin fecha, con su
  * marcador vacío y su botón `hidden`; sin enlaces ni zona; fuera del JSON-LD y de Pagefind; sin la
  * jornada del build; que las 2+ no lo llevan ni piden la isla; y que el contenedor sale idéntico
  * byte a byte con la afiliación encendida. Lo que hace con y sin guion lo mira
@@ -96,12 +97,26 @@ const conElTope = (umbrales: string, valor: string) =>
 const paginaConstruida = (proyecto: string, ruta: string) => readFileSync(rutaConstruida(proyecto, ruta), 'utf8');
 const BREVEDAD = '/obra/seneca/sobre-la-brevedad-de-la-vida/';
 const IRA = '/obra/seneca/de-la-ira/';
-/** La apertura del contenedor, sin el `>`: Astro le añade la clase de ámbito de la página. */
-const APERTURA = '<div data-pagefind-ignore="all" style="margin-top: calc(var(--unidad) * 3)"';
+/**
+ * La apertura del contenedor de «Cómo citar», al pie y a 5 × `--unidad` de lo que lo precede, sin
+ * el `>`: Astro le añade la clase de ámbito de la página.
+ */
+const APERTURA = '<div data-pagefind-ignore="all" style="margin-top: calc(var(--unidad) * 5)"';
+/** La del contenedor de arriba (32.4): «Dónde leer esta obra» y, si hay incipit, «Cómo empieza». */
+const APERTURA_DE_ARRIBA = '<div data-pagefind-ignore="all" style="margin-top: calc(var(--unidad) * 2)"';
 
-/** El contenedor de los desplegables de la página 1, entero, o `undefined`. */
+/** El contenedor de «Cómo citar» de la página 1, entero —hasta el `</div>` tras su `</details>`—, o `undefined`. */
 function contenedorDe(html: string): string | undefined {
   const inicio = html.indexOf(APERTURA);
+  if (inicio === -1) return undefined;
+  const fin = /<\/details>\s*<\/div>/u.exec(html.slice(inicio));
+  if (fin === null) return undefined;
+  return html.slice(inicio, inicio + fin.index + fin[0].length);
+}
+
+/** El contenedor de arriba de la página 1, entero, o `undefined`. */
+function contenedorDeArribaDe(html: string): string | undefined {
+  const inicio = html.indexOf(APERTURA_DE_ARRIBA);
   if (inicio === -1) return undefined;
   const listado = html.indexOf('<ul class="listado"', inicio);
   const fin = html.lastIndexOf('</details>', listado);
@@ -143,19 +158,25 @@ describe('Historia 32.5 — «Cómo citar» en la Página de Obra construida', (
     ira = paginaConstruida(proyecto, IRA);
   }, 600_000);
 
-  it('es el último desplegable del contenedor: tras «Cómo empieza» si hay incipit, solo si no, y antes del listado', () => {
-    for (const [pagina, esperados] of [
-      [brevedad, ['Cómo empieza', 'Cómo citar']],
-      [ira, ['Cómo citar']],
+  it('va al pie, solo en su contenedor: tras los Temas (o «Buscar en esta obra») y antes de la nota; arriba, solo «Dónde leer» y «Cómo empieza»', () => {
+    for (const [pagina, arriba] of [
+      [brevedad, ['Dónde leer esta obra', 'Cómo empieza']],
+      [ira, ['Dónde leer esta obra']],
     ] as const) {
       const contenedor = contenedorDe(pagina);
       expect(contenedor).toBeDefined();
-      expect(pagina.indexOf(APERTURA)).toBeGreaterThan(pagina.indexOf('</header>'));
-      expect(pagina.indexOf('<ul class="listado"')).toBeGreaterThan(pagina.indexOf(APERTURA) + contenedor!.length - 1);
-      expect(rotulosDe(contenedor!)).toEqual(esperados);
-      // Los desplegables son los hijos directos y el contenedor acaba en el último.
-      expect(contenedor!.match(/<details class="desplegable"/gu)).toHaveLength(esperados.length);
-      expect(contenedor!).toMatch(/<\/details>\s*<\/div>$/u);
+      expect(rotulosDe(contenedor!)).toEqual(['Cómo citar']);
+      expect(contenedor!.match(/<details class="desplegable"/gu)).toHaveLength(1);
+      const posicion = (marca: string) => pagina.indexOf(marca);
+      const desde = posicion(APERTURA);
+      expect(desde).toBeGreaterThan(posicion('<ul class="listado"'));
+      expect(desde).toBeGreaterThan(posicion('<form class="buscar-en"'));
+      if (pagina.includes('class="temas"')) expect(desde).toBeGreaterThan(posicion('class="temas"'));
+      if (pagina.includes('class="nota-de-la-ficha"')) {
+        expect(posicion('class="nota-de-la-ficha"')).toBeGreaterThan(desde + contenedor!.length - 1);
+      }
+      // El contenedor de arriba ya no lo lleva (decisión 1b).
+      expect(rotulosDe(contenedorDeArribaDe(pagina) ?? '')).toEqual(arriba);
       // Uno solo en toda la página, cerrado.
       expect(rotulosDe(pagina).filter((r) => r === 'Cómo citar')).toHaveLength(1);
       expect(comoCitarDe(pagina)).not.toMatch(/<details\b[^>]*\bopen\b/u);
@@ -228,7 +249,7 @@ describe('Historia 32.5 — «Cómo citar» en la Página de Obra construida', (
     }
   });
 
-  it('el contenedor de los desplegables sale byte a byte igual con la afiliación encendida y una tienda declarada', async () => {
+  it('el contenedor de «Cómo citar» sale byte a byte igual con la afiliación encendida y una tienda declarada', async () => {
     const fuente = await readFile(join(RAIZ, 'src/lib/ingreso.ts'), 'utf8');
     const encendida = fuenteConModeloEncendido(fuenteConTiendaDePrueba(fuente), 'afiliacion-de-libros');
     const otro = await construirConCorpus(corpus(), {
