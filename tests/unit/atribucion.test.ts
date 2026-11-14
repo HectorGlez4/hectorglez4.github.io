@@ -597,7 +597,7 @@ describe('Historia 32.4 — textoDeLoTomado', () => {
       'De esta edición se tomaron 5 de sus 27 citas.',
     ]);
     for (const frase of frases) expect(frase).not.toMatch(/documento|no tienen/u);
-    expect(textoDeLoTomado(1, 3)).toBe('De esta edición se tomaron 1 de sus 3 citas.');
+    expect(textoDeLoTomado(1, 3)).toBe('De esta edición se tomó 1 de sus 3 citas.');
   });
 
   it.each([

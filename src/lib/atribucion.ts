@@ -417,6 +417,8 @@ export function descripcionDeObra(
  *
  *   · n = 1 → «De esta edición se tomó su cita.»
  *   · k = n → «De esta edición se tomaron sus {n} citas.»
+ *   · k = 1 → «De esta edición se tomó 1 de sus {n} citas.» (el verbo concuerda con la una;
+ *     decisión delegada por Héctor, chat, 2026-11-14, pendiente de asentar en UX-DR127)
  *   · si no → «De esta edición se tomaron {k} de sus {n} citas.»
  *
  * Lanza si `k` o `n` no son enteros, si `k` < 1 o si `k` > `n`: una edición de la que no se tomó
@@ -429,6 +431,7 @@ export function textoDeLoTomado(k: number, n: number): string {
   }
   if (n === 1) return 'De esta edición se tomó su cita.';
   if (k === n) return `De esta edición se tomaron sus ${n} citas.`;
+  if (k === 1) return `De esta edición se tomó 1 de sus ${n} citas.`;
   return `De esta edición se tomaron ${k} de sus ${n} citas.`;
 }
 

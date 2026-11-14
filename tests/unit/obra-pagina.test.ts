@@ -1092,11 +1092,11 @@ describe('Historia 22.6 — «Dónde leer esta obra» y la nota, construidas', (
     expect(donde).not.toContain('<a');
   });
 
-  it('parcial, una de tres: «De esta edición se tomaron 1 de sus 3 citas.»', async () => {
+  it('parcial, una de tres: «De esta edición se tomó 1 de sus 3 citas.»', async () => {
     const donde = await seccion('/obra/seneca/cartas-a-lucilio/');
     expect(lineas(donde)).toEqual([
       'Wikisource en español. Licencia CC BY-SA 4.0.',
-      'De esta edición se tomaron 1 de sus 3 citas.',
+      'De esta edición se tomó 1 de sus 3 citas.',
     ]);
   });
 

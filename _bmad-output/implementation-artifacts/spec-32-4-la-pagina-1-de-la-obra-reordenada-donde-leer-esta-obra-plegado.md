@@ -20,7 +20,7 @@ deferred:
       src/pages/obra/[autor]/[slug]/[...page].astro
     severity: medium
   - summary: >-
-      pendiente de Héctor (bmad-ux): con k = 1 y n > 1 la plantilla de UX-DR127 da «De esta edición se tomaron 1 de sus {n} citas.», sin concordancia.
+      Decisión delegada por Héctor (chat, 2026-11-14): "se tomó" con k = 1; pendiente de Héctor (bmad-ux) asentarlo en UX-DR127. Con k = 1 y n > 1 `textoDeLoTomado` dice «De esta edición se tomó 1 de sus {n} citas.»; la plantilla de UX-DR127 daba «se tomaron 1 de sus {n} citas», sin concordancia.
     evidence: |-
       UX-DR127 fija literalmente «De esta edición se tomaron {k} de sus {n} citas.» y solo exceptúa k = n y n = 1; `textoDeLoTomado` la sigue al pie de la letra y `tests/unit/atribucion.test.ts` y `tests/unit/obra-pagina.test.ts` la fijan. Con dos Fuentes, una que aporta una sola Cita lo pinta en el sitio (revisión de la 32.4, blind-hunter y edge-case-hunter). La forma concordada —«se tomó 1 de sus {n} citas» o «se tomó una de sus {n} citas»— es redacción de la UX, no de la implementación.
     location: >-
@@ -234,4 +234,4 @@ Baseline: 0eb8fdaf5f6de5ee073bd9b5a8a6a606cde292cc (la reanudación; el trabajo 
 - `npx astro check` — 0 errores, 0 avisos.
 - `npm test` (desatendido) — 175 ficheros, 7.927 pruebas, verde.
 
-**Riesgos residuales.** Los de la pasada anterior, más la frase «se tomaron 1 de sus {n} citas» en el sitio hasta que Héctor redacte la forma concordada en UX-DR127.
+**Riesgos residuales.** Los de la pasada anterior, y la frase «se tomó 1 de sus {n} citas» (decisión delegada por Héctor, 2026-11-14) pendiente de asentar en UX-DR127 con `bmad-ux`.
