@@ -29,7 +29,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 # - Retrospective appends its action items to action_items; the status view surfaces open ones
 generated: 08-11-2026 09:00
-last_updated: 11-15-2026 06:00
+last_updated: 11-15-2026 12:00
 project: brainlySabiduria
 project_key: NOKEY
 tracking_system: file-system
@@ -535,8 +535,8 @@ development_status:
   35-7-lo-que-cuenta-solo-la-clase-de-siempre: review  # v9-ralph 2026-11-14: dos pasadas de revisión, 22 parches; 8 diferidos para Héctor en el spec
   35-8-pedir-que-se-corrija-o-se-retire-y-que-conste: review  # v9-ralph 2026-11-14: dos pasadas de revisión, 28 parches; diferidos para Héctor en el spec (BUZON_DE_PETICIONES y las constantes de SM-C6 sin valor; EXPERIENCE.md 3.2.6 por bmad-ux)
   35-9-la-obra-con-derechos-vigentes-se-vende-sola: backlog  # bloqueada: tras la 32.4 (bloqueada para Héctor, bmad-ux), la 32.5, la 33.2 y la 35.4 (v9-ralph 2026-11-09)
-  35-10-la-siembra-acotada-desde-brainyquote: review  # v9-ralph 2026-11-14: dos pasadas, 31 parches; con la traducción propia que decidió Héctor el 14/11 (FR-68 enmendado, pendiente de bmad-prd, bmad-architecture y bmad-spec); semilla vacía, la siembra real es de Héctor
-  35-11-la-traducción-propia-como-la-decidió-héctor: backlog  # v9.2 (2026-11-14): ajusta la 35.10; la Épica 35 no se funde sin ella
+  35-10-la-siembra-acotada-desde-brainyquote: review  # v9-ralph 2026-11-14: dos pasadas, 31 parches; con la traducción propia que decidió Héctor el 14/11 (FR-68 enmendado; la planificación v9.2 ya la recoge y la 35.11 la ajustó); semilla vacía, la siembra real es de Héctor
+  35-11-la-traducción-propia-como-la-decidió-héctor: review  # v9-ralph 2026-11-15: la traducción propia como la decidió Héctor (sin línea en la página, partida {texto, lengua}, doble aprobación con corpus/aprobaciones-de-atribuidas.yml, sustitución por atribuida texto, segunda muestra de SM-C6); dos pasadas de revisión; supuestos aceptados por delegación de Héctor (14/11): orden de commits, LENGUAS_DE_PARTIDA, población por el fichero de hoy; pendientes de bmad-architecture en el spec
   epic-35-retrospective: optional
   epic-36: backlog  # UX v9.3 (2026-11-14): se construye tras fundir las Épicas 29 a 35
   36-1-los-paneles-de-la-página-de-cita-y-de-la-de-autor: backlog
