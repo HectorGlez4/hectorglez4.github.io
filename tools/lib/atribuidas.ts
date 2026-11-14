@@ -338,6 +338,25 @@ export function fallosDeAtribuidas(entrada: EntradaDelJuicio): FalloDeAtribuida[
     );
   }
 
+  fallos.push(...fallosDeDuplicados(juzgadas, entrada));
+  return fallos;
+}
+
+/**
+ * Los duplicados entre clases y las formas vedadas de unas atribuidas ya elegidas — Historia 35.1b,
+ * 35.7; extraída en la 35.10 para que `npm run atribuida -- proponer` los juzgue también con la
+ * puerta cerrada. La misma `parecidoEntre`, contra `citas`, `comparables` y `vedadas` de la entrada.
+ */
+export function fallosDeDuplicados(
+  juzgadas: readonly CitaParaAtribuidas[],
+  entrada: Pick<EntradaDelJuicio, 'citas' | 'comparables' | 'vedadas'>,
+): FalloDeAtribuida[] {
+  const fallos: FalloDeAtribuida[] = [];
+  const deUna = (c: CitaParaAtribuidas, motivo: string): FalloDeAtribuida => ({
+    slugs: [c.slug],
+    ...(c.ruta !== undefined ? { ruta: c.ruta } : {}),
+    motivo,
+  });
   // ── Los duplicados entre clases ──
   const otras = [...entrada.citas, ...(entrada.comparables ?? [])];
   // Desde la 35.6 cada Cita aporta sus formas —texto y, si la declara, Variante—, y la juzgada

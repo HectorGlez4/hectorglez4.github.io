@@ -1464,6 +1464,24 @@ export const MAX_ATRIBUIDAS_POR_DUEÑO: number | undefined = undefined;
  */
 export const MIN_ATESTIGUACIONES_DE_ATRIBUIDA: number | undefined = undefined;
 
+/** Una entrada de la semilla de prueba: el Personaje o Autor y su página de BrainyQuote. */
+export interface EntradaDeSemilla {
+  /** El slug de un Personaje de `corpus/personajes/` o de un Autor de `corpus/autores/`. */
+  slug: string;
+  /** La página de BrainyQuote de la que salen sus frases en inglés (`https://www.brainyquote.com/…`). */
+  pagina: string;
+}
+
+/**
+ * La semilla de prueba de la Cita atribuida — Historia 35.10, FR-68 (§5 enmendado).
+ *
+ * Los únicos Personajes y Autores que admiten `npm run atribuida -- semilla` y `-- proponer`.
+ * **La llena Héctor en un diff; ningún agente**: el repositorio la versiona vacía, y vacía las dos
+ * órdenes se niegan con 1. No hay búsqueda abierta: la siembra a escala espera a la respuesta de
+ * la pregunta 18, y generalizar la semilla es otra decisión de Héctor. Ninguna página la lee.
+ */
+export const SEMILLA_DE_ATRIBUIDAS: readonly EntradaDeSemilla[] = [];
+
 /*
  * El canal de corrección y retirada y SM-C6 — Historia 35.8, FR-69, AD-32, AD-35.
  *

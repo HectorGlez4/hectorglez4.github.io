@@ -463,6 +463,59 @@ frente a `HEAD^1`, no fechan ni avisan, y ningún módulo de `src/` los lee (AD-
 anota peticiones que no ha recibido ni auditorías que no ha hecho**, ni da valor a
 `BUZON_DE_PETICIONES` ni a las cuatro constantes de `umbrales.ts`: son de Héctor.
 
+## Una sesión de sembrado de la Cita atribuida
+
+La atribuida no se siembra desde las obras ni se coteja (Historia 35.10, FR-68): se siembra desde
+una **semilla de prueba** de BrainyQuote, acotada y declarada como prueba (§5 enmendado). Los
+Personajes y Autores que admite van en `SEMILLA_DE_ATRIBUIDAS` de `src/lib/umbrales.ts`, cada uno
+con su página de BrainyQuote (`{slug, pagina}`, `https://` de `brainyquote.com`). **La llena Héctor
+en un diff; el repositorio la versiona vacía y ningún agente le da valor ni corre la siembra sobre
+el Corpus real.** Con ella vacía, o ante un Personaje o Autor fuera de ella, las dos órdenes se
+niegan con 1, y lo dicen: **no hay búsqueda abierta**, la siembra a escala espera a la respuesta de
+la pregunta 18 y generalizar la semilla es otra decisión de Héctor.
+
+```
+npm run atribuida -- semilla <slug> [--salida semillas/<slug>.json]   # la página, una sola vez
+npm run atribuida -- proponer <lote.yaml> [--corpus corpus]            # las candidatas, a _revision/
+npx tsx tools/revisar.ts --aprobar <slug> [<slug>...] --temas <tema>    # aprobar: una persona
+npx tsx tools/objetivo.ts --registrar --clase-de-cita atribuida         # la sesión, con su clase
+```
+
+- **`semilla`** es la única orden de la atribuida que pide algo a la red (AD-22, en la cáscara
+  `tools/atribuida.ts`): la página declarada, **una vez** —si la salida ya existe no la vuelve a pedir
+  y sale con 1—, sin seguir redirecciones, y escribe en `semillas/` (ignorado por git; nunca dentro de
+  `corpus/`) la lista **en inglés** de frases y quién las dice. Nada de eso se publica ni atestigua:
+  `brainyquote.com` está en `DOMINIOS_QUE_NO_ATESTIGUAN`. El lector de la página (`frasesDeLaPagina`
+  de `tools/lib/siembraAtribuida.ts`, anclas `title="view quote"` y `title="view author"`) es un
+  supuesto sin contrastar con la página real: si no reconoce ninguna frase, sale con 1 sin escribir.
+- **El texto en español sale de una versión que ya circula** —un doblaje o una traducción
+  publicada—, con su `origen` (`original`, `doblaje`, `traduccion-publicada`): **el sitio no traduce**,
+  y una frase sin versión en español que circule no entra. El lote es una lista YAML de candidatas con
+  `texto`, `personaje` y/o `autor` (slugs que ya existen: se dan de alta con sus órdenes, nunca
+  tecleando el campo), `obra`, `año` o `referencia` (la Procedencia que el esquema exige), `origen`,
+  `atestiguaciones` (`{url, consultadaEl}`), y si acaso `variante` y `temas`. Sin `clase`: se deriva.
+- **`proponer` es la puerta de calidad, y nunca publica.** Juzga cada candidata con el esquema de la
+  35.1b y la Variante de la 35.6 (`citaAdmisible`), cuenta sus dominios con `dominiosQueAtestiguan`
+  —sin BrainyQuote, sus espejos ni el propio dominio; ninguno que cuente la rechaza siempre—, resuelve
+  la Obra con `resolverFichaDeObra` en solo lectura y rechaza la que choca (`fallosDeDuplicados`, la
+  misma `parecidoEntre`) con una publicada de cualquiera de las dos clases, una candidata de
+  `corpus/_revision/`, una anterior del mismo lote o `corpus/formas-vedadas.yml`; también la que llega
+  sin `texto`, sin Personaje ni Autor, con uno que no existe o fuera de la semilla, o que sería de la
+  clase de siempre. Cada rechazo sale nombrado con su motivo. Las que pasan van a `corpus/_revision/`
+  —nunca a `corpus/citas/`, ni crean ficha de Obra ni anotan registro alguno—: **aprobarlas es siempre
+  de una persona**, con `revisar --aprobar`, y con la puerta cerrada siguen en revisión. Sin valor de
+  `MIN_ATESTIGUACIONES_DE_ATRIBUIDA` informa los dominios de cada una sin juzgar el mínimo y lo dice
+  nombrando la constante. Códigos: 2 la forma (sin lote, ilegible o que no es una lista); 1 lo que dice
+  (con algún rechazo, o un registro ilegible); con el lote rechazado entero no escribe nada.
+- **La sesión se registra con su clase**: `--clase-de-cita atribuida` anota en
+  `corpus/sesiones-de-sembrado.yml` `claseDeCita: atribuida` y el resultado medido —`citasPublicadas`
+  (las dos clases, como siempre) y `atribuidasPublicadas`—, sin `clase`, `propuesto` ni `hueco`: la
+  política del objetivo es de la clase de siempre y no la propone. Las entradas sin el campo se leen
+  como de la clase de siempre (`claseDeCitaDeLaSesion` de `tools/lib/corpus.ts`). Otro valor, la bandera
+  sin `--registrar` o con `--anular`, 2; un reintento del mismo día con el mismo resultado, 1.
+- Las pruebas (`tests/unit/siembra-atribuida.test.ts`) usan el doble de red y llenan la lista solo en
+  una copia del proyecto; ninguna pide nada a la red ni escribe en el Corpus real.
+
 ## Los Personajes
 
 Un Personaje (Batman) dice Citas atribuidas sin ser un Autor (Historia 35.2, AD-1, AD-33). Vive en

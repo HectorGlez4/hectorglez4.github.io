@@ -21,7 +21,7 @@ import {
   type PersonajeAdmisible,
 } from '../../src/lib/admision.ts';
 import type { FichaDeObra } from '../../src/lib/obras.ts';
-import { CLASES, esClase, type Clase } from '../../src/lib/clase.ts';
+import { CLASE_ATRIBUIDA, CLASE_DE_SIEMPRE, CLASES, esClase, type Clase } from '../../src/lib/clase.ts';
 import type {
   ClaseDeObjetivo,
   ObjetivoDeTema,
@@ -1558,18 +1558,39 @@ export interface SesionDeSembrado {
   resultado: ResultadoDeLaSesion;
 }
 
+/**
+ * Una sesión de siembra de la Cita atribuida — Historia 35.10, FR-68. Dice su clase en un campo
+ * propio, `claseDeCita`, distinto del `clase` que nombra la del objetivo: la política del objetivo es
+ * de la clase de siempre y no la propone, así que no lleva `clase`, `propuesto` ni `hueco`. Su
+ * resultado medido son las Citas publicadas de las dos clases —la misma clave que mide siempre— y las
+ * atribuidas publicadas.
+ */
+export interface SesionDeSembradoAtribuida {
+  momento?: Date;
+  claseDeCita: typeof CLASE_ATRIBUIDA;
+  resultado: { citasPublicadas: number; atribuidasPublicadas: number };
+}
+
 /** Una entrada ya escrita en el registro, tal y como se relee. */
 export interface SesionRegistrada {
   fecha: string;
   hora?: string;
-  clase: string;
-  propuesto: string;
+  /** Historia 35.10 — solo en las de la atribuida; sin el campo, la sesión es de la clase de siempre. */
+  claseDeCita?: string;
+  /** Las de la atribuida no lo llevan: la política del objetivo no las propone. */
+  clase?: string;
+  propuesto?: string;
   hueco?: string;
   tema?: { slug: string; nombre: string; publicadas: number; faltan: number };
   tradicion?: { nombre: string; porcentaje?: number; suelo: number; autoresQueFaltan?: number };
   elegido?: string;
   motivo?: string;
-  resultado?: ResultadoDeLaSesion;
+  resultado?: ResultadoDeLaSesion & { atribuidasPublicadas?: number };
+}
+
+/** De qué clase de Cita es una sesión registrada: sin `claseDeCita`, de la de siempre (Historia 35.10). */
+export function claseDeCitaDeLaSesion(sesion: Pick<SesionRegistrada, 'claseDeCita'>): Clase {
+  return sesion.claseDeCita === CLASE_ATRIBUIDA ? CLASE_ATRIBUIDA : CLASE_DE_SIEMPRE;
 }
 
 /**
@@ -1658,7 +1679,7 @@ export async function leerSesionesDeSembrado(rutas: Rutas): Promise<SesionRegist
  */
 export async function registrarSesionDeSembrado(
   rutas: Rutas,
-  sesion: SesionDeSembrado,
+  sesion: SesionDeSembrado | SesionDeSembradoAtribuida,
 ): Promise<string> {
   const ruta = rutas.sesionesDeSembrado;
   const nombre = `corpus/${FICHERO_DE_SESIONES}`;
@@ -1678,18 +1699,26 @@ export async function registrarSesionDeSembrado(
   const cuantasHabia = analizarRegistro(nombre, anterior).length;
 
   const momento = sesion.momento ?? new Date();
-  const entrada: Record<string, unknown> = {
-    fecha: fechaLocal(momento),
-    hora: horaLocal(momento),
-    clase: sesion.clase,
-    propuesto: sesion.propuesto,
-    hueco: sesion.hueco,
-    tema: sesion.tema,
-    tradicion: sesion.tradicion,
-    elegido: sesion.elegido,
-    motivo: sesion.motivo,
-    resultado: { ...sesion.resultado },
-  };
+  const entrada: Record<string, unknown> =
+    'claseDeCita' in sesion
+      ? {
+          fecha: fechaLocal(momento),
+          hora: horaLocal(momento),
+          claseDeCita: sesion.claseDeCita,
+          resultado: { ...sesion.resultado },
+        }
+      : {
+          fecha: fechaLocal(momento),
+          hora: horaLocal(momento),
+          clase: sesion.clase,
+          propuesto: sesion.propuesto,
+          hueco: sesion.hueco,
+          tema: sesion.tema,
+          tradicion: sesion.tradicion,
+          elegido: sesion.elegido,
+          motivo: sesion.motivo,
+          resultado: { ...sesion.resultado },
+        };
 
   // `- ` ocupa el sitio de los dos primeros espacios de la primera clave: la entrada es un
   // elemento de la lista `sesiones` y el resto de sus claves cuelgan sangradas de él.

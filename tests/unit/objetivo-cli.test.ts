@@ -320,6 +320,66 @@ describe('Historia 11.3 — el resultado medido lo deriva la orden del Corpus', 
   });
 });
 
+describe('Historia 35.10 — la sesión de siembra de la atribuida dice su clase', () => {
+  async function conUnaAtribuida() {
+    const corpus = await corpusDePrueba({ citasPorTema: { 'el-tiempo': 2 }, conProcedencia: 2 });
+    await writeFile(
+      join(corpus, 'citas', 'el-tiempo-atribuida.md'),
+      ['---', 'slug: "autor-0-atribuida"', 'texto: "Una atribuida de prueba."', 'autor: "autor-0"',
+        'clase: "atribuida"', 'temas:', '  - el-tiempo', '---', ''].join('\n'),
+      'utf8',
+    );
+    return corpus;
+  }
+
+  it('--registrar --clase-de-cita atribuida anota claseDeCita y las atribuidas, sin la política', async () => {
+    const corpus = await conUnaAtribuida();
+    const { codigo, salida } = await correr(['--corpus', corpus, '--registrar', '--clase-de-cita', 'atribuida']);
+    expect(codigo).toBe(0);
+    expect(salida).toContain('Atribuidas publicadas:       1');
+    const [sesion] = await sesionesRegistradas(corpus);
+    expect(sesion.claseDeCita).toBe('atribuida');
+    expect(sesion.resultado).toEqual({ citasPublicadas: 3, atribuidasPublicadas: 1 });
+    for (const campo of ['clase', 'propuesto', 'hueco', 'tema', 'tradicion', 'motivo', 'elegido']) {
+      expect(sesion).not.toHaveProperty(campo);
+    }
+  });
+
+  it('un reintento con el mismo resultado no se anota dos veces', async () => {
+    const corpus = await conUnaAtribuida();
+    await correr(['--corpus', corpus, '--registrar', '--clase-de-cita', 'atribuida']);
+    const { codigo } = await correr(['--corpus', corpus, '--registrar', '--clase-de-cita', 'atribuida']);
+    expect(codigo).toBe(1);
+    expect(await sesionesRegistradas(corpus)).toHaveLength(1);
+  });
+
+  it('las entradas sin el campo se leen como de la clase de siempre', async () => {
+    const { claseDeCitaDeLaSesion } = await import('../../tools/lib/corpus.ts');
+    expect(claseDeCitaDeLaSesion({})).toBe('siempre');
+    expect(claseDeCitaDeLaSesion({ claseDeCita: 'atribuida' })).toBe('atribuida');
+    const corpus = await conUnaAtribuida();
+    await correr(['--corpus', corpus, '--registrar']);
+    await correr(['--corpus', corpus, '--registrar', '--clase-de-cita', 'atribuida']);
+    const [siempre, atribuida] = await sesionesRegistradas(corpus);
+    expect(siempre).not.toHaveProperty('claseDeCita');
+    expect(claseDeCitaDeLaSesion(siempre)).toBe('siempre');
+    expect(claseDeCitaDeLaSesion(atribuida)).toBe('atribuida');
+  });
+
+  it.each([
+    ['otro valor', ['--registrar', '--clase-de-cita', 'siempre']],
+    ['sin valor', ['--registrar', '--clase-de-cita']],
+    ['sin --registrar', ['--clase-de-cita', 'atribuida']],
+    ['con --anular', ['--clase-de-cita', 'atribuida', '--anular', 'porque sí']],
+    ['repetida', ['--registrar', '--clase-de-cita', 'atribuida', '--clase-de-cita', 'atribuida']],
+  ])('%s es la forma de la invocación: sale con 2 y no escribe nada', async (_, extra) => {
+    const corpus = await conUnaAtribuida();
+    const { codigo } = await correr(['--corpus', corpus, ...extra]);
+    expect(codigo).toBe(2);
+    expect(existsSync(join(corpus, FICHERO_DE_SESIONES))).toBe(false);
+  });
+});
+
 describe('Historia 11.3 — la anulación del editor queda registrada', () => {
   it('escribe lo propuesto, lo elegido y el motivo', async () => {
     const corpus = await corpusDePrueba();
