@@ -203,8 +203,6 @@ export type MotivoSinIncipit = 'sin-tope' | 'primera-no-cabe' | 'forma-indetermi
 
 /** La forma ante la que no se sabe qué es una frase ni un verso. */
 const FORMA_INDETERMINADA: FormaDeLineas = FORMAS_DE_LINEAS[4];
-/** La forma cuyo párrafo es el bloque entre líneas en blanco (los saltos interiores son espacio). */
-const FORMA_AJUSTADA: FormaDeLineas = FORMAS_DE_LINEAS[3];
 
 /**
  * El fin de una frase en un párrafo ya colapsado: `.`, `?`, `!` o `…`, cero o más cierres, y
