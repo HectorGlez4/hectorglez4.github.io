@@ -384,3 +384,20 @@ describe('Historia 35.3b — cuándo se indexa la Página de Personaje, y su Tar
     expect(tarjetas).toEqual(['a.png', 'b.png', 'c.png', 'd.png']);
   });
 });
+
+describe('Historia 35.8 — la línea de retirada de la Página de Personaje', () => {
+  it('va en la página 1 y en la 2, tras el listado y su paginación, la última de la página', () => {
+    for (const ruta of ['/personaje/a/', '/personaje/a/2/', '/personaje/b/']) {
+      const pagina = html(ruta);
+      const inicio = pagina.indexOf('<p class="linea-de-retirada"');
+      expect(inicio, ruta).toBeGreaterThan(pagina.lastIndexOf('<ul class="listado"'));
+      if (ruta !== '/personaje/b/') expect(inicio, ruta).toBeGreaterThan(pagina.indexOf('<nav class="paginacion"'));
+      const linea = pagina.slice(inicio, pagina.indexOf('</p>', inicio));
+      expect(linea).toContain('¿Alguna cita de esta página está mal atribuida o te afecta? ');
+      expect(linea).toContain(`subject=Corregir%20o%20retirar%20citas%20del%20personaje%20${ruta.split('/')[2]}`);
+      // Nada visible tras ella dentro de `main`.
+      const resto = pagina.slice(pagina.indexOf('</p>', inicio) + 4, pagina.indexOf('</main>'));
+      expect(resto.replace(/<[^>]*>/gu, '').trim(), ruta).toBe('');
+    }
+  });
+});

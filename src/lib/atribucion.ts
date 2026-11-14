@@ -243,6 +243,49 @@ export function lineaDeVariante(cita: Pick<Cita, 'variante'>): string | undefine
   return `En ${rotulo}: «${variante.texto}»`;
 }
 
+/** Sobre qué página se pide corregir o retirar: una Cita atribuida o un Personaje. */
+export type SobreLaRetirada = { sobre: 'cita' | 'personaje'; slug: string };
+
+/** Lo que pinta la línea de retirada: la pregunta, el enlace, su `href` y la dirección como texto. */
+export interface LineaDeRetirada {
+  pregunta: string;
+  enlace: string;
+  href: string;
+  direccion: string;
+}
+
+/**
+ * La línea de retirada — Historia 35.8, FR-69, AD-35, UX-DR139. Su único dueño.
+ *
+ * «¿Esta cita está mal atribuida o te afecta? Pide que se corrija o se retire.» al pie de la
+ * Página de Cita atribuida, y «¿Alguna cita de esta página…» al pie de la de Personaje. La
+ * segunda frase es un `mailto:` a `buzon` con un `?subject=` que lleva el slug codificado; la
+ * dirección se dice también como texto. El buzón lo pasa quien pinta (`BUZON_DE_PETICIONES` de
+ * `src/lib/dominio.ts`), porque este módulo lo importan islas del cliente y `dominio.ts` lee el
+ * disco. **Sin buzón lanza**: la línea nunca falta donde hay una atribuida (con la puerta de la
+ * 35.1b, sin buzón no se publica ninguna).
+ */
+export function lineaDeRetirada({ sobre, slug }: SobreLaRetirada, buzon: string | undefined): LineaDeRetirada {
+  if (buzon === undefined || buzon.trim() === '') {
+    throw new Error(
+      `La línea de retirada de «${slug}» no tiene a dónde pedir: BUZON_DE_PETICIONES (src/lib/dominio.ts) no tiene valor. ` +
+        'Sin buzón no se publica ninguna atribuida (Historia 35.8, AD-35).',
+    );
+  }
+  const direccion = buzon.trim();
+  const asunto =
+    sobre === 'cita' ? `Corregir o retirar la cita ${slug}` : `Corregir o retirar citas del personaje ${slug}`;
+  return {
+    pregunta:
+      sobre === 'cita'
+        ? '¿Esta cita está mal atribuida o te afecta? '
+        : '¿Alguna cita de esta página está mal atribuida o te afecta? ',
+    enlace: 'Pide que se corrija o se retire.',
+    href: `mailto:${direccion}?subject=${encodeURIComponent(asunto)}`,
+    direccion,
+  };
+}
+
 /**
  * La línea de la Fuente de «Lee el pasaje» — Historia 31.2, AD-28: la de `lineaDeLaFuente`, o
  * lanza. El pasaje sale de un documento casado con la Fuente de la Cita (`documentosDeCita`), así

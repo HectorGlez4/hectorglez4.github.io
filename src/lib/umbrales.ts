@@ -1463,3 +1463,36 @@ export const MAX_ATRIBUIDAS_POR_DUEÑO: number | undefined = undefined;
  * y el propio dominio no atestiguan, y dos subdominios del mismo dominio cuentan uno.
  */
 export const MIN_ATESTIGUACIONES_DE_ATRIBUIDA: number | undefined = undefined;
+
+/*
+ * El canal de corrección y retirada y SM-C6 — Historia 35.8, FR-69, AD-32, AD-35.
+ *
+ * Las cuatro constantes que siguen **las fija Héctor; ningún agente les da valor**. Las lee solo
+ * `npm run peticion` (`tools/peticion.ts`), nunca el sitio: sin valor, la orden lista y lo
+ * dice, pero no juzga plazo, no elige muestra ni juzga SM-C6. Son literales, como las de arriba.
+ */
+
+/**
+ * Cuántos días puede seguir sin resolver una petición de corregir o retirar antes de que la
+ * consulta la nombre como vencida — Historia 35.8, FR-69. Lo fija Héctor.
+ */
+export const PLAZO_DE_RESPUESTA_A_RETIRADA_DIAS: number | undefined = undefined;
+
+/**
+ * Cuántas atribuidas publicadas al cierre de un mes se auditan contra una fuente que las documente
+ * — Historia 35.8, SM-C6. La muestra la eligen sin mano las de menor SHA-256 de `{slug}|{mes}`.
+ * Lo fija Héctor.
+ */
+export const MUESTRA_DE_AUDITORIA_SM_C6: number | undefined = undefined;
+
+/**
+ * Cuántas atribuidas publicadas tiene que tener un mes para que SM-C6 lo juzgue — Historia 35.8.
+ * Por debajo no se juzga, y el cero no se lee como calidad. Lo fija Héctor.
+ */
+export const MIN_ATRIBUIDAS_PARA_JUZGAR_SM_C6: number | undefined = undefined;
+
+/**
+ * La proporción mal atribuida de la auditoría (entre 0 y 1) por encima de la cual SM-C6 salta, en
+ * dos meses seguidos — Historia 35.8. Lo fija Héctor.
+ */
+export const MAX_PROPORCION_MAL_ATRIBUIDA_SM_C6: number | undefined = undefined;

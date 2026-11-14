@@ -17,6 +17,7 @@
 import Armazon from '../../../components/Armazon.astro';
 import DatosDePersonaje from '../../../components/DatosDePersonaje.astro';
 import Paginacion from '../../../components/Paginacion.astro';
+import LineaDeRetirada from '../../../components/LineaDeRetirada.astro';
 import TarjetaDeCita from '../../../components/TarjetaDeCita.astro';
 import AtribucionDeSemblanza from '../../../components/AtribucionDeSemblanza.astro';
 import ListaDeObras from '../../../components/ListaDeObras.astro';
@@ -144,6 +145,8 @@ const pieDeObras =
     </ul>
 
     <Paginacion pagina={pagina} zona="paginacion" />
+    {/* Historia 35.8 — la línea de retirada, tras el listado y su paginación, en toda página. */}
+    <LineaDeRetirada sobre="personaje" slug={personaje.slug} />
   </div>
 </Armazon>
 

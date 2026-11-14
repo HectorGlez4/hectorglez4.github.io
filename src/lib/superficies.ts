@@ -913,6 +913,11 @@ export type CriterioDeWcag = {
  * `tests/e2e/accesibilidad.spec.ts` que exige que nada fijo tape el contenido al cargar, y eso
  * no es el criterio: el foco puede quedar tapado por algo pequeño o al desplazarse.
  *
+ * *(v9.1)* 3.2.6 pasa de `no-aplica` a `ux` con la Historia 35.8: la línea de retirada es un correo
+ * con destinatario, un mecanismo de ayuda, y la UX la pone en la misma posición relativa en las dos
+ * páginas que la llevan. `EXPERIENCE.md` («Accessibility Floor») sigue diciendo que no aplica:
+ * pendiente de Héctor (bmad-ux).
+ *
  * El 2.5.8 sí es `axe`: `target-size`, que en la 4.14.0 es la única regla de `wcag22aa` y ya
  * no da por solapados dos enlaces con el mismo destino, que es lo que la v8 va a apilar. El
  * sitio pide 44 px por decisión de producto (`EXPERIENCE.md`), muy por encima de los 24 del
@@ -944,8 +949,10 @@ export const CRITERIOS_QUE_AÑADE_WCAG_22: readonly CriterioDeWcag[] = [
     criterio: '3.2.6',
     nivel: 'A',
     nombre: 'Ayuda consistente',
-    comprueba: 'no-aplica',
-    motivo: 'el sitio no ofrece ningún mecanismo de ayuda',
+    comprueba: 'ux',
+    motivo:
+      'el único mecanismo de ayuda es la línea de retirada (Historia 35.8), un solo componente al pie ' +
+      'de la Página de Cita atribuida y de toda página de Personaje, en la misma posición relativa',
   },
   {
     criterio: '3.3.7',

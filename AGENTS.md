@@ -164,7 +164,8 @@ Cuando el documento no declara autor —o firma «Anónimo», que es lo mismo—
 escriben solas las órdenes: `revisar --rechazar` anota cada candidata de siempre antes de borrarla
 (`sin-procedencia` si no trae Procedencia, `cotejo-fallido` si no), la aprobación anota la de siempre
 que deja en revisión por el cotejo (sin Fuente) o por la Procedencia —sin repetir una entrada igual—,
-y `documentar --retirar` anota lo que retira. El alta, la aprobación y `npm run atribuida` se niegan
+y `documentar --retirar` y la retirada por petición de `npm run peticion` (Historia 35.8, siempre
+`retirada`) anotan lo que retiran. El alta, la aprobación y `npm run atribuida` se niegan
 ante una atribuida cuyo texto o Variante coincide (`parecidoEntre`) con una forma de ahí, nombrando
 la entrada, y el build rompe por lo mismo (lo lee solo para romper). Una entrada `cambio-de-clase`
 no veda nada, ni una con `slug` a la Cita de ese slug. No se edita a mano ni se siembra con las
@@ -385,6 +386,72 @@ sobre el Corpus real.
 **`documentar` no toca una atribuida**: `npm run documentar -- <slug> …` y `--retirar` se niegan con 1
 nombrando `npm run atribuida`, y los modos por lote (`--restituir-traduccion`, `--restituir-saltos`) la
 saltan y la cuentan en su parte («Atribuidas saltadas»).
+
+### Corregir o retirar una Cita atribuida (Historia 35.8, FR-69, AD-35)
+
+**La línea de retirada.** Al pie de toda Página de Cita atribuida —tras las Rutas de salida, lo
+último visible; solo la sigue el bloque oculto de filtros— y de toda página de Personaje —también
+las 2+, tras el listado y su paginación— va «¿Esta cita está mal atribuida o te afecta? Pide que se
+corrija o se retire.» («¿Alguna cita de esta página…» en la de Personaje). La segunda frase es un
+`mailto:` a `BUZON_DE_PETICIONES` con `?subject=` y el slug codificado, en la misma pestaña, y la
+dirección va también como texto, entre paréntesis. La pinta solo `src/components/LineaDeRetirada.astro`,
+con la redacción de `lineaDeRetirada` de `src/lib/atribucion.ts`, que **para la construcción sin
+buzón**. Sin guion, sin zona ni exención (no es enlace interno), bajo `data-pagefind-ignore="all"` y
+con la presentación en `style` —un `<style>` de componente cambiaría el CSS de toda Página de Cita—.
+Una prueba de `dist/` (`tests/unit/personaje-donde-el-autor.test.ts`) exige la línea en toda Página
+de Cita atribuida y de Personaje y en ninguna otra. Desde aquí WCAG 3.2.6 es `ux`, no `no-aplica`
+(`CRITERIOS_QUE_AÑADE_WCAG_22`): un segundo mecanismo de ayuda —otro correo con destinatario, un
+teléfono— lo desmiente, y la prueba de señales de `tests/unit/superficies.test.ts` lo dice.
+
+**El registro** es `corpus/peticiones-de-retirada.yml`, que **solo añade** dos clases de entrada:
+`peticion` `{id, fecha, cita, solicitante, peticion, motivo?}` y `resolucion` `{peticion, fecha,
+resolucion}`. Lo escribe solo su orden:
+
+```
+npm run peticion                                   # por mes, las vencidas y SM-C6. NO escribe nada.
+npm run peticion -- anotar <slug> --solicitante persona-afectada|titular-de-derechos|otro \
+                          --peticion corregir|retirar [--motivo "…"] [--fecha AAAA-MM-DD]
+npm run peticion -- resolver <id> corregida|retirada|rechazada [--fecha AAAA-MM-DD]
+npm run peticion -- auditar <AAAA-MM> [--resultado <slug>=bien|mal-atribuida|sin-fuente …]
+```
+
+**Ningún campo admite contacto**: el repositorio es público, y un `--motivo` con forma de correo o de
+teléfono (`tieneContacto` de `tools/lib/peticiones.ts`) se rechaza con 1. La Cita se valida contra lo
+publicado o contra el registro de clases —una atribuida ya retirada se resuelve; una de siempre se
+rechaza con 1—. El `id` es correlativo. Códigos: 2 por la forma (bandera desconocida o repetida,
+argumentos de menos o de más, fecha o mes sin forma, motivo vacío, un valor fuera de su conjunto); 1
+por lo que dice (fecha futura, registro o Corpus ilegible, id inexistente o ya resuelto, resolución
+anterior a su petición). En ninguno se escribe nada.
+
+**Retirar por petición** lo hacen la petición de retirar de un **titular de derechos**, en el mismo
+gesto de anotarla —la resolución queda para después—, y `resolver <id> retirada` sobre cualquier otra
+si la Cita sigue publicada: mueve el fichero a `corpus/_revision/` (AD-2), anota su forma en
+`formas-vedadas.yml` con `retirada`, pone al día el título de su Ficha de Obra y, después, anota la
+entrada; si algo falla, la Cita vuelve. **No se niega por NFR-5**: informa de lo que quedaría fuera de
+alcance con su Tema y su recuento, y eso se resuelve en el mismo commit antes de fusionar, porque el
+build sigue rompiendo. `rechazada` sobre una retirada primero no la devuelve: devolverla es moverla de
+vuelta a mano, con su commit. **El fichero retirado se añade a mano con `git add`** —`_revision/` no se
+versiona y git es su única copia— y su texto sigue en el historial de git (pregunta 25, de Héctor).
+
+**La consulta** lista por mes y nombra las peticiones sin resolver pasado
+`PLAZO_DE_RESPUESTA_A_RETIRADA_DIAS`; sin valor, las lista sin juzgar y lo dice. Da por mes, para
+SM-C6, las atribuidas publicadas al cierre —del registro de clases menos las retiradas que fecha
+`formas-vedadas.yml`, sin leer git—, las peticiones y las retiradas por cada cien («sin tasa» sin
+atribuidas, nunca 0 %) y la proporción mal atribuida de la última auditoría del mes. **Salta**
+(`juicioDeSmC6`) en el segundo de dos meses cerrados seguidos con al menos
+`MIN_ATRIBUIDAS_PARA_JUZGAR_SM_C6` atribuidas si las peticiones por cada cien suben, o si la proporción
+pasa de `MAX_PROPORCION_MAL_ATRIBUIDA_SM_C6` en los dos; sin esas constantes informa y no juzga, por
+debajo del mínimo lo dice, y el freno no lo propone: lo decide Héctor.
+
+**La auditoría** de un mes cerrado: la muestra son las `MUESTRA_DE_AUDITORIA_SM_C6` atribuidas al
+cierre con menor SHA-256 de `{slug}|{mes}` (sin valor, lo dice y no elige); con un `--resultado` por
+cada slug de la muestra, que decide una persona, anota en `corpus/auditorias-de-atribuidas.yml` —solo
+añade— `{mes, muestra, resultados, auditadoEl}`. Un slug ajeno o una muestra incompleta, 1.
+
+Los dos registros se versionan con su cabecera y la lista vacía, `npm test` comprueba que solo añaden
+frente a `HEAD^1`, no fechan ni avisan, y ningún módulo de `src/` los lee (AD-24). **Ningún agente
+anota peticiones que no ha recibido ni auditorías que no ha hecho**, ni da valor a
+`BUZON_DE_PETICIONES` ni a las cuatro constantes de `umbrales.ts`: son de Héctor.
 
 ## Los Personajes
 

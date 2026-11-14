@@ -1,5 +1,5 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { existsSync, readFileSync } from 'node:fs';
+import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 import {
   ATESTIGUADA,
@@ -473,5 +473,53 @@ describe('Historia 35.4 — una Obra cuyo dueño no tiene página', () => {
     expect(mensajeDeDueñoSinPagina({ nombre: 'seneca--x', dueño: { tipo: 'autor', slug: 'seneca' } })).toMatch(
       /del Autor «seneca», que no tiene página publicada/u,
     );
+  });
+});
+
+describe('Historia 35.8 — la línea de retirada, en toda Página de Cita atribuida y de Personaje, y en ninguna otra', () => {
+  /** Toda página HTML del `dist/`, como ruta del sitio. */
+  const paginas = () =>
+    (readdirSync(join(proyecto, 'dist'), { recursive: true }) as string[])
+      .filter((f) => String(f).endsWith('.html'))
+      .map((f) => `/${String(f).replace(/(?:^|\/)index\.html$/u, '').replace(/\.html$/u, '')}`.replace(/\/?$/u, '/'));
+  const LINEA = /<p class="linea-de-retirada"[^>]*>[\s\S]*?<\/p>/u;
+  const lineaDe = (pagina: string) => LINEA.exec(pagina)?.[0];
+
+  it('la llevan exactamente las Páginas de Cita atribuidas y la de Personaje', () => {
+    expect(codigo, salida).toBe(0);
+    const conLinea: string[] = [];
+    for (const ruta of paginas()) {
+      const fichero = ruta === '/404/' ? join(proyecto, 'dist', '404.html') : paginaConstruida(proyecto, ruta);
+      if (!existsSync(fichero)) continue;
+      if (lineaDe(readFileSync(fichero, 'utf8')) !== undefined) conLinea.push(ruta);
+    }
+    const atribuidas = [B1, B2, B3, B4, V1, ...Array.from({ length: 12 }, (_, i) => `vivo-relleno-${String(i + 1).padStart(2, '0')}`)];
+    expect(conLinea.sort()).toEqual([...atribuidas.map((s) => `/cita/${s}/`), '/personaje/batman/'].sort());
+    expect(lineaDe(cita(S1))).toBeUndefined();
+  });
+
+  it('en la Cita dice su frase, con el mailto y el slug en el asunto, sin zona, sin pestaña nueva y fuera de Pagefind', () => {
+    const linea = lineaDe(cita(B1)) ?? '';
+    expect(linea).toContain('¿Esta cita está mal atribuida o te afecta? ');
+    expect(linea).toContain(
+      '<a href="mailto:peticiones@ejemplo.org?subject=Corregir%20o%20retirar%20la%20cita%20batman-soy-la-noche">Pide que se corrija o se retire.</a> (peticiones@ejemplo.org)',
+    );
+    expect(linea).toContain('data-pagefind-ignore="all"');
+    expect(linea).not.toMatch(/data-zona|data-sin-zona|target=|<script/u);
+  });
+
+  it('en la Cita va tras las Rutas de salida y solo la sigue el bloque oculto de filtros', () => {
+    const pagina = cita(B1);
+    const articulo = /<article[^>]*>([\s\S]*)<\/article>/u.exec(pagina)?.[1] ?? '';
+    const inicio = articulo.indexOf('<p class="linea-de-retirada"');
+    expect(inicio).toBeGreaterThan(articulo.lastIndexOf('</nav>'));
+    const tras = articulo.slice(inicio);
+    expect(tras.replace(LINEA, '').trim()).toMatch(/^[^<]*<div hidden data-pagefind-ignore[\s\S]*<\/div>\s*$/u);
+  });
+
+  it('en la de Personaje dice la frase de la página, con el slug del Personaje en el asunto', () => {
+    const linea = lineaDe(html('/personaje/batman/')) ?? '';
+    expect(linea).toContain('¿Alguna cita de esta página está mal atribuida o te afecta? ');
+    expect(linea).toContain('mailto:peticiones@ejemplo.org?subject=Corregir%20o%20retirar%20citas%20del%20personaje%20batman');
   });
 });

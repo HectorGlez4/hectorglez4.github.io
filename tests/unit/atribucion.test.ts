@@ -531,3 +531,28 @@ describe('Historia 35.4 — la firma de una Cita, en orden fijo Personaje, Obra,
     expect(() => cierreDeMasDelPersonaje(BATMAN, 1)).toThrow(/dos Citas o más/);
   });
 });
+
+describe('Historia 35.8 — la línea de retirada', async () => {
+  const { lineaDeRetirada } = await import('../../src/lib/atribucion.ts');
+
+  it('en la Página de Cita, la pregunta, el enlace y el asunto con el slug codificado', () => {
+    expect(lineaDeRetirada({ sobre: 'cita', slug: 'buzz-hasta-el-infinito' }, ' peticiones@ejemplo.org ')).toEqual({
+      pregunta: '¿Esta cita está mal atribuida o te afecta? ',
+      enlace: 'Pide que se corrija o se retire.',
+      href: 'mailto:peticiones@ejemplo.org?subject=Corregir%20o%20retirar%20la%20cita%20buzz-hasta-el-infinito',
+      direccion: 'peticiones@ejemplo.org',
+    });
+  });
+
+  it('en la de Personaje, la pregunta por las citas de la página', () => {
+    const linea = lineaDeRetirada({ sobre: 'personaje', slug: 'buzz' }, 'peticiones@ejemplo.org');
+    expect(linea.pregunta).toBe('¿Alguna cita de esta página está mal atribuida o te afecta? ');
+    expect(linea.enlace).toBe('Pide que se corrija o se retire.');
+    expect(linea.href).toBe('mailto:peticiones@ejemplo.org?subject=Corregir%20o%20retirar%20citas%20del%20personaje%20buzz');
+  });
+
+  it('sin buzón —sin valor o en blanco— lanza nombrando la constante', () => {
+    expect(() => lineaDeRetirada({ sobre: 'cita', slug: 'x' }, undefined)).toThrow(/BUZON_DE_PETICIONES/u);
+    expect(() => lineaDeRetirada({ sobre: 'personaje', slug: 'x' }, '   ')).toThrow(/BUZON_DE_PETICIONES/u);
+  });
+});

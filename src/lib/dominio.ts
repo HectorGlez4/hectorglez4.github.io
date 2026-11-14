@@ -58,7 +58,8 @@ export const SITIO = process.env.SITE_URL?.trim() || `https://${DOMINIO}`;
  *
  * **La fija Héctor; ningún agente le da valor.** Es la quinta constante de la puerta de la
  * atribuida (las otras cuatro, en `src/lib/umbrales.ts`): sin ella no se publica ninguna,
- * porque una atribuida no se publica sin a dónde pedir su retirada. La línea que la pinta
- * llega con la Historia 35.8.
+ * porque una atribuida no se publica sin a dónde pedir su retirada. La pinta la línea de
+ * retirada (`src/components/LineaDeRetirada.astro`, Historia 35.8), que para la construcción sin
+ * ella: un alias dedicado y desechable, nunca una dirección personal.
  */
 export const BUZON_DE_PETICIONES: string | undefined = undefined;

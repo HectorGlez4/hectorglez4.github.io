@@ -181,6 +181,19 @@ export const FICHERO_DE_CLASES = 'clases-de-cita.yml';
  */
 export const FICHERO_DE_FORMAS_VEDADAS = 'formas-vedadas.yml';
 
+/**
+ * El registro de peticiones de corrección y retirada de una Cita atribuida — Historia 35.8,
+ * AD-35. Solo añade; lo leen y lo escriben `tools/lib/peticiones.ts` y `npm run peticion`, y
+ * ningún módulo de `src/` lo nombra (AD-24).
+ */
+export const FICHERO_DE_PETICIONES_DE_RETIRADA = 'peticiones-de-retirada.yml';
+
+/**
+ * El registro de auditorías de SM-C6 — Historia 35.8, AD-32. Solo añade; lo escribe
+ * `npm run peticion -- auditar`, y ningún módulo de `src/` lo nombra (AD-24).
+ */
+export const FICHERO_DE_AUDITORIAS = 'auditorias-de-atribuidas.yml';
+
 export interface Rutas {
   raiz: string;
   citas: string;
@@ -359,6 +372,10 @@ export interface Rutas {
   clasesDeCita: string;
   /** El registro de formas vedadas a la atribuida — Historia 35.7. Solo añade. */
   formasVedadas: string;
+  /** El registro de peticiones de corrección y retirada — Historia 35.8. Solo añade. */
+  peticionesDeRetirada: string;
+  /** El registro de auditorías de SM-C6 — Historia 35.8. Solo añade. */
+  auditoriasDeAtribuidas: string;
   /**
    * Las fijaciones de jornada de la Cita del Día — FR-9, Historia 13.1.
    *
@@ -403,6 +420,8 @@ export function rutasDelCorpus(raizCorpus: string): Rutas {
     descartesDeCandidatos: join(raizCorpus, FICHERO_DE_DESCARTES),
     clasesDeCita: join(raizCorpus, FICHERO_DE_CLASES),
     formasVedadas: join(raizCorpus, FICHERO_DE_FORMAS_VEDADAS),
+    peticionesDeRetirada: join(raizCorpus, FICHERO_DE_PETICIONES_DE_RETIRADA),
+    auditoriasDeAtribuidas: join(raizCorpus, FICHERO_DE_AUDITORIAS),
     portada: join(raizCorpus, FICHERO_DE_PORTADA),
   };
 }
@@ -2912,8 +2931,9 @@ function bloqueDePublicacion(publicacion: PublicacionDeCanal): string {
  * Antes de escribir se valida el fichero y se compone en memoria lo que quedaría, así que un
  * fichero ilegible —o uno en el que la lista no es lo último— se niega sin tocarlo. Después
  * se relee y se comprueba que la última entrada es la nueva y que el recuento creció en uno.
+ * Desde la 35.8 lo usan también las peticiones de retirada y las auditorías de SM-C6.
  */
-async function añadirAlRegistro<T>(registro: {
+export async function añadirAlRegistro<T>(registro: {
   ruta: string;
   raiz: string;
   nombre: string;

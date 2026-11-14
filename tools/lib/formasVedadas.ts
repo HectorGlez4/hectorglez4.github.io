@@ -9,8 +9,9 @@
  * `{forma, slug?, motivo, fecha}`, con `forma` la canónica de `normalizar` (AD-3).
  *
  *   · Lo escriben solo las órdenes que rechazan una candidata de siempre —`revisar --rechazar` y
- *     la aprobación que la deja en revisión por el cotejo o por la Procedencia— y la que retira
- *     (`documentar --retirar`).
+ *     la aprobación que la deja en revisión por el cotejo o por la Procedencia— y las que retiran
+ *     (`documentar --retirar` y, desde la 35.8, la retirada por petición de `npm run peticion`,
+ *     siempre con `retirada`). La cabecera del fichero no cambia: el registro solo añade.
  *   · Lo leen la puerta de la atribuida en el alta, la aprobación, `npm run atribuida` y el build
  *     (`integraciones/clases.ts`), que lo lee solo para romper: ningún byte de `dist/` sale de él.
  *   · Una entrada `cambio-de-clase` no veda nunca: es la forma de una Cita que vuelve como

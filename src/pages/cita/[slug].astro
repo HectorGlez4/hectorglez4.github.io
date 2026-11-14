@@ -46,6 +46,12 @@ import { clavesDeOrden } from '../../lib/obras.ts';
 import { enUnaLinea } from '../../lib/verso.ts';
 import { recortarPorPalabra } from '../../lib/recorte.ts';
 import { MAX_CARACTERES_DE_TITULO_Y_META } from '../../lib/umbrales.ts';
+/*
+ * Historia 35.8 — la línea de retirada, la última importación a propósito: el orden de las hojas de
+ * estilo de la página sigue el de las importaciones, y en medio movía el de los Desplegables.
+ */
+import LineaDeRetirada from '../../components/LineaDeRetirada.astro';
+import { esAtribuida } from '../../lib/clase.ts';
 
 export const getStaticPaths = (async () => {
   const conjunto = await conjuntoPublicable();
@@ -229,6 +235,11 @@ const comoCitar = (() => {
       * nada, y sin ninguno no hay `nav`: la Atribución sigue enlazando al Autor y a la Obra.
       */}
     <RutasDeSalida dueño={dueñoDeLasRutas} autorDeLaCita={cita.autor} rutas={rutas} zona="rutas-de-salida" />
+    {/*
+      * Historia 35.8 — en la Cita atribuida, la línea de retirada: lo último visible de la página,
+      * tras las Rutas de salida o, sin ellas, tras los desplegables. La de siempre no la lleva.
+      */}
+    {esAtribuida(cita) && <LineaDeRetirada sobre="cita" slug={cita.slug} />}
     {/*
       * Historia 27.1 — lo que la Cita declara a Pagefind: sus filtros, su metadato `autor` y su
       * clave de orden. El último hijo de `<article>`, fuera de todo bloque que se repite en otra

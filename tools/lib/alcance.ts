@@ -310,7 +310,7 @@ export function veredictoDeAlcance(
 const enNumero = (n: number, singular: string, plural: string) => `${n} ${n === 1 ? singular : plural}`;
 
 /** Lo que se dice de los Temas de una Cita fuera de alcance: los que no se publican, o por qué ninguno. */
-function lineaDeTemas(temas: readonly TemaBajoUmbral[], declarados: number): string {
+export function lineaDeTemas(temas: readonly TemaBajoUmbral[], declarados: number): string {
   if (temas.length === 0) {
     return declarados === 0 ? 'no declara ningún Tema' : 'todos sus Temas se publican';
   }

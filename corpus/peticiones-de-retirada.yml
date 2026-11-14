@@ -1,0 +1,23 @@
+# Peticiones de corrección y retirada de una Cita atribuida — Historia 35.8, Épica 35, AD-35
+#
+# QUÉ REGISTRA. Lo que alguien pidió, por el correo de la línea de retirada, sobre una Cita
+# atribuida, y cómo se resolvió. Dos clases de entrada en la misma lista:
+#   - peticion: {id, fecha, cita, solicitante, peticion, motivo?}
+#       solicitante: persona-afectada, titular-de-derechos u otro; peticion: corregir o retirar.
+#   - resolucion: {peticion, fecha, resolucion}
+#       peticion: el id de la petición; resolucion: corregida, retirada o rechazada.
+#
+# NINGÚN CAMPO ADMITE CONTACTO. El repositorio es público: ni el correo ni el teléfono de quien
+# pide se anotan, y la orden rechaza un motivo que los lleve.
+#
+# SOLO AÑADE. Ninguna entrada se reescribe ni se borra. `npm test` comprueba que el fichero
+# del commit empieza, byte a byte, por el del commit padre.
+#
+# NO SE EDITA A MANO. Lo escribe `npm run peticion -- anotar` y `npm run peticion -- resolver`.
+# Ningún agente anota una petición que no ha recibido una persona. La petición de retirar de un
+# titular de derechos retira la Cita en el mismo gesto; las demás, al resolverlas `retirada`.
+#
+# Lo lee `npm run peticion`, por mes y con su plazo, y de aquí sale SM-C6. No es una colección:
+# ningún módulo de src/ lo lee (AD-24), ningún byte de dist/ sale de él y no fecha ni avisa.
+
+entradas:
