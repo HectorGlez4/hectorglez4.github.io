@@ -313,9 +313,9 @@ export type Columna = Exclude<FamiliaDeRuta, 'directorio'> | 'directorioDeAutore
  */
 export const CAMPOS_QUE_PINTA = {
   cita: {
-    // Historia 35.6 — la Variante de una atribuida la pinta solo su Página de Cita; y desde la
-    // 35.10, el `origen`, que ahí dice si el texto es la traducción del sitio.
-    cita: [...CAMPOS_DE_CITA, 'variante', 'origen'],
+    // Historia 35.6 — la Variante de una atribuida la pinta solo su Página de Cita. El `origen`
+    // estuvo aquí en la 35.10 y volvió a `CAMPOS_QUE_NO_FECHAN` en la 35.11 (AD-27 v9.2).
+    cita: [...CAMPOS_DE_CITA, 'variante'],
     autor: CAMPOS_DE_CITA,
     tema: CAMPOS_DE_CITA,
     coleccion: CAMPOS_DE_CITA,
@@ -397,10 +397,10 @@ export const CAMPOS_QUE_PINTA = {
  * prueba de clasificación exige que cada clave de los esquemas esté aquí o en la tabla.
  */
 export const CAMPOS_QUE_NO_FECHAN = {
-  // Historia 35.1b — las atestiguaciones de la atribuida no se pintan (35.4 decide lo que pinta). El
-  // `origen` salió de aquí en la 35.10: la Página de Cita dice la traducción propia.
-  // El `textoOriginal` de la traducción propia (35.10) se guarda para auditarla y no se pinta.
-  cita: ['aptaParaPortada', 'estadoDerechos', 'clase', 'atestiguaciones', 'textoOriginal'],
+  // Historia 35.1b — las atestiguaciones de la atribuida no se pintan (35.4 decide lo que pinta).
+  // Historia 35.11 (AD-27 v9.2) — ninguna superficie pinta el `origen` ni la `partida` de la
+  // traducción propia (UX v9.3): se guardan para auditarla, y un cambio solo de ellos no fecha nada.
+  cita: ['aptaParaPortada', 'estadoDerechos', 'clase', 'atestiguaciones', 'origen', 'partida'],
   autor: ['tradicion'],
   obra: ['distintaDe'],
   /*

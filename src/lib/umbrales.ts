@@ -1514,3 +1514,11 @@ export const MIN_ATRIBUIDAS_PARA_JUZGAR_SM_C6: number | undefined = undefined;
  * dos meses seguidos — Historia 35.8. Lo fija Héctor.
  */
 export const MAX_PROPORCION_MAL_ATRIBUIDA_SM_C6: number | undefined = undefined;
+
+/**
+ * La proporción mal traducida de la segunda muestra de la auditoría —solo traducción propia— (entre
+ * 0 y 1) por encima de la cual SM-C6 salta, en dos meses cerrados seguidos y sobre su propia
+ * población — Historia 35.11, SM-C6 v9.2. Se juzga aparte de la mal atribuida, con el mismo mínimo.
+ * Lo fija Héctor.
+ */
+export const MAX_PROPORCION_MAL_TRADUCIDA_SM_C6: number | undefined = undefined;

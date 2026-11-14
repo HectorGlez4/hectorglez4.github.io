@@ -1,10 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import { citaAdmisible, variante } from '../../src/lib/admision.ts';
+import { citaAdmisible, LENGUAS_DE_PARTIDA, variante } from '../../src/lib/admision.ts';
 import { REGIONES_DE_VARIANTE, esRegionDeVariante } from '../../src/lib/variante.ts';
 import {
   firmaDeCita,
   fragmentoParaInsertar,
-  lineaDeTraduccionPropia,
   lineaDeVariante,
   procedenciaCompuesta,
   textoParaCopiar,
@@ -120,45 +119,58 @@ describe('Historia 35.6 — la línea de la Variante', () => {
   });
 });
 
-describe('Historia 35.10 — la línea de la traducción propia', () => {
-  it('dice que el texto es la traducción del sitio, y nada sin ella', () => {
-    expect(lineaDeTraduccionPropia({ traduccionPropia: true })).toBe(
-      'Traducción de Sabiduría de Bolsillo: no circula ninguna versión en español.',
-    );
-    expect(lineaDeTraduccionPropia({})).toBeUndefined();
+describe('Historia 35.11 — la página no dice la traducción propia', () => {
+  it('ningún módulo de src/lib/atribucion.ts compone una línea de traducción propia', async () => {
+    const atribucion = await import('../../src/lib/atribucion.ts');
+    expect(Object.keys(atribucion)).not.toContain('lineaDeTraduccionPropia');
   });
 });
 
-describe('Historia 35.10 — el esquema de la traducción propia (pasada de revisión 2)', () => {
-  const ORIGINAL = 'To infinity and beyond!';
+describe('Historia 35.11 — el esquema de la traducción propia: la partida', () => {
+  const PARTIDA = { texto: 'To infinity and beyond!', lengua: 'en' };
 
-  it('admite la traducción propia con su textoOriginal', () => {
-    expect(mensajes(atribuida({ origen: 'traduccion-propia', textoOriginal: ORIGINAL }))).toEqual([]);
+  it('admite la traducción propia con su partida {texto, lengua}', () => {
+    expect(mensajes(atribuida({ origen: 'traduccion-propia', partida: PARTIDA }))).toEqual([]);
   });
 
-  it('rechaza la traducción propia sin textoOriginal: la traducción no se podría auditar', () => {
+  it('admite cada lengua de LENGUAS_DE_PARTIDA', () => {
+    for (const lengua of LENGUAS_DE_PARTIDA) {
+      expect(mensajes(atribuida({ origen: 'traduccion-propia', partida: { ...PARTIDA, lengua } })), lengua).toEqual([]);
+    }
+    expect([...LENGUAS_DE_PARTIDA]).toEqual(['en', 'fr', 'it', 'de', 'pt', 'ja']);
+  });
+
+  it('rechaza la traducción propia sin partida, nombrando «partida»', () => {
     expect(mensajes(atribuida({ origen: 'traduccion-propia' })).join('\n')).toMatch(
-      /«origen: traduccion-propia» declara su «textoOriginal»/,
+      /«origen: traduccion-propia» declara su «partida»/,
     );
   });
 
   it.each([
-    ['otro origen de la atribuida', atribuida({ textoOriginal: ORIGINAL })],
-    ['la Cita de siempre', { texto: 'Una frase', autor: 'seneca', temas: [], slug: 'seneca-una-frase', procedencia: { año: 60 }, estadoDerechos: 'dominio-público', textoOriginal: ORIGINAL }],
-  ])('rechaza textoOriginal con %s', (_, cita) => {
-    expect(mensajes(cita).join('\n')).toMatch(/declara «textoOriginal»/);
+    ['otro origen de la atribuida (doblaje)', atribuida({ partida: PARTIDA })],
+    ['la Cita de siempre', { texto: 'Una frase', autor: 'seneca', temas: [], slug: 'seneca-una-frase', procedencia: { año: 60 }, estadoDerechos: 'dominio-público', partida: PARTIDA }],
+  ])('rechaza partida con %s', (_, cita) => {
+    expect(mensajes(cita).join('\n')).toMatch(/declara «partida»/);
+  });
+
+  it('el campo viejo, textoOriginal, no sustituye a la partida: el rechazo nombra «partida»', () => {
+    expect(mensajes(atribuida({ origen: 'traduccion-propia', textoOriginal: PARTIDA.texto })).join('\n')).toMatch(/«partida»/);
   });
 
   it.each([
-    ['en blanco', '   ', /no puede estar en blanco/],
-    ['con un salto de línea', 'To infinity\nand beyond!', /va en una sola línea/],
-  ])('rechaza un textoOriginal %s', (_, valor, regla) => {
-    expect(mensajes(atribuida({ origen: 'traduccion-propia', textoOriginal: valor })).join('\n')).toMatch(regla);
+    ['una lengua fuera del conjunto', { texto: PARTIDA.texto, lengua: 'es' }, /«lengua» de la «partida» es una de/],
+    ['sin lengua', { texto: PARTIDA.texto }, /«lengua» de la «partida» es una de/],
+    ['un texto en blanco', { texto: '   ', lengua: 'en' }, /no puede estar en blanco/],
+    ['un texto con salto de línea', { texto: 'To infinity\nand beyond!', lengua: 'en' }, /va en una sola línea/],
+    ['una clave de más', { ...PARTIDA, fuente: 'x' }, /solo declara «texto» y «lengua»/],
+    ['una cadena en vez de un objeto', 'To infinity and beyond!', /«partida» es un objeto con «texto» y «lengua»/],
+  ])('rechaza una partida con %s', (_, valor, regla) => {
+    expect(mensajes(atribuida({ origen: 'traduccion-propia', partida: valor })).join('\n')).toMatch(regla);
   });
 
-  it('rechaza la traducción propia con Variante: la Página diría que no circula ninguna y enseñaría una', () => {
+  it('rechaza la traducción propia con Variante', () => {
     expect(
-      mensajes(atribuida({ origen: 'traduccion-propia', textoOriginal: ORIGINAL, variante: VARIANTE })).join('\n'),
+      mensajes(atribuida({ origen: 'traduccion-propia', partida: PARTIDA, variante: VARIANTE })).join('\n'),
     ).toMatch(/«origen: traduccion-propia» no declara Variante/);
   });
 });

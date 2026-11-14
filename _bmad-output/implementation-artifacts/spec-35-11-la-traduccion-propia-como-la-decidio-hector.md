@@ -2,8 +2,8 @@
 title: 'Historia 35.11 — La traducción propia, como la decidió Héctor'
 type: 'feature'
 created: '2026-11-14'
-status: 'ready-for-dev'
-baseline_revision: '37a44f3e372fa31320954ce9c47f17891377e030'
+status: 'done'
+baseline_revision: 'b5484f1bb6f2a7e15e430f209c67dac715cad811'
 review_loop_iteration: 0
 followup_review_recommended: false
 context:
@@ -20,6 +20,20 @@ deferred:
   - summary: 'Pendiente de Héctor: dar valor a MAX_PROPORCION_MAL_TRADUCIDA_SM_C6 (y a las demás constantes de SM-C6). Ningún agente lo hace.'
     severity: low
     location: 'src/lib/umbrales.ts'
+  - summary: >-
+      tests/unit/tipografia-en-tokens.test.ts falla en la rama desde la UX v9.3: DESIGN.md declara el token quote-xs (Fichas, Épica 36) y tokens.css no lo tiene.
+    evidence: |-
+      npm test de la 35.11: 1 fallo, «un interlineado por token de tipografía», con «quote-xs» de más en el frontmatter. La historia no toca src/styles ni la planificación (git diff b5484f1b -- src/styles _bmad-output/planning-artifacts vacío); llegó con 5e3eb5e37d (ux: v9.3). Lo cierra la historia de la Épica 36 que pinte las Fichas.
+    location: >-
+      tests/unit/tipografia-en-tokens.test.ts:246
+    severity: medium
+  - summary: >-
+      La cabecera versionada de corpus/auditorias-de-atribuidas.yml no nombra la segunda muestra ni mal-traducida: el registro solo añade y su cabecera no se reescribe.
+    evidence: |-
+      La 35.11 amplía el analizador (muestraDeTraduccion, resultadosDeTraduccion) sin tocar CABECERA_DE_AUDITORIAS, porque la prueba del árbol exige que el fichero empiece por el del primer padre. La documentación de la segunda muestra vive en AGENTS.md y en la cabecera de tools/peticion.ts.
+    location: >-
+      tools/lib/peticiones.ts
+    severity: low
 ---
 
 <intent-contract>
@@ -118,6 +132,17 @@ deferred:
 
 ## Review Triage Log
 
+### 2026-11-14 — Review pass
+- intent_gap: 0
+- bad_spec: 0
+- patch: 0
+- defer: 0
+- reject: 0
+- addressed_findings:
+  - none
+
+Las capas de revisión son externas y no traían hallazgos en esta pasada (la orquesta las corre aparte).
+
 ## Design Notes
 
 - **«Fecha igual o posterior a su último cambio de texto», leído como orden de commits.** La orden escribe la entrada con la jornada de hoy y el commit llega después, quizá otro día: comparar la `fecha` con el instante del commit rompería un flujo legítimo, y la Cita no guarda ninguna fecha de texto. Por eso el build exige que alguna entrada del slug **apareciera en el registro** en el mismo commit que el último cambio de `texto` de la Cita, en uno posterior, o sin commitear; y que, si el texto está sin commitear, también lo esté la entrada. Instante del texto: la última transición del fichero con `cambiaronLosCampos(t, ['texto'])` (el alta cuenta), o «sin commitear» si el `texto` del disco difiere del de `HEAD` o el fichero no está en `HEAD`. Instante de la entrada *i*: la primera versión del registro con más de *i* entradas (el registro solo añade), o «sin commitear» si `HEAD` no la tiene. Sin historial fiable (`motivo` de `estadoDelRepositorio`: copia superficial, sin git) se comprueban solo la existencia y la igualdad, y el build avisa con el motivo, como el sitemap. Diferido a Héctor.
@@ -135,5 +160,48 @@ deferred:
 
 ## Auto Run Result
 
-Status: ready-for-dev
-Blocking condition: ninguna (parada tras planificar, como pedía la invocación).
+Status: done
+Blocking condition: ninguna.
+
+**Resumen.** La traducción propia queda como la decidió Héctor (v9.2): la Página de Cita ya no la dice
+(se retiran `TraduccionPropia.astro`, `lineaDeTraduccionPropia` y el campo `traduccionPropia`); `origen` y
+`partida` pasan a `CAMPOS_QUE_NO_FECHAN.cita`; `textoOriginal` se sustituye por `partida: {texto, lengua}`
+con `LENGUAS_DE_PARTIDA`; la aprueban dos agentes distintos (`--propone`/`--aprueba` en el alta y en
+`revisar --aprobar`) y queda en `corpus/aprobaciones-de-atribuidas.yml`, registro nuevo que solo añade,
+con su vuelta atrás si falla y puerta en el build (un solo sentido; orden de commits por git, sin
+historial avisa); `atribuida texto` sustituye (con `--origen` y `--atestiguacion`, sin parecido ni
+aprobación) o retraduce (con dos agentes, anotados); y SM-C6 gana una segunda muestra solo de traducción
+propia (SHA-256 de `traduccion|{slug}|{mes}`, `mal-traducida`, juicio aparte con
+`MAX_PROPORCION_MAL_TRADUCIDA_SM_C6`, sin valor).
+
+**Ficheros.**
+- `src/components/TraduccionPropia.astro` — borrado; `src/pages/cita/[slug].astro` — sin su uso.
+- `src/lib/atribucion.ts`, `src/lib/publicado.ts` — sin `lineaDeTraduccionPropia` ni `traduccionPropia`.
+- `src/lib/admision.ts`, `src/content.config.ts` — `partida` y `LENGUAS_DE_PARTIDA`; reglas de clase al día.
+- `src/lib/umbrales.ts` — `MAX_PROPORCION_MAL_TRADUCIDA_SM_C6 = undefined`.
+- `tools/lib/cambios.ts` — `origen` y `partida` no fechan.
+- `tools/lib/corpus.ts` — `FICHERO_DE_APROBACIONES` y `Rutas.aprobacionesDeAtribuidas`.
+- `tools/lib/aprobaciones.ts` (nuevo) — cabecera, analizador, lector, escritor, agentes y `fallosDeAprobaciones`.
+- `corpus/aprobaciones-de-atribuidas.yml` (nuevo) — cabecera y `aprobaciones:` vacío.
+- `tools/lib/revision.ts`, `tools/revisar.ts`, `tools/alta.ts` — agentes, añadido y vuelta atrás; `partida` en el alta.
+- `tools/lib/cambioDeAtribuida.ts`, `tools/atribuida.ts` — sustitución y retraducción; banderas nuevas.
+- `tools/lib/siembraAtribuida.ts` — `partida` en el lote y en los avisos.
+- `integraciones/clases.ts` — la puerta del registro (`instantesDeLasAprobaciones`).
+- `tools/lib/peticiones.ts`, `tools/peticion.ts` — segunda muestra, registro, consulta y juicio aparte; `_revision/` solo se lee si hay una atribuida retirada.
+- `AGENTS.md` — la puerta, la sustitución y la retraducción, la segunda muestra y el quinto registro.
+- Pruebas: `aprobaciones.test.ts` (nueva), `variante`, `variante-build`, `siembra-atribuida`, `atribuidas`, `atribuida-cli`, `fecha-de-cambio`, `peticiones`, `revision`, `alta`, `clase-build`.
+
+**Revisión.** Sin hallazgos externos en esta pasada: 0 parches, 0 diferidos por revisión, 0 rechazados.
+Seguimiento recomendado: `false` (0 parches; puntuación 0).
+
+**Verificación.**
+- Lote 1 (`aprobaciones`, `variante`, `siembra-atribuida`, `atribuida-cli`, `atribuidas`, `peticiones`, `fecha-de-cambio`): 7 ficheros, 389 pruebas en verde.
+- Lote 2 (`variante-build`, `clase-build`, `revision`, `alta`): 4 ficheros, 139 pruebas en verde.
+- `npx astro check`: 0 errores, 0 avisos (12 sugerencias).
+- `npm run build` del árbol frente a la línea base (worktree desacoplado de `b5484f1b`, ya retirado), con `FECHA_JORNADA=2026-11-14`: los HTML de `dist/` idénticos; solo difieren ficheros de `dist/pagefind/` (`filter/*.pf_filter`, `*.pf_meta`, `pagefind-entry.json`), y volver a correr Pagefind sobre la misma `dist/` de la base ya da otros nombres: no es de la historia. Con el Corpus real (sin atribuidas) el componente no pintaba nada, así que no hay bytes que quitar.
+- `npm test`: 2 fallos de 8.600. «La consulta sobre el árbol» de `peticiones.test.ts` agotaba los 120 s leyendo las 288.594 candidatas de `corpus/_revision/`: se corrigió (solo se lee `_revision/` si alguna atribuida registrada no está publicada) y el fichero pasa entero (78 pruebas, con una nueva para la retirada); la consulta del árbol tarda 1,6 s. El otro, `tipografia-en-tokens.test.ts` («quote-xs»), es previo a la historia y queda diferido.
+
+**Riesgos.** La puerta del build lee el orden de commits por la fecha del committer: dos commits en el
+mismo segundo, el de la entrada antes que el del texto, pasarían (lectura de AD-32 diferida a Héctor).
+Una Ficha de Obra que creó una traducción propia devuelta a revisión por un registro roto se queda; el
+build solo avisa de una ficha sin Citas.

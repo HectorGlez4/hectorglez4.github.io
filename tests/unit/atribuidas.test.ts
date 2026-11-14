@@ -291,9 +291,9 @@ describe('el esquema de la atribuida sola', () => {
   it('la feliz pasa; los cuatro orígenes del conjunto, con la traducción propia de la 35.10', () => {
     expect(citaAdmisible.safeParse(base).success).toBe(true);
     expect(ORIGENES).toEqual(['original', 'doblaje', 'traduccion-publicada', 'traduccion-propia']);
-    // La traducción propia lleva además la frase que se tradujo (pasada de revisión 2 de la 35.10).
+    // La traducción propia lleva además su partida (Historia 35.11).
     for (const origen of ORIGENES) {
-      const conOriginal = origen === 'traduccion-propia' ? { textoOriginal: 'The original line.' } : {};
+      const conOriginal = origen === 'traduccion-propia' ? { partida: { texto: 'The original line.', lengua: 'en' } } : {};
       expect(citaAdmisible.safeParse({ ...base, origen, ...conOriginal }).success, origen).toBe(true);
     }
   });

@@ -5,7 +5,8 @@
  *   npm run atribuida -- autor <slug> <slug-de-autor>
  *   npm run atribuida -- personaje <slug> <slug-de-personaje>
  *   npm run atribuida -- variante <slug> "<texto>" --region <región> --origen <origen>
- *   npm run atribuida -- texto <slug> "<texto>"
+ *   npm run atribuida -- texto <slug> "<texto>" [--propone <agente> --aprueba <agente>]
+ *   npm run atribuida -- texto <slug> "<versión>" --origen <origen> --atestiguacion <url> [...]
  *
  * Una atribuida publicada no se edita a mano: el esquema no ve su Ficha de Obra, sus topes ni
  * los duplicados entre clases, y `documentar` se niega ante ella. Esta función es el camino:
@@ -19,6 +20,19 @@
  *     (`parecidoDeTextos`, AD-3), y un texto canónicamente igual a la Variante (o una Variante
  *     igual al texto) **intercambia** los dos textos y sus dos `origen`, sin tocar la región;
  *   · el slug y el nombre del fichero no cambian nunca (AD-4).
+ *
+ * La traducción propia (Historia 35.11, AD-35 v9.2) tiene dos caminos por `texto`, y ninguna orden
+ * posterior al alta la crea (`--origen traduccion-propia` se niega, y la Variante nunca la lleva):
+ *
+ *   · **sustituirla** por la versión en español que circula: `--origen` (cualquiera menos
+ *     `traduccion-propia`) con sus `--atestiguacion`, que reemplazan a las de antes con
+ *     `consultadaEl` de hoy; se quita la `partida`, no se mira el parecido (es otra letra de la
+ *     misma frase) y no se anota ninguna aprobación;
+ *   · **retraducirla** conservando el origen: el parecido de siempre, y `--propone`/`--aprueba`,
+ *     dos agentes distintos, que se anotan en `corpus/aprobaciones-de-atribuidas.yml` después de
+ *     escribir la Cita; si el registro falla, la Cita vuelve a su contenido original.
+ *
+ * `--origen`, `--atestiguacion` y los agentes sobre una atribuida que no es traducción propia se niegan.
  *
  * Lo nuevo pasa por las mismas puertas que el alta: el esquema (`citaAdmisible`), y los topes, la
  * figura sin Obra y los duplicados entre clases (`fallosDeAtribuidas`) contra lo publicado —con la
@@ -42,7 +56,15 @@ import {
 } from './corpus.ts';
 import type { Resultado } from './gestion.ts';
 import { citaAdmisible, ORIGENES_DE_VARIANTE } from '../../src/lib/admision.ts';
-import { claseDe, claseQueCorresponde, esAtribuida } from '../../src/lib/clase.ts';
+import { claseDe, claseQueCorresponde, esAtribuida, ORIGEN_TRADUCCION_PROPIA } from '../../src/lib/clase.ts';
+import {
+  agentesDe,
+  MOTIVO_AGENTES_SIN_TRADUCCION,
+  NOMBRE_DEL_REGISTRO_DE_APROBACIONES,
+  registrarAprobaciones,
+  type Agentes,
+} from './aprobaciones.ts';
+import { fechaLocal } from './corpus.ts';
 import { fichaDeCita, indiceDeFichas } from '../../src/lib/obras.ts';
 import { normalizar } from '../../src/lib/normalizar.ts';
 import { CLAVES_DE_REGION, esRegionDeVariante } from '../../src/lib/variante.ts';
@@ -69,12 +91,29 @@ export type CambioDeAtribuida =
   | { tipo: 'autor'; slug: string; autor: string }
   | { tipo: 'personaje'; slug: string; personaje: string }
   | { tipo: 'variante'; slug: string; texto: string; region: string; origen: string }
-  | { tipo: 'texto'; slug: string; texto: string };
+  | {
+      tipo: 'texto';
+      slug: string;
+      texto: string;
+      /** Historia 35.11 — el origen de la versión que sustituye a la traducción propia. */
+      origen?: string;
+      /** Historia 35.11 — las URL que atestiguan esa versión: reemplazan a las de antes. */
+      atestiguaciones?: readonly string[];
+      /** Historia 35.11 — los dos agentes de una retraducción, tal como llegan. */
+      agentes?: { propone?: string; aprueba?: string };
+    };
 
 export interface OpcionesDeCambio {
   /** Los valores de la puerta; por omisión, los del árbol (`VALORES_DEL_ARBOL`). */
   puerta?: ValoresDeLaPuerta;
+  /** La jornada de la consulta y de la aprobación; por omisión, la de hoy. */
+  hoy?: string;
 }
+
+/** Ninguna orden posterior al alta crea una traducción propia — Historia 35.11. */
+export const MOTIVO_NO_CREA_TRADUCCION_PROPIA =
+  'ninguna orden posterior al alta crea una traducción propia: «origen: traduccion-propia» solo entra con el ' +
+  'alta o la aprobación, con sus dos agentes, cuando no circula ninguna versión en español.';
 
 function negar(...motivos: string[]): Resultado {
   return { ok: false, motivos: [...motivos, 'No se ha escrito nada.'] };
@@ -116,6 +155,7 @@ function mejorParecido(nuevo: string, contra: readonly string[]): number {
 function componer(
   cambio: CambioDeAtribuida,
   datos: Record<string, unknown>,
+  hoy: string,
 ): { ok: true; datos: Record<string, unknown>; nota?: string } | { ok: false; motivos: string[] } {
   const nuevos: Record<string, unknown> = { ...datos };
   const slug = cambio.slug;
@@ -213,6 +253,24 @@ function componer(
       return { ok: true, datos: nuevos };
     }
     case 'texto': {
+      /*
+       * Historia 35.11 — la sustitución de la traducción propia por la versión que circula: texto,
+       * origen y atestiguaciones nuevos, sin partida y sin parecido (es otra letra de la misma frase).
+       */
+      if (cambio.origen !== undefined) {
+        const { partida: _partida, ...sinPartida } = nuevos;
+        void _partida;
+        return {
+          ok: true,
+          datos: {
+            ...sinPartida,
+            texto: cambio.texto,
+            origen: cambio.origen,
+            atestiguaciones: (cambio.atestiguaciones ?? []).map((url) => ({ url, consultadaEl: hoy })),
+          },
+          nota: `Sustituida la traducción propia por la versión que circula (origen: ${cambio.origen}); sin partida.`,
+        };
+      }
       if (textoDeLaVariante !== undefined && normalizar(cambio.texto) === normalizar(textoDeLaVariante)) {
         // El texto que resulta es la letra tecleada, no la guardada: puede corregirla.
         return intercambio(nuevos, cambio.texto, variante!.origen, texto, variante!.region, datos.origen);
@@ -310,7 +368,44 @@ export async function cambiarAtribuida(
   const datos = separarFrontmatter(original);
   if (datos === null) return negar(`${cita.ruta} no tiene frontmatter.`);
 
-  const compuesto = componer(cambio, datos);
+  /*
+   * Historia 35.11 — la traducción propia: sustituirla (con `--origen` y sus atestiguaciones, sin
+   * agentes) o retraducirla (sin `--origen`, con dos agentes distintos). Nada de eso sobre otra
+   * atribuida, y nunca para crear una.
+   */
+  const hoy = opciones.hoy ?? fechaLocal(new Date());
+  const esPropia = cita.origen === ORIGEN_TRADUCCION_PROPIA;
+  let agentes: Agentes | undefined;
+  if (cambio.tipo === 'texto') {
+    const conAgentes = cambio.agentes?.propone !== undefined || cambio.agentes?.aprueba !== undefined;
+    const conAtestiguaciones = (cambio.atestiguaciones ?? []).length > 0;
+    if (cambio.origen === ORIGEN_TRADUCCION_PROPIA) return negar(`No se cambia «${cambio.slug}»: ${MOTIVO_NO_CREA_TRADUCCION_PROPIA}`);
+    if (!esPropia && (cambio.origen !== undefined || conAtestiguaciones)) {
+      return negar(
+        `«${cambio.slug}» no es una traducción propia: --origen y --atestiguacion sustituyen la traducción del ` +
+          'sitio por la versión que circula, y esta atribuida ya es una versión que circula.',
+      );
+    }
+    if (conAtestiguaciones && cambio.origen === undefined) {
+      return negar('--atestiguacion va con --origen: son las de la versión que sustituye a la traducción propia.');
+    }
+    if (cambio.origen !== undefined) {
+      if (conAgentes) return negar(`No se cambia «${cambio.slug}»: ${MOTIVO_AGENTES_SIN_TRADUCCION}`);
+      if (!conAtestiguaciones) {
+        return negar(
+          `La versión que sustituye a la traducción propia de «${cambio.slug}» trae sus atestiguaciones ` +
+            '(--atestiguacion <url>, una o más): las de antes atestiguan la frase de partida, no esta.',
+        );
+      }
+    } else if (esPropia) {
+      const juicio = agentesDe(cambio.agentes?.propone, cambio.agentes?.aprueba);
+      if (!juicio.ok) return negar(`No se retraduce «${cambio.slug}»: ${juicio.motivo}`);
+      agentes = juicio.agentes;
+    } else if (conAgentes) {
+      return negar(`No se cambia «${cambio.slug}»: ${MOTIVO_AGENTES_SIN_TRADUCCION}`);
+    }
+  }
+  const compuesto = componer(cambio, datos, hoy);
   if (!compuesto.ok) return negar(...compuesto.motivos);
   const nuevos = compuesto.datos;
   // Un cambio que deja la Cita como estaba no reescribe nada ni se da por hecho; el orden de las
@@ -431,6 +526,32 @@ export async function cambiarAtribuida(
     }
     return negar(`No se pudo escribir ${cita.ruta}: ${fallo instanceof Error ? fallo.message : String(fallo)}.`);
   }
+  /*
+   * Historia 35.11 — la retraducción anota su aprobación después de escribir la Cita; si el
+   * registro falla, la Cita vuelve a su contenido original.
+   */
+  let deLaAprobacion: string | undefined;
+  if (agentes !== undefined) {
+    try {
+      await registrarAprobaciones(rutas, [{ slug: cambio.slug, ...agentes, fecha: hoy }]);
+      deLaAprobacion = `Retraducción propuesta por «${agentes.propone}» y aprobada por «${agentes.aprueba}»: ${NOMBRE_DEL_REGISTRO_DE_APROBACIONES}.`;
+    } catch (fallo) {
+      const motivo = fallo instanceof Error ? fallo.message : String(fallo);
+      try {
+        await writeFile(cita.ruta, original, 'utf8');
+      } catch (otro) {
+        return {
+          ok: false,
+          motivos: [
+            `${NOMBRE_DEL_REGISTRO_DE_APROBACIONES} no se pudo escribir (${motivo}), y ${cita.ruta} no se pudo ` +
+              `devolver a su contenido original (${otro instanceof Error ? otro.message : String(otro)}): quedó ` +
+              'retraducida sin su aprobación. Restitúyala con git.',
+          ],
+        };
+      }
+      return negar(`${NOMBRE_DEL_REGISTRO_DE_APROBACIONES} no se pudo escribir (${motivo}), y ${cita.ruta} ha vuelto a su contenido original.`);
+    }
+  }
   let deLaFicha: string | undefined;
   if (plan !== undefined) {
     const ficha = await aplicarFichaDeObra(rutas, plan);
@@ -458,6 +579,7 @@ export async function cambiarAtribuida(
       `Cambiada la atribuida «${cambio.slug}» (${cambio.tipo}): ${cita.ruta}.`,
       ...(compuesto.nota !== undefined ? [compuesto.nota] : []),
       ...(deLaFicha !== undefined ? [deLaFicha] : []),
+      ...(deLaAprobacion !== undefined ? [deLaAprobacion] : []),
       'El slug y el fichero no han cambiado. El cambio del corpus va en un commit propio.',
     ].join('\n'),
   };

@@ -62,6 +62,14 @@ export type TipoDeResolucion = (typeof RESOLUCIONES)[number];
 export const RESULTADOS_DE_AUDITORIA = ['bien', 'mal-atribuida', 'sin-fuente'] as const;
 export type ResultadoDeAuditoria = (typeof RESULTADOS_DE_AUDITORIA)[number];
 
+/**
+ * El resultado de auditar una traducción propia de la segunda muestra de SM-C6 — Historia 35.11,
+ * SM-C6 v9.2: los de la primera más `mal-traducida`, que solo cabe aquí (la traducción del sitio no
+ * es fiel a su partida). Las dos muestras se juzgan por separado.
+ */
+export const RESULTADOS_DE_TRADUCCION = [...RESULTADOS_DE_AUDITORIA, 'mal-traducida'] as const;
+export type ResultadoDeTraduccion = (typeof RESULTADOS_DE_TRADUCCION)[number];
+
 const enConjunto =
   <T extends string>(conjunto: readonly T[]) =>
   (valor: unknown): valor is T =>
@@ -71,6 +79,7 @@ export const esSolicitante = enConjunto(SOLICITANTES);
 export const esTipoDePeticion = enConjunto(PETICIONES);
 export const esTipoDeResolucion = enConjunto(RESOLUCIONES);
 export const esResultadoDeAuditoria = enConjunto(RESULTADOS_DE_AUDITORIA);
+export const esResultadoDeTraduccion = enConjunto(RESULTADOS_DE_TRADUCCION);
 
 /** Quién retira primero: el titular de derechos que pide retirar se atiende retirando (FR-69). */
 export const SOLICITANTE_QUE_RETIRA_PRIMERO: Solicitante = 'titular-de-derechos';
@@ -98,6 +107,12 @@ export interface Auditoria {
   mes: string;
   muestra: string[];
   resultados: Record<string, ResultadoDeAuditoria>;
+  /**
+   * Historia 35.11 — la segunda muestra, solo de traducción propia, y sus resultados: los dos o
+   * ninguno (sin traducciones propias al cierre del mes, ninguno).
+   */
+  muestraDeTraduccion?: string[];
+  resultadosDeTraduccion?: Record<string, ResultadoDeTraduccion>;
   auditadoEl: string;
 }
 
@@ -368,7 +383,9 @@ export function analizarAuditorias(nombre: string, contenido: string): Auditoria
   for (const [i, a] of lista.entries()) {
     const problema = !esObjeto(a)
       ? 'no es una entrada'
-      : Object.keys(a).some((k) => !['mes', 'muestra', 'resultados', 'auditadoEl'].includes(k))
+      : Object.keys(a).some(
+            (k) => !['mes', 'muestra', 'resultados', 'muestraDeTraduccion', 'resultadosDeTraduccion', 'auditadoEl'].includes(k),
+          )
         ? 'declara campos que la auditoría no tiene'
         : typeof a.mes !== 'string' || !esMes(a.mes)
           ? 'no declara un mes AAAA-MM'
@@ -382,10 +399,32 @@ export function analizarAuditorias(nombre: string, contenido: string): Auditoria
                 ? `no declara un resultado (${RESULTADOS_DE_AUDITORIA.join(', ')}) para cada slug de la muestra, y solo para ellos`
                 : typeof a.auditadoEl !== 'string' || !esJornada(a.auditadoEl)
                   ? 'no declara auditadoEl AAAA-MM-DD'
-                  : undefined;
+                  : problemaDeLaSegundaMuestra(a);
     if (problema !== undefined) throw new Error(`${nombre}: la entrada ${i + 1} ${problema} (${JSON.stringify(a)}).`);
   }
   return lista as Auditoria[];
+}
+
+/** Historia 35.11 — lo que no se sostiene de la segunda muestra de una auditoría, o `undefined`. */
+function problemaDeLaSegundaMuestra(a: Record<string, unknown>): string | undefined {
+  const muestra = a.muestraDeTraduccion;
+  const resultados = a.resultadosDeTraduccion;
+  if (muestra === undefined && resultados === undefined) return undefined;
+  if (muestra === undefined || resultados === undefined) {
+    return 'declara la muestra de traducción o sus resultados, y van los dos o ninguno';
+  }
+  if (!Array.isArray(muestra) || muestra.length === 0 || muestra.some((s) => typeof s !== 'string' || !FORMA_DE_SLUG.test(s))) {
+    return 'no declara una muestra de traducción de slugs';
+  }
+  if (new Set(muestra).size !== muestra.length) return 'repite un slug en la muestra de traducción';
+  if (
+    !esObjeto(resultados) ||
+    Object.keys(resultados).length !== muestra.length ||
+    (muestra as string[]).some((s) => !esResultadoDeTraduccion((resultados as Record<string, unknown>)[s]))
+  ) {
+    return `no declara un resultado (${RESULTADOS_DE_TRADUCCION.join(', ')}) para cada slug de la muestra de traducción, y solo para ellos`;
+  }
+  return undefined;
 }
 
 export async function leerAuditorias(rutas: Pick<Rutas, 'auditoriasDeAtribuidas'>): Promise<Auditoria[]> {
@@ -642,17 +681,47 @@ export function muestraDeAuditoria(slugs: readonly string[], mes: string, n: num
     .map((x) => x.slug);
 }
 
+/** El SHA-256 hex de `traduccion|{slug}|{mes}`, la clave de la segunda muestra — Historia 35.11. */
+export const claveDeMuestraDeTraduccion = (slug: string, mes: string) =>
+  createHash('sha256').update(`traduccion|${slug}|${mes}`).digest('hex');
+
+/**
+ * La segunda muestra de SM-C6 de un mes — Historia 35.11, SM-C6 v9.2: las `n` traducciones propias
+ * con menor SHA-256 de `traduccion|{slug}|{mes}` (todas si hay menos). Sin mano, y con otra clave
+ * que la primera: una Cita puede salir en las dos, y se juzga en cada una por separado.
+ */
+export function muestraDeTraduccion(slugs: readonly string[], mes: string, n: number): string[] {
+  return [...new Set(slugs)]
+    .map((slug) => ({ slug, clave: claveDeMuestraDeTraduccion(slug, mes) }))
+    .sort((a, b) => (a.clave < b.clave ? -1 : a.clave > b.clave ? 1 : a.slug < b.slug ? -1 : 1))
+    .slice(0, Math.max(0, n))
+    .map((x) => x.slug);
+}
+
+/**
+ * Las traducciones propias publicadas al cierre de un mes — Historia 35.11: las atribuidas al
+ * cierre (`atribuidasAlCierre`) cuyo fichero de hoy —en `corpus/citas/` o `corpus/_revision/`—
+ * declara `origen: traduccion-propia`. Sin leer git, como la primera: una sustituida deja de contar.
+ */
+export function traduccionesAlCierre(atribuidas: readonly string[], traduccionesHoy: ReadonlySet<string>): string[] {
+  return atribuidas.filter((s) => traduccionesHoy.has(s));
+}
+
 /** Lo que la consulta dice de un mes. */
 export interface MesDeSmC6 {
   mes: string;
   cerrado: boolean;
   atribuidas: number;
+  /** Historia 35.11 — las traducciones propias publicadas al cierre: la población de la segunda muestra. */
+  traducciones: number;
   peticiones: number;
   retiradas: number;
   /** Por cada cien atribuidas publicadas; ausente sin atribuidas (nunca 0 % por falta de ellas). */
   peticionesPorCien?: number;
   retiradasPorCien?: number;
   auditoria?: { muestra: number; malAtribuidas: number; sinFuente: number; proporcion: number };
+  /** Historia 35.11 — la segunda muestra: cuántas mal traducidas de cuántas, y su proporción. */
+  auditoriaDeTraduccion?: { muestra: number; malTraducidas: number; proporcion: number };
 }
 
 /**
@@ -700,9 +769,12 @@ export function mesesDeSmC6(contexto: {
   clases: readonly ClaseRegistrada[];
   vedadas: readonly FormaVedada[];
   publicadasHoy: ReadonlySet<string>;
+  /** Historia 35.11 — los slugs con `origen: traduccion-propia` hoy, en `corpus/citas/` o `corpus/_revision/`. */
+  traduccionesHoy?: ReadonlySet<string>;
   hoy: string;
 }): MesDeSmC6[] {
   const { entradas, auditorias, clases, vedadas, publicadasHoy, hoy } = contexto;
+  const traduccionesHoy = contexto.traduccionesHoy ?? new Set<string>();
   const { peticiones, resoluciones } = separarEntradas(entradas);
   const mesDeHoy = mesDe(hoy);
   const candidatos = [
@@ -716,15 +788,21 @@ export function mesesDeSmC6(contexto: {
   for (const a of auditorias) ultimaAuditoria.set(a.mes, a);
   const retiradasPorMes = mesesDeLasRetiradas(peticiones, resoluciones, vedadas);
   for (let mes = candidatos.sort()[0]; mes <= mesDeHoy; mes = mesSiguiente(mes)) {
-    const atribuidas = atribuidasAlCierre(mes, clases, vedadas, publicadasHoy).length;
+    const alCierre = atribuidasAlCierre(mes, clases, vedadas, publicadasHoy);
+    const atribuidas = alCierre.length;
+    const traducciones = traduccionesAlCierre(alCierre, traduccionesHoy).length;
     const deMes = peticiones.filter((p) => mesDe(p.fecha) === mes).length;
     const retiradas = [...retiradasPorMes.values()].filter((m) => m === mes).length;
     const a = ultimaAuditoria.get(mes);
     const malAtribuidas = a === undefined ? 0 : Object.values(a.resultados).filter((r) => r === 'mal-atribuida').length;
+    const deTraduccion = a?.muestraDeTraduccion !== undefined && a.resultadosDeTraduccion !== undefined ? a : undefined;
+    const malTraducidas =
+      deTraduccion === undefined ? 0 : Object.values(deTraduccion.resultadosDeTraduccion!).filter((r) => r === 'mal-traducida').length;
     meses.push({
       mes,
       cerrado: mes < mesDeHoy,
       atribuidas,
+      traducciones,
       peticiones: deMes,
       retiradas,
       ...(atribuidas > 0 ? { peticionesPorCien: (deMes * 100) / atribuidas, retiradasPorCien: (retiradas * 100) / atribuidas } : {}),
@@ -735,6 +813,15 @@ export function mesesDeSmC6(contexto: {
               malAtribuidas,
               sinFuente: Object.values(a.resultados).filter((r) => r === 'sin-fuente').length,
               proporcion: malAtribuidas / a.muestra.length,
+            },
+          }
+        : {}),
+      ...(deTraduccion !== undefined
+        ? {
+            auditoriaDeTraduccion: {
+              muestra: deTraduccion.muestraDeTraduccion!.length,
+              malTraducidas,
+              proporcion: malTraducidas / deTraduccion.muestraDeTraduccion!.length,
             },
           }
         : {}),
@@ -789,6 +876,50 @@ export function juicioDeSmC6(
       );
     }
     if (motivos.length > 0) saltos.push({ mes: b.mes, motivos });
+  }
+  if (parejas === 0) return { estado: 'sin-pareja' };
+  if (juzgadas === 0) return { estado: 'bajo-minimo', minimo };
+  return { estado: 'juzgado', minimo, maximo, saltos };
+}
+
+/**
+ * El juicio de la traducción propia en SM-C6 — Historia 35.11, SM-C6 v9.2, aparte del de la
+ * atribuida: salta en el segundo de dos meses cerrados y seguidos, los dos con al menos `minimo`
+ * traducciones propias publicadas al cierre (su propia población), si la proporción mal traducida
+ * de la segunda muestra pasa de `maximo` en los dos. Sin las dos constantes no juzga. No propone
+ * ningún freno: eso lo decide Héctor.
+ */
+export function juicioDeTraduccionSmC6(
+  meses: readonly MesDeSmC6[],
+  constantes: { minimo: number | undefined; maximo: number | undefined },
+): JuicioDeSmC6 {
+  const { minimo, maximo } = constantes;
+  const faltan = [
+    ...(minimo === undefined ? ['MIN_ATRIBUIDAS_PARA_JUZGAR_SM_C6'] : []),
+    ...(maximo === undefined ? ['MAX_PROPORCION_MAL_TRADUCIDA_SM_C6'] : []),
+  ];
+  if (minimo === undefined || maximo === undefined) return { estado: 'sin-valores', faltan };
+  const cerrados = meses.filter((m) => m.cerrado);
+  const saltos: { mes: string; motivos: string[] }[] = [];
+  let juzgadas = 0;
+  let parejas = 0;
+  for (let i = 1; i < cerrados.length; i += 1) {
+    const a = cerrados[i - 1];
+    const b = cerrados[i];
+    if (mesSiguiente(a.mes) !== b.mes) continue;
+    parejas += 1;
+    if (a.traducciones < minimo || b.traducciones < minimo) continue;
+    juzgadas += 1;
+    const ta = a.auditoriaDeTraduccion;
+    const tb = b.auditoriaDeTraduccion;
+    if (ta !== undefined && tb !== undefined && ta.proporcion > maximo && tb.proporcion > maximo) {
+      saltos.push({
+        mes: b.mes,
+        motivos: [
+          `la proporción mal traducida pasa de ${maximo} en ${a.mes} (${ta.proporcion.toFixed(2)}) y en ${b.mes} (${tb.proporcion.toFixed(2)})`,
+        ],
+      });
+    }
   }
   if (parejas === 0) return { estado: 'sin-pareja' };
   if (juzgadas === 0) return { estado: 'bajo-minimo', minimo };

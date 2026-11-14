@@ -11,7 +11,7 @@
  *   · **La propuesta** (`npm run atribuida -- proponer <lote.yaml>`): un lote de candidatas **en
  *     español** —la versión que ya circula, de un doblaje o de una traducción publicada, con su
  *     `origen`, o, si no circula ninguna, la traducción del sitio, lo más fiel posible, con
- *     `origen: traduccion-propia` (decisión de Héctor del 2026-11-14, que enmienda FR-68)—, cada una con su Personaje o su Autor, su Obra si consta y sus
+ *     `origen: traduccion-propia` y su `partida` (FR-68 v9.2; Historia 35.11)—, cada una con su Personaje o su Autor, su Obra si consta y sus
  *     atestiguaciones. Las que pasan van a `corpus/_revision/`, nunca a `corpus/citas/`: aprobarlas
  *     es siempre de una persona, con `revisar --aprobar`.
  *
@@ -192,8 +192,9 @@ export function componerSemilla(entrada: EntradaDeSemilla, descargadaEl: string,
     aviso:
       'Semilla de prueba de la Cita atribuida (FR-68): lista de trabajo en inglés, sin versionar. ' +
       'No se publica ni atestigua nada. El texto en español es la versión que ya circula, con su origen, ' +
-      'o, si no circula ninguna, la traducción del sitio, lo más fiel posible, con «origen: traduccion-propia» ' +
-      'y la frase de aquí en «textoOriginal» (FR-68, enmendado por Héctor el 2026-11-14).',
+      'o, como último recurso si no circula ninguna, la traducción del sitio, lo más fiel posible, con ' +
+      '«origen: traduccion-propia» y la frase de aquí en «partida» ({texto, lengua: en}), que proponen y ' +
+      'aprueban dos agentes distintos (FR-68 v9.2).',
     frases,
   };
 }
@@ -226,9 +227,9 @@ export type ResultadoDePropuesta =
 
 const MOTIVO_SIN_ESPAÑOL =
   'sin texto en español: falta «texto». La semilla está en inglés, y alguien escribe el español: la versión ' +
-  'que circula (con su origen: original, doblaje o traduccion-publicada) o, si no circula ninguna, la ' +
-  'traducción del sitio, lo más fiel posible, con «origen: traduccion-propia» y la frase traducida en ' +
-  '«textoOriginal» (FR-68, enmendado por Héctor el 2026-11-14).';
+  'que circula (con su origen: original, doblaje o traduccion-publicada) o, como último recurso si no ' +
+  'circula ninguna, la traducción del sitio, lo más fiel posible, con «origen: traduccion-propia» y la ' +
+  'frase de partida en «partida» ({texto, lengua}) (FR-68 v9.2).';
 
 /**
  * Los campos que admite una entrada del lote. Lo demás se rechaza nombrándolo: una errata
@@ -246,7 +247,7 @@ const CAMPOS_DEL_LOTE = new Set([
   'atestiguaciones',
   'origen',
   'variante',
-  'textoOriginal',
+  'partida',
 ]);
 
 const MOTIVO_SIN_DUEÑO = 'sin Personaje ni Autor: lo que llega sin ninguno de los dos no se publica (FR-68).';
@@ -405,7 +406,7 @@ export async function proponerAtribuidas(
       ...(entrada.atestiguaciones !== undefined ? { atestiguaciones: entrada.atestiguaciones } : {}),
       ...(entrada.origen !== undefined ? { origen: entrada.origen } : {}),
       ...(entrada.variante !== undefined ? { variante: entrada.variante } : {}),
-      ...(entrada.textoOriginal !== undefined ? { textoOriginal: entrada.textoOriginal } : {}),
+      ...(entrada.partida !== undefined ? { partida: entrada.partida } : {}),
     };
 
     if (motivos.length === 0) {

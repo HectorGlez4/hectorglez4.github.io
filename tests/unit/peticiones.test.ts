@@ -10,7 +10,11 @@ import { principal, problemasDeLasConstantes, type Constantes } from '../../tool
 import {
   CABECERA_DE_AUDITORIAS,
   CABECERA_DE_PETICIONES_DE_RETIRADA,
+  analizarAuditorias,
   analizarPeticiones,
+  juicioDeTraduccionSmC6,
+  muestraDeTraduccion,
+  traduccionesAlCierre,
   atribuidasAlCierre,
   informeDeAlcanceDeLaRetirada,
   juicioDeSmC6,
@@ -582,6 +586,7 @@ describe('35.8 — SM-C6', () => {
     mes: m,
     cerrado: true,
     atribuidas,
+    traducciones: 0,
     peticiones: 0,
     retiradas: 0,
     ...(peticionesPorCien !== undefined ? { peticionesPorCien, retiradasPorCien: 0 } : {}),
@@ -677,7 +682,8 @@ describe('35.8 — SM-C6', () => {
     expect(await principal(['auditar', '2026-10', '--resultado', `${BUZZ}=sin-fuente`, '--corpus', raiz], AHORA, conMuestra)).toBe(0);
     salida.length = 0;
     expect(await principal(['--corpus', raiz], AHORA, conMuestra)).toBe(0);
-    expect(salida.join('')).toMatch(/^2026-10 .* 0 de 1 \(0\.00\), 1 sin fuente$/mu);
+    // Historia 35.11 — tras la mal atribuida, la columna de la traducción propia (sin ninguna: «—»).
+    expect(salida.join('')).toMatch(/^2026-10 .* 0 de 1 \(0\.00\), 1 sin fuente\s+0\s+—$/mu);
   });
 
   it('auditar: imprime la muestra, anota un resultado por slug y rechaza lo ajeno, lo incompleto y el mes abierto', async () => {
@@ -762,5 +768,195 @@ describe('35.8 — los registros del árbol', () => {
     const antes = readFileSync(join(RAIZ, 'corpus', FICHERO_DE_PETICIONES_DE_RETIRADA), 'utf8');
     expect(await principal(['--corpus', join(RAIZ, 'corpus')], AHORA)).toBe(0);
     expect(readFileSync(join(RAIZ, 'corpus', FICHERO_DE_PETICIONES_DE_RETIRADA), 'utf8')).toBe(antes);
+  });
+});
+
+describe('35.11 — SM-C6: la segunda muestra, solo de traducción propia', () => {
+  const SLUGS = ['buzz-a', 'buzz-b', 'buzz-c', 'buzz-d', 'buzz-e', 'buzz-f'];
+
+  it('la segunda muestra sale de SHA-256 de «traduccion|{slug}|{mes}»: fijada, distinta de la primera, y la misma en dos ejecuciones', () => {
+    expect(muestraDeTraduccion(SLUGS, '2026-10', 3)).toEqual(['buzz-d', 'buzz-f', 'buzz-c']);
+    expect(muestraDeAuditoria(SLUGS, '2026-10', 3)).toEqual(['buzz-d', 'buzz-a', 'buzz-c']);
+    expect(muestraDeTraduccion([...SLUGS].reverse(), '2026-10', 3)).toEqual(['buzz-d', 'buzz-f', 'buzz-c']);
+    expect(muestraDeTraduccion(SLUGS.slice(0, 2), '2026-10', 5)).toHaveLength(2);
+  });
+
+  it('su población son las atribuidas al cierre que hoy declaran traducción propia', () => {
+    expect(traduccionesAlCierre(['a', 'b', 'c'], new Set(['b', 'z']))).toEqual(['b']);
+  });
+
+  const mes = (m: string, traducciones: number, proporcion?: number, atribuidas = 100): MesDeSmC6 => ({
+    mes: m,
+    cerrado: true,
+    atribuidas,
+    traducciones,
+    peticiones: 0,
+    retiradas: 0,
+    ...(proporcion !== undefined ? { auditoriaDeTraduccion: { muestra: 10, malTraducidas: proporcion * 10, proporcion } } : {}),
+  });
+
+  it('sin MAX_PROPORCION_MAL_TRADUCIDA_SM_C6 informa y no juzga, y lo dice', () => {
+    expect(juicioDeTraduccionSmC6([mes('2026-09', 50, 0.5), mes('2026-10', 50, 0.5)], { minimo: 10, maximo: undefined })).toEqual({
+      estado: 'sin-valores',
+      faltan: ['MAX_PROPORCION_MAL_TRADUCIDA_SM_C6'],
+    });
+  });
+
+  it('con valor salta en el segundo de dos meses cerrados seguidos sobre su propia población, aparte de la atribuida', () => {
+    const salta = juicioDeTraduccionSmC6([mes('2026-09', 50, 0.3), mes('2026-10', 50, 0.4)], { minimo: 10, maximo: 0.2 });
+    expect(salta.estado === 'juzgado' && salta.saltos.map((x) => x.mes)).toEqual(['2026-10']);
+    expect(salta.estado === 'juzgado' && salta.saltos[0].motivos[0]).toMatch(/proporción mal traducida/u);
+    // Solo uno de los dos pasa: no salta.
+    const uno = juicioDeTraduccionSmC6([mes('2026-09', 50, 0.1), mes('2026-10', 50, 0.4)], { minimo: 10, maximo: 0.2 });
+    expect(uno.estado === 'juzgado' && uno.saltos).toEqual([]);
+    // Con cien atribuidas pero cinco traducciones, el mínimo se mira sobre las cinco: no se juzga.
+    expect(juicioDeTraduccionSmC6([mes('2026-09', 5, 0.9), mes('2026-10', 5, 0.9)], { minimo: 10, maximo: 0.2 })).toEqual({
+      estado: 'bajo-minimo',
+      minimo: 10,
+    });
+    // La proporción mal traducida no mueve el juicio de la atribuida.
+    expect(juicioDeSmC6([mes('2026-09', 50, 0.9), mes('2026-10', 50, 0.9)], { minimo: 10, maximo: 0.2 })).toEqual({
+      estado: 'juzgado',
+      minimo: 10,
+      maximo: 0.2,
+      saltos: [],
+    });
+  });
+
+  it('el registro admite la segunda muestra con sus resultados, los dos o ninguno, y mal-traducida solo en ella', () => {
+    const fichero = (a: unknown) => `auditorias:\n  - ${JSON.stringify(a)}\n`;
+    const base = { mes: '2026-10', muestra: ['a'], resultados: { a: 'bien' }, auditadoEl: '2026-11-02' };
+    expect(analizarAuditorias('r', fichero({ ...base, muestraDeTraduccion: ['a'], resultadosDeTraduccion: { a: 'mal-traducida' } }))).toHaveLength(1);
+    expect(() => analizarAuditorias('r', fichero({ ...base, muestraDeTraduccion: ['a'] }))).toThrow(/los dos o ninguno/u);
+    expect(() => analizarAuditorias('r', fichero({ ...base, resultados: { a: 'mal-traducida' } }))).toThrow(/no declara un resultado/u);
+    expect(() =>
+      analizarAuditorias('r', fichero({ ...base, muestraDeTraduccion: ['a'], resultadosDeTraduccion: { b: 'bien' } })),
+    ).toThrow(/muestra de traducción/u);
+  });
+
+  /** El Corpus de prueba, con la atribuida de Buzz como traducción propia. */
+  async function conTraduccion(): Promise<{ raiz: string; rutas: Rutas }> {
+    const corpus = await corpusDePrueba();
+    await writeFile(
+      join(corpus.rutas.citas, `buzz--hasta-el-infinito.md`),
+      citaValida({
+        texto: 'Hasta el infinito y más allá de las estrellas.',
+        slug: BUZZ,
+        autor: undefined,
+        personaje: 'buzz',
+        clase: 'atribuida',
+        estadoDerechos: undefined,
+        temas: [TEMA_PUBLICADO],
+        procedencia: undefined,
+        fuente: undefined,
+        ...ATESTIGUADA,
+        origen: 'traduccion-propia',
+        partida: { texto: 'To infinity and beyond the stars.', lengua: 'en' },
+      }),
+    );
+    return corpus;
+  }
+
+  it('auditar: una Cita en las dos muestras se juzga por separado, y la consulta da la mal traducida aparte', async () => {
+    const { raiz, rutas } = await conTraduccion();
+    const salida = capturarSalida();
+    const conMuestra: Constantes = { ...SIN_VALORES, muestra: 5 };
+    const auditar = (...args: string[]) => principal(['auditar', ...args, '--corpus', raiz], AHORA, conMuestra);
+    expect(await auditar('2026-10', '--json')).toBe(0);
+    expect(JSON.parse(salida.join(''))).toEqual({ mes: '2026-10', muestra: [BUZZ], atribuidas: 1, muestraDeTraduccion: [BUZZ], traducciones: 1 });
+    // mal-traducida en la primera muestra es la forma de la invocación: 2.
+    expect(await auditar('2026-10', '--resultado', `${BUZZ}=mal-traducida`, '--resultado-de-traduccion', `${BUZZ}=bien`)).toBe(2);
+    // Sin el resultado de la segunda, o con un slug ajeno: 1.
+    expect(await auditar('2026-10', '--resultado', `${BUZZ}=bien`)).toBe(1);
+    expect(
+      await auditar('2026-10', '--resultado', `${BUZZ}=bien`, '--resultado-de-traduccion', `${BUZZ}=bien`, '--resultado-de-traduccion', 'otra=bien'),
+    ).toBe(1);
+    expect(existsSync(rutas.auditoriasDeAtribuidas)).toBe(false);
+    expect(await auditar('2026-10', '--resultado', `${BUZZ}=bien`, '--resultado-de-traduccion', `${BUZZ}=mal-traducida`)).toBe(0);
+    expect(await leerAuditorias(rutas)).toEqual([
+      {
+        mes: '2026-10',
+        muestra: [BUZZ],
+        resultados: { [BUZZ]: 'bien' },
+        muestraDeTraduccion: [BUZZ],
+        resultadosDeTraduccion: { [BUZZ]: 'mal-traducida' },
+        auditadoEl: HOY,
+      },
+    ]);
+    salida.length = 0;
+    expect(await principal(['--corpus', raiz], AHORA, { ...conMuestra, minimo: 1, maximo: 0.5, maximoTraduccion: 0.5 })).toBe(0);
+    const texto = salida.join('');
+    // La mal atribuida, 0 de 1; la mal traducida, aparte, 1 de 1.
+    expect(texto).toMatch(/^2026-10 .* 0 de 1 \(0\.00\), 0 sin fuente\s+1\s+1 de 1 \(1\.00\)$/mu);
+    // Septiembre no tiene ninguna traducción propia: la pareja no llega al mínimo sobre su propia población.
+    expect(texto).toMatch(/La traducción propia no se juzga: ningún par de meses cerrados seguidos llega a 1 traducciones propias/u);
+    salida.length = 0;
+    expect(await principal(['--corpus', raiz], AHORA, conMuestra)).toBe(0);
+    expect(salida.join('')).toMatch(/La traducción propia no se juzga: no tienen valor MIN_ATRIBUIDAS_PARA_JUZGAR_SM_C6 ni MAX_PROPORCION_MAL_TRADUCIDA_SM_C6/u);
+  });
+
+  it('la consulta salta en el segundo de dos meses cerrados seguidos mal traducidos, y sin el umbral no juzga', async () => {
+    const { raiz } = await conTraduccion();
+    const salida = capturarSalida();
+    const DICIEMBRE = new Date('2026-12-14T12:00:00');
+    const conMuestra: Constantes = { ...SIN_VALORES, muestra: 5 };
+    for (const m of ['2026-10', '2026-11']) {
+      expect(
+        await principal(['auditar', m, '--resultado', `${BUZZ}=bien`, '--resultado-de-traduccion', `${BUZZ}=mal-traducida`, '--corpus', raiz], DICIEMBRE, conMuestra),
+      ).toBe(0);
+    }
+    salida.length = 0;
+    expect(await principal(['--corpus', raiz], DICIEMBRE, { ...conMuestra, minimo: 1, maximo: 0.5, maximoTraduccion: 0.5 })).toBe(0);
+    const texto = salida.join('');
+    expect(texto).toMatch(/La traducción propia salta en 2026-11:\n\s+· la proporción mal traducida pasa de 0\.5/u);
+    // La atribuida, juzgada aparte, no salta: sus dos meses están bien atribuidos.
+    expect(texto).toContain('SM-C6 no salta en ningún par de meses cerrados seguidos que llega al mínimo.');
+    salida.length = 0;
+    expect(await principal(['--corpus', raiz], DICIEMBRE, { ...conMuestra, minimo: 1, maximo: 0.5 })).toBe(0);
+    expect(salida.join('')).toMatch(/La traducción propia no se juzga: no tienen valor MAX_PROPORCION_MAL_TRADUCIDA_SM_C6/u);
+  });
+
+  it('una sustituida —que ya no declara traducción propia— deja de contar en la segunda muestra', async () => {
+    const { raiz } = await corpusDePrueba();
+    const salida = capturarSalida();
+    expect(await principal(['auditar', '2026-10', '--json', '--corpus', raiz], AHORA, { ...SIN_VALORES, muestra: 5 })).toBe(0);
+    expect(JSON.parse(salida.join(''))).not.toHaveProperty('muestraDeTraduccion');
+  });
+
+  it('una traducción propia retirada a corpus/_revision/ cuenta en los meses en que seguía publicada', async () => {
+    const { raiz, rutas } = await corpusDePrueba();
+    const RETIRADA = 'buzz-la-traducida-que-se-fue';
+    await writeFile(
+      join(rutas.revision, 'buzz--la-traducida-que-se-fue.md'),
+      citaValida({
+        texto: 'La traducida que se fue de aquí.',
+        slug: RETIRADA,
+        autor: undefined,
+        personaje: 'buzz',
+        clase: 'atribuida',
+        estadoDerechos: undefined,
+        temas: [TEMA_PUBLICADO],
+        procedencia: undefined,
+        fuente: undefined,
+        ...ATESTIGUADA,
+        origen: 'traduccion-propia',
+        partida: { texto: 'The translated one that left.', lengua: 'en' },
+      }),
+    );
+    await registrarClases(rutas, [{ slug: RETIRADA, clase: 'atribuida', fecha: '2026-09-05' }]);
+    await registrarFormasVedadas(rutas, [entradaVedada('La traducida que se fue de aquí.', 'retirada', '2026-10-10', RETIRADA)!]);
+    const salida = capturarSalida();
+    expect(await principal(['auditar', '2026-09', '--json', '--corpus', raiz], AHORA, { ...SIN_VALORES, muestra: 5 })).toBe(0);
+    expect(JSON.parse(salida.join(''))).toMatchObject({ muestraDeTraduccion: [RETIRADA], traducciones: 1 });
+    salida.length = 0;
+    expect(await principal(['auditar', '2026-10', '--json', '--corpus', raiz], AHORA, { ...SIN_VALORES, muestra: 5 })).toBe(0);
+    expect(JSON.parse(salida.join(''))).not.toHaveProperty('muestraDeTraduccion');
+  });
+
+  it('MAX_PROPORCION_MAL_TRADUCIDA_SM_C6 es una proporción entre 0 y 1, o no tiene valor', () => {
+    expect(problemasDeLasConstantes({ ...SIN_VALORES, maximoTraduccion: 1.5 })).toEqual([
+      'MAX_PROPORCION_MAL_TRADUCIDA_SM_C6 vale 1.5, y tiene que ser una proporción entre 0 y 1.',
+    ]);
+    expect(problemasDeLasConstantes({ ...SIN_VALORES, maximoTraduccion: 0.2 })).toEqual([]);
   });
 });

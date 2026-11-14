@@ -310,9 +310,21 @@ lanza si no encuentra la declaración de alguna) o por parámetro (`puerta` de `
   u `origen` es error que nombra el fichero. Una `url` con usuario o contraseña no vale. Las órdenes
   repiten el mínimo de dominios en `fallosDeAtribuidas` con el valor de su `puerta`, para que abrirla
   por parámetro lo aplique igual que el esquema con el del árbol. Las atestiguaciones no se pintan: van
-  en `CAMPOS_QUE_NO_FECHAN.cita` y no viajan a `publicado.ts` ni a `dist/`. El `origen` tampoco, salvo
-  `traduccion-propia` (35.10), que viaja como `traduccionPropia` y la Página de Cita dice: por eso
-  `origen` está en `CAMPOS_QUE_PINTA` de la Página de Cita.
+  en `CAMPOS_QUE_NO_FECHAN.cita` y no viajan a `publicado.ts` ni a `dist/`. **El `origen` y la
+  `partida` tampoco, ni siquiera `traduccion-propia`** (Historia 35.11, UX v9.3, AD-27 v9.2): ninguna
+  superficie dice que el texto es traducción del sitio —ni línea, ni sello, ni hueco—, los dos van en
+  `CAMPOS_QUE_NO_FECHAN.cita` y un cambio solo de ellos no fecha nada. La línea de la 35.10
+  (`TraduccionPropia.astro`, `lineaDeTraduccionPropia`) se retiró.
+- **La traducción propia** (`origen: traduccion-propia`, FR-68 v9.2, AD-32 v9.2) lleva, obligatoria,
+  `partida: {texto, lengua}` —la frase que dijo su dueño en su lengua, tal cual la traen sus
+  atestiguaciones, con el mismo mínimo de dominios; `lengua` de `LENGUAS_DE_PARTIDA` (`en`, `fr`, `it`,
+  `de`, `pt`, `ja`, códigos de trabajo que amplía Héctor); el texto en una línea; sin otras claves—, que
+  con cualquier otro origen y en la de siempre se rechaza. El campo de la 35.10, `textoOriginal`, ya no
+  existe. **La proponen y la aprueban dos agentes distintos** (`--propone`/`--aprueba` del alta y de
+  `revisar --aprobar`, recortados y comparados en minúsculas; los dos en blanco, uno solo o el mismo, 1
+  sin escribir nada, también en seco; dados sin ninguna traducción propia en la pasada, 1), y lo anota
+  `corpus/aprobaciones-de-atribuidas.yml` (abajo). La atribuida con otro origen la aprueba una persona
+  por convención, sin puerta.
 - **El dominio lo cuenta solo `dominioDeAtestiguacion`** de `src/lib/atestiguaciones.ts`: eTLD+1 con
   `tldts` (7.4.19, versión exacta), solo la lista ICANN —dos `*.github.io` cuentan uno—, y no cuentan
   una dirección sin dominio registrable, los de `DOMINIOS_QUE_NO_ATESTIGUAN` (`brainyquote.com`; un
@@ -365,7 +377,8 @@ npm run atribuida -- obra <slug> "<obra>"                 # le añade la Obra (y
 npm run atribuida -- autor <slug> <slug-de-autor>          # le añade el Autor
 npm run atribuida -- personaje <slug> <slug-de-personaje>  # le añade el Personaje
 npm run atribuida -- variante <slug> "<texto>" --region espana --origen doblaje
-npm run atribuida -- texto <slug> "<texto>"
+npm run atribuida -- texto <slug> "<texto>" [--propone <agente> --aprueba <agente>]
+npm run atribuida -- texto <slug> "<versión>" --origen <origen> --atestiguacion <url> [--atestiguacion <url>...]
 ```
 
 `obra`, `autor` y `personaje` **solo añaden** (con el campo ya declarado, 1); la clase tiene que seguir
@@ -385,6 +398,21 @@ menos o de más, bandera desconocida, repetida, vacía o sin valor, `variante` s
 que dice; en ningún caso se escribe nada. Se escribe la Cita y después la ficha; si la ficha falla, la
 Cita vuelve a su contenido original. Vive en `tools/lib/cambioDeAtribuida.ts`; ningún agente la corre
 sobre el Corpus real.
+
+**La traducción propia tiene dos caminos por `texto`** (Historia 35.11, AD-35 v9.2), y **ninguna
+orden posterior al alta la crea**: `texto --origen traduccion-propia` y `variante` con ese origen se
+niegan con 1.
+
+- **Sustituirla** por la versión en español que circula, en cuanto aparece una: `--origen` (cualquiera
+  menos `traduccion-propia`) con una o más `--atestiguacion <url>`, que **reemplazan** a las de antes
+  con `consultadaEl` de hoy (las de antes atestiguaban la partida). Se quita la `partida`, el slug no
+  cambia y **no se mira el parecido** —es otra letra de la misma frase—, pero sí los topes, el mínimo
+  de dominios y los duplicados; no se anota ninguna aprobación, y con `--propone`/`--aprueba` se niega.
+  Sin `--atestiguacion`, 1; `--atestiguacion` sin `--origen`, 2.
+- **Retraducirla** conservando el origen: el parecido de siempre y `--propone`/`--aprueba`, dos agentes
+  distintos (sin ellos o iguales, 1). La aprobación se anota **después** de escribir la Cita; si el
+  registro falla, la Cita vuelve a su contenido original y sale con 1.
+- `--origen`, `--atestiguacion` o los agentes sobre una atribuida que no es traducción propia, 1.
 
 **`documentar` no toca una atribuida**: `npm run documentar -- <slug> …` y `--retirar` se niegan con 1
 nombrando `npm run atribuida`, y los modos por lote (`--restituir-traduccion`, `--restituir-saltos`) la
@@ -416,6 +444,7 @@ npm run peticion -- anotar <slug> --solicitante persona-afectada|titular-de-dere
                           --peticion corregir|retirar [--motivo "…"] [--fecha AAAA-MM-DD]
 npm run peticion -- resolver <id> corregida|retirada|rechazada [--fecha AAAA-MM-DD]
 npm run peticion -- auditar <AAAA-MM> [--resultado <slug>=bien|mal-atribuida|sin-fuente …]
+                          [--resultado-de-traduccion <slug>=bien|mal-atribuida|sin-fuente|mal-traducida …]
 ```
 
 **Ningún campo admite contacto**: el repositorio es público, y un `--motivo` con forma de correo, de
@@ -461,10 +490,44 @@ cierre con menor SHA-256 de `{slug}|{mes}` (sin valor, lo dice y no elige); con 
 cada slug de la muestra, que decide una persona, anota en `corpus/auditorias-de-atribuidas.yml` —solo
 añade— `{mes, muestra, resultados, auditadoEl}`. Un slug ajeno o una muestra incompleta, 1.
 
+**La segunda muestra, solo de traducción propia** (Historia 35.11, SM-C6 v9.2): las
+`MUESTRA_DE_AUDITORIA_SM_C6` atribuidas al cierre cuyo fichero de hoy —en `corpus/citas/` o
+`corpus/_revision/`— declara `origen: traduccion-propia` (una sustituida deja de contar), con menor
+SHA-256 de `traduccion|{slug}|{mes}`; sus resultados van con `--resultado-de-traduccion <slug>=…`, que
+admite además `mal-traducida` (en `--resultado`, 2), y se anotan en la misma entrada como
+`muestraDeTraduccion` y `resultadosDeTraduccion` (los dos o ninguno). Una Cita puede salir en las dos
+muestras y se juzga en cada una por separado; un slug ajeno o un resultado que falta, 1. La consulta da
+la columna de traducciones al cierre y de la proporción mal traducida, y la juzga **aparte**
+(`juicioDeTraduccionSmC6`): salta en el segundo de dos meses cerrados seguidos con al menos
+`MIN_ATRIBUIDAS_PARA_JUZGAR_SM_C6` traducciones propias si la proporción pasa de
+`MAX_PROPORCION_MAL_TRADUCIDA_SM_C6` en los dos; sin valor, informa y lo dice.
+
 Los dos registros se versionan con su cabecera y la lista vacía, `npm test` comprueba que solo añaden
 frente a `HEAD^1`, no fechan ni avisan, y ningún módulo de `src/` los lee (AD-24). **Ningún agente
 anota peticiones que no ha recibido ni auditorías que no ha hecho**, ni da valor a
-`BUZON_DE_PETICIONES` ni a las cuatro constantes de `umbrales.ts`: son de Héctor.
+`BUZON_DE_PETICIONES` ni a las cinco constantes de `umbrales.ts` (con
+`MAX_PROPORCION_MAL_TRADUCIDA_SM_C6`): son de Héctor.
+
+### Las aprobaciones de la traducción propia (Historia 35.11, AD-32 v9.2)
+
+`corpus/aprobaciones-de-atribuidas.yml` **solo añade** `{slug, propone, aprueba, fecha}`, una línea
+por aprobación (`tools/lib/aprobaciones.ts`: `registrarAprobaciones` por `appendFile`, juzgando el
+añadido en memoria antes y releyendo después). Lo escriben solo el alta y `revisar --aprobar` que
+publican una traducción propia y `npm run atribuida -- texto` que la retraduce, siempre **después** de
+escribir la Cita y antes que `clases-de-cita.yml`; si falla, la Cita vuelve —la aprobada, a
+`corpus/_revision/` con su contenido de antes; la dada de alta, movida a `corpus/_revision/`; la
+retraducida, a su contenido original—, no se anota su clase, el parte lo dice y sale con 1. **Nunca se
+escribe a mano.** El build (`integraciones/clases.ts`) lo lee **solo para romper**, en un solo sentido:
+toda traducción propia publicada tiene una entrada suya, ninguna suya dice el mismo agente dos veces, y
+alguna apareció en el registro en el mismo commit que el último cambio de `texto` de la Cita, en uno
+posterior o sin commitear (si el texto está sin commitear, también la entrada); lo lee de git
+(`historialDeLosFicheros`, `cambiaronLosCampos(…, ['texto'])`) solo si hay alguna traducción propia
+publicada, y sin historial fiable comprueba solo la existencia y los agentes y avisa con el motivo. Una
+entrada de una Cita retirada o sustituida no rompe nada. Se versiona con su cabecera y `aprobaciones:`
+vacío, `npm test` comprueba que solo añade frente a `HEAD^1`, no es familia de AD-27 y ningún módulo de
+`src/` lo nombra (AD-24). Son **cinco registros de actos** que solo añaden —clases, formas vedadas,
+peticiones, auditorías y aprobaciones—, y **tres los lee el build** para romper: clases, formas vedadas
+y aprobaciones.
 
 ## Una sesión de sembrado de la Cita atribuida
 
@@ -492,15 +555,16 @@ npx tsx tools/objetivo.ts --registrar --clase-de-cita atribuida         # la ses
   de `tools/lib/siembraAtribuida.ts`, anclas `title="view quote"` y `title="view author"`) es un
   supuesto sin contrastar con la página real: si no reconoce ninguna frase, sale con 1 sin escribir.
 - **El texto en español sale de una versión que ya circula** —un doblaje o una traducción
-  publicada—, con su `origen` (`original`, `doblaje`, `traduccion-publicada`), y **si no circula
-  ninguna, de la traducción del sitio** (decisión de Héctor del 2026-11-14, que enmienda FR-68 solo para
-  la atribuida): quien compone el lote traduce cada frase inglesa sin versión en español lo más fiel
-  posible y la marca `origen: traduccion-propia`, que la Página de Cita dice en una línea propia
-  («Traducción de Sabiduría de Bolsillo: no circula ninguna versión en español.», `lineaDeTraduccionPropia`
-  de `src/lib/atribucion.ts`; redacción pendiente de Héctor con `bmad-ux`), fuera del índice de Pagefind
-  (`data-pagefind-ignore`: es la misma frase en toda Cita traducida). Con ese origen la Cita guarda,
-  obligatoria, la frase que se tradujo en `textoOriginal` —tal cual la trae su atestiguación; una línea,
-  no se pinta ni fecha—, que con cualquier otro origen se rechaza, y **no declara Variante** (el esquema
+  publicada—, con su `origen` (`original`, `doblaje`, `traduccion-publicada`), y **solo como último
+  recurso, si no circula ninguna, de la traducción del sitio** (FR-68 v9.2, Historia 35.11): quien
+  compone el lote traduce la frase lo más fiel posible y la marca `origen: traduccion-propia`, con su
+  `partida: {texto, lengua}` —la frase que dijo su dueño, tal cual la traen sus atestiguaciones—.
+  **La página no lo dice** (UX v9.3): ni línea, ni sello, ni hueco. **La proponen y la aprueban dos
+  agentes distintos**: `revisar --aprobar … --propone <agente> --aprueba <agente>` (o el alta con las
+  mismas banderas), y la aprobación queda en `corpus/aprobaciones-de-atribuidas.yml`. En cuanto
+  circule una versión en español, la sustituye una persona con
+  `npm run atribuida -- texto <slug> "<versión>" --origen … --atestiguacion …`, sin cambiar el slug. La
+  `partida` no se pinta ni fecha, con cualquier otro origen se rechaza, y la traducción propia **no declara Variante** (el esquema
   rechaza el par, también en `npm run atribuida -- variante`): una Variante es una versión que circula,
   y con ella el texto sería esa versión. La Variante tampoco admite ese
   origen (`ORIGENES_DE_VARIANTE`): es la letra que circula en otra región. La clase de siempre **nunca
@@ -508,7 +572,7 @@ npx tsx tools/objetivo.ts --registrar --clase-de-cita atribuida         # la ses
   **aprobarla sigue siendo de una persona**. El lote es una lista YAML de candidatas con
   `texto`, `personaje` y/o `autor` (slugs que ya existen: se dan de alta con sus órdenes, nunca
   tecleando el campo), `obra`, `año` o `referencia` (la Procedencia que el esquema exige), `origen`,
-  `atestiguaciones` (`{url, consultadaEl}`), `textoOriginal` con la traducción propia, y si acaso
+  `atestiguaciones` (`{url, consultadaEl}`), `partida` con la traducción propia, y si acaso
   `variante` y `temas`. Sin `clase`: se deriva.
 - **`proponer` es la puerta de calidad, y nunca publica.** Juzga cada candidata con el esquema de la
   35.1b y la Variante de la 35.6 (`citaAdmisible`), cuenta sus dominios con `dominiosQueAtestiguan`
@@ -519,7 +583,8 @@ npx tsx tools/objetivo.ts --registrar --clase-de-cita atribuida         # la ses
   sin `texto`, sin Personaje ni Autor, con uno que no existe o fuera de la semilla, o que sería de la
   clase de siempre. Cada rechazo sale nombrado con su motivo. Las que pasan van a `corpus/_revision/`
   —nunca a `corpus/citas/`, ni crean ficha de Obra ni anotan registro alguno—: **aprobarlas es siempre
-  de una persona**, con `revisar --aprobar`, y con la puerta cerrada siguen en revisión. Sin valor de
+  de una persona** —y la traducción propia, de dos agentes distintos—, con `revisar --aprobar`, y con
+  la puerta cerrada siguen en revisión. Sin valor de
   `MIN_ATESTIGUACIONES_DE_ATRIBUIDA` informa los dominios de cada una sin juzgar el mínimo y lo dice
   nombrando la constante. Códigos: 2 la forma (sin lote, ilegible o que no es una lista); 1 lo que dice
   (con algún rechazo, o un registro ilegible); con el lote rechazado entero no escribe nada.

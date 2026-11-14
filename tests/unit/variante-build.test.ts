@@ -22,8 +22,10 @@ import { indiceDe } from './ayuda/pagefind.ts';
  *     sin `tabindex` y sin enlace; su texto no sale en ningún otro sitio de la página —ni lo
  *     copiado, ni la Imagen, ni el Fragmento, ni el JSON-LD, ni la meta, ni el `<title>`—, y la
  *     búsqueda la encuentra por tres palabras suyas en la misma `/cita/{slug}/`;
- *   · **SV** — de Buzz, sin Variante: ni línea ni hueco. Desde la 35.10 es además la traducción
- *     del sitio (`origen: traduccion-propia`), y su página lo dice; la de CV, de doblaje, no.
+ *   · **SV** — de Buzz, sin Variante: ni línea ni hueco. Es además la traducción del sitio
+ *     (`origen: traduccion-propia`, con su `partida` y su aprobación de dos agentes), y desde la
+ *     35.11 su página **no lo dice** (UX v9.3): es idéntica a la de **SD** —la misma Cita de
+ *     doblaje, con otro slug y otro texto— tras sustituir slug y texto.
  *
  * Y dos construcciones que rompen: una Cita de siempre con `variante`, nombrando su fichero, y dos
  * atribuidas cuya Variante se repite. Lo puro está en `variante.test.ts`.
@@ -42,6 +44,9 @@ ordenAlfabetico: "Lightyear"
 
 const CV = 'buzz-hasta-el-infinito-y-mas-alla';
 const SV = 'buzz-al-rescate-guardian-espacial';
+const TEXTO_SV = 'Al rescate, que la galaxia no se defiende sola.';
+const SD = 'buzz-al-rescate-guardian-espacial-b';
+const TEXTO_SD = 'Ningún cadete duerme si el cosmos lo llama, ya.';
 const VARIANTE = 'Hasta el infinito y aún más allá astronauta valiente';
 
 const atribuida = (campos: Record<string, unknown>) =>
@@ -87,14 +92,26 @@ function corpusBase(): CorpusDePrueba {
     }),
     'citas/buzz--al-rescate-guardian-espacial.md': atribuida({
       slug: SV,
-      texto: 'Al rescate, que la galaxia no se defiende sola.',
+      texto: TEXTO_SV,
       autor: undefined,
       personaje: 'buzz',
       procedencia: { año: 1995 },
-      // Historia 35.10 — la traducción del sitio: su Página de Cita lo dice.
+      // Historia 35.11 — la traducción del sitio, con su partida: su Página de Cita no lo dice.
       origen: 'traduccion-propia',
-      textoOriginal: 'To the rescue, the galaxy will not defend itself.',
+      partida: { texto: 'To the rescue, the galaxy will not defend itself.', lengua: 'en' },
     }),
+    // La misma Cita, de doblaje, con otro slug y otro texto del mismo largo: su página es la de SV.
+    'citas/buzz--al-rescate-guardian-espacial-b.md': atribuida({
+      slug: SD,
+      texto: TEXTO_SD,
+      autor: undefined,
+      personaje: 'buzz',
+      procedencia: { año: 1995 },
+      origen: 'doblaje',
+    }),
+    // Historia 35.11 — la aprobación de dos agentes de la traducción propia (sin git en la copia,
+    // el build comprueba que exista y que los dos agentes sean distintos).
+    'aprobaciones-de-atribuidas.yml': `aprobaciones:\n  - { slug: "${SV}", propone: "agente-a", aprueba: "agente-b", fecha: "2026-11-14" }\n`,
     'citas/seneca--no-es-que-tengamos-poco-tiempo.md': citaValida(),
   };
   // Hasta `MIN_CITAS_POR_TEMA` (15), con atribuidas de la Autora Viva.
@@ -200,7 +217,7 @@ describe('Historia 35.6 — la Página de Cita atribuida con Variante', () => {
     const { readdirSync } = await import('node:fs');
     const { join } = await import('node:path');
     const citas = readdirSync(join(proyecto, 'dist', 'cita')).filter((n) => n.startsWith('buzz-'));
-    expect(citas.sort()).toEqual([SV, CV].sort());
+    expect(citas.sort()).toEqual([SV, SD, CV].sort());
   });
 
   it('la búsqueda propia la encuentra por tres palabras de la Variante, en la misma Página de Cita', async () => {
@@ -215,40 +232,50 @@ describe('Historia 35.6 — la Página de Cita atribuida con Variante', () => {
   });
 });
 
-describe('Historia 35.10 — la atribuida que es traducción del sitio lo dice', () => {
-  const LINEA = 'Traducción de Sabiduría de Bolsillo: no circula ninguna versión en español.';
-
-  it('pinta la línea tras la Atribución y antes de Copiar, como texto con los tokens', () => {
+describe('Historia 35.11 — la página no dice la traducción propia', () => {
+  it('no contiene traduccion-propia, «Traducción de», la partida ni ningún nodo nuevo', () => {
     const pagina = cita(SV);
-    const p = /<p class="traduccion-propia"[^>]*>\s*([^<]*?)\s*<\/p>/u.exec(pagina);
-    expect(p, 'la línea de la traducción propia').not.toBeNull();
-    expect(p![1]).toBe(LINEA);
-    expect(pagina.indexOf('class="traduccion-propia"')).toBeGreaterThan(pagina.indexOf('</figcaption>'));
-    expect(p![0]).not.toMatch(/\blang=|tabindex|<a\b/u);
-    expect(p![0]).toMatch(/style="[^"]*var\(--pie\)/u);
-    // Antes de la Fila de acciones —Copiar—, como dice el componente (pasada de revisión 2).
-    expect(pagina.indexOf('class="traduccion-propia"')).toBeLessThan(pagina.indexOf('class="fila-de-acciones'));
-    // Fuera del índice: es la misma frase en toda Cita traducida.
-    expect(p![0]).toMatch(/\bdata-pagefind-ignore\b/u);
-    // El original que se tradujo se guarda en el fichero y no se pinta.
+    expect(pagina).not.toContain('traduccion-propia');
+    expect(pagina).not.toContain('Traducción de');
+    // La partida no sale en ninguna forma: ni su texto ni su lengua como dato.
+    expect(pagina).not.toMatch(/data-partida|"partida"|lengua/u);
     expect(pagina).not.toContain('To the rescue');
+    expect(pagina).not.toContain('class="traduccion-propia"');
   });
 
-  it('la búsqueda propia no la devuelve por las palabras de la línea, y sí por su texto', async () => {
-    const indice = await indiceDe(proyecto);
-    try {
-      const urlsDe = async (consulta: string) =>
-        Promise.all((await indice.search(consulta)).results.map(async (r) => (await r.data()).url));
-      expect(await urlsDe('circula ninguna versión')).not.toContain(`/cita/${SV}/`);
-      expect(await urlsDe('galaxia defiende sola')).toContain(`/cita/${SV}/`);
-    } finally {
-      indice.soltar();
+  it('es idéntica a la de la misma Cita de doblaje, tras sustituir slug y texto', () => {
+    // El slug y el texto, en cada forma en que la página los escribe: tal cual y en una dirección.
+    const formas = (t: string) => [t, encodeURIComponent(t), encodeURIComponent(t).replace(/%20/gu, '+')];
+    const neutra = (html: string) => {
+      let salida = html.split(SD).join('«SLUG»').split(SV).join('«SLUG»');
+      for (const [texto, marca] of [[TEXTO_SD, '«TEXTO»'], [TEXTO_SV, '«TEXTO»']] as const) {
+        for (const forma of formas(texto)) salida = salida.split(forma).join(marca);
+      }
+      // El orden alfabético por slug en la búsqueda propia sale del slug, no del origen.
+      return salida.replace(/data-pagefind-sort="orden:\d+"/gu, 'data-pagefind-sort="orden:«N»"');
+    };
+    const propia = neutra(cita(SV));
+    const doblaje = neutra(cita(SD));
+    if (propia !== doblaje) {
+      // El primer punto en que difieren, para leer el fallo.
+      let k = 0;
+      while (propia[k] === doblaje[k]) k += 1;
+      expect(propia.slice(Math.max(0, k - 200), k + 200)).toBe(doblaje.slice(Math.max(0, k - 200), k + 200));
     }
+    expect(propia).toBe(doblaje);
   });
 
-  it('una atribuida de otro origen no la lleva, ni hueco', () => {
-    expect(cita(CV)).not.toContain('class="traduccion-propia"');
-    expect(cita(CV)).not.toContain(LINEA);
+  it('ninguna página del sitio construido nombra la traducción propia', async () => {
+    const { readdirSync } = await import('node:fs');
+    const { join } = await import('node:path');
+    const html = readdirSync(join(proyecto, 'dist'), { recursive: true })
+      .map(String)
+      .filter((f) => f.endsWith('.html'));
+    for (const f of html) {
+      const contenido = readFileSync(join(proyecto, 'dist', f), 'utf8');
+      expect(contenido, f).not.toContain('traduccion-propia');
+      expect(contenido, f).not.toContain('Traducción de Sabiduría de Bolsillo');
+    }
   });
 });
 

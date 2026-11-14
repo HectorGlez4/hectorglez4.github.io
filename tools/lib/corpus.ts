@@ -194,6 +194,14 @@ export const FICHERO_DE_PETICIONES_DE_RETIRADA = 'peticiones-de-retirada.yml';
  */
 export const FICHERO_DE_AUDITORIAS = 'auditorias-de-atribuidas.yml';
 
+/**
+ * El registro de aprobaciones de la traducción propia — Historia 35.11, AD-32 v9.2. Solo añade
+ * `{slug, propone, aprueba, fecha}`; lo leen y lo escriben `tools/lib/aprobaciones.ts`, el alta,
+ * `revisar --aprobar` y `npm run atribuida -- texto`, y el build lo lee solo para romper
+ * (`integraciones/clases.ts`). Ningún módulo de `src/` lo nombra (AD-24).
+ */
+export const FICHERO_DE_APROBACIONES = 'aprobaciones-de-atribuidas.yml';
+
 export interface Rutas {
   raiz: string;
   citas: string;
@@ -376,6 +384,7 @@ export interface Rutas {
   peticionesDeRetirada: string;
   /** El registro de auditorías de SM-C6 — Historia 35.8. Solo añade. */
   auditoriasDeAtribuidas: string;
+  aprobacionesDeAtribuidas: string;
   /**
    * Las fijaciones de jornada de la Cita del Día — FR-9, Historia 13.1.
    *
@@ -422,6 +431,7 @@ export function rutasDelCorpus(raizCorpus: string): Rutas {
     formasVedadas: join(raizCorpus, FICHERO_DE_FORMAS_VEDADAS),
     peticionesDeRetirada: join(raizCorpus, FICHERO_DE_PETICIONES_DE_RETIRADA),
     auditoriasDeAtribuidas: join(raizCorpus, FICHERO_DE_AUDITORIAS),
+    aprobacionesDeAtribuidas: join(raizCorpus, FICHERO_DE_APROBACIONES),
     portada: join(raizCorpus, FICHERO_DE_PORTADA),
   };
 }

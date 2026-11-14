@@ -14,7 +14,6 @@ import Armazon from '../../components/Armazon.astro';
 import BloqueDeCita from '../../components/BloqueDeCita.astro';
 import Fuente from '../../components/Fuente.astro';
 import Variante from '../../components/Variante.astro';
-import TraduccionPropia from '../../components/TraduccionPropia.astro';
 import TarjetaDeObra from '../../components/TarjetaDeObra.astro';
 import CopiarCita from '../../islands/CopiarCita.astro';
 import ImagenDeCita from '../../islands/ImagenDeCita.astro';
@@ -186,8 +185,6 @@ const comoCitar = (() => {
       * verificar una atribución.
       */}
     <Fuente cita={cita} />
-    {/* Historia 35.10 — la atribuida que es traducción del sitio lo dice; las demás, nada. */}
-    <TraduccionPropia cita={cita} />
     {/* Historia 35.6 — la Variante de la atribuida, si la declara; sin ella, nada. */}
     <Variante cita={cita} />
     {/*

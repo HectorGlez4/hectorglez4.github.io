@@ -1,0 +1,20 @@
+# Aprobaciones de la traducción propia — Historia 35.11, Épica 35, AD-32, FR-68
+#
+# QUÉ REGISTRA. Quién propuso y quién aprobó cada Cita atribuida cuyo texto es la traducción
+# del sitio (origen: traduccion-propia), el último recurso cuando no circula ninguna versión en
+# español. Una línea por aprobación: slug, propone, aprueba y la jornada en que se anotó. Los dos
+# agentes son distintos (se comparan recortados y en minúsculas).
+#
+# SOLO AÑADE. Ninguna entrada se reescribe ni se borra; retraducir una Cita añade otra.
+# `npm test` comprueba que el fichero del commit empieza, byte a byte, por el del commit padre.
+#
+# NO SE EDITA A MANO. Lo escriben el alta (tools/alta.ts) y `npx tsx tools/revisar.ts --aprobar`
+# que publican una traducción propia, y `npm run atribuida -- texto` que la retraduce, siempre con
+# --propone y --aprueba. Ningún agente anota una aprobación que no ha pasado por esas órdenes.
+#
+# El build (integraciones/clases.ts) lo lee solo para romper: una traducción propia publicada sin
+# entrada suya, con una entrada de un solo agente o cuyo texto cambió después de su última
+# entrada. No es una colección: ningún módulo de src/ lo lee (AD-24), ningún byte de dist/ sale
+# de él y no fecha ni avisa ninguna superficie.
+
+aprobaciones:

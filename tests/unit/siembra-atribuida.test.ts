@@ -12,6 +12,7 @@ import { sembrarTemaPublicado, TEMA_PUBLICADO } from './ayuda/relleno.ts';
 import { rutasDelCorpus, separarFrontmatter, type Rutas } from '../../tools/lib/corpus.ts';
 import { registrarFormasVedadas, entradaVedada } from '../../tools/lib/formasVedadas.ts';
 import { aprobar } from '../../tools/lib/revision.ts';
+import { leerAprobaciones } from '../../tools/lib/aprobaciones.ts';
 import {
   frasesDeLaPagina,
   problemasDeLaSemilla,
@@ -237,17 +238,17 @@ describe('Historia 35.10 — proponer: a corpus/_revision/, nunca a corpus/citas
     expect(existsSync(rutas.clasesDeCita)).toBe(false);
   });
 
-  it('la traducción del sitio —origen traduccion-propia— se escribe en revisión con su origen (FR-68 enmendado, 2026-11-14)', async () => {
+  it('la traducción del sitio —origen traduccion-propia— se escribe en revisión con su origen y su partida (FR-68 v9.2)', async () => {
     const rutas = await corpusDePrueba();
-    const ORIGINAL = 'To the rescue, the galaxy will not defend itself.';
-    const resultado = await proponerAtribuidas(rutas, [deBuzz({ origen: 'traduccion-propia', textoOriginal: ORIGINAL })], {
+    const PARTIDA = { texto: 'To the rescue, the galaxy will not defend itself.', lengua: 'en' };
+    const resultado = await proponerAtribuidas(rutas, [deBuzz({ origen: 'traduccion-propia', partida: PARTIDA })], {
       semilla: SEMILLA,
       minAtestiguaciones: 2,
     });
     expect(resultado.ok && resultado.rechazadas).toEqual([]);
     const datos = separarFrontmatter(await readFile(join(rutas.revision, 'buzz--al-rescate-que-la-galaxia-no-se.md'), 'utf8'))!;
-    // La frase que se tradujo se guarda con la candidata (pasada de revisión 2): la traducción se puede auditar.
-    expect(datos).toMatchObject({ clase: 'atribuida', personaje: 'buzz', origen: 'traduccion-propia', textoOriginal: ORIGINAL });
+    // La frase de partida se guarda con la candidata (35.11): la traducción se puede auditar.
+    expect(datos).toMatchObject({ clase: 'atribuida', personaje: 'buzz', origen: 'traduccion-propia', partida: PARTIDA });
     expect((await readdir(rutas.citas)).sort()).not.toContain('buzz--al-rescate-que-la-galaxia-no-se.md');
   });
 
@@ -279,14 +280,16 @@ describe('Historia 35.10 — proponer: a corpus/_revision/, nunca a corpus/citas
     ['sin origen', { origen: undefined }, /origen/u],
     ['con un origen ajeno', { origen: 'traduccion-automatica' }, /origen/u],
     ['con aptaParaPortada', { aptaParaPortada: true }, /aptaParaPortada|portada/u],
-    // Pasada de revisión 2 — la traducción propia guarda su original, y no convive con una Variante.
-    ['la traducción propia sin textoOriginal', { origen: 'traduccion-propia' }, /declara su «textoOriginal»/u],
-    ['un textoOriginal con otro origen', { textoOriginal: 'To the rescue!' }, /solo una atribuida con «origen: traduccion-propia» declara «textoOriginal»/u],
+    // Historia 35.11 — la traducción propia guarda su partida, y no convive con una Variante.
+    ['la traducción propia sin partida', { origen: 'traduccion-propia' }, /declara su «partida»/u],
+    ['una partida con otro origen', { partida: { texto: 'To the rescue!', lengua: 'en' } }, /solo una atribuida con «origen: traduccion-propia» declara «partida»/u],
+    ['una partida en una lengua ajena', { origen: 'traduccion-propia', partida: { texto: 'To the rescue!', lengua: 'xx' } }, /«lengua» de la «partida»/u],
+    ['el campo viejo textoOriginal', { textoOriginal: 'To the rescue!' }, /«textoOriginal»/u],
     [
       'la traducción propia con Variante',
       {
         origen: 'traduccion-propia',
-        textoOriginal: 'To the rescue!',
+        partida: { texto: 'To the rescue!', lengua: 'en' },
         variante: { texto: 'Al rescate, que la galaxia no se defiende solita.', region: 'espana', origen: 'doblaje' },
       },
       /no declara Variante/u,
@@ -424,19 +427,26 @@ describe('Historia 35.10 — proponer: a corpus/_revision/, nunca a corpus/citas
     expect(await revision(rutas)).toEqual(['woody--hay-una-serpiente-en-mi-bota.md']);
   });
 
-  it('la traducción propia también es aprobable tal cual, y se publica con su origen y su textoOriginal', async () => {
+  it('la traducción propia también es aprobable tal cual, con dos agentes, y se publica con su origen y su partida', async () => {
     const rutas = await corpusDePrueba();
-    const ORIGINAL = 'To the rescue, the galaxy will not defend itself.';
-    const resultado = await proponerAtribuidas(rutas, [deBuzz({ origen: 'traduccion-propia', textoOriginal: ORIGINAL })], {
+    const PARTIDA = { texto: 'To the rescue, the galaxy will not defend itself.', lengua: 'en' };
+    const resultado = await proponerAtribuidas(rutas, [deBuzz({ origen: 'traduccion-propia', partida: PARTIDA })], {
       semilla: SEMILLA,
       minAtestiguaciones: 2,
     });
     expect(resultado.ok && resultado.escritas).toHaveLength(1);
-    const aprobada = await aprobar(rutas, ['buzz-al-rescate-que-la-galaxia-no-se'], [], { puerta: PUERTA });
+    const aprobada = await aprobar(rutas, ['buzz-al-rescate-que-la-galaxia-no-se'], [], {
+      puerta: PUERTA,
+      agentes: { propone: 'agente-a', aprueba: 'agente-b' },
+    });
     expect(aprobada.rechazadasPorAdmision).toEqual([]);
     expect(aprobada.publicadas).toEqual(['buzz-al-rescate-que-la-galaxia-no-se']);
     const publicada = separarFrontmatter(await readFile(join(rutas.citas, 'buzz--al-rescate-que-la-galaxia-no-se.md'), 'utf8'))!;
-    expect(publicada).toMatchObject({ origen: 'traduccion-propia', textoOriginal: ORIGINAL });
+    expect(publicada).toMatchObject({ origen: 'traduccion-propia', partida: PARTIDA });
+    expect(publicada).not.toHaveProperty('textoOriginal');
+    expect(await leerAprobaciones(rutas)).toEqual([
+      { slug: 'buzz-al-rescate-que-la-galaxia-no-se', propone: 'agente-a', aprueba: 'agente-b', fecha: aprobada.aprobaciones![0]!.fecha },
+    ]);
   });
 });
 
@@ -551,7 +561,8 @@ describe('Historia 35.10 — por proceso, en una copia del proyecto con la semil
     const conAviso = escrita as unknown as { aviso: string; descargadaEl: string };
     expect(conAviso.descargadaEl).toMatch(/^\d{4}-\d{2}-\d{2}$/u);
     expect(conAviso.aviso).toMatch(/traduccion-propia/u);
-    expect(conAviso.aviso).toMatch(/textoOriginal/u);
+    expect(conAviso.aviso).toMatch(/«partida»/u);
+    expect(conAviso.aviso).not.toMatch(/textoOriginal/u);
     expect(conAviso.aviso).not.toMatch(/sale de una versión que ya circula/u);
     expect(escrita.frases).toEqual([
       { frase: 'To infinity & beyond!', quien: 'Buzz Lightyear' },

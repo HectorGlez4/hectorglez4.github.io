@@ -4,6 +4,7 @@ import { existsSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { aprobar, loteEnRevision, rechazar } from '../../tools/lib/revision.ts';
+import { leerAprobaciones } from '../../tools/lib/aprobaciones.ts';
 import {
   CABECERA_DE_CLASES,
   leerCitas,
@@ -818,6 +819,98 @@ describe('Historia 35.1 — aprobar deriva la clase y la anota', () => {
       expect(pasada.rechazadasPorAdmision.map((r) => [r.slug, r.motivos.join(' ')])).toEqual([
         [dos.slug, expect.stringMatching(/la Obra «ana-ejemplo--obras-de-ana» tendría 2 atribuidas y el tope es 1/u)],
       ]);
+    });
+
+    describe('Historia 35.11 — la traducción propia la aprueban dos agentes, y queda anotado', () => {
+      const PARTIDA = { texto: 'A sentence nobody else ever said.', lengua: 'en' };
+      const propia = () =>
+        deAna('ana-ejemplo-la-traducida', 'Una frase que nadie más dijo jamás en ninguna lengua.', {
+          origen: 'traduccion-propia',
+          partida: PARTIDA,
+        });
+      /** Todo lo que una negativa no puede cambiar: el Corpus entero, registros incluidos. */
+      const instantanea = async (rutas: Rutas) => {
+        const salida: Record<string, string> = {};
+        for (const e of await readdir(rutas.raiz, { recursive: true, withFileTypes: true })) {
+          if (!e.isFile()) continue;
+          const ruta = join(e.parentPath, e.name);
+          salida[ruta] = await readFile(ruta, 'utf8');
+        }
+        return salida;
+      };
+
+      it('con dos agentes distintos la publica, anota {slug, propone, aprueba, fecha} y su clase', async () => {
+        const c = propia();
+        const rutas = await conAutores([c]);
+        await fichaDeAna(rutas);
+        const resultado = await aprobar(rutas, [c.slug], [], { puerta: ABIERTA, agentes: { propone: ' agente-a ', aprueba: 'agente-b' } });
+        expect(resultado.rechazadasPorAdmision).toEqual([]);
+        expect(resultado.publicadas).toEqual([c.slug]);
+        const [entrada] = await leerAprobaciones(rutas);
+        expect(entrada).toEqual({ slug: c.slug, propone: 'agente-a', aprueba: 'agente-b', fecha: expect.stringMatching(/^\d{4}-\d{2}-\d{2}$/u) });
+        expect(await readFile(rutas.aprobacionesDeAtribuidas, 'utf8')).toMatch(/^# Aprobaciones de la traducción propia/u);
+        expect(await readFile(rutas.clasesDeCita, 'utf8')).toMatch(new RegExp(`slug: "${c.slug}", clase: atribuida`, 'u'));
+      });
+
+      it.each<[string, { propone?: string; aprueba?: string } | undefined, RegExp]>([
+        ['sin agentes', undefined, /falta --propone y falta --aprueba/u],
+        ['sin --aprueba', { propone: 'Ana' }, /falta --aprueba/u],
+        ['el mismo agente, recortado y en minúsculas', { propone: 'Ana', aprueba: ' ana ' }, /dicen el mismo/u],
+        ['un agente en blanco', { propone: '  ', aprueba: 'b' }, /--propone está en blanco/u],
+      ])('%s: sale sin escribir nada', async (_, agentes, motivo) => {
+        const c = propia();
+        const rutas = await conAutores([c]);
+        await fichaDeAna(rutas);
+        const antes = await instantanea(rutas);
+        const resultado = await aprobar(rutas, [c.slug], [], { puerta: ABIERTA, ...(agentes ? { agentes } : {}) });
+        expect(resultado.agentesRechazados).toMatch(motivo);
+        expect(resultado.publicadas).toEqual([]);
+        expect(await instantanea(rutas)).toEqual(antes);
+      });
+
+      it('agentes sin ninguna traducción propia en la pasada: sale sin escribir nada', async () => {
+        const feliz = deAna('ana-ejemplo-la-feliz', 'Una frase que nadie más ha dicho nunca.');
+        const rutas = await conAutores([feliz]);
+        await fichaDeAna(rutas);
+        const antes = await instantanea(rutas);
+        const resultado = await aprobar(rutas, [feliz.slug], [], { puerta: ABIERTA, agentes: { propone: 'a', aprueba: 'b' } });
+        expect(resultado.agentesRechazados).toMatch(/solo la traducción propia lleva dos agentes/u);
+        expect(await instantanea(rutas)).toEqual(antes);
+      });
+
+      it('si el registro falla tras escribirla, vuelve a corpus/_revision/ con su contenido de antes y sin clase', async () => {
+        const c = propia();
+        const rutas = await conAutores([c]);
+        await fichaDeAna(rutas);
+        // Un registro sin su clave: el añadido se juzga y se niega después de publicar la Cita.
+        await writeFile(rutas.aprobacionesDeAtribuidas, 'otra: cosa\n', 'utf8');
+        const candidata = join(rutas.revision, `${c.slug}.md`);
+        const antes = await readFile(candidata, 'utf8');
+        const resultado = await aprobar(rutas, [c.slug], [], {
+          puerta: ABIERTA,
+          agentes: { propone: 'a', aprueba: 'b' },
+        });
+        expect(resultado.aprobacionesSinAnotar?.devueltas).toEqual([c.slug]);
+        expect(resultado.aprobacionesSinAnotar?.motivo).toMatch(/falta la clave «aprobaciones:»/u);
+        expect(resultado.publicadas).toEqual([]);
+        expect(await readFile(candidata, 'utf8')).toBe(antes);
+        expect(existsSync(join(rutas.citas, `${c.slug}.md`))).toBe(false);
+        const clases = existsSync(rutas.clasesDeCita) ? await readFile(rutas.clasesDeCita, 'utf8') : '';
+        expect(clases).not.toContain(c.slug);
+      });
+
+      it('con Temas de la orden (la reescribe), si el registro falla también vuelve con su contenido de antes', async () => {
+        const c = propia();
+        const rutas = await conAutores([c]);
+        await fichaDeAna(rutas);
+        await writeFile(rutas.aprobacionesDeAtribuidas, 'otra: cosa\n', 'utf8');
+        const candidata = join(rutas.revision, `${c.slug}.md`);
+        const antes = await readFile(candidata, 'utf8');
+        const resultado = await aprobar(rutas, [c.slug], [TEMA_PUBLICADO], { puerta: ABIERTA, agentes: { propone: 'a', aprueba: 'b' } });
+        expect(resultado.aprobacionesSinAnotar?.devueltas).toEqual([c.slug]);
+        expect(await readFile(candidata, 'utf8')).toBe(antes);
+        expect((await readdir(rutas.citas)).filter((f) => f.includes('la-traducida'))).toEqual([]);
+      });
     });
 
     it('el mínimo de dominios sigue a la puerta: dos direcciones de un mismo dominio no bastan con MIN 2', async () => {

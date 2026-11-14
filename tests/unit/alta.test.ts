@@ -7,6 +7,7 @@ import { componerDocumento } from '../../tools/lib/documento.ts';
 import { CABECERA_DE_CLASES, escribirCita, rutasDelCorpus, separarFrontmatter, type Rutas } from '../../tools/lib/corpus.ts';
 import { ORDEN_SEMBRAR_CLASES, PublicacionInterrumpida } from '../../tools/lib/clases.ts';
 import { motivoPuertaCerrada, type ValoresDeLaPuerta } from '../../tools/lib/atribuidas.ts';
+import { leerAprobaciones } from '../../tools/lib/aprobaciones.ts';
 import { CENSO_DE_PARTIDA } from '../../tools/lib/cotejo.ts';
 import { MIN_CITAS_POR_TEMA } from '../../src/lib/umbrales.ts';
 import {
@@ -539,6 +540,75 @@ describe('Historia 35.1 — el alta deriva la clase y la anota', () => {
       // La ficha que la misma entrada crea cuenta como Obra de la Autora (pregunta 23).
       expect(await readdir(rutas.obras)).toContain('ana-ejemplo--obras-de-ana.yml');
       expect(await readFile(rutas.clasesDeCita, 'utf8')).toMatch(/clase: atribuida/u);
+    });
+
+    describe('Historia 35.11 — la traducción propia la dan de alta dos agentes, y queda anotado', () => {
+      const PARTIDA = { texto: 'A sentence nobody else ever said.', lengua: 'en' };
+      const propia = () => deAna('Una frase que nadie más dijo jamás en ninguna lengua.', { origen: 'traduccion-propia', partida: PARTIDA });
+      const instantanea = async (rutas: Rutas) => {
+        const salida: Record<string, string> = {};
+        for (const e of await readdir(rutas.raiz, { recursive: true, withFileTypes: true })) {
+          if (e.isFile()) salida[join(e.parentPath, e.name)] = await readFile(join(e.parentPath, e.name), 'utf8');
+        }
+        return salida;
+      };
+
+      it('con dos agentes la publica con su partida y anota la aprobación antes que la clase', async () => {
+        const rutas = await conAna();
+        const informe = await darDeAltaLote([propia()], rutas, { puerta: ABIERTA, agentes: { propone: 'agente-a', aprueba: 'agente-b' } });
+        expect(informe.enRevision).toEqual([]);
+        expect(informe.publicadas).toHaveLength(1);
+        const datos = separarFrontmatter(await readFile(informe.publicadas[0].ruta, 'utf8'))!;
+        expect(datos).toMatchObject({ origen: 'traduccion-propia', partida: PARTIDA });
+        const slug = informe.publicadas[0].slug;
+        expect(await leerAprobaciones(rutas)).toEqual([
+          { slug, propone: 'agente-a', aprueba: 'agente-b', fecha: expect.stringMatching(/^\d{4}-\d{2}-\d{2}$/u) },
+        ]);
+        expect(await readFile(rutas.clasesDeCita, 'utf8')).toContain(slug);
+        expect(altaConFallo(informe)).toBe(false);
+        expect(formatearInforme(informe)).toMatch(/propuesta por «agente-a» y aprobada por «agente-b»/u);
+      });
+
+      it.each<[string, { propone?: string; aprueba?: string } | undefined, boolean, RegExp]>([
+        ['sin agentes', undefined, false, /falta --propone y falta --aprueba/u],
+        ['el mismo agente, en seco', { propone: 'Ana', aprueba: 'ANA' }, true, /dicen el mismo/u],
+        ['sin --propone', { aprueba: 'b' }, false, /falta --propone/u],
+      ])('%s: sale con 1 sin escribir nada', async (_, agentes, seco, motivo) => {
+        const rutas = await conAna();
+        const antes = await instantanea(rutas);
+        const informe = await darDeAltaLote([propia()], rutas, { puerta: ABIERTA, seco, ...(agentes ? { agentes } : {}) });
+        expect(informe.agentesRechazados).toMatch(motivo);
+        expect(altaConFallo(informe)).toBe(true);
+        expect(formatearInforme(informe)).toMatch(/No se ha escrito nada/u);
+        expect(await instantanea(rutas)).toEqual(antes);
+      });
+
+      it('agentes sin ninguna traducción propia en el lote: sale con 1 sin escribir nada', async () => {
+        const rutas = await conAna();
+        const antes = await instantanea(rutas);
+        const informe = await darDeAltaLote([deAna('Una frase que nadie más ha dicho nunca.')], rutas, {
+          puerta: ABIERTA,
+          agentes: { propone: 'a', aprueba: 'b' },
+        });
+        expect(informe.agentesRechazados).toMatch(/solo la traducción propia lleva dos agentes/u);
+        expect(await instantanea(rutas)).toEqual(antes);
+      });
+
+      it('si el registro falla tras escribirla, se mueve a corpus/_revision/ sin anotar su clase, y sale con 1', async () => {
+        const rutas = await conAna();
+        await writeFile(rutas.aprobacionesDeAtribuidas, 'otra: cosa\n', 'utf8');
+        const informe = await darDeAltaLote([propia()], rutas, { puerta: ABIERTA, agentes: { propone: 'a', aprueba: 'b' } });
+        expect(informe.aprobacionesSinAnotar?.motivo).toMatch(/falta la clave «aprobaciones:»/u);
+        const [slug] = informe.aprobacionesSinAnotar!.devueltas;
+        expect(slug).toMatch(/^ana-ejemplo-/u);
+        expect(informe.publicadas).toEqual([]);
+        expect(altaConFallo(informe)).toBe(true);
+        expect((await readdir(rutas.citas)).some((f) => f.includes('nadie-mas-dijo'))).toBe(false);
+        const enRevision = await readdir(rutas.revision);
+        expect(enRevision.some((f) => f.includes('nadie-mas-dijo'))).toBe(true);
+        const clases = await readFile(rutas.clasesDeCita, 'utf8').catch(() => '');
+        expect(clases).not.toContain(slug);
+      });
     });
 
     it('un duplicado de una publicada de siempre no se publica, ni con --con-duplicados', async () => {

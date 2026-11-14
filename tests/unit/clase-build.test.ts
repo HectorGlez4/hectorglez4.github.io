@@ -197,3 +197,42 @@ describe('Historia 35.1 — la clase en el build', () => {
     expect(r.salida).toMatch(/rosa-reciente--protegida\.md: la Cita «rosa-reciente-protegida» es de siempre .*no es de dominio público/u);
   });
 });
+
+describe('Historia 35.11 — la doble aprobación de la traducción propia es puerta del build', () => {
+  it('una propia sin aprobación, o con un solo agente, rompe nombrando su fichero y el registro; sin git, avisa con el motivo', async () => {
+    const propia = (slug: string, texto: string) =>
+      citaDe('ana-ejemplo', slug, texto, {
+        clase: ATRIBUIDA,
+        estadoDerechos: undefined,
+        ...ATESTIGUADA,
+        origen: 'traduccion-propia',
+        partida: { texto: `${texto} (en)`, lengua: 'en' },
+      });
+    const r = await construirConCorpus(
+      {
+        ...BASE,
+        'autores/ana-ejemplo.yml': VIVA,
+        'citas/ana-ejemplo--sin-aprobar.md': propia('ana-ejemplo-sin-aprobar', 'Una traducción que nadie aprobó.'),
+        'citas/ana-ejemplo--un-agente.md': propia('ana-ejemplo-un-agente', 'Una traducción de una sola mano.'),
+        // Una entrada de una Cita que ya no es traducción propia no rompe nada: un solo sentido.
+        'aprobaciones-de-atribuidas.yml':
+          'aprobaciones:\n' +
+          '  - { slug: "ana-ejemplo-un-agente", propone: "Ana", aprueba: " ana ", fecha: "2026-11-14" }\n' +
+          '  - { slug: "ana-ejemplo-ya-no-existe", propone: "a", aprueba: "a", fecha: "2026-11-14" }\n',
+      },
+      { ficheros: conLaPuertaAbierta() },
+    );
+    aLimpiar.push(r.proyecto);
+    expect(r.codigo).not.toBe(0);
+    expect(r.salida).toMatch(
+      /corpus\/citas\/ana-ejemplo--sin-aprobar\.md: es una traducción propia publicada y corpus\/aprobaciones-de-atribuidas\.yml no anota su aprobación/u,
+    );
+    expect(r.salida).toMatch(
+      /corpus\/citas\/ana-ejemplo--un-agente\.md: corpus\/aprobaciones-de-atribuidas\.yml anota su aprobación del 2026-11-14 con el mismo agente/u,
+    );
+    expect(r.salida).not.toMatch(/ya-no-existe/u);
+    // La copia no es un repositorio de git: se comprueba solo la existencia y los dos agentes, y se dice.
+    expect(r.salida).toMatch(/solo se comprueba que cada una tenga su aprobación de dos agentes, no que sea posterior/u);
+    expect(r.salida).toContain('Clases de Cita: 2 desacuerdos');
+  });
+});

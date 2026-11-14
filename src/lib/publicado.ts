@@ -32,7 +32,7 @@ import {
 } from './umbrales.ts';
 import type { FuenteDeCita, ORIGENES, Procedencia, tradicion } from './admision.ts';
 import type { RegionDeVariante } from './variante.ts';
-import { CLASE_ATRIBUIDA, esAtribuida, ORIGEN_TRADUCCION_PROPIA } from './clase.ts';
+import { CLASE_ATRIBUIDA, esAtribuida } from './clase.ts';
 import { cuentaParaElSuelo } from './huecos.ts';
 import { milesEnEspañol } from './formato.ts';
 import { compararPorClave } from './normalizar.ts';
@@ -120,12 +120,6 @@ export interface Cita {
    * no entra en el slug, ni en lo copiado, compartido, la Imagen, el Fragmento ni la Tarjeta.
    */
   variante?: VarianteDeCita;
-  /**
-   * Historia 35.10 — solo en la atribuida cuyo `origen` es `traduccion-propia`: el texto es la
-   * traducción del sitio, y la Página de Cita lo dice con `lineaDeTraduccionPropia`. Los demás
-   * orígenes no se pintan y no viajan.
-   */
-  traduccionPropia?: true;
   aptaParaPortada: boolean;
 }
 
@@ -1722,10 +1716,6 @@ export function aplanarCita(entrada: EntradaCita): Cita {
             origen: entrada.data.variante.origen,
           },
         }
-      : {}),
-    // Historia 35.10 — la traducción del sitio viaja para que la Página de Cita lo diga.
-    ...(esAtribuida(entrada.data) && entrada.data.origen === ORIGEN_TRADUCCION_PROPIA
-      ? { traduccionPropia: true as const }
       : {}),
     aptaParaPortada: entrada.data.aptaParaPortada,
   };

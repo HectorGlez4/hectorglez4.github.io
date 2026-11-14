@@ -5,7 +5,8 @@
  *   npm run atribuida -- autor <slug> <slug-de-autor>
  *   npm run atribuida -- personaje <slug> <slug-de-personaje>
  *   npm run atribuida -- variante <slug> "<texto>" --region <región> --origen <origen>
- *   npm run atribuida -- texto <slug> "<texto>"
+ *   npm run atribuida -- texto <slug> "<texto>" [--propone <agente> --aprueba <agente>]
+ *   npm run atribuida -- texto <slug> "<versión>" --origen <origen> --atestiguacion <url> [--atestiguacion <url>...]
  *   npm run atribuida -- semilla <slug> [--salida semillas/<slug>.json]   (Historia 35.10)
  *   npm run atribuida -- proponer <lote.yaml> [--corpus corpus]          (Historia 35.10)
  *
@@ -20,7 +21,8 @@
  * fuera de `corpus/`, sin versionar; `proponer` escribe solo en `corpus/_revision/` y nunca publica.
  *
  * Códigos: 2 es la forma de la invocación (suborden desconocida, argumentos de menos o de más,
- * bandera desconocida, repetida, vacía o sin valor, `variante` sin `--region` o `--origen`), 1 lo que la
+ * bandera desconocida, repetida, vacía o sin valor, `variante` sin `--region` o `--origen`, `--atestiguacion`
+ * sin `--origen`), 1 lo que la
  * invocación dice; en ninguno de los dos se escribe nada, salvo en `proponer`, que escribe en
  * `corpus/_revision/` las candidatas que pasan aunque salga con 1 por las que rechaza (el parte lo dice).
  */
@@ -50,19 +52,27 @@ const USO = [
   '  npm run atribuida -- autor <slug> <slug-de-autor>',
   '  npm run atribuida -- personaje <slug> <slug-de-personaje>',
   '  npm run atribuida -- variante <slug> "<texto>" --region <región> --origen <origen>',
-  '  npm run atribuida -- texto <slug> "<texto>"',
+  '  npm run atribuida -- texto <slug> "<texto>" [--propone <agente> --aprueba <agente>]',
+  '  npm run atribuida -- texto <slug> "<versión>" --origen <origen> --atestiguacion <url> [--atestiguacion <url>...]',
   '  npm run atribuida -- semilla <slug> [--salida semillas/<slug>.json]',
   '  npm run atribuida -- proponer <lote.yaml> [--corpus corpus]',
   '',
 ].join('\n');
 
-/** Por suborden: cuántos argumentos sueltos toma tras su nombre y sus banderas con valor. */
-const FORMA: Record<string, { sueltos: number; conValor: readonly string[] }> = {
+/**
+ * Por suborden: cuántos argumentos sueltos toma tras su nombre, sus banderas con valor y, de ellas,
+ * las que se pueden repetir (Historia 35.11: `--atestiguacion`).
+ */
+const FORMA: Record<string, { sueltos: number; conValor: readonly string[]; repetibles?: readonly string[] }> = {
   obra: { sueltos: 2, conValor: ['--corpus'] },
   autor: { sueltos: 2, conValor: ['--corpus'] },
   personaje: { sueltos: 2, conValor: ['--corpus'] },
   variante: { sueltos: 2, conValor: ['--corpus', '--region', '--origen'] },
-  texto: { sueltos: 2, conValor: ['--corpus'] },
+  texto: {
+    sueltos: 2,
+    conValor: ['--corpus', '--origen', '--atestiguacion', '--propone', '--aprueba'],
+    repetibles: ['--atestiguacion'],
+  },
   semilla: { sueltos: 1, conValor: ['--salida'] },
   proponer: { sueltos: 1, conValor: ['--corpus'] },
 };
@@ -99,7 +109,18 @@ if (sueltos.length > forma.sueltos) {
 }
 if (sueltos.length < forma.sueltos) noReconocidos.push(`Faltan argumentos: ${orden} toma ${forma.sueltos}.`);
 for (const bandera of forma.conValor) {
+  if (forma.repetibles?.includes(bandera)) continue;
   if (argumentos.filter((a) => a === bandera).length > 1) noReconocidos.push(`«${bandera}» está repetida.`);
+}
+// Historia 35.11 — las atestiguaciones son de la versión que sustituye: van con su origen.
+if (orden === 'texto' && argumentos.includes('--atestiguacion') && !argumentos.includes('--origen')) {
+  noReconocidos.push('«--atestiguacion» va con «--origen»: son las de la versión que sustituye a la traducción propia.');
+}
+/** Los valores de una bandera repetible, en orden. */
+const valoresDe = (bandera: string): string[] =>
+  argumentos.flatMap((a, i) => (a === bandera && argumentos[i + 1] !== undefined && !argumentos[i + 1]!.startsWith('--') ? [argumentos[i + 1]!] : []));
+for (const bandera of forma.repetibles ?? []) {
+  if (valoresDe(bandera).some((v) => v.trim() === '')) noReconocidos.push(`«${bandera}» va vacía.`);
 }
 if (orden === 'variante') {
   for (const bandera of ['--region', '--origen']) {
@@ -139,7 +160,22 @@ const cambio: CambioDeAtribuida =
               region: opcion(argumentos, '--region') ?? '',
               origen: opcion(argumentos, '--origen') ?? '',
             }
-          : { tipo: 'texto', slug, texto: valor };
+          : {
+              tipo: 'texto',
+              slug,
+              texto: valor,
+              // Historia 35.11 — la sustitución de la traducción propia, o su retraducción.
+              ...(opcion(argumentos, '--origen') !== undefined ? { origen: opcion(argumentos, '--origen')! } : {}),
+              ...(argumentos.includes('--atestiguacion') ? { atestiguaciones: valoresDe('--atestiguacion') } : {}),
+              ...(argumentos.includes('--propone') || argumentos.includes('--aprueba')
+                ? {
+                    agentes: {
+                      ...(opcion(argumentos, '--propone') !== undefined ? { propone: opcion(argumentos, '--propone')! } : {}),
+                      ...(opcion(argumentos, '--aprueba') !== undefined ? { aprueba: opcion(argumentos, '--aprueba')! } : {}),
+                    },
+                  }
+                : {}),
+            };
 
 terminar(await cambiarAtribuida(rutas, cambio));
 
@@ -238,8 +274,8 @@ async function semilla(slug: string): Promise<never> {
     mensaje: [
       `Semilla de «${slug}»: ${frases.length} frases en inglés en ${salida}.`,
       'No se versiona, no se publica y no atestigua nada. El lote de candidatas se escribe en español, con la',
-      'versión que circula y su origen —o, si no circula ninguna, la traducción del sitio con «origen:',
-      'traduccion-propia» y la frase de aquí en «textoOriginal»—, y se propone con',
+      'versión que circula y su origen —o, como último recurso si no circula ninguna, la traducción del sitio',
+      'con «origen: traduccion-propia» y la frase de aquí en «partida» ({texto, lengua: en})—, y se propone con',
       '«npm run atribuida -- proponer <lote.yaml>».',
     ].join('\n'),
   });

@@ -24,7 +24,7 @@ import {
   atestiguaciones,
   origen,
   variante,
-  textoOriginal,
+  partida,
   personajeAdmisible,
   procedencia,
   reglasDeAutor,
@@ -107,8 +107,8 @@ const citas = defineCollection({
     origen: origen.optional(),
     // Historia 35.6 — la Variante de la atribuida, prohibida en la de siempre (`reglasDeClase`).
     variante: variante.optional(),
-    // Historia 35.10 — la frase que tradujo la traducción propia; no viaja a `publicado.ts`.
-    textoOriginal: textoOriginal.optional(),
+    // Historia 35.11 — la frase de partida de la traducción propia; no viaja a `publicado.ts`.
+    partida: partida.optional(),
     /*
      * Historia 11.2 — la Fuente de la que salió la Cita, y con ella su documento.
      *

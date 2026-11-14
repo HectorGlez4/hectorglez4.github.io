@@ -19,6 +19,12 @@
  *
  * Uso:
  *   npx tsx tools/alta.ts <lote.yaml> [--corpus corpus] [--seco] [--con-duplicados]
+ *                         [--propone <agente> --aprueba <agente>]
+ *
+ * Historia 35.11 — un lote con alguna atribuida de `origen: traduccion-propia` exige `--propone` y
+ * `--aprueba`, dos agentes distintos (recortados y en minúsculas); sin ellos, iguales, o dados sin
+ * ninguna traducción propia en el lote, sale con 1 sin escribir nada, también en seco. La
+ * aprobación de cada traducción propia publicada se anota en `corpus/aprobaciones-de-atribuidas.yml`.
  *
  * Sale con 1 si alguna entrada se quedó sin escribir por no tener Tema publicado —también en
  * seco— o si alguna publicada se quedó sin él; con 2 si falta el lote o no es una lista; y con 0
@@ -43,6 +49,7 @@ import {
   leerDocumentosDeclarados,
   leerFichasDeObra,
   leerTemas,
+  mover,
   nombreDeFicheroDeCita,
   registrarClases,
   rutasDelCorpus,
@@ -50,7 +57,15 @@ import {
   type ClaseRegistrada,
   type Rutas,
 } from './lib/corpus.ts';
-import { CLASE_ATRIBUIDA, claseDe, claseQueCorresponde, esAtribuida, type Clase } from '../src/lib/clase.ts';
+import {
+  CLASE_ATRIBUIDA,
+  claseDe,
+  claseQueCorresponde,
+  esAtribuida,
+  ORIGEN_TRADUCCION_PROPIA,
+  type Clase,
+} from '../src/lib/clase.ts';
+import { agentesDe, MOTIVO_AGENTES_SIN_TRADUCCION, registrarAprobaciones, type Agentes } from './lib/aprobaciones.ts';
 import {
   fallosDeAtribuidas,
   fichaPlaneada,
@@ -103,6 +118,11 @@ export interface EntradaDeLote {
    */
   atestiguaciones?: { url?: string; consultadaEl?: string }[];
   origen?: string;
+  /**
+   * Historia 35.11 — la frase de partida de la traducción propia, `{texto, lengua}`: solo con
+   * `origen: traduccion-propia`, y en ella obligatoria (la juzga el esquema).
+   */
+  partida?: { texto?: string; lengua?: string };
   /**
    * Historia 35.6 — la Variante de una atribuida, `{texto, region, origen}`. La juzga el esquema
    * (solo la atribuida) y no entra en el slug, que sale solo de `texto`.
@@ -206,6 +226,18 @@ export interface InformeDeAlta {
    * sale con 1 — Historia 35.1.
    */
   registroSinAnotar?: string;
+  /**
+   * Historia 35.11 — por qué los agentes del alta no valen (falta uno, son el mismo, o se dan sin
+   * ninguna traducción propia en el lote): no se escribió nada, tampoco en seco, y la orden sale con 1.
+   */
+  agentesRechazados?: string;
+  /** Historia 35.11 — las aprobaciones anotadas en `corpus/aprobaciones-de-atribuidas.yml`. */
+  aprobaciones?: { slug: string; propone: string; aprueba: string; fecha: string }[];
+  /**
+   * Historia 35.11 — si el registro de aprobaciones no se pudo escribir tras publicar: el motivo, y
+   * las traducciones propias que se movieron a `corpus/_revision/` (AD-2), sin anotar su clase.
+   */
+  aprobacionesSinAnotar?: { motivo: string; devueltas: string[] };
 }
 
 /** Una entrada que la pasada publica (o publicaría, en el ensayo), con sus Temas y su clase. */
@@ -215,6 +247,8 @@ interface Publicada {
   slug: string;
   temas: string[];
   clase: Clase;
+  /** Historia 35.11 — si es una traducción propia, y dónde quedó escrita. */
+  traduccionPropia?: { ruta: string };
 }
 
 /**
@@ -227,8 +261,38 @@ export async function darDeAltaLote(
   lote: EntradaDeLote[],
   rutas: Rutas,
   /** `puerta`: los valores de la puerta de la atribuida (Historia 35.1b); por omisión, los del árbol. */
-  opciones: { seco?: boolean; conDuplicados?: boolean; puerta?: ValoresDeLaPuerta } = {},
+  /** `agentes`: los de `--propone` y `--aprueba` (Historia 35.11), solo para la traducción propia. */
+  opciones: {
+    seco?: boolean;
+    conDuplicados?: boolean;
+    puerta?: ValoresDeLaPuerta;
+    agentes?: { propone?: string; aprueba?: string };
+  } = {},
 ): Promise<InformeDeAlta> {
+  /*
+   * Historia 35.11 — los agentes, antes de leer ni escribir nada (también en seco): con una
+   * traducción propia en el lote, los dos y distintos; sin ninguna, ninguno.
+   */
+  const conTraduccion = lote.some((e) => e.origen === ORIGEN_TRADUCCION_PROPIA);
+  const dados = opciones.agentes?.propone !== undefined || opciones.agentes?.aprueba !== undefined;
+  let agentes: Agentes | undefined;
+  const rechazoPorAgentes = (motivo: string): InformeDeAlta => ({
+    publicadas: [],
+    enRevision: [],
+    autoresDesconocidos: [],
+    posiblesDuplicados: [],
+    casiIguales: [],
+    rechazadasPorTema: [],
+    agentesRechazados: motivo,
+  });
+  if (conTraduccion) {
+    const juicio = agentesDe(opciones.agentes?.propone, opciones.agentes?.aprueba);
+    if (!juicio.ok) return rechazoPorAgentes(juicio.motivo);
+    agentes = juicio.agentes;
+  } else if (dados) {
+    return rechazoPorAgentes(MOTIVO_AGENTES_SIN_TRADUCCION);
+  }
+
   const autores = await leerAutores(rutas);
   const slugsDePersonaje = new Set((await leerPersonajes(rutas)).map((p) => p.slug));
   // Historia 35.1 — el registro de clases se lee antes de escribir nada: ilegible, nada se escribe.
@@ -364,8 +428,36 @@ export async function darDeAltaLote(
       );
     }
   }
-  const { informe, aPublicar } = pasada;
+  const { informe } = pasada;
+  let { aPublicar } = pasada;
   if (!opciones.seco) {
+    /*
+     * Historia 35.11 — la aprobación de cada traducción propia publicada, en un solo añadido y antes
+     * que la clase. Si falla, cada una se mueve a `corpus/_revision/` (AD-2: nada se borra) y no se
+     * anota su clase: publicada sin aprobación, rompería el build.
+     */
+    const propias = aPublicar.filter((p) => p.traduccionPropia !== undefined);
+    if (agentes !== undefined && propias.length > 0) {
+      const aprobaciones = propias.map((p) => ({ slug: p.slug, ...agentes, fecha: hoy }));
+      try {
+        await registrarAprobaciones(rutas, aprobaciones);
+        informe.aprobaciones = aprobaciones;
+      } catch (fallo) {
+        const devueltas: string[] = [];
+        for (const p of propias) {
+          try {
+            await mover(p.traduccionPropia!.ruta, rutas.revision);
+            devueltas.push(p.slug);
+          } catch {
+            // La que no se mueve sigue publicada sin aprobación: el build lo dirá.
+          }
+        }
+        const fuera = new Set(devueltas);
+        aPublicar = aPublicar.filter((p) => !fuera.has(p.slug));
+        informe.publicadas = informe.publicadas.filter((c) => !fuera.has(c.slug));
+        informe.aprobacionesSinAnotar = { motivo: fallo instanceof Error ? fallo.message : String(fallo), devueltas };
+      }
+    }
     /*
      * Historia 35.1 — lo publicado se anota en el registro de clases, en un solo añadido al final.
      * Si falla, las Citas ya están escritas: el parte da la orden que las anota y sale con 1.
@@ -637,6 +729,8 @@ export async function darDeAltaLote(
         // Historia 35.1b — se pasan tal cual: el esquema los exige a la atribuida y los prohíbe a la de siempre.
         ...(entrada.atestiguaciones !== undefined ? { atestiguaciones: entrada.atestiguaciones } : {}),
         ...(entrada.origen !== undefined ? { origen: entrada.origen } : {}),
+        // Historia 35.11 — la partida de la traducción propia, tal cual: el esquema la juzga.
+        ...(entrada.partida !== undefined ? { partida: entrada.partida } : {}),
         // Historia 35.6 — la Variante, tal cual: el esquema la admite solo en la atribuida.
         ...(entrada.variante !== undefined ? { variante: entrada.variante } : {}),
         // Se pasa tal cual y la valida la misma puerta que el resto: un `fuente:` a medias
@@ -745,7 +839,14 @@ export async function darDeAltaLote(
         ? ''
         : await escribirCita(rutas.citas, nombreFichero, aRegistroDeCita(validada.data));
       slugsOcupados.add(candidata.slug);
-      aPublicar.push({ indice, texto, slug: candidata.slug, temas: validada.data.temas, clase });
+      aPublicar.push({
+        indice,
+        texto,
+        slug: candidata.slug,
+        temas: validada.data.temas,
+        clase,
+        ...(atribuida && validada.data.origen === ORIGEN_TRADUCCION_PROPIA ? { traduccionPropia: { ruta } } : {}),
+      });
       publicadasEnLaPasada.push(paraAtribuidas(validada.data));
       if (planDaFichaAlAutor(plan) && conAutor) autoresConFichaEnLaPasada.add(slugAutor);
       const fichaNueva = fichaPlaneada(plan, conAutor ? slugAutor : undefined);
@@ -815,6 +916,8 @@ function aRegistroDeCita(datos: CitaAdmisible): Record<string, unknown> {
     // Historia 35.1b — las atestiguaciones y el origen de la atribuida.
     ...(datos.atestiguaciones !== undefined ? { atestiguaciones: datos.atestiguaciones } : {}),
     ...(datos.origen !== undefined ? { origen: datos.origen } : {}),
+    // Historia 35.11 — la partida de la traducción propia, en el orden texto, lengua.
+    ...(datos.partida !== undefined ? { partida: { texto: datos.partida.texto, lengua: datos.partida.lengua } } : {}),
     // Historia 35.6 — la Variante de la atribuida, en el orden texto, region, origen.
     ...(datos.variante !== undefined
       ? { variante: { texto: datos.variante.texto, region: datos.variante.region, origen: datos.variante.origen } }
@@ -871,12 +974,22 @@ export function mensajeDeAltaFallida(fallo: unknown): string {
  * de clases (Historia 35.1).
  */
 export function altaConFallo(informe: InformeDeAlta): boolean {
-  return sinTemaPublicado(informe) || informe.registroSinAnotar !== undefined;
+  return (
+    sinTemaPublicado(informe) ||
+    informe.registroSinAnotar !== undefined ||
+    informe.agentesRechazados !== undefined ||
+    informe.aprobacionesSinAnotar !== undefined
+  );
 }
 
 /** Informe legible en terminal. Sin colores: se lee igual en un registro de CI. */
 export function formatearInforme(informe: InformeDeAlta): string {
   const lineas: string[] = [];
+
+  // Historia 35.11 — sin agentes que valgan, no se ha escrito nada.
+  if (informe.agentesRechazados !== undefined) {
+    return `No se da de alta nada: ${informe.agentesRechazados}\nNo se ha escrito nada.`;
+  }
 
   lineas.push(`Publicadas: ${informe.publicadas.length}`);
   for (const c of informe.publicadas) {
@@ -904,6 +1017,22 @@ export function formatearInforme(informe: InformeDeAlta): string {
       `${suelta.slug}: publicada, pero se quedó sin ningún Tema publicado. Dele un Tema con ` +
         'página o retírela antes de construir.',
       ...suelta.motivos.map((m) => `  ${m}`),
+    );
+  }
+
+  for (const a of informe.aprobaciones ?? []) {
+    lineas.push(
+      '',
+      `${a.slug}: traducción propia, propuesta por «${a.propone}» y aprobada por «${a.aprueba}» (corpus/aprobaciones-de-atribuidas.yml).`,
+    );
+  }
+  if (informe.aprobacionesSinAnotar !== undefined) {
+    lineas.push(
+      '',
+      `corpus/aprobaciones-de-atribuidas.yml no se pudo escribir: ${informe.aprobacionesSinAnotar.motivo}`,
+      ...informe.aprobacionesSinAnotar.devueltas.map(
+        (slug) => `  ${slug} se movió a corpus/_revision/, sin anotar su clase.`,
+      ),
     );
   }
 
@@ -1012,14 +1141,30 @@ export async function textosCanonicosDelCorpus(rutas: Rutas): Promise<Map<string
 
 if (import.meta.url === `file://${process.argv[1]}`) {
   const argumentos = process.argv.slice(2);
-  const fichero = argumentos.find((a) => !a.startsWith('--'));
+  // El lote es el primer argumento suelto que no es el valor de una opción.
+  const conValor = new Set(['--corpus', '--propone', '--aprueba']);
+  const fichero = argumentos.find((a, i) => !a.startsWith('--') && !conValor.has(argumentos[i - 1] ?? ''));
   const seco = argumentos.includes('--seco');
   const conDuplicados = argumentos.includes('--con-duplicados');
   const indiceCorpus = argumentos.indexOf('--corpus');
   const raizCorpus = indiceCorpus === -1 ? 'corpus' : argumentos[indiceCorpus + 1];
+  // Historia 35.11 — los dos agentes de una traducción propia, con valor.
+  const agentes: { propone?: string; aprueba?: string } = {};
+  for (const [bandera, campo] of [['--propone', 'propone'], ['--aprueba', 'aprueba']] as const) {
+    const i = argumentos.indexOf(bandera);
+    if (i === -1) continue;
+    const valor = argumentos[i + 1];
+    if (valor === undefined || valor.startsWith('--')) {
+      process.stderr.write(`«${bandera}» necesita el nombre de un agente.\n`);
+      process.exit(2);
+    }
+    agentes[campo] = valor;
+  }
 
   if (!fichero) {
-    process.stderr.write('Uso: npx tsx tools/alta.ts <lote.yaml> [--corpus corpus] [--seco]\n');
+    process.stderr.write(
+      'Uso: npx tsx tools/alta.ts <lote.yaml> [--corpus corpus] [--seco] [--propone <agente> --aprueba <agente>]\n',
+    );
     process.exit(2);
   }
 
@@ -1031,7 +1176,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
 
   let informe: InformeDeAlta;
   try {
-    informe = await darDeAltaLote(lote, rutasDelCorpus(raizCorpus), { seco, conDuplicados });
+    informe = await darDeAltaLote(lote, rutasDelCorpus(raizCorpus), { seco, conDuplicados, agentes });
   } catch (fallo) {
     process.stderr.write(`${mensajeDeAltaFallida(fallo)}\n`);
     process.exit(1);

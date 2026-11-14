@@ -258,11 +258,12 @@ export const atestiguaciones = z
   .min(1, 'Regla incumplida: una atribuida declara al menos una atestiguación.');
 
 /**
- * De dónde sale la letra de una atribuida — Historia 35.1b, AD-32. `traduccion-propia` (Historia
- * 35.10, decisión de Héctor del 2026-11-14 que enmienda FR-68): cuando no circula ninguna versión
- * en español, el texto es la traducción del sitio, lo más fiel posible, y lo dice la Página de Cita
- * (`lineaDeTraduccionPropia` de `src/lib/atribucion.ts`). Solo la atribuida: la de siempre no
- * declara origen y nunca se traduce (§4.11).
+ * De dónde sale la letra de una atribuida — Historia 35.1b, AD-32. `traduccion-propia` (decisión de
+ * Héctor del 2026-11-14, FR-68 v9.2; Historia 35.11): el último recurso, cuando no circula ninguna
+ * versión en español; el texto es la traducción del sitio, lleva su `partida` y la aprueban dos
+ * agentes distintos, cuyo registro lee solo el build. **Ninguna superficie pinta el origen** —ni
+ * línea, ni sello, ni hueco (UX v9.3)—: se guarda para auditar y no fecha (`CAMPOS_QUE_NO_FECHAN`).
+ * Solo la atribuida: la de siempre no declara origen y nunca se traduce (§4.11).
  */
 export const ORIGENES = ['original', 'doblaje', 'traduccion-publicada', ORIGEN_TRADUCCION_PROPIA] as const;
 
@@ -315,16 +316,38 @@ export const variante = z.strictObject(
 );
 
 /**
- * La frase de la que sale la traducción propia — Historia 35.10, pasada de revisión 2: con
- * `origen: traduccion-propia` la atribuida guarda la letra que el sitio tradujo, tal cual la trae
- * su atestiguación (hoy, en inglés), para que la fidelidad de la traducción se pueda auditar
- * después. Obligatoria con ese origen y prohibida con cualquier otro y en la de siempre
- * (`reglasDeClase`). Una línea; no se pinta, y por eso no fecha (`CAMPOS_QUE_NO_FECHAN`).
+ * Las lenguas de las que sale una traducción propia — Historia 35.11, AD-32 v9.2: un conjunto
+ * cerrado de códigos ISO 639-1 de trabajo. Ampliarlo o renombrarlo es un diff de Héctor.
  */
-export const textoOriginal = z
-  .string({ message: 'Regla incumplida: «textoOriginal» es la frase que el sitio tradujo, como texto.' })
-  .refine((t) => t.trim() !== '', 'Regla incumplida: «textoOriginal» no puede estar en blanco.')
-  .refine((t) => !/[\n\r\u2028\u2029\u0085\v\f]/u.test(t), 'Regla incumplida: «textoOriginal» va en una sola línea.');
+export const LENGUAS_DE_PARTIDA = ['en', 'fr', 'it', 'de', 'pt', 'ja'] as const;
+
+/**
+ * La frase de partida de la traducción propia — Historia 35.11, AD-32 v9.2: lo que dijo su dueño en
+ * su lengua, tal cual lo traen sus atestiguaciones, con la lengua de `LENGUAS_DE_PARTIDA`, para que
+ * la fidelidad de la traducción se pueda auditar (SM-C6, segunda muestra). Obligatoria con
+ * `origen: traduccion-propia` y prohibida con cualquier otro y en la de siempre (`reglasDeClase`).
+ * El texto, en una línea. No se pinta en ninguna superficie, y por eso no fecha.
+ */
+export const partida = z.strictObject(
+  {
+    texto: z
+      .string({ message: 'Regla incumplida: la «partida» declara su «texto», la frase en su lengua.' })
+      .refine((t) => t.trim() !== '', 'Regla incumplida: el texto de la «partida» no puede estar en blanco.')
+      .refine(
+        (t) => !/[\n\r\u2028\u2029\u0085\v\f]/u.test(t),
+        'Regla incumplida: el texto de la «partida» va en una sola línea.',
+      ),
+    lengua: z.enum(LENGUAS_DE_PARTIDA, {
+      message: `Regla incumplida: la «lengua» de la «partida» es una de ${LENGUAS_DE_PARTIDA.map((l) => `«${l}»`).join(', ')}.`,
+    }),
+  },
+  {
+    error: (problema) =>
+      problema.code === 'unrecognized_keys'
+        ? 'Regla incumplida: la «partida» solo declara «texto» y «lengua».'
+        : 'Regla incumplida: «partida» es un objeto con «texto» y «lengua».',
+  },
+);
 
 /** Sin Autor ni Personaje, una Cita no tiene dueño: ni prefijo, ni fichero, ni página. */
 export const MENSAJE_CITA_SIN_DUEÑO =
@@ -363,7 +386,7 @@ export function reglasDeClase(valor: unknown, contexto: z.RefinementCtx): void {
     }
     return;
   }
-  for (const campo of ['atestiguaciones', 'origen', 'textoOriginal'] as const) {
+  for (const campo of ['atestiguaciones', 'origen', 'partida'] as const) {
     if (cita[campo] === undefined) continue;
     contexto.addIssue({
       code: 'custom',
@@ -450,7 +473,7 @@ function reglasDeLaAtribuida(cita: Record<string, unknown>, contexto: z.Refineme
       message: `Regla incumplida: una Cita atribuida declara su «origen»: ${ORIGENES.join(', ')}.`,
     });
   }
-  // Historia 35.10 — la traducción del sitio no convive con una letra que circula, y guarda su original.
+  // Historias 35.10 y 35.11 — la traducción del sitio no convive con una letra que circula, y guarda su partida.
   const traduccionPropia = cita.origen === ORIGEN_TRADUCCION_PROPIA;
   if (traduccionPropia && cita.variante !== undefined) {
     contexto.addIssue({
@@ -462,21 +485,22 @@ function reglasDeLaAtribuida(cita: Record<string, unknown>, contexto: z.Refineme
         'que circula: con ella, el texto es esa versión y su origen, el de ella.',
     });
   }
-  if (traduccionPropia && cita.textoOriginal === undefined) {
+  if (traduccionPropia && cita.partida === undefined) {
     contexto.addIssue({
       code: 'custom',
-      path: ['textoOriginal'],
+      path: ['partida'],
       message:
-        'Regla incumplida: una atribuida con «origen: traduccion-propia» declara su «textoOriginal», la frase ' +
-        'que el sitio tradujo, tal cual la trae su atestiguación: sin ella, la traducción no se puede auditar.',
+        'Regla incumplida: una atribuida con «origen: traduccion-propia» declara su «partida» —{texto, lengua}—, ' +
+        'la frase que dijo su dueño en su lengua, tal cual la traen sus atestiguaciones: sin ella, la traducción ' +
+        'no se puede auditar.',
     });
   }
-  if (!traduccionPropia && cita.textoOriginal !== undefined) {
+  if (!traduccionPropia && cita.partida !== undefined) {
     contexto.addIssue({
       code: 'custom',
-      path: ['textoOriginal'],
+      path: ['partida'],
       message:
-        'Regla incumplida: solo una atribuida con «origen: traduccion-propia» declara «textoOriginal»: el ' +
+        'Regla incumplida: solo una atribuida con «origen: traduccion-propia» declara «partida»: el ' +
         'texto de las demás es la versión en español que circula, y no se tradujo de nada.',
     });
   }
@@ -890,8 +914,8 @@ export const citaAdmisible = z.object({
   origen: origen.optional(),
   // Historia 35.6 — solo de la atribuida, una como mucho (`reglasDeClase`).
   variante: variante.optional(),
-  // Historia 35.10 — solo con `origen: traduccion-propia`, y en ella obligatorio (`reglasDeClase`).
-  textoOriginal: textoOriginal.optional(),
+  // Historia 35.11 — solo con `origen: traduccion-propia`, y en ella obligatoria (`reglasDeClase`).
+  partida: partida.optional(),
   aptaParaPortada: z.boolean().default(false),
   /*
    * Opcional, y lo será mientras quede censo. Las 38 Citas anteriores a la v3 no tienen

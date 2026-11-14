@@ -13,7 +13,7 @@
  * Una candidata que la incumpla se queda donde está por muy aprobada que esté.
  */
 
-import { readFile, rm, writeFile } from 'node:fs/promises';
+import { readFile, rename, rm, writeFile } from 'node:fs/promises';
 import { basename, join } from 'node:path';
 import { citaAdmisible, gradoDeProcedencia } from '../../src/lib/admision.ts';
 import {
@@ -58,7 +58,13 @@ import {
   registrarClases,
   type Rutas,
 } from './corpus.ts';
-import { claseDe, claseQueCorresponde, esAtribuida, type Clase } from '../../src/lib/clase.ts';
+import { claseDe, claseQueCorresponde, esAtribuida, ORIGEN_TRADUCCION_PROPIA, type Clase } from '../../src/lib/clase.ts';
+import {
+  agentesDe,
+  MOTIVO_AGENTES_SIN_TRADUCCION,
+  registrarAprobaciones,
+  type Agentes,
+} from './aprobaciones.ts';
 import { anotarTrasInterrupcion, motivoClaseDistinta, slugsConOtraClase } from './clases.ts';
 import {
   fallosDeAtribuidas,
@@ -111,6 +117,11 @@ export interface CandidataEnRevision {
    * con el tope y la compara como duplicado, y el aviso FR-14 la mira también.
    */
   variante?: string;
+  /**
+   * Historia 35.11 — si es una atribuida con `origen: traduccion-propia`: aprobarla exige dos
+   * agentes distintos y anota su aprobación en `corpus/aprobaciones-de-atribuidas.yml`.
+   */
+  traduccionPropia?: true;
   /**
    * La Cita ya presente con la que coincide, si coincide con alguna — FR-14.
    *
@@ -337,6 +348,7 @@ export async function loteEnRevision(rutas: Rutas): Promise<CandidataEnRevision[
       ...(typeof candidata.fuente?.id === 'string' ? { fuente: { id: candidata.fuente.id } } : {}),
       ...(candidata.atestiguaciones !== undefined ? { atestiguaciones: candidata.atestiguaciones } : {}),
       ...(varianteDeLaCandidata !== undefined ? { variante: varianteDeLaCandidata } : {}),
+      ...(esAtribuida(candidata) && candidata.origen === ORIGEN_TRADUCCION_PROPIA ? { traduccionPropia: true as const } : {}),
       // La publicada gana: lo que el editor necesita saber es que ya está publicada.
       ...(duplicadaPublicada !== undefined
         ? { duplicaA: { slug: duplicadaPublicada, donde: 'publicadas' as const } }
@@ -469,6 +481,21 @@ export interface ResultadoDeDecision {
    * aprobado, y la orden sale con 1.
    */
   vedadasSinAnotar?: string;
+  /**
+   * Historia 35.11 — por qué los agentes de la pasada no valen (falta uno, son el mismo, o se dan
+   * sin ninguna traducción propia): no se escribió nada, y la orden sale con 1.
+   */
+  agentesRechazados?: string;
+  /**
+   * Historia 35.11 — las aprobaciones anotadas en `corpus/aprobaciones-de-atribuidas.yml`.
+   */
+  aprobaciones?: { slug: string; propone: string; aprueba: string; fecha: string }[];
+  /**
+   * Historia 35.11 — si el registro de aprobaciones no se pudo escribir tras publicar: el motivo, y
+   * las traducciones propias que volvieron a `corpus/_revision/` con su contenido de antes (sin
+   * entrada de clase). La orden sale con 1.
+   */
+  aprobacionesSinAnotar?: { motivo: string; devueltas: string[] };
 }
 
 /**
@@ -494,7 +521,14 @@ export async function aprobar(
    * Historia 35.1b — los valores de la puerta de la atribuida. Por omisión, los del árbol; las
    * pruebas la abren por aquí sin parchear nada.
    */
-  opciones: { puerta?: ValoresDeLaPuerta } = {},
+  opciones: {
+    puerta?: ValoresDeLaPuerta;
+    /**
+     * Historia 35.11 — los agentes de `--propone` y `--aprueba`, tal como llegan: solo la traducción
+     * propia los lleva, y en ella son obligatorios y distintos.
+     */
+    agentes?: { propone?: string; aprueba?: string };
+  } = {},
 ): Promise<ResultadoDeDecision> {
   const lote = await loteEnRevision(rutas);
   let leidos:
@@ -528,6 +562,21 @@ export async function aprobar(
    * lo caza después con `reference()`, pero para entonces la Cita ya está publicada y lo
    * que se rompe es la construcción del sitio.
    */
+  /*
+   * Historia 35.11 — los agentes, antes de escribir nada: con una traducción propia en la pasada,
+   * los dos y distintos; sin ninguna, ninguno.
+   */
+  const conTraduccion = [...new Set(slugs)].some((slug) => lote.find((c) => c.slug === slug)?.traduccionPropia === true);
+  const dados = opciones.agentes?.propone !== undefined || opciones.agentes?.aprueba !== undefined;
+  let agentes: Agentes | undefined;
+  if (conTraduccion) {
+    const juicio = agentesDe(opciones.agentes?.propone, opciones.agentes?.aprueba);
+    if (!juicio.ok) return { ...resultado, agentesRechazados: juicio.motivo };
+    agentes = juicio.agentes;
+  } else if (dados) {
+    return { ...resultado, agentesRechazados: MOTIVO_AGENTES_SIN_TRADUCCION };
+  }
+
   const temasDelCorpus = await leerTemas(rutas);
   if (temas.length > 0) {
     const conocidos = new Set(temasDelCorpus.map((t) => t.slug));
@@ -734,6 +783,8 @@ export async function aprobar(
   const publicadaComo = new Map<string, string>();
   // Lo que esta pasada ya publicó: cuenta para los Temas de las que quedan.
   const escritas: { slug: string; temas: string[]; clase: Clase }[] = [];
+  // Historia 35.11 — las traducciones propias escritas: dónde quedaron y qué eran antes.
+  const propiasEscritas: { slug: string; de: string; publicada: string; contenido: string }[] = [];
   let pendientes = planeadas;
   /*
    * La regla de Tema sobre lo que queda por escribir. Se repite si una Ficha de Obra falla al
@@ -793,13 +844,18 @@ export async function aprobar(
       const definitivo = slugLibre(candidata.slug, [...ocupados, ...slugsConOtraClase(registro, candidata.clase)]);
       ocupados.add(definitivo);
 
+      const contenidoDeAntes = candidata.traduccionPropia === true ? await readFile(candidata.ruta, 'utf8') : undefined;
+      let publicadaEn: string;
       if (definitivo === candidata.slug && temas.length === 0 && conSaltos === undefined) {
-        await mover(candidata.ruta, rutas.citas);
+        publicadaEn = await mover(candidata.ruta, rutas.citas);
       } else {
-        await reescribirConSlug(candidata, definitivo, rutas, temas, conSaltos?.texto);
+        publicadaEn = await reescribirConSlug(candidata, definitivo, rutas, temas, conSaltos?.texto);
         if (definitivo !== candidata.slug) {
           resultado.renombradas.push({ de: candidata.slug, a: definitivo });
         }
+      }
+      if (contenidoDeAntes !== undefined) {
+        propiasEscritas.push({ slug: definitivo, de: candidata.ruta, publicada: publicadaEn, contenido: contenidoDeAntes });
       }
       publicadasParaObra.push(comoPublicada);
       escritas.push({ slug: definitivo, temas: suyos, clase: candidata.clase });
@@ -821,11 +877,43 @@ export async function aprobar(
       if (conSaltos !== undefined) resultado.conSaltos.push({ slug: definitivo, documento: conSaltos.documento });
     }
   } catch (fallo) {
+    // Historia 35.11 — lo ya publicado como traducción propia lleva su aprobación, si se puede.
+    if (agentes !== undefined && propiasEscritas.length > 0) {
+      await registrarAprobaciones(
+        rutas,
+        propiasEscritas.map((p) => ({ slug: p.slug, ...agentes, fecha: hoy })),
+      ).catch(() => undefined);
+    }
     throw await anotarTrasInterrupcion(
       rutas,
       escritas.map((e) => ({ slug: e.slug, clase: e.clase, fecha: hoy })),
       fallo,
     );
+  }
+
+  /*
+   * Historia 35.11 — la aprobación de cada traducción propia publicada, en un solo añadido y antes
+   * que la clase. Si falla, cada una vuelve a `corpus/_revision/` con su contenido de antes, y no
+   * se anota su clase: publicada sin aprobación, rompería el build.
+   */
+  if (agentes !== undefined && propiasEscritas.length > 0) {
+    const entradas = propiasEscritas.map((p) => ({ slug: p.slug, ...agentes, fecha: hoy }));
+    try {
+      await registrarAprobaciones(rutas, entradas);
+      resultado.aprobaciones = entradas;
+    } catch (fallo) {
+      const devueltas = await devolverAlaRevision(propiasEscritas);
+      const fuera = new Set(devueltas);
+      for (let i = escritas.length - 1; i >= 0; i--) if (fuera.has(escritas[i]!.slug)) escritas.splice(i, 1);
+      resultado.publicadas = resultado.publicadas.filter((slug) => {
+        const publicada = publicadaComo.get(slug);
+        return publicada === undefined || !fuera.has(publicada);
+      });
+      resultado.aprobacionesSinAnotar = {
+        motivo: fallo instanceof Error ? fallo.message : String(fallo),
+        devueltas,
+      };
+    }
   }
 
   /*
@@ -935,7 +1023,7 @@ async function reescribirConSlug(
   rutas: Rutas,
   temas: string[] = [],
   conSaltos?: string,
-): Promise<void> {
+): Promise<string> {
   const leido = await readFile(candidata.ruta, 'utf8');
   // Historia 29.2 — solo cambia la línea `texto:`, como en la restitución.
   const bruto = conSaltos === undefined ? leido : conLaLineaDeTexto(leido, candidata.texto, conSaltos);
@@ -963,6 +1051,28 @@ async function reescribirConSlug(
   // candidata sigue en revisión en lugar de haberse evaporado.
   await writeFile(destino, conTemas, 'utf8');
   await rm(candidata.ruta, { force: true });
+  return destino;
+}
+
+/**
+ * Historia 35.11 — devuelve a `corpus/_revision/` las traducciones propias publicadas cuyo registro
+ * de aprobaciones no se pudo escribir: cada una se **mueve** de vuelta a su fichero de candidata y
+ * recupera su contenido de antes (AD-2: nada se borra). Devuelve los slugs publicados que volvieron.
+ */
+async function devolverAlaRevision(
+  propias: readonly { slug: string; de: string; publicada: string; contenido: string }[],
+): Promise<string[]> {
+  const devueltas: string[] = [];
+  for (const propia of propias) {
+    try {
+      await rename(propia.publicada, propia.de);
+      await writeFile(propia.de, propia.contenido, 'utf8');
+      devueltas.push(propia.slug);
+    } catch {
+      // La que no vuelve sigue publicada sin aprobación: el build lo dirá.
+    }
+  }
+  return devueltas;
 }
 
 /**

@@ -7,6 +7,7 @@ import { promisify } from 'node:util';
 import { ATESTIGUADA, AUTOR_VALIDO, RAIZ, TEMA_VALIDO, citaValida, type CorpusDePrueba } from './ayuda/construir.js';
 import { cambiarAtribuida, type CambioDeAtribuida } from '../../tools/lib/cambioDeAtribuida.ts';
 import { rutasDelCorpus, separarFrontmatter } from '../../tools/lib/corpus.ts';
+import { leerAprobaciones } from '../../tools/lib/aprobaciones.ts';
 import type { ValoresDeLaPuerta } from '../../tools/lib/atribuidas.ts';
 
 const ejecutar = promisify(execFile);
@@ -329,7 +330,7 @@ describe('Historia 35.6 — `texto` y `variante`', () => {
         personaje: 'buzz',
         procedencia: { año: 1995 },
         origen: 'traduccion-propia',
-        textoOriginal: 'To the rescue, the galaxy will not defend itself.',
+        partida: { texto: 'To the rescue, the galaxy will not defend itself.', lengua: 'en' },
       }),
     };
     const directorio = await enDisco(corpus);
@@ -531,6 +532,11 @@ describe('Historia 35.6 — la orden por proceso', () => {
     ['variante sin --region', ['variante', A1, 'x', '--origen', 'doblaje']],
     ['variante sin --origen', ['variante', A1, 'x', '--region', 'espana']],
     ['una bandera con valor dada sin él', ['variante', A1, 'x', '--origen', 'doblaje', '--region']],
+    // Historia 35.11 — las atestiguaciones son de la versión que sustituye: van con su origen.
+    ['--atestiguacion sin --origen', ['texto', A1, 'x', '--atestiguacion', 'https://es.wikiquote.org/wiki/X']],
+    ['--atestiguacion vacía', ['texto', A1, 'x', '--origen', 'doblaje', '--atestiguacion', '']],
+    ['--propone repetida', ['texto', A1, 'x', '--propone', 'a', '--propone', 'b']],
+    ['--propone en otra suborden', ['obra', A4, 'x', '--propone', 'a']],
   ])('%s sale con 2 sin escribir', async (_, argumentos) => {
     const directorio = await enDisco();
     const antes = await instantanea(directorio);
@@ -545,6 +551,149 @@ describe('Historia 35.6 — la orden por proceso', () => {
     const r = await correr(directorio, ['texto', A1, 'Hasta el infinito y más allá, ¡guardián del cosmos!']);
     expect(r.codigo, r.error).toBe(1);
     expect(r.error).toMatch(/la puerta de la atribuida está cerrada/u);
+    expect(await instantanea(directorio)).toEqual(antes);
+  });
+});
+
+describe('Historia 35.11 — sustituir y retraducir la traducción propia', () => {
+  const A5 = 'buzz-nadie-defiende-la-galaxia';
+  const FICHERO_A5 = 'citas/buzz--nadie-defiende-la-galaxia.md';
+  const TEXTO_A5 = 'Nadie defiende la galaxia si no la defiendes tú, cadete.';
+  const PARTIDA = { texto: "No one defends the galaxy if you don't, cadet.", lengua: 'en' };
+  const HOY = '2026-11-14';
+  const CON_PROPIA: CorpusDePrueba = {
+    ...CORPUS,
+    [FICHERO_A5]: atribuida({
+      slug: A5,
+      texto: TEXTO_A5,
+      autor: undefined,
+      personaje: 'buzz',
+      procedencia: { año: 1995 },
+      origen: 'traduccion-propia',
+      partida: PARTIDA,
+    }),
+  };
+  const NUEVAS = ['https://es.wikiquote.org/wiki/Doblaje', 'https://www.elmundo.es/cultura/doblaje.html'];
+  const VERSION = 'Que nadie defienda la galaxia por ti, cadete espacial.';
+
+  const cambiarPropia = (directorio: string, cambio: CambioDeAtribuida) =>
+    cambiarAtribuida(rutasDelCorpus(directorio), cambio, { puerta: PUERTA, hoy: HOY });
+
+  async function seNiegaPropia(cambio: CambioDeAtribuida, motivo: RegExp, corpus: CorpusDePrueba = CON_PROPIA) {
+    const directorio = await enDisco(corpus);
+    const antes = await instantanea(directorio);
+    const r = await cambiarPropia(directorio, cambio);
+    expect(r.ok).toBe(false);
+    if (!r.ok) expect(r.motivos.join('\n')).toMatch(motivo);
+    expect(await instantanea(directorio)).toEqual(antes);
+  }
+
+  it('sustituir: texto, origen y atestiguaciones nuevos (consultadaEl hoy), sin partida, mismo slug y fichero, sin aprobación', async () => {
+    const directorio = await enDisco(CON_PROPIA);
+    const antes = await instantanea(directorio);
+    const r = await cambiarPropia(directorio, { tipo: 'texto', slug: A5, texto: VERSION, origen: 'doblaje', atestiguaciones: NUEVAS });
+    expect(r.ok, r.ok ? '' : r.motivos.join('\n')).toBe(true);
+    // Solo cambia la Cita: ni el registro de aprobaciones ni ninguna ficha.
+    await soloCambio(directorio, antes, [FICHERO_A5]);
+    const datos = await datosDe(directorio, FICHERO_A5);
+    const { partida: _p, ...previos } = separarFrontmatter(antes[FICHERO_A5])!;
+    void _p;
+    expect(datos).toEqual({
+      ...previos,
+      texto: VERSION,
+      origen: 'doblaje',
+      atestiguaciones: NUEVAS.map((url) => ({ url, consultadaEl: HOY })),
+    });
+    expect(datos.slug).toBe(A5);
+  });
+
+  it('sustituir con atestiguaciones de un solo dominio no llega al mínimo, y se niega sin escribir', async () => {
+    await seNiegaPropia(
+      { tipo: 'texto', slug: A5, texto: VERSION, origen: 'doblaje', atestiguaciones: ['https://es.wikiquote.org/wiki/A', 'https://es.wikiquote.org/wiki/B'] },
+      /MIN_ATESTIGUACIONES_DE_ATRIBUIDA/u,
+    );
+  });
+
+  it('sustituir sin atestiguaciones se niega: las de antes atestiguan la partida', async () => {
+    await seNiegaPropia({ tipo: 'texto', slug: A5, texto: VERSION, origen: 'doblaje' }, /trae sus atestiguaciones/u);
+  });
+
+  it('sustituir por un texto que repite otra Cita es un duplicado, y se niega', async () => {
+    await seNiegaPropia({ tipo: 'texto', slug: A5, texto: TEXTO_A4, origen: 'doblaje', atestiguaciones: NUEVAS }, /A4|al-rescate|duplic|repite/iu);
+  });
+
+  it('sustituir con agentes se niega: solo la traducción propia lleva dos agentes', async () => {
+    await seNiegaPropia(
+      { tipo: 'texto', slug: A5, texto: VERSION, origen: 'doblaje', atestiguaciones: NUEVAS, agentes: { propone: 'a', aprueba: 'b' } },
+      /solo la traducción propia lleva dos agentes/u,
+    );
+  });
+
+  it('--origen traduccion-propia se niega: ninguna orden posterior al alta crea una traducción propia', async () => {
+    await seNiegaPropia(
+      { tipo: 'texto', slug: A4, texto: TEXTO_A4, origen: 'traduccion-propia', atestiguaciones: NUEVAS },
+      /ninguna orden posterior al alta crea una traducción propia/u,
+    );
+    await seNiegaPropia(
+      { tipo: 'texto', slug: A5, texto: VERSION, origen: 'traduccion-propia', atestiguaciones: NUEVAS },
+      /ninguna orden posterior al alta crea una traducción propia/u,
+    );
+  });
+
+  it.each<[string, CambioDeAtribuida]>([
+    ['--origen', { tipo: 'texto', slug: A4, texto: 'Al rescate, que la galaxia no se defiende solita.', origen: 'doblaje', atestiguaciones: NUEVAS }],
+    ['--atestiguacion', { tipo: 'texto', slug: A4, texto: 'Al rescate, que la galaxia no se defiende solita.', atestiguaciones: NUEVAS }],
+  ])('%s sobre una atribuida que no es traducción propia se niega', async (_, cambio) => {
+    await seNiegaPropia(cambio, /no es una traducción propia|va con --origen/u);
+  });
+
+  it('agentes sobre una atribuida que no es traducción propia se niegan', async () => {
+    await seNiegaPropia(
+      { tipo: 'texto', slug: A4, texto: 'Al rescate, que la galaxia no se defiende solita.', agentes: { propone: 'a', aprueba: 'b' } },
+      /solo la traducción propia lleva dos agentes/u,
+    );
+  });
+
+  it.each<[string, { propone?: string; aprueba?: string } | undefined, RegExp]>([
+    ['sin agentes', undefined, /falta --propone y falta --aprueba/u],
+    ['sin --aprueba', { propone: 'Ana' }, /falta --aprueba/u],
+    ['el mismo agente, recortado y en minúsculas', { propone: 'Ana', aprueba: ' ana ' }, /dicen el mismo/u],
+  ])('retraducir %s se niega sin escribir', async (_, agentes, motivo) => {
+    await seNiegaPropia(
+      { tipo: 'texto', slug: A5, texto: 'Nadie defiende la galaxia si no la defiendes tú, ¡cadete!', ...(agentes ? { agentes } : {}) },
+      motivo,
+    );
+  });
+
+  it('retraducir con dos agentes: el parecido de siempre, la partida se queda, y se anota la aprobación', async () => {
+    const directorio = await enDisco(CON_PROPIA);
+    const antes = await instantanea(directorio);
+    const nuevo = 'Nadie defiende la galaxia si no la defiendes tú, ¡cadete!';
+    const r = await cambiarPropia(directorio, { tipo: 'texto', slug: A5, texto: nuevo, agentes: { propone: ' agente-a ', aprueba: 'agente-b' } });
+    expect(r.ok, r.ok ? '' : r.motivos.join('\n')).toBe(true);
+    await soloCambio(directorio, antes, [FICHERO_A5], ['aprobaciones-de-atribuidas.yml']);
+    const datos = await datosDe(directorio, FICHERO_A5);
+    expect(datos).toEqual({ ...separarFrontmatter(antes[FICHERO_A5])!, texto: nuevo });
+    expect(await leerAprobaciones(rutasDelCorpus(directorio))).toEqual([{ slug: A5, propone: 'agente-a', aprueba: 'agente-b', fecha: HOY }]);
+  });
+
+  it('retraducir a otra frase se niega por el parecido', async () => {
+    await seNiegaPropia({ tipo: 'texto', slug: A5, texto: VERSION, agentes: { propone: 'a', aprueba: 'b' } }, /se parece/u);
+  });
+
+  it('si el registro de aprobaciones no se deja escribir, la Cita vuelve a su contenido original y sale con 1', async () => {
+    // Un registro sin su clave: el añadido se juzga y se niega después de escribir la Cita.
+    const corpus = { ...CON_PROPIA, 'aprobaciones-de-atribuidas.yml': 'otra: cosa\n' };
+    const directorio = await enDisco(corpus);
+    const antes = await instantanea(directorio);
+    const r = await cambiarPropia(directorio, {
+      tipo: 'texto',
+      slug: A5,
+      texto: 'Nadie defiende la galaxia si no la defiendes tú, ¡cadete!',
+      agentes: { propone: 'a', aprueba: 'b' },
+    });
+    expect(r.ok).toBe(false);
+    if (!r.ok) expect(r.motivos.join('\n')).toMatch(/aprobaciones-de-atribuidas\.yml no se pudo escribir.*ha vuelto a su contenido original/su);
     expect(await instantanea(directorio)).toEqual(antes);
   });
 });
