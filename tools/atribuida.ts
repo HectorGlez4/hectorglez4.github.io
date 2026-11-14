@@ -237,7 +237,8 @@ async function semilla(slug: string): Promise<never> {
     mensaje: [
       `Semilla de «${slug}»: ${frases.length} frases en inglés en ${salida}.`,
       'No se versiona, no se publica y no atestigua nada. El lote de candidatas se escribe en español, con la',
-      'versión que circula y su origen, y se propone con «npm run atribuida -- proponer <lote.yaml>».',
+      'versión que circula y su origen —o, si no circula ninguna, la traducción del sitio con «origen:',
+      'traduccion-propia»—, y se propone con «npm run atribuida -- proponer <lote.yaml>».',
     ].join('\n'),
   });
 }

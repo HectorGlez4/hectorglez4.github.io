@@ -237,6 +237,18 @@ describe('Historia 35.10 — proponer: a corpus/_revision/, nunca a corpus/citas
     expect(existsSync(rutas.clasesDeCita)).toBe(false);
   });
 
+  it('la traducción del sitio —origen traduccion-propia— se escribe en revisión con su origen (FR-68 enmendado, 2026-11-14)', async () => {
+    const rutas = await corpusDePrueba();
+    const resultado = await proponerAtribuidas(rutas, [deBuzz({ origen: 'traduccion-propia' })], {
+      semilla: SEMILLA,
+      minAtestiguaciones: 2,
+    });
+    expect(resultado.ok && resultado.rechazadas).toEqual([]);
+    const datos = separarFrontmatter(await readFile(join(rutas.revision, 'buzz--al-rescate-que-la-galaxia-no-se.md'), 'utf8'))!;
+    expect(datos).toMatchObject({ clase: 'atribuida', personaje: 'buzz', origen: 'traduccion-propia' });
+    expect((await readdir(rutas.citas)).sort()).not.toContain('buzz--al-rescate-que-la-galaxia-no-se.md');
+  });
+
   it('sin MIN_ATESTIGUACIONES_DE_ATRIBUIDA informa sus dominios sin juzgar el mínimo, y la deja en revisión', async () => {
     const rutas = await corpusDePrueba();
     const una = deBuzz({ atestiguaciones: [ATESTIGUADA.atestiguaciones[0]] });
@@ -255,7 +267,7 @@ describe('Historia 35.10 — proponer: a corpus/_revision/, nunca a corpus/citas
   });
 
   it.each([
-    ['sin versión en español', { texto: undefined }, /sin versión en español que circule/u],
+    ['sin texto en español', { texto: undefined }, /falta «texto».*traduccion-propia/u],
     ['sin Personaje ni Autor', { personaje: undefined }, /sin Personaje ni Autor/u],
     ['un Personaje que no existe', { personaje: 'jessie' }, /«jessie» no existe en corpus\/personajes/u],
     ['un Autor que no existe', { personaje: undefined, autor: 'nadie' }, /«nadie» no existe en corpus\/autores/u],
@@ -263,7 +275,7 @@ describe('Historia 35.10 — proponer: a corpus/_revision/, nunca a corpus/citas
     ['de la clase de siempre', { personaje: undefined, autor: 'seneca' }, /clase de siempre/u],
     ['con la clase tecleada', { clase: 'atribuida' }, /la clase no se teclea/u],
     ['sin origen', { origen: undefined }, /origen/u],
-    ['con un origen ajeno', { origen: 'traduccion-propia' }, /origen/u],
+    ['con un origen ajeno', { origen: 'traduccion-automatica' }, /origen/u],
     ['con aptaParaPortada', { aptaParaPortada: true }, /aptaParaPortada|portada/u],
     [
       'sin ninguna atestiguación que cuente',

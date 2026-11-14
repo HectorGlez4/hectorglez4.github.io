@@ -22,7 +22,7 @@ import {
 import { dominiosQueAtestiguan } from './atestiguaciones.ts';
 import { inicialDeClave, normalizar } from './normalizar.ts';
 import { esJornada } from './jornada.ts';
-import { esAtribuida } from './clase.ts';
+import { esAtribuida, ORIGEN_TRADUCCION_PROPIA } from './clase.ts';
 import { CLAVES_DE_REGION, esRegionDeVariante } from './variante.ts';
 import { FORMATOS_DE_EDICION, TIENDAS, esDelDominio, tiendaDe, type Tienda } from './ingreso.ts';
 
@@ -257,11 +257,32 @@ export const atestiguaciones = z
   .array(atestiguacion, { message: 'Regla incumplida: «atestiguaciones» es una lista de {url, consultadaEl}.' })
   .min(1, 'Regla incumplida: una atribuida declara al menos una atestiguación.');
 
-/** De dónde sale la letra de una atribuida — Historia 35.1b, AD-32. */
-export const ORIGENES = ['original', 'doblaje', 'traduccion-publicada'] as const;
+/**
+ * De dónde sale la letra de una atribuida — Historia 35.1b, AD-32. `traduccion-propia` (Historia
+ * 35.10, decisión de Héctor del 2026-11-14 que enmienda FR-68): cuando no circula ninguna versión
+ * en español, el texto es la traducción del sitio, lo más fiel posible, y lo dice la Página de Cita
+ * (`lineaDeTraduccionPropia` de `src/lib/atribucion.ts`). Solo la atribuida: la de siempre no
+ * declara origen y nunca se traduce (§4.11).
+ */
+export const ORIGENES = ['original', 'doblaje', 'traduccion-publicada', ORIGEN_TRADUCCION_PROPIA] as const;
 
 export const origen = z.enum(ORIGENES, {
   message: `Regla incumplida: «origen» es uno de ${ORIGENES.map((o) => `«${o}»`).join(', ')}.`,
+});
+
+/**
+ * Los de la Variante: los mismos salvo la traducción propia. Una Variante es la letra que circula
+ * en otra región —hoy, el doblaje de España—; una traducción del sitio no es de ninguna región, y
+ * donde circula una versión en español no hace falta traducir.
+ */
+export const ORIGENES_DE_VARIANTE = ORIGENES.filter(
+  (o): o is Exclude<(typeof ORIGENES)[number], typeof ORIGEN_TRADUCCION_PROPIA> => o !== ORIGEN_TRADUCCION_PROPIA,
+);
+
+const origenDeVariante = z.enum(ORIGENES_DE_VARIANTE, {
+  message:
+    `Regla incumplida: el «origen» de la Variante es uno de ${ORIGENES_DE_VARIANTE.map((o) => `«${o}»`).join(', ')}` +
+    ' —una Variante es la letra que circula en otra región, nunca una traducción del sitio—.',
 });
 
 /**
@@ -283,7 +304,7 @@ export const variante = z.strictObject(
         esRegionDeVariante,
         `Regla incumplida: la «region» de la Variante es una de ${CLAVES_DE_REGION.map((r) => `«${r}»`).join(', ')}.`,
       ),
-    origen,
+    origen: origenDeVariante,
   },
   {
     error: (problema) =>

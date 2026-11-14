@@ -22,7 +22,8 @@ import { indiceDe } from './ayuda/pagefind.ts';
  *     sin `tabindex` y sin enlace; su texto no sale en ningún otro sitio de la página —ni lo
  *     copiado, ni la Imagen, ni el Fragmento, ni el JSON-LD, ni la meta, ni el `<title>`—, y la
  *     búsqueda la encuentra por tres palabras suyas en la misma `/cita/{slug}/`;
- *   · **SV** — de Buzz, sin Variante: ni línea ni hueco.
+ *   · **SV** — de Buzz, sin Variante: ni línea ni hueco. Desde la 35.10 es además la traducción
+ *     del sitio (`origen: traduccion-propia`), y su página lo dice; la de CV, de doblaje, no.
  *
  * Y dos construcciones que rompen: una Cita de siempre con `variante`, nombrando su fichero, y dos
  * atribuidas cuya Variante se repite. Lo puro está en `variante.test.ts`.
@@ -90,6 +91,8 @@ function corpusBase(): CorpusDePrueba {
       autor: undefined,
       personaje: 'buzz',
       procedencia: { año: 1995 },
+      // Historia 35.10 — la traducción del sitio: su Página de Cita lo dice.
+      origen: 'traduccion-propia',
     }),
     'citas/seneca--no-es-que-tengamos-poco-tiempo.md': citaValida(),
   };
@@ -208,6 +211,27 @@ describe('Historia 35.6 — la Página de Cita atribuida con Variante', () => {
     } finally {
       indice.soltar();
     }
+  });
+});
+
+describe('Historia 35.10 — la atribuida que es traducción del sitio lo dice', () => {
+  const LINEA = 'Traducción de Sabiduría de Bolsillo: no circula ninguna versión en español.';
+
+  it('pinta la línea tras la Atribución y antes de Copiar, como texto con los tokens', () => {
+    const pagina = cita(SV);
+    const p = /<p class="traduccion-propia"[^>]*>\s*([^<]*?)\s*<\/p>/u.exec(pagina);
+    expect(p, 'la línea de la traducción propia').not.toBeNull();
+    expect(p![1]).toBe(LINEA);
+    expect(pagina.indexOf('class="traduccion-propia"')).toBeGreaterThan(pagina.indexOf('</figcaption>'));
+    expect(p![0]).not.toMatch(/\blang=|tabindex|<a\b/u);
+    expect(p![0]).toMatch(/style="[^"]*var\(--pie\)/u);
+    const ancestros = antepasados(pagina, pagina.indexOf('<p class="traduccion-propia"'));
+    expect(ancestros.some((a) => a.includes('data-pagefind-body'))).toBe(true);
+  });
+
+  it('una atribuida de otro origen no la lleva, ni hueco', () => {
+    expect(cita(CV)).not.toContain('class="traduccion-propia"');
+    expect(cita(CV)).not.toContain(LINEA);
   });
 });
 

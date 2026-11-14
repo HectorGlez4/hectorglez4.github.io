@@ -1,0 +1,34 @@
+---
+/**
+ * La línea de la traducción propia — Historia 35.10, decisión de Héctor del 2026-11-14 (FR-68
+ * enmendado para la atribuida).
+ *
+ * «Traducción de Sabiduría de Bolsillo: no circula ninguna versión en español.», en caption, bajo
+ * la Línea de la Fuente de la Página de Cita atribuida cuyo `origen` es `traduccion-propia`, y
+ * antes de la Variante. La compone solo `lineaDeTraduccionPropia` de `src/lib/atribucion.ts`; sin
+ * traducción propia no se emite nada, ni nodo vacío. Ningún otro origen se pinta.
+ *
+ * Es texto: sin enlace, no enfocable y sin guion, dentro de `data-pagefind-body`. Como la Variante,
+ * la presentación va en un atributo `style` con los tokens y nunca en un bloque `<style>`, que
+ * Astro emitiría en toda Página de Cita aunque ninguna la pinte.
+ */
+import type { Cita } from '../lib/publicado.ts';
+import { lineaDeTraduccionPropia } from '../lib/atribucion.ts';
+
+interface Props {
+  cita: Cita;
+}
+
+const linea = lineaDeTraduccionPropia(Astro.props.cita);
+---
+
+{
+  linea !== undefined && (
+    <p
+      class="traduccion-propia"
+      style="font-family: var(--sans); font-size: var(--pie); font-weight: var(--peso-regular); line-height: var(--interlineado-pie); color: var(--tinta-apagada); margin: var(--unidad) 0 0; max-width: var(--medida-prosa);"
+    >
+      {linea}
+    </p>
+  )
+}

@@ -312,6 +312,13 @@ describe('Historia 35.6 — `texto` y `variante`', () => {
     expect(await instantanea(directorio)).toEqual(antes);
   });
 
+  it('una Variante con origen traduccion-propia se niega: no es la letra de ninguna región (35.10)', async () => {
+    await seNiega(
+      { tipo: 'variante', slug: A4, texto: TEXTO_A4, region: 'espana', origen: 'traduccion-propia' },
+      /no es un origen de Variante.*nunca una traducción del sitio/u,
+    );
+  });
+
   it('una Variante de una región ajena se niega', async () => {
     await seNiega({ tipo: 'variante', slug: A4, texto: TEXTO_A4, region: 'mexico', origen: 'doblaje' }, /no es una región de Variante/u);
   });

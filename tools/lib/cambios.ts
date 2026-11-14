@@ -313,8 +313,9 @@ export type Columna = Exclude<FamiliaDeRuta, 'directorio'> | 'directorioDeAutore
  */
 export const CAMPOS_QUE_PINTA = {
   cita: {
-    // Historia 35.6 — la Variante de una atribuida la pinta solo su Página de Cita.
-    cita: [...CAMPOS_DE_CITA, 'variante'],
+    // Historia 35.6 — la Variante de una atribuida la pinta solo su Página de Cita; y desde la
+    // 35.10, el `origen`, que ahí dice si el texto es la traducción del sitio.
+    cita: [...CAMPOS_DE_CITA, 'variante', 'origen'],
     autor: CAMPOS_DE_CITA,
     tema: CAMPOS_DE_CITA,
     coleccion: CAMPOS_DE_CITA,
@@ -396,8 +397,9 @@ export const CAMPOS_QUE_PINTA = {
  * prueba de clasificación exige que cada clave de los esquemas esté aquí o en la tabla.
  */
 export const CAMPOS_QUE_NO_FECHAN = {
-  // Historia 35.1b — las atestiguaciones y el origen de la atribuida no se pintan (35.4 decide lo que pinta).
-  cita: ['aptaParaPortada', 'estadoDerechos', 'clase', 'atestiguaciones', 'origen'],
+  // Historia 35.1b — las atestiguaciones de la atribuida no se pintan (35.4 decide lo que pinta). El
+  // `origen` salió de aquí en la 35.10: la Página de Cita dice la traducción propia.
+  cita: ['aptaParaPortada', 'estadoDerechos', 'clase', 'atestiguaciones'],
   autor: ['tradicion'],
   obra: ['distintaDe'],
   /*

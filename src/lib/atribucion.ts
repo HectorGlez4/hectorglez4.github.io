@@ -243,6 +243,18 @@ export function lineaDeVariante(cita: Pick<Cita, 'variante'>): string | undefine
   return `En ${rotulo}: «${variante.texto}»`;
 }
 
+/**
+ * La línea de la traducción propia — Historia 35.10, decisión de Héctor del 2026-11-14 (FR-68
+ * enmendado): «Traducción de Sabiduría de Bolsillo: no circula ninguna versión en español.», en
+ * caption, bajo la Línea de la Fuente de la Página de Cita atribuida cuyo texto es la traducción
+ * del sitio, y antes de la Variante. Sigue la forma de «Traducción de {traductor}» de § Obra
+ * traducida, con la marca en el lugar del traductor. La redacción es un supuesto pendiente de
+ * Héctor (`bmad-ux`). Sin traducción propia, `undefined`: no se pinta nada.
+ */
+export function lineaDeTraduccionPropia(cita: Pick<Cita, 'traduccionPropia'>): string | undefined {
+  return cita.traduccionPropia === true ? `Traducción de ${MARCA}: no circula ninguna versión en español.` : undefined;
+}
+
 /** Sobre qué página se pide corregir o retirar: una Cita atribuida o un Personaje. */
 export type SobreLaRetirada = { sobre: 'cita' | 'personaje'; slug: string };
 

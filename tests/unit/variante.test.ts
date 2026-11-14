@@ -4,6 +4,7 @@ import { REGIONES_DE_VARIANTE, esRegionDeVariante } from '../../src/lib/variante
 import {
   firmaDeCita,
   fragmentoParaInsertar,
+  lineaDeTraduccionPropia,
   lineaDeVariante,
   procedenciaCompuesta,
   textoParaCopiar,
@@ -57,7 +58,9 @@ describe('Historia 35.6 — el esquema de la Variante', () => {
 
   it.each([
     ['una región ajena', { ...VARIANTE, region: 'mexico' }, /«region» de la Variante es una de «espana»/],
-    ['un origen ajeno', { ...VARIANTE, origen: 'radio' }, /«origen» es uno de/],
+    ['un origen ajeno', { ...VARIANTE, origen: 'radio' }, /el «origen» de la Variante es uno de/],
+    // Historia 35.10 — la traducción del sitio no es la letra de ninguna región.
+    ['la traducción propia', { ...VARIANTE, origen: 'traduccion-propia' }, /nunca una traducción del sitio/],
     ['una lista en vez de un objeto', [VARIANTE], /«variante» es un objeto con «texto», «region» y «origen»; una como mucho/],
     ['una clave de más', { ...VARIANTE, idioma: 'es' }, /la Variante solo declara «texto», «region» y «origen»/],
     ['un texto vacío', { ...VARIANTE, texto: '' }, /el texto de la Variante no puede estar vacío/],
@@ -114,6 +117,15 @@ describe('Historia 35.6 — la línea de la Variante', () => {
     expect(() =>
       lineaDeVariante({ variante: { texto: 'x', region: 'mexico', origen: 'doblaje' } } as unknown as Parameters<typeof lineaDeVariante>[0]),
     ).toThrow(/no es de REGIONES_DE_VARIANTE/);
+  });
+});
+
+describe('Historia 35.10 — la línea de la traducción propia', () => {
+  it('dice que el texto es la traducción del sitio, y nada sin ella', () => {
+    expect(lineaDeTraduccionPropia({ traduccionPropia: true })).toBe(
+      'Traducción de Sabiduría de Bolsillo: no circula ninguna versión en español.',
+    );
+    expect(lineaDeTraduccionPropia({})).toBeUndefined();
   });
 });
 

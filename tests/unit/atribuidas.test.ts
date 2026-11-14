@@ -288,9 +288,9 @@ describe('el esquema de la atribuida sola', () => {
   const mensajes = (valor: unknown) =>
     (citaAdmisible.safeParse(valor).error?.issues ?? []).map((i) => `${i.path.join('.')}: ${i.message}`).join('\n');
 
-  it('la feliz pasa; los tres orígenes del conjunto', () => {
+  it('la feliz pasa; los cuatro orígenes del conjunto, con la traducción propia de la 35.10', () => {
     expect(citaAdmisible.safeParse(base).success).toBe(true);
-    expect(ORIGENES).toEqual(['original', 'doblaje', 'traduccion-publicada']);
+    expect(ORIGENES).toEqual(['original', 'doblaje', 'traduccion-publicada', 'traduccion-propia']);
     for (const origen of ORIGENES) expect(citaAdmisible.safeParse({ ...base, origen }).success).toBe(true);
   });
 

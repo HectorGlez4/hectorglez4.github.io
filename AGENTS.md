@@ -303,14 +303,16 @@ lanza si no encuentra la declaración de alguna) o por parámetro (`puerta` de `
 `aprobar`); ninguna fija el valor del árbol.
 
 - **El esquema** (`src/lib/admision.ts`, `reglasDeClase`) exige a la atribuida `atestiguaciones`
-  —lista no vacía de `{url (http/https), consultadaEl (jornada)}`— y `origen` (`original`, `doblaje`
-  o `traduccion-publicada`, `ORIGENES`), su texto en una sola línea aunque traiga Fuente, y la rechaza
+  —lista no vacía de `{url (http/https), consultadaEl (jornada)}`— y `origen` (`original`, `doblaje`,
+  `traduccion-publicada` o, desde la 35.10, `traduccion-propia`, `ORIGENES`), su texto en una sola línea aunque traiga Fuente, y la rechaza
   con `aptaParaPortada: true` (pregunta 22). Con `MIN_ATESTIGUACIONES_DE_ATRIBUIDA` con valor, la
   atestiguan al menos tantos **dominios registrables** distintos. La de siempre con `atestiguaciones`
   u `origen` es error que nombra el fichero. Una `url` con usuario o contraseña no vale. Las órdenes
   repiten el mínimo de dominios en `fallosDeAtribuidas` con el valor de su `puerta`, para que abrirla
-  por parámetro lo aplique igual que el esquema con el del árbol. Los dos campos no se pintan: van en
-  `CAMPOS_QUE_NO_FECHAN.cita` y no viajan a `publicado.ts` ni a `dist/`.
+  por parámetro lo aplique igual que el esquema con el del árbol. Las atestiguaciones no se pintan: van
+  en `CAMPOS_QUE_NO_FECHAN.cita` y no viajan a `publicado.ts` ni a `dist/`. El `origen` tampoco, salvo
+  `traduccion-propia` (35.10), que viaja como `traduccionPropia` y la Página de Cita dice: por eso
+  `origen` está en `CAMPOS_QUE_PINTA` de la Página de Cita.
 - **El dominio lo cuenta solo `dominioDeAtestiguacion`** de `src/lib/atestiguaciones.ts`: eTLD+1 con
   `tldts` (7.4.19, versión exacta), solo la lista ICANN —dos `*.github.io` cuentan uno—, y no cuentan
   una dirección sin dominio registrable, los de `DOMINIOS_QUE_NO_ATESTIGUAN` (`brainyquote.com`; un
@@ -340,7 +342,8 @@ lanza si no encuentra la declaración de alguna) o por parámetro (`puerta` de `
 
 Una frase con dos doblajes —Latinoamérica y España— es **una** Cita, no dos: la atribuida declara
 `variante: { texto, region, origen }` (una como mucho; `region` del conjunto cerrado
-`REGIONES_DE_VARIANTE` de `src/lib/variante.ts`, hoy `espana`; `origen` de `ORIGENES`). El esquema
+`REGIONES_DE_VARIANTE` de `src/lib/variante.ts`, hoy `espana`; `origen` de `ORIGENES_DE_VARIANTE`,
+todos salvo `traduccion-propia`). El esquema
 (`reglasDeClase`) la prohíbe en la de siempre y le exige una línea, como al texto. **No crea slug**
 —el slug y la URL salen solo del texto principal (AD-4)—, y el tope de caracteres y los duplicados
 entre clases la juzgan como al texto (`fallosDeAtribuidas`, que compara las formas {texto, variante}
@@ -489,8 +492,15 @@ npx tsx tools/objetivo.ts --registrar --clase-de-cita atribuida         # la ses
   de `tools/lib/siembraAtribuida.ts`, anclas `title="view quote"` y `title="view author"`) es un
   supuesto sin contrastar con la página real: si no reconoce ninguna frase, sale con 1 sin escribir.
 - **El texto en español sale de una versión que ya circula** —un doblaje o una traducción
-  publicada—, con su `origen` (`original`, `doblaje`, `traduccion-publicada`): **el sitio no traduce**,
-  y una frase sin versión en español que circule no entra. El lote es una lista YAML de candidatas con
+  publicada—, con su `origen` (`original`, `doblaje`, `traduccion-publicada`), y **si no circula
+  ninguna, de la traducción del sitio** (decisión de Héctor del 2026-11-14, que enmienda FR-68 solo para
+  la atribuida): quien compone el lote traduce cada frase inglesa sin versión en español lo más fiel
+  posible y la marca `origen: traduccion-propia`, que la Página de Cita dice en una línea propia
+  («Traducción de Sabiduría de Bolsillo: no circula ninguna versión en español.», `lineaDeTraduccionPropia`
+  de `src/lib/atribucion.ts`; redacción pendiente de Héctor con `bmad-ux`). La Variante no admite ese
+  origen (`ORIGENES_DE_VARIANTE`): es la letra que circula en otra región. La clase de siempre **nunca
+  se traduce** (§4.11). Una candidata sin `texto` sigue rechazada: el español lo escribe alguien, y
+  **aprobarla sigue siendo de una persona**. El lote es una lista YAML de candidatas con
   `texto`, `personaje` y/o `autor` (slugs que ya existen: se dan de alta con sus órdenes, nunca
   tecleando el campo), `obra`, `año` o `referencia` (la Procedencia que el esquema exige), `origen`,
   `atestiguaciones` (`{url, consultadaEl}`), y si acaso `variante` y `temas`. Sin `clase`: se deriva.

@@ -32,6 +32,20 @@ deferred:
     location: >-
       src/lib/atestiguaciones.ts:29
     severity: low
+  - summary: 'FR-68 enmendado por Héctor el 2026-11-14 (traducción propia en la atribuida): pendiente de volver a pasar bmad-prd, bmad-architecture y bmad-spec.'
+    evidence: |-
+      Decisión de Héctor en el chat, 2026-11-14: «lets just translate the text as the best as we can». El PRD (FR-68), la espina (AD-32: el conjunto cerrado de `origen`; AD-27: `origen` en CAMPOS_QUE_NO_FECHAN) y el SPEC dicen todavía «el sitio no traduce» y tres orígenes; el código ya lleva el cuarto, `traduccion-propia`, solo en la atribuida. La clase de siempre sigue sin traducirse (§4.11).
+    location: >-
+      src/lib/admision.ts (ORIGENES), src/lib/clase.ts (ORIGEN_TRADUCCION_PROPIA)
+    severity: medium
+  - summary: '[ASSUMPTION] pendiente de Héctor (bmad-ux): la redacción y el sitio de la línea de la traducción propia, «Traducción de Sabiduría de Bolsillo: no circula ninguna versión en español.», en caption bajo la Línea de la Fuente de la Página de Cita y antes de la Variante; y si lo copiado, la Imagen, el Fragmento, el JSON-LD o «Cómo citar» tienen que decirlo también (hoy no lo dicen: ninguna superficie pintaba el origen).'
+    location: >-
+      src/lib/atribucion.ts (lineaDeTraduccionPropia), src/components/TraduccionPropia.astro
+    severity: medium
+  - summary: '[ASSUMPTION] pendiente de Héctor (bmad-ux/bmad-architecture): la Variante no admite `traduccion-propia` (ORIGENES_DE_VARIANTE), porque es la letra que circula en otra región; un intercambio por `variante` que la dejaría con ese origen se niega.'
+    location: >-
+      src/lib/admision.ts (ORIGENES_DE_VARIANTE), tools/lib/cambioDeAtribuida.ts
+    severity: low
 ---
 
 <intent-contract>
@@ -121,6 +135,17 @@ deferred:
 
 ## Spec Change Log
 
+### 2026-11-14 — FR-68 enmendado por Héctor: la traducción propia en la atribuida
+
+Decisión de Héctor en el chat: «lets just translate the text as the best as we can». Para la clase
+atribuida, cuando no circula ninguna versión en español, el texto es la traducción del sitio, lo más fiel
+posible, con `origen: traduccion-propia`. El «Never: traducir» de arriba queda enmendado solo para eso; la
+clase de siempre nunca se traduce (§4.11). `proponer` sigue rechazando la entrada sin `texto` (el español
+lo escribe alguien) y aprobar sigue siendo de una persona. La Página de Cita lo dice en una línea propia
+(supuesto de redacción, diferido a `bmad-ux`), así que `origen` pasa de `CAMPOS_QUE_NO_FECHAN` a
+`CAMPOS_QUE_PINTA` de la Página de Cita. La Variante no admite ese origen. PRD, espina y SPEC quedan
+pendientes de volver a pasar sus skills (diferido).
+
 ## Review Triage Log
 
 ### 2026-11-14 — Review pass
@@ -166,7 +191,7 @@ deferred:
 
 - **La lista lleva la página.** Cada entrada es `{slug, pagina}`: la dirección de BrainyQuote la declara Héctor con el slug, en vez de adivinarla por el nombre; la orden solo admite `https://` de `brainyquote.com` (o `www.`). El slug tiene que ser, al proponer, un Personaje de `corpus/personajes/` o un Autor de `corpus/autores/` (lo dan de alta sus órdenes; `proponer` no crea ninguno), y todo Personaje y Autor que declare una candidata tiene que estar en la lista.
 - **Ninguna atestiguación que cuente** rechaza siempre: cualquier valor de `MIN_ATESTIGUACIONES_DE_ATRIBUIDA` es un entero positivo, así que cero dominios no pasaría con ninguno; no es inventar un mínimo.
-- **Sin versión en español** = la entrada sin `texto`. El lote no lleva la frase inglesa; la semilla solo sirve de lista de trabajo.
+- **Sin versión en español** = la entrada sin `texto`. El lote no lleva la frase inglesa; la semilla solo sirve de lista de trabajo. Desde la enmienda del 2026-11-14, sin versión que circule el `texto` es la traducción del sitio con `origen: traduccion-propia`; sin `texto` sigue rechazada.
 - **La sesión atribuida no lleva la política**: sin `clase`, `propuesto` ni `hueco`. Su `resultado` es `{citasPublicadas (las dos clases, como siempre), atribuidasPublicadas}`.
 
 ## Verification
@@ -258,3 +283,12 @@ vacío.
 que hay en `semillas/`: borrar el fichero, o escribir fuera del repositorio con `--salida`, permite
 volver a pedir la página.
 
+### Enmienda de Héctor, 2026-11-14: la traducción propia
+
+`traduccion-propia` entra en `ORIGENES` (`src/lib/admision.ts`; la constante, `ORIGEN_TRADUCCION_PROPIA`
+de `src/lib/clase.ts`), no en `ORIGENES_DE_VARIANTE`. `aplanarCita` la hace viajar como
+`traduccionPropia: true` y `TraduccionPropia.astro` la dice en la Página de Cita con
+`lineaDeTraduccionPropia`; `origen` pasa a `CAMPOS_QUE_PINTA.cita.cita`. `MOTIVO_SIN_ESPAÑOL`, el parte de
+`semilla` y AGENTS.md («Una sesión de sembrado de la Cita atribuida») dicen ya las dos salidas: la versión
+que circula o la traducción propia. `src/lib/vocabulario.ts` no se toca. Con el Corpus real (sin
+atribuidas) `dist/` es idéntico al de la base 7b6a041031.

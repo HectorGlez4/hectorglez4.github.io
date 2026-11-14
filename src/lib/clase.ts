@@ -28,6 +28,15 @@ export const CLASE_DE_SIEMPRE = 'siempre';
 export const CLASE_ATRIBUIDA = 'atribuida';
 
 /**
+ * El `origen` de una atribuida cuyo texto es la traducción del sitio — Historia 35.10, decisión de
+ * Héctor del 2026-11-14 que enmienda FR-68: cuando no circula ninguna versión en español de una
+ * frase atribuida, el texto es la nuestra, lo más fiel posible, y la Página de Cita lo dice. Vive
+ * aquí, junto a la clase, porque solo la atribuida se traduce —la de siempre, nunca (§4.11)— y
+ * porque `src/lib/atribucion.ts`, que viaja a las islas, no puede importar el esquema.
+ */
+export const ORIGEN_TRADUCCION_PROPIA = 'traduccion-propia';
+
+/**
  * Las dos clases de Cita, como se anotan en el registro. La de siempre, primero. Se recorre,
  * nunca se indexa: cada clase se nombra por su constante, para que el orden de la lista no
  * decida qué es cada una.

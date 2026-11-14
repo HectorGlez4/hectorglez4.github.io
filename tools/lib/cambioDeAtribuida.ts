@@ -41,7 +41,7 @@ import {
   type Rutas,
 } from './corpus.ts';
 import type { Resultado } from './gestion.ts';
-import { citaAdmisible, ORIGENES } from '../../src/lib/admision.ts';
+import { citaAdmisible, ORIGENES_DE_VARIANTE } from '../../src/lib/admision.ts';
 import { claseDe, claseQueCorresponde, esAtribuida } from '../../src/lib/clase.ts';
 import { fichaDeCita, indiceDeFichas } from '../../src/lib/obras.ts';
 import { normalizar } from '../../src/lib/normalizar.ts';
@@ -176,10 +176,13 @@ function componer(
           ],
         };
       }
-      if (!(ORIGENES as readonly string[]).includes(cambio.origen)) {
+      if (!(ORIGENES_DE_VARIANTE as readonly string[]).includes(cambio.origen)) {
         return {
           ok: false,
-          motivos: [`«${cambio.origen}» no es un origen: ${ORIGENES.map((o) => `«${o}»`).join(', ')}.`],
+          motivos: [
+            `«${cambio.origen}» no es un origen de Variante: ${ORIGENES_DE_VARIANTE.map((o) => `«${o}»`).join(', ')}` +
+              ' —una Variante es la letra que circula en otra región, nunca una traducción del sitio—.',
+          ],
         };
       }
       // Una Variante igual al texto: con Variante declarada, es el intercambio; sin ella, nada.

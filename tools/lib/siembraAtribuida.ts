@@ -10,7 +10,8 @@
  *     se publica y no atestigua nada (`DOMINIOS_QUE_NO_ATESTIGUAN`).
  *   · **La propuesta** (`npm run atribuida -- proponer <lote.yaml>`): un lote de candidatas **en
  *     español** —la versión que ya circula, de un doblaje o de una traducción publicada, con su
- *     `origen`; el sitio no traduce—, cada una con su Personaje o su Autor, su Obra si consta y sus
+ *     `origen`, o, si no circula ninguna, la traducción del sitio, lo más fiel posible, con
+ *     `origen: traduccion-propia` (decisión de Héctor del 2026-11-14, que enmienda FR-68)—, cada una con su Personaje o su Autor, su Obra si consta y sus
  *     atestiguaciones. Las que pasan van a `corpus/_revision/`, nunca a `corpus/citas/`: aprobarlas
  *     es siempre de una persona, con `revisar --aprobar`.
  *
@@ -222,8 +223,10 @@ export type ResultadoDePropuesta =
   | { ok: false; motivos: string[] };
 
 const MOTIVO_SIN_ESPAÑOL =
-  'sin versión en español que circule: falta «texto». La semilla está en inglés y el sitio no traduce; ' +
-  'una frase sin doblaje ni traducción publicada no entra (FR-68).';
+  'sin texto en español: falta «texto». La semilla está en inglés, y alguien escribe el español: la versión ' +
+  'que circula (con su origen: original, doblaje o traduccion-publicada) o, si no circula ninguna, la ' +
+  'traducción del sitio, lo más fiel posible, con «origen: traduccion-propia» (FR-68, enmendado por Héctor ' +
+  'el 2026-11-14).';
 
 /**
  * Los campos que admite una entrada del lote. Lo demás se rechaza nombrándolo: una errata
