@@ -33,10 +33,12 @@ const PERFIL = 'escritorio';
 
 /*
  * Puerto propio: 4321 es el sitio del repositorio, 4399/4400 los de `receptor.spec.ts`, 4402 el de
- * `ingreso-accesible`, 4403 el de `busqueda-historial`, 4404 el de `desplegable` y 4405 el de
- * `ficha-tecnica`.
+ * `ingreso-accesible`, 4403 el de `busqueda-historial`, 4404 el de `desplegable`, 4405 el de
+ * `lee-el-pasaje`, 4406 el de `obras-de-la-portada`, 4407 el de
+ * `temas-colecciones-autores-de-la-portada` y 4408 el de `ficha-tecnica`
+ * (`tests/unit/puertos-e2e.test.ts` vigila que no se repitan).
  */
-const PUERTO_SITIO = 4406;
+const PUERTO_SITIO = 4409;
 const SITIO = `http://localhost:${PUERTO_SITIO}`;
 
 /** El título más largo del Corpus real (`corpus/obras/mariano-jose-de-larra--primera-representacion-…`). */
