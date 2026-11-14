@@ -66,7 +66,7 @@ describe('Historia 26.2 — la tabla de tipos de resultado', () => {
     expect(Object.keys(ETIQUETAS_DE_RESULTADO).sort()).toEqual([...FAMILIAS, 'portada'].sort());
   });
 
-  it('el rótulo de la portada no repite la marca: su título sale del `h1`', () => {
+  it('el rótulo de la portada no repite la marca: su título es el que declara el armazón (Historia 28.1)', () => {
     expect(ETIQUETAS_DE_RESULTADO.portada).not.toContain(MARCA);
     expect(MARCA).not.toContain(ETIQUETAS_DE_RESULTADO.portada);
   });

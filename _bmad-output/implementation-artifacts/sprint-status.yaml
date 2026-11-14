@@ -453,12 +453,12 @@ development_status:
   epic-27-retrospective: done
 
   # Épica 28 — la portada de retorno. Al final; conviene la 21.2 antes (con 16 aptas la Cita del Día se repite cada 16 días).
-  epic-28: backlog
-  28-1-la-portada-abre-con-las-cifras-del-corpus-y-un-campo-para-bu: backlog
-  28-2-la-cita-de-hoy-lleva-su-obra-y-las-acciones-de-su-página: backlog  # v9, Héctor 2026-11-07: nace en el orden v9 (acciones, «Compartir en», «Ver esta cita», Tarjeta de Obra; UX-DR123), criterios enmendados en epics.md
-  28-3-seis-obras-que-cambian-con-la-jornada: backlog
-  28-4-todos-los-temas-las-colecciones-con-su-criterio-y-ocho-autor: backlog
-  28-5-la-portada-nueva-llega-en-vivo-tras-el-juicio-de-sm-11: backlog  # operativa: acto de Héctor (merge desde el 2026-12-05 o con la fecha que declare Héctor)
+  epic-28: in-progress
+  28-1-la-portada-abre-con-las-cifras-del-corpus-y-un-campo-para-bu: review  # v8-ralph 2026-10-30: la portada abre con las cifras del Corpus y el campo de búsqueda; diferido para Héctor: desfase AD-11/AD-17 con la UX v8.2 (bmad-architecture)
+  28-2-la-cita-de-hoy-lleva-su-obra-y-las-acciones-de-su-página: backlog  # bloqueada: respuesta de bmad-ux sobre DESCRIPCION_DEL_SITIO y la Épica 25 (v8-ralph 2026-10-30)
+  28-3-seis-obras-que-cambian-con-la-jornada: review  # v8-ralph 2026-10-30: seis Obras de la portada que rotan con la jornada; sin diferidos para Héctor
+  28-4-todos-los-temas-las-colecciones-con-su-criterio-y-ocho-autor: review # v8-ralph 2026-10-30: la portada lista todos los Temas, las Colecciones con su criterio y ocho Autores destacados; diferido para Héctor: si las órdenes que retiran deben comparar también los destacados de antes y de después (NFR-5)
+  28-5-la-portada-nueva-llega-en-vivo-tras-el-juicio-de-sm-11: done  # Héctor declaró la fecha el 2026-11-14; en vivo con 8a8fe217ba (28.2 sigue fuera)
   epic-28-retrospective: optional
 
   # ── v9 y v9.1, de la cita al libro y la Cita atribuida ─────────────────────────────
@@ -490,7 +490,7 @@ development_status:
   # (Héctor; 1.200 propuesto): el corte cae el día en que se le da valor, no el del merge.
   epic-31: in-progress
   31-1-el-pasaje-se-localiza-con-el-localizador-del-orden-del-libro: review  # v9-ralph 2026-11-08: el cargador de posiciones da el pasaje (pasaje.ts, ofrecePasaje); MAX_CARACTERES_DEL_PASAJE sin valor (lo fija Héctor); rama apilada sobre la Épica 29; una ronda de revisión (3 parches)
-  31-2-lee-el-pasaje-plegado-en-la-página-de-cita: backlog  # bloqueada: espera la 31.1 y la Épica 30 en la principal; inserta el pasaje en el bloque de desplegables que deja la 30.3 (sin construir) tras el orden de la 30.1 (v9/epica-30, sin fundir) (v9-ralph 2026-11-07)
+  31-2-lee-el-pasaje-plegado-en-la-página-de-cita: review  # v9-ralph 2026-11-12: «Lee el pasaje» plegado en la Página de Cita (tope sin valor: no se pinta en el Corpus real); dos pasadas de revisión; diferidos para Héctor: con el tope a 1.200 la cobertura tipográfica para el build (griego, «ş», cirílico), el tope no compone la relación de superficies, <mark> en colores forzados
   epic-31-retrospective: optional
 
   # Épica 32 — la Obra como destino. Pregunta 12 («Granos de oro») antes de la 32.1;
@@ -515,9 +515,9 @@ development_status:
   # excepción con nombre a la unidad de fusión, como la 23.12 (Héctor, 2026-11-07).
   epic-34: in-progress
   34-0-la-primitiva-de-desplegable: review  # v9-ralph 2026-11-07: Desplegable.astro, la primitiva de lo plegado (details nativo, rótulo en summary, glifo › provisional); se funde sola en la principal, antes que la Épica 30. Diferidos para Héctor (bmad-ux): el glifo, filete con envoltorios, anidado, esquema de encabezados, hover, anclas e impresión, medida de prosa
-  34-1-un-solo-dueño-del-recorte-por-palabra: backlog
-  34-2-la-página-de-autor-enseña-tres-obras-y-despliega-el-resto: backlog
-  34-3-el-campo-de-búsqueda-se-ve-como-campo: backlog
+  34-1-un-solo-dueño-del-recorte-por-palabra: review  # v9-ralph 2026-11-08: recortarPorPalabra en src/lib/recorte.ts, topes de Tarjeta (120) y título/meta (110) en umbrales.ts; dos pasadas de revisión; diferidos para Héctor: palabra única más larga que el tope sin «…», signos colgantes antes de «…»
+  34-2-la-página-de-autor-enseña-tres-obras-y-despliega-el-resto: review  # v9-ralph 2026-11-08: dos pasadas de revisión; diferida a Héctor la zona del pliegue
+  34-3-el-campo-de-búsqueda-se-ve-como-campo: review  # v9-ralph 2026-11-08: campo de búsqueda con contorno completo; diferido a Héctor: el AC «la del filtro sin tocarla» choca con el contorno (se reescribió el reposo de la e2e); la portada (28.1) se integra al fundir
   epic-34-retrospective: optional
 
   # Épica 35 — la Cita atribuida, construida entera con la puerta cerrada: sin los cinco
@@ -536,7 +536,12 @@ development_status:
   35-8-pedir-que-se-corrija-o-se-retire-y-que-conste: backlog
   35-9-la-obra-con-derechos-vigentes-se-vende-sola: backlog
   35-10-la-siembra-acotada-desde-brainyquote: backlog
+  35-11-la-traducción-propia-como-la-decidió-héctor: backlog  # v9.2 (2026-11-14): ajusta la 35.10; la Épica 35 no se funde sin ella
   epic-35-retrospective: optional
+  epic-36: backlog  # UX v9.3 (2026-11-14): se construye tras fundir las Épicas 29 a 35
+  36-1-los-paneles-de-la-página-de-cita-y-de-la-de-autor: backlog
+  36-2-el-mismo-patrón-en-obra-personaje-tema-y-colección: backlog
+  epic-36-retrospective: optional
 
 action_items:
   - id: "epic-6-retro-item-1-separar-los-artefactos-de-planificación"

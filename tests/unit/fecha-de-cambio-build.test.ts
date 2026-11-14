@@ -116,6 +116,13 @@ const CUARTO_INSTANTE = '2024-07-08T09:00:00.000Z';
 const QUINTO_COMMIT = '2024-09-10';
 const QUINTO_INSTANTE = '2024-09-10T09:00:00.000Z';
 const SLUG_NUEVO = 'seneca-fragmento-nuevo';
+/**
+ * Su texto, que el documento de la Fuente trae **desde el primer commit**: la siembra real
+ * (`extraer` y `revisar --aprobar`) no reescribe ningún documento, y desde la 31.2 la Página de
+ * Cita compone los documentos de su Obra —de ellos sale su pasaje—, así que reescribir el
+ * documento en el mismo commit fecharía a sabiendas todas las hermanas.
+ */
+const TEXTO_NUEVO = 'Una Cita sembrada después, sobre la brevedad de la vida y lo poco que la usamos.';
 
 /**
  * El entorno de git de estas pruebas, sin heredar la configuración de quien las corre.
@@ -194,6 +201,12 @@ describe('Historia 18.4 — el sitemap declara cuándo cambió cada superficie',
         },
       });
 
+    // Historia 31.2 — el documento ya trae el texto de la Cita que se sembrará en el paso 5.
+    const fuentes = join(proyecto, 'corpus', 'fuentes');
+    const documentos = (await readdir(fuentes)).filter((nombre) => nombre.endsWith('.txt'));
+    expect(documentos).toHaveLength(1);
+    await appendFile(join(fuentes, documentos[0] as string), `\n${TEXTO_NUEVO}\n`, 'utf8');
+
     await git(['init', '--initial-branch=principal']);
     // Se versiona el proyecto entero —no solo el corpus— porque la fase superficial de
     // abajo clona esto y construye el clon: lo que no esté versionado no llega allí.
@@ -254,20 +267,15 @@ describe('Historia 18.4 — el sitemap declara cuándo cambió cada superficie',
 
     /*
      * 5) Historia 24.8 — una siembra: una Cita nueva de la misma Obra, el mismo Autor y el mismo
-     *    Tema que todas las demás, con su texto añadido al documento de la Fuente para que cruce
-     *    el cotejo. Su «Siguiente», «De la misma obra» y los recuentos cambian el HTML de las
+     *    Tema que todas las demás, cuyo texto ya traía el documento de la Fuente (arriba), así que
+     *    cruza el cotejo sin tocarlo. Su «Siguiente», «De la misma obra» y los recuentos cambian el HTML de las
      *    hermanas; su fecha no debe moverse. Y el aviso del mismo commit, leído con git de verdad,
      *    tiene que nombrar exactamente las rutas que el sitemap refecha.
      */
     const desde = (await git(['rev-parse', 'HEAD'])).stdout.trim();
-    const textoNuevo = 'Una Cita sembrada después, sobre la brevedad de la vida y lo poco que la usamos.';
-    const fuentes = join(proyecto, 'corpus', 'fuentes');
-    const documentos = (await readdir(fuentes)).filter((nombre) => nombre.endsWith('.txt'));
-    expect(documentos).toHaveLength(1);
-    await appendFile(join(fuentes, documentos[0] as string), `\n${textoNuevo}\n`, 'utf8');
     await writeFile(
       join(proyecto, 'corpus', 'citas', 'seneca--fragmento-nuevo.md'),
-      citaValida({ slug: SLUG_NUEVO, texto: textoNuevo }),
+      citaValida({ slug: SLUG_NUEVO, texto: TEXTO_NUEVO }),
       'utf8',
     );
     await git(['add', 'corpus']);

@@ -13,6 +13,7 @@
 import type { Cita, Autor, SiguienteCita } from './publicado.ts';
 import { rotuloDeFuente, type ObraResuelta } from './obras.ts';
 import { MARCA } from './marca.ts';
+import { milesEnEspañol } from './formato.ts';
 import { escapar } from './lienzo.ts';
 import { enUnaLinea, versosDe } from './verso.ts';
 import { MARCADOR_DE_FECHA_DE_CONSULTA, fechaDeConsulta } from './fechaDeConsulta.ts';
@@ -140,12 +141,63 @@ export const SUPERFICIES_DE_LA_SEMBLANZA = [
 export type SuperficieDeLaSemblanza = (typeof SUPERFICIES_DE_LA_SEMBLANZA)[number];
 
 /**
+ * La Línea de la Fuente — FR-2, Historia 31.2, AD-28: «Texto tomado de {rótulo}. {licencia}.»,
+ * con el rótulo enlazado a la edición. La pintan dos superficies, la Línea de la Fuente bajo la
+ * Atribución (`Fuente.astro`) y la de «Lee el pasaje» (`LeeElPasaje.astro`), y este es su único
+ * dueño: las dos ponen el enlace entre `antes` y `despues`, y `licencia` —ya con su espacio y su
+ * punto— detrás, solo si consta. Sin rótulo no hay línea.
+ */
+export function lineaDeLaFuente(
+  fuente: Pick<NonNullable<Cita['fuente']>, 'url' | 'nombre' | 'licencia'> & { id?: string },
+): { antes: string; url: string; rotulo: string; despues: string; licencia?: string } | undefined {
+  const rotulo = rotuloDeFuente(fuente);
+  if (rotulo === undefined) return undefined;
+  return {
+    antes: 'Texto tomado de ',
+    url: fuente.url,
+    rotulo,
+    despues: '.',
+    ...(fuente.licencia !== undefined && { licencia: ` ${fuente.licencia}.` }),
+  };
+}
+
+/**
+ * La línea de la Fuente de «Lee el pasaje» — Historia 31.2, AD-28: la de `lineaDeLaFuente`, o
+ * lanza. El pasaje sale de un documento casado con la Fuente de la Cita (`documentosDeCita`), así
+ * que sin Fuente el contrato está roto; y con Fuente pero sin rótulo —ni nombre, ni anfitrión, ni
+ * identificador— no hay con qué atribuirlo. En los dos casos no se pinta un texto ajeno sin decir
+ * de dónde sale, y la construcción se para nombrando la Cita y cuál de los dos es.
+ */
+export function lineaDeLaFuenteDelPasaje(
+  fuente: Parameters<typeof lineaDeLaFuente>[0] | undefined,
+  slug: string,
+): NonNullable<ReturnType<typeof lineaDeLaFuente>> {
+  if (fuente === undefined) {
+    throw new Error(
+      `La Cita «${slug}» trae pasaje sin Fuente que lo atribuya: un pasaje solo sale de un documento de su Fuente (Historia 31.2, AD-28).`,
+    );
+  }
+  const linea = lineaDeLaFuente(fuente);
+  if (linea === undefined) {
+    throw new Error(
+      `La Cita «${slug}» trae pasaje, pero su Fuente (${fuente.url}) no da rótulo —ni nombre, ni anfitrión, ni identificador— con que atribuirlo (Historia 31.2, AD-28).`,
+    );
+  }
+  return linea;
+}
+
+/**
  * Las superficies que **portan** la atribución de un texto ajeno: la Ficha de Autor de la
  * página 1, que la publica visible justo debajo. AD-28 pone aquí el único dueño de esta
  * lista; ninguna página decide por su cuenta dónde se reproduce texto de tercero.
  */
-export const PORTAN_LA_ATRIBUCION: ReadonlySet<SuperficieDeLaSemblanza> = new Set([
+export const PORTAN_LA_ATRIBUCION: ReadonlySet<SuperficieDeLaSemblanza | 'pasaje'> = new Set<
+  SuperficieDeLaSemblanza | 'pasaje'
+>([
   'ficha-de-autor',
+  // Historia 31.2 — «Lee el pasaje» reproduce texto del documento de Fuente, con su línea de la
+  // Fuente y su licencia debajo (`lineaDeLaFuente`).
+  'pasaje',
 ]);
 
 /**
@@ -530,6 +582,60 @@ export function cierreDeLaMismaObra(obra: Pick<ObraResuelta, 'recuento' | 'titul
  */
 export function cierreDeMasDelAutor(autor: Pick<Autor, 'nombre'>, recuento: number): string {
   return `Las ${recuentoDeCierre('cierreDeMasDelAutor', recuento)} citas de ${autor.nombre}`;
+}
+
+/**
+ * El cierre de las Obras de la portada — «Las {n} obras», FR-55, UX-DR56, Historia 28.3.
+ *
+ * Lleva a `/obras/`, así que `n` son las Obras que lista el Directorio de Obras —también las que no
+ * se indexan—, no las que la portada enseña hoy. Con punto de millar («Las 1.234 obras»), como la
+ * línea de cifras de la 28.1, y concordado con una («La 1 obra»), que solo se da en las pruebas.
+ * Sin el glifo de avance «›»: lo pone la portada, en un `span` `aria-hidden`. Lanza con un recuento
+ * que no sea un entero de 1 en adelante.
+ */
+export function cierreDeLasObras(n: number): string {
+  // Como los cierres de la 24.6 (`recuentoDeCierre`), un recuento imposible no se redacta: con
+  // ninguna Obra la portada no tiene bloque, así que «Las 0 obras» solo saldría de un uso roto.
+  if (!Number.isInteger(n) || n < 1) {
+    throw new Error(`cierreDeLasObras: «${n}» no es un recuento de Obras (un entero de 1 en adelante).`);
+  }
+  return n === 1 ? 'La 1 obra' : `Las ${milesEnEspañol(n)} obras`;
+}
+
+/**
+ * El cierre de los Autores de la portada — «Los {m} autores, de la A a la Z», FR-55, UX-DR62,
+ * Historia 28.4.
+ *
+ * Lleva a `/autores/`, así que `m` son los Autores que lista el Directorio —todos los publicados,
+ * la misma m que la línea de cifras—, no los ocho destacados que la portada enseña. Con punto de
+ * millar («Los 1.234 autores») y concordado con uno («El 1 autor»), que solo se da en las pruebas.
+ * Sin el glifo de avance «›»: lo pone la portada, en un `span` `aria-hidden`. Lanza con un recuento
+ * que no sea un entero de 1 en adelante: sin ningún Autor la portada no tiene sección.
+ */
+export function cierreDeLosAutores(m: number): string {
+  if (!Number.isInteger(m) || m < 1) {
+    throw new Error(`cierreDeLosAutores: «${m}» no es un recuento de Autores (un entero de 1 en adelante).`);
+  }
+  return m === 1 ? 'El 1 autor, de la A a la Z' : `Los ${milesEnEspañol(m)} autores, de la A a la Z`;
+}
+
+/**
+ * El rótulo del Desplegable de la Lista de Obras plegada — «Y {m} obras más», UX-DR130,
+ * Historia 34.2.
+ *
+ * `m` son las Obras que quedan dentro del Desplegable, tras las `MAX_OBRAS_ANTES_DE_LAS_CITAS`
+ * primeras: «Y una obra más» con una, «Y {m} obras más» con dos o más. Es la única que redacta el
+ * rótulo. Un `m` que no es un entero de 1 o más lanza: un Desplegable sin Obras no se pinta
+ * (UX-DR144), así que el uso está roto.
+ */
+export function rotuloDeObrasPlegadas(m: number): string {
+  if (!Number.isInteger(m) || m < 1) {
+    throw new Error(
+      `rotuloDeObrasPlegadas: el Desplegable de la Lista de Obras pliega una Obra o más, y este pliega ${m}. ` +
+        'Sin Obras plegadas no hay Desplegable: el uso está roto (Historia 34.2).',
+    );
+  }
+  return m === 1 ? 'Y una obra más' : `Y ${m} obras más`;
 }
 
 /**

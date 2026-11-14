@@ -6,6 +6,7 @@ import {
   citasDeAutor,
   citasDeTema,
   coleccionesPublicadas,
+  lineaDeCifras,
   rutasIndexables,
   rutasPublicadas,
   temasDeLaCita,
@@ -271,5 +272,66 @@ describe('Historia 2.1 / AD-11 — nadie filtra colecciones por su cuenta', () =
     // Solo `import type` (que se borra al compilar) y un `import()` dentro de la fachada.
     expect(codigo).not.toMatch(/^import \{[^}]*\} from 'astro:content'/m);
     expect(codigo).toMatch(/import type \{[^}]*\} from 'astro:content'/);
+  });
+});
+
+/*
+ * Historia 28.1, AD-11 — la línea de cifras de la portada. «Queda censo» es «k < n»: lo garantiza
+ * `integraciones/cotejo.ts`, así que aquí basta con Citas con Fuente y sin ella, en memoria.
+ */
+describe('Historia 28.1 — la línea de cifras de la portada', () => {
+  const documentada = (slug: string, slugAutor: string): Cita => ({
+    ...cita(slug, slugAutor),
+    fuente: { id: 'wikisource-es', url: `https://es.wikisource.org/wiki/${slug}` },
+  });
+  const documentadas = (n: number, autores: readonly string[]) =>
+    Array.from({ length: n }, (_, i) => documentada(`d${i}`, autores[i % autores.length]));
+  const censadas = (n: number, slugAutor: string) =>
+    Array.from({ length: n }, (_, i) => cita(`p${i}`, slugAutor));
+
+  it('con censo: n citas de m autores; k cotejadas, con punto de millar', () => {
+    const slugs = Array.from({ length: 400 }, (_, i) => `a${i}`);
+    const citas = [...documentadas(3473, slugs), ...censadas(21, 'a0')];
+    // Un Autor sin Citas no cuenta: m son los publicados.
+    const linea = lineaDeCifras(citas, [...slugs.map((s) => autor(s)), autor('sin-citas')]);
+    expect(linea).toBe('3.494 citas de 400 autores; 3.473 cotejadas con el texto de su fuente.');
+  });
+
+  it('con censo, en singular: 1 autor, 1 cotejada', () => {
+    const linea = lineaDeCifras([documentada('d', 'a'), cita('p', 'a')], [autor('a')]);
+    expect(linea).toBe('2 citas de 1 autor; 1 cotejada con el texto de su fuente.');
+  });
+
+  it('con censo nunca dice «cada una», tampoco con una sola Cita y ninguna cotejada', () => {
+    const casos: [Cita[], Autor[]][] = [
+      [[cita('p', 'a')], [autor('a')]],
+      [[documentada('d', 'a'), cita('p', 'b')], [autor('a'), autor('b')]],
+      [[...documentadas(50, ['a', 'b', 'c']), cita('p', 'a')], [autor('a'), autor('b'), autor('c')]],
+    ];
+    for (const [citas, autores] of casos) {
+      const linea = lineaDeCifras(citas, autores);
+      expect(linea).toMatch(/; \d[\d.]* cotejadas? con el texto de su fuente\.$/);
+      expect(linea).not.toContain('cada una');
+    }
+    expect(lineaDeCifras([cita('p', 'a')], [autor('a')])).toBe('1 cita de 1 autor; 0 cotejadas con el texto de su fuente.');
+  });
+
+  it('censo vacío, varios Autores: cada una cotejada', () => {
+    const linea = lineaDeCifras(documentadas(12, ['a', 'b', 'c']), [autor('a'), autor('b'), autor('c')]);
+    expect(linea).toBe('12 citas de 3 autores, cada una cotejada con el texto de su fuente.');
+  });
+
+  it('censo vacío, un Autor: de 1 autor', () => {
+    const linea = lineaDeCifras(documentadas(51, ['a']), [autor('a')]);
+    expect(linea).toBe('51 citas de 1 autor, cada una cotejada con el texto de su fuente.');
+  });
+
+  it('censo vacío, una Cita: 1 cita de 1 autor, cotejada', () => {
+    const linea = lineaDeCifras([documentada('d', 'a')], [autor('a')]);
+    expect(linea).toBe('1 cita de 1 autor, cotejada con el texto de su fuente.');
+  });
+
+  it('sin Citas no hay línea', () => {
+    expect(lineaDeCifras([], [autor('a')])).toBeUndefined();
   });
 });

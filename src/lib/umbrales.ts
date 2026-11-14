@@ -55,6 +55,28 @@ export const MAX_CARACTERES_DEL_PASAJE: number | undefined = undefined;
 export const MAX_CARACTERES_DEL_INCIPIT: number | undefined = undefined;
 
 /**
+ * Tope del fragmento de la Tarjeta de Cita en los listados — UX-DR132, Historia 34.1.
+ *
+ * Puntos de código sin contar los saltos de verso, «…» incluido; solo lo rebasa una primera
+ * palabra que ya no cabe (sale entera). Lo aplica solo
+ * `recortarPorPalabra` de `src/lib/recorte.ts`, que corta en la última palabra entera: el
+ * listado resume la Cita, nunca la publica recortada (NFR-12). Literal, sin cálculo: este módulo
+ * viaja en el guion del filtro de los Directorios.
+ */
+export const MAX_CARACTERES_DE_TARJETA_DE_CITA = 120;
+
+/**
+ * Tope de la Cita en el título de pestaña y la meta descripción de la Página de Cita —
+ * UX-DR131, Historia 34.1.
+ *
+ * Se cuenta igual que el de la Tarjeta y lo aplica la misma función; el verso pasa a una línea
+ * (`enUnaLinea`) después de recortar, así que un título o una meta en verso lo rebasa en los
+ * « / » que suma (tres caracteres por salto que quede dentro), a propósito. Quien llega desde un buscador decide si entrar leyendo
+ * esto, así que lo que cabe va entero.
+ */
+export const MAX_CARACTERES_DE_TITULO_Y_META = 110;
+
+/**
  * Entradas por página en los listados de Autor, de Tema, de Colección y de Obra — FR-5.
  *
  * La Página de Obra (Historia 22.4) pagina con este mismo número y la misma `Paginacion`: un
@@ -207,6 +229,21 @@ export const DESPLIEGUE_DE_LA_BUSQUEDA_CON_FILTROS: string | undefined = '2026-1
 export const DESPLIEGUE_DE_CITAR_Y_LLEVARSE: string | undefined = undefined;
 
 /**
+ * La llegada en vivo de «Lee el pasaje» — la Épica 31, AD-9, AD-13, Historia 31.2.
+ *
+ * Es la jornada UTC del **primer despliegue en que una Página de Cita enseña un pasaje en vivo**:
+ * el que sigue a que Héctor dé valor a `MAX_CARACTERES_DEL_PASAJE`, porque con el tope en
+ * `undefined` ninguna página lo pinta. **Nunca la del merge**: el merge publica la puerta cerrada.
+ * `undefined` mientras no haya llegado; **le da valor Héctor, en un commit aparte, y ningún
+ * agente la elige.**
+ *
+ * El pasaje entra en el bloque de desplegables de la Página de Cita, delante de «Cómo citar», y
+ * cambia lo que miden la continuación de la Página de Cita y SM-C5: su entrada en
+ * `CORTES_DE_SERIE_DECLARADOS` parte solo la serie `continuacion-de-cita`, como la de la 30.1.
+ */
+export const DESPLIEGUE_DEL_PASAJE: string | undefined = undefined;
+
+/**
  * La jornada UTC del primer día en que una Página de Obra enseña «Cómo empieza» en el sitio en
  * vivo — Historia 32.3, AD-9, AD-13.
  *
@@ -267,6 +304,11 @@ export type SerieDeMedicion = 'sm8' | 'lectura' | 'busqueda' | 'continuacion-de-
 export interface CorteDeSerie {
   /** La jornada UTC de la llegada en vivo, `AAAA-MM-DD`; `undefined` mientras no haya llegado. */
   readonly jornada: string | undefined;
+  /**
+   * El nombre de la constante de la que sale `jornada` (Historia 31.2): con él se nombra la línea
+   * base que abre y un juicio declara las llegadas que lo parten.
+   */
+  readonly deDondeLlega: string;
   /** Qué cambió, como lo nombra el informe. */
   readonly que: string;
   /** Las series que parte. */
@@ -283,26 +325,38 @@ export interface CorteLlegado extends CorteDeSerie {
  * La de la Épica 23 parte SM-8 —la marca se cuenta una vez por llegada y la vista sale del fichero
  * diferido—, la serie de la lectura y la de la búsqueda, que empiezan con ella; la de la 24 con la
  * 26 parte SM-8, porque los Directorios emiten vista; la de la 30 parte solo la continuación de la
- * Página de Cita y SM-C5 (Historia 30.1).
+ * Página de Cita y SM-C5 (Historia 30.1), y la del pasaje de la 31, lo mismo (Historia 31.2); la del
+ * incipit de la 32 parte solo la continuación de la Página de Obra (Historia 32.3).
+ * Cada entrada nombra su constante en `deDondeLlega`, y una prueba lo coteja con su `jornada:`.
  */
 export const CORTES_DE_SERIE_DECLARADOS: readonly CorteDeSerie[] = [
   {
     jornada: DESPLIEGUE_DE_LA_LECTURA,
+    deDondeLlega: 'DESPLIEGUE_DE_LA_LECTURA',
     que: 'la llegada de la Épica 23 (la lectura, las marcas contadas una vez, las salidas y la búsqueda asentada)',
     series: ['sm8', 'lectura', 'busqueda'],
   },
   {
     jornada: DESPLIEGUE_DE_OBRA_Y_DIRECTORIOS,
+    deDondeLlega: 'DESPLIEGUE_DE_OBRA_Y_DIRECTORIOS',
     que: 'la llegada de la Tarjeta de Obra con los Directorios (Épicas 24 y 26)',
     series: ['sm8'],
   },
   {
     jornada: DESPLIEGUE_DE_CITAR_Y_LLEVARSE,
+    deDondeLlega: 'DESPLIEGUE_DE_CITAR_Y_LLEVARSE',
     que: 'el orden nuevo de la Página de Cita: las acciones antes de la Tarjeta de Obra, con “Cómo citar” e “Inserta esta cita” detrás',
     series: ['continuacion-de-cita'],
   },
   {
+    jornada: DESPLIEGUE_DEL_PASAJE,
+    deDondeLlega: 'DESPLIEGUE_DEL_PASAJE',
+    que: '“Lee el pasaje” en la Página de Cita',
+    series: ['continuacion-de-cita'],
+  },
+  {
     jornada: DESPLIEGUE_DEL_INCIPIT,
+    deDondeLlega: 'DESPLIEGUE_DEL_INCIPIT',
     que: '«Cómo empieza» en la página 1 de Obra',
     series: ['continuacion-de-obra'],
   },
@@ -424,6 +478,18 @@ export const MAX_CITAS_RELACIONADAS = 4;
  * reparte `repartir`, que con menos lanza y para la construcción.
  */
 export const MAX_CITAS_DE_LA_MISMA_OBRA = 3;
+
+/**
+ * Obras que la Lista de Obras de la Página de Autor enseña antes de las Citas — UX-DR130, FR-4,
+ * AD-9, Historia 34.2. Valor de Héctor del 2026-11-05.
+ *
+ * Con más, la Lista pinta las primeras y pliega el resto en un Desplegable cerrado («Y {m} obras
+ * más», `rotuloDeObrasPlegadas`), para que la primera Cita no quede pantallas abajo (Rafael
+ * Barrett, con su Lista entera, la dejaba a unos 3.249 px a 360 × 640). `/obras/` no se pliega nunca.
+ * Moverlo lo decide Héctor, en un diff visible. Literal: el filtro de los Directorios importa este
+ * módulo y un cálculo aquí engordaría su guion.
+ */
+export const MAX_OBRAS_ANTES_DE_LAS_CITAS = 3;
 
 /**
  * Saltos de enlace interno desde la portada en los que toda superficie publicada debe
@@ -824,6 +890,16 @@ export const TANDA_DE_RESULTADOS = 30;
  * un solo dueño para las dos superficies, y ninguna lo escribe.
  */
 export const AUTORES_DESTACADOS = 8;
+
+/**
+ * Cuántas Obras enseña la portada cada jornada — AD-9, AD-12, FR-55, UX-DR56, Historia 28.3.
+ *
+ * Las elige `obrasDelDia` de `src/lib/citaDelDia.ts` entre las indexables, de Autores distintos
+ * mientras haya tantos Autores con Obras como este número (con menos, una por Autor), y la ventana
+ * avanza cada jornada tantos puestos como Obras salen. Es la cifra de «seis Obras de seis Autores»
+ * de la portada de retorno: ni la función, ni la página, ni las pruebas la escriben.
+ */
+export const OBRAS_DE_LA_PORTADA = 6;
 
 /**
  * El techo de lo que el alojamiento admite por sitio — Historia 24.2, Entorno operativo.

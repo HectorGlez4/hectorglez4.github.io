@@ -71,6 +71,20 @@ describe('la Página de Cita enseña de dónde salió el texto', () => {
     expect(html).toContain('Wikisource en español');
     expect(html).toContain('CC BY-SA 4.0');
 
+    // La línea entera, tal cual (Historia 31.2: la compone `lineaDeLaFuente`): el punto tras el
+    // rótulo, la licencia con el suyo y el enlace con su `rel`, sin pestaña nueva.
+    const linea = /<p class="fuente[^"-]*"[^>]*>([\s\S]*?)<\/p>/.exec(html)?.[1];
+    expect(linea).toBeDefined();
+    expect(linea!.replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim()).toBe(
+      'Texto tomado de Wikisource en español. CC BY-SA 4.0.',
+    );
+    const enlaces = [...linea!.matchAll(/<a\b([^>]*)>([^<]*)<\/a>/g)];
+    expect(enlaces).toHaveLength(1);
+    expect(enlaces[0][1]).toContain(`href="${URL_DE_LA_FUENTE}"`);
+    expect(enlaces[0][1]).toContain('rel="noopener nofollow"');
+    expect(enlaces[0][1]).not.toContain('target=');
+    expect(enlaces[0][2]).toBe('Wikisource en español');
+
     /*
      * Y no se promete el cotejo. `corpus/pendientes-de-cotejo.yml` exime a unas cuantas
      * Citas de la puerta de la Historia 11.2, así que una página que afirmara «cotejada»

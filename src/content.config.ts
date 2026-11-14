@@ -26,6 +26,7 @@ import {
 } from './lib/admision.js';
 import { leerBiografia } from './lib/biografia.js';
 import { MAX_CARACTERES_DEL_INCIPIT, MAX_CARACTERES_DEL_PASAJE } from './lib/umbrales.js';
+import { problemaDeLosParrafos } from './lib/pasaje.js';
 import {
   guardarIncipits,
   guardarOrdenDeLosIndices,
@@ -351,9 +352,18 @@ const posiciones = defineCollection({
             texto: z.string().min(1),
             inicio: z.number().int().nonnegative(),
             fin: z.number().int(),
+            // Historia 31.2 — los párrafos y sus líneas, tramos [desde, hasta) sobre el texto.
+            parrafos: z
+              .array(z.array(z.tuple([z.number().int().nonnegative(), z.number().int()])).min(1))
+              .min(1),
           })
           .refine((p) => p.inicio < p.fin && p.fin <= p.texto.length, {
             message: 'El tramo de la Cita no cabe en su pasaje: hace falta inicio < fin ≤ largo del texto.',
+          })
+          .superRefine((p, ctx) => {
+            // Historia 31.2 — los tramos dicen todo el texto, en orden y sin pisarse (`problemaDeLosParrafos`).
+            const problema = problemaDeLosParrafos(p);
+            if (problema !== undefined) ctx.addIssue({ code: 'custom', message: `Los párrafos del pasaje no se pueden pintar: ${problema}.` });
           })
           .optional(),
       }),

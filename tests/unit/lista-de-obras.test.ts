@@ -12,7 +12,9 @@ import {
 } from './ayuda/construir.js';
 import { componerDocumento } from '../../tools/lib/documento.ts';
 import { obrasDelAutor } from '../../src/lib/publicado.ts';
-import type { ObraResuelta } from '../../src/lib/obras.ts';
+import { ordenDeLaListaDeObras, partirLaListaDeObras, type ObraResuelta } from '../../src/lib/obras.ts';
+import { rotuloDeObrasPlegadas } from '../../src/lib/atribucion.ts';
+import { MAX_OBRAS_ANTES_DE_LAS_CITAS } from '../../src/lib/umbrales.ts';
 
 /**
  * Historia 17.3 — la Página de Autor enumera su obra (UX-DR46).
@@ -364,5 +366,221 @@ describe('Historia 17.3 — la Lista de Obras, construida', () => {
     for (const ruta of ['/autor/seneca/', '/autor/epicteto/', '/autor/antonio-machado/']) {
       expect(await html(ruta), ruta).not.toContain('data-ingreso');
     }
+  });
+});
+
+/**
+ * Historia 34.2 — la Página de Autor enseña `MAX_OBRAS_ANTES_DE_LAS_CITAS` Obras y pliega el resto
+ * en el Desplegable (UX-DR130). `/obras/` no se pliega nunca.
+ */
+describe('Historia 34.2 — el rótulo del pliegue', () => {
+  it('«Y una obra más» con una; «Y {m} obras más» con dos o más', () => {
+    expect(rotuloDeObrasPlegadas(1)).toBe('Y una obra más');
+    expect(rotuloDeObrasPlegadas(2)).toBe('Y 2 obras más');
+    expect(rotuloDeObrasPlegadas(56)).toBe('Y 56 obras más');
+  });
+
+  it('lanza, nombrándose, con un m que no es un entero de 1 o más', () => {
+    for (const m of [0, -1, 1.5, Number.NaN]) {
+      expect(() => rotuloDeObrasPlegadas(m), String(m)).toThrow(/rotuloDeObrasPlegadas.*pliega (0|-1|1\.5|NaN)\b/);
+    }
+  });
+});
+
+describe('Historia 34.2 — el corte de la Lista', () => {
+  it('las MAX_OBRAS_ANTES_DE_LAS_CITAS primeras y el resto, en el orden de entrada; con esa cifra o menos, nada plegado', () => {
+    const lista = (n: number) => Array.from({ length: n }, (_, i) => i);
+    const cinco = partirLaListaDeObras(lista(MAX_OBRAS_ANTES_DE_LAS_CITAS + 2));
+    expect(cinco.primeras).toEqual(lista(MAX_OBRAS_ANTES_DE_LAS_CITAS));
+    expect(cinco.resto).toEqual([MAX_OBRAS_ANTES_DE_LAS_CITAS, MAX_OBRAS_ANTES_DE_LAS_CITAS + 1]);
+    expect(partirLaListaDeObras(lista(MAX_OBRAS_ANTES_DE_LAS_CITAS + 1)).resto).toEqual([MAX_OBRAS_ANTES_DE_LAS_CITAS]);
+    expect(partirLaListaDeObras(lista(MAX_OBRAS_ANTES_DE_LAS_CITAS))).toEqual({ primeras: lista(MAX_OBRAS_ANTES_DE_LAS_CITAS), resto: [] });
+    expect(partirLaListaDeObras([])).toEqual({ primeras: [], resto: [] });
+  });
+
+  it('un umbral que no es un entero ≥ 1 para la construcción, con la lista que sea', () => {
+    expect(partirLaListaDeObras([0, 1], 1)).toEqual({ primeras: [0], resto: [1] });
+    for (const maximo of [0, -1, 1.5, Number.NaN]) {
+      expect(() => partirLaListaDeObras([0, 1, 2], maximo), String(maximo)).toThrow(/partirLaListaDeObras/);
+      expect(() => partirLaListaDeObras([], maximo), String(maximo)).toThrow(/partirLaListaDeObras/);
+    }
+  });
+});
+
+describe('Historia 34.2 — la Lista de Obras plegada, construida', () => {
+  const WS = 'https://es.wikisource.org/wiki/';
+  const EPICTETO = 'nombre: Epicteto\nañoNacimiento: 50\nañoFallecimiento: 135\nsemblanza: Filósofo estoico griego.\nordenAlfabetico: Epicteto\n';
+  const MACHADO =
+    'nombre: Antonio Machado\nañoNacimiento: 1875\nañoFallecimiento: 1939\nsemblanza: Poeta sevillano de la generación del 98.\nordenAlfabetico: Machado\n';
+  // El censo es cerrado (11.2): las Citas sin obra son slugs suyos. Epicteto no tiene ninguna.
+  const SIN_OBRA = {
+    seneca: { slug: 'seneca-mientras-esperamos-vivir-la-vida-pasa', texto: 'Mientras esperamos vivir, la vida pasa.' },
+    'antonio-machado': { slug: 'antonio-machado-caminante-no-hay-camino-se-hace-camino', texto: 'Caminante, no hay camino, se hace camino al andar.' },
+  } as const;
+
+  const corpus: Record<string, string> = {
+    'autores/seneca.yml': AUTOR_VALIDO,
+    'autores/epicteto.yml': EPICTETO,
+    'autores/antonio-machado.yml': MACHADO,
+    'temas/el-tiempo.yml': TEMA_VALIDO,
+    'pendientes-de-cotejo.yml': `citas:\n${Object.values(SIN_OBRA).map(({ slug }) => `  - ${slug}\n`).join('')}`,
+  };
+  for (const [autor, { slug, texto }] of Object.entries(SIN_OBRA)) {
+    corpus[`citas/${autor}--sin-obra.md`] = citaValida({ autor, slug, texto, procedencia: { referencia: 'Sin obra' }, fuente: undefined });
+  }
+
+  /** Las Obras sembradas de cada Autor, para derivar el orden esperado con la regla del sitio. */
+  const sembradas: Record<string, ObraResuelta[]> = { seneca: [], epicteto: [], 'antonio-machado': [] };
+
+  /** Siembra `n` Citas cotejadas de una Obra, con su documento. Recuentos distintos: el orden no empata. */
+  function sembrar(autor: string, clave: string, titulo: string, n: number) {
+    const textos: string[] = [];
+    for (let i = 0; i < n; i += 1) {
+      const texto = `${titulo} ${i}: una sentencia distinta para cada número, la ${i}.`;
+      textos.push(texto);
+      corpus[`citas/${autor}--${clave}-${i}.md`] = citaValida({
+        autor,
+        slug: `${autor}-${clave}-${i}`,
+        texto,
+        procedencia: { obra: titulo },
+        fuente: { id: 'wikisource-es', url: `${WS}${titulo.replaceAll(' ', '_')}` },
+      });
+    }
+    corpus[`fuentes/wikisource-es--${clave}.txt`] = componerDocumento(
+      { fuente: 'wikisource-es', obra: titulo, url: `${WS}${titulo.replaceAll(' ', '_')}`, recuperado: '2026-11-07' },
+      titulo,
+      textos.join('\n\n'),
+    );
+    sembradas[autor].push(obra(`${autor}--${clave}`, titulo, n));
+  }
+
+  // Títulos en un orden alfabético distinto del de recuento, para que el orden se note.
+  sembrar('seneca', 'de-la-ira', 'De la ira', 2);
+  sembrar('seneca', 'cartas-a-lucilio', 'Cartas a Lucilio', 6);
+  sembrar('seneca', 'sobre-la-brevedad-de-la-vida', 'Sobre la brevedad de la vida', 3);
+  sembrar('seneca', 'de-la-providencia', 'De la providencia', 5);
+  sembrar('seneca', 'de-la-clemencia', 'De la clemencia', 4);
+  sembrar('epicteto', 'enquiridion', 'Enquiridión', 2);
+  sembrar('epicteto', 'disertaciones', 'Disertaciones', 5);
+  sembrar('epicteto', 'fragmentos', 'Fragmentos', 3);
+  sembrar('epicteto', 'maximas', 'Máximas', 4);
+  sembrar('antonio-machado', 'soledades', 'Soledades', 2);
+  sembrar('antonio-machado', 'campos-de-castilla', 'Campos de Castilla', 4);
+  sembrar('antonio-machado', 'juan-de-mairena', 'Juan de Mairena', 3);
+
+  const ruta = (o: ObraResuelta) => `/obra/${o.nombre.replace('--', '/')}/`;
+  const esperadas = (autor: string) => ordenDeLaListaDeObras(sembradas[autor]).map(ruta);
+
+  let proyecto = '';
+  const html = (r: string) => readFile(paginaConstruida(proyecto, r), 'utf8');
+  const seccion = (pagina: string) => {
+    const inicio = pagina.indexOf('<section class="obras-del-autor');
+    return inicio === -1 ? '' : pagina.slice(inicio, pagina.indexOf('</section>', inicio) + '</section>'.length);
+  };
+  const hrefs = (s: string) => [...s.matchAll(/<li[^>]*>\s*<a href="([^"]+)"/g)].map((m) => m[1]);
+  /** Los `<ul>` de la Lista, cada uno con sus `<li>`, en el orden del marcado. */
+  const listas = (s: string) =>
+    [...s.matchAll(/<ul class="lista-de-obras"([^>]*)>([\s\S]*?)<\/ul>/g)].map((m) => ({ atributos: m[1], hrefs: hrefs(m[2]) }));
+
+  beforeAll(async () => {
+    const resultado = await construirConCorpus(corpus);
+    proyecto = resultado.proyecto;
+    expect(resultado.codigo, resultado.salida).toBe(0);
+  }, 300_000);
+
+  afterAll(async () => {
+    if (proyecto !== '') await limpiar(proyecto);
+  });
+
+  it('el corte es el umbral: más de MAX_OBRAS_ANTES_DE_LAS_CITAS Obras se pliegan', () => {
+    expect(sembradas.seneca.length).toBeGreaterThan(MAX_OBRAS_ANTES_DE_LAS_CITAS);
+    expect(sembradas.epicteto.length).toBeGreaterThan(MAX_OBRAS_ANTES_DE_LAS_CITAS);
+    expect(sembradas['antonio-machado'].length).toBeLessThanOrEqual(MAX_OBRAS_ANTES_DE_LAS_CITAS);
+  });
+
+  for (const autor of ['seneca', 'epicteto'] as const) {
+    it(`${autor}: las primeras a la vista y el resto en un Desplegable cerrado, en el orden de la Lista`, async () => {
+      const s = seccion(await html(`/autor/${autor}/`));
+      const todas = esperadas(autor);
+      const m = todas.length - MAX_OBRAS_ANTES_DE_LAS_CITAS;
+      const [fuera, dentro, ...otras] = listas(s);
+      expect(otras).toEqual([]);
+      expect(fuera.hrefs).toEqual(todas.slice(0, MAX_OBRAS_ANTES_DE_LAS_CITAS));
+      expect(dentro.hrefs).toEqual(todas.slice(MAX_OBRAS_ANTES_DE_LAS_CITAS));
+      for (const { atributos } of [fuera, dentro]) expect(atributos).toContain('data-zona="lista-de-obras"');
+      // Cada Obra una vez, en toda la página.
+      expect(hrefs(s)).toEqual(todas);
+      const detalles = /<details class="desplegable"([^>]*)><summary[^>]*>([\s\S]*?)<\/summary>([\s\S]*?)<\/details>/.exec(s);
+      expect(detalles, s).not.toBeNull();
+      const [, atributosDetalles, resumen, contenido] = detalles!;
+      expect(atributosDetalles.replace(/data-astro-cid-\w+/g, '')).not.toMatch(/\bopen\b/);
+      expect(resumen).not.toMatch(/<h[1-6][\s>]/);
+      expect(resumen.replace(/<span class="glifo"[\s\S]*$/, '').replace(/<[^>]+>/g, '')).toBe(rotuloDeObrasPlegadas(m));
+      expect(hrefs(contenido)).toEqual(dentro.hrefs);
+      // El primer `<ul>` va antes del Desplegable, sin `<li>` que lo envuelva.
+      expect(s.indexOf('<ul class="lista-de-obras"')).toBeLessThan(s.indexOf('<details'));
+      expect(s).not.toMatch(/<li[^>]*>\s*<details/);
+      // La línea de Citas sin obra, tras el Desplegable y antes de «Citas documentadas».
+      const pagina = await html(`/autor/${autor}/`);
+      const finDetalles = pagina.indexOf('</details>');
+      expect(finDetalles).toBeGreaterThan(-1);
+      expect(finDetalles).toBeLessThan(pagina.indexOf('Citas documentadas</h2>'));
+      if (autor in SIN_OBRA) {
+        expect(pagina.indexOf('Y una cita sin obra documentada.')).toBeGreaterThan(finDetalles);
+        expect(pagina.indexOf('Y una cita sin obra documentada.')).toBeLessThan(pagina.indexOf('Citas documentadas</h2>'));
+      } else {
+        expect(pagina).not.toContain('sin obra documentada');
+      }
+    });
+  }
+
+  it('seneca dice «Y 2 obras más» y epicteto «Y una obra más»', async () => {
+    expect(seccion(await html('/autor/seneca/'))).toContain('>Y 2 obras más<');
+    expect(seccion(await html('/autor/epicteto/'))).toContain('>Y una obra más<');
+  });
+
+  it('con tres Obras o menos, un solo `<ul>` y ningún Desplegable', async () => {
+    const s = seccion(await html('/autor/antonio-machado/'));
+    expect(listas(s).map((l) => l.hrefs)).toEqual([esperadas('antonio-machado')]);
+    expect(s).not.toContain('<details');
+    expect(s.indexOf('Y una cita sin obra documentada.')).toBeGreaterThan(s.indexOf('</ul>'));
+  });
+
+  it('`/obras/` no se pliega: ningún Desplegable, ni su hoja', async () => {
+    const obras = await html('/obras/');
+    expect(obras).not.toContain('<details');
+    expect(obras).not.toContain('desplegable');
+    for (const autor of ['seneca', 'epicteto', 'antonio-machado']) {
+      for (const href of esperadas(autor)) expect(obras.split(`href="${href}"`).length - 1, href).toBe(1);
+    }
+  });
+
+  /*
+   * El HTML de `/obras/` no cambia con el pliegue (34.2), y lo frágil es el orden de las hojas de
+   * componente en su `<style>` en línea: Astro lo deriva del grafo de importaciones, y un solo
+   * `import` nuevo en `ListaDeObras.astro` (el de `umbrales.ts`) bastó para cambiar de sitio la
+   * hoja de la Lista y la del filtro sin añadir ninguna regla. Se fija la secuencia de hojas por el
+   * primer selector de cada una —no por el hash de `data-astro-cid-*`—. Si cambia a propósito,
+   * con una decisión que mueva `/obras/`, se actualiza aquí en el mismo commit; si no, es una
+   * regresión del criterio «el HTML de `/obras/` no cambia».
+   */
+  it('`/obras/` conserva el orden de las hojas de componente de su `<style>` en línea', async () => {
+    const obras = await html('/obras/');
+    const secuencias = [...obras.matchAll(/<style[^>]*>([\s\S]*?)<\/style>/g)]
+      .map(([, hoja]) => {
+        const vistas = new Map<string, string>();
+        for (const [, selector, cid] of hoja.matchAll(/([^{}]*?)\[data-astro-cid-([a-z0-9]+)\]/g)) {
+          if (!vistas.has(cid)) vistas.set(cid, selector.trim());
+        }
+        return [...vistas.values()];
+      })
+      .filter((s) => s.length > 0);
+    expect(secuencias).toEqual([
+      ['.letras', '.grupo', '.filtro', '.rotulo', '.seguir', '.saltar', '.lista-de-obras', 'label', '.pagina'],
+    ]);
+  });
+
+  it('sin ningún Modelo de Ingreso en la Página de Autor plegada', async () => {
+    for (const autor of ['seneca', 'epicteto']) expect(await html(`/autor/${autor}/`)).not.toContain('data-ingreso');
   });
 });

@@ -25,6 +25,22 @@ function campo(contenido: string, nombre: string): string | undefined {
   return linea?.slice(nombre.length + 1).trim().replace(/^"|"$/g, '');
 }
 
+/**
+ * Los slugs del censo de pendientes de cotejo (Historia 11.2), o ninguno si el fichero falta o no
+ * trae lista. Lo usa la línea de cifras de la portada (Historia 28.1), cuya forma depende de si
+ * queda censo: el día que la 11.4 lo vacíe, la prueba sigue juzgando la forma que toca.
+ */
+export function censoDeCotejo(): string[] {
+  let contenido: string;
+  try {
+    contenido = readFileSync(join(raiz, 'pendientes-de-cotejo.yml'), 'utf8');
+  } catch {
+    return [];
+  }
+  const leido = parse(contenido) as { citas?: unknown } | null;
+  return Array.isArray(leido?.citas) ? leido.citas.filter((s): s is string => typeof s === 'string') : [];
+}
+
 /** Cuántas Citas publicadas declara cada Tema, por su slug. */
 export function citasPorTema(): Map<string, number> {
   const cuenta = new Map<string, number>();
@@ -404,6 +420,30 @@ export function autorEnVariasPaginas(): { slug: string; citas: number } | undefi
     .filter(([, n]) => n > CITAS_POR_PAGINA)
     .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))[0];
   return elegido === undefined ? undefined : { slug: elegido[0], citas: elegido[1] };
+}
+
+/**
+ * Historia 34.2 — cuántas Obras tiene cada Autor en su Lista de Obras, por su slug: las fichas
+ * distintas de sus Citas, resueltas como el build. Un Autor sin ninguna Obra no aparece.
+ */
+export function obrasPorAutor(): Map<string, number> {
+  const fichas = new Map<string, Set<string>>();
+  for (const c of citasResueltas()) {
+    if (c.ficha === undefined) continue;
+    const delAutor = fichas.get(c.autor) ?? new Set<string>();
+    delAutor.add(c.ficha);
+    fichas.set(c.autor, delAutor);
+  }
+  return new Map([...fichas].map(([autor, suyas]) => [autor, suyas.size]));
+}
+
+/**
+ * Historia 34.2 — el Autor con más Obras del Corpus (empate: el primero por slug), el de la Lista
+ * de Obras plegada más larga; `undefined` si el Corpus no tiene ninguna Obra.
+ */
+export function autorConMasObras(): { slug: string; obras: number } | undefined {
+  const elegido = [...obrasPorAutor()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))[0];
+  return elegido === undefined ? undefined : { slug: elegido[0], obras: elegido[1] };
 }
 
 /** Cuántas Citas publicadas tiene cada Autor, por su slug. */

@@ -57,7 +57,7 @@ import { filtrosDeLaBusqueda } from '../../src/lib/publicado.ts';
 import { MAPA_DE_OBRAS_EN_DIST } from '../../tools/lib/peso.ts';
 import { EXENCIONES_DE_ZONA, MARCA_DE_BUSQUEDA_ASENTADA } from '../../src/lib/medicion.ts';
 import { rutaDeLaBusqueda, rutaDelDirectorioDeAutores, rutaDelDirectorioDeObras } from '../../src/lib/superficies.ts';
-import { NOMBRE_DEL_DIRECTORIO_DE_AUTORES, NOMBRE_DEL_DIRECTORIO_DE_OBRAS } from '../../src/lib/marca.ts';
+import { MARCA, NOMBRE_DEL_DIRECTORIO_DE_AUTORES, NOMBRE_DEL_DIRECTORIO_DE_OBRAS } from '../../src/lib/marca.ts';
 import { guionExternoDe } from '../../src/lib/guiones.ts';
 import { ARRANQUE_DE_MEDICION, rutaDelGuionDeMedicion } from '../../src/lib/medicion.ts';
 import {
@@ -764,6 +764,18 @@ describe('Historia 27.2 — lo construido', () => {
     expect(html).not.toMatch(/<script\b[^>]*type="module"[^>]*>[^<]/u);
   });
 
+  /*
+   * Historia 28.1 — la forma del censo vacío con varios Autores, construida: este Corpus no trae
+   * censo (todas sus Citas tienen documento) y tiene tres Autores con Citas y uno sin ellas, que no
+   * cuenta. La de un Autor la construyen `dos-jornadas.test.ts` y `publicable-y-alcanzable.test.ts`;
+   * la de censo, `cotejo-build.test.ts`.
+   */
+  it('Historia 28.1 — con censo vacío y varios Autores, la línea dice «cada una» y cuenta solo los Autores con Citas', () => {
+    const portada = readFileSync(paginaConstruida(proyecto, '/'), 'utf8');
+    const linea = /<p class="cifras[^"]*"[^>]*>([\s\S]*?)<\/p>/u.exec(portada)?.[1].replace(/\s+/gu, ' ').trim();
+    expect(linea).toBe(`${CITAS.length} citas de ${Object.keys(AUTORES).length} autores, cada una cotejada con el texto de su fuente.`);
+  });
+
   it('NFR-7 — `/buscar/` no pide ninguna hoja de estilo: la suya va en línea, como la del Armazón', () => {
     // Fuera, la hoja de la búsqueda bloqueaba la primera pintura (+360 ms de FCP en la puerta de la 27.9).
     expect(html).not.toMatch(/<link\b[^>]*\brel="stylesheet"/u);
@@ -1258,6 +1270,29 @@ describe('Historia 27.2 — lo construido', () => {
         expect(dato, ruta).toBeDefined();
         expect(dato!.meta.title, ruta).toBe(titulo);
         expect(dato!.filters[FILTRO_DE_TIPO]?.[0], ruta).toBe('directorio');
+      }
+    });
+
+    /*
+     * Historia 28.1 — la portada responde solo por el título que declara el armazón (un `span`
+     * `hidden` con `data-pagefind-meta="title:…"`), y todo lo que pinta va bajo
+     * `data-pagefind-ignore="all"`. El HTML no basta: si una versión de Pagefind dejara de indexar
+     * el texto oculto, la portada saldría del índice con el HTML intacto. Esto lo mira el índice
+     * generado, en el CI; el navegador con el Corpus entero, `tests/e2e/busqueda.spec.ts`.
+     */
+    it('Historia 28.1 — la portada sale por el nombre del sitio, rotulada «portada», y no por su línea ni su campo', async () => {
+      const portada = (await datos(await indice!.search(MARCA))).find((d) => rutaDe(d.url) === '/');
+      // El control positivo: con la portada en el índice, que no salga por lo demás dice algo.
+      expect(portada, `«${MARCA}» no devuelve la portada`).toBeDefined();
+      expect(portada!.meta.title).toBe(MARCA);
+      expect(portada!.filters[FILTRO_DE_TIPO]).toEqual(['portada']);
+      expect(portada!.content.trim()).toBe(MARCA);
+      const linea = /<p class="cifras[^"]*"[^>]*>([\s\S]*?)<\/p>/u.exec(readFileSync(paginaConstruida(proyecto, '/'), 'utf8'))?.[1];
+      expect(linea, 'la portada sin línea de cifras').toBeDefined();
+      const sinCifras = linea!.replace(/[\d.;,]/gu, ' ').replace(/\s+/gu, ' ').trim();
+      for (const termino of [sinCifras, 'cotejada', 'autores', ETIQUETA_DE_LA_BUSQUEDA, TEXTO_DE_EJEMPLO_DE_LA_BUSQUEDA]) {
+        const rutas = (await datos(await indice!.search(termino))).map((d) => rutaDe(d.url));
+        expect(rutas, termino).not.toContain('/');
       }
     });
 

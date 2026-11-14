@@ -27,6 +27,7 @@ import {
   declararRutasIndexables,
   esRutaDeDirectorio,
   olvidarRutasIndexables,
+  rutaDeLaBusqueda,
   rutaDelDirectorioDeAutores,
   rutaDelDirectorioDeObras,
   rutaNormalizada,
@@ -34,6 +35,12 @@ import {
 } from '../../src/lib/superficies.ts';
 import { CITAS_POR_PAGINA, MAX_SALTOS_DESDE_LA_PORTADA } from '../../src/lib/umbrales.ts';
 import { MARCA } from '../../src/lib/marca.ts';
+import {
+  BOTON_DE_BUSCAR,
+  ETIQUETA_DE_LA_BUSQUEDA,
+  PARAMETROS_DE_LA_BUSQUEDA,
+  TEXTO_DE_EJEMPLO_DE_LA_BUSQUEDA,
+} from '../../src/lib/busqueda.ts';
 import {
   FILTRO_DE_TIPO,
   FILTROS_DE_CITA,
@@ -516,9 +523,12 @@ describe('Historia 12.1 — sobre un sitio construido de verdad', () => {
             (e) => e.etiqueta === 'nav' && e.atributos.get('aria-label') === 'Principal',
           );
           if (i === 0) {
-            // La marca va fuera de la navegación «Principal», y no es un `h1` (eso es de la 28.1).
+            // La marca va fuera de la navegación «Principal». Historia 28.1: en la portada es su
+            // `h1`, que la envuelve sin más; en el resto de páginas no va en ningún encabezado.
             expect(nav, `${ruta}: la marca dentro de la navegación`).toBe(-1);
-            expect(antepasados.some((e) => /^h[1-6]$/.test(e.etiqueta)), `${ruta}: la marca en un encabezado`).toBe(false);
+            const encabezados = antepasados.filter((e) => /^h[1-6]$/.test(e.etiqueta)).map((e) => e.etiqueta);
+            expect(encabezados, `${ruta}: los encabezados de la marca`).toEqual(ruta === '/' ? ['h1'] : []);
+            if (ruta === '/') expect(antepasados.at(-1)?.etiqueta, `${ruta}: la marca no es hija del h1`).toBe('h1');
             continue;
           }
           // nav[aria-label="Principal"] > ul[role="list"] > li > a
@@ -961,12 +971,20 @@ describe('Historia 12.1 — sobre un sitio construido de verdad', () => {
       expect(vistas).toContain('autor');
     });
 
-    it('la portada solo expone su `h1`, que es la marca: todo lo demás de `main` queda fuera del índice', async () => {
+    it('la portada solo expone su título, que es la marca: todo lo demás de `main` queda fuera del índice', async () => {
       const portada = (await paginas()).get('/')!;
       expect(portada).toBeDefined();
-      const { enMain, titulos, textoDelTitulo, expuestos, fueraDelIndice } = exposicionDeLaPortada(portada);
-      expect(titulos).toBe(1);
-      expect(textoDelTitulo).toBe(MARCA);
+      const exposicion = exposicionDeLaPortada(portada);
+      const { enMain, expuestos, fueraDelIndice } = exposicion;
+      // Historia 28.1 — el único `h1` es la marca de la cabecera; `main` no lleva ninguno, y el
+      // título lo declara el armazón con `data-pagefind-meta="title:…"`, oculto.
+      expect(exposicion.titulosEnMain).toBe(0);
+      expect(exposicion.titulosEnLaCabecera).toBe(1);
+      expect(exposicion.textoDelTituloDeLaCabecera).toBe(MARCA);
+      expect(exposicion.titulosDeclarados).toBe(1);
+      expect(exposicion.valorDelTitulo).toBe(MARCA);
+      expect(exposicion.textoDelTitulo).toBe(MARCA);
+      expect(exposicion.tituloOculto).toBe(true);
       expect(expuestos).toEqual([]);
       // La Cita del Día —el estado de producción, con alguna Cita apta— está en la portada y
       // fuera del índice: buscar su texto daba también la portada. La otra rama, la entrada sin
@@ -975,11 +993,155 @@ describe('Historia 12.1 — sobre un sitio construido de verdad', () => {
       const delDia = conClase(enMain, 'section', 'del-dia');
       expect(delDia).toHaveLength(1);
       expect(fueraDelIndice(delDia[0])).toBe(true);
+      // La línea de cifras y el campo, también fuera.
+      for (const [etiqueta, clase] of [['p', 'cifras'], ['form', 'formulario']] as const) {
+        const elementos = conClase(enMain, etiqueta, clase);
+        expect(elementos, `${etiqueta}.${clase}`).toHaveLength(1);
+        expect(fueraDelIndice(elementos[0]), `${etiqueta}.${clase}`).toBe(true);
+      }
       // Y no en vacío: la portada trae la Cita del Día, los Temas y los Autores.
       expect(enMain.length).toBeGreaterThan(10);
-      expect(enMain.filter(({ elemento }) => elemento.atributos.get('data-pagefind-ignore') === 'all').length).toBeGreaterThanOrEqual(3);
       // Y al compartirse dice ser un sitio, no un artículo (FR-19): su tipo no cambia esa regla.
       expect(portada).toContain('<meta property="og:type" content="website">');
+    });
+
+    it('la marca sale con los mismos atributos en la portada que en el resto: solo cambia `aria-current`', async () => {
+      const marcaDe = (html: string) => {
+        let marca: Elemento | undefined;
+        recorrerElementos(html, (elemento, antepasados) => {
+          const enLaCabecera = antepasados.some((a) => a.etiqueta === 'header');
+          if (marca === undefined && enLaCabecera && elemento.etiqueta === 'a' && (elemento.atributos.get('class') ?? '').split(/\s+/).includes('marca')) marca = elemento;
+        });
+        return marca && new Map([...marca.atributos].filter(([nombre]) => nombre !== 'aria-current'));
+      };
+      const todas = await paginas();
+      const enLaPortada = marcaDe(todas.get('/')!);
+      expect(enLaPortada, 'la portada sin a.marca en la cabecera').toBeDefined();
+      let comparadas = 0;
+      for (const [ruta, html] of todas) {
+        const marca = marcaDe(html);
+        if (ruta === '/' || marca === undefined) continue;
+        expect(marca, ruta).toEqual(enLaPortada);
+        comparadas += 1;
+      }
+      expect(comparadas).toBeGreaterThan(0);
+    });
+
+    it('ninguna otra página declara el título de la portada ni lleva `h1` en la cabecera', async () => {
+      for (const [ruta, html] of await paginas()) {
+        if (ruta === '/') continue;
+        const exposicion = exposicionDeLaPortada(html);
+        expect(exposicion.titulosEnLaCabecera, ruta).toBe(0);
+        expect(exposicion.titulosDeclarados, ruta).toBe(0);
+      }
+    });
+  });
+
+  /*
+   * Historia 28.1 (UX-DR56) — la portada abre con la línea de cifras y el Campo de búsqueda, y sus
+   * bloques van en el orden fijo, cada uno con su rótulo literal.
+   */
+  describe('Historia 28.1 — la portada abre con las cifras del Corpus y un campo para buscar', () => {
+    const portada = async () => readFile(join(proyecto, 'dist', 'index.html'), 'utf8');
+
+    /** Los hijos directos de `.pagina`, en orden, y el árbol de `main`. */
+    async function estructura() {
+      const html = await portada();
+      const enMain: { elemento: Elemento; antepasados: readonly Elemento[] }[] = [];
+      recorrerElementos(html, (elemento, antepasados) => {
+        if (antepasados.some((a) => a.etiqueta === 'main')) enMain.push({ elemento, antepasados });
+      });
+      const clases = (e: Elemento) => (e.atributos.get('class') ?? '').split(/\s+/);
+      const pagina = enMain.find(({ elemento }) => clases(elemento).includes('pagina'));
+      expect(pagina, 'sin .pagina en main').toBeDefined();
+      const hijos = enMain.filter(({ antepasados }) => antepasados.at(-1) === pagina!.elemento).map((e) => e.elemento);
+      return { html, enMain, pagina: pagina!, hijos, clases };
+    }
+
+    it('`.pagina` es el primer hijo de `main`, queda fuera del índice y abre con la línea de cifras', async () => {
+      const { enMain, pagina, hijos, clases } = await estructura();
+      expect(pagina.antepasados.at(-1)?.etiqueta).toBe('main');
+      expect(enMain[0].elemento).toBe(pagina.elemento);
+      expect(pagina.elemento.atributos.get('data-pagefind-ignore')).toBe('all');
+      expect(hijos[0].etiqueta).toBe('p');
+      expect(clases(hijos[0])).toContain('cifras');
+      // Luego el formulario, y luego la Cita del Día.
+      expect(hijos[1].etiqueta).toBe('form');
+      expect(clases(hijos[2])).toContain('del-dia');
+    });
+
+    it('la línea dice las cifras del Corpus, con el censo vacío: «cada una cotejada»', async () => {
+      const html = await portada();
+      const linea = /<p class="cifras[^"]*"[^>]*>([\s\S]*?)<\/p>/.exec(html)?.[1].replace(/\s+/g, ' ').trim();
+      // 53 Citas de Séneca, todas con Fuente: el andamio les escribe el documento.
+      expect(linea).toBe(`${CITAS_POR_PAGINA + 1 + CITAS_DE_CARTAS.length} citas de 1 autor, cada una cotejada con el texto de su fuente.`);
+    });
+
+    it('el formulario es un GET a `/buscar/` con `q`, con su botón y sin ningún guion', async () => {
+      const { html, enMain, hijos } = await estructura();
+      const formulario = hijos[1];
+      expect(formulario.atributos.get('role')).toBe('search');
+      expect(formulario.atributos.get('action')).toBe(rutaDeLaBusqueda());
+      expect(formulario.atributos.get('method')).toBe('get');
+      const dentro = enMain.filter(({ antepasados }) => antepasados.includes(formulario)).map((e) => e.elemento);
+      const campos = dentro.filter((e) => e.etiqueta === 'input');
+      expect(campos.map((e) => e.atributos.get('name'))).toEqual([PARAMETROS_DE_LA_BUSQUEDA.texto]);
+      // El Campo del 404 (27.8): su etiqueta, su ejemplo y la tecla de buscar del móvil.
+      expect(campos[0].atributos.get('placeholder')).toBe(TEXTO_DE_EJEMPLO_DE_LA_BUSQUEDA);
+      expect(campos[0].atributos.get('enterkeyhint')).toBe('search');
+      const id = campos[0].atributos.get('id')!;
+      const etiqueta = new RegExp(`<label\\b[^>]*\\bfor="${id}"[^>]*>([\\s\\S]*?)<\\/label>`).exec(html)?.[1];
+      expect(etiqueta?.replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim()).toBe(ETIQUETA_DE_LA_BUSQUEDA);
+      const botones = dentro.filter((e) => e.etiqueta === 'button');
+      expect(botones).toHaveLength(1);
+      // Un envío sin `name`, que añadiría algo a la dirección, y tras el campo.
+      expect(botones[0].atributos.get('type')).toBe('submit');
+      expect(botones[0].atributos.has('name')).toBe(false);
+      expect(dentro.indexOf(botones[0])).toBeGreaterThan(dentro.indexOf(campos[0]));
+      const marcadoDelFormulario = /<form\b[^>]*role="search"[^>]*>[\s\S]*?<\/form>/.exec(
+        /<main[\s\S]*?<\/main>/.exec(html)![0],
+      )![0];
+      expect(/<button\b[^>]*>([\s\S]*?)<\/button>/.exec(marcadoDelFormulario)![1].replace(/<[^>]*>/g, '').trim()).toBe(
+        BOTON_DE_BUSCAR,
+      );
+      expect(dentro.filter((e) => e.etiqueta === 'script')).toEqual([]);
+      // Sin enlaces, así que ni zona ni exención.
+      expect(dentro.filter((e) => e.etiqueta === 'a')).toEqual([]);
+      expect(formulario.atributos.has('data-zona')).toBe(false);
+      expect(formulario.atributos.has('data-sin-zona')).toBe(false);
+    });
+
+    it('los rótulos de `main` van en el orden de la portada, cada sección con su `h2`', async () => {
+      const { html, enMain, hijos } = await estructura();
+      const cuerpo = /<main[\s\S]*?<\/main>/.exec(html)?.[0] ?? '';
+      const rotulos = [...cuerpo.matchAll(/<h([1-6])\b[^>]*>([\s\S]*?)<\/h\1>/g)].map(
+        (m) => `h${m[1]}:${m[2].replace(/<[^>]*>/g, '').trim()}`,
+      );
+      // Historia 28.3 — este Corpus tiene Obras indexables: «Obras» va entre la Cita del Día y los Temas.
+      expect(rotulos).toEqual(['h2:La cita de hoy', 'h2:Obras', 'h2:Temas', 'h2:Colecciones', 'h2:Autores']);
+      // Cada sección de la portada se nombra por su rótulo, y el `id` no se repite en la página.
+      const secciones = hijos.filter((e) => e.etiqueta === 'section' && !(e.atributos.get('class') ?? '').includes('del-dia'));
+      expect(secciones).toHaveLength(4);
+      const ids = [...html.matchAll(/\sid="([^"]+)"/g)].map((m) => m[1]);
+      for (const seccion of secciones) {
+        const nombre = seccion.atributos.get('aria-labelledby');
+        expect(nombre, 'una sección sin `aria-labelledby`').toBeDefined();
+        const rotulo = enMain.find(({ elemento, antepasados }) => antepasados.at(-1) === seccion && elemento.etiqueta === 'h2');
+        expect(rotulo?.elemento.atributos.get('id'), nombre).toBe(nombre);
+        expect(ids.filter((id) => id === nombre), nombre).toHaveLength(1);
+      }
+      // Y ningún `id` de la portada se repite —el del campo (`consulta`) tampoco—: son cortos, y los
+      // bloques que llegan después (la invitación, las Obras, los Autores destacados) pueden traer
+      // otro igual.
+      expect(ids).toContain('consulta');
+      expect(ids.filter((id, i) => ids.indexOf(id) !== i), 'ids repetidos en la portada').toEqual([]);
+    });
+
+    it('el campo no trae Pagefind a la portada: ni guion ni precarga', async () => {
+      const html = await portada();
+      const externos = [...html.matchAll(/<script\b[^>]*\bsrc="([^"]+)"/g)].map((m) => m[1]);
+      expect(externos.filter((src) => /pagefind/.test(src))).toEqual([]);
+      expect(html).not.toMatch(/<link[^>]*rel="modulepreload"[^>]*pagefind/);
     });
   });
 });
