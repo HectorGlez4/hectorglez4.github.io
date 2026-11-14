@@ -453,12 +453,12 @@ development_status:
   epic-27-retrospective: done
 
   # Épica 28 — la portada de retorno. Al final; conviene la 21.2 antes (con 16 aptas la Cita del Día se repite cada 16 días).
-  epic-28: backlog
-  28-1-la-portada-abre-con-las-cifras-del-corpus-y-un-campo-para-bu: backlog
-  28-2-la-cita-de-hoy-lleva-su-obra-y-las-acciones-de-su-página: backlog  # v9, Héctor 2026-11-07: nace en el orden v9 (acciones, «Compartir en», «Ver esta cita», Tarjeta de Obra; UX-DR123), criterios enmendados en epics.md
-  28-3-seis-obras-que-cambian-con-la-jornada: backlog
-  28-4-todos-los-temas-las-colecciones-con-su-criterio-y-ocho-autor: backlog
-  28-5-la-portada-nueva-llega-en-vivo-tras-el-juicio-de-sm-11: backlog  # operativa: acto de Héctor (merge desde el 2026-12-05 o con la fecha que declare Héctor)
+  epic-28: in-progress
+  28-1-la-portada-abre-con-las-cifras-del-corpus-y-un-campo-para-bu: review  # v8-ralph 2026-10-30: la portada abre con las cifras del Corpus y el campo de búsqueda; diferido para Héctor: desfase AD-11/AD-17 con la UX v8.2 (bmad-architecture)
+  28-2-la-cita-de-hoy-lleva-su-obra-y-las-acciones-de-su-página: backlog  # bloqueada: respuesta de bmad-ux sobre DESCRIPCION_DEL_SITIO y la Épica 25 (v8-ralph 2026-10-30)
+  28-3-seis-obras-que-cambian-con-la-jornada: review  # v8-ralph 2026-10-30: seis Obras de la portada que rotan con la jornada; sin diferidos para Héctor
+  28-4-todos-los-temas-las-colecciones-con-su-criterio-y-ocho-autor: review # v8-ralph 2026-10-30: la portada lista todos los Temas, las Colecciones con su criterio y ocho Autores destacados; diferido para Héctor: si las órdenes que retiran deben comparar también los destacados de antes y de después (NFR-5)
+  28-5-la-portada-nueva-llega-en-vivo-tras-el-juicio-de-sm-11: done  # Héctor declaró la fecha el 2026-11-14; en vivo con 8a8fe217ba (28.2 sigue fuera)
   epic-28-retrospective: optional
 
   # ── v9 y v9.1, de la cita al libro y la Cita atribuida ─────────────────────────────
@@ -490,7 +490,7 @@ development_status:
   # (Héctor; 1.200 propuesto): el corte cae el día en que se le da valor, no el del merge.
   epic-31: in-progress
   31-1-el-pasaje-se-localiza-con-el-localizador-del-orden-del-libro: review  # v9-ralph 2026-11-08: el cargador de posiciones da el pasaje (pasaje.ts, ofrecePasaje); MAX_CARACTERES_DEL_PASAJE sin valor (lo fija Héctor); rama apilada sobre la Épica 29; una ronda de revisión (3 parches)
-  31-2-lee-el-pasaje-plegado-en-la-página-de-cita: backlog  # v9-ralph 2026-11-08: desbloqueada, la 31.1 en review y la Épica 30 en la principal
+  31-2-lee-el-pasaje-plegado-en-la-página-de-cita: review  # v9-ralph 2026-11-12: «Lee el pasaje» plegado en la Página de Cita (tope sin valor: no se pinta en el Corpus real); dos pasadas de revisión; diferidos para Héctor: con el tope a 1.200 la cobertura tipográfica para el build (griego, «ş», cirílico), el tope no compone la relación de superficies, <mark> en colores forzados
   epic-31-retrospective: optional
 
   # Épica 32 — la Obra como destino. Pregunta 12 («Granos de oro») antes de la 32.1;
@@ -532,10 +532,10 @@ development_status:
   35-4-el-personaje-va-donde-va-el-autor: review  # v9-ralph 2026-11-14: el Personaje va donde va el Autor (firmaDeCita única, guardas de la 35.2 levantadas, Obra de Personaje con su Cabecera y JSON-LD character); dos pasadas de revisión; diferidos para Héctor: creator frente a author, serif o Inter para el Personaje, el año en la línea sin Obra, ficha de Personaje resuelta solo por Citas de otros
   35-5-los-personajes-en-los-directorios-y-en-la-búsqueda: review  # v9-ralph 2026-11-14: Personajes en los Directorios (sección tras la A–Z en /autores/ y /obras/) y en /buscar/ (personaje=, optgroup, filtro de Pagefind); topes de los guiones de búsqueda y filtro subidos con la cifra medida; una pasada de revisión (2 parches); diferidos para Héctor en el spec
   35-6-la-variante-de-españa-y-la-única-orden-que-cambia-una-atribu: review  # v9-ralph 2026-11-15: la Variante de España de la atribuida y npm run atribuida, la única orden que cambia una atribuida (la puerta sigue cerrada en el árbol); dos pasadas de revisión; supuestos para Héctor en el spec
-  35-7-lo-que-cuenta-solo-la-clase-de-siempre: backlog  # bloqueada: tras la 35.1b y, además, la 28.1 de la Épica 28 de la v8, sin fundir en la principal, que decide Héctor (la línea de cifras que enmienda es suya) (v9-ralph 2026-11-09)
-  35-8-pedir-que-se-corrija-o-se-retire-y-que-conste: backlog  # bloqueada: tras la 35.1b (BUZON_DE_PETICIONES) y la 35.7 (formas-vedadas.yml), y, además, la 28.1 de la Épica 28 de la v8, sin fundir en la principal, que decide Héctor (v9-ralph 2026-11-09)
+  35-7-lo-que-cuenta-solo-la-clase-de-siempre: backlog
+  35-8-pedir-que-se-corrija-o-se-retire-y-que-conste: backlog
   35-9-la-obra-con-derechos-vigentes-se-vende-sola: backlog  # bloqueada: tras la 32.4 (bloqueada para Héctor, bmad-ux), la 32.5, la 33.2 y la 35.4 (v9-ralph 2026-11-09)
-  35-10-la-siembra-acotada-desde-brainyquote: backlog  # bloqueada: tras la 35.1b, la 35.6 y la 35.7, y, además, la 28.1 de la Épica 28 de la v8, sin fundir en la principal, que decide Héctor; la semilla la llena Héctor y la orden se construye con la lista vacía (v9-ralph 2026-11-09)
+  35-10-la-siembra-acotada-desde-brainyquote: backlog
   epic-35-retrospective: optional
 
 action_items:

@@ -1,0 +1,43 @@
+---
+/**
+ * Lo que rota con la jornada — AD-11, AD-12, Historias 26.8 y 28.3.
+ *
+ * **Es el único emisor de la marca `data-jornada`** (atributo sin valor) en todo `src/` y
+ * `public/`. Lo que cuelga del elemento que pinta cambia de un día a otro sin ningún commit —la
+ * Cita del Día de la portada y del 404, y las Obras de la portada—, así que no puede sostener
+ * ninguna garantía del sitio: el grafo de enlaces con el que el build comprueba NFR-5
+ * (`integraciones/alcance.ts`, por `MARCA_DE_JORNADA` de `tools/lib/alcance.ts`) se salta su
+ * subárbol entero, y la prueba de dos jornadas (`tests/unit/dos-jornadas.test.ts`) exige que la
+ * portada y el 404 solo difieran ahí. Los dos siguen el atributo, no el componente.
+ *
+ * Uno solo y sin otro trabajo porque AD-12 pide una sola marca puesta por un solo componente: la
+ * Cita del Día no puede pintar las Obras (el 404 lleva la Cita sin Obras), y dos emisores dejarían
+ * que algo rotara a escondidas fuera de lo que este marca. Por eso
+ * `tests/unit/alcance-construido.test.ts` exige que ningún otro fichero de `src/` ni de `public/`
+ * nombre la marca.
+ *
+ * Envuelve su `slot` en un `section` o un `div` (`como`), con su `class` si la recibe, la marca y
+ * `data-pagefind-ignore="all"`, en ese orden: lo que rota no entra en el índice propio —la Cita del
+ * Día ya tiene su página, y las Obras la suya—. Dos ramas con el mismo marcado y no una etiqueta
+ * dinámica, porque Astro pinta un atributo sin valor de una etiqueta dinámica como `="true"` (lo
+ * cuenta `Rotulo.astro`), y la marca dejaría de salir byte a byte igual. Sin `<style>`: la
+ * presentación es de quien lo usa, y así no añade ningún atributo de ámbito.
+ */
+
+interface Props {
+  /** El elemento que envuelve lo que rota. */
+  como: 'section' | 'div';
+  /** La clase del elemento, si quien lo usa lo estiliza o lo nombra por ella. */
+  class?: string;
+}
+
+const { como, class: clase } = Astro.props;
+---
+
+{
+  como === 'section' ? (
+    <section class={clase} data-jornada data-pagefind-ignore="all"><slot /></section>
+  ) : (
+    <div class={clase} data-jornada data-pagefind-ignore="all"><slot /></div>
+  )
+}

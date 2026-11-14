@@ -23,7 +23,7 @@
  */
 import type { PasajeDeAparicion } from '../lib/obras.ts';
 import type { Cita } from '../lib/publicado.ts';
-import { lineaDeLaFuente } from '../lib/atribucion.ts';
+import { lineaDeLaFuenteDelPasaje } from '../lib/atribucion.ts';
 import { partesDelPasaje } from '../lib/pasaje.ts';
 
 interface Props {
@@ -35,16 +35,10 @@ interface Props {
 const { pasaje, fuente, slug } = Astro.props;
 
 /*
- * El pasaje sale de un documento casado con la Fuente de la Cita (`documentosDeCita`), así que
- * su Fuente es la de la Cita: sin ella el contrato está roto, y no se pinta un texto ajeno sin
- * decir de dónde sale.
+ * Sin Fuente, o con una que no da rótulo, no se pinta un texto ajeno sin decir de dónde sale:
+ * `lineaDeLaFuenteDelPasaje` lanza y la construcción se para nombrando la Cita.
  */
-const linea = fuente === undefined ? undefined : lineaDeLaFuente(fuente);
-if (linea === undefined) {
-  throw new Error(
-    `La Cita «${slug}» trae pasaje sin Fuente que lo atribuya: un pasaje solo sale de un documento de su Fuente (Historia 31.2, AD-28).`,
-  );
-}
+const linea = lineaDeLaFuenteDelPasaje(fuente, slug);
 
 const partes = partesDelPasaje(pasaje);
 ---

@@ -16,6 +16,7 @@ import { rotuloDeFuente, type ObraResuelta } from './obras.ts';
 import type { AtribucionDeSemblanza } from './biografia.ts';
 import { MARCA } from './marca.ts';
 import { REGIONES_DE_VARIANTE } from './variante.ts';
+import { milesEnEspañol } from './formato.ts';
 import { escapar } from './lienzo.ts';
 import { enUnaLinea, versosDe } from './verso.ts';
 import { recuentoDeAutores, recuentoDeCitas, recuentoDeObras, temaEnFrase } from './recuentos.ts';
@@ -240,6 +241,31 @@ export function lineaDeVariante(cita: Pick<Cita, 'variante'>): string | undefine
   // El esquema solo admite regiones del conjunto; si una llegara sin rótulo, no se pinta «En undefined».
   if (rotulo === undefined) throw new Error(`La Variante declara la región «${String(variante.region)}», que no es de REGIONES_DE_VARIANTE.`);
   return `En ${rotulo}: «${variante.texto}»`;
+}
+
+/**
+ * La línea de la Fuente de «Lee el pasaje» — Historia 31.2, AD-28: la de `lineaDeLaFuente`, o
+ * lanza. El pasaje sale de un documento casado con la Fuente de la Cita (`documentosDeCita`), así
+ * que sin Fuente el contrato está roto; y con Fuente pero sin rótulo —ni nombre, ni anfitrión, ni
+ * identificador— no hay con qué atribuirlo. En los dos casos no se pinta un texto ajeno sin decir
+ * de dónde sale, y la construcción se para nombrando la Cita y cuál de los dos es.
+ */
+export function lineaDeLaFuenteDelPasaje(
+  fuente: Parameters<typeof lineaDeLaFuente>[0] | undefined,
+  slug: string,
+): NonNullable<ReturnType<typeof lineaDeLaFuente>> {
+  if (fuente === undefined) {
+    throw new Error(
+      `La Cita «${slug}» trae pasaje sin Fuente que lo atribuya: un pasaje solo sale de un documento de su Fuente (Historia 31.2, AD-28).`,
+    );
+  }
+  const linea = lineaDeLaFuente(fuente);
+  if (linea === undefined) {
+    throw new Error(
+      `La Cita «${slug}» trae pasaje, pero su Fuente (${fuente.url}) no da rótulo —ni nombre, ni anfitrión, ni identificador— con que atribuirlo (Historia 31.2, AD-28).`,
+    );
+  }
+  return linea;
 }
 
 /**
@@ -599,6 +625,41 @@ export function cierreDeMasDelAutor(autor: Pick<Autor, 'nombre'>, recuento: numb
  */
 export function cierreDeMasDelPersonaje(personaje: Pick<Personaje, 'nombre'>, recuento: number): string {
   return `Las ${recuentoDeCierre('cierreDeMasDelPersonaje', recuento)} citas de ${personaje.nombre}`;
+}
+
+/**
+ * El cierre de las Obras de la portada — «Las {n} obras», FR-55, UX-DR56, Historia 28.3.
+ *
+ * Lleva a `/obras/`, así que `n` son las Obras que lista el Directorio de Obras —también las que no
+ * se indexan—, no las que la portada enseña hoy. Con punto de millar («Las 1.234 obras»), como la
+ * línea de cifras de la 28.1, y concordado con una («La 1 obra»), que solo se da en las pruebas.
+ * Sin el glifo de avance «›»: lo pone la portada, en un `span` `aria-hidden`. Lanza con un recuento
+ * que no sea un entero de 1 en adelante.
+ */
+export function cierreDeLasObras(n: number): string {
+  // Como los cierres de la 24.6 (`recuentoDeCierre`), un recuento imposible no se redacta: con
+  // ninguna Obra la portada no tiene bloque, así que «Las 0 obras» solo saldría de un uso roto.
+  if (!Number.isInteger(n) || n < 1) {
+    throw new Error(`cierreDeLasObras: «${n}» no es un recuento de Obras (un entero de 1 en adelante).`);
+  }
+  return n === 1 ? 'La 1 obra' : `Las ${milesEnEspañol(n)} obras`;
+}
+
+/**
+ * El cierre de los Autores de la portada — «Los {m} autores, de la A a la Z», FR-55, UX-DR62,
+ * Historia 28.4.
+ *
+ * Lleva a `/autores/`, así que `m` son los Autores que lista el Directorio —todos los publicados,
+ * la misma m que la línea de cifras—, no los ocho destacados que la portada enseña. Con punto de
+ * millar («Los 1.234 autores») y concordado con uno («El 1 autor»), que solo se da en las pruebas.
+ * Sin el glifo de avance «›»: lo pone la portada, en un `span` `aria-hidden`. Lanza con un recuento
+ * que no sea un entero de 1 en adelante: sin ningún Autor la portada no tiene sección.
+ */
+export function cierreDeLosAutores(m: number): string {
+  if (!Number.isInteger(m) || m < 1) {
+    throw new Error(`cierreDeLosAutores: «${m}» no es un recuento de Autores (un entero de 1 en adelante).`);
+  }
+  return m === 1 ? 'El 1 autor, de la A a la Z' : `Los ${milesEnEspañol(m)} autores, de la A a la Z`;
 }
 
 /**

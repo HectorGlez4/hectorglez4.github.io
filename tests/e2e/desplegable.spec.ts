@@ -34,7 +34,7 @@ const PERFIL = 'escritorio';
 
 /*
  * Puerto propio: 4321 es el sitio del repositorio, 4399 y 4400 los de `receptor.spec.ts`, 4402
- * el de `ingreso-accesible.spec.ts` y 4403 el de `busqueda-historial.spec.ts`.
+ * el de `ingreso-accesible.spec.ts`, 4403 el de `busqueda-historial.spec.ts` y 4405 el de `lee-el-pasaje.spec.ts`.
  */
 const PUERTO_SITIO = 4404;
 const SITIO = `http://localhost:${PUERTO_SITIO}`;

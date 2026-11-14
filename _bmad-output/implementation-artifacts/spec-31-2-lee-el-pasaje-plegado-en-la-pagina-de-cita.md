@@ -25,6 +25,20 @@ deferred:
     location: >-
       src/lib/atribucion.ts (lineaDeLaFuente); src/lib/umbrales.ts (MAX_CARACTERES_DEL_PASAJE)
     severity: low
+  - summary: >-
+      Pendiente de Héctor (bmad-architecture, AD-27): dar valor a MAX_CARACTERES_DEL_PASAJE cambia unas 2.104 Páginas de Cita sin mover su lastmod ni avisarlas, porque la relación de superficies no compone ningún umbral de src/lib/umbrales.ts.
+    evidence: |-
+      tools/lib/cambios.ts compone ficheros del Corpus por campos (cambiaronLosCampos) y ningún umbral es componente de ninguna superficie: tampoco MIN_CITAS_POR_TEMA o MAX_CITAS_RELACIONADAS, que también cambian páginas. src/lib/umbrales.ts solo entra en el git diff del aviso para las listas de Obras indexables. Con el tope en undefined no hay pasaje y nada se pierde hoy; el día del commit que le da valor, el sitemap y IndexNow no se enteran. Salidas: un componente «umbral» en la relación (decisión de espina) o un aviso manual de las Páginas de Cita en ese despliegue; decide Héctor.
+    location: >-
+      tools/lib/cambios.ts (relacionDeSuperficies, Página de Cita); src/lib/umbrales.ts (MAX_CARACTERES_DEL_PASAJE)
+    severity: medium
+  - summary: >-
+      Pendiente de Héctor (bmad-ux, UX-DR146): con forced-colors el <mark> del pasaje solo se distingue por la familia, porque su fondo es transparent y su única otra señal es el color.
+    evidence: |-
+      src/components/EstiloDeLeeElPasaje.astro pinta .pasaje mark con la serif, --tinta y background transparent, como manda UX-DR146 (sin peso 600). En modo de alto contraste el navegador iguala los colores y queda solo el cambio de familia; una señal que no sea de color (subrayado, regla forced-colors) es una decisión de diseño.
+    location: >-
+      src/components/EstiloDeLeeElPasaje.astro (.pasaje mark)
+    severity: low
 ---
 
 <intent-contract>
@@ -114,7 +128,7 @@ deferred:
 - `src/lib/umbrales.ts` -- `DESPLIEGUE_DEL_PASAJE` y su entrada en `CORTES_DE_SERIE_DECLARADOS`.
 - `tools/lib/lineaBase.ts` -- SM-C5 declara los dos cortes de su serie (ver Design Notes); el informe nombra cada uno pendiente y el llegado.
 - `tests/unit/linea-base.test.ts` -- lista de constantes con `DESPLIEGUE_DEL_PASAJE`; con la constante sin valor, el informe dice «La llegada de DESPLIEGUE_DEL_PASAJE no ha ocurrido» y que la marca el primer despliegue con valor en `MAX_CARACTERES_DEL_PASAJE`, no el merge; con las dos con valor, la línea base propia empieza tras la del pasaje y ninguna ventana la cruza; los casos de la 30.1 siguen dando lo mismo.
-- `tests/e2e/lee-el-pasaje.spec.ts` (nuevo) -- construcción parcheada como `ingreso-accesible.spec.ts`, servida en el puerto 4403: a 360 × 640 Copiar acaba dentro de 640 y su `y` no cambia al quitar del DOM el `<details>` del pasaje; a 320 px, abierto, sin desplazamiento horizontal; tabulación: el `<summary>` «Lee el pasaje» va tras el último enfocable de la Tarjeta de Obra y, abierto, le sigue el enlace a la edición; con JavaScript apagado se abre y se cierra; axe sin violaciones con el desplegable abierto.
+- `tests/e2e/lee-el-pasaje.spec.ts` (nuevo) -- construcción parcheada como `ingreso-accesible.spec.ts`, servida en el puerto 4405: a 360 × 640 Copiar acaba dentro de 640 y su `y` no cambia al quitar del DOM el `<details>` del pasaje; a 320 px, abierto, sin desplazamiento horizontal; tabulación: el `<summary>` «Lee el pasaje» va tras el último enfocable de la Tarjeta de Obra y, abierto, le sigue el enlace a la edición; con JavaScript apagado se abre y se cierra; axe sin violaciones con el desplegable abierto.
 - `AGENTS.md` -- el texto de `corpus/fuentes/` se publica también como pasaje, lo entrega solo el cargador de posiciones, la Página de Cita compone los documentos de su Obra y las `formas` de su ficha, `MAX_CARACTERES_DEL_PASAJE` es de Héctor y `DESPLIEGUE_DEL_PASAJE` es la jornada del primer despliegue con el tope con valor, no la del merge.
 
 **Acceptance Criteria:**
@@ -139,6 +153,33 @@ deferred:
   - none
 
 Sin hallazgos externos en esta pasada: el orquestador no pasó secciones «## Hallazgos externos — …». No cuenta como revisión: la primera revisión con hallazgos es la siguiente.
+
+### 2026-11-08 — Review pass
+- intent_gap: 0
+- bad_spec: 0
+- patch: 6 (high 0, medium 4, low 2)
+- defer: 2 (high 0, medium 1, low 1)
+- reject: 24 (high 0, medium 3, low 21)
+- addressed_findings:
+  - `[medium]` `[patch]` El refinamiento del esquema de `posiciones` no comprobaba que los tramos dijeran todo el texto (una palabra de la Cita fuera de los tramos se perdía sin error) y ninguna prueba le daba datos malos (blind-hunter, edge-case-hunter, verification-gap). Ahora lo juzga `problemaDeLosParrafos` de `src/lib/pasaje.ts` —tramo de la Cita, tramos en orden y sin pisarse, y fuera de ellos solo blanco— desde un `superRefine` de `src/content.config.ts`; `tests/unit/lee-el-pasaje.test.ts` lo prueba puro con cada forma de romperlo y con una construcción cuyo productor parcheado pierde la última letra de cada tramo, que se para con el mensaje.
+  - `[low]` `[patch]` En un documento CRLF el `\r` del final de línea quedaba dentro del tramo y se publicaba delante de cada `<br>`. `parrafosDelTrozo` (`tools/lib/pasaje.ts`) lo deja fuera del tramo, entre líneas; `tests/unit/pasaje.test.ts` lo fija.
+  - `[medium]` `[patch]` `LeeElPasaje.astro` decía «sin Fuente» también ante una Fuente sin rótulo, y su `throw` no lo probaba nada. Lo hace ahora `lineaDeLaFuenteDelPasaje` de `src/lib/atribucion.ts`, con un mensaje para cada caso, probado puro.
+  - `[medium]` `[patch]` La Línea de la Fuente refactorizada solo la vigilaban subcadenas. `tests/unit/fuente-visible.test.ts` exige su texto exacto («Texto tomado de Wikisource en español. CC BY-SA 4.0.»), un solo enlace con `href`, `rel="noopener nofollow"` y sin `target`; `lineaDeLaFuente` se prueba pura con licencia, sin ella y sin rótulo.
+  - `[medium]` `[patch]` La prueba e2e de Copiar era tautológica (quitaba un `<details>` que va detrás de Copiar), no había comparación con la página de antes, ni prueba de que nada se intercale entre la Atribución, la Fuente y Copiar, ni de que lo copiado y la Imagen sean «los de antes», y la ausencia con el tope en `undefined` era solo una medida a mano (blind-hunter, verification-gap, intent-alignment, ac-auditor). `tests/unit/lee-el-pasaje.test.ts` construye además el mismo Corpus con el tope en `undefined` y exige que cada página con pasaje, sin su `<details>` y sin su hoja, sea byte a byte la de antes, con el pasaje detrás del botón Copiar, y que las páginas sin pasaje sean idénticas; la e2e mide ahora que el pasaje va por debajo de Copiar, cerrado y abierto, y que abrirlo no mueve ni a Copiar ni a él.
+  - `[low]` `[patch]` Las `llegadas` de SM-C5 se escribían a mano sin cotejarse con `CORTES_DE_SERIE_DECLARADOS`. `tests/unit/linea-base.test.ts` exige que cada juicio con corte declare exactamente los cortes de su serie, en su orden.
+
+Diferidos: la relación no compone el tope (darle valor no fecha ni avisa las Páginas de Cita; pendiente de Héctor, bmad-architecture) y la señal no cromática del `<mark>` en forced-colors (pendiente de Héctor, bmad-ux). Rechazados, entre otros: el sobrefechado de 483 `lastmod` con el tope en `undefined` y la sobreaproximación por Obra (los manda el intent-contract, `documento.cita = CUALQUIER_CAMBIO`, y el criterio dice «a sabiendas»; medidos y anotados), `'pasaje'` en `PORTAN_LA_ATRIBUCION` (lo manda el contrato), la hoja `is:inline` (desviación anotada y medida en peso), las formas por índice (las fija el orden de `FORMAS_DE_LINEAS` en `tests/unit/lineas.test.ts`), el `text-underline-offset` (el mismo literal que `tokens.css` y `Fuente.astro`), la e2e en un solo perfil y puerto fijo (decisión anotada; `afterAll` para el servidor aunque falle el `beforeAll`), `pendientes[0]` indefinido (imposible con llegadas no vacías), el bloqueo de cobertura tipográfica (ya diferido) y las medidas de peso y NFR-7 no repetidas (actos manuales anotados).
+
+### 2026-11-09 — Review pass
+- intent_gap: 0
+- bad_spec: 0
+- patch: 1 (high 0, medium 1, low 0)
+- defer: 0
+- reject: 40 (high 0, medium 4, low 36)
+- addressed_findings:
+  - `[medium]` `[patch]` `tests/e2e/lee-el-pasaje.spec.ts` servía en 4403, el mismo puerto que `tests/e2e/busqueda-historial.spec.ts`; con `fullyParallel: true` una pasada entera de `npm run test:e2e` podía levantar los dos a la vez y tumbar uno por el puerto (verification-gap, blind-hunter, edge-case-hunter, ac-auditor). Pasa a 4405, la lista de puertos de su comentario y la de `desplegable.spec.ts` se ponen al día, y `tests/unit/puertos-e2e.test.ts` (nueva, sin construir) exige que ningún `const PUERTO… = N` de `tests/e2e/` se repita entre ficheros ni pise 4321 u 8787: en rojo antes del cambio, en verde después. De paso, `expect(cerrado).not.toBeNull()` antes de leer `cerrado!.y`.
+
+Rechazados en esta última pasada, por proporción: el sobrefechado por documento y por `formas` con el tope en `undefined` y la sobreaproximación por Obra (los manda el intent-contract, ya juzgado en la pasada anterior), el tope como componente de la relación y la señal no cromática del `<mark>` (ya diferidos), el bloqueo de cobertura tipográfica (ya diferido, high), el `\r` interior de un bloque `prosa-ajustada` CRLF (el analizador de HTML normaliza CR a LF y el bloque se pinta como espacio, igual que su `\n`), los tramos adyacentes sin separador y los extremos de la Cita en blanco no cubierto (solo los produce un productor roto, y el único productor sale de líneas no vacías), espacios finales de línea antes de `<br>` (los colapsa el HTML), `parrafos: []` (lo para el esquema, que es lo pedido), las formas por índice (las fija `tests/unit/lineas.test.ts`), el `<mark>` y los lectores de pantalla (la marca es de lectura visual por UX-DR146; decisión de diseño, no defecto), la hoja `is:inline` (desviación anotada y medida), `rel="noopener nofollow"` en la misma pestaña (lo manda el contrato y es el de `Fuente.astro`), `PORTAN_LA_ATRIBUCION` ampliado (lo manda el contrato), `deDondeLlega` cotejado por texto y `partidaDelCorte!` (una serie con corte declarado siempre se parte; la prueba de la pasada anterior coteja las llegadas con los cortes), la licencia vacía o con punto final y la URL no http (los juzga el esquema de Fuente, preexistente), el perfil `escritorio` sin pruebas (los criterios son a 360 y 320 px), la fragilidad de las palabras de sonda y de `String.replace` en `lee-el-pasaje.test.ts`, la Cita sin Obra con pasaje (no se puede construir; anotado), el estado `done` con `followup_review_recommended` y las medidas manuales no repetidas (actos anotados).
 
 ## Design Notes
 
@@ -188,7 +229,7 @@ Blocking condition: none
 - El `mark` lleva `font-weight: var(--peso-regular)` y no `inherit`: `tests/unit/tipografia-en-tokens.test.ts` rechaza todo peso que no sea `var(--peso-…)`, y el spec prohíbe una excepción nueva. El efecto es el mismo (el párrafo es regular).
 - La presentación no va en un `<style>` de `LeeElPasaje.astro` sino en `EstiloDeLeeElPasaje.astro`, puesto en la cabeza solo en las páginas con pasaje: con el `<style>` del componente, Astro lo metía en la hoja de toda Página de Cita y el nombre con huella de esa hoja cambiaba las 4.424 páginas con el tope en `undefined` (Block If). Coste: unos 650 bytes por página con pasaje.
 - La Cita sin Obra con pasaje de la matriz no se puede construir: un documento solo casa con una Cita que declara obra y toda obra con forma tiene ficha. Su regla la prueba `orden-del-libro.test.ts` (`pasajesDeCitas` sin Obra); el filete es la regla de `.desplegables`, que no depende de la Tarjeta de Obra.
-- E2E: todo en el perfil `movil` (el de `escritorio` se salta), porque el montaje levanta un puerto fijo (4403); las medidas fijan su ventana. El receptor de la medida NFR-7 fue el de 204 de la Épica 30 en 8787, no `wrangler dev`.
+- E2E: todo en el perfil `movil` (el de `escritorio` se salta), porque el montaje levanta un puerto fijo (4405 desde la tercera pasada; antes 4403, que chocaba con `busqueda-historial.spec.ts`); las medidas fijan su ventana. El receptor de la medida NFR-7 fue el de 204 de la Épica 30 en 8787, no `wrangler dev`.
 - `fecha-de-cambio-build.test.ts`: el documento ya trae el texto de la Cita sembrada desde el primer commit (la siembra real no reescribe documentos); reescribirlo en el commit de la siembra fecha ahora, a sabiendas, las hermanas.
 
 **Verificación (2026-11-08).**
@@ -201,6 +242,58 @@ Blocking condition: none
 - NFR-7, Lighthouse 13.5.0 `simulate`, 10 corridas alternas, `max-age=600` y gzip; la Cita en verso con el pasaje más largo es `fernan-gonzalez-de-eslava-por-que-mi-dios-me-soltais-y` (697 caracteres, 27 saltos). Medias, tope del árbol → 1.200: Fernán González LCP 1.595 → 1.626 (+31), FCP 948 → 922 (−25); Machado LCP 1.639 → 1.610 (−29), FCP 939 → 900 (−39); Martí «sincero» LCP 1.596 → 1.626 (+30), FCP 922 → 919 (−2); Martí «vengo» LCP 1.580 → 1.624 (+44), FCP 896 → 917 (+21). Todas dentro del margen de 100 ms. Las tres de la auditoría no tienen pasaje (su HTML es igual en las dos copias): su diferencia es ruido.
 - `git diff --stat 020a4dce8a -- corpus/` — vacío. La copia se borró.
 
-**Revisión.** Pasada sin hallazgos externos: 0 parches, 0 diferidos, 0 rechazados. `followup_review_recommended: false` (parches: high 0, medium 0, low 0; puntuación 0).
+**Revisión.** Primera pasada sin hallazgos externos: 0 parches. Segunda pasada (2026-11-08/09, cinco capas externas): 6 parches, 2 diferidos (pendientes de Héctor: el tope como componente de la relación, bmad-architecture; la señal no cromática del `<mark>`, bmad-ux), 24 rechazados. `followup_review_recommended: true` (parches: high 0, medium 4, low 2; puntuación 3 × 4 + 2 = 14).
+
+**Parches de la segunda pasada.**
+- `src/lib/pasaje.ts` — `problemaDeLosParrafos`: el tramo de la Cita, tramos en orden y sin pisarse, y fuera de ellos solo blanco.
+- `src/content.config.ts` — el esquema de `posiciones` lo juzga con esa función (`superRefine`), en lugar del refinamiento que no miraba la cobertura.
+- `tools/lib/pasaje.ts` — el `\r` de un final de línea CRLF queda fuera del tramo de su línea.
+- `src/lib/atribucion.ts`, `src/components/LeeElPasaje.astro` — `lineaDeLaFuenteDelPasaje`: lanza con un mensaje para «sin Fuente» y otro para «Fuente sin rótulo».
+- `tests/unit/lee-el-pasaje.test.ts` — pruebas puras de `problemaDeLosParrafos`, `lineaDeLaFuente` y `lineaDeLaFuenteDelPasaje`; una tercera construcción con el tope en `undefined` frente a la que cada página con pasaje, sin su `<details>` ni su hoja, es byte a byte igual (y el pasaje va tras el botón Copiar), y las páginas sin pasaje son idénticas; una construcción con el productor parcheado que se para por el esquema.
+- `tests/unit/fuente-visible.test.ts` — el texto exacto de la Línea de la Fuente y su enlace (`href`, `rel`, sin `target`).
+- `tests/unit/pasaje.test.ts` — CRLF sin `\r` en el tramo.
+- `tests/unit/linea-base.test.ts` — las `llegadas` de cada juicio con corte son los cortes declarados de su serie.
+- `tests/e2e/lee-el-pasaje.spec.ts` — la prueba de Copiar mide que el pasaje va por debajo, cerrado y abierto, y que abrirlo no mueve nada (en coordenadas del documento), en lugar de quitar un nodo que va detrás.
+- `AGENTS.md` — la puerta del esquema, el `\r` y el error del pasaje sin rótulo.
+
+**Verificación de la segunda pasada.** `npx vitest run` de `lee-el-pasaje` (24 en verde, con las cuatro construcciones), `fuente-visible`, `pasaje`, `linea-base`, `semblanza`, `tipografia-en-tokens` y `lineas` — en verde; `npx astro check` — 0 errores, 0 avisos; `npm test` entero — 168 ficheros, 7.666 pruebas, en verde; `npx playwright test tests/e2e/lee-el-pasaje.spec.ts --project=movil` — 5 en verde. No se repitieron la construcción del Corpus real frente a `baseline_revision`, la copia con el tope en 1.200 ni Lighthouse: con el tope en `undefined` ningún parche toca lo que se pinta (el esquema solo juzga pasajes, y no hay ninguno), y con el tope en 1.200 el único cambio de bytes es quitar un `\r` por línea en los documentos CRLF; la nueva prueba byte a byte cubre en el Corpus de prueba lo que la medida a mano afirmaba.
 
 **Riesgos residuales.** Con el tope en 1.200 el build se para por la cobertura tipográfica (tres pasajes): darle valor exige antes la decisión de Héctor (diferido). La hoja en la cabeza suma unos 650 bytes por Página de Cita con pasaje. El orden de tabulación se comprobó en una Cita con Tarjeta de Obra; sin Obra no hay Cita con pasaje.
+
+**Tercera pasada (2026-11-09, cinco capas externas, la última).** 1 parche, 0 diferidos nuevos, 40 rechazados. `followup_review_recommended: false` (parches: high 0, medium 1, low 0; puntuación 3 × 1 = 3).
+- `tests/e2e/lee-el-pasaje.spec.ts` — sirve en 4405 (antes 4403, el de `busqueda-historial.spec.ts`; con `fullyParallel: true` chocaban en una pasada entera) y comprueba `cerrado` no nulo antes de leerlo.
+- `tests/e2e/desplegable.spec.ts` — su lista de puertos ocupados nombra el 4405.
+- `tests/unit/puertos-e2e.test.ts` (nueva, sin construir) — ningún `const PUERTO… = N` de `tests/e2e/` se repite entre ficheros ni pisa 4321 u 8787; en rojo antes del cambio.
+
+**Verificación de la tercera pasada.** `npx vitest run tests/unit/puertos-e2e.test.ts` — en rojo antes, en verde después; `npx playwright test tests/e2e/lee-el-pasaje.spec.ts tests/e2e/busqueda-historial.spec.ts` (los dos proyectos, en paralelo) — 8 en verde, 8 saltadas; `npx astro check` — 0 errores; `npm test` entero — 169 ficheros, 7.669 pruebas, en verde. Nada de lo que se pinta cambia: no se repitieron construcciones del Corpus real, la copia con 1.200 ni Lighthouse.
+
+## Verificación previa a la fusión — 2026-11-12
+
+Puerta de la etapa s-31 (31.1 y 31.2 en revisión), primer intento.
+
+**Sincronización.** `origin/main` (ad3a0edbc7: Épicas 29, 30 con la fase B de la 30.5, y 34) no era antepasado: fusionada en 965c3491fc. Dos conflictos, resueltos con los dos lados: `src/lib/umbrales.ts` (el tope del pasaje de la 31.1 junto a los topes de Tarjeta y de título/meta de la 34.1) y `sprint-status.yaml` (la fecha de esta rama; las líneas de la principal entraron solas). `npx tsx tools/autor.ts proponer-claves` no escribió nada. Sin cambios en `package-lock.json`, así que sin `npm ci`.
+
+**Interacción real con la 34.1, corregida (916b14086a).** La prueba «nadie más recorta texto de Cita» de `tests/unit/recorte.test.ts` marcaba `src/lib/pasaje.ts` (tres `texto.slice(`) y el comentario de `PasajeDeAparicion` en `src/lib/obras.ts`. No es un recorte de la Cita —es el reparto del texto del pasaje por sus tramos—, así que se renombró el local a `delPasaje` y el comentario dejó de escribir la forma; la prueba no se tocó. Con la 34.3 (el campo) no hubo choque: la e2e entera lo cubre.
+
+**CI equivalente** (`publicar.yml`): `npm run build` en verde (Directorio de Obras 235.999 bytes; `dist/` 520,7 MiB juzgados, por debajo del aviso); `npx astro check` — 0 errores, 0 avisos; `npm test` — 171 ficheros, 7.710 pruebas: una sola caída, `objetivo-cli.test.ts` «las dos órdenes hermanas escriben los porcentajes igual» por el plazo de 120 s de la CLI bajo carga; repetida sola, 41/41 en verde. `huella.test.ts` en verde: la etapa no toca `src/lib/vocabulario.ts` ni `medicion/migrations/` respecto de la principal.
+
+**`npm run test:e2e` entero** (los dos proyectos, contra el receptor local en 8787): 1.408 en verde, 161 saltadas, 1 caída —`tipografia-calculada.spec.ts` «buscar-con-resultados» en móvil, el `p.estado` de la instantánea, la caída conocida que también da la principal—; el fichero repetido entero, 28/28 en verde. El choque del puerto 4403 entre `lee-el-pasaje.spec.ts` y `busqueda-historial.spec.ts` ya no aparece en la pasada entera: los dos en verde.
+
+**NFR-7** (Página de Cita; con `MAX_CARACTERES_DEL_PASAJE` en `undefined` no se pinta ningún pasaje, se midió igual). Lighthouse 13.5.0 móvil, `--throttling-method=simulate`, 10 corridas alternas principal/rama por página, las dos construidas con `MEDICION_ENDPOINT=http://localhost:8787/` y servidas por `tests/servidor.mjs` de la rama con `SERVIDOR_CACHE_CONTROL=max-age=600` y `SERVIDOR_GZIP=1`, receptor ficticio en 8787:
+
+| Página | LCP principal | LCP rama | Δ | FCP principal | FCP rama | Δ |
+|---|---|---|---|---|---|---|
+| `/cita/jose-marti-yo-soy-un-hombre-sincero-de-donde/` | 1.642 | 1.537 | −105 | 901 | 899 | −1 |
+| `/cita/antonio-machado-caminante-no-hay-camino-se-hace-camino/` | 1.640 | 1.655 | +15 | 936 | 934 | −2 |
+
+Medias en ms; margen max(100 ms, 5 %). LCP de Cita por debajo de 2.500 ms y dentro del margen en las dos: veredicto **ok**, sin desempate con `devtools`. Registros en `.claude/v9-ralph/logs/s-31/nfr7-gate1/`.
+
+## Verificación en el sitio en vivo — 2026-11-12
+
+Fusión d36cd944c9, Publicar 43284008696 en verde. Solo curl.
+
+| URL | Qué se buscó | Resultado |
+|---|---|---|
+| /cita/jose-marti-yo-vengo-de-todas-partes-y-hacia/ | 200 y la página sin cambios de contenido | encontrado (200; «Cómo citar» sigue) |
+| la misma | «Lee el pasaje» (31.2) | sin datos que enseñar: MAX_CARACTERES_DEL_PASAJE sigue sin valor, así que ningún pasaje se pinta hasta que Héctor le dé valor |
+| 31.1 | localizador del pasaje (tools/ y cargador) | sin superficie que mirar en el sitio |
